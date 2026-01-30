@@ -1,0 +1,21 @@
+name = "simple-memo"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "simple-memo-prod"
+routes = [
+  { pattern = "simplememofast.com/*", zone_name = "simplememofast.com" }
+]
+
+[build]
+command = "npm run build"
+cwd = "."
+watch_paths = ["src/**/*.ts"]
+
+[[assets]]
+directory = "public"
+binding = "ASSETS"
+
+[triggers]
+crons = []
