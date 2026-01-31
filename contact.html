@@ -3,9 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>お問い合わせ | Simple Memo</title>
-  <meta name="description" content="Simple Memoへのお問い合わせはこちら。">
-  <meta name="theme-color" content="#0b0f14">
+  <title data-lang="ja" class="active">お問い合わせ | Simple Memo</title>
+  <title data-lang="en">Contact | Simple Memo</title>
+  <meta name="description" data-lang="ja" class="active" content="Simple Memoへのお問い合わせはこちら。">
+  <meta name="description" data-lang="en" content="Contact Simple Memo.">
+  <meta name="theme-color" content="#0a0d12">
   
   <!-- OGP -->
   <meta property="og:title" content="お問い合わせ | Simple Memo">
@@ -31,21 +33,35 @@
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-  <!-- Header -->
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container">
+      <a href="/" class="site-header__logo">Simple Memo</a>
+      <div class="lang-switcher">
+        <button type="button" class="lang-switcher__btn active" data-lang-btn="ja">日本語</button>
+        <button type="button" class="lang-switcher__btn" data-lang-btn="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Header -->
   <header class="page-header">
     <div class="container page-header__inner">
-      <a href="/" class="page-header__logo">Simple Memo</a>
-      <a href="/" class="page-header__back">ホームへ戻る</a>
+      <span></span>
+      <a href="/" class="page-header__back" data-lang="ja">ホームへ戻る</a>
+      <a href="/" class="page-header__back" data-lang="en">Back to Home</a>
     </div>
   </header>
 
   <!-- Content -->
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">お問い合わせ</h1>
+      <h1 class="page-content__title" data-lang="ja">お問い合わせ</h1>
+      <h1 class="page-content__title" data-lang="en">Contact</h1>
       
       <div class="contact-info">
-        <p class="contact-info__label">連絡先</p>
+        <p class="contact-info__label" data-lang="ja">連絡先</p>
+        <p class="contact-info__label" data-lang="en">Email</p>
         <a href="mailto:support@simplememofast.com" class="contact-info__email">support@simplememofast.com</a>
       </div>
     </div>
@@ -55,13 +71,19 @@
   <footer class="footer">
     <div class="container">
       <nav class="footer__links">
-        <a href="/terms.html" class="footer__link">利用規約</a>
-        <a href="/privacy.html" class="footer__link">プライバシーポリシー</a>
-        <a href="/legal.html" class="footer__link">特商法</a>
-        <a href="/contact.html" class="footer__link">お問い合わせ</a>
+        <a href="/terms.html" class="footer__link" data-lang="ja">利用規約</a>
+        <a href="/terms.html" class="footer__link" data-lang="en">Terms of Service</a>
+        <a href="/privacy.html" class="footer__link" data-lang="ja">プライバシーポリシー</a>
+        <a href="/privacy.html" class="footer__link" data-lang="en">Privacy Policy</a>
+        <a href="/legal.html" class="footer__link" data-lang="ja">特定商取引法に基づく表記</a>
+        <a href="/legal.html" class="footer__link" data-lang="en">Legal Notice</a>
+        <a href="/contact.html" class="footer__link" data-lang="ja">お問い合わせ</a>
+        <a href="/contact.html" class="footer__link" data-lang="en">Contact</a>
       </nav>
       <p class="footer__copyright">© 2026 Simple Memo App. All rights reserved.</p>
     </div>
   </footer>
+
+  <script src="/assets/js/lang.js"></script>
 </body>
 </html>
