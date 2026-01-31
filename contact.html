@@ -3,22 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>お問い合わせ | Simple Memo</title>
-  <meta name="description" content="Simple Memoへのお問い合わせはこちら。">
+  <title>お問い合わせ | 軽快シンプルメモ</title>
+  <meta name="description" content="軽快シンプルメモへのお問い合わせはこちら。">
   <meta name="theme-color" content="#0b0f14">
   
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">お問い合わせ | 軽快シンプルメモ</span>
+      <span class="meta-og-title">お問い合わせ | 軽快シンプルメモ</span>
+      <span class="meta-description">軽快シンプルメモへのお問い合わせはこちら。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Contact Us | Simple Memo Fast</span>
+      <span class="meta-og-title">Contact Us | Simple Memo Fast</span>
+      <span class="meta-description">Contact information for Simple Memo Fast.</span>
+    </div>
+  </div>
+
   <!-- OGP -->
-  <meta property="og:title" content="お問い合わせ | Simple Memo">
-  <meta property="og:description" content="Simple Memoへのお問い合わせはこちら。">
+  <meta property="og:title" content="お問い合わせ | 軽快シンプルメモ">
+  <meta property="og:description" content="軽快シンプルメモへのお問い合わせはこちら。">
   <meta property="og:type" content="website">
-  <!-- TODO: Replace YOUR_SITE_URL with actual URL -->
   <meta property="og:url" content="YOUR_SITE_URL/contact.html">
   <meta property="og:image" content="/assets/img/ogp.png">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="お問い合わせ | Simple Memo">
-  <meta name="twitter:description" content="Simple Memoへのお問い合わせはこちら。">
+  <meta name="twitter:title" content="お問い合わせ | 軽快シンプルメモ">
+  <meta name="twitter:description" content="軽快シンプルメモへのお問い合わせはこちら。">
   <meta name="twitter:image" content="/assets/img/ogp.png">
   
   <!-- Favicon -->
@@ -29,23 +42,49 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
   
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .lang-switcher { display: flex; justify-content: center; gap: 1rem; padding: 1rem 0; }
+    .lang-switcher__btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; }
+    .lang-switcher__btn.active { background: var(--accent, #6AAAD0); border-color: var(--accent, #6AAAD0); box-shadow: 0 0 10px var(--glow, rgba(106, 170, 208, 0.55)); }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+  </style>
 </head>
 <body>
   <!-- Header -->
   <header class="page-header">
-    <div class="container page-header__inner">
-      <a href="/" class="page-header__logo">Simple Memo</a>
-      <a href="/" class="page-header__back">ホームへ戻る</a>
+    <div class="container">
+      <div class="lang-switcher">
+        <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+        <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">軽快シンプルメモ</span>
+          <span data-lang="en">Simple Memo Fast</span>
+        </a>
+        <a href="/" class="page-header__back">
+          <span data-lang="ja">ホームへ戻る</span>
+          <span data-lang="en">Back to Home</span>
+        </a>
+      </div>
     </div>
   </header>
 
   <!-- Content -->
   <main class="page-content">
     <div class="container">
-      <h1 class="page-content__title">お問い合わせ</h1>
+      <h1 class="page-content__title">
+        <span data-lang="ja">お問い合わせ</span>
+        <span data-lang="en">Contact Us</span>
+      </h1>
       
       <div class="contact-info">
-        <p class="contact-info__label">連絡先</p>
+        <p class="contact-info__label">
+          <span data-lang="ja">連絡先</span>
+          <span data-lang="en">Contact Info</span>
+        </p>
         <a href="mailto:support@simplememofast.com" class="contact-info__email">support@simplememofast.com</a>
       </div>
     </div>
@@ -55,13 +94,32 @@
   <footer class="footer">
     <div class="container">
       <nav class="footer__links">
-        <a href="/terms.html" class="footer__link">利用規約</a>
-        <a href="/privacy.html" class="footer__link">プライバシーポリシー</a>
-        <a href="/legal.html" class="footer__link">特商法</a>
-        <a href="/contact.html" class="footer__link">お問い合わせ</a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/legal.html" class="footer__link">
+          <span data-lang="ja">特商法</span>
+          <span data-lang="en">Legal</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
       </nav>
-      <p class="footer__copyright">© 2026 Simple Memo App. All rights reserved.</p>
+      <p class="footer__copyright">
+        © 2026 
+        <span data-lang="ja">軽快シンプルメモ</span>
+        <span data-lang="en">Simple Memo Fast</span>. 
+        All rights reserved.
+      </p>
     </div>
   </footer>
+
+  <script src="/js/lang.js"></script>
 </body>
 </html>

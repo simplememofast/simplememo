@@ -3,22 +3,35 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Simple Memo</title>
-  <meta name="description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ。">
+  <title>軽快シンプルメモ — メモしてタップ、すぐにメールが届く</title>
+  <meta name="description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。">
   <meta name="theme-color" content="#0b0f14">
   
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">軽快シンプルメモ — メモしてタップ、すぐにメールが届く</span>
+      <span class="meta-og-title">軽快シンプルメモ</span>
+      <span class="meta-description">思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Simple Memo Fast — Write. Send. In your inbox.</span>
+      <span class="meta-og-title">Simple Memo Fast</span>
+      <span class="meta-description">Fast, minimal memo app. Write a note and send it to your inbox in one tap.</span>
+    </div>
+  </div>
+
   <!-- OGP -->
-  <meta property="og:title" content="Simple Memo">
-  <meta property="og:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ。">
+  <meta property="og:title" content="軽快シンプルメモ">
+  <meta property="og:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。">
   <meta property="og:type" content="website">
-  <!-- TODO: Replace YOUR_SITE_URL with actual URL -->
   <meta property="og:url" content="YOUR_SITE_URL">
   <meta property="og:image" content="/assets/img/ogp.png">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Simple Memo">
-  <meta name="twitter:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ。">
+  <meta name="twitter:title" content="軽快シンプルメモ">
+  <meta name="twitter:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。">
   <meta name="twitter:image" content="/assets/img/ogp.png">
   
   <!-- Favicon -->
@@ -29,18 +42,60 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
   
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Language Switcher Styles */
+    .lang-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+    .lang-switcher__btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    .lang-switcher__btn.active {
+      background: var(--accent, #6AAAD0);
+      border-color: var(--accent, #6AAAD0);
+      box-shadow: 0 0 10px var(--glow, rgba(106, 170, 208, 0.55));
+    }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+  </style>
 </head>
 <body>
+  <!-- Header with Lang Switcher -->
+  <header class="header">
+    <div class="container">
+      <div class="lang-switcher">
+        <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+        <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+      </div>
+    </div>
+  </header>
+
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
       <div class="hero__icon">
-        <img src="/assets/img/app-icon.png" alt="Simple Memo アプリアイコン">
+        <img src="/assets/img/app-icon.png" alt="App Icon">
       </div>
-      <h1 class="hero__title">書く、送る、<br>メールに届く。</h1>
-      <p class="hero__subtitle">思いついた瞬間にメモして、<br>ワンタップで自分のメールへ。</p>
-      <!-- TODO: Replace APP_STORE_URL with actual App Store link -->
-      <a href="APP_STORE_URL" class="app-store-badge" aria-label="App Storeでダウンロード">
+      <h1 class="hero__title">
+        <span data-lang="ja">メモしてタップ、<br>すぐにメールが届く</span>
+        <span data-lang="en">Write. Send.<br>In your inbox.</span>
+      </h1>
+      <p class="hero__subtitle">
+        <span data-lang="ja">思いついた瞬間にメモして、<br>ワンタップで自分のメールへ。</span>
+        <span data-lang="en">Capture your thoughts instantly<br>and send them to your email in one tap.</span>
+      </p>
+      <a href="APP_STORE_URL" class="app-store-badge" aria-label="Download on the App Store">
         <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83" alt="Download on the App Store">
       </a>
     </div>
@@ -49,7 +104,10 @@
   <!-- How to Use Section -->
   <section class="how-to-use">
     <div class="container">
-      <h2 class="section-title">使い方</h2>
+      <h2 class="section-title">
+        <span data-lang="ja">使い方</span>
+        <span data-lang="en">How to Use</span>
+      </h2>
       <div class="steps">
         <div class="step">
           <div class="step__icon">
@@ -58,8 +116,14 @@
             </svg>
           </div>
           <div class="step__content">
-            <div class="step__number">1. 書く</div>
-            <div class="step__description">思いついたらすぐメモ。</div>
+            <div class="step__number">
+              <span data-lang="ja">1. 書く</span>
+              <span data-lang="en">1. Write</span>
+            </div>
+            <div class="step__description">
+              <span data-lang="ja">思いついたらすぐメモ。</span>
+              <span data-lang="en">Jot down your ideas immediately.</span>
+            </div>
           </div>
         </div>
         <div class="step">
@@ -69,8 +133,14 @@
             </svg>
           </div>
           <div class="step__content">
-            <div class="step__number">2. 送る</div>
-            <div class="step__description">ワンタップで自分のメールへ。</div>
+            <div class="step__number">
+              <span data-lang="ja">2. 送る</span>
+              <span data-lang="en">2. Send</span>
+            </div>
+            <div class="step__description">
+              <span data-lang="ja">ワンタップで自分のメールへ。</span>
+              <span data-lang="en">One tap to send to your inbox.</span>
+            </div>
           </div>
         </div>
         <div class="step">
@@ -80,8 +150,14 @@
             </svg>
           </div>
           <div class="step__content">
-            <div class="step__number">3. 見返す</div>
-            <div class="step__description">メールでいつでも確認。</div>
+            <div class="step__number">
+              <span data-lang="ja">3. 見返す</span>
+              <span data-lang="en">3. Review</span>
+            </div>
+            <div class="step__description">
+              <span data-lang="ja">メールでいつでも確認。</span>
+              <span data-lang="en">Check your notes anytime in email.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -91,7 +167,10 @@
   <!-- Features Section -->
   <section class="features">
     <div class="container">
-      <h2 class="section-title">主要機能</h2>
+      <h2 class="section-title">
+        <span data-lang="ja">主要機能</span>
+        <span data-lang="en">Key Features</span>
+      </h2>
       <div class="feature-cards">
         <div class="feature-card">
           <div class="feature-card__icon">
@@ -100,8 +179,14 @@
             </svg>
           </div>
           <div class="feature-card__content">
-            <h3 class="feature-card__title">ワンタップ送信</h3>
-            <p class="feature-card__description">思いついた瞬間に、瞬間的さやないかで<br>ワンタップ送信。</p>
+            <h3 class="feature-card__title">
+              <span data-lang="ja">ワンタップ送信</span>
+              <span data-lang="en">One-Tap Send</span>
+            </h3>
+            <p class="feature-card__description">
+              <span data-lang="ja">思いついた瞬間に、<br>迷わずワンタップ送信。</span>
+              <span data-lang="en">Send instantly with a single tap<br>the moment you have an idea.</span>
+            </p>
           </div>
         </div>
         <div class="feature-card">
@@ -111,8 +196,14 @@
             </svg>
           </div>
           <div class="feature-card__content">
-            <h3 class="feature-card__title">オフライン対応</h3>
-            <p class="feature-card__description">快適。オフライン対応により、オフライ<br>ンを補完します。</p>
+            <h3 class="feature-card__title">
+              <span data-lang="ja">オフライン対応</span>
+              <span data-lang="en">Offline Support</span>
+            </h3>
+            <p class="feature-card__description">
+              <span data-lang="ja">電波がなくても大丈夫。<br>オンライン復帰時に自動再送。</span>
+              <span data-lang="en">Works without internet.<br>Auto-resends when back online.</span>
+            </p>
           </div>
         </div>
         <div class="feature-card">
@@ -122,8 +213,14 @@
             </svg>
           </div>
           <div class="feature-card__content">
-            <h3 class="feature-card__title">履歴・ステータス</h3>
-            <p class="feature-card__description">履歴・ステータスの通知に確認し、規則<br>的に快適、送信メールを選択できます。</p>
+            <h3 class="feature-card__title">
+              <span data-lang="ja">履歴・ステータス</span>
+              <span data-lang="en">History & Status</span>
+            </h3>
+            <p class="feature-card__description">
+              <span data-lang="ja">送信履歴をアプリ内で確認。<br>未送信メモも一目でわかります。</span>
+              <span data-lang="en">Check send history in-app.<br>Easily track pending memos.</span>
+            </p>
           </div>
         </div>
         <div class="feature-card">
@@ -134,8 +231,14 @@
             </svg>
           </div>
           <div class="feature-card__content">
-            <h3 class="feature-card__title">3分で完了する設定</h3>
-            <p class="feature-card__description">快適に使ってメールする変だから、3分<br>で完了設定することができます。</p>
+            <h3 class="feature-card__title">
+              <span data-lang="ja">3分で完了する設定</span>
+              <span data-lang="en">3-Minute Setup</span>
+            </h3>
+            <p class="feature-card__description">
+              <span data-lang="ja">宛先を設定するだけ。<br>すぐに使い始められます。</span>
+              <span data-lang="en">Just set your destination email.<br>Ready to use in minutes.</span>
+            </p>
           </div>
         </div>
       </div>
@@ -145,26 +248,45 @@
   <!-- Pricing Section -->
   <section class="pricing">
     <div class="container">
-      <h2 class="section-title">料金プラン</h2>
+      <h2 class="section-title">
+        <span data-lang="ja">料金プラン</span>
+        <span data-lang="en">Pricing Plans</span>
+      </h2>
       <div class="pricing-cards">
         <div class="pricing-card">
           <div class="pricing-card__name">Free</div>
           <div class="pricing-card__price">¥0</div>
-          <div class="pricing-card__limit">1日3通まで</div>
+          <div class="pricing-card__limit">
+            <span data-lang="ja">1日3通まで</span>
+            <span data-lang="en">Up to 3 sends/day</span>
+          </div>
         </div>
         <div class="pricing-card pricing-card--premium">
           <div class="pricing-card__name">Premium</div>
           <div class="pricing-card__price-row">
             <span class="pricing-card__price">¥500/月（税込）</span>
           </div>
-          <div class="pricing-card__limit">送信無制限</div>
-          <div class="pricing-card__trial">7日間無料</div>
+          <div class="pricing-card__limit">
+            <span data-lang="ja">送信無制限</span>
+            <span data-lang="en">Unlimited Sends</span>
+          </div>
+          <div class="pricing-card__trial">
+            <span data-lang="ja">7日間無料</span>
+            <span data-lang="en">7-Day Free Trial</span>
+          </div>
         </div>
       </div>
       <p class="pricing-notes">
-        7日間無料（送信無制限）<br>
-        以降 Free：1日3通まで / Premium：送信無制限<br>
-        ※安全対策として短時間の連続送信には制限（クールダウン）があり、送信基盤の保護上限（サーバ側レート制限等）が適用される場合があります。
+        <span data-lang="ja">
+          7日間無料（送信無制限）<br>
+          以降 Free：1日3通まで / Premium：送信無制限<br>
+          ※安全対策として短時間の連続送信には制限（クールダウン）があり、送信基盤の保護上限（サーバ側レート制限等）が適用される場合があります。
+        </span>
+        <span data-lang="en">
+          7-Day Free Trial (Unlimited Sends)<br>
+          After trial, Free: 3 sends/day / Premium: Unlimited<br>
+          *Cooldown limits between consecutive sends and server-side rate limits may apply for system protection.
+        </span>
       </p>
     </div>
   </section>
@@ -172,8 +294,7 @@
   <!-- Footer CTA -->
   <section class="footer-cta">
     <div class="container">
-      <!-- TODO: Replace APP_STORE_URL with actual App Store link -->
-      <a href="APP_STORE_URL" class="app-store-badge" aria-label="App Storeでダウンロード">
+      <a href="APP_STORE_URL" class="app-store-badge" aria-label="Download on the App Store">
         <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/ja-jp?size=250x83" alt="Download on the App Store">
       </a>
     </div>
@@ -183,13 +304,32 @@
   <footer class="footer">
     <div class="container">
       <nav class="footer__links">
-        <a href="/terms.html" class="footer__link">利用規約</a>
-        <a href="/privacy.html" class="footer__link">プライバシーポリシー</a>
-        <a href="/legal.html" class="footer__link">特商法</a>
-        <a href="/contact.html" class="footer__link">お問い合わせ</a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/legal.html" class="footer__link">
+          <span data-lang="ja">特商法</span>
+          <span data-lang="en">Legal</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
       </nav>
-      <p class="footer__copyright">© 2026 Simple Memo App. All rights reserved.</p>
+      <p class="footer__copyright">
+        © 2026 
+        <span data-lang="ja">軽快シンプルメモ</span>
+        <span data-lang="en">Simple Memo Fast</span>. 
+        All rights reserved.
+      </p>
     </div>
   </footer>
+
+  <script src="/js/lang.js"></script>
 </body>
 </html>

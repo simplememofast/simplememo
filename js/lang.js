@@ -68,8 +68,10 @@
     // Update all elements with data-lang attribute
     document.querySelectorAll('[data-lang]').forEach(el => {
       if (el.getAttribute('data-lang') === lang) {
+        el.style.display = '';
         el.classList.add('active');
       } else {
+        el.style.display = 'none';
         el.classList.remove('active');
       }
     });
@@ -83,24 +85,50 @@
       }
     });
 
-    // Update document title (find the active title element)
-    const activeTitle = document.querySelector('title[data-lang="' + lang + '"]');
-    if (activeTitle) {
-      document.title = activeTitle.textContent || activeTitle.innerText;
-    }
+    // Update document title and meta info from hidden templates
+    const metaSource = document.querySelector(`.meta-template[data-lang="${lang}"]`);
+    if (metaSource) {
+      // Title
+      const title = metaSource.querySelector('.meta-title');
+      if (title) document.title = title.textContent;
 
-    // Update meta description
-    const activeMeta = document.querySelector('meta[name="description"][data-lang="' + lang + '"]');
-    if (activeMeta) {
-      let mainMeta = document.querySelector('meta[name="description"]:not([data-lang])');
-      if (!mainMeta) {
-        // Create a main meta if it doesn't exist
-        mainMeta = document.createElement('meta');
-        mainMeta.name = 'description';
-        document.head.appendChild(mainMeta);
+      // Description
+      const desc = metaSource.querySelector('.meta-description');
+      if (desc) {
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', desc.textContent);
+        
+        const ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.setAttribute('content', desc.textContent);
+
+        const twitterDesc = document.querySelector('meta[name="twitter:description"]');
+        if (twitterDesc) twitterDesc.setAttribute('content', desc.textContent);
       }
-      mainMeta.content = activeMeta.content;
+
+      // OG/Twitter Title
+      const ogTitle = metaSource.querySelector('.meta-og-title');
+      if (ogTitle) {
+        const metaOgTitle = document.querySelector('meta[property="og:title"]');
+        if (metaOgTitle) metaOgTitle.setAttribute('content', ogTitle.textContent);
+
+        const metaTwitterTitle = document.querySelector('meta[name="twitter:title"]');
+        if (metaTwitterTitle) metaTwitterTitle.setAttribute('content', ogTitle.textContent);
+      }
     }
+    
+    // Update all internal links to preserve lang param
+    document.querySelectorAll('a').forEach(a => {
+      const href = a.getAttribute('href');
+      if (href && (href.startsWith('/') || !href.includes(':')) && !href.startsWith('#')) {
+        try {
+          const url = new URL(href, window.location.origin);
+          url.searchParams.set('lang', lang);
+          a.setAttribute('href', url.pathname + url.search + url.hash);
+        } catch (e) {
+          // Skip if invalid URL
+        }
+      }
+    });
   }
 
   /**
@@ -118,26 +146,22 @@
    * Initialize language switcher
    */
   function init() {
-    // Get and apply current language
     const currentLang = getCurrentLang();
     
-    // Save to storage if it came from query
     if (getLangFromQuery()) {
       saveLangToStorage(currentLang);
     }
     
-    // Update query param to reflect current state
     updateQueryParam(currentLang);
-    
-    // Apply language
     applyLang(currentLang);
 
     // Bind click events to language switcher buttons
-    document.querySelectorAll('[data-lang-btn]').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const lang = this.getAttribute('data-lang-btn');
+    document.addEventListener('click', function(e) {
+      const btn = e.target.closest('[data-lang-btn]');
+      if (btn) {
+        const lang = btn.getAttribute('data-lang-btn');
         switchLang(lang);
-      });
+      }
     });
   }
 
