@@ -43,9 +43,43 @@
   
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
-    .lang-switcher { display: flex; justify-content: center; gap: 1rem; padding: 1rem 0; }
-    .lang-switcher__btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; }
-    .lang-switcher__btn.active { background: var(--accent, #6AAAD0); border-color: var(--accent, #6AAAD0); box-shadow: 0 0 10px var(--glow, rgba(106, 170, 208, 0.55)); }
+    /* Language Switcher Styles - Chic & Modern */
+    .page-header {
+      position: relative;
+      z-index: 100;
+    }
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2px;
+      overflow: hidden;
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.4rem 1rem;
+      border-radius: 18px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    .lang-switcher__btn.active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
     [data-lang] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
@@ -55,9 +89,11 @@
   <!-- Header -->
   <header class="page-header">
     <div class="container">
-      <div class="lang-switcher">
-        <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
-        <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
       </div>
       <div class="page-header__inner">
         <a href="/" class="page-header__logo">
