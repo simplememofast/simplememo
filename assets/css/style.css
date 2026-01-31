@@ -1,0 +1,583 @@
+/* ========================================
+   Simple Memo LP - style.css
+   ======================================== */
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  background-color: #0b0f14;
+  color: #ffffff;
+  line-height: 1.7;
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: anywhere;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ========================================
+   Hero Section
+   ======================================== */
+.hero {
+  text-align: center;
+  padding: 60px 0 50px;
+}
+
+.hero__icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 30px;
+  border-radius: 24px;
+  box-shadow: 
+    0 0 30px rgba(100, 180, 255, 0.15),
+    0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.hero__icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  display: block;
+}
+
+.hero__title {
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+
+.hero__subtitle {
+  font-size: clamp(0.875rem, 3.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* App Store Badge */
+.app-store-badge {
+  display: inline-block;
+  transition: opacity 0.2s ease;
+}
+
+.app-store-badge:hover {
+  opacity: 0.85;
+}
+
+.app-store-badge img {
+  height: 44px;
+  width: auto;
+}
+
+/* ========================================
+   Section Common
+   ======================================== */
+section {
+  padding: 50px 0;
+}
+
+.section-title {
+  font-size: clamp(1.25rem, 5vw, 1.5rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 35px;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   How to Use Section
+   ======================================== */
+.how-to-use {
+  padding: 40px 0;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.step__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.step__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.step__content {
+  flex: 1;
+}
+
+.step__number {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2px;
+}
+
+.step__description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+/* ========================================
+   Features Section
+   ======================================== */
+.features {
+  padding: 50px 0;
+}
+
+.feature-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feature-card {
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.6) 0%, rgba(20, 28, 40, 0.8) 100%);
+  border: 1px solid rgba(100, 180, 255, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.feature-card__icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, rgba(60, 130, 200, 0.3) 0%, rgba(40, 100, 180, 0.2) 100%);
+  border: 1px solid rgba(100, 180, 255, 0.25);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6ab4ff;
+}
+
+.feature-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.feature-card__content {
+  flex: 1;
+}
+
+.feature-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #ffffff;
+}
+
+.feature-card__description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+/* ========================================
+   Pricing Section
+   ======================================== */
+.pricing {
+  padding: 50px 0;
+}
+
+.pricing-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.pricing-card {
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.6) 0%, rgba(20, 28, 40, 0.8) 100%);
+  border: 1px solid rgba(100, 180, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+}
+
+.pricing-card--premium {
+  border-color: rgba(100, 180, 255, 0.35);
+  background: linear-gradient(135deg, rgba(40, 60, 90, 0.5) 0%, rgba(25, 40, 60, 0.7) 100%);
+}
+
+.pricing-card__name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.pricing-card__price {
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pricing-card__price-row {
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.pricing-card__price-row .pricing-card__price {
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
+}
+
+.pricing-card__price-sub {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.pricing-card__limit {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+}
+
+.pricing-card__trial {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4fc3f7;
+}
+
+/* Pricing Notes */
+.pricing-notes {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
+  text-align: center;
+  padding: 0 10px;
+}
+
+/* ========================================
+   Footer CTA
+   ======================================== */
+.footer-cta {
+  text-align: center;
+  padding: 40px 0 30px;
+}
+
+/* ========================================
+   Footer
+   ======================================== */
+.footer {
+  padding: 30px 0 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer__links {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 20px;
+  margin-bottom: 24px;
+}
+
+.footer__link {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  text-align: center;
+  padding: 8px;
+  transition: color 0.2s ease;
+}
+
+.footer__link:hover {
+  color: #ffffff;
+}
+
+.footer__copyright {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+/* ========================================
+   Sub Pages (Terms, Privacy, Legal, Contact)
+   ======================================== */
+.page-header {
+  padding: 30px 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-header__logo {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.page-header__back {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.page-header__back:hover {
+  color: #ffffff;
+}
+
+.page-content {
+  padding: 40px 0 60px;
+}
+
+.page-content__title {
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.page-content__body {
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.page-content__body h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 32px 0 16px;
+  color: #ffffff;
+}
+
+.page-content__body h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 24px 0 12px;
+  color: #ffffff;
+}
+
+.page-content__body p {
+  margin-bottom: 16px;
+}
+
+.page-content__body ul {
+  margin: 12px 0 16px 20px;
+}
+
+.page-content__body li {
+  margin-bottom: 8px;
+}
+
+.page-content__body a {
+  color: #6ab4ff;
+  text-decoration: none;
+}
+
+.page-content__body a:hover {
+  text-decoration: underline;
+}
+
+.page-content__date {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* Language Toggle */
+.lang-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 30px;
+}
+
+.lang-toggle__btn {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-toggle__btn:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+.lang-toggle__btn.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(100, 180, 255, 0.5);
+  color: #ffffff;
+}
+
+.lang-content {
+  display: none;
+}
+
+.lang-content.active {
+  display: block;
+}
+
+/* Contact Page */
+.contact-info {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, rgba(30, 40, 55, 0.6) 0%, rgba(20, 28, 40, 0.8) 100%);
+  border: 1px solid rgba(100, 180, 255, 0.15);
+  border-radius: 16px;
+}
+
+.contact-info__label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+.contact-info__email {
+  font-size: 1.125rem;
+  color: #6ab4ff;
+  text-decoration: none;
+}
+
+.contact-info__email:hover {
+  text-decoration: underline;
+}
+
+/* ========================================
+   Responsive - Tablet & Desktop
+   ======================================== */
+@media (min-width: 768px) {
+  .container {
+    max-width: 640px;
+    padding: 0 40px;
+  }
+
+  .hero {
+    padding: 80px 0 60px;
+  }
+
+  .hero__icon {
+    width: 140px;
+    height: 140px;
+  }
+
+  section {
+    padding: 60px 0;
+  }
+
+  .feature-cards {
+    gap: 20px;
+  }
+
+  .feature-card {
+    padding: 24px;
+  }
+
+  .pricing-cards {
+    flex-direction: row;
+    gap: 20px;
+  }
+
+  .pricing-card {
+    flex: 1;
+    padding: 30px 24px;
+  }
+
+  .footer__links {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 720px;
+  }
+
+  .hero {
+    padding: 100px 0 80px;
+  }
+
+  .hero__icon {
+    width: 160px;
+    height: 160px;
+    margin-bottom: 40px;
+  }
+
+  .hero__title {
+    margin-bottom: 20px;
+  }
+
+  .hero__subtitle {
+    margin-bottom: 40px;
+  }
+
+  section {
+    padding: 70px 0;
+  }
+
+  .steps {
+    gap: 30px;
+  }
+
+  .feature-card {
+    padding: 28px;
+  }
+
+  .feature-card__icon {
+    width: 50px;
+    height: 50px;
+  }
+}
