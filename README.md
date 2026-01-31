@@ -2,6 +2,7 @@
 
 A dark-themed, modern landing page for the Simple Memo iOS app, built with HTML, CSS, and Cloudflare Workers.
 
+
 ## Project Structure
 
 ```
