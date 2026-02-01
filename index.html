@@ -98,35 +98,9 @@
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
 
-    /* App Store Badge Fallback */
-    .badge-fallback {
-      display: none;
-      background: rgba(15, 20, 30, 0.8);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 12px;
-      border: 1px solid rgba(100, 160, 220, 0.2);
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .badge-fallback:hover {
-      border-color: rgba(100, 180, 255, 0.35);
-      box-shadow: 0 0 20px rgba(100, 180, 255, 0.08);
-    }
-    .badge-img.error + .badge-fallback {
-      display: block;
-    }
-    .badge-img.error {
-      display: none;
-    }
-
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
-      .lang-switcher__btn,
-      .badge-fallback {
+      .lang-switcher__btn {
         transition: none;
       }
     }
@@ -160,10 +134,8 @@
         <span data-lang="en">Capture your thoughts instantly<br>and send them to your email in one tap.</span>
       </p>
       <a href="APP_STORE_URL" class="app-store-badge" aria-label="Download on the App Store">
-        <img data-lang="ja" class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード" onerror="this.classList.add('error')">
-        <span data-lang="ja" class="badge-fallback">App Store からダウンロード</span>
-        <img data-lang="en" class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store" onerror="this.classList.add('error')">
-        <span data-lang="en" class="badge-fallback">Download on the App Store</span>
+        <img data-lang="ja" class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        <img data-lang="en" class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
       </a>
     </div>
   </section>
@@ -392,10 +364,8 @@
   <section class="footer-cta">
     <div class="container">
       <a href="APP_STORE_URL" class="app-store-badge" aria-label="Download on the App Store">
-        <img data-lang="ja" class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード" onerror="this.classList.add('error')">
-        <span data-lang="ja" class="badge-fallback">App Store からダウンロード</span>
-        <img data-lang="en" class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store" onerror="this.classList.add('error')">
-        <span data-lang="en" class="badge-fallback">Download on the App Store</span>
+        <img data-lang="ja" class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        <img data-lang="en" class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
       </a>
     </div>
   </section>
