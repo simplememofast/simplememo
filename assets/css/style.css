@@ -376,11 +376,31 @@ section {
   padding: 55px 0;
 }
 
+.pricing .container {
+  max-width: 100%;
+  padding: 0;
+}
+
+.pricing .section-title {
+  padding: 0 20px;
+}
+
 .pricing-cards {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
+  flex-direction: row;
+  gap: 14px;
   margin-bottom: 28px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 20px 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pricing-cards::-webkit-scrollbar {
+  display: none;
 }
 
 .pricing-card {
@@ -389,11 +409,16 @@ section {
   -webkit-backdrop-filter: blur(var(--blur));
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 28px 24px;
+  padding: 24px 20px;
   text-align: center;
   position: relative;
   overflow: hidden;
   transition: border-color var(--transition), box-shadow var(--transition);
+  flex: 0 0 auto;
+  width: calc(100vw - 80px);
+  min-width: 260px;
+  max-width: 320px;
+  scroll-snap-align: center;
 }
 
 .pricing-card::before {
@@ -480,7 +505,7 @@ section {
   color: var(--text-subtle);
   line-height: 1.7;
   text-align: center;
-  padding: 0 10px;
+  padding: 0 20px;
 }
 
 .pricing-notes strong {
@@ -752,14 +777,29 @@ section {
     padding: 26px;
   }
 
+  .pricing .container {
+    max-width: 640px;
+    padding: 0 40px;
+  }
+
+  .pricing .section-title {
+    padding: 0;
+  }
+
   .pricing-cards {
-    flex-direction: row;
-    gap: 22px;
+    justify-content: center;
+    gap: 16px;
+    overflow-x: visible;
+    padding: 8px 0 16px;
+    flex-wrap: wrap;
   }
 
   .pricing-card {
-    flex: 1;
-    padding: 34px 26px;
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 180px;
+    max-width: 200px;
+    padding: 28px 20px;
   }
 
   .footer__links {
@@ -817,7 +857,17 @@ section {
     height: 54px;
   }
 
+  .pricing .container {
+    max-width: 720px;
+  }
+
+  .pricing-cards {
+    gap: 20px;
+  }
+
   .pricing-card {
-    padding: 38px 30px;
+    min-width: 200px;
+    max-width: 220px;
+    padding: 32px 24px;
   }
 }
