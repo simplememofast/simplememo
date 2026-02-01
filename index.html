@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>軽快シンプルメモ — メモしてタップ、すぐにメールが届く</title>
   <meta name="description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。">
-  <meta name="theme-color" content="#0b0f14">
+  <meta name="theme-color" content="#000000">
   
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
@@ -34,6 +34,11 @@
   <meta name="twitter:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。">
   <meta name="twitter:image" content="/assets/img/ogp.png">
   
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -43,7 +48,7 @@
   
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
-    /* Language Switcher Styles - Chic & Modern */
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
     .header {
       position: relative;
       z-index: 100;
@@ -51,78 +56,79 @@
     .lang-switcher-container {
       display: flex;
       justify-content: flex-end;
-      padding: 1rem 0;
+      padding: 1.25rem 0;
     }
     .lang-switcher {
       display: inline-flex;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2px;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
       overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
     .lang-switcher__btn {
       background: transparent;
       border: none;
       color: rgba(255, 255, 255, 0.5);
-      padding: 0.4rem 1rem;
-      border-radius: 18px;
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 500;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       letter-spacing: 0.02em;
     }
     .lang-switcher__btn:hover {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
     }
     .lang-switcher__btn.active {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
       color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
     }
     [data-lang] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
 
-    /* Pricing Layout Adjustments for 3 cards */
-    @media (min-width: 480px) {
-      .pricing-cards {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
-      }
-    }
-    
-    .pricing-card__trial {
-      background: rgba(79, 195, 247, 0.1);
-      padding: 4px 12px;
-      border-radius: 12px;
-      margin-top: 12px;
-    }
-
     /* App Store Badge Fallback */
-    .app-store-badge {
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-    }
     .badge-fallback {
       display: none;
-      background: #000;
+      background: rgba(15, 20, 30, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #fff;
-      padding: 8px 20px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.2);
+      padding: 12px 24px;
+      border-radius: 12px;
+      border: 1px solid rgba(100, 160, 220, 0.2);
       font-weight: 600;
       font-size: 0.9rem;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .badge-fallback:hover {
+      border-color: rgba(100, 180, 255, 0.35);
+      box-shadow: 0 0 20px rgba(100, 180, 255, 0.08);
     }
     .badge-img.error + .badge-fallback {
       display: block;
     }
     .badge-img.error {
       display: none;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn,
+      .badge-fallback {
+        transition: none;
+      }
     }
   </style>
 </head>
