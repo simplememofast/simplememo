@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>お問い合わせ | 軽快シンプルメモ</title>
   <meta name="description" content="軽快シンプルメモへのお問い合わせはこちら。">
-  <meta name="theme-color" content="#0b0f14">
-  
+  <meta name="theme-color" content="#000000">
+
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -43,46 +48,57 @@
   
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
-    /* Language Switcher Styles - Chic & Modern */
-    .page-header {
-      position: relative;
-      z-index: 100;
-    }
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
     .lang-switcher-container {
       display: flex;
       justify-content: flex-end;
-      padding: 1rem 0;
+      padding: 1.25rem 0;
     }
     .lang-switcher {
       display: inline-flex;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 2px;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
       overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
     .lang-switcher__btn {
       background: transparent;
       border: none;
       color: rgba(255, 255, 255, 0.5);
-      padding: 0.4rem 1rem;
-      border-radius: 18px;
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 500;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       letter-spacing: 0.02em;
     }
     .lang-switcher__btn:hover {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
     }
     .lang-switcher__btn.active {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
       color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
     }
     [data-lang] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
   </style>
 </head>
 <body>
