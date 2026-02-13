@@ -533,78 +533,62 @@
   </section>
 
   <!-- FAQ Section -->
-  <section class="faq">
+  <section class="faq-preview">
     <div class="container">
       <h2 class="section-title">
-        <span data-lang="ja">よくある質問</span>
+        <span data-lang="ja">よくあるご質問</span>
         <span data-lang="en">FAQ</span>
       </h2>
-      <div class="faq-list">
-        <!-- Q1 -->
-        <details class="faq-item" data-lang="ja">
-          <summary class="faq-item__question">Captioとの違いは何ですか？</summary>
-          <div class="faq-item__answer">
-            <p>CaptioはGmail APIに依存していましたが、Capito式シンプルメモはCloudflare Workersベースの独自Relay APIを採用しています。オフライン時もOutboxアーキテクチャでメッセージの取りこぼしゼロを実現し、AES-GCM暗号化でプライバシーを保護します。また、起動0.3秒・送信150msとCaptio以上の高速体験を提供します。</p>
-          </div>
-        </details>
-        <details class="faq-item" data-lang="en">
-          <summary class="faq-item__question">How is this different from Captio?</summary>
-          <div class="faq-item__answer">
-            <p>While Captio relied on Gmail API, Simple Memo uses a custom Relay API built on Cloudflare Workers. It guarantees zero message loss with Outbox architecture even offline, protects privacy with AES-GCM encryption, and delivers a faster experience with 0.3s launch and 150ms send times.</p>
-          </div>
-        </details>
-        <!-- Q2 -->
-        <details class="faq-item" data-lang="ja">
-          <summary class="faq-item__question">オフラインでも使えますか？</summary>
-          <div class="faq-item__answer">
-            <p>はい。Outboxアーキテクチャにより、電波のない環境でもメモを書いて送信操作ができます。メモはローカルにAES-GCM暗号化して保存され、オンライン復帰時に自動的に送信されます。メッセージの取りこぼしはゼロです。</p>
-          </div>
-        </details>
-        <details class="faq-item" data-lang="en">
-          <summary class="faq-item__question">Does it work offline?</summary>
-          <div class="faq-item__answer">
-            <p>Yes. The Outbox architecture allows you to write and queue memos even without internet. Memos are encrypted locally with AES-GCM and automatically sent when connectivity is restored. Zero message loss guaranteed.</p>
-          </div>
-        </details>
-        <!-- Q3 -->
-        <details class="faq-item" data-lang="ja">
-          <summary class="faq-item__question">無料でどこまで使えますか？</summary>
-          <div class="faq-item__answer">
-            <p>最初の7日間は送信無制限の無料トライアルが利用できます。トライアル終了後、Freeプランでは1日3通まで送信可能です。Premiumプラン（月額500円または年額5,000円）にアップグレードすると、送信無制限になります。</p>
-          </div>
-        </details>
-        <details class="faq-item" data-lang="en">
-          <summary class="faq-item__question">How much can I use for free?</summary>
-          <div class="faq-item__answer">
-            <p>You get a 7-day free trial with unlimited sends. After the trial, the Free plan allows up to 3 sends per day. Upgrade to Premium (monthly $2.99 or yearly $29.99) for unlimited sends.</p>
-          </div>
-        </details>
-        <!-- Q4 -->
-        <details class="faq-item" data-lang="ja">
-          <summary class="faq-item__question">プライバシーは安全ですか？</summary>
-          <div class="faq-item__answer">
-            <p>プライバシーファースト設計を徹底しています。メモはAES-GCM暗号化で保護され、通信にはephemeral URLSessionを使用。サーバーにメモ内容は一切保存されません。ログも無害化処理されており、メモアプリだからこそ過剰なくらいのプライバシー保護を実現しています。</p>
-          </div>
-        </details>
-        <details class="faq-item" data-lang="en">
-          <summary class="faq-item__question">Is my privacy protected?</summary>
-          <div class="faq-item__answer">
-            <p>Absolutely. We follow a privacy-first design philosophy. Memos are protected with AES-GCM encryption, communications use ephemeral URLSessions, and no memo content is ever stored on our servers. Logs are sanitized — because a memo app deserves the highest level of privacy protection.</p>
-          </div>
-        </details>
-        <!-- Q5 -->
-        <details class="faq-item" data-lang="ja">
-          <summary class="faq-item__question">メモをメールで自分に送る方法は？</summary>
-          <div class="faq-item__answer">
-            <p>3ステップで完了します。(1) アプリをインストールし、宛先メールアドレスを設定（約3分）。(2) メモを書く。(3) 送信ボタンをワンタップ。これだけで自分のメールボックスにメモが届きます。</p>
-          </div>
-        </details>
-        <details class="faq-item" data-lang="en">
-          <summary class="faq-item__question">How do I send a memo to myself via email?</summary>
-          <div class="faq-item__answer">
-            <p>It takes just 3 steps: (1) Install the app and set your destination email (about 3 minutes). (2) Write your memo. (3) Tap send. That's it — the memo arrives in your inbox.</p>
-          </div>
-        </details>
+      <div class="faq-preview-items">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary">
+              <span data-lang="ja">Simple Memoはどんなアプリですか？</span>
+              <span data-lang="en">What is Simple Memo?</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <span data-lang="ja">Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。</span>
+                <span data-lang="en">Simple Memo is a memo app focused on one thing: launch, write, send. Your memo is sent as an email to a pre-configured address with a single tap. There are no folders, tags, sync settings, or complex features.</span>
+              </p>
+            </div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary">
+              <span data-lang="ja">オフラインでもメモを送信できますか？</span>
+              <span data-lang="en">Can I send memos while offline?</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <span data-lang="ja">はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。</span>
+                <span data-lang="en">Yes. When you send a memo offline, it's stored in the Outbox — encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically.</span>
+              </p>
+            </div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary">
+              <span data-lang="ja">無料で使えますか？</span>
+              <span data-lang="en">Can I use Simple Memo for free?</span>
+            </summary>
+            <div class="faq-answer">
+              <p>
+                <span data-lang="ja">はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。</span>
+                <span data-lang="en">Yes. The first 7 days are a free trial with full access to all features and unlimited sending. After the trial, you can continue on the free plan (3 memos per day).</span>
+              </p>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div class="faq-preview-cta">
+        <a href="/faq.html">
+          <span data-lang="ja">すべてのFAQを見る</span>
+          <span data-lang="en">View all FAQ</span>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </a>
       </div>
     </div>
   </section>
@@ -633,6 +617,10 @@
           <span data-lang="ja">プライバシーポリシー</span>
           <span data-lang="en">Privacy</span>
         </a>
+        <a href="/faq.html" class="footer__link">
+          <span data-lang="ja">よくあるご質問</span>
+          <span data-lang="en">FAQ</span>
+        </a>
         <a href="/legal.html" class="footer__link footer__link--legal">
           <span data-lang="ja">特定商取引法に基づく表記</span>
           <span data-lang="en">Legal</span>
@@ -647,7 +635,7 @@
         </a>
       </nav>
       <p class="footer__copyright">
-        © 2026 
+        © 2026
         <span data-lang="ja">Capito式シンプルメモ</span>
         <span data-lang="en">Simple Memo - Captio-style</span>. 
         All rights reserved.
