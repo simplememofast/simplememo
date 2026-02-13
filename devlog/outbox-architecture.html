@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Capito式シンプルメモ 開発日誌</title>
+  <meta name="description" content="送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta name="keywords" content="Outbox パターン, オフライン ファースト iOS, offline first architecture, AES-GCM iOS encryption, メッセージ 取りこぼし ゼロ">
+  <meta name="theme-color" content="#000000">
+
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-og-title">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-description">送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log</span>
+      <span class="meta-og-title">Outbox Architecture: Zero Message Loss Design | Simple Memo Dev Log</span>
+      <span class="meta-description">UI clears the instant you tap send, yet messages are never lost. The complete Outbox architecture with AES-GCM encryption, exponential backoff retry, and NWPathMonitor connectivity detection.</span>
+    </div>
+  </div>
+
+  <!-- OGP -->
+  <meta property="og:title" content="Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Capito式シンプルメモ 開発日誌">
+  <meta property="og:description" content="送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/devlog/outbox-architecture.html">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計 | Capito式シンプルメモ 開発日誌">
+  <meta name="twitter:description" content="送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。">
+  <meta name="twitter:image" content="/assets/img/ogp.png">
+
+  <link rel="canonical" href="https://simplememofast.com/devlog/outbox-architecture.html">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/outbox-architecture.html?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/devlog/outbox-architecture.html?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/outbox-architecture.html">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(15, 20, 30, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(100, 160, 220, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.5); padding: 0.5rem 1.1rem; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: rgba(255, 255, 255, 0.85); }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #6ab4ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(100, 180, 255, 0.12); border: 1px solid rgba(100, 180, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(100, 180, 255, 0.1); }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
+    .flow-list { list-style: none; padding: 0; counter-reset: flow; }
+    .flow-list li { counter-increment: flow; padding: 10px 0 10px 40px; position: relative; border-left: 2px solid rgba(100,180,255,0.2); margin-left: 12px; }
+    .flow-list li::before { content: counter(flow); position: absolute; left: -14px; top: 8px; width: 26px; height: 26px; background: rgba(100,180,255,0.15); border: 1px solid rgba(100,180,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--accent); }
+    .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
+    .related-card { background: rgba(15,20,30,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(100,180,255,0.3); }
+    .related-card__title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計",
+    "description": "送信ボタンを押した瞬間にUIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化・指数バックオフリトライ・NWPathMonitor回線復帰検知によるOutboxアーキテクチャの全容。",
+    "url": "https://simplememofast.com/devlog/outbox-architecture.html",
+    "datePublished": "2026-02-13",
+    "dateModified": "2026-02-13",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/devlog/outbox-architecture.html"
+    },
+    "keywords": ["Outbox パターン", "オフライン ファースト iOS", "offline first architecture", "AES-GCM iOS encryption", "メッセージ 取りこぼし ゼロ"],
+    "proficiencyLevel": "Expert",
+    "dependencies": "Apple CryptoKit, Network.framework, BackgroundTasks"
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://simplememofast.com/" },
+      { "@type": "ListItem", "position": 2, "name": "開発日誌", "item": "https://simplememofast.com/devlog/" },
+      { "@type": "ListItem", "position": 3, "name": "Outboxアーキテクチャ", "item": "https://simplememofast.com/devlog/outbox-architecture.html" }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "オフラインで送信したメモはどうなりますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Outboxに暗号化保存され、回線復帰時にNWPathMonitorが検知して自動再送します。メッセージが失われることはありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アプリを閉じてもメモは失われませんか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Outboxは永続ストレージです。アプリ終了・iPhone再起動しても失われません。次回アプリ起動時に自動的にリトライされます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "なぜAES-GCMを選んだのですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Apple CryptoKitがネイティブサポートしており、認証付き暗号化により改ざん検知も可能です。外部ライブラリ依存がゼロになります。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "送信失敗時のリトライ回数は？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "指数バックオフで自動リトライします。バックグラウンドタスクとしてスケジュールされ、確実に送信完了するまで続けます。"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/devlog/" class="page-header__back">
+          <span data-lang="ja">開発日誌へ戻る</span>
+          <span data-lang="en">Back to Dev Log</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">
+        <span data-lang="ja">Outboxアーキテクチャ：メッセージ取りこぼしゼロの設計</span>
+        <span data-lang="en">Outbox Architecture: Zero Message Loss Design</span>
+      </h1>
+
+      <!-- ======================== -->
+      <!-- Japanese Content         -->
+      <!-- ======================== -->
+      <div class="lang-content" data-lang="ja">
+        <p class="page-content__date">2026年2月13日</p>
+        <div class="page-content__body">
+
+          <!-- Section 1 -->
+          <h2>課題：送信即クリアなのにメッセージを失わない</h2>
+          <p>Captio式シンプルメモでは、ユーザーが送信ボタンをタップした瞬間にUIがクリアされ、すぐに次のメモを書き始められる。これがCaptioスタイルの根幹をなすUXだ。</p>
+          <p>しかし現実のネットワークは300ms〜2秒のレイテンシがあり、失敗もするし、そもそもオフラインかもしれない。多くのアプリはネットワーク応答を待ってからUIをクリアする。安全だが、UXは悪い。逆に即座にクリアすると、メッセージを失うリスクがある。</p>
+          <p><strong>Outboxパターン</strong>は、この相反する要件を同時に解決する。送信タップの瞬間にメッセージをローカルの暗号化ストレージ（Outbox）に永続保存し、UIを即座にクリアし、バックグラウンドでネットワーク送信を行う。送信に成功したらOutboxから削除し、失敗したら自動リトライする。これにより<strong>メッセージ取りこぼしゼロ</strong>を実現しながら、体感レイテンシはゼロに近づく。</p>
+
+          <!-- Section 2 -->
+          <h2>Outboxパターンの設計フロー</h2>
+          <p>以下が、送信ボタンをタップしてからメッセージが確実に送信されるまでの全フローだ。</p>
+          <ol class="flow-list">
+            <li><strong>送信タップ → まずOutboxにAES-GCM暗号化して永続保存</strong><br>ユーザーが送信ボタンをタップした瞬間、メッセージはAES-GCM 256bitで暗号化され、デバイスのローカルストレージに永続保存される。このステップが完了するまで、UIクリアは行わない。つまり、Outbox保存が「取りこぼしゼロ」の最初の防波堤になる。</li>
+            <li><strong>UIを即座にクリア（ユーザーは次のメモを書き始められる）</strong><br>Outbox保存が成功した時点で、テキストビューをクリアし、送信アニメーションを再生する。ユーザーから見れば「送信した」と同義。ネットワーク応答を一切待っていない。Send-to-Resetの目標は150ms（アニメーション込みで0.25秒）。</li>
+            <li><strong>バックグラウンドでRelay API経由でメール送信</strong><br>UIクリアと並行して、SendManagerがCloudflare Workers上のRelay APIへHTTPリクエストを送信する。この処理はメインスレッドをブロックしない完全非同期。</li>
+            <li><strong>成功したらOutboxから削除</strong><br>Relay APIから200レスポンスを受信したら、該当メッセージをOutboxから安全に削除する。これでメッセージのライフサイクルが完了する。</li>
+            <li><strong>失敗したら指数バックオフで自動リトライ</strong><br>ネットワークエラーやサーバーエラーの場合、指数バックオフ（1秒→2秒→4秒→8秒…）で自動リトライする。BGTaskSchedulerを使い、アプリがバックグラウンドでも確実にリトライを実行する。</li>
+            <li><strong>オフラインならNWPathMonitorで回線復帰を検知して自動再送</strong><br>送信時点でオフラインの場合、Network.frameworkのNWPathMonitorが回線状態を監視。Wi-Fiやセルラーが復帰した瞬間に自動的にOutbox内の全未送信メッセージを再送する。</li>
+          </ol>
+
+          <!-- Section 3 -->
+          <h2>SendManagerのコード</h2>
+          <p>SendManagerの<code>send()</code>関数は、Outboxパターンのエントリーポイントだ。まずOutboxに保存し、ネットワーク接続がなければキューイングし、接続があれば即座に送信を実行する。</p>
+<pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+    // まずOutboxに保存（取りこぼしゼロを保証）
+    let outboxMessage: OutboxMessage
+    do {
+        outboxMessage = try OutboxManager.shared.add(body: message)
+    } catch {
+        DispatchQueue.main.async { completion(.failure(error)) }
+        return
+    }
+
+    // ネットワーク接続がない場合はキューに入れたことを通知
+    guard NetworkMonitor.shared.isConnected else {
+        BackgroundTaskManager.shared.scheduleRetryTask()
+        DispatchQueue.main.async { completion(.queued) }
+        return
+    }
+
+    // 送信処理を実行
+    performSend(message: message, outboxId: outboxMessage.id, ...)
+}</code></pre>
+          <p>重要なポイントは、<code>OutboxManager.shared.add(body:)</code>が同期的に永続ストレージに書き込むこと。この呼び出しが成功した時点で、メッセージの安全性が保証される。ネットワーク送信がどのような結果になっても、メッセージはOutboxに残り続ける。</p>
+
+          <!-- Section 4 -->
+          <h2>AES-GCM暗号化の実装</h2>
+          <p>Outboxに保存されるメッセージは、ユーザーのプライベートなメモだ。ローカルストレージとはいえ、平文で保存するわけにはいかない。Apple CryptoKitのAES-GCMを使い、外部ライブラリ依存ゼロで暗号化を実装した。</p>
+          <ul>
+            <li><strong>Apple CryptoKit</strong> — iOS 13以降で利用可能。外部依存なし。</li>
+            <li><strong>256-bit対称鍵</strong> — Keychainに保存され、デバイスに紐づく。</li>
+            <li><strong>認証付き暗号化</strong> — AES-GCMはデータの機密性と完全性を同時に保証。改ざんされたデータは復号時に検知される。</li>
+          </ul>
+<pre><code>enum OutboxEncryption {
+    private static var encryptionKey: SymmetricKey {
+        if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
+            return SymmetricKey(data: existingKey)
+        }
+        let newKey = SymmetricKey(size: .bits256)
+        let keyData = newKey.withUnsafeBytes { Data($0) }
+        KeychainHelper.save(key: "outbox_encryption_key", data: keyData)
+        return newKey
+    }
+
+    static func encrypt(_ plainText: String) throws -&gt; Data {
+        guard let data = plainText.data(using: .utf8) else {
+            throw OutboxError.encryptionFailed
+        }
+        let sealedBox = try AES.GCM.seal(data, using: encryptionKey)
+        guard let combined = sealedBox.combined else {
+            throw OutboxError.encryptionFailed
+        }
+        return combined
+    }
+}</code></pre>
+          <p>鍵はアプリ初回起動時に自動生成され、Keychainに安全に保存される。Keychainはデバイスのセキュアエンクレーブに紐づいており、他のアプリやバックアップからはアクセスできない。</p>
+
+          <!-- Section 5 -->
+          <h2>外部ライブラリ依存ゼロの意味</h2>
+          <p>Outboxアーキテクチャで使用しているフレームワークはすべてAppleネイティブだ。</p>
+          <ul>
+            <li><strong>CryptoKit</strong> — AES-GCM暗号化。サードパーティの暗号化ライブラリは不要。</li>
+            <li><strong>Network.framework</strong> — NWPathMonitorによる回線状態監視。Reachabilityライブラリは不要。</li>
+            <li><strong>BackgroundTasks</strong> — BGTaskSchedulerによるバックグラウンドリトライ。</li>
+          </ul>
+          <p>外部依存がゼロであることの意味は大きい。</p>
+          <ul>
+            <li><strong>破壊的変更のリスクがない</strong> — OSアップデート時にサードパーティライブラリが壊れることがない。</li>
+            <li><strong>セキュリティ</strong> — ユーザーのメモデータに触れるコードパスに、第三者のコードが一切含まれない。</li>
+            <li><strong>アプリバイナリの軽量化</strong> — 不要なフレームワークを含まないため、ダウンロードサイズが最小限。</li>
+            <li><strong>ビルドの高速化</strong> — 依存関係の解決が不要で、CIが速い。</li>
+          </ul>
+
+          <!-- Section 6 -->
+          <h2>UIクリアとネットワーク送信の分離</h2>
+          <p>Outboxパターンの真の価値は、UIレイヤーとネットワークレイヤーの完全な分離にある。送信ボタンのタップハンドラを見てみよう。</p>
+<pre><code>@objc private func sendButtonTapped() {
+    PerformanceLogger.shared.beginSendToReset()
+    let message = textView.text ?? ""
+    isSending = true
+    sendBarButton.isEnabled = false
+
+    // Animation → UI clear (does NOT wait for network!)
+    performSendAnimation {
+        self.clearTextView()
+        PerformanceLogger.shared.endSendToReset()
+    }
+
+    // Send is async. Does not block UI.
+    SendManager.shared.send(message: message) { [weak self] result in
+        self?.isSending = false
+        self?.updateSendButtonState()
+        switch result {
+        case .success:
+            PerformanceLogger.shared.logEvent(name: "SendSuccess")
+        case .failure(let error):
+            self?.handleSendError(error)
+        case .queued:
+            self?.showQueuedFeedback()
+        }
+    }
+}</code></pre>
+          <p><code>performSendAnimation</code>と<code>SendManager.shared.send</code>は完全に独立して実行される。アニメーションは0.25秒で完了し、テキストビューはクリアされる。ネットワーク送信はバックグラウンドで非同期に進行し、UIを一切ブロックしない。</p>
+          <p>Send-to-Resetの目標は<strong>150ms</strong>。アニメーション込みでも0.25秒。ユーザーは送信ボタンをタップした直後に、次のメモを書き始められる。これがCaptioスタイルのUXだ。</p>
+
+          <!-- FAQ -->
+          <h2>よくある質問</h2>
+
+          <h3>Q. オフラインで送信したメモはどうなりますか？</h3>
+          <p>Outboxに暗号化保存され、回線復帰時にNWPathMonitorが検知して自動再送します。ユーザーが何もしなくても、メッセージは確実に届きます。</p>
+
+          <h3>Q. アプリを閉じてもメモは失われませんか？</h3>
+          <p>Outboxは永続ストレージです。アプリ終了・iPhone再起動しても失われません。次回アプリ起動時、またはバックグラウンドタスクにより自動的にリトライされます。</p>
+
+          <h3>Q. なぜAES-GCMを選んだのですか？</h3>
+          <p>Apple CryptoKitがネイティブサポートしており、認証付き暗号化（Authenticated Encryption）により改ざん検知も可能です。外部ライブラリ依存がゼロになる点も大きな利点です。</p>
+
+          <h3>Q. 送信失敗時のリトライ回数は？</h3>
+          <p>指数バックオフで自動リトライします。BGTaskSchedulerでバックグラウンドタスクとしてスケジュールされ、確実に送信完了するまで続けます。ユーザーのメモを絶対に取りこぼさない設計です。</p>
+
+          <!-- Related Articles -->
+          <h2>関連記事</h2>
+          <div class="related-grid">
+            <a href="/devlog/day1.html" class="related-card">
+              <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
+              <div class="related-card__desc">起動0.3秒、送信150ms、取りこぼしゼロ。すべてはここから始まった。</div>
+            </a>
+            <a href="/devlog/" class="related-card">
+              <div class="related-card__title">開発日誌一覧</div>
+              <div class="related-card__desc">技術的な意思決定とCaptioの体験再現の全記録。</div>
+            </a>
+            <a href="/devlog/uikit-vs-swiftui.html" class="related-card">
+              <div class="related-card__title">UIKit vs SwiftUI：起動速度のための選択</div>
+              <div class="related-card__desc">2026年にUIKitを選んだ理由。Time-to-Text 500ms以下を実現するアーキテクチャ設計。</div>
+            </a>
+            <a href="/devlog/relay-api-design.html" class="related-card">
+              <div class="related-card__title">Relay API：Cloudflare Workersでメール送信基盤を構築</div>
+              <div class="related-card__desc">エッジコンピューティングで世界中から数十msでメール送信する設計。</div>
+            </a>
+            <a href="/devlog/privacy-first-design.html" class="related-card">
+              <div class="related-card__title">プライバシーファースト設計：偏執的なこだわり</div>
+              <div class="related-card__desc">ephemeral URLSession、プライバシーオーバーレイ、ログ無害化。</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================== -->
+      <!-- English Content          -->
+      <!-- ======================== -->
+      <div class="lang-content" data-lang="en">
+        <p class="page-content__date">February 13, 2026</p>
+        <div class="page-content__body">
+
+          <!-- Section 1 -->
+          <h2>The Challenge: Instant UI Clear Without Losing Messages</h2>
+          <p>In Simple Memo (Captio-style), the UI clears the instant you tap send, letting you immediately start writing your next memo. This is the core of the Captio-style UX.</p>
+          <p>But real-world networks have 300ms-2s latency. They fail. They go offline entirely. Most apps wait for a network response before clearing the UI. Safe, but terrible UX. Clear immediately? You risk losing the message.</p>
+          <p>The <strong>Outbox pattern</strong> solves both simultaneously. The moment you tap send, the message is persisted to encrypted local storage (the Outbox), the UI clears instantly, and background network delivery begins. On success, the message is removed from the Outbox. On failure, automatic retry kicks in. The result: <strong>zero message loss</strong> with near-zero perceived latency.</p>
+
+          <!-- Section 2 -->
+          <h2>Outbox Pattern Design Flow</h2>
+          <p>Here is the complete flow from tapping send to guaranteed message delivery.</p>
+          <ol class="flow-list">
+            <li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense for zero message loss.</li>
+            <li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: 150ms (0.25s with animation).</li>
+            <li><strong>Background Send via Relay API</strong><br>In parallel with the UI clear, SendManager fires an HTTP request to the Relay API on Cloudflare Workers. This is fully asynchronous and never blocks the main thread.</li>
+            <li><strong>On Success: Remove from Outbox</strong><br>When the Relay API returns a 200 response, the message is safely deleted from the Outbox. The message lifecycle is complete.</li>
+            <li><strong>On Failure: Automatic Retry with Exponential Backoff</strong><br>For network or server errors, automatic retry with exponential backoff (1s → 2s → 4s → 8s...) kicks in. BGTaskScheduler ensures retries happen even when the app is in the background.</li>
+            <li><strong>If Offline: NWPathMonitor Detects Connectivity and Auto-Resends</strong><br>If the device is offline at send time, Network.framework's NWPathMonitor watches for connectivity changes. The moment Wi-Fi or cellular returns, all unsent messages in the Outbox are automatically resent.</li>
+          </ol>
+
+          <!-- Section 3 -->
+          <h2>SendManager Code</h2>
+          <p>The SendManager's <code>send()</code> function is the entry point for the Outbox pattern. It persists to the Outbox first, queues if offline, and sends immediately if connected.</p>
+<pre><code>func send(message: String, completion: @escaping (SendResult) -&gt; Void) {
+    // Persist to Outbox first (guarantees zero message loss)
+    let outboxMessage: OutboxMessage
+    do {
+        outboxMessage = try OutboxManager.shared.add(body: message)
+    } catch {
+        DispatchQueue.main.async { completion(.failure(error)) }
+        return
+    }
+
+    // If no network, notify that message has been queued
+    guard NetworkMonitor.shared.isConnected else {
+        BackgroundTaskManager.shared.scheduleRetryTask()
+        DispatchQueue.main.async { completion(.queued) }
+        return
+    }
+
+    // Execute the send
+    performSend(message: message, outboxId: outboxMessage.id, ...)
+}</code></pre>
+          <p>The critical point: <code>OutboxManager.shared.add(body:)</code> writes synchronously to persistent storage. Once this call succeeds, message safety is guaranteed. Regardless of what happens with the network send, the message remains in the Outbox until explicitly deleted after confirmed delivery.</p>
+
+          <!-- Section 4 -->
+          <h2>AES-GCM Encryption Implementation</h2>
+          <p>Messages stored in the Outbox are private user memos. Even on local storage, plaintext is unacceptable. We implemented encryption using Apple CryptoKit's AES-GCM with zero external dependencies.</p>
+          <ul>
+            <li><strong>Apple CryptoKit</strong> — Available from iOS 13+. No external dependencies.</li>
+            <li><strong>256-bit Symmetric Key</strong> — Stored in Keychain, bound to the device.</li>
+            <li><strong>Authenticated Encryption</strong> — AES-GCM guarantees both confidentiality and integrity. Tampered data is detected on decryption.</li>
+          </ul>
+<pre><code>enum OutboxEncryption {
+    private static var encryptionKey: SymmetricKey {
+        if let existingKey = KeychainHelper.load(key: "outbox_encryption_key") {
+            return SymmetricKey(data: existingKey)
+        }
+        let newKey = SymmetricKey(size: .bits256)
+        let keyData = newKey.withUnsafeBytes { Data($0) }
+        KeychainHelper.save(key: "outbox_encryption_key", data: keyData)
+        return newKey
+    }
+
+    static func encrypt(_ plainText: String) throws -&gt; Data {
+        guard let data = plainText.data(using: .utf8) else {
+            throw OutboxError.encryptionFailed
+        }
+        let sealedBox = try AES.GCM.seal(data, using: encryptionKey)
+        guard let combined = sealedBox.combined else {
+            throw OutboxError.encryptionFailed
+        }
+        return combined
+    }
+}</code></pre>
+          <p>The key is auto-generated on first launch and securely stored in Keychain. Keychain is tied to the device's Secure Enclave, making it inaccessible to other apps or backups.</p>
+
+          <!-- Section 5 -->
+          <h2>Zero External Dependencies</h2>
+          <p>Every framework used in the Outbox architecture is Apple-native.</p>
+          <ul>
+            <li><strong>CryptoKit</strong> — AES-GCM encryption. No third-party crypto libraries needed.</li>
+            <li><strong>Network.framework</strong> — NWPathMonitor for connectivity monitoring. No Reachability library needed.</li>
+            <li><strong>BackgroundTasks</strong> — BGTaskScheduler for background retry.</li>
+          </ul>
+          <p>Zero external dependencies has significant implications:</p>
+          <ul>
+            <li><strong>No Breaking Changes</strong> — Third-party libraries won't break on OS updates.</li>
+            <li><strong>Security</strong> — No third-party code touches the user's memo data. The entire code path handling user content is first-party.</li>
+            <li><strong>Small Binary</strong> — No unnecessary frameworks means minimal download size.</li>
+            <li><strong>Faster Builds</strong> — No dependency resolution overhead. CI stays fast.</li>
+          </ul>
+
+          <!-- Section 6 -->
+          <h2>Decoupling UI Clear from Network Send</h2>
+          <p>The true value of the Outbox pattern is the complete separation of the UI layer and the network layer. Let's look at the send button tap handler.</p>
+<pre><code>@objc private func sendButtonTapped() {
+    PerformanceLogger.shared.beginSendToReset()
+    let message = textView.text ?? ""
+    isSending = true
+    sendBarButton.isEnabled = false
+
+    // Animation → UI clear (does NOT wait for network!)
+    performSendAnimation {
+        self.clearTextView()
+        PerformanceLogger.shared.endSendToReset()
+    }
+
+    // Send is async. Does not block UI.
+    SendManager.shared.send(message: message) { [weak self] result in
+        self?.isSending = false
+        self?.updateSendButtonState()
+        switch result {
+        case .success:
+            PerformanceLogger.shared.logEvent(name: "SendSuccess")
+        case .failure(let error):
+            self?.handleSendError(error)
+        case .queued:
+            self?.showQueuedFeedback()
+        }
+    }
+}</code></pre>
+          <p><code>performSendAnimation</code> and <code>SendManager.shared.send</code> execute completely independently. The animation completes in 0.25 seconds and the text view clears. The network send proceeds asynchronously in the background, never blocking the UI.</p>
+          <p>Send-to-Reset target: <strong>150ms</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
+
+          <!-- FAQ -->
+          <h2>FAQ</h2>
+
+          <h3>Q. What happens to memos sent offline?</h3>
+          <p>They are encrypted and stored in the Outbox. When connectivity returns, NWPathMonitor detects it and automatically resends all pending messages. No user action required.</p>
+
+          <h3>Q. Are memos lost if I close the app?</h3>
+          <p>No. The Outbox uses persistent storage. Messages survive app termination and iPhone restarts. They are automatically retried on next app launch or via background tasks.</p>
+
+          <h3>Q. Why AES-GCM?</h3>
+          <p>Apple CryptoKit provides native AES-GCM support, offering authenticated encryption that detects data tampering during decryption. It requires zero external dependencies, keeping the security code path entirely first-party.</p>
+
+          <h3>Q. How many retries on failure?</h3>
+          <p>Retries use exponential backoff and are scheduled as background tasks via BGTaskScheduler. They continue until the message is successfully delivered. The system is designed to never drop a user's memo.</p>
+
+          <!-- Related Articles -->
+          <h2>Related Articles</h2>
+          <div class="related-grid">
+            <a href="/devlog/day1.html" class="related-card">
+              <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+              <div class="related-card__desc">Launch in 0.3s, send in 150ms, zero message loss. It all started here.</div>
+            </a>
+            <a href="/devlog/" class="related-card">
+              <div class="related-card__title">Dev Log Index</div>
+              <div class="related-card__desc">The complete record of technical decisions and Captio experience recreation.</div>
+            </a>
+            <a href="/devlog/uikit-vs-swiftui.html" class="related-card">
+              <div class="related-card__title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
+              <div class="related-card__desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
+            </a>
+            <a href="/devlog/relay-api-design.html" class="related-card">
+              <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
+              <div class="related-card__desc">Edge computing for global email delivery in milliseconds.</div>
+            </a>
+            <a href="/devlog/privacy-first-design.html" class="related-card">
+              <div class="related-card__title">Privacy-First Design: Obsessive Attention to Detail</div>
+              <div class="related-card__desc">Ephemeral URLSession, privacy overlay, sanitized logs.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/devlog/" class="footer__link">
+          <span data-lang="ja">開発日誌</span>
+          <span data-lang="en">Dev Log</span>
+        </a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>

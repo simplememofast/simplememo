@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Capito式シンプルメモ 開発日誌</title>
+  <meta name="description" content="Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。">
+  <meta name="theme-color" content="#000000">
+
+  <!-- SEO keywords targeting -->
+  <meta name="keywords" content="Cloudflare Workers メール送信, Resend API, iOS メール送信 API, Gmail API 代替, email relay API architecture">
+
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-og-title">Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-description">Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log</span>
+      <span class="meta-og-title">Relay API Design: Building Email Infrastructure on Cloudflare Workers | Simple Memo Dev Log</span>
+      <span class="meta-description">Breaking free from Gmail API dependency. Edge computing email infrastructure with Cloudflare Workers + Resend API. Email verification, multi-layer rate limiting, and idempotency guarantees.</span>
+    </div>
+  </div>
+
+  <!-- OGP -->
+  <meta property="og:title" content="Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Capito式シンプルメモ 開発日誌">
+  <meta property="og:description" content="Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/devlog/relay-api-design.html">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Relay API設計：Cloudflare Workersでメール送信基盤を構築 | Capito式シンプルメモ 開発日誌">
+  <meta name="twitter:description" content="Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。">
+  <meta name="twitter:image" content="/assets/img/ogp.png">
+
+  <link rel="canonical" href="https://simplememofast.com/devlog/relay-api-design.html">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/relay-api-design.html?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/devlog/relay-api-design.html?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design.html">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
+    }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    .page-content__body h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .page-content__body h3 {
+      margin-top: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .page-content__body p {
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+    .page-content__body ul,
+    .page-content__body ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    .page-content__body li {
+      line-height: 1.8;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(10, 14, 22, 0.8);
+      border: 1px solid rgba(100, 160, 220, 0.15);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+      -webkit-overflow-scrolling: touch;
+    }
+    pre code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: #c8d6e5;
+      background: none;
+      padding: 0;
+    }
+    code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.85rem;
+      background: rgba(100, 180, 255, 0.08);
+      border: 1px solid rgba(100, 180, 255, 0.12);
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: #a8d8ff;
+    }
+    .code-comment { color: #5c6773; }
+    .code-keyword { color: #c678dd; }
+    .code-string { color: #98c379; }
+    .code-number { color: #d19a66; }
+    .code-type { color: #61afef; }
+
+    /* Architecture Diagram */
+    .arch-diagram {
+      background: rgba(10, 14, 22, 0.8);
+      border: 1px solid rgba(100, 160, 220, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 1.5rem 0;
+      text-align: center;
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      font-size: 0.85rem;
+      color: #a8d8ff;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .arch-diagram .arrow {
+      color: rgba(100, 180, 255, 0.6);
+    }
+    .arch-diagram .node {
+      display: inline-block;
+      background: rgba(100, 180, 255, 0.08);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      border-radius: 8px;
+      padding: 6px 14px;
+      margin: 4px;
+      color: #c8d6e5;
+      white-space: nowrap;
+    }
+
+    /* Feature / Info Cards */
+    .info-card {
+      background: rgba(15, 20, 30, 0.5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .info-card__label {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .info-card__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .info-card__desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Related Card Grid */
+    .related-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin: 1.2rem 0;
+    }
+    @media (min-width: 600px) {
+      .related-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(15, 20, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .related-card:hover {
+      border-color: rgba(100, 180, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Cross Links */
+    .cross-links {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .cross-links h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    .cross-links__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .cross-links__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .cross-links__item {
+      background: rgba(15, 20, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .cross-links__item:hover {
+      border-color: rgba(100, 180, 255, 0.3);
+    }
+    .cross-links__item-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .cross-links__item-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* CTA Box */
+    .cta-box {
+      background: rgba(100, 180, 255, 0.06);
+      border: 1px solid rgba(100, 180, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .cta-box p {
+      margin-bottom: 0.8rem;
+    }
+    .cta-box a {
+      display: inline-block;
+      background: rgba(100, 180, 255, 0.15);
+      border: 1px solid rgba(100, 180, 255, 0.3);
+      border-radius: 20px;
+      padding: 10px 24px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.25s, box-shadow 0.25s;
+    }
+    .cta-box a:hover {
+      background: rgba(100, 180, 255, 0.25);
+      box-shadow: 0 0 16px rgba(100, 180, 255, 0.15);
+    }
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Relay API設計：Cloudflare Workersでメール送信基盤を構築",
+    "description": "Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。",
+    "url": "https://simplememofast.com/devlog/relay-api-design.html",
+    "datePublished": "2026-02-13",
+    "dateModified": "2026-02-13",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/devlog/relay-api-design.html"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "keywords": "Cloudflare Workers メール送信, Resend API, iOS メール送信 API, Gmail API 代替, email relay API architecture",
+    "proficiencyLevel": "Expert"
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://simplememofast.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "開発日誌",
+        "item": "https://simplememofast.com/devlog/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Relay API設計",
+        "item": "https://simplememofast.com/devlog/relay-api-design.html"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "なぜCloudflare Workersを選んだのですか？ / Why Cloudflare Workers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "コールドスタートがほぼゼロ、世界中のエッジから配信、月額ほぼ無料。メモアプリに必要な速さと信頼性の両方を実現。 / Near-zero cold start, global edge delivery, and nearly free monthly cost. Achieves both the speed and reliability a memo app demands."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メールの到達率は？ / What's the email delivery rate?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Resend APIは高い到達率を実現。SPF/DKIM/DMARC設定済みで、迷惑メール判定を最小化。 / Resend API achieves high delivery rates. SPF/DKIM/DMARC are pre-configured to minimize spam classification."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "サーバーにメモの内容は保存されますか？ / Is memo content stored on the server?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Relay APIは通過型。メモ内容の恒常的な保存は行わない。送信処理に必要な範囲でのみ一時的に扱う。 / The Relay API is pass-through. Memo content is not persistently stored. It is handled temporarily only as needed for the send operation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "レート制限に引っかかったらどうなりますか？ / What happens when rate limited?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "アプリ側でOutboxにキューイングされ、制限解除後に自動リトライ。メモは失われない。 / The app queues memos in the Outbox and automatically retries after the rate limit resets. No memos are lost."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/devlog/" class="page-header__back">
+          <span data-lang="ja">開発日誌へ戻る</span>
+          <span data-lang="en">Back to Dev Log</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">
+        <span data-lang="ja">Relay API設計：Cloudflare Workersでメール送信基盤を構築</span>
+        <span data-lang="en">Relay API Design: Building Email Infrastructure on Cloudflare Workers</span>
+      </h1>
+
+      <!-- Japanese Content -->
+      <div class="lang-content" data-lang="ja">
+        <p class="article-meta">2026年2月13日 公開</p>
+        <div class="page-content__body">
+
+          <h2>1. なぜGmail APIを使わなかったのか</h2>
+          <p>メモをメールで送信するアプリを作るとき、最初に思い浮かぶのはGmail APIです。しかし、個人開発者にとってGoogle OAuth審査のハードルは極めて高いものでした。</p>
+          <p>Google OAuth審査を通過していないアプリには、「このアプリはGoogleで確認されていません」という警告画面が表示されます。メモアプリにとって、この警告は致命的です。ユーザーは自分の考えや個人的な情報をメモとして送信します。その最初の体験で「検証されていません」と表示されたら、誰がこのアプリを信頼するでしょうか。</p>
+          <p>Google OAuth審査の申請プロセスは、個人開発者にとって険しい道のりです。プライバシーポリシーの準備、スコープの正当性説明、セキュリティ評価——大企業のチームならともかく、一人で開発しているアプリにとっては、メール送信という単一機能のために払うコストとしてはあまりにも大きすぎます。</p>
+          <p>必要だったのは、OAuth審査の複雑さなしに、ユーザーの信頼を損なわずメールを送信できるソリューションでした。その答えが、自前のRelay APIです。</p>
+
+          <h2>2. Cloudflare Workers + Resend APIアーキテクチャ</h2>
+          <p>Relay APIのアーキテクチャは、シンプルかつ堅牢です。iOSアプリからのリクエストを受け取り、メール送信サービスに中継する——それだけに特化した設計です。</p>
+
+          <div class="arch-diagram">
+            <span class="node">iOS App</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Relay API (Cloudflare Workers)</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Resend API</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Email Delivery</span>
+          </div>
+
+          <p><strong>Cloudflare Workers</strong>は、世界中のエッジロケーションでTypeScriptコードを実行するサーバーレスプラットフォームです。従来のサーバーレスで問題になるコールドスタートがほぼゼロで、リクエストを受けた瞬間から処理が始まります。</p>
+          <p><strong>Resend API</strong>は、モダンなメール送信サービスです。SPF/DKIM/DMARCの設定が容易で、高い到達率を実現します。開発者フレンドリーなAPIで、TypeScriptからシンプルに呼び出せます。</p>
+          <p>コスト面でも優れています。メモアプリのトラフィック量であれば、Cloudflare Workersの無料枠（1日10万リクエスト）で十分にまかなえます。Resend APIも月100通まで無料。個人開発のメモアプリにとって、ほぼゼロコストで運用できるインフラです。</p>
+
+          <h2>3. メールアドレス検証（6桁コード方式）</h2>
+          <p>Relay APIは、検証済みのメールアドレスにのみメモを送信します。これは悪用防止の最も基本的な防御層です。</p>
+          <p>メモ送信を開始する前に、送信先のメールアドレスを検証するフローが必要です。</p>
+          <ul>
+            <li>ユーザーがアプリにメールアドレスを入力</li>
+            <li>Relay APIが6桁の検証コードをそのアドレスに送信</li>
+            <li>ユーザーが受信した6桁コードをアプリに入力</li>
+            <li>検証完了。以降、そのメールアドレスへのメモ送信が許可される</li>
+          </ul>
+          <p>この仕組みにより、他人のメールアドレスに無断でメモが送信されることを防ぎます。メールアドレスの所有者本人だけが検証コードを受信できるため、なりすまし送信は不可能です。</p>
+          <p>検証はメールアドレスごとに一度だけ。一度検証が完了すれば、以降はコード入力なしでメモを送信し続けられます。</p>
+
+          <h2>4. 多層レート制限の実装</h2>
+          <p>メール送信APIの悪用を防ぐため、複数のレイヤーでレート制限を実装しています。</p>
+
+<pre><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
+  <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
+  <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
+  <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
+  <span class="code-string">globalPerDay</span>: <span class="code-number">300</span>,
+};</code></pre>
+
+          <div class="info-card">
+            <div class="info-card__label">Device Level</div>
+            <div class="info-card__title">デバイス単位の制限</div>
+            <div class="info-card__desc">1台のデバイスからの過剰な送信を防止。1分あたり30件、1日あたり200件の上限を設定。通常のメモ利用では到達しない閾値ですが、自動化による大量送信を確実にブロックします。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">IP Level</div>
+            <div class="info-card__title">IPアドレス単位の制限</div>
+            <div class="info-card__desc">同一ネットワークからの大量リクエストを制限。1時間あたり120件。複数デバイスを使った攻撃からもインフラを保護します。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">Global</div>
+            <div class="info-card__title">グローバル制限</div>
+            <div class="info-card__desc">インフラ全体の保護。1日あたり300件のグローバル上限で、いかなる攻撃パターンに対しても最終防衛線として機能します。</div>
+          </div>
+
+          <p>カウンターはCloudflare KVに保存され、各時間ウィンドウごとにリセットされます。エッジコンピューティングの利点により、レート制限チェックも数十ミリ秒で完了。正当なリクエストの遅延を最小限に抑えつつ、不正アクセスを確実に遮断します。</p>
+
+          <h2>5. 冪等性の保証：メモが2通届かない設計</h2>
+          <p>ネットワーク通信には不確実性がつきものです。送信ボタンを押してから応答が返るまでの間に、通信が途切れることがあります。アプリはタイムアウトと判断して再送信を試みますが、実は最初のリクエストはサーバーに届いていた——よくあるシナリオです。</p>
+          <p>この問題を解決するのが冪等性（idempotency）の保証です。</p>
+          <ul>
+            <li>各メモに一意のUUID（メッセージID）を付与</li>
+            <li>Relay APIは受信したメッセージIDを記録</li>
+            <li>同一のメッセージIDを持つリクエストが再度届いた場合、メールの重複送信は行わない</li>
+            <li>クライアントには成功レスポンスを返す（すでに送信済みであることを通知）</li>
+          </ul>
+          <p>この設計により、ネットワーク不安定な環境でリトライが発生しても、同じメモが2通届くことは絶対にありません。ユーザーの信頼を守るための重要な設計判断です。</p>
+
+          <h2>6. エッジコンピューティングの利点</h2>
+          <p>Cloudflare Workersをメール送信基盤に採用した最大の理由は、エッジコンピューティングの本質的な利点にあります。</p>
+
+          <div class="info-card">
+            <div class="info-card__label">Latency</div>
+            <div class="info-card__title">世界中のエッジロケーション = 低レイテンシ</div>
+            <div class="info-card__desc">Cloudflareは世界300以上の都市にエッジサーバーを展開。ユーザーに最も近いロケーションでリクエストが処理されるため、どの国からでも数十ミリ秒でAPIレスポンスが返ります。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">Cold Start</div>
+            <div class="info-card__title">コールドスタートがほぼゼロ</div>
+            <div class="info-card__desc">従来のサーバーレス（AWS Lambdaなど）ではコールドスタートに数百ミリ秒〜数秒かかることがあります。Cloudflare Workersはその問題がほぼ存在しません。メモの送信ボタンを押した瞬間に処理が始まります。</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">Operations</div>
+            <div class="info-card__title">インフラ管理不要のオートスケーリング</div>
+            <div class="info-card__desc">サーバーの管理、キャパシティプランニング、スケーリング設定——これらすべてが不要です。リクエストが増えれば自動的にスケールし、アイドル時にはコストが発生しません。</div>
+          </div>
+
+          <p>メモアプリにとって、この組み合わせは理想的です。速い、信頼性が高い、安い。ユーザーが世界中どこにいても、メモを送信した瞬間に処理が完了する。それがエッジコンピューティングで構築したRelay APIの強みです。</p>
+
+          <div class="cta-box">
+            <p>この技術基盤の上に構築された「Capito式シンプルメモ」を、ぜひお試しください。</p>
+            <a href="https://apps.apple.com/app/capito-simple-memo/id6744729498" target="_blank" rel="noopener noreferrer">App Storeでダウンロード</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- English Content -->
+      <div class="lang-content" data-lang="en">
+        <p class="article-meta">Published February 13, 2026</p>
+        <div class="page-content__body">
+
+          <h2>1. Why We Didn't Use Gmail API</h2>
+          <p>When building an app that sends memos via email, Gmail API is the first thing that comes to mind. However, for indie developers, the Google OAuth verification process presents a formidable barrier.</p>
+          <p>Apps that haven't passed Google OAuth verification display a warning screen: "This app isn't verified by Google." For a memo app, this warning is devastating. Users send their personal thoughts and private information as memos. If "unverified" appears during their very first experience, who would trust this app?</p>
+          <p>The Google OAuth verification process is a steep climb for solo developers. Preparing a privacy policy, justifying scope requirements, undergoing security assessments -- for a team at a large company, this is routine. But for a solo-developed app, the cost of going through all this just for a single email-sending feature is disproportionately high.</p>
+          <p>What we needed was a solution that could send emails without compromising user trust and without the complexity of OAuth verification. The answer was building our own Relay API.</p>
+
+          <h2>2. Cloudflare Workers + Resend API Architecture</h2>
+          <p>The Relay API architecture is simple yet robust. It receives requests from the iOS app and relays them to an email delivery service -- a design focused on doing exactly one thing well.</p>
+
+          <div class="arch-diagram">
+            <span class="node">iOS App</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Relay API (Cloudflare Workers)</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Resend API</span>
+            <span class="arrow"> &rarr; </span>
+            <span class="node">Email Delivery</span>
+          </div>
+
+          <p><strong>Cloudflare Workers</strong> is a serverless platform that executes TypeScript code at edge locations around the world. Unlike traditional serverless platforms that suffer from cold starts, Workers starts processing requests almost instantly with near-zero cold start time.</p>
+          <p><strong>Resend API</strong> is a modern email delivery service. It makes SPF/DKIM/DMARC configuration straightforward and achieves high delivery rates. Its developer-friendly API can be called simply from TypeScript.</p>
+          <p>The cost advantage is significant. For a memo app's traffic volume, Cloudflare Workers' free tier (100,000 requests per day) is more than sufficient. Resend API is also free for up to 100 emails per month. For an indie-developed memo app, this means near-zero operational cost.</p>
+
+          <h2>3. Email Address Verification (6-Digit Code)</h2>
+          <p>The Relay API only sends memos to verified email addresses. This is the most fundamental layer of abuse prevention.</p>
+          <p>Before any memos can be sent, the destination email address must go through a verification flow:</p>
+          <ul>
+            <li>User enters their email address in the app</li>
+            <li>Relay API sends a 6-digit verification code to that address</li>
+            <li>User enters the received 6-digit code back into the app</li>
+            <li>Verification complete. Memo sending to that email address is now permitted</li>
+          </ul>
+          <p>This mechanism prevents unauthorized sending to other people's email addresses. Since only the email address owner can receive the verification code, impersonation is impossible.</p>
+          <p>Verification is a one-time process per email address. Once verified, users can continue sending memos without re-entering any code.</p>
+
+          <h2>4. Multi-Layer Rate Limiting</h2>
+          <p>To prevent abuse of the email sending API, we implement rate limiting across multiple layers.</p>
+
+<pre><code><span class="code-keyword">const</span> <span class="code-type">RATE_LIMITS</span> = {
+  <span class="code-string">devicePerMinute</span>: <span class="code-number">30</span>,
+  <span class="code-string">devicePerDay</span>: <span class="code-number">200</span>,
+  <span class="code-string">ipPerHour</span>: <span class="code-number">120</span>,
+  <span class="code-string">globalPerDay</span>: <span class="code-number">300</span>,
+};</code></pre>
+
+          <div class="info-card">
+            <div class="info-card__label">Device Level</div>
+            <div class="info-card__title">Per-Device Limiting</div>
+            <div class="info-card__desc">Prevents excessive sending from a single device. Limits set at 30 per minute and 200 per day. These thresholds are unreachable during normal memo usage but reliably block automated mass sending.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">IP Level</div>
+            <div class="info-card__title">Per-IP Address Limiting</div>
+            <div class="info-card__desc">Limits mass requests from the same network. 120 per hour. Protects infrastructure even against attacks using multiple devices on the same network.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">Global</div>
+            <div class="info-card__title">Global Limit</div>
+            <div class="info-card__desc">Protects the entire infrastructure. A global cap of 300 per day serves as the final line of defense against any attack pattern.</div>
+          </div>
+
+          <p>Counters are stored in Cloudflare KV and reset per time window. Thanks to edge computing, rate limit checks complete in tens of milliseconds. This minimizes latency for legitimate requests while reliably blocking unauthorized access.</p>
+
+          <h2>5. Idempotency: Ensuring Memos Never Arrive Twice</h2>
+          <p>Network communication is inherently unreliable. Between tapping send and receiving a response, the connection can drop. The app detects a timeout and retries the send, but the first request had actually reached the server -- a common scenario.</p>
+          <p>Idempotency guarantees solve this problem:</p>
+          <ul>
+            <li>Each memo is assigned a unique UUID (message ID)</li>
+            <li>The Relay API records every received message ID</li>
+            <li>If a request with the same message ID arrives again, the email is not sent a second time</li>
+            <li>A success response is returned to the client (notifying that it was already sent)</li>
+          </ul>
+          <p>With this design, even if retries occur due to network instability, the same memo will never be delivered twice. This is a critical design decision for maintaining user trust.</p>
+
+          <h2>6. The Edge Computing Advantage</h2>
+          <p>The primary reason for choosing Cloudflare Workers as our email infrastructure is the fundamental advantages of edge computing.</p>
+
+          <div class="info-card">
+            <div class="info-card__label">Latency</div>
+            <div class="info-card__title">Global Edge Locations = Low Latency</div>
+            <div class="info-card__desc">Cloudflare operates edge servers in over 300 cities worldwide. Requests are processed at the location closest to the user, delivering API responses in tens of milliseconds from any country.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">Cold Start</div>
+            <div class="info-card__title">Near-Zero Cold Start</div>
+            <div class="info-card__desc">Traditional serverless platforms (like AWS Lambda) can take hundreds of milliseconds to several seconds for cold starts. Cloudflare Workers essentially eliminates this problem. Processing begins the instant the send button is tapped.</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card__label">Operations</div>
+            <div class="info-card__title">Auto-Scaling with No Infrastructure Management</div>
+            <div class="info-card__desc">Server management, capacity planning, scaling configuration -- none of these are needed. The system scales automatically as requests increase, and incurs no cost when idle.</div>
+          </div>
+
+          <p>For a memo app, this combination is ideal. Fast, reliable, cheap. No matter where in the world the user is, processing completes the moment they send a memo. That's the strength of a Relay API built on edge computing.</p>
+
+          <div class="cta-box">
+            <p>Try Simple Memo - Captio-style, built on this technical foundation.</p>
+            <a href="https://apps.apple.com/app/capito-simple-memo/id6744729498" target="_blank" rel="noopener noreferrer">Download on the App Store</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FAQ Section (visible, mirrors JSON-LD) -->
+      <div data-lang="ja">
+        <div class="page-content__body cross-links">
+          <h2>よくある質問</h2>
+
+          <h3>Q. なぜCloudflare Workersを選んだのですか？</h3>
+          <p>コールドスタートがほぼゼロ、世界中のエッジから配信、月額ほぼ無料。メモアプリに必要な速さと信頼性の両方を実現できるプラットフォームだからです。</p>
+
+          <h3>Q. メールの到達率は？</h3>
+          <p>Resend APIは高い到達率を実現しています。SPF/DKIM/DMARC設定済みで、迷惑メール判定を最小化しています。</p>
+
+          <h3>Q. サーバーにメモの内容は保存されますか？</h3>
+          <p>Relay APIは通過型です。メモ内容の恒常的な保存は行いません。送信処理に必要な範囲でのみ一時的に扱います。</p>
+
+          <h3>Q. レート制限に引っかかったらどうなりますか？</h3>
+          <p>アプリ側でOutboxにキューイングされ、制限解除後に自動リトライします。メモは失われません。</p>
+        </div>
+      </div>
+
+      <div data-lang="en">
+        <div class="page-content__body cross-links">
+          <h2>Frequently Asked Questions</h2>
+
+          <h3>Q. Why Cloudflare Workers?</h3>
+          <p>Near-zero cold start, global edge delivery, and nearly free monthly cost. It's a platform that achieves both the speed and reliability a memo app demands.</p>
+
+          <h3>Q. What's the email delivery rate?</h3>
+          <p>Resend API achieves high delivery rates. SPF/DKIM/DMARC are pre-configured to minimize spam classification.</p>
+
+          <h3>Q. Is memo content stored on the server?</h3>
+          <p>The Relay API is pass-through. Memo content is not persistently stored. It is handled temporarily only as needed for the send operation.</p>
+
+          <h3>Q. What happens when rate limited?</h3>
+          <p>The app queues memos in the Outbox and automatically retries after the rate limit resets. No memos are lost.</p>
+        </div>
+      </div>
+
+      <!-- Cross Links -->
+      <div data-lang="ja">
+        <div class="cross-links">
+          <h2>関連記事</h2>
+          <div class="cross-links__grid">
+            <a href="/devlog/day1.html" class="cross-links__item">
+              <div class="cross-links__item-title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
+              <div class="cross-links__item-desc">起動0.3秒、送信150ms、取りこぼしゼロ——初回開発日誌の全文。</div>
+            </a>
+            <a href="/devlog/" class="cross-links__item">
+              <div class="cross-links__item-title">開発日誌 一覧</div>
+              <div class="cross-links__item-desc">すべての開発日誌と技術トピックの一覧ページ。</div>
+            </a>
+            <a href="/devlog/outbox-architecture.html" class="cross-links__item">
+              <div class="cross-links__item-title">Outboxアーキテクチャ：取りこぼしゼロ設計</div>
+              <div class="cross-links__item-desc">送信即UIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化Outboxパターンの全容。</div>
+            </a>
+            <a href="/devlog/uikit-vs-swiftui.html" class="cross-links__item">
+              <div class="cross-links__item-title">UIKit vs SwiftUI：起動速度のための選択</div>
+              <div class="cross-links__item-desc">2026年にUIKitを選んだ理由。Time-to-Text 500ms以下を実現するアーキテクチャ設計。</div>
+            </a>
+            <a href="/devlog/privacy-first-design.html" class="cross-links__item">
+              <div class="cross-links__item-title">プライバシーファースト設計：偏執的なこだわり</div>
+              <div class="cross-links__item-desc">ephemeral URLSession、プライバシーオーバーレイ、ログ無害化。メモアプリだからこそ過剰なくらいがちょうどいい。</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div data-lang="en">
+        <div class="cross-links">
+          <h2>Related Articles</h2>
+          <div class="cross-links__grid">
+            <a href="/devlog/day1.html" class="cross-links__item">
+              <div class="cross-links__item-title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+              <div class="cross-links__item-desc">Launch in 0.3s, send in 150ms, zero message loss — the full first dev log entry.</div>
+            </a>
+            <a href="/devlog/" class="cross-links__item">
+              <div class="cross-links__item-title">Dev Log Index</div>
+              <div class="cross-links__item-desc">All dev log entries and technical deep dives in one place.</div>
+            </a>
+            <a href="/devlog/outbox-architecture.html" class="cross-links__item">
+              <div class="cross-links__item-title">Outbox Architecture: Zero Message Loss</div>
+              <div class="cross-links__item-desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+            </a>
+            <a href="/devlog/uikit-vs-swiftui.html" class="cross-links__item">
+              <div class="cross-links__item-title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
+              <div class="cross-links__item-desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
+            </a>
+            <a href="/devlog/privacy-first-design.html" class="cross-links__item">
+              <div class="cross-links__item-title">Privacy-First Design: Obsessive Attention to Detail</div>
+              <div class="cross-links__item-desc">Ephemeral URLSession, privacy overlay, sanitized logs. For a memo app, being overly cautious is just right.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/devlog/" class="footer__link">
+          <span data-lang="ja">開発日誌</span>
+          <span data-lang="en">Dev Log</span>
+        </a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
