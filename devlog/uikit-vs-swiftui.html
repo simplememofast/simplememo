@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由 | Capito式シンプルメモ 開発日誌</title>
+  <meta name="description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。">
+  <meta name="keywords" content="UIKit SwiftUI パフォーマンス, SwiftUI 起動速度, iOS app launch performance, UIKit vs SwiftUI 2026, Time-to-Text, becomeFirstResponder, os_signpost, iOS performance optimization">
+  <meta name="theme-color" content="#000000">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-og-title">UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由</span>
+      <span class="meta-description">2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">UIKit vs SwiftUI: Why We Chose UIKit for Launch Speed | Simple Memo Dev Log</span>
+      <span class="meta-og-title">UIKit vs SwiftUI: Why We Chose UIKit for Launch Speed</span>
+      <span class="meta-description">Deliberately choosing UIKit in 2026. Achieving Time-to-Text under 500ms with no Storyboard, direct VC instantiation, and becomeFirstResponder in viewDidAppear — 200-300ms on real devices.</span>
+    </div>
+  </div>
+
+  <!-- OGP -->
+  <meta property="og:title" content="UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由">
+  <meta property="og:description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/devlog/uikit-vs-swiftui.html">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由">
+  <meta name="twitter:description" content="2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。">
+  <meta name="twitter:image" content="/assets/img/ogp.png">
+
+  <link rel="canonical" href="https://simplememofast.com/devlog/uikit-vs-swiftui.html">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
+    }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Styles */
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(15, 20, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .related-card:hover {
+      border-color: rgba(100, 180, 255, 0.3);
+    }
+    .related-card__title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .related-card__desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .metric-highlight {
+      background: rgba(100, 180, 255, 0.08);
+      border: 1px solid rgba(100, 180, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .metric-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由",
+    "description": "2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。",
+    "url": "https://simplememofast.com/devlog/uikit-vs-swiftui.html",
+    "datePublished": "2026-02-13",
+    "dateModified": "2026-02-13",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "inLanguage": ["ja", "en"],
+    "keywords": "UIKit SwiftUI パフォーマンス, SwiftUI 起動速度, iOS app launch performance, UIKit vs SwiftUI 2026",
+    "proficiencyLevel": "Expert",
+    "dependencies": "Xcode 16, Swift 6, iOS 17+",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/" },
+      { "@type": "ListItem", "position": 2, "name": "開発日誌", "item": "https://simplememofast.com/devlog/" },
+      { "@type": "ListItem", "position": 3, "name": "UIKit vs SwiftUI", "item": "https://simplememofast.com/devlog/uikit-vs-swiftui.html" }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "SwiftUIでは500ms以下の起動は無理ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "不可能ではないが、UIKitのほうが確実にミリ秒単位で速い。@StateObject初期化やbody再評価のオーバーヘッドがある。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Storyboardを使わないデメリットは？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "UIの可視化がコードベースになる。ただしメモアプリのUIはシンプルなので問題にならない。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "実機での計測結果は？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "目標500ms以下に対し、実機で200〜300ms台で安定。os_signpostでナノ秒単位で計測。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "今後SwiftUIに移行する予定は？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "クリティカルパス（起動→入力→送信）はUIKitを維持。非クリティカルな画面は検討の余地あり。"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/devlog/" class="page-header__back">
+          <span data-lang="ja">開発日誌へ戻る</span>
+          <span data-lang="en">Back to Dev Log</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">
+        <span data-lang="ja">UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由</span>
+        <span data-lang="en">UIKit vs SwiftUI: Why We Chose UIKit for Launch Speed</span>
+      </h1>
+
+      <div class="article-meta">
+        <span data-lang="ja">2026年2月13日 ・ 技術トピック深掘り</span>
+        <span data-lang="en">February 13, 2026 ・ Technical Deep Dive</span>
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="lang-content" data-lang="ja">
+        <div class="article-body">
+
+          <h2>1. なぜ2026年にUIKitなのか</h2>
+          <p>2026年現在、新規iOSアプリの多くはSwiftUIで開発されている。Appleも毎年のWWDCでSwiftUIの進化を強調し、宣言的UIの利便性はもはや疑いようがない。</p>
+          <p>しかし、このアプリには<strong>譲れない要件</strong>がある。それは<strong>Time-to-Text（起動からテキスト入力可能になるまでの時間）を500ms以下にすること</strong>だ。</p>
+          <p>SwiftUIでは、<code>@StateObject</code>の初期化、<code>body</code>の再評価、<code>.onAppear</code>のタイミング制御など、宣言的UIフレームワーク固有のオーバーヘッドが存在する。これらは一般的なアプリでは無視できる程度だが、ミリ秒単位の最適化を追求する場面では無視できない。</p>
+          <p>一方、UIKitの<code>viewDidAppear</code>から<code>becomeFirstResponder()</code>を呼ぶパスは<strong>決定論的に高速</strong>だ。ViewControllerのライフサイクルは明確で、いつキーボードが表示されるかを正確に制御できる。</p>
+          <div class="metric-highlight">
+            <strong>設計判断：</strong>Time-to-Text 500ms以下という非機能要件を確実に満たすため、UIKitを採用。実機計測で<strong>200〜300ms</strong>を安定して達成。
+          </div>
+
+          <h2>2. Storyboardを完全に排除した理由</h2>
+          <p>UIKitを選んだだけでは不十分だ。Storyboardにも起動パフォーマンスに影響するオーバーヘッドがある。</p>
+          <ul>
+            <li><strong>XML解析コスト：</strong>Storyboardは内部的にXMLファイルであり、起動時にパースが必要</li>
+            <li><strong>Segue解決コスト：</strong>画面遷移のためのSegue設定の解決に時間がかかる</li>
+            <li><strong>不必要な複雑性：</strong>シンプルなメモアプリにStoryboardの視覚的設計ツールは過剰</li>
+          </ul>
+          <p>代わりに、<code>SceneDelegate</code>で直接ViewControllerを生成する方式を採用した。</p>
+          <pre><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    PerformanceLogger.shared.signpostBegin(name: "SceneConnect")
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    let composeVC = ComposeViewController()
+    let navController = UINavigationController(rootViewController: composeVC)
+    window.rootViewController = navController
+    window.makeKeyAndVisible()
+    PerformanceLogger.shared.signpostEnd(name: "SceneConnect")
+}</code></pre>
+          <p>このアプローチにより、<strong>Storyboardのパース時間ゼロ、Segue解決時間ゼロ</strong>を実現している。SceneDelegateから直接ComposeViewControllerを生成することで、起動パスから不要な処理を完全に排除した。</p>
+
+          <h2>3. viewDidAppearの1行がすべてを完結させる</h2>
+          <p>UIKitの最大の強みは、ViewControllerのライフサイクルが明確に定義されていることだ。<code>viewDidAppear(_:)</code>が呼ばれた時点で、ビューは完全に画面に表示されている。この確実なタイミングで<code>becomeFirstResponder()</code>を呼ぶことで、キーボード表示までの遅延を最小化できる。</p>
+          <pre><code>override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    activateTextInput()
+}
+
+private func activateTextInput() {
+    textView.becomeFirstResponder()
+    PerformanceLogger.shared.endTimeToText()
+}</code></pre>
+          <p><code>os_signpost</code>による計測をナノ秒精度で実施している。<code>PerformanceLogger.shared.endTimeToText()</code>がSignpostの終了イベントを記録し、Instrumentsでの詳細な分析を可能にしている。</p>
+          <div class="metric-highlight">
+            <strong>計測結果：</strong>目標 500ms以下 → 実機実測値 <strong>200〜300ms</strong>で安定動作。ユーザーがアプリアイコンをタップしてから、テキスト入力が可能になるまでわずか0.2〜0.3秒。
+          </div>
+
+          <h2>4. パフォーマンス計測の仕組み</h2>
+          <p>「速い」という感覚的な判断ではなく、定量的なデータに基づいて設計判断を行っている。</p>
+          <ul>
+            <li><strong>PerformanceLogger：</strong><code>os_signpost</code>をラップしたカスタムロガー。起動・送信・UI更新の各フェーズを計測</li>
+            <li><strong>Instruments連携：</strong>Xcodeのos_signpost Instrumentでナノ秒精度のトラッキングが可能</li>
+            <li><strong>主要メトリクス：</strong>Time-to-Text（起動→入力可能）、Send-to-Reset（送信ボタン→UI初期化）</li>
+            <li><strong>継続的モニタリング：</strong>開発中のビルドすべてでパフォーマンス計測を実施し、リグレッションを即座に検出</li>
+          </ul>
+          <p>パフォーマンスは機能である。ユーザーは「速さ」を明示的に要求しなくても、遅いアプリは無意識のうちに使わなくなる。だからこそ、パフォーマンスを数値で管理し続けることが重要だ。</p>
+
+          <h2>5. SwiftUIを使う場面はあるか</h2>
+          <p>UIKit一択というわけではない。アプリ内には、SwiftUIが適している場面もある。</p>
+          <ul>
+            <li><strong>設定画面：</strong>起動速度に影響しない非クリティカルな画面ではSwiftUIの宣言的UIが生産性を高める</li>
+            <li><strong>クリティカルパスの定義：</strong>起動 → メモ入力 → 送信というコアフローはUIKitで維持する</li>
+            <li><strong>ハイブリッドの複雑性：</strong>UIKitとSwiftUIを混在させると、UIHostingControllerの管理やデータフローの一貫性に注意が必要</li>
+            <li><strong>現時点の判断：</strong>メモアプリのUIはシンプルであり、全画面UIKitで統一するほうがコードベースの一貫性が保たれる</li>
+          </ul>
+          <p>将来的にSwiftUIのパフォーマンスがさらに改善されれば再評価の余地はあるが、クリティカルパスのUIKitは当面維持する方針だ。</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2>よくある質問</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. SwiftUIでは500ms以下の起動は無理ですか？</div>
+              <div class="faq-item__answer">不可能ではないが、UIKitのほうが確実にミリ秒単位で速い。<code>@StateObject</code>初期化や<code>body</code>再評価のオーバーヘッドがある。最速を追求するなら、UIKitの決定論的なライフサイクルが有利。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Storyboardを使わないデメリットは？</div>
+              <div class="faq-item__answer">UIの可視化がコードベースになる。Interface Builderでのドラッグ&ドロップ設計ができなくなる。ただしメモアプリのUIはシンプルなので、コードベースのUI構築で問題にならない。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 実機での計測結果は？</div>
+              <div class="faq-item__answer">目標500ms以下に対し、実機で200〜300ms台で安定。<code>os_signpost</code>でナノ秒単位で計測し、Instrumentsで詳細分析を実施している。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 今後SwiftUIに移行する予定は？</div>
+              <div class="faq-item__answer">クリティカルパス（起動→入力→送信）はUIKitを維持する。設定画面などの非クリティカルな画面については、SwiftUIの採用を検討する余地はある。</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title">関連記事</h2>
+            <div class="related-grid">
+              <a href="/devlog/day1.html" class="related-card">
+                <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
+                <div class="related-card__desc">起動0.3秒、送信150ms、取りこぼしゼロ。すべての技術判断を記録した初回開発日誌。</div>
+              </a>
+              <a href="/devlog/" class="related-card">
+                <div class="related-card__title">開発日誌 一覧</div>
+                <div class="related-card__desc">Capito式シンプルメモの技術的な意思決定の記録。</div>
+              </a>
+              <a href="/devlog/outbox-architecture.html" class="related-card">
+                <div class="related-card__title">Outboxアーキテクチャ：取りこぼしゼロ設計</div>
+                <div class="related-card__desc">送信即UIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化Outboxパターンの全容。</div>
+              </a>
+              <a href="/devlog/relay-api-design.html" class="related-card">
+                <div class="related-card__title">Relay API：Cloudflare Workersでメール送信基盤を構築</div>
+                <div class="related-card__desc">Gmail API依存からの脱却。エッジコンピューティングで世界中から数十msでメール送信。</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+      <div class="lang-content" data-lang="en">
+        <div class="article-body">
+
+          <h2>1. Why UIKit in 2026</h2>
+          <p>In 2026, the majority of new iOS apps are built with SwiftUI. Apple emphasizes SwiftUI's evolution at every WWDC, and the convenience of declarative UI is beyond question.</p>
+          <p>However, this app has a <strong>non-negotiable requirement</strong>: <strong>Time-to-Text (the time from launch to text input readiness) must be under 500ms</strong>.</p>
+          <p>SwiftUI introduces overhead inherent to declarative UI frameworks: <code>@StateObject</code> initialization, <code>body</code> re-evaluation, and <code>.onAppear</code> timing control. While negligible for most apps, these become significant when optimizing at the millisecond level.</p>
+          <p>In contrast, UIKit's <code>viewDidAppear</code> to <code>becomeFirstResponder()</code> path is <strong>deterministically faster</strong>. The ViewController lifecycle is explicit, giving precise control over when the keyboard appears.</p>
+          <div class="metric-highlight">
+            <strong>Design Decision:</strong> UIKit was chosen to reliably meet the non-functional requirement of Time-to-Text under 500ms. Real device measurements consistently achieve <strong>200-300ms</strong>.
+          </div>
+
+          <h2>2. Why We Completely Eliminated Storyboard</h2>
+          <p>Choosing UIKit alone wasn't enough. Storyboards also introduce overhead that impacts launch performance.</p>
+          <ul>
+            <li><strong>XML Parsing Cost:</strong> Storyboards are XML files internally, requiring parsing at launch time</li>
+            <li><strong>Segue Resolution Cost:</strong> Resolving segue configurations for screen transitions takes time</li>
+            <li><strong>Unnecessary Complexity:</strong> A simple memo app doesn't need Storyboard's visual design tools</li>
+          </ul>
+          <p>Instead, we instantiate ViewControllers directly in <code>SceneDelegate</code>.</p>
+          <pre><code>func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
+           options connectionOptions: UIScene.ConnectionOptions) {
+    PerformanceLogger.shared.signpostBegin(name: "SceneConnect")
+    guard let windowScene = (scene as? UIWindowScene) else { return }
+    let window = UIWindow(windowScene: windowScene)
+    let composeVC = ComposeViewController()
+    let navController = UINavigationController(rootViewController: composeVC)
+    window.rootViewController = navController
+    window.makeKeyAndVisible()
+    PerformanceLogger.shared.signpostEnd(name: "SceneConnect")
+}</code></pre>
+          <p>This approach achieves <strong>zero Storyboard parse time and zero segue resolution</strong>. By instantiating ComposeViewController directly from SceneDelegate, all unnecessary processing is eliminated from the launch path.</p>
+
+          <h2>3. One Line in viewDidAppear Completes Everything</h2>
+          <p>UIKit's greatest strength is its explicitly defined ViewController lifecycle. When <code>viewDidAppear(_:)</code> is called, the view is fully rendered on screen. Calling <code>becomeFirstResponder()</code> at this precise timing minimizes the delay to keyboard display.</p>
+          <pre><code>override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    activateTextInput()
+}
+
+private func activateTextInput() {
+    textView.becomeFirstResponder()
+    PerformanceLogger.shared.endTimeToText()
+}</code></pre>
+          <p>Measurement is performed at nanosecond precision using <code>os_signpost</code>. <code>PerformanceLogger.shared.endTimeToText()</code> records the signpost end event, enabling detailed analysis in Instruments.</p>
+          <div class="metric-highlight">
+            <strong>Measurement Results:</strong> Target 500ms or less → Actual device measurement: stable at <strong>200-300ms</strong>. From the moment a user taps the app icon to text input readiness takes only 0.2-0.3 seconds.
+          </div>
+
+          <h2>4. Performance Measurement Infrastructure</h2>
+          <p>Design decisions are based on quantitative data, not subjective impressions of "feeling fast."</p>
+          <ul>
+            <li><strong>PerformanceLogger:</strong> A custom logger wrapping <code>os_signpost</code>, measuring each phase of launch, send, and UI updates</li>
+            <li><strong>Instruments Integration:</strong> Nanosecond-precision tracking via Xcode's os_signpost Instrument</li>
+            <li><strong>Key Metrics:</strong> Time-to-Text (launch to input ready), Send-to-Reset (send button to UI reset)</li>
+            <li><strong>Continuous Monitoring:</strong> Performance measurement on every development build for immediate regression detection</li>
+          </ul>
+          <p>Performance is a feature. Users don't explicitly demand "speed," but they unconsciously stop using slow apps. That's why continuously managing performance through numbers matters.</p>
+
+          <h2>5. Are There Cases for Using SwiftUI?</h2>
+          <p>It's not UIKit-or-nothing. There are areas within the app where SwiftUI could be appropriate.</p>
+          <ul>
+            <li><strong>Settings Screens:</strong> Non-critical screens that don't affect launch speed could benefit from SwiftUI's declarative productivity</li>
+            <li><strong>Critical Path Definition:</strong> The core flow of launch → compose → send must remain UIKit</li>
+            <li><strong>Hybrid Complexity:</strong> Mixing UIKit and SwiftUI requires careful management of UIHostingController and data flow consistency</li>
+            <li><strong>Current Decision:</strong> The memo app's UI is simple enough that a pure UIKit approach maintains codebase consistency</li>
+          </ul>
+          <p>If SwiftUI's performance improves further in the future, there's room for re-evaluation. But UIKit on the critical path is the policy for the foreseeable future.</p>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Can't SwiftUI achieve sub-500ms launch?</div>
+              <div class="faq-item__answer">It's not impossible, but UIKit is reliably faster by milliseconds. There's overhead from <code>@StateObject</code> initialization and <code>body</code> re-evaluation. For maximum speed, UIKit's deterministic lifecycle has the advantage.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. What are the downsides of not using Storyboard?</div>
+              <div class="faq-item__answer">UI visualization becomes code-based. You lose Interface Builder's drag-and-drop design capability. However, for a memo app with a simple UI, code-based UI construction presents no issues.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. What are the real device measurements?</div>
+              <div class="faq-item__answer">Against the target of under 500ms, real device measurements are stable in the 200-300ms range. Measured at nanosecond precision with <code>os_signpost</code> and analyzed in detail with Instruments.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Plans to migrate to SwiftUI?</div>
+              <div class="faq-item__answer">The critical path (launch → input → send) will remain UIKit. Non-critical screens like settings may be considered for SwiftUI adoption.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title">Related Articles</h2>
+            <div class="related-grid">
+              <a href="/devlog/day1.html" class="related-card">
+                <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+                <div class="related-card__desc">Launch in 0.3s, send in 150ms, zero message loss. Every technical decision documented.</div>
+              </a>
+              <a href="/devlog/" class="related-card">
+                <div class="related-card__title">Dev Log Index</div>
+                <div class="related-card__desc">Technical decision records for Simple Memo - Captio-style.</div>
+              </a>
+              <a href="/devlog/outbox-architecture.html" class="related-card">
+                <div class="related-card__title">Outbox Architecture: Zero Message Loss</div>
+                <div class="related-card__desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+              </a>
+              <a href="/devlog/relay-api-design.html" class="related-card">
+                <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
+                <div class="related-card__desc">Breaking free from Gmail API. Edge computing for global email delivery in milliseconds.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/devlog/" class="footer__link">
+          <span data-lang="ja">開発日誌</span>
+          <span data-lang="en">Dev Log</span>
+        </a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>

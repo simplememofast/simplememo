@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>プライバシーファースト設計：メモアプリにおける偏執的なこだわり | Capito式シンプルメモ 開発日誌</title>
+  <meta name="description" content="メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。">
+  <meta name="keywords" content="iOS プライバシー設計, iOS app privacy, ephemeral URLSession, アプリスイッチャー プライバシー, メモアプリ セキュリティ">
+  <meta name="theme-color" content="#000000">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">プライバシーファースト設計：メモアプリにおける偏執的なこだわり | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-og-title">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
+      <span class="meta-description">メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Privacy-First Design: Obsessive Attention to Detail in a Memo App | Simple Memo Dev Log</span>
+      <span class="meta-og-title">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
+      <span class="meta-description">What people write in a memo app is the raw contents of their mind. The full privacy architecture: ephemeral URLSession, app switcher overlay, sanitized logging, AES-GCM encryption.</span>
+    </div>
+  </div>
+
+  <!-- OGP -->
+  <meta property="og:title" content="プライバシーファースト設計：メモアプリにおける偏執的なこだわり">
+  <meta property="og:description" content="メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/devlog/privacy-first-design.html">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="プライバシーファースト設計：メモアプリにおける偏執的なこだわり">
+  <meta name="twitter:description" content="メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。">
+  <meta name="twitter:image" content="/assets/img/ogp.png">
+
+  <link rel="canonical" href="https://simplememofast.com/devlog/privacy-first-design.html">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
+    }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Code Block Styles */
+    pre {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #e0e0e0;
+    }
+
+    /* Related Card Grid */
+    .related-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    @media (min-width: 600px) {
+      .related-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .related-card {
+      background: rgba(15,20,30,0.4);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: border-color 0.25s;
+    }
+    .related-card:hover {
+      border-color: rgba(100,180,255,0.3);
+    }
+    .related-card__title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .related-card__desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Styles */
+    .article-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .article-body h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--text);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .article-body p {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      font-size: 0.92rem;
+    }
+    .article-body ul, .article-body ol {
+      color: var(--text-secondary);
+      line-height: 1.9;
+      margin-bottom: 16px;
+      padding-left: 1.5em;
+      font-size: 0.92rem;
+    }
+    .article-body li {
+      margin-bottom: 6px;
+    }
+    .article-body strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    .philosophy-highlight {
+      background: rgba(100, 180, 255, 0.08);
+      border: 1px solid rgba(100, 180, 255, 0.15);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .philosophy-highlight strong {
+      color: var(--accent);
+    }
+    .faq-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .faq-item {
+      margin-bottom: 24px;
+    }
+    .faq-item__question {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .faq-item__answer {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .related-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .related-section__title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+  </style>
+
+  <!-- JSON-LD: TechArticle -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "プライバシーファースト設計：メモアプリにおける偏執的なこだわり",
+    "description": "メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。",
+    "url": "https://simplememofast.com/devlog/privacy-first-design.html",
+    "datePublished": "2026-02-13",
+    "dateModified": "2026-02-13",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "inLanguage": ["ja", "en"],
+    "keywords": "iOS プライバシー設計, iOS app privacy, ephemeral URLSession, アプリスイッチャー プライバシー, メモアプリ セキュリティ",
+    "proficiencyLevel": "Expert",
+    "dependencies": "Xcode 16, Swift 6, iOS 17+, Apple CryptoKit",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://simplememofast.com/" },
+      { "@type": "ListItem", "position": 2, "name": "開発日誌", "item": "https://simplememofast.com/devlog/" },
+      { "@type": "ListItem", "position": 3, "name": "プライバシーファースト設計", "item": "https://simplememofast.com/devlog/privacy-first-design.html" }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "メモの内容はサーバーに保存されますか？ / Is memo content stored on servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Relay APIは通過型設計。メモ内容の恒常的な保存は行いません。法令対応や障害対応等の正当な必要性がある場合を除きます。 / The Relay API uses a pass-through design. Memo content is not permanently stored, except where required by law or for legitimate operational needs such as incident response."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アプリは通信を暗号化していますか？ / Is communication encrypted?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。HTTPS通信に加え、ephemeral URLSessionでキャッシュ・Cookie・認証情報を一切保存しません。 / Yes. In addition to HTTPS, the app uses ephemeral URLSession which stores no cache, cookies, or credentials."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "端末を紛失した場合、メモは安全ですか？ / Are memos safe if I lose my device?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Outboxの未送信メモはAES-GCM（256ビット鍵）で暗号化。鍵はKeychainに保存され、端末に紐づいています。 / Unsent memos in the Outbox are encrypted with AES-GCM (256-bit key). The key is stored in the Keychain and bound to the device."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アナリティクスやトラッキングはありますか？ / Is there analytics or tracking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "アプリ内にサードパーティのアナリティクスSDKは含まれていません。 / The app contains no third-party analytics SDK."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "なぜ外部ライブラリを使わないのですか？ / Why no external libraries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "セキュリティとプライバシーのため。外部ライブラリはすべて攻撃対象面。Apple純正フレームワークのみで、ユーザーデータに触れるサードパーティコードをゼロにしています。 / For security and privacy. Every external library is an attack surface. By using only Apple's native frameworks, zero third-party code touches user data."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/devlog/" class="page-header__back">
+          <span data-lang="ja">開発日誌へ戻る</span>
+          <span data-lang="en">Back to Dev Log</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">
+        <span data-lang="ja">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
+        <span data-lang="en">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
+      </h1>
+
+      <div class="article-meta">
+        <span data-lang="ja">2026年2月13日 ・ 技術トピック深掘り</span>
+        <span data-lang="en">February 13, 2026 ・ Technical Deep Dive</span>
+      </div>
+
+      <!-- Japanese Content -->
+      <div class="lang-content" data-lang="ja">
+        <div class="article-body">
+
+          <h2>1. なぜメモアプリにプライバシーが重要なのか</h2>
+          <p>メモアプリに書かれるものは、その人の頭の中身そのものだ。</p>
+          <p>パスワードの仮メモ。誰にも言えない相談事の下書き。日記のような独白。仕事のアイデア。買い物リスト。診察前に整理した症状メモ。メモアプリは、ユーザーの最もプライベートな思考が通過する場所である。</p>
+          <p>だからこそ、ユーザーは「このアプリは自分を見ていない」という絶対的な信頼を必要とする。機能的に優れていても、プライバシーに対する不信感があれば、人は本音を書かなくなる。メモアプリとしての存在意義が根底から揺らぐ。</p>
+          <p>Captioにはその信頼があった。シンプルすぎるがゆえに、余計なことをしていないと直感的に感じられた。私たちはその信頼を、技術的な設計で裏付ける必要がある。</p>
+          <div class="philosophy-highlight">
+            <strong>設計哲学：</strong>「過剰なくらいがちょうどいい」——メモアプリにおけるプライバシー保護は、やりすぎて困ることがない。ユーザーが気づかないレベルで、あらゆる漏洩経路を塞ぐ。
+          </div>
+
+          <h2>2. アプリスイッチャーでのプライバシーオーバーレイ</h2>
+          <p>iOSのマルチタスク画面（アプリスイッチャー）は、各アプリのスナップショットを表示する。つまり、ユーザーがメモを書いている最中にホームに戻ると、その内容がアプリスイッチャー上に丸見えになる。</p>
+          <p>他人がiPhoneを手に取ってアプリスイッチャーを開けば、メモの内容が見えてしまう。パスワードを書いていたら？ 秘密の相談を下書きしていたら？</p>
+          <p>解決策として、アプリがバックグラウンドに移行する際にプライバシーオーバーレイを表示する。アプリアイコンとアプリ名だけが見える画面で、メモ内容を完全に隠す。</p>
+          <pre><code>func sceneWillResignActive(_ scene: UIScene) {
+    showPrivacyOverlay()
+}
+
+func sceneDidEnterBackground(_ scene: UIScene) {
+    showPrivacyOverlay()  // Ensure overlay in background too
+}</code></pre>
+          <p>二重の保護を行っている点に注目してほしい。<code>sceneWillResignActive</code>と<code>sceneDidEnterBackground</code>の両方でオーバーレイを表示する。<code>resignActive</code>はコントロールセンターや通知センターの表示時にも呼ばれるため、あらゆるシナリオでメモ内容を保護できる。</p>
+          <p>オーバーレイは、アプリがアクティブに戻った時点（<code>sceneDidBecomeActive</code>）で即座に解除される。ユーザーにとっては完全に透過的な保護だ。</p>
+
+          <h2>3. ephemeral URLSession：通信の痕跡を残さない</h2>
+          <p>標準の<code>URLSession</code>は、キャッシュ、Cookie、認証情報をディスクに保存する。一般的なアプリではこれは便利な機能だが、メモアプリでは不要であり、リスクになりうる。</p>
+          <p>通信キャッシュが端末に残るということは、どのURLにいつアクセスしたかの痕跡がディスク上に存在するということだ。Cookieが保存されるということは、セッション情報が端末に残るということだ。</p>
+          <p>このアプリでは、<code>URLSessionConfiguration.ephemeral</code>を使用する。</p>
+          <pre><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>ディスクキャッシュなし：</strong>通信内容が端末に残らない</li>
+            <li><strong>Cookieの受信・送信なし：</strong>セッション追跡の余地を排除</li>
+            <li><strong>URLキャッシュ無効化：</strong>キャッシュストレージ自体を<code>nil</code>に設定</li>
+            <li><strong>セッションの完全な分離：</strong>各セッションが独立し、前回の通信情報を一切引き継がない</li>
+          </ul>
+          <p>仮に端末が物理的に侵害されたとしても、通信履歴はディスク上に存在しない。ephemeral URLSessionは、通信レイヤーでの「痕跡ゼロ」を実現する。</p>
+
+          <h2>4. ログに機密情報を一切出さない</h2>
+          <p>ログは開発者にとって最も基本的なデバッグツールだが、プライバシーの観点からは最も危険な情報漏洩経路のひとつでもある。</p>
+          <p>このアプリでは、DEBUGビルドであっても以下の情報をログに出力しない。</p>
+          <ul>
+            <li>メールアドレス</li>
+            <li>メモの内容</li>
+            <li>認証コード</li>
+            <li>完全なURL</li>
+          </ul>
+          <p>特に重要なのは、エラーログの設計だ。多くの開発者は<code>error.localizedDescription</code>をそのままログに出力するが、<code>localizedDescription</code>にはファイルパス、ユーザーデータ、内部的なURLなど、機密情報が含まれることがある。</p>
+          <pre><code>func logError(name: String, error: Error) {
+    #if DEBUG
+    // Only error type. Never localizedDescription.
+    os_log("[%.2f ms] ERROR %@: %@", log: log, type: .debug,
+            elapsed, name, String(describing: type(of: error)))
+    #endif
+}</code></pre>
+          <p>エラーの<strong>型</strong>だけを記録する。<code>URLError</code>なのか、<code>EncodingError</code>なのか、<code>CryptoKitError</code>なのか——型情報だけでデバッグには十分であり、ユーザーデータは一切漏洩しない。</p>
+          <p>Releaseビルドではログ出力がゼロになる。<code>#if DEBUG</code>ガードにより、本番環境で動作するコードにはログ出力のコードパス自体が存在しない。万が一ログがキャプチャされたとしても、機密データは含まれていない。多層防御の思想だ。</p>
+
+          <h2>5. AES-GCM暗号化Outbox</h2>
+          <p>このアプリでは、送信ボタンを押した瞬間にUIがクリアされるが、メモ自体はOutboxに保存され、バックグラウンドで送信される。では、Outboxに保存されている未送信メモはどう保護されるか？</p>
+          <ul>
+            <li><strong>AES-GCM暗号化：</strong>すべての未送信メッセージはAES-GCM（Galois/Counter Mode）で暗号化される</li>
+            <li><strong>256ビット鍵：</strong>暗号化鍵は256ビットで生成され、Keychainに保存される</li>
+            <li><strong>端末バインド：</strong>鍵はKeychainに保存されるため、その端末でしか復号できない</li>
+            <li><strong>Apple CryptoKit：</strong>暗号化処理はApple純正のCryptoKitを使用。外部暗号ライブラリへの依存はゼロ</li>
+          </ul>
+          <p>仮に端末に物理的にアクセスされたとしても、Keychainのセキュリティが破られない限り、Outbox内のメモは暗号化されたまま読み取ることができない。</p>
+          <p>Outboxアーキテクチャの全体設計については、<a href="/devlog/outbox-architecture.html">Outboxアーキテクチャ：取りこぼしゼロ設計</a>で詳述している。</p>
+
+          <h2>6. 外部ライブラリ依存ゼロの意味（セキュリティ面）</h2>
+          <p>外部ライブラリの追加は、機能的には便利だが、セキュリティの観点からはすべてが攻撃対象面（Attack Surface）になる。</p>
+          <p>サプライチェーン攻撃は現実の脅威だ。信頼されたライブラリがアップデートで悪意あるコードを含む事例は、npm、PyPI、CocoaPodsなどのエコシステムで実際に発生している。</p>
+          <p>このアプリでは、Apple純正フレームワークのみを使用している。</p>
+          <ul>
+            <li><strong>CryptoKit：</strong>暗号化処理</li>
+            <li><strong>Network.framework：</strong>ネットワーク接続状態の監視</li>
+            <li><strong>BackgroundTasks：</strong>バックグラウンド送信のスケジューリング</li>
+            <li><strong>os.log：</strong>ログ出力</li>
+          </ul>
+          <p>サードパーティのコードがユーザーデータに一切触れないという事実は、セキュリティ監査を大幅に簡素化する。監査対象はApple純正フレームワークと自分たちのコードだけだ。依存関係グラフの複雑性がゼロであることは、それ自体がセキュリティ上の強みになる。</p>
+
+          <h2>7. 設計哲学：「気配を消す」</h2>
+          <p>最良のプライバシー保護は、ユーザーが意識しないものだ。</p>
+          <p>プライバシー設定画面はない。トグルスイッチもない。「プライバシーモードを有効にしますか？」というダイアログも表示されない。すべてのプライバシー保護機能は、最初から有効であり、無効にする手段は存在しない。</p>
+          <p>ユーザーはプライバシーについて考える必要がない。アプリスイッチャーにメモが表示されないこと、通信の痕跡が残らないこと、Outboxが暗号化されていること——これらすべてが、サイレントに、バックグラウンドで動作する。</p>
+          <p>これがCaptio式の体験の延長線上にある設計思想だ。Captioがもたらしたのは「考えずに信頼できる」という感覚だった。プライバシーについても同じアプローチを取る。ユーザーが信頼を意識的に判断する必要がないほど、徹底的に設計する。</p>
+          <div class="philosophy-highlight">
+            <strong>原則：</strong>気配を消す——プライバシー保護は見えないほうがいい。ユーザーが「安全だろうか？」と一瞬でも考えた時点で、設計の失敗だ。
+          </div>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2>よくある質問</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. メモの内容はサーバーに保存されますか？</div>
+              <div class="faq-item__answer">Relay APIは通過型設計です。メモ内容の恒常的な保存は行いません。法令対応や障害対応等の正当な必要性がある場合を除きます。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. アプリは通信を暗号化していますか？</div>
+              <div class="faq-item__answer">はい。HTTPS通信に加え、ephemeral URLSessionでキャッシュ・Cookie・認証情報を一切保存しません。通信の痕跡がディスク上に残ることはありません。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. 端末を紛失した場合、メモは安全ですか？</div>
+              <div class="faq-item__answer">Outboxの未送信メモはAES-GCM（256ビット鍵）で暗号化されています。鍵はKeychainに保存され、端末に紐づいているため、Keychainのセキュリティが維持される限り、メモは保護されます。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. アナリティクスやトラッキングはありますか？</div>
+              <div class="faq-item__answer">アプリ内にサードパーティのアナリティクスSDKは含まれていません。ユーザーの行動を追跡するコードは一切組み込まれていません。</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. なぜ外部ライブラリを使わないのですか？</div>
+              <div class="faq-item__answer">セキュリティとプライバシーのためです。外部ライブラリはすべて攻撃対象面になります。Apple純正フレームワークのみで構築し、ユーザーデータに触れるサードパーティコードをゼロにしています。</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title">関連記事</h2>
+            <div class="related-grid">
+              <a href="/devlog/day1.html" class="related-card">
+                <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
+                <div class="related-card__desc">起動0.3秒、送信150ms、取りこぼしゼロ。すべての技術判断を記録した初回開発日誌。</div>
+              </a>
+              <a href="/devlog/" class="related-card">
+                <div class="related-card__title">開発日誌 一覧</div>
+                <div class="related-card__desc">Capito式シンプルメモの技術的な意思決定の記録。</div>
+              </a>
+              <a href="/devlog/outbox-architecture.html" class="related-card">
+                <div class="related-card__title">Outboxアーキテクチャ：取りこぼしゼロ設計</div>
+                <div class="related-card__desc">送信即UIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化Outboxパターンの全容。</div>
+              </a>
+              <a href="/devlog/relay-api-design.html" class="related-card">
+                <div class="related-card__title">Relay API：Cloudflare Workersでメール送信基盤を構築</div>
+                <div class="related-card__desc">エッジコンピューティングで世界中から数十msでメール送信。通過型設計の全容。</div>
+              </a>
+              <a href="/devlog/captio-alternative.html" class="related-card">
+                <div class="related-card__title">Captio代替アプリを作った理由</div>
+                <div class="related-card__desc">Captioの3つの体験要素を分析し、Captio代替アプリを開発した経緯。</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- English Content -->
+      <div class="lang-content" data-lang="en">
+        <div class="article-body">
+
+          <h2>1. Why Privacy Matters for a Memo App</h2>
+          <p>What people write in a memo app is the raw contents of their mind.</p>
+          <p>A temporary password note. A draft of a consultation they can't share with anyone. A diary-like monologue. Work ideas. Shopping lists. Symptoms organized before a doctor's visit. A memo app is the place where a user's most private thoughts pass through.</p>
+          <p>Because of this, users need absolute trust that the app isn't watching them. No matter how functionally excellent an app is, if there's any distrust around privacy, people stop writing honestly. The very purpose of the memo app crumbles at its foundation.</p>
+          <p>Captio had that trust. It was so simple that you intuitively felt it wasn't doing anything extra. We need to earn that same trust — but backed by concrete technical design.</p>
+          <div class="philosophy-highlight">
+            <strong>Design Philosophy:</strong> "Being overly cautious is just right" — when it comes to privacy protection in a memo app, you can never overdo it. We seal every possible leakage path at a level users never even notice.
+          </div>
+
+          <h2>2. Privacy Overlay in the App Switcher</h2>
+          <p>The iOS multitask screen (app switcher) displays a snapshot of each app. This means if a user goes to the home screen while writing a memo, that content is fully visible in the app switcher.</p>
+          <p>If someone else picks up the iPhone and opens the app switcher, they can see the memo content. What if it contained a password? What if it was a draft of a secret consultation?</p>
+          <p>The solution: display a privacy overlay when the app transitions to the background. A screen showing only the app icon and title, completely hiding the memo content.</p>
+          <pre><code>func sceneWillResignActive(_ scene: UIScene) {
+    showPrivacyOverlay()
+}
+
+func sceneDidEnterBackground(_ scene: UIScene) {
+    showPrivacyOverlay()  // Ensure overlay in background too
+}</code></pre>
+          <p>Notice the double protection. The overlay is applied in both <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code>. Since <code>resignActive</code> is also called when Control Center or Notification Center appears, this ensures memo content is protected in every scenario.</p>
+          <p>The overlay is immediately removed when the app becomes active again (<code>sceneDidBecomeActive</code>). For users, it's completely transparent protection.</p>
+
+          <h2>3. Ephemeral URLSession: Leave No Communication Trace</h2>
+          <p>The standard <code>URLSession</code> stores cache, cookies, and credentials to disk. For typical apps this is convenient functionality, but for a memo app it's unnecessary and potentially risky.</p>
+          <p>Communication cache persisting on the device means traces of which URLs were accessed and when exist on disk. Cookies being stored means session information remains on the device.</p>
+          <p>This app uses <code>URLSessionConfiguration.ephemeral</code>.</p>
+          <pre><code>private let session: URLSession = {
+    let config = URLSessionConfiguration.ephemeral
+    config.httpCookieAcceptPolicy = .never
+    config.httpShouldSetCookies = false
+    config.urlCache = nil
+    return URLSession(configuration: config)
+}()</code></pre>
+          <ul>
+            <li><strong>No disk cache:</strong> Communication content doesn't persist on the device</li>
+            <li><strong>No cookies sent or received:</strong> Eliminates any possibility of session tracking</li>
+            <li><strong>URL cache disabled:</strong> The cache storage itself is set to <code>nil</code></li>
+            <li><strong>Complete session isolation:</strong> Each session is independent, carrying over zero information from previous communications</li>
+          </ul>
+          <p>Even if the device is physically compromised, no communication history exists on disk. Ephemeral URLSession achieves "zero trace" at the communication layer.</p>
+
+          <h2>4. Never Log Sensitive Information</h2>
+          <p>Logs are a developer's most fundamental debugging tool, but from a privacy perspective, they're also one of the most dangerous information leakage vectors.</p>
+          <p>In this app, even in DEBUG builds, the following information is never logged:</p>
+          <ul>
+            <li>Email addresses</li>
+            <li>Memo content</li>
+            <li>Authentication codes</li>
+            <li>Full URLs</li>
+          </ul>
+          <p>Particularly critical is the design of error logging. Many developers output <code>error.localizedDescription</code> directly to logs, but <code>localizedDescription</code> can contain sensitive information such as file paths, user data, and internal URLs.</p>
+          <pre><code>func logError(name: String, error: Error) {
+    #if DEBUG
+    // Only error type. Never localizedDescription.
+    os_log("[%.2f ms] ERROR %@: %@", log: log, type: .debug,
+            elapsed, name, String(describing: type(of: error)))
+    #endif
+}</code></pre>
+          <p>Only the error <strong>type</strong> is recorded. Whether it's a <code>URLError</code>, <code>EncodingError</code>, or <code>CryptoKitError</code> — type information alone is sufficient for debugging, and zero user data is leaked.</p>
+          <p>Release builds have zero log output. The <code>#if DEBUG</code> guard means the code path for logging doesn't even exist in production binaries. Even if logs were somehow captured, they would contain no sensitive data. This is the defense-in-depth philosophy.</p>
+
+          <h2>5. AES-GCM Encrypted Outbox</h2>
+          <p>In this app, the UI clears the moment the send button is pressed, but the memo itself is saved to the Outbox and sent in the background. So how are unsent memos in the Outbox protected?</p>
+          <ul>
+            <li><strong>AES-GCM encryption:</strong> All unsent messages are encrypted with AES-GCM (Galois/Counter Mode)</li>
+            <li><strong>256-bit key:</strong> The encryption key is generated at 256 bits and stored in the Keychain</li>
+            <li><strong>Device-bound:</strong> Since the key is stored in the Keychain, decryption is only possible on that specific device</li>
+            <li><strong>Apple CryptoKit:</strong> Encryption is handled by Apple's native CryptoKit. Zero dependency on external crypto libraries</li>
+          </ul>
+          <p>Even with physical access to the device, Outbox memos remain encrypted and unreadable as long as Keychain security is maintained.</p>
+          <p>For the complete Outbox architecture design, see <a href="/devlog/outbox-architecture.html">Outbox Architecture: Zero Message Loss Design</a>.</p>
+
+          <h2>6. Zero External Library Dependencies (Security Perspective)</h2>
+          <p>Adding external libraries is functionally convenient, but from a security perspective, every single one becomes an attack surface.</p>
+          <p>Supply chain attacks are a real threat. Cases where trusted libraries include malicious code in updates have actually occurred across ecosystems including npm, PyPI, and CocoaPods.</p>
+          <p>This app uses only Apple's native frameworks:</p>
+          <ul>
+            <li><strong>CryptoKit:</strong> Encryption operations</li>
+            <li><strong>Network.framework:</strong> Network connectivity monitoring</li>
+            <li><strong>BackgroundTasks:</strong> Background send scheduling</li>
+            <li><strong>os.log:</strong> Logging output</li>
+          </ul>
+          <p>The fact that no third-party code touches user data dramatically simplifies security auditing. The audit scope is limited to Apple's native frameworks and our own code. Having zero dependency graph complexity is itself a security strength.</p>
+
+          <h2>7. Design Philosophy: "Disappear Without a Trace"</h2>
+          <p>The best privacy protection is the kind users never think about.</p>
+          <p>There is no privacy settings screen. No toggle switches. No "Would you like to enable privacy mode?" dialog. All privacy features are enabled by default, and there is no way to disable them.</p>
+          <p>Users don't need to think about privacy. The fact that memos don't appear in the app switcher, that no communication traces remain, that the Outbox is encrypted — all of this operates silently, in the background.</p>
+          <p>This is a design philosophy that extends from the Captio-style experience. What Captio delivered was the feeling of "trust without thinking." We take the same approach with privacy. The design is so thorough that users never need to consciously evaluate whether they can trust the app.</p>
+          <div class="philosophy-highlight">
+            <strong>Principle:</strong> Disappear without a trace — privacy protection is better when invisible. The moment a user thinks "Is this safe?" even for a second, the design has failed.
+          </div>
+
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Is memo content stored on servers?</div>
+              <div class="faq-item__answer">The Relay API uses a pass-through design. Memo content is not permanently stored, except where required by law or for legitimate operational needs such as incident response.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Is communication encrypted?</div>
+              <div class="faq-item__answer">Yes. In addition to HTTPS, the app uses ephemeral URLSession which stores no cache, cookies, or credentials. No communication traces persist on disk.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Are memos safe if I lose my device?</div>
+              <div class="faq-item__answer">Unsent memos in the Outbox are encrypted with AES-GCM (256-bit key). The key is stored in the Keychain and bound to the device, so memos remain protected as long as Keychain security is maintained.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Is there analytics or tracking?</div>
+              <div class="faq-item__answer">The app contains no third-party analytics SDK. There is absolutely no code that tracks user behavior.</div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-item__question">Q. Why no external libraries?</div>
+              <div class="faq-item__answer">For security and privacy. Every external library is an attack surface. By building exclusively with Apple's native frameworks, zero third-party code touches user data.</div>
+            </div>
+          </div>
+
+          <!-- Related Articles -->
+          <div class="related-section">
+            <h2 class="related-section__title">Related Articles</h2>
+            <div class="related-grid">
+              <a href="/devlog/day1.html" class="related-card">
+                <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+                <div class="related-card__desc">Launch in 0.3s, send in 150ms, zero message loss. Every technical decision documented.</div>
+              </a>
+              <a href="/devlog/" class="related-card">
+                <div class="related-card__title">Dev Log Index</div>
+                <div class="related-card__desc">Technical decision records for Simple Memo - Captio-style.</div>
+              </a>
+              <a href="/devlog/outbox-architecture.html" class="related-card">
+                <div class="related-card__title">Outbox Architecture: Zero Message Loss</div>
+                <div class="related-card__desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+              </a>
+              <a href="/devlog/relay-api-design.html" class="related-card">
+                <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
+                <div class="related-card__desc">Edge computing for global email delivery in milliseconds. The full pass-through design.</div>
+              </a>
+              <a href="/devlog/captio-alternative.html" class="related-card">
+                <div class="related-card__title">Why We Built a Captio Alternative</div>
+                <div class="related-card__desc">Analyzing Captio's 3 experience elements and the journey to building a Captio alternative.</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/devlog/" class="footer__link">
+          <span data-lang="ja">開発日誌</span>
+          <span data-lang="en">Dev Log</span>
+        </a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
