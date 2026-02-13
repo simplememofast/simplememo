@@ -46,6 +46,332 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/faq.html">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/faq.html?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/faq.html?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/faq.html">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "ホーム",
+        "item": "https://simplememofast.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "よくあるご質問（FAQ）",
+        "item": "https://simplememofast.com/faq.html"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage (Japanese) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Simple Memoはどんなアプリですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。「思いついたことを今すぐメモして、自分のメールに送る」——それだけを、極限まで速く・確実に行うためのアプリです。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "どんな場面で使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "買い物リストを自分にメール、移動中にふと思いついたアイデアをメモ、会議で聞いた大事なことを即座に記録、仕事のタスクリマインダーを自分宛に送信、帰宅後にやることを歩きながらメモ、URL・電話番号・住所などあとで必要な情報の一時メモなどに使えます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "対応デバイス・動作環境を教えてください。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "iPhone（iOS 16.0以降）、iPad（iPadOS 16.0以降）に対応しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アプリの起動速度はどれくらいですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "アプリを起動してからテキスト入力が可能になるまで（Time-to-Text）の目標値は500ミリ秒以下です。実測では多くのデバイスで200〜300ミリ秒台を記録しています。Storyboardを使わず、UIKitによる直接初期化で最速の起動を実現しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "外部ライブラリや依存関係はありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ありません。Swift + Apple純正フレームワーク（CryptoKit、Network.framework、BackgroundTasks、StoreKit 2）のみで構成されています。外部ライブラリに依存しないため、アプリのサイズが小さく、セキュリティリスクも最小限に抑えられています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "最初に何を設定すればいいですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "アプリを初めて起動すると、宛先メールアドレスの設定を促すダイアログが表示されます。「設定へ」をタップし、宛先欄にメモを受信したいメールアドレスを入力、「認証」をタップ、届く6桁の認証コードを入力すれば完了です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "なぜメールアドレスの認証が必要なのですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "他人のメールアドレスへの無断送信を防止するためです。認証を行うことで、あなた自身がそのメールアドレスの所有者であることが確認されます。これはアプリの安全性を保つための重要な仕組みです。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "認証コードが届きません。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "メールアドレスにタイプミスがないか確認してください。迷惑メール（スパム）フォルダを確認してください。送信元は Simple Memo <noreply@mail.simplememofast.com> です。認証コードの有効期限は10分間です。入力は最大5回までで、超過した場合は新しいコードを再送信してください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "宛先メールアドレスを変更できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。設定画面の「宛先」をタップして、新しいメールアドレスを入力し、再度認証を行ってください。新しいアドレスの認証が完了すると、以降のメモはすべて新しいアドレスに送信されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "どのメールサービスに対応していますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "メールを受信できるアドレスであれば、すべてのメールサービスに対応しています。Gmail、Outlook、Yahoo!メール、iCloudメール、会社のメール、独自ドメインのメールなど、制限はありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモはどこに送られますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元は Simple Memo <noreply@mail.simplememofast.com> です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "件名はどうなりますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "件名テンプレートが設定されている場合はテンプレート + メモの1行目になります。空の場合はメモの1行目がそのまま件名になります。件名は最大60文字で切り取られます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "送信ボタンを押したら画面がすぐ消えました。メモは送れていますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい、送信されています。Simple Memoは送信ボタンをタップした瞬間にUIをクリアする設計です（Send-to-Reset目標：150ミリ秒以下）。メモはバックグラウンドで送信処理が行われ、万が一送信に失敗した場合でもOutboxに暗号化保存されているため、メモが失われることはありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "オフラインでもメモを送信できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アプリを閉じてもOutboxのメッセージは保持されますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。Outboxのメッセージは端末のストレージに暗号化して保存されるため、アプリを閉じても、iPhoneを再起動しても失われません。次回アプリ起動時またはバックグラウンドタスクとして自動的に再送信が試みられます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "送信したメモの履歴は確認できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。メイン画面の左上にある履歴ボタン（時計アイコン）をタップすると、送信済み・未送信・送信失敗のメモ一覧を確認できます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "履歴からメモを再送信できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。履歴画面でメモをタップし、「再送信」を選択すると、同じメモを再度送信できます。同じメッセージIDを使用するため、サーバー側で重複送信が防止されます（冪等性保証）。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無料で使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "サブスクリプションの解約方法を教えてください。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "iPhoneの「設定」アプリ → 自分の名前 → 「サブスクリプション」→「Simple Memo Premium」→「サブスクリプションをキャンセル」で解約できます。解約後も、現在の課金期間の終了日まではプレミアム機能をご利用いただけます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモの内容はどこかのサーバーに保存されますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay APIを経由してメールとして送信されますが、送信完了後にサーバー上にデータは残りません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモの暗号化について詳しく教えてください。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memoでは、端末内に保存されるすべてのメモデータ（Outbox・履歴）をAES-GCM（256ビット）で暗号化しています。暗号化キーはKeychainに保存され、端末のセキュアエンクレーブで保護されます。暗号化キーが端末外に送信されることはありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "対応している言語を教えてください。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "日本語、英語、スペイン語、フランス語、ドイツ語、ポルトガル語、ロシア語、中国語（簡体字）、中国語（繁体字）、アラビア語の10言語に対応しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "このアプリは旧Captioの公式後継アプリですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。Simple Memoは旧Captioにインスパイアされた独立したアプリであり、Captioの開発元との関係はありません。Captioが持っていた「起動→即入力→ワンタップ送信→即クリア」という体験を再現・発展させることを目指しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Captioと何が違いますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Captioのコア体験を再現しつつ、Outbox（未送信キュー）によるオフライン時の自動再送機能、AES-GCM暗号化による端末内データ保護、プライバシーオーバーレイによるマルチタスク画面保護、10言語対応（RTL含む）、メールアドレス6桁コード認証、ページめくり風3Dアニメーション+ハプティクスなどの改善・拡張を行っています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "開発元はどこですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "YURIKA, K.K.（株式会社YURIKA）が開発・運営しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo is a memo app focused on one thing: launch, write, send. Your memo is sent as an email to a pre-configured address with a single tap. It's designed to capture your thoughts instantly and deliver them to your inbox — nothing more, nothing less."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What devices are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "iPhone (iOS 16.0 or later) and iPad (iPadOS 16.0 or later)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How fast does the app launch?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The target for Time-to-Text (from launch to keyboard ready) is under 500 milliseconds. In real-world testing, most devices achieve 200–300ms using UIKit with direct initialization."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the app depend on any third-party libraries?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Simple Memo is built entirely with Swift and Apple-native frameworks (CryptoKit, Network.framework, BackgroundTasks, StoreKit 2). Zero external dependencies means a smaller app size and minimized security risk."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I send memos while offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. When you send a memo offline, it's stored in the Outbox — encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are my memos stored on any server?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Your memo content is never stored on Simple Memo's servers. Memos pass through the Relay API for email delivery, but no data is retained after transmission. All on-device data is encrypted with AES-GCM."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Simple Memo for free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The first 7 days are a free trial with full access to all features and unlimited sending. After the trial, you can continue on the free plan (3 memos per day)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this the official successor to Captio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Simple Memo is an independent app inspired by Captio. It has no affiliation with the original Captio developer. The goal is to recreate and build upon the 'launch, type, send, clear' experience that made Captio beloved."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is Simple Memo different from Captio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo preserves Captio's core experience while adding: Outbox with auto-retry for offline support, AES-GCM encryption for all on-device data, privacy overlay in App Switcher, 10 languages including Arabic RTL, email verification with 6-digit code, and 3D page-flip send animation with haptic feedback."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which languages are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo supports 10 languages: Japanese, English, Spanish, French, German, Portuguese, Russian, Chinese (Simplified), Chinese (Traditional), and Arabic."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Who develops Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo is developed and operated by YURIKA, K.K."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="stylesheet" href="/assets/css/style.css">
   <style>
     /* Language Switcher Styles - 2026 Dark Sleek Premium */
