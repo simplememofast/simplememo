@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Captio代替アプリを作った理由 | Capito式シンプルメモ 開発日誌</title>
+  <meta name="description" content="Captioがサービス終了。起動即入力・送ったら消える・余計なものゼロ——3つの体験要素を分析し、Captio代替アプリ「Capito式シンプルメモ」を開発した経緯。">
+  <meta name="theme-color" content="#000000">
+
+  <!-- SEO keywords targeting -->
+  <meta name="keywords" content="Captio 代替, Captio alternative, Captio アプリ なくなった, Captio discontinued, メモ メール 送信, memo to email app">
+
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">Captio代替アプリを作った理由 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-og-title">Captio代替アプリを作った理由 | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-description">Captioがサービス終了。起動即入力・送ったら消える・余計なものゼロ——3つの体験要素を分析し、Captio代替アプリ「Capito式シンプルメモ」を開発した経緯。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Why We Built a Captio Alternative | Simple Memo - Captio-style Dev Log</span>
+      <span class="meta-og-title">Why We Built a Captio Alternative | Simple Memo - Captio-style Dev Log</span>
+      <span class="meta-description">Captio was discontinued. Instant input on launch, clear after send, zero clutter — we analyzed these 3 experience pillars and built a Captio alternative app.</span>
+    </div>
+  </div>
+
+  <!-- OGP -->
+  <meta property="og:title" content="Captio代替アプリを作った理由 | Capito式シンプルメモ 開発日誌">
+  <meta property="og:description" content="Captioがサービス終了。起動即入力・送ったら消える・余計なものゼロ——3つの体験要素を分析し、Captio代替アプリ「Capito式シンプルメモ」を開発した経緯。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/devlog/captio-alternative.html">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Captio代替アプリを作った理由 | Capito式シンプルメモ 開発日誌">
+  <meta name="twitter:description" content="Captioがサービス終了。起動即入力・送ったら消える・余計なものゼロ——3つの体験要素を分析し、Captio代替アプリ「Capito式シンプルメモ」を開発した経緯。">
+  <meta name="twitter:image" content="/assets/img/ogp.png">
+
+  <link rel="canonical" href="https://simplememofast.com/devlog/captio-alternative.html">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
+    }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    .page-content__body h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .page-content__body h3 {
+      margin-top: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .page-content__body p {
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+    .page-content__body ul,
+    .page-content__body ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    .page-content__body li {
+      line-height: 1.8;
+      margin-bottom: 0.4rem;
+    }
+    .experience-element {
+      background: rgba(15, 20, 30, 0.5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+    .experience-element__label {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .experience-element__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .experience-element__desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 1.2rem 0;
+    }
+    .feature-list__item {
+      background: rgba(15, 20, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .feature-list__item strong {
+      color: var(--text-primary);
+    }
+    .cross-links {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    .cross-links h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+    .cross-links__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .cross-links__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .cross-links__item {
+      background: rgba(15, 20, 30, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.25s;
+      display: block;
+    }
+    .cross-links__item:hover {
+      border-color: rgba(100, 180, 255, 0.3);
+    }
+    .cross-links__item-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .cross-links__item-desc {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .cta-box {
+      background: rgba(100, 180, 255, 0.06);
+      border: 1px solid rgba(100, 180, 255, 0.15);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+    .cta-box p {
+      margin-bottom: 0.8rem;
+    }
+    .cta-box a {
+      display: inline-block;
+      background: rgba(100, 180, 255, 0.15);
+      border: 1px solid rgba(100, 180, 255, 0.3);
+      border-radius: 20px;
+      padding: 10px 24px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: background 0.25s, box-shadow 0.25s;
+    }
+    .cta-box a:hover {
+      background: rgba(100, 180, 255, 0.25);
+      box-shadow: 0 0 16px rgba(100, 180, 255, 0.15);
+    }
+  </style>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Captio代替アプリを作った理由",
+    "description": "Captioがサービス終了。起動即入力・送ったら消える・余計なものゼロ——3つの体験要素を分析し、Captio代替アプリ「Capito式シンプルメモ」を開発した経緯。",
+    "url": "https://simplememofast.com/devlog/captio-alternative.html",
+    "datePublished": "2026-02-13",
+    "dateModified": "2026-02-13",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/devlog/captio-alternative.html"
+    },
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://simplememofast.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "開発日誌",
+        "item": "https://simplememofast.com/devlog/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Captio代替アプリを作った理由",
+        "item": "https://simplememofast.com/devlog/captio-alternative.html"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Captioはなぜなくなったのですか？ / Why was Captio discontinued?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "公式な理由は不明ですが、App Storeから削除されサーバーも停止しました。開発元からの公式アナウンスもなく、突然サービスが終了した形です。 / The official reason is unknown, but the app was removed from the App Store and its servers were shut down. There was no official announcement from the developer — the service simply disappeared."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Captioの代わりになるアプリはありますか？ / Are there alternatives to Captio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモは、Captioの「起動即入力・送ったら消える・余計なものゼロ」を再現したアプリです。Captioと同じ操作感を目指して開発されました。 / Simple Memo - Captio-style is an app that recreates Captio's core experience: instant input on launch, clear after send, and zero clutter. It was built to match the same feel as Captio."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Capito式シンプルメモとCaptioの違いは？ / How is Simple Memo different from Captio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "オフライン対応、送信履歴、10言語対応、暗号化Outboxなど、Captioにはなかった機能を追加しつつ、同じ操作感を実現しています。 / While maintaining the same user experience, Simple Memo adds features Captio didn't have: offline support, send history, 10-language support, and an encrypted Outbox."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモは安全ですか？ / Are my memos safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AES-GCM暗号化でOutboxに保存されます。外部ライブラリ依存ゼロ、Apple純正フレームワークのみ使用しています。 / Memos are stored in the Outbox with AES-GCM encryption. The app has zero external library dependencies and uses only Apple's native frameworks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無料で使えますか？ / Is it free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "7日間の無料トライアル後、Freeプランは1日3通まで送信可能です。Premiumプランでは送信無制限になります。 / After a 7-day free trial, the Free plan allows up to 3 sends per day. The Premium plan offers unlimited sending."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/devlog/" class="page-header__back">
+          <span data-lang="ja">開発日誌へ戻る</span>
+          <span data-lang="en">Back to Dev Log</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">
+        <span data-lang="ja">Captio代替アプリを作った理由</span>
+        <span data-lang="en">Why We Built a Captio Alternative</span>
+      </h1>
+
+      <!-- Japanese Content -->
+      <div class="lang-content" data-lang="ja">
+        <p class="article-meta">2026年2月13日 公開</p>
+        <div class="page-content__body">
+
+          <h2>1. Captioとは何だったのか</h2>
+          <p>Captioは、2012年頃に登場したiOS向けの有料アプリ（約240円）でした。やることはただひとつ——アプリを開いて、メモを書いて、送信ボタンを押す。それだけで、あらかじめ設定したメールアドレスにメモが届きます。</p>
+          <p>通知はありません。フォルダもタグもありません。設定画面は最小限。余計なものが一切ない、究極にシンプルなメモ→メール送信アプリでした。</p>
+          <p>使い方は人それぞれ。買い物リストを自分に送る人。ふと思いついたアイデアを忘れる前にメールで残す人。仕事のリマインダーを自分の業務メールに飛ばす人。共通していたのは、「思いついた瞬間に、最短距離でメモを未来の自分に届ける」という体験でした。</p>
+
+          <h2>2. Captioサービス終了の衝撃</h2>
+          <p>ある日、CaptioがApp Storeから消えました。公式なアナウンスはありませんでした。</p>
+          <p>既にインストール済みのユーザーはしばらく使い続けることができましたが、iPhoneを買い替えた瞬間、もうCaptioは戻ってきませんでした。App Storeで検索しても見つからない。バックアップから復元しても動かない。サーバーも停止していた。</p>
+          <p>「Captio 代替」「Captio alternative」——検索する人が増えました。「Note to Email」「Note To Self Mail」など、似たアプリを試してみた人も多いでしょう。でも、どこか違う。機能としては近いのに、あの体験とは何かが違う。</p>
+          <p>その「何かが違う」の正体を突き止めるために、Captioの体験を要素に分解することにしました。</p>
+
+          <h2>3. Captio体験の3要素</h2>
+          <p>Captioが他のメモアプリと決定的に違っていたのは、単なる機能の違いではなく、体験の質でした。その体験を構成していた3つの要素を分析します。</p>
+
+          <div class="experience-element">
+            <div class="experience-element__label">Element 1</div>
+            <div class="experience-element__title">起動即入力</div>
+            <div class="experience-element__desc">アプリを開いた瞬間、キーボードが表示されている。0.5秒以内に文字を打ち始められる。この速さが、思考を中断させないために決定的に重要でした。多くのメモアプリは起動後にホーム画面を表示し、「新規作成」ボタンを押す必要があります。そのワンステップが、頭に浮かんだ言葉を消してしまうのです。</div>
+          </div>
+
+          <div class="experience-element">
+            <div class="experience-element__label">Element 2</div>
+            <div class="experience-element__title">送ったらすぐ消える</div>
+            <div class="experience-element__desc">送信ボタンを押すと、画面が瞬時にクリアされる。ネットワークの応答を待つ必要はない。まるで郵便ポストにメモを投函するような感覚——入れたら、もう自分の手元からは消えている。送信の完了を確認する必要すらない、という信頼感がありました。</div>
+          </div>
+
+          <div class="experience-element">
+            <div class="experience-element__label">Element 3</div>
+            <div class="experience-element__title">余計なものが一切ない</div>
+            <div class="experience-element__desc">フォルダなし。タグなし。カレンダー連携なし。AI機能なし。リッチテキストなし。Captioには「選ぶ」という行為が存在しませんでした。意思決定の疲労（Decision Fatigue）がゼロ。アプリを開いたら、書いて、送る。それだけです。</div>
+          </div>
+
+          <p>この3つの要素が組み合わさることで、Captioは単なるメモアプリではなく、「思考のアウトプット装置」になっていました。どれかひとつが欠けても、あの体験は再現できません。</p>
+
+          <h2>4. 「似たもの」ではなく「あの体験」を再現する</h2>
+          <p>Captioの代替を作るとき、最も重要な判断がありました。それは、「機能をコピーする」のではなく「体験を再現する」という方針です。</p>
+          <p>機能のコピーなら簡単です。テキストフィールドとメール送信APIを組み合わせれば、それらしいものはすぐに作れます。しかし、0.5秒以内にキーボードが表示されること、送信後150ミリ秒以内に画面がリセットされること、ネットワーク圏外でもメッセージが一通も失われないこと——これらを同時に実現するのは、まったく別次元の技術課題です。</p>
+          <p>私たちは具体的な技術ターゲットを設定しました。</p>
+          <ul>
+            <li><strong>Time-to-Text: 500ms以下</strong> — アプリ起動からキーボード表示・入力可能状態まで</li>
+            <li><strong>Send-to-Reset: 150ms以下</strong> — 送信ボタンタップから画面クリアまで</li>
+            <li><strong>メッセージロス: ゼロ</strong> — オフライン・アプリ強制終了・電池切れ、いかなる状況でも取りこぼさない</li>
+          </ul>
+          <p>これらのターゲットを達成するために、UIKitによるネイティブUI構築、暗号化Outboxアーキテクチャ、Cloudflare Workers上のRelay APIなど、多くの技術的判断を行いました。詳細は各技術トピックの記事で解説しています。</p>
+
+          <h2>5. Capito式シンプルメモが提供するもの</h2>
+          <p>Captioの3要素を忠実に再現しつつ、2026年のアプリとして必要な改善を加えたのが「Capito式シンプルメモ」です。</p>
+
+          <div class="feature-list">
+            <div class="feature-list__item"><strong>ワンタップ送信</strong> — 起動したら書いて送る。メモはあなたのメールアドレスに届きます。Captioと同じ操作感。</div>
+            <div class="feature-list__item"><strong>オフライン対応</strong> — 圏外でもメモを作成・送信操作が可能。通信が回復したら自動的に再送信。Captioにはなかった機能です。</div>
+            <div class="feature-list__item"><strong>送信履歴とステータス</strong> — 送信済み・未送信・失敗のステータスを確認可能。Outboxで管理し、取りこぼしゼロを実現。</div>
+            <div class="feature-list__item"><strong>10言語対応</strong> — 日本語、英語、中国語（簡体・繁体）、韓国語、スペイン語、フランス語、ドイツ語、ポルトガル語、イタリア語に対応。</div>
+            <div class="feature-list__item"><strong>プライバシーファースト設計</strong> — AES-GCM暗号化Outbox、ephemeral URLSession、外部ライブラリ依存ゼロ。Apple純正フレームワークのみ使用。</div>
+            <div class="feature-list__item"><strong>料金プラン</strong> — 7日間の無料トライアル（送信無制限）。その後、Freeプランは1日3通まで。Premiumプランは送信無制限。</div>
+          </div>
+
+          <div class="cta-box">
+            <p>Captioが好きだったあなたへ。あの体験を、もう一度。</p>
+            <a href="https://apps.apple.com/app/capito-simple-memo/id6744729498" target="_blank" rel="noopener noreferrer">App Storeでダウンロード</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- English Content -->
+      <div class="lang-content" data-lang="en">
+        <p class="article-meta">Published February 13, 2026</p>
+        <div class="page-content__body">
+
+          <h2>1. What Was Captio?</h2>
+          <p>Captio was a paid iOS app (around $2) that appeared around 2012. It did exactly one thing — you opened the app, wrote a note, and tapped send. That was it. Your memo arrived at a pre-configured email address.</p>
+          <p>No notifications. No folders. No tags. Minimal settings. It was the ultimate simple memo-to-email app, stripped of everything unnecessary.</p>
+          <p>People used it in all sorts of ways. Some sent themselves shopping lists. Others jotted down fleeting ideas before they vanished. Some fired work reminders to their office email. What everyone shared was the experience of "getting a thought to your future self via the shortest possible path."</p>
+
+          <h2>2. The Shock of Captio's Discontinuation</h2>
+          <p>One day, Captio disappeared from the App Store. There was no official announcement.</p>
+          <p>Users who already had it installed could keep using it for a while, but the moment you replaced your iPhone, Captio was gone for good. Search the App Store — nothing. Restore from backup — it wouldn't work. The servers had been shut down too.</p>
+          <p>"Captio alternative" "Captio discontinued" — search queries multiplied. Many people tried similar apps: "Note to Email," "Note To Self Mail," and others. They were functionally close, but something felt different. The features were similar, yet the experience wasn't the same.</p>
+          <p>To understand what that "something different" was, we decided to deconstruct the Captio experience into its core elements.</p>
+
+          <h2>3. The 3 Elements of the Captio Experience</h2>
+          <p>What made Captio fundamentally different from other memo apps wasn't a feature difference — it was a quality of experience. Here are the three elements that defined it.</p>
+
+          <div class="experience-element">
+            <div class="experience-element__label">Element 1</div>
+            <div class="experience-element__title">Instant Input on Launch</div>
+            <div class="experience-element__desc">The moment you opened the app, the keyboard was already there. You could start typing within 0.5 seconds. This speed was critical for not interrupting your train of thought. Most memo apps show a home screen first and require tapping a "New" button. That single extra step is enough to make the words in your head disappear.</div>
+          </div>
+
+          <div class="experience-element">
+            <div class="experience-element__label">Element 2</div>
+            <div class="experience-element__title">Clear Instantly After Send</div>
+            <div class="experience-element__desc">When you tapped send, the screen cleared instantly. No waiting for a network response. It felt like dropping a note into a mailbox — once it's in, it's out of your hands. There was a sense of trust that you didn't even need to confirm delivery had completed.</div>
+          </div>
+
+          <div class="experience-element">
+            <div class="experience-element__label">Element 3</div>
+            <div class="experience-element__title">Absolutely Zero Clutter</div>
+            <div class="experience-element__desc">No folders. No tags. No calendar integration. No AI features. No rich text. In Captio, the act of "choosing" simply didn't exist. Zero decision fatigue. Open the app, write, send. That's all.</div>
+          </div>
+
+          <p>The combination of these three elements made Captio not just a memo app, but a "thought output device." Remove any one of them, and the experience falls apart.</p>
+
+          <h2>4. Recreating "The Experience," Not Just "Something Similar"</h2>
+          <p>When building a Captio alternative, we faced one crucial decision: we wouldn't just copy the features — we would recreate the experience.</p>
+          <p>Feature copying is easy. Combine a text field with an email-sending API and you'll have something that looks close enough. But ensuring the keyboard appears within 0.5 seconds of launch, that the screen resets within 150 milliseconds of tapping send, and that no message is ever lost even offline — achieving all of these simultaneously is an entirely different engineering challenge.</p>
+          <p>We set concrete technical targets:</p>
+          <ul>
+            <li><strong>Time-to-Text: under 500ms</strong> — from app launch to keyboard visible and input ready</li>
+            <li><strong>Send-to-Reset: under 150ms</strong> — from tapping send to screen clear</li>
+            <li><strong>Message loss: zero</strong> — no matter the scenario: offline, force quit, battery death</li>
+          </ul>
+          <p>To achieve these targets, we made many technical decisions: native UI with UIKit, an encrypted Outbox architecture, a Relay API on Cloudflare Workers, and more. The details are documented in our other dev log articles.</p>
+
+          <h2>5. What Simple Memo Delivers</h2>
+          <p>Simple Memo - Captio-style faithfully recreates Captio's three core elements while adding the improvements expected of a 2026 app.</p>
+
+          <div class="feature-list">
+            <div class="feature-list__item"><strong>One-tap send</strong> — Launch, write, send. Your memo arrives at your email address. The same workflow as Captio.</div>
+            <div class="feature-list__item"><strong>Offline support</strong> — Create and queue memos even without connectivity. Automatic retry when connection returns. A feature Captio never had.</div>
+            <div class="feature-list__item"><strong>Send history and status</strong> — Check the status of sent, pending, and failed memos. Managed through the Outbox for zero message loss.</div>
+            <div class="feature-list__item"><strong>10 language support</strong> — Japanese, English, Chinese (Simplified & Traditional), Korean, Spanish, French, German, Portuguese, and Italian.</div>
+            <div class="feature-list__item"><strong>Privacy-first design</strong> — AES-GCM encrypted Outbox, ephemeral URLSession, zero external library dependencies. Built exclusively with Apple's native frameworks.</div>
+            <div class="feature-list__item"><strong>Pricing</strong> — 7-day free trial with unlimited sending. After that, the Free plan allows 3 sends/day. Premium offers unlimited sending.</div>
+          </div>
+
+          <div class="cta-box">
+            <p>For everyone who loved Captio. That experience, once more.</p>
+            <a href="https://apps.apple.com/app/capito-simple-memo/id6744729498" target="_blank" rel="noopener noreferrer">Download on the App Store</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FAQ Section (visible, mirrors JSON-LD) -->
+      <div data-lang="ja">
+        <div class="page-content__body cross-links">
+          <h2>よくある質問</h2>
+
+          <h3>Q. Captioはなぜなくなったのですか？</h3>
+          <p>公式な理由は不明ですが、App Storeから削除されサーバーも停止しました。開発元からの公式アナウンスもなく、突然サービスが終了した形です。</p>
+
+          <h3>Q. Captioの代わりになるアプリはありますか？</h3>
+          <p>Capito式シンプルメモは、Captioの「起動即入力・送ったら消える・余計なものゼロ」を再現したアプリです。Captioと同じ操作感を目指して開発されました。</p>
+
+          <h3>Q. Capito式シンプルメモとCaptioの違いは？</h3>
+          <p>オフライン対応、送信履歴、10言語対応、暗号化Outboxなど、Captioにはなかった機能を追加しつつ、同じ操作感を実現しています。</p>
+
+          <h3>Q. メモは安全ですか？</h3>
+          <p>AES-GCM暗号化でOutboxに保存されます。外部ライブラリ依存ゼロ、Apple純正フレームワークのみ使用しています。</p>
+
+          <h3>Q. 無料で使えますか？</h3>
+          <p>7日間の無料トライアル後、Freeプランは1日3通まで送信可能です。Premiumプランでは送信無制限になります。</p>
+        </div>
+      </div>
+
+      <div data-lang="en">
+        <div class="page-content__body cross-links">
+          <h2>Frequently Asked Questions</h2>
+
+          <h3>Q. Why was Captio discontinued?</h3>
+          <p>The official reason is unknown, but the app was removed from the App Store and its servers were shut down. There was no official announcement from the developer — the service simply disappeared.</p>
+
+          <h3>Q. Are there alternatives to Captio?</h3>
+          <p>Simple Memo - Captio-style is an app that recreates Captio's core experience: instant input on launch, clear after send, and zero clutter. It was built to match the same feel as Captio.</p>
+
+          <h3>Q. How is Simple Memo different from Captio?</h3>
+          <p>While maintaining the same user experience, Simple Memo adds features Captio didn't have: offline support, send history, 10-language support, and an encrypted Outbox.</p>
+
+          <h3>Q. Are my memos safe?</h3>
+          <p>Memos are stored in the Outbox with AES-GCM encryption. The app has zero external library dependencies and uses only Apple's native frameworks.</p>
+
+          <h3>Q. Is it free to use?</h3>
+          <p>After a 7-day free trial, the Free plan allows up to 3 sends per day. The Premium plan offers unlimited sending.</p>
+        </div>
+      </div>
+
+      <!-- Cross Links -->
+      <div data-lang="ja">
+        <div class="cross-links">
+          <h2>関連記事</h2>
+          <div class="cross-links__grid">
+            <a href="/devlog/day1.html" class="cross-links__item">
+              <div class="cross-links__item-title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
+              <div class="cross-links__item-desc">起動0.3秒、送信150ms、取りこぼしゼロ——初回開発日誌の全文。</div>
+            </a>
+            <a href="/devlog/" class="cross-links__item">
+              <div class="cross-links__item-title">開発日誌 一覧</div>
+              <div class="cross-links__item-desc">すべての開発日誌と技術トピックの一覧ページ。</div>
+            </a>
+            <a href="/devlog/outbox-architecture.html" class="cross-links__item">
+              <div class="cross-links__item-title">Outboxアーキテクチャ：取りこぼしゼロ設計</div>
+              <div class="cross-links__item-desc">送信即UIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化Outboxパターンの全容。</div>
+            </a>
+            <a href="/devlog/privacy-first-design.html" class="cross-links__item">
+              <div class="cross-links__item-title">プライバシーファースト設計：偏執的なこだわり</div>
+              <div class="cross-links__item-desc">ephemeral URLSession、プライバシーオーバーレイ、ログ無害化。メモアプリだからこそ過剰なくらいがちょうどいい。</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div data-lang="en">
+        <div class="cross-links">
+          <h2>Related Articles</h2>
+          <div class="cross-links__grid">
+            <a href="/devlog/day1.html" class="cross-links__item">
+              <div class="cross-links__item-title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
+              <div class="cross-links__item-desc">Launch in 0.3s, send in 150ms, zero message loss — the full first dev log entry.</div>
+            </a>
+            <a href="/devlog/" class="cross-links__item">
+              <div class="cross-links__item-title">Dev Log Index</div>
+              <div class="cross-links__item-desc">All dev log entries and technical deep dives in one place.</div>
+            </a>
+            <a href="/devlog/outbox-architecture.html" class="cross-links__item">
+              <div class="cross-links__item-title">Outbox Architecture: Zero Message Loss</div>
+              <div class="cross-links__item-desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+            </a>
+            <a href="/devlog/privacy-first-design.html" class="cross-links__item">
+              <div class="cross-links__item-title">Privacy-First Design: Obsessive Attention to Detail</div>
+              <div class="cross-links__item-desc">Ephemeral URLSession, privacy overlay, sanitized logs. For a memo app, being overly cautious is just right.</div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/devlog/" class="footer__link">
+          <span data-lang="ja">開発日誌</span>
+          <span data-lang="en">Dev Log</span>
+        </a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
