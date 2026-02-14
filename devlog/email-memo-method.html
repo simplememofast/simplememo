@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>なぜ「自分にメールを送る」が最強のメモ術なのか | Capito式シンプルメモ 開発日誌</title>
+  <meta name="description" content="GTD、Inbox Zero、思考のキャプチャ。生産性メソッドの多くが「素早く書き留めて、後で処理する」を推奨する。自分宛メール送信がなぜ最も速く・確実で・ツール依存しないメモ術なのかを解説。">
+  <meta name="theme-color" content="#000000">
+
+  <!-- SEO keywords targeting -->
+  <meta name="keywords" content="自分にメール メモ, email to self, GTD メモアプリ, 思考の整理 ツール, Inbox Zero メモ, メモ術 最強, 自分宛メール 生産性, quick capture GTD, send note to email, Captio 代替">
+
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">なぜ「自分にメールを送る」が最強のメモ術なのか | Capito式シンプルメモ 開発日誌</span>
+      <span class="meta-og-title">なぜ「自分にメールを送る」が最強のメモ術なのか</span>
+      <span class="meta-description">GTD、Inbox Zero、思考のキャプチャ。生産性メソッドの多くが「素早く書き留めて、後で処理する」を推奨する。自分宛メール送信がなぜ最も速く・確実で・ツール依存しないメモ術なのかを解説。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Why "Email Yourself" Is the Most Powerful Note-Taking Method | Simple Memo Dev Log</span>
+      <span class="meta-og-title">Why "Email Yourself" Is the Most Powerful Note-Taking Method</span>
+      <span class="meta-description">GTD, Inbox Zero, thought capture. Most productivity methods recommend "write it down fast, process later." Here's why emailing yourself is the fastest, most reliable, and tool-independent note-taking method.</span>
+    </div>
+  </div>
+
+  <!-- OGP -->
+  <meta property="og:title" content="なぜ「自分にメールを送る」が最強のメモ術なのか">
+  <meta property="og:description" content="GTD・Inbox Zeroの考え方から、自分宛メール送信がなぜ最も速く・確実なメモ術なのかを解説。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://simplememofast.com/devlog/email-memo-method.html">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="なぜ「自分にメールを送る」が最強のメモ術なのか">
+  <meta name="twitter:description" content="GTD・Inbox Zeroの考え方から、自分宛メール送信がなぜ最も速く・確実なメモ術なのかを解説。">
+  <meta name="twitter:image" content="/assets/img/ogp.png">
+
+  <link rel="canonical" href="https://simplememofast.com/devlog/email-memo-method.html">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/email-memo-method.html?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/devlog/email-memo-method.html?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/email-memo-method.html">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    /* Language Switcher Styles - 2026 Dark Sleek Premium */
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+    }
+    .lang-switcher__btn:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__btn:focus-visible {
+      outline: 2px solid #6ab4ff;
+      outline-offset: 2px;
+    }
+    .lang-switcher__btn.active {
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
+    }
+    [data-lang] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lang-switcher__btn {
+        transition: none;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+    }
+    .page-content__body h2 {
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .page-content__body h3 {
+      margin-top: 1.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .page-content__body p {
+      line-height: 1.9;
+      margin-bottom: 1rem;
+    }
+    .page-content__body ul,
+    .page-content__body ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+    .page-content__body li {
+      line-height: 1.8;
+      margin-bottom: 0.4rem;
+    }
+    .method-comparison {
+      background: rgba(15, 20, 30, 0.5);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .method-comparison__title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .method-comparison__desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .method-comparison__score {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .article-cta {
+      background: rgba(100, 180, 255, 0.06);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .article-cta__title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .article-cta__desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .article-cta__link {
+      display: inline-block;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+    .article-cta__link:hover {
+      text-decoration: underline;
+    }
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 16px;
+      margin: 1.2rem 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  </style>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "なぜ「自分にメールを送る」が最強のメモ術なのか",
+    "alternativeHeadline": "Why 'Email Yourself' Is the Most Powerful Note-Taking Method",
+    "description": "GTD、Inbox Zero、思考のキャプチャ。生産性メソッドの多くが「素早く書き留めて、後で処理する」を推奨する。自分宛メール送信がなぜ最も速く・確実で・ツール依存しないメモ術なのかを解説。",
+    "url": "https://simplememofast.com/devlog/email-memo-method.html",
+    "datePublished": "2026-02-14",
+    "dateModified": "2026-02-14",
+    "author": {
+      "@type": "Organization",
+      "name": "YURIKA, K.K.",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      }
+    },
+    "mainEntityOfPage": "https://simplememofast.com/devlog/email-memo-method.html",
+    "image": "https://simplememofast.com/assets/img/ogp.png",
+    "inLanguage": ["ja", "en"],
+    "keywords": ["自分にメール メモ", "email to self", "GTD", "Inbox Zero", "メモ術", "Captio 代替", "quick capture", "生産性"],
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/" },
+      { "@type": "ListItem", "position": 2, "name": "開発日誌", "item": "https://simplememofast.com/devlog/" },
+      { "@type": "ListItem", "position": 3, "name": "なぜ自分にメールが最強のメモ術か", "item": "https://simplememofast.com/devlog/email-memo-method.html" }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "なぜ自分にメールを送るのが効率的なメモ術なのですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "メールは(1)すでに毎日チェックする習慣がある、(2)検索・フォルダ分類が標準機能として備わっている、(3)すべてのデバイスでアクセスできる、(4)特定のアプリやサービスに依存しない——この4つの理由から、メモの最終到達地点として最も信頼性が高いからです。GTDの「キャプチャ→処理」の流れと完全に一致します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "GTDにおけるクイックキャプチャとは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "GTD（Getting Things Done）のクイックキャプチャとは、頭に浮かんだアイデアやタスクを即座に書き留める行為です。キャプチャの速度が遅いと、思考が中断されたり、メモすること自体を諦めてしまいます。理想的なキャプチャツールは、起動が速く、操作ステップが少なく、メモ後すぐに元の作業に戻れるものです。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "自分にメールを送るのに最適なアプリはありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモ（Simple Memo - Captio-style）は、自分宛メール送信に特化したiOSアプリです。0.3秒で起動し、ワンタップで送信、150msで画面がクリアされるため、GTDのクイックキャプチャに最適です。オフライン時もOutboxに暗号化保存され、オンライン復帰で自動送信されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモアプリではなくメール送信アプリを使うメリットは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "メモアプリはメモを「貯める」場所ですが、メール送信アプリはメモを「流す」パイプラインです。メモアプリは蓄積するほど検索・整理のコストが増えますが、メールは既存のフィルタ・ラベル・フォルダ機能で自動整理できます。また、メモアプリのサービスが終了するとデータにアクセスできなくなるリスクがありますが、メールはプロバイダ間で移行可能で、データのロックインが発生しません。"
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/devlog/" class="page-header__back">
+          <span data-lang="ja">開発日誌へ戻る</span>
+          <span data-lang="en">Back to Dev Log</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">
+        <span data-lang="ja">なぜ「自分にメールを送る」が<br>最強のメモ術なのか</span>
+        <span data-lang="en">Why "Email Yourself" Is the<br>Most Powerful Note-Taking Method</span>
+      </h1>
+
+      <!-- Japanese Content -->
+      <div class="lang-content" data-lang="ja">
+        <p class="article-meta">2026年2月14日 &middot; YURIKA, K.K.</p>
+        <div class="page-content__body">
+
+          <p><strong>「自分にメールを送る」メモ術</strong>とは、思いついたアイデアやタスクを即座にメールとして自分宛に送信し、後からメールボックスで処理する方法です。GTD（Getting Things Done）の「クイックキャプチャ」に最も適した手段であり、メモアプリでは到達できないレベルの速度と確実性を実現します。</p>
+
+          <h2>問題：なぜメモの大半は「役に立たない」のか</h2>
+
+          <p>思いついたことをメモする習慣は、多くの人が持っています。しかし、そのメモが後から実際に活用されることは驚くほど少ない。</p>
+
+          <p>原因は3つあります：</p>
+          <ol>
+            <li><strong>キャプチャが遅い</strong>：アプリを探し、起動し、ノートを選び、入力を始めるまでに10秒以上かかる。その間に元の思考は薄れ、「まあいいか」と書くのをやめてしまう</li>
+            <li><strong>見返さない</strong>：メモアプリに書いたメモは、そのアプリを開かない限り目に触れない。日常的にチェックする場所にメモがない</li>
+            <li><strong>整理コストが高い</strong>：メモが蓄積するほど、どこに何を書いたか分からなくなる。フォルダやタグを作る作業自体が億劫になる</li>
+          </ol>
+
+          <p>この3つの問題をすべて解決するのが、「自分にメールを送る」というメソッドです。</p>
+
+          <h2>メールが「最強の到達地点」である4つの理由</h2>
+
+          <h3>1. すでに毎日チェックする場所にメモが届く</h3>
+          <p>メールは、ほぼすべてのビジネスパーソンが毎日複数回チェックするツールです。自分にメールを送ったメモは、他のメールと同じInboxに届きます。つまり、<strong>わざわざメモアプリを開く必要がない</strong>。「見返さないメモ」問題が根本的に解消されます。</p>
+
+          <h3>2. 検索・整理が既存の仕組みで完結する</h3>
+          <p>Gmail、Outlook、Apple Mailなどのメールクライアントには、強力な全文検索、フィルタルール、ラベル・フォルダ機能が最初から備わっています。メモ専用の整理システムを新たに構築する必要がありません。例えば、件名に「Simple Memo」というプレフィックスを付ければ、フィルタで自動的に専用フォルダに振り分けることもできます。</p>
+
+          <h3>3. すべてのデバイスでアクセス可能</h3>
+          <p>メールはスマートフォン、タブレット、PC、ブラウザ——あらゆるデバイスでアクセスできます。iPhoneで書いたメモを、デスクのMacで処理する。出先のiPadで確認する。特定のアプリやOSに縛られることがありません。</p>
+
+          <h3>4. ベンダーロックインが発生しない</h3>
+          <p>特定のメモアプリに依存すると、そのサービスが終了した瞬間にデータにアクセスできなくなるリスクがあります（実際にCaptioは2023年にサービスを終了しました）。メールはプロバイダ間で移行可能であり、IMAPやMBOX形式でエクスポートできます。メモの「最終保存先」としてメールほど安全な場所はありません。</p>
+
+          <h2>GTDのフレームワークとの整合性</h2>
+
+          <p>David Allenが提唱したGTD（Getting Things Done）メソッドの最初のステップは<strong>「キャプチャ（収集）」</strong>です。</p>
+
+          <blockquote>
+            「頭の中にあるものはすべて、信頼できるシステムに外部化しなければならない」——David Allen
+          </blockquote>
+
+          <p>キャプチャの原則は明確です：</p>
+          <ul>
+            <li><strong>摩擦ゼロ</strong>：キャプチャのステップが多いほど、キャプチャしない理由が増える</li>
+            <li><strong>信頼性</strong>：キャプチャしたものが失われない保証がなければ、脳は「覚えておかなきゃ」と手放さない</li>
+            <li><strong>即座の完了</strong>：キャプチャに時間がかかると、元の作業（会議、会話、思考）に戻れない</li>
+          </ul>
+
+          <p>自分宛メール送信は、この3原則に完全に適合します：</p>
+          <ul>
+            <li>起動→入力→送信の3ステップ（Capito式シンプルメモなら起動0.3秒、送信150ms）</li>
+            <li>Outboxアーキテクチャにより、オフライン時もメモが失われない</li>
+            <li>送信完了後は画面が即クリアされ、すぐに元の作業に復帰できる</li>
+          </ul>
+
+          <h2>メモ手段の比較：速度・確実性・アクセス性</h2>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">自分宛メール送信（専用アプリ）</div>
+            <div class="method-comparison__desc">起動→入力→ワンタップ送信。メモは受信トレイに直接届く。Outboxにより送信失敗ゼロ。</div>
+            <div class="method-comparison__score">速度: 最速 (0.3秒起動) / 確実性: 最高 (Outbox) / アクセス性: 全デバイス (メール)</div>
+          </div>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">汎用メモアプリ（Apple Notes、Notionなど）</div>
+            <div class="method-comparison__desc">アプリ起動→ノート選択→入力→保存。見返すにはそのアプリを開く必要がある。同期に依存。</div>
+            <div class="method-comparison__score">速度: 中 (複数ステップ) / 確実性: 中 (同期依存) / アクセス性: アプリ限定</div>
+          </div>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">紙のメモ・付箋</div>
+            <div class="method-comparison__desc">ペンと紙があれば即座に書ける。ただし、検索不可、紛失リスク、デジタル化コスト。</div>
+            <div class="method-comparison__score">速度: 速い (物理制約あり) / 確実性: 低 (紛失リスク) / アクセス性: その場のみ</div>
+          </div>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">音声メモ（Siri、ボイスレコーダー）</div>
+            <div class="method-comparison__desc">手が使えない場面で有効。ただし、後から聞き返すコストが高く、テキスト検索不可。公共の場では使いにくい。</div>
+            <div class="method-comparison__score">速度: 速い (環境依存) / 確実性: 中 / アクセス性: 端末限定・検索不可</div>
+          </div>
+
+          <h2>Inbox Zeroとの相性</h2>
+
+          <p>Merlin Mannが提唱した<strong>Inbox Zero</strong>は、受信トレイを常に空（またはそれに近い状態）に保つ考え方です。自分宛メモが受信トレイに届くと、それは「処理すべきタスク」として自然にワークフローに組み込まれます。</p>
+
+          <p>具体的なフロー：</p>
+          <ol>
+            <li>アイデアが浮かぶ → Capito式シンプルメモでワンタップ送信</li>
+            <li>メールが受信トレイに届く</li>
+            <li>次回のメール処理タイミングでトリアージ（即実行 / カレンダーに追加 / 参考資料として保存 / アーカイブ）</li>
+          </ol>
+
+          <p>メモアプリに「あとで見るリスト」を作るのではなく、既存のメール処理ルーティンにメモを統合する——これがInbox Zeroとの最大のシナジーです。</p>
+
+          <h2>なぜ「専用アプリ」が必要なのか</h2>
+
+          <p>「自分にメールを送るなら、標準のメールアプリで十分では？」という疑問は当然です。しかし、標準メールアプリには致命的な摩擦があります：</p>
+
+          <ol>
+            <li><strong>宛先入力</strong>：毎回、自分のメールアドレスを入力（または候補から選択）する必要がある</li>
+            <li><strong>件名入力</strong>：件名フィールドが表示され、入力を求められる</li>
+            <li><strong>送信確認</strong>：送信後にメモを閉じ、下書きを保存するか聞かれることもある</li>
+            <li><strong>オフライン耐性</strong>：オフライン時の挙動がアプリによって異なり、メモが失われるリスクがある</li>
+          </ol>
+
+          <p>Capito式シンプルメモのような専用アプリは、これらの摩擦をすべて排除します。宛先は事前設定済み、件名は自動生成、送信はワンタップ、オフラインでもOutboxに暗号化保存。<strong>「書く→送る」以外のすべてを削ぎ落とした</strong>からこそ、キャプチャ速度が圧倒的に速いのです。</p>
+
+          <h2>まとめ：メモは「貯める」ものではなく「流す」もの</h2>
+
+          <p>メモの本質は情報を蓄積することではなく、<strong>頭の中にある情報を信頼できる場所に移動させること</strong>です。そして、メールはすでにあなたが信頼している「処理する場所」です。</p>
+
+          <p>「自分にメールを送る」メモ術が最強である理由をまとめます：</p>
+          <ul>
+            <li>毎日チェックするInboxに届くから、見落とさない</li>
+            <li>メールの検索・フィルタ機能で整理コストゼロ</li>
+            <li>すべてのデバイスからアクセス可能</li>
+            <li>ベンダーロックインなし——メモの安全な最終保存先</li>
+            <li>GTDのキャプチャ原則、Inbox Zeroのワークフローと完全一致</li>
+          </ul>
+
+          <div class="article-cta">
+            <div class="article-cta__title">Capito式シンプルメモで試してみる</div>
+            <div class="article-cta__desc">0.3秒起動・ワンタップ送信・オフライン対応。<br>Captioが好きだったすべての人のために作りました。</div>
+            <a href="/" class="article-cta__link">ダウンロードページへ →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- English Content -->
+      <div class="lang-content" data-lang="en">
+        <p class="article-meta">February 14, 2026 &middot; YURIKA, K.K.</p>
+        <div class="page-content__body">
+
+          <p><strong>The "email yourself" note-taking method</strong> means instantly sending ideas and tasks to your own email address, then processing them later from your inbox. It's the optimal approach for GTD's "quick capture" step — achieving a level of speed and reliability that no memo app can match.</p>
+
+          <h2>The Problem: Why Most Notes Never Get Used</h2>
+
+          <p>Many people have a note-taking habit. Yet surprisingly few notes actually get used afterward.</p>
+
+          <p>Three reasons:</p>
+          <ol>
+            <li><strong>Slow capture</strong>: Finding the app, launching it, selecting a notebook, then starting to type takes 10+ seconds. By then, the original thought has faded and you give up</li>
+            <li><strong>Never reviewed</strong>: Notes in a memo app stay invisible unless you open that specific app. They're not where you naturally look</li>
+            <li><strong>High organization cost</strong>: As notes accumulate, finding anything becomes harder. Creating folders and tags becomes a chore in itself</li>
+          </ol>
+
+          <p>The "email yourself" method solves all three problems.</p>
+
+          <h2>Why Email Is the Ultimate Destination: 4 Reasons</h2>
+
+          <h3>1. Notes arrive where you already look every day</h3>
+          <p>Email is checked multiple times daily by virtually everyone. Self-sent notes land in the same inbox as everything else. <strong>No need to open a separate memo app.</strong> The "never reviewed" problem simply vanishes.</p>
+
+          <h3>2. Search and organization come built-in</h3>
+          <p>Gmail, Outlook, Apple Mail — all have powerful full-text search, filter rules, labels, and folders by default. You don't need to build a new organization system. For example, add "Simple Memo" as a subject prefix and set up an automatic filter to sort all your notes into a dedicated folder.</p>
+
+          <h3>3. Accessible from every device</h3>
+          <p>Email works on smartphones, tablets, PCs, and browsers. Write a note on your iPhone, process it on your Mac at your desk, review it on your iPad on the go. No app or OS lock-in.</p>
+
+          <h3>4. No vendor lock-in</h3>
+          <p>Depending on a specific memo app means risking data loss if the service shuts down (Captio was discontinued in 2023 — this actually happened). Email can be migrated between providers and exported via IMAP or MBOX. As a final destination for your notes, nothing is safer than email.</p>
+
+          <h2>Alignment with GTD</h2>
+
+          <p>The first step in David Allen's GTD (Getting Things Done) methodology is <strong>"Capture"</strong>.</p>
+
+          <blockquote>
+            "Your mind is for having ideas, not holding them." — David Allen
+          </blockquote>
+
+          <p>The principles of effective capture are clear:</p>
+          <ul>
+            <li><strong>Zero friction</strong>: The more steps capture requires, the more excuses not to capture</li>
+            <li><strong>Reliability</strong>: If captured items might be lost, your brain refuses to let go</li>
+            <li><strong>Instant completion</strong>: If capture takes too long, you can't return to your current task (meeting, conversation, thinking)</li>
+          </ul>
+
+          <p>Emailing yourself fits all three principles perfectly:</p>
+          <ul>
+            <li>Launch → type → send in 3 steps (Simple Memo: 0.3s launch, 150ms send)</li>
+            <li>Outbox architecture ensures zero message loss, even offline</li>
+            <li>Screen clears instantly after send — back to what you were doing</li>
+          </ul>
+
+          <h2>Comparing Note-Taking Methods</h2>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">Email to Self (Dedicated App)</div>
+            <div class="method-comparison__desc">Launch → type → one-tap send. Notes arrive directly in your inbox. Zero send failures via Outbox.</div>
+            <div class="method-comparison__score">Speed: Fastest (0.3s launch) / Reliability: Highest (Outbox) / Access: All devices (email)</div>
+          </div>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">General Note Apps (Apple Notes, Notion, etc.)</div>
+            <div class="method-comparison__desc">Launch app → select notebook → type → save. Must open the app to review. Depends on sync.</div>
+            <div class="method-comparison__score">Speed: Medium (multiple steps) / Reliability: Medium (sync-dependent) / Access: App-specific</div>
+          </div>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">Paper Notes / Sticky Notes</div>
+            <div class="method-comparison__desc">Write instantly with pen and paper. But unsearchable, easily lost, and requires digitization effort.</div>
+            <div class="method-comparison__score">Speed: Fast (physical constraints) / Reliability: Low (loss risk) / Access: Physical only</div>
+          </div>
+
+          <div class="method-comparison">
+            <div class="method-comparison__title">Voice Memos (Siri, Voice Recorder)</div>
+            <div class="method-comparison__desc">Useful hands-free. But expensive to review, not text-searchable, awkward in public.</div>
+            <div class="method-comparison__score">Speed: Fast (environment-dependent) / Reliability: Medium / Access: Device-only, no search</div>
+          </div>
+
+          <h2>Synergy with Inbox Zero</h2>
+
+          <p>Merlin Mann's <strong>Inbox Zero</strong> philosophy keeps your inbox empty (or near-empty) at all times. When self-sent notes arrive in your inbox, they naturally integrate into your workflow as items to process.</p>
+
+          <p>The flow:</p>
+          <ol>
+            <li>Idea strikes → one-tap send with Simple Memo</li>
+            <li>Email arrives in your inbox</li>
+            <li>Next time you process email: triage (do now / add to calendar / save as reference / archive)</li>
+          </ol>
+
+          <p>Instead of maintaining a separate "review later" list in a memo app, integrate notes into your existing email processing routine — that's the ultimate synergy with Inbox Zero.</p>
+
+          <h2>Why a Dedicated App Matters</h2>
+
+          <p>"Can't I just use the built-in Mail app?" — Fair question. But the standard email app has fatal friction:</p>
+
+          <ol>
+            <li><strong>Recipient entry</strong>: You must type (or select) your own email address every time</li>
+            <li><strong>Subject line</strong>: The subject field demands input</li>
+            <li><strong>Post-send flow</strong>: After sending, you may be asked about drafts, confirmations</li>
+            <li><strong>Offline behavior</strong>: Varies by app — risk of lost notes</li>
+          </ol>
+
+          <p>A dedicated app like Simple Memo eliminates all friction. Recipient pre-configured, subject auto-generated, send with one tap, offline storage via encrypted Outbox. <strong>Everything except "write → send" has been stripped away</strong> — that's why capture speed is unmatched.</p>
+
+          <h2>Conclusion: Notes Are Meant to Flow, Not Accumulate</h2>
+
+          <p>The essence of a note isn't to store information — it's to <strong>move information from your head to a trusted place</strong>. And email is already the trusted place where you process things.</p>
+
+          <p>Why the "email yourself" method is the most powerful:</p>
+          <ul>
+            <li>Arrives in the inbox you check daily — nothing gets missed</li>
+            <li>Zero organization cost thanks to email's built-in search and filters</li>
+            <li>Accessible from every device</li>
+            <li>No vendor lock-in — the safest final destination for your notes</li>
+            <li>Perfect alignment with GTD capture principles and Inbox Zero workflow</li>
+          </ul>
+
+          <div class="article-cta">
+            <div class="article-cta__title">Try Simple Memo - Captio-style</div>
+            <div class="article-cta__desc">0.3-second launch. One-tap send. Offline support.<br>Built for everyone who loved Captio.</div>
+            <a href="/" class="article-cta__link">Go to download page →</a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/devlog/" class="footer__link">
+          <span data-lang="ja">開発日誌</span>
+          <span data-lang="en">Dev Log</span>
+        </a>
+        <a href="/terms.html" class="footer__link">
+          <span data-lang="ja">利用規約</span>
+          <span data-lang="en">Terms</span>
+        </a>
+        <a href="/privacy.html" class="footer__link">
+          <span data-lang="ja">プライバシーポリシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact.html" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
