@@ -47,12 +47,18 @@ export async function onRequestPost(context) {
   const res = await fetch("https://api.postiz.com/public/v1/posts", {
     method: "POST",
     headers: {
-      Authorization: apiKey,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
   });
 
-  const data = await res.json();
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { error: "Postiz non-JSON response", body: text.slice(0, 500) };
+  }
   return Response.json({ ok: res.ok, scheduleDate, data }, { status: res.status });
 }
