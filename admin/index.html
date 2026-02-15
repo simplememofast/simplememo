@@ -596,8 +596,8 @@
 
         log('i', 'slide_'+(i+1)+'.png アップロード中…');
         var res = await fetch('/admin/api/upload', { method: 'POST', body: form });
-        if(!res.ok) throw new Error('Upload failed: slide_'+(i+1)+' ('+res.status+')');
         var data = await res.json();
+        if(!res.ok) throw new Error('Upload failed: slide_'+(i+1)+' ('+res.status+') '+(data.error||JSON.stringify(data)));
         uploaded.push({ id: data.id, path: data.path });
         log('ok', 'slide_'+(i+1)+'.png → '+data.path);
       }
