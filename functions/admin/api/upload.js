@@ -29,7 +29,7 @@ export async function onRequestPost(context) {
 
     const res = await fetch("https://api.postiz.com/public/v1/upload", {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { Authorization: apiKey },
       body: upstream,
     });
 

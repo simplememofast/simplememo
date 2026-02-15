@@ -47,7 +47,7 @@ export async function onRequestPost(context) {
   const res = await fetch("https://api.postiz.com/public/v1/posts", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: apiKey,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
