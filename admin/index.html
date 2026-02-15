@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>TikTok Slide Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #000; --surface: #0d1117; --accent: #6ab4ff; --accent2: #4fc3f7;
+      --green: #3fb950; --red: #f85149; --yellow: #d29922;
+      --text: #fff; --text2: rgba(255,255,255,.7); --text3: rgba(255,255,255,.45);
+      --border: rgba(100,160,220,.12); --border2: rgba(100,180,255,.25);
+      --r: 10px; --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh}
+
+    .hdr{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);z-index:50}
+    .hdr h1{font-size:.88rem;font-weight:600;color:var(--text2)} .hdr h1 b{color:var(--accent)}
+
+    .main{padding:20px;max-width:1100px;margin:0 auto}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;overflow:hidden}
+    .card-h{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.8rem;font-weight:600;color:var(--text2);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+
+    .card-b{padding:14px}
+
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+    select,button{font-family:var(--font);font-size:.8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 12px;cursor:pointer}
+    select:focus,button:focus{outline:none;border-color:var(--accent)}
+    .btn-accent{background:var(--accent);color:#000;font-weight:700;border:none;padding:8px 22px}
+    .btn-accent:hover{background:var(--accent2)}
+    .btn-accent:disabled{opacity:.5;cursor:wait}
+    .btn-sm{padding:4px 10px;font-size:.72rem}
+    .btn-outline{background:transparent;color:var(--text2)}
+    .btn-outline:hover{border-color:var(--border2);color:var(--text)}
+    .btn-green{background:var(--green);color:#000;border:none}
+    .btn-dl{background:rgba(63,185,80,.12);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+
+    label{font-size:.78rem;color:var(--text3)}
+    .check-row{display:flex;align-items:center;gap:6px}
+    .check-row input{accent-color:var(--accent)}
+
+    .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+    @media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:500px){.grid{grid-template-columns:repeat(2,1fr)}}
+
+    .slot{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative}
+    .slot:hover{border-color:var(--border2)}
+    .slot-n{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);color:var(--text3);font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:3px;z-index:2}
+    .slot-img{width:100%;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:.7rem;overflow:hidden}
+    .slot-img img{width:100%;height:100%;object-fit:cover}
+    .slot-meta{padding:6px 8px;border-top:1px solid var(--border);font-size:.6rem;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
+
+    .log{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:'SF Mono','Fira Code',monospace;font-size:.68rem;color:var(--text3);max-height:160px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6}
+    .log .ok{color:var(--green)} .log .err{color:var(--red)} .log .i{color:var(--accent)} .log .w{color:var(--yellow)}
+
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text3);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .status{font-size:.75rem;color:var(--text3);margin-top:8px}
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <h1><b>TikTok</b> Slide Builder</h1>
+  <span id="timer" style="font-size:.75rem;color:var(--text3)"></span>
+</header>
+
+<div class="main">
+
+  <!-- Controls -->
+  <div class="card">
+    <div class="card-h">Generate</div>
+    <div class="card-b">
+      <div class="row">
+        <div>
+          <label>Variant</label><br>
+          <select id="variant">
+            <option value="A" selected>A — 忘れる系</option>
+            <option value="B">B — 先延ばし系</option>
+            <option value="C">C — 忙しい仕事人</option>
+          </select>
+        </div>
+        <div class="check-row" style="margin-top:14px">
+          <input type="checkbox" id="brand"><label for="brand">Brand Footer</label>
+        </div>
+        <button class="btn-accent" id="gen-btn" style="margin-top:14px">Generate 6 Slides</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="card">
+    <div class="card-h">
+      <span>Slides Preview</span>
+      <div class="row" id="dl-row" style="display:none">
+        <button class="btn-sm btn-dl" id="zip-btn">ZIP Download</button>
+        <button class="btn-sm btn-outline" id="log-btn">Export Log</button>
+      </div>
+    </div>
+    <div class="card-b">
+      <div class="grid" id="grid"></div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div class="card">
+    <div class="card-h">Log</div>
+    <div class="card-b">
+      <div class="log" id="log">待機中…</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id) };
+  var logEl = $('log');
+  var gridEl = $('grid');
+  var currentPlan = null;
+  var currentBlobs = []; // Store generated blobs for ZIP
+
+  // ── Logging ──────────────────────────────────────────────────
+  function log(cls, msg){
+    if(logEl.textContent==='待機中…') logEl.textContent='';
+    var d = document.createElement('div');
+    d.className = cls;
+    d.textContent = '['+new Date().toLocaleTimeString()+'] '+msg;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // ── Scripts (3 variants × 6 slides) ─────────────────────────
+  var SCRIPTS = {
+    A: [
+      ["I screenshot it.", "Then it dies."],
+      ["Notes apps don't fail.", "I do."],
+      ["So I email myself", "one verb."],
+      ["Inbox guilt", "actually works."],
+      ["No system.", "One habit."],
+      ["Where do your tasks", "go to die?"]
+    ],
+    B: [
+      ["I nod. I forget.", "Every time."],
+      ["To-do apps are", "where tasks go to die."],
+      ["So I email the task.", "Instantly."],
+      ["Now it stares back", "in my inbox."],
+      ["No system.", "Just friction."],
+      ["Be honest\u2014", "notes app or inbox?"]
+    ],
+    C: [
+      ["If it's not in my inbox,", "it's gone."],
+      ["Slack scrolls.", "Notes get buried."],
+      ["Email doesn't.", ""],
+      ["One tap,", "one reminder."],
+      ["Boring on purpose.", "That's why it works."],
+      ["What actually works", "for you?"]
+    ]
+  };
+
+  // ── Constants ────────────────────────────────────────────────
+  var W = 1080, H = 1920, SAFE = 120;
+  var LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
+  var POSITIONS = [
+    "top-left", "top-center", "top-right",
+    "bottom-left", "bottom-center", "bottom-right"
+  ];
+  var CROPS = ["wide", "zoom-in", "left-focus", "right-focus"];
+
+  // ── Utility ──────────────────────────────────────────────────
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+    }
+    return arr;
+  }
+
+  function assignLayouts(){
+    return shuffle(["poster_dark","poster_dark","caption_subtle","caption_subtle","caption_light","caption_light"]);
+  }
+
+  function assignPositions(){
+    var picked=[], available=POSITIONS.slice();
+    for(var i=0;i<6;i++){
+      var idx=Math.floor(Math.random()*available.length);
+      picked.push(available[idx]);
+      available.splice(idx,1);
+      if(available.length===0) available=POSITIONS.slice();
+    }
+    return picked;
+  }
+
+  function assignCrops(){
+    var pool=[];
+    while(pool.length<6) pool=pool.concat(shuffle(CROPS.slice()));
+    return pool.slice(0,6);
+  }
+
+  // ── Crop logic (pure math, ported from compose-slides.js) ───
+  function getCropRegion(srcW, srcH, cropVariant){
+    var targetRatio = W/H;
+    var extractW, extractH, left, top;
+
+    if(cropVariant==="zoom-in"){
+      extractW=Math.round(srcW*0.65);
+      extractH=Math.round(extractW/targetRatio);
+      if(extractH>srcH*0.65){
+        extractH=Math.round(srcH*0.65);
+        extractW=Math.round(extractH*targetRatio);
+      }
+      left=Math.round((srcW-extractW)/2);
+      top=Math.round((srcH-extractH)/2);
+    } else if(cropVariant==="left-focus"){
+      extractH=srcH;
+      extractW=Math.round(extractH*targetRatio);
+      if(extractW>srcW){ extractW=srcW; extractH=Math.round(srcW/targetRatio); }
+      left=0;
+      top=Math.round((srcH-extractH)/2);
+    } else if(cropVariant==="right-focus"){
+      extractH=srcH;
+      extractW=Math.round(extractH*targetRatio);
+      if(extractW>srcW){ extractW=srcW; extractH=Math.round(srcW/targetRatio); }
+      left=Math.max(0,srcW-extractW);
+      top=Math.round((srcH-extractH)/2);
+    } else {
+      // "wide" — default center crop
+      var srcRatio=srcW/srcH;
+      if(srcRatio>targetRatio){
+        extractH=srcH;
+        extractW=Math.round(srcH*targetRatio);
+        left=Math.round((srcW-extractW)/2);
+        top=0;
+      } else {
+        extractW=srcW;
+        extractH=Math.round(srcW/targetRatio);
+        left=0;
+        top=Math.round((srcH-extractH)/2);
+      }
+    }
+
+    extractW=Math.min(extractW,srcW-left);
+    extractH=Math.min(extractH,srcH-top);
+    return {left:left, top:top, width:extractW, height:extractH};
+  }
+
+  // ── Preload background images ────────────────────────────────
+  var bgImages = [];
+  var bgLoaded = 0;
+
+  function preloadBackgrounds(callback){
+    bgLoaded = 0;
+    bgImages = [];
+    for(var i=0;i<6;i++){
+      (function(idx){
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function(){
+          bgImages[idx] = img;
+          bgLoaded++;
+          if(bgLoaded===6) callback();
+        };
+        img.onerror = function(){
+          log('err', 'Failed to load bg/'+(idx+1)+'.jpg');
+        };
+        img.src = 'bg/'+(idx+1)+'.jpg';
+      })(i);
+    }
+  }
+
+  // ── Canvas: draw text overlay ────────────────────────────────
+  function drawTextOverlay(ctx, lines, layout, position, brand){
+    var linesFiltered = lines.filter(function(l){ return l.length>0; });
+    var fontSize = lines.some(function(l){ return l.length>25; }) ? 64 : 76;
+    var lineHeight = fontSize * 1.35;
+    var textBlockH = linesFiltered.length * lineHeight;
+    var boxPadH = 44, boxPadW = 56;
+    var boxW = Math.min(W - SAFE*2, 880);
+    var boxH = textBlockH + boxPadH*2;
+    var boxR = 20;
+
+    // Position
+    var boxX = (W - boxW) / 2;
+    var boxY;
+    if(position.indexOf("top")===0){
+      boxY = SAFE + 40;
+    } else {
+      boxY = H - SAFE - boxH - 40;
+    }
+    if(position.indexOf("left")!==-1) boxX = SAFE;
+    else if(position.indexOf("right")!==-1) boxX = W - boxW - SAFE;
+
+    // Text alignment
+    var textAlign = "center";
+    var textX = boxX + boxW/2;
+    if(position.indexOf("left")!==-1){ textAlign="left"; textX = boxX + boxPadW; }
+    else if(position.indexOf("right")!==-1){ textAlign="right"; textX = boxX + boxW - boxPadW; }
+
+    // Draw box
+    ctx.save();
+    if(layout==="poster_dark"){
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+    } else if(layout==="caption_light"){
+      ctx.fillStyle = "rgba(255,255,255,0.55)";
+    } else {
+      // caption_subtle
+      ctx.fillStyle = "rgba(255,255,255,0.18)";
+    }
+    roundRect(ctx, boxX, boxY, boxW, boxH, boxR);
+    ctx.fill();
+    ctx.restore();
+
+    // Draw text
+    ctx.save();
+    ctx.font = "800 "+fontSize+"px 'Inter','Helvetica Neue',Arial,sans-serif";
+    ctx.textAlign = textAlign;
+    ctx.textBaseline = "alphabetic";
+
+    if(layout==="caption_light"){
+      ctx.fillStyle = "#111111";
+    } else {
+      ctx.fillStyle = "#ffffff";
+    }
+
+    // Drop shadow for caption_subtle and all text
+    if(layout==="caption_subtle"){
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 3;
+      ctx.shadowBlur = 16;
+    }
+
+    var textY = boxY + boxPadH + fontSize;
+    for(var i=0;i<linesFiltered.length;i++){
+      ctx.fillText(linesFiltered[i], textX, textY + i*lineHeight);
+    }
+    ctx.restore();
+
+    // Brand footer
+    if(brand){
+      ctx.save();
+      ctx.font = "500 26px 'Inter','Helvetica Neue',Arial,sans-serif";
+      ctx.textAlign = "end";
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.shadowColor = "rgba(0,0,0,0.55)";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 3;
+      ctx.shadowBlur = 16;
+      ctx.fillText("SimpleMemo (captio-style)", W - SAFE, H - 34);
+      ctx.restore();
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  // ── Compose single slide on canvas ───────────────────────────
+  function composeSlide(bgImg, lines, layout, position, cropVariant, brand){
+    var canvas = document.createElement('canvas');
+    canvas.width = W;
+    canvas.height = H;
+    var ctx = canvas.getContext('2d');
+
+    // Crop & draw background
+    var crop = getCropRegion(bgImg.naturalWidth, bgImg.naturalHeight, cropVariant);
+    ctx.drawImage(bgImg, crop.left, crop.top, crop.width, crop.height, 0, 0, W, H);
+
+    // Text overlay
+    drawTextOverlay(ctx, lines, layout, position, brand);
+
+    return canvas;
+  }
+
+  // ── Canvas to Blob (Promise) ─────────────────────────────────
+  function canvasToBlob(canvas){
+    return new Promise(function(resolve){
+      canvas.toBlob(function(blob){ resolve(blob); }, 'image/png');
+    });
+  }
+
+  // ── Init 6 empty slots ──────────────────────────────────────
+  function initSlots(){
+    gridEl.innerHTML = '';
+    for(var i=0;i<6;i++){
+      var s = document.createElement('div');
+      s.className = 'slot'; s.id = 'slot-'+i;
+      s.innerHTML = '<span class="slot-n">'+(i+1)+'</span>'
+        +'<div class="slot-img" id="img-'+i+'">—</div>'
+        +'<div class="slot-meta"><span id="meta-'+i+'"></span><button class="btn-sm btn-outline" data-i="'+i+'" style="display:none">Regen</button></div>';
+      gridEl.appendChild(s);
+    }
+    gridEl.querySelectorAll('[data-i]').forEach(function(btn){
+      btn.addEventListener('click', function(){ regenSlide(parseInt(btn.dataset.i)); });
+    });
+  }
+  initSlots();
+
+  function showSlide(i, url, meta){
+    var wrap = $('img-'+i);
+    wrap.innerHTML = '<img src="'+url+'">';
+    var metaEl = $('meta-'+i);
+    metaEl.textContent = meta || '';
+    var btn = gridEl.querySelector('[data-i="'+i+'"]');
+    if(btn) btn.style.display = '';
+  }
+
+  // ── Generate 6 slides ────────────────────────────────────────
+  $('gen-btn').addEventListener('click', function(){
+    var btn = $('gen-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Generating...';
+    $('status').textContent = '';
+    $('dl-row').style.display = 'none';
+    initSlots();
+    currentBlobs = [];
+
+    var variant = $('variant').value;
+    var brand = $('brand').checked;
+    var t0 = Date.now();
+    log('i', 'Generating variant='+variant+' brand='+(brand?'ON':'OFF'));
+    log('i', 'Loading background images...');
+
+    preloadBackgrounds(function(){
+      log('ok', '6 backgrounds loaded');
+
+      var texts = SCRIPTS[variant];
+      var layouts = assignLayouts();
+      var positions = assignPositions();
+      var crops = assignCrops();
+
+      var plan = {
+        timestamp: new Date().toISOString(),
+        variant: variant,
+        brand: brand,
+        output_size: W+'x'+H,
+        slides: []
+      };
+
+      var generated = 0;
+
+      function processSlide(i){
+        var canvas = composeSlide(bgImages[i], texts[i], layouts[i], positions[i], crops[i], brand);
+
+        var slideConfig = {
+          slide_index: i,
+          background: (i+1)+'.jpg',
+          text: texts[i],
+          layout_variant: layouts[i],
+          text_position: positions[i],
+          crop_variant: crops[i],
+          brand: brand
+        };
+        plan.slides.push(slideConfig);
+
+        canvasToBlob(canvas).then(function(blob){
+          currentBlobs[i] = blob;
+          var sizeKB = Math.round(blob.size/1024);
+          var url = URL.createObjectURL(blob);
+          var meta = layouts[i]+' \u00b7 '+crops[i]+' \u00b7 '+sizeKB+'KB';
+          showSlide(i, url, meta);
+          log('ok', 'Slide '+(i+1)+': '+layouts[i]+' / '+positions[i]+' / '+crops[i]);
+
+          generated++;
+          if(generated===6){
+            currentPlan = plan;
+            var sec = ((Date.now()-t0)/1000).toFixed(1);
+            $('status').textContent = '6枚生成完了 ('+sec+'s)';
+            $('timer').textContent = sec+'s';
+            $('dl-row').style.display = 'flex';
+            log('ok', 'Done in '+sec+'s (client-side)');
+            btn.disabled = false;
+            btn.textContent = 'Generate 6 Slides';
+          }
+        });
+      }
+
+      for(var i=0;i<6;i++){
+        processSlide(i);
+      }
+    });
+  });
+
+  // ── Regenerate single slide ──────────────────────────────────
+  function regenSlide(index){
+    if(!currentPlan || !bgImages[index]) return;
+    var btn = gridEl.querySelector('[data-i="'+index+'"]');
+    btn.textContent = '...';
+
+    var variant = $('variant').value;
+    var brand = $('brand').checked;
+    var texts = SCRIPTS[variant];
+    log('i', 'Regenerating slide '+(index+1)+'...');
+
+    // Pick new random layout/position/crop for this slide
+    var layout = LAYOUTS[Math.floor(Math.random()*LAYOUTS.length)];
+    var position = POSITIONS[Math.floor(Math.random()*POSITIONS.length)];
+    var crop = CROPS[Math.floor(Math.random()*CROPS.length)];
+
+    var canvas = composeSlide(bgImages[index], texts[index], layout, position, crop, brand);
+
+    canvasToBlob(canvas).then(function(blob){
+      currentBlobs[index] = blob;
+
+      // Update plan
+      currentPlan.slides[index] = {
+        slide_index: index,
+        background: (index+1)+'.jpg',
+        text: texts[index],
+        layout_variant: layout,
+        text_position: position,
+        crop_variant: crop,
+        brand: brand
+      };
+
+      var sizeKB = Math.round(blob.size/1024);
+      var url = URL.createObjectURL(blob);
+      showSlide(index, url, layout+' \u00b7 '+crop+' \u00b7 '+sizeKB+'KB');
+      btn.textContent = 'Regen';
+      log('ok', 'Slide '+(index+1)+' regenerated: '+layout+' / '+position+' / '+crop);
+    });
+  }
+
+  // ── ZIP download (client-side with JSZip) ────────────────────
+  $('zip-btn').addEventListener('click', function(){
+    if(!currentPlan || currentBlobs.length<6) return;
+    var zipBtn = $('zip-btn');
+    zipBtn.textContent = 'Packing...';
+    zipBtn.disabled = true;
+    log('i', 'Creating ZIP...');
+
+    var zip = new JSZip();
+    var promises = [];
+
+    for(var i=0;i<6;i++){
+      (function(idx){
+        var blob = currentBlobs[idx];
+        if(blob){
+          zip.file('slide_'+(idx+1)+'.png', blob);
+        }
+      })(i);
+    }
+
+    zip.file('slide_plan.json', JSON.stringify(currentPlan, null, 2));
+
+    zip.generateAsync({type:'blob'}).then(function(content){
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(content);
+      var ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+      a.download = 'slides_'+currentPlan.variant+'_'+ts+'.zip';
+      a.click();
+      zipBtn.textContent = 'ZIP Download';
+      zipBtn.disabled = false;
+      log('ok', 'ZIP downloaded: '+a.download);
+    });
+  });
+
+  // ── Export log ───────────────────────────────────────────────
+  $('log-btn').addEventListener('click', function(){
+    if(!currentPlan) return;
+    var json = JSON.stringify(currentPlan, null, 2);
+    var blob = new Blob([json], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'slide_plan.json';
+    a.click();
+    log('i', 'Exported slide_plan.json');
+  });
+
+  log('i', 'Ready. Select variant and click Generate.');
+  log('i', 'Client-side mode — no server required.');
+})();
+</script>
+
+</body>
+</html>
