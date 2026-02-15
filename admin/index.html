@@ -32,8 +32,9 @@
 
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 
-    select,button{font-family:var(--font);font-size:.8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 12px;cursor:pointer}
-    select:focus,button:focus{outline:none;border-color:var(--accent)}
+    select,button,input[type=number]{font-family:var(--font);font-size:.8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 12px;cursor:pointer}
+    input[type=number]{width:60px;cursor:text}
+    select:focus,button:focus,input:focus{outline:none;border-color:var(--accent)}
     .btn-accent{background:var(--accent);color:#000;font-weight:700;border:none;padding:8px 22px}
     .btn-accent:hover{background:var(--accent2)}
     .btn-accent:disabled{opacity:.5;cursor:wait}
@@ -45,7 +46,7 @@
 
     label{font-size:.78rem;color:var(--text3)}
     .check-row{display:flex;align-items:center;gap:6px}
-    .check-row input{accent-color:var(--accent)}
+    .check-row input[type=checkbox]{accent-color:var(--accent)}
 
     .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
     @media(max-width:900px){.grid{grid-template-columns:repeat(3,1fr)}}
@@ -65,6 +66,10 @@
     @keyframes spin{to{transform:rotate(360deg)}}
 
     .status{font-size:.75rem;color:var(--text3);margin-top:8px}
+    .badge{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.65rem;font-weight:600;margin-left:6px}
+    .badge-ok{background:rgba(63,185,80,.15);color:var(--green)}
+    .badge-warn{background:rgba(210,153,34,.15);color:var(--yellow)}
+    .badge-err{background:rgba(248,81,73,.15);color:var(--red)}
   </style>
 </head>
 <body>
@@ -84,10 +89,50 @@
         <div>
           <label>Variant</label><br>
           <select id="variant">
-            <option value="A" selected>A — 忘れる系</option>
+            <option value="A" selected>A — 忘れる系 (100 patterns)</option>
             <option value="B">B — 先延ばし系</option>
             <option value="C">C — 忙しい仕事人</option>
           </select>
+        </div>
+        <div>
+          <label>Pattern Mode</label><br>
+          <select id="pattern-mode">
+            <option value="random" selected>Random</option>
+            <option value="tag">Tag-based</option>
+            <option value="seeded">Seeded</option>
+          </select>
+        </div>
+        <div id="tag-select-wrap" style="display:none">
+          <label>Category</label><br>
+          <select id="tag-select">
+            <option value="">All</option>
+            <option value="forgetful">Forgetful</option>
+            <option value="procrastination">Procrastination</option>
+            <option value="inbox_guilt">Inbox Guilt</option>
+            <option value="friction">Friction</option>
+            <option value="one_rule">One Rule</option>
+            <option value="deadline_panic">Deadline Panic</option>
+            <option value="minimal_system">Minimal System</option>
+            <option value="self_talk">Self-Talk</option>
+            <option value="question_hooks">Question Hooks</option>
+            <option value="dark_humor">Dark Humor</option>
+          </select>
+        </div>
+        <div id="seed-wrap" style="display:none">
+          <label>Pattern ID</label><br>
+          <input type="text" id="seed-input" placeholder="A001" style="width:80px;font-family:var(--font);font-size:.8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 12px">
+        </div>
+        <div>
+          <label>Diversity</label><br>
+          <select id="diversity">
+            <option value="low">Low (0.2)</option>
+            <option value="mid" selected>Mid (0.4)</option>
+            <option value="high">High (0.6)</option>
+          </select>
+        </div>
+        <div>
+          <label>Avoid Recent</label><br>
+          <input type="number" id="avoid-recent" value="20" min="0" max="99">
         </div>
         <div class="check-row" style="margin-top:14px">
           <input type="checkbox" id="brand"><label for="brand">Brand Footer</label>
@@ -100,7 +145,7 @@
   <!-- Preview -->
   <div class="card">
     <div class="card-h">
-      <span>Slides Preview</span>
+      <span>Slides Preview <span id="pattern-badge"></span></span>
       <div class="row" id="dl-row" style="display:none">
         <button class="btn-sm btn-dl" id="zip-btn">ZIP Download</button>
         <button class="btn-sm btn-outline" id="log-btn">Export Log</button>
@@ -129,28 +174,12 @@
   var logEl = $('log');
   var gridEl = $('grid');
   var currentPlan = null;
-  var currentBlobs = []; // Store generated blobs for ZIP
+  var currentBlobs = [];
+  var currentPattern = null;
 
-  // ── Logging ──────────────────────────────────────────────────
-  function log(cls, msg){
-    if(logEl.textContent==='待機中…') logEl.textContent='';
-    var d = document.createElement('div');
-    d.className = cls;
-    d.textContent = '['+new Date().toLocaleTimeString()+'] '+msg;
-    logEl.appendChild(d);
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  // ── Scripts (3 variants × 6 slides) ─────────────────────────
-  var SCRIPTS = {
-    A: [
-      ["I screenshot it.", "Then it dies."],
-      ["Notes apps don't fail.", "I do."],
-      ["So I email myself", "one verb."],
-      ["Inbox guilt", "actually works."],
-      ["No system.", "One habit."],
-      ["Where do your tasks", "go to die?"]
-    ],
+  // ── Pattern data ──────────────────────────────────────────────
+  var patternLibrary = {};   // { A: { patterns: [...], bannedWords: [...], ... } }
+  var FALLBACK_SCRIPTS = {
     B: [
       ["I nod. I forget.", "Every time."],
       ["To-do apps are", "where tasks go to die."],
@@ -168,6 +197,180 @@
       ["What actually works", "for you?"]
     ]
   };
+
+  // ── Logging ──────────────────────────────────────────────────
+  function log(cls, msg){
+    if(logEl.textContent==='待機中…') logEl.textContent='';
+    var d = document.createElement('div');
+    d.className = cls;
+    d.textContent = '['+new Date().toLocaleTimeString()+'] '+msg;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  // ── Recent history (localStorage) ─────────────────────────────
+  var HISTORY_KEY = 'tiktok_pattern_history';
+  function getHistory(){
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e){ return []; }
+  }
+  function addToHistory(patternId){
+    var h = getHistory();
+    h.unshift(patternId);
+    if(h.length > 200) h = h.slice(0, 200);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  }
+
+  // ── Load pattern library ──────────────────────────────────────
+  async function loadPatterns(variant){
+    if(patternLibrary[variant]) return patternLibrary[variant];
+    try {
+      var res = await fetch('patterns/'+variant+'.json');
+      if(!res.ok) return null;
+      var data = await res.json();
+      patternLibrary[variant] = data;
+      log('ok', 'Loaded '+data.patterns.length+' patterns for variant '+variant);
+      return data;
+    } catch(e){
+      log('w', 'No pattern library for variant '+variant+', using fallback');
+      return null;
+    }
+  }
+
+  // ── Similarity: Jaccard on words ──────────────────────────────
+  function tokenize(text){
+    return text.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(function(w){ return w.length > 1; });
+  }
+
+  function jaccardSimilarity(textA, textB){
+    var a = tokenize(textA);
+    var b = tokenize(textB);
+    if(a.length===0 && b.length===0) return 0;
+    var setA = {}; a.forEach(function(w){ setA[w]=1; });
+    var setB = {}; b.forEach(function(w){ setB[w]=1; });
+    var intersection = 0, union = {};
+    for(var k in setA){ union[k]=1; if(setB[k]) intersection++; }
+    for(var k in setB){ union[k]=1; }
+    var unionSize = Object.keys(union).length;
+    return unionSize === 0 ? 0 : intersection / unionSize;
+  }
+
+  function patternToText(pattern){
+    return pattern.slides.map(function(s){ return s.join(' '); }).join(' ');
+  }
+
+  // ── Banned/caution word filter ────────────────────────────────
+  var DEFAULT_BANNED = [
+    "free money","guaranteed","100%","cure","miracle","hack your",
+    "doctors hate","secret trick","make money","get rich","no effort",
+    "limited time","act now","don't miss","once in a lifetime"
+  ];
+  var DEFAULT_CAUTION = [
+    "download","install","buy","subscribe","sign up","ADHD",
+    "depression","anxiety","mental health","disorder"
+  ];
+
+  function checkSafety(pattern, lib){
+    var banned = (lib && lib.bannedWords) || DEFAULT_BANNED;
+    var caution = (lib && lib.cautionWords) || DEFAULT_CAUTION;
+    var text = patternToText(pattern).toLowerCase();
+    var result = { passed: true, bannedHits: [], cautionHits: [], appNameCount: 0 };
+
+    banned.forEach(function(w){
+      if(text.indexOf(w.toLowerCase()) !== -1){
+        result.bannedHits.push(w);
+        result.passed = false;
+      }
+    });
+
+    caution.forEach(function(w){
+      if(text.indexOf(w.toLowerCase()) !== -1){
+        result.cautionHits.push(w);
+      }
+    });
+
+    // Count app name mentions (SimpleMemo, Simple Memo)
+    var appRegex = /simple\s*memo/gi;
+    var matches = text.match(appRegex);
+    result.appNameCount = matches ? matches.length : 0;
+    if(result.appNameCount > 1){
+      result.passed = false;
+      result.bannedHits.push('App name mentioned '+result.appNameCount+' times (max 1)');
+    }
+
+    return result;
+  }
+
+  // ── Pattern selection algorithm ───────────────────────────────
+  function selectPattern(lib, mode, tagFilter, seedId, avoidN, diversityThreshold){
+    var patterns = lib.patterns;
+    var history = getHistory();
+    var recentIds = history.slice(0, avoidN);
+
+    // Filter by mode
+    var candidates;
+    if(mode === 'seeded' && seedId){
+      var found = patterns.filter(function(p){ return p.id === seedId.toUpperCase(); });
+      if(found.length > 0) return { pattern: found[0], reason: 'seeded' };
+      log('w', 'Pattern '+seedId+' not found, falling back to random');
+    }
+
+    if(mode === 'tag' && tagFilter){
+      candidates = patterns.filter(function(p){ return p.category === tagFilter; });
+      if(candidates.length === 0){
+        log('w', 'No patterns for tag '+tagFilter+', using all');
+        candidates = patterns;
+      }
+    } else {
+      candidates = patterns;
+    }
+
+    // Exclude recent
+    var available = candidates.filter(function(p){
+      return recentIds.indexOf(p.id) === -1;
+    });
+    if(available.length === 0){
+      log('w', 'All patterns used recently, resetting avoid list');
+      available = candidates;
+    }
+
+    // Weighted random selection with similarity check
+    var totalWeight = 0;
+    available.forEach(function(p){ totalWeight += (p.weight || 1); });
+
+    var maxAttempts = Math.min(available.length, 10);
+    var recentTexts = [];
+    // Build recent texts for similarity
+    for(var i=0; i<Math.min(recentIds.length, 5); i++){
+      var rp = patterns.filter(function(p){ return p.id === recentIds[i]; })[0];
+      if(rp) recentTexts.push(patternToText(rp));
+    }
+
+    for(var attempt=0; attempt < maxAttempts; attempt++){
+      // Weighted random pick
+      var r = Math.random() * totalWeight;
+      var acc = 0;
+      var pick = available[0];
+      for(var j=0; j<available.length; j++){
+        acc += (available[j].weight || 1);
+        if(acc >= r){ pick = available[j]; break; }
+      }
+
+      // Similarity check against recent
+      var pickText = patternToText(pick);
+      var maxSim = 0;
+      for(var k=0; k<recentTexts.length; k++){
+        var sim = jaccardSimilarity(pickText, recentTexts[k]);
+        if(sim > maxSim) maxSim = sim;
+      }
+
+      if(maxSim < diversityThreshold || attempt === maxAttempts - 1){
+        return { pattern: pick, reason: mode, similarity: maxSim, attempts: attempt + 1 };
+      }
+    }
+
+    // Fallback: just pick first available
+    return { pattern: available[0], reason: 'fallback', similarity: 1, attempts: maxAttempts };
+  }
 
   // ── Constants ────────────────────────────────────────────────
   var W = 1080, H = 1920, SAFE = 120;
@@ -208,7 +411,7 @@
     return pool.slice(0,6);
   }
 
-  // ── Crop logic (pure math, ported from compose-slides.js) ───
+  // ── Crop logic ────────────────────────────────────────────────
   function getCropRegion(srcW, srcH, cropVariant){
     var targetRatio = W/H;
     var extractW, extractH, left, top;
@@ -235,7 +438,6 @@
       left=Math.max(0,srcW-extractW);
       top=Math.round((srcH-extractH)/2);
     } else {
-      // "wide" — default center crop
       var srcRatio=srcW/srcH;
       if(srcRatio>targetRatio){
         extractH=srcH;
@@ -290,7 +492,6 @@
     var boxH = textBlockH + boxPadH*2;
     var boxR = 20;
 
-    // Position
     var boxX = (W - boxW) / 2;
     var boxY;
     if(position.indexOf("top")===0){
@@ -301,27 +502,23 @@
     if(position.indexOf("left")!==-1) boxX = SAFE;
     else if(position.indexOf("right")!==-1) boxX = W - boxW - SAFE;
 
-    // Text alignment
     var textAlign = "center";
     var textX = boxX + boxW/2;
     if(position.indexOf("left")!==-1){ textAlign="left"; textX = boxX + boxPadW; }
     else if(position.indexOf("right")!==-1){ textAlign="right"; textX = boxX + boxW - boxPadW; }
 
-    // Draw box
     ctx.save();
     if(layout==="poster_dark"){
       ctx.fillStyle = "rgba(0,0,0,0.65)";
     } else if(layout==="caption_light"){
       ctx.fillStyle = "rgba(255,255,255,0.55)";
     } else {
-      // caption_subtle
       ctx.fillStyle = "rgba(255,255,255,0.18)";
     }
     roundRect(ctx, boxX, boxY, boxW, boxH, boxR);
     ctx.fill();
     ctx.restore();
 
-    // Draw text
     ctx.save();
     ctx.font = "800 "+fontSize+"px 'Inter','Helvetica Neue',Arial,sans-serif";
     ctx.textAlign = textAlign;
@@ -333,7 +530,6 @@
       ctx.fillStyle = "#ffffff";
     }
 
-    // Drop shadow for caption_subtle and all text
     if(layout==="caption_subtle"){
       ctx.shadowColor = "rgba(0,0,0,0.55)";
       ctx.shadowOffsetX = 0;
@@ -347,7 +543,6 @@
     }
     ctx.restore();
 
-    // Brand footer
     if(brand){
       ctx.save();
       ctx.font = "500 26px 'Inter','Helvetica Neue',Arial,sans-serif";
@@ -383,17 +578,15 @@
     canvas.height = H;
     var ctx = canvas.getContext('2d');
 
-    // Crop & draw background
     var crop = getCropRegion(bgImg.naturalWidth, bgImg.naturalHeight, cropVariant);
     ctx.drawImage(bgImg, crop.left, crop.top, crop.width, crop.height, 0, 0, W, H);
 
-    // Text overlay
     drawTextOverlay(ctx, lines, layout, position, brand);
 
     return canvas;
   }
 
-  // ── Canvas to Blob (Promise) ─────────────────────────────────
+  // ── Canvas to Blob ────────────────────────────────────────────
   function canvasToBlob(canvas){
     return new Promise(function(resolve){
       canvas.toBlob(function(blob){ resolve(blob); }, 'image/png');
@@ -426,35 +619,125 @@
     if(btn) btn.style.display = '';
   }
 
+  // ── UI: show/hide mode-specific controls ─────────────────────
+  $('pattern-mode').addEventListener('change', function(){
+    var mode = this.value;
+    $('tag-select-wrap').style.display = mode === 'tag' ? '' : 'none';
+    $('seed-wrap').style.display = mode === 'seeded' ? '' : 'none';
+  });
+
+  // ── Diversity threshold mapping ───────────────────────────────
+  function getDiversityThreshold(){
+    var val = $('diversity').value;
+    if(val === 'low') return 0.2;
+    if(val === 'high') return 0.6;
+    return 0.4;
+  }
+
   // ── Generate 6 slides ────────────────────────────────────────
-  $('gen-btn').addEventListener('click', function(){
+  $('gen-btn').addEventListener('click', async function(){
     var btn = $('gen-btn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Generating...';
     $('status').textContent = '';
     $('dl-row').style.display = 'none';
+    $('pattern-badge').innerHTML = '';
     initSlots();
     currentBlobs = [];
+    currentPattern = null;
 
     var variant = $('variant').value;
     var brand = $('brand').checked;
+    var mode = $('pattern-mode').value;
+    var tagFilter = $('tag-select').value;
+    var seedId = $('seed-input').value.trim();
+    var avoidN = parseInt($('avoid-recent').value) || 20;
+    var divThreshold = getDiversityThreshold();
     var t0 = Date.now();
-    log('i', 'Generating variant='+variant+' brand='+(brand?'ON':'OFF'));
+
+    log('i', 'Generating variant='+variant+' mode='+mode+' diversity='+$('diversity').value+' avoidRecent='+avoidN);
     log('i', 'Loading background images...');
+
+    // Load pattern library
+    var lib = await loadPatterns(variant);
+    var texts;
+    var selectedPattern = null;
+    var safetyResult = null;
+    var similarity = 0;
+
+    if(lib){
+      // Use pattern library
+      var selection = selectPattern(lib, mode, tagFilter, seedId, avoidN, divThreshold);
+      selectedPattern = selection.pattern;
+      similarity = selection.similarity || 0;
+      currentPattern = selectedPattern;
+
+      // Safety check
+      safetyResult = checkSafety(selectedPattern, lib);
+      if(!safetyResult.passed){
+        log('w', 'Safety filter triggered for '+selectedPattern.id+': '+safetyResult.bannedHits.join(', '));
+        // Try to find a safe alternative
+        for(var retry=0; retry<5; retry++){
+          selection = selectPattern(lib, 'random', '', '', avoidN, divThreshold);
+          selectedPattern = selection.pattern;
+          similarity = selection.similarity || 0;
+          currentPattern = selectedPattern;
+          safetyResult = checkSafety(selectedPattern, lib);
+          if(safetyResult.passed) break;
+        }
+      }
+
+      texts = selectedPattern.slides;
+      addToHistory(selectedPattern.id);
+
+      log('i', 'Pattern: '+selectedPattern.id+' ['+selectedPattern.category+'] sim='+similarity.toFixed(3)+' attempts='+selection.attempts);
+      if(safetyResult.cautionHits.length > 0){
+        log('w', 'Caution words: '+safetyResult.cautionHits.join(', '));
+      }
+
+      // Show pattern badge
+      var badgeCls = safetyResult.passed ? 'badge-ok' : 'badge-err';
+      $('pattern-badge').innerHTML = '<span class="badge '+badgeCls+'">'+selectedPattern.id+'</span>'
+        + '<span class="badge badge-ok">'+selectedPattern.category+'</span>'
+        + '<span class="badge badge-ok">sim: '+similarity.toFixed(2)+'</span>';
+    } else {
+      // Fallback to hardcoded scripts
+      texts = FALLBACK_SCRIPTS[variant] || FALLBACK_SCRIPTS.B;
+      log('w', 'Using fallback scripts (no pattern library)');
+    }
 
     preloadBackgrounds(function(){
       log('ok', '6 backgrounds loaded');
 
-      var texts = SCRIPTS[variant];
       var layouts = assignLayouts();
       var positions = assignPositions();
       var crops = assignCrops();
 
+      // Calculate text lengths per slide
+      var textLengths = texts.map(function(s){
+        return s.filter(function(l){return l;}).join(' ').length;
+      });
+
       var plan = {
-        timestamp: new Date().toISOString(),
+        generated_at: new Date().toISOString(),
         variant: variant,
         brand: brand,
         output_size: W+'x'+H,
+        pattern_id: selectedPattern ? selectedPattern.id : 'fallback',
+        pattern_category: selectedPattern ? selectedPattern.category : null,
+        pattern_tags: selectedPattern ? selectedPattern.tags : [],
+        pattern_structure: selectedPattern ? selectedPattern.structure : null,
+        similarity_score: similarity,
+        safety_filter_result: safetyResult ? {
+          passed: safetyResult.passed,
+          banned_hits: safetyResult.bannedHits,
+          caution_hits: safetyResult.cautionHits,
+          app_name_count: safetyResult.appNameCount
+        } : null,
+        text_length_per_slide: textLengths,
+        diversity_setting: $('diversity').value,
+        avoid_recent_n: avoidN,
+        pattern_mode: mode,
         slides: []
       };
 
@@ -463,16 +746,16 @@
       function processSlide(i){
         var canvas = composeSlide(bgImages[i], texts[i], layouts[i], positions[i], crops[i], brand);
 
-        var slideConfig = {
+        plan.slides.push({
           slide_index: i,
           background: (i+1)+'.jpg',
           text: texts[i],
+          text_length: textLengths[i],
           layout_variant: layouts[i],
           text_position: positions[i],
           crop_variant: crops[i],
           brand: brand
-        };
-        plan.slides.push(slideConfig);
+        });
 
         canvasToBlob(canvas).then(function(blob){
           currentBlobs[i] = blob;
@@ -486,10 +769,10 @@
           if(generated===6){
             currentPlan = plan;
             var sec = ((Date.now()-t0)/1000).toFixed(1);
-            $('status').textContent = '6枚生成完了 ('+sec+'s)';
+            $('status').textContent = '6枚生成完了 ('+sec+'s)' + (selectedPattern ? ' — Pattern '+selectedPattern.id : '');
             $('timer').textContent = sec+'s';
             $('dl-row').style.display = 'flex';
-            log('ok', 'Done in '+sec+'s (client-side)');
+            log('ok', 'Done in '+sec+'s — Pattern: '+(selectedPattern ? selectedPattern.id+' ['+selectedPattern.category+']' : 'fallback'));
             btn.disabled = false;
             btn.textContent = 'Generate 6 Slides';
           }
@@ -508,12 +791,10 @@
     var btn = gridEl.querySelector('[data-i="'+index+'"]');
     btn.textContent = '...';
 
-    var variant = $('variant').value;
     var brand = $('brand').checked;
-    var texts = SCRIPTS[variant];
+    var texts = currentPattern ? currentPattern.slides : (FALLBACK_SCRIPTS[$('variant').value] || FALLBACK_SCRIPTS.B);
     log('i', 'Regenerating slide '+(index+1)+'...');
 
-    // Pick new random layout/position/crop for this slide
     var layout = LAYOUTS[Math.floor(Math.random()*LAYOUTS.length)];
     var position = POSITIONS[Math.floor(Math.random()*POSITIONS.length)];
     var crop = CROPS[Math.floor(Math.random()*CROPS.length)];
@@ -523,11 +804,11 @@
     canvasToBlob(canvas).then(function(blob){
       currentBlobs[index] = blob;
 
-      // Update plan
       currentPlan.slides[index] = {
         slide_index: index,
         background: (index+1)+'.jpg',
         text: texts[index],
+        text_length: texts[index].filter(function(l){return l;}).join(' ').length,
         layout_variant: layout,
         text_position: position,
         crop_variant: crop,
@@ -542,7 +823,7 @@
     });
   }
 
-  // ── ZIP download (client-side with JSZip) ────────────────────
+  // ── ZIP download ──────────────────────────────────────────────
   $('zip-btn').addEventListener('click', function(){
     if(!currentPlan || currentBlobs.length<6) return;
     var zipBtn = $('zip-btn');
@@ -551,7 +832,6 @@
     log('i', 'Creating ZIP...');
 
     var zip = new JSZip();
-    var promises = [];
 
     for(var i=0;i<6;i++){
       (function(idx){
@@ -568,7 +848,7 @@
       var a = document.createElement('a');
       a.href = URL.createObjectURL(content);
       var ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-      a.download = 'slides_'+currentPlan.variant+'_'+ts+'.zip';
+      a.download = 'slides_'+currentPlan.variant+'_'+(currentPlan.pattern_id||'fb')+'_'+ts+'.zip';
       a.click();
       zipBtn.textContent = 'ZIP Download';
       zipBtn.disabled = false;
@@ -587,7 +867,6 @@
     log('i', 'TikTok投稿を開始…');
 
     try {
-      // 1. Upload 6 images
       var uploaded = [];
       for(var i=0;i<6;i++){
         var blob = currentBlobs[i];
@@ -602,11 +881,9 @@
         log('ok', 'slide_'+(i+1)+'.png → '+data.path);
       }
 
-      // 2. Build caption from slide 1 text
       var hook = currentPlan.slides[0].text.filter(function(t){return t;}).join(' ');
       var caption = hook + '\n\nSimple Memo - one tap, straight to your inbox.\n\n#simplememo #productivity #notetaking #lifehack #iphone';
 
-      // 3. Create post (scheduled +1 min)
       log('i', '投稿作成中（1分後に予約）…');
       var postRes = await fetch('/admin/api/post-tiktok', {
         method: 'POST',
@@ -627,20 +904,22 @@
     }
   });
 
-  // ── Export log ───────────────────────────────────────────────
+  // ── Export log (enhanced) ─────────────────────────────────────
   $('log-btn').addEventListener('click', function(){
     if(!currentPlan) return;
     var json = JSON.stringify(currentPlan, null, 2);
     var blob = new Blob([json], {type:'application/json'});
     var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'slide_plan.json';
+    a.download = 'slide_plan_'+(currentPlan.pattern_id||'fb')+'_'+new Date().toISOString().replace(/[:.]/g,'-').slice(0,19)+'.json';
     a.click();
-    log('i', 'Exported slide_plan.json');
+    log('i', 'Exported '+a.download);
   });
 
+  // ── Init ─────────────────────────────────────────────────────
   log('i', 'Ready. Select variant and click Generate.');
-  log('i', 'Client-side mode — no server required.');
+  log('i', 'Loading pattern libraries...');
+  loadPatterns('A');
 })();
 </script>
 
