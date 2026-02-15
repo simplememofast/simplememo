@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Capito式シンプルメモ — App Store</title>
+  <meta name="description" content="書いて、送って、受信箱へ。TikTokからApp Storeへ。">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Capito式シンプルメモ">
+  <meta property="og:description" content="書いて、送って、受信箱へ。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/tiktok">
+  <meta property="og:image" content="/assets/img/ogp.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <style>
+    /* ============================================================
+       CONFIG — Replace these values as needed
+       ============================================================ */
+    :root {
+      /* App Store URL (Japanese locale) */
+      --app-store-url-ja: url('https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948');
+      /* Design tokens (matching main site) */
+      --bg: #000000;
+      --bg-surface: rgba(15, 20, 30, 0.6);
+      --accent: #6ab4ff;
+      --accent-hover: #4fc3f7;
+      --text: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.7);
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --text-subtle: rgba(255, 255, 255, 0.4);
+      --border: rgba(100, 160, 220, 0.12);
+      --radius: 16px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --font: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+    }
+
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      text-align: center;
+    }
+
+    /* ============================================================
+       LANGUAGE TOGGLE
+       ============================================================ */
+    .lang-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 0;
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .lang-toggle button {
+      font-family: var(--font);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    .lang-toggle button.active {
+      background: rgba(106, 180, 255, 0.15);
+      color: var(--accent);
+    }
+
+    .lang-toggle button:hover:not(.active) {
+      color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       CARD
+       ============================================================ */
+    .card {
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* App Icon */
+    .app-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(106, 180, 255, 0.15);
+    }
+
+    /* Heading */
+    .app-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .app-tagline {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-top: -12px;
+    }
+
+    /* CTA Button */
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 300px;
+      padding: 14px 24px;
+      background: var(--accent);
+      color: #000;
+      font-family: var(--font);
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background var(--transition), transform var(--transition);
+    }
+
+    .cta-button:hover {
+      background: var(--accent-hover);
+    }
+
+    .cta-button:active {
+      transform: scale(0.97);
+    }
+
+    .cta-button svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Redirect Note */
+    .redirect-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .countdown {
+      display: inline-block;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      font-weight: 600;
+      min-width: 1.2em;
+    }
+
+    /* Search Fallback */
+    .fallback {
+      font-size: 0.75rem;
+      color: var(--text-subtle);
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      line-height: 1.6;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .fallback-appname {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Non-iOS message */
+    .non-ios-note {
+      display: none;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      line-height: 1.6;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .footer a {
+      font-size: 0.7rem;
+      color: var(--text-subtle);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    .footer a:hover {
+      color: var(--text-secondary);
+    }
+
+    /* Language visibility */
+    [data-lang] { display: none; }
+    [data-lang].active { display: inline; }
+    span[data-lang].active { display: inline; }
+    div[data-lang].active { display: block; }
+    p[data-lang].active { display: block; }
+    a[data-lang].active { display: inline-flex; }
+  </style>
+</head>
+<body>
+  <script>
+    // ============================================================
+    // CONFIG — Edit these values
+    // ============================================================
+    var CONFIG = {
+      APP_STORE_URL: 'https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948',
+      APP_NAME_JA: 'Capito式シンプルメモ',
+      APP_NAME_EN: 'Simple Memo - Captio-style',
+      TERMS_URL: '/terms.html',
+      PRIVACY_URL: '/privacy.html',
+      DELAY_MS: 2500
+    };
+  </script>
+
+  <!-- Language Toggle -->
+  <div class="lang-toggle">
+    <button id="lang-ja" onclick="setLang('ja')">日本語</button>
+    <button id="lang-en" onclick="setLang('en')">EN</button>
+  </div>
+
+  <!-- Main Card -->
+  <div class="card">
+    <!-- App Icon -->
+    <img src="/assets/img/app-icon.png" alt="App Icon" class="app-icon" width="88" height="88">
+
+    <!-- App Name -->
+    <h1 class="app-name">
+      <span data-lang="ja">Capito式シンプルメモ</span>
+      <span data-lang="en">Simple Memo - Captio-style</span>
+    </h1>
+
+    <!-- Tagline -->
+    <p class="app-tagline">
+      <span data-lang="ja">書いて、送って、受信箱へ。</span>
+      <span data-lang="en">Write. Send. Inbox.</span>
+    </p>
+
+    <!-- CTA Button -->
+    <a id="cta-button" class="cta-button" href="#" role="button">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      <span data-lang="ja">App Storeで開く</span>
+      <span data-lang="en">Open in the App Store</span>
+    </a>
+
+    <!-- Redirect Note (iOS only, shown by JS) -->
+    <p class="redirect-note" id="redirect-note" style="display:none;">
+      <span data-lang="ja">
+        <span class="countdown" id="countdown-ja"></span>秒後にApp Storeを開きます<br>
+        開かない場合はボタンをタップ
+      </span>
+      <span data-lang="en">
+        Redirecting in <span class="countdown" id="countdown-en"></span>s<br>
+        Tap the button if it doesn't open
+      </span>
+    </p>
+
+    <!-- Non-iOS note (shown by JS) -->
+    <div class="non-ios-note" id="non-ios-note">
+      <span data-lang="ja">
+        このアプリはiPhone専用です。<br>
+        iPhoneのApp Storeで「<span class="fallback-appname" id="non-ios-appname-ja"></span>」を検索してください。
+      </span>
+      <span data-lang="en">
+        This app is available on iPhone only.<br>
+        Search "<span class="fallback-appname" id="non-ios-appname-en"></span>" on the App Store from your iPhone.
+      </span>
+    </div>
+
+    <!-- Search Fallback -->
+    <div class="fallback" id="fallback">
+      <span data-lang="ja">
+        開かないとき：App Storeで<br>
+        「<span class="fallback-appname" id="fallback-appname-ja"></span>」を検索
+      </span>
+      <span data-lang="en">
+        Not opening? Search<br>
+        "<span class="fallback-appname" id="fallback-appname-en"></span>" on the App Store
+      </span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <a href="/terms.html">
+      <span data-lang="ja">利用規約</span>
+      <span data-lang="en">Terms</span>
+    </a>
+    <a href="/privacy.html">
+      <span data-lang="ja">プライバシーポリシー</span>
+      <span data-lang="en">Privacy</span>
+    </a>
+  </footer>
+
+  <script>
+    // ============================================================
+    // iOS Detection
+    // ============================================================
+    var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+
+    // ============================================================
+    // Language Detection & Switching
+    // ============================================================
+    var currentLang = 'ja';
+
+    function detectLang() {
+      var lang = navigator.language || navigator.userLanguage || 'en';
+      return lang.toLowerCase().indexOf('ja') !== -1 ? 'ja' : 'en';
+    }
+
+    function setLang(lang) {
+      currentLang = lang;
+      // Update active state on all data-lang elements
+      var els = document.querySelectorAll('[data-lang]');
+      for (var i = 0; i < els.length; i++) {
+        if (els[i].getAttribute('data-lang') === lang) {
+          els[i].classList.add('active');
+        } else {
+          els[i].classList.remove('active');
+        }
+      }
+      // Update toggle buttons
+      document.getElementById('lang-ja').classList.toggle('active', lang === 'ja');
+      document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+      // Update html lang
+      document.documentElement.lang = lang;
+      // Update title
+      document.title = lang === 'ja'
+        ? 'Capito式シンプルメモ — App Store'
+        : 'Simple Memo - Captio-style — App Store';
+    }
+
+    // ============================================================
+    // Initialize
+    // ============================================================
+    (function init() {
+      // Set app names in fallback/non-ios sections
+      document.getElementById('fallback-appname-ja').textContent = CONFIG.APP_NAME_JA;
+      document.getElementById('fallback-appname-en').textContent = CONFIG.APP_NAME_EN;
+      document.getElementById('non-ios-appname-ja').textContent = CONFIG.APP_NAME_JA;
+      document.getElementById('non-ios-appname-en').textContent = CONFIG.APP_NAME_EN;
+
+      // Set footer URLs
+      var footerLinks = document.querySelectorAll('.footer a');
+      footerLinks[0].href = CONFIG.TERMS_URL;
+      footerLinks[1].href = CONFIG.PRIVACY_URL;
+
+      // Set CTA button URL
+      var ctaButton = document.getElementById('cta-button');
+      ctaButton.href = CONFIG.APP_STORE_URL;
+
+      // CTA click tracking
+      ctaButton.addEventListener('click', function() {
+        logEvent('cta_click');
+      });
+
+      // Set language
+      setLang(detectLang());
+
+      // iOS-specific behavior
+      if (isIOS) {
+        startAutoRedirect();
+      } else {
+        // Show non-iOS message
+        document.getElementById('non-ios-note').style.display = 'block';
+      }
+    })();
+
+    // ============================================================
+    // Auto-Redirect (iOS only)
+    // ============================================================
+    function startAutoRedirect() {
+      var noteEl = document.getElementById('redirect-note');
+      noteEl.style.display = 'block';
+
+      var remaining = Math.ceil(CONFIG.DELAY_MS / 1000);
+      var countdownJa = document.getElementById('countdown-ja');
+      var countdownEn = document.getElementById('countdown-en');
+
+      countdownJa.textContent = remaining;
+      countdownEn.textContent = remaining;
+
+      var interval = setInterval(function() {
+        remaining--;
+        if (remaining <= 0) remaining = 0;
+        countdownJa.textContent = remaining;
+        countdownEn.textContent = remaining;
+      }, 1000);
+
+      setTimeout(function() {
+        clearInterval(interval);
+        logEvent('auto_redirect');
+        window.location.href = CONFIG.APP_STORE_URL;
+      }, CONFIG.DELAY_MS);
+    }
+
+    // ============================================================
+    // Event Logging (minimal)
+    // ============================================================
+    function logEvent(eventName) {
+      // GA4 event
+      if (typeof gtag === 'function') {
+        gtag('event', eventName, {
+          event_category: 'tiktok_lp',
+          event_label: isIOS ? 'ios' : 'other'
+        });
+      }
+      // Console log as fallback
+      console.log('[TikTok LP]', eventName, { ios: isIOS, lang: currentLang });
+    }
+
+    // Log page view with source info
+    logEvent('page_view');
+  </script>
+</body>
+</html>
