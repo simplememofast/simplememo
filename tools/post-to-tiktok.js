@@ -15,7 +15,7 @@
  * The script:
  *   1. Reads slide_1.png … slide_6.png from the directory
  *   2. Uploads each image to Postiz
- *   3. Creates a scheduled TikTok post (far-future date = draft)
+ *   3. Creates a TikTok post scheduled 1 min from now (triggers TikTok notification)
  */
 
 import { readFileSync, existsSync, createReadStream } from "fs";
@@ -28,7 +28,7 @@ import { resolve, join } from "path";
 const BASE_URL = "https://api.postiz.com/public/v1";
 const TIKTOK_INTEGRATION_ID = "cmlm8shaq014jns0yd392f591";
 const SLIDE_COUNT = 6;
-const DRAFT_DATE = "2099-12-31T00:00:00.000Z"; // far-future = stays as draft
+const SCHEDULE_DELAY_MS = 60_000; // 1 minute from now
 
 // Load .env manually (no extra dependency)
 function loadEnv() {
@@ -77,9 +77,12 @@ async function uploadImage(filePath) {
 }
 
 async function createTikTokPost(images, caption) {
+  const scheduleDate = new Date(Date.now() + SCHEDULE_DELAY_MS).toISOString();
+  console.log(`  Schedule: ${scheduleDate} (1 min from now)`);
+
   const payload = {
     type: "schedule",
-    date: DRAFT_DATE,
+    date: scheduleDate,
     shortLink: false,
     tags: [],
     posts: [

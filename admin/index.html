@@ -104,6 +104,7 @@
       <div class="row" id="dl-row" style="display:none">
         <button class="btn-sm btn-dl" id="zip-btn">ZIP Download</button>
         <button class="btn-sm btn-outline" id="log-btn">Export Log</button>
+        <button class="btn-sm btn-green" id="tiktok-btn">TikTokへ送る</button>
       </div>
     </div>
     <div class="card-b">
@@ -573,6 +574,57 @@
       zipBtn.disabled = false;
       log('ok', 'ZIP downloaded: '+a.download);
     });
+  });
+
+  // ── Post to TikTok via Postiz ───────────────────────────────
+  $('tiktok-btn').addEventListener('click', async function(){
+    if(!currentPlan || currentBlobs.length<6){
+      log('err', 'スライドを先に生成してください'); return;
+    }
+    var btn = $('tiktok-btn');
+    btn.disabled = true;
+    btn.textContent = '送信中...';
+    log('i', 'TikTok投稿を開始…');
+
+    try {
+      // 1. Upload 6 images
+      var uploaded = [];
+      for(var i=0;i<6;i++){
+        var blob = currentBlobs[i];
+        var form = new FormData();
+        form.append('file', blob, 'slide_'+(i+1)+'.png');
+
+        log('i', 'slide_'+(i+1)+'.png アップロード中…');
+        var res = await fetch('/admin/api/upload', { method: 'POST', body: form });
+        if(!res.ok) throw new Error('Upload failed: slide_'+(i+1)+' ('+res.status+')');
+        var data = await res.json();
+        uploaded.push({ id: data.id, path: data.path });
+        log('ok', 'slide_'+(i+1)+'.png → '+data.path);
+      }
+
+      // 2. Build caption from slide 1 text
+      var hook = currentPlan.slides[0].text.filter(function(t){return t;}).join(' ');
+      var caption = hook + '\n\nSimple Memo - one tap, straight to your inbox.\n\n#simplememo #productivity #notetaking #lifehack #iphone';
+
+      // 3. Create post (scheduled +1 min)
+      log('i', '投稿作成中（1分後に予約）…');
+      var postRes = await fetch('/admin/api/post-tiktok', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: uploaded, caption: caption })
+      });
+      var postData = await postRes.json();
+      if(!postRes.ok) throw new Error('Post failed: '+JSON.stringify(postData));
+
+      log('ok', 'TikTok投稿を予約しました！ ('+postData.scheduleDate+')');
+      log('ok', '約1分後にTikTokへ送信 → システム通知が届きます');
+      btn.textContent = '送信完了!';
+      setTimeout(function(){ btn.textContent = 'TikTokへ送る'; btn.disabled = false; }, 3000);
+    } catch(e) {
+      log('err', 'エラー: '+e.message);
+      btn.textContent = 'TikTokへ送る';
+      btn.disabled = false;
+    }
   });
 
   // ── Export log ───────────────────────────────────────────────
