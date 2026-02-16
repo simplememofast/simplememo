@@ -1,0 +1,200 @@
+{
+  "version": 2,
+  "variant": "W",
+  "name": "仕事勢SOP",
+  "categories": [
+    "inbox_sop","slack_sop","meeting_sop","notification_sop",
+    "email_sop","eod_sop","morning_sop","calendar_sop",
+    "capture_sop","focus_sop","review_sop","async_sop"
+  ],
+  "defaultBgTypes": ["desk","desk","desk","desk","desk","desk"],
+  "brandSlideOnly": 5,
+  "bannedWords": [
+    "free money","guaranteed","100%","cure","miracle","hack your",
+    "doctors hate","secret trick","make money","get rich","no effort",
+    "limited time","act now","don't miss","once in a lifetime",
+    "tax","taxation","interest rate","compound interest"
+  ],
+  "cautionWords": [
+    "download","install","buy","subscribe","sign up",
+    "optimize","efficient","important","in conclusion","therefore"
+  ],
+  "slideRules": {
+    "slide1": {"role":"stop_hook","maxWords":12,"fontSize":"xl","position":"top"},
+    "slide2": {"role":"rule","prefix":"Rule #1:"},
+    "slide3": {"role":"rule","prefix":"Rule #2:"},
+    "slide4": {"role":"rule","prefix":"Rule #3:"},
+    "slide5": {"role":"summary"},
+    "slide6": {"role":"save_cta","mustContain":"Save this SOP","brandFooter":true}
+  },
+  "patterns": [
+    {
+      "id":"W001","category":"inbox_sop",
+      "tags":["hero","inbox","email","2min","sort"],
+      "structure":"hook→rule1→rule2→rule3→summary→save",
+      "weight":2.0,
+      "slides":[
+        ["Your inbox is not a to-do list.","It's messages."],
+        ["Rule #1:","< 2 min → do it now."],
+        ["Rule #2:","Needs work → forward as a task."],
+        ["Subject:","ACTION — verb + due date"],
+        ["Inbox = messages.","Tasks = somewhere else."],
+        ["Save this SOP.","Use it every morning."]
+      ]
+    },
+    {
+      "id":"W002","category":"slack_sop",
+      "tags":["hero","slack","dm","task","move"],
+      "structure":"hook→rule1→rule2→format→summary→save",
+      "weight":2.0,
+      "slides":[
+        ["Stop using Slack","as your task manager."],
+        ["Rule #1:","DMs are for messages, not tasks."],
+        ["Rule #2:","Tasks go to one place."],
+        ["Format:","ACTION — verb + due date"],
+        ["Reply once,","then move it out of Slack."],
+        ["Save this SOP.","Use it on every DM."]
+      ]
+    },
+    {
+      "id":"W003","category":"meeting_sop",
+      "tags":["hero","meeting","output","decline","25min"],
+      "structure":"hook→rule1→rule2→rule3→summary→save",
+      "weight":2.0,
+      "slides":[
+        ["Meetings need","one output."],
+        ["Rule #1:","No output → decline."],
+        ["Rule #2:","25 min default."],
+        ["Rule #3:","End with owner + due date."],
+        ["Decision / doc / task list.","Pick one."],
+        ["Save this SOP.","Paste into invites."]
+      ]
+    },
+    {
+      "id":"W004","category":"notification_sop",
+      "tags":["hero","notifications","focus","15min","batch"],
+      "structure":"hook→rule1→rule2→rule3→summary→save",
+      "weight":2.0,
+      "slides":[
+        ["Notifications","destroy focus."],
+        ["Rule #1:","Check messages at set times."],
+        ["Rule #2:","15 min AM / 15 min PM."],
+        ["Rule #3:","Use the 2-min rule."],
+        ["Everything else →","capture as a task."],
+        ["Save this SOP.","Try it for 7 days."]
+      ]
+    },
+    {
+      "id":"W005","category":"email_sop",
+      "tags":["email","subject_line","action","fyi"],
+      "structure":"hook→rule1→rule2→rule3→example→save",
+      "weight":1.0,
+      "slides":[
+        ["Your subject line","is your SOP."],
+        ["Rule #1:","Start with ACTION or FYI."],
+        ["Rule #2:","Add due date to subject."],
+        ["Rule #3:","One topic per thread."],
+        ["Bad: 'Quick question'","Good: 'ACTION — Review by Fri'"],
+        ["Save this SOP.","Fix your next email."]
+      ]
+    },
+    {
+      "id":"W006","category":"eod_sop",
+      "tags":["end_of_day","close","5min","tomorrow"],
+      "structure":"hook→rule1→rule2→rule3→benefit→save",
+      "weight":1.0,
+      "slides":[
+        ["Close your day","in 5 minutes."],
+        ["Rule #1:","Clear inbox to zero."],
+        ["Rule #2:","Move open tasks to tomorrow."],
+        ["Rule #3:","Write one line: what's first."],
+        ["Tomorrow-you","starts with clarity."],
+        ["Save this SOP.","Run it at 5 PM."]
+      ]
+    },
+    {
+      "id":"W007","category":"morning_sop",
+      "tags":["morning","startup","15min","deep_work"],
+      "structure":"hook→rule1→rule2→rule3→principle→save",
+      "weight":1.0,
+      "slides":[
+        ["Your first 15 minutes","decide your day."],
+        ["Rule #1:","Don't open Slack first."],
+        ["Rule #2:","Review today's 3 tasks."],
+        ["Rule #3:","Block your first deep work."],
+        ["Inbox last.","Tasks first. Always."],
+        ["Save this SOP.","Start tomorrow with it."]
+      ]
+    },
+    {
+      "id":"W008","category":"calendar_sop",
+      "tags":["calendar","block","deep_work","buffer"],
+      "structure":"hook→rule1→rule2→rule3→principle→save",
+      "weight":1.0,
+      "slides":[
+        ["If it's not on your calendar,","it won't happen."],
+        ["Rule #1:","Block 2 hours for deep work."],
+        ["Rule #2:","No meetings before 11 AM."],
+        ["Rule #3:","Buffer 15 min between calls."],
+        ["Your calendar","is your commitment."],
+        ["Save this SOP.","Audit your week."]
+      ]
+    },
+    {
+      "id":"W009","category":"capture_sop",
+      "tags":["capture","brain","30sec","one_tool"],
+      "structure":"hook→rule1→rule2→rule3→principle→save",
+      "weight":1.0,
+      "slides":[
+        ["Your brain","won't remember this."],
+        ["Rule #1:","Capture within 30 seconds."],
+        ["Rule #2:","Use one tool. Just one."],
+        ["Rule #3:","Verb + noun + due date."],
+        ["If it lives in your head,","it's already lost."],
+        ["Save this SOP.","Use it right now."]
+      ]
+    },
+    {
+      "id":"W010","category":"focus_sop",
+      "tags":["focus","90min","deep_work","silence"],
+      "structure":"hook→rule1→rule2→rule3→comparison→save",
+      "weight":1.0,
+      "slides":[
+        ["3 rules for","90 minutes of deep work."],
+        ["Rule #1:","Close Slack and email."],
+        ["Rule #2:","Phone on silent, face down."],
+        ["Rule #3:","One task. No switching."],
+        ["90 focused minutes >","8 hours of switching."],
+        ["Save this SOP.","Try it today."]
+      ]
+    },
+    {
+      "id":"W011","category":"review_sop",
+      "tags":["weekly","review","sunday","15min","top3"],
+      "structure":"hook→rule1→rule2→rule3→comparison→save",
+      "weight":1.0,
+      "slides":[
+        ["15 minutes","that save your week."],
+        ["Rule #1:","Clear all inboxes."],
+        ["Rule #2:","Review next 7 days."],
+        ["Rule #3:","Pick your top 3 for Monday."],
+        ["Sunday 15 min >","Monday 2 hours."],
+        ["Save this SOP.","Run it every Sunday."]
+      ]
+    },
+    {
+      "id":"W012","category":"async_sop",
+      "tags":["async","communication","context","calls"],
+      "structure":"hook→rule1→rule2→rule3→benefit→save",
+      "weight":1.0,
+      "slides":[
+        ["Stop expecting","instant replies."],
+        ["Rule #1:","State the ask. State the deadline."],
+        ["Rule #2:","One message. All context."],
+        ["Rule #3:","Default to async. Calls are last."],
+        ["Good async =","fewer meetings."],
+        ["Save this SOP.","Send it to your team."]
+      ]
+    }
+  ]
+}
