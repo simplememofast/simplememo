@@ -1,0 +1,43 @@
+name: Auto Post TikTok (3x daily)
+
+on:
+  schedule:
+    # JST 10:00, 16:00, 21:00 (UTC 01:00, 07:00, 12:00)
+    - cron: '0 1 * * *'
+    - cron: '0 7 * * *'
+    - cron: '0 12 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: tools
+        run: npm ci
+
+      - name: Restore post history
+        uses: actions/cache@v4
+        with:
+          path: tools/.auto-post-history.json
+          key: auto-post-history
+
+      - name: Run auto-post
+        working-directory: tools
+        env:
+          POSTIZ_API_KEY: ${{ secrets.POSTIZ_API_KEY }}
+          POSTIZ_TIKTOK_ID: ${{ secrets.POSTIZ_TIKTOK_ID }}
+        run: node auto-post.js
+
+      - name: Save post history
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: tools/.auto-post-history.json
+          key: auto-post-history-${{ github.run_id }}
