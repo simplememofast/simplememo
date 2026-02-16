@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <title>TikTok Slide Builder v2</title>
+  <title>TikTok Slide Builder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;800&display=swap" rel="stylesheet">
@@ -55,13 +55,11 @@
     .slot{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;position:relative}
     .slot:hover{border-color:var(--border2)}
     .slot-n{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);color:var(--text3);font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:3px;z-index:2}
-    .slot-type{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.7);font-size:.55rem;font-weight:600;padding:1px 5px;border-radius:3px;z-index:2}
-    .slot-type.t-desk{color:#4fc3f7} .slot-type.t-hand{color:#ff9800} .slot-type.t-proof{color:#3fb950}
     .slot-img{width:100%;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:.7rem;overflow:hidden}
     .slot-img img{width:100%;height:100%;object-fit:cover}
     .slot-meta{padding:6px 8px;border-top:1px solid var(--border);font-size:.6rem;color:var(--text3);display:flex;justify-content:space-between;align-items:center}
 
-    .log{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:'SF Mono','Fira Code',monospace;font-size:.68rem;color:var(--text3);max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6}
+    .log{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-family:'SF Mono','Fira Code',monospace;font-size:.68rem;color:var(--text3);max-height:160px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;line-height:1.6}
     .log .ok{color:var(--green)} .log .err{color:var(--red)} .log .i{color:var(--accent)} .log .w{color:var(--yellow)}
 
     .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text3);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
@@ -72,13 +70,12 @@
     .badge-ok{background:rgba(63,185,80,.15);color:var(--green)}
     .badge-warn{background:rgba(210,153,34,.15);color:var(--yellow)}
     .badge-err{background:rgba(248,81,73,.15);color:var(--red)}
-    .badge-blue{background:rgba(106,180,255,.15);color:var(--accent)}
   </style>
 </head>
 <body>
 
 <header class="hdr">
-  <h1><b>TikTok</b> Slide Builder <span style="font-size:.65rem;color:var(--text3)">v2</span></h1>
+  <h1><b>TikTok</b> Slide Builder</h1>
   <span id="timer" style="font-size:.75rem;color:var(--text3)"></span>
 </header>
 
@@ -92,9 +89,10 @@
         <div>
           <label>Variant</label><br>
           <select id="variant">
-            <option value="A" selected>A — 忘れる系 (103 patterns)</option>
-            <option value="B">B — 時短・実利系 (15 patterns)</option>
-            <option value="C">C — 対立煽り系 (15 patterns)</option>
+            <option value="W" selected>W — 仕事勢SOP (12 patterns)</option>
+            <option value="A">A — 忘れる系 (100 patterns)</option>
+            <option value="B">B — 先延ばし系</option>
+            <option value="C">C — 忙しい仕事人</option>
           </select>
         </div>
         <div>
@@ -107,11 +105,13 @@
         </div>
         <div id="tag-select-wrap" style="display:none">
           <label>Category</label><br>
-          <select id="tag-select"></select>
+          <select id="tag-select">
+            <option value="">All</option>
+          </select>
         </div>
         <div id="seed-wrap" style="display:none">
           <label>Pattern ID</label><br>
-          <input type="text" id="seed-input" placeholder="A001" style="width:80px;font-family:var(--font);font-size:.8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 12px">
+          <input type="text" id="seed-input" placeholder="W001" style="width:80px;font-family:var(--font);font-size:.8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:7px 12px">
         </div>
         <div>
           <label>Diversity</label><br>
@@ -126,10 +126,10 @@
           <input type="number" id="avoid-recent" value="20" min="0" max="99">
         </div>
         <div class="check-row" style="margin-top:14px">
-          <input type="checkbox" id="hook-swap"><label for="hook-swap">Hook Swap</label>
+          <input type="checkbox" id="hook-swap" checked><label for="hook-swap">Hook Swap</label>
         </div>
         <div class="check-row" style="margin-top:14px">
-          <input type="checkbox" id="brand"><label for="brand">Brand Footer</label>
+          <input type="checkbox" id="brand" checked><label for="brand">Brand Footer</label>
         </div>
         <button class="btn-accent" id="gen-btn" style="margin-top:14px">Generate 6 Slides</button>
       </div>
@@ -170,13 +170,31 @@
   var currentPlan = null;
   var currentBlobs = [];
   var currentPattern = null;
-  var currentTexts = null;
+  var currentSlides = null; // slides after hook swap
 
-  // ── Pattern & hooks data ────────────────────────────────────────
-  var patternLibrary = {};   // { A: { patterns: [...], ... }, B: {...}, C: {...} }
-  var hooksLibrary = null;   // { hooks: [...] }
+  // ── Pattern data ──────────────────────────────────────────────
+  var patternLibrary = {};   // { W: { patterns: [...], ... }, A: {...} }
+  var hooksLibrary = null;
+  var FALLBACK_SCRIPTS = {
+    B: [
+      ["I nod. I forget.", "Every time."],
+      ["To-do apps are", "where tasks go to die."],
+      ["So I email the task.", "Instantly."],
+      ["Now it stares back", "in my inbox."],
+      ["No system.", "Just friction."],
+      ["Be honest\u2014", "notes app or inbox?"]
+    ],
+    C: [
+      ["If it's not in my inbox,", "it's gone."],
+      ["Slack scrolls.", "Notes get buried."],
+      ["Email doesn't.", ""],
+      ["One tap,", "one reminder."],
+      ["Boring on purpose.", "That's why it works."],
+      ["What actually works", "for you?"]
+    ]
+  };
 
-  // ── Logging ────────────────────────────────────────────────────
+  // ── Logging ──────────────────────────────────────────────────
   function log(cls, msg){
     if(logEl.textContent==='待機中…') logEl.textContent='';
     var d = document.createElement('div');
@@ -186,7 +204,7 @@
     logEl.scrollTop = logEl.scrollHeight;
   }
 
-  // ── Recent history (localStorage) ──────────────────────────────
+  // ── Recent history (localStorage) ─────────────────────────────
   var HISTORY_KEY = 'tiktok_pattern_history';
   function getHistory(){
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch(e){ return []; }
@@ -198,7 +216,7 @@
     localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
   }
 
-  // ── Hook history (avoid reusing same hook within 10 posts) ─────
+  // ── Hook history (localStorage) ───────────────────────────────
   var HOOK_HISTORY_KEY = 'tiktok_hook_history';
   function getHookHistory(){
     try { return JSON.parse(localStorage.getItem(HOOK_HISTORY_KEY)) || []; } catch(e){ return []; }
@@ -206,11 +224,11 @@
   function addToHookHistory(hookId){
     var h = getHookHistory();
     h.unshift(hookId);
-    if(h.length > 50) h = h.slice(0, 50);
+    if(h.length > 200) h = h.slice(0, 200);
     localStorage.setItem(HOOK_HISTORY_KEY, JSON.stringify(h));
   }
 
-  // ── Load pattern library ────────────────────────────────────────
+  // ── Load pattern library ──────────────────────────────────────
   async function loadPatterns(variant){
     if(patternLibrary[variant]) return patternLibrary[variant];
     try {
@@ -219,27 +237,17 @@
       var data = await res.json();
       patternLibrary[variant] = data;
       log('ok', 'Loaded '+data.patterns.length+' patterns for variant '+variant);
-      // Populate category dropdown
-      if(data.categories){
-        var sel = $('tag-select');
-        sel.innerHTML = '<option value="">All</option>';
-        data.categories.forEach(function(c){
-          var opt = document.createElement('option');
-          opt.value = c;
-          opt.textContent = c.replace(/_/g,' ').replace(/\b\w/g, function(l){return l.toUpperCase();});
-          sel.appendChild(opt);
-        });
-      }
+      // Populate categories dynamically
+      populateCategories(data);
       return data;
     } catch(e){
-      log('w', 'No pattern library for variant '+variant);
+      log('w', 'No pattern library for variant '+variant+', using fallback');
       return null;
     }
   }
 
-  // ── Load hooks library ──────────────────────────────────────────
+  // ── Load hooks ────────────────────────────────────────────────
   async function loadHooks(){
-    if(hooksLibrary) return hooksLibrary;
     try {
       var res = await fetch('patterns/hooks.json');
       if(!res.ok) return null;
@@ -247,12 +255,84 @@
       log('ok', 'Loaded '+hooksLibrary.hooks.length+' hook alternatives');
       return hooksLibrary;
     } catch(e){
-      log('w', 'Could not load hooks.json');
+      log('w', 'No hooks library found');
       return null;
     }
   }
 
-  // ── Similarity: Jaccard on words ────────────────────────────────
+  // ── Populate categories from library ──────────────────────────
+  function populateCategories(lib){
+    var sel = $('tag-select');
+    sel.innerHTML = '<option value="">All</option>';
+    if(lib && lib.categories){
+      lib.categories.forEach(function(cat){
+        var opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        sel.appendChild(opt);
+      });
+    } else if(lib && lib.patterns){
+      // Infer categories from patterns
+      var cats = {};
+      lib.patterns.forEach(function(p){ if(p.category) cats[p.category]=1; });
+      Object.keys(cats).sort().forEach(function(cat){
+        var opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        sel.appendChild(opt);
+      });
+    }
+  }
+
+  // ── Hook swap ─────────────────────────────────────────────────
+  function swapHook(slides, variant){
+    if(!hooksLibrary || !hooksLibrary.hooks || hooksLibrary.hooks.length === 0){
+      return { slides: slides, hookId: null };
+    }
+    var pool = hooksLibrary.hooks;
+    if(variant){
+      var variantHooks = pool.filter(function(h){ return h.variant === variant; });
+      if(variantHooks.length > 0) pool = variantHooks;
+    }
+    var recentHooks = getHookHistory().slice(0, 10);
+    var available = pool.filter(function(h){ return recentHooks.indexOf(h.id) === -1; });
+    if(available.length === 0) available = pool;
+
+    var pick = available[Math.floor(Math.random() * available.length)];
+    addToHookHistory(pick.id);
+    var newSlides = slides.map(function(s){ return s.slice(); });
+    newSlides[0] = pick.text;
+    return { slides: newSlides, hookId: pick.id, hookTone: pick.tone };
+  }
+
+  // ── NG Filter ─────────────────────────────────────────────────
+  var NG_STOP_WORDS = ["i","a","an","the","is","it","to","my","in","of","and","or","but","not","no","do","be","so","that","this","for","you","your","just","don","t","s","re","ll","ve","m","d"];
+
+  function ngFilter(slides){
+    var issues = [];
+    // Word repetition across slides
+    var wordSlideCount = {};
+    for(var si=0; si<slides.length; si++){
+      var text = slides[si].join(" ").toLowerCase().replace(/[^a-z0-9\s]/g, "");
+      var words = text.split(/\s+/).filter(function(w){ return w.length > 2 && NG_STOP_WORDS.indexOf(w) === -1; });
+      var seen = {};
+      for(var wi=0; wi<words.length; wi++){
+        if(!seen[words[wi]]){
+          seen[words[wi]] = true;
+          wordSlideCount[words[wi]] = (wordSlideCount[words[wi]] || 0) + 1;
+        }
+      }
+    }
+    for(var w in wordSlideCount){
+      if(wordSlideCount[w] >= 3) issues.push({ type: "word_repeat", word: w, count: wordSlideCount[w] });
+    }
+    // Long hook check
+    var hookWords = slides[0].join(" ").split(/\s+/).filter(function(w){ return w.length > 0; }).length;
+    if(hookWords > 12) issues.push({ type: "long_hook", words: hookWords });
+    return issues;
+  }
+
+  // ── Similarity: Jaccard on words ──────────────────────────────
   function tokenize(text){
     return text.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(function(w){ return w.length > 1; });
   }
@@ -274,51 +354,7 @@
     return pattern.slides.map(function(s){ return s.join(' '); }).join(' ');
   }
 
-  // ── NG Filter: word repetition, abstract-only, explanation-in-hook ─
-  var STOP_WORDS = ['i','a','an','the','is','it','to','my','in','of','and','or','but','not','no','do','be','so','that','this','for','you','your','just','don','t','s','re','ll','ve','m','d'];
-  var ABSTRACT_WORDS = ['better','more','less','good','great','always','never','every','nothing','everything','something','real','true','simple','easy','hard','best','worst','way','thing','stuff','time'];
-
-  function ngFilter(slides){
-    var issues = [];
-
-    // 1. Word repetition: count words across slides, flag if any content word appears in 3+ slides
-    var wordSlideCount = {};
-    slides.forEach(function(lines, idx){
-      var text = lines.join(' ').toLowerCase().replace(/[^a-z0-9\s]/g,'');
-      var words = text.split(/\s+/).filter(function(w){ return w.length > 2 && STOP_WORDS.indexOf(w) === -1; });
-      var seen = {};
-      words.forEach(function(w){
-        if(!seen[w]){ seen[w] = true; wordSlideCount[w] = (wordSlideCount[w]||0) + 1; }
-      });
-    });
-    for(var w in wordSlideCount){
-      if(wordSlideCount[w] >= 3){
-        issues.push({type:'word_repeat', word:w, count:wordSlideCount[w], severity:'warn'});
-      }
-    }
-
-    // 2. Abstract-only slides: flag if all content words are abstract
-    slides.forEach(function(lines, idx){
-      if(idx === 0 || idx === 5) return; // skip hook and CTA
-      var text = lines.join(' ').toLowerCase().replace(/[^a-z0-9\s]/g,'');
-      var words = text.split(/\s+/).filter(function(w){ return w.length > 2 && STOP_WORDS.indexOf(w) === -1; });
-      if(words.length === 0) return;
-      var abstractCount = words.filter(function(w){ return ABSTRACT_WORDS.indexOf(w) !== -1; }).length;
-      if(abstractCount === words.length){
-        issues.push({type:'abstract_only', slide:idx+1, severity:'warn'});
-      }
-    });
-
-    // 3. Explanation in slide 1: flag if hook has more than 12 words
-    var hookWords = slides[0].join(' ').split(/\s+/).filter(function(w){return w.length > 0;}).length;
-    if(hookWords > 12){
-      issues.push({type:'long_hook', words:hookWords, severity:'err'});
-    }
-
-    return issues;
-  }
-
-  // ── Banned/caution word filter ──────────────────────────────────
+  // ── Banned/caution word filter ────────────────────────────────
   var DEFAULT_BANNED = [
     "free money","guaranteed","100%","cure","miracle","hack your",
     "doctors hate","secret trick","make money","get rich","no effort",
@@ -326,7 +362,8 @@
   ];
   var DEFAULT_CAUTION = [
     "download","install","buy","subscribe","sign up","ADHD",
-    "depression","anxiety","mental health","disorder"
+    "depression","anxiety","mental health","disorder",
+    "optimize","efficient","important","in conclusion","therefore"
   ];
 
   function checkSafety(pattern, lib){
@@ -348,6 +385,7 @@
       }
     });
 
+    // Count app name mentions (SimpleMemo, Simple Memo)
     var appRegex = /simple\s*memo/gi;
     var matches = text.match(appRegex);
     result.appNameCount = matches ? matches.length : 0;
@@ -359,19 +397,20 @@
     return result;
   }
 
-  // ── Pattern selection algorithm ─────────────────────────────────
+  // ── Pattern selection algorithm ───────────────────────────────
   function selectPattern(lib, mode, tagFilter, seedId, avoidN, diversityThreshold){
     var patterns = lib.patterns;
     var history = getHistory();
     var recentIds = history.slice(0, avoidN);
 
+    // Filter by mode
+    var candidates;
     if(mode === 'seeded' && seedId){
       var found = patterns.filter(function(p){ return p.id === seedId.toUpperCase(); });
       if(found.length > 0) return { pattern: found[0], reason: 'seeded' };
       log('w', 'Pattern '+seedId+' not found, falling back to random');
     }
 
-    var candidates;
     if(mode === 'tag' && tagFilter){
       candidates = patterns.filter(function(p){ return p.category === tagFilter; });
       if(candidates.length === 0){
@@ -382,6 +421,7 @@
       candidates = patterns;
     }
 
+    // Exclude recent
     var available = candidates.filter(function(p){
       return recentIds.indexOf(p.id) === -1;
     });
@@ -390,17 +430,20 @@
       available = candidates;
     }
 
+    // Weighted random selection with similarity check
     var totalWeight = 0;
     available.forEach(function(p){ totalWeight += (p.weight || 1); });
 
     var maxAttempts = Math.min(available.length, 10);
     var recentTexts = [];
+    // Build recent texts for similarity
     for(var i=0; i<Math.min(recentIds.length, 5); i++){
       var rp = patterns.filter(function(p){ return p.id === recentIds[i]; })[0];
       if(rp) recentTexts.push(patternToText(rp));
     }
 
     for(var attempt=0; attempt < maxAttempts; attempt++){
+      // Weighted random pick
       var r = Math.random() * totalWeight;
       var acc = 0;
       var pick = available[0];
@@ -409,6 +452,7 @@
         if(acc >= r){ pick = available[j]; break; }
       }
 
+      // Similarity check against recent
       var pickText = patternToText(pick);
       var maxSim = 0;
       for(var k=0; k<recentTexts.length; k++){
@@ -416,32 +460,16 @@
         if(sim > maxSim) maxSim = sim;
       }
 
-      // NG filter check
-      var ngIssues = ngFilter(pick.slides);
-      var hasError = ngIssues.some(function(i){ return i.severity === 'err'; });
-
-      if((maxSim < diversityThreshold && !hasError) || attempt === maxAttempts - 1){
-        return { pattern: pick, reason: mode, similarity: maxSim, attempts: attempt + 1, ngIssues: ngIssues };
+      if(maxSim < diversityThreshold || attempt === maxAttempts - 1){
+        return { pattern: pick, reason: mode, similarity: maxSim, attempts: attempt + 1 };
       }
     }
 
-    return { pattern: available[0], reason: 'fallback', similarity: 1, attempts: maxAttempts, ngIssues: [] };
+    // Fallback: just pick first available
+    return { pattern: available[0], reason: 'fallback', similarity: 1, attempts: maxAttempts };
   }
 
-  // ── Hook swap: replace slide 1 with a random hook ──────────────
-  function swapHook(slides){
-    if(!hooksLibrary || !hooksLibrary.hooks || hooksLibrary.hooks.length === 0) return { slides: slides, hookId: null };
-    var recentHooks = getHookHistory().slice(0, 10);
-    var available = hooksLibrary.hooks.filter(function(h){ return recentHooks.indexOf(h.id) === -1; });
-    if(available.length === 0) available = hooksLibrary.hooks;
-    var pick = available[Math.floor(Math.random() * available.length)];
-    var newSlides = slides.slice();
-    newSlides[0] = pick.text;
-    addToHookHistory(pick.id);
-    return { slides: newSlides, hookId: pick.id, hookTone: pick.tone };
-  }
-
-  // ── Constants ──────────────────────────────────────────────────
+  // ── Constants ────────────────────────────────────────────────
   var W = 1080, H = 1920, SAFE = 120;
   var LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
   var POSITIONS = [
@@ -449,23 +477,8 @@
     "bottom-left", "bottom-center", "bottom-right"
   ];
   var CROPS = ["wide", "zoom-in", "left-focus", "right-focus"];
-  var DEFAULT_BG_TYPES = ["desk","desk","hand","hand","proof","desk"];
 
-  // ── Slide-specific layout rules ────────────────────────────────
-  // Slide 1 (hook): poster_dark preferred, top position, large font
-  // Slides 2-4: mix of layouts, varied positions
-  // Slide 5: proof slide, caption_subtle or poster_dark
-  // Slide 6 (CTA): poster_dark or caption_light, bottom-center, extra padding
-  var SLIDE_LAYOUT_RULES = {
-    0: { layouts: ["poster_dark","poster_dark","caption_subtle"], positions: ["top-center","top-left","top-right"] },
-    1: { layouts: ["poster_dark","caption_subtle","caption_light"], positions: ["top-left","top-center","bottom-left","bottom-center"] },
-    2: { layouts: ["caption_subtle","poster_dark","caption_light"], positions: ["bottom-left","bottom-center","top-left","top-center"] },
-    3: { layouts: ["caption_subtle","poster_dark","caption_light"], positions: ["top-right","top-center","bottom-right","bottom-center"] },
-    4: { layouts: ["poster_dark","caption_subtle"], positions: ["bottom-center","bottom-left","bottom-right"] },
-    5: { layouts: ["poster_dark","caption_light"], positions: ["bottom-center","top-center"] }
-  };
-
-  // ── Utility ────────────────────────────────────────────────────
+  // ── Utility ──────────────────────────────────────────────────
   function shuffle(arr){
     for(var i=arr.length-1;i>0;i--){
       var j=Math.floor(Math.random()*(i+1));
@@ -474,36 +487,19 @@
     return arr;
   }
 
-  function pickRandom(arr){
-    return arr[Math.floor(Math.random()*arr.length)];
-  }
-
-  // ── Slide-aware layout assignment ──────────────────────────────
   function assignLayouts(){
-    var result = [];
-    for(var i=0;i<6;i++){
-      var rule = SLIDE_LAYOUT_RULES[i];
-      result.push(pickRandom(rule.layouts));
-    }
-    // Ensure we have at least 2 different layouts
-    var unique = {};
-    result.forEach(function(l){ unique[l]=1; });
-    if(Object.keys(unique).length < 2){
-      // Force diversity: swap one middle slide
-      var alt = LAYOUTS.filter(function(l){ return l !== result[2]; });
-      result[2] = pickRandom(alt);
-    }
-    return result;
+    return shuffle(["poster_dark","poster_dark","caption_subtle","caption_subtle","caption_light","caption_light"]);
   }
 
-  // ── Slide-aware position assignment ────────────────────────────
   function assignPositions(){
-    var result = [];
+    var picked=[], available=POSITIONS.slice();
     for(var i=0;i<6;i++){
-      var rule = SLIDE_LAYOUT_RULES[i];
-      result.push(pickRandom(rule.positions));
+      var idx=Math.floor(Math.random()*available.length);
+      picked.push(available[idx]);
+      available.splice(idx,1);
+      if(available.length===0) available=POSITIONS.slice();
     }
-    return result;
+    return picked;
   }
 
   function assignCrops(){
@@ -512,7 +508,7 @@
     return pool.slice(0,6);
   }
 
-  // ── Crop logic ─────────────────────────────────────────────────
+  // ── Crop logic ────────────────────────────────────────────────
   function getCropRegion(srcW, srcH, cropVariant){
     var targetRatio = W/H;
     var extractW, extractH, left, top;
@@ -558,99 +554,77 @@
     return {left:left, top:top, width:extractW, height:extractH};
   }
 
-  // ── Preload background images per type ─────────────────────────
-  var bgImageSets = { desk: [], hand: [], proof: [] };
-  var bgLoadStatus = { desk: false, hand: false, proof: false };
-  var BG_COUNT = 6;
+  // ── Preload background images ────────────────────────────────
+  var bgImages = [];
+  var bgLoaded = 0;
 
-  function preloadBgType(type, callback){
-    if(bgLoadStatus[type]){ callback(); return; }
-    var loaded = 0;
-    var imgs = [];
-    var basePath = type === 'desk' ? 'bg/' : 'bg/'+type+'/';
-
-    for(var i=0; i<BG_COUNT; i++){
+  function preloadBackgrounds(bgTypes, callback){
+    bgLoaded = 0;
+    bgImages = [];
+    var total = 6;
+    for(var i=0;i<6;i++){
       (function(idx){
+        var bgType = (bgTypes && bgTypes[idx]) || 'desk';
         var img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = function(){
-          imgs[idx] = img;
-          loaded++;
-          if(loaded===BG_COUNT){
-            bgImageSets[type] = imgs;
-            bgLoadStatus[type] = true;
-            callback();
-          }
+          bgImages[idx] = img;
+          bgLoaded++;
+          if(bgLoaded===total) callback();
         };
         img.onerror = function(){
-          // Fallback to desk type if hand/proof not available
-          if(type !== 'desk'){
-            imgs[idx] = bgImageSets.desk[idx] || null;
-          }
-          loaded++;
-          if(loaded===BG_COUNT){
-            bgImageSets[type] = imgs;
-            bgLoadStatus[type] = true;
-            callback();
+          // Fallback to desk if type-specific not found
+          if(bgType !== 'desk'){
+            log('w', 'bg/'+bgType+'/'+(idx+1)+'.jpg not found, fallback to desk');
+            var fallback = new Image();
+            fallback.crossOrigin = 'anonymous';
+            fallback.onload = function(){
+              bgImages[idx] = fallback;
+              bgLoaded++;
+              if(bgLoaded===total) callback();
+            };
+            fallback.onerror = function(){
+              log('err', 'Failed to load bg/'+(idx+1)+'.jpg');
+              bgLoaded++;
+              if(bgLoaded===total) callback();
+            };
+            fallback.src = 'bg/'+(idx+1)+'.jpg';
+          } else {
+            log('err', 'Failed to load bg/'+(idx+1)+'.jpg');
+            bgLoaded++;
+            if(bgLoaded===total) callback();
           }
         };
-        img.src = basePath+(idx+1)+'.jpg';
+        // Try type-specific first, then default
+        if(bgType !== 'desk'){
+          img.src = 'bg/'+bgType+'/'+(idx+1)+'.jpg';
+        } else {
+          img.src = 'bg/'+(idx+1)+'.jpg';
+        }
       })(i);
     }
   }
 
-  function preloadAllBgTypes(bgTypes, callback){
-    var typesNeeded = {};
-    bgTypes.forEach(function(t){ typesNeeded[t] = true; });
-    // Always need desk as fallback
-    typesNeeded.desk = true;
-    var types = Object.keys(typesNeeded);
-    var done = 0;
-
-    function check(){
-      done++;
-      if(done === types.length) callback();
-    }
-
-    types.forEach(function(t){ preloadBgType(t, check); });
-  }
-
-  // ── Get background image for a slide ───────────────────────────
-  function getBgImage(slideIndex, bgType){
-    var imgs = bgImageSets[bgType];
-    if(imgs && imgs[slideIndex]) return imgs[slideIndex];
-    // Fallback: use desk type
-    var deskImgs = bgImageSets.desk;
-    if(deskImgs && deskImgs[slideIndex]) return deskImgs[slideIndex];
-    return null;
-  }
-
-  // ── Canvas: draw text overlay (slide-aware sizing) ─────────────
-  function drawTextOverlay(ctx, lines, layout, position, brand, slideIndex){
+  // ── Canvas: draw text overlay (slide-aware sizing) ────────────
+  function drawTextOverlay(ctx, lines, layout, position, brand, slideIndex, variantMode){
     var linesFiltered = lines.filter(function(l){ return l.length>0; });
+    var fontSize;
 
-    // Slide-specific font sizing
-    var fontSize, maxLines;
+    // Slide-aware font sizing
     if(slideIndex === 0){
-      // Hook: larger, bolder
-      fontSize = lines.some(function(l){ return l.length>20; }) ? 72 : 88;
-      maxLines = 2;
+      // Hook slide: large
+      fontSize = lines.some(function(l){ return l.length>20; }) ? 80 : 96;
     } else if(slideIndex === 5){
-      // CTA: slightly smaller for breathing room
+      // CTA slide: slightly smaller
       fontSize = lines.some(function(l){ return l.length>25; }) ? 60 : 68;
-      maxLines = 2;
     } else {
       // Body slides
       fontSize = lines.some(function(l){ return l.length>25; }) ? 64 : 76;
-      maxLines = 2;
     }
-
-    // Truncate to maxLines
-    if(linesFiltered.length > maxLines) linesFiltered = linesFiltered.slice(0, maxLines);
 
     var lineHeight = fontSize * 1.35;
     var textBlockH = linesFiltered.length * lineHeight;
-    var boxPadH = slideIndex === 5 ? 56 : 44; // Extra padding for CTA
+    var boxPadH = slideIndex === 5 ? 56 : 44;
     var boxPadW = 56;
     var boxW = Math.min(W - SAFE*2, 880);
     var boxH = textBlockH + boxPadH*2;
@@ -684,8 +658,7 @@
     ctx.restore();
 
     ctx.save();
-    var fontWeight = slideIndex === 0 ? "800" : "800";
-    ctx.font = fontWeight+" "+fontSize+"px 'Inter','Helvetica Neue',Arial,sans-serif";
+    ctx.font = "800 "+fontSize+"px 'Inter','Helvetica Neue',Arial,sans-serif";
     ctx.textAlign = textAlign;
     ctx.textBaseline = "alphabetic";
 
@@ -736,8 +709,8 @@
     ctx.closePath();
   }
 
-  // ── Compose single slide on canvas ─────────────────────────────
-  function composeSlide(bgImg, lines, layout, position, cropVariant, brand, slideIndex){
+  // ── Compose single slide on canvas ───────────────────────────
+  function composeSlide(bgImg, lines, layout, position, cropVariant, brand, slideIndex, variantMode){
     var canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
@@ -746,26 +719,25 @@
     var crop = getCropRegion(bgImg.naturalWidth, bgImg.naturalHeight, cropVariant);
     ctx.drawImage(bgImg, crop.left, crop.top, crop.width, crop.height, 0, 0, W, H);
 
-    drawTextOverlay(ctx, lines, layout, position, brand, slideIndex);
+    drawTextOverlay(ctx, lines, layout, position, brand, slideIndex, variantMode);
 
     return canvas;
   }
 
-  // ── Canvas to Blob ─────────────────────────────────────────────
+  // ── Canvas to Blob ────────────────────────────────────────────
   function canvasToBlob(canvas){
     return new Promise(function(resolve){
       canvas.toBlob(function(blob){ resolve(blob); }, 'image/png');
     });
   }
 
-  // ── Init 6 empty slots ─────────────────────────────────────────
+  // ── Init 6 empty slots ──────────────────────────────────────
   function initSlots(){
     gridEl.innerHTML = '';
     for(var i=0;i<6;i++){
       var s = document.createElement('div');
       s.className = 'slot'; s.id = 'slot-'+i;
       s.innerHTML = '<span class="slot-n">'+(i+1)+'</span>'
-        +'<span class="slot-type" id="type-'+i+'"></span>'
         +'<div class="slot-img" id="img-'+i+'">—</div>'
         +'<div class="slot-meta"><span id="meta-'+i+'"></span><button class="btn-sm btn-outline" data-i="'+i+'" style="display:none">Regen</button></div>';
       gridEl.appendChild(s);
@@ -776,33 +748,30 @@
   }
   initSlots();
 
-  function showSlide(i, url, meta, bgType){
+  function showSlide(i, url, meta){
     var wrap = $('img-'+i);
     wrap.innerHTML = '<img src="'+url+'">';
     var metaEl = $('meta-'+i);
     metaEl.textContent = meta || '';
-    var typeEl = $('type-'+i);
-    if(bgType){
-      typeEl.textContent = bgType;
-      typeEl.className = 'slot-type t-'+bgType;
-    }
     var btn = gridEl.querySelector('[data-i="'+i+'"]');
     if(btn) btn.style.display = '';
   }
 
-  // ── UI: show/hide mode-specific controls ───────────────────────
+  // ── UI: show/hide mode-specific controls ─────────────────────
   $('pattern-mode').addEventListener('change', function(){
     var mode = this.value;
     $('tag-select-wrap').style.display = mode === 'tag' ? '' : 'none';
     $('seed-wrap').style.display = mode === 'seeded' ? '' : 'none';
   });
 
-  // ── Reload categories when variant changes ─────────────────────
-  $('variant').addEventListener('change', function(){
-    loadPatterns(this.value);
+  // ── Variant change: reload categories ─────────────────────────
+  $('variant').addEventListener('change', async function(){
+    var variant = this.value;
+    var lib = await loadPatterns(variant);
+    if(lib) populateCategories(lib);
   });
 
-  // ── Diversity threshold mapping ────────────────────────────────
+  // ── Diversity threshold mapping ───────────────────────────────
   function getDiversityThreshold(){
     var val = $('diversity').value;
     if(val === 'low') return 0.2;
@@ -810,7 +779,7 @@
     return 0.4;
   }
 
-  // ── Generate 6 slides ──────────────────────────────────────────
+  // ── Generate 6 slides ────────────────────────────────────────
   $('gen-btn').addEventListener('click', async function(){
     var btn = $('gen-btn');
     btn.disabled = true;
@@ -821,11 +790,11 @@
     initSlots();
     currentBlobs = [];
     currentPattern = null;
-    currentTexts = null;
+    currentSlides = null;
 
     var variant = $('variant').value;
-    var brand = $('brand').checked;
-    var hookSwap = $('hook-swap').checked;
+    var brandChecked = $('brand').checked;
+    var hookSwapEnabled = $('hook-swap').checked;
     var mode = $('pattern-mode').value;
     var tagFilter = $('tag-select').value;
     var seedId = $('seed-input').value.trim();
@@ -833,36 +802,41 @@
     var divThreshold = getDiversityThreshold();
     var t0 = Date.now();
 
-    log('i', 'Generating variant='+variant+' mode='+mode+' hookSwap='+hookSwap+' diversity='+$('diversity').value+' avoidRecent='+avoidN);
+    log('i', 'Generating variant='+variant+' mode='+mode+' hookSwap='+(hookSwapEnabled?'ON':'OFF')+' brand='+(brandChecked?'ON':'OFF'));
+    log('i', 'Loading background images...');
 
-    // Load pattern library & hooks
+    // Load pattern library
     var lib = await loadPatterns(variant);
-    if(hookSwap) await loadHooks();
-
     var texts;
     var selectedPattern = null;
     var safetyResult = null;
     var similarity = 0;
-    var ngIssues = [];
-    var swappedHookId = null;
-    var bgTypes = DEFAULT_BG_TYPES;
+    var brandSlideOnly = -1; // -1 = use brandChecked for all, >= 0 = only that slide
+    var bgTypes = null;
 
     if(lib){
+      // Get library config
+      if(lib.brandSlideOnly !== undefined) brandSlideOnly = lib.brandSlideOnly;
+      bgTypes = lib.defaultBgTypes || null;
+
+      // Use pattern library
       var selection = selectPattern(lib, mode, tagFilter, seedId, avoidN, divThreshold);
       selectedPattern = selection.pattern;
       similarity = selection.similarity || 0;
-      ngIssues = selection.ngIssues || [];
       currentPattern = selectedPattern;
+
+      // Per-pattern bgTypes override
+      if(selectedPattern.bgTypes) bgTypes = selectedPattern.bgTypes;
 
       // Safety check
       safetyResult = checkSafety(selectedPattern, lib);
       if(!safetyResult.passed){
         log('w', 'Safety filter triggered for '+selectedPattern.id+': '+safetyResult.bannedHits.join(', '));
+        // Try to find a safe alternative
         for(var retry=0; retry<5; retry++){
           selection = selectPattern(lib, 'random', '', '', avoidN, divThreshold);
           selectedPattern = selection.pattern;
           similarity = selection.similarity || 0;
-          ngIssues = selection.ngIssues || [];
           currentPattern = selectedPattern;
           safetyResult = checkSafety(selectedPattern, lib);
           if(safetyResult.passed) break;
@@ -870,71 +844,57 @@
       }
 
       texts = selectedPattern.slides.map(function(s){ return s.slice(); }); // deep copy
-      bgTypes = selectedPattern.bgTypes || lib.defaultBgTypes || DEFAULT_BG_TYPES;
-
-      // Hook swap
-      if(hookSwap && hooksLibrary){
-        var result = swapHook(texts);
-        texts = result.slides;
-        swappedHookId = result.hookId;
-        if(swappedHookId){
-          log('i', 'Hook swapped → '+swappedHookId+' ('+result.hookTone+')');
-        }
-      }
-
       addToHistory(selectedPattern.id);
 
       log('i', 'Pattern: '+selectedPattern.id+' ['+selectedPattern.category+'] sim='+similarity.toFixed(3)+' attempts='+selection.attempts);
-      log('i', 'BgTypes: '+bgTypes.join(' → '));
-
-      // Log NG issues
-      if(ngIssues.length > 0){
-        ngIssues.forEach(function(issue){
-          if(issue.type === 'word_repeat'){
-            log('w', 'NG: "'+issue.word+'" repeated in '+issue.count+' slides');
-          } else if(issue.type === 'abstract_only'){
-            log('w', 'NG: Slide '+issue.slide+' is abstract-only');
-          } else if(issue.type === 'long_hook'){
-            log('err', 'NG: Hook has '+issue.words+' words (max 12)');
-          }
-        });
-      }
-
-      if(safetyResult && safetyResult.cautionHits.length > 0){
+      if(safetyResult.cautionHits.length > 0){
         log('w', 'Caution words: '+safetyResult.cautionHits.join(', '));
       }
 
-      // Show pattern badge
-      var badgeCls = safetyResult && safetyResult.passed ? 'badge-ok' : 'badge-err';
-      var badgeHtml = '<span class="badge '+badgeCls+'">'+selectedPattern.id+'</span>'
-        + '<span class="badge badge-ok">'+selectedPattern.category+'</span>'
-        + '<span class="badge badge-blue">sim: '+similarity.toFixed(2)+'</span>';
-      if(swappedHookId){
-        badgeHtml += '<span class="badge badge-warn">hook: '+swappedHookId+'</span>';
+      // Hook swap
+      if(hookSwapEnabled){
+        var hookResult = swapHook(texts, variant);
+        if(hookResult.hookId){
+          texts = hookResult.slides;
+          log('i', 'Hook swapped → '+hookResult.hookId+' ('+hookResult.hookTone+'): "'+texts[0].join(' ')+'"');
+        }
       }
+
+      // NG filter
+      var ngIssues = ngFilter(texts);
       if(ngIssues.length > 0){
-        var ngCount = ngIssues.length;
-        badgeHtml += '<span class="badge badge-warn">NG: '+ngCount+'</span>';
+        for(var ni=0; ni<ngIssues.length; ni++){
+          var issue = ngIssues[ni];
+          if(issue.type === 'word_repeat'){
+            log('w', 'NG: "'+issue.word+'" repeated in '+issue.count+' slides');
+          } else if(issue.type === 'long_hook'){
+            log('w', 'NG: Hook has '+issue.words+' words (max 12)');
+          }
+        }
       }
-      $('pattern-badge').innerHTML = badgeHtml;
+
+      currentSlides = texts;
+
+      // Show pattern badge
+      var badgeCls = safetyResult.passed ? 'badge-ok' : 'badge-err';
+      $('pattern-badge').innerHTML = '<span class="badge '+badgeCls+'">'+selectedPattern.id+'</span>'
+        + '<span class="badge badge-ok">'+selectedPattern.category+'</span>'
+        + '<span class="badge badge-ok">sim: '+similarity.toFixed(2)+'</span>';
     } else {
-      log('w', 'No pattern library loaded, cannot generate');
-      btn.disabled = false;
-      btn.textContent = 'Generate 6 Slides';
-      return;
+      // Fallback to hardcoded scripts
+      texts = FALLBACK_SCRIPTS[variant] || FALLBACK_SCRIPTS.B;
+      currentSlides = texts;
+      log('w', 'Using fallback scripts (no pattern library)');
     }
 
-    currentTexts = texts;
-
-    log('i', 'Loading backgrounds ('+bgTypes.filter(function(t,i,a){return a.indexOf(t)===i;}).join(', ')+')...');
-
-    preloadAllBgTypes(bgTypes, function(){
-      log('ok', 'Backgrounds loaded');
+    preloadBackgrounds(bgTypes, function(){
+      log('ok', '6 backgrounds loaded');
 
       var layouts = assignLayouts();
       var positions = assignPositions();
       var crops = assignCrops();
 
+      // Calculate text lengths per slide
       var textLengths = texts.map(function(s){
         return s.filter(function(l){return l;}).join(' ').length;
       });
@@ -942,17 +902,14 @@
       var plan = {
         generated_at: new Date().toISOString(),
         variant: variant,
-        brand: brand,
-        hook_swap: hookSwap,
-        swapped_hook_id: swappedHookId,
+        brand: brandChecked,
+        brandSlideOnly: brandSlideOnly,
         output_size: W+'x'+H,
         pattern_id: selectedPattern ? selectedPattern.id : 'fallback',
         pattern_category: selectedPattern ? selectedPattern.category : null,
         pattern_tags: selectedPattern ? selectedPattern.tags : [],
         pattern_structure: selectedPattern ? selectedPattern.structure : null,
-        bg_types: bgTypes,
         similarity_score: similarity,
-        ng_issues: ngIssues,
         safety_filter_result: safetyResult ? {
           passed: safetyResult.passed,
           banned_hits: safetyResult.bannedHits,
@@ -963,36 +920,32 @@
         diversity_setting: $('diversity').value,
         avoid_recent_n: avoidN,
         pattern_mode: mode,
+        hook_swap: hookSwapEnabled,
         slides: []
       };
 
       var generated = 0;
 
       function processSlide(i){
-        var bgType = bgTypes[i] || 'desk';
-        var bgImg = getBgImage(i, bgType);
-        if(!bgImg){
-          log('err', 'No background for slide '+(i+1)+' ('+bgType+'), using desk fallback');
-          bgImg = getBgImage(i, 'desk');
-        }
-        if(!bgImg){
-          log('err', 'No background available for slide '+(i+1));
-          generated++;
-          return;
+        // Brand logic: if brandSlideOnly >= 0, only show on that slide; otherwise use checkbox
+        var showBrand;
+        if(brandSlideOnly >= 0){
+          showBrand = brandChecked && (i === brandSlideOnly);
+        } else {
+          showBrand = brandChecked;
         }
 
-        var canvas = composeSlide(bgImg, texts[i], layouts[i], positions[i], crops[i], brand, i);
+        var canvas = composeSlide(bgImages[i], texts[i], layouts[i], positions[i], crops[i], showBrand, i, variant);
 
         plan.slides.push({
           slide_index: i,
           background: (i+1)+'.jpg',
-          bg_type: bgType,
           text: texts[i],
           text_length: textLengths[i],
           layout_variant: layouts[i],
           text_position: positions[i],
           crop_variant: crops[i],
-          brand: brand
+          brand: showBrand
         });
 
         canvasToBlob(canvas).then(function(blob){
@@ -1000,8 +953,8 @@
           var sizeKB = Math.round(blob.size/1024);
           var url = URL.createObjectURL(blob);
           var meta = layouts[i]+' \u00b7 '+crops[i]+' \u00b7 '+sizeKB+'KB';
-          showSlide(i, url, meta, bgType);
-          log('ok', 'Slide '+(i+1)+': '+bgType+' / '+layouts[i]+' / '+positions[i]+' / '+crops[i]);
+          showSlide(i, url, meta);
+          log('ok', 'Slide '+(i+1)+': '+layouts[i]+' / '+positions[i]+' / '+crops[i]+(showBrand?' +brand':''));
 
           generated++;
           if(generated===6){
@@ -1023,27 +976,30 @@
     });
   });
 
-  // ── Regenerate single slide ────────────────────────────────────
+  // ── Regenerate single slide ──────────────────────────────────
   function regenSlide(index){
-    if(!currentPlan || !currentTexts) return;
+    if(!currentPlan || !bgImages[index]) return;
     var btn = gridEl.querySelector('[data-i="'+index+'"]');
     btn.textContent = '...';
 
-    var brand = $('brand').checked;
-    var texts = currentTexts;
-    var bgType = (currentPlan.bg_types && currentPlan.bg_types[index]) || 'desk';
-    var bgImg = getBgImage(index, bgType);
-    if(!bgImg) bgImg = getBgImage(index, 'desk');
-    if(!bgImg){ log('err', 'No background for regen'); return; }
-
+    var variant = $('variant').value;
+    var brandChecked = $('brand').checked;
+    var brandSlideOnly = currentPlan.brandSlideOnly;
+    var texts = currentSlides || (currentPattern ? currentPattern.slides : (FALLBACK_SCRIPTS[variant] || FALLBACK_SCRIPTS.B));
     log('i', 'Regenerating slide '+(index+1)+'...');
 
-    var rule = SLIDE_LAYOUT_RULES[index];
-    var layout = pickRandom(rule.layouts);
-    var position = pickRandom(rule.positions);
+    var layout = LAYOUTS[Math.floor(Math.random()*LAYOUTS.length)];
+    var position = POSITIONS[Math.floor(Math.random()*POSITIONS.length)];
     var crop = CROPS[Math.floor(Math.random()*CROPS.length)];
 
-    var canvas = composeSlide(bgImg, texts[index], layout, position, crop, brand, index);
+    var showBrand;
+    if(brandSlideOnly >= 0){
+      showBrand = brandChecked && (index === brandSlideOnly);
+    } else {
+      showBrand = brandChecked;
+    }
+
+    var canvas = composeSlide(bgImages[index], texts[index], layout, position, crop, showBrand, index, variant);
 
     canvasToBlob(canvas).then(function(blob){
       currentBlobs[index] = blob;
@@ -1051,24 +1007,23 @@
       currentPlan.slides[index] = {
         slide_index: index,
         background: (index+1)+'.jpg',
-        bg_type: bgType,
         text: texts[index],
         text_length: texts[index].filter(function(l){return l;}).join(' ').length,
         layout_variant: layout,
         text_position: position,
         crop_variant: crop,
-        brand: brand
+        brand: showBrand
       };
 
       var sizeKB = Math.round(blob.size/1024);
       var url = URL.createObjectURL(blob);
-      showSlide(index, url, layout+' \u00b7 '+crop+' \u00b7 '+sizeKB+'KB', bgType);
+      showSlide(index, url, layout+' \u00b7 '+crop+' \u00b7 '+sizeKB+'KB');
       btn.textContent = 'Regen';
-      log('ok', 'Slide '+(index+1)+' regenerated: '+bgType+' / '+layout+' / '+position+' / '+crop);
+      log('ok', 'Slide '+(index+1)+' regenerated: '+layout+' / '+position+' / '+crop);
     });
   }
 
-  // ── ZIP download ───────────────────────────────────────────────
+  // ── ZIP download ──────────────────────────────────────────────
   $('zip-btn').addEventListener('click', function(){
     if(!currentPlan || currentBlobs.length<6) return;
     var zipBtn = $('zip-btn');
@@ -1101,7 +1056,7 @@
     });
   });
 
-  // ── Post to TikTok via Postiz ──────────────────────────────────
+  // ── Post to TikTok via Postiz ───────────────────────────────
   $('tiktok-btn').addEventListener('click', async function(){
     if(!currentPlan || currentBlobs.length<6){
       log('err', 'スライドを先に生成してください'); return;
@@ -1149,7 +1104,7 @@
     }
   });
 
-  // ── Export log (enhanced) ──────────────────────────────────────
+  // ── Export log (enhanced) ─────────────────────────────────────
   $('log-btn').addEventListener('click', function(){
     if(!currentPlan) return;
     var json = JSON.stringify(currentPlan, null, 2);
@@ -1161,10 +1116,10 @@
     log('i', 'Exported '+a.download);
   });
 
-  // ── Init ───────────────────────────────────────────────────────
+  // ── Init ─────────────────────────────────────────────────────
   log('i', 'Ready. Select variant and click Generate.');
   log('i', 'Loading pattern libraries...');
-  loadPatterns('A');
+  loadPatterns('W');
   loadHooks();
 })();
 </script>

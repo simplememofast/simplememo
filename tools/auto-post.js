@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 /**
- * Auto-post v2: pick a random pattern from A/B/C, optionally swap hook,
- * generate 6 slides with visual type awareness, post to TikTok.
+ * Auto-post: pick a random pattern, generate 6 slides, post to TikTok.
  *
  * Usage:
- *   node auto-post.js [--variant=A|B|C] [--hook-swap]
+ *   node auto-post.js [--variant=W|A|B|C]
  *
  * Environment:
  *   POSTIZ_API_KEY  – Postiz API key (or set in .env)
  *
  * The script:
- *   1. Loads pattern libraries (A/B/C) and hooks
+ *   1. Loads pattern libraries (W, A, B, C)
  *   2. Picks a random pattern avoiding recent N
- *   3. Optionally swaps slide 1 with a random hook
- *   4. Generates 6 slides via compose-slides.js (bgType-aware)
- *   5. Uploads & posts to TikTok via Postiz
- *   6. Logs pattern_id, hook_id, and result
+ *   3. Hook swap for variety
+ *   4. NG filter check
+ *   5. Generates 6 slides via compose-slides.js
+ *   6. Uploads & posts to TikTok via Postiz
+ *   7. Logs pattern_id and result
  */
 
-import { readFileSync, writeFileSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve, join } from "path";
 import { composeSlide } from "./compose-slides.js";
 
@@ -31,16 +31,14 @@ const SLIDE_COUNT = 6;
 const SCHEDULE_DELAY_MS = 60_000;
 const AVOID_RECENT_N = 20;
 const ROOT = resolve(import.meta.dirname, "..");
-const PATTERNS_DIR = join(ROOT, "admin", "patterns");
 const BG_DIR = join(ROOT, "admin", "bg");
 const HISTORY_PATH = join(import.meta.dirname, ".auto-post-history.json");
 const HOOK_HISTORY_PATH = join(import.meta.dirname, ".auto-hook-history.json");
-const DEFAULT_BG_TYPES = ["desk", "desk", "hand", "hand", "proof", "desk"];
+const DEFAULT_BG_TYPES = ["desk", "desk", "desk", "desk", "desk", "desk"];
 
-// Parse CLI args
-const args = process.argv.slice(2).join(" ");
-const cliVariant = (args.match(/--variant=([ABC])/i) || [, null])[1];
-const hookSwapEnabled = /--hook-swap/i.test(args);
+// CLI args
+const cliArgs = process.argv.slice(2).join(" ");
+const cliVariant = (cliArgs.match(/--variant=([WABC])/i) || [, null])[1];
 
 // Load .env
 function loadEnv() {
@@ -66,6 +64,30 @@ const TIKTOK_INTEGRATION_ID = process.env.POSTIZ_TIKTOK_ID || "cmlm8shaq014jns0y
 if (!API_KEY) {
   console.error("Error: POSTIZ_API_KEY not set.");
   process.exit(1);
+}
+
+// ---------------------------------------------------------------------------
+// Pattern & hooks loading
+// ---------------------------------------------------------------------------
+
+function loadPatternLib(variant) {
+  const filePath = join(ROOT, "admin", "patterns", `${variant}.json`);
+  if (!existsSync(filePath)) return null;
+  try {
+    return JSON.parse(readFileSync(filePath, "utf-8"));
+  } catch {
+    return null;
+  }
+}
+
+function loadHooks() {
+  const filePath = join(ROOT, "admin", "patterns", "hooks.json");
+  if (!existsSync(filePath)) return null;
+  try {
+    return JSON.parse(readFileSync(filePath, "utf-8"));
+  } catch {
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -99,36 +121,20 @@ function getHookHistory() {
 function addToHookHistory(hookId) {
   const h = getHookHistory();
   h.unshift(hookId);
-  writeFileSync(HOOK_HISTORY_PATH, JSON.stringify(h.slice(0, 50)));
+  writeFileSync(HOOK_HISTORY_PATH, JSON.stringify(h.slice(0, 200)));
 }
 
 // ---------------------------------------------------------------------------
-// Load pattern libraries
+// Pattern selection
 // ---------------------------------------------------------------------------
 
-function loadPatternLib(variant) {
-  const path = join(PATTERNS_DIR, `${variant}.json`);
-  if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, "utf-8"));
-}
-
-function loadHooks() {
-  const path = join(PATTERNS_DIR, "hooks.json");
-  if (!existsSync(path)) return null;
-  return JSON.parse(readFileSync(path, "utf-8"));
-}
-
-// ---------------------------------------------------------------------------
-// Pattern selection (multi-variant, weighted, avoid recent)
-// ---------------------------------------------------------------------------
-
-function selectPattern(allPatterns) {
+function selectPattern(patterns) {
   const recent = getHistory().slice(0, AVOID_RECENT_N);
 
-  let candidates = allPatterns.filter((p) => !recent.includes(p.id));
+  let candidates = patterns.filter((p) => !recent.includes(p.id));
   if (candidates.length === 0) {
     console.log("  All patterns used recently, resetting.");
-    candidates = allPatterns;
+    candidates = patterns;
   }
 
   // Weighted random
@@ -145,13 +151,19 @@ function selectPattern(allPatterns) {
 // Hook swap
 // ---------------------------------------------------------------------------
 
-function swapHook(slides, hooksLib) {
+function swapHook(slides, hooksLib, variant) {
   if (!hooksLib || !hooksLib.hooks || hooksLib.hooks.length === 0) {
     return { slides, hookId: null };
   }
+  // Filter by variant if available
+  let pool = hooksLib.hooks;
+  if (variant) {
+    const variantHooks = pool.filter((h) => h.variant === variant);
+    if (variantHooks.length > 0) pool = variantHooks;
+  }
   const recentHooks = getHookHistory().slice(0, 10);
-  let available = hooksLib.hooks.filter((h) => !recentHooks.includes(h.id));
-  if (available.length === 0) available = hooksLib.hooks;
+  let available = pool.filter((h) => !recentHooks.includes(h.id));
+  if (available.length === 0) available = pool;
 
   const pick = available[Math.floor(Math.random() * available.length)];
   const newSlides = [...slides];
@@ -199,17 +211,12 @@ function ngFilter(slides) {
 // Slide generation (server-side via Sharp, bgType-aware)
 // ---------------------------------------------------------------------------
 
+const LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
+const POSITIONS = [
+  "top-left", "top-center", "top-right",
+  "bottom-left", "bottom-center", "bottom-right",
+];
 const CROPS = ["wide", "zoom-in", "left-focus", "right-focus"];
-
-// Slide-specific layout rules (matches client-side)
-const SLIDE_LAYOUT_RULES = {
-  0: { layouts: ["poster_dark", "poster_dark", "caption_subtle"], positions: ["top-center", "top-left", "top-right"] },
-  1: { layouts: ["poster_dark", "caption_subtle", "caption_light"], positions: ["top-left", "top-center", "bottom-left"] },
-  2: { layouts: ["caption_subtle", "poster_dark", "caption_light"], positions: ["bottom-left", "bottom-center", "top-left"] },
-  3: { layouts: ["caption_subtle", "poster_dark", "caption_light"], positions: ["top-right", "top-center", "bottom-right"] },
-  4: { layouts: ["poster_dark", "caption_subtle"], positions: ["bottom-center", "bottom-left", "bottom-right"] },
-  5: { layouts: ["poster_dark", "caption_light"], positions: ["bottom-center", "top-center"] },
-};
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -219,16 +226,20 @@ function shuffle(arr) {
   return arr;
 }
 
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 function assignLayouts() {
-  return Array.from({ length: 6 }, (_, i) => pickRandom(SLIDE_LAYOUT_RULES[i].layouts));
+  return shuffle(["poster_dark", "poster_dark", "caption_subtle", "caption_subtle", "caption_light", "caption_light"]);
 }
 
 function assignPositions() {
-  return Array.from({ length: 6 }, (_, i) => pickRandom(SLIDE_LAYOUT_RULES[i].positions));
+  const picked = [];
+  const available = [...POSITIONS];
+  for (let i = 0; i < 6; i++) {
+    const idx = Math.floor(Math.random() * available.length);
+    picked.push(available[idx]);
+    available.splice(idx, 1);
+    if (available.length === 0) available.push(...POSITIONS);
+  }
+  return picked;
 }
 
 function assignCrops() {
@@ -255,7 +266,7 @@ function resolveBgPath(slideIndex, bgType) {
   throw new Error(`Background not found for slide ${slideIndex + 1} (${bgType})`);
 }
 
-async function generateSlides(slides, bgTypes) {
+async function generateSlides(slides, bgTypes, brandSlideOnly) {
   const layouts = assignLayouts();
   const positions = assignPositions();
   const crops = assignCrops();
@@ -264,9 +275,11 @@ async function generateSlides(slides, bgTypes) {
   for (let i = 0; i < SLIDE_COUNT; i++) {
     const bgType = bgTypes[i] || "desk";
     const bgPath = resolveBgPath(i, bgType);
-    const buf = await composeSlide(bgPath, slides[i], layouts[i], positions[i], crops[i], false);
+    // Brand footer: only on specified slide (or never if -1)
+    const showBrand = brandSlideOnly !== undefined ? (i === brandSlideOnly) : false;
+    const buf = await composeSlide(bgPath, slides[i], layouts[i], positions[i], crops[i], showBrand, i);
     buffers.push(buf);
-    console.log(`  [${i + 1}/6] ${bgType.padEnd(6)} ${layouts[i].padEnd(16)} ${crops[i].padEnd(12)} ${positions[i]}`);
+    console.log(`  [${i + 1}/6] ${bgType.padEnd(6)} ${layouts[i].padEnd(16)} ${crops[i].padEnd(12)} ${positions[i]}${showBrand ? ' +brand' : ''}`);
   }
 
   return buffers;
@@ -347,18 +360,25 @@ async function createTikTokPost(images, caption) {
 // ---------------------------------------------------------------------------
 
 async function main() {
-  console.log("\n=== Auto Post to TikTok v2 ===\n");
+  console.log("\n=== Auto Post to TikTok ===\n");
 
   // 1. Load all pattern libraries
-  const variants = cliVariant ? [cliVariant.toUpperCase()] : ["A", "B", "C"];
+  const variants = cliVariant ? [cliVariant.toUpperCase()] : ["W", "A", "B", "C"];
   let allPatterns = [];
   let defaultBgTypes = DEFAULT_BG_TYPES;
+  const libConfigs = {};
 
   for (const v of variants) {
     const lib = loadPatternLib(v);
     if (lib) {
       console.log(`Loaded ${lib.patterns.length} patterns from ${v}.json`);
+      // Tag patterns with their source variant
+      for (const p of lib.patterns) {
+        p._variant = v;
+        p._brandSlideOnly = lib.brandSlideOnly;
+      }
       allPatterns.push(...lib.patterns);
+      libConfigs[v] = lib;
       if (lib.defaultBgTypes) defaultBgTypes = lib.defaultBgTypes;
     }
   }
@@ -367,8 +387,6 @@ async function main() {
     console.error("No patterns found!");
     process.exit(1);
   }
-
-  console.log(`Total: ${allPatterns.length} patterns across ${variants.join("/")}`);
 
   // 2. Load hooks
   const hooksLib = loadHooks();
@@ -380,15 +398,18 @@ async function main() {
   const pattern = selectPattern(allPatterns);
   let slides = pattern.slides.map((s) => [...s]); // deep copy
   const bgTypes = pattern.bgTypes || defaultBgTypes;
+  const patternVariant = pattern._variant || "A";
+  const brandSlideOnly = pattern._brandSlideOnly !== undefined ? pattern._brandSlideOnly : -1;
 
-  console.log(`\nSelected: ${pattern.id} [${pattern.category}]`);
+  console.log(`\nSelected: ${pattern.id} [${pattern.category}] variant=${patternVariant}`);
   console.log(`  Hook: "${slides[0].join(" ")}"`);
   console.log(`  BgTypes: ${bgTypes.join(" → ")}`);
+  if (brandSlideOnly >= 0) console.log(`  Brand: Slide ${brandSlideOnly + 1} only`);
 
   // 4. Hook swap (always enabled for auto-post for max variety)
   let hookId = null;
   if (hooksLib) {
-    const result = swapHook(slides, hooksLib);
+    const result = swapHook(slides, hooksLib, patternVariant);
     slides = result.slides;
     hookId = result.hookId;
     if (hookId) {
@@ -410,7 +431,7 @@ async function main() {
 
   // 6. Generate slides
   console.log("\nGenerating slides...");
-  const buffers = await generateSlides(slides, bgTypes);
+  const buffers = await generateSlides(slides, bgTypes, brandSlideOnly);
 
   // 7. Upload
   console.log("\nUploading to Postiz...");
@@ -434,7 +455,7 @@ async function main() {
 
   // 10. Record history
   addToHistory(pattern.id);
-  console.log(`\nDone! Pattern ${pattern.id}${hookId ? ` + hook ${hookId}` : ""} recorded.`);
+  console.log(`\nDone! Pattern ${pattern.id} (hook: ${hookId || 'original'}) recorded to history.`);
   console.log(`Caption:\n${caption}`);
 }
 

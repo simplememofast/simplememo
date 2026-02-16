@@ -148,8 +148,16 @@ function escXml(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function buildSvgOverlay(lines, layout, position, brand) {
-  const fontSize = lines.some(l => l.length > 25) ? 64 : 76;
+function buildSvgOverlay(lines, layout, position, brand, slideIndex) {
+  // Slide-aware font sizing
+  let fontSize;
+  if(slideIndex === 0){
+    fontSize = lines.some(l => l.length > 20) ? 80 : 96;
+  } else if(slideIndex === 5){
+    fontSize = lines.some(l => l.length > 25) ? 60 : 68;
+  } else {
+    fontSize = lines.some(l => l.length > 25) ? 64 : 76;
+  }
   const lineHeight = fontSize * 1.35;
   const linesFiltered = lines.filter(l => l.length > 0);
   const textBlockH = linesFiltered.length * lineHeight;
@@ -220,7 +228,7 @@ function buildSvgOverlay(lines, layout, position, brand) {
 }
 
 // ── Compose single slide ────────────────────────────────────────
-export async function composeSlide(bgPath, lines, layout, position, cropVariant, brand) {
+export async function composeSlide(bgPath, lines, layout, position, cropVariant, brand, slideIndex) {
   const meta = await sharp(bgPath).metadata();
   const crop = getCropRegion(meta.width, meta.height, cropVariant);
 
@@ -230,7 +238,7 @@ export async function composeSlide(bgPath, lines, layout, position, cropVariant,
     .png()
     .toBuffer();
 
-  const svgOverlay = buildSvgOverlay(lines, layout, position, brand);
+  const svgOverlay = buildSvgOverlay(lines, layout, position, brand, slideIndex);
   const svgBuf = Buffer.from(svgOverlay);
 
   return sharp(bg)
