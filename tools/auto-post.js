@@ -266,9 +266,14 @@ function resolveBgPath(slideIndex, bgType) {
   throw new Error(`Background not found for slide ${slideIndex + 1} (${bgType})`);
 }
 
-async function generateSlides(slides, bgTypes, brandSlideOnly) {
-  const layouts = assignLayouts();
-  const positions = assignPositions();
+async function generateSlides(slides, bgTypes, brandSlideOnly, libConfig) {
+  // Layout consistency: use fixed values from lib config if available
+  const layouts = (libConfig && libConfig.fixedLayout)
+    ? Array(SLIDE_COUNT).fill(libConfig.fixedLayout)
+    : assignLayouts();
+  const positions = (libConfig && libConfig.fixedPosition)
+    ? Array(SLIDE_COUNT).fill(libConfig.fixedPosition)
+    : assignPositions();
   const crops = assignCrops();
   const buffers = [];
 
@@ -430,8 +435,12 @@ async function main() {
   }
 
   // 6. Generate slides
+  const libConfig = libConfigs[patternVariant] || null;
   console.log("\nGenerating slides...");
-  const buffers = await generateSlides(slides, bgTypes, brandSlideOnly);
+  if (libConfig && libConfig.fixedLayout) {
+    console.log(`  Layout: ${libConfig.fixedLayout} (fixed) / Position: ${libConfig.fixedPosition} (fixed)`);
+  }
+  const buffers = await generateSlides(slides, bgTypes, brandSlideOnly, libConfig);
 
   // 7. Upload
   console.log("\nUploading to Postiz...");

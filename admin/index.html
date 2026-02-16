@@ -890,8 +890,13 @@
     preloadBackgrounds(bgTypes, function(){
       log('ok', '6 backgrounds loaded');
 
-      var layouts = assignLayouts();
-      var positions = assignPositions();
+      // Layout consistency: use fixed values from lib config if available
+      var layouts = (lib && lib.fixedLayout)
+        ? [lib.fixedLayout,lib.fixedLayout,lib.fixedLayout,lib.fixedLayout,lib.fixedLayout,lib.fixedLayout]
+        : assignLayouts();
+      var positions = (lib && lib.fixedPosition)
+        ? [lib.fixedPosition,lib.fixedPosition,lib.fixedPosition,lib.fixedPosition,lib.fixedPosition,lib.fixedPosition]
+        : assignPositions();
       var crops = assignCrops();
 
       // Calculate text lengths per slide
