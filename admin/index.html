@@ -70,6 +70,11 @@
     .badge-ok{background:rgba(63,185,80,.15);color:var(--green)}
     .badge-warn{background:rgba(210,153,34,.15);color:var(--yellow)}
     .badge-err{background:rgba(248,81,73,.15);color:var(--red)}
+    .warn-badges{padding:4px 8px;display:flex;gap:4px;flex-wrap:wrap}
+    .warn-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:.58rem;font-weight:600}
+    .warn-badge-warn{background:rgba(210,153,34,.18);color:var(--yellow)}
+    .warn-badge-err{background:rgba(248,81,73,.18);color:var(--red)}
+    .warn-summary{font-size:.72rem;color:var(--yellow);margin-top:6px}
   </style>
 </head>
 <body>
@@ -130,6 +135,9 @@
         </div>
         <div class="check-row" style="margin-top:14px">
           <input type="checkbox" id="brand" checked><label for="brand">Brand Footer</label>
+        </div>
+        <div class="check-row" style="margin-top:14px">
+          <input type="checkbox" id="ab-mode"><label for="ab-mode">A/B Copy Mode</label>
         </div>
         <button class="btn-accent" id="gen-btn" style="margin-top:14px">Generate 6 Slides</button>
       </div>
@@ -284,8 +292,11 @@
     }
   }
 
-  // ── Hook swap ─────────────────────────────────────────────────
-  function swapHook(slides, variant){
+  // ── Hook category weights ──────────────────────────────────────
+  var HOOK_CATEGORY_WEIGHTS = { pain: 3.0, gain: 2.5, contrarian: 2.0, identity: 1.5, 'quiet-luxury': 1.0 };
+
+  // ── Hook swap (with category weighting) ───────────────────────
+  function swapHook(slides, variant, preferredCategory){
     if(!hooksLibrary || !hooksLibrary.hooks || hooksLibrary.hooks.length === 0){
       return { slides: slides, hookId: null };
     }
@@ -294,15 +305,53 @@
       var variantHooks = pool.filter(function(h){ return h.variant === variant; });
       if(variantHooks.length > 0) pool = variantHooks;
     }
+    if(preferredCategory){
+      var catHooks = pool.filter(function(h){ return h.category === preferredCategory; });
+      if(catHooks.length > 0) pool = catHooks;
+    }
     var recentHooks = getHookHistory().slice(0, 10);
     var available = pool.filter(function(h){ return recentHooks.indexOf(h.id) === -1; });
     if(available.length === 0) available = pool;
 
-    var pick = available[Math.floor(Math.random() * available.length)];
+    // Weighted random by category
+    var totalWeight = 0;
+    available.forEach(function(h){ totalWeight += (HOOK_CATEGORY_WEIGHTS[h.category] || 1); });
+    var r = Math.random() * totalWeight;
+    var pick = available[0];
+    for(var i = 0; i < available.length; i++){
+      r -= (HOOK_CATEGORY_WEIGHTS[available[i].category] || 1);
+      if(r <= 0){ pick = available[i]; break; }
+    }
+
     addToHookHistory(pick.id);
     var newSlides = slides.map(function(s){ return s.slice(); });
     newSlides[0] = pick.text;
-    return { slides: newSlides, hookId: pick.id, hookTone: pick.tone };
+    return { slides: newSlides, hookId: pick.id, hookTone: pick.tone, hookCategory: pick.category };
+  }
+
+  // ── Slide rules validation ─────────────────────────────────────
+  function validateSlideRules(slides, slideRules){
+    if(!slideRules) return [];
+    var warnings = [];
+    for(var i = 0; i < slides.length; i++){
+      var rule = slideRules['slide' + (i + 1)];
+      if(!rule) continue;
+      var text = slides[i].filter(function(l){ return l; }).join(' ');
+      var chars = text.length;
+      var words = text.split(/\s+/).filter(function(w){ return w.length > 0; }).length;
+      var lineCount = slides[i].filter(function(l){ return l && l.length > 0; }).length;
+
+      if(rule.maxChars && chars > rule.maxChars){
+        warnings.push({ slide: i + 1, type: 'chars', value: chars, max: rule.maxChars });
+      }
+      if(rule.maxWords && words > rule.maxWords){
+        warnings.push({ slide: i + 1, type: 'words', value: words, max: rule.maxWords });
+      }
+      if(rule.maxLines && lineCount > rule.maxLines){
+        warnings.push({ slide: i + 1, type: 'lines', value: lineCount, max: rule.maxLines });
+      }
+    }
+    return warnings;
   }
 
   // ── NG Filter ─────────────────────────────────────────────────
@@ -492,6 +541,16 @@
   var BAND_MIN_W = 320;
   var MAX_TEXT_LINES = 3;
 
+  // ── Band width templates (3 sizes for consistency) ────────
+  var BAND_TEMPLATES = {
+    short:  { widthRatio: 0.55, maxChars: 20 },
+    medium: { widthRatio: 0.75, maxChars: 40 },
+    long:   { widthRatio: 0.95, maxChars: 999 }
+  };
+
+  // ── Top position (10% safe area center) ───────────────────
+  var TOP_POSITION_Y = 192;
+
   // Font size steps per slide role (descending)
   var FONT_STEPS = {
     hook: [96, 80, 64, 48],
@@ -629,6 +688,39 @@
     }
   }
 
+  // ── Select band template by total character count ──────────
+  function selectBandTemplate(lines){
+    var totalChars = lines.filter(function(l){ return l && l.length > 0; }).join('').length;
+    if(totalChars <= BAND_TEMPLATES.short.maxChars) return 'short';
+    if(totalChars <= BAND_TEMPLATES.medium.maxChars) return 'medium';
+    return 'long';
+  }
+
+  // ── Balance 2-line text for even width distribution ───────
+  function balanceWrapLines(lines, fontSize, maxWidth, measureFn){
+    if(lines.length !== 2) return lines;
+    var w0 = measureFn(lines[0], fontSize);
+    var w1 = measureFn(lines[1], fontSize);
+    var diff = Math.abs(w0 - w1);
+    var avg = (w0 + w1) / 2;
+    if(diff < avg * 0.3) return lines;
+    var combined = lines[0] + ' ' + lines[1];
+    var words = combined.split(/\s+/);
+    if(words.length < 3) return lines;
+    var bestSplit = lines;
+    var bestDiff = diff;
+    for(var i = 1; i < words.length; i++){
+      var a = words.slice(0, i).join(' ');
+      var b = words.slice(i).join(' ');
+      var wa = measureFn(a, fontSize);
+      var wb = measureFn(b, fontSize);
+      if(wa > maxWidth || wb > maxWidth) continue;
+      var d = Math.abs(wa - wb);
+      if(d < bestDiff){ bestDiff = d; bestSplit = [a, b]; }
+    }
+    return bestSplit;
+  }
+
   // ── Get slide role for font sizing ──────────────────────────
   function getSlideRole(slideIndex){
     if(slideIndex === 0) return 'hook';
@@ -707,14 +799,19 @@
       var wrapped = wrapTextLines(ctx, linesFiltered, textMaxW);
 
       if(wrapped.length <= MAX_TEXT_LINES){
+        // Balance 2-line text for even width
+        var ctxRef = ctx;
+        var balanced = balanceWrapLines(wrapped, fs, textMaxW, function(text, _fs){
+          return ctxRef.measureText(text).width;
+        });
         // Find max line width for band sizing
         var maxLineWidth = 0;
-        for(var i=0; i<wrapped.length; i++){
-          var w = ctx.measureText(wrapped[i]).width;
+        for(var i=0; i<balanced.length; i++){
+          var w = ctx.measureText(balanced[i]).width;
           if(w > maxLineWidth) maxLineWidth = w;
         }
         return {
-          lines: wrapped,
+          lines: balanced,
           fontSize: fs,
           lineHeight: Math.round(fs * 1.35),
           maxLineWidth: maxLineWidth
@@ -751,11 +848,11 @@
     var wrappedLines = measured.lines;
     var maxLineWidth = measured.maxLineWidth;
 
-    // Calculate band dimensions (content-driven)
-    var bandContentW = maxLineWidth + BAND_PAD_X * 2;
-    // For 3+ lines, widen slightly for readability
-    if(wrappedLines.length >= 3) bandContentW = Math.min(bandContentW * 1.05, safe.maxW);
-    var boxW = Math.max(BAND_MIN_W, Math.min(Math.round(bandContentW), safe.maxW));
+    // Calculate band dimensions (template-driven)
+    var bandTpl = selectBandTemplate(wrappedLines);
+    var templateW = Math.round(safe.maxW * BAND_TEMPLATES[bandTpl].widthRatio);
+    var contentW = maxLineWidth + BAND_PAD_X * 2;
+    var boxW = Math.max(BAND_MIN_W, Math.min(Math.max(templateW, contentW), safe.maxW));
     var textBlockH = wrappedLines.length * lineHeight;
     var boxH = textBlockH + BAND_PAD_Y * 2 + Math.round(fontSize * 0.15); // extra for descenders
     var boxR = BAND_RADIUS;
@@ -770,7 +867,7 @@
       boxX = Math.round((W - boxW) / 2);
     }
     if(position.indexOf("top")===0){
-      boxY = SAFE_TOP + 20;
+      boxY = TOP_POSITION_Y;
     } else {
       boxY = H - SAFE_BOTTOM - boxH - 20;
     }
@@ -856,6 +953,63 @@
     ctx.closePath();
   }
 
+  // ── Check slide warnings (overflow, safe area, rules) ─────────
+  function checkSlideWarnings(ctx, slides, positions, layouts, lib){
+    var warnings = []; // [{slide, badges:[{label,level}]}]
+    for(var i = 0; i < slides.length; i++){
+      var badges = [];
+      var lines = slides[i].filter(function(l){ return l && l.length > 0; });
+      var text = lines.join(' ');
+      var chars = text.length;
+      var words = text.split(/\s+/).filter(function(w){ return w.length > 0; }).length;
+      var lineCount = lines.length;
+
+      // Get safe area and measure
+      var safe = getSafeArea(positions[i]);
+      var measured = measureAndLayout(ctx, slides[i], i, safe.maxW);
+      var bandTpl = selectBandTemplate(measured.lines);
+      var templateW = Math.round(safe.maxW * BAND_TEMPLATES[bandTpl].widthRatio);
+      var contentW = measured.maxLineWidth + BAND_PAD_X * 2;
+      var boxW = Math.max(BAND_MIN_W, Math.min(Math.max(templateW, contentW), safe.maxW));
+
+      // Overflow: content wider than safe area
+      if(contentW > safe.maxW){
+        badges.push({ label: 'Overflow', level: 'err' });
+      }
+
+      // Safe area: top band too close to edge
+      var textBlockH = measured.lines.length * measured.lineHeight;
+      var boxH = textBlockH + BAND_PAD_Y * 2 + Math.round(measured.fontSize * 0.15);
+      if(positions[i].indexOf('top') === 0){
+        var boxY = TOP_POSITION_Y;
+        if(boxY < SAFE_TOP){
+          badges.push({ label: 'Safe area', level: 'warn' });
+        }
+      }
+
+      // Slide rules check
+      if(lib && lib.slideRules){
+        var rule = lib.slideRules['slide' + (i + 1)];
+        if(rule){
+          if(rule.maxChars && chars > rule.maxChars) badges.push({ label: 'Chars:'+chars+'/'+rule.maxChars, level: 'warn' });
+          if(rule.maxWords && words > rule.maxWords) badges.push({ label: 'Words:'+words+'/'+rule.maxWords, level: 'warn' });
+          if(rule.maxLines && lineCount > rule.maxLines) badges.push({ label: 'Lines:'+lineCount+'/'+rule.maxLines, level: 'warn' });
+        }
+      }
+
+      // Slide 1 hook check: is it a question/rule instead of a hook?
+      if(i === 0){
+        var hookText = text.toLowerCase();
+        if(hookText.indexOf('the fix:') === 0 || hookText.indexOf('rule') === 0 || hookText.indexOf('step') === 0){
+          badges.push({ label: 'Hook?', level: 'warn' });
+        }
+      }
+
+      warnings.push({ slide: i, badges: badges });
+    }
+    return warnings;
+  }
+
   // ── Compose single slide on canvas ───────────────────────────
   function composeSlide(bgImg, lines, layout, position, cropVariant, brand, slideIndex, variantMode){
     var canvas = document.createElement('canvas');
@@ -886,6 +1040,7 @@
       s.className = 'slot'; s.id = 'slot-'+i;
       s.innerHTML = '<span class="slot-n">'+(i+1)+'</span>'
         +'<div class="slot-img" id="img-'+i+'">—</div>'
+        +'<div class="warn-badges" id="warn-'+i+'"></div>'
         +'<div class="slot-meta"><span id="meta-'+i+'"></span><button class="btn-sm btn-outline" data-i="'+i+'" style="display:none">Regen</button></div>';
       gridEl.appendChild(s);
     }
@@ -938,10 +1093,13 @@
     currentBlobs = [];
     currentPattern = null;
     currentSlides = null;
+    abBlobsB = [];
+    abTextsB = null;
 
     var variant = $('variant').value;
     var brandChecked = $('brand').checked;
     var hookSwapEnabled = $('hook-swap').checked;
+    var abMode = $('ab-mode').checked;
     var mode = $('pattern-mode').value;
     var tagFilter = $('tag-select').value;
     var seedId = $('seed-input').value.trim();
@@ -1003,7 +1161,7 @@
         var hookResult = swapHook(texts, variant);
         if(hookResult.hookId){
           texts = hookResult.slides;
-          log('i', 'Hook swapped → '+hookResult.hookId+' ('+hookResult.hookTone+'): "'+texts[0].join(' ')+'"');
+          log('i', 'Hook swapped → '+hookResult.hookId+' ('+hookResult.hookTone+'/'+hookResult.hookCategory+'): "'+texts[0].join(' ')+'"');
         }
       }
 
@@ -1021,6 +1179,15 @@
       }
 
       currentSlides = texts;
+
+      // Slide rules validation
+      if(lib && lib.slideRules){
+        var ruleWarnings = validateSlideRules(texts, lib.slideRules);
+        for(var ri = 0; ri < ruleWarnings.length; ri++){
+          var rw = ruleWarnings[ri];
+          log('w', 'SlideRule: slide '+rw.slide+' '+rw.type+'='+rw.value+' exceeds max='+rw.max);
+        }
+      }
 
       // Show pattern badge
       var badgeCls = safetyResult.passed ? 'badge-ok' : 'badge-err';
@@ -1118,6 +1285,40 @@
             log('ok', 'Done in '+sec+'s — Pattern: '+(selectedPattern ? selectedPattern.id+' ['+selectedPattern.category+']' : 'fallback'));
             btn.disabled = false;
             btn.textContent = 'Generate 6 Slides';
+
+            // Show warning badges
+            showWarningBadges(texts, positions, layouts, lib);
+
+            // A/B mode: generate variant B with different hook
+            if(abMode && hooksLibrary){
+              log('i', 'A/B mode: generating variant B...');
+              var textsB = texts.map(function(s){ return s.slice(); });
+              var hookB = swapHook(textsB, variant);
+              if(hookB.hookId){
+                textsB = hookB.slides;
+                abTextsB = textsB;
+                log('i', 'Variant B hook: '+hookB.hookId+' ('+hookB.hookTone+'/'+hookB.hookCategory+'): "'+textsB[0].join(' ')+'"');
+                var bGenerated = 0;
+                for(var bi=0; bi<6; bi++){
+                  (function(idx){
+                    var showBrandB;
+                    if(brandSlideOnly >= 0){
+                      showBrandB = brandChecked && (idx === brandSlideOnly);
+                    } else {
+                      showBrandB = brandChecked;
+                    }
+                    var canvasB = composeSlide(bgImages[idx], textsB[idx], layouts[idx], positions[idx], crops[idx], showBrandB, idx, variant);
+                    canvasToBlob(canvasB).then(function(blob){
+                      abBlobsB[idx] = blob;
+                      bGenerated++;
+                      if(bGenerated === 6){
+                        log('ok', 'A/B variant B generated (6 slides)');
+                      }
+                    });
+                  })(bi);
+                }
+              }
+            }
           }
         });
       }
@@ -1175,6 +1376,38 @@
     });
   }
 
+  // ── Show warning badges on slides ──────────────────────────────
+  function showWarningBadges(texts, positions, layouts, lib){
+    // Create a temp canvas for measurement
+    var tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = W; tmpCanvas.height = H;
+    var tmpCtx = tmpCanvas.getContext('2d');
+    tmpCtx.font = "800 64px 'Inter','Helvetica Neue',Arial,sans-serif";
+
+    var warnings = checkSlideWarnings(tmpCtx, texts, positions, layouts, lib);
+    var totalWarnings = 0;
+    for(var i = 0; i < warnings.length; i++){
+      var warnEl = $('warn-'+i);
+      if(!warnEl) continue;
+      warnEl.innerHTML = '';
+      var badges = warnings[i].badges;
+      totalWarnings += badges.length;
+      for(var j = 0; j < badges.length; j++){
+        var span = document.createElement('span');
+        span.className = 'warn-badge warn-badge-' + badges[j].level;
+        span.textContent = badges[j].label;
+        warnEl.appendChild(span);
+      }
+    }
+    if(totalWarnings > 0){
+      log('w', totalWarnings + ' warning(s) detected across slides');
+    }
+  }
+
+  // ── A/B mode state ─────────────────────────────────────────────
+  var abBlobsB = []; // variant B blobs for A/B mode
+  var abTextsB = null; // variant B texts
+
   // ── ZIP download ──────────────────────────────────────────────
   $('zip-btn').addEventListener('click', function(){
     if(!currentPlan || currentBlobs.length<6) return;
@@ -1184,14 +1417,24 @@
     log('i', 'Creating ZIP...');
 
     var zip = new JSZip();
+    var isAB = abBlobsB.length === 6;
 
-    for(var i=0;i<6;i++){
-      (function(idx){
-        var blob = currentBlobs[idx];
-        if(blob){
-          zip.file('slide_'+(idx+1)+'.png', blob);
-        }
-      })(i);
+    if(isAB){
+      // A/B mode: variant_A and variant_B folders
+      for(var i=0;i<6;i++){
+        if(currentBlobs[i]) zip.file('variant_A/slide_'+(i+1)+'.png', currentBlobs[i]);
+        if(abBlobsB[i]) zip.file('variant_B/slide_'+(i+1)+'.png', abBlobsB[i]);
+      }
+      var abSummary = {
+        variant_A: { texts: currentSlides },
+        variant_B: { texts: abTextsB },
+        generated_at: new Date().toISOString()
+      };
+      zip.file('ab_summary.json', JSON.stringify(abSummary, null, 2));
+    } else {
+      for(var i=0;i<6;i++){
+        if(currentBlobs[i]) zip.file('slide_'+(i+1)+'.png', currentBlobs[i]);
+      }
     }
 
     zip.file('slide_plan.json', JSON.stringify(currentPlan, null, 2));
@@ -1200,7 +1443,7 @@
       var a = document.createElement('a');
       a.href = URL.createObjectURL(content);
       var ts = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-      a.download = 'slides_'+currentPlan.variant+'_'+(currentPlan.pattern_id||'fb')+'_'+ts+'.zip';
+      a.download = 'slides_'+currentPlan.variant+'_'+(currentPlan.pattern_id||'fb')+'_'+(isAB?'AB_':'')+ts+'.zip';
       a.click();
       zipBtn.textContent = 'ZIP Download';
       zipBtn.disabled = false;

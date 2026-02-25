@@ -33,6 +33,16 @@ const BAND_RADIUS = 16;
 const BAND_MIN_W = 320;
 const MAX_TEXT_LINES = 3;
 
+// ── Band width templates (3 sizes for consistency) ──────────────
+const BAND_TEMPLATES = {
+  short:  { widthRatio: 0.55, maxChars: 20 },  // ~493px
+  medium: { widthRatio: 0.75, maxChars: 40 },  // ~672px
+  long:   { widthRatio: 0.95, maxChars: 999 }, // ~851px
+};
+
+// ── Top position (10% safe area center) ─────────────────────────
+const TOP_POSITION_Y = 192;
+
 // Font size steps per slide role (descending)
 const FONT_STEPS = {
   hook: [96, 80, 64, 48],
@@ -214,6 +224,41 @@ function wrapTextSvg(inputLines, fontSize, maxWidth) {
   return result;
 }
 
+// ── Select band template by total character count ───────────────
+function selectBandTemplate(lines) {
+  const totalChars = lines.filter(l => l && l.length > 0).join('').length;
+  if (totalChars <= BAND_TEMPLATES.short.maxChars) return 'short';
+  if (totalChars <= BAND_TEMPLATES.medium.maxChars) return 'medium';
+  return 'long';
+}
+
+// ── Balance 2-line text for even width distribution ─────────────
+function balanceWrapLines(lines, fontSize, maxWidth, measureFn) {
+  if (lines.length !== 2) return lines;
+  const w0 = measureFn(lines[0], fontSize);
+  const w1 = measureFn(lines[1], fontSize);
+  const diff = Math.abs(w0 - w1);
+  const avg = (w0 + w1) / 2;
+  // Only rebalance if difference > 30% of average
+  if (diff < avg * 0.3) return lines;
+  // Try re-splitting the combined text
+  const combined = lines[0] + ' ' + lines[1];
+  const words = combined.split(/\s+/);
+  if (words.length < 3) return lines;
+  let bestSplit = lines;
+  let bestDiff = diff;
+  for (let i = 1; i < words.length; i++) {
+    const a = words.slice(0, i).join(' ');
+    const b = words.slice(i).join(' ');
+    const wa = measureFn(a, fontSize);
+    const wb = measureFn(b, fontSize);
+    if (wa > maxWidth || wb > maxWidth) continue;
+    const d = Math.abs(wa - wb);
+    if (d < bestDiff) { bestDiff = d; bestSplit = [a, b]; }
+  }
+  return bestSplit;
+}
+
 // ── Slide role ──────────────────────────────────────────────────
 function getSlideRole(slideIndex) {
   if (slideIndex === 0) return 'hook';
@@ -232,13 +277,15 @@ function measureAndLayoutSvg(lines, slideIndex, maxWidth) {
     const wrapped = wrapTextSvg(linesFiltered, fs, textMaxW);
 
     if (wrapped.length <= MAX_TEXT_LINES) {
+      // Balance 2-line text for even width
+      const balanced = balanceWrapLines(wrapped, fs, textMaxW, estimateTextWidth);
       let maxLineWidth = 0;
-      for (const line of wrapped) {
+      for (const line of balanced) {
         const w = estimateTextWidth(line, fs);
         if (w > maxLineWidth) maxLineWidth = w;
       }
       return {
-        lines: wrapped,
+        lines: balanced,
         fontSize: fs,
         lineHeight: Math.round(fs * 1.35),
         maxLineWidth,
@@ -285,10 +332,11 @@ function buildSvgOverlay(lines, layout, position, brand, slideIndex) {
   const { fontSize, lineHeight } = measured;
   const wrappedLines = measured.lines;
 
-  // Calculate band dimensions (content-driven)
-  let bandContentW = measured.maxLineWidth + BAND_PAD_X * 2;
-  if (wrappedLines.length >= 3) bandContentW = Math.min(bandContentW * 1.05, safe.maxW);
-  const boxW = Math.max(BAND_MIN_W, Math.min(Math.round(bandContentW), safe.maxW));
+  // Calculate band dimensions (template-driven)
+  const bandTpl = selectBandTemplate(wrappedLines);
+  const templateW = Math.round(safe.maxW * BAND_TEMPLATES[bandTpl].widthRatio);
+  const contentW = measured.maxLineWidth + BAND_PAD_X * 2;
+  const boxW = Math.max(BAND_MIN_W, Math.min(Math.max(templateW, contentW), safe.maxW));
   const textBlockH = wrappedLines.length * lineHeight;
   const boxH = textBlockH + BAND_PAD_Y * 2 + Math.round(fontSize * 0.15);
   const boxR = BAND_RADIUS;
@@ -303,7 +351,7 @@ function buildSvgOverlay(lines, layout, position, brand, slideIndex) {
     boxX = Math.round((W - boxW) / 2);
   }
   if (position.startsWith("top")) {
-    boxY = SAFE_TOP + 20;
+    boxY = TOP_POSITION_Y;
   } else {
     boxY = H - SAFE_BOTTOM - boxH - 20;
   }
@@ -433,6 +481,36 @@ export async function generateABTest(options = {}) {
     results.push({ text: SLIDE1_AB[i], buffer: buf });
   }
   return results;
+}
+
+// ── Generate Copy A/B (same images, different hook) ──────────────
+export async function generateCopyAB(options = {}) {
+  const {
+    textsA,
+    textsB,
+    bgDir = path.join(import.meta.dirname, "backgrounds", "master"),
+    brand = true,
+  } = options;
+
+  const layouts = assignLayouts();
+  const positions = assignPositions();
+  const crops = assignCrops();
+
+  const resultA = [];
+  const resultB = [];
+
+  for (let i = 0; i < 6; i++) {
+    const bgFile = path.join(bgDir, `${i + 1}.png`);
+    if (!fs.existsSync(bgFile)) throw new Error(`Background not found: ${bgFile}`);
+
+    const bufA = await composeSlide(bgFile, textsA[i], layouts[i], positions[i], crops[i], brand, i);
+    resultA.push(bufA);
+
+    const bufB = await composeSlide(bgFile, textsB[i], layouts[i], positions[i], crops[i], brand, i);
+    resultB.push(bufB);
+  }
+
+  return { variantA: resultA, variantB: resultB, layouts, positions, crops };
 }
 
 // ── CLI ─────────────────────────────────────────────────────────

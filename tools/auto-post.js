@@ -148,10 +148,12 @@ function selectPattern(patterns) {
 }
 
 // ---------------------------------------------------------------------------
-// Hook swap
+// Hook swap (with category weighting)
 // ---------------------------------------------------------------------------
 
-function swapHook(slides, hooksLib, variant) {
+const HOOK_CATEGORY_WEIGHTS = { pain: 3.0, gain: 2.5, contrarian: 2.0, identity: 1.5, "quiet-luxury": 1.0 };
+
+function swapHook(slides, hooksLib, variant, preferredCategory) {
   if (!hooksLib || !hooksLib.hooks || hooksLib.hooks.length === 0) {
     return { slides, hookId: null };
   }
@@ -161,15 +163,28 @@ function swapHook(slides, hooksLib, variant) {
     const variantHooks = pool.filter((h) => h.variant === variant);
     if (variantHooks.length > 0) pool = variantHooks;
   }
+  // Filter by preferred category if specified
+  if (preferredCategory) {
+    const catHooks = pool.filter((h) => h.category === preferredCategory);
+    if (catHooks.length > 0) pool = catHooks;
+  }
   const recentHooks = getHookHistory().slice(0, 10);
   let available = pool.filter((h) => !recentHooks.includes(h.id));
   if (available.length === 0) available = pool;
 
-  const pick = available[Math.floor(Math.random() * available.length)];
+  // Weighted random by category
+  const totalWeight = available.reduce((s, h) => s + (HOOK_CATEGORY_WEIGHTS[h.category] || 1), 0);
+  let r = Math.random() * totalWeight;
+  let pick = available[0];
+  for (const h of available) {
+    r -= HOOK_CATEGORY_WEIGHTS[h.category] || 1;
+    if (r <= 0) { pick = h; break; }
+  }
+
   const newSlides = [...slides];
   newSlides[0] = pick.text;
   addToHookHistory(pick.id);
-  return { slides: newSlides, hookId: pick.id, hookTone: pick.tone };
+  return { slides: newSlides, hookId: pick.id, hookTone: pick.tone, hookCategory: pick.category };
 }
 
 // ---------------------------------------------------------------------------
@@ -205,6 +220,34 @@ function ngFilter(slides) {
   }
 
   return issues;
+}
+
+// ---------------------------------------------------------------------------
+// Slide rules validation
+// ---------------------------------------------------------------------------
+
+function validateSlideRules(slides, slideRules) {
+  if (!slideRules) return [];
+  const warnings = [];
+  for (let i = 0; i < slides.length; i++) {
+    const rule = slideRules[`slide${i + 1}`];
+    if (!rule) continue;
+    const text = slides[i].filter((l) => l).join(" ");
+    const chars = text.length;
+    const words = text.split(/\s+/).filter((w) => w.length > 0).length;
+    const lineCount = slides[i].filter((l) => l && l.length > 0).length;
+
+    if (rule.maxChars && chars > rule.maxChars) {
+      warnings.push({ slide: i + 1, type: "chars", value: chars, max: rule.maxChars });
+    }
+    if (rule.maxWords && words > rule.maxWords) {
+      warnings.push({ slide: i + 1, type: "words", value: words, max: rule.maxWords });
+    }
+    if (rule.maxLines && lineCount > rule.maxLines) {
+      warnings.push({ slide: i + 1, type: "lines", value: lineCount, max: rule.maxLines });
+    }
+  }
+  return warnings;
 }
 
 // ---------------------------------------------------------------------------
@@ -418,7 +461,7 @@ async function main() {
     slides = result.slides;
     hookId = result.hookId;
     if (hookId) {
-      console.log(`  Hook swapped → ${hookId} (${result.hookTone}): "${slides[0].join(" ")}"`);
+      console.log(`  Hook swapped → ${hookId} (${result.hookTone}/${result.hookCategory}): "${slides[0].join(" ")}"`);
     }
   }
 
@@ -434,8 +477,16 @@ async function main() {
     }
   }
 
-  // 6. Generate slides
+  // 5b. Slide rules validation
   const libConfig = libConfigs[patternVariant] || null;
+  if (libConfig && libConfig.slideRules) {
+    const ruleWarnings = validateSlideRules(slides, libConfig.slideRules);
+    for (const w of ruleWarnings) {
+      console.log(`  SlideRule: slide ${w.slide} ${w.type}=${w.value} exceeds max=${w.max}`);
+    }
+  }
+
+  // 6. Generate slides
   console.log("\nGenerating slides...");
   if (libConfig && libConfig.fixedLayout) {
     console.log(`  Layout: ${libConfig.fixedLayout} (fixed) / Position: ${libConfig.fixedPosition} (fixed)`);
