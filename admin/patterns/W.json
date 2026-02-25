@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "variant": "W",
   "name": "仕事勢SOP",
   "categories": [
@@ -22,12 +22,12 @@
     "optimize","efficient","important","in conclusion","therefore"
   ],
   "slideRules": {
-    "slide1": {"role":"stop_hook","maxWords":12,"fontSize":"xl","position":"top"},
-    "slide2": {"role":"rule","prefix":"Rule #1:"},
-    "slide3": {"role":"rule","prefix":"Rule #2:"},
-    "slide4": {"role":"rule","prefix":"Rule #3:"},
-    "slide5": {"role":"summary"},
-    "slide6": {"role":"save_cta","mustContain":"Save this SOP","brandFooter":true}
+    "slide1": {"role":"stop_hook","maxWords":12,"maxChars":28,"fontSize":"xl","position":"top"},
+    "slide2": {"role":"rule","prefix":"Rule #1:","maxLines":2,"maxChars":42},
+    "slide3": {"role":"rule","prefix":"Rule #2:","maxLines":2,"maxChars":42},
+    "slide4": {"role":"rule","prefix":"Rule #3:","maxLines":2,"maxChars":42},
+    "slide5": {"role":"summary","maxLines":2,"maxChars":42},
+    "slide6": {"role":"save_cta","mustContain":"Save this SOP","brandFooter":true,"maxLines":2,"maxChars":42}
   },
   "patterns": [
     {
@@ -36,26 +36,26 @@
       "structure":"hook→rule1→rule2→rule3→summary→save",
       "weight":2.0,
       "slides":[
-        ["Your inbox is not a to-do list.","It's messages."],
-        ["Rule #1:","< 2 min → do it now."],
-        ["Rule #2:","Needs work → forward as a task."],
-        ["Subject:","ACTION — verb + due date"],
-        ["Inbox = messages.","Tasks = somewhere else."],
-        ["Save this SOP.","Use it every morning."]
+        ["Your inbox is not","a to-do list."],
+        ["Rule #1:","< 2 min? Do it now."],
+        ["Rule #2:","Needs action? Move it out."],
+        ["Rule #3:","Subject = ACTION + deadline."],
+        ["Messages stay in inbox.","Tasks live somewhere else."],
+        ["Save this SOP.","Try it tomorrow morning."]
       ]
     },
     {
       "id":"W002","category":"slack_sop",
       "tags":["hero","slack","dm","task","move"],
-      "structure":"hook→rule1→rule2→format→summary→save",
+      "structure":"hook→rule1→rule2→rule3→summary→save",
       "weight":2.0,
       "slides":[
-        ["Stop using Slack","as your task manager."],
-        ["Rule #1:","DMs are for messages, not tasks."],
-        ["Rule #2:","Tasks go to one place."],
-        ["Format:","ACTION — verb + due date"],
-        ["Reply once,","then move it out of Slack."],
-        ["Save this SOP.","Use it on every DM."]
+        ["Slack is not","your task manager."],
+        ["Rule #1:","Read. Reply. Move on."],
+        ["Rule #2:","If it needs work, move it out."],
+        ["Rule #3:","One tool for tasks. Not Slack."],
+        ["Messages expire.","Tasks don't."],
+        ["Save this SOP.","Share it with your team."]
       ]
     },
     {
@@ -64,12 +64,12 @@
       "structure":"hook→rule1→rule2→rule3→summary→save",
       "weight":2.0,
       "slides":[
-        ["Meetings need","one output."],
-        ["Rule #1:","No output → decline."],
-        ["Rule #2:","25 min default."],
-        ["Rule #3:","End with owner + due date."],
-        ["Decision / doc / task list.","Pick one."],
-        ["Save this SOP.","Paste into invites."]
+        ["Most meetings","should be emails."],
+        ["Rule #1:","No agenda? Decline."],
+        ["Rule #2:","25 min max. Not 60."],
+        ["Rule #3:","End with owner + deadline."],
+        ["One meeting.","One output. That's it."],
+        ["Save this SOP.","Send before your next invite."]
       ]
     },
     {
@@ -78,12 +78,12 @@
       "structure":"hook→rule1→rule2→rule3→summary→save",
       "weight":2.0,
       "slides":[
-        ["Notifications","destroy focus."],
-        ["Rule #1:","Check messages at set times."],
-        ["Rule #2:","15 min AM / 15 min PM."],
-        ["Rule #3:","Use the 2-min rule."],
-        ["Everything else →","capture as a task."],
-        ["Save this SOP.","Try it for 7 days."]
+        ["Every notification","costs you 23 minutes."],
+        ["Rule #1:","Check at set times only."],
+        ["Rule #2:","15 min AM. 15 min PM."],
+        ["Rule #3:","Everything else? Capture it."],
+        ["Silence isn't missing out.","It's getting ahead."],
+        ["Save this SOP.","Turn off badges tonight."]
       ]
     },
     {
@@ -92,11 +92,11 @@
       "structure":"hook→rule1→rule2→rule3→example→save",
       "weight":1.0,
       "slides":[
-        ["Your subject line","is your SOP."],
+        ["Your subject line","decides everything."],
         ["Rule #1:","Start with ACTION or FYI."],
-        ["Rule #2:","Add due date to subject."],
-        ["Rule #3:","One topic per thread."],
-        ["Bad: 'Quick question'","Good: 'ACTION — Review by Fri'"],
+        ["Rule #2:","Add the deadline. Always."],
+        ["Rule #3:","One topic. One thread."],
+        ["Bad: 'Quick question'","Good: 'ACTION \u2014 Review by Fri'"],
         ["Save this SOP.","Fix your next email."]
       ]
     },
@@ -104,13 +104,13 @@
       "id":"W006","category":"eod_sop",
       "tags":["end_of_day","close","5min","tomorrow"],
       "structure":"hook→rule1→rule2→rule3→benefit→save",
-      "weight":1.0,
+      "weight":1.5,
       "slides":[
-        ["Close your day","in 5 minutes."],
-        ["Rule #1:","Clear inbox to zero."],
+        ["5 minutes tonight.","2 hours saved tomorrow."],
+        ["Rule #1:","Inbox to zero."],
         ["Rule #2:","Move open tasks to tomorrow."],
         ["Rule #3:","Write one line: what's first."],
-        ["Tomorrow-you","starts with clarity."],
+        ["Tomorrow-you","starts with zero friction."],
         ["Save this SOP.","Run it at 5 PM."]
       ]
     },
@@ -120,12 +120,12 @@
       "structure":"hook→rule1→rule2→rule3→principle→save",
       "weight":2.0,
       "slides":[
-        ["Don't open Slack first.","It hijacks your day."],
-        ["Rule #1:","Pick today's 3 tasks."],
-        ["Rule #2:","Block 60–90 min deep work."],
-        ["Rule #3:","Slack + email only after."],
-        ["Inbox last.","Tasks first. Always."],
-        ["Save this SOP.","Use it tomorrow."]
+        ["Don't touch your phone.","Not yet."],
+        ["Rule #1:","Write down 3 tasks."],
+        ["Rule #2:","90 min deep work. No inbox."],
+        ["Rule #3:","Messages only after 11 AM."],
+        ["Own your first hour.","Or someone else will."],
+        ["Save this SOP.","Start tomorrow."]
       ]
     },
     {
@@ -134,25 +134,25 @@
       "structure":"hook→rule1→rule2→rule3→principle→save",
       "weight":1.0,
       "slides":[
-        ["If it's not on your calendar,","it won't happen."],
-        ["Rule #1:","Block 2 hours for deep work."],
-        ["Rule #2:","No meetings before 11 AM."],
-        ["Rule #3:","Buffer 15 min between calls."],
-        ["Your calendar","is your commitment."],
-        ["Save this SOP.","Audit your week."]
+        ["If it's not blocked,","it won't happen."],
+        ["Rule #1:","2 hours for deep work. Daily."],
+        ["Rule #2:","No meetings before 11."],
+        ["Rule #3:","15 min buffer between calls."],
+        ["Your calendar shows","your real priorities."],
+        ["Save this SOP.","Audit your week now."]
       ]
     },
     {
       "id":"W009","category":"capture_sop",
       "tags":["capture","brain","30sec","one_tool"],
       "structure":"hook→rule1→rule2→rule3→principle→save",
-      "weight":1.0,
+      "weight":1.5,
       "slides":[
-        ["Your brain","won't remember this."],
-        ["Rule #1:","Capture within 30 seconds."],
-        ["Rule #2:","Use one tool. Just one."],
-        ["Rule #3:","Verb + noun + due date."],
-        ["If it lives in your head,","it's already lost."],
+        ["That idea you just had?","Already fading."],
+        ["Rule #1:","Capture in 30 seconds."],
+        ["Rule #2:","One tool. Not five."],
+        ["Rule #3:","Verb + noun + deadline."],
+        ["If it's in your head,","it's already gone."],
         ["Save this SOP.","Use it right now."]
       ]
     },
@@ -160,14 +160,14 @@
       "id":"W010","category":"focus_sop",
       "tags":["focus","90min","deep_work","silence"],
       "structure":"hook→rule1→rule2→rule3→comparison→save",
-      "weight":1.0,
+      "weight":1.5,
       "slides":[
-        ["3 rules for","90 minutes of deep work."],
-        ["Rule #1:","Close Slack and email."],
-        ["Rule #2:","Phone on silent, face down."],
-        ["Rule #3:","One task. No switching."],
         ["90 focused minutes >","8 hours of switching."],
-        ["Save this SOP.","Try it today."]
+        ["Rule #1:","Close Slack. Close email."],
+        ["Rule #2:","Phone face down. Silent."],
+        ["Rule #3:","One task. Zero tabs."],
+        ["Deep work is the job.","Not a luxury."],
+        ["Save this SOP.","Block 90 min today."]
       ]
     },
     {
@@ -176,12 +176,12 @@
       "structure":"hook→rule1→rule2→rule3→comparison→save",
       "weight":1.0,
       "slides":[
-        ["15 minutes","that save your week."],
-        ["Rule #1:","Clear all inboxes."],
-        ["Rule #2:","Review next 7 days."],
+        ["15 minutes on Sunday.","Saves your whole week."],
+        ["Rule #1:","Clear every inbox."],
+        ["Rule #2:","Scan the next 7 days."],
         ["Rule #3:","Pick your top 3 for Monday."],
-        ["Sunday 15 min >","Monday 2 hours."],
-        ["Save this SOP.","Run it every Sunday."]
+        ["Review once.","Execute all week."],
+        ["Save this SOP.","Do it this Sunday."]
       ]
     },
     {
@@ -190,12 +190,12 @@
       "structure":"hook→rule1→rule2→rule3→benefit→save",
       "weight":1.0,
       "slides":[
-        ["Stop expecting","instant replies."],
-        ["Rule #1:","State the ask. State the deadline."],
-        ["Rule #2:","One message. All context."],
-        ["Rule #3:","Default to async. Calls are last."],
-        ["Good async =","fewer meetings."],
-        ["Save this SOP.","Send it to your team."]
+        ["Stop waiting for replies.","Start moving."],
+        ["Rule #1:","State the ask + the deadline."],
+        ["Rule #2:","One message. Full context."],
+        ["Rule #3:","Async first. Calls last."],
+        ["Clear messages =","fewer meetings."],
+        ["Save this SOP.","Share it with your team."]
       ]
     }
   ]

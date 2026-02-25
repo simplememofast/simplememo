@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * TikTok Slide Compositor v2
+ * TikTok Slide Compositor v3
  * Background photo + SVG text overlay → 1080×1920 PNG
  *
- * Changes v2:
- *  - caption_none → caption_subtle (thin white box 18% for readability)
- *  - Stronger text shadows everywhere
- *  - Updated scripts (punchier copy)
- *  - Brand footer ON by default
- *  - 1枚目ABテスト用 --ab モード
+ * Changes v3:
+ *  - Auto-sizing text band (content-driven, not fixed width)
+ *  - TikTok safe areas (top/right/bottom UI avoidance)
+ *  - Font-size stepping with word-wrap
+ *  - Text width estimation for SVG (no Canvas available)
+ *  - Premium band design (rgba(35,35,35,0.68), radius 16, shadow)
  */
 
 import sharp from "sharp";
@@ -18,9 +18,29 @@ import path from "node:path";
 // ── Output size ─────────────────────────────────────────────────
 const W = 1080;
 const H = 1920;
-const SAFE = 120;
 
-// ── Scripts (強め版) ────────────────────────────────────────────
+// ── TikTok safe areas ───────────────────────────────────────────
+const SAFE_LEFT = 64;
+const SAFE_RIGHT = 120;
+const SAFE_TOP = 140;
+const SAFE_BOTTOM = 280;
+const SAFE_MAX_W = W - SAFE_LEFT - SAFE_RIGHT; // 896
+
+// ── Band design tokens ──────────────────────────────────────────
+const BAND_PAD_X = 40;
+const BAND_PAD_Y = 28;
+const BAND_RADIUS = 16;
+const BAND_MIN_W = 320;
+const MAX_TEXT_LINES = 3;
+
+// Font size steps per slide role (descending)
+const FONT_STEPS = {
+  hook: [96, 80, 64, 48],
+  body: [76, 64, 52, 42],
+  cta:  [68, 56, 46, 38],
+};
+
+// ── Scripts (legacy fallback) ───────────────────────────────────
 const SCRIPTS = {
   A: [
     ["I screenshot it.", "Then it dies."],
@@ -56,7 +76,6 @@ const SLIDE1_AB = [
 ];
 
 // ── Layout variants ─────────────────────────────────────────────
-// caption_none を廃止 → caption_subtle (極薄白ボックス)
 const LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
 const POSITIONS = [
   "top-left", "top-center", "top-right",
@@ -143,84 +162,193 @@ function getCropRegion(srcW, srcH, cropVariant) {
   return { left, top, width: extractW, height: extractH };
 }
 
-// ── SVG text overlay ────────────────────────────────────────────
+// ── Text width estimation (Inter 800 heuristic) ─────────────────
+function estimateTextWidth(text, fontSize) {
+  let width = 0;
+  for (const ch of text) {
+    if (ch === ' ') width += fontSize * 0.28;
+    else if (ch >= 'A' && ch <= 'Z') width += fontSize * 0.68;
+    else if (ch >= 'a' && ch <= 'z') width += fontSize * 0.55;
+    else if (ch >= '0' && ch <= '9') width += fontSize * 0.58;
+    else if ('.,;:!?'.includes(ch)) width += fontSize * 0.30;
+    else if ('-\u2013\u2014/'.includes(ch)) width += fontSize * 0.42;
+    else if ("'\"'\u2018\u2019\u201c\u201d".includes(ch)) width += fontSize * 0.28;
+    else if (ch === '#') width += fontSize * 0.65;
+    else if (ch === '>') width += fontSize * 0.60;
+    else if (ch === '=') width += fontSize * 0.60;
+    else if (ch === '+') width += fontSize * 0.60;
+    else if (ch === '<') width += fontSize * 0.60;
+    else width += fontSize * 0.55;
+  }
+  return width * 1.08; // 8% safety margin
+}
+
+// ── Word-wrap with number+unit keep-together ────────────────────
+function wrapTextSvg(inputLines, fontSize, maxWidth) {
+  const result = [];
+  for (const line of inputLines) {
+    const lineW = estimateTextWidth(line, fontSize);
+    if (lineW <= maxWidth) {
+      result.push(line);
+    } else {
+      const words = line.split(/\s+/);
+      let currentLine = '';
+      for (let wi = 0; wi < words.length; wi++) {
+        let word = words[wi];
+        // Keep number+unit pairs together
+        if (wi < words.length - 1 && /^\d+$/.test(word) && /^(min|AM|PM|hours?|days?|sec|seconds?|minutes?)/.test(words[wi + 1])) {
+          word = word + ' ' + words[wi + 1];
+          wi++;
+        }
+        const testLine = currentLine ? currentLine + ' ' + word : word;
+        if (estimateTextWidth(testLine, fontSize) <= maxWidth) {
+          currentLine = testLine;
+        } else {
+          if (currentLine) result.push(currentLine);
+          currentLine = word;
+        }
+      }
+      if (currentLine) result.push(currentLine);
+    }
+  }
+  return result;
+}
+
+// ── Slide role ──────────────────────────────────────────────────
+function getSlideRole(slideIndex) {
+  if (slideIndex === 0) return 'hook';
+  if (slideIndex === 5) return 'cta';
+  return 'body';
+}
+
+// ── Measure and layout with auto-fit ────────────────────────────
+function measureAndLayoutSvg(lines, slideIndex, maxWidth) {
+  const role = getSlideRole(slideIndex);
+  const steps = FONT_STEPS[role];
+  const linesFiltered = lines.filter(l => l && l.length > 0);
+
+  for (const fs of steps) {
+    const textMaxW = maxWidth - BAND_PAD_X * 2;
+    const wrapped = wrapTextSvg(linesFiltered, fs, textMaxW);
+
+    if (wrapped.length <= MAX_TEXT_LINES) {
+      let maxLineWidth = 0;
+      for (const line of wrapped) {
+        const w = estimateTextWidth(line, fs);
+        if (w > maxLineWidth) maxLineWidth = w;
+      }
+      return {
+        lines: wrapped,
+        fontSize: fs,
+        lineHeight: Math.round(fs * 1.35),
+        maxLineWidth,
+      };
+    }
+  }
+
+  // Fallback: smallest font
+  const smallestFs = steps[steps.length - 1];
+  const textMaxW = maxWidth - BAND_PAD_X * 2;
+  const fallbackWrapped = wrapTextSvg(linesFiltered, smallestFs, textMaxW);
+  let fallbackMaxW = 0;
+  for (const line of fallbackWrapped) {
+    const w = estimateTextWidth(line, smallestFs);
+    if (w > fallbackMaxW) fallbackMaxW = w;
+  }
+  return {
+    lines: fallbackWrapped,
+    fontSize: smallestFs,
+    lineHeight: Math.round(smallestFs * 1.35),
+    maxLineWidth: fallbackMaxW,
+  };
+}
+
+// ── Safe area for a position ────────────────────────────────────
+function getSafeArea(position) {
+  let maxW;
+  if (position.endsWith("left") || position.endsWith("right")) {
+    maxW = W - SAFE_LEFT - SAFE_RIGHT - 40;
+  } else {
+    maxW = SAFE_MAX_W;
+  }
+  return { maxW };
+}
+
+// ── SVG text overlay (auto-sizing band) ─────────────────────────
 function escXml(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function buildSvgOverlay(lines, layout, position, brand, slideIndex) {
-  // Slide-aware font sizing
-  let fontSize;
-  if(slideIndex === 0){
-    fontSize = lines.some(l => l.length > 20) ? 80 : 96;
-  } else if(slideIndex === 5){
-    fontSize = lines.some(l => l.length > 25) ? 60 : 68;
-  } else {
-    fontSize = lines.some(l => l.length > 25) ? 64 : 76;
-  }
-  const lineHeight = fontSize * 1.35;
-  const linesFiltered = lines.filter(l => l.length > 0);
-  const textBlockH = linesFiltered.length * lineHeight;
-  const boxPadH = 44;
-  const boxPadW = 56;
-  const boxW = Math.min(W - SAFE * 2, 880);
-  const boxH = textBlockH + boxPadH * 2;
-  const boxR = 20;
+  const safe = getSafeArea(position);
+  const measured = measureAndLayoutSvg(lines, slideIndex, safe.maxW);
+  const { fontSize, lineHeight } = measured;
+  const wrappedLines = measured.lines;
 
-  // Position
-  let boxX = (W - boxW) / 2;
-  let boxY;
-  if (position.startsWith("top")) {
-    boxY = SAFE + 40;
+  // Calculate band dimensions (content-driven)
+  let bandContentW = measured.maxLineWidth + BAND_PAD_X * 2;
+  if (wrappedLines.length >= 3) bandContentW = Math.min(bandContentW * 1.05, safe.maxW);
+  const boxW = Math.max(BAND_MIN_W, Math.min(Math.round(bandContentW), safe.maxW));
+  const textBlockH = wrappedLines.length * lineHeight;
+  const boxH = textBlockH + BAND_PAD_Y * 2 + Math.round(fontSize * 0.15);
+  const boxR = BAND_RADIUS;
+
+  // Position the band
+  let boxX, boxY;
+  if (position.endsWith("left")) {
+    boxX = SAFE_LEFT;
+  } else if (position.endsWith("right")) {
+    boxX = W - SAFE_RIGHT - boxW;
   } else {
-    boxY = H - SAFE - boxH - 40;
+    boxX = Math.round((W - boxW) / 2);
   }
-  if (position.endsWith("left")) boxX = SAFE;
-  else if (position.endsWith("right")) boxX = W - boxW - SAFE;
+  if (position.startsWith("top")) {
+    boxY = SAFE_TOP + 20;
+  } else {
+    boxY = H - SAFE_BOTTOM - boxH - 20;
+  }
 
   // Text anchor
   let textAnchor = "middle";
   let textX = boxX + boxW / 2;
-  if (position.endsWith("left")) { textAnchor = "start"; textX = boxX + boxPadW; }
-  else if (position.endsWith("right")) { textAnchor = "end"; textX = boxX + boxW - boxPadW; }
+  if (position.endsWith("left")) { textAnchor = "start"; textX = boxX + BAND_PAD_X; }
+  else if (position.endsWith("right")) { textAnchor = "end"; textX = boxX + boxW - BAND_PAD_X; }
 
-  let textY = boxY + boxPadH + fontSize;
+  const textY = boxY + BAND_PAD_Y + fontSize;
 
-  // Global text shadow filter (used by ALL layouts for extra punch)
+  // SVG filters
   const globalShadow = `<filter id="gs"><feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#000" flood-opacity="0.55"/></filter>`;
+  const bandShadow = `<filter id="bs"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.16"/></filter>`;
 
   let boxSvg = "";
   let textFill = "#ffffff";
   let textFilterAttr = "";
 
   if (layout === "poster_dark") {
-    // Strong dark box
-    boxSvg = `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="${boxR}" fill="rgba(0,0,0,0.65)" />`;
+    boxSvg = `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="${boxR}" fill="rgba(35,35,35,0.68)" filter="url(#bs)" />`;
     textFill = "#ffffff";
   } else if (layout === "caption_light") {
-    // White box
-    boxSvg = `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="${boxR}" fill="rgba(255,255,255,0.55)" />`;
+    boxSvg = `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="${boxR}" fill="rgba(255,255,255,0.55)" filter="url(#bs)" />`;
     textFill = "#111111";
   } else {
-    // caption_subtle — thin white box (18% opacity) + shadow for safety
     boxSvg = `<rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="${boxR}" fill="rgba(255,255,255,0.18)" />`;
     textFill = "#ffffff";
     textFilterAttr = ` filter="url(#gs)"`;
   }
 
-  const textLines = linesFiltered.map((line, i) => {
+  const textLines = wrappedLines.map((line, i) => {
     return `<text x="${textX}" y="${textY + i * lineHeight}" font-family="'Inter','Helvetica Neue','Arial',sans-serif" font-size="${fontSize}" font-weight="800" fill="${textFill}" text-anchor="${textAnchor}"${textFilterAttr}>${escXml(line)}</text>`;
   }).join("\n    ");
 
-  // Brand footer (always with shadow for visibility)
+  // Brand footer
   let brandSvg = "";
   if (brand) {
     brandSvg = `
-    <text x="${W - SAFE}" y="${H - 34}" font-family="'Inter','Helvetica Neue','Arial',sans-serif" font-size="26" font-weight="500" fill="rgba(255,255,255,0.35)" text-anchor="end" filter="url(#gs)">SimpleMemo (captio-style)</text>`;
+    <text x="${W - SAFE_RIGHT}" y="${H - SAFE_BOTTOM + 40}" font-family="'Inter','Helvetica Neue','Arial',sans-serif" font-size="26" font-weight="500" fill="rgba(255,255,255,0.35)" text-anchor="end" filter="url(#gs)">SimpleMemo</text>`;
   }
 
   return `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
-  <defs>${globalShadow}</defs>
+  <defs>${globalShadow}${bandShadow}</defs>
   ${boxSvg}
   ${textLines}
   ${brandSvg}
@@ -280,7 +408,7 @@ export async function generateSet(options = {}) {
     };
     plan.push(slideConfig);
 
-    const buf = await composeSlide(bgFile, texts[i], layouts[i], positions[i], crops[i], brand);
+    const buf = await composeSlide(bgFile, texts[i], layouts[i], positions[i], crops[i], brand, i);
     buffers.push(buf);
   }
 
@@ -295,13 +423,13 @@ export async function generateABTest(options = {}) {
   } = options;
 
   const bgFile = path.join(bgDir, "1.png");
-  const layout = "poster_dark"; // strongest readability for hook
-  const position = "top-center"; // highest impact
+  const layout = "poster_dark";
+  const position = "top-center";
   const crop = "wide";
 
   const results = [];
   for (let i = 0; i < SLIDE1_AB.length; i++) {
-    const buf = await composeSlide(bgFile, SLIDE1_AB[i], layout, position, crop, brand);
+    const buf = await composeSlide(bgFile, SLIDE1_AB[i], layout, position, crop, brand, 0);
     results.push({ text: SLIDE1_AB[i], buffer: buf });
   }
   return results;
@@ -318,7 +446,6 @@ async function cli() {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 
   if (abTest) {
-    // A/B test mode: 3 variants of slide 1
     console.log(`\n  A/B Test Mode — Slide 1 × 3 variants\n`);
     const results = await generateABTest({ brand });
     const outDir = path.join(import.meta.dirname, "out", `ab_test_${timestamp}`);
@@ -334,7 +461,6 @@ async function cli() {
     const sec = ((Date.now() - t0) / 1000).toFixed(1);
     console.log(`\n  Done in ${sec}s → ${outDir}\n`);
   } else {
-    // Normal mode: 6 slides
     console.log(`\n  Variant: ${variant} | Brand: ${brand ? "ON" : "OFF"}\n`);
     const { plan, buffers } = await generateSet({ variant, brand });
 

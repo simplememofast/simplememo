@@ -470,13 +470,34 @@
   }
 
   // ── Constants ────────────────────────────────────────────────
-  var W = 1080, H = 1920, SAFE = 120;
+  var W = 1080, H = 1920;
   var LAYOUTS = ["poster_dark", "caption_subtle", "caption_light"];
   var POSITIONS = [
     "top-left", "top-center", "top-right",
     "bottom-left", "bottom-center", "bottom-right"
   ];
   var CROPS = ["wide", "zoom-in", "left-focus", "right-focus"];
+
+  // ── TikTok safe areas (avoid UI overlay) ───────────────────
+  var SAFE_LEFT = 64;
+  var SAFE_RIGHT = 120;
+  var SAFE_TOP = 140;
+  var SAFE_BOTTOM = 280;
+  var SAFE_MAX_W = W - SAFE_LEFT - SAFE_RIGHT; // 896
+
+  // ── Band design tokens ─────────────────────────────────────
+  var BAND_PAD_X = 40;
+  var BAND_PAD_Y = 28;
+  var BAND_RADIUS = 16;
+  var BAND_MIN_W = 320;
+  var MAX_TEXT_LINES = 3;
+
+  // Font size steps per slide role (descending)
+  var FONT_STEPS = {
+    hook: [96, 80, 64, 48],
+    body: [76, 64, 52, 42],
+    cta:  [68, 56, 46, 38]
+  };
 
   // ── Utility ──────────────────────────────────────────────────
   function shuffle(arr){
@@ -608,51 +629,172 @@
     }
   }
 
-  // ── Canvas: draw text overlay (slide-aware sizing) ────────────
-  function drawTextOverlay(ctx, lines, layout, position, brand, slideIndex, variantMode){
-    var linesFiltered = lines.filter(function(l){ return l.length>0; });
-    var fontSize;
+  // ── Get slide role for font sizing ──────────────────────────
+  function getSlideRole(slideIndex){
+    if(slideIndex === 0) return 'hook';
+    if(slideIndex === 5) return 'cta';
+    return 'body';
+  }
 
-    // Slide-aware font sizing
-    if(slideIndex === 0){
-      // Hook slide: large
-      fontSize = lines.some(function(l){ return l.length>20; }) ? 80 : 96;
-    } else if(slideIndex === 5){
-      // CTA slide: slightly smaller
-      fontSize = lines.some(function(l){ return l.length>25; }) ? 60 : 68;
+  // ── Get safe area for a position ──────────────────────────
+  function getSafeArea(position){
+    var x, y, maxW, maxH;
+    if(position.indexOf("left")!==-1){
+      x = SAFE_LEFT;
+      maxW = W - SAFE_LEFT - SAFE_RIGHT - 40; // extra margin from right UI
+    } else if(position.indexOf("right")!==-1){
+      x = SAFE_LEFT + 40;
+      maxW = W - SAFE_LEFT - SAFE_RIGHT - 40;
     } else {
-      // Body slides
-      fontSize = lines.some(function(l){ return l.length>25; }) ? 64 : 76;
+      x = SAFE_LEFT;
+      maxW = SAFE_MAX_W;
     }
-
-    var lineHeight = fontSize * 1.35;
-    var textBlockH = linesFiltered.length * lineHeight;
-    var boxPadH = slideIndex === 5 ? 56 : 44;
-    var boxPadW = 56;
-    var boxW = Math.min(W - SAFE*2, 880);
-    var boxH = textBlockH + boxPadH*2;
-    var boxR = 20;
-
-    var boxX = (W - boxW) / 2;
-    var boxY;
     if(position.indexOf("top")===0){
-      boxY = SAFE + 40;
+      y = SAFE_TOP;
+      maxH = H - SAFE_TOP - SAFE_BOTTOM;
     } else {
-      boxY = H - SAFE - boxH - 40;
+      y = SAFE_TOP;
+      maxH = H - SAFE_TOP - SAFE_BOTTOM;
     }
-    if(position.indexOf("left")!==-1) boxX = SAFE;
-    else if(position.indexOf("right")!==-1) boxX = W - boxW - SAFE;
+    return { x: x, y: y, maxW: maxW, maxH: maxH };
+  }
 
+  // ── Word-wrap text to fit within maxWidth ─────────────────
+  function wrapTextLines(ctx, inputLines, maxWidth){
+    var result = [];
+    for(var li=0; li<inputLines.length; li++){
+      var line = inputLines[li];
+      var measured = ctx.measureText(line);
+      if(measured.width <= maxWidth){
+        result.push(line);
+      } else {
+        // Word-wrap: keep number+unit together (e.g. "15 min", "2 hours", "90 min")
+        var words = line.split(/\s+/);
+        var currentLine = '';
+        for(var wi=0; wi<words.length; wi++){
+          var word = words[wi];
+          // Keep number+unit pairs together
+          if(wi < words.length-1 && /^\d+$/.test(word) && /^(min|AM|PM|hours?|days?|sec|seconds?|minutes?)/.test(words[wi+1])){
+            word = word + ' ' + words[wi+1];
+            wi++;
+          }
+          var testLine = currentLine ? currentLine + ' ' + word : word;
+          if(ctx.measureText(testLine).width <= maxWidth){
+            currentLine = testLine;
+          } else {
+            if(currentLine) result.push(currentLine);
+            currentLine = word;
+          }
+        }
+        if(currentLine) result.push(currentLine);
+      }
+    }
+    return result;
+  }
+
+  // ── Measure and layout text with auto-fit ─────────────────
+  function measureAndLayout(ctx, lines, slideIndex, maxWidth){
+    var role = getSlideRole(slideIndex);
+    var steps = FONT_STEPS[role];
+    var linesFiltered = lines.filter(function(l){ return l && l.length > 0; });
+
+    for(var si=0; si<steps.length; si++){
+      var fs = steps[si];
+      ctx.font = "800 " + fs + "px 'Inter','Helvetica Neue',Arial,sans-serif";
+      var textMaxW = maxWidth - BAND_PAD_X * 2;
+
+      // Try wrapping at this font size
+      var wrapped = wrapTextLines(ctx, linesFiltered, textMaxW);
+
+      if(wrapped.length <= MAX_TEXT_LINES){
+        // Find max line width for band sizing
+        var maxLineWidth = 0;
+        for(var i=0; i<wrapped.length; i++){
+          var w = ctx.measureText(wrapped[i]).width;
+          if(w > maxLineWidth) maxLineWidth = w;
+        }
+        return {
+          lines: wrapped,
+          fontSize: fs,
+          lineHeight: Math.round(fs * 1.35),
+          maxLineWidth: maxLineWidth
+        };
+      }
+    }
+
+    // Fallback: use smallest font, accept result
+    var smallestFs = steps[steps.length - 1];
+    ctx.font = "800 " + smallestFs + "px 'Inter','Helvetica Neue',Arial,sans-serif";
+    var textMaxW2 = maxWidth - BAND_PAD_X * 2;
+    var fallbackWrapped = wrapTextLines(ctx, linesFiltered, textMaxW2);
+    var fallbackMaxW = 0;
+    for(var fi=0; fi<fallbackWrapped.length; fi++){
+      var fw = ctx.measureText(fallbackWrapped[fi]).width;
+      if(fw > fallbackMaxW) fallbackMaxW = fw;
+    }
+    return {
+      lines: fallbackWrapped,
+      fontSize: smallestFs,
+      lineHeight: Math.round(smallestFs * 1.35),
+      maxLineWidth: fallbackMaxW
+    };
+  }
+
+  // ── Canvas: draw text overlay (auto-sizing band) ────────────
+  function drawTextOverlay(ctx, lines, layout, position, brand, slideIndex, variantMode){
+    var safe = getSafeArea(position);
+
+    // Measure and layout text with auto-fit
+    var measured = measureAndLayout(ctx, lines, slideIndex, safe.maxW);
+    var fontSize = measured.fontSize;
+    var lineHeight = measured.lineHeight;
+    var wrappedLines = measured.lines;
+    var maxLineWidth = measured.maxLineWidth;
+
+    // Calculate band dimensions (content-driven)
+    var bandContentW = maxLineWidth + BAND_PAD_X * 2;
+    // For 3+ lines, widen slightly for readability
+    if(wrappedLines.length >= 3) bandContentW = Math.min(bandContentW * 1.05, safe.maxW);
+    var boxW = Math.max(BAND_MIN_W, Math.min(Math.round(bandContentW), safe.maxW));
+    var textBlockH = wrappedLines.length * lineHeight;
+    var boxH = textBlockH + BAND_PAD_Y * 2 + Math.round(fontSize * 0.15); // extra for descenders
+    var boxR = BAND_RADIUS;
+
+    // Position the band within safe area
+    var boxX, boxY;
+    if(position.indexOf("left")!==-1){
+      boxX = SAFE_LEFT;
+    } else if(position.indexOf("right")!==-1){
+      boxX = W - SAFE_RIGHT - boxW;
+    } else {
+      boxX = Math.round((W - boxW) / 2);
+    }
+    if(position.indexOf("top")===0){
+      boxY = SAFE_TOP + 20;
+    } else {
+      boxY = H - SAFE_BOTTOM - boxH - 20;
+    }
+
+    // Text alignment within band
     var textAlign = "center";
-    var textX = boxX + boxW/2;
-    if(position.indexOf("left")!==-1){ textAlign="left"; textX = boxX + boxPadW; }
-    else if(position.indexOf("right")!==-1){ textAlign="right"; textX = boxX + boxW - boxPadW; }
+    var textX = boxX + boxW / 2;
+    if(position.indexOf("left")!==-1){ textAlign = "left"; textX = boxX + BAND_PAD_X; }
+    else if(position.indexOf("right")!==-1){ textAlign = "right"; textX = boxX + boxW - BAND_PAD_X; }
 
+    // Draw band background
     ctx.save();
     if(layout==="poster_dark"){
-      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.fillStyle = "rgba(35,35,35,0.68)";
+      ctx.shadowColor = "rgba(0,0,0,0.16)";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 8;
+      ctx.shadowBlur = 24;
     } else if(layout==="caption_light"){
       ctx.fillStyle = "rgba(255,255,255,0.55)";
+      ctx.shadowColor = "rgba(0,0,0,0.08)";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      ctx.shadowBlur = 16;
     } else {
       ctx.fillStyle = "rgba(255,255,255,0.18)";
     }
@@ -660,8 +802,9 @@
     ctx.fill();
     ctx.restore();
 
+    // Draw text
     ctx.save();
-    ctx.font = "800 "+fontSize+"px 'Inter','Helvetica Neue',Arial,sans-serif";
+    ctx.font = "800 " + fontSize + "px 'Inter','Helvetica Neue',Arial,sans-serif";
     ctx.textAlign = textAlign;
     ctx.textBaseline = "alphabetic";
 
@@ -678,12 +821,13 @@
       ctx.shadowBlur = 16;
     }
 
-    var textY = boxY + boxPadH + fontSize;
-    for(var i=0;i<linesFiltered.length;i++){
-      ctx.fillText(linesFiltered[i], textX, textY + i*lineHeight);
+    var textY = boxY + BAND_PAD_Y + fontSize;
+    for(var i=0; i<wrappedLines.length; i++){
+      ctx.fillText(wrappedLines[i], textX, textY + i * lineHeight);
     }
     ctx.restore();
 
+    // Brand footer
     if(brand){
       ctx.save();
       ctx.font = "500 26px 'Inter','Helvetica Neue',Arial,sans-serif";
@@ -693,7 +837,7 @@
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 3;
       ctx.shadowBlur = 16;
-      ctx.fillText("SimpleMemo (captio-style)", W - SAFE, H - 34);
+      ctx.fillText("SimpleMemo", W - SAFE_RIGHT, H - SAFE_BOTTOM + 40);
       ctx.restore();
     }
   }
