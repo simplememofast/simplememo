@@ -2,7 +2,7 @@
  * POST /admin/api/post-tiktok
  * Creates a TikTok post via Postiz API, scheduled 1 min from now.
  *
- * Body JSON: { images: [{id, path}], caption: string }
+ * Body JSON: { images: [{id, path}], caption: string, title?: string }
  * Requires POSTIZ_API_KEY and POSTIZ_TIKTOK_ID env vars in Cloudflare Pages.
  */
 export async function onRequestPost(context) {
@@ -12,9 +12,19 @@ export async function onRequestPost(context) {
     return Response.json({ error: "POSTIZ_API_KEY or POSTIZ_TIKTOK_ID not configured" }, { status: 500 });
   }
 
-  const { images, caption } = await context.request.json();
+  const { images, caption, title } = await context.request.json();
   if (!images || images.length === 0) {
     return Response.json({ error: "No images provided" }, { status: 400 });
+  }
+
+  // Build TikTok title: explicit title > caption first line, max 90 chars
+  let tiktokTitle = title || "";
+  if (!tiktokTitle && caption) {
+    tiktokTitle = caption.split("\n")[0];
+  }
+  if (tiktokTitle.length > 90) {
+    // Trim at word boundary
+    tiktokTitle = tiktokTitle.slice(0, 90).replace(/\s+\S*$/, "");
   }
 
   const scheduleDate = new Date(Date.now() + 60_000).toISOString();
@@ -32,6 +42,7 @@ export async function onRequestPost(context) {
       }],
       settings: {
         __type: "tiktok",
+        title: tiktokTitle,
         privacy_level: "SELF_ONLY",
         duet: false,
         stitch: false,

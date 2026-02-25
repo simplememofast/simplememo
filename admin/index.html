@@ -1479,11 +1479,22 @@
       var hook = currentPlan.slides[0].text.filter(function(t){return t;}).join(' ');
       var caption = hook + '\n\nSimple Memo - one tap, straight to your inbox.\n\n#simplememo #productivity #notetaking #lifehack #iphone';
 
+      // Build TikTok title from hook (max 90 chars)
+      var title = hook;
+      if(title.length > 90){
+        title = title.slice(0, 90).replace(/\s+\S*$/, '');
+      }
+      if(!title){
+        log('w', 'タイトル未設定: フック文言が空です');
+      } else {
+        log('i', 'TikTokタイトル: "'+title+'" ('+title.length+'/90文字)');
+      }
+
       log('i', '投稿作成中（1分後に予約）…');
       var postRes = await fetch('/admin/api/post-tiktok', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ images: uploaded, caption: caption })
+        body: JSON.stringify({ images: uploaded, caption: caption, title: title })
       });
       var postData = await postRes.json();
       if(!postRes.ok) throw new Error('Post failed: '+JSON.stringify(postData));
