@@ -355,8 +355,17 @@ async function uploadImage(buffer, filename) {
   return res.json();
 }
 
-async function createTikTokPost(images, caption) {
+async function createTikTokPost(images, caption, title) {
   const scheduleDate = new Date(Date.now() + SCHEDULE_DELAY_MS).toISOString();
+
+  // Build TikTok title: explicit title > caption first line, max 90 chars
+  let tiktokTitle = title || "";
+  if (!tiktokTitle && caption) {
+    tiktokTitle = caption.split("\n")[0];
+  }
+  if (tiktokTitle.length > 90) {
+    tiktokTitle = tiktokTitle.slice(0, 90).replace(/\s+\S*$/, "");
+  }
 
   const payload = {
     type: "schedule",
@@ -374,6 +383,7 @@ async function createTikTokPost(images, caption) {
         ],
         settings: {
           __type: "tiktok",
+          title: tiktokTitle,
           privacy_level: "SELF_ONLY",
           duet: false,
           stitch: false,
@@ -507,10 +517,12 @@ async function main() {
   // 8. Build caption
   const hook = slides[0].filter((t) => t).join(" ");
   const caption = `${hook}\n\nSimple Memo - one tap, straight to your inbox.\n\n#simplememo #productivity #notetaking #lifehack #iphone`;
+  const title = hook; // Hook as TikTok title (max 90 chars enforced in createTikTokPost)
 
   // 9. Create post
-  console.log("\nCreating TikTok post (scheduled +1 min)...");
-  const result = await createTikTokPost(uploaded, caption);
+  console.log(`\nCreating TikTok post (scheduled +1 min)...`);
+  console.log(`  Title: "${title}"`);
+  const result = await createTikTokPost(uploaded, caption, title);
   console.log("Post created:", JSON.stringify(result, null, 2));
 
   // 10. Record history

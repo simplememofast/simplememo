@@ -80,6 +80,13 @@ async function createTikTokPost(images, caption) {
   const scheduleDate = new Date(Date.now() + SCHEDULE_DELAY_MS).toISOString();
   console.log(`  Schedule: ${scheduleDate} (1 min from now)`);
 
+  // Build title: first line of caption, max 90 chars
+  let title = caption.split("\n")[0] || "";
+  if (title.length > 90) {
+    title = title.slice(0, 90).replace(/\s+\S*$/, "");
+  }
+  console.log(`  Title: "${title}"`);
+
   const payload = {
     type: "schedule",
     date: scheduleDate,
@@ -96,6 +103,7 @@ async function createTikTokPost(images, caption) {
         ],
         settings: {
           __type: "tiktok",
+          title,
           privacy_level: "SELF_ONLY",
           duet: false,
           stitch: false,
