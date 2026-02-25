@@ -558,10 +558,13 @@
   var bgImages = [];
   var bgLoaded = 0;
 
+  var BG_VERSION = 2; // bump to bust cache after bg image update
+
   function preloadBackgrounds(bgTypes, callback){
     bgLoaded = 0;
     bgImages = [];
     var total = 6;
+    var cacheBust = '?v=' + BG_VERSION;
     for(var i=0;i<6;i++){
       (function(idx){
         var bgType = (bgTypes && bgTypes[idx]) || 'desk';
@@ -588,7 +591,7 @@
               bgLoaded++;
               if(bgLoaded===total) callback();
             };
-            fallback.src = 'bg/'+(idx+1)+'.jpg';
+            fallback.src = 'bg/'+(idx+1)+'.jpg' + cacheBust;
           } else {
             log('err', 'Failed to load bg/'+(idx+1)+'.jpg');
             bgLoaded++;
@@ -597,9 +600,9 @@
         };
         // Try type-specific first, then default
         if(bgType !== 'desk'){
-          img.src = 'bg/'+bgType+'/'+(idx+1)+'.jpg';
+          img.src = 'bg/'+bgType+'/'+(idx+1)+'.jpg' + cacheBust;
         } else {
-          img.src = 'bg/'+(idx+1)+'.jpg';
+          img.src = 'bg/'+(idx+1)+'.jpg' + cacheBust;
         }
       })(i);
     }
