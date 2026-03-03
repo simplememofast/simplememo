@@ -75,6 +75,19 @@
     .warn-badge-warn{background:rgba(210,153,34,.18);color:var(--yellow)}
     .warn-badge-err{background:rgba(248,81,73,.18);color:var(--red)}
     .warn-summary{font-size:.72rem;color:var(--yellow);margin-top:6px}
+
+    .bg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+    @media(max-width:900px){.bg-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:500px){.bg-grid{grid-template-columns:repeat(2,1fr)}}
+    .bg-slot{position:relative;border:2px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+    .bg-slot:hover{border-color:var(--accent)}
+    .bg-slot.bg-custom{border-color:var(--green)}
+    .bg-slot-n{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);color:var(--text3);font-size:.6rem;font-weight:700;padding:1px 6px;border-radius:3px;z-index:2}
+    .bg-slot-badge{position:absolute;top:4px;right:4px;background:rgba(63,185,80,.85);color:#000;font-size:.55rem;font-weight:700;padding:1px 5px;border-radius:3px;z-index:2}
+    .bg-slot-img{width:100%;aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg)}
+    .bg-slot-img img{width:100%;height:100%;object-fit:cover}
+    .bg-slot-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);opacity:0;transition:opacity .2s;font-size:.7rem;color:var(--text2);font-weight:600}
+    .bg-slot:hover .bg-slot-overlay{opacity:1}
   </style>
 </head>
 <body>
@@ -141,6 +154,21 @@
         </div>
         <button class="btn-accent" id="gen-btn" style="margin-top:14px">Generate 6 Slides</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Background Images -->
+  <div class="card">
+    <div class="card-h">
+      <span>Background Images</span>
+      <div class="row">
+        <button class="btn-sm btn-outline" id="bg-reset-btn" style="display:none">Reset All</button>
+      </div>
+    </div>
+    <div class="card-b">
+      <div class="bg-grid" id="bg-grid"></div>
+      <input type="file" id="bg-file-input" accept="image/*" style="display:none">
+      <div style="margin-top:8px;font-size:.68rem;color:var(--text3)">Click image to replace. Recommended: 1080x1920 (9:16).</div>
     </div>
   </div>
 
@@ -637,6 +665,7 @@
   // ── Preload background images ────────────────────────────────
   var bgImages = [];
   var bgLoaded = 0;
+  var customBgImages = [null,null,null,null,null,null]; // user-uploaded overrides
 
   var BG_VERSION = 2; // bump to bust cache after bg image update
 
@@ -647,6 +676,13 @@
     var cacheBust = '?v=' + BG_VERSION;
     for(var i=0;i<6;i++){
       (function(idx){
+        // Use custom image if set
+        if(customBgImages[idx]){
+          bgImages[idx] = customBgImages[idx];
+          bgLoaded++;
+          if(bgLoaded===total) callback();
+          return;
+        }
         var bgType = (bgTypes && bgTypes[idx]) || 'desk';
         var img = new Image();
         img.crossOrigin = 'anonymous';
@@ -687,6 +723,56 @@
       })(i);
     }
   }
+
+  // ── Background image manager UI ─────────────────────────────
+  var bgGridEl = $('bg-grid');
+  var bgFileInput = $('bg-file-input');
+  var bgResetBtn = $('bg-reset-btn');
+  var bgEditingIndex = -1;
+
+  function initBgGrid(){
+    bgGridEl.innerHTML = '';
+    var cacheBust = '?v=' + BG_VERSION;
+    for(var i=0;i<6;i++){
+      var slot = document.createElement('div');
+      slot.className = 'bg-slot' + (customBgImages[i] ? ' bg-custom' : '');
+      slot.dataset.idx = i;
+      var src = customBgImages[i] ? customBgImages[i].src : ('bg/'+(i+1)+'.jpg' + cacheBust);
+      slot.innerHTML = '<span class="bg-slot-n">'+(i+1)+'</span>'
+        + (customBgImages[i] ? '<span class="bg-slot-badge">Custom</span>' : '')
+        + '<div class="bg-slot-img"><img src="'+src+'"></div>'
+        + '<div class="bg-slot-overlay">Click to change</div>';
+      slot.addEventListener('click', (function(idx){ return function(){ bgEditingIndex = idx; bgFileInput.click(); }; })(i));
+      bgGridEl.appendChild(slot);
+    }
+    bgResetBtn.style.display = customBgImages.some(function(v){ return v !== null; }) ? '' : 'none';
+  }
+  initBgGrid();
+
+  bgFileInput.addEventListener('change', function(){
+    if(bgEditingIndex < 0 || !this.files || !this.files[0]) return;
+    var file = this.files[0];
+    var idx = bgEditingIndex;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = function(){
+        customBgImages[idx] = img;
+        log('ok', 'Background '+(idx+1)+' replaced ('+img.naturalWidth+'x'+img.naturalHeight+')');
+        initBgGrid();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+    this.value = '';
+  });
+
+  bgResetBtn.addEventListener('click', function(){
+    customBgImages = [null,null,null,null,null,null];
+    log('i', 'All backgrounds reset to default');
+    initBgGrid();
+  });
 
   // ── Select band template by total character count ──────────
   function selectBandTemplate(lines){
@@ -1202,7 +1288,8 @@
     }
 
     preloadBackgrounds(bgTypes, function(){
-      log('ok', '6 backgrounds loaded');
+      var customCount = customBgImages.filter(function(v){ return v !== null; }).length;
+      log('ok', '6 backgrounds loaded' + (customCount > 0 ? ' ('+customCount+' custom)' : ''));
 
       // Layout consistency: use fixed values from lib config if available
       var layouts = (lib && lib.fixedLayout)
@@ -1258,7 +1345,7 @@
 
         plan.slides.push({
           slide_index: i,
-          background: (i+1)+'.jpg',
+          background: customBgImages[i] ? 'custom' : (i+1)+'.jpg',
           text: texts[i],
           text_length: textLengths[i],
           layout_variant: layouts[i],
