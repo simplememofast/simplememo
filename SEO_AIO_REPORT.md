@@ -194,7 +194,42 @@ index.html (Hub)
 
 ---
 
-## 10. 次の90日施策（推奨）
+## 10. Google Search Console 登録手順
+
+**現状**: 未登録（google-site-verification なし）
+
+### 手順
+
+1. https://search.google.com/search-console にアクセス
+2. 「プロパティを追加」→「URL プレフィックス」→ `https://simplememofast.com/` を入力
+3. 検証方法を選択（推奨順）:
+
+   **方法A: DNS TXT レコード（推奨）**
+   - Cloudflare DNS に TXT レコードを追加
+   - `google-site-verification=XXXXX` を DNS に設定
+   - Cloudflare Dashboard → DNS → レコード追加
+
+   **方法B: HTML ファイル**
+   - Google が提供する `googleXXXX.html` ファイルをリポジトリルートに配置
+   - `git add googleXXXX.html && git commit && git push`
+
+   **方法C: meta タグ**
+   - `<meta name="google-site-verification" content="XXXXX">` を `index.html` の `<head>` に追加
+
+4. 検証完了後:
+   - サイトマップ送信: 「サイトマップ」→ `sitemap.xml` を入力 → 送信
+   - インデックス登録リクエスト: 主要ページのURLを個別にリクエスト
+   - 構造化データレポートで JSON-LD エラーを確認
+
+### 優先確認ページ
+- `/` (WebSite, SoftwareApp, FAQPage, HowTo, BreadcrumbList, Speakable)
+- `/captio-alternative/` (Article, FAQPage, BreadcrumbList, Speakable)
+- `/note-to-email/` (Article, HowTo, FAQPage, BreadcrumbList, Speakable)
+- `/faq.html` (FAQPage, BreadcrumbList)
+
+---
+
+## 11. 次の90日施策（推奨）
 
 1. **言語URL移行 (`/ja/` `/en/`)**
    - SSG（Astro, 11ty等）への移行と同時に実施
