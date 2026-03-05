@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Note To Self Mailとの比較 — Capito式シンプルメモ</title>
+  <meta name="description" content="Note To Self MailとCapito式シンプルメモを徹底比較。起動速度・オフライン対応・AES-GCM暗号化・Cloudflare Workers基盤・無料プランの違いを解説します。">
+  <meta name="keywords" content="Note to Self Mail 比較, Note to Self Mail 代替, メール メモアプリ 比較, 自分にメール アプリ 比較, iPhone メモ メール">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Note To Self Mailとの比較 — Capito式シンプルメモ">
+  <meta property="og:description" content="Note To Self MailとCapito式シンプルメモを徹底比較。起動速度・オフライン対応・暗号化・料金の違いを解説します。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/vs/note-to-self-mail/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Note To Self Mailとの比較 — Capito式シンプルメモ">
+  <meta name="twitter:description" content="Note To Self MailとCapito式シンプルメモを徹底比較。起動速度・オフライン対応・暗号化・料金の違いを解説します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/vs/note-to-self-mail/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/note-to-self-mail/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/vs/note-to-self-mail/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/note-to-self-mail/">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Note To Self Mail vs Capito式シンプルメモ — 比較ガイド",
+    "description": "同じ「自分にメールするメモアプリ」カテゴリのNote To Self MailとCapito式シンプルメモを、速度・オフライン・暗号化・料金の観点で徹底比較します。",
+    "url": "https://simplememofast.com/vs/note-to-self-mail/",
+    "datePublished": "2026-03-05",
+    "dateModified": "2026-03-05",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/vs/note-to-self-mail/"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Note To Self MailとCapito式シンプルメモの最大の違いは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "最も大きな違いは起動速度とオフライン対応です。Capito式シンプルメモは起動0.3秒でキーボードが立ち上がり、オフライン時もOutboxアーキテクチャでメモを暗号化保存して自動再送します。また、Cloudflare Workers + Resend APIによる独自インフラを持ちます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Capito式シンプルメモのAES-GCM暗号化とは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AES-GCM（Galois/Counter Mode）はNISTが標準化した認証付き暗号化方式です。Capito式シンプルメモはオフライン時にメモをAES-GCMで端末内に暗号化保存します。サーバーにメモ本文は保存されず、プライバシーを保護します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "どちらのアプリも無料で使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモは1日3通まで無料のFreeプランがあり、7日間の無料トライアルでは送信無制限を試せます。Note To Self Mailの料金体系はアプリのストアページでご確認ください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Cloudflare Workersを使うと何が変わりますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Cloudflare WorkersはCloudflareのエッジネットワーク上で動くサーバーレス基盤です。世界300箇所以上のデータセンターからユーザーの最寄りノードで処理するため、送信レイテンシが150ms程度に抑えられます。また、特定クラウドへの依存がなく、サービス安定性が高くなります。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Note To Self Mailからの乗り換えは簡単ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。Capito式シンプルメモはApp Storeからダウンロードし、メールアドレスを設定するだけで3分以内に使い始められます。過去のメモはメール受信箱にそのまま残っています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the biggest difference between Note To Self Mail and Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The biggest differences are launch speed and offline support. Simple Memo launches in 0.3 seconds with keyboard ready, and stores offline memos with AES-GCM encryption via Outbox architecture for auto-resend on reconnection. It also runs on Cloudflare Workers + Resend API infrastructure."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What does AES-GCM encryption mean for my memos?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AES-GCM is an authenticated encryption standard by NIST. Simple Memo encrypts offline memos on-device with AES-GCM before any transmission attempt. Your memo content is never stored on servers — only sent through Cloudflare Workers to your email."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Simple Memo free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Simple Memo has a Free plan with 3 sends per day, and a 7-day free trial with unlimited sends. Premium ($2.99/month or $29.99/year) unlocks unlimited sends permanently."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why does Cloudflare Workers infrastructure matter?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Cloudflare Workers runs on 300+ edge locations worldwide, processing requests at the nearest node to the user. This results in ~150ms send latency and high availability without dependence on a single cloud provider."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is it easy to switch from Note To Self Mail to Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Download Simple Memo from the App Store, set your email address, and you're ready in under 3 minutes. Your previous memos remain in your email inbox unchanged."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "比較", "item": "https://simplememofast.com/vs/"},
+      {"@type": "ListItem", "position": 3, "name": "vs Note To Self Mail", "item": "https://simplememofast.com/vs/note-to-self-mail/"}
+    ]
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.88rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:500;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:600;color:var(--text-secondary);white-space:nowrap}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .diff-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .diff-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .diff-card__num{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.05em;margin-bottom:.5rem}
+    .diff-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .diff-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7}
+
+    .choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0 2rem}
+    @media(max-width:600px){.choose-grid{grid-template-columns:1fr}}
+    .choose-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .choose-card__title{font-size:1rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .choose-card__list{list-style:none;margin:0;padding:0;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+    .choose-card__list li::before{content:"→ ";color:var(--accent)}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Note To Self Mail vs Capito式シンプルメモ 比較",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".diff-card__title"]
+    },
+    "url": "https://simplememofast.com/vs/note-to-self-mail/"
+  }
+  </script>
+</head>
+<body>
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">Note To Self Mailとの比較 — Capito式シンプルメモ</span>
+      <span class="meta-og-title">Note To Self Mailとの比較 — Capito式シンプルメモ</span>
+      <span class="meta-description">Note To Self MailとCapito式シンプルメモを徹底比較。起動速度・オフライン対応・AES-GCM暗号化・Cloudflare Workers基盤・無料プランの違いを解説します。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Simple Memo vs Note To Self Mail — Comparison</span>
+      <span class="meta-og-title">Simple Memo vs Note To Self Mail — Comparison</span>
+      <span class="meta-description">Both apps email your notes to yourself. Compare launch speed, offline Outbox, AES-GCM encryption, Cloudflare Workers infrastructure, and free tier availability.</span>
+    </div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/vs/" class="page-header__back">
+          <span data-lang="ja">比較一覧へ戻る</span>
+          <span data-lang="en">Back to Comparisons</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">同カテゴリ2アプリの詳細比較</span>
+          <span data-lang="en">Head-to-head: two email-yourself memo apps</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">Note To Self Mail vs<br>Capito式シンプルメモ 比較</span>
+          <span data-lang="en">Simple Memo vs Note To Self Mail<br>Full Comparison</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">どちらも「自分にメモをメールで送る」アプリです。同じカテゴリだからこそ、細かな違いが体験の差になります。起動速度・オフライン対応・暗号化方式・送信インフラ・料金体系を詳細に比較します。</span>
+          <span data-lang="en">Both apps do the same thing: email your notes to yourself. That's why the details matter. Compare launch speed, offline Outbox support, AES-GCM encryption, Cloudflare Workers infrastructure, and free tier pricing.</span>
+        </p>
+      </div>
+
+      <!-- Entity Definition -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">「自分にメールするメモアプリ」カテゴリとは</span>
+          <span data-lang="en">What Is the "Email Yourself" Note App Category</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">「自分にメールするメモアプリ」は、スマートフォンでメモを書き、指定したメールアドレスに即送信するカテゴリのアプリです。Note To Self MailとCapito式シンプルメモはともにこのカテゴリに属します。どちらもメールの永続性・検索性・クロスデバイスアクセスというメリットを活用しており、基本コンセプトは同じです。ただし、起動速度・オフライン設計・暗号化実装・送信インフラの選択において顕著な違いがあり、日常的な使用感に大きく影響します。Capito式シンプルメモは0.3秒起動・Outboxオフライン対応・AES-GCM端末内暗号化・Cloudflare Workers + Resend APIという4つの技術的優位を持ちます。</span>
+          <span data-lang="en">The "email yourself" note app category lets you write a memo on your phone and instantly send it to a specified email address. Both Note To Self Mail and Simple Memo belong to this category, leveraging email's permanence, searchability, and cross-device access. The core concept is shared, but they diverge significantly in launch speed, offline architecture, encryption implementation, and sending infrastructure — differences that compound into a noticeably different daily experience. Simple Memo's technical differentiators are: 0.3s launch, Outbox offline support, AES-GCM on-device encryption, and Cloudflare Workers + Resend API infrastructure.</span>
+        </p>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">Note To Self Mail vs Capito式シンプルメモ 比較表</span>
+          <span data-lang="en">Note To Self Mail vs Simple Memo — Comparison Table</span>
+        </h2>
+        <div style="overflow-x:auto">
+          <table class="compare-table" data-lang="ja">
+            <thead><tr><th>項目</th><th>Note To Self Mail</th><th>Capito式シンプルメモ</th></tr></thead>
+            <tbody>
+              <tr><td>起動速度</td><td>標準的</td><td class="yes">0.3秒</td></tr>
+              <tr><td>オフライン対応</td><td>不明</td><td class="yes">Outbox自動再送</td></tr>
+              <tr><td>端末内暗号化</td><td>不明</td><td class="yes">AES-GCM</td></tr>
+              <tr><td>送信インフラ</td><td>標準SMTP</td><td class="yes">Cloudflare Workers + Resend</td></tr>
+              <tr><td>送信速度</td><td>標準的</td><td class="yes">150ms</td></tr>
+              <tr><td>無料プラン</td><td>要確認</td><td class="yes">1日3通</td></tr>
+              <tr><td>7日間無料トライアル</td><td>要確認</td><td class="yes">送信無制限</td></tr>
+              <tr><td>送信履歴</td><td>要確認</td><td class="yes">アプリ内で確認</td></tr>
+              <tr><td>対応OS</td><td>iOS</td><td class="yes">iOS 16+</td></tr>
+              <tr><td>日本語ローカライズ</td><td>要確認</td><td class="yes">完全対応</td></tr>
+            </tbody>
+          </table>
+          <table class="compare-table" data-lang="en">
+            <thead><tr><th>Feature</th><th>Note To Self Mail</th><th>Simple Memo</th></tr></thead>
+            <tbody>
+              <tr><td>Launch Speed</td><td>Standard</td><td class="yes">0.3 seconds</td></tr>
+              <tr><td>Offline Support</td><td>Unknown</td><td class="yes">Outbox auto-resend</td></tr>
+              <tr><td>On-Device Encryption</td><td>Unknown</td><td class="yes">AES-GCM</td></tr>
+              <tr><td>Send Infrastructure</td><td>Standard SMTP</td><td class="yes">Cloudflare Workers + Resend</td></tr>
+              <tr><td>Send Latency</td><td>Standard</td><td class="yes">~150ms</td></tr>
+              <tr><td>Free Tier</td><td>Check App Store</td><td class="yes">3 sends/day</td></tr>
+              <tr><td>Free Trial</td><td>Check App Store</td><td class="yes">7 days, unlimited sends</td></tr>
+              <tr><td>Send History</td><td>Check App Store</td><td class="yes">In-app tracking</td></tr>
+              <tr><td>Supported OS</td><td>iOS</td><td class="yes">iOS 16+</td></tr>
+              <tr><td>Japanese Localization</td><td>Unknown</td><td class="yes">Full support</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5 Key Differences -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">5つの決定的な違い</span>
+          <span data-lang="en">5 Key Differences</span>
+        </h2>
+        <div class="diff-cards">
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 01</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 01</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">起動速度：0.3秒の差が体験を変える</span>
+              <span data-lang="en">Launch Speed: 0.3 Seconds Changes Everything</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモはアプリを開いた瞬間、0.3秒でキーボードが立ち上がります。ロック解除後すぐに入力を開始できる「インスタントキーボード」設計です。思いついたアイデアを逃さない最速のキャプチャ体験を実現します。</span>
+              <span data-lang="en">Simple Memo's keyboard appears in 0.3 seconds from app launch — designed for instant input immediately after unlocking your phone. The sub-second capture experience means ideas are recorded before they fade, not after navigating through loading screens.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 02</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 02</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">Outboxオフラインアーキテクチャ</span>
+              <span data-lang="en">Outbox Offline Architecture</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">電波のない場所でメモを書いてもどうなるか——Capito式シンプルメモはOutboxアーキテクチャを採用し、オフライン時のメモをAES-GCMで暗号化してデバイス内に保存。オンラインに戻ったとき自動で送信します。メモの取りこぼしゼロを保証します。</span>
+              <span data-lang="en">What happens when you write a memo with no signal? Simple Memo's Outbox architecture stores offline memos in AES-GCM encrypted local storage and automatically sends them when connectivity returns. Zero message loss, regardless of network conditions.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 03</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 03</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">AES-GCM暗号化によるプライバシー保護</span>
+              <span data-lang="en">AES-GCM Encryption for Privacy</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモはオフライン保存時にAES-GCM（認証付き暗号化）を使用します。NISTが標準化した強固な暗号化方式で、デバイス内のメモが第三者に読まれることを防ぎます。サーバー側にメモ本文は保存されません。</span>
+              <span data-lang="en">Simple Memo uses AES-GCM (Galois/Counter Mode) authenticated encryption for offline storage — a NIST-standardized scheme that prevents unauthorized reading of locally stored memos. Memo content is never stored server-side, only transmitted through encrypted channels.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 04</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 04</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">Cloudflare Workersエッジインフラ</span>
+              <span data-lang="en">Cloudflare Workers Edge Infrastructure</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモはCloudflare Workers + Resend APIを独自送信基盤として採用しています。世界300箇所以上のエッジノードから最寄りのサーバーで処理するため送信レイテンシが約150msと低く、高可用性・スケーラビリティを実現しています。</span>
+              <span data-lang="en">Simple Memo's backend runs on Cloudflare Workers at 300+ global edge locations, processing from the node nearest to the user. Combined with Resend API, this achieves ~150ms send latency, high availability, and no single-cloud dependency.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 05</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 05</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">明確な無料プラン</span>
+              <span data-lang="en">Clear Free Tier Availability</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモは1日3通まで無料のFreeプランを提供しています。さらに7日間の無料トライアルでは送信無制限を体験できます。料金を気にせずまず試してみることが可能です。</span>
+              <span data-lang="en">Simple Memo offers a transparent free tier: 3 sends per day forever, plus a 7-day unlimited send trial. No credit card required to start. Premium ($2.99/month or $29.99/year) unlocks unlimited sends.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Who Should Choose Which -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">どちらを選ぶべきか</span>
+          <span data-lang="en">Who Should Choose Which</span>
+        </h2>
+        <div class="choose-grid">
+          <div class="choose-card">
+            <div class="choose-card__title">
+              <span data-lang="ja">Note To Self Mailが向いている人</span>
+              <span data-lang="en">Consider Note To Self Mail If...</span>
+            </div>
+            <ul class="choose-card__list">
+              <li><span data-lang="ja">現在のインターフェースに満足している</span><span data-lang="en">You're satisfied with the current interface</span></li>
+              <li><span data-lang="ja">速度よりも他の機能を重視する</span><span data-lang="en">You prioritize features other than speed</span></li>
+              <li><span data-lang="ja">すでにアプリの有料プランを契約している</span><span data-lang="en">You're already on a paid plan</span></li>
+            </ul>
+          </div>
+          <div class="choose-card">
+            <div class="choose-card__title">
+              <span data-lang="ja">Capito式シンプルメモが向いている人</span>
+              <span data-lang="en">Choose Simple Memo If...</span>
+            </div>
+            <ul class="choose-card__list">
+              <li><span data-lang="ja">0.3秒起動の最速キャプチャが欲しい</span><span data-lang="en">You want the fastest possible 0.3s capture</span></li>
+              <li><span data-lang="ja">オフライン環境でもメモを取る必要がある</span><span data-lang="en">You need reliable offline note-taking</span></li>
+              <li><span data-lang="ja">AES-GCM暗号化でプライバシーを重視する</span><span data-lang="en">You prioritize AES-GCM encryption for privacy</span></li>
+              <li><span data-lang="ja">Cloudflare Workersの低レイテンシ送信を求める</span><span data-lang="en">You want low-latency edge sending</span></li>
+              <li><span data-lang="ja">まず無料で試してから判断したい</span><span data-lang="en">You want to try before committing to a paid plan</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">よくある質問</span>
+          <span data-lang="en">FAQ</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Note To Self MailとCapito式シンプルメモの最大の違いは何ですか？</summary><div class="faq-answer"><p>最も大きな違いは起動速度とオフライン対応です。Capito式シンプルメモは起動0.3秒でキーボードが立ち上がり、オフライン時もOutboxアーキテクチャでメモを暗号化保存して自動再送します。また、Cloudflare Workers + Resend APIによる独自インフラを持ちます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Capito式シンプルメモのAES-GCM暗号化とは何ですか？</summary><div class="faq-answer"><p>AES-GCM（Galois/Counter Mode）はNISTが標準化した認証付き暗号化方式です。Capito式シンプルメモはオフライン時にメモをAES-GCMで端末内に暗号化保存します。サーバーにメモ本文は保存されず、プライバシーを保護します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">どちらのアプリも無料で使えますか？</summary><div class="faq-answer"><p>Capito式シンプルメモは1日3通まで無料のFreeプランがあり、7日間の無料トライアルでは送信無制限を試せます。Note To Self Mailの料金体系はアプリのストアページでご確認ください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Cloudflare Workersを使うと何が変わりますか？</summary><div class="faq-answer"><p>Cloudflare WorkersはCloudflareのエッジネットワーク上で動くサーバーレス基盤です。世界300箇所以上のデータセンターからユーザーの最寄りノードで処理するため、送信レイテンシが150ms程度に抑えられます。また、特定クラウドへの依存がなく、サービス安定性が高くなります。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Note To Self Mailからの乗り換えは簡単ですか？</summary><div class="faq-answer"><p>はい。Capito式シンプルメモはApp Storeからダウンロードし、メールアドレスを設定するだけで3分以内に使い始められます。過去のメモはメール受信箱にそのまま残っています。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the biggest difference between Note To Self Mail and Simple Memo?</summary><div class="faq-answer"><p>The biggest differences are launch speed and offline support. Simple Memo launches in 0.3 seconds with keyboard ready, and stores offline memos with AES-GCM encryption via Outbox architecture for auto-resend on reconnection. It also runs on Cloudflare Workers + Resend API infrastructure.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What does AES-GCM encryption mean for my memos?</summary><div class="faq-answer"><p>AES-GCM is an authenticated encryption standard by NIST. Simple Memo encrypts offline memos on-device with AES-GCM before any transmission attempt. Your memo content is never stored on servers — only sent through Cloudflare Workers to your email.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo free to use?</summary><div class="faq-answer"><p>Yes. Simple Memo has a Free plan with 3 sends per day, and a 7-day free trial with unlimited sends. Premium ($2.99/month or $29.99/year) unlocks unlimited sends permanently.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Why does Cloudflare Workers infrastructure matter?</summary><div class="faq-answer"><p>Cloudflare Workers runs on 300+ edge locations worldwide, processing requests at the nearest node to the user. This results in ~150ms send latency and high availability without dependence on a single cloud provider.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is it easy to switch from Note To Self Mail to Simple Memo?</summary><div class="faq-answer"><p>Yes. Download Simple Memo from the App Store, set your email address, and you're ready in under 3 minutes. Your previous memos remain in your email inbox unchanged.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span data-lang="ja">0.3秒起動・Outbox対応・AES-GCM暗号化を試す</span>
+          <span data-lang="en">Try 0.3s launch, Outbox offline support, and AES-GCM encryption</span>
+        </div>
+        <div class="cta-box__desc">
+          <span data-lang="ja">7日間の無料トライアル付き。送信無制限でお試しいただけます。</span>
+          <span data-lang="en">7-day free trial with unlimited sends. No credit card required.</span>
+        </div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        </a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        </a>
+      </div>
+
+      <!-- Related Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">関連ページ</span>
+          <span data-lang="en">Related Pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/vs/">
+            <span data-lang="ja">アプリ比較ハブ</span>
+            <span data-lang="en">All Comparisons</span>
+          </a>
+          <a href="/vs/email-me-app/">
+            <span data-lang="ja">vs Email Me App</span>
+            <span data-lang="en">vs Email Me App</span>
+          </a>
+          <a href="/vs/slack-self-dm/">
+            <span data-lang="ja">vs Slack自分DM</span>
+            <span data-lang="en">vs Slack Self-DM</span>
+          </a>
+          <a href="/vs/bear/">
+            <span data-lang="ja">vs Bearメモアプリ</span>
+            <span data-lang="en">vs Bear</span>
+          </a>
+          <a href="/captio-alternative/">
+            <span data-lang="ja">Captio代替</span>
+            <span data-lang="en">Captio Alternative</span>
+          </a>
+          <a href="/note-to-email/">
+            <span data-lang="ja">自分にメールするメモとは</span>
+            <span data-lang="en">Note-to-Email Guide</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/captio-alternative/" class="footer__link">
+          <span data-lang="ja">Captio代替</span>
+          <span data-lang="en">Captio Alternative</span>
+        </a>
+        <a href="/note-to-email/" class="footer__link">
+          <span data-lang="ja">メモ→メール</span>
+          <span data-lang="en">Note to Email</span>
+        </a>
+        <a href="/vs/" class="footer__link">
+          <span data-lang="ja">比較</span>
+          <span data-lang="en">vs</span>
+        </a>
+        <a href="/use-cases/" class="footer__link">
+          <span data-lang="ja">活用事例</span>
+          <span data-lang="en">Use Cases</span>
+        </a>
+        <a href="/guides/" class="footer__link">
+          <span data-lang="ja">ガイド</span>
+          <span data-lang="en">Guides</span>
+        </a>
+        <a href="/faq" class="footer__link">
+          <span data-lang="ja">FAQ</span>
+          <span data-lang="en">FAQ</span>
+        </a>
+        <a href="/privacy" class="footer__link">
+          <span data-lang="ja">プライバシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>

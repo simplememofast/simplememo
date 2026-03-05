@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>セカンドブレイン × メールメモ — Capito式シンプルメモで構築</title>
+  <meta name="description" content="セカンドブレイン（Building a Second Brain / PARA）をメールメモで構築する方法を解説。メールメモはクイックキャプチャツールとして機能し、NotionやObsidianへの中継地点になります。">
+  <meta name="keywords" content="セカンドブレイン メモ, Building a Second Brain, PARA メソッド, セカンドブレイン 構築, PKM メモアプリ, second brain capture tool">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="セカンドブレイン × メールメモ — Capito式シンプルメモで構築">
+  <meta property="og:description" content="Building a Second Brain（BASB）のクイックキャプチャツールとしてメールメモを活用。NotionやObsidianへの中継地点として機能します。実践ガイド付き。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/methods/second-brain/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="セカンドブレイン × メールメモ — Capito式シンプルメモで構築">
+  <meta name="twitter:description" content="Building a Second Brainのクイックキャプチャツールとしてメールメモを活用。NotionやObsidianへの中継地点として機能します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/methods/second-brain/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/methods/second-brain/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/methods/second-brain/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/methods/second-brain/">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "セカンドブレイン × メールメモ — Capito式シンプルメモで構築",
+    "description": "Building a Second Brain（BASB）のクイックキャプチャツールとしてメールメモを活用する方法。メールはユニバーサルインボックスとして機能し、Notion・Obsidianなどのシステムへ知識を流し込みます。",
+    "url": "https://simplememofast.com/methods/second-brain/",
+    "datePublished": "2026-03-05",
+    "dateModified": "2026-03-05",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/methods/second-brain/"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "セカンドブレイン × メールメモの実践手順（CODEフレームワーク）",
+    "description": "Building a Second Brain（BASB）のCODEフレームワーク（Capture・Organize・Distill・Express）をメールメモと組み合わせて実践するステップバイステップガイド",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Capture（キャプチャ）— メールメモで即時記録",
+        "text": "本を読んでいて気づいたこと、会話で面白いと思ったこと、ふとしたアイデアをCapito式シンプルメモで即座にメール送信。「後で覚えている」を信用しない。メモのしきい値を下げることで、本来なら失われていた洞察を捕捉します。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Organize（整理）— PARAに振り分ける",
+        "text": "定期的にメール受信箱を開き、届いたメモをPARAの4カテゴリ（Projects・Areas・Resources・Archive）に振り分けます。NotionやObsidianの対応フォルダ・データベースに転記してアーカイブします。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Distill（蒸留）— エッセンスを抽出する",
+        "text": "Notionなどのシステムに移した後、ボールドサマリー（Progressive Summarization）でノートのエッセンスを抽出します。最初のパス：重要な部分をボールド。第2パス：さらに重要な部分をハイライト。第3パス：エグゼクティブサマリーを1文で書く。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Express（表現）— 創造物に変換する",
+        "text": "蒸留したノートを組み合わせて、記事・プレゼン・企画書・コードなどの創造物に変換します。メモメールは原材料であり、Expressフェーズでその価値が発揮されます。"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "セカンドブレインのクイックキャプチャにメールメモを使うメリットは？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "起動0.3秒・ワンタップ送信で、思いついた瞬間に記録できます。Notionを開く・アプリを起動するという手間がない分、キャプチャのしきい値が下がります。また、メールはどのシステムとも統合しやすく、後でNotionやObsidianに転記する際も検索・コピーが簡単です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "セカンドブレインのPARAとメールメモをどう組み合わせますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "メモメールが届いたら、PARAの4カテゴリ（Projects：現在進行中のプロジェクト、Areas：継続的な責任領域、Resources：将来使えるかもしれない参考情報、Archive：完了・不要になったもの）のどれに属するかを判断し、NotionやObsidianの対応フォルダに転記します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Progressive Summarization（段階的要約）とは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tiago Forteが提唱するノート蒸留手法です。1回目：重要な文をボールド体に。2回目：ボールド体の中でさらに重要な部分をハイライト。3回目：ハイライト部分をもとに自分の言葉でエグゼクティブサマリーを1〜2文で書く。これにより、後で読み返す時間を大幅に短縮できます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "NotionとObsidian、セカンドブレインにはどちらが向いていますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Notionはデータベース機能が強力でPARAの実装に向いています。Obsidianはリンク機能（バックリンク・グラフビュー）が強力でZettelkasten的な知識ネットワーク構築に向いています。どちらを使っても、メールメモはキャプチャ層として機能します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "セカンドブレインを始めるのに必要なツールは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "最低限必要なのはキャプチャツール（Capito式シンプルメモなどのメモアプリ）と知識管理ツール（NotionやObsidianなど）の2つです。最初から完璧なシステムを作ろうとせず、まずキャプチャ習慣から始めることが成功の鍵です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the benefits of email memo for Second Brain quick capture?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "0.3-second launch and one-tap send means you can capture the instant an idea appears, without opening Notion or another app. The lower the capture friction, the more ideas you preserve. Email is also universally compatible — easy to search, copy, and transfer to Notion, Obsidian, or any other system."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does email memo fit into the PARA framework?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Email memos are your raw capture layer. When you process them, you route each note into PARA: Projects (active projects), Areas (ongoing responsibilities), Resources (useful reference material), or Archive (completed or inactive items). The email gets archived once transferred to your knowledge system."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Progressive Summarization?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Progressive Summarization is Tiago Forte's note distillation method. Pass 1: bold the most important sentences. Pass 2: highlight the most important parts of the bolded text. Pass 3: write a 1-2 sentence executive summary in your own words. This makes notes scannable in seconds rather than minutes when you return to them."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use Notion or Obsidian for my Second Brain?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Notion excels at database-style organization, making it ideal for PARA implementation. Obsidian excels at linking (backlinks, graph view), making it ideal for Zettelkasten-style knowledge networks. Both work equally well with email memo as the capture layer. Choose the tool you'll actually use consistently."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What tools do I need to start a Second Brain?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You need two things: a capture tool (Simple Memo or similar) and a knowledge management tool (Notion, Obsidian, etc.). Don't try to build a perfect system from the start. Begin with just the capture habit, then gradually add organization and distillation. The system grows with you."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "生産性メソッド", "item": "https://simplememofast.com/methods/"},
+      {"@type": "ListItem", "position": 3, "name": "セカンドブレイン × メールメモ", "item": "https://simplememofast.com/methods/second-brain/"}
+    ]
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .steps-list li strong{display:block;margin-bottom:.3rem;color:var(--text)}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7}
+
+    .para-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .para-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem}
+    .para-card__letter{font-size:2rem;font-weight:900;color:var(--accent);opacity:.6;line-height:1;margin-bottom:.4rem}
+    .para-card__name{font-size:.9rem;font-weight:700;margin-bottom:.4rem}
+    .para-card__def{font-size:.8rem;color:var(--text-secondary);line-height:1.6;margin-bottom:.5rem}
+    .para-card__example{font-size:.78rem;color:var(--text-muted);font-style:italic;line-height:1.5}
+
+    .code-flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin:1.5rem 0 2rem}
+    .code-step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem;text-align:center}
+    .code-step__letter{font-size:1.6rem;font-weight:900;color:var(--accent);line-height:1;margin-bottom:.3rem}
+    .code-step__name{font-size:.82rem;font-weight:700;margin-bottom:.3rem}
+    .code-step__tool{font-size:.75rem;color:var(--text-secondary)}
+
+    .scenario-box{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .scenario-box__title{font-weight:700;margin-bottom:.75rem;color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:.05em}
+    .scenario-box p{color:var(--text-secondary);margin-bottom:.5rem}
+    .scenario-box p:last-child{margin-bottom:0}
+
+    .insight-box{background:rgba(100,180,255,.05);border:1px solid rgba(100,180,255,.15);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1.5rem 0;font-size:.9rem;line-height:1.8;color:var(--text-secondary)}
+    .insight-box strong{color:var(--text)}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "セカンドブレイン × メールメモ実践ガイド",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".lp-section__lead"]
+    },
+    "url": "https://simplememofast.com/methods/second-brain/"
+  }
+  </script>
+</head>
+<body>
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">セカンドブレイン × メールメモ — Capito式シンプルメモで構築</span>
+      <span class="meta-og-title">セカンドブレイン × メールメモ — Capito式シンプルメモで構築</span>
+      <span class="meta-description">セカンドブレイン（Building a Second Brain / PARA）をメールメモで構築する方法を解説。メールメモはクイックキャプチャツールとして機能し、NotionやObsidianへの中継地点になります。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Second Brain × Email Memo — Build with Simple Memo</span>
+      <span class="meta-og-title">Second Brain × Email Memo — Build with Simple Memo</span>
+      <span class="meta-description">Learn how to use email memo as your Second Brain quick capture tool. Email is the universal inbox that feeds into Notion, Obsidian, or any PKM system. CODE framework guide included.</span>
+    </div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/methods/" class="page-header__back">
+          <span data-lang="ja">メソッド一覧へ戻る</span>
+          <span data-lang="en">Back to Methods</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">セカンドブレイン × メールメモ</span>
+          <span data-lang="en">Second Brain × Email Memo</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">セカンドブレイン × メールメモ<br>Capito式シンプルメモで<br>第二の脳を構築する</span>
+          <span data-lang="en">Second Brain × Email Memo<br>Build Your Second Brain<br>with Simple Memo</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">Capito式シンプルメモはセカンドブレインの「クイックキャプチャ」ツールです。メールはユニバーサルインボックスとして機能し、キャプチャしたアイデアはNotionやObsidianなどの知識管理システムへ流れ込みます。</span>
+          <span data-lang="en">Simple Memo is your Second Brain's "Quick Capture" tool. Email acts as the universal inbox — ideas captured here flow into Notion, Obsidian, or any knowledge management system you use.</span>
+        </p>
+      </div>
+
+      <!-- What is Second Brain -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">セカンドブレイン（Building a Second Brain）とは</span>
+          <span data-lang="en">What is Second Brain (Building a Second Brain)?</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">セカンドブレイン（Building a Second Brain、略称BASB）は、生産性コンサルタントのティアゴ・フォルテが体系化した個人知識管理（PKM：Personal Knowledge Management）メソッドです。「脳の外に第二の脳を構築し、アイデアや知識を蓄積・整理・活用する」というコンセプトのもと、CODEフレームワーク（Capture・Organize・Distill・Express）とPARAシステムを組み合わせています。</span>
+          <span data-lang="en">Building a Second Brain (BASB) is a Personal Knowledge Management (PKM) methodology developed by productivity consultant Tiago Forte. The concept: build an external "second brain" to accumulate, organize, and leverage your ideas and knowledge. It combines the CODE framework (Capture, Organize, Distill, Express) with the PARA organization system.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">BASBが解決する問題は「現代の情報過多環境において、学んだことや気づいたことが記憶から抜け落ち、創造的な仕事に活かせていない」というものです。本を読んでも内容を忘れる、会議でいいアイデアが出ても次の日には忘れる、過去のリサーチがどこにあるか分からない――こうした問題を、外部の知識システムを構築することで解決します。</span>
+          <span data-lang="en">The problem BASB solves: in today's information-overload environment, what we learn and notice falls through the cracks of memory. We finish a book and forget it. Great meeting ideas disappear by morning. Past research is lost in a sea of unsorted files. Building an external knowledge system fixes this.</span>
+        </p>
+
+        <div class="insight-box" data-lang="ja">
+          <strong>セカンドブレインの核心：</strong>「最も有用なコンテンツをフィルタリングし、未来の自分のために保存する」ことです。現在の自分がキャプチャし整理した知識が、未来のプロジェクトで予想外に役立つ。セカンドブレインはそういう「知識の複利」を生み出すシステムです。
+        </div>
+        <div class="insight-box" data-lang="en">
+          <strong>The core of Second Brain:</strong> "Filter the most useful content and save it for your future self." Knowledge you capture and organize today will unexpectedly power a project months or years from now. Second Brain creates compound interest on your ideas.
+        </div>
+      </section>
+
+      <!-- PARA System -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">PARAシステムとは</span>
+          <span data-lang="en">The PARA System</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">PARAはセカンドブレインの整理フレームワークです。4つのカテゴリですべての情報を管理します。メモメールはこのPARAに振り分けられます。</span>
+          <span data-lang="en">PARA is Second Brain's organization framework. All information is managed in four categories. Memo emails are routed into PARA during processing sessions.</span>
+        </p>
+        <div class="para-grid" data-lang="ja">
+          <div class="para-card">
+            <div class="para-card__letter">P</div>
+            <div class="para-card__name">Projects（プロジェクト）</div>
+            <div class="para-card__def">明確な期限と目標を持つ現在進行中の取り組み</div>
+            <div class="para-card__example">例：ウェブサイトリニューアル、Q1プレゼン作成、読書感想文</div>
+          </div>
+          <div class="para-card">
+            <div class="para-card__letter">A</div>
+            <div class="para-card__name">Areas（エリア）</div>
+            <div class="para-card__def">期限はないが継続的に管理すべき責任領域</div>
+            <div class="para-card__example">例：健康、家計、スキルアップ、チームマネジメント</div>
+          </div>
+          <div class="para-card">
+            <div class="para-card__letter">R</div>
+            <div class="para-card__name">Resources（リソース）</div>
+            <div class="para-card__def">将来役立つかもしれないトピック・参考情報</div>
+            <div class="para-card__example">例：マーケティング手法メモ、読んだ本のハイライト、デザインインスピレーション</div>
+          </div>
+          <div class="para-card">
+            <div class="para-card__letter">A</div>
+            <div class="para-card__name">Archive（アーカイブ）</div>
+            <div class="para-card__def">完了・非アクティブになったP/A/Rのアイテム</div>
+            <div class="para-card__example">例：完了したプロジェクト、退職した企業のエリア、過去のリソース</div>
+          </div>
+        </div>
+        <div class="para-grid" data-lang="en">
+          <div class="para-card">
+            <div class="para-card__letter">P</div>
+            <div class="para-card__name">Projects</div>
+            <div class="para-card__def">Current work with a clear goal and deadline</div>
+            <div class="para-card__example">e.g.: Website redesign, Q1 presentation, book review</div>
+          </div>
+          <div class="para-card">
+            <div class="para-card__letter">A</div>
+            <div class="para-card__name">Areas</div>
+            <div class="para-card__def">Ongoing responsibilities with no end date</div>
+            <div class="para-card__example">e.g.: Health, finances, skill development, team management</div>
+          </div>
+          <div class="para-card">
+            <div class="para-card__letter">R</div>
+            <div class="para-card__name">Resources</div>
+            <div class="para-card__def">Topics and references that may be useful someday</div>
+            <div class="para-card__example">e.g.: Marketing tactics, book highlights, design inspiration</div>
+          </div>
+          <div class="para-card">
+            <div class="para-card__letter">A</div>
+            <div class="para-card__name">Archive</div>
+            <div class="para-card__def">Completed or inactive items from P/A/R</div>
+            <div class="para-card__example">e.g.: Finished projects, previous companies' areas, outdated resources</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How email memo fits -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">なぜメールメモがセカンドブレインに最適なのか</span>
+          <span data-lang="en">Why Email Memo is Perfect for Second Brain</span>
+        </h2>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">最低摩擦のキャプチャ</span>
+              <span data-lang="en">Lowest-Friction Capture</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">BASBの失敗理由の第一は「キャプチャが面倒でやめてしまう」ことです。Notionを開く、ページを探す、書く――この手順が多すぎます。メールメモは起動0.3秒でキャプチャ完了。しきい値がゼロに近いため、本来失われていたアイデアを捕捉できます。</span>
+              <span data-lang="en">The number one reason BASB fails: capture becomes too cumbersome. Opening Notion, finding the right page, writing — too many steps. Email memo captures in 0.3 seconds. Near-zero threshold means ideas that would have been lost are now preserved.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">ユニバーサルインボックスとして機能</span>
+              <span data-lang="en">Functions as Universal Inbox</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">セカンドブレインでは「すべてのキャプチャが流れ込む単一のインボックス」を持つことが推奨されます。メールは多くの人にとって毎日確認するユニバーサルなインボックスです。スマホで撮った写真も、Webクリップも、メモも、最終的にメールで自分に送れば一元管理できます。</span>
+              <span data-lang="en">BASB recommends a single "capture inbox" where everything flows. Email is the universal inbox most people already check daily. Screenshots, web clips, ideas — everything sent to yourself by email becomes one stream to process.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">どのPKMツールとも共存</span>
+              <span data-lang="en">Works with Any PKM Tool</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">Notion・Obsidian・Roam Research・Logseq・Apple Notes――どのツールを選んでも、メールメモはキャプチャ層として機能します。PKMツールを変えても、キャプチャ習慣は継続できます。</span>
+              <span data-lang="en">Notion, Obsidian, Roam Research, Logseq, Apple Notes — email memo works as the capture layer for any PKM tool. Switch your knowledge system without disrupting your capture habit.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CODE Framework with email memo -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">CODEフレームワーク × メールメモ</span>
+          <span data-lang="en">CODE Framework × Email Memo</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">BASBの中核フレームワーク「CODE」の各フェーズにメールメモがどう対応するかを示します。</span>
+          <span data-lang="en">Here's how email memo maps onto each phase of BASB's core CODE framework.</span>
+        </p>
+
+        <div class="code-flow" data-lang="ja">
+          <div class="code-step">
+            <div class="code-step__letter">C</div>
+            <div class="code-step__name">Capture</div>
+            <div class="code-step__tool">Capito式シンプルメモ<br>（メールとして送信）</div>
+          </div>
+          <div class="code-step">
+            <div class="code-step__letter">O</div>
+            <div class="code-step__name">Organize</div>
+            <div class="code-step__tool">PARAに振り分け<br>（Notion/Obsidianへ転記）</div>
+          </div>
+          <div class="code-step">
+            <div class="code-step__letter">D</div>
+            <div class="code-step__name">Distill</div>
+            <div class="code-step__tool">Progressive Summarization<br>でエッセンスを抽出</div>
+          </div>
+          <div class="code-step">
+            <div class="code-step__letter">E</div>
+            <div class="code-step__name">Express</div>
+            <div class="code-step__tool">記事・企画書・プレゼン等<br>の創造物に変換</div>
+          </div>
+        </div>
+
+        <div class="code-flow" data-lang="en">
+          <div class="code-step">
+            <div class="code-step__letter">C</div>
+            <div class="code-step__name">Capture</div>
+            <div class="code-step__tool">Simple Memo<br>(send as email)</div>
+          </div>
+          <div class="code-step">
+            <div class="code-step__letter">O</div>
+            <div class="code-step__name">Organize</div>
+            <div class="code-step__tool">Route into PARA<br>(transfer to Notion/Obsidian)</div>
+          </div>
+          <div class="code-step">
+            <div class="code-step__letter">D</div>
+            <div class="code-step__name">Distill</div>
+            <div class="code-step__tool">Progressive Summarization<br>to extract essence</div>
+          </div>
+          <div class="code-step">
+            <div class="code-step__letter">E</div>
+            <div class="code-step__name">Express</div>
+            <div class="code-step__tool">Create articles, proposals,<br>presentations, code</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step by Step -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">セカンドブレイン × メールメモ 実践4ステップ</span>
+          <span data-lang="en">Second Brain × Email Memo: 4-Step Implementation</span>
+        </h2>
+
+        <ol class="steps-list" data-lang="ja">
+          <li>
+            <strong>Capture — 摩擦ゼロでアイデアをキャプチャ</strong>
+            本を読んでいて「これは使える」と思ったら即メモ送信。会話の中で「面白い視点だ」と思ったら即メモ送信。シャワー中に浮かんだアイデアもスマートフォンに手を伸ばして即メモ送信。BASBではキャプチャの質より量を重視します。「後でメモしよう」は失われたアイデアを意味します。捕捉すべきものはすべてその瞬間に捕捉します。
+            <br><br>
+            BASBの創始者ティアゴ・フォルテは「12のお気に入りの問い（12 Favorite Problems）」というキャプチャ基準を提唱しています。自分が常に考えている12の問いを持ち、それに関連するものを優先的にキャプチャします。これにより、関連性の高い情報だけが第二の脳に蓄積されます。
+          </li>
+          <li>
+            <strong>Organize — PARAに振り分ける（週1回のバッチ処理）</strong>
+            メモメールを毎日処理する必要はありません。週1回のバッチ処理で十分です。処理セッションでは、受信箱のメモメールを一件ずつ開き、PARAの4カテゴリのどれに属するかを判断します：<br>
+            Projectsフォルダ：現在進行中のプロジェクトに関連するアイデアやタスク<br>
+            Areasフォルダ：継続的な責任領域（健康・スキル・家族など）に関連するメモ<br>
+            Resourcesフォルダ：将来使えそうなアイデア・参考情報・インスピレーション<br>
+            Archiveフォルダ：今は不要だが削除もしたくないもの<br>
+            振り分け後、NotionやObsidianの対応フォルダ・データベースに転記してアーカイブします。
+          </li>
+          <li>
+            <strong>Distill — Progressive Summarizationで蒸留する</strong>
+            転記したノートはそのままでは情報が多すぎて後で読み返すのが大変です。Progressive Summarization（段階的要約）で蒸留します：<br>
+            第1パス：メモ全体を読んで重要な文・フレーズをボールド体にする<br>
+            第2パス：ボールド体の中でさらに重要な部分をハイライトする<br>
+            第3パス：ハイライト部分をもとに、自分の言葉でエグゼクティブサマリーを1〜2文で書く<br>
+            このプロセスにより、後で読み返す際に最も重要な部分だけをスキャンできます。
+          </li>
+          <li>
+            <strong>Express — 蓄積した知識を創造物に変換する</strong>
+            セカンドブレインの最終目的は「知識の活用」です。Projectsフォルダのノートを組み合わせてブログ記事を書く。Resourcesフォルダのアイデアをプレゼンのスライドに変換する。過去の会議メモをもとに企画書を作成する。メモメールでキャプチャした原材料が、Expressフェーズで価値ある創造物に変わります。
+          </li>
+        </ol>
+
+        <ol class="steps-list" data-lang="en">
+          <li>
+            <strong>Capture — Capture ideas with zero friction</strong>
+            Reading a book and spot something useful? Send a memo immediately. Interesting perspective in a conversation? Send it. Shower idea? Reach for your phone and send it. BASB prioritizes volume over quality in capture. "I'll note it later" equals a lost idea. Capture everything relevant in the moment it appears.
+            <br><br>
+            BASB creator Tiago Forte recommends having "12 Favorite Problems" — twelve questions you're always thinking about — and prioritizing capture of anything related to them. This filters your capture so only high-relevance information accumulates in your Second Brain.
+          </li>
+          <li>
+            <strong>Organize — Route into PARA (weekly batch processing)</strong>
+            You don't need to process memo emails daily. Weekly batch processing is sufficient. In each processing session, open each memo email and decide which PARA category it belongs to:<br>
+            Projects: ideas and tasks related to current active projects<br>
+            Areas: notes related to ongoing responsibilities (health, skills, family, etc.)<br>
+            Resources: ideas, references, and inspiration for potential future use<br>
+            Archive: things you don't need now but don't want to delete<br>
+            After routing, transfer to the corresponding folder or database in Notion or Obsidian, then archive the email.
+          </li>
+          <li>
+            <strong>Distill — Summarize with Progressive Summarization</strong>
+            Raw notes transferred to your system are often too long to review quickly. Apply Progressive Summarization to distill them:<br>
+            Pass 1: Read the note and bold important sentences and phrases<br>
+            Pass 2: Among the bolded text, highlight the most critical parts<br>
+            Pass 3: Using the highlighted sections, write a 1-2 sentence executive summary in your own words<br>
+            After this process, you can scan a note in seconds rather than minutes when you return to it later.
+          </li>
+          <li>
+            <strong>Express — Convert accumulated knowledge into creative output</strong>
+            The ultimate purpose of Second Brain is using knowledge. Combine notes from your Projects folder to write a blog post. Transform Resource ideas into presentation slides. Turn past meeting notes into a new business proposal. Memo-captured raw material becomes valuable output at the Express stage.
+          </li>
+        </ol>
+      </section>
+
+      <!-- Real Scenario -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">実際のシナリオ：セカンドブレイン実践者の1週間</span>
+          <span data-lang="en">Real Scenario: A Week for a Second Brain Practitioner</span>
+        </h2>
+
+        <div class="scenario-box" data-lang="ja">
+          <div class="scenario-box__title">山田さん（コンテンツマーケター）の1週間</div>
+          <p><strong>月〜木（キャプチャ週）</strong>　本「ザ・ドリップ・マーケティング」を読んでいて「顧客教育の重要性」について重要な節を発見。Capito式シンプルメモで「顧客教育コンテンツ戦略のヒント：〇〇〇〇」と送信。会議中に競合分析の指摘が面白かったので「競合Bのコンテンツ戦略：ハウツー特化、SEO強め」とメモ送信。合計で週10件のメモメールが受信箱に蓄積。</p>
+          <p><strong>金曜（週次バッチ処理・30分）</strong>　受信箱の10件のメモメールを処理。「顧客教育コンテンツ戦略のヒント」→Notionの「Resources/マーケティング」フォルダへ転記してアーカイブ。「競合Bのコンテンツ戦略」→Notionの「Projects/Q2コンテンツ戦略」フォルダへ転記。その他8件も同様に振り分け完了。受信箱ゼロ。</p>
+          <p><strong>翌々週（Expressフェーズ）</strong>　「Q2コンテンツ戦略の記事を書く」プロジェクトを開始。NotionのQ2フォルダを開くと、過去2週間でキャプチャした競合分析・顧客教育の知見が揃っている。これらを組み合わせて2000字の戦略記事を3時間で完成。ゼロからリサーチする場合の10時間から大幅短縮。</p>
+        </div>
+
+        <div class="scenario-box" data-lang="en">
+          <div class="scenario-box__title">Morgan (Content Marketer) — One Week</div>
+          <p><strong>Mon-Thu (Capture Week)</strong> Reading "The Content Trap" and finds a key passage about customer education. Sends a memo: "Key insight on customer education content strategy: [...]." In a meeting, competitor analysis raises an interesting point — sends another memo: "Competitor B's content: heavy how-to, SEO-focused." By Thursday, 10 memo emails have accumulated in the inbox.</p>
+          <p><strong>Friday (Weekly batch processing — 30 min)</strong> Processes all 10 memo emails. "Customer education insight" → transferred to Notion "Resources/Marketing" folder, email archived. "Competitor B strategy" → transferred to Notion "Projects/Q2 Content Strategy" folder. All 10 memos routed and archived. Inbox zero.</p>
+          <p><strong>Two weeks later (Express phase)</strong> Starts project: "Write Q2 content strategy article." Opens Notion's Q2 folder — two weeks of captured competitor analysis and customer education insights are already organized. Combines them into a 2,000-word strategy piece in 3 hours. Starting from scratch would have taken 10+ hours of research.</p>
+        </div>
+      </section>
+
+      <!-- Tool Recommendations -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">セカンドブレイン構築に使うツール</span>
+          <span data-lang="en">Tools for Building Your Second Brain</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">メールメモはキャプチャ層として機能します。Organize・Distill・Expressには別の知識管理ツールが必要です。主な選択肢を紹介します。</span>
+          <span data-lang="en">Email memo handles the Capture layer. You'll need a separate knowledge management tool for Organize, Distill, and Express. Here are the main options.</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">Notion</div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">データベース機能が強力でPARA実装に最適。テーブル・カレンダー・ギャラリービューで情報を多角的に管理。チームでの共有も容易。初心者にも比較的使いやすい。</span>
+              <span data-lang="en">Powerful database features ideal for PARA implementation. Multiple views (table, calendar, gallery) for different perspectives on the same data. Easy team sharing. Relatively beginner-friendly.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">Obsidian</div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">バックリンクとグラフビューが強力。知識間の関連性を可視化し、Zettelkasten的なネットワーク構築に最適。ローカル保存でプライバシーも確保。上級者向け。</span>
+              <span data-lang="en">Powerful backlinks and graph view. Visualizes connections between notes, ideal for Zettelkasten-style knowledge networks. Local storage protects privacy. More advanced learning curve.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">Apple Notes / Google Keep</div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">シンプルさが最大の強み。まずセカンドブレインを始めたいなら、使い慣れたツールから始めるのがおすすめ。メモメールからのコピー&ペーストも簡単。</span>
+              <span class="data-lang-en">Simplicity is the biggest strength. If you're just starting a Second Brain, begin with familiar tools. Copy-paste from memo emails is straightforward.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">よくある質問（セカンドブレイン × メールメモ）</span>
+          <span data-lang="en">FAQ: Second Brain × Email Memo</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">セカンドブレインのクイックキャプチャにメールメモを使うメリットは？</summary><div class="faq-answer"><p>起動0.3秒・ワンタップ送信で、思いついた瞬間に記録できます。Notionを開く・アプリを起動するという手間がない分、キャプチャのしきい値が下がります。また、メールはどのシステムとも統合しやすく、後でNotionやObsidianに転記する際も検索・コピーが簡単です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">セカンドブレインのPARAとメールメモをどう組み合わせますか？</summary><div class="faq-answer"><p>メモメールが届いたら（週1回のバッチ処理推奨）、PARAの4カテゴリのどれに属するかを判断し、NotionやObsidianの対応フォルダに転記します。Projects（現在進行中のプロジェクト）、Areas（継続的な責任領域）、Resources（将来使えるかもしれない参考情報）、Archive（完了・不要になったもの）の4つで全情報を管理します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Progressive Summarization（段階的要約）とは何ですか？</summary><div class="faq-answer"><p>ティアゴ・フォルテが提唱するノート蒸留手法です。1回目：重要な文をボールド体に。2回目：ボールド体の中でさらに重要な部分をハイライト。3回目：ハイライト部分をもとに自分の言葉でエグゼクティブサマリーを1〜2文で書く。これにより、後で読み返す時間を大幅に短縮できます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">NotionとObsidian、セカンドブレインにはどちらが向いていますか？</summary><div class="faq-answer"><p>Notionはデータベース機能が強力でPARAの実装に向いています。Obsidianはリンク機能（バックリンク・グラフビュー）が強力でZettelkasten的な知識ネットワーク構築に向いています。どちらを使っても、メールメモはキャプチャ層として機能します。最初はどちらか1つだけ選んで始めることをおすすめします。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">セカンドブレインを始めるのに必要なツールは何ですか？</summary><div class="faq-answer"><p>最低限必要なのはキャプチャツール（Capito式シンプルメモなどのメモアプリ）と知識管理ツール（NotionやObsidianなど）の2つです。最初から完璧なシステムを作ろうとせず、まずキャプチャ習慣から始めることが成功の鍵です。システムは使いながら少しずつ成長させます。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What are the benefits of email memo for Second Brain quick capture?</summary><div class="faq-answer"><p>0.3-second launch and one-tap send means you capture the instant an idea appears, without opening Notion or another app. The lower the capture friction, the more ideas you preserve. Email is also universally compatible — easy to search, copy, and transfer to any PKM system.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does email memo fit into the PARA framework?</summary><div class="faq-answer"><p>Email memos are your raw capture layer. During weekly processing sessions, route each note into PARA: Projects (active projects), Areas (ongoing responsibilities), Resources (useful reference material), or Archive (completed or inactive items). Transfer to your knowledge system, then archive the email.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is Progressive Summarization?</summary><div class="faq-answer"><p>Progressive Summarization is Tiago Forte's note distillation method. Pass 1: bold the most important sentences and phrases. Pass 2: highlight the most important parts of the bolded text. Pass 3: write a 1-2 sentence executive summary in your own words using the highlighted sections. This makes notes scannable in seconds rather than minutes when you return to them.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Should I use Notion or Obsidian for my Second Brain?</summary><div class="faq-answer"><p>Notion excels at database-style organization, making it ideal for PARA implementation. Obsidian excels at linking (backlinks, graph view), making it ideal for Zettelkasten-style knowledge networks. Both work equally well with email memo as the capture layer. Pick one and start — you can always migrate later.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What tools do I need to start a Second Brain?</summary><div class="faq-answer"><p>You need two things: a capture tool (Simple Memo) and a knowledge management tool (Notion, Obsidian, etc.). Don't try to build a perfect system from day one. Start with just the capture habit — send memos, let them accumulate, then add organization once the habit is established. The system grows with you.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span data-lang="ja">セカンドブレインのキャプチャを今日から始める</span>
+          <span data-lang="en">Start your Second Brain capture layer today</span>
+        </div>
+        <div class="cta-box__desc">
+          <span data-lang="ja">7日間の無料トライアル付き。まずはメールメモでキャプチャ習慣を作ることから始めましょう。</span>
+          <span data-lang="en">7-day free trial included. Build your capture habit first — the rest of your Second Brain will grow from there.</span>
+        </div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        </a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">関連ページ</span>
+          <span data-lang="en">Related Pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/methods/">
+            <span data-lang="ja">生産性メソッド一覧</span>
+            <span data-lang="en">All Productivity Methods</span>
+          </a>
+          <a href="/methods/gtd/">
+            <span data-lang="ja">GTD × メールメモ</span>
+            <span data-lang="en">GTD × Email Memo</span>
+          </a>
+          <a href="/methods/inbox-zero/">
+            <span data-lang="ja">Inbox Zero × メールメモ</span>
+            <span data-lang="en">Inbox Zero × Email Memo</span>
+          </a>
+          <a href="/note-to-email/">
+            <span data-lang="ja">メモ→メールとは</span>
+            <span data-lang="en">Note-to-Email Guide</span>
+          </a>
+          <a href="/use-cases/">
+            <span data-lang="ja">ユースケース一覧</span>
+            <span data-lang="en">Use Cases</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/captio-alternative/" class="footer__link">
+          <span data-lang="ja">Captio代替</span>
+          <span data-lang="en">Captio Alternative</span>
+        </a>
+        <a href="/note-to-email/" class="footer__link">
+          <span data-lang="ja">メモ→メール</span>
+          <span data-lang="en">Note to Email</span>
+        </a>
+        <a href="/vs/" class="footer__link">
+          <span data-lang="ja">比較</span>
+          <span data-lang="en">vs</span>
+        </a>
+        <a href="/use-cases/" class="footer__link">
+          <span data-lang="ja">ユースケース</span>
+          <span data-lang="en">Use Cases</span>
+        </a>
+        <a href="/guides/" class="footer__link">
+          <span data-lang="ja">ガイド</span>
+          <span data-lang="en">Guides</span>
+        </a>
+        <a href="/faq" class="footer__link">
+          <span data-lang="ja">FAQ</span>
+          <span data-lang="en">FAQ</span>
+        </a>
+        <a href="/privacy" class="footer__link">
+          <span data-lang="ja">プライバシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
