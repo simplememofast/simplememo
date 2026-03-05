@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Proton Mail設定ガイド — Capito式シンプルメモ</title>
+  <meta name="description" content="Capito式シンプルメモのProton Mail設定ガイド。プライバシー重視のProton Mailアドレスを宛先に設定する手順、スパムフィルター対策、Bridge互換性など専門的な注意点を解説。">
+  <meta name="keywords" content="Proton Mail シンプルメモ 設定, ProtonMail メモアプリ 設定, プライバシー メモ メール, Proton Mail 自分に送る">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Proton Mail設定ガイド — Capito式シンプルメモ">
+  <meta property="og:description" content="プライバシー重視のProton MailをCapito式シンプルメモに設定する手順。スパムフィルター対策・Bridge互換性・トラブルシューティングまで。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/guides/proton-mail/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Proton Mail設定ガイド — Capito式シンプルメモ">
+  <meta name="twitter:description" content="プライバシー重視のProton MailをCapito式シンプルメモに設定する手順。スパムフィルター・Bridge互換性まで解説。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/guides/proton-mail/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/proton-mail/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/guides/proton-mail/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/proton-mail/">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Proton Mail設定ガイド — Capito式シンプルメモ",
+    "description": "プライバシー重視のProton MailをCapito式シンプルメモの送信先として設定する手順。スパムフィルター対策、Bridge互換性、トラブルシューティングを解説。",
+    "url": "https://simplememofast.com/guides/proton-mail/",
+    "datePublished": "2026-03-05",
+    "dateModified": "2026-03-05",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/guides/proton-mail/"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: HowTo -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "Proton Mail設定ガイド — Capito式シンプルメモ",
+    "description": "Capito式シンプルメモにProton Mailアドレスを設定してメモ送信を開始する手順。",
+    "totalTime": "PT5M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "アプリをダウンロードする",
+        "text": "App StoreでCapito式シンプルメモ（またはSimple Memo - Fast）を検索してダウンロードします。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "アプリを起動して設定を開く",
+        "text": "アプリを起動し、右下の設定アイコン（歯車）をタップして設定画面へ進みます。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Proton Mailアドレスを入力する",
+        "text": "「宛先メールアドレス」の欄にProton Mailアドレス（例：yourname@proton.me または yourname@protonmail.com）を入力し、「確認コードを送る」をタップします。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Proton Mailに届いた確認コードを入力する",
+        "text": "Proton Mailの受信トレイを開きます。迷惑メールフォルダも必ず確認してください。6桁の確認コードをアプリに入力して「確認する」をタップします。届かない場合はSpamフォルダを確認し、送信元（noreply@simplememofast.com）をセーフリストに追加します。"
+      },
+      {
+        "@type": "HowToStep",
+        "position": 5,
+        "name": "送信元アドレスをホワイトリストに追加する",
+        "text": "Proton Mailの設定→フィルター→ブロックリスト/許可リストで、noreply@simplememofast.comを許可リストに追加します。これにより以降のメモが確実に受信トレイに届きます。"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Proton Mailに確認コードが届かないのはなぜですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Proton Mailのスパムフィルターは非常に厳格です。まず「スパム」フォルダを確認してください。見つかった場合は「スパムではない」をクリックして受信トレイに移動させ、送信元（noreply@simplememofast.com）を許可リストに追加します。それでも届かない場合は、Proton Mailの「すべてのメール」から検索してください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Proton Mail BridgeはCapito式シンプルメモと互換性がありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Proton Mail Bridgeは主にデスクトップのメールクライアント（Outlook・Thunderbirdなど）用のツールです。Capito式シンプルメモはProton MailのWeb/モバイルAPIを経由してメールを送信するため、BridgeのインストールはCapito式シンプルメモの動作に影響しません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Proton Mailアドレス（@proton.me）と旧アドレス（@protonmail.com）のどちらを使えばいいですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "どちらでも使用可能です。@proton.meは新しいドメイン、@protonmail.comは旧ドメインですが、Proton Mailでは両方が同じアカウントに届きます。設定する際はProton Mailアプリで普段使っているアドレスを入力してください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Proton Mail無料プランでCapito式シンプルメモは使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。Proton Mailの無料プランでもCapito式シンプルメモは完全に動作します。ただし無料プランのProton Mailはストレージ容量に上限（1GB）があります。送信されるメモは1件あたり数KBなので、実用上は問題になりません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Capito式シンプルメモのメモはProton Mailの暗号化で保護されますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Proton Mailのエンドツーエンド暗号化（E2EE）はProton Mailアカウント同士の通信を暗号化します。Capito式シンプルメモのサーバーからProton Mailへの配信にはTLS暗号化が使われます。Proton Mailの受信トレイに届いたメモはProton Mailのゼロアクセス暗号化で保護されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why isn't the verification code arriving in Proton Mail?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Proton Mail's spam filters are among the most aggressive of any email provider. First check your Spam folder. If found, click 'Not spam' and add noreply@simplememofast.com to your allow list (Settings → Filters → Allow list). If still not found, search 'All Mail' for the code. As a last resort, resend from the app after 2 minutes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Proton Mail Bridge compatible with Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Proton Mail Bridge is for desktop email clients (Outlook, Thunderbird, etc.). Simple Memo communicates directly with Proton Mail's servers via their API, so Bridge installation has no effect on Simple Memo's operation. Bridge is irrelevant to the Simple Memo setup."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Should I use @proton.me or @protonmail.com with Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Either works. @proton.me is Proton's newer domain; @protonmail.com is the legacy domain. Both aliases deliver to the same Proton Mail inbox. Use whichever address you normally use in Proton Mail."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Simple Memo work with a free Proton Mail account?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, fully. Simple Memo works with any Proton Mail plan including the free tier. Free Proton Mail accounts have 1GB storage, but since each memo is only a few kilobytes, this is not a practical concern."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are memos sent to Proton Mail protected by end-to-end encryption?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Memos are transmitted to Proton Mail's servers using TLS. Once received, they are protected by Proton Mail's zero-access encryption — Proton cannot read them, and neither can anyone else. Proton's E2E encryption applies between Proton Mail accounts; external senders use standard TLS delivery."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "設定ガイド", "item": "https://simplememofast.com/guides/"},
+      {"@type": "ListItem", "position": 3, "name": "Proton Mail設定ガイド", "item": "https://simplememofast.com/guides/proton-mail/"}
+    ]
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.8rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .steps-list li strong{display:block;margin-bottom:.3rem;color:var(--text)}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.88rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .warn-box{background:rgba(255,180,50,.06);border:1px solid rgba(255,180,50,.25);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.88rem;line-height:1.8}
+    .warn-box__title{font-weight:700;color:#f0a040;margin-bottom:.4rem;font-size:.85rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Proton Mail設定ガイド — Capito式シンプルメモ",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".lp-section__lead"]
+    },
+    "url": "https://simplememofast.com/guides/proton-mail/"
+  }
+  </script>
+</head>
+<body>
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">Proton Mail設定ガイド — Capito式シンプルメモ</span>
+      <span class="meta-og-title">Proton Mail設定ガイド — Capito式シンプルメモ</span>
+      <span class="meta-description">Capito式シンプルメモのProton Mail設定ガイド。プライバシー重視のProton Mailアドレスを宛先に設定する手順、スパムフィルター対策、Bridge互換性など専門的な注意点を解説。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Proton Mail Setup Guide — Simple Memo</span>
+      <span class="meta-og-title">Proton Mail Setup Guide — Simple Memo</span>
+      <span class="meta-description">How to set up Simple Memo with your Proton Mail address. Step-by-step guide for privacy-focused memo capture, spam filter workarounds, Bridge compatibility, and troubleshooting.</span>
+    </div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/guides/" class="page-header__back">
+          <span data-lang="ja">設定ガイド一覧へ</span>
+          <span data-lang="en">Back to Guides</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">Proton Mail 設定ガイド</span>
+          <span data-lang="en">Proton Mail Setup Guide</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">Proton Mailで<br>Capito式シンプルメモを使う</span>
+          <span data-lang="en">Using Simple Memo<br>with Proton Mail</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">プライバシー重視のProton Mailアドレスを宛先に設定して、メモをプライベートに管理しましょう。Proton Mailは他のメールサービスより厳格なスパムフィルターを持つため、設定に若干のコツが必要です。このガイドで全て解説します。</span>
+          <span data-lang="en">Set your privacy-focused Proton Mail address as the destination for your memos. Proton Mail has more aggressive spam filters than other email providers, so setup requires a couple of extra steps. This guide covers everything you need.</span>
+        </p>
+      </div>
+
+      <!-- What is Proton Mail -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">Proton Mailとは — プライバシー優先のメールサービス</span>
+          <span data-lang="en">What is Proton Mail — Privacy-First Email</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">Proton Mailはスイスに本拠を置くProton AG（旧ProtonMail）が提供するプライバシー重視のメールサービスです。エンドツーエンド暗号化（E2EE）によりProton Mail社自身もメールの内容を読むことができず、スイスのプライバシー法の保護下に置かれています。2013年にCERN研究者によって設立されました。</span>
+          <span data-lang="en">Proton Mail is a privacy-focused email service provided by Proton AG, based in Switzerland. Its end-to-end encryption (E2EE) means even Proton cannot read email contents. The service operates under Swiss privacy law. It was founded in 2013 by CERN researchers.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">Proton Mailをメモの受け取り先として選ぶメリットは「メモの内容が第三者から守られる」点にあります。思考・アイデア・個人的な覚え書きをメールメモとして送る場合、Proton Mailの受信トレイに届いたメモはゼロアクセス暗号化で保護されます。GmailやOutlookと異なり、メモの内容が広告ターゲティングに使われることはありません。</span>
+          <span data-lang="en">Choosing Proton Mail as your memo destination means your memo contents are protected from third parties. Thoughts, ideas, and personal notes sent as email memos are protected by Proton's zero-access encryption once they arrive. Unlike Gmail or Outlook, memo contents are never used for ad targeting.</span>
+        </p>
+      </section>
+
+      <!-- Prerequisites -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">始める前に確認すること</span>
+          <span data-lang="en">Before You Begin</span>
+        </h2>
+        <ul class="prereq-list" data-lang="ja">
+          <li>iPhone（iOS 16.0以降）を用意する</li>
+          <li>Proton Mailアカウント（@proton.me または @protonmail.com）を用意する</li>
+          <li>設定中にProton Mailアプリまたはwebmail（mail.proton.me）を確認できる環境を用意する</li>
+          <li>Capito式シンプルメモをApp Storeからダウンロードする</li>
+          <li>Proton Mailのスパムフォルダを確認できる状態にしておく（重要）</li>
+        </ul>
+        <ul class="prereq-list" data-lang="en">
+          <li>iPhone (iOS 16.0 or later)</li>
+          <li>A Proton Mail account (@proton.me or @protonmail.com)</li>
+          <li>Access to Proton Mail app or webmail (mail.proton.me) during setup to receive the verification code</li>
+          <li>Simple Memo downloaded from the App Store</li>
+          <li>Ability to check Proton Mail's Spam folder (important — see why below)</li>
+        </ul>
+        <div class="warn-box" data-lang="ja">
+          <div class="warn-box__title">重要：Proton Mailのスパムフィルターについて</div>
+          <p>Proton Mailは他のメールサービスと比較して非常に厳格なスパムフィルターを搭載しています。初回の確認コードメールがスパムフォルダに振り分けられる場合があります。設定完了後は送信元アドレスを許可リストに追加することで、以降のメモが確実に受信トレイに届くようになります。このページでその手順を詳しく説明します。</p>
+        </div>
+        <div class="warn-box" data-lang="en">
+          <div class="warn-box__title">Important: Proton Mail Spam Filters</div>
+          <p>Proton Mail has significantly more aggressive spam filtering than Gmail, Outlook, or iCloud. The initial verification code email may land in your Spam folder. After setup, adding the sender address to your allow list ensures all future memos arrive in your inbox. We explain the exact steps below.</p>
+        </div>
+      </section>
+
+      <!-- Steps -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">設定手順（5ステップ）</span>
+          <span data-lang="en">Setup Steps (5 Steps)</span>
+        </h2>
+        <ol class="steps-list" data-lang="ja">
+          <li>
+            <strong>アプリをダウンロードする</strong><br>
+            App Storeで「Capito式シンプルメモ」または「Simple Memo Fast」を検索してダウンロードします。または<a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" style="color:var(--accent)">こちらのリンク</a>から直接ダウンロードできます。
+          </li>
+          <li>
+            <strong>アプリを起動して設定画面を開く</strong><br>
+            アプリを起動するとメモ入力画面が表示されます。画面右下の設定アイコン（歯車マーク）をタップして設定画面を開きます。
+          </li>
+          <li>
+            <strong>Proton Mailアドレスを入力する</strong><br>
+            「宛先メールアドレス」の入力欄に、メモを受け取りたいProton Mailアドレス（例：yourname@proton.me または yourname@protonmail.com）を入力します。入力後、「確認コードを送る」ボタンをタップしてください。
+          </li>
+          <li>
+            <strong>Proton Mailの確認コードを受け取る（スパムフォルダ必須確認）</strong><br>
+            Proton Mailアプリ（または mail.proton.me）を開きます。受信トレイに届いていない場合は、必ず「スパム」フォルダを確認してください。確認コードメールが見つかったら「スパムではない」をクリックして受信トレイへ移動させます。6桁の数字をCapito式シンプルメモの確認コード欄に入力し「確認する」をタップします。
+          </li>
+          <li>
+            <strong>送信元アドレスをProton Mailの許可リストに追加する</strong><br>
+            これが最も重要なステップです。Proton Mailの設定を開き、「フィルター」→「ブロックリストと許可リスト」→「許可リスト」に <code>noreply@simplememofast.com</code> を追加します。この設定により、以降送信されるメモが確実に受信トレイに届きます。設定完了です。
+          </li>
+        </ol>
+        <ol class="steps-list" data-lang="en">
+          <li>
+            <strong>Download the app</strong><br>
+            Search "Simple Memo Fast" on the App Store, or use <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" style="color:var(--accent)">this direct link</a> to download immediately.
+          </li>
+          <li>
+            <strong>Open the app and navigate to Settings</strong><br>
+            When the app opens, you'll see the memo input screen. Tap the gear icon in the bottom-right corner to open Settings.
+          </li>
+          <li>
+            <strong>Enter your Proton Mail address</strong><br>
+            In the "Destination Email" field, type your Proton Mail address (e.g., yourname@proton.me or yourname@protonmail.com). Then tap "Send Verification Code."
+          </li>
+          <li>
+            <strong>Retrieve the verification code from Proton Mail (check Spam)</strong><br>
+            Open the Proton Mail app or webmail (mail.proton.me). If the code email isn't in your inbox, check the Spam folder immediately. When found, click "Not spam" to move it to your inbox. Enter the 6-digit code in the app and tap "Verify."
+          </li>
+          <li>
+            <strong>Add the sender to Proton Mail's allow list</strong><br>
+            This is the most important step for ongoing reliability. In Proton Mail Settings, go to Filters → Block list and allow list → Allow list, and add <code>noreply@simplememofast.com</code>. All future memos will now arrive directly in your inbox. Setup complete.
+          </li>
+        </ol>
+      </section>
+
+      <!-- Tips -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">Proton Mailでメモを整理するコツ</span>
+          <span data-lang="en">Tips: Organizing Memos in Proton Mail</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="tip-box">
+            <div class="tip-box__title">ヒント 1 — フォルダとラベルで自動整理</div>
+            <p>Proton MailはGmailと同様にフォルダとラベルをサポートしています。設定→フィルターで、送信元 noreply@simplememofast.com に対して「Memos」フォルダに自動振り分けするフィルターを作成できます。GTDの実践者は @Next・@Waiting・@Someday などのラベルも作成しておくと便利です。</p>
+          </div>
+          <div class="tip-box">
+            <div class="tip-box__title">ヒント 2 — Proton Mail暗号化の活用</div>
+            <p>Proton Mailで受け取ったメモはゼロアクセス暗号化で保護されています。特に機密性の高い思考（ビジネスアイデア・個人的な覚え書き）をメモする場合、Proton Mailは最も安全な選択肢の一つです。Proton Mailのモバイルアプリはパスコード・生体認証ロックをサポートしており、さらにセキュリティを高めることができます。</p>
+          </div>
+          <div class="tip-box">
+            <div class="tip-box__title">ヒント 3 — Proton Drive連携でメモをアーカイブする</div>
+            <p>重要なメモをProton Driveにエクスポートして長期保管することもできます。Proton Mailの「エクスポート」機能（Proton Mail Exporterアプリ経由）を使って、月次・年次でメモのバックアップを暗号化ファイルとして保存できます。</p>
+          </div>
+        </div>
+        <div data-lang="en">
+          <div class="tip-box">
+            <div class="tip-box__title">Tip 1 — Auto-sort with Proton Mail Filters</div>
+            <p>Proton Mail supports folders and labels, like Gmail. In Settings → Filters, create a filter for sender noreply@simplememofast.com to auto-move to a "Memos" folder. GTD practitioners can also create @Next, @Waiting, and @Someday labels for full GTD integration.</p>
+          </div>
+          <div class="tip-box">
+            <div class="tip-box__title">Tip 2 — Leverage Proton Mail's Encryption</div>
+            <p>Memos received in Proton Mail are protected by zero-access encryption — meaning Proton themselves cannot read your notes. For highly sensitive thoughts (business ideas, personal reflections), Proton Mail is one of the most secure destinations available. Proton's mobile app also supports passcode and biometric locking for additional protection.</p>
+          </div>
+          <div class="tip-box">
+            <div class="tip-box__title">Tip 3 — Archive Memos to Proton Drive</div>
+            <p>For long-term memo archiving, you can export Proton Mail content to Proton Drive using the Proton Mail Exporter tool. Create monthly or annual encrypted backups of your memo archive — all within the Proton ecosystem.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Troubleshooting -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">トラブルシューティング</span>
+          <span data-lang="en">Troubleshooting</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="trouble-item">
+            <div class="trouble-item__q">確認コードがProton Mailに届かない（スパムにもない）</div>
+            <div class="trouble-item__a">
+              <p>Proton Mailの「すべてのメール」ビューから検索してください。それでも見つからない場合は、2分待ってからCapito式シンプルメモの設定画面で「コードを再送する」をタップします。Proton Mailのアカウントが新規作成直後の場合、外部メール受信が制限されている場合があります（Proton Mailは新規アカウントに一時的な受信制限を設けることがあります）。この場合は数時間待つか、Proton Mailサポートに問い合わせてください。</p>
+            </div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">設定後もメモが届かない、またはスパムに入る</div>
+            <div class="trouble-item__a">
+              <p>許可リストへの追加が完了しているか確認してください（設定手順ステップ5）。追加済みの場合は、Proton Mailの設定→フィルターで「カスタムフィルター」を作成し、送信元アドレス（noreply@simplememofast.com）を明示的に受信トレイへ振り分けるルールを設定します。</p>
+            </div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Proton Mail Bridgeとの互換性について</div>
+            <div class="trouble-item__a">
+              <p>Proton Mail BridgeはデスクトップのOutlook・Thunderbirdなどでプライベートキーを使ったE2EE復号を行うためのツールです。Capito式シンプルメモはProton MailのAPIと直接通信するため、Bridgeのインストール状況はCapito式シンプルメモの動作に影響しません。BridgeがあってもなくてもCapito式シンプルメモは正常に動作します。</p>
+            </div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Proton Mailの無料プランで使えますか？</div>
+            <div class="trouble-item__a">
+              <p>はい。Proton Mailの無料プランでもCapito式シンプルメモは完全に動作します。無料プランのProton Mailはストレージ1GB・1アドレスという制限がありますが、メモは1件あたり数KBのため実用上は問題ありません。</p>
+            </div>
+          </div>
+        </div>
+        <div data-lang="en">
+          <div class="trouble-item">
+            <div class="trouble-item__q">Verification code not arriving in Proton Mail (not in Spam either)</div>
+            <div class="trouble-item__a">
+              <p>Search in Proton Mail's "All Mail" view. If still not found, wait 2 minutes and tap "Resend Code" in the app settings. If your Proton Mail account was very recently created, external email receiving may be temporarily restricted — this is a Proton anti-abuse measure for new accounts. Wait a few hours or contact Proton Mail support.</p>
+            </div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Memos still going to Spam after setup</div>
+            <div class="trouble-item__a">
+              <p>Confirm the allow list addition is complete (Setup Step 5). If already added, create a custom filter in Proton Mail Settings → Filters: set sender = noreply@simplememofast.com and action = Move to Inbox. This explicit rule overrides spam scoring for all future memos.</p>
+            </div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Proton Mail Bridge compatibility</div>
+            <div class="trouble-item__a">
+              <p>Proton Mail Bridge is a tool for decrypting E2EE emails in desktop clients like Outlook and Thunderbird using your private key. Simple Memo communicates directly with Proton Mail's API, so Bridge installation has no effect on Simple Memo. Bridge is neither required nor contraindicated.</p>
+            </div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Free Proton Mail plan limitations</div>
+            <div class="trouble-item__a">
+              <p>Proton Mail's free plan (1GB storage, 1 address) works fully with Simple Memo. Each memo is only a few kilobytes, so storage is not a practical concern even with years of memo history. Free plan does not restrict external email receiving after account maturation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">よくある質問</span>
+          <span data-lang="en">FAQ</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mailに確認コードが届かないのはなぜですか？</summary><div class="faq-answer"><p>Proton Mailのスパムフィルターは非常に厳格です。まず「スパム」フォルダを確認してください。見つかった場合は「スパムではない」をクリックして受信トレイに移動させ、送信元（noreply@simplememofast.com）を許可リストに追加します。それでも届かない場合は、Proton Mailの「すべてのメール」から検索してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mail BridgeはCapito式シンプルメモと互換性がありますか？</summary><div class="faq-answer"><p>Proton Mail BridgeはデスクトップのOutlook・Thunderbirdなど向けのツールです。Capito式シンプルメモはProton MailのAPIと直接通信するため、BridgeのインストールはCapito式シンプルメモの動作に影響しません。Bridgeの有無にかかわらず正常動作します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">@proton.meと@protonmail.comのどちらを使えばいいですか？</summary><div class="faq-answer"><p>どちらでも使用可能です。@proton.meは新しいドメイン、@protonmail.comは旧ドメインですが、同じアカウントの受信トレイに届きます。普段使っているアドレスを入力してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mailのメモの内容は暗号化されますか？</summary><div class="faq-answer"><p>Capito式シンプルメモのサーバーからProton Mailへの転送にはTLS暗号化が使われます。Proton Mailに届いたメモはゼロアクセス暗号化で保護されます。Proton AG社自身もメモの内容を読めません。GmailやOutlookと異なり、メモの内容が広告に利用されることはありません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Proton Mail無料プランでCapito式シンプルメモは使えますか？</summary><div class="faq-answer"><p>はい。Proton Mailの無料プランでも完全に動作します。無料プランはストレージ1GBですが、メモは1件数KBのため実用上は問題ありません。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Why isn't the verification code arriving in Proton Mail?</summary><div class="faq-answer"><p>Proton Mail's spam filters are among the most aggressive of any provider. Check your Spam folder first. If found, click "Not spam" and add noreply@simplememofast.com to your allow list. If still not found, search "All Mail." As a last resort, resend from the app after 2 minutes.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Proton Mail Bridge compatible with Simple Memo?</summary><div class="faq-answer"><p>Bridge is for desktop email clients using Proton's private keys. Simple Memo communicates directly with Proton's API, so Bridge has no effect on Simple Memo's operation — it's neither required nor problematic.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Should I use @proton.me or @protonmail.com?</summary><div class="faq-answer"><p>Either works. Both aliases deliver to the same Proton Mail inbox. Use whichever address you normally use in Proton Mail.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are my memos encrypted in Proton Mail?</summary><div class="faq-answer"><p>Memos are transmitted via TLS. Once in your Proton Mail inbox, they're protected by zero-access encryption — Proton AG cannot read them, and neither can anyone else. Unlike Gmail or Outlook, memo content is never used for advertising or profiling.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo work with a free Proton Mail account?</summary><div class="faq-answer"><p>Yes, fully. Free Proton Mail (1GB storage) works without restriction. Each memo is only a few kilobytes — not a practical storage concern.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span data-lang="ja">プライバシー保護されたメモ管理を始める</span>
+          <span data-lang="en">Start managing memos with privacy protection</span>
+        </div>
+        <div class="cta-box__desc">
+          <span data-lang="ja">7日間の無料トライアル付き。Proton Mailで最もプライベートなメモ環境を。</span>
+          <span data-lang="en">7-day free trial included. The most private memo environment with Proton Mail.</span>
+        </div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        </a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">関連ページ</span>
+          <span data-lang="en">Related Pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/guides/">
+            <span data-lang="ja">設定ガイド一覧</span>
+            <span data-lang="en">All Setup Guides</span>
+          </a>
+          <a href="/guides/gmail/">
+            <span data-lang="ja">Gmail設定ガイド</span>
+            <span data-lang="en">Gmail Setup Guide</span>
+          </a>
+          <a href="/guides/outlook/">
+            <span data-lang="ja">Outlook設定ガイド</span>
+            <span data-lang="en">Outlook Setup Guide</span>
+          </a>
+          <a href="/guides/icloud/">
+            <span data-lang="ja">iCloudメール設定ガイド</span>
+            <span data-lang="en">iCloud Mail Setup Guide</span>
+          </a>
+          <a href="/guides/custom-domain/">
+            <span data-lang="ja">独自ドメインメール設定ガイド</span>
+            <span data-lang="en">Custom Domain Email Setup</span>
+          </a>
+          <a href="/captio-alternative/">
+            <span data-lang="ja">Captio代替アプリ比較</span>
+            <span data-lang="en">Captio Alternative Guide</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/captio-alternative/" class="footer__link">
+          <span data-lang="ja">Captio代替</span>
+          <span data-lang="en">Captio Alternative</span>
+        </a>
+        <a href="/note-to-email/" class="footer__link">
+          <span data-lang="ja">メモ→メール</span>
+          <span data-lang="en">Note to Email</span>
+        </a>
+        <a href="/vs/" class="footer__link">
+          <span data-lang="ja">比較</span>
+          <span data-lang="en">vs</span>
+        </a>
+        <a href="/use-cases/" class="footer__link">
+          <span data-lang="ja">ユースケース</span>
+          <span data-lang="en">Use Cases</span>
+        </a>
+        <a href="/guides/" class="footer__link">
+          <span data-lang="ja">ガイド</span>
+          <span data-lang="en">Guides</span>
+        </a>
+        <a href="/faq" class="footer__link">
+          <span data-lang="ja">FAQ</span>
+          <span data-lang="en">FAQ</span>
+        </a>
+        <a href="/privacy" class="footer__link">
+          <span data-lang="ja">プライバシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
