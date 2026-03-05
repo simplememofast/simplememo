@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Email Me Appとの比較 — Capito式シンプルメモ</title>
+  <meta name="description" content="Email Me AppとCapito式シンプルメモを徹底比較。サブ秒パフォーマンス・AES-GCM暗号化・Outboxオフライン・アカウント不要・日本語対応の違いを解説します。">
+  <meta name="keywords" content="Email Me App 比較, Email Me App 代替, email me app vs, メール メモアプリ 比較, 自分にメール iPhone アプリ">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Email Me Appとの比較 — Capito式シンプルメモ">
+  <meta property="og:description" content="Email Me AppとCapito式シンプルメモを徹底比較。速度・暗号化・オフライン・アカウント不要・日本語対応の違いを解説します。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-05T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/vs/email-me-app/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Email Me Appとの比較 — Capito式シンプルメモ">
+  <meta name="twitter:description" content="Email Me AppとCapito式シンプルメモを徹底比較。速度・暗号化・オフライン・アカウント不要・日本語対応の違いを解説します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/vs/email-me-app/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/email-me-app/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/vs/email-me-app/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/email-me-app/">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Email Me App vs Capito式シンプルメモ — 比較ガイド",
+    "description": "Email Me AppとCapito式シンプルメモを、サブ秒パフォーマンス・AES-GCM暗号化・Outboxオフライン対応・アカウント不要・日本語ローカライズの観点で徹底比較します。",
+    "url": "https://simplememofast.com/vs/email-me-app/",
+    "datePublished": "2026-03-05",
+    "dateModified": "2026-03-05",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/vs/email-me-app/"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Email Me AppとCapito式シンプルメモはどちらが速いですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモは起動0.3秒でキーボードが立ち上がり、送信レイテンシは約150msです。Cloudflare Workersのエッジインフラにより、ユーザーの最寄りノードから処理されるためサブ秒のパフォーマンスを実現しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Email Me Appにもオフライン機能はありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモはOutboxアーキテクチャによりオフライン時のメモをAES-GCM暗号化でデバイスに保存し、オンライン復帰時に自動送信します。Email Me Appのオフライン対応状況はアプリのストアページでご確認ください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Capito式シンプルメモはアカウント登録不要ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。Capito式シンプルメモはメールアドレスを設定するだけで使い始められます。アカウント登録・パスワード管理は不要です。メールを受信できるアドレスさえあれば3分以内にセットアップ完了します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "日本語ユーザーにはCapito式シンプルメモの方が良いですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。Capito式シンプルメモは日本語・英語の完全バイリンガル対応で、UIから各種説明文まですべて日本語でご利用いただけます。日本語入力の最適化も行っており、日本語ユーザーに最適です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Email Me Appの無料プランとCapito式シンプルメモの無料プランの違いは？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモは1日3通まで永久無料のFreeプランと、7日間の送信無制限無料トライアルを提供しています。Email Me Appの料金体系はApp Storeのアプリページでご確認ください。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Which is faster, Email Me App or Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo launches in 0.3 seconds with keyboard ready, and sends with ~150ms latency via Cloudflare Workers edge infrastructure. The sub-second performance is a key differentiator for capturing fleeting thoughts."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Email Me App support offline note-taking?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo's Outbox architecture stores offline memos with AES-GCM encryption on-device and auto-sends them on reconnection. For Email Me App's offline support, please check their App Store listing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Simple Memo require account registration?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Simple Memo requires only an email address to start. No account creation, no password management. Setup takes under 3 minutes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Simple Memo available in Japanese?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Simple Memo is fully bilingual — Japanese and English — with complete UI localization and optimized Japanese text input. It's the recommended choice for Japanese-speaking users."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is Simple Memo's free tier?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo offers 3 sends per day free forever, plus a 7-day unlimited sends trial. Premium is $2.99/month or $29.99/year for unlimited sends."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "比較", "item": "https://simplememofast.com/vs/"},
+      {"@type": "ListItem", "position": 3, "name": "vs Email Me App", "item": "https://simplememofast.com/vs/email-me-app/"}
+    ]
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.88rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:500;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:600;color:var(--text-secondary);white-space:nowrap}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .diff-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .diff-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .diff-card__num{font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.05em;margin-bottom:.5rem}
+    .diff-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .diff-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7}
+
+    .choose-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1.5rem 0 2rem}
+    @media(max-width:600px){.choose-grid{grid-template-columns:1fr}}
+    .choose-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .choose-card__title{font-size:1rem;font-weight:700;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .choose-card__list{list-style:none;margin:0;padding:0;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+    .choose-card__list li::before{content:"→ ";color:var(--accent)}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Email Me App vs Capito式シンプルメモ 比較",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".diff-card__title"]
+    },
+    "url": "https://simplememofast.com/vs/email-me-app/"
+  }
+  </script>
+</head>
+<body>
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">Email Me Appとの比較 — Capito式シンプルメモ</span>
+      <span class="meta-og-title">Email Me Appとの比較 — Capito式シンプルメモ</span>
+      <span class="meta-description">Email Me AppとCapito式シンプルメモを徹底比較。サブ秒パフォーマンス・AES-GCM暗号化・Outboxオフライン・アカウント不要・日本語対応の違いを解説します。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Simple Memo vs Email Me App — Comparison</span>
+      <span class="meta-og-title">Simple Memo vs Email Me App — Comparison</span>
+      <span class="meta-description">Both apps send notes to your email. Compare sub-second performance, AES-GCM encryption, Outbox offline architecture, no-account setup, and Japanese localization.</span>
+    </div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/vs/" class="page-header__back">
+          <span data-lang="ja">比較一覧へ戻る</span>
+          <span data-lang="en">Back to Comparisons</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">「自分にメール」アプリの詳細比較</span>
+          <span data-lang="en">Two "email yourself" apps — side by side</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">Email Me App vs<br>Capito式シンプルメモ 比較</span>
+          <span data-lang="en">Simple Memo vs Email Me App<br>Full Comparison</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">どちらもメモをメールで自分に送るアプリです。しかしその裏側には大きな違いがあります。サブ秒のパフォーマンス・AES-GCM暗号化・Outboxオフライン対応・アカウント不要設計・完全日本語ローカライズ——Capito式シンプルメモが選ばれる5つの理由を比較します。</span>
+          <span data-lang="en">Both apps send notes to your email. But the details differ significantly: sub-second performance, AES-GCM encryption, Outbox offline architecture, zero account requirement, and complete Japanese localization. Here's why Simple Memo stands out in each area.</span>
+        </p>
+      </div>
+
+      <!-- Entity Definition -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">Email Me Appとは何か：同カテゴリの先行アプリ</span>
+          <span data-lang="en">What Is Email Me App: A Pioneer in the Category</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">Email Me Appは「自分にメールを送る」シンプルなコンセプトのiOSアプリです。起動してテキストを入力し、ボタンを押すだけで指定メールアドレスにメモが届くというシンプルな設計で、カテゴリの先駆け的な存在です。Capito式シンプルメモも同じカテゴリに属しますが、後発として起動速度の最適化・オフライン対応・端末内暗号化・エッジインフラ・日本語ローカライズという5つの領域で明確な技術的差別化を図っています。どちらも「メモをメールで送る」という本質的な価値は同じですが、ユーザー体験の質に違いがあります。</span>
+          <span data-lang="en">Email Me App is an iOS app built on the simple concept of emailing yourself notes. It pioneered the category with a minimal interface: open, type, send. Simple Memo enters the same category but differentiates on five technical dimensions: launch speed optimization, offline Outbox support, on-device AES-GCM encryption, Cloudflare Workers edge infrastructure, and full Japanese localization. Both deliver the core value of email-yourself notes, but the user experience quality differs meaningfully across these dimensions.</span>
+        </p>
+      </section>
+
+      <!-- Comparison Table -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">Email Me App vs Capito式シンプルメモ 比較表</span>
+          <span data-lang="en">Email Me App vs Simple Memo — Comparison Table</span>
+        </h2>
+        <div style="overflow-x:auto">
+          <table class="compare-table" data-lang="ja">
+            <thead><tr><th>項目</th><th>Email Me App</th><th>Capito式シンプルメモ</th></tr></thead>
+            <tbody>
+              <tr><td>起動速度</td><td>標準的</td><td class="yes">0.3秒</td></tr>
+              <tr><td>送信レイテンシ</td><td>標準的</td><td class="yes">150ms</td></tr>
+              <tr><td>オフライン対応</td><td class="no">限定的</td><td class="yes">Outbox自動再送</td></tr>
+              <tr><td>端末内暗号化</td><td class="no">なし</td><td class="yes">AES-GCM</td></tr>
+              <tr><td>送信インフラ</td><td>標準SMTP</td><td class="yes">Cloudflare Workers + Resend</td></tr>
+              <tr><td>アカウント登録</td><td class="no">必要</td><td class="yes">不要</td></tr>
+              <tr><td>日本語ローカライズ</td><td class="no">英語のみ</td><td class="yes">完全対応</td></tr>
+              <tr><td>無料プラン</td><td>要確認</td><td class="yes">1日3通</td></tr>
+              <tr><td>7日間無料トライアル</td><td class="no">なし</td><td class="yes">送信無制限</td></tr>
+              <tr><td>送信履歴</td><td>要確認</td><td class="yes">アプリ内で確認</td></tr>
+            </tbody>
+          </table>
+          <table class="compare-table" data-lang="en">
+            <thead><tr><th>Feature</th><th>Email Me App</th><th>Simple Memo</th></tr></thead>
+            <tbody>
+              <tr><td>Launch Speed</td><td>Standard</td><td class="yes">0.3 seconds</td></tr>
+              <tr><td>Send Latency</td><td>Standard</td><td class="yes">~150ms</td></tr>
+              <tr><td>Offline Support</td><td class="no">Limited</td><td class="yes">Outbox auto-resend</td></tr>
+              <tr><td>On-Device Encryption</td><td class="no">No</td><td class="yes">AES-GCM</td></tr>
+              <tr><td>Send Infrastructure</td><td>Standard SMTP</td><td class="yes">Cloudflare Workers + Resend</td></tr>
+              <tr><td>Account Required</td><td class="no">Yes</td><td class="yes">No account needed</td></tr>
+              <tr><td>Japanese Localization</td><td class="no">English only</td><td class="yes">Full bilingual support</td></tr>
+              <tr><td>Free Tier</td><td>Check App Store</td><td class="yes">3 sends/day</td></tr>
+              <tr><td>Free Trial</td><td class="no">Not available</td><td class="yes">7 days unlimited</td></tr>
+              <tr><td>Send History</td><td>Check App Store</td><td class="yes">In-app tracking</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5 Key Differences -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">5つの決定的な違い</span>
+          <span data-lang="en">5 Key Differences</span>
+        </h2>
+        <div class="diff-cards">
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 01</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 01</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">サブ秒パフォーマンス：起動0.3秒・送信150ms</span>
+              <span data-lang="en">Sub-Second Performance: 0.3s Launch, 150ms Send</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモはアプリ起動から0.3秒でキーボードが立ち上がります。送信ボタンを押してからメールが届くまで約150ms。Cloudflare Workersのエッジインフラにより、ユーザーに最も近いノードで処理されます。この速度はアイデアの鮮度を保ちます。</span>
+              <span data-lang="en">Simple Memo launches to keyboard in 0.3 seconds and sends in ~150ms via Cloudflare Workers edge processing. The speed isn't just a spec — it's the difference between capturing an idea while it's fresh and losing it to app loading time.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 02</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 02</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">AES-GCM暗号化：端末内プライバシー保護</span>
+              <span data-lang="en">AES-GCM Encryption: On-Device Privacy</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモはオフライン保存時にAES-GCM認証付き暗号化を使用します。端末内に保存されたメモは暗号化されており、万が一デバイスを紛失しても内容が漏れません。サーバー側にメモ本文は保存されない設計です。</span>
+              <span data-lang="en">Simple Memo encrypts locally stored offline memos with AES-GCM authenticated encryption. Even if your device is lost or compromised, memo content remains protected. No memo text is stored server-side — only transmitted to your email.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 03</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 03</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">Outboxオフラインアーキテクチャ</span>
+              <span data-lang="en">Outbox Offline Architecture</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">地下鉄・飛行機・山間部——電波がない場所でもCapito式シンプルメモは使えます。Outboxアーキテクチャがオフライン時のメモをAES-GCMで暗号化保存し、ネット接続が回復したときに自動でメール送信します。メモの取りこぼしゼロを保証します。</span>
+              <span data-lang="en">Subway, airplane, mountain area — Simple Memo works everywhere with its Outbox architecture. Offline memos are stored with AES-GCM encryption and auto-sent when connectivity returns. You never lose a note due to network conditions.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 04</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 04</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">アカウント不要：メールアドレスだけで始める</span>
+              <span data-lang="en">No Account Required: Just Your Email Address</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモはアカウント登録不要です。App Storeからダウンロードし、メールアドレスを設定するだけで3分以内に使い始められます。パスワードの管理やメール認証の待ち時間がありません。メモを送りたいだけなのに余計な手続きは必要ありません。</span>
+              <span data-lang="en">Simple Memo requires no account creation. Download from App Store, enter your email address, done in 3 minutes. No password management, no email verification waiting. You just want to send a note — the setup should match that simplicity.</span>
+            </div>
+          </div>
+          <div class="diff-card">
+            <div class="diff-card__num" data-lang="ja">違い 05</div>
+            <div class="diff-card__num" data-lang="en">DIFFERENCE 05</div>
+            <div class="diff-card__title">
+              <span data-lang="ja">完全日本語ローカライズ</span>
+              <span data-lang="en">Full Japanese Localization</span>
+            </div>
+            <div class="diff-card__desc">
+              <span data-lang="ja">Capito式シンプルメモは日本語・英語の完全バイリンガル対応です。UIのすべての文字列・エラーメッセージ・ヘルプテキストが日本語で確認できます。日本語入力の最適化も行っており、長押しキーや変換候補との相性も考慮した設計です。</span>
+              <span data-lang="en">Simple Memo is fully bilingual in Japanese and English. Every UI string, error message, and help text is available in Japanese. Input is optimized for Japanese IME, making it the best choice for Japanese-speaking iPhone users.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Who Should Choose Which -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">どちらを選ぶべきか</span>
+          <span data-lang="en">Who Should Choose Which</span>
+        </h2>
+        <div class="choose-grid">
+          <div class="choose-card">
+            <div class="choose-card__title">
+              <span data-lang="ja">Email Me Appが向いている人</span>
+              <span data-lang="en">Consider Email Me App If...</span>
+            </div>
+            <ul class="choose-card__list">
+              <li><span data-lang="ja">すでにアプリに慣れていてUXに満足している</span><span data-lang="en">You're comfortable with the existing UX</span></li>
+              <li><span data-lang="ja">英語インターフェースに問題ない</span><span data-lang="en">You're comfortable with English-only UI</span></li>
+              <li><span data-lang="ja">常時オンライン環境で使う</span><span data-lang="en">You always have reliable internet</span></li>
+              <li><span data-lang="ja">アカウント管理に慣れている</span><span data-lang="en">You don't mind account management</span></li>
+            </ul>
+          </div>
+          <div class="choose-card">
+            <div class="choose-card__title">
+              <span data-lang="ja">Capito式シンプルメモが向いている人</span>
+              <span data-lang="en">Choose Simple Memo If...</span>
+            </div>
+            <ul class="choose-card__list">
+              <li><span data-lang="ja">0.3秒起動・150ms送信の最速体験が欲しい</span><span data-lang="en">You want 0.3s launch and 150ms send speed</span></li>
+              <li><span data-lang="ja">オフライン環境でもメモを取る必要がある</span><span data-lang="en">You need reliable offline note capture</span></li>
+              <li><span data-lang="ja">AES-GCM暗号化でプライバシーを重視する</span><span data-lang="en">You care about AES-GCM on-device privacy</span></li>
+              <li><span data-lang="ja">アカウント登録なしで今すぐ使いたい</span><span data-lang="en">You want to start without account creation</span></li>
+              <li><span data-lang="ja">日本語インターフェースで使いたい</span><span data-lang="en">You prefer a fully Japanese-localized app</span></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">よくある質問</span>
+          <span data-lang="en">FAQ</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Email Me AppとCapito式シンプルメモはどちらが速いですか？</summary><div class="faq-answer"><p>Capito式シンプルメモは起動0.3秒でキーボードが立ち上がり、送信レイテンシは約150msです。Cloudflare Workersのエッジインフラにより、ユーザーの最寄りノードから処理されるためサブ秒のパフォーマンスを実現しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Email Me Appにもオフライン機能はありますか？</summary><div class="faq-answer"><p>Capito式シンプルメモはOutboxアーキテクチャによりオフライン時のメモをAES-GCM暗号化でデバイスに保存し、オンライン復帰時に自動送信します。Email Me Appのオフライン対応状況はアプリのストアページでご確認ください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Capito式シンプルメモはアカウント登録不要ですか？</summary><div class="faq-answer"><p>はい。Capito式シンプルメモはメールアドレスを設定するだけで使い始められます。アカウント登録・パスワード管理は不要です。メールを受信できるアドレスさえあれば3分以内にセットアップ完了します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">日本語ユーザーにはCapito式シンプルメモの方が良いですか？</summary><div class="faq-answer"><p>はい。Capito式シンプルメモは日本語・英語の完全バイリンガル対応で、UIから各種説明文まですべて日本語でご利用いただけます。日本語入力の最適化も行っており、日本語ユーザーに最適です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Email Me Appの無料プランとCapito式シンプルメモの無料プランの違いは？</summary><div class="faq-answer"><p>Capito式シンプルメモは1日3通まで永久無料のFreeプランと、7日間の送信無制限無料トライアルを提供しています。Email Me Appの料金体系はApp Storeのアプリページでご確認ください。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which is faster, Email Me App or Simple Memo?</summary><div class="faq-answer"><p>Simple Memo launches in 0.3 seconds with keyboard ready, and sends with ~150ms latency via Cloudflare Workers edge infrastructure. The sub-second performance is a key differentiator for capturing fleeting thoughts.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Email Me App support offline note-taking?</summary><div class="faq-answer"><p>Simple Memo's Outbox architecture stores offline memos with AES-GCM encryption on-device and auto-sends them on reconnection. For Email Me App's offline support, please check their App Store listing.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo require account registration?</summary><div class="faq-answer"><p>No. Simple Memo requires only an email address to start. No account creation, no password management. Setup takes under 3 minutes.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo available in Japanese?</summary><div class="faq-answer"><p>Yes. Simple Memo is fully bilingual — Japanese and English — with complete UI localization and optimized Japanese text input. It's the recommended choice for Japanese-speaking users.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is Simple Memo's free tier?</summary><div class="faq-answer"><p>Simple Memo offers 3 sends per day free forever, plus a 7-day unlimited sends trial. Premium is $2.99/month or $29.99/year for unlimited sends.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span data-lang="ja">アカウント不要・0.3秒起動を今すぐ試す</span>
+          <span data-lang="en">Try no-account setup with 0.3s launch — free today</span>
+        </div>
+        <div class="cta-box__desc">
+          <span data-lang="ja">7日間の無料トライアル付き。メールアドレスだけで今すぐ始められます。</span>
+          <span data-lang="en">7-day free trial with unlimited sends. No account required — just your email address.</span>
+        </div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        </a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        </a>
+      </div>
+
+      <!-- Related Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">関連ページ</span>
+          <span data-lang="en">Related Pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/vs/">
+            <span data-lang="ja">アプリ比較ハブ</span>
+            <span data-lang="en">All Comparisons</span>
+          </a>
+          <a href="/vs/note-to-self-mail/">
+            <span data-lang="ja">vs Note To Self Mail</span>
+            <span data-lang="en">vs Note To Self Mail</span>
+          </a>
+          <a href="/vs/slack-self-dm/">
+            <span data-lang="ja">vs Slack自分DM</span>
+            <span data-lang="en">vs Slack Self-DM</span>
+          </a>
+          <a href="/vs/bear/">
+            <span data-lang="ja">vs Bearメモアプリ</span>
+            <span data-lang="en">vs Bear</span>
+          </a>
+          <a href="/captio-alternative/">
+            <span data-lang="ja">Captio代替</span>
+            <span data-lang="en">Captio Alternative</span>
+          </a>
+          <a href="/note-to-email/">
+            <span data-lang="ja">自分にメールするメモとは</span>
+            <span data-lang="en">Note-to-Email Guide</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/captio-alternative/" class="footer__link">
+          <span data-lang="ja">Captio代替</span>
+          <span data-lang="en">Captio Alternative</span>
+        </a>
+        <a href="/note-to-email/" class="footer__link">
+          <span data-lang="ja">メモ→メール</span>
+          <span data-lang="en">Note to Email</span>
+        </a>
+        <a href="/vs/" class="footer__link">
+          <span data-lang="ja">比較</span>
+          <span data-lang="en">vs</span>
+        </a>
+        <a href="/use-cases/" class="footer__link">
+          <span data-lang="ja">活用事例</span>
+          <span data-lang="en">Use Cases</span>
+        </a>
+        <a href="/guides/" class="footer__link">
+          <span data-lang="ja">ガイド</span>
+          <span data-lang="en">Guides</span>
+        </a>
+        <a href="/faq" class="footer__link">
+          <span data-lang="ja">FAQ</span>
+          <span data-lang="en">FAQ</span>
+        </a>
+        <a href="/privacy" class="footer__link">
+          <span data-lang="ja">プライバシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Capito式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
