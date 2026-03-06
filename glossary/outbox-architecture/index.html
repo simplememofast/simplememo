@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Outboxアーキテクチャとは — Capito式シンプルメモ用語集</title>
+  <meta name="description" content="Outboxアーキテクチャ（Outboxパターン）とは、メッセージをローカルにキューイングし、ネットワーク接続時に送信する設計パターンです。Capito式シンプルメモのオフラインメモ送信を支えるコア技術を解説。">
+  <meta name="keywords" content="Outbox パターン, オフライン メモ 仕組み, Outbox アーキテクチャ, キューイング パターン, オフライン ファースト">
+  <meta name="theme-color" content="#000000">
+
+  <meta property="og:title" content="Outboxアーキテクチャとは — Capito式シンプルメモ用語集">
+  <meta property="og:description" content="Outboxパターン（ローカルキューイング+自動送信）の技術解説。シンプルメモのコア技術革新。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/glossary/outbox-architecture/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Outboxアーキテクチャとは — Capito式シンプルメモ用語集">
+  <meta name="twitter:description" content="Outboxパターンの技術解説。オフラインメモが確実に届く仕組み。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <link rel="canonical" href="https://simplememofast.com/glossary/outbox-architecture/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/outbox-architecture/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/glossary/outbox-architecture/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/outbox-architecture/">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Outboxアーキテクチャとは — Capito式シンプルメモ用語集",
+    "description": "Outboxアーキテクチャ（Outboxパターン）は、メッセージをローカルにキューイングしネットワーク接続時に送信する設計パターンです。Capito式シンプルメモのオフラインメモ機能を支えるコア技術。",
+    "url": "https://simplememofast.com/glossary/outbox-architecture/",
+    "datePublished": "2026-03-06",
+    "dateModified": "2026-03-06",
+    "author": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com"},
+    "publisher": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com", "logo": {"@type": "ImageObject", "url": "https://simplememofast.com/assets/img/app-icon.png"}},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://simplememofast.com/glossary/outbox-architecture/"}
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "Outboxアーキテクチャとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "Outboxアーキテクチャ（Outboxパターン）は、メッセージやデータをまずローカルのキュー（送信箱）に保存し、ネットワーク接続が利用可能になった時点で自動的に送信する設計パターンです。オフライン環境でもユーザー操作を中断させず、接続回復時に確実にデータを届けます。"}},
+      {"@type": "Question", "name": "シンプルメモのOutboxはどう動きますか？", "acceptedAnswer": {"@type": "Answer", "text": "メモ送信時にネットワークが利用できない場合、メモはAES-256-GCMで暗号化されてデバイス上のOutboxキューに保存されます。iOSのバックグラウンドタスクとネットワーク状態監視により、接続回復を自動検出。Outbox内のメモを順次復号し、Cloudflare Workers経由でResend APIに送信します。送信完了後、Outboxデータは即座に削除されます。"}},
+      {"@type": "Question", "name": "Outboxのメモは安全ですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Outboxに保存されるメモはすべてAES-256-GCM暗号化されます。暗号鍵はiOSのKeychain（Secure Enclave）に保管され、デバイス外に送信されることはありません。万が一デバイスを紛失しても、暗号化されたメモは第三者に読まれることはありません。"}},
+      {"@type": "Question", "name": "What is the Outbox architecture pattern?", "acceptedAnswer": {"@type": "Answer", "text": "The Outbox pattern stores messages in a local queue (outbox) first, then automatically sends them when network connectivity becomes available. This ensures the user experience is never interrupted by network issues, and data delivery is guaranteed upon reconnection."}},
+      {"@type": "Question", "name": "How does Simple Memo's Outbox work?", "acceptedAnswer": {"@type": "Answer", "text": "When a memo is sent without network connectivity, it is encrypted with AES-256-GCM and stored in an on-device Outbox queue. iOS background tasks and network state monitoring detect when connectivity is restored. Memos are then decrypted, sent via Cloudflare Workers to the Resend API, and deleted from the Outbox upon successful delivery."}},
+      {"@type": "Question", "name": "Are memos in the Outbox secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. All memos in the Outbox are AES-256-GCM encrypted. The encryption key is stored in the iOS Keychain (backed by Secure Enclave) and never leaves the device. Even if the device is lost or stolen, encrypted memos cannot be read by third parties."}}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "用語集", "item": "https://simplememofast.com/glossary/"},
+      {"@type": "ListItem", "position": 3, "name": "Outboxアーキテクチャ", "item": "https://simplememofast.com/glossary/outbox-architecture/"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Outboxアーキテクチャとは",
+    "speakable": {"@type": "SpeakableSpecification", "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".definition-block"]},
+    "url": "https://simplememofast.com/glossary/outbox-architecture/"
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+    .definition-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .definition-block__label{font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+    .definition-block p{color:var(--text-secondary);margin-bottom:.5rem}
+    .definition-block p:last-child{margin-bottom:0}
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7}
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja"><span class="meta-title">Outboxアーキテクチャとは — Capito式シンプルメモ用語集</span><span class="meta-og-title">Outboxアーキテクチャとは — Capito式シンプルメモ用語集</span><span class="meta-description">Outboxパターン（ローカルキューイング+自動送信）の技術解説。シンプルメモのオフラインメモ機能を支えるコア技術。</span></div>
+    <div class="meta-template" data-lang="en"><span class="meta-title">What is Outbox Architecture? — Simple Memo Glossary</span><span class="meta-og-title">What is Outbox Architecture? — Simple Memo Glossary</span><span class="meta-description">Outbox pattern explained: queue locally, send when connected. The core technical innovation behind Simple Memo's offline capability.</span></div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container"><div class="lang-switcher"><button class="lang-switcher__btn" data-lang-btn="ja">日本語</button><button class="lang-switcher__btn" data-lang-btn="en">English</button></div></div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo"><span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span></a>
+        <a href="/glossary/" class="page-header__back"><span data-lang="ja">用語集へ戻る</span><span data-lang="en">Back to Glossary</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <div class="lp-hero">
+        <div class="lp-hero__label"><span data-lang="ja">用語集 — 技術</span><span data-lang="en">Glossary — Technology</span></div>
+        <h1 class="lp-hero__title"><span data-lang="ja">Outboxアーキテクチャとは</span><span data-lang="en">What is Outbox Architecture?</span></h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">Outboxアーキテクチャ（Outboxパターン）は、メッセージをローカルにキューイングし、ネットワーク接続が回復した時点で自動送信する設計パターンです。Capito式シンプルメモでは、この仕組みにより地下鉄や機内などオフライン環境でもメモが失われません。</span>
+          <span data-lang="en">Outbox Architecture (Outbox Pattern) is a design pattern that queues messages locally and automatically sends them when network connectivity is restored. In Simple Memo, this ensures memos are never lost — even in subways, airplanes, or any offline environment.</span>
+        </p>
+      </div>
+
+      <div class="definition-block" data-lang="ja">
+        <div class="definition-block__label">定義</div>
+        <p><strong>Outboxアーキテクチャ</strong>は、分散システムにおけるメッセージ配信保証パターンです。送信者はメッセージをまずローカルのOutbox（送信箱）に永続化し、バックグラウンドプロセスがOutboxを監視して、ネットワーク接続時に順次送信します。送信成功を確認後、Outboxからメッセージを削除します。これにより「ネットワーク障害時のデータ損失」と「重複送信」の両方を防止します。モバイルアプリではオフラインファースト設計の基盤技術です。</p>
+      </div>
+      <div class="definition-block" data-lang="en">
+        <div class="definition-block__label">Definition</div>
+        <p><strong>Outbox Architecture</strong> is a message delivery guarantee pattern used in distributed systems. The sender first persists messages in a local Outbox, and a background process monitors the Outbox to send messages when network connectivity is available. After confirming successful delivery, messages are removed from the Outbox. This prevents both data loss during network failures and duplicate sends. In mobile apps, it forms the foundation of offline-first design.</p>
+      </div>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">Outboxパターンの3つの要素</span><span data-lang="en">Three Components of the Outbox Pattern</span></h2>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span data-lang="ja">ローカル永続化</span><span data-lang="en">Local Persistence</span></div><div class="reason-card__desc"><span data-lang="ja">メモはまずデバイス上のストレージに保存されます。ネットワークの状態に関係なく、ユーザーの操作は即座に完了します。シンプルメモではAES-256-GCMで暗号化して保存します。</span><span data-lang="en">Memos are first saved to on-device storage regardless of network state, so user actions complete instantly. Simple Memo encrypts stored memos with AES-256-GCM.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span data-lang="ja">バックグラウンド監視</span><span data-lang="en">Background Monitoring</span></div><div class="reason-card__desc"><span data-lang="ja">iOSのバックグラウンドタスクとNWPathMonitor（ネットワーク状態監視API）を使用して、接続回復を自動検出します。ユーザーがアプリを閉じていても、OSレベルで監視が続きます。</span><span data-lang="en">iOS background tasks and NWPathMonitor (network state monitoring API) automatically detect connectivity restoration. Monitoring continues at the OS level even when the app is closed.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span data-lang="ja">確認付き削除</span><span data-lang="en">Confirmed Deletion</span></div><div class="reason-card__desc"><span data-lang="ja">Cloudflare Workers + Resend APIからの送信成功レスポンスを確認した後にのみ、OutboxからメモデータをDelete します。APIエラー時はリトライし、メモが消失することはありません。</span><span data-lang="en">Outbox data is deleted only after receiving a successful delivery response from Cloudflare Workers + Resend API. On API errors, the system retries — memos are never lost.</span></div></div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">シンプルメモのOutbox実装</span><span data-lang="en">Simple Memo's Outbox Implementation</span></h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">Capito式シンプルメモのOutboxは、単なるオフラインキューではなく、セキュリティとUXを両立させた設計です。メモの保存時にAES-256-GCMで暗号化し、送信時にのみ復号。送信完了後はOutboxデータを即座に完全削除します。ユーザーにはOutboxの存在すら意識させません。送信ボタンを押した瞬間に「送信完了」UIを表示し、実際の送信はバックグラウンドで非同期に行います。</span>
+          <span data-lang="en">Simple Memo's Outbox goes beyond a simple offline queue — it balances security and UX. Memos are AES-256-GCM encrypted on save and decrypted only for transmission. After successful delivery, Outbox data is immediately and permanently deleted. Users never even notice the Outbox exists — the "sent" UI appears instantly when the send button is tapped, while actual delivery happens asynchronously in the background.</span>
+        </p>
+      </section>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">実例：地下鉄でのメモ送信</span><span data-lang="en">Example: Sending a Memo on the Subway</span></h2>
+        <div class="definition-block" data-lang="ja">
+          <div class="definition-block__label">シナリオ</div>
+          <p><strong>1.</strong> 地下鉄の車内でアイデアをメモに入力し、送信ボタンをタップ</p>
+          <p><strong>2.</strong> アプリは「送信完了」を表示（ユーザー体験としては即完了）</p>
+          <p><strong>3.</strong> 裏側ではメモをAES-256-GCMで暗号化してOutboxに保存</p>
+          <p><strong>4.</strong> 地上に出てLTE/Wi-Fiに接続 → NWPathMonitorが接続を検出</p>
+          <p><strong>5.</strong> Outboxからメモを取り出し、復号してCloudflare Workers APIに送信</p>
+          <p><strong>6.</strong> Resend APIが受信者メールアドレスへ配信 → 成功レスポンスを確認</p>
+          <p><strong>7.</strong> Outboxの暗号化データを完全削除</p>
+        </div>
+        <div class="definition-block" data-lang="en">
+          <div class="definition-block__label">Scenario</div>
+          <p><strong>1.</strong> On the subway, type an idea and tap send</p>
+          <p><strong>2.</strong> The app shows "Sent" immediately (from the user's perspective, it's done)</p>
+          <p><strong>3.</strong> Behind the scenes, the memo is AES-256-GCM encrypted and saved to the Outbox</p>
+          <p><strong>4.</strong> You emerge above ground and connect to LTE/Wi-Fi — NWPathMonitor detects connectivity</p>
+          <p><strong>5.</strong> The memo is retrieved from the Outbox, decrypted, and sent to Cloudflare Workers API</p>
+          <p><strong>6.</strong> Resend API delivers to the recipient email address — success response confirmed</p>
+          <p><strong>7.</strong> Encrypted Outbox data is permanently deleted</p>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">よくある質問（Outboxアーキテクチャ）</span><span data-lang="en">FAQ: Outbox Architecture</span></h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outboxアーキテクチャとは何ですか？</summary><div class="faq-answer"><p>メッセージをローカルのキュー（送信箱）に保存し、ネットワーク接続時に自動送信する設計パターンです。オフライン環境でもデータを失わず、接続回復時に確実にデータを届けます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモのOutboxはどう動きますか？</summary><div class="faq-answer"><p>メモ送信時にネットワークが利用できない場合、AES-256-GCMで暗号化してOutboxに保存。接続回復を自動検出し、Cloudflare Workers経由でResend APIに送信。送信完了後にOutboxデータを削除します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outboxのメモは安全ですか？</summary><div class="faq-answer"><p>はい。すべてAES-256-GCM暗号化されます。暗号鍵はiOSのKeychain（Secure Enclave）に保管され、デバイス外に送信されません。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the Outbox architecture pattern?</summary><div class="faq-answer"><p>A design pattern that stores messages in a local queue and automatically sends them when connectivity is available. It ensures no data loss during network failures and guarantees delivery upon reconnection.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Simple Memo's Outbox work?</summary><div class="faq-answer"><p>When a memo is sent without connectivity, it is AES-256-GCM encrypted and saved to the Outbox. iOS background tasks detect when connectivity returns, then memos are decrypted, sent via Cloudflare Workers + Resend API, and deleted from the Outbox upon success.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are memos in the Outbox secure?</summary><div class="faq-answer"><p>Yes. All memos are AES-256-GCM encrypted. The encryption key stays in the iOS Keychain (Secure Enclave) and never leaves the device.</p></div></details></div>
+        </div>
+      </section>
+
+      <div class="cta-box">
+        <div class="cta-box__title"><span data-lang="ja">オフラインでもメモは絶対に失わない</span><span data-lang="en">Never Lose a Memo, Even Offline</span></div>
+        <div class="cta-box__desc"><span data-lang="ja">Outboxアーキテクチャ+AES-256-GCM暗号化で、地下鉄でも機内でもメモが確実に届きます。7日間の無料トライアル付き。</span><span data-lang="en">Outbox architecture + AES-256-GCM encryption ensures your memos are delivered reliably — subway, airplane, anywhere. 7-day free trial included.</span></div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード"></a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store"></a>
+      </div>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2>
+        <div class="internal-links">
+          <a href="/glossary/"><span data-lang="ja">用語集トップ</span><span data-lang="en">Glossary Home</span></a>
+          <a href="/glossary/aes-gcm/"><span data-lang="ja">AES-GCM暗号化とは</span><span data-lang="en">What is AES-GCM?</span></a>
+          <a href="/glossary/e2e-encryption/"><span data-lang="ja">E2E暗号化とは</span><span data-lang="en">What is E2E Encryption?</span></a>
+          <a href="/glossary/smtp/"><span data-lang="ja">SMTP/IMAPとは</span><span data-lang="en">What is SMTP/IMAP?</span></a>
+          <a href="/devlog/outbox-architecture"><span data-lang="ja">Outboxアーキテクチャ開発記</span><span data-lang="en">Outbox Architecture Dev Log</span></a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a>
+        <a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a>
+        <a href="/vs/" class="footer__link"><span data-lang="ja">比較</span><span data-lang="en">vs</span></a>
+        <a href="/use-cases/" class="footer__link"><span data-lang="ja">使い方</span><span data-lang="en">Use Cases</span></a>
+        <a href="/guides/" class="footer__link"><span data-lang="ja">ガイド</span><span data-lang="en">Guides</span></a>
+        <a href="/glossary/" class="footer__link"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a>
+        <a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a>
+      </nav>
+      <p class="footer__copyright">&copy; 2026 <span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p>
+    </div>
+  </footer>
+  <script src="/js/lang.js"></script>
+</body>
+</html>

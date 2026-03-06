@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>E2E暗号化とは — Capito式シンプルメモ用語集</title>
+  <meta name="description" content="E2E暗号化（エンドツーエンド暗号化）とは、送信者と受信者の間でデータを暗号化し、中間サーバーでも復号できない方式です。Capito式シンプルメモのオンデバイスAES-GCMアプローチとの比較も解説。">
+  <meta name="keywords" content="E2E暗号化 とは, エンドツーエンド暗号化 メモ, end-to-end encryption, メモアプリ 暗号化, プライバシー メモ">
+  <meta name="theme-color" content="#000000">
+
+  <meta property="og:title" content="E2E暗号化とは — Capito式シンプルメモ用語集">
+  <meta property="og:description" content="エンドツーエンド暗号化の仕組みとシンプルメモのオンデバイスAES-GCMアプローチとの比較を解説。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/glossary/e2e-encryption/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="E2E暗号化とは — Capito式シンプルメモ用語集">
+  <meta name="twitter:description" content="エンドツーエンド暗号化の仕組みとメモアプリにおける暗号化アプローチの比較。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <link rel="canonical" href="https://simplememofast.com/glossary/e2e-encryption/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/e2e-encryption/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/glossary/e2e-encryption/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/e2e-encryption/">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "E2E暗号化とは — Capito式シンプルメモ用語集",
+    "description": "E2E暗号化（エンドツーエンド暗号化）は送信者と受信者の間でデータを暗号化し、中間サーバーでも復号できない方式。Capito式シンプルメモのオンデバイス暗号化アプローチとの比較。",
+    "url": "https://simplememofast.com/glossary/e2e-encryption/",
+    "datePublished": "2026-03-06",
+    "dateModified": "2026-03-06",
+    "author": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com"},
+    "publisher": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com", "logo": {"@type": "ImageObject", "url": "https://simplememofast.com/assets/img/app-icon.png"}},
+    "mainEntityOfPage": {"@type": "WebPage", "@id": "https://simplememofast.com/glossary/e2e-encryption/"}
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type": "Question", "name": "E2E暗号化とは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "E2E暗号化（エンドツーエンド暗号化）は、データを送信者のデバイスで暗号化し、受信者のデバイスでのみ復号できる方式です。中間に位置するサーバーやネットワーク事業者はデータの内容を読むことができません。WhatsApp、Signal、Proton Mailなどで採用されています。"}},
+      {"@type": "Question", "name": "シンプルメモはE2E暗号化ですか？", "acceptedAnswer": {"@type": "Answer", "text": "Capito式シンプルメモは従来のE2E暗号化とは異なるアプローチを採用しています。メモはデバイス上でAES-256-GCMで暗号化されてOutboxに保存されますが、送信時にはCloudflare Workers経由でResend APIに渡されます。重要な点は、サーバーにメモが永続的に保存されないことです。送信が完了した時点でサーバー上のデータは破棄されます。"}},
+      {"@type": "Question", "name": "E2E暗号化とAES-GCMの違いは？", "acceptedAnswer": {"@type": "Answer", "text": "E2E暗号化は「誰と誰の間で暗号化するか」というアーキテクチャの概念です。AES-GCMは「どのアルゴリズムで暗号化するか」という暗号化方式です。E2E暗号化の実装にAES-GCMを使用することも可能です。シンプルメモではデバイス上のOutbox保護にAES-256-GCMを使用しています。"}},
+      {"@type": "Question", "name": "What is E2E encryption?", "acceptedAnswer": {"@type": "Answer", "text": "End-to-end encryption (E2E) encrypts data on the sender's device so that only the intended recipient's device can decrypt it. No intermediate server or network provider can read the data. It is used by WhatsApp, Signal, Proton Mail, and other privacy-focused services."}},
+      {"@type": "Question", "name": "Does Simple Memo use E2E encryption?", "acceptedAnswer": {"@type": "Answer", "text": "Simple Memo takes a different approach. Memos are AES-256-GCM encrypted on-device in the Outbox, but are transmitted via Cloudflare Workers and Resend API for email delivery. The key difference: no memo data is permanently stored on any server. Once delivery completes, server-side data is discarded."}},
+      {"@type": "Question", "name": "What is the difference between E2E encryption and AES-GCM?", "acceptedAnswer": {"@type": "Answer", "text": "E2E encryption is an architectural concept describing who can decrypt data (only endpoints, not intermediaries). AES-GCM is a specific encryption algorithm. E2E encryption implementations may use AES-GCM internally. Simple Memo uses AES-256-GCM for on-device Outbox protection."}}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "用語集", "item": "https://simplememofast.com/glossary/"},
+      {"@type": "ListItem", "position": 3, "name": "E2E暗号化", "item": "https://simplememofast.com/glossary/e2e-encryption/"}
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "E2E暗号化とは",
+    "speakable": {"@type": "SpeakableSpecification", "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".definition-block"]},
+    "url": "https://simplememofast.com/glossary/e2e-encryption/"
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+    .definition-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .definition-block__label{font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+    .definition-block p{color:var(--text-secondary);margin-bottom:.5rem}
+    .definition-block p:last-child{margin-bottom:0}
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7}
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja"><span class="meta-title">E2E暗号化とは — Capito式シンプルメモ用語集</span><span class="meta-og-title">E2E暗号化とは — Capito式シンプルメモ用語集</span><span class="meta-description">エンドツーエンド暗号化の仕組みとシンプルメモのオンデバイスAES-GCMアプローチとの比較を解説。</span></div>
+    <div class="meta-template" data-lang="en"><span class="meta-title">What is E2E Encryption? — Simple Memo Glossary</span><span class="meta-og-title">What is E2E Encryption? — Simple Memo Glossary</span><span class="meta-description">End-to-end encryption explained. Compare with Simple Memo's on-device AES-GCM approach — no server storage, no data retention.</span></div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container"><div class="lang-switcher"><button class="lang-switcher__btn" data-lang-btn="ja">日本語</button><button class="lang-switcher__btn" data-lang-btn="en">English</button></div></div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo"><span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span></a>
+        <a href="/glossary/" class="page-header__back"><span data-lang="ja">用語集へ戻る</span><span data-lang="en">Back to Glossary</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <div class="lp-hero">
+        <div class="lp-hero__label"><span data-lang="ja">用語集 — セキュリティ</span><span data-lang="en">Glossary — Security</span></div>
+        <h1 class="lp-hero__title"><span data-lang="ja">E2E暗号化<br>（エンドツーエンド暗号化）とは</span><span data-lang="en">What is End-to-End<br>(E2E) Encryption?</span></h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">E2E暗号化（エンドツーエンド暗号化）は、データを送信者のデバイスで暗号化し、受信者のデバイスでのみ復号できる方式です。中間サーバーではデータの内容を読むことができません。Capito式シンプルメモは「サーバーに保存しない」という異なるアプローチでプライバシーを保護しています。</span>
+          <span data-lang="en">E2E (end-to-end) encryption encrypts data on the sender's device so only the recipient's device can decrypt it. No intermediate server can read the content. Simple Memo takes a different privacy approach: never storing data on servers at all.</span>
+        </p>
+      </div>
+
+      <div class="definition-block" data-lang="ja">
+        <div class="definition-block__label">定義</div>
+        <p><strong>E2E暗号化（End-to-End Encryption）</strong>は、通信の両端（エンドポイント）でのみデータを復号可能にする暗号化方式です。送信者のデバイスでデータを暗号化し、受信者の持つ秘密鍵でのみ復号できます。メッセージを中継するサーバー、ネットワーク事業者、さらにはサービス提供者自身もデータの中身を読むことができません。WhatsApp、Signal、Proton Mailなどがこの方式を採用しています。</p>
+      </div>
+      <div class="definition-block" data-lang="en">
+        <div class="definition-block__label">Definition</div>
+        <p><strong>End-to-End Encryption (E2E)</strong> is an encryption scheme where data can only be decrypted at the two endpoints of a communication channel. Data is encrypted on the sender's device and can only be decrypted with the recipient's private key. Servers relaying the message, network providers, and even the service operator itself cannot read the data. WhatsApp, Signal, and Proton Mail use this approach.</p>
+      </div>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">E2E暗号化 vs シンプルメモのアプローチ</span><span data-lang="en">E2E Encryption vs Simple Memo's Approach</span></h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">Capito式シンプルメモは、従来のE2E暗号化とは異なる「ゼロ保存」アプローチを採用しています。E2E暗号化がサーバー上のデータを「読めなくする」のに対し、シンプルメモはそもそもサーバーにデータを「保存しない」ことでプライバシーを保護します。</span>
+          <span data-lang="en">Simple Memo uses a "zero-storage" approach rather than traditional E2E encryption. While E2E encryption makes server-stored data unreadable, Simple Memo protects privacy by never storing data on servers in the first place.</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card"><div class="reason-card__title"><span data-lang="ja">E2E暗号化のアプローチ</span><span data-lang="en">E2E Encryption Approach</span></div><div class="reason-card__desc"><span data-lang="ja">Standard NotesやProton Mailのようなサービスは、データをサーバーに保存しますが、E2E暗号化により内容をサーバー側で読むことはできません。同期・バックアップが可能ですが、暗号化されたデータはサーバーに永続的に存在します。</span><span data-lang="en">Services like Standard Notes and Proton Mail store data on servers, but E2E encryption prevents the server from reading the content. Sync and backup are possible, but encrypted data permanently resides on servers.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span data-lang="ja">シンプルメモのアプローチ</span><span data-lang="en">Simple Memo's Approach</span></div><div class="reason-card__desc"><span data-lang="ja">メモはデバイス上でAES-256-GCMで暗号化されてOutboxに一時保存。送信時にCloudflare Workers経由でメール配信。送信完了後、サーバー上のデータは即破棄。メモの永続的保存先はユーザーのメール受信箱のみです。</span><span data-lang="en">Memos are AES-256-GCM encrypted on-device in the Outbox. Sent via Cloudflare Workers for email delivery. After delivery, server-side data is immediately discarded. The only permanent storage is the user's email inbox.</span></div></div>
+          <div class="reason-card"><div class="reason-card__title"><span data-lang="ja">どちらが優れているか？</span><span data-lang="en">Which is Better?</span></div><div class="reason-card__desc"><span data-lang="ja">用途が異なります。長期保存・同期が必要ならE2E暗号化のノートアプリが適しています。「書いて送るだけ」のキャプチャツールなら、サーバーに保存しないシンプルメモのアプローチが最もシンプルで安全です。</span><span data-lang="en">Different use cases. For long-term storage and sync, E2E encrypted note apps are ideal. For a "write and send" capture tool, Simple Memo's zero-storage approach is the simplest and most secure option.</span></div></div>
+        </div>
+      </section>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">よくある質問（E2E暗号化）</span><span data-lang="en">FAQ: E2E Encryption</span></h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2E暗号化とは何ですか？</summary><div class="faq-answer"><p>データを送信者のデバイスで暗号化し、受信者のデバイスでのみ復号できる方式です。中間サーバーやネットワーク事業者はデータを読むことができません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモはE2E暗号化ですか？</summary><div class="faq-answer"><p>従来のE2E暗号化とは異なるアプローチです。デバイス上ではAES-256-GCMで暗号化し、サーバーにはメモを永続保存しません。送信完了後にサーバー上のデータは破棄されます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2E暗号化とAES-GCMの違いは？</summary><div class="faq-answer"><p>E2E暗号化はアーキテクチャの概念（誰が復号できるか）。AES-GCMは暗号化アルゴリズム（どう暗号化するか）。E2E暗号化の内部実装にAES-GCMを使うことも可能です。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is E2E encryption?</summary><div class="faq-answer"><p>End-to-end encryption encrypts data on the sender's device so only the recipient can decrypt it. No server or network provider in between can read the content.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo use E2E encryption?</summary><div class="faq-answer"><p>Simple Memo uses a different approach. Memos are AES-256-GCM encrypted on-device, and no memo data is permanently stored on servers. After delivery, server-side data is discarded.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the difference between E2E encryption and AES-GCM?</summary><div class="faq-answer"><p>E2E encryption is an architectural concept (who can decrypt). AES-GCM is an encryption algorithm (how to encrypt). E2E implementations may use AES-GCM internally.</p></div></details></div>
+        </div>
+      </section>
+
+      <div class="cta-box">
+        <div class="cta-box__title"><span data-lang="ja">サーバーに保存しない安心感</span><span data-lang="en">Peace of Mind: Zero Server Storage</span></div>
+        <div class="cta-box__desc"><span data-lang="ja">Capito式シンプルメモは、メモをサーバーに永続保存しません。デバイス上のAES-256-GCM暗号化+ゼロ保存で、最もシンプルなプライバシー保護を実現。7日間の無料トライアル付き。</span><span data-lang="en">Simple Memo never permanently stores memos on servers. On-device AES-256-GCM + zero server storage delivers the simplest privacy protection. 7-day free trial included.</span></div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード"></a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store"></a>
+      </div>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2>
+        <div class="internal-links">
+          <a href="/glossary/"><span data-lang="ja">用語集トップ</span><span data-lang="en">Glossary Home</span></a>
+          <a href="/glossary/aes-gcm/"><span data-lang="ja">AES-GCM暗号化とは</span><span data-lang="en">What is AES-GCM?</span></a>
+          <a href="/glossary/outbox-architecture/"><span data-lang="ja">Outboxアーキテクチャとは</span><span data-lang="en">What is Outbox Architecture?</span></a>
+          <a href="/vs/standard-notes/"><span data-lang="ja">Standard Notes比較</span><span data-lang="en">vs Standard Notes</span></a>
+          <a href="/guides/proton-mail/"><span data-lang="ja">Proton Mail設定ガイド</span><span data-lang="en">Proton Mail Setup Guide</span></a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a>
+        <a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a>
+        <a href="/vs/" class="footer__link"><span data-lang="ja">比較</span><span data-lang="en">vs</span></a>
+        <a href="/use-cases/" class="footer__link"><span data-lang="ja">使い方</span><span data-lang="en">Use Cases</span></a>
+        <a href="/guides/" class="footer__link"><span data-lang="ja">ガイド</span><span data-lang="en">Guides</span></a>
+        <a href="/glossary/" class="footer__link"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a>
+        <a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a>
+      </nav>
+      <p class="footer__copyright">&copy; 2026 <span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p>
+    </div>
+  </footer>
+  <script src="/js/lang.js"></script>
+</body>
+</html>
