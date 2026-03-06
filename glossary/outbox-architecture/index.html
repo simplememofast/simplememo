@@ -38,9 +38,6 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
 
   <link rel="canonical" href="https://simplememofast.com/glossary/outbox-architecture/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/outbox-architecture/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/glossary/outbox-architecture/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/outbox-architecture/">
 
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -60,21 +57,6 @@
     "author": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com"},
     "publisher": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com", "logo": {"@type": "ImageObject", "url": "https://simplememofast.com/assets/img/app-icon.png"}},
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://simplememofast.com/glossary/outbox-architecture/"}
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {"@type": "Question", "name": "Outboxアーキテクチャとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "Outboxアーキテクチャ（Outboxパターン）は、メッセージやデータをまずローカルのキュー（送信箱）に保存し、ネットワーク接続が利用可能になった時点で自動的に送信する設計パターンです。オフライン環境でもユーザー操作を中断させず、接続回復時に確実にデータを届けます。"}},
-      {"@type": "Question", "name": "シンプルメモのOutboxはどう動きますか？", "acceptedAnswer": {"@type": "Answer", "text": "メモ送信時にネットワークが利用できない場合、メモはAES-256-GCMで暗号化されてデバイス上のOutboxキューに保存されます。iOSのバックグラウンドタスクとネットワーク状態監視により、接続回復を自動検出。Outbox内のメモを順次復号し、Cloudflare Workers経由でResend APIに送信します。送信完了後、Outboxデータは即座に削除されます。"}},
-      {"@type": "Question", "name": "Outboxのメモは安全ですか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Outboxに保存されるメモはすべてAES-256-GCM暗号化されます。暗号鍵はiOSのKeychain（Secure Enclave）に保管され、デバイス外に送信されることはありません。万が一デバイスを紛失しても、暗号化されたメモは第三者に読まれることはありません。"}},
-      {"@type": "Question", "name": "What is the Outbox architecture pattern?", "acceptedAnswer": {"@type": "Answer", "text": "The Outbox pattern stores messages in a local queue (outbox) first, then automatically sends them when network connectivity becomes available. This ensures the user experience is never interrupted by network issues, and data delivery is guaranteed upon reconnection."}},
-      {"@type": "Question", "name": "How does Simple Memo's Outbox work?", "acceptedAnswer": {"@type": "Answer", "text": "When a memo is sent without network connectivity, it is encrypted with AES-256-GCM and stored in an on-device Outbox queue. iOS background tasks and network state monitoring detect when connectivity is restored. Memos are then decrypted, sent via Cloudflare Workers to the Resend API, and deleted from the Outbox upon successful delivery."}},
-      {"@type": "Question", "name": "Are memos in the Outbox secure?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. All memos in the Outbox are AES-256-GCM encrypted. The encryption key is stored in the iOS Keychain (backed by Secure Enclave) and never leaves the device. Even if the device is lost or stolen, encrypted memos cannot be read by third parties."}}
-    ]
   }
   </script>
 
@@ -110,7 +92,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -140,10 +122,150 @@
     .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
     .internal-links a:hover{border-color:var(--accent)}
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja"><span class="meta-title">Outboxアーキテクチャとは — Capito式シンプルメモ用語集</span><span class="meta-og-title">Outboxアーキテクチャとは — Capito式シンプルメモ用語集</span><span class="meta-description">Outboxパターン（ローカルキューイング+自動送信）の技術解説。シンプルメモのオフラインメモ機能を支えるコア技術。</span></div>
     <div class="meta-template" data-lang="en"><span class="meta-title">What is Outbox Architecture? — Simple Memo Glossary</span><span class="meta-og-title">What is Outbox Architecture? — Simple Memo Glossary</span><span class="meta-description">Outbox pattern explained: queue locally, send when connected. The core technical innovation behind Simple Memo's offline capability.</span></div>
@@ -274,5 +396,12 @@
     </div>
   </footer>
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

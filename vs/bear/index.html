@@ -42,9 +42,6 @@
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/vs/bear/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/bear/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/vs/bear/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/bear/">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -84,96 +81,6 @@
   }
   </script>
 
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "BearとCapito式シンプルメモはどちらが速いですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "起動速度の比較では、Capito式シンプルメモが起動0.3秒でキーボードが立ち上がります。Bearはノートのリストを表示してから新規作成するため、数タップと数秒が必要です。瞬間的なアイデアをキャプチャする用途ではCapito式シンプルメモが有利です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "BearはMarkdownに対応していますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。BearはMarkdown記法を完全にサポートしており、見出し・リスト・コードブロック・太字などの書式設定が可能です。長文ライティングやドキュメント作成に向いています。Capito式シンプルメモはMarkdownには対応しておらず、プレーンテキストの即時送信に特化しています。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "BearのサブスクリプションとCapito式シンプルメモの料金はどちらが安いですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Bearの有料プラン（Bear Pro）は年額約1,500円〜3,000円程度です。Capito式シンプルメモは月額500円／年額5,000円のPremiumプランと、1日3通まで無料のFreeプランがあります。シンプルな用途なら無料プランで十分なケースも多いです。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "BearとCapito式シンプルメモを併用することはできますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。2つのアプリは用途が異なるため、併用が最も効果的です。移動中や会議中の瞬間的なメモはCapito式シンプルメモで素早くキャプチャし、後でBearに整理・まとめるというワークフローが多くのユーザーに支持されています。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "BearはiCloud同期に対応していますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。BearはiCloud経由でMac・iPhone・iPad間でノートを同期できます。ただし同期にはインターネット接続が必要で、オフライン環境では同期できません。Capito式シンプルメモはオフライン時もOutboxアーキテクチャで保存し、接続回復時に自動送信します。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Bear or Simple Memo faster for quick note capture?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memo wins on speed. It launches in 0.3 seconds with the keyboard ready. Bear requires opening the app, browsing your note list, and creating a new note. For fleeting thoughts, Simple Memo captures faster."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does Bear support Markdown?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Bear has full Markdown support including headings, lists, code blocks, and bold/italic formatting. It's ideal for long-form writing and document organization. Simple Memo focuses on plain-text instant delivery to email, with no Markdown."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I use both Bear and Simple Memo together?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes, and this is actually the recommended approach. Use Simple Memo for instant capture on the go, then organize and expand your thoughts in Bear later. The two apps complement each other perfectly."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Bear free or paid?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Bear has a free tier with basic features. Bear Pro (sync across devices, themes, export formats) requires a subscription. Simple Memo has a free tier with 3 sends per day, and a Premium plan for unlimited sends."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does Simple Memo work offline like Bear?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Simple Memo's Outbox architecture stores memos locally with AES-GCM encryption when offline, then auto-sends when reconnected. Bear also works offline for writing, but sync requires an internet connection."
-        }
-      }
-    ]
-  }
-  </script>
-
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
   {
@@ -197,7 +104,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
@@ -244,6 +151,119 @@
     .internal-links a:hover{border-color:var(--accent)}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
 
   <!-- JSON-LD: Speakable -->
@@ -262,6 +282,33 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -601,5 +648,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

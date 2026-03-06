@@ -42,9 +42,6 @@
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/guides/yahoo-mail/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/guides/yahoo-mail/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/guides/yahoo-mail/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/guides/yahoo-mail/">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -52,91 +49,6 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
-
-  <!-- JSON-LD: HowTo -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "Yahoo!メール設定ガイド — Capito式シンプルメモ",
-    "description": "Capito式シンプルメモにYahoo!メールアドレスを設定してメモ送信を開始する手順。",
-    "totalTime": "PT3M",
-    "step": [
-      {
-        "@type": "HowToStep",
-        "position": 1,
-        "name": "アプリをダウンロードする",
-        "text": "App StoreでCapito式シンプルメモ（またはSimple Memo - Fast）を検索してダウンロードします。"
-      },
-      {
-        "@type": "HowToStep",
-        "position": 2,
-        "name": "アプリを起動して設定を開く",
-        "text": "アプリを起動するとメモ入力画面が開きます。右下の設定アイコン（歯車）をタップして設定画面へ進みます。"
-      },
-      {
-        "@type": "HowToStep",
-        "position": 3,
-        "name": "Yahoo!メールアドレスを入力する",
-        "text": "「宛先メールアドレス」の欄にあなたのYahoo!メールアドレス（例：yourname@yahoo.co.jp または yourname@yahoo.com）を入力し、「確認コードを送る」をタップします。"
-      },
-      {
-        "@type": "HowToStep",
-        "position": 4,
-        "name": "Yahoo!メールに届いた6桁のコードを入力する",
-        "text": "Yahoo!メールの受信トレイ（またはYahooメールアプリ）を開きます。確認コードのメールが届いているので、6桁の数字をアプリに入力して「確認する」をタップします。迷惑メールフォルダも確認してください。"
-      },
-      {
-        "@type": "HowToStep",
-        "position": 5,
-        "name": "メモを送り始める",
-        "text": "設定完了。メモ入力画面でテキストを入力し、送信ボタンをタップするとYahoo!メールの受信トレイにメモが届きます。"
-      }
-    ]
-  }
-  </script>
-
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "確認コードがYahoo!メールに届かないのですが？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yahoo!メールの「迷惑メールフォルダ」を確認してください。Yahoo!メールは外部からのメールを迷惑メールと判定することがあります。見つかったら「迷惑メールではない」を設定することで、以降のメモが迷惑メールに振り分けられなくなります。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "@yahoo.co.jpと@yahoo.comの両方で使えますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。Yahoo!メール（日本）の@yahoo.co.jpも、Yahoo Mail（海外）の@yahoo.comも、どちらでも利用できます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Why is the verification code going to Yahoo Mail spam?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yahoo Mail aggressively filters emails from new senders. Check your Spam folder. Once you find the code email, mark it as 'Not Spam' to ensure future Simple Memo messages are delivered to your inbox."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does both @yahoo.co.jp and @yahoo.com work?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Both Yahoo Mail Japan (@yahoo.co.jp) and international Yahoo Mail (@yahoo.com, @ymail.com) work as destinations for Simple Memo."
-        }
-      }
-    ]
-  }
-  </script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -161,7 +73,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
@@ -212,10 +124,150 @@
     .alert-box__title{font-weight:700;color:#f85149;margin-bottom:.4rem;font-size:.85rem;letter-spacing:.04em}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -573,5 +625,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

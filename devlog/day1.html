@@ -48,9 +48,6 @@
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
 
   <link rel="canonical" href="https://simplememofast.com/devlog/day1">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/day1?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/devlog/day1?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/day1">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -83,7 +80,7 @@
     .lang-switcher__btn:hover { color: rgba(255, 255, 255, 0.85); }
     .lang-switcher__btn:focus-visible { outline: 2px solid #6ab4ff; outline-offset: 2px; }
     .lang-switcher__btn.active { background: rgba(100, 180, 255, 0.12); border: 1px solid rgba(100, 180, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(100, 180, 255, 0.1); }
-    [data-lang] { display: none; }
+    [data-lang="en"] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
     @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
@@ -105,6 +102,119 @@
     .related-card:hover { border-color: rgba(100,180,255,0.3); }
     .related-card__title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary, #fff); margin-bottom: 4px; }
     .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
 
   <!-- JSON-LD: Article -->
@@ -158,59 +268,36 @@
     ]
   }
   </script>
-
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Captioとは何ですか？ / What is Captio?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Captioは、メモを書いてワンタップで自分のメールに送信できるiOSアプリでした。極限までシンプルなUIで、起動した瞬間にテキスト入力が可能で、送信後は即座に画面がクリアされるという体験が特徴でした。残念ながらサービスは終了しましたが、Capito式シンプルメモはその体験を再現するために開発されました。 / Captio was an iOS app that let you write a memo and send it to your email with a single tap. It featured an extremely simple UI where text input was ready the moment you launched the app, and the screen cleared instantly after sending. Unfortunately, the service was discontinued, but Simple Memo (Captio-style) was developed to recreate that experience."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "なぜSwiftUIではなくUIKitを使ったのですか？ / Why UIKit instead of SwiftUI?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Time-to-Text（起動からテキスト入力可能になるまでの時間）を500ms以下にするという目標のためです。SwiftUIのbody再評価やStateObject初期化のオーバーヘッドを避け、SceneDelegateから直接ViewControllerを生成し、viewDidAppearでbecomeFirstResponderを呼ぶことで、実機計測200〜300msを達成しました。 / To achieve our goal of Time-to-Text (time from launch to text input ready) under 500ms. By avoiding SwiftUI's body re-evaluation and StateObject initialization overhead, directly creating ViewControllers from SceneDelegate, and calling becomeFirstResponder in viewDidAppear, we achieved 200-300ms on real devices."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "オフラインでもメモは失われませんか？ / Are memos lost when offline?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "いいえ、メモは失われません。Outboxアーキテクチャにより、送信ボタンを押した瞬間にAES-GCM暗号化されたメモがローカルのOutboxに保存されます。ネットワーク送信はバックグラウンドで行われ、失敗時はExponential Backoffで再試行します。オフライン時はNWPathMonitorで接続を監視し、復帰時に自動再送します。 / No, memos are never lost. With the Outbox architecture, the moment you tap send, the memo is saved to a local Outbox with AES-GCM encryption. Network transmission happens in the background, with exponential backoff retry on failure. When offline, NWPathMonitor watches for connectivity and auto-resends when connection is restored."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "メモの内容はサーバーに保存されますか？ / Is memo content stored on the server?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "いいえ、サーバーにメモ内容は保存されません。Relay APIはCloudflare Workers上で動作し、メモ内容はメール送信のためにのみ一時的に処理され、永続的に保存されることはありません。さらに、ephemeral URLSession（キャッシュなし・クッキーなし）を使用し、ログにもメモ内容は一切記録されません。DEBUGビルドでも同様です。 / No, memo content is never stored on the server. The Relay API runs on Cloudflare Workers and only temporarily processes memo content for email delivery without persistent storage. Additionally, ephemeral URLSession (no cache, no cookies) is used, and memo content is never recorded in logs, even in DEBUG builds."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Captio式シンプルメモは無料ですか？ / Is Simple Memo free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "7日間の無料トライアル（送信無制限）があります。トライアル終了後、Freeプランでは1日3通まで送信可能です。Premiumプラン（月額¥500 / $2.99、年額¥5,000 / $29.99）では送信無制限でご利用いただけます。 / There is a 7-day free trial with unlimited sends. After the trial, the Free plan allows up to 3 sends per day. The Premium plan (monthly ¥500 / $2.99, yearly ¥5,000 / $29.99) offers unlimited sends."
-        }
-      }
-    ]
-  }
-  </script>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -1112,5 +1199,12 @@ func applyLanguageChange() {
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

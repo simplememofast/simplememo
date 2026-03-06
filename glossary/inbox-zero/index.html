@@ -38,9 +38,6 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
 
   <link rel="canonical" href="https://simplememofast.com/glossary/inbox-zero/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/inbox-zero/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/glossary/inbox-zero/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/inbox-zero/">
 
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -60,21 +57,6 @@
     "author": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com"},
     "publisher": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com", "logo": {"@type": "ImageObject", "url": "https://simplememofast.com/assets/img/app-icon.png"}},
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://simplememofast.com/glossary/inbox-zero/"}
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {"@type": "Question", "name": "Inbox Zeroとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "Inbox Zeroは、Merlin Mannが2006年にGoogle Tech Talkで発表したメール管理の方法論です。受信トレイのメール数をゼロにすることではなく、受信トレイに費やす精神的エネルギーをゼロにすることを目的としています。メールを削除・委任・返信・延期・実行の5つのアクションで即座に処理します。"}},
-      {"@type": "Question", "name": "Inbox Zeroを実践するコツは？", "acceptedAnswer": {"@type": "Answer", "text": "メールを受信したら、即座に5つのアクション（削除・委任・返信・延期・実行）のいずれかを適用します。受信トレイを一時保管場所として使わず、処理済みメールは即アーカイブします。メール確認は1日2〜3回の決まった時間に行うのが効果的です。"}},
-      {"@type": "Question", "name": "シンプルメモとInbox Zeroの関係は？", "acceptedAnswer": {"@type": "Answer", "text": "Capito式シンプルメモで送ったメモは受信トレイに届きます。Inbox Zeroの5つのアクションで即座に処理することで、メモが受信トレイに溜まることなく適切な場所に移動します。メモの「キャプチャ」と「処理」を分離する点がInbox Zeroとの親和性が高いです。"}},
-      {"@type": "Question", "name": "What is Inbox Zero?", "acceptedAnswer": {"@type": "Answer", "text": "Inbox Zero is an email management methodology presented by Merlin Mann at a Google Tech Talk in 2006. Its goal is not to have zero emails in your inbox, but to spend zero mental energy on your inbox. Emails are processed immediately using five actions: delete, delegate, respond, defer, or do."}},
-      {"@type": "Question", "name": "How does Simple Memo work with Inbox Zero?", "acceptedAnswer": {"@type": "Answer", "text": "Memos sent via Simple Memo arrive in your email inbox. Using Inbox Zero's five actions, you process each memo immediately — archive it, label it for later, or act on it right away. This separates the 'capture' moment from the 'processing' moment, which is the key principle of Inbox Zero."}},
-      {"@type": "Question", "name": "How often should I check my inbox for Inbox Zero?", "acceptedAnswer": {"@type": "Answer", "text": "Merlin Mann recommends checking email at scheduled intervals — typically 2-3 times per day — rather than constantly monitoring. Process everything in your inbox to zero at each session. This batching approach reduces context switching and improves focus."}}
-    ]
   }
   </script>
 
@@ -110,7 +92,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -140,10 +122,150 @@
     .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
     .internal-links a:hover{border-color:var(--accent)}
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
       <span class="meta-title">Inbox Zeroとは — Capito式シンプルメモ用語集</span>
@@ -304,5 +426,12 @@
     </div>
   </footer>
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

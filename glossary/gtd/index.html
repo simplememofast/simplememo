@@ -38,9 +38,6 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
 
   <link rel="canonical" href="https://simplememofast.com/glossary/gtd/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/gtd/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/glossary/gtd/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/gtd/">
 
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -60,21 +57,6 @@
     "author": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com"},
     "publisher": {"@type": "Organization", "name": "Capito式シンプルメモ", "url": "https://simplememofast.com", "logo": {"@type": "ImageObject", "url": "https://simplememofast.com/assets/img/app-icon.png"}},
     "mainEntityOfPage": {"@type": "WebPage", "@id": "https://simplememofast.com/glossary/gtd/"}
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {"@type": "Question", "name": "GTDとは何ですか？", "acceptedAnswer": {"@type": "Answer", "text": "GTD（Getting Things Done）は、David Allenが2001年に著書『Getting Things Done』で発表した生産性管理メソッドです。「頭の中にあるすべてのことを信頼できる外部システムに移す」ことを核に、Capture（キャプチャ）→ Clarify（明確化）→ Organize（整理）→ Reflect（レビュー）→ Engage（実行）の5つのフェーズでタスクを管理します。"}},
-      {"@type": "Question", "name": "GTDの5ステップとは？", "acceptedAnswer": {"@type": "Answer", "text": "1. Capture：頭に浮かんだことをすべて記録する。2. Clarify：記録したものを一つずつ処理し、行動可能かどうかを判断する。3. Organize：明確化したアイテムをカテゴリ別に整理する。4. Reflect：定期的にシステム全体を見直す（ウィークリーレビュー）。5. Engage：状況に応じて最適なアクションを選んで実行する。"}},
-      {"@type": "Question", "name": "GTDのキャプチャにメールメモを使えますか？", "acceptedAnswer": {"@type": "Answer", "text": "はい。Capito式シンプルメモの0.3秒起動・ワンタップ送信は、GTDのキャプチャフェーズに最適です。思いついた瞬間にメモをメールとして送信し、メールインボックスがGTDインボックスとして機能します。定期的にインボックスを処理することで、GTDの5ステップが自然に回ります。"}},
-      {"@type": "Question", "name": "What is GTD (Getting Things Done)?", "acceptedAnswer": {"@type": "Answer", "text": "GTD is a productivity methodology by David Allen, published in 2001. Its core principle is moving everything out of your head into a trusted external system, then managing it through five phases: Capture, Clarify, Organize, Reflect, and Engage."}},
-      {"@type": "Question", "name": "What are the 5 steps of GTD?", "acceptedAnswer": {"@type": "Answer", "text": "1. Capture: Record everything that has your attention. 2. Clarify: Process each item and decide if it is actionable. 3. Organize: Sort clarified items into categories (next actions, projects, someday, reference). 4. Reflect: Review your system regularly (weekly review). 5. Engage: Choose the best action based on context and execute."}},
-      {"@type": "Question", "name": "Can I use email memo for GTD capture?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Simple Memo's 0.3-second launch and one-tap send make it ideal for GTD capture. Send ideas as emails the moment they arise — your email inbox becomes your GTD inbox. Process it regularly using the Clarify and Organize phases to keep the system running."}}
-    ]
   }
   </script>
 
@@ -110,7 +92,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -140,10 +122,150 @@
     .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
     .internal-links a:hover{border-color:var(--accent)}
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja"><span class="meta-title">GTDとは — Capito式シンプルメモ用語集</span><span class="meta-og-title">GTDとは — Capito式シンプルメモ用語集</span><span class="meta-description">GTD（Getting Things Done）の意味と5ステップを解説。David Allenのタスク管理メソッドとメールメモとの組み合わせ方。</span></div>
     <div class="meta-template" data-lang="en"><span class="meta-title">What is GTD? — Simple Memo Glossary</span><span class="meta-og-title">What is GTD? — Simple Memo Glossary</span><span class="meta-description">GTD (Getting Things Done) explained. David Allen's 5-step productivity system and how email memo integrates with it.</span></div>
@@ -252,5 +374,12 @@
     </div>
   </footer>
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

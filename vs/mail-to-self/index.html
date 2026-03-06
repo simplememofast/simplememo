@@ -42,9 +42,6 @@
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/vs/mail-to-self/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/mail-to-self/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/vs/mail-to-self/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/mail-to-self/">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -81,96 +78,6 @@
       "@type": "WebPage",
       "@id": "https://simplememofast.com/vs/mail-to-self/"
     }
-  }
-  </script>
-
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "自分にメールを送るアプリで一番おすすめはどれですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "速度・セキュリティ・オフライン対応を重視するならCapito式シンプルメモがおすすめです。0.3秒起動、150ms送信、AES-GCM暗号化、Outboxオフライン自動再送を備え、SMTP設定やアカウント登録も不要です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Mail to Selfアプリにはどんな種類がありますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "代表的なアプリにはEmailMe、Note To Self Mail、MeMail、Captio（廃止）、Moca、メモポストなどがあります。多くはSMTP設定やアカウント登録が必要ですが、Capito式シンプルメモはCloudflare Workers経由のリレーでSMTP設定不要で使えます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "SMTPの設定は必要ですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "多くの「自分にメールを送る」アプリではSMTP設定（サーバーアドレス・ポート・パスワード）が必要です。Capito式シンプルメモはCloudflare Workers + Resend APIのリレーサーバーを使用するため、SMTP設定は完全に不要です。メールアドレスを入力するだけで使えます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "オフラインでもメモを送れるアプリはありますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "多くのMail to Selfアプリはインターネット接続が必要ですが、Capito式シンプルメモはOutboxアーキテクチャにより、オフラインでもメモをAES-GCM暗号化で保存し、接続回復時に自動送信します。地下鉄や飛行機内でも安心してメモを取れます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "自分にメールするメモアプリは安全ですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "アプリによって安全性は異なります。多くのアプリはSMTPパスワードを保存する必要があり、暗号化機能もありません。Capito式シンプルメモはSMTP不要でパスワードを保存せず、Outbox内データはAES-GCM暗号化で保護され、サーバーにメモ本文を永続保存しません。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is the best email-to-self app?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "For speed, security, and offline reliability, Simple Memo (Captio-style) is the best email-to-self app. It launches in 0.3 seconds, sends in 150ms via Cloudflare Workers, encrypts offline memos with AES-GCM, and requires no SMTP setup or account creation."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Do I need to configure SMTP to use a mail-to-self app?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Most mail-to-self apps require SMTP configuration (server address, port, password). Simple Memo eliminates this entirely by using Cloudflare Workers and Resend API as a relay server. You only need to enter your email address — no SMTP knowledge required."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Which email-to-self app works offline?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Most mail-to-self apps like EmailMe and Note To Self require internet connectivity. Simple Memo is the exception — its Outbox architecture stores memos with AES-GCM encryption when offline and automatically sends them when connectivity returns, ensuring zero message loss."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is it safe to email notes to myself?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "It depends on the app. Apps requiring SMTP passwords store your credentials on the device. Simple Memo uses Cloudflare Workers relay, so your email password is never stored. Outbox memos are encrypted with AES-GCM on-device, and memo content is never permanently stored on any server."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What happened to Captio and what is the best replacement?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Captio was discontinued in 2025. Simple Memo (Captio-style) was designed as its spiritual successor, maintaining the same one-tap email capture philosophy while adding AES-GCM encryption, Outbox offline architecture, and Cloudflare Workers relay for 150ms send speed."
-        }
-      }
-    ]
   }
   </script>
 
@@ -211,7 +118,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
@@ -262,10 +169,150 @@
     .choose-card ul li::before{content:"✓ ";color:#3fb950;font-weight:700}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -627,5 +674,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>
