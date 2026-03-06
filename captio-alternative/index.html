@@ -42,9 +42,6 @@
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/captio-alternative/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/captio-alternative/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/captio-alternative/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/captio-alternative/">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -84,64 +81,6 @@
   }
   </script>
 
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Captioはなぜなくなったのですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Captioは2025年頃にApp Storeから削除され、サーバーも停止しました。公式な理由は発表されていません。Gmail APIへの依存が一因と考えられています。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Captioの代わりになるアプリはありますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Capito式シンプルメモはCaptioの「起動即入力・送ったら消える・余計なものゼロ」を再現したiOSアプリです。Captioと同じ操作感を目指して開発されました。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "CaptioからCapito式シンプルメモへの移行は簡単ですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。App Storeからダウンロードし、メールアドレスを設定するだけで3分以内に使い始められます。データ移行は不要です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Captioと同じようにオフラインで使えますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。Outboxアーキテクチャにより、オフライン時のメモはAES-GCM暗号化で保存され、オンライン復帰時に自動送信されます。メッセージの取りこぼしはゼロです。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Why was Captio discontinued?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Captio was removed from the App Store around 2025 and its servers were shut down. No official reason was given. Its dependency on Gmail API is believed to be a contributing factor."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is there a Captio alternative app?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memo - Captio-style recreates Captio's core experience: instant launch, send and clear, zero clutter. It's an iOS app designed as a direct Captio replacement."
-        }
-      }
-    ]
-  }
-  </script>
-
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
   {
@@ -164,7 +103,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
@@ -211,6 +150,119 @@
     .internal-links a:hover{border-color:var(--accent)}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
 
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
@@ -229,6 +281,33 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -554,5 +633,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

@@ -49,9 +49,6 @@
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/faq">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/faq?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/faq?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/faq">
 
   <link rel="preload" as="style" href="/assets/css/style.min.css">
   <link rel="preload" as="script" href="/js/lang.js">
@@ -99,7 +96,7 @@
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
     }
-    [data-lang] { display: none; }
+    [data-lang="en"] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
 
@@ -116,217 +113,122 @@
     .internal-links a:hover{border-color:var(--accent)}
     .faq-category{margin-top:2rem}
     .faq-category__title{font-size:1.1rem;font-weight:600;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);color:var(--accent)}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
 
   <!-- FAQPage JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "無料で使えますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "プランの違いを教えてください。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "無料トライアル（7日間）・無料プラン・プレミアムの3プランがあります。1日の送信上限は無料トライアルが無制限、無料プランが3通、プレミアムが無制限です。オフライン送信、AES-GCM暗号化、10言語対応、履歴・再送信はすべてのプランで利用可能です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "プレミアムプランの料金はいくらですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "月額プランと年額プランをご用意しています。価格はApp Storeのアプリ内課金画面でご確認ください。年額プランは月額より割安です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "サブスクリプションの解約方法を教えてください。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Apple IDの「サブスクリプション管理」画面から解約できます。iPhoneの「設定」アプリを開き、画面上部の自分の名前をタップ、「サブスクリプション」をタップ、「Simple Memo Premium」を選択、「サブスクリプションをキャンセル」をタップしてください。解約後も、現在の課金期間の終了日まではプレミアム機能をご利用いただけます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "メモはどこに送られますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元はSimple Memo <noreply@mail.simplememofast.com>です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "件名はどうなりますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "件名テンプレートが設定されている場合はテンプレート + メモの1行目になります。件名テンプレートが空の場合はメモの1行目がそのまま件名になります。メモが空行で始まる場合は最初に文字が出現する行が件名になります。件名は最大60文字で切り取られます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "オフラインでもメモを送信できますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "送信したメモの履歴は確認できますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。メイン画面の左上にある履歴ボタン（時計アイコン）をタップすると、送信済み・未送信・送信失敗のメモ一覧を確認できます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "1日に何通まで送信できますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "無料トライアル期間（最初の7日間）は無制限、無料プラン（トライアル終了後）は3通/日、プレミアムプランは無制限です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "メモの内容はどこかのサーバーに保存されますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay APIを経由してメールとして送信されますが、送信完了後にサーバー上にデータは残りません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "メモの暗号化について詳しく教えてください。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memoでは、端末内に保存されるすべてのメモデータ（Outbox・履歴）をAES-GCM（256ビット）で暗号化しています。暗号化キーはKeychainに保存され、端末のセキュアエンクレーブで保護されます。ファイルにはApple標準のData Protection（completeUntilFirstUserAuthentication）が適用されます。暗号化キーが端末外に送信されることはありません。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "通信は暗号化されていますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。アプリとRelay API間のすべての通信はHTTPS（TLS）で暗号化されています。また、URLSessionはephemeral（一時的）構成を使用しており、通信キャッシュ、Cookie、URLキャッシュは一切保存されません。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "メモデータを完全に削除するにはどうすればいいですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "アプリをアンインストールすると、端末内のすべてのデータ（Outbox、履歴、設定、暗号化キー）が削除されます。Keychain内のデータもアンインストール時に削除されます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Simple Memoはどんなアプリですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。「思いついたことを今すぐメモして、自分のメールに送る」——それだけを、極限まで速く・確実に行うためのアプリです。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "最初に何を設定すればいいですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "アプリを初めて起動すると、宛先メールアドレスの設定を促すダイアログが表示されます。ダイアログの「設定へ」をタップし、「宛先」欄にメモを受信したいメールアドレスを入力、「認証」をタップして6桁の認証コードを入力すれば認証完了です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "件名テンプレートとは何ですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "送信されるメールの件名の先頭に付加されるテキストです。たとえば「Simple Memo」と設定すると、メモの1行目が「今日の買い物」の場合、件名は「Simple Memo 今日の買い物」になります。空にすると、メモの1行目がそのまま件名になります。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "ダークモードに対応していますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。iOSのシステム設定に連動して、自動的にライトモード/ダークモードが切り替わります。アプリ独自のテーマ切り替え機能はなく、常にシステム設定に追従します。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "対応デバイス・動作環境を教えてください。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "iPhone（iOS 16.0以降）、iPad（iPadOS 16.0以降）"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "対応している言語を教えてください。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "以下の10言語に対応しています：日本語、英語、スペイン語、フランス語、ドイツ語、ポルトガル語、ロシア語、中国語（簡体字）、中国語（繁体字）、アラビア語"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "アプリの起動速度はどれくらいですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "アプリを起動してからテキスト入力が可能になるまで（Time-to-Text）の目標値は500ミリ秒以下です。実測では多くのデバイスで200〜300ミリ秒台を記録しています。Storyboardを使わず、UIKitによる直接初期化で最速の起動を実現しています。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "バッテリー消費が気になります。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memoはバックグラウンドでのネットワーク通信を最小限に設計しています。Outboxの再送信はiOSのBGTaskSchedulerを利用しており、システムが適切なタイミング（充電中、Wi-Fi接続中など）を選んで実行します。常時バックグラウンド動作は行いません。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "認証コードが届きません。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "メールアドレスにタイプミスがないか、迷惑メール（スパム）フォルダに振り分けられていないかご確認ください。送信元はSimple Memo <noreply@mail.simplememofast.com>です。認証コードの有効期限は10分間です。期限切れの場合は再送信してください。認証コードの入力は最大5回までです。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "テスト送信が届きません。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "宛先メールアドレスが正しく認証されているか、ネットワーク接続が安定しているか、迷惑メール（スパム）フォルダを確認してください。メールサービスのフィルタリング設定でsimplememofast.comからのメールがブロックされていないかもご確認ください。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "アプリが強制終了しました。未送信のメモはどうなりますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Outboxに保存済みのメモは失われません。送信ボタンを押した時点でメモはOutboxに暗号化保存されるため、アプリのクラッシュ後にアプリを再起動すれば、自動的に再送信が試みられます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "「レート制限中」と表示されます。",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "短時間に多くのメモを送信した場合に表示されます。1分あたり（デバイス）30通、1日あたり（デバイス）200通、1時間あたり（IP）120通の制限が適用されます。制限に達した場合は、しばらく待ってから再度お試しください。Outboxに保存されたメッセージは、制限が解除された後に自動的に再送信されます。"
-        }
-      }
-    ]
-  }
-  </script>
 
   <!-- BreadcrumbList JSON-LD -->
   <script type="application/ld+json">
@@ -342,6 +244,33 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -1861,5 +1790,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

@@ -42,9 +42,6 @@
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/vs/moca/">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/moca/?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/vs/moca/?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/moca/">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -81,96 +78,6 @@
       "@type": "WebPage",
       "@id": "https://simplememofast.com/vs/moca/"
     }
-  }
-  </script>
-
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "MocaとCapito式シンプルメモの最大の違いは何ですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "最大の違いはオフライン対応と暗号化です。Mocaはシンプルなメール送信に特化していますが、オフライン時のメモ保存やAES-GCM暗号化機能はありません。シンプルメモはOutboxアーキテクチャにより、オフラインでもメモを暗号化保存し、接続回復時に自動送信します。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Mocaにはメモの編集・削除機能がないのはなぜですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Mocaは意図的に編集・削除機能を省いています。メモを書いたらすぐ送るという思想で設計されています。シンプルメモも同様に送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Mocaの代わりになるアプリはありますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Mocaと同じ「自分にメールを送る」コンセプトのアプリとしてCapito式シンプルメモがあります。Mocaのシンプルさを維持しつつ、AES-GCM暗号化、Outboxオフライン対応、Cloudflare Workers経由の150ms高速送信を追加しています。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "シンプルメモの送信速度はMocaより速いですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。シンプルメモはCloudflare Workers + Resend APIを使用し、送信ボタンを押してから約150msでメール配信を完了します。Mocaも高速ですが、シンプルメモはエッジコンピューティングによるリレーサーバーで更に高速な配信を実現しています。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Mocaとシンプルメモはどちらが安全ですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "セキュリティ面ではシンプルメモが優れています。AES-GCM暗号化によりOutbox内のメモは端末内で暗号化保存されます。Mocaにはこの暗号化機能はありません。どちらもメモ本文をサーバーに永続保存しない設計ですが、オフライン時の端末内データ保護はシンプルメモが上回ります。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What is the difference between Moca and Simple Memo?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Both apps let you email memos to yourself, but Simple Memo adds AES-GCM encryption for offline storage, Outbox architecture for reliable delivery without connectivity, and Cloudflare Workers relay for 150ms send speed. Moca is intentionally minimal with no edit or delete functions."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is Simple Memo a good alternative to Moca?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Simple Memo shares Moca's core philosophy of quick email-to-self memos but adds enterprise-grade security (AES-GCM encryption), offline reliability (Outbox auto-send), faster delivery (150ms via Cloudflare Workers), and bilingual support (Japanese/English)."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does Simple Memo require an account like Moca?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Neither app requires account creation. Both Moca and Simple Memo only need your existing email address. Simple Memo additionally offers a 7-day free trial with unlimited sends, followed by a free tier of 3 sends per day."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Which app works better offline — Moca or Simple Memo?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memo is significantly better offline. Its Outbox architecture stores memos with AES-GCM encryption when there is no internet connection and automatically sends them when connectivity returns. Moca requires an active internet connection to send memos."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How fast does Simple Memo send emails compared to Moca?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memo sends emails in approximately 150ms using Cloudflare Workers edge computing and Resend API. This relay infrastructure ensures consistently fast delivery regardless of your location. Moca also sends quickly but does not use edge-optimized relay infrastructure."
-        }
-      }
-    ]
   }
   </script>
 
@@ -211,7 +118,7 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
     a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
@@ -262,10 +169,150 @@
     .choose-card ul li::before{content:"✓ ";color:#3fb950;font-weight:700}
 
     @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -623,5 +670,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>

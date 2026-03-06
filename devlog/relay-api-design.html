@@ -44,9 +44,6 @@
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
 
   <link rel="canonical" href="https://simplememofast.com/devlog/relay-api-design">
-  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/relay-api-design?lang=ja">
-  <link rel="alternate" hreflang="en" href="https://simplememofast.com/devlog/relay-api-design?lang=en">
-  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -115,7 +112,7 @@
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
     }
-    [data-lang] { display: none; }
+    [data-lang="en"] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
 
@@ -354,6 +351,119 @@
       background: rgba(100, 180, 255, 0.25);
       box-shadow: 0 0 16px rgba(100, 180, 255, 0.15);
     }
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
   </style>
 
   <!-- JSON-LD: TechArticle -->
@@ -417,51 +527,36 @@
     ]
   }
   </script>
-
-  <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "なぜCloudflare Workersを選んだのですか？ / Why Cloudflare Workers?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "コールドスタートがほぼゼロ、世界中のエッジから配信、月額ほぼ無料。メモアプリに必要な速さと信頼性の両方を実現。 / Near-zero cold start, global edge delivery, and nearly free monthly cost. Achieves both the speed and reliability a memo app demands."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "メールの到達率は？ / What's the email delivery rate?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Resend APIは高い到達率を実現。SPF/DKIM/DMARC設定済みで、迷惑メール判定を最小化。 / Resend API achieves high delivery rates. SPF/DKIM/DMARC are pre-configured to minimize spam classification."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "サーバーにメモの内容は保存されますか？ / Is memo content stored on the server?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Relay APIは通過型。メモ内容の恒常的な保存は行わない。送信処理に必要な範囲でのみ一時的に扱う。 / The Relay API is pass-through. Memo content is not persistently stored. It is handled temporarily only as needed for the send operation."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "レート制限に引っかかったらどうなりますか？ / What happens when rate limited?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "アプリ側でOutboxにキューイングされ、制限解除後に自動リトライ。メモは失われない。 / The app queues memos in the Outbox and automatically retries after the rate limit resets. No memos are lost."
-        }
-      }
-    ]
-  }
-  </script>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
 <body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
@@ -874,5 +969,12 @@
   </footer>
 
   <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
 </body>
 </html>
