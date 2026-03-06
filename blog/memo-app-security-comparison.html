@@ -1,0 +1,202 @@
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large"><script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-EPZVZKCVQG');</script><title>メモアプリのセキュリティ比較：暗号化方式を徹底解説 — E2EE・AES・ゼロナレッジ | Capito式シンプルメモ</title><meta name="description" content="メモアプリのセキュリティ比較を徹底解説。エンドツーエンド暗号化、AES-256、ゼロナレッジ暗号化の仕組みと、主要メモアプリのセキュリティ機能を比較。"><meta name="keywords" content="メモアプリ セキュリティ, メモ 暗号化, E2EE メモ, AES-256 メモアプリ, ゼロナレッジ メモ">
+  <meta property="og:title" content="メモアプリのセキュリティ比較"><meta property="og:description" content="暗号化方式を徹底解説。E2EE・AES・ゼロナレッジ。"><meta property="og:type" content="article"><meta property="article:published_time" content="2026-03-06T00:00:00+09:00"><meta property="og:url" content="https://simplememofast.com/blog/memo-app-security-comparison.html"><meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:site_name" content="Capito式シンプルメモ"><meta property="og:locale" content="ja_JP"><meta property="og:locale:alternate" content="en_US"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@simplememofast"><meta name="twitter:title" content="メモアプリのセキュリティ比較"><meta name="twitter:description" content="暗号化方式を徹底解説。"><meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"メモアプリのセキュリティ比較：暗号化方式を徹底解説","description":"メモアプリのセキュリティ比較。E2EE・AES-256・ゼロナレッジの仕組みと主要アプリの比較。","url":"https://simplememofast.com/blog/memo-app-security-comparison.html","datePublished":"2026-03-06","dateModified":"2026-03-06","author":{"@type":"Organization","name":"Capito式シンプルメモ","url":"https://simplememofast.com"},"publisher":{"@type":"Organization","name":"Capito式シンプルメモ","url":"https://simplememofast.com","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-security-comparison.html"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"メモアプリのセキュリティ比較","item":"https://simplememofast.com/blog/memo-app-security-comparison.html"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"メモアプリのセキュリティ比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub"]},"url":"https://simplememofast.com/blog/memo-app-security-comparison.html"}</script>
+  <link rel="preload" as="style" href="/assets/css/style.min.css"><link rel="preload" as="script" href="/js/lang.js"><link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}a.app-store-badge[data-lang].active{display:inline-flex}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.75rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:600}.tip-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.85rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.8rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="meta-templates" style="display:none;"><div class="meta-template" data-lang="ja"><span class="meta-title">メモアプリのセキュリティ比較 | Capito式シンプルメモ</span><span class="meta-og-title">メモアプリのセキュリティ比較</span><span class="meta-description">暗号化方式を徹底解説。E2EE・AES・ゼロナレッジ。</span></div><div class="meta-template" data-lang="en"><span class="meta-title">Memo App Security Comparison | Simple Memo</span><span class="meta-og-title">Memo App Security</span><span class="meta-description">E2EE, AES-256, and zero-knowledge encryption explained.</span></div></div>
+  <header class="page-header"><div class="container"><div class="lang-switcher-container"><div class="lang-switcher"><button class="lang-switcher__btn" data-lang-btn="ja">日本語</button><button class="lang-switcher__btn" data-lang-btn="en">English</button></div></div><div class="page-header__inner"><a href="/" class="page-header__logo"><span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span></a><a href="/blog/" class="page-header__back"><span data-lang="ja">ブログ一覧へ</span><span data-lang="en">Back to Blog</span></a></div></div></header>
+  <main class="page-content"><div class="container">
+    <div class="lp-hero"><div class="lp-hero__label"><span data-lang="ja">セキュリティ</span><span data-lang="en">Security</span></div><h1 class="lp-hero__title"><span data-lang="ja">メモアプリの<br>セキュリティ比較</span><span data-lang="en">Memo App<br>Security Comparison</span></h1><p class="lp-hero__sub"><span data-lang="ja">メモアプリのセキュリティ比較とは、主要なメモアプリが採用する暗号化方式（エンドツーエンド暗号化、AES-256、ゼロナレッジ暗号化）を技術的に解説し、用途に応じた最適な選択を支援する比較分析です。個人メモからビジネス機密情報まで、求めるセキュリティレベルに応じたアプリ選びのポイントを解説します。</span><span data-lang="en">Memo app security comparison is a technical analysis of encryption methods (end-to-end encryption, AES-256, zero-knowledge encryption) used by major memo apps, helping users choose the optimal app for their security needs. From personal notes to business secrets, this guide explains how to choose based on required security levels.</span></p></div>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">暗号化方式1：エンドツーエンド暗号化（E2EE）</span><span data-lang="en">Encryption 1: End-to-End Encryption (E2EE)</span></h2>
+      <div data-lang="ja"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>サーバーでも読めない暗号化</span><span class="tip-card__rank">E2EE</span></div><div class="tip-card__desc"><p>E2EEの仕組みと対応アプリ：</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>仕組み：</strong>データはデバイス上で暗号化され、サーバーには暗号化されたままで保存。復号は自分のデバイスでのみ行われる</li><li><strong>メリット：</strong>サーバーがハッキングされてもメモ内容は読めない</li><li><strong>デメリット：</strong>パスワードを忘れるとデータ復旧が不可能</li></ul><p style="margin-top:.75rem"><strong>対応アプリ：</strong></p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Apple純正メモ：</strong>iCloudキーチェーンでE2EE（Advanced Data Protection有効時）</li><li><strong>Standard Notes：</strong>デフォルトでE2EE対応</li><li><strong>Joplin：</strong>E2EEをオプションで有効化可能</li><li><strong>Obsidian Sync：</strong>E2EE対応の有料同期サービス</li></ul></div><div class="tip-card__example"><strong>Capito式の場合：</strong>メモをメール経由で送信するため、Gmailの「保管時暗号化」（AES-128）とTLS通信暗号化の二重保護。さらにGmailの「秘密モード」を組み合わせると有効期限付き送信も可能。</div></div></div>
+      <div data-lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>Encryption Even Servers Can't Read</span><span class="tip-card__rank">E2EE</span></div><div class="tip-card__desc"><p>How E2EE works and supported apps:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>How it works:</strong> Data encrypted on-device, stored encrypted on servers, decrypted only on your device</li><li><strong>Pro:</strong> Even if servers are hacked, note content can't be read</li><li><strong>Con:</strong> Forgot your password? Data is unrecoverable</li></ul><p style="margin-top:.75rem"><strong>Supported apps:</strong></p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Apple Notes:</strong> E2EE via iCloud Keychain (with Advanced Data Protection)</li><li><strong>Standard Notes:</strong> E2EE by default</li><li><strong>Joplin:</strong> Optional E2EE activation</li><li><strong>Obsidian Sync:</strong> E2EE paid sync service</li></ul></div><div class="tip-card__example"><strong>Simple Memo approach:</strong> Notes sent via email get Gmail's at-rest encryption (AES-128) plus TLS transport encryption -- dual protection. Gmail's "confidential mode" adds expiration dates.</div></div></div>
+    </section>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">暗号化方式2：AES-256暗号化</span><span data-lang="en">Encryption 2: AES-256</span></h2>
+      <div data-lang="ja"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>銀行レベルの暗号化強度</span><span class="tip-card__rank">AES-256</span></div><div class="tip-card__desc"><p>AES-256（Advanced Encryption Standard 256-bit）は現在最も広く使われる暗号化方式です：</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>鍵の長さ：</strong>256ビット（2の256乗通りの組み合わせ）</li><li><strong>解読に必要な時間：</strong>現在のスーパーコンピュータで数十億年</li><li><strong>採用例：</strong>米国政府の機密情報保護、オンラインバンキング、VPN</li></ul><p style="margin-top:.75rem"><strong>メモアプリでの実装：</strong></p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>OneNote：</strong>セクション単位でAES-128暗号化（パスワード保護）</li><li><strong>Bear：</strong>ロック機能でAES-256暗号化</li><li><strong>Evernote：</strong>テキスト単位の暗号化（AES-128相当）</li></ul></div></div></div>
+      <div data-lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>Bank-Level Encryption Strength</span><span class="tip-card__rank">AES-256</span></div><div class="tip-card__desc"><p>AES-256 (Advanced Encryption Standard 256-bit) is the most widely used encryption:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Key length:</strong> 256 bits (2^256 possible combinations)</li><li><strong>Time to crack:</strong> Billions of years with current supercomputers</li><li><strong>Used by:</strong> US government classified info, online banking, VPNs</li></ul><p style="margin-top:.75rem"><strong>Implementation in memo apps:</strong></p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>OneNote:</strong> Section-level AES-128 (password protection)</li><li><strong>Bear:</strong> Lock feature with AES-256</li><li><strong>Evernote:</strong> Text-level encryption (AES-128 equivalent)</li></ul></div></div></div>
+    </section>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">暗号化方式3：ゼロナレッジ暗号化</span><span data-lang="en">Encryption 3: Zero-Knowledge</span></h2>
+      <div data-lang="ja"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>サービス提供者すら知らない</span><span class="tip-card__rank">ゼロナレッジ</span></div><div class="tip-card__desc"><p>ゼロナレッジ暗号化は最も厳格なプライバシー保護方式です：</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>原理：</strong>暗号鍵がユーザーのパスワードから生成され、サーバーには保存されない</li><li><strong>結果：</strong>サービス運営者でさえユーザーのデータを見ることが不可能</li><li><strong>法的意味：</strong>法執行機関からの要請があっても、技術的にデータを提出できない</li></ul><p style="margin-top:.75rem"><strong>対応アプリ：</strong></p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Standard Notes：</strong>完全なゼロナレッジ設計</li><li><strong>Tresorit Notes：</strong>スイスのプライバシー法に基づくゼロナレッジ</li><li><strong>Notesnook：</strong>オープンソースのゼロナレッジメモアプリ</li></ul></div><div class="tip-card__example"><strong>選び方：</strong>日常メモにはCapito式（Gmail暗号化で十分）。機密情報にはStandard Notes（ゼロナレッジ）。用途に応じた使い分けが最も実用的です。</div></div></div>
+      <div data-lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>Even the Provider Can't See Your Data</span><span class="tip-card__rank">Zero-Knowledge</span></div><div class="tip-card__desc"><p>Zero-knowledge encryption is the strictest privacy protection:</p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Principle:</strong> Encryption keys derived from user passwords, never stored on servers</li><li><strong>Result:</strong> Service operators literally cannot see user data</li><li><strong>Legal meaning:</strong> Even law enforcement requests can't be fulfilled technically</li></ul><p style="margin-top:.75rem"><strong>Supported apps:</strong></p><ul style="margin-top:.5rem;padding-left:1.2rem"><li><strong>Standard Notes:</strong> Full zero-knowledge design</li><li><strong>Tresorit Notes:</strong> Zero-knowledge under Swiss privacy law</li><li><strong>Notesnook:</strong> Open-source zero-knowledge memo app</li></ul></div><div class="tip-card__example"><strong>How to choose:</strong> Simple Memo (Gmail encryption) for daily notes. Standard Notes (zero-knowledge) for sensitive info. Purpose-based selection is most practical.</div></div></div>
+    </section>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">セキュリティチェックリスト</span><span data-lang="en">Security Checklist</span></h2>
+      <div data-lang="ja"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name">メモアプリ選びの5つの確認項目</span><span class="tip-card__rank">チェック</span></div><div class="tip-card__desc"><ul style="padding-left:1.2rem"><li><strong>通信暗号化：</strong>HTTPS/TLSで通信中のデータが保護されるか</li><li><strong>保管時暗号化：</strong>サーバー上のデータが暗号化されているか</li><li><strong>E2EE対応：</strong>エンドツーエンドで暗号化されるか</li><li><strong>2段階認証：</strong>2FA/MFAに対応しているか</li><li><strong>データ所在地：</strong>データがどの国のサーバーに保存されるか（GDPR/個人情報保護法の適用）</li></ul></div></div></div>
+      <div data-lang="en"><div class="tip-card"><div class="tip-card__header"><span class="tip-card__name">5 Points to Check When Choosing</span><span class="tip-card__rank">Checklist</span></div><div class="tip-card__desc"><ul style="padding-left:1.2rem"><li><strong>Transport encryption:</strong> Is data protected via HTTPS/TLS during transit?</li><li><strong>At-rest encryption:</strong> Is data encrypted on servers?</li><li><strong>E2EE:</strong> Is end-to-end encryption supported?</li><li><strong>2FA:</strong> Does it support two-factor authentication?</li><li><strong>Data location:</strong> Which country stores your data? (GDPR/privacy law implications)</li></ul></div></div></div>
+    </section>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">よくある質問</span><span data-lang="en">FAQ</span></h2>
+      <div data-lang="ja">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EEとは何ですか？</summary><div class="faq-answer"><p>エンドツーエンド暗号化の略。デバイス上で暗号化し、サーバーでも内容を読めない方式です。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-256はどれくらい安全？</summary><div class="faq-answer"><p>解読に数十億年かかる強度。銀行やVPNでも使用される最高レベルの暗号化です。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ゼロナレッジ暗号化は必要？</summary><div class="faq-answer"><p>パスワードや財務データなど機密情報を扱うなら必須。日常メモにはGmail暗号化で十分です。</p></div></details></div>
+      </div>
+      <div data-lang="en">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is E2EE?</summary><div class="faq-answer"><p>End-to-end encryption. Data encrypted on-device; even the server can't read it.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How secure is AES-256?</summary><div class="faq-answer"><p>Billions of years to crack. The highest encryption level used by banks and VPNs.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need zero-knowledge encryption?</summary><div class="faq-answer"><p>Essential for passwords and financial data. Gmail encryption is sufficient for everyday notes.</p></div></details></div>
+      </div>
+    </section>
+
+    <div class="cta-box"><div class="cta-box__title"><span data-lang="ja">安全&高速の両立</span><span data-lang="en">Security meets speed</span></div><div class="cta-box__desc"><span data-lang="ja">Gmail暗号化で保護された自分宛メモ。0.3秒起動で安全にキャプチャ。</span><span data-lang="en">Self-emails protected by Gmail encryption. Capture securely with 0.3s launch.</span></div><a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード"></a><a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store"></a></div>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2><div class="internal-links"><a href="/blog/free-memo-apps-ranking.html"><span data-lang="ja">無料メモアプリランキング</span><span data-lang="en">Free App Ranking</span></a><a href="/blog/offline-memo-apps.html"><span data-lang="ja">オフラインメモアプリ</span><span data-lang="en">Offline Memo Apps</span></a><a href="/blog/memo-taking-tips.html"><span data-lang="ja">メモの取り方コツ10選</span><span data-lang="en">10 Note-Taking Tips</span></a><a href="/blog/minimalist-digital-memo.html"><span data-lang="ja">ミニマリストのメモ術</span><span data-lang="en">Minimalist Memos</span></a><a href="/blog/productivity-methods-comparison.html"><span data-lang="ja">生産性メソッド比較</span><span data-lang="en">Productivity Methods</span></a><a href="/blog/"><span data-lang="ja">ブログ一覧</span><span data-lang="en">All Articles</span></a></div></section>
+  </div></main>
+  <footer class="footer"><div class="container"><nav class="footer__links"><a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a><a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a><a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a><a href="/vs/" class="footer__link"><span data-lang="ja">アプリ比較</span><span data-lang="en">Comparisons</span></a><a href="/use-cases/" class="footer__link"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a><a href="/guides/" class="footer__link"><span data-lang="ja">設定ガイド</span><span data-lang="en">Guides</span></a><a href="/blog/" class="footer__link"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a><a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a><a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a><a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a></nav><p class="footer__copyright">&copy; 2026 <span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p></div></footer>
+  <script src="/js/lang.js" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body></html>
