@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>AES-GCM暗号化とは — Capito式シンプルメモ用語集</title>
+  <meta name="description" content="AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）とは、認証付き暗号化方式です。AES-256-GCMはCapito式シンプルメモのOutboxストレージで使用され、オフラインメモを軍事レベルで保護します。">
+  <meta name="keywords" content="AES-GCM とは, AES-GCM 暗号化, メモ 暗号化, AES-256-GCM, 認証付き暗号化, Galois Counter Mode">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="AES-GCM暗号化とは — Capito式シンプルメモ用語集">
+  <meta property="og:description" content="AES-GCM（Galois/Counter Mode）認証付き暗号化の仕組みを解説。シンプルメモのOutboxでの使用方法と安全性について。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/glossary/aes-gcm/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="AES-GCM暗号化とは — Capito式シンプルメモ用語集">
+  <meta name="twitter:description" content="AES-GCM認証付き暗号化の仕組みとシンプルメモでの使用方法を解説。オフラインメモの安全性を保証する技術。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/glossary/aes-gcm/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/aes-gcm/?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/glossary/aes-gcm/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/aes-gcm/">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "AES-GCM暗号化とは — Capito式シンプルメモ用語集",
+    "description": "AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は認証付き暗号化方式で、データの機密性と完全性を同時に保証します。Capito式シンプルメモではOutboxストレージの暗号化にAES-256-GCMを採用しています。",
+    "url": "https://simplememofast.com/glossary/aes-gcm/",
+    "datePublished": "2026-03-06",
+    "dateModified": "2026-03-06",
+    "author": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Capito式シンプルメモ",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://simplememofast.com/glossary/aes-gcm/"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "AES-GCMとは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は、データの暗号化と認証を同時に行う暗号化方式です。暗号化によりデータを読めなくし、認証タグにより改ざんを検出します。米国政府の機密情報保護にも採用されている信頼性の高い方式です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "AES-GCMとAES-CBCの違いは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AES-CBCは暗号化のみを行い、データの改ざん検出は別途MACなどが必要です。AES-GCMは暗号化と認証を一体化（AEAD）しており、より高速で安全です。また、GCMはパラレル処理が可能で、CBCより高いパフォーマンスを発揮します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "シンプルメモはどのようにAES-GCMを使っていますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Capito式シンプルメモは、オフライン時にデバイス上のOutbox（送信待ちキュー）にメモを保存する際、AES-256-GCMで暗号化します。暗号鍵はデバイスのKeychain/Secure Enclaveに保管され、サーバーには送信されません。これにより、デバイスを紛失してもメモ内容は保護されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is AES-GCM encryption?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AES-GCM (Advanced Encryption Standard - Galois/Counter Mode) is an authenticated encryption algorithm that provides both data confidentiality and integrity verification simultaneously. It encrypts data so it cannot be read, and generates an authentication tag that detects any tampering. It is used by the U.S. government and is a standard in TLS 1.3."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does Simple Memo use AES-GCM?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo uses AES-256-GCM to encrypt memos stored in the on-device Outbox when offline. The encryption key is stored in the device's Keychain/Secure Enclave and never transmitted to any server. This ensures memos remain protected even if the device is lost or stolen."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is AES-256-GCM safe enough for sensitive notes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. AES-256-GCM is approved for Top Secret classification by the U.S. NSA. It would take billions of years to brute-force a 256-bit key with current technology. Combined with Simple Memo's on-device key storage, your offline memos are protected at the highest commercially available level."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "用語集", "item": "https://simplememofast.com/glossary/"},
+      {"@type": "ListItem", "position": 3, "name": "AES-GCM暗号化", "item": "https://simplememofast.com/glossary/aes-gcm/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "AES-GCM暗号化とは",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".definition-block"]
+    },
+    "url": "https://simplememofast.com/glossary/aes-gcm/"
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang]{display:none} [data-lang].active{display:block} span[data-lang].active{display:inline}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .definition-block{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0 2rem;font-size:.9rem;line-height:1.8}
+    .definition-block__label{font-weight:700;margin-bottom:.5rem;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em}
+    .definition-block p{color:var(--text-secondary);margin-bottom:.5rem}
+    .definition-block p:last-child{margin-bottom:0}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">AES-GCM暗号化とは — Capito式シンプルメモ用語集</span>
+      <span class="meta-og-title">AES-GCM暗号化とは — Capito式シンプルメモ用語集</span>
+      <span class="meta-description">AES-GCM（Galois/Counter Mode）認証付き暗号化の仕組みを解説。Capito式シンプルメモのOutboxストレージで使用されるAES-256-GCMの安全性について。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">What is AES-GCM Encryption? — Simple Memo Glossary</span>
+      <span class="meta-og-title">What is AES-GCM Encryption? — Simple Memo Glossary</span>
+      <span class="meta-description">AES-GCM (Galois/Counter Mode) authenticated encryption explained. Learn how Simple Memo uses AES-256-GCM to protect offline memos in the Outbox.</span>
+    </div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Capito式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/glossary/" class="page-header__back">
+          <span data-lang="ja">用語集へ戻る</span>
+          <span data-lang="en">Back to Glossary</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">用語集 — セキュリティ</span>
+          <span data-lang="en">Glossary — Security</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">AES-GCM暗号化とは</span>
+          <span data-lang="en">What is AES-GCM Encryption?</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">AES-GCM（Galois/Counter Mode）は、データの暗号化と改ざん検出を同時に行う認証付き暗号化方式です。Capito式シンプルメモでは、オフライン時のOutboxストレージにAES-256-GCMを採用し、メモを軍事レベルで保護しています。</span>
+          <span data-lang="en">AES-GCM (Galois/Counter Mode) is an authenticated encryption algorithm that simultaneously encrypts data and detects tampering. Simple Memo uses AES-256-GCM for Outbox storage, protecting offline memos at military-grade security levels.</span>
+        </p>
+      </div>
+
+      <!-- Definition Block -->
+      <div class="definition-block" data-lang="ja">
+        <div class="definition-block__label">定義</div>
+        <p><strong>AES-GCM</strong>（Advanced Encryption Standard - Galois/Counter Mode）は、NIST（米国国立標準技術研究所）が標準化した認証付き暗号化（AEAD: Authenticated Encryption with Associated Data）方式です。AESブロック暗号をCounter Modeで動作させてデータを暗号化し、同時にGalois Fieldの演算で認証タグを生成します。鍵長は128/192/256ビットから選択でき、AES-256-GCMは最高強度の256ビット鍵を使用します。TLS 1.3のデフォルト暗号スイートに採用されており、現在のインターネット通信の基盤技術です。</p>
+      </div>
+      <div class="definition-block" data-lang="en">
+        <div class="definition-block__label">Definition</div>
+        <p><strong>AES-GCM</strong> (Advanced Encryption Standard - Galois/Counter Mode) is an authenticated encryption with associated data (AEAD) scheme standardized by NIST. It runs the AES block cipher in Counter Mode for encryption while simultaneously computing an authentication tag using Galois Field arithmetic. Key lengths of 128, 192, or 256 bits are supported; AES-256-GCM uses the strongest 256-bit key. It is the default cipher suite in TLS 1.3 and forms the backbone of modern internet security.</p>
+      </div>
+
+      <!-- Detailed Explanation -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">AES-GCMの仕組み</span>
+          <span data-lang="en">How AES-GCM Works</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">AES-GCMは「暗号化」と「認証」という2つの機能を1回の処理で実現します。従来の暗号化方式（AES-CBCなど）では、暗号化した後に別途HMAC等で改ざん検出を行う必要がありました。AES-GCMはこの2つを統合することで、高速かつ安全なデータ保護を実現しています。</span>
+          <span data-lang="en">AES-GCM achieves two functions in a single pass: encryption and authentication. Traditional encryption modes like AES-CBC require a separate HMAC step for tamper detection. AES-GCM integrates both, delivering fast and secure data protection.</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">Counter Mode（暗号化）</span>
+              <span data-lang="en">Counter Mode (Encryption)</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">初期化ベクトル（IV/Nonce）とカウンターを組み合わせ、AESブロック暗号でキーストリームを生成。平文とXOR演算して暗号文を生成します。各ブロックが独立して処理できるため、並列処理に適しています。</span>
+              <span data-lang="en">Combines an initialization vector (IV/Nonce) with a counter to generate a keystream via AES block cipher. The plaintext is XORed with the keystream to produce ciphertext. Each block is processed independently, enabling parallel computation.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">Galois認証（改ざん検出）</span>
+              <span data-lang="en">Galois Authentication (Tamper Detection)</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">暗号文に対してGF(2^128)上の多項式演算を行い、128ビットの認証タグを生成します。復号時にタグを検証し、1ビットでもデータが変更されていれば即座に検出して復号を拒否します。</span>
+              <span data-lang="en">Performs polynomial arithmetic over GF(2^128) on the ciphertext to produce a 128-bit authentication tag. During decryption, the tag is verified; any change — even a single bit — is detected and decryption is rejected.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">256ビット鍵の強度</span>
+              <span data-lang="en">256-bit Key Strength</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">AES-256の鍵空間は2^256（約1.16 x 10^77）通り。現在のスーパーコンピューターでも総当たりに数十億年かかります。量子コンピューターを考慮してもGroverのアルゴリズムで2^128相当の安全性が保たれます。</span>
+              <span data-lang="en">AES-256 has a key space of 2^256 (approximately 1.16 x 10^77) possibilities. Even modern supercomputers would need billions of years for brute force. Against quantum computers, Grover's algorithm still leaves 2^128 effective security.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Simple Memo Connection -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">シンプルメモでのAES-GCM活用</span>
+          <span data-lang="en">AES-GCM in Simple Memo</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">Capito式シンプルメモは、オフライン時にメモをデバイス上のOutbox（送信待ちキュー）に一時保存します。このOutboxに保存されるメモデータは、すべてAES-256-GCMで暗号化されます。暗号鍵はiOSのKeychain（Secure Enclaveバックアップ）に格納され、アプリ外からはアクセスできません。</span>
+          <span data-lang="en">Simple Memo temporarily stores memos in an on-device Outbox queue when offline. All memo data in the Outbox is encrypted with AES-256-GCM. The encryption key is stored in the iOS Keychain (backed by Secure Enclave) and cannot be accessed outside the app.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">ネットワーク接続が回復すると、メモはCloudflare Workers経由でResend APIを通じて送信されます。送信完了後、Outboxのデータは即座に削除されます。つまり、サーバー上にメモが永続的に保存されることはなく、デバイス上の一時データもAES-256-GCMで保護されています。</span>
+          <span data-lang="en">When network connectivity is restored, memos are sent via Cloudflare Workers through the Resend API. After successful delivery, Outbox data is immediately deleted. This means memos are never permanently stored on any server, and temporary on-device data is always AES-256-GCM protected.</span>
+        </p>
+      </section>
+
+      <!-- Practical Example -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">実例：オフラインメモの暗号化フロー</span>
+          <span data-lang="en">Example: Offline Memo Encryption Flow</span>
+        </h2>
+        <div class="definition-block" data-lang="ja">
+          <div class="definition-block__label">シナリオ</div>
+          <p>地下鉄の車内でアイデアを思いつき、シンプルメモに入力。送信ボタンをタップするが、地下で電波が届かない。</p>
+          <p><strong>1.</strong> アプリはメモのテキストをAES-256-GCMで暗号化</p>
+          <p><strong>2.</strong> 暗号化されたデータをOutboxキューに保存（平文はメモリから即破棄）</p>
+          <p><strong>3.</strong> 地上に出てWi-Fiに接続 → Outboxから暗号文を取り出し、復号してAPIに送信</p>
+          <p><strong>4.</strong> 送信成功を確認 → Outboxの暗号化データを完全削除</p>
+          <p>このプロセスはユーザーには完全に透過的で、意識する必要はありません。</p>
+        </div>
+        <div class="definition-block" data-lang="en">
+          <div class="definition-block__label">Scenario</div>
+          <p>You have an idea on the subway, type it into Simple Memo, and tap send — but there is no signal underground.</p>
+          <p><strong>1.</strong> The app encrypts the memo text with AES-256-GCM</p>
+          <p><strong>2.</strong> Encrypted data is saved to the Outbox queue (plaintext is immediately discarded from memory)</p>
+          <p><strong>3.</strong> You emerge above ground and connect to Wi-Fi — the encrypted data is retrieved from Outbox, decrypted, and sent via API</p>
+          <p><strong>4.</strong> Delivery confirmed — encrypted Outbox data is permanently deleted</p>
+          <p>This entire process is completely transparent to the user — no action required.</p>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">よくある質問（AES-GCM暗号化）</span>
+          <span data-lang="en">FAQ: AES-GCM Encryption</span>
+        </h2>
+        <div data-lang="ja">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとは何ですか？</summary><div class="faq-answer"><p>AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は、データの暗号化と認証を同時に行う暗号化方式です。暗号化によりデータを読めなくし、認証タグにより改ざんを検出します。米国政府の機密情報保護にも採用されている信頼性の高い方式です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとAES-CBCの違いは何ですか？</summary><div class="faq-answer"><p>AES-CBCは暗号化のみを行い、データの改ざん検出は別途MACなどが必要です。AES-GCMは暗号化と認証を一体化（AEAD）しており、より高速で安全です。また、GCMはパラレル処理が可能で、CBCより高いパフォーマンスを発揮します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモはどのようにAES-GCMを使っていますか？</summary><div class="faq-answer"><p>オフライン時にデバイス上のOutbox（送信待ちキュー）にメモを保存する際、AES-256-GCMで暗号化します。暗号鍵はデバイスのKeychain/Secure Enclaveに保管され、サーバーには送信されません。デバイスを紛失してもメモ内容は保護されます。</p></div></details></div>
+        </div>
+        <div data-lang="en">
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is AES-GCM encryption?</summary><div class="faq-answer"><p>AES-GCM (Advanced Encryption Standard - Galois/Counter Mode) is an authenticated encryption algorithm that provides both data confidentiality and integrity verification. It encrypts data so it cannot be read, and generates an authentication tag that detects any tampering. It is used by the U.S. government and is a standard in TLS 1.3.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Simple Memo use AES-GCM?</summary><div class="faq-answer"><p>Simple Memo uses AES-256-GCM to encrypt memos stored in the on-device Outbox when offline. The encryption key is stored in the device's Keychain/Secure Enclave and never transmitted to any server. This ensures memos remain protected even if the device is lost or stolen.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is AES-256-GCM safe enough for sensitive notes?</summary><div class="faq-answer"><p>Yes. AES-256-GCM is approved for Top Secret classification by the U.S. NSA. It would take billions of years to brute-force a 256-bit key with current technology. Combined with Simple Memo's on-device key storage, your offline memos are protected at the highest commercially available level.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span data-lang="ja">AES-256-GCMで守られたメモ体験</span>
+          <span data-lang="en">Memo Experience Protected by AES-256-GCM</span>
+        </div>
+        <div class="cta-box__desc">
+          <span data-lang="ja">Capito式シンプルメモは暗号化を意識させません。書いて送るだけで、裏側ではAES-256-GCMがメモを守ります。7日間の無料トライアル付き。</span>
+          <span data-lang="en">Simple Memo makes encryption invisible. Just write and send — AES-256-GCM protects your memos behind the scenes. 7-day free trial included.</span>
+        </div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        </a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">関連ページ</span>
+          <span data-lang="en">Related Pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/glossary/">
+            <span data-lang="ja">用語集トップ</span>
+            <span data-lang="en">Glossary Home</span>
+          </a>
+          <a href="/glossary/e2e-encryption/">
+            <span data-lang="ja">E2E暗号化とは</span>
+            <span data-lang="en">What is E2E Encryption?</span>
+          </a>
+          <a href="/glossary/outbox-architecture/">
+            <span data-lang="ja">Outboxアーキテクチャとは</span>
+            <span data-lang="en">What is Outbox Architecture?</span>
+          </a>
+          <a href="/vs/standard-notes/">
+            <span data-lang="ja">Standard Notes比較</span>
+            <span data-lang="en">vs Standard Notes</span>
+          </a>
+          <a href="/guides/proton-mail/">
+            <span data-lang="ja">Proton Mail設定ガイド</span>
+            <span data-lang="en">Proton Mail Setup Guide</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a>
+        <a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a>
+        <a href="/vs/" class="footer__link"><span data-lang="ja">比較</span><span data-lang="en">vs</span></a>
+        <a href="/use-cases/" class="footer__link"><span data-lang="ja">使い方</span><span data-lang="en">Use Cases</span></a>
+        <a href="/guides/" class="footer__link"><span data-lang="ja">ガイド</span><span data-lang="en">Guides</span></a>
+        <a href="/glossary/" class="footer__link"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a>
+        <a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a>
+      </nav>
+      <p class="footer__copyright">&copy; 2026 <span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>

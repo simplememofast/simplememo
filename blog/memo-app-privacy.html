@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>メモアプリのプライバシー比較 — 暗号化・データ所有権を徹底検証 | Capito式シンプルメモ</title>
+  <meta name="description" content="メモアプリのプライバシーを徹底比較。Apple Notes、Google Keep、Evernote、Standard Notes、Capito式シンプルメモの暗号化方式、データ所有権、ゼロナレッジ設計、GDPR対応を解説。">
+  <meta name="keywords" content="メモアプリ プライバシー, メモ セキュリティ, 暗号化 メモアプリ, メモアプリ 安全性, E2E暗号化 メモ">
+  <meta name="theme-color" content="#000000">
+
+  <meta property="og:title" content="メモアプリのプライバシー比較 — 暗号化・データ所有権を徹底検証">
+  <meta property="og:description" content="Apple Notes、Google Keep、Evernote、Standard Notes、シンプルメモの暗号化とプライバシーを比較。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/blog/memo-app-privacy.html">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="メモアプリのプライバシー比較 — 暗号化・データ所有権を徹底検証">
+  <meta name="twitter:description" content="Apple Notes、Google Keep、Evernote、Standard Notes、シンプルメモの暗号化とプライバシーを比較。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <link rel="canonical" href="https://simplememofast.com/blog/memo-app-privacy.html">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-app-privacy.html?lang=ja">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/blog/memo-app-privacy.html?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-app-privacy.html">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"メモアプリのプライバシー比較 — 暗号化・データ所有権を徹底検証","description":"主要メモアプリのプライバシーを暗号化方式、データ所有権、ゼロナレッジ設計の観点から比較。","url":"https://simplememofast.com/blog/memo-app-privacy.html","datePublished":"2026-03-06","dateModified":"2026-03-06","author":{"@type":"Organization","name":"Capito式シンプルメモ","url":"https://simplememofast.com"},"publisher":{"@type":"Organization","name":"Capito式シンプルメモ","url":"https://simplememofast.com","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-privacy.html"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"メモアプリで最もプライバシーが高いのはどれですか？","acceptedAnswer":{"@type":"Answer","text":"E2E（エンドツーエンド）暗号化を標準搭載しているStandard Notesが最もプライバシーが高いです。オープンソースで第三者監査済み。次いでObsidian（ローカル保存）、Apple Notes（ロックされたメモのみE2E）、Capito式シンプルメモ（AES-GCM暗号化Outbox、サーバー非保存）が続きます。"}},{"@type":"Question","name":"Google Keepのメモは安全ですか？","acceptedAnswer":{"@type":"Answer","text":"Google Keepはサーバー側暗号化（AES-256）で保護されていますが、E2E暗号化ではありません。Googleはサーバー上のデータにアクセスでき、広告ターゲティングに使用される可能性があります。機密情報には向きません。"}},{"@type":"Question","name":"Capito式シンプルメモのプライバシーはどうなっていますか？","acceptedAnswer":{"@type":"Answer","text":"メモはCloudflare Workers + Resend API経由でメール送信のみ行い、サーバーにメモ内容を保存しません。オフラインOutboxはAES-GCM暗号化でデバイス上に保存。AIによるメモ内容の解析も行いません。"}},{"@type":"Question","name":"Which memo app has the best privacy?","acceptedAnswer":{"@type":"Answer","text":"Standard Notes with E2E encryption by default is the most private. It's open-source and independently audited. Obsidian (local storage), Apple Notes (E2E for locked notes only), and Simple Memo (AES-GCM encrypted Outbox, no server storage) follow."}},{"@type":"Question","name":"Is Google Keep safe for private notes?","acceptedAnswer":{"@type":"Answer","text":"Google Keep uses server-side encryption (AES-256) but not E2E encryption. Google can access data on their servers and may use it for ad targeting. Not recommended for confidential information."}},{"@type":"Question","name":"How does Simple Memo handle privacy?","acceptedAnswer":{"@type":"Answer","text":"Memos are only sent as email via Cloudflare Workers + Resend API. No memo content is stored on servers. Offline Outbox uses AES-GCM encryption on device. No AI analysis of memo content."}}]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"メモアプリのプライバシー比較","item":"https://simplememofast.com/blog/memo-app-privacy.html"}]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","name":"メモアプリのプライバシー比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub"]},"url":"https://simplememofast.com/blog/memo-app-privacy.html"}
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="preload" as="script" href="/js/lang.js">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.5rem 1.1rem;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}a.app-store-badge[data-lang].active{display:inline-flex}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .privacy-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.privacy-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.privacy-card__name{font-size:1.05rem;font-weight:700}.privacy-card__rank{font-size:.75rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:600}.privacy-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.privacy-card__meta{display:flex;gap:1.5rem;font-size:.82rem;color:var(--text-muted);flex-wrap:wrap}.privacy-card__pros{color:#3fb950}.privacy-card__cons{color:#f85149}
+    .compare-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.85rem}.compare-table th,.compare-table td{padding:.75rem;border:1px solid var(--border);text-align:left}.compare-table th{background:rgba(100,180,255,.06);font-weight:600;color:var(--text-primary)}.compare-table td{color:var(--text-secondary)}.compare-table .highlight{color:var(--accent);font-weight:600}.compare-table .good{color:#3fb950;font-weight:600}.compare-table .bad{color:#f85149}
+    .faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}.internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja"><span class="meta-title">メモアプリのプライバシー比較 — 暗号化・データ所有権を徹底検証 | Capito式シンプルメモ</span><span class="meta-og-title">メモアプリのプライバシー比較 — 暗号化・データ所有権を検証</span><span class="meta-description">Apple Notes、Google Keep、Evernote、Standard Notes、シンプルメモの暗号化とプライバシーを比較。</span></div>
+    <div class="meta-template" data-lang="en"><span class="meta-title">Memo App Privacy Comparison — Encryption & Data Ownership | Simple Memo</span><span class="meta-og-title">Memo App Privacy Comparison — Who Can Read Your Notes?</span><span class="meta-description">Compare encryption, data ownership, and privacy policies of Apple Notes, Google Keep, Evernote, Standard Notes, and Simple Memo.</span></div>
+  </div>
+
+  <header class="page-header"><div class="container"><div class="lang-switcher-container"><div class="lang-switcher"><button class="lang-switcher__btn" data-lang-btn="ja">日本語</button><button class="lang-switcher__btn" data-lang-btn="en">English</button></div></div><div class="page-header__inner"><a href="/" class="page-header__logo"><span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span></a><a href="/blog/" class="page-header__back"><span data-lang="ja">ブログ一覧へ</span><span data-lang="en">Back to Blog</span></a></div></div></header>
+
+  <main class="page-content"><div class="container">
+
+    <div class="lp-hero">
+      <div class="lp-hero__label"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></div>
+      <h1 class="lp-hero__title"><span data-lang="ja">メモアプリのプライバシー比較<br>暗号化・データ所有権を徹底検証</span><span data-lang="en">Memo App Privacy Comparison<br>Encryption and Data Ownership Analyzed</span></h1>
+      <p class="lp-hero__sub"><span data-lang="ja">メモには仕事の機密情報、個人的な思考、パスワードのメモ、将来の計画が含まれます。そのデータを「誰が読めるか」を知っていますか？ Apple Notes、Google Keep、Evernote、Standard Notes、Capito式シンプルメモの暗号化方式とプライバシー設計を徹底比較します。</span><span data-lang="en">Your notes contain work secrets, personal thoughts, password references, and future plans. Do you know who can read that data? We compare encryption methods and privacy designs of Apple Notes, Google Keep, Evernote, Standard Notes, and Simple Memo.</span></p>
+    </div>
+
+    <!-- Privacy comparison table -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">プライバシー比較表</span><span data-lang="en">Privacy Comparison Table</span></h2>
+      <div data-lang="ja">
+        <table class="compare-table">
+          <thead>
+            <tr><th>アプリ</th><th>暗号化方式</th><th>サーバー保存</th><th>AI解析</th><th>オープンソース</th><th>GDPR</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Standard Notes</strong></td><td class="good">E2E暗号化（標準）</td><td>暗号化済み</td><td class="good">なし</td><td class="good">はい（監査済み）</td><td class="good">対応</td></tr>
+            <tr><td><strong>Obsidian</strong></td><td class="good">ローカル保存</td><td class="good">なし（同期は任意）</td><td class="good">なし</td><td>コアは非公開</td><td class="good">対応</td></tr>
+            <tr><td><strong>Apple Notes</strong></td><td>ロック時のみE2E</td><td>iCloud保存</td><td>Apple Intelligence</td><td>非公開</td><td class="good">対応</td></tr>
+            <tr><td><strong>Capito式シンプルメモ</strong></td><td class="good">AES-GCM（Outbox）</td><td class="good">非保存（送信のみ）</td><td class="good">なし</td><td>非公開</td><td class="good">対応</td></tr>
+            <tr><td><strong>Google Keep</strong></td><td>サーバー側AES-256</td><td>Google Cloud</td><td class="bad">あり（広告関連）</td><td>非公開</td><td class="good">対応</td></tr>
+            <tr><td><strong>Evernote</strong></td><td>サーバー側暗号化</td><td>Evernoteサーバー</td><td>あり（検索強化）</td><td>非公開</td><td class="good">対応</td></tr>
+            <tr><td><strong>Notion</strong></td><td>サーバー側AES-256</td><td>AWS</td><td class="bad">あり（Notion AI）</td><td>非公開</td><td class="good">対応</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div data-lang="en">
+        <table class="compare-table">
+          <thead>
+            <tr><th>App</th><th>Encryption</th><th>Server Storage</th><th>AI Analysis</th><th>Open Source</th><th>GDPR</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Standard Notes</strong></td><td class="good">E2E (default)</td><td>Encrypted</td><td class="good">None</td><td class="good">Yes (audited)</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Obsidian</strong></td><td class="good">Local storage</td><td class="good">None (sync optional)</td><td class="good">None</td><td>Core is closed</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Apple Notes</strong></td><td>E2E for locked only</td><td>iCloud</td><td>Apple Intelligence</td><td>Closed</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Simple Memo</strong></td><td class="good">AES-GCM (Outbox)</td><td class="good">No storage (send only)</td><td class="good">None</td><td>Closed</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Google Keep</strong></td><td>Server-side AES-256</td><td>Google Cloud</td><td class="bad">Yes (ad-related)</td><td>Closed</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Evernote</strong></td><td>Server-side</td><td>Evernote servers</td><td>Yes (search enhance)</td><td>Closed</td><td class="good">Yes</td></tr>
+            <tr><td><strong>Notion</strong></td><td>Server-side AES-256</td><td>AWS</td><td class="bad">Yes (Notion AI)</td><td>Closed</td><td class="good">Yes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- E2E vs Server-side -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">E2E暗号化 vs サーバー側暗号化の違い</span><span data-lang="en">E2E Encryption vs Server-Side Encryption</span></h2>
+      <div data-lang="ja">
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">E2E（エンドツーエンド）暗号化</span><span class="privacy-card__rank">最強</span></div>
+          <div class="privacy-card__desc">
+            <p>データが端末上で暗号化され、サーバーには暗号化された状態でのみ保存されます。サーバー運営者を含め、<strong>あなた以外の誰もデータを読めません</strong>。</p>
+            <p style="margin-top:.75rem">Standard Notesはこの方式を標準で採用。Apple Notesは「ロック」されたメモのみE2E暗号化（それ以外はサーバー側暗号化）。</p>
+          </div>
+          <div class="privacy-card__meta"><span class="privacy-card__pros">利点：最高のプライバシー保護</span><span class="privacy-card__cons">制約：パスワードを忘れるとデータ復元不可</span></div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">サーバー側暗号化</span><span class="privacy-card__rank">標準</span></div>
+          <div class="privacy-card__desc">
+            <p>データはサーバーに保存される際に暗号化されますが、<strong>サーバー運営者はデータを復号できます</strong>。つまり、Google KeepやNotionの場合、Google/Notionの社員が理論上あなたのメモを読める状態です。</p>
+            <p style="margin-top:.75rem">法執行機関の要請があれば、データの提供も可能です。また、AI機能を使う場合、メモの内容がAIモデルの学習や処理に使用される可能性があります。</p>
+          </div>
+          <div class="privacy-card__meta"><span class="privacy-card__pros">利点：パスワードリセット可能</span><span class="privacy-card__cons">制約：運営者がデータにアクセス可能</span></div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">「非保存」方式（Capito式）</span><span class="privacy-card__rank">独自</span></div>
+          <div class="privacy-card__desc">
+            <p>Capito式シンプルメモは独自のアプローチを取っています。メモはCloudflare Workers + Resend API経由で<strong>メール送信のみ</strong>行い、サーバーにメモ内容を一切保存しません。</p>
+            <p style="margin-top:.75rem">送信後のメモのプライバシーは、あなたが使っているメールサービス（Gmail、Outlook、ProtonMailなど）のセキュリティに依存します。最大限のプライバシーを求めるなら、<a href="/guides/proton-mail/" style="color:var(--accent)">ProtonMailとの組み合わせ</a>がおすすめです。</p>
+            <p style="margin-top:.75rem">オフライン時のOutboxはデバイス上にAES-GCM暗号化で保存され、オンライン復帰時に自動送信後に削除されます。</p>
+          </div>
+          <div class="privacy-card__meta"><span class="privacy-card__pros">利点：サーバーにデータが残らない</span><span class="privacy-card__cons">制約：メールのセキュリティに依存</span></div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">E2E (End-to-End) Encryption</span><span class="privacy-card__rank">Strongest</span></div>
+          <div class="privacy-card__desc">
+            <p>Data is encrypted on your device and stored on servers only in encrypted form. <strong>No one except you can read the data</strong>, including the server operator.</p>
+            <p style="margin-top:.75rem">Standard Notes uses this by default. Apple Notes only uses E2E for "locked" notes (others use server-side encryption).</p>
+          </div>
+          <div class="privacy-card__meta"><span class="privacy-card__pros">Pro: Maximum privacy protection</span><span class="privacy-card__cons">Con: Lose password = lose data forever</span></div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">Server-Side Encryption</span><span class="privacy-card__rank">Standard</span></div>
+          <div class="privacy-card__desc">
+            <p>Data is encrypted when stored on servers, but <strong>the server operator can decrypt it</strong>. For Google Keep or Notion, employees could theoretically read your notes.</p>
+            <p style="margin-top:.75rem">Data can be provided to law enforcement on request. AI features may also process your note content for model training or analysis.</p>
+          </div>
+          <div class="privacy-card__meta"><span class="privacy-card__pros">Pro: Password reset possible</span><span class="privacy-card__cons">Con: Operator can access data</span></div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">"No Storage" Approach (Capito-style)</span><span class="privacy-card__rank">Unique</span></div>
+          <div class="privacy-card__desc">
+            <p>Simple Memo takes a unique approach. Memos are <strong>only sent as email</strong> via Cloudflare Workers + Resend API. No memo content is stored on servers.</p>
+            <p style="margin-top:.75rem">Post-send privacy depends on your email service (Gmail, Outlook, ProtonMail). For maximum privacy, <a href="/guides/proton-mail/" style="color:var(--accent)">combine with ProtonMail</a>.</p>
+            <p style="margin-top:.75rem">Offline Outbox is stored on device with AES-GCM encryption, auto-sent when reconnected, then deleted.</p>
+          </div>
+          <div class="privacy-card__meta"><span class="privacy-card__pros">Pro: No data remains on servers</span><span class="privacy-card__cons">Con: Privacy depends on email service</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Data Ownership -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">データ所有権 — メモは誰のものか</span><span data-lang="en">Data Ownership — Who Owns Your Notes?</span></h2>
+      <div data-lang="ja">
+        <div class="privacy-card">
+          <div class="privacy-card__desc">
+            <p>メモアプリを選ぶ際に見落としがちなのが「データ所有権」です。サービスが終了した場合、あなたのメモはどうなるのでしょうか。</p>
+            <p style="margin-top:.75rem"><strong>データポータビリティの比較：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem;line-height:2">
+              <li><strong>Obsidian</strong>：ローカルのMarkdownファイル → <span class="good" style="color:#3fb950">完全にあなたのもの</span></li>
+              <li><strong>Standard Notes</strong>：エクスポート機能あり → あなたのもの</li>
+              <li><strong>Capito式シンプルメモ</strong>：メールとして残る → <span class="good" style="color:#3fb950">メールサービスがある限り永続</span></li>
+              <li><strong>Apple Notes</strong>：iCloudエクスポート可 → Appleエコシステム依存</li>
+              <li><strong>Google Keep</strong>：Google Takeoutでエクスポート → Googleアカウント依存</li>
+              <li><strong>Evernote</strong>：ENEX形式でエクスポート → 独自形式で変換必要</li>
+              <li><strong>Notion</strong>：Markdown/CSVエクスポート → 複雑なページは再現困難</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>判定基準：</strong>メール方式の最大の利点は「メールは普遍的なフォーマット」ということです。サービスが終了しても、メールとして受信トレイに残り続けます。</p>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="privacy-card">
+          <div class="privacy-card__desc">
+            <p>An often-overlooked factor when choosing a memo app is "data ownership." If the service shuts down, what happens to your notes?</p>
+            <p style="margin-top:.75rem"><strong>Data portability comparison:</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem;line-height:2">
+              <li><strong>Obsidian</strong>: Local Markdown files -> <span style="color:#3fb950;font-weight:600">100% yours</span></li>
+              <li><strong>Standard Notes</strong>: Export available -> Yours</li>
+              <li><strong>Simple Memo</strong>: Stays as email -> <span style="color:#3fb950;font-weight:600">Permanent as long as email exists</span></li>
+              <li><strong>Apple Notes</strong>: iCloud export -> Apple ecosystem dependent</li>
+              <li><strong>Google Keep</strong>: Google Takeout export -> Google account dependent</li>
+              <li><strong>Evernote</strong>: ENEX format export -> Proprietary format needs conversion</li>
+              <li><strong>Notion</strong>: Markdown/CSV export -> Complex pages hard to reproduce</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>Benchmark:</strong> The email approach's biggest advantage: email is a universal format. Even if the service shuts down, memos remain in your inbox.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Zero Knowledge -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">ゼロナレッジ・アーキテクチャとは</span><span data-lang="en">What is Zero-Knowledge Architecture?</span></h2>
+      <div data-lang="ja">
+        <div class="privacy-card">
+          <div class="privacy-card__desc">
+            <p>「ゼロナレッジ（Zero-Knowledge）」とは、サービス提供者がユーザーのデータ内容を一切知ることができない設計のことです。</p>
+            <p style="margin-top:.75rem"><strong>ゼロナレッジの条件：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li>E2E暗号化で、サーバーには暗号化されたデータのみ保存</li>
+              <li>暗号化キーはユーザーの端末にのみ存在</li>
+              <li>サーバー運営者はデータを復号できない</li>
+              <li>パスワードリセットではなくパスワード変更のみ可能</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>ゼロナレッジを採用しているメモアプリ：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>Standard Notes</strong>：完全なゼロナレッジ（オープンソース・監査済み）</li>
+              <li><strong><a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notesとの比較</a></strong>はこちら</li>
+            </ul>
+            <p style="margin-top:.75rem">Capito式シンプルメモはゼロナレッジではありませんが、「そもそもデータを保存しない」というアプローチでプライバシーを確保しています。保存しないデータは漏洩のしようがありません。</p>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="privacy-card">
+          <div class="privacy-card__desc">
+            <p>"Zero-Knowledge" means the service provider cannot know the content of user data at all.</p>
+            <p style="margin-top:.75rem"><strong>Zero-knowledge requirements:</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li>E2E encryption with only encrypted data on servers</li>
+              <li>Encryption keys exist only on user's device</li>
+              <li>Server operator cannot decrypt data</li>
+              <li>Password change only (no password reset)</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>Zero-knowledge memo apps:</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>Standard Notes</strong>: Full zero-knowledge (open source, audited)</li>
+              <li>See <strong><a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes comparison</a></strong></li>
+            </ul>
+            <p style="margin-top:.75rem">Simple Memo isn't zero-knowledge, but takes the approach of "not storing data at all." Data that doesn't exist can't leak.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">プライバシーレベル別おすすめ</span><span data-lang="en">Recommendations by Privacy Level</span></h2>
+      <div data-lang="ja">
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">最高レベル：機密情報を扱う人</span><span class="privacy-card__rank">E2E必須</span></div>
+          <div class="privacy-card__desc">
+            <p>法律事務所、医療関係者、ジャーナリスト、活動家など、メモ内容の漏洩が深刻な結果をもたらす場合。</p>
+            <p style="margin-top:.5rem"><strong>おすすめ：Standard Notes</strong>（E2E暗号化・オープンソース・監査済み）</p>
+          </div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">高レベル：ビジネスの機密情報を扱う人</span><span class="privacy-card__rank">非保存が理想</span></div>
+          <div class="privacy-card__desc">
+            <p>仕事の会議メモ、プロジェクトの進捗、クライアント情報など、漏洩は避けたいが日常的に使いたい場合。</p>
+            <p style="margin-top:.5rem"><strong>おすすめ：Capito式シンプルメモ + ProtonMail</strong>（サーバー非保存 + E2Eメール）</p>
+          </div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">標準レベル：一般的なメモ利用</span><span class="privacy-card__rank">サーバー側暗号化で十分</span></div>
+          <div class="privacy-card__desc">
+            <p>日常的なメモ、買い物リスト、アイデアメモなど、特に機密性の高くない情報。</p>
+            <p style="margin-top:.5rem"><strong>おすすめ：Apple Notes / Google Keep / Capito式シンプルメモ</strong></p>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">Maximum: Handling confidential data</span><span class="privacy-card__rank">E2E Required</span></div>
+          <div class="privacy-card__desc">
+            <p>Law firms, healthcare, journalists, activists -- where memo leaks have serious consequences.</p>
+            <p style="margin-top:.5rem"><strong>Pick: Standard Notes</strong> (E2E, open source, audited)</p>
+          </div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">High: Business confidential info</span><span class="privacy-card__rank">No-Storage Ideal</span></div>
+          <div class="privacy-card__desc">
+            <p>Work meeting notes, project progress, client info -- leaks unwanted but needs daily use.</p>
+            <p style="margin-top:.5rem"><strong>Pick: Simple Memo + ProtonMail</strong> (no server storage + E2E email)</p>
+          </div>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__header"><span class="privacy-card__name">Standard: General memo use</span><span class="privacy-card__rank">Server-Side OK</span></div>
+          <div class="privacy-card__desc">
+            <p>Daily notes, shopping lists, idea memos -- not particularly sensitive.</p>
+            <p style="margin-top:.5rem"><strong>Pick: Apple Notes / Google Keep / Simple Memo</strong></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">よくある質問</span><span data-lang="en">FAQ</span></h2>
+      <div data-lang="ja">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモアプリで最もプライバシーが高いのはどれですか？</summary><div class="faq-answer"><p>E2E暗号化を標準搭載しているStandard Notesが最もプライバシーが高いです。次いでObsidian（ローカル保存）、Capito式シンプルメモ（AES-GCM暗号化Outbox、サーバー非保存）が続きます。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Google Keepのメモは安全ですか？</summary><div class="faq-answer"><p>Google Keepはサーバー側暗号化で保護されていますが、E2E暗号化ではありません。Googleはサーバー上のデータにアクセスでき、広告ターゲティングに使用される可能性があります。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Capito式シンプルメモのプライバシーはどうなっていますか？</summary><div class="faq-answer"><p>メモはCloudflare Workers + Resend API経由でメール送信のみ行い、サーバーにメモ内容を保存しません。オフラインOutboxはAES-GCM暗号化でデバイス上に保存。AIによるメモ内容の解析も行いません。</p></div></details></div>
+      </div>
+      <div data-lang="en">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which memo app has the best privacy?</summary><div class="faq-answer"><p>Standard Notes with E2E encryption by default is the most private. Obsidian (local storage) and Simple Memo (AES-GCM encrypted Outbox, no server storage) follow.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Google Keep safe for private notes?</summary><div class="faq-answer"><p>Google Keep uses server-side encryption but not E2E. Google can access data on their servers and may use it for ad targeting. Not recommended for confidential information.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Simple Memo handle privacy?</summary><div class="faq-answer"><p>Memos are only sent as email via Cloudflare Workers + Resend API. No memo content is stored on servers. Offline Outbox uses AES-GCM encryption on device. No AI analysis of content.</p></div></details></div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-box">
+      <div class="cta-box__title"><span data-lang="ja">サーバーに残さないメモ体験</span><span data-lang="en">Notes that don't stay on servers</span></div>
+      <div class="cta-box__desc"><span data-lang="ja">メモ内容はサーバー非保存。AES-GCM暗号化Outbox。AI解析なし。あなたのメモはあなたのもの。</span><span data-lang="en">No server storage. AES-GCM encrypted Outbox. No AI analysis. Your notes are yours.</span></div>
+      <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード"></a>
+      <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store"></a>
+    </div>
+
+    <!-- Related Pages -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2>
+      <div class="internal-links">
+        <a href="/vs/standard-notes/"><span data-lang="ja">vs Standard Notes</span><span data-lang="en">vs Standard Notes</span></a>
+        <a href="/guides/proton-mail/"><span data-lang="ja">ProtonMail設定ガイド</span><span data-lang="en">ProtonMail Guide</span></a>
+        <a href="/blog/how-to-choose-memo-app.html"><span data-lang="ja">メモアプリの選び方</span><span data-lang="en">How to Choose</span></a>
+        <a href="/blog/ai-vs-simple-memo.html"><span data-lang="ja">AI vs シンプルメモ</span><span data-lang="en">AI vs Simple Memo</span></a>
+        <a href="/blog/best-memo-apps-2026.html"><span data-lang="ja">おすすめメモアプリ10選</span><span data-lang="en">Best Memo Apps 2026</span></a>
+        <a href="/blog/"><span data-lang="ja">ブログ一覧</span><span data-lang="en">All Articles</span></a>
+      </div>
+    </section>
+
+  </div></main>
+
+  <footer class="footer"><div class="container"><nav class="footer__links"><a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a><a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a><a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a><a href="/vs/" class="footer__link"><span data-lang="ja">アプリ比較</span><span data-lang="en">Comparisons</span></a><a href="/use-cases/" class="footer__link"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a><a href="/guides/" class="footer__link"><span data-lang="ja">設定ガイド</span><span data-lang="en">Guides</span></a><a href="/blog/" class="footer__link"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a><a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a><a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a><a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a></nav><p class="footer__copyright">&copy; 2026 <span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p></div></footer>
+
+  <script src="/js/lang.js"></script>
+</body>
+</html>
