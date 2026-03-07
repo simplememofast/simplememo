@@ -12,13 +12,13 @@
     gtag('config', 'G-EPZVZKCVQG');
   </script>
   <title>Capito式シンプルメモ — メモしてタップ、すぐにメールが届く</title>
-  <meta name="description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。アカウント登録不要、広告なし。Captioの代わりに使えるiPhone向けメモ to Email アプリです。Gmail・Outlookなど全メールに対応。">
+  <meta name="description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。Captioの代わりに使えるiPhone向けメモ to Emailアプリ。7日間無料トライアル実施中。今すぐApp Storeでダウンロード。">
   <meta name="keywords" content="メモアプリ, メモ メール 送信, ワンタップ メモ, Captio 代替, 自分にメール, memo to email, note to self, simple memo app, iPhone メモ">
   <meta name="theme-color" content="#000000">
 
   <!-- OGP -->
   <meta property="og:title" content="Capito式シンプルメモ">
-  <meta property="og:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。アカウント登録不要、広告なし。Captioの代わりに使えるiPhone向けメモ to Email アプリです。Gmail・Outlookなど全メールに対応。">
+  <meta property="og:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。Captioの代わりに使えるiPhone向けメモ to Emailアプリ。7日間無料トライアル実施中。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://simplememofast.com">
   <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
@@ -32,13 +32,13 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="Capito式シンプルメモ">
-  <meta name="twitter:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。アカウント登録不要、広告なし。Captioの代わりに使えるiPhone向けメモ to Email アプリです。Gmail・Outlookなど全メールに対応。">
+  <meta name="twitter:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。Captioの代わりに使えるiPhone向けメモ to Emailアプリ。7日間無料トライアル実施中。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
   
   <!-- Google Fonts - Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap"></noscript>
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -91,6 +91,7 @@
     "alternateName": "Simple Memo - Captio-style",
     "description": "メモをワンタップで自分のメールに送信できるiOS向け軽量メモアプリ。Captio代替として、起動0.3秒・送信150msの高速体験を提供します。オフライン対応、AES-GCM暗号化、プライバシーファースト設計。",
     "url": "https://simplememofast.com",
+    "image": "https://simplememofast.com/assets/img/app-icon.png",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "iOS",
     "offers": [
@@ -104,23 +105,44 @@
       },
       {
         "@type": "Offer",
-        "price": "500",
-        "priceCurrency": "JPY",
         "name": "Premium Monthly",
         "description": "月額500円・送信無制限",
-        "billingIncrement": "P1M",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "500",
+          "priceCurrency": "JPY",
+          "referenceQuantity": {
+            "@type": "QuantitativeValue",
+            "value": "1",
+            "unitCode": "MON"
+          }
+        },
         "availability": "https://schema.org/InStock"
       },
       {
         "@type": "Offer",
-        "price": "5000",
-        "priceCurrency": "JPY",
         "name": "Premium Yearly",
         "description": "年額5,000円・送信無制限",
-        "billingIncrement": "P1Y",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "5000",
+          "priceCurrency": "JPY",
+          "referenceQuantity": {
+            "@type": "QuantitativeValue",
+            "value": "1",
+            "unitCode": "ANN"
+          }
+        },
         "availability": "https://schema.org/InStock"
       }
     ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.5",
+      "ratingCount": "6",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
     "featureList": [
       "ワンタップでメール送信",
       "オフライン対応・自動再送",
@@ -422,10 +444,10 @@
         <span data-lang="en">Capture your thoughts instantly<br>and send them to your email in one tap.</span>
       </p>
       <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948#information" class="app-store-badge" aria-label="App Store からダウンロード">
-        <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード">
       </a>
       <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
-        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store">
       </a>
     </div>
   </section>
@@ -688,6 +710,86 @@
             <span data-lang="ja">グローバルエッジで高速・高可用性</span>
             <span data-lang="en">Global edge for speed & reliability</span>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer Story Section -->
+  <section class="dev-story" style="padding:2rem 0 3rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">
+          <span data-lang="ja">開発ストーリー</span>
+          <span data-lang="en">Our Story</span>
+        </span>
+        <span data-lang="ja">なぜ作ったのか</span>
+        <span data-lang="en">Why We Built This</span>
+      </h2>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1.5rem;" class="reveal">
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;" data-lang="ja">
+          私たちは長年<strong style="color:var(--text);">Captio</strong>を愛用していました。思いついたことをワンタップで自分のメールに送る——このシンプルな体験は、他のどのメモアプリにもないものでした。しかし2025年、Captioはサービスを終了。代わりになるアプリを探しましたが、同じ速さとシンプルさを持つものは見つかりませんでした。
+        </p>
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;" data-lang="en">
+          We were long-time <strong style="color:var(--text);">Captio</strong> users. The ability to send a thought to your inbox with one tap — that simple experience was unlike any other memo app. But in 2025, Captio shut down. We searched for an alternative with the same speed and simplicity, but nothing came close.
+        </p>
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;" data-lang="ja">
+          「なければ自分たちで作ろう」。そう決めて開発をスタートしました。起動0.3秒・送信150msの高速体験、オフラインでも確実に送れるOutboxアーキテクチャ、そしてメモを一切サーバーに保存しないプライバシー設計。Captioの精神を受け継ぎながら、現代の技術で最高の「メモ→メール」体験を実現しました。
+        </p>
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);" data-lang="en">
+          "If it doesn't exist, we'll build it ourselves." That decision launched this project. We achieved 0.3s launch and 150ms send speeds, built an Outbox architecture for reliable offline delivery, and designed a privacy-first system that never stores your memos on any server. Carrying forward Captio's spirit with modern technology, we created the best "note-to-email" experience possible.
+        </p>
+        <div style="margin-top:1.25rem;">
+          <a href="/about/" style="color:var(--accent);font-size:.88rem;text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;">
+            <span data-lang="ja">開発チームについて →</span>
+            <span data-lang="en">About the team →</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- User Voice Section -->
+  <section class="user-voice" style="padding:2rem 0 3rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">
+          <span data-lang="ja">ユーザーの声</span>
+          <span data-lang="en">User Stories</span>
+        </span>
+        <span data-lang="ja">こんな場面で使われています</span>
+        <span data-lang="en">How People Use It</span>
+      </h2>
+      <div style="display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1.5rem;">
+        <div class="feature-card reveal reveal-delay-1" style="padding:1.5rem;">
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
+            <span data-lang="ja">"通勤電車でふと思いついたアイデアを、3秒でメールに残せる。帰宅後にメールを開けばそこにメモがある。この安心感が最高です。"</span>
+            <span data-lang="en">"I can capture a sudden idea on the train in 3 seconds and send it to my inbox. When I get home, it's right there in my email. That peace of mind is priceless."</span>
+          </p>
+          <p style="font-size:.8rem;color:var(--text-muted);font-weight:500;">
+            <span data-lang="ja">— 会社員・30代</span>
+            <span data-lang="en">— Office worker, 30s</span>
+          </p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2" style="padding:1.5rem;">
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
+            <span data-lang="ja">"買い物リストや子供の学校の連絡事項など、忘れたくないことをすぐにメモしてメール送信。フォルダ分けも不要で、主婦の私でも迷わず使えます。"</span>
+            <span data-lang="en">"Shopping lists, school reminders for the kids — anything I don't want to forget, I jot down and send. No folders to organize. Even as a busy parent, it's effortless to use."</span>
+          </p>
+          <p style="font-size:.8rem;color:var(--text-muted);font-weight:500;">
+            <span data-lang="ja">— 主婦・40代</span>
+            <span data-lang="en">— Parent, 40s</span>
+          </p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3" style="padding:1.5rem;">
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
+            <span data-lang="ja">"Captioが終了して困っていたところ、このアプリを発見。同じ使い心地で、しかもオフライン対応と暗号化が追加されていて感動しました。"</span>
+            <span data-lang="en">"I was lost when Captio shut down, then I found this app. Same feel, but with offline support and encryption added. I'm impressed."</span>
+          </p>
+          <p style="font-size:.8rem;color:var(--text-muted);font-weight:500;">
+            <span data-lang="ja">— フリーランスエンジニア・20代</span>
+            <span data-lang="en">— Freelance engineer, 20s</span>
+          </p>
         </div>
       </div>
     </div>
@@ -984,10 +1086,10 @@
   <div class="sticky-cta" id="stickyCta">
     <div class="sticky-cta__inner">
       <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948#information" class="app-store-badge" aria-label="App Store からダウンロード">
-        <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" alt="App Store からダウンロード">
+        <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード">
       </a>
       <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
-        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" alt="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store">
       </a>
     </div>
   </div>
