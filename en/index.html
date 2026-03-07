@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>Simple Memo - Captio-style — Write. Send. In your inbox.</title>
+  <meta name="description" content="Fast, minimal memo app for iPhone. Write a note and send it to your inbox in one tap. Captio alternative with offline support and AES-GCM encryption. 7-day free trial.">
+  <meta name="keywords" content="memo app, note to email, one tap memo, Captio alternative, email to self, simple memo app, iPhone memo, send note to inbox">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Simple Memo - Captio-style">
+  <meta property="og:description" content="Fast, minimal memo app. Write a note and send it to your inbox in one tap. Captio alternative with offline support and encryption. 7-day free trial.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/en/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - Captio-style">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Simple Memo - Captio-style">
+  <meta name="twitter:description" content="Fast, minimal memo app. Write a note and send it to your inbox in one tap. Captio alternative with offline support and encryption. 7-day free trial.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <!-- Google Fonts - Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap"></noscript>
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/en/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/">
+
+  <!-- JSON-LD: WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Simple Memo - Captio-style",
+    "alternateName": "Capito式シンプルメモ",
+    "url": "https://simplememofast.com/en/",
+    "inLanguage": "en",
+    "description": "Fast, minimal memo app. Write a note and send it to your inbox in one tap.",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Simple Memo - Captio-style",
+      "url": "https://simplememofast.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://simplememofast.com/assets/img/app-icon.png"
+      },
+      "sameAs": [
+        "https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948",
+        "https://x.com/simplememofast"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@simplememofast.com",
+        "url": "https://simplememofast.com/contact",
+        "availableLanguage": ["Japanese", "English"]
+      }
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Simple Memo - Captio-style",
+    "alternateName": "Capito式シンプルメモ",
+    "description": "Fast, minimal memo app that sends notes to your email inbox with one tap. A Captio alternative with 0.3s launch, 150ms send, offline support, and AES-GCM encryption.",
+    "url": "https://simplememofast.com/en/",
+    "image": "https://simplememofast.com/assets/img/app-icon.png",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "iOS",
+    "offers": [
+      {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "name": "Free",
+        "description": "Up to 3 sends per day (with 7-day free trial)",
+        "availability": "https://schema.org/InStock"
+      },
+      {
+        "@type": "Offer",
+        "name": "Premium Monthly",
+        "description": "$2.99/month, unlimited sends",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "2.99",
+          "priceCurrency": "USD",
+          "referenceQuantity": {
+            "@type": "QuantitativeValue",
+            "value": "1",
+            "unitCode": "MON"
+          }
+        },
+        "availability": "https://schema.org/InStock"
+      },
+      {
+        "@type": "Offer",
+        "name": "Premium Yearly",
+        "description": "$29.99/year, unlimited sends",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "29.99",
+          "priceCurrency": "USD",
+          "referenceQuantity": {
+            "@type": "QuantitativeValue",
+            "value": "1",
+            "unitCode": "ANN"
+          }
+        },
+        "availability": "https://schema.org/InStock"
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.5",
+      "ratingCount": "6",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "featureList": [
+      "One-tap email sending",
+      "Offline support with auto-resend",
+      "Send history and status tracking",
+      "AES-GCM encryption",
+      "0.3s launch speed",
+      "Privacy-first design"
+    ],
+    "screenshot": "https://simplememofast.com/assets/img/ogp.png",
+    "softwareVersion": "1.0",
+    "datePublished": "2026-02-13",
+    "dateModified": "2026-03-05",
+    "inLanguage": "en",
+    "downloadUrl": "https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US"
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://simplememofast.com/en/"
+      }
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Simple Memo - Captio-style",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".entity-definition__text", ".hero__title", ".hero__subtitle"]
+    },
+    "url": "https://simplememofast.com/en/"
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage (AIO / AI Search) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memo is a memo app focused on one thing: launch, write, send. Your memo is sent as an email to a pre-configured address with a single tap. There are no folders, tags, sync settings, or complex features."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I send memos while offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. When you send a memo offline, it's stored in the Outbox — encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use Simple Memo for free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The first 7 days are a free trial with full access to all features and unlimited sending. After the trial, you can continue on the free plan (3 memos per day)."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="preload" as="style" href="/assets/css/style.min.css">
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    /* Language Switcher Styles */
+    .header {
+      position: relative;
+      z-index: 100;
+    }
+    .lang-switcher-container {
+      display: flex;
+      justify-content: flex-end;
+      padding: 1.25rem 0;
+    }
+    .lang-switcher {
+      display: inline-flex;
+      background: rgba(15, 20, 30, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(100, 160, 220, 0.12);
+      border-radius: 22px;
+      padding: 3px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .lang-switcher__link {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 0.5rem 1.1rem;
+      border-radius: 19px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .lang-switcher__link:hover {
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .lang-switcher__link.active {
+      background: rgba(100, 180, 255, 0.12);
+      border: 1px solid rgba(100, 180, 255, 0.2);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
+    }
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Main navigation">
+    <div class="global-nav__inner">
+      <a href="/en/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">Guides</a></li>
+        <li><a href="/use-cases/">Use Cases</a></li>
+        <li><a href="/vs/">Compare</a></li>
+        <li><a href="/methods/">Methods</a></li>
+        <li><a href="/blog/">Blog</a></li>
+        <li><a href="/glossary/">Glossary</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US">Download</a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="global-nav__cta">
+          Download
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="Menu">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header with Lang Switcher -->
+  <header class="header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <a class="lang-switcher__link" href="/">日本語</a>
+          <a class="lang-switcher__link active" href="/en/">English</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero__icon">
+        <img src="/assets/img/app-icon-256.png" alt="App Icon" width="256" height="256" fetchpriority="high">
+      </div>
+      <div class="hero__badge">
+        iOS App &#8212; Launches in 0.3s
+      </div>
+      <p class="hero__app-name">
+        Simple Memo - Captio-style
+      </p>
+      <h1 class="hero__title">
+        Write. Send.<br>In your inbox.
+      </h1>
+      <p class="hero__subtitle">
+        Capture your thoughts instantly<br>and send them to your email in one tap.
+      </p>
+      <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store">
+      </a>
+    </div>
+  </section>
+
+  <!-- Entity Definition (AIO / AI Search Optimization) -->
+  <section class="entity-definition">
+    <div class="container">
+      <p class="entity-definition__text">
+        <strong>Simple Memo - Captio-style</strong> is a lightweight iOS app that lets you send notes to your email inbox with one tap.
+        Released in 2026 as a <strong><a href="/captio-alternative/" style="color:var(--accent);">Captio alternative</a></strong> after Captio shut down.
+        Features 0.3s launch, 150ms send, offline support via Outbox architecture, and AES-GCM encryption for privacy.
+      </p>
+    </div>
+  </section>
+
+  <!-- What is Email Memo / Concept Section -->
+  <section class="concept-section" style="padding:2rem 0 3rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">Concept</span>
+        What is Email Memo?
+      </h2>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1.5rem;" class="reveal">
+        <p style="font-size:1rem;line-height:1.8;color:var(--text-secondary);margin-bottom:1rem;">
+          <strong style="color:var(--text);">Email Memo</strong> is a new way to take notes — jot down your thought and <strong style="color:var(--text);">send it to your own inbox with one tap</strong>. Email is the one place everyone checks daily. That's why zero memos get missed. No folders, no tags, no organizing. <a href="/note-to-email/" style="color:var(--accent);">Learn how Note-to-Email works</a> and never lose a thought again.
+        </p>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+          <a href="/use-cases/" style="color:var(--accent);font-size:.88rem;text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;">
+            See Use Cases →
+          </a>
+          <a href="/guides/" style="color:var(--accent);font-size:.88rem;text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;">
+            Setup Guides →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How to Use Section -->
+  <section class="how-to-use">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">3 Steps</span>
+        How to Use
+      </h2>
+      <div class="steps">
+        <div class="step reveal reveal-delay-1">
+          <div class="step__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+          </div>
+          <div class="step__content">
+            <div class="step__number">1. Write</div>
+            <div class="step__description">Jot down your ideas immediately.</div>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-2">
+          <div class="step__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+            </svg>
+          </div>
+          <div class="step__content">
+            <div class="step__number">2. Send</div>
+            <div class="step__description">One tap to send to your inbox.</div>
+          </div>
+        </div>
+        <div class="step reveal reveal-delay-3">
+          <div class="step__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+            </svg>
+          </div>
+          <div class="step__content">
+            <div class="step__number">3. Review</div>
+            <div class="step__description">Check your notes anytime in email.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section — Bento Grid -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">Features</span>
+        Key Features
+      </h2>
+      <div class="feature-cards">
+        <div class="feature-card feature-card--highlight reveal reveal-delay-1">
+          <div class="feature-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
+            </svg>
+          </div>
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">One-Tap Send</h3>
+            <p class="feature-card__description">
+              Send instantly with a single tap the moment you have an idea.<br>0.3s launch, 150ms send. The fastest path from thought to inbox.
+            </p>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 017.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 011.06 0z" />
+            </svg>
+          </div>
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">Offline Support</h3>
+            <p class="feature-card__description">
+              Works without internet.<br>Auto-resends when back online.
+            </p>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">History & Status</h3>
+            <p class="feature-card__description">
+              Check send history in-app.<br>Easily track pending memos.
+            </p>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">Privacy First</h3>
+            <p class="feature-card__description">
+              AES-GCM encryption.<br>Your memos never stored on server.
+            </p>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-4">
+          <div class="feature-card__icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">3-Minute Setup</h3>
+            <p class="feature-card__description">
+              Just set your destination email.<br>Ready to use in minutes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Badges Section -->
+  <section class="trust-badges" style="padding:2rem 0;">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;text-align:center;" class="reveal">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">🔒</div>
+          <div style="font-weight:600;font-size:.9rem;margin-bottom:.25rem;">Privacy First</div>
+          <div style="font-size:.78rem;color:var(--text-muted);">AES-GCM encryption, no server storage</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">👤</div>
+          <div style="font-weight:600;font-size:.9rem;margin-bottom:.25rem;">No Account Required</div>
+          <div style="font-size:.78rem;color:var(--text-muted);">Just your email address to start</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
+          <div style="font-size:1.5rem;margin-bottom:.5rem;">⚡</div>
+          <div style="font-weight:600;font-size:.9rem;margin-bottom:.25rem;">Cloudflare Infrastructure</div>
+          <div style="font-size:.78rem;color:var(--text-muted);">Global edge for speed & reliability</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Developer Story Section -->
+  <section class="dev-story" style="padding:2rem 0 3rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">Our Story</span>
+        Why We Built This
+      </h2>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1.5rem;" class="reveal">
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;">
+          We were long-time <strong style="color:var(--text);">Captio</strong> users. The ability to send a thought to your inbox with one tap — that simple experience was unlike any other memo app. But in 2025, Captio shut down. We searched for an alternative with the same speed and simplicity, but nothing came close.
+        </p>
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);">
+          "If it doesn't exist, we'll build it ourselves." That decision launched this project. We achieved 0.3s launch and 150ms send speeds, built an Outbox architecture for reliable offline delivery, and designed a privacy-first system that never stores your memos on any server. Carrying forward Captio's spirit with modern technology, we created the best "note-to-email" experience possible.
+        </p>
+        <div style="margin-top:1.25rem;">
+          <a href="/about/" style="color:var(--accent);font-size:.88rem;text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;">
+            About the team →
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- User Voice Section -->
+  <section class="user-voice" style="padding:2rem 0 3rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">User Stories</span>
+        How People Use It
+      </h2>
+      <div style="display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1.5rem;">
+        <div class="feature-card reveal reveal-delay-1" style="padding:1.5rem;">
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
+            "I can capture a sudden idea on the train in 3 seconds and send it to my inbox. When I get home, it's right there in my email. That peace of mind is priceless."
+          </p>
+          <p style="font-size:.8rem;color:var(--text-muted);font-weight:500;">
+            — Office worker, 30s
+          </p>
+        </div>
+        <div class="feature-card reveal reveal-delay-2" style="padding:1.5rem;">
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
+            "Shopping lists, school reminders for the kids — anything I don't want to forget, I jot down and send. No folders to organize. Even as a busy parent, it's effortless to use."
+          </p>
+          <p style="font-size:.8rem;color:var(--text-muted);font-weight:500;">
+            — Parent, 40s
+          </p>
+        </div>
+        <div class="feature-card reveal reveal-delay-3" style="padding:1.5rem;">
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
+            "I was lost when Captio shut down, then I found this app. Same feel, but with offline support and encryption added. I'm impressed."
+          </p>
+          <p style="font-size:.8rem;color:var(--text-muted);font-weight:500;">
+            — Freelance engineer, 20s
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">Plans</span>
+        Pricing Plans
+      </h2>
+      <div class="pricing-cards">
+        <div class="pricing-card">
+          <div class="pricing-card__name">Free</div>
+          <div class="pricing-card__price">$0</div>
+          <div class="pricing-card__limit">After trial: Up to 3 sends/day</div>
+        </div>
+        <div class="pricing-card pricing-card--premium">
+          <div class="pricing-card__name">Premium (Monthly)</div>
+          <div class="pricing-card__price-row">
+            <span class="pricing-card__price">$2.99 / month</span>
+          </div>
+          <div class="pricing-card__limit">Unlimited sends</div>
+          <div class="pricing-card__trial">7-day free trial (Unlimited)</div>
+        </div>
+        <div class="pricing-card pricing-card--premium">
+          <div class="pricing-card__name">Premium (Yearly)</div>
+          <div class="pricing-card__price-row">
+            <span class="pricing-card__price">$29.99 / year</span>
+          </div>
+          <div class="pricing-card__limit">Unlimited sends</div>
+          <div class="pricing-card__trial">7-day free trial (Unlimited)</div>
+        </div>
+      </div>
+      <p class="pricing-notes">
+        <strong>7-day free trial: Unlimited sends</strong><br>
+        After trial: Free up to 3 sends/day / Premium (monthly & yearly) unlimited<br>
+        Price may vary by region. See the App Store for the latest price.<br>
+        *Cooldown limits and server-side rate limits may apply to protect system stability.
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-preview">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">Support</span>
+        FAQ
+      </h2>
+      <div class="faq-preview-items">
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary">What is Simple Memo?</summary>
+            <div class="faq-answer">
+              <p>Simple Memo is a memo app focused on one thing: launch, write, send. Your memo is sent as an email to a pre-configured address with a single tap. There are no folders, tags, sync settings, or complex features.</p>
+            </div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary">Can I send memos while offline?</summary>
+            <div class="faq-answer">
+              <p>Yes. When you send a memo offline, it's stored in the Outbox — encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically.</p>
+            </div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary">Can I use Simple Memo for free?</summary>
+            <div class="faq-answer">
+              <p>Yes. The first 7 days are a free trial with full access to all features and unlimited sending. After the trial, you can continue on the free plan (3 memos per day).</p>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div class="faq-preview-cta">
+        <a href="/faq">
+          View all FAQ
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Explore Section -->
+  <section class="explore-hubs" style="padding:3rem 0 1rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">Explore</span>
+        Related Content
+      </h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem;">
+        <a href="/vs/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
+          <h3 class="feature-card__title" style="font-size:1rem;">App Comparisons</h3>
+          <p class="feature-card__description" style="font-size:0.85rem;">vs Apple Notes, Google Keep, Notion & more</p>
+        </a>
+        <a href="/use-cases/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
+          <h3 class="feature-card__title" style="font-size:1rem;">Use Cases</h3>
+          <p class="feature-card__description" style="font-size:0.85rem;">Work, shopping, ideas & more</p>
+        </a>
+        <a href="/guides/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
+          <h3 class="feature-card__title" style="font-size:1rem;">Setup Guides</h3>
+          <p class="feature-card__description" style="font-size:0.85rem;">Gmail, Outlook, iCloud setup</p>
+        </a>
+        <a href="/methods/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
+          <h3 class="feature-card__title" style="font-size:1rem;">Productivity Methods</h3>
+          <p class="feature-card__description" style="font-size:0.85rem;">GTD, Inbox Zero, Second Brain</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links">
+        <a href="/terms" class="footer__link">Terms</a>
+        <a href="/privacy" class="footer__link">Privacy</a>
+        <a href="/faq" class="footer__link">FAQ</a>
+        <a href="/captio-alternative/" class="footer__link">Captio Alternative</a>
+        <a href="/note-to-email/" class="footer__link">Note to Email</a>
+        <a href="/vs/" class="footer__link">Comparisons</a>
+        <a href="/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/guides/" class="footer__link">Guides</a>
+        <a href="/about/" class="footer__link">About</a>
+        <a href="/legal" class="footer__link footer__link--legal">Legal</a>
+        <a href="/contact" class="footer__link">Contact</a>
+        <a href="/devlog/" class="footer__link">Dev Log</a>
+        <a href="/captio/" class="footer__link">Captio Method</a>
+        <a href="/how-to/" class="footer__link">How to Use</a>
+        <a href="/templates/" class="footer__link">Templates</a>
+        <a href="/methods/" class="footer__link">Methods</a>
+        <a href="/blog/" class="footer__link">Blog</a>
+        <a href="/glossary/" class="footer__link">Glossary</a>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Simple Memo - Captio-style. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Sticky Mobile CTA -->
+  <div class="sticky-cta" id="stickyCta">
+    <div class="sticky-cta__inner">
+      <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store">
+      </a>
+    </div>
+  </div>
+
+  <!-- Scroll Reveal + Sticky CTA -->
+  <script>
+  (function() {
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      reveals.forEach(function(el) { observer.observe(el); });
+    } else {
+      reveals.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    var stickyCta = document.getElementById('stickyCta');
+    var hero = document.querySelector('.hero');
+    if (stickyCta && hero && window.innerWidth < 768) {
+      document.body.classList.add('has-sticky-cta');
+      var stickyObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) {
+            stickyCta.classList.add('visible');
+          } else {
+            stickyCta.classList.remove('visible');
+          }
+        });
+      }, { threshold: 0 });
+      stickyObserver.observe(hero);
+    }
+  })();
+  </script>
+
+  <script>
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>
