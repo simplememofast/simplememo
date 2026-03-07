@@ -50,6 +50,80 @@
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/faq">
 
+  <!-- JSON-LD: FAQPage (AIO / AI Search) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Simple Memoはどんなアプリですか？ / What is Simple Memo?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。 / Simple Memo is a memo app focused on one thing: launch, write, send. Your memo is sent as an email to a pre-configured address with a single tap."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無料で使えますか？ / Can I use Simple Memo for free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。 / Yes. The first 7 days are a free trial with full access. After the trial, you can continue on the free plan (3 memos per day)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "オフラインでもメモを送信できますか？ / Can I send memos while offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。 / Yes. When you send a memo offline, it's stored in the Outbox encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモの内容はどこかのサーバーに保存されますか？ / Are my memos stored on any server?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。メモの内容はサーバーに一切保存されません。送信処理のみをRelay APIが行い、メモ本文はメール配信後にサーバーのメモリから即座に破棄されます。 / No. Your memos are never stored on any server. The Relay API only handles sending, and the memo content is immediately discarded from server memory after email delivery."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "このアプリは旧Captioの公式後継アプリですか？ / Is this the official successor to Captio?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ、公式の後継・関連アプリではありません。Captioの「ワンタップで自分にメール」という理念に共感し、独自に開発した別アプリです。Outboxアーキテクチャ、AES-GCM暗号化、オフライン対応など、Captioにはなかった機能を追加しています。 / No, it is not an official successor. We built it independently, inspired by Captio's one-tap email concept, adding offline support, AES-GCM encryption, and Outbox architecture."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アプリの起動速度はどれくらいですか？ / How fast does the app launch?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "iPhone 15 Proの計測で平均0.3秒で起動し、テキスト入力が可能な状態になります。送信処理は平均150msで完了します。 / On iPhone 15 Pro, the app launches in an average of 0.3 seconds and is ready for text input. Sending completes in an average of 150ms."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "どのメールサービスに対応していますか？ / Which email services are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Gmail、Outlook、iCloud Mail、Yahoo Mail、Proton Mail、独自ドメインメールなど、メールを受信できるアドレスであればどのサービスでも利用できます。 / Any email service that can receive mail: Gmail, Outlook, iCloud Mail, Yahoo Mail, Proton Mail, custom domains, and more."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "サブスクリプションの解約方法を教えてください。 / How do I cancel my subscription?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Apple IDの「サブスクリプション管理」画面から解約できます。設定 → Apple ID → サブスクリプション → Simple Memo → サブスクリプションをキャンセル、の手順で解約可能です。 / Go to Settings → Apple ID → Subscriptions → Simple Memo → Cancel Subscription."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="preload" as="style" href="/assets/css/style.min.css">
   <link rel="preload" as="script" href="/js/lang.js">
   <link rel="stylesheet" href="/assets/css/style.min.css">
