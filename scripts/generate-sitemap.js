@@ -23,9 +23,20 @@ const EXCLUDED_PATHS = [
   '/screenshots/',
 ];
 
+// Glossary pages whose canonical points to /methods/ (exclude from sitemap)
+const CANONICAL_CONFLICT_PAGES = [
+  '/glossary/gtd/',
+  '/glossary/inbox-zero/',
+  '/glossary/pomodoro/',
+  '/glossary/second-brain/',
+  '/glossary/zettelkasten/',
+];
+
 // Pages with hreflang alternates (JA path -> EN path)
 const HREFLANG_PAIRS = {
   '/': '/en/',
+  '/captio-alternative/': '/en/captio-alternative/',
+  '/note-to-email/': '/en/note-to-email/',
 };
 
 function getAllHtmlFiles(dir, basePath = '') {
@@ -88,6 +99,7 @@ function generateSitemap() {
   const pages = files
     .filter(f => !isNoindex(f.fullPath))
     .filter(f => !EXCLUDED_PATHS.some(ex => f.relativePath.startsWith(ex)))
+    .filter(f => !CANONICAL_CONFLICT_PAGES.includes(filePathToUrl(f.relativePath)))
     .map(f => ({
       url: filePathToUrl(f.relativePath),
       lastmod: getLastModified(f.fullPath),
