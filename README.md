@@ -1,4 +1,4 @@
-# Capito式シンプルメモ (Simple Memo - Captio-style) Landing Page
+# Captio式シンプルメモ (Simple Memo - Captio-style) Landing Page
 
 A dark-themed, modern landing page for the Simple Memo iOS app, built with HTML, CSS, and Cloudflare Workers.
 
