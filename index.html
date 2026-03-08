@@ -39,7 +39,10 @@
   <!-- Google Fonts - Noto Sans JP -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap"></noscript>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"></noscript>
+
+  <!-- Hero image preload for LCP -->
+  <link rel="preload" as="image" href="/assets/img/hero-ja.webp" type="image/webp" imagesrcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" imagesizes="(max-width: 1200px) 100vw, 1200px">
 
   <!-- Hero image preload for LCP -->
   <link rel="preload" as="image" href="/assets/img/hero-ja.webp" type="image/webp" imagesrcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" imagesizes="(max-width: 1200px) 100vw, 1200px">
@@ -73,22 +76,6 @@
   }
   </script>
 
-  <!-- JSON-LD: BreadcrumbList -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "ホーム",
-        "item": "https://simplememofast.com/"
-      }
-    ]
-  }
-  </script>
-
   <!-- JSON-LD: WebSite -->
   <script type="application/ld+json">
   {
@@ -96,13 +83,13 @@
     "@type": "WebSite",
     "name": "Captio式シンプルメモ",
     "alternateName": "Simple Memo - Captio-style",
-    "url": "https://simplememofast.com",
+    "url": "https://simplememofast.com/",
     "inLanguage": "ja",
     "description": "メモをワンタップで自分のメールに送信できるiOS向け軽量アプリ。Captioの代替として2026年にリリース。",
     "publisher": {
       "@type": "Organization",
       "name": "Captio式シンプルメモ",
-      "url": "https://simplememofast.com",
+      "url": "https://simplememofast.com/",
       "logo": {
         "@type": "ImageObject",
         "url": "https://simplememofast.com/assets/img/app-icon.png"
@@ -214,6 +201,12 @@
       "@type": "Person",
       "name": "AI Ataka",
       "url": "https://simplememofast.com/about/"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5.0",
+      "ratingCount": "6",
+      "bestRating": "5"
     }
   }
   </script>
@@ -318,7 +311,7 @@
       gap: 0.5rem;
       text-decoration: none;
       color: #fff;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.95rem;
       letter-spacing: -0.01em;
     }
@@ -356,7 +349,7 @@
       color: #fff !important;
       text-decoration: none;
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       padding: 0.45rem 1rem;
       border-radius: 20px;
       transition: opacity 0.2s;
@@ -391,7 +384,7 @@
         border-bottom: 1px solid rgba(100,160,220,0.1);
         gap: 0.1rem;
       }
-      .global-nav__links.open a {
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
         padding: 0.7rem 1rem;
         font-size: 0.9rem;
       }
@@ -403,7 +396,7 @@
         color: #fff;
         border-radius: 12px;
         padding: 0.8rem;
-        font-weight: 600;
+        font-weight: 700;
       }
     }
 
@@ -488,7 +481,7 @@
         <span data-lang="ja">思いついた瞬間にメモして、<br>ワンタップで自分のメールへ。</span>
         <span data-lang="en">Capture your thoughts instantly<br>and send them to your email in one tap.</span>
       </p>
-      <p style="font-size:.75rem;color:var(--text-muted);margin-top:.5rem;">
+      <p style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
         <span data-lang="ja">最終更新: 2026年3月8日</span>
         <span data-lang="en">Last updated: March 8, 2026</span>
       </p>
@@ -753,7 +746,7 @@
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;text-align:center;" class="reveal">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">🔒</div>
-          <div style="font-weight:600;font-size:.9rem;margin-bottom:.25rem;">
+          <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">
             <span data-lang="ja">プライバシーファースト</span>
             <span data-lang="en">Privacy First</span>
           </div>
@@ -764,7 +757,7 @@
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">👤</div>
-          <div style="font-weight:600;font-size:.9rem;margin-bottom:.25rem;">
+          <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">
             <span data-lang="ja">アカウント不要</span>
             <span data-lang="en">No Account Required</span>
           </div>
@@ -775,7 +768,7 @@
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">⚡</div>
-          <div style="font-weight:600;font-size:.9rem;margin-bottom:.25rem;">
+          <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">
             <span data-lang="ja">Cloudflare基盤</span>
             <span data-lang="en">Cloudflare Infrastructure</span>
           </div>
@@ -813,8 +806,8 @@
           "If it doesn't exist, we'll build it ourselves." That decision launched this project. We achieved 0.3s launch and 150ms send speeds, built an Outbox architecture for reliable offline delivery, and designed a privacy-first system that never stores your memos on any server. Carrying forward Captio's spirit with modern technology, we created the best "note-to-email" experience possible.
         </p>
         <p style="font-size:.88rem;color:var(--text-muted);margin-top:1rem;">
-          <span data-lang="ja">開発者: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:600;">AI Ataka</a> — iOS開発歴10年以上、UIKit / Swift / Cloudflare Workers</span>
-          <span data-lang="en">Developer: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:600;">AI Ataka</a> — 10+ years iOS development, UIKit / Swift / Cloudflare Workers</span>
+          <span data-lang="ja">開発者: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:700;">AI Ataka</a> — iOS開発歴10年以上、UIKit / Swift / Cloudflare Workers</span>
+          <span data-lang="en">Developer: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:700;">AI Ataka</a> — 10+ years iOS development, UIKit / Swift / Cloudflare Workers</span>
         </p>
         <div style="margin-top:1.25rem;">
           <a href="/about/" style="color:var(--accent);font-size:.88rem;text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;">
