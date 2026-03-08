@@ -21,7 +21,7 @@
   <meta property="og:title" content="Capito式シンプルメモ">
   <meta property="og:description" content="思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。Captioの代わりに使えるiPhone向けメモ to Emailアプリ。7日間無料トライアル実施中。">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://simplememofast.com">
+  <meta property="og:url" content="https://simplememofast.com/">
   <meta property="og:image" content="https://simplememofast.com/assets/img/hero-ja.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -40,6 +40,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap"></noscript>
+
+  <!-- Hero image preload for LCP -->
+  <link rel="preload" as="image" href="/assets/img/hero-ja.webp" type="image/webp" imagesrcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" imagesizes="(max-width: 1200px) 100vw, 1200px">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -70,22 +73,6 @@
   }
   </script>
 
-  <!-- JSON-LD: BreadcrumbList -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "ホーム",
-        "item": "https://simplememofast.com/"
-      }
-    ]
-  }
-  </script>
-
   <!-- JSON-LD: WebSite -->
   <script type="application/ld+json">
   {
@@ -94,7 +81,7 @@
     "name": "Capito式シンプルメモ",
     "alternateName": "Simple Memo - Captio-style",
     "url": "https://simplememofast.com",
-    "inLanguage": ["ja", "en"],
+    "inLanguage": "ja",
     "description": "メモをワンタップで自分のメールに送信できるiOS向け軽量アプリ。Captioの代替として2026年にリリース。",
     "publisher": {
       "@type": "Organization",
@@ -124,7 +111,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Person",
-    "name": "Hajime Ataka",
+    "name": "AI Ataka",
     "jobTitle": "iOS Developer",
     "worksFor": {
       "@type": "Organization",
@@ -205,11 +192,11 @@
     "softwareVersion": "1.0",
     "datePublished": "2026-02-13",
     "dateModified": "2026-03-08",
-    "inLanguage": ["ja", "en"],
+    "inLanguage": "ja",
     "downloadUrl": "https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948",
     "author": {
       "@type": "Person",
-      "name": "Hajime Ataka",
+      "name": "AI Ataka",
       "url": "https://simplememofast.com/about/"
     }
   }
@@ -226,48 +213,6 @@
       "cssSelector": [".entity-definition__text", ".hero__title", ".hero__subtitle"]
     },
     "url": "https://simplememofast.com/"
-  }
-  </script>
-
-  <!-- JSON-LD: FAQPage (AIO / AI Search) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Simple Memoはどんなアプリですか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "オフラインでもメモを送信できますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "無料で使えますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。"
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "無料トライアル期間中に解約できますか？",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "はい、いつでも解約可能です。7日間の無料トライアル期間中に解約すれば一切費用はかかりません。解約はiPhoneの「設定」→「サブスクリプション」から行えます。トライアル終了後も、無料プラン（1日3通まで）でそのままお使いいただけます。"
-        }
-      }
-    ]
   }
   </script>
 
@@ -408,7 +353,9 @@
       color: #fff;
       font-size: 1.5rem;
       cursor: pointer;
-      padding: 0.25rem;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
       line-height: 1;
     }
     @media (max-width: 768px) {
@@ -598,8 +545,14 @@
         <span data-lang="en">Simple Means Fast</span>
       </h2>
       <div style="margin-top:2rem;">
-        <img data-lang="ja" src="/assets/img/hero-ja.jpg" srcset="/assets/img/hero-ja.jpg 1200w, /assets/img/hero-ja@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemoアプリのスクリーンショット — メモ入力画面、設定画面、送信履歴画面を表示するiPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="lazy">
-        <img data-lang="en" src="/assets/img/hero-en.jpg" srcset="/assets/img/hero-en.jpg 1200w, /assets/img/hero-en@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemo app screenshots — memo input screen, settings screen, and send history on iPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="lazy">
+        <picture data-lang="ja">
+          <source type="image/webp" srcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" sizes="(max-width: 1200px) 100vw, 1200px">
+          <img src="/assets/img/hero-ja.jpg" srcset="/assets/img/hero-ja.jpg 1200w, /assets/img/hero-ja@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemoアプリのスクリーンショット — メモ入力画面、設定画面、送信履歴画面を表示するiPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="eager" fetchpriority="high">
+        </picture>
+        <picture data-lang="en">
+          <source type="image/webp" srcset="/assets/img/hero-en.webp 1200w, /assets/img/hero-en@2x.webp 2400w" sizes="(max-width: 1200px) 100vw, 1200px">
+          <img src="/assets/img/hero-en.jpg" srcset="/assets/img/hero-en.jpg 1200w, /assets/img/hero-en@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemo app screenshots — memo input screen, settings screen, and send history on iPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="lazy">
+        </picture>
       </div>
     </div>
   </section>
@@ -1222,7 +1175,7 @@
     </div>
   </div>
 
-  <script src="/js/lang.js"></script>
+  <script src="/js/lang.js" defer></script>
 
   <!-- Scroll Reveal + Sticky CTA -->
   <script>
