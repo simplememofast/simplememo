@@ -43,12 +43,20 @@
   }
 
   /**
-   * Update URL query parameter without page reload
+   * Clean URL: remove ?lang= parameter and update URL bar
+   * SEO: ?lang= causes duplicate URL signals for search engines.
+   * Language preference is persisted via localStorage only.
    */
-  function updateQueryParam(lang) {
+  function cleanUrlParam() {
     const url = new URL(window.location.href);
-    url.searchParams.set('lang', lang);
-    window.history.replaceState({}, '', url.toString());
+    if (url.searchParams.has('lang')) {
+      const lang = url.searchParams.get('lang');
+      if (SUPPORTED_LANGS.includes(lang)) {
+        saveLangToStorage(lang);
+      }
+      url.searchParams.delete('lang');
+      window.history.replaceState({}, '', url.pathname + (url.search || '') + url.hash);
+    }
   }
 
   /**
@@ -116,19 +124,9 @@
       }
     }
     
-    // Update all internal links to preserve lang param
-    document.querySelectorAll('a').forEach(a => {
-      const href = a.getAttribute('href');
-      if (href && (href.startsWith('/') || !href.includes(':')) && !href.startsWith('#')) {
-        try {
-          const url = new URL(href, window.location.origin);
-          url.searchParams.set('lang', lang);
-          a.setAttribute('href', url.pathname + url.search + url.hash);
-        } catch (e) {
-          // Skip if invalid URL
-        }
-      }
-    });
+    // SEO: Do NOT append ?lang= to internal links.
+    // Language preference is persisted via localStorage.
+    // This prevents duplicate parameterized URLs in search engine indexes.
   }
 
   /**
@@ -138,7 +136,6 @@
     if (!SUPPORTED_LANGS.includes(lang)) return;
     
     saveLangToStorage(lang);
-    updateQueryParam(lang);
     applyLang(lang);
   }
 
@@ -148,11 +145,9 @@
   function init() {
     const currentLang = getCurrentLang();
     
-    if (getLangFromQuery()) {
-      saveLangToStorage(currentLang);
-    }
-    
-    updateQueryParam(currentLang);
+    // Migrate: if user arrives with ?lang= param, absorb it into localStorage and clean URL
+    cleanUrlParam();
+
     applyLang(currentLang);
 
     // Bind click events to language switcher buttons

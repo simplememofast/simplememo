@@ -1,0 +1,28 @@
+name: SEO Validation
+
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  seo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run SEO validation
+        run: node scripts/seo-check.js
+
+      - name: Generate sitemap (dry run)
+        run: node scripts/generate-sitemap.js
+
+      - name: IndexNow notification (on main push only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: node scripts/indexnow-notify.js --since 1
+        continue-on-error: true
