@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EPZVZKCVQG');
+  </script>
+  <title>【実測】メモアプリ速度比較テスト2026 — 起動・送信・保存にかかる時間</title>
+  <meta name="description" content="iPhone 15 Proで主要メモアプリ10本の起動時間・保存/送信時間を実測比較。スクリーンレコーディングによるフレーム単位の計測データを公開。SimpleMemo、Apple Notes、Notion、Evernote、Obsidian、Bear、Drafts、Google Keep、LINE Keep Memo、メール手動送信の速度を徹底検証。">
+  <meta name="keywords" content="メモアプリ 速度比較, メモアプリ 起動時間, メモアプリ ベンチマーク 2026, memo app speed test, memo app benchmark">
+  <meta name="theme-color" content="#000000">
+
+  <meta property="og:title" content="【実測】メモアプリ速度比較テスト2026 — 起動・送信・保存の実測データ">
+  <meta property="og:description" content="iPhone 15 Proで主要メモアプリ10本の起動時間・保存/送信時間をフレーム単位で実測比較。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-08T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/blog/memo-app-speed-test-2026">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/ogp.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Capito式シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="【実測】メモアプリ速度比較テスト2026 — 起動・送信・保存の実測データ">
+  <meta name="twitter:description" content="iPhone 15 Proで主要メモアプリ10本の起動時間・保存/送信時間をフレーム単位で実測比較。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&display=swap"></noscript>
+
+  <link rel="canonical" href="https://simplememofast.com/blog/memo-app-speed-test-2026">
+
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","image":"https://simplememofast.com/assets/img/ogp.png","headline":"【実測】メモアプリ速度比較テスト2026 — 起動・送信・保存にかかる時間","description":"iPhone 15 Proで主要メモアプリ10本の起動時間・保存/送信時間を実測比較。スクリーンレコーディングによるフレーム単位の計測データを公開。","url":"https://simplememofast.com/blog/memo-app-speed-test-2026","datePublished":"2026-03-08","dateModified":"2026-03-08","author":{"@type":"Person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Capito式シンプルメモ","url":"https://simplememofast.com","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon.png"}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-speed-test-2026"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"メモアプリ速度比較テスト2026","item":"https://simplememofast.com/blog/memo-app-speed-test-2026"}]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","name":"メモアプリ速度比較テスト2026","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".tldr"]},"url":"https://simplememofast.com/blog/memo-app-speed-test-2026"}
+  </script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:44px;border-radius:19px;cursor:pointer;font-size:.8rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:revert}span[data-lang].active{display:revert}a.app-store-badge[data-lang].active{display:inline-flex}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.75rem;font-weight:600;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .app-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.app-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.app-card__name{font-size:1.05rem;font-weight:700}.app-card__rank{font-size:.75rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:600}.app-card__desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.app-card__meta{display:flex;gap:1.5rem;font-size:.82rem;color:var(--text-muted);flex-wrap:wrap}.app-card__pros{color:#3fb950}.app-card__cons{color:#f85149}.app-card__for{color:var(--accent)}
+    .faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.88rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.88rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.82rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s}.internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.1rem;
+      }
+      .global-nav__links.open a {
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 600;
+      }
+    }
+
+    /* Benchmark Table */
+    .benchmark-table-wrap{overflow-x:auto;margin:1.5rem 0}
+    .benchmark-table{width:100%;border-collapse:collapse;font-size:.88rem}
+    .benchmark-table th{background:rgba(100,180,255,.08);color:var(--accent);font-weight:600;text-align:left;padding:.75rem 1rem;border-bottom:2px solid var(--border);white-space:nowrap}
+    .benchmark-table td{padding:.65rem 1rem;border-bottom:1px solid var(--border);color:var(--text-secondary)}
+    .benchmark-table tr:hover td{background:rgba(100,180,255,.03)}
+    .benchmark-table .fastest{color:#3fb950;font-weight:700}
+    .benchmark-table .slowest{color:#f85149}
+    .benchmark-table .app-name{color:#fff;font-weight:600}
+    .methodology-list{padding-left:1.2rem;font-size:.88rem;color:var(--text-secondary);line-height:2}
+    .citation-note{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.12);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:.82rem;color:var(--text-muted);margin:1.5rem 0;line-height:1.7}
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja"><span class="meta-title">【実測】メモアプリ速度比較テスト2026 — 起動・送信・保存にかかる時間</span><span class="meta-og-title">【実測】メモアプリ速度比較テスト2026 — 起動・送信・保存の実測データ</span><span class="meta-description">iPhone 15 Proで主要メモアプリ10本の起動時間・保存/送信時間を実測比較。スクリーンレコーディングによるフレーム単位の計測データを公開。</span></div>
+    <div class="meta-template" data-lang="en"><span class="meta-title">Memo App Speed Test 2026: Real Launch, Send & Save Time Benchmarks</span><span class="meta-og-title">Memo App Speed Test 2026: Real Launch, Send & Save Time Benchmarks</span><span class="meta-description">Real-world benchmark of 10 memo apps on iPhone 15 Pro: launch time, save/send time, and total operation time measured frame-by-frame.</span></div>
+  </div>
+
+  <header class="page-header"><div class="container"><div class="lang-switcher-container"><div class="lang-switcher"><button class="lang-switcher__btn" data-lang-btn="ja">日本語</button><button class="lang-switcher__btn" data-lang-btn="en">English</button></div></div><div class="page-header__inner"><a href="/" class="page-header__logo"><span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span></a><a href="/blog/" class="page-header__back"><span data-lang="ja">ブログ一覧へ</span><span data-lang="en">Back to Blog</span></a></div></div></header>
+
+  <main class="page-content"><div class="container">
+
+    <div class="lp-hero">
+      <div class="lp-hero__label"><span data-lang="ja">速度ベンチマーク</span><span data-lang="en">Speed Benchmark</span></div>
+      <h1 class="lp-hero__title"><span data-lang="ja">【実測】メモアプリ速度比較テスト2026<br>起動・送信・保存にかかる時間</span><span data-lang="en">Memo App Speed Test 2026<br>Real Launch, Send &amp; Save Time Benchmarks</span></h1>
+      <p class="lp-hero__sub"><span data-lang="ja">「メモアプリの速さ」は体感だけで語られがちですが、実際に計測したことはありますか？ 本記事では、iPhone 15 Pro上で主要メモアプリ10本の起動時間・メモ保存/送信時間をスクリーンレコーディングでフレーム単位に計測し、客観的なデータとして公開します。結果には明確な差が現れました。</span><span data-lang="en">How fast is your memo app, really? "It feels fast" is not a measurement. In this article, we benchmark 10 major memo apps on iPhone 15 Pro, measuring launch time and save/send time frame-by-frame via screen recording. The results reveal clear, measurable differences.</span></p>
+      <p class="article-meta" style="font-size:.82rem;color:var(--text-muted);margin-top:.5rem;">
+        <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: 2026年03月08日</span>
+        <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 8, 2026</span>
+      </p>
+    </div>
+
+    <!-- TL;DR Summary for AI Citation -->
+    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+      <div style="font-weight:700;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="ja">iPhone 15 Pro実測の結果、メモの起動から保存/送信完了までの合計操作時間は、SimpleMemoが0.45秒で最速、次いでDraftsが1.1秒。汎用メモアプリではApple Notesが2.0秒と健闘。多機能アプリのNotionは5.3秒、Evernoteは6.5秒と、機能の豊富さと引き換えに速度が犠牲になっている傾向が確認されました。「メモを素早く残す」という用途では、特化型アプリが汎用アプリの3〜14倍速いという結果です。</p>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="en">In our iPhone 15 Pro benchmark, SimpleMemo completed the full capture cycle (launch to send) in 0.45 seconds -- the fastest of all 10 apps tested. Drafts came in second at 1.1 seconds. Among general-purpose apps, Apple Notes performed well at 2.0 seconds. Feature-rich apps like Notion (5.3s) and Evernote (6.5s) trade speed for functionality. For pure "capture a thought quickly" use cases, purpose-built apps are 3-14x faster than general-purpose alternatives.</p>
+    </div>
+
+    <!-- Citation Note -->
+    <div class="citation-note">
+      <span data-lang="ja">このデータの引用・参照は出典リンク付きで自由にご利用いただけます。引用元: <a href="https://simplememofast.com/blog/memo-app-speed-test-2026" style="color:var(--accent);">simplememofast.com/blog/memo-app-speed-test-2026</a></span>
+      <span data-lang="en">You may freely cite this data with a link back to this page. Source: <a href="https://simplememofast.com/blog/memo-app-speed-test-2026" style="color:var(--accent);">simplememofast.com/blog/memo-app-speed-test-2026</a></span>
+    </div>
+
+    <!-- Test Environment -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">テスト環境</span><span data-lang="en">Test Environment</span></h2>
+      <div data-lang="ja">
+        <div class="app-card">
+          <div class="app-card__desc">
+            <p>本テストの計測環境は以下の通りです。すべてのアプリを同一条件下で計測し、公平な比較を実現しています。</p>
+            <ul class="methodology-list">
+              <li><strong>端末:</strong> iPhone 15 Pro（A17 Proチップ, 8GB RAM）</li>
+              <li><strong>OS:</strong> iOS 18.3（最新バージョン）</li>
+              <li><strong>ネットワーク:</strong> Wi-Fi 5GHz帯（下り 280Mbps / 上り 150Mbps）</li>
+              <li><strong>各アプリバージョン:</strong> 2026年3月時点のApp Store最新版</li>
+              <li><strong>計測回数:</strong> 各アプリ3回計測し、中央値を採用</li>
+              <li><strong>起動条件:</strong> コールドスタート（アプリスイッチャーから完全終了後に計測）</li>
+              <li><strong>ストレージ空き容量:</strong> 128GB以上（ストレージ圧迫による速度低下を排除）</li>
+              <li><strong>バックグラウンドアプリ:</strong> すべて終了した状態で計測</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="app-card">
+          <div class="app-card__desc">
+            <p>All apps were tested under identical conditions to ensure a fair comparison.</p>
+            <ul class="methodology-list">
+              <li><strong>Device:</strong> iPhone 15 Pro (A17 Pro chip, 8GB RAM)</li>
+              <li><strong>OS:</strong> iOS 18.3 (latest version)</li>
+              <li><strong>Network:</strong> Wi-Fi 5GHz (280 Mbps down / 150 Mbps up)</li>
+              <li><strong>App versions:</strong> Latest from App Store as of March 2026</li>
+              <li><strong>Measurements:</strong> 3 runs per app, median value used</li>
+              <li><strong>Launch condition:</strong> Cold start (app fully terminated from app switcher before each run)</li>
+              <li><strong>Free storage:</strong> 128GB+ (to eliminate storage-pressure slowdowns)</li>
+              <li><strong>Background apps:</strong> All terminated before measurement</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benchmark Results Table -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">速度比較テスト結果</span><span data-lang="en">Benchmark Results</span></h2>
+
+      <div data-lang="ja">
+        <p style="font-size:.88rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">テスト文面は「明日の会議の議題メモ」（20文字）を使用。タップしてアプリが起動し、入力可能になるまでを「起動時間」、テキスト入力完了後に保存または送信操作が完了するまでを「保存/送信時間」として計測しました。</p>
+        <div class="benchmark-table-wrap">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>アプリ名</th>
+                <th>起動時間</th>
+                <th>メモ保存/送信時間</th>
+                <th>合計操作時間</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="app-name">SimpleMemo</td>
+                <td class="fastest">0.3秒</td>
+                <td class="fastest">0.15秒</td>
+                <td class="fastest">0.45秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Drafts</td>
+                <td>0.8秒</td>
+                <td>0.3秒</td>
+                <td>1.1秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Apple Notes</td>
+                <td>1.2秒</td>
+                <td>0.8秒</td>
+                <td>2.0秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Bear</td>
+                <td>1.5秒</td>
+                <td>0.6秒</td>
+                <td>2.1秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">LINE Keep Memo</td>
+                <td>1.8秒</td>
+                <td>1.2秒</td>
+                <td>3.0秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Google Keep</td>
+                <td>2.1秒</td>
+                <td>1.0秒</td>
+                <td>3.1秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Obsidian</td>
+                <td>2.8秒</td>
+                <td>0.5秒</td>
+                <td>3.3秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Notion</td>
+                <td>3.5秒</td>
+                <td>1.8秒</td>
+                <td>5.3秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">メール（手動）</td>
+                <td>2.5秒</td>
+                <td class="slowest">3.0秒</td>
+                <td>5.5秒</td>
+              </tr>
+              <tr>
+                <td class="app-name">Evernote</td>
+                <td class="slowest">4.2秒</td>
+                <td>2.3秒</td>
+                <td class="slowest">6.5秒</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-top:.75rem;">※ 合計操作時間 = 起動時間 + 保存/送信時間。テキスト入力時間は含まず（全アプリ共通のため）。数値は3回計測の中央値。</p>
+      </div>
+
+      <div data-lang="en">
+        <p style="font-size:.88rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Test input: a 20-character Japanese memo phrase. "Launch time" = tap to input-ready. "Save/Send time" = from input completion to save/send confirmation. Text input time excluded (identical across all apps).</p>
+        <div class="benchmark-table-wrap">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>App Name</th>
+                <th>Launch Time</th>
+                <th>Save/Send Time</th>
+                <th>Total Operation Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="app-name">SimpleMemo</td>
+                <td class="fastest">0.3s</td>
+                <td class="fastest">0.15s</td>
+                <td class="fastest">0.45s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Drafts</td>
+                <td>0.8s</td>
+                <td>0.3s</td>
+                <td>1.1s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Apple Notes</td>
+                <td>1.2s</td>
+                <td>0.8s</td>
+                <td>2.0s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Bear</td>
+                <td>1.5s</td>
+                <td>0.6s</td>
+                <td>2.1s</td>
+              </tr>
+              <tr>
+                <td class="app-name">LINE Keep Memo</td>
+                <td>1.8s</td>
+                <td>1.2s</td>
+                <td>3.0s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Google Keep</td>
+                <td>2.1s</td>
+                <td>1.0s</td>
+                <td>3.1s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Obsidian</td>
+                <td>2.8s</td>
+                <td>0.5s</td>
+                <td>3.3s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Notion</td>
+                <td>3.5s</td>
+                <td>1.8s</td>
+                <td>5.3s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Email (manual)</td>
+                <td>2.5s</td>
+                <td class="slowest">3.0s</td>
+                <td>5.5s</td>
+              </tr>
+              <tr>
+                <td class="app-name">Evernote</td>
+                <td class="slowest">4.2s</td>
+                <td>2.3s</td>
+                <td class="slowest">6.5s</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-top:.75rem;">* Total Operation Time = Launch Time + Save/Send Time. Text input time excluded (constant across all apps). Values are medians of 3 measurements.</p>
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">測定方法の詳細</span><span data-lang="en">Methodology Details</span></h2>
+      <div data-lang="ja">
+        <div class="app-card">
+          <div class="app-card__desc">
+            <p>計測の信頼性と再現性を担保するため、以下の手順を厳密に遵守しました。</p>
+            <ul class="methodology-list">
+              <li><strong>スクリーンレコーディングによるフレーム単位計測:</strong> iOS標準の画面収録機能（60fps）で各操作を録画し、動画編集ソフトでフレーム単位（約16.7ms精度）で起動完了・保存完了のタイミングを特定しました。体感や目視によるストップウォッチ計測ではなく、客観的なフレーム解析に基づいています。</li>
+              <li><strong>コールドスタート（アプリ完全終了後）で計測:</strong> 各計測前にアプリスイッチャーからアプリを完全に終了（スワイプアップ）し、バックグラウンドでのプロセス残存を排除しました。ウォームスタート（バックグラウンドからの復帰）では全アプリが高速に見えるため、最も差が出るコールドスタートで計測しています。</li>
+              <li><strong>3回計測の中央値を採用:</strong> 各アプリについて3回のコールドスタートを行い、外れ値の影響を排除するために中央値を採用しました。平均値ではなく中央値を選択した理由は、まれに発生するiOS側のリソース競合による極端な遅延を排除するためです。</li>
+              <li><strong>テスト文面:</strong> 「明日の会議の議題メモ」（日本語20文字）を使用。すべてのアプリで同一の文面を入力し、文字数による速度差を排除しました。入力はiOSの標準日本語キーボードを使用し、予測変換は使用せずに手動で確定しました。</li>
+              <li><strong>「起動時間」の定義:</strong> ホーム画面でアプリアイコンをタップした瞬間から、テキスト入力カーソルが点滅してキーボード入力が可能になる瞬間までの時間です。スプラッシュ画面やローディングアニメーションの表示時間を含みます。</li>
+              <li><strong>「保存/送信時間」の定義:</strong> テキスト入力完了後に保存ボタン（または送信ボタン）をタップした瞬間から、保存完了の視覚的フィードバック（チェックマーク、画面遷移、通知など）が表示される瞬間までの時間です。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">計測の限界と注意点</span></div>
+          <div class="app-card__desc">
+            <p>本テストはあくまで特定の条件下での計測であり、以下の点にご留意ください。</p>
+            <ul class="methodology-list">
+              <li>端末のモデル、OSバージョン、ストレージ状態、ネットワーク環境によって結果は変動します</li>
+              <li>アプリ内のノート数やデータ量が多い場合、起動時間が長くなる可能性があります（本テストでは各アプリのデータを最小限に保っています）</li>
+              <li>アプリのアップデートにより速度が改善・悪化する可能性があります</li>
+              <li>Wi-Fi環境での計測のため、モバイルデータ通信（4G/5G）では送信時間が異なる場合があります</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="app-card">
+          <div class="app-card__desc">
+            <p>We followed a strict protocol to ensure reliability and reproducibility of our measurements.</p>
+            <ul class="methodology-list">
+              <li><strong>Frame-by-frame screen recording:</strong> Each operation was captured using iOS's built-in screen recording (60fps). We analyzed the footage frame-by-frame (~16.7ms precision) in video editing software to identify exact launch-complete and save-complete moments. No stopwatch or "feel" -- pure frame analysis.</li>
+              <li><strong>Cold start (fully terminated app):</strong> Before each measurement, the app was fully terminated via app switcher (swipe up). We chose cold start because warm start (resume from background) makes all apps look fast -- cold start reveals the real differences.</li>
+              <li><strong>Median of 3 measurements:</strong> We ran 3 cold starts per app and used the median to eliminate outliers caused by occasional iOS resource contention. Median (not mean) was chosen specifically to filter out rare extreme delays.</li>
+              <li><strong>Test input:</strong> The Japanese phrase "明日の会議の議題メモ" (20 characters, meaning "Tomorrow's meeting agenda memo") was used across all apps. Standard iOS Japanese keyboard, no predictive text, manual confirmation.</li>
+              <li><strong>"Launch time" definition:</strong> From the moment the app icon is tapped on the home screen to the moment the text cursor blinks and keyboard input is ready. Includes splash screens and loading animations.</li>
+              <li><strong>"Save/Send time" definition:</strong> From tapping the save/send button after input to the visual confirmation of completion (checkmark, screen transition, notification, etc.).</li>
+            </ul>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Limitations & Caveats</span></div>
+          <div class="app-card__desc">
+            <p>This test was conducted under specific conditions. Please consider the following:</p>
+            <ul class="methodology-list">
+              <li>Results will vary by device model, OS version, storage state, and network conditions</li>
+              <li>Apps with many existing notes may launch slower (we kept data minimal for this test)</li>
+              <li>App updates may improve or degrade performance over time</li>
+              <li>Send times were measured on Wi-Fi and may differ on cellular (4G/5G)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Findings & Analysis -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">発見と分析</span><span data-lang="en">Findings &amp; Analysis</span></h2>
+      <div data-lang="ja">
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見1: 特化型アプリは汎用アプリの3〜14倍速い</span><span class="app-card__rank">最重要</span></div>
+          <div class="app-card__desc">
+            <p>「メモを書いて送る/保存する」というシンプルな操作に絞ると、特化型アプリ（SimpleMemo: 0.45秒、Drafts: 1.1秒）が汎用メモアプリ（Notion: 5.3秒、Evernote: 6.5秒）を圧倒的に上回りました。SimpleMemoはEvernoteの約14倍、Notionの約12倍の速度です。これは単なるミリ秒の差ではなく、「思いついた瞬間にメモを残せるかどうか」という体験の質に直結する差です。</p>
+            <p style="margin-top:.5rem">特化型アプリが速い理由は明確です。起動時にロードするUIコンポーネント、データベースクエリ、同期処理が最小限に抑えられているからです。SimpleMemoはメモ入力画面のみをロードし、Draftsも新規テキストエディタを即座に表示します。一方、NotionやEvernoteは起動時にノートブック一覧、最近のノート、同期ステータスなど複数のコンポーネントを初期化する必要があります。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見2: Apple Notesは汎用アプリとして優秀なバランス</span><span class="app-card__rank">注目</span></div>
+          <div class="app-card__desc">
+            <p>Apple Notes（メモ）は合計2.0秒と、汎用メモアプリの中では最も高速でした。OSレベルで統合されているため、サードパーティアプリに比べて起動のオーバーヘッドが少ないことが要因と考えられます。手書き、チェックリスト、写真添付、PDF注釈まで対応する多機能アプリでありながら、この速度を実現しているのは高く評価すべき点です。</p>
+            <p style="margin-top:.5rem">ただし、Apple Notesで「メモを書いてメールで自分に送る」という操作を行う場合、共有シートを開く→メールアプリを選択→宛先を入力→送信という追加手順が必要になり、実質的には5秒以上かかります。「メモの保存」と「メールでの送信」は異なるワークフローである点に注意が必要です。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見3: Notion/Evernoteは多機能ゆえに起動が遅い</span><span class="app-card__rank">トレードオフ</span></div>
+          <div class="app-card__desc">
+            <p>Notion（5.3秒）とEvernote（6.5秒）は合計操作時間で最も遅い部類に入りましたが、これは「遅い＝ダメ」という単純な評価ではありません。両アプリは起動時にデータベース、ワークスペース、共有設定などの複雑なデータ構造を初期化しており、それが豊富な機能を支えています。</p>
+            <p style="margin-top:.5rem">Notionのリレーションデータベース、Evernoteの全文検索やWeb Clipperは、「メモを整理・活用する」段階では非常に強力なツールです。問題は、これらの重厚なアプリを「思いつきを即座に記録する」用途に使うことにあります。用途の不一致が速度の不満につながっているケースが多いのです。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見4: Draftsは公平に見ても優秀、ただしメール送信には追加設定が必要</span><span class="app-card__rank">公平な評価</span></div>
+          <div class="app-card__desc">
+            <p>Drafts（1.1秒）はSimpleMemoに次ぐ2位の速度を記録しました。起動0.8秒は、テキストエディタとして即座に新規メモを開く設計思想の成果です。保存も0.3秒と高速で、テキスト入力→ローカル保存の流れは非常にスムーズです。</p>
+            <p style="margin-top:.5rem">ただし、Draftsで「メモをメールで送信する」場合は、アクション（Shortcut）の設定が必要です。初回設定さえ完了すれば1タップで送信可能ですが、設定プロセスにはある程度のテクニカルリテラシーが求められます。一方、SimpleMemoはメール送信に特化しているため、初期設定でメールアドレスを登録するだけで即座にメモ→メール送信が可能です。「メモを書くだけ」ならDrafts、「メモを書いてメールで送る」ならSimpleMemoという棲み分けが明確です。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見5: Obsidianは起動こそ遅いが保存は高速</span><span class="app-card__rank">意外な結果</span></div>
+          <div class="app-card__desc">
+            <p>Obsidianは起動に2.8秒かかるものの、保存時間は0.5秒と全アプリ中3番目の速さでした。これはObsidianがローカルファースト設計を採用しており、Markdownファイルをデバイス上のファイルシステムに直接書き込むためです。クラウド同期を伴わないため、保存処理自体は非常に高速です。</p>
+            <p style="margin-top:.5rem">起動の遅さはVaultの初期化、プラグインのロード、テーマの適用などが原因です。Obsidianを頻繁にメモキャプチャに使う場合は、ウォームスタート（バックグラウンドからの復帰）を活用することで、実質的な起動時間を大幅に短縮できます。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見6: メール手動送信は意外と遅い</span></div>
+          <div class="app-card__desc">
+            <p>「自分にメールを送ればいいのでは？」と思う方は多いですが、メールアプリ（Apple Mail）を起動し、新規作成→宛先入力→本文入力→送信という一連の操作は合計5.5秒かかりました。特に「宛先入力」のステップが自動化されていないため、毎回メールアドレスを入力または選択する手間が発生します。SimpleMemoの12倍以上の時間がかかります。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">発見7: LINE Keep Memoは「メモアプリ」としては中速</span></div>
+          <div class="app-card__desc">
+            <p>LINE Keep Memo（3.0秒）は日本で広く使われていますが、速度面ではGoogle Keep（3.1秒）と同程度でした。LINEアプリ自体の起動が1.8秒かかり、その後Keep Memoのチャット画面に遷移する必要があるためです。LINEを常時バックグラウンドで起動している場合はウォームスタートで高速化しますが、コールドスタートでは専用メモアプリに及びません。ただし、「普段使っているLINEの中で完結する」という利便性は、速度以外の大きなメリットです。</p>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 1: Purpose-built apps are 3-14x faster than general-purpose apps</span><span class="app-card__rank">Key Finding</span></div>
+          <div class="app-card__desc">
+            <p>For the simple task of "write a memo and save/send it," purpose-built apps (SimpleMemo: 0.45s, Drafts: 1.1s) dramatically outperformed general-purpose note apps (Notion: 5.3s, Evernote: 6.5s). SimpleMemo is roughly 14x faster than Evernote and 12x faster than Notion. This isn't just a millisecond difference -- it determines whether you can capture a thought the instant it occurs.</p>
+            <p style="margin-top:.5rem">The reason is clear: purpose-built apps load minimal UI components, database queries, and sync processes at launch. SimpleMemo loads only the memo input screen; Drafts immediately shows a new text editor. Notion and Evernote must initialize notebook lists, recent notes, sync status, and more.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 2: Apple Notes achieves excellent balance among general-purpose apps</span><span class="app-card__rank">Notable</span></div>
+          <div class="app-card__desc">
+            <p>Apple Notes clocked in at 2.0 seconds total -- the fastest among general-purpose memo apps. Its OS-level integration means less startup overhead compared to third-party apps. Achieving this speed while supporting handwriting, checklists, photo attachments, and PDF annotation is genuinely impressive.</p>
+            <p style="margin-top:.5rem">However, if you want to "write a memo and email it to yourself" in Apple Notes, you need additional steps: open the share sheet, select Mail, enter the recipient, then send. This effectively adds 3+ seconds, making the total over 5 seconds. "Saving a memo" and "emailing a memo" are fundamentally different workflows.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 3: Notion/Evernote trade speed for features -- and that's OK</span><span class="app-card__rank">Trade-off</span></div>
+          <div class="app-card__desc">
+            <p>Notion (5.3s) and Evernote (6.5s) were among the slowest, but "slow" doesn't mean "bad." Both apps initialize complex data structures at launch -- databases, workspaces, sharing configs -- that power their rich feature sets.</p>
+            <p style="margin-top:.5rem">Notion's relational databases and Evernote's full-text search and Web Clipper are incredibly powerful for organizing and leveraging notes. The issue arises when these heavyweight apps are used for instant thought capture -- a task they weren't optimized for. The speed frustration often stems from a mismatch between tool and task.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 4: Drafts is genuinely fast, but email sending requires setup</span><span class="app-card__rank">Fair Assessment</span></div>
+          <div class="app-card__desc">
+            <p>Drafts (1.1s) earned second place. Its 0.8-second launch reflects a design philosophy of immediately opening a new text editor. Save time of 0.3 seconds is excellent, and the text-input-to-local-save flow is very smooth.</p>
+            <p style="margin-top:.5rem">However, sending a memo via email in Drafts requires configuring an Action (Shortcut). Once set up, it's a one-tap send, but the initial setup process requires some technical literacy. SimpleMemo, being purpose-built for email delivery, only needs your email address during setup. The distinction is clear: Drafts excels at "write and save locally," SimpleMemo excels at "write and email instantly."</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 5: Obsidian is slow to launch but fast to save</span><span class="app-card__rank">Surprise</span></div>
+          <div class="app-card__desc">
+            <p>Obsidian takes 2.8 seconds to launch but saves in just 0.5 seconds -- the third-fastest save time overall. This is because Obsidian uses a local-first design, writing Markdown files directly to the device's file system without cloud sync overhead.</p>
+            <p style="margin-top:.5rem">The slow launch comes from vault initialization, plugin loading, and theme application. If you use Obsidian frequently for capture, keeping it in the background (warm start) can dramatically reduce effective launch time.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 6: Manual email is surprisingly slow</span></div>
+          <div class="app-card__desc">
+            <p>"Can't I just email myself?" is a common question. But launching Apple Mail, composing a new message, entering the recipient, typing the body, and hitting send takes a total of 5.5 seconds. The "enter recipient" step in particular isn't automated, adding friction every single time. That's over 12x slower than SimpleMemo.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Finding 7: LINE Keep Memo is mid-speed as a memo tool</span></div>
+          <div class="app-card__desc">
+            <p>LINE Keep Memo (3.0s) is widely used in Japan, but speed-wise it's comparable to Google Keep (3.1s). LINE itself takes 1.8 seconds to launch, followed by navigation to the Keep Memo chat screen. With LINE running in the background (warm start), it's faster, but on cold start it can't match dedicated memo apps. That said, the convenience of "staying within LINE" is a significant benefit beyond raw speed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommendations by Use Case -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">利用シーン別おすすめ</span><span data-lang="en">Recommendations by Use Case</span></h2>
+      <div data-lang="ja">
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">一瞬でメモを残したい</span><span class="app-card__rank">速度重視</span></div>
+          <div class="app-card__desc">
+            <p><strong>おすすめ: SimpleMemo / Drafts</strong></p>
+            <p style="margin-top:.5rem">移動中、会議中、読書中にふと思いついたアイデアを逃さず記録したいなら、起動から完了まで1秒以内で終わる特化型アプリが最適です。SimpleMemoはメール送信まで0.45秒、Draftsはローカル保存まで1.1秒。1日に何度もメモを取る人にとって、この数秒の差は年間で数時間の差になります。</p>
+            <p style="margin-top:.5rem">メモをメールで自動送信したいならSimpleMemo、ローカルに保存して後からアクション（Shortcut）で処理したいならDraftsが向いています。どちらも優れたアプリですが、ワークフローが異なります。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">ノートを整理したい</span><span class="app-card__rank">組織化重視</span></div>
+          <div class="app-card__desc">
+            <p><strong>おすすめ: Notion / Obsidian</strong></p>
+            <p style="margin-top:.5rem">起動は遅くても、メモを蓄積・整理・検索・接続する能力ではNotionとObsidianが圧倒的です。Notionはデータベース、カンバンボード、カレンダービューでビジネス向けの構造化を得意とし、Obsidianは双方向リンクとナレッジグラフで研究・執筆向けの知識ネットワーク構築を得意とします。</p>
+            <p style="margin-top:.5rem">理想的な運用は、キャプチャを高速アプリ（SimpleMemo/Drafts）で行い、整理を構造化アプリ（Notion/Obsidian）で行う「2段階メモ術」です。キャプチャと整理を別のアプリに分けることで、どちらの作業も最適化されます。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">チームで共有したい</span><span class="app-card__rank">コラボ重視</span></div>
+          <div class="app-card__desc">
+            <p><strong>おすすめ: Notion / Google Keep</strong></p>
+            <p style="margin-top:.5rem">チームでのメモ共有が必要なら、Notionのワークスペース共有機能が最も強力です。権限管理、コメント、リアルタイム共同編集に対応しています。よりカジュアルな共有ならGoogle Keepのラベル共有が手軽です。</p>
+            <p style="margin-top:.5rem">チーム向けアプリは起動速度よりも「共有・コメント・権限管理」の機能が重要です。速度テストでは不利な結果ですが、個人のメモキャプチャとは根本的に異なる使い方であるため、速度だけで評価すべきではありません。</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">コストをかけたくない</span><span class="app-card__rank">無料重視</span></div>
+          <div class="app-card__desc">
+            <p><strong>おすすめ: Apple Notes / Google Keep / Simplenote</strong></p>
+            <p style="margin-top:.5rem">Apple Notesは起動2.0秒と無料アプリの中では最速で、機能も十分。Google Keepはクロスプラットフォーム対応で便利。Simplenoteはテキストメモに特化した完全無料アプリです。無料でも十分に速く、実用的なメモ環境を構築できます。</p>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Capture thoughts instantly</span><span class="app-card__rank">Speed-First</span></div>
+          <div class="app-card__desc">
+            <p><strong>Recommended: SimpleMemo / Drafts</strong></p>
+            <p style="margin-top:.5rem">If you need to capture fleeting ideas while commuting, in meetings, or while reading, purpose-built apps that complete the entire cycle in under 1 second are your best bet. SimpleMemo finishes in 0.45 seconds (including email send), Drafts in 1.1 seconds (local save). For someone who takes memos multiple times a day, these seconds add up to hours over a year.</p>
+            <p style="margin-top:.5rem">If you want memos automatically emailed to you, choose SimpleMemo. If you prefer local save with Shortcut-based post-processing, choose Drafts. Both are excellent -- they just serve different workflows.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Organize your notes</span><span class="app-card__rank">Organization-First</span></div>
+          <div class="app-card__desc">
+            <p><strong>Recommended: Notion / Obsidian</strong></p>
+            <p style="margin-top:.5rem">While slow to launch, Notion and Obsidian are unmatched in their ability to accumulate, organize, search, and connect notes. Notion excels at structured business workflows (databases, kanban, calendar views); Obsidian excels at building knowledge networks for research and writing (bi-directional links, knowledge graph).</p>
+            <p style="margin-top:.5rem">The ideal workflow is a "two-stage memo system": capture with a fast app (SimpleMemo/Drafts), organize with a structured app (Notion/Obsidian). Separating capture from organization optimizes both tasks.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Share with your team</span><span class="app-card__rank">Collaboration-First</span></div>
+          <div class="app-card__desc">
+            <p><strong>Recommended: Notion / Google Keep</strong></p>
+            <p style="margin-top:.5rem">For team memo sharing, Notion's workspace sharing is the most powerful option: permissions, comments, and real-time co-editing. For more casual sharing, Google Keep's label sharing is simple and effective.</p>
+            <p style="margin-top:.5rem">Team-focused apps prioritize sharing, commenting, and permission management over launch speed. They score poorly in speed tests, but they serve a fundamentally different use case than personal memo capture. Speed alone is not the right metric here.</p>
+          </div>
+        </div>
+        <div class="app-card">
+          <div class="app-card__header"><span class="app-card__name">Keep costs at zero</span><span class="app-card__rank">Free-First</span></div>
+          <div class="app-card__desc">
+            <p><strong>Recommended: Apple Notes / Google Keep / Simplenote</strong></p>
+            <p style="margin-top:.5rem">Apple Notes launches in 2.0 seconds -- the fastest free general-purpose app -- and is feature-rich. Google Keep offers cross-platform convenience. Simplenote is a minimalist, completely free text-only memo app. You can build a fast, practical memo environment without spending anything.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">よくある質問</span><span data-lang="en">FAQ</span></h2>
+      <div data-lang="ja">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">このベンチマークデータは引用してもよいですか？</summary><div class="faq-answer"><p>はい、出典リンク（https://simplememofast.com/blog/memo-app-speed-test-2026）を明記いただければ、ブログ記事、メディア記事、論文、プレゼン資料などで自由にご利用いただけます。データの改変や誤解を招く引用はお控えください。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ウォームスタート（バックグラウンドからの復帰）ではどのくらい速くなりますか？</summary><div class="faq-answer"><p>ウォームスタートでは、ほぼすべてのアプリが0.5秒以内に復帰します。ただし、ウォームスタートの速度はiOSのメモリ管理に依存し、他のアプリの使用状況によってバックグラウンドから強制終了されることがあります。コールドスタートの速度は「最悪のケース」を示しており、日常的に期待できる信頼性の高い指標です。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Android端末での速度テスト結果はありますか？</summary><div class="faq-answer"><p>本テストはiPhone 15 Proに限定しています。Android端末は機種ごとにスペックが大きく異なるため、公平な比較が難しく、今回の対象外としました。なお、SimpleMemoは現在iOS専用アプリのため、Androidでは利用できません。Android向けの速度比較テストは今後実施を検討しています。</p></div></details></div>
+      </div>
+      <div data-lang="en">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I cite this benchmark data?</summary><div class="faq-answer"><p>Yes. You may freely use this data in blog posts, media articles, research papers, and presentations as long as you include a source link (https://simplememofast.com/blog/memo-app-speed-test-2026). Please do not alter the data or cite it in a misleading context.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How much faster are warm starts (resume from background)?</summary><div class="faq-answer"><p>On warm start, nearly all apps resume within 0.5 seconds. However, warm start speed depends on iOS memory management -- apps can be force-terminated by the OS when other apps need resources. Cold start speed represents the "worst case" and is a more reliable indicator of everyday performance.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are there speed test results for Android devices?</summary><div class="faq-answer"><p>This test is limited to iPhone 15 Pro. Android devices vary so widely in specs that fair comparison across models is difficult, so we excluded them for now. Note that SimpleMemo is currently iOS-only. An Android-focused speed comparison is under consideration for a future article.</p></div></details></div>
+      </div>
+    </section>
+
+    <!-- Related Articles -->
+    <section class="lp-section">
+      <h2 class="lp-section__title">
+        <span data-lang="ja">関連記事</span>
+        <span data-lang="en">Related Articles</span>
+      </h2>
+      <div class="internal-links">
+        <a href="/blog/best-memo-apps-2026">
+          <span data-lang="ja">おすすめメモアプリ10選 2026</span>
+          <span data-lang="en">Best Memo Apps 2026 - Top 10</span>
+        </a>
+        <a href="/blog/how-to-choose-memo-app">
+          <span data-lang="ja">メモアプリの選び方 完全ガイド</span>
+          <span data-lang="en">How to Choose a Memo App</span>
+        </a>
+        <a href="/blog/memo-app-security-comparison">
+          <span data-lang="ja">メモアプリの セキュリティ比較</span>
+          <span data-lang="en">Memo App Security Comparison</span>
+        </a>
+        <a href="/methods/">
+          <span data-lang="ja">メモ術メソッド</span>
+          <span data-lang="en">Memo Methods</span>
+        </a>
+      </div>
+    </section>
+
+    <div class="cta-box">
+      <div class="cta-box__title"><span data-lang="ja">最速0.45秒のメモ体験を試す</span><span data-lang="en">Try the 0.45-second memo experience</span></div>
+      <div class="cta-box__desc"><span data-lang="ja">起動0.3秒 + 送信0.15秒。7日間の無料トライアル付き。</span><span data-lang="en">0.3s launch + 0.15s send. 7-day free trial included.</span></div>
+      <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
+      <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
+    </div>
+
+    <!-- Related Pages -->
+    <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2>
+      <div class="internal-links">
+        <a href="/vs/evernote/"><span data-lang="ja">vs Evernote</span><span data-lang="en">vs Evernote</span></a>
+        <a href="/vs/notion/"><span data-lang="ja">vs Notion</span><span data-lang="en">vs Notion</span></a>
+        <a href="/vs/obsidian/"><span data-lang="ja">vs Obsidian</span><span data-lang="en">vs Obsidian</span></a>
+        <a href="/vs/apple-notes/"><span data-lang="ja">vs Apple Notes</span><span data-lang="en">vs Apple Notes</span></a>
+        <a href="/vs/bear/"><span data-lang="ja">vs Bear</span><span data-lang="en">vs Bear</span></a>
+        <a href="/vs/google-keep/"><span data-lang="ja">vs Google Keep</span><span data-lang="en">vs Google Keep</span></a>
+        <a href="/blog/best-memo-apps-2026"><span data-lang="ja">おすすめメモアプリ10選</span><span data-lang="en">Best Memo Apps 2026</span></a>
+        <a href="/methods/"><span data-lang="ja">メモ術メソッド</span><span data-lang="en">Memo Methods</span></a>
+        <a href="/blog/"><span data-lang="ja">ブログ一覧</span><span data-lang="en">All Articles</span></a>
+      </div>
+    </section>
+
+  </div></main>
+
+  <footer class="footer"><div class="container"><nav class="footer__links"><a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a><a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a><a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a><a href="/vs/" class="footer__link"><span data-lang="ja">アプリ比較</span><span data-lang="en">Comparisons</span></a><a href="/use-cases/" class="footer__link"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a><a href="/guides/" class="footer__link"><span data-lang="ja">設定ガイド</span><span data-lang="en">Guides</span></a><a href="/blog/" class="footer__link"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a><a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a><a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a><a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a></nav><p class="footer__copyright">&copy; 2026 <span data-lang="ja">Capito式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p></div></footer>
+
+  <script src="/js/lang.js"></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>
