@@ -17,7 +17,11 @@ jobs:
           node-version: '20'
 
       - name: Run SEO validation
-        run: node scripts/seo-check.js
+        run: |
+          EXIT_CODE=0
+          node scripts/seo-check.js || EXIT_CODE=$?
+          # Exit code 1 = warnings only (acceptable), 2 = errors (fail CI)
+          if [ $EXIT_CODE -ge 2 ]; then exit $EXIT_CODE; fi
 
       - name: Generate sitemap (dry run)
         run: node scripts/generate-sitemap.js
