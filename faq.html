@@ -52,17 +52,84 @@
   <link rel="canonical" href="https://simplememofast.com/faq">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/faq">
 
-  <!-- JSON-LD: Speakable -->
+  <!-- JSON-LD: FAQPage -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebPage",
+    "@type": "FAQPage",
     "name": "よくあるご質問（FAQ） | Captio式シンプルメモ",
+    "url": "https://simplememofast.com/faq",
+    "inLanguage": "ja",
     "speakable": {
       "@type": "SpeakableSpecification",
       "cssSelector": [".faq-summary", ".faq-answer"]
     },
-    "url": "https://simplememofast.com/faq"
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "無料で使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモはどこに送られますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "設定画面で認証済みの宛先メールアドレスに、メールとして送信されます。送信元は Simple Memo <noreply@mail.simplememofast.com> です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモの内容はどこかのサーバーに保存されますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。メモの内容がSimple Memoのサーバーに保存されることはありません。メモはRelay APIを経由してメールとして送信されますが、送信完了後にサーバー上にデータは残りません。端末内のOutboxと履歴データはAES-GCM暗号化された状態で端末にのみ保存されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "オフラインでもメモを送信できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。オフライン時に送信ボタンをタップすると、メモはAES-GCM暗号化された状態でOutbox（未送信キュー）に保存されます。ネットワークが回復すると、自動的にOutbox内のメモが順次送信されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "メモの暗号化について詳しく教えてください。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memoでは、端末内に保存されるすべてのメモデータ（Outbox・履歴）をAES-GCM（256ビット）で暗号化しています。暗号化キーはKeychainに保存され、端末のセキュアエンクレーブで保護されます。暗号化キーが端末外に送信されることはありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "サブスクリプションの解約方法を教えてください。",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Apple IDの「サブスクリプション管理」画面から解約できます。iPhoneの「設定」→ 自分の名前 →「サブスクリプション」→「Simple Memo Premium」→「サブスクリプションをキャンセル」。解約後も、現在の課金期間の終了日まではプレミアム機能をご利用いただけます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "アプリの起動速度はどれくらいですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "約0.3秒で起動します。UIKitネイティブで開発されており、外部ライブラリへの依存がゼロのため、高速な起動を実現しています。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "このアプリは旧Captioの公式後継アプリですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "公式の後継ではありません。Simple Memoは、旧CaptioのUXコンセプト（メモをメールで自分に送る）にインスパイアされた独立開発のアプリです。Captioの開発元とは無関係ですが、「書いて、タップ、メールが届く」という体験を現代のiOS向けに再構築しました。"
+        }
+      }
+    ]
   }
   </script>
 
