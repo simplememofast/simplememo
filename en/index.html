@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
@@ -48,6 +49,9 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
+  <!-- LCP preload: hero app icon -->
+  <link rel="preload" as="image" href="/assets/img/app-icon-256.png">
+
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/en/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/">
@@ -72,7 +76,9 @@
       "url": "https://simplememofast.com/",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://simplememofast.com/assets/img/app-icon.png"
+        "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+        "width": 256,
+        "height": 256
       },
       "sameAs": [
         "https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948",
@@ -120,7 +126,7 @@
     "alternateName": "Captio式シンプルメモ",
     "description": "Fast, minimal memo app that sends notes to your email inbox with one tap. A Captio alternative with 0.3s launch, 150ms send, offline support, and AES-GCM encryption.",
     "url": "https://simplememofast.com/en/",
-    "image": "https://simplememofast.com/assets/img/app-icon.png",
+    "image": "https://simplememofast.com/assets/img/app-icon-256.png",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "iOS",
     "offers": [
@@ -181,27 +187,20 @@
     "downloadUrl": "https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US",
     "author": {
       "@id": "https://simplememofast.com/about/#person"
-    },
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "5.0",
-      "ratingCount": "6",
-      "bestRating": "5"
     }
   }
   </script>
 
-  <!-- JSON-LD: Speakable (AIO / Voice Search) -->
+  <!-- JSON-LD: WebPage -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebPage",
+    "@id": "https://simplememofast.com/en/#webpage",
     "name": "Simple Memo - Captio-style",
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".entity-definition__text", ".hero__title", ".hero__subtitle"]
-    },
-    "url": "https://simplememofast.com/en/"
+    "url": "https://simplememofast.com/en/",
+    "inLanguage": "en",
+    "isPartOf": { "@id": "https://simplememofast.com/en/#website" }
   }
   </script>
 
@@ -423,7 +422,7 @@
   <section class="hero">
     <div class="container">
       <div class="hero__icon">
-        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo app icon" width="256" height="256" >
+        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo app icon" width="256" height="256" fetchpriority="high">
       </div>
       <div class="hero__badge">
         iOS App &#8212; Launches in 0.3s
