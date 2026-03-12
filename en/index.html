@@ -3,15 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+  <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      requestIdleCallback(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>Simple Memo - Captio-style | Email Yourself App for iOS</title>
   <meta name="description" content="Email yourself app for iPhone. Write a note and send it to your inbox in one tap. The best Captio alternative with offline support, encryption, and 0.3s launch.">
@@ -37,10 +45,7 @@
   <meta name="twitter:description" content="Email yourself app for iPhone. Write a note and send it to your inbox in one tap. The best Captio alternative with offline support and encryption. 7-day free trial.">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/ogp.png">
 
-  <!-- Google Fonts - Noto Sans JP -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"></noscript>
+  <!-- System font stack (no CJK font needed for EN page) -->
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -50,7 +55,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- LCP preload: hero app icon -->
-  <link rel="preload" as="image" href="/assets/img/app-icon-256.png">
+  <link rel="preload" as="image" href="/assets/img/app-icon-256.webp" type="image/webp">
 
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/en/">
@@ -426,7 +431,7 @@
   <section class="hero">
     <div class="container">
       <div class="hero__icon">
-        <img src="/assets/img/app-icon-256.png" alt="SimpleMemo app icon" width="256" height="256" fetchpriority="high">
+        <img src="/assets/img/app-icon-256.webp" alt="SimpleMemo app icon" width="256" height="256" fetchpriority="high">
       </div>
       <div class="hero__badge">
         iOS App &#8212; Launches in 0.3s
@@ -451,7 +456,7 @@
     <div class="container">
       <p class="entity-definition__text">
         <strong>Simple Memo - Captio-style</strong> is a lightweight iOS app that lets you send notes to your email inbox with one tap.
-        Released in 2026 as a <strong><a href="/captio-alternative/" style="color:var(--accent);">Captio alternative</a></strong> after Captio shut down.
+        Released in 2026 as a <strong><a href="/captio-alternative/" style="color:var(--accent);display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">Captio alternative</a></strong> after Captio shut down.
         Features 0.3s launch, 150ms send, offline support via Outbox architecture, and AES-GCM encryption for privacy.
       </p>
     </div>
@@ -466,7 +471,7 @@
       </h2>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1.5rem;" class="reveal">
         <p style="font-size:1rem;line-height:1.8;color:var(--text-secondary);margin-bottom:1rem;">
-          <strong style="color:var(--text);">Email Memo</strong> is a new way to take notes — jot down your thought and <strong style="color:var(--text);">send it to your own inbox with one tap</strong>. Email is the one place everyone checks daily. That's why zero memos get missed. No folders, no tags, no organizing. <a href="/note-to-email/" style="color:var(--accent);">Learn how Note-to-Email works</a> and never lose a thought again.
+          <strong style="color:var(--text);">Email Memo</strong> is a new way to take notes — jot down your thought and <strong style="color:var(--text);">send it to your own inbox with one tap</strong>. Email is the one place everyone checks daily. That's why zero memos get missed. No folders, no tags, no organizing. <a href="/note-to-email/" style="color:var(--accent);display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">Learn how Note-to-Email works</a> and never lose a thought again.
         </p>
         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
           <a href="/use-cases/" style="color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;min-height:48px;display:inline-flex;align-items:center;">
@@ -490,7 +495,7 @@
       <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-top:2rem;">
         <div style="text-align:center;">
           <div style="width:200px;height:380px;background:linear-gradient(180deg,rgba(20,24,35,1) 0%,rgba(15,18,28,1) 100%);border:2px solid rgba(100,160,220,.2);border-radius:28px;padding:2.5rem 1.25rem 1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 40px rgba(0,0,0,.4);margin:0 auto;">
-            <img src="/assets/img/app-icon-256.png" alt="Simple Memo app icon" width="64" height="64" style="border-radius:14px;margin-bottom:1.25rem;" loading="lazy">
+            <img src="/assets/img/app-icon-256.webp" alt="Simple Memo app icon" width="64" height="64" style="border-radius:14px;margin-bottom:1.25rem;" loading="lazy">
             <div style="width:100%;background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.12);border-radius:12px;padding:.75rem;margin-bottom:.75rem;">
               <p style="font-size:.7rem;color:rgba(255,255,255,.4);text-align:left;margin-bottom:.25rem;">To: me@gmail.com</p>
               <p style="font-size:.875rem;color:rgba(255,255,255,.85);text-align:left;line-height:1.5;">New feature idea to propose at tomorrow's meeting...</p>
