@@ -301,54 +301,6 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "MocaとCaptio式シンプルメモの最大の違いは何ですか？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "最大の違いはオフライン対応と暗号化です。Mocaはシンプルなメール送信に特化していますが、オフライン時のメモ保存やAES-GCM暗号化機能はありません。シンプルメモはOutboxアーキテクチャにより、オフラインでもメモを暗号化保存し、接続回復時に自動送信します。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Mocaにはメモの編集・削除機能がないのはなぜですか？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Mocaは意図的に編集・削除機能を省いています。メモを書いたらすぐ送るという思想で設計されています。シンプルメモも同様に送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Mocaの代わりになるアプリはありますか？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Mocaと同じ「自分にメールを送る」コンセプトのアプリとしてCaptio式シンプルメモがあります。Mocaのシンプルさを維持しつつ、AES-GCM暗号化、Outboxオフライン対応、Cloudflare Workers経由の150ms高速送信を追加しています。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "シンプルメモの送信速度はMocaより速いですか？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "はい。シンプルメモはCloudflare Workers + Resend APIを使用し、送信ボタンを押してから約150msでメール配信を完了します。エッジコンピューティングによるリレーサーバーで、地理的位置に関わらず高速な配信を実現しています。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Mocaとシンプルメモはどちらが安全ですか？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "セキュリティ面ではシンプルメモが優れています。AES-GCM暗号化によりOutbox内のメモは端末内で暗号化保存されます。Mocaにはこの暗号化機能はありません。どちらもサーバーにメモを永続保存しませんが、端末内データの保護はシンプルメモが上回ります。"
-      }
-    }
-  ]
-}
-  </script>
   </head>
 <body>
   <!-- Global Navigation -->
