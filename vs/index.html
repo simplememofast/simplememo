@@ -61,6 +61,10 @@
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".lp-section__lead"]
+    },
     "name": "メモアプリ比較 — Captio式シンプルメモ vs 他アプリ",
     "description": "Apple Notes・Google Keep・Notion・LINEなど人気メモアプリをCaptio式シンプルメモと徹底比較。起動速度・メール連携・オフライン対応などの観点で一覧表示。",
     "url": "https://simplememofast.com/vs/",
@@ -143,18 +147,7 @@
   </script>
 
   <!-- JSON-LD: Speakable -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "メモアプリ比較ハブ",
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".lp-section__lead"]
-    },
-    "url": "https://simplememofast.com/vs/"
-  }
-  </script>
+  
 
   <link rel="stylesheet" href="/assets/css/style.min.css">
   <style>
@@ -364,11 +357,10 @@
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
-
 
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">

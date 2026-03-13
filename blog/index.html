@@ -60,6 +60,10 @@
   {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".lp-hero__title", ".lp-hero__sub"]
+    },
     "name": "ブログ — Captio式シンプルメモ",
     "description": "メモアプリ・iPhone活用術・メール管理術など、生産性を高める実践的なガイドを発信。",
     "url": "https://simplememofast.com/blog/",
@@ -508,18 +512,7 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "ブログ | Captio式シンプルメモ",
-    "url": "https://simplememofast.com/blog/",
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".lp-hero__title", ".lp-hero__sub"]
-    }
-  }
-  </script>
+  
 </head>
 <body>
   <!-- Global Navigation -->
@@ -545,11 +538,10 @@
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
-
 
   <!-- Meta Templates for JS -->
   <div class="meta-templates" style="display:none;">
