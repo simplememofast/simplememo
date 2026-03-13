@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>Outboxアーキテクチャとは — Captio式シンプルメモ用語集</title>
   <meta name="description" content="Outboxアーキテクチャ（Outboxパターン）とは、メッセージをローカルにキューイングし、ネットワーク接続時に送信する設計パターンです。Captio式シンプルメモのオフラインメモ送信を支えるコア技術を解説。">
@@ -32,8 +42,7 @@
   <meta name="twitter:description" content="Outboxパターンの技術解説。オフラインメモが確実に届く仕組み。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/glossary-outbox-architecture.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="canonical" href="https://simplememofast.com/glossary/outbox-architecture/">
+    <link rel="canonical" href="https://simplememofast.com/glossary/outbox-architecture/">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/glossary/outbox-architecture/">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/glossary/outbox-architecture/">
 

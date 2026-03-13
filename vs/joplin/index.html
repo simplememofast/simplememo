@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>シンプルメモ vs Joplin — メモアプリ比較 | Captio式シンプルメモ</title>
   <meta name="description" content="Joplinとシンプルメモの違いを徹底比較。オープンソースの多機能ノートアプリと瞬間キャプチャ専用アプリ、目的別に最適な選び方を解説します。">
@@ -33,11 +43,8 @@
   <meta name="twitter:title" content="シンプルメモ vs Joplin — メモアプリ徹底比較">
   <meta name="twitter:description" content="Joplinとシンプルメモの違いを徹底比較。オープンソースの多機能ノートアプリと瞬間キャプチャ専用アプリ、目的別に最適な選び方を解説します。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-joplin.png">
-
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <!-- Canonical & Hreflang -->
+    <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/vs/joplin/">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/joplin/">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/joplin/">

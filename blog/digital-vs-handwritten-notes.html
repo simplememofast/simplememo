@@ -3,8 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-EPZVZKCVQG');</script>
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
+  </script>
   <title>デジタルメモ vs 手書きメモ — Captio式シンプルメモ</title>
   <meta name="description" content="デジタルメモと手書きメモの科学的比較。手書きの記憶定着効果、デジタルの検索性・速度・共有性。場面別の最適な使い分けとCaptio式シンプルメモによるハイブリッドワークフローを解説。">
   <meta name="theme-color" content="#000000">
@@ -25,11 +40,14 @@
   <meta name="twitter:description" content="手書きの記憶定着効果 vs デジタルの検索性・速度。場面別の最適な使い分けガイド。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-digital-vs-handwritten-notes.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="canonical" href="https://simplememofast.com/blog/digital-vs-handwritten-notes">
+    <link rel="canonical" href="https://simplememofast.com/blog/digital-vs-handwritten-notes">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/digital-vs-handwritten-notes">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/digital-vs-handwritten-notes">
-  <link rel="icon" href="/favicon.ico"><link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png"><link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png"><link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-digital-vs-handwritten-notes.png","headline":"デジタルメモ vs 手書きメモ — 科学的根拠で選ぶ最適な使い分け","description":"デジタルメモと手書きメモの科学的比較と最適な使い分け。","url":"https://simplememofast.com/blog/digital-vs-handwritten-notes","datePublished":"2026-02-24","dateModified":"2026-02-24","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/digital-vs-handwritten-notes"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"デジタルメモ vs 手書きメモ","item":"https://simplememofast.com/blog/digital-vs-handwritten-notes"}]}</script>
@@ -38,7 +56,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"></noscript>
+  <noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap"></noscript>
   <link rel="stylesheet" href="/assets/css/style.min.css">
   <style>
     .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:revert}span[data-lang].active{display:revert}a.app-store-badge[data-lang].active{display:inline-flex}

@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>Simplenoteとの比較 — Captio式シンプルメモ | メモアプリ比較</title>
   <meta name="description" content="SimplenoteとCaptio式シンプルメモの違いを徹底比較。メール送信・アカウント不要・オフラインOutbox・起動速度の観点で解説。Simplenoteとの違いを知りたい方へ。">
@@ -33,11 +43,8 @@
   <meta name="twitter:title" content="シンプルメモ vs Simplenote — メモアプリ徹底比較">
   <meta name="twitter:description" content="SimplenoteとCaptio式シンプルメモの違いを徹底比較。メール送信・アカウント不要・オフラインOutbox・起動速度の観点で解説。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/vs-simplenote.png">
-
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <!-- Canonical & Hreflang -->
+    <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/vs/simplenote/">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/simplenote/">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/simplenote/">

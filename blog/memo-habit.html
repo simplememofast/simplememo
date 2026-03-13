@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>メモ習慣化の完全ガイド — 続かない人のための21日間プログラム | Captio式シンプルメモ</title>
   <meta name="description" content="メモが続かない人のためのメモ習慣化ガイド。21日間ルール、トリガー・アクション・パターン、朝晩メモルーティン、摩擦の削減法など、科学的に裏付けられた習慣化メソッドを解説。">
@@ -32,8 +42,7 @@
   <meta name="twitter:description" content="21日間ルール、トリガー・アクション・パターン、摩擦の削減法など、メモが続かない人のための習慣化メソッド。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-habit.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="canonical" href="https://simplememofast.com/blog/memo-habit">
+    <link rel="canonical" href="https://simplememofast.com/blog/memo-habit">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/memo-habit">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/memo-habit">
 
