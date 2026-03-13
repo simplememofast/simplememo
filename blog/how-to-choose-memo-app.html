@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>メモアプリの選び方 完全ガイド — 5つの基準で失敗しない | Captio式シンプルメモ</title>
   <meta name="description" content="メモアプリの選び方を5つの基準で徹底解説。速度、プライバシー、同期、価格、エコシステムの観点から最適なメモアプリを選ぶ決定フローチャートとペルソナ別おすすめを紹介。">
@@ -32,8 +42,7 @@
   <meta name="twitter:description" content="速度、プライバシー、同期、価格、エコシステム。5つの基準でメモアプリを選ぶ完全ガイド。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-how-to-choose-memo-app.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="canonical" href="https://simplememofast.com/blog/how-to-choose-memo-app">
+    <link rel="canonical" href="https://simplememofast.com/blog/how-to-choose-memo-app">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/how-to-choose-memo-app">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/how-to-choose-memo-app">
 

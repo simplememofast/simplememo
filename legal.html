@@ -3,20 +3,27 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
+    <!-- Google tag (gtag.js) -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>特定商取引法に基づく表記 | Captio式シンプルメモ</title>
   <meta name="description" content="Captio式シンプルメモ（軽快シンプルメモ）の特定商取引法に基づく表記。販売事業者情報、料金体系、返金ポリシー、お問い合わせ先など、法令に基づく事業者情報を掲載しています。">
   <meta name="theme-color" content="#000000">
-
-  <!-- Google Fonts - Noto Sans JP -->
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
   <meta property="og:title" content="特定商取引法に基づく表記 | Captio式シンプルメモ">

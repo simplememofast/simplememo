@@ -7,7 +7,8 @@
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
     window.addEventListener('load', function() {
-      requestIdleCallback(function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
         var s = document.createElement('script');
         s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
         s.async = true;

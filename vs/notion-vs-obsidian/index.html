@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>Notion vs Obsidian — どちらが最適？ナレッジ管理アプリ徹底比較</title>
   <meta name="description" content="NotionとObsidianの違いを徹底比較。クラウド vs ローカル、ブロックエディタ vs Markdown、チーム向け vs 個人向けの観点で解説。どちらにも満足できない場合の代替案も。">
@@ -37,8 +47,7 @@
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <!-- Canonical & Hreflang -->
+    <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/vs/notion-vs-obsidian/">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/notion-vs-obsidian/">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/notion-vs-obsidian/">

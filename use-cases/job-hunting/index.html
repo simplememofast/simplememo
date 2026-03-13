@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EPZVZKCVQG');
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
   </script>
   <title>就活メモの整理術 — Captio式シンプルメモ | 面接・企業研究・ES対策</title>
   <meta name="description" content="就活メモの整理術ガイド。面接で聞いた質問、企業説明会の印象、ES下書きのアイデアをワンタップでメール送信。就職活動をCaptio式シンプルメモで効率化。">
@@ -37,8 +47,7 @@
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://analytics.ahrefs.com">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <!-- Canonical & Hreflang -->
+    <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/use-cases/job-hunting/">
     <link rel="alternate" hreflang="ja" href="https://simplememofast.com/use-cases/job-hunting/">
     <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/use-cases/job-hunting/">
