@@ -52,6 +52,9 @@
   <!-- Hero image preload for LCP -->
   <link rel="preload" as="image" href="/assets/img/hero-ja.webp" type="image/webp" imagesrcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" imagesizes="(max-width: 1200px) 100vw, 1200px">
 
+  <!-- App icon preload -->
+  <link rel="preload" as="image" href="/assets/img/app-icon-256.webp" type="image/webp">
+
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -426,7 +429,7 @@
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')" aria-label="メニュー">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
