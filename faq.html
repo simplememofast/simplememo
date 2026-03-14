@@ -27,8 +27,6 @@
     .lang-switcher {
       display: inline-flex;
       background: rgba(15, 20, 30, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(100, 160, 220, 0.12);
       border-radius: 22px;
       padding: 3px;
@@ -155,6 +153,7 @@
       align-items: center;
     }
     .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
     .global-nav__hamburger {
       display: none;
       background: none;
@@ -220,15 +219,24 @@
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "よくあるご質問（FAQ） | Captio式シンプルメモ",
-    "url": "https://simplememofast.com/faq",
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".faq-summary", ".faq-answer", ".lp-hero__title"]
-    }
-  }
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/faq#webpage",
+  "inLanguage": "ja",
+  "name": "よくあるご質問（FAQ） | Captio式シンプルメモ",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/#website"
+  },
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [
+      ".faq-summary",
+      ".faq-answer",
+      ".lp-hero__title"
+    ]
+  },
+  "url": "https://simplememofast.com/faq"
+}
   </script>
 </head>
 <body>
@@ -249,13 +257,13 @@
         <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
         <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
         <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>

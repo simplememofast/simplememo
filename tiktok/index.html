@@ -91,8 +91,6 @@
       display: flex;
       gap: 0;
       background: var(--bg-surface);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
@@ -209,8 +207,6 @@
       font-size: 0.75rem;
       color: var(--text-subtle);
       background: var(--bg-surface);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 12px 16px;
@@ -230,8 +226,6 @@
       font-size: 0.8rem;
       color: var(--text-secondary);
       background: var(--bg-surface);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 14px 16px;
@@ -347,6 +341,7 @@
       align-items: center;
     }
     .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
     .global-nav__hamburger {
       display: none;
       background: none;
@@ -416,13 +411,13 @@
         <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
         <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
         <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
