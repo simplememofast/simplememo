@@ -80,7 +80,7 @@
   <link rel="stylesheet" href="/assets/css/style.min.css">
   <style>
     .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
-    .lang-switcher { display: inline-flex; background: rgba(15, 20, 30, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(100, 160, 220, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher { display: inline-flex; background: rgba(15, 20, 30, 0.6); border: 1px solid rgba(100, 160, 220, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
     .lang-switcher__btn { background: transparent; border: none; color: rgba(255, 255, 255, 0.5); padding: 0.75rem 1.1rem;
       min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
     .lang-switcher__btn:hover { color: rgba(255, 255, 255, 0.85); }
@@ -186,6 +186,7 @@
       align-items: center;
     }
     .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
     .global-nav__hamburger {
       display: none;
       background: none;
@@ -239,63 +240,75 @@
   <!-- JSON-LD: CollectionPage + BreadcrumbList -->
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "開発日誌 - Captio式シンプルメモ",
-    "description": "Captio式シンプルメモの開発日誌。技術的な意思決定とCaptioの体験再現の記録。",
-    "url": "https://simplememofast.com/devlog/",
-    "hasPart": [
-      {
-        "@type": "Article",
-        "inLanguage": "ja",
-        "image": "https://simplememofast.com/assets/img/og/devlog.png",
-        "headline": "【開発日誌 Day1】Captioが好きすぎて、もう一度あの体験を作りたくなった",
-        "url": "https://simplememofast.com/devlog/day1"
-      },
-      {
-        "@type": "Article",
-        "inLanguage": "ja",
-        "image": "https://simplememofast.com/assets/img/og/devlog.png",
-        "headline": "Captio代替アプリを作った理由",
-        "url": "https://simplememofast.com/devlog/captio-alternative"
-      },
-      {
-        "@type": "Article",
-        "inLanguage": "ja",
-        "image": "https://simplememofast.com/assets/img/og/devlog.png",
-        "headline": "UIKit vs SwiftUI：起動速度のための選択",
-        "url": "https://simplememofast.com/devlog/uikit-vs-swiftui"
-      },
-      {
-        "@type": "Article",
-        "inLanguage": "ja",
-        "image": "https://simplememofast.com/assets/img/og/devlog.png",
-        "headline": "Outboxアーキテクチャ：取りこぼしゼロ設計",
-        "url": "https://simplememofast.com/devlog/outbox-architecture"
-      },
-      {
-        "@type": "Article",
-        "inLanguage": "ja",
-        "image": "https://simplememofast.com/assets/img/og/devlog.png",
-        "headline": "Relay API：Cloudflare Workersでメール送信基盤を構築",
-        "url": "https://simplememofast.com/devlog/relay-api-design"
-      },
-      {
-        "@type": "Article",
-        "inLanguage": "ja",
-        "image": "https://simplememofast.com/assets/img/og/devlog.png",
-        "headline": "プライバシーファースト設計：偏執的なこだわり",
-        "url": "https://simplememofast.com/devlog/privacy-first-design"
-      }
-    ],
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/" },
-        { "@type": "ListItem", "position": 2, "name": "開発日誌", "item": "https://simplememofast.com/devlog/" }
-      ]
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "@id": "https://simplememofast.com/devlog/#webpage",
+  "inLanguage": "ja",
+  "name": "開発日誌 - Captio式シンプルメモ",
+  "description": "Captio式シンプルメモの開発日誌。技術的な意思決定とCaptioの体験再現の記録。",
+  "url": "https://simplememofast.com/devlog/",
+  "hasPart": [
+    {
+      "@type": "Article",
+      "inLanguage": "ja",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "【開発日誌 Day1】Captioが好きすぎて、もう一度あの体験を作りたくなった",
+      "url": "https://simplememofast.com/devlog/day1"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "ja",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "Captio代替アプリを作った理由",
+      "url": "https://simplememofast.com/devlog/captio-alternative"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "ja",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "UIKit vs SwiftUI：起動速度のための選択",
+      "url": "https://simplememofast.com/devlog/uikit-vs-swiftui"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "ja",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "Outboxアーキテクチャ：取りこぼしゼロ設計",
+      "url": "https://simplememofast.com/devlog/outbox-architecture"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "ja",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "Relay API：Cloudflare Workersでメール送信基盤を構築",
+      "url": "https://simplememofast.com/devlog/relay-api-design"
+    },
+    {
+      "@type": "Article",
+      "inLanguage": "ja",
+      "image": "https://simplememofast.com/assets/img/og/devlog.png",
+      "headline": "プライバシーファースト設計：偏執的なこだわり",
+      "url": "https://simplememofast.com/devlog/privacy-first-design"
     }
+  ],
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "ホーム",
+        "item": "https://simplememofast.com/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "開発日誌",
+        "item": "https://simplememofast.com/devlog/"
+      }
+    ]
   }
+}
   </script>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
@@ -317,13 +330,13 @@
         <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
         <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
         <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>

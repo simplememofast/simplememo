@@ -59,15 +59,23 @@
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "UIKit vs SwiftUI：起動速度のための選択",
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".page-content__title", ".page-content__body h2"]
-    },
-    "url": "https://simplememofast.com/devlog/uikit-vs-swiftui"
-  }
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/devlog/uikit-vs-swiftui#webpage",
+  "inLanguage": "ja",
+  "name": "UIKit vs SwiftUI：起動速度のための選択",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/#website"
+  },
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [
+      ".page-content__title",
+      ".page-content__body h2"
+    ]
+  },
+  "url": "https://simplememofast.com/devlog/uikit-vs-swiftui"
+}
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css">
@@ -81,8 +89,6 @@
     .lang-switcher {
       display: inline-flex;
       background: rgba(15, 20, 30, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(100, 160, 220, 0.12);
       border-radius: 22px;
       padding: 3px;
@@ -338,6 +344,7 @@
       align-items: center;
     }
     .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
     .global-nav__hamburger {
       display: none;
       background: none;
@@ -455,13 +462,13 @@
         <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
         <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
         <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>

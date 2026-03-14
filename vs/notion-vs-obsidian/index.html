@@ -110,21 +110,27 @@
   <!-- JSON-LD: Speakable -->
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "Notion vs Obsidian 比較",
-    "speakable": {
-      "@type": "SpeakableSpecification",
-      "cssSelector": [".lp-hero__title", ".lp-hero__sub", ".reason-card__title"]
-    },
-    "url": "https://simplememofast.com/vs/notion-vs-obsidian/"
-  }
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/vs/notion-vs-obsidian/#webpage",
+  "inLanguage": "ja",
+  "name": "Notion vs Obsidian 比較",
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [
+      ".lp-hero__title",
+      ".lp-hero__sub",
+      ".reason-card__title"
+    ]
+  },
+  "url": "https://simplememofast.com/vs/notion-vs-obsidian/"
+}
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css">
   <style>
     .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
-    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
     .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
@@ -197,6 +203,7 @@
     .global-nav__actions { display: flex; align-items: center; gap: 0.5rem; }
     .global-nav__cta { background: linear-gradient(135deg, #007AFF, #5856D6); color: #fff !important; text-decoration: none; font-size: 0.875rem; font-weight: 700; padding: 0.45rem 1rem; border-radius: 20px; transition: opacity 0.2s; }
     .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
     .global-nav__hamburger { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; min-width: 48px; min-height: 48px; padding: 0.5rem; line-height: 1; }
     @media (max-width: 768px) {
       .global-nav__links { display: none; }
@@ -232,13 +239,13 @@
         <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
         <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
         <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>

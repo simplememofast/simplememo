@@ -50,9 +50,7 @@
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Hero image preload for LCP -->
-  <link rel="preload" as="image" href="/assets/img/hero-ja.webp" type="image/webp" imagesrcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" imagesizes="(max-width: 1200px) 100vw, 1200px">
-  <!-- App icon preload -->
-  <link rel="preload" as="image" href="/assets/img/app-icon-256.webp" type="image/webp">
+  <link rel="preload" as="image" type="image/webp" imagesrcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" imagesizes="(max-width: 1200px) 100vw, 1200px">
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -196,7 +194,10 @@
     "inLanguage": "ja",
     "downloadUrl": "https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948",
     "author": {
-      "@id": "https://simplememofast.com/about/#person"
+      "@type": "Person",
+      "@id": "https://simplememofast.com/about/#person",
+      "name": "AI Ataka",
+      "url": "https://simplememofast.com/about/"
     }
   }
   </script>
@@ -234,8 +235,6 @@
     .lang-switcher {
       display: inline-flex;
       background: rgba(15, 20, 30, 0.6);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(100, 160, 220, 0.12);
       border-radius: 22px;
       padding: 3px;
@@ -356,6 +355,7 @@
       align-items: center;
     }
     .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
     .global-nav__hamburger {
       display: none;
       background: none;
@@ -425,13 +425,13 @@
         <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
         <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
         <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile" style="display:none;"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
           <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
         </a>
-        <button class="global-nav__hamburger" aria-label="メニュー" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
@@ -565,7 +565,7 @@
         </picture>
         <picture data-lang="en">
           <source type="image/webp" srcset="/assets/img/hero-en.webp 1200w, /assets/img/hero-en@2x.webp 2400w" sizes="(max-width: 1200px) 100vw, 1200px">
-          <img src="/assets/img/hero-en.jpg" srcset="/assets/img/hero-en.jpg 1200w, /assets/img/hero-en@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemo app screenshots — memo input screen, settings screen, and send history on iPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="eager">
+          <img src="/assets/img/hero-en.jpg" srcset="/assets/img/hero-en.jpg 1200w, /assets/img/hero-en@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemo app screenshots — memo input screen, settings screen, and send history on iPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="lazy">
         </picture>
       </div>
     </div>
