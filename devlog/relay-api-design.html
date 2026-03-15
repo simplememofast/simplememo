@@ -48,9 +48,6 @@
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-relay-api-design.png">
 
   <link rel="canonical" href="https://simplememofast.com/devlog/relay-api-design">
-    <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/relay-api-design">
-    <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/relay-api-design">
-
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -118,7 +115,7 @@
       outline-offset: 2px;
     }
     .lang-switcher__btn.active {
-      background: rgba(100, 180, 255, 0.12);
+      background: rgba(100, 180, 255, 0.25);
       border: 1px solid rgba(100, 180, 255, 0.2);
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
@@ -491,38 +488,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "inLanguage": "ja",
-    "headline": "Relay API設計：Cloudflare Workersでメール送信基盤を構築",
-    "description": "Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。",
-    "url": "https://simplememofast.com/devlog/relay-api-design",
-    "datePublished": "2026-02-13",
-    "dateModified": "2026-02-13",
-    "author": {"@type": "Person", "@id": "https://simplememofast.com/about/#person", "name": "AI Ataka", "url": "https://simplememofast.com/about/"},
-    "image": "https://simplememofast.com/assets/img/og/devlog-relay-api-design.png",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Captio式シンプルメモ",
-      "@id": "https://simplememofast.com/#organization",
-      "url": "https://simplememofast.com/",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://simplememofast.com/assets/img/app-icon-256.png",
-        "width": 256,
-        "height": 256
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://simplememofast.com/devlog/relay-api-design"
-    },
-    "keywords": "Cloudflare Workers メール送信, Resend API, iOS メール送信 API, Gmail API 代替, email relay API architecture",
-    "proficiencyLevel": "Expert"
-  }
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/relay-api-design#article","inLanguage":"ja","headline":"Relay API設計：Cloudflare Workersでメール送信基盤を構築","description":"Gmail API依存からの脱却。Cloudflare Workers + Resend APIによるエッジコンピューティングメール送信基盤。メールアドレス検証・多層レート制限・冪等性保証の実装詳細。","url":"https://simplememofast.com/devlog/relay-api-design","datePublished":"2026-02-13","dateModified":"2026-02-13","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-relay-api-design.png","publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/relay-api-design"},"keywords":"Cloudflare Workers メール送信, Resend API, iOS メール送信 API, Gmail API 代替, email relay API architecture","proficiencyLevel":"Expert"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -947,6 +913,20 @@
 
     </div>
   
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span data-lang="ja">参考文献</span>
+    <span data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener" style="color:var(--accent);">Cloudflare Workers Documentation</a> — <span data-lang="ja">リレーAPIのサーバーレス実行基盤。エッジでのリクエスト処理に使用</span><span data-lang="en">Serverless execution platform for the relay API, processing requests at the edge</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc5321" target="_blank" rel="noopener" style="color:var(--accent);">RFC 5321 — Simple Mail Transfer Protocol (SMTP)</a> — <span data-lang="ja">メール送信の基本プロトコル仕様。リレーAPIが準拠するSMTP標準</span><span data-lang="en">Core email transmission protocol specification that the relay API adheres to</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc6376" target="_blank" rel="noopener" style="color:var(--accent);">RFC 6376 — DomainKeys Identified Mail (DKIM)</a> — <span data-lang="ja">送信メールの改ざん防止と送信元認証に使用する電子署名仕様</span><span data-lang="en">Digital signature specification for preventing email tampering and authenticating senders</span></li>
+    <li><a href="https://www.rfc-editor.org/rfc/rfc7208" target="_blank" rel="noopener" style="color:var(--accent);">RFC 7208 — Sender Policy Framework (SPF)</a> — <span data-lang="ja">送信ドメイン認証。許可されたIPアドレスからのメール送信を検証</span><span data-lang="en">Sender domain authentication verifying email is sent from authorized IP addresses</span></li>
+    <li><a href="https://resend.com/docs" target="_blank" rel="noopener" style="color:var(--accent);">Resend API Documentation</a> — <span data-lang="ja">メール送信APIプロバイダー。Cloudflare Workersから呼び出すメール配信サービス</span><span data-lang="en">Email sending API provider called from Cloudflare Workers for mail delivery</span></li>
+  </ul>
+</section>
+
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">

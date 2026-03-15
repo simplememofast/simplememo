@@ -46,9 +46,6 @@
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png">
 
   <link rel="canonical" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
-    <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
-    <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/uikit-vs-swiftui">
-
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -116,7 +113,7 @@
       outline-offset: 2px;
     }
     .lang-switcher__btn.active {
-      background: rgba(100, 180, 255, 0.12);
+      background: rgba(100, 180, 255, 0.25);
       border: 1px solid rgba(100, 180, 255, 0.2);
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
@@ -396,39 +393,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由",
-    "description": "2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。",
-    "url": "https://simplememofast.com/devlog/uikit-vs-swiftui",
-    "datePublished": "2026-02-13",
-    "dateModified": "2026-02-13",
-    "author": {"@type": "Person", "@id": "https://simplememofast.com/about/#person", "name": "AI Ataka", "url": "https://simplememofast.com/about/"},
-    "image": "https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Captio式シンプルメモ",
-      "@id": "https://simplememofast.com/#organization",
-      "url": "https://simplememofast.com/",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://simplememofast.com/assets/img/app-icon-256.png",
-        "width": 256,
-        "height": 256
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://simplememofast.com/devlog/uikit-vs-swiftui"
-    },
-    "inLanguage": "ja",
-    "keywords": "UIKit SwiftUI パフォーマンス, SwiftUI 起動速度, iOS app launch performance, UIKit vs SwiftUI 2026",
-    "proficiencyLevel": "Expert",
-    "dependencies": "Xcode 16, Swift 6, iOS 17+"
-  }
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/uikit-vs-swiftui#article","headline":"UIKit vs SwiftUI：起動速度のためにUIKitを選んだ理由","description":"2026年にあえてUIKitを選択。Time-to-Text 500ms以下を実現するため、Storyboard不使用・直接VC生成・viewDidAppearでのbecomeFirstResponder——実機200-300ms達成の設計判断。","url":"https://simplememofast.com/devlog/uikit-vs-swiftui","datePublished":"2026-02-13","dateModified":"2026-02-13","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-uikit-vs-swiftui.png","publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/uikit-vs-swiftui"},"inLanguage":"ja","keywords":"UIKit SwiftUI パフォーマンス, SwiftUI 起動速度, iOS app launch performance, UIKit vs SwiftUI 2026","proficiencyLevel":"Expert","dependencies":"Xcode 16, Swift 6, iOS 17+"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -762,6 +727,19 @@ private func activateTextInput() {
       </div>
     </div>
   
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span data-lang="ja">参考文献</span>
+    <span data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/uikit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — UIKit Documentation</a> — <span data-lang="ja">SimpleMemoのUI構築に採用したフレームワークの公式リファレンス</span><span data-lang="en">Official reference for the framework chosen to build SimpleMemo's UI</span></li>
+    <li><a href="https://developer.apple.com/documentation/swiftui" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — SwiftUI Documentation</a> — <span data-lang="ja">比較検討した宣言的UIフレームワーク。パフォーマンス測定の対象</span><span data-lang="en">Declarative UI framework evaluated as an alternative and measured for performance</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/ossignposter" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — os_signpost / OSSignposter</a> — <span data-lang="ja">Time-to-Text計測に使用したInstruments連携のパフォーマンス測定API</span><span data-lang="en">Performance measurement API integrated with Instruments, used for Time-to-Text measurement</span></li>
+    <li><a href="https://developer.apple.com/videos/play/wwdc2023/10160/" target="_blank" rel="noopener" style="color:var(--accent);">WWDC 2023 — Analyze hangs with Instruments</a> — <span data-lang="ja">UIレスポンス最適化の参考にしたWWDCセッション</span><span data-lang="en">WWDC session referenced for UI responsiveness optimization</span></li>
+  </ul>
+</section>
+
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">

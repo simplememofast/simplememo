@@ -46,9 +46,6 @@
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
 
   <link rel="canonical" href="https://simplememofast.com/devlog/privacy-first-design">
-    <link rel="alternate" hreflang="ja" href="https://simplememofast.com/devlog/privacy-first-design">
-    <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/devlog/privacy-first-design">
-
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -116,7 +113,7 @@
       outline-offset: 2px;
     }
     .lang-switcher__btn.active {
-      background: rgba(100, 180, 255, 0.12);
+      background: rgba(100, 180, 255, 0.25);
       border: 1px solid rgba(100, 180, 255, 0.2);
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
@@ -396,39 +393,7 @@
   </style>
 
   <!-- JSON-LD: TechArticle -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "プライバシーファースト設計：メモアプリにおける偏執的なこだわり",
-    "description": "メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。",
-    "url": "https://simplememofast.com/devlog/privacy-first-design",
-    "datePublished": "2026-02-13",
-    "dateModified": "2026-02-13",
-    "author": {"@type": "Person", "@id": "https://simplememofast.com/about/#person", "name": "AI Ataka", "url": "https://simplememofast.com/about/"},
-    "image": "https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Captio式シンプルメモ",
-      "@id": "https://simplememofast.com/#organization",
-      "url": "https://simplememofast.com/",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://simplememofast.com/assets/img/app-icon-256.png",
-        "width": 256,
-        "height": 256
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": "https://simplememofast.com/devlog/privacy-first-design"
-    },
-    "inLanguage": "ja",
-    "keywords": "iOS プライバシー設計, iOS app privacy, ephemeral URLSession, アプリスイッチャー プライバシー, メモアプリ セキュリティ",
-    "proficiencyLevel": "Expert",
-    "dependencies": "Xcode 16, Swift 6, iOS 17+, Apple CryptoKit"
-  }
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。","url":"https://simplememofast.com/devlog/privacy-first-design","datePublished":"2026-02-13","dateModified":"2026-02-13","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design"},"inLanguage":"ja","keywords":"iOS プライバシー設計, iOS app privacy, ephemeral URLSession, アプリスイッチャー プライバシー, メモアプリ セキュリティ","proficiencyLevel":"Expert","dependencies":"Xcode 16, Swift 6, iOS 17+, Apple CryptoKit"}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -836,6 +801,19 @@ func sceneDidEnterBackground(_ scene: UIScene) {
       </div>
     </div>
   
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span data-lang="ja">参考文献</span>
+    <span data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span data-lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span><span data-lang="en">Used for implementing AES-GCM encryption to protect Outbox data at rest</span></li>
+    <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span data-lang="ja">エフェメラル（一時的）セッションによるネットワーク通信でプライバシーを確保</span><span data-lang="en">Ephemeral session configuration for privacy-preserving network communication</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/app_transport_security" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — App Transport Security</a> — <span data-lang="ja">TLS通信の強制によるデータ転送時のセキュリティ確保</span><span data-lang="en">Enforcing TLS for secure data transmission</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/logging" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Unified Logging (os.log)</a> — <span data-lang="ja">ログサニタイズによる個人情報漏洩防止の実装に参照</span><span data-lang="en">Referenced for implementing log sanitization to prevent personal data leakage</span></li>
+  </ul>
+</section>
+
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
