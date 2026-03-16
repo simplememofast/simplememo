@@ -54,7 +54,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/moca/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-moca.png","headline":"シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較","description":"Moca（自分にメールを送るメモ帳）とCaptio式シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度の観点で解説。","url":"https://simplememofast.com/vs/moca/","datePublished":"2026-03-06","dateModified":"2026-03-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/moca/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/moca/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-moca.png","headline":"シンプルメモ vs Moca — 自分にメールするメモアプリ徹底比較","description":"Moca（自分にメールを送るメモ帳）とCaptio式シンプルメモの違いを徹底比較。暗号化・オフライン対応・送信速度の観点で解説。","url":"https://simplememofast.com/vs/moca/","datePublished":"2026-03-06","dateModified":"2026-03-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/moca/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs Moca","item":"https://simplememofast.com/vs/moca/"}]}</script>
@@ -396,61 +396,51 @@
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">5つの決定的な違い</span>
-          <span data-lang="en">5 Key Differences</span>
+          <span data-lang="ja">4つのMocaとの違い</span>
+          <span data-lang="en">4 Differences from Moca</span>
         </h2>
         <ul class="diff-list" data-lang="ja">
           <li>
             <span class="diff-num">1</span>
-            <strong>AES-GCM暗号化：端末内データを安全に保護</strong><br>
-            シンプルメモはOutbox内のメモをAES-GCM暗号化で保護します。端末を紛失した場合でも、未送信メモの内容は暗号化されているため読み取れません。Mocaにはこの暗号化機能がなく、端末内のデータは平文で保存されます。業務メモや個人情報を含むメモを扱う方にとって、この差は重要です。
+            <strong>メール送信 vs アプリ内保存</strong><br>
+            Mocaは「自分にメールを送るメモ帳」というコンセプトですが、メモの保存先はアプリ内にとどまる設計です。シンプルメモはメール送信に完全特化しており、メモは即座にメール受信箱に届きます。メールの検索性・永続性・クロスデバイスアクセスを活用したい方にはシンプルメモが有利です。
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>Outboxオフライン対応 vs ネット必須</strong><br>
-            シンプルメモはOutboxアーキテクチャにより、圏外・地下鉄・機内でもメモを保存し、接続回復時に自動送信します。Mocaはインターネット接続が必要で、オフライン時にはメモを送信できません。通勤中や外出先でメモを取る方には、この違いが実用的に大きいです。
+            <strong>起動速度の実測</strong><br>
+            シンプルメモは0.3秒でキーボードが表示され、即座に入力を開始できます。Mocaも軽快な起動を実現していますが、シンプルメモのインスタントキーボード設計は起動→入力開始のラグを最小限に抑える専用最適化が施されています。
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>送信速度：150ms vs 標準送信</strong><br>
-            シンプルメモはCloudflare Workersのエッジコンピューティングとresend APIを使用し、送信ボタンから約150msでメール配信を完了します。世界中のエッジサーバーを活用するため、地理的位置に関わらず高速です。Mocaも十分速いですが、エッジ最適化されたリレーインフラは使用していません。
+            <strong>バックアップの仕組み</strong><br>
+            シンプルメモはメモをメール受信箱に送るため、メールサービスのバックアップ機構がそのまま適用されます。Mocaはアプリ内保存のため、端末の故障や機種変更時にデータが失われるリスクがあります。メール送信=自動バックアップという設計上の安心感があります。
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>7日間無料トライアル vs トライアルなし</strong><br>
-            シンプルメモは7日間の無料トライアルで全機能（送信無制限）を体験できます。その後は1日3通の無料プランか、Premiumプランを選べます。Mocaには同様のトライアル期間は提供されていません。シンプルメモならリスクなく全機能を試せます。
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>バイリンガル対応 vs 日本語のみ</strong><br>
-            シンプルメモは日本語と英語の両方に対応しており、言語切り替えがワンタップで可能です。海外在住の日本人ユーザーや、英語環境で使いたい方にも適しています。Mocaは主に日本語ユーザー向けに設計されています。
+            <strong>開発アクティビティ</strong><br>
+            シンプルメモは2026年も継続的にアップデートされ、新機能やセキュリティ改善が行われています。Mocaの最終更新時期はApp Storeで確認できますが、長期的なサポートやアクティブな開発継続が見込めるアプリを選ぶことも大切な判断基準です。
           </li>
         </ul>
         <ul class="diff-list" data-lang="en">
           <li>
             <span class="diff-num">1</span>
-            <strong>AES-GCM Encryption: On-Device Data Protection</strong><br>
-            Simple Memo encrypts all Outbox memos with AES-GCM. Even if your device is lost or stolen, unsent memos remain encrypted and unreadable. Moca does not offer this encryption layer, storing data in plaintext on the device. For anyone handling work notes or personal information, this difference matters significantly.
+            <strong>Email Delivery vs In-App Storage</strong><br>
+            While Moca brands itself as a "memo pad that emails yourself," its memos primarily stay within the app. Simple Memo is fully dedicated to email delivery — memos arrive in your inbox immediately. If you value email's searchability, permanence, and cross-device access, Simple Memo has the advantage.
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>Outbox Offline Architecture vs Internet Required</strong><br>
-            Simple Memo's Outbox architecture stores memos when offline (subway, airplane, poor connectivity) and automatically sends them when connection is restored. Moca requires an active internet connection to send memos. For commuters and frequent travelers, this reliability gap is substantial.
+            <strong>Measured Launch Speed</strong><br>
+            Simple Memo displays the keyboard in 0.3 seconds, ready for immediate input. Moca also launches quickly, but Simple Memo's instant-keyboard design is specifically optimized to minimize the gap between app launch and first keystroke.
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>Send Speed: 150ms vs Standard Delivery</strong><br>
-            Simple Memo uses Cloudflare Workers edge computing and Resend API to deliver emails in approximately 150ms from button press. The global edge network ensures consistent speed regardless of your location. Moca sends quickly but does not use edge-optimized relay infrastructure.
+            <strong>Backup Architecture</strong><br>
+            Simple Memo sends memos to your email inbox, so your email provider's backup infrastructure applies automatically. Moca stores memos in-app, which means data can be lost if the device is damaged or replaced. Email-as-backup gives Simple Memo a built-in safety net.
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>7-Day Free Trial vs No Trial</strong><br>
-            Simple Memo offers a 7-day free trial with unlimited sends, letting you experience the full product before deciding. After the trial, the free tier provides 3 sends per day with no feature gates. Moca does not offer a comparable trial period. Simple Memo lets you evaluate risk-free.
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>Bilingual Support vs Japanese Only</strong><br>
-            Simple Memo supports both Japanese and English with one-tap language switching. This makes it suitable for Japanese users living abroad or anyone who prefers an English interface. Moca is primarily designed for Japanese-speaking users.
+            <strong>Development Activity</strong><br>
+            Simple Memo continues to receive regular updates in 2026 with new features and security improvements. Moca's last update can be checked on the App Store. Choosing an app with active, ongoing development is an important factor for long-term reliability.
           </li>
         </ul>
       </section>
@@ -518,26 +508,24 @@
           <span data-lang="en">FAQ</span>
         </h2>
         <div data-lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">MocaとCaptio式シンプルメモの最大の違いは何ですか？</summary><div class="faq-answer"><p>最大の違いはオフライン対応と暗号化です。Mocaはシンプルなメール送信に特化していますが、オフライン時のメモ保存やAES-GCM暗号化機能はありません。シンプルメモはOutboxアーキテクチャにより、オフラインでもメモを暗号化保存し、接続回復時に自動送信します。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaにはメモの編集・削除機能がないのはなぜですか？</summary><div class="faq-answer"><p>Mocaは意図的に編集・削除機能を省いています。メモを書いたらすぐ送るという思想で設計されています。シンプルメモも同様に送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの代わりになるアプリはありますか？</summary><div class="faq-answer"><p>Mocaと同じ「自分にメールを送る」コンセプトのアプリとしてCaptio式シンプルメモがあります。Mocaのシンプルさを維持しつつ、AES-GCM暗号化、Outboxオフライン対応、Cloudflare Workers経由の150ms高速送信を追加しています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモの送信速度はMocaより速いですか？</summary><div class="faq-answer"><p>はい。シンプルメモはCloudflare Workers + Resend APIを使用し、送信ボタンを押してから約150msでメール配信を完了します。エッジコンピューティングによるリレーサーバーで、地理的位置に関わらず高速な配信を実現しています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaとシンプルメモはどちらが安全ですか？</summary><div class="faq-answer"><p>セキュリティ面ではシンプルメモが優れています。AES-GCM暗号化によりOutbox内のメモは端末内で暗号化保存されます。Mocaにはこの暗号化機能はありません。どちらもサーバーにメモを永続保存しませんが、端末内データの保護はシンプルメモが上回ります。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaのメモはメール受信箱に届きますか？</summary><div class="faq-answer"><p>Mocaは「自分にメールを送る」コンセプトですが、メモの保存先はアプリ内が中心です。シンプルメモはメール受信箱に直接届くため、メールの検索やクロスデバイスアクセスが可能です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの端末を変更したらメモは引き継げますか？</summary><div class="faq-answer"><p>Mocaはアプリ内保存のため、機種変更時にデータが引き継げない場合があります。シンプルメモで送ったメモはメール受信箱に残っているため、端末を変えても過去のメモに常にアクセスできます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaの編集・削除がないという設計思想はシンプルメモにもありますか？</summary><div class="faq-answer"><p>シンプルメモも送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。Mocaの「書いたら送る、余計な機能はいらない」という思想を共有しつつ、AES-GCM暗号化とオフライン対応を追加しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mocaからシンプルメモに移行する手順は？</summary><div class="faq-answer"><p>App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけです。1分以内に使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。</p></div></details></div>
         </div>
         <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the difference between Moca and Simple Memo?</summary><div class="faq-answer"><p>Both apps let you email memos to yourself, but Simple Memo adds AES-GCM encryption for offline storage, Outbox architecture for reliable delivery without connectivity, and Cloudflare Workers relay for 150ms send speed. Moca is intentionally minimal with no edit or delete functions.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo a good alternative to Moca?</summary><div class="faq-answer"><p>Yes. Simple Memo shares Moca's core philosophy of quick email-to-self memos but adds enterprise-grade security (AES-GCM encryption), offline reliability (Outbox auto-send), faster delivery (150ms via Cloudflare Workers), and bilingual support (Japanese/English).</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo require an account like Moca?</summary><div class="faq-answer"><p>Neither app requires account creation. Both Moca and Simple Memo only need your existing email address. Simple Memo additionally offers a 7-day free trial with unlimited sends, followed by a free tier of 3 sends per day.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which app works better offline — Moca or Simple Memo?</summary><div class="faq-answer"><p>Simple Memo is significantly better offline. Its Outbox architecture stores memos with AES-GCM encryption when there is no internet connection and automatically sends them when connectivity returns. Moca requires an active internet connection to send memos.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How fast does Simple Memo send emails compared to Moca?</summary><div class="faq-answer"><p>Simple Memo sends emails in approximately 150ms using Cloudflare Workers edge computing and Resend API. This relay infrastructure ensures consistently fast delivery regardless of your location. Moca also sends quickly but does not use edge-optimized relay infrastructure.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do Moca memos arrive in your email inbox?</summary><div class="faq-answer"><p>Moca's "email yourself" concept primarily stores memos within the app. Simple Memo delivers memos directly to your email inbox, enabling email search and cross-device access.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I keep my memos when switching devices from Moca?</summary><div class="faq-answer"><p>Moca stores memos in-app, so data may not transfer when changing devices. Memos sent via Simple Memo live in your email inbox and are always accessible regardless of which device you use.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo share Moca's no-edit/no-delete philosophy?</summary><div class="faq-answer"><p>Simple Memo is also focused on sending, but unsent Outbox memos can be reviewed and managed. It shares Moca's "write it, send it" ethos while adding AES-GCM encryption and offline support.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I migrate from Moca to Simple Memo?</summary><div class="faq-answer"><p>Download Simple Memo from the App Store and set your email address. You will be ready in under a minute. Using the same email address as Moca unifies all your memos in one inbox.</p></div></details></div>
         </div>
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">Mocaからのアップグレードを試す</span>
-          <span data-lang="en">Try upgrading from Moca</span>
+          <span data-lang="ja">Mocaユーザーのための次のステップ</span>
+          <span data-lang="en">The Next Step for Moca Users</span>
         </div>
         <div class="cta-box__desc">
           <span data-lang="ja">7日間の無料トライアル付き。暗号化・オフライン対応・150ms送信を体験してください。</span>
