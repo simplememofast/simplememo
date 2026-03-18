@@ -351,6 +351,25 @@
         </p>
       </section>
 
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">ショートカットが壊れた経験はありませんか？</span>
+          <span data-lang="en">Have Your Shortcuts Ever Broken?</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">iOSショートカットで「自分にメール」を設定したことがある方なら、iOSのメジャーアップデート後にショートカットが動作しなくなった経験があるかもしれません。iOS 16からiOS 17、iOS 17からiOS 18へのアップデート時に、メール送信アクションの仕様変更やプライバシーポリシーの変更により、既存のショートカットが無効になるケースが複数報告されています。そのたびに、アクションの再設定、変数の再定義、テスト送信による動作確認が必要になります。</span>
+          <span data-lang="en">If you have ever set up a "mail to self" shortcut on iOS, you may have experienced it breaking after a major iOS update. During upgrades from iOS 16 to 17, and iOS 17 to 18, changes to mail action specifications and privacy policies have caused existing shortcuts to stop working. Each time, you must reconfigure actions, redefine variables, and test-send to verify functionality. Multiple cases have been reported across Apple's support forums.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">この「壊れる」問題の根本原因は、ショートカットがAppleのシステムAPIに依存するDIYソリューションだということです。Appleがメールの送信権限やバックグラウンド動作のルールを変更するたびに、ユーザー側で対応が必要になります。一方、シンプルメモは専用アプリとしてメール送信機能を実装しているため、iOS APIの変更にはアプリ開発者が対応します。ユーザーは何もする必要がありません。アプリを開いて、入力して、送信する。この体験はiOSのバージョンに関係なく一貫しています。</span>
+          <span data-lang="en">The root cause of this "breaking" problem is that Shortcuts is a DIY solution dependent on Apple's system APIs. Every time Apple changes email sending permissions or background execution rules, users must adapt manually. Simple Memo, as a dedicated app, implements email sending natively -- iOS API changes are handled by the app developer, not the user. You do nothing. Open the app, type, send. This experience remains consistent regardless of iOS version.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">さらに見落とされがちなのが、ショートカットの「送信確認」の問題です。ショートカットでメールを送信する場合、実際にメールアプリが一瞬表示される「UIフラッシュ」が発生し、送信が完了したかどうかの確認手段もありません。オフライン時には送信自体が失敗しますが、エラー通知も表示されないことがあります。シンプルメモはOutboxアーキテクチャを採用しており、オフラインでもメモをキューに保存し、ネットワーク復帰時に自動送信します。送信ステータスも画面上で確認でき、メモが確実に届いたかどうかを常に把握できます。</span>
+          <span data-lang="en">Another overlooked issue is Shortcuts' "send confirmation" problem. When sending email via Shortcuts, the Mail app briefly flashes on screen (UI flash), and there is no way to confirm whether the send actually completed. Offline sends fail silently with no error notification. Simple Memo uses an Outbox architecture that queues memos offline and auto-sends when connectivity returns. Send status is visible on screen, so you always know whether your memo was delivered successfully.</span>
+        </p>
+      </section>
+
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
@@ -526,8 +545,8 @@
           <span data-lang="en">More Reliable Than Shortcuts — 0.3 Seconds</span>
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">7日間の無料トライアル付き。オフラインでも安心のOutbox機能を体験してください。</span>
-          <span data-lang="en">7-day free trial included. Experience reliable offline sending with Outbox architecture.</span>
+          <span data-lang="ja">ショートカット設定不要。インストールして即使える。7日間無料。</span>
+          <span data-lang="en">No shortcut setup needed. Install and go. 7 days free.</span>
         </div>
         <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">

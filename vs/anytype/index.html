@@ -147,6 +147,14 @@
     </section>
 
     <section class="lp-section">
+      <h2 class="lp-section__title"><span data-lang="ja">自己ホスト型PKMのトレードオフ</span><span data-lang="en">The Tradeoffs of Self-Hosted PKM</span></h2>
+      <p class="lp-section__lead">
+        <span data-lang="ja">Anytypeは「データの完全な所有権」を掲げるP2P分散型のナレッジ管理ツールです。データはローカルに保存され、IPFS/libp2pベースのP2Pネットワークでデバイス間を同期します。中央サーバーが存在しないため、理論上はどの企業もあなたのデータにアクセスできません。プライバシーを重視するユーザーにとって、これは非常に魅力的な提案です。しかし、このアーキテクチャにはトレードオフがあります。P2P同期は中央サーバー型と比べて不安定になりやすく、両方のデバイスがオンラインでないと同期が完了しません。自宅のPCとスマホでメモを同期するには、PCが起動している必要があります。また、12語のリカバリーフレーズを紛失するとデータが完全に失われるリスクがあり、技術に詳しくないユーザーにはハードルが高いのが現実です。SimpleMemoはプライバシーに対して異なるアプローチを取ります。メモはデバイス上でAES-GCM暗号化され、メールとして直接送信されます。サーバーにデータを保存しない「サーバーレス」設計です。P2P同期の複雑さなしに、プライバシーを確保しています。メールは既存のインフラ（Gmail、iCloud等）を使うため、同期の問題も発生しません。どちらのモデルがより安全かは、脅威モデルによります。国家レベルの監視を懸念するなら、AnytypeのP2P方式が優位です。日常的なプライバシーを効率的に確保したいなら、SimpleMemoの暗号化メール方式が実用的です。</span>
+        <span data-lang="en">Anytype champions "complete data ownership" as a P2P distributed knowledge management tool. Data is stored locally and syncs between devices via IPFS/libp2p-based P2P networking. With no central server, theoretically no company can access your data. For privacy-conscious users, this is a compelling proposition. But this architecture has tradeoffs. P2P sync is inherently less stable than centralized servers — both devices must be online for sync to complete. To sync notes between your home PC and phone, the PC needs to be running. And losing your 12-word recovery phrase means permanent, irrecoverable data loss — a real barrier for less technical users. SimpleMemo takes a different approach to privacy. Notes are AES-GCM encrypted on-device and sent directly as email. No data is stored on any server — a truly "serverless" design. It achieves privacy without the complexity of P2P sync. Since email uses existing infrastructure (Gmail, iCloud, etc.), sync issues simply don't arise. Which privacy model is more secure depends on your threat model. If state-level surveillance is your concern, Anytype's P2P approach has the edge. If you want practical everyday privacy with efficiency, SimpleMemo's encrypted email delivery is more pragmatic. The key distinction: Anytype asks you to manage your own infrastructure for maximum control. SimpleMemo leverages email infrastructure you already trust, adding encryption on top. Both respect your privacy — they just draw the line differently on the control-versus-convenience spectrum.</span>
+      </p>
+    </section>
+
+    <section class="lp-section">
       <h2 class="lp-section__title"><span data-lang="ja">どちらを選ぶべきか</span><span data-lang="en">Who Should Choose Which?</span></h2>
       <div class="choose-grid" data-lang="ja">
         <div class="choose-card"><div class="choose-card__title">Captio式シンプルメモ向き</div><ul><li>アイデアを瞬時にキャプチャしたい</li><li>メールで自分にメモを送りたい</li><li>新しい概念の学習をしたくない</li><li>どんなデバイスからもアクセスしたい</li><li>メール経由で即座に共有したい</li><li>最小限の操作で完結したい</li></ul></div>
@@ -234,7 +242,7 @@
 
     <div class="cta-box">
       <div class="cta-box__title"><span data-lang="ja">Anytypeに同期する前の0.3秒</span><span data-lang="en">0.3 Seconds Before Syncing to Anytype</span></div>
-      <div class="cta-box__desc"><span data-lang="ja">7日間の無料トライアル付き。Anytypeと組み合わせて使うのが最も効果的です。</span><span data-lang="en">7-day free trial included. Works best as a fast capture layer alongside Anytype.</span></div>
+      <div class="cta-box__desc"><span data-lang="ja">P2P同期を待たない0.3秒のキャプチャ。7日間無料。</span><span data-lang="en">0.3-second capture without waiting for P2P sync. 7 days free.</span></div>
       <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
       <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
     </div>
