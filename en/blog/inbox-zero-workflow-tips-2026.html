@@ -274,7 +274,7 @@
   <nav class="global-nav" aria-label="Main navigation">
     <div class="global-nav__inner">
       <a href="/en/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        <img src="/assets/img/app-icon-56.png" alt="" width="28" height="28" loading="eager">
         SimpleMemo
       </a>
       <ul class="global-nav__links" id="navLinks">
@@ -579,57 +579,26 @@
   <footer class="footer">
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
-        <a href="/terms" class="footer__link">Terms</a>
-        <a href="/privacy" class="footer__link">Privacy</a>
+        <a href="/en/" class="footer__link">Home</a>
+        <a href="/en/captio-alternative/" class="footer__link">Captio Alternative</a>
+        <a href="/en/note-to-email/" class="footer__link">Note to Email</a>
+        <a href="/en/send-email-to-yourself/" class="footer__link">Email Yourself Apps</a>
         <a href="/faq" class="footer__link">FAQ</a>
-        <a href="/captio-alternative/" class="footer__link">Captio Alternative</a>
-        <a href="/note-to-email/" class="footer__link">Note to Email</a>
+        <a href="/privacy" class="footer__link">Privacy</a>
         <a href="/vs/" class="footer__link">Comparisons</a>
         <a href="/use-cases/" class="footer__link">Use Cases</a>
         <a href="/guides/" class="footer__link">Guides</a>
         <a href="/about/" class="footer__link">About</a>
-        <a href="/legal" class="footer__link footer__link--legal">Legal</a>
         <a href="/contact" class="footer__link">Contact</a>
-        <a href="/devlog/" class="footer__link">Dev Log</a>
-        <a href="/captio/" class="footer__link">Captio Method</a>
-        <a href="/how-to/" class="footer__link">How to Use</a>
-        <a href="/templates/" class="footer__link">Templates</a>
-        <a href="/methods/" class="footer__link">Methods</a>
-        <a href="/blog/" class="footer__link">Blog</a>
-        <a href="/glossary/" class="footer__link">Glossary</a>
-        <a href="/comparison/" class="footer__link">Comparison Guide</a>
       </nav>
-      <nav class="footer__social" aria-label="Social links">
-        <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X / Twitter</a>
-        <a href="https://note.com/simplememo" rel="me noopener" target="_blank" class="footer__link">note</a>
-        <a href="https://zenn.dev/simplememo" rel="me noopener" target="_blank" class="footer__link">Zenn</a>
-        <a href="https://github.com/hajimeataka" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
-      </nav>
-      <p class="footer__copyright">
-        &copy; 2026 Simple Memo - Captio-style. All rights reserved.<br>
-        Operated by Yurika Inc.
-      </p>
+      <p class="footer__copyright">&copy; 2026 Simple Memo - Captio-style. All rights reserved.</p>
     </div>
   </footer>
 
-  <!-- Scroll Reveal -->
   <script>
-  (function() {
-    var reveals = document.querySelectorAll('.reveal');
-    if ('IntersectionObserver' in window) {
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
-      reveals.forEach(function(el) { observer.observe(el); });
-    } else {
-      reveals.forEach(function(el) { el.classList.add('visible'); });
-    }
-  })();
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
   </script>
 </body>
 </html>
