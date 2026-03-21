@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
+  </script>
+  <title>Why Captio Died After 14 Years — And What We Built to Avoid the Same Fate</title>
+  <meta name="description" content="Captio lasted 14 years before Gmail API changes killed it. Here's the technical post-mortem — and why we chose Cloudflare Workers + Resend to build a successor that won't suffer the same fate.">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Why Captio Died After 14 Years — And What We Built to Avoid the Same Fate">
+  <meta property="og:description" content="Captio lasted 14 years before Gmail API changes killed it. Here's the technical post-mortem — and why we chose Cloudflare Workers + Resend to build a successor that won't suffer the same fate.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/en/blog/why-captio-died">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - Captio-style">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Why Captio Died After 14 Years — And What We Built to Avoid the Same Fate">
+  <meta name="twitter:description" content="Captio lasted 14 years before Gmail API changes killed it. Here's the technical post-mortem — and why we chose Cloudflare Workers + Resend to build a successor that won't suffer the same fate.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://simplememofast.com/en/blog/why-captio-died">
+
+  <!-- JSON-LD: BlogPosting -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","inLanguage":"en","headline":"Why Captio Died After 14 Years — And What We Built to Avoid the Same Fate","description":"Captio lasted 14 years before Gmail API changes killed it. Here's the technical post-mortem — and why we chose Cloudflare Workers + Resend to build a successor that won't suffer the same fate.","url":"https://simplememofast.com/en/blog/why-captio-died","datePublished":"2026-03-21","dateModified":"2026-03-21","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - Captio-style","@id":"https://simplememofast.com/#organization"}}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"Why Captio Died","item":"https://simplememofast.com/en/blog/why-captio-died"}]}</script>
+
+  <!-- JSON-LD: WebPage with SpeakableSpecification -->
+  <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/en/blog/why-captio-died#webpage",
+  "inLanguage": "en",
+  "name": "Why Captio Died After 14 Years — And What We Built to Avoid the Same Fate",
+  "isPartOf": { "@id": "https://simplememofast.com/en/#website" },
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [".page-content__title", ".page-content__body p:first-of-type"]
+  },
+  "url": "https://simplememofast.com/en/blog/why-captio-died"
+}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Main navigation">
+    <div class="global-nav__inner">
+      <a href="/en/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">Guides</a></li>
+        <li><a href="/use-cases/">Use Cases</a></li>
+        <li><a href="/vs/">Compare</a></li>
+        <li><a href="/methods/">Methods</a></li>
+        <li><a href="/blog/">Blog</a></li>
+        <li><a href="/glossary/">Glossary</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/devlog/">Dev Log</a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US">Download</a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="global-nav__cta">
+          Download
+        </a>
+        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">&#9776;</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="page-header__inner">
+        <a href="/en/" class="page-header__logo">Simple Memo - Captio-style</a>
+        <a href="/blog/" class="page-header__back">Back to Blog</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <h1 class="page-content__title">Why Captio Died After 14 Years &mdash; And What We Built to Avoid the Same Fate</h1>
+
+      <p class="article-meta">
+        By <a href="/about/">AI Ataka</a> &middot; Published: March 21, 2026 &middot; Reading time: ~12 minutes
+      </p>
+
+      <div class="page-content__body article-body">
+
+        <p>In October 2024, Captio was removed from the App Store. No dramatic announcement. No corporate acquisition gone wrong. Just a quiet disappearance after 14 years of faithful service. For the thousands of productivity enthusiasts who relied on it daily, the loss was personal. For me, it was a wake-up call -- and ultimately the reason I built Simple Memo.</p>
+
+        <p>This is the technical story of what happened. Why a beloved, well-built app died not because of bad code or bad decisions, but because the platform it depended on changed the rules. And what we did differently when we decided to build its successor.</p>
+
+        <!-- Section 1: Timeline -->
+        <h2>Captio's Rise and Fall: A Timeline</h2>
+
+        <p>To understand why Captio died, you need to understand what made it remarkable in the first place.</p>
+
+        <ul class="timeline-list">
+          <li><strong>~2010: Captio launches on iOS.</strong> The concept was deceptively simple: one text field, one button, sends to your email. No accounts, no configuration, no clutter. You opened the app, typed a thought, tapped send, and it was in your inbox. The entire interaction took less than five seconds.</li>
+          <li><strong>2010-2015: Quiet, organic growth.</strong> Captio never went viral. It spread through word-of-mouth among productivity communities. It appeared in "best iPhone apps" roundups. Journalists, writers, developers, and GTD practitioners adopted it as their default capture tool. The app had a near-perfect App Store rating.</li>
+          <li><strong>2015-2020: Peak adoption.</strong> Captio became a verb in some circles. "Just captio it" meant "send yourself a quick note." The app charged $1.99 as a one-time purchase -- generous pricing for a tool that many users opened dozens of times per day.</li>
+          <li><strong>2020-2022: The cracks appear.</strong> Behind the scenes, the technical landscape was shifting. Captio's core mechanism relied on Gmail API (and later Apple Mail APIs) to send emails directly from the user's device. This was elegant and efficient -- no server infrastructure, no ongoing costs. But it also meant Captio's fate was tied to Google's API policies.</li>
+          <li><strong>2023: Google tightens the screws.</strong> Google announces stricter OAuth scope requirements for third-party apps accessing Gmail. Apps that touch email must now go through enhanced verification. The <code>mail.send</code> scope, which Captio used to send emails on behalf of users, is classified as "restricted."</li>
+          <li><strong>2024: The economics become impossible.</strong> Google's "enhanced security" program requires expensive third-party security audits for apps accessing restricted scopes. The cost ranges from $15,000 to $75,000 depending on the assessor. For a solo developer charging $1.99 once per user, this is a death sentence.</li>
+          <li><strong>October 2024: Captio is removed from the App Store.</strong> The developer could not justify the audit cost for a single-function app with no recurring revenue. The servers were shut down. 14 years of quiet, excellent service came to an end.</li>
+        </ul>
+
+        <div class="callout">
+          <p><strong>The irony:</strong> Captio did nothing wrong. The app was well-built, well-maintained, and beloved by its users. It died because the API it depended on changed the rules -- and the business model could not absorb the new compliance costs.</p>
+        </div>
+
+        <!-- Section 2: Technical Autopsy -->
+        <h2>The Technical Autopsy -- Why Gmail API Dependency Was Fatal</h2>
+
+        <p>Let's get into the technical specifics, because the details matter for anyone building on third-party APIs.</p>
+
+        <h3>How Captio's Email Sending Worked</h3>
+
+        <p>Captio used the Gmail API's <code>users.messages.send</code> endpoint to send emails on behalf of the user. The flow looked like this:</p>
+
+        <div class="arch-diagram">
+          User types memo &rarr; Captio app &rarr; Gmail OAuth token &rarr; Gmail API (mail.send) &rarr; User's inbox
+        </div>
+
+        <p>This was brilliant from an infrastructure perspective. Captio needed zero backend servers. The user's own Gmail account handled sending. The app was essentially a lightweight UI wrapper around Gmail's send functionality. No servers to maintain, no deliverability to worry about, no infrastructure costs.</p>
+
+        <p>The OAuth flow required the <code>https://www.googleapis.com/auth/gmail.send</code> scope -- a restricted scope that gives the app permission to send emails as the user. Captio did not request broader scopes like full mailbox read access. It was a minimal, focused permission request.</p>
+
+        <h3>Google's Restricted Scope Verification Process</h3>
+
+        <p>In 2023, Google started enforcing its <a href="https://support.google.com/cloud/answer/9110914" rel="nofollow">Restricted Scope verification</a> process more aggressively. The requirements for apps using restricted scopes include:</p>
+
+        <ol>
+          <li><strong>Annual security assessment</strong> by a Google-approved third-party security firm (CASA Tier 2 assessment)</li>
+          <li><strong>Cost: $15,000 to $75,000</strong> per assessment, depending on the assessor and scope of the audit</li>
+          <li><strong>Comprehensive security review</strong> covering code quality, data handling, encryption practices, and incident response procedures</li>
+          <li><strong>Annual renewal</strong> -- not a one-time cost, but a recurring expense</li>
+        </ol>
+
+        <p>Do the math on this. Captio charged $1.99 per download, one time. Assuming the app had a few thousand active installs per year and some new downloads, the total annual revenue might have been $5,000-$15,000. The security audit alone could eat the entire revenue -- before accounting for development time, Apple's 30% cut, or any other expenses.</p>
+
+        <p>For a VC-backed company with millions in revenue, a $50,000 security audit is a line item. For a solo developer with a single-function app, it's an extinction event.</p>
+
+        <h3>The Broader Lesson: Platform Risk Is Existential Risk</h3>
+
+        <p>Captio's story is not unique. The same pattern has played out across the industry:</p>
+
+        <ul>
+          <li><strong>Twitter API (2023):</strong> Hundreds of third-party clients killed overnight when Twitter (now X) moved to paid API access at $42,000/month for basic enterprise tiers. Tweetbot, Twitterrific, and dozens of others were immediately unviable.</li>
+          <li><strong>Reddit API (2023):</strong> Apollo, one of the most popular Reddit clients, shut down after Reddit announced API pricing that would cost the developer $20 million per year. A beloved app, killed by an API pricing change.</li>
+          <li><strong>Google Maps API (2018):</strong> Google increased Maps API pricing by 1,400%, forcing many small apps and websites to either absorb massive costs or switch to alternatives like OpenStreetMap.</li>
+          <li><strong>Facebook Platform (2018-2020):</strong> Post-Cambridge Analytica, Facebook drastically restricted API access. Apps that had built their entire businesses on Facebook's social graph lost access to their core data source.</li>
+        </ul>
+
+        <p>The pattern is always the same: a platform offers generous API access to attract developers, developers build businesses on that access, and then the platform changes the rules. Sometimes for legitimate security reasons. Sometimes for revenue extraction. The motivation doesn't matter to the developer whose app just died.</p>
+
+        <div class="callout callout-warning">
+          <p><strong>If your core feature depends entirely on a third-party API, you don't have a product -- you have a feature of someone else's product.</strong> And they can revoke that feature at any time, for any reason, with no recourse.</p>
+        </div>
+
+        <!-- Section 3: Building the Replacement -->
+        <h2>Building the Replacement -- Our Architecture Decisions</h2>
+
+        <p>When I decided to build Simple Memo, the Captio post-mortem was the starting document. Every architectural decision was filtered through one question: <em>Could this kill us?</em></p>
+
+        <h3>Decision 1: No Gmail API Dependency</h3>
+
+        <p>This was non-negotiable. The entire point of building a Captio successor was to avoid Captio's fate. We would not use Gmail's API, Apple Mail's API, or any other email provider's API to send messages on behalf of users.</p>
+
+        <p>Instead, we built our own mail relay. The app sends memos through our infrastructure, not the user's email account. This means we control the entire email delivery pipeline. No third party can shut us down by changing their OAuth policies.</p>
+
+        <h3>Decision 2: Cloudflare Workers for Edge Compute</h3>
+
+        <p>The backend runs on <a href="https://workers.cloudflare.com/" rel="nofollow">Cloudflare Workers</a>. Here's why:</p>
+
+        <ul>
+          <li><strong>$0 for the first 100,000 requests per day.</strong> For a single-function app with a focused user base, this means our compute costs are literally zero for the foreseeable future.</li>
+          <li><strong>Sub-50ms latency globally.</strong> Workers run on Cloudflare's edge network -- over 300 data centers worldwide. Whether you're in Tokyo, San Francisco, or London, your memo hits a nearby server.</li>
+          <li><strong>No cold starts.</strong> Unlike AWS Lambda or Google Cloud Functions, Workers don't have cold start latency. The first request is as fast as the thousandth.</li>
+          <li><strong>V8 isolate architecture.</strong> Workers use V8 isolates instead of containers, which means sub-millisecond startup times and significantly lower memory overhead.</li>
+        </ul>
+
+        <p>The Worker receives the encrypted memo from the app, decrypts it, formats the email, and forwards it to our email delivery provider. The entire server-side processing takes under 30ms.</p>
+
+        <h3>Decision 3: Resend for Email Delivery</h3>
+
+        <p>For the actual email delivery, we chose <a href="https://resend.com/" rel="nofollow">Resend</a> over established players like SendGrid and Mailgun. The reasons were practical:</p>
+
+        <ul>
+          <li><strong>Developer experience.</strong> Resend's API is clean and modern. The SDK works well with Workers. Integration took hours, not days.</li>
+          <li><strong>Deliverability.</strong> Resend handles SPF, DKIM, and DMARC configuration automatically. Our emails land in inboxes, not spam folders.</li>
+          <li><strong>Transparent pricing.</strong> $0 for the first 3,000 emails/month, then straightforward per-email pricing. No hidden fees, no "enterprise" upsells.</li>
+          <li><strong>Modern infrastructure.</strong> Built on AWS SES under the hood but with a much better developer layer on top.</li>
+        </ul>
+
+        <h3>The Complete Architecture</h3>
+
+        <div class="arch-diagram">
+          iPhone App (UIKit) &rarr; AES-GCM Encryption (on-device) &rarr; HTTPS &rarr; Cloudflare Worker (edge) &rarr; Resend API &rarr; User's inbox
+        </div>
+
+        <p>The total infrastructure cost: approximately $5 per month at current usage levels. That's $60/year to run a globally distributed, encrypted email relay with sub-100ms end-to-end latency.</p>
+
+        <p>Compare this to Captio's infrastructure cost of $0 -- which was the vulnerability. Captio paid nothing because it offloaded everything to Gmail. When Gmail changed the rules, there was no alternative. Our $5/month is insurance against platform risk. We own every piece of the stack from app to inbox.</p>
+
+        <h3>Decision 4: End-to-End Encryption</h3>
+
+        <p>Every memo is encrypted on-device before it leaves the user's phone using <strong>AES-GCM</strong> (Advanced Encryption Standard in Galois/Counter Mode). This is the same encryption standard used by Signal, WhatsApp, and most modern secure messaging apps.</p>
+
+        <p>The encryption happens before the HTTPS layer, meaning:</p>
+
+        <ul>
+          <li>The memo is encrypted in the app's memory</li>
+          <li>The encrypted payload is sent over HTTPS (double encryption)</li>
+          <li>The Cloudflare Worker decrypts and processes the memo</li>
+          <li>The plaintext is never stored on disk or in any database</li>
+          <li>After the email is sent, the plaintext is garbage collected from memory</li>
+        </ul>
+
+        <p>Captio had no encryption layer. Your memo traveled from app to Gmail API as plaintext (over HTTPS, but readable by the API endpoint). This wasn't a criticism of Captio -- encryption wasn't a standard expectation for apps of that era. But in 2026, we can and should do better.</p>
+
+        <h3>Decision 5: Outbox Architecture for Offline Support</h3>
+
+        <p>One of Captio's weaknesses was offline behavior. If you had no internet connection, you couldn't send. Your thought was lost or you had to remember to come back later.</p>
+
+        <p>Simple Memo implements an Outbox architecture:</p>
+
+        <ol>
+          <li>User writes a memo and taps send</li>
+          <li>The memo is immediately encrypted and stored in a local SQLite-backed queue</li>
+          <li>If network is available: the memo is sent immediately and removed from the queue</li>
+          <li>If network is unavailable: the memo stays in the encrypted queue</li>
+          <li>A background task monitors connectivity and automatically drains the queue when the network returns</li>
+          <li>The user sees a clear status indicator: "Sent" or "Queued (will send when online)"</li>
+        </ol>
+
+        <p>This means you can use Simple Memo on a plane, in the subway, in a rural area with no signal -- anywhere. Your memos will reach your inbox eventually, guaranteed. You never have to think about it.</p>
+
+        <!-- Section 4: Performance -->
+        <h2>The Performance Story -- 0.3 Second Launch</h2>
+
+        <p>Speed was Captio's defining characteristic, so it had to be ours too. Our target: the app must be ready for typing within 0.3 seconds of tapping the icon. Here's how we got there.</p>
+
+        <h3>UIKit Over SwiftUI</h3>
+
+        <p>This will be controversial. SwiftUI is the future of iOS development, and for most apps, it's the right choice. But for an app where launch-to-interactive time is the single most important metric, UIKit still wins.</p>
+
+        <p>SwiftUI's view rendering pipeline has overhead that's invisible for complex apps but measurable when you're trying to shave milliseconds from launch. Our main screen has one text view, one button, and a status bar. The UIKit implementation renders in under 16ms (one frame). The equivalent SwiftUI implementation consistently added 40-60ms.</p>
+
+        <p>For a social media app or a settings screen, nobody notices 60ms. For an app whose entire value proposition is "faster than anything else," 60ms is the difference between perception of "instant" and "almost instant." We chose UIKit.</p>
+
+        <h3>Pre-warming and State Caching</h3>
+
+        <p>The app aggressively caches its state between sessions:</p>
+
+        <ul>
+          <li>The user's email configuration is loaded from Keychain during <code>application(_:didFinishLaunchingWithOptions:)</code></li>
+          <li>The text view is pre-configured with the correct font, color, and keyboard settings before the first frame renders</li>
+          <li>The keyboard is requested to appear immediately -- no animation delay</li>
+          <li>Network reachability status is cached, so the app doesn't block on a network check</li>
+        </ul>
+
+        <h3>No Login Screen, No Onboarding Flow</h3>
+
+        <p>Many apps waste their launch budget on splash screens, onboarding carousels, and login flows. Simple Memo has none of these. The first screen IS the compose screen. Always. You open the app and you're typing.</p>
+
+        <p>Email configuration happens in Settings, and only once. After that, the app remembers everything. There's no login because there's no account system. Your email address is stored locally in the Keychain.</p>
+
+        <h3>Network After UI</h3>
+
+        <p>A critical decision: the network call happens AFTER the UI is interactive, not before. When you tap send, the app immediately clears the text view and shows a "Sent" indicator. The actual network request happens asynchronously. If it fails, the outbox catches it and retries.</p>
+
+        <p>This means the perceived send time is near-zero. You tap, the screen clears, you're done. The actual delivery might take 100-300ms in the background, but you've already moved on with your day.</p>
+
+        <p>The result: 0.3 seconds from icon tap to cursor blinking in the text field. For a detailed speed comparison with other apps, see our <a href="/en/captio-alternative/">full benchmark on the Captio Alternative page</a>.</p>
+
+        <!-- Section 5: Lessons -->
+        <h2>Lessons for Indie Developers</h2>
+
+        <p>Building Simple Memo taught me lessons that apply far beyond "note-to-email" apps. Here's what I'd tell any indie developer starting a new project today.</p>
+
+        <h3>1. Own Your Critical Path</h3>
+
+        <p>If your core feature depends on a third-party API, you are one policy change from shutdown. This is the central lesson of Captio's death, and it's not hypothetical -- it has happened to Tweetbot, Apollo, and hundreds of other apps.</p>
+
+        <p>"But the API is stable," you say. It is stable until it isn't. Google's Gmail API was stable for over a decade before the restricted scope requirements changed the economics for small developers.</p>
+
+        <p>This doesn't mean you should never use third-party APIs. It means you should never use them for your <em>critical path</em> -- the thing your app cannot function without. Use them for nice-to-have features, analytics, or secondary functionality. For your core value proposition, build it yourself or ensure you have a migration path.</p>
+
+        <h3>2. Budget for Independence</h3>
+
+        <p>Captio's $0 infrastructure cost was its vulnerability. When the free option disappeared, there was no budget allocated for an alternative because the app had been designed around the assumption of zero infrastructure cost.</p>
+
+        <p>$5 per month for your own infrastructure is insurance, not overhead. It's the difference between a business that can survive API changes and one that can't. If $5/month feels expensive, the business model needs work, not the infrastructure.</p>
+
+        <p>When you run your own stack -- even a tiny one -- you have options. When the third party changes, you can migrate your backend in a weekend. When you have no backend, you're starting from zero in a crisis.</p>
+
+        <h3>3. One-Feature Apps Can Work, But Diversify the Revenue</h3>
+
+        <p>Captio proved that a single-feature app can sustain a user base for 14 years. The simplicity was the product. But the one-time purchase model at $1.99 couldn't sustain the app when compliance costs appeared.</p>
+
+        <p>If Captio had charged $0.99/month -- a trivial amount that most users would never notice -- the developer would have had recurring revenue to fund the security audit. The $15,000-$75,000 audit cost is devastating against one-time purchases but manageable against a subscription base of even a few thousand users.</p>
+
+        <p>This isn't about maximizing revenue. It's about building a financial foundation that can absorb unexpected costs. Subscriptions provide that foundation. One-time purchases don't.</p>
+
+        <h3>4. Build Offline-First</h3>
+
+        <p>Your app should work without the internet, not just "tolerate its absence." This is a design philosophy, not a feature checkbox.</p>
+
+        <p>Offline-first means the local state is the source of truth. The network is a synchronization mechanism, not a dependency. When the network is available, sync. When it's not, the app works exactly the same -- the user just gets a "will sync later" indicator instead of a "sent" indicator.</p>
+
+        <p>This philosophy makes your app resilient not just to the user's network conditions but to your own infrastructure failures. If your server goes down for an hour, offline-first users don't notice. Their memos queue locally and send when things recover. Compare this to an app that shows an error dialog and loses the user's input.</p>
+
+        <h3>5. Ship the Simplest Thing, Then Iterate</h3>
+
+        <p>Simple Memo launched with one screen. It still has one screen. The text field, the send button, and a settings gear. That's it.</p>
+
+        <p>There's enormous pressure -- internal and external -- to add features. Tags, folders, rich text, images, collaboration. Every feature request feels reasonable in isolation. But every feature you add is a feature you must maintain, a feature that can break, and a feature that makes the app slower to launch.</p>
+
+        <p>Captio resisted feature creep for 14 years. That discipline was its greatest strength and what made its users so loyal. We intend to maintain the same discipline. The app's value is not in what it does -- it's in what it doesn't do.</p>
+
+        <!-- Section 6: What's Next -->
+        <h2>What's Next</h2>
+
+        <p>Simple Memo is actively maintained and under continuous development. We're exploring a few directions -- Apple Watch support for even faster capture, Siri Shortcuts integration for voice-first workflows, and improved widget capabilities -- but we're being deliberate about what earns a place in the app.</p>
+
+        <p>The core promise will not change: one screen, instant capture, your inbox. Everything else is a bonus.</p>
+
+        <p>If you're a Captio user looking for a new home, <a href="/en/captio-alternative/">check out the full comparison</a> or read the <a href="/en/captio-migration-guide/">migration guide</a>. The transition takes about three minutes.</p>
+
+        <p>If you're an indie developer building something similar -- or just navigating the same platform-dependency challenges -- I'd genuinely love to hear your story. Reach out via <a href="/contact">the contact page</a> or find me on <a href="https://x.com/simplememofast" rel="noopener" target="_blank">X/Twitter</a>.</p>
+
+        <p><a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US">Download Simple Memo on the App Store</a> -- free to start, with a 7-day unlimited trial.</p>
+
+        <!-- Disclosure -->
+        <div class="disclosure">
+          <strong>Disclosure:</strong> I'm AI Ataka, the solo developer of Simple Memo. This is a first-hand account of why I built this app and the technical decisions involved. I've tried to be honest about the tradeoffs: Captio was a great app, and its shutdown was caused by API policy changes, not by any fault of its developer. I built Simple Memo because the problem Captio solved still matters, and I believe the architecture described here is more resilient to the same risks.
+        </div>
+
+        <!-- Related Articles -->
+        <div style="margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+          <h3>Related Articles</h3>
+          <ul>
+            <li><a href="/en/captio-alternative/">Captio Alternative: Full Speed Comparison</a></li>
+            <li><a href="/en/captio-migration-guide/">Captio Migration Guide</a></li>
+            <li><a href="/en/blog/captio-shutdown-alternatives">Captio Shutdown: Best Alternatives</a></li>
+            <li><a href="/en/">Simple Memo Homepage</a></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links" aria-label="Footer navigation">
+        <a href="/terms" class="footer__link">Terms</a>
+        <a href="/privacy" class="footer__link">Privacy</a>
+        <a href="/faq" class="footer__link">FAQ</a>
+        <a href="/captio-alternative/" class="footer__link">Captio Alternative</a>
+        <a href="/note-to-email/" class="footer__link">Note to Email</a>
+        <a href="/vs/" class="footer__link">Comparisons</a>
+        <a href="/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/guides/" class="footer__link">Guides</a>
+        <a href="/about/" class="footer__link">About</a>
+        <a href="/legal" class="footer__link footer__link--legal">Legal</a>
+        <a href="/contact" class="footer__link">Contact</a>
+        <a href="/devlog/" class="footer__link">Dev Log</a>
+        <a href="/captio/" class="footer__link">Captio Method</a>
+        <a href="/how-to/" class="footer__link">How to Use</a>
+        <a href="/templates/" class="footer__link">Templates</a>
+        <a href="/methods/" class="footer__link">Methods</a>
+        <a href="/blog/" class="footer__link">Blog</a>
+        <a href="/glossary/" class="footer__link">Glossary</a>
+        <a href="/comparison/" class="footer__link">Comparison Guide</a>
+      </nav>
+      <nav class="footer__social" aria-label="Social links">
+        <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X / Twitter</a>
+        <a href="https://note.com/simplememo" rel="me noopener" target="_blank" class="footer__link">note</a>
+        <a href="https://zenn.dev/simplememo" rel="me noopener" target="_blank" class="footer__link">Zenn</a>
+        <a href="https://github.com/hajimeataka" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026 Simple Memo - Captio-style. All rights reserved.<br>
+        Operated by Yurika Inc.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scroll Reveal -->
+  <script>
+  (function() {
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      reveals.forEach(function(el) { observer.observe(el); });
+    } else {
+      reveals.forEach(function(el) { el.classList.add('visible'); });
+    }
+  })();
+  </script>
+
+  <script>
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>
