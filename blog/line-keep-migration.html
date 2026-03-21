@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
+  </script>
+  <title>LINE Keep終了後の完全移行ガイド — データ保全とメモアプリ乗り換え【2026年】</title>
+  <meta name="description" content="LINE Keepが2024年8月28日に終了。データのエクスポート方法からSimpleMemoへの移行手順、代替アプリ比較まで完全ガイド。LINE Keepユーザーのための実践的な乗り換えマニュアル。">
+  <meta name="theme-color" content="#000000">
+
+  <meta property="og:title" content="LINE Keep終了後の完全移行ガイド — データ保全とメモアプリ乗り換え【2026年】">
+  <meta property="og:description" content="LINE Keepが終了。データエクスポートからSimpleMemoへの移行手順、代替アプリ比較まで完全ガイド。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/blog/line-keep-migration">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-line-keep-migration.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Captio式シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="LINE Keep終了後の完全移行ガイド【2026年】">
+  <meta name="twitter:description" content="LINE Keepが終了。データエクスポートからSimpleMemoへの移行手順、代替アプリ比較まで完全ガイド。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-line-keep-migration.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <link rel="canonical" href="https://simplememofast.com/blog/line-keep-migration">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/line-keep-migration">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/line-keep-migration#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-line-keep-migration.png","headline":"LINE Keep終了後の完全移行ガイド — データ保全とメモアプリ乗り換え【2026年】","description":"LINE Keepが2024年8月28日に終了。データのエクスポート方法からSimpleMemoへの移行手順、代替アプリ比較まで完全ガイド。","url":"https://simplememofast.com/blog/line-keep-migration","datePublished":"2026-03-21","dateModified":"2026-03-21","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/line-keep-migration"}}</script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"LINE Keep移行ガイド","item":"https://simplememofast.com/blog/line-keep-migration"}]}
+  </script>
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/blog/line-keep-migration#webpage",
+  "inLanguage": "ja",
+  "name": "LINE Keep終了後の完全移行ガイド",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/#website"
+  },
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [
+      ".lp-hero__title",
+      ".lp-hero__sub",
+      ".tldr"
+    ]
+  },
+  "url": "https://simplememofast.com/blog/line-keep-migration"
+}
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "LINE Keepのデータはまだ取り出せますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "LINE Keepは2024年8月28日にサービスが完全終了しました。終了前にエクスポートしなかったデータは残念ながら復元できません。ただし、LINEトーク内でKeepに保存した元のメッセージが残っている場合は、トーク履歴から再取得が可能です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "LINE KeepメモとLINE Keepの違いは何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "LINE Keepはクラウドストレージ機能（1GBまで）で、テキスト・画像・動画・リンクを保存できるサービスでした。LINE Keepメモは自分だけのトークルームで、メモとして使える機能です。Keepが終了した後もKeepメモは引き続き利用可能ですが、ストレージとしての保存機能はありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "SimpleMemoはLINE Keepの完全な代替になりますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "テキストメモの保存・管理という点では、SimpleMemoはLINE Keepの優れた代替となります。0.3秒の高速起動、メールベースの確実な保存、AES-GCM暗号化によるセキュリティを提供します。ただし、画像や動画の保存にはGoogle PhotosやiCloud Photosとの併用をおすすめします。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "LINE Keepの代わりに無料で使えるメモアプリはありますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Apple NotesやGoogle Keepは完全無料で利用できます。SimpleMemoも1日3回まで無料で送信可能で、7日間の無料トライアルも付いています。用途に応じて、テキスト中心ならSimpleMemo、画像込みならGoogle Keep、Apple製品ユーザーならApple Notesがおすすめです。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "LINE Keepメモからの移行で最も手軽な方法は何ですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "最も手軽な方法は、LINE Keepメモのテキストをコピーして、SimpleMemoに貼り付けてメール送信する方法です。1件あたり10秒程度で完了します。大量のメモがある場合は、まずLINEのトーク履歴をテキストファイルでエクスポートし、メールで一括転送する方法が効率的です。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "LINE KeepからSimpleMemoへの移行にかかる時間はどのくらいですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "メモの数によりますが、テキストメモ10件程度なら5分以内で完了します。50件以上の場合でも、トーク履歴のエクスポート機能を使えば15〜20分程度で移行できます。SimpleMemoの初期設定自体は2分で完了します。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "LINE Keepで保存していた画像やファイルはどうすればいいですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "画像はGoogle PhotosまたはiCloud Photosに保存するのがベストです。PDFやファイルはiCloud Drive、Google Drive、Dropboxなどのクラウドストレージに保存しましょう。テキストメモだけをSimpleMemoに移行し、ファイル類は専用のクラウドストレージで管理する分業体制が最も効率的です。"
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:revert}span[data-lang].active{display:revert}a.app-store-badge[data-lang].active{display:inline-flex}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .tldr{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:2rem;font-size:.95rem;line-height:1.8}
+    .tldr strong{color:var(--accent)}
+    .step-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin:1rem 0}
+    .step-box__num{display:inline-block;background:var(--accent);color:#000;font-weight:700;width:28px;height:28px;line-height:28px;text-align:center;border-radius:50%;margin-right:.5rem;font-size:.875rem}
+    .comparison-table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.875rem}
+    .comparison-table th,.comparison-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .comparison-table th{background:var(--surface);font-weight:700;position:sticky;top:0}
+    .comparison-table td:first-child{font-weight:700;white-space:nowrap}
+    .comparison-table tr:hover td{background:rgba(100,180,255,.04)}
+    @media(max-width:600px){.comparison-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+    .article-body{font-size:.95rem;line-height:1.9;color:var(--text-primary)}
+    .article-body h2{font-size:1.3rem;font-weight:700;margin:3rem 0 1.25rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+    .article-body h3{font-size:1.1rem;font-weight:700;margin:2rem 0 1rem}
+    .article-body p{margin-bottom:1.25rem}
+    .article-body ul,.article-body ol{margin:1rem 0 1.5rem;padding-left:1.5rem}
+    .article-body li{margin-bottom:.5rem;line-height:1.7}
+    .article-body a{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(100,180,255,.3);text-underline-offset:2px}
+    .article-body a:hover{text-decoration-color:var(--accent)}
+    .highlight-box{background:rgba(100,180,255,.06);border-left:3px solid var(--accent);padding:1rem 1.25rem;margin:1.5rem 0;border-radius:0 8px 8px 0;font-size:.9rem;line-height:1.7}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Captio式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/blog/" class="page-header__back">
+          <span data-lang="ja">ブログ一覧へ戻る</span>
+          <span data-lang="en">Back to Blog</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">LINE Keep移行</span>
+          <span data-lang="en">LINE Keep Migration</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">LINE Keep終了後の完全移行ガイド — データ保全とメモアプリ乗り換え【2026年】</span>
+          <span data-lang="en">Complete LINE Keep Migration Guide — Data Backup & Memo App Switch [2026]</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">LINE Keepが2024年8月28日にサービス終了。大切なメモ・画像・リンクを失わないためのデータエクスポート手順と、最適な移行先アプリの選び方を解説します。</span>
+          <span data-lang="en">LINE Keep shut down on August 28, 2024. Learn how to export your memos, images, and links, and find the best replacement app for your workflow.</span>
+        </p>
+        <p style="font-size:.875rem;color:var(--text-muted)">
+          <time datetime="2026-03-21">
+            <span data-lang="ja">2026年3月21日</span>
+            <span data-lang="en">March 21, 2026</span>
+          </time>
+        </p>
+      </div>
+
+      <!-- TL;DR -->
+      <div class="tldr" data-lang="ja">
+        <strong>この記事の要約：</strong> LINE Keepは2024年8月28日にサービス終了しました。テキストメモの移行先として最もおすすめなのは、0.3秒起動・メール経由で確実に保存できる<strong>SimpleMemo</strong>です。本記事ではデータのエクスポート方法、SimpleMemoへの移行手順、他アプリとの比較を詳しく解説します。
+      </div>
+      <div class="tldr" data-lang="en">
+        <strong>TL;DR:</strong> LINE Keep ended on August 28, 2024. For text memos, <strong>SimpleMemo</strong> is the best replacement with 0.3s launch and email-based reliable storage. This guide covers data export, migration steps, and app comparisons.
+      </div>
+
+      <!-- Article Body -->
+      <article class="article-body">
+
+        <!-- Section 1: LINE Keep終了の経緯 -->
+        <h2 data-lang="ja">1. LINE Keep終了の経緯 — なぜサービスは終了したのか</h2>
+        <h2 data-lang="en">1. Why LINE Keep Was Discontinued</h2>
+
+        <p data-lang="ja">LINE Keepは、LINEアプリ内のクラウドストレージ機能として2014年にスタートしました。テキストメモ、画像、動画、リンク、ファイルなどを最大1GBまで保存できるサービスで、多くの日本のユーザーに愛用されてきました。</p>
+        <p data-lang="en">LINE Keep launched in 2014 as an in-app cloud storage feature within LINE. It allowed users to save text memos, images, videos, links, and files up to 1GB, becoming popular among millions of Japanese users.</p>
+
+        <p data-lang="ja">しかし、LINEヤフー株式会社は2024年6月にLINE Keepの終了を発表。<strong>2024年8月28日をもってサービスは完全に終了</strong>しました。終了の主な理由は以下の通りです。</p>
+        <p data-lang="en">However, LY Corporation announced in June 2024 that LINE Keep would be discontinued. <strong>The service was fully terminated on August 28, 2024.</strong></p>
+
+        <ul data-lang="ja">
+          <li><strong>サービスの集約と効率化：</strong>LINEヤフー統合後、重複するサービスの整理が進められた</li>
+          <li><strong>利用率の低下：</strong>専門的なクラウドストレージ（Google Drive、iCloud等）の普及により、LINE Keep単独の需要が減少</li>
+          <li><strong>セキュリティ要件の変化：</strong>2023年の個人情報流出事件を受け、データ保管サービスの見直しが行われた</li>
+          <li><strong>運用コストの最適化：</strong>無料で提供していたストレージサービスの維持コストが課題に</li>
+        </ul>
+        <ul data-lang="en">
+          <li><strong>Service consolidation:</strong> Post LY Corporation merger, overlapping services were streamlined</li>
+          <li><strong>Declining usage:</strong> Dedicated cloud storage services reduced demand for LINE Keep</li>
+          <li><strong>Security review:</strong> Following the 2023 data breach incident, data storage services were reassessed</li>
+          <li><strong>Cost optimization:</strong> Maintaining free storage became unsustainable</li>
+        </ul>
+
+        <div class="highlight-box" data-lang="ja">
+          <strong>重要：</strong>LINE Keepは終了しましたが、「LINE Keepメモ」（自分だけのトークルーム）は引き続き利用可能です。ただし、Keepメモはあくまでトーク機能であり、クラウドストレージとしてのバックアップ機能はありません。大切なメモは別のアプリに移行することを強くおすすめします。
+        </div>
+        <div class="highlight-box" data-lang="en">
+          <strong>Important:</strong> While LINE Keep has ended, "LINE Keep Memo" (a personal chat room) is still available. However, Keep Memo is just a chat feature without cloud backup capabilities. We strongly recommend migrating important memos to a dedicated app.
+        </div>
+
+        <p data-lang="ja">LINE Keepの終了は、多くのユーザーにとって突然の出来事でした。しかし、これは「プラットフォーム依存のリスク」を改めて認識する機会でもあります。特定のアプリに全てのデータを預けることの危険性を示す好例と言えるでしょう。</p>
+        <p data-lang="en">The shutdown of LINE Keep was sudden for many users, highlighting the risks of platform dependency. It serves as a reminder of the dangers of storing all your data in a single app.</p>
+
+        <!-- Section 2: データエクスポート方法 -->
+        <h2 data-lang="ja">2. LINE Keepのデータエクスポート方法</h2>
+        <h2 data-lang="en">2. How to Export LINE Keep Data</h2>
+
+        <p data-lang="ja">LINE Keepのサービスは既に終了していますが、終了前にエクスポートしたデータの活用方法や、LINE Keepメモに残っているデータの取り出し方について解説します。</p>
+        <p data-lang="en">While LINE Keep has already shut down, here's how to work with previously exported data and retrieve data still in LINE Keep Memo.</p>
+
+        <h3 data-lang="ja">2-1. テキストメモの保存</h3>
+        <h3 data-lang="en">2-1. Saving Text Memos</h3>
+
+        <div class="step-box" data-lang="ja">
+          <p><span class="step-box__num">1</span><strong>LINE Keepメモを開く：</strong>LINEアプリのホームタブから「Keepメモ」をタップ</p>
+          <p><span class="step-box__num">2</span><strong>テキストを選択：</strong>保存したいメモを長押しして「コピー」を選択</p>
+          <p><span class="step-box__num">3</span><strong>メモアプリに貼り付け：</strong>SimpleMemoを開いて貼り付け、ワンタップで送信</p>
+        </div>
+        <div class="step-box" data-lang="en">
+          <p><span class="step-box__num">1</span><strong>Open LINE Keep Memo:</strong> Tap "Keep Memo" from the LINE home tab</p>
+          <p><span class="step-box__num">2</span><strong>Select text:</strong> Long-press the memo and choose "Copy"</p>
+          <p><span class="step-box__num">3</span><strong>Paste to memo app:</strong> Open SimpleMemo, paste, and send with one tap</p>
+        </div>
+
+        <h3 data-lang="ja">2-2. 画像・動画の保存</h3>
+        <h3 data-lang="en">2-2. Saving Images & Videos</h3>
+
+        <p data-lang="ja">LINE Keepに保存していた画像・動画は、サービス終了前にダウンロードしていない場合は復元できません。今後はLINEトーク内の画像についても、以下の手順で早めに保存しておきましょう。</p>
+        <p data-lang="en">Images and videos stored in LINE Keep cannot be recovered if they weren't downloaded before the shutdown. Going forward, save LINE chat images promptly using these steps.</p>
+
+        <ul data-lang="ja">
+          <li><strong>カメラロールに保存：</strong>画像を長押し → 「保存」を選択</li>
+          <li><strong>Google Photosに自動バックアップ：</strong>Google Photosアプリのバックアップ設定をONにしておけば自動保存</li>
+          <li><strong>iCloud Photosを活用：</strong>iPhoneの「設定」→「写真」→「iCloud写真」をONに</li>
+        </ul>
+        <ul data-lang="en">
+          <li><strong>Save to Camera Roll:</strong> Long-press image and select "Save"</li>
+          <li><strong>Auto-backup to Google Photos:</strong> Enable backup in Google Photos settings</li>
+          <li><strong>Use iCloud Photos:</strong> Turn on iCloud Photos in iPhone Settings</li>
+        </ul>
+
+        <h3 data-lang="ja">2-3. リンク・URLの保存</h3>
+        <h3 data-lang="en">2-3. Saving Links & URLs</h3>
+
+        <p data-lang="ja">LINE Keepでブックマーク代わりにリンクを保存していた方は、以下の代替手段がおすすめです。</p>
+        <p data-lang="en">If you used LINE Keep as a bookmark tool for links, consider these alternatives.</p>
+
+        <ul data-lang="ja">
+          <li><strong>SimpleMemoでメール送信：</strong>URLをSimpleMemoにペーストして送信すれば、メールの受信ボックスで検索可能に</li>
+          <li><strong>ブラウザのブックマーク：</strong>Safariの「共有」→「ブックマークに追加」</li>
+          <li><strong>リーディングリスト：</strong>Safariの「共有」→「リーディングリストに追加」でオフライン閲覧も可能</li>
+        </ul>
+        <ul data-lang="en">
+          <li><strong>Send via SimpleMemo:</strong> Paste URLs into SimpleMemo and send to make them searchable in your inbox</li>
+          <li><strong>Browser bookmarks:</strong> Use Safari's Share menu to add bookmarks</li>
+          <li><strong>Reading List:</strong> Safari's "Add to Reading List" enables offline reading</li>
+        </ul>
+
+        <!-- Section 3: SimpleMemoへの移行ガイド -->
+        <h2 data-lang="ja">3. LINE Keep → SimpleMemoへの移行ガイド</h2>
+        <h2 data-lang="en">3. LINE Keep to SimpleMemo Migration Guide</h2>
+
+        <p data-lang="ja">LINE Keepの代替として<a href="/">SimpleMemo</a>をおすすめする最大の理由は、「メモがメールとして確実に保存される」点です。アプリが終了してもメールは残り続けるため、プラットフォーム依存のリスクを根本的に解消できます。</p>
+        <p data-lang="en">The key reason <a href="/">SimpleMemo</a> is the best LINE Keep replacement is that memos are reliably saved as emails. Even if the app shuts down, your emails persist, fundamentally eliminating platform dependency risk.</p>
+
+        <h3 data-lang="ja">ステップ1：SimpleMemoをインストール（所要時間：1分）</h3>
+        <h3 data-lang="en">Step 1: Install SimpleMemo (Time: 1 minute)</h3>
+
+        <div class="step-box" data-lang="ja">
+          <p><span class="step-box__num">1</span>App Storeで「SimpleMemo」または「シンプルメモ」で検索</p>
+          <p><span class="step-box__num">2</span>アプリをダウンロード・インストール</p>
+          <p><span class="step-box__num">3</span>起動して送信先メールアドレスを設定（Gmail、Outlook、iCloud等に対応）</p>
+        </div>
+        <div class="step-box" data-lang="en">
+          <p><span class="step-box__num">1</span>Search "SimpleMemo" on the App Store</p>
+          <p><span class="step-box__num">2</span>Download and install the app</p>
+          <p><span class="step-box__num">3</span>Launch and set your email address (Gmail, Outlook, iCloud supported)</p>
+        </div>
+
+        <h3 data-lang="ja">ステップ2：LINE Keepメモからデータを移行（所要時間：5〜15分）</h3>
+        <h3 data-lang="en">Step 2: Migrate Data from LINE Keep Memo (Time: 5-15 minutes)</h3>
+
+        <div class="step-box" data-lang="ja">
+          <p><span class="step-box__num">1</span>LINEアプリでKeepメモを開く</p>
+          <p><span class="step-box__num">2</span>重要なメモを1件ずつコピー</p>
+          <p><span class="step-box__num">3</span>SimpleMemoを開いて貼り付け → 送信ボタンをタップ</p>
+          <p><span class="step-box__num">4</span>メモが即座にメールで届くことを確認</p>
+        </div>
+        <div class="step-box" data-lang="en">
+          <p><span class="step-box__num">1</span>Open Keep Memo in LINE app</p>
+          <p><span class="step-box__num">2</span>Copy important memos one by one</p>
+          <p><span class="step-box__num">3</span>Open SimpleMemo, paste, and tap send</p>
+          <p><span class="step-box__num">4</span>Confirm the memo arrives in your email</p>
+        </div>
+
+        <h3 data-lang="ja">ステップ3：一括移行（メモが大量にある場合）</h3>
+        <h3 data-lang="en">Step 3: Bulk Migration (For Many Memos)</h3>
+
+        <div class="step-box" data-lang="ja">
+          <p><span class="step-box__num">1</span>LINEの「設定」→「トーク」→「トーク履歴の送信」でKeepメモのトーク履歴をテキストファイルでエクスポート</p>
+          <p><span class="step-box__num">2</span>エクスポートしたテキストファイルをメールで自分宛てに送信</p>
+          <p><span class="step-box__num">3</span>今後の新しいメモはSimpleMemoで管理を開始</p>
+        </div>
+        <div class="step-box" data-lang="en">
+          <p><span class="step-box__num">1</span>In LINE Settings, export Keep Memo chat history as a text file</p>
+          <p><span class="step-box__num">2</span>Email the exported text file to yourself</p>
+          <p><span class="step-box__num">3</span>Start managing new memos with SimpleMemo going forward</p>
+        </div>
+
+        <div class="highlight-box" data-lang="ja">
+          <strong>移行のコツ：</strong>全てのメモを移行する必要はありません。直近3ヶ月以内に参照したメモだけを優先的に移行し、古いメモは必要になった時にコピーするのが効率的です。
+        </div>
+        <div class="highlight-box" data-lang="en">
+          <strong>Migration tip:</strong> You don't need to migrate everything. Prioritize memos referenced in the last 3 months. Copy older memos only when needed.
+        </div>
+
+        <!-- Section 4: 機能比較テーブル -->
+        <h2 data-lang="ja">4. LINE Keep vs SimpleMemo 機能比較</h2>
+        <h2 data-lang="en">4. LINE Keep vs SimpleMemo Feature Comparison</h2>
+
+        <p data-lang="ja">LINE KeepとSimpleMemoを主要な機能で比較します。SimpleMemoはテキストメモに特化することで、LINE Keepにはなかった高速性とセキュリティを実現しています。</p>
+        <p data-lang="en">A side-by-side comparison of LINE Keep and SimpleMemo across key features. SimpleMemo focuses on text memos to deliver speed and security that LINE Keep couldn't match.</p>
+
+        <div data-lang="ja">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>機能</th>
+              <th>LINE Keep</th>
+              <th>SimpleMemo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>メモ保存</td>
+              <td>クラウドに保存（1GBまで）</td>
+              <td>メールとして永久保存（容量無制限）</td>
+            </tr>
+            <tr>
+              <td>共有</td>
+              <td>LINEトークに転送</td>
+              <td>メールで自由に共有・転送</td>
+            </tr>
+            <tr>
+              <td>検索</td>
+              <td>Keep内検索のみ</td>
+              <td>メールアプリの全文検索を活用</td>
+            </tr>
+            <tr>
+              <td>暗号化</td>
+              <td>LINEのサーバーに依存</td>
+              <td>AES-GCM暗号化（端末〜サーバー間）</td>
+            </tr>
+            <tr>
+              <td>オフライン対応</td>
+              <td>一部のみ（テキスト）</td>
+              <td>完全対応（Outbox自動再送）</td>
+            </tr>
+            <tr>
+              <td>起動速度</td>
+              <td>LINE起動 + Keep画面遷移（3〜5秒）</td>
+              <td>0.3秒で直接起動</td>
+            </tr>
+            <tr>
+              <td>サービス終了リスク</td>
+              <td>終了済み（2024年8月）</td>
+              <td>メールに保存されるため影響なし</td>
+            </tr>
+            <tr>
+              <td>対応ファイル</td>
+              <td>テキスト・画像・動画・ファイル</td>
+              <td>テキストに特化（軽量・高速）</td>
+            </tr>
+            <tr>
+              <td>料金</td>
+              <td>無料（LINEアプリ内）</td>
+              <td>1日3回無料 / Premium ¥500/月</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div data-lang="en">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>LINE Keep</th>
+              <th>SimpleMemo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Memo Storage</td>
+              <td>Cloud storage (up to 1GB)</td>
+              <td>Saved as email (unlimited)</td>
+            </tr>
+            <tr>
+              <td>Sharing</td>
+              <td>Forward to LINE chats</td>
+              <td>Share via email freely</td>
+            </tr>
+            <tr>
+              <td>Search</td>
+              <td>Keep-only search</td>
+              <td>Full-text search via email app</td>
+            </tr>
+            <tr>
+              <td>Encryption</td>
+              <td>Dependent on LINE servers</td>
+              <td>AES-GCM encryption</td>
+            </tr>
+            <tr>
+              <td>Offline</td>
+              <td>Partial (text only)</td>
+              <td>Full support (Outbox auto-resend)</td>
+            </tr>
+            <tr>
+              <td>Launch Speed</td>
+              <td>LINE launch + Keep navigation (3-5s)</td>
+              <td>0.3s direct launch</td>
+            </tr>
+            <tr>
+              <td>Shutdown Risk</td>
+              <td>Already ended (Aug 2024)</td>
+              <td>No impact (saved in email)</td>
+            </tr>
+            <tr>
+              <td>File Types</td>
+              <td>Text, images, video, files</td>
+              <td>Text-focused (lightweight, fast)</td>
+            </tr>
+            <tr>
+              <td>Price</td>
+              <td>Free (within LINE)</td>
+              <td>3 sends/day free / Premium ¥500/mo</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <!-- Section 5: 他の代替アプリとの比較 -->
+        <h2 data-lang="ja">5. 他の代替アプリとの比較</h2>
+        <h2 data-lang="en">5. Comparison with Other Alternatives</h2>
+
+        <p data-lang="ja">LINE Keepの代替として検討されることが多い主要アプリを比較します。それぞれに強みがありますが、「手軽さ」と「データの安全性」の両立ではSimpleMemoが最もバランスが取れています。</p>
+        <p data-lang="en">Here's how the most commonly considered LINE Keep alternatives compare. Each has strengths, but SimpleMemo offers the best balance of convenience and data safety.</p>
+
+        <h3 data-lang="ja">5-1. Apple Notes（メモアプリ）</h3>
+        <h3 data-lang="en">5-1. Apple Notes</h3>
+
+        <p data-lang="ja"><a href="/vs/apple-notes/">Apple Notes</a>はiPhoneに標準搭載されているメモアプリです。リッチテキスト、手書き、スキャン、フォルダ整理など多機能ですが、起動に1.2秒かかり、「さっとメモる」用途にはやや重いのが難点です。iCloudでの同期が前提のため、Appleエコシステムに依存します。</p>
+        <p data-lang="en"><a href="/vs/apple-notes/">Apple Notes</a> comes pre-installed on iPhone with rich text, handwriting, scanning, and folder organization. However, its 1.2s launch time makes it slightly heavy for quick capture. It also requires iCloud sync, creating Apple ecosystem dependency.</p>
+
+        <ul data-lang="ja">
+          <li>メリット：無料、多機能、Apple製品間で自動同期</li>
+          <li>デメリット：起動が遅い（1.2秒）、Android非対応、エクスポートが面倒</li>
+          <li>おすすめユーザー：Apple製品のみを使い、整理されたメモを書きたい人</li>
+        </ul>
+        <ul data-lang="en">
+          <li>Pros: Free, feature-rich, auto-sync across Apple devices</li>
+          <li>Cons: Slow launch (1.2s), no Android support, export is cumbersome</li>
+          <li>Best for: Apple-only users who want organized, detailed notes</li>
+        </ul>
+
+        <h3 data-lang="ja">5-2. Google Keep</h3>
+        <h3 data-lang="en">5-2. Google Keep</h3>
+
+        <p data-lang="ja"><a href="/vs/google-keep/">Google Keep</a>は付箋風のUIが特徴的なメモアプリです。Android・iOS・Webで利用可能でクロスプラットフォーム対応が強みですが、起動に1.5秒かかり、Googleアカウントへの依存が生じます。LINE Keepと似た「手軽にメモ」の体験を提供しますが、プラットフォーム依存のリスクは残ります。</p>
+        <p data-lang="en"><a href="/vs/google-keep/">Google Keep</a> features a sticky-note UI available on Android, iOS, and Web. Its cross-platform support is strong, but 1.5s launch time and Google account dependency are drawbacks. It offers a similar "quick memo" experience to LINE Keep, but platform dependency risk remains.</p>
+
+        <ul data-lang="ja">
+          <li>メリット：無料、クロスプラットフォーム、画像・リスト対応</li>
+          <li>デメリット：起動が遅い（1.5秒）、Googleに依存、オフライン機能が限定的</li>
+          <li>おすすめユーザー：AndroidとiPhoneを両方使う人、ビジュアルなメモが好きな人</li>
+        </ul>
+        <ul data-lang="en">
+          <li>Pros: Free, cross-platform, supports images and lists</li>
+          <li>Cons: Slow launch (1.5s), Google dependency, limited offline features</li>
+          <li>Best for: Users on both Android and iPhone, visual memo lovers</li>
+        </ul>
+
+        <h3 data-lang="ja">5-3. Notion</h3>
+        <h3 data-lang="en">5-3. Notion</h3>
+
+        <p data-lang="ja"><a href="/vs/notion/">Notion</a>は「万能ワークスペース」として知られるアプリです。データベース、カンバン、Wiki、ドキュメントなど高度な機能を持ちますが、起動に3.8秒もかかるため、メモの即時記録には不向きです。LINE Keepのような「さっとメモる」使い方をしていた方には機能過多に感じるでしょう。</p>
+        <p data-lang="en"><a href="/vs/notion/">Notion</a> is known as an "all-in-one workspace" with databases, kanban, wiki, and documents. Its 3.8s launch time makes it unsuitable for instant capture. For former LINE Keep users who valued quick memos, Notion may feel overwhelming.</p>
+
+        <ul data-lang="ja">
+          <li>メリット：高度な整理機能、テンプレート豊富、チーム共有</li>
+          <li>デメリット：起動が非常に遅い（3.8秒）、オフライン機能が弱い、学習コストが高い</li>
+          <li>おすすめユーザー：プロジェクト管理や知識データベースが必要な人</li>
+        </ul>
+        <ul data-lang="en">
+          <li>Pros: Advanced organization, rich templates, team sharing</li>
+          <li>Cons: Very slow launch (3.8s), weak offline, steep learning curve</li>
+          <li>Best for: Users needing project management or knowledge databases</li>
+        </ul>
+
+        <div class="highlight-box" data-lang="ja">
+          <strong>LINE Keepユーザーへの結論：</strong>LINE Keepの「手軽さ」を重視するなら、<strong>SimpleMemo（0.3秒起動）</strong>がベスト。整理機能も欲しいならApple Notes。クロスプラットフォームならGoogle Keep。高度な管理ならNotionを検討してください。詳しい比較は<a href="/blog/best-memo-apps-2026.html">おすすめメモアプリ10選</a>もご参照ください。
+        </div>
+        <div class="highlight-box" data-lang="en">
+          <strong>Conclusion for LINE Keep users:</strong> For LINE Keep's ease of use, <strong>SimpleMemo (0.3s launch)</strong> is best. For organization, try Apple Notes. For cross-platform, Google Keep. For advanced management, consider Notion. See also: <a href="/blog/best-memo-apps-2026.html">Best Memo Apps 2026</a>.
+        </div>
+
+        <!-- Section 6: おすすめのワークフロー -->
+        <h2 data-lang="ja">6. LINE Keepユーザーにおすすめのワークフロー</h2>
+        <h2 data-lang="en">6. Recommended Workflow for LINE Keep Users</h2>
+
+        <p data-lang="ja">LINE Keepを日常的に使っていた方が、スムーズに新しいメモ習慣を確立するためのワークフローを提案します。ポイントは「メモ → メール → 検索可能なアーカイブ」の流れを作ることです。</p>
+        <p data-lang="en">Here's a recommended workflow for former LINE Keep users to establish a new memo habit. The key is building a "Memo to Email to Searchable Archive" pipeline.</p>
+
+        <h3 data-lang="ja">6-1. 即座にメモする（SimpleMemo）</h3>
+        <h3 data-lang="en">6-1. Instant Capture (SimpleMemo)</h3>
+
+        <p data-lang="ja">思いついたことはSimpleMemoで即座にキャプチャ。0.3秒で起動して、ワンタップで送信。LINE Keepより10倍速いメモ体験です。通勤中、会議中、買い物中 — いつでもどこでもメモが取れます。</p>
+        <p data-lang="en">Capture thoughts instantly with SimpleMemo. 0.3s launch, one-tap send. 10x faster than LINE Keep. Whether commuting, in meetings, or shopping, you can always capture memos.</p>
+
+        <h3 data-lang="ja">6-2. メールで自動アーカイブ（Gmail / Outlook）</h3>
+        <h3 data-lang="en">6-2. Auto-Archive via Email (Gmail / Outlook)</h3>
+
+        <p data-lang="ja">SimpleMemoで送信したメモは、設定したメールアドレスに自動的に届きます。Gmailのフィルター機能を使えば、SimpleMemoからのメモを自動的にラベル付けし、整理することも可能です。</p>
+        <p data-lang="en">Memos sent via SimpleMemo automatically arrive at your configured email address. Using Gmail filters, you can auto-label and organize memos from SimpleMemo.</p>
+
+        <div class="step-box" data-lang="ja">
+          <p><strong>Gmailフィルター設定例：</strong></p>
+          <p><span class="step-box__num">1</span>Gmailの「設定」→「フィルタとブロック中のアドレス」→「新しいフィルタを作成」</p>
+          <p><span class="step-box__num">2</span>From: に「simplememo」と入力</p>
+          <p><span class="step-box__num">3</span>「ラベルを付ける」→「メモ」ラベルを作成して適用</p>
+          <p><span class="step-box__num">4</span>「既存の一致するメールにもフィルタを適用する」にチェック</p>
+        </div>
+        <div class="step-box" data-lang="en">
+          <p><strong>Gmail filter example:</strong></p>
+          <p><span class="step-box__num">1</span>Gmail Settings > Filters and Blocked Addresses > Create a new filter</p>
+          <p><span class="step-box__num">2</span>From: enter "simplememo"</p>
+          <p><span class="step-box__num">3</span>Apply label > Create "Memos" label</p>
+          <p><span class="step-box__num">4</span>Check "Also apply filter to matching conversations"</p>
+        </div>
+
+        <h3 data-lang="ja">6-3. 検索可能なアーカイブとして活用</h3>
+        <h3 data-lang="en">6-3. Use as a Searchable Archive</h3>
+
+        <p data-lang="ja">メールに保存されたメモは、Gmailの強力な検索機能で瞬時に見つけられます。LINE Keepの検索機能よりも高速かつ正確です。「先月のアイデア」「あの会議のメモ」「買い物リスト」— すべてメールの検索ボックスから一発で探せます。</p>
+        <p data-lang="en">Memos saved in email are instantly findable through Gmail's powerful search. Faster and more accurate than LINE Keep's search. "Last month's idea," "that meeting memo," "shopping list" — all searchable from your email search box.</p>
+
+        <h3 data-lang="ja">6-4. 画像はGoogle PhotosまたはiCloudで管理</h3>
+        <h3 data-lang="en">6-4. Manage Images with Google Photos or iCloud</h3>
+
+        <p data-lang="ja">LINE Keepで画像も保存していた方は、テキストメモはSimpleMemo、画像はGoogle PhotosまたはiCloud Photosという分業体制が最も効率的です。それぞれのサービスが得意なことに集中させることで、データの安全性と利便性を最大化できます。</p>
+        <p data-lang="en">If you also stored images in LINE Keep, the most efficient approach is: text memos in SimpleMemo, images in Google Photos or iCloud Photos. Each service handles what it does best, maximizing both safety and convenience.</p>
+
+        <div class="highlight-box" data-lang="ja">
+          <strong>ワークフローまとめ：</strong><br>
+          テキストメモ → <strong>SimpleMemo</strong>（0.3秒起動 → メール保存 → Gmail検索）<br>
+          画像・動画 → <strong>Google Photos / iCloud Photos</strong>（自動バックアップ）<br>
+          リンク・URL → <strong>SimpleMemo</strong>（URLをメモして送信 → メール内検索）<br>
+          ファイル・PDF → <strong>iCloud Drive / Google Drive</strong>（クラウドストレージ）
+        </div>
+        <div class="highlight-box" data-lang="en">
+          <strong>Workflow summary:</strong><br>
+          Text memos: <strong>SimpleMemo</strong> (0.3s launch > email > Gmail search)<br>
+          Images/video: <strong>Google Photos / iCloud Photos</strong> (auto backup)<br>
+          Links/URLs: <strong>SimpleMemo</strong> (memo URL > send > email search)<br>
+          Files/PDFs: <strong>iCloud Drive / Google Drive</strong> (cloud storage)
+        </div>
+
+        <!-- Section 7: FAQ -->
+        <h2 data-lang="ja">7. よくある質問（FAQ）</h2>
+        <h2 data-lang="en">7. Frequently Asked Questions</h2>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">LINE Keepのデータはまだ取り出せますか？</summary>
+            <div class="faq-answer">LINE Keepは2024年8月28日にサービスが完全終了しました。終了前にエクスポートしなかったデータは残念ながら復元できません。ただし、LINEトーク内でKeepに保存した元のメッセージが残っている場合は、トーク履歴から再取得が可能です。今後のデータロスを防ぐためにも、メールベースで保存できるSimpleMemoへの移行をおすすめします。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">Can I still retrieve LINE Keep data?</summary>
+            <div class="faq-answer">LINE Keep fully ended on August 28, 2024. Data not exported before shutdown cannot be recovered. However, if original messages saved to Keep still exist in LINE chats, you can retrieve them from chat history. To prevent future data loss, we recommend migrating to SimpleMemo which saves memos as emails.</div>
+          </details>
+        </div>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">LINE KeepメモとLINE Keepの違いは何ですか？</summary>
+            <div class="faq-answer">LINE Keepはクラウドストレージ機能（1GBまで）で、テキスト・画像・動画・リンクを保存できるサービスでした。LINE Keepメモは自分だけのトークルームで、メモとして使える機能です。Keepが終了した後もKeepメモは引き続き利用可能ですが、ストレージとしての保存機能はありません。重要なデータはKeepメモに頼らず、別のアプリに保存しましょう。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">What's the difference between LINE Keep Memo and LINE Keep?</summary>
+            <div class="faq-answer">LINE Keep was a cloud storage feature (up to 1GB) for text, images, video, and links. LINE Keep Memo is a personal chat room for note-taking. While Keep Memo remains available after Keep's shutdown, it lacks backup capabilities. Store important data in a dedicated app instead.</div>
+          </details>
+        </div>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">SimpleMemoはLINE Keepの完全な代替になりますか？</summary>
+            <div class="faq-answer">テキストメモの保存・管理という点では、SimpleMemoはLINE Keepの優れた代替となります。0.3秒の高速起動、メールベースの確実な保存、AES-GCM暗号化によるセキュリティを提供します。ただし、画像や動画の保存にはGoogle PhotosやiCloud Photosとの併用をおすすめします。詳しくは<a href="/vs/line-keep-memo/">LINE Keep vs SimpleMemo比較</a>をご覧ください。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">Is SimpleMemo a complete LINE Keep replacement?</summary>
+            <div class="faq-answer">For text memo storage and management, SimpleMemo is an excellent LINE Keep alternative with 0.3s launch, email-based reliable storage, and AES-GCM encryption. For images and videos, we recommend using Google Photos or iCloud Photos alongside SimpleMemo. See <a href="/vs/line-keep-memo/">LINE Keep vs SimpleMemo comparison</a> for details.</div>
+          </details>
+        </div>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">LINE Keepの代わりに無料で使えるメモアプリはありますか？</summary>
+            <div class="faq-answer"><a href="/vs/apple-notes/">Apple Notes</a>や<a href="/vs/google-keep/">Google Keep</a>は完全無料で利用できます。SimpleMemoも1日3回まで無料で送信可能で、7日間の無料トライアルも付いています。用途に応じて、テキスト中心ならSimpleMemo、画像込みならGoogle Keep、Apple製品ユーザーならApple Notesがおすすめです。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">Are there free alternatives to LINE Keep?</summary>
+            <div class="faq-answer"><a href="/vs/apple-notes/">Apple Notes</a> and <a href="/vs/google-keep/">Google Keep</a> are completely free. SimpleMemo also offers 3 free sends per day plus a 7-day trial. For text-focused use, SimpleMemo is best. For images, try Google Keep. For Apple users, Apple Notes works well.</div>
+          </details>
+        </div>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">LINE Keepメモからの移行で最も手軽な方法は何ですか？</summary>
+            <div class="faq-answer">最も手軽な方法は、LINE Keepメモのテキストをコピーして、SimpleMemoに貼り付けてメール送信する方法です。1件あたり10秒程度で完了します。大量のメモがある場合は、まずLINEのトーク履歴をテキストファイルでエクスポートし、メールで一括転送する方法が効率的です。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">What's the easiest way to migrate from LINE Keep Memo?</summary>
+            <div class="faq-answer">The easiest method is to copy text from LINE Keep Memo, paste into SimpleMemo, and send via email. Each memo takes about 10 seconds. For bulk migration, export LINE chat history as a text file and forward it via email.</div>
+          </details>
+        </div>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">LINE KeepからSimpleMemoへの移行にかかる時間はどのくらいですか？</summary>
+            <div class="faq-answer">メモの数によりますが、テキストメモ10件程度なら5分以内で完了します。50件以上の場合でも、トーク履歴のエクスポート機能を使えば15〜20分程度で移行できます。SimpleMemoの初期設定自体は2分で完了します。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">How long does migration from LINE Keep to SimpleMemo take?</summary>
+            <div class="faq-answer">It depends on the number of memos. Around 10 text memos can be done in under 5 minutes. Even 50+ memos take only 15-20 minutes using the chat history export feature. SimpleMemo's initial setup takes just 2 minutes.</div>
+          </details>
+        </div>
+
+        <div class="faq-item" data-lang="ja">
+          <details class="faq-details">
+            <summary class="faq-summary">LINE Keepで保存していた画像やファイルはどうすればいいですか？</summary>
+            <div class="faq-answer">画像はGoogle PhotosまたはiCloud Photosに保存するのがベストです。PDFやファイルはiCloud Drive、Google Drive、Dropboxなどのクラウドストレージに保存しましょう。テキストメモだけをSimpleMemoに移行し、ファイル類は専用のクラウドストレージで管理する分業体制が最も効率的です。</div>
+          </details>
+        </div>
+        <div class="faq-item" data-lang="en">
+          <details class="faq-details">
+            <summary class="faq-summary">What should I do with images and files from LINE Keep?</summary>
+            <div class="faq-answer">Save images to Google Photos or iCloud Photos. Store PDFs and files in iCloud Drive, Google Drive, or Dropbox. The most efficient approach is migrating text memos to SimpleMemo while managing files in dedicated cloud storage.</div>
+          </details>
+        </div>
+
+      </article>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title"><span data-lang="ja">LINE Keepの代わりに、最速のメモ体験を</span><span data-lang="en">Replace LINE Keep with the fastest memo experience</span></div>
+        <div class="cta-box__desc"><span data-lang="ja">0.3秒起動 + 150ms送信。メールに保存されるから、サービス終了の心配なし。7日間の無料トライアル付き。</span><span data-lang="en">0.3s launch + 150ms send. Saved as email, so no shutdown worries. 7-day free trial included.</span></div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
+        <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
+      </div>
+
+      <!-- Related Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2>
+        <div class="internal-links">
+          <a href="/vs/line-keep-memo/"><span data-lang="ja">vs LINE Keepメモ</span><span data-lang="en">vs LINE Keep Memo</span></a>
+          <a href="/vs/google-keep/"><span data-lang="ja">vs Google Keep</span><span data-lang="en">vs Google Keep</span></a>
+          <a href="/vs/notion/"><span data-lang="ja">vs Notion</span><span data-lang="en">vs Notion</span></a>
+          <a href="/vs/apple-notes/"><span data-lang="ja">vs Apple Notes</span><span data-lang="en">vs Apple Notes</span></a>
+          <a href="/blog/line-keep-alternative.html"><span data-lang="ja">LINE Keep代替アプリ</span><span data-lang="en">LINE Keep Alternatives</span></a>
+          <a href="/blog/best-memo-apps-2026.html"><span data-lang="ja">おすすめメモアプリ10選</span><span data-lang="en">Best Memo Apps 2026</span></a>
+          <a href="/blog/"><span data-lang="ja">ブログ一覧</span><span data-lang="en">All Articles</span></a>
+        </div>
+      </section>
+
+    </div>
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span data-lang="ja">関連コンテンツ</span>
+    <span data-lang="en">Related Content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">自分にメール送信する方法</span><span data-lang="en">How to Email Yourself</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">メモアプリ比較一覧</span><span data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
+  </ul>
+</section>
+</main>
+
+      <section class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://official-blog.line.me/ja/archives/keep_end.html" target="_blank" rel="noopener">LINE公式ブログ (2024). LINE Keepサービス終了のお知らせ.</a></li>
+        <li><a href="https://guide.line.me/ja/chats-calls-notifications/keep-memo.html" target="_blank" rel="noopener">LINE みんなの使い方ガイド. Keepメモの使い方.</a></li>
+        <li><a href="https://www.pcmag.com/picks/the-best-note-taking-apps" target="_blank" rel="noopener">PCMag (2025). The Best Note-Taking Apps.</a></li>
+        </ul>
+      </section>
+      <section class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://official-blog.line.me/ja/archives/keep_end.html" target="_blank" rel="noopener">LINE Official Blog (2024). LINE Keep Service Termination Notice.</a></li>
+        <li><a href="https://guide.line.me/ja/chats-calls-notifications/keep-memo.html" target="_blank" rel="noopener">LINE User Guide. How to Use Keep Memo.</a></li>
+        <li><a href="https://www.pcmag.com/picks/the-best-note-taking-apps" target="_blank" rel="noopener">PCMag (2025). The Best Note-Taking Apps.</a></li>
+        </ul>
+      </section>
+
+  <footer class="footer"><div class="container"><nav class="footer__links" aria-label="Footer navigation"><a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a><a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a><a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a><a href="/vs/" class="footer__link"><span data-lang="ja">アプリ比較</span><span data-lang="en">Comparisons</span></a><a href="/use-cases/" class="footer__link"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a><a href="/guides/" class="footer__link"><span data-lang="ja">設定ガイド</span><span data-lang="en">Guides</span></a><a href="/blog/" class="footer__link"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a><a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a><a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a><a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a></nav><p class="footer__copyright">&copy; 2026 <span data-lang="ja">Captio式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p></div></footer>
+
+  <script src="/js/lang.js" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>

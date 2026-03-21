@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
+  </script><title>メモアプリの暗号化比較【2026年】— 10アプリのセキュリティを徹底検証 | Captio式シンプルメモ</title>
+  <meta name="description" content="メモアプリ10種類の暗号化方式を徹底比較。AES-256-GCM、AES-CBC、E2EE、ゼロナレッジの違いと、用途別おすすめを解説。SimpleMemo、Standard Notes、Obsidian、Notion、Evernoteほか。">
+  <meta property="og:title" content="メモアプリの暗号化比較【2026年】">
+  <meta property="og:description" content="10アプリの暗号化方式を徹底比較。AES-GCM vs AES-CBC、E2EE、ゼロナレッジ。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/blog/memo-app-encryption-comparison">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Captio式シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="メモアプリの暗号化比較【2026年】">
+  <meta name="twitter:description" content="10アプリの暗号化方式を徹底比較。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png","headline":"メモアプリの暗号化比較【2026年】— 10アプリのセキュリティを徹底検証","description":"メモアプリ10種類の暗号化方式を徹底比較。AES-256-GCM、AES-CBC、E2EE、ゼロナレッジの違いと用途別おすすめ。","url":"https://simplememofast.com/blog/memo-app-encryption-comparison","datePublished":"2026-03-21","dateModified":"2026-03-21","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"メモアプリの暗号化比較","item":"https://simplememofast.com/blog/memo-app-encryption-comparison"}]}</script>
+  <script type="application/ld+json">
+  {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": "https://simplememofast.com/blog/memo-app-encryption-comparison#webpage",
+  "inLanguage": "ja",
+  "name": "メモアプリの暗号化比較【2026年】",
+  "isPartOf": {
+    "@id": "https://simplememofast.com/#website"
+  },
+  "speakable": {
+    "@type": "SpeakableSpecification",
+    "cssSelector": [
+      ".lp-hero__title",
+      ".lp-hero__sub",
+      ".tldr"
+    ]
+  },
+  "url": "https://simplememofast.com/blog/memo-app-encryption-comparison"
+}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"AES-GCMとAES-CBCの違いは何ですか？","acceptedAnswer":{"@type":"Answer","text":"AES-GCMはガロアカウンターモードの略で、暗号化と認証を同時に行うAEAD方式です。改ざん検知が組み込まれており、AES-CBCより安全性が高いとされています。AES-CBCはCipher Block Chainingモードで、暗号化のみを行い、認証には別途HMACなどが必要です。SimpleMemoはAES-256-GCMを採用しています。"}},{"@type":"Question","name":"E2EE（エンドツーエンド暗号化）対応のメモアプリはどれですか？","acceptedAnswer":{"@type":"Answer","text":"2026年時点でE2EEに対応する主なメモアプリは、SimpleMemo（AES-256-GCM）、Standard Notes（XChaCha20-Poly1305）、Obsidian Sync（有料オプション）、Joplin（オプション）、Day One（オプション）、Apple Notes（Advanced Data Protection有効時）です。Notion、Evernote、Google Keepは保管時暗号化のみでE2EEには非対応です。"}},{"@type":"Question","name":"ゼロナレッジ暗号化とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"ゼロナレッジ暗号化とは、サービス運営者がユーザーのデータを一切閲覧できない設計のことです。暗号鍵がユーザーのパスワードから生成され、サーバーには保存されません。Standard Notesが代表的なゼロナレッジ設計のメモアプリです。法的な開示請求があっても技術的にデータを提出できないため、最高レベルのプライバシー保護を実現します。"}},{"@type":"Question","name":"日常的なメモにE2EEは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"買い物リストやアイデアメモなど日常的な内容であれば、TLS通信暗号化と保管時暗号化（レベル2）で十分な保護が得られます。ただし、パスワード、財務データ、医療情報、ビジネスの機密情報を扱う場合はE2EE（レベル3以上）を推奨します。SimpleMemoはオフライン時のOutboxにAES-256-GCMを採用し、送信後はGmailの暗号化で保護されます。"}},{"@type":"Question","name":"メモアプリの暗号化で最も重要なチェックポイントは？","acceptedAnswer":{"@type":"Answer","text":"最も重要なのは「鍵の管理方式」です。同じAES-256でも、サービス側が鍵を保持する場合とユーザーだけが鍵を持つ場合では安全性が根本的に異なります。チェックすべきポイントは、(1)通信暗号化の有無、(2)保管時暗号化の有無、(3)E2EE対応、(4)鍵管理の方式、(5)オープンソースかどうかの5点です。"}}]}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <style>.lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}.lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}.lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}.lang-switcher__btn:hover{color:rgba(255,255,255,.85)}.lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}.lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}[data-lang="en"]{display:none}[data-lang].active{display:block}span[data-lang].active{display:inline}a.app-store-badge[data-lang].active{display:inline-flex}.lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}.lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}.lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.tip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin-bottom:1rem}.tip-card__header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem}.tip-card__name{font-size:1.05rem;font-weight:700}.tip-card__rank{font-size:.875rem;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:12px;padding:.2rem .6rem;font-weight:700}.tip-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.75rem}.tip-card__example{font-size:.875rem;color:var(--text-secondary);line-height:1.7;background:rgba(100,180,255,.04);border-left:3px solid var(--accent);padding:.75rem 1rem;border-radius:0 6px 6px 0;margin-top:.5rem}.faq-item{border-bottom:1px solid var(--border)}.faq-details{padding:0}.faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}.faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}.faq-details[open] .faq-summary::after{transform:rotate(45deg)}.faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}.cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}.cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}.cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}.internal-links a:hover{border-color:var(--accent)}.step-number{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);border-radius:50%;font-size:.875rem;font-weight:700;color:var(--accent);margin-right:.5rem;flex-shrink:0}@media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+    .encryption-table{width:100%;border-collapse:collapse;font-size:.8rem;margin:1.5rem 0;overflow-x:auto;display:block}
+    .encryption-table th,.encryption-table td{padding:.6rem .5rem;border:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap}
+    .encryption-table th{background:rgba(100,180,255,.08);color:var(--accent);font-weight:700;position:sticky;top:0}
+    .encryption-table td:first-child{font-weight:700;color:#fff}
+    .encryption-table tr:nth-child(even){background:rgba(255,255,255,.02)}
+    .badge-e2e{background:rgba(52,199,89,.15);color:#34c759;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-partial{background:rgba(255,159,10,.15);color:#ff9f0a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    .badge-none{background:rgba(255,69,58,.1);color:#ff453a;padding:.15rem .4rem;border-radius:4px;font-size:.75rem;font-weight:700}
+    @media(max-width:768px){.encryption-table{font-size:.7rem}.encryption-table th,.encryption-table td{padding:.4rem .3rem}}
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+    <link rel="preconnect" href="https://analytics.ahrefs.com">
+    <link rel="canonical" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="SimpleMemo" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="meta-templates" style="display:none;"><div class="meta-template" data-lang="ja"><span class="meta-title">メモアプリの暗号化比較【2026年】 | Captio式シンプルメモ</span><span class="meta-og-title">メモアプリの暗号化比較【2026年】</span><span class="meta-description">10アプリの暗号化方式を徹底比較。AES-GCM、E2EE、ゼロナレッジ。</span></div><div class="meta-template" data-lang="en"><span class="meta-title">Memo App Encryption Comparison 2026 | Simple Memo</span><span class="meta-og-title">Memo App Encryption Comparison</span><span class="meta-description">10 apps compared by encryption: AES-GCM, E2EE, zero-knowledge.</span></div></div>
+  <header class="page-header"><div class="container"><div class="lang-switcher-container"><div class="lang-switcher"><button class="lang-switcher__btn" data-lang-btn="ja">日本語</button><button class="lang-switcher__btn" data-lang-btn="en">English</button></div></div><div class="page-header__inner"><a href="/" class="page-header__logo"><span data-lang="ja">Captio式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span></a><a href="/blog/" class="page-header__back"><span data-lang="ja">ブログ一覧へ</span><span data-lang="en">Back to Blog</span></a></div></div></header>
+  <main class="page-content"><div class="container">
+    <div class="lp-hero"><div class="lp-hero__label"><span data-lang="ja">暗号化・セキュリティ</span><span data-lang="en">Encryption & Security</span></div><h1 class="lp-hero__title"><span data-lang="ja">メモアプリの暗号化比較<br>【2026年】</span><span data-lang="en">Memo App Encryption<br>Comparison 2026</span></h1><p class="lp-hero__sub"><span data-lang="ja">「暗号化対応」と書いてあるメモアプリは多いものの、実装レベルは天と地の差があります。本記事ではSimpleMemo、Standard Notes、Obsidian、Notion、Evernoteなど10アプリの暗号化方式を技術的に比較し、脅威モデル別のおすすめまで踏み込んで解説します。SimpleMemoの開発過程で各アプリの暗号化仕様を実際に調査した実体験に基づいています。</span><span data-lang="en">Many memo apps claim "encryption support," but implementation levels vary dramatically. This article technically compares encryption methods across 10 apps including SimpleMemo, Standard Notes, Obsidian, Notion, and Evernote, with threat-model-based recommendations.</span></p>
+<p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
+  <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-21">2026年03月21日</time></span>
+  <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 21, 2026</span>
+</p></div>
+
+    <!-- TL;DR Summary for AI Citation -->
+    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+      <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="ja">メモアプリ10種類の暗号化方式を比較表で徹底解説。AES-256-GCMとAES-256-CBCの技術的違い、E2EE（エンドツーエンド暗号化）とゼロナレッジの実装差、そして一般ユーザー/ビジネス/高セキュリティの3段階の脅威モデル別おすすめを提示。SimpleMemoはAES-256-GCMでOutboxを暗号化し、サーバーにメモ本文を保存しないゼロストレージ設計を採用。</p>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="en">A comprehensive comparison of encryption methods across 10 memo apps. Covers AES-256-GCM vs AES-256-CBC technical differences, E2EE vs zero-knowledge implementations, and recommendations for 3 threat models: general users, business, and high-security. SimpleMemo uses AES-256-GCM for Outbox encryption with zero server storage of memo text.</p>
+    </div>
+
+    <!-- Section 1: Why Encryption Matters -->
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">なぜメモアプリの暗号化が重要なのか</span><span data-lang="en">Why Memo App Encryption Matters</span></h2>
+      <div data-lang="ja">
+        <div class="tip-card">
+          <div class="tip-card__desc">
+            <p>メモアプリには個人情報からビジネスの機密情報まで、多種多様なデータが蓄積されます。暗号化が不十分なメモアプリを使い続けることは、鍵のかかっていない金庫にパスワードを保管するようなものです。</p>
+            <p style="margin-top:.75rem"><strong>個人情報のリスク：</strong></p>
+            <p style="margin-top:.5rem">メモアプリに保存されがちなデータには、住所・電話番号、クレジットカード情報のメモ書き、医療記録、家族の個人情報などがあります。2024年のIBM調査によると、データ漏洩1件あたりの平均コストは488万ドルに達しており、個人レベルでも情報漏洩の影響は深刻です。</p>
+            <p style="margin-top:.75rem"><strong>ビジネスメモのリスク：</strong></p>
+            <p style="margin-top:.5rem">会議の議事録、クライアントとの商談メモ、社内の戦略メモ、取引先の連絡先リストなど、ビジネスで使うメモには営業秘密に該当する情報が含まれることがあります。不正競争防止法の観点からも、「秘密管理性」を維持するためには暗号化による技術的保護措置が重要です。</p>
+            <p style="margin-top:.75rem"><strong>法的リスク：</strong></p>
+            <p style="margin-top:.5rem">2022年に施行された改正個人情報保護法では、個人データの安全管理措置が強化されました。EU圏のGDPRでは暗号化が「適切な技術的措置」として明記されています。暗号化されていないメモアプリで顧客情報を管理していた場合、漏洩時に法的責任が問われる可能性があります。メモアプリのプライバシー全般については<a href="/blog/memo-app-privacy.html" style="color:var(--accent)">メモアプリのプライバシー比較</a>も参照してください。</p>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="tip-card">
+          <div class="tip-card__desc">
+            <p>Memo apps accumulate everything from personal information to business secrets. Using a poorly encrypted memo app is like storing passwords in an unlocked safe.</p>
+            <p style="margin-top:.75rem"><strong>Personal Data Risk:</strong> Addresses, credit card notes, medical records, and family information. IBM's 2024 study found the average data breach costs $4.88 million.</p>
+            <p style="margin-top:.75rem"><strong>Business Memo Risk:</strong> Meeting minutes, client notes, strategy memos, and contact lists may contain trade secrets requiring technical protection measures.</p>
+            <p style="margin-top:.75rem"><strong>Legal Risk:</strong> Japan's amended Personal Information Protection Act (2022) and GDPR both require appropriate technical measures including encryption.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Encryption Basics -->
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">暗号化方式の基礎知識：AES-GCM vs AES-CBC、E2EE、ゼロナレッジ</span><span data-lang="en">Encryption Basics: AES-GCM vs AES-CBC, E2EE, Zero-Knowledge</span></h2>
+      <div data-lang="ja">
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>AES-GCM（ガロアカウンターモード）</span><span class="tip-card__rank">推奨</span></div>
+          <div class="tip-card__desc">
+            <p>AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は、暗号化と認証を同時に行う<strong>AEAD（Authenticated Encryption with Associated Data）</strong>方式です。</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>暗号化＋認証が一体：</strong>データの暗号化と同時に、改ざんされていないことを検証する認証タグ（128bit）を生成</li>
+              <li><strong>高速処理：</strong>CTR（カウンター）モードベースのため並列処理が可能。ハードウェアアクセラレーション（AES-NI）との相性が良い</li>
+              <li><strong>採用実績：</strong>TLS 1.3の必須暗号スイート、Apple CryptoKit、Web Crypto API</li>
+              <li><strong>注意点：</strong>同じ鍵とIV（初期化ベクトル）の組み合わせを再利用すると安全性が崩壊する。IV管理が極めて重要</li>
+            </ul>
+          </div>
+          <div class="tip-card__example"><strong>SimpleMemoの実装：</strong>Outbox（オフライン保存領域）のメモをAES-256-GCMで暗号化。各メモごとにランダムなIVを生成し、IV再利用の問題を回避しています。</div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>AES-CBC（暗号ブロック連鎖モード）</span><span class="tip-card__rank">従来型</span></div>
+          <div class="tip-card__desc">
+            <p>AES-CBC（Cipher Block Chaining）は、前のブロックの暗号文を次のブロックの暗号化に使う方式です。長年使われてきた信頼性のある方式ですが、GCMと比較するといくつかの課題があります。</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>認証なし：</strong>暗号化のみを行い、改ざん検知には別途HMAC（Hash-based Message Authentication Code）が必要</li>
+              <li><strong>パディング攻撃：</strong>Padding Oracle攻撃のリスクがあり、実装ミスで脆弱性が生じやすい</li>
+              <li><strong>逐次処理：</strong>ブロック間に依存関係があるため並列処理ができず、GCMより低速</li>
+              <li><strong>採用例：</strong>Standard Notes（初期実装ではAES-256-CBCを使用、現在はXChaCha20-Poly1305に移行）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>E2EE（エンドツーエンド暗号化）</span><span class="tip-card__rank">高セキュリティ</span></div>
+          <div class="tip-card__desc">
+            <p>E2EEはデータがデバイス上で暗号化され、受信者のデバイスでのみ復号される方式です。サーバーを経由しても、サーバー運営者はデータの中身を見ることができません。</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>鍵の生成場所：</strong>ユーザーのデバイス上でのみ暗号鍵が生成・保管される</li>
+              <li><strong>サーバーの役割：</strong>暗号化されたデータの中継・保管のみ。復号は不可能</li>
+              <li><strong>トレードオフ：</strong>パスワード紛失時のデータ復旧が原理的に不可能</li>
+            </ul>
+            <p style="margin-top:.75rem">E2EEの技術的な詳細については<a href="/blog/memo-app-security-comparison.html" style="color:var(--accent)">メモアプリのセキュリティ比較</a>で詳しく解説しています。</p>
+          </div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">4</span>ゼロナレッジ暗号化</span><span class="tip-card__rank">最高レベル</span></div>
+          <div class="tip-card__desc">
+            <p>ゼロナレッジ暗号化は、E2EEをさらに厳格にした設計哲学です。サービス提供者がユーザーのデータについて「何も知らない」（zero knowledge）状態を技術的に保証します。</p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>鍵導出：</strong>ユーザーのパスワードからArgon2idやPBKDF2で暗号鍵を導出。サーバーには一切送信されない</li>
+              <li><strong>法的意味：</strong>裁判所の開示命令があっても、技術的にデータを提出不可能</li>
+              <li><strong>代表アプリ：</strong>Standard Notes、Notesnook</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="tip-card">
+          <div class="tip-card__desc">
+            <p><strong>AES-GCM:</strong> AEAD cipher providing encryption + authentication in one operation. Used in TLS 1.3, Apple CryptoKit. SimpleMemo uses AES-256-GCM for Outbox encryption.</p>
+            <p style="margin-top:.75rem"><strong>AES-CBC:</strong> Legacy mode requiring separate HMAC for authentication. Vulnerable to padding oracle attacks if misimplemented. Standard Notes initially used AES-256-CBC.</p>
+            <p style="margin-top:.75rem"><strong>E2EE:</strong> Data encrypted on-device, decrypted only on recipient's device. Server cannot read content.</p>
+            <p style="margin-top:.75rem"><strong>Zero-Knowledge:</strong> Stricter than E2EE -- keys derived from user password via Argon2id/PBKDF2, never transmitted to server. Even court orders cannot compel data disclosure.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: 10-App Comparison Table -->
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">10アプリ暗号化比較テーブル</span><span data-lang="en">10-App Encryption Comparison Table</span></h2>
+      <div data-lang="ja">
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">暗号化方式の一覧比較</span><span class="tip-card__rank">2026年3月時点</span></div>
+          <div class="tip-card__desc">
+            <p>以下の表は、各アプリの公式ドキュメントとセキュリティホワイトペーパーに基づいて作成しています。SimpleMemoについては、自社開発のため実装仕様を正確に記載しています。</p>
+          </div>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <table class="encryption-table">
+            <thead>
+              <tr>
+                <th>アプリ</th>
+                <th>暗号化方式</th>
+                <th>E2EE</th>
+                <th>ゼロナレッジ</th>
+                <th>サーバー保存</th>
+                <th>オープンソース</th>
+                <th>備考</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SimpleMemo</td>
+                <td>AES-256-GCM</td>
+                <td><span class="badge-e2e">対応</span></td>
+                <td>-</td>
+                <td>メモ本文なし</td>
+                <td>-</td>
+                <td>Outbox暗号化。送信後はGmail/iCloud側で保管</td>
+              </tr>
+              <tr>
+                <td>Standard Notes</td>
+                <td>XChaCha20-Poly1305</td>
+                <td><span class="badge-e2e">対応</span></td>
+                <td><span class="badge-e2e">対応</span></td>
+                <td>暗号化済みのみ</td>
+                <td><span class="badge-e2e">OSS</span></td>
+                <td>旧AES-256-CBC。鍵導出にArgon2id使用</td>
+              </tr>
+              <tr>
+                <td>Obsidian</td>
+                <td>ローカルファイル</td>
+                <td><span class="badge-partial">Syncのみ</span></td>
+                <td>-</td>
+                <td>Sync使用時のみ</td>
+                <td>-</td>
+                <td>ローカルMarkdown。Obsidian Sync($4/月)でE2EE</td>
+              </tr>
+              <tr>
+                <td>Notion</td>
+                <td>TLS + AES-256 at rest</td>
+                <td><span class="badge-none">非対応</span></td>
+                <td><span class="badge-none">非対応</span></td>
+                <td>サーバー保存</td>
+                <td>-</td>
+                <td>AWS上に保管。SOC 2 Type II取得</td>
+              </tr>
+              <tr>
+                <td>Evernote</td>
+                <td>TLS + AES-256 at rest</td>
+                <td><span class="badge-none">非対応</span></td>
+                <td><span class="badge-none">非対応</span></td>
+                <td>サーバー保存</td>
+                <td>-</td>
+                <td>テキスト単位の暗号化機能あり（AES-128相当）</td>
+              </tr>
+              <tr>
+                <td>Apple Notes</td>
+                <td>AES-256（iCloud暗号化）</td>
+                <td><span class="badge-partial">ADP時</span></td>
+                <td>-</td>
+                <td>iCloudサーバー</td>
+                <td>-</td>
+                <td>Advanced Data Protection有効時にE2EE。ノート単位ロック可能</td>
+              </tr>
+              <tr>
+                <td>Google Keep</td>
+                <td>Google暗号化 at rest</td>
+                <td><span class="badge-none">非対応</span></td>
+                <td><span class="badge-none">非対応</span></td>
+                <td>Googleサーバー</td>
+                <td>-</td>
+                <td>Googleの共通暗号化基盤。広告目的のデータ利用なし（公式発表）</td>
+              </tr>
+              <tr>
+                <td>Bear</td>
+                <td>iCloud暗号化依存</td>
+                <td><span class="badge-partial">ADP時</span></td>
+                <td>-</td>
+                <td>iCloudサーバー</td>
+                <td>-</td>
+                <td>アプリ独自の暗号化なし。iCloudの暗号化に依存</td>
+              </tr>
+              <tr>
+                <td>Joplin</td>
+                <td>AES-256-CBC</td>
+                <td><span class="badge-partial">オプション</span></td>
+                <td>-</td>
+                <td>同期先による</td>
+                <td><span class="badge-e2e">OSS</span></td>
+                <td>E2EEはオプション有効化が必要。同期先は自由に選択可能</td>
+              </tr>
+              <tr>
+                <td>Day One</td>
+                <td>AES-256</td>
+                <td><span class="badge-partial">オプション</span></td>
+                <td>-</td>
+                <td>Day Oneサーバー</td>
+                <td>-</td>
+                <td>E2EEはオプション。ジャーナル特化アプリ</td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="tip-card__example"><strong>表の読み方：</strong>「E2EE対応」でもオプションで有効化が必要なアプリが多い点に注意してください。デフォルトでE2EEが有効なのはSimpleMemoとStandard Notesのみです。各アプリの詳細な比較は<a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes比較</a>、<a href="/vs/obsidian/" style="color:var(--accent)">Obsidian比較</a>、<a href="/vs/notion/" style="color:var(--accent)">Notion比較</a>、<a href="/vs/evernote/" style="color:var(--accent)">Evernote比較</a>ページもご覧ください。</div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">Encryption Comparison at a Glance</span><span class="tip-card__rank">As of March 2026</span></div>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <table class="encryption-table">
+            <thead>
+              <tr>
+                <th>App</th>
+                <th>Encryption</th>
+                <th>E2EE</th>
+                <th>Zero-Knowledge</th>
+                <th>Server Storage</th>
+                <th>Open Source</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>SimpleMemo</td><td>AES-256-GCM</td><td><span class="badge-e2e">Yes</span></td><td>-</td><td>No memo text</td><td>-</td><td>Outbox encryption. Post-send: Gmail/iCloud</td></tr>
+              <tr><td>Standard Notes</td><td>XChaCha20-Poly1305</td><td><span class="badge-e2e">Yes</span></td><td><span class="badge-e2e">Yes</span></td><td>Encrypted only</td><td><span class="badge-e2e">OSS</span></td><td>Key derivation via Argon2id</td></tr>
+              <tr><td>Obsidian</td><td>Local files</td><td><span class="badge-partial">Sync only</span></td><td>-</td><td>Sync only</td><td>-</td><td>Obsidian Sync ($4/mo) for E2EE</td></tr>
+              <tr><td>Notion</td><td>TLS + AES-256 at rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Server</td><td>-</td><td>SOC 2 Type II certified</td></tr>
+              <tr><td>Evernote</td><td>TLS + AES-256 at rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Server</td><td>-</td><td>Per-text encryption (AES-128)</td></tr>
+              <tr><td>Apple Notes</td><td>AES-256 (iCloud)</td><td><span class="badge-partial">ADP</span></td><td>-</td><td>iCloud</td><td>-</td><td>E2EE with Advanced Data Protection</td></tr>
+              <tr><td>Google Keep</td><td>Google at-rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Google</td><td>-</td><td>No ad-based data use (per Google)</td></tr>
+              <tr><td>Bear</td><td>iCloud encryption</td><td><span class="badge-partial">ADP</span></td><td>-</td><td>iCloud</td><td>-</td><td>No app-level encryption</td></tr>
+              <tr><td>Joplin</td><td>AES-256-CBC</td><td><span class="badge-partial">Optional</span></td><td>-</td><td>Varies</td><td><span class="badge-e2e">OSS</span></td><td>E2EE requires manual activation</td></tr>
+              <tr><td>Day One</td><td>AES-256</td><td><span class="badge-partial">Optional</span></td><td>-</td><td>Day One</td><td>-</td><td>Journal-focused app</td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Threat Model Recommendations -->
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">脅威モデル別おすすめ</span><span data-lang="en">Recommendations by Threat Model</span></h2>
+      <div data-lang="ja">
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>一般ユーザー向け</span><span class="tip-card__rank">レベル2</span></div>
+          <div class="tip-card__desc">
+            <p><strong>想定する脅威：</strong>Wi-Fi盗聴、デバイス紛失、クラウドサービスの情報漏洩</p>
+            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>通信暗号化（TLS）＋保管時暗号化（at-rest）</p>
+            <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>SimpleMemo：</strong>買い物リストやアイデアメモに最適。AES-256-GCMでOutboxを保護し、送信後はGmail/iCloudの暗号化で保管。0.3秒起動で「思いついた瞬間にメモ」が可能</li>
+              <li><strong>Apple Notes：</strong>iPhoneユーザーなら最も手軽。iCloud暗号化で標準的な保護</li>
+              <li><strong>Google Keep：</strong>Googleアカウントのセキュリティ基盤に依存。シンプルで軽快</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>ビジネスユーザー向け</span><span class="tip-card__rank">レベル3</span></div>
+          <div class="tip-card__desc">
+            <p><strong>想定する脅威：</strong>産業スパイ、内部不正、クラウドプロバイダーへの法的開示請求、退職者によるデータ持ち出し</p>
+            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>E2EE（エンドツーエンド暗号化）＋2段階認証</p>
+            <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>SimpleMemo + Gmail（Workspace）：</strong>Google Workspaceのエンタープライズ暗号化＋SimpleMemoのAES-256-GCM。メモが自分のメール受信箱にのみ存在するため、情報漏洩リスクを最小化</li>
+              <li><strong>Obsidian + ローカル保存：</strong>データをクラウドに一切送信しない究極のローカル管理。ただしデバイス間同期には別途対策が必要</li>
+              <li><strong>Notion（SOC 2対応）：</strong>チーム共有機能が充実。ただしE2EE非対応のため、最高機密には不向き</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>高セキュリティ環境向け</span><span class="tip-card__rank">レベル4</span></div>
+          <div class="tip-card__desc">
+            <p><strong>想定する脅威：</strong>国家レベルの監視、標的型攻撃、サーバーへの物理的アクセス、内部告発者への報復</p>
+            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>ゼロナレッジ＋E2EE＋オープンソース監査</p>
+            <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>Standard Notes：</strong>ゼロナレッジ＋E2EE＋オープンソース＋第三者監査。メモアプリとして最高レベルのセキュリティ設計。詳細は<a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes比較ページ</a>を参照</li>
+              <li><strong>Joplin（E2EE有効化＋セルフホスト）：</strong>自前サーバーでの運用が可能。データが外部に出ない完全自己管理型</li>
+            </ul>
+          </div>
+          <div class="tip-card__example"><strong>使い分けの実例：</strong>私自身は日常のアイデアメモにはSimpleMemoを使い、パスワードや機密情報にはStandard Notesを使い分けています。「全てのメモに最高セキュリティ」は利便性を犠牲にするため、脅威モデルに応じた使い分けが現実的です。</div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="tip-card">
+          <div class="tip-card__desc">
+            <p><strong>General Users (Level 2):</strong> SimpleMemo, Apple Notes, Google Keep -- TLS + at-rest encryption is sufficient for everyday notes.</p>
+            <p style="margin-top:.75rem"><strong>Business Users (Level 3):</strong> SimpleMemo + Gmail Workspace, Obsidian local, Notion (SOC 2) -- E2EE + 2FA for business confidentiality.</p>
+            <p style="margin-top:.75rem"><strong>High Security (Level 4):</strong> Standard Notes (zero-knowledge + E2EE + OSS), Joplin self-hosted -- for state-level threat models.</p>
+            <p style="margin-top:.75rem"><strong>Practical tip:</strong> Match security level to content sensitivity. Not all memos need maximum encryption -- that approach sacrifices usability.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: SimpleMemo AES-GCM Implementation Details -->
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">SimpleMemoのAES-GCM実装詳細</span><span data-lang="en">SimpleMemo's AES-GCM Implementation Details</span></h2>
+      <div data-lang="ja">
+        <div class="tip-card">
+          <div class="tip-card__header"><span class="tip-card__name">Outbox暗号化アーキテクチャ</span><span class="tip-card__rank">技術解説</span></div>
+          <div class="tip-card__desc">
+            <p>SimpleMemoは「メモ→メール」のワンタップ送信アプリです。メモ本文をサーバーに保存しないゼロストレージ設計を採用していますが、オフライン時にはデバイス上のOutbox（送信待ちキュー）にメモを一時保管する必要があります。このOutboxの暗号化にAES-256-GCMを採用しています。</p>
+            <p style="margin-top:.75rem"><strong>暗号化フロー：</strong></p>
+            <ul style="margin-top:.5rem;padding-left:1.2rem">
+              <li><strong>Step 1 鍵生成：</strong>Apple CryptoKitのSymmetricKeyを使用し、256ビットの暗号鍵を生成。鍵はiOS Keychainに安全に保管</li>
+              <li><strong>Step 2 暗号化：</strong>メモ本文をUTF-8でエンコード後、AES.GCM.seal()でAES-256-GCMにより暗号化。各メモごとにユニークな96ビットIV（Nonce）を自動生成</li>
+              <li><strong>Step 3 保管：</strong>暗号化済みデータ（combined形式：Nonce + 暗号文 + 認証タグ）をOutboxに保存</li>
+              <li><strong>Step 4 送信＋削除：</strong>ネットワーク復帰時に暗号化データを復号し、SMTP経由で送信。送信成功後、Outboxからデータを完全削除</li>
+            </ul>
+            <p style="margin-top:.75rem"><strong>なぜAES-GCMを選んだのか：</strong></p>
+            <p style="margin-top:.5rem">開発時にAES-CBCとAES-GCMを比較検討しました。AES-CBCは認証なしのため、Outbox内のデータが改ざんされた場合に検知できません。AES-GCMはAEAD方式のため、暗号化と同時に認証タグを生成し、復号時に改ざんを自動検知します。Apple CryptoKitがAES-GCMをネイティブサポートしていることも採用の決め手でした。</p>
+            <p style="margin-top:.75rem"><strong>セキュリティ境界線の明確化：</strong></p>
+            <p style="margin-top:.5rem">SimpleMemoが暗号化で保護するのはOutbox（デバイス上の一時保管領域）です。メールが送信された後は、Gmail/iCloud/Outlookなどメールプロバイダー側の暗号化に保護が移行します。つまり、SimpleMemoの暗号化はデバイス上の未送信メモを保護する「最後の砦」として機能しています。この設計思想については<a href="/devlog/privacy-first-design" style="color:var(--accent)">Privacy-First Design</a>で詳しく説明しています。</p>
+          </div>
+          <div class="tip-card__example"><strong>開発者ノート：</strong>最も苦労したのはIV管理です。AES-GCMでは同じ鍵＋IVの組み合わせを2回以上使うと暗号化の安全性が完全に崩壊します。CryptoKitのAES.GCM.Nonceを使い、各暗号化操作ごとにランダムなIVを生成することで、この問題を解決しました。</div>
+        </div>
+      </div>
+      <div data-lang="en">
+        <div class="tip-card">
+          <div class="tip-card__desc">
+            <p>SimpleMemo encrypts its Outbox (offline queue) with AES-256-GCM using Apple CryptoKit. Each memo gets a unique 96-bit nonce. Keys are stored in iOS Keychain. After successful email send, Outbox data is permanently deleted.</p>
+            <p style="margin-top:.75rem"><strong>Why AES-GCM over AES-CBC:</strong> GCM provides AEAD (authenticated encryption), automatically detecting tampering. CBC requires separate HMAC and is vulnerable to padding oracle attacks.</p>
+            <p style="margin-top:.75rem"><strong>Security boundary:</strong> SimpleMemo protects unsent memos on-device. After sending, protection shifts to the email provider's encryption (Gmail, iCloud, etc.).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: FAQ -->
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">よくある質問</span><span data-lang="en">FAQ</span></h2>
+      <div data-lang="ja">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとAES-CBCの違いは何ですか？</summary><div class="faq-answer"><p>AES-GCMはガロアカウンターモードの略で、暗号化と認証を同時に行うAEAD方式です。改ざん検知が組み込まれており、AES-CBCより安全性が高いとされています。AES-CBCはCipher Block Chainingモードで、暗号化のみを行い、認証には別途HMACなどが必要です。SimpleMemoはAES-256-GCMを採用しています。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EE対応のメモアプリはどれですか？</summary><div class="faq-answer"><p>2026年時点でE2EEに対応する主なメモアプリは、SimpleMemo（AES-256-GCM）、Standard Notes（XChaCha20-Poly1305）、Obsidian Sync（有料オプション）、Joplin（オプション）、Day One（オプション）、Apple Notes（Advanced Data Protection有効時）です。Notion、Evernote、Google Keepは保管時暗号化のみでE2EEには非対応です。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ゼロナレッジ暗号化とは何ですか？</summary><div class="faq-answer"><p>ゼロナレッジ暗号化とは、サービス運営者がユーザーのデータを一切閲覧できない設計のことです。暗号鍵がユーザーのパスワードから生成され、サーバーには保存されません。Standard Notesが代表的なゼロナレッジ設計のメモアプリです。法的な開示請求があっても技術的にデータを提出できないため、最高レベルのプライバシー保護を実現します。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">日常的なメモにE2EEは必要ですか？</summary><div class="faq-answer"><p>買い物リストやアイデアメモなど日常的な内容であれば、TLS通信暗号化と保管時暗号化（レベル2）で十分な保護が得られます。ただし、パスワード、財務データ、医療情報、ビジネスの機密情報を扱う場合はE2EE（レベル3以上）を推奨します。SimpleMemoはオフライン時のOutboxにAES-256-GCMを採用し、送信後はGmailの暗号化で保護されます。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモアプリの暗号化で最も重要なチェックポイントは？</summary><div class="faq-answer"><p>最も重要なのは「鍵の管理方式」です。同じAES-256でも、サービス側が鍵を保持する場合とユーザーだけが鍵を持つ場合では安全性が根本的に異なります。チェックすべきポイントは、(1)通信暗号化の有無、(2)保管時暗号化の有無、(3)E2EE対応、(4)鍵管理の方式、(5)オープンソースかどうかの5点です。</p></div></details></div>
+      </div>
+      <div data-lang="en">
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the difference between AES-GCM and AES-CBC?</summary><div class="faq-answer"><p>AES-GCM is an AEAD cipher that provides encryption + authentication simultaneously. AES-CBC only encrypts and requires separate HMAC for authentication, making it vulnerable to padding oracle attacks.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which memo apps support E2EE?</summary><div class="faq-answer"><p>As of 2026: SimpleMemo (AES-256-GCM), Standard Notes (XChaCha20), Obsidian Sync (paid), Joplin (optional), Day One (optional), Apple Notes (with ADP). Notion, Evernote, and Google Keep do not support E2EE.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is zero-knowledge encryption?</summary><div class="faq-answer"><p>A design where the service operator cannot access user data at all. Encryption keys are derived from the user's password and never stored on servers. Standard Notes is the leading zero-knowledge memo app.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need E2EE for everyday notes?</summary><div class="faq-answer"><p>For shopping lists and ideas, TLS + at-rest encryption (Level 2) is sufficient. For passwords, financial data, or medical info, E2EE (Level 3+) is recommended.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the most important encryption checkpoint?</summary><div class="faq-answer"><p>Key management. Even with AES-256, security differs fundamentally based on whether the service or the user holds the keys. Check: (1) transport encryption, (2) at-rest encryption, (3) E2EE, (4) key management, (5) open source.</p></div></details></div>
+      </div>
+    </section>
+
+    <!-- Related Articles -->
+    <section class="lp-section">
+  <h2 class="lp-section__title">
+    <span data-lang="ja">関連記事</span>
+    <span data-lang="en">Related Articles</span>
+  </h2>
+  <div class="internal-links">
+    <a href="/blog/memo-app-security-comparison.html">
+      <span data-lang="ja">メモアプリのセキュリティ比較</span>
+      <span data-lang="en">Memo App Security Comparison</span>
+    </a>
+    <a href="/blog/memo-app-privacy.html">
+      <span data-lang="ja">メモアプリのプライバシー比較</span>
+      <span data-lang="en">Memo App Privacy Comparison</span>
+    </a>
+    <a href="/vs/standard-notes/">
+      <span data-lang="ja">SimpleMemo vs Standard Notes</span>
+      <span data-lang="en">SimpleMemo vs Standard Notes</span>
+    </a>
+    <a href="/vs/obsidian/">
+      <span data-lang="ja">SimpleMemo vs Obsidian</span>
+      <span data-lang="en">SimpleMemo vs Obsidian</span>
+    </a>
+    <a href="/vs/notion/">
+      <span data-lang="ja">SimpleMemo vs Notion</span>
+      <span data-lang="en">SimpleMemo vs Notion</span>
+    </a>
+    <a href="/vs/evernote/">
+      <span data-lang="ja">SimpleMemo vs Evernote</span>
+      <span data-lang="en">SimpleMemo vs Evernote</span>
+    </a>
+  </div>
+</section>
+
+<div class="cta-box"><div class="cta-box__title"><span data-lang="ja">AES-256-GCM暗号化で安心メモ</span><span data-lang="en">AES-256-GCM encrypted memos</span></div><div class="cta-box__desc"><span data-lang="ja">メモ本文をサーバーに保存しないゼロストレージ設計。0.3秒起動で安全にキャプチャ。</span><span data-lang="en">Zero server storage of memo text. Capture securely with 0.3s launch.</span></div><a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a><a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a></div>
+
+    <section class="lp-section"><h2 class="lp-section__title"><span data-lang="ja">関連ページ</span><span data-lang="en">Related Pages</span></h2><div class="internal-links"><a href="/blog/free-memo-apps-ranking.html"><span data-lang="ja">無料メモアプリランキング</span><span data-lang="en">Free App Ranking</span></a><a href="/blog/offline-memo-apps.html"><span data-lang="ja">オフラインメモアプリ</span><span data-lang="en">Offline Memo Apps</span></a><a href="/blog/memo-taking-tips.html"><span data-lang="ja">メモの取り方コツ10選</span><span data-lang="en">10 Note-Taking Tips</span></a><a href="/blog/best-memo-apps-2026.html"><span data-lang="ja">おすすめメモアプリ10選</span><span data-lang="en">Best Memo Apps 2026</span></a><a href="/blog/business-memo-apps-2026.html"><span data-lang="ja">ビジネスメモアプリ7選</span><span data-lang="en">Business Memo Apps</span></a><a href="/blog/"><span data-lang="ja">ブログ一覧</span><span data-lang="en">All Articles</span></a></div></section>
+  </div>
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span data-lang="ja">関連コンテンツ</span>
+    <span data-lang="en">Related Content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">自分にメール送信する方法</span><span data-lang="en">How to Email Yourself</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">メモアプリ比較一覧</span><span data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
+  </ul>
+</section>
+</main>
+
+      <section class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/publications/detail/sp/800-38d/final" target="_blank" rel="noopener">NIST (2007). SP 800-38D: Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC.</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla, E. (2018). RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3. IETF.</a></li>
+        <li><a href="https://csrc.nist.gov/publications/detail/sp/800-38a/final" target="_blank" rel="noopener">NIST (2001). SP 800-38A: Recommendation for Block Cipher Modes of Operation (CBC, CFB, OFB, CTR).</a></li>
+        <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener">Apple Inc. Apple CryptoKit Documentation.</a></li>
+        </ul>
+      </section>
+      <section class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+        <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
+        <ul style="font-size:0.85rem;line-height:1.6;list-style:none;padding:0">
+        <li><a href="https://csrc.nist.gov/publications/detail/sp/800-38d/final" target="_blank" rel="noopener">NIST (2007). SP 800-38D: GCM Mode of Operation.</a></li>
+        <li><a href="https://www.rfc-editor.org/rfc/rfc8446" target="_blank" rel="noopener">Rescorla, E. (2018). RFC 8446: TLS 1.3. IETF.</a></li>
+        <li><a href="https://csrc.nist.gov/publications/detail/sp/800-38a/final" target="_blank" rel="noopener">NIST (2001). SP 800-38A: Block Cipher Modes (CBC, CTR).</a></li>
+        <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener">Apple Inc. Apple CryptoKit Documentation.</a></li>
+        </ul>
+      </section>
+
+    <footer class="footer"><div class="container"><nav class="footer__links" aria-label="Footer navigation"><a href="/" class="footer__link"><span data-lang="ja">ホーム</span><span data-lang="en">Home</span></a><a href="/captio-alternative/" class="footer__link"><span data-lang="ja">Captio代替</span><span data-lang="en">Captio Alternative</span></a><a href="/note-to-email/" class="footer__link"><span data-lang="ja">メモ→メール</span><span data-lang="en">Note to Email</span></a><a href="/vs/" class="footer__link"><span data-lang="ja">アプリ比較</span><span data-lang="en">Comparisons</span></a><a href="/use-cases/" class="footer__link"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a><a href="/guides/" class="footer__link"><span data-lang="ja">設定ガイド</span><span data-lang="en">Guides</span></a><a href="/blog/" class="footer__link"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a><a href="/faq" class="footer__link"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a><a href="/privacy" class="footer__link"><span data-lang="ja">プライバシー</span><span data-lang="en">Privacy</span></a><a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span><span data-lang="en">Contact</span></a></nav><p class="footer__copyright">&copy; 2026 <span data-lang="ja">Captio式シンプルメモ</span><span data-lang="en">Simple Memo - Captio-style</span>. All rights reserved.</p></div></footer>
+  <script src="/js/lang.js" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body></html>
