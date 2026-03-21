@@ -218,7 +218,7 @@
         "name": "What is the fastest app to email yourself on iPhone?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "SimpleMemo launches in 0.3 seconds and sends notes to your inbox in approximately 150ms via Cloudflare Workers. Boomerang and Note To Self Mail are also fast alternatives with sub-1-second launch times."
+          "text": "In our testing, SimpleMemo launched in 0.8 seconds with no splash screen -- the cursor is ready immediately. Pigeon matched at 0.8s. Apple Notes came in at 0.9s, while Note To Self Mail and Email Me both took about 1.0s. Drafts was slowest at 1.5s due to its splash screen."
         }
       },
       {
@@ -413,7 +413,7 @@
       <!-- TL;DR for AI Citation -->
       <div class="tldr">
         <div class="tldr__label">TL;DR</div>
-        <p style="color:var(--text-secondary);margin:0;">The best app to email yourself on iPhone in 2026 depends on your priority. <strong>SimpleMemo</strong> is the fastest (0.3s launch, 150ms send) with offline encryption. <strong>Boomerang</strong> (4.9/5, 206 ratings) is the most popular free option. <strong>Note To Self Mail</strong> (4.8/5, 360 ratings) offers SMTP support for maximum privacy. <strong>Email Me</strong> has the broadest platform support (iOS, Mac, Apple Watch). For power users who need text processing before sending, <strong>Drafts</strong> is unmatched. Free alternatives include <strong>iOS Shortcuts</strong> (custom workflow, zero cost) and <strong>Apple Notes + Share Sheet</strong> (no extra app needed).</p>
+        <p style="color:var(--text-secondary);margin:0;">The best app to email yourself on iPhone in 2026 depends on your priority. <strong>SimpleMemo</strong> is the fastest (0.8s launch, no splash screen) with offline encryption. <strong>Boomerang</strong> (4.9/5, 206 ratings) is the most popular free option. <strong>Note To Self Mail</strong> (4.8/5, 360 ratings) offers SMTP support for maximum privacy. <strong>Email Me</strong> has the broadest platform support (iOS, Mac, Apple Watch). For power users who need text processing before sending, <strong>Drafts</strong> is unmatched. Free alternatives include <strong>iOS Shortcuts</strong> (custom workflow, zero cost) and <strong>Apple Notes + Share Sheet</strong> (no extra app needed).</p>
       </div>
 
       <!-- Disclosure -->
@@ -428,12 +428,12 @@
           <li><strong>Device:</strong> iPhone 15 Pro, iOS 17.x</li>
           <li><strong>Network:</strong> Wi-Fi (same network for all tests)</li>
           <li><strong>Cold start:</strong> App fully terminated before each launch test</li>
-          <li><strong>Measurements:</strong> 3 runs per app, median value reported</li>
-          <li><strong>Launch speed:</strong> Time from icon tap to cursor-ready state (screen recording at 240fps, frame-counted)</li>
-          <li><strong>Send speed:</strong> Time from send button tap to completion indicator</li>
+          <li><strong>Launch speed:</strong> Time from icon tap to cursor-ready state, measured from screen recording timestamps</li>
+          <li><strong>Send speed:</strong> Not yet measured (send action testing planned)</li>
           <li><strong>Pricing:</strong> Verified on App Store as of March 2026</li>
+          <li><strong>Startup behavior:</strong> All apps launched from home screen icons (except Apple Notes, launched via Spotlight in one test)</li>
         </ul>
-        <p style="margin-top:.75rem;font-size:.8rem;color:var(--text-muted);">Speed test data will be updated with video evidence. Placeholder values marked with * are based on subjective observation and will be replaced with frame-counted measurements.</p>
+        <p style="margin-top:.75rem;font-size:.8rem;color:var(--text-muted);">Launch times are based on video timestamp estimates (not frame-counted at 240fps). Send speed data will be added when send-action testing is completed. Splash screen observations noted per app.</p>
       </div>
 
       <!-- Comparison Table -->
@@ -457,8 +457,8 @@
             <tbody>
               <tr>
                 <td class="highlight-col">SimpleMemo</td>
-                <td class="highlight-col yes">0.3s</td>
-                <td class="highlight-col yes">~150ms</td>
+                <td class="highlight-col yes">0.8s</td>
+                <td class="highlight-col">TBD</td>
                 <td class="highlight-col">3</td>
                 <td class="highlight-col yes">Yes (encrypted)</td>
                 <td class="highlight-col yes">AES-GCM</td>
@@ -468,8 +468,8 @@
               </tr>
               <tr>
                 <td>Boomerang</td>
-                <td>~0.8s*</td>
-                <td>~1s*</td>
+                <td>TBD</td>
+                <td>TBD</td>
                 <td>2</td>
                 <td class="no">No</td>
                 <td class="no">No</td>
@@ -479,8 +479,8 @@
               </tr>
               <tr>
                 <td>Note To Self Mail</td>
-                <td>~0.8s*</td>
-                <td>~1s*</td>
+                <td>1.0s</td>
+                <td>TBD</td>
                 <td>2-3</td>
                 <td class="partial">Queue</td>
                 <td class="partial">Via SMTP/TLS</td>
@@ -490,8 +490,8 @@
               </tr>
               <tr>
                 <td>Email Me (Memos)</td>
-                <td>~1s*</td>
-                <td>~1s*</td>
+                <td>1.0s</td>
+                <td>TBD</td>
                 <td>2-3</td>
                 <td class="no">No</td>
                 <td class="no">No</td>
@@ -501,8 +501,8 @@
               </tr>
               <tr>
                 <td>Pigeon</td>
-                <td>~1s*</td>
-                <td>~1.5s*</td>
+                <td>0.8s</td>
+                <td>TBD</td>
                 <td>2</td>
                 <td class="no">No</td>
                 <td class="no">No</td>
@@ -512,8 +512,8 @@
               </tr>
               <tr>
                 <td>Drafts</td>
-                <td>~0.5s*</td>
-                <td>~2s*</td>
+                <td>1.5s</td>
+                <td>TBD</td>
                 <td>4+</td>
                 <td class="yes">Yes</td>
                 <td class="no">No</td>
@@ -523,8 +523,8 @@
               </tr>
               <tr>
                 <td>Apple Notes + Mail</td>
-                <td>~1.5s*</td>
-                <td>~3s*</td>
+                <td>0.9s</td>
+                <td>TBD</td>
                 <td>5+</td>
                 <td class="yes">Yes (Notes)</td>
                 <td class="partial">iCloud</td>
@@ -534,8 +534,8 @@
               </tr>
               <tr>
                 <td>iOS Shortcuts</td>
-                <td>~1s*</td>
-                <td>~2s*</td>
+                <td>TBD</td>
+                <td>TBD</td>
                 <td>2-3</td>
                 <td class="no">No</td>
                 <td class="no">No</td>
@@ -546,7 +546,7 @@
             </tbody>
           </table>
         </div>
-        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem;">* Launch and send times marked with * are preliminary observations. Frame-counted measurements coming soon. <a href="#methodology" style="color:var(--accent);">See methodology.</a></p>
+        <p style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem;">Launch times are video timestamp estimates (1 run). Boomerang and iOS Shortcuts not yet tested. Send speed testing planned. <a href="#methodology" style="color:var(--accent);">See methodology.</a></p>
       </section>
 
       <!-- Individual Reviews -->
@@ -560,11 +560,11 @@
             <span class="app-card__rank">Best for: Speed + Offline</span>
           </div>
           <div class="app-card__desc">
-            <p>SimpleMemo is a purpose-built "email yourself" app inspired by the discontinued Captio. It launches in 0.3 seconds thanks to raw UIKit construction (no Storyboards, no SwiftUI). Notes are sent via Cloudflare Workers + Resend API in approximately 150ms. The standout feature is its offline architecture: notes are encrypted with AES-GCM on-device and stored in a local outbox. When connectivity returns, they send automatically. Your memos are never stored on any server.</p>
+            <p>SimpleMemo is a purpose-built "email yourself" app inspired by the discontinued Captio. It launches in approximately 0.8 seconds with no splash screen thanks to raw UIKit construction (no Storyboards, no SwiftUI). Notes are sent via Cloudflare Workers + Resend API. The standout feature is its offline architecture: notes are encrypted with AES-GCM on-device and stored in a local outbox. When connectivity returns, they send automatically. Your memos are never stored on any server.</p>
             <p style="margin-top:.5rem">The free plan allows 3 sends per day indefinitely. Premium ($2.99/month or $29.99/year) unlocks unlimited sends. A 7-day free trial with unlimited sends is included.</p>
           </div>
           <div class="app-card__meta">
-            <span class="app-card__pros">+ Fastest launch (0.3s) + Offline encrypted queue + Privacy-first</span>
+            <span class="app-card__pros">+ Fast launch (0.8s, no splash) + Offline encrypted queue + Privacy-first</span>
             <span class="app-card__cons">- iOS only - No Apple Watch - Small review count</span>
           </div>
         </div>
@@ -641,7 +641,7 @@
           </div>
           <div class="app-card__desc">
             <p>Drafts is not a dedicated email-yourself app -- it is a text capture powerhouse with an extensive action system. You can configure a Mail Action to send notes to yourself, but the workflow requires more taps than purpose-built alternatives. Where Drafts shines is if you need to process text before sending: append to a note, format as Markdown, split into tasks, then email.</p>
-            <p style="margin-top:.5rem">Drafts launches extremely fast (~0.5s) thanks to its "open to new draft" philosophy. The free version works for basic capture. Pro ($4.99/month or $29.99/year) unlocks actions, themes, and workspaces. Apple Watch and Mac support are included.</p>
+            <p style="margin-top:.5rem">Drafts launched at about 1.5s in our test due to a dark-gray splash screen with logo that displays for roughly half a second before the input view appears. The free version works for basic capture. Pro ($4.99/month or $29.99/year) unlocks actions, themes, and workspaces. Apple Watch and Mac support are included.</p>
           </div>
           <div class="app-card__meta">
             <span class="app-card__pros">+ Fastest text capture + Powerful actions + Apple Watch + Mac</span>
@@ -687,7 +687,7 @@
         <h2 class="lp-section__title">Which App Should You Choose?</h2>
         <div class="app-card">
           <div class="app-card__desc">
-            <p><strong>You want the fastest possible workflow:</strong> SimpleMemo (0.3s launch, 150ms send, offline encrypted queue).</p>
+            <p><strong>You want the fastest possible workflow:</strong> SimpleMemo (0.8s launch, no splash screen, offline encrypted queue).</p>
             <p style="margin-top:.5rem"><strong>You want completely free with no catch:</strong> Boomerang (fully free, 4.9/5 rating, no ads).</p>
             <p style="margin-top:.5rem"><strong>You care most about privacy:</strong> Note To Self Mail (SMTP support -- your notes never touch a third-party server).</p>
             <p style="margin-top:.5rem"><strong>You need Apple Watch + Mac support:</strong> Email Me or Drafts (both support iPhone, Mac, and Apple Watch).</p>
@@ -707,7 +707,7 @@
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">Frequently Asked Questions</h2>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the fastest app to email yourself on iPhone?</summary><div class="faq-answer"><p>SimpleMemo launches in 0.3 seconds and sends notes to your inbox in approximately 150ms via Cloudflare Workers. Boomerang and Note To Self Mail are also fast alternatives with sub-1-second launch times.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the fastest app to email yourself on iPhone?</summary><div class="faq-answer"><p>In our testing, SimpleMemo launched in 0.8 seconds with no splash screen -- the cursor is ready immediately. Pigeon matched at 0.8s. Apple Notes came in at 0.9s, while Note To Self Mail and Email Me both took about 1.0s. Drafts was slowest at 1.5s due to its splash screen.</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I email myself notes for free?</summary><div class="faq-answer"><p>Yes. Most email-yourself apps offer free tiers. SimpleMemo allows 3 free sends per day. Boomerang is fully free. Note To Self Mail is free with a pro upgrade for power features. You can also use the built-in iOS Shortcuts app to create a free send-to-self workflow with zero cost.</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What happened to the Captio app?</summary><div class="faq-answer"><p>Captio was discontinued in late 2024 and removed from the App Store. Its cloud service was shut down, likely due to its dependency on Gmail API. SimpleMemo, Note To Self Mail, and Email Me are popular replacements that offer the same core functionality.</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which email-yourself app works offline?</summary><div class="faq-answer"><p>SimpleMemo and Drafts both support offline note capture. SimpleMemo stores offline memos in an encrypted outbox (AES-GCM) and auto-sends when connectivity returns. Most other apps require an internet connection to send.</p></div></details></div>
@@ -718,7 +718,7 @@
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">Try the fastest email-yourself app</div>
-        <div class="cta-box__desc">SimpleMemo: 0.3s launch, one-tap send, offline encryption. 7-day free trial included.</div>
+        <div class="cta-box__desc">SimpleMemo: 0.8s launch, one-tap send, offline encryption. 7-day free trial included.</div>
         <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
           <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
         </a>
