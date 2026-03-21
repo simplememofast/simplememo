@@ -61,26 +61,40 @@
 
 ---
 
+## 今セッションで完了 — Claude実行済み
+
+### 技術SEO
+- [x] JSON-LD sameAs に新規プラットフォーム追加（Qiita, Zenn, Product Hunt, AlternativeTo）— index.html, en/index.html
+- [x] rel="me" リンク追加（X, note, Zenn, GitHub）— フッターにソーシャルリンクnav追加
+- [x] Open Graph / Twitter Card メタタグ監査 — 169ページ中165ページOK、faq.htmlにtwitter:card追加
+- [x] /comparison/ をフッターに追加 — index.html, en/index.html
+- [x] 新規記事6件に /comparison/ リンク + 記事間クロスリンク追加
+- [x] comparison/index.html に欠落5記事（暗号化・iOS・LINE Keep移行・セカンドブレイン・ビジネス）追加 + JSON-LD hasPart更新
+- [x] blog/index.html にハブページへの誘導リンク追加（/comparison/, /guides/）
+
+### コンテンツ作成
+- [x] LINE Keepユーザー向け専用LP作成（/line-keep/index.html）— FAQ・比較テーブル・移行ステップ付き
+- [x] Long-tail記事5件作成:
+  - memo-app-free-guide.html（メモアプリ 無料 おすすめ）
+  - memo-shuukan-tips.html（メモ 習慣化 コツ）
+  - business-memo-kakikata.html（ビジネスメモ 書き方）
+  - memo-app-hikaku-matome.html（メモアプリ 比較 2026）
+  - iphone-memo-katsuyou.html（iPhone メモ 活用法）
+- [x] sitemap.xml に6ページ追加
+
+---
+
 ## 未実施 — Claude実行可能（次セッションで）
 
 ### コンテンツ作成
-- [ ] Long-tail記事5-10件（「メモアプリ 無料」「メモ 習慣化 コツ」「ビジネスメモ 書き方」等）
 - [ ] /en/captio-alternative/ ページ拡張（3,000語、比較テーブル、移行ガイド追加）
-- [ ] Captioユーザー向け専用LP作成（/captio/）
-- [ ] LINE Keepユーザー向け専用LP作成（/line-keep/）
 - [ ] テスティモニアルページ作成（App Storeレビューから）
+- [ ] Long-tail記事追加5件（「メモアプリ セキュリティ」「メモ 効率化」「メモアプリ オフライン」等）
+- [ ] 新規5記事のblog/index.htmlへの追加
 
 ### 技術SEO
-- [ ] Open Graph / Twitter Card メタタグ監査・最適化
 - [ ] 画像alt属性の一括監査
 - [ ] Core Web Vitals再チェック
-- [ ] rel="me" リンク追加（各外部プロフィールへ）
-- [ ] JSON-LD sameAs に新規プラットフォーム追加（Qiita, はてな, Product Hunt, AlternativeTo, Indie Hackers）
-
-### 内部リンク追加ラウンド
-- [ ] 新規記事6件からの内部リンク（line-keep→vs/ページ、encryption→vs/ページ等）
-- [ ] ハブページ（/comparison/, /guides/）へのフッターリンク追加
-- [ ] ブログindex→ハブページへの誘導リンク
 
 ---
 
