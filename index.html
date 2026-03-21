@@ -60,6 +60,56 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
   
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Simple Memoはどんなアプリですか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "オフラインでもメモを送信できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無料で使えますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "無料トライアル期間中に解約できますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "はい、いつでも解約可能です。7日間の無料トライアル期間中に解約すれば一切費用はかかりません。解約はiPhoneの「設定」→「サブスクリプション」から行えます。"
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "画像は送れますか？",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "いいえ。Simple Memoはテキストメモの高速送信に特化しており、画像の添付には対応していません。Simple Memoは「思いついたことをすぐテキストで残す」ための専用ツールです。"
+        }
+      }
+    ]
+  }
+  </script>
+
   <!-- Canonical & Hreflang -->
   <link rel="canonical" href="https://simplememofast.com/">
   <link rel="alternate" hreflang="ja" href="https://simplememofast.com/">
@@ -140,9 +190,11 @@
     "sameAs": [
       "https://github.com/simplememofast",
       "https://x.com/simplememofast",
-      "https://note.com/simplememo"
+      "https://note.com/simplememo",
+      "https://zenn.dev/simplememo",
+      "https://qiita.com/paji"
     ],
-    "knowsAbout": ["iOS Development", "UIKit", "Swift", "Cloudflare Workers", "Privacy-first Design", "AES-GCM Encryption"]
+    "knowsAbout": ["iOS Development", "UIKit", "Swift", "Cloudflare Workers", "Privacy-first Design", "AES-GCM Encryption", "Outbox Architecture"]
   }
   </script>
 
@@ -819,9 +871,19 @@
 </p>
         </div>
       </div>
+      <!-- Real quote about the Captio concept (from ITreview, about original Captio) -->
+      <div style="margin-top:2rem;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);">
+        <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);margin-bottom:.75rem;font-style:italic;">
+          「極めてシンプルなUI/UX。自分のメールアドレスにメモ感覚でToDo送信ができるのが素晴らしい。スマホアプリでどこでも便利にToDo記録ができ、タスクの忘れ防止にとても便利。」
+        </p>
+        <p style="font-size:.8rem;color:var(--text-muted);margin:0;">
+          ― 「メモ→メール」コンセプトへのレビュー（<a href="https://www.itreview.jp/products/captio/reviews/15910" target="_blank" rel="noopener" style="color:var(--accent);">ITreview</a>、2019年 旧Captioに対する評価）
+        </p>
+      </div>
+
       <div style="text-align:center;margin-top:2rem;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);">
         <p style="font-size:.95rem;font-weight:700;margin-bottom:.25rem;">App Store 評価 ★5.0</p>
-        <p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:1rem;">App Storeで公開中</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:1rem;">App Storeで公開中（2026年2月リリース）</p>
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" style="display:inline-flex;align-items:center;gap:.5rem;color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1.5rem;min-height:48px;border:1px solid rgba(100,180,255,.2);border-radius:8px;">
           <img src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy" style="vertical-align:middle;">
         </a>
