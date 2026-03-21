@@ -90,7 +90,8 @@
       top: 0;
       z-index: 1000;
       background: rgba(10, 12, 18, 0.85);
-      -webkit-
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(100, 160, 220, 0.1);
     }
     .global-nav__inner {
@@ -346,7 +347,7 @@
       <h2 class="lp-section__title"><span data-lang="ja">情報が散らかる人の共通パターンとその解決法</span><span data-lang="en">Common Patterns of Disorganized People & Solutions</span></h2>
       <div class="reason-cards" data-lang="ja">
         <div class="reason-card"><div class="reason-card__title">パターン1：ツールが多すぎる</div><div class="reason-card__desc">Apple純正メモ、Evernote、Notion、Google Keep、Slackの保存済み、LINEのKeepメモ、手書きノート…情報の保存先が5箇所以上に分散している人は、情報を「探す」だけで毎日平均20分を浪費しています。解決策は「入口を1つに絞る」ことです。全ての情報をまず1つの場所（メール受信トレイなど）に集約し、そこから適切な場所に振り分けるワークフローを構築しましょう。Captio式シンプルメモは、どんな情報もまず自分のメール宛に送信するため、入口が自動的に1つに統一されます。</div></div>
-        <div class="reason-card"><div class="reason-card__title">パターン2：分類を作りすぎる</div><div class="reason-card__desc">フォルダを30個、タグを50個作って「完璧なシステム」を構築しようとする人がいます。しかし、分類が細かすぎると「このメモはどのフォルダに入れるべきか」で毎回迷い、結局「未分類」フォルダが最も巨大になります。PARAフレームワークが推奨するのは、最上位カテゴリは4つだけにすること。Projects（進行中）、Areas（継続的な責任）、Resources（参考資料）、Archives（完了・不要）の4つです。この4つのどれに該当するかは直感的に判断でき、迷う時間がほぼゼロになります。</div></div>
+        <div class="reason-card"><div class="reason-card__title">パターン2：分類を作りすぎる</div><div class="reason-card__desc">フォルダを30個、タグを50個作って「完璧なシステム」を構築しようとする人がいます。しかし、分類が細かすぎると「このメモはどのフォルダに入れるべきか」で毎回迷い、結局「未分類」フォルダが最も巨大になります。PARAフレームワークが推奨するのは、最上位カテゴリは4つだけにすること。Projects（進行中）、Areas（継続的な責任）、Resources（参考資料）、Archives（完了・不要）の4つです。この4つのどれに該当するかは直感的に判断でき、迷う時間がほぼゼロになります。PARA的な構造化が得意なツールを検討するなら、<a href="/vs/notion/">Notionとの比較</a>や<a href="/vs/obsidian/">Obsidianとの比較</a>も参考になります。</div></div>
         <div class="reason-card"><div class="reason-card__title">パターン3：キャプチャしない完璧主義</div><div class="reason-card__desc">「きちんとした文章でメモしないと」と思うあまり、メモを取らない人がいます。会議中に完璧な議事録を取ろうとして結局何も書けなかった、という経験はないでしょうか。解決策は「とにかく書く」ことです。単語の羅列でも、文法が崩れていても、後から読み返せれば十分です。セカンドブレインの提唱者ティアゴ・フォルテは「メモの質より量を優先しろ。質は後から付けられるが、存在しないメモに質は加えられない」と述べています。まずはCaptio式で1行だけ送信する習慣を始めてみてください。</div></div>
         <div class="reason-card"><div class="reason-card__title">パターン4：レビューしない蓄積主義</div><div class="reason-card__desc">メモを取ることが目的になり、見返すことを一切しない人がいます。メモアプリに3,000件のメモが入っているのに、検索したことがほとんどないという状態です。情報を蓄積しても、活用しなければ意味がありません。解決策は週次レビューの習慣化と、メモを「アクション」に変換する意識です。「〇〇が面白かった」というメモは「〇〇をプロジェクトに応用する」と書き換えるだけで、行動に繋がるメモに変わります。レビューの際には、古いメモと新しいメモの間に意外なつながりを発見することも多く、これが創造的な発想の源泉になります。</div></div>
       </div>
@@ -411,6 +412,19 @@
     <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
   </ul>
 </section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="AI Ataka" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI Ataka</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">SimpleMemo開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動0.3秒・メモ→メール特化」のSimpleMemoを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>
+      <a href="https://github.com/hajimeataka" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
 </main>
 
   

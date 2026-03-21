@@ -54,7 +54,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/ios-shortcuts/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-ios-shortcuts.png","headline":"シンプルメモ vs iOSショートカット — メール送信比較","description":"iOSショートカットで自分にメール送信する方法とシンプルメモの違いを徹底比較。セットアップの手間・オフライン対応・送信履歴・信頼性の観点で解説。","url":"https://simplememofast.com/vs/ios-shortcuts/","datePublished":"2026-03-07","dateModified":"2026-03-07","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/ios-shortcuts/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/ios-shortcuts/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-ios-shortcuts.png","headline":"シンプルメモ vs iOSショートカット — メール送信比較","description":"iOSショートカットで自分にメール送信する方法とシンプルメモの違いを徹底比較。セットアップの手間・オフライン対応・送信履歴・信頼性の観点で解説。","url":"https://simplememofast.com/vs/ios-shortcuts/","datePublished":"2026-03-07","dateModified":"2026-03-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/ios-shortcuts/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs iOSショートカット","item":"https://simplememofast.com/vs/ios-shortcuts/"}]}</script>
@@ -130,7 +130,8 @@
       top: 0;
       z-index: 1000;
       background: rgba(10, 12, 18, 0.85);
-      -webkit-
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(100, 160, 220, 0.1);
     }
     .global-nav__inner {
@@ -351,6 +352,25 @@
         </p>
       </section>
 
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">ショートカットが壊れた経験はありませんか？</span>
+          <span data-lang="en">Have Your Shortcuts Ever Broken?</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">iOSショートカットで「自分にメール」を設定したことがある方なら、iOSのメジャーアップデート後にショートカットが動作しなくなった経験があるかもしれません。iOS 16からiOS 17、iOS 17からiOS 18へのアップデート時に、メール送信アクションの仕様変更やプライバシーポリシーの変更により、既存のショートカットが無効になるケースが複数報告されています。そのたびに、アクションの再設定、変数の再定義、テスト送信による動作確認が必要になります。</span>
+          <span data-lang="en">If you have ever set up a "mail to self" shortcut on iOS, you may have experienced it breaking after a major iOS update. During upgrades from iOS 16 to 17, and iOS 17 to 18, changes to mail action specifications and privacy policies have caused existing shortcuts to stop working. Each time, you must reconfigure actions, redefine variables, and test-send to verify functionality. Multiple cases have been reported across Apple's support forums.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">この「壊れる」問題の根本原因は、ショートカットがAppleのシステムAPIに依存するDIYソリューションだということです。Appleがメールの送信権限やバックグラウンド動作のルールを変更するたびに、ユーザー側で対応が必要になります。一方、シンプルメモは専用アプリとしてメール送信機能を実装しているため、iOS APIの変更にはアプリ開発者が対応します。ユーザーは何もする必要がありません。アプリを開いて、入力して、送信する。この体験はiOSのバージョンに関係なく一貫しています。</span>
+          <span data-lang="en">The root cause of this "breaking" problem is that Shortcuts is a DIY solution dependent on Apple's system APIs. Every time Apple changes email sending permissions or background execution rules, users must adapt manually. Simple Memo, as a dedicated app, implements email sending natively -- iOS API changes are handled by the app developer, not the user. You do nothing. Open the app, type, send. This experience remains consistent regardless of iOS version.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">さらに見落とされがちなのが、ショートカットの「送信確認」の問題です。ショートカットでメールを送信する場合、実際にメールアプリが一瞬表示される「UIフラッシュ」が発生し、送信が完了したかどうかの確認手段もありません。オフライン時には送信自体が失敗しますが、エラー通知も表示されないことがあります。シンプルメモはOutboxアーキテクチャを採用しており、オフラインでもメモをキューに保存し、ネットワーク復帰時に自動送信します。送信ステータスも画面上で確認でき、メモが確実に届いたかどうかを常に把握できます。</span>
+          <span data-lang="en">Another overlooked issue is Shortcuts' "send confirmation" problem. When sending email via Shortcuts, the Mail app briefly flashes on screen (UI flash), and there is no way to confirm whether the send actually completed. Offline sends fail silently with no error notification. Simple Memo uses an Outbox architecture that queues memos offline and auto-sends when connectivity returns. Send status is visible on screen, so you always know whether your memo was delivered successfully.</span>
+        </p>
+      </section>
+
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
@@ -394,61 +414,51 @@
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">5つの決定的な違い</span>
-          <span data-lang="en">5 Key Differences</span>
+          <span data-lang="ja">4つの自動化とアプリの違い</span>
+          <span data-lang="en">4 Differences Between Automation and a Dedicated App</span>
         </h2>
         <ul class="diff-list" data-lang="ja">
           <li>
             <span class="diff-num">1</span>
-            <strong>セットアップ不要 vs DIYセットアップ</strong><br>
-            シンプルメモはApp Storeからインストールし、メールアドレスを設定するだけで使い始められます。iOSショートカットの場合、ショートカットアプリを開き、新規ショートカットを作成、「メールを送信」アクションを追加、宛先を設定、件名を決め、ホーム画面にアイコンとして追加するまで5〜10分の設定作業が発生します。非エンジニアにとってはハードルが高い手順です。
+            <strong>セットアップ：インストールだけ vs DIY構築</strong><br>
+            シンプルメモはApp Storeからインストールしてメールアドレスを設定するだけ。iOSショートカットでは、アプリを開き、新規ショートカット作成→「メールを送信」アクション追加→宛先設定→件名設定→ホーム画面追加と、5〜10分のDIY作業が必要です。非エンジニアには高いハードルです。
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>オフライン信頼性：Outbox vs 無通知エラー</strong><br>
-            シンプルメモはオフライン時のメモをAES-GCM暗号化でOutboxに保存し、通信復帰後に自動で再送信します。iOSショートカットにはオフラインキューの仕組みがなく、ネットワーク接続がない場合はメール送信が失敗し、多くの場合ユーザーに通知されません。地下鉄や飛行機など接続が不安定な環境では、この差が致命的です。
+            <strong>オフライン：Outbox自動再送 vs 無通知エラー</strong><br>
+            シンプルメモはオフライン時にAES-GCM暗号化でOutboxに保存し、通信復帰後に自動再送します。ショートカットにはオフラインキューがなく、ネットワークなしではメール送信が失敗し、通知もされません。地下鉄や飛行機内では致命的な差です。
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>送信体験：バックグラウンド送信 vs UIフラッシュ</strong><br>
-            シンプルメモは150msのバックグラウンド送信で、画面遷移なしに完了します。iOSショートカット経由のメール送信では、標準メールアプリが一瞬表示されてから閉じるUIフラッシュが発生します。送信の度に画面が切り替わるストレスは、1日に何度もメモを送るユーザーにとって無視できない体験の差です。
+            <strong>送信体験：バックグラウンド150ms vs メールアプリのUIフラッシュ</strong><br>
+            シンプルメモは画面遷移なしで150msバックグラウンド送信。ショートカット経由では標準メールアプリが一瞬起動・閉じるUIフラッシュが毎回発生します。1日に何度もメモする人にとって、この画面切り替えストレスは無視できません。
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>送信履歴とステータス追跡</strong><br>
-            シンプルメモにはアプリ内で送信履歴を確認する機能があり、いつ・何を送ったかを振り返れます。iOSショートカットには送信履歴の仕組みがなく、メールの「送信済み」フォルダを手動で確認する必要があります。オフラインで失敗した送信がどうなったかも追跡できません。
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>長期的な安定性：専用アプリ vs OS依存の自動化</strong><br>
-            iOSショートカットはAppleのOS更新の影響を直接受けます。毎年のiOSメジャーアップデートでアクションの仕様変更やバグが発生し、ユーザーがショートカットを再作成する必要が生じた事例が複数報告されています。シンプルメモは専用のネイティブアプリとして独立しており、OS更新とは切り離された安定動作を提供します。
+            <strong>長期安定性：専用アプリ vs iOSアップデートで壊れるリスク</strong><br>
+            ショートカットはiOSメジャーアップデートでアクション仕様が変わり、動作しなくなった事例が複数報告されています。シンプルメモは独立したネイティブアプリなので、OS更新に左右されず安定動作します。
           </li>
         </ul>
         <ul class="diff-list" data-lang="en">
           <li>
             <span class="diff-num">1</span>
-            <strong>Zero Setup vs DIY Configuration</strong><br>
-            Simple Memo is ready to use after a single install and email address entry. iOS Shortcuts requires opening the Shortcuts app, creating a new shortcut, adding a "Send Email" action, setting the recipient, configuring the subject line, and adding it to the home screen — a 5-10 minute setup process that assumes familiarity with automation tools.
+            <strong>Setup: Install Only vs DIY Build</strong><br>
+            Simple Memo is ready after install and email address entry. iOS Shortcuts requires creating a new shortcut, adding a "Send Email" action, configuring recipient and subject, and adding to home screen — a 5-10 minute DIY process requiring automation familiarity.
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>Offline Reliability: Outbox vs Silent Failure</strong><br>
-            Simple Memo stores offline memos in an AES-GCM encrypted Outbox and automatically resends them when connectivity returns. iOS Shortcuts has no offline queue at all — if you try to send without an internet connection, the email simply fails, often without any notification. In subways, on flights, or in spotty coverage areas, this difference is critical.
+            <strong>Offline: Outbox Auto-Resend vs Silent Failure</strong><br>
+            Simple Memo saves offline memos in an AES-GCM encrypted Outbox and auto-resends on reconnect. Shortcuts has no offline queue — sends fail silently without connectivity. Critical in subways, flights, or spotty coverage.
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>Send Experience: Background Send vs UI Flash</strong><br>
-            Simple Memo completes email sends in 150ms in the background with no screen transitions. iOS Shortcuts triggers the Mail app, which briefly opens and closes — creating a visible UI flash with every send. For users sending multiple memos daily, this interruption adds up to a meaningfully worse experience.
+            <strong>Send Experience: Background 150ms vs Mail App UI Flash</strong><br>
+            Simple Memo sends in 150ms in the background with no screen transitions. Shortcuts triggers the Mail app, which briefly opens and closes — a visible UI flash every time. For frequent memo senders, this interruption is a meaningfully worse experience.
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>Send History and Status Tracking</strong><br>
-            Simple Memo includes an in-app history view showing when and what you sent. iOS Shortcuts provides no send history — you must manually check your Mail app's Sent folder. If an offline send failed, there is no way to know what was lost.
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>Long-Term Stability: Dedicated App vs OS-Dependent Automation</strong><br>
-            iOS Shortcuts are directly affected by Apple's OS updates. Every major iOS release has the potential to change action behavior or introduce bugs that break existing shortcuts, forcing users to rebuild their automations. Simple Memo operates as an independent native app, unaffected by Shortcuts framework changes, providing consistent reliability across iOS versions.
+            <strong>Long-Term Stability: Dedicated App vs iOS Update Breakage Risk</strong><br>
+            Shortcuts can break after major iOS updates when action behavior changes — multiple cases reported. Simple Memo operates as an independent native app, unaffected by Shortcuts framework changes, providing stable operation across iOS versions.
           </li>
         </ul>
       </section>
@@ -516,30 +526,28 @@
           <span data-lang="en">FAQ</span>
         </h2>
         <div data-lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">iOSショートカットで「自分にメール」を作る方法は？</summary><div class="faq-answer"><p>ショートカットアプリを開き、右上の「+」をタップ。「アクションを追加」から「メールを送信」を検索して追加します。宛先に自分のメールアドレスを入力し、件名を「メモ」などに設定。「テキストを要求」アクションを前に追加すると入力欄が表示されます。完成したら、共有メニューから「ホーム画面に追加」すればアイコンとして使えます。ただし、この方法ではオフライン送信や送信履歴の確認はできません。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">iOSショートカットはオフラインでもメールを送れますか？</summary><div class="faq-answer"><p>いいえ。iOSショートカットのメール送信アクションはネットワーク接続が必須です。オフラインでショートカットを実行した場合、メール送信は失敗し、多くの場合ユーザーへの明確な通知もありません。シンプルメモはOutboxアーキテクチャでオフライン時のメモをAES-GCM暗号化して保存し、接続復帰後に自動再送します。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットがiOSアップデート後に動かなくなったら？</summary><div class="faq-answer"><p>iOSのメジャーアップデート（例：iOS 18→19）では、ショートカットのアクション仕様が変更されることがあります。動作しなくなった場合は、ショートカットを開いて問題のアクションを確認し、再設定する必要があります。シンプルメモは専用アプリのため、OS更新に伴うショートカット仕様変更の影響を受けません。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモはショートカットより速いですか？</summary><div class="faq-answer"><p>はい。シンプルメモは起動0.3秒で即座にテキスト入力が可能で、送信は150msのバックグラウンド処理で完了します。iOSショートカット経由の場合、ショートカットの起動に1〜2秒、さらにメールアプリが一瞬表示されるUIフラッシュが発生するため、体感速度は大きく異なります。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモは無料で使えますか？</summary><div class="faq-answer"><p>はい。7日間の無料トライアル（送信無制限）の後、Freeプランで1日3通まで無期限で使えます。Premiumプラン（月額500円/年額5,000円）で送信無制限になります。iOSショートカットは完全無料ですが、オフライン対応や送信履歴がないため、用途によってどちらが適切か検討してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットで自分にメールする設定方法を教えてください</summary><div class="faq-answer"><p>ショートカットアプリ→「+」→「メールを送信」アクション追加→宛先を自分に→「テキストを要求」を前に追加→ホーム画面に追加。5〜10分かかります。シンプルメモならインストール後すぐに使えるので、この設定作業自体が不要です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットがiOSアップデートで壊れたことがあります。シンプルメモは大丈夫？</summary><div class="faq-answer"><p>iOSメジャーアップデートでショートカットのアクション仕様が変わり動作しなくなる事例は多数報告されています。シンプルメモは独立したネイティブアプリのため、ショートカットフレームワークの変更に影響されず、iOS更新後も安定動作します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットのUIフラッシュ（メールアプリが一瞬開く）を防ぐ方法は？</summary><div class="faq-answer"><p>ショートカット経由のメール送信ではメールアプリが一瞬起動・閉じるUIフラッシュを回避する方法はありません。これはiOSの仕様です。シンプルメモは150msのバックグラウンド送信で画面遷移が一切発生しないため、この問題自体がありません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ショートカットとシンプルメモを併用する意味はありますか？</summary><div class="faq-answer"><p>メール送信以外の自動化（例：Wi-Fi切替、特定アプリ起動、ファイル操作）はショートカットが得意です。しかし「自分にメールでメモ」だけが目的なら、シンプルメモの方がオフライン対応・送信履歴・暗号化を備えた専用ツールとして優れています。</p></div></details></div>
         </div>
         <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I create an "email to self" shortcut on iPhone?</summary><div class="faq-answer"><p>Open the Shortcuts app, tap "+" to create a new shortcut. Search for "Send Email" and add it as an action. Set the recipient to your own email address and configure the subject line (e.g., "Memo"). Add an "Ask for Input" action before it to get a text field. Then share and select "Add to Home Screen" to create an icon. Note that this workflow has no offline queue and no send history.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can iOS Shortcuts send email offline?</summary><div class="faq-answer"><p>No. The Send Email action in iOS Shortcuts requires an active internet connection. If you run the shortcut offline, the email will fail — often without any clear notification to the user. Simple Memo solves this with its Outbox architecture: offline memos are saved locally with AES-GCM encryption and automatically sent when connectivity is restored.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What happens when my shortcut breaks after an iOS update?</summary><div class="faq-answer"><p>Major iOS updates (e.g., iOS 18 to 19) can change Shortcuts action behavior, breaking existing automations. When this happens, you need to open the Shortcuts app, identify the broken action, and reconfigure or rebuild the shortcut. Simple Memo is a standalone app unaffected by Shortcuts framework changes.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo faster than using an iOS Shortcut?</summary><div class="faq-answer"><p>Yes. Simple Memo launches in 0.3 seconds with the cursor ready for typing, and sends in 150ms in the background with no screen transitions. An iOS Shortcut takes 1-2 seconds to trigger, then briefly opens the Mail app (a visible UI flash). For frequent memo senders, this difference in speed and smoothness is substantial.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo free to use?</summary><div class="faq-answer"><p>Yes. After a 7-day free trial with unlimited sends, the Free plan allows 3 sends per day indefinitely. The Premium plan (500 yen/month or 5,000 yen/year) unlocks unlimited sends. iOS Shortcuts is completely free, but lacks offline support and send history — consider which trade-offs matter most for your workflow.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I set up an email-to-self shortcut?</summary><div class="faq-answer"><p>Open Shortcuts app, tap "+", add "Send Email" action, set recipient to yourself, add "Ask for Input" before it, then add to Home Screen. Takes 5-10 minutes. Simple Memo is ready immediately after install — no setup needed.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">My shortcut broke after an iOS update. Is Simple Memo more stable?</summary><div class="faq-answer"><p>Multiple cases of shortcuts breaking after major iOS updates have been reported. Simple Memo is an independent native app unaffected by Shortcuts framework changes, providing stable operation across iOS versions.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I prevent the UI flash (Mail app briefly opening) with Shortcuts?</summary><div class="faq-answer"><p>There is no way to prevent the Mail app UI flash when sending email via Shortcuts — it is an iOS limitation. Simple Memo sends in 150ms in the background with zero screen transitions, eliminating this problem entirely.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is there a reason to use both Shortcuts and Simple Memo?</summary><div class="faq-answer"><p>Shortcuts excels at non-email automations (Wi-Fi toggling, app launching, file operations). But for "email memo to self" specifically, Simple Memo is the superior dedicated tool with offline support, send history, and encryption.</p></div></details></div>
         </div>
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">ショートカット設定不要。専用アプリで確実にメール送信</span>
-          <span data-lang="en">No shortcut setup needed. Send memos reliably with a dedicated app</span>
+          <span data-lang="ja">ショートカットより確実な0.3秒</span>
+          <span data-lang="en">More Reliable Than Shortcuts — 0.3 Seconds</span>
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">7日間の無料トライアル付き。オフラインでも安心のOutbox機能を体験してください。</span>
-          <span data-lang="en">7-day free trial included. Experience reliable offline sending with Outbox architecture.</span>
+          <span data-lang="ja">ショートカット設定不要。インストールして即使える。7日間無料。</span>
+          <span data-lang="en">No shortcut setup needed. Install and go. 7 days free.</span>
         </div>
         <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">

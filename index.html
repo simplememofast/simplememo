@@ -66,7 +66,6 @@
   <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/">
   <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/">
 
-
   <!-- JSON-LD: WebSite -->
   <script type="application/ld+json">
   {
@@ -92,7 +91,11 @@
       "sameAs": [
         "https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948",
         "https://x.com/simplememofast",
-        "https://note.com/simplememo"
+        "https://note.com/simplememo",
+        "https://qiita.com/organizations/simplememo",
+        "https://zenn.dev/simplememo",
+        "https://www.producthunt.com/products/simplememo",
+        "https://alternativeto.net/software/simplememo/"
       ],
       "contactPoint": {
         "@type": "ContactPoint",
@@ -101,8 +104,23 @@
         "url": "https://simplememofast.com/contact",
         "availableLanguage": ["Japanese", "English"]
       }
-    },
-    "potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://simplememofast.com/blog/?q={search_term_string}"},"query-input":"required name=search_term_string"}
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "ホーム",
+        "item": "https://simplememofast.com/"
+      }
+    ]
   }
   </script>
 
@@ -271,10 +289,6 @@
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
     }
-    [data-lang="en"] { display: none; }
-    [data-lang].active { display: block; }
-    span[data-lang].active { display: inline; }
-    a.app-store-badge[data-lang].active { display: inline-flex; }
 
     /* Reduced motion support */
     @media (prefers-reduced-motion: reduce) {
@@ -418,48 +432,33 @@
         SimpleMemo
       </a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/">使い方</a></li>
+        <li><a href="/use-cases/">活用事例</a></li>
+        <li><a href="/vs/">比較</a></li>
+        <li><a href="/methods/">メソッド</a></li>
+        <li><a href="/blog/">ブログ</a></li>
+        <li><a href="/glossary/">用語集</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about/">開発者</a></li>
+        <li><a href="/devlog/">開発記録</a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948">ダウンロード</a></li>
       </ul>
       <div class="global-nav__actions">
         <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          ダウンロード
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
-  <!-- Meta Templates for JS (language switching) -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">Captio式シンプルメモ — メモしてタップ、すぐにメールが届く</span>
-      <span class="meta-og-title">Captio式シンプルメモ</span>
-      <span class="meta-description">思いついた瞬間にメモして、ワンタップで自分のメールへ送れる軽量メモアプリ。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">Simple Memo - Captio-style — Write. Send. In your inbox.</span>
-      <span class="meta-og-title">Simple Memo - Captio-style</span>
-      <span class="meta-description">Fast, minimal memo app. Write a note and send it to your inbox in one tap.</span>
-    </div>
-  </div>
-
   <!-- Header with Lang Switcher -->
   <header class="header">
     <div class="container">
       <div class="lang-switcher-container">
         <div class="lang-switcher">
-          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
-          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+          <span class="lang-switcher__btn active">日本語</span>
+          <a class="lang-switcher__btn" href="/en/">English</a>
         </div>
       </div>
     </div>
@@ -473,38 +472,28 @@
         <img src="/assets/img/app-icon-256.webp" alt="SimpleMemoアプリアイコン" width="256" height="256" fetchpriority="high">
       </div>
       <div class="hero__badge">
-        <span data-lang="ja">iOS App &#8212; 0.3秒で起動</span>
-        <span data-lang="en">iOS App &#8212; Launches in 0.3s</span>
+        iOS App &#8212; 0.3秒で起動
       </div>
       <p class="hero__app-name">
-        <span data-lang="ja">Captio式シンプルメモ</span>
-        <span data-lang="en">Simple Memo - Captio-style</span>
+        Captio式シンプルメモ
       </p>
       <h1 class="hero__title">
-        <span data-lang="ja">メモしてタップ、<br>すぐにメールが届く</span>
-        <span data-lang="en">Write. Send.<br>In your inbox.</span>
+        メモしてタップ、<br>すぐにメールが届く
       </h1>
       <p class="hero__subtitle">
-        <span data-lang="ja">思いついた瞬間にメモして、<br>ワンタップで自分のメールへ。</span>
-        <span data-lang="en">Capture your thoughts instantly<br>and send them to your email in one tap.</span>
+        思いついた瞬間にメモして、<br>ワンタップで自分のメールへ。
       </p>
       <p style="font-size:1rem;color:var(--text-secondary,#b0b8c4);margin-top:.75rem;font-weight:500;letter-spacing:.02em;">
-        <span data-lang="ja">思いついたら即メール。自分にメモを送る最速アプリ。</span>
-        <span data-lang="en">The fastest app to email yourself notes.</span>
+        思いついたら即メール。自分にメモを送る最速アプリ。
       </p>
       <p style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-        <span data-lang="ja">最終更新: <time datetime="2026-03-08">2026年3月8日</time></span>
-        <span data-lang="en">Last updated: <time datetime="2026-03-08">March 8, 2026</time></span>
+        最終更新: <time datetime="2026-03-08">2026年3月8日</time>
       </p>
-      <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948#information" class="app-store-badge" aria-label="App Store からダウンロード">
+      <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948#information" class="app-store-badge" aria-label="App Store からダウンロード">
         <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="eager">
       </a>
-      <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
-        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
-      </a>
       <p style="font-size:.8rem;color:var(--text-muted,#8a919a);margin-top:.75rem;letter-spacing:.03em;">
-        <span data-lang="ja">7日間無料 ・ 3通/日は永久無料 ・ テキスト専用</span>
-        <span data-lang="en">7-day free trial · 3 sends/day always free · Text only</span>
+        7日間無料 ・ 3通/日は永久無料 ・ テキスト専用
       </p>
     </div>
   </section>
@@ -512,15 +501,10 @@
   <!-- Entity Definition (AIO / AI Search Optimization) -->
   <section class="entity-definition">
     <div class="container">
-      <p class="entity-definition__text" data-lang="ja">
+      <p class="entity-definition__text">
         <strong>Captio式シンプルメモ</strong>は、メモをワンタップで自分のメールに送信できるiOS向け軽量アプリです。
         サービス終了した<strong><a href="/captio-alternative/" style="color:var(--accent);display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">Captioの代替</a></strong>として2026年にリリース。<a href="/blog/line-keep-alternative" style="color:var(--accent);">LINE Keep終了後</a>のテキストメモ保存先としても最適です。
         起動0.3秒・送信150msの高速体験、Outboxアーキテクチャによるオフライン対応、AES-GCM暗号化によるプライバシー保護を特長としています。
-      </p>
-      <p class="entity-definition__text" data-lang="en">
-        <strong>Simple Memo - Captio-style</strong> is a lightweight iOS app that lets you send notes to your email inbox with one tap.
-        Released in 2026 as a <strong><a href="/captio-alternative/" style="color:var(--accent);">Captio alternative</a></strong> after Captio shut down. Also ideal as a <a href="/blog/line-keep-alternative" style="color:var(--accent);">LINE Keep replacement</a> for text memos.
-        Features 0.3s launch, 150ms send, offline support via Outbox architecture, and AES-GCM encryption for privacy.
       </p>
     </div>
   </section>
@@ -530,21 +514,13 @@
     <div class="container">
       <div style="display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;">
         <a href="/blog/line-keep-alternative" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:20px;transition:border-color .2s;display:inline-flex;align-items:center;min-height:48px;">
-          <span data-lang="ja">LINE Keepの代わりに</span>
-          <span data-lang="en">LINE Keep alternative</span>
-        </a>
+          LINE Keepの代わりに</a>
         <a href="/captio-alternative/" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:20px;transition:border-color .2s;display:inline-flex;align-items:center;min-height:48px;">
-          <span data-lang="ja">Captioの代わりに</span>
-          <span data-lang="en">Captio alternative</span>
-        </a>
+          Captioの代わりに</a>
         <a href="/blog/email-yourself-memo" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:20px;transition:border-color .2s;display:inline-flex;align-items:center;min-height:48px;">
-          <span data-lang="ja">自分へのメールをもっと速く</span>
-          <span data-lang="en">Email yourself faster</span>
-        </a>
+          自分へのメールをもっと速く</a>
         <a href="/blog/fastest-memo-app-benchmark" style="font-size:.875rem;color:var(--accent);text-decoration:none;padding:.5rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:20px;transition:border-color .2s;display:inline-flex;align-items:center;min-height:48px;">
-          <span data-lang="ja">最速メモアプリを探す</span>
-          <span data-lang="en">Find the fastest memo app</span>
-        </a>
+          最速メモアプリを探す</a>
       </div>
     </div>
   </section>
@@ -554,28 +530,19 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">コンセプト</span>
-          <span data-lang="en">Concept</span>
-        </span>
-        <span data-lang="ja">メールメモとは？</span>
-        <span data-lang="en">What is Email Memo?</span>
-      </h2>
+          コンセプト
+</span>
+        メールメモとは？
+</h2>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1.5rem;" class="reveal">
-        <p style="font-size:1rem;line-height:1.8;color:var(--text-secondary);margin-bottom:1rem;" data-lang="ja">
+        <p style="font-size:1rem;line-height:1.8;color:var(--text-secondary);margin-bottom:1rem;">
           <strong style="color:var(--text);">メールメモ</strong>とは、思いついたことをすぐにメモして、<strong style="color:var(--text);">ワンタップで自分のメールに送信</strong>する新しいメモの形です。メールは誰もが毎日チェックする場所。だからこそ、メモの「見逃し」がゼロになります。フォルダ整理もタグ付けも不要。<a href="/note-to-email/" style="color:var(--accent);display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">メモ→メールの仕組み</a>で、あなたの思考を確実にキャッチします。
         </p>
-        <p style="font-size:1rem;line-height:1.8;color:var(--text-secondary);margin-bottom:1rem;" data-lang="en">
-          <strong style="color:var(--text);">Email Memo</strong> is a new way to take notes — jot down your thought and <strong style="color:var(--text);">send it to your own inbox with one tap</strong>. Email is the one place everyone checks daily. That's why zero memos get missed. No folders, no tags, no organizing. <a href="/note-to-email/" style="color:var(--accent);display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">Learn how Note-to-Email works</a> and never lose a thought again.
-        </p>
-        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
           <a href="/use-cases/" style="color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;min-height:48px;display:inline-flex;align-items:center;">
-            <span data-lang="ja">活用事例を見る →</span>
-            <span data-lang="en">See Use Cases →</span>
-          </a>
+            活用事例を見る →</a>
           <a href="/guides/" style="color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;min-height:48px;display:inline-flex;align-items:center;">
-            <span data-lang="ja">設定ガイド →</span>
-            <span data-lang="en">Setup Guides →</span>
-          </a>
+            設定ガイド →</a>
         </div>
       </div>
     </div>
@@ -586,22 +553,16 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">アプリプレビュー</span>
-          <span data-lang="en">App Preview</span>
-        </span>
-        <span data-lang="ja">シンプルだから、速い</span>
-        <span data-lang="en">Simple Means Fast</span>
-      </h2>
+          アプリプレビュー
+</span>
+        シンプルだから、速い
+</h2>
       <div style="margin-top:2rem;">
-        <picture data-lang="ja">
+        <picture>
           <source type="image/webp" srcset="/assets/img/hero-ja.webp 1200w, /assets/img/hero-ja@2x.webp 2400w" sizes="(max-width: 1200px) 100vw, 1200px">
           <img src="/assets/img/hero-ja.jpg" srcset="/assets/img/hero-ja.jpg 1200w, /assets/img/hero-ja@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemoアプリのスクリーンショット — メモ入力画面、設定画面、送信履歴画面を表示するiPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="eager" fetchpriority="high">
         </picture>
-        <picture data-lang="en">
-          <source type="image/webp" srcset="/assets/img/hero-en.webp 1200w, /assets/img/hero-en@2x.webp 2400w" sizes="(max-width: 1200px) 100vw, 1200px">
-          <img src="/assets/img/hero-en.jpg" srcset="/assets/img/hero-en.jpg 1200w, /assets/img/hero-en@2x.jpg 2400w" sizes="(max-width: 1200px) 100vw, 1200px" alt="SimpleMemo app screenshots — memo input screen, settings screen, and send history on iPhone" width="1200" height="869" style="width:100%;height:auto;border-radius:var(--radius-lg);" loading="lazy">
-        </picture>
-      </div>
+</div>
     </div>
   </section>
 
@@ -610,12 +571,10 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">3ステップ</span>
-          <span data-lang="en">3 Steps</span>
-        </span>
-        <span data-lang="ja">使い方</span>
-        <span data-lang="en">How to Use</span>
-      </h2>
+          3ステップ
+</span>
+        使い方
+</h2>
       <div class="steps">
         <div class="step reveal reveal-delay-1">
           <div class="step__icon">
@@ -625,13 +584,11 @@
           </div>
           <div class="step__content">
             <div class="step__number">
-              <span data-lang="ja">1. 書く</span>
-              <span data-lang="en">1. Write</span>
-            </div>
+              1. 書く
+</div>
             <div class="step__description">
-              <span data-lang="ja">思いついたらすぐメモ。</span>
-              <span data-lang="en">Jot down your ideas immediately.</span>
-            </div>
+              思いついたらすぐメモ。
+</div>
           </div>
         </div>
         <div class="step reveal reveal-delay-2">
@@ -642,13 +599,11 @@
           </div>
           <div class="step__content">
             <div class="step__number">
-              <span data-lang="ja">2. 送る</span>
-              <span data-lang="en">2. Send</span>
-            </div>
+              2. 送る
+</div>
             <div class="step__description">
-              <span data-lang="ja">ワンタップで自分のメールへ。</span>
-              <span data-lang="en">One tap to send to your inbox.</span>
-            </div>
+              ワンタップで自分のメールへ。
+</div>
           </div>
         </div>
         <div class="step reveal reveal-delay-3">
@@ -659,13 +614,11 @@
           </div>
           <div class="step__content">
             <div class="step__number">
-              <span data-lang="ja">3. 見返す</span>
-              <span data-lang="en">3. Review</span>
-            </div>
+              3. 見返す
+</div>
             <div class="step__description">
-              <span data-lang="ja">メールでいつでも確認。</span>
-              <span data-lang="en">Check your notes anytime in email.</span>
-            </div>
+              メールでいつでも確認。
+</div>
           </div>
         </div>
       </div>
@@ -677,12 +630,10 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">機能</span>
-          <span data-lang="en">Features</span>
-        </span>
-        <span data-lang="ja">主要機能</span>
-        <span data-lang="en">Key Features</span>
-      </h2>
+          機能
+</span>
+        主要機能
+</h2>
       <div class="feature-cards">
         <!-- Hero Bento Tile (full width on tablet+) -->
         <div class="feature-card feature-card--highlight reveal reveal-delay-1">
@@ -693,13 +644,11 @@
           </div>
           <div class="feature-card__content">
             <h3 class="feature-card__title">
-              <span data-lang="ja">ワンタップ送信</span>
-              <span data-lang="en">One-Tap Send</span>
-            </h3>
+              ワンタップ送信
+</h3>
             <p class="feature-card__description">
-              <span data-lang="ja">思いついた瞬間に、迷わずワンタップ送信。<br>起動0.3秒、送信150ms。アプリを開いた瞬間から最速で送れます。</span>
-              <span data-lang="en">Send instantly with a single tap the moment you have an idea.<br>0.3s launch, 150ms send. The fastest path from thought to inbox.</span>
-            </p>
+              思いついた瞬間に、迷わずワンタップ送信。<br>起動0.3秒、送信150ms。アプリを開いた瞬間から最速で送れます。
+</p>
           </div>
         </div>
         <!-- Bento tile 2 -->
@@ -711,13 +660,11 @@
           </div>
           <div class="feature-card__content">
             <h3 class="feature-card__title">
-              <span data-lang="ja">オフライン対応</span>
-              <span data-lang="en">Offline Support</span>
-            </h3>
+              オフライン対応
+</h3>
             <p class="feature-card__description">
-              <span data-lang="ja">電波がなくても大丈夫。<br>オンライン復帰時に自動再送。</span>
-              <span data-lang="en">Works without internet.<br>Auto-resends when back online.</span>
-            </p>
+              電波がなくても大丈夫。<br>オンライン復帰時に自動再送。
+</p>
           </div>
         </div>
         <!-- Bento tile 3 -->
@@ -729,13 +676,11 @@
           </div>
           <div class="feature-card__content">
             <h3 class="feature-card__title">
-              <span data-lang="ja">履歴・ステータス</span>
-              <span data-lang="en">History & Status</span>
-            </h3>
+              履歴・ステータス
+</h3>
             <p class="feature-card__description">
-              <span data-lang="ja">送信履歴をアプリ内で確認。<br>未送信メモも一目でわかります。</span>
-              <span data-lang="en">Check send history in-app.<br>Easily track pending memos.</span>
-            </p>
+              送信履歴をアプリ内で確認。<br>未送信メモも一目でわかります。
+</p>
           </div>
         </div>
         <!-- Bento tile 4 -->
@@ -747,13 +692,11 @@
           </div>
           <div class="feature-card__content">
             <h3 class="feature-card__title">
-              <span data-lang="ja">プライバシー保護</span>
-              <span data-lang="en">Privacy First</span>
-            </h3>
+              プライバシー保護
+</h3>
             <p class="feature-card__description">
-              <span data-lang="ja">AES-GCM暗号化。<br>サーバーにメモは保存しません。</span>
-              <span data-lang="en">AES-GCM encryption.<br>Your memos never stored on server.</span>
-            </p>
+              AES-GCM暗号化。<br>サーバーにメモは保存しません。
+</p>
           </div>
         </div>
         <!-- Bento tile 5 -->
@@ -766,13 +709,11 @@
           </div>
           <div class="feature-card__content">
             <h3 class="feature-card__title">
-              <span data-lang="ja">3分で完了する設定</span>
-              <span data-lang="en">3-Minute Setup</span>
-            </h3>
+              3分で完了する設定
+</h3>
             <p class="feature-card__description">
-              <span data-lang="ja">宛先を設定するだけ。<br>すぐに使い始められます。</span>
-              <span data-lang="en">Just set your destination email.<br>Ready to use in minutes.</span>
-            </p>
+              宛先を設定するだけ。<br>すぐに使い始められます。
+</p>
           </div>
         </div>
       </div>
@@ -786,35 +727,29 @@
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">🔒</div>
           <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">
-            <span data-lang="ja">プライバシーファースト</span>
-            <span data-lang="en">Privacy First</span>
-          </div>
+            プライバシーファースト
+</div>
           <div style="font-size:.875rem;color:var(--text-muted);">
-            <span data-lang="ja">AES-GCM暗号化・サーバー非保存</span>
-            <span data-lang="en">AES-GCM encryption, no server storage</span>
-          </div>
+            AES-GCM暗号化・サーバー非保存
+</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">👤</div>
           <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">
-            <span data-lang="ja">アカウント不要</span>
-            <span data-lang="en">No Account Required</span>
-          </div>
+            アカウント不要
+</div>
           <div style="font-size:.875rem;color:var(--text-muted);">
-            <span data-lang="ja">メールアドレスだけで即利用</span>
-            <span data-lang="en">Just your email address to start</span>
-          </div>
+            メールアドレスだけで即利用
+</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;">
           <div style="font-size:1.5rem;margin-bottom:.5rem;">⚡</div>
           <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">
-            <span data-lang="ja">Cloudflare基盤</span>
-            <span data-lang="en">Cloudflare Infrastructure</span>
-          </div>
+            Cloudflare基盤
+</div>
           <div style="font-size:.875rem;color:var(--text-muted);">
-            <span data-lang="ja">グローバルエッジで高速・高可用性</span>
-            <span data-lang="en">Global edge for speed & reliability</span>
-          </div>
+            グローバルエッジで高速・高可用性
+</div>
         </div>
       </div>
     </div>
@@ -825,34 +760,23 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">開発ストーリー</span>
-          <span data-lang="en">Our Story</span>
-        </span>
-        <span data-lang="ja">なぜ作ったのか</span>
-        <span data-lang="en">Why We Built This</span>
-      </h2>
+          開発ストーリー
+</span>
+        なぜ作ったのか
+</h2>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;margin-top:1.5rem;" class="reveal">
-        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;" data-lang="ja">
+        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;">
           私たちは長年<strong style="color:var(--text);">Captio</strong>を愛用していました。思いついたことをワンタップで自分のメールに送る——このシンプルな体験は、他のどのメモアプリにもないものでした。しかし2025年、Captioはサービスを終了。代わりになるアプリを探しましたが、同じ速さとシンプルさを持つものは見つかりませんでした。
         </p>
-        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;" data-lang="en">
-          We were long-time <strong style="color:var(--text);">Captio</strong> users. The ability to send a thought to your inbox with one tap — that simple experience was unlike any other memo app. But in 2025, Captio shut down. We searched for an alternative with the same speed and simplicity, but nothing came close.
-        </p>
-        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;" data-lang="ja">
+<p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);margin-bottom:1rem;">
           「なければ自分たちで作ろう」。そう決めて開発をスタートしました。起動0.3秒・送信150msの高速体験、オフラインでも確実に送れるOutboxアーキテクチャ、そしてメモを一切サーバーに保存しないプライバシー設計。Captioの精神を受け継ぎながら、現代の技術で最高の「メモ→メール」体験を実現しました。
         </p>
-        <p style="font-size:1rem;line-height:1.9;color:var(--text-secondary);" data-lang="en">
-          "If it doesn't exist, we'll build it ourselves." That decision launched this project. We achieved 0.3s launch and 150ms send speeds, built an Outbox architecture for reliable offline delivery, and designed a privacy-first system that never stores your memos on any server. Carrying forward Captio's spirit with modern technology, we created the best "note-to-email" experience possible.
-        </p>
-        <p style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
-          <span data-lang="ja">開発者: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:700;display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">AI Ataka</a> — iOS開発歴10年以上、UIKit / Swift / Cloudflare Workers</span>
-          <span data-lang="en">Developer: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:700;display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">AI Ataka</a> — 10+ years iOS development, UIKit / Swift / Cloudflare Workers</span>
-        </p>
+<p style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          開発者: <a href="/about/" style="color:var(--accent);text-decoration:none;font-weight:700;display:inline-flex;align-items:center;min-height:48px;padding:8px 0;">AI Ataka</a> — iOS開発歴10年以上、UIKit / Swift / Cloudflare Workers
+</p>
         <div style="margin-top:1.25rem;">
           <a href="/about/" style="color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;min-height:48px;display:inline-flex;align-items:center;">
-            <span data-lang="ja">開発チームについて →</span>
-            <span data-lang="en">About the team →</span>
-          </a>
+            開発チームについて →</a>
         </div>
       </div>
     </div>
@@ -863,50 +787,38 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">ユーザーの声</span>
-          <span data-lang="en">User Stories</span>
-        </span>
-        <span data-lang="ja">こんな場面で使われています</span>
-        <span data-lang="en">How People Use It</span>
-      </h2>
-      <div style="display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1.5rem;">
+          利用シーン
+</span>
+        こんな場面で使われています
+</h2>
+      <p style="font-size:.8rem;color:var(--text-muted);text-align:center;margin-bottom:1rem;">※ 想定される利用シーンの紹介です</p>
+      <div style="display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1rem;">
         <div class="feature-card reveal reveal-delay-1" style="padding:1.5rem;">
-          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
-            <span data-lang="ja">"通勤電車でふと思いついたアイデアを、3秒でメールに残せる。帰宅後にメールを開けばそこにメモがある。この安心感が最高です。"</span>
-            <span data-lang="en">"I can capture a sudden idea on the train in 3 seconds and send it to my inbox. When I get home, it's right there in my email. That peace of mind is priceless."</span>
-          </p>
-          <p style="font-size:.875rem;color:var(--text-muted);font-weight:400;">
-            <span data-lang="ja">— IT企業マーケター・30代男性</span>
-            <span data-lang="en">— Marketing professional, 30s</span>
-          </p>
+          <p style="font-size:.875rem;font-weight:700;color:var(--accent);margin-bottom:.5rem;">通勤中のアイデアキャプチャ</p>
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);margin-bottom:0;">
+            電車の中でふと思いついたアイデアを、起動0.3秒 → ワンタップ送信でメールに保存。帰宅後にメールを開けばそこにメモがある。フォルダ選択もタグ付けも不要。
+</p>
         </div>
         <div class="feature-card reveal reveal-delay-2" style="padding:1.5rem;">
-          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
-            <span data-lang="ja">"買い物リストや子供の学校の連絡事項など、忘れたくないことをすぐにメモしてメール送信。フォルダ分けも不要で、主婦の私でも迷わず使えます。"</span>
-            <span data-lang="en">"Shopping lists, school reminders for the kids — anything I don't want to forget, I jot down and send. No folders to organize. Even as a busy parent, it's effortless to use."</span>
-          </p>
-          <p style="font-size:.875rem;color:var(--text-muted);font-weight:400;">
-            <span data-lang="ja">— 2児の母・東京在住・40代</span>
-            <span data-lang="en">— Mother of two, Tokyo, 40s</span>
-          </p>
+          <p style="font-size:.875rem;font-weight:700;color:var(--accent);margin-bottom:.5rem;">買い物リスト・連絡事項のメモ</p>
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);margin-bottom:0;">
+            買い物リストや学校の連絡事項など、忘れたくないことをすぐにメモしてメール送信。受信箱がToDoリストになるので、見逃しがなくなります。
+</p>
         </div>
         <div class="feature-card reveal reveal-delay-3" style="padding:1.5rem;">
-          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);font-style:italic;margin-bottom:.75rem;">
-            <span data-lang="ja">"Captioが終了して困っていたところ、このアプリを発見。同じ使い心地で、しかもオフライン対応と暗号化が追加されていて感動しました。"</span>
-            <span data-lang="en">"I was lost when Captio shut down, then I found this app. Same feel, but with offline support and encryption added. I'm impressed."</span>
-          </p>
-          <p style="font-size:.875rem;color:var(--text-muted);font-weight:400;">
-            <span data-lang="ja">— フリーランスiOSエンジニア・元Captioユーザー</span>
-            <span data-lang="en">— Freelance iOS engineer, former Captio user</span>
-          </p>
+          <p style="font-size:.875rem;font-weight:700;color:var(--accent);margin-bottom:.5rem;">Captioからの乗り換え</p>
+          <p style="font-size:.95rem;line-height:1.8;color:var(--text-secondary);margin-bottom:0;">
+            Captio終了後の代替アプリとして、同じ「メモ→メール」体験を提供。さらにオフライン対応とAES-GCM暗号化を追加。<a href="/captio-alternative/" style="color:var(--accent);">詳しい比較はこちら →</a>
+</p>
         </div>
       </div>
-      <p style="text-align:center;margin-top:1.5rem;">
-        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" style="color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1rem;min-height:48px;display:inline-flex;align-items:center;">
-          <span data-lang="ja">App Storeのレビューをもっと見る →</span>
-          <span data-lang="en">See more reviews on the App Store →</span>
+      <div style="text-align:center;margin-top:2rem;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);">
+        <p style="font-size:.95rem;font-weight:700;margin-bottom:.5rem;">App Storeで公開中</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);margin-bottom:1rem;">実際のユーザーレビューはApp Storeでご確認いただけます</p>
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" style="display:inline-flex;align-items:center;gap:.5rem;color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1.5rem;min-height:48px;border:1px solid rgba(100,180,255,.2);border-radius:8px;">
+          <img src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy" style="vertical-align:middle;">
         </a>
-      </p>
+      </div>
     </div>
   </section>
 
@@ -915,78 +827,60 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">プラン</span>
-          <span data-lang="en">Plans</span>
-        </span>
-        <span data-lang="ja">料金プラン</span>
-        <span data-lang="en">Pricing Plans</span>
-      </h2>
+          プラン
+</span>
+        料金プラン
+</h2>
       <div class="pricing-cards">
         <!-- Free Plan -->
         <div class="pricing-card">
           <div class="pricing-card__name">Free</div>
           <div class="pricing-card__price">
-            <span data-lang="ja">¥0</span>
-            <span data-lang="en">$0</span>
-          </div>
+            ¥0
+</div>
           <div class="pricing-card__limit">
-            <span data-lang="ja">8日目以降：1日3通まで</span>
-            <span data-lang="en">After trial: Up to 3 sends/day</span>
-          </div>
+            8日目以降：1日3通まで
+</div>
         </div>
         <!-- Premium Monthly -->
         <div class="pricing-card pricing-card--premium">
           <div class="pricing-card__name">
-            <span data-lang="ja">Premium (月額)</span>
-            <span data-lang="en">Premium (Monthly)</span>
-          </div>
+            Premium (月額)
+</div>
           <div class="pricing-card__price-row">
-            <span data-lang="ja" class="pricing-card__price">¥500/月（税込）</span>
-            <span data-lang="en" class="pricing-card__price">$2.99 / month</span>
-          </div>
+            ¥500/月（税込）
+</div>
           <div class="pricing-card__limit">
-            <span data-lang="ja">送信無制限</span>
-            <span data-lang="en">Unlimited sends</span>
-          </div>
+            送信無制限
+</div>
           <div class="pricing-card__trial">
-            <span data-lang="ja">7日間無料（送信無制限）</span>
-            <span data-lang="en">7-day free trial (Unlimited)</span>
-          </div>
+            7日間無料（送信無制限）
+</div>
         </div>
         <!-- Premium Yearly -->
         <div class="pricing-card pricing-card--premium">
           <div class="pricing-card__name">
-            <span data-lang="ja">Premium (年額)</span>
-            <span data-lang="en">Premium (Yearly)</span>
-          </div>
+            Premium (年額)
+</div>
           <div class="pricing-card__price-row">
-            <span data-lang="ja" class="pricing-card__price">¥5,000/年（税込）</span>
-            <span data-lang="en" class="pricing-card__price">$29.99 / year</span>
-          </div>
+            ¥5,000/年（税込）
+</div>
           <div class="pricing-card__limit">
-            <span data-lang="ja">送信無制限</span>
-            <span data-lang="en">Unlimited sends</span>
-          </div>
+            送信無制限
+</div>
           <div class="pricing-card__trial">
-            <span data-lang="ja">7日間無料（送信無制限）</span>
-            <span data-lang="en">7-day free trial (Unlimited)</span>
-          </div>
+            7日間無料（送信無制限）
+</div>
         </div>
       </div>
       <p class="pricing-notes">
-        <span data-lang="ja">
+        
           <strong>7日間無料トライアル：送信無制限</strong><br>
           無料期間終了後：Freeは1日3通まで / Premium（月額・年額）は送信無制限<br>
           価格は地域により異なる場合があります。最新の価格はApp Storeの購入画面をご確認ください。<br>
           ※安全対策として短時間の連続送信には制限（クールダウン）があり、送信基盤の保護上限（サーバ側レート制限等）が適用される場合があります。
-        </span>
-        <span data-lang="en">
-          <strong>7-day free trial: Unlimited sends</strong><br>
-          After trial: Free up to 3 sends/day / Premium (monthly & yearly) unlimited<br>
-          Price may vary by region. See the App Store for the latest price.<br>
-          *Cooldown limits and server-side rate limits may apply to protect system stability.
-        </span>
-      </p>
+        
+</p>
     </div>
   </section>
 
@@ -995,89 +889,76 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">サポート</span>
-          <span data-lang="en">Support</span>
-        </span>
-        <span data-lang="ja">よくあるご質問</span>
-        <span data-lang="en">FAQ</span>
-      </h2>
+          サポート
+</span>
+        よくあるご質問
+</h2>
       <div class="faq-preview-items">
         <div class="faq-item">
           <details class="faq-details">
             <summary class="faq-summary">
-              <span data-lang="ja">Simple Memoはどんなアプリですか？</span>
-              <span data-lang="en">What is Simple Memo?</span>
-            </summary>
+              Simple Memoはどんなアプリですか？
+</summary>
             <div class="faq-answer">
               <p>
-                <span data-lang="ja">Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。</span>
-                <span data-lang="en">Simple Memo is a memo app focused on one thing: launch, write, send. Your memo is sent as an email to a pre-configured address with a single tap. There are no folders, tags, sync settings, or complex features.</span>
-              </p>
+                Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理、タグ付け、同期設定などの複雑な機能はありません。
+</p>
             </div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
             <summary class="faq-summary">
-              <span data-lang="ja">オフラインでもメモを送信できますか？</span>
-              <span data-lang="en">Can I send memos while offline?</span>
-            </summary>
+              オフラインでもメモを送信できますか？
+</summary>
             <div class="faq-answer">
               <p>
-                <span data-lang="ja">はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。</span>
-                <span data-lang="en">Yes. When you send a memo offline, it's stored in the Outbox — encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically.</span>
-              </p>
+                はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。
+</p>
             </div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
             <summary class="faq-summary">
-              <span data-lang="ja">無料で使えますか？</span>
-              <span data-lang="en">Can I use Simple Memo for free?</span>
-            </summary>
+              無料で使えますか？
+</summary>
             <div class="faq-answer">
               <p>
-                <span data-lang="ja">はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。</span>
-                <span data-lang="en">Yes. The first 7 days are a free trial with full access to all features and unlimited sending. After the trial, you can continue on the free plan (3 memos per day).</span>
-              </p>
+                はい。最初の7日間は無料トライアルとして、すべての機能を無制限にご利用いただけます。トライアル終了後は無料プラン（1日3通まで）としてご利用を継続できます。
+</p>
             </div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
             <summary class="faq-summary">
-              <span data-lang="ja">無料トライアル期間中に解約できますか？</span>
-              <span data-lang="en">Can I cancel during the free trial?</span>
-            </summary>
+              無料トライアル期間中に解約できますか？
+</summary>
             <div class="faq-answer">
               <p>
-                <span data-lang="ja">はい、いつでも解約可能です。7日間の無料トライアル期間中に解約すれば一切費用はかかりません。解約はiPhoneの「設定」→「サブスクリプション」から行えます。トライアル終了後も、無料プラン（1日3通まで）でそのままお使いいただけます。</span>
-                <span data-lang="en">Yes, you can cancel anytime. If you cancel during the 7-day free trial, you won't be charged at all. Cancel through iPhone Settings → Subscriptions. After the trial ends, you can continue using the free plan (up to 3 sends per day).</span>
-              </p>
+                はい、いつでも解約可能です。7日間の無料トライアル期間中に解約すれば一切費用はかかりません。解約はiPhoneの「設定」→「サブスクリプション」から行えます。トライアル終了後も、無料プラン（1日3通まで）でそのままお使いいただけます。
+</p>
             </div>
           </details>
         </div>
         <div class="faq-item">
           <details class="faq-details">
             <summary class="faq-summary">
-              <span data-lang="ja">画像は送れますか？</span>
-              <span data-lang="en">Can I send images?</span>
-            </summary>
+              画像は送れますか？
+</summary>
             <div class="faq-answer">
               <p>
-                <span data-lang="ja">いいえ。Simple Memoはテキストメモの高速送信に特化しており、画像の添付には対応していません。写真を保存したい場合は、Apple純正の「写真」アプリや「メモ」アプリをご利用ください。Simple Memoは「思いついたことをすぐテキストで残す」ための専用ツールです。</span>
-                <span data-lang="en">No. Simple Memo is designed exclusively for fast text memo delivery and does not support image attachments. For saving photos, use Apple's built-in Photos or Notes app. Simple Memo is a dedicated tool for capturing thoughts as text, instantly.</span>
-              </p>
+                いいえ。Simple Memoはテキストメモの高速送信に特化しており、画像の添付には対応していません。写真を保存したい場合は、Apple純正の「写真」アプリや「メモ」アプリをご利用ください。Simple Memoは「思いついたことをすぐテキストで残す」ための専用ツールです。
+</p>
             </div>
           </details>
         </div>
       </div>
       <div class="faq-preview-cta">
         <a href="/faq">
-          <span data-lang="ja">すべてのFAQを見る</span>
-          <span data-lang="en">View all FAQ</span>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          すべてのFAQを見る
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </a>
       </div>
     </div>
@@ -1088,52 +969,42 @@
     <div class="container">
       <h2 class="section-title reveal">
         <span class="section-label">
-          <span data-lang="ja">もっと知る</span>
-          <span data-lang="en">Explore</span>
-        </span>
-        <span data-lang="ja">関連コンテンツ</span>
-        <span data-lang="en">Related Content</span>
-      </h2>
+          もっと知る
+</span>
+        関連コンテンツ
+</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1.5rem;">
         <a href="/vs/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
           <h3 class="feature-card__title" style="font-size:1rem;">
-            <span data-lang="ja">アプリ比較</span>
-            <span data-lang="en">App Comparisons</span>
-          </h3>
+            アプリ比較
+</h3>
           <p class="feature-card__description" style="font-size:0.875rem;">
-            <span data-lang="ja">Apple Notes、Google Keep、Notionなどとの違い</span>
-            <span data-lang="en">vs Apple Notes, Google Keep, Notion & more</span>
-          </p>
+            Apple Notes、Google Keep、Notionなどとの違い
+</p>
         </a>
         <a href="/use-cases/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
           <h3 class="feature-card__title" style="font-size:1rem;">
-            <span data-lang="ja">活用事例</span>
-            <span data-lang="en">Use Cases</span>
-          </h3>
+            活用事例
+</h3>
           <p class="feature-card__description" style="font-size:0.875rem;">
-            <span data-lang="ja">仕事、買い物、アイデア記録などの使い方</span>
-            <span data-lang="en">Work, shopping, ideas & more</span>
-          </p>
+            仕事、買い物、アイデア記録などの使い方
+</p>
         </a>
         <a href="/guides/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
           <h3 class="feature-card__title" style="font-size:1rem;">
-            <span data-lang="ja">設定ガイド</span>
-            <span data-lang="en">Setup Guides</span>
-          </h3>
+            設定ガイド
+</h3>
           <p class="feature-card__description" style="font-size:0.875rem;">
-            <span data-lang="ja">Gmail、Outlook、iCloudの設定方法</span>
-            <span data-lang="en">Gmail, Outlook, iCloud setup</span>
-          </p>
+            Gmail、Outlook、iCloudの設定方法
+</p>
         </a>
         <a href="/methods/" class="feature-card reveal" style="text-decoration:none;padding:1.25rem;">
           <h3 class="feature-card__title" style="font-size:1rem;">
-            <span data-lang="ja">生産性メソッド</span>
-            <span data-lang="en">Productivity Methods</span>
-          </h3>
+            生産性メソッド
+</h3>
           <p class="feature-card__description" style="font-size:0.875rem;">
-            <span data-lang="ja">GTD、Inbox Zero、Second Brain活用法</span>
-            <span data-lang="en">GTD, Inbox Zero, Second Brain</span>
-          </p>
+            GTD、Inbox Zero、Second Brain活用法
+</p>
         </a>
       </div>
     </div>
@@ -1146,83 +1017,53 @@
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
         <a href="/terms" class="footer__link">
-          <span data-lang="ja">利用規約</span>
-          <span data-lang="en">Terms</span>
-        </a>
+          利用規約</a>
         <a href="/privacy" class="footer__link">
-          <span data-lang="ja">プライバシーポリシー</span>
-          <span data-lang="en">Privacy</span>
-        </a>
+          プライバシーポリシー</a>
         <a href="/faq" class="footer__link">
-          <span data-lang="ja">よくあるご質問</span>
-          <span data-lang="en">FAQ</span>
-        </a>
+          よくあるご質問</a>
         <a href="/captio-alternative/" class="footer__link">
-          <span data-lang="ja">Captio代替</span>
-          <span data-lang="en">Captio Alternative</span>
-        </a>
+          Captio代替</a>
         <a href="/note-to-email/" class="footer__link">
-          <span data-lang="ja">メモ→メール</span>
-          <span data-lang="en">Note to Email</span>
-        </a>
+          メモ→メール</a>
         <a href="/vs/" class="footer__link">
-          <span data-lang="ja">アプリ比較</span>
-          <span data-lang="en">Comparisons</span>
-        </a>
+          アプリ比較</a>
         <a href="/use-cases/" class="footer__link">
-          <span data-lang="ja">活用事例</span>
-          <span data-lang="en">Use Cases</span>
-        </a>
+          活用事例</a>
         <a href="/guides/" class="footer__link">
-          <span data-lang="ja">設定ガイド</span>
-          <span data-lang="en">Guides</span>
-        </a>
+          設定ガイド</a>
         <a href="/about/" class="footer__link">
-          <span data-lang="ja">について</span>
-          <span data-lang="en">About</span>
-        </a>
+          について</a>
         <a href="/legal" class="footer__link footer__link--legal">
-          <span data-lang="ja">特定商取引法に基づく表記</span>
-          <span data-lang="en">Legal</span>
-        </a>
+          特定商取引法に基づく表記</a>
         <a href="/contact" class="footer__link">
-          <span data-lang="ja">お問い合わせ</span>
-          <span data-lang="en">Contact</span>
-        </a>
+          お問い合わせ</a>
         <a href="/devlog/" class="footer__link">
-          <span data-lang="ja">開発日誌</span>
-          <span data-lang="en">Dev Log</span>
-        </a>
+          開発日誌</a>
         <a href="/captio/" class="footer__link">
-          <span data-lang="ja">Captio式</span>
-          <span data-lang="en">Captio Method</span>
-        </a>
+          Captio式</a>
         <a href="/how-to/" class="footer__link">
-          <span data-lang="ja">使い方</span>
-          <span data-lang="en">How to Use</span>
-        </a>
+          使い方</a>
         <a href="/templates/" class="footer__link">
-          <span data-lang="ja">テンプレ</span>
-          <span data-lang="en">Templates</span>
-        </a>
+          テンプレ</a>
         <a href="/methods/" class="footer__link">
-          <span data-lang="ja">メソッド</span>
-          <span data-lang="en">Methods</span>
-        </a>
+          メソッド</a>
         <a href="/blog/" class="footer__link">
-          <span data-lang="ja">ブログ</span>
-          <span data-lang="en">Blog</span>
-        </a>
+          ブログ</a>
         <a href="/glossary/" class="footer__link">
-          <span data-lang="ja">用語集</span>
-          <span data-lang="en">Glossary</span>
-        </a>
+          用語集</a>
+        <a href="/comparison/" class="footer__link">
+          比較ガイド</a>
+      </nav>
+      <nav class="footer__social" aria-label="ソーシャルリンク">
+        <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X / Twitter</a>
+        <a href="https://note.com/simplememo" rel="me noopener" target="_blank" class="footer__link">note</a>
+        <a href="https://zenn.dev/simplememo" rel="me noopener" target="_blank" class="footer__link">Zenn</a>
+        <a href="https://github.com/hajimeataka" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
       </nav>
       <p class="footer__copyright">
-        © 2026
-        <span data-lang="ja">Captio式シンプルメモ</span>
-        <span data-lang="en">Simple Memo - Captio-style</span>. 
-        All rights reserved.
+        © 2026 Captio式シンプルメモ. All rights reserved.<br>
+        運営: 株式会社ユリカ
       </p>
     </div>
   </footer>
@@ -1230,16 +1071,11 @@
   <!-- Sticky Mobile CTA -->
   <div class="sticky-cta" id="stickyCta">
     <div class="sticky-cta__inner">
-      <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948#information" class="app-store-badge" aria-label="App Store からダウンロード">
+      <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948#information" class="app-store-badge" aria-label="App Store からダウンロード">
         <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="eager">
-      </a>
-      <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store">
-        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
       </a>
     </div>
   </div>
-
-  <script src="/js/lang.js" defer></script>
 
   <!-- Scroll Reveal + Sticky CTA -->
   <script>

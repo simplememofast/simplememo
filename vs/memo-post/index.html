@@ -54,7 +54,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/memo-post/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-memo-post.png","headline":"シンプルメモ vs メモポスト — メモアプリ徹底比較","description":"メモポスト（NotePost）とCaptio式シンプルメモの違いを徹底比較。AI機能・起動速度・暗号化・オフライン対応の観点で解説。","url":"https://simplememofast.com/vs/memo-post/","datePublished":"2026-03-06","dateModified":"2026-03-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/memo-post/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/memo-post/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-memo-post.png","headline":"シンプルメモ vs メモポスト — メモアプリ徹底比較","description":"メモポスト（NotePost）とCaptio式シンプルメモの違いを徹底比較。AI機能・起動速度・暗号化・オフライン対応の観点で解説。","url":"https://simplememofast.com/vs/memo-post/","datePublished":"2026-03-06","dateModified":"2026-03-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/memo-post/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs メモポスト","item":"https://simplememofast.com/vs/memo-post/"}]}</script>
@@ -130,7 +130,8 @@
       top: 0;
       z-index: 1000;
       background: rgba(10, 12, 18, 0.85);
-      -webkit-
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(100, 160, 220, 0.1);
     }
     .global-nav__inner {
@@ -351,6 +352,18 @@
         </p>
       </section>
 
+      <!-- Current State of Memo-Sending Apps -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">メモ送信アプリ市場の現状</span>
+          <span data-lang="en">The Current State of Memo-Sending Apps</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">「メモをメールで自分に送る」というカテゴリは、Captioが2009年にiOSアプリとして開拓しました。シンプルなコンセプトと美しいUIで多くのユーザーに愛されましたが、2024年にApp Storeから姿を消しました。その後、Email Me App、Note To Self Mail、Moca、メモポストなどが同カテゴリに参入しましたが、多くは開発が限定的で、最新のiOS機能やセキュリティ要件に十分に対応できていません。SimpleMemoは2026年現在、このカテゴリで最もアクティブに開発が続けられているアプリです。Outboxオフラインキュー、AES-GCM端末内暗号化、Cloudflare Workers経由の150ms高速送信など、Captio時代には存在しなかったモダンな機能を実装しています。Captioの精神を受け継ぎながら、2026年の技術水準で再構築されたメモ送信アプリです。</span>
+          <span data-lang="en">The "email a memo to yourself" category was pioneered by Captio, launched as an iOS app in 2009. Beloved for its simple concept and beautiful UI, Captio disappeared from the App Store in 2024. Since then, apps like Email Me App, Note To Self Mail, Moca, and NotePost have entered the category, but most have seen limited development and don't fully address modern iOS capabilities or security requirements. As of 2026, SimpleMemo is the most actively maintained app in this category. It implements modern features that didn't exist in Captio's era: Outbox offline queue, AES-GCM on-device encryption, and 150ms send speed via Cloudflare Workers. It carries forward Captio's spirit while being rebuilt for 2026's technical standards.</span>
+        </p>
+      </section>
+
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
@@ -396,61 +409,51 @@
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">5つの決定的な違い</span>
-          <span data-lang="en">5 Key Differences</span>
+          <span data-lang="ja">4つのメモ送信アプリの違い</span>
+          <span data-lang="en">4 Differences Between Memo-Sending Apps</span>
         </h2>
         <ul class="diff-list" data-lang="ja">
           <li>
             <span class="diff-num">1</span>
-            <strong>起動速度：0.3秒 vs 標準速度</strong><br>
-            シンプルメモはアプリを開いた瞬間にカーソルが入力フィールドに合い、0.3秒で入力開始できます。メモポストは多機能なUIを読み込むため、起動からタイピング開始までの時間がやや長くなります。「思いついた瞬間にキャプチャ」という用途では、この起動速度の差が体験を大きく変えます。
+            <strong>UIデザインの方向性</strong><br>
+            メモポストはAI提案やデスクトップ連携など多機能UIを備えています。シンプルメモは入力フィールドと送信ボタンだけの極限ミニマルUIです。多機能ゆえのUI複雑さを避けたい方にはシンプルメモ、AI活用を求める方にはメモポストが適しています。
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>AI機能：なし vs メモポストAI</strong><br>
-            メモポストの最大の特徴はメモポストAIです。メモの内容からアクション提案を自動生成し、タスクやリマインダーに変換できます。シンプルメモは意図的にAI機能を持たず、入力と送信のみに特化しています。AIによる提案が業務効率を上げたい方にはメモポスト、余計な機能なしで最速キャプチャしたい方にはシンプルメモが向いています。
+            <strong>送信先の柔軟性</strong><br>
+            メモポストはアカウント内でメモを管理し、メール送信はその一機能です。シンプルメモはメール送信に完全特化しており、送信先メールアドレスを自由に設定できます。仕事用・個人用で送信先を変える運用もシンプルメモなら簡単です。
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>アカウント不要 vs アカウント登録必須</strong><br>
-            シンプルメモは既存のメールアドレスを設定するだけで使えます。アカウント作成・ログイン・パスワード管理は不要です。メモポストはサービス利用にアカウント登録が必要で、AI機能やデスクトップ同期のためにユーザーデータをサーバーで管理します。
+            <strong>サーバー保存 vs ダイレクト送信</strong><br>
+            メモポストはAI処理のためにメモデータをサーバーに保存します。シンプルメモはCloudflare Workersリレーでメモを中継するだけで、サーバーにメモ本文を永続保存しません。プライバシーを重視する方にとってこの設計差は重要です。
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>AES-GCM暗号化 vs 暗号化なし</strong><br>
-            シンプルメモはOutbox内の未送信メモをAES-GCM暗号化で保護します。端末を紛失しても内容は暗号化されており安全です。メモポストにはこのレベルの端末内暗号化はありません。セキュリティ意識の高いユーザーやビジネスメモを扱う方には重要な違いです。
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>Outboxオフライン対応 vs ネット必須</strong><br>
-            シンプルメモはOutboxアーキテクチャにより、オフラインでもメモを暗号化保存し、接続回復時に自動送信します。メモポストはインターネット接続が必要です。地下鉄・飛行機・電波の弱い場所でメモを取る方には、シンプルメモのオフライン対応が安心です。
+            <strong>価格設定</strong><br>
+            メモポストは無料プランがありますが、AI機能のフル活用には有料プランが必要です。シンプルメモは1日3通まで完全無料（機能制限なし）、7日間の無料トライアルで送信無制限を試せます。Premium（月額$2.99）で無制限送信が可能です。
           </li>
         </ul>
         <ul class="diff-list" data-lang="en">
           <li>
             <span class="diff-num">1</span>
-            <strong>Launch Speed: 0.3s vs Standard</strong><br>
-            Simple Memo places the cursor in the input field the instant you open the app — 0.3 seconds to typing. NotePost loads a richer UI with AI and multi-feature interfaces, resulting in a longer time from launch to first keystroke. For capturing fleeting thoughts, this speed gap fundamentally changes the experience.
+            <strong>UI Design Direction</strong><br>
+            NotePost offers a feature-rich UI with AI suggestions and desktop integration. Simple Memo uses an ultra-minimal UI with just an input field and a send button. If you want to avoid UI complexity, choose Simple Memo; if you need AI-powered workflows, NotePost is the better fit.
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>AI Features: None vs NotePost AI</strong><br>
-            NotePost's standout feature is NotePost AI, which analyzes memo content and auto-generates action suggestions like tasks and reminders. Simple Memo intentionally has no AI — it does one thing only: input and send. If AI-powered workflow optimization matters to you, choose NotePost. If you want zero-friction capture, choose Simple Memo.
+            <strong>Destination Flexibility</strong><br>
+            NotePost manages memos within its own account system, with email sending as one feature among many. Simple Memo is fully dedicated to email delivery and lets you freely set the destination address. Switching between work and personal addresses is straightforward with Simple Memo.
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>No Account Required vs Account Registration Required</strong><br>
-            Simple Memo works with just your existing email address — no account creation, login, or password management needed. NotePost requires account registration for its services, including AI features and desktop sync. Simple Memo's zero-account design means less friction and no additional service dependency.
+            <strong>Server Storage vs Direct Send</strong><br>
+            NotePost stores memo data on its servers for AI processing. Simple Memo relays memos through Cloudflare Workers without permanently storing memo content on any server. For privacy-conscious users, this architectural difference is significant.
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>AES-GCM Encryption vs No Encryption</strong><br>
-            Simple Memo encrypts all unsent Outbox memos with AES-GCM on the device. Even if the device is lost, memo content remains encrypted and unreadable. NotePost does not offer this level of on-device encryption. For security-conscious users or those handling business memos, this is a critical difference.
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>Outbox Offline Support vs Internet Required</strong><br>
-            Simple Memo's Outbox architecture stores memos with encryption when offline and auto-sends when connectivity returns. NotePost requires an active internet connection. For anyone who takes notes in subways, airplanes, or areas with poor connectivity, Simple Memo's offline reliability provides peace of mind.
+            <strong>Pricing Model</strong><br>
+            NotePost has a free plan but full AI features require a paid subscription. Simple Memo offers 3 sends per day completely free with no feature gates, plus a 7-day unlimited trial. Premium ($2.99/month) unlocks unlimited sends.
           </li>
         </ul>
       </section>
@@ -518,30 +521,30 @@
           <span data-lang="en">FAQ</span>
         </h2>
         <div data-lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストとシンプルメモの最大の違いは何ですか？</summary><div class="faq-answer"><p>メモポストはAI機能（メモポストAI）とデスクトップ対応が強みです。シンプルメモは起動速度（0.3秒）、AES-GCM暗号化、Outboxオフライン自動送信、アカウント登録不要が強みです。AI提案が必要ならメモポスト、速度とプライバシーを優先するならシンプルメモが向いています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストAIとはどんな機能ですか？</summary><div class="faq-answer"><p>メモポストAIは、送信したメモの内容を分析してアクション提案を行う機能です。例えばメモの内容からタスクやリマインダーを自動生成します。シンプルメモにはAI機能はなく、メモの入力と送信のみに特化しています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストはアカウント登録が必要ですか？</summary><div class="faq-answer"><p>はい、メモポストはアカウント登録が必要です。デスクトップ対応やAI機能のためにユーザーアカウントが必要です。シンプルメモはアカウント登録不要で、既存のメールアドレスを設定するだけですぐに使えます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストの代わりになるアプリはありますか？</summary><div class="faq-answer"><p>メモポストのメール送信機能の代替としてCaptio式シンプルメモがあります。AI機能やデスクトップ対応はありませんが、起動速度0.3秒、AES-GCM暗号化、Outboxオフライン対応、150ms高速送信など、速度とセキュリティに特化しています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストとシンプルメモはどちらが安全ですか？</summary><div class="faq-answer"><p>プライバシーとセキュリティの面ではシンプルメモが優れています。AES-GCM暗号化によるOutbox内データ保護、アカウント不要設計、Cloudflare Workers経由の中継でメモ本文をサーバーに永続保存しません。メモポストはAI機能のためにデータをサーバーで処理する必要があります。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストのAI機能がなくても困りませんか？</summary><div class="faq-answer"><p>メモの記録と送信だけが目的なら、AI機能は不要です。シンプルメモは入力→送信に特化することで起動0.3秒・送信150msを実現しています。AI提案よりも速度を求める方にはシンプルメモが最適です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストはサーバーにメモを保存しますか？</summary><div class="faq-answer"><p>はい。メモポストはAI処理のためにメモをサーバーに保存します。シンプルメモはCloudflare Workers経由で中継するだけで、メモ本文をサーバーに永続保存しません。プライバシーを重視する方にはこの設計差が重要です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストとシンプルメモの料金体系の違いは？</summary><div class="faq-answer"><p>シンプルメモは1日3通まで完全無料で機能制限なし。7日間の無料トライアルで全機能を試せます。メモポストも無料プランがありますが、AI機能のフル活用には有料プランが必要です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモポストからシンプルメモに送信先を引き継げますか？</summary><div class="faq-answer"><p>シンプルメモで同じメールアドレスを送信先に設定すれば、メモポストで送ったメモもシンプルメモで送ったメモも同じ受信箱に届きます。データ移行の手間は不要です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">デスクトップからもメモを送りたい場合は？</summary><div class="faq-answer"><p>デスクトップ対応はメモポストの強みです。シンプルメモはiOS専用ですが、モバイルでの最速キャプチャに特化しています。デスクトップではメーラーで自分にメールする従来の方法を併用するのも選択肢です。</p></div></details></div>
         </div>
         <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the difference between NotePost and Simple Memo?</summary><div class="faq-answer"><p>NotePost (メモポスト) offers AI-powered action suggestions from memos and desktop support, but requires account registration. Simple Memo prioritizes speed (0.3s launch), privacy (AES-GCM encryption, no account), and reliability (Outbox offline auto-send). Choose NotePost for AI features, Simple Memo for speed and security.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simple Memo a good alternative to NotePost?</summary><div class="faq-answer"><p>If you primarily use NotePost for quick email memos and don't rely on its AI features, Simple Memo is an excellent alternative. It offers faster launch speed (0.3s), AES-GCM encryption, offline Outbox, and no account registration required. However, it lacks AI suggestions and desktop support.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does NotePost require an account?</summary><div class="faq-answer"><p>Yes, NotePost requires account registration to use its services, including AI features and desktop sync. Simple Memo requires no account — just enter your existing email address and start sending. This zero-friction setup means you can start in seconds.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which is faster — NotePost or Simple Memo?</summary><div class="faq-answer"><p>Simple Memo is significantly faster. It launches in 0.3 seconds with the cursor ready to type, and sends emails in 150ms via Cloudflare Workers relay. NotePost's launch time is slower due to its richer feature set including AI processing and desktop sync capabilities.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have AI features like NotePost?</summary><div class="faq-answer"><p>No. Simple Memo intentionally has no AI features. It is purpose-built for one task: capture a thought and email it as fast as possible. If you need AI-powered action suggestions from your memos, NotePost is the better choice. If you want the fastest, most private capture tool, choose Simple Memo.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I get by without NotePost's AI features?</summary><div class="faq-answer"><p>If your goal is simply recording and sending memos, AI features are unnecessary. Simple Memo achieves 0.3s launch and 150ms send by focusing exclusively on input and send. For users who prioritize speed over AI suggestions, Simple Memo is the better fit.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does NotePost store memos on its servers?</summary><div class="faq-answer"><p>Yes. NotePost stores memo data on its servers for AI processing. Simple Memo only relays through Cloudflare Workers without permanently storing memo content on any server. This architectural difference matters for privacy-conscious users.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do NotePost and Simple Memo pricing compare?</summary><div class="faq-answer"><p>Simple Memo offers 3 sends per day completely free with no feature gates, plus a 7-day unlimited trial. NotePost has a free plan but full AI features require a paid subscription. Simple Memo Premium ($2.99/month) unlocks unlimited sends.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I keep using the same email address when switching from NotePost?</summary><div class="faq-answer"><p>Yes. Set the same email address as your destination in Simple Memo, and memos from both apps will arrive in the same inbox. No data migration required.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What if I also need to send memos from desktop?</summary><div class="faq-answer"><p>Desktop support is NotePost's strength. Simple Memo is iOS-only but optimized for the fastest mobile capture. You can complement it by emailing yourself from your desktop email client for a hybrid workflow.</p></div></details></div>
         </div>
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">最速のメモキャプチャを試す</span>
-          <span data-lang="en">Try the fastest memo capture</span>
+          <span data-lang="ja">メモの送信をもっと速く</span>
+          <span data-lang="en">Send Your Memos Even Faster</span>
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">7日間の無料トライアル付き。AI不要で速度とプライバシーを最優先するなら。</span>
-          <span data-lang="en">7-day free trial included. Speed and privacy first, without the complexity of AI.</span>
+          <span data-lang="ja">Captioの精神を受け継ぐ、次世代メモ送信。7日間無料。</span>
+          <span data-lang="en">Next-gen memo sending in Captio's spirit. 7 days free.</span>
         </div>
         <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">

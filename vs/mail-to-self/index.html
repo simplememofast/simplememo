@@ -54,7 +54,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/mail-to-self/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-mail-to-self.png","headline":"シンプルメモ vs Mail to Self — 自分にメールするアプリ徹底比較","description":"自分にメールを送るアプリ（Mail to Self）を徹底比較。SMTP不要・暗号化・オフライン対応の観点で解説。","url":"https://simplememofast.com/vs/mail-to-self/","datePublished":"2026-03-06","dateModified":"2026-03-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/mail-to-self/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/mail-to-self/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-mail-to-self.png","headline":"シンプルメモ vs Mail to Self — 自分にメールするアプリ徹底比較","description":"自分にメールを送るアプリ（Mail to Self）を徹底比較。SMTP不要・暗号化・オフライン対応の観点で解説。","url":"https://simplememofast.com/vs/mail-to-self/","datePublished":"2026-03-06","dateModified":"2026-03-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/mail-to-self/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs Mail to Self","item":"https://simplememofast.com/vs/mail-to-self/"}]}</script>
@@ -130,7 +130,8 @@
       top: 0;
       z-index: 1000;
       background: rgba(10, 12, 18, 0.85);
-      -webkit-
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(100, 160, 220, 0.1);
     }
     .global-nav__inner {
@@ -396,63 +397,55 @@
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">5つの決定的な違い</span>
-          <span data-lang="en">5 Key Differences</span>
+          <span data-lang="ja">3つのメール自分送信の違い</span>
+          <span data-lang="en">3 Differences in Self-Email Methods</span>
         </h2>
         <ul class="diff-list" data-lang="ja">
           <li>
             <span class="diff-num">1</span>
-            <strong>SMTP設定不要：メールアドレスだけで使える</strong><br>
-            EmailMe・MeMailなど多くのMail to Selfアプリは、SMTPサーバーのアドレス・ポート番号・認証パスワードの設定が必要です。これは技術的なハードルが高く、設定ミスでメールが送れない原因にもなります。シンプルメモはCloudflare Workers + Resend APIのリレーサーバーを使用するため、メールアドレスを入力するだけで即座に使い始められます。
+            <strong>専用アプリ vs メーラー操作</strong><br>
+            Mail to Self系のアプリは汎用メーラーを経由して自分宛にメールを送りますが、シンプルメモは専用アプリとして設計されています。メーラーを開く→宛先を入力→送信という3ステップが、シンプルメモではアプリ起動→入力→送信ボタンのワンタップに短縮されます。メーラーの他のメールに気を取られることもありません。
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>AES-GCM暗号化：端末紛失時もデータ安全</strong><br>
-            ほとんどのMail to Selfアプリは、端末内のメモデータを暗号化しません。SMTPパスワードも平文で保存されるケースがあります。シンプルメモはOutbox内のメモをAES-GCM暗号化で保護し、SMTPパスワードの保存自体が不要なリレー方式を採用しています。端末を紛失してもデータは安全です。
+            <strong>起動→送信の所要ステップ数</strong><br>
+            一般的なMail to Selfの方法では、メーラー起動→新規作成→宛先入力→本文入力→送信と5ステップかかります。シンプルメモは起動0.3秒でキーボードが即表示され、本文入力→送信ボタンの2ステップで完了します。毎日何度もメモを送る人にとって、このステップ数の差は大きな時間節約になります。
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>Outboxオフライン対応：圏外でもメモ確実送信</strong><br>
-            地下鉄・飛行機・山間部など電波の届かない場所でメモを取りたいとき、ほとんどのMail to Selfアプリはメール送信に失敗します。シンプルメモのOutboxアーキテクチャは、オフラインでもメモを暗号化保存し、接続回復時に自動でメール送信します。一切のメモが失われません。
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>150ms送信速度：エッジコンピューティングによる超高速配信</strong><br>
-            従来のMail to Selfアプリは、SMTPサーバーへの接続→認証→送信というプロセスで1〜5秒かかります。シンプルメモはCloudflare Workersのエッジサーバーに直接リクエストを送り、Resend APIで即座にメール配信するため、ボタンを押してから約150msで送信完了します。
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>パスワード保存不要：リレー方式でセキュリティ向上</strong><br>
-            SMTP方式のアプリはメールアカウントのパスワードを端末に保存する必要があります。これはセキュリティリスクです。シンプルメモはリレー方式（Cloudflare Workers経由）なので、ユーザーのメールパスワードを一切保存しません。メールアドレスの入力のみで完結します。
+            <strong>送信失敗時の挙動</strong><br>
+            メーラー経由のMail to Selfは、圏外や通信エラー時にメールが下書きに残るか、エラーで消えてしまうリスクがあります。シンプルメモのOutboxアーキテクチャは、送信失敗時にメモをAES-GCM暗号化で端末内に安全に保存し、接続回復時に自動再送します。メモの紛失リスクがゼロです。
           </li>
         </ul>
         <ul class="diff-list" data-lang="en">
           <li>
             <span class="diff-num">1</span>
-            <strong>No SMTP Setup: Just Enter Your Email Address</strong><br>
-            Most mail-to-self apps like EmailMe and MeMail require SMTP server configuration — server address, port number, and authentication password. This is a technical barrier and a common source of setup failures. Simple Memo uses Cloudflare Workers + Resend API as a relay, so you only need to enter your email address to start sending immediately.
+            <strong>Dedicated App vs Mail Client Operation</strong><br>
+            Mail to Self methods typically involve using a general-purpose email client to send to your own address, but Simple Memo is purpose-built for this task. The three steps of opening your mail client, entering a recipient, and sending are reduced to a single-tap workflow: launch, type, send. No distractions from other emails in your inbox.
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>AES-GCM Encryption: Data Safe Even If Device Is Lost</strong><br>
-            Most mail-to-self apps store memo data unencrypted on the device. Some even store SMTP passwords in plaintext. Simple Memo encrypts all Outbox memos with AES-GCM and uses a relay architecture that never stores your email password. Your data remains safe even if the device is lost or stolen.
+            <strong>Steps from Launch to Send</strong><br>
+            A typical Mail to Self workflow requires 5 steps: open email client, compose new, enter recipient, type body, send. Simple Memo launches in 0.3 seconds with the keyboard ready, reducing the process to just 2 steps: type and tap send. For anyone sending multiple memos daily, this step reduction adds up to significant time savings.
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>Outbox Offline Support: Never Lose a Memo</strong><br>
-            When you need to take notes in the subway, on an airplane, or in areas with poor connectivity, most mail-to-self apps simply fail to send. Simple Memo's Outbox architecture stores memos with encryption offline and automatically sends them when connectivity returns. Zero message loss, guaranteed.
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>150ms Send Speed: Edge Computing for Ultra-Fast Delivery</strong><br>
-            Traditional mail-to-self apps go through SMTP connection, authentication, and transmission — taking 1 to 5 seconds. Simple Memo sends requests directly to Cloudflare Workers edge servers and delivers via Resend API, completing the entire process in approximately 150ms from button press.
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>No Password Storage: Relay Architecture for Better Security</strong><br>
-            SMTP-based apps must store your email account password on the device — a significant security risk. Simple Memo's relay architecture (via Cloudflare Workers) means your email password is never stored anywhere on the device. Only your email address is needed, nothing more.
+            <strong>Behavior on Send Failure</strong><br>
+            When using a mail client for self-email, a connectivity error can leave your message stuck in drafts or lost entirely. Simple Memo's Outbox architecture safely stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss.
           </li>
         </ul>
+      </section>
+
+      <!-- The Problem with Emailing Yourself -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">メーラーで自分にメール送信する手順の問題点</span>
+          <span data-lang="en">The Problem with Emailing Yourself via Mail App</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">標準のメールアプリで自分にメモを送る手順を確認しましょう。メールアプリを開く → 新規作成をタップ → 宛先に自分のアドレスを入力 → 件名を入力 → 本文にメモを入力 → 送信をタップ。合計6ステップです。しかもメーラーを開いた瞬間、他のメールが目に入り注意が逸れることも。SimpleMemoなら：アプリを開く → メモを入力 → 送信をタップ。たった3ステップ、摩擦は半分以下です。宛先の入力は不要で、件名はメモの1行目から自動設定されます。毎日何度もメモを送る習慣がある人にとって、このステップ数の差は体験の質を根本的に変えます。</span>
+          <span data-lang="en">Let's walk through the steps of manually emailing yourself via the Mail app: open Mail → tap compose → type your email address in the To field → type a subject → type the memo body → tap send. That's 6 steps. And the moment you open your mail client, other emails compete for your attention. With SimpleMemo: open the app → type your memo → tap send. Just 3 steps — less than half the friction. No need to type a recipient address, and the subject line is auto-generated from the first line of your memo. For anyone who sends memos to themselves multiple times a day, this step reduction fundamentally changes the quality of the experience.</span>
+        </p>
       </section>
 
       <!-- Who Should Choose Which -->
@@ -518,30 +511,28 @@
           <span data-lang="en">FAQ</span>
         </h2>
         <div data-lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">自分にメールを送るアプリで一番おすすめはどれですか？</summary><div class="faq-answer"><p>速度・セキュリティ・オフライン対応を重視するならCaptio式シンプルメモがおすすめです。0.3秒起動、150ms送信、AES-GCM暗号化、Outboxオフライン自動再送を備え、SMTP設定やアカウント登録も不要です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリにはどんな種類がありますか？</summary><div class="faq-answer"><p>代表的なアプリにはEmailMe、Note To Self Mail、MeMail、Captio（廃止）、Moca、メモポストなどがあります。多くはSMTP設定やアカウント登録が必要ですが、Captio式シンプルメモはCloudflare Workers経由のリレーでSMTP設定不要で使えます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SMTPの設定は必要ですか？</summary><div class="faq-answer"><p>多くの「自分にメールを送る」アプリではSMTP設定（サーバーアドレス・ポート・パスワード）が必要です。Captio式シンプルメモはCloudflare Workers + Resend APIのリレーサーバーを使用するため、SMTP設定は完全に不要です。メールアドレスを入力するだけで使えます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">オフラインでもメモを送れるアプリはありますか？</summary><div class="faq-answer"><p>多くのMail to Selfアプリはインターネット接続が必要ですが、Captio式シンプルメモはOutboxアーキテクチャにより、オフラインでもメモをAES-GCM暗号化で保存し、接続回復時に自動送信します。地下鉄や飛行機内でも安心してメモを取れます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">自分にメールするメモアプリは安全ですか？</summary><div class="faq-answer"><p>アプリによって安全性は異なります。多くのアプリはSMTPパスワードを保存する必要があり、暗号化機能もありません。Captio式シンプルメモはSMTP不要でパスワードを保存せず、Outbox内データはAES-GCM暗号化で保護されます。サーバーにメモ本文を永続保存しません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？</summary><div class="faq-answer"><p>メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.3秒起動で2ステップ送信を実現しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メーラーのSMTP設定なしで自分にメールできますか？</summary><div class="faq-answer"><p>はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを入力するだけで即座にメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">電波の悪い場所で自分にメールしたメモが消えることはありますか？</summary><div class="faq-answer"><p>メーラー経由の場合、通信エラーでメモが消える可能性があります。シンプルメモはOutboxアーキテクチャにより、送信失敗時もAES-GCM暗号化で端末に保存し、接続回復時に自動再送します。メモの紛失リスクはゼロです。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？</summary><div class="faq-answer"><p>はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。</p></div></details></div>
         </div>
         <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the best email-to-self app?</summary><div class="faq-answer"><p>For speed, security, and offline reliability, Simple Memo (Captio-style) is the best email-to-self app. It launches in 0.3 seconds, sends in 150ms via Cloudflare Workers, encrypts offline memos with AES-GCM, and requires no SMTP setup or account creation.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need to configure SMTP to use a mail-to-self app?</summary><div class="faq-answer"><p>Most mail-to-self apps require SMTP configuration (server address, port, password). Simple Memo eliminates this entirely by using Cloudflare Workers and Resend API as a relay server. You only need to enter your email address — no SMTP knowledge required.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which email-to-self app works offline?</summary><div class="faq-answer"><p>Most mail-to-self apps like EmailMe and Note To Self require internet connectivity. Simple Memo is the exception — its Outbox architecture stores memos with AES-GCM encryption when offline and automatically sends them when connectivity returns, ensuring zero message loss.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is it safe to email notes to myself?</summary><div class="faq-answer"><p>It depends on the app. Apps requiring SMTP passwords store your credentials on the device. Simple Memo uses Cloudflare Workers relay, so your email password is never stored. Outbox memos are encrypted with AES-GCM on-device, and memo content is never permanently stored on any server.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What happened to Captio and what is the best replacement?</summary><div class="faq-answer"><p>Captio was discontinued in 2025. Simple Memo (Captio-style) was designed as its spiritual successor, maintaining the same one-tap email capture philosophy while adding AES-GCM encryption, Outbox offline architecture, and Cloudflare Workers relay for 150ms send speed.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is a Mail to Self app different from just emailing myself?</summary><div class="faq-answer"><p>Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.3 seconds, type, and tap send. No inbox distractions, no wasted steps.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I send memos to myself without SMTP configuration?</summary><div class="faq-answer"><p>Yes. Simple Memo uses Cloudflare Workers as a relay, so SMTP setup is completely unnecessary. Just enter your receiving email address and start sending memos immediately. No server addresses, port numbers, or passwords required.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Will I lose a memo if I send it with poor connectivity?</summary><div class="faq-answer"><p>With a regular email client, a connectivity error can lose your draft. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is switching from another Mail to Self app to Simple Memo easy?</summary><div class="faq-answer"><p>Yes. Download from the App Store, set your email address, and you are ready in under a minute. All memos sent by your previous app remain in your email inbox. No data migration needed.</p></div></details></div>
         </div>
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">最速・最安全のMail to Selfアプリを試す</span>
-          <span data-lang="en">Try the fastest, most secure mail-to-self app</span>
+          <span data-lang="ja">メーラーを開かずにセルフメール</span>
+          <span data-lang="en">Self-Email Without Opening Your Mail App</span>
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">7日間の無料トライアル付き。SMTP設定不要、メールアドレスだけで今すぐ開始。</span>
-          <span data-lang="en">7-day free trial included. No SMTP setup — just enter your email and start sending.</span>
+          <span data-lang="ja">宛先入力不要。ワンタップでセルフメール。7日間無料。</span>
+          <span data-lang="en">No address typing. One-tap self-email. 7 days free.</span>
         </div>
         <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">

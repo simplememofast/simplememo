@@ -54,7 +54,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/simplenote/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-simplenote.png","headline":"シンプルメモ vs Simplenote — メモアプリ徹底比較","description":"SimplenoteとCaptio式シンプルメモの違いを徹底比較。メール送信・アカウント不要・オフラインOutbox・起動速度の観点で解説。","url":"https://simplememofast.com/vs/simplenote/","datePublished":"2026-03-05","dateModified":"2026-03-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/simplenote/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/vs/simplenote/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/vs-simplenote.png","headline":"シンプルメモ vs Simplenote — メモアプリ徹底比較","description":"SimplenoteとCaptio式シンプルメモの違いを徹底比較。メール送信・アカウント不要・オフラインOutbox・起動速度の観点で解説。","url":"https://simplememofast.com/vs/simplenote/","datePublished":"2026-03-05","dateModified":"2026-03-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/vs/simplenote/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"メモアプリ比較","item":"https://simplememofast.com/vs/"},{"@type":"ListItem","position":3,"name":"vs Simplenote","item":"https://simplememofast.com/vs/simplenote/"}]}</script>
@@ -130,7 +130,8 @@
       top: 0;
       z-index: 1000;
       background: rgba(10, 12, 18, 0.85);
-      -webkit-
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(100, 160, 220, 0.1);
     }
     .global-nav__inner {
@@ -402,63 +403,69 @@
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">5つの決定的な違い</span>
-          <span data-lang="en">5 Key Differences</span>
+          <span data-lang="ja">4つの「シンプル」の定義の違い</span>
+          <span data-lang="en">4 Different Definitions of "Simple"</span>
         </h2>
         <ul class="diff-list" data-lang="ja">
           <li>
             <span class="diff-num">1</span>
-            <strong>メール送信 vs アプリ内保存</strong><br>
-            Simplenoteのメモはアプリ内に保存され、Simplenoteのサーバーに同期されます。メールで送る機能はありません。シンプルメモはワンタップで150msでメモを直接メールに送信します。メモが自動的にメール受信トレイに届くため、Gmail・Outlook・Apple Mailなどどんなクライアントからでもアクセスでき、メール検索で簡単に見つけられます。
+            <strong>シンプルの意味が違う：保存するシンプル vs 送信するシンプル</strong><br>
+            Simplenoteの「シンプル」はメモの保存・同期・検索をシンプルにすることです。シンプルメモの「シンプル」はメモを書いてメールで送るまでを0.3秒+150msでシンプルにすること。同じ「シンプル」でも、設計が最適化するポイントが根本的に異なります。
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>アカウント不要 vs Simplenoteアカウント必須</strong><br>
-            Simplenoteはメールアドレスでのアカウント作成が必要です。パスワードの管理も必要です。シンプルメモは既存のメールアドレスを送信先として設定するだけ。新しいサービスへのサインアップやパスワード管理は不要です。
+            <strong>同期モデル：Simperium vs メール</strong><br>
+            SimplenoteはSimperiumプロトコルでリアルタイム同期し、全デバイスのSimplenoteアプリでメモを閲覧できます。シンプルメモはメール送信が同期の代わりです。メールはSimplenoteアプリがなくても読め、Gmail・Outlook・Apple Mailなどあらゆるクライアントからアクセス可能。同期の仕組みが根本的に違います。
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>オフラインOutbox vs オフライン編集</strong><br>
-            Simplenoteはオフラインでメモを編集できますが、「オフラインで書いて、接続回復時に自動送信する」仕組みはありません。シンプルメモのOutboxアーキテクチャは、オフラインでもメモを書き、接続回復時に自動でメール送信します。保存中はAES-GCM暗号化で安全に保護されます。
+            <strong>蓄積 vs フロー：メモの滞在時間の違い</strong><br>
+            Simplenoteのメモはアプリ内に「蓄積」され、タグ・検索・バージョン履歴で管理されます。シンプルメモのメモはアプリ内に「滞在しない」設計で、書いたら即座にメールとして送り出されます。メモが「留まる場所」か「通過する場所」か、アプリの性格が正反対です。
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>目的の根本的な違い：送り出す vs 蓄積する</strong><br>
-            Simplenoteはメモを「蓄積して検索する」ためのツールです。ノート一覧、タグ、バージョン履歴でメモを管理します。シンプルメモはメモを「書いて即座に送り出す」ためのツールです。メモはアプリ内に残りません。この根本的な設計思想の違いが、使い心地の差を生みます。
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>起動から入力まで：0.3秒 vs ノート一覧を経由</strong><br>
-            Simplenoteを開くとまずノート一覧が表示され、新規ノートボタンをタップして入力を始めます。シンプルメモは起動と同時にカーソルが入力フィールドに合い、0.3秒で入力を開始できます。「書きたい」と思った瞬間から入力開始までのステップ数が異なります。
+            <strong>オフライン時の動作：保存 vs 保存+自動送信</strong><br>
+            Simplenoteはオフラインでメモを編集・保存できますが、接続回復時に行われるのはSimplenoteサーバーとの同期です。シンプルメモのOutboxアーキテクチャは、オフラインで書いたメモをAES-GCM暗号化で保持し、接続回復時にメールとして自動送信します。オフライン復帰後の「出口」が違います。
           </li>
         </ul>
         <ul class="diff-list" data-lang="en">
           <li>
             <span class="diff-num">1</span>
-            <strong>Email Delivery vs In-App Storage</strong><br>
-            Simplenote stores notes within the app and syncs to Simplenote's servers. There is no email send feature. Simple Memo sends your memo directly to your email inbox in 150ms with one tap. Your memo arrives in Gmail, Outlook, Apple Mail, or any email client — accessible and searchable everywhere.
+            <strong>Different Meanings of "Simple": Save Simply vs Send Simply</strong><br>
+            Simplenote's "simple" means simplifying note storage, sync, and search. Simple Memo's "simple" means simplifying the path from thought to email in 0.3s + 150ms. Same word, fundamentally different optimization targets.
           </li>
           <li>
             <span class="diff-num">2</span>
-            <strong>No Account vs Simplenote Account Required</strong><br>
-            Simplenote requires account creation with email and password. Simple Memo requires no account — just enter your existing email address as the delivery destination. No sign-up, no password to manage, no new service dependency.
+            <strong>Sync Model: Simperium vs Email</strong><br>
+            Simplenote uses the Simperium protocol for real-time sync across all devices running the Simplenote app. Simple Memo uses email as sync — readable without any Simplenote app, accessible from Gmail, Outlook, Apple Mail, or any client. The sync mechanism is fundamentally different.
           </li>
           <li>
             <span class="diff-num">3</span>
-            <strong>Offline Outbox vs Offline Editing</strong><br>
-            Simplenote supports offline editing, but has no mechanism to auto-send notes when connectivity returns. Simple Memo's Outbox architecture lets you write memos offline, then automatically emails them when connection is restored. Pending memos are AES-GCM encrypted on-device.
+            <strong>Accumulation vs Flow: How Long Notes Stay</strong><br>
+            Simplenote notes "accumulate" within the app, managed by tags, search, and version history. Simple Memo notes "don't stay" — they're immediately sent out as email. Whether the app is a "place notes reside" or a "place notes pass through" defines opposite app personalities.
           </li>
           <li>
             <span class="diff-num">4</span>
-            <strong>Fundamentally Different Purpose: Send Out vs Accumulate</strong><br>
-            Simplenote is built to accumulate and search notes. It has a note list, tags, and version history for note management. Simple Memo is built to send notes out immediately. Notes don't stay in the app. This fundamental design difference shapes the entire user experience.
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>Launch to Typing: 0.3s vs Navigate Note List</strong><br>
-            Opening Simplenote shows a note list first — you tap "New Note" to start typing. Simple Memo launches with the cursor in the input field at 0.3 seconds. The number of steps between "I want to write something" and actually typing is meaningfully different.
+            <strong>Offline Behavior: Save vs Save + Auto-Send</strong><br>
+            Simplenote can edit and save notes offline, syncing to Simplenote servers when reconnected. Simple Memo's Outbox holds offline memos with AES-GCM encryption and auto-sends them as email when connectivity returns. The "exit path" after going back online is different.
           </li>
         </ul>
+      </section>
+
+      <!-- Redefining Simple -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">シンプルさの再定義：保存 vs 送信</span>
+          <span data-lang="en">Redefining Simple: Storage vs Delivery</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">SimplenoteとシンプルメモはどちらもUI最小限の「シンプル」を標榜していますが、シンプルさの哲学が根本的に異なります。Simplenoteは「メモを保存する場所をシンプルにする」アプリです。余計な装飾を排除し、テキストとタグだけでメモを管理します。一方、シンプルメモは「メモを送る行為をシンプルにする」アプリです。書いたテキストをワンタップでメールに送り、アプリ内にはデータを残しません。</span>
+          <span data-lang="en">Both Simplenote and Simple Memo champion "simple" minimal UIs, but their philosophies of simplicity are fundamentally different. Simplenote simplifies "where you store notes" — stripping away decoration, managing text with just tags. Simple Memo simplifies "the act of sending notes" — one-tap email delivery with no data retained in the app.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span data-lang="ja">この違いは「メモのライフサイクル」に表れます。Simplenoteではメモはアプリ内に蓄積され、タグで検索し、バージョン履歴で過去の状態に戻れます。メモの「居場所」はSimplenoteです。シンプルメモではメモは書いた瞬間にメールとして外へ出ていきます。メモの「居場所」はあなたのメールの受信トレイです。どちらが優れているということではなく、「メモをどう扱いたいか」で選ぶべきツールが変わります。蓄積して検索したいならSimplenote、書いたら即座に受信トレイへ届けたいならシンプルメモが最適です。</span>
+          <span data-lang="en">This difference manifests in the "memo lifecycle." In Simplenote, notes accumulate within the app, searchable by tags, with version history for rollback. The note's "home" is Simplenote. In Simple Memo, notes leave as email the moment you write them. The note's "home" is your email inbox. Neither is superior — the right tool depends on how you want to handle your notes. Accumulate and search? Simplenote. Instant delivery to your inbox? Simple Memo.</span>
+        </p>
       </section>
 
       <!-- Who Should Choose Which -->
@@ -524,30 +531,30 @@
           <span data-lang="en">FAQ</span>
         </h2>
         <div data-lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimplenoteとCaptio式シンプルメモの最大の違いは何ですか？</summary><div class="faq-answer"><p>最大の違いはメモの行き先です。Simplenoteはメモをアプリ内に保存し、Simplenoteのサーバーと同期します。シンプルメモはメモを自分のメールアドレスに直接送信します。メモが自動的にメール受信トレイに届くため、どのデバイスからでもアクセスでき、メール検索で簡単に見つけられます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteにアカウント登録は必要ですか？</summary><div class="faq-answer"><p>はい、Simplenoteの利用にはメールアドレスでのアカウント作成が必須です。シンプルメモはアカウント作成不要で、既存のメールアドレスを送信先として設定するだけで使えます。新しいサービスへの登録なしに、すぐにメモを始められます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteは無料ですか？シンプルメモとの料金比較は？</summary><div class="faq-answer"><p>Simplenoteは完全無料で、すべての機能を制限なく利用できます。シンプルメモは無料プランで1日3通の送信が可能で、基本機能に制限はありません。プレミアムプランでは送信数が無制限になります。7日間の無料トライアルも利用できます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteとシンプルメモはどちらがシンプルですか？</summary><div class="faq-answer"><p>Simplenoteもシンプルですが、ノート一覧・検索・タグ・バージョン履歴などの機能があります。シンプルメモはさらにシンプルで、入力フィールドと送信ボタンのみ。ノート管理機能は意図的に排除し、「書いて送る」だけに特化しています。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteのメモをメールで送ることはできますか？</summary><div class="faq-answer"><p>Simplenoteにはメール送信機能がありません。メモを共有するにはコピーして別のメールアプリに貼り付ける必要があります。シンプルメモはワンタップでメモを直接メールに送信でき、150msで配信されます。メールでメモを自分に送りたい場合はシンプルメモが最適です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteの同期（Simperium）とメール送信、どちらが確実ですか？</summary><div class="faq-answer"><p>Simplenoteは独自のSimperiumプロトコルで同期しますが、サーバー障害時にはメモが同期されないリスクがあります。シンプルメモはSMTPメール送信を使うため、世界中のメールインフラが冗長性を担保します。メモの到達確実性ではメールプロトコルが優れています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteのタグ整理とシンプルメモのメール検索、どちらが見つけやすい？</summary><div class="faq-answer"><p>Simplenoteはタグで分類しますが、タグ付けの手間が必要です。シンプルメモはメールとして送信されるため、GmailやOutlookの強力な全文検索がそのまま使えます。整理する手間なく、後から自然言語で検索できる点が異なります。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteのバージョン履歴機能はシンプルメモにもありますか？</summary><div class="faq-answer"><p>Simplenoteにはスライダー式のバージョン履歴があり、過去の編集状態に戻れます。シンプルメモにはバージョン履歴はありませんが、送信したメモは個別のメールとして残るため、上書きされることがありません。考え方が異なり、Simplenoteは「編集の歴史」、シンプルメモは「思考の時系列記録」です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenoteは無料ですが、シンプルメモにする理由はありますか？</summary><div class="faq-answer"><p>Simplenoteは完全無料で優れたアプリですが、メモが蓄積されていくモデルです。シンプルメモは「書いて送って忘れる」フロー型で、メモ管理の負担がゼロです。無料のシンプルメモプラン（1日3通）でも、思いついたことを即座にメールに飛ばす用途には十分です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">SimplenoteとシンプルメモをAndroidとiPhoneで併用できますか？</summary><div class="faq-answer"><p>Simplenoteはクロスプラットフォーム対応（iOS・Android・Web・デスクトップ）ですが、シンプルメモは現在iOS専用です。ただしシンプルメモで送ったメモはメールとして届くため、Android端末のメールアプリからも閲覧・検索が可能です。キャプチャはiPhone、閲覧はどこからでも行えます。</p></div></details></div>
         </div>
         <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the biggest difference between Simplenote and Simple Memo?</summary><div class="faq-answer"><p>The fundamental difference is where your notes go. Simplenote stores notes in the app and syncs to Simplenote's servers. Simple Memo sends notes directly to your email address. Your memos arrive in your inbox automatically — accessible from any device, searchable with your email client, and never locked in a proprietary service.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simplenote have email delivery like Simple Memo?</summary><div class="faq-answer"><p>No. Simplenote has no email delivery feature. Notes stay within the Simplenote ecosystem. To send a note via email, you must manually copy it and paste it into your email app. Simple Memo sends memos to your email in 150ms with a single tap — the entire purpose of the app is email delivery.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simplenote or Simple Memo simpler to use?</summary><div class="faq-answer"><p>Simplenote is simple for a note app — but it still has a note list, search, tags, version history, and Markdown support. Simple Memo is radically simpler: just an input field and a send button. No note management, no organization. You type and send. That's the entire app.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Simple Memo and Simplenote together?</summary><div class="faq-answer"><p>Yes. Use Simple Memo for instant capture — tap, type, send to email in 0.3 seconds. Then, if you want to keep certain notes organized long-term, copy them from your email into Simplenote. Simple Memo handles the fast capture; Simplenote handles long-term note storage.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo require an account like Simplenote?</summary><div class="faq-answer"><p>No. Simplenote requires creating an account with your email. Simple Memo requires no account — you simply enter your existing email address as the delivery destination. No sign-up, no password, no new service to manage. Your existing email IS the system.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is Simplenote's Simperium sync or email delivery more reliable?</summary><div class="faq-answer"><p>Simplenote uses its proprietary Simperium protocol for sync, which can fail during server outages. Simple Memo uses standard SMTP email delivery, backed by the global email infrastructure with built-in redundancy. For guaranteed memo delivery, email protocol has decades of proven reliability.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenote tags vs Simple Memo email search — which finds notes faster?</summary><div class="faq-answer"><p>Simplenote organizes with tags, but you must tag notes manually. Simple Memo sends memos as emails, so you get Gmail's or Outlook's powerful full-text search for free. No tagging effort needed — just search naturally later. The trade-off is organization effort vs zero-effort retrieval.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have version history like Simplenote?</summary><div class="faq-answer"><p>Simplenote has a slider-based version history that lets you revert to past edits. Simple Memo doesn't have version history, but each memo is sent as a separate email that can never be overwritten. The philosophy differs: Simplenote tracks "editing history," while Simple Memo creates a "chronological thought stream."</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Simplenote is free — why would I choose Simple Memo?</summary><div class="faq-answer"><p>Simplenote is an excellent free app, but it follows an accumulation model where notes pile up. Simple Memo follows a flow model — write, send, forget. Zero note management burden. Even the free plan (3 memos per day) is enough for capturing fleeting thoughts and sending them to your inbox instantly.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Simplenote and Simple Memo across Android and iPhone?</summary><div class="faq-answer"><p>Simplenote is cross-platform (iOS, Android, Web, desktop), while Simple Memo is currently iOS only. However, memos sent via Simple Memo arrive as emails, so you can view and search them from any Android email app. Capture on iPhone, access everywhere via email.</p></div></details></div>
         </div>
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">メモをメールに送る、最速の方法を試す</span>
-          <span data-lang="en">Try the fastest way to email a memo to yourself</span>
+          <span data-lang="ja">もう一つのシンプル、もう一つの速さ</span>
+          <span data-lang="en">A Different Kind of Simple, A Different Kind of Fast</span>
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">7日間の無料トライアル付き。Simplenoteと併用して、キャプチャはシンプルメモ、保管はSimplenoteという使い方も効果的です。</span>
-          <span data-lang="en">7-day free trial included. Use Simple Memo for fast capture and Simplenote for long-term storage — they work great together.</span>
+          <span data-lang="ja">シンプルの新しい形。書いたら即メール。7日間試す。</span>
+          <span data-lang="en">A new form of simple. Write, send, done. Try 7 days.</span>
         </div>
         <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">

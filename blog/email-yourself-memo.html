@@ -97,7 +97,8 @@
       top: 0;
       z-index: 1000;
       background: rgba(10, 12, 18, 0.85);
-      -webkit-
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(100, 160, 220, 0.1);
     }
     .global-nav__inner {
@@ -359,7 +360,7 @@
           <div class="app-card__meta"><span class="app-card__pros">10倍速い</span><span class="app-card__for">年間22時間以上の節約</span></div>
         </div>
 
-        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-top:1rem;">この差は「ちょっとした便利さ」ではありません。1日5回メモを送る人の場合、手動だと年間約25時間、SimpleMemoなら約2.5時間。<strong>22時間以上の差</strong>が生まれます。しかも、手動メール作成の「宛先入力・件名入力」という摩擦は、メモしたい瞬間のモチベーションを削ぎます。結果、「あとでメモしよう」と思って忘れるケースが増えるのです。</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-top:1rem;">この差は「ちょっとした便利さ」ではありません。1日5回メモを送る人の場合、手動だと年間約25時間、SimpleMemoなら約2.5時間。<strong>22時間以上の差</strong>が生まれます。しかも、手動メール作成の「宛先入力・件名入力」という摩擦は、メモしたい瞬間のモチベーションを削ぎます。結果、「あとでメモしよう」と思って忘れるケースが増えるのです。同じ「自分にメール送信」系のアプリとしては<a href="/vs/email-me-app/">Email Me Appとの比較</a>や<a href="/vs/mail-to-self/">Mail to Selfとの違い</a>も参考になります。</p>
       </div>
 
       <div data-lang="en">
@@ -689,6 +690,78 @@
       </div>
     </section>
 
+    <!-- Section: GTD/PKM Integration -->
+    <section class="lp-section">
+      <h2 class="lp-section__title">
+        <span data-lang="ja">GTD・PKM統合ワークフロー — メモを「書いて終わり」にしない</span>
+        <span data-lang="en">GTD & PKM Integration Workflow — Don't Just Capture, Process</span>
+      </h2>
+
+      <div data-lang="ja">
+        <p class="lp-section__lead">「自分にメールでメモを送る」は、実はGTD（Getting Things Done）やPKM（パーソナルナレッジマネジメント）の最初のステップそのものです。SimpleMemoをキャプチャツールとして位置づけ、その後のプロセスまで設計することで、メモの価値は何倍にもなります。</p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:2rem 0 1rem;">GTDとの統合：キャプチャ→プロセス→整理</h3>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">デビッド・アレンのGTDメソッドでは、生産性の最初のステップは「キャプチャ（収集）」です。頭の中にあるすべてのタスク・アイデア・気になることを、信頼できるシステムに書き出すこと。SimpleMemoの0.3秒起動＋ワンタップ送信は、このキャプチャフェーズを極限まで効率化します。</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">キャプチャしたメモは受信箱に届きます。GTDの次のステップは「プロセス（処理）」です。1日1回、受信箱のメモを見返して、以下の判断を行います：</p>
+        <ul style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;padding-left:1.5rem;">
+          <li><strong>2分以内にできること</strong> → その場で実行して完了</li>
+          <li><strong>タスクとして残すこと</strong> → カレンダーやタスク管理ツール（Todoist、TickTickなど）に転記</li>
+          <li><strong>参考情報として保存すること</strong> → ノートアプリ（Notion、Obsidianなど）に整理</li>
+          <li><strong>不要なもの</strong> → アーカイブまたは削除</li>
+        </ul>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.5rem;">この「キャプチャ→プロセス→整理」の3ステップを毎日5分実践するだけで、頭の中が驚くほどクリアになります。SimpleMemoは「書く」に特化し、「整理する」は既存のツールに任せる。この分業こそが、シンプルなのに強力なワークフローを生み出します。</p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:2rem 0 1rem;">PKM（パーソナルナレッジマネジメント）連携：SimpleMemo → Notion/Obsidianへの流し方</h3>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">PKMの世界では、知識を「キャプチャ→キュレーション→コネクション→クリエーション」の4段階で育てるという考え方があります。SimpleMemoはこの第1段階「キャプチャ」を担います。</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;"><strong>Notionとの連携ワークフロー：</strong>SimpleMemoからGmailに届いたメモを、Notionのデータベースに転送する方法があります。Gmailの「メモ」ラベルが付いたメールを週に1回まとめてNotionのInboxデータベースにコピーし、そこから関連するプロジェクトやトピックのページにリンクしていきます。手動で行う場合は、メモの内容をコピー&ペーストしてNotionのクイックキャプチャに貼り付けるだけです。</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;"><strong>Obsidianとの連携ワークフロー：</strong>Obsidianユーザーなら、受信箱に届いたメモの中で「育てたい」と思ったものだけをObsidianのDaily Noteに転記します。Zettelkasten方式で他のノートとリンクすることで、単なるメモが知識のネットワークに変わります。SimpleMemoで10秒で書いたメモが、Obsidianで数か月後に意外なつながりを生むことがあります。</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.5rem;">ポイントは「すべてのメモを移す必要はない」ということ。SimpleMemoで書いたメモの80%は一時的なもの（買い物リスト、タスクのリマインダーなど）です。残りの20%、つまり「後で使える知識」だけをPKMツールに移せば十分です。</p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:2rem 0 1rem;">Zapier/IFTTT連携の可能性 — 自動化でさらに効率化</h3>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">SimpleMemoから送信されたメモはメールとして届くため、メールをトリガーにしたZapierやIFTTTの自動化が可能です。例えば以下のような自動化が考えられます：</p>
+        <ul style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;padding-left:1.5rem;">
+          <li><strong>Gmail + Zapier + Notion：</strong>特定のラベル（例：「SimpleMemo」）が付いたメールを受信したら、自動的にNotionデータベースに新規アイテムを作成</li>
+          <li><strong>Gmail + IFTTT + Googleスプレッドシート：</strong>メモの内容をスプレッドシートに自動記録。日記やアイデアログとして活用</li>
+          <li><strong>Gmail + Zapier + Todoist：</strong>件名に「TODO」を含むメモを受信したら、Todoistにタスクを自動作成</li>
+          <li><strong>Gmail + Zapier + Slack：</strong>チームメンバーと共有したいメモを特定のSlackチャンネルに自動転送</li>
+        </ul>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">設定のコツは、Gmailのフィルター機能でSimpleMemoからのメールに自動ラベルを付けることです。「from:noreply@simplememofast.com」でフィルターを作成し、「SimpleMemo」ラベルを自動付与すれば、そのラベルをZapier/IFTTTのトリガーとして使えます。</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.5rem;">このように、SimpleMemoは「書いて送る」だけのシンプルなアプリですが、メールという汎用プロトコルを使っているからこそ、後工程の自動化や統合が容易です。あなたのワークフローに合わせてカスタマイズしてみてください。</p>
+      </div>
+
+      <div data-lang="en">
+        <p class="lp-section__lead">"Emailing memos to yourself" is actually the first step of GTD (Getting Things Done) and PKM (Personal Knowledge Management). By positioning SimpleMemo as your capture tool and designing the downstream process, the value of each memo multiplies.</p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:2rem 0 1rem;">GTD Integration: Capture → Process → Organize</h3>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">In David Allen's GTD methodology, the first step to productivity is "Capture" -- writing down every task, idea, and concern into a trusted system. SimpleMemo's 0.3-second launch + one-tap send maximizes the efficiency of this capture phase.</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">Captured memos land in your inbox. The next GTD step is "Process." Once a day, review your inbox memos and make these decisions:</p>
+        <ul style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;padding-left:1.5rem;">
+          <li><strong>Can be done in 2 minutes</strong> → Do it immediately</li>
+          <li><strong>Needs to become a task</strong> → Transfer to a task manager (Todoist, TickTick, etc.)</li>
+          <li><strong>Reference material</strong> → Organize in a note app (Notion, Obsidian, etc.)</li>
+          <li><strong>No longer needed</strong> → Archive or delete</li>
+        </ul>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.5rem;">Practicing this "Capture → Process → Organize" cycle for just 5 minutes daily clears your mind remarkably. SimpleMemo specializes in "writing," while existing tools handle "organizing." This division of labor creates a workflow that's simple yet powerful.</p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:2rem 0 1rem;">PKM Integration: SimpleMemo → Notion/Obsidian Flow</h3>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">In the PKM world, knowledge grows through four stages: Capture → Curate → Connect → Create. SimpleMemo handles stage one: Capture.</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;"><strong>Notion workflow:</strong> Memos that arrive in Gmail can be forwarded to a Notion database. Weekly, batch-copy memos labeled "Notes" in Gmail to a Notion Inbox database, then link them to relevant projects or topics. For manual transfer, simply copy and paste memo content into Notion's quick capture.</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;"><strong>Obsidian workflow:</strong> Obsidian users can selectively transfer "keeper" memos to their Daily Note. Using Zettelkasten linking, simple memos transform into a knowledge network. A 10-second SimpleMemo capture might spark unexpected connections months later in Obsidian.</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.5rem;">The key insight: you don't need to transfer everything. About 80% of SimpleMemo captures are temporary (shopping lists, task reminders). Only the 20% that represent "reusable knowledge" need to reach your PKM tool.</p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:2rem 0 1rem;">Zapier/IFTTT Automation — Even More Efficiency</h3>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">Since SimpleMemo delivers memos as emails, you can use email-triggered Zapier or IFTTT automations. For example:</p>
+        <ul style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;padding-left:1.5rem;">
+          <li><strong>Gmail + Zapier + Notion:</strong> Auto-create a Notion database item when a "SimpleMemo" labeled email arrives</li>
+          <li><strong>Gmail + IFTTT + Google Sheets:</strong> Auto-log memo content to a spreadsheet for journaling or idea tracking</li>
+          <li><strong>Gmail + Zapier + Todoist:</strong> Auto-create a Todoist task when a memo with "TODO" in the subject arrives</li>
+          <li><strong>Gmail + Zapier + Slack:</strong> Auto-forward specific memos to a shared Slack channel</li>
+        </ul>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1rem;">Pro tip: Use Gmail's filter feature to auto-label SimpleMemo emails. Create a filter for "from:noreply@simplememofast.com" and auto-apply a "SimpleMemo" label. Then use that label as a Zapier/IFTTT trigger.</p>
+        <p style="font-size:.92rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.5rem;">SimpleMemo is a simple "write and send" app, but because it uses email -- a universal protocol -- downstream automation and integration are effortless. Customize it to match your workflow.</p>
+      </div>
+    </section>
+
     <!-- Section 6: FAQ -->
     <section class="lp-section">
       <h2 class="lp-section__title"><span data-lang="ja">よくある質問</span><span data-lang="en">FAQ</span></h2>
@@ -839,6 +912,19 @@
     <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
   </ul>
 </section>
+<!-- Author Bio -->
+<aside class="author-bio" style="margin:3rem auto 2rem;max-width:800px;padding:1.5rem 2rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;gap:1.25rem;align-items:flex-start;">
+  <img src="/assets/img/app-icon-56.png" alt="AI Ataka" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
+  <div>
+    <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI Ataka</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">SimpleMemo開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動0.3秒・メモ→メール特化」のSimpleMemoを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
+      <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>
+      <a href="https://github.com/hajimeataka" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">GitHub</a>
+    </div>
+  </div>
+</aside>
 </main>
 
 
