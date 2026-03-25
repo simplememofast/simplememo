@@ -61,9 +61,6 @@
   "url": "https://simplememofast.com/blog/memo-app-encryption-comparison"
 }
   </script>
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"AES-GCMとAES-CBCの違いは何ですか？","acceptedAnswer":{"@type":"Answer","text":"AES-GCMはガロアカウンターモードの略で、暗号化と認証を同時に行うAEAD方式です。改ざん検知が組み込まれており、AES-CBCより安全性が高いとされています。AES-CBCはCipher Block Chainingモードで、暗号化のみを行い、認証には別途HMACなどが必要です。SimpleMemoはAES-256-GCMを採用しています。"}},{"@type":"Question","name":"E2EE（エンドツーエンド暗号化）対応のメモアプリはどれですか？","acceptedAnswer":{"@type":"Answer","text":"2026年時点でE2EEに対応する主なメモアプリは、SimpleMemo（AES-256-GCM）、Standard Notes（XChaCha20-Poly1305）、Obsidian Sync（有料オプション）、Joplin（オプション）、Day One（オプション）、Apple Notes（Advanced Data Protection有効時）です。Notion、Evernote、Google Keepは保管時暗号化のみでE2EEには非対応です。"}},{"@type":"Question","name":"ゼロナレッジ暗号化とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"ゼロナレッジ暗号化とは、サービス運営者がユーザーのデータを一切閲覧できない設計のことです。暗号鍵がユーザーのパスワードから生成され、サーバーには保存されません。Standard Notesが代表的なゼロナレッジ設計のメモアプリです。法的な開示請求があっても技術的にデータを提出できないため、最高レベルのプライバシー保護を実現します。"}},{"@type":"Question","name":"日常的なメモにE2EEは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"買い物リストやアイデアメモなど日常的な内容であれば、TLS通信暗号化と保管時暗号化（レベル2）で十分な保護が得られます。ただし、パスワード、財務データ、医療情報、ビジネスの機密情報を扱う場合はE2EE（レベル3以上）を推奨します。SimpleMemoはオフライン時のOutboxにAES-256-GCMを採用し、送信後はGmailの暗号化で保護されます。"}},{"@type":"Question","name":"メモアプリの暗号化で最も重要なチェックポイントは？","acceptedAnswer":{"@type":"Answer","text":"最も重要なのは「鍵の管理方式」です。同じAES-256でも、サービス側が鍵を保持する場合とユーザーだけが鍵を持つ場合では安全性が根本的に異なります。チェックすべきポイントは、(1)通信暗号化の有無、(2)保管時暗号化の有無、(3)E2EE対応、(4)鍵管理の方式、(5)オープンソースかどうかの5点です。"}}]}
-  </script>
   <link rel="stylesheet" href="/assets/css/style.min.css">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
