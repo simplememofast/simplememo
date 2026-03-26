@@ -351,6 +351,24 @@
       align-items: center;
       gap: 0.5rem;
     }
+    .global-nav__lang {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      transition: all 0.2s;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__lang:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.4);
+    }
     .global-nav__cta {
       background: linear-gradient(135deg, #007AFF, #5856D6);
       color: #fff !important;
@@ -417,9 +435,6 @@
     /* Tighter hero on mobile to keep CTA above fold */
     @media (max-width: 767px) {
       .global-nav__inner { height: 40px; }
-      .lang-switcher-container { padding: 0 0 0; }
-      .lang-switcher__link { padding: 0.5rem 1rem; min-height: 36px; }
-      .header { margin-bottom: 0; }
       .hero { padding: 0 0 16px; }
       .hero::before, .hero::after { display: none; }
       .hero__icon { width: 48px; height: 48px; margin-bottom: 4px; }
@@ -451,6 +466,7 @@
         <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US">Download</a></li>
       </ul>
       <div class="global-nav__actions">
+        <a href="/" class="global-nav__lang">JA</a>
         <a href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="global-nav__cta">
           Download
         </a>
@@ -458,18 +474,6 @@
       </div>
     </div>
   </nav>
-
-  <!-- Header with Lang Switcher -->
-  <header class="header">
-    <div class="container">
-      <div class="lang-switcher-container">
-        <div class="lang-switcher">
-          <a class="lang-switcher__link" href="/">日本語</a>
-          <a class="lang-switcher__link active" href="/en/">English</a>
-        </div>
-      </div>
-    </div>
-  </header>
 
   <main>
   <!-- Hero Section -->
