@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <link rel="dns-prefetch" href="https://apps.apple.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG');
+        };
+      });
+    });
+  </script>
+  <title>0.3秒速记发邮件 — Captio替代 | SimpleMemo</title>
+  <meta name="description" content="最快的自发邮件备忘录应用。0.3秒启动，一键发送到邮箱，AES-GCM加密，离线自动重发。Captio最佳替代品。">
+  <meta name="theme-color" content="#000000">
+
+  <!-- OGP -->
+  <meta property="og:title" content="0.3秒速记发邮件 — Captio替代 | SimpleMemo">
+  <meta property="og:description" content="最快的自发邮件备忘录应用。0.3秒启动，一键发送到邮箱。Captio最佳替代品。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/zh/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - Captio-style">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="0.3秒速记发邮件 — Captio替代 | SimpleMemo">
+  <meta name="twitter:description" content="最快的自发邮件备忘录应用。0.3秒启动，一键发送到邮箱。Captio最佳替代品。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- LCP preload: hero app icon -->
+  <link rel="preload" as="image" href="/assets/img/app-icon-256.webp" type="image/webp">
+
+  <!-- Canonical & Hreflang -->
+  <link rel="canonical" href="https://simplememofast.com/zh/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/">
+  <link rel="alternate" hreflang="zh-Hans" href="https://simplememofast.com/zh/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/">
+
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+  <style>
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__lang {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      transition: all 0.2s;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__lang:hover {
+      color: #fff;
+      border-color: rgba(255,255,255,0.4);
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+    }
+
+    /* Tighter hero on mobile to keep CTA above fold */
+    @media (max-width: 767px) {
+      .global-nav__inner { height: 40px; }
+      .hero { padding: 0 0 16px; }
+      .hero::before, .hero::after { display: none; }
+      .hero__icon { width: 48px; height: 48px; margin-bottom: 4px; }
+      .hero__title { margin-bottom: 8px; }
+      .hero__subtitle { margin-bottom: 12px; font-size: 0.9rem; }
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Main navigation">
+    <div class="global-nav__inner">
+      <a href="/zh/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <div class="global-nav__actions">
+        <a href="/" class="global-nav__lang">JA</a>
+        <a href="https://apps.apple.com/app/simple-memo-fast/id6758438948" class="global-nav__cta">
+          下载
+        </a>
+        <button class="global-nav__hamburger" aria-label="菜单" onclick="window.location.href='https://apps.apple.com/app/simple-memo-fast/id6758438948'">☰</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero__icon">
+        <img src="/assets/img/app-icon-256.webp" alt="SimpleMemo应用图标" width="256" height="256" fetchpriority="high">
+      </div>
+      <h1 class="hero__title">
+        一键轻触，直达邮箱。
+      </h1>
+      <p class="hero__subtitle">
+        0.3秒将备忘录发送到你的邮箱。
+      </p>
+      <a href="https://apps.apple.com/app/simple-memo-fast/id6758438948" class="app-store-badge" aria-label="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
+      </a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">功能</span>
+        核心特性
+      </h2>
+      <div class="feature-cards">
+        <div class="feature-card feature-card--highlight reveal reveal-delay-1">
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">⚡ 0.3秒启动</h3>
+            <p class="feature-card__description">
+              极速启动，瞬间开始记录。<br>从想法到发送，只需0.3秒。
+            </p>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-2">
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">📧 一键发送到邮箱</h3>
+            <p class="feature-card__description">
+              轻触一下即可发送到你的收件箱。<br>无需文件夹、标签或复杂设置。
+            </p>
+          </div>
+        </div>
+        <div class="feature-card reveal reveal-delay-3">
+          <div class="feature-card__content">
+            <h3 class="feature-card__title">🔒 AES-GCM加密</h3>
+            <p class="feature-card__description">
+              端到端加密保护你的隐私。<br>备忘录永远不会存储在服务器上。
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- App Store CTA Section -->
+  <section class="pricing" style="padding:3rem 0;">
+    <div class="container" style="text-align:center;">
+      <h2 class="section-title reveal">
+        立即下载
+      </h2>
+      <p style="font-size:1rem;color:var(--text-secondary);margin-bottom:1.5rem;">7天免费试用，无限发送。</p>
+      <a href="https://apps.apple.com/app/simple-memo-fast/id6758438948" class="app-store-badge" aria-label="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
+      </a>
+    </div>
+  </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__social" aria-label="Social links">
+        <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">X / Twitter</a>
+        <a href="https://note.com/simplememo" rel="me noopener" target="_blank" class="footer__link">note</a>
+        <a href="https://github.com/simplememofast" rel="me noopener" target="_blank" class="footer__link">GitHub</a>
+      </nav>
+      <div class="footer__copyright">
+        <p class="footer__copyright-main">&copy; 2026 Simple Memo - Captio-style. All rights reserved.</p>
+        <p class="footer__copyright-company">Operated by Yurika Inc.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky Mobile CTA -->
+  <div class="sticky-cta" id="stickyCta">
+    <div class="sticky-cta__inner">
+      <a href="https://apps.apple.com/app/simple-memo-fast/id6758438948" class="app-store-badge" aria-label="Download on the App Store">
+        <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
+      </a>
+    </div>
+  </div>
+
+  <!-- Scroll Reveal + Sticky CTA -->
+  <script>
+  (function() {
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      reveals.forEach(function(el) { observer.observe(el); });
+    } else {
+      reveals.forEach(function(el) { el.classList.add('visible'); });
+    }
+
+    var stickyCta = document.getElementById('stickyCta');
+    var hero = document.querySelector('.hero');
+    if (stickyCta && hero && window.innerWidth < 768) {
+      document.body.classList.add('has-sticky-cta');
+      var stickyObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) {
+            stickyCta.classList.add('visible');
+          } else {
+            stickyCta.classList.remove('visible');
+          }
+        });
+      }, { threshold: 0 });
+      stickyObserver.observe(hero);
+    }
+  })();
+  </script>
+</body>
+</html>
