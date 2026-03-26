@@ -101,24 +101,28 @@
       align-items: center;
       gap: 0.5rem;
     }
-    .global-nav__lang {
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      padding: 0.4rem 0.6rem;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 6px;
-      transition: all 0.2s;
-      min-height: 32px;
-      display: inline-flex;
-      align-items: center;
+    .lang-dropdown { position: relative; }
+    .lang-dropdown__toggle {
+      color: rgba(255,255,255,0.6); background: none; border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; padding: 0.4rem 0.6rem; font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.05em; cursor: pointer; min-height: 32px; display: inline-flex;
+      align-items: center; gap: 4px; transition: all 0.2s;
     }
-    .global-nav__lang:hover {
-      color: #fff;
-      border-color: rgba(255,255,255,0.4);
+    .lang-dropdown__toggle:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+    .lang-dropdown__toggle::after { content: '▾'; font-size: 0.6rem; }
+    .lang-dropdown__menu {
+      display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
+      background: rgba(10,12,18,0.95); border: 1px solid rgba(100,160,220,0.15);
+      border-radius: 8px; padding: 4px; min-width: 120px; z-index: 1001;
+      backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
+    .lang-dropdown.open .lang-dropdown__menu { display: block; }
+    .lang-dropdown__menu a {
+      display: block; padding: 8px 12px; color: rgba(255,255,255,0.7); text-decoration: none;
+      font-size: 0.75rem; border-radius: 4px; transition: background 0.15s;
+    }
+    .lang-dropdown__menu a:hover { background: rgba(100,180,255,0.1); color: #fff; }
+    .lang-dropdown__menu a.active { color: var(--accent); font-weight: 700; }
     .global-nav__cta {
       background: linear-gradient(135deg, #007AFF, #5856D6);
       color: #fff !important;
@@ -171,7 +175,21 @@
         SimpleMemo
       </a>
       <div class="global-nav__actions">
-        <a href="/" class="global-nav__lang">JA</a>
+        <div class="lang-dropdown" onclick="this.classList.toggle('open')">
+          <button class="lang-dropdown__toggle" aria-label="Language">ZH</button>
+          <div class="lang-dropdown__menu">
+            <a href="/">日本語</a>
+            <a href="/en/">English</a>
+            <a href="/zh/" class="active">简体中文</a>
+            <a href="/zh-Hant/">繁體中文</a>
+            <a href="/ko/">한국어</a>
+            <a href="/es/">Español</a>
+            <a href="/pt-BR/">Português</a>
+            <a href="/id/">Indonesia</a>
+            <a href="/ar/">العربية</a>
+            <a href="/tr/">Türkçe</a>
+          </div>
+        </div>
         <a href="https://apps.apple.com/app/simple-memo-fast/id6758438948" class="global-nav__cta">
           下载
         </a>
