@@ -18,7 +18,20 @@
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-EPZVZKCVQG');
+          var ua = navigator.userAgent || '';
+          var aiSource = 'direct';
+          if (/ChatGPT-User/i.test(ua)) aiSource = 'chatgpt';
+          else if (/OAI-SearchBot/i.test(ua)) aiSource = 'openai-search';
+          else if (/PerplexityBot/i.test(ua)) aiSource = 'perplexity';
+          else if (/ClaudeBot/i.test(ua)) aiSource = 'claude';
+          else if (/Google-Extended/i.test(ua)) aiSource = 'google-ai';
+          else if (/Bingbot/i.test(ua) && /AI/i.test(ua)) aiSource = 'bing-copilot';
+          if (aiSource !== 'direct') {
+            gtag('set', {'ai_traffic_source': aiSource});
+          }
+          gtag('config', 'G-EPZVZKCVQG', {
+            'custom_map': {'dimension1': 'ai_traffic_source'}
+          });
         };
       });
     });
@@ -110,6 +123,40 @@
         "url": "https://simplememofast.com/contact",
         "availableLanguage": ["Japanese", "English"]
       }
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://simplememofast.com/#organization",
+    "name": "Captio式シンプルメモ",
+    "alternateName": "Simple Memo - Captio-style",
+    "url": "https://simplememofast.com/",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://simplememofast.com/assets/img/app-icon-256.png",
+      "width": 256,
+      "height": 256
+    },
+    "sameAs": [
+      "https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948",
+      "https://x.com/simplememofast",
+      "https://note.com/simplememo",
+      "https://qiita.com/organizations/simplememo",
+      "https://zenn.dev/simplememo",
+      "https://www.producthunt.com/products/simplememo",
+      "https://alternativeto.net/software/simplememo/"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@simplememofast.com",
+      "url": "https://simplememofast.com/contact",
+      "availableLanguage": ["Japanese", "English"]
     }
   }
   </script>
