@@ -78,6 +78,7 @@
 <nav class="tabs" role="tablist">
   <button class="tab active" data-panel="book">ブランドブック</button>
   <button class="tab" data-panel="playbook">X 運用ガイド</button>
+  <button class="tab" data-panel="cowork">Cowork 依頼書</button>
   <button class="tab" data-panel="ops">動作確認</button>
   <button class="tab" data-panel="setup">セットアップ手順</button>
 </nav>
@@ -89,6 +90,10 @@
 
   <section id="panel-playbook" class="panel">
     <div id="playbook-body" class="md"><p class="loading">X 運用ガイドを読み込み中…</p></div>
+  </section>
+
+  <section id="panel-cowork" class="panel">
+    <div id="cowork-body" class="md"><p class="loading">Cowork 依頼書を読み込み中…</p></div>
   </section>
 
   <section id="panel-ops" class="panel">
@@ -165,6 +170,7 @@ async function loadMd(name, targetId) {
 
 loadMd('brand-book', 'book-body');
 loadMd('x-playbook', 'playbook-body');
+loadMd('cowork-x-engagement-brief', 'cowork-body');
 loadMd('setup', 'setup-body');
 
 // ---- 動作確認 ----
@@ -177,7 +183,7 @@ function setStatus(id, cls, text) {
 async function checkDocs(btn) {
   btn.disabled = true;
   setStatus('docs-status', 'info', '確認中…');
-  const files = ['brand-book.md', 'x-playbook.md', 'setup.md'];
+  const files = ['brand-book.md', 'x-playbook.md', 'cowork-x-engagement-brief.md', 'setup.md'];
   const lines = [];
   let allOk = true;
   for (const f of files) {
