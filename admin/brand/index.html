@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>ブランド管理 — SimpleMemo Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #000; --surface: #0d1117; --accent: #6ab4ff; --accent2: #4fc3f7;
+    --green: #3fb950; --red: #f85149; --yellow: #d29922;
+    --text: #fff; --text2: rgba(255,255,255,.72); --text3: rgba(255,255,255,.45);
+    --border: rgba(100,160,220,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text)}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;min-height:100dvh;line-height:1.7;font-size:14px}
+  .hdr{padding:12px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);z-index:50;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .hdr h1{font-size:.9rem;font-weight:600;color:var(--text2)}
+  .hdr h1 b{color:var(--accent)}
+  .hdr a{color:var(--text3);font-size:.75rem;text-decoration:none}
+  .hdr a:hover{color:var(--accent)}
+  .tabs{display:flex;gap:4px;padding:10px 20px;border-bottom:1px solid var(--border);background:#050505;flex-wrap:wrap;position:sticky;top:46px;z-index:49;overflow-x:auto}
+  .tab{font-family:inherit;font-size:.8rem;padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;white-space:nowrap}
+  .tab:hover{border-color:var(--accent);color:var(--text)}
+  .tab.active{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+  .main{padding:24px 20px 60px;max-width:920px;margin:0 auto}
+  .panel{display:none}
+  .panel.active{display:block}
+
+  /* Markdown styling */
+  .md h1{font-size:1.55rem;margin:1.6em 0 .6em;color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:.35em;line-height:1.4}
+  .md h1:first-child{margin-top:.2em}
+  .md h2{font-size:1.22rem;margin:1.8em 0 .5em;color:var(--accent2);line-height:1.5}
+  .md h3{font-size:1.05rem;margin:1.4em 0 .4em;color:var(--text);line-height:1.5}
+  .md h4{font-size:.95rem;margin:1.2em 0 .3em;color:var(--text2)}
+  .md p{margin:.8em 0;color:var(--text2)}
+  .md ul,.md ol{margin:.6em 0 .6em 1.4em;color:var(--text2)}
+  .md li{margin:.3em 0}
+  .md code{background:#1a1a1a;padding:2px 6px;border-radius:4px;font-size:.85em;color:var(--accent);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+  .md pre{background:#0a0a0a;border:1px solid var(--border);padding:14px;border-radius:6px;overflow-x:auto;margin:1em 0}
+  .md pre code{background:transparent;padding:0;color:var(--text);font-size:.82em}
+  .md table{border-collapse:collapse;margin:1em 0;width:100%;font-size:.82em;display:block;overflow-x:auto}
+  .md th,.md td{border:1px solid var(--border);padding:6px 10px;text-align:left;vertical-align:top}
+  .md th{background:#0a0a0a;color:var(--accent2);font-weight:600}
+  .md blockquote{border-left:3px solid var(--accent);padding:.4em 1em;margin:1em 0;background:#0a0a0a;color:var(--text2);border-radius:0 6px 6px 0}
+  .md hr{border:none;border-top:1px solid var(--border);margin:2.4em 0}
+  .md a{color:var(--accent);text-decoration:underline;text-decoration-color:rgba(106,180,255,.35)}
+  .md strong{color:var(--text)}
+  .md img{max-width:100%;border-radius:6px}
+
+  /* Ops panel */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px}
+  .card h2{font-size:1rem;color:var(--accent);margin-bottom:10px}
+  .card p{color:var(--text2);font-size:.82rem;margin-bottom:12px;line-height:1.7}
+  .card p.sub{color:var(--text3);font-size:.75rem}
+  .btn{font-family:inherit;font-size:.82rem;padding:9px 16px;border-radius:6px;border:none;background:var(--accent);color:#000;font-weight:700;cursor:pointer;margin:0 6px 6px 0}
+  .btn:hover{background:var(--accent2)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .status{margin-top:12px;padding:12px;border-radius:6px;font-size:.78rem;font-family:ui-monospace,"SF Mono",Menlo,monospace;white-space:pre-wrap;word-break:break-word;max-height:420px;overflow:auto;line-height:1.55}
+  .status.ok{background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.3);color:#7ee787}
+  .status.err{background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);color:#ff7b72}
+  .status.info{background:#0a0a0a;border:1px solid var(--border);color:var(--text2)}
+  input.txt{font-family:inherit;font-size:.82rem;padding:9px 12px;border-radius:6px;border:1px solid var(--border);background:#000;color:#fff;width:100%;max-width:440px;margin-bottom:10px;display:block}
+  input.txt:focus{outline:none;border-color:var(--accent)}
+  .loading{color:var(--text3);font-size:.82rem;padding:20px 0}
+  .notice{background:#0a0a0a;border-left:3px solid var(--yellow);padding:10px 14px;border-radius:0 6px 6px 0;margin:14px 0;color:var(--text2);font-size:.78rem;line-height:1.7}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <h1><b>SimpleMemo</b> ブランド管理画面</h1>
+  <a href="/admin/">← TikTok スライドツールへ</a>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-panel="book">ブランドブック</button>
+  <button class="tab" data-panel="playbook">X 運用ガイド</button>
+  <button class="tab" data-panel="ops">動作確認</button>
+  <button class="tab" data-panel="setup">セットアップ手順</button>
+</nav>
+
+<main class="main">
+  <section id="panel-book" class="panel active">
+    <div id="book-body" class="md"><p class="loading">ブランドブックを読み込み中…</p></div>
+  </section>
+
+  <section id="panel-playbook" class="panel">
+    <div id="playbook-body" class="md"><p class="loading">X 運用ガイドを読み込み中…</p></div>
+  </section>
+
+  <section id="panel-ops" class="panel">
+    <div class="notice">
+      この画面は <code>/admin/*</code> の Basic 認証で保護されています。外部公開されません。
+      すべてのテストは Cloudflare Pages Functions 経由で実行され、
+      X API キーはブラウザには送られません。
+    </div>
+
+    <div class="card">
+      <h2>1. 資料ファイル疎通確認</h2>
+      <p>ブランドブック・X 運用ガイド・セットアップ手順の Markdown ファイルが、認証付きでこの画面から読み取れるかを確認します。</p>
+      <button class="btn" onclick="checkDocs(this)">資料ファイルを確認</button>
+      <div id="docs-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>2. Cloudflare 環境変数の状態</h2>
+      <p>X API 関連の Secret が Cloudflare Pages に登録されているかを確認します。<strong>値は表示されません</strong>。設定済みか未設定かだけが返ります。</p>
+      <button class="btn" onclick="checkEnv(this)">環境変数を確認</button>
+      <div id="env-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>3. X API 接続テスト（検索）</h2>
+      <p><code>X_BEARER_TOKEN</code> を使って X API v2 の <code>GET /2/tweets/search/recent</code> にリクエストします。</p>
+      <p class="sub">※ このエンドポイントは X の Basic ティア以上のプランが必要です。Free ティアでは 403 が返ります。</p>
+      <input class="txt" id="q" value="from:simplememofast" placeholder="検索クエリ（例: メモアプリ min_faves:30 lang:ja）">
+      <button class="btn" onclick="testSearch(this)">検索を実行</button>
+      <div id="search-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>4. 自アカウント情報取得テスト</h2>
+      <p><code>X_USER_ACCESS_TOKEN</code>（OAuth 2.0 User Context）が登録されている場合、<code>GET /2/users/me</code> を叩いて自アカウント情報を取得します。App-only Bearer Token では取得できないエンドポイントです。</p>
+      <button class="btn" onclick="testMe(this)">自アカウント情報を取得</button>
+      <div id="me-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>5. 認証情報の再入力が必要な場合</h2>
+      <p>Basic 認証の Cookie を削除してログインし直したい場合は、ブラウザのプライバシー設定からこのサイトの Cookie を削除してください。</p>
+    </div>
+  </section>
+
+  <section id="panel-setup" class="panel">
+    <div id="setup-body" class="md"><p class="loading">セットアップ手順を読み込み中…</p></div>
+  </section>
+</main>
+
+<script>
+// ---- タブ切替 ----
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+    tab.classList.add('active');
+    document.getElementById('panel-'+tab.dataset.panel).classList.add('active');
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+});
+
+// ---- Markdown 読み込み ----
+async function loadMd(name, targetId) {
+  try {
+    const res = await fetch('/admin/brand/docs/'+name+'.md', {credentials:'include', cache:'no-store'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    document.getElementById(targetId).innerHTML = marked.parse(text);
+  } catch (e) {
+    document.getElementById(targetId).innerHTML = '<p style="color:#ff7b72">読み込み失敗: ' + e.message + '</p>';
+  }
+}
+
+loadMd('brand-book', 'book-body');
+loadMd('x-playbook', 'playbook-body');
+loadMd('setup', 'setup-body');
+
+// ---- 動作確認 ----
+function setStatus(id, cls, text) {
+  const el = document.getElementById(id);
+  el.className = 'status ' + cls;
+  el.textContent = text;
+}
+
+async function checkDocs(btn) {
+  btn.disabled = true;
+  setStatus('docs-status', 'info', '確認中…');
+  const files = ['brand-book.md', 'x-playbook.md', 'setup.md'];
+  const lines = [];
+  let allOk = true;
+  for (const f of files) {
+    try {
+      const res = await fetch('/admin/brand/docs/' + f, {credentials:'include', cache:'no-store'});
+      const len = res.headers.get('content-length') || '?';
+      lines.push((res.ok ? '[OK]' : '[NG]') + ' ' + res.status + '  ' + f + '  (' + len + ' bytes)');
+      if (!res.ok) allOk = false;
+    } catch (e) {
+      lines.push('[ERR] ' + f + '  ' + e.message);
+      allOk = false;
+    }
+  }
+  setStatus('docs-status', allOk ? 'ok' : 'err', lines.join('\n'));
+  btn.disabled = false;
+}
+
+async function checkEnv(btn) {
+  btn.disabled = true;
+  setStatus('env-status', 'info', '確認中…');
+  try {
+    const res = await fetch('/admin/api/x-verify?action=env', {credentials:'include', cache:'no-store'});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+    const lines = [];
+    for (const [k, v] of Object.entries(data.env)) {
+      lines.push((v ? '[設定済み]' : '[未設定　]') + '  ' + k);
+    }
+    const allSet = Object.values(data.env).every(Boolean);
+    const anySet = Object.values(data.env).some(Boolean);
+    const summary = allSet
+      ? '\n\nすべての環境変数が設定されています。'
+      : (anySet ? '\n\n一部の変数が未設定です。「セットアップ手順」タブを参照してください。' : '\n\nまだ何も登録されていません。「セットアップ手順」タブを参照してください。');
+    setStatus('env-status', allSet ? 'ok' : 'err', lines.join('\n') + summary);
+  } catch (e) {
+    setStatus('env-status', 'err', 'エラー: ' + e.message);
+  }
+  btn.disabled = false;
+}
+
+async function testSearch(btn) {
+  btn.disabled = true;
+  setStatus('search-status', 'info', 'リクエスト送信中…');
+  const q = document.getElementById('q').value || 'from:simplememofast';
+  try {
+    const res = await fetch('/admin/api/x-verify?action=search&q=' + encodeURIComponent(q), {credentials:'include', cache:'no-store'});
+    const data = await res.json();
+    const cls = (data.status >= 200 && data.status < 300) ? 'ok' : 'err';
+    const rl = data.rateLimit ? '\nRate Limit: remaining=' + data.rateLimit.remaining + ' / limit=' + data.rateLimit.limit : '';
+    setStatus('search-status', cls, 'HTTP ' + data.status + rl + '\n\n' + JSON.stringify(data.body, null, 2));
+  } catch (e) {
+    setStatus('search-status', 'err', 'エラー: ' + e.message);
+  }
+  btn.disabled = false;
+}
+
+async function testMe(btn) {
+  btn.disabled = true;
+  setStatus('me-status', 'info', 'リクエスト送信中…');
+  try {
+    const res = await fetch('/admin/api/x-verify?action=me', {credentials:'include', cache:'no-store'});
+    const data = await res.json();
+    const cls = (data.status >= 200 && data.status < 300) ? 'ok' : 'err';
+    setStatus('me-status', cls, 'HTTP ' + data.status + '\n\n' + JSON.stringify(data.body, null, 2));
+  } catch (e) {
+    setStatus('me-status', 'err', 'エラー: ' + e.message);
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
