@@ -152,7 +152,7 @@
       <h2>収集条件</h2>
       <p class="sub">※ <code>min_faves:</code> などの高度オペレータは X のプラン／エンドポイントによって挙動が異なります。<code>search/all</code>（Pro 以上）推奨。</p>
       <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">検索クエリ</label>
-      <input class="txt" id="cap-q" value='captio (メモ OR メモ帳 OR アプリ) lang:ja min_faves:1 -is:retweet'>
+      <input class="txt" id="cap-q" value="captio lang:ja -is:retweet">
       <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">エンドポイント</label>
       <select class="txt" id="cap-endpoint" style="max-width:260px">
         <option value="all" selected>search/all（全期間・Pro 以上）</option>
@@ -164,6 +164,9 @@
       <input class="txt" id="cap-start" placeholder="空欄で無指定">
       <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">end_time（任意・ISO8601）</label>
       <input class="txt" id="cap-end" placeholder="空欄で無指定">
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">最小いいね数（クライアント側フィルタ・この値未満は保存しない）</label>
+      <input class="txt" id="cap-min-faves" value="1" style="max-width:160px">
+      <p class="sub" style="margin-top:4px">※ 現プランでは X API の <code>min_faves:</code> 演算子が使えないため、受信後にクライアント側で間引きます。API 課金は取得件数分かかります。</p>
     </div>
 
     <div class="card">
@@ -442,13 +445,17 @@ async function captioFetchNext(btn) {
       return;
     }
 
-    // マージ（id で重複除外）
+    // マージ（id で重複除外 + 最小いいね数フィルタ）
+    const minFavesRaw = document.getElementById('cap-min-faves').value.trim();
+    const minFaves = Math.max(0, parseInt(minFavesRaw || '0', 10) || 0);
     let added = 0;
     let dup = 0;
+    let filteredOut = 0;
     const tweets = Array.isArray(data.tweets) ? data.tweets : [];
     for (const t of tweets) {
       if (!t || !t.id) continue;
       if (s.ids[t.id]) { dup++; continue; }
+      if ((t.like_count || 0) < minFaves) { filteredOut++; continue; }
       s.ids[t.id] = 1;
       s.tweets.push(t);
       added++;
@@ -466,7 +473,7 @@ async function captioFetchNext(btn) {
     const summary =
       'HTTP ' + data.status + '\n' +
       rlLine + '\n' +
-      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 重複 ' + dup + '\n' +
+      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 重複 ' + dup + ' / いいね<' + minFaves + ' で除外 ' + filteredOut + '\n' +
       '累計: ' + s.tweets.length + ' 件 / ' + s.calls + ' コール\n' +
       'next_token: ' + (s.nextToken ? '(あり — もう一度ボタンを押すと続きを取得)' : '(なし — 結果終端)');
     setStatus('cap-status', 'ok', summary);
@@ -533,7 +540,7 @@ function captioTs() {
 }
 
 // クエリやエンドポイント変更時に進捗表示を更新
-['cap-q', 'cap-endpoint', 'cap-max', 'cap-start', 'cap-end'].forEach(function (id) {
+['cap-q', 'cap-endpoint', 'cap-max', 'cap-start', 'cap-end', 'cap-min-faves'].forEach(function (id) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', captioRender);
 });
