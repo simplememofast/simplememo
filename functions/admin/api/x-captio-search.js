@@ -38,7 +38,11 @@ export async function onRequest(context) {
   params.set('user.fields', 'username,name');
   params.set('expansions', 'author_id');
   if (nextToken) params.set('next_token', nextToken);
-  if (startTime) params.set('start_time', startTime);
+  // search/all は start_time を指定しないと「過去 30 日」に狭められるため、
+  // endpoint=all かつ未指定の場合は Twitter 創業日 (2006-03-21) を自動注入して全アーカイブ対象にする。
+  const effectiveStartTime = startTime
+    || (endpointParam === 'all' ? '2006-03-21T00:00:00Z' : '');
+  if (effectiveStartTime) params.set('start_time', effectiveStartTime);
   if (endTime) params.set('end_time', endTime);
   // 並びはサーバ側で触らず、フロントで created_at 昇順ソートする
 
