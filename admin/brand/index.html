@@ -80,6 +80,7 @@
   <button class="tab" data-panel="playbook">X 運用ガイド</button>
   <button class="tab" data-panel="cowork">Cowork 依頼書</button>
   <button class="tab" data-panel="ops">動作確認</button>
+  <button class="tab" data-panel="captio">captio 言及収集</button>
   <button class="tab" data-panel="setup">セットアップ手順</button>
 </nav>
 
@@ -136,6 +137,51 @@
     <div class="card">
       <h2>5. 認証情報の再入力が必要な場合</h2>
       <p>Basic 認証の Cookie を削除してログインし直したい場合は、ブラウザのプライバシー設定からこのサイトの Cookie を削除してください。</p>
+    </div>
+  </section>
+
+  <section id="panel-captio" class="panel">
+    <div class="notice">
+      X 検索 API（v2 <code>search/recent</code> または <code>search/all</code>）で
+      <b>captio</b> のメモ帳アプリに言及している日本語ツイートを 1 コールずつ取得します。
+      課金を抑えるため <b>ページングは手動</b>（「次のページを取得」ボタンを押した時だけ API を叩きます）。
+      取得済みツイートはブラウザ内（localStorage）に保存され、同じ ID は重複追加されません。
+    </div>
+
+    <div class="card">
+      <h2>収集条件</h2>
+      <p class="sub">※ <code>min_faves:</code> などの高度オペレータは X のプラン／エンドポイントによって挙動が異なります。<code>search/all</code>（Pro 以上）推奨。</p>
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">検索クエリ</label>
+      <input class="txt" id="cap-q" value='captio (メモ OR メモ帳 OR アプリ) lang:ja min_faves:1 -is:retweet'>
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">エンドポイント</label>
+      <select class="txt" id="cap-endpoint" style="max-width:260px">
+        <option value="all" selected>search/all（全期間・Pro 以上）</option>
+        <option value="recent">search/recent（過去 7 日・Basic 以上）</option>
+      </select>
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">1 コールあたりの最大件数（recent 最大 100 / all 最大 500）</label>
+      <input class="txt" id="cap-max" value="100" style="max-width:160px">
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">start_time（任意・ISO8601、例: 2010-01-01T00:00:00Z）</label>
+      <input class="txt" id="cap-start" placeholder="空欄で無指定">
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">end_time（任意・ISO8601）</label>
+      <input class="txt" id="cap-end" placeholder="空欄で無指定">
+    </div>
+
+    <div class="card">
+      <h2>ページング</h2>
+      <p id="cap-progress" style="color:var(--text2);font-size:.82rem;margin-bottom:10px">未取得</p>
+      <button class="btn" id="cap-fetch-btn" onclick="captioFetchNext(this)">次のページを取得</button>
+      <button class="btn" style="background:#222;color:#fff" onclick="captioReset()">ローカルを全クリア</button>
+      <div id="cap-status"></div>
+    </div>
+
+    <div class="card">
+      <h2>収集結果（重複除外後）</h2>
+      <p class="sub">並び順：投稿日時の昇順（最古が先頭）。リンク先は x.com のパーマリンク。</p>
+      <button class="btn" onclick="captioCopyMd(this)">Markdown をコピー</button>
+      <button class="btn" onclick="captioDownloadCsv()">CSV をダウンロード</button>
+      <button class="btn" style="background:#222;color:#fff" onclick="captioDownloadJson()">JSON をダウンロード</button>
+      <div id="cap-list-summary" style="margin-top:10px;color:var(--text3);font-size:.78rem"></div>
+      <pre id="cap-list" class="status info" style="max-height:520px;margin-top:12px"></pre>
     </div>
   </section>
 
@@ -253,6 +299,247 @@ async function testMe(btn) {
   }
   btn.disabled = false;
 }
+
+// ---- captio 言及収集 ----
+const CAP_STORE_KEY = 'captio_collect_v1';
+
+function captioLoadState() {
+  try {
+    const raw = localStorage.getItem(CAP_STORE_KEY);
+    if (!raw) return captioDefaultState();
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object') return captioDefaultState();
+    if (!Array.isArray(s.tweets)) s.tweets = [];
+    if (!s.ids || typeof s.ids !== 'object') {
+      s.ids = {};
+      for (const t of s.tweets) s.ids[t.id] = 1;
+    }
+    if (typeof s.calls !== 'number') s.calls = 0;
+    if (typeof s.lastQuery !== 'string') s.lastQuery = '';
+    if (typeof s.lastEndpoint !== 'string') s.lastEndpoint = 'all';
+    if (!('nextToken' in s)) s.nextToken = null;
+    return s;
+  } catch (e) {
+    return captioDefaultState();
+  }
+}
+function captioDefaultState() {
+  return { tweets: [], ids: {}, calls: 0, lastQuery: '', lastEndpoint: 'all', nextToken: null, lastFetchAt: null };
+}
+function captioSaveState(s) {
+  localStorage.setItem(CAP_STORE_KEY, JSON.stringify(s));
+}
+
+function captioRender() {
+  const s = captioLoadState();
+  const q = document.getElementById('cap-q').value;
+  const endpoint = document.getElementById('cap-endpoint').value;
+
+  // クエリやエンドポイントを変えたら next_token は無効化表示
+  const queryChanged = s.lastQuery && (s.lastQuery !== q || s.lastEndpoint !== endpoint);
+
+  const prog = document.getElementById('cap-progress');
+  const parts = [];
+  parts.push('蓄積ツイート: ' + s.tweets.length + ' 件');
+  parts.push('API コール累積: ' + s.calls + ' 回');
+  if (s.nextToken) {
+    parts.push(queryChanged
+      ? '(前回クエリの next_token あり・クエリ変更後は先頭から再取得します)'
+      : 'next_token: あり（続きを取得可能）');
+  } else {
+    parts.push(s.lastFetchAt ? '次ページ: なし（完了 or 初回）' : '次ページ: 未取得');
+  }
+  if (s.lastFetchAt) parts.push('最終取得: ' + new Date(s.lastFetchAt).toLocaleString());
+  prog.textContent = parts.join(' / ');
+
+  // 本文：created_at 昇順（最古→新）
+  const sorted = s.tweets.slice().sort(function (a, b) {
+    const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return ta - tb;
+  });
+
+  const md = captioBuildMd(sorted);
+  document.getElementById('cap-list').textContent = md || '（まだ何も取得していません）';
+  document.getElementById('cap-list-summary').textContent =
+    '合計 ' + sorted.length + ' 件 / ' + (md ? md.length.toLocaleString() : 0) + ' 文字';
+}
+
+function captioBuildMd(tweets) {
+  if (!tweets.length) return '';
+  const lines = [];
+  for (const t of tweets) {
+    const d = t.created_at ? t.created_at.slice(0, 10) : '----';
+    const who = t.author_username ? ('@' + t.author_username) : '(unknown)';
+    const faves = t.like_count || 0;
+    const rts = t.retweet_count || 0;
+    const text = (t.text || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    lines.push('- [' + d + '] ' + who + ' ♥' + faves + ' RT' + rts + ' — ' + t.url + (text ? '  \n    > ' + text : ''));
+  }
+  return lines.join('\n');
+}
+
+function captioBuildCsv(tweets) {
+  const header = ['created_at', 'url', 'id', 'author_username', 'author_name', 'lang', 'like_count', 'retweet_count', 'reply_count', 'quote_count', 'impression_count', 'text'];
+  const rows = [header.join(',')];
+  for (const t of tweets) {
+    rows.push(header.map(function (k) { return csvCell(t[k]); }).join(','));
+  }
+  return rows.join('\n');
+}
+function csvCell(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  if (s.indexOf('"') >= 0 || s.indexOf(',') >= 0 || s.indexOf('\n') >= 0) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+async function captioFetchNext(btn) {
+  btn.disabled = true;
+  setStatus('cap-status', 'info', 'リクエスト送信中…（1 コールのみ）');
+
+  const q = document.getElementById('cap-q').value.trim();
+  const endpoint = document.getElementById('cap-endpoint').value;
+  const maxResults = document.getElementById('cap-max').value.trim() || '100';
+  const startTime = document.getElementById('cap-start').value.trim();
+  const endTime = document.getElementById('cap-end').value.trim();
+
+  if (!q) {
+    setStatus('cap-status', 'err', 'クエリが空です。');
+    btn.disabled = false;
+    return;
+  }
+
+  const s = captioLoadState();
+  // クエリまたはエンドポイントが変わったら next_token を使わない
+  const useToken = s.nextToken && s.lastQuery === q && s.lastEndpoint === endpoint;
+
+  const params = new URLSearchParams();
+  params.set('q', q);
+  params.set('endpoint', endpoint);
+  params.set('max_results', maxResults);
+  if (useToken) params.set('next_token', s.nextToken);
+  if (startTime) params.set('start_time', startTime);
+  if (endTime) params.set('end_time', endTime);
+
+  try {
+    const res = await fetch('/admin/api/x-captio-search?' + params.toString(), {
+      credentials: 'include',
+      cache: 'no-store',
+    });
+    const data = await res.json();
+
+    if (!res.ok || data.error || data.errors) {
+      const msg = data.error || data.detail || data.title
+        || (data.errors && JSON.stringify(data.errors))
+        || ('HTTP ' + res.status);
+      setStatus('cap-status', 'err',
+        'HTTP ' + (data.status || res.status) + '\n' +
+        JSON.stringify({ error: msg, body: data }, null, 2));
+      btn.disabled = false;
+      return;
+    }
+
+    // マージ（id で重複除外）
+    let added = 0;
+    let dup = 0;
+    const tweets = Array.isArray(data.tweets) ? data.tweets : [];
+    for (const t of tweets) {
+      if (!t || !t.id) continue;
+      if (s.ids[t.id]) { dup++; continue; }
+      s.ids[t.id] = 1;
+      s.tweets.push(t);
+      added++;
+    }
+    s.calls = (s.calls || 0) + 1;
+    s.lastQuery = q;
+    s.lastEndpoint = endpoint;
+    s.nextToken = data.next_token || null;
+    s.lastFetchAt = Date.now();
+    captioSaveState(s);
+
+    const rl = data.rateLimit || {};
+    const rlLine = 'Rate Limit: remaining=' + (rl.remaining || '?') + ' / limit=' + (rl.limit || '?') +
+      (rl.reset ? ' (reset=' + new Date(Number(rl.reset) * 1000).toLocaleTimeString() + ')' : '');
+    const summary =
+      'HTTP ' + data.status + '\n' +
+      rlLine + '\n' +
+      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 重複 ' + dup + '\n' +
+      '累計: ' + s.tweets.length + ' 件 / ' + s.calls + ' コール\n' +
+      'next_token: ' + (s.nextToken ? '(あり — もう一度ボタンを押すと続きを取得)' : '(なし — 結果終端)');
+    setStatus('cap-status', 'ok', summary);
+
+    captioRender();
+  } catch (e) {
+    setStatus('cap-status', 'err', 'エラー: ' + e.message);
+  }
+  btn.disabled = false;
+}
+
+function captioReset() {
+  if (!confirm('ローカルに保存した取得済みツイート・next_token・API コール数を全てクリアします。よろしいですか？')) return;
+  localStorage.removeItem(CAP_STORE_KEY);
+  setStatus('cap-status', 'info', 'ローカル状態をクリアしました。');
+  captioRender();
+}
+
+async function captioCopyMd(btn) {
+  const s = captioLoadState();
+  const sorted = s.tweets.slice().sort(function (a, b) {
+    return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+  });
+  const md = captioBuildMd(sorted);
+  try {
+    await navigator.clipboard.writeText(md);
+    btn.textContent = 'コピーしました ✓';
+    setTimeout(function () { btn.textContent = 'Markdown をコピー'; }, 1600);
+  } catch (e) {
+    setStatus('cap-status', 'err', 'クリップボードにコピーできませんでした: ' + e.message);
+  }
+}
+
+function captioDownloadCsv() {
+  const s = captioLoadState();
+  const sorted = s.tweets.slice().sort(function (a, b) {
+    return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+  });
+  const csv = captioBuildCsv(sorted);
+  captioTriggerDownload(csv, 'captio-mentions-' + captioTs() + '.csv', 'text/csv;charset=utf-8');
+}
+function captioDownloadJson() {
+  const s = captioLoadState();
+  const sorted = s.tweets.slice().sort(function (a, b) {
+    return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+  });
+  captioTriggerDownload(JSON.stringify(sorted, null, 2), 'captio-mentions-' + captioTs() + '.json', 'application/json;charset=utf-8');
+}
+function captioTriggerDownload(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+function captioTs() {
+  const d = new Date();
+  const pad = function (n) { return String(n).padStart(2, '0'); };
+  return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes());
+}
+
+// クエリやエンドポイント変更時に進捗表示を更新
+['cap-q', 'cap-endpoint', 'cap-max', 'cap-start', 'cap-end'].forEach(function (id) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', captioRender);
+});
+
+// 初期描画
+captioRender();
 </script>
 </body>
 </html>
