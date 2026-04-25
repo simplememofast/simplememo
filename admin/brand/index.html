@@ -151,8 +151,14 @@
     <div class="card">
       <h2>収集条件</h2>
       <p class="sub">※ <code>min_faves:</code> などの高度オペレータは X のプラン／エンドポイントによって挙動が異なります。<code>search/all</code>（Pro 以上）推奨。</p>
-      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">検索クエリ</label>
-      <input class="txt" id="cap-q" value="captio lang:ja -is:retweet">
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">検索クエリ（<code>lang:</code> は下のドロップダウンで自動付与されます）</label>
+      <input class="txt" id="cap-q" value="captio -is:retweet">
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">言語</label>
+      <select class="txt" id="cap-lang" style="max-width:260px">
+        <option value="ja" selected>日本語（lang:ja）</option>
+        <option value="en">英語（lang:en）</option>
+        <option value="all">指定なし（全言語）</option>
+      </select>
       <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">エンドポイント</label>
       <select class="txt" id="cap-endpoint" style="max-width:260px">
         <option value="all" selected>search/all（全期間・Pro 以上）</option>
@@ -333,9 +339,18 @@ function captioSaveState(s) {
   localStorage.setItem(CAP_STORE_KEY, JSON.stringify(s));
 }
 
+function captioBuildQuery() {
+  const base = (document.getElementById('cap-q').value || '').trim();
+  const lang = document.getElementById('cap-lang').value;
+  if (!base) return '';
+  // ユーザが既に lang: を直書きしていたら二重付与しない
+  if (lang === 'all' || /\blang:\w+/i.test(base)) return base;
+  return base + ' lang:' + lang;
+}
+
 function captioRender() {
   const s = captioLoadState();
-  const q = document.getElementById('cap-q').value;
+  const q = captioBuildQuery();
   const endpoint = document.getElementById('cap-endpoint').value;
 
   // クエリやエンドポイントを変えたら next_token は無効化表示
@@ -403,7 +418,7 @@ async function captioFetchNext(btn) {
   btn.disabled = true;
   setStatus('cap-status', 'info', 'リクエスト送信中…（1 コールのみ）');
 
-  const q = document.getElementById('cap-q').value.trim();
+  const q = captioBuildQuery();
   const endpoint = document.getElementById('cap-endpoint').value;
   const maxResults = document.getElementById('cap-max').value.trim() || '100';
   const startTime = document.getElementById('cap-start').value.trim();
@@ -540,9 +555,11 @@ function captioTs() {
 }
 
 // クエリやエンドポイント変更時に進捗表示を更新
-['cap-q', 'cap-endpoint', 'cap-max', 'cap-start', 'cap-end', 'cap-min-faves'].forEach(function (id) {
+['cap-q', 'cap-lang', 'cap-endpoint', 'cap-max', 'cap-start', 'cap-end', 'cap-min-faves'].forEach(function (id) {
   const el = document.getElementById(id);
-  if (el) el.addEventListener('input', captioRender);
+  if (!el) return;
+  el.addEventListener('input', captioRender);
+  el.addEventListener('change', captioRender);
 });
 
 // 初期描画
