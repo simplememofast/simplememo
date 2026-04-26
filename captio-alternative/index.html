@@ -259,13 +259,13 @@
        トップページのクオリティ感に寄せる：暗背景でも沈まないラディアルグロー、
        ヒーロー内に製品アイコン＋ベネフィットチップ＋ ATF CTA を配置。 */
 
-    /* ページ背景：上部から青の光が放射するラディアルグラデ */
-    body { background: #06070b; }
+    /* ページ背景：青味の濃いダーク（黒から離す）＋ 上部グロー */
+    body { background: #0e1424; }
     .page-content {
       background:
-        radial-gradient(ellipse 1100px 700px at 50% 0%, rgba(80,140,230,.18), transparent 60%),
-        radial-gradient(ellipse 800px 600px at 50% 30%, rgba(124,108,255,.10), transparent 70%),
-        #0a0d14;
+        radial-gradient(ellipse 1100px 700px at 50% 0%, rgba(100,160,240,.22), transparent 60%),
+        radial-gradient(ellipse 800px 600px at 50% 30%, rgba(140,120,255,.12), transparent 70%),
+        #10172a;
       color: #ffffff;
       font-weight: 500;
     }
@@ -274,7 +274,7 @@
     .page-content {
       --text: #ffffff;
       --text-secondary: #ffffff;
-      --text-muted: #e6ecf5;
+      --text-muted: #ffffff;
     }
     /* 本文の最低ウェイト＝500、強調はすべて純白＋700 */
     .page-content p,
@@ -359,14 +359,15 @@
       margin: 0 auto 1.8rem;
     }
     .lp-hero__chips li {
-      background: rgba(26,35,51,.92);
-      border: 1px solid rgba(160,200,240,.40);
+      background: linear-gradient(160deg, #2a3a5e, #233152);
+      border: 1px solid rgba(180,210,250,.50);
       border-radius: 999px;
       padding: .6rem 1.1rem;
       font-size: .95rem;
       font-weight: 700;
       color: #ffffff;
       backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(0,0,0,.35);
     }
     .lp-hero__chips li b {
       color: #7cc4ff;
@@ -404,7 +405,7 @@
     }
     .lp-hero__note {
       font-size: .9rem;
-      color: #e6ecf5;
+      color: #ffffff;
       font-weight: 500;
       max-width: 580px;
       margin: 1.2rem auto 0;
@@ -422,14 +423,14 @@
     }
     .lp-section__lead { color: #ffffff; font-size: 1.08rem; font-weight: 500; line-height: 1.85; }
 
-    /* カード・テーブル・FAQ をリッチダーク化 */
+    /* カード・テーブル・FAQ をリッチブルーに（黒っぽさを抜く） */
     .reason-card,
     .steps-list li,
     .cta-box,
     .tldr {
-      background: linear-gradient(160deg, rgba(26,35,51,.92) 0%, rgba(20,28,44,.92) 100%) !important;
-      border: 1px solid rgba(160,200,240,.22) !important;
-      box-shadow: 0 6px 24px rgba(0,0,0,.32);
+      background: linear-gradient(160deg, #2a3a5e 0%, #233152 100%) !important;
+      border: 1px solid rgba(180,210,250,.45) !important;
+      box-shadow: 0 8px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
     }
     .reason-card { border-radius: 16px; padding: 1.7rem; }
     .reason-card__title { color: #ffffff; font-size: 1.12rem; font-weight: 800; letter-spacing: -.01em; }
@@ -459,7 +460,7 @@
     .compare-table .no { color: #ff8a7e; font-weight: 700; }
 
     /* インライン style で text-muted を使っている注釈 */
-    p[style*="text-muted"] { color: #e6ecf5 !important; font-weight: 500 !important; }
+    p[style*="text-muted"] { color: #ffffff !important; font-weight: 500 !important; }
     /* 本文中の strong / b は最強の白＋800 */
     .reason-card__desc strong,
     .lp-section__lead strong,
@@ -470,10 +471,10 @@
 
     /* 既存「Captioから3分で移行完了」CTA ボックスの上書き */
     main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] {
-      background: linear-gradient(160deg, rgba(26,35,51,.92), rgba(20,28,44,.92)) !important;
-      border: 1px solid rgba(160,200,240,.22) !important;
+      background: linear-gradient(160deg, #2a3a5e, #233152) !important;
+      border: 1px solid rgba(180,210,250,.45) !important;
       border-radius: 18px !important;
-      box-shadow: 0 6px 24px rgba(0,0,0,.32);
+      box-shadow: 0 8px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
     }
     main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p { color: #ffffff !important; font-weight: 500 !important; }
     main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p[style*="font-weight:700"] { color: #ffffff !important; font-size: 1.15rem !important; font-weight: 800 !important; }
