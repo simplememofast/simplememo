@@ -255,22 +255,165 @@
       }
     }
 
-    /* === 読みやすさ改善（このページ専用） ===
-       グローバルテーマが暗すぎたので、サーフェス・枠線・本文色を持ち上げる。 */
-    .page-content { background: #0d1218; }
+    /* === ファーストビュー設計刷新（このページ専用） ===
+       トップページのクオリティ感に寄せる：暗背景でも沈まないラディアルグロー、
+       ヒーロー内に製品アイコン＋ベネフィットチップ＋ ATF CTA を配置。 */
+
+    /* ページ背景：上部から青の光が放射するラディアルグラデ */
+    body { background: #06070b; }
+    .page-content {
+      background:
+        radial-gradient(ellipse 1100px 700px at 50% 0%, rgba(80,140,230,.18), transparent 60%),
+        radial-gradient(ellipse 800px 600px at 50% 30%, rgba(124,108,255,.10), transparent 70%),
+        #0a0d14;
+      color: #f3f6fb;
+    }
     .page-content .container { color: #f3f6fb; }
-    .lp-hero__title { color: #fff; letter-spacing: -.01em; }
-    .lp-hero__sub { color: #d8e0ec; font-size: 1.05rem; }
-    .lp-section__title { color: #fff; border-bottom-color: rgba(160,200,240,.32); font-size: 1.55rem; }
+
+    /* page-header の重複ゾーンを畳む（global-nav と機能が被るため） */
+    .page-header { padding: 0; }
+    .page-header__inner { display: none; }
+    .lang-switcher-container { padding: .8rem 0 0; }
+
+    /* ヒーロー：縦ボリューム＋中央寄せ＋グロー */
+    .lp-hero {
+      padding: 1.6rem 0 3.2rem;
+      position: relative;
+      text-align: center;
+    }
+    .lp-hero__icon {
+      width: 132px;
+      height: 132px;
+      margin: 0 auto 1.4rem;
+      position: relative;
+    }
+    .lp-hero__icon::before {
+      content: '';
+      position: absolute;
+      inset: -38%;
+      background: radial-gradient(circle, rgba(124,196,255,.45), rgba(124,196,255,0) 65%);
+      filter: blur(14px);
+      z-index: 0;
+    }
+    .lp-hero__icon img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 28px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 32px rgba(124,196,255,.28);
+    }
+    .lp-hero__label {
+      font-size: .8rem;
+      color: #9ad1ff;
+      background: rgba(100,180,255,.10);
+      border: 1px solid rgba(154,209,255,.30);
+      padding: .4rem 1rem;
+      letter-spacing: .04em;
+      text-transform: none;
+    }
+    .lp-hero__title {
+      color: #fff;
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+      font-weight: 800;
+      line-height: 1.18;
+      letter-spacing: -.02em;
+      margin: 1.2rem auto 1.1rem;
+      max-width: 760px;
+    }
+    .lp-hero__title .grad {
+      background: linear-gradient(135deg, #7cc4ff 0%, #a78bfa 55%, #ff8a7e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .lp-hero__sub {
+      color: #d8e0ec;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      max-width: 640px;
+      margin: 0 auto 1.6rem;
+    }
+    .lp-hero__chips {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .6rem;
+      padding: 0;
+      margin: 0 auto 1.8rem;
+    }
+    .lp-hero__chips li {
+      background: rgba(26,35,51,.85);
+      border: 1px solid rgba(160,200,240,.28);
+      border-radius: 999px;
+      padding: .55rem 1.05rem;
+      font-size: .88rem;
+      color: #dde3ee;
+      backdrop-filter: blur(8px);
+    }
+    .lp-hero__chips li b {
+      color: #7cc4ff;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-right: .35rem;
+    }
+    .lp-hero__cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .8rem;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .lp-hero__cta .app-store-badge { display: inline-flex; }
+    .lp-hero__cta .app-store-badge img {
+      height: 52px;
+      width: auto;
+      filter: drop-shadow(0 8px 24px rgba(124,196,255,.25));
+    }
+    .lp-hero__secondary {
+      color: #9ad1ff;
+      text-decoration: none;
+      font-size: .92rem;
+      padding: .8rem 1.2rem;
+      border: 1px solid rgba(154,209,255,.32);
+      border-radius: 12px;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .lp-hero__secondary:hover {
+      color: #fff;
+      border-color: #9ad1ff;
+      background: rgba(154,209,255,.08);
+    }
+    .lp-hero__note {
+      font-size: .82rem;
+      color: #98a4b8;
+      max-width: 580px;
+      margin: 1.2rem auto 0;
+      line-height: 1.6;
+    }
+    .lp-hero__note strong { color: #cdd6e3; }
+
+    /* セクション本文の見やすさ */
+    .lp-section__title {
+      color: #fff;
+      border-bottom-color: rgba(160,200,240,.32);
+      font-size: 1.55rem;
+    }
     .lp-section__lead { color: #d8e0ec; font-size: 1rem; }
+
+    /* カード・テーブル・FAQ をリッチダーク化 */
     .reason-card,
     .steps-list li,
     .cta-box,
     .tldr {
-      background: #1a2333 !important;
-      border-color: rgba(160,200,240,.28) !important;
-      box-shadow: 0 4px 16px rgba(0,0,0,.25);
+      background: linear-gradient(160deg, rgba(26,35,51,.92) 0%, rgba(20,28,44,.92) 100%) !important;
+      border: 1px solid rgba(160,200,240,.22) !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,.32);
     }
+    .reason-card { border-radius: 16px; padding: 1.7rem; }
     .reason-card__title { color: #fff; font-size: 1.05rem; }
     .reason-card__desc,
     .cta-box__desc,
@@ -281,9 +424,11 @@
     .spec-list,
     .spec-list dd { color: #dde3ee !important; }
     .spec-list dt { color: #fff !important; font-size: .95rem; }
+    .cta-box { border-radius: 18px; padding: 2.4rem 1.6rem; }
     .cta-box__title { color: #fff; font-size: 1.3rem; }
     .faq-summary { color: #f3f6fb; font-size: 1rem; }
     .faq-item { border-bottom-color: rgba(160,200,240,.22); }
+
     .compare-table { font-size: .95rem; }
     .compare-table th,
     .compare-table td { border-bottom-color: rgba(160,200,240,.22); padding: .9rem 1rem; }
@@ -292,19 +437,32 @@
     .compare-table td:first-child { color: #fff; }
     .compare-table .yes { color: #5ee29c; font-weight: 600; }
     .compare-table .no { color: #ff8074; }
-    /* 注釈・小さい文字 */
-    .lp-hero p[style*="text-muted"],
+
+    /* インライン style で text-muted を使っている注釈 */
     p[style*="text-muted"] { color: #b8c2d4 !important; }
-    /* 上部 CTA ブロックの上書き（インラインスタイルが使われているので強めに） */
-    main .lp-hero + .tldr + div[style*="text-align:center"] {
-      background: #1a2333 !important;
-      border-color: rgba(160,200,240,.28) !important;
+
+    /* 既存「Captioから3分で移行完了」CTA ボックスの上書き */
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] {
+      background: linear-gradient(160deg, rgba(26,35,51,.92), rgba(20,28,44,.92)) !important;
+      border: 1px solid rgba(160,200,240,.22) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,.32);
     }
-    main .lp-hero + .tldr + div[style*="text-align:center"] p { color: #dde3ee !important; }
-    main .lp-hero + .tldr + div[style*="text-align:center"] p[style*="font-weight:700"] { color: #fff !important; }
-    /* 内部リンクのコントラスト */
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p { color: #dde3ee !important; }
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p[style*="font-weight:700"] { color: #fff !important; }
+
+    /* 内部リンク */
     .internal-links a { color: #9ad1ff; border-color: rgba(154,209,255,.32); }
     .internal-links a:hover { color: #fff; border-color: #9ad1ff; }
+
+    @media (max-width: 640px) {
+      .lp-hero { padding: 1rem 0 2.4rem; }
+      .lp-hero__icon { width: 100px; height: 100px; }
+      .lp-hero__title { font-size: clamp(1.85rem, 7vw, 2.4rem); }
+      .lp-hero__sub { font-size: .98rem; }
+      .lp-hero__chips li { font-size: .82rem; padding: .5rem .9rem; }
+      .lp-hero__cta .app-store-badge img { height: 46px; }
+    }
   </style>
 
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
@@ -383,19 +541,42 @@
 
       <!-- Hero -->
       <div class="lp-hero">
+        <div class="lp-hero__icon">
+          <img src="/assets/img/app-icon-256.webp" alt="Captio式シンプルメモ アプリアイコン" width="132" height="132" loading="eager">
+        </div>
         <div class="lp-hero__label">
           <span data-lang="ja">Captioの代わりを探している方へ</span>
           <span data-lang="en">Looking for a Captio replacement?</span>
         </div>
         <h1 class="lp-hero__title">
-          <span data-lang="ja">Captio代替アプリ<br>比較・移行ガイド</span>
-          <span data-lang="en">Captio Alternative<br>Comparison & Migration Guide</span>
+          <span data-lang="ja">Captioの代わりは<br><span class="grad">Captio式シンプルメモ</span></span>
+          <span data-lang="en">The Captio replacement<br>is <span class="grad">Simple Memo</span></span>
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">Captioがサービス終了しました。Captio式シンプルメモは、Captioの「起動即入力・送ったら消える・余計なものゼロ」を再現したiOSアプリです。</span>
-          <span data-lang="en">Captio has been discontinued. Simple Memo - Captio-style recreates Captio's core experience: instant launch, send and clear, zero clutter.</span>
+          <span data-lang="ja">Captio がサービス終了。「起動即入力・送ったら消える・余計なものゼロ」を、AES-GCM 暗号化＋オフライン Outbox で取り戻した iOS アプリです。</span>
+          <span data-lang="en">Captio is gone. Simple Memo brings back the "open, type, send, forget" feel — now with AES-GCM encryption and an offline Outbox so nothing gets lost.</span>
         </p>
-        <p style="font-size:.875rem;color:var(--text-muted);margin-top:.75rem;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.6">
+        <ul class="lp-hero__chips" data-lang="ja">
+          <li><b>0.3秒</b>起動</li>
+          <li><b>AES-GCM</b>暗号化</li>
+          <li><b>Outbox</b>取りこぼしゼロ</li>
+          <li><b>Gmail 非依存</b>独自基盤</li>
+        </ul>
+        <ul class="lp-hero__chips" data-lang="en">
+          <li><b>0.3s</b>launch</li>
+          <li><b>AES-GCM</b>encrypted</li>
+          <li><b>Outbox</b>zero loss</li>
+          <li><b>Gmail-free</b>infra</li>
+        </ul>
+        <div class="lp-hero__cta">
+          <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img src="/assets/img/app-store-badge-ja.svg" width="156" height="52" alt="App Store からダウンロード" loading="eager"></a>
+          <a data-lang="en" href="https://apps.apple.com/jp/app/simple-memo-fast/id6758438948?l=en-US" class="app-store-badge" aria-label="Download on the App Store"><img src="/assets/img/app-store-badge-en.svg" width="170" height="52" alt="Download on the App Store" loading="eager"></a>
+          <a class="lp-hero__secondary" href="#compare">
+            <span data-lang="ja">比較表を見る ↓</span>
+            <span data-lang="en">See comparison ↓</span>
+          </a>
+        </div>
+        <p class="lp-hero__note">
           <span data-lang="ja">※ このページは<strong>メモアプリ「Captio」</strong>（ワンタップで自分にメール送信）の代替アプリについての情報です。経費管理サービスの Emburse Captio とは異なります。</span>
           <span data-lang="en">* This page is about the <strong>note-taking app "Captio"</strong> (one-tap email to yourself), not Emburse Captio (expense management software).</span>
         </p>
@@ -474,7 +655,7 @@
       </section>
 
       <!-- Comparison Table -->
-      <section class="lp-section">
+      <section id="compare" class="lp-section" style="scroll-margin-top:80px">
         <h2 class="lp-section__title">
           <span data-lang="ja">Captio vs Captio式シンプルメモ 比較表</span>
           <span data-lang="en">Captio vs Simple Memo Comparison</span>
