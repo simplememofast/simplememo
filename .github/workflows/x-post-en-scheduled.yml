@@ -1,0 +1,130 @@
+name: X EN Auto Post (Scheduled)
+
+# 英語アカウント @simplememo_en 用の自動投稿。
+# 配信時刻 (UTC 目安): 13:00 / 19:00 / 01:00 ＝ 米国東部 朝 / 昼過ぎ / 夜
+# 各 ±25 分のランダムゆらぎ。
+# コンテンツ: admin/brand/content/posts-en.json から 8 時間スロット単位で決定的にローテーション。
+# 認証: GitHub Secret ADMIN_BASIC_AUTH (形式 "user:pass") を利用し、
+#       Cloudflare Pages の /admin/api/x-post (account=en) 経由で投稿。
+# Cloudflare 環境変数: X_EN_API_KEY / X_EN_API_SECRET / X_EN_ACCESS_TOKEN / X_EN_ACCESS_TOKEN_SECRET
+
+on:
+  schedule:
+    # 13:00 UTC = 8am EST / 9am EDT (米国東部 朝)
+    - cron: '45 12 * * *'
+    # 19:00 UTC = 2pm EST / 3pm EDT (米国東部 昼過ぎ)
+    - cron: '45 18 * * *'
+    # 01:00 UTC = 8pm EST / 9pm EDT (米国東部 夜)
+    - cron: '45 0 * * *'
+  workflow_dispatch:
+    inputs:
+      index:
+        description: '投稿インデックスを指定（空欄ならスロットから自動選択）'
+        required: false
+        default: ''
+      dry_run:
+        description: 'true にすると投稿せず選択結果だけ表示'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Organic random delay (0-25 min)
+        if: github.event_name == 'schedule'
+        run: |
+          DELAY=$((RANDOM % 1500))
+          echo "Random delay: ${DELAY} seconds"
+          sleep $DELAY
+
+      - name: Pick post from EN library
+        id: pick
+        env:
+          MANUAL_INDEX: ${{ github.event.inputs.index }}
+        run: |
+          python3 <<'PY'
+          import json, os, time
+          with open('admin/brand/content/posts-en.json', encoding='utf-8') as f:
+              posts = json.load(f)
+          n = len(posts)
+          manual = (os.environ.get('MANUAL_INDEX') or '').strip()
+          if manual:
+              idx = int(manual) % n
+              source = 'manual'
+          else:
+              # 8 時間スロットを単位に決定的ローテーション
+              # JA 側と被らないようにオフセットを 1 入れる
+              slot = int(time.time() // (8 * 3600)) + 1
+              idx = slot % n
+              source = f'slot={slot}'
+          post = posts[idx]
+          text_preview = post['text'].replace('\n', ' ')[:120]
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as out:
+              out.write(f"index={idx}\n")
+              out.write(f"id={post['id']}\n")
+              out.write(f"pillar={post['pillar']}\n")
+              out.write(f"preview={text_preview}\n")
+          with open('/tmp/post.json', 'w', encoding='utf-8') as out:
+              json.dump({'text': post['text'], 'account': 'en'}, out, ensure_ascii=False)
+          print(f"Source: {source}")
+          print(f"Selected index: {idx}/{n}")
+          print(f"Post id: {post['id']}")
+          print(f"Pillar:  {post['pillar']}")
+          print(f"Text:    {text_preview}")
+          PY
+
+      - name: Post via admin API
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          ADMIN_BASIC_AUTH: ${{ secrets.ADMIN_BASIC_AUTH }}
+        run: |
+          if [ -z "$ADMIN_BASIC_AUTH" ]; then
+            echo "::error::ADMIN_BASIC_AUTH secret が未設定です"
+            exit 1
+          fi
+          HTTP_CODE=$(curl -sS -o /tmp/response.json -w '%{http_code}' \
+            -u "$ADMIN_BASIC_AUTH" \
+            -H 'Content-Type: application/json' \
+            -H 'User-Agent: Mozilla/5.0 (compatible; SimpleMemoENScheduler/1.0)' \
+            -X POST \
+            --data @/tmp/post.json \
+            https://simplememofast.com/admin/api/x-post)
+          echo "HTTP ${HTTP_CODE}"
+          cat /tmp/response.json
+          echo
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::管理 API が HTTP ${HTTP_CODE} を返しました"
+            exit 1
+          fi
+          UPSTREAM=$(python3 -c "import json; d=json.load(open('/tmp/response.json')); print(d.get('status',''))")
+          if [ "$UPSTREAM" != "201" ] && [ "$UPSTREAM" != "200" ]; then
+            echo "::error::X API が ${UPSTREAM} を返しました"
+            exit 1
+          fi
+          TWEET_ID=$(python3 -c "import json; d=json.load(open('/tmp/response.json')); print(d.get('body',{}).get('data',{}).get('id',''))")
+          echo "::notice::Posted tweet https://x.com/simplememo_en/status/${TWEET_ID}"
+          echo "account: en" >> $GITHUB_STEP_SUMMARY
+          echo "index: ${{ steps.pick.outputs.index }}" >> $GITHUB_STEP_SUMMARY
+          echo "id: ${{ steps.pick.outputs.id }}" >> $GITHUB_STEP_SUMMARY
+          echo "pillar: ${{ steps.pick.outputs.pillar }}" >> $GITHUB_STEP_SUMMARY
+          echo "tweet: https://x.com/simplememo_en/status/${TWEET_ID}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Dry run output
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          echo "DRY RUN — would post:"
+          cat /tmp/post.json
+          echo

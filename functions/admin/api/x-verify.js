@@ -23,6 +23,10 @@ export async function onRequest(context) {
     X_ACCESS_TOKEN: Boolean(env.X_ACCESS_TOKEN),
     X_ACCESS_TOKEN_SECRET: Boolean(env.X_ACCESS_TOKEN_SECRET),
     X_USER_ACCESS_TOKEN: Boolean(env.X_USER_ACCESS_TOKEN),
+    X_EN_API_KEY: Boolean(env.X_EN_API_KEY),
+    X_EN_API_SECRET: Boolean(env.X_EN_API_SECRET),
+    X_EN_ACCESS_TOKEN: Boolean(env.X_EN_ACCESS_TOKEN),
+    X_EN_ACCESS_TOKEN_SECRET: Boolean(env.X_EN_ACCESS_TOKEN_SECRET),
   };
 
   if (action === 'env') {

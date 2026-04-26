@@ -23,11 +23,16 @@
 | `X_ACCESS_TOKEN` | OAuth 1.0a の User Access Token | 投稿する場合 | Keys and tokens → Access Token and Secret |
 | `X_ACCESS_TOKEN_SECRET` | OAuth 1.0a の User Access Token Secret | 投稿する場合 | 同上 |
 | `X_USER_ACCESS_TOKEN` | OAuth 2.0 User Context の Access Token | 自分情報取得 | OAuth 2.0 認可フロー経由で取得 |
+| `X_EN_API_KEY` | 英語アカウント @simplememo_en の Consumer Key | 英語自動投稿する場合 | 英語アカウントの Developer App から |
+| `X_EN_API_SECRET` | 英語アカウントの Consumer Secret | 英語自動投稿する場合 | 同上 |
+| `X_EN_ACCESS_TOKEN` | 英語アカウントの User Access Token | 英語自動投稿する場合 | 同上 |
+| `X_EN_ACCESS_TOKEN_SECRET` | 英語アカウントの User Access Token Secret | 英語自動投稿する場合 | 同上 |
 
 ### どれを先に入れるか
 
 - **最低限**: `X_BEARER_TOKEN` だけ入れれば、この管理画面の「X API 接続テスト」は動きます（Basic ティア以上が必要）。
-- **投稿まで自動化したい場合**: OAuth 1.0a の 4 点セット（API Key / Secret / Access Token / Access Token Secret）をすべて登録。
+- **日本語アカウント（@simplememofast）への投稿を自動化したい場合**: OAuth 1.0a の 4 点セット（`X_API_KEY` / `X_API_SECRET` / `X_ACCESS_TOKEN` / `X_ACCESS_TOKEN_SECRET`）をすべて登録。
+- **英語アカウント（@simplememo_en）への投稿も自動化したい場合**: 上記 4 点に加えて `X_EN_*` の 4 点（`X_EN_API_KEY` / `X_EN_API_SECRET` / `X_EN_ACCESS_TOKEN` / `X_EN_ACCESS_TOKEN_SECRET`）を登録。投稿時に Body の `account: "en"` で切替。
 - **自アカウント情報（`/2/users/me`）を取得したい場合**: `X_USER_ACCESS_TOKEN` が必要（App-only Bearer では取れない）。
 
 ---
@@ -106,6 +111,15 @@ wrangler pages secret put X_API_KEY --project-name=simplememo
 wrangler pages secret put X_API_SECRET --project-name=simplememo
 wrangler pages secret put X_ACCESS_TOKEN --project-name=simplememo
 wrangler pages secret put X_ACCESS_TOKEN_SECRET --project-name=simplememo
+```
+
+英語アカウント (@simplememo_en) を使うなら同じ要領で 4 点を追加:
+
+```
+wrangler pages secret put X_EN_API_KEY --project-name=simplememo
+wrangler pages secret put X_EN_API_SECRET --project-name=simplememo
+wrangler pages secret put X_EN_ACCESS_TOKEN --project-name=simplememo
+wrangler pages secret put X_EN_ACCESS_TOKEN_SECRET --project-name=simplememo
 ```
 
 ### 一覧表示・削除
@@ -203,3 +217,44 @@ npx wrangler pages dev .
 5. **投稿実行**: OAuth 1.0a の 4 点セットが登録済みなら、この画面から直接投稿
 
 これらは別セッションで追加実装できます。まずは Secret の登録と疎通確認までを完了させてください。
+
+---
+
+## 11. 英語アカウント @simplememo_en の自動投稿
+
+日本語の `@simplememofast` と同じ仕組みを別アカウントで動かします。
+
+### 必要なもの
+- @simplememo_en の X Developer App から取得した 4 点（API Key / Secret / Access Token / Access Token Secret）
+- アプリ権限は **Read and write**
+
+### 登録する Cloudflare 環境変数（Production）
+- `X_EN_API_KEY`
+- `X_EN_API_SECRET`
+- `X_EN_ACCESS_TOKEN`
+- `X_EN_ACCESS_TOKEN_SECRET`
+
+すべて **Encrypted** タイプで登録し、登録後に Pages を再デプロイ。
+
+### 動く仕組み
+- ワークフロー `.github/workflows/x-post-en-scheduled.yml` が cron で発火
+- `admin/brand/content/posts-en.json` の 40 本から 8 時間スロット単位で 1 件選ぶ
+- `/admin/api/x-post` に `{"text": "...", "account": "en"}` で POST
+- Function は `account === "en"` のときだけ `X_EN_*` の 4 点を使って OAuth1.0a 署名
+
+### スケジュール（UTC ベース・米国東部のゴールデンタイム狙い）
+- 13:00 UTC ＝ 8〜9 am ET（米国東部 朝）
+- 19:00 UTC ＝ 2〜3 pm ET（米国東部 昼過ぎ）
+- 01:00 UTC ＝ 8〜9 pm ET（米国東部 夜）
+
+各スロットは ±25 分のランダム遅延つき。
+
+### 疎通確認
+1. Secret 登録 → 再デプロイ
+2. **動作確認**タブの **環境変数の状態** で `X_EN_*` が `[設定済み]` になることを確認
+3. GitHub Actions → **X EN Auto Post (Scheduled)** → **Run workflow**
+   - `dry_run` を `true` にすると投稿せず選択結果だけ確認可能
+   - `false` にすると 1 件投稿される
+
+### コンテンツ編集
+`admin/brand/content/posts-en.json` を直接編集してコミット。各エントリは `id` / `pillar` / `text` の 3 フィールド、`text` は 280 字以内。

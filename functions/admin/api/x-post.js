@@ -8,6 +8,7 @@
 //   Content-Type: application/json
 //   Body: {
 //     "text": "本文 (280 字以内)",
+//     "account": "ja" | "en"  (任意・既定 "ja"。@simplememofast 用 / @simplememo_en 用の鍵を切替)
 //     "quote_tweet_id": "引用 RT する場合の元ツイート ID (任意)",
 //     "in_reply_to_tweet_id": "返信する場合の対象ツイート ID (任意)"
 //   }
@@ -19,16 +20,23 @@ export async function onRequest(context) {
     return json({ error: 'POST only' }, 405);
   }
 
-  const required = ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET'];
-  for (const k of required) {
-    if (!env[k]) return json({ error: k + ' が Cloudflare 環境変数に未設定です' }, 400);
-  }
-
   let body;
   try {
     body = await request.json();
   } catch (e) {
     return json({ error: '不正な JSON' }, 400);
+  }
+
+  const account = (body && body.account) === 'en' ? 'en' : 'ja';
+  const prefix = account === 'en' ? 'X_EN_' : 'X_';
+  const credKeys = {
+    consumerKey: prefix + 'API_KEY',
+    consumerSecret: prefix + 'API_SECRET',
+    token: prefix + 'ACCESS_TOKEN',
+    tokenSecret: prefix + 'ACCESS_TOKEN_SECRET',
+  };
+  for (const k of Object.values(credKeys)) {
+    if (!env[k]) return json({ error: k + ' が Cloudflare 環境変数に未設定です' }, 400);
   }
 
   const text = body && body.text;
@@ -53,10 +61,10 @@ export async function onRequest(context) {
     authHeader = await buildOAuth1Header({
       method: method,
       url: url,
-      consumerKey: env.X_API_KEY,
-      consumerSecret: env.X_API_SECRET,
-      token: env.X_ACCESS_TOKEN,
-      tokenSecret: env.X_ACCESS_TOKEN_SECRET,
+      consumerKey: env[credKeys.consumerKey],
+      consumerSecret: env[credKeys.consumerSecret],
+      token: env[credKeys.token],
+      tokenSecret: env[credKeys.tokenSecret],
     });
   } catch (e) {
     return json({ error: 'OAuth 署名に失敗しました: ' + e.message }, 500);
@@ -75,6 +83,7 @@ export async function onRequest(context) {
     const respBody = await safeJson(res);
     return json({
       status: res.status,
+      account: account,
       sent: payload,
       body: respBody,
     });
