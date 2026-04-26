@@ -151,13 +151,22 @@
     <div class="card">
       <h2>収集条件</h2>
       <p class="sub">※ <code>min_faves:</code> などの高度オペレータは X のプラン／エンドポイントによって挙動が異なります。<code>search/all</code>（Pro 以上）推奨。</p>
-      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">検索クエリ（<code>lang:</code> は下のドロップダウンで自動付与されます）</label>
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">プリセット（選ぶとクエリと言語が上書きされます）</label>
+      <select class="txt" id="cap-preset" style="max-width:480px">
+        <option value="custom" selected>カスタム（手で編集）</option>
+        <option value="ja-broad">日本語・広め（captio lang:ja）</option>
+        <option value="ja-app">日本語・アプリ文脈限定（共起語必須）</option>
+        <option value="en-strict">英語・ピンポイント（&quot;captio app&quot; 系の完全一致）</option>
+        <option value="en-context">英語・アプリ文脈＋ノイズ除外</option>
+        <option value="en-context-broad">英語・アプリ文脈＋ノイズ除外（広め）</option>
+      </select>
+      <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">検索クエリ（<code>lang:</code> は下のドロップダウンで自動付与されます。プリセット選択時はクエリ内に直書きされます）</label>
       <input class="txt" id="cap-q" value="captio -is:retweet">
       <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">言語</label>
       <select class="txt" id="cap-lang" style="max-width:260px">
         <option value="ja" selected>日本語（lang:ja）</option>
         <option value="en">英語（lang:en）</option>
-        <option value="all">指定なし（全言語）</option>
+        <option value="all">指定なし（全言語・プリセット利用時はこちら）</option>
       </select>
       <label style="display:block;font-size:.78rem;color:var(--text3);margin:6px 0 2px">エンドポイント</label>
       <select class="txt" id="cap-endpoint" style="max-width:260px">
@@ -337,6 +346,43 @@ function captioDefaultState() {
 }
 function captioSaveState(s) {
   localStorage.setItem(CAP_STORE_KEY, JSON.stringify(s));
+}
+
+// プリセット定義。Captio iOS アプリに関する English 検索のノイズ
+//   (a) "caption" タイポ、(b) Italian "capito?"、(c) Sen. Shelley Moore Capito、(d) Frank Captio
+// を共起語必須＋固有名詞否定で除外する。
+const CAPTIO_PRESETS = {
+  'ja-broad': {
+    q: 'captio -is:retweet lang:ja',
+    lang: 'all',
+  },
+  'ja-app': {
+    q: 'captio (アプリ OR メモ OR メール OR iPhone OR iOS OR Mac OR 自分宛) -is:retweet lang:ja',
+    lang: 'all',
+  },
+  'en-strict': {
+    q: '("captio app" OR "captio.app" OR "captio ios" OR "captio iphone" OR "captio mac" OR "captio for ios" OR "captio for iphone") -is:retweet lang:en',
+    lang: 'all',
+  },
+  'en-context': {
+    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store") -caption -capito -Senator -Shelley -Frank -is:retweet lang:en',
+    lang: 'all',
+  },
+  'en-context-broad': {
+    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store" OR shutdown OR sunset OR alternative OR replacement OR "send to email") -caption -capito -Senator -Shelley -Frank -"Moore Capito" -is:retweet lang:en',
+    lang: 'all',
+  },
+};
+
+function captioApplyPreset() {
+  const sel = document.getElementById('cap-preset');
+  const key = sel.value;
+  if (key === 'custom') return;
+  const p = CAPTIO_PRESETS[key];
+  if (!p) return;
+  document.getElementById('cap-q').value = p.q;
+  document.getElementById('cap-lang').value = p.lang;
+  captioRender();
 }
 
 function captioBuildQuery() {
@@ -561,6 +607,19 @@ function captioTs() {
   el.addEventListener('input', captioRender);
   el.addEventListener('change', captioRender);
 });
+// プリセット選択時はクエリと言語を上書き
+{
+  const presetEl = document.getElementById('cap-preset');
+  if (presetEl) presetEl.addEventListener('change', captioApplyPreset);
+}
+// 手でクエリを編集したらプリセット選択を「カスタム」に戻す
+{
+  const qEl = document.getElementById('cap-q');
+  if (qEl) qEl.addEventListener('input', function () {
+    const presetEl = document.getElementById('cap-preset');
+    if (presetEl && presetEl.value !== 'custom') presetEl.value = 'custom';
+  });
+}
 
 // 初期描画
 captioRender();
