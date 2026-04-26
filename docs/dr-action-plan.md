@@ -27,7 +27,7 @@
 | License | Freemium (Free with 3 sends/day, Premium $2.99/mo) |
 | Description | Simple Memo lets you email yourself notes in one tap. Designed as a Captio replacement, it launches in 0.3 seconds and sends your memo instantly. Features AES-GCM end-to-end encryption, an offline outbox that queues messages when you have no connection, and a minimal UI focused purely on speed. Free tier includes 3 sends per day; Premium unlocks unlimited sends for $2.99/month. |
 | Tags | Note-taking, Email, Productivity, Memo, Privacy, Offline |
-| App Store link | https://apps.apple.com/jp/app/simple-memo-fast/id6758438948 |
+| App Store link | https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948 |
 
 ---
 
