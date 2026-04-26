@@ -347,9 +347,12 @@
     }
 
     /* === スクロール後も残るフローティング CTA ===
-       global の a に min-height や inline-flex 等が当たっているため、
-       明示的な flex-row + nowrap + min-height: auto で形を固定する。 */
+       lang.js が非アクティブ要素に inline display:none を付けるので、
+       表示は .active のときだけ flex に切り替える（それまでは hidden）。 */
     .floating-cta {
+      display: none;
+    }
+    .floating-cta.active {
       position: fixed;
       bottom: 1.4rem;
       right: 1.4rem;
@@ -374,7 +377,7 @@
       transition: opacity .35s, transform .35s, box-shadow .25s;
       pointer-events: none;
     }
-    .floating-cta.visible {
+    .floating-cta.active.visible {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
@@ -476,15 +479,19 @@
       max-width: 600px;
       margin: 0 auto 1.1rem;
     }
-    /* チップは確実に横並び。グローバルの ul / li ルールで block 化されないよう明示 */
+    /* チップは確実に横並び。lang.js で非アクティブにはインラインで display:none が付くため、
+       ベースは display:none、active のときだけ flex で表示する。 */
     .lp-hero__chips {
+      display: none;
+    }
+    .lp-hero__chips.active {
       list-style: none !important;
       display: flex !important;
       flex-direction: row !important;
       flex-wrap: wrap !important;
       justify-content: center !important;
       align-items: center !important;
-      gap: .5rem !important;
+      gap: .55rem !important;
       padding: 0 !important;
       margin: 0 auto 1.2rem !important;
       max-width: 720px;
@@ -496,17 +503,19 @@
       max-width: none !important;
       align-items: center !important;
     }
+    .lp-hero__chips li * { display: inline !important; }
     .lp-hero__chips li {
       background: linear-gradient(160deg, #2a3a5e, #233152) !important;
       border: 1px solid rgba(180,210,250,.50) !important;
       border-radius: 999px !important;
-      padding: .45rem .85rem !important;
-      font-size: .85rem !important;
+      padding: .5rem 1rem !important;
+      font-size: .9rem !important;
       font-weight: 700 !important;
       color: #ffffff !important;
       backdrop-filter: blur(8px);
       box-shadow: 0 4px 14px rgba(0,0,0,.30);
-      white-space: nowrap;
+      white-space: nowrap !important;
+      letter-spacing: .01em;
     }
     .lp-hero__chips li b {
       color: #7cc4ff;
@@ -756,16 +765,14 @@
           <span data-lang="en">Captio is gone. Simple Memo brings back the "open, type, send, forget" feel — now with AES-GCM encryption and an offline Outbox so nothing gets lost.</span>
         </p>
         <ul class="lp-hero__chips" data-lang="ja">
-          <li><b>0.3秒</b>起動</li>
-          <li><b>AES-GCM</b>暗号化</li>
-          <li><b>Outbox</b>取りこぼしゼロ</li>
-          <li><b>Gmail 非依存</b>独自基盤</li>
+          <li>0.3秒で起動</li>
+          <li>暗号化送信</li>
+          <li>オフライン対応</li>
         </ul>
         <ul class="lp-hero__chips" data-lang="en">
-          <li><b>0.3s</b>launch</li>
-          <li><b>AES-GCM</b>encrypted</li>
-          <li><b>Outbox</b>zero loss</li>
-          <li><b>Gmail-free</b>infra</li>
+          <li>0.3s launch</li>
+          <li>Encrypted send</li>
+          <li>Offline first</li>
         </ul>
         <div class="lp-hero__cta">
           <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948" class="app-store-badge" aria-label="App Store からダウンロード"><img src="/assets/img/app-store-badge-ja.svg" width="156" height="52" alt="App Store からダウンロード" loading="eager"></a>
