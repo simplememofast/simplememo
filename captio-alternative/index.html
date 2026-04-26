@@ -276,12 +276,36 @@
       --text-secondary: #ffffff;
       --text-muted: #ffffff;
     }
-    /* 本文の最低ウェイト＝500、強調はすべて純白＋700 */
+    /* === 純白の徹底適用 ===
+       .page-content 配下の文字は原則すべて #ffffff にする。
+       アクセント色（チップの数字、yes/no、リンクなど）だけ後段で個別指定。
+       アンチエイリアスとフォントウェイトの底上げで「はっきり白字」を出す。 */
+    .page-content,
+    .page-content * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
     .page-content p,
     .page-content li,
-    .page-content dd { font-weight: 500; }
+    .page-content dd,
+    .page-content dt,
+    .page-content span,
+    .page-content summary,
+    .page-content td,
+    .page-content th,
+    .page-content h1,
+    .page-content h2,
+    .page-content h3,
+    .page-content h4,
+    .page-content h5,
+    .page-content h6 {
+      color: #ffffff !important;
+    }
+    .page-content p,
+    .page-content li,
+    .page-content dd { font-weight: 600; }
     .page-content strong,
-    .page-content b { color: #ffffff !important; font-weight: 700; }
+    .page-content b { color: #ffffff !important; font-weight: 800; }
 
     /* page-header の重複ゾーンを畳む（global-nav と機能が被るため） */
     .page-header { padding: 0; }
@@ -491,6 +515,29 @@
       .lp-hero__chips li { font-size: .82rem; padding: .5rem .9rem; }
       .lp-hero__cta .app-store-badge img { height: 46px; }
     }
+
+    /* === アクセント色の復活（上の純白徹底ルールで潰されないように後段で再指定） === */
+    .page-content .lp-hero__title .grad,
+    .page-content .lp-hero__title .grad * { color: transparent !important; }
+    .page-content .lp-hero__label,
+    .page-content .lp-hero__label * { color: #9ad1ff !important; }
+    .page-content .lp-hero__chips li b { color: #7cc4ff !important; }
+    .page-content .lp-hero__secondary,
+    .page-content .lp-hero__secondary * { color: #9ad1ff !important; }
+    .page-content .compare-table .yes { color: #6ee5a3 !important; }
+    .page-content .compare-table .no { color: #ff8a7e !important; }
+    .page-content .internal-links a,
+    .page-content .internal-links a * { color: #9ad1ff !important; }
+    .page-content .internal-links a:hover,
+    .page-content .internal-links a:hover * { color: #ffffff !important; }
+    /* TL;DR バッジ（インラインスタイルで accent 指定） */
+    .page-content .tldr > div[style*="font-weight:700"],
+    .page-content .tldr > div[style*="font-weight:700"] * { color: #9ad1ff !important; }
+    /* 言語スイッチャー */
+    .page-content .lang-switcher__link,
+    .page-content .lang-switcher__btn { color: rgba(255,255,255,.65) !important; }
+    .page-content .lang-switcher__link.active,
+    .page-content .lang-switcher__btn.active { color: #ffffff !important; }
   </style>
 
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
