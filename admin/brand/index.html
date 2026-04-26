@@ -349,8 +349,10 @@ function captioSaveState(s) {
 }
 
 // プリセット定義。Captio iOS アプリに関する English 検索のノイズ
-//   (a) "caption" タイポ、(b) Italian "capito?"、(c) Sen. Shelley Moore Capito、(d) Frank Captio
-// を共起語必須＋固有名詞否定で除外する。
+//   (a) "caption" タイポ、(b) Italian "capito?"、(c) Sen. Shelley Moore Capito、
+//   (d) Frank Captio、(e) スペイン Captio (Barcelona の経費精算 SaaS、
+//       Telefonica が販売契約、最終的に €25M で買収)
+// を共起語必須＋固有名詞／業界語否定で除外する。
 const CAPTIO_PRESETS = {
   'ja-broad': {
     q: 'captio -is:retweet lang:ja',
@@ -361,15 +363,15 @@ const CAPTIO_PRESETS = {
     lang: 'all',
   },
   'en-strict': {
-    q: '("captio app" OR "captio.app" OR "captio ios" OR "captio iphone" OR "captio mac" OR "captio for ios" OR "captio for iphone") -is:retweet lang:en',
+    q: '("captio app" OR "captio.app" OR "captio ios" OR "captio iphone" OR "captio mac" OR "captio for ios" OR "captio for iphone") -Telefonica -fintech -expense -"raises" -is:retweet lang:en',
     lang: 'all',
   },
   'en-context': {
-    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store") -caption -capito -Senator -Shelley -Frank -is:retweet lang:en',
+    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store") -caption -capito -Senator -Shelley -Frank -Telefonica -fintech -expense -"raises" -is:retweet lang:en',
     lang: 'all',
   },
   'en-context-broad': {
-    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store" OR shutdown OR sunset OR alternative OR replacement OR "send to email") -caption -capito -Senator -Shelley -Frank -"Moore Capito" -is:retweet lang:en',
+    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store" OR shutdown OR sunset OR alternative OR replacement OR "send to email") -caption -capito -Senator -Shelley -Frank -"Moore Capito" -Telefonica -fintech -expense -"raises" -Barcelona -SaaS -is:retweet lang:en',
     lang: 'all',
   },
 };
