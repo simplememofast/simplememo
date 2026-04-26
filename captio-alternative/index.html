@@ -255,6 +255,56 @@
       }
     }
 
+    /* === 読みやすさ改善（このページ専用） ===
+       グローバルテーマが暗すぎたので、サーフェス・枠線・本文色を持ち上げる。 */
+    .page-content { background: #0d1218; }
+    .page-content .container { color: #f3f6fb; }
+    .lp-hero__title { color: #fff; letter-spacing: -.01em; }
+    .lp-hero__sub { color: #d8e0ec; font-size: 1.05rem; }
+    .lp-section__title { color: #fff; border-bottom-color: rgba(160,200,240,.32); font-size: 1.55rem; }
+    .lp-section__lead { color: #d8e0ec; font-size: 1rem; }
+    .reason-card,
+    .steps-list li,
+    .cta-box,
+    .tldr {
+      background: #1a2333 !important;
+      border-color: rgba(160,200,240,.28) !important;
+      box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    }
+    .reason-card__title { color: #fff; font-size: 1.05rem; }
+    .reason-card__desc,
+    .cta-box__desc,
+    .tldr p,
+    .steps-list li,
+    .faq-answer,
+    .faq-answer p,
+    .spec-list,
+    .spec-list dd { color: #dde3ee !important; }
+    .spec-list dt { color: #fff !important; font-size: .95rem; }
+    .cta-box__title { color: #fff; font-size: 1.3rem; }
+    .faq-summary { color: #f3f6fb; font-size: 1rem; }
+    .faq-item { border-bottom-color: rgba(160,200,240,.22); }
+    .compare-table { font-size: .95rem; }
+    .compare-table th,
+    .compare-table td { border-bottom-color: rgba(160,200,240,.22); padding: .9rem 1rem; }
+    .compare-table th { color: #cdd6e3; font-size: .8rem; }
+    .compare-table td { color: #e3e8f1; }
+    .compare-table td:first-child { color: #fff; }
+    .compare-table .yes { color: #5ee29c; font-weight: 600; }
+    .compare-table .no { color: #ff8074; }
+    /* 注釈・小さい文字 */
+    .lp-hero p[style*="text-muted"],
+    p[style*="text-muted"] { color: #b8c2d4 !important; }
+    /* 上部 CTA ブロックの上書き（インラインスタイルが使われているので強めに） */
+    main .lp-hero + .tldr + div[style*="text-align:center"] {
+      background: #1a2333 !important;
+      border-color: rgba(160,200,240,.28) !important;
+    }
+    main .lp-hero + .tldr + div[style*="text-align:center"] p { color: #dde3ee !important; }
+    main .lp-hero + .tldr + div[style*="text-align:center"] p[style*="font-weight:700"] { color: #fff !important; }
+    /* 内部リンクのコントラスト */
+    .internal-links a { color: #9ad1ff; border-color: rgba(154,209,255,.32); }
+    .internal-links a:hover { color: #fff; border-color: #9ad1ff; }
   </style>
 
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
