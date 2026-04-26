@@ -266,9 +266,15 @@
         radial-gradient(ellipse 1100px 700px at 50% 0%, rgba(80,140,230,.18), transparent 60%),
         radial-gradient(ellipse 800px 600px at 50% 30%, rgba(124,108,255,.10), transparent 70%),
         #0a0d14;
-      color: #f3f6fb;
+      color: #eef2f8;
     }
-    .page-content .container { color: #f3f6fb; }
+    .page-content .container { color: #eef2f8; }
+    /* グローバル変数が暗い値で使われている箇所を持ち上げる（このページのみ） */
+    .page-content {
+      --text: #ffffff;
+      --text-secondary: #eef2f8;
+      --text-muted: #c8d2e0;
+    }
 
     /* page-header の重複ゾーンを畳む（global-nav と機能が被るため） */
     .page-header { padding: 0; }
@@ -329,8 +335,9 @@
       color: transparent;
     }
     .lp-hero__sub {
-      color: #d8e0ec;
-      font-size: 1.05rem;
+      color: #eaf0f8;
+      font-size: 1.1rem;
+      font-weight: 500;
       line-height: 1.8;
       max-width: 640px;
       margin: 0 auto 1.6rem;
@@ -346,11 +353,12 @@
     }
     .lp-hero__chips li {
       background: rgba(26,35,51,.85);
-      border: 1px solid rgba(160,200,240,.28);
+      border: 1px solid rgba(160,200,240,.32);
       border-radius: 999px;
       padding: .55rem 1.05rem;
-      font-size: .88rem;
-      color: #dde3ee;
+      font-size: .92rem;
+      font-weight: 500;
+      color: #eef2f8;
       backdrop-filter: blur(8px);
     }
     .lp-hero__chips li b {
@@ -388,21 +396,22 @@
       background: rgba(154,209,255,.08);
     }
     .lp-hero__note {
-      font-size: .82rem;
-      color: #98a4b8;
+      font-size: .85rem;
+      color: #c8d2e0;
       max-width: 580px;
       margin: 1.2rem auto 0;
-      line-height: 1.6;
+      line-height: 1.7;
     }
-    .lp-hero__note strong { color: #cdd6e3; }
+    .lp-hero__note strong { color: #ffffff; font-weight: 600; }
 
     /* セクション本文の見やすさ */
     .lp-section__title {
-      color: #fff;
-      border-bottom-color: rgba(160,200,240,.32);
-      font-size: 1.55rem;
+      color: #ffffff;
+      border-bottom-color: rgba(160,200,240,.36);
+      font-size: 1.6rem;
+      font-weight: 700;
     }
-    .lp-section__lead { color: #d8e0ec; font-size: 1rem; }
+    .lp-section__lead { color: #eaf0f8; font-size: 1.05rem; line-height: 1.85; }
 
     /* カード・テーブル・FAQ をリッチダーク化 */
     .reason-card,
@@ -414,7 +423,7 @@
       box-shadow: 0 6px 24px rgba(0,0,0,.32);
     }
     .reason-card { border-radius: 16px; padding: 1.7rem; }
-    .reason-card__title { color: #fff; font-size: 1.05rem; }
+    .reason-card__title { color: #ffffff; font-size: 1.1rem; font-weight: 700; }
     .reason-card__desc,
     .cta-box__desc,
     .tldr p,
@@ -422,24 +431,31 @@
     .faq-answer,
     .faq-answer p,
     .spec-list,
-    .spec-list dd { color: #dde3ee !important; }
-    .spec-list dt { color: #fff !important; font-size: .95rem; }
+    .spec-list dd { color: #eef2f8 !important; line-height: 1.85; }
+    .reason-card__desc { font-size: .95rem; }
+    .spec-list dt { color: #ffffff !important; font-size: 1rem; font-weight: 700; }
     .cta-box { border-radius: 18px; padding: 2.4rem 1.6rem; }
-    .cta-box__title { color: #fff; font-size: 1.3rem; }
-    .faq-summary { color: #f3f6fb; font-size: 1rem; }
+    .cta-box__title { color: #ffffff; font-size: 1.35rem; font-weight: 700; }
+    .cta-box__desc { font-size: .95rem; }
+    .faq-summary { color: #ffffff; font-size: 1.02rem; font-weight: 600; }
     .faq-item { border-bottom-color: rgba(160,200,240,.22); }
 
-    .compare-table { font-size: .95rem; }
+    .compare-table { font-size: 1rem; }
     .compare-table th,
-    .compare-table td { border-bottom-color: rgba(160,200,240,.22); padding: .9rem 1rem; }
-    .compare-table th { color: #cdd6e3; font-size: .8rem; }
-    .compare-table td { color: #e3e8f1; }
-    .compare-table td:first-child { color: #fff; }
-    .compare-table .yes { color: #5ee29c; font-weight: 600; }
-    .compare-table .no { color: #ff8074; }
+    .compare-table td { border-bottom-color: rgba(160,200,240,.24); padding: .95rem 1rem; }
+    .compare-table th { color: #eaf0f8; font-size: .82rem; font-weight: 700; letter-spacing: .04em; }
+    .compare-table td { color: #eef2f8; }
+    .compare-table td:first-child { color: #ffffff; font-weight: 600; }
+    .compare-table .yes { color: #6ee5a3; font-weight: 700; }
+    .compare-table .no { color: #ff8a7e; font-weight: 600; }
 
     /* インライン style で text-muted を使っている注釈 */
-    p[style*="text-muted"] { color: #b8c2d4 !important; }
+    p[style*="text-muted"] { color: #c8d2e0 !important; }
+    /* 本文中の strong / b */
+    .reason-card__desc strong,
+    .lp-section__lead strong,
+    .tldr p strong,
+    .faq-answer strong { color: #ffffff; font-weight: 700; }
 
     /* 既存「Captioから3分で移行完了」CTA ボックスの上書き */
     main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] {
@@ -448,8 +464,8 @@
       border-radius: 18px !important;
       box-shadow: 0 6px 24px rgba(0,0,0,.32);
     }
-    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p { color: #dde3ee !important; }
-    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p[style*="font-weight:700"] { color: #fff !important; }
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p { color: #eef2f8 !important; }
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p[style*="font-weight:700"] { color: #ffffff !important; font-size: 1.1rem !important; }
 
     /* 内部リンク */
     .internal-links a { color: #9ad1ff; border-color: rgba(154,209,255,.32); }
