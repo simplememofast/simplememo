@@ -18,3 +18,30 @@
 
 /*.js
   Cache-Control: public, max-age=604800
+
+# Per-locale HTML edge caching for /en/* (i18n Phase 3).
+# Browser revalidates hourly; Cloudflare edge serves for up to 1 day.
+/en/*
+  Cache-Control: public, max-age=3600, s-maxage=86400, must-revalidate
+
+# Sitemaps: enforce XML content type so Bing/Search Console accept them.
+/sitemap.xml
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/sitemap-ja.xml
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/sitemap-en.xml
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+# robots.txt + llms.txt: explicit text/plain, longer browser cache.
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=86400
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=86400
