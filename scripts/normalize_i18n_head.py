@@ -118,6 +118,74 @@ def build_plan() -> list[tuple[Path, str, str, list[tuple[str, str]], str | None
 
 
 # ---------------------------------------------------------------------------
+# Auto plan: every other HTML file gets self-canonical + locale-from-path
+# + content-language meta. No hreflang alternate (no symmetric pair exists).
+
+EXCLUDED_DIR_PARTS = {
+    "node_modules", "admin", "drafts", "docs", "scripts", "screenshots",
+    "tools", "tiktok", "templates", ".git", ".github", ".claude", "js",
+    "assets", "functions",
+}
+
+EXCLUDED_TOP_FILES = {"404.html"}
+
+# Minor locale -> the locale code we use for <html lang>
+LOCALE_FROM_DIR = {
+    "en": "en",
+    "ar": "ar",
+    "es": "es",
+    "id": "id",
+    "ko": "ko",
+    "pt-BR": "pt-BR",
+    "tr": "tr",
+    "zh": "zh-Hans",
+    "zh-Hant": "zh-Hant",
+}
+
+
+def file_to_url(file_path: Path) -> str | None:
+    rel = file_path.relative_to(REPO_ROOT).as_posix()
+    if rel.endswith("/index.html"):
+        return absolute_url("/" + rel[: -len("index.html")])
+    if rel.endswith(".html"):
+        # Match existing extension-less convention used in canonical/sitemap.
+        return absolute_url("/" + rel[: -len(".html")])
+    return None
+
+
+def detect_locale_from_path(file_path: Path) -> str:
+    rel_parts = file_path.relative_to(REPO_ROOT).parts
+    if rel_parts and rel_parts[0] in LOCALE_FROM_DIR:
+        return LOCALE_FROM_DIR[rel_parts[0]]
+    return "ja"
+
+
+def build_auto_plan(
+    explicit_files: set[Path],
+) -> list[tuple[Path, str, str, list[tuple[str, str]], str | None]]:
+    """Cover every remaining .html file in the repo so that, after running,
+    every public page emits at least <html lang>, self-canonical, and
+    content-language meta. No hreflang alternate is added here."""
+    auto: list[tuple[Path, str, str, list[tuple[str, str]], str | None]] = []
+    for f in REPO_ROOT.rglob("*.html"):
+        rel_parts = f.relative_to(REPO_ROOT).parts
+        if any(p in EXCLUDED_DIR_PARTS for p in rel_parts):
+            continue
+        if rel_parts == ("index.html",):
+            continue  # top page is already in TOP_CLUSTER explicit plan
+        if f.name in EXCLUDED_TOP_FILES and len(rel_parts) == 1:
+            continue
+        if f in explicit_files:
+            continue
+        url = file_to_url(f)
+        if url is None:
+            continue
+        locale = detect_locale_from_path(f)
+        auto.append((f, locale, url, [], None))
+    return auto
+
+
+# ---------------------------------------------------------------------------
 # Head-tag manipulation
 
 # Patterns that match a SINGLE LINE of an owned tag (whitespace + tag).
@@ -252,9 +320,18 @@ def normalize_file(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Don't write files")
+    parser.add_argument(
+        "--no-auto",
+        action="store_true",
+        help="Skip the auto plan that covers every uncovered HTML file",
+    )
     args = parser.parse_args()
 
     plan = build_plan()
+    explicit_files = {p[0] for p in plan}
+    if not args.no_auto:
+        plan.extend(build_auto_plan(explicit_files))
+
     changed = 0
     skipped = 0
     for file_path, locale, canonical, alternates, x_default in plan:
@@ -268,10 +345,10 @@ def main() -> int:
             return 1
         if did:
             changed += 1
-            print(f"[update] {rel}  ({locale}, {len(alternates)} alts)")
+            if changed <= 5 or changed % 25 == 0:
+                print(f"[update] {rel}  ({locale}, {len(alternates)} alts)")
         else:
             skipped += 1
-            print(f"[ok]     {rel}")
 
     print(f"\nSummary: {changed} changed, {skipped} unchanged, {len(plan)} total")
     return 0
