@@ -1,23 +1,52 @@
 # SimpleMemoFast - Robots.txt
-# AI検索エンジンからの引用を許可、学習専用クローラーのみブロック
+# AI search engines and major search bots: allowed (LLMO + organic SEO).
+# Pure training-only crawlers: blocked.
 
-# AI Search Engines — Allow (for AIO/citation)
+# ----------------------------------------------------------------------
+# AI search / answer engines (allow for citation in AI Overviews, etc.)
+# ----------------------------------------------------------------------
+
+# OpenAI / ChatGPT
 User-agent: GPTBot
 Allow: /
 Disallow: /admin/
 
-User-agent: Google-Extended
+User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin/
 
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+
+# Anthropic / Claude
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin/
 
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /admin/
+
+# Perplexity
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin/
 
+User-agent: Perplexity-User
+Allow: /
+Disallow: /admin/
+
+# Google AI training opt-in (separate from Googlebot - required for Gemini etc.)
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+
+# Apple Intelligence / Siri search
 User-agent: Applebot
 Allow: /
 Disallow: /admin/
@@ -26,7 +55,19 @@ User-agent: Applebot-Extended
 Allow: /
 Disallow: /admin/
 
-# Training-only crawlers — Block
+# Major web search (Bing index also feeds ChatGPT Search)
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+
+User-agent: DuckDuckBot
+Allow: /
+Disallow: /admin/
+
+# ----------------------------------------------------------------------
+# Pure training-only crawlers - blocked
+# ----------------------------------------------------------------------
+
 User-agent: CCBot
 Disallow: /
 
@@ -39,12 +80,20 @@ Disallow: /
 User-agent: meta-externalagent
 Disallow: /
 
-# Default
+# ----------------------------------------------------------------------
+# Default for everyone else (Googlebot, etc.)
+# ----------------------------------------------------------------------
+
 User-agent: *
 Allow: /
 Disallow: /admin/
+# Don't index URLs with tracking parameters - keeps canonical URLs clean
+Disallow: /*?utm_*
+Disallow: /*?fbclid=
+Disallow: /*?gclid=
 
-# llms.txt — AI-readable site summary
-# https://simplememofast.com/llms.txt
-
+# ----------------------------------------------------------------------
+# Sitemap + AI-readable site summary
+# ----------------------------------------------------------------------
+# llms.txt: https://simplememofast.com/llms.txt
 Sitemap: https://simplememofast.com/sitemap.xml
