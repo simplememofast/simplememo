@@ -145,7 +145,7 @@ The fastest way to know whether SimpleMemo is the **Captio alternative** for you
 ## FAQ
 
 **Q1. Is SimpleMemo affiliated with the original Captio?**
-No. SimpleMemo is independently developed by Yurika Inc. in Japan. We are not affiliated with **Ben Lenarts** or with **Emburse Captio** (the unrelated expense-management SaaS by Captio Tech SL). We built SimpleMemo after the original app shut down because we missed it ourselves.
+No. SimpleMemo is independently developed by YURIKA, K.K. in Japan. We are not affiliated with **Ben Lenarts** or with **Emburse Captio** (the unrelated expense-management SaaS by Captio Tech SL). We built SimpleMemo after the original app shut down because we missed it ourselves.
 
 **Q2. Will my old Gmail filters keep working?**
 Yes. Because every SimpleMemo message lands in your own inbox just like Captio's did, your existing labels, filters, and search operators continue to apply. Add the SimpleMemo sender domain to your existing rule and your archive remains coherent.
@@ -184,7 +184,7 @@ We will not raise the price for existing subscribers without at least 90 days' n
 
 ## Disclaimer
 
-SimpleMemo is an independent iOS application developed by Yurika Inc. (Japan). SimpleMemo is **not affiliated** with the original Captio app by **Ben Lenarts** (which shut down on October 1, 2024), nor is SimpleMemo affiliated with **Emburse Captio**, the unrelated expense-management SaaS produced by Captio Tech SL. References to "Captio" in this document refer to the original consumer iOS app unless explicitly stated otherwise. We make no claim to be the official successor to either product. SimpleMemo is offered as a **spiritual successor** in design intent only.
+SimpleMemo is an independent iOS application developed by YURIKA, K.K. (Japan). SimpleMemo is **not affiliated** with the original Captio app by **Ben Lenarts** (which shut down on October 1, 2024), nor is SimpleMemo affiliated with **Emburse Captio**, the unrelated expense-management SaaS produced by Captio Tech SL. References to "Captio" in this document refer to the original consumer iOS app unless explicitly stated otherwise. We make no claim to be the official successor to either product. SimpleMemo is offered as a **spiritual successor** in design intent only.
 
 ---
 *End of draft. Native English speaker review required before publication. Re-run `python3 scripts/inject_faq_schema.py` after merging to refresh the FAQPage JSON-LD.*
