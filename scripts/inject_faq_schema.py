@@ -161,6 +161,11 @@ def main() -> int:
             "https://simplememofast.com/en/captio-alternative/",
             "en",
         ),
+        (
+            REPO_ROOT / "blog" / "captio-discontinued.html",
+            "https://simplememofast.com/blog/captio-discontinued",
+            "ja",
+        ),
     ]
     for fp, url, lang in targets:
         if not fp.exists():
