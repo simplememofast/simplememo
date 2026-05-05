@@ -25,7 +25,7 @@ Auto-posting is **strictly forbidden** by design. Every send is human-driven.
 | Layer | Implementation |
 |---|---|
 | Frontend | Static HTML + vanilla JS (no React/Next.js) |
-| Auth | None at admin level. `/admin/reddit/` has `noindex,nofollow`; security depends on URL obscurity. **Add Cloudflare Access if needed before sharing access.** |
+| Auth | **Pages Functions middleware** (`functions/admin/_middleware.js`) — Basic Auth gate over all `/admin/*` paths. Username/password hardcoded; cookie `admin_auth=ok_*` set after login (Path=/admin, 24h). Same gate protects `drafts.json` and any future API endpoints. |
 | Data source | `admin/reddit/drafts.json` (built from `docs/cross-platform-engagement/`) |
 | Cadence enforcement | localStorage (1/day, 3/week, 14d/sub). Bypassable by clearing browser data — fine for solo operation. |
 | Lint | 10 rules (L01–L10) computed both at build time (in JSON) and live in the modal |
@@ -87,6 +87,9 @@ L11 (n-gram similarity vs past 30 posts) is **NOT implemented** in MVP — revie
 
 ```
 1. Open https://simplememofast.com/admin/reddit/
+   → Login page appears (existing /admin auth)
+   → Enter credentials → cookie set for 24h, all /admin/* paths
+     (including drafts.json) become accessible
 2. Top bar shows: Today 0/1, Week 0/3, Drafts available
 3. Find a green card (cadence_eligible + lint_red=0)
 4. Click "Prepare"
@@ -140,9 +143,9 @@ This clears the local log. The git-committed `docs/outreach-log.md` is the autho
 
 ## Future work (not in MVP)
 
-- [ ] Cloudflare Access auth gate
+- [x] ~~Auth gate~~ — already in place via `functions/admin/_middleware.js`
 - [ ] GitHub Actions cron: 24h after each posted entry, fetch the comment via PullPush and update `outreach-log.md` with upvotes/comments
-- [ ] Server-side cadence re-check (Pages Functions + KV)
+- [ ] Server-side cadence re-check (Pages Functions + KV) — would persist past localStorage clears
 - [ ] 7d / 30d aggregation
 - [ ] L11 n-gram similarity check (compare each new draft body against the last 30 posted bodies)
 - [ ] Slack / email reminder when 24h check is due
