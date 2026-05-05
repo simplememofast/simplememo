@@ -487,6 +487,14 @@
     if (!d) return;
     const body = STATE.activeBody;
 
+    // Persist submission context BEFORE closing the prepare modal,
+    // so confirmPosted() still has access after closeModal nulls activeDraft.
+    STATE.pendingSubmission = {
+      draft: d,
+      version: STATE.activeVersion,
+      body,
+    };
+
     // Copy to clipboard
     try {
       await navigator.clipboard.writeText(body);
@@ -533,12 +541,19 @@
       if (!confirm('URL doesn\'t look like a standard Reddit/HN comment permalink. Continue anyway?')) return;
     }
 
-    const d = STATE.activeDraft;
+    // Use the persisted submission context (closeModal nulls activeDraft).
+    const sub = STATE.pendingSubmission;
+    if (!sub) {
+      alert('No active submission context. Please close this dialog and try Prepare again.');
+      return;
+    }
+    const d = sub.draft;
+    const versionKey = sub.version;
     const notes = document.getElementById('post-notes').value.trim();
     const now = new Date();
     const postedAt = now.toISOString();
 
-    const v = d.versions[STATE.activeVersion];
+    const v = d.versions[versionKey];
     const utm = v.utm_content || d.thread_id;
 
     const entry = {
@@ -546,7 +561,7 @@
       draft_id: d.id,
       subreddit: d.subreddit,
       comment_url: url,
-      version: STATE.activeVersion,
+      version: versionKey,
       utm_content: utm,
       notes,
     };
@@ -562,7 +577,7 @@
 - **Draft**: ${d.id} — ${d.title}
 - **Thread**: ${d.thread_url}
 - **Comment**: ${url}
-- **Version**: ${STATE.activeVersion} (${v.word_count}w, link=${v.has_link})
+- **Version**: ${versionKey} (${v.word_count}w, link=${v.has_link})
 - **utm_content**: ${utm}
 - **Notes**: ${notes || '(none)'}
 - **Status**: pending — check in 24h
