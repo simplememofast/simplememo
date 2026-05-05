@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Reddit 1-Click Prefill — SimpleMemo Admin</title>
+  <style>
+    :root {
+      --bg: #0a0c12; --surface: #0f141d; --surface-2: #161c28;
+      --accent: #6ab4ff; --accent-2: #4fc3f7;
+      --green: #3fb950; --red: #f85149; --yellow: #d29922;
+      --text: #fff; --text-2: rgba(255,255,255,.7); --text-3: rgba(255,255,255,.45);
+      --border: rgba(100,160,220,.18); --border-2: rgba(100,180,255,.32);
+      --r: 10px;
+      --font: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh;font-size:14px;line-height:1.55}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .hdr{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(10,12,18,.92);backdrop-filter:blur(12px);z-index:50}
+    .hdr h1{font-size:.95rem;font-weight:700;color:var(--text)}
+    .hdr h1 b{color:var(--accent)}
+    .hdr-meta{font-size:.78rem;color:var(--text-3)}
+
+    .main{padding:20px;max-width:1200px;margin:0 auto}
+
+    .cadence-bar{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
+    .cadence-stat{display:flex;flex-direction:column;gap:2px}
+    .cadence-stat__label{font-size:.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em}
+    .cadence-stat__value{font-size:1.2rem;font-weight:700}
+    .cadence-stat__value.ok{color:var(--green)}
+    .cadence-stat__value.warn{color:var(--yellow)}
+    .cadence-stat__value.bad{color:var(--red)}
+
+    .filter-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .filter-btn{padding:6px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--text-2);cursor:pointer;font-size:.78rem}
+    .filter-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
+
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;transition:border-color .15s}
+    .card:hover{border-color:var(--border-2)}
+    .card.disabled{opacity:.55}
+    .card.posted{border-left:3px solid var(--green)}
+
+    .card-row1{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+    .card-id{font-size:.7rem;color:var(--text-3);font-family:ui-monospace,monospace}
+    .card-priority{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:700}
+    .card-priority.p0{background:rgba(248,81,73,.15);color:var(--red)}
+    .card-priority.p1{background:rgba(210,153,34,.15);color:var(--yellow)}
+    .card-title{font-size:.95rem;font-weight:600;flex:1;min-width:0}
+    .card-sub{font-size:.78rem;color:var(--text-3)}
+    .card-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--text-2);margin:6px 0 12px}
+    .card-meta b{color:var(--text)}
+
+    .card-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn{padding:7px 14px;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface-2);color:var(--text);transition:all .15s}
+    .btn:hover:not(:disabled){border-color:var(--accent);background:rgba(106,180,255,.08)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+    .btn.primary:hover:not(:disabled){background:var(--accent-2);border-color:var(--accent-2)}
+    .btn.danger{color:var(--red);border-color:rgba(248,81,73,.3)}
+
+    .blocker{display:inline-block;padding:2px 8px;background:rgba(248,81,73,.1);color:var(--red);border-radius:4px;font-size:.72rem;margin-left:6px}
+
+    /* Modal */
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal{background:var(--surface);border:1px solid var(--border-2);border-radius:var(--r);max-width:760px;width:100%;max-height:90vh;overflow-y:auto;padding:24px}
+    .modal h2{font-size:1rem;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+    .modal-close{background:none;border:none;color:var(--text-3);cursor:pointer;font-size:1.2rem;padding:0}
+
+    .step-label{font-size:.72rem;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px}
+    .version-tabs{display:flex;gap:6px;margin-bottom:12px}
+    .version-tab{padding:8px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;color:var(--text-2);cursor:pointer;font-size:.82rem}
+    .version-tab.active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
+
+    .lint-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;margin:12px 0}
+    .lint-item{padding:6px 10px;border-radius:6px;font-size:.78rem;display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border)}
+    .lint-item.ok{color:var(--green)}
+    .lint-item.warn{color:var(--yellow)}
+    .lint-item.fail{color:var(--red)}
+    .lint-item .icon{font-weight:900}
+
+    .body-textarea{width:100%;min-height:220px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;color:var(--text);font-family:ui-monospace,monospace;font-size:.85rem;line-height:1.55;resize:vertical}
+    .body-textarea:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap}
+
+    .posted-notice{padding:14px;background:rgba(63,185,80,.1);border:1px solid rgba(63,185,80,.3);border-radius:6px;margin:12px 0}
+    .posted-notice strong{color:var(--green)}
+
+    .url-input{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:ui-monospace,monospace;font-size:.82rem}
+
+    .log-output{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:ui-monospace,monospace;font-size:.78rem;white-space:pre-wrap;margin-top:10px;color:var(--text-2)}
+
+    .empty{text-align:center;padding:60px 20px;color:var(--text-3)}
+    .help{font-size:.78rem;color:var(--text-3);margin-top:4px}
+    .warning{padding:10px 14px;background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);border-radius:6px;font-size:.82rem;color:var(--yellow);margin-bottom:14px}
+  </style>
+</head>
+<body>
+  <header class="hdr">
+    <h1>📨 Captio Reddit <b>1-Click Prefill</b></h1>
+    <div class="hdr-meta" id="meta">loading drafts.json…</div>
+  </header>
+
+  <main class="main">
+    <div class="warning">
+      <strong>⚠ This is a static admin UI.</strong> No server auth, no D1, no Cron.
+      Cadence is enforced via browser localStorage (clearable). The "posted" log entry must be pasted manually into <code>docs/outreach-log.md</code> and committed to git. Auto-posting is <b>strictly forbidden</b> — every send is human-driven.
+    </div>
+
+    <div class="cadence-bar" id="cadence-bar">
+      <!-- populated by JS -->
+    </div>
+
+    <div class="filter-row" id="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="ready">Ready</button>
+      <button class="filter-btn" data-filter="blocked">Blocked</button>
+      <button class="filter-btn" data-filter="posted">Posted</button>
+      <button class="filter-btn" data-filter="reddit">Reddit only</button>
+    </div>
+
+    <div id="cards-container">
+      <div class="empty">Loading drafts…</div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modal-bg" style="display:none">
+    <div class="modal" id="modal">
+      <h2>
+        <span id="modal-title">—</span>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </h2>
+
+      <div id="modal-body">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn danger" id="btn-skip" onclick="markSkipped()">Skip</button>
+        <button class="btn primary" id="btn-copy" onclick="copyAndOpen()">Copy + Open Reddit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posted form modal -->
+  <div class="modal-bg" id="posted-modal-bg" style="display:none">
+    <div class="modal">
+      <h2>
+        <span>📝 Record post</span>
+        <button class="modal-close" onclick="closePostedModal()">×</button>
+      </h2>
+
+      <div class="posted-notice">
+        <strong>✅ Body copied. Reddit thread opened in new tab.</strong>
+        Paste your comment, submit, then come back here to log the URL.
+      </div>
+
+      <label>Comment URL (Reddit permalink to your comment):</label>
+      <input type="url" class="url-input" id="comment-url" placeholder="https://www.reddit.com/r/productivity/comments/.../m99xx/">
+      <p class="help">Right-click your comment timestamp → Copy link. Paste here.</p>
+
+      <label style="display:block;margin-top:14px">Notes (optional):</label>
+      <textarea class="body-textarea" id="post-notes" rows="3" style="min-height:60px" placeholder="e.g. customized 2 phrases for context"></textarea>
+
+      <div class="modal-actions">
+        <button class="btn" onclick="closePostedModal()">Cancel</button>
+        <button class="btn primary" onclick="confirmPosted()">Confirm + Generate log entry</button>
+      </div>
+
+      <div id="log-output-container" style="display:none">
+        <p class="step-label">Append this to <code>docs/outreach-log.md</code> and commit:</p>
+        <pre class="log-output" id="log-output"></pre>
+        <div class="modal-actions">
+          <button class="btn primary" onclick="copyLogEntry()">📋 Copy log entry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ============================================================
+  // Captio Reddit 1-Click Prefill — vanilla JS
+  // ============================================================
+
+  const STATE = {
+    drafts: [],
+    cadenceRules: { per_day_max: 1, per_week_max: 3, per_subreddit_min_days: 14 },
+    log: [], // { posted_at, draft_id, subreddit, comment_url, version }
+    activeDraft: null,
+    activeVersion: 'v1',
+    activeBody: '',
+    filter: 'all',
+  };
+
+  // --- localStorage ---
+  function loadLog() {
+    try {
+      STATE.log = JSON.parse(localStorage.getItem('captio_outreach_log') || '[]');
+    } catch (e) { STATE.log = []; }
+  }
+  function saveLog() {
+    localStorage.setItem('captio_outreach_log', JSON.stringify(STATE.log));
+  }
+
+  // --- cadence ---
+  function checkCadence(draft) {
+    const now = Date.now();
+    const dayAgo = now - 24 * 60 * 60 * 1000;
+    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const subCooldownMs = STATE.cadenceRules.per_subreddit_min_days * 24 * 60 * 60 * 1000;
+
+    const todayCount = STATE.log.filter(e => new Date(e.posted_at).getTime() >= dayAgo).length;
+    if (todayCount >= STATE.cadenceRules.per_day_max) {
+      return { eligible: false, blocker: 'daily_max_reached' };
+    }
+
+    const weekCount = STATE.log.filter(e => new Date(e.posted_at).getTime() >= weekAgo).length;
+    if (weekCount >= STATE.cadenceRules.per_week_max) {
+      return { eligible: false, blocker: 'weekly_max_reached' };
+    }
+
+    const sameSub = STATE.log
+      .filter(e => e.subreddit === draft.subreddit)
+      .sort((a, b) => new Date(b.posted_at) - new Date(a.posted_at))[0];
+    if (sameSub) {
+      const elapsed = now - new Date(sameSub.posted_at).getTime();
+      if (elapsed < subCooldownMs) {
+        const daysLeft = Math.ceil((subCooldownMs - elapsed) / (24 * 60 * 60 * 1000));
+        return { eligible: false, blocker: `subreddit_cooldown_${daysLeft}d` };
+      }
+    }
+
+    return { eligible: true, blocker: null };
+  }
+
+  function isPosted(draftId) {
+    return STATE.log.some(e => e.draft_id === draftId);
+  }
+
+  // --- render dashboard ---
+  function renderCadenceBar() {
+    const now = Date.now();
+    const dayAgo = now - 24 * 60 * 60 * 1000;
+    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const today = STATE.log.filter(e => new Date(e.posted_at).getTime() >= dayAgo).length;
+    const week = STATE.log.filter(e => new Date(e.posted_at).getTime() >= weekAgo).length;
+    const total = STATE.log.length;
+
+    const bar = document.getElementById('cadence-bar');
+    bar.innerHTML = `
+      <div class="cadence-stat">
+        <span class="cadence-stat__label">Today</span>
+        <span class="cadence-stat__value ${today >= STATE.cadenceRules.per_day_max ? 'bad' : 'ok'}">${today} / ${STATE.cadenceRules.per_day_max}</span>
+      </div>
+      <div class="cadence-stat">
+        <span class="cadence-stat__label">This week</span>
+        <span class="cadence-stat__value ${week >= STATE.cadenceRules.per_week_max ? 'bad' : (week >= 2 ? 'warn' : 'ok')}">${week} / ${STATE.cadenceRules.per_week_max}</span>
+      </div>
+      <div class="cadence-stat">
+        <span class="cadence-stat__label">Total posted (all time)</span>
+        <span class="cadence-stat__value">${total}</span>
+      </div>
+      <div class="cadence-stat">
+        <span class="cadence-stat__label">Drafts available</span>
+        <span class="cadence-stat__value">${STATE.drafts.length}</span>
+      </div>
+    `;
+  }
+
+  function renderCards() {
+    const container = document.getElementById('cards-container');
+    if (!STATE.drafts.length) {
+      container.innerHTML = '<div class="empty">No drafts loaded.</div>';
+      return;
+    }
+
+    let visible = STATE.drafts.filter(d => {
+      if (STATE.filter === 'all') return true;
+      if (STATE.filter === 'reddit') return d.platform === 'reddit';
+      if (STATE.filter === 'posted') return isPosted(d.id);
+      const c = checkCadence(d);
+      if (STATE.filter === 'ready') return c.eligible && !isPosted(d.id);
+      if (STATE.filter === 'blocked') return !c.eligible && !isPosted(d.id);
+      return true;
+    });
+
+    if (!visible.length) {
+      container.innerHTML = '<div class="empty">No drafts match this filter.</div>';
+      return;
+    }
+
+    container.innerHTML = visible.map(d => {
+      const cad = checkCadence(d);
+      const posted = isPosted(d.id);
+      const v1 = d.versions.v1 || Object.values(d.versions)[0];
+      const lintRed = v1.lint.red;
+      const lintYellow = v1.lint.yellow;
+      const cardClass = posted ? 'posted' : (cad.eligible ? '' : 'disabled');
+      // Card Prepare button: enabled if cadence-eligible and not already posted.
+      // Lint is enforced inside the modal (Copy+Open button), allowing user to switch
+      // versions or edit the body to fix lint failures.
+      const buttonDisabled = posted || !cad.eligible;
+
+      return `
+        <div class="card ${cardClass}">
+          <div class="card-row1">
+            <div style="flex:1;min-width:0">
+              <span class="card-id">${d.id}</span>
+              <span class="card-priority p${d.priority}">P${d.priority}</span>
+              ${d.necro ? '<span style="font-size:.7rem;color:var(--text-3)">necro</span>' : ''}
+              <div class="card-title">${escapeHtml(d.title)}</div>
+              <div class="card-sub">${d.platform === 'reddit' ? 'r/' + d.subreddit : d.platform} · ${Object.keys(d.versions).length} version(s)</div>
+            </div>
+          </div>
+          <div class="card-meta">
+            <span><b>Lint:</b> ${lintRed > 0 ? '<span style="color:var(--red)">'+lintRed+' red</span>' : '<span style="color:var(--green)">0 red</span>'}, ${lintYellow} yellow</span>
+            <span><b>Words:</b> ${v1.word_count}</span>
+            <span><b>Link:</b> ${v1.has_link ? 'yes' : 'no'}</span>
+            ${posted ? '<span style="color:var(--green)"><b>✓ Posted</b></span>' : ''}
+            ${!cad.eligible && !posted ? `<span class="blocker">${cad.blocker}</span>` : ''}
+          </div>
+          <div class="card-actions">
+            <button class="btn" onclick="window.open('${d.thread_url}', '_blank', 'noopener')">View thread ↗</button>
+            <button class="btn primary" onclick="openModal('${d.id}')" ${buttonDisabled ? 'disabled' : ''}>
+              ${posted ? '✓ Posted' : (cad.eligible ? 'Prepare' : 'Cadence locked')}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // --- modal ---
+  function openModal(draftId) {
+    const draft = STATE.drafts.find(d => d.id === draftId);
+    if (!draft) return;
+    STATE.activeDraft = draft;
+    const versionKeys = Object.keys(draft.versions);
+    STATE.activeVersion = versionKeys[0];
+    STATE.activeBody = draft.versions[STATE.activeVersion].body;
+    renderModal();
+    document.getElementById('modal-bg').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal-bg').style.display = 'none';
+    STATE.activeDraft = null;
+  }
+
+  function renderModal() {
+    const d = STATE.activeDraft;
+    if (!d) return;
+    document.getElementById('modal-title').textContent = `${d.id} — ${d.title}`;
+    const versionKeys = Object.keys(d.versions);
+    const v = d.versions[STATE.activeVersion];
+
+    const tabsHtml = versionKeys.map(vk => `
+      <button class="version-tab ${vk === STATE.activeVersion ? 'active' : ''}" onclick="switchVersion('${vk}')">
+        ${vk} · ${d.versions[vk].word_count}w · ${d.versions[vk].has_link ? '🔗' : 'no link'}
+      </button>
+    `).join('');
+
+    // Recompute lint for edited body in real-time
+    const editedLint = computeClientLint(STATE.activeBody, v.has_link, d.sub_policy.link_ok, d.necro, d.platform);
+    const lintHtml = editedLint.checks.map(c => {
+      const cls = c.passed ? 'ok' : (c.level === 'red' ? 'fail' : 'warn');
+      const icon = c.passed ? '✅' : (c.level === 'red' ? '❌' : '⚠️');
+      return `<div class="lint-item ${cls}"><span class="icon">${icon}</span><span>${c.id}: ${c.name}</span></div>`;
+    }).join('');
+
+    document.getElementById('modal-body').innerHTML = `
+      <p class="step-label">Thread</p>
+      <p><a href="${d.thread_url}" target="_blank" rel="noopener">${d.thread_url}</a></p>
+
+      <p class="step-label">Step 1 / 3 — Version</p>
+      <div class="version-tabs">${tabsHtml}</div>
+
+      <p class="step-label">Step 2 / 3 — Lint (edits live-update)</p>
+      <div class="lint-grid">${lintHtml}</div>
+
+      <p class="step-label">Step 3 / 3 — Body (editable)</p>
+      <textarea class="body-textarea" id="body-textarea" oninput="onBodyEdit()">${escapeHtml(STATE.activeBody)}</textarea>
+      <p class="help">Customize 2-3 phrases to match the thread context. The Disclosure line must remain.</p>
+    `;
+
+    // Set button enabled state based on lint
+    const btn = document.getElementById('btn-copy');
+    btn.disabled = editedLint.red > 0;
+    btn.textContent = editedLint.red > 0 ? 'Fix red lints first' : 'Copy + Open Reddit';
+  }
+
+  function switchVersion(vk) {
+    STATE.activeVersion = vk;
+    STATE.activeBody = STATE.activeDraft.versions[vk].body;
+    renderModal();
+  }
+
+  function onBodyEdit() {
+    STATE.activeBody = document.getElementById('body-textarea').value;
+    // Re-render only lint to avoid losing cursor — patch lint grid only
+    const d = STATE.activeDraft;
+    const v = d.versions[STATE.activeVersion];
+    const editedLint = computeClientLint(STATE.activeBody, v.has_link, d.sub_policy.link_ok, d.necro, d.platform);
+    const lintHtml = editedLint.checks.map(c => {
+      const cls = c.passed ? 'ok' : (c.level === 'red' ? 'fail' : 'warn');
+      const icon = c.passed ? '✅' : (c.level === 'red' ? '❌' : '⚠️');
+      return `<div class="lint-item ${cls}"><span class="icon">${icon}</span><span>${c.id}: ${c.name}</span></div>`;
+    }).join('');
+    document.querySelector('.lint-grid').innerHTML = lintHtml;
+    document.getElementById('btn-copy').disabled = editedLint.red > 0;
+    document.getElementById('btn-copy').textContent = editedLint.red > 0 ? 'Fix red lints first' : 'Copy + Open Reddit';
+  }
+
+  // --- client-side lint (mirrors scripts/build_admin_drafts.py rules) ---
+  function computeClientLint(body, hasLinkInOriginal, subLinkOk, necro, platform) {
+    const checks = [];
+    const text = body || '';
+    const isJapanese = /[぀-ヿ一-鿿]/.test(text);
+    const isLongForm = platform === 'blog' || platform === 'email' || platform === 'note';
+
+    const hasCaptio = /\bcaptio\b/i.test(text);
+    checks.push({id:'L01', name:'Captio mention', level:'red', passed: hasCaptio});
+
+    const hasDisclosure = /(?:disclosure|開発者|提携(?:関係|・|なし|・公式)|非提携|公認関係|スポンサーシップ|affiliated with|株式会社ユリカ)/i.test(text);
+    checks.push({id:'L02', name:'Disclosure present', level:'red', passed: hasDisclosure});
+
+    const hasAlt = /\b(Drafts|Pigeon|Apple Notes|Shortcuts|Braintoss|EmailMe|Email Me|Note to Self Mail)\b/i.test(text);
+    checks.push({id:'L03', name:'Alternative app co-mention', level:'yellow', passed: hasAlt});
+
+    const hasHonesty = /(iOS-only|iOS only|subscription|disclosure|i'm the dev|i built|author bias|text-only|by design|imperfect|trade-?off)/i.test(text);
+    checks.push({id:'L04', name:'Honest weakness/disclosure of bias', level:'yellow', passed: hasHonesty});
+
+    const badEn = text.match(/\b(best|perfect|amazing|awesome|the only|sign up now|click here|try it free)\b/i);
+    checks.push({id:'L05', name:'No forbidden EN superlatives', level:'red', passed: !badEn});
+
+    const badJa = text.match(/(ぜひ|使ってください|無料です|今すぐ)/);
+    checks.push({id:'L06', name:'No forbidden JA push phrases', level:'red', passed: !badJa});
+
+    const linkPresent = /https?:\/\//i.test(text);
+    const hasUtm = /utm_source=[\w-]+[\s\S]{0,200}?utm_content=/i.test(text);
+    checks.push({id:'L07', name:'UTM completeness when link present', level:'red', passed: !linkPresent || hasUtm});
+
+    // Word count: platform-aware thresholds
+    let wc;
+    if (isJapanese) {
+      wc = Math.floor(text.replace(/\s+/g,'').length / 2);
+    } else {
+      wc = text.split(/\s+/).filter(Boolean).length;
+    }
+    let loYellow, loRed, hiYellow, hiRed;
+    if (isLongForm) { loYellow=80; loRed=50; hiYellow=600; hiRed=800; }
+    else if (isJapanese) { loYellow=60; loRed=40; hiYellow=320; hiRed=450; }
+    else { loYellow=100; loRed=80; hiYellow=200; hiRed=220; }
+    let wcLevel = 'ok';
+    if (wc < loRed || wc > hiRed) wcLevel = 'red';
+    else if (wc < loYellow || wc > hiYellow) wcLevel = 'yellow';
+    checks.push({id:'L08', name:`Word count in range (${wc})`, level: wcLevel === 'yellow' ? 'yellow' : 'red', passed: wcLevel === 'ok', value: wc});
+
+    const linkPolicyOk = !linkPresent || subLinkOk;
+    checks.push({id:'L09', name:'Subreddit link policy compatible', level:'yellow', passed: linkPolicyOk});
+
+    if (necro) {
+      const hasFuture = /future readers?|future searchers?|landing here/i.test(text);
+      checks.push({id:'L10', name:"Necro post mentions 'future readers'", level:'yellow', passed: hasFuture});
+    } else {
+      checks.push({id:'L10', name:'Necro check (n/a)', level:'yellow', passed: true});
+    }
+
+    const red = checks.filter(c => c.level === 'red' && !c.passed).length;
+    const yellow = checks.filter(c => c.level === 'yellow' && !c.passed).length;
+    return {checks, red, yellow, passed: red === 0};
+  }
+
+  // --- copy + open ---
+  async function copyAndOpen() {
+    const d = STATE.activeDraft;
+    if (!d) return;
+    const body = STATE.activeBody;
+
+    // Copy to clipboard
+    try {
+      await navigator.clipboard.writeText(body);
+    } catch (e) {
+      // Fallback: select textarea + execCommand
+      const ta = document.getElementById('body-textarea');
+      ta.select();
+      document.execCommand('copy');
+    }
+
+    // Open Reddit thread
+    window.open(d.thread_url, '_blank', 'noopener');
+
+    // Show posted modal
+    closeModal();
+    document.getElementById('comment-url').value = '';
+    document.getElementById('post-notes').value = '';
+    document.getElementById('log-output-container').style.display = 'none';
+    document.getElementById('posted-modal-bg').style.display = 'flex';
+  }
+
+  function closePostedModal() {
+    document.getElementById('posted-modal-bg').style.display = 'none';
+  }
+
+  function markSkipped() {
+    const d = STATE.activeDraft;
+    if (!d) return;
+    if (!confirm(`Skip ${d.id}? It will be hidden until you reload.`)) return;
+    // For MVP, store skip in localStorage
+    const skipped = JSON.parse(localStorage.getItem('captio_skipped') || '[]');
+    skipped.push(d.id);
+    localStorage.setItem('captio_skipped', JSON.stringify(skipped));
+    closeModal();
+    renderAll();
+  }
+
+  // --- record posted ---
+  function confirmPosted() {
+    const url = document.getElementById('comment-url').value.trim();
+    if (!url) { alert('Comment URL required'); return; }
+    if (!/^https:\/\/(www\.)?reddit\.com\/r\/[\w-]+\/comments\/[a-z0-9]+\/.+/i.test(url) &&
+        !/^https:\/\/news\.ycombinator\.com\/item\?id=\d+/i.test(url)) {
+      if (!confirm('URL doesn\'t look like a standard Reddit/HN comment permalink. Continue anyway?')) return;
+    }
+
+    const d = STATE.activeDraft;
+    const notes = document.getElementById('post-notes').value.trim();
+    const now = new Date();
+    const postedAt = now.toISOString();
+
+    const v = d.versions[STATE.activeVersion];
+    const utm = v.utm_content || d.thread_id;
+
+    const entry = {
+      posted_at: postedAt,
+      draft_id: d.id,
+      subreddit: d.subreddit,
+      comment_url: url,
+      version: STATE.activeVersion,
+      utm_content: utm,
+      notes,
+    };
+
+    STATE.log.push(entry);
+    saveLog();
+
+    // Generate markdown log entry for paste-into-outreach-log.md
+    const jstString = now.toLocaleString('ja-JP', {timeZone:'Asia/Tokyo', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+    const md = `## ${now.toISOString().slice(0,10)} — ${d.id} (${d.platform === 'reddit' ? 'r/'+d.subreddit : d.platform})
+
+- **Posted at (JST)**: ${jstString}
+- **Draft**: ${d.id} — ${d.title}
+- **Thread**: ${d.thread_url}
+- **Comment**: ${url}
+- **Version**: ${STATE.activeVersion} (${v.word_count}w, link=${v.has_link})
+- **utm_content**: ${utm}
+- **Notes**: ${notes || '(none)'}
+- **Status**: pending — check in 24h
+`;
+
+    document.getElementById('log-output').textContent = md;
+    document.getElementById('log-output-container').style.display = 'block';
+
+    renderAll();
+  }
+
+  async function copyLogEntry() {
+    const text = document.getElementById('log-output').textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Log entry copied. Paste into docs/outreach-log.md and commit.');
+    } catch (e) {
+      alert('Copy failed. Select the text manually.');
+    }
+  }
+
+  // --- filter ---
+  function setFilter(f) {
+    STATE.filter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+    renderCards();
+  }
+
+  // --- init ---
+  function renderAll() {
+    renderCadenceBar();
+    renderCards();
+  }
+
+  async function init() {
+    loadLog();
+    try {
+      // Cache-bust to ensure fresh JSON in dev
+      const r = await fetch('drafts.json?v=' + Date.now());
+      const data = await r.json();
+      STATE.drafts = data.drafts;
+      STATE.cadenceRules = data.cadence_rules;
+      // Filter out skipped
+      const skipped = JSON.parse(localStorage.getItem('captio_skipped') || '[]');
+      STATE.drafts = STATE.drafts.filter(d => !skipped.includes(d.id));
+
+      document.getElementById('meta').textContent = `${STATE.drafts.length} drafts · generated ${data.generated_at.slice(0,10)}`;
+      renderAll();
+    } catch (e) {
+      document.getElementById('cards-container').innerHTML = `<div class="empty">Failed to load drafts.json: ${e.message}<br>Run <code>python3 scripts/build_admin_drafts.py</code> first.</div>`;
+    }
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.addEventListener('click', () => setFilter(b.dataset.filter));
+    });
+  }
+
+  init();
+  </script>
+</body>
+</html>
