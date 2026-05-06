@@ -63,6 +63,9 @@
     .btn.danger{color:var(--red);border-color:rgba(248,81,73,.3)}
 
     .blocker{display:inline-block;padding:2px 8px;background:rgba(248,81,73,.1);color:var(--red);border-radius:4px;font-size:.72rem;margin-left:6px}
+    .archived-badge{display:inline-block;padding:2px 8px;background:rgba(248,81,73,.18);color:#ff9b94;border:1px solid rgba(248,81,73,.4);border-radius:4px;font-size:.7rem;font-weight:700;margin-left:6px}
+    .open-badge{display:inline-block;padding:2px 8px;background:rgba(63,185,80,.14);color:#7ee2a0;border:1px solid rgba(63,185,80,.3);border-radius:4px;font-size:.7rem;margin-left:6px}
+    .card.archived{opacity:.5;border-left:3px solid var(--red)}
 
     /* Modal */
     .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -119,6 +122,7 @@
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="ready">Ready</button>
       <button class="filter-btn" data-filter="blocked">Blocked</button>
+      <button class="filter-btn" data-filter="archived">🔒 Archived</button>
       <button class="filter-btn" data-filter="posted">Posted</button>
       <button class="filter-btn" data-filter="reddit">Reddit only</button>
     </div>
@@ -243,6 +247,11 @@
     return STATE.log.some(e => e.draft_id === draftId);
   }
 
+  function isArchived(draft) {
+    const ts = draft.thread_status || {};
+    return ts.archived === true || ts.locked === true;
+  }
+
   // --- render dashboard ---
   function renderCadenceBar() {
     const now = Date.now();
@@ -284,9 +293,11 @@
       if (STATE.filter === 'all') return true;
       if (STATE.filter === 'reddit') return d.platform === 'reddit';
       if (STATE.filter === 'posted') return isPosted(d.id);
+      if (STATE.filter === 'archived') return isArchived(d);
       const c = checkCadence(d);
-      if (STATE.filter === 'ready') return c.eligible && !isPosted(d.id);
-      if (STATE.filter === 'blocked') return !c.eligible && !isPosted(d.id);
+      const archived = isArchived(d);
+      if (STATE.filter === 'ready') return c.eligible && !isPosted(d.id) && !archived;
+      if (STATE.filter === 'blocked') return (!c.eligible || archived) && !isPosted(d.id);
       return true;
     });
 
@@ -298,14 +309,25 @@
     container.innerHTML = visible.map(d => {
       const cad = checkCadence(d);
       const posted = isPosted(d.id);
+      const archived = isArchived(d);
       const v1 = d.versions.v1 || Object.values(d.versions)[0];
       const lintRed = v1.lint.red;
       const lintYellow = v1.lint.yellow;
-      const cardClass = posted ? 'posted' : (cad.eligible ? '' : 'disabled');
-      // Card Prepare button: enabled if cadence-eligible and not already posted.
-      // Lint is enforced inside the modal (Copy+Open button), allowing user to switch
-      // versions or edit the body to fix lint failures.
-      const buttonDisabled = posted || !cad.eligible;
+      let cardClass = '';
+      if (posted) cardClass = 'posted';
+      else if (archived) cardClass = 'archived';
+      else if (!cad.eligible) cardClass = 'disabled';
+      // Prepare button is disabled if posted, archived, or cadence-blocked.
+      // (Lint is enforced inside the modal, not at card level.)
+      const buttonDisabled = posted || archived || !cad.eligible;
+      const ts = d.thread_status || {};
+      const ageDays = ts.created_utc ? Math.round((Date.now()/1000 - ts.created_utc) / 86400) : null;
+
+      let buttonLabel;
+      if (posted) buttonLabel = '✓ Posted';
+      else if (archived) buttonLabel = '🔒 Archived';
+      else if (!cad.eligible) buttonLabel = 'Cadence locked';
+      else buttonLabel = 'Prepare';
 
       return `
         <div class="card ${cardClass}">
@@ -314,8 +336,9 @@
               <span class="card-id">${d.id}</span>
               <span class="card-priority p${d.priority}">P${d.priority}</span>
               ${d.necro ? '<span style="font-size:.7rem;color:var(--text-3)">necro</span>' : ''}
+              ${archived ? '<span class="archived-badge">🔒 ARCHIVED</span>' : (ts.checked ? '<span class="open-badge">✓ open</span>' : '')}
               <div class="card-title">${escapeHtml(d.title)}</div>
-              <div class="card-sub">${d.platform === 'reddit' ? 'r/' + d.subreddit : d.platform} · ${Object.keys(d.versions).length} version(s)</div>
+              <div class="card-sub">${d.platform === 'reddit' ? 'r/' + d.subreddit : d.platform} · ${Object.keys(d.versions).length} version(s)${ageDays !== null ? ` · age ${ageDays}d` : ''}${ts.score ? ` · ${ts.score}↑ ${ts.num_comments}💬` : ''}</div>
             </div>
           </div>
           <div class="card-meta">
@@ -323,13 +346,12 @@
             <span><b>Words:</b> ${v1.word_count}</span>
             <span><b>Link:</b> ${v1.has_link ? 'yes' : 'no'}</span>
             ${posted ? '<span style="color:var(--green)"><b>✓ Posted</b></span>' : ''}
-            ${!cad.eligible && !posted ? `<span class="blocker">${cad.blocker}</span>` : ''}
+            ${archived && !posted ? '<span class="blocker">archived — cannot comment</span>' : ''}
+            ${!cad.eligible && !archived && !posted ? `<span class="blocker">${cad.blocker}</span>` : ''}
           </div>
           <div class="card-actions">
             <button class="btn" onclick="window.open('${d.thread_url}', '_blank', 'noopener')">View thread ↗</button>
-            <button class="btn primary" onclick="openModal('${d.id}')" ${buttonDisabled ? 'disabled' : ''}>
-              ${posted ? '✓ Posted' : (cad.eligible ? 'Prepare' : 'Cadence locked')}
-            </button>
+            <button class="btn primary" onclick="openModal('${d.id}')" ${buttonDisabled ? 'disabled' : ''}>${buttonLabel}</button>
           </div>
         </div>
       `;

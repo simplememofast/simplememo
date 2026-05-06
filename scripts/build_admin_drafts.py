@@ -5,14 +5,23 @@ Extracts Reddit + HN thread contexts (where the engagement method is comment
 and a full draft is present) into a single JSON file the admin UI can fetch
 client-side. Includes lint signals computed at build time.
 
+Also pre-fetches the archive/locked status of each Reddit thread via the
+public .json endpoint so the admin UI can grey out un-postable cards.
+
 Run:
     python3 scripts/build_admin_drafts.py
+    python3 scripts/build_admin_drafts.py --skip-archive-check  # offline mode
 """
 from __future__ import annotations
+import argparse
 import json
+import os
 import re
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 REPO = Path(__file__).resolve().parent.parent
 SRC_DIR = REPO / "docs" / "cross-platform-engagement"
@@ -58,6 +67,58 @@ DISCLOSURE_RE = re.compile(
     r"affiliated with|株式会社ユリカ"
 )
 CAPTIO_RE = re.compile(r"\bcaptio\b", re.IGNORECASE)
+
+USER_AGENT = os.environ.get(
+    "REDDIT_USER_AGENT",
+    "captio-research/1.0 (admin draft build script)"
+)
+
+
+def fetch_reddit_thread_status(thread_url: str) -> dict:
+    """Fetch a Reddit thread's .json endpoint and return archive/locked status.
+
+    Returns dict:
+        - checked: bool — did we successfully fetch
+        - archived: bool — Reddit's archived flag
+        - locked: bool — comments locked
+        - score: int — current upvote count of OP
+        - num_comments: int
+        - created_utc: int — when thread was posted (for age computation)
+        - error: str — populated on failure
+    """
+    # Extract thread ID from URL: .../comments/<id>/[title/[comment-id/]]
+    m = re.search(r"reddit\.com/r/([\w-]+)/comments/([a-z0-9]+)", thread_url)
+    if not m:
+        return {"checked": False, "error": "url_not_reddit_thread"}
+    sub = m.group(1)
+    thread_id = m.group(2)
+    json_url = f"https://www.reddit.com/r/{sub}/comments/{thread_id}.json"
+
+    try:
+        req = Request(json_url, headers={"User-Agent": USER_AGENT})
+        with urlopen(req, timeout=20) as resp:
+            if resp.status != 200:
+                return {"checked": False, "error": f"http_{resp.status}"}
+            data = json.loads(resp.read().decode("utf-8"))
+        # data[0] is the post listing, data[1] is the comments listing
+        post = data[0]["data"]["children"][0]["data"]
+        return {
+            "checked": True,
+            "archived": bool(post.get("archived", False)),
+            "locked": bool(post.get("locked", False)),
+            "score": int(post.get("score", 0) or 0),
+            "num_comments": int(post.get("num_comments", 0) or 0),
+            "created_utc": int(post.get("created_utc", 0) or 0),
+            "subreddit": post.get("subreddit", sub),
+        }
+    except HTTPError as e:
+        return {"checked": False, "error": f"http_{e.code}"}
+    except URLError as e:
+        return {"checked": False, "error": f"url_error_{e.reason}"}
+    except (json.JSONDecodeError, KeyError, IndexError) as e:
+        return {"checked": False, "error": f"parse_error_{type(e).__name__}"}
+    except Exception as e:
+        return {"checked": False, "error": f"exception_{type(e).__name__}"}
 
 
 def word_count(text: str) -> int:
@@ -329,12 +390,41 @@ def parse_p1_file(path: Path, results: list[dict]) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--skip-archive-check", action="store_true",
+                        help="Skip Reddit .json fetch (offline mode)")
+    args = parser.parse_args()
+
     results: list[dict] = []
     parse_p0_file(SRC_DIR / "01-priority-P0-drafts.md", results)
     parse_p1_file(SRC_DIR / "02-priority-P1-drafts.md", results)
 
     # Filter: keep only entries with at least one version
     results = [r for r in results if r["versions"]]
+
+    # Archive / locked detection for Reddit threads
+    if args.skip_archive_check:
+        print("[info] --skip-archive-check: not fetching Reddit thread status")
+        for r in results:
+            r["thread_status"] = {"checked": False, "skipped": True}
+    else:
+        print(f"[info] checking archive/locked status for {sum(1 for r in results if r['platform'] == 'reddit')} Reddit threads...")
+        for r in results:
+            if r["platform"] == "reddit":
+                status = fetch_reddit_thread_status(r["thread_url"])
+                r["thread_status"] = status
+                if status.get("checked"):
+                    flags = []
+                    if status.get("archived"): flags.append("ARCHIVED")
+                    if status.get("locked"): flags.append("LOCKED")
+                    flag_str = " ".join(flags) if flags else "open"
+                    age_d = (time.time() - status.get("created_utc", 0)) / 86400 if status.get("created_utc") else 0
+                    print(f"  [{flag_str:>16}] {r['id']:<8} (age={age_d:.0f}d, score={status.get('score', 0)}, comments={status.get('num_comments', 0)})")
+                else:
+                    print(f"  [        unknown] {r['id']:<8} ({status.get('error', 'unknown')})")
+                time.sleep(1.5)  # be polite to Reddit
+            else:
+                r["thread_status"] = {"checked": False, "platform": r["platform"]}
 
     out = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -348,9 +438,14 @@ def main() -> int:
     }
 
     OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2))
-    print(f"[ok] wrote {len(results)} drafts -> {OUT.relative_to(REPO)}")
+    print(f"\n[ok] wrote {len(results)} drafts -> {OUT.relative_to(REPO)}")
+    print("\nDraft summary:")
     for r in results:
-        print(f"  {r['id']:<8} {r['platform']:<10} r/{r['subreddit']:<24} versions={list(r['versions'].keys())}")
+        ts = r.get("thread_status", {})
+        flag = ""
+        if ts.get("archived"): flag = " 🔒 ARCHIVED"
+        elif ts.get("locked"): flag = " 🔒 LOCKED"
+        print(f"  {r['id']:<8} {r['platform']:<10} r/{r['subreddit']:<24} versions={list(r['versions'].keys())}{flag}")
     return 0
 
 
