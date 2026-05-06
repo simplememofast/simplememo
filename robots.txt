@@ -87,10 +87,17 @@ Disallow: /
 User-agent: *
 Allow: /
 Disallow: /admin/
-# Don't index URLs with tracking parameters - keeps canonical URLs clean
+# Don't index URLs with tracking / referral / legacy-language parameters.
+# All of these resolve to the same content as the canonical (clean) URL,
+# so crawling them just wastes budget and creates "alternate page" entries
+# in Search Console (GSC: 代替ページ・適切な canonical タグあり).
 Disallow: /*?utm_*
 Disallow: /*?fbclid=
 Disallow: /*?gclid=
+Disallow: /*?lang=
+Disallow: /*?ref=
+Disallow: /*?from=
+Disallow: /*?source=
 
 # ----------------------------------------------------------------------
 # Sitemap + AI-readable site summary
