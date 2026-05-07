@@ -355,7 +355,7 @@
       
       <!-- Japanese Content -->
       <div class="lang-content" data-lang="ja">
-        <p class="page-content__date">最終更新日：<time datetime="2026-01-31">2026年1月31日</time></p>
+        <p class="page-content__date">最終更新日：<time datetime="2026-05-07">2026年5月7日</time></p>
         <div class="page-content__body">
           <p>株式会社ユリカ（以下「当社」）は、「Captio式シンプルメモ」（以下「本サービス」）におけるユーザー情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。</p>
 
@@ -396,7 +396,38 @@
             <li>当社は、法令対応や不正対策、障害対応等の正当な必要性がある場合を除き、メモ内容を恒常的に保存・閲覧することを目的としていません。</li>
           </ul>
 
-          <h2>5. 第三者提供</h2>
+          <h2>5. メールリマインダー機能（任意）</h2>
+          <p>本サービスは、メモ送信の習慣化を支援するため、希望されたユーザーに対してリマインダーメールを送信する任意機能を提供しています。</p>
+
+          <h3>(A) 同意の取得</h3>
+          <ul>
+            <li>本機能は<strong>既定で無効</strong>であり、認証画面または設定画面でユーザーが明示的に有効化した場合にのみ送信します。</li>
+            <li>有効化後も、設定画面から1タップで停止できます。各リマインダーメール末尾の解除リンクからも停止可能です。</li>
+          </ul>
+
+          <h3>(B) 取得・保存する情報</h3>
+          <ul>
+            <li>メールアドレスの<strong>ハッシュ値</strong>（SHA-256）— 当社サーバ（Cloudflare D1）に保存します。</li>
+            <li>同意状態（有効／無効）、最終メモ送信日時、累計送信回数。</li>
+            <li>リマインダー送信履歴（送信日時、配信／開封／クリック／バウンス等のイベント）。</li>
+            <li><strong>生のメールアドレス自体は当社サーバに保存しません</strong>。メール送信基盤（Resend）の連絡先 API のみが保持します。</li>
+          </ul>
+
+          <h3>(C) 送信頻度</h3>
+          <ul>
+            <li>最終メモ送信から 24時間／72時間／7日間 経過したタイミングで、各 1通まで送信します。</li>
+            <li>1ユーザーあたり 1週間で最大 2通、サービス全体で 1日あたり最大 80通の上限を設けています。</li>
+          </ul>
+
+          <h3>(D) 自動解除</h3>
+          <ul>
+            <li>メール配信時のバウンス・苦情があった場合、当該アドレスへの送信を直ちに停止し、同意状態を無効化します。</li>
+          </ul>
+
+          <h3>(E) 委託先</h3>
+          <p>リマインダーメールの送信および連絡先管理は、Resend, Inc.（米国）に委託しています。同社は <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Agreement</a> および国際的なメール送信規制（CAN-SPAM、GDPR、特定電子メール法等）に準拠しています。</p>
+
+          <h2>6. 第三者提供</h2>
           <p>当社は、以下の場合を除き、個人情報を第三者に提供しません。</p>
           <ul>
             <li>ユーザーの同意がある場合</li>
@@ -405,26 +436,26 @@
             <li>業務委託先に必要な範囲で提供する場合（次項）</li>
           </ul>
 
-          <h2>6. 委託（メール送信等）</h2>
+          <h2>7. 委託（メール送信等）</h2>
           <p>当社は、メール送信の提供、運用保守、分析等のため、外部事業者に業務を委託することがあります。その場合、委託先を適切に監督します。</p>
 
-          <h2>7. 安全管理</h2>
+          <h2>8. 安全管理</h2>
           <p>当社は、情報の漏えい、滅失、毀損の防止等のため、合理的な安全対策を講じます。</p>
 
-          <h2>8. 保管期間</h2>
+          <h2>9. 保管期間</h2>
           <p>当社は、利用目的に必要な期間を超えて情報を保管しないよう努めます。ログ等は、不正対策や運用上必要な範囲で一定期間保管される場合があります。</p>
 
-          <h2>9. 改定</h2>
+          <h2>10. 改定</h2>
           <p>当社は、本ポリシーを必要に応じて改定します。改定後は本サービスまたは当社ウェブサイト等に掲示します。</p>
 
-          <h2>10. お問い合わせ</h2>
+          <h2>11. お問い合わせ</h2>
           <p><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></p>
         </div>
       </div>
 
       <!-- English Content -->
       <div class="lang-content" data-lang="en">
-        <p class="page-content__date">Last updated: <time datetime="2026-01-31">Jan 31, 2026</time></p>
+        <p class="page-content__date">Last updated: <time datetime="2026-05-07">May 7, 2026</time></p>
         <div class="page-content__body">
           <p>YURIKA, K.K. ("we," "us," or "our") describes how we handle user information in "Simple Memo - Captio-style" (the "Service").</p>
 
@@ -465,22 +496,53 @@
             <li>We do not intend to store or view memo content on an ongoing basis except where necessary for legitimate purposes such as legal compliance, abuse prevention, or troubleshooting.</li>
           </ul>
 
-          <h2>5. Sharing With Third Parties</h2>
+          <h2>5. Email Reminder Feature (Optional)</h2>
+          <p>To help you build a memo-writing habit, we offer an optional reminder email feature for users who explicitly opt in.</p>
+
+          <h3>(A) Consent</h3>
+          <ul>
+            <li>This feature is <strong>disabled by default</strong>. We send reminder emails only after you explicitly enable it on the verification screen or in Settings.</li>
+            <li>You can disable it at any time from Settings (one tap), or from the unsubscribe link in any reminder email.</li>
+          </ul>
+
+          <h3>(B) Information We Store</h3>
+          <ul>
+            <li>A <strong>hash</strong> (SHA-256) of your email address — stored on our servers (Cloudflare D1).</li>
+            <li>Your consent state (enabled/disabled), last memo send timestamp, and total send count.</li>
+            <li>Reminder send history (timestamps for sent/delivered/opened/clicked/bounced events).</li>
+            <li><strong>The raw email address itself is NOT stored on our servers.</strong> It lives only in the contact API of our email delivery provider (Resend).</li>
+          </ul>
+
+          <h3>(C) Sending Frequency</h3>
+          <ul>
+            <li>Reminders are sent at most once per stall window: 24 hours, 72 hours, and 7 days after your last memo send.</li>
+            <li>Per-user cap: max 2 reminders per 7 days. Service-wide cap: max 80 reminders per day.</li>
+          </ul>
+
+          <h3>(D) Automatic Opt-out</h3>
+          <ul>
+            <li>If a reminder email bounces or generates a complaint, we immediately stop sending to that address and disable the consent flag.</li>
+          </ul>
+
+          <h3>(E) Service Provider</h3>
+          <p>Reminder email delivery and contact management are handled by Resend, Inc. (USA) under appropriate <a href="https://resend.com/legal/dpa" rel="noopener">Data Processing Agreement</a> and compliance with international email regulations (CAN-SPAM, GDPR, the Japanese Act on Regulation of Transmission of Specified Electronic Mail, etc.).</p>
+
+          <h2>6. Sharing With Third Parties</h2>
           <p>We do not share personal information except with consent, as required by law, to protect vital interests, or to service providers.</p>
 
-          <h2>6. Service Providers</h2>
+          <h2>7. Service Providers</h2>
           <p>We may use third-party vendors for email delivery and operations under appropriate supervision.</p>
 
-          <h2>7. Security</h2>
+          <h2>8. Security</h2>
           <p>We take reasonable measures to protect information.</p>
 
-          <h2>8. Retention</h2>
+          <h2>9. Retention</h2>
           <p>We aim not to retain information longer than necessary. Some logs may be retained for limited periods for security/operations.</p>
 
-          <h2>9. Updates</h2>
+          <h2>10. Updates</h2>
           <p>We may update this Policy and will post the latest version.</p>
 
-          <h2>10. Contact</h2>
+          <h2>11. Contact</h2>
           <p><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></p>
         </div>
       </div>
