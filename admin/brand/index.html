@@ -353,26 +353,28 @@ function captioSaveState(s) {
 //   (d) Frank Captio、(e) スペイン Captio (Barcelona の経費精算 SaaS、
 //       Telefonica が販売契約、最終的に €25M で買収)
 // を共起語必須＋固有名詞／業界語否定で除外する。
+// 言語フィルタは lang ドロップダウン側で一元管理する（query 内には埋め込まない）。
+// プリセットは「言語条件以外」の検索式と、適用したい言語をペアで持つ。
 const CAPTIO_PRESETS = {
   'ja-broad': {
-    q: 'captio -is:retweet lang:ja',
-    lang: 'all',
+    q: 'captio -is:retweet',
+    lang: 'ja',
   },
   'ja-app': {
-    q: 'captio (アプリ OR メモ OR メール OR iPhone OR iOS OR Mac OR 自分宛) -is:retweet lang:ja',
-    lang: 'all',
+    q: 'captio (アプリ OR メモ OR メール OR iPhone OR iOS OR Mac OR 自分宛) -is:retweet',
+    lang: 'ja',
   },
   'en-strict': {
-    q: '("captio app" OR "captio.app" OR "captio ios" OR "captio iphone" OR "captio mac" OR "captio for ios" OR "captio for iphone") -Telefonica -fintech -expense -"raises" -is:retweet lang:en',
-    lang: 'all',
+    q: '("captio app" OR "captio.app" OR "captio ios" OR "captio iphone" OR "captio mac" OR "captio for ios" OR "captio for iphone") -Telefonica -fintech -expense -"raises" -is:retweet',
+    lang: 'en',
   },
   'en-context': {
-    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store") -caption -capito -Senator -Shelley -Frank -Telefonica -fintech -expense -"raises" -is:retweet lang:en',
-    lang: 'all',
+    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store") -caption -capito -Senator -Shelley -Frank -Telefonica -fintech -expense -"raises" -is:retweet',
+    lang: 'en',
   },
   'en-context-broad': {
-    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store" OR shutdown OR sunset OR alternative OR replacement OR "send to email") -caption -capito -Senator -Shelley -Frank -"Moore Capito" -Telefonica -fintech -expense -"raises" -Barcelona -SaaS -is:retweet lang:en',
-    lang: 'all',
+    q: 'captio (app OR ios OR iphone OR mac OR memo OR note OR notes OR email OR appstore OR "app store" OR shutdown OR sunset OR alternative OR replacement OR "send to email") -caption -capito -Senator -Shelley -Frank -"Moore Capito" -Telefonica -fintech -expense -"raises" -Barcelona -SaaS -is:retweet',
+    lang: 'en',
   },
 };
 
@@ -388,11 +390,13 @@ function captioApplyPreset() {
 }
 
 function captioBuildQuery() {
-  const base = (document.getElementById('cap-q').value || '').trim();
+  const baseRaw = (document.getElementById('cap-q').value || '').trim();
+  if (!baseRaw) return '';
   const lang = document.getElementById('cap-lang').value;
-  if (!base) return '';
-  // ユーザが既に lang: を直書きしていたら二重付与しない
-  if (lang === 'all' || /\blang:\w+/i.test(base)) return base;
+  // 既存の lang:xx は常に剥がす（ドロップダウンを単一情報源にする）。
+  // 過去はクエリ内 lang:xx があるとドロップダウン変更が無視されていた。
+  const base = baseRaw.replace(/\s*\blang:\w+\b/gi, '').replace(/\s+/g, ' ').trim();
+  if (lang === 'all') return base;
   return base + ' lang:' + lang;
 }
 
@@ -439,8 +443,9 @@ function captioBuildMd(tweets) {
     const who = t.author_username ? ('@' + t.author_username) : '(unknown)';
     const faves = t.like_count || 0;
     const rts = t.retweet_count || 0;
+    const lang = t.lang ? '[' + t.lang + '] ' : '';
     const text = (t.text || '').replace(/\s+/g, ' ').trim().slice(0, 80);
-    lines.push('- [' + d + '] ' + who + ' ♥' + faves + ' RT' + rts + ' — ' + t.url + (text ? '  \n    > ' + text : ''));
+    lines.push('- [' + d + '] ' + lang + who + ' ♥' + faves + ' RT' + rts + ' — ' + t.url + (text ? '  \n    > ' + text : ''));
   }
   return lines.join('\n');
 }
@@ -508,17 +513,25 @@ async function captioFetchNext(btn) {
       return;
     }
 
-    // マージ（id で重複除外 + 最小いいね数フィルタ）
+    // マージ（id で重複除外 + 最小いいね数フィルタ + 言語ミスマッチ除外）
     const minFavesRaw = document.getElementById('cap-min-faves').value.trim();
     const minFaves = Math.max(0, parseInt(minFavesRaw || '0', 10) || 0);
+    // X API の lang: 演算子は短文ブランド名で誤分類が起きやすいので、
+    // tweet.lang （Twitter 分類器のラベル）を使って二重チェックする。
+    const desiredLang = document.getElementById('cap-lang').value;
     let added = 0;
     let dup = 0;
     let filteredOut = 0;
+    let langMismatch = 0;
     const tweets = Array.isArray(data.tweets) ? data.tweets : [];
     for (const t of tweets) {
       if (!t || !t.id) continue;
       if (s.ids[t.id]) { dup++; continue; }
       if ((t.like_count || 0) < minFaves) { filteredOut++; continue; }
+      if (desiredLang !== 'all' && t.lang && t.lang !== desiredLang) {
+        langMismatch++;
+        continue;
+      }
       s.ids[t.id] = 1;
       s.tweets.push(t);
       added++;
@@ -533,10 +546,13 @@ async function captioFetchNext(btn) {
     const rl = data.rateLimit || {};
     const rlLine = 'Rate Limit: remaining=' + (rl.remaining || '?') + ' / limit=' + (rl.limit || '?') +
       (rl.reset ? ' (reset=' + new Date(Number(rl.reset) * 1000).toLocaleTimeString() + ')' : '');
+    const langLine = desiredLang === 'all'
+      ? ''
+      : ' / lang≠' + desiredLang + ' で除外 ' + langMismatch;
     const summary =
       'HTTP ' + data.status + '\n' +
       rlLine + '\n' +
-      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 重複 ' + dup + ' / いいね<' + minFaves + ' で除外 ' + filteredOut + '\n' +
+      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 重複 ' + dup + ' / いいね<' + minFaves + ' で除外 ' + filteredOut + langLine + '\n' +
       '累計: ' + s.tweets.length + ' 件 / ' + s.calls + ' コール\n' +
       'next_token: ' + (s.nextToken ? '(あり — もう一度ボタンを押すと続きを取得)' : '(なし — 結果終端)');
     setStatus('cap-status', 'ok', summary);
