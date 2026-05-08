@@ -37,6 +37,15 @@
   Content-Type: application/xml; charset=utf-8
   Cache-Control: public, max-age=3600
 
+# /admin/* is gated by Cloudflare Access (Zero Trust). The middleware in
+# functions/admin/_middleware.js also forces these headers on its responses,
+# but this rule covers any static asset under /admin/ (e.g. /admin/bg/*.jpg)
+# that bypasses the function. Authenticated content must never be cached by
+# the CDN — otherwise one user's response could be served to another.
+/admin/*
+  Cache-Control: private, no-store
+  X-Robots-Tag: noindex, nofollow
+
 # robots.txt + llms.txt: explicit text/plain, longer browser cache.
 /robots.txt
   Content-Type: text/plain; charset=utf-8
