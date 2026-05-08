@@ -8,7 +8,7 @@
 
 - 保管場所: **Cloudflare Pages プロジェクトの「環境変数」** に Secret タイプで登録
 - 読み取り箇所: `functions/admin/api/x-verify.js` の `context.env.X_*`
-- 認証保護: `/admin/*` は `functions/admin/_middleware.js` の Basic 認証（`simplememo / tiktok2026`）で保護済み
+- 認証保護: `/admin/*` は Cloudflare Access (Zero Trust) でエッジ保護。Identity allowlist は Zero Trust ダッシュボードで管理
 - デプロイ後: 環境変数を変更したら **再デプロイが必要**（Pages の仕様）
 
 ---
@@ -22,7 +22,6 @@
 | `X_API_SECRET` | OAuth 1.0a の Consumer Secret | 投稿する場合 | 同上 |
 | `X_ACCESS_TOKEN` | OAuth 1.0a の User Access Token | 投稿する場合 | Keys and tokens → Access Token and Secret |
 | `X_ACCESS_TOKEN_SECRET` | OAuth 1.0a の User Access Token Secret | 投稿する場合 | 同上 |
-| `X_USER_ACCESS_TOKEN` | OAuth 2.0 User Context の Access Token | 自分情報取得 | OAuth 2.0 認可フロー経由で取得 |
 | `X_EN_API_KEY` | 英語アカウント @simplememo_en の Consumer Key | 英語自動投稿する場合 | 英語アカウントの Developer App から |
 | `X_EN_API_SECRET` | 英語アカウントの Consumer Secret | 英語自動投稿する場合 | 同上 |
 | `X_EN_ACCESS_TOKEN` | 英語アカウントの User Access Token | 英語自動投稿する場合 | 同上 |
@@ -33,7 +32,7 @@
 - **最低限**: `X_BEARER_TOKEN` だけ入れれば、この管理画面の「X API 接続テスト」は動きます（Basic ティア以上が必要）。
 - **日本語アカウント（@simplememofast）への投稿を自動化したい場合**: OAuth 1.0a の 4 点セット（`X_API_KEY` / `X_API_SECRET` / `X_ACCESS_TOKEN` / `X_ACCESS_TOKEN_SECRET`）をすべて登録。
 - **英語アカウント（@simplememo_en）への投稿も自動化したい場合**: 上記 4 点に加えて `X_EN_*` の 4 点（`X_EN_API_KEY` / `X_EN_API_SECRET` / `X_EN_ACCESS_TOKEN` / `X_EN_ACCESS_TOKEN_SECRET`）を登録。投稿時に Body の `account: "en"` で切替。
-- **自アカウント情報（`/2/users/me`）を取得したい場合**: `X_USER_ACCESS_TOKEN` が必要（App-only Bearer では取れない）。
+- **自アカウント情報（`/2/users/me`）を取得したい場合**: 「動作確認」タブの「自アカウント情報を取得」ボタンから OAuth 1.0a User Context（投稿用キーと同じ 4 点）で叩く。アプリ専用 Bearer Token では取得できないエンドポイント。
 
 ---
 
@@ -164,13 +163,13 @@ npx wrangler pages dev .
 4. **資料ファイル疎通確認** → すべて OK が出るはず
 5. **Cloudflare 環境変数の状態** → 登録した変数が `[設定済み]` と表示されるはず
 6. **X API 接続テスト** → HTTP 200 が返れば成功。403 の場合は X のプランが Free のままか、権限不足
-7. **自アカウント情報取得テスト** → `X_USER_ACCESS_TOKEN` が登録されていれば自分の `id` `username` が返る
+7. **自アカウント情報取得テスト** → JA / EN それぞれの OAuth 1.0a 4 点セットが揃っていれば、`@simplememofast` / `@simplememo_en` の `id` と `username` が返る
 
 ---
 
 ## 8. セキュリティ上の注意
 
-- 管理画面の Basic 認証は現在 `simplememo / tiktok2026` で、`functions/admin/_middleware.js` にハードコードされています。本番運用するなら、この認証情報も Cloudflare 環境変数（`ADMIN_USER` / `ADMIN_PASS`）に移す運用に切り替えることを推奨します。
+- 管理画面は Cloudflare Access (Zero Trust) で `simplememofast.com/admin/*` がエッジ保護されています。Identity allowlist は Zero Trust ダッシュボード → Access → Applications → `simplememo-admin` のポリシーで管理。`functions/admin/_middleware.js` は `Cf-Access-Jwt-Assertion` の有無を最終チェックするのみで、ハードコード認証情報はありません。
 - Secret は一度登録すると Cloudflare Dashboard でも値を再表示できません。控えを別途安全な場所に保管しておくこと。
 - キーが漏洩した疑いがある場合は、Developer Portal で **Regenerate** して旧キーを無効化、Cloudflare の Secret も上書き更新、再デプロイ、という順で対応します。
 - Git の履歴にキーを混入させないため、コードやコメントに直接書かない。`.dev.vars` `.env` などは必ず `.gitignore` に追加。

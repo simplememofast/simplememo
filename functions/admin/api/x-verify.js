@@ -1,28 +1,31 @@
-// X API 接続確認用エンドポイント
-// 認証は /functions/admin/_middleware.js の Basic 認証で担保されているため、
-// この関数自体では認証チェックをしない（middleware 通過後にのみ到達する）。
+// X API 接続確認用エンドポイント。
+// 認証は /functions/admin/_middleware.js (Cloudflare Access) で担保されている
+// ため、この関数自体では認証チェックをしない。
 //
 // 使い方:
 //   GET /admin/api/x-verify?action=env
-//     → Cloudflare 環境変数が設定されているかを true/false で返す（値は返さない）
+//     → Cloudflare 環境変数の存在フラグを返す（値は返さない）
 //   GET /admin/api/x-verify?action=search&q=<query>
-//     → X API v2 の GET /2/tweets/search/recent に Bearer Token で問い合わせる
-//   GET /admin/api/x-verify?action=me
-//     → X API v2 の GET /2/users/me に User Access Token で問い合わせる
+//     → X API v2 GET /2/tweets/search/recent を Bearer Token で叩く
+//   GET /admin/api/x-verify?action=me[&account=ja|en]
+//     → X API v2 GET /2/users/me を OAuth 1.0a User Context で叩く
+//        account=ja (既定): X_API_KEY/SECRET + X_ACCESS_TOKEN/SECRET
+//        account=en       : X_EN_API_KEY/SECRET + X_EN_ACCESS_TOKEN/SECRET
+//        Bearer (App-only) では /2/users/me が拒否されるため OAuth1 を使う。
 
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const action = url.searchParams.get('action') || 'env';
 
-  // 環境変数の存在フラグ（値は絶対に返さない）
+  // 環境変数の存在フラグ（値は絶対に返さない）。
+  // 投稿で実際に使う 9 キーのみ。X_USER_ACCESS_TOKEN は廃止。
   const envStatus = {
     X_BEARER_TOKEN: Boolean(env.X_BEARER_TOKEN),
     X_API_KEY: Boolean(env.X_API_KEY),
     X_API_SECRET: Boolean(env.X_API_SECRET),
     X_ACCESS_TOKEN: Boolean(env.X_ACCESS_TOKEN),
     X_ACCESS_TOKEN_SECRET: Boolean(env.X_ACCESS_TOKEN_SECRET),
-    X_USER_ACCESS_TOKEN: Boolean(env.X_USER_ACCESS_TOKEN),
     X_EN_API_KEY: Boolean(env.X_EN_API_KEY),
     X_EN_API_SECRET: Boolean(env.X_EN_API_SECRET),
     X_EN_ACCESS_TOKEN: Boolean(env.X_EN_ACCESS_TOKEN),
@@ -37,7 +40,7 @@ export async function onRequest(context) {
     if (!env.X_BEARER_TOKEN) {
       return json({
         status: 0,
-        body: { error: 'X_BEARER_TOKEN が Cloudflare 環境変数に設定されていません。「セットアップ手順」タブを参照してください。' },
+        body: { error: 'X_BEARER_TOKEN が Cloudflare 環境変数に設定されていません。' },
       }, 400);
     }
     const q = url.searchParams.get('q') || 'from:simplememofast';
@@ -68,28 +71,93 @@ export async function onRequest(context) {
   }
 
   if (action === 'me') {
-    const token = env.X_USER_ACCESS_TOKEN || env.X_BEARER_TOKEN;
-    if (!token) {
-      return json({
-        status: 0,
-        body: { error: 'X_USER_ACCESS_TOKEN または X_BEARER_TOKEN を登録してください。' },
-      }, 400);
+    const account = url.searchParams.get('account') === 'en' ? 'en' : 'ja';
+    const prefix = account === 'en' ? 'X_EN_' : 'X_';
+    const credKeys = {
+      consumerKey: prefix + 'API_KEY',
+      consumerSecret: prefix + 'API_SECRET',
+      token: prefix + 'ACCESS_TOKEN',
+      tokenSecret: prefix + 'ACCESS_TOKEN_SECRET',
+    };
+    for (const k of Object.values(credKeys)) {
+      if (!env[k]) {
+        return json({
+          status: 0,
+          body: { error: k + ' が Cloudflare 環境変数に未設定です' },
+        }, 400);
+      }
     }
+    const apiUrl = 'https://api.x.com/2/users/me';
     try {
-      const res = await fetch('https://api.x.com/2/users/me', {
+      const authHeader = await buildOAuth1Header({
+        method: 'GET',
+        url: apiUrl,
+        consumerKey: env[credKeys.consumerKey],
+        consumerSecret: env[credKeys.consumerSecret],
+        token: env[credKeys.token],
+        tokenSecret: env[credKeys.tokenSecret],
+      });
+      const res = await fetch(apiUrl, {
         headers: {
-          'Authorization': 'Bearer ' + token,
+          'Authorization': authHeader,
           'User-Agent': 'SimpleMemoAdmin/1.0',
         },
       });
       const body = await safeJson(res);
-      return json({ status: res.status, body: body });
+      return json({ status: res.status, account: account, body: body });
     } catch (e) {
       return json({ status: 0, body: { error: e.message } }, 500);
     }
   }
 
   return json({ error: '未知の action: ' + action }, 400);
+}
+
+async function buildOAuth1Header(opts) {
+  const oauth = {
+    oauth_consumer_key: opts.consumerKey,
+    oauth_nonce: randomNonce(),
+    oauth_signature_method: 'HMAC-SHA1',
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_token: opts.token,
+    oauth_version: '1.0',
+  };
+  const u = new URL(opts.url);
+  const params = Object.assign({}, oauth);
+  for (const [k, v] of u.searchParams.entries()) params[k] = v;
+  const sortedKeys = Object.keys(params).sort();
+  const paramString = sortedKeys.map(function (k) { return pe(k) + '=' + pe(params[k]); }).join('&');
+  const baseUrl = u.origin + u.pathname;
+  const sigBase = opts.method.toUpperCase() + '&' + pe(baseUrl) + '&' + pe(paramString);
+  const signingKey = pe(opts.consumerSecret) + '&' + pe(opts.tokenSecret);
+  const signature = await hmacSha1(signingKey, sigBase);
+  oauth.oauth_signature = signature;
+  const authParts = Object.keys(oauth).sort().map(function (k) { return pe(k) + '="' + pe(oauth[k]) + '"'; });
+  return 'OAuth ' + authParts.join(', ');
+}
+
+function pe(s) {
+  return encodeURIComponent(String(s))
+    .replace(/!/g, '%21').replace(/\*/g, '%2A').replace(/'/g, '%27')
+    .replace(/\(/g, '%28').replace(/\)/g, '%29');
+}
+
+function randomNonce() {
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+async function hmacSha1(key, data) {
+  const enc = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(data));
+  const bytes = new Uint8Array(sig);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
 }
 
 async function safeJson(res) {
