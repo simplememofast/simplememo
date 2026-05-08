@@ -129,14 +129,15 @@
 
     <div class="card">
       <h2>4. 自アカウント情報取得テスト</h2>
-      <p><code>X_USER_ACCESS_TOKEN</code>（OAuth 2.0 User Context）が登録されている場合、<code>GET /2/users/me</code> を叩いて自アカウント情報を取得します。App-only Bearer Token では取得できないエンドポイントです。</p>
-      <button class="btn" onclick="testMe(this)">自アカウント情報を取得</button>
+      <p><code>GET /2/users/me</code> を OAuth 1.0a User Context (<code>X_API_KEY/SECRET</code> + <code>X_ACCESS_TOKEN/SECRET</code>) で叩き、id / username が返ることを確認します。投稿時と同じ認証なので、これが通れば <code>/admin/api/x-post</code> が機能する保証になります。</p>
+      <button class="btn" onclick="testMe(this, 'ja')">JA (@simplememofast) を確認</button>
+      <button class="btn" onclick="testMe(this, 'en')">EN (@simplememo_en) を確認</button>
       <div id="me-status"></div>
     </div>
 
     <div class="card">
       <h2>5. 認証情報の再入力が必要な場合</h2>
-      <p>Basic 認証の Cookie を削除してログインし直したい場合は、ブラウザのプライバシー設定からこのサイトの Cookie を削除してください。</p>
+      <p>Cloudflare Access のセッションを切りたい場合は、ブラウザのプライバシー設定から <code>simplememofast.com</code> と <code>simplememo.cloudflareaccess.com</code> の Cookie を削除してください。</p>
     </div>
   </section>
 
@@ -304,14 +305,15 @@ async function testSearch(btn) {
   btn.disabled = false;
 }
 
-async function testMe(btn) {
+async function testMe(btn, account) {
   btn.disabled = true;
-  setStatus('me-status', 'info', 'リクエスト送信中…');
+  setStatus('me-status', 'info', '(' + (account || 'ja').toUpperCase() + ') リクエスト送信中…');
   try {
-    const res = await fetch('/admin/api/x-verify?action=me', {credentials:'include', cache:'no-store'});
+    const url = '/admin/api/x-verify?action=me&account=' + encodeURIComponent(account || 'ja');
+    const res = await fetch(url, {credentials:'include', cache:'no-store'});
     const data = await res.json();
     const cls = (data.status >= 200 && data.status < 300) ? 'ok' : 'err';
-    setStatus('me-status', cls, 'HTTP ' + data.status + '\n\n' + JSON.stringify(data.body, null, 2));
+    setStatus('me-status', cls, '(' + (data.account || account || 'ja').toUpperCase() + ') HTTP ' + data.status + '\n\n' + JSON.stringify(data.body, null, 2));
   } catch (e) {
     setStatus('me-status', 'err', 'エラー: ' + e.message);
   }
