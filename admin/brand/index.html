@@ -323,6 +323,38 @@ async function testMe(btn, account) {
 // ---- captio 言及収集 ----
 const CAP_STORE_KEY = 'captio_collect_v1';
 
+// 既に @simplememo_en で対応済み (replied) もしくは判断のうえ無視 (skipped) の
+// ツイート ID 一覧。/admin/brand/content/captio-handled.csv に CSV で保存。
+// 取得 / レンダー双方で除外。CSV を編集するだけで除外リストを増やせる。
+const CAP_HANDLED_CSV = '/admin/brand/content/captio-handled.csv';
+let CAP_HANDLED_IDS = null;          // Set<string> | null (lazy load)
+let CAP_HANDLED_LOAD_ERROR = null;   // string | null
+const CAP_HANDLED_READY = (async function () {
+  try {
+    const res = await fetch(CAP_HANDLED_CSV, { credentials: 'include', cache: 'no-store' });
+    if (!res.ok) {
+      CAP_HANDLED_IDS = new Set();
+      CAP_HANDLED_LOAD_ERROR = 'HTTP ' + res.status;
+      return;
+    }
+    const text = await res.text();
+    const ids = new Set();
+    const lines = text.split(/\r?\n/);
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const id = trimmed.split(',', 1)[0];
+      if (!id || id === 'status_id') continue; // ヘッダ行 / 空行スキップ
+      if (!/^\d+$/.test(id)) continue;
+      ids.add(id);
+    }
+    CAP_HANDLED_IDS = ids;
+  } catch (e) {
+    CAP_HANDLED_IDS = new Set();
+    CAP_HANDLED_LOAD_ERROR = e && e.message ? e.message : String(e);
+  }
+})();
+
 function captioLoadState() {
   try {
     const raw = localStorage.getItem(CAP_STORE_KEY);
@@ -410,9 +442,27 @@ function captioRender() {
   // クエリやエンドポイントを変えたら next_token は無効化表示
   const queryChanged = s.lastQuery && (s.lastQuery !== q || s.lastEndpoint !== endpoint);
 
+  // 既処理 (replied/skipped) を表示時にも除外する。
+  // 過去に蓄積された state が CSV 追加前のものでも、表示は最新 CSV に合わせる。
+  const handled = CAP_HANDLED_IDS;
+  let handledHidden = 0;
+  const visibleTweets = !handled
+    ? s.tweets.slice()
+    : s.tweets.filter(function (t) {
+        if (t && t.id && handled.has(String(t.id))) { handledHidden++; return false; }
+        return true;
+      });
+
   const prog = document.getElementById('cap-progress');
   const parts = [];
   parts.push('蓄積ツイート: ' + s.tweets.length + ' 件');
+  if (handled) {
+    parts.push('既処理除外: ' + handled.size + ' ID（うち state 上 ' + handledHidden + ' 件を非表示）');
+  } else if (CAP_HANDLED_LOAD_ERROR) {
+    parts.push('既処理リスト読込失敗: ' + CAP_HANDLED_LOAD_ERROR);
+  } else {
+    parts.push('既処理リスト読込中…');
+  }
   parts.push('API コール累積: ' + s.calls + ' 回');
   if (s.nextToken) {
     parts.push(queryChanged
@@ -425,7 +475,7 @@ function captioRender() {
   prog.textContent = parts.join(' / ');
 
   // 本文：created_at 昇順（最古→新）
-  const sorted = s.tweets.slice().sort(function (a, b) {
+  const sorted = visibleTweets.sort(function (a, b) {
     const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
     const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
     return ta - tb;
@@ -473,6 +523,10 @@ async function captioFetchNext(btn) {
   btn.disabled = true;
   setStatus('cap-status', 'info', 'リクエスト送信中…（1 コールのみ）');
 
+  // 取得前に必ず除外リスト読み込みを待つ。
+  // ロード失敗時は CAP_HANDLED_IDS が空 Set なので除外なしで続行（fail-open）。
+  await CAP_HANDLED_READY;
+
   const q = captioBuildQuery();
   const endpoint = document.getElementById('cap-endpoint').value;
   const maxResults = document.getElementById('cap-max').value.trim() || '100';
@@ -515,19 +569,22 @@ async function captioFetchNext(btn) {
       return;
     }
 
-    // マージ（id で重複除外 + 最小いいね数フィルタ + 言語ミスマッチ除外）
+    // マージ（id で重複除外 + 既処理除外 + 最小いいね数フィルタ + 言語ミスマッチ除外）
     const minFavesRaw = document.getElementById('cap-min-faves').value.trim();
     const minFaves = Math.max(0, parseInt(minFavesRaw || '0', 10) || 0);
     // X API の lang: 演算子は短文ブランド名で誤分類が起きやすいので、
     // tweet.lang （Twitter 分類器のラベル）を使って二重チェックする。
     const desiredLang = document.getElementById('cap-lang').value;
+    const handled = CAP_HANDLED_IDS || new Set();
     let added = 0;
     let dup = 0;
     let filteredOut = 0;
     let langMismatch = 0;
+    let handledOut = 0;
     const tweets = Array.isArray(data.tweets) ? data.tweets : [];
     for (const t of tweets) {
       if (!t || !t.id) continue;
+      if (handled.has(String(t.id))) { handledOut++; continue; } // 既 replied/skipped を弾く
       if (s.ids[t.id]) { dup++; continue; }
       if ((t.like_count || 0) < minFaves) { filteredOut++; continue; }
       if (desiredLang !== 'all' && t.lang && t.lang !== desiredLang) {
@@ -554,7 +611,7 @@ async function captioFetchNext(btn) {
     const summary =
       'HTTP ' + data.status + '\n' +
       rlLine + '\n' +
-      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 重複 ' + dup + ' / いいね<' + minFaves + ' で除外 ' + filteredOut + langLine + '\n' +
+      '今回: ' + tweets.length + ' 件取得 / 新規 ' + added + ' / 既処理で除外 ' + handledOut + ' / 重複 ' + dup + ' / いいね<' + minFaves + ' で除外 ' + filteredOut + langLine + '\n' +
       '累計: ' + s.tweets.length + ' 件 / ' + s.calls + ' コール\n' +
       'next_token: ' + (s.nextToken ? '(あり — もう一度ボタンを押すと続きを取得)' : '(なし — 結果終端)');
     setStatus('cap-status', 'ok', summary);
@@ -643,6 +700,9 @@ function captioTs() {
 
 // 初期描画
 captioRender();
+
+// 既処理 CSV 読込完了後にもう一度描画して「既処理除外: N ID」を反映する。
+CAP_HANDLED_READY.then(function () { captioRender(); });
 </script>
 </body>
 </html>
