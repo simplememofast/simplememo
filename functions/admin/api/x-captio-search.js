@@ -1,12 +1,14 @@
 // captio 言及ツイート収集用エンドポイント。
 // 認証は /functions/admin/_middleware.js (Cloudflare Access) で担保。
 //
-// 検索は @simplememo_en の User Context (OAuth 1.0a) で叩く。Bearer
-// (App-only) ではなく、X_EN_* 4 キーで HMAC-SHA1 署名する。
-//   - X_EN_API_KEY / X_EN_API_SECRET           = Consumer Key / Secret
-//   - X_EN_ACCESS_TOKEN / X_EN_ACCESS_TOKEN_SECRET = User Access Token
-// この移行で X_BEARER_TOKEN へのこの関数の依存はゼロになる（他の関数で
-// 引き続き使用）。
+// X API 側の制約:
+//   - GET /2/tweets/search/recent  → OAuth 1.0a / OAuth 2.0 App-only / OAuth 2.0 User Context すべて可
+//   - GET /2/tweets/search/all     → **OAuth 2.0 App-only (Bearer) のみ**。OAuth 1.0a は 403。
+//
+// このエンドポイントは両方を切替えて叩くので、両対応する唯一の手段である
+// Bearer Token (App-only OAuth 2.0) を使う。@simplememo_en の Developer App
+// から発行した Bearer Token を `X_EN_BEARER_TOKEN` という env で受け取る。
+// この env がアカウント (= rate-limit プール) を実質的に決める。
 //
 // 使い方:
 //   GET /admin/api/x-captio-search?q=<query>&endpoint=recent|all
@@ -20,11 +22,12 @@
 export async function onRequest(context) {
   const { request, env } = context;
 
-  const required = ['X_EN_API_KEY', 'X_EN_API_SECRET', 'X_EN_ACCESS_TOKEN', 'X_EN_ACCESS_TOKEN_SECRET'];
-  for (const k of required) {
-    if (!env[k]) {
-      return json({ error: k + ' が Cloudflare 環境変数に未登録です。' }, 400);
-    }
+  if (!env.X_EN_BEARER_TOKEN) {
+    return json({
+      error: 'X_EN_BEARER_TOKEN が Cloudflare 環境変数に未登録です。'
+        + ' X Developer Portal の @simplememo_en 用 App から Bearer Token を発行し、'
+        + 'Cloudflare Pages → Settings → Environment Variables に X_EN_BEARER_TOKEN として保存してください。',
+    }, 400);
   }
 
   const url = new URL(request.url);
@@ -59,18 +62,9 @@ export async function onRequest(context) {
   const apiUrl = 'https://api.x.com/2/tweets/search/' + endpointParam + '?' + params.toString();
 
   try {
-    const authHeader = await buildOAuth1Header({
-      method: 'GET',
-      url: apiUrl,
-      consumerKey: env.X_EN_API_KEY,
-      consumerSecret: env.X_EN_API_SECRET,
-      token: env.X_EN_ACCESS_TOKEN,
-      tokenSecret: env.X_EN_ACCESS_TOKEN_SECRET,
-    });
-
     const res = await fetch(apiUrl, {
       headers: {
-        'Authorization': authHeader,
+        'Authorization': 'Bearer ' + env.X_EN_BEARER_TOKEN,
         'User-Agent': 'SimpleMemoAdmin/1.0',
       },
     });
@@ -107,7 +101,7 @@ export async function onRequest(context) {
       ok: res.ok,
       endpoint: endpointParam,
       query: q,
-      account: 'en', // どのアカウントの User Context で叩いたか（ログ/デバッグ用）
+      account: 'en', // どのアカウントの Bearer で叩いたか（ログ/デバッグ用）
       tweets: tweets,
       result_count: (body && body.meta && body.meta.result_count) || tweets.length,
       next_token: (body && body.meta && body.meta.next_token) || null,
@@ -125,57 +119,6 @@ export async function onRequest(context) {
   } catch (e) {
     return json({ error: e.message }, 500);
   }
-}
-
-// ---- OAuth 1.0a 署名ヘルパー ----
-// 同じ実装が x-post.js / x-delete.js / x-verify.js にもある。共通モジュールに
-// 抽出する案はあるが、現状は各エンドポイントで自己完結させる方針。
-
-async function buildOAuth1Header(opts) {
-  const oauth = {
-    oauth_consumer_key: opts.consumerKey,
-    oauth_nonce: randomNonce(),
-    oauth_signature_method: 'HMAC-SHA1',
-    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-    oauth_token: opts.token,
-    oauth_version: '1.0',
-  };
-  const u = new URL(opts.url);
-  const params = Object.assign({}, oauth);
-  for (const [k, v] of u.searchParams.entries()) params[k] = v;
-  const sortedKeys = Object.keys(params).sort();
-  const paramString = sortedKeys.map(function (k) { return pe(k) + '=' + pe(params[k]); }).join('&');
-  const baseUrl = u.origin + u.pathname;
-  const sigBase = opts.method.toUpperCase() + '&' + pe(baseUrl) + '&' + pe(paramString);
-  const signingKey = pe(opts.consumerSecret) + '&' + pe(opts.tokenSecret);
-  const signature = await hmacSha1(signingKey, sigBase);
-  oauth.oauth_signature = signature;
-  const authParts = Object.keys(oauth).sort().map(function (k) { return pe(k) + '="' + pe(oauth[k]) + '"'; });
-  return 'OAuth ' + authParts.join(', ');
-}
-
-function pe(s) {
-  return encodeURIComponent(String(s))
-    .replace(/!/g, '%21').replace(/\*/g, '%2A').replace(/'/g, '%27')
-    .replace(/\(/g, '%28').replace(/\)/g, '%29');
-}
-
-function randomNonce() {
-  const arr = new Uint8Array(16);
-  crypto.getRandomValues(arr);
-  return Array.from(arr).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
-}
-
-async function hmacSha1(key, data) {
-  const enc = new TextEncoder();
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
-  );
-  const sig = await crypto.subtle.sign('HMAC', cryptoKey, enc.encode(data));
-  const bytes = new Uint8Array(sig);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary);
 }
 
 async function safeJson(res) {
