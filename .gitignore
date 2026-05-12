@@ -4,3 +4,22 @@ scripts/indexnow-failed.log
 # MCP server configs may contain bearer-equivalent tokens in URLs;
 # never commit. Keep a local copy if needed for development.
 .mcp.json
+
+# Local-only dev tooling (Playwright for screenshot/audit scripts, etc.)
+node_modules/
+package.json
+package-lock.json
+screenshots/
+
+# Ad-hoc audit/screenshot scripts kept out of the deployed bundle.
+scripts/audit*.py
+scripts/capture*.py
+scripts/capture_all.js
+scripts/check_computed.py
+scripts/fix_nav*.py
+scripts/minify_css.py
+scripts/reaudit*.py
+scripts/seo_visual_audit.py
+scripts/validate_css.py
+scripts/verify_footer.py
+scripts/visual*.py
