@@ -54,3 +54,28 @@
 /llms.txt
   Content-Type: text/plain; charset=utf-8
   Cache-Control: public, max-age=86400
+
+# Apple Universal Links: the AASA file MUST be served from the apex domain
+# (Apple only fetches https://simplememofast.com/.well-known/apple-app-site-association,
+# never the api. subdomain) AND MUST be Content-Type: application/json.
+# Cloudflare Pages defaults an extension-less file to application/octet-stream,
+# so we override here. Cache 1h on the browser; Apple's CDN caches its own
+# copy separately for 24-48h after first fetch — which is why a fresh deploy
+# of the AASA isn't picked up by iOS immediately.
+/.well-known/apple-app-site-association
+  Content-Type: application/json
+  Cache-Control: public, max-age=3600
+  X-Robots-Tag: noindex, nofollow
+
+# /verify: email-verification fallback page. JS reads ?code= from the URL
+# and renders the 6-digit code; Universal Links route users into the app
+# when installed, otherwise this HTML is shown. Mirrors the API-side
+# /verify served from api.simplememofast.com so both apex and API can
+# absorb the same incoming email link.
+/verify
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: public, max-age=3600
+
+/verify/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: public, max-age=3600
