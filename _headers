@@ -72,10 +72,11 @@
 # when installed, otherwise this HTML is shown. Mirrors the API-side
 # /verify served from api.simplememofast.com so both apex and API can
 # absorb the same incoming email link.
+#
+# Served from verify.html at the repo root (matches the site's
+# extension-less-canonical convention: faq.html, contact.html, etc.).
+# /verify returns 200 directly; /verify/ and /verify.html both 308 to
+# /verify per Cloudflare Pages defaults.
 /verify
-  X-Robots-Tag: noindex, nofollow
-  Cache-Control: public, max-age=3600
-
-/verify/*
   X-Robots-Tag: noindex, nofollow
   Cache-Control: public, max-age=3600
