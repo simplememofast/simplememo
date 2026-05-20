@@ -79,7 +79,7 @@
   "url": "https://simplememofast.com/en/blog/why-captio-died"
 }</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260502">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260520-cream">
   <style>
     /* Global Navigation */
     .global-nav {
@@ -399,21 +399,23 @@
 
         <p>Compare this to Captio's infrastructure cost of $0 -- which was the vulnerability. Captio paid nothing because it offloaded everything to Gmail. When Gmail changed the rules, there was no alternative. Our $5/month is insurance against platform risk. We own every piece of the stack from app to inbox.</p>
 
-        <h3>Decision 4: End-to-End Encryption</h3>
+        <h3>Decision 4: On-device Encryption for the Outbox &amp; History</h3>
 
-        <p>Every memo is encrypted on-device before it leaves the user's phone using <strong>AES-GCM</strong> (Advanced Encryption Standard in Galois/Counter Mode). This is the same encryption standard used by Signal, WhatsApp, and most modern secure messaging apps.</p>
+        <p>Simple Memo's offline outbox queue and send history are encrypted on-device with <strong>AES-GCM-256</strong> (Apple's CryptoKit). The symmetric key lives in Apple Keychain Services and never leaves the device. This protects the data at rest if the phone is lost or backed up to an untrusted environment.</p>
 
-        <p>The encryption happens before the HTTPS layer, meaning:</p>
+        <p>Important: this is <strong>not end-to-end encryption</strong>. The memo body itself is delivered over standard SMTP so you can read it in your own mail client (Gmail, Apple Mail, Outlook). On the network path, the protection is TLS (HTTPS); on our infrastructure, the protection is data minimization — we don't persistently store memo bodies on the server.</p>
+
+        <p>Concretely:</p>
 
         <ul>
-          <li>The memo is encrypted in the app's memory</li>
-          <li>The encrypted payload is sent over HTTPS (double encryption)</li>
-          <li>The Cloudflare Worker decrypts and processes the memo</li>
-          <li>The plaintext is never stored on disk or in any database</li>
-          <li>After the email is sent, the plaintext is garbage collected from memory</li>
+          <li>The on-device outbox queue and the local history database are AES-GCM-256 encrypted on disk</li>
+          <li>The symmetric key is stored in Apple Keychain (excluded from backups, not exportable)</li>
+          <li>API calls use <code>URLSessionConfiguration.ephemeral</code> over TLS — no cookies, no caches</li>
+          <li>The Cloudflare Worker forwards the memo body to Resend for SMTP delivery without persisting it</li>
+          <li>The plaintext is not written to disk or any database on our side; logs do not capture memo bodies (except in DEBUG builds during local development)</li>
         </ul>
 
-        <p>Captio had no encryption layer. Your memo traveled from app to Gmail API as plaintext (over HTTPS, but readable by the API endpoint). This wasn't a criticism of Captio -- encryption wasn't a standard expectation for apps of that era. But in 2026, we can and should do better.</p>
+        <p>Captio's encryption story was thinner — memos traveled from the app to the Gmail API in plaintext over HTTPS, readable by the API endpoint. We've made improvements on the at-rest and data-minimization fronts. If you need true end-to-end encryption (where even the email recipient infrastructure can't read your content), a purpose-built tool like Standard Notes, Signal, or ProtonMail is the right pick — Simple Memo's design optimizes for fast capture into your existing email inbox, not for E2EE.</p>
 
         <h3>Decision 5: Outbox Architecture for Offline Support</h3>
 
