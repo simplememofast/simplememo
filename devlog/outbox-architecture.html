@@ -378,9 +378,9 @@
 
           <!-- Section 4 -->
           <h2>AES-GCM暗号化の実装</h2>
-          <p>Outboxに保存されるメッセージは、ユーザーのプライベートなメモだ。ローカルストレージとはいえ、平文で保存するわけにはいかない。Apple CryptoKitのAES-GCMを使い、外部ライブラリ依存ゼロで暗号化を実装した。</p>
+          <p>Outbox に保存されるメッセージは、ユーザーのプライベートなメモだ。ローカルストレージとはいえ、平文で保存するわけにはいかない。Apple CryptoKit の AES-GCM を使い、暗号化に関しては外部 SDK を一切介さない実装にしている。</p>
           <ul>
-            <li><strong>Apple CryptoKit</strong> — iOS 13以降で利用可能。外部依存なし。</li>
+            <li><strong>Apple CryptoKit</strong> — iOS 13以降で利用可能。暗号化処理に外部 SDK を介さない（Apple 純正のみ）。</li>
             <li><strong>256-bit対称鍵</strong> — Keychainに保存され、デバイスに紐づく。</li>
             <li><strong>認証付き暗号化</strong> — AES-GCMはデータの機密性と完全性を同時に保証。改ざんされたデータは復号時に検知される。</li>
           </ul>
@@ -409,7 +409,7 @@
           <p>鍵はアプリ初回起動時に自動生成され、Keychainに安全に保存される。Keychainはデバイスのセキュアエンクレーブに紐づいており、他のアプリやバックアップからはアクセスできない。</p>
 
           <!-- Section 5 -->
-          <h2>外部ライブラリ依存ゼロの意味</h2>
+          <h2>データパスを Apple 純正のみで構成する意味</h2>
           <p>Outboxアーキテクチャで使用しているフレームワークはすべてAppleネイティブだ。</p>
           <ul>
             <li><strong>CryptoKit</strong> — AES-GCM暗号化。サードパーティの暗号化ライブラリは不要。</li>
@@ -550,7 +550,7 @@
 
           <!-- Section 4 -->
           <h2>AES-GCM Encryption Implementation</h2>
-          <p>Messages stored in the Outbox are private user memos. Even on local storage, plaintext is unacceptable. We implemented encryption using Apple CryptoKit's AES-GCM with zero external dependencies.</p>
+          <p>Messages stored in the Outbox are private user memos. Even on local storage, plaintext is unacceptable. We implemented encryption using Apple CryptoKit's AES-GCM, with no third-party SDK in the encryption path.</p>
           <ul>
             <li><strong>Apple CryptoKit</strong> — Available from iOS 13+. No external dependencies.</li>
             <li><strong>256-bit Symmetric Key</strong> — Stored in Keychain, bound to the device.</li>
@@ -581,7 +581,7 @@
           <p>The key is auto-generated on first launch and securely stored in Keychain. Keychain is tied to the device's Secure Enclave, making it inaccessible to other apps or backups.</p>
 
           <!-- Section 5 -->
-          <h2>Zero External Dependencies</h2>
+          <h2>Keeping the Data Path Free of External SDKs</h2>
           <p>Every framework used in the Outbox architecture is Apple-native.</p>
           <ul>
             <li><strong>CryptoKit</strong> — AES-GCM encryption. No third-party crypto libraries needed.</li>
@@ -638,7 +638,7 @@
           <p>No. The Outbox uses persistent storage. Messages survive app termination and iPhone restarts. They are automatically retried on next app launch or via background tasks.</p>
 
           <h3>Q. Why AES-GCM?</h3>
-          <p>Apple CryptoKit provides native AES-GCM support, offering authenticated encryption that detects data tampering during decryption. It requires zero external dependencies, keeping the security code path entirely first-party.</p>
+          <p>Apple CryptoKit provides native AES-GCM support, offering authenticated encryption that detects data tampering during decryption. The encryption code path is entirely first-party — no third-party SDK touches the security-critical code.</p>
 
           <h3>Q. How many retries on failure?</h3>
           <p>Retries use exponential backoff and are scheduled as background tasks via BGTaskScheduler. They continue until the message is successfully delivered. The system is designed to never drop a user's memo.</p>

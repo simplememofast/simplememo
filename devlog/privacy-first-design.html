@@ -559,17 +559,17 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           <p>仮に端末に物理的にアクセスされたとしても、Keychainのセキュリティが破られない限り、Outbox内のメモは暗号化されたまま読み取ることができない。</p>
           <p>Outboxアーキテクチャの全体設計については、<a href="/devlog/outbox-architecture">Outboxアーキテクチャ：取りこぼしゼロ設計</a>で詳述している。</p>
 
-          <h2>6. 外部ライブラリ依存ゼロの意味（セキュリティ面）</h2>
+          <h2>6. データパスを Apple 純正のみで構成する意味（セキュリティ面）</h2>
           <p>外部ライブラリの追加は、機能的には便利だが、セキュリティの観点からはすべてが攻撃対象面（Attack Surface）になる。</p>
           <p>サプライチェーン攻撃は現実の脅威だ。信頼されたライブラリがアップデートで悪意あるコードを含む事例は、npm、PyPI、CocoaPodsなどのエコシステムで実際に発生している。</p>
-          <p>このアプリでは、Apple純正フレームワークのみを使用している。</p>
+          <p>このアプリでは、メモ本文の暗号化・保管・送信といったデータの主要パスを <strong>Apple 純正フレームワークのみ</strong> で構成している。v2.4 から、任意のオンボーディング短縮（Google Sign-In）とバックエンド保護（App Check）のために Firebase / GoogleSignIn SDK を併用しているが、これらはメモ本文に一切触れない。</p>
           <ul>
             <li><strong>CryptoKit：</strong>暗号化処理</li>
             <li><strong>Network.framework：</strong>ネットワーク接続状態の監視</li>
             <li><strong>BackgroundTasks：</strong>バックグラウンド送信のスケジューリング</li>
             <li><strong>os.log：</strong>ログ出力</li>
           </ul>
-          <p>サードパーティのコードがユーザーデータに一切触れないという事実は、セキュリティ監査を大幅に簡素化する。監査対象はApple純正フレームワークと自分たちのコードだけだ。依存関係グラフの複雑性がゼロであることは、それ自体がセキュリティ上の強みになる。</p>
+          <p>メモ本文を扱うデータパスにサードパーティのコードが一切入らないという事実は、セキュリティ監査を大幅に簡素化する。監査対象は Apple 純正フレームワークと自分たちのコードだけだ（v2.4 で追加された Firebase / GoogleSignIn SDK はメモ本文を扱わないため、データパスの監査対象には含まれない）。この境界線が明示的に引かれていること自体がセキュリティ上の強みになる。</p>
 
           <h2>7. 設計哲学：「気配を消す」</h2>
           <p>最良のプライバシー保護は、ユーザーが意識しないものだ。</p>
@@ -606,7 +606,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. なぜ外部ライブラリを使わないのですか？</div>
-              <div class="faq-item__answer">セキュリティとプライバシーのためです。外部ライブラリはすべて攻撃対象面になります。Apple純正フレームワークのみで構築し、ユーザーデータに触れるサードパーティコードをゼロにしています。</div>
+              <div class="faq-item__answer">セキュリティとプライバシーのためです。外部ライブラリは攻撃対象面になるため、ユーザーデータ（メモ本文・暗号鍵・通信）に触れるコードは Apple 純正フレームワークのみとしています。v2.4 で追加された Firebase / GoogleSignIn SDK は任意機能（Google Sign-In・App Check）専用で、メモ本文には一切触れません。</div>
             </div>
           </div>
 
@@ -762,7 +762,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
             </div>
 
             <div class="faq-item">
-              <div class="faq-item__question">Q. Why no external libraries?</div>
+              <div class="faq-item__question">Q. Why keep the data path free of external libraries?</div>
               <div class="faq-item__answer">For security and privacy. Every external library is an attack surface. By building exclusively with Apple's native frameworks, zero third-party code touches user data.</div>
             </div>
           </div>

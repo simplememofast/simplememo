@@ -604,7 +604,7 @@
       "name": "外部ライブラリや依存関係はありますか？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "ありません。Swift + Apple純正フレームワーク（CryptoKit、Network.framework、BackgroundTasks、StoreKit 2）のみで構成されています。外部ライブラリに依存しないため、アプリのサイズが小さく、セキュリティリスクも最小限に抑えられています。"
+        "text": "メモ本文の暗号化（CryptoKit）・鍵保管（Keychain Services）・通信（URLSession / Network.framework）など『データの主要パス』には外部 SDK が一切入りません。Apple 純正フレームワークのみで構成されています。v2.4 以降、任意のオンボーディング短縮機能（Google アカウントから email を取り込む）として GoogleSignIn-iOS SDK と Firebase Authentication SDK、バックエンド API への不正アクセス防止のため Firebase App Check SDK を併用しています。利用解析は自社の /v1/analytics/event エンドポイントへ送信し、外部分析 SDK は使用していません。"
       }
     },
     {
@@ -1408,7 +1408,7 @@
               <details class="faq-details">
                 <summary class="faq-summary">外部ライブラリや依存関係はありますか？</summary>
                 <div class="faq-answer">
-                  <p>ありません。Swift + Apple純正フレームワーク（CryptoKit、Network.framework、BackgroundTasks、StoreKit 2）のみで構成されています。外部ライブラリに依存しないため、アプリのサイズが小さく、セキュリティリスクも最小限に抑えられています。</p>
+                  <p>メモ本文の暗号化（CryptoKit）・鍵保管（Keychain Services）・通信（URLSession / Network.framework）など <strong>「データの主要パス」</strong> には外部 SDK が一切入りません。Apple 純正フレームワークのみで構成されています。</p><p>v2.4 以降、任意のオンボーディング短縮機能（Google アカウントから email を取り込む）として GoogleSignIn-iOS SDK と Firebase Authentication SDK、バックエンド API への不正アクセス防止のため Firebase App Check SDK を併用しています。利用解析は自社の <code>/v1/analytics/event</code> エンドポイントへ送信し、外部分析 SDK は使用していません。</p>
                 </div>
               </details>
             </div>
