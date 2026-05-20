@@ -454,6 +454,16 @@
               <span data-lang="en">"It stops my notes from becoming write-only," "I use it as an email-draft pad too," and "even if I clear the email, the app still has it" — feedback we received from testers. A capture app is wasted if the captured thought has no path back to you. Simple Memo deliberately keeps two parallel paths: your own email inbox AND the in-app history. Pruning one of them does not destroy the other.</span>
             </div>
           </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🚀 「登録周りで迷わずすぐ使い始められた」</span>
+              <span data-lang="en">🚀 "No detours on the way to writing my first memo"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">「登録周りで迷うことなく、すぐに使い始められた」「全体的に使いやすかった」というご感想をいただきました。最初の1通を送るまでの導線は、最も大事にしているUX判断のひとつです。設定画面の選択肢を増やすたびに迷いが生まれるため、初回フローは「メールアドレスを入れる → 認証コードを入れる → メモ画面」の3画面に絞り込み、フォルダ作成や設定の同意ボタンなど、後から戻ってこられる項目は意図的に省いています。「すぐに使い始められた」という反応は、この設計判断が機能している証でもあります。</span>
+              <span data-lang="en">"I didn't get lost during sign-up — I could start using it right away," and "overall it was easy to use." The path from "open the app" to "send your first memo" is one of the UX decisions we guard most carefully. Every additional setting screen creates hesitation, so the initial flow is deliberately reduced to three screens (email → verification code → memo) — folder setup, preference toggles, and other one-time choices are intentionally moved out of the critical path so testers can come back to them later. Hearing "I just started using it" is the signal that the trade-off is working.</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -495,6 +505,17 @@
             <div class="reason-card__desc">
               <span data-lang="ja"><strong>ご報告</strong>：利用規約ページを開いた最初の表示が真っ白で、ブラウザの再読込で表示されたケース。<br><strong>状況</strong>：iOSの WebView での初回読込時にまれに発生する事象の可能性があり、現在は再現確認中です。再読込で復旧することは確認済み。お気づきの点があれば <a href="/contact" style="color:var(--accent)">お問い合わせ</a> からお知らせください。</span>
               <span data-lang="en"><strong>What testers reported:</strong> The Terms page rendered as a blank screen on first load; a browser reload brought it back.<br><strong>Status:</strong> Possibly an intermittent in-app WebView issue on first cold load — currently under investigation. A reload reliably recovers the page. If you spot it, please <a href="/contact" style="color:var(--accent)">contact us</a>.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🔍 「『検索すればいつでも戻れる』が分かりづらかった」</span>
+              <span data-lang="en">🔍 "'Search anytime to come back' was ambiguous"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>ご報告</strong>：初回ウェルカム時に届くメモに「検索すればいつでも戻ってこられる」とあるが、検索機能がアプリ側かメール側か迷い、アプリ内で検索を探してしまったというご報告。さらに、メールに届いたメモから<strong>アプリへ戻る動線がない</strong>ため、メール→アプリの導線が無いことに気づいた、という声もいただきました。<br><strong>現状の設計</strong>：「検索」が指しているのは<strong>メールクライアント側</strong>（Gmail/Apple Mailなどの検索）です。本アプリは「投げ込み」に役割を絞り、「整理・検索」は普段使い慣れているメールクライアントに委ねる方針です。<br><strong>対応</strong>：表現が誤解を招きやすいというご指摘はその通りで、初回案内の文言を「お使いのメールクライアントで検索」と明示する形に改善を検討中。アプリ内履歴一覧も過去メモを見返す手段として存在しますが、初回案内での説明が不足しているため、こちらも併せて改善予定。詳しくは <a href="/faq" style="color:var(--accent)">FAQ</a> や <a href="/blog/email-management-tips" style="color:var(--accent)">メール管理のコツ</a> もご参照ください。</span>
+              <span data-lang="en"><strong>What testers reported:</strong> The welcome memo says "you can always come back via search," but the wording was ambiguous: testers wondered whether "search" meant the app or the email client, and ended up looking for a search bar inside the app. They also noticed there's no link from the delivered email back to the app, which compounded the confusion.<br><strong>Current design:</strong> "Search" here refers to your <strong>email client</strong> (Gmail / Apple Mail / etc.). Simple Memo deliberately scopes itself to "capture," and outsources "organize / search" to the email client you already use every day.<br><strong>What we're changing:</strong> The wording is genuinely misleading, and we plan to make the welcome copy explicit — something like "search in your email client." The in-app history list also lets you revisit past memos, but onboarding doesn't currently surface it well; both will be improved. See the <a href="/faq" style="color:var(--accent)">FAQ</a> and <a href="/blog/email-management-tips" style="color:var(--accent)">email management tips</a> for the current workflow.</span>
             </div>
           </div>
         </div>
@@ -549,6 +570,28 @@
             <div class="reason-card__desc">
               <span data-lang="ja"><strong>ご要望</strong>：「メールに送らずに、アプリ内だけにメモを残す機能があると嬉しい」というお声。下書きや、まだ送る相手・タイミングが決まっていないメモを、いったんアプリに保管できるとさらに便利、というご提案です。<br><strong>現在の考え</strong>：おっしゃる通り、Save ボタン的なアクションがあると体験が広がりそうです。現状の「メモは必ず自分宛にメール送信される」設計は Captio の核心体験を守るための判断ですが、「送らない選択肢」を追加することは矛盾しないはず。ロードマップに追加して、UI への組み込み方を検討します。希望される具体的な動き方（保留メモのアイコン位置、後から送信するときの動線など）があれば <a href="/contact" style="color:var(--accent)">お問い合わせ</a> からお聞かせください。</span>
               <span data-lang="en"><strong>The request:</strong> "I'd love a way to keep a memo inside the app without sending it as email." A draft pad for memos whose destination or timing hasn't been decided yet.<br><strong>Our current thinking:</strong> Agreed — a Save action would expand the use case without breaking the Captio-style core (one-tap send stays the default). "Don't send, just keep" is on the roadmap as a UI addition. If you have a specific shape in mind (where the save icon lives, how a saved memo gets sent later, etc.), please share via <a href="/contact" style="color:var(--accent)">contact</a>.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">✏️ 「メモ1行目を太字にして件名と本文を視覚的に分けたい」</span>
+              <span data-lang="en">✏️ "Bold the first line so subject/body split is obvious"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>ご要望</strong>：「メールの件名と本文の切り分けが改行で行われているのは分かったが、メモ画面上で1行目を太字にしてくれると、どこまでが件名か直感的に分かる」というご提案。<br><strong>現在の挙動</strong>：メモの1行目は自動でメールの件名（Subject）に、2行目以降が本文（Body）になります。仕様としては<a href="/faq" style="color:var(--accent)">FAQ</a>と<a href="/note-to-email/" style="color:var(--accent)">使い方ガイド</a>に記載していますが、画面上のUIヒントは現状ありません。<br><strong>今後の対応</strong>：1行目だけフォントウェイトを上げる、もしくは「件名」「本文」と薄いラベルを添える、というのは追加コストの低い改善案として有力。ロードマップに追加します。書きながら境界が見える方が直感的、というご指摘はその通りなので、組み込み方を検討中です。</span>
+              <span data-lang="en"><strong>The request:</strong> "I figured out that the email subject/body split happens at the first newline, but bolding the first line in the memo editor would make it obvious as you type."<br><strong>Current behavior:</strong> Line 1 becomes the email Subject; lines 2+ become the Body. It's documented in the <a href="/faq" style="color:var(--accent)">FAQ</a> and <a href="/note-to-email/" style="color:var(--accent)">usage guide</a>, but there's no inline UI hint while typing.<br><strong>Next steps:</strong> Bumping the first line's font-weight, or adding subtle "Subject / Body" affordances inline, is a low-cost improvement we're adding to the roadmap. The point that the boundary should be visible while typing is exactly right.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🤖 「AI チャットへの動線が欲しい」</span>
+              <span data-lang="en">🤖 "An entry point to AI chat"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>ご要望</strong>：「最近メモを書くと何でもAIに入れる癖があるので、AIに渡すための動線がほしい。それが課金機能になるのか、これから付くのか、現状では分からなかった」というお声。<br><strong>現在の答え</strong>：本アプリ単体には現時点で AI 機能は載っていません。AI への渡し方は「メール経由で AI クライアントに転送・コピペ」または「履歴からコピー → ChatGPT / Claude / Gemini に貼り付け」という外部連携を想定しています。これは <a href="/blog/ai-vs-simple-memo" style="color:var(--accent)">ブログ「AI とメモアプリの違い」</a> や <a href="/blog/chatgpt-memo-workflow" style="color:var(--accent)">ChatGPT 連携ワークフロー</a> にもまとめています。<br><strong>今後の対応</strong>：Theme 3 のもうひとつのカード「履歴からの部分コピー」と密接に関連するご要望です。AI 連携の動線（履歴からワンタップで AI に渡す、共有シート経由など）はロードマップ検討中。課金/無料の切り分けは未定。具体的なユースケース（どのAIに、何をどう渡したいか）があれば <a href="/contact" style="color:var(--accent)">お問い合わせ</a> からお聞かせください。</span>
+              <span data-lang="en"><strong>The request:</strong> "I've gotten into the habit of piping every memo into an AI chat, so I'd love a clearer entry point — whether it'll be a paid feature or land later, I couldn't tell from the current UI."<br><strong>Our current answer:</strong> Simple Memo doesn't include built-in AI features today. The intended pattern is "email → forward/paste into your AI client" or "tap-copy from history → paste into ChatGPT / Claude / Gemini." See <a href="/blog/ai-vs-simple-memo" style="color:var(--accent)">"AI vs. memo apps"</a> and <a href="/blog/chatgpt-memo-workflow" style="color:var(--accent)">"ChatGPT memo workflow"</a> for the current playbook.<br><strong>Next steps:</strong> This connects directly to the "partial copy from history" card above. A clear AI hand-off (one-tap from history, system share sheet, etc.) is on the roadmap. Paid vs. free tier split is TBD. If you have a specific use case (which AI, what data, what action), please share via <a href="/contact" style="color:var(--accent)">contact</a>.</span>
             </div>
           </div>
         </div>
