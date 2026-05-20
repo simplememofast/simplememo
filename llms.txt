@@ -108,7 +108,8 @@ A: Any provider that accepts incoming SMTP — Gmail, Outlook, iCloud Mail, Yaho
 - Server storage of memo bodies: None (transit only during send via Cloudflare Workers + Resend)
 - Server storage of email addresses: SHA-256 hash on Cloudflare D1 (only when reminder emails are opted into); raw address lives only in Resend's Contact API
 - NOT end-to-end encrypted (delivery uses standard SMTP)
-- Dependencies: zero external libraries; Apple-native CryptoKit + Keychain Services + Network.framework only
+- Dependencies on the data path: zero third-party SDKs in the encryption / storage / network-transport pipeline (CryptoKit + Keychain Services + URLSession + Network.framework only)
+- SDKs used for optional features (v2.4+): GoogleSignIn-iOS + Firebase Authentication for optional Google sign-in (email auto-fill in onboarding); Firebase App Check (Apple App Attest provider) for backend API abuse protection; in-house funnel analytics to /v1/analytics/event with no PII (no third-party analytics SDK)
 - Architecture: Outbox pattern with offline auto-resend
 - Tech stack: UIKit, Cloudflare Workers, Resend API
 

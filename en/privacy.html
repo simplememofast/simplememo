@@ -24,12 +24,12 @@
     });
   </script>
   <title>Privacy Policy — SimpleMemo</title>
-  <meta name="description" content="Privacy Policy for SimpleMemo (Simple Memo - Captio-style). Learn about our privacy-first design: AES-GCM encryption, zero external dependencies, ephemeral URLSession, and more.">
+  <meta name="description" content="Privacy Policy for SimpleMemo (Simple Memo - Captio-style). Learn about our privacy-first design: AES-GCM encryption, TLS transport, ephemeral URLSession, data minimization, and more.">
   <meta name="theme-color" content="#F5F1E8">
 
   <!-- OGP -->
   <meta property="og:title" content="Privacy Policy — SimpleMemo">
-  <meta property="og:description" content="Privacy Policy for SimpleMemo. Learn about our privacy-first design: AES-GCM encryption, zero external dependencies, ephemeral URLSession, and more.">
+  <meta property="og:description" content="Privacy Policy for SimpleMemo. Learn about our privacy-first design: AES-GCM encryption, TLS transport, ephemeral URLSession, data minimization, and more.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://simplememofast.com/en/privacy">
   <meta property="og:image" content="https://simplememofast.com/assets/img/og/privacy.png">
@@ -42,7 +42,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="Privacy Policy — SimpleMemo">
-  <meta name="twitter:description" content="Privacy Policy for SimpleMemo. Learn about our privacy-first design: AES-GCM encryption, zero external dependencies, ephemeral URLSession, and more.">
+  <meta name="twitter:description" content="Privacy Policy for SimpleMemo. Learn about our privacy-first design: AES-GCM encryption, TLS transport, ephemeral URLSession, data minimization, and more.">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/privacy.png">
 
   <!-- Canonical -->
@@ -365,7 +365,8 @@
           <li><strong>Transport</strong>: All API calls use TLS (HTTPS) over <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
           <li><strong>Email body handling</strong>: Memo bodies transit through our Relay API (Cloudflare Workers) and the external delivery infrastructure (Resend) for the sole purpose of sending email. We do not persistently store them on our infrastructure, and they are not written to logs (except in DEBUG builds during local development).</li>
           <li><strong>Email address storage on the server</strong>: Only if you opt into reminder emails, we store a SHA-256 hash of your email address in Cloudflare D1. The raw address lives only in Resend's Contact API.</li>
-          <li><strong>Dependencies</strong>: Zero external libraries. Only Apple-native CryptoKit, Keychain Services, and Network.framework are used.</li>
+          <li><strong>Dependencies on the data path</strong>: Memo body encryption (CryptoKit), key storage (Keychain Services), and network transport (URLSession / Network.framework) are all Apple-native — no third-party SDK sits in the data path.</li>
+            <li><strong>SDKs used for optional features</strong>: As of v2.4, an optional onboarding-shortcut feature can pull your email from your Google account; this uses the <code>GoogleSignIn-iOS SDK</code> and the Firebase Authentication SDK. The Firebase App Check SDK is initialized at launch to harden our backend API against abuse (uses Apple App Attest). Anonymous funnel analytics (no PII) are sent in-house to our <code>/v1/analytics/event</code> endpoint with no external analytics SDK.</li>
         </ul>
         <p><strong>Note</strong>: The Service is <strong>not End-to-End Encrypted (E2EE)</strong>. Memo bodies are delivered through standard SMTP so you (the recipient) can read them in your normal mail client. For workloads requiring true E2EE, consider purpose-built services such as Standard Notes, Signal, or ProtonMail.</p>
       </div>
