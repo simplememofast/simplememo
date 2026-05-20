@@ -450,6 +450,18 @@
 
           <h2>11. お問い合わせ</h2>
           <p><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></p>
+
+          <h2>12. 暗号化に関する技術的な情報（参考）</h2>
+          <p>本サービスは、ユーザーのプライバシーを保護するため、以下の技術的な対策を講じています。これらは「セキュリティ」というよりも「データ最小化」と「端末内保護」のための実装です。</p>
+          <ul>
+            <li><strong>端末内ストレージ</strong>: オフライン送信待ちメッセージ（Outbox）と送信履歴を、Apple 純正 CryptoKit による <strong>AES-GCM-256</strong> 暗号化で端末内に保存します（ファイル保護クラス: <code>completeFileProtectionUntilFirstUserAuthentication</code>）。</li>
+            <li><strong>鍵管理</strong>: 256-bit 対称鍵は Apple Keychain Services（<code>kSecClassGenericPassword</code>）に保管され、デバイス外に取り出せません。バックアップにも含まれません。</li>
+            <li><strong>通信路</strong>: API 通信はすべて TLS（HTTPS）で保護されます。クライアント側は <code>URLSessionConfiguration.ephemeral</code> を使用し、Cookie・キャッシュを残しません。</li>
+            <li><strong>メール本文</strong>: 送信処理のため当社の Relay API（Cloudflare Workers）と外部送信基盤（Resend）を通過しますが、恒常的な保存は行いません。ログにも記録しません（開発時の DEBUG ビルドを除く）。</li>
+            <li><strong>メールアドレスのサーバ保存</strong>: リマインダー機能をオプトインされた場合のみ、メールアドレスの SHA-256 ハッシュを Cloudflare D1 に保存します。原文は Resend の Contact API のみが保持します。</li>
+            <li><strong>外部依存</strong>: 外部ライブラリへの依存はありません。Apple 純正フレームワーク（CryptoKit / Keychain Services / Network.framework）のみを使用しています。</li>
+          </ul>
+          <p><strong>注意</strong>: 本サービスは <strong>End-to-End 暗号化（E2EE）を提供していません</strong>。受信者であるユーザーご自身のメールクライアントで通常通り本文を読めるよう、メール本文は標準的な SMTP プロトコルで配信されます。E2EE が必要な用途には、Standard Notes・Signal・ProtonMail などの専用サービスをご検討ください。</p>
         </div>
       </div>
 
@@ -544,6 +556,18 @@
 
           <h2>11. Contact</h2>
           <p><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></p>
+
+          <h2>12. Technical notes on encryption (for reference)</h2>
+          <p>To protect user privacy, the Service implements the following technical measures. These are oriented toward "data minimization" and "on-device protection" rather than promising blanket security.</p>
+          <ul>
+            <li><strong>On-device storage</strong>: The offline pending-send queue (Outbox) and send history are encrypted on-device with <strong>AES-GCM-256</strong> via Apple's native CryptoKit, and stored with file protection class <code>completeFileProtectionUntilFirstUserAuthentication</code>.</li>
+            <li><strong>Key management</strong>: A 256-bit symmetric key is stored in Apple Keychain Services (<code>kSecClassGenericPassword</code>). It is excluded from backups and cannot be exported.</li>
+            <li><strong>Transport</strong>: All API calls use TLS (HTTPS) over <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
+            <li><strong>Email body handling</strong>: Memo bodies transit through our Relay API (Cloudflare Workers) and the external delivery infrastructure (Resend) for the sole purpose of sending email. We do not persistently store them on our infrastructure, and they are not written to logs (except in DEBUG builds during local development).</li>
+            <li><strong>Email address storage on the server</strong>: Only if you opt into reminder emails, we store a SHA-256 hash of your email address in Cloudflare D1. The raw address lives only in Resend's Contact API.</li>
+            <li><strong>Dependencies</strong>: Zero external libraries. Only Apple-native CryptoKit, Keychain Services, and Network.framework are used.</li>
+          </ul>
+          <p><strong>Note</strong>: The Service is <strong>not End-to-End Encrypted (E2EE)</strong>. Memo bodies are delivered through standard SMTP so you (the recipient) can read them in your normal mail client. For workloads requiring true E2EE, consider purpose-built services such as Standard Notes, Signal, or ProtonMail.</p>
         </div>
       </div>
     </div>

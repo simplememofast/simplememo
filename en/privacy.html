@@ -356,6 +356,18 @@
 
         <h2>11. Contact</h2>
         <p><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></p>
+
+        <h2>12. Technical notes on encryption (for reference)</h2>
+        <p>To protect user privacy, the Service implements the following technical measures. These are oriented toward "data minimization" and "on-device protection" rather than promising blanket security.</p>
+        <ul>
+          <li><strong>On-device storage</strong>: The offline pending-send queue (Outbox) and send history are encrypted on-device with <strong>AES-GCM-256</strong> via Apple's native CryptoKit, and stored with file protection class <code>completeFileProtectionUntilFirstUserAuthentication</code>.</li>
+          <li><strong>Key management</strong>: A 256-bit symmetric key is stored in Apple Keychain Services (<code>kSecClassGenericPassword</code>). It is excluded from backups and cannot be exported.</li>
+          <li><strong>Transport</strong>: All API calls use TLS (HTTPS) over <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
+          <li><strong>Email body handling</strong>: Memo bodies transit through our Relay API (Cloudflare Workers) and the external delivery infrastructure (Resend) for the sole purpose of sending email. We do not persistently store them on our infrastructure, and they are not written to logs (except in DEBUG builds during local development).</li>
+          <li><strong>Email address storage on the server</strong>: Only if you opt into reminder emails, we store a SHA-256 hash of your email address in Cloudflare D1. The raw address lives only in Resend's Contact API.</li>
+          <li><strong>Dependencies</strong>: Zero external libraries. Only Apple-native CryptoKit, Keychain Services, and Network.framework are used.</li>
+        </ul>
+        <p><strong>Note</strong>: The Service is <strong>not End-to-End Encrypted (E2EE)</strong>. Memo bodies are delivered through standard SMTP so you (the recipient) can read them in your normal mail client. For workloads requiring true E2EE, consider purpose-built services such as Standard Notes, Signal, or ProtonMail.</p>
       </div>
     </div>
   </main>
