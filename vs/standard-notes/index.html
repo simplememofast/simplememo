@@ -23,7 +23,7 @@
   </script>
   <title>Standard Notesとの比較 — Captio式シンプルメモ | メモアプリ比較</title>
   <meta name="description" content="Standard NotesとCaptio式シンプルメモの違いを徹底比較。メール出力・AES-GCM暗号化・アカウント不要・起動速度・シンプルな無料プランの観点で解説。暗号化メモアプリを比較したい方へ。">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#F5F1E8">
 
   <!-- OGP -->
   <meta property="og:title" content="シンプルメモ vs Standard Notes — メモアプリ徹底比較">
@@ -341,8 +341,8 @@
           <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 5, 2026</span>
         </p>
         <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:1rem auto 0;font-style:italic;">
-          <span data-lang="ja">Standard Notesの暗号化機能をセキュリティ観点で検証した際、サーバー側でのE2E暗号化は堅牢でしたが、シンプルメモのAES-GCM端末内暗号化は「そもそもサーバーにデータを送らない」という設計思想の違いがあり、プライバシーへのアプローチが根本的に異なると感じました。</span>
-          <span data-lang="en">When I tested Standard Notes' encryption from a security perspective, its server-side E2E encryption was solid — but Simple Memo's AES-GCM on-device encryption takes a fundamentally different approach: your data never leaves your device in the first place.</span>
+          <span data-lang="ja">Standard Notes の E2E 暗号化は堅牢で、サーバー側でも本文を読めません。一方シンプルメモは別アプローチで、オフライン送信待ちの Outbox と送信履歴を端末内で AES-GCM-256 暗号化し、メール本文をサーバに恒常的に保存しません（送信処理時のみ通過します）。メール送信そのものは標準 SMTP のため E2E 暗号化ではありませんが、プライバシーへのアプローチが根本的に異なります。</span>
+          <span data-lang="en">Standard Notes' E2E encryption is solid — the server itself can't read your content. Simple Memo takes a different approach: it encrypts the on-device Outbox and send history with AES-GCM-256, and does not persistently store memo bodies on its servers (they only transit during send). Memo delivery itself goes through standard SMTP, so this is not E2E encryption — it's a different privacy posture aimed at minimizing what the server ever holds.</span>
         </p>
       </div>
 

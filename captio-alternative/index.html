@@ -23,7 +23,7 @@
   </script>
   <title>Captio使えない？代わりのメモ→メールアプリはこれ【2026年最新】</title>
   <meta name="description" content="Captio（Tupil製）が2024年10月に終了。後継アプリ「Captio式シンプルメモ」は起動0.3秒・ワンタップ送信・AES-GCM暗号化・オフラインOutbox対応。Note To Self Mail / Note to Email / Captioo / Apple純正メモを含む6アプリ比較と3分で完了する移行5ステップを掲載。">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#F5F1E8">
 
   <!-- OGP -->
   <meta property="og:title" content="Captio使えない？代わりのメモ→メールアプリはこれ【2026年最新】">
@@ -712,9 +712,157 @@
     .page-content .tldr > div[style*="font-weight:700"] * { color: #9ad1ff !important; }
     /* 言語スイッチャー */
     .page-content .lang-switcher__link,
-    .page-content .lang-switcher__btn { color: rgba(255,255,255,.65) !important; }
+    .page-content .lang-switcher__btn { color: rgba(31,27,21,.65) !important; }
     .page-content .lang-switcher__link.active,
-    .page-content .lang-switcher__btn.active { color: #ffffff !important; }
+    .page-content .lang-switcher__btn.active { color: #1f1b15 !important; }
+
+    /* ============================================================
+       Claude Cream Override — flips this page's legacy dark theme
+       to the new intellectual-cream palette. Source-order wins
+       against the !important rules above.
+       ============================================================ */
+    body { background: #f5f1e8; }
+    .page-content {
+      background:
+        radial-gradient(ellipse 1100px 700px at 50% 0%, rgba(217,119,87,.14), transparent 60%),
+        radial-gradient(ellipse 800px 600px at 50% 30%, rgba(232,168,124,.10), transparent 70%),
+        #fffdf7;
+      color: #1f1b15;
+    }
+    .page-content { --text: #1f1b15; --text-secondary: #3d352b; --text-muted: #6a5f4e; }
+    .page-content .container { color: #1f1b15; }
+    .page-content p,
+    .page-content li,
+    .page-content dd,
+    .page-content dt,
+    .page-content span,
+    .page-content summary,
+    .page-content td,
+    .page-content th,
+    .page-content h1,
+    .page-content h2,
+    .page-content h3,
+    .page-content h4,
+    .page-content h5,
+    .page-content h6 { color: #1f1b15 !important; }
+    .page-content strong,
+    .page-content b { color: #1f1b15 !important; }
+
+    /* Cards / tables / FAQ — warm cream surface */
+    .reason-card,
+    .steps-list li,
+    .cta-box,
+    .tldr {
+      background: linear-gradient(160deg, #fffdf7 0%, #f7f1e3 100%) !important;
+      border: 1px solid rgba(60,45,25,.14) !important;
+      box-shadow: 0 8px 24px rgba(60,40,20,.10), inset 0 1px 0 rgba(255,255,255,.6) !important;
+    }
+    .reason-card__title,
+    .cta-box__title,
+    .reason-card__desc,
+    .cta-box__desc,
+    .tldr p,
+    .spec-list,
+    .spec-list dd,
+    .spec-list dt,
+    .faq-summary,
+    .faq-answer,
+    .faq-answer p,
+    .compare-table th,
+    .compare-table td,
+    .compare-table td:first-child,
+    .lp-section__title,
+    .lp-section__lead,
+    .reason-card__desc strong,
+    .lp-section__lead strong,
+    .tldr p strong,
+    .faq-answer strong,
+    .lp-hero__title,
+    .lp-hero__sub,
+    .lp-hero__note,
+    .lp-hero__note strong { color: #1f1b15 !important; }
+    .compare-table .yes { color: #2e7d4f !important; }
+    .compare-table .no { color: #b8552c !important; }
+    .compare-table th,
+    .compare-table td { border-bottom-color: rgba(60,45,25,.12) !important; }
+    .lp-section__title { border-bottom-color: rgba(60,45,25,.18) !important; }
+    .faq-item { border-bottom-color: rgba(60,45,25,.12) !important; }
+
+    /* Hero glow + chip + secondary CTA in clay tones */
+    .lp-hero__icon::before {
+      background: radial-gradient(circle, rgba(217,119,87,.40), rgba(217,119,87,0) 65%) !important;
+    }
+    .lp-hero__icon img {
+      box-shadow: 0 14px 32px rgba(60,40,20,.18), 0 0 28px rgba(217,119,87,.22) !important;
+    }
+    .lp-hero__title .grad {
+      background: linear-gradient(135deg, #c96442 0%, #d97757 55%, #e8a87c 100%) !important;
+      -webkit-background-clip: text !important;
+      background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+    }
+    .lp-hero__label,
+    .page-content .lp-hero__label,
+    .page-content .lp-hero__label * { color: #c96442 !important; background: rgba(217,119,87,.10) !important; border: 1px solid rgba(201,100,66,.30) !important; }
+    .lp-hero__chips li {
+      background: linear-gradient(160deg, #fffdf7, #f7f1e3) !important;
+      border: 1px solid rgba(60,45,25,.14) !important;
+      color: #1f1b15 !important;
+      box-shadow: 0 4px 12px rgba(60,40,20,.10) !important;
+    }
+    .lp-hero__chips li b,
+    .page-content .lp-hero__chips li b { color: #c96442 !important; }
+    .lp-hero__secondary,
+    .page-content .lp-hero__secondary,
+    .page-content .lp-hero__secondary * { color: #c96442 !important; border-color: rgba(201,100,66,.32) !important; }
+    .lp-hero__secondary:hover {
+      color: #1f1b15 !important;
+      border-color: #c96442 !important;
+      background: rgba(217,119,87,.10) !important;
+    }
+    .lp-hero__cta .app-store-badge img {
+      filter: drop-shadow(0 8px 20px rgba(201,100,66,.28)) !important;
+    }
+
+    /* Floating CTA and "Captioから3分で移行完了" box → clay gradient */
+    .floating-cta.active {
+      background: linear-gradient(135deg, #d97757, #c96442) !important;
+      box-shadow: 0 14px 32px rgba(201,100,66,.40), 0 0 0 1px rgba(255,255,255,.30) !important;
+    }
+    .floating-cta.active,
+    .floating-cta.active * { color: #fffdf7 !important; }
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] {
+      background: linear-gradient(160deg, #fffdf7, #f7f1e3) !important;
+      border: 1px solid rgba(60,45,25,.14) !important;
+      box-shadow: 0 8px 24px rgba(60,40,20,.10), inset 0 1px 0 rgba(255,255,255,.6) !important;
+    }
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p { color: #1f1b15 !important; }
+    main .lp-hero ~ div[style*="text-align:center"][style*="max-width:560px"] p[style*="font-weight:700"] { color: #1f1b15 !important; }
+    p[style*="text-muted"] { color: #6a5f4e !important; }
+
+    /* Internal links → clay */
+    .internal-links a,
+    .page-content .internal-links a,
+    .page-content .internal-links a * { color: #c96442 !important; border-color: rgba(201,100,66,.32) !important; }
+    .page-content .internal-links a:hover,
+    .page-content .internal-links a:hover * { color: #1f1b15 !important; border-color: #c96442 !important; }
+
+    /* TL;DR badge accent */
+    .page-content .tldr > div[style*="font-weight:700"],
+    .page-content .tldr > div[style*="font-weight:700"] * { color: #c96442 !important; }
+
+    /* Page-local global-nav lang switch */
+    .global-nav__lang {
+      background: rgba(255,252,244,.7) !important;
+      border: 1px solid rgba(60,45,25,.14) !important;
+    }
+    .global-nav__lang a { color: rgba(31,27,21,.60) !important; }
+    .global-nav__lang a:hover { color: #1f1b15 !important; }
+    .global-nav__lang a.active {
+      background: rgba(217,119,87,.16) !important;
+      color: #1f1b15 !important;
+      border: 1px solid rgba(201,100,66,.32) !important;
+    }
   </style>
 
   <!-- JSON-LD: Speakable (AIO / Voice Search) -->
@@ -802,17 +950,17 @@
           <span data-lang="en">The Captio replacement<br>is <span class="grad">Simple Memo</span></span>
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">Captio がサービス終了。「起動即入力・送ったら消える・余計なものゼロ」を、AES-GCM 暗号化＋オフライン Outbox で取り戻した iOS アプリです。</span>
-          <span data-lang="en">Captio is gone. Simple Memo brings back the "open, type, send, forget" feel — now with AES-GCM encryption and an offline Outbox so nothing gets lost.</span>
+          <span data-lang="ja">Captio がサービス終了。「起動即入力・送ったら消える・余計なものゼロ」を、端末内 AES-GCM 暗号化された Outbox（オフライン対応）で取り戻した iOS アプリです。</span>
+          <span data-lang="en">Captio is gone. Simple Memo brings back the "open, type, send, forget" feel — now with on-device AES-GCM encryption for the offline Outbox and history, so nothing gets lost.</span>
         </p>
         <ul class="lp-hero__chips" data-lang="ja">
           <li>0.3秒で起動</li>
-          <li>暗号化送信</li>
+          <li>端末内暗号化</li>
           <li>オフライン対応</li>
         </ul>
         <ul class="lp-hero__chips" data-lang="en">
           <li>0.3s launch</li>
-          <li>Encrypted send</li>
+          <li>On-device encryption</li>
           <li>Offline first</li>
         </ul>
         <div class="lp-hero__cta">
@@ -1006,12 +1154,12 @@
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">3. オフライン対応 + 暗号化</span>
-              <span data-lang="en">3. Offline + Encryption</span>
+              <span data-lang="ja">3. オフライン対応 + 端末内暗号化</span>
+              <span data-lang="en">3. Offline + On-device encryption</span>
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">Outboxアーキテクチャでオフラインメモを暗号化保存。オンライン復帰時に自動再送。AES-GCM暗号化でプライバシーも保護。</span>
-              <span data-lang="en">Outbox architecture stores offline memos with AES-GCM encryption. Auto-resend on reconnection. Privacy protected by design.</span>
+              <span data-lang="ja">Outboxアーキテクチャでオフラインメモを端末内で AES-GCM-256 暗号化保存。オンライン復帰時に自動再送。送信履歴も同じく端末内で暗号化されます。</span>
+              <span data-lang="en">Outbox architecture stores offline memos with on-device AES-GCM-256 encryption. Auto-resend on reconnection. The send history is encrypted with the same scheme.</span>
             </div>
           </div>
         </div>
@@ -1048,7 +1196,7 @@
               <tr><td>送信基盤</td><td class="yes">Cloudflare + Resend（独自）</td><td class="no">Gmail API</td><td class="mid">Gmail OAuth</td><td>SMTP直接</td><td>不明</td><td>Apple共有シート</td></tr>
               <tr><td>セットアップの手軽さ</td><td class="yes">メール入力のみ</td><td>メール入力のみ</td><td class="mid">Gmail OAuth必須</td><td class="yes">メール入力のみ</td><td>メール入力のみ</td><td>—</td></tr>
               <tr><td>オフライン対応</td><td class="yes">Outbox自動再送</td><td class="no">なし</td><td class="no">なし</td><td class="no">なし</td><td class="no">なし</td><td class="yes">iCloud同期</td></tr>
-              <tr><td>暗号化</td><td class="yes">AES-GCM</td><td class="no">なし</td><td class="no">なし</td><td class="no">なし</td><td class="no">なし</td><td class="mid">iCloud暗号化</td></tr>
+              <tr><td>端末内暗号化（Outbox / 履歴）</td><td class="yes">AES-GCM-256</td><td class="no">なし</td><td class="no">なし</td><td class="no">なし</td><td class="no">なし</td><td class="mid">iCloud 暗号化</td></tr>
               <tr><td>送信履歴</td><td class="yes">アプリ内で全件確認</td><td class="no">なし</td><td class="mid">一部のみ</td><td class="no">なし</td><td class="no">なし</td><td class="no">—</td></tr>
               <tr><td>送信先メールの数</td><td class="yes">複数対応</td><td>1件</td><td class="mid">有料版で2件</td><td>2件まで</td><td>1件</td><td>制限なし</td></tr>
               <tr><td>添付・写真</td><td class="no">テキストのみ（設計）</td><td class="no">なし</td><td class="mid">有料版のみ</td><td>写真複数枚OK</td><td class="no">なし</td><td class="yes">対応</td></tr>
@@ -1081,7 +1229,7 @@
               <tr><td>Send Infrastructure</td><td class="yes">Cloudflare + Resend</td><td class="no">Gmail API</td><td class="mid">Gmail OAuth</td><td>Direct SMTP</td><td>Unknown</td><td>Apple Share Sheet</td></tr>
               <tr><td>Setup</td><td class="yes">Email only</td><td>Email only</td><td class="mid">Gmail OAuth required</td><td class="yes">Email only</td><td>Email only</td><td>—</td></tr>
               <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">iCloud sync</td></tr>
-              <tr><td>Encryption</td><td class="yes">AES-GCM</td><td class="no">None</td><td class="no">None</td><td class="no">None</td><td class="no">None</td><td class="mid">iCloud</td></tr>
+              <tr><td>On-device encryption (Outbox / history)</td><td class="yes">AES-GCM-256</td><td class="no">None</td><td class="no">None</td><td class="no">None</td><td class="no">None</td><td class="mid">iCloud</td></tr>
               <tr><td>Send History</td><td class="yes">In-app tracking</td><td class="no">No</td><td class="mid">Partial</td><td class="no">No</td><td class="no">No</td><td class="no">—</td></tr>
               <tr><td>Multiple Recipients</td><td class="yes">Yes</td><td>1</td><td class="mid">Paid: 2</td><td>2</td><td>1</td><td>Unlimited</td></tr>
               <tr><td>Attachments / Photos</td><td class="no">Text-only</td><td class="no">No</td><td class="mid">Paid only</td><td>Multiple photos</td><td class="no">No</td><td class="yes">Yes</td></tr>
@@ -1181,18 +1329,22 @@
         <dl class="spec-list" data-lang="ja">
           <dt>対応OS</dt><dd>iOS 16.0以降</dd>
           <dt>送信方式</dt><dd>Cloudflare Workers + Resend API（GMail非依存）</dd>
-          <dt>オフライン</dt><dd>Outboxアーキテクチャ（AES-GCM暗号化ローカル保存 → 自動再送）</dd>
-          <dt>暗号化</dt><dd>AES-GCM（端末内暗号化、サーバーにメモ本文を保存しない）</dd>
+          <dt>オフライン</dt><dd>Outboxアーキテクチャ（端末内 AES-GCM-256 暗号化ローカル保存 → 自動再送）</dd>
+          <dt>端末内暗号化</dt><dd>AES-GCM-256（Outbox / 送信履歴、鍵は Apple Keychain 保管）</dd>
+          <dt>通信路</dt><dd>TLS（HTTPS）</dd>
+          <dt>サーバ保存ポリシー</dt><dd>メール本文は恒常的に保存しません（送信処理時のみ通過）</dd>
           <dt>無料プラン制限</dt><dd>1日3通（7日間無料トライアルは送信無制限）</dd>
           <dt>Premium</dt><dd>月額500円 / 年額5,000円（送信無制限）</dd>
         </dl>
         <dl class="spec-list" data-lang="en">
           <dt>Supported OS</dt><dd>iOS 16.0+</dd>
           <dt>Send Method</dt><dd>Cloudflare Workers + Resend API (no Gmail dependency)</dd>
-          <dt>Offline</dt><dd>Outbox architecture (AES-GCM encrypted local storage, auto-resend)</dd>
-          <dt>Encryption</dt><dd>AES-GCM (on-device, memos never stored on server)</dd>
+          <dt>Offline</dt><dd>Outbox architecture (on-device AES-GCM-256 encrypted local storage, auto-resend)</dd>
+          <dt>On-device encryption</dt><dd>AES-GCM-256 (Outbox &amp; send history, key in Apple Keychain)</dd>
+          <dt>Transport</dt><dd>TLS (HTTPS)</dd>
+          <dt>Server storage policy</dt><dd>Memo bodies are not persistently stored (transit only during send)</dd>
           <dt>Free Plan</dt><dd>3 sends/day (7-day free trial: unlimited)</dd>
-          <dt>Premium</dt><dd>$2.99/month or $29.99/year (unlimited sends)</dd>
+          <dt>Premium</dt><dd>¥500/mo or ¥5,000/yr (Japan); local pricing varies — see App Store</dd>
         </dl>
       </section>
 
@@ -1343,8 +1495,8 @@
               <span data-lang="en">Feature Parity Checklist</span>
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">Captioと同じ点：ワンタップ送信、メールでの配信、ミニマルなUI、送信後の自動クリア、余計な設定不要のシンプルさ。これらのコア体験はCaptio式シンプルメモでも完全に再現されています。Captioになかった新機能：AES-GCM暗号化（端末内でメモを暗号化してからサーバーに送信するため、通信経路上でもプライバシーが保護されます）、オフラインキュー（Outboxアーキテクチャによる自動再送）、送信履歴（アプリ内で過去に送ったメモの一覧を確認可能）、ダークモード（iOS標準のダークモードに完全対応）。つまり、Captioでできたことはすべてできる上に、セキュリティ・オフライン・履歴管理・デザインの4つの領域で機能が追加されています。</span>
-              <span data-lang="en">What stays the same as Captio: one-tap send, email delivery, minimal UI, auto-clear after sending, and dead-simple setup with no unnecessary configuration. These core experience pillars are fully preserved in Simple Memo. What is new beyond Captio: AES-GCM encryption (your memo is encrypted on-device before it ever leaves your phone, protecting privacy across the entire transmission path), offline queue (Outbox architecture with automatic resend when back online), send history (browse a list of previously sent memos right inside the app), and dark mode (full support for iOS system-level dark mode). In short, everything Captio could do is covered, plus you gain meaningful improvements in four areas: security, offline reliability, history management, and visual design.</span>
+              <span data-lang="ja">Captioと同じ点：ワンタップ送信、メールでの配信、ミニマルなUI、送信後の自動クリア、余計な設定不要のシンプルさ。これらのコア体験はCaptio式シンプルメモでも完全に再現されています。Captioになかった新機能：端末内 AES-GCM-256 暗号化（オフライン送信待ちの Outbox と送信履歴を端末内で暗号化し、鍵を Apple Keychain に保管。通信は TLS で保護され、メール本文を当社サーバに恒常的に保存しません）、オフラインキュー（Outboxアーキテクチャによる自動再送）、送信履歴（アプリ内で過去に送ったメモの一覧を確認可能）、ダークモード（iOS標準のダークモードに完全対応）。つまり、Captioでできたことはすべてできる上に、セキュリティ・オフライン・履歴管理・デザインの4つの領域で機能が追加されています。</span>
+              <span data-lang="en">What stays the same as Captio: one-tap send, email delivery, minimal UI, auto-clear after sending, and dead-simple setup with no unnecessary configuration. These core experience pillars are fully preserved in Simple Memo. What is new beyond Captio: on-device AES-GCM-256 encryption (the offline outbox and history are encrypted on-device with the key stored in Apple Keychain; network traffic is protected by TLS, and memo bodies are not persistently stored on our servers), offline queue (Outbox architecture with automatic resend when back online), send history (browse a list of previously sent memos right inside the app), and dark mode (full support for iOS system-level dark mode). In short, everything Captio could do is covered, plus you gain meaningful improvements in four areas: on-device protection, offline reliability, history management, and visual design.</span>
             </div>
           </div>
         </div>
