@@ -280,8 +280,8 @@
     <!-- TL;DR Summary for AI Citation -->
     <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
       <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-      <p style="color:var(--text-secondary);margin:0;" data-lang="ja">LINE Keepは2024年8月にサービス終了。テキストメモの代替5候補を検証した結果、LINE Keepの「手軽にテキストを保存する」体験を最もシンプルに再現するのは<a href="/captio-alternative/" style="color:var(--accent)">SimpleMemo</a>（起動0.3秒、ワンタップ送信、AES-GCM暗号化）。ただしテキスト専用で画像は非対応。画像も保存したいならApple NotesかGoogle Keepが現実的な選択肢。</p>
-      <p style="color:var(--text-secondary);margin:0;" data-lang="en">LINE Keep shut down in August 2024. After testing 5 alternatives for text memos, <a href="/captio-alternative/" style="color:var(--accent)">SimpleMemo</a> best replicates LINE Keep's "quick text save" experience (0.3s launch, one-tap send, AES-GCM encryption) -- though it's text-only with no image support. For images too, Apple Notes or Google Keep are practical choices.</p>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="ja">LINE Keep（一般版）は2024年8月28日にサービス終了。テキストメモの代替7候補を検証した結果、LINE Keepの「手軽にテキストを保存する」体験を最もシンプルに再現するのは<a href="/captio-alternative/" style="color:var(--accent)">SimpleMemo</a>（起動0.3秒、ワンタップ送信、端末内 Outbox / 履歴の AES-GCM-256 暗号化）。ただしテキスト専用で画像は非対応。画像も保存したいならApple NotesかGoogle Keepが現実的な選択肢。後半に <strong>3 分で完了する 5 ステップ移行手順</strong> を掲載。</p>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="en">LINE Keep (consumer version) shut down on August 28, 2024. After testing 7 alternatives for text memos, <a href="/captio-alternative/" style="color:var(--accent)">SimpleMemo</a> best replicates LINE Keep's "quick text save" experience (0.3s launch, one-tap send, on-device AES-GCM-256 encryption for the Outbox &amp; history) — though it's text-only with no image support. For images too, Apple Notes or Google Keep are practical choices. The article includes a <strong>3-minute, 5-step migration guide</strong> below.</p>
     </div>
 
     <!-- Disclosure -->
@@ -660,6 +660,46 @@
               <li><strong>Honest limitation:</strong> SimpleMemo is text-only. If you stored images, videos, or files in LINE Keep, Apple Notes or Google Keep are better choices. We don't claim SimpleMemo is perfect for everyone. For text memos, it's the fastest and simplest. For multimedia, look elsewhere.</li>
             </ul>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section: 5-step migration guide -->
+    <section class="lp-section">
+      <h2 class="lp-section__title">
+        <span data-lang="ja">3 分で完了する 5 ステップ移行手順</span>
+        <span data-lang="en">5-Step Migration Guide (3 Minutes Total)</span>
+      </h2>
+      <p class="lp-section__lead">
+        <span data-lang="ja">LINE Keep（一般版）はすでにサービス終了済みのため、データの新規ダウンロードはできません。終了前にエクスポート済みの方も、まだの方も、これ以上 LINE 環境にロックインされない形でテキストメモを蓄積する手順です。所要時間 3 分、追加コストゼロから始められます。</span>
+        <span data-lang="en">LINE Keep (consumer version) is already shut down, so fresh exports aren't possible. Whether you saved your data before the shutdown or not, this 5-step path gets you set up with a memo workflow that's not locked into LINE going forward. Three minutes total, no cost to start.</span>
+      </p>
+
+      <div data-lang="ja">
+        <ol class="steps-list" style="margin:1.5rem 0 2rem;">
+          <li><strong>ステップ 1（30秒）：移行先を決める。</strong>テキストメモのみで十分なら SimpleMemo（起動 0.3 秒、ワンタップ送信）。画像も残したいなら Apple Notes（iPhone 標準、無料）か Google Keep（クロスプラットフォーム、無料）。本記事の比較表を参考に「自分の用途」を1つ選んでください。</li>
+          <li><strong>ステップ 2（60秒）：宛先メールアドレスを決める。</strong>SimpleMemo を選ぶ場合、メモを送る先のメールアドレスを決めます。普段使いの Gmail / iCloud / Outlook どれでも OK。専用フォルダで管理したい方は <code>yourname+memo@gmail.com</code> のような Gmail のプラスエイリアスがおすすめ（Gmail フィルターで自動振り分け可能）。</li>
+          <li><strong>ステップ 3（30秒）：SimpleMemo をインストール。</strong>App Store で「シンプルメモ」と検索 → ダウンロード。アカウント作成は不要。起動後に宛先メールアドレスを入力し、認証コードを 1 回確認すれば完了。</li>
+          <li><strong>ステップ 4（60秒）：Gmail フィルターを設定（任意・推奨）。</strong>Gmail で「from:simplememofast.com」を検索 → 検索バー右の「フィルタを作成」→「ラベルを付ける（📝 Self Memo など新規作成）」「スターを付ける」を選択 → 保存。以降、メモが届くたびに自動でラベル付与・スター付与され、通常メールと混ざりません。<a href="/guides/inbox-memo-organization/" style="color:var(--accent)">詳細手順はこちら</a>。</li>
+          <li><strong>ステップ 5（30秒）：書き慣れる。</strong>SimpleMemo を開き、ためしに 3 通ほどメモを送信してみてください。Outbox 自動再送・送信履歴・サイレントモード時の挙動などが体感できます。LINE Keep 時代と違って <strong>「アプリを開く → 入力 → 送信」だけ</strong>。フォルダ操作・タグ付け・整理判断はいったん不要です。整理はメール側に任せる設計です。</li>
+        </ol>
+        <div class="tip-box" style="margin-top:1.5rem;">
+          <div class="tip-box__title">💡 移行のコツ</div>
+          <p style="margin:0;">過去の LINE Keep データをエクスポート済みなら、テキスト部分だけを SimpleMemo で 1 通ずつ自分宛に送信し直すと、すべて 1 つの受信箱に集約できます。100 通単位の場合は週末にまとめて、または「過去メモは過去のもの」と割り切って新規分のみ SimpleMemo に蓄積するのも一つの判断です。</p>
+        </div>
+      </div>
+
+      <div data-lang="en">
+        <ol class="steps-list" style="margin:1.5rem 0 2rem;">
+          <li><strong>Step 1 (30s): Pick your destination.</strong> Text only? SimpleMemo (0.3s launch, one-tap send). Need images too? Apple Notes (built into iPhone, free) or Google Keep (cross-platform, free). Use the comparison table above to pick the one that fits your use case.</li>
+          <li><strong>Step 2 (60s): Decide your destination email address.</strong> If you picked SimpleMemo, choose where memos should land. Any Gmail / iCloud / Outlook address works. To keep them organized, use a Gmail plus-alias like <code>yourname+memo@gmail.com</code> (Gmail can auto-filter on that).</li>
+          <li><strong>Step 3 (30s): Install SimpleMemo.</strong> Search the App Store for "Simple Memo" and download. No account creation needed. After launch, enter your destination email and confirm the verification code once.</li>
+          <li><strong>Step 4 (60s): Set up a Gmail filter (optional, recommended).</strong> In Gmail, search <code>from:simplememofast.com</code> → click the filter-options icon on the right → "Create filter" → check "Star it" and "Apply the label" (create a new one, e.g. 📝 Self Memo). New memos will now auto-route into a dedicated, starred bucket. <a href="/guides/inbox-memo-organization/" style="color:var(--accent)">Detailed guide</a>.</li>
+          <li><strong>Step 5 (30s): Build the habit.</strong> Open SimpleMemo and send 3 test memos to get a feel for it. You'll see the Outbox auto-resend, send history, and the silent-mode sound behavior. Unlike LINE Keep, the entire flow is just <strong>"open → type → send."</strong> Skip folders, tags, and organization decisions — organization lives in your inbox now.</li>
+        </ol>
+        <div class="tip-box" style="margin-top:1.5rem;">
+          <div class="tip-box__title">💡 Migration tips</div>
+          <p style="margin:0;">If you exported your LINE Keep data before the shutdown, send each text memo to yourself once via SimpleMemo to consolidate everything in one inbox. If you have hundreds, batch a weekend session — or just call past memos past memos and start fresh from today. Either is fine.</p>
         </div>
       </div>
     </section>
