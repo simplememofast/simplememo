@@ -1,89 +1,156 @@
 # SimpleMemoFast - Robots.txt
-# AI search engines and major search bots: allowed (LLMO + organic SEO).
-# Pure training-only crawlers: blocked.
+# Strategy: explicitly allow every major AI search / answer-engine bot
+# (17 user-agents across 11 vendors) so SimpleMemo can be cited in
+# AI Overviews, Perplexity, Gemini, Copilot, ChatGPT, Le Chat, Apple
+# Intelligence, etc. Pure-training scrapers with no answer-engine
+# surface are blocked. Admin paths are blocked across the board.
+#
+# Last reviewed: 2026-05-20
+# Companion file: /llms.txt (citation guidelines + authoritative-page map)
 
-# ----------------------------------------------------------------------
-# AI search / answer engines (allow for citation in AI Overviews, etc.)
-# ----------------------------------------------------------------------
+# ======================================================================
+# AI ANSWER ENGINES — explicit allow (17 user-agents, 11 vendors)
+# ======================================================================
 
-# OpenAI / ChatGPT
+# --- OpenAI (3) ---------------------------------------------------------
+# GPTBot: training crawler for GPT family.
 User-agent: GPTBot
 Allow: /
 Disallow: /admin/
 
+# ChatGPT-User: on-demand fetch when a ChatGPT user clicks/cites a URL.
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin/
 
+# OAI-SearchBot: ChatGPT Search index crawler.
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin/
 
-# Anthropic / Claude
+# --- Anthropic (3) ------------------------------------------------------
+# ClaudeBot: training crawler for Claude family.
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin/
 
+# anthropic-ai: legacy / general Anthropic fetcher.
 User-agent: anthropic-ai
 Allow: /
 Disallow: /admin/
 
+# Claude-Web: Claude on-demand web fetch when a user cites a URL.
 User-agent: Claude-Web
 Allow: /
 Disallow: /admin/
 
-# Perplexity
+# --- Perplexity (2) -----------------------------------------------------
+# PerplexityBot: Perplexity index crawler.
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin/
 
+# Perplexity-User: on-demand fetch when a Perplexity user asks a query.
 User-agent: Perplexity-User
 Allow: /
 Disallow: /admin/
 
-# Google AI training opt-in (separate from Googlebot - required for Gemini etc.)
+# --- Google (1) ---------------------------------------------------------
+# Google-Extended: opt-in token for Gemini training AND Google AI
+# Overviews / SGE generative answers. Distinct from Googlebot (which is
+# already allowed via the User-agent: * rule for normal search index).
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin/
 
-# Apple Intelligence / Siri search
-User-agent: Applebot
-Allow: /
-Disallow: /admin/
-
-User-agent: Applebot-Extended
-Allow: /
-Disallow: /admin/
-
-# Major web search (Bing index also feeds ChatGPT Search)
+# --- Microsoft (1) ------------------------------------------------------
+# Bingbot: powers Bing search, Microsoft Copilot, AND the index that
+# ChatGPT Search consumes. Single bot, three answer surfaces — highest
+# leverage in the AI-citation stack.
 User-agent: Bingbot
 Allow: /
 Disallow: /admin/
 
+# --- Apple (2) ----------------------------------------------------------
+# Applebot: Spotlight / Siri Suggestions / Safari quick answers.
+User-agent: Applebot
+Allow: /
+Disallow: /admin/
+
+# Applebot-Extended: opt-in for Apple Intelligence training.
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin/
+
+# --- DuckDuckGo (1) -----------------------------------------------------
+# DuckDuckBot: also feeds DuckDuckGo AI Chat (which routes to GPT-4o /
+# Claude / Llama / Mistral under the hood with privacy-pass).
 User-agent: DuckDuckBot
 Allow: /
 Disallow: /admin/
 
-# ----------------------------------------------------------------------
-# Pure training-only crawlers - blocked
-# ----------------------------------------------------------------------
+# --- Meta (1) -----------------------------------------------------------
+# meta-externalagent: Meta AI search-context fetcher (powers Meta AI
+# answers in WhatsApp / Instagram / Facebook). Flipped from previous
+# Disallow to Allow on 2026-05-20 to expand citation surface.
+User-agent: meta-externalagent
+Allow: /
+Disallow: /admin/
 
+# --- Mistral (1) --------------------------------------------------------
+# MistralAI-User: Le Chat on-demand web fetch.
+User-agent: MistralAI-User
+Allow: /
+Disallow: /admin/
+
+# --- Cohere (1) ---------------------------------------------------------
+# cohere-ai: Cohere RAG retrieval / Cohere Command web grounding.
+User-agent: cohere-ai
+Allow: /
+Disallow: /admin/
+
+# --- You.com (1) --------------------------------------------------------
+# YouBot: You.com answer engine index.
+User-agent: YouBot
+Allow: /
+Disallow: /admin/
+
+# ======================================================================
+# Note on xAI / Grok
+# ======================================================================
+# xAI does not publish a documented Grok crawler user-agent; Grok is
+# trained primarily on X (Twitter) data and uses ad-hoc web fetches
+# without an opt-in token. SimpleMemo's X presence
+# (https://x.com/simplememofast) is the supported surface for Grok
+# citations rather than this site's robots.txt.
+
+# ======================================================================
+# Pure training-only crawlers — blocked
+# (no public answer-engine surface; net negative for our content control)
+# ======================================================================
+
+# Common Crawl: distributed dataset; sources downstream training but not
+# directly tied to a user-facing answer engine where we can be cited.
 User-agent: CCBot
 Disallow: /
 
+# ByteDance / Doubao: limited reach for SimpleMemo's audience.
 User-agent: Bytespider
 Disallow: /
 
+# Amazon Alexa+: low public-surface citation today; revisit when Alexa+
+# generative answers become more public.
 User-agent: Amazonbot
 Disallow: /
 
-User-agent: meta-externalagent
+# Diffbot: scrapes structured data for resale; we already publish
+# JSON-LD ourselves and don't need a middleman.
+User-agent: Diffbot
 Disallow: /
 
-# ----------------------------------------------------------------------
-# Default for everyone else (Googlebot, etc.)
-# ----------------------------------------------------------------------
-
+# ======================================================================
+# Default for everyone else (Googlebot, normal search bots, RSS readers)
+# ======================================================================
 User-agent: *
 Allow: /
 Disallow: /admin/
@@ -99,8 +166,9 @@ Disallow: /*?ref=
 Disallow: /*?from=
 Disallow: /*?source=
 
-# ----------------------------------------------------------------------
+# ======================================================================
 # Sitemap + AI-readable site summary
-# ----------------------------------------------------------------------
-# llms.txt: https://simplememofast.com/llms.txt
+# ======================================================================
+# llms.txt has citation guidelines, authoritative-page map, and Q&A.
+# https://simplememofast.com/llms.txt
 Sitemap: https://simplememofast.com/sitemap.xml
