@@ -371,12 +371,12 @@
             <tbody>
               <tr>
                 <td>SimpleMemo</td>
-                <td>AES-256-GCM</td>
-                <td><span class="badge-e2e">対応</span></td>
+                <td>AES-256-GCM<br><small>（端末内 Outbox / 履歴）</small></td>
+                <td><span class="badge-none">非対応</span></td>
                 <td>-</td>
-                <td>メモ本文なし</td>
+                <td>本文の恒常保存なし<br><small>（送信時のみ通過）</small></td>
                 <td>-</td>
-                <td>Outbox暗号化。送信後はGmail/iCloud側で保管</td>
+                <td>端末内ストレージのみ暗号化。メール送信は標準 SMTP（E2E ではない）</td>
               </tr>
               <tr>
                 <td>Standard Notes</td>
@@ -462,7 +462,7 @@
             </tbody>
           </table>
           </div>
-          <div class="tip-card__example"><strong>表の読み方：</strong>「E2EE対応」でもオプションで有効化が必要なアプリが多い点に注意してください。デフォルトでE2EEが有効なのはSimpleMemoとStandard Notesのみです。各アプリの詳細な比較は<a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes比較</a>、<a href="/vs/obsidian/" style="color:var(--accent)">Obsidian比較</a>、<a href="/vs/notion/" style="color:var(--accent)">Notion比較</a>、<a href="/vs/evernote/" style="color:var(--accent)">Evernote比較</a>ページもご覧ください。</div>
+          <div class="tip-card__example"><strong>表の読み方：</strong>「E2EE対応」でもオプションで有効化が必要なアプリが多い点に注意してください。デフォルトで E2EE が有効なのは Standard Notes のみです（Joplin・Day One・Apple Notes ADP・Obsidian Sync はオプション設定が必要）。SimpleMemo は E2EE ではなく「端末内 Outbox/履歴の暗号化＋メール本文のサーバ恒常保存なし」というデータ最小化モデルです。各アプリの詳細な比較は<a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes比較</a>、<a href="/vs/obsidian/" style="color:var(--accent)">Obsidian比較</a>、<a href="/vs/notion/" style="color:var(--accent)">Notion比較</a>、<a href="/vs/evernote/" style="color:var(--accent)">Evernote比較</a>ページもご覧ください。</div>
         </div>
       </div>
       <div data-lang="en">
@@ -482,7 +482,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td>SimpleMemo</td><td>AES-256-GCM</td><td><span class="badge-e2e">Yes</span></td><td>-</td><td>No memo text</td><td>-</td><td>Outbox encryption. Post-send: Gmail/iCloud</td></tr>
+              <tr><td>SimpleMemo</td><td>AES-256-GCM<br><small>(on-device Outbox / history only)</small></td><td><span class="badge-none">No</span></td><td>-</td><td>Memo bodies not persistently stored<br><small>(transit only during send)</small></td><td>-</td><td>On-device storage only. Email delivery via standard SMTP — not E2EE</td></tr>
               <tr><td>Standard Notes</td><td>XChaCha20-Poly1305</td><td><span class="badge-e2e">Yes</span></td><td><span class="badge-e2e">Yes</span></td><td>Encrypted only</td><td><span class="badge-e2e">OSS</span></td><td>Key derivation via Argon2id</td></tr>
               <tr><td>Obsidian</td><td>Local files</td><td><span class="badge-partial">Sync only</span></td><td>-</td><td>Sync only</td><td>-</td><td>Obsidian Sync ($4/mo) for E2EE</td></tr>
               <tr><td>Notion</td><td>TLS + AES-256 at rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Server</td><td>-</td><td>SOC 2 Type II certified</td></tr>
@@ -519,12 +519,13 @@
           <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>ビジネスユーザー向け</span><span class="tip-card__rank">レベル3</span></div>
           <div class="tip-card__desc">
             <p><strong>想定する脅威：</strong>産業スパイ、内部不正、クラウドプロバイダーへの法的開示請求、退職者によるデータ持ち出し</p>
-            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>E2EE（エンドツーエンド暗号化）＋2段階認証</p>
+            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>本格的な機密情報には E2EE（エンドツーエンド暗号化）＋ 2 段階認証。一般業務メモには端末内暗号化＋本文サーバ非保存（データ最小化）でも実用上は十分</p>
             <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
             <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>SimpleMemo + Gmail（Workspace）：</strong>Google Workspaceのエンタープライズ暗号化＋SimpleMemoのAES-256-GCM。メモが自分のメール受信箱にのみ存在するため、情報漏洩リスクを最小化</li>
+              <li><strong>SimpleMemo + Gmail（Workspace）：</strong>端末内 Outbox/履歴の AES-256-GCM 暗号化＋本文をサーバに恒常保存しない設計＋ Google Workspace のエンタープライズ暗号化（at-rest + in-transit）。E2EE ではないが、自分のメール受信箱にしかメモが存在しない構造のため、開発元への情報漏洩リスクが構造的にゼロ。日常業務メモにはこのモデルが現実的</li>
               <li><strong>Obsidian + ローカル保存：</strong>データをクラウドに一切送信しない究極のローカル管理。ただしデバイス間同期には別途対策が必要</li>
               <li><strong>Notion（SOC 2対応）：</strong>チーム共有機能が充実。ただしE2EE非対応のため、最高機密には不向き</li>
+              <li><strong>Standard Notes（最高機密用）：</strong>本物の E2EE が必要なら、メモアプリとしては Standard Notes 一択。SimpleMemo は併用すると良い</li>
             </ul>
           </div>
         </div>
