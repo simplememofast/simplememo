@@ -15,26 +15,26 @@
   --surface: rgba(255, 252, 244, 0.72);
   --surface-elevated: #fffdf7;
   --surface-raised: #ffffff;
-  --border: rgba(20, 16, 10, 0.14);
-  --border-highlight: rgba(170, 60, 28, 0.36);
-  --border-strong: rgba(170, 60, 28, 0.60);
+  --border: rgba(20, 16, 10, 0.18);
+  --border-highlight: rgba(138, 42, 10, 0.42);
+  --border-strong: rgba(138, 42, 10, 0.65);
   --text: #000000;
   --text-secondary: #060503;
   --text-muted: #1a160e;
   --text-subtle: #3a3024;
-  --accent: #b8431f;
-  --accent-bright: #d05227;
-  --accent-neon: #a23a18;
-  --accent-violet: #7a3e1f;
-  --accent-warm: #e36a36;
-  --glow: rgba(184, 67, 31, 0.18);
-  --glow-strong: rgba(184, 67, 31, 0.32);
-  --glow-neon: rgba(162, 58, 24, 0.20);
+  --accent: #8a2a0a;
+  --accent-bright: #a23814;
+  --accent-neon: #6e1d04;
+  --accent-violet: #5a2410;
+  --accent-warm: #b54224;
+  --glow: rgba(138, 42, 10, 0.22);
+  --glow-strong: rgba(138, 42, 10, 0.38);
+  --glow-neon: rgba(110, 29, 4, 0.24);
 
-  /* Gradients — punchier Claude clay/red-earth on cream */
-  --grad-brand: linear-gradient(135deg, #a23a18 0%, #b8431f 50%, #d05227 100%);
-  --grad-brand-soft: linear-gradient(135deg, rgba(184, 67, 31, 0.18), rgba(208, 82, 39, 0.10), rgba(227, 106, 54, 0.07));
-  --grad-cta: linear-gradient(135deg, #d05227 0%, #b8431f 50%, #8e2e10 100%);
+  /* Gradients — deeper red-earth on cream, for stronger presence */
+  --grad-brand: linear-gradient(135deg, #6e1d04 0%, #8a2a0a 50%, #a23814 100%);
+  --grad-brand-soft: linear-gradient(135deg, rgba(138, 42, 10, 0.22), rgba(162, 56, 20, 0.12), rgba(181, 66, 36, 0.08));
+  --grad-cta: linear-gradient(135deg, #a23814 0%, #8a2a0a 50%, #5e1700 100%);
   --grad-text: linear-gradient(180deg, #0c0a06 0%, #1d180f 100%);
   --grad-border: linear-gradient(135deg, rgba(170, 60, 28, 0.55) 0%, rgba(208, 82, 39, 0.30) 50%, rgba(227, 106, 54, 0.22) 100%);
 
@@ -162,7 +162,11 @@ body {
   font-family: 'Noto Sans JP', 'Noto Sans JP Fallback', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
   background: var(--bg);
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
+  /* CJK pseudo-thickening: the Noto JP subset only ships 400 + 700,
+     so this extra .35px shadow gives glyphs the perceived weight of
+     a Heavy face without loading another woff2. */
+  text-shadow: 0 0 0.35px currentColor;
   line-height: 1.75;
   word-break: keep-all;
   line-break: strict;
@@ -194,12 +198,27 @@ p, li, dd, dt, td, th, blockquote, figcaption,
 .spec-list, .spec-list dd,
 .compare-table th, .compare-table td,
 .lp-section__lead {
-  font-weight: 700;
+  font-weight: 800;
 }
 
-/* Strong should pop a step heavier than its surrounding 700. */
+/* Strong: maxed out + extra stroke shadow for the heaviest punch. */
 strong, b {
   font-weight: 900;
+  text-shadow: 0 0 0.55px currentColor;
+}
+
+/* Clay-colored elements (links, accent labels, CTAs) need extra
+   weight so the deep red-earth pops against cream surfaces. */
+.entity-definition__text a,
+.page-content__body a,
+.faq-answer a,
+.faq-preview-cta a,
+.contact-info__email,
+.lang-dropdown__menu a.active,
+[style*="color:var(--accent)"],
+[style*="color: var(--accent)"] {
+  font-weight: 800;
+  text-shadow: 0 0 0.4px currentColor;
 }
 
 /* Mesh Gradient Background Layer — warm cream wash */
