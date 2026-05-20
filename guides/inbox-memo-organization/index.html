@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/guides/inbox-memo-organization/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ</title>
+  <meta name="description" content="Captio式シンプルメモで自分宛に送ったメモが溜まった後、Gmail フィルター・自動スター付け・検索演算子・Gemini / Apple Intelligence で効率的に整理・抽出する完全ガイド。">
+  <meta name="theme-color" content="#F5F1E8">
+
+  <!-- OGP -->
+  <meta property="og:title" content="自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ">
+  <meta property="og:description" content="メモを高速送信したあと、たまった100通・300通をどう整理するか。Gmail フィルター + AI 連携の運用設計。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-20T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/guides/inbox-memo-organization/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/guides-inbox-organization.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Captio式シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ">
+  <meta name="twitter:description" content="メモが溜まった後の整理術を、Gmail × AI 連携で解説するガイド。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/guides-inbox-organization.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <meta http-equiv="content-language" content="ja">
+  <link rel="canonical" href="https://simplememofast.com/guides/inbox-memo-organization/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "設定ガイド", "item": "https://simplememofast.com/guides/"},
+      {"@type": "ListItem", "position": 3, "name": "自分宛メモが溜まった後の整理術", "item": "https://simplememofast.com/guides/inbox-memo-organization/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/guides/inbox-memo-organization/#article","inLanguage":"ja","headline":"自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ","description":"Captio式シンプルメモで自分宛に送ったメモが溜まった後、Gmail フィルター・自動スター付け・検索演算子・Gemini / Apple Intelligence で効率的に整理・抽出する完全ガイド。","url":"https://simplememofast.com/guides/inbox-memo-organization/","datePublished":"2026-05-20","dateModified":"2026-05-20","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Captio式シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"image":"https://simplememofast.com/assets/img/og/guides-inbox-organization.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/guides/inbox-memo-organization/"}}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/guides/inbox-memo-organization/#webpage","inLanguage":"ja","name":"自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ","url":"https://simplememofast.com/guides/inbox-memo-organization/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260502">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="" width="28" height="28" loading="eager">
+        SimpleMemo
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948?ct=guide-gmail-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948?ct=guide-gmail-jp&amp;mt=8" class="global-nav__cta">
+          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div class="meta-template" data-lang="ja">
+      <span class="meta-title">自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ</span>
+      <span class="meta-og-title">自分宛メモが溜まった後の整理術 — Gmail × AI 活用ガイド | Captio式シンプルメモ</span>
+      <span class="meta-description">Captio式シンプルメモで自分宛に送ったメモが溜まった後、Gmail フィルター・自動スター付け・検索演算子・Gemini / Apple Intelligence で効率的に整理・抽出する完全ガイド。</span>
+    </div>
+    <div class="meta-template" data-lang="en">
+      <span class="meta-title">Gmail Setup Guide — Simple Memo</span>
+      <span class="meta-og-title">Gmail Setup Guide — Simple Memo</span>
+      <span class="meta-description">How to set up Simple Memo with your Gmail address. Step-by-step guide, tips for Gmail labels and filters, and troubleshooting. Complete setup in 3 minutes.</span>
+    </div>
+  </div>
+
+  <header class="page-header">
+    <div class="container">
+      <div class="lang-switcher-container">
+        <div class="lang-switcher">
+          <button class="lang-switcher__btn" data-lang-btn="ja">日本語</button>
+          <button class="lang-switcher__btn" data-lang-btn="en">English</button>
+        </div>
+      </div>
+      <div class="page-header__inner">
+        <a href="/" class="page-header__logo">
+          <span data-lang="ja">Captio式シンプルメモ</span>
+          <span data-lang="en">Simple Memo - Captio-style</span>
+        </a>
+        <a href="/guides/" class="page-header__back">
+          <span data-lang="ja">設定ガイド一覧へ</span>
+          <span data-lang="en">Back to Guides</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span data-lang="ja">運用ガイド</span>
+          <span data-lang="en">Workflow Guide</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span data-lang="ja">自分宛メモが溜まった後の整理術</span>
+          <span data-lang="en">Managing the Memos After You Send Them</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span data-lang="ja">メモを投げ込むのは0.3秒。でも溜まった100通をどう扱うかは、別のスキルです。Gmail フィルター・検索演算子・Gemini / Apple Intelligence を組み合わせた、現実的な整理ワークフロー。</span>
+          <span data-lang="en">Capturing a memo takes 0.3 seconds — but figuring out what to do with 100 of them is a separate skill. A pragmatic workflow that combines Gmail filters, search operators, and AI assistants (Gemini / Apple Intelligence).</span>
+        </p>
+      </div>
+
+      <!-- Atomic answer block -->
+      <aside class="answer-block" aria-label="このページの要点" style="background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-left:3px solid var(--accent,#6ab4ff);border-radius:8px;padding:1.25rem 1.5rem;margin:0 auto 2rem;max-width:760px;font-size:.95rem;line-height:1.85;color:rgba(255,255,255,.75);">
+        <span data-lang="ja" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
+        <span data-lang="en" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">TL;DR</span>
+        <p data-lang="ja" style="margin:0;">3ステップで整理する：(1) Gmail フィルターで <code>from:simplememofast.com</code> を自動スター + 専用ラベルに振り分け、(2) 検索演算子で必要なときに一発抽出、(3) Gemini / Apple Intelligence に要約・分類を任せる。<strong style="color:#fff;">「整理」をアプリ側に持たせず、メール基盤に任せる</strong>のがこの設計の核心。月300通でも崩れません。</p>
+        <p data-lang="en" style="margin:0;">Organize in three steps: (1) auto-star and label everything <code>from:simplememofast.com</code> with a Gmail filter, (2) use search operators to extract exactly what you need, (3) hand summarization and categorization to Gemini or Apple Intelligence. <strong style="color:#fff;">The core idea: don't build organization into the capture app — let your email infrastructure do what it's already great at.</strong> This scales past 300 memos/month without falling apart.</p>
+      </aside>
+
+      <!-- Why-this-guide section -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">なぜこのガイドが必要なのか</span>
+          <span data-lang="en">Why this guide exists</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">初期ユーザーから「メモをメールに送って、1日10通、1ヶ月300通になったとき、どう整理するか」というご質問をたびたびいただきます。Captio式シンプルメモは「投げ込む側」を極限まで速くする設計のため、整理機能はあえて持っていません。代わりに、すでに整理に向いている Gmail・メール基盤の機能を使い倒すことで、「速さ × 整理」を両立する運用を推奨しています。本ガイドではその具体的な手順をまとめます。</span>
+          <span data-lang="en">A common question from early users: "If I send 10 memos a day, that's 300 a month — how do I keep that under control?" Simple Memo is designed to make the capture side as fast as possible, so organization features are deliberately absent. Instead, this guide shows how to use what Gmail and your mail platform already do well — keeping capture fast while organization stays manageable.</span>
+        </p>
+      </section>
+
+      <!-- Section 1: Gmail filter -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">1. Gmail フィルター + 自動スター付け</span>
+          <span data-lang="en">1. Gmail filter + auto-star</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">いちばん効くのが、このアプリ経由で届くメールを <strong>Gmail 側で自動的にスター付け + 専用ラベル</strong> に振り分ける設定です。通常の受信トレイには紛れず、「自分宛メモ」として独立したスペースに溜まります。設定は1回だけ。</span>
+          <span data-lang="en">The single most useful thing you can do: configure Gmail to <strong>auto-star and auto-label</strong> every email that comes from this app. They stop mixing with the rest of your inbox and accumulate as their own searchable space. One-time setup.</span>
+        </p>
+
+        <h3 style="font-size:1.1rem;margin:1.5rem 0 .75rem">
+          <span data-lang="ja">手順（PC版 Gmail）</span>
+          <span data-lang="en">Setup steps (Gmail desktop)</span>
+        </h3>
+        <ol class="steps-list" data-lang="ja">
+          <li>Gmail の検索ボックスに <code>from:simplememofast.com</code> と入力 → 検索バー右端の「絞り込みオプション」アイコンをクリック。</li>
+          <li>「From」欄に <code>simplememofast.com</code> が入っていることを確認し、「フィルタを作成」をクリック。</li>
+          <li>「スターを付ける」「ラベルを付ける（例：📝 Self Memo を新規作成）」「重要マークを付けない」を選択。</li>
+          <li>「既存のメール◯件にもフィルタを適用する」にチェックを入れて「フィルタを作成」。</li>
+          <li>過去の自分宛メモも含めて、すべて自動スター + ラベル状態になります。</li>
+        </ol>
+        <ol class="steps-list" data-lang="en">
+          <li>In the Gmail search bar, type <code>from:simplememofast.com</code> and click the filter options icon at the right of the search bar.</li>
+          <li>Confirm <code>simplememofast.com</code> is in the From field, then click "Create filter."</li>
+          <li>Select: "Star it," "Apply the label" (create a new one, e.g. 📝 Self Memo), "Never mark as important."</li>
+          <li>Check the box "Also apply filter to N matching conversations."</li>
+          <li>All past and future self-addressed memos are now auto-starred and labeled.</li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span data-lang="ja">💡 さらに分類するなら</span>
+            <span data-lang="en">💡 Add finer categories</span>
+          </div>
+          <p data-lang="ja" style="margin:0;">アイデア・タスク・参照資料など、用途別にサブラベル（例：📝 Self Memo/Idea、📝 Self Memo/Task）を作っておくと、メモを書くときに件名や本文の冒頭にキーワードを入れるだけで自動振り分けできます。Gmail のフィルター条件で <code>subject:[Idea]</code> や <code>has:"##task"</code> など組み合わせると効果的。</p>
+          <p data-lang="en" style="margin:0;">Add sub-labels for use cases (e.g. 📝 Self Memo/Idea, 📝 Self Memo/Task). Then auto-sort by including a keyword in the subject or first line, with filter conditions like <code>subject:[Idea]</code> or <code>has:"##task"</code>. Memos route themselves at send time.</p>
+        </div>
+      </section>
+
+      <!-- Section 2: Search operators -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">2. 検索演算子で取り出す</span>
+          <span data-lang="en">2. Extract with search operators</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">フィルタで溜まったメモを引き出すときは、Gmail の検索演算子を使えば一発です。覚えるべきは6つだけ。</span>
+          <span data-lang="en">Once memos are accumulated, Gmail's search operators extract exactly what you need. Six operators cover almost all use cases.</span>
+        </p>
+
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title"><code>from:simplememofast.com</code></div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">送信元アプリで絞り込む。最も基本。</span>
+              <span data-lang="en">Filter by sender domain. The foundation.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>label:self-memo</code></div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">作成したラベルで絞り込む。スター付けしたメモだけなら <code>is:starred</code> と組み合わせて。</span>
+              <span data-lang="en">Filter by your custom label. Combine with <code>is:starred</code> for starred-only memos.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>after:2026/05/01 before:2026/05/31</code></div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">期間で絞り込む。月次レビューや週次レビューに必須。</span>
+              <span data-lang="en">Date range filter. Essential for weekly and monthly reviews.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>subject:アイデア</code> / <code>"keyword"</code></div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">件名キーワード or 本文の完全一致フレーズで絞り込む。引用符で囲むと完全一致。</span>
+              <span data-lang="en">Subject keywords or exact-phrase body match (with quotes).</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>-in:trash -in:spam</code></div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">ゴミ箱・迷惑メールを除外。検索結果が汚れているときに使う。</span>
+              <span data-lang="en">Exclude trash and spam folders — useful when search results get noisy.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><code>has:attachment</code></div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">添付ファイル付きのメモだけを抽出（メモアプリで画像送信した場合など）。</span>
+              <span data-lang="en">Memos with attachments only (useful if you send images from the share sheet).</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span data-lang="ja">💡 組み合わせ例</span>
+            <span data-lang="en">💡 Combined query examples</span>
+          </div>
+          <p data-lang="ja" style="margin:0 0 .6rem;"><code>from:simplememofast.com label:self-memo after:2026/05/01 subject:アイデア</code><br>→ 5月以降の「アイデア」件名のメモだけを表示。</p>
+          <p data-lang="ja" style="margin:0;"><code>from:simplememofast.com -label:processed</code><br>→ まだ処理していないメモだけを表示（「processed」ラベルを手動付与する運用と組み合わせる）。</p>
+          <p data-lang="en" style="margin:0 0 .6rem;"><code>from:simplememofast.com label:self-memo after:2026/05/01 subject:idea</code><br>→ Memos with "idea" in subject since May 2026.</p>
+          <p data-lang="en" style="margin:0;"><code>from:simplememofast.com -label:processed</code><br>→ Only memos you haven't reviewed (pair with a manually-applied "processed" label).</p>
+        </div>
+      </section>
+
+      <!-- Section 3: AI -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">3. AI に整理してもらう（2026年現在）</span>
+          <span data-lang="en">3. Let AI do the sorting (as of 2026)</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">「乱雑に投げて、後で AI に整理させる」という運用がついに現実的になりました。2026年時点で実用レベルの3つの選択肢。</span>
+          <span data-lang="en">"Capture loosely, sort with AI later" finally works in practice. Three options at production-ready quality as of 2026:</span>
+        </p>
+
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🤖 Gemini in Gmail</span>
+              <span data-lang="en">🤖 Gemini in Gmail</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">Gmail のサイドパネルから Gemini を呼び出し、「📝 Self Memo ラベルの中から、今週のタスクだけ抽出して」「先週のメモから読書感想だけまとめて」など自然言語で指示できます。Google Workspace 個人版 / Business 版で利用可能。<a href="https://gemini.google.com/" rel="noopener" target="_blank" style="color:var(--accent)">Gemini</a> へのリンク。</span>
+              <span data-lang="en">Open the Gemini side panel inside Gmail and ask natural-language questions like "From my 📝 Self Memo label, pull out everything that looks like a task for this week" or "Summarize last week's reading-related memos." Available on Google Workspace Personal and Business. <a href="https://gemini.google.com/" rel="noopener" target="_blank" style="color:var(--accent)">Gemini</a> for details.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🍎 Apple Intelligence</span>
+              <span data-lang="en">🍎 Apple Intelligence</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">iOS 18 以降の Mail.app で「優先メール」「メール要約」「クイック返信」が動作。Apple Intelligence 対応端末（iPhone 15 Pro 以降）で日本語にも対応。プライバシー設計上、端末内処理が中心なので、内容外部送信を避けたい運用に向いています。</span>
+              <span data-lang="en">iOS 18+ Mail.app exposes "Priority email," "Summarize," and "Smart Reply" features. Available on Apple Intelligence-capable devices (iPhone 15 Pro and later). Since most processing happens on-device, this is the lowest-friction option if you want minimal external data sharing.</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">💬 ChatGPT などに手動で渡す</span>
+              <span data-lang="en">💬 Hand off to ChatGPT manually</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">Gmail から該当ラベルのメモ複数件をコピー → ChatGPT / Claude などにプロンプトと一緒に貼る。「カテゴリ分けして」「重要度順に並べて」「アクションアイテムだけ抽出して」など。手数は多いが、AI モデルの選択肢が広い。</span>
+              <span data-lang="en">Copy a label's worth of memos out of Gmail and paste them into ChatGPT / Claude with a prompt like "Group these by category," "Sort by urgency," or "Extract only the actionable items." More manual, but you get to pick the model and the prompt.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span data-lang="ja">💡 設計思想</span>
+            <span data-lang="en">💡 The design principle</span>
+          </div>
+          <p data-lang="ja" style="margin:0;">投げ込む瞬間に「これはアイデアか、タスクか、参考資料か」を判断する作業を、メモを書く側に背負わせない設計です。判断は AI に任せ、人間は「思いついた瞬間に書く」ことに集中する。Captio が捨てた摩擦を、AI 時代になっても再現しない設計判断です。</p>
+          <p data-lang="en" style="margin:0;">The principle: don't ask the person capturing a memo to also decide its category in that same moment. Let AI do the classification later; let the human focus on "write what's in your head right now." It's the same friction-cut Captio made — restated for the AI era.</p>
+        </div>
+      </section>
+
+      <!-- Section 4: Weekly review template -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">4. 週次レビューのテンプレート</span>
+          <span data-lang="en">4. Weekly review template</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">溜めっぱなしを防ぐには、週1回30分のレビュー枠を確保するだけで十分です。GTD（Getting Things Done）の Inbox Zero 思想を、メール基盤に落とし込んだ運用。</span>
+          <span data-lang="en">A weekly 30-minute review prevents accumulation overload. This is the GTD (Getting Things Done) Inbox Zero principle adapted to a mail-first workflow.</span>
+        </p>
+
+        <ol class="steps-list" data-lang="ja">
+          <li><strong>絞り込み</strong>：Gmail で <code>label:self-memo after:今週月曜日</code> で今週のメモを表示。</li>
+          <li><strong>分類</strong>：1件ずつ開いて、3つの行き先のどれかに振り分ける：<br>
+            ・<strong>Action</strong>（今週中にやる）→ タスク管理アプリへ転記 or スター付け維持<br>
+            ・<strong>Reference</strong>（あとで見返す）→ 「processed」ラベル付けてアーカイブ<br>
+            ・<strong>Trash</strong>（不要）→ 削除</li>
+          <li><strong>AI 要約（任意）</strong>：Gemini や Apple Intelligence に「今週のメモを要約して」と依頼し、振り返り用の要約を作成。</li>
+          <li><strong>翌週へ持ち越し</strong>：今週中に処理しきれなかったメモは、スターを残して翌週レビューに送る。</li>
+        </ol>
+        <ol class="steps-list" data-lang="en">
+          <li><strong>Filter</strong>: in Gmail, run <code>label:self-memo after:Monday-this-week</code>.</li>
+          <li><strong>Classify</strong>: open each memo and route it to one of three destinations:<br>
+            • <strong>Action</strong> (do this week) → move to your task manager or keep starred<br>
+            • <strong>Reference</strong> (revisit later) → add a "processed" label and archive<br>
+            • <strong>Trash</strong> (not needed) → delete</li>
+          <li><strong>AI summary (optional)</strong>: ask Gemini or Apple Intelligence to "summarize this week's memos" for retrospective notes.</li>
+          <li><strong>Carry-over</strong>: anything you didn't process this week keeps its star and rolls into next week's review.</li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title">
+            <span data-lang="ja">💡 30分が長いと感じたら</span>
+            <span data-lang="en">💡 If 30 minutes feels long</span>
+          </div>
+          <p data-lang="ja" style="margin:0;">最初は「今週のメモを Gemini にざっと要約させる」だけでも十分価値があります。分類は次の週からで OK。完璧な GTD を目指すより、「とりあえず今週何をメモったか把握する」習慣の方が継続しやすいです。</p>
+          <p data-lang="en" style="margin:0;">Start with just "have Gemini summarize this week's memos." Skip classification entirely the first few weeks. The habit of knowing what you wrote down is more valuable than a perfect GTD setup — and easier to sustain.</p>
+        </div>
+      </section>
+
+      <!-- Section 5: Troubleshooting / FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">5. よくあるご質問</span>
+          <span data-lang="en">5. FAQ</span>
+        </h2>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span data-lang="ja">過去の自分宛メモが Gmail 検索で見つかりません</span>
+            <span data-lang="en">My old memos don't show up in Gmail search</span>
+          </div>
+          <div class="trouble-item__a">
+            <span data-lang="ja">Gmail の検索は標準で「ゴミ箱・迷惑メール」を除外します。<code>-in:trash -in:spam</code> を消した <code>from:simplememofast.com</code> 単独で検索しても出ない場合は、メモを「すべてのメール」フォルダで確認するか、<code>in:anywhere from:simplememofast.com</code> を試してください。</span>
+            <span data-lang="en">Gmail search excludes Trash and Spam by default. If <code>from:simplememofast.com</code> alone doesn't surface them, try <code>in:anywhere from:simplememofast.com</code> or check the "All Mail" folder.</span>
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span data-lang="ja">iPhone の Mail.app でも同じ整理ができますか？</span>
+            <span data-lang="en">Can I do the same on the iPhone Mail.app?</span>
+          </div>
+          <div class="trouble-item__a">
+            <span data-lang="ja">iOS の Mail.app には Gmail のような自動フィルタ機能はありませんが、「VIP」マークと「メールルール」を組み合わせることで同等の運用ができます。iOS 18 以降ならば Apple Intelligence の「優先メール」が自動的に重要度を判定してくれるので、iPhone 単体で完結する整理も可能。Gmail Web 版で一度フィルター設定をしておけば、iPhone Mail.app 側にもラベル分類が反映されます。</span>
+            <span data-lang="en">iOS Mail.app doesn't have Gmail-equivalent automatic filtering, but VIP designation + mail rules give you similar behavior. iOS 18+ adds Apple Intelligence "Priority email" classification, which makes a fully iPhone-native workflow viable. If you set up the Gmail filter once in the web UI, the label classification carries through to the iPhone Mail.app automatically.</span>
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span data-lang="ja">どこまでアーカイブして、どこから削除すべきですか？</span>
+            <span data-lang="en">When should I archive vs delete a memo?</span>
+          </div>
+          <div class="trouble-item__a">
+            <span data-lang="ja">迷ったらアーカイブを推奨します。Gmail のストレージは Google アカウントで 15GB 共有ですが、テキストメモのみであれば1万通でも数MB程度。検索で全件引ける状態を維持する方が、後で「あのメモなんだっけ」となったときに圧倒的に強いです。明らかに不要（誤送信、重複、テストメモ）のみ削除で十分。</span>
+            <span data-lang="en">When in doubt, archive. Gmail's 15GB Google-account quota easily holds 10,000 text memos in a few MB. Keeping everything searchable is dramatically more useful than aggressively trashing things — "wait, I wrote about that, where is it?" is the moment archives pay off. Only delete obvious mistakes, duplicates, or test memos.</span>
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span data-lang="ja">メモを Obsidian や Notion に取り込みたい</span>
+            <span data-lang="en">I want my memos in Obsidian or Notion</span>
+          </div>
+          <div class="trouble-item__a">
+            <span data-lang="ja">Gmail から週次でエクスポートする運用が現実的です。Gmail の「ラベルを選択 → 右上の3点メニュー → メールを転送 / メールを Google Takeout で書き出し」で .mbox 形式が取得でき、<a href="/vs/obsidian/" style="color:var(--accent)">Obsidian</a> や <a href="/vs/notion/" style="color:var(--accent)">Notion</a> 側のインポータで取り込めます。リアルタイム連携が必要な場合は Zapier や Make などのメール → 外部アプリ連携サービスを噛ませる手もあります。</span>
+            <span data-lang="en">A weekly batch export from Gmail works well. Use "select label → top-right 3-dot menu → forward or Google Takeout" to get a .mbox file, then import it into <a href="/vs/obsidian/" style="color:var(--accent)">Obsidian</a> or <a href="/vs/notion/" style="color:var(--accent)">Notion</a>. For near-real-time, Zapier or Make can pipe matching Gmail messages into either tool.</span>
+          </div>
+        </div>
+
+        <div class="trouble-item">
+          <div class="trouble-item__q">
+            <span data-lang="ja">プライバシー上、AI にメモ内容を見せたくない</span>
+            <span data-lang="en">I don't want AI providers to see my memos</span>
+          </div>
+          <div class="trouble-item__a">
+            <span data-lang="ja">Apple Intelligence は端末内処理が中心で、プライバシークラウド利用時も Apple サーバ側にデータが保存されない設計です。Gmail + Gemini は Google にデータが渡るので、機密内容が含まれる場合は使い分けるか、整理を手動 + 検索演算子だけで完結させてください。Captio式シンプルメモ自体は、メモ本文をサーバ側に保存しません（送信完了でサーバメモリからも消去）。詳細は <a href="/privacy" style="color:var(--accent)">プライバシーポリシー</a> をご確認ください。</span>
+            <span data-lang="en">Apple Intelligence runs primarily on-device, and even its Private Cloud Compute calls don't retain data on Apple servers. Gmail + Gemini does send data to Google, so for sensitive memos, either stay on-device or rely on manual organization with search operators only. Simple Memo itself never stores memo text on the server (it's wiped from server memory once the send completes). See our <a href="/privacy" style="color:var(--accent)">Privacy Policy</a> for details.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span data-lang="ja">まずは送る側を試してみる</span>
+          <span data-lang="en">Start with the capture side</span>
+        </div>
+        <div class="cta-box__desc">
+          <span data-lang="ja">整理は溜まってからで間に合います。7日間の無料トライアルで、まず「投げ込む速さ」を体感してください。</span>
+          <span data-lang="en">Organization can wait until things accumulate. Try the 7-day free trial first and feel the capture speed.</span>
+        </div>
+        <a data-lang="ja" href="https://apps.apple.com/jp/app/%E8%BB%BD%E5%BF%AB%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2/id6758438948?ct=guides-inbox-organization&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+        </a>
+        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=guides-inbox-organization&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">関連ページ</span>
+          <span data-lang="en">Related Pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/guides/">
+            <span data-lang="ja">設定ガイド一覧</span>
+            <span data-lang="en">All Setup Guides</span>
+          </a>
+          <a href="/guides/gmail/">
+            <span data-lang="ja">Gmail 設定ガイド</span>
+            <span data-lang="en">Gmail Setup Guide</span>
+          </a>
+          <a href="/blog/email-management-tips">
+            <span data-lang="ja">ブログ：メール管理のコツ</span>
+            <span data-lang="en">Blog: Email Management Tips</span>
+          </a>
+          <a href="/blog/inbox-zero-workflow-tips-2026">
+            <span data-lang="ja">ブログ：Inbox Zero ワークフロー</span>
+            <span data-lang="en">Blog: Inbox Zero Workflow</span>
+          </a>
+          <a href="/use-cases/">
+            <span data-lang="ja">活用事例集</span>
+            <span data-lang="en">Use Cases</span>
+          </a>
+          <a href="/voices/">
+            <span data-lang="ja">ユーザーの声</span>
+            <span data-lang="en">User Voices</span>
+          </a>
+          <a href="/vs/obsidian/">
+            <span data-lang="ja">vs Obsidian 比較</span>
+            <span data-lang="en">vs Obsidian</span>
+          </a>
+          <a href="/faq">
+            <span data-lang="ja">よくあるご質問</span>
+            <span data-lang="en">FAQ</span>
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links" aria-label="Footer navigation">
+        <a href="/" class="footer__link">
+          <span data-lang="ja">ホーム</span>
+          <span data-lang="en">Home</span>
+        </a>
+        <a href="/captio-alternative/" class="footer__link">
+          <span data-lang="ja">Captio代替</span>
+          <span data-lang="en">Captio Alternative</span>
+        </a>
+        <a href="/note-to-email/" class="footer__link">
+          <span data-lang="ja">メモ→メール</span>
+          <span data-lang="en">Note to Email</span>
+        </a>
+        <a href="/vs/" class="footer__link">
+          <span data-lang="ja">比較</span>
+          <span data-lang="en">vs</span>
+        </a>
+        <a href="/use-cases/" class="footer__link">
+          <span data-lang="ja">使い方</span>
+          <span data-lang="en">Use Cases</span>
+        </a>
+        <a href="/guides/" class="footer__link">
+          <span data-lang="ja">設定ガイド</span>
+          <span data-lang="en">Guides</span>
+        </a>
+        <a href="/faq" class="footer__link">
+          <span data-lang="ja">FAQ</span>
+          <span data-lang="en">FAQ</span>
+        </a>
+        <a href="/privacy" class="footer__link">
+          <span data-lang="ja">プライバシー</span>
+          <span data-lang="en">Privacy</span>
+        </a>
+        <a href="/contact" class="footer__link">
+          <span data-lang="ja">お問い合わせ</span>
+          <span data-lang="en">Contact</span>
+        </a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026
+        <span data-lang="ja">Captio式シンプルメモ</span>
+        <span data-lang="en">Simple Memo - Captio-style</span>.
+        All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>
