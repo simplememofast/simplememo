@@ -18,10 +18,10 @@
   --border: rgba(20, 16, 10, 0.14);
   --border-highlight: rgba(170, 60, 28, 0.36);
   --border-strong: rgba(170, 60, 28, 0.60);
-  --text: #0c0a06;
-  --text-secondary: rgba(12, 10, 6, 0.92);
-  --text-muted: rgba(12, 10, 6, 0.72);
-  --text-subtle: rgba(12, 10, 6, 0.50);
+  --text: #07060a;
+  --text-secondary: #16130d;
+  --text-muted: #2f281c;
+  --text-subtle: #5a4d3b;
   --accent: #b8431f;
   --accent-bright: #d05227;
   --accent-neon: #a23a18;
@@ -98,7 +98,7 @@
 @font-face {
   font-family: 'Noto Sans JP';
   src: url('/assets/fonts/NotoSansJP-Bold-subset.woff2') format('woff2');
-  font-weight: 700;
+  font-weight: 500 800;
   font-style: normal;
   font-display: swap;
 }
@@ -116,7 +116,7 @@
 @font-face {
   font-family: 'Noto Sans JP';
   src: url('/assets/fonts/NotoSansJP-Bold-ext.woff2') format('woff2');
-  font-weight: 700;
+  font-weight: 500 800;
   font-style: normal;
   font-display: swap;
   unicode-range: U+4E00-9FFF, U+3400-4DBF;
@@ -162,16 +162,44 @@ body {
   font-family: 'Noto Sans JP', 'Noto Sans JP Fallback', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.7;
+  font-weight: 500;
+  line-height: 1.75;
   word-break: keep-all;
   line-break: strict;
   overflow-wrap: anywhere;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "kern", "liga", "calt", "ss01";
+  font-feature-settings: "kern", "liga", "calt", "ss01", "palt";
   text-rendering: optimizeLegibility;
   min-height: 100vh;
   overflow-x: hidden;
+}
+
+/* Boost body-text weight so paragraphs/lists feel solid on cream. The
+   subset only ships 400 and 700; specifying 600 pushes the matcher to
+   the Bold file (heavier than synthesized 500). */
+p, li, dd, dt, td, th, blockquote, figcaption,
+.hero__subtitle, .entity-definition__text,
+.step__description, .step__title,
+.feature-card__description,
+.faq-item__answer p, .faq-answer, .faq-answer p, .faq-summary,
+.page-content__body, .page-content__body p, .page-content__body li,
+.pricing-notes, .pricing-card__name, .pricing-card__limit,
+.footer__link, .footer__copyright,
+.lang-toggle__btn,
+.contact-info__label,
+.faq-preview .faq-summary, .faq-preview .faq-answer,
+.lp-hero__sub, .lp-hero__note,
+.reason-card__desc, .cta-box__desc, .tldr p,
+.spec-list, .spec-list dd,
+.compare-table th, .compare-table td,
+.lp-section__lead {
+  font-weight: 600;
+}
+
+/* Strong should pop a touch more than its surrounding 600. */
+strong, b {
+  font-weight: 800;
 }
 
 /* Mesh Gradient Background Layer — warm cream wash */
