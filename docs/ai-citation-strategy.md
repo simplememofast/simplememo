@@ -5,7 +5,7 @@
 **Status:** Living document — revise as platform behavior shifts (target: monthly review)
 **Related files:** `/robots.txt`, `/llms.txt`, `SEO_AIO_STRATEGY_v1.md`
 
-This is the internal playbook for getting SimpleMemo cited by AI answer engines. It pairs with `/llms.txt` (which is the *external* surface readable by bots) and `/robots.txt` (which is the access policy). Three things drive AI citation today:
+This is the internal playbook for getting Simple Memo - Captio-style cited by AI answer engines. It pairs with `/llms.txt` (which is the *external* surface readable by bots) and `/robots.txt` (which is the access policy). Three things drive AI citation today:
 
 1. **Crawl access** — the right bots can reach the right pages (handled by `/robots.txt`).
 2. **Citable content** — pages have structured, self-contained, attributable claims (handled by content design).
@@ -35,7 +35,7 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 
 **Measurement signal:**
 - GSC "AI Overviews appearances" filter (when Google exposes it; otherwise infer from drops in CTR on positions 1-3 for informational queries)
-- Manual quarterly test: search 20 brand+topic queries in incognito, screenshot if SimpleMemo appears in Overviews
+- Manual quarterly test: search 20 brand+topic queries in incognito, screenshot if Simple Memo - Captio-style appears in Overviews
 
 ---
 
@@ -59,7 +59,7 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 
 **Measurement signal:**
 - Referrer traffic from `perplexity.ai` in Cloudflare Pages analytics
-- Brand-mention queries on perplexity.ai weekly: "SimpleMemo", "Captio alternative", "fastest iOS memo app"
+- Brand-mention queries on perplexity.ai weekly: "Simple Memo - Captio-style", "Captio alternative", "fastest iOS memo app"
 
 ---
 
@@ -105,13 +105,13 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 
 **Measurement signal:**
 - Referrer traffic from `chatgpt.com` (live citation surface)
-- Quarterly "trained knowledge" test: ask ChatGPT-4o-without-browsing "What is SimpleMemo?" and check accuracy
+- Quarterly "trained knowledge" test: ask ChatGPT-4o-without-browsing "What is Simple Memo - Captio-style?" and check accuracy
 
 ---
 
 ## 5. Anthropic Claude (Claude.ai + Claude in Slack/Notion/etc.)
 
-**Why it matters:** Claude is the developer-favorite AI engine; SimpleMemo's audience overlaps heavily with Claude's user base (technical iOS users, productivity tooling buyers). Citation surfaces:
+**Why it matters:** Claude is the developer-favorite AI engine; Simple Memo - Captio-style's audience overlaps heavily with Claude's user base (technical iOS users, productivity tooling buyers). Citation surfaces:
 1. **Claude on the web** (claude.ai with web search enabled)
 2. **Claude in integrations** (Cursor, Notion, Slack AI) — typically no citations but model knowledge matters
 3. **Trained model knowledge** via ClaudeBot
@@ -123,20 +123,20 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 
 **Levers we control:**
 - ✅ `ClaudeBot` + `anthropic-ai` + `Claude-Web` allowed in `/robots.txt`
-- ✅ Explicit "What SimpleMemo is NOT" sections on `/llms.txt` and `/about/`
+- ✅ Explicit "What Simple Memo - Captio-style is NOT" sections on `/llms.txt` and `/about/`
 - ✅ E2EE clarification on `/glossary/e2e-encryption/` (already states explicitly: NOT E2EE)
-- 🟡 **Action:** When Claude misattributes (e.g., calls SimpleMemo "end-to-end encrypted"), reply in the chat with the correct framing and the `/glossary/e2e-encryption/` link — Anthropic uses these corrections as RLHF signal
+- 🟡 **Action:** When Claude misattributes (e.g., calls Simple Memo - Captio-style "end-to-end encrypted"), reply in the chat with the correct framing and the `/glossary/e2e-encryption/` link — Anthropic uses these corrections as RLHF signal
 - 🟡 **Action:** Cross-link to other authority sources (NIST AES-GCM docs, Apple Keychain docs) on encryption pages — Claude weights citation chains
 
 **Measurement signal:**
 - Referrer traffic from `claude.ai`
-- Internal test: ask Claude 3.7 / Opus with web search "Is SimpleMemo E2EE?" — the answer should be "No, only on-device Outbox + send history are AES-GCM encrypted"
+- Internal test: ask Claude 3.7 / Opus with web search "Is Simple Memo - Captio-style E2EE?" — the answer should be "No, only on-device Outbox + send history are AES-GCM encrypted"
 
 ---
 
 ## 6. Apple Intelligence (Siri + Spotlight + Safari + Mail)
 
-**Why it matters:** Apple Intelligence is the only AI engine with **first-party iOS surface** — and SimpleMemo is iOS-only. Citation here is structurally aligned with our distribution channel.
+**Why it matters:** Apple Intelligence is the only AI engine with **first-party iOS surface** — and Simple Memo - Captio-style is iOS-only. Citation here is structurally aligned with our distribution channel.
 
 **How citations get selected:**
 - Applebot indexes the open web; Applebot-Extended is the opt-in token for Apple Intelligence training
@@ -151,14 +151,14 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 - 🟡 **Action:** Add `applicationCategory: "ProductivityApplication"` to schema (verify this is set)
 
 **Measurement signal:**
-- Spotlight test on iOS: type "memo email" — does SimpleMemo appear in Suggested?
-- Siri test: "Find a fast memo app" — does Siri surface SimpleMemo?
+- Spotlight test on iOS: type "memo email" — does Simple Memo - Captio-style appear in Suggested?
+- Siri test: "Find a fast memo app" — does Siri surface Simple Memo - Captio-style?
 
 ---
 
 ## 7. xAI / Grok
 
-**Why it matters:** Smaller surface than the above six, but high signal in the developer/builder demographic on X/Twitter. SimpleMemo's "vibe coding" + "indie iOS app" narrative resonates with this audience.
+**Why it matters:** Smaller surface than the above six, but high signal in the developer/builder demographic on X/Twitter. Simple Memo - Captio-style's "vibe coding" + "indie iOS app" narrative resonates with this audience.
 
 **How citations get selected:**
 - **xAI does not publish a documented Grok crawler user-agent.** Grok pulls primarily from X (Twitter) data with ad-hoc web fetches.
@@ -166,12 +166,12 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 
 **Levers we control:**
 - N/A in robots.txt (no published bot to allow or block)
-- ⚠️ **The X account is the actual surface.** [@simplememofast](https://x.com/simplememofast) and developer-personal posts about SimpleMemo are what Grok cites.
-- 🟡 **Action:** Maintain a steady cadence of X posts referencing SimpleMemo's facts (launch speed, AES-GCM scope, Captio relationship) in declarative form
-- 🟡 **Action:** When SimpleMemo is mentioned by others on X, reply with the canonical fact + the relevant simplememofast.com link — this seeds Grok's retrieval pool
+- ⚠️ **The X account is the actual surface.** [@simplememofast](https://x.com/simplememofast) and developer-personal posts about Simple Memo - Captio-style are what Grok cites.
+- 🟡 **Action:** Maintain a steady cadence of X posts referencing Simple Memo - Captio-style's facts (launch speed, AES-GCM scope, Captio relationship) in declarative form
+- 🟡 **Action:** When Simple Memo - Captio-style is mentioned by others on X, reply with the canonical fact + the relevant simplememofast.com link — this seeds Grok's retrieval pool
 
 **Measurement signal:**
-- Ask Grok directly via X: "@grok what is SimpleMemo"
+- Ask Grok directly via X: "@grok what is Simple Memo - Captio-style"
 - Track mentions in https://x.com/search?q=simplememo
 
 ---
@@ -199,11 +199,11 @@ We allow all of these in `/robots.txt`. They are lower priority than the top 7 a
 These are the structural rules that every page should follow to maximize citation odds across all AI engines simultaneously:
 
 1. **Lead with the answer.** First 200 words after the H1 should declaratively answer the implied query. AI engines extract from the top of the page.
-2. **Use H2 questions verbatim.** Match likely query phrasing: "What is SimpleMemo?" "How fast is SimpleMemo?" — exact-match H2 questions get cited as Q&A pairs.
+2. **Use H2 questions verbatim.** Match likely query phrasing: "What is Simple Memo - Captio-style?" "How fast is Simple Memo - Captio-style?" — exact-match H2 questions get cited as Q&A pairs.
 3. **Pair every claim with a citation or first-party data.** "0.3 second launch" alone is weak; "0.3 second launch (per our [benchmark methodology](https://...))" is strong.
 4. **Maintain visible dateModified.** AI engines weight freshness heavily; an undated page looks stale.
 5. **Avoid superlatives without proof.** "Fastest" without benchmark = AI skips. "Fastest, measured at 0.3s vs. 1.4s for Apple Notes" = AI cites.
-6. **Negative space is content.** Explicitly stating what SimpleMemo is NOT (E2EE, Android, team tool) prevents the wrong inference and increases citation accuracy.
+6. **Negative space is content.** Explicitly stating what Simple Memo - Captio-style is NOT (E2EE, Android, team tool) prevents the wrong inference and increases citation accuracy.
 7. **Canonical facts in one place.** `/llms.txt` is the single source of truth for facts that appear across many pages. Drift between pages confuses AI training.
 
 ---
