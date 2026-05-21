@@ -2386,24 +2386,29 @@ section {
   text-underline-offset: 3px;
 }
 
-/* References / Related Content link colors — kill the default browser
-   blue (#0000EE) that was leaking through on auto-injected References
-   blocks whose <a> elements ship with no class and no inline color.
-   These selectors also catch the SEO-related-links capsule list. */
-.references a,
-.references a:visited,
-.related-links a,
-.related-links a:visited {
-  color: var(--accent) !important;
-  text-decoration: none !important;
-  font-weight: 700;
-  transition: color 0.18s, border-color 0.18s;
-}
-.references a:hover,
-.related-links a:hover {
-  color: var(--accent-bright) !important;
-  text-decoration: underline !important;
-  text-underline-offset: 3px;
+/* ============================================================
+   Restore grid layouts clobbered by data-lang toggling
+
+   Many bilingual pages ship `[data-lang].active{display:revert}`
+   (or `…{display:block}`) inline. That rule collides with grid
+   containers whose root element doubles as a data-lang wrapper
+   (.use-case-grid, .reason-cards, .choose-grid, etc.) — when
+   lang.js adds .active, the inline rule wins and the grid
+   collapses to a single-column block stack.
+
+   Force these known grid containers back to display:grid via
+   !important so the responsive auto-fit / auto-fill columns
+   from each page's own CSS keep working as authored.
+   ============================================================ */
+.use-case-grid,
+.reason-cards,
+.choose-grid,
+.template-grid,
+.label-grid,
+.para-grid,
+.scenario-cards,
+.reason-card-grid {
+  display: grid !important;
 }
 
 /* Generic safeguard: legacy inline cards that hard-code dark surfaces.
