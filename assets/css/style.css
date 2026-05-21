@@ -2366,6 +2366,46 @@ section {
   }
 }
 
+/* References / Related Content link colors — kill the default browser
+   blue (#0000EE) that was leaking through on auto-injected References
+   blocks whose <a> elements ship with no class and no inline color.
+   These selectors also catch the SEO-related-links capsule list. */
+.references a,
+.references a:visited,
+.related-links a,
+.related-links a:visited {
+  color: var(--accent) !important;
+  text-decoration: none !important;
+  font-weight: 700;
+  transition: color 0.18s, border-color 0.18s;
+}
+.references a:hover,
+.related-links a:hover {
+  color: var(--accent-bright) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+/* References / Related Content link colors — kill the default browser
+   blue (#0000EE) that was leaking through on auto-injected References
+   blocks whose <a> elements ship with no class and no inline color.
+   These selectors also catch the SEO-related-links capsule list. */
+.references a,
+.references a:visited,
+.related-links a,
+.related-links a:visited {
+  color: var(--accent) !important;
+  text-decoration: none !important;
+  font-weight: 700;
+  transition: color 0.18s, border-color 0.18s;
+}
+.references a:hover,
+.related-links a:hover {
+  color: var(--accent-bright) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
 /* Generic safeguard: legacy inline cards that hard-code dark surfaces.
    Catches occurrences like `background:var(--surface)` already pick up
    the new cream tokens; these explicit overrides cover known inline patterns
