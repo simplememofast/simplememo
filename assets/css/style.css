@@ -2231,6 +2231,37 @@ section {
   outline: 2px solid var(--accent) !important;
 }
 
+/* ============================================================
+   Unified in-nav language switcher (.lang-switcher--nav)
+   Sits inside .global-nav__actions next to the DL CTA so every
+   bilingual page exposes the JA/EN toggle from the same fixed
+   spot. Compact sizing overrides the legacy page-header pill.
+   ============================================================ */
+.lang-switcher.lang-switcher--nav {
+  display: inline-flex !important;
+  padding: 2px !important;
+  border-radius: 999px !important;
+  margin-right: 0.4rem !important;
+  box-shadow: none !important;
+}
+.lang-switcher.lang-switcher--nav .lang-switcher__btn {
+  min-height: 30px !important;
+  padding: 4px 10px !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  border-radius: 999px !important;
+  line-height: 1 !important;
+  transition: background 0.18s, color 0.18s !important;
+}
+@media (max-width: 480px) {
+  .lang-switcher.lang-switcher--nav { margin-right: 0.2rem !important; }
+  .lang-switcher.lang-switcher--nav .lang-switcher__btn {
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
+  }
+}
+
 /* Generic safeguard: legacy inline cards that hard-code dark surfaces.
    Catches occurrences like `background:var(--surface)` already pick up
    the new cream tokens; these explicit overrides cover known inline patterns
