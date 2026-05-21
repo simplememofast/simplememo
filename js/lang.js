@@ -93,6 +93,18 @@
       }
     });
 
+    // Update logo href so clicking the brand always lands on the
+    // matching locale homepage. We only swap between "/" and "/en/"
+    // because the JA/EN pill is the only switcher on these pages —
+    // pages under /zh/, /ko/, /ar/, etc. have their own locale-home
+    // logo href baked in and we must not rewrite those.
+    document.querySelectorAll('.global-nav__logo').forEach(a => {
+      var current = a.getAttribute('href');
+      if (current === '/' || current === '/en/') {
+        a.setAttribute('href', lang === 'en' ? '/en/' : '/');
+      }
+    });
+
     // Update document title and meta info from hidden templates
     const metaSource = document.querySelector(`.meta-template[data-lang="${lang}"]`);
     if (metaSource) {
