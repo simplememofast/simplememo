@@ -2389,25 +2389,37 @@ section {
 /* ============================================================
    Restore grid layouts clobbered by data-lang toggling
 
-   Many bilingual pages ship `[data-lang].active{display:revert}`
-   (or `…{display:block}`) inline. That rule collides with grid
-   containers whose root element doubles as a data-lang wrapper
-   (.use-case-grid, .reason-cards, .choose-grid, etc.) — when
-   lang.js adds .active, the inline rule wins and the grid
-   collapses to a single-column block stack.
+   Many bilingual pages ship inline CSS like:
+     [data-lang="en"]{display:none}
+     [data-lang].active{display:revert}    (or display:block)
+   When lang.js adds .active to a grid container that also
+   carries data-lang="ja", the .active rule wins by specificity
+   and collapses the grid to a single-column block stack.
 
-   Force these known grid containers back to display:grid via
-   !important so the responsive auto-fit / auto-fill columns
-   from each page's own CSS keep working as authored.
+   Targets two cases per class:
+     A) grids WITHOUT data-lang -> always grid
+     B) grids WITH data-lang that are currently .active -> grid
+   Inactive data-lang grids stay display:none via
+   `[data-lang="en"]{display:none}`, so the EN copy does NOT
+   leak in JA mode (the previous unconditional override caused
+   that leak on /use-cases/).
    ============================================================ */
-.use-case-grid,
-.reason-cards,
-.choose-grid,
-.template-grid,
-.label-grid,
-.para-grid,
-.scenario-cards,
-.reason-card-grid {
+.use-case-grid:not([data-lang]),
+.use-case-grid[data-lang].active,
+.reason-cards:not([data-lang]),
+.reason-cards[data-lang].active,
+.choose-grid:not([data-lang]),
+.choose-grid[data-lang].active,
+.template-grid:not([data-lang]),
+.template-grid[data-lang].active,
+.label-grid:not([data-lang]),
+.label-grid[data-lang].active,
+.para-grid:not([data-lang]),
+.para-grid[data-lang].active,
+.scenario-cards:not([data-lang]),
+.scenario-cards[data-lang].active,
+.reason-card-grid:not([data-lang]),
+.reason-card-grid[data-lang].active {
   display: grid !important;
 }
 
