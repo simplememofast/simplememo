@@ -56,7 +56,7 @@
 
   <!-- JSON-LD: WebPage -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/voices/#webpage","name":"ユーザーの声 — 初期テスターからいただいたフィードバック","description":"Captio式シンプルメモの初期テスターから匿名でお寄せいただいたフィードバックの要約。良かった点・気になった点・ご要望と、それぞれへの対応をまとめました。","url":"https://simplememofast.com/voices/","inLanguage":"ja","datePublished":"2026-05-20","dateModified":"2026-05-20","publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Captio式シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".voice-card__paraphrase"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/voices/#webpage","name":"ユーザーの声 — 初期テスターからいただいたフィードバック","description":"Captio式シンプルメモの初期テスターから匿名でお寄せいただいたフィードバックの要約。良かった点・気になった点・ご要望と、それぞれへの対応をまとめました。","url":"https://simplememofast.com/voices/","inLanguage":"ja","datePublished":"2026-05-20","dateModified":"2026-05-21","publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Captio式シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".voice-card__paraphrase"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
 
   <!-- JSON-LD: Organization -->
@@ -464,6 +464,28 @@
               <span data-lang="en">"I didn't get lost during sign-up — I could start using it right away," and "overall it was easy to use." The path from "open the app" to "send your first memo" is one of the UX decisions we guard most carefully. Every additional setting screen creates hesitation, so the initial flow is deliberately reduced to three screens (email → verification code → memo) — folder setup, preference toggles, and other one-time choices are intentionally moved out of the critical path so testers can come back to them later. Hearing "I just started using it" is the signal that the trade-off is working.</span>
             </div>
           </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">⏱ 「ダウンロードから1分以内、認証コード自動入力で感激」</span>
+              <span data-lang="en">⏱ "Under 1 minute from download to first memo — autofill on the verification code was a delight"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja">「アプリダウンロード→メアド入力→認証コード受信→アプリで入力→メモ使えるようになる、までエラーなしで1分かからなかった」「認証コードの自動入力に感激した」というご報告。認証コード入力欄では iOS の AutoFill ヒント（textContentType: .oneTimeCode）を利用し、メールに届いたコードをキーボード上部から直接タップで入力できるようにしています。地味ですが、初回体験で<strong>「コピペすら不要だった」</strong>と感じてもらえる差分はかなり大きい部分。マグカップで言うと取っ手のすわり心地のような細部ですが、テスターの方々が言語化してくださることでようやく「ここは効いている」と確信できます。</span>
+              <span data-lang="en">"Download → email → verification code → paste in → ready, all under one minute, no errors," and "the verification-code autofill was a wow moment." For the OTP input we use iOS's AutoFill hint (`textContentType: .oneTimeCode`), so the code that just arrived by email can be tapped directly from the keyboard suggestion bar — no manual copy/paste. Tiny detail, but the gap between "I had to copy-paste" and <strong>"I didn't even need to copy"</strong> is huge on first run. We never quite know if details like this land until testers spell them out.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🖥️ 「iPhone↔他端末のテキストブリッジとして使える」</span>
+              <span data-lang="en">🖥️ "Works great as an iPhone-to-other-devices text bridge"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>使い方の発見</strong>：「iPhone から Windows PC など他端末へテキストをコピペする環境が簡単にできて、これは使える場面ある」というご感想をいただきました。iPhone でメモ → 自分のメールへ送信 → PC のメーラーで開いてテキストをコピー、というフローを「クリップボード代替」として活用するアイデアです。<br><strong>背景</strong>：Apple の Universal Clipboard は同じ Apple ID 配下の端末間でしか動かないため、Windows / Linux / ChromeOS との間にはクリップボードの壁があります。本アプリは「自分宛てメールへ書く」だけのシンプルさを守る代わりに、メール自体がもつ<strong>クロスプラットフォーム性</strong>を自然に引き継ぐので、結果として「電子メールが届くあらゆる端末」がコピー先になります。設計時にここまで明確には謳っていなかった用途ですが、テスターの方が独自に見つけてくださった使い方として価値があります。<a href="/use-cases/" style="color:var(--accent)">活用事例</a> に追記検討中。</span>
+              <span data-lang="en"><strong>A discovered use case:</strong> "It's an easy way to get text from iPhone to a Windows PC — there are real situations where this beats the alternatives." The flow is: write on iPhone → send to your own email → open the message on the PC's mail client → copy the text. Effectively a cross-platform clipboard.<br><strong>Context:</strong> Apple's Universal Clipboard only works between devices on the same Apple ID, so the iPhone-to-Windows / -Linux / -ChromeOS gap is a real one. By keeping the app's job to "write a memo to your own email," we inherit email's <strong>cross-platform reach</strong> for free — any device that receives your email becomes a paste target. We hadn't been explicit about this use case in our copy; thanks to testers discovering it independently, we're adding it to the <a href="/use-cases/" style="color:var(--accent)">use-case gallery</a>.</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -581,6 +603,17 @@
             <div class="reason-card__desc">
               <span data-lang="ja"><strong>ご要望</strong>：「メールの件名と本文の切り分けが改行で行われているのは分かったが、メモ画面上で1行目を太字にしてくれると、どこまでが件名か直感的に分かる」というご提案。<br><strong>現在の挙動</strong>：メモの1行目は自動でメールの件名（Subject）に、2行目以降が本文（Body）になります。仕様としては<a href="/faq" style="color:var(--accent)">FAQ</a>と<a href="/note-to-email/" style="color:var(--accent)">使い方ガイド</a>に記載していますが、画面上のUIヒントは現状ありません。<br><strong>今後の対応</strong>：1行目だけフォントウェイトを上げる、もしくは「件名」「本文」と薄いラベルを添える、というのは追加コストの低い改善案として有力。ロードマップに追加します。書きながら境界が見える方が直感的、というご指摘はその通りなので、組み込み方を検討中です。</span>
               <span data-lang="en"><strong>The request:</strong> "I figured out that the email subject/body split happens at the first newline, but bolding the first line in the memo editor would make it obvious as you type."<br><strong>Current behavior:</strong> Line 1 becomes the email Subject; lines 2+ become the Body. It's documented in the <a href="/faq" style="color:var(--accent)">FAQ</a> and <a href="/note-to-email/" style="color:var(--accent)">usage guide</a>, but there's no inline UI hint while typing.<br><strong>Next steps:</strong> Bumping the first line's font-weight, or adding subtle "Subject / Body" affordances inline, is a low-cost improvement we're adding to the roadmap. The point that the boundary should be visible while typing is exactly right.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">💬 「送信先を Slack のチャネル投稿用メールにすると面白いのでは」</span>
+              <span data-lang="en">💬 "What if the destination were a Slack channel's post-by-email address?"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>使い方の提案</strong>：「送信先を Slack のチャネル投稿用メールアドレスにできると、Slack 上にメモが溜まって良さそう」というアイデア。<br><strong>現在の答え</strong>：実はそのまま<strong>今の設計のままで実現できます</strong>。Slack の有料プランには「Email to Channel」機能があり、各チャネルに一意のメール投稿用アドレスが発行されます。本アプリの宛先メールアドレスをそのアドレスに設定するだけで、メモが Slack のチャネルに自動で流れていきます。「整理はメールクライアント／他ツールに任せる」という設計（Theme 3 の <em>送信先を Obsidian にしては？</em> と同じ系統）が、Slack に対しても同じやり方で機能する例です。シンプルな宛先1つに絞っているからこそ、こうした<em>パイプの片側</em>として自然に組み合わせられます。<br><strong>注意点</strong>：Slack の Email-to-Channel はワークスペース管理者が有効化したプランでのみ利用可能で、件名や本文の長さに上限があります。具体的な設定方法を <a href="/blog/email-management-tips" style="color:var(--accent)">メール管理のコツ</a> で扱う予定です。シンプルさを保ったまま、こうしたユースケースの紹介を増やしていきます。</span>
+              <span data-lang="en"><strong>A user-suggested workflow:</strong> "What if the destination were a Slack channel's post-by-email address? Memos would auto-collect inside Slack."<br><strong>The answer:</strong> This actually <strong>already works with the current single-target design</strong>. Slack's paid plans support "Email to Channel" — each channel gets a unique post-by-email address. Setting Simple Memo's destination to that address means every memo flows straight into Slack. This is the same architectural philosophy as the existing <em>Send-to-Obsidian</em> card above: by keeping the app a single-target pipe, it composes naturally with any tool that accepts an email address as input.<br><strong>Caveats:</strong> Slack's Email-to-Channel requires admin enablement on a paid plan, and message length is capped. We'll document the setup in <a href="/blog/email-management-tips" style="color:var(--accent)">email management tips</a>. Showcasing more of these composable workflows — without growing the in-app surface — is the goal.</span>
             </div>
           </div>
 
