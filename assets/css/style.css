@@ -2262,6 +2262,30 @@ section {
   }
 }
 
+/* ============================================================
+   Article footer sections (References, Related Content)
+   These blocks are appended outside the article's container on
+   many pages (149+), so without an explicit width they span the
+   full viewport and read as awkwardly left-aligned. Centering
+   them with the same max-width as .container restores the
+   editorial column.
+   ============================================================ */
+.references,
+.related-links {
+  max-width: 760px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+  box-sizing: border-box;
+}
+@media (min-width: 1024px) {
+  .references,
+  .related-links {
+    max-width: 820px !important;
+  }
+}
+
 /* Generic safeguard: legacy inline cards that hard-code dark surfaces.
    Catches occurrences like `background:var(--surface)` already pick up
    the new cream tokens; these explicit overrides cover known inline patterns
