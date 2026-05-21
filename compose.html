@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://simplememofast.com/compose">
+<title>シンプルメモを開く / Open Simple Memo</title>
+<style>
+body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 480px; margin: 40px auto; padding: 20px; color: #1c1c1e; }
+h1, h2 { font-size: 22px; margin: 16px 0; }
+h2 { font-size: 18px; color: #1c1c1e; }
+.btn { display: block; padding: 14px 24px; border-radius: 8px; text-align: center; text-decoration: none; margin: 12px 0; font-weight: 600; }
+.btn-primary { background: #007AFF; color: white; }
+.btn-secondary { background: #f0f0f0; color: #007AFF; }
+.lang-divider { margin: 32px 0; border-top: 1px solid #eee; }
+.note { color: #666; font-size: 14px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h1>シンプルメモで書く</h1>
+<p class="note">アプリを開いて、新しいメモを書き始めましょう。</p>
+
+<a id="appLinkJa" class="btn btn-primary" href="#">アプリで開く</a>
+<a class="btn btn-secondary" href="https://apps.apple.com/jp/app/id6758438948">App Store からダウンロード</a>
+
+<div class="lang-divider"></div>
+
+<h2>Write in Simple Memo</h2>
+<p class="note">Open the app and start writing a new memo.</p>
+
+<a id="appLinkEn" class="btn btn-primary" href="#">Open in app</a>
+<a class="btn btn-secondary" href="https://apps.apple.com/us/app/id6758438948">Download on App Store</a>
+
+<script>
+(function () {
+  // Bounce-into-app pattern: the two "アプリで開く / Open in app" buttons
+  // re-link to this page's own URL. If the device has the app installed
+  // and AASA matches, iOS intercepts the navigation and routes to the
+  // app. If not, the user stays on this page and can tap the secondary
+  // App Store button.
+  var here = window.location.href;
+  document.getElementById('appLinkJa').setAttribute('href', here);
+  document.getElementById('appLinkEn').setAttribute('href', here);
+})();
+</script>
+</body>
+</html>
