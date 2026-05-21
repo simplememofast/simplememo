@@ -2263,6 +2263,86 @@ section {
 }
 
 /* ============================================================
+   FAQ cards — enforce cream card design site-wide
+
+   149 pages ship a minimal inline `.faq-item{border-bottom}` /
+   `.faq-summary{padding:1rem 0}` CSS block that overrides the
+   rich card design in this file. The result is a thin underline
+   list that doesn't read like a card on the cream surface.
+
+   These rules use !important to win over the per-page inline
+   <style> (which loads after this file in source order).
+   ============================================================ */
+.faq-item {
+  border-bottom: none !important;
+  margin-bottom: 12px !important;
+}
+.faq-item .faq-details {
+  background: var(--surface-elevated) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s !important;
+}
+.faq-item .faq-details:hover {
+  border-color: var(--border-highlight) !important;
+  box-shadow: 0 4px 16px -6px rgba(60, 40, 20, 0.10) !important;
+}
+.faq-item .faq-details[open] {
+  border-color: var(--border-highlight) !important;
+  box-shadow: 0 8px 24px -6px rgba(60, 40, 20, 0.14) !important;
+}
+.faq-item .faq-summary {
+  padding: 18px 22px !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  cursor: pointer;
+  list-style: none;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  line-height: 1.5 !important;
+}
+.faq-item .faq-summary::after {
+  content: '+' !important;
+  flex-shrink: 0 !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  border: 1px solid var(--border-highlight) !important;
+  background: var(--surface-raised) !important;
+  color: var(--accent) !important;
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  transition: transform 0.25s, background 0.25s, color 0.25s !important;
+}
+.faq-item .faq-details[open] .faq-summary::after {
+  transform: rotate(45deg) !important;
+  background: var(--accent) !important;
+  color: #fffdf7 !important;
+  border-color: var(--accent) !important;
+}
+.faq-item .faq-answer {
+  padding: 4px 22px 18px !important;
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.85 !important;
+}
+.faq-item .faq-answer p {
+  margin-bottom: 10px;
+}
+.faq-item .faq-answer p:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================================
    Article footer sections (References, Related Content)
    These blocks are appended outside the article's container on
    many pages (149+), so without an explicit width they span the
