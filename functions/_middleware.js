@@ -23,8 +23,11 @@
 //
 //   1. Strip any `?lang=*` query parameter. The site does not use this
 //      parameter — locale is determined by path (`/en/*` for EN, root for
-//      JA). robots.txt already has `Disallow: /*?lang=` for well-behaved
-//      crawlers; the 301 catches the rest (AI bots and legacy backlinks).
+//      JA). This 301 is the SOLE handler for `?lang=`: robots.txt
+//      deliberately does NOT Disallow it, because a robots block would
+//      stop Googlebot from ever fetching the URL and therefore from ever
+//      seeing this redirect (it would just sit in GSC as "blocked by
+//      robots.txt" instead of being dropped from the index).
 //
 //   2. Strip `.html` from `/blog/*.html` URLs only. The blog directory's
 //      canonical form is extension-less. Root-level pages such as

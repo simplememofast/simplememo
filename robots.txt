@@ -154,17 +154,24 @@ Disallow: /
 User-agent: *
 Allow: /
 Disallow: /admin/
-# Don't index URLs with tracking / referral / legacy-language parameters.
+# Don't index URLs with tracking / referral parameters.
 # All of these resolve to the same content as the canonical (clean) URL,
 # so crawling them just wastes budget and creates "alternate page" entries
 # in Search Console (GSC: 代替ページ・適切な canonical タグあり).
 Disallow: /*?utm_*
 Disallow: /*?fbclid=
 Disallow: /*?gclid=
-Disallow: /*?lang=
 Disallow: /*?ref=
 Disallow: /*?from=
 Disallow: /*?source=
+#
+# NOTE: ?lang= is deliberately NOT Disallowed. functions/_middleware.js
+# 301-redirects every ?lang= URL to its clean canonical — a stronger dedup
+# signal than a robots block, since Google drops the variant from the index
+# entirely once it sees the 301. A Disallow rule would stop Googlebot from
+# ever fetching the URL, so it could never reach the redirect — which is
+# exactly what produced the "blocked by robots.txt" GSC report (72 pages,
+# first detected 2026-05-09). Rule removed 2026-05-22 to let the 301 work.
 
 # ======================================================================
 # Sitemap + AI-readable site summary
