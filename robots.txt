@@ -3,7 +3,8 @@
 # (17 user-agents across 11 vendors) so Simple Memo - Captio-style can be cited in
 # AI Overviews, Perplexity, Gemini, Copilot, ChatGPT, Le Chat, Apple
 # Intelligence, etc. Pure-training scrapers with no answer-engine
-# surface are blocked. Admin paths are blocked across the board.
+# surface are blocked. /admin/ and /docs/ (internal SEO strategy notes +
+# the backlink disavow file) are blocked across the board for all crawlers.
 #
 # Last reviewed: 2026-05-20
 # Companion file: /llms.txt (citation guidelines + authoritative-page map)
@@ -17,43 +18,51 @@
 User-agent: GPTBot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # ChatGPT-User: on-demand fetch when a ChatGPT user clicks/cites a URL.
 User-agent: ChatGPT-User
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # OAI-SearchBot: ChatGPT Search index crawler.
 User-agent: OAI-SearchBot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Anthropic (3) ------------------------------------------------------
 # ClaudeBot: training crawler for Claude family.
 User-agent: ClaudeBot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # anthropic-ai: legacy / general Anthropic fetcher.
 User-agent: anthropic-ai
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # Claude-Web: Claude on-demand web fetch when a user cites a URL.
 User-agent: Claude-Web
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Perplexity (2) -----------------------------------------------------
 # PerplexityBot: Perplexity index crawler.
 User-agent: PerplexityBot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # Perplexity-User: on-demand fetch when a Perplexity user asks a query.
 User-agent: Perplexity-User
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Google (1) ---------------------------------------------------------
 # Google-Extended: opt-in token for Gemini training AND Google AI
@@ -62,6 +71,7 @@ Disallow: /admin/
 User-agent: Google-Extended
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Microsoft (1) ------------------------------------------------------
 # Bingbot: powers Bing search, Microsoft Copilot, AND the index that
@@ -70,17 +80,20 @@ Disallow: /admin/
 User-agent: Bingbot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Apple (2) ----------------------------------------------------------
 # Applebot: Spotlight / Siri Suggestions / Safari quick answers.
 User-agent: Applebot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # Applebot-Extended: opt-in for Apple Intelligence training.
 User-agent: Applebot-Extended
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- DuckDuckGo (1) -----------------------------------------------------
 # DuckDuckBot: also feeds DuckDuckGo AI Chat (which routes to GPT-4o /
@@ -88,6 +101,7 @@ Disallow: /admin/
 User-agent: DuckDuckBot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Meta (1) -----------------------------------------------------------
 # meta-externalagent: Meta AI search-context fetcher (powers Meta AI
@@ -96,24 +110,28 @@ Disallow: /admin/
 User-agent: meta-externalagent
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Mistral (1) --------------------------------------------------------
 # MistralAI-User: Le Chat on-demand web fetch.
 User-agent: MistralAI-User
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- Cohere (1) ---------------------------------------------------------
 # cohere-ai: Cohere RAG retrieval / Cohere Command web grounding.
 User-agent: cohere-ai
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # --- You.com (1) --------------------------------------------------------
 # YouBot: You.com answer engine index.
 User-agent: YouBot
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 
 # ======================================================================
 # Note on xAI / Grok
@@ -154,6 +172,7 @@ Disallow: /
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /docs/
 # Don't index URLs with tracking / referral parameters.
 # All of these resolve to the same content as the canonical (clean) URL,
 # so crawling them just wastes budget and creates "alternate page" entries
