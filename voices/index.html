@@ -56,7 +56,7 @@
 
   <!-- JSON-LD: WebPage -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/voices/#webpage","name":"ユーザーの声 — 初期テスターからいただいたフィードバック","description":"Captio式シンプルメモの初期テスターから匿名でお寄せいただいたフィードバックの要約。良かった点・気になった点・ご要望と、それぞれへの対応をまとめました。","url":"https://simplememofast.com/voices/","inLanguage":"ja","datePublished":"2026-05-20","dateModified":"2026-05-21","publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Captio式シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".voice-card__paraphrase"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/voices/#webpage","name":"ユーザーの声 — 初期テスターからいただいたフィードバック","description":"Captio式シンプルメモの初期テスターから匿名でお寄せいただいたフィードバックの要約。良かった点・気になった点・ご要望と、それぞれへの対応をまとめました。","url":"https://simplememofast.com/voices/","inLanguage":"ja","datePublished":"2026-05-20","dateModified":"2026-05-25","publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Captio式シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".voice-card__paraphrase"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
 
   <!-- JSON-LD: Organization -->
@@ -462,6 +462,17 @@
               <span data-lang="en"><strong>A discovered use case:</strong> "It's an easy way to get text from iPhone to a Windows PC — there are real situations where this beats the alternatives." The flow is: write on iPhone → send to your own email → open the message on the PC's mail client → copy the text. Effectively a cross-platform clipboard.<br><strong>Context:</strong> Apple's Universal Clipboard only works between devices on the same Apple ID, so the iPhone-to-Windows / -Linux / -ChromeOS gap is a real one. By keeping the app's job to "write a memo to your own email," we inherit email's <strong>cross-platform reach</strong> for free — any device that receives your email becomes a paste target. We hadn't been explicit about this use case in our copy; thanks to testers discovering it independently, we're adding it to the <a href="/use-cases/" style="color:var(--accent)">use-case gallery</a>.</span>
             </div>
           </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🌙 「日中の思いつきを夜に確認できる、メールベースの良さ」</span>
+              <span data-lang="en">🌙 "Catch the day's stray thoughts at night — the email-as-inbox win"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>使い方の発見</strong>：「メールボックスを必ずチェックする習慣があるので、夜寝る前までに日中思いついたことをメールで確認できる」というお声をいただきました。メモアプリは開かない日があっても、メールは毎日見る — その<strong>毎日の動線</strong>に乗せられること自体が価値である、というシナリオです。<br><strong>設計とのつながり</strong>：本アプリが「自分宛てメール」を出力先に固定している理由のひとつは、まさにこの「すでに通っている動線に重ねる」発想です。アプリを毎日開く必要がない代わりに、すでに通っているメールという経路に思考のかけらが流れ込むので、「メモした事実を思い出すコスト」が要りません。<a href="/use-cases/" style="color:var(--accent)">活用事例集</a> にも追記検討中。</span>
+              <span data-lang="en"><strong>A discovered workflow:</strong> "Because I always check my inbox, by the time I'm winding down at night I get to revisit whatever crossed my mind during the day — that alone makes this useful." Memo apps often go unopened for days; email gets checked daily. Riding on that <strong>existing daily path</strong> is the value, not the app itself.<br><strong>How it connects to the design:</strong> One reason we pin the output to "your own email" is exactly this — overlap with a path you're already walking. You don't have to remember to open the app; the thought already arrives where you'll see it. Adding this scenario to the <a href="/use-cases/" style="color:var(--accent)">use-case gallery</a> too.</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -514,6 +525,17 @@
             <div class="reason-card__desc">
               <span data-lang="ja"><strong>ご報告</strong>：初回ウェルカム時に届くメモに「検索すればいつでも戻ってこられる」とあるが、検索機能がアプリ側かメール側か迷い、アプリ内で検索を探してしまったというご報告。さらに、メールに届いたメモから<strong>アプリへ戻る動線がない</strong>ため、メール→アプリの導線が無いことに気づいた、という声もいただきました。<br><strong>現状の設計</strong>：「検索」が指しているのは<strong>メールクライアント側</strong>（Gmail/Apple Mailなどの検索）です。本アプリは「投げ込み」に役割を絞り、「整理・検索」は普段使い慣れているメールクライアントに委ねる方針です。<br><strong>対応</strong>：表現が誤解を招きやすいというご指摘はその通りで、初回案内の文言を「お使いのメールクライアントで検索」と明示する形に改善を検討中。アプリ内履歴一覧も過去メモを見返す手段として存在しますが、初回案内での説明が不足しているため、こちらも併せて改善予定。詳しくは <a href="/faq" style="color:var(--accent)">FAQ</a> や <a href="/blog/email-management-tips" style="color:var(--accent)">メール管理のコツ</a> もご参照ください。</span>
               <span data-lang="en"><strong>What testers reported:</strong> The welcome memo says "you can always come back via search," but the wording was ambiguous: testers wondered whether "search" meant the app or the email client, and ended up looking for a search bar inside the app. They also noticed there's no link from the delivered email back to the app, which compounded the confusion.<br><strong>Current design:</strong> "Search" here refers to your <strong>email client</strong> (Gmail / Apple Mail / etc.). Simple Memo deliberately scopes itself to "capture," and outsources "organize / search" to the email client you already use every day.<br><strong>What we're changing:</strong> The wording is genuinely misleading, and we plan to make the welcome copy explicit — something like "search in your email client." The in-app history list also lets you revisit past memos, but onboarding doesn't currently surface it well; both will be improved. See the <a href="/faq" style="color:var(--accent)">FAQ</a> and <a href="/blog/email-management-tips" style="color:var(--accent)">email management tips</a> for the current workflow.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">⌨️ 「登録画面でキーボードに入力欄が隠れることがある」</span>
+              <span data-lang="en">⌨️ "Email field can be hidden by the keyboard on sign-up"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>ご報告</strong>：登録画面でメールアドレス欄をタップした際、キーボードに入力欄が隠れてしまうケースがあるというご報告。何度か試すと見えたり見えなかったりして、表示位置が不安定に感じる、というお声でした。<br><strong>原因</strong>：iOS のキーボード回避ロジック（ScrollView の inset 調整、SafeArea / keyboardLayoutGuide の制約）がフォーカス時に揃っていなかったことが原因。アクティブな入力欄が画面下に潜るケースが残っていました。<br><strong>対応予定</strong>：次回のマイナーアップデートで改修予定。フォーカス時に該当フィールドが必ずキーボード上にくるよう、スクロール挙動を明示的に揃える方針です。ご報告ありがとうございました。</span>
+              <span data-lang="en"><strong>What testers reported:</strong> On the sign-up screen, tapping the email field sometimes leaves it hidden behind the keyboard. Retrying can show it correctly — the focus position felt unstable.<br><strong>Cause:</strong> Incomplete keyboard-avoidance behavior — the ScrollView insets and SafeArea / <code>keyboardLayoutGuide</code> constraints weren't aligned on focus, so the active field could land below the keyboard.<br><strong>What we're doing:</strong> Slated for the next minor UI-fix release. On focus, the field will be explicitly scrolled to sit above the keyboard. Thanks for the report.</span>
             </div>
           </div>
         </div>
@@ -601,6 +623,28 @@
             <div class="reason-card__desc">
               <span data-lang="ja"><strong>ご要望</strong>：「最近メモを書くと何でもAIに入れる癖があるので、AIに渡すための動線がほしい。それが課金機能になるのか、これから付くのか、現状では分からなかった」というお声。<br><strong>現在の答え</strong>：本アプリ単体には現時点で AI 機能は載っていません。AI への渡し方は「メール経由で AI クライアントに転送・コピペ」または「履歴からコピー → ChatGPT / Claude / Gemini に貼り付け」という外部連携を想定しています。これは <a href="/blog/ai-vs-simple-memo" style="color:var(--accent)">ブログ「AI とメモアプリの違い」</a> や <a href="/blog/chatgpt-memo-workflow" style="color:var(--accent)">ChatGPT 連携ワークフロー</a> にもまとめています。<br><strong>今後の対応</strong>：Theme 3 のもうひとつのカード「履歴からの部分コピー」と密接に関連するご要望です。AI 連携の動線（履歴からワンタップで AI に渡す、共有シート経由など）はロードマップ検討中。課金/無料の切り分けは未定。具体的なユースケース（どのAIに、何をどう渡したいか）があれば <a href="/contact" style="color:var(--accent)">お問い合わせ</a> からお聞かせください。</span>
               <span data-lang="en"><strong>The request:</strong> "I've gotten into the habit of piping every memo into an AI chat, so I'd love a clearer entry point — whether it'll be a paid feature or land later, I couldn't tell from the current UI."<br><strong>Our current answer:</strong> Simple Memo doesn't include built-in AI features today. The intended pattern is "email → forward/paste into your AI client" or "tap-copy from history → paste into ChatGPT / Claude / Gemini." See <a href="/blog/ai-vs-simple-memo" style="color:var(--accent)">"AI vs. memo apps"</a> and <a href="/blog/chatgpt-memo-workflow" style="color:var(--accent)">"ChatGPT memo workflow"</a> for the current playbook.<br><strong>Next steps:</strong> This connects directly to the "partial copy from history" card above. A clear AI hand-off (one-tap from history, system share sheet, etc.) is on the roadmap. Paid vs. free tier split is TBD. If you have a specific use case (which AI, what data, what action), please share via <a href="/contact" style="color:var(--accent)">contact</a>.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🔎 「アプリ内の履歴に検索機能が欲しい」</span>
+              <span data-lang="en">🔎 "Add in-app search across history"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>ご要望</strong>：「送付したメールが履歴として残るのは、後から振り返れて貴重。検索等で簡単に探せるようになると、使い込んでいく満足度が高まる」というお声。<br><strong>現在の考え</strong>：当初は「整理・検索」をメールクライアント側に委ねる設計でした（Gmail の検索演算子は非常に強力）。ただ、アプリ内で「自分が書いたメモの一覧」をその場で振り返りたいというニーズは別軸のものとして、確かに存在することに気付かされました。Theme 2 の「『検索すればいつでも戻れる』が分かりづらかった」が welcome 文言の話だったのに対し、こちらは <strong>in-app での検索 UI 追加</strong>のご要望です。<br><strong>今後の対応</strong>：履歴一覧へのインクリメンタル検索（タイトル + 本文）の追加を検討中。ロードマップに入れました。希望される具体的な仕様（検索範囲、日付フィルタの有無など）があれば <a href="/contact" style="color:var(--accent)">お問い合わせ</a> からお聞かせください。</span>
+              <span data-lang="en"><strong>The request:</strong> "Sent emails staying as history is valuable — being able to look back on them later. Adding search would deepen the satisfaction as the archive grows."<br><strong>Our current thinking:</strong> Initially we outsourced "organize / search" to your mail client (Gmail's operators are powerful). But "I want to glance over my own captures, right here in the app" is a different need — and a real one. The Theme 2 card about welcome-copy ambiguity was about wording; this is specifically about adding an <strong>in-app search UI</strong>.<br><strong>Next steps:</strong> Incremental search over the history list (title + body) is on the roadmap. If you have specific wishes (scope, date filters, etc.), please share via <a href="/contact" style="color:var(--accent)">contact</a>.</span>
+            </div>
+          </div>
+
+          <div class="reason-card">
+            <div class="reason-card__title">
+              <span data-lang="ja">🧭 「送信ボタンと設定アイコンの配置を見直しては？」</span>
+              <span data-lang="en">🧭 "Reconsider the send / settings button placement"</span>
+            </div>
+            <div class="reason-card__desc">
+              <span data-lang="ja"><strong>ご要望</strong>：複数の方から配置に関するご指摘をいただきました。「送信ボタンは右上よりキーボードのすぐ上にある方が押しやすい（LINE やチャット系 AI に慣れている）」「右上には設定を置き、左上は履歴だけにすると、それぞれの入口が分かりやすい」「設定アイコンの場所が一瞬どこか迷う」など、操作導線をシンプルに整理してほしい、という方向性のご提案です。<br><strong>現在の考え</strong>：旧 Captio が培った「右上＝送信」というメンタルモデルを継承していますが、近年のチャット UI（Messenger、ChatGPT、Claude など）は <strong>キーボード直上の送信ボタン</strong> が主流。ユーザー世代や普段使うアプリによって最適解が分かれる領域です。一方で、設定アイコンが見つけづらいというご指摘は配置とは別問題で、視認性を高める余地があります。<br><strong>今後の対応</strong>：(1) 送信ボタン位置のカスタマイズ（右上 or キーボード上）、(2) 左上＝履歴／右上＝設定 の役割を視覚的に明確化、の 2 点を検討中。見た目のシンプルさを保ったまま、入れ替えの仕組みを設計します。具体的な好みがあれば <a href="/contact" style="color:var(--accent)">お問い合わせ</a> からお聞かせください。</span>
+              <span data-lang="en"><strong>The request:</strong> Several testers suggested rethinking button placement — "the send button feels more reachable just above the keyboard (we're used to that from LINE and ChatGPT-style apps) rather than top-right," "if send moves down, put settings top-right and keep history alone in the top-left so each entry point is obvious," and "the settings icon location takes a beat to find."<br><strong>Our current thinking:</strong> The classic Captio model put send in the top-right, which we inherited. But modern chat UIs (Messenger, ChatGPT, Claude) place send <strong>directly above the keyboard</strong>, and that's the muscle memory of newer users. The right answer likely varies by user. The "settings icon is hard to find" point, though, is a separate visibility issue we can improve regardless.<br><strong>Next steps:</strong> (1) A settings toggle for send-button placement (top-right vs. above-keyboard), and (2) clarifying the visual roles of top-left = history / top-right = settings. The goal is to keep the spare look while making the swap learnable. Share specific preferences via <a href="/contact" style="color:var(--accent)">contact</a>.</span>
             </div>
           </div>
         </div>
