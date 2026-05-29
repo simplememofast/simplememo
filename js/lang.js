@@ -10,6 +10,15 @@
   const DEFAULT_LANG = 'ja';
   const SUPPORTED_LANGS = ['ja', 'en'];
 
+  // The language the server actually rendered this page in. The static
+  // <title>/<meta name="description">/<meta property="og:title"> are written
+  // for THIS language and are the SEO-canonical, hand-tuned versions. We must
+  // NOT overwrite them from .meta-template when the active language equals the
+  // served language — doing so silently reverts the canonical <title> to the
+  // (often staler) template copy at runtime. Captured once at parse time,
+  // before applyLang() mutates document.documentElement.lang.
+  const SERVED_LANG = (document.documentElement.getAttribute('lang') || DEFAULT_LANG);
+
   /**
    * Get language from URL query parameter
    */
@@ -105,8 +114,12 @@
       }
     });
 
-    // Update document title and meta info from hidden templates
-    const metaSource = document.querySelector(`.meta-template[data-lang="${lang}"]`);
+    // Update document title and meta info from hidden templates.
+    // Only when switching AWAY from the served language — otherwise we keep the
+    // server-rendered (SEO-canonical) <title>/<meta> instead of clobbering them.
+    const metaSource = (lang === SERVED_LANG)
+      ? null
+      : document.querySelector(`.meta-template[data-lang="${lang}"]`);
     if (metaSource) {
       // Title
       const title = metaSource.querySelector('.meta-title');
