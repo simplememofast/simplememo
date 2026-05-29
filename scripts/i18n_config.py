@@ -38,6 +38,16 @@ JA_EN_PAIRS = [
     ("/blog/best-memo-apps-2026",            "/en/blog/best-memo-apps-2026"),
     ("/vs/notion-vs-obsidian/",              "/en/vs/notion-vs-obsidian/"),
     ("/vs/notion-vs-evernote/",              "/en/vs/notion-vs-evernote/"),
+    ("/vs/google-keep-vs-apple-notes/",      "/en/vs/google-keep-vs-apple-notes/"),
+    ("/vs/obsidian/",                        "/en/vs/obsidian/"),
+    ("/vs/notion/",                          "/en/vs/notion/"),
+    ("/vs/evernote/",                        "/en/vs/evernote/"),
+    ("/vs/apple-notes/",                     "/en/vs/apple-notes/"),
+    ("/vs/google-keep/",                     "/en/vs/google-keep/"),
+    ("/vs/note-to-self-mail/",               "/en/vs/note-to-self-mail/"),
+    ("/vs/email-me-app/",                    "/en/vs/email-me-app/"),
+    ("/vs/mail-to-self/",                    "/en/vs/mail-to-self/"),
+    ("/vs/drafts/",                          "/en/vs/drafts/"),
 ]
 # x-default for ja-en pairs points to the JA url (current site convention).
 JA_EN_XDEFAULT = "ja"  # "ja" or "en"
