@@ -40,6 +40,8 @@ SHARED_JA_EN = {
         "After Captio shut down, built Simple Memo — focused on a 0.3-second launch "
         "and memo-to-email — and stands by privacy-first design (AES-GCM encryption, "
         "zero server-side storage).",
+    # EN content sometimes references the brand by its JA name inline.
+    "Captio式シンプルメモ": EN_BRAND,
     "プロフィール": "Profile",
     "メインナビゲーション": "Main navigation",
     "メニュー": "Menu",
