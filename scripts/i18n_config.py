@@ -36,6 +36,8 @@ JA_EN_PAIRS = [
     ("/terms",                              "/en/terms"),
     ("/blog/ios-quick-capture-comparison",  "/en/blog/ios-quick-capture-comparison"),
     ("/blog/best-memo-apps-2026",            "/en/blog/best-memo-apps-2026"),
+    ("/vs/notion-vs-obsidian/",              "/en/vs/notion-vs-obsidian/"),
+    ("/vs/notion-vs-evernote/",              "/en/vs/notion-vs-evernote/"),
 ]
 # x-default for ja-en pairs points to the JA url (current site convention).
 JA_EN_XDEFAULT = "ja"  # "ja" or "en"
