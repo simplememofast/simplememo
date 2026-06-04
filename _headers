@@ -19,10 +19,10 @@
 /*.js
   Cache-Control: public, max-age=604800
 
-# Per-locale HTML edge caching for /en/* (i18n Phase 3).
-# Browser revalidates hourly; Cloudflare edge serves for up to 1 day.
-/en/*
-  Cache-Control: public, max-age=3600, s-maxage=86400, must-revalidate
+# Note: /en/* intentionally has NO Cache-Control override here. Cloudflare
+# Pages _headers is additive (it appended to the /* rule, producing a
+# duplicate/malformed Cache-Control). /en/* now inherits the single clean
+# /* rule. For dedicated edge TTL, use a Cloudflare Cache Rule (dashboard).
 
 # Sitemaps: enforce XML content type so Bing/Search Console accept them.
 /sitemap.xml
