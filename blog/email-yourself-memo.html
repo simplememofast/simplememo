@@ -424,7 +424,7 @@
           <div class="app-card__desc">
             <p>「自分にメールでメモを送る」に完全特化したアプリです。起動0.3秒で即座に入力画面が表示され、メモを書いて送信ボタンをタップするだけ。宛先入力、件名入力は一切不要。初回設定でメールアドレスを登録すれば、あとはワンタップ送信のみ。</p>
             <p style="margin-top:.75rem">オフライン対応（圏外でもメモを書いて送信キューに保存、通信回復後に自動送信）、AES-GCM暗号化（端末内のキューデータを保護）、サーバーにデータを保持しない設計など、セキュリティ面でも手動メール送信より優れています。</p>
-            <p style="margin-top:.75rem">無料プランで1日3通まで送信可能。有料プラン（月額500円）で無制限送信と7日間の無料トライアル付き。</p>
+            <p style="margin-top:.75rem">無料プランで1日3通まで（ずっと無料）送信可能。有料プラン（月額500円）で無制限送信になります。</p>
           </div>
           <div class="app-card__meta"><span class="app-card__pros">強み: 0.3秒起動、ワンタップ送信、オフライン暗号化</span><span class="app-card__cons">弱み: iOS専用、有料プランあり</span></div>
         </div>
@@ -510,7 +510,7 @@
           <div class="app-card__desc">
             <p>An app built specifically for emailing memos to yourself. Launches in 0.3 seconds with the input field immediately focused. Type your memo, tap Send -- done. No recipient field, no subject line. Set your email address once, and it's one-tap sending forever after.</p>
             <p style="margin-top:.75rem">Offline support (write and queue memos without connectivity, auto-send on reconnect), AES-GCM encryption (protects queued data on-device), and zero server retention make it more secure than manual email sending.</p>
-            <p style="margin-top:.75rem">Free tier allows 3 sends/day. Premium ($4/month) unlocks unlimited sending with a 7-day free trial.</p>
+            <p style="margin-top:.75rem">Free tier allows 3 sends/day, free forever. Premium ($4/month) unlocks unlimited sending.</p>
           </div>
           <div class="app-card__meta"><span class="app-card__pros">Strengths: 0.3s launch, one-tap send, offline encryption</span><span class="app-card__cons">Weaknesses: iOS-only, paid tier</span></div>
         </div>
@@ -768,14 +768,14 @@
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Gmailの「自分に送信」は迷惑メールに分類されませんか？</summary><div class="faq-answer"><p>Obsidian連携シンプルメモ経由で送信されたメモは、Cloudflare Workers + Resend APIを使用しており、SPF/DKIM/DMARC認証済みのため、通常は迷惑メールに分類されません。万が一迷惑メールフォルダに入った場合は、「迷惑メールでない」とマークすることで、以降は正常に受信箱に届くようになります。手動でGmailから自分に送る場合は、もちろん迷惑メールにはなりません。</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Outlookでも使えますか？</summary><div class="faq-answer"><p>はい、Obsidian連携シンプルメモはOutlook（Microsoft 365、Outlook.com）に完全対応しています。メールの送信先として自分のOutlookアドレスを設定するだけでOKです。詳しい設定方法は<a href="/guides/outlook/" style="color:var(--accent)">Outlook設定ガイド</a>をご覧ください。Outlookの仕分けルールと組み合わせれば、Obsidian連携シンプルメモからのメモを自動的に専用フォルダに振り分けることも可能です。</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">オフラインで書いたメモはいつ送信されますか？</summary><div class="faq-answer"><p>Obsidian連携シンプルメモでオフライン時に書いたメモは、端末内のキューにAES-GCM暗号化された状態で保存されます。Wi-Fiやモバイルデータ通信が回復した時点で、自動的にバックグラウンドで送信されます。通常、通信回復後10秒以内に送信が完了します。キュー内のメモは送信完了まで端末内に安全に保持されます。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料プランの制限は何ですか？</summary><div class="faq-answer"><p>無料プランでは1日3通までメモを送信できます。3通で足りない場合は、有料プラン（月額500円）にアップグレードすると無制限に送信可能です。7日間の無料トライアル付きなので、まずは試してみてください。なお、オフラインキューと暗号化は無料プランでも利用できます。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料プランの制限は何ですか？</summary><div class="faq-answer"><p>無料プランでは1日3通までメモを送信できます。3通で足りない場合は、有料プラン（月額500円）にアップグレードすると無制限に送信可能です。無料プランは1日3通までずっと無料なので、まずは試してみてください。なお、オフラインキューと暗号化は無料プランでも利用できます。</p></div></details></div>
       </div>
 
       <div data-lang="en">
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Will Gmail mark self-sent emails as spam?</summary><div class="faq-answer"><p>Memos sent via Simple Memo - for Obsidian use Cloudflare Workers + Resend API with full SPF/DKIM/DMARC authentication, so they typically land in your inbox, not spam. If a memo does end up in spam, marking it "Not spam" once will train Gmail to deliver future memos correctly. When sending manually from Gmail to yourself, spam classification is never an issue.</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does this work with Outlook?</summary><div class="faq-answer"><p>Yes, Simple Memo - for Obsidian fully supports Outlook (Microsoft 365 and Outlook.com). Just set your Outlook address as the delivery destination. See our <a href="/guides/outlook/" style="color:var(--accent)">Outlook Setup Guide</a> for details. You can also combine Simple Memo - for Obsidian with Outlook's inbox rules to auto-sort memos into a dedicated folder.</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">When are offline memos actually sent?</summary><div class="faq-answer"><p>Memos written offline are stored in an AES-GCM encrypted queue on your device. When Wi-Fi or cellular connectivity is restored, they're automatically sent in the background -- typically within 10 seconds of reconnection. Queued memos remain safely encrypted on-device until delivery is confirmed.</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What are the free plan limits?</summary><div class="faq-answer"><p>The free plan allows 3 memo sends per day. If you need more, the premium plan ($4/month) unlocks unlimited sending. It comes with a 7-day free trial, so you can test the full experience risk-free. Offline queuing and encryption are available on the free plan as well.</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What are the free plan limits?</summary><div class="faq-answer"><p>The free plan allows 3 memo sends per day, free forever. If you need more, the premium plan ($4/month) unlocks unlimited sending. You can test the full experience risk-free on the free plan. Offline queuing and encryption are available on the free plan as well.</p></div></details></div>
       </div>
     </section>
 
@@ -859,7 +859,7 @@
     <!-- CTA Box -->
     <div class="cta-box">
       <div class="cta-box__title"><span data-lang="ja">「自分にメール」を10倍速くする</span><span data-lang="en">Email yourself 10x faster</span></div>
-      <div class="cta-box__desc"><span data-lang="ja">0.3秒起動 + ワンタップ送信 + オフライン暗号化。Gmail、Outlook、iCloudメール対応。7日間の無料トライアル付き。</span><span data-lang="en">0.3s launch + one-tap send + offline encryption. Works with Gmail, Outlook, and iCloud Mail. 7-day free trial included.</span></div>
+      <div class="cta-box__desc"><span data-lang="ja">0.3秒起動 + ワンタップ送信 + オフライン暗号化。Gmail、Outlook、iCloudメール対応。ダウンロードは無料。</span><span data-lang="en">0.3s launch + one-tap send + offline encryption. Works with Gmail, Outlook, and iCloud Mail. Free to download.</span></div>
       <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=blog-email-yourself-memo-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
       <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=blog-email-yourself-memo-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
     </div>
