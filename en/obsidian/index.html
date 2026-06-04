@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/obsidian/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>Obsidian Integration — Auto-append iPhone Notes to Obsidian | Simple Memo - for Obsidian</title>
+  <meta name="description" content="Simple Memo's Obsidian integration auto-appends the notes you send to your Obsidian vault on iCloud Drive. No plugin, no app switching — timestamped lines land in your daily note or Inbox note in the background. Set up in about a minute.">
+  <meta name="theme-color" content="#F5F1E8">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian Integration — Auto-append iPhone Notes to Obsidian | Simple Memo - for Obsidian">
+  <meta property="og:description" content="Auto-append the notes you send to your Obsidian daily note or Inbox note. No plugin, no app switching, in the background. Your iPhone sparks flow straight into your PKM.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-05-30T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/en/obsidian/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-banner.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian Integration — Auto-append iPhone Notes to Obsidian | Simple Memo - for Obsidian">
+  <meta name="twitter:description" content="Auto-append the notes you send to your Obsidian notes. No plugin, no app switching, in the background.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-banner.jpg">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <meta http-equiv="content-language" content="en">
+  <link rel="canonical" href="https://simplememofast.com/en/obsidian/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/obsidian/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/obsidian/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/obsidian/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://simplememofast.com/en/"},
+      {"@type": "ListItem", "position": 2, "name": "Obsidian Integration", "item": "https://simplememofast.com/en/obsidian/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/obsidian/#article","inLanguage":"en","headline":"Obsidian Integration — Auto-append iPhone Notes to Obsidian","description":"Simple Memo's Obsidian integration auto-appends the notes you send to your Obsidian vault on iCloud Drive. No plugin, no app switching — timestamped lines land in your daily note or Inbox note in the background.","url":"https://simplememofast.com/en/obsidian/","datePublished":"2026-05-30","dateModified":"2026-05-30","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256}},"image":"https://simplememofast.com/assets/img/og/obsidian-banner.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/obsidian/"}}</script>
+
+  <!-- JSON-LD: HowTo (setup) -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","@id":"https://simplememofast.com/en/obsidian/#howto","inLanguage":"en","name":"How to auto-append your iPhone notes to Obsidian","description":"Use Simple Memo's Advanced Mode to set up automatic appending of the notes you send to a note in your Obsidian vault, in about a minute.","totalTime":"PT1M","supply":[{"@type":"HowToSupply","name":"iPhone (iOS 16 or later)"},{"@type":"HowToSupply","name":"An Obsidian vault folder stored on iCloud Drive"}],"tool":[{"@type":"HowToTool","name":"Simple Memo - for Obsidian"},{"@type":"HowToTool","name":"Obsidian"}],"step":[{"@type":"HowToStep","position":1,"name":"Turn on Advanced Mode","text":"Toggle on \"Advanced Mode\" in Settings. During onboarding, choose \"Turn on\" on the \"Advanced Mode\" screen.","url":"https://simplememofast.com/en/obsidian/#step1"},{"@type":"HowToStep","position":2,"name":"Turn on Obsidian integration","text":"Toggle on the \"Obsidian Integration\" row that appears inside Advanced Mode.","url":"https://simplememofast.com/en/obsidian/#step2"},{"@type":"HowToStep","position":3,"name":"Choose your Obsidian folder","text":"Select your Obsidian vault folder on iCloud Drive. The app stores secure access to that folder.","url":"https://simplememofast.com/en/obsidian/#step3"},{"@type":"HowToStep","position":4,"name":"Pick a destination","text":"Choose to append to your \"Daily note (yyyy-MM-dd.md)\" or a fixed \"Inbox note.\"","url":"https://simplememofast.com/en/obsidian/#step4"},{"@type":"HowToStep","position":5,"name":"Send a memo","text":"From then on, each memo you send is automatically appended to the chosen note as \"- HH:mm memo.\" Obsidian doesn't open.","url":"https://simplememofast.com/en/obsidian/#step5"}]}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/obsidian/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Do I need an Obsidian plugin?","acceptedAnswer":{"@type":"Answer","text":"No. No community plugin is needed — it works with Obsidian's standard features. The app writes notes directly into your vault folder on iCloud Drive."}},{"@type":"Question","name":"Does Obsidian open every time I send a memo?","acceptedAnswer":{"@type":"Answer","text":"Not if you've selected a folder — memos are appended in the background. Only when no folder is selected does it fall back to the URL scheme, briefly opening Obsidian to append."}},{"@type":"Question","name":"Which note does it append to, and in what format?","acceptedAnswer":{"@type":"Answer","text":"It depends on your destination. The daily note appends to today's yyyy-MM-dd.md; the Inbox note appends to a fixed Inbox note. Each memo is a timestamped list line, - HH:mm memo, added one line at a time without erasing existing content."}},{"@type":"Question","name":"Does it work if I only sync with Obsidian Sync?","acceptedAnswer":{"@type":"Answer","text":"The target folder must be on iCloud Drive or \"On My iPhone\" and accessible from the Files app. An Obsidian Sync-only vault may not appear in the folder picker; in that case it falls back to the URL-scheme method."}},{"@type":"Question","name":"Can I use it on Android or a computer?","acceptedAnswer":{"@type":"Answer","text":"Simple Memo, which performs the integration, is currently an iPhone (iOS 16+) app. If you sync the target Obsidian vault via iCloud Drive or Obsidian Sync, you can open the same notes from Obsidian on Mac, iPad, and other devices."}},{"@type":"Question","name":"Are my memos stored on your servers?","acceptedAnswer":{"@type":"Answer","text":"Appending to Obsidian is a local operation that stays entirely on your device. It changes nothing about the existing send and encryption path. Memo bodies are transit-only during send and are not persistently stored on our servers."}},{"@type":"Question","name":"What happens to my regular email sending?","acceptedAnswer":{"@type":"Answer","text":"It still arrives in your email as before. Obsidian append runs as an additive step after a successful send, so email delivery and the offline Outbox queue are unaffected."}},{"@type":"Question","name":"Does it append to Obsidian even when offline?","acceptedAnswer":{"@type":"Answer","text":"Yes. With folder-direct integration, it appends to the local file in your chosen folder on the spot, so no internet is needed. Even when offline (the email is queued in the Outbox), the Obsidian note is saved locally. Syncing to other devices via iCloud happens once you're back online."}}]}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/obsidian/#webpage","inLanguage":"en","name":"Obsidian Integration — Auto-append iPhone Notes to Obsidian | Simple Memo - for Obsidian","url":"https://simplememofast.com/en/obsidian/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260521-grid2">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn,.lang-switcher__link{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em;text-decoration:none;display:inline-block}
+    .lang-switcher__btn:hover,.lang-switcher__link:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible,.lang-switcher__link:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active,.lang-switcher__link.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    /* Obsidian feature page extras */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:1.5rem 0}
+    .flow-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;font-size:.95rem;font-weight:700}
+    .flow-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-radius:10px;background:rgba(100,180,255,.10);border:1px solid rgba(100,180,255,.2);color:var(--text)}
+    .flow-arrow{color:var(--accent);font-weight:700}
+    .note-preview{margin-top:1.25rem;background:#0d1117;border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;line-height:1.9;color:#c9d1d9;overflow-x:auto}
+    .note-preview .nt-h{color:#79c0ff;font-weight:700}
+    .note-preview .nt-time{color:#6ab4ff}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn,.lang-switcher__link{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Main navigation">
+    <div class="global-nav__inner">
+      <a href="/en/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager">
+        Simple Memo - for Obsidian
+      </a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/">Guides</a></li>
+        <li><a href="/use-cases/">Use Cases</a></li>
+        <li><a href="/vs/">Compare</a></li>
+        <li><a href="/methods/">Methods</a></li>
+        <li><a href="/en/blog/">Blog</a></li>
+        <li><a href="/glossary/">Glossary</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about/">About</a></li>
+        <li><a href="/devlog/">Dev Log</a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=obsidian-en&amp;mt=8">Download</a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__link" href="/obsidian/" aria-label="日本語に切替">JA</a><a class="lang-switcher__link active" href="/en/obsidian/" aria-current="page" aria-label="Switch to English">EN</a></div>
+        <a href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=obsidian-en&amp;mt=8" class="global-nav__cta">
+          Download
+        </a>
+        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">New in v3.0</div>
+        <h1 class="lp-hero__title">Your iPhone notes, automatically in Obsidian.</h1>
+        <p class="lp-hero__sub">Capture with one tap the moment an idea strikes. That note is automatically appended to a note in your Obsidian vault — <strong>no plugin, no app switching, in the background</strong>, and it <strong>saves locally even with no internet (offline OK)</strong>. Capture on iPhone, organize in Obsidian: a clean division of labor.</p>
+        <div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+          <a href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=obsidian-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+            <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="eager">
+          </a>
+          <a href="#setup" class="hero-cta-secondary" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(100,180,255,.25);border-radius:24px;color:var(--accent);text-decoration:none;font-size:.9rem;">
+            See setup steps
+          </a>
+        </div>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a>
+        </p>
+      </div>
+
+      <!-- Answer-first definition (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title">In one sentence</div>
+          <p><strong>Simple Memo's Obsidian integration</strong> automatically <strong>appends the notes you send</strong> to a note in your Obsidian vault stored on iCloud Drive. No community plugin needed. Pick a folder once, and from then on every memo is recorded — line by line as <code>- HH:mm memo</code> — into <strong>today's daily note or a fixed Inbox note</strong>, in the background, without ever opening Obsidian.</p>
+        </div>
+      </section>
+
+      <!-- What you get -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">What this changes</h2>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">💡 Never lose a thought</div>
+            <div class="reason-card__desc">
+              Ideas vanish while you're deciding which Obsidian note to open. With Simple Memo you capture in a 0.3-second launch and send — then it piles up in Obsidian on its own.
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🗂️ Split capture from curation</div>
+            <div class="reason-card__desc">
+              Catch it fast on iPhone out in the world; sit down and curate in Obsidian later. Your <a href="/methods/second-brain/" style="color:var(--accent);">second brain</a> or <a href="/methods/zettelkasten/" style="color:var(--accent);">Zettelkasten</a> inbox grows by itself.
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">⚙️ Zero-effort automation</div>
+            <div class="reason-card__desc">
+              No copy-paste, no share sheet. Sending is appending. It still arrives in your email too, so you can review it even on days you don't open Obsidian — a built-in backup.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">How it works</h2>
+        <p class="lp-section__lead">Once you turn on the integration and pick your Obsidian folder, sent notes are written directly into a note in the background (Obsidian never opens). The mechanism is intentionally simple.</p>
+        <div class="flow-card">
+          <div class="flow-row">
+            <span class="flow-chip">📝 Write a memo</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-chip">⚡ One-tap send</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-chip">📥 Lands in email</span>
+            <span class="flow-arrow">＋</span>
+            <span class="flow-chip" style="background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.28);">🟣 Auto-append to Obsidian</span>
+          </div>
+          <div class="note-preview" aria-label="Obsidian note preview">
+            <div class="nt-h"># 2026-05-30</div>
+            <div>- <span class="nt-time">09:14</span> Headline idea I had at the station</div>
+            <div>- <span class="nt-time">12:38</span> Check the competitor feature I heard about at lunch</div>
+            <div>- <span class="nt-time">21:05</span> Quote from the book I just finished</div>
+          </div>
+        </div>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">Two destinations to choose from</div>
+            <div class="reason-card__desc">
+              <strong>Daily note</strong> = appended to today's <code>yyyy-MM-dd.md</code>, leaving a per-day log.<br><strong>Inbox note</strong> = everything appended to one fixed file — ideal for a "process-later" inbox.
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">No plugins at all</div>
+            <div class="reason-card__desc">
+              The app writes notes directly into your vault folder on iCloud Drive. No Obsidian-side configuration and no community plugins required.
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">Saves locally even offline</div>
+            <div class="reason-card__desc">
+              Because it writes the file directly, it appends to the local note on the spot <strong>even with no internet</strong> — nothing is lost in a tunnel or up a mountain. iCloud sync happens once you're back online.
+            </div>
+          </div>
+        </div>
+        <div class="tip-box">
+          <div class="tip-box__title">Privacy</div>
+          <p>Appending to Obsidian is a <strong>local operation that stays on your device</strong>. It changes nothing about the existing send and encryption path (AES-GCM encryption of the on-device offline queue and send history). Memo bodies are transit-only during send and are not persistently stored on our servers. See the <a href="/privacy" style="color:var(--accent);">Privacy Policy</a> for details.</p>
+        </div>
+      </section>
+
+      <!-- Setup -->
+      <section class="lp-section" id="setup">
+        <h2 class="lp-section__title">Setup (about 1 minute)</h2>
+        <ul class="prereq-list">
+          <li>Simple Memo installed on iPhone (iOS 16.0 or later)</li>
+          <li>Obsidian installed on the same iPhone</li>
+          <li>Your Obsidian vault is on <strong>iCloud Drive</strong> or "On My iPhone" and accessible from the Files app</li>
+        </ul>
+        <ol class="steps-list">
+          <li><strong>Turn on Advanced Mode</strong><br>Toggle "Advanced Mode" on in Settings. During onboarding, choose "Turn on" on the Advanced Mode screen that appears before the reminder step. If you just want to capture quickly, you can leave this off.</li>
+          <li><strong>Turn on Obsidian integration</strong><br>Once Advanced Mode is on, toggle on the "Obsidian Integration" row that appears.</li>
+          <li><strong>Choose your Obsidian folder</strong><br>Tap "Choose Obsidian Folder" and select your Obsidian vault folder on iCloud Drive. The app only stores secure access to that folder.</li>
+          <li><strong>Pick a destination</strong><br>Choose "Daily Note" or "Inbox Note." For the daily note, make sure Obsidian's Daily Notes feature is enabled and files are named <code>yyyy-MM-dd.md</code>.</li>
+          <li><strong>Send a memo</strong><br>From now on, each memo you send is appended to the chosen note as <code>- HH:mm memo</code>. Obsidian doesn't open. Because of iCloud sync, it can take a few seconds to appear in Obsidian.</li>
+        </ol>
+        <div class="tip-box">
+          <div class="tip-box__title">You can set this up later</div>
+          <p>Choosing "Not now" during onboarding is fine. You can toggle it any time from <strong>Settings → "Advanced Mode."</strong></p>
+        </div>
+      </section>
+
+      <!-- Use cases -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">Ways to use it</h2>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">Capture-first</div>
+            <div class="reason-card__desc">Commit to "capture now, organize later." Funnel everything into the Inbox note and sort it on the weekend.</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">Daily log / journaling</div>
+            <div class="reason-card__desc">Timestamped lines in the daily note become a log of your day's thinking — a great fit for <a href="/use-cases/journaling/" style="color:var(--accent);">journaling</a>.</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">Meeting notes</div>
+            <div class="reason-card__desc">Send key points with one tap during a meeting. They line up chronologically in Obsidian, drafting your minutes for you.</div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">Reading &amp; quotes</div>
+            <div class="reason-card__desc">Send any passage that catches your eye while reading. Your <a href="/use-cases/reading-notes/" style="color:var(--accent);">reading notes</a> consolidate in Obsidian.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Constraints (honest) -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">Requirements &amp; caveats</h2>
+        <div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">The vault must be on iCloud Drive / on-device</div>
+            <div class="trouble-item__a"><p>The destination folder must be accessible from the Files app. An <strong>Obsidian Sync-only</strong> vault may not appear in the folder picker; in that case the app falls back to the URL-scheme method (Obsidian briefly opens to append on send).</p></div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Daily notes assume <code>yyyy-MM-dd.md</code></div>
+            <div class="trouble-item__a"><p>If you've customized the daily-note folder or naming, files may not match. Choose "Inbox Note" to reliably deliver everything into one file.</p></div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">iCloud sync may take a few seconds</div>
+            <div class="trouble-item__a"><p>The write happens immediately, but it can take a few seconds for the change to surface in Obsidian via iCloud.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">FAQ</h2>
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need an Obsidian plugin?</summary><div class="faq-answer"><p>No. No community plugin is needed — it works with Obsidian's standard features. The app writes notes directly into your vault folder on iCloud Drive.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Obsidian open every time I send a memo?</summary><div class="faq-answer"><p>Not if you've selected a folder — memos are appended in the background. Only when no folder is selected does it fall back to the URL scheme, briefly opening Obsidian to append.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which note does it append to, and in what format?</summary><div class="faq-answer"><p>It depends on your destination. Daily note appends to today's <code>yyyy-MM-dd.md</code>; Inbox note appends to a fixed Inbox note. Each memo is a timestamped list line, <code>- HH:mm memo</code>, added one line at a time without erasing existing content.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does it work if I only use Obsidian Sync?</summary><div class="faq-answer"><p>The folder must be on iCloud Drive or "On My iPhone" and accessible from the Files app. An Obsidian Sync-only vault may not appear in the picker; in that case it falls back to the URL-scheme method.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use it on Android or desktop?</summary><div class="faq-answer"><p>Simple Memo is currently an iPhone (iOS 16+) app. If your Obsidian vault syncs via iCloud Drive or Obsidian Sync, you can open the same notes from Obsidian on Mac, iPad, and other devices.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are my memos stored on your servers?</summary><div class="faq-answer"><p>Appending to Obsidian is a local, on-device operation. It changes nothing about the existing send/encryption path. Memo bodies are transit-only during send and are not persistently stored on our servers.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What happens to my regular email sending?</summary><div class="faq-answer"><p>It still arrives in your email as before. Obsidian append runs as an additive step after a successful send, so email delivery and the offline Outbox queue are unaffected.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does it append to Obsidian even offline?</summary><div class="faq-answer"><p>Yes. With folder-direct integration, it appends to the local file in your chosen folder on the spot, so no internet is needed. Even when offline (the email is queued in the Outbox), the Obsidian note is saved locally. Syncing to other devices via iCloud happens once you're back online.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">Start streaming iPhone notes into Obsidian</div>
+        <div class="cta-box__desc">Free to download with a 7-day free trial. Obsidian setup takes about a minute.</div>
+        <a href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=obsidian-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">Related Pages</h2>
+        <div class="internal-links">
+          <a href="/guides/">All Setup Guides</a>
+          <a href="/guides/draft-autosave/">Draft Auto-save Guide</a>
+          <a href="/guides/gmail-star-todo/">Turn Your Inbox into a To-Do List</a>
+          <a href="/methods/second-brain/">Second Brain</a>
+          <a href="/methods/zettelkasten/">Zettelkasten</a>
+          <a href="/vs/obsidian/">vs Obsidian</a>
+          <a href="/en/note-to-email/">Note to Email</a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">References</h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://help.obsidian.md/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help</a> — Official Obsidian Help for vault, daily notes, and sync behavior</li>
+    <li><a href="https://help.obsidian.md/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian URI</a> — Official docs for the standard obsidian:// URI used in the fallback path</li>
+    <li><a href="https://support.apple.com/iCloud" target="_blank" rel="noopener" style="color:var(--accent);">Apple — iCloud</a> — Official support for file sync via iCloud Drive</li>
+    <li><a href="https://apps.apple.com/us/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Simple Memo - for Obsidian — App Store</a> — App Store download page</li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Related Content</h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;">All Methods</a></li>
+    <li><a href="/en/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;">All Blog Posts</a></li>
+    <li><a href="/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;">Use Cases</a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;">FAQ</a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__links" aria-label="Footer navigation">
+        <a href="/en/" class="footer__link">Home</a>
+        <a href="/en/obsidian/" class="footer__link">Obsidian</a>
+        <a href="/en/note-to-email/" class="footer__link">Note to Email</a>
+        <a href="/vs/" class="footer__link">vs</a>
+        <a href="/use-cases/" class="footer__link">Use Cases</a>
+        <a href="/guides/" class="footer__link">Guides</a>
+        <a href="/faq" class="footer__link">FAQ</a>
+        <a href="/privacy" class="footer__link">Privacy</a>
+        <a href="/contact" class="footer__link">Contact</a>
+      </nav>
+      <p class="footer__copyright">
+        &copy; 2026 Simple Memo - for Obsidian. All rights reserved. / Operated by YURIKA, K.K.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>
