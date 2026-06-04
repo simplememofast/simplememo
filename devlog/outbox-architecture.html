@@ -78,7 +78,7 @@
 }
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260604-langswitch">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260605-audit">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -312,7 +312,7 @@
 
           <!-- Section 1 -->
           <h2>課題：送信即クリアなのにメッセージを失わない</h2>
-          <p>Captio式シンプルメモでは、ユーザーが送信ボタンをタップした瞬間にUIがクリアされ、すぐに次のメモを書き始められる。これがCaptioスタイルの根幹をなすUXだ。</p>
+          <p>Obsidian連携シンプルメモでは、ユーザーが送信ボタンをタップした瞬間にUIがクリアされ、すぐに次のメモを書き始められる。これがCaptioスタイルの根幹をなすUXだ。</p>
           <p>しかし現実のネットワークは300ms〜2秒のレイテンシがあり、失敗もするし、そもそもオフラインかもしれない。多くのアプリはネットワーク応答を待ってからUIをクリアする。安全だが、UXは悪い。逆に即座にクリアすると、メッセージを失うリスクがある。</p>
           <p><strong>Outboxパターン</strong>は、この相反する要件を同時に解決する。送信タップの瞬間にメッセージをローカルの暗号化ストレージ（Outbox）に永続保存し、UIを即座にクリアし、バックグラウンドでネットワーク送信を行う。送信に成功したらOutboxから削除し、失敗したら自動リトライする。これにより<strong>メッセージ取りこぼしゼロ</strong>を実現しながら、体感レイテンシはゼロに近づく。</p>
 
