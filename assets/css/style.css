@@ -177,10 +177,18 @@ body {
 }
 
 h1, h2, h3, h4 {
-  word-break: keep-all;
+  /* keep-all はかな漢字+Latin の連続を 1 つの分割不能語に融合させ、
+     overflow-wrap が Latin 単語の途中（自動でO|bsidianへ）で緊急折返し
+     してしまう。normal なら Latin 単語は崩れず、日本語は通常どおり折返す。
+     auto-phrase 対応ブラウザ(Chrome)では BudouX 文節折返しに昇格。 */
+  word-break: normal;
+  word-break: auto-phrase;
   overflow-wrap: break-word;
   text-wrap: balance;
 }
+
+/* 見出し内の「分けたくない塊」(製品名+助詞など) 用。改行はこの外側でのみ起こる */
+.nb { white-space: nowrap; }
 
 /* Mesh Gradient Background Layer — warm cream wash */
 body::before {
