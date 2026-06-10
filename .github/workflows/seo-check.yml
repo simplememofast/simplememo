@@ -23,8 +23,11 @@ jobs:
           # Exit code 1 = warnings only (acceptable), 2 = errors (fail CI)
           if [ $EXIT_CODE -ge 2 ]; then exit $EXIT_CODE; fi
 
+      # Smoke test only (--dry-run writes nothing). Note: the shallow CI
+      # checkout means git-derived lastmod dates collapse to one date here;
+      # real sitemap generation happens locally with full history.
       - name: Generate sitemap (dry run)
-        run: node scripts/generate-sitemap.js
+        run: python3 scripts/generate_sitemap.py --dry-run
 
       - name: IndexNow notification (on main push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
