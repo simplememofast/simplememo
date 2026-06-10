@@ -19,6 +19,8 @@
 // フロント側で localStorage に結果をマージしつつ「次のページを取得」で
 // 1 コールずつ叩く想定。サーバ側ではページ自動連結しない（API 課金対策）。
 
+import { safeJson, json } from './_shared.js';
+
 export async function onRequest(context) {
   const { request, env } = context;
 
@@ -119,26 +121,4 @@ export async function onRequest(context) {
   } catch (e) {
     return json({ error: e.message }, 500);
   }
-}
-
-async function safeJson(res) {
-  try {
-    return await res.json();
-  } catch (e) {
-    try {
-      return { _raw: await res.text() };
-    } catch (e2) {
-      return { _raw: '(本文読み取り不能)' };
-    }
-  }
-}
-
-function json(obj, status) {
-  return new Response(JSON.stringify(obj), {
-    status: status || 200,
-    headers: {
-      'Content-Type': 'application/json;charset=utf-8',
-      'Cache-Control': 'no-store',
-    },
-  });
 }

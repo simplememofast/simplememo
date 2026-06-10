@@ -72,7 +72,7 @@
 
 | スクリプト | 用途 | タイミング |
 |-----------|------|-----------|
-| `scripts/generate-sitemap.js` | sitemap.xml生成 | デプロイ前 |
+| `scripts/generate_sitemap.py` | sitemap.xml生成 | デプロイ前 |
 | `scripts/add-hreflang.js` | hreflangタグ一括追加 | 新ページ追加時 |
 | `scripts/add-internal-links.js` | 関連リンク一括追加 | 新ページ追加時 |
 | `scripts/seo-check.js` | SEO検証 | CI (push時自動) |
@@ -83,7 +83,7 @@
 1. HTMLファイルを作成 (canonical, meta, OG, JSON-LD含む)
 2. `node scripts/add-hreflang.js` → hreflangタグ追加
 3. `node scripts/add-internal-links.js` → 関連リンク追加
-4. `node scripts/generate-sitemap.js` → sitemap更新
+4. `python3 scripts/generate_sitemap.py` → sitemap更新
 5. `node scripts/seo-check.js` → 検証
 6. git commit & push → CI自動実行 → Cloudflare Pagesデプロイ
 7. CI: IndexNow自動通知

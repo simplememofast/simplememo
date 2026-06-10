@@ -7,7 +7,7 @@
 - GA4（2026-05-01〜05-28、493 アクティブユーザー）
 - Ahrefs サイトクロール（2026-05-27、346 URL）
 
-> このドキュメントは v1（`/SEO_AIO_STRATEGY_v1.md`, 2026-03-06、当時96ページ・UUほぼ0）の後継。
+> このドキュメントは v1（`docs/SEO_AIO_STRATEGY_v1.md`, 2026-03-06、当時96ページ・UUほぼ0）の後継。
 > v1のPhase 0/1（robots.txt・canonical・OGP・hreflang・/en/分離・llms.txt・middleware 301）は**ほぼ実行済み**。
 > 本書は「実トラフィックが出た後の実測診断」と次フェーズのロードマップ。
 > AIO引用の詳細運用は `docs/ai-citation-strategy.md` を参照（重複させない）。
@@ -122,7 +122,7 @@ App Store導線はライブで301→localizedに解決し**正常**。
 - オーファン候補3件（`/line-keep/`, `/blog/email-yourself-app-comparison`, `/en/blog/best-note-to-self-apps-2026`）→ 関連記事から内部リンク追加。
 - 薄い多言語スタブ（`/zh/ /zh-Hant/ /ar/ /tr/ /id/ /ko/ /es/ /pt-BR/` 62–139語）→ 中身拡充 or `noindex`。
 - `AggregateRating` は1ページのみ → App Store実評価を主要LPに展開（★表示でCTR底上げ。実数値のみ）。
-- **要確認(privacy):** ルートの `SEO_AIO_STRATEGY_v1.md` / `SEO_AIO_REPORT.md` は robots非ブロックで公開配信され得る。`docs/` へ移動 or 配信除外を推奨。
+- ~~**要確認(privacy):** ルートの `SEO_AIO_STRATEGY_v1.md` / `SEO_AIO_REPORT.md` は robots非ブロックで公開配信され得る。`docs/` へ移動 or 配信除外を推奨。~~ → 2026-06-10 `docs/` へ移動済み（robots.txt の `Disallow: /docs/` 配下）。
 
 ---
 

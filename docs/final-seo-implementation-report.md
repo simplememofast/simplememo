@@ -14,7 +14,7 @@
 | **lang.js修正** | ✅ 完了 | `?lang=` パラメータの付与を廃止。localStorageのみで言語永続化。既存の`?lang=`付きURLは吸収してクリーンURLに書換え |
 | **hreflang一括追加** | ✅ 完了 | 153ページに自己参照 `hreflang="ja"` タグを追加。ホームページ2ページは既存のJA/EN相互hreflangを維持 |
 | **canonical確認** | ✅ 完了 | 全ページにself-canonical確認。欠落ページがあればadd-hreflang.jsが自動追加 |
-| **sitemap自動生成** | ✅ 完了 | `scripts/generate-sitemap.js` — ファイルシステムから155 URLを生成。noindex除外、lastmod=ファイル更新日 |
+| **sitemap自動生成** | ✅ 完了 | `scripts/generate_sitemap.py` — ファイルシステムから155 URLを生成。noindex除外、lastmod=ファイル更新日 |
 | **robots.txt** | ✅ 確認 | 既に最適な状態。AI crawler制御、sitemap宣言あり |
 
 ### Phase 3: 拡張 (完了)
@@ -99,7 +99,7 @@
 
 | ファイル | 種別 | 用途 |
 |---------|------|------|
-| `scripts/generate-sitemap.js` | スクリプト | sitemap.xml自動生成 |
+| `scripts/generate_sitemap.py` | スクリプト | sitemap.xml自動生成 |
 | `scripts/add-hreflang.js` | スクリプト | hreflangタグ一括追加 |
 | `scripts/add-internal-links.js` | スクリプト | 関連リンク自動挿入 + 孤立ページ検出 |
 | `scripts/seo-check.js` | スクリプト | SEO検証（CI統合） |
