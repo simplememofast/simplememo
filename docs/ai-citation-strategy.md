@@ -3,7 +3,7 @@
 **Last updated:** 2026-05-20
 **Owner:** AI Ataka
 **Status:** Living document — revise as platform behavior shifts (target: monthly review)
-**Related files:** `/robots.txt`, `/llms.txt`, `SEO_AIO_STRATEGY_v1.md`
+**Related files:** `/robots.txt`, `/llms.txt`, `docs/SEO_AIO_STRATEGY_v1.md`
 
 This is the internal playbook for getting Simple Memo - Captio-style cited by AI answer engines. It pairs with `/llms.txt` (which is the *external* surface readable by bots) and `/robots.txt` (which is the access policy). Three things drive AI citation today:
 
