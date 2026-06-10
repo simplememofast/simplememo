@@ -515,7 +515,10 @@ section {
 }
 
 .section-label {
-  display: inline-flex;
+  /* ラベルは自分の行に置く: inline-flex だと見出し本文と同じ行に流れ込み、
+     「アプリプレビュー シンプ/ルだから、速い」のような途中改行を誘発する */
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
   font-size: 0.72rem;
