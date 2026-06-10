@@ -857,7 +857,10 @@ section {
   inset: 0;
   border-radius: var(--radius-lg);
   padding: 1px;
-  background: var(--grad-border);
+  /* longhand on purpose: a var() inside the `background` shorthand made
+     Chromium resolve the painted image from later lower-specificity rules */
+  background-image: var(--grad-border);
+  background-color: transparent;
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -866,7 +869,6 @@ section {
   pointer-events: none;
   height: auto;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-color: transparent;
 }
 
 .pricing-card--premium::after {
@@ -2185,16 +2187,8 @@ section {
 }
 .lang-switcher__btn,
 .lang-switcher__link {
-  text-decoration: none !important;
-}
-.lang-switcher__btn {
   color: rgba(226, 236, 255, 0.6) !important;
-}
-/* NOTE: __link anchors were never re-skinned by the midnight layer in
-   production — values kept verbatim for parity (see PR notes; the dark
-   ink on dark nav is a pre-existing issue to fix separately). */
-.lang-switcher__link {
-  color: #1a160e !important;
+  text-decoration: none !important;
 }
 .lang-switcher__link {
   display: inline-flex !important;
@@ -2203,27 +2197,19 @@ section {
   white-space: nowrap !important;
   flex: 0 0 auto !important;
 }
-.lang-switcher__btn:hover {
+.lang-switcher__btn:hover,
+.lang-switcher__link:hover {
   color: #fff !important;
 }
-.lang-switcher__link:hover {
-  color: var(--text) !important;
-}
-.lang-switcher__btn.active {
+.lang-switcher__btn.active,
+.lang-switcher__link.active {
   background: rgba(56, 140, 255, 0.18) !important;
   color: #fff !important;
   box-shadow: inset 0 1px 0 rgba(180, 210, 255, 0.15) !important;
 }
-.lang-switcher__link.active {
-  background: rgba(217, 119, 87, 0.14) !important;
-  color: var(--text) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-}
-.lang-switcher__btn:focus-visible {
-  outline: 2px solid var(--accent-bright) !important;
-}
+.lang-switcher__btn:focus-visible,
 .lang-switcher__link:focus-visible {
-  outline: 2px solid var(--accent) !important;
+  outline: 2px solid var(--accent-bright) !important;
 }
 
 /* ============================================================
@@ -2506,10 +2492,3 @@ img[src*="hero-ja"], img[src*="hero-en"] {
 /* ------------------------------------------------------------
    8. FAQ — re-skin over style.css !important cream rules
    ------------------------------------------------------------ */
-
-/* Must stay AFTER .pricing-card--premium::before: its background uses a
-   var() shorthand, and Chromium lets this later rule decide the painted
-   ::before image (observed prod behavior — kept for parity). */
-.pricing-card::before {
-  background: linear-gradient(90deg, transparent, rgba(77, 163, 255, 0.35), transparent);
-}
