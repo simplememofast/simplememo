@@ -1142,6 +1142,55 @@ section {
   background: rgba(148, 178, 255, 0.07);
 }
 
+/* Grouped footer columns (2026-06 redesign): label-led columns instead of
+   one flat 19-link blob. .footer__links rules above are kept for any
+   page that still carries the legacy flat nav. */
+.footer__nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 1.25rem;
+  width: 100%;
+  max-width: 640px;
+  margin: 0.5rem auto 1rem;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .footer__nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 880px;
+  }
+}
+
+.footer__col-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+  margin: 0 0 0.4rem;
+}
+
+.footer__col .footer__link {
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 0;
+  border-radius: 0;
+}
+
+.footer__social {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 8px;
+  width: 100%;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
 .footer__copyright {
   font-size: 0.75rem;
   color: var(--text-subtle);
