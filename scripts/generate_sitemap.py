@@ -128,6 +128,8 @@ def url_for_file(file_path: Path) -> str | None:
         return None
     if rel == "404.html":
         return None
+    if rel == "index.html":  # root homepage must map to /, not /index
+        return SITE_URL + "/"
     if rel.endswith("/index.html"):
         return SITE_URL + "/" + rel[: -len("index.html")]
     if rel.endswith(".html"):
