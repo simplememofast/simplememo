@@ -24,7 +24,7 @@
   </script>
   <title>【開発日誌 Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった | Obsidian連携シンプルメモ</title>
   <meta name="description" content="Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動0.3秒、送信150ms、取りこぼしゼロを実現する設計。">
-  <meta name="theme-color" content="#F5F1E8">
+  <meta name="theme-color" content="#070b14">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
@@ -94,16 +94,17 @@
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=20260609-typo2">
+  <link rel="stylesheet" href="/assets/css/theme-midnight.min.css?v=20260610">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
     .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
-    .lang-switcher { display: inline-flex; background: rgba(255, 252, 244, 0.95); border: 1px solid rgba(170, 60, 28, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
-    .lang-switcher__btn { background: transparent; border: none; color: #5a4d3b; padding: 0.75rem 1.1rem;
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
       min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
-    .lang-switcher__btn:hover { color: #0c0a06; }
-    .lang-switcher__btn:focus-visible { outline: 2px solid #b8431f; outline-offset: 2px; }
-    .lang-switcher__btn.active { background: rgba(170, 60, 28, 0.25); border: 1px solid rgba(170, 60, 28, 0.2); color: #fff; box-shadow: 0 0 12px rgba(170, 60, 28, 0.1); }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
     [data-lang="en"] { display: none; }
     [data-lang].active { display: block; }
     span[data-lang].active { display: inline; }
@@ -112,7 +113,7 @@
     pre { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin: 16px 0; }
     code { font-family: 'SF Mono', Monaco, monospace; font-size: 0.85rem; color: #e0e0e0; }
     .article-meta { text-align: center; margin-bottom: 30px; color: var(--text-muted); font-size: 0.85rem; }
-    .article-toc { background: rgba(255, 252, 244, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
+    .article-toc { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 30px; }
     .article-toc h2 { font-size: 0.95rem; margin-bottom: 12px; }
     .article-toc ol { padding-left: 20px; }
     .article-toc li { margin-bottom: 6px; }
@@ -122,8 +123,8 @@
     .related-topics h2 { font-size: 1.1rem; margin-bottom: 16px; }
     .related-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 600px) { .related-grid { grid-template-columns: 1fr 1fr; } }
-    .related-card { background: rgba(255, 252, 244, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
-    .related-card:hover { border-color: rgba(170, 60, 28, 0.3); }
+    .related-card { background: rgba(18, 26, 46, 0.85); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-decoration: none; color: inherit; display: block; transition: border-color 0.25s; }
+    .related-card:hover { border-color: rgba(82, 160, 255, 0.3); }
     .related-card__title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary, #fff); margin-bottom: 4px; }
     .related-card__desc { font-size: 0.8rem; color: var(--text-secondary); }
   
@@ -132,10 +133,10 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(245, 241, 232, 0.85);
+      background: rgba(7, 11, 20, 0.85);
       -webkit-backdrop-filter: blur(20px);
       backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(170, 60, 28, 0.1);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
     }
     .global-nav__inner {
       max-width: 1200px;
@@ -182,7 +183,7 @@
     }
     .global-nav__links a:hover {
       color: #fff;
-      background: rgba(170, 60, 28, 0.08);
+      background: rgba(82, 160, 255, 0.08);
     }
     .global-nav__actions {
       display: flex;
@@ -227,10 +228,10 @@
         top: 56px;
         left: 0;
         right: 0;
-        background: rgba(245, 241, 232, 0.96);
+        background: rgba(7, 11, 20, 0.96);
         backdrop-filter: blur(20px);
         padding: 0.5rem 1rem 1rem;
-        border-bottom: 1px solid rgba(170, 60, 28, 0.1);
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
         gap: 0.5rem;
       }
       .global-nav__links.open a { color: rgba(255,255,255,0.9);
@@ -1131,15 +1132,15 @@ func applyLanguageChange() {
 </section>
 
 <!-- SEO: Auto-generated related content links -->
-<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(170, 60, 28, 0.10));">
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(82, 160, 255, 0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
     <span data-lang="ja">関連コンテンツ</span>
     <span data-lang="en">Related Content</span>
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#b8431f);border:1px solid var(--border-highlight,rgba(170, 60, 28, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#b8431f);border:1px solid var(--border-highlight,rgba(170, 60, 28, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">ブログ記事一覧</span><span data-lang="en">All Blog Posts</span></a></li>
-    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#b8431f);border:1px solid var(--border-highlight,rgba(170, 60, 28, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">メモアプリ比較一覧</span><span data-lang="en">Compare Memo Apps</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">ブログ記事一覧</span><span data-lang="en">All Blog Posts</span></a></li>
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#4da3ff);border:1px solid var(--border-highlight,rgba(82, 160, 255, 0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">メモアプリ比較一覧</span><span data-lang="en">Compare Memo Apps</span></a></li>
   </ul>
 </section>
 </main>
