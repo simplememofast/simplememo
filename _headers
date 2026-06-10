@@ -1,4 +1,9 @@
+# Cloudflare Pages injects Access-Control-Allow-Origin: * on every response
+# by default. Wildcard CORS on HTML is unnecessary, so detach it site-wide
+# and re-allow it only under /assets/ (fonts need CORS when referenced
+# cross-origin, e.g. from pages mirrored on api.simplememofast.com).
 /*
+  ! Access-Control-Allow-Origin
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
@@ -12,6 +17,7 @@
 
 /assets/*
   Cache-Control: public, max-age=604800, immutable
+  Access-Control-Allow-Origin: *
 
 /*.css
   Cache-Control: public, max-age=604800
@@ -34,6 +40,10 @@
   Cache-Control: public, max-age=3600
 
 /sitemap-en.xml
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: public, max-age=3600
+
+/sitemap-locales.xml
   Content-Type: application/xml; charset=utf-8
   Cache-Control: public, max-age=3600
 
