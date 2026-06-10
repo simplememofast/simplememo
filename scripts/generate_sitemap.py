@@ -3,12 +3,15 @@ Generate sitemap-ja.xml, sitemap-en.xml, and sitemap.xml (index) for
 simplememofast.com.
 
 Strategy:
-  - Parse the existing sitemap.xml to preserve <lastmod> values for
-    every URL that's already listed. This avoids unnecessary churn.
+  - Derive <lastmod> per URL from git history (last commit touching the
+    file, skipping known mechanical sweep commits by subject prefix), so
+    lastmod reflects real content changes instead of the deploy date.
+  - Skip pages whose HTML declares robots noindex.
   - Group entries by sitemap target:
-      sitemap-ja.xml  -> ja root URLs + 8 minor-locale homepage stubs
-      sitemap-en.xml  -> /en/* URLs
-      sitemap.xml     -> index referencing the two above
+      sitemap-ja.xml      -> ja root URLs
+      sitemap-en.xml      -> /en/* URLs
+      sitemap-locales.xml -> 8 minor-locale homepage stubs
+      sitemap.xml         -> index referencing the three above
   - Annotate each <url> with <xhtml:link rel="alternate"> entries pulled
     from i18n_config (TOP_CLUSTER for the homepages, JA_EN_PAIRS for
     paired pages).
@@ -21,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from datetime import date
 from pathlib import Path
@@ -42,9 +46,55 @@ from i18n_config import (  # noqa: E402
 SITEMAP_INDEX_PATH = REPO_ROOT / "sitemap.xml"
 SITEMAP_JA_PATH = REPO_ROOT / "sitemap-ja.xml"
 SITEMAP_EN_PATH = REPO_ROOT / "sitemap-en.xml"
+SITEMAP_LOCALES_PATH = REPO_ROOT / "sitemap-locales.xml"
 
 MINOR_LOCALES = {"ar", "es", "id", "ko", "pt-BR", "tr", "zh", "zh-Hant"}
 TODAY = date.today().isoformat()
+
+# A commit that touches more than this many HTML pages at once is treated
+# as a mechanical sweep (cache-version bumps, meta cleanups, sitewide
+# find-and-replace) and ignored when deriving lastmod. Real content edits
+# land in small commits on this repo.
+MECHANICAL_SWEEP_THRESHOLD = 40
+
+NOINDEX_RE = re.compile(
+    r'<meta\s+name="robots"\s+content="[^"]*noindex', re.IGNORECASE
+)
+
+
+def build_lastmod_index() -> dict[str, str]:
+    """Map repo-relative file path -> date of the last commit that touched
+    it as part of a non-sweep change (see MECHANICAL_SWEEP_THRESHOLD)."""
+    out = subprocess.run(
+        ["git", "log", "--format=%x01%cs", "--name-only"],
+        cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+    ).stdout
+    lastmod: dict[str, str] = {}
+    for chunk in out.split("\x01"):
+        if not chunk.strip():
+            continue
+        lines = chunk.strip().splitlines()
+        cs, files = lines[0].strip(), [l.strip() for l in lines[1:] if l.strip()]
+        html_files = [f for f in files if f.endswith(".html")]
+        if len(html_files) > MECHANICAL_SWEEP_THRESHOLD:
+            continue
+        # git log is newest-first: keep the first (= most recent) date seen
+        for f in files:
+            lastmod.setdefault(f, cs)
+    return lastmod
+
+
+LASTMOD_INDEX: dict[str, str] = {}
+
+
+def git_lastmod(file_path: Path) -> str:
+    """Date (YYYY-MM-DD) of the last non-sweep commit touching the file.
+    Falls back to TODAY for untracked/new files."""
+    global LASTMOD_INDEX
+    if not LASTMOD_INDEX:
+        LASTMOD_INDEX = build_lastmod_index()
+    rel = file_path.relative_to(REPO_ROOT).as_posix()
+    return LASTMOD_INDEX.get(rel, TODAY)
 
 # URL -> (locale_for_html_lang, url_path)
 TOP_CLUSTER_PATHS = {absolute_url(p): (loc, p) for loc, p in TOP_CLUSTER}
@@ -64,21 +114,6 @@ for ja_path, en_path in JA_EN_PAIRS:
 
 # ---------------------------------------------------------------------------
 
-def parse_existing_lastmods(path: Path) -> dict[str, str]:
-    """Return {url: lastmod} from an existing sitemap.xml. Used to
-    preserve previously-published lastmod values."""
-    if not path.exists():
-        return {}
-    text = path.read_text(encoding="utf-8")
-    out: dict[str, str] = {}
-    for m in re.finditer(
-        r"<url>\s*<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>",
-        text,
-    ):
-        out[m.group(1).strip()] = m.group(2).strip()
-    return out
-
-
 def url_for_file(file_path: Path) -> str | None:
     """Map a file path to its public URL. None if the file should not
     appear in the sitemap (drafts, admin, etc.)."""
@@ -93,6 +128,8 @@ def url_for_file(file_path: Path) -> str | None:
         return None
     if rel == "404.html":
         return None
+    if rel == "index.html":  # root homepage must map to /, not /index
+        return SITE_URL + "/"
     if rel.endswith("/index.html"):
         return SITE_URL + "/" + rel[: -len("index.html")]
     if rel.endswith(".html"):
@@ -104,23 +141,33 @@ def url_for_file(file_path: Path) -> str | None:
     return None
 
 
-def collect_urls() -> list[str]:
-    urls: set[str] = set()
+def collect_urls() -> dict[str, Path]:
+    """Return {url: file_path}, skipping noindex pages."""
+    urls: dict[str, Path] = {}
     for f in REPO_ROOT.rglob("*.html"):
         u = url_for_file(f)
-        if u:
-            urls.add(u)
-    return sorted(urls)
+        if not u:
+            continue
+        try:
+            head = f.read_text(encoding="utf-8", errors="replace")[:6000]
+        except OSError:
+            continue
+        if NOINDEX_RE.search(head):
+            continue
+        urls[u] = f
+    return urls
 
 
 # ---------------------------------------------------------------------------
 
 def determine_target(url: str) -> str:
-    """Return 'en' for en URLs, 'ja' for everything else (incl. minor
-    locale stubs)."""
+    """Return 'en' for en URLs, 'locales' for minor-locale homepage
+    stubs, 'ja' for everything else."""
     rest = url[len(SITE_URL):]
     if rest == "/en/" or rest.startswith("/en/"):
         return "en"
+    if rest.strip("/") in MINOR_LOCALES:
+        return "locales"
     return "ja"
 
 
@@ -188,33 +235,26 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    existing_lastmods = parse_existing_lastmods(SITEMAP_INDEX_PATH)
-    urls = collect_urls()
+    url_files = collect_urls()
 
-    ja_entries: list[tuple[str, str]] = []
-    en_entries: list[tuple[str, str]] = []
+    entries: dict[str, list[tuple[str, str]]] = {"ja": [], "en": [], "locales": []}
+    for url in sorted(url_files):
+        lastmod = git_lastmod(url_files[url])
+        entries[determine_target(url)].append((url, lastmod))
 
-    for url in urls:
-        lastmod = existing_lastmods.get(url, TODAY)
-        target = determine_target(url)
-        if target == "en":
-            en_entries.append((url, lastmod))
-        else:
-            ja_entries.append((url, lastmod))
-
-    ja_entries.sort()
-    en_entries.sort()
-
-    ja_xml = render_sitemap(ja_entries)
-    en_xml = render_sitemap(en_entries)
+    ja_xml = render_sitemap(entries["ja"])
+    en_xml = render_sitemap(entries["en"])
+    locales_xml = render_sitemap(entries["locales"])
     index_xml = render_sitemap_index([
         (f"{SITE_URL}/sitemap-ja.xml", TODAY),
         (f"{SITE_URL}/sitemap-en.xml", TODAY),
+        (f"{SITE_URL}/sitemap-locales.xml", TODAY),
     ])
 
-    print(f"sitemap-ja.xml: {len(ja_entries)} URLs")
-    print(f"sitemap-en.xml: {len(en_entries)} URLs")
-    print(f"sitemap.xml:    index of 2 sitemaps")
+    print(f"sitemap-ja.xml:      {len(entries['ja'])} URLs")
+    print(f"sitemap-en.xml:      {len(entries['en'])} URLs")
+    print(f"sitemap-locales.xml: {len(entries['locales'])} URLs")
+    print(f"sitemap.xml:         index of 3 sitemaps")
 
     if args.dry_run:
         print("[dry-run] no files written")
@@ -222,10 +262,12 @@ def main() -> int:
 
     SITEMAP_JA_PATH.write_text(ja_xml, encoding="utf-8")
     SITEMAP_EN_PATH.write_text(en_xml, encoding="utf-8")
+    SITEMAP_LOCALES_PATH.write_text(locales_xml, encoding="utf-8")
     SITEMAP_INDEX_PATH.write_text(index_xml, encoding="utf-8")
     print("Written:")
     print(f"  {SITEMAP_JA_PATH.relative_to(REPO_ROOT)}")
     print(f"  {SITEMAP_EN_PATH.relative_to(REPO_ROOT)}")
+    print(f"  {SITEMAP_LOCALES_PATH.relative_to(REPO_ROOT)}")
     print(f"  {SITEMAP_INDEX_PATH.relative_to(REPO_ROOT)}")
     return 0
 
