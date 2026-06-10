@@ -77,8 +77,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -262,85 +260,73 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span data-lang="ja">Obsidian連携シンプルメモ</span><span data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-vs-apple-notes-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-vs-apple-notes-jp&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/google-keep-vs-apple-notes/" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/google-keep-vs-apple-notes/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-vs-apple-notes-jp&amp;mt=8" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          <span>ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">Google Keep vs Apple Notes — どちらが最適？メモアプリ徹底比較</span>
-      <span class="meta-og-title">Google Keep vs Apple Notes — メモアプリ徹底比較</span>
-      <span class="meta-description">Google KeepとApple Notesの違いを徹底比較。クロスプラットフォーム・整理方法・共有機能の観点で解説。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">Google Keep vs Apple Notes — Which Is Better? Comparison</span>
-      <span class="meta-og-title">Google Keep vs Apple Notes — In-Depth Comparison</span>
-      <span class="meta-description">Google Keep vs Apple Notes compared: cross-platform support, organization, sharing, and which is better for different use cases.</span>
-    </div>
-  </div>
+  
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span data-lang="ja">メモアプリ比較</span>
-          <span data-lang="en">Memo App Comparison</span>
+          <span>メモアプリ比較</span>
+          
         </div>
         <h1 class="lp-hero__title">
-          <span data-lang="ja">Google Keep vs Apple Notes<br>どちらを選ぶべきか</span>
-          <span data-lang="en">Google Keep vs Apple Notes<br>Which Should You Choose?</span>
+          <span>Google Keep vs Apple Notes<br>どちらを選ぶべきか</span>
+          
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">Google KeepはGoogleエコシステムに統合された付箋型メモアプリ、Apple NotesはAppleデバイスにプリインストールされたリッチテキスト対応メモアプリです。どちらも無料で使えますが、対応プラットフォームや整理方法が大きく異なります。本記事では両者の違いを中立的に比較し、どちらにも満足できない場合の代替案も紹介します。</span>
-          <span data-lang="en">Google Keep is a sticky-note-style memo app integrated with the Google ecosystem. Apple Notes is a rich-text note app pre-installed on Apple devices. Both are free, but differ significantly in platform support and organization. This article offers a neutral comparison and an alternative for those who find neither app sufficient.</span>
+          <span>Google KeepはGoogleエコシステムに統合された付箋型メモアプリ、Apple NotesはAppleデバイスにプリインストールされたリッチテキスト対応メモアプリです。どちらも無料で使えますが、対応プラットフォームや整理方法が大きく異なります。本記事では両者の違いを中立的に比較し、どちらにも満足できない場合の代替案も紹介します。</span>
+          
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
-          <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 6, 2026</span>
+          <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
+          
         </p>
       </div>
 
       <!-- Entity Definitions -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">Google Keepとは / Apple Notesとは</span>
-          <span data-lang="en">What is Google Keep? / What is Apple Notes?</span>
+          <span>Google Keepとは / Apple Notesとは</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">Google Keepは、Googleが提供する無料のメモアプリです。付箋形式のUI、ラベル・色分け、リマインダー、チェックリスト、画像メモ、音声メモなどを備え、Web・Android・iOSで利用可能です。Googleアカウントで同期され、Gmail・Google Docs・Googleカレンダーとの連携が強みです。Apple Notesは、AppleがiOS・iPadOS・macOS・iCloud.comで提供する無料メモアプリです。リッチテキスト編集、手書き対応（Apple Pencil）、フォルダ整理、スキャン機能、iCloud同期を備え、Appleエコシステム内でシームレスに動作します。</span>
-          <span data-lang="en">Google Keep is a free note-taking app by Google. It features a sticky-note-style UI, labels, color coding, reminders, checklists, image notes, and voice notes. Available on Web, Android, and iOS, it syncs via Google Account and integrates with Gmail, Google Docs, and Google Calendar. Apple Notes is a free note-taking app from Apple, available on iOS, iPadOS, macOS, and iCloud.com. It offers rich text editing, handwriting support (Apple Pencil), folder organization, document scanning, and iCloud sync — designed to work seamlessly within the Apple ecosystem.</span>
+          <span>Google Keepは、Googleが提供する無料のメモアプリです。付箋形式のUI、ラベル・色分け、リマインダー、チェックリスト、画像メモ、音声メモなどを備え、Web・Android・iOSで利用可能です。Googleアカウントで同期され、Gmail・Google Docs・Googleカレンダーとの連携が強みです。Apple Notesは、AppleがiOS・iPadOS・macOS・iCloud.comで提供する無料メモアプリです。リッチテキスト編集、手書き対応（Apple Pencil）、フォルダ整理、スキャン機能、iCloud同期を備え、Appleエコシステム内でシームレスに動作します。</span>
+          
         </p>
       </section>
 
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">比較表：Google Keep vs Apple Notes</span>
-          <span data-lang="en">Comparison Table: Google Keep vs Apple Notes</span>
+          <span>比較表：Google Keep vs Apple Notes</span>
+          
         </h2>
         <div style="overflow-x:auto">
-          <table class="compare-table" data-lang="ja">
+          <table class="compare-table">
             <thead><tr><th>項目</th><th>Google Keep</th><th>Apple Notes</th></tr></thead>
             <tbody>
               <tr><td>プラットフォーム</td><td class="yes">Web・Android・iOS</td><td class="no">Apple製品のみ + iCloud.com</td></tr>
@@ -355,31 +341,17 @@
               <tr><td>暗号化</td><td>サーバー側</td><td class="yes">エンドツーエンド（iCloud）</td></tr>
             </tbody>
           </table>
-          <table class="compare-table" data-lang="en">
-            <thead><tr><th>Feature</th><th>Google Keep</th><th>Apple Notes</th></tr></thead>
-            <tbody>
-              <tr><td>Platform</td><td class="yes">Web, Android, iOS</td><td class="no">Apple devices + iCloud.com</td></tr>
-              <tr><td>Price</td><td class="yes">Completely free</td><td class="yes">Completely free</td></tr>
-              <tr><td>Organization</td><td>Labels & colors</td><td>Folders & tags</td></tr>
-              <tr><td>Rich Text</td><td class="no">Limited</td><td class="yes">Full (headings, bold, etc.)</td></tr>
-              <tr><td>Handwriting</td><td>Basic drawing</td><td class="yes">Full Apple Pencil support</td></tr>
-              <tr><td>Reminders</td><td class="yes">Time & location-based</td><td class="no">None (separate app)</td></tr>
-              <tr><td>Sharing</td><td class="yes">Real-time collaboration</td><td class="yes">iCloud sharing</td></tr>
-              <tr><td>Document Scan</td><td class="no">No</td><td class="yes">Built-in scanner</td></tr>
-              <tr><td>Google Integration</td><td class="yes">Gmail, Docs, Calendar</td><td class="no">No</td></tr>
-              <tr><td>Encryption</td><td>Server-side</td><td class="yes">End-to-end (iCloud)</td></tr>
-            </tbody>
-          </table>
+          
         </div>
       </section>
 
       <!-- 7 Three-Way Comparison Points -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">7つの三者比較ポイント</span>
-          <span data-lang="en">7 Three-Way Comparison Points</span>
+          <span>7つの三者比較ポイント</span>
+          
         </h2>
-        <ul class="diff-list" data-lang="ja">
+        <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
             <strong>起動速度の実測：Google Keep vs Apple Notes vs Obsidian連携シンプルメモ</strong><br>
@@ -416,64 +388,28 @@
             Google KeepはGoogle Takeoutでエクスポート可能ですが、独自フォーマットです。Apple Notesは直接エクスポート機能が限定的で、PDFやテキストコピーが必要です。Obsidian連携シンプルメモのメモはすべてメールとして保存されるため、データの可搬性が最も高く、どのサービスにも移行不要です。
           </li>
         </ul>
-        <ul class="diff-list" data-lang="en">
-          <li>
-            <span class="diff-num">1</span>
-            <strong>Launch Speed: Google Keep vs Apple Notes vs Simple Memo - for Obsidian</strong><br>
-            Google Keep takes about 2-3 seconds to launch; Apple Notes takes about 1.5-2 seconds. Both add cloud sync wait time. Simple Memo - for Obsidian launches in 0.3 seconds with the cursor ready to type. For capturing thoughts the instant they appear, the speed difference is decisive.
-          </li>
-          <li>
-            <span class="diff-num">2</span>
-            <strong>Ecosystem Dependency: Google vs Apple vs Email</strong><br>
-            Google Keep depends entirely on a Google account, integrated with Gmail, Docs, and Calendar. Apple Notes is tied to Apple ID and iCloud, working within the Apple ecosystem. Simple Memo - for Obsidian uses email delivery and has no ecosystem dependency — any email address works as the destination.
-          </li>
-          <li>
-            <span class="diff-num">3</span>
-            <strong>Sharing and Collaboration</strong><br>
-            Google Keep supports real-time collaborative editing of lists and notes. Apple Notes allows sharing folders and notes via iCloud. Simple Memo - for Obsidian has no sharing features — it is strictly for emailing notes to yourself. Need collaboration? Use Keep or Notes. Need personal capture? Simple Memo - for Obsidian.
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>Offline Functionality</strong><br>
-            Google Keep allows offline note creation and viewing, syncing when reconnected. Apple Notes accesses locally cached notes offline. Simple Memo - for Obsidian creates notes offline and sends the email once connectivity returns. All three work offline, but the underlying mechanisms differ.
-          </li>
-          <li>
-            <span class="diff-num">5</span>
-            <strong>Note Searchability</strong><br>
-            Google Keep offers full-text search plus label and color filtering. Apple Notes integrates with Spotlight and supports folder, tag, and image OCR search. Simple Memo - for Obsidian stores notes as emails, so you can leverage powerful email search (e.g., Gmail) to instantly find past notes.
-          </li>
-          <li>
-            <span class="diff-num">6</span>
-            <strong>Cross-Platform Support</strong><br>
-            Google Keep works on Web, Android, and iOS — the broadest platform support. Apple Notes is limited to Apple devices and iCloud.com. Simple Memo - for Obsidian is iOS-only, but since notes are delivered as emails, you can access them from any device.
-          </li>
-          <li>
-            <span class="diff-num">7</span>
-            <strong>Data Portability</strong><br>
-            Google Keep exports via Google Takeout in a proprietary format. Apple Notes has limited direct export options, requiring PDF or text copy. Simple Memo - for Obsidian notes live as emails — the most portable format, requiring no migration to any service.
-          </li>
-        </ul>
+        
       </section>
 
       <!-- Scenario: Using All Three Apps -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">3つのアプリを全部使うシナリオ</span>
-          <span data-lang="en">Scenario: Using All Three Apps</span>
+          <span>3つのアプリを全部使うシナリオ</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">実は、Google Keep・Apple Notes・Obsidian連携シンプルメモの3つを全部使うユーザーは少なくありません。それぞれの役割を明確にすると、非常に効率的なワークフローが構築できます。Google Keepは買い物リスト、TODOリスト、短い付箋メモに最適です。ラベルと色分けで一覧性が高く、家族との共有リストにも便利です。Apple Notesは長文のメモ、議事録、Apple Pencilでの手書きメモに向いています。フォルダで整理でき、リッチテキストで構造化された情報を管理できます。Obsidian連携シンプルメモは瞬間キャプチャの入口です。通勤中、会議前、シャワー中に浮かんだアイデアを0.3秒で起動して即メール送信。後からKeepやNotesに整理するかどうかは、受信箱を見て判断すればOK。重要なのは、Obsidian連携シンプルメモが最も速い入力手段であるという点です。KeepもNotesも起動に1.5〜3秒かかりますが、Obsidian連携シンプルメモは0.3秒。この差が「メモを取る/取らない」の分かれ目になります。</span>
-          <span data-lang="en">Many users actually use all three — Google Keep, Apple Notes, and Simple Memo - for Obsidian — with clearly defined roles for each. Google Keep excels at shopping lists, TODO lists, and short sticky-note memos. Its labels and color coding provide great overview, and shared lists are convenient for families. Apple Notes is ideal for long-form notes, meeting minutes, and Apple Pencil handwriting. Folders enable organized, rich-text structured information management. Simple Memo - for Obsidian serves as the fastest entry point for instant capture. When an idea strikes during a commute, before a meeting, or in the shower — launch in 0.3 seconds and email it instantly. Whether to later organize it into Keep or Notes is a decision you make when reviewing your inbox. The key point: Simple Memo - for Obsidian is the fastest input method. Keep and Notes take 1.5-3 seconds to launch; Simple Memo - for Obsidian takes 0.3 seconds. This difference determines whether a fleeting thought gets captured or lost.</span>
+          <span>実は、Google Keep・Apple Notes・Obsidian連携シンプルメモの3つを全部使うユーザーは少なくありません。それぞれの役割を明確にすると、非常に効率的なワークフローが構築できます。Google Keepは買い物リスト、TODOリスト、短い付箋メモに最適です。ラベルと色分けで一覧性が高く、家族との共有リストにも便利です。Apple Notesは長文のメモ、議事録、Apple Pencilでの手書きメモに向いています。フォルダで整理でき、リッチテキストで構造化された情報を管理できます。Obsidian連携シンプルメモは瞬間キャプチャの入口です。通勤中、会議前、シャワー中に浮かんだアイデアを0.3秒で起動して即メール送信。後からKeepやNotesに整理するかどうかは、受信箱を見て判断すればOK。重要なのは、Obsidian連携シンプルメモが最も速い入力手段であるという点です。KeepもNotesも起動に1.5〜3秒かかりますが、Obsidian連携シンプルメモは0.3秒。この差が「メモを取る/取らない」の分かれ目になります。</span>
+          
         </p>
       </section>
 
       <!-- Who Should Choose Which -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">どちらを選ぶべきか</span>
-          <span data-lang="en">Who Should Choose Which?</span>
+          <span>どちらを選ぶべきか</span>
+          
         </h2>
-        <div class="choose-grid" data-lang="ja">
+        <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Google Keep向き</div>
             <ul>
@@ -497,118 +433,87 @@
             </ul>
           </div>
         </div>
-        <div class="choose-grid" data-lang="en">
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Google Keep if you...</div>
-            <ul>
-              <li>Use both Android and iOS devices</li>
-              <li>Prefer short, sticky-note-style memos</li>
-              <li>Want integration with Gmail and Google Docs</li>
-              <li>Need location-based reminders</li>
-              <li>Manage everything with a Google account</li>
-              <li>Need access from Windows PCs</li>
-            </ul>
-          </div>
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Apple Notes if you...</div>
-            <ul>
-              <li>Use only Apple devices</li>
-              <li>Need long-form writing and rich text</li>
-              <li>Want Apple Pencil handwriting support</li>
-              <li>Need built-in document scanning</li>
-              <li>Prioritize end-to-end encryption</li>
-              <li>Prefer folder-based organization</li>
-            </ul>
-          </div>
-        </div>
+        
       </section>
 
       <!-- Neither Satisfied -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">どちらにも満足できない場合</span>
-          <span data-lang="en">If Neither App Satisfies You</span>
+          <span>どちらにも満足できない場合</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">Google KeepもApple Notesも「メモを保存する」ことに重点を置いています。しかし、「思いついた瞬間に素早くキャプチャして、メールで自分に送信したい」というニーズには、どちらも最適ではありません。起動に数秒かかり、保存先を選ぶ必要があり、メール送信には別途操作が必要です。Obsidian連携シンプルメモは、起動0.3秒でカーソルが即入力可能、ワンタップでメール送信、アカウント不要という「瞬間キャプチャ→メール配信」に完全特化したアプリです。Google KeepやApple Notesと併用し、素早いインプットレイヤーとして使うのが最も効果的です。</span>
-          <span data-lang="en">Both Google Keep and Apple Notes focus on "storing notes." But if your core need is "capture a thought instantly and email it to yourself," neither is optimized for that. Both require a few seconds to launch, force you to choose where to save, and require extra steps for email. Simple Memo (Captio-style) launches in 0.3 seconds with the cursor ready, sends memos via email with one tap, and requires no account. It's purpose-built for "instant capture to email delivery." Use it alongside Google Keep or Apple Notes as a fast input layer.</span>
+          <span>Google KeepもApple Notesも「メモを保存する」ことに重点を置いています。しかし、「思いついた瞬間に素早くキャプチャして、メールで自分に送信したい」というニーズには、どちらも最適ではありません。起動に数秒かかり、保存先を選ぶ必要があり、メール送信には別途操作が必要です。Obsidian連携シンプルメモは、起動0.3秒でカーソルが即入力可能、ワンタップでメール送信、アカウント不要という「瞬間キャプチャ→メール配信」に完全特化したアプリです。Google KeepやApple Notesと併用し、素早いインプットレイヤーとして使うのが最も効果的です。</span>
+          
         </p>
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">よくある質問</span>
-          <span data-lang="en">FAQ</span>
+          <span>よくある質問</span>
+          
         </h2>
-        <div data-lang="ja">
+        <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">GoogleエコシステムからAppleエコシステムに乗り換える場合、メモはどう移行すべきですか？</summary><div class="faq-answer"><p>Google KeepからApple Notesへの直接エクスポート機能はありません。Google Takeoutでデータをダウンロードし、手動でコピーするかサードパーティツールを使う必要があります。移行の手間を避けたい場合、Obsidian連携シンプルメモでメモをメール送信しておけば、エコシステムに関係なくどこからでもアクセスできます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">iPhoneユーザーにはGoogle Keep・Apple Notes・Obsidian連携シンプルメモのどれが最適ですか？</summary><div class="faq-answer"><p>Apple製品だけを使っているならApple Notesが最もシームレスです。AndroidやWindowsも併用するならGoogle Keepがクロスプラットフォームで便利です。どちらの場合も、瞬間的なメモキャプチャにはObsidian連携シンプルメモを併用すると、0.3秒起動でアイデアを逃しません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Google Keep・Apple Notes・Obsidian連携シンプルメモの3つを同時に使うことは可能ですか？</summary><div class="faq-answer"><p>はい、むしろ併用が最も効果的です。Obsidian連携シンプルメモで瞬時にアイデアをキャプチャしてメール送信し、Google KeepやApple Notesで整理・管理するワークフローがおすすめです。役割が明確に異なるため、競合せず補完し合います。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">家族でAppleとAndroidが混在している場合、メモの共有はどうすればよいですか？</summary><div class="faq-answer"><p>Apple NotesはAppleデバイス間でしか共有できません。Google Keepならプラットフォームを問わず共有可能です。Obsidian連携シンプルメモはメール送信なので、どんなデバイスの家族にもメモを転送できます。混在環境ではGoogle KeepまたはObsidian連携シンプルメモが柔軟です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">3つのアプリで最もデータの安全性が高いのはどれですか？</summary><div class="faq-answer"><p>Apple Notesはエンドツーエンド暗号化とノート単位のパスワードロックに対応しており、プライバシー面で最も強力です。Google Keepはサーバー側暗号化のみです。Obsidian連携シンプルメモは端末内AES-GCM暗号化を採用し、メモがメールとして自分の受信箱に届くため、第三者サーバーにデータが残りません。</p></div></details></div>
         </div>
-        <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How should I migrate notes when switching from Google to Apple ecosystem (or vice versa)?</summary><div class="faq-answer"><p>There's no direct export between Google Keep and Apple Notes. You'll need Google Takeout data and manual copying or third-party tools. To avoid migration headaches entirely, use Simple Memo - for Obsidian to email notes to yourself — they're accessible from any ecosystem, no migration needed.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which app is best for iPhone users: Google Keep, Apple Notes, or Simple Memo - for Obsidian?</summary><div class="faq-answer"><p>If you only use Apple devices, Apple Notes integrates most seamlessly. If you also use Android or Windows, Google Keep's cross-platform support is ideal. In either case, pairing with Simple Memo - for Obsidian for instant 0.3-second capture ensures you never lose a fleeting idea.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Google Keep, Apple Notes, and Simple Memo - for Obsidian all at the same time?</summary><div class="faq-answer"><p>Yes — in fact, using all three together is the most effective approach. Use Simple Memo - for Obsidian for instant idea capture via email, then organize in Google Keep or Apple Notes. Their roles are distinct and complementary rather than competing.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I share notes when family members use both Apple and Android devices?</summary><div class="faq-answer"><p>Apple Notes only shares between Apple devices. Google Keep shares across all platforms. Simple Memo - for Obsidian sends notes as email, which can be forwarded to anyone on any device. For mixed-device families, Google Keep or Simple Memo - for Obsidian offers the most flexibility.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which of the three apps offers the strongest data security?</summary><div class="faq-answer"><p>Apple Notes supports end-to-end encryption and per-note password locks, making it strongest for privacy. Google Keep uses server-side encryption only. Simple Memo - for Obsidian uses on-device AES-GCM encryption and delivers notes to your email inbox, keeping no data on third-party servers.</p></div></details></div>
-        </div>
+        
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">KeepでもNotesでもない第三の選択</span>
-          <span data-lang="en">The Third Option Beyond Keep and Notes</span>
+          <span>KeepでもNotesでもない第三の選択</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">KeepでもNotesでもない、0.3秒の第三選択。ダウンロードは無料。</span>
-          <span data-lang="en">Neither Keep nor Notes — a 0.3s third option. Free to download.</span>
+          <span>KeepでもNotesでもない、0.3秒の第三選択。ダウンロードは無料。</span>
+          
         </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-vs-apple-notes-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-vs-apple-notes-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=vs-google-keep-vs-apple-notes-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">関連ページ</span>
-          <span data-lang="en">Related Pages</span>
+          <span>関連ページ</span>
+          
         </h2>
         <div class="internal-links">
           <a href="/vs/">
-            <span data-lang="ja">メモアプリ比較一覧</span>
-            <span data-lang="en">All App Comparisons</span>
+            <span>メモアプリ比較一覧</span>
+            
           </a>
           <a href="/vs/google-keep/">
-            <span data-lang="ja">vs Google Keep</span>
-            <span data-lang="en">vs Google Keep</span>
+            <span>vs Google Keep</span>
+            
           </a>
           <a href="/vs/apple-notes/">
-            <span data-lang="ja">vs Apple Notes</span>
-            <span data-lang="en">vs Apple Notes</span>
+            <span>vs Apple Notes</span>
+            
           </a>
           <a href="/vs/notion-vs-obsidian/">
-            <span data-lang="ja">Notion vs Obsidian</span>
-            <span data-lang="en">Notion vs Obsidian</span>
+            <span>Notion vs Obsidian</span>
+            
           </a>
           <a href="/captio-alternative/">
-            <span data-lang="ja">Captio代替ガイド</span>
-            <span data-lang="en">Captio Alternative</span>
+            <span>Captio代替ガイド</span>
+            
           </a>
           <a href="/note-to-email/">
-            <span data-lang="ja">自分にメールするメモとは</span>
-            <span data-lang="en">Note-to-Email Guide</span>
+            <span>自分にメールするメモとは</span>
+            
           </a>
           <a href="/faq">
-            <span data-lang="ja">よくあるご質問</span>
-            <span data-lang="en">FAQ</span>
+            <span>よくあるご質問</span>
+            
           </a>
         </div>
       </section>
@@ -618,17 +523,17 @@
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span data-lang="ja">関連コンテンツ</span>
-    <span data-lang="en">Related Content</span>
+    <span>関連コンテンツ</span>
+    
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">自分にメール送信する方法</span><span data-lang="en">How to Email Yourself</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">よくあるご質問</span><span data-lang="en">FAQ</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio代替アプリ比較</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>自分にメール送信する方法</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>よくあるご質問</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使い方ガイド</span></a></li>
   </ul>
 </section>
-<section class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+<section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li><a href="https://keep.google.com/" target="_blank" rel="noopener">Google Keep 公式サイト</a></li>
@@ -638,16 +543,6 @@
     <li><a href="https://support.apple.com/guide/iphone/notes-iph45583e2bc/ios" target="_blank" rel="noopener">Apple - iPhoneユーザガイド: メモ</a></li>
   </ul>
 </section>
-<section class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-  <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-  <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
-    <li><a href="https://keep.google.com/" target="_blank" rel="noopener">Google Keep Official Site</a></li>
-    <li><a href="https://support.apple.com/guide/notes/welcome/mac" target="_blank" rel="noopener">Apple Notes Official Site</a></li>
-    <li><a href="https://www.pcmag.com/picks/the-best-note-taking-apps" target="_blank" rel="noopener">PCMag Best Note-Taking Apps</a></li>
-    <li><a href="https://en.wikipedia.org/wiki/Google_Keep" target="_blank" rel="noopener">Google Keep - Wikipedia</a></li>
-    <li><a href="https://support.apple.com/guide/iphone/notes-iph45583e2bc/ios" target="_blank" rel="noopener">Apple - iPhone User Guide: Notes</a></li>
-  </ul>
-</section>
 
 </main>
 
@@ -655,52 +550,50 @@
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
         <a href="/" class="footer__link">
-          <span data-lang="ja">ホーム</span>
-          <span data-lang="en">Home</span>
+          <span>ホーム</span>
+          
         </a>
         <a href="/captio-alternative/" class="footer__link">
-          <span data-lang="ja">Captio代替</span>
-          <span data-lang="en">Captio Alternative</span>
+          <span>Captio代替</span>
+          
         </a>
         <a href="/note-to-email/" class="footer__link">
-          <span data-lang="ja">メモ→メール</span>
-          <span data-lang="en">Note to Email</span>
+          <span>メモ→メール</span>
+          
         </a>
         <a href="/vs/" class="footer__link">
-          <span data-lang="ja">アプリ比較</span>
-          <span data-lang="en">Comparisons</span>
+          <span>アプリ比較</span>
+          
         </a>
         <a href="/use-cases/" class="footer__link">
-          <span data-lang="ja">使い方</span>
-          <span data-lang="en">Use Cases</span>
+          <span>使い方</span>
+          
         </a>
         <a href="/guides/" class="footer__link">
-          <span data-lang="ja">ガイド</span>
-          <span data-lang="en">Guides</span>
+          <span>ガイド</span>
+          
         </a>
         <a href="/faq" class="footer__link">
-          <span data-lang="ja">FAQ</span>
-          <span data-lang="en">FAQ</span>
+          <span>FAQ</span>
+          
         </a>
         <a href="/privacy" class="footer__link">
-          <span data-lang="ja">プライバシー</span>
-          <span data-lang="en">Privacy</span>
+          <span>プライバシー</span>
+          
         </a>
         <a href="/contact" class="footer__link">
-          <span data-lang="ja">お問い合わせ</span>
-          <span data-lang="en">Contact</span>
+          <span>お問い合わせ</span>
+          
         </a>
       </nav>
       <p class="footer__copyright">
         &copy; 2026
-        <span data-lang="ja">Obsidian連携シンプルメモ</span>
-        <span data-lang="en">Simple Memo - for Obsidian</span>.
+        <span>Obsidian連携シンプルメモ</span>
+        .
         All rights reserved.
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

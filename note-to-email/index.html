@@ -86,8 +86,6 @@
     .lang-switcher__btn:hover,.lang-switcher__link:hover{color: #0c0a06}
     .lang-switcher__btn:focus-visible,.lang-switcher__link:focus-visible{outline:2px solid #b8431f;outline-offset:2px}
     .lang-switcher__btn.active,.lang-switcher__link.active{background:rgba(170, 60, 28, 0.12);border:1px solid rgba(170, 60, 28, 0.2);color:#fff;box-shadow:0 0 12px rgba(170, 60, 28, 0.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:600;color:var(--accent);background:rgba(170, 60, 28, 0.08);border:1px solid rgba(170, 60, 28, 0.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -273,58 +271,46 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span data-lang="ja">Obsidian連携シンプルメモ</span><span data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=note-to-email-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=note-to-email-jp&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/note-to-email/" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/note-to-email/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=note-to-email-jp&amp;mt=8" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          <span>ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
 </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">自分にメールでメモを送る方法 — Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">自分にメールでメモを送る方法</span>
-      <span class="meta-description">思いついたアイデアをワンタップで自分のメールに送信。受信トレイがそのままToDoリストに。起動0.3秒の高速メモアプリ。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">How to Email Notes to Yourself — Simple Memo</span>
-      <span class="meta-og-title">How to Email Notes to Yourself</span>
-      <span class="meta-description">Send ideas to your inbox with one tap. Your email becomes your to-do list. 0.3s launch, 150ms send.</span>
-    </div>
-  </div>
+  
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span data-lang="ja">メモ → メール 最速ルート</span>
-          <span data-lang="en">Fastest Note-to-Email Route</span>
+          <span>メモ → メール 最速ルート</span>
+          
         </div>
         <h1 class="lp-hero__title">
-          <span data-lang="ja">自分にメールで<br>メモを送る方法</span>
-          <span data-lang="en">How to Email<br>Notes to Yourself</span>
+          <span>自分にメールで<br>メモを送る方法</span>
+          
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">思いついた瞬間にメモして、ワンタップで自分のメールへ。受信トレイがそのままToDoリストになる、最もシンプルなメモ管理法。</span>
-          <span data-lang="en">Capture ideas instantly and send them to your inbox in one tap. Your email becomes your to-do list. The simplest way to manage notes.</span>
+          <span>思いついた瞬間にメモして、ワンタップで自分のメールへ。受信トレイがそのままToDoリストになる、最もシンプルなメモ管理法。</span>
+          
         </p>
       </div>
 
@@ -332,58 +318,58 @@
       <div class="tldr" style="background:var(--surface-elevated);border:1px solid var(--border-highlight);border-radius:var(--radius-md);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;box-shadow:var(--shadow-soft);">
         <div style="font-weight:800;color:var(--accent);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">TL;DR</div>
         <p style="color:var(--text-secondary);margin:0;">
-          <span data-lang="ja">メモを自分のメールに即座に送れる「Note to Email」ワークフロー。受信箱がToDoリストになり、フォルダ整理もタグ付けも不要。Obsidian連携シンプルメモなら起動0.3秒・ワンタップで送信完了。</span>
-          <span data-lang="en">"Note to Email" is a workflow where you instantly send memos to your own inbox. The inbox itself becomes your to-do list — no folders, no tags. With Simple Memo - for Obsidian, the app launches in 0.3 seconds and sends with one tap.</span>
+          <span>メモを自分のメールに即座に送れる「Note to Email」ワークフロー。受信箱がToDoリストになり、フォルダ整理もタグ付けも不要。Obsidian連携シンプルメモなら起動0.3秒・ワンタップで送信完了。</span>
+          
         </p>
       </div>
 
       <!-- Conclusion -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">なぜ「自分にメール」が最強のメモ術なのか</span>
-          <span data-lang="en">Why "Email to Self" Is the Best Note System</span>
+          <span>なぜ「自分にメール」が最強のメモ術なのか</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">メモアプリは増え続けていますが、結局ほとんどの人が見返しません。自分のメールに送れば、<strong>毎日必ず開く受信トレイ</strong>がそのままタスクリストになります。フォルダ管理もタグ付けも不要。書いたら送る、それだけ。</span>
-          <span data-lang="en">Note apps keep multiplying, but most people never look back at them. Email your notes to yourself, and <strong>the inbox you check every day</strong> becomes your task list. No folders, no tags. Write and send, that's it.</span>
+          <span>メモアプリは増え続けていますが、結局ほとんどの人が見返しません。自分のメールに送れば、<strong>毎日必ず開く受信トレイ</strong>がそのままタスクリストになります。フォルダ管理もタグ付けも不要。書いたら送る、それだけ。</span>
+          
         </p>
       </section>
 
       <!-- 3 Reasons -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">メモをメールで管理する3つのメリット</span>
-          <span data-lang="en">3 Benefits of Managing Notes via Email</span>
+          <span>メモをメールで管理する3つのメリット</span>
+          
         </h2>
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">1. 見落とさない</span>
-              <span data-lang="en">1. Never Overlooked</span>
+              <span>1. 見落とさない</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">メモアプリを別に開く習慣がない人でも、メールは毎日確認します。受信トレイにメモがあれば、必ず目に入ります。</span>
-              <span data-lang="en">Even if you don't habitually open a memo app, you check email daily. Notes in your inbox are impossible to miss.</span>
+              <span>メモアプリを別に開く習慣がない人でも、メールは毎日確認します。受信トレイにメモがあれば、必ず目に入ります。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">2. どこからでも確認</span>
-              <span data-lang="en">2. Access Anywhere</span>
+              <span>2. どこからでも確認</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">スマホ、PC、タブレット——どの端末からでもメールを確認すればメモが見られます。同期の心配も不要。</span>
-              <span data-lang="en">Phone, PC, tablet — check your email from any device to see your notes. No sync worries.</span>
+              <span>スマホ、PC、タブレット——どの端末からでもメールを確認すればメモが見られます。同期の心配も不要。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">3. 管理コストゼロ</span>
-              <span data-lang="en">3. Zero Overhead</span>
+              <span>3. 管理コストゼロ</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">フォルダ分けもタグ付けも不要。メールとして届くから、既存のメール整理ルール（スター、アーカイブ等）がそのまま使えます。</span>
-              <span data-lang="en">No folders or tags needed. Notes arrive as emails, so your existing email rules (stars, archive, etc.) just work.</span>
+              <span>フォルダ分けもタグ付けも不要。メールとして届くから、既存のメール整理ルール（スター、アーカイブ等）がそのまま使えます。</span>
+              
             </div>
           </div>
         </div>
@@ -392,78 +378,57 @@
       <!-- Use Cases -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">こんな場面で使える</span>
-          <span data-lang="en">Use Cases</span>
+          <span>こんな場面で使える</span>
+          
         </h2>
         <div class="use-cases">
-          <div class="use-case" data-lang="ja">
+          <div class="use-case">
             <div class="use-case__icon">&#128188;</div>
             <div class="use-case__title">仕事のタスク管理</div>
             <div class="use-case__desc">打ち合わせ中に思いついたToDoをサッとメモ→自分のメールへ。PCに戻ったら受信トレイで確認。</div>
           </div>
-          <div class="use-case" data-lang="ja">
+          <div class="use-case">
             <div class="use-case__icon">&#128161;</div>
             <div class="use-case__title">アイデアメモ</div>
             <div class="use-case__desc">移動中やシャワー後のひらめきを0.3秒で起動→即送信。忘れる前にメールで保存。</div>
           </div>
-          <div class="use-case" data-lang="ja">
+          <div class="use-case">
             <div class="use-case__icon">&#128722;</div>
             <div class="use-case__title">買い物リスト</div>
             <div class="use-case__desc">「牛乳、卵、パン」をメモしてワンタップ。スーパーでメールを開くだけ。</div>
           </div>
-          <div class="use-case" data-lang="ja">
+          <div class="use-case">
             <div class="use-case__icon">&#128214;</div>
             <div class="use-case__title">読書メモ</div>
             <div class="use-case__desc">気になった一節や感想をその場でメモ→メール。後でブログや資料にまとめるときに便利。</div>
           </div>
-          <div class="use-case" data-lang="en">
-            <div class="use-case__icon">&#128188;</div>
-            <div class="use-case__title">Work Task Management</div>
-            <div class="use-case__desc">Quick-capture to-dos during meetings and send to your inbox. Review on your PC later.</div>
-          </div>
-          <div class="use-case" data-lang="en">
-            <div class="use-case__icon">&#128161;</div>
-            <div class="use-case__title">Idea Capture</div>
-            <div class="use-case__desc">Launch in 0.3s to capture ideas on the go. Send before you forget.</div>
-          </div>
-          <div class="use-case" data-lang="en">
-            <div class="use-case__icon">&#128722;</div>
-            <div class="use-case__title">Shopping Lists</div>
-            <div class="use-case__desc">Memo "milk, eggs, bread" and send with one tap. Just check email at the store.</div>
-          </div>
-          <div class="use-case" data-lang="en">
-            <div class="use-case__icon">&#128214;</div>
-            <div class="use-case__title">Reading Notes</div>
-            <div class="use-case__desc">Capture quotes and thoughts on the spot. Easy to compile for blog posts or reports later.</div>
-          </div>
+
+          
+          
         </div>
       </section>
 
       <!-- Steps -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">使い方（3ステップ・3分で設定完了）</span>
-          <span data-lang="en">How to Use (3 Steps, 3-Minute Setup)</span>
+          <span>使い方（3ステップ・3分で設定完了）</span>
+          
         </h2>
-        <ol class="steps-list" data-lang="ja">
+        <ol class="steps-list">
           <li><strong>App Storeからダウンロード</strong> — 「Obsidian連携シンプルメモ」で検索。無料でダウンロードできます。</li>
           <li><strong>自分のメールアドレスを設定</strong> — Gmail、Outlook、Yahoo!メールなど、どのアドレスでもOK。普段使いのメールが最適です。</li>
           <li><strong>メモを書いてワンタップ送信</strong> — 起動0.3秒で即入力、送信ボタンを押すだけ。150msで自分のメールに届きます。Freeプランは1日3通までずっと無料。</li>
         </ol>
-        <ol class="steps-list" data-lang="en">
-          <li><strong>Download from App Store</strong> — Search "Simple Memo" or use the link below. Free to download.</li>
-          <li><strong>Set your email address</strong> — Gmail, Outlook, Yahoo Mail — any address works. Use the one you check most.</li>
-          <li><strong>Write and send with one tap</strong> — 0.3s launch, instant input, 150ms send. The Free plan gives you 3 sends a day, forever.</li>
-        </ol>
+        
       </section>
 
       <!-- Specs -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">仕様・一次情報</span>
-          <span data-lang="en">Specifications</span>
+          <span>仕様・一次情報</span>
+          
         </h2>
-        <dl class="spec-list" data-lang="ja">
+        <dl class="spec-list">
           <dt>対応OS</dt><dd>iOS 16.0以降</dd>
           <dt>起動速度</dt><dd>0.3秒（UIKit直接生成、Storyboard不使用）</dd>
           <dt>送信速度</dt><dd>150ms（Cloudflare Workers + Resend API）</dd>
@@ -472,101 +437,86 @@
           <dt>無料プラン</dt><dd>1日3通まで（ずっと無料）</dd>
           <dt>Premium</dt><dd>月額500円 / 年額5,000円（送信無制限）</dd>
         </dl>
-        <dl class="spec-list" data-lang="en">
-          <dt>Supported OS</dt><dd>iOS 16.0+</dd>
-          <dt>Launch Speed</dt><dd>0.3 seconds (UIKit, no Storyboard)</dd>
-          <dt>Send Speed</dt><dd>150ms (Cloudflare Workers + Resend API)</dd>
-          <dt>Offline</dt><dd>Outbox architecture (AES-GCM encrypted, auto-resend)</dd>
-          <dt>Email Support</dt><dd>Gmail / Outlook / Yahoo Mail / iCloud Mail / Work email — any provider</dd>
-          <dt>Free Plan</dt><dd>3 sends/day (free forever)</dd>
-          <dt>Premium</dt><dd>$2.99/month or $29.99/year (unlimited sends)</dd>
-        </dl>
+        
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">よくある質問</span>
-          <span data-lang="en">FAQ</span>
+          <span>よくある質問</span>
+          
         </h2>
-        <div data-lang="ja">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">自分にメールでメモを送るメリットは何ですか？</span><span data-lang="en">What are the benefits of emailing notes to yourself?</span></summary><div class="faq-answer"><p data-lang="ja">受信トレイがそのままToDoリストになります。メモアプリを別に管理する必要がなく、毎日開くメールで確認できるため見落としを防げます。</p><p data-lang="en">Your inbox becomes your to-do list. There is no separate memo app to manage — you check the same email you already open every day, so nothing slips through.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">どんなメールアドレスでも使えますか？</span><span data-lang="en">Does it work with any email address?</span></summary><div class="faq-answer"><p data-lang="ja">はい。Gmail、Outlook、Yahoo!メール、iCloudメール、会社メールなど、どのメールアドレスでも宛先に設定できます。</p><p data-lang="en">Yes. Gmail, Outlook, Yahoo! Mail, iCloud Mail, and corporate email — any address can be set as the destination.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">オフラインでもメモを送れますか？</span><span data-lang="en">Can I send memos while offline?</span></summary><div class="faq-answer"><p data-lang="ja">はい。Outboxアーキテクチャにより、オフライン時のメモはAES-GCM暗号化で保存され、オンライン復帰時に自動送信されます。</p><p data-lang="en">Yes. Thanks to the Outbox architecture, offline memos are AES-GCM-encrypted on device and sent automatically when you come back online.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">メモの内容はサーバーに保存されますか？</span><span data-lang="en">Are my memos stored on your servers?</span></summary><div class="faq-answer"><p data-lang="ja">いいえ。メモは端末内でAES-GCM暗号化され、送信後はサーバーに保存されません。プライバシーファースト設計を徹底しています。</p><p data-lang="en">No. Memos are AES-GCM-encrypted on the device and are not retained on the server after sending. Privacy-first by design.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">件名や署名はカスタマイズできますか？</span><span data-lang="en">Can I customize the subject line and signature?</span></summary><div class="faq-answer"><p data-lang="ja">はい。メールの件名と署名はアプリ内で自由に設定できます。用途に応じて「[メモ]」「[TODO]」などの件名プレフィックスを設定すれば、メール側で自動振り分けも可能です。</p><p data-lang="en">Yes. The subject prefix and signature are fully configurable inside the app. Set prefixes like "[Memo]" or "[TODO]" to auto-route messages with email filters.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">Gmailの自分宛メールとの違いは？</span><span data-lang="en">How is this different from emailing yourself in Gmail?</span></summary><div class="faq-answer"><p data-lang="ja">Gmailアプリで自分宛にメールを送ることもできますが、宛先入力・件名入力・送信ボタンの複数ステップが必要です。Obsidian連携シンプルメモなら起動→入力→ワンタップの最短ルートで送れます。</p><p data-lang="en">You can email yourself in Gmail, but that path needs multiple steps — pick a recipient, type a subject, tap send. Simple Memo - for Obsidian collapses that to launch → type → one tap.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span data-lang="ja">Androidでも使えますか？（自分にメールを送りたい）</span><span data-lang="en">Can I use it on Android?</span></summary><div class="faq-answer"><p data-lang="ja">Obsidian連携シンプルメモは現在iOS専用です。Androidで自分にメールを送りたい場合は、Gmailアプリで自分宛に送る、またはGoogle Keepのメモを共有する方法が代替になります。ただし宛先・件名の入力という手間がかかるため、iPhone／iPadをお持ちなら本アプリのワンタップ送信が最速です。</p><p data-lang="en">Simple Memo is currently iOS-only. On Android, emailing yourself via the Gmail app or sharing a note from Google Keep are alternatives, though they take more steps. If you have an iPhone or iPad, this app's one-tap send is the fastest route.</p></div></details></div>
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>自分にメールでメモを送るメリットは何ですか？</span></summary><div class="faq-answer"><p>受信トレイがそのままToDoリストになります。メモアプリを別に管理する必要がなく、毎日開くメールで確認できるため見落としを防げます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>どんなメールアドレスでも使えますか？</span></summary><div class="faq-answer"><p>はい。Gmail、Outlook、Yahoo!メール、iCloudメール、会社メールなど、どのメールアドレスでも宛先に設定できます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>オフラインでもメモを送れますか？</span></summary><div class="faq-answer"><p>はい。Outboxアーキテクチャにより、オフライン時のメモはAES-GCM暗号化で保存され、オンライン復帰時に自動送信されます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>メモの内容はサーバーに保存されますか？</span></summary><div class="faq-answer"><p>いいえ。メモは端末内でAES-GCM暗号化され、送信後はサーバーに保存されません。プライバシーファースト設計を徹底しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>件名や署名はカスタマイズできますか？</span></summary><div class="faq-answer"><p>はい。メールの件名と署名はアプリ内で自由に設定できます。用途に応じて「[メモ]」「[TODO]」などの件名プレフィックスを設定すれば、メール側で自動振り分けも可能です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Gmailの自分宛メールとの違いは？</span></summary><div class="faq-answer"><p>Gmailアプリで自分宛にメールを送ることもできますが、宛先入力・件名入力・送信ボタンの複数ステップが必要です。Obsidian連携シンプルメモなら起動→入力→ワンタップの最短ルートで送れます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary"><span>Androidでも使えますか？（自分にメールを送りたい）</span></summary><div class="faq-answer"><p>Obsidian連携シンプルメモは現在iOS専用です。Androidで自分にメールを送りたい場合は、Gmailアプリで自分宛に送る、またはGoogle Keepのメモを共有する方法が代替になります。ただし宛先・件名の入力という手間がかかるため、iPhone／iPadをお持ちなら本アプリのワンタップ送信が最速です。</p></div></details></div>
         </div>
-        <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What are the benefits of emailing notes to yourself?</summary><div class="faq-answer"><p>Your inbox becomes your to-do list. No need for a separate app — notes land where you already look every day.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does it work with any email provider?</summary><div class="faq-answer"><p>Yes. Gmail, Outlook, Yahoo Mail, iCloud Mail, work email — any address works as the destination.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I send notes while offline?</summary><div class="faq-answer"><p>Yes. Outbox architecture stores offline memos with AES-GCM encryption and auto-sends when connectivity returns.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are my notes stored on a server?</summary><div class="faq-answer"><p>No. Notes are encrypted on-device with AES-GCM and never stored on the server after sending. Privacy-first by design.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is this different from emailing yourself via Gmail?</summary><div class="faq-answer"><p>Emailing yourself via Gmail requires entering the recipient, subject, and hitting send — multiple steps. Simple Memo cuts this to: launch → type → one tap. 0.3s to first character, 150ms to send.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use it on Android?</summary><div class="faq-answer"><p>Simple Memo is currently iOS-only. On Android, emailing yourself via the Gmail app or sharing a note from Google Keep are alternatives, though they require more steps. If you have an iPhone or iPad, this app's one-tap send is the fastest route.</p></div></details></div>
-        </div>
+        
       </section>
 
       <!-- 5 Reasons -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">メモ→メールが選ばれる5つの理由</span>
-          <span data-lang="en">5 Reasons Email Beats Traditional Note Apps</span>
+          <span>メモ→メールが選ばれる5つの理由</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">「メモは専用アプリで管理すべき」という思い込みを、一度疑ってみてください。メールという既存インフラを活用することで、メモの記録・確認・活用がすべてシームレスにつながります。ここでは、メモをメールで管理する方法が多くのユーザーに支持される5つの具体的な理由を紹介します。</span>
-          <span data-lang="en">Challenge the assumption that notes belong in a dedicated app. By leveraging email — infrastructure you already use every day — capturing, reviewing, and acting on notes becomes seamless. Here are five concrete reasons why the email-based memo approach resonates with so many users.</span>
+          <span>「メモは専用アプリで管理すべき」という思い込みを、一度疑ってみてください。メールという既存インフラを活用することで、メモの記録・確認・活用がすべてシームレスにつながります。ここでは、メモをメールで管理する方法が多くのユーザーに支持される5つの具体的な理由を紹介します。</span>
+          
         </p>
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">1. 誰もが毎日開く「受信トレイ」</span>
-              <span data-lang="en">1. The Universal Inbox</span>
+              <span>1. 誰もが毎日開く「受信トレイ」</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">メールは世界中で最も普及したコミュニケーションツールです。新しいアプリを覚える必要も、新しい習慣を身につける必要もありません。毎日必ず開く受信トレイにメモが届くため、確認忘れがゼロになります。メモアプリを別途起動するという追加のステップを完全に排除できる点が、最大の利点です。</span>
-              <span data-lang="en">Email is the one place everyone checks daily. There is no new app to learn and no new habit to build. Your memos land in the inbox you already open every morning, every lunch break, and every evening. By eliminating the extra step of launching a separate note app, you remove the friction that causes most captured ideas to be forgotten. The inbox is universal — it works whether you use Gmail, Outlook, or any other provider.</span>
+              <span>メールは世界中で最も普及したコミュニケーションツールです。新しいアプリを覚える必要も、新しい習慣を身につける必要もありません。毎日必ず開く受信トレイにメモが届くため、確認忘れがゼロになります。メモアプリを別途起動するという追加のステップを完全に排除できる点が、最大の利点です。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">2. 強力な検索機能を無料で利用</span>
-              <span data-lang="en">2. Built-in Search Power</span>
+              <span>2. 強力な検索機能を無料で利用</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">GmailやOutlookの検索機能は、ほとんどのメモアプリの検索より高性能です。キーワード、日付、送信元などの条件で瞬時にメモを見つけられます。さらに、メールの件名にプレフィックスを設定しておけば、「subject:[メモ] 会議」のように絞り込むことも可能です。何千通のメールの中からでも、目的のメモを数秒で発見できます。</span>
-              <span data-lang="en">Gmail and Outlook search is more powerful than the search in most dedicated note apps. Find any memo by keyword, date, or sender instantly. Set a subject-line prefix like "[Memo]" and you can filter with queries such as "subject:[Memo] meeting" to narrow results further. Even among thousands of emails, you can locate the exact note you need in seconds — no tagging or folder hierarchy required.</span>
+              <span>GmailやOutlookの検索機能は、ほとんどのメモアプリの検索より高性能です。キーワード、日付、送信元などの条件で瞬時にメモを見つけられます。さらに、メールの件名にプレフィックスを設定しておけば、「subject:[メモ] 会議」のように絞り込むことも可能です。何千通のメールの中からでも、目的のメモを数秒で発見できます。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">3. ベンダーロックインなし</span>
-              <span data-lang="en">3. Zero Lock-in</span>
+              <span>3. ベンダーロックインなし</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">メモはあなたのメールアカウントに保存されるため、独自データベースに閉じ込められる心配がありません。メモアプリを変えてもデータはそのまま残ります。エクスポート機能の有無や、サービス終了を心配する必要がなくなります。メールという標準プロトコルを使っているからこそ実現できるデータポータビリティです。</span>
-              <span data-lang="en">Your memos live in your email account, not in a proprietary database controlled by a single vendor. Switch memo apps anytime without losing a single note. You never have to worry about export formats, service shutdowns, or migration headaches. Because email is built on open, standard protocols, your data remains truly portable and permanently accessible to you.</span>
+              <span>メモはあなたのメールアカウントに保存されるため、独自データベースに閉じ込められる心配がありません。メモアプリを変えてもデータはそのまま残ります。エクスポート機能の有無や、サービス終了を心配する必要がなくなります。メールという標準プロトコルを使っているからこそ実現できるデータポータビリティです。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">4. すべてのデバイスで自動同期</span>
-              <span data-lang="en">4. Cross-Device by Default</span>
+              <span>4. すべてのデバイスで自動同期</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">メールはスマートフォン、タブレット、ノートPC、職場のPCなど、あらゆるデバイスで自動的に同期されます。専用の同期設定やクラウドサービスへの登録は一切不要です。iPhoneでメモを送り、職場のWindows PCで確認し、帰宅後にiPadで見返す——そんな使い方が、特別な準備なしに実現します。</span>
-              <span data-lang="en">Email syncs across every device you own — phone, tablet, laptop, work PC — without any additional sync setup or cloud service registration. Send a memo from your iPhone during your commute, review it on your Windows PC at work, and revisit it on your iPad at home. This cross-device workflow happens automatically because email synchronization is already built into every device you use.</span>
+              <span>メールはスマートフォン、タブレット、ノートPC、職場のPCなど、あらゆるデバイスで自動的に同期されます。専用の同期設定やクラウドサービスへの登録は一切不要です。iPhoneでメモを送り、職場のWindows PCで確認し、帰宅後にiPadで見返す——そんな使い方が、特別な準備なしに実現します。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">5. メモがそのままアクションに変わる</span>
-              <span data-lang="en">5. Actionable Format</span>
+              <span>5. メモがそのままアクションに変わる</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">メールとして届いたメモは、返信して補足情報を追加したり、転送して同僚に共有したり、スヌーズしてリマインダーとして使うことができます。メモが単なる記録ではなく、アクション可能なアイテムに変わるのです。タスク管理ツールとの連携も容易で、例えばGmailからGoogle Tasksへの変換もワンクリックで完了します。</span>
-              <span data-lang="en">Reply to a memo-email to add context or follow-up thoughts. Forward it to a colleague to delegate a task. Snooze it to turn the memo into a timed reminder. Your memos become actionable items, not static records collecting dust in a notebook. Integration with task management tools is also straightforward — for example, converting a Gmail message into a Google Task takes just one click.</span>
+              <span>メールとして届いたメモは、返信して補足情報を追加したり、転送して同僚に共有したり、スヌーズしてリマインダーとして使うことができます。メモが単なる記録ではなく、アクション可能なアイテムに変わるのです。タスク管理ツールとの連携も容易で、例えばGmailからGoogle Tasksへの変換もワンクリックで完了します。</span>
+              
             </div>
           </div>
         </div>
@@ -575,30 +525,30 @@
       <!-- Comparison with Traditional Note Apps -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">従来のメモアプリとの違い</span>
-          <span data-lang="en">How Email Memos Differ from Traditional Note Apps</span>
+          <span>従来のメモアプリとの違い</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">従来のメモアプリは「記録する → 整理する → 見返す」の3ステップで成り立っています。一見シンプルですが、それぞれのステップに摩擦があります。記録するためにアプリを起動し、フォルダやタグで整理し、後から意識的に見返す——この3段階すべてを継続できる人はごく少数です。実際、多くのメモアプリユーザーが「メモはたくさん取るが、ほとんど見返さない」という問題を抱えています。</span>
-          <span data-lang="en">Traditional note apps follow a three-step workflow: Capture, Organize, then Retrieve. Each step introduces friction. You launch a dedicated app to capture, spend time choosing folders or tags to organize, and then must consciously remember to revisit your notes to retrieve them. Very few people sustain all three steps consistently. In practice, most note app users admit they capture plenty of notes but rarely look back at them.</span>
+          <span>従来のメモアプリは「記録する → 整理する → 見返す」の3ステップで成り立っています。一見シンプルですが、それぞれのステップに摩擦があります。記録するためにアプリを起動し、フォルダやタグで整理し、後から意識的に見返す——この3段階すべてを継続できる人はごく少数です。実際、多くのメモアプリユーザーが「メモはたくさん取るが、ほとんど見返さない」という問題を抱えています。</span>
+          
         </p>
         <p class="lp-section__lead">
-          <span data-lang="ja">メモ→メール方式はこのワークフローを根本的に変えます。「記録する → 完了」のたった1ステップです。整理のステップを完全に排除し、見返す行為はメールチェックという既存の習慣に統合されます。これが最大のイノベーションです。整理しなくていいからこそ、メモを取るハードルが限りなく低くなり、結果としてより多くのアイデアや気づきを記録できるようになります。</span>
-          <span data-lang="en">The email memo approach fundamentally changes this workflow. It reduces the process to a single step: Capture, then Done. The organize step is completely eliminated, and retrieval is absorbed into a habit you already have — checking email. This is the key innovation. Because there is nothing to organize, the barrier to capturing a note drops to near zero, which means you end up recording more ideas, more tasks, and more insights than you ever did with a traditional app.</span>
+          <span>メモ→メール方式はこのワークフローを根本的に変えます。「記録する → 完了」のたった1ステップです。整理のステップを完全に排除し、見返す行為はメールチェックという既存の習慣に統合されます。これが最大のイノベーションです。整理しなくていいからこそ、メモを取るハードルが限りなく低くなり、結果としてより多くのアイデアや気づきを記録できるようになります。</span>
+          
         </p>
         <p class="lp-section__lead">
-          <span data-lang="ja">「整理」を省くことに不安を感じるかもしれません。しかし、考えてみてください。GmailやOutlookの検索機能は年々進化しており、数万通のメールからでもキーワード一つで目的の情報を瞬時に見つけられます。フォルダやタグで手動整理するよりも、高性能な検索エンジンに任せたほうが、はるかに効率的です。整理に費やしていた時間を、本来の仕事やクリエイティブな作業に充てることができます。さらに、メールの件名プレフィックス機能を使えば、最小限の労力で分類も可能です。メモアプリの「整理の手間」から解放されることで、メモを取ることの本質——アイデアを逃さず記録し、必要なときに取り出す——に集中できるようになります。</span>
-          <span data-lang="en">You might feel uneasy about skipping the organize step. But consider this: search engines inside Gmail and Outlook improve every year and can pinpoint any message among tens of thousands in an instant using just a keyword. Relying on a powerful search engine is far more efficient than manually sorting notes into folders or applying tags. The time you once spent organizing can be redirected to your actual work and creative endeavors. Moreover, the subject-line prefix feature lets you add minimal categorization with almost no effort. By freeing yourself from the organizational overhead of traditional note apps, you can focus on what note-taking is truly about — capturing ideas before they slip away and retrieving them when you need them most.</span>
+          <span>「整理」を省くことに不安を感じるかもしれません。しかし、考えてみてください。GmailやOutlookの検索機能は年々進化しており、数万通のメールからでもキーワード一つで目的の情報を瞬時に見つけられます。フォルダやタグで手動整理するよりも、高性能な検索エンジンに任せたほうが、はるかに効率的です。整理に費やしていた時間を、本来の仕事やクリエイティブな作業に充てることができます。さらに、メールの件名プレフィックス機能を使えば、最小限の労力で分類も可能です。メモアプリの「整理の手間」から解放されることで、メモを取ることの本質——アイデアを逃さず記録し、必要なときに取り出す——に集中できるようになります。</span>
+          
         </p>
       </section>
 
       <!-- Competitor Comparison -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">「自分にメール」アプリ比較</span>
-          <span data-lang="en">"Email Yourself" App Comparison</span>
+          <span>「自分にメール」アプリ比較</span>
+          
         </h2>
-        <div data-lang="ja">
+        <div>
           <table class="comparison-table">
             <thead><tr><th>比較項目</th><th class="highlight-col">Obsidian連携シンプルメモ</th><th>Moca</th><th>手動メール作成</th><th>iOSショートカット</th></tr></thead>
             <tbody>
@@ -611,93 +561,79 @@
             </tbody>
           </table>
         </div>
-        <div data-lang="en">
-          <table class="comparison-table">
-            <thead><tr><th>Feature</th><th class="highlight-col">Simple Memo - for Obsidian</th><th>Moca</th><th>Manual Email</th><th>iOS Shortcuts</th></tr></thead>
-            <tbody>
-              <tr><td>Time to Send</td><td class="highlight-col"><strong>3s</strong></td><td>~5s</td><td>30s+</td><td>~10s</td></tr>
-              <tr><td>Launch Speed</td><td class="highlight-col"><strong>0.3s</strong></td><td>~1.0s</td><td>~1.5s</td><td>~2s</td></tr>
-              <tr><td>Offline</td><td class="highlight-col">✅ Auto-resend</td><td>❌</td><td>✅ Drafts</td><td>❌</td></tr>
-              <tr><td>Encryption</td><td class="highlight-col">✅ AES-GCM</td><td>❌</td><td>TLS only</td><td>None</td></tr>
-              <tr><td>Recipient Input</td><td class="highlight-col">Pre-set</td><td>Pre-set</td><td>Every time</td><td>Pre-set</td></tr>
-              <tr><td>Price</td><td class="highlight-col">$2.99/mo</td><td>One-time</td><td>Free</td><td>Free</td></tr>
-            </tbody>
-          </table>
-        </div>
+        
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">今すぐ「メモ→メール」を始める</span>
-          <span data-lang="en">Start emailing notes to yourself</span>
+          <span>今すぐ「メモ→メール」を始める</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">ダウンロードは無料。設定は3分で完了します。</span>
-          <span data-lang="en">Free to download. Setup takes 3 minutes.</span>
+          <span>ダウンロードは無料。設定は3分で完了します。</span>
+          
         </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=note-to-email-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=note-to-email-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=note-to-email-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">関連ページ</span>
-          <span data-lang="en">Related Pages</span>
+          <span>関連ページ</span>
+          
         </h2>
         <div class="internal-links">
           <a href="/captio-alternative/">
-            <span data-lang="ja">Captio代替アプリ 比較ガイド</span>
-            <span data-lang="en">Captio Alternative Guide</span>
+            <span>Captio代替アプリ 比較ガイド</span>
+            
           </a>
           <a href="/blog/email-yourself-app-comparison">
-            <span data-lang="ja">自分にメール送信アプリ5選 比較</span>
-            <span data-lang="en">Email-Yourself Apps Compared</span>
+            <span>自分にメール送信アプリ5選 比較</span>
+            
           </a>
           <a href="/use-cases/">
-            <span data-lang="ja">活用事例一覧</span>
-            <span data-lang="en">Use Cases</span>
+            <span>活用事例一覧</span>
+            
           </a>
           <a href="/use-cases/work-tasks/">
-            <span data-lang="ja">仕事のタスク管理</span>
-            <span data-lang="en">Work Task Management</span>
+            <span>仕事のタスク管理</span>
+            
           </a>
           <a href="/use-cases/ideas/">
-            <span data-lang="ja">アイデア記録</span>
-            <span data-lang="en">Idea Capture</span>
+            <span>アイデア記録</span>
+            
           </a>
           <a href="/guides/">
-            <span data-lang="ja">メール設定ガイド</span>
-            <span data-lang="en">Setup Guides</span>
+            <span>メール設定ガイド</span>
+            
           </a>
           <a href="/methods/">
-            <span data-lang="ja">生産性メソッド</span>
-            <span data-lang="en">Productivity Methods</span>
+            <span>生産性メソッド</span>
+            
           </a>
           <a href="/faq">
-            <span data-lang="ja">よくあるご質問（全一覧）</span>
-            <span data-lang="en">Full FAQ</span>
+            <span>よくあるご質問（全一覧）</span>
+            
           </a>
           <a href="/">
-            <span data-lang="ja">Obsidian連携シンプルメモ トップ</span>
-            <span data-lang="en">Simple Memo Home</span>
+            <span>Obsidian連携シンプルメモ トップ</span>
+            
           </a>
           <a href="/privacy">
-            <span data-lang="ja">プライバシーポリシー</span>
-            <span data-lang="en">Privacy Policy</span>
+            <span>プライバシーポリシー</span>
+            
           </a>
           <a href="/blog/email-yourself-memo">
-            <span data-lang="ja">自分にメールでメモを10倍速く</span>
-            <span data-lang="en">Email Yourself Memos 10x Faster</span>
+            <span>自分にメールでメモを10倍速く</span>
+            
           </a>
           <a href="/blog/instant-capture-workflow">
-            <span data-lang="ja">即キャプチャワークフロー</span>
-            <span data-lang="en">Instant Capture Workflow</span>
+            <span>即キャプチャワークフロー</span>
+            
           </a>
         </div>
       </section>
@@ -709,60 +645,58 @@
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
         <a href="/" class="footer__link">
-          <span data-lang="ja">ホーム</span>
-          <span data-lang="en">Home</span>
+          <span>ホーム</span>
+          
         </a>
         <a href="/captio-alternative/" class="footer__link">
-          <span data-lang="ja">Captio代替</span>
-          <span data-lang="en">Captio Alternative</span>
+          <span>Captio代替</span>
+          
         </a>
         <a href="/note-to-email/" class="footer__link">
-          <span data-lang="ja">メモ→メール</span>
-          <span data-lang="en">Note to Email</span>
+          <span>メモ→メール</span>
+          
         </a>
         <a href="/faq" class="footer__link">
-          <span data-lang="ja">FAQ</span>
-          <span data-lang="en">FAQ</span>
+          <span>FAQ</span>
+          
         </a>
         <a href="/privacy" class="footer__link">
-          <span data-lang="ja">プライバシー</span>
-          <span data-lang="en">Privacy</span>
+          <span>プライバシー</span>
+          
         </a>
         <a href="/vs/" class="footer__link">
-          <span data-lang="ja">アプリ比較</span>
-          <span data-lang="en">Comparisons</span>
+          <span>アプリ比較</span>
+          
         </a>
         <a href="/use-cases/" class="footer__link">
-          <span data-lang="ja">活用事例</span>
-          <span data-lang="en">Use Cases</span>
+          <span>活用事例</span>
+          
         </a>
         <a href="/guides/" class="footer__link">
-          <span data-lang="ja">設定ガイド</span>
-          <span data-lang="en">Guides</span>
+          <span>設定ガイド</span>
+          
         </a>
         <a href="/about/" class="footer__link">
-          <span data-lang="ja">について</span>
-          <span data-lang="en">About</span>
+          <span>について</span>
+          
         </a>
         <a href="/contact" class="footer__link">
-          <span data-lang="ja">お問い合わせ</span>
-          <span data-lang="en">Contact</span>
+          <span>お問い合わせ</span>
+          
         </a>
         <a href="/templates/" class="footer__link">
-          <span data-lang="ja">テンプレ</span>
-          <span data-lang="en">Templates</span>
+          <span>テンプレ</span>
+          
         </a>
       </nav>
       <p class="footer__copyright">
         &copy; 2026
-        <span data-lang="ja">Obsidian連携シンプルメモ</span>
-        <span data-lang="en">Simple Memo - for Obsidian</span>.
+        <span>Obsidian連携シンプルメモ</span>
+        .
         All rights reserved.
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

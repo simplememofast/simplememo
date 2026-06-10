@@ -76,8 +76,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -261,85 +259,73 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span data-lang="ja">Obsidian連携シンプルメモ</span><span data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-mail-to-self-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-mail-to-self-jp&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/mail-to-self/" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/mail-to-self/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-mail-to-self-jp&amp;mt=8" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          <span>ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">Mail to Selfアプリとの比較 — Obsidian連携シンプルメモ | 自分にメール アプリ比較</span>
-      <span class="meta-og-title">シンプルメモ vs Mail to Self — 自分にメールするアプリ徹底比較</span>
-      <span class="meta-description">自分にメールを送るアプリ（Mail to Self）を徹底比較。EmailMe・Note To Self・MeMailなどとObsidian連携シンプルメモの違いを解説。SMTP不要・暗号化・オフライン対応。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">Simple Memo vs Mail to Self Apps — Email-to-Self Comparison</span>
-      <span class="meta-og-title">Simple Memo vs Mail to Self — In-Depth Comparison</span>
-      <span class="meta-description">The best email-to-self app compared: Simple Memo vs EmailMe, Note To Self, MeMail. No SMTP setup, AES-GCM encryption, offline Outbox, 150ms send speed.</span>
-    </div>
-  </div>
+  
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span data-lang="ja">メモアプリ比較</span>
-          <span data-lang="en">Memo App Comparison</span>
+          <span>メモアプリ比較</span>
+          
         </div>
         <h1 class="lp-hero__title">
-          <span data-lang="ja">シンプルメモ vs Mail to Self<br>最速・最安全の自分メールアプリ</span>
-          <span data-lang="en">Simple Memo vs Mail to Self<br>The Fastest, Most Secure Email-to-Self App</span>
+          <span>シンプルメモ vs Mail to Self<br>最速・最安全の自分メールアプリ</span>
+          
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">「自分にメールを送る」アプリは多数ありますが、ほとんどがSMTP設定やアカウント登録を要求します。Obsidian連携シンプルメモはCloudflare Workers経由のリレーでSMTP不要、AES-GCM暗号化のOutbox、0.3秒起動で、最速・最安全のMail to Selfアプリです。</span>
-          <span data-lang="en">There are many "email yourself" apps, but most require SMTP setup or account creation. Simple Memo uses Cloudflare Workers relay — no SMTP configuration needed. Just enter your email address, type, and send in 150ms. With AES-GCM encrypted Outbox and 0.3s launch, it's the fastest, most secure mail-to-self app.</span>
+          <span>「自分にメールを送る」アプリは多数ありますが、ほとんどがSMTP設定やアカウント登録を要求します。Obsidian連携シンプルメモはCloudflare Workers経由のリレーでSMTP不要、AES-GCM暗号化のOutbox、0.3秒起動で、最速・最安全のMail to Selfアプリです。</span>
+          
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
-          <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 6, 2026</span>
+          <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-06">2026年03月06日</time></span>
+          
         </p>
       </div>
 
       <!-- Entity Definition -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">Mail to Selfアプリとは</span>
-          <span data-lang="en">What are Mail to Self Apps?</span>
+          <span>Mail to Selfアプリとは</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">「Mail to Self」（自分にメールを送る）アプリは、素早くメモを取って自分のメールアドレスに送信するためのアプリの総称です。EmailMe、Note To Self Mail、MeMail、Captio（2024年10月廃止）などが代表的です。多くのアプリはSMTP設定（メールサーバーのアドレス・ポート番号・パスワード）を要求するため、技術的な知識がないユーザーにはハードルが高くなります。また、ほとんどのアプリにはオフライン対応や端末内暗号化がありません。Obsidian連携シンプルメモは、これらの課題をCloudflare Workersリレー・AES-GCM暗号化・Outboxアーキテクチャで解決した、次世代のMail to Selfアプリです。</span>
-          <span data-lang="en">"Mail to Self" apps are a category of tools designed for one purpose: quickly capturing a thought and emailing it to your own address. Popular examples include EmailMe, Note To Self Mail, MeMail, and the now-discontinued Captio. Most of these apps require SMTP configuration (server address, port, password), creating a technical barrier for non-technical users. Additionally, few offer offline support or on-device encryption. Simple Memo solves these problems with Cloudflare Workers relay (no SMTP needed), AES-GCM encryption, and Outbox architecture — making it the next-generation mail-to-self app.</span>
+          <span>「Mail to Self」（自分にメールを送る）アプリは、素早くメモを取って自分のメールアドレスに送信するためのアプリの総称です。EmailMe、Note To Self Mail、MeMail、Captio（2024年10月廃止）などが代表的です。多くのアプリはSMTP設定（メールサーバーのアドレス・ポート番号・パスワード）を要求するため、技術的な知識がないユーザーにはハードルが高くなります。また、ほとんどのアプリにはオフライン対応や端末内暗号化がありません。Obsidian連携シンプルメモは、これらの課題をCloudflare Workersリレー・AES-GCM暗号化・Outboxアーキテクチャで解決した、次世代のMail to Selfアプリです。</span>
+          
         </p>
       </section>
 
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">比較表：シンプルメモ vs 他のMail to Selfアプリ</span>
-          <span data-lang="en">Comparison: Simple Memo vs Other Mail to Self Apps</span>
+          <span>比較表：シンプルメモ vs 他のMail to Selfアプリ</span>
+          
         </h2>
         <div style="overflow-x:auto">
-          <table class="compare-table" data-lang="ja">
+          <table class="compare-table">
             <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>一般的なMail to Selfアプリ</th></tr></thead>
             <tbody>
               <tr><td>起動速度</td><td class="yes">0.3秒（即入力可）</td><td>0.5〜2秒</td></tr>
@@ -354,31 +340,17 @@
               <tr><td>Captio後継</td><td class="yes">設計コンセプト継承</td><td class="no">なし</td></tr>
             </tbody>
           </table>
-          <table class="compare-table" data-lang="en">
-            <thead><tr><th>Feature</th><th>Simple Memo</th><th>Typical Mail to Self Apps</th></tr></thead>
-            <tbody>
-              <tr><td>Launch Speed</td><td class="yes">0.3s (type immediately)</td><td>0.5–2s</td></tr>
-              <tr><td>SMTP Setup</td><td class="yes">Not required</td><td class="no">Required by most</td></tr>
-              <tr><td>Account Registration</td><td class="yes">Not required (email only)</td><td class="no">Required by most</td></tr>
-              <tr><td>Send Speed</td><td class="yes">150ms (Cloudflare Workers)</td><td>1–5 seconds</td></tr>
-              <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td class="no">Rarely available</td></tr>
-              <tr><td>Encryption</td><td class="yes">AES-GCM (on-device)</td><td class="no">Rarely available</td></tr>
-              <tr><td>Password Storage</td><td class="yes">Not needed (relay)</td><td class="no">SMTP password required</td></tr>
-              <tr><td>Free Tier</td><td class="yes">3 sends/day, no feature gates</td><td>Ads / feature-limited</td></tr>
-              <tr><td>Bilingual</td><td class="yes">Japanese / English</td><td>English only (mostly)</td></tr>
-              <tr><td>Captio Successor</td><td class="yes">Spiritual successor</td><td class="no">No</td></tr>
-            </tbody>
-          </table>
+          
         </div>
       </section>
 
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">3つのメール自分送信の違い</span>
-          <span data-lang="en">3 Differences in Self-Email Methods</span>
+          <span>3つのメール自分送信の違い</span>
+          
         </h2>
-        <ul class="diff-list" data-lang="ja">
+        <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
             <strong>専用アプリ vs メーラー操作</strong><br>
@@ -395,44 +367,28 @@
             メーラー経由のMail to Selfは、圏外や通信エラー時にメールが下書きに残るか、エラーで消えてしまうリスクがあります。シンプルメモのOutboxアーキテクチャは、送信失敗時にメモをAES-GCM暗号化で端末内に安全に保存し、接続回復時に自動再送します。メモの紛失リスクがゼロです。
           </li>
         </ul>
-        <ul class="diff-list" data-lang="en">
-          <li>
-            <span class="diff-num">1</span>
-            <strong>Dedicated App vs Mail Client Operation</strong><br>
-            Mail to Self methods typically involve using a general-purpose email client to send to your own address, but Simple Memo is purpose-built for this task. The three steps of opening your mail client, entering a recipient, and sending are reduced to a single-tap workflow: launch, type, send. No distractions from other emails in your inbox.
-          </li>
-          <li>
-            <span class="diff-num">2</span>
-            <strong>Steps from Launch to Send</strong><br>
-            A typical Mail to Self workflow requires 5 steps: open email client, compose new, enter recipient, type body, send. Simple Memo launches in 0.3 seconds with the keyboard ready, reducing the process to just 2 steps: type and tap send. For anyone sending multiple memos daily, this step reduction adds up to significant time savings.
-          </li>
-          <li>
-            <span class="diff-num">3</span>
-            <strong>Behavior on Send Failure</strong><br>
-            When using a mail client for self-email, a connectivity error can leave your message stuck in drafts or lost entirely. Simple Memo's Outbox architecture safely stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss.
-          </li>
-        </ul>
+        
       </section>
 
       <!-- The Problem with Emailing Yourself -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">メーラーで自分にメール送信する手順の問題点</span>
-          <span data-lang="en">The Problem with Emailing Yourself via Mail App</span>
+          <span>メーラーで自分にメール送信する手順の問題点</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">標準のメールアプリで自分にメモを送る手順を確認しましょう。メールアプリを開く → 新規作成をタップ → 宛先に自分のアドレスを入力 → 件名を入力 → 本文にメモを入力 → 送信をタップ。合計6ステップです。しかもメーラーを開いた瞬間、他のメールが目に入り注意が逸れることも。Obsidian連携シンプルメモなら：アプリを開く → メモを入力 → 送信をタップ。たった3ステップ、摩擦は半分以下です。宛先の入力は不要で、件名はメモの1行目から自動設定されます。毎日何度もメモを送る習慣がある人にとって、このステップ数の差は体験の質を根本的に変えます。</span>
-          <span data-lang="en">Let's walk through the steps of manually emailing yourself via the Mail app: open Mail → tap compose → type your email address in the To field → type a subject → type the memo body → tap send. That's 6 steps. And the moment you open your mail client, other emails compete for your attention. With Simple Memo - for Obsidian: open the app → type your memo → tap send. Just 3 steps — less than half the friction. No need to type a recipient address, and the subject line is auto-generated from the first line of your memo. For anyone who sends memos to themselves multiple times a day, this step reduction fundamentally changes the quality of the experience.</span>
+          <span>標準のメールアプリで自分にメモを送る手順を確認しましょう。メールアプリを開く → 新規作成をタップ → 宛先に自分のアドレスを入力 → 件名を入力 → 本文にメモを入力 → 送信をタップ。合計6ステップです。しかもメーラーを開いた瞬間、他のメールが目に入り注意が逸れることも。Obsidian連携シンプルメモなら：アプリを開く → メモを入力 → 送信をタップ。たった3ステップ、摩擦は半分以下です。宛先の入力は不要で、件名はメモの1行目から自動設定されます。毎日何度もメモを送る習慣がある人にとって、このステップ数の差は体験の質を根本的に変えます。</span>
+          
         </p>
       </section>
 
       <!-- Who Should Choose Which -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">どちらを選ぶべきか</span>
-          <span data-lang="en">Who Should Choose Which?</span>
+          <span>どちらを選ぶべきか</span>
+          
         </h2>
-        <div class="choose-grid" data-lang="ja">
+        <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
             <ul>
@@ -456,108 +412,78 @@
             </ul>
           </div>
         </div>
-        <div class="choose-grid" data-lang="en">
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Simple Memo if you...</div>
-            <ul>
-              <li>Want to start immediately without SMTP setup</li>
-              <li>Need on-device encryption for memo security</li>
-              <li>Need reliable offline memo delivery</li>
-              <li>Want the fastest send speed (150ms)</li>
-              <li>Don't want your email password stored on device</li>
-              <li>Are looking for a Captio replacement</li>
-            </ul>
-          </div>
-          <div class="choose-card">
-            <div class="choose-card__title">Choose other Mail to Self apps if you...</div>
-            <ul>
-              <li>Are comfortable with SMTP configuration</li>
-              <li>Want to use your own mail server directly</li>
-              <li>Prefer not to route through a third-party relay</li>
-              <li>Prefer a specific app's UI or features</li>
-              <li>Need an Android version</li>
-              <li>Don't mind ad-supported free tiers</li>
-            </ul>
-          </div>
-        </div>
+        
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">よくある質問</span>
-          <span data-lang="en">FAQ</span>
+          <span>よくある質問</span>
+          
         </h2>
-        <div data-lang="ja">
+        <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリと普通のメーラーで自分に送るのは何が違いますか？</summary><div class="faq-answer"><p>メーラーで自分にメールを送る場合、宛先入力・件名設定・送信の手間がかかります。Mail to Selfアプリは送信先が固定されており、起動→入力→送信のステップが最小化されています。シンプルメモは0.3秒起動で2ステップ送信を実現しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メーラーのSMTP設定なしで自分にメールできますか？</summary><div class="faq-answer"><p>はい。シンプルメモはCloudflare Workersリレーを使用するため、SMTP設定は一切不要です。受信用メールアドレスを入力するだけで即座にメモを自分に送れます。SMTPサーバーやポート番号の知識も必要ありません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">電波の悪い場所で自分にメールしたメモが消えることはありますか？</summary><div class="faq-answer"><p>メーラー経由の場合、通信エラーでメモが消える可能性があります。シンプルメモはOutboxアーキテクチャにより、送信失敗時もAES-GCM暗号化で端末に保存し、接続回復時に自動再送します。メモの紛失リスクはゼロです。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Mail to Selfアプリからシンプルメモへの乗り換えは簡単ですか？</summary><div class="faq-answer"><p>はい。App Storeからダウンロードしてメールアドレスを設定するだけで完了します。過去に他のアプリで送ったメモはメール受信箱にそのまま残っています。データ移行の手間はありません。</p></div></details></div>
         </div>
-        <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is a Mail to Self app different from just emailing myself?</summary><div class="faq-answer"><p>Using a regular email client to mail yourself requires opening the client, entering your address, composing, and sending. A dedicated Mail to Self app like Simple Memo fixes the recipient and minimizes steps: launch in 0.3 seconds, type, and tap send. No inbox distractions, no wasted steps.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I send memos to myself without SMTP configuration?</summary><div class="faq-answer"><p>Yes. Simple Memo uses Cloudflare Workers as a relay, so SMTP setup is completely unnecessary. Just enter your receiving email address and start sending memos immediately. No server addresses, port numbers, or passwords required.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Will I lose a memo if I send it with poor connectivity?</summary><div class="faq-answer"><p>With a regular email client, a connectivity error can lose your draft. Simple Memo's Outbox architecture stores failed sends with AES-GCM encryption on-device and automatically retries when connectivity returns. Zero risk of memo loss.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is switching from another Mail to Self app to Simple Memo easy?</summary><div class="faq-answer"><p>Yes. Download from the App Store, set your email address, and you are ready in under a minute. All memos sent by your previous app remain in your email inbox. No data migration needed.</p></div></details></div>
-        </div>
+        
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">メーラーを開かずにセルフメール</span>
-          <span data-lang="en">Self-Email Without Opening Your Mail App</span>
+          <span>メーラーを開かずにセルフメール</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">宛先入力不要。ワンタップでセルフメール。ダウンロードは無料。</span>
-          <span data-lang="en">No address typing. One-tap self-email. Free to download.</span>
+          <span>宛先入力不要。ワンタップでセルフメール。ダウンロードは無料。</span>
+          
         </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-mail-to-self-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-mail-to-self-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=vs-mail-to-self-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">関連ページ</span>
-          <span data-lang="en">Related Pages</span>
+          <span>関連ページ</span>
+          
         </h2>
         <div class="internal-links">
           <a href="/vs/">
-            <span data-lang="ja">メモアプリ比較一覧</span>
-            <span data-lang="en">All App Comparisons</span>
+            <span>メモアプリ比較一覧</span>
+            
           </a>
           <a href="/vs/moca/">
-            <span data-lang="ja">vs Moca</span>
-            <span data-lang="en">vs Moca</span>
+            <span>vs Moca</span>
+            
           </a>
           <a href="/vs/memo-post/">
-            <span data-lang="ja">vs メモポスト</span>
-            <span data-lang="en">vs NotePost</span>
+            <span>vs メモポスト</span>
+            
           </a>
           <a href="/vs/note-to-self-mail/">
-            <span data-lang="ja">vs Note To Self Mail</span>
-            <span data-lang="en">vs Note To Self Mail</span>
+            <span>vs Note To Self Mail</span>
+            
           </a>
           <a href="/vs/email-me-app/">
-            <span data-lang="ja">vs Email Me App</span>
-            <span data-lang="en">vs Email Me App</span>
+            <span>vs Email Me App</span>
+            
           </a>
           <a href="/captio-alternative/">
-            <span data-lang="ja">Captio代替ガイド</span>
-            <span data-lang="en">Captio Alternative</span>
+            <span>Captio代替ガイド</span>
+            
           </a>
           <a href="/note-to-email/">
-            <span data-lang="ja">自分にメールするメモとは</span>
-            <span data-lang="en">Note-to-Email Guide</span>
+            <span>自分にメールするメモとは</span>
+            
           </a>
           <a href="/faq">
-            <span data-lang="ja">よくあるご質問</span>
-            <span data-lang="en">FAQ</span>
+            <span>よくあるご質問</span>
+            
           </a>
         </div>
       </section>
@@ -567,32 +493,23 @@
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span data-lang="ja">関連コンテンツ</span>
-    <span data-lang="en">Related Content</span>
+    <span>関連コンテンツ</span>
+    
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">自分にメール送信する方法</span><span data-lang="en">How to Email Yourself</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">よくあるご質問</span><span data-lang="en">FAQ</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio代替アプリ比較</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>自分にメール送信する方法</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>よくあるご質問</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使い方ガイド</span></a></li>
   </ul>
 </section>
-<section class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+<section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li><a href="https://apps.apple.com/app/mail-to-self/id1517055498" target="_blank" rel="noopener">Mail to Self 公式サイト</a></li>
     <li>Wirecutter ベストメモアプリレビュー</li>
     <li><a href="https://hbr.org/topic/subject/productivity" target="_blank" rel="noopener">Harvard Business Review — 生産性とメモ術</a></li>
     <li>Wired — デジタルメモの効果的な活用</li>
-  </ul>
-</section>
-<section class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-  <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-  <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
-    <li><a href="https://apps.apple.com/app/mail-to-self/id1517055498" target="_blank" rel="noopener">Mail to Self Official Site</a></li>
-    <li>Wirecutter Best Note-Taking Apps</li>
-    <li><a href="https://hbr.org/topic/subject/productivity" target="_blank" rel="noopener">Harvard Business Review - Productivity</a></li>
-    <li>Wired - Digital Note-Taking</li>
   </ul>
 </section>
 
@@ -602,52 +519,50 @@
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
         <a href="/" class="footer__link">
-          <span data-lang="ja">ホーム</span>
-          <span data-lang="en">Home</span>
+          <span>ホーム</span>
+          
         </a>
         <a href="/captio-alternative/" class="footer__link">
-          <span data-lang="ja">Captio代替</span>
-          <span data-lang="en">Captio Alternative</span>
+          <span>Captio代替</span>
+          
         </a>
         <a href="/note-to-email/" class="footer__link">
-          <span data-lang="ja">メモ→メール</span>
-          <span data-lang="en">Note to Email</span>
+          <span>メモ→メール</span>
+          
         </a>
         <a href="/vs/" class="footer__link">
-          <span data-lang="ja">アプリ比較</span>
-          <span data-lang="en">Comparisons</span>
+          <span>アプリ比較</span>
+          
         </a>
         <a href="/use-cases/" class="footer__link">
-          <span data-lang="ja">使い方</span>
-          <span data-lang="en">Use Cases</span>
+          <span>使い方</span>
+          
         </a>
         <a href="/guides/" class="footer__link">
-          <span data-lang="ja">ガイド</span>
-          <span data-lang="en">Guides</span>
+          <span>ガイド</span>
+          
         </a>
         <a href="/faq" class="footer__link">
-          <span data-lang="ja">FAQ</span>
-          <span data-lang="en">FAQ</span>
+          <span>FAQ</span>
+          
         </a>
         <a href="/privacy" class="footer__link">
-          <span data-lang="ja">プライバシー</span>
-          <span data-lang="en">Privacy</span>
+          <span>プライバシー</span>
+          
         </a>
         <a href="/contact" class="footer__link">
-          <span data-lang="ja">お問い合わせ</span>
-          <span data-lang="en">Contact</span>
+          <span>お問い合わせ</span>
+          
         </a>
       </nav>
       <p class="footer__copyright">
         &copy; 2026
-        <span data-lang="ja">Obsidian連携シンプルメモ</span>
-        <span data-lang="en">Simple Memo - for Obsidian</span>.
+        <span>Obsidian連携シンプルメモ</span>
+        .
         All rights reserved.
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

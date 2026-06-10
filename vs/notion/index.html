@@ -76,8 +76,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -266,71 +264,59 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span data-lang="ja">Obsidian連携シンプルメモ</span><span data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-notion-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-notion-jp&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/notion/" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/notion/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-notion-jp&amp;mt=8" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          <span>ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">シンプルメモ vs Notion — Notionシンプル代替 | Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">シンプルメモ vs Notion — Notionシンプル代替</span>
-      <span class="meta-description">NotionとObsidian連携シンプルメモを徹底比較。Notionは高機能すぎてメモに向かない。0.3秒起動・ワンタップ送信の超シンプルな代替アプリを解説。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">Simple Memo vs Notion — Simpler Notion Alternative</span>
-      <span class="meta-og-title">Simple Memo vs Notion — Simpler Alternative</span>
-      <span class="meta-description">Simple Memo vs Notion: the ultimate simplicity showdown. Zero learning curve, instant capture, email delivery vs Notion's powerful but complex workspace. Which is right for you?</span>
-    </div>
-  </div>
+  
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span data-lang="ja">Notionシンプル代替・徹底比較</span>
-          <span data-lang="en">Simple Notion Alternative & Comparison</span>
+          <span>Notionシンプル代替・徹底比較</span>
+          
         </div>
         <h1 class="lp-hero__title">
-          <span data-lang="ja">シンプルメモ vs Notion<br>「多機能」vs「ゼロ摩擦」</span>
-          <span data-lang="en">Simple Memo vs Notion<br>"All-in-One" vs "Zero Friction"</span>
+          <span>シンプルメモ vs Notion<br>「多機能」vs「ゼロ摩擦」</span>
+          
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">Notionは強力なワークスペースツールですが、瞬間メモには明らかに向いていません。シンプルメモはNotionの対極：機能ゼロ・学習コストゼロ・起動0.3秒。「思いついた → メール送信」を完璧にこなす一点突破ツールです。</span>
-          <span data-lang="en">Notion is a powerful all-in-one workspace. But it is clearly overkill for quick memos. Simple Memo is the antithesis: zero features, zero learning curve, 0.3-second launch. It does one thing — "thought to email" — with perfection.</span>
+          <span>Notionは強力なワークスペースツールですが、瞬間メモには明らかに向いていません。シンプルメモはNotionの対極：機能ゼロ・学習コストゼロ・起動0.3秒。「思いついた → メール送信」を完璧にこなす一点突破ツールです。</span>
+          
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-05">2026年03月05日</time></span>
-          <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 5, 2026</span>
+          <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-05">2026年03月05日</time></span>
+          
         </p>
         <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:1rem auto 0;font-style:italic;">
-          <span data-lang="ja">Notionを1年半メインで使った後にシンプルメモを併用し始めた理由は、電車内でNotionを開くたびにページ読み込みで3〜5秒待たされ、その間にアイデアを忘れてしまう経験が何度もあったからです。</span>
-          <span data-lang="en">After using Notion as my main tool for a year and a half, I started using Simple Memo alongside it — because every time I opened Notion on the train, the 3-5 second page load meant I'd forget my idea before I could type it.</span>
+          <span>Notionを1年半メインで使った後にシンプルメモを併用し始めた理由は、電車内でNotionを開くたびにページ読み込みで3〜5秒待たされ、その間にアイデアを忘れてしまう経験が何度もあったからです。</span>
+          
         </p>
       </div>
 
       <!-- Philosophy -->
-      <div class="philosophy-box" data-lang="ja">
+      <div class="philosophy-box">
         <div class="philosophy-box__label">設計哲学</div>
         <div class="philosophy-box__vs">「すべてができる」vs「一つだけ完璧に」</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;text-align:left;max-width:560px;margin:0 auto">
@@ -344,41 +330,27 @@
           </div>
         </div>
       </div>
-      <div class="philosophy-box" data-lang="en">
-        <div class="philosophy-box__label">Design Philosophy</div>
-        <div class="philosophy-box__vs">"Do Everything" vs "Do One Thing Perfectly"</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;text-align:left;max-width:560px;margin:0 auto">
-          <div>
-            <div class="philosophy-box__label">Notion</div>
-            <div class="philosophy-box__left">Databases, pages, wikis, project management, calendars, gallery views — combine every productivity tool into one workspace.</div>
-          </div>
-          <div>
-            <div class="philosophy-box__label">Simple Memo</div>
-            <div class="philosophy-box__right">One input field. One send button. Write the instant you have a thought. One tap to email. That's it.</div>
-          </div>
-        </div>
-      </div>
 
       <!-- Entity Definition -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">Notionとは</span>
-          <span data-lang="en">What is Notion?</span>
+          <span>Notionとは</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">Notionは、ドキュメント・データベース・プロジェクト管理・ウィキを一体化したオールインワン生産性ツールです。リッチテキスト・テーブル・カンバン・カレンダー・ギャラリービューなど高度な機能を持ち、個人から大規模チームまで幅広く使われています。しかし、その多機能さゆえに学習コストが高く、モバイル版の起動は平均3秒前後かかります。「素早いメモを取る」という単一の用途には明らかにオーバースペックであり、UIフリクションが高い点が弱点です。</span>
-          <span data-lang="en">Notion is an all-in-one productivity workspace combining documents, databases, project management, and wikis. It supports rich text, tables, kanban boards, calendar views, and gallery views, serving everyone from individuals to large teams. However, its power comes with a steep learning curve and a mobile launch time averaging 3 seconds. For the single use case of "quick memo capture," Notion is clearly overengineered, and its high UI friction is a significant weakness.</span>
+          <span>Notionは、ドキュメント・データベース・プロジェクト管理・ウィキを一体化したオールインワン生産性ツールです。リッチテキスト・テーブル・カンバン・カレンダー・ギャラリービューなど高度な機能を持ち、個人から大規模チームまで幅広く使われています。しかし、その多機能さゆえに学習コストが高く、モバイル版の起動は平均3秒前後かかります。「素早いメモを取る」という単一の用途には明らかにオーバースペックであり、UIフリクションが高い点が弱点です。</span>
+          
         </p>
       </section>
 
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">比較表：シンプルメモ vs Notion</span>
-          <span data-lang="en">Comparison Table: Simple Memo vs Notion</span>
+          <span>比較表：シンプルメモ vs Notion</span>
+          
         </h2>
         <div style="overflow-x:auto">
-          <table class="compare-table" data-lang="ja">
+          <table class="compare-table">
             <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>Notion</th></tr></thead>
             <tbody>
               <tr><td>起動速度</td><td class="yes">0.3秒</td><td class="no">〜3秒</td></tr>
@@ -394,32 +366,17 @@
               <tr><td>モバイル最適化</td><td class="yes">iOS特化・超軽量</td><td>重い・操作複雑</td></tr>
             </tbody>
           </table>
-          <table class="compare-table" data-lang="en">
-            <thead><tr><th>Feature</th><th>Simple Memo</th><th>Notion</th></tr></thead>
-            <tbody>
-              <tr><td>Launch Speed</td><td class="yes">0.3s</td><td class="no">~3s</td></tr>
-              <tr><td>Learning Curve</td><td class="yes">Zero</td><td class="no">High (hours to master)</td></tr>
-              <tr><td>One-Tap Send</td><td class="yes">Yes (direct email)</td><td class="no">No</td></tr>
-              <tr><td>Email Integration</td><td class="yes">Direct, 150ms</td><td class="no">Manual export only</td></tr>
-              <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td>Limited</td></tr>
-              <tr><td>Encryption</td><td class="yes">AES-GCM</td><td class="no">No (no E2E)</td></tr>
-              <tr><td>Databases</td><td class="no">None (intentional)</td><td class="yes">Yes</td></tr>
-              <tr><td>Team Sharing</td><td class="no">No</td><td class="yes">Yes</td></tr>
-              <tr><td>Templates</td><td class="no">No</td><td class="yes">Thousands</td></tr>
-              <tr><td>Free Plan</td><td class="yes">3 sends/day</td><td>Limited</td></tr>
-              <tr><td>Mobile Optimization</td><td class="yes">iOS-specific, ultra-light</td><td>Heavy, complex</td></tr>
-            </tbody>
-          </table>
+          
         </div>
       </section>
 
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">4つの本質的な違い</span>
-          <span data-lang="en">4 Essential Differences</span>
+          <span>4つの本質的な違い</span>
+          
         </h2>
-        <ul class="diff-list" data-lang="ja">
+        <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
             <strong>起動速度 vs ページロード：0.3秒 vs 3秒超</strong><br>
@@ -441,69 +398,48 @@
             シンプルメモは無料プラン（1日3通）でもすべての機能が使え、Premiumは月額500円で送信無制限。Notionは個人利用は無料ですが、チーム利用やAPI連携、高度な機能はプラスプラン以上が必要で、料金体系が複雑です。シンプルメモは「メモを送る」という単一機能に対して透明な価格設定です。
           </li>
         </ul>
-        <ul class="diff-list" data-lang="en">
-          <li>
-            <span class="diff-num">1</span>
-            <strong>Launch Speed vs Page Load: 0.3s vs 3s+</strong><br>
-            Simple Memo's keyboard is ready the instant you tap the app icon. Notion must load the workspace, expand the page tree, and render blocks — averaging 3+ seconds on mobile. The gap between "I had a thought" and "I'm typing" is 10x wider in Notion.
-          </li>
-          <li>
-            <span class="diff-num">2</span>
-            <strong>Text-Only vs Block Editor</strong><br>
-            Notion's block editor is powerful, but even writing one line presents choices: text block, heading block, to-do block, toggle block. Simple Memo has no block concept — just type and send. Zero choices means zero interruption to your train of thought.
-          </li>
-          <li>
-            <span class="diff-num">3</span>
-            <strong>Offline Reliability: Outbox vs Limited Cache</strong><br>
-            Simple Memo stores offline memos with AES-GCM encryption and auto-sends on reconnection. Notion mobile has offline cache but new page creation may not sync correctly without connectivity — a real problem on subways and flights.
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>Pricing Philosophy: Pay for What You Use vs Workspace Billing</strong><br>
-            Simple Memo's free plan (3 sends/day) includes all features; Premium is a flat $2.99/mo for unlimited sends. Notion is free for personal use but team features, API access, and advanced capabilities require Plus plans or higher — a more complex pricing model. Simple Memo offers transparent pricing for a single function.
-          </li>
-        </ul>
+        
       </section>
 
       <!-- Notion User Workflow -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">Notionユーザーの併用ワークフロー</span>
-          <span data-lang="en">Workflow for Notion Users</span>
+          <span>Notionユーザーの併用ワークフロー</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">Notionは強力なワークスペースですが、モバイルでの素早いキャプチャが苦手です。多くのNotionユーザーが「Notionを開く前にアイデアを忘れる」問題に直面しています。シンプルメモをNotionの「高速インボックス」として活用すれば、この問題は完全に解消されます。以下の3ステップワークフローを試してください。</span>
-          <span data-lang="en">Notion is a powerful workspace, but quick mobile capture is not its strength. Many Notion users face the "I forgot the idea before Notion loaded" problem. By using Simple Memo - for Obsidian as Notion's "fast inbox," this problem disappears entirely. Try this 3-step workflow.</span>
+          <span>Notionは強力なワークスペースですが、モバイルでの素早いキャプチャが苦手です。多くのNotionユーザーが「Notionを開く前にアイデアを忘れる」問題に直面しています。シンプルメモをNotionの「高速インボックス」として活用すれば、この問題は完全に解消されます。以下の3ステップワークフローを試してください。</span>
+          
         </p>
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">Step 1: シンプルメモで瞬間キャプチャ</span>
-              <span data-lang="en">Step 1: Instant Capture with Simple Memo - for Obsidian</span>
+              <span>Step 1: シンプルメモで瞬間キャプチャ</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">移動中・会議中・シャワー後、アイデアが浮かんだ瞬間にシンプルメモを開き（0.3秒）、書いてワンタップ送信。メモは150msであなたのメール受信トレイに届きます。Notionの起動を待つ必要はありません。</span>
-              <span data-lang="en">While commuting, in meetings, or right after a shower — open Simple Memo - for Obsidian the instant an idea strikes (0.3s), write, and tap send. Your memo arrives in your email inbox in 150ms. No waiting for Notion to load.</span>
+              <span>移動中・会議中・シャワー後、アイデアが浮かんだ瞬間にシンプルメモを開き（0.3秒）、書いてワンタップ送信。メモは150msであなたのメール受信トレイに届きます。Notionの起動を待つ必要はありません。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">Step 2: メールがNotionに自動到着</span>
-              <span data-lang="en">Step 2: Email Arrives Automatically</span>
+              <span>Step 2: メールがNotionに自動到着</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">Notionのemail-in機能（各データベースに固有のメールアドレス）を使えば、シンプルメモからのメールを直接Notionデータベースに取り込めます。Zapierやmake.comでGmailフィルタ→Notionデータベースの自動連携も設定可能です。手動コピーは不要です。</span>
-              <span data-lang="en">Using Notion's email-in feature (each database has a unique email address), Simple Memo - for Obsidian emails can flow directly into your Notion database. You can also set up Gmail filter to Notion database automation via Zapier or make.com. No manual copying needed.</span>
+              <span>Notionのemail-in機能（各データベースに固有のメールアドレス）を使えば、シンプルメモからのメールを直接Notionデータベースに取り込めます。Zapierやmake.comでGmailフィルタ→Notionデータベースの自動連携も設定可能です。手動コピーは不要です。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">Step 3: Notionでレビュー・整理</span>
-              <span data-lang="en">Step 3: Review & Organize in Notion</span>
+              <span>Step 3: Notionでレビュー・整理</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">Notionのデータベースビュー（テーブル・ボード・カレンダー）でキャプチャしたメモを一覧し、プロジェクトに紐付けたりタグを追加します。キャプチャは0.3秒、整理はNotionの強力なUIで。それぞれの得意分野を活かす分業体制です。</span>
-              <span data-lang="en">Use Notion's database views (table, board, calendar) to review captured memos, link them to projects, and add tags. Capture in 0.3 seconds, organize with Notion's powerful UI. A division of labor that leverages each tool's strengths.</span>
+              <span>Notionのデータベースビュー（テーブル・ボード・カレンダー）でキャプチャしたメモを一覧し、プロジェクトに紐付けたりタグを追加します。キャプチャは0.3秒、整理はNotionの強力なUIで。それぞれの得意分野を活かす分業体制です。</span>
+              
             </div>
           </div>
         </div>
@@ -512,10 +448,10 @@
       <!-- Who Should Choose Which -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">どちらを選ぶべきか</span>
-          <span data-lang="en">Who Should Choose Which?</span>
+          <span>どちらを選ぶべきか</span>
+          
         </h2>
-        <div class="choose-grid" data-lang="ja">
+        <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
             <ul>
@@ -539,67 +475,44 @@
             </ul>
           </div>
         </div>
-        <div class="choose-grid" data-lang="en">
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Simple Memo if you...</div>
-            <ul>
-              <li>Want to capture thoughts the instant they appear</li>
-              <li>Don't want to maintain a workspace</li>
-              <li>Prefer email as your permanent archive</li>
-              <li>Need offline memos to be reliably delivered</li>
-              <li>Want zero learning curve</li>
-              <li>Need the fastest possible iOS memo app</li>
-            </ul>
-          </div>
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Notion if you...</div>
-            <ul>
-              <li>Need project management and wikis</li>
-              <li>Do real-time team collaboration</li>
-              <li>Organize notes in databases and structures</li>
-              <li>Need kanban, calendar, and gallery views</li>
-              <li>Already have a Notion workspace you love</li>
-              <li>Write and manage long-form documents</li>
-            </ul>
-          </div>
-        </div>
+        
       </section>
 
       <!-- Use Both Together -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">両方を使い分ける：「キャプチャ」と「整理」を分離する</span>
-          <span data-lang="en">Use Both Together: Separate "Capture" from "Organization"</span>
+          <span>両方を使い分ける：「キャプチャ」と「整理」を分離する</span>
+          
         </h2>
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">ステップ1：シンプルメモでキャプチャ</span>
-              <span data-lang="en">Step 1: Capture with Simple Memo</span>
+              <span>ステップ1：シンプルメモでキャプチャ</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">会議中・移動中・アイデアが浮かんだ瞬間に、シンプルメモで0.3秒で書いてワンタップ送信。メール受信トレイに届きます。</span>
-              <span data-lang="en">In meetings, commuting, or when inspiration strikes — write in Simple Memo in 0.3s and send. It lands in your inbox immediately.</span>
+              <span>会議中・移動中・アイデアが浮かんだ瞬間に、シンプルメモで0.3秒で書いてワンタップ送信。メール受信トレイに届きます。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">ステップ2：Notionで整理</span>
-              <span data-lang="en">Step 2: Organize in Notion</span>
+              <span>ステップ2：Notionで整理</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">後でまとまった時間に、メール受信トレイのメモをレビューし、重要なものをNotionのデータベースに移動します。</span>
-              <span data-lang="en">Later, when you have focused time, review your inbox memos and transfer important ones into Notion's databases and pages.</span>
+              <span>後でまとまった時間に、メール受信トレイのメモをレビューし、重要なものをNotionのデータベースに移動します。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span data-lang="ja">結果：取りこぼしゼロ + 整理された知識ベース</span>
-              <span data-lang="en">Result: Zero Missed Ideas + Organized Knowledge Base</span>
+              <span>結果：取りこぼしゼロ + 整理された知識ベース</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span data-lang="ja">キャプチャとアーカイブを分離することで、Notionを開く前にアイデアを失う心配がなくなります。GTDの「インボックス」概念を実現します。</span>
-              <span data-lang="en">Separating capture from archiving means no idea is ever lost while waiting for Notion to load. This is the GTD "inbox" concept made real.</span>
+              <span>キャプチャとアーカイブを分離することで、Notionを開く前にアイデアを失う心配がなくなります。GTDの「インボックス」概念を実現します。</span>
+              
             </div>
           </div>
         </div>
@@ -608,85 +521,77 @@
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">よくある質問</span>
-          <span data-lang="en">FAQ</span>
+          <span>よくある質問</span>
+          
         </h2>
-        <div data-lang="ja">
+        <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Notionからシンプルメモにメモを移行できますか？</summary><div class="faq-answer"><p>シンプルメモは「移行先」ではなく「キャプチャ入口」です。Notionの既存データを移行する必要はありません。シンプルメモで素早くキャプチャしたメモをメールで受信し、必要なものだけNotionに整理するワークフローが最適です。両方を併用することで、Notionの強みを活かしつつキャプチャ速度を劇的に改善できます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Notion APIと連携してメモを自動的にNotionに送れますか？</summary><div class="faq-answer"><p>シンプルメモは直接Notion APIと連携する機能はありませんが、メール送信をトリガーにZapierやMake（旧Integromat）を使えば、シンプルメモ→メール→Notionデータベースという自動化が可能です。メールフィルタで特定の件名のメモをNotionに自動転送する設定も効果的です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Notionの「クイックノート」機能ではダメですか？</summary><div class="faq-answer"><p>Notion公式のクイックノート機能もありますが、アプリ自体の起動時間（約3秒）は変わりません。またクイックノートで作成したページの整理が後で必要になります。シンプルメモは0.3秒起動でメール送信するため、Notionのクイックノートより圧倒的に速く、整理の手間もありません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Notionが重くて起動が遅いのですが改善策はありますか？</summary><div class="faq-answer"><p>Notionのモバイル起動速度はワークスペースのサイズやネットワーク状況に依存し、根本的な改善は難しいです。「素早くメモを取る」場面だけシンプルメモを使い、「整理・検索・共有」はNotionで行う二刀流が最も実用的な解決策です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモで送ったメモをNotionに効率的に移す方法は？</summary><div class="faq-answer"><p>シンプルメモからのメールをGmailやOutlookで受信し、重要なものだけNotionのWebクリッパーやコピペでNotionに移します。毎日のレビュー時間（5分程度）にまとめて処理するGTD方式が効果的です。すべてのメモをNotionに移す必要はなく、メールに残しておくだけで十分なものも多いです。</p></div></details></div>
         </div>
-        <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I migrate my Notion notes to Simple Memo?</summary><div class="faq-answer"><p>Simple Memo is not a migration destination — it's a capture front-end. There's no need to move existing Notion data. Instead, use Simple Memo for instant capture, receive memos via email, and move only what matters into Notion. This workflow enhances Notion rather than replacing it.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can Simple Memo send notes directly to Notion via API?</summary><div class="faq-answer"><p>Simple Memo doesn't integrate with Notion's API directly, but you can automate the flow using Zapier or Make: Simple Memo sends to email, and an automation rule forwards specific memos into a Notion database. Email filters based on subject lines make this setup reliable and low-maintenance.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Why not just use Notion's Quick Note feature?</summary><div class="faq-answer"><p>Notion's Quick Note feature still requires the app to launch (~3 seconds), and captured notes need to be organized later. Simple Memo launches in 0.3 seconds and sends directly to email — no app load time, no page organization needed afterward. For pure capture speed, Simple Memo is in a different league.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Notion is slow on my phone. Is there a fix?</summary><div class="faq-answer"><p>Notion's mobile launch speed depends on workspace size and network conditions — there's no fundamental fix. The most practical solution is to use Simple Memo for quick capture moments and Notion for organization, search, and collaboration. This dual-tool approach eliminates the "waiting for Notion" frustration.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What's the best way to move Simple Memo emails into Notion?</summary><div class="faq-answer"><p>Receive Simple Memo emails in Gmail or Outlook, then during a daily review (about 5 minutes), move important ones into Notion via the Web Clipper or copy-paste. GTD-style batch processing works best. Many memos are fine staying in email — not everything needs to go into Notion.</p></div></details></div>
-        </div>
+        
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">Notionのインボックスを0.3秒に</span>
-          <span data-lang="en">Make Your Notion Inbox 0.3 Seconds</span>
+          <span>Notionのインボックスを0.3秒に</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">Notionの受信箱に0.3秒で送り込む。ダウンロードは無料。</span>
-          <span data-lang="en">Feed your Notion inbox in 0.3 seconds. Free to download.</span>
+          <span>Notionの受信箱に0.3秒で送り込む。ダウンロードは無料。</span>
+          
         </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-notion-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-notion-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=vs-notion-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">関連ページ</span>
-          <span data-lang="en">Related Pages</span>
+          <span>関連ページ</span>
+          
         </h2>
         <div class="internal-links">
           <a href="/vs/">
-            <span data-lang="ja">メモアプリ比較一覧</span>
-            <span data-lang="en">All App Comparisons</span>
+            <span>メモアプリ比較一覧</span>
+            
           </a>
           <a href="/vs/apple-notes/">
-            <span data-lang="ja">vs Apple Notes</span>
-            <span data-lang="en">vs Apple Notes</span>
+            <span>vs Apple Notes</span>
+            
           </a>
           <a href="/vs/google-keep/">
-            <span data-lang="ja">vs Google Keep</span>
-            <span data-lang="en">vs Google Keep</span>
+            <span>vs Google Keep</span>
+            
           </a>
           <a href="/vs/anytype/">
-            <span data-lang="ja">vs Anytype</span>
-            <span data-lang="en">vs Anytype</span>
+            <span>vs Anytype</span>
+            
           </a>
           <a href="/vs/tana/">
-            <span data-lang="ja">vs Tana</span>
-            <span data-lang="en">vs Tana</span>
+            <span>vs Tana</span>
+            
           </a>
           <a href="/captio-alternative/">
-            <span data-lang="ja">Captio代替ガイド</span>
-            <span data-lang="en">Captio Alternative</span>
+            <span>Captio代替ガイド</span>
+            
           </a>
           <a href="/note-to-email/">
-            <span data-lang="ja">自分にメールするメモとは</span>
-            <span data-lang="en">Note-to-Email Guide</span>
+            <span>自分にメールするメモとは</span>
+            
           </a>
           <a href="/use-cases/">
-            <span data-lang="ja">使い方・ユースケース</span>
-            <span data-lang="en">Use Cases</span>
+            <span>使い方・ユースケース</span>
+            
           </a>
           <a href="/faq">
-            <span data-lang="ja">よくあるご質問</span>
-            <span data-lang="en">FAQ</span>
+            <span>よくあるご質問</span>
+            
           </a>
         </div>
       </section>
@@ -696,32 +601,23 @@
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span data-lang="ja">関連コンテンツ</span>
-    <span data-lang="en">Related Content</span>
+    <span>関連コンテンツ</span>
+    
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">自分にメール送信する方法</span><span data-lang="en">How to Email Yourself</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">よくあるご質問</span><span data-lang="en">FAQ</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio代替アプリ比較</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>自分にメール送信する方法</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>よくあるご質問</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使い方ガイド</span></a></li>
   </ul>
 </section>
-<section class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+<section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li><a href="https://www.notion.so/" target="_blank" rel="noopener">Notion 公式サイト</a></li>
     <li><a href="https://www.pcmag.com/picks/the-best-note-taking-apps" target="_blank" rel="noopener">PCMag ベストメモアプリガイド</a></li>
     <li><a href="https://apps.apple.com/app/notion-notes-docs-tasks/id1232780281" target="_blank" rel="noopener">Notion - App Store</a></li>
     <li><a href="https://en.wikipedia.org/wiki/Notion_(productivity_software)" target="_blank" rel="noopener">Notion - Wikipedia</a></li>
-  </ul>
-</section>
-<section class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-  <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-  <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
-    <li><a href="https://www.notion.so/" target="_blank" rel="noopener">Notion Official Site</a></li>
-    <li><a href="https://www.pcmag.com/picks/the-best-note-taking-apps" target="_blank" rel="noopener">PCMag Best Note-Taking Apps</a></li>
-    <li><a href="https://apps.apple.com/app/notion-notes-docs-tasks/id1232780281" target="_blank" rel="noopener">Notion on the App Store</a></li>
-    <li><a href="https://en.wikipedia.org/wiki/Notion_(productivity_software)" target="_blank" rel="noopener">Notion (productivity software) - Wikipedia</a></li>
   </ul>
 </section>
 
@@ -731,52 +627,50 @@
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
         <a href="/" class="footer__link">
-          <span data-lang="ja">ホーム</span>
-          <span data-lang="en">Home</span>
+          <span>ホーム</span>
+          
         </a>
         <a href="/captio-alternative/" class="footer__link">
-          <span data-lang="ja">Captio代替</span>
-          <span data-lang="en">Captio Alternative</span>
+          <span>Captio代替</span>
+          
         </a>
         <a href="/note-to-email/" class="footer__link">
-          <span data-lang="ja">メモ→メール</span>
-          <span data-lang="en">Note to Email</span>
+          <span>メモ→メール</span>
+          
         </a>
         <a href="/vs/" class="footer__link">
-          <span data-lang="ja">アプリ比較</span>
-          <span data-lang="en">Comparisons</span>
+          <span>アプリ比較</span>
+          
         </a>
         <a href="/use-cases/" class="footer__link">
-          <span data-lang="ja">使い方</span>
-          <span data-lang="en">Use Cases</span>
+          <span>使い方</span>
+          
         </a>
         <a href="/guides/" class="footer__link">
-          <span data-lang="ja">ガイド</span>
-          <span data-lang="en">Guides</span>
+          <span>ガイド</span>
+          
         </a>
         <a href="/faq" class="footer__link">
-          <span data-lang="ja">FAQ</span>
-          <span data-lang="en">FAQ</span>
+          <span>FAQ</span>
+          
         </a>
         <a href="/privacy" class="footer__link">
-          <span data-lang="ja">プライバシー</span>
-          <span data-lang="en">Privacy</span>
+          <span>プライバシー</span>
+          
         </a>
         <a href="/contact" class="footer__link">
-          <span data-lang="ja">お問い合わせ</span>
-          <span data-lang="en">Contact</span>
+          <span>お問い合わせ</span>
+          
         </a>
       </nav>
       <p class="footer__copyright">
         &copy; 2026
-        <span data-lang="ja">Obsidian連携シンプルメモ</span>
-        <span data-lang="en">Simple Memo - for Obsidian</span>.
+        <span>Obsidian連携シンプルメモ</span>
+        .
         All rights reserved.
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

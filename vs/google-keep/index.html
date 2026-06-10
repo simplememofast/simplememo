@@ -76,8 +76,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -264,90 +262,78 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span data-lang="ja">Obsidian連携シンプルメモ</span><span data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-jp&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/google-keep/" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/google-keep/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-jp&amp;mt=8" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          <span>ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">シンプルメモ vs Google Keep — 比較・Google Keep代替 | Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">シンプルメモ vs Google Keep — 徹底比較</span>
-      <span class="meta-description">Google KeepとObsidian連携シンプルメモを徹底比較。Googleアカウント不要・直接メール送信・AES-GCM暗号化の違いを解説。Google Keep代替を探している方へ。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">Simple Memo vs Google Keep — Comparison & Alternative</span>
-      <span class="meta-og-title">Simple Memo vs Google Keep — In-Depth Comparison</span>
-      <span class="meta-description">Simple Memo vs Google Keep: no Google account required, direct email delivery, AES-GCM encryption. Find the best Google Keep alternative.</span>
-    </div>
-  </div>
+  
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span data-lang="ja">Google Keep代替・徹底比較</span>
-          <span data-lang="en">Google Keep Alternative & Comparison</span>
+          <span>Google Keep代替・徹底比較</span>
+          
         </div>
         <h1 class="lp-hero__title">
-          <span data-lang="ja">シンプルメモ vs Google Keep<br>アカウント不要・直接メール送信</span>
-          <span data-lang="en">Simple Memo vs Google Keep<br>No Account Required, Direct Email</span>
+          <span>シンプルメモ vs Google Keep<br>アカウント不要・直接メール送信</span>
+          
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">Google KeepはGoogleアカウントが必須で、クラウドにすべてのデータを同期します。Obsidian連携シンプルメモはアカウント不要・クラウド非依存で、メモをワンタップで直接メール送信します。プライバシーと速さを求めるなら、比較してみてください。</span>
-          <span data-lang="en">Google Keep requires a Google account and syncs everything to Google's cloud. Simple Memo needs no account, stores nothing server-side, and delivers memos directly to your email in one tap. Compare before you decide.</span>
+          <span>Google KeepはGoogleアカウントが必須で、クラウドにすべてのデータを同期します。Obsidian連携シンプルメモはアカウント不要・クラウド非依存で、メモをワンタップで直接メール送信します。プライバシーと速さを求めるなら、比較してみてください。</span>
+          
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
-          <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-05">2026年03月05日</time></span>
-          <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 5, 2026</span>
+          <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-05">2026年03月05日</time></span>
+          
         </p>
       </div>
 
       <p class="lp-section__lead" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem;margin-bottom:2rem;font-size:.95rem;line-height:1.8;">
-        <span data-lang="ja">Google Keepとシンプルメモを同じ端末に入れて10日間検証した結果、Keepはラベルやリマインダーが便利な一方、メモを自分にメール送信するワークフローではシンプルメモがステップ数・速度ともに圧勝でした。</span>
-        <span data-lang="en">After testing Google Keep and Simple Memo side by side on the same device for 10 days, I found Keep's labels and reminders convenient, but for the workflow of emailing notes to yourself, Simple Memo won decisively in both step count and speed.</span>
+        <span>Google Keepとシンプルメモを同じ端末に入れて10日間検証した結果、Keepはラベルやリマインダーが便利な一方、メモを自分にメール送信するワークフローではシンプルメモがステップ数・速度ともに圧勝でした。</span>
+        
       </p>
 
       <!-- Entity Definition -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">Google Keepとは</span>
-          <span data-lang="en">What is Google Keep?</span>
+          <span>Google Keepとは</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">Google KeepはGoogleが提供する無料のメモアプリです。テキスト・音声・画像・手書きメモをGoogleアカウントに紐付けて保存し、Android・iOS・Web間でリアルタイム同期します。色分け、ラベル、リマインダー機能を持ち、Google WorkspaceやGoogleドキュメントとの連携も可能です。利用にはGoogleアカウントが必須で、すべてのメモはGoogleのサーバーに保存されます。メール連携は手動の共有操作が必要で、ワンタップ送信機能はありません。</span>
-          <span data-lang="en">Google Keep is Google's free note-taking service. It stores text, voice, images, and handwritten notes tied to your Google account, syncing in real time across Android, iOS, and web. It offers color-coding, labels, and reminders, with integration into Google Workspace and Docs. A Google account is mandatory, and all notes are stored on Google's servers. Email integration requires manual sharing — there is no one-tap send to email feature.</span>
+          <span>Google KeepはGoogleが提供する無料のメモアプリです。テキスト・音声・画像・手書きメモをGoogleアカウントに紐付けて保存し、Android・iOS・Web間でリアルタイム同期します。色分け、ラベル、リマインダー機能を持ち、Google WorkspaceやGoogleドキュメントとの連携も可能です。利用にはGoogleアカウントが必須で、すべてのメモはGoogleのサーバーに保存されます。メール連携は手動の共有操作が必要で、ワンタップ送信機能はありません。</span>
+          
         </p>
       </section>
 
       <!-- Comparison Table -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">比較表：シンプルメモ vs Google Keep</span>
-          <span data-lang="en">Comparison Table: Simple Memo vs Google Keep</span>
+          <span>比較表：シンプルメモ vs Google Keep</span>
+          
         </h2>
         <div style="overflow-x:auto">
-          <table class="compare-table" data-lang="ja">
+          <table class="compare-table">
             <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>Google Keep</th></tr></thead>
             <tbody>
               <tr><td>Googleアカウント</td><td class="yes">不要</td><td class="no">必須</td></tr>
@@ -363,48 +349,33 @@
               <tr><td>クロスプラットフォーム</td><td>iOS専用</td><td class="yes">全OS対応</td></tr>
             </tbody>
           </table>
-          <table class="compare-table" data-lang="en">
-            <thead><tr><th>Feature</th><th>Simple Memo</th><th>Google Keep</th></tr></thead>
-            <tbody>
-              <tr><td>Google Account</td><td class="yes">Not required</td><td class="no">Mandatory</td></tr>
-              <tr><td>Launch Speed</td><td class="yes">0.3s</td><td>~1.5s</td></tr>
-              <tr><td>Direct Email Send</td><td class="yes">One-tap, 150ms</td><td class="no">Manual share only</td></tr>
-              <tr><td>Server Storage</td><td class="yes">None (memo content)</td><td class="no">Google servers</td></tr>
-              <tr><td>Encryption</td><td class="yes">AES-GCM (on-device)</td><td class="no">Transit only</td></tr>
-              <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td class="yes">Cache available</td></tr>
-              <tr><td>Labels / Categories</td><td class="no">None (intentional)</td><td class="yes">Yes</td></tr>
-              <tr><td>Reminders</td><td class="no">No</td><td class="yes">Yes</td></tr>
-              <tr><td>Voice Memos</td><td class="no">No</td><td class="yes">Yes</td></tr>
-              <tr><td>Free Plan</td><td class="yes">3 sends/day</td><td class="yes">Completely free</td></tr>
-              <tr><td>Cross-Platform</td><td>iOS only</td><td class="yes">All platforms</td></tr>
-            </tbody>
-          </table>
+          
         </div>
       </section>
 
       <!-- Data Portability -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">Google Keepの将来性とデータポータビリティ</span>
-          <span data-lang="en">Google Keep's Future and Data Portability</span>
+          <span>Google Keepの将来性とデータポータビリティ</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span data-lang="ja">Googleは過去に人気サービスを突然終了してきた歴史があります（Google Reader、Inbox by Gmail、Google+など）。Google Keepのメモは専用フォーマットでGoogleサーバーに保存されるため、サービス終了時のデータ移行は容易ではありません。Google Takeoutでエクスポートは可能ですが、HTMLまたはJSON形式でのバルク出力になり、他のメモアプリへの直接インポートには変換作業が必要です。</span>
-          <span data-lang="en">Google has a history of abruptly discontinuing popular services (Google Reader, Inbox by Gmail, Google+, etc.). Google Keep notes are stored in a proprietary format on Google servers, making data migration non-trivial if the service is discontinued. While Google Takeout allows export, the output is bulk HTML or JSON requiring conversion for import into other note apps.</span>
+          <span>Googleは過去に人気サービスを突然終了してきた歴史があります（Google Reader、Inbox by Gmail、Google+など）。Google Keepのメモは専用フォーマットでGoogleサーバーに保存されるため、サービス終了時のデータ移行は容易ではありません。Google Takeoutでエクスポートは可能ですが、HTMLまたはJSON形式でのバルク出力になり、他のメモアプリへの直接インポートには変換作業が必要です。</span>
+          
         </p>
         <p class="lp-section__lead">
-          <span data-lang="ja">シンプルメモのアプローチは根本的に異なります。メモはメールとして送信されるため、データは最初から標準的なメールフォーマットで受信トレイに存在します。Gmail、Outlook、Apple Mailなど、どのメールサービスでも検索・フィルタリング・転送が可能。アプリが終了しても、メモはメールとして永続的に残ります。ベンダーロックインのリスクがゼロです。</span>
-          <span data-lang="en">Simple Memo's approach is fundamentally different. Since memos are sent as email, your data exists in standard email format in your inbox from day one. Searchable, filterable, and forwardable in Gmail, Outlook, Apple Mail — any email service. Even if the app disappears, your memos persist as emails forever. Zero vendor lock-in risk.</span>
+          <span>シンプルメモのアプローチは根本的に異なります。メモはメールとして送信されるため、データは最初から標準的なメールフォーマットで受信トレイに存在します。Gmail、Outlook、Apple Mailなど、どのメールサービスでも検索・フィルタリング・転送が可能。アプリが終了しても、メモはメールとして永続的に残ります。ベンダーロックインのリスクがゼロです。</span>
+          
         </p>
       </section>
 
       <!-- 5 Key Differences -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">4つの意外な違い</span>
-          <span data-lang="en">4 Surprising Differences</span>
+          <span>4つの意外な違い</span>
+          
         </h2>
-        <ul class="diff-list" data-lang="ja">
+        <ul class="diff-list">
           <li>
             <span class="diff-num">1</span>
             <strong>起動速度の実測差：0.3秒 vs 約1.5秒</strong><br>
@@ -426,37 +397,16 @@
             Google Keepはカード形式のUI、色分け、ラベル、リマインダー、チェックリストなど多彩な機能があります。シンプルメモは入力フィールドと送信ボタンのみ。「今書きたいこと」だけに集中できる環境は、視覚的ノイズを排除したい人に最適です。
           </li>
         </ul>
-        <ul class="diff-list" data-lang="en">
-          <li>
-            <span class="diff-num">1</span>
-            <strong>Measured Launch Speed: 0.3s vs ~1.5s</strong><br>
-            Simple Memo launches in 0.3 seconds with the keyboard ready. Google Keep takes approximately 1.5 seconds and shows a note list before you can create a new note. A 3x+ speed difference that's clearly felt when taking notes multiple times a day.
-          </li>
-          <li>
-            <span class="diff-num">2</span>
-            <strong>Memo Destination: Direct to Inbox vs Stored in Keep</strong><br>
-            Simple Memo delivers memos to your email address in 150ms — instantly viewable in Gmail, Outlook, or Apple Mail. Google Keep stores notes within the app; emailing them requires 4 manual steps. Where your memo "lands" is fundamentally different.
-          </li>
-          <li>
-            <span class="diff-num">3</span>
-            <strong>Google Account Dependency: None vs Mandatory</strong><br>
-            Google Keep requires a Google account login, and all notes are stored on Google's servers. Simple Memo needs no Google account and no dedicated account at all. Just set your email address and go — no data shared with Google.
-          </li>
-          <li>
-            <span class="diff-num">4</span>
-            <strong>Text Input Focus: 1 Screen vs Cards + Colors + Labels</strong><br>
-            Google Keep's card-based UI with color-coding, labels, reminders, and checklists offers versatility. Simple Memo has only an input field and send button. For those who want to focus purely on "what I need to write right now," the visual noise elimination is ideal.
-          </li>
-        </ul>
+        
       </section>
 
       <!-- Who Should Choose Which -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">どちらを選ぶべきか</span>
-          <span data-lang="en">Who Should Choose Which?</span>
+          <span>どちらを選ぶべきか</span>
+          
         </h2>
-        <div class="choose-grid" data-lang="ja">
+        <div class="choose-grid">
           <div class="choose-card">
             <div class="choose-card__title">Obsidian連携シンプルメモ向き</div>
             <ul>
@@ -480,39 +430,16 @@
             </ul>
           </div>
         </div>
-        <div class="choose-grid" data-lang="en">
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Simple Memo if you...</div>
-            <ul>
-              <li>Don't want Google storing your thoughts</li>
-              <li>Want zero sign-up friction</li>
-              <li>Need to email ideas instantly</li>
-              <li>Demand the fastest possible capture</li>
-              <li>Can't afford offline memo loss</li>
-              <li>Are an iOS user who values simplicity</li>
-            </ul>
-          </div>
-          <div class="choose-card">
-            <div class="choose-card__title">Choose Google Keep if you...</div>
-            <ul>
-              <li>Are deep in the Google ecosystem</li>
-              <li>Need Android and PC access to notes</li>
-              <li>Use labels, colors, and reminders</li>
-              <li>Capture voice memos and images</li>
-              <li>Integrate with Google Workspace</li>
-              <li>Want a completely free solution</li>
-            </ul>
-          </div>
-        </div>
+        
       </section>
 
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">よくある質問</span>
-          <span data-lang="en">FAQ</span>
+          <span>よくある質問</span>
+          
         </h2>
-        <div data-lang="ja">
+        <div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Google Keepはサービス終了する？</summary><div class="faq-answer"><p>2026年3月現在、Google Keepのサービス終了は発表されていません。ただし、2021年にはGoogle Keep Chrome版アプリが廃止された実績があります。Google提供のサービスであっても完全に安全とは言い切れません。万が一に備えてメモをメールでバックアップする方法があります。<a href='/blog/memo-app-service-shutdown-risk'>メモアプリ サービス終了リスクの完全ガイド</a>で詳しく解説しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Google Keepのメモを自分のメールに素早く転送する方法は？</summary><div class="faq-answer"><p>Google Keepには直接メール送信機能がなく、「その他」→「送信」→メールアプリ選択→宛先入力の4ステップが必要です。シンプルメモならワンタップ150msで完了。メモのメール転送が日常的なら、シンプルメモの方が圧倒的に効率的です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Google Keepのリマインダー機能はシンプルメモにありますか？</summary><div class="faq-answer"><p>シンプルメモにリマインダー機能はありません。しかし、メモがメールとして届くため、メールクライアント側のスヌーズ・フラグ・リマインダー機能を活用できます。Gmail・Outlookのリマインダー機能と組み合わせれば、Google Keepのリマインダーと同等の運用が可能です。</p></div></details></div>
@@ -520,63 +447,55 @@
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Googleアカウントなしで使えるメモアプリはありますか？</summary><div class="faq-answer"><p>シンプルメモはGoogleアカウントも専用アカウントも不要です。既存のメールアドレスを設定するだけで使い始められます。プライバシーを重視し、Googleにデータを預けたくない方に最適です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Google KeepとシンプルメモをAndroidとiOSで使い分けられますか？</summary><div class="faq-answer"><p>現在シンプルメモはiOS専用です。Android端末ではGoogle Keepを使い、iPhone側ではシンプルメモを使うという併用も可能です。どちらで書いたメモも最終的にメール受信トレイに集約できるのがシンプルメモの強みです。</p></div></details></div>
         </div>
-        <div data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do I quickly email a Google Keep note to myself?</summary><div class="faq-answer"><p>Google Keep has no direct email send — you need 4 steps via the share menu. Simple Memo sends in one tap at 150ms. If emailing notes to yourself is a regular workflow, Simple Memo is dramatically more efficient.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have reminders like Google Keep?</summary><div class="faq-answer"><p>Simple Memo has no built-in reminders, but since memos arrive as emails, you can use your email client's snooze, flag, or reminder features. Combined with Gmail or Outlook reminders, you get equivalent functionality to Google Keep's reminders.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can Google Keep auto-send notes to Gmail?</summary><div class="faq-answer"><p>No — Google Keep has no auto-send-to-email feature. Manual sharing is required each time. Simple Memo auto-sends every memo to your configured email address, creating a "write it, it's in Gmail" workflow automatically.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is there a note app that doesn't require a Google account?</summary><div class="faq-answer"><p>Simple Memo requires no Google account and no dedicated account at all. Just enter your email address and start capturing. Ideal for privacy-conscious users who prefer not to store data with Google.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Google Keep on Android and Simple Memo on iOS?</summary><div class="faq-answer"><p>Yes. Simple Memo is currently iOS-only. You can use Google Keep on Android and Simple Memo on iPhone — memos from both ultimately converge in your email inbox, which is Simple Memo's key advantage.</p></div></details></div>
-        </div>
+        
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span data-lang="ja">Google Keepより速くメモを飛ばす</span>
-          <span data-lang="en">Send Notes Faster Than Google Keep</span>
+          <span>Google Keepより速くメモを飛ばす</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">Keepが消えてもメモは残る。メール保存の安心感を、無料で。</span>
-          <span data-lang="en">Even if Keep disappears, your memos survive in email. Free to download.</span>
+          <span>Keepが消えてもメモは残る。メール保存の安心感を、無料で。</span>
+          
         </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=vs-google-keep-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=vs-google-keep-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span data-lang="ja">関連ページ</span>
-          <span data-lang="en">Related Pages</span>
+          <span>関連ページ</span>
+          
         </h2>
         <div class="internal-links">
           <a href="/vs/">
-            <span data-lang="ja">メモアプリ比較一覧</span>
-            <span data-lang="en">All App Comparisons</span>
+            <span>メモアプリ比較一覧</span>
+            
           </a>
           <a href="/vs/apple-notes/">
-            <span data-lang="ja">vs Apple Notes</span>
-            <span data-lang="en">vs Apple Notes</span>
+            <span>vs Apple Notes</span>
+            
           </a>
           <a href="/vs/notion/">
-            <span data-lang="ja">vs Notion</span>
-            <span data-lang="en">vs Notion</span>
+            <span>vs Notion</span>
+            
           </a>
           <a href="/captio-alternative/">
-            <span data-lang="ja">Captio代替ガイド</span>
-            <span data-lang="en">Captio Alternative</span>
+            <span>Captio代替ガイド</span>
+            
           </a>
           <a href="/note-to-email/">
-            <span data-lang="ja">自分にメールするメモとは</span>
-            <span data-lang="en">Note-to-Email Guide</span>
+            <span>自分にメールするメモとは</span>
+            
           </a>
           <a href="/faq">
-            <span data-lang="ja">よくあるご質問</span>
-            <span data-lang="en">FAQ</span>
+            <span>よくあるご質問</span>
+            
           </a>
         </div>
       </section>
@@ -586,31 +505,22 @@
 <!-- SEO: Auto-generated related content links -->
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
-    <span data-lang="ja">関連コンテンツ</span>
-    <span data-lang="en">Related Content</span>
+    <span>関連コンテンツ</span>
+    
   </h3>
   <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
-    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">Captio代替アプリ比較</span><span data-lang="en">Captio Alternatives</span></a></li>
-    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">自分にメール送信する方法</span><span data-lang="en">How to Email Yourself</span></a></li>
-    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">よくあるご質問</span><span data-lang="en">FAQ</span></a></li>
-    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span data-lang="ja">使い方ガイド</span><span data-lang="en">Setup Guides</span></a></li>
+    <li><a href="/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio代替アプリ比較</span></a></li>
+    <li><a href="/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>自分にメール送信する方法</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>よくあるご質問</span></a></li>
+    <li><a href="/guides/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>使い方ガイド</span></a></li>
   </ul>
 </section>
-<section class="references" data-lang="ja" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
+<section class="references" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
   <h3 style="font-size:1rem;margin-bottom:0.75rem">参考文献</h3>
   <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
     <li><a href="https://keep.google.com/" target="_blank" rel="noopener">Google Keep 公式サイト</a></li>
     <li><a href="https://zapier.com/blog/best-note-taking-apps/" target="_blank" rel="noopener">Zapier ベストメモアプリガイド</a></li>
     <li><a href="https://apps.apple.com/app/google-keep-notes-and-lists/id1029207872" target="_blank" rel="noopener">Google Keep - App Store</a></li>
-    <li><a href="https://en.wikipedia.org/wiki/Google_Keep" target="_blank" rel="noopener">Google Keep - Wikipedia</a></li>
-  </ul>
-</section>
-<section class="references" data-lang="en" style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1)">
-  <h3 style="font-size:1rem;margin-bottom:0.75rem">References</h3>
-  <ul style="font-size:.875rem;line-height:3.5;list-style:none;padding:0">
-    <li><a href="https://keep.google.com/" target="_blank" rel="noopener">Google Keep Official Site</a></li>
-    <li><a href="https://zapier.com/blog/best-note-taking-apps/" target="_blank" rel="noopener">Zapier Best Note-Taking Apps</a></li>
-    <li><a href="https://apps.apple.com/app/google-keep-notes-and-lists/id1029207872" target="_blank" rel="noopener">Google Keep on the App Store</a></li>
     <li><a href="https://en.wikipedia.org/wiki/Google_Keep" target="_blank" rel="noopener">Google Keep - Wikipedia</a></li>
   </ul>
 </section>
@@ -621,52 +531,50 @@
     <div class="container">
       <nav class="footer__links" aria-label="Footer navigation">
         <a href="/" class="footer__link">
-          <span data-lang="ja">ホーム</span>
-          <span data-lang="en">Home</span>
+          <span>ホーム</span>
+          
         </a>
         <a href="/captio-alternative/" class="footer__link">
-          <span data-lang="ja">Captio代替</span>
-          <span data-lang="en">Captio Alternative</span>
+          <span>Captio代替</span>
+          
         </a>
         <a href="/note-to-email/" class="footer__link">
-          <span data-lang="ja">メモ→メール</span>
-          <span data-lang="en">Note to Email</span>
+          <span>メモ→メール</span>
+          
         </a>
         <a href="/vs/" class="footer__link">
-          <span data-lang="ja">アプリ比較</span>
-          <span data-lang="en">Comparisons</span>
+          <span>アプリ比較</span>
+          
         </a>
         <a href="/use-cases/" class="footer__link">
-          <span data-lang="ja">使い方</span>
-          <span data-lang="en">Use Cases</span>
+          <span>使い方</span>
+          
         </a>
         <a href="/guides/" class="footer__link">
-          <span data-lang="ja">ガイド</span>
-          <span data-lang="en">Guides</span>
+          <span>ガイド</span>
+          
         </a>
         <a href="/faq" class="footer__link">
-          <span data-lang="ja">FAQ</span>
-          <span data-lang="en">FAQ</span>
+          <span>FAQ</span>
+          
         </a>
         <a href="/privacy" class="footer__link">
-          <span data-lang="ja">プライバシー</span>
-          <span data-lang="en">Privacy</span>
+          <span>プライバシー</span>
+          
         </a>
         <a href="/contact" class="footer__link">
-          <span data-lang="ja">お問い合わせ</span>
-          <span data-lang="en">Contact</span>
+          <span>お問い合わせ</span>
+          
         </a>
       </nav>
       <p class="footer__copyright">
         &copy; 2026
-        <span data-lang="ja">Obsidian連携シンプルメモ</span>
-        <span data-lang="en">Simple Memo - for Obsidian</span>.
+        <span>Obsidian連携シンプルメモ</span>
+        .
         All rights reserved.
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
 
   <script>
   // Close mobile nav when clicking a link
