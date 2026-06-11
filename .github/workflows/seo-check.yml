@@ -23,6 +23,10 @@ jobs:
           # Exit code 1 = warnings only (acceptable), 2 = errors (fail CI)
           if [ $EXIT_CODE -ge 2 ]; then exit $EXIT_CODE; fi
 
+      # Rating / price / © / og:site_name must match data/site-constants.json
+      - name: Site constants consistency
+        run: node scripts/sync_constants.js --check
+
       # Smoke test only (--dry-run writes nothing). Note: the shallow CI
       # checkout means git-derived lastmod dates collapse to one date here;
       # real sitemap generation happens locally with full history.
