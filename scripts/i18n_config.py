@@ -30,6 +30,11 @@ TOP_CLUSTER_XDEFAULT = "/"  # x-default points to ja root
 # (ja_url_path, en_url_path)
 # Each entry MUST have both files present on disk for hreflang to be emitted.
 JA_EN_PAIRS = [
+    ("/about/",                             "/en/about/"),
+    ("/faq",                                "/en/faq"),
+    ("/apple-watch/",                       "/en/apple-watch/"),
+    ("/obsidian/",                          "/en/obsidian/"),
+    ("/blog/",                              "/en/blog/"),
     ("/captio-alternative/",                "/en/captio-alternative/"),
     ("/note-to-email/",                     "/en/note-to-email/"),
     ("/privacy",                            "/en/privacy"),
@@ -58,7 +63,6 @@ EN_ONLY_PAGES = [
     "/en/iphone-shortcuts-email-guide/",
     "/en/send-email-to-yourself/",
     "/en/captio-migration-guide/",
-    "/en/blog/",
     "/en/blog/captio-shutdown-alternatives",
     "/en/blog/fastest-note-app-iphone-2026",
     "/en/blog/how-to-email-yourself-note-iphone",

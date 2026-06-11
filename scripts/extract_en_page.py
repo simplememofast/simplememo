@@ -27,16 +27,16 @@ from bs4 import BeautifulSoup
 
 REPO = Path(__file__).resolve().parent.parent
 SITE = "https://simplememofast.com"
-EN_BRAND = "Simple Memo - Captio-style"
+EN_BRAND = "Simple Memo - for Obsidian"
 
 # JA-only blocks (no data-lang wrapper) that leak into the extracted EN page.
 # These are SHARED across the blog cluster, so translating once covers all pages.
 # Keep entries here exact; applied as plain-text replacements on the final HTML.
 SHARED_JA_EN = {
-    "Simple Memo - Captio-style開発者。iOS開発歴10年以上。Captio終了をきっかけに"
+    "Simple Memo - for Obsidian開発者。iOS開発歴10年以上。Captio終了をきっかけに"
     "「起動0.3秒・メモ→メール特化」のCaptio式シンプルメモを開発。"
     "プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。":
-        "Developer of Simple Memo (Captio-style). 10+ years of iOS development. "
+        "Developer of Simple Memo - for Obsidian. 10+ years of iOS development. "
         "After Captio shut down, built Simple Memo — focused on a 0.3-second launch "
         "and memo-to-email — and stands by privacy-first design (AES-GCM encryption, "
         "zero server-side storage).",

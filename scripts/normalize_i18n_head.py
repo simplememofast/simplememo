@@ -246,7 +246,8 @@ def build_block(
     """Return the i18n block as a list of lines (each ending with '\\n')."""
     lines = [
         "  <!-- i18n: managed by scripts/normalize_i18n_head.py -->\n",
-        f'  <meta http-equiv="content-language" content="{LOCALE_CONTENT_LANG[locale]}">\n',
+        # content-language meta is obsolete (ignored by Google, removed
+        # site-wide 2026-06-10) — the remover regex still strips old copies.
         f'  <link rel="canonical" href="{canonical_url}">\n',
     ]
     for hreflang, url in alternates:
