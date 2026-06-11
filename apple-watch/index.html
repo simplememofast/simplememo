@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/apple-watch/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>Apple Watchから音声メモをメールへ | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Apple Watchから2タップで自分宛メールにメモを送信。音声入力・スマートスタック対応。「起動と同時の自動音声入力」がwatchOSの制約でできない理由も正直に解説します。手首の上で思いつきを逃さない。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Apple Watchから音声メモをメールへ | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="Apple Watchから2タップで自分宛メールにメモを送信。音声入力・スマートスタック対応。watchOSの制約（起動時の自動音声入力は不可）も正直に解説。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-06-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/apple-watch/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:locale:alternate" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Apple Watchから音声メモをメールへ | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="Apple Watchから2タップで自分宛メールにメモを送信。音声入力・スマートスタック対応。watchOSの制約も正直に解説。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/index.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/apple-watch/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/apple-watch/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/apple-watch/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/apple-watch/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Apple Watch対応", "item": "https://simplememofast.com/apple-watch/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/apple-watch/#webpage","inLanguage":"ja","name":"Apple Watchから音声メモをメールへ | Obsidian連携シンプルメモ","description":"Apple Watchから2タップで自分宛メールにメモを送信。音声入力・スマートスタック対応。起動と同時の自動音声入力がwatchOSの制約でできない理由も正直に解説。","url":"https://simplememofast.com/apple-watch/","datePublished":"2026-06-11","dateModified":"2026-06-11","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"about":{"@type":"SoftwareApplication","name":"Obsidian連携シンプルメモ","operatingSystem":"iOS, watchOS","applicationCategory":"ProductivityApplication","url":"https://apps.apple.com/jp/app/id6758438948","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/apple-watch/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Apple Watchで起動と同時に音声入力を始められますか？","acceptedAnswer":{"@type":"Answer","text":"いいえ、できません。watchOSの公開APIでは、音声入力（ディクテーション）はユーザーが入力欄をタップしたときにしか起動できず、アプリ起動と同時に自動で開始する手段が提供されていません。これは当アプリに限らず、すべてのサードパーティ製Watchアプリに共通するwatchOSの制約です。アプリを開いたら入力欄のマイクをタップして話してください。なお、iPhone版は起動時の自動音声入力に対応しています。"}},{"@type":"Question","name":"Obsidian連携はApple Watchから送ったメモにも反映されますか？","acceptedAnswer":{"@type":"Answer","text":"はい。Watchから送ったメモもiPhone版と同じ送信の仕組みを通るため、iPhone側でObsidian連携をオンにしていれば、デイリーノートやInboxノートへ同じ形式（- HH:mm メモ）で追記されます。"}},{"@type":"Question","name":"Apple Watch単体（圏外・iPhoneなし）でも使えますか？","acceptedAnswer":{"@type":"Answer","text":"メモの入力自体はWatch上で完結しますが、自分宛メールの送信には通信が必要です。ペアリング中のiPhoneが近くにあるか、WatchがWi-Fi／モバイル通信（セルラーモデル）でつながっている状態でお使いください。通信がない場合は、接続が戻ってから送信してください。"}},{"@type":"Question","name":"これはObsidian公式のApple Watchアプリですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。Obsidian連携シンプルメモは株式会社ユリカが開発する独立したアプリで、Obsidian公式アプリではありません。送信したメモをObsidianの保管庫へ自動追記する「連携機能」を提供するものです。Obsidianを使っていなくても、自分宛メールのメモアプリとして使えます。"}},{"@type":"Question","name":"スマートスタックには対応していますか？","acceptedAnswer":{"@type":"Answer","text":"はい。watchOSのスマートスタックにウィジェットを追加でき、文字盤からデジタルクラウンを回す（または下にスワイプする）だけでワンタップ起動できます。手首を上げてから送信完了までの動線が最短になります。"}},{"@type":"Question","name":"Apple Watchから送信するまで何タップ必要ですか？","acceptedAnswer":{"@type":"Answer","text":"最短2タップです。スマートスタックやコンプリケーションからアプリを開く（1タップ）→ 送信（1タップ）。音声でメモを取る場合は、開いたあとに入力欄のマイクをタップして話し、送信ボタンを押します。"}}]}</script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260611-nav">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn,.lang-switcher__link{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em;text-decoration:none;display:inline-block}
+    .lang-switcher__btn:hover,.lang-switcher__link:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible,.lang-switcher__link:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active,.lang-switcher__link.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem}
+    .steps-list li{counter-increment:step;position:relative;padding:1rem 1rem 1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.5rem 0 2rem}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1rem;font-weight:700;margin-bottom:.5rem}
+    .reason-card__desc{font-size:.875rem;color:var(--text-secondary);line-height:1.7}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .tip-box{background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.875rem;line-height:1.8}
+    .tip-box__title{font-weight:700;color:var(--accent);margin-bottom:.4rem;font-size:.875rem;text-transform:uppercase;letter-spacing:.04em}
+
+    .trouble-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:.75rem 0}
+    .trouble-item__q{font-weight:700;font-size:.92rem;margin-bottom:.5rem}
+    .trouble-item__a{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .prereq-list{margin:1rem 0 1.5rem;padding-left:0;list-style:none}
+    .prereq-list li{font-size:.9rem;color:var(--text-secondary);padding:.4rem 0 .4rem 1.5rem;position:relative;line-height:1.6}
+    .prereq-list li::before{content:'✓';position:absolute;left:0;color:#3fb950;font-weight:700}
+
+    /* Watch page extras */
+    .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.75rem;margin:1.5rem 0}
+    .flow-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;font-size:.95rem;font-weight:700}
+    .flow-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem .9rem;border-radius:10px;background:rgba(100,180,255,.10);border:1px solid rgba(100,180,255,.2);color:var(--text)}
+    .flow-arrow{color:var(--accent);font-weight:700}
+    .limitation-box{background:rgba(255,180,100,.06);border:1px solid rgba(255,180,100,.25);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.9rem;line-height:1.9}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn,.lang-switcher__link{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=apple-watch-jp&amp;mt=8"><span>ダウンロード</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__link active" href="/apple-watch/" aria-current="page" hreflang="ja" aria-label="日本語">JA</a><a class="lang-switcher__link" href="/en/apple-watch/" hreflang="en" aria-label="Switch to English">EN</a></div>
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=apple-watch-jp&amp;mt=8" class="global-nav__cta">
+          <span>ダウンロード</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span>Apple Watch対応</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span>Apple Watchから、音声メモをメールへ。</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span>iPhoneをポケットから出すまでもない一瞬の思いつきは、手首の上で捕まえる。Apple Watchでアプリを開いて送信するまで<strong>最短2タップ</strong>。<strong>音声入力</strong>で話すだけのメモも、<strong>スマートスタック</strong>からの即起動も対応。送ったメモは自分宛メールに届き、設定していれば<strong>Obsidianのノートにも自動追記</strong>されます。</span>
+        </p>
+        <div class="hero-cta-row" style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+          <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=apple-watch-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="eager">
+          </a>
+          <a href="#limitation" class="hero-cta-secondary" style="display:inline-flex;align-items:center;min-height:48px;padding:.6rem 1.1rem;border:1px solid rgba(100,180,255,.25);border-radius:24px;color:var(--accent);text-decoration:none;font-size:.9rem;">
+            <span>正直な制約を先に読む</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Answer-first definition (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span>ひとことで言うと</span></div>
+          <p><strong>Obsidian連携シンプルメモのApple Watch対応</strong>は、Watch上でメモを入力して<strong>2タップで自分宛メールに送信</strong>できる機能です。入力は<strong>音声入力（ディクテーション）</strong>に対応し、<strong>スマートスタックのウィジェット</strong>から文字盤直下で起動できます。ただし<strong>「アプリ起動と同時に音声入力が自動で始まる」ことはwatchOSの公開APIでは実装できません</strong>（入力欄のタップが必要）。この制約は本ページで隠さず説明しています。</p>
+        </div>
+      </section>
+
+      <!-- Why watch capture -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>なぜ「手首でメモ」なのか</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span>アイデアの寿命は数秒です。歩いているとき、料理中、満員電車、ランニング中——iPhoneを取り出してロック解除する数秒のあいだに、思いつきは形を失います。Apple Watchなら、手首を上げた姿勢のままキャプチャが終わります。</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">⌚ <span>iPhoneを出せない場面で効く</span></div>
+            <div class="reason-card__desc">
+              <span>両手がふさがる家事や運転前後の駐車場、ジムや散歩中など、「ポケットから出す」こと自体が障壁になる場面で、手首だけでメモが完結します。</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🎙️ <span>話すだけの音声入力</span></div>
+            <div class="reason-card__desc">
+              <span>Watchの小さな画面でも、入力欄のマイクをタップして話せばwatchOSの音声入力がテキスト化。短い思いつきなら手書きやフリック入力より速く済みます。</span>
+            </div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">📬 <span>届く先はいつものメール</span></div>
+            <div class="reason-card__desc">
+              <span>送信先は自分宛メール。受信箱がそのままToDoのインボックスになるので、Watch・iPhoneどちらから送っても集まる場所は一つです。仕組みは<a href="/note-to-email/" style="color:var(--accent);">メモ→メール</a>のページで解説しています。</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works: 2 taps -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>使い方 — 手首の上で最短2タップ</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span>Watch側の操作は「開く」と「送る」だけ。音声でメモを取る場合の流れは次のとおりです。</span>
+        </p>
+        <div class="flow-card">
+          <div class="flow-row">
+            <span class="flow-chip">⌚ <span>手首を上げる</span></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-chip">🚀 <span>スマートスタック／コンプリケーションから起動</span></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-chip">🎙️ <span>マイクをタップして話す</span></span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-chip" style="background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.28);">📨 <span>送信</span></span>
+          </div>
+        </div>
+        <ol class="steps-list">
+          <li><strong>アプリを開く（1タップ目）</strong><br>スマートスタックのウィジェット、文字盤のコンプリケーション、またはアプリ一覧からObsidian連携シンプルメモを起動します。</li>
+          <li><strong>メモを入力する</strong><br>入力欄をタップすると、watchOSの音声入力（マイク）・手書き入力（スクリブル）・絵文字などが選べます。話し終えると自動でテキストになります。</li>
+          <li><strong>送信する（2タップ目）</strong><br>送信ボタンをタップすれば完了。メモは自分宛メールとして届きます。iPhone側でObsidian連携をオンにしていれば、デイリーノートまたはInboxノートに <code>- HH:mm メモ</code> の形で自動追記されます。</li>
+        </ol>
+        <div class="tip-box">
+          <div class="tip-box__title"><span>スマートスタック対応</span></div>
+          <p>watchOS の<strong>スマートスタック</strong>にウィジェットを追加しておくと、文字盤からデジタルクラウンを回す（または下にスワイプする）だけでワンタップ起動できます。「手首を上げる→回す→タップ」が習慣になれば、思いつきからメール到達まで10秒かかりません。</p>
+        </div>
+      </section>
+
+      <!-- Honest limitation (AIO primary info) -->
+      <section class="lp-section" id="limitation">
+        <h2 class="lp-section__title">
+          <span>正直な制約：起動と同時の自動音声入力はできません</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span>「Watchでアプリを開いた瞬間に、もう音声入力が始まっていてほしい」——開発中、私たちが一番実現したかった体験です。しかし結論から言うと、<strong>これはwatchOSの公開APIでは実装できません</strong>。検討した経緯ごと、ありのままお伝えします。</span>
+        </p>
+        <div class="limitation-box">
+          <p><strong>技術的な理由：</strong>watchOSにおける音声入力（ディクテーション）は、システム標準のテキスト入力UIの一部として提供されています。サードパーティのアプリができるのは「テキスト入力欄を表示する」ところまでで、<strong>ディクテーションをプログラムから自動起動する公開APIは存在しません</strong>。音声入力が始まるのは、ユーザー自身が入力欄（またはマイク）をタップしたときだけです。これはプライバシー保護（アプリが勝手にマイクを起動できない）の観点からwatchOSが課している制約で、当アプリに限らず<strong>すべてのサードパーティ製Watchアプリに共通</strong>します。</p>
+        </div>
+        <p class="lp-section__lead" style="margin-top:1.5rem;">
+          <span>そのため、Apple Watchでの現実的な最速フローは「<strong>手首を上げる → スマートスタックやコンプリケーションから開く → マイクをタップ → 話す → 送信</strong>」になります。マイクのタップが1回挟まりますが、それでもiPhoneを取り出してロック解除するより速い場面は多いはずです。</span>
+        </p>
+        <div class="tip-box">
+          <div class="tip-box__title"><span>iPhone版は自動音声入力に対応</span></div>
+          <p>一方、<strong>iPhone版アプリは「起動と同時に音声入力を開始する」設定に対応しています</strong>。声で完結する最速キャプチャを求める場合はiPhone版の起動時自動音声入力を、ポケットからすら出せない場面の保険としてWatch版を、と使い分けるのがおすすめです。watchOSのアップデートで自動起動が可能になれば、対応を検討します。</p>
+        </div>
+      </section>
+
+      <!-- Watch vs iPhone -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>Apple WatchとiPhone、どう使い分ける？</span>
+        </h2>
+        <div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">Apple Watch — 「iPhoneを出せない瞬間」の保険</div>
+            <div class="trouble-item__a"><p>2タップ送信＋音声入力。歩行中・家事中・運動中など、手がふさがっている数秒の思いつきに。起動時の自動音声入力は不可（上記の制約）。</p></div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">iPhone — メインのキャプチャ装置</div>
+            <div class="trouble-item__a"><p>起動0.3秒・起動時の自動音声入力・オフラインのOutboxキュー・<a href="/obsidian/" style="color:var(--accent);">Obsidian自動追記</a>の設定もiPhone側で行います。長めのメモや圏外での確実な保存はiPhone版が得意です。</p></div>
+          </div>
+          <div class="trouble-item">
+            <div class="trouble-item__q">届く場所は同じ — 自分宛メールとObsidian</div>
+            <div class="trouble-item__a"><p>どちらから送っても、メモは同じ受信箱と同じObsidianノートに集まります。「どこでメモしたか」を覚えておく必要がないのが、この仕組みのいちばんの利点です。</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>よくある質問</span>
+        </h2>
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple Watchで起動と同時に音声入力を始められますか？</summary><div class="faq-answer"><p>いいえ、できません。watchOSの公開APIでは、音声入力（ディクテーション）はユーザーが入力欄をタップしたときにしか起動できず、アプリ起動と同時に自動で開始する手段が提供されていません。これは当アプリに限らず、すべてのサードパーティ製Watchアプリに共通するwatchOSの制約です。アプリを開いたら入力欄のマイクをタップして話してください。なお、iPhone版は起動時の自動音声入力に対応しています。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian連携はApple Watchから送ったメモにも反映されますか？</summary><div class="faq-answer"><p>はい。Watchから送ったメモもiPhone版と同じ送信の仕組みを通るため、iPhone側でObsidian連携をオンにしていれば、デイリーノートやInboxノートへ同じ形式（<code>- HH:mm メモ</code>）で追記されます。連携の設定方法は<a href="/obsidian/" style="color:var(--accent);">Obsidian連携ページ</a>をご覧ください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple Watch単体（圏外・iPhoneなし）でも使えますか？</summary><div class="faq-answer"><p>メモの入力自体はWatch上で完結しますが、自分宛メールの送信には通信が必要です。ペアリング中のiPhoneが近くにあるか、WatchがWi-Fi／モバイル通信（セルラーモデル）でつながっている状態でお使いください。通信がない場合は、接続が戻ってから送信してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">これはObsidian公式のApple Watchアプリですか？</summary><div class="faq-answer"><p>いいえ。Obsidian連携シンプルメモは株式会社ユリカが開発する独立したアプリで、Obsidian公式アプリではありません。送信したメモをObsidianの保管庫へ自動追記する「連携機能」を提供するものです。Obsidianを使っていなくても、自分宛メールのメモアプリとして使えます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">スマートスタックには対応していますか？</summary><div class="faq-answer"><p>はい。watchOSのスマートスタックにウィジェットを追加でき、文字盤からデジタルクラウンを回す（または下にスワイプする）だけでワンタップ起動できます。手首を上げてから送信完了までの動線が最短になります。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple Watchから送信するまで何タップ必要ですか？</summary><div class="faq-answer"><p>最短2タップです。スマートスタックやコンプリケーションからアプリを開く（1タップ）→ 送信（1タップ）。音声でメモを取る場合は、開いたあとに入力欄のマイクをタップして話し、送信ボタンを押します。</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>手首の上の思いつきを、逃さない</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>ダウンロードは無料。iPhoneにインストールすると、ペアリング中のApple Watchでも使えます。</span>
+        </div>
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=apple-watch-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>関連ページ</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/obsidian/"><span>Obsidian連携</span></a>
+          <a href="/guides/"><span>設定ガイド一覧</span></a>
+          <a href="/note-to-email/"><span>メモ→メールの仕組み</span></a>
+          <a href="/use-cases/"><span>活用事例</span></a>
+          <a href="/methods/second-brain/"><span>セカンドブレイン</span></a>
+          <a href="/faq"><span>FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span>参考文献</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://support.apple.com/ja-jp/guide/watch/welcome/watchos" target="_blank" rel="noopener" style="color:var(--accent);">Apple Watchユーザガイド</a> — <span>スマートスタック・コンプリケーション・音声入力などwatchOSの公式ガイド</span></li>
+    <li><a href="https://developer.apple.com/documentation/watchos-apps/" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — watchOS apps</a> — <span>watchOSアプリで利用できる公開APIの公式ドキュメント（ディクテーション自動起動APIは提供されていません）</span></li>
+    <li><a href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span>App Storeのダウンロードページ</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span>関連コンテンツ</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>メソッド一覧</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>ブログ記事一覧</span></a></li>
+    <li><a href="/use-cases/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>活用事例</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>よくあるご質問</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/" class="footer__link"><span>ホーム</span></a>
+        <a href="/obsidian/" class="footer__link"><span>Obsidian連携</span></a>
+        <a href="/use-cases/" class="footer__link"><span>使い方</span></a>
+        <a href="/guides/" class="footer__link"><span>設定ガイド</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span>メモ→メール</span></a>
+        <a href="/vs/" class="footer__link"><span>比較</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/faq" class="footer__link"><span>FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span>プライバシー</span></a>
+        <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>

@@ -22,6 +22,9 @@
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/faq">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/faq">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/faq">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/faq">
   <link rel="stylesheet" href="/assets/css/style.min.css?v=20260611-nav">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
@@ -67,9 +70,6 @@
       color: #fff;
       box-shadow: 0 0 12px rgba(100, 180, 255, 0.1);
     }
-    [data-lang="en"] { display: none; }
-    [data-lang].active { display: block; }
-    span[data-lang].active { display: inline; }
 
     @media (prefers-reduced-motion: reduce) {
       .lang-switcher__btn {
@@ -212,7 +212,6 @@
 
   </style>
 
-
   <!-- BreadcrumbList JSON-LD -->
   <script type="application/ld+json">
   {
@@ -247,8 +246,7 @@
 }
   </script>
   <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">
-{
+  <script type="application/ld+json">{
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "@id": "https://simplememofast.com/faq#faqpage",
@@ -749,11 +747,25 @@
         "@type": "Answer",
         "text": "YURIKA, K.K.（株式会社YURIKA）が開発・運営しています。"
       }
+    },
+    {
+      "@type": "Question",
+      "name": "このアプリはObsidian公式のアプリですか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "いいえ。本アプリ（Obsidian連携シンプルメモ）はObsidian公式のアプリ・プラグインではなく、株式会社ユリカが開発する独立アプリです。Obsidian連携機能は、送信したメモをあなたのObsidian保管庫のノートに自動追記するもので、Obsidian本体のアカウントやプラグインを必要としません。Obsidianは Dynalist Inc. の商標です。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Apple Watchで使えますか？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "はい。Apple Watchから最短2タップで自分宛メールを送信でき、音声入力とスマートスタックにも対応しています。watchOSの仕様上、起動と同時の自動音声入力はできません（マイクのタップが必要）。詳しくはApple Watch対応ページをご覧ください。"
+      }
     }
   ]
-}
-
-  </script>
+}</script>
 
 </head>
 <body>
@@ -761,79 +773,64 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span data-lang="ja">Obsidian連携シンプルメモ</span><span data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span data-lang="ja">使い方</span><span data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span data-lang="ja">活用事例</span><span data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span data-lang="ja">比較</span><span data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span data-lang="ja">メソッド</span><span data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span data-lang="ja">ブログ</span><span data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span data-lang="ja">用語集</span><span data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span data-lang="ja">FAQ</span><span data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span data-lang="ja">開発者</span><span data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span data-lang="ja">開発記録</span><span data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=faq-jp&amp;mt=8"><span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=faq-jp&amp;mt=8"><span>ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/faq" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/faq" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=faq-jp&amp;mt=8" class="global-nav__cta">
-          <span data-lang="ja">ダウンロード</span><span data-lang="en">Download</span>
+          <span>ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
     </div>
   </nav>
 
-
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja">
-      <span class="meta-title">よくあるご質問（FAQ） | Obsidian連携シンプルメモ</span>
-      <span class="meta-og-title">よくあるご質問（FAQ） | Obsidian連携シンプルメモ</span>
-      <span class="meta-description">Obsidian連携シンプルメモのよくあるご質問（FAQ）。料金プラン・使い方・対応メール・プライバシー・解約方法など、アプリに関する疑問をまとめて解説しています。基本的な使い方、設定、料金プラン、セキュリティなどについてお答えします。</span>
-    </div>
-    <div class="meta-template" data-lang="en">
-      <span class="meta-title">FAQ | Simple Memo - for Obsidian</span>
-      <span class="meta-og-title">FAQ | Simple Memo - for Obsidian</span>
-      <span class="meta-description">Frequently Asked Questions about Simple Memo - for Obsidian. Learn about setup, features, pricing, security, and more.</span>
-    </div>
-  </div>
 
   <!-- Header -->
 <!-- Content -->
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">
-        <span data-lang="ja">よくあるご質問（FAQ）</span>
-        <span data-lang="en">Frequently Asked Questions</span>
+        <span>よくあるご質問（FAQ）</span>
+        
       </h1>
 
       <!-- Atomic Answer Block (AI / LLM citation-friendly) -->
       <aside class="answer-block" aria-label="このページの要点" style="background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-left:3px solid var(--accent,#6ab4ff);border-radius:8px;padding:1.25rem 1.5rem;margin:0 auto 2rem;max-width:760px;font-size:.95rem;line-height:1.85;color:rgba(255,255,255,.75);">
-        <span data-lang="ja" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
-        <span data-lang="en" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">TL;DR</span>
-        <p data-lang="ja" style="margin:0;"><strong style="color:#fff;">Simple Memo（Obsidian連携シンプルメモ）</strong>は、Captioが2024年10月にサービス終了した後の代替として開発されたiOSメモ→メール送信アプリ。起動0.3秒・送信150ms・AES-GCM端末内暗号化・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。株式会社ユリカ（日本）が開発・運営する独立アプリで、Captio公式後継ではありません。本ページは料金・機能・セキュリティ・移行に関するよくあるご質問を集約しています。</p>
-        <p data-lang="en" style="margin:0;"><strong style="color:#fff;">Simple Memo</strong> is an iOS memo-to-email app built as a successor to Captio (which shut down in October 2024). It launches in 0.3 seconds, sends in 150ms, uses AES-GCM on-device encryption, stores zero memo content on servers, and includes offline Outbox auto-resend. Developed by YURIKA, K.K. (Japan) as an independent app — not Captio's official successor. This page collects FAQs about pricing, features, security, and migration.</p>
+        <span style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
+        
+        <p style="margin:0;"><strong style="color:#fff;">Simple Memo（Obsidian連携シンプルメモ）</strong>は、Captioが2024年10月にサービス終了した後の代替として開発されたiOSメモ→メール送信アプリ。起動0.3秒・送信150ms・AES-GCM端末内暗号化・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。株式会社ユリカ（日本）が開発・運営する独立アプリで、Captio公式後継ではありません。本ページは料金・機能・セキュリティ・移行に関するよくあるご質問を集約しています。</p>
+        
       </aside>
 
       <div class="cta-box" style="margin-bottom:2rem">
         <div class="cta-box__title">
-          <span data-lang="ja">まずは無料で試してみる</span>
-          <span data-lang="en">Try it free</span>
+          <span>まずは無料で試してみる</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span data-lang="ja">ダウンロードは無料。3分で使い始められ、Freeプランは1日3通までずっと無料です。</span>
-          <span data-lang="en">Free to download. Start in 3 minutes — the Free plan gives you 3 sends a day, forever.</span>
+          <span>ダウンロードは無料。3分で使い始められ、Freeプランは1日3通までずっと無料です。</span>
+          
         </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=faq-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=faq-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=faq-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Japanese Content -->
-      <div class="lang-content" data-lang="ja">
+      <div class="lang-body">
         <p class="page-content__date">最終更新：<time datetime="2026-03-05">2026年3月5日</time></p>
         <div class="page-content__body faq-body">
 
@@ -1316,6 +1313,18 @@
                   <p>いいえ。Simple Memoは旧Captioに<strong>インスパイアされた独立したアプリ</strong>であり、Captioの開発元との関係はありません。Captioが持っていた「起動→即入力→ワンタップ送信→即クリア」という体験を再現・発展させることを目指しています。</p>
                 </div>
               </details>
+              <details class="faq-details">
+                <summary class="faq-summary">このアプリはObsidian公式のアプリですか？</summary>
+                <div class="faq-answer">
+                  <p>いいえ。本アプリ（Obsidian連携シンプルメモ）はObsidian公式のアプリ・プラグインではなく、株式会社ユリカが開発する独立アプリです。Obsidian連携機能は、送信したメモをあなたのObsidian保管庫のノートに自動追記するもので、Obsidian本体のアカウントやプラグインを必要としません。Obsidianは Dynalist Inc. の商標です。</p>
+                </div>
+              </details>
+              <details class="faq-details">
+                <summary class="faq-summary">Apple Watchで使えますか？</summary>
+                <div class="faq-answer">
+                  <p>はい。Apple Watchから最短2タップで自分宛メールを送信でき、音声入力とスマートスタックにも対応しています。watchOSの仕様上、起動と同時の自動音声入力はできません（マイクのタップが必要）。詳しくは<a href="/apple-watch/">Apple Watch対応ページ</a>をご覧ください。</p>
+                </div>
+              </details>
             </div>
 
             <div class="faq-item">
@@ -1630,849 +1639,31 @@
       </div>
 
       <!-- English Content -->
-      <div class="lang-content" data-lang="en">
-        <p class="page-content__date">Last updated: <time datetime="2026-03-05">March 5, 2026</time></p>
-        <div class="page-content__body faq-body">
-
-          <!-- Pricing & Plans -->
-          <div class="faq-category">
-            <h2 id="pricing-en" class="faq-category__title">Pricing & Plans</h2>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I use Simple Memo for free?</summary>
-                <div class="faq-answer">
-                  <p>Yes. The <strong>Free plan lets you send up to 3 memos per day, free forever</strong> — no credit card required, available from day one. If you want to send more, the Premium plan (monthly &amp; yearly) unlocks unlimited sending.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What's the difference between plans?</summary>
-                <div class="faq-answer">
-                  <table class="faq-table">
-                    <thead>
-                      <tr><th>Feature</th><th>Free Plan</th><th>Premium</th></tr>
-                    </thead>
-                    <tbody>
-                      <tr><td>Daily send limit</td><td>3</td><td>Unlimited</td></tr>
-                      <tr><td>Offline sending (Outbox)</td><td>Yes</td><td>Yes</td></tr>
-                      <tr><td>AES-GCM encryption</td><td>Yes</td><td>Yes</td></tr>
-                      <tr><td>10 languages</td><td>Yes</td><td>Yes</td></tr>
-                      <tr><td>History &amp; resend</td><td>Yes</td><td>Yes</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How much does Premium cost?</summary>
-                <div class="faq-answer">
-                  <p>Monthly and annual plans are available. Annual plans offer a discount compared to monthly pricing. Check the in-app subscription screen for current pricing in your region.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How do I subscribe to Premium?</summary>
-                <div class="faq-answer">
-                  <p>In Settings, open the Premium section and tap <strong>"View Plans &amp; Subscribe"</strong>. This opens the Paywall screen, which shows:</p>
-                  <ul>
-                    <li>Monthly and yearly plan names, duration, and localized price</li>
-                    <li>Auto-renewal and cancellation details</li>
-                    <li>Links to the Terms of Use and Privacy Policy</li>
-                    <li>The "Restore Purchases" button</li>
-                  </ul>
-                  <p>You'll also see an upgrade prompt when you hit the free plan's daily send limit.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I keep using the free plan?</summary>
-                <div class="faq-answer">
-                  <p>Yes. The <strong>Free plan requires no sign-up and never expires</strong> — you get up to 3 sends per day, free from day one, with no credit card required.</p>
-                  <p>Subscribing is entirely optional. Whenever you want to send more, upgrade to the Premium plan (monthly &amp; yearly) for unlimited sending.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How do I cancel my subscription?</summary>
-                <div class="faq-answer">
-                  <p>Through Apple's subscription management:</p>
-                  <ol>
-                    <li>Open the Settings app on your iPhone</li>
-                    <li>Tap your name at the top</li>
-                    <li>Tap "Subscriptions"</li>
-                    <li>Select "Simple Memo Premium"</li>
-                    <li>Tap "Cancel Subscription"</li>
-                  </ol>
-                  <p>You'll retain Premium access until the end of the current billing period. After cancelling, you can keep using the Free plan (3 sends per day) at no cost.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I restore my purchase after switching devices?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Open the Premium section in Settings, tap <strong>"View Plans &amp; Subscribe"</strong>, then tap "Restore Purchases" at the bottom of the Paywall screen. As long as you're signed in with the same Apple ID, your subscription will be restored.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I don't see the plan prices. It says "Tap to load."</summary>
-                <div class="faq-answer">
-                  <p>The App Store product information hasn't loaded yet. Try this:</p>
-                  <ol>
-                    <li>Check your network connection (Wi-Fi or cellular)</li>
-                    <li>Tap the "Tap to load" button to retry fetching product info</li>
-                    <li>Once the products load successfully, you can proceed straight into the purchase flow</li>
-                    <li>If it keeps failing, verify you're signed in under iOS <code>Settings &gt; Apple ID &gt; Media &amp; Purchases</code></li>
-                  </ol>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- Data & Sending -->
-          <div class="faq-category">
-            <h2 id="data-en" class="faq-category__title">Data & Sending</h2>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Where are my memos sent?</summary>
-                <div class="faq-answer">
-                  <p>Memos are sent as emails to your verified recipient address. The sender appears as <code>Simple Memo &lt;noreply@mail.simplememofast.com&gt;</code>.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How is the email subject line determined?</summary>
-                <div class="faq-answer">
-                  <p>The subject is generated automatically:</p>
-                  <ul>
-                    <li><strong>If a subject template is set</strong>: Template + first line of memo (e.g., "Simple Memo Grocery list for today")</li>
-                    <li><strong>If the subject template is empty</strong>: The first line of your memo becomes the subject</li>
-                    <li><strong>If the memo starts with blank lines</strong>: The first line containing text is used</li>
-                    <li>Subject lines are truncated at 60 characters</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I add a signature (footer) to my emails?</summary>
-                <div class="faq-answer">
-                  <p>Yes. In Settings, enter text in the "Signature" field. It will be appended to every memo with a <code>--</code> separator line.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I pressed send and the screen cleared immediately. Was my memo actually sent?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Simple Memo clears the screen instantly after you tap send (target: under 150ms). Your memo is processed in the background. Even if the network request fails, the memo is safely stored in the encrypted Outbox and will be retried automatically. Your memo is never lost.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I send memos in quick succession?</summary>
-                <div class="faq-answer">
-                  <p>Yes, but a <strong>1.5-second cooldown</strong> is enforced between sends to prevent accidental double-taps. Tapping during cooldown shows a brief "Please wait" message.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How many memos can I send per day?</summary>
-                <div class="faq-answer">
-                  <table class="faq-table">
-                    <thead><tr><th>Plan</th><th>Daily Send Limit</th></tr></thead>
-                    <tbody>
-                      <tr><td>Free Plan</td><td>3 per day</td></tr>
-                      <tr><td>Premium Plan</td><td>Unlimited</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I send memos while offline?</summary>
-                <div class="faq-answer">
-                  <p>Yes. When you send a memo offline, it's stored in the Outbox — encrypted with AES-GCM on your device. When connectivity is restored, all pending memos are sent automatically.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How does the app tell me I'm offline?</summary>
-                <div class="faq-answer">
-                  <p>An orange banner appears at the top of the screen reading "Offline -- will send when connected." It disappears automatically when the network is restored.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Are Outbox messages preserved if I close the app?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Outbox messages are encrypted and written to persistent storage. They survive app termination, device restarts, and iOS memory management. On next launch (or via background tasks), delivery is reattempted automatically.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I see my sent memos?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Tap the clock icon in the top-left corner of the main screen to open the History view, which shows all sent, pending, and failed memos.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What information is shown in History?</summary>
-                <div class="faq-answer">
-                  <p>For each memo:</p>
-                  <ul>
-                    <li>Text preview (up to 10 lines)</li>
-                    <li>Date and time</li>
-                    <li>Status: Sent / Pending / Failed</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I resend a memo from History?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Tap a memo in History and select "Resend." The same message ID is reused to prevent duplicate delivery on the server side (idempotency guarantee).</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I share a memo from History?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Tap a memo and select "Share" to open the standard iOS share sheet (copy, AirDrop, Messages, etc.).</p>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- Security & Privacy -->
-          <div class="faq-category">
-            <h2 id="security-en" class="faq-category__title">Security & Privacy</h2>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Are my memos stored on any server?</summary>
-                <div class="faq-answer">
-                  <p>No. Your memo content is never stored on Simple Memo's servers. Memos pass through the Relay API for email delivery, but no data is retained after transmission. All on-device data (Outbox and History) is stored only on your device, encrypted with AES-GCM.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How exactly is my data encrypted?</summary>
-                <div class="faq-answer">
-                  <p>Simple Memo encrypts all locally stored memo data (Outbox and History) with <strong>AES-GCM (256-bit)</strong>:</p>
-                  <ul>
-                    <li>Encryption keys are stored in the <strong>Keychain</strong>, protected by the device's Secure Enclave</li>
-                    <li>Files are protected with Apple's <strong>Data Protection</strong> (<code>completeUntilFirstUserAuthentication</code>)</li>
-                    <li>Encryption keys never leave your device</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Is network communication encrypted?</summary>
-                <div class="faq-answer">
-                  <p>Yes. All communication between the app and the Relay API (Cloudflare Workers) uses HTTPS (TLS). Additional protections:</p>
-                  <ul>
-                    <li><strong>HMAC signatures</strong>: every request is HMAC-SHA256 signed, detecting tampering.</li>
-                    <li><strong>Static API key auth</strong>: a dedicated API key is required to reach the relay.</li>
-                    <li><strong>Ephemeral URLSession</strong>: the client uses an ephemeral URLSession, so no network cache, cookies, or URL cache is ever stored on disk.</li>
-                    <li><strong>Idempotency-Key</strong>: each send carries a unique message ID, so the server can deduplicate retries automatically.</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Does the server store my memo text, verification codes, or email addresses?</summary>
-                <div class="faq-answer">
-                  <p>No. The Relay API simply forwards your message body to Resend for delivery and does not retain the message afterward. What is briefly stored in Cloudflare KV is hashed/anonymized:</p>
-                  <ul>
-                    <li>Email addresses are stored as a <strong>128-bit hash</strong> (for rate limiting)</li>
-                    <li>Verification codes use <strong>constant-time comparison</strong> and auto-expire after 10 minutes</li>
-                    <li>Device tokens are hashed and used only for rate-limit counters</li>
-                  </ul>
-                  <p>On-device, Outbox and history data are AES-GCM encrypted, with keys held in the Keychain.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can someone see my memos in the App Switcher?</summary>
-                <div class="faq-answer">
-                  <p>No. When the app moves to the background, a privacy overlay (showing only the app icon and title) is immediately placed over the screen. Your memo content is never visible in the multitasking view.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Are my memos logged anywhere in the app?</summary>
-                <div class="faq-answer">
-                  <p>No. Email addresses, memo text, verification codes, tokens, and URLs are never written to any log — including DEBUG builds. Error logs only record the error type name, never the detailed message.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Is History data encrypted?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Like the Outbox, History data is stored on-device with AES-GCM (256-bit) encryption. The encryption key is stored in the Keychain and protected by Apple's Data Protection (<code>completeUntilFirstUserAuthentication</code>).</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How do I permanently delete all my data?</summary>
-                <div class="faq-answer">
-                  <p>Uninstalling the app removes all data from your device, including Outbox messages, History, settings, and encryption keys stored in the Keychain.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Why do I need to verify my email address?</summary>
-                <div class="faq-answer">
-                  <p>To prevent unauthorized sending to someone else's email address. Verification confirms that you own the email address you're sending memos to. This is a critical safety measure.</p>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- How to Use -->
-          <div class="faq-category">
-            <h2 id="howto-en" class="faq-category__title">How to Use</h2>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What is Simple Memo?</summary>
-                <div class="faq-answer">
-                  <p>Simple Memo is a memo app focused on one thing: <strong>launch, write, send</strong>. Your memo is sent as an email to a pre-configured address with a single tap. There are no folders, tags, sync settings, or complex features. It's designed to capture your thoughts instantly and deliver them to your inbox -- nothing more, nothing less.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What are some common use cases?</summary>
-                <div class="faq-answer">
-                  <ul>
-                    <li>Sending yourself a quick shopping list</li>
-                    <li>Jotting down ideas while commuting</li>
-                    <li>Recording key takeaways from a meeting</li>
-                    <li>Emailing yourself task reminders</li>
-                    <li>Saving URLs, phone numbers, or addresses for later</li>
-                    <li>Quick brain-dumps before you forget</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What do I need to set up before using the app?</summary>
-                <div class="faq-answer">
-                  <p>When you first launch the app, you'll be prompted to set up a recipient email address:</p>
-                  <ol>
-                    <li>Tap "Go to Settings" in the setup dialog (or open Settings manually)</li>
-                    <li>Enter the email address where you want to receive your memos</li>
-                    <li>Tap "Verify"</li>
-                    <li>Enter the 6-digit verification code sent to that email</li>
-                    <li>Done -- you're ready to send memos</li>
-                  </ol>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I change my recipient email address?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Go to Settings, tap "To", enter a new email address, and complete the verification process again. All future memos will be sent to the newly verified address.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How do I reset my recipient and verification (Clear Recipient)?</summary>
-                <div class="faq-answer">
-                  <p>Go to Settings &rarr; Email Settings. At the bottom of the section, tap <strong>"Clear Recipient"</strong> (shown in red). Confirm in the dialog to wipe:</p>
-                  <ul>
-                    <li>The saved recipient email address</li>
-                    <li>Verified-email status (stored in Keychain)</li>
-                    <li>Any legacy verification data from older versions</li>
-                  </ul>
-                  <p>After clearing, the "To" field is empty, the verification checkmark disappears, and you'll need to set up again before sending. Useful if you want to switch to a different account or re-run verification.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Is there an in-app help screen?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Open Settings and tap <strong>"How It Works"</strong>. You'll see a 3-step visual guide:</p>
-                  <ol>
-                    <li><strong>Email setup</strong> — register and verify your recipient email</li>
-                    <li><strong>Write a memo</strong> — keyboard appears on launch; start typing instantly</li>
-                    <li><strong>Send</strong> — one tap delivers the memo to your inbox</li>
-                  </ol>
-                  <p>Translated into all 10 supported languages.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Which email services are supported?</summary>
-                <div class="faq-answer">
-                  <p>All of them. Gmail, Outlook, Yahoo Mail, iCloud Mail, corporate email, custom domains -- any address that can receive email will work.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What is the subject template?</summary>
-                <div class="faq-answer">
-                  <p>A text prefix added to the email subject of every memo you send. For example, if you set it to "Simple Memo" and your memo's first line is "Grocery list," the subject becomes "Simple Memo Grocery list." Leave it empty to use only the first line of your memo as the subject.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I turn off the send sound?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Go to Settings, then "Sound &amp; Haptics" to toggle the send sound on or off. Haptic feedback remains active regardless of this setting. Note: the sound is automatically muted when your device is in Silent Mode.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Does the app support Dark Mode?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Simple Memo follows your iOS system appearance setting automatically. There is no separate in-app theme toggle.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Is this the official successor to Captio?</summary>
-                <div class="faq-answer">
-                  <p>No. Simple Memo is an <strong>independent app inspired by Captio</strong>. It has no affiliation with the original Captio developer. Our goal is to recreate and build upon the "launch, type, send, clear" experience that made Captio beloved.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How is Simple Memo different from Captio?</summary>
-                <div class="faq-answer">
-                  <p>Simple Memo preserves Captio's core experience while adding modern improvements:</p>
-                  <ul>
-                    <li><strong>Outbox with auto-retry</strong>: Memos are never lost, even offline</li>
-                    <li><strong>AES-GCM encryption</strong>: All on-device data is encrypted</li>
-                    <li><strong>Privacy overlay</strong>: Memos are hidden in the App Switcher</li>
-                    <li><strong>10 languages</strong>: Including Arabic with full RTL support</li>
-                    <li><strong>Email verification</strong>: 6-digit code verification prevents unauthorized sending</li>
-                    <li><strong>Send animation</strong>: 3D page-flip animation with haptic feedback</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I import my data from Captio?</summary>
-                <div class="faq-answer">
-                  <p>No. Simple Memo does not support data import from the original Captio app, as they are independent applications with no data compatibility.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Can I send images?</summary>
-                <div class="faq-answer">
-                  <p>No. Simple Memo is designed exclusively for fast text memo delivery and does not support image attachments. For saving photos, use Apple's built-in Photos or Notes app. Simple Memo is a dedicated tool for capturing thoughts as text, instantly.</p>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- Compatibility -->
-          <div class="faq-category">
-            <h2 id="compatibility-en" class="faq-category__title">Compatibility</h2>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">What devices are supported?</summary>
-                <div class="faq-answer">
-                  <ul>
-                    <li>iPhone (iOS 16.0 or later)</li>
-                    <li>iPad (iPadOS 16.0 or later)</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How fast does the app launch?</summary>
-                <div class="faq-answer">
-                  <p>The target for Time-to-Text (from launch to keyboard ready) is <strong>under 500 milliseconds</strong>. In real-world testing, most devices achieve 200-300ms. This is made possible by using UIKit with direct initialization -- no Storyboards, no SwiftUI overhead.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Does the app depend on any third-party libraries?</summary>
-                <div class="faq-answer">
-                  <p>No. Simple Memo is built entirely with Swift and Apple-native frameworks (CryptoKit, Network.framework, BackgroundTasks, StoreKit 2). Zero external dependencies means a smaller app size and minimized security risk.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Which languages are supported?</summary>
-                <div class="faq-answer">
-                  <p>Simple Memo supports 10 languages: Japanese, English, Spanish, French, German, Portuguese, Russian, Chinese (Simplified), Chinese (Traditional), and Arabic.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How do I change the language?</summary>
-                <div class="faq-answer">
-                  <p>Go to Settings, then "Language." Changes take effect immediately across the entire app (the interface reloads automatically).</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Is Arabic RTL (right-to-left) supported?</summary>
-                <div class="faq-answer">
-                  <p>Yes. When Arabic is selected, text direction, UI layout, and navigation bar button placement all switch to RTL automatically.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Does Simple Memo drain my battery?</summary>
-                <div class="faq-answer">
-                  <p>No. Background network operations are minimal. Outbox retry uses iOS's BGTaskScheduler, which intelligently schedules retries during optimal conditions (e.g., while charging, on Wi-Fi). The app does not run continuously in the background.</p>
-                </div>
-              </details>
-            </div>
-          </div>
-
-          <!-- Troubleshooting -->
-          <div class="faq-category">
-            <h2 id="troubleshooting-en" class="faq-category__title">Troubleshooting</h2>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I didn't receive the verification code.</summary>
-                <div class="faq-answer">
-                  <p>Please check the following:</p>
-                  <ul>
-                    <li>Verify there are no typos in your email address</li>
-                    <li>Check your spam/junk folder</li>
-                    <li>The sender is <code>Simple Memo &lt;noreply@mail.simplememofast.com&gt;</code></li>
-                    <li>Verification codes expire after <strong>10 minutes</strong> -- request a new one if expired</li>
-                    <li>You have a maximum of <strong>5 attempts</strong> per code -- request a new code if exceeded</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I see "Please set your recipient email address."</summary>
-                <div class="faq-answer">
-                  <p>You need to set up and verify a recipient email in Settings before you can send memos.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I see "Email address not verified."</summary>
-                <div class="faq-answer">
-                  <p>Your recipient email verification is incomplete. Go to Settings, tap "Verify" next to your email address, and complete the 6-digit code verification flow. This is also required after changing your email address.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I see "Rate limited."</summary>
-                <div class="faq-answer">
-                  <p>You've sent too many memos in a short period. The following limits apply:</p>
-                  <table class="faq-table">
-                    <thead><tr><th>Limit Type</th><th>Threshold</th></tr></thead>
-                    <tbody>
-                      <tr><td>Per minute (device)</td><td>2</td></tr>
-                      <tr><td>Per day (device)</td><td>20</td></tr>
-                      <tr><td>Per hour (IP)</td><td>10</td></tr>
-                      <tr><td>Per day (global)</td><td>90</td></tr>
-                    </tbody>
-                  </table>
-                  <p>Wait a moment and try again. Memos stored in the Outbox will be retried automatically once the limit resets. Typical usage (a handful of sends per day) won't hit these limits.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">I see "Server error."</summary>
-                <div class="faq-answer">
-                  <p>The Relay API server is experiencing a temporary issue. This usually resolves within minutes. Your memo is safely stored in the Outbox and will be resent automatically once the server recovers. If the issue persists, please contact support.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">My test email isn't arriving.</summary>
-                <div class="faq-answer">
-                  <p>Check the following:</p>
-                  <ol>
-                    <li>Your recipient email is correctly verified</li>
-                    <li>Your network connection is stable</li>
-                    <li>Check your spam/junk folder</li>
-                    <li>Ensure <code>simplememofast.com</code> isn't blocked by your email provider's filters</li>
-                  </ol>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">My Outbox messages aren't being sent.</summary>
-                <div class="faq-answer">
-                  <p>Please check:</p>
-                  <ul>
-                    <li>Your network connection is stable</li>
-                    <li>Your recipient email is still verified</li>
-                    <li>Each message retries up to <strong>5 times</strong> -- messages that exceed this limit are marked as failed</li>
-                    <li>You can manually retry from the History screen</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">The app crashed. Are my unsent memos lost?</summary>
-                <div class="faq-answer">
-                  <p>No. When you tap send, your memo is saved to the encrypted Outbox <strong>before</strong> any network request is made. If the app crashes, memos in the Outbox remain intact. They'll be retried automatically when you relaunch the app.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">History shows "Pending" but the email actually arrived. Why?</summary>
-                <div class="faq-answer">
-                  <p>This can happen if the server response is lost (e.g., network timeout, app backgrounding) while the send has already completed on the server. v1.5 addresses this in several ways:</p>
-                  <ul>
-                    <li><strong>Automatic retry after 5 seconds</strong>: if the client treats a send as timed out, it retries once in the background.</li>
-                    <li><strong>Retry on foreground</strong>: any pending messages are retried the moment the app returns to the foreground.</li>
-                    <li><strong>Duplicate prevention</strong>: every send path uses the same <code>Idempotency-Key</code>, so even if the server already accepted the message, you won't receive the email twice.</li>
-                    <li><strong>Self-healing history</strong>: once a retry succeeds, the history entry flips to "Sent" automatically.</li>
-                  </ul>
-                  <p>Net result: "Pending" may show briefly, but only one actual email is delivered.</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Are duplicate memos with the same text tracked correctly?</summary>
-                <div class="faq-answer">
-                  <p>Yes. Starting with v1.5, each send is tracked by a unique <strong>history entry ID</strong> (not by message text). Sending "OK" three times in a row now produces three distinct history entries, each correctly marked "Sent" (earlier versions could misattribute status when duplicate bodies were pending).</p>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">How do I report a bug or request a feature?</summary>
-                <div class="faq-answer">
-                  <p>You can reach us through:</p>
-                  <ul>
-                    <li><strong>Email</strong>: <a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></li>
-                    <li><strong>App Store review</strong>: Via the in-app rating prompt or the App Store review section</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div class="faq-item">
-              <details class="faq-details">
-                <summary class="faq-summary">Where can I find the Terms of Use and Privacy Policy?</summary>
-                <div class="faq-answer">
-                  <ul>
-                    <li><strong>Terms of Use</strong>: <a href="/terms">https://simplememofast.com/terms</a></li>
-                    <li><strong>Privacy Policy</strong>: <a href="/privacy">https://simplememofast.com/privacy</a></li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-          <div class="faq-item">
-            <details class="faq-details">
-              <summary class="faq-summary">Can I import my data from Captio?</summary>
-              <div class="faq-answer">
-                <p>No. Simple Memo does not support data import from the original Captio app, as they are independent applications with no data compatibility.</p>
-              </div>
-            </details>
-          </div>
-
-          <!-- Contact & Support -->
-          <h2 id="support-en">Contact & Support</h2>
-
-          <div class="faq-item">
-            <details class="faq-details">
-              <summary class="faq-summary">How do I report a bug or request a feature?</summary>
-              <div class="faq-answer">
-                <p>You can reach us through:</p>
-                <ul>
-                  <li><strong>Email</strong>: <a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a></li>
-                  <li><strong>App Store review</strong>: Via the in-app rating prompt or the App Store review section</li>
-                </ul>
-              </div>
-            </details>
-          </div>
-
-          <div class="faq-item">
-            <details class="faq-details">
-              <summary class="faq-summary">Where can I find the Terms of Use and Privacy Policy?</summary>
-              <div class="faq-answer">
-                <ul>
-                  <li><strong>Terms of Use</strong>: <a href="/terms">https://simplememofast.com/terms</a></li>
-                  <li><strong>Privacy Policy</strong>: <a href="/privacy">https://simplememofast.com/privacy</a></li>
-                </ul>
-              </div>
-            </details>
-          </div>
-
-          <div class="faq-item">
-            <details class="faq-details">
-              <summary class="faq-summary">Who develops Simple Memo?</summary>
-              <div class="faq-answer">
-                <p>Simple Memo is developed and operated by <strong>YURIKA, K.K.</strong></p>
-              </div>
-            </details>
-          </div>
-
-        </div>
-      </div>
-
-      <p class="faq-footer-note">
-        <span data-lang="ja">Simple Memo — Captioが好きだった、すべての人へ。</span>
-        <span data-lang="en">Simple Memo — For everyone who loved Captio.</span>
-      </p>
-
-      <div class="cta-box" style="margin-top:2rem">
-        <div class="cta-box__title">
-          <span data-lang="ja">まずは無料で試してみる</span>
-          <span data-lang="en">Try it free</span>
-        </div>
-        <div class="cta-box__desc">
-          <span data-lang="ja">ダウンロードは無料。3分で使い始められ、Freeプランは1日3通までずっと無料です。</span>
-          <span data-lang="en">Free to download. Start in 3 minutes — the Free plan gives you 3 sends a day, forever.</span>
-        </div>
-        <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=faq-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
-          <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
-        </a>
-        <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=faq-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
-      </div>
-
-    </div>
+      
   </main>
 
   <!-- Internal Links -->
   <section class="lp-section">
     <h2 class="lp-section__title">
-      <span data-lang="ja">関連ページ</span>
-      <span data-lang="en">Related Pages</span>
+      <span>関連ページ</span>
+      
     </h2>
     <div class="internal-links">
       <a href="/captio/">
-        <span data-lang="ja">Captio式メモ術とは</span>
-        <span data-lang="en">What is the Captio Method?</span>
+        <span>Captio式メモ術とは</span>
+        
       </a>
       <a href="/how-to/">
-        <span data-lang="ja">使い方ガイド</span>
-        <span data-lang="en">How to Use Guide</span>
+        <span>使い方ガイド</span>
+        
       </a>
       <a href="/templates/">
-        <span data-lang="ja">メモテンプレート集</span>
-        <span data-lang="en">Memo Templates</span>
+        <span>メモテンプレート集</span>
+        
       </a>
       <a href="/captio-alternative/">
-        <span data-lang="ja">Captio代替アプリ比較</span>
-        <span data-lang="en">Captio Alternative Comparison</span>
+        <span>Captio代替アプリ比較</span>
+        
       </a>
     </div>
   </section>
@@ -2483,20 +1674,20 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/how-to/" class="footer__link"><span data-lang="ja">使い方</span> <span data-lang="en">How to Use</span></a>
-        <a href="/templates/" class="footer__link"><span data-lang="ja">テンプレ</span> <span data-lang="en">Templates</span></a>
+        <a href="/how-to/" class="footer__link"><span>使い方</span> </a>
+        <a href="/templates/" class="footer__link"><span>テンプレ</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio/" class="footer__link"><span data-lang="ja">Captio式</span> <span data-lang="en">Captio Method</span></a>
+        <a href="/captio/" class="footer__link"><span>Captio式</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/terms" class="footer__link"><span data-lang="ja">利用規約</span> <span data-lang="en">Terms</span></a>
-        <a href="/privacy" class="footer__link"><span data-lang="ja">プライバシーポリシー</span> <span data-lang="en">Privacy</span></a>
-        <a href="/faq" class="footer__link"><span data-lang="ja">よくあるご質問</span> <span data-lang="en">FAQ</span></a>
-        <a href="/legal" class="footer__link footer__link--legal"><span data-lang="ja">特定商取引法に基づく表記</span> <span data-lang="en">Legal</span></a>
-        <a href="/contact" class="footer__link"><span data-lang="ja">お問い合わせ</span> <span data-lang="en">Contact</span></a>
+        <a href="/terms" class="footer__link"><span>利用規約</span> </a>
+        <a href="/privacy" class="footer__link"><span>プライバシーポリシー</span> </a>
+        <a href="/faq" class="footer__link"><span>よくあるご質問</span> </a>
+        <a href="/legal" class="footer__link footer__link--legal"><span>特定商取引法に基づく表記</span> </a>
+        <a href="/contact" class="footer__link"><span>お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -2504,8 +1695,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
 
   <script>
   // Close mobile nav when clicking a link

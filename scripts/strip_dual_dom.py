@@ -18,6 +18,8 @@ VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input",
         "link", "meta", "param", "source", "track", "wbr"}
 
 PAGES = {
+    "about/index.html": ("/about/", "/en/about/"),
+    "faq.html": ("/faq", "/en/faq"),
     "blog/best-memo-apps-2026.html": ("/blog/best-memo-apps-2026", "/en/blog/best-memo-apps-2026"),
     "blog/ios-quick-capture-comparison.html": ("/blog/ios-quick-capture-comparison", "/en/blog/ios-quick-capture-comparison"),
     "captio-alternative/index.html": ("/captio-alternative/", "/en/captio-alternative/"),
