@@ -355,12 +355,12 @@
 
         <p><strong>Best for:</strong> Speed-obsessed users who want encryption without complexity. Privacy-focused individuals.</p>
 
-        <p>Simple Memo - for Obsidian takes a minimalist approach: capture text, hit send, it goes to your email. The innovation here is encryption. Every note is encrypted with AES-GCM (Advanced Encryption Standard with Galois/Counter Mode) before leaving your device. Even Simple Memo - for Obsidian's servers can't read your content -- only your email inbox can decrypt it.</p>
+        <p>Simple Memo - for Obsidian takes a minimalist approach: capture text, hit send, it goes to your email. The privacy posture is data minimization. The local Outbox and send history are encrypted on-device with AES-GCM (Advanced Encryption Standard with Galois/Counter Mode), and memo bodies are never persistently stored on Simple Memo's servers — they exist in transit only during send (zero retention). Email delivery itself uses standard SMTP and is not end-to-end encrypted.</p>
 
         <h4>Simple Memo - for Obsidian Strengths:</h4>
         <ul>
           <li>Fastest launch time (0.3s)</li>
-          <li>End-to-end encryption by default</li>
+          <li>On-device AES-GCM encryption for the local Outbox and send history (zero server retention; not end-to-end encrypted)</li>
           <li>No account required (uses your existing email)</li>
           <li>Works with any email provider (Gmail, Outlook, iCloud Mail, etc.)</li>
           <li>Offline-capable</li>
@@ -555,8 +555,8 @@
 
         <p>Privacy is increasingly central to choosing an app. Let's be direct about what each app actually protects:</p>
 
-        <h4>Simple Memo - for Obsidian: End-to-End Encryption</h4>
-        <p>AES-GCM encryption before transmission. Your email provider never sees decrypted content. Simple Memo - for Obsidian's servers never see your data. This is the strongest privacy posture on the list.</p>
+        <h4>Simple Memo - for Obsidian: On-Device Encryption, Zero Server Retention</h4>
+        <p>On-device AES-GCM encryption for the local Outbox and send history, and memo bodies are never persistently stored on Simple Memo's servers (transit only during send). Email delivery itself is not end-to-end encrypted — your mail provider handles the message like any normal email. The privacy strength here is data minimization, not E2EE.</p>
 
         <h4>Drafts: Transit Encryption Only</h4>
         <p>TLS in transit, but Drafts has decryption keys and can read your notes on their servers. For casual capture, this is fine. For sensitive data, it's not.</p>
