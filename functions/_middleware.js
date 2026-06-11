@@ -54,6 +54,15 @@ export const onRequest = async (context) => {
     return context.next();
   }
 
+  // /docs/ holds internal working files that live in the repo but must not
+  // be publicly served (Cloudflare Pages deploys every tracked file).
+  if (path === "/docs" || path.startsWith("/docs/")) {
+    return new Response("Not Found", {
+      status: 404,
+      headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+    });
+  }
+
   let needsRedirect = false;
 
   // 1. Drop ?lang= (case-sensitive — URLSearchParams is, and we never use
