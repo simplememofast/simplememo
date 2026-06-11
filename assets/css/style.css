@@ -2162,6 +2162,28 @@ section {
 .global-nav__logo {
   color: var(--text) !important;
 }
+
+/* Brand name must never wrap in the header. Page-local <style> blocks set
+   the logo at 0.95rem; at phone widths the two-pill JA/EN switcher squeezed
+   it onto two lines — shrink both instead (!important beats inline styles). */
+.global-nav__logo span {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .global-nav__logo {
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .global-nav__logo {
+    font-size: 0.78rem !important;
+  }
+  .global-nav__inner {
+    padding: 0 1rem !important;
+  }
+}
 .global-nav__logo img {
   box-shadow:
     0 0 0 1px rgba(148, 178, 230, 0.18),
@@ -2300,7 +2322,7 @@ section {
   .lang-switcher.lang-switcher--nav { margin-right: 0.2rem !important; }
   .lang-switcher.lang-switcher--nav .lang-switcher__btn,
   .lang-switcher.lang-switcher--nav .lang-switcher__link {
-    padding: 0 12px !important;
+    padding: 0 10px !important;
     min-height: 44px !important;
     font-size: 0.7rem !important;
   }
