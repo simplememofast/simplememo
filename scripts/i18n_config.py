@@ -70,6 +70,7 @@ EN_ONLY_PAGES = [
     "/en/blog/offline-first-comparison",
     "/en/blog/revenue-report-2025",
     "/en/blog/why-captio-died",
+    "/en/blog/ios26-speechanalyzer-live-mic",
 ]
 
 # JA-only top-level pages that previously had partial/orphan hreflang to be
