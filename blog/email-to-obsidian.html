@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/blog/email-to-obsidian">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- Google tag (gtag.js) - deferred for LCP -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>iPhoneのメモをObsidianにメールで送る方法【Gmail・Outlook・iCloud対応】</title>
+  <meta name="description" content="iPhoneで書いたメモをObsidianに自動で残す方法。Gmail/Outlook/iCloudどのメールでも、プラグイン不要・オフライン対応でInboxノートやデイリーノートに追記。手動Shortcutsとも比較。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iPhoneのメモをObsidianにメールで送る方法【Gmail・Outlook・iCloud対応】">
+  <meta property="og:description" content="iPhoneで書いたメモをObsidianに自動で残す方法。Gmail/Outlook/iCloudどのメールでも、プラグイン不要・オフライン対応でInboxノートやデイリーノートに追記。手動Shortcutsとも比較。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-06-16T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/blog/email-to-obsidian">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/blog.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iPhoneのメモをObsidianにメールで送る方法【Gmail・Outlook・iCloud対応】">
+  <meta name="twitter:description" content="iPhoneで書いたメモをObsidianに自動で残す方法。Gmail/Outlook/iCloudどのメールでも、プラグイン不要・オフライン対応でInboxノートやデイリーノートに追記。手動Shortcutsとも比較。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- Canonical -->
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/blog/email-to-obsidian">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/blog/email-to-obsidian">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/blog/email-to-obsidian">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/blog/email-to-obsidian">
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","inLanguage":"ja","headline":"iPhoneのメモをObsidianにメールで送る方法【Gmail・Outlook・iCloud対応】","description":"iPhoneで書いたメモをObsidianに自動で残す方法。Gmail/Outlook/iCloudどのメールでも、プラグイン不要・オフライン対応でInboxノートやデイリーノートに追記。手動Shortcutsとも比較。","image":"https://simplememofast.com/assets/img/og/blog.png","url":"https://simplememofast.com/blog/email-to-obsidian","datePublished":"2026-06-16","dateModified":"2026-06-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"keywords":"Obsidian, iPhone, メール, Gmail, Outlook, iCloud, send to obsidian, obsidian inbox"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"Obsidianにメールでメモを送る方法","item":"https://simplememofast.com/blog/email-to-obsidian"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/blog/email-to-obsidian#webpage","inLanguage":"ja","name":"iPhoneのメモをObsidianにメールで送る方法【Gmail・Outlook・iCloud対応】","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body p:first-of-type"]},"url":"https://simplememofast.com/blog/email-to-obsidian"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"iPhoneのメモをObsidianに自動で残すには？","acceptedAnswer":{"@type":"Answer","text":"送信時に保管庫のノートへ自動追記するキャプチャアプリを使うのが最短です。Obsidian連携シンプルメモはワンタップ送信と同時に、Inboxノートまたはデイリーノートへ『- HH:mm メモ』形式で追記します。プラグイン不要・オフライン対応です。"}},{"@type":"Question","name":"Gmail・Outlook・iCloudのどれでもObsidianに残せますか？","acceptedAnswer":{"@type":"Answer","text":"はい。Obsidianへの追記は端末内のローカル処理でメール送信と独立しているため、宛先のプロバイダに関係なく同じように動きます。メールは普段の受信箱に届き、同じメモがObsidianにも残ります。"}},{"@type":"Question","name":"Obsidianの Inbox ノートに集約できますか？","acceptedAnswer":{"@type":"Answer","text":"できます。送り先に固定のInboxノートを選ぶと、送ったメモがすべて1枚に時系列で溜まります。整理・リンクはあとでObsidian側で行えます。"}},{"@type":"Question","name":"プラグインは必要ですか？オフラインでも動きますか？","acceptedAnswer":{"@type":"Answer","text":"プラグインは不要です。保管庫フォルダへアプリが直接書き込みます。圏外でもローカルに保存され、iCloud同期は通信復帰時に反映されます。"}}]}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260611-nav">
+  <style>
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+    /* Article-specific styles */
+    .article-meta { font-size: .875rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .article-meta a { color: var(--accent); text-decoration: none; }
+    .article-body h2 { font-size: 1.4rem; font-weight: 700; margin: 2.5rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--border); }
+    .article-body h3 { font-size: 1.1rem; font-weight: 600; margin: 2rem 0 .75rem; }
+    .article-body p { font-size: .95rem; line-height: 1.85; color: var(--text-secondary); margin-bottom: 1.25rem; }
+    .article-body ul, .article-body ol { margin: 1rem 0 1.5rem 1.25rem; font-size: .95rem; color: var(--text-secondary); line-height: 1.85; }
+    .article-body li { margin-bottom: .5rem; }
+    .article-body strong { color: var(--text); }
+    .article-body a { color: var(--accent); text-decoration: none; }
+    .article-body a:hover { text-decoration: underline; }
+    .article-body code { background: rgba(100,180,255,.08); padding: .15rem .4rem; border-radius: 4px; font-size: .85rem; color: var(--accent); }
+    .article-body pre { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: .85rem; line-height: 1.7; }
+    .article-body pre code { background: none; padding: 0; color: var(--text-secondary); }
+    .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin: 1.5rem 0; }
+    .callout p { margin: 0; }
+    .callout-warning { border-left-color: #f85149; }
+    .timeline-list { list-style: none; margin: 1.5rem 0; padding: 0; }
+    .timeline-list li { position: relative; padding: 0 0 1.5rem 2rem; border-left: 2px solid var(--border); font-size: .95rem; line-height: 1.85; color: var(--text-secondary); }
+    .timeline-list li:last-child { padding-bottom: 0; border-left-color: transparent; }
+    .timeline-list li::before { content: ''; position: absolute; left: -5px; top: .5rem; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .timeline-list li strong { color: var(--text); }
+    .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.5rem; margin: 1.5rem 0; text-align: center; font-family: monospace; font-size: .9rem; line-height: 2; color: var(--text-secondary); overflow-x: auto; }
+    .disclosure { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem 1.5rem; margin-top: 2.5rem; font-size: .875rem; color: var(--text-muted); line-height: 1.7; }
+  
+    /* article code blocks */
+    .article-body pre{background:#0d1424;border:1px solid rgba(148,178,230,.18);border-radius:12px;
+      padding:16px 18px;overflow-x:auto;margin:1.25rem 0;font-size:.82rem;line-height:1.6;}
+    .article-body pre code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#dbe6ff;white-space:pre;}
+    .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
+      font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+    .article-body table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+    .article-body th{color:var(--text-muted);font-weight:700;}
+    .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
+      border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
+</style>
+</head>
+<body>
+<nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=blog-best-memo-apps-2026-jp&amp;mt=8"><span>ダウンロード</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/blog/best-memo-apps-2026" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/blog/best-memo-apps-2026" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
+        <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=blog-best-memo-apps-2026-jp&amp;mt=8" class="global-nav__cta">
+          <span>ダウンロード</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+<main class="page-content">
+    <div class="container">
+
+      <h1 class="page-content__title">iPhoneのメモをObsidianにメールで送る方法【Gmail・Outlook・iCloud対応】</h1>
+
+      <p class="article-meta">
+        著者: <a href="/about/">AI Ataka</a> ・ 最終更新: <time datetime="2026-06-16">2026年6月16日</time> ・ 読了：約8分
+      </p>
+
+      <div class="page-content__body article-body">
+
+        <div class="callout">
+          <strong>結論（先に要点）。</strong>iPhoneで書いたメモをObsidianに残す一番手早い方法は、<strong>送信時に保管庫のノートへ自動追記する</strong>キャプチャアプリを使うことです。追記は端末内のローカル処理なので、<strong>メールがGmail・Outlook・iCloudのどれでも同じように動き</strong>、プラグインも不要、オフラインでも保存されます。「メールでObsidianに取り込む（メール転送→Obsidian）」という別方式もありますが、用途の多くはこのローカル追記型で十分かつ高速・プライベートです。
+        </div>
+
+        <h2>「Obsidianにメールで送る」には2つの意味がある</h2>
+        <p>検索意図を最初に切り分けます。ここを混同すると遠回りになります。</p>
+        <ul>
+          <li><strong>(A) iPhoneで思いついたメモを、自分のObsidian保管庫に貯めたい</strong> — 大多数はこちら。スマホで素早くキャプチャし、整理はObsidianで。これは<strong>ローカル追記型</strong>が最適です（後述）。</li>
+          <li><strong>(B) 受信したメールそのものをObsidianに取り込みたい</strong>（メール転送→自動でノート化） — これは別物で、サードパーティのメール取り込みサービスや自動化が要ります。手軽さ・速さ・プライバシーではローカル追記型に劣りがちです。</li>
+        </ul>
+        <p>本記事は主に(A)を扱い、(B)との違いも正直に説明します。</p>
+
+        <h2>最短の方法：ワンタップで保管庫に追記する</h2>
+        <p><a href="/obsidian/">Obsidian連携シンプルメモ</a>は、メモをワンタップで自分宛メールに送ると同時に、あなたのObsidian保管庫のノートへ<strong>自動で追記</strong>します。手順はこれだけです。</p>
+        <ol>
+          <li>アプリをインストールし、送り先メールアドレスを設定（どのプロバイダでも可）。</li>
+          <li>Obsidian連携で<strong>Inboxノート</strong>か<strong>デイリーノート</strong>を選ぶ（iCloud Drive上の保管庫フォルダを指定）。</li>
+          <li>メモを書いて送信。メールが届き、同じ内容がObsidianにも残ります。</li>
+        </ol>
+        <p>追記はタイムスタンプ付きのリスト行で、既存の内容を消さずに1行ずつ足されます。</p>
+        <pre><code>- 09:14 打ち合わせの要点：見積もりは金曜まで
+- 09:31 買うもの：牛乳、電池
+- 12:05 アイデア：オンボーディングを3画面に短縮</code></pre>
+        <p>プラグインは不要で、アプリを開かずバックグラウンドで追記されます。圏外でもローカルファイルに保存され、iCloud同期は通信復帰時に反映されます。</p>
+
+        <h2>Gmail・Outlook・iCloud — メールの種類は関係ある？</h2>
+        <p><strong>関係ありません。</strong>Obsidianへの追記は端末内のローカル処理で、メール送信とは独立しています。だから宛先がGmailでもOutlookでもiCloudでも、Obsidianへの残り方は同じです。あなたの普段の受信箱にメモが届き、同じメモがObsidianの保管庫にも入ります——二重に残るのが利点です。</p>
+        <p>「<strong>obsidian gmail</strong>」「<strong>outlook obsidian</strong>」「<strong>obsidian icloud</strong>」で探している方の多くはここが知りたいはず：メール側のプロバイダ設定をObsidianのために変える必要はありません。</p>
+
+        <h2>Inboxノート運用（送ってから整理する）</h2>
+        <p>固定の<strong>Inboxノート</strong>を送り先にすると、送ったメモはすべて1枚に時系列で溜まります。あとでObsidian側で仕分け・リンク・タグ付けするだけ。これは「まずキャプチャ、整理は後」という<a href="/methods/second-brain/">セカンドブレイン</a>／<a href="/methods/inbox-zero/">Inbox Zero</a>の考え方そのものです。日付ごとに分けたいならデイリーノートに切り替えられます。</p>
+
+        <h2>手動でやるなら：Apple Shortcuts</h2>
+        <p>アプリを使わず<strong>Apple Shortcuts</strong>でファイルに追記する方法もあります。ファイル App 経由で保管庫の.mdに「ファイルに追加」アクションで書き込む構成です。自由度は高い一方で、初期設定が手間で、オフライン時の確実な再送やタイムスタンプ整形は自分で作り込む必要があります。「とにかく速く・確実に貯めたい」なら専用アプリ、「自分で組むのが好き」ならShortcuts、と割り切るとよいです。</p>
+
+        <h2>Apple WatchからObsidianに送る</h2>
+        <p>Apple Watchから自分宛にメモを送ると、iPhone側の連携処理を通じて同じメモがObsidianにも追記されます（追記はiPhoneが担当します）。手首でキャプチャ→Obsidianに集約、という流れも作れます。詳しくは<a href="/apple-watch/">Apple Watch対応ページ</a>をご覧ください。</p>
+
+        <h2>FAQ</h2>
+        <p><strong>「send to obsidian」だけしたい。メールは要らない場合は？</strong><br>本アプリはメール送信とObsidian追記の両方を行います。メールは「確実に手元に残る冗長バックアップ」として機能します。Obsidianだけに残したい場合も、メールは普段使わない受信箱に溜めておけば実害はありません。</p>
+        <p><strong>Obsidianのプラグインは要りますか？</strong><br>不要です。Obsidianの標準機能だけで動きます。保管庫フォルダへアプリが直接書き込みます。</p>
+        <p><strong>オフラインでもObsidianに残りますか？</strong><br>はい。フォルダ直書きはローカル処理なので圏外でも保存され、他端末への同期は通信復帰時に行われます。</p>
+        <p><strong>Android・パソコンでも使えますか？</strong><br>連携アプリ自体はiPhone（iOS 16以降）向けです。保管庫をiCloud DriveやObsidian Syncで同期しておけば、Mac・iPad・他端末のObsidianから同じノートを開けます。</p>
+
+        <p style="margin-top:2rem;">この連携を実際に搭載しているのが <a href="/obsidian/">Obsidian連携シンプルメモ</a> です。仕組み（どのノートに・どんな形式で追記するか）はそちらのページで詳しく説明しています。</p>
+
+      </div>
+    </div>
+  </main>
+
+
+  <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/" class="footer__link"><span>ホーム</span></a>
+        <a href="/use-cases/" class="footer__link"><span>活用事例</span></a>
+        <a href="/guides/" class="footer__link"><span>設定ガイド</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/captio-alternative/" class="footer__link"><span>Captio代替</span></a>
+        <a href="/note-to-email/" class="footer__link"><span>メモ→メール</span></a>
+        <a href="/vs/" class="footer__link"><span>アプリ比較</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">読みもの</p>
+        <a href="/blog/" class="footer__link"><span>ブログ</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/faq" class="footer__link"><span>FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span>プライバシー</span></a>
+        <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>
+      </div>
+      </nav><p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p></div></footer>
+
+  <script>
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+</body>
+</html>
