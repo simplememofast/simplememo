@@ -41,6 +41,7 @@ JA_EN_PAIRS = [
     ("/terms",                              "/en/terms"),
     ("/blog/ios-quick-capture-comparison",  "/en/blog/ios-quick-capture-comparison"),
     ("/blog/best-memo-apps-2026",            "/en/blog/best-memo-apps-2026"),
+    ("/blog/email-to-obsidian",              "/en/blog/email-to-obsidian"),
     ("/vs/notion-vs-obsidian/",              "/en/vs/notion-vs-obsidian/"),
     ("/vs/notion-vs-evernote/",              "/en/vs/notion-vs-evernote/"),
     ("/vs/google-keep-vs-apple-notes/",      "/en/vs/google-keep-vs-apple-notes/"),
