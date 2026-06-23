@@ -27,7 +27,7 @@ KENAPA SIMPLEMEMO?
 - Kirim satu ketukan — memo langsung masuk email kamu
 - Enkripsi AES-GCM — teks kamu dienkripsi, nggak pernah disimpan di server kami
 - Offline tetap jalan — memo dikirim otomatis saat koneksi kembali (Outbox pattern)
-- Pengganti Captio — Captio sudah tutup di 2025, SimpleMemo lanjutkan misinya
+- Pengganti Captio — Captio sudah tutup pada Oktober 2024, SimpleMemo lanjutkan misinya
 
 FITUR UTAMA:
 

@@ -18,7 +18,7 @@ Escribe tu idea, pulsa enviar y aparece en tu bandeja de entrada. Así de simple
 ### 説明文（フル版・4000文字以内）
 **1 segundo para abrir. Un toque para enviar. Tu nota llega a tu email.**
 
-SimpleMemo es la forma más rápida de capturar una idea antes de que se te escape. Nacida como alternativa a Captio (cerrado en 2025), pero más rápida, más segura y más inteligente.
+SimpleMemo es la forma más rápida de capturar una idea antes de que se te escape. Nacida como alternativa a Captio (cerrado en octubre de 2024), pero más rápida, más segura y más inteligente.
 
 **¿Por qué SimpleMemo?**
 

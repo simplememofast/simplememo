@@ -18,7 +18,7 @@ Escreveu, mandou, chegou na sua caixa de entrada. Sem pastas, sem etiquetas, sem
 ### 説明文（フル版・4000文字以内）
 **1 segundo pra abrir. Um toque pra enviar. Sua nota chega no seu email.**
 
-SimpleMemo é o jeito mais rápido de anotar uma ideia antes que ela suma. Nasceu como alternativa ao Captio (que encerrou em 2025), mas é mais rápido, mais seguro e mais inteligente.
+SimpleMemo é o jeito mais rápido de anotar uma ideia antes que ela suma. Nasceu como alternativa ao Captio (que encerrou em outubro de 2024), mas é mais rápido, mais seguro e mais inteligente.
 
 **Por que SimpleMemo?**
 
