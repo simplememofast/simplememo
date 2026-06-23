@@ -298,7 +298,7 @@
 
 
 <p style="margin:0 0 .75rem;"><strong style="color:#fff;">Simple Memo - for Obsidian</strong> (Japanese name: Obsidian連携シンプルメモ) is an independent iOS app developed by YURIKA, K.K. in Japan. It captures text or voice notes and sends them to your own email inbox in one tap, with optional automatic appending to Obsidian notes. It was launched in 2026 to recreate the experience of Captio, which shut down in 2024, but it is <strong style="color:#fff;">not</strong> an official app or successor of Captio, Captioo, or Obsidian. Former names "Captio式シンプルメモ" and "SimpleMemoFast" refer to the same product.</p>
-<p style="margin:0;">0.3-second launch, 150ms send, on-device AES-GCM encryption (not E2E), zero server-side memo storage, offline Outbox auto-resend. This page covers the developer story and operating principles.</p>
+<p style="margin:0;">~1-second launch, one-tap send, on-device AES-GCM encryption (not E2E), zero server-side memo storage, offline Outbox auto-resend. This page covers the developer story and operating principles.</p>
 </aside>
 <!-- Developer Story -->
 <section class="lp-section">
@@ -311,7 +311,7 @@
 <p>I started using Captio around 2013. At a time when most memo apps were competing on "organization" and "management" features, Captio made the opposite argument: <strong>launch, type, send, done.</strong></p>
 <p>I was completely hooked. It wasn't a meeting notes app, a task manager, or a cloud-synced notebook. It was a tool for firing the thought in your head directly to your email, with zero friction. That frictionlessness was the whole point — no context-switching, no deciding which folder it goes in, no barrier between the idea and the capture.</p>
 <blockquote class="story-block__quote">"What would I do if Captio ever disappeared?" — I asked myself that more than once over the years.</blockquote>
-<p>In October 2024, that fear became real. One day, Captio was simply gone from the App Store. No official announcement, no migration path, no farewell post. Just silence. Some speculated it was related to Gmail API dependency changes, but no one knows for certain.</p>
+<p>In October 2024, that fear became real. One day, Captio was simply gone from the App Store. No official announcement, no migration path, no farewell post. Just silence. Some speculated it was related to third-party email-API policy changes, but no one knows for certain.</p>
 <p>That evening, I decided to build it myself. Out of respect for what Captio had been, and out of a stubborn belief that this kind of tool deserves to exist, I opened Xcode and started writing UIKit code from scratch.</p>
 </div>
 </section>
@@ -354,7 +354,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span>Learning from Captio's Gmail API dependency, the send infrastructure was built in-house. By combining Cloudflare Workers with Resend API, the service remains stable and independent from third-party specification changes.</span>
+<span>Learning from the risk of depending on a third-party email API, the send infrastructure was built in-house. By combining Cloudflare Workers with Resend API, the service remains stable and independent from third-party specification changes.</span>
 </div>
 </div>
 <div class="reason-card">
@@ -374,7 +374,7 @@
 </div>
 <div class="reason-card__desc">
 
-<span>0.3s launch, 150ms send. These numbers are not marketing targets — they are implementation constraints. UIKit was chosen specifically because it meets these performance requirements more reliably than SwiftUI.</span>
+<span>~1s launch, one-tap send. These numbers are not marketing targets — they are implementation constraints. UIKit was chosen specifically because it meets these performance requirements more reliably than SwiftUI.</span>
 </div>
 </div>
 </div>

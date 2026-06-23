@@ -451,7 +451,7 @@ X の検索ボックスに以下をそのまま貼り付けて「最新」タブ
 
 **例**:
 > "起動が遅いメモは使わなくなる" という話、実際に測ると差は体感どころではない。
-> Apple Notes 0.6s / Notion 2.1s / シンプルメモ 0.3s
+> Apple Notes 0.6s / Notion 2.1s / シンプルメモ ~1s
 > 測定条件: simplememofast.com/blog/benchmark-methodology
 
 ### 型 3: 質問で開く型（会話誘発）
@@ -1146,7 +1146,7 @@ URL: [対象投稿 URL]
 
 **候補 A への引用 RT（型 2: 数字で返す型）**:
 > 会議の "その瞬間" に間に合わないメモは、後悔の材料にしかならない。
-> Notion 2.1s / Apple Notes 0.6s / シンプルメモ 0.3s。
+> Notion 2.1s / Apple Notes 0.6s / シンプルメモ ~1s。
 > この差を軽く見ていたのは、自分も作る前まで同じでした。
 > 測定条件 → simplememofast.com/blog/benchmark-methodology
 

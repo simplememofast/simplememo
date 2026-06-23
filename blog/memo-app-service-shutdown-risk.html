@@ -295,7 +295,7 @@
           <tr>
             <td><a href="/blog/captio-discontinued" style="color:var(--accent);text-decoration:none;">Captio</a></td>
             <td>2024年10月</td>
-            <td>Gmail API制限</td>
+            <td>外部API依存（推測）</td>
             <td>メールに残存</td>
           </tr>
           <tr>
@@ -345,7 +345,7 @@
       <p style="font-size:.9rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1.5rem;">自分が使っているメモアプリにサービス終了リスクがどれくらいあるか、以下のチェックリストで確認してみましょう。該当する項目が多いほど、リスクは高いと考えられます。</p>
 
       <ul class="checklist">
-        <li><strong>特定APIへの依存</strong> ― CaptioはGmail APIに依存していたため、Googleの仕様変更で致命的なダメージを受けました。外部APIに依存しているアプリは、その提供元の方針変更で突然機能しなくなる可能性があります。</li>
+        <li><strong>特定APIへの依存</strong> ― Captioは端末から直接メールを送る仕組みで、外部メールAPIの仕様変更の影響を受けやすかったと推測されています（公式な確認はありません）。外部APIに依存しているアプリは、その提供元の方針変更で突然機能しなくなる可能性があります。</li>
         <li><strong>収益モデルの脆弱性</strong> ― 買い切り型（ワンタイム課金）のアプリは、ユーザー数の増加が止まると収益が激減します。開発を継続するための資金が枯渇し、アップデートが止まり、最終的にサービス終了に至るパターンが非常に多いです。</li>
         <li><strong>買収リスク</strong> ― Wunderlistは6000万ユーザーを抱える人気アプリでしたが、Microsoftに買収された後、Microsoft To Doへの統合という名目で2020年に終了しました。スタートアップ企業が運営するアプリは、買収によって消滅するリスクがあります。</li>
         <li><strong>クラウド専用設計</strong> ― データがクラウドにのみ保存され、ローカルにコピーが残らないアプリは、サーバーが停止した瞬間にすべてのデータにアクセスできなくなります。</li>
@@ -472,9 +472,9 @@
       </div>
 
       <div class="app-card">
-        <div class="app-card__header"><span class="app-card__name">Gmail API非依存</span><span class="app-card__rank">Captioの教訓</span></div>
+        <div class="app-card__header"><span class="app-card__name">外部メールAPI非依存</span><span class="app-card__rank">Captioの教訓</span></div>
         <div class="app-card__desc">
-          <p>Captioが終了した最大の原因は、Gmail APIへの依存でした。GoogleがAPIの利用条件を厳格化したことで、Captioは機能しなくなりました。Simple Memoはこの失敗から学び、<strong>Gmail APIに一切依存しない設計</strong>を採用しています。</p>
+          <p>Captioの終了原因は公式には不明ですが、外部API依存が一因と推測されています。外部のメール送信の要件が厳格化していくと、こうした構造のアプリは影響を受けやすくなります。Simple Memoはこの教訓から、<strong>特定の外部メールAPIに一切依存しない設計</strong>を採用しています。</p>
           <p style="margin-top:.75rem;">メール送信にはResend APIを使用し、標準的なSMTPプロトコルでメールを送信します。特定のメールサービスのAPIに依存しないため、同様の問題が起きるリスクは極めて低いです。</p>
         </div>
       </div>
@@ -551,7 +551,7 @@
     <!-- CTA Bottom -->
     <div class="cta-box">
       <div class="cta-box__title">サービス終了に強いメモアプリを使いませんか？</div>
-      <div class="cta-box__desc">Simple Memoは、メモをメールとして保存するから、アプリが消えてもデータは永久に残ります。起動0.3秒、AES-GCM暗号化、ベンダーロックインゼロ。</div>
+      <div class="cta-box__desc">Simple Memoは、メモをメールとして保存するから、アプリが消えてもデータは永久に残ります。起動約1秒、AES-GCM暗号化、ベンダーロックインゼロ。</div>
       <a href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=blog-memo-app-service-shutdown-risk-jp&amp;mt=8" class="global-nav__cta" style="font-size:1rem;padding:.7rem 2rem;">
         Simple Memo を無料で試す
       </a>
@@ -577,7 +577,7 @@
   <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
   <div>
     <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI Ataka</p>
-    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">Obsidian連携シンプルメモ開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動0.3秒・メモ→メール特化」のObsidian連携シンプルメモを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">Obsidian連携シンプルメモ開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動約1秒・メモ→メール特化」のObsidian連携シンプルメモを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
       <a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
       <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>

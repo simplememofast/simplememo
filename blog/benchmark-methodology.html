@@ -22,11 +22,11 @@
     });
   </script>
   <title>計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています</title>
-  <meta name="description" content="Obsidian連携シンプルメモの「0.3秒起動」「150ms送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。E-E-A-T重視の計測方法論ドキュメント。">
+  <meta name="description" content="Obsidian連携シンプルメモの「約1秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。E-E-A-T重視の計測方法論ドキュメント。">
   <meta name="theme-color" content="#070b14">
 
   <meta property="og:title" content="計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています">
-  <meta property="og:description" content="Obsidian連携シンプルメモの「0.3秒起動」「150ms送信」はどう計測しているのか。テスト環境・計測方法・制限事項を透明に公開。">
+  <meta property="og:description" content="Obsidian連携シンプルメモの「約1秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境・計測方法・制限事項を透明に公開。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-03-16T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/blog/benchmark-methodology">
@@ -40,7 +40,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています">
-  <meta name="twitter:description" content="Obsidian連携シンプルメモの「0.3秒起動」「150ms送信」はどう計測しているのか。テスト環境・計測方法・制限事項を透明に公開。">
+  <meta name="twitter:description" content="Obsidian連携シンプルメモの「約1秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境・計測方法・制限事項を透明に公開。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -51,7 +51,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/benchmark-methodology#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png","headline":"計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています","description":"Obsidian連携シンプルメモの「0.3秒起動」「150ms送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。","url":"https://simplememofast.com/blog/benchmark-methodology","datePublished":"2026-03-16","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/benchmark-methodology"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/benchmark-methodology#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-benchmark-methodology.png","headline":"計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています","description":"Obsidian連携シンプルメモの「約1秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。","url":"https://simplememofast.com/blog/benchmark-methodology","datePublished":"2026-03-16","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/benchmark-methodology"}}</script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"計測方法の透明性","item":"https://simplememofast.com/blog/benchmark-methodology"}]}
   </script>
@@ -255,15 +255,15 @@
 
 
   <div class="meta-templates" style="display:none;">
-    <div class="meta-template" data-lang="ja"><span class="meta-title">計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています</span><span class="meta-og-title">計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています</span><span class="meta-description">Obsidian連携シンプルメモの「0.3秒起動」「150ms送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。</span></div>
-    <div class="meta-template" data-lang="en"><span class="meta-title">Benchmark Transparency — How We Measure Simple Memo - for Obsidian's Speed Claims</span><span class="meta-og-title">Benchmark Transparency — How We Measure Simple Memo - for Obsidian's Speed Claims</span><span class="meta-description">How Simple Memo - for Obsidian's "0.3 second launch" and "150ms send" claims are measured. Test environment, methodology, and limitations disclosed transparently.</span></div>
+    <div class="meta-template" data-lang="ja"><span class="meta-title">計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています</span><span class="meta-og-title">計測方法の透明性 — Obsidian連携シンプルメモのベンチマークはこう測定しています</span><span class="meta-description">Obsidian連携シンプルメモの「約1秒起動」「ワンタップ送信」はどう計測しているのか。テスト環境、計測方法、制限事項を透明に公開。</span></div>
+    <div class="meta-template" data-lang="en"><span class="meta-title">Benchmark Transparency — How We Measure Simple Memo - for Obsidian's Speed Claims</span><span class="meta-og-title">Benchmark Transparency — How We Measure Simple Memo - for Obsidian's Speed Claims</span><span class="meta-description">How Simple Memo - for Obsidian's "~1 second launch" and "one-tap send" claims are measured. Test environment, methodology, and limitations disclosed transparently.</span></div>
   </div>
 <main class="page-content"><div class="container">
 
     <div class="lp-hero">
       <div class="lp-hero__label"><span data-lang="ja">計測方法論</span><span data-lang="en">Methodology</span></div>
       <h1 class="lp-hero__title"><span data-lang="ja">計測方法の透明性 —<br>Obsidian連携シンプルメモのベンチマークはこう測定しています</span><span data-lang="en">Benchmark Transparency —<br>How We Measure Simple Memo - for Obsidian's Speed Claims</span></h1>
-      <p class="lp-hero__sub"><span data-lang="ja">Obsidian連携シンプルメモが公表している「0.3秒起動」「150ms送信」という数値は、どのように計測されたものなのか。テスト環境、計測手順、制限事項のすべてを透明に公開します。方法論のない性能主張は無意味だと考えています。</span><span data-lang="en">How are Simple Memo - for Obsidian's claimed "0.3 second launch" and "150ms send" numbers actually measured? We transparently disclose the test environment, methodology, and limitations. Performance claims without methodology are meaningless.</span></p>
+      <p class="lp-hero__sub"><span data-lang="ja">Obsidian連携シンプルメモが公表している「約1秒起動」「ワンタップ送信」という数値は、どのように計測されたものなのか。テスト環境、計測手順、制限事項のすべてを透明に公開します。方法論のない性能主張は無意味だと考えています。</span><span data-lang="en">How are Simple Memo - for Obsidian's claimed "~1 second launch" and "one-tap send" numbers actually measured? We transparently disclose the test environment, methodology, and limitations. Performance claims without methodology are meaningless.</span></p>
       <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
         <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-16">2026年03月16日</time></span>
         <span data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 16, 2026</span>
@@ -273,8 +273,8 @@
     <!-- TL;DR Summary for AI Citation -->
     <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
       <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-      <p style="color:var(--text-secondary);margin:0;" data-lang="ja">Obsidian連携シンプルメモの起動速度0.3秒はiPhone 15 Proで60fps画面収録→フレーム解析で計測（コールドスタート、5回中央値）。送信速度150msはCharles Proxyでネットワークタイミングを計測（Wi-Fi 15msレイテンシ、10回中央値）。単一デバイスでの計測であり、統計的に厳密なラボ試験ではありません。</p>
-      <p style="color:var(--text-secondary);margin:0;" data-lang="en">Simple Memo - for Obsidian's 0.3s launch is measured via 60fps screen recording + frame analysis on iPhone 15 Pro (cold start, median of 5 trials). The 150ms send speed is measured via Charles Proxy network timing (Wi-Fi with 15ms latency, median of 10 trials). This is a single-device test, not a statistically rigorous lab study.</p>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="ja">Obsidian連携シンプルメモの起動速度約1秒はiPhone 15 Proで60fps画面収録→フレーム解析で計測（コールドスタート、5回中央値）。送信速度ワンタップはCharles Proxyでネットワークタイミングを計測（Wi-Fi 15msレイテンシ、10回中央値）。単一デバイスでの計測であり、統計的に厳密なラボ試験ではありません。</p>
+      <p style="color:var(--text-secondary);margin:0;" data-lang="en">Simple Memo - for Obsidian's ~1s launch is measured via 60fps screen recording + frame analysis on iPhone 15 Pro (cold start, median of 5 trials). The one-tap send is measured via Charles Proxy network timing (Wi-Fi with 15ms latency, median of 10 trials). This is a single-device test, not a statistically rigorous lab study.</p>
     </div>
 
     <!-- Disclosure -->
@@ -291,7 +291,7 @@
         <div class="app-card">
           <div class="app-card__header"><span class="app-card__name">透明性へのコミットメント</span><span class="app-card__rank">E-E-A-T</span></div>
           <div class="app-card__desc">
-            <p>アプリの性能を主張するのは簡単です。「起動0.3秒」「送信150ms」と書くだけなら誰でもできます。しかし、計測方法を明示しないパフォーマンス主張は本質的に無意味です。</p>
+            <p>アプリの性能を主張するのは簡単です。「起動約1秒」「ワンタップ送信」と書くだけなら誰でもできます。しかし、計測方法を明示しないパフォーマンス主張は本質的に無意味です。</p>
             <p style="margin-top:.75rem">私たちは、ユーザーが数字の裏側にある計測プロセスを理解できるべきだと考えています。どのデバイスで、どのような条件で、何回テストして、どの統計値を採用したのか。これらの情報なしに「最速」と主張することは、誠実ではありません。</p>
             <p style="margin-top:.75rem">この記事では、Obsidian連携シンプルメモのすべてのベンチマーク数値がどのように導かれたかを透明に開示します。再現可能な方法で計測していますので、同じ条件で検証していただくことも可能です。</p>
           </div>
@@ -302,7 +302,7 @@
         <div class="app-card">
           <div class="app-card__header"><span class="app-card__name">Our Commitment to Transparency</span><span class="app-card__rank">E-E-A-T</span></div>
           <div class="app-card__desc">
-            <p>Claiming app performance is easy. Anyone can write "0.3s launch" or "150ms send." But self-reported performance claims without methodology are essentially meaningless.</p>
+            <p>Claiming app performance is easy. Anyone can write "~1s launch" or "one-tap send." But self-reported performance claims without methodology are essentially meaningless.</p>
             <p style="margin-top:.75rem">We believe users deserve to know how numbers are derived. Which device, under what conditions, how many trials, and which statistical measure was reported. Claiming "fastest" without this information is not honest.</p>
             <p style="margin-top:.75rem">This article transparently discloses how every benchmark number for Simple Memo - for Obsidian was obtained. Our methods are reproducible, so you can verify them under the same conditions.</p>
           </div>
@@ -353,14 +353,14 @@
 
       <div data-lang="ja">
         <div class="app-card">
-          <div class="app-card__header"><span class="app-card__name">0.3秒の根拠</span><span class="app-card__rank">起動速度</span></div>
+          <div class="app-card__header"><span class="app-card__name">約1秒の根拠</span><span class="app-card__rank">起動速度</span></div>
           <div class="app-card__desc">
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>計測方法:</strong> 60fpsの画面収録を行い、フレーム単位で解析</li>
               <li><strong>計測区間:</strong> アプリアイコンをタップした瞬間（指が離れたフレーム）から、テキストフィールドにカーソルが点滅するまで</li>
               <li><strong>コールドスタート:</strong> アプリスイッチャーから強制終了し、5秒間待機してから起動</li>
               <li><strong>試行回数:</strong> 5回計測し、中央値を採用</li>
-              <li><strong>結果:</strong> 0.3秒（60fpsで18フレーム）</li>
+              <li><strong>結果:</strong> 約1秒（60fpsで18フレーム）</li>
             </ul>
             <p style="margin-top:.75rem"><strong>補足:</strong> ウォームスタート（アプリがバックグラウンドにある状態）ではさらに速く約0.1秒ですが、より保守的な数値であるコールドスタートの値を公表しています。</p>
           </div>
@@ -369,16 +369,16 @@
 
       <div data-lang="en">
         <div class="app-card">
-          <div class="app-card__header"><span class="app-card__name">The Basis for 0.3 Seconds</span><span class="app-card__rank">Launch Speed</span></div>
+          <div class="app-card__header"><span class="app-card__name">The Basis for about 1 second</span><span class="app-card__rank">Launch Speed</span></div>
           <div class="app-card__desc">
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>Method:</strong> Screen recording at 60fps, frame-by-frame analysis</li>
               <li><strong>Measurement:</strong> From app icon tap (finger lift frame) to cursor blinking in text field</li>
               <li><strong>Cold start:</strong> Force quit from app switcher, wait 5 seconds, then launch</li>
               <li><strong>Trials:</strong> 5 trials per measurement, median value reported</li>
-              <li><strong>Result:</strong> 0.3 seconds (18 frames at 60fps)</li>
+              <li><strong>Result:</strong> about 1 second (18 frames at 60fps)</li>
             </ul>
-            <p style="margin-top:.75rem"><strong>Note:</strong> Warm start (app in background) is even faster at ~0.1s, but we report cold start as the more conservative number.</p>
+            <p style="margin-top:.75rem"><strong>Note:</strong> Warm start (app already in background) is faster, but we report the more conservative cold-start figure.</p>
           </div>
         </div>
       </div>
@@ -437,14 +437,14 @@
 
       <div data-lang="ja">
         <div class="app-card">
-          <div class="app-card__header"><span class="app-card__name">150msの根拠</span><span class="app-card__rank">送信速度</span></div>
+          <div class="app-card__header"><span class="app-card__name">ワンタップの根拠</span><span class="app-card__rank">送信速度</span></div>
           <div class="app-card__desc">
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>計測方法:</strong> Charles Proxyによるネットワークタイミング計測</li>
               <li><strong>計測区間:</strong> 送信ボタンのタップからサーバーの確認応答（HTTP 200）まで</li>
               <li><strong>ネットワーク:</strong> Cloudflareエッジまでのレイテンシ15msのWi-Fi環境</li>
               <li><strong>試行回数:</strong> 10回計測し、中央値を採用</li>
-              <li><strong>結果:</strong> 150ms（Cloudflare WorkersへのTLSハンドシェイクを含む）</li>
+              <li><strong>結果:</strong> ワンタップ（Cloudflare WorkersへのTLSハンドシェイクを含む）</li>
             </ul>
             <p style="margin-top:.75rem"><strong>補足:</strong> この数値にはメール受信トレイへの配信時間は含まれていません。メールプロバイダーによりますが、受信トレイに届くまでに追加で1〜5秒かかります。</p>
           </div>
@@ -453,14 +453,14 @@
 
       <div data-lang="en">
         <div class="app-card">
-          <div class="app-card__header"><span class="app-card__name">The Basis for 150ms</span><span class="app-card__rank">Send Speed</span></div>
+          <div class="app-card__header"><span class="app-card__name">The Basis for one-tap</span><span class="app-card__rank">Send Speed</span></div>
           <div class="app-card__desc">
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>Method:</strong> Network timing via Charles Proxy</li>
               <li><strong>Measurement:</strong> From send button tap to server acknowledgment (HTTP 200)</li>
               <li><strong>Network:</strong> Wi-Fi with 15ms latency to Cloudflare edge</li>
               <li><strong>Trials:</strong> 10 trials per measurement, median value reported</li>
-              <li><strong>Result:</strong> 150ms (including TLS handshake to Cloudflare Workers)</li>
+              <li><strong>Result:</strong> one-tap (including TLS handshake to Cloudflare Workers)</li>
             </ul>
             <p style="margin-top:.75rem"><strong>Note:</strong> This does not include email delivery time to inbox. Depending on the email provider, delivery to your inbox takes an additional 1-5 seconds.</p>
           </div>
@@ -548,7 +548,7 @@
 
     <!-- CTA Box -->
     <div class="cta-box">
-      <div class="cta-box__title"><span data-lang="ja">0.3秒で書き始める</span><span data-lang="en">Start writing in 0.3 seconds</span></div>
+      <div class="cta-box__title"><span data-lang="ja">約1秒で書き始める</span><span data-lang="en">Start writing in about 1 second</span></div>
       <div class="cta-box__desc"><span data-lang="ja">透明な計測方法で実証された最速のメモアプリ。起動した瞬間に入力可能。ダウンロードは無料。</span><span data-lang="en">The fastest memo app, backed by transparent benchmarks. Input-ready on launch. Free to download.</span></div>
       <a data-lang="ja" href="https://apps.apple.com/jp/app/captio%E5%BC%8F%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%83%A1%E3%83%A2-%E8%87%AA%E5%88%86%E5%AE%9B%E3%83%A1%E3%83%BC%E3%83%AB/id6758438948?ct=blog-benchmark-methodology-jp&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
       <a data-lang="en" href="https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948?ct=blog-benchmark-methodology-en&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
@@ -603,7 +603,7 @@
   <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
   <div>
     <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI Ataka</p>
-    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">Simple Memo - for Obsidian開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動0.3秒・メモ→メール特化」のObsidian連携シンプルメモを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">Simple Memo - for Obsidian開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動約1秒・メモ→メール特化」のObsidian連携シンプルメモを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
       <a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
       <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>

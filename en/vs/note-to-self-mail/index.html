@@ -306,7 +306,7 @@
 </h2>
 <p class="lp-section__lead">
 
-<span>The "email yourself" note app category lets you write a memo on your phone and instantly send it to a specified email address. Both Note To Self Mail and Simple Memo belong to this category, leveraging email's permanence, searchability, and cross-device access. The core concept is shared, but they diverge significantly in launch speed, offline architecture, encryption implementation, and sending infrastructure — differences that compound into a noticeably different daily experience. Simple Memo's technical differentiators are: 0.3s launch, Outbox offline support, AES-GCM on-device encryption, and Cloudflare Workers + Resend API infrastructure.</span>
+<span>The "email yourself" note app category lets you write a memo on your phone and instantly send it to a specified email address. Both Note To Self Mail and Simple Memo belong to this category, leveraging email's permanence, searchability, and cross-device access. The core concept is shared, but they diverge significantly in launch speed, offline architecture, encryption implementation, and sending infrastructure — differences that compound into a noticeably different daily experience. Simple Memo's technical differentiators are: ~1s launch, Outbox offline support, AES-GCM on-device encryption, and Cloudflare Workers + Resend API infrastructure.</span>
 </p>
 </section>
 <!-- Comparison Table -->
@@ -320,11 +320,11 @@
 <table class="compare-table">
 <thead><tr><th>Feature</th><th>Note To Self Mail</th><th>Simple Memo</th></tr></thead>
 <tbody>
-<tr><td>Launch Speed</td><td>Standard</td><td class="yes">0.3 seconds</td></tr>
+<tr><td>Launch Speed</td><td>Standard</td><td class="yes">about 1 second</td></tr>
 <tr><td>Offline Support</td><td>Unknown</td><td class="yes">Outbox auto-resend</td></tr>
 <tr><td>On-Device Encryption</td><td>Unknown</td><td class="yes">AES-GCM</td></tr>
 <tr><td>Send Infrastructure</td><td>Standard SMTP</td><td class="yes">Cloudflare Workers + Resend</td></tr>
-<tr><td>Send Latency</td><td>Standard</td><td class="yes">~150ms</td></tr>
+<tr><td>Send Latency</td><td>Standard</td><td class="yes">one-tap</td></tr>
 <tr><td>Free Tier</td><td>Check App Store</td><td class="yes">3 sends/day</td></tr><tr><td>Send History</td><td>Check App Store</td><td class="yes">In-app tracking</td></tr>
 <tr><td>Supported OS</td><td>iOS</td><td class="yes">iOS 16+</td></tr>
 <tr><td>Japanese Localization</td><td>Unknown</td><td class="yes">Full support</td></tr>
@@ -401,7 +401,7 @@
 <span>Choose Simple Memo If...</span>
 </div>
 <ul class="choose-card__list">
-<li><span>You want the fastest possible 0.3s capture</span></li>
+<li><span>You want the fastest possible ~1s capture</span></li>
 <li><span>You need reliable offline note-taking</span></li>
 <li><span>You prioritize AES-GCM encryption for privacy</span></li>
 <li><span>You want low-latency edge sending</span></li>
@@ -418,7 +418,7 @@
 </h2>
 <p class="lp-section__lead">
 
-<span>Building a lasting self-email memo habit requires a few practical tips. First, place Simple Memo - for Obsidian in your home screen dock (the fixed area at the bottom). Having the app accessible the moment you want to capture a thought — launching in 0.3 seconds — is critical. Second, consciously use Simple Memo - for Obsidian instead of opening a notes app. "Send it now via email" produces fewer missed memos than "I'll organize it later in a notes app." Third, build a daily habit of processing your email inbox — reviewing and acting on the memos you've sent yourself. The key insight: the habit sticks when capture takes less than 3 seconds. This speed is what sustains the habit. Simple Memo - for Obsidian's 0.3-second launch → type → one-tap send is designed precisely to meet this "3-second rule."</span>
+<span>Building a lasting self-email memo habit requires a few practical tips. First, place Simple Memo - for Obsidian in your home screen dock (the fixed area at the bottom). Having the app accessible the moment you want to capture a thought — launching in about 1 second — is critical. Second, consciously use Simple Memo - for Obsidian instead of opening a notes app. "Send it now via email" produces fewer missed memos than "I'll organize it later in a notes app." Third, build a daily habit of processing your email inbox — reviewing and acting on the memos you've sent yourself. The key insight: the habit sticks when capture takes less than 3 seconds. This speed is what sustains the habit. Simple Memo - for Obsidian's ~1-second launch → type → one-tap send is designed precisely to meet this "3-second rule."</span>
 </p>
 </section>
 <!-- FAQ -->
@@ -429,7 +429,7 @@
 </h2>
 
 <div>
-<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which app has fewer steps to send — Note To Self Mail or Simple Memo?</summary><div class="faq-answer"><p>Simple Memo has fewer steps. After initial setup, the workflow is just two steps: launch the app (keyboard appears in 0.3s), type your memo, and tap send. No recipient entry or subject line setup required.</p></div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which app has fewer steps to send — Note To Self Mail or Simple Memo?</summary><div class="faq-answer"><p>Simple Memo has fewer steps. After initial setup, the workflow is just two steps: launch the app (keyboard appears in ~1s), type your memo, and tap send. No recipient entry or subject line setup required.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo auto-generate email subjects?</summary><div class="faq-answer"><p>Yes. Simple Memo automatically uses the first line of your memo as the email subject. No separate subject field to fill in, which further reduces the steps between thought and send.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I view my sent memo history within the app?</summary><div class="faq-answer"><p>Yes. Simple Memo provides an in-app view of sent memos and lets you manage unsent Outbox memos. You can review past memos from within the app as well as your email inbox.</p></div></details></div>
 <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What happens to my old memos if I switch from Note To Self Mail?</summary><div class="faq-answer"><p>All memos previously sent via Note To Self Mail remain in your email inbox. Simple Memo can use the same email address, so your old and new memos are unified in one inbox.</p></div></details></div>

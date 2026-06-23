@@ -10,7 +10,7 @@ Fastest memo app. One-tap send.
 email yourself,quick note,memo to self,Captio alternative,note to email,fast memo,send note,inbox
 
 ### 説明文（短縮版・最初の3行が最重要）
-The fastest way to email a note to yourself. Launch in 0.3 seconds, tap once to send. Your thought is in your inbox before you forget it.
+The fastest way to email a note to yourself. Launch in about 1 second, tap once to send. Your thought is in your inbox before you forget it.
 
 SimpleMemo is the spiritual successor to Captio — rebuilt from scratch with modern encryption and offline support. No signup walls, no cloud sync headaches, no subscription fatigue. Just open, type, send.
 
@@ -19,15 +19,15 @@ Unlike Apple Notes or Google Keep, SimpleMemo puts your memos exactly where you 
 ### 説明文（フル版・4000文字以内）
 **The fastest way to email a note to yourself.**
 
-Launch in 0.3 seconds. Tap once to send. Your thought is in your inbox in 150 milliseconds. That's faster than switching apps, faster than dictation, faster than any note app on the market.
+Launch in about 1 second. Tap once to send. Your thought is in your inbox in 150 milliseconds. That's faster than switching apps, faster than dictation, faster than any note app on the market.
 
 SimpleMemo is built for people who think fast and forget faster. Capture ideas, reminders, shopping lists, and to-dos the moment they hit — then deal with them later in the place you already manage everything: your email inbox.
 
 **Why SimpleMemo?**
 
-- **0.3s launch** — Open the app and you're already typing. No splash screens, no loading.
+- **~1s launch** — Open the app and you're already typing. No splash screens, no loading.
 - **One-tap send** — Hit the send button and your memo arrives in your inbox instantly.
-- **150ms delivery** — Your note is sent before your thumb leaves the screen.
+- **one-tap delivery** — Your note is sent before your thumb leaves the screen.
 - **AES-GCM encryption** — Your memos are encrypted on-device. We never store your text on our servers.
 - **Offline auto-resend** — Write notes on the subway, in a tunnel, on a plane. SimpleMemo queues them and sends automatically when you're back online.
 - **No account required** — Just enter your email address and start sending.
@@ -59,8 +59,8 @@ No ads. No data selling. No tricks.
 **Download SimpleMemo and never lose a thought again.**
 
 ### スクリーンショットキャプション（5枚分）
-1. Launch in 0.3 seconds. Start typing instantly.
-2. One tap to send. Memo in your inbox in 150ms.
+1. Launch in about 1 second. Start typing instantly.
+2. One tap to send. Memo in your inbox with one tap.
 3. Works offline. Auto-sends when you reconnect.
 4. AES-GCM encrypted. Your notes stay private.
 5. Free forever. 3 sends/day at no cost.

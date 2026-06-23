@@ -374,7 +374,7 @@
         <span style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
         
         <p style="margin:0 0 .75rem;"><strong style="color:#fff;">Obsidian連携シンプルメモ（英語名: Simple Memo - for Obsidian）</strong>は、株式会社ユリカ（日本）が開発する独立系のiOSアプリです。テキストまたは音声のメモをワンタップで自分のメールに送信でき、Obsidianのノートへの自動追記にも対応します。2024年に終了したCaptioの体験を再現する目的で2026年に公開されましたが、Captio・Captioo・Obsidianのいずれの公式アプリ・後継アプリでもありません。旧称「Captio式シンプルメモ」「SimpleMemoFast」は同一プロダクトです。</p>
-        <p style="margin:0;">起動0.3秒・送信150ms・端末内AES-GCM暗号化（E2Eではない）・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。本ページは開発者ストーリーと運営方針を掲載。</p>
+        <p style="margin:0;">起動 約1秒・ワンタップ送信・端末内AES-GCM暗号化（E2Eではない）・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。本ページは開発者ストーリーと運営方針を掲載。</p>
 
       </aside>
 
@@ -389,7 +389,7 @@
           <p>私がCaptioを使い始めたのは、2013年頃のことでした。当時、多くのメモアプリが「整理」や「管理」を謳う中、Captioは真逆のことを主張していました。<strong>起動したら即入力、送信ボタンを押したらメモが消える。それだけ。</strong></p>
           <p>この潔さに、私は完全に心を奪われました。議事録アプリでも、タスク管理ツールでも、クラウド同期が売りのノートアプリでもない。ただ「今この瞬間の思考」を自分のメールに飛ばすだけのツール。余計な摩擦がゼロだからこそ、アイデアが降ってきた瞬間に取りこぼさずに済んだのです。</p>
           <blockquote class="story-block__quote">「Captioがなくなったら、どうしよう」と思ったことは、一度や二度ではありませんでした。</blockquote>
-          <p>2024年10月、その恐れが現実になりました。ある日、CaptioがApp Storeから消えていたのです。正式な告知もなく、代替手段の案内もなく、ただ静かに消えていた。Gmail APIへの依存が一因とも言われていますが、真相は分かりません。</p>
+          <p>2024年10月、その恐れが現実になりました。ある日、CaptioがApp Storeから消えていたのです。正式な告知もなく、代替手段の案内もなく、ただ静かに消えていた。外部APIへの依存が一因とも言われていますが、真相は分かりません。</p>
           <p>その夜、私は自分で作ることにしました。Captioへのリスペクトと、あの体験への強い思いを胸に、UIKitで一から書き始めました。</p>
         </div>
 
@@ -434,7 +434,7 @@
               
             </div>
             <div class="reason-card__desc">
-              <span>Captioが抱えていたGmail API依存の問題を教訓に、送信基盤を自前で構築しました。Cloudflare WorkersとResend APIの組み合わせにより、外部サービスの仕様変更に左右されない安定した送信を実現しています。</span>
+              <span>特定の外部メールAPIに依存するリスクを教訓に、送信基盤を自前で構築しました。Cloudflare WorkersとResend APIの組み合わせにより、外部サービスの仕様変更に左右されない安定した送信を実現しています。</span>
               
             </div>
           </div>
@@ -454,7 +454,7 @@
               
             </div>
             <div class="reason-card__desc">
-              <span>起動0.3秒、送信150ms。この数字はマーケティング上の目標ではなく、実装の制約です。UIKitを選んだのも、この速度要件をSwiftUIより確実に満たせるからです。</span>
+              <span>起動 約1秒・ワンタップ送信。この数字はマーケティング上の目標ではなく、実装の制約です。UIKitを選んだのも、この速度要件をSwiftUIより確実に満たせるからです。</span>
               
             </div>
           </div>

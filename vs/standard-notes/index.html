@@ -357,7 +357,7 @@
               <tr><td>メモの出力先</td><td class="yes">メール受信トレイ</td><td class="no">Standard Notesアプリ内</td></tr>
               <tr><td>暗号化</td><td class="yes">AES-GCM（端末内Outbox）</td><td class="yes">XChaCha20-Poly1305（E2E）</td></tr>
               <tr><td>アカウント不要</td><td class="yes">既存メールのみ</td><td class="no">アカウント作成必須</td></tr>
-              <tr><td>起動速度</td><td class="yes">0.3秒（即入力可）</td><td>ノート一覧読込あり</td></tr>
+              <tr><td>起動速度</td><td class="yes">約1秒（即入力可）</td><td>ノート一覧読込あり</td></tr>
               <tr><td>オフライン対応</td><td class="yes">Outbox自動再送</td><td class="yes">オフライン編集・接続時同期</td></tr>
               <tr><td>サービス依存</td><td class="yes">メールのみ</td><td class="no">Standard Notesサービス</td></tr>
               <tr><td>オープンソース</td><td class="no">非公開</td><td class="yes">あり（GitHub）</td></tr>
@@ -374,7 +374,7 @@
               <tr><td>Note Output</td><td class="yes">Email inbox</td><td class="no">Standard Notes app only</td></tr>
               <tr><td>Encryption</td><td class="yes">AES-GCM (on-device outbox)</td><td class="yes">XChaCha20-Poly1305 (E2E)</td></tr>
               <tr><td>No Account Required</td><td class="yes">Use existing email</td><td class="no">Account creation required</td></tr>
-              <tr><td>Launch Speed</td><td class="yes">0.3s (type immediately)</td><td>Note list loads first</td></tr>
+              <tr><td>Launch Speed</td><td class="yes">~1s (type immediately)</td><td>Note list loads first</td></tr>
               <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td class="yes">Edit offline, sync on connect</td></tr>
               <tr><td>Service Dependency</td><td class="yes">Email only</td><td class="no">Standard Notes service</td></tr>
               <tr><td>Open Source</td><td class="no">Closed source</td><td class="yes">Yes (GitHub)</td></tr>
@@ -408,7 +408,7 @@
           <li>
             <span class="diff-num">3</span>
             <strong>エディタ拡張 vs 単一入力</strong><br>
-            Standard Notesは有料プランでMarkdownエディタ、スプレッドシート、コードエディタなど多彩な拡張エディタを利用できます。シンプルメモはプレーンテキストの単一入力フィールドのみで、あえて機能を絞ることで起動0.3秒・送信150msという速度を実現しています。
+            Standard Notesは有料プランでMarkdownエディタ、スプレッドシート、コードエディタなど多彩な拡張エディタを利用できます。シンプルメモはプレーンテキストの単一入力フィールドのみで、あえて機能を絞ることで起動 約1秒・ワンタップ送信という速度を実現しています。
           </li>
           <li>
             <span class="diff-num">4</span>
@@ -430,7 +430,7 @@
           <li>
             <span class="diff-num">3</span>
             <strong>Extended Editors vs Single Input</strong><br>
-            Standard Notes offers Markdown, spreadsheet, and code editors on paid plans. Simple Memo has only a plain-text input field — deliberately minimal to achieve 0.3s launch and 150ms send speed.
+            Standard Notes offers Markdown, spreadsheet, and code editors on paid plans. Simple Memo has only a plain-text input field — deliberately minimal to achieve ~1s launch and one-tap send.
           </li>
           <li>
             <span class="diff-num">4</span>
@@ -455,7 +455,7 @@
               <li>メモをメールで受け取りたい</li>
               <li>サーバーへのデータ保存を避けたい</li>
               <li>無料で機能制限なく使いたい</li>
-              <li>0.3秒起動の速さを求める</li>
+              <li>約1秒起動の速さを求める</li>
             </ul>
           </div>
           <div class="choose-card">
@@ -479,7 +479,7 @@
               <li>Want notes delivered to your email</li>
               <li>Prefer no server storage of memo content</li>
               <li>Want full features on the free plan</li>
-              <li>Value 0.3-second launch speed</li>
+              <li>Value ~1-second launch speed</li>
             </ul>
           </div>
           <div class="choose-card">
@@ -505,13 +505,13 @@
         <div data-lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notes の E2E 暗号化とシンプルメモの AES-GCM はどう違いますか？</summary><div class="faq-answer"><p>Standard Notes は XChaCha20-Poly1305 でデータを暗号化してクラウドに保存します（E2E 暗号化）。シンプルメモはオフライン Outbox と送信履歴を端末内で AES-GCM-256 暗号化しますが、メール送信自体は標準 SMTP のため E2E ではありません。代わりに、メール本文を当社サーバに恒常的に保存しない設計（送信処理時のみ通過）です。「暗号化してクラウド保存」vs「本文をサーバに残さない」という設計思想の違いで、どちらもプライバシーを重視するアプローチです。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesのアカウント作成なしでシンプルメモは使えますか？</summary><div class="faq-answer"><p>はい。シンプルメモはアカウント作成が不要で、既存のメールアドレスを設定するだけで即使い始められます。パスワード設定やメール認証も不要です。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesの拡張エディタはシンプルメモにありますか？</summary><div class="faq-answer"><p>シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動0.3秒・送信150msの速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Standard Notesの拡張エディタはシンプルメモにありますか？</summary><div class="faq-answer"><p>シンプルメモにはMarkdown、スプレッドシート、コードエディタなどの拡張エディタはありません。プレーンテキストの単一入力に特化することで、起動 約1秒・ワンタップ送信の速度を実現しています。構造化されたノートにはStandard Notes、瞬間キャプチャにはシンプルメモという使い分けが効果的です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">プライバシー重視ならStandard Notesとシンプルメモどちらを選ぶべきですか？</summary><div class="faq-answer"><p>用途で異なります。暗号化されたノートをクラウドに長期保存したいならStandard Notes。サーバーにデータを一切残さず瞬間的にメモをメール送信したいならシンプルメモ。両者を併用して、キャプチャと保管を分担するのも効果的です。</p></div></details></div>
         </div>
         <div data-lang="en">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does Standard Notes' E2E encryption differ from Simple Memo's AES-GCM?</summary><div class="faq-answer"><p>Standard Notes encrypts data with XChaCha20-Poly1305 and stores it in the cloud (E2EE — even the server can't read it). Simple Memo encrypts the on-device Outbox and send history with AES-GCM-256, but email delivery itself goes through standard SMTP, so it is not end-to-end encrypted. The privacy posture is data minimization instead: memo bodies are not persistently stored on our servers (transit only during send). "Encrypted server storage" vs "don't keep the body on the server" — different design philosophies, both privacy-focused.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use Simple Memo without creating an account like Standard Notes requires?</summary><div class="faq-answer"><p>Yes. Simple Memo requires no account creation — just enter your existing email address and start sending. No password setup, no email verification, no new service dependency.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have extended editors like Standard Notes?</summary><div class="faq-answer"><p>No. Simple Memo has no Markdown, spreadsheet, or code editors. It focuses on a single plain-text input to achieve 0.3s launch and 150ms send speed. For structured notes, Standard Notes excels. For instant capture, Simple Memo is purpose-built.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does Simple Memo have extended editors like Standard Notes?</summary><div class="faq-answer"><p>No. Simple Memo has no Markdown, spreadsheet, or code editors. It focuses on a single plain-text input to achieve ~1s launch and one-tap send. For structured notes, Standard Notes excels. For instant capture, Simple Memo is purpose-built.</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">For privacy, should I choose Standard Notes or Simple Memo?</summary><div class="faq-answer"><p>It depends on your use case. For encrypted long-term cloud storage of notes, Standard Notes. For zero-server memo capture sent directly to email, Simple Memo. Using both together — Simple Memo for capture, Standard Notes for archival — gives you the best of both privacy-first approaches.</p></div></details></div>
         </div>
       </section>

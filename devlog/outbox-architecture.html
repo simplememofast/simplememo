@@ -320,7 +320,7 @@
           <p>以下が、送信ボタンをタップしてからメッセージが確実に送信されるまでの全フローだ。</p>
           <ol class="flow-list">
             <li><strong>送信タップ → まずOutboxにAES-GCM暗号化して永続保存</strong><br>ユーザーが送信ボタンをタップした瞬間、メッセージはAES-GCM 256bitで暗号化され、デバイスのローカルストレージに永続保存される。このステップが完了するまで、UIクリアは行わない。つまり、Outbox保存が「取りこぼしゼロ」の最初の防波堤になる。</li>
-            <li><strong>UIを即座にクリア（ユーザーは次のメモを書き始められる）</strong><br>Outbox保存が成功した時点で、テキストビューをクリアし、送信アニメーションを再生する。ユーザーから見れば「送信した」と同義。ネットワーク応答を一切待っていない。Send-to-Resetの目標は150ms（アニメーション込みで0.25秒）。</li>
+            <li><strong>UIを即座にクリア（ユーザーは次のメモを書き始められる）</strong><br>Outbox保存が成功した時点で、テキストビューをクリアし、送信アニメーションを再生する。ユーザーから見れば「送信した」と同義。ネットワーク応答を一切待っていない。Send-to-Resetの目標はワンタップ（アニメーション込みで0.25秒）。</li>
             <li><strong>バックグラウンドでRelay API経由でメール送信</strong><br>UIクリアと並行して、SendManagerがCloudflare Workers上のRelay APIへHTTPリクエストを送信する。この処理はメインスレッドをブロックしない完全非同期。</li>
             <li><strong>成功したらOutboxから削除</strong><br>Relay APIから200レスポンスを受信したら、該当メッセージをOutboxから安全に削除する。これでメッセージのライフサイクルが完了する。</li>
             <li><strong>失敗したら指数バックオフで自動リトライ</strong><br>ネットワークエラーやサーバーエラーの場合、指数バックオフ（1秒→2秒→4秒→8秒…）で自動リトライする。BGTaskSchedulerを使い、アプリがバックグラウンドでも確実にリトライを実行する。</li>
@@ -430,7 +430,7 @@
     }
 }</code></pre>
           <p><code>performSendAnimation</code>と<code>SendManager.shared.send</code>は完全に独立して実行される。アニメーションは0.25秒で完了し、テキストビューはクリアされる。ネットワーク送信はバックグラウンドで非同期に進行し、UIを一切ブロックしない。</p>
-          <p>Send-to-Resetの目標は<strong>150ms</strong>。アニメーション込みでも0.25秒。ユーザーは送信ボタンをタップした直後に、次のメモを書き始められる。これがCaptioスタイルのUXだ。</p>
+          <p>Send-to-Resetの目標は<strong>ワンタップ</strong>。アニメーション込みでも0.25秒。ユーザーは送信ボタンをタップした直後に、次のメモを書き始められる。これがCaptioスタイルのUXだ。</p>
 
           <!-- FAQ -->
           <h2>よくある質問</h2>
@@ -452,7 +452,7 @@
           <div class="related-grid">
             <a href="/devlog/day1" class="related-card">
               <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
-              <div class="related-card__desc">起動0.3秒、送信150ms、取りこぼしゼロ。すべてはここから始まった。</div>
+              <div class="related-card__desc">起動 約1秒・ワンタップ送信、取りこぼしゼロ。すべてはここから始まった。</div>
             </a>
             <a href="/devlog/" class="related-card">
               <div class="related-card__title">開発日誌一覧</div>
@@ -492,7 +492,7 @@
           <p>Here is the complete flow from tapping send to guaranteed message delivery.</p>
           <ol class="flow-list">
             <li><strong>Tap Send → Persist to Outbox with AES-GCM Encryption</strong><br>The instant the user taps send, the message is encrypted with AES-GCM 256-bit and persisted to local storage. The UI does not clear until this step completes. Outbox persistence is the first line of defense for zero message loss.</li>
-            <li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: 150ms (0.25s with animation).</li>
+            <li><strong>Clear UI Immediately (User Can Start Writing Next Memo)</strong><br>Once Outbox persistence succeeds, the text view clears and the send animation plays. From the user's perspective, the message has been "sent." No network response has been waited for. Send-to-Reset target: one-tap (0.25s with animation).</li>
             <li><strong>Background Send via Relay API</strong><br>In parallel with the UI clear, SendManager fires an HTTP request to the Relay API on Cloudflare Workers. This is fully asynchronous and never blocks the main thread.</li>
             <li><strong>On Success: Remove from Outbox</strong><br>When the Relay API returns a 200 response, the message is safely deleted from the Outbox. The message lifecycle is complete.</li>
             <li><strong>On Failure: Automatic Retry with Exponential Backoff</strong><br>For network or server errors, automatic retry with exponential backoff (1s → 2s → 4s → 8s...) kicks in. BGTaskScheduler ensures retries happen even when the app is in the background.</li>
@@ -602,7 +602,7 @@
     }
 }</code></pre>
           <p><code>performSendAnimation</code> and <code>SendManager.shared.send</code> execute completely independently. The animation completes in 0.25 seconds and the text view clears. The network send proceeds asynchronously in the background, never blocking the UI.</p>
-          <p>Send-to-Reset target: <strong>150ms</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
+          <p>Send-to-Reset target: <strong>one-tap</strong>. Even with animation, 0.25 seconds. The user can start writing their next memo immediately after tapping send. This is the Captio-style UX.</p>
 
           <!-- FAQ -->
           <h2>FAQ</h2>
@@ -624,7 +624,7 @@
           <div class="related-grid">
             <a href="/devlog/day1" class="related-card">
               <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-              <div class="related-card__desc">Launch in 0.3s, send in 150ms, zero message loss. It all started here.</div>
+              <div class="related-card__desc">Launch in ~1s, send with one tap, zero message loss. It all started here.</div>
             </a>
             <a href="/devlog/" class="related-card">
               <div class="related-card__title">Dev Log Index</div>

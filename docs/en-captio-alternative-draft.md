@@ -9,7 +9,7 @@
 
 ## Hero
 
-If you opened this page, there is a reasonable chance you used to tap that little blue icon every day, type a quick line, hit send, and let your inbox become your second brain. SimpleMemo is built for you. It is the closest **Captio replacement** on iOS we know of — a tiny, focused app that launches in 0.3 seconds, sends a note to email in roughly 150 milliseconds, and then quietly gets out of your way. We are not the original Captio. We are not the official successor. We are simply an independent team of iOS users who refused to accept that this category had to die.
+If you opened this page, there is a reasonable chance you used to tap that little blue icon every day, type a quick line, hit send, and let your inbox become your second brain. SimpleMemo is built for you. It is the closest **Captio replacement** on iOS we know of — a tiny, focused app that launches in about a second, sends a note to email in roughly 150 milliseconds, and then quietly gets out of your way. We are not the original Captio. We are not the official successor. We are simply an independent team of iOS users who refused to accept that this category had to die.
 
 ---
 
@@ -55,7 +55,7 @@ A meaningful number of **Captio refugees** describe the same withdrawal symptom:
 
 SimpleMemo was not designed to clone Captio pixel by pixel. It was designed around the **Captio philosophy**: a thought captured in three seconds is worth more than a beautifully tagged note captured in thirty. We reverse-engineered the parts that mattered, not the parts that were incidental.
 
-**Launch speed.** Cold start under 0.3 seconds on iPhone 12 or newer. The keyboard is up before you have finished pulling the phone out of your pocket. We measure this in CI on every release.
+**Launch speed.** Cold start about a second on iPhone 12 or newer. The keyboard is up before you have finished pulling the phone out of your pocket. We measure this in CI on every release.
 
 **Send latency.** Median 150 milliseconds from "send" to "delivered." Not queued, not synced later — actually emailed through a transactional provider built for low-latency delivery.
 
@@ -74,7 +74,7 @@ A fair comparison does not pretend Captio still exists or claim that any newcome
 | Feature | SimpleMemo | Captio (2010–2024, RIP) | Note to Self Mail | Email Me App | Pigeon | Drafts |
 |---|---|---|---|---|---|---|
 | One-tap launch | Yes | Yes | Yes | Yes | Partial | No (action picker) |
-| Median send latency | ~150 ms | Gmail API dependent | ~600 ms | ~800 ms | ~400 ms | N/A (manual share) |
+| Median send latency | one-tap | Gmail API dependent | ~600 ms | ~800 ms | ~400 ms | N/A (manual share) |
 | Works without Gmail | Yes | No | Yes | Yes | Partial | Yes |
 | Custom from-address | Yes | Yes | No | No | No | Yes |
 | Attachments | Roadmap (2026 H2) | Limited | No | No | No | Yes |
@@ -151,7 +151,7 @@ No. SimpleMemo is independently developed by YURIKA, K.K. in Japan. We are not a
 Yes. Because every SimpleMemo message lands in your own inbox just like Captio's did, your existing labels, filters, and search operators continue to apply. Add the SimpleMemo sender domain to your existing rule and your archive remains coherent.
 
 **Q3. How fast is "fast" in real numbers?**
-Cold launch under 0.3 seconds on iPhone 12 or newer. Median end-to-end send latency around 150 milliseconds. Both numbers are tracked on every release. They will not silently degrade.
+Cold launch about a second on iPhone 12 or newer. Median end-to-end send latency around 150 milliseconds. Both numbers are tracked on every release. They will not silently degrade.
 
 **Q4. What happens to my notes if SimpleMemo goes away?**
 They are already in your email. That is the entire point of a **note to email** workflow. There is no proprietary database we hold hostage. Even in the worst-case scenario, your archive is wherever your inbox is.

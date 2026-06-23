@@ -10,20 +10,20 @@ Envie notas pro seu email já
 nota rápida,memo email,email pra mim,lembrete,anotar ideias,bloco de notas,memo rápido,captio
 
 ### 説明文（短縮版・最初の3行が最重要）
-Abre em 0.3s, envia com um toque pro seu email. O app de notas mais rápido do mundo.
+Abre em ~1s, envia com um toque pro seu email. O app de notas mais rápido do mundo.
 Criptografia AES-GCM, funciona offline e reenvia automaticamente. 3 envios grátis por dia, pra sempre.
 
 Escreveu, mandou, chegou na sua caixa de entrada. Sem pastas, sem etiquetas, sem complicação. Seu email já é seu sistema de organização.
 
 ### 説明文（フル版・4000文字以内）
-**0.3 segundo pra abrir. Um toque pra enviar. Sua nota chega no seu email.**
+**1 segundo pra abrir. Um toque pra enviar. Sua nota chega no seu email.**
 
 SimpleMemo é o jeito mais rápido de anotar uma ideia antes que ela suma. Nasceu como alternativa ao Captio (que encerrou em 2025), mas é mais rápido, mais seguro e mais inteligente.
 
 **Por que SimpleMemo?**
 
-- Abre em 0.3 segundo — mais rápido que qualquer app de notas
-- Envio em 150ms — um toque e sua nota tá na caixa de entrada
+- Abre em 1 segundo — mais rápido que qualquer app de notas
+- Envio em one-tap — um toque e sua nota tá na caixa de entrada
 - Criptografia AES-GCM — seu texto nunca fica armazenado nos nossos servidores
 - Funciona offline — anotou no metrô, envia automaticamente quando voltar a conexão
 - 3 envios grátis por dia — sem propaganda, grátis pra sempre
@@ -55,7 +55,7 @@ Enquanto você abre o Notas da Apple, procura a pasta certa e começa a digitar,
 Baixe agora e teste todas as funções grátis por 7 dias.
 
 ### スクリーンショットキャプション（5枚分）
-1. Abre em 0.3s — anote sua ideia na hora
+1. Abre em ~1s — anote sua ideia na hora
 2. Um toque e sua nota chega no seu email
 3. Criptografia AES-GCM: suas notas são só suas
 4. Sem internet? Envia automaticamente depois
