@@ -399,19 +399,19 @@
         <div class="timeline">
           <div class="timeline__item">
             <div class="timeline__year">Around 2011 -- Launch</div>
-            <div class="timeline__desc">Captio launched on the iOS App Store as a minimalist "send to self" email app. Its premise was simple: open the app, type a thought, tap send. The memo goes straight to your Gmail inbox. No folders, no categories, no formatting toolbar. The app gained a devoted following among GTD practitioners, journalists, and anyone who used their inbox as a capture tool.</div>
+            <div class="timeline__desc">Captio launched on the iOS App Store as a minimalist "send to self" email app. Its premise was simple: open the app, type a thought, tap send. The memo goes straight to your inbox. No folders, no categories, no formatting toolbar. The app gained a devoted following among GTD practitioners, journalists, and anyone who used their inbox as a capture tool.</div>
           </div>
           <div class="timeline__item">
             <div class="timeline__year">2014-2019 -- Peak Popularity</div>
             <div class="timeline__desc">Captio was featured by major productivity blogs including Lifehacker, The Sweet Setup, and MacStories. It maintained a 4.5+ star rating and became a staple recommendation in "best productivity apps" roundups. The app operated on a one-time purchase model at $2.99, making it accessible to almost everyone.</div>
           </div>
           <div class="timeline__item">
-            <div class="timeline__year">2020-2022 -- Google API Policy Changes</div>
-            <div class="timeline__desc">Google began progressively tightening its API access policies. New OAuth consent screen requirements, stricter scope limitations, and mandatory security assessments created growing compliance challenges. For a small development team maintaining a one-time-purchase app with no recurring revenue, these requirements became increasingly difficult to meet.</div>
+            <div class="timeline__year">2020-2023 -- Slowing development</div>
+            <div class="timeline__desc">Updates became infrequent and active development slowed. Maintaining a one-time-purchase app with no recurring revenue is hard to sustain over many years, especially as iOS kept evolving.</div>
           </div>
           <div class="timeline__item">
-            <div class="timeline__year">2023 -- App Store Removal</div>
-            <div class="timeline__desc">Captio was removed from the App Store. While no official statement was issued by the developers, the removal coincided with another round of Google API policy changes. Users who already had the app installed could continue using it temporarily, but new downloads were no longer possible.</div>
+            <div class="timeline__year">October 2024 -- App Store Removal</div>
+            <div class="timeline__desc">Captio was removed from the App Store in October 2024. No official statement was issued by the developers. Users who already had the app installed could continue using it temporarily, but new downloads were no longer possible.</div>
           </div>
           <div class="timeline__item">
             <div class="timeline__year">2024-2025 -- Server Shutdown</div>
@@ -489,7 +489,7 @@
         <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">For comparison, using Apple's built-in Mail app to email yourself a quick note takes approximately 15-25 seconds: you have to open Mail, tap compose, type the recipient address, add a subject, write the body, and tap send. That is 6 discrete steps and multiple keyboard switches. With Simple Memo, it is one step: open, type, send. The keyboard is already visible when the app finishes launching.</p>
 
         <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 1rem;">On-Device AES-GCM Encryption</h3>
-        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Captio sent your memos as plain text through Gmail's servers. Simple Memo encrypts every memo with AES-GCM on your device before transmission. This means even if someone intercepted the data in transit, they would see only encrypted gibberish. Your thoughts are private by default, not by policy.</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Simple Memo encrypts every memo with AES-GCM on your device before transmission. This means even if someone intercepted the data in transit, they would see only encrypted gibberish. Your thoughts are private by default, not by policy.</p>
 
         <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 1rem;">Offline-First Architecture</h3>
         <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Captio required an active internet connection to send. If you were in the subway, on a flight, or in a basement with no signal, your memo simply failed. Simple Memo uses an Outbox architecture: when you tap send without connectivity, the memo is encrypted and stored locally. As soon as your device regains connectivity, the memo is automatically sent in the background. You never have to remember to retry, and you never lose a thought.</p>
@@ -517,8 +517,8 @@
             </thead>
             <tbody>
               <tr><td>Service Status</td><td class="yes">Active</td><td class="no">Discontinued (Oct 2024)</td><td class="yes">Active</td><td class="yes">Active</td><td class="mid">Active (different vendor)</td><td class="yes">OS built-in</td></tr>
-              <tr><td>Launch to Input</td><td class="yes">~1s</td><td>~0.5s</td><td>~0.6s</td><td>~1.0s</td><td>~0.5s</td><td>~1.2s</td></tr>
-              <tr><td>Send Speed</td><td class="yes">one-tap</td><td>~500ms</td><td>~400ms</td><td>~700ms</td><td>~500ms</td><td>15-25s (share)</td></tr>
+              <tr><td>Launch to Input</td><td class="yes">~1s</td><td>—</td><td>~0.6s</td><td>~1.0s</td><td>~0.5s</td><td>~1.2s</td></tr>
+              <tr><td>Send Speed</td><td class="yes">one-tap</td><td>—</td><td>~400ms</td><td>~700ms</td><td>~500ms</td><td>15-25s (share)</td></tr>
               <tr><td>Taps to Send</td><td class="yes">1 tap</td><td class="yes">1 tap</td><td>1 tap</td><td>1 tap</td><td>1 tap</td><td class="no">4-6 taps</td></tr>
               <tr><td>Send Infrastructure</td><td class="yes">Cloudflare + Resend</td><td class="no">Third-party API (undisclosed)</td><td class="mid">Gmail OAuth</td><td>Direct SMTP</td><td>Unknown</td><td>Apple Share Sheet</td></tr>
               <tr><td>Setup</td><td class="yes">Email only</td><td>Email only</td><td class="mid">Gmail OAuth required</td><td class="yes">Email only</td><td>Email only</td><td>—</td></tr>
@@ -624,7 +624,7 @@
         <dl class="spec-list">
           <dt>Supported OS</dt><dd>iOS 16.0 or later (iPhone)</dd>
           <dt>App Size</dt><dd>Under 10 MB</dd>
-          <dt>Send Method</dt><dd>Cloudflare Workers + Resend API (no Gmail dependency)</dd>
+          <dt>Send Method</dt><dd>Cloudflare Workers + Resend API (no third-party email-API dependency)</dd>
           <dt>Offline</dt><dd>Outbox architecture (AES-GCM encrypted local storage, automatic resend on reconnection)</dd>
           <dt>Encryption</dt><dd>AES-GCM (on-device encryption before transmission; memos are never stored on the server in plain text)</dd>
           <dt>Widget</dt><dd>Home screen widget for direct input access</dd>
@@ -721,7 +721,6 @@
           <a href="/en/captio-migration-guide/">Captio Migration Guide</a>
           <a href="/en/iphone-shortcuts-email-guide/">iPhone Shortcuts Email Guide</a>
           <a href="/en/blog/captio-shutdown-alternatives">Captio Shutdown: Best Alternatives</a>
-          <a href="/en/blog/why-captio-died">Why Captio Died</a>
           <a href="/en/blog/ios-quick-capture-comparison">iOS Quick Capture Comparison</a>
           <a href="/en/blog/offline-first-comparison">Offline-First Note Apps</a>
           <a href="/en/blog/inbox-zero-workflow-tips-2026">Inbox Zero Workflow Tips</a>
@@ -735,13 +734,11 @@
 <section class="lp-section references">
         <h2 class="lp-section__title">References</h2>
         <ul class="references-list">
-          <li>[1] Google, "OAuth 2.0 Scopes for Google APIs," <a href="https://developers.google.com/identity/protocols/oauth2/scopes" rel="nofollow noopener" target="_blank">developers.google.com</a>, accessed March 2026.</li>
-          <li>[2] Google, "Changes to Google API access for third-party apps," <a href="https://developers.google.com/terms/api-services-user-data-policy" rel="nofollow noopener" target="_blank">developers.google.com</a>, 2022-2024.</li>
-          <li>[3] Apple, "App Store Review Guidelines," <a href="https://developer.apple.com/app-store/review/guidelines/" rel="nofollow noopener" target="_blank">developer.apple.com</a>, 2024.</li>
-          <li>[4] Cloudflare, "Workers documentation," <a href="https://developers.cloudflare.com/workers/" rel="nofollow noopener" target="_blank">developers.cloudflare.com</a>.</li>
-          <li>[5] Resend, "Email API documentation," <a href="https://resend.com/docs" rel="nofollow noopener" target="_blank">resend.com/docs</a>.</li>
-          <li>[6] NIST, "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM)," SP 800-38D, 2007.</li>
-          <li>[7] Reddit r/productivity, "Captio alternative thread," various user discussions, 2024-2025.</li>
+          <li>[1] Apple, "App Store Review Guidelines," <a href="https://developer.apple.com/app-store/review/guidelines/" rel="nofollow noopener" target="_blank">developer.apple.com</a>, 2024.</li>
+          <li>[2] Cloudflare, "Workers documentation," <a href="https://developers.cloudflare.com/workers/" rel="nofollow noopener" target="_blank">developers.cloudflare.com</a>.</li>
+          <li>[3] Resend, "Email API documentation," <a href="https://resend.com/docs" rel="nofollow noopener" target="_blank">resend.com/docs</a>.</li>
+          <li>[4] NIST, "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM)," SP 800-38D, 2007.</li>
+          <li>[5] Reddit r/productivity, "Captio alternative thread," various user discussions, 2024-2025.</li>
         </ul>
       </section>
 
