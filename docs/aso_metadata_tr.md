@@ -27,7 +27,7 @@ NEDEN SIMPLEMEMO?
 - Tek dokunuşla gönderim — notun anında e-postanda
 - AES-GCM şifreleme — metinlerin şifrelenir, sunucularımızda asla saklanmaz
 - Çevrimdışı çalışır — internet gelince notlar otomatik gönderilir
-- Captio alternatifi — Captio 2025'te kapandı, SimpleMemo devam ediyor
+- Captio alternatifi — Captio Ekim 2024'te kapandı, SimpleMemo devam ediyor
 
 TEMEL ÖZELLİKLER:
 

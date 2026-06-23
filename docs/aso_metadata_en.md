@@ -34,7 +34,7 @@ SimpleMemo is built for people who think fast and forget faster. Capture ideas, 
 
 **The Captio alternative you've been looking for**
 
-If you loved Captio before it shut down in 2025, SimpleMemo is your new home. Same one-tap simplicity, but with encryption, offline queuing, and a modern design.
+If you loved Captio before it shut down in October 2024, SimpleMemo is your new home. Same one-tap simplicity, but with encryption, offline queuing, and a modern design.
 
 **How does it compare?**
 
@@ -82,7 +82,7 @@ No ads. No data selling. No tricks.
 | inbox note | 低 | 低 | ★★☆ |
 
 ### その市場固有の注意点
-- The "email yourself" niche lost its dominant player when Captio shut down in 2025. There is a clear gap in the US/UK App Store for this exact use case. Target "Captio alternative" and "Captio replacement" aggressively in the first 6 months while search intent is high.
+- The "email yourself" niche lost its dominant player when Captio shut down in October 2024. There is a clear gap in the US/UK App Store for this exact use case. Target "Captio alternative" and "Captio replacement" aggressively in the first 6 months while search intent is high.
 - US users are increasingly fatigued by subscription-heavy productivity apps (Notion, Evernote, Drafts). The "3 free sends/day forever" angle is a strong differentiator — emphasize it in screenshots and the first line of the description.
 - "Email yourself" is a surprisingly common search query with low competition. Most results are how-to articles, not apps. This is a keyword goldmine.
 - UK English spelling differences are minor for this category; a single EN listing covers both markets effectively.
