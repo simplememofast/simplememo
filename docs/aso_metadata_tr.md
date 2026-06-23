@@ -10,7 +10,7 @@ Notunu e-postana tek dokunuşla
 hızlı not,kendine e-posta,not defteri,memo,hatırlatma,captio alternatif,hızlı yazma,not alma
 
 ### 説明文（短縮版・最初の3行が最重要）
-0.3 saniyede aç, yaz, tek dokunuşla e-postana gönder.
+yaklaşık 1 saniyede aç, yaz, tek dokunuşla e-postana gönder.
 Klasör yok, etiket yok. Notun anında e-postanda.
 Günde 3 kez sonsuza kadar ücretsiz. AES-GCM şifreleme, sunucuda metin saklanmaz.
 
@@ -19,11 +19,11 @@ SimpleMemo, notlarını doğrudan kendi e-postana gönderen en hızlı not uygul
 ### 説明文（フル版・4000文字以内）
 SimpleMemo — Kendine Not Göndermenin En Hızlı Yolu
 
-Harika bir fikir aklına geldi ama not almaya fırsat bulamadığın için unuttun mu? SimpleMemo tam bu sorun için tasarlandı. Uygulamayı 0.3 saniyede aç, notunu yaz ve 150 milisaniyede e-postana gönder. Bu kadar basit.
+Harika bir fikir aklına geldi ama not almaya fırsat bulamadığın için unuttun mu? SimpleMemo tam bu sorun için tasarlandı. Uygulamayı yaklaşık 1 saniyede aç, notunu yaz ve 150 milisaniyede e-postana gönder. Bu kadar basit.
 
 NEDEN SIMPLEMEMO?
 
-- 0.3 saniyede açılır — diğer tüm not uygulamalarından hızlı
+- yaklaşık 1 saniyede açılır — diğer tüm not uygulamalarından hızlı
 - Tek dokunuşla gönderim — notun anında e-postanda
 - AES-GCM şifreleme — metinlerin şifrelenir, sunucularımızda asla saklanmaz
 - Çevrimdışı çalışır — internet gelince notlar otomatik gönderilir
@@ -31,8 +31,8 @@ NEDEN SIMPLEMEMO?
 
 TEMEL ÖZELLİKLER:
 
-- 0.3 saniye açılış hızı
-- 150ms gönderim hızı
+- yaklaşık 1 saniye açılış hızı
+- one-tap gönderim hızı
 - Uçtan uca AES-GCM şifreleme
 - Çevrimdışıyken otomatik yeniden gönderim
 - Sunucuda metin depolanmaz
@@ -61,7 +61,7 @@ KULLANICI YORUMLARI:
 SimpleMemo'yu şimdi indir ve fikirlerini yakalamanın en hızlı yolunu keşfet!
 
 ### スクリーンショットキャプション（5枚分）
-1. 0.3 saniyede aç — hemen yazmaya başla
+1. yaklaşık 1 saniyede aç — hemen yazmaya başla
 2. Tek dokunuşla notun e-postanda
 3. AES-GCM şifreleme — notların güvende
 4. İnternet olmasa da çalışır

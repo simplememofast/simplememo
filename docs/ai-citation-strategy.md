@@ -200,9 +200,9 @@ These are the structural rules that every page should follow to maximize citatio
 
 1. **Lead with the answer.** First 200 words after the H1 should declaratively answer the implied query. AI engines extract from the top of the page.
 2. **Use H2 questions verbatim.** Match likely query phrasing: "What is Simple Memo - Captio-style?" "How fast is Simple Memo - Captio-style?" — exact-match H2 questions get cited as Q&A pairs.
-3. **Pair every claim with a citation or first-party data.** "0.3 second launch" alone is weak; "0.3 second launch (per our [benchmark methodology](https://...))" is strong.
+3. **Pair every claim with a citation or first-party data.** "~1 second launch" alone is weak; "~1 second launch (per our [benchmark methodology](https://...))" is strong.
 4. **Maintain visible dateModified.** AI engines weight freshness heavily; an undated page looks stale.
-5. **Avoid superlatives without proof.** "Fastest" without benchmark = AI skips. "Fastest, measured at 0.3s vs. 1.4s for Apple Notes" = AI cites.
+5. **Avoid superlatives without proof.** "Fastest" without benchmark = AI skips. "Fastest, measured at ~1s vs. 1.4s for Apple Notes" = AI cites.
 6. **Negative space is content.** Explicitly stating what Simple Memo - Captio-style is NOT (E2EE, Android, team tool) prevents the wrong inference and increases citation accuracy.
 7. **Canonical facts in one place.** `/llms.txt` is the single source of truth for facts that appear across many pages. Drift between pages confuses AI training.
 

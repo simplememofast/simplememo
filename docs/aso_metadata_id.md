@@ -4,13 +4,13 @@
 SimpleMemo - Catatan ke Email
 
 ### サブタイトル（30文字以内）
-Kirim memo ke inbox 0.3 detik
+Kirim memo ke inbox sekitar 1 detik
 
 ### キーワードフィールド（100文字以内、カンマ区切り）
 catatan cepat,memo kilat,email ke diri sendiri,kirim email,note cepat,pengganti captio,memo harian
 
 ### 説明文（短縮版・最初の3行が最重要）
-Buka 0.3 detik, ketik, kirim — memo langsung masuk ke inbox email kamu.
+Buka sekitar 1 detik, ketik, kirim — memo langsung masuk ke inbox email kamu.
 Nggak perlu folder, nggak perlu tag. Cukup satu ketukan, ide kamu aman di email.
 Gratis selamanya 3x/hari. Enkripsi AES-GCM, tanpa server simpan teks kamu.
 
@@ -19,11 +19,11 @@ SimpleMemo adalah aplikasi memo tercepat yang langsung mengirim catatan ke email
 ### 説明文（フル版・4000文字以内）
 SimpleMemo — Cara Tercepat Kirim Memo ke Email Kamu Sendiri
 
-Pernah punya ide bagus tapi lupa karena nggak sempat catat? SimpleMemo hadir untuk masalah itu. Buka aplikasi dalam 0.3 detik, ketik memo kamu, dan kirim ke inbox email dalam 150 milidetik. Selesai.
+Pernah punya ide bagus tapi lupa karena nggak sempat catat? SimpleMemo hadir untuk masalah itu. Buka aplikasi dalam sekitar 1 detik, ketik memo kamu, dan kirim ke inbox email dalam 150 milidetik. Selesai.
 
 KENAPA SIMPLEMEMO?
 
-- Buka instan 0.3 detik — lebih cepat dari aplikasi catatan mana pun
+- Buka instan sekitar 1 detik — lebih cepat dari aplikasi catatan mana pun
 - Kirim satu ketukan — memo langsung masuk email kamu
 - Enkripsi AES-GCM — teks kamu dienkripsi, nggak pernah disimpan di server kami
 - Offline tetap jalan — memo dikirim otomatis saat koneksi kembali (Outbox pattern)
@@ -31,8 +31,8 @@ KENAPA SIMPLEMEMO?
 
 FITUR UTAMA:
 
-- Kecepatan launch 0.3 detik
-- Pengiriman memo 150ms
+- Kecepatan launch sekitar 1 detik
+- Pengiriman memo one-tap
 - Enkripsi end-to-end AES-GCM
 - Auto-resend saat offline
 - Tanpa penyimpanan teks di server
@@ -61,7 +61,7 @@ KATA PENGGUNA:
 Download SimpleMemo sekarang dan rasakan cara tercepat menangkap ide kamu!
 
 ### スクリーンショットキャプション（5枚分）
-1. Buka 0.3 detik — langsung siap ketik
+1. Buka sekitar 1 detik — langsung siap ketik
 2. Satu ketukan, memo masuk email kamu
 3. Enkripsi AES-GCM — memo kamu aman
 4. Tetap jalan walau offline

@@ -513,7 +513,7 @@ private func activateTextInput() {
 }</code></pre>
           <p><code>os_signpost</code>による計測をナノ秒精度で実施している。<code>PerformanceLogger.shared.endTimeToText()</code>がSignpostの終了イベントを記録し、Instrumentsでの詳細な分析を可能にしている。</p>
           <div class="metric-highlight">
-            <strong>計測結果：</strong>目標 500ms以下 → 実機実測値 <strong>200〜300ms</strong>で安定動作。ユーザーがアプリアイコンをタップしてから、テキスト入力が可能になるまでわずか0.2〜0.3秒。
+            <strong>計測結果：</strong>目標 500ms以下 → 実機実測値 <strong>200〜300ms</strong>で安定動作。ユーザーがアプリアイコンをタップしてから、テキスト入力が可能になるまでわずか0.2〜約1秒。
           </div>
 
           <h2>4. パフォーマンス計測の仕組み</h2>
@@ -567,7 +567,7 @@ private func activateTextInput() {
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
-                <div class="related-card__desc">起動0.3秒、送信150ms、取りこぼしゼロ。すべての技術判断を記録した初回開発日誌。</div>
+                <div class="related-card__desc">起動 約1秒・ワンタップ送信、取りこぼしゼロ。すべての技術判断を記録した初回開発日誌。</div>
               </a>
               <a href="/devlog/" class="related-card">
                 <div class="related-card__title">開発日誌 一覧</div>
@@ -579,7 +579,7 @@ private func activateTextInput() {
               </a>
               <a href="/devlog/relay-api-design" class="related-card">
                 <div class="related-card__title">Relay API：Cloudflare Workersでメール送信基盤を構築</div>
-                <div class="related-card__desc">Gmail API依存からの脱却。エッジコンピューティングで世界中から数十msでメール送信。</div>
+                <div class="related-card__desc">外部メールAPIへの依存からの脱却。エッジコンピューティングで世界中から数十msでメール送信。</div>
               </a>
             </div>
           </div>
@@ -633,7 +633,7 @@ private func activateTextInput() {
 }</code></pre>
           <p>Measurement is performed at nanosecond precision using <code>os_signpost</code>. <code>PerformanceLogger.shared.endTimeToText()</code> records the signpost end event, enabling detailed analysis in Instruments.</p>
           <div class="metric-highlight">
-            <strong>Measurement Results:</strong> Target 500ms or less → Actual device measurement: stable at <strong>200-300ms</strong>. From the moment a user taps the app icon to text input readiness takes only 0.2-0.3 seconds.
+            <strong>Measurement Results:</strong> Target 500ms or less → Actual device measurement: stable at <strong>200-300ms</strong>. From the moment a user taps the app icon to text input readiness takes only 0.2-about 1 second.
           </div>
 
           <h2>4. Performance Measurement Infrastructure</h2>
@@ -687,7 +687,7 @@ private func activateTextInput() {
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-                <div class="related-card__desc">Launch in 0.3s, send in 150ms, zero message loss. Every technical decision documented.</div>
+                <div class="related-card__desc">Launch in ~1s, send with one tap, zero message loss. Every technical decision documented.</div>
               </a>
               <a href="/devlog/" class="related-card">
                 <div class="related-card__title">Dev Log Index</div>
@@ -699,7 +699,7 @@ private func activateTextInput() {
               </a>
               <a href="/devlog/relay-api-design" class="related-card">
                 <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
-                <div class="related-card__desc">Breaking free from Gmail API. Edge computing for global email delivery in milliseconds.</div>
+                <div class="related-card__desc">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</div>
               </a>
             </div>
           </div>

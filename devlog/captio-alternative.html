@@ -495,7 +495,7 @@
         <div class="page-content__body">
 
           <h2>1. Captioとは何だったのか</h2>
-          <p>Captioは、2012年頃に登場したiOS向けの有料アプリ（約240円）でした。やることはただひとつ——アプリを開いて、メモを書いて、送信ボタンを押す。それだけで、あらかじめ設定したメールアドレスにメモが届きます。</p>
+          <p>Captioは、2011年頃に登場したiOS向けの有料アプリ（約240円）でした。やることはただひとつ——アプリを開いて、メモを書いて、送信ボタンを押す。それだけで、あらかじめ設定したメールアドレスにメモが届きます。</p>
           <p>通知はありません。フォルダもタグもありません。設定画面は最小限。余計なものが一切ない、究極にシンプルなメモ→メール送信アプリでした。</p>
           <p>使い方は人それぞれ。買い物リストを自分に送る人。ふと思いついたアイデアを忘れる前にメールで残す人。仕事のリマインダーを自分の業務メールに飛ばす人。共通していたのは、「思いついた瞬間に、最短距離でメモを未来の自分に届ける」という体験でした。</p>
 
@@ -530,11 +530,11 @@
 
           <h2>4. 「似たもの」ではなく「あの体験」を再現する</h2>
           <p>Captioの代替を作るとき、最も重要な判断がありました。それは、「機能をコピーする」のではなく「体験を再現する」という方針です。</p>
-          <p>機能のコピーなら簡単です。テキストフィールドとメール送信APIを組み合わせれば、それらしいものはすぐに作れます。しかし、0.5秒以内にキーボードが表示されること、送信後150ミリ秒以内に画面がリセットされること、ネットワーク圏外でもメッセージが一通も失われないこと——これらを同時に実現するのは、まったく別次元の技術課題です。</p>
+          <p>機能のコピーなら簡単です。テキストフィールドとメール送信APIを組み合わせれば、それらしいものはすぐに作れます。しかし、起動するとすぐにキーボードが表示されること、ワンタップの送信操作で画面がすぐにリセットされること、ネットワーク圏外でもメッセージが一通も失われないこと——これらを同時に実現するのは、まったく別次元の技術課題です。</p>
           <p>私たちは具体的な技術ターゲットを設定しました。</p>
           <ul>
             <li><strong>Time-to-Text: 500ms以下</strong> — アプリ起動からキーボード表示・入力可能状態まで</li>
-            <li><strong>Send-to-Reset: 150ms以下</strong> — 送信ボタンタップから画面クリアまで</li>
+            <li><strong>Send-to-Reset: ワンタップ以下</strong> — 送信ボタンタップから画面クリアまで</li>
             <li><strong>メッセージロス: ゼロ</strong> — オフライン・アプリ強制終了・電池切れ、いかなる状況でも取りこぼさない</li>
           </ul>
           <p>これらのターゲットを達成するために、UIKitによるネイティブUI構築、暗号化Outboxアーキテクチャ、Cloudflare Workers上のRelay APIなど、多くの技術的判断を行いました。詳細は各技術トピックの記事で解説しています。</p>
@@ -565,7 +565,7 @@
         <div class="page-content__body">
 
           <h2>1. What Was Captio?</h2>
-          <p>Captio was a paid iOS app (around $2) that appeared around 2012. It did exactly one thing — you opened the app, wrote a note, and tapped send. That was it. Your memo arrived at a pre-configured email address.</p>
+          <p>Captio was a paid iOS app (around $2) that appeared around 2011. It did exactly one thing — you opened the app, wrote a note, and tapped send. That was it. Your memo arrived at a pre-configured email address.</p>
           <p>No notifications. No folders. No tags. Minimal settings. It was the ultimate simple memo-to-email app, stripped of everything unnecessary.</p>
           <p>People used it in all sorts of ways. Some sent themselves shopping lists. Others jotted down fleeting ideas before they vanished. Some fired work reminders to their office email. What everyone shared was the experience of "getting a thought to your future self via the shortest possible path."</p>
 
@@ -604,7 +604,7 @@
           <p>We set concrete technical targets:</p>
           <ul>
             <li><strong>Time-to-Text: under 500ms</strong> — from app launch to keyboard visible and input ready</li>
-            <li><strong>Send-to-Reset: under 150ms</strong> — from tapping send to screen clear</li>
+            <li><strong>Send-to-Reset: under one-tap</strong> — from tapping send to screen clear</li>
             <li><strong>Message loss: zero</strong> — no matter the scenario: offline, force quit, battery death</li>
           </ul>
           <p>To achieve these targets, we made many technical decisions: native UI with UIKit, an encrypted Outbox architecture, a Relay API on Cloudflare Workers, and more. The details are documented in our other dev log articles.</p>
@@ -683,7 +683,7 @@
             </a>
             <a href="/devlog/day1" class="cross-links__item">
               <div class="cross-links__item-title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
-              <div class="cross-links__item-desc">起動0.3秒、送信150ms、取りこぼしゼロ——初回開発日誌の全文。</div>
+              <div class="cross-links__item-desc">起動 約1秒・ワンタップ送信、取りこぼしゼロ——初回開発日誌の全文。</div>
             </a>
             <a href="/note-to-email/" class="cross-links__item">
               <div class="cross-links__item-title">自分にメールでメモを送る方法</div>
@@ -711,7 +711,7 @@
             </a>
             <a href="/devlog/day1" class="cross-links__item">
               <div class="cross-links__item-title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-              <div class="cross-links__item-desc">Launch in 0.3s, send in 150ms, zero message loss — the full first dev log entry.</div>
+              <div class="cross-links__item-desc">Launch in ~1s, send with one tap, zero message loss — the full first dev log entry.</div>
             </a>
             <a href="/note-to-email/" class="cross-links__item">
               <div class="cross-links__item-title">How to Email Notes to Yourself</div>

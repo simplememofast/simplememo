@@ -10,20 +10,20 @@ Envía notas a tu email al toque
 nota rápida,memo email,email a mí mismo,recordatorio,captura ideas,notas rápidas,memo voz,captio
 
 ### 説明文（短縮版・最初の3行が最重要）
-Abre en 0.3s, envía en un toque a tu email. La app de notas más rápida del mundo.
+Abre en ~1s, envía en un toque a tu email. La app de notas más rápida del mundo.
 Cifrado AES-GCM, funciona sin conexión y reenvía automáticamente. 3 envíos gratis al día, para siempre.
 
 Escribe tu idea, pulsa enviar y aparece en tu bandeja de entrada. Así de simple. Sin carpetas, sin etiquetas, sin complicaciones. Tu email ya es tu sistema de organización.
 
 ### 説明文（フル版・4000文字以内）
-**0.3 segundos para abrir. Un toque para enviar. Tu nota llega a tu email.**
+**1 segundo para abrir. Un toque para enviar. Tu nota llega a tu email.**
 
 SimpleMemo es la forma más rápida de capturar una idea antes de que se te escape. Nacida como alternativa a Captio (cerrado en 2025), pero más rápida, más segura y más inteligente.
 
 **¿Por qué SimpleMemo?**
 
-- Se abre en 0.3 segundos — más rápido que cualquier app de notas
-- Envío en 150ms — un toque y tu nota está en tu bandeja
+- Se abre en 1 segundo — más rápido que cualquier app de notas
+- Envío en one-tap — un toque y tu nota está en tu bandeja
 - Cifrado AES-GCM — tu texto nunca se almacena en nuestros servidores
 - Funciona sin conexión — toma notas en el metro, se envían automáticamente después
 - 3 envíos gratis al día — sin anuncios, gratis para siempre
@@ -55,7 +55,7 @@ Mientras abres Apple Notes, buscas la carpeta correcta y empiezas a escribir, co
 Descarga ahora y prueba todas las funciones gratis durante 7 días.
 
 ### スクリーンショットキャプション（5枚分）
-1. Abre en 0.3s — captura tu idea al instante
+1. Abre en ~1s — captura tu idea al instante
 2. Un toque y tu nota llega a tu email
 3. Cifrado AES-GCM: tus notas son solo tuyas
 4. Sin conexión? Se envía automáticamente después

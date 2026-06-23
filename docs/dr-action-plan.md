@@ -25,7 +25,7 @@
 | URL | https://simplememofast.com |
 | Platforms | iPhone, iPad |
 | License | Freemium (Free with 3 sends/day, Premium $2.99/mo) |
-| Description | Simple Memo lets you email yourself notes in one tap. Designed as a Captio replacement, it launches in 0.3 seconds and sends your memo instantly. Features AES-GCM end-to-end encryption, an offline outbox that queues messages when you have no connection, and a minimal UI focused purely on speed. Free tier includes 3 sends per day; Premium unlocks unlimited sends for $2.99/month. |
+| Description | Simple Memo lets you email yourself notes in one tap. Designed as a Captio replacement, it launches in about a second and sends your memo instantly. Features AES-GCM end-to-end encryption, an offline outbox that queues messages when you have no connection, and a minimal UI focused purely on speed. Free tier includes 3 sends per day; Premium unlocks unlimited sends for $2.99/month. |
 | Tags | Note-taking, Email, Productivity, Memo, Privacy, Offline |
 | App Store link | https://apps.apple.com/us/app/captio-style-simple-memo/id6758438948 |
 
@@ -41,7 +41,7 @@
 |-----------|------|
 | Product Name | Simple Memo |
 | Website URL | https://simplememofast.com |
-| Description | Simple Memo is the fastest way to email yourself notes on iOS. Launch in 0.3 seconds, type your thought, and tap send. AES-GCM encryption protects every message. An offline outbox queues notes when you have no connection and sends them automatically when you are back online. Built as a modern Captio replacement after that app was discontinued. Free (3 sends/day) or Premium ($2.99/mo) for unlimited. |
+| Description | Simple Memo is the fastest way to email yourself notes on iOS. Launch in about 1 second, type your thought, and tap send. AES-GCM encryption protects every message. An offline outbox queues notes when you have no connection and sends them automatically when you are back online. Built as a modern Captio replacement after that app was discontinued. Free (3 sends/day) or Premium ($2.99/mo) for unlimited. |
 | Category | Productivity, Note-taking |
 | Pricing | Freemium |
 | Competitors | Email Me App, Drafts, Note To Self Mail, Pigeon |
@@ -63,22 +63,22 @@
 | フィールド | 内容 |
 |-----------|------|
 | Product Name | Simple Memo |
-| Tagline | Email yourself notes in one tap. 0.3s launch. |
+| Tagline | Email yourself notes in one tap. ~1s launch. |
 | Tags | Productivity, iOS, Note-taking |
 | Product URL | https://simplememofast.com |
 
 **Description（500文字以内）:**
 
-Simple Memo is the fastest way to capture a thought and send it to your inbox. It launches in 0.3 seconds, so your idea never escapes. Type, tap, done. Every note is encrypted with AES-GCM before it leaves your device. No connection? Notes queue in an offline outbox and send automatically later. Built as a modern replacement for Captio, which was discontinued in 2024 after 14 years. Free with 3 sends per day. Premium ($2.99/mo) unlocks unlimited sends.
+Simple Memo is the fastest way to capture a thought and send it to your inbox. It launches in about a second, so your idea never escapes. Type, tap, done. Every note is encrypted with AES-GCM before it leaves your device. No connection? Notes queue in an offline outbox and send automatically later. Built as a modern replacement for Captio, which was discontinued in 2024 after 14 years. Free with 3 sends per day. Premium ($2.99/mo) unlocks unlimited sends.
 
 **Maker's First Comment:**
 
 > Hi Product Hunt! I built Simple Memo because Captio, the app I used every day for years to email myself quick notes, was discontinued in 2024.
 >
-> I wanted something just as fast -- actually faster. Simple Memo launches in 0.3 seconds. You type your thought and tap send. That's it.
+> I wanted something just as fast -- actually faster. Simple Memo launches in about a second. You type your thought and tap send. That's it.
 >
 > A few things I focused on:
-> - **Speed above everything.** 0.3s cold launch. No splash screens, no onboarding walls.
+> - **Speed above everything.** ~1s cold launch. No splash screens, no onboarding walls.
 > - **Privacy by default.** AES-GCM encryption on every message before it leaves your device.
 > - **Works offline.** Notes queue in a local outbox and send automatically when you reconnect.
 > - **No account required.** Just configure your email and start sending.
@@ -142,7 +142,7 @@ Simple Memo is the fastest way to capture a thought and send it to your inbox. I
 >
 > I noticed your article "[ARTICLE_TITLE]" still links to captio.co, but the app was discontinued on October 1, 2024 and its servers were shut down.
 >
-> SimpleMemo (simplememofast.com) is a spiritual successor -- same one-tap email-to-self concept, launches in 0.3 seconds, uses Cloudflare Workers for independent infrastructure (no Gmail API dependency like Captio had). It also adds AES-GCM encryption and offline support.
+> SimpleMemo (simplememofast.com) is a spiritual successor -- same one-tap email-to-self concept, launches in about a second, uses Cloudflare Workers for independent infrastructure (no Gmail API dependency like Captio had). It also adds AES-GCM encryption and offline support.
 >
 > Would you consider updating the link for your readers? Happy to provide any additional info.
 >
@@ -158,7 +158,7 @@ Simple Memo is the fastest way to capture a thought and send it to your inbox. I
 >
 > [SITE_NAME]の「[ARTICLE_TITLE]」を拝読しました。記事内のCaptioリンク(captio.co)ですが、2024年10月にサービスが終了し、現在アクセスできなくなっています。
 >
-> SimpleMemo（simplememofast.com）は、Captioと同じ「ワンタップでメモをメールに送る」コンセプトを引き継いだ後継アプリです。起動0.3秒、AES-GCM暗号化、オフライン対応を備えています。
+> SimpleMemo（simplememofast.com）は、Captioと同じ「ワンタップでメモをメールに送る」コンセプトを引き継いだ後継アプリです。起動約1秒、AES-GCM暗号化、オフライン対応を備えています。
 >
 > 記事の更新時にSimpleMemoへのリンク追加をご検討いただけましたら幸いです。
 >
@@ -226,14 +226,14 @@ Simple Memo is the fastest way to capture a thought and send it to your inbox. I
 
 #### ピッチ2: テクニカルアーキテクチャアングル
 
-> Subject: How I built a 0.3-second-launch iOS app with Cloudflare Workers edge relay
+> Subject: How I built a ~1-second-launch iOS app with Cloudflare Workers edge relay
 >
 > Hi [HOST_NAME],
 >
 > Big fan of [PODCAST_NAME]. Your episode on [SPECIFIC_EPISODE_TITLE] got me thinking about how few people discuss edge computing for consumer apps, not just enterprise infrastructure.
 >
 > I built SimpleMemo, an iOS app that lets you email yourself instantly. The technical story has some angles your audience would find valuable:
-> - **0.3s cold launch**: How I optimized UIKit to beat SwiftUI's launch time
+> - **~1s cold launch**: How I optimized UIKit to beat SwiftUI's launch time
 > - **Cloudflare Workers email relay**: Edge computing for sub-100ms server response, globally
 > - **E2E encryption**: AES-GCM on-device before anything hits the network
 > - **Offline-first design**: Core Data queue that syncs when connectivity returns

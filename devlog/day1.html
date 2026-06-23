@@ -23,14 +23,14 @@
     });
   </script>
   <title>【開発日誌 Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった | Obsidian連携シンプルメモ</title>
-  <meta name="description" content="Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動0.3秒、送信150ms、取りこぼしゼロを実現する設計。">
+  <meta name="description" content="Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動 約1秒・ワンタップ送信、取りこぼしゼロを実現する設計。">
   <meta name="theme-color" content="#070b14">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Obsidian連携シンプルメモ開発チーム">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
   <meta property="og:title" content="【開発日誌 Day1】Captioが好きすぎて、もう一度&quot;あの体験&quot;を作りたくなった">
-  <meta property="og:description" content="Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動0.3秒、送信150ms、取りこぼしゼロを実現する設計。">
+  <meta property="og:description" content="Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動 約1秒・ワンタップ送信、取りこぼしゼロを実現する設計。">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://simplememofast.com/devlog/day1">
   <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-day1.png">
@@ -65,7 +65,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/day1#article","headline":"【開発日誌 Day1】Captioが好きすぎて、もう一度\"あの体験\"を作りたくなった","description":"Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動0.3秒、送信150ms、取りこぼしゼロを実現する設計。","url":"https://simplememofast.com/devlog/day1","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/day1#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/day1#article","headline":"【開発日誌 Day1】Captioが好きすぎて、もう一度\"あの体験\"を作りたくなった","description":"Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動 約1秒・ワンタップ送信、取りこぼしゼロを実現する設計。","url":"https://simplememofast.com/devlog/day1","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-day1.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/day1#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"開発日誌 Day1","item":"https://simplememofast.com/devlog/day1"}]}</script>
@@ -288,12 +288,12 @@
     <div class="meta-template" data-lang="ja">
       <span class="meta-title">【開発日誌 Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった | Obsidian連携シンプルメモ</span>
       <span class="meta-og-title">【開発日誌 Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</span>
-      <span class="meta-description">Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動0.3秒、送信150ms、取りこぼしゼロを実現する設計。</span>
+      <span class="meta-description">Captioの体験を分解し、UIKit・Outboxアーキテクチャ・Relay API・プライバシー設計まで、すべての技術判断を記録した開発日誌Day1。起動 約1秒・ワンタップ送信、取りこぼしゼロを実現する設計。</span>
     </div>
     <div class="meta-template" data-lang="en">
       <span class="meta-title">[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience | Simple Memo - for Obsidian</span>
       <span class="meta-og-title">[Dev Log Day 1] Loved Captio So Much, I Had to Recreate That Experience</span>
-      <span class="meta-description">Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in 0.3s, send in 150ms, zero message loss.</span>
+      <span class="meta-description">Dissecting the Captio experience and documenting every technical decision: UIKit architecture, Outbox pattern, Relay API, and privacy-first design. Launch in ~1s, send with one tap, zero message loss.</span>
     </div>
   </div>
 <main class="page-content">
@@ -313,9 +313,9 @@
             <li><a href="#ja-intro">はじめに：Captioという存在</a></li>
             <li><a href="#ja-section1">Captioの「何」が良かったのか——体験を分解してみた</a></li>
             <li><a href="#ja-section2">アーキテクチャ：なぜSwiftUI「ではなく」UIKitなのか</a></li>
-            <li><a href="#ja-section3">「送ったら消える」を150ミリ秒で実現する設計</a></li>
+            <li><a href="#ja-section3">「送ったら消える」をワンタップで実現する設計</a></li>
             <li><a href="#ja-section4">「取りこぼしゼロ」を実現するOutboxアーキテクチャ</a></li>
-            <li><a href="#ja-section5">Relay API：Gmail依存からの脱却</a></li>
+            <li><a href="#ja-section5">Relay API：外部メールAPIへの依存からの脱却</a></li>
             <li><a href="#ja-section6">今日やったこと：小さな違和感を、ひとつずつ消す</a></li>
             <li><a href="#ja-section7">Historyの表示ステータス不整合を解消した</a></li>
             <li><a href="#ja-section8">プライバシーへの偏執的なこだわり</a></li>
@@ -348,7 +348,7 @@
             <p>Captioを起動すると、即座にキーボードが表示され、テキスト入力が可能になる。スプラッシュスクリーンの後にホーム画面が表示されて、そこからメモ作成ボタンを押して……という手順がない。起動＝入力。この「起動からテキスト入力可能になるまでの時間」を、私たちは<strong>Time-to-Text</strong>と呼んでいる。Captioのそれは、体感で0.5秒以下だった。</p>
 
             <h3>要素2：送ったらすぐ消える（Instant Clear After Send）</h3>
-            <p>送信ボタンを押すと、画面は即座にクリアされる。「送信中…」のプログレスバーを見つめて待つ時間がない。書いたメモが消えた瞬間、「ああ、送れたな」という安心感とともに次の行動に移れる。この「送信ボタンを押してからUIがクリアされるまでの時間」を、私たちは<strong>Send-to-Reset</strong>と呼んでいる。目標は150ms以下だ。</p>
+            <p>送信ボタンを押すと、画面は即座にクリアされる。「送信中…」のプログレスバーを見つめて待つ時間がない。書いたメモが消えた瞬間、「ああ、送れたな」という安心感とともに次の行動に移れる。この「送信ボタンを押してからUIがクリアされるまでの時間」を、私たちは<strong>Send-to-Reset</strong>と呼んでいる。目標はワンタップ以下だ。</p>
 
             <h3>要素3：余計なものが一切ない（Nothing Unnecessary）</h3>
             <p>フォルダ機能、タグ機能、リッチテキスト、マークダウン対応——Captioにはそのどれもなかった。あるのはテキスト入力欄と送信ボタンだけ。この潔さが、認知負荷をゼロに近づけていた。「何をすべきか」を考える必要がないアプリ。それがCaptioだった。</p>
@@ -395,7 +395,7 @@ override func viewDidAppear(_ animated: Bool) {
 
           <!-- Section 3 -->
           <section id="ja-section3">
-            <h2>3. 「送ったら消える」を150ミリ秒で実現する設計</h2>
+            <h2>3. 「送ったら消える」をワンタップで実現する設計</h2>
             <p>Captioの「送ったら消える」体験を再現するために、最も重要な設計判断がある。それは、<strong>送信アニメーションとUIクリアを、ネットワークレスポンスから完全に分離する</strong>ことだ。</p>
 
             <p>一般的なアプリの送信フローはこうだ：</p>
@@ -477,8 +477,8 @@ func enqueue(message: OutboxMessage) throws {
 
           <!-- Section 5 -->
           <section id="ja-section5">
-            <h2>5. Relay API：Gmail依存からの脱却</h2>
-            <p>Captioは当初、ユーザーのGmailアカウントを通じてメールを送信していた。しかし、GoogleのOAuth要件の変更やAPI制限により、この方式は持続可能ではない。</p>
+            <h2>5. Relay API：外部メールAPIへの依存からの脱却</h2>
+            <p>Captioの送信の仕組みは公式には公開されていないが、端末から外部のメール送信に頼る方式だったと推測されている。一般論として、外部メールAPIのOAuth要件の変更やアクセス制限が重なると、この種の方式は持続可能でなくなりやすい。</p>
 
             <p>私たちは<strong>Cloudflare Workers + Resend API</strong>という構成を選んだ。</p>
 
@@ -634,7 +634,7 @@ func applyLanguageChange() {
             <p>技術的な数値をまとめてみる：</p>
             <ul>
               <li><strong>Time-to-Text</strong>：500ms以下（実測200〜300ms）</li>
-              <li><strong>Send-to-Reset</strong>：150ms以下</li>
+              <li><strong>Send-to-Reset</strong>：ワンタップ以下</li>
               <li><strong>メッセージの取りこぼし</strong>：ゼロ（Outboxパターン）</li>
               <li><strong>暗号化</strong>：AES-GCM（CryptoKit）</li>
               <li><strong>外部ライブラリ依存</strong>：ゼロ</li>
@@ -679,9 +679,9 @@ func applyLanguageChange() {
             <li><a href="#en-intro">Introduction: The App Called Captio</a></li>
             <li><a href="#en-section1">What Made Captio So Good -- Deconstructing the Experience</a></li>
             <li><a href="#en-section2">Architecture: Why UIKit Instead of SwiftUI</a></li>
-            <li><a href="#en-section3">Achieving "Send and Clear" in 150 Milliseconds</a></li>
+            <li><a href="#en-section3">Achieving "Send and Clear" in a Single Tap</a></li>
             <li><a href="#en-section4">Zero Message Loss: The Outbox Architecture</a></li>
-            <li><a href="#en-section5">Relay API: Breaking Free from Gmail Dependency</a></li>
+            <li><a href="#en-section5">Relay API: Breaking Free from External Email API Dependency</a></li>
             <li><a href="#en-section6">Today's Work: Eliminating Small Annoyances One by One</a></li>
             <li><a href="#en-section7">Fixing History Status Display Inconsistencies</a></li>
             <li><a href="#en-section8">An Obsessive Commitment to Privacy</a></li>
@@ -714,7 +714,7 @@ func applyLanguageChange() {
             <p>When you launched Captio, the keyboard appeared instantly and text input was ready. There was no splash screen followed by a home screen where you then tap a "compose" button. Launch equals input. We call the time from launch to text input readiness <strong>Time-to-Text</strong>. Captio's felt like under 0.5 seconds.</p>
 
             <h3>Element 2: Instant Clear After Send</h3>
-            <p>When you tapped send, the screen cleared immediately. No staring at a "Sending..." progress bar. The moment your memo disappeared, you felt the reassurance of "it's sent" and moved on. We call the time from tapping send to UI clearing <strong>Send-to-Reset</strong>. Our target is under 150ms.</p>
+            <p>When you tapped send, the screen cleared immediately. No staring at a "Sending..." progress bar. The moment your memo disappeared, you felt the reassurance of "it's sent" and moved on. We call the time from tapping send to UI clearing <strong>Send-to-Reset</strong>. Our target is under one-tap.</p>
 
             <h3>Element 3: Nothing Unnecessary</h3>
             <p>Folders, tags, rich text, markdown support -- Captio had none of these. Just a text field and a send button. This decisiveness brought cognitive load close to zero. An app where you never have to think about "what should I do." That was Captio.</p>
@@ -761,7 +761,7 @@ override func viewDidAppear(_ animated: Bool) {
 
           <!-- Section 3 -->
           <section id="en-section3">
-            <h2>3. Achieving "Send and Clear" in 150 Milliseconds</h2>
+            <h2>3. Achieving "Send and Clear" in a Single Tap</h2>
             <p>To recreate Captio's "send and it's gone" experience, the most critical design decision was to <strong>completely decouple the send animation and UI clear from the network response</strong>.</p>
 
             <p>A typical app's send flow looks like this:</p>
@@ -843,8 +843,8 @@ func enqueue(message: OutboxMessage) throws {
 
           <!-- Section 5 -->
           <section id="en-section5">
-            <h2>5. Relay API: Breaking Free from Gmail Dependency</h2>
-            <p>Captio originally sent emails through users' Gmail accounts. However, changes in Google's OAuth requirements and API restrictions made this approach unsustainable.</p>
+            <h2>5. Relay API: Breaking Free from External Email API Dependency</h2>
+            <p>Captio's sending mechanism was never officially documented, but it is believed to have relied on sending mail through an external provider from the device. In general, when an external email API's OAuth requirements change and access restrictions pile up, this kind of approach tends to become unsustainable.</p>
 
             <p>We chose a <strong>Cloudflare Workers + Resend API</strong> architecture.</p>
 
@@ -1000,7 +1000,7 @@ func applyLanguageChange() {
             <p>Let me summarize the technical metrics:</p>
             <ul>
               <li><strong>Time-to-Text</strong>: Under 500ms (measured 200-300ms)</li>
-              <li><strong>Send-to-Reset</strong>: Under 150ms</li>
+              <li><strong>Send-to-Reset</strong>: Under one-tap</li>
               <li><strong>Message loss</strong>: Zero (Outbox pattern)</li>
               <li><strong>Encryption</strong>: AES-GCM (CryptoKit)</li>
               <li><strong>External library dependencies</strong>: Zero</li>
@@ -1076,8 +1076,8 @@ func applyLanguageChange() {
               <span data-lang="en">Relay API: Email Infrastructure on Cloudflare Workers</span>
             </div>
             <div class="related-card__desc">
-              <span data-lang="ja">Gmail API依存からの脱却。エッジコンピューティングで世界中から数十msでメール送信。</span>
-              <span data-lang="en">Breaking free from Gmail API. Edge computing for global email delivery in milliseconds.</span>
+              <span data-lang="ja">外部メールAPIへの依存からの脱却。エッジコンピューティングで世界中から数十msでメール送信。</span>
+              <span data-lang="en">Breaking free from external email API dependency. Edge computing for global email delivery in milliseconds.</span>
             </div>
           </a>
           <a href="/devlog/privacy-first-design" class="related-card">
