@@ -21,13 +21,13 @@
       });
     });
   </script>
-  <title>AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集</title>
-  <meta name="description" content="AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）とは、認証付き暗号化方式です。AES-256-GCMはObsidian連携シンプルメモのOutboxストレージで使用され、オフラインメモを軍事レベルで保護します。">
+  <title>AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説 | 用語集</title>
+  <meta name="description" content="AES-GCM（Galois/Counter Mode）とは、暗号化と改ざん検出を同時に行うNIST標準の認証付き暗号（AEAD）。仕組み、AES-CBC・ChaCha20-Poly1305との違い、TLS 1.3で採用される理由をやさしく解説します。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
-  <meta property="og:title" content="AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集">
-  <meta property="og:description" content="AES-GCM（Galois/Counter Mode）認証付き暗号化の仕組みを解説。シンプルメモのOutboxでの使用方法と安全性について。">
+  <meta property="og:title" content="AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説">
+  <meta property="og:description" content="暗号化と改ざん検出を同時に行う認証付き暗号AES-GCM。仕組み、AES-CBCとの違い、TLS 1.3での採用理由を解説。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-03-06T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/glossary/aes-gcm/">
@@ -41,8 +41,8 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
-  <meta name="twitter:title" content="AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集">
-  <meta name="twitter:description" content="AES-GCM認証付き暗号化の仕組みとシンプルメモでの使用方法を解説。オフラインメモの安全性を保証する技術。">
+  <meta name="twitter:title" content="AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説">
+  <meta name="twitter:description" content="暗号化と改ざん検出を同時に行う認証付き暗号AES-GCM。仕組みとAES-CBCとの違い、TLS 1.3での採用理由を解説。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/glossary-aes-gcm.png">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -55,7 +55,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/glossary/aes-gcm/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/glossary-aes-gcm.png","headline":"AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集","description":"AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は認証付き暗号化方式で、データの機密性と完全性を同時に保証します。Obsidian連携シンプルメモではOutboxストレージの暗号化にAES-256-GCMを採用しています。","url":"https://simplememofast.com/glossary/aes-gcm/","datePublished":"2026-03-06","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/glossary/aes-gcm/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/glossary/aes-gcm/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/glossary-aes-gcm.png","headline":"AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説","description":"AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は認証付き暗号化方式で、データの機密性と完全性を同時に保証します。Obsidian連携シンプルメモではOutboxストレージの暗号化にAES-256-GCMを採用しています。","url":"https://simplememofast.com/glossary/aes-gcm/","datePublished":"2026-03-06","dateModified":"2026-06-05","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/glossary/aes-gcm/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">
@@ -74,7 +74,7 @@
   "@context": "https://schema.org",
   "@type": "DefinedTerm",
   "name": "AES-GCM暗号化",
-  "description": "AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）とは、認証付き暗号化方式です。AES-256-GCMはObsidian連携シンプルメモのOutboxストレージで使用され、オフラインメモを軍事レベルで保護します。",
+  "description": "AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）とは、暗号化と改ざん検出を同時に行うNIST標準の認証付き暗号（AEAD）です。TLS 1.3で採用され、Obsidian連携シンプルメモのOutboxストレージにも使用されています。",
   "inDefinedTermSet": {
     "@type": "DefinedTermSet",
     "name": "メモアプリ用語集",
@@ -296,9 +296,9 @@
 
   <div class="meta-templates" style="display:none;">
     <div class="meta-template" data-lang="ja">
-      <span class="meta-title">AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集</span>
-      <span class="meta-og-title">AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集</span>
-      <span class="meta-description">AES-GCM（Galois/Counter Mode）認証付き暗号化の仕組みを解説。Obsidian連携シンプルメモのOutboxストレージで使用されるAES-256-GCMの安全性について。</span>
+      <span class="meta-title">AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説 | 用語集</span>
+      <span class="meta-og-title">AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説</span>
+      <span class="meta-description">暗号化と改ざん検出を同時に行う認証付き暗号AES-GCM。仕組み、AES-CBCとの違い、TLS 1.3での採用理由を解説。</span>
     </div>
     <div class="meta-template" data-lang="en">
       <span class="meta-title">What is AES-GCM Encryption? — Simple Memo Glossary</span>
@@ -319,8 +319,8 @@
           <span data-lang="en">What is AES-GCM Encryption?</span>
         </h1>
         <p class="lp-hero__sub">
-          <span data-lang="ja">AES-GCM（Galois/Counter Mode）は、データの暗号化と改ざん検出を同時に行う認証付き暗号化方式です。Obsidian連携シンプルメモでは、オフライン時のOutboxストレージにAES-256-GCMを採用し、メモを軍事レベルで保護しています。</span>
-          <span data-lang="en">AES-GCM (Galois/Counter Mode) is an authenticated encryption algorithm that simultaneously encrypts data and detects tampering. Simple Memo uses AES-256-GCM for Outbox storage, protecting offline memos at military-grade security levels.</span>
+          <span data-lang="ja">AES-GCM（Galois/Counter Mode）は、データの暗号化と改ざん検出を同時に行う認証付き暗号化方式です。Obsidian連携シンプルメモでは、オフライン時のOutboxストレージにAES-256-GCMを採用しています。TLS 1.3（現在のHTTPS通信）と同じ方式ファミリーです。</span>
+          <span data-lang="en">AES-GCM (Galois/Counter Mode) is an authenticated encryption algorithm that simultaneously encrypts data and detects tampering. Simple Memo uses AES-256-GCM for Outbox storage — the same cipher family that protects TLS 1.3 (modern HTTPS) traffic.</span>
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
           <span data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
@@ -380,6 +380,44 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- Cipher Comparison -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span data-lang="ja">AES-GCM・AES-CBC・ChaCha20-Poly1305の違い</span>
+          <span data-lang="en">AES-GCM vs AES-CBC vs ChaCha20-Poly1305</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span data-lang="ja">「AES-CBCとGCMのどちらを使うべき？」という疑問への答えを比較表にまとめました。結論から言うと、新規設計では認証付き暗号（AEAD）であるAES-GCMまたはChaCha20-Poly1305を選ぶのが現在の定石で、AES-CBC単体を新たに採用する理由はほぼありません。</span>
+          <span data-lang="en">Wondering whether to use CBC or GCM? The short answer: for new designs, choose an authenticated cipher (AEAD) — AES-GCM or ChaCha20-Poly1305. There is rarely a reason to adopt bare AES-CBC today.</span>
+        </p>
+        <div style="overflow-x:auto">
+        <table class="compare-table" data-lang="ja">
+          <thead><tr><th>項目</th><th>AES-GCM</th><th>AES-CBC</th><th>ChaCha20-Poly1305</th></tr></thead>
+          <tbody>
+            <tr><td>改ざん検出（認証）</td><td>内蔵（AEAD）</td><td>なし（別途HMACが必要）</td><td>内蔵（AEAD）</td></tr>
+            <tr><td>並列処理</td><td>可能（高速）</td><td>暗号化側は不可</td><td>可能</td></tr>
+            <tr><td>ハードウェア支援</td><td>AES-NIで非常に高速</td><td>AES-NIで高速</td><td>専用命令なしでも高速（モバイル向き）</td></tr>
+            <tr><td>主な採用例</td><td>TLS 1.3・HTTPS・SSH</td><td>旧TLS・レガシーシステム</td><td>TLS 1.3・WireGuard</td></tr>
+            <tr><td>既知の注意点</td><td>nonce（IV）の再利用は致命的</td><td>パディングオラクル攻撃の事例</td><td>nonceの再利用は致命的</td></tr>
+          </tbody>
+        </table>
+        <table class="compare-table" data-lang="en">
+          <thead><tr><th>Aspect</th><th>AES-GCM</th><th>AES-CBC</th><th>ChaCha20-Poly1305</th></tr></thead>
+          <tbody>
+            <tr><td>Tamper detection (auth)</td><td>Built in (AEAD)</td><td>No (needs separate HMAC)</td><td>Built in (AEAD)</td></tr>
+            <tr><td>Parallelizable</td><td>Yes (fast)</td><td>Not for encryption</td><td>Yes</td></tr>
+            <tr><td>Hardware acceleration</td><td>Very fast with AES-NI</td><td>Fast with AES-NI</td><td>Fast even without special instructions (mobile-friendly)</td></tr>
+            <tr><td>Typical usage</td><td>TLS 1.3, HTTPS, SSH</td><td>Legacy TLS and systems</td><td>TLS 1.3, WireGuard</td></tr>
+            <tr><td>Known caveat</td><td>Nonce (IV) reuse is catastrophic</td><td>History of padding-oracle attacks</td><td>Nonce reuse is catastrophic</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="lp-section__lead">
+          <span data-lang="ja">補足：nonceの誤用リスクまで設計で吸収したい場合は、誤用耐性を持つ派生方式のAES-GCM-SIV（RFC 8452）もあります。</span>
+          <span data-lang="en">Note: if you need resilience against nonce misuse, the misuse-resistant variant AES-GCM-SIV (RFC 8452) exists for exactly that.</span>
+        </p>
       </section>
 
       <!-- Simple Memo Connection -->
