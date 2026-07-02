@@ -245,10 +245,16 @@ def main() -> int:
     ja_xml = render_sitemap(entries["ja"])
     en_xml = render_sitemap(entries["en"])
     locales_xml = render_sitemap(entries["locales"])
+    def newest(part: list[tuple[str, str]]) -> str:
+        """Index entries advertise the child's real latest change, not the
+        run date — an unchanged child with a fresh lastmod wastes crawler
+        trust (2026-07-02 audit LOW #31)."""
+        return max((lm for _, lm in part), default=TODAY)
+
     index_xml = render_sitemap_index([
-        (f"{SITE_URL}/sitemap-ja.xml", TODAY),
-        (f"{SITE_URL}/sitemap-en.xml", TODAY),
-        (f"{SITE_URL}/sitemap-locales.xml", TODAY),
+        (f"{SITE_URL}/sitemap-ja.xml", newest(entries["ja"])),
+        (f"{SITE_URL}/sitemap-en.xml", newest(entries["en"])),
+        (f"{SITE_URL}/sitemap-locales.xml", newest(entries["locales"])),
     ])
 
     print(f"sitemap-ja.xml:      {len(entries['ja'])} URLs")
