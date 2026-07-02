@@ -9,10 +9,10 @@ Claude (api/インフラ担当エージェント、simplememoアカウント aut
 ## 実施項目
 
 - [x] CF-1 paji.me 1ホップ301化 → **実測監査完了・実装はオーナー作業**(paji.meは別Cloudflareアカウント管理。§CF-1に5分手順を記載)
-- [x] CF-2 Bing Webmaster Tools登録・認証・sitemap送信 → **IndexNowを実装**(本PR)。WMT本登録はオーナー作業(GSCインポート推奨、§CF-2)
+- [x] CF-2 Bing Webmaster Tools登録・認証・sitemap送信 → **IndexNow実装・送信完了**(HTTP 200、224 URL受理)。WMT本登録はオーナー作業(GSCインポート推奨、§CF-2)
 - [x] CF-3 AIボット許可維持確認 → **完了**(9UA×2パス全200実測)
 - [x] CF-4 robots.txt配信経路確認 → **完了**(Pages静的配信+`_headers`で24hエッジキャッシュ、デプロイはパージしないことを実測確認)
-- [x] CF-5 Claude系UA robots追記 → **リポジトリ対応済み**(本日PR #374でmainマージ済み。ライブはTTL失効 2026-07-02 10:41 UTC頃に自然反映)
+- [x] CF-5 Claude系UA robots追記 → **完了・ライブ反映確認済み**(PR #374でmainマージ、2026-07-02 10:41 UTCのTTL失効による反映を実測確認)
 - [x] CF-6 404 URL対応 → **完了**(5件全件トリアージ済み・**リダイレクトは意図的に実施しない**、§CF-6)
 - [x] CF-7 キャッシュパージ運用確認 → **完了**(手順確立。現行トークンはパージ権限なし=ダッシュボード運用、§CF-7)
 
@@ -97,6 +97,7 @@ curl -I  https://simplememofast.com/captio/         # → 200
 
 - キーファイル `6515127e391c7f93478f50b879568143.txt` をサイトルートに設置。
 - デプロイ確認後、`https://api.indexnow.org/indexnow` へ全ページを送信(sitemap-ja 181 + sitemap-en 35 + sitemap-locales 8 = **224 URL**)。IndexNowはBing・Yandex等の参加エンジンに共有され、WMT登録前でもBingへのURL発見を前倒しできる。
+- **送信完了(2026-07-02)**: 初回POSTは `403 SiteVerificationNotCompleted`(新規キーの非同期検証中=正常挙動)→ 約10分後のリトライで **HTTP 200・224 URL受理**。今後の再送信は同ペイロードのPOSTのみでよい(検証済みキーとして即時200)。
 - ※ IndexNowはWMT登録の**補完**であり代替ではない(インデックス状況の確認・URL検査はWMTが必要)。
 - 今後の運用: 重要ページの追加・更新時に同エンドポイントへ該当URLをPOSTする(キーは上記ファイル)。
 
@@ -128,7 +129,8 @@ Googlebot           200    200
 Bingbot             200    200
 ```
 
-- 403/429/503 なし。UAベースのブロックルールが存在しないことを確認。
+- 403/429/503 なし。主要AI/検索ボットUAへのブロックが存在しないことを確認。
+- 補足発見: `Python-urllib/3.9` のような汎用スクリプトUAは403になる(実測)— 何らかのUAフィルタは存在するが、対象ボットUAには影響なし。セキュリティ設定変更時は上記curl検証の再実施を必須とする。
 - robots.txt 側も主要AI/検索ボットを明示Allow済み(Google-Extended含む)。CCBot / Bytespider / Amazonbot / Diffbot のみ意図的Disallow(既存方針)。
 - `llms.txt` も200(19KB)で配信中。
 - Cloudflare設定の変更は行っていない(=許可状態を維持)。
@@ -150,7 +152,7 @@ Bingbot             200    200
 ## CF-5: Claude系UA robots追記 — 状態
 
 - **リポジトリ対応済み**: `robots.txt` に `Claude-SearchBot` / `Claude-User` の明示Allowブロックあり(ClaudeBot / anthropic-ai / Claude-Web は従来から明示済み)。本日 PR #374 で main にマージ済み。既存の Disallow(/admin/, /docs/, /cdn-cgi/, パラメータ系)は不変で、`User-agent: *` とも矛盾なし。
-- **ライブ反映**: エッジキャッシュのTTL失効 **2026-07-02 10:41 UTC(19:41 JST)頃**に自然反映(NRTコロの実測ageから算出。コロにより多少前後、最大でも24h)。手動パージすれば即時。
+- **ライブ反映確認済み**: 事前算出どおり **2026-07-02 10:41 UTC(19:41 JST)** のTTL失効で反映。live robots.txt に `Claude-SearchBot` / `Claude-User` の Allow ブロックが出現(etag更新も確認)、両UAでトップページ200を再実測。
 - 反映後の検証:
 
 ```bash
@@ -229,12 +231,20 @@ curl -A "Claude-SearchBot" -I https://simplememofast.com/  → HTTP/2 200
 (全9UA×2パスの結果は §CF-3 の表のとおり、すべて200)
 ```
 
+### 事後検証(2026-07-02 10:41 UTC)
+
+```text
+live robots.txt                      → Claude-SearchBot / Claude-User の Allow ブロック出現(etag更新確認)
+curl -A "Claude-User" -I /           → 200
+curl -A "Claude-SearchBot" -I /      → 200
+IndexNowキーファイル                 → 200 / text/plain; charset=utf-8 / body一致
+IndexNow POST (api.indexnow.org)     → HTTP 200(224 URL受理)
+```
+
 ## 未対応・保留事項
 
 - CF-1 実装: オーナーの個人Cloudflareアカウントでの Redirect Rule 作成 + Always Use HTTPS OFF(手順は§CF-1)
 - CF-2 WMT本登録: オーナーによる Bing Webmaster Tools 登録(GSCインポート推奨)
-- CF-5 ライブ反映の最終確認: TTL失効(10:41 UTC頃)後に `curl` で Claude-SearchBot ブロックの出現を確認(本セッション内で確認し、結果はチャット報告)
-- IndexNow ping: 本PRデプロイ直後に実施(結果はチャット報告)
 
 ## 依頼者確認が必要な事項
 
