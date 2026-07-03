@@ -33,6 +33,7 @@ JA_EN_PAIRS = [
     ("/about/",                             "/en/about/"),
     ("/faq",                                "/en/faq"),
     ("/apple-watch/",                       "/en/apple-watch/"),
+    ("/apple-watch-obsidian/",              "/en/apple-watch-obsidian/"),
     ("/obsidian/",                          "/en/obsidian/"),
     ("/blog/",                              "/en/blog/"),
     ("/captio-alternative/",                "/en/captio-alternative/"),
