@@ -31,9 +31,10 @@
 //
 //   2. Strip `.html` from `/blog/*.html` URLs only. The blog directory's
 //      canonical form is extension-less. Root-level pages such as
-//      /contact.html, /faq.html, /legal.html keep their extension as the
-//      canonical URL form — those would 404 on the extension-less version,
-//      so we deliberately leave them alone.
+//      /contact.html, /faq.html, /legal.html are left alone here: Pages
+//      itself already serves them at both forms and 308-redirects the
+//      .html form to the extension-less one (e.g. /faq.html → /faq; see
+//      the note in _headers), so no extra handling is needed.
 //
 // Other directories (/vs/, /use-cases/, /glossary/, /guides/) use
 // /<dir>/<slug>/ (folder + index.html). Direct .html requests under those
@@ -54,9 +55,20 @@ export const onRequest = async (context) => {
     return context.next();
   }
 
-  // /docs/ holds internal working files that live in the repo but must not
-  // be publicly served (Cloudflare Pages deploys every tracked file).
-  if (path === "/docs" || path.startsWith("/docs/")) {
+  // /docs/, /scripts/, /tools/ and /CLAUDE.md hold internal working files
+  // that live in the repo but must not be publicly served (Cloudflare Pages
+  // deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
+  // and /tools/.env.example were live 200 — ops-intel leak, no public pages
+  // under any of these paths.
+  if (
+    path === "/docs" ||
+    path.startsWith("/docs/") ||
+    path === "/scripts" ||
+    path.startsWith("/scripts/") ||
+    path === "/tools" ||
+    path.startsWith("/tools/") ||
+    path === "/CLAUDE.md"
+  ) {
     return new Response("Not Found", {
       status: 404,
       headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
@@ -70,6 +82,20 @@ export const onRequest = async (context) => {
   if (url.searchParams.has("lang")) {
     url.searchParams.delete("lang");
     needsRedirect = true;
+  }
+
+  // 2a. Retired blog slugs: redirect straight to their final targets
+  //     (mirrors _redirects). Without this, the generic .html strip below
+  //     fires first and produces a 2-hop chain
+  //     (/blog/<slug>.html → /blog/<slug> → target). Must match the
+  //     _redirects targets exactly.
+  if (path === "/blog/captio-alternatives-comparison.html") {
+    url.pathname = "/captio-alternative/";
+    return Response.redirect(url.toString(), 301);
+  }
+  if (path === "/blog/memo-shuukan-tips.html") {
+    url.pathname = "/blog/memo-habit";
+    return Response.redirect(url.toString(), 301);
   }
 
   // 2. Strip .html from /blog/*.html only (canonical form is extensionless).

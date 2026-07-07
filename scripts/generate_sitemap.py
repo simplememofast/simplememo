@@ -87,6 +87,29 @@ def build_lastmod_index() -> dict[str, str]:
 LASTMOD_INDEX: dict[str, str] = {}
 
 
+def read_existing_lastmods() -> dict[str, str]:
+    """URL -> lastmod as currently published across all child sitemaps.
+
+    Used as a monotonic floor on regeneration: the 2026-07-07 audit found
+    a fresh regen would have rewritten 44 lastmods, 38 of them BACKWARD.
+    Root cause: cowork branches commit small (<threshold) content edits
+    and regenerate on-branch, but the squash-merge collapses them into a
+    single >threshold commit that build_lastmod_index() then skips as a
+    mechanical sweep — so git history can no longer reproduce the dates
+    that were honestly published. A regen must never roll a published
+    lastmod back; final_lastmod = max(published, git-derived).
+    """
+    lastmods: dict[str, str] = {}
+    pat = re.compile(
+        r"<loc>(.*?)</loc>\s*<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>", re.S
+    )
+    for path in (SITEMAP_JA_PATH, SITEMAP_EN_PATH, SITEMAP_LOCALES_PATH):
+        if path.exists():
+            for loc, lm in pat.findall(path.read_text(encoding="utf-8")):
+                lastmods[loc.strip()] = lm
+    return lastmods
+
+
 def git_lastmod(file_path: Path) -> str:
     """Date (YYYY-MM-DD) of the last non-sweep commit touching the file.
     Falls back to TODAY for untracked/new files."""
@@ -236,10 +259,17 @@ def main() -> int:
     args = parser.parse_args()
 
     url_files = collect_urls()
+    existing = read_existing_lastmods()
 
     entries: dict[str, list[tuple[str, str]]] = {"ja": [], "en": [], "locales": []}
+    floored = 0
     for url in sorted(url_files):
-        lastmod = git_lastmod(url_files[url])
+        computed = git_lastmod(url_files[url])
+        published = existing.get(url, "")
+        # Monotonic floor — ISO date strings compare lexicographically.
+        lastmod = max(published, computed)
+        if published > computed:
+            floored += 1
         entries[determine_target(url)].append((url, lastmod))
 
     ja_xml = render_sitemap(entries["ja"])
@@ -261,6 +291,10 @@ def main() -> int:
     print(f"sitemap-en.xml:      {len(entries['en'])} URLs")
     print(f"sitemap-locales.xml: {len(entries['locales'])} URLs")
     print(f"sitemap.xml:         index of 3 sitemaps")
+    print(
+        f"lastmod floor:       kept {floored} published dates that git "
+        f"history would have moved backward"
+    )
 
     if args.dry_run:
         print("[dry-run] no files written")

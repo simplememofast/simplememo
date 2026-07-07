@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 const { chromium } = require('playwright');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -297,6 +298,26 @@ h1 {
 </html>`;
 }
 
+// Compress a PNG in place: palette quantize (256, Floyd-Steinberg) +
+// optimize — the PR #372 recompress method. Raw Playwright screenshots run
+// ~500-650KB; the 2026-07-07 audit found `--only` output skipped the #372
+// sweep and shipped og/apple-watch-obsidian.png at 516KB, so compression now
+// runs inside the pipeline. Falls back to the uncompressed PNG (with a
+// warning) if python3/Pillow is unavailable.
+function compressPng(filePath) {
+  const py =
+    'import sys\n' +
+    'from PIL import Image\n' +
+    'p = sys.argv[1]\n' +
+    'im = Image.open(p).convert("RGB").quantize(256, dither=Image.Dither.FLOYDSTEINBERG)\n' +
+    'im.save(p, optimize=True)\n';
+  try {
+    execFileSync('python3', ['-c', py, filePath], { stdio: 'pipe' });
+  } catch (e) {
+    console.warn(`  ! compress skipped for ${path.basename(filePath)} (python3/Pillow unavailable) — recompress manually before commit`);
+  }
+}
+
 async function generateImage(browser, title, slug, outputPath) {
   const page = await browser.newPage();
   await page.setViewportSize({ width: 1200, height: 630 });
@@ -307,6 +328,7 @@ async function generateImage(browser, title, slug, outputPath) {
 
   await page.screenshot({ path: outputPath, type: 'png' });
   await page.close();
+  compressPng(outputPath);
 }
 
 async function main() {
