@@ -32,6 +32,7 @@ TOP_CLUSTER_XDEFAULT = "/"  # x-default points to ja root
 JA_EN_PAIRS = [
     ("/about/",                             "/en/about/"),
     ("/faq",                                "/en/faq"),
+    ("/ai-tags/",                           "/en/ai-tags/"),
     ("/apple-watch/",                       "/en/apple-watch/"),
     ("/apple-watch-obsidian/",              "/en/apple-watch-obsidian/"),
     ("/obsidian/",                          "/en/obsidian/"),
