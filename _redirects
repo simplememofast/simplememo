@@ -32,3 +32,8 @@ https://www.simplememofast.com/*  https://simplememofast.com/:splat  301
 # closing parenthesis in the URL and lands on a 404. Reclaim it with a 301.
 /)    /  301
 /%29  /  301
+
+# GSC hygiene: /en/vs/notion// — double-slash remnant of a schema-URL typo
+# (page-side fixed in #369) still crawled and served as a 200 duplicate.
+# Fold it into the canonical URL.
+/en/vs/notion//  /en/vs/notion/  301
