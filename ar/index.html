@@ -26,12 +26,12 @@
     });
   </script>
   <title>أرسل ملاحظاتك لبريدك في ثانية واحدة تقريبًا — بديل Captio | Simple Memo - for Obsidian</title>
-  <meta name="description" content="أسرع تطبيق لإرسال الملاحظات لبريدك على الآيفون. لمسة واحدة — فتح في ثانية واحدة تقريبًا، تشفير AES-GCM، إعادة إرسال دون اتصال. أفضل بديل لـ Captio.">
+  <meta name="description" content="تحدّث ويضيف الذكاء الاصطناعي عنوانًا ووسومًا ونوعًا. ملاحظاتك إلى بريدك بلمسة واحدة، تشفير AES-GCM، وإعادة إرسال دون اتصال. أفضل بديل لـ Captio.">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
   <meta property="og:title" content="أرسل ملاحظاتك لبريدك في ثانية واحدة تقريبًا — بديل Captio">
-  <meta property="og:description" content="تطبيق لإرسال الملاحظات لبريدك على الآيفون. اكتب وأرسل لصندوق الوارد بلمسة واحدة. أفضل بديل لـ Captio مع دعم بدون إنترنت وتشفير.">
+  <meta property="og:description" content="تحدّث ويضيف الذكاء الاصطناعي عنوانًا ووسومًا ونوعًا. ملاحظاتك إلى بريدك بلمسة واحدة، تشفير AES-GCM، وإعادة إرسال دون اتصال. أفضل بديل لـ Captio.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://simplememofast.com/ar/">
   <meta property="og:image" content="https://simplememofast.com/assets/img/og/ar.png">
@@ -44,7 +44,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="أرسل ملاحظاتك لبريدك في ثانية واحدة تقريبًا — بديل Captio">
-  <meta name="twitter:description" content="تطبيق لإرسال الملاحظات لبريدك على الآيفون. اكتب وأرسل لصندوق الوارد بلمسة واحدة. أفضل بديل لـ Captio.">
+  <meta name="twitter:description" content="تحدّث ويضيف الذكاء الاصطناعي عنوانًا ووسومًا ونوعًا. ملاحظاتك إلى بريدك بلمسة واحدة، تشفير AES-GCM، وإعادة إرسال دون اتصال. أفضل بديل لـ Captio.">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/ar.png">
 
   <!-- Favicon -->
@@ -218,13 +218,55 @@
       text-align: center;
       padding: 3rem 0 4rem;
     }
+
+    /* AI auto-tagging spotlight banner (NEW) */
+    .aib { position: relative; overflow: hidden; border-radius: var(--radius-xl, 20px); border: 1px solid rgba(139,124,255,.34); background: linear-gradient(135deg,#080b16 0%,#0b1024 45%,#070a14 100%); box-shadow: 0 14px 44px rgba(88,60,200,.2); }
+    .aib::before { content: ''; position: absolute; inset: 0; background: radial-gradient(52% 60% at 12% 18%, rgba(124,77,255,.2), transparent 68%), radial-gradient(46% 52% at 84% 42%, rgba(34,211,238,.13), transparent 70%); pointer-events: none; }
+    .aib__inner { position: relative; display: grid; grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr); gap: 1.5rem; align-items: center; padding: 2rem 1.9rem 1.4rem; }
+    .aib__badge { display: inline-flex; align-items: center; gap: .5rem; padding: .3rem .9rem .3rem .38rem; font-size: .78rem; font-weight: 700; color: #e9e2ff; background: rgba(124,77,255,.16); border: 1px solid rgba(124,77,255,.5); border-radius: 999px; margin: 0 0 1rem; }
+    .aib__badge b { font-size: .66rem; letter-spacing: .06em; color: #fff; background: linear-gradient(135deg,#7c4dff,#5856D6); padding: .14rem .55rem; border-radius: 999px; }
+    .aib__title { font-size: clamp(1.7rem,4.6vw,2.6rem); font-weight: 700; line-height: 1.24; letter-spacing: .01em; margin: 0 0 .7rem; }
+    .aib__c { background: linear-gradient(135deg,#22d3ee,#4da3ff 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+    .aib__v { background: linear-gradient(135deg,#8b7cff,#b388ff 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+    .aib__sub { font-size: 1rem; color: var(--text-secondary); line-height: 1.85; margin: 0 0 1.2rem; }
+    .aib__sub strong { color: var(--text); }
+    .aib__go { display: inline-flex; align-items: center; min-height: 48px; padding: .7rem 1.4rem; border-radius: 24px; background: linear-gradient(135deg,#7c4dff,#5856D6); color: #fff; text-decoration: none; font-weight: 700; font-size: .95rem; }
+    .aib__go:hover { opacity: .88; }
+    .aib__stage { display: flex; align-items: center; justify-content: center; gap: .85rem; flex-wrap: wrap; }
+    .aib__mic { position: relative; width: 58px; height: 58px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 30%, rgba(34,211,238,.35), rgba(77,163,255,.14)); border: 1px solid rgba(77,195,255,.45); box-shadow: 0 0 26px rgba(56,140,255,.32); }
+    .aib__mic svg { width: 26px; height: 26px; fill: #dff3ff; }
+    .aib__mic::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(77,195,255,.35); animation: aib-pulse 2.2s ease-out infinite; }
+    @keyframes aib-pulse { 0% { transform: scale(.9); opacity: .9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
+    .aib__wave { display: flex; align-items: center; gap: 3px; height: 38px; flex: none; }
+    .aib__wave i { display: block; width: 3px; border-radius: 2px; background: linear-gradient(180deg,#22d3ee,#8b7cff); height: 30%; animation: aib-wave 1.15s ease-in-out infinite; }
+    .aib__wave i:nth-child(2) { animation-delay: .1s; } .aib__wave i:nth-child(3) { animation-delay: .2s; } .aib__wave i:nth-child(4) { animation-delay: .3s; } .aib__wave i:nth-child(5) { animation-delay: .4s; } .aib__wave i:nth-child(6) { animation-delay: .5s; } .aib__wave i:nth-child(7) { animation-delay: .6s; }
+    @keyframes aib-wave { 0%, 100% { height: 22%; } 50% { height: 100%; } }
+    .aib__tags { display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; max-width: 260px; }
+    .aib__tag { display: inline-flex; align-items: center; padding: .38rem .8rem; border-radius: 999px; font-size: .85rem; font-weight: 700; color: #efe9ff; background: rgba(139,124,255,.13); border: 1px solid rgba(139,124,255,.4); box-shadow: 0 0 18px rgba(124,108,255,.14); }
+    .aib__tag--cyan { color: #dff6ff; background: rgba(34,211,238,.1); border-color: rgba(34,211,238,.38); }
+    .aib__feats { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; margin: 0 1.9rem; padding: 0; list-style: none; background: rgba(139,124,255,.22); border: 1px solid rgba(139,124,255,.22); border-radius: 14px; overflow: hidden; }
+    .aib__feats li { background: rgba(8,11,22,.86); padding: .9rem 1rem; }
+    .aib__feats b { display: block; font-size: .92rem; font-weight: 700; color: var(--text); }
+    .aib__feats span { display: block; font-size: .78rem; color: var(--text-muted); margin-top: .2rem; line-height: 1.6; }
+    .aib__note { position: relative; margin: .9rem 1.9rem 0; padding-bottom: 1.5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.75; }
+    @media (max-width: 860px) {
+      .aib__inner { grid-template-columns: 1fr; padding: 1.6rem 1.2rem 1.2rem; text-align: center; }
+      .aib__stage { order: -1; }
+      .aib__tags { max-width: 100%; }
+      .aib__feats { grid-template-columns: 1fr; margin: 0 1.2rem; text-align: center; }
+      .aib__note { margin: .9rem 1.2rem 0; text-align: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .aib__mic::after, .aib__wave i { animation: none; }
+      .aib__wave i { height: 60%; }
+    }
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebPage","name":"أرسل ملاحظاتك لبريدك في ثانية واحدة تقريبًا — بديل Captio","url":"https://simplememofast.com/ar/","inLanguage":"ar","isPartOf":{"@id":"https://simplememofast.com/#website"},"dateModified":"2026-06-10","description":"الصفحة الرسمية باللغة العربية لتطبيق Simple Memo - for Obsidian على iOS، الذي يرسل ملاحظاتك إلى بريدك الإلكتروني بلمسة واحدة."}
   </script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Simple Memo - for Obsidian","legalName":"株式会社ユリカ","alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"],"url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"sameAs":["https://apps.apple.com/jp/app/id6758438948","https://x.com/simplememofast","https://note.com/simplememo","https://zenn.dev/simplememo","https://github.com/simplememofast","https://github.com/simplememofast/simplememo-ios","https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","@id":"https://simplememofast.com/#app","name":"Obsidian連携シンプルメモ","alternateName":["Simple Memo - for Obsidian","Simple Memo","シンプルメモ","Captio式シンプルメモ","SimpleMemoFast","Obsidian連携シンプルメモ - 最速の音声入力"],"operatingSystem":"iOS 16.0+","applicationCategory":"UtilitiesApplication","url":"https://simplememofast.com/","mainEntityOfPage":"https://simplememofast.com/ar/","inLanguage":"ar","isAccessibleForFree":true,"publisher":{"@id":"https://simplememofast.com/#organization"},"image":"https://simplememofast.com/assets/img/app-icon-256.png","softwareVersion":"3.9","offers":[{"@type":"Offer","price":"0","priceCurrency":"USD","name":"Free","description":"Up to 3 sends per day (free forever)","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Monthly","description":"$2.99/month, unlimited sends","price":"2.99","priceCurrency":"USD","availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Premium Yearly","description":"$29.99/year, unlimited sends","price":"29.99","priceCurrency":"USD","availability":"https://schema.org/InStock"}],"downloadUrl":"https://apps.apple.com/us/app/id6758438948","datePublished":"2026-02-12","dateModified":"2026-07-06","aggregateRating":{"@type":"AggregateRating","ratingValue":"4.4","ratingCount":"21","bestRating":"5","worstRating":"1"},"sameAs":["https://x.com/simplememofast","https://note.com/simplememo","https://zenn.dev/simplememo","https://github.com/simplememofast","https://github.com/simplememofast/simplememo-ios","https://alternativeto.net/software/simple-memo--captio-style/","https://apps.apple.com/jp/app/id6758438948","https://prtimes.jp/main/html/rd/p/000000001.000182412.html","https://prtimes.jp/main/html/rd/p/000000003.000182412.html","https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"]}</script>
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "@id": "https://simplememofast.com/#app", "name": "Obsidian連携シンプルメモ", "alternateName": ["Simple Memo - for Obsidian", "Simple Memo", "シンプルメモ", "Captio式シンプルメモ", "SimpleMemoFast", "Obsidian連携シンプルメモ - 最速の音声入力"], "operatingSystem": "iOS 16.0+", "applicationCategory": "UtilitiesApplication", "url": "https://simplememofast.com/", "mainEntityOfPage": "https://simplememofast.com/ar/", "inLanguage": "ar", "isAccessibleForFree": true, "publisher": {"@id": "https://simplememofast.com/#organization"}, "image": "https://simplememofast.com/assets/img/app-icon-256.png", "softwareVersion": "3.9", "offers": [{"@type": "Offer", "price": "0", "priceCurrency": "USD", "name": "Free", "description": "Up to 3 sends per day (free forever)", "availability": "https://schema.org/InStock"}, {"@type": "Offer", "name": "Premium Monthly", "description": "$2.99/month, unlimited sends", "price": "2.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}, {"@type": "Offer", "name": "Premium Yearly", "description": "$29.99/year, unlimited sends", "price": "29.99", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}], "downloadUrl": "https://apps.apple.com/us/app/id6758438948", "datePublished": "2026-02-12", "dateModified": "2026-07-25", "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.4", "ratingCount": "21", "bestRating": "5", "worstRating": "1"}, "sameAs": ["https://x.com/simplememofast", "https://note.com/simplememo", "https://zenn.dev/simplememo", "https://github.com/simplememofast", "https://github.com/simplememofast/simplememo-ios", "https://alternativeto.net/software/simple-memo--captio-style/", "https://apps.apple.com/jp/app/id6758438948", "https://prtimes.jp/main/html/rd/p/000000001.000182412.html", "https://prtimes.jp/main/html/rd/p/000000003.000182412.html", "https://www.indiehackers.com/post/i-built-simplememofast-a-captio-style-app-to-email-yourself-notes-instantly-e6225127d8"], "featureList": ["وسم تلقائي بالذكاء الاصطناعي (عنوان ووسوم ونوع داخل الجهاز)"]}</script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","inLanguage":"ar","mainEntity":[
     {"@type":"Question","name":"ما هو Simple Memo؟","acceptedAnswer":{"@type":"Answer","text":"هو تطبيق سريع لنظام iOS يتيح لك إرسال ملاحظاتك إلى بريدك الإلكتروني أنت بلمسة واحدة. يفتح في ثانية واحدة تقريبًا فقط، فتلتقط فكرتك قبل أن تنساها وتجدها بانتظارك في صندوق الوارد لتنظمها لاحقاً كما تشاء."}},
@@ -287,6 +329,40 @@
         <p style="font-size:.8rem;color:var(--text-muted);margin-top:.5rem;">★ 4.4 (21 تقييمات في App Store)</p>
     </div>
   </section>
+
+  <!-- AI Auto-Tagging Banner (newest feature) -->
+  <section class="ai-tags-banner" id="ai-tags" style="padding:1.5rem 0 0.5rem;">
+    <div class="container">
+      <div class="aib">
+        <div class="aib__inner">
+          <div class="aib__body">
+            <p class="aib__badge"><b>NEW</b><span>الوسم التلقائي بالذكاء الاصطناعي — متاح الآن</span></p>
+            <h2 class="aib__title"><span class="aib__c">تحدّث</span> فحسب.<br>و<span class="aib__v">الذكاء الاصطناعي</span> ينظّم.</h2>
+            <p class="aib__sub">تحدّث، <strong>والوسم يتم تلقائيًا</strong>. يقرأ الذكاء الاصطناعي داخل جهازك ملاحظتك ويضيف <strong>عنوانًا ووسومًا ونوعًا</strong> قبل إرسالها إلى بريدك وإلى <strong>Obsidian</strong>.</p>
+            <a href="/en/ai-tags/" class="aib__go" hreflang="en" aria-label="تعرّف على الوسم التلقائي بالذكاء الاصطناعي">تعرّف على الوسم التلقائي ←</a>
+          </div>
+          <div class="aib__stage" aria-hidden="true">
+            <span class="aib__mic"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></span>
+            <span class="aib__wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="aib__tags">
+              <span class="aib__tag"><bdi>#Obsidian</bdi></span>
+              <span class="aib__tag aib__tag--cyan"><bdi>#تسوق</bdi></span>
+              <span class="aib__tag"><bdi>#فكرة</bdi></span>
+              <span class="aib__tag aib__tag--cyan"><bdi>#ذكاء_اصطناعي</bdi></span>
+              <span class="aib__tag"><bdi>#مزامنة</bdi></span>
+            </span>
+          </div>
+        </div>
+        <ul class="aib__feats">
+          <li><b>🎤 تحدّث فحسب</b><span>تفريغ نصي داخل الجهاز</span></li>
+          <li><b>🏷️ وسوم تلقائية</b><span>الذكاء الاصطناعي يفهم المحتوى وينظّمه</span></li>
+          <li><b>💎 تكامل Obsidian</b><span>يُضاف تلقائيًا إلى ملاحظاتك</span></li>
+        </ul>
+        <p class="aib__note">يتم الوسم بالذكاء الاصطناعي بالكامل داخل جهاز iPhone الخاص بك، ولا تُرسل ملاحظاتك إلى خادم خارجي لهذا الغرض.</p>
+      </div>
+    </div>
+  </section>
+
 
   <!-- Features -->
   <section class="features" style="padding:3rem 0;">
