@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/">
-  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <link rel="dns-prefetch" href="https://analytics.ahrefs.com">
   <link rel="dns-prefetch" href="https://apps.apple.com">
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
@@ -65,6 +65,8 @@
   <!-- Self-hosted Noto Sans JP (subset) -->
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-delta.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-delta.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
@@ -342,7 +344,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260702-low">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260725-font">
   <style>
     /* Language Switcher — 2026 refined */
     .header {
@@ -586,7 +588,19 @@
     }
 
   </style>
-  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- Ahrefs analytics - deferred for LCP (same pattern as gtag above) -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://analytics.ahrefs.com/analytics.js';
+        s.async = true;
+        s.setAttribute('data-key', '6MwVxHQiKMs/Wl2rNBoiwQ');
+        document.head.appendChild(s);
+      });
+    });
+  </script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -637,7 +651,7 @@
   <section class="hero">
     <div class="container">
       <div class="hero__icon">
-        <img src="/assets/img/app-icon-256.webp" alt="Obsidian連携シンプルメモアプリアイコン" width="256" height="256">
+        <img src="/assets/img/app-icon-256.webp" alt="Obsidian連携シンプルメモアプリアイコン" width="256" height="256" fetchpriority="high">
       </div>
       <p style="margin:0 0 14px;">
         <a href="/ai-tags/" style="display:inline-flex;align-items:center;gap:.5rem;padding:.32rem .9rem .32rem .4rem;font-size:.8rem;font-weight:700;color:#e9e2ff;background:rgba(124,77,255,.14);border:1px solid rgba(124,77,255,.45);border-radius:999px;text-decoration:none;">
