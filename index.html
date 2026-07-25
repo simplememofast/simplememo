@@ -591,49 +591,17 @@
       .hero__subtitle { margin-bottom: 12px; font-size: 0.9rem; }
     }
 
-    /* AI auto-tagging spotlight banner (v4.0 / NEW) */
-    .aib { position: relative; overflow: hidden; border-radius: var(--radius-xl, 20px); border: 1px solid rgba(139,124,255,.34); background: linear-gradient(135deg,#080b16 0%,#0b1024 45%,#070a14 100%); box-shadow: 0 14px 44px rgba(88,60,200,.2); }
-    .aib::before { content: ''; position: absolute; inset: 0; background: radial-gradient(52% 60% at 12% 18%, rgba(124,77,255,.2), transparent 68%), radial-gradient(46% 52% at 84% 42%, rgba(34,211,238,.13), transparent 70%); pointer-events: none; }
-    .aib__inner { position: relative; display: grid; grid-template-columns: minmax(0,1.05fr) minmax(0,.95fr); gap: 1.5rem; align-items: center; padding: 2rem 1.9rem 1.4rem; }
-    .aib__badge { display: inline-flex; align-items: center; gap: .5rem; padding: .3rem .9rem .3rem .38rem; font-size: .78rem; font-weight: 700; color: #e9e2ff; background: rgba(124,77,255,.16); border: 1px solid rgba(124,77,255,.5); border-radius: 999px; margin: 0 0 1rem; }
+    /* AI auto-tagging banner — artwork above, crawlable copy below */
+    .aib__badge { display: inline-flex; align-items: center; gap: .5rem; padding: .3rem .9rem .3rem .38rem; font-size: .78rem; font-weight: 700; color: #e9e2ff; background: rgba(124,77,255,.16); border: 1px solid rgba(124,77,255,.5); border-radius: 999px; }
     .aib__badge b { font-size: .66rem; letter-spacing: .06em; color: #fff; background: linear-gradient(135deg,#7c4dff,#5856D6); padding: .14rem .55rem; border-radius: 999px; }
-    .aib__title { font-size: clamp(1.7rem,4.6vw,2.6rem); font-weight: 700; line-height: 1.24; letter-spacing: .01em; margin: 0 0 .7rem; }
+    .aib__title { font-size: clamp(1.5rem,4vw,2.1rem); font-weight: 700; line-height: 1.32; letter-spacing: .01em; margin: 0 0 .6rem; }
     .aib__c { background: linear-gradient(135deg,#22d3ee,#4da3ff 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
     .aib__v { background: linear-gradient(135deg,#8b7cff,#b388ff 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
-    .aib__sub { font-size: 1rem; color: var(--text-secondary); line-height: 1.85; margin: 0 0 1.2rem; }
+    .aib__sub { font-size: .95rem; color: var(--text-secondary); line-height: 1.85; max-width: 680px; margin: 0 auto .5rem; }
     .aib__sub strong { color: var(--text); }
+    .aib__note { font-size: .8rem; color: var(--text-muted); line-height: 1.75; max-width: 680px; margin: 0 auto 1rem; }
     .aib__go { display: inline-flex; align-items: center; min-height: 48px; padding: .7rem 1.4rem; border-radius: 24px; background: linear-gradient(135deg,#7c4dff,#5856D6); color: #fff; text-decoration: none; font-weight: 700; font-size: .95rem; }
     .aib__go:hover { opacity: .88; }
-    /* voice -> wave -> tags visual */
-    .aib__stage { display: flex; align-items: center; justify-content: center; gap: .85rem; flex-wrap: wrap; }
-    .aib__mic { position: relative; width: 58px; height: 58px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 30%, rgba(34,211,238,.35), rgba(77,163,255,.14)); border: 1px solid rgba(77,195,255,.45); box-shadow: 0 0 26px rgba(56,140,255,.32); }
-    .aib__mic svg { width: 26px; height: 26px; fill: #dff3ff; }
-    .aib__mic::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 1px solid rgba(77,195,255,.35); animation: aib-pulse 2.2s ease-out infinite; }
-    @keyframes aib-pulse { 0% { transform: scale(.9); opacity: .9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
-    .aib__wave { display: flex; align-items: center; gap: 3px; height: 38px; flex: none; }
-    .aib__wave i { display: block; width: 3px; border-radius: 2px; background: linear-gradient(180deg,#22d3ee,#8b7cff); height: 30%; animation: aib-wave 1.15s ease-in-out infinite; }
-    .aib__wave i:nth-child(2) { animation-delay: .1s; } .aib__wave i:nth-child(3) { animation-delay: .2s; } .aib__wave i:nth-child(4) { animation-delay: .3s; } .aib__wave i:nth-child(5) { animation-delay: .4s; } .aib__wave i:nth-child(6) { animation-delay: .5s; } .aib__wave i:nth-child(7) { animation-delay: .6s; }
-    @keyframes aib-wave { 0%, 100% { height: 22%; } 50% { height: 100%; } }
-    .aib__tags { display: flex; gap: .45rem; flex-wrap: wrap; justify-content: center; max-width: 260px; }
-    .aib__tag { display: inline-flex; align-items: center; padding: .38rem .8rem; border-radius: 999px; font-size: .85rem; font-weight: 700; color: #efe9ff; background: rgba(139,124,255,.13); border: 1px solid rgba(139,124,255,.4); box-shadow: 0 0 18px rgba(124,108,255,.14); }
-    .aib__tag--cyan { color: #dff6ff; background: rgba(34,211,238,.1); border-color: rgba(34,211,238,.38); }
-    /* feature strip */
-    .aib__feats { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1px; margin: 0 1.9rem; padding: 0; list-style: none; background: rgba(139,124,255,.22); border: 1px solid rgba(139,124,255,.22); border-radius: 14px; overflow: hidden; }
-    .aib__feats li { background: rgba(8,11,22,.86); padding: .9rem 1rem; }
-    .aib__feats b { display: block; font-size: .92rem; font-weight: 700; color: var(--text); }
-    .aib__feats span { display: block; font-size: .78rem; color: var(--text-muted); margin-top: .2rem; line-height: 1.6; }
-    .aib__note { position: relative; margin: .9rem 1.9rem 0; padding-bottom: 1.5rem; font-size: .8rem; color: var(--text-muted); line-height: 1.75; }
-    @media (max-width: 860px) {
-      .aib__inner { grid-template-columns: 1fr; padding: 1.6rem 1.2rem 1.2rem; text-align: center; }
-      .aib__stage { order: -1; }
-      .aib__tags { max-width: 100%; }
-      .aib__feats { grid-template-columns: 1fr; margin: 0 1.2rem; text-align: center; }
-      .aib__note { margin: .9rem 1.2rem 0; text-align: center; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .aib__mic::after, .aib__wave i { animation: none; }
-      .aib__wave i { height: 60%; }
-    }
 
   </style>
   <!-- Ahrefs analytics - deferred for LCP (same pattern as gtag above) -->
@@ -735,32 +703,18 @@
   <!-- AI Auto-Tagging Banner (newest feature — first banner after hero) -->
   <section class="ai-tags-banner" id="ai-tags" style="padding:1.5rem 0 0.5rem;">
     <div class="container">
-      <div class="aib">
-        <div class="aib__inner">
-          <div class="aib__body">
-            <p class="aib__badge"><b>NEW</b><span class="nb">AIタグ自動追加 — 提供中</span></p>
-            <h2 class="aib__title"><span class="nb"><span class="aib__c">声</span>で残す。</span><br><span class="nb"><span class="aib__v">AI</span>が整える。</span></h2>
-            <p class="aib__sub">話すだけで、<strong>タグ付けまで自動</strong>。オンデバイスAIがメモの内容を理解して、<strong>タイトル・タグ・種別</strong>を整えてから、メールと<strong>Obsidian</strong>へ届けます。</p>
-            <a href="/ai-tags/" class="aib__go">AIタグ自動追加を詳しく見る →</a>
-          </div>
-          <div class="aib__stage" aria-hidden="true">
-            <span class="aib__mic"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></span>
-            <span class="aib__wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-            <span class="aib__tags">
-              <span class="aib__tag">#Obsidian</span>
-              <span class="aib__tag aib__tag--cyan">#買い物</span>
-              <span class="aib__tag">#アイデア</span>
-              <span class="aib__tag aib__tag--cyan">#AI</span>
-              <span class="aib__tag">#連携</span>
-            </span>
-          </div>
-        </div>
-        <ul class="aib__feats">
-          <li><b>🎤 話すだけ</b><span>AIが文字起こし</span></li>
-          <li><b>🏷️ タグを自動追加</b><span>AIが内容を理解して整理</span></li>
-          <li><b>💎 Obsidian連携</b><span>ノートに自動追記</span></li>
-        </ul>
+      <a href="/ai-tags/" aria-label="AIタグ自動追加を詳しく見る" style="display:block;text-decoration:none;border-radius:var(--radius-lg);overflow:hidden;border:1px solid rgba(139,124,255,.28);box-shadow:0 10px 34px rgba(124,77,255,.16);">
+        <picture>
+          <source type="image/webp" srcset="/assets/img/ai-tags-banner-ja.webp 1200w, /assets/img/ai-tags-banner-ja@2x.webp 1737w" sizes="(max-width: 1140px) 100vw, 1140px">
+          <img src="/assets/img/ai-tags-banner-ja.jpg" width="1200" height="626" alt="AIタグ自動追加リリース — 声で残す。AIが整える。話すだけで、タグ付けまで自動。話すだけでAIが文字起こし・AIが内容を理解してタグを自動追加・Obsidianのノートに自動追記。AIによるタグ付けはお使いのiPhoneの中だけで行われ、メモが外部サーバーへ送られることはありません" style="width:100%;height:auto;display:block;" loading="lazy" decoding="async">
+        </picture>
+      </a>
+      <div style="text-align:center;margin-top:1.25rem;">
+        <p style="margin:0 0 .6rem;"><span class="aib__badge"><b>NEW</b><span class="nb">AIタグ自動追加 — 提供中</span></span></p>
+        <h2 class="aib__title"><span class="nb"><span class="aib__c">声</span>で残す。</span><span class="nb"><span class="aib__v">AI</span>が整える。</span></h2>
+        <p class="aib__sub">話すだけで、<strong>タグ付けまで自動</strong>。オンデバイスAIがメモの内容を理解して、<strong>タイトル・タグ・種別</strong>を整えてから、メールと<strong>Obsidian</strong>へ届けます。</p>
         <p class="aib__note">AIによるタグ付けはお使いのiPhoneの中だけで行われます。メモが外部サーバーへ送られることはありません。</p>
+        <a href="/ai-tags/" class="aib__go">AIタグ自動追加を詳しく見る →</a>
       </div>
     </div>
   </section>
