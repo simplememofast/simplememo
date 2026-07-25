@@ -19,7 +19,8 @@
 // who land on an old `?lang=en` bookmark get redirected to the canonical
 // page, which is a better UX than serving identical content from two URLs.
 //
-// Two normalizations:
+// Normalizations, in order (all folded into a single 301 so no request ever
+// costs more than one hop):
 //
 //   1. Strip any `?lang=*` query parameter. The site does not use this
 //      parameter — locale is determined by path (`/en/*` for EN, root for
@@ -35,6 +36,14 @@
 //      itself already serves them at both forms and 308-redirects the
 //      .html form to the extension-less one (e.g. /faq.html → /faq; see
 //      the note in _headers), so no extra handling is needed.
+//
+//   3. Strip referral/attribution params (`ref`, `from`, `source`, `q`) that
+//      identify a traffic source rather than a document. Analytics params
+//      (`utm_*`, `gclid`, `fbclid`) are left intact — see the note at the
+//      call site.
+//
+//   4. Map retired paths to their live targets, and answer 410 Gone for
+//      slugs that never existed here.
 //
 // Other directories (/vs/, /use-cases/, /glossary/, /guides/) use
 // /<dir>/<slug>/ (folder + index.html). Direct .html requests under those
@@ -84,23 +93,83 @@ export const onRequest = async (context) => {
     needsRedirect = true;
   }
 
-  // 2a. Retired blog slugs: redirect straight to their final targets
-  //     (mirrors _redirects). Without this, the generic .html strip below
-  //     fires first and produces a 2-hop chain
-  //     (/blog/<slug>.html → /blog/<slug> → target). Must match the
-  //     _redirects targets exactly.
-  if (path === "/blog/captio-alternatives-comparison.html") {
-    url.pathname = "/captio-alternative/";
-    return Response.redirect(url.toString(), 301);
-  }
-  if (path === "/blog/memo-shuukan-tips.html") {
-    url.pathname = "/blog/memo-habit";
-    return Response.redirect(url.toString(), 301);
+  // 1b. Drop referral/attribution params that carry no content meaning.
+  //     Each one mints a distinct crawlable URL for the same page — GSC has
+  //     collected `/?ref=launches.uicomet.com`, `/?from=AppAgg.com&…` and
+  //     `/blog/?q={search_term_string}` (a literal from a since-removed
+  //     SearchAction schema) that way. A 301 folds the backlink into the
+  //     canonical URL instead of leaving a near-duplicate parked in the
+  //     index.
+  //
+  //     `utm_*`, `gclid` and `fbclid` are deliberately NOT stripped: GA4 and
+  //     the ad platforms read them off the landing URL, so a redirect would
+  //     silently break campaign attribution. Those URLs are handled by the
+  //     self-referencing canonical instead, which is also why robots.txt no
+  //     longer Disallows them — a robots block would stop Googlebot from
+  //     fetching the page and therefore from ever seeing the canonical
+  //     (same reasoning as `?lang=` above).
+  for (const param of ["ref", "from", "source", "q"]) {
+    if (url.searchParams.has(param)) {
+      url.searchParams.delete(param);
+      needsRedirect = true;
+    }
   }
 
   // 2. Strip .html from /blog/*.html only (canonical form is extensionless).
-  if (path.startsWith("/blog/") && path.endsWith(".html")) {
-    url.pathname = path.slice(0, -".html".length);
+  let pathname = path;
+  if (pathname.startsWith("/blog/") && pathname.endsWith(".html")) {
+    pathname = pathname.slice(0, -".html".length);
+  }
+
+  // 3. Retired paths → their final targets, applied to the ALREADY
+  //    normalized pathname so every variant of a retired URL costs exactly
+  //    one hop. Before this, `/blog/memo-shuukan-tips.html?lang=ja` went
+  //    .html-strip → 301 → _redirects → 301 (two hops, and GSC reports every
+  //    intermediate). Mirrors _redirects, which stays in place as the
+  //    fallback if a Function deploy ever fails — keep the two in sync.
+  const RETIRED = {
+    "/blog/captio-alternatives-comparison": "/captio-alternative/",
+    "/blog/memo-shuukan-tips": "/blog/memo-habit",
+    "/en/blog/why-captio-died": "/en/captio-alternative/",
+    "/privacy-policy": "/privacy",
+    "/privacy-policy/": "/privacy",
+    "/vs/whatsapp/": "/vs/",
+    "/vs/telegram/": "/vs/",
+    "/vs/trello/": "/vs/",
+    "/vs/slack-self-dm/": "/vs/",
+  };
+  if (RETIRED[pathname]) {
+    pathname = RETIRED[pathname];
+  }
+
+  // 4. Slugs that never existed on this site but are repeatedly crawled
+  //    because they are linked from off-site (see
+  //    docs/seo/gsc-index-triage-2026-07-02.md — fabricated HN-style slugs
+  //    that mimic our own vocabulary). A 404 invites Google to keep
+  //    re-checking; 410 Gone is the explicit "this will never exist" signal
+  //    and drops the URL from the index far faster. Verified absent from the
+  //    full git history, all current sources and every sitemap.
+  const GONE = new Set([
+    "/blog/offline-first-outbox-teardown",
+    "/blog/email-inbox-as-task-manager",
+    "/blog/energy-budget-field-notes",
+    "/blog/ios-cold-start-1-4s-to-287ms",
+    "/blog/i-was-wrong-about-todo-debt",
+    "/blog/no-third-party-deps-ios-18-months",
+  ]);
+  if (GONE.has(pathname)) {
+    return new Response("Gone", {
+      status: 410,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Robots-Tag": "noindex",
+      },
+    });
+  }
+
+  if (pathname !== path) {
+    url.pathname = pathname;
     needsRedirect = true;
   }
 

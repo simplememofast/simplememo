@@ -2,6 +2,12 @@
 # This file is intentionally left without wildcard rules to prevent SPA fallback.
 # Existing files will be served automatically.
 # Non-existent paths will result in a 404 status.
+#
+# NOTE: Pages Functions run BEFORE this file, and functions/_middleware.js now
+# mirrors every path rule below in its RETIRED map so that query-string and
+# .html variants resolve in a single hop. These rules therefore act as the
+# fallback if a Functions deploy ever fails. Keep the two lists in sync when
+# adding or removing a retired path.
 
 # www -> apex (requires DNS CNAME for www to be configured in Cloudflare)
 https://www.simplememofast.com/*  https://simplememofast.com/:splat  301
