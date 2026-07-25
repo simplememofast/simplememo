@@ -117,7 +117,9 @@ body::before {
 .wrap { position: relative; height: 100%; display: flex; align-items: center; padding: 54px 64px; }
 .left { width: 640px; flex: none; }
 .brand { display: flex; align-items: center; gap: 16px; margin-bottom: 26px; }
-.brand img { width: 52px; height: 52px; border-radius: 12px; display: block; }
+/* The app icon is itself dark-on-dark, so it needs a light plate to read
+   against the card gradient. Keeps working if the icon art changes again. */
+.brand img { width: 56px; height: 56px; border-radius: 13px; display: block; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18); box-shadow: 0 2px 14px rgba(0,0,0,.4); }
 .brand span { font-size: 28px; font-weight: 700; letter-spacing: .01em; }
 .badge {
   display: inline-block; font-size: 21px; font-weight: 700; color: #ece6ff;
