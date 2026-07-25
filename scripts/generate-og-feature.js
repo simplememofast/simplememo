@@ -26,17 +26,11 @@ const ICON_DATA_URI = 'data:image/png;base64,' +
   fs.readFileSync(path.join(ROOT_DIR, 'assets', 'img', 'app-icon-256.png')).toString('base64');
 
 // Tag chips shown in the artwork. `cyan` flips a chip to the accent colour.
+//
+// Note: the Japanese /ai-tags/ card is NOT generated here — it is cropped from
+// the designer's banner by scripts/build-ai-tags-banner.py. Only the cards
+// without dedicated artwork are rendered below.
 const CARDS = {
-  'ai-tags': {
-    file: 'ai-tags.png',
-    lang: 'ja',
-    brand: 'シンプルメモ',
-    badge: 'AIタグ自動追加 ― 提供中',
-    title: '<em class="c">声</em>で残す。<br><em class="v">AI</em>が整える。',
-    sub: '話すだけで、タグ付けまで<b>自動</b>。',
-    tags: [['#Obsidian'], ['#買い物', 'cyan'], ['#アイデア'], ['#AI', 'cyan'], ['#連携']],
-    note: 'AIによるタグ付けはお使いのiPhoneの中だけで行われます。<br>メモが外部サーバーへ送られることはありません。',
-  },
   'ai-tags-en': {
     file: 'ai-tags-en.png',
     lang: 'en',
