@@ -124,16 +124,19 @@ Disallow: /
 User-agent: Diffbot
 Disallow: /
 
+# Parameter URLs are deliberately NOT Disallowed here. A robots block stops
+# Googlebot from fetching the URL at all, so it never sees the signal that
+# would retire it — the URL just sits in Search Console as "blocked" instead
+# of being dropped. Handled at the edge instead (functions/_middleware.js):
+#   ref / from / source / q  -> 301 to the canonical URL
+#   utm_* / gclid / fbclid   -> served as-is, deduped by the self-referencing
+#                               canonical (a 301 would break GA4 and ad
+#                               attribution, which read these off the landing
+#                               URL)
 User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /docs/
 Disallow: /cdn-cgi/
-Disallow: /*?utm_*
-Disallow: /*?fbclid=
-Disallow: /*?gclid=
-Disallow: /*?ref=
-Disallow: /*?from=
-Disallow: /*?source=
 
 Sitemap: https://simplememofast.com/sitemap.xml
