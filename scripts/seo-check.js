@@ -152,6 +152,142 @@ function checkRobots() {
   if (!content.includes('Sitemap:')) {
     warnings.push('[ROBOTS] No Sitemap directive in robots.txt');
   }
+
+  // A `Disallow` on a query-parameter pattern is always a mistake here.
+  // Blocking the URL stops Googlebot from fetching it, so it never sees the
+  // canonical or the 301 that would retire it — the URL does not drop out of
+  // the index, it parks in Search Console as "blocked by robots.txt" instead.
+  // This exact regression put 79 URLs in that bucket (unblocked for `?lang=`
+  // in PR #270, for `utm_*`/`ref`/`from`/`source` in PR #412). Parameter URLs
+  // are handled at the edge in functions/_middleware.js — never here.
+  for (const line of content.split('\n')) {
+    const rule = line.trim();
+    if (/^Disallow:\s*\S*[?*]?\?/i.test(rule)) {
+      errors.push(`[ROBOTS] Parameter URLs must not be Disallowed (handle at the edge): ${rule}`);
+    }
+  }
+}
+
+/**
+ * URL hygiene: every internal reference must already be the canonical form.
+ *
+ * Each non-canonical form below mints a second crawlable URL for the same
+ * page. The edge redirects them, but a redirect Google has to discover is
+ * still a crawl it did not need to spend, and it lands in the "Page with
+ * redirect" bucket in the meantime. These invariants were verified by hand in
+ * five consecutive audits (07-02, 07-07, 07-16, 07-19, 07-25); encoding them
+ * here is what stops the sixth.
+ */
+function checkUrlHygiene() {
+  const SELF = /^https?:\/\/(www\.)?simplememofast\.com/i;
+  const TRACKING = ['ref=', 'from=', 'source=', 'utm_', 'fbclid=', 'gclid='];
+  let checked = 0;
+
+  for (const file of getAllHtmlFiles(ROOT_DIR)) {
+    const rel = getRelative(file);
+    const content = fs.readFileSync(file, 'utf8');
+
+    for (const m of content.matchAll(/href="([^"]*)"/g)) {
+      const href = m[1];
+      const isAbsoluteSelf = SELF.test(href);
+      // Site-internal only: a leading single "/" path, or an absolute URL
+      // pointing back at our own host. Everything else is off-site.
+      if (!isAbsoluteSelf && !(href.startsWith('/') && !href.startsWith('//'))) continue;
+      checked++;
+
+      if (/^http:\/\//i.test(href)) {
+        errors.push(`[URL] Insecure self-link (use https or a root-relative path): ${rel} → ${href}`);
+      }
+      if (/^https?:\/\/www\./i.test(href)) {
+        errors.push(`[URL] www host redirects to the apex — link the apex: ${rel} → ${href}`);
+      }
+
+      const pathAndQuery = isAbsoluteSelf ? href.replace(SELF, '') : href;
+      const [pathname, query = ''] = pathAndQuery.split('#')[0].split('?');
+
+      if (pathname.includes('//')) {
+        errors.push(`[URL] Double slash in path: ${rel} → ${href}`);
+      }
+      if (pathname.endsWith('.html')) {
+        errors.push(`[URL] Link the extensionless canonical, not the .html form: ${rel} → ${href}`);
+      }
+      if (query) {
+        if (/(^|&)lang=/.test(query)) {
+          errors.push(`[URL] ?lang= is stripped by a 301 — link the canonical URL: ${rel} → ${href}`);
+        }
+        for (const param of TRACKING) {
+          if (query.includes(param)) {
+            errors.push(`[URL] Tracking parameter on an internal link: ${rel} → ${href}`);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  console.log(`  URL hygiene: ${checked} internal links`);
+}
+
+/**
+ * The edge owns two lists of URLs that must never be advertised: paths that
+ * 301 elsewhere (functions/_middleware.js RETIRED + _redirects) and paths that
+ * answer 410 (RETIRED's sibling GONE). Shipping either in a sitemap tells
+ * Google to go crawl a URL we have just told it to forget.
+ *
+ * Also asserts the middleware's RETIRED map is fully covered by _redirects.
+ * The middleware runs first and is the fast path; _redirects is the fallback
+ * if a Functions deploy fails, so it has to know every retired path too.
+ */
+function checkEdgeRules() {
+  const mwPath = path.join(ROOT_DIR, 'functions/_middleware.js');
+  const redirectsPath = path.join(ROOT_DIR, '_redirects');
+  if (!fs.existsSync(mwPath) || !fs.existsSync(redirectsPath)) {
+    errors.push('[EDGE] functions/_middleware.js or _redirects is missing');
+    return;
+  }
+
+  const mw = fs.readFileSync(mwPath, 'utf8');
+  const retired = new Map();
+  const retiredBlock = mw.match(/const RETIRED = \{([\s\S]*?)\n {2}\};/);
+  if (retiredBlock) {
+    for (const m of retiredBlock[1].matchAll(/"([^"]+)":\s*"([^"]+)"/g)) retired.set(m[1], m[2]);
+  }
+  const gone = new Set();
+  const goneBlock = mw.match(/const GONE = new Set\(\[([\s\S]*?)\n {2}\]\);/);
+  if (goneBlock) {
+    for (const m of goneBlock[1].matchAll(/"([^"]+)"/g)) gone.add(m[1]);
+  }
+  if (!retired.size || !gone.size) {
+    errors.push('[EDGE] Could not parse RETIRED/GONE from functions/_middleware.js');
+    return;
+  }
+
+  const fallback = new Map();
+  for (const line of fs.readFileSync(redirectsPath, 'utf8').split('\n')) {
+    const m = line.trim().match(/^(\/\S*)\s+(\S+)\s+30[18]$/);
+    if (m) fallback.set(m[1], m[2]);
+  }
+  for (const [from, to] of retired) {
+    if (fallback.get(from) !== to) {
+      errors.push(`[EDGE] _redirects fallback missing or divergent for ${from} → ${to} (got ${fallback.get(from) || 'nothing'})`);
+    }
+  }
+
+  for (const name of ['sitemap-ja.xml', 'sitemap-en.xml', 'sitemap-locales.xml']) {
+    const p = path.join(ROOT_DIR, name);
+    if (!fs.existsSync(p)) continue;
+    for (const m of fs.readFileSync(p, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)) {
+      const pathname = m[1].replace(/^https?:\/\/[^/]+/, '');
+      if (retired.has(pathname)) {
+        errors.push(`[EDGE] ${name} lists a 301'd URL: ${pathname} → ${retired.get(pathname)}`);
+      }
+      if (gone.has(pathname)) {
+        errors.push(`[EDGE] ${name} lists a 410 Gone URL: ${pathname}`);
+      }
+    }
+  }
+
+  console.log(`  Edge rules: ${retired.size} retired paths, ${gone.size} gone slugs`);
 }
 
 function checkOrphanPages() {
@@ -209,6 +345,8 @@ function main() {
 
   checkSitemap();
   checkRobots();
+  checkUrlHygiene();
+  checkEdgeRules();
   checkOrphanPages();
 
   // Report
