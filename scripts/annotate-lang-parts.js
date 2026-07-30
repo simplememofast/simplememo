@@ -35,6 +35,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { collectHtmlFiles } = require('./lib/site-files');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'admin'];
@@ -46,14 +47,9 @@ const DATA_LANG = /\sdata-lang\s*=\s*"(ja|en)"/;
 const HAS_LANG = /\slang\s*=\s*"/;
 
 function htmlFiles(dir) {
-  const out = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_DIRS.includes(entry.name) || entry.name.startsWith('.')) continue;
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) out.push(...htmlFiles(full));
-    else if (entry.name.endsWith('.html')) out.push(full);
-  }
-  return out;
+  // No skipFiles: unlike the other scripts this one deliberately annotates
+  // 404.html too. tolerateReadErrors: false keeps its fail-loud behaviour.
+  return collectHtmlFiles(dir, { skipDirs: SKIP_DIRS, tolerateReadErrors: false });
 }
 
 /** Byte ranges of <style>/<script> bodies, which must not be rewritten. */

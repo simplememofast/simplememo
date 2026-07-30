@@ -10,6 +10,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 
 const SITE_URL = 'https://simplememofast.com';
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -18,36 +19,17 @@ const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'ad
 const SKIP_FILES = ['404.html'];
 
 function getAllHtmlFiles(dir) {
-  const results = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    if (SKIP_DIRS.includes(entry.name)) continue;
-    if (entry.name.startsWith('.')) continue;
-
-    const fullPath = path.join(dir, entry.name);
-
-    if (entry.isDirectory()) {
-      results.push(...getAllHtmlFiles(fullPath));
-    } else if (entry.name.endsWith('.html') && !SKIP_FILES.includes(entry.name)) {
-      results.push(fullPath);
-    }
-  }
-
-  return results;
+  // tolerateReadErrors: false — this script has always let an unreadable
+  // directory surface as a hard failure rather than silently skipping pages.
+  return collectHtmlFiles(dir, {
+    skipDirs: SKIP_DIRS,
+    skipFiles: SKIP_FILES,
+    tolerateReadErrors: false,
+  });
 }
 
 function getCanonicalUrl(filePath) {
-  const relative = path.relative(ROOT_DIR, filePath);
-  let url = '/' + relative.replace(/\\/g, '/');
-
-  if (url.endsWith('/index.html')) {
-    url = url.replace('/index.html', '/');
-  } else if (url.endsWith('.html')) {
-    url = url.replace('.html', '');
-  }
-
-  return SITE_URL + url;
+  return SITE_URL + toUrlPath(ROOT_DIR, filePath);
 }
 
 function getPageLang(filePath) {

@@ -10,6 +10,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 
 const SITE_URL = 'https://simplememofast.com';
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -21,20 +22,7 @@ const errors = [];
 const warnings = [];
 
 function getAllHtmlFiles(dir) {
-  const results = [];
-  try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (SKIP_DIRS.includes(entry.name) || entry.name.startsWith('.')) continue;
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        results.push(...getAllHtmlFiles(fullPath));
-      } else if (entry.name.endsWith('.html') && !SKIP_FILES.includes(entry.name)) {
-        results.push(fullPath);
-      }
-    }
-  } catch (e) { /* skip */ }
-  return results;
+  return collectHtmlFiles(dir, { skipDirs: SKIP_DIRS, skipFiles: SKIP_FILES });
 }
 
 function getRelative(filePath) {
@@ -315,9 +303,7 @@ function checkOrphanPages() {
     const content = allContent[file];
     if (/content\s*=\s*["'][^"']*noindex/i.test(content)) continue;
 
-    let pageUrl = '/' + rel.replace(/\\/g, '/');
-    if (pageUrl.endsWith('/index.html')) pageUrl = pageUrl.replace('/index.html', '/');
-    else if (pageUrl.endsWith('.html')) pageUrl = pageUrl.replace('.html', '');
+    const pageUrl = toUrlPath(ROOT_DIR, file);
 
     // Skip homepage
     if (pageUrl === '/') continue;
