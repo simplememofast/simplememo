@@ -15,6 +15,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 const { chromium } = require('playwright');
+const { collectHtmlFiles } = require('./lib/site-files');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'assets', 'img', 'og');
@@ -32,20 +33,7 @@ function loadAppIcon() {
 }
 
 function getAllHtmlFiles(dir) {
-  const results = [];
-  try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (SKIP_DIRS.includes(entry.name) || entry.name.startsWith('.')) continue;
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        results.push(...getAllHtmlFiles(fullPath));
-      } else if (entry.name.endsWith('.html') && entry.name !== '404.html') {
-        results.push(fullPath);
-      }
-    }
-  } catch (e) { /* skip */ }
-  return results;
+  return collectHtmlFiles(dir, { skipDirs: SKIP_DIRS, skipFiles: ['404.html'] });
 }
 
 function getPageTitle(content) {

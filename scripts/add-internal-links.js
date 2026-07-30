@@ -14,6 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { toUrlPath } = require('./lib/site-files');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
@@ -48,11 +49,7 @@ function getPageType(filePath) {
 }
 
 function getPageUrl(filePath) {
-  const relative = path.relative(ROOT_DIR, filePath).replace(/\\/g, '/');
-  let url = '/' + relative;
-  if (url.endsWith('/index.html')) url = url.replace('/index.html', '/');
-  else if (url.endsWith('.html')) url = url.replace('.html', '');
-  return url;
+  return toUrlPath(ROOT_DIR, filePath);
 }
 
 function buildRelatedBlock(links, currentUrl) {

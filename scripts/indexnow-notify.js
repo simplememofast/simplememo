@@ -18,6 +18,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 
 const SITE_URL = 'https://simplememofast.com';
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -53,28 +54,11 @@ function getOrCreateKey() {
 }
 
 function getAllHtmlFiles(dir) {
-  const results = [];
-  try {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (SKIP_DIRS.includes(entry.name) || entry.name.startsWith('.')) continue;
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        results.push(...getAllHtmlFiles(fullPath));
-      } else if (entry.name.endsWith('.html') && entry.name !== '404.html') {
-        results.push(fullPath);
-      }
-    }
-  } catch (e) { /* skip */ }
-  return results;
+  return collectHtmlFiles(dir, { skipDirs: SKIP_DIRS, skipFiles: ['404.html'] });
 }
 
 function filePathToUrl(filePath) {
-  let relative = path.relative(ROOT_DIR, filePath).replace(/\\/g, '/');
-  let url = '/' + relative;
-  if (url.endsWith('/index.html')) url = url.replace('/index.html', '/');
-  else if (url.endsWith('.html')) url = url.replace('.html', '');
-  return SITE_URL + url;
+  return SITE_URL + toUrlPath(ROOT_DIR, filePath);
 }
 
 function getRecentlyModified(days = 1) {
