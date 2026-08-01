@@ -38,3 +38,17 @@ Monthly tracking of the captio keyword cluster. Baseline: 2026-05-03 (PR #186 de
 | captio 使えない | 1 (`/blog/captio-discontinued`) | **9** | 0 / attnoel **-9 (new entry)** | attnoel entered top 10 for first time at ~9; SimpleMemo holds #1 |
 
 **Take:** SimpleMemo continued to dominate the three high-intent keywords (なくなった, 後継, 使えない) at #1, and the "captio 代替" EN page surged from ~4 to #1 — now clearly outranking attnoel (held at ~3). The JP `/captio-alternative/` page still has no visible top-10 ranking, so the PR #186 structured-data investment has yet to show directly; it may be the EN page benefiting instead. One watch item: attnoel entered the top 10 for "captio 使えない" at ~9 this month (was absent), suggesting it is slowly broadening its footprint across the keyword cluster.
+
+---
+
+## 2026-08-01
+
+| Keyword | SimpleMemo pos | attnoel pos | Δ vs last | Notes |
+|---|---|---|---|---|
+| captio | not in top 10 | not in top 10 | 0 / 0 | US index dominated by Emburse/captio.co; JP memo-app context absent |
+| captio 代替 | ~5 (`/captio/`) | **~1** | SimpleMemo **−4** / attnoel **+2** | EN `/en/captio-alternative/` disappeared from results; `/captio/` now best SimpleMemo entry; attnoel jumped to #1 from #3 |
+| captio なくなった | ~4 (`/blog/captio-discontinued`) | **~2** | SimpleMemo **−3** / attnoel **+2** | Captioo App Store page (apps.apple.com) newly entered at #1, displacing SimpleMemo; attnoel rose from #4 to #2 |
+| captio 後継 | ~5 (`/blog/captio-discontinued`) | **~3** | SimpleMemo **−4** / attnoel **new (+top 5)** | note.com and Captioo App Store push SimpleMemo to #5; attnoel entered top 5 (was absent) |
+| captio 使えない | ~6 (`/blog/captio-discontinued`) | not in top 10 | SimpleMemo **−5** / attnoel **+9 (dropped out)** | Captioo App Store, older review blogs dominate top 5; attnoel dropped out after entering at ~9 last month |
+
+**Take:** Significant SERP shift this month — SimpleMemo's /blog/captio-discontinued dropped from #1 to #4–6 across the three high-intent keywords it previously led, and the EN /en/captio-alternative/ page that held "captio 代替" #1 last month has vanished from visible results entirely. The primary displacer is the Captioo App Store page (apps.apple.com/jp/app/captioo), which newly appeared in top-2 positions across three keywords. attnoel gained meaningfully: now #1 for "captio 代替", #2 for "captio なくなった", and #3 for "captio 後継". The /captio-alternative/ JP page (PR #186 target) remains absent from all keywords. This pattern across all five queries in the same month is unlikely to be noise — a ranking reset or algorithm update affecting our blog cluster is the most probable cause and warrants investigation.
