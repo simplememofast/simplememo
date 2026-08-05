@@ -19,10 +19,13 @@
   --border: rgba(148, 178, 230, 0.14);
   --border-highlight: rgba(82, 160, 255, 0.42);
   --border-strong: rgba(82, 160, 255, 0.65);
+  /* Text ramp — each step keeps ≥7:1 on --bg so the dimmer roles stay
+     readable. The old ramp bottomed out at 5.0:1 (--text-subtle), which
+     read as washed-out grey on the midnight background. */
   --text: #f2f6ff;
-  --text-secondary: #c9d4ec;
-  --text-muted: #9aabcc;
-  --text-subtle: #71819f;
+  --text-secondary: #dde5f7;
+  --text-muted: #b9c6e2;
+  --text-subtle: #93a2c1;
   --accent: #4da3ff;
   --accent-bright: #7cc4ff;
   --accent-neon: #22d3ee;
@@ -194,11 +197,19 @@ body {
   color: var(--text);
   font-weight: 400;
   line-height: 1.75;
+  /* auto-phrase = BudouX 相当の文節折返し(Chrome)。word-break は継承する
+     ので body に置けば div 直下のテキストにも効く（本文が div で組まれて
+     いる箇所が多い）。非対応ブラウザは直前の normal にフォールバック。
+     万一 1 文節が入りきらない場合は overflow-wrap が逃がす。 */
   word-break: normal;
+  word-break: auto-phrase;
   line-break: strict;
   overflow-wrap: break-word;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* antialiased / grayscale は macOS・iOS で subpixel レンダリングを
+     切るため、暗い背景の明るい文字が一段細く描かれ「薄くて読みづらい」
+     原因になる。既定に戻して本来の字面の太さを出す。 */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
   font-feature-settings: "kern", "liga", "calt", "ss01", "palt";
   text-rendering: optimizeLegibility;
   min-height: 100vh;
@@ -214,6 +225,12 @@ h1, h2, h3, h4 {
   word-break: auto-phrase;
   overflow-wrap: break-word;
   text-wrap: balance;
+}
+
+/* text-wrap:pretty は最終行の孤立文字（ぶら下がり1文字）を減らす。
+   balance は見出し専用 — 長い本文に効かせると行長が揃わず逆に読みにくい。 */
+p, li, dd, dt, td, th, figcaption, summary, blockquote {
+  text-wrap: pretty;
 }
 
 /* 見出し内の「分けたくない塊」(製品名+助詞など) 用。改行はこの外側でのみ起こる */
