@@ -61,3 +61,31 @@ light arc across the middle, left half kept dark and clean for overlay text.
 
 案A（歩行シーン）で生成・採用。1731×909 → 1200×630 リサイズ、256色最適化で 434KB。
 `assets/img/og/siri.png` 配置・figure有効化済み。ページヒーロー／OGP／プレス素材を本画像1枚で兼用する。
+
+## ✅ 差し替え済み — AirPods主語版（2026-08-05）
+
+訴求の主語を Siri から **AirPods** に変更。文字入りバナーも
+「SiriでObsidianへメモ／アプリを開かず、声で残す。」→
+**「AirPodsからObsidianへメモ／スマホを触らず、声で残す」** に作り直した。
+
+入稿は 1691×930（アスペクト1.818）。OGP標準の 1.905 に合わせるため、
+**上26px・下16pxの黒余白だけを切って 1691×888 にしてから 1200×630 へ縮小**した
+（歪ませない・内容を削らない）。内容は y=52〜916 に収まっており、下端に見えた
+明部はテキストではなくフルブリードのジーンズ地なので切って問題ない。
+
+### 生成物
+
+| ファイル | 用途 | サイズ |
+|---|---|---|
+| `assets/img/og/siri.png` (1200×630, 256色) | OGPスロット／プレス素材／webp非対応フォールバック | 342KB |
+| `assets/img/siri-banner-ja.webp` (1200×630) | 実ユーザー向け1x | 74KB |
+| `assets/img/siri-banner-ja@2x.webp` (1691×888) | 実ユーザー向け2x | 124KB |
+| `assets/img/siri-banner-ja.jpg` (1200×630) | トップページの非webpフォールバック | 113KB |
+
+`/siri/` ヒーローとトップページのバナーはどちらも `<picture>` にしてあり、
+実ユーザーには webp が届く。PNG は OGP クローラ用に URL を固定したまま残す
+（ヒーローは LCP なので 342KB→74KB の差が効く）。
+
+`og/siri.png` の参照には `?v=20260805c` を付けてある（`/assets/*` は7日
+immutable キャッシュのため、中身を変えたらバンプが要る）。
+`siri-banner-ja.*` は新規ファイルなのでバージョン不要。
