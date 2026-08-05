@@ -61,3 +61,18 @@ light arc across the middle, left half kept dark and clean for overlay text.
 
 案A（歩行シーン）で生成・採用。1731×909 → 1200×630 リサイズ、256色最適化で 434KB。
 `assets/img/og/siri.png` 配置・figure有効化済み。ページヒーロー／OGP／プレス素材を本画像1枚で兼用する。
+
+## ⏳ 差し替え待ち — AirPods主語版（2026-08-05）
+
+訴求の主語を Siri から **AirPods** に変更した。文字入りバナーも
+「SiriでObsidianへメモ／アプリを開かず、声で残す。」→
+**「AirPodsからObsidianへメモ／スマホを触らず、声で残す」** に作り直し済み。
+
+ページ側（`/siri/` のコピー・title・OGP・alt、トップページの予告チップ）は
+新バナー前提に更新済みだが、**画像ファイルはまだ未配置**。同じスロット
+`assets/img/og/siri.png` を上書きすれば有効になる。
+
+- 参照側の `?v=` は `20260805c` に上げてある（`/assets/*` は7日 immutable
+  キャッシュのため、バンプなしだと差し替えても最大7日間は旧画像が出る）
+- 上書きするまでは、H1「AirPodsから、Obsidianへメモ。」の直下に旧バナー
+  「Siriで…アプリを開かず」が出て矛盾する。**差し替え前にマージしないこと**
