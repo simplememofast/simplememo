@@ -56,3 +56,8 @@ light arc across the middle, left half kept dark and clean for overlay text.
 1. `assets/img/og/siri.png` に配置（1200×630、圧縮）
 2. `/siri/index.html` 内のコメントアウト済み `<figure>`（TODO(hero-banner)マーカー）を有効化
 3. 必要ならプレス用に文字入り版の組版（HTML側で重ねてスクショ）
+
+## ✅ 納品済み（2026-08-05）
+
+案A（歩行シーン）で生成・採用。1731×909 → 1200×630 リサイズ、256色最適化で 434KB。
+`assets/img/og/siri.png` 配置・figure有効化済み。ページヒーロー／OGP／プレス素材を本画像1枚で兼用する。
