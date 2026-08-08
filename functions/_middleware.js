@@ -22,6 +22,14 @@
 // Normalizations, in order (all folded into a single 301 so no request ever
 // costs more than one hop):
 //
+//   0. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
+//      Pages resolves the extra slashes and serves 200, so these are true
+//      duplicate URLs — the 2026-08-05 GSC snapshot had five of them parked
+//      in "Alternate page with proper canonical tag" (all `/en/vs/*//`).
+//      The canonical tag was doing its job, but a canonical is a hint;
+//      a 301 removes the duplicate outright. Runs first so every later rule
+//      sees a clean path.
+//
 //   1. Strip any `?lang=*` query parameter. The site does not use this
 //      parameter — locale is determined by path (`/en/*` for EN, root for
 //      JA). This 301 is the SOLE handler for `?lang=`: robots.txt
@@ -30,12 +38,19 @@
 //      seeing this redirect (it would just sit in GSC as "blocked by
 //      robots.txt" instead of being dropped from the index).
 //
-//   2. Strip `.html` from `/blog/*.html` URLs only. The blog directory's
-//      canonical form is extension-less. Root-level pages such as
-//      /contact.html, /faq.html, /legal.html are left alone here: Pages
-//      itself already serves them at both forms and 308-redirects the
-//      .html form to the extension-less one (e.g. /faq.html → /faq; see
-//      the note in _headers), so no extra handling is needed.
+//   2. Strip `.html` site-wide (was: `/blog/*.html` only). Every page on
+//      this site is canonically extension-less, and Pages itself already
+//      308-redirects `X.html` → `X`. Handling it here instead upgrades that
+//      308 to a 301 and, more importantly, folds it into the SAME hop as
+//      the `?lang=` strip and the retired-path lookup — `/blog/x.html?lang=ja`
+//      is one 301, not three. `index.html` maps to the directory form
+//      (`/vs/notion/index.html` → `/vs/notion/`), never to `/vs/notion/index`,
+//      which would 404. `/404.html` is exempt: it is Pages' error document,
+//      not a page with a canonical URL.
+//
+//      Verified safe: no `X.html` on this site has a sibling directory `X/`,
+//      so stripping the extension can never make a path ambiguous
+//      (`scripts/check-internal-redirects.js` re-checks this on every run).
 //
 //   3. Strip referral/attribution params (`ref`, `from`, `source`, `q`) that
 //      identify a traffic source rather than a document. Analytics params
@@ -44,12 +59,6 @@
 //
 //   4. Map retired paths to their live targets, and answer 410 Gone for
 //      slugs that never existed here.
-//
-// Other directories (/vs/, /use-cases/, /glossary/, /guides/) use
-// /<dir>/<slug>/ (folder + index.html). Direct .html requests under those
-// paths are rare; if Search Console shows them later we can add similar
-// scoped rules. Keeping the rule narrow today avoids accidentally breaking
-// any path that intentionally serves a .html file.
 //
 // /admin/* is protected by its own middleware (Cloudflare Access auth).
 // We must pass those requests through unmodified — root middleware runs
@@ -64,19 +73,25 @@ export const onRequest = async (context) => {
     return context.next();
   }
 
+  // 0. Collapse runs of duplicate slashes before anything else inspects the
+  //    path. Pages treats `//docs//x` as `/docs/x`, so the internal-path
+  //    block below has to reason about the collapsed form or it can be
+  //    walked around with an extra slash.
+  let pathname = path.includes("//") ? path.replace(/\/{2,}/g, "/") : path;
+
   // /docs/, /scripts/, /tools/ and /CLAUDE.md hold internal working files
   // that live in the repo but must not be publicly served (Cloudflare Pages
   // deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
   // and /tools/.env.example were live 200 — ops-intel leak, no public pages
   // under any of these paths.
   if (
-    path === "/docs" ||
-    path.startsWith("/docs/") ||
-    path === "/scripts" ||
-    path.startsWith("/scripts/") ||
-    path === "/tools" ||
-    path.startsWith("/tools/") ||
-    path === "/CLAUDE.md"
+    pathname === "/docs" ||
+    pathname.startsWith("/docs/") ||
+    pathname === "/scripts" ||
+    pathname.startsWith("/scripts/") ||
+    pathname === "/tools" ||
+    pathname.startsWith("/tools/") ||
+    pathname === "/CLAUDE.md"
   ) {
     return new Response("Not Found", {
       status: 404,
@@ -115,10 +130,14 @@ export const onRequest = async (context) => {
     }
   }
 
-  // 2. Strip .html from /blog/*.html only (canonical form is extensionless).
-  let pathname = path;
-  if (pathname.startsWith("/blog/") && pathname.endsWith(".html")) {
-    pathname = pathname.slice(0, -".html".length);
+  // 2. Strip .html site-wide (canonical form is extensionless everywhere).
+  //    `/404.html` is Pages' error document and has no canonical URL of its
+  //    own, so it is left alone. `index.html` collapses to the directory
+  //    form — `/vs/notion/index.html` → `/vs/notion/`, not `/vs/notion/index`.
+  if (pathname !== "/404.html" && pathname.endsWith(".html")) {
+    pathname = pathname.endsWith("/index.html")
+      ? pathname.slice(0, -"index.html".length)
+      : pathname.slice(0, -".html".length);
   }
 
   // 3. Retired paths → their final targets, applied to the ALREADY
