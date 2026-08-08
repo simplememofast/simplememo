@@ -29,6 +29,26 @@ function getRelative(filePath) {
   return path.relative(ROOT_DIR, filePath);
 }
 
+/**
+ * Read one attribute off the first <meta> tag whose `key` attribute equals
+ * `value`, regardless of attribute order or quote style. Scoping the scan to
+ * a single tag is what keeps a value containing an apostrophe (or a page that
+ * writes `content` before `name`) from being mis-measured.
+ * Returns null when no such tag exists.
+ */
+function getMetaContent(html, key, value) {
+  for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+    const attrs = {};
+    for (const a of tag.matchAll(/([a-zA-Z:-]+)\s*=\s*("([^"]*)"|'([^']*)')/g)) {
+      attrs[a[1].toLowerCase()] = a[3] !== undefined ? a[3] : a[4];
+    }
+    if ((attrs[key] || '').toLowerCase() === value) {
+      return attrs.content !== undefined ? attrs.content : null;
+    }
+  }
+  return null;
+}
+
 function checkFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const rel = getRelative(filePath);
@@ -48,12 +68,27 @@ function checkFile(filePath) {
   }
 
   // 2. Meta description
-  const descMatch = content.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)
-    || content.match(/<meta\s+content=["']([^"']*)["']\s+name=["']description["']/i);
-  if (!descMatch || !descMatch[1].trim()) {
+  //
+  // Parsed per <meta> tag rather than with one document-wide regex. Two
+  // real bugs made that necessary:
+  //   - `content="([^"']*)"` stopped the value at the first apostrophe, so
+  //     `content="…memos aren't. Set up…"` measured 35 chars instead of 141
+  //     and skipped the >160 check entirely.
+  //   - Widening it to a lazy `[\s\S]*?` then over-matched in the other
+  //     direction on the ~15 pages that write the attributes content-first
+  //     (`<meta content="…" name="description"/>`): the pattern anchored on
+  //     an earlier `<meta content="…">` tag and swallowed everything up to
+  //     the description, reporting 1,400+ chars.
+  const desc = getMetaContent(content, 'name', 'description');
+  if (desc === null || !desc.trim()) {
     errors.push(`[DESC] Missing meta description: ${rel}`);
-  } else if (descMatch[1].length > 160) {
-    warnings.push(`[DESC] Description too long (${descMatch[1].length} chars): ${rel}`);
+  } else if (desc.length > 160) {
+    warnings.push(`[DESC] Description too long (${desc.length} chars): ${rel}`);
+  } else if (desc.length < 110) {
+    // Ahrefs' Site Audit flags anything under 100 characters as "Meta
+    // description too short" (59 pages in the 2026-08-05 crawl). 110 keeps a
+    // margin above that line.
+    warnings.push(`[DESC] Description too short (${desc.length} chars): ${rel}`);
   }
 
   // 3. Canonical tag

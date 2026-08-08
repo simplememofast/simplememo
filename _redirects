@@ -8,6 +8,12 @@
 # .html variants resolve in a single hop. These rules therefore act as the
 # fallback if a Functions deploy ever fails. Keep the two lists in sync when
 # adding or removing a retired path.
+#
+# Only RETIRED paths need mirroring here. The middleware's other two
+# normalizations — collapsing duplicate slashes and stripping `.html` — are
+# behaviours Pages already provides natively (it resolves `//` and 308s
+# `X.html` → `X`), so if Functions ever fail to deploy those URLs still
+# resolve; they just cost a 308 instead of the 301 the middleware returns.
 
 # www -> apex (requires DNS CNAME for www to be configured in Cloudflare)
 https://www.simplememofast.com/*  https://simplememofast.com/:splat  301

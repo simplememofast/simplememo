@@ -23,6 +23,18 @@ jobs:
           # Exit code 1 = warnings only (acceptable), 2 = errors (fail CI)
           if [ $EXIT_CODE -ge 2 ]; then exit $EXIT_CODE; fi
 
+      # Every URL shape GSC has reported must resolve in exactly one hop, and
+      # no `X.html` may gain a sibling directory `X/` (which would make the
+      # middleware's extension stripping ambiguous).
+      - name: URL normalization rules
+        run: node scripts/check-url-normalization.mjs
+
+      # Internal links must point at a direct 200 — never at a redirect, a
+      # 404, or a bare mailto: that Cloudflare rewrites into
+      # /cdn-cgi/l/email-protection.
+      - name: Internal links resolve directly
+        run: node scripts/check-internal-redirects.mjs
+
       # Rating / price / © / og:site_name must match data/site-constants.json
       - name: Site constants consistency
         run: node scripts/sync_constants.js --check
