@@ -62,10 +62,34 @@ const RULES = [
   ['USD yearly $N/yr',
     /(\$)(\d{2}\.\d{2})(\s*\/\s*(?:yr\b|year))/g,
     (m, a, v, b) => a + C.priceYearlyUsd + b, 'pricing'],
+  // JSON-LD softwareVersion — our own SoftwareApplication entity, always ours.
+  // Added 2026-08-09: 12 blocks still declared 3.9 while the app had moved on
+  // by roughly four releases. Nothing enforced it, so the value could only ever
+  // drift further. It is one field in site-constants.json now.
+  ['JSON-LD softwareVersion',
+    /("softwareVersion":\s?")([^"]+)(")/g,
+    (m, a, v, b) => a + C.appVersion + b, false],
   // © line — unified string, unambiguous
   ['© line',
     /((?:©|&copy;)\s?2026[^<\n]{0,200})(?=<\/p>|\n|<\/div>)/g,
     () => C.copyrightLine, false],
+];
+
+/**
+ * llms.txt is not HTML, so it never passes through the walker below — and it is
+ * the single most important place for this value to be right, because it exists
+ * specifically to stop AI assistants inventing facts about the app. A stale
+ * version there is authoritative-looking misinformation, which is worse than
+ * saying nothing. Its own instruction ("Do NOT infer or extrapolate … version
+ * numbers beyond these published values") is what gives the wrong number teeth.
+ */
+const LLMS_RULES = [
+  ['llms.txt Current facts version',
+    /(\*\*Current facts \(as of \d{4}-\d{2}-\d{2}\):\*\* version )([0-9][0-9.]*)/,
+    (m, a, v) => a + C.appVersion],
+  ['llms.txt rating',
+    /(App Store rating )(\d\.\d)( \()(\d+)( ratings\))/,
+    (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c],
 ];
 
 const args = new Set(process.argv.slice(2));
@@ -125,6 +149,32 @@ for (const file of htmlFiles(ROOT)) {
   if (WRITE && src !== orig) {
     fs.writeFileSync(file, src);
     filesChanged++;
+  }
+}
+
+// llms.txt — same source of truth, different file type (see LLMS_RULES).
+{
+  const llmsPath = path.join(ROOT, 'llms.txt');
+  if (fs.existsSync(llmsPath)) {
+    let src = fs.readFileSync(llmsPath, 'utf8');
+    const orig = src;
+    for (const [desc, re, build] of LLMS_RULES) {
+      if (!re.test(src)) {
+        // A rule that matches nothing is a silent hole in the gate, not a pass.
+        driftCount++;
+        report.push(`${WRITE ? 'fix' : 'DRIFT'}: llms.txt: ${desc}: pattern not found — the file's wording changed, so this value is no longer enforced`);
+        continue;
+      }
+      src = src.replace(re, (...a) => {
+        const m = a[0];
+        const canonical = build(...a);
+        if (m === canonical) return m;
+        driftCount++;
+        report.push(`${WRITE ? 'fix' : 'DRIFT'}: llms.txt: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+        return WRITE ? canonical : m;
+      });
+    }
+    if (WRITE && src !== orig) { fs.writeFileSync(llmsPath, src); filesChanged++; }
   }
 }
 

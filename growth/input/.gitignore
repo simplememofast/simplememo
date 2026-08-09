@@ -1,0 +1,15 @@
+# Drop zone for raw Search Console exports — not the record.
+#
+# The committed artifact is the normalised snapshot under growth/data/gsc/,
+# which is what every script reads. These CSVs are overwritten by next week's
+# export, so tracking them would churn the same paths every cycle while adding
+# nothing that data/gsc/ does not already hold in a queryable form.
+#
+# The export also carries dimensions we deliberately do not publish through the
+# repo (country breakdowns), and this directory is served by Cloudflare Pages
+# unless blocked — it is, in functions/_middleware.js, but not tracking the
+# files removes the question entirely.
+*.csv
+*.tsv
+*.zip
+!.gitkeep

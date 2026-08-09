@@ -79,11 +79,15 @@ export const onRequest = async (context) => {
   //    walked around with an extra slash.
   let pathname = path.includes("//") ? path.replace(/\/{2,}/g, "/") : path;
 
-  // /docs/, /scripts/, /tools/ and /CLAUDE.md hold internal working files
-  // that live in the repo but must not be publicly served (Cloudflare Pages
-  // deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
+  // /docs/, /scripts/, /tools/, /growth/ and /CLAUDE.md hold internal working
+  // files that live in the repo but must not be publicly served (Cloudflare
+  // Pages deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
   // and /tools/.env.example were live 200 — ops-intel leak, no public pages
   // under any of these paths.
+  //
+  // /growth/ matters more than the others: it holds committed Search Console
+  // snapshots and App Store Connect exports. Without this block, click,
+  // impression and revenue figures would be readable at a guessable URL.
   if (
     pathname === "/docs" ||
     pathname.startsWith("/docs/") ||
@@ -91,6 +95,8 @@ export const onRequest = async (context) => {
     pathname.startsWith("/scripts/") ||
     pathname === "/tools" ||
     pathname.startsWith("/tools/") ||
+    pathname === "/growth" ||
+    pathname.startsWith("/growth/") ||
     pathname === "/CLAUDE.md"
   ) {
     return new Response("Not Found", {

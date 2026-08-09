@@ -1,0 +1,602 @@
+{
+  "version": 1,
+  "note": "Seeded 2026-08-09 from the git diffs of PRs #367/#374/#376. See growth/README.md.",
+  "experiments": [
+    {
+      "id": "title-2026-07-01-001",
+      "page": "/apple-watch/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "Apple Watchから音声メモをメールへ | Obsidian連携シンプルメモ"
+      },
+      "after": {
+        "title": "Apple Watchで音声入力メモを取る方法｜2タップでメールに残す"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: apple-watch: 変更前のGSC値が記録されていないため比較不能。現状 imp 954 / CTR 2.10% / pos 7.5（期待2.5%）。ほぼ期待どおりで是正対象ではない。今回の値を次サイクルのベースラインとする。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-002",
+      "page": "/blog/line-keep-alternative",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "LINE Keep終了後の代わりは？代替メモアプリ比較と消えない保存先【2026年版】"
+      },
+      "after": {
+        "title": "LINE Keepは終了・Keepメモは継続中｜代わりのメモアプリと保存先【2026】"
+      },
+      "baseline": {
+        "impressions": 4045,
+        "ctr": 0.009,
+        "position": 7.2,
+        "clicks": null,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1",
+        "straddles_change": true
+      },
+      "target_metric": "ctr",
+      "decision": "iterate",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: line-keep: imp 4045→5291, pos 7.2→7.0, CTR 0.90→0.85%。タイトル変更はCTRを動かさなかった。律速はタイトルではなく検索意図の不一致で、08-09のFAQ追加で対処済み。タイトルは据え置き、次はFAQ実験で判断。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-003",
+      "page": "/en/blog/email-to-obsidian",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "How to Send Notes to Obsidian from iPhone (Gmail, Outlook, iCloud)"
+      },
+      "after": {
+        "title": "Email to Obsidian: Send iPhone Notes to Your Vault (No Plugin)"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: en/blog/email-to-obsidian: 比較不能。現状 imp 343 / CTR 1.17% / pos 12.2。順位が2ページ目でタイトルでは動かない帯。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-004",
+      "page": "/en/iphone-shortcuts-email-guide/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "iPhone Shortcuts to Email Yourself: 5 Instant-Capture Recipes"
+      },
+      "after": {
+        "title": "iPhone Shortcuts to Email Yourself: 5 Recipes (No Compose Sheet)"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: en/iphone-shortcuts-email-guide: 比較不能。現状 imp 3293 / CTR 0.82% / pos 7.3（期待1.4%）。表示が多くCTRが低い。別途CTR改善対象として起票すべき。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-005",
+      "page": "/en/vs/google-keep-vs-apple-notes/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "Google Keep vs Apple Notes — Which Is Better? Comparison"
+      },
+      "after": {
+        "title": "Google Keep vs Apple Notes (2026): Which Is Better?"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: en/vs/google-keep-vs-apple-notes: 比較不能。現状 imp 1696 / CTR 0.35% / pos 7.8（期待2.5%）。期待比7分の1でサイト最悪水準。別途CTR改善対象。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-006",
+      "page": "/glossary/aes-gcm/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "AES-GCM暗号化とは — Obsidian連携シンプルメモ用語集"
+      },
+      "after": {
+        "title": "AES-GCMとは？仕組み・AES-CBCとの違いをやさしく解説 | 用語集"
+      },
+      "baseline": {
+        "impressions": 703,
+        "ctr": 0.011,
+        "position": 13.1,
+        "clicks": null,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1",
+        "straddles_change": true
+      },
+      "target_metric": "ctr",
+      "decision": "keep",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: aes-gcm: imp 703→989, CTR 1.10→2.22%, pos 13.1→8.8。全指標改善。順位上昇が主因だが明確な勝ち。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-007",
+      "page": "/note-to-email/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "自分にメールでメモ — ワンタップ送信アプリですばやく | iPhone対応"
+      },
+      "after": {
+        "title": "自分にメールでメモを送る方法｜iPhoneならワンタップ送信"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: note-to-email: 比較不能。現状 imp 286 / CTR 1.40% / pos 6.8。母数が小さく判断に足りない。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-008",
+      "page": "/vs/capacities/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 367,
+        "commit": "33d44f51"
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "evaluated",
+      "before": {
+        "title": "Capacitiesとの比較 — Obsidian連携シンプルメモ | メモアプリ比較"
+      },
+      "after": {
+        "title": "Capacitiesとは？特徴・料金・Obsidianとの違いまで徹底比較【2026】"
+      },
+      "baseline": {
+        "impressions": 485,
+        "ctr": 0.014,
+        "position": 8.4,
+        "clicks": null,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1",
+        "straddles_change": true
+      },
+      "target_metric": "ctr",
+      "decision": "keep",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: capacities: imp 485→1605(3.3x), CTR 1.40→1.62%, pos 8.4→7.4。表示・CTR・順位すべて改善。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-01-900",
+      "page": "/blog/best-memo-apps-2026",
+      "type": "title_test",
+      "hypothesis": null,
+      "source": {
+        "pr": 367,
+        "commit": null
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "cancelled",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": 2035,
+        "ctr": 0.022,
+        "position": 6.7,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Listed as a frozen 07-01 retitle in ahrefs-gsc-analysis-2026-07-07.md §3-1, but no title change exists.",
+        "git log -S'<title>' -- blog/best-memo-apps-2026.html returns only the page-creation commit (3abaf029).",
+        "Cancelled rather than deleted so the page reads as unfrozen and is editable again."
+      ]
+    },
+    {
+      "id": "title-2026-07-02-009",
+      "page": "/glossary/second-brain/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 374,
+        "commit": "73660041"
+      },
+      "started_at": "2026-07-02",
+      "evaluation_at": "2026-07-30",
+      "status": "evaluated",
+      "before": {
+        "title": "セカンドブレインとは — Obsidian連携シンプルメモ用語集"
+      },
+      "after": {
+        "title": "セカンドブレイン（Second Brain）とは — 意味と作り方"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: glossary/second-brain: 比較不能かつ現状 imp 12 で母数ゼロに近い。評価対象として成立しない。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-02-010",
+      "page": "/methods/second-brain/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 374,
+        "commit": "73660041"
+      },
+      "started_at": "2026-07-02",
+      "evaluation_at": "2026-07-30",
+      "status": "evaluated",
+      "before": {
+        "title": "セカンドブレイン × メールメモ — Obsidian連携シンプルメモで構築"
+      },
+      "after": {
+        "title": "セカンドブレイン（Second Brain）の作り方 — メールメモ×Obsidianで構築"
+      },
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "note": "No pre-change GSC value was recorded for this page."
+      },
+      "target_metric": "ctr",
+      "decision": "inconclusive",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: methods/second-brain: 比較不能。現状 imp 721 / CTR 3.88% / pos 8.0（期待2.5%）。期待を上回っており是正不要。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-02-011",
+      "page": "/obsidian/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 376,
+        "commit": "e7be7431"
+      },
+      "started_at": "2026-07-02",
+      "evaluation_at": "2026-07-30",
+      "status": "evaluated",
+      "before": {
+        "title": "Obsidian連携 — iPhoneのメモを自動でObsidianに追記 | Obsidian連携シンプルメモ"
+      },
+      "after": {
+        "title": "Obsidianに最速でメモを送る方法 — iPhoneから自動追記（プラグイン不要）"
+      },
+      "baseline": {
+        "impressions": 682,
+        "ctr": 0.073,
+        "position": 7.9,
+        "clicks": null,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1",
+        "straddles_change": true
+      },
+      "target_metric": "ctr",
+      "decision": "keep",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: obsidian: pos 7.9→8.0(横ばい)なのにCTR 7.30→4.47%。実クリックは約50→37で26%減。表示は+21%なので広く浅くに転じた。Tier1最重要ページのため旧タイトル復帰を推奨。実行はオーナー確認後。",
+        "2026-08-09: オーナー判断で据え置き。データはrevertを示したが、変更後タイトルの「最速」訴求は /siri/ /fastest-voice-memo/ とブランドを揃えた意図的なもので、CTR単体では覆さない。",
+        "2026-08-09: カニバリ仮説は反証された。同期間の /siri/ は20imp、/fastest-voice-memo/ は17imp しかなく、/obsidian/ が失った約13クリックを説明できない。この説明を再提出しないこと。",
+        "2026-08-09: **CTR低下は未解決のまま残る。** 7.30%→4.47%（順位横ばい、実クリック約50→37）。タイトルという手段が1つ外れただけで、問題は消えていない。監視エントリ monitor-2026-08-09-obsidian-ctr で追跡する。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      },
+      "unresolved": {
+        "issue": "CTR regression not addressed by this decision",
+        "before_ctr": 0.073,
+        "after_ctr": 0.0447,
+        "clicks_lost_per_28d": 13,
+        "ruled_out": [
+          "revert title (owner decision)",
+          "cannibalisation by /siri/ or /fastest-voice-memo/ (falsified: 20 and 17 impressions)"
+        ],
+        "remaining_levers": [
+          "meta description / snippet rewrite",
+          "SERP feature change (needs query x page export to check)"
+        ]
+      }
+    },
+    {
+      "id": "title-2026-07-02-012",
+      "page": "/vs/notion-vs-evernote/",
+      "type": "title_test",
+      "hypothesis": "Front-loaded, intent-matching title lifts CTR at unchanged position.",
+      "source": {
+        "pr": 376,
+        "commit": "e7be7431"
+      },
+      "started_at": "2026-07-02",
+      "evaluation_at": "2026-07-30",
+      "status": "evaluated",
+      "before": {
+        "title": "Notion vs Evernote どっちがいい？【2026年版】料金・速度・移行を実比較"
+      },
+      "after": {
+        "title": "Notion vs Evernote 失敗しない選び方【2026】料金・速度・移行"
+      },
+      "baseline": {
+        "impressions": 433,
+        "ctr": 0.037,
+        "position": 11.6,
+        "clicks": null,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1",
+        "straddles_change": true
+      },
+      "target_metric": "ctr",
+      "decision": "keep",
+      "evaluated_at": "2026-08-09",
+      "notes": [
+        "2026-08-09: notion-vs-evernote: imp 433→556, CTR 3.70→4.68%, pos 11.6→8.4。順位+3.2で明確な改善。"
+      ],
+      "evidence": {
+        "gsc_snapshots": [
+          "2026-08-09"
+        ]
+      }
+    },
+    {
+      "id": "faq-2026-08-09-line-keep-doko",
+      "page": "/blog/line-keep-alternative",
+      "type": "faq_add",
+      "hypothesis": "Answering the 'どこ' intent directly lifts CTR on a query pool that currently converts at 0%.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 0,
+        "impressions": 139,
+        "ctr": 0,
+        "position": 9.9,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09 — measured, replaces the estimate seeded from report prose",
+        "note": "Clean pre-change baseline: the FAQ shipped 08-09, after this window closed."
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-09: The page also carries frozen title test title-2026-07-01-002. Its measurement window (2026-07-01..07-29) has already elapsed and is banked in GSC, so this change cannot corrupt it retroactively — but that window is the ONLY period from which the title decision may be read. Do not evaluate the title test on post-08-09 data.",
+        "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed.",
+        "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly."
+      ]
+    },
+    {
+      "id": "monitor-2026-08-09-obsidian-ctr",
+      "page": "/obsidian/",
+      "type": "monitor",
+      "hypothesis": "Title kept by owner decision; the -39% CTR regression is unexplained and must not drop out of view.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 37,
+        "impressions": 827,
+        "ctr": 0.0447,
+        "position": 8,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09",
+        "note": "Pre-retitle reference: 682 imp / CTR 7.30% / pos 7.9 (docs 06-09..07-04). Recovery target is CTR back above ~6%."
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "No change ships with this entry — it exists so the regression stays visible. The title was kept by owner decision (title-2026-07-02-011); that ruled out one lever, not the problem.",
+        "On the next snapshot: if CTR is still near 4.5% at a flat position, the remaining lever is the meta description / snippet. Check the query x page export first to see whether the query mix widened."
+      ]
+    },
+    {
+      "id": "snippet-2026-08-09-gkeep-vs-anotes",
+      "page": "/en/vs/google-keep-vs-apple-notes/",
+      "type": "snippet_rewrite",
+      "hypothesis": "Leading with a verdict in the snippet and adding FAQ rich-result eligibility lifts CTR at unchanged position.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 6,
+        "impressions": 1696,
+        "ctr": 0.0035,
+        "position": 7.8,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Three changes, one experiment — they cannot be separated at this traffic level (6 clicks/28d): (1) intro now opens with the verdict, (2) description rewritten to carry it into the snippet, (3) FAQPage schema added — 5 answers existed on the page with no schema at all.",
+        "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
+        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too."
+      ]
+    }
+  ]
+}
