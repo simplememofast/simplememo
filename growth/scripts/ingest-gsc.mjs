@@ -83,15 +83,39 @@ if (!totalRows) {
   process.exit(2);
 }
 
-// The CTR curve is derived from whichever dimension has the most rows: it needs
-// volume per position bucket, and query rows are usually the deepest table.
-const curveSource = buckets.queries.length >= buckets.pages.length ? buckets.queries : buckets.pages;
-const { curve, derivedPositions } = buildCtrCurve(curveSource);
-
-const totals = curveSource.reduce(
+const sum = (rows) => rows.reduce(
   (acc, r) => ({ clicks: acc.clicks + (r.clicks || 0), impressions: acc.impressions + (r.impressions || 0) }),
   { clicks: 0, impressions: 0 }
 );
+
+// Site totals come from the `dates` dimension, never from queries.
+//
+// The query export is capped at 1,000 rows and omits anonymised queries, so it
+// covers only a fraction of real traffic — on the 2026-08-09 export it showed
+// 257 clicks / 15,778 impressions against a true 813 / 38,599. Reporting the
+// query-table sum as "site clicks" would understate traffic by ~68% while
+// looking perfectly plausible, which is worse than having no number at all.
+// Pages is a close second (near-complete); queries is the last resort and is
+// flagged when used.
+const totalsSource =
+  buckets.dates.length ? { rows: buckets.dates, from: 'dates' }
+  : buckets.pages.length ? { rows: buckets.pages, from: 'pages' }
+  : { rows: buckets.queries, from: 'queries (TRUNCATED — top 1,000 only; treat as a floor)' };
+const totals = sum(totalsSource.rows);
+
+// The CTR curve prefers `pages` over `queries` for the same reason, plus one
+// more: GSC sorts the top-1,000 query list by clicks, so the rows that get cut
+// are disproportionately high-impression/low-click ones. A curve fitted to
+// what survives runs high, and an inflated expected CTR manufactures
+// "opportunities" out of ordinary performance — the exact error this curve
+// exists to avoid. Pages carries position at near-full impression coverage.
+const curveSource = buckets.pages.length ? buckets.pages : buckets.queries;
+const curveFrom = buckets.pages.length ? 'pages' : 'queries';
+const { curve, derivedPositions } = buildCtrCurve(curveSource);
+
+const coverage = totals.impressions
+  ? sum(curveSource).impressions / totals.impressions
+  : null;
 
 const meta = {
   label,
@@ -104,8 +128,13 @@ const meta = {
     clicks: totals.clicks,
     impressions: totals.impressions,
     ctr: totals.impressions ? totals.clicks / totals.impressions : null,
+    source: totalsSource.from,
   },
   ctr_curve: curve,
+  ctr_curve_source: curveFrom,
+  // Share of total impressions the curve was fitted on. A low value means the
+  // curve reflects a biased slice, not the site.
+  ctr_curve_coverage: coverage,
   // Which positions the curve measured from this site's own rows vs. fell back
   // to the reference table. A reader comparing two snapshots needs to know
   // whether a moved "expected CTR" reflects the site or just better coverage.
@@ -127,7 +156,12 @@ for (const [kind, rows] of Object.entries(buckets)) {
 fs.writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(meta, null, 2) + '\n');
 
 console.log(`\nSnapshot written: growth/data/gsc/${label}/`);
-console.log(`  ${totals.clicks} clicks · ${totals.impressions} impressions · CTR ${(meta.totals.ctr * 100).toFixed(2)}%`);
-console.log(`  CTR curve derived from own data at positions: ${derivedPositions.join(', ') || '(none — reference curve used throughout)'}`);
+console.log(`  ${totals.clicks} clicks · ${totals.impressions} impressions · CTR ${(meta.totals.ctr * 100).toFixed(2)}%  [totals from: ${totalsSource.from}]`);
+console.log(`  CTR curve fitted on ${curveFrom}` +
+  (coverage != null ? ` (${(coverage * 100).toFixed(0)}% of total impressions)` : '') +
+  `; measured at positions: ${derivedPositions.join(', ') || '(none — reference curve throughout)'}`);
+if (buckets.queries.length >= 1000) {
+  console.log(`  note: the query export is capped at 1,000 rows (${sum(buckets.queries).impressions.toLocaleString()} of ${totals.impressions.toLocaleString()} impressions). Query-level analysis sees only the head of the distribution.`);
+}
 console.log('\nNext:  node growth/scripts/analyze.mjs        # opportunities, CTR gaps, decay, cannibalisation');
 console.log('       node growth/scripts/weekly-report.mjs   # the report a human actually reads');

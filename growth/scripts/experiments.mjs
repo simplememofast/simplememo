@@ -47,12 +47,24 @@ function line(e, asOf) {
   return `${e.id.padEnd(24)} ${state.padEnd(16)} ${e.page}`;
 }
 
-/** GSC snapshots whose window starts on/after a date — i.e. post-change data. */
-function snapshotsCovering(afterDate) {
+/**
+ * Snapshots that are usable as post-change evidence for an experiment.
+ *
+ * The bar is "the measurement window begins on or after the change shipped"
+ * (`started_at`) — NOT after `evaluation_at`. Those are different dates and
+ * conflating them was a real bug: a snapshot covering 07-11..08-07 is entirely
+ * post-change for a 07-01 retitle and is exactly the data the decision should
+ * be read from, yet comparing against the 07-29 evaluation date rejected it.
+ * The evaluation date says when we promised to look, not which data is valid.
+ */
+function snapshotsCovering(exp) {
+  const changedOn = exp.started_at || exp.evaluation_at;
+  if (!changedOn) return [];
   return listSnapshots().filter((label) => {
     try {
       const s = loadSnapshot(label);
-      return (s.meta.period_start || s.meta.captured_at || label) >= afterDate;
+      const start = s.meta.period_start || s.meta.captured_at || label;
+      return start >= changedOn;
     } catch { return false; }
   });
 }
@@ -82,7 +94,7 @@ switch (cmd) {
       if (e.before?.title) console.log(`  before    ${e.before.title}`);
       if (e.after?.title)  console.log(`  after     ${e.after.title}`);
     }
-    const snaps = snapshotsCovering('2026-07-29');
+    const snaps = [...new Set(due.flatMap(snapshotsCovering))].sort();
     console.log(snaps.length
       ? `\nPost-change GSC snapshots available: ${snaps.join(', ')}`
       : '\nNo post-change GSC snapshot ingested yet — see growth/GSC_OWNER_ACTION.md.');
@@ -129,7 +141,7 @@ switch (cmd) {
     const decision = flag('decision') || die(`--decision is required, one of: ${DECISIONS.join(', ')}`);
     if (!DECISIONS.includes(decision)) die(`invalid decision ${decision}; expected ${DECISIONS.join(', ')}`);
 
-    const snaps = snapshotsCovering(e.evaluation_at || e.started_at || '0000-00-00');
+    const snaps = snapshotsCovering(e);
     if (!snaps.length && !has('force')) {
       die(
         `No GSC snapshot covers the period after ${e.evaluation_at}, so there is nothing to read this decision off.\n` +

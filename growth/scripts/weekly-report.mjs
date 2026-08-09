@@ -98,8 +98,13 @@ p();
  * effort drifts toward traffic that was never going to convert. */
 if (snap) {
   const curve = snap.meta.ctr_curve;
+  // Impression floor. Without it the ranking surfaces pages with a handful of
+  // impressions: a 7-impression page at 0% CTR scores a "+1 click upside" that
+  // is really just rounding, and it pushes genuine work off the table. 100 is
+  // roughly where a 28-day CTR figure starts meaning anything.
+  const MIN_IMPRESSIONS = 100;
   const scored = snap.pages
-    .filter((r) => r.page && r.impressions)
+    .filter((r) => r.page && r.impressions >= MIN_IMPRESSIONS)
     .map((r) => {
       const exp = expectedCtr(curve, r.position);
       const gap = Math.max(0, (exp ?? 0) - (r.ctr ?? 0));
