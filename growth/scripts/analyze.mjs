@@ -3,7 +3,7 @@
  * The detectors that turn a snapshot into a ranked list of things to do.
  *
  *   node growth/scripts/analyze.mjs [--snapshot 2026-08-09] [--json] [--top 20]
- *   node growth/scripts/analyze.mjs --only opportunities|ctr-gap|decay|cannibalisation
+ *   node growth/scripts/analyze.mjs --only opportunities|ctr-gap|unanswered|decay|cannibalisation
  *
  * Every number printed here traces to a committed snapshot under
  * growth/data/gsc/. Nothing is typed in by hand, which is the point: the
@@ -136,12 +136,73 @@ function cannibalisation() {
   return rows.sort((a, b) => b.impressions - a.impressions).slice(0, top);
 }
 
+/* ── 5. Unanswered intent ────────────────────────────────────────────────
+ * Ranked, shown, never clicked: clicks == 0, position ≤ 12, impressions ≥ 8.
+ *
+ * Deliberately separate from the CTR gap above. That one finds "clicked, but
+ * fewer times than the position deserves", which has a dozen possible causes
+ * (SERP features, brand recognition, snippet wording) and so rarely names its
+ * own fix. Zero clicks at a workable position is the sharper signal: the page
+ * is already in front of these searchers and not one of them read it as an
+ * answer — nearly always because the words of the intent are simply not on the
+ * page. That is a cheap, specific edit.
+ *
+ * The trap this detector has to avoid: at these positions most rows are small,
+ * and a row that would only ever have earned one click tells you nothing by
+ * earning none. The 2026-08-09 cycle was talked into exactly that mistake by
+ * hand — "249 unclicked impressions in the Obsidian cluster" was really four
+ * queries with a combined expectation of 1.3 clicks. So a row has to clear a
+ * surprise bar, not an impression bar: with 3 expected clicks, coming back with
+ * zero happens about 5% of the time by chance, which is worth a look. Ranking
+ * by raw impressions instead puts the noisiest rows on top, which is how that
+ * cycle ended up queueing edits to two pages that were performing normally. */
+const UNANSWERED_MAX_POSITION = 12;
+const UNANSWERED_MIN_IMPRESSIONS = 8;
+const UNANSWERED_MIN_EXPECTED_CLICKS = 3;
+
+function unanswered() {
+  // Existing Page First: with the query×page table we can name the URL already
+  // being shown, so the fix is a section on that page rather than a new page.
+  // Without it the caller only learns that *something* is ranking.
+  const landing = new Map();
+  for (const r of snap.queryPages) {
+    if (!r.query || !r.page) continue;
+    if (!landing.has(r.query)) landing.set(r.query, []);
+    landing.get(r.query).push(r);
+  }
+
+  const rows = [];
+  for (const r of [...snap.queries, ...snap.pages]) {
+    const key = r.query || r.page;
+    if (!key || (r.clicks || 0) > 0) continue;
+    if ((r.impressions || 0) < UNANSWERED_MIN_IMPRESSIONS) continue;
+    if (r.position == null || r.position > UNANSWERED_MAX_POSITION) continue;
+    const exp = expectedCtr(curve, r.position);
+    const expectedClicks = r.impressions * (exp ?? 0);
+    if (expectedClicks < UNANSWERED_MIN_EXPECTED_CLICKS) continue;
+    rows.push({
+      kind: r.query ? 'query' : 'page',
+      key,
+      impressions: r.impressions,
+      position: r.position,
+      expected_ctr: exp,
+      expected_clicks: expectedClicks,
+      relevance: r.page ? businessRelevance(r.page) : null,
+      ranking_pages: (landing.get(r.query) || [])
+        .sort((a, b) => (a.position ?? 99) - (b.position ?? 99))
+        .map((h) => ({ page: h.page, impressions: h.impressions, position: h.position })),
+    });
+  }
+  return rows.sort((a, b) => b.expected_clicks - a.expected_clicks).slice(0, top);
+}
+
 const result = {
   snapshot: snap.label,
   period: snap.meta.period_start ? `${snap.meta.period_start}..${snap.meta.period_end}` : null,
   compared_to: prev?.label ?? null,
   opportunities: opportunities(),
   ctr_gap: ctrGap(),
+  unanswered: unanswered(),
   decay: decay(),
   cannibalisation: cannibalisation(),
 };
@@ -173,6 +234,20 @@ if (show('ctr-gap')) {
   for (const r of result.ctr_gap) {
     console.log(`  +${String(Math.round(r.upside_clicks)).padStart(4)} clicks  [${r.kind}] ${r.key}`);
     console.log(`               imp ${r.impressions} · CTR ${pct(r.ctr)} vs ${pct(r.expected_ctr)} · pos ${n1(r.position)}`);
+  }
+  console.log();
+}
+
+if (show('unanswered')) {
+  console.log(`── Unanswered intent (0 clicks where ≥ ${UNANSWERED_MIN_EXPECTED_CLICKS} were expected, pos ≤ ${UNANSWERED_MAX_POSITION})`);
+  if (!result.unanswered.length) console.log('   none — no row is missing enough clicks to rule out chance\n');
+  for (const r of result.unanswered) {
+    console.log(`  −${n1(r.expected_clicks).padStart(4)} clicks  [${r.kind}] ${r.key}`);
+    console.log(`               imp ${r.impressions} · pos ${n1(r.position)} · expected CTR ${pct(r.expected_ctr)} · got 0`);
+    for (const p of r.ranking_pages) console.log(`               already ranking: ${p.page} (pos ${n1(p.position)}, ${p.impressions} imp)`);
+  }
+  if (result.unanswered.length && !snap.queryPages.length) {
+    console.log('\n  Which page each query lands on needs the query×page export — growth/GSC_OWNER_ACTION.md step 3.');
   }
   console.log();
 }

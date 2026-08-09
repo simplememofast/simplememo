@@ -77,12 +77,40 @@ export function previousSnapshot(label) {
 }
 
 /**
+ * Weighted pool-adjacent-violators: the closest non-increasing fit to `values`.
+ *
+ * Expected CTR has to fall as position gets worse — that is what "expected"
+ * means here. A curve derived from one small site does not come out that way:
+ * each bucket is dominated by whichever handful of pages happen to sit in it,
+ * so one exceptional page lifts its whole position. Left alone, the 2026-08-09
+ * snapshot expected 9.8% at position 5 and 1.4% at position 7, which quietly
+ * inverts every detector downstream — a page at 7 could not register a CTR gap
+ * however badly it did, while an ordinary page at 10 looked like a crisis.
+ */
+function isotonicNonIncreasing(values, weights) {
+  const blocks = values.map((v, i) => ({ sum: v * weights[i], w: weights[i], n: 1 }));
+  for (let i = 1; i < blocks.length; i++) {
+    while (i > 0 && blocks[i - 1].sum / blocks[i - 1].w < blocks[i].sum / blocks[i].w) {
+      blocks[i - 1].sum += blocks[i].sum;
+      blocks[i - 1].w += blocks[i].w;
+      blocks[i - 1].n += blocks[i].n;
+      blocks.splice(i, 1);
+      i--;
+    }
+  }
+  const out = [];
+  for (const b of blocks) for (let k = 0; k < b.n; k++) out.push(b.sum / b.w);
+  return out;
+}
+
+/**
  * Derive expected CTR by position from the site's own rows.
  *
  * Preferred over the reference table because SimpleMemo's SERPs are mostly
  * Japanese informational queries where the generic curves (built from
  * English-language, commercially-skewed samples) run high. A bucket falls back
- * to the reference value when it has too little volume to be believable.
+ * to the reference value when it has too little volume to be believable, and
+ * the whole curve is then forced non-increasing (see above).
  */
 export function buildCtrCurve(rows) {
   const buckets = new Map();
@@ -95,21 +123,33 @@ export function buildCtrCurve(rows) {
     buckets.set(p, b);
   }
 
-  const curve = {};
+  const raw = [];
+  const weights = [];
   const derived = [];
   for (let p = 1; p <= 20; p++) {
     const b = buckets.get(p);
     if (b && b.impressions >= MIN_BUCKET_IMPRESSIONS) {
-      curve[p] = b.clicks / b.impressions;
+      raw.push(b.clicks / b.impressions);
+      weights.push(b.impressions);
       derived.push(p);
     } else {
-      curve[p] = REFERENCE_CTR_CURVE[p];
+      raw.push(REFERENCE_CTR_CURVE[p]);
+      // A reference value is trusted as much as a bucket sitting exactly on the
+      // volume threshold — enough to hold its ground against a thin derived
+      // neighbour, not enough to override a well-populated one.
+      weights.push(MIN_BUCKET_IMPRESSIONS);
     }
   }
+  const fitted = isotonicNonIncreasing(raw, weights);
+
+  const curve = {};
+  for (let p = 1; p <= 20; p++) curve[p] = fitted[p - 1];
+
   const tail = buckets.get(21);
-  curve.tail = tail && tail.impressions >= MIN_BUCKET_IMPRESSIONS
+  const tailRaw = tail && tail.impressions >= MIN_BUCKET_IMPRESSIONS
     ? tail.clicks / tail.impressions
     : TAIL_CTR;
+  curve.tail = Math.min(tailRaw, curve[20]);
 
   return { curve, derivedPositions: derived };
 }

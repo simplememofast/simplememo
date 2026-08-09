@@ -74,7 +74,7 @@ Obsidianクラスタの既存16ページ + 関連EN。判定は実測に基づ�
 |---|---|---|
 | `/blog/obsidian-voice-input` | 588 / 10.9% | **「文字起こし」セクション**。4クエリ計46 impがpos5〜8で0クリック |
 | `/obsidian/` | 827 / 4.5% / pos 8.0 | ハブとして作り替え（現状は製品ページ寄り）。§Hub設計 |
-| `/apple-watch/` | 954 / **2.1%** / pos 7.5 | 最大imp・最低CTR。Obsidian文脈の導線を追加し `/apple-watch-obsidian/` へ送る |
+| `/apple-watch/` | 954 / 2.1% / pos 7.5 | ~~最大imp・最低CTR~~ → **訂正（08-09）: pos 7.5 の期待CTRは1.89%で、このページは期待を下回っていない。** CTR是正としては着手不要。実際に足したのは watchOS標準の音声入力の使い方（「apple watch 音声入力 設定」等が未回答だったため）とページ内の自己矛盾の修正 |
 | `/methods/second-brain/` | 721 / 3.9% | Obsidian軸の節を追加（「セカンドブレイン obsidian」42 imp対応） |
 | `/blog/obsidian-iphone-memo` | 24 / 4.2% | 「obsidian iphone」26 imp 0クリックの受け皿として強化 |
 | `/voice-input/` | 167 / 3.0% | 役割の明確化（音声4LPの整理・後述） |

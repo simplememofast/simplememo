@@ -2,7 +2,7 @@
   "version": 1,
   "generated_at": "2026-08-09",
   "source": "growth/data/gsc/2026-08-09 (2026-07-11..08-07, 28d)",
-  "note": "Ordered by measured lost impressions, not by opinion. See docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md.",
+  "note": "Ordered by measured lost impressions, not by opinion. IMPORTANT: an item must clear the noise floor before it is actionable — impressions x expectedCtr(position) is the number of clicks a row was ever going to earn, and three of the five items here were queued on rows that expected under 1.5. See growth/scripts/analyze.mjs --only unanswered and docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md.",
   "items": [
     {
       "id": "R1",
@@ -45,7 +45,9 @@
       "impact": "medium",
       "confidence": "high",
       "effort": "S",
-      "constraint": "Do not touch the title. This is the strongest page on the site."
+      "constraint": "Do not touch the title. This is the strongest page on the site.",
+      "status": "dropped",
+      "dropped_reason": "Dropped 2026-08-09. The stated cause was wrong: 「文字起こし」 already appears 6 times in the body, including an H2 (方法3) and two FAQ answers. And the four lost queries total 1.3 EXPECTED clicks (17 imp @ pos 7.2 = 0.2, 10 @ 6.5 = 0.1, 10 @ 7.8 = 0.1, 9 @ 5.1 = 0.9). Zero clicks there is the normal outcome, not a finding."
     },
     {
       "id": "R2",
@@ -63,14 +65,15 @@
           "query": "obsidian apple watch",
           "impressions": 24,
           "clicks": 0,
-          "position": 6.0
+          "position": 6
         }
       ],
       "lost_impressions": 24,
       "impact": "medium",
       "confidence": "medium",
       "effort": "S",
-      "blocked_by": "query x page export needed to confirm which page receives these impressions"
+      "status": "dropped",
+      "dropped_reason": "Dropped 2026-08-09. 「obsidian apple watch」 24 imp @ pos 6.0 = 1.0 expected click. Also, /apple-watch/ is NOT underperforming: 2.1% CTR at pos 7.5 against an expected 1.89%. The earlier 2.5% expectation came from a non-monotonic CTR curve, since fixed."
     },
     {
       "id": "R3",
@@ -81,7 +84,7 @@
         "impressions": 721,
         "clicks": 28,
         "ctr": 0.039,
-        "position": 8.0
+        "position": 8
       },
       "lost_queries": [
         {
@@ -94,7 +97,9 @@
       "lost_impressions": 42,
       "impact": "medium",
       "confidence": "high",
-      "effort": "S"
+      "effort": "S",
+      "status": "dropped",
+      "dropped_reason": "Dropped 2026-08-09. Same two errors as R1. The page title is already 「セカンドブレイン（Second Brain）の作り方 — メールメモ×Obsidianで構築」 and Obsidian appears 43 times. 「セカンドブレイン obsidian」 42 imp @ pos 8.8 = 0.5 expected clicks."
     },
     {
       "id": "R4",
@@ -112,7 +117,7 @@
           "query": "obsidian iphone",
           "impressions": 26,
           "clicks": 0,
-          "position": 11.0
+          "position": 11
         },
         {
           "query": "obsidian memo",
@@ -131,7 +136,8 @@
       "impact": "medium",
       "confidence": "low",
       "effort": "M",
-      "blocked_by": "landing page for 'obsidian 使い方 iphone' (68 imp, CTR 5.9%) is unknown"
+      "blocked_by": "landing page for 'obsidian 使い方 iphone' (68 imp, CTR 5.9%) is unknown",
+      "status": "blocked"
     },
     {
       "id": "R5",
@@ -147,7 +153,8 @@
       "impact": "unknown",
       "confidence": "low",
       "effort": "M",
-      "blocked_by": "query x page export needed before any merge decision across the 4 voice LPs"
+      "blocked_by": "query x page export needed before any merge decision across the 4 voice LPs",
+      "status": "blocked"
     }
   ]
 }

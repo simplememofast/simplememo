@@ -15,6 +15,7 @@
 | `detect-opportunities` | ✅ `growth/scripts/analyze.mjs --only opportunities` |
 | `detect-decay` | ✅ 同 `--only decay`（**次スナップショットで初稼働**。比較対象が2つ必要） |
 | `detect-cannibalization` | ✅ 同 `--only cannibalisation`（**クエリ×ページのエクスポート待ち**） |
+| `detect-unanswered-intent` | ✅ 同 `--only unanswered`（**2026-08-09 実装**。期待クリック数3以上で足切り・下記A3） |
 | `build-weekly-report` | ✅ `growth/scripts/weekly-report.mjs` |
 | §93 Experiment Ledger | ✅ `growth/experiments/experiments.json` |
 | §94 Evaluation Date 検知 | ✅ `growth/scripts/check-experiments.mjs`（CIで注釈・非ブロッキング） |
@@ -74,9 +75,9 @@ Effort: S。**これが入るまで、Obsidianクラスタの成長を週次で�
 
 Effort: S〜M。
 
-### A3. `detect-unanswered-intent`（今回の調査で最も価値があった分析）
+### A3. `detect-unanswered-intent` — 実装済み（2026-08-09）。ただし当初案は間違っていた
 
-今回 249 imp の取りこぼしを見つけたのはこの視点である:
+当初、この節はこう書いていた:
 
 ```
 clicks == 0
@@ -84,14 +85,32 @@ clicks == 0
 かつ impressions >= 8    （偶然ではない）
 ```
 
-**「順位はあるのに答えていない」を機械的に洗い出す。**
-`analyze.mjs` の CTR gap 検出とは別物で、CTR gapは「クリックはあるが少ない」を、
-これは「クリックがゼロ」を拾う。後者のほうが原因が明確で、対処も具体的になる。
+そして「今回 249 imp の取りこぼしを見つけた最も価値のある分析」だと書いた。
+**これは誤りだった。** `impressions >= 8` は「偶然ではない」ことを保証しない。
 
-Effort: XS（`analyze.mjs` に `--only unanswered` を足すだけ）。
+実装して回したところ、この条件では20行・4,387 impが引っかかった。
+だが上位の多くは**期待クリック数が1未満**——0クリックが正常な行だった。
+249 imp の「発見」の実体は、合計1.3クリックしか期待できない4クエリだった。
 
-**3つのうち最優先はこれ。** 今回手作業で得た最大の発見を、
-次回から自動で得られるようにする。
+実装した条件は次のとおり:
+
+```
+clicks == 0
+かつ position <= 12
+かつ impressions × 期待CTR(position) >= 3   ← 追加
+```
+
+期待3クリックに対して0が返る確率は偶然でも約5%（e^-3）。
+ここを超えて初めて「見に行く価値がある」と言える。
+並び順も imp ではなく**期待クリック数**にした。impで並べると
+最もノイズの多い行が上に来る。
+
+結果は20行 → **6行**。Obsidianクラスタは1行も残らなかった。
+
+**この検出器の価値は、前回手作業で得た結論を再現したことではなく、
+それが間違いだったと示したことにある。**
+
+Effort: XS（実装済み・`analyze.mjs --only unanswered`）。
 
 ---
 
