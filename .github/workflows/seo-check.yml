@@ -39,6 +39,16 @@ jobs:
       - name: Site constants consistency
         run: node scripts/sync_constants.js --check
 
+      # An experiment whose evaluation date has passed must not go unnoticed.
+      # Deliberately NOT blocking: a green run here is what lets auto-merge
+      # ship to production, so failing on an unevaluated retitle would also
+      # block unrelated fixes and pressure someone into rubber-stamping a
+      # decision to unblock a deploy. It annotates the PR and writes a job
+      # summary instead. A *malformed* ledger still exits non-zero, because an
+      # unparseable entry can never come due and would disable this check.
+      - name: Experiment evaluation dates
+        run: node growth/scripts/check-experiments.mjs
+
       # Smoke test only (--dry-run writes nothing). Note: the shallow CI
       # checkout means git-derived lastmod dates collapse to one date here;
       # real sitemap generation happens locally with full history.

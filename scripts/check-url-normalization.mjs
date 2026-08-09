@@ -194,6 +194,12 @@ await notFound("//docs//seo/FULL-AUDIT-REPORT-2026-07-07.md");
 await notFound("/scripts/seo-check.js");
 await notFound("/tools/");
 await notFound("/CLAUDE.md");
+// growth/ carries committed GSC snapshots and App Store exports. Pages deploys
+// every tracked file, so without the block these are click, impression and
+// revenue figures sitting at a guessable URL.
+await notFound("/growth/data/gsc/2026-08-09/queries.json");
+await notFound("//growth//experiments/experiments.json");
+await notFound("/growth/");
 
 // ── 8. /admin/* keeps its Cloudflare Access auth chain ───────────────────
 await servesDirectly("/admin/");
