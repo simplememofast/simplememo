@@ -437,14 +437,31 @@
         "straddles_change": true
       },
       "target_metric": "ctr",
-      "decision": "revert",
+      "decision": "keep",
       "evaluated_at": "2026-08-09",
       "notes": [
-        "2026-08-09: obsidian: pos 7.9→8.0(横ばい)なのにCTR 7.30→4.47%。実クリックは約50→37で26%減。表示は+21%なので広く浅くに転じた。Tier1最重要ページのため旧タイトル復帰を推奨。実行はオーナー確認後。"
+        "2026-08-09: obsidian: pos 7.9→8.0(横ばい)なのにCTR 7.30→4.47%。実クリックは約50→37で26%減。表示は+21%なので広く浅くに転じた。Tier1最重要ページのため旧タイトル復帰を推奨。実行はオーナー確認後。",
+        "2026-08-09: オーナー判断で据え置き。データはrevertを示したが、変更後タイトルの「最速」訴求は /siri/ /fastest-voice-memo/ とブランドを揃えた意図的なもので、CTR単体では覆さない。",
+        "2026-08-09: カニバリ仮説は反証された。同期間の /siri/ は20imp、/fastest-voice-memo/ は17imp しかなく、/obsidian/ が失った約13クリックを説明できない。この説明を再提出しないこと。",
+        "2026-08-09: **CTR低下は未解決のまま残る。** 7.30%→4.47%（順位横ばい、実クリック約50→37）。タイトルという手段が1つ外れただけで、問題は消えていない。監視エントリ monitor-2026-08-09-obsidian-ctr で追跡する。"
       ],
       "evidence": {
         "gsc_snapshots": [
           "2026-08-09"
+        ]
+      },
+      "unresolved": {
+        "issue": "CTR regression not addressed by this decision",
+        "before_ctr": 0.073,
+        "after_ctr": 0.0447,
+        "clicks_lost_per_28d": 13,
+        "ruled_out": [
+          "revert title (owner decision)",
+          "cannibalisation by /siri/ or /fastest-voice-memo/ (falsified: 20 and 17 impressions)"
+        ],
+        "remaining_levers": [
+          "meta description / snippet rewrite",
+          "SERP feature change (needs query x page export to check)"
         ]
       }
     },
@@ -517,6 +534,37 @@
         "2026-08-09: The page also carries frozen title test title-2026-07-01-002. Its measurement window (2026-07-01..07-29) has already elapsed and is banked in GSC, so this change cannot corrupt it retroactively — but that window is the ONLY period from which the title decision may be read. Do not evaluate the title test on post-08-09 data.",
         "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed.",
         "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly."
+      ]
+    },
+    {
+      "id": "monitor-2026-08-09-obsidian-ctr",
+      "page": "/obsidian/",
+      "type": "monitor",
+      "hypothesis": "Title kept by owner decision; the -39% CTR regression is unexplained and must not drop out of view.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 37,
+        "impressions": 827,
+        "ctr": 0.0447,
+        "position": 8.0,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09",
+        "note": "Pre-retitle reference: 682 imp / CTR 7.30% / pos 7.9 (docs 06-09..07-04). Recovery target is CTR back above ~6%."
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "No change ships with this entry — it exists so the regression stays visible. The title was kept by owner decision (title-2026-07-02-011); that ruled out one lever, not the problem.",
+        "On the next snapshot: if CTR is still near 4.5% at a flat position, the remaining lever is the meta description / snippet. Check the query x page export first to see whether the query mix widened."
       ]
     }
   ]
