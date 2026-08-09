@@ -249,6 +249,37 @@
       "notes": []
     },
     {
+      "id": "title-2026-07-01-900",
+      "page": "/blog/best-memo-apps-2026",
+      "type": "title_test",
+      "hypothesis": null,
+      "source": {
+        "pr": 367,
+        "commit": null
+      },
+      "started_at": "2026-07-01",
+      "evaluation_at": "2026-07-29",
+      "status": "cancelled",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": 2035,
+        "ctr": 0.022,
+        "position": 6.7,
+        "window": "2026-06-09..2026-07-04",
+        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Listed as a frozen 07-01 retitle in ahrefs-gsc-analysis-2026-07-07.md §3-1, but no title change exists.",
+        "git log -S'<title>' -- blog/best-memo-apps-2026.html returns only the page-creation commit (3abaf029).",
+        "Cancelled rather than deleted so the page reads as unfrozen and is editable again."
+      ]
+    },
+    {
       "id": "title-2026-07-02-009",
       "page": "/glossary/second-brain/",
       "type": "title_test",
@@ -373,34 +404,34 @@
       "notes": []
     },
     {
-      "id": "title-2026-07-01-900",
-      "page": "/blog/best-memo-apps-2026",
-      "type": "title_test",
-      "hypothesis": null,
+      "id": "faq-2026-08-09-line-keep-doko",
+      "page": "/blog/line-keep-alternative",
+      "type": "faq_add",
+      "hypothesis": "Answering the 'どこ' intent directly lifts CTR on a query pool that currently converts at 0%.",
       "source": {
-        "pr": 367,
+        "pr": null,
         "commit": null
       },
-      "started_at": "2026-07-01",
-      "evaluation_at": "2026-07-29",
-      "status": "cancelled",
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
       "before": null,
       "after": null,
       "baseline": {
-        "clicks": null,
-        "impressions": 2035,
-        "ctr": 0.022,
-        "position": 6.7,
-        "window": "2026-06-09..2026-07-04",
-        "source": "docs/seo/ahrefs-gsc-analysis-2026-07-07.md §3-1"
+        "clicks": 0,
+        "impressions": 490,
+        "ctr": 0.0,
+        "position": 9.7,
+        "window": "7d observation 2026-07-08..07-14, scaled to 28d",
+        "source": "docs/seo/gsc-analysis-2026-07-16.md §3-1 (「line keepメモ どこ」122 imp/7d, 0 clicks)",
+        "note": "Query-level baseline, not page-level: the change targets one query's intent."
       },
       "target_metric": "ctr",
       "decision": null,
       "evaluated_at": null,
       "notes": [
-        "Listed as a frozen 07-01 retitle in ahrefs-gsc-analysis-2026-07-07.md §3-1, but no title change exists.",
-        "git log -S'<title>' -- blog/best-memo-apps-2026.html returns only the page-creation commit (3abaf029).",
-        "Cancelled rather than deleted so the page reads as unfrozen and is editable again."
+        "2026-08-09: The page also carries frozen title test title-2026-07-01-002. Its measurement window (2026-07-01..07-29) has already elapsed and is banked in GSC, so this change cannot corrupt it retroactively — but that window is the ONLY period from which the title decision may be read. Do not evaluate the title test on post-08-09 data.",
+        "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed."
       ]
     }
   ]
