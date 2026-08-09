@@ -69,6 +69,14 @@ function clusterOf(urlPath) {
   return 'other';
 }
 
+/**
+ * Remove the attributes this script writes, so placement is always measured
+ * against the same baseline document. See the call site for why this matters.
+ */
+function stripCtaAttrs(html) {
+  return html.replace(/\s+data-cta-(?:placement|cluster|variant)="[^"]*"/g, '');
+}
+
 /** Byte ranges of page chrome, so nav/footer CTAs are not mistaken for content. */
 function chromeZones(html) {
   const zones = [];
@@ -113,10 +121,39 @@ function classify(html) {
     a.isCta = a.isOwn && /[?&]ct=/.test(a.tag);
     if (/class="[^"]*(nav-cta|global-nav)/.test(a.tag)) a.zone = 'nav';
   }
-  const content = anchors.filter((a) => a.isCta && !a.zone);
-  content.forEach((a, i) => {
-    a.placement = i === 0 ? 'hero' : i === content.length - 1 && content.length > 1 ? 'bottom' : 'mid';
-  });
+  // Placement is where the CTA physically sits in the content, NOT its ordinal
+  // among CTAs. Ordinal looked right and was badly wrong: most pages carry a
+  // single content CTA and it lives at the end, so "first content CTA" labelled
+  // 168 of 207 bottom-of-page CTAs as `hero`. Comparing hero-vs-bottom would
+  // then have compared "pages with one closing CTA" against "pages with two",
+  // which is not a placement question at all.
+  //
+  // The fraction is measured across <main>, which 237 of 240 pages have. Using
+  // it rather than "between the chrome" matters: 222 pages carry two or more
+  // <nav> blocks (breadcrumbs, footer nav), so taking the last nav's end as the
+  // content start dragged the origin most of the way down the page and made
+  // nearly every CTA look like it was at the top.
+  let contentStart = 0;
+  let contentEnd = html.length;
+  const main = html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i);
+  if (main) {
+    contentStart = main.index;
+    contentEnd = main.index + main[0].length;
+  } else {
+    // No <main>: fall back to the FIRST nav/header ending and the FIRST footer
+    // start — first, not last, for the reason above.
+    contentStart = zones.filter(([k]) => k === 'nav')
+      .reduce((end, [, , b], i) => (i === 0 ? b : Math.min(end, b)), 0);
+    contentEnd = zones.filter(([k]) => k === 'footer')
+      .reduce((start, [, a]) => Math.min(start, a), html.length);
+  }
+  const span = Math.max(1, contentEnd - contentStart);
+
+  for (const a of anchors) {
+    if (!a.isCta || a.zone) continue;
+    const frac = (a.index - contentStart) / span;
+    a.placement = frac < 0.25 ? 'hero' : frac > 0.75 ? 'bottom' : 'mid';
+  }
   for (const a of anchors) {
     if (!a.isOwn) a.placement = null;
     else if (!a.isCta) a.placement = 'reference';
@@ -138,8 +175,21 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
   const urlPath = toUrlPath(ROOT_DIR, file);
   const cluster = clusterOf(urlPath);
 
+  // Classify against the document with our own attributes stripped.
+  //
+  // Measuring the live document is not idempotent: adding data-cta-* makes the
+  // HTML longer, which shifts every later anchor's byte offset, which moves its
+  // position fraction. On two pages a CTA sat close enough to a 0.25/0.75
+  // boundary that it flipped label on every run — --write and --check
+  // disagreed forever and CI would have stayed red. Normalising first means
+  // the same page always yields the same placements, however many times the
+  // script has run over it.
+  const measured = classify(stripCtaAttrs(html));
+  if (!measured.some((a) => a.isOwn)) continue;
+  // Attribute stripping never reorders anchors, so the Nth measured anchor is
+  // the Nth live anchor.
   const anchors = classify(html);
-  if (!anchors.some((a) => a.isOwn)) continue;
+  anchors.forEach((a, i) => { a.placement = measured[i]?.placement ?? null; });
 
   // Rebuild back-to-front so earlier offsets stay valid.
   for (const a of [...anchors].reverse()) {
