@@ -46,43 +46,26 @@ simple-memo-v2/
 --glow: rgba(106, 170, 208, 0.55)  /* Glow effect */
 ```
 
-## Deployment to Cloudflare Workers
+## Deployment
 
-### Prerequisites
-- Cloudflare account with a domain
-- `wrangler` CLI installed (`npm install -g @cloudflare/wrangler`)
-- Node.js 16+
+### How this site actually deploys
 
-### Steps
+**Cloudflare Pages, auto-deployed on every push to `main`.** There is no manual
+step and no `wrangler deploy` in the loop — the `functions/` directory in this
+repo is Pages Functions, not a Worker.
 
-1. **Clone or download this repository**
-   ```bash
-   git clone <your-repo-url>
-   cd simple-memo-v2
-   ```
+```
+work on a claude/* branch → open a PR → SEO Validation passes
+→ auto-merge merges it → Cloudflare Pages deploys main
+```
 
-2. **Install dependencies** (if using build tools)
-   ```bash
-   npm install
-   ```
+Merging to `main` **is** the production deploy, which is why
+`.github/workflows/auto-merge.yml` waits for SEO Validation to succeed and
+merges only the validated SHA. To hold a change back, mark the PR as draft.
 
-3. **Configure wrangler.toml**
-   - Update `name` to your project name
-   - Update the `routes` section with your domain
+See `CLAUDE.md` for the full workflow and the auto-merge design notes.
 
-4. **Deploy to Cloudflare Workers**
-   ```bash
-   wrangler deploy
-   ```
-
-5. **Set up custom domain** (if not already configured)
-   - Go to Cloudflare Dashboard
-   - Add your domain and configure DNS
-   - Ensure Workers route is properly configured
-
-### Alternative: GitHub + Cloudflare Pages
-
-If you prefer Cloudflare Pages instead of Workers:
+### One-time Pages setup (already done — for rebuilding from scratch)
 
 1. Push this repository to GitHub
 2. In Cloudflare Dashboard, go to Pages
@@ -92,6 +75,8 @@ If you prefer Cloudflare Pages instead of Workers:
    - **Build command**: (leave empty)
    - **Build output directory**: `/`
 5. Deploy
+6. Add the custom domain (`simplememofast.com`) under the project's Custom
+   domains tab and point DNS at it
 
 ## Pages
 
