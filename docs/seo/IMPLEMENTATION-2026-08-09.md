@@ -177,20 +177,23 @@ node growth/scripts/experiments.mjs evaluate <id> --decision keep|revert|iterate
 > からのみ**読むこと。同ページに 08-09 のFAQ追加が入っており、以降は交絡する。
 > 07-29までのデータは既にGSCに記録済みなので遡って壊れてはいない。
 
-### 3. App Store 公開版数の確認（約1分）
+### ~~3. App Store 公開版数の確認~~ → ✅ 完了（2026-08-09）
 
-`data/site-constants.json` の `appVersion` は **5.0.3**。
-`simplememo-ios` の `MARKETING_VERSION` は 5.7.3 だが、`release.yml` は
-TestFlight 経路で App Review 提出は `submit_review`（既定 false）が必要な
-別ステップのため、**公開版ではない**。本環境からは `itunes.apple.com` が
-ネットワークポリシーで遮断されており実地確認できなかった。
+オーナーが App Store Connect で **5.7.3 が配信中**であることを確認。
+`appVersion` を 5.7.3 に更新し、JSON-LD 12ブロックと llms.txt へ伝播済み。
+
+**当初 5.0.3 を採用したのは誤りだった。** `release.yml` が TestFlight 経路で
+App Review 提出が opt-in（`submit_review` 既定 false）であることから
+「5.5.0〜5.7.3 は TestFlight 止まり」と推測したが、実際には審査を通って
+公開されていた。ビルド経路の既定値からリリース状態は決まらない。
+
+教訓として `appVersionNote` には「両者は正当に乖離しうるので、
+リポジトリの MARKETING_VERSION ではなく公開版を入れる」旨を残した。
+再確認コマンド:
 
 ```sh
 curl -s 'https://itunes.apple.com/lookup?id=6758438948&country=jp' | grep -o '"version":"[^"]*"'
 ```
-
-正しい値に1フィールド書き換えて `node scripts/sync_constants.js --write`。
-JSON-LD 12ブロックと llms.txt に自動で伝播する。
 
 ### 4. LINE Keep ページの手順詳細（任意）
 
