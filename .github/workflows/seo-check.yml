@@ -39,6 +39,12 @@ jobs:
       - name: Site constants consistency
         run: node scripts/sync_constants.js --check
 
+      # Every App Store CTA must carry placement/cluster/variant metadata. A new
+      # page copied from an old template would otherwise silently reintroduce
+      # unmeasurable CTAs, which is the state this replaced.
+      - name: CTA placement metadata
+        run: node scripts/tag-cta-placements.js --check
+
       # An experiment whose evaluation date has passed must not go unnoticed.
       # Deliberately NOT blocking: a green run here is what lets auto-merge
       # ship to production, so failing on an unevaluated retitle would also
