@@ -104,39 +104,86 @@ function isotonicNonIncreasing(values, weights) {
 }
 
 /**
- * Derive expected CTR by position from the site's own rows.
- *
- * Preferred over the reference table because SimpleMemo's SERPs are mostly
- * Japanese informational queries where the generic curves (built from
- * English-language, commercially-skewed samples) run high. A bucket falls back
- * to the reference value when it has too little volume to be believable, and
- * the whole curve is then forced non-increasing (see above).
+ * A position bucket this dominated by one page is that page's CTR wearing a
+ * bucket's name, and everything else at that position then gets judged against
+ * a single competitor's idiosyncrasy.
  */
-export function buildCtrCurve(rows) {
+const MAX_BUCKET_CONCENTRATION = 0.5;
+
+/** Bucket rows by rounded position, keeping the largest page's share. */
+function positionBuckets(rows) {
   const buckets = new Map();
   for (const r of rows) {
     if (r.position == null || r.impressions == null) continue;
     const p = Math.min(21, Math.max(1, Math.round(r.position)));
-    const b = buckets.get(p) || { clicks: 0, impressions: 0 };
+    const b = buckets.get(p) || { clicks: 0, impressions: 0, top: 0 };
     b.clicks += r.clicks || 0;
     b.impressions += r.impressions;
+    b.top = Math.max(b.top, r.impressions);
     buckets.set(p, b);
   }
+  return buckets;
+}
+
+const usable = (b) => b
+  && b.impressions >= MIN_BUCKET_IMPRESSIONS
+  && b.top / b.impressions <= MAX_BUCKET_CONCENTRATION;
+
+/**
+ * Level, fitted across every row at once: how this site's clicks compare to
+ * what the reference curve predicts for the positions it actually holds.
+ *
+ * One number, pooled over all positions, is the most this site's volume can
+ * support. Estimating twenty of them — one per position — is what went wrong:
+ * on the 2026-08-09 snapshot the Japanese position-5 bucket was 79% a single
+ * page, position 13 was 95% one page, and the English position-7 bucket held
+ * exactly one page, so that page was measured against itself and could not
+ * deviate from expectation by construction.
+ */
+export function fitCalibration(rows) {
+  let clicks = 0;
+  let expected = 0;
+  for (const r of rows) {
+    if (r.position == null || !r.impressions) continue;
+    const p = Math.min(20, Math.max(1, Math.round(r.position)));
+    clicks += r.clicks || 0;
+    expected += r.impressions * REFERENCE_CTR_CURVE[p];
+  }
+  return expected > 0 ? clicks / expected : 1;
+}
+
+/**
+ * Expected CTR by position: shape borrowed, level measured.
+ *
+ * The shape comes from the reference table because this site cannot estimate
+ * one — 240 pages spread over twenty positions leaves a handful of pages per
+ * bucket, and the resulting "curve" was mostly noise (it came out
+ * non-monotonic, and had to be forced back into order before it could be used
+ * at all). The level comes from the site's own rows, pooled into the single
+ * calibration factor above, which its volume does support.
+ *
+ * A bucket still overrides the calibrated reference where it has both the
+ * volume and the diversity to be believable — so the curve sharpens on its own
+ * as the site grows, rather than staying pinned to a borrowed shape forever.
+ */
+export function buildCtrCurve(rows) {
+  const buckets = positionBuckets(rows);
+  const k = fitCalibration(rows);
 
   const raw = [];
   const weights = [];
   const derived = [];
   for (let p = 1; p <= 20; p++) {
     const b = buckets.get(p);
-    if (b && b.impressions >= MIN_BUCKET_IMPRESSIONS) {
+    if (usable(b)) {
       raw.push(b.clicks / b.impressions);
       weights.push(b.impressions);
       derived.push(p);
     } else {
-      raw.push(REFERENCE_CTR_CURVE[p]);
-      // A reference value is trusted as much as a bucket sitting exactly on the
-      // volume threshold — enough to hold its ground against a thin derived
-      // neighbour, not enough to override a well-populated one.
+      raw.push(REFERENCE_CTR_CURVE[p] * k);
+      // Calibrated reference is trusted as much as a bucket sitting exactly on
+      // the volume threshold — enough to hold its ground against a thin derived
+      // neighbour, not enough to override a well-populated, diverse one.
       weights.push(MIN_BUCKET_IMPRESSIONS);
     }
   }
@@ -146,12 +193,10 @@ export function buildCtrCurve(rows) {
   for (let p = 1; p <= 20; p++) curve[p] = fitted[p - 1];
 
   const tail = buckets.get(21);
-  const tailRaw = tail && tail.impressions >= MIN_BUCKET_IMPRESSIONS
-    ? tail.clicks / tail.impressions
-    : TAIL_CTR;
+  const tailRaw = usable(tail) ? tail.clicks / tail.impressions : TAIL_CTR * k;
   curve.tail = Math.min(tailRaw, curve[20]);
 
-  return { curve, derivedPositions: derived };
+  return { curve, derivedPositions: derived, calibration: k };
 }
 
 /**
@@ -194,19 +239,14 @@ const SEGMENT_MIN_IMPRESSIONS = 3000;
  * competition, brand recognition, or simply worse pages) is not answerable from
  * Search Console alone and stays open.
  */
-export function buildSegmentCurves(rows, overall) {
+export function buildSegmentCurves(rows) {
   const bySegment = new Map();
-  let totalClicks = 0;
-  let totalImpressions = 0;
   for (const r of rows) {
     if (r.position == null || r.impressions == null) continue;
     const s = segmentOfPath(r.page);
     if (!bySegment.has(s)) bySegment.set(s, []);
     bySegment.get(s).push(r);
-    totalClicks += r.clicks || 0;
-    totalImpressions += r.impressions;
   }
-  const siteCtr = totalImpressions ? totalClicks / totalImpressions : 0;
 
   const out = {};
   for (const [segment, segRows] of bySegment) {
@@ -214,45 +254,14 @@ export function buildSegmentCurves(rows, overall) {
     const impressions = segRows.reduce((s, r) => s + r.impressions, 0);
     if (impressions < SEGMENT_MIN_IMPRESSIONS) continue;
 
-    const buckets = new Map();
-    for (const r of segRows) {
-      const p = Math.min(21, Math.max(1, Math.round(r.position)));
-      const b = buckets.get(p) || { clicks: 0, impressions: 0 };
-      b.clicks += r.clicks || 0;
-      b.impressions += r.impressions;
-      buckets.set(p, b);
-    }
-
-    // Positions this segment cannot fill on its own inherit the site curve,
-    // rescaled by how much harder this segment converts overall. Falling back
-    // to the site curve unscaled is what produced the original error.
-    const ratio = siteCtr > 0 ? (clicks / impressions) / siteCtr : 1;
-    const raw = [];
-    const weights = [];
-    const derived = [];
-    for (let p = 1; p <= 20; p++) {
-      const b = buckets.get(p);
-      if (b && b.impressions >= MIN_BUCKET_IMPRESSIONS) {
-        raw.push(b.clicks / b.impressions);
-        weights.push(b.impressions);
-        derived.push(p);
-      } else {
-        raw.push(overall[p] * ratio);
-        weights.push(MIN_BUCKET_IMPRESSIONS);
-      }
-    }
-    const fitted = isotonicNonIncreasing(raw, weights);
-    const curve = {};
-    for (let p = 1; p <= 20; p++) curve[p] = fitted[p - 1];
-    curve.tail = Math.min(overall.tail * ratio, curve[20]);
-
+    const { curve, derivedPositions, calibration } = buildCtrCurve(segRows);
     out[segment] = {
       curve,
-      derivedPositions: derived,
+      derivedPositions,
+      calibration,
       impressions,
       clicks,
       ctr: clicks / impressions,
-      ratio_to_site: ratio,
     };
   }
   return out;

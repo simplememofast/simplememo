@@ -111,10 +111,10 @@ const totals = sum(totalsSource.rows);
 // exists to avoid. Pages carries position at near-full impression coverage.
 const curveSource = buckets.pages.length ? buckets.pages : buckets.queries;
 const curveFrom = buckets.pages.length ? 'pages' : 'queries';
-const { curve, derivedPositions } = buildCtrCurve(curveSource);
+const { curve, derivedPositions, calibration } = buildCtrCurve(curveSource);
 // Japanese and English pages do not click alike at the same position, so a
 // single curve judges the smaller segment against the larger one's standard.
-const segmentCurves = curveFrom === 'pages' ? buildSegmentCurves(curveSource, curve) : {};
+const segmentCurves = curveFrom === 'pages' ? buildSegmentCurves(curveSource) : {};
 
 const coverage = totals.impressions
   ? sum(curveSource).impressions / totals.impressions
@@ -142,6 +142,9 @@ const meta = {
   // to the reference table. A reader comparing two snapshots needs to know
   // whether a moved "expected CTR" reflects the site or just better coverage.
   ctr_curve_derived_positions: derivedPositions,
+  // Level fitted against the reference shape: <1 means the site clicks less
+  // than the reference table predicts for the positions it holds.
+  ctr_curve_calibration: calibration,
   // Per-language curves. Only segments with enough impressions to fit their own
   // appear here; everything else falls back to `ctr_curve` via curveFor().
   ctr_curve_segments: segmentCurves,
