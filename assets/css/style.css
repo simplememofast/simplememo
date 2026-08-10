@@ -2630,3 +2630,14 @@ img[src*="hero-ja"], img[src*="hero-en"] {
 /* ------------------------------------------------------------
    8. FAQ — re-skin over style.css !important cream rules
    ------------------------------------------------------------ */
+
+/* Desktop-only QR beside the closing CTA.
+   On desktop the App Store badge opens a page the visitor cannot install from;
+   21 of 60 App Store clicks in 2026-07-13..08-09 came from there. Hidden below
+   900px because on a phone the badge already works. */
+.cta-qr { display: none; }
+@media (min-width: 900px) {
+  .cta-qr { display: block; margin: 1.25rem auto 0; text-align: center; }
+  .cta-qr img { width: 132px; height: 132px; background: #fff; border-radius: 12px; padding: 6px; display: block; margin: 0 auto .4rem; }
+  .cta-qr small { font-size: .72rem; color: var(--text-muted); }
+}

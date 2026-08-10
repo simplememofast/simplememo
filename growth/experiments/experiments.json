@@ -595,7 +595,204 @@
       "notes": [
         "Three changes, one experiment — they cannot be separated at this traffic level (6 clicks/28d): (1) intro now opens with the verdict, (2) description rewritten to carry it into the snippet, (3) FAQPage schema added — 5 answers existed on the page with no schema at all.",
         "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
-        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too."
+        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too.",
+        "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves."
+      ]
+    },
+    {
+      "id": "snippet-2026-08-09-free-memo-ranking",
+      "page": "/blog/free-memo-apps-ranking",
+      "type": "snippet_rewrite",
+      "hypothesis": "Dropping the brand suffix and leading with the qualifiers searchers actually type (広告なし・シンプル) lifts CTR at unchanged position.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "title": "無料で使えるメモアプリランキング2026 — コスト0で始める最強メモ環境 | Obsidian連携シンプルメモ"
+      },
+      "after": {
+        "title": "無料メモアプリおすすめ10選2026｜広告なし・シンプルで選ぶ"
+      },
+      "baseline": {
+        "clicks": 33,
+        "impressions": 4027,
+        "ctr": 0.0082,
+        "position": 9.19,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Two changes, one experiment: title and meta description both moved. At 33 clicks/28d they cannot be separated, and both are the same surface (the SERP snippet).",
+        "The queries this page is shown for are dominated by qualifiers absent from the old title: メモアプリ 無料 (966 imp, 1 click, pos 8.4), メモアプリ 無料 シンプル (756 imp, 1 click, pos 9.3), メモ帳アプリ 広告なし 無料 (82 imp, 0 clicks). 「最強メモ環境」 answered none of them.",
+        "Brand-suffix hypothesis is SUGGESTIVE, NOT ESTABLISHED. Site-wide, titles carrying 「| Obsidian連携シンプルメモ」 average 1.72% CTR (67 pages, 7,889 imp) against 2.17% without (146 pages, 31,431 imp) — but position and page type are not controlled for, so this is a reason to test one page, not to strip suffixes site-wide.",
+        "Body untouched. If CTR moves, the cause is the snippet alone."
+      ]
+    },
+    {
+      "id": "snippet-2026-08-09-offline-memo-apps",
+      "page": "/blog/offline-memo-apps",
+      "type": "snippet_rewrite",
+      "hypothesis": "A description that opens on the category and the mechanism, rather than on the product, earns more clicks from searchers comparing offline memo apps.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "title": "オフラインで使えるメモアプリ｜電波なしでも即記録"
+      },
+      "after": {
+        "title": "オフラインで使えるメモアプリ5選｜圏外でも書けて復帰後に自動同期"
+      },
+      "baseline": {
+        "clicks": 32,
+        "impressions": 1319,
+        "ctr": 0.0243,
+        "position": 5.95,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Top unblocked opportunity on the segment-corrected model: +27.6 clicks/month against a Japanese-only expectation of 4.52% at pos 6.0.",
+        "The old title already carried the query words. The change adds the list signal (5選) the competing results carry, and moves the description off 「SimpleMemoを中心に」 — a comparison shopper reads a vendor-first description as a vendor page.",
+        "Known dilution: some impressions are Android intent (「android メモアプリ オフライン」 31 imp, 0 clicks, pos 6.2) on an iOS-only app. Those clicks are unwinnable and unwanted, so the realised gain should land under +27.6 even if the hypothesis is right.",
+        "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated."
+      ]
+    },
+    {
+      "id": "cta-2026-08-10-mid-placement",
+      "page": "(8 pages: /vs/logseq/, /vs/dynalist/, /vs/capacities/, /methods/second-brain/, /blog/free-memo-apps-ranking, /blog/offline-memo-apps, /blog/meeting-memo-template, /blog/memo-app-encryption-comparison)",
+      "type": "cta_placement",
+      "hypothesis": "A contextual mid-article CTA reaches readers who never scroll to the closing CTA, raising session-to-App-Store rate above 3.8%.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-10",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "mid_ctas_on_these_pages": 0,
+        "note": "Persuasive CTA was bottom-only; nav links aside, nothing before ~75% of the article."
+      },
+      "after": {
+        "mid_ctas_added": 16,
+        "note": "8 pages x 2 languages. Inline text link, not a badge — the conversion model allows MEDIUM pages one inline CTA with no stacked badges."
+      },
+      "baseline": {
+        "source": "GA4 event export 2026-07-13..2026-08-09 (28d)",
+        "sessions": 1600,
+        "users": 1334,
+        "app_store_click": 60,
+        "app_store_click_users": 56,
+        "session_to_app_store": 0.0375,
+        "scroll_90pct_users": 139,
+        "scroll_90pct_rate": 0.104,
+        "pages_per_session": 1.21
+      },
+      "target_metric": "app_store_click / session_start",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Why now: 39 of the 53 pages carrying GSC traffic had a persuasive CTA only at the bottom, and those 39 take 486 of 694 search clicks (70%). GA4 says 10.4% of users reach 90% scroll depth. Most readers were never shown a reason to install.",
+        "COMPETING HYPOTHESIS, not yet ruled out: 56 users clicked App Store while only 139 reached 90% depth. 40% of deep scrollers converting is implausible, so a large share of the 60 clicks probably comes from the always-visible nav link or from the 14 pages that already had hero/mid CTAs. If nav is doing the work, this change adds little. The data-cta-placement dimension resolves this at the next snapshot — that is what it was built for.",
+        "Power: at a 3.8% baseline and 1,600 sessions/28d, only a near-doubling is detectable in one cycle. A 50% lift would need roughly 2.5 months. Read the placement breakdown, not just the aggregate rate.",
+        "No A/B split. data-cta-variant stays v1 everywhere; placement-level attribution replaces the need to split, and splitting at this traffic would halve an already underpowered sample.",
+        "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). Not a violation of the one-variable rule: those measure GSC CTR (search to page), this measures App Store clicks per session (page to store). A body paragraph cannot move the first.",
+        "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed)."
+      ]
+    },
+    {
+      "id": "cta-2026-08-10-desktop-qr",
+      "page": "(9 pages: /vs/logseq/, /obsidian/, /blog/best-memo-apps-2026, /vs/dynalist/, /blog/free-memo-apps-ranking, /blog/offline-memo-apps, /methods/second-brain/, /vs/capacities/, /apple-watch/)",
+      "type": "desktop_qr",
+      "hypothesis": "Desktop visitors who click the App Store badge cannot install from where they are. A QR beside the closing CTA converts that dead end into an install.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-10",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "qr_pages": 2,
+        "note": "Only /ai-tags/ (ja+en) carried a QR, out of 240 pages."
+      },
+      "after": {
+        "qr_pages": 11,
+        "assets_added": 15,
+        "note": "Desktop-only (min-width:900px), 132px, anchored to the last bottom-placement CTA. ct=<slug>-<lang>__qr."
+      },
+      "baseline": {
+        "source": "GA4 event export 2026-07-13..2026-08-09 (28d), filtered device=desktop AND event=app_store_click",
+        "app_store_click_total": 60,
+        "app_store_click_desktop": 21,
+        "app_store_click_desktop_users": 18,
+        "desktop_share_of_app_store_clicks": 0.35,
+        "gsc_pc_share_of_search_clicks": 0.509
+      },
+      "target_metric": "App Store Connect campaign installs for ct=*__qr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Ceiling is 21 clicks per 28 days. That is the entire desktop App Store click volume, and no more than that can be recovered. Do not size this as a growth lever.",
+        "NOT MEASURABLE IN GA4. A scan is not a click, so app_store_click will not rise — it may fall as desktop visitors scan instead of clicking. The only readout is App Store Connect campaign data for the __qr tokens, which is an owner action; growth/data/appstore/ is still empty.",
+        "Desktop converts worse than its traffic share (51% of search clicks, 35% of App Store clicks), which is expected: desktop visitors sensibly decline to click a badge they cannot install from. The waste is these 21 clicks, not half the audience.",
+        "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
+        "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input)."
+      ]
+    },
+    {
+      "id": "cta-2026-08-10-strongest-page-inline",
+      "page": "/blog/obsidian-voice-input",
+      "type": "cta_placement",
+      "hypothesis": "The site strongest page had no in-body App Store CTA at all. One contextual inline link should convert some of its traffic.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-10",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "cta_placements": {
+          "nav": 2
+        },
+        "note": "Zero hero, mid, or bottom CTAs. The only App Store links were the header and footer nav buttons."
+      },
+      "after": {
+        "cta_placements": {
+          "nav": 2,
+          "mid": 1
+        }
+      },
+      "baseline": {
+        "clicks": 64,
+        "impressions": 588,
+        "ctr": 0.1088,
+        "position": 5.3,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09"
+      },
+      "target_metric": "app_store_click attributed to ct=blog-obsidian-voice-input-jp__mid",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "This page was excluded from the 2026-08-10 mid-CTA batch on the grounds of not using the strongest page as a test bed. That exclusion is revised here, and the reason it was wrong is worth recording: it was written to protect the page from title and snippet experiments, which move search performance. A body paragraph cannot move SERP CTR — it is not in the title, the description, or above the fold. Applying the rule to a body CTA left the highest-intent traffic on the site (relevance 1.0, CTR 10.9%, position 5.3) with no way to install without scrolling back to the header.",
+        "Placed after 方法4, the section that already describes this app, so the link follows content the reader has just read rather than interrupting the comparison.",
+        "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question."
       ]
     }
   ]
