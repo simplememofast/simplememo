@@ -154,6 +154,119 @@ export function buildCtrCurve(rows) {
   return { curve, derivedPositions: derived };
 }
 
+/**
+ * Language segment of a page path. The site publishes Japanese at the root and
+ * every other language under its own prefix.
+ */
+export function segmentOfPath(pagePath) {
+  if (!pagePath) return 'JA';
+  if (pagePath === '/en' || pagePath.startsWith('/en/')) return 'EN';
+  if (/^\/(zh-Hant|zh|ko|es|pt-BR|id|ar|tr)(\/|$)/.test(pagePath)) return 'other';
+  return 'JA';
+}
+
+/** Queries carry no URL, so the script they are written in stands in for one. */
+export function segmentOfQuery(query) {
+  return /[ぁ-んァ-ヶ一-龥]/.test(query || '') ? 'JA' : 'EN';
+}
+
+/** Below this a segment cannot support its own curve and inherits the site's. */
+const SEGMENT_MIN_IMPRESSIONS = 3000;
+
+/**
+ * One expected-CTR curve per language, because they are not the same SERP.
+ *
+ * On the 2026-08-09 snapshot the site clicks at 2.50% across Japanese pages and
+ * 0.69% across English ones, and the split holds position by position — 3.12%
+ * vs 0.51% at position 8, 4.52% vs 1.48% at position 6. A single curve fitted
+ * across both is really the Japanese curve, since Japanese traffic is 77% of
+ * impressions, and it then judges every English page against an expectation
+ * three-odd times what English pages on this site have ever achieved. That is
+ * how two English pages came to sit in the top four "opportunities" while
+ * performing normally for their segment.
+ *
+ * What this fixes and what it does not: comparing English pages against other
+ * English pages is now fair, so the ranking within a segment means something.
+ * But the English curve is fitted on the site's own English pages, so it
+ * encodes their current performance as the standard — it can say which English
+ * page is worst, never whether English as a whole is underperforming. That
+ * question (why 0.69% against 2.50% at the same positions — weaker SERP
+ * competition, brand recognition, or simply worse pages) is not answerable from
+ * Search Console alone and stays open.
+ */
+export function buildSegmentCurves(rows, overall) {
+  const bySegment = new Map();
+  let totalClicks = 0;
+  let totalImpressions = 0;
+  for (const r of rows) {
+    if (r.position == null || r.impressions == null) continue;
+    const s = segmentOfPath(r.page);
+    if (!bySegment.has(s)) bySegment.set(s, []);
+    bySegment.get(s).push(r);
+    totalClicks += r.clicks || 0;
+    totalImpressions += r.impressions;
+  }
+  const siteCtr = totalImpressions ? totalClicks / totalImpressions : 0;
+
+  const out = {};
+  for (const [segment, segRows] of bySegment) {
+    const clicks = segRows.reduce((s, r) => s + (r.clicks || 0), 0);
+    const impressions = segRows.reduce((s, r) => s + r.impressions, 0);
+    if (impressions < SEGMENT_MIN_IMPRESSIONS) continue;
+
+    const buckets = new Map();
+    for (const r of segRows) {
+      const p = Math.min(21, Math.max(1, Math.round(r.position)));
+      const b = buckets.get(p) || { clicks: 0, impressions: 0 };
+      b.clicks += r.clicks || 0;
+      b.impressions += r.impressions;
+      buckets.set(p, b);
+    }
+
+    // Positions this segment cannot fill on its own inherit the site curve,
+    // rescaled by how much harder this segment converts overall. Falling back
+    // to the site curve unscaled is what produced the original error.
+    const ratio = siteCtr > 0 ? (clicks / impressions) / siteCtr : 1;
+    const raw = [];
+    const weights = [];
+    const derived = [];
+    for (let p = 1; p <= 20; p++) {
+      const b = buckets.get(p);
+      if (b && b.impressions >= MIN_BUCKET_IMPRESSIONS) {
+        raw.push(b.clicks / b.impressions);
+        weights.push(b.impressions);
+        derived.push(p);
+      } else {
+        raw.push(overall[p] * ratio);
+        weights.push(MIN_BUCKET_IMPRESSIONS);
+      }
+    }
+    const fitted = isotonicNonIncreasing(raw, weights);
+    const curve = {};
+    for (let p = 1; p <= 20; p++) curve[p] = fitted[p - 1];
+    curve.tail = Math.min(overall.tail * ratio, curve[20]);
+
+    out[segment] = {
+      curve,
+      derivedPositions: derived,
+      impressions,
+      clicks,
+      ctr: clicks / impressions,
+      ratio_to_site: ratio,
+    };
+  }
+  return out;
+}
+
+/**
+ * The curve to judge a row by. Falls back to the site-wide curve for segments
+ * too small to fit their own — including snapshots ingested before segment
+ * curves existed, which carry no `ctr_curve_segments` at all.
+ */
+export function curveFor(meta, segment) {
+  return meta.ctr_curve_segments?.[segment]?.curve ?? meta.ctr_curve;
+}
+
 export function expectedCtr(curve, position) {
   if (position == null) return null;
   const p = Math.round(position);

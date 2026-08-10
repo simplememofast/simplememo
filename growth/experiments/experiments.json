@@ -595,7 +595,8 @@
       "notes": [
         "Three changes, one experiment — they cannot be separated at this traffic level (6 clicks/28d): (1) intro now opens with the verdict, (2) description rewritten to carry it into the snippet, (3) FAQPage schema added — 5 answers existed on the page with no schema at all.",
         "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
-        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too."
+        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too.",
+        "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves."
       ]
     },
     {
@@ -632,6 +633,42 @@
         "The queries this page is shown for are dominated by qualifiers absent from the old title: メモアプリ 無料 (966 imp, 1 click, pos 8.4), メモアプリ 無料 シンプル (756 imp, 1 click, pos 9.3), メモ帳アプリ 広告なし 無料 (82 imp, 0 clicks). 「最強メモ環境」 answered none of them.",
         "Brand-suffix hypothesis is SUGGESTIVE, NOT ESTABLISHED. Site-wide, titles carrying 「| Obsidian連携シンプルメモ」 average 1.72% CTR (67 pages, 7,889 imp) against 2.17% without (146 pages, 31,431 imp) — but position and page type are not controlled for, so this is a reason to test one page, not to strip suffixes site-wide.",
         "Body untouched. If CTR moves, the cause is the snippet alone."
+      ]
+    },
+    {
+      "id": "snippet-2026-08-09-offline-memo-apps",
+      "page": "/blog/offline-memo-apps",
+      "type": "snippet_rewrite",
+      "hypothesis": "A description that opens on the category and the mechanism, rather than on the product, earns more clicks from searchers comparing offline memo apps.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "title": "オフラインで使えるメモアプリ｜電波なしでも即記録"
+      },
+      "after": {
+        "title": "オフラインで使えるメモアプリ5選｜圏外でも書けて復帰後に自動同期"
+      },
+      "baseline": {
+        "clicks": 32,
+        "impressions": 1319,
+        "ctr": 0.0243,
+        "position": 5.95,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Top unblocked opportunity on the segment-corrected model: +27.6 clicks/month against a Japanese-only expectation of 4.52% at pos 6.0.",
+        "The old title already carried the query words. The change adds the list signal (5選) the competing results carry, and moves the description off 「SimpleMemoを中心に」 — a comparison shopper reads a vendor-first description as a vendor page.",
+        "Known dilution: some impressions are Android intent (「android メモアプリ オフライン」 31 imp, 0 clicks, pos 6.2) on an iOS-only app. Those clicks are unwinnable and unwanted, so the realised gain should land under +27.6 even if the hypothesis is right.",
+        "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated."
       ]
     }
   ]

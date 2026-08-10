@@ -15,6 +15,7 @@
 import {
   latestSnapshot, loadSnapshot, previousSnapshot, listSnapshots,
   expectedCtr, positionOpportunity, businessRelevance,
+  curveFor, segmentOfPath, segmentOfQuery,
 } from '../lib/gsc.mjs';
 
 const argv = process.argv.slice(2);
@@ -33,7 +34,12 @@ if (!snap) {
   process.exit(2);
 }
 const prev = previousSnapshot(snap.label);
-const curve = snap.meta.ctr_curve;
+
+/* Every expectation is drawn from the row's own language segment. Judging an
+ * English page against the site curve — which Japanese traffic dominates — is
+ * how two normally-performing English pages reached the top of this list. */
+const segmentOf = (r) => (r.page ? segmentOfPath(r.page) : segmentOfQuery(r.query));
+const curveOf = (r) => curveFor(snap.meta, segmentOf(r));
 
 const pct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`);
 const n1 = (v) => (v == null ? '—' : Number(v).toFixed(1));
@@ -49,7 +55,7 @@ function opportunities() {
   const rows = [];
   for (const r of snap.pages) {
     if (!r.page || !r.impressions) continue;
-    const exp = expectedCtr(curve, r.position);
+    const exp = expectedCtr(curveOf(r), r.position);
     const gap = Math.max(0, (exp ?? 0) - (r.ctr ?? 0));
     const rel = businessRelevance(r.page);
     const score = r.impressions * positionOpportunity(r.position) * gap * rel;
@@ -73,7 +79,7 @@ function ctrGap() {
     const key = r.page || r.query;
     if (!key || !r.impressions || r.impressions < 100) continue;
     if (r.position == null || r.position > 10) continue;
-    const exp = expectedCtr(curve, r.position);
+    const exp = expectedCtr(curveOf(r), r.position);
     if (!exp || (r.ctr ?? 0) >= exp * 0.7) continue;
     rows.push({ kind: r.page ? 'page' : 'query', key,
                 impressions: r.impressions, ctr: r.ctr, expected_ctr: exp,
@@ -177,7 +183,7 @@ function unanswered() {
     if (!key || (r.clicks || 0) > 0) continue;
     if ((r.impressions || 0) < UNANSWERED_MIN_IMPRESSIONS) continue;
     if (r.position == null || r.position > UNANSWERED_MAX_POSITION) continue;
-    const exp = expectedCtr(curve, r.position);
+    const exp = expectedCtr(curveOf(r), r.position);
     const expectedClicks = r.impressions * (exp ?? 0);
     if (expectedClicks < UNANSWERED_MIN_EXPECTED_CLICKS) continue;
     rows.push({
