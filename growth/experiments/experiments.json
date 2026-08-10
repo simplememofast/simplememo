@@ -670,6 +670,49 @@
         "Known dilution: some impressions are Android intent (「android メモアプリ オフライン」 31 imp, 0 clicks, pos 6.2) on an iOS-only app. Those clicks are unwinnable and unwanted, so the realised gain should land under +27.6 even if the hypothesis is right.",
         "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated."
       ]
+    },
+    {
+      "id": "cta-2026-08-10-mid-placement",
+      "page": "(8 pages: /vs/logseq/, /vs/dynalist/, /vs/capacities/, /methods/second-brain/, /blog/free-memo-apps-ranking, /blog/offline-memo-apps, /blog/meeting-memo-template, /blog/memo-app-encryption-comparison)",
+      "type": "cta_placement",
+      "hypothesis": "A contextual mid-article CTA reaches readers who never scroll to the closing CTA, raising session-to-App-Store rate above 3.8%.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-10",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "mid_ctas_on_these_pages": 0,
+        "note": "Persuasive CTA was bottom-only; nav links aside, nothing before ~75% of the article."
+      },
+      "after": {
+        "mid_ctas_added": 16,
+        "note": "8 pages x 2 languages. Inline text link, not a badge — the conversion model allows MEDIUM pages one inline CTA with no stacked badges."
+      },
+      "baseline": {
+        "source": "GA4 event export 2026-07-13..2026-08-09 (28d)",
+        "sessions": 1600,
+        "users": 1334,
+        "app_store_click": 60,
+        "app_store_click_users": 56,
+        "session_to_app_store": 0.0375,
+        "scroll_90pct_users": 139,
+        "scroll_90pct_rate": 0.104,
+        "pages_per_session": 1.21
+      },
+      "target_metric": "app_store_click / session_start",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Why now: 39 of the 53 pages carrying GSC traffic had a persuasive CTA only at the bottom, and those 39 take 486 of 694 search clicks (70%). GA4 says 10.4% of users reach 90% scroll depth. Most readers were never shown a reason to install.",
+        "COMPETING HYPOTHESIS, not yet ruled out: 56 users clicked App Store while only 139 reached 90% depth. 40% of deep scrollers converting is implausible, so a large share of the 60 clicks probably comes from the always-visible nav link or from the 14 pages that already had hero/mid CTAs. If nav is doing the work, this change adds little. The data-cta-placement dimension resolves this at the next snapshot — that is what it was built for.",
+        "Power: at a 3.8% baseline and 1,600 sessions/28d, only a near-doubling is detectable in one cycle. A 50% lift would need roughly 2.5 months. Read the placement breakdown, not just the aggregate rate.",
+        "No A/B split. data-cta-variant stays v1 everywhere; placement-level attribution replaces the need to split, and splitting at this traffic would halve an already underpowered sample.",
+        "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). Not a violation of the one-variable rule: those measure GSC CTR (search to page), this measures App Store clicks per session (page to store). A body paragraph cannot move the first.",
+        "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed)."
+      ]
     }
   ]
 }
