@@ -101,8 +101,44 @@ def route_for(url):
     return DEFAULT[0], DEFAULT[1], DEFAULT[2], DEFAULT[3], DEFAULT[4], DEFAULT[5]
 
 
-def card_html(stage, dest, ja_l, ja_b, en_l, en_b, indent='  '):
+def bilingual(src):
+    """
+    Whether this page can switch languages at runtime.
+
+    `data-lang` spans are inert markup on their own — js/lang.js is what shows
+    one and hides the other, and the stylesheet hides `[data-lang="en"]` until
+    it runs. A page without that script therefore renders the *Japanese* span
+    and nothing else, whatever its own <html lang> says.
+
+    The first cut of this script emitted both spans everywhere, which put a
+    Japanese-only card at the foot of 39 English pages. Nothing failed: the
+    markup was valid, the link worked, and every check passed, because no check
+    knows what language a page is supposed to be in.
+    """
+    return 'lang.js' in src
+
+
+def pick(src, ja, en):
+    """Text for a page that cannot switch: follow its declared <html lang>."""
+    m = re.search(r'<html[^>]*\blang="([^"]+)"', src)
+    return en if (m and m.group(1).lower().startswith('en')) else ja
+
+
+def span_pair(ja, en):
+    return (f'<span lang="ja" data-lang="ja">{ja}</span>'
+            f'<span lang="en" data-lang="en">{en}</span>')
+
+
+def card_html(stage, dest, ja_l, ja_b, en_l, en_b, indent='  ', src=''):
     i = indent
+    if bilingual(src):
+        eyebrow = span_pair('次に読む', 'Read next')
+        headline = span_pair(ja_l, en_l)
+        blurb = span_pair(ja_b, en_b)
+    else:
+        eyebrow = pick(src, '次に読む', 'Read next')
+        headline = pick(src, ja_l, en_l)
+        blurb = pick(src, ja_b, en_b)
     return (
         f'{i}<!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.\n'
         f'{i}     Exactly one destination per page. Adding a second defeats the purpose: the page\n'
@@ -113,13 +149,13 @@ def card_html(stage, dest, ja_l, ja_b, en_l, en_b, indent='  '):
         f'border-radius:var(--radius-sm);text-decoration:none;color:inherit;">\n'
         f'{i}    <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;'
         f'text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">\n'
-        f'{i}      <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>\n'
+        f'{i}      {eyebrow}\n'
         f'{i}    </span>\n'
         f'{i}    <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">\n'
-        f'{i}      <span lang="ja" data-lang="ja">{ja_l}</span><span lang="en" data-lang="en">{en_l}</span>\n'
+        f'{i}      {headline}\n'
         f'{i}    </span>\n'
         f'{i}    <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">\n'
-        f'{i}      <span lang="ja" data-lang="ja">{ja_b}</span><span lang="en" data-lang="en">{en_b}</span>\n'
+        f'{i}      {blurb}\n'
         f'{i}    </span>\n'
         f'{i}  </a>\n'
         f'{i}</aside>\n\n'
@@ -141,6 +177,8 @@ def main():
     ap.add_argument('--check', action='store_true',
                     help='report what would change; exit 1 if anything would')
     ap.add_argument('--limit', type=int)
+    ap.add_argument('--repair', action='store_true',
+                    help='rewrite cards already in place (fixes language markup)')
     args = ap.parse_args()
 
     pages = []
@@ -162,7 +200,7 @@ def main():
             break
         path = os.path.join(ROOT, rel)
         src = open(path, encoding='utf-8').read()
-        if MARKER in src:
+        if MARKER in src and not args.repair:
             skipped += 1
             continue
         stage, dest, ja_l, ja_b, en_l, en_b = route_for(url)
@@ -175,6 +213,21 @@ def main():
             if dest.rstrip('/') == url.rstrip('/'):
                 skipped += 1
                 continue
+        if args.repair:
+            existing = re.search(r'[ \t]*<!-- One named next step.*?</aside>\n\n', src, re.S)
+            if not existing:
+                skipped += 1
+                continue
+            indent = re.match(r'[ \t]*', existing.group(0)).group(0) or '  '
+            fixed = card_html(stage, dest, ja_l, ja_b, en_l, en_b, indent, src)
+            if fixed == existing.group(0):
+                skipped += 1
+                continue
+            if not args.check:
+                open(path, 'w', encoding='utf-8').write(
+                    src[:existing.start()] + fixed + src[existing.end():])
+            changed += 1
+            continue
         m = next((a.search(src) for a in ANCHORS if a.search(src)), None)
         if not m:
             no_anchor.append(rel)
@@ -183,7 +236,7 @@ def main():
         if args.check:
             changed += 1
             continue
-        out = src[:m.start()] + card_html(stage, dest, ja_l, ja_b, en_l, en_b, indent) + src[m.start():]
+        out = src[:m.start()] + card_html(stage, dest, ja_l, ja_b, en_l, en_b, indent, src) + src[m.start():]
         open(path, 'w', encoding='utf-8').write(out)
         changed += 1
 
