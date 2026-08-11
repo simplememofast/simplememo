@@ -50,16 +50,38 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 ```
 node growth/scripts/analyze.mjs --only unanswered
 node growth/scripts/analyze.mjs --only clusters
+node growth/scripts/analyze.mjs --only conversational  # AIO: fan-outクエリの数と平均順位
 node growth/scripts/analyze.mjs --only decay          # 2026-09-06以降のみ有効
 ```
 
+**AIOはSEOと別の面として毎回見る。** 会話型（fan-out）クエリと生成AI機能表示
+（`pages-aio` 取り込み分）はクリックが構造的に出ない面であり、KPIは
+表示数と平均順位（`SEO_AIO_PLAN_2026-08.md` §3 指標の再定義）。
+順位を持つ会話型クエリに対応ページが「名指しで答えて」いなければ、
+それがその日の最有力アクションになる（下の§2レーンB）。
+
 ## 2. アクションの選び方（優先順）
 
-1. **Refresh**: 足切りを超える未回答意図が既存ページに残っている → その1本
-2. **New**: キューの未実装項目で、ロードマップ上解禁済み・ブロック解除済みのもの
-   （実装済みチェック: そのURLが既に存在しないか必ず確認）
-3. **配線**: `OBSIDIAN_INTERNAL_LINK_PLAN.md` の未実施配線でデータ根拠があるもの
-4. **どれも正当化できない** → §6の保守作業＋ログのみ（これは失敗ではない）
+- **レーンA（SEO）**: 1. Refresh（足切りを超える未回答意図が既存ページに残っている）
+  → 2. New（キュー未実装・解禁済み。URL既存でないか必ず確認）
+  → 3. 配線（`OBSIDIAN_INTERNAL_LINK_PLAN.md` の未実施分でデータ根拠あり）
+- **レーンB（AIO・回答ブロック）**: 順位を持つ会話型クエリに、質問文とほぼ同一の
+  `<h2>`＋2文以内の断定的な答えが対応ページに無い → 置く（P0-1の実証済み手法。
+  FAQPageスキーマは足さない・プレーンな見出しと段落でよい）
+- **レーンC（Evidence Asset・一次情報）**: 記事ではなく**引用可能な証拠**を1つ作る回。
+  例: サードパーティアプリの実挙動検証（PR #470のObsidian/Logseq検証が型）、
+  公式レジストリ・公式リリースの実カウント/実測データ更新、`data/benchmark.json`
+  系の定点データの鮮度維持、既存記事への実測表の注入。
+  AIOで強いのは「測った・断定できる・数値と固有名詞を持つ」主張（§2-2実測）で、
+  このレーンはSEO需要ゼロでも成立する。**週に1回以上はこのレーンを検討する。**
+- **レーンD（Paid relevance例外）**: 検索需要は足切り未満だが productRelevance が
+  highで製品の主訴求に直結する企画（例: N2 quick-capture）は、
+  **四半期1本まで**・実験台帳に登録して評価日を切る条件で作ってよい。
+  「GSCに出ていない＝需要がない」ではなく「まだ露出していない」の可能性を
+  この上限付きレーンだけで扱う（無制限にすると量産圧に変わるため）。
+- **どれも正当化できない** → §6の保守作業＋ログのみ（これは失敗ではない）
+
+レーンの選択理由は必ずログとステータスJSONの `reason` に書く。
 
 キュー状態の参考（2026-08-11時点）:
 - N1 `/obsidian/compare/logseq/` ✅ 実装済み（PR #470）
@@ -83,7 +105,13 @@ node growth/scripts/analyze.mjs --only decay          # 2026-09-06以降のみ�
 - 「次に読む」は1枚だけ。原則 `/obsidian/` へ（P1-1の集約原則）
 - 内部リンク: Parent 1本 + Sibling 1本以上。新ページへの被リンクを既存ページに
   最低2本配線（`/vs/logseq/` の意図分岐バナーが実例）
-- `llms.txt` にエントリ追加（誤引用の訂正情報を含める書式が効いている）
+- **`data/content-graph.json` に必ず登録**（cluster/intent/funnel/relevance/
+  parent/siblings/nextStep）。`/obsidian/` 配下は登録漏れがCIで落ちる
+  （`scripts/check-content-graph.mjs`）。Parent/Siblingの判断はこの台帳が正
+- `llms.txt`: **引用可能な一次情報・訂正情報を持つページのみ**エントリ追加する
+  （毎ページ機械的には足さない）。GoogleはAI検索でllms.txtを使わないと公言して
+  おり、この形式が効きうるのは他のAIクローラー向け。このサイトでの価値の実体は
+  「誤り訂正リスト」と出典マップにある — その価値が増えるときだけ更新する
 - sitemap: **`git fetch --unshallow` してから** `python3 scripts/generate_sitemap.py`
   （浅いままだと全ページのlastmodが壊れる）
 - OG画像: `scripts/generate-og-batch.js` にエントリ追加して実行。
@@ -155,6 +183,35 @@ python3 scripts/generate_sitemap.py --dry-run
 - 依頼キューの整理: Simulator撮影が必要な案件を
   `AUTOPILOT_LOG.md` の「オーナー依頼」欄に一言で積む
   （実行は オーナーのMacで `simplememo-ios/scripts/qa/capture-article-screenshots.sh <slug>`）
+- `docs/ai-citation-strategy.md` の主張監査: 1回につき数項目を
+  VERIFIED（公式一次ソースあり）/ OBSERVED（自サイト実測）/ HYPOTHESIS（推定）/
+  DEPRECATED（古い）の4状態に振り分けて根拠リンクを付す（全量一括でやらない）
+- `build-topic-map`（`OBSIDIAN_AUTOMATION_PLAN.md` A2・未実装）: スナップショットの
+  クエリからObsidian関連の新出クエリ（imp≥5）を抽出して new-queue 候補に足す
+  仕組み。実装できる回があれば1回で作りきる（作りかけを残さない）
+- **Mention & Competitor Watch（週1回・キー不要）**: セッションのWebSearchで
+  `growth/data/mentions/README.md` の固定クエリ群を検索し、スナップショットJSONを
+  保存・前回差分を日報に載せる。前回ファイルの日付が7日以上前なら実行する
+- **AIプローブ集計**: `growth/input/ai-probe/YYYY-MM.md`（オーナーが月1で貼る）に
+  未集計の新規ファイルがあれば `growth/data/ai-probes/YYYY-MM.json` へ機械可読化し、
+  `wrong_claims` があれば llms.txt 訂正リストと該当ページ回答ブロックの更新を
+  次回アクション候補に積む（`growth/input/AI_PROBE_PROTOCOL.md` 参照）
+- **App Store CSV取り込み**: `growth/input/` にオーナーがDLした
+  App Store Connect のCSV（獲得ソース・サブスクリプション）が新規にあれば、
+  初回はその列構成を見てから `growth/data/appstore/` への取り込みスクリプトを
+  書き起こす（列を見ずにパーサを先に書かない）
+
+**書かない回でも出荷はある**: `data/autopilot-status.json`（action: "skip" か
+"maintenance"・reasonにスキップ根拠）と `AUTOPILOT_LOG.md` の追記だけのPRを
+必ず出す。docs+dataのみの変更はSEO Validationを素通りするので、
+auto-mergeまで数分で終わる。これを省くと日報が「上流停止」と誤報する。
+
+**毎日運転での枯渇時の手順**: キューに実行可能項目が無い日は、順に
+(1) `new-queue.json` の解禁条件（需要の再確認・ブロック解除）を最新データで見直す、
+(2) 比較横展開（`/obsidian/compare/<x>/`）の需要をクエリ実測で確認する
+（例:「memos vs obsidian」32imp・pos4.1 は 2026-08-11 時点で足切りを超える唯一の候補）、
+(3) それでも正当化できなければ堂々とスキップする。
+需要の無い記事を出すより、スキップの理由を日報に書く方がこのサイトの価値になる。
 
 **書かない回でも出荷はある**: `data/autopilot-status.json`（action: "skip" か
 "maintenance"・reasonにスキップ根拠）と `AUTOPILOT_LOG.md` の追記だけのPRを

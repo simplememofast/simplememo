@@ -64,6 +64,12 @@ jobs:
       - name: Internal links resolve directly
         run: node scripts/check-internal-redirects.mjs
 
+      # data/content-graph.json（Parent/Sibling/NextStepの台帳）が実在ページと
+      # growth側のBUSINESS_RELEVANCEに整合しているか。/obsidian/ 配下は登録必須。
+      # 台帳が現実からズレた瞬間に落とす — 「更新されない記録」を作らないための門。
+      - name: Content graph integrity
+        run: node scripts/check-content-graph.mjs
+
       # Rating / price / © / og:site_name must match data/site-constants.json
       - name: Site constants consistency
         run: node scripts/sync_constants.js --check
