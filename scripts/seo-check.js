@@ -59,6 +59,27 @@ function checkFile(filePath) {
     return;
   }
 
+  // 0. Language-switch markup that nothing switches.
+  //
+  // `data-lang` spans are inert on their own: the stylesheet hides
+  // [data-lang="en"] and js/lang.js is what reveals the right one. A page
+  // carrying those spans WITHOUT that script renders the Japanese span and
+  // only the Japanese span — including on pages declaring <html lang="en">.
+  //
+  // This shipped on 2026-08-11: the next-step card was written with both
+  // spans and added site-wide, which put a Japanese-only card at the foot of
+  // 39 English pages. Every existing check passed, because none of them knew
+  // what language a page was supposed to be in. This one does.
+  if (/data-lang\s*=\s*["']ja["']/i.test(content) && !/lang\.js/i.test(content)) {
+    const langAttr = content.match(/<html[^>]*\blang\s*=\s*["']([^"']+)["']/i);
+    const declared = langAttr ? langAttr[1].toLowerCase() : '';
+    if (declared.startsWith('en')) {
+      errors.push(`[LANG] English page renders Japanese-only data-lang spans (no lang.js to switch them): ${rel}`);
+    } else {
+      warnings.push(`[LANG] data-lang spans present but no lang.js to switch them: ${rel}`);
+    }
+  }
+
   // 1. Title tag
   const titleMatch = content.match(/<title[^>]*>([^<]*)<\/title>/i);
   if (!titleMatch || !titleMatch[1].trim()) {
