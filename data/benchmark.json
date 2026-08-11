@@ -121,6 +121,176 @@
       },
       "ready_note": "Only our own app's ready time is trustworthy here (0.600s median), because its field is focused on launch — the frames show the caret in the first settled frame. For the others 'ready to type' requires taps the detector cannot model: Notion drew its sidebar at 0.883s, then needed a compose tap and a page load, with the caret appearing around 4.0s. Those elapsed times include human reaction and are not comparable.",
       "headline": "Every launch figure came in far below the published table, and Google Keep (0.383s) and Apple Notes (0.433s) launched faster than our own app (0.600s). Some of the gap is hardware — the recording is on an A18, the published table on an A17 Pro — and some is app versions moving since March. But a chip generation does not explain Notion at 0.883s against a published 3.8s, or Google Keep at 0.383s against 1.5s. Those are 4x. With n=1 per competitor this does not settle the right numbers; it does say the published competitor figures are not safe to keep quoting."
+    },
+    {
+      "run": "2026-08-11-owner-full",
+      "measuredBy": "owner",
+      "device": "iPhone 16e (A18), iOS 26.5.2, 256GB (14.29GB free)",
+      "status": "CANONICAL CANDIDATE — awaiting sign-off; see open_questions",
+      "columns": {
+        "focus": "tap → the note field receives focus",
+        "kb_start": "tap → the keyboard begins presenting",
+        "ready": "tap → the keyboard is fully presented, i.e. the app is ready for you to type. INCLUDES any taps in the sequence.",
+        "first_char": "tap → the first character appears on screen. Adds one human keypress on top of `ready`."
+      },
+      "why_ready_not_first_char": "`first_char` was the metric agreed on 2026-08-11, and this run measures it. On the data it turns out to be the noisier of the two: the gap between `ready` and `first_char` is the operator's keypress, and it ranged 0.200-0.500s ACROSS APPS. That 0.30s of spread belongs to the hand, not the app, and the differences being measured are 0.4-2.8s. `ready` keeps every tap the definition asked for and drops only the final keystroke, so it is the recommended published column. Both are recorded; nothing is lost by revisiting this.",
+      "apps": {
+        "Simple Memo - for Obsidian": {
+          "focus": 0.167,
+          "kb_start": 0.234,
+          "ready": 0.4,
+          "first_char": 0.6,
+          "n": 5,
+          "ready_range": [
+            0.366,
+            0.433
+          ],
+          "first_char_runs": [
+            1.0,
+            0.5,
+            0.6,
+            0.533,
+            0.667
+          ]
+        },
+        "Drafts": {
+          "focus": 0.9,
+          "kb_start": 1.0,
+          "ready": 1.2,
+          "first_char": 1.7,
+          "n": 5,
+          "ready_range": [
+            0.4,
+            1.5
+          ],
+          "first_char_runs": [
+            2.1,
+            1.7,
+            1.4,
+            1.8,
+            0.8
+          ]
+        },
+        "Apple Notes": {
+          "focus": 1.259,
+          "kb_start": 1.451,
+          "ready": 1.726,
+          "first_char": 2.167,
+          "n": 10,
+          "ready_range": [
+            1.2,
+            2.367
+          ],
+          "first_char_runs": [
+            2.2,
+            2.8,
+            1.3,
+            1.7,
+            2.7,
+            2.135,
+            2.883,
+            1.467,
+            1.683,
+            2.733
+          ]
+        },
+        "Google Keep": {
+          "focus": 1.651,
+          "kb_start": 1.702,
+          "ready": 2.068,
+          "first_char": 2.301,
+          "n": 4,
+          "ready_range": [
+            1.969,
+            2.234
+          ],
+          "first_char_runs": [
+            2.435,
+            2.434,
+            2.168,
+            2.085
+          ]
+        },
+        "Bear": {
+          "focus": 1.7,
+          "kb_start": 1.8,
+          "ready": 1.9,
+          "first_char": 2.4,
+          "n": 5,
+          "ready_range": [
+            0.7,
+            2.3
+          ],
+          "first_char_runs": [
+            2.7,
+            1.3,
+            2.4,
+            1.2,
+            2.4
+          ]
+        },
+        "Evernote": {
+          "focus": 2.2,
+          "kb_start": 2.3,
+          "ready": 2.5,
+          "first_char": 2.8,
+          "n": 5,
+          "ready_range": [
+            2.3,
+            5.1
+          ],
+          "first_char_runs": [
+            2.7,
+            5.4,
+            2.8,
+            2.9,
+            2.6
+          ]
+        },
+        "OneNote": {
+          "focus": 2.3,
+          "kb_start": 2.4,
+          "ready": 2.6,
+          "first_char": 3.0,
+          "n": 5,
+          "ready_range": [
+            2.2,
+            3.3
+          ],
+          "first_char_runs": [
+            3.3,
+            3.5,
+            3.0,
+            2.6,
+            2.8
+          ]
+        },
+        "Notion": {
+          "focus": 2.5,
+          "kb_start": 2.6,
+          "ready": 2.8,
+          "first_char": 3.3,
+          "n": 5,
+          "ready_range": [
+            2.5,
+            3.5
+          ],
+          "first_char_runs": [
+            3.1,
+            3.3,
+            2.8,
+            3.8,
+            3.8
+          ]
+        }
+      },
+      "cross_check": "Independent agreement with the earlier recording: scripts/analyze-launch-recording.py put Simple Memo's settle at 0.600s median (n=5), and this run's first_char median is also 0.600s (n=5). Two different methods, same number.",
+      "open_questions": [
+        "The recordings themselves were not supplied, so these figures could not be re-derived here. Who measured what is recorded above; independent verification is not.",
+        "Precision is mixed: Simple Memo, Google Keep and one Apple Notes file are frame-accurate (multiples of 1/60s); Notion, OneNote, Evernote, Bear, Drafts and the other Apple Notes file are rounded to 0.1s. Usable, but coarser.",
+        "Whether force-quit + 5s dwell was followed is not visible from a table. Bear (0.7/0.8 vs 1.9-2.3) and Drafts (0.4 vs 1.2-1.5) are bimodal on `ready`, which is what a mix of cold and warm runs looks like. The median absorbs it; worth confirming.",
+        "Apple Notes arrived as two files (5 runs each) and is pooled to n=10 here."
+      ]
     }
   ],
   "readyDefinition": {
