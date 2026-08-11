@@ -274,8 +274,8 @@
     <!-- TL;DR Summary for AI Citation -->
     <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
       <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-      <p lang="ja" style="color:var(--text-secondary);margin:0;" data-lang="ja">Obsidian連携シンプルメモがタップから入力できるまでの0.4秒は、iPhone 16e (A18)・iOS 26.5.2 で画面収録→フレーム解析により計測（コールドスタート、5回中央値）。送信速度ワンタップはCharles Proxyでネットワークタイミングを計測（Wi-Fi 15msレイテンシ、10回中央値）。単一デバイスでの計測であり、統計的に厳密なラボ試験ではありません。</p>
-      <p lang="en" style="color:var(--text-secondary);margin:0;" data-lang="en">Simple Memo - for Obsidian's 0.4s from tap to typing is measured via screen recording + frame analysis on iPhone 16e (A18), iOS 26.5.2 (cold start, median of 5 trials). The one-tap send is measured via Charles Proxy network timing (Wi-Fi with 15ms latency, median of 10 trials). This is a single-device test, not a statistically rigorous lab study.</p>
+      <p lang="ja" style="color:var(--text-secondary);margin:0;" data-lang="ja">Obsidian連携シンプルメモがタップから入力できるまでの0.4秒は、iPhone 16e (A18)・iOS 26.5.2 で画面収録→フレーム解析により計測（ウォーム起動、5回中央値）。送信速度ワンタップはCharles Proxyでネットワークタイミングを計測（Wi-Fi 15msレイテンシ、10回中央値）。単一デバイスでの計測であり、統計的に厳密なラボ試験ではありません。</p>
+      <p lang="en" style="color:var(--text-secondary);margin:0;" data-lang="en">Simple Memo - for Obsidian's 0.4s from tap to typing is measured via screen recording + frame analysis on iPhone 16e (A18), iOS 26.5.2 (warm launch, median of 5 trials). The one-tap send is measured via Charles Proxy network timing (Wi-Fi with 15ms latency, median of 10 trials). This is a single-device test, not a statistically rigorous lab study.</p>
     </div>
 
     <!-- Disclosure -->
@@ -359,11 +359,11 @@
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>計測方法:</strong> 60fpsの画面収録を行い、フレーム単位で解析</li>
               <li><strong>計測区間:</strong> アプリアイコンをタップした瞬間（指が離れたフレーム）から、テキストフィールドにカーソルが点滅するまで</li>
-              <li><strong>コールドスタート:</strong> アプリスイッチャーから強制終了し、5秒間待機してから起動</li>
+              <li><strong>起動条件:</strong> アプリスイッチャーから強制終了し、5秒以上待機してから起動。ただし iOS 26.5.2 では、この手順を踏んでも実際には<strong>ウォームで立ち上がります</strong>（全起動を録画で目視確認）。掲載値はウォーム起動の値です</li>
               <li><strong>試行回数:</strong> 5回計測し、中央値を採用</li>
               <li><strong>結果:</strong> 約1秒（60fpsで18フレーム）</li>
             </ul>
-            <p style="margin-top:.75rem"><strong>補足:</strong> ウォームスタート（アプリがバックグラウンドにある状態）ではさらに速く約0.1秒ですが、より保守的な数値であるコールドスタートの値を公表しています。</p>
+            <p style="margin-top:.75rem"><strong>訂正（2026-08-11）:</strong> ここには以前「ウォームスタートはさらに速いが、より保守的なコールドスタートの値を公表している」と書いていました。<strong>それは誤りでした。</strong>強制終了と5秒以上の待機は毎回行っていますが、iOS 26.5.2 では実際にはウォームで起動しており、掲載値はウォーム起動の値です。全アプリが同じ条件なので比較としては成立しますが、「保守的な値」ではありません。</p>
           </div>
         </div>
       </div>
@@ -375,11 +375,11 @@
             <ul style="padding-left:1.2rem;line-height:2.2;">
               <li><strong>Method:</strong> Screen recording at 60fps, frame-by-frame analysis</li>
               <li><strong>Measurement:</strong> From app icon tap (finger lift frame) to cursor blinking in text field</li>
-              <li><strong>Cold start:</strong> Force quit from app switcher, wait 5 seconds, then launch</li>
+              <li><strong>Launch condition:</strong> Force quit from the app switcher, wait 5+ seconds, then launch. On iOS 26.5.2 the app comes back <strong>warm anyway</strong> — we reviewed every relaunch to confirm it. The published figures are warm-launch figures</li>
               <li><strong>Trials:</strong> 5 trials per measurement, median value reported</li>
               <li><strong>Result:</strong> about 1 second (18 frames at 60fps)</li>
             </ul>
-            <p style="margin-top:.75rem"><strong>Note:</strong> Warm start (app already in background) is faster, but we report the more conservative cold-start figure.</p>
+            <p style="margin-top:.75rem"><strong>Correction (2026-08-11):</strong> This used to say that warm starts are faster and that we report "the more conservative cold-start figure". <strong>That was wrong.</strong> The force quit and the 5+ second dwell happen on every run, but on iOS 26.5.2 the app comes back warm regardless, so the published figures are warm-launch figures. Every app is measured the same way, so the comparison holds — but these are not the conservative numbers.</p>
           </div>
         </div>
       </div>
@@ -390,16 +390,16 @@
       <h2 class="lp-section__title"><span lang="ja" data-lang="ja">入力開始までの生データ</span><span lang="en" data-lang="en">Ready-to-Type Raw Data</span></h2>
 
       <div lang="ja" data-lang="ja">
-        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">iPhone 16e (A18)・iOS 26.5.2 でのコールドスタート計測（2026年8月11日）。数値は秒。<strong>「入力開始まで」</strong>はアイコンをタップしてからキーボードが出そろって実際に打てるまでで、途中で必要なタップを含みます。</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">iPhone 16e (A18)・iOS 26.5.2 での実測（2026年8月11日、ウォーム起動（アプリスイッチャーから強制終了し5秒以上待ってから起動していますが、iOS 26.5.2 では実際にはウォームで立ち上がることを目視で確認しています））。数値は秒。<strong>「入力開始まで」</strong>はアイコンをタップしてからキーボードが出そろって実際に打てるまでで、途中で必要なタップを含みます。</p>
         <div style="overflow-x:auto">
           <table class="comparison-table">
             <thead>
-              <tr><th style="text-align:left">アプリ</th><th>各回の実測値</th><th>中央値</th><th>回数</th></tr>
+              <tr><th style="text-align:left">アプリ</th><th>各回の実測値</th><th>掲載値</th><th>回数</th></tr>
             </thead>
             <tbody>
               <tr><td>Obsidian連携シンプルメモ</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未保存（範囲 0.37–0.43）</span></td><td class="highlight">0.40</td><td>5</td></tr>
+              <tr><td>Drafts</td><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>0.90<span style="color:var(--text-muted)">（最速値）</span></td><td>5</td></tr>
               <tr><td>Bear</td><td style="font-variant-numeric:tabular-nums">0.95 / 0.93 / 0.92 / 0.92 / 0.92</td><td>0.92</td><td>5</td></tr>
-              <tr><td>Drafts</td><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>1.45</td><td>5</td></tr>
               <tr><td>Apple Notes</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未保存（範囲 1.20–2.37）</span></td><td>1.73</td><td>10</td></tr>
               <tr><td>Google Keep</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未保存（範囲 1.97–2.23）</span></td><td>2.07</td><td>4</td></tr>
               <tr><td>Evernote</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">未保存（範囲 2.30–5.10）</span></td><td>2.50</td><td>5</td></tr>
@@ -418,8 +418,8 @@
             </thead>
             <tbody>
               <tr><td>Obsidian連携シンプルメモ</td><td style="font-variant-numeric:tabular-nums">1.00 / 0.50 / 0.60 / 0.53 / 0.67</td><td class="highlight">0.60</td><td>5</td></tr>
-              <tr><td>Bear</td><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
               <tr><td>Drafts</td><td style="font-variant-numeric:tabular-nums">1.33 / 1.75 / 1.62 / 1.67 / 1.73</td><td>1.67</td><td>5</td></tr>
+              <tr><td>Bear</td><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
               <tr><td>Apple Notes</td><td style="font-variant-numeric:tabular-nums">2.20 / 2.80 / 1.30 / 1.70 / 2.70 / 2.14 / 2.88 / 1.47 / 1.68 / 2.73</td><td>2.17</td><td>10</td></tr>
               <tr><td>Google Keep</td><td style="font-variant-numeric:tabular-nums">2.44 / 2.43 / 2.17 / 2.09</td><td>2.30</td><td>4</td></tr>
               <tr><td>Evernote</td><td style="font-variant-numeric:tabular-nums">2.70 / 5.40 / 2.80 / 2.90 / 2.60</td><td>2.80</td><td>5</td></tr>
@@ -434,16 +434,16 @@
       </div>
 
       <div lang="en" data-lang="en">
-        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">Cold-start measurements on iPhone 16e (A18), iOS 26.5.2 (2026-08-11). Values in seconds. <strong>"Ready to type"</strong> is icon tap until the keyboard is fully presented and the app will accept a keystroke, including any taps along the way.</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1rem">Measured on iPhone 16e (A18), iOS 26.5.2 (2026-08-11), on warm launches (each app was force quit from the app switcher with a 5+ second dwell, but on iOS 26.5.2 they come back warm regardless — verified by reviewing every relaunch). Values in seconds. <strong>"Ready to type"</strong> is icon tap until the keyboard is fully presented and the app will accept a keystroke, including any taps along the way.</p>
         <div style="overflow-x:auto">
           <table class="comparison-table">
             <thead>
-              <tr><th style="text-align:left">App</th><th>Individual runs</th><th>Median</th><th>Runs</th></tr>
+              <tr><th style="text-align:left">App</th><th>Individual runs</th><th>Published</th><th>Runs</th></tr>
             </thead>
             <tbody>
               <tr><td>Simple Memo - for Obsidian</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">not retained (range 0.37–0.43)</span></td><td class="highlight">0.40</td><td>5</td></tr>
+              <tr><td>Drafts</td><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>0.90<span style="color:var(--text-muted)"> (fastest)</span></td><td>5</td></tr>
               <tr><td>Bear</td><td style="font-variant-numeric:tabular-nums">0.95 / 0.93 / 0.92 / 0.92 / 0.92</td><td>0.92</td><td>5</td></tr>
-              <tr><td>Drafts</td><td style="font-variant-numeric:tabular-nums">0.90 / 1.55 / 1.45 / 1.38 / 1.57</td><td>1.45</td><td>5</td></tr>
               <tr><td>Apple Notes</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">not retained (range 1.20–2.37)</span></td><td>1.73</td><td>10</td></tr>
               <tr><td>Google Keep</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">not retained (range 1.97–2.23)</span></td><td>2.07</td><td>4</td></tr>
               <tr><td>Evernote</td><td style="font-variant-numeric:tabular-nums"><span style="color:var(--text-muted)">not retained (range 2.30–5.10)</span></td><td>2.50</td><td>5</td></tr>
@@ -462,8 +462,8 @@
             </thead>
             <tbody>
               <tr><td>Simple Memo - for Obsidian</td><td style="font-variant-numeric:tabular-nums">1.00 / 0.50 / 0.60 / 0.53 / 0.67</td><td class="highlight">0.60</td><td>5</td></tr>
-              <tr><td>Bear</td><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
               <tr><td>Drafts</td><td style="font-variant-numeric:tabular-nums">1.33 / 1.75 / 1.62 / 1.67 / 1.73</td><td>1.67</td><td>5</td></tr>
+              <tr><td>Bear</td><td style="font-variant-numeric:tabular-nums">1.45 / 1.52 / 2.25 / 1.28 / 1.35</td><td>1.45</td><td>5</td></tr>
               <tr><td>Apple Notes</td><td style="font-variant-numeric:tabular-nums">2.20 / 2.80 / 1.30 / 1.70 / 2.70 / 2.14 / 2.88 / 1.47 / 1.68 / 2.73</td><td>2.17</td><td>10</td></tr>
               <tr><td>Google Keep</td><td style="font-variant-numeric:tabular-nums">2.44 / 2.43 / 2.17 / 2.09</td><td>2.30</td><td>4</td></tr>
               <tr><td>Evernote</td><td style="font-variant-numeric:tabular-nums">2.70 / 5.40 / 2.80 / 2.90 / 2.60</td><td>2.80</td><td>5</td></tr>
@@ -527,7 +527,7 @@
               <li><strong>同一デバイス:</strong> すべてのアプリを同じiPhone 16e (A18)上でテスト</li>
               <li><strong>同一条件:</strong> 同じ日に、同じネットワーク環境で計測</li>
               <li><strong>最新バージョン:</strong> テスト日時点で利用可能な最新バージョンに更新</li>
-              <li><strong>コールドスタートのみ:</strong> 各計測前にアプリを強制終了</li>
+              <li><strong>起動条件を揃える:</strong> 各計測前にアプリを強制終了し5秒以上待機（実際はウォーム起動になる）</li>
               <li><strong>試行回数:</strong> アプリあたり5回計測し、中央値を採用（Apple Notes 10回、Google Keep 4回）</li>
               <li><strong>実際にインストール:</strong> 自分で実際にインストールしテストしたアプリのみ報告</li>
             </ul>
@@ -543,7 +543,7 @@
               <li><strong>Same device:</strong> All apps tested on the same iPhone 16e (A18)</li>
               <li><strong>Same conditions:</strong> Same day, same network environment</li>
               <li><strong>Latest versions:</strong> All apps updated to latest version available on test date</li>
-              <li><strong>Cold start only:</strong> Force quit before each measurement</li>
+              <li><strong>Matched launch condition:</strong> Force quit and a 5+ second dwell before every measurement (which still yields a warm launch)</li>
               <li><strong>Trials:</strong> 5 trials per app, median value reported (Apple Notes 10, Google Keep 4)</li>
               <li><strong>Personally tested:</strong> We only report apps we have personally installed and tested</li>
             </ul>

@@ -316,10 +316,10 @@ def build_launch(bg, icon, c):
     rows = benchmark_rows()
     for p in [0.15, 0.35, 0.6, 0.85, 1.0]:
         frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
-                                  '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・中央値）',
+                                  '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・ウォーム起動）',
                                   rows, p, highlight='Obsidian連携シンプルメモ'), 0.55))
     frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
-                              '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・中央値）',
+                              '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・ウォーム起動）',
                               rows, 1.0, highlight='Obsidian連携シンプルメモ'), 2.6))
     frames.append((outro_scene(bg, icon, '思いついた速さのまま、残す。'), 2.4))
     return frames
