@@ -753,7 +753,8 @@
         "Power: at a 3.8% baseline and 1,600 sessions/28d, only a near-doubling is detectable in one cycle. A 50% lift would need roughly 2.5 months. Read the placement breakdown, not just the aggregate rate.",
         "No A/B split. data-cta-variant stays v1 everywhere; placement-level attribution replaces the need to split, and splitting at this traffic would halve an already underpowered sample.",
         "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). Not a violation of the one-variable rule: those measure GSC CTR (search to page), this measures App Store clicks per session (page to store). A body paragraph cannot move the first.",
-        "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed)."
+        "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed).",
+        "2026-08-11: 本実験の途中で、全ページ末尾に「次に読む」カード(P1-1)を挿入した。tag-cta-placements.js は placement を本文中の相対位置(frac)で決めるため、末尾にコンテンツが増えた結果 81件のCTAが bottom → mid に再分類された。**評価日 2026-09-13 に GA4 を placement 次元で見ると、実験と無関係に mid のクリックが増えて見える。**本実験の target_metric は app_store_click / session_start の集計比であり、ラベルの付け替えでは動かないため主判定は成立する。placement 別の内訳を見る場合のみ、08-11 以前と以後を分けて読むこと。"
       ]
     },
     {
@@ -834,6 +835,33 @@
         "/blog/meeting-memo-template",
         "/ai-tags/"
       ]
+    },
+    {
+      "id": "engage-2026-08-11-next-step",
+      "page": "(215 pages: 全コンテンツページ)",
+      "type": "next_step_card",
+      "hypothesis": "1ページに52〜98本ある内部リンクのどれも「次の一歩」を名指ししていないため1.21ページ/セッションに留まっている。行き先を1つだけ明示すれば押される。判定は比率(ページ/セッション)ではなくnext_step_clickの実数で行う——1,600セッション/28日では比率の差は検出できない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-11",
+      "evaluation_at": "2026-09-25",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 0,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": "2026-07-13..2026-08-09",
+        "source": "next_step_click は本日実装のため実績0。参考: ページ/セッション 1.21・90%到達 10.4%・session_start 1,600（growth/reports/2026-08-10-cta-funnel.md）"
+      },
+      "target_metric": "next_step_click",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": []
     }
   ]
 }
