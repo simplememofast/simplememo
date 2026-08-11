@@ -94,8 +94,30 @@ function ctrGap() {
  * actionable; "clicks fell while impressions held and position held" (a CTR
  * loss, usually a SERP-feature change) points somewhere quite different from
  * "impressions fell too" (demand or indexing). */
+/** Days two snapshots share, as a fraction of the newer window. */
+function windowOverlap(a, b) {
+  if (!a?.meta.period_start || !b?.meta.period_start) return null;
+  const d = (x) => new Date(`${x}T00:00:00Z`).getTime();
+  const start = Math.max(d(a.meta.period_start), d(b.meta.period_start));
+  const end = Math.min(d(a.meta.period_end), d(b.meta.period_end));
+  const day = 86400000;
+  const shared = Math.max(0, (end - start) / day + 1);
+  const span = (d(b.meta.period_end) - d(b.meta.period_start)) / day + 1;
+  return span > 0 ? shared / span : null;
+}
+
+/* Equal-length windows can still be uncomparable when they cover mostly the
+ * same days: nearly every click is in both totals, so the difference is the few
+ * days at the edges plus noise. The length check below catches 28d vs 90d; this
+ * catches 28d vs 28d taken two days apart, which is what happened on
+ * 2026-08-11 (26 of 28 days shared). Withheld rather than printed with a
+ * caveat — caveats go unread, numbers do not. */
+const MAX_DECAY_OVERLAP = 0.5;
+const overlap = windowOverlap(prev, snap);
+
 function decay() {
   if (!prev) return null;
+  if (overlap != null && overlap > MAX_DECAY_OVERLAP) return { overlapping: { share: overlap } };
   // Clicks are counted over a window, so two snapshots are only comparable
   // when their windows are the same length. Every snapshot so far has been 28
   // days, which made the check look unnecessary — until the 3-month export
@@ -316,7 +338,12 @@ if (show('unanswered')) {
 if (show('decay')) {
   console.log('── Decay (vs previous snapshot)');
   if (result.decay === null) console.log('   needs a second snapshot\n');
-  else if (result.decay.incomparable) {
+  else if (result.decay.overlapping) {
+    console.log(`   withheld: ${prev.label} (${prev.meta.period_start}..${prev.meta.period_end}) and ${snap.label} (${snap.meta.period_start}..${snap.meta.period_end})`);
+    console.log(`   share ${(result.decay.overlapping.share * 100).toFixed(0)}% of their days. Almost every click is in both`);
+    console.log('   totals, so a difference here would be the window shift, not decay. Compare');
+    console.log('   snapshots taken at least one full period apart.\n');
+  } else if (result.decay.incomparable) {
     const { now_days, prev_days } = result.decay.incomparable;
     console.log(`   not comparable: this snapshot covers ${now_days} days, the previous one ${prev_days}.`);
     console.log('   Click counts scale with the window, so the difference would be the window, not decay.\n');

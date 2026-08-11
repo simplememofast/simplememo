@@ -30,6 +30,15 @@ const OUT = path.join(ROOT, 'assets/img');
 const APP_ID = 'id6758438948';
 
 /**
+ * Provider token from App Store Connect's own campaign-link generator
+ * (Analytics → Acquisition → Campaigns → +). Not a secret — it ships in every
+ * public campaign link — and NOT the vendor number, which is a different
+ * identifier used for sales reports. Without it, App Analytics recorded nothing
+ * for any `ct` token: the Campaigns page read "not enough data" across 90 days.
+ */
+const PROVIDER_TOKEN = '128498560';
+
+/**
  * Pages carrying a desktop QR. `en: true` means the page ships both languages
  * in one document and needs a code per store front.
  */
@@ -47,7 +56,8 @@ export const QR_PAGES = [
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */
 export const storeUrl = (slug, lang) =>
-  `https://apps.apple.com/${lang === 'jp' ? 'jp' : 'us'}/app/${APP_ID}?ct=${slug}-${lang}__qr&mt=8`;
+  `https://apps.apple.com/${lang === 'jp' ? 'jp' : 'us'}/app/${APP_ID}`
+  + `?pt=${PROVIDER_TOKEN}&ct=${slug}-${lang}__qr&mt=8`;
 
 const fileFor = (slug, lang) => `qr-${slug}-${lang === 'jp' ? 'ja' : 'en'}.svg`;
 
