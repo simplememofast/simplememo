@@ -20,7 +20,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseGscExport } from '../lib/csv.mjs';
-import { ROOT, GSC_DIR, buildCtrCurve, buildSegmentCurves, toPath } from '../lib/gsc.mjs';
+import { ROOT, toPath } from '../lib/gsc.mjs';
+import { buildMeta, emptyBuckets, summarise, writeSnapshot } from '../lib/snapshot.mjs';
 
 const argv = process.argv.slice(2);
 const flag = (n, d = null) => {
@@ -47,7 +48,7 @@ if (!files.length) {
   process.exit(2);
 }
 
-const buckets = { queries: [], pages: [], 'pages-aio': [], 'query-pages': [], dates: [], devices: [], countries: [] };
+const buckets = emptyBuckets();
 const skipped = [];
 
 for (const f of files) {
@@ -93,83 +94,9 @@ if (!totalRows) {
   process.exit(2);
 }
 
-const sum = (rows) => rows.reduce(
-  (acc, r) => ({ clicks: acc.clicks + (r.clicks || 0), impressions: acc.impressions + (r.impressions || 0) }),
-  { clicks: 0, impressions: 0 }
-);
-
-// Site totals come from the `dates` dimension, never from queries.
-//
-// The query export is capped at 1,000 rows and omits anonymised queries, so it
-// covers only a fraction of real traffic — on the 2026-08-09 export it showed
-// 257 clicks / 15,778 impressions against a true 813 / 38,599. Reporting the
-// query-table sum as "site clicks" would understate traffic by ~68% while
-// looking perfectly plausible, which is worse than having no number at all.
-// Pages is a close second (near-complete); queries is the last resort and is
-// flagged when used.
-const totalsSource =
-  buckets.dates.length ? { rows: buckets.dates, from: 'dates' }
-  : buckets.pages.length ? { rows: buckets.pages, from: 'pages' }
-  : { rows: buckets.queries, from: 'queries (TRUNCATED — top 1,000 only; treat as a floor)' };
-const totals = sum(totalsSource.rows);
-
-// The CTR curve prefers `pages` over `queries` for the same reason, plus one
-// more: GSC sorts the top-1,000 query list by clicks, so the rows that get cut
-// are disproportionately high-impression/low-click ones. A curve fitted to
-// what survives runs high, and an inflated expected CTR manufactures
-// "opportunities" out of ordinary performance — the exact error this curve
-// exists to avoid. Pages carries position at near-full impression coverage.
-const curveSource = buckets.pages.length ? buckets.pages : buckets.queries;
-const curveFrom = buckets.pages.length ? 'pages' : 'queries';
-const { curve, derivedPositions, calibration } = buildCtrCurve(curveSource);
-// Japanese and English pages do not click alike at the same position, so a
-// single curve judges the smaller segment against the larger one's standard.
-const segmentCurves = curveFrom === 'pages' ? buildSegmentCurves(curveSource) : {};
-
-const coverage = totals.impressions
-  ? sum(curveSource).impressions / totals.impressions
-  : null;
-
-const meta = {
-  label,
-  captured_at: new Date().toISOString().slice(0, 10),
-  period_start: period ? period.split('..')[0] : null,
-  period_end: period ? period.split('..').pop() : null,
-  source_files: files,
-  row_counts: Object.fromEntries(Object.entries(buckets).map(([k, v]) => [k, v.length])),
-  totals: {
-    clicks: totals.clicks,
-    impressions: totals.impressions,
-    ctr: totals.impressions ? totals.clicks / totals.impressions : null,
-    source: totalsSource.from,
-  },
-  // AI-surface exposure, kept apart from `totals` on purpose. These rows carry
-  // impressions only, so they can never be divided into a CTR — the share of
-  // total impressions is the whole measurement, and the number to watch is
-  // whether it grows.
-  aio: buckets['pages-aio'].length ? {
-    impressions: sum(buckets['pages-aio']).impressions,
-    pages: buckets['pages-aio'].length,
-    impression_share: totals.impressions
-      ? sum(buckets['pages-aio']).impressions / totals.impressions
-      : null,
-  } : null,
-  ctr_curve: curve,
-  ctr_curve_source: curveFrom,
-  // Share of total impressions the curve was fitted on. A low value means the
-  // curve reflects a biased slice, not the site.
-  ctr_curve_coverage: coverage,
-  // Which positions the curve measured from this site's own rows vs. fell back
-  // to the reference table. A reader comparing two snapshots needs to know
-  // whether a moved "expected CTR" reflects the site or just better coverage.
-  ctr_curve_derived_positions: derivedPositions,
-  // Level fitted against the reference shape: <1 means the site clicks less
-  // than the reference table predicts for the positions it holds.
-  ctr_curve_calibration: calibration,
-  // Per-language curves. Only segments with enough impressions to fit their own
-  // appear here; everything else falls back to `ctr_curve` via curveFor().
-  ctr_curve_segments: segmentCurves,
-};
+// Totals rule, CTR curve and meta shape are shared with the BigQuery ingest —
+// see lib/snapshot.mjs for why they cannot live in either script.
+const meta = buildMeta({ label, buckets, period, source: 'csv-export', sourceFiles: files });
 
 if (dryRun) {
   console.log('\n--dry-run: nothing written.');
@@ -177,21 +104,14 @@ if (dryRun) {
   process.exit(0);
 }
 
-const outDir = path.join(GSC_DIR, label);
-fs.mkdirSync(outDir, { recursive: true });
-for (const [kind, rows] of Object.entries(buckets)) {
-  if (!rows.length) continue;
-  fs.writeFileSync(path.join(outDir, `${kind}.json`), JSON.stringify(rows, null, 0) + '\n');
-}
-fs.writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(meta, null, 2) + '\n');
+const outDir = writeSnapshot({ label, buckets, meta });
 
-console.log(`\nSnapshot written: growth/data/gsc/${label}/`);
-console.log(`  ${totals.clicks} clicks · ${totals.impressions} impressions · CTR ${(meta.totals.ctr * 100).toFixed(2)}%  [totals from: ${totalsSource.from}]`);
-console.log(`  CTR curve fitted on ${curveFrom}` +
-  (coverage != null ? ` (${(coverage * 100).toFixed(0)}% of total impressions)` : '') +
-  `; measured at positions: ${derivedPositions.join(', ') || '(none — reference curve throughout)'}`);
+console.log(`\nSnapshot written: ${path.relative(ROOT, outDir)}/`);
+console.log(summarise(meta));
 if (buckets.queries.length >= 1000) {
-  console.log(`  note: the query export is capped at 1,000 rows (${sum(buckets.queries).impressions.toLocaleString()} of ${totals.impressions.toLocaleString()} impressions). Query-level analysis sees only the head of the distribution.`);
+  const queryImpressions = buckets.queries.reduce((n, r) => n + (r.impressions || 0), 0);
+  console.log(`  note: the query export is capped at 1,000 rows (${queryImpressions.toLocaleString()} of ${meta.totals.impressions.toLocaleString()} impressions). Query-level analysis sees only the head of the distribution.`);
+  console.log('        growth/scripts/ingest-bigquery.mjs has no such cap — see growth/BIGQUERY_SETUP.md.');
 }
 console.log('\nNext:  node growth/scripts/analyze.mjs        # opportunities, CTR gaps, decay, cannibalisation');
 console.log('       node growth/scripts/weekly-report.mjs   # the report a human actually reads');
