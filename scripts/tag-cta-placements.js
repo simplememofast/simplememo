@@ -77,6 +77,16 @@ function stripCtaAttrs(html) {
   return html.replace(/\s+data-cta-(?:placement|cluster|variant)="[^"]*"/g, '');
 }
 
+/**
+ * Query parameters in HTML source are separated by `&amp;`, so the character
+ * immediately before every parameter after the first is `;`, not `&`. Matching
+ * on `[?&]ct=` alone silently stopped recognising every CTA on the site the
+ * moment `pt=` was added ahead of `ct=` — 892 links were reclassified as
+ * editorial references in one edit.
+ */
+const PARAM_CT = /(?:[?&]|&amp;)ct=/;
+const PARAM_PT = /(?:[?&]|&amp;)pt=/;
+
 /** Byte ranges of page chrome, so nav/footer CTAs are not mistaken for content. */
 function chromeZones(html) {
   const zones = [];
@@ -118,7 +128,7 @@ function classify(html) {
     // reference link on a page steals the `bottom` label from the actual
     // closing CTA — which is how a placement measurement ends up meaning
     // different things on different pages.
-    a.isCta = a.isOwn && /[?&]ct=/.test(a.tag);
+    a.isCta = a.isOwn && PARAM_CT.test(a.tag);
     if (/class="[^"]*(nav-cta|global-nav)/.test(a.tag)) a.zone = 'nav';
   }
   // Placement is where the CTA physically sits in the content, NOT its ordinal
@@ -198,7 +208,7 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
 
     // ct= gains the placement suffix; a token already carrying one is left alone
     // so re-running is idempotent.
-    tag = tag.replace(/([?&]ct=)([^"&]*)/, (m, pre, token) => {
+    tag = tag.replace(/((?:[?&]|&amp;)ct=)([^"&]*)/, (m, pre, token) => {
       const base = token.split('__')[0];
       const next = `${base}__${a.placement}`;
       if (next.length > CT_MAX) {
@@ -237,6 +247,16 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
     if (WRITE) { fs.writeFileSync(file, html); filesChanged++; }
     else problems.push(`${rel}: ${anchors.filter((a) => a.placement).length} CTA(s) not tagged with placement metadata`);
   }
+
+  // A campaign token without the provider token records nothing. Every `ct` on
+  // this site shipped without `pt` until 2026-08-11, and App Analytics showed
+  // "not enough data" for ninety days rather than an error — the tracking looked
+  // installed and was inert. Note the provider token is NOT the vendor number;
+  // it comes from App Store Connect's own campaign-link generator.
+  const missingPt = anchors.filter((a) => a.isCta && !PARAM_PT.test(a.tag));
+  if (missingPt.length) {
+    problems.push(`${rel}: ${missingPt.length} CTA(s) carry ct= without pt= — App Analytics will not record them`);
+  }
 }
 
 problems.forEach((p) => console.log(`  ${p}`));
@@ -249,7 +269,7 @@ if (WRITE) {
   process.exit(problems.length ? 1 : 0);
 }
 if (problems.length) {
-  console.error(`FAIL: ${problems.length} file(s) have untagged CTAs — run: node scripts/tag-cta-placements.js --write`);
+  console.error(`FAIL: ${problems.length} file(s) — see above. Placement metadata: node scripts/tag-cta-placements.js --write. Missing pt= must be added to the href.`);
   process.exit(1);
 }
 console.log(`OK: every App Store CTA carries placement/cluster/variant metadata (${notices.length} keep page-level ct=)`);
