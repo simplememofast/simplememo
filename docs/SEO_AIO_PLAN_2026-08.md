@@ -691,3 +691,88 @@ CSSには `check-css-version.mjs` があったがJSには無く、**報告する
 2. **P1-3 一次情報1本** — 通信の実測など。実機計測が要る
 3. **P1-4 EN 3本のネイティブ書き直し** — 8,482表示・CTR 0.2〜0.95%
 4. **動画の再収録** — macOS環境が使えるようになれば、図解4本を実機の画面収録に差し替える価値はある
+
+---
+
+## 10. P1-4 実装記録（2026-08-11）— 見立ての訂正を含む
+
+英語3ページを書き直した。**本書 §2-5 の原因の見立ては、3ページのうち1ページしか当たっていなかった。**
+
+### 10-1. §2-5 の訂正
+
+§2-5 は「原因は翻訳文体か、意図の不一致か、その両方」と書いた。
+実際にページを読むと、3ページで原因が違う。
+
+| ページ | 実際の原因 | 書き直しで直るか |
+|---|---|---|
+| `/en/iphone-shortcuts-email-guide/` | **意図不一致。**英語自体は自然 | ✅ 直せる |
+| `/en/vs/google-keep-vs-apple-notes/` | **構造的。**タイトル・ディスクリプションとも既に最適 | ❌ ほぼ直らない |
+| `/en/blog/ios-quick-capture-comparison` | **記事内の数値が自己矛盾** | ✅ 直せる |
+
+「翻訳文体」は主因ではなかった。`google-keep-vs-apple-notes` の冒頭は
+"Short answer: if every device you own is Apple, pick Apple Notes — …" で、
+機械翻訳臭はない。**読まずに原因を書いていた。**
+
+### 10-2. 最大の発見 — 自社の数値が3系統に割れていた
+
+`/en/blog/ios-quick-capture-comparison` は起動速度をこう書いていた。
+
+| アプリ | 当該ページ | `/blog/fastest-memo-app-benchmark`（入力開始まで） | `/en/blog/fastest-note-app-iphone-2026`（合計） |
+|---|---:|---:|---:|
+| Simple Memo | 約1秒 | 約1秒 | 約1秒 |
+| Drafts | 0.6–0.7秒 | 0.8秒 | 1.3秒 |
+| Apple Notes | **0.4–0.5秒** | 2.5秒 | 2.6秒 |
+| Google Keep | 0.7–0.8秒 | 2.8秒 | 3.45秒 |
+| Bear | 0.8–0.9秒 | 3.2秒 | 3.7秒 |
+| Notion | 1.0–1.2秒 | 6.5秒 | — |
+
+後ろ2つは互いに整合している。**当該ページだけが外れており、しかも
+「競合を全部自分より速い数字で並べたうえで、自分を the fastest of the bunch /
+the speed champion と書いていた」。**同じページ内で矛盾している。
+
+さらに `Final Verdict` にも "the fastest app on the market"、
+料金表には自社が「Free / N/A」（無料枠3通/日と有料プランの記載なし）とあった。
+
+**これは翻訳の問題ではなく、検証されていない主張の問題である。**
+AIに引用させたい面で、自社サイトが自社の数値について食い違っているのは
+最も避けたい状態にあたる。
+
+### 10-3. 実施した変更
+
+**`/en/blog/ios-quick-capture-comparison`**
+- 起動速度セクションを正準の計測表に差し替え、`/blog/fastest-memo-app-benchmark` と `/blog/benchmark-methodology` を参照
+- **「Drafts のほうが速い」と明記**（"Drafts is faster than we are, and it stays faster."）。速度だけが基準なら Drafts を選べ、と書いた
+- 主張を「起動の速さ」から「送信して保存先に届くまで」に移した。計測が支持しているのはそちら
+- `Introduction: The Speed Matters`（非文法）→ `Why capture speed decides which app you keep`
+- 「We've tested each app extensively」を、公開済みの計測手順への参照に置換
+- 料金表の自社行を `site-constants.json` に一致させた（無料3通/日・$2.99/月・$29.99/年）
+
+**`/en/iphone-shortcuts-email-guide/`**
+- 「Show Compose Sheet」系5クエリ（67+表示・順位6.0〜8.1・**全部0クリック**）に対し、
+  質問文どおりの `<h2>What does "Show Compose Sheet" do in Shortcuts?</h2>` と2文の答えを追加。
+  ページは同トグルを15回書いていたが**一度も見出しにしておらず**、全H2が「Recipe N」だった
+- タイトル `iPhone Shortcuts to Email Yourself: 5 Recipes (No Compose Sheet)` → `Email Yourself on iPhone: 5 Shortcuts + Show Compose Sheet`
+- ディスクリプションを134文字に短縮し、**答えがスニペット内に収まる**ようにした（旧217文字は途中で切られる）
+- 短縮形の回避（`let us` → `let's` 等）を修正
+
+**`/en/vs/google-keep-vs-apple-notes/`**
+- `7 Three-Way Comparison Points` → `Seven things that actually differ`、`Scenario: Using All Three Apps` → `What using all three together looks like`
+- 速度の記述（Keep 2–3秒 / Apple Notes 1.5–2秒）を計測表に合わせた
+- **このページのCTRは、この変更では動かない見込み。** 判定材料としては残す
+
+### 10-4. 残っている不整合（本件のスコープ外）
+
+正準表と食い違う数値が他に14箇所ある。
+
+- `en/vs/notion/`・`en/vs/notion-vs-evernote/`・`en/vs/notion-vs-obsidian/` — Notion「3–5秒」
+- `en/blog/best-memo-apps-2026` — Notion「2–3秒」
+- `blog/memo-app-speed-test-2026` — Apple Notes「2.0秒」
+
+散文の概算なのか別計測なのかはページごとに判断が要る。**P1-4は3ページの指示なので
+ここでは触っていない。**サイト全体で数値を一本化するかは別途決める。
+
+### 10-5. 判定
+
+`en-2026-08-11-native-rewrite` — 評価日 2026-11-11、閾値 **CTR 1.5%**。
+ベースライン 57クリック / 8,482表示 / 0.67% / 平均順位7.8（2026-05-09..08-08）。
+超えなければ英語圏への追加投資を止める、という §4 P1-4 の事前宣言をそのまま適用する。
