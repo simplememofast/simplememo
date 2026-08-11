@@ -13,7 +13,7 @@
   "units": "seconds",
   "columns": {
     "focus": "tap → the note field receives focus",
-    "ready": "tap → the keyboard is fully presented and the app will accept a keystroke. INCLUDES every tap in the app's sequence. This is the published figure.",
+    "ready": "tap → the keyboard is fully presented and the app will accept a keystroke. INCLUDES every tap in the app's sequence. This is the published figure. Measured on WARM launches — see launchCondition.",
     "first_char": "tap → the first character appears. Adds one human keypress on top of `ready`; recorded, not published, because that keypress ranged 0.200-0.500s across apps and belongs to the hand, not the app."
   },
   "apps": {
@@ -28,14 +28,15 @@
       ]
     },
     "Drafts": {
-      "ready": 1.45,
+      "ready": 0.9,
       "focus": 1.0,
       "first_char": 1.667,
       "n": 5,
       "ready_range": [
         0.9,
         1.567
-      ]
+      ],
+      "ready_basis": "FAST MODE, not the median. Runs: 0.9 / 1.55 / 1.45 / 1.383 / 1.567. The published figure is the 0.900s run on the owner's instruction to take the faster side of a bimodal set: 0.900 sits 0.48s below a cluster that itself spans only 0.18s. Every other app publishes a median. Drafts is the only app that has BOTH per-run `ready` values and a bimodal split, so it is the only one the rule can be applied to — the six apps from the full run kept only median and range. If the rule is ever applied uniformly, Drafts' median is 1.450."
     },
     "Apple Notes": {
       "ready": 1.726,
@@ -433,8 +434,8 @@
         }
       },
       "headline": "Bear halves: 1.900s to 0.917s, and moves from 4th to 2nd. Drafts moves the other way, 1.200s to 1.450s, and drops behind Bear. Our own lead over the nearest rival therefore narrows from 3.0x (vs Drafts) to 2.3x (vs Bear).",
-      "unresolved": "Which mode was the cold one is still not settled, and the re-recording arguably deepens the question rather than closing it. The full run had Bear at 0.7-0.8s and 1.9-2.3s; this run lands tightly on 0.917-0.950s, i.e. near the FAST mode, not between them. If the fast mode were warm starts, this run would be warm throughout — but Drafts, recorded in the same session minutes later, is NOT uniformly fast (0.900s then 1.383-1.567s), which is hard to explain as a warm session. Recorded as an open point rather than argued away.",
-      "exposure": "Bear moved 2x between two sessions on the same device and OS. The four apps still carrying wide ranges from the full run — Apple Notes 1.2-2.367s, Evernote 2.3-5.1s, OneNote 2.2-3.3s, Notion 2.5-3.5s — are exactly the shape Bear had before it was re-recorded. The two apps with tight ranges (our own 0.366-0.433s, Google Keep 1.969-2.234s) are the two nobody has disputed. Re-recording the wide four would likely move them too; it has not been done."
+      "unresolved": "RESOLVED 2026-08-11 by the owner: the launches were WARM. Force quit plus a >5s dwell was performed for every run, and every relaunch was reviewed and came up warm regardless. That explains what the earlier note could not — this run landing tightly near the FAST mode of the full run rather than between the two modes — and it means the full run's bimodality was not cold-vs-warm at all. See launchCondition.",
+      "exposure": "Bear moved 2x between two sessions on the same device and OS, which is still unexplained by the warm finding: warm launches should not be twice as slow as other warm launches. The four apps still carrying wide ranges from the full run — Apple Notes 1.2-2.367s, Evernote 2.3-5.1s, OneNote 2.2-3.3s, Notion 2.5-3.5s — are the shape Bear had before it was re-recorded. An earlier version of this note read those ranges as a cold/warm mix; with the launches confirmed warm that reading is wrong, and the spread is within-warm variance instead. Either way the two apps with tight ranges (our own 0.366-0.433s, Google Keep 1.969-2.234s) are the two nobody has disputed, and re-recording the wide four would likely move them. It has not been done, and until it is, those four are the least trustworthy rows in the table."
     }
   ],
   "readyDefinition": {
@@ -456,11 +457,19 @@
   },
   "canonicalRun": "2026-08-11-owner-full",
   "launchColumnRetired": "The old table carried a separate 起動速度 (app-drawn) column. This run does not measure it — it measures focus, which for a multi-step app lands after the taps, not before. Rather than carry a stale column beside fresh ones, 起動速度 is retired and `focus` published in its place.",
-  "draftsNote": "Drafts has now been measured twice and moved both times. The retired March table put it at 0.8s and FASTER than us, which is why /en/blog/ios-quick-capture-comparison said so in print. The 2026-08-11 full run put it at 1.200s (range 0.4-1.5). The re-recording puts it at 1.450s (range 0.900-1.567), with four of five runs inside 1.383-1.567s and one fast outlier at 0.900s. Publish the median with the range; the outlier is why the range column exists. It is no longer the closest rival — Bear is.",
+  "draftsNote": "Drafts has been measured three times and moved every time. The retired March table put it at 0.8s and FASTER than us, which is why /en/blog/ios-quick-capture-comparison said so in print. The 2026-08-11 full run put it at 1.200s. The re-recording produced 0.900 / 1.383 / 1.450 / 1.550 / 1.567s, and the published figure is the 0.900s fast mode (see apps.Drafts.ready_basis), which puts it level with Bear at the top of the field behind us. Publish the range with it — one run in five reached 0.900s and the rest sat near 1.45s, so the headline figure is the best of the five, not the typical one. That asymmetry is the reason the range column exists.",
   "canonicalRunOverrides": {
     "Bear": "2026-08-11-owner-rerecord-bear-drafts",
     "Drafts": "2026-08-11-owner-rerecord-bear-drafts",
     "_why": "canonicalRun covers six apps. These two were re-recorded after it, and their figures come from that run instead. Kept as an explicit override so no one has to diff two run blocks to find out which number is live."
   },
-  "bearNote": "Bear is the largest single correction this table has taken: 1.900s in the full run, 0.917s on re-recording, second place. Treat the 1.900s figure as withdrawn, not as an alternative reading — the full run mixed 0.7-0.8s and 1.9-2.3s launches and its median sat on the slow mode, while the re-recording is five runs inside a 0.033s band. It is now the nearest competitor at 2.3x our 0.400s, so a page that names \"the second-fastest app\" means Bear, not Drafts."
+  "bearNote": "Bear is the largest single correction this table has taken: 1.900s in the full run, 0.917s on re-recording. Treat the 1.900s figure as withdrawn, not as an alternative reading — the full run mixed 0.7-0.8s and 1.9-2.3s launches and its median sat on the slow mode, while the re-recording is five runs inside a 0.033s band. It needs no fast-mode adjustment: unimodal, and its median IS its fastest run. It now ties Drafts for second at 0.9s, and the two are separated by 0.017s, which is inside the +-0.02-0.05s boundary error the owner puts on these readings.",
+  "launchCondition": {
+    "published_as": "warm start",
+    "protocol_performed": "Force quit from the app switcher, wait more than 5 seconds, relaunch — the documented cold-start protocol, followed for every run.",
+    "what_actually_happened": "Warm. The owner reviewed every relaunch in the recordings on 2026-08-11 and confirmed all of them came up warm despite the force quit and the dwell. On iOS 26.5.2 that sequence does not reliably evict an app from memory.",
+    "why_the_whole_table_is_labelled_warm": "Only the Bear and Drafts re-recording was reviewed frame by frame for this, but the earlier session used the same protocol on the same device and the same OS, so the same iOS behaviour applies. Labelling two apps warm and six cold would assert a difference nothing supports.",
+    "why_it_matters": "The methodology page claimed the opposite in print — that warm starts are faster and we publish \"the more conservative cold-start figure\". We were not. A comparison table is still fair when every app is warm; what is not defensible is naming a condition that was not the one measured.",
+    "effect_on_the_figures": "None. No number moved because of this; only the label did. Warm is also the condition most users are actually in, since an app opened several times a day is rarely evicted."
+  }
 }
