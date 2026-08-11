@@ -31,6 +31,7 @@ const IMAGES = [
   { file: 'obsidian-shortcuts-not-working.png', title: 'Obsidian × ショートカットが\n動かない', icon: '🧩' },
   { file: 'obsidian-apple-watch-not-working.png', title: 'Apple WatchからObsidianへ\n送れない理由', icon: '⌚' },
   { file: 'obsidian-daily-note.png', title: 'iPhoneを開かず\nObsidianのデイリーノートへ', icon: '📅' },
+  { file: 'obsidian-logseq.png', title: 'Obsidian と Logseq\nどちらを選ぶ？', icon: '⚖️' },
 ];
 
 /**
