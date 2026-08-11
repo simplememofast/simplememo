@@ -837,6 +837,35 @@
       ]
     },
     {
+      "id": "brand-2026-08-11-entity-merge",
+      "page": "(サイト全体 + サイト外4面)",
+      "type": "entity_consolidation",
+      "hypothesis": "エンティティが6つの別名に割れており、702表示しかないブランド需要がさらに分割されている。表記を1つに統一すればナレッジグラフとLLMのエンティティ解決が安定し、ブランド検索が伸びる。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-11",
+      "evaluation_at": "2026-11-11",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 95,
+        "impressions": 702,
+        "ctr": 0.1353,
+        "position": 3.8,
+        "window": "2026-05-09..2026-08-08",
+        "source": "ブランド検索14クエリ合計(可視分) — docs/SEO_AIO_PLAN_2026-08.md §2-4"
+      },
+      "target_metric": "brand_search_impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-11: オーナーがサイト外（App Store・note・Zenn・X）の表示名統一を完了。サイト側はOrganizationを持つ223ページ全数が正準@id https://simplememofast.com/#organization を指しており元から連結済みだったため、施策案の「sameAsを全240ページに展開」は不要と判明していた（§4 P0-4追記）。これでエンティティ分割は内外とも解消し、施策は投入完了。あとは評価日にブランド検索表示数を読むだけ。"
+      ]
+    },
+    {
       "id": "en-2026-08-11-native-rewrite",
       "page": "(3 pages: /en/iphone-shortcuts-email-guide/, /en/vs/google-keep-vs-apple-notes/, /en/blog/ios-quick-capture-comparison)",
       "type": "content_rewrite",
@@ -913,6 +942,33 @@
         "source": "GSC 3ヶ月ページ次元。AIO表示25件。被リンク数は未計測のため、評価時にAhrefsで参照する"
       },
       "target_metric": "impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": []
+    },
+    {
+      "id": "video-2026-08-11-five-clips",
+      "page": "(5 pages: /, /apple-watch/, /siri/, /obsidian/, /ai-tags/)",
+      "type": "video",
+      "hypothesis": "240ページに動画が1つも無く、リッチリザルト露出はレビュースニペット13表示のみ。動画は現在も表示され続ける数少ない型で、how-toクエリではAI Overviewが動画を引用する。5本入れれば新規の露出面を獲得できる。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-11",
+      "evaluation_at": "2026-10-11",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": 0,
+        "ctr": null,
+        "position": null,
+        "window": "2026-05-09..2026-08-08",
+        "source": "GSC 検索での見え方: レビュースニペット13表示のみ、動画は0。動画リッチリザルト表示数を新規に追う"
+      },
+      "target_metric": "rich_result_impressions",
       "decision": null,
       "evaluated_at": null,
       "notes": []
