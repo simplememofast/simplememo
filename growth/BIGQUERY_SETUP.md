@@ -153,6 +153,68 @@ GitHub → Actions → **SEO Daily (BigQuery)** → **Run workflow**。
 
 ---
 
+## 6. 週次PRのマージまで自動にする（任意・5分）
+
+毎週月曜のスナップショットPRは、既定では**SEO Validation が自動で走りません**。
+GitHub には再帰防止の仕様があり、`GITHUB_TOKEN` による push や PR 作成は
+他のワークフローを起動しないためです。結果、`auto-merge.yml` も発火せず、
+マージに手動の再実行が1クリック要ります。
+
+週1回のクリックが気にならなければ、この手順は不要です。
+
+自動にするには PAT（Personal Access Token）を1つ登録します。
+
+### 作る
+
+GitHub → Settings（アカウント）→ Developer settings →
+**Personal access tokens** → **Fine-grained tokens** → **Generate new token**
+
+Fine-grained を使ってください。classic は組織内の全リポジトリに効いてしまいます。
+
+| 項目 | 値 |
+| --- | --- |
+| Token name | `simplememo-seo-daily` |
+| Expiration | 90日〜1年（無期限にしない） |
+| Repository access | **Only select repositories** → `simplememofast/simplememo` **だけ** |
+
+Permissions は**2つだけ**:
+
+| 権限 | レベル |
+| --- | --- |
+| Contents | Read and write |
+| Pull requests | Read and write |
+
+> **Workflows 権限は付けないでください。** 週次コミットが触るのは
+> `growth/data/` と `growth/reports/` だけで、`.github/workflows/` は
+> 変更しません。付けると、このトークンでCI定義自体を書き換えられる状態に
+> なります。付けない理由があるので付けない、というだけです。
+
+### 登録する
+
+GitHub → リポジトリ → Settings → Secrets and variables → Actions →
+**New repository secret**
+
+- Name: **`GH_PAT`**（この名前でないとワークフローが拾いません）
+- Secret: 生成されたトークンを貼る
+
+**トークンは生成直後の1回しか表示されません。** 貼り終えたら、
+メモやチャットに残った控えは消してください。
+
+### 確認する
+
+Actions → **SEO Daily (BigQuery)** → **Run workflow** で
+`snapshot` を **true** にして実行。作られたPRに **SEO Validation** が
+走っていればPATが効いています。走っていなければ Secret 名か
+Repository access を見直してください。
+
+### 期限が切れたら
+
+PATが失効すると、週次のコミット手順が push で失敗し、
+**ワークフローが赤くなります**（黙って止まりはしません）。
+新しいトークンを同じ `GH_PAT` に上書きすれば復旧します。
+
+---
+
 ## 手作業のCSVはいつやめられるか
 
 **あと28日ぶん履歴が溜まるまでは続ける。**
@@ -204,6 +266,22 @@ Discover の比率が動いたとき、ウェブ検索の数字だけ見てい�
 AI Overview が答えを吸っている場合、これが出方になる。**断定はできない**が、
 「順位は無事なのにクリックが消えた」は他の原因（強調スニペット、
 競合のリッチリザルト）と合わせて実際に見るべき現象で、毎日測る価値がある。
+
+**③ 生成AI機能のエクスポートだけは手作業が残る**
+
+Search Console の「Search Generative AI 機能のパフォーマンス」エクスポートは
+UI からのCSVダウンロードのみで、**BigQuery一括エクスポートに対応する列が無い**。
+`ingest-gsc.mjs` はこれを `pages-aio` として取り込む（表示回数のみ・
+クリックもCTRも順位もGoogleが返さないため、`pages` とは別バケットにしてある）。
+
+つまり手作業のCSVを完全にやめると、**この次元だけ静かに集まらなくなる**。
+「AI面からの表示がゼロだった」ではなく「誰も取っていない」なのに、
+見え方は同じになる。`ingest-bigquery.mjs` は `pages-aio` が空のとき毎回
+その旨を出力する。
+
+AI面のシェアを追いたいなら、このCSVだけは月1回でも落とし続けること。
+`meta.bigquery.surfaces` は `search_type`（WEB / DISCOVER / NEWS …）の内訳で、
+これとは別の切り口。
 
 サイト側のAIO施策（`llms.txt`、JSON-LD、FAQスキーマ、AIクローラの許可）は
 既に入っている。`robots.txt` は GPTBot / ClaudeBot / PerplexityBot /
