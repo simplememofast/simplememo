@@ -58,6 +58,12 @@ STILL_RUN = 12
 
 # A caret blinks at roughly 1Hz: ~30 frames on, ~30 off at 60fps.
 BLINK_MIN_HZ, BLINK_MAX_HZ = 0.6, 1.6
+# Longest gap between "screen settled" and "caret appeared" that can still be a
+# real readiness event. Beyond this the detector is looking at something else.
+# Set from both directions: the synthetic fixtures' true onsets are 0.2-0.6s
+# after settle, while the exit animation on the 2026-08-11 recording sat at
+# 1.95s and slipped under an earlier 2.0s bound.
+MAX_ONSET_S = 1.5
 
 
 def extract(path, fps, workdir, scale=480):
@@ -123,11 +129,11 @@ def find_caret(frames, start, fps):
     must run on the settled screen and not from the tap.
     """
     if start >= len(frames) - int(fps * 2):
-        return None, 0.0
+        return None, 0.0, False
     seg = frames[start:]
     h, w = seg.shape[1:]
     ch, cw = max(4, h // 40), max(4, w // 40)
-    best = (None, 0.0)
+    best = (None, 0.0, None, 0.0)
     for y in range(0, h - ch, ch):
         for x in range(0, w - cw, cw):
             cell = seg[:, y:y + ch, x:x + cw].mean(axis=(1, 2))
@@ -144,12 +150,33 @@ def find_caret(frames, start, fps):
             total = spec[1:].sum() or 1.0
             score = float(peak / total)         # share of variation at caret rate
             if score > best[1]:
-                # First frame in this cell that departs from its own baseline —
-                # the caret's first appearance, not the whole segment's start.
-                dev = np.abs(cell - cell[0])
-                onset = int(np.argmax(dev > swing * 0.4))
-                best = (start + onset, score)
-    return best
+                best = (start, score, cell, swing)
+    if best[0] is None:
+        return None, 0.0, False
+    _, score, cell, swing = best
+    # When does the blinking begin?
+    #
+    # Take the cell's first departure from its opening value. That is right when
+    # the caret arrives after the screen settles, and it is what the synthetic
+    # fixtures exercise.
+    #
+    # It is wrong when the app auto-focuses its field, because then the caret is
+    # already in the first settled frame and there is no arrival to find. The
+    # search runs on to the largest late change instead — on the 2026-08-11
+    # recording that was the app being swiped away, reported as a 2.7s cursor
+    # that the frames show present at 0.3s.
+    #
+    # The two cases cannot be told apart from a short window of the blink alone:
+    # an initial flat run is either "no caret yet" or "the caret is mid-phase".
+    # What separates them is scale. A caret that first appears more than
+    # MAX_ONSET_S after the screen has settled is not a launch-readiness event —
+    # nothing about becoming ready to type takes that long once drawing is done.
+    # Past that bound, treat the cursor as having been there all along and say
+    # so, rather than reporting a number from whatever else moved.
+    onset = int(np.argmax(np.abs(cell - cell[0]) > swing * 0.4))
+    if onset > MAX_ONSET_S * fps:
+        return start, score, True        # present at settle; no distinct onset
+    return start + onset, score, False
 
 
 def analyse(path, fps, contact_sheet=None):
@@ -163,7 +190,8 @@ def analyse(path, fps, contact_sheet=None):
         # tap put the whole launch animation in scope, and its variance buries
         # a 3px caret — the first test run reported 0.667s for a caret that
         # appears at 1.400s, having locked onto the loading transition.
-        caret, caret_score = find_caret(frames, (settled if settled is not None else tap) + 1, fps)
+        caret, caret_score, caret_at_settle = find_caret(
+            frames, (settled if settled is not None else tap) + 1, fps)
 
         res = {
             'file': os.path.basename(path),
@@ -182,6 +210,9 @@ def analyse(path, fps, contact_sheet=None):
             res['warning'] = 'caret detected before screen settled — verify with --contact-sheet'
         if caret_score < 0.12:
             res['warning'] = 'weak blink signal — cursor may never appear, or the app was already open'
+        elif caret_at_settle:
+            res['cursor_present_at_settle'] = True
+            res['warning'] = 'cursor already present when the screen settled — ready == launch'
 
         if contact_sheet:
             marks = [m for m in (tap, settled, caret) if m is not None]
