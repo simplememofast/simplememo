@@ -154,7 +154,9 @@ export const onRequest = async (context) => {
   //    fallback if a Function deploy ever fails — keep the two in sync.
   const RETIRED = {
     "/blog/captio-alternatives-comparison": "/captio-alternative/",
+    "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
     "/blog/memo-shuukan-tips": "/blog/memo-habit",
+    "/devlog/captio-alternative": "/captio-alternative/",
     "/en/blog/why-captio-died": "/en/captio-alternative/",
     "/privacy-policy": "/privacy",
     "/privacy-policy/": "/privacy",
