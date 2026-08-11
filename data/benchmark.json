@@ -11,8 +11,8 @@
   },
   "units": "seconds",
   "columns": {
-    "launch": "app icon tap (finger-lift frame) to app drawn",
-    "ready": "app icon tap to cursor blinking in an editable field"
+    "launch": "app icon tap (finger-lift frame) to the app finishing its first draw",
+    "ready": "app icon tap to the first character being enterable in the note body, INCLUDING any taps needed to get there"
   },
   "apps": {
     "Simple Memo - for Obsidian": {
@@ -84,10 +84,10 @@
   "measuredRuns": [
     {
       "run": "2026-08-11-owner-recording",
-      "source": "ScreenRecording_08112026_151315 (38.0s, 60fps, 1170x2532)",
+      "source": "ScreenRecording_08112026_151315 (38.0s, 60fps, 1170x2532) — iPhone 16e, confirmed by the owner",
       "analysedBy": "scripts/analyze-launch-recording.py",
       "status": "NOT canonical — see deviations",
-      "device_note": "Recording is 1170x2532. That is the iPhone 12/12 Pro/13/13 Pro/14 class, NOT the iPhone 15 Pro (1179x2556) the methodology page documents. Older hardware, yet every figure came out faster than the published table.",
+      "device_note": "iPhone 16e (A18). An earlier version of this note inferred 'iPhone 12/13/14 class' from the 1170x2532 resolution and concluded the run used OLDER hardware than the methodology page's iPhone 15 Pro. That was wrong: the 16e shares the 14's display but carries the A18, which is a generation NEWER than the 15 Pro's A17 Pro and faster on CPU. Faster launch figures are therefore partly expected, and this run is not like-for-like with the published table either way.",
       "deviations_from_protocol": [
         "Force quit was performed (verified frame-by-frame: the switcher card is flung upward off-screen before each relaunch), but the dwell before relaunching was 0.13-1.92s, not the documented 5 seconds.",
         "Competitors have n=1 each; the protocol asks for 3. Only our own app has n=5.",
@@ -120,7 +120,24 @@
         }
       },
       "ready_note": "Only our own app's ready time is trustworthy here (0.600s median), because its field is focused on launch — the frames show the caret in the first settled frame. For the others 'ready to type' requires taps the detector cannot model: Notion drew its sidebar at 0.883s, then needed a compose tap and a page load, with the caret appearing around 4.0s. Those elapsed times include human reaction and are not comparable.",
-      "headline": "Every launch figure is far below the published table, and Google Keep (0.383s) and Apple Notes (0.433s) launched FASTER than our own app (0.600s). With n=1 per competitor this does not settle what the right numbers are, but it is further evidence the published table cannot be relied on."
+      "headline": "Every launch figure came in far below the published table, and Google Keep (0.383s) and Apple Notes (0.433s) launched faster than our own app (0.600s). Some of the gap is hardware — the recording is on an A18, the published table on an A17 Pro — and some is app versions moving since March. But a chip generation does not explain Notion at 0.883s against a published 3.8s, or Google Keep at 0.383s against 1.5s. Those are 4x. With n=1 per competitor this does not settle the right numbers; it does say the published competitor figures are not safe to keep quoting."
     }
-  ]
+  ],
+  "readyDefinition": {
+    "decided": "2026-08-11, by the owner",
+    "wording_ja": "アプリアイコンをタップしてから、本文に1文字目を入力できるまで。途中で必要なタップを含む。",
+    "why": "This is the number the site already argues from, and it is the only one that describes the experience being sold: a thought survives or it does not. Launch time alone flatters apps that draw fast and then make you find the compose button.",
+    "includes_human_reaction": "Yes, and that is accepted. The tap between launch and the editor is part of what the user actually does. It adds variance, so: one operator, one session, all apps back to back — then reaction time is roughly constant across apps and the differences still belong to the apps. Do NOT mix operators or sessions within a comparison.",
+    "tapSequence": {
+      "Simple Memo - for Obsidian": "launch → field is already focused → type",
+      "Drafts": "launch → new draft opens automatically (default setting) → type. If the install opens the draft list instead, tap + first and say so.",
+      "Apple Notes": "launch → new-note button (bottom right) → type",
+      "Google Keep": "launch → 「メモを入力」 → type",
+      "Bear": "launch → + → type",
+      "OneNote": "launch → notebook → + new page → type",
+      "Notion": "launch → new page → wait for the page to load → type",
+      "Evernote": "launch → + new note → type"
+    },
+    "measurement_note": "The caret detector finds when a cursor starts blinking, which lands on the right frame ONLY when no tap intervened. For every app with a tap in its sequence the detector's `ready` is not the defined metric — read those from the contact sheet instead, or mark the first-keystroke frame by hand. scripts/analyze-launch-recording.py flags which is which via cursor_present_at_settle."
+  }
 }
