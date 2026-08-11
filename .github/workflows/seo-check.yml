@@ -26,6 +26,14 @@ jobs:
       # Every URL shape GSC has reported must resolve in exactly one hop, and
       # no `X.html` may gain a sibling directory `X/` (which would make the
       # middleware's extension stripping ambiguous).
+      # The stylesheet's cache-busting query is derived from a hash of the CSS,
+      # so changing the CSS without changing the query is a hard failure. That
+      # combination shipped once (2026-08-10): the markup went live while the CDN
+      # and browsers kept serving the previous stylesheet, so none of the new
+      # rules applied and nothing reported an error.
+      - name: CSS cache-buster matches stylesheet contents
+        run: node scripts/check-css-version.mjs
+
       - name: URL normalization rules
         run: node scripts/check-url-normalization.mjs
 

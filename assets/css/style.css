@@ -2637,7 +2637,10 @@ img[src*="hero-ja"], img[src*="hero-en"] {
    900px because on a phone the badge already works. */
 .cta-qr { display: none; }
 @media (min-width: 900px) {
-  .cta-qr { display: block; margin: 1.25rem auto 0; text-align: center; }
-  .cta-qr img { width: 132px; height: 132px; background: #fff; border-radius: 12px; padding: 6px; display: block; margin: 0 auto .4rem; }
+  /* Flex, not `margin: 0 auto` on the image: the language toggle declares
+     `[data-lang].active { display: block }` at a higher specificity, so the
+     image's own display and centering cannot be relied on here. */
+  .cta-qr { display: flex; flex-direction: column; align-items: center; margin: 1.25rem 0 0; }
+  .cta-qr img { width: 132px; height: 132px; background: #fff; border-radius: 12px; padding: 6px; margin: 0 0 .4rem; }
   .cta-qr small { font-size: .72rem; color: var(--text-muted); }
 }
