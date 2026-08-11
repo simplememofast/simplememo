@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/privacy-architecture/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>Privacy Architecture — Where Your Memo Travels, Where It Never Stays</title>
+  <meta name="description" content="The complete data path: vault appends stay local, AI tagging runs on-device so memo bodies never leave the phone, and delivery is standard SMTP — not E2EE.">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Privacy Architecture — Where Your Memo Travels, and Where It Never Stays">
+  <meta property="og:description" content="Vault appends stay local. AI tagging is on-device. Not E2EE — and here is exactly why. The complete data path, stated plainly.">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/en/privacy-architecture/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Simple Memo - for Obsidian">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Privacy Architecture — Where Your Memo Travels, and Where It Never Stays">
+  <meta name="twitter:description" content="Vault appends stay local. AI tagging is on-device. Not E2EE — and here is exactly why. The complete data path, stated plainly.">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/en/privacy-architecture/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/privacy-architecture/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/privacy-architecture/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/privacy-architecture/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/en/privacy-architecture/#article","inLanguage":"en","image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","headline":"Privacy Architecture — Where Your Memo Travels, and Where It Never Stays","description":"The complete data path of Simple Memo - for Obsidian: vault appends stay local, AI tagging runs on-device, and email delivery uses standard SMTP — which is why it is not E2EE.","url":"https://simplememofast.com/en/privacy-architecture/","datePublished":"2026-08-11","dateModified":"2026-08-11","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/en/privacy-architecture/"}}</script>
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Privacy Architecture","item":"https://simplememofast.com/en/privacy-architecture/"}]}</script>
+
+  <!-- JSON-LD: Speakable -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/privacy-architecture/#webpage","inLanguage":"en","name":"Privacy Architecture","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".flow-step__title"]},"url":"https://simplememofast.com/en/privacy-architecture/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
+
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:640px;margin:0 auto 2rem}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem}
+
+    .flow-steps{list-style:none;margin:1.5rem 0 2rem;padding:0;counter-reset:flow}
+    .flow-steps li{padding:1.25rem 1.25rem 1.25rem 4rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.92rem;line-height:1.7;position:relative}
+    .flow-steps li::before{counter-increment:flow;content:counter(flow);position:absolute;left:1.25rem;top:1.25rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:var(--accent);font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .flow-step__title{display:block;font-weight:700;color:var(--text);margin-bottom:.3rem}
+
+    .compare-table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:.875rem}
+    .compare-table th,.compare-table td{padding:.75rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+    .compare-table th{color:var(--text-muted);font-weight:400;font-size:.875rem;text-transform:uppercase;letter-spacing:.05em}
+    .compare-table td:first-child{font-weight:700;color:var(--text-secondary)}
+    .compare-table .yes{color:#3fb950} .compare-table .no{color:#f85149}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.95rem;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+    .faq-summary::after{content:'+';font-size:1.2rem;color:var(--accent);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+
+    .cta-box{text-align:center;padding:2.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.2rem;font-weight:700;margin-bottom:.75rem}
+    .cta-box__desc{font-size:.875rem;color:var(--text-secondary);margin-bottom:1.5rem}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.875rem;color:var(--accent);text-decoration:none;padding:.4rem .8rem;border:1px solid rgba(100,180,255,.15);border-radius:6px;transition:border-color .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent)}
+
+    .honest-box{background:var(--surface);border:1px solid rgba(248,81,73,.25);border-radius:var(--radius-sm);padding:1.5rem;margin:1.5rem 0;font-size:.92rem;line-height:1.8;color:var(--text-secondary)}
+    .honest-box strong{color:var(--text)}
+
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,0.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,0.1)}
+    .global-nav__inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:0.5rem;text-decoration:none;color:#fff;font-weight:700;font-size:0.95rem;letter-spacing:-0.01em}
+    .global-nav__logo img{border-radius:8px}
+    .global-nav__links{display:flex;align-items:center;gap:0.25rem;list-style:none;margin:0;padding:0}
+    .global-nav__links a{color:rgba(255,255,255,0.65);text-decoration:none;font-size:0.875rem;font-weight:400;padding:0.4rem 0.7rem;border-radius:8px;transition:color 0.2s,background 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__links a:hover{color:#fff;background:rgba(100,180,255,0.08)}
+    .global-nav__actions{display:flex;align-items:center;gap:0.5rem}
+    .global-nav__cta{background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff !important;text-decoration:none;font-size:0.875rem;font-weight:700;padding:0.45rem 1rem;border-radius:20px;transition:opacity 0.2s;min-height:48px;display:inline-flex;align-items:center}
+    .global-nav__cta:hover{opacity:0.85}
+    .nav-cta-mobile{display:none}
+    .global-nav__hamburger{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer;min-width:48px;min-height:48px;padding:0.5rem;line-height:1}
+    @media (max-width:768px){
+      .global-nav__links{display:none}
+      .global-nav__cta{display:none}
+      .global-nav__hamburger{display:block}
+      .global-nav__links.open{display:flex;flex-direction:column;position:absolute;top:56px;left:0;right:0;background:rgba(10,12,18,0.95);backdrop-filter:blur(20px);padding:0.5rem 1rem 1rem;border-bottom:1px solid rgba(100,160,220,0.1);gap:0.5rem}
+      .global-nav__links.open a{color:rgba(255,255,255,0.9);padding:0.7rem 1rem;font-size:0.9rem;min-height:48px;display:flex;align-items:center}
+      .global-nav__links.open .nav-cta-mobile{display:block;text-align:center;margin-top:0.5rem;background:linear-gradient(135deg,#007AFF,#5856D6);color:#fff;border-radius:12px;padding:0.8rem;font-weight:700}
+    }
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="Main navigation">
+    <div class="global-nav__inner">
+      <a href="/en/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span>Guides</span></a></li>
+        <li><a href="/use-cases/"><span>Use Cases</span></a></li>
+        <li><a href="/vs/"><span>Compare</span></a></li>
+        <li><a href="/methods/"><span>Methods</span></a></li>
+        <li><a href="/en/blog/"><span>Blog</span></a></li>
+        <li><a href="/glossary/"><span>Glossary</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>About</span></a></li>
+        <li><a href="/devlog/"><span>Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=privacy-arch-en__nav&amp;mt=8"><span>Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn" href="/privacy-architecture/" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn active" href="/en/privacy-architecture/" aria-current="page" hreflang="en" aria-label="English" style="text-decoration:none">EN</a></div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=privacy-arch-en__nav&amp;mt=8" class="global-nav__cta">
+          <span>Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="Menu" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span>Privacy Architecture</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span>Where Your Memo Travels,<br>and Where It Never Stays</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span>"It writes to my local vault — so why does a server appear at all?" This is the question we hear most from Obsidian users, and this page answers it as a route map. What we do well (local-only vault appends, on-device AI, no server retention) and what we deliberately don't do (end-to-end encryption) are written at the same resolution.</span>
+        </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
+          <span>Author: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: <time datetime="2026-08-11">August 11, 2026</time></span>
+        </p>
+      </div>
+
+      <!-- Data path -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>The data path of a single memo</span>
+        </h2>
+        <ol class="flow-steps">
+          <li><span class="flow-step__title">Created on your device — protected with AES-GCM-256</span>A memo first enters the on-device Outbox (the unsent queue). Simple Memo - for Obsidian encrypts the on-device Outbox queue and send history with <strong>AES-GCM-256</strong> via Apple's CryptoKit; the 256-bit symmetric key lives in Apple Keychain, never leaves the device, and is excluded from backups. Offline, the memo waits here and auto-resends when the connection returns.</li>
+          <li><span class="flow-step__title">Append to your Obsidian vault — entirely local</span>With the Obsidian integration enabled, the append is a <strong>direct file write into the vault folder on your device</strong> (with a URI fallback when direct access isn't possible). No plugin, no external server — the network never appears in this path.</li>
+          <li><span class="flow-step__title">AI tagging — completed on-device</span>The automatic title (up to 20 characters), 1–3 tags, and type (todo / idea / log) are generated by <strong>on-device AI via Apple Foundation Models</strong>, entirely on your iPhone. <strong>Memos are not sent to an external server for tagging.</strong> Devices without Apple Intelligence fall back automatically to on-device lightweight formatting.</li>
+          <li><span class="flow-step__title">Email send — passes through over TLS, never stored</span>Only at send time does the body <strong>pass through</strong> our relay API (Cloudflare Workers) and the delivery provider (Resend), over TLS. Memo bodies are not persistently stored on our servers, and they are not written to logs. The client uses <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
+          <li><span class="flow-step__title">Into your own inbox — delivered over standard SMTP (= not E2EE)</span>Final delivery is standard SMTP. That is exactly why you can read your memos in your regular mail client — and also why Simple Memo - for Obsidian is <strong>not end-to-end encrypted</strong>. See "Stated plainly" below for the reasoning behind this trade-off.</li>
+        </ol>
+      </section>
+
+      <!-- What stays / what doesn't -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>What stays on a server — and what never does</span>
+        </h2>
+        <div style="overflow-x:auto">
+          <table class="compare-table">
+            <thead><tr><th>Data</th><th>Where</th><th>Retained?</th></tr></thead>
+            <tbody>
+              <tr><td>Memo body</td><td>Our servers (relay / delivery)</td><td class="yes">No — transit only during send, not logged</td></tr>
+              <tr><td>Memo body</td><td>Your email inbox</td><td>Yes (that is the point)</td></tr>
+              <tr><td>Memo body</td><td>Your Obsidian vault (if enabled)</td><td>Yes — local, on your device</td></tr>
+              <tr><td>Outbox &amp; send history</td><td>On-device only</td><td>Encrypted with AES-GCM-256</td></tr>
+              <tr><td>Email address</td><td>Cloudflare D1</td><td class="yes">Only a SHA-256 hash, and only if you opt into reminder emails (the raw address lives only in Resend's Contact API)</td></tr>
+              <tr><td>Tagging input (memo body)</td><td>External servers</td><td class="yes">Never sent — processing is on-device</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Zero third-party SDK -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>Zero third-party SDKs on the data path</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span>Encryption (CryptoKit), key storage (Keychain Services), and networking (URLSession / Network.framework) are all first-party Apple frameworks — <strong>there are zero third-party SDKs in the encryption / storage / network-transport pipeline.</strong> SDKs used for optional features are scoped and listed: Google sign-in for email auto-fill in onboarding (GoogleSignIn-iOS + Firebase Authentication), backend API abuse protection (Firebase App Check with Apple App Attest), and in-house funnel analytics with no PII. None of these touch the memo-body data path.</span>
+        </p>
+      </section>
+
+      <!-- Honest limitations -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>Stated plainly — this is not E2EE</span>
+        </h2>
+        <div class="honest-box">
+          <p style="margin-bottom:.75rem;"><strong>Simple Memo - for Obsidian is not end-to-end encrypted — emails are delivered over standard SMTP.</strong> "Readable in your regular mail client" and "only you hold the decryption key at every hop" cannot both be true; we chose the former, by design.</p>
+          <p style="margin-bottom:.75rem;">The on-device Outbox queue and send history are encrypted with AES-GCM-256, but that is <strong>on-device protection</strong>, not a substitute for E2EE (<a href="/glossary/e2e-encryption/" style="color:var(--accent);">what E2EE is, and why this app doesn't qualify</a>).</p>
+          <p>If E2EE is a hard requirement for you, an E2EE-designed notes app such as Standard Notes is the better fit. With that stated, our commitments are: memo bodies never stored on our servers, tagging completed on-device, and vault appends performed locally.</p>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>Frequently asked questions</span>
+        </h2>
+        <div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is any external server involved in the Obsidian vault append?</summary><div class="faq-answer"><p>No. The append is a direct file write into the vault folder on your device (URI fallback when direct access isn't available), with no plugin and no network involved. Local draft saves that don't involve sending an email also stay entirely on-device.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does AI tagging send my memo to Apple or anyone else's servers?</summary><div class="faq-answer"><p>No. Tagging runs on-device via Apple Foundation Models with no network calls, and memos are not sent to an external server for tagging. On devices without Apple Intelligence, it falls back to on-device lightweight formatting — still with nothing sent externally. Details on the <a href="/ai-tags/" style="color:var(--accent);">AI auto-tagging page</a>.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Why not make it E2EE?</summary><div class="faq-answer"><p>Because the destination is your everyday email inbox. If your mail server can show you the memo, it can decrypt it — so E2EE is structurally impossible here. Choosing E2EE would require a dedicated client and give up the "readable on any device, in any mail app" property this app exists for. For E2EE-first needs we genuinely recommend Standard Notes and similar apps.</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How does this page relate to the Privacy Policy?</summary><div class="faq-answer"><p>The legally binding text is the <a href="/en/privacy" style="color:var(--accent);">Privacy Policy</a> (especially §12, "Technical notes on encryption"). This page rearranges the same facts as a route map, organized around what Obsidian users ask most — whether things stay local. If they ever disagree, the Privacy Policy wins.</p></div></details></div>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <div class="cta-box">
+        <div class="cta-box__title">
+          <span>Check the route first. Then try it.</span>
+        </div>
+        <div class="cta-box__desc">
+          <span>Free for 3 sends/day. Vault appends stay local; memo bodies never stay on our servers.</span>
+        </div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=privacy-arch-en__mid&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
+        </a>
+      </div>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span>Related pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/en/privacy"><span>Privacy Policy (the binding text)</span></a>
+          <a href="/devlog/privacy-first-design"><span>Dev log: privacy-first design</span></a>
+          <a href="/glossary/e2e-encryption/"><span>What E2EE is (and why this app isn't)</span></a>
+          <a href="/glossary/aes-gcm/"><span>What AES-GCM is</span></a>
+          <a href="/ai-tags/"><span>AI auto-tagging (on-device)</span></a>
+          <a href="/en/obsidian/"><span>How the Obsidian integration works</span></a>
+          <a href="/en/vs/obsidian-share-sheet/"><span>Obsidian share sheet — honest comparison</span></a>
+          <a href="/en/faq"><span>FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+  <!-- One named next step -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="devlog" href="/devlog/privacy-first-design" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        Read next
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        Why we built it this way — the dev log
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        The decision process behind the privacy-first architecture, from the developer.
+      </span>
+    </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span>Related content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/en/captio-alternative/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Captio alternative</span></a></li>
+    <li><a href="/en/note-to-email/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Note to email</span></a></li>
+    <li><a href="/en/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>FAQ</span></a></li>
+    <li><a href="/blog/memo-app-encryption-comparison" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span>Memo app encryption comparison</span></a></li>
+  </ul>
+</section>
+
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">Product</p>
+        <a href="/en/" class="footer__link"><span>Home</span></a>
+        <a href="/use-cases/" class="footer__link"><span>Use Cases</span></a>
+        <a href="/guides/" class="footer__link"><span>Guides</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Compare &amp; Switch</p>
+        <a href="/en/captio-alternative/" class="footer__link"><span>Captio Alternative</span></a>
+        <a href="/en/note-to-email/" class="footer__link"><span>Note to Email</span></a>
+        <a href="/vs/" class="footer__link"><span>Comparisons</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">Support</p>
+        <a href="/en/faq" class="footer__link"><span>FAQ</span></a>
+        <a href="/en/privacy" class="footer__link"><span>Privacy</span></a>
+        <a href="/contact" class="footer__link"><span>Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
+</html>
