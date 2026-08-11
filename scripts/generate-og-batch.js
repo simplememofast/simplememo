@@ -3,7 +3,12 @@
  * Batch OG Image Generator - generates specific OG images (1200x630)
  * Uses same visual style as generate-og-images.js
  *
- * Usage: node scripts/generate-og-batch.js
+ * Existing files are left alone so a re-run only fills in what is missing —
+ * the headless render depends on a Google Fonts fetch, so regenerating images
+ * that are already committed risks silent visual drift. Pass --force to
+ * overwrite deliberately.
+ *
+ * Usage: node scripts/generate-og-batch.js [--force]
  */
 
 const fs = require('fs');
@@ -22,6 +27,7 @@ const IMAGES = [
   { file: 'blog-inbox-zero-workflow-tips-2026.png', title: 'Inbox Zero Workflow Tips 2026', icon: '📥' },
   { file: 'blog-why-captio-died.png', title: 'Why Captio Died: Developer Story', icon: '📖' },
   { file: 'captio-migration-guide.png', title: 'Captio Migration Guide', icon: '🚀' },
+  { file: 'guides-inbox-memo-organization.png', title: '自分宛メモの整理術 — Gmail × AI 活用ガイド', icon: '🗂️' },
 ];
 
 function generateHtml(title, icon) {
@@ -124,12 +130,22 @@ h1 {
 async function main() {
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
+  const force = process.argv.includes('--force');
+  const pending = IMAGES.filter(
+    (img) => force || !fs.existsSync(path.join(OUTPUT_DIR, img.file)),
+  );
+
+  if (!pending.length) {
+    console.log(`All ${IMAGES.length} OG images already present (--force to regenerate).`);
+    return;
+  }
+
   const browser = await chromium.launch();
   let generated = 0;
 
-  console.log(`Generating ${IMAGES.length} OG images...`);
+  console.log(`Generating ${pending.length} of ${IMAGES.length} OG images...`);
 
-  for (const img of IMAGES) {
+  for (const img of pending) {
     const outputPath = path.join(OUTPUT_DIR, img.file);
     const page = await browser.newPage();
     await page.setViewportSize({ width: 1200, height: 630 });
