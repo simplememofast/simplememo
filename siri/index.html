@@ -153,9 +153,10 @@
     .flow-step--siri .flow-step__who{color:#b0a5ff}
     .flow-step__say{font-size:.95rem;font-weight:700;line-height:1.7;color:var(--text)}
 
-    /* 言語で画像を出し分けるため data-lang を載せる。上の .flow-steps と同じ話で、
-       [data-lang].active{display:revert} (0,2,0) が display:flex (0,1,0) に勝つ。
-       併記が無いと言語切替後に block へ戻り、横スクロール帯が縦積みになる。 */
+    /* 言語で画像を出し分けるため data-lang を載せる。上の注意書きのとおり
+       [data-lang].active{display:revert} (0,2,0) が display:flex に勝つので、
+       .flow-steps と同じく詳細度を上げた指定を併記する。これが無いと
+       言語切替後に block へ戻り、横スクロール帯が縦積みになる。 */
     .shot-strip,
     .shot-strip[data-lang].active{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
     .shot-strip img{width:min(68vw,250px);height:auto;border-radius:18px;border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000}

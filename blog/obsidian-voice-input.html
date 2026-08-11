@@ -231,7 +231,10 @@
     .article-body th{color:var(--text-muted);font-weight:700;}
     .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
       border-radius:10px;padding:1rem 1.25rem;margin:1.5rem 0;}
-    /* 実機スクショの横スクロール帯。/siri/ のアプリ内ガイド節（#428）と同じ形。
+    /* アプリ画面スクショの横スクロール帯。/siri/ のアプリ内ガイド節（#428）と同じ形。
+       ⚠️ あちらは実機、こちらは Simulator 撮影（ArticleScreenshotUITests）。
+       manifest の verification は "simulator" 固定で、音声認識の精度・AirPods・
+       Watch連携は Simulator では再現できない。本文に「実機確認済み」と書かないこと。
        ⚠️ フレックスとスナップは img 側に掛ける。<picture> で包むとフレックスの
        子が picture に変わって並びが崩れる（webp は Safari 14 以降で通るため
        フォールバックは置いていない）。 */
