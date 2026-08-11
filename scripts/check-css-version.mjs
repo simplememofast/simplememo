@@ -35,6 +35,17 @@ const ASSETS = [
   'assets/css/style.min.css',
   'js/app-store-tracking.js',
   'js/lang.js',
+  // /siri/ のアプリ内ガイド。2026-08-11 に3例目が出た。#462 が英語5枚を
+  // onboarding-en-1..5.png で出し、その直後に #463 が同じURLへ別の画面を
+  // 入れた（en-2 が phrase → invoke に変わる並び替え）。`/assets/*` は
+  // immutable/max-age=604800 なので、CDNは #462 のバイトを掴んだまま。
+  // 実際に en-1/3/5 が cf-cache-status: HIT で旧画像を返しており、英語の帯は
+  // dialogue と checklist が二重に並んで phrase と delivery が消えていた。
+  // 日本語6枚も #428 から5日間配ったURLを中身だけ差し替えているため同じ。
+  ...[1, 2, 3, 4, 5, 6].flatMap((n) => [
+    `assets/img/siri/onboarding-${n}.png`,
+    `assets/img/siri/onboarding-en-${n}.png`,
+  ]),
 ];
 
 const { collectHtmlFiles, toUrlPath } = createRequire(import.meta.url)('./lib/site-files.js');
