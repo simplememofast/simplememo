@@ -67,3 +67,26 @@
     （growth/data/appstore/ は受け皿だけ存在・SEO→Paidの接続に必須）
   - AI Visibility Probe（外部AI各社への定点質問）: 外部APIキーと予算が必要。
     導入するなら growth/data/ai-probes/ に機械可読で貯める設計から
+
+## 2026-08-11 — キー不要の外部観測レーンを実装（オーナー質問への回答）
+
+- App Store Connect「キャンペーン」が90日間で空だった件: **計測の故障ではない**。
+  ct=/pt= の形式は正しく、原因は流量（App Storeクリック2.1件/日）×インストール率
+  ×App Analytics共有オプトイン率が、Appleの表示閾値（少数は秘匿）未満のため。
+  流量が育つまでキャンペーン別は出ない。代替の閉ループ:
+  **獲得→ソース（Webリファラー）と収益化のCSVを月1でDL** → growth/input/ へ
+  （GSC週次5分の儀式に統合）。自動化したくなったら、iOSリポジトリが既に持つ
+  App Store Connect APIキー（fastlane/nominations用）でAnalytics Reports APIを
+  叩く道がある＝**新種のキーは不要**（オーナー判断待ち）
+- 追加した観測レーン（すべてAPIキー・課金なし）:
+  1. `growth/input/AI_PROBE_PROTOCOL.md` — 月1・10分の手動AIプローブ
+     （質問はGSC実測の会話型クエリ由来で固定・回答貼り付け→自動集計）
+  2. `growth/data/mentions/` — 毎日セッションのWebSearchによる週次言及ウォッチ
+  3. AI経由の実流入: ChatGPT(utm_source=chatgpt.com)・Perplexity等のリファラーは
+     **GA4に既に記録されている**。月1のGA4エクスポート（獲得→セッションの参照元）
+     を growth/input/ に置けば取り込む。GA4のBigQueryリンク（無料・一度きり）を
+     設定すれば全自動化可能（GSCのBQ設定と同じ流儀）
+- 提案のみ（本番の全リクエスト経路に触るため勝手にやらない）:
+  functions/_middleware.js でAIクローラーUA（GPTBot/OAI-SearchBot/PerplexityBot/
+  ClaudeBot/Google-Extended）のヒットをsimplememo-apiへwaitUntilビーコン→D1集計
+  →「AIに読まれたページ」を日報へ。実装は小さいが1ホップ設計への追加なので要承認

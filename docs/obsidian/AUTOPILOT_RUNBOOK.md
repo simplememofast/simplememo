@@ -189,6 +189,17 @@ python3 scripts/generate_sitemap.py --dry-run
 - `build-topic-map`（`OBSIDIAN_AUTOMATION_PLAN.md` A2・未実装）: スナップショットの
   クエリからObsidian関連の新出クエリ（imp≥5）を抽出して new-queue 候補に足す
   仕組み。実装できる回があれば1回で作りきる（作りかけを残さない）
+- **Mention & Competitor Watch（週1回・キー不要）**: セッションのWebSearchで
+  `growth/data/mentions/README.md` の固定クエリ群を検索し、スナップショットJSONを
+  保存・前回差分を日報に載せる。前回ファイルの日付が7日以上前なら実行する
+- **AIプローブ集計**: `growth/input/ai-probe/YYYY-MM.md`（オーナーが月1で貼る）に
+  未集計の新規ファイルがあれば `growth/data/ai-probes/YYYY-MM.json` へ機械可読化し、
+  `wrong_claims` があれば llms.txt 訂正リストと該当ページ回答ブロックの更新を
+  次回アクション候補に積む（`growth/input/AI_PROBE_PROTOCOL.md` 参照）
+- **App Store CSV取り込み**: `growth/input/` にオーナーがDLした
+  App Store Connect のCSV（獲得ソース・サブスクリプション）が新規にあれば、
+  初回はその列構成を見てから `growth/data/appstore/` への取り込みスクリプトを
+  書き起こす（列を見ずにパーサを先に書かない）
 
 **書かない回でも出荷はある**: `data/autopilot-status.json`（action: "skip" か
 "maintenance"・reasonにスキップ根拠）と `AUTOPILOT_LOG.md` の追記だけのPRを
