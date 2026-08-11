@@ -153,7 +153,11 @@
     .flow-step--siri .flow-step__who{color:#b0a5ff}
     .flow-step__say{font-size:.95rem;font-weight:700;line-height:1.7;color:var(--text)}
 
-    .shot-strip{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+    /* 言語で画像を出し分けるため data-lang を載せる。上の .flow-steps と同じ話で、
+       [data-lang].active{display:revert} (0,2,0) が display:flex (0,1,0) に勝つ。
+       併記が無いと言語切替後に block へ戻り、横スクロール帯が縦積みになる。 */
+    .shot-strip,
+    .shot-strip[data-lang].active{display:flex;gap:.9rem;overflow-x:auto;padding:.25rem .1rem 1rem;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
     .shot-strip img{width:min(68vw,250px);height:auto;border-radius:18px;border:1px solid var(--border);flex:0 0 auto;scroll-snap-align:start;background:#000}
     /* 縦つなぎ: 線 + 三角の矢じり */
     .flow-step + .flow-step::before{content:'';position:absolute;left:50%;top:-1.5rem;width:2px;height:1rem;transform:translateX(-50%);background:linear-gradient(rgba(34,211,238,.18),rgba(34,211,238,.8))}
@@ -462,15 +466,24 @@
           <span lang="en" data-lang="en">See it on a real device</span>
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">アプリ内の「AirPodsでハンズフリー」ガイドそのままの5画面。合言葉・2ターンの会話・届き先・事前チェックまで、この順に案内されます（横にスクロール）。</span>
-          <span lang="en" data-lang="en">The in-app "Hands-free with AirPods" guide, all five screens (Japanese UI): the magic phrase, the two-turn dialog, where memos land, and the pre-flight checklist. Scroll sideways.</span>
+          <span lang="ja" data-lang="ja">アプリ内の「AirPodsでハンズフリー」ガイドそのままの6画面。Siriの呼び方・合言葉・2ターンの会話・届き先・事前チェックまで、この順に案内されます（横にスクロール）。</span>
+          <span lang="en" data-lang="en">The in-app "Hands-free with AirPods" guide, all six screens: how to summon Siri, the magic phrase, the two-turn dialog, where memos land, and the pre-flight checklist. Scroll sideways.</span>
         </p>
-        <div class="shot-strip">
-          <img src="/assets/img/siri/onboarding-1.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド1: AirPodsから、Obsidianへ。— Obsidian・話す・メールの流れ図。ポケットのiPhoneはそのまま">
-          <img src="/assets/img/siri/onboarding-2.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド2: 合言葉は「シンプルメモで残す」。「〜にメモ」はiPhone標準のメモに取られることがある">
-          <img src="/assets/img/siri/onboarding-3.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド3: 「何をメモしますか？」に答えるだけ — Siriとの2ターンの会話例。アプリは開かない">
-          <img src="/assets/img/siri/onboarding-4.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド4: メールとObsidianに同時に届く。デイリーノートに自動追記・圏外でも消えない">
-          <img src="/assets/img/siri/onboarding-5.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド5: 3つだけ確認しておく — 送信先メールの認証・Obsidian連携・ショートカットAppでSiriがオン">
+        <div class="shot-strip" data-lang="ja">
+          <img src="/assets/img/siri/onboarding-1.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド1: AirPodsから、Obsidianへ。— Obsidian・話す・メールの流れ図。iPhoneはポケットのまま、合言葉ひとつで届く">
+          <img src="/assets/img/siri/onboarding-2.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド2: まず、Siriを呼ぶ — 確実なのは「Hey Siri」。AirPods Pro・AirPods 4 はステム長押しの初期設定がノイズコントロールなので、設定から変える">
+          <img src="/assets/img/siri/onboarding-3.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド3: 合言葉は「シンプルメモで残す」— ○「シンプルメモで残す」／×「シンプルメモにメモ」。Siriが応えたら、そのまま言うだけ">
+          <img src="/assets/img/siri/onboarding-4.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド4: 「何をメモしますか？」に答えるだけ — Siriとの2ターンの会話例。話した内容がそのまま本文になり、アプリは開かない">
+          <img src="/assets/img/siri/onboarding-5.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド5: メールとObsidianに、同時に届く — いつもの受信箱へ・デイリーノートに自動追記・圏外でも消えない">
+          <img src="/assets/img/siri/onboarding-6.png" width="640" height="1385" loading="lazy" alt="アプリ内ガイド6: 3つだけ、確認しておく — 送信先メールの認証・Obsidian連携・ショートカットAppでSiriをオン">
+        </div>
+        <div class="shot-strip" data-lang="en">
+          <img src="/assets/img/siri/onboarding-en-1.png" width="640" height="1385" loading="lazy" alt="In-app guide 1: From AirPods to Obsidian — a flow diagram of Obsidian, Speak and Email. The phone stays pocketed; one phrase and it is delivered">
+          <img src="/assets/img/siri/onboarding-en-2.png" width="640" height="1385" loading="lazy" alt="In-app guide 2: First, summon Siri — &quot;Hey Siri&quot; always works; on AirPods Pro and AirPods 4 the stem press defaults to Noise Control, so switch it to Siri in Settings">
+          <img src="/assets/img/siri/onboarding-en-3.png" width="640" height="1385" loading="lazy" alt="In-app guide 3: Say &quot;send a memo with Simple Memo&quot; — the phrase to use, and &quot;Note this in Simple Memo&quot; as the one to avoid. Once Siri answers, just say it">
+          <img src="/assets/img/siri/onboarding-en-4.png" width="640" height="1385" loading="lazy" alt="In-app guide 4: Just answer &quot;What do you want to note down?&quot; — a two-turn exchange with Siri. What you say becomes the memo and the app never opens">
+          <img src="/assets/img/siri/onboarding-en-5.png" width="640" height="1385" loading="lazy" alt="In-app guide 5: It lands in email and Obsidian at once — straight to your inbox, appended to your daily note, and nothing is lost offline">
+          <img src="/assets/img/siri/onboarding-en-6.png" width="640" height="1385" loading="lazy" alt="In-app guide 6: Three things to check — destination email verified, Obsidian integration, and Siri turned on in the Shortcuts app">
         </div>
       </section>
 
