@@ -63,7 +63,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic#webpage","inLanguage":"en","name":"Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You","isPartOf":{"@id":"https://simplememofast.com/en/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body p:first-of-type"]},"url":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic"}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is SpeechAnalyzer on-device? Does it work offline?","acceptedAnswer":{"@type":"Answer","text":"Transcription runs fully on-device. The language model downloads on first use, so the first run needs a network connection; after that it works offline."}},{"@type":"Question","name":"Does it work on Apple Watch?","acceptedAnswer":{"@type":"Answer","text":"No — SpeechAnalyzer is iOS / iPadOS / macOS / visionOS / tvOS 26, not watchOS. Use the system dictation UI (TextFieldLink) on the Watch."}},{"@type":"Question","name":"SpeechAnalyzer vs SFSpeechRecognizer — which should I use?","acceptedAnswer":{"@type":"Answer","text":"SpeechAnalyzer for new iOS 26+ work. Keep SFSpeechRecognizer only for older OS support or if you need custom vocabulary."}},{"@type":"Question","name":"Why is my first transcription slow?","acceptedAnswer":{"@type":"Answer","text":"Stale beta builds were slow (the 14s+ reports were on iOS 26.0 beta). On shipping iOS 26.5, an iPhone 16e (the non-Pro A18) reaches the first volatile result in ~0.3–0.5s on a warm start (model installed, locale allocated). Pre-install the model and start the analyzer early; budget separately for the first-ever launch, which downloads the model once."}},{"@type":"Question","name":"Can I add custom vocabulary?","acceptedAnswer":{"@type":"Answer","text":"Not as of iOS 26.0 — there is no contextualStrings equivalent."}}]}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260805-read">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -409,6 +409,23 @@ TextFieldLink(prompt: Text("Speak or type")) {
 
       </div>
     </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
   </main>
 
 
@@ -450,6 +467,6 @@ TextFieldLink(prompt: Text("Speak or type")) {
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=20260809" defer></script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
 </body>
 </html>

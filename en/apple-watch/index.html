@@ -75,7 +75,7 @@
 
   <!-- JSON-LD: FAQPage -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/apple-watch/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can dictation start automatically when the Watch app launches?","acceptedAnswer":{"@type":"Answer","text":"Yes, it can. Opening the app brings up the dictation screen automatically — just speak and press Done. This page used to say it was impossible with watchOS public APIs; that was our own oversight. WatchKit's presentTextInputController does let an app open the system input screen on its own, and we shipped it after confirming it works on a real device. The mic button in the middle of the screen is still there if you prefer to start dictation yourself."}},{"@type":"Question","name":"Do memos sent from the Apple Watch reach Obsidian too?","acceptedAnswer":{"@type":"Answer","text":"Yes. Memos sent from the Watch go through the same sending pipeline as the iPhone app, so if Obsidian integration is enabled on your iPhone, they are appended to your daily note or Inbox note in the same - HH:mm memo format."}},{"@type":"Question","name":"Does it work offline or without my iPhone nearby?","acceptedAnswer":{"@type":"Answer","text":"You can type or dictate the memo on the Watch itself, but sending the email requires a connection — either your paired iPhone nearby, or the Watch's own Wi-Fi or cellular (on cellular models). If you have no connection, send the memo once you're back online."}},{"@type":"Question","name":"Is this the official Obsidian app for Apple Watch?","acceptedAnswer":{"@type":"Answer","text":"No. Simple Memo - for Obsidian is an independent app developed by YURIKA, K.K. and is not an official Obsidian app. It provides an integration that auto-appends the memos you send to your Obsidian vault. You can also use it purely as a self-email memo app without Obsidian."}},{"@type":"Question","name":"Does it support the watchOS Smart Stack?","acceptedAnswer":{"@type":"Answer","text":"Yes. You can add the widget to the Smart Stack and launch the app with one tap by turning the Digital Crown (or swiping down) from the watch face — the shortest path from raising your wrist to sending a memo."}},{"@type":"Question","name":"How many taps does it take to send from the Watch?","acceptedAnswer":{"@type":"Answer","text":"Two taps at minimum: open the app from the Smart Stack or a complication (tap one), then send (tap two). A voice memo is the same two taps — dictation opens by itself, so you speak and press Done."}}]}</script>
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=20260805-read">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -431,7 +431,7 @@
       <div class="cta-box">
         <div class="cta-box__title">Don't let wrist-level ideas get away</div>
         <div class="cta-box__desc">Free to download. Install on your iPhone and it's available on your paired Apple Watch.</div>
-        <a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="bottom" href="https://apps.apple.com/us/app/id6758438948?ct=apple-watch-en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
+        <a data-cta-variant="v1" data-cta-cluster="watch" data-cta-placement="mid" href="https://apps.apple.com/us/app/id6758438948?ct=apple-watch-en__mid&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
           <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
         </a>
       </div>
@@ -464,6 +464,23 @@
 </section>
 
 <!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="feature" href="/en/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">声で残したメモの、行き先を決める</span><span lang="en" data-lang="en">Choose where your voice notes land</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールとObsidianの両方に届きます。プラグインは要りません。</span><span lang="en" data-lang="en">They arrive in both your inbox and Obsidian. No plugin required.</span>
+      </span>
+    </a>
+  </aside>
+
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <div class="container">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Related Content</h3>
@@ -511,6 +528,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=20260809" defer></script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
 </body>
 </html>
