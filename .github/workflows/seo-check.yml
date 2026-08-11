@@ -10,7 +10,12 @@ jobs:
   seo-check:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 2 — IndexNow 通知が HEAD~1..HEAD の first-parent 差分で
+      # 対象を決めるため、親コミットまで必要（既定の depth=1 だと HEAD~1 が無く
+      # git diff が失敗する）。
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
@@ -85,6 +90,11 @@ jobs:
       - name: Generate sitemap (dry run)
         run: python3 scripts/generate_sitemap.py --dry-run
 
+      # --since 1 = HEAD~1..HEAD（マージは首親差分）で実際に変わった .html だけを
+      # 通知する。以前は mtime 判定で、新規 checkout では全ファイルが「更新済み」に
+      # 見えるため main push のたびに全ページ通知になっていた。内訳と送信結果は
+      # ジョブサマリに出る。複数コミットの直接 push は最後の1コミット分のみに
+      # なるので、必要なら手動で --since N を実行する。
       - name: IndexNow notification (on main push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: node scripts/indexnow-notify.js --since 1
