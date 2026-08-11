@@ -48,3 +48,22 @@
 - 実行結果は `data/autopilot-status.json` → `simplememo-api` の
   `autopilot_report` cron（10:00 JST）→ Resend でオーナーへ日報メール。
   スキップ日もJSONを更新すること（更新なし＝上流停止として報告される）。
+
+## 2026-08-11 — 拡張: content-graph導入とレーン制（オーナーの#471レビュー反映）
+
+- 実装: `data/content-graph.json`（Obsidianクラスタ16ページ・
+  INTERNAL_LINK_PLANのC案）＋ `scripts/check-content-graph.mjs`（CI組込。
+  URL/parent/sibling/nextStep実在・語彙・BUSINESS_RELEVANCE整合・
+  /obsidian/配下の登録必須）
+- Runbook改訂: アクションをレーン制へ（A: SEO / B: AIO回答ブロック /
+  C: Evidence Asset一次情報 / D: Paid relevance例外・四半期1本上限）。
+  llms.txtは「引用可能な一次情報・訂正があるときのみ」に基準変更
+- 積み残し（優先順・今後の回で消化）:
+  1. weekly-report.mjs へのObsidianクラスタ節＋AIO節（AUTOMATION_PLAN A1）
+  2. build-topic-map（同A2）
+  3. ai-citation-strategy.md の4状態監査（VERIFIED/OBSERVED/HYPOTHESIS/DEPRECATED）
+- オーナー判断待ち（セッションからは実装不可）:
+  - App Store Connect の ct= 別インストール/課金CSVの定期エクスポート
+    （growth/data/appstore/ は受け皿だけ存在・SEO→Paidの接続に必須）
+  - AI Visibility Probe（外部AI各社への定点質問）: 外部APIキーと予算が必要。
+    導入するなら growth/data/ai-probes/ に機械可読で貯める設計から
