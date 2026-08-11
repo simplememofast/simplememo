@@ -67,15 +67,17 @@
         "straddles_change": true
       },
       "target_metric": "ctr",
-      "decision": "iterate",
-      "evaluated_at": "2026-08-09",
+      "decision": "abandoned",
+      "evaluated_at": "2026-08-11",
       "notes": [
-        "2026-08-09: line-keep: imp 4045→5291, pos 7.2→7.0, CTR 0.90→0.85%。タイトル変更はCTRを動かさなかった。律速はタイトルではなく検索意図の不一致で、08-09のFAQ追加で対処済み。タイトルは据え置き、次はFAQ実験で判断。"
+        "2026-08-09: line-keep: imp 4045→5291, pos 7.2→7.0, CTR 0.90→0.85%。タイトル変更はCTRを動かさなかった。律速はタイトルではなく検索意図の不一致で、08-09のFAQ追加で対処済み。タイトルは据え置き、次はFAQ実験で判断。",
+        "2026-08-11: 3ヶ月データ（05-09..08-08）で再評価し、iterate を abandoned に変更。このページのクエリは確認型（line keepメモ 終了 1,055imp/2clk・pos 9.2、line キープメモ サービス終了 237imp/0clk・pos 6.8、line keepとkeepメモの違い 53imp/0clk）で、現行タイトル「LINE Keepは終了・Keepメモは継続中」がSERP上で答えを完結させている。検索者は用が足りるためクリックしない。10,301imp/CTR 0.83% はサイト最大の表示・最低のCTRだが、これは失敗ではなくクエリの性質である。同時にこのページはAIO表示1,663件でサイト最大のAI面でもあり、ブランド露出資産として残す。CTR改善の対象から恒久的に外し、週次レポートの低CTRリストからも除外する。3度目のタイトル/スニペット実験を回さないこと。"
       ],
       "evidence": {
         "gsc_snapshots": [
           "2026-08-09"
-        ]
+        ],
+        "note": "加えて 2026-05-09..08-08 の3ヶ月エクスポート（docs/SEO_AIO_PLAN_2026-08.md §2-1）"
       }
     },
     {
@@ -568,38 +570,6 @@
       ]
     },
     {
-      "id": "snippet-2026-08-09-gkeep-vs-anotes",
-      "page": "/en/vs/google-keep-vs-apple-notes/",
-      "type": "snippet_rewrite",
-      "hypothesis": "Leading with a verdict in the snippet and adding FAQ rich-result eligibility lifts CTR at unchanged position.",
-      "source": {
-        "pr": null,
-        "commit": null
-      },
-      "started_at": "2026-08-09",
-      "evaluation_at": "2026-09-13",
-      "status": "running",
-      "before": null,
-      "after": null,
-      "baseline": {
-        "clicks": 6,
-        "impressions": 1696,
-        "ctr": 0.0035,
-        "position": 7.8,
-        "window": "2026-07-11..2026-08-07 (28d)",
-        "source": "growth/data/gsc/2026-08-09"
-      },
-      "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [
-        "Three changes, one experiment — they cannot be separated at this traffic level (6 clicks/28d): (1) intro now opens with the verdict, (2) description rewritten to carry it into the snippet, (3) FAQPage schema added — 5 answers existed on the page with no schema at all.",
-        "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
-        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too.",
-        "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves."
-      ]
-    },
-    {
       "id": "snippet-2026-08-09-free-memo-ranking",
       "page": "/blog/free-memo-apps-ranking",
       "type": "snippet_rewrite",
@@ -636,6 +606,38 @@
       ]
     },
     {
+      "id": "snippet-2026-08-09-gkeep-vs-anotes",
+      "page": "/en/vs/google-keep-vs-apple-notes/",
+      "type": "snippet_rewrite",
+      "hypothesis": "Leading with a verdict in the snippet and adding FAQ rich-result eligibility lifts CTR at unchanged position.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-09",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 6,
+        "impressions": 1696,
+        "ctr": 0.0035,
+        "position": 7.8,
+        "window": "2026-07-11..2026-08-07 (28d)",
+        "source": "growth/data/gsc/2026-08-09"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Three changes, one experiment — they cannot be separated at this traffic level (6 clicks/28d): (1) intro now opens with the verdict, (2) description rewritten to carry it into the snippet, (3) FAQPage schema added — 5 answers existed on the page with no schema at all.",
+        "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
+        "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too.",
+        "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves."
+      ]
+    },
+    {
       "id": "snippet-2026-08-09-offline-memo-apps",
       "page": "/blog/offline-memo-apps",
       "type": "snippet_rewrite",
@@ -669,6 +671,46 @@
         "The old title already carried the query words. The change adds the list signal (5選) the competing results carry, and moves the description off 「SimpleMemoを中心に」 — a comparison shopper reads a vendor-first description as a vendor page.",
         "Known dilution: some impressions are Android intent (「android メモアプリ オフライン」 31 imp, 0 clicks, pos 6.2) on an iOS-only app. Those clicks are unwinnable and unwanted, so the realised gain should land under +27.6 even if the hypothesis is right.",
         "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated."
+      ]
+    },
+    {
+      "id": "cta-2026-08-10-desktop-qr",
+      "page": "(9 pages: /vs/logseq/, /obsidian/, /blog/best-memo-apps-2026, /vs/dynalist/, /blog/free-memo-apps-ranking, /blog/offline-memo-apps, /methods/second-brain/, /vs/capacities/, /apple-watch/)",
+      "type": "desktop_qr",
+      "hypothesis": "Desktop visitors who click the App Store badge cannot install from where they are. A QR beside the closing CTA converts that dead end into an install.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-10",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "qr_pages": 2,
+        "note": "Only /ai-tags/ (ja+en) carried a QR, out of 240 pages."
+      },
+      "after": {
+        "qr_pages": 11,
+        "assets_added": 15,
+        "note": "Desktop-only (min-width:900px), 132px, anchored to the last bottom-placement CTA. ct=<slug>-<lang>__qr."
+      },
+      "baseline": {
+        "source": "GA4 event export 2026-07-13..2026-08-09 (28d), filtered device=desktop AND event=app_store_click",
+        "app_store_click_total": 60,
+        "app_store_click_desktop": 21,
+        "app_store_click_desktop_users": 18,
+        "desktop_share_of_app_store_clicks": 0.35,
+        "gsc_pc_share_of_search_clicks": 0.509
+      },
+      "target_metric": "App Store Connect campaign installs for ct=*__qr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "Ceiling is 21 clicks per 28 days. That is the entire desktop App Store click volume, and no more than that can be recovered. Do not size this as a growth lever.",
+        "NOT MEASURABLE IN GA4. A scan is not a click, so app_store_click will not rise — it may fall as desktop visitors scan instead of clicking. The only readout is App Store Connect campaign data for the __qr tokens, which is an owner action; growth/data/appstore/ is still empty.",
+        "Desktop converts worse than its traffic share (51% of search clicks, 35% of App Store clicks), which is expected: desktop visitors sensibly decline to click a badge they cannot install from. The waste is these 21 clicks, not half the audience.",
+        "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
+        "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input)."
       ]
     },
     {
@@ -715,46 +757,6 @@
       ]
     },
     {
-      "id": "cta-2026-08-10-desktop-qr",
-      "page": "(9 pages: /vs/logseq/, /obsidian/, /blog/best-memo-apps-2026, /vs/dynalist/, /blog/free-memo-apps-ranking, /blog/offline-memo-apps, /methods/second-brain/, /vs/capacities/, /apple-watch/)",
-      "type": "desktop_qr",
-      "hypothesis": "Desktop visitors who click the App Store badge cannot install from where they are. A QR beside the closing CTA converts that dead end into an install.",
-      "source": {
-        "pr": null,
-        "commit": null
-      },
-      "started_at": "2026-08-10",
-      "evaluation_at": "2026-09-13",
-      "status": "running",
-      "before": {
-        "qr_pages": 2,
-        "note": "Only /ai-tags/ (ja+en) carried a QR, out of 240 pages."
-      },
-      "after": {
-        "qr_pages": 11,
-        "assets_added": 15,
-        "note": "Desktop-only (min-width:900px), 132px, anchored to the last bottom-placement CTA. ct=<slug>-<lang>__qr."
-      },
-      "baseline": {
-        "source": "GA4 event export 2026-07-13..2026-08-09 (28d), filtered device=desktop AND event=app_store_click",
-        "app_store_click_total": 60,
-        "app_store_click_desktop": 21,
-        "app_store_click_desktop_users": 18,
-        "desktop_share_of_app_store_clicks": 0.35,
-        "gsc_pc_share_of_search_clicks": 0.509
-      },
-      "target_metric": "App Store Connect campaign installs for ct=*__qr",
-      "decision": null,
-      "evaluated_at": null,
-      "notes": [
-        "Ceiling is 21 clicks per 28 days. That is the entire desktop App Store click volume, and no more than that can be recovered. Do not size this as a growth lever.",
-        "NOT MEASURABLE IN GA4. A scan is not a click, so app_store_click will not rise — it may fall as desktop visitors scan instead of clicking. The only readout is App Store Connect campaign data for the __qr tokens, which is an owner action; growth/data/appstore/ is still empty.",
-        "Desktop converts worse than its traffic share (51% of search clicks, 35% of App Store clicks), which is expected: desktop visitors sensibly decline to click a badge they cannot install from. The waste is these 21 clicks, not half the audience.",
-        "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
-        "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input)."
-      ]
-    },
-    {
       "id": "cta-2026-08-10-strongest-page-inline",
       "page": "/blog/obsidian-voice-input",
       "type": "cta_placement",
@@ -793,6 +795,44 @@
         "This page was excluded from the 2026-08-10 mid-CTA batch on the grounds of not using the strongest page as a test bed. That exclusion is revised here, and the reason it was wrong is worth recording: it was written to protect the page from title and snippet experiments, which move search performance. A body paragraph cannot move SERP CTR — it is not in the title, the description, or above the fold. Applying the rule to a body CTA left the highest-intent traffic on the site (relevance 1.0, CTR 10.9%, position 5.3) with no way to install without scrolling back to the header.",
         "Placed after 方法4, the section that already describes this app, so the link follows content the reader has just read rather than interrupting the comparison.",
         "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question."
+      ]
+    },
+    {
+      "id": "aio-2026-08-11-answer-blocks",
+      "page": "/blog/memo-app-security-comparison",
+      "type": "answer_block",
+      "hypothesis": "会話型(AI Mode fan-out)クエリに、質問文そのままのh2と2文以内の断定的な答えを置くと、AIの回答内で名指しされる頻度が上がり、2-3ヶ月遅れでブランド検索とAIO表示が増える。クリックはこの面では発生しないため指標にしない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-11",
+      "evaluation_at": "2026-11-11",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 95,
+        "impressions": 702,
+        "ctr": 0.1353,
+        "position": 3.8,
+        "window": "2026-05-09..2026-08-08",
+        "source": "ブランド検索14クエリ合計(可視分) — docs/SEO_AIO_PLAN_2026-08.md §2-4。AIO表示 6,947(全表示の10.2%)・会話型クエリ27件/343imp/平均順位6.8 も同時に追う"
+      },
+      "target_metric": "brand_search_impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-11: 7ページに data-answer-block を挿入。対象は会話型クエリ 「セキュリティとコラボレーションの両立(54imp/pos4.7)」「apple watchで音声入力するには(49imp/pos9.0)」「2026年に社会人に最も評価されている(31imp/pos6.5)」「お金を払う価値がある(31imp/pos7.2)」「デジタルと手書きどちらが優れているか(18imp/pos5.9)」「標準的な議事録テンプレート(7imp/pos4.1)」「AIでタグを自動提案(7imp/pos6.4)」。セキュリティ比較の回答は他社(CryptPad/Notion/Standard Notes)を推し、自社は該当しないと明記している。短期CVを下げうるが現状クリック0のため下げる余地がない。判定はクリックではなく、ブランド検索表示数・AIO表示数・会話型クエリ件数と平均順位で行う。"
+      ],
+      "pages": [
+        "/blog/memo-app-security-comparison",
+        "/apple-watch/",
+        "/blog/business-memo-apps-2026",
+        "/blog/best-memo-apps-2026",
+        "/blog/digital-vs-handwritten-notes",
+        "/blog/meeting-memo-template",
+        "/ai-tags/"
       ]
     }
   ]

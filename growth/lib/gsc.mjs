@@ -59,6 +59,11 @@ export function loadSnapshot(label) {
     meta,
     queries: read('queries'),
     pages: read('pages'),
+    // Impressions-only rows from the generative-AI export. Deliberately a
+    // separate field rather than a flag on `pages`: everything that consumes
+    // `pages` divides clicks by impressions somewhere, and these rows have no
+    // clicks to divide.
+    pagesAio: read('pages-aio'),
     queryPages: read('query-pages'),
   };
 }

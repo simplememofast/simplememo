@@ -47,7 +47,7 @@ if (!files.length) {
   process.exit(2);
 }
 
-const buckets = { queries: [], pages: [], 'query-pages': [], dates: [], devices: [], countries: [] };
+const buckets = { queries: [], pages: [], 'pages-aio': [], 'query-pages': [], dates: [], devices: [], countries: [] };
 const skipped = [];
 
 for (const f of files) {
@@ -59,6 +59,16 @@ for (const f of files) {
   let kind = null;
   if (has('query') && has('page')) kind = 'query-pages';
   else if (has('query')) kind = 'queries';
+  // The "Performance on Search Generative AI Features" export is a page table
+  // with impressions and NOTHING else — Google reports no clicks, CTR or
+  // position for AI surfaces. Its filename and headers are identical to the
+  // ordinary page export's, so before this branch existed it matched
+  // `has('page')` and its 179 rows were appended straight into `pages`. That
+  // is silent corruption of the worst kind: page rows would double, totals
+  // would inflate, and every AI-surface row would enter the CTR curve as a
+  // page earning zero clicks at position 0 — dragging expected CTR down across
+  // the whole site while every number still looked plausible.
+  else if (has('page') && has('impressions') && !has('clicks')) kind = 'pages-aio';
   else if (has('page')) kind = 'pages';
   else if (has('date')) kind = 'dates';
   else if (has('device')) kind = 'devices';
@@ -133,6 +143,17 @@ const meta = {
     ctr: totals.impressions ? totals.clicks / totals.impressions : null,
     source: totalsSource.from,
   },
+  // AI-surface exposure, kept apart from `totals` on purpose. These rows carry
+  // impressions only, so they can never be divided into a CTR — the share of
+  // total impressions is the whole measurement, and the number to watch is
+  // whether it grows.
+  aio: buckets['pages-aio'].length ? {
+    impressions: sum(buckets['pages-aio']).impressions,
+    pages: buckets['pages-aio'].length,
+    impression_share: totals.impressions
+      ? sum(buckets['pages-aio']).impressions / totals.impressions
+      : null,
+  } : null,
   ctr_curve: curve,
   ctr_curve_source: curveFrom,
   // Share of total impressions the curve was fitted on. A low value means the
