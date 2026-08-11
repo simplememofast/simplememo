@@ -20,31 +20,50 @@ growth/
   input/                drop zone for raw GSC CSVs — see GSC_OWNER_ACTION.md
   experiments/          experiments.json — the ledger
   reports/              generated weekly reports
-  lib/                  csv.mjs · gsc.mjs · ledger.mjs
-  scripts/              ingest-gsc · analyze · experiments · check-experiments · weekly-report
+  lib/                  csv.mjs · bigquery.mjs · snapshot.mjs · gsc.mjs · ledger.mjs
+  scripts/              ingest-gsc · ingest-bigquery · bq-preflight · analyze ·
+                        experiments · check-experiments · weekly-report
 ```
 
 No dependencies. The repo has no root `package.json` and no build step, so
-every script runs under a bare `node` (v20+, matching CI).
+every script runs under a bare `node` (v20+, matching CI) — including the
+BigQuery client, which is `lib/bigquery.mjs` rather than `@google-cloud/bigquery`
+for that reason.
 
 ## The loop
 
 ```
-GSC export ──▶ ingest-gsc ──▶ snapshot (committed)
-                                  │
-                                  ├──▶ analyze ──────▶ opportunities / CTR gap / decay / cannibalisation
-                                  │
-                                  └──▶ weekly-report ─▶ growth/reports/YYYY-MM-DD-weekly.md
-                                                              │
-  experiments.json ◀── evaluate ◀─────────────────────────────┘
+BigQuery bulk export ──▶ bq-preflight ──▶ ingest-bigquery ──┐   (daily, CI)
+                                                            │
+GSC CSV export ──────────────────────▶ ingest-gsc ──────────┤   (manual, fallback)
+                                                            ▼
+                                                   snapshot (committed)
+                                                            │
+                            ├──▶ analyze ──────▶ opportunities / CTR gap / unanswered /
+                            │                    decay / cannibalisation
+                            │
+                            └──▶ weekly-report ─▶ growth/reports/YYYY-MM-DD-weekly.md
+                                                            │
+  experiments.json ◀── evaluate ◀───────────────────────────┘
         │
         └──▶ check-experiments (CI) ──▶ annotation + job summary when a date passes
 ```
 
+Both ingests write the same snapshot through `lib/snapshot.mjs`. Nothing
+downstream can tell which one produced it, which is the point: a totals rule or
+a curve fit that drifted between two copies would show up as a step change on
+the day the source switched, and would be read as the site changing.
+
 ## Commands
 
 ```sh
-# once a week, after dropping the export into growth/input/ (see GSC_OWNER_ACTION.md)
+# BigQuery bulk export — what CI runs daily. Setup: growth/BIGQUERY_SETUP.md
+node growth/scripts/bq-preflight.mjs                     # is the export landing?
+node growth/scripts/ingest-bigquery.mjs --site sc-domain:simplememofast.com
+node growth/scripts/ingest-bigquery.mjs --days 7 --dry-run   # inspect without writing
+
+# CSV fallback: once a week, after dropping the export into growth/input/
+# (see GSC_OWNER_ACTION.md). Still needed until the export has 28 days of history.
 node growth/scripts/ingest-gsc.mjs --label 2026-08-09 --period 2026-07-12..2026-08-08
 node growth/scripts/weekly-report.mjs --write
 
@@ -110,10 +129,23 @@ join silently, which looks identical to "that page has no data". `toPath()`
 consults `scripts/lib/site-files.js` and passes unknown paths through unchanged
 so that GSC-reported 404s and spam URLs stay visible.
 
+**Ingest runs daily; snapshots stay weekly.** `.github/workflows/seo-daily.yml`
+pulls a fresh 28-day window every morning, runs the detectors and writes them to
+the job summary — but commits nothing except on Mondays. Committing daily would
+put ~180 MB of near-duplicate JSON a year into the repo the site is served from,
+and would quietly break decay: `previousSnapshot()` returns the label
+immediately before, so daily snapshots would be compared against a baseline
+sharing 27 of their 28 days. Every delta would collapse toward zero while still
+printing a confident cause. The daily value is seeing today's numbers, not
+accumulating history.
+
+**A stale export fails the workflow.** This is the same failure the directory
+exists for, relocated: a pipeline that stops delivering does not raise its hand,
+it reports smaller numbers, and smaller numbers get explained. `bq-preflight.mjs`
+runs first and `--strict` makes staleness an incident rather than a data point.
+
 ## Not built yet
 
-- **Search Console API ingest.** CSV only today; `GSC_OWNER_ACTION.md` ends with
-  the service-account setup that would remove the last manual step.
 - **App Store Connect ingest.** `data/appstore/` is scaffolded but empty. Paid
   conversion is the North Star metric and it is not yet in this loop, so the
   weekly report currently stops at clicks.
