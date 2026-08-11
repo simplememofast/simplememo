@@ -28,13 +28,13 @@
       ]
     },
     "Drafts": {
-      "ready": 1.2,
-      "focus": 0.9,
-      "first_char": 1.7,
+      "ready": 1.45,
+      "focus": 1.0,
+      "first_char": 1.667,
       "n": 5,
       "ready_range": [
-        0.4,
-        1.5
+        0.9,
+        1.567
       ]
     },
     "Apple Notes": {
@@ -58,13 +58,13 @@
       ]
     },
     "Bear": {
-      "ready": 1.9,
-      "focus": 1.7,
-      "first_char": 2.4,
+      "ready": 0.917,
+      "focus": 0.583,
+      "first_char": 1.45,
       "n": 5,
       "ready_range": [
-        0.7,
-        2.3
+        0.917,
+        0.95
       ]
     },
     "Evernote": {
@@ -337,9 +337,104 @@
       "open_questions": [
         "The recordings themselves were not supplied, so these figures could not be re-derived here. Who measured what is recorded above; independent verification is not.",
         "Precision is mixed: Simple Memo, Google Keep and one Apple Notes file are frame-accurate (multiples of 1/60s); Notion, OneNote, Evernote, Bear, Drafts and the other Apple Notes file are rounded to 0.1s. Usable, but coarser.",
-        "Whether force-quit + 5s dwell was followed is not visible from a table. Bear (0.7/0.8 vs 1.9-2.3) and Drafts (0.4 vs 1.2-1.5) are bimodal on `ready`, which is what a mix of cold and warm runs looks like. The median absorbs it; worth confirming.",
+        "RESOLVED for Bear and Drafts by 2026-08-11-owner-rerecord-bear-drafts: both were re-recorded under one protocol and both figures changed (Bear 1.900 -> 0.917, Drafts 1.200 -> 1.450). The original wording follows, because the same doubt still applies to Apple Notes, Evernote, OneNote and Notion, which keep their wide ranges: \"Whether force-quit + 5s dwell was followed is not visible from a table. Bear (0.7/0.8 vs 1.9-2.3) and Drafts (0.4 vs 1.2-1.5) are bimodal on `ready`, which is what a mix of cold and warm runs looks like.\"",
         "Apple Notes arrived as two files (5 runs each) and is pooled to n=10 here."
       ]
+    },
+    {
+      "run": "2026-08-11-owner-rerecord-bear-drafts",
+      "measuredBy": "owner",
+      "device": "iPhone 16e (A18), iOS 26.5.2",
+      "status": "CANONICAL for Bear and Drafts only — supersedes those two apps in 2026-08-11-owner-full",
+      "why": "The full run left Bear (0.7-2.3s) and Drafts (0.4-1.5s) bimodal on `ready`, which is what a mix of cold and warm launches looks like. Re-recorded under one protocol to settle it.",
+      "excluded": "The recording opens with two further Bear launches that are not in these five: the first returns to the app switcher part-way through, and the second reaches the editor via the note list rather than +, which is a different tap sequence. Both are excluded by the owner, and the five consecutive launches after them are the adopted log.",
+      "frame_precision": "Variable frame rate; the owner puts boundary error at roughly +-0.02-0.05s per reading. Both apps move by far more than that.",
+      "runs": {
+        "Bear": {
+          "focus": [
+            0.617,
+            0.583,
+            0.567,
+            0.567,
+            0.583
+          ],
+          "kb_start": [
+            0.583,
+            0.583,
+            0.533,
+            0.533,
+            0.55
+          ],
+          "ready": [
+            0.95,
+            0.933,
+            0.917,
+            0.917,
+            0.917
+          ],
+          "first_char": [
+            1.45,
+            1.517,
+            2.25,
+            1.283,
+            1.35
+          ],
+          "ready_median": 0.917,
+          "ready_mean": 0.927
+        },
+        "Drafts": {
+          "focus": [
+            0.517,
+            1.05,
+            1.0,
+            0.933,
+            1.1
+          ],
+          "kb_start": [
+            0.55,
+            1.15,
+            1.05,
+            1.0,
+            1.167
+          ],
+          "ready": [
+            0.9,
+            1.55,
+            1.45,
+            1.383,
+            1.567
+          ],
+          "first_char": [
+            1.333,
+            1.75,
+            1.617,
+            1.667,
+            1.733
+          ],
+          "ready_median": 1.45,
+          "ready_mean": 1.37
+        }
+      },
+      "statistic_published": "median, as for the other six apps. The owner proposed means (Bear 0.927, Drafts 1.370); for Bear that is 0.010s away and immaterial, for Drafts 0.080s. Drafts Run 1 (0.900s) sits well below the other four (1.383-1.567s), so the mean is pulled toward a figure four runs out of five did not reach. A mean for two apps in a column of six medians is also the per-app statistic switch this table has been trying to get rid of.",
+      "supersedes": {
+        "Bear": {
+          "ready": 1.9,
+          "ready_range": [
+            0.7,
+            2.3
+          ]
+        },
+        "Drafts": {
+          "ready": 1.2,
+          "ready_range": [
+            0.4,
+            1.5
+          ]
+        }
+      },
+      "headline": "Bear halves: 1.900s to 0.917s, and moves from 4th to 2nd. Drafts moves the other way, 1.200s to 1.450s, and drops behind Bear. Our own lead over the nearest rival therefore narrows from 3.0x (vs Drafts) to 2.3x (vs Bear).",
+      "unresolved": "Which mode was the cold one is still not settled, and the re-recording arguably deepens the question rather than closing it. The full run had Bear at 0.7-0.8s and 1.9-2.3s; this run lands tightly on 0.917-0.950s, i.e. near the FAST mode, not between them. If the fast mode were warm starts, this run would be warm throughout — but Drafts, recorded in the same session minutes later, is NOT uniformly fast (0.900s then 1.383-1.567s), which is hard to explain as a warm session. Recorded as an open point rather than argued away.",
+      "exposure": "Bear moved 2x between two sessions on the same device and OS. The four apps still carrying wide ranges from the full run — Apple Notes 1.2-2.367s, Evernote 2.3-5.1s, OneNote 2.2-3.3s, Notion 2.5-3.5s — are exactly the shape Bear had before it was re-recorded. The two apps with tight ranges (our own 0.366-0.433s, Google Keep 1.969-2.234s) are the two nobody has disputed. Re-recording the wide four would likely move them too; it has not been done."
     }
   ],
   "readyDefinition": {
@@ -361,5 +456,11 @@
   },
   "canonicalRun": "2026-08-11-owner-full",
   "launchColumnRetired": "The old table carried a separate 起動速度 (app-drawn) column. This run does not measure it — it measures focus, which for a multi-step app lands after the taps, not before. Rather than carry a stale column beside fresh ones, 起動速度 is retired and `focus` published in its place.",
-  "draftsNote": "Drafts is the reversal to watch. The retired table put it at 0.8s and FASTER than us, which is why /en/blog/ios-quick-capture-comparison said so in print. Measured here it is 1.200s median against our 0.400s. The range matters and is published with it: Drafts ran 0.4-1.5s, and the 0.4s run is close to the old published figure, so it can be very fast — it just is not, typically. State the median and the range together; do not claim it is simply slow."
+  "draftsNote": "Drafts has now been measured twice and moved both times. The retired March table put it at 0.8s and FASTER than us, which is why /en/blog/ios-quick-capture-comparison said so in print. The 2026-08-11 full run put it at 1.200s (range 0.4-1.5). The re-recording puts it at 1.450s (range 0.900-1.567), with four of five runs inside 1.383-1.567s and one fast outlier at 0.900s. Publish the median with the range; the outlier is why the range column exists. It is no longer the closest rival — Bear is.",
+  "canonicalRunOverrides": {
+    "Bear": "2026-08-11-owner-rerecord-bear-drafts",
+    "Drafts": "2026-08-11-owner-rerecord-bear-drafts",
+    "_why": "canonicalRun covers six apps. These two were re-recorded after it, and their figures come from that run instead. Kept as an explicit override so no one has to diff two run blocks to find out which number is live."
+  },
+  "bearNote": "Bear is the largest single correction this table has taken: 1.900s in the full run, 0.917s on re-recording, second place. Treat the 1.900s figure as withdrawn, not as an alternative reading — the full run mixed 0.7-0.8s and 1.9-2.3s launches and its median sat on the slow mode, while the re-recording is five runs inside a 0.033s band. It is now the nearest competitor at 2.3x our 0.400s, so a page that names \"the second-fastest app\" means Bear, not Drafts."
 }
