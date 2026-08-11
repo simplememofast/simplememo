@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/daily-note/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>iPhoneを開かずObsidianのデイリーノートへ追記する方法 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidianのデイリーノートにメモを追記する3つのルートを、「どこまでiPhoneを触らずに済むか」で比較します。1.11のキャプチャアクション、ショートカット＋URLスキーム、メール送信型アプリの自動追記。追記されない原因になりやすい日付フォーマットの合わせ方も。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="iPhoneを開かずObsidianのデイリーノートへ追記する方法 | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="デイリーノートへ追記する3ルートを「どこまでiPhoneを触らずに済むか」で比較。1.11のキャプチャアクション、ショートカット＋URLスキーム、メール送信型アプリの自動追記。日付フォーマットの合わせ方も。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-11T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/daily-note/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="iPhoneを開かずObsidianのデイリーノートへ追記する方法 | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="デイリーノートへ追記する3ルートを「どこまでiPhoneを触らずに済むか」で比較。日付フォーマットが合わずに追記が迷子になる問題の直し方も解説します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/daily-note/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Obsidian連携", "item": "https://simplememofast.com/obsidian/"},
+      {"@type": "ListItem", "position": 3, "name": "デイリーノートへ追記する", "item": "https://simplememofast.com/obsidian/daily-note/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/daily-note/#article","inLanguage":"ja","headline":"iPhoneを開かず、Obsidianのデイリーノートへ追記する","description":"Obsidianのデイリーノートに追記する3つのルートを「どこまでiPhoneを触らずに済むか」という軸で比較し、追記が迷子になる原因と対処をまとめます。","url":"https://simplememofast.com/obsidian/daily-note/","datePublished":"2026-08-11","dateModified":"2026-08-11","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/daily-note/"}}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/daily-note/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"デイリーノートに追記したはずなのに、ノートに何も増えていません","acceptedAnswer":{"@type":"Answer","text":"多くの場合、書き込み自体は成功していて、あなたが見ているノートとは別のファイルに入っています。原因の大半はデイリーノートの日付フォーマットか保存先フォルダの不一致です。Obsidianの設定→デイリーノートで「日付フォーマット」と「新規ファイルの作成場所」を確認し、送る側の設定と一字一句合わせてください。保管庫全体をファイル名で検索すると、意図しない場所に同名ノートが増えていないかを確認できます。"}},{"@type":"Question","name":"その日のデイリーノートがまだ無いときはどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"経路によって変わります。ファイルを新規作成してから追記する方式なら、朝いちばんのメモでその日のノートが作られます。既存ノートへの追記しか行わない方式では、対象ファイルが無い時点で失敗するか、意図しない場所に新規ファイルが作られます。テンプレートを使っている場合、自動作成されたノートにテンプレートが適用されないことがある点にも注意してください。"}},{"@type":"Question","name":"デイリーノートとInboxノート、どちらに集めるべきですか？","acceptedAnswer":{"@type":"Answer","text":"1日の流れを時系列のログとして残したいならデイリーノート、あとでまとめて仕分ける受信箱として使いたいなら固定のInboxノートが向いています。運用が安定しないうちはInboxノートのほうが安全です。日付に依存しないため、日付フォーマットの不一致で追記が迷子になる事故が起きません。慣れてからデイリーノートに切り替えても、過去の記録は失われません。"}},{"@type":"Question","name":"追記の位置を指定できますか（特定の見出しの下など）","acceptedAnswer":{"@type":"Answer","text":"経路によります。ノートの末尾に追記するか先頭に挿入するかを選べる方式が一般的で、特定の見出しの直下に差し込みたい場合は、その機能を持つ専用のショートカットアクションやコミュニティプラグインが必要になります。多くの用途では、時刻付きの1行を末尾に積んでいく形にしておき、整理はあとからObsidian側で行うほうが破綻しにくくなります。"}},{"@type":"Question","name":"「iPhoneを開かず」とは具体的にどこまでを指しますか？","acceptedAnswer":{"@type":"Answer","text":"このページでは3段階に分けて整理しています。レベル1はObsidianアプリを開かずに済む状態、レベル2はiPhoneは手に取るがアプリを開かずアクションボタンやウィジェットから入力する状態、レベル3はiPhoneを取り出さず声やApple Watchだけで完結する状態です。多くの記事が「iPhoneを開かず」と書いているのはレベル1のことで、ポケットからiPhoneを出す動作自体は残ります。どのレベルを目指すかで選ぶべき経路が変わります。"}},{"@type":"Question","name":"Obsidianを開かずに追記できるのはどの方法ですか？","acceptedAnswer":{"@type":"Answer","text":"Obsidian 1.11以降のアプリ内蔵キャプチャアクションは、アプリを前面に出さずにノートへ追記できます。obsidian:// のURLスキームを使う方法は、仕組み上Obsidianが前面に開きます。保管庫フォルダへ直接書き込むタイプのアプリも、Obsidianを開かずに追記します。ロック中や画面を見ずに実行したい場合は、この違いが決定的になります。"}},{"@type":"Question","name":"追記されたのに他の端末のObsidianに反映されません","acceptedAnswer":{"@type":"Answer","text":"iCloud Driveで同期している場合、書き込みそのものは即座に行われますが、他の端末に反映されるまで数秒から数十秒かかることがあります。まずiPhone側のObsidianでノートを開き、そこに反映されているかを確認してください。iPhoneでは見えていて別の端末で見えないなら同期の遅延、iPhoneでも見えないなら追記先そのものがズレています。"}},{"@type":"Question","name":"声だけでデイリーノートに追記できますか？","acceptedAnswer":{"@type":"Answer","text":"できます。Obsidian連携シンプルメモの場合、「Hey Siri、シンプルメモで残す」と話しかけると、画面を見ずに送信まで完了し、同じ内容がデイリーノートに追記されます。AirPodsを着けていればiPhoneをポケットに入れたままで完結します。Obsidian 1.11以降もSiri経由のキャプチャに対応しているため、追記先の指定が固定でよいならそちらでも同様のことができます。"}}]}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/obsidian/daily-note/#webpage","inLanguage":"ja","name":"iPhoneを開かずObsidianのデイリーノートへ追記する方法 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/obsidian/daily-note/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* ── 「開かず」の段階 ──────────────────────────────
+       この記事の骨子。読者が言う「開かず」と記事が指す「開かず」は
+       ずれていることが多いので、先に3段階へ分解して合意を取る。 */
+    .lv{display:grid;grid-template-columns:auto 1fr;gap:0 1.1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.3rem 1.3rem;margin:.85rem 0}
+    .lv__n{grid-row:1/3;width:2.6rem;height:2.6rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;align-self:start}
+    .lv__t{font-size:1.05rem;font-weight:700;line-height:1.55;margin:0 0 .4rem}
+    .lv__d{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0}
+    @media(max-width:520px){
+      .lv{grid-template-columns:1fr;gap:.6rem}
+      .lv__n{grid-row:auto}
+    }
+
+    /* 原因ブロック */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/siri/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ct=obsidian-daily-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ct=obsidian-daily-jp__nav&amp;mt=8" class="global-nav__cta">
+          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span lang="ja" data-lang="ja">Obsidian デイリーノート × クイックキャプチャ</span><span lang="en" data-lang="en">Obsidian daily note × quick capture</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span lang="ja" data-lang="ja">iPhoneを開かず、Obsidianのデイリーノートへ追記する</span><span lang="en" data-lang="en">Append to your Obsidian daily note without opening your iPhone</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span lang="ja" data-lang="ja">思いついたことを、その日のノートに1行足すだけ。それだけのことに、アプリを開いて・ノートを探して・カーソルを末尾に置いて、という手数がかかります。ここでは<strong>「どこまでiPhoneを触らずに済むか」</strong>という軸で3つのルートを比較し、追記が迷子になりやすい設定の合わせ方まで整理します。</span><span lang="en" data-lang="en">Adding one line to today's note should be trivial. Instead it means opening an app, finding the note and placing the cursor at the end. This page compares three routes on a single axis — <strong>how little you have to touch your iPhone</strong> — and covers the settings that most often make an append go missing.</span>
+        </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-11">2026年8月11日</time></span><span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published <time datetime="2026-08-11">August 11, 2026</time></span>
+        </p>
+      </div>
+
+      <!-- Answer-first (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">ひとことで言うと</span><span lang="en" data-lang="en">SHORT ANSWER</span></div>
+          <p><span lang="ja" data-lang="ja">デイリーノートに追記する道は大きく3つあります。<strong>①Obsidian 1.11以降のアプリ内蔵キャプチャアクション</strong>（Obsidianを開かずに追記できる。設定が最も少ない）、<strong>②ショートカット＋<code>obsidian://</code> URLスキーム</strong>（自由度は高いが、実行のたびObsidianが前面に開き、URLの組み立てを自分で保守する必要がある）、<strong>③保管庫フォルダへ直接書き込むアプリに任せる</strong>（iPhoneを取り出さず、声やApple Watchからでも届く）。<strong>「アプリを開かない」で足りるなら①、「iPhoneを取り出さない」まで求めるなら③</strong>です。そして追記が入らないときの原因は、経路によらず<strong>日付フォーマットと保存先フォルダの不一致</strong>がほとんどを占めます。</span><span lang="en" data-lang="en">Three routes exist. <strong>(1) Obsidian's built-in capture actions</strong> since 1.11 — appends without opening the app, least setup. <strong>(2) Shortcuts plus the <code>obsidian://</code> URL scheme</strong> — most flexible, but Obsidian comes to the foreground each time and you maintain the URL yourself. <strong>(3) An app that writes straight into the vault folder</strong> — reaches the note from your voice or your watch, phone still in your pocket. <strong>If "don't open the app" is enough, take route 1; if you want "don't take out the phone", take route 3.</strong> And when an append goes missing, the cause is nearly always the same regardless of route: <strong>a mismatched date format or folder</strong>.</span></p>
+        </div>
+      </section>
+
+      <!-- Define "without opening" -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">「iPhoneを開かず」には3段階ある</span><span lang="en" data-lang="en">"Without opening your iPhone" has three levels</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">この言葉は書き手によって指す範囲が違います。自分がどのレベルを求めているのかを先に決めると、選ぶべきルートが一意に決まります。多くの解説記事が「開かず」と書いているのはレベル1のことで、<strong>ポケットからiPhoneを出す動作そのものは残ります</strong>。</span><span lang="en" data-lang="en">Different writers mean different things by it. Decide which level you actually want and the route follows. Most tutorials mean level 1 — which still leaves <strong>taking the phone out of your pocket</strong> in the loop.</span>
+        </p>
+
+        <div class="lv">
+          <div class="lv__n">Lv.1</div>
+          <div>
+            <h3 class="lv__t"><span lang="ja" data-lang="ja">Obsidianを開かない</span><span lang="en" data-lang="en">Don't open Obsidian</span></h3>
+            <p class="lv__d"><span lang="ja" data-lang="ja">iPhoneは手に取って操作しますが、Obsidianアプリを起動してノートを探す工程がなくなります。ホーム画面のショートカットアイコンやウィジェットから入力する形です。<strong>アプリの起動と同期の待ち時間が消える</strong>のが主な効果。</span><span lang="en" data-lang="en">You still pick up the phone, but you skip launching Obsidian and hunting for the note — you type into a shortcut icon or widget instead. The win is <strong>no app launch and no waiting on sync</strong>.</span></p>
+          </div>
+        </div>
+
+        <div class="lv">
+          <div class="lv__n">Lv.2</div>
+          <div>
+            <h3 class="lv__t"><span lang="ja" data-lang="ja">アプリを開かない</span><span lang="en" data-lang="en">Don't open any app</span></h3>
+            <p class="lv__d"><span lang="ja" data-lang="ja">iPhoneは手に取りますが、アクションボタンや背面タップなど<strong>物理的な入口</strong>から直接入力を始めます。ホーム画面を眺めてアイコンを探す時間がなくなるため、「思いついてから書き始めるまで」が数秒縮みます。ロック画面から起動できるかどうかがここの分かれ目です。</span><span lang="en" data-lang="en">The phone is in your hand, but you start from a <strong>physical entry point</strong> — the Action button or a back tap — rather than hunting for an icon. That removes a few seconds between the thought and the first character. Whether it works from the lock screen is the deciding detail here.</span></p>
+          </div>
+        </div>
+
+        <div class="lv">
+          <div class="lv__n">Lv.3</div>
+          <div>
+            <h3 class="lv__t"><span lang="ja" data-lang="ja">iPhoneを取り出さない</span><span lang="en" data-lang="en">Don't take the phone out at all</span></h3>
+            <p class="lv__d"><span lang="ja" data-lang="ja">声（Siri・AirPods）またはApple Watchから入力し、iPhoneはポケットに入れたままにします。歩行中・運転前後・調理中・就寝前など、<strong>そもそも画面を見られない場面</strong>で唯一機能するレベルです。ここまで来ると、キャプチャできる場面の数そのものが変わります。</span><span lang="en" data-lang="en">You capture by voice (Siri, AirPods) or from an Apple Watch, phone still in your pocket. This is the only level that works <strong>when you can't look at a screen at all</strong> — walking, cooking, before bed. Reaching it changes not how fast you capture but how many moments you can capture in.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Route comparison -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">3つのルートを比較する</span><span lang="en" data-lang="en">The three routes compared</span>
+        </h2>
+        <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col"><span lang="ja" data-lang="ja">項目</span><span lang="en" data-lang="en">Aspect</span></th>
+              <th scope="col"><span lang="ja" data-lang="ja">① 内蔵キャプチャアクション</span><span lang="en" data-lang="en">1. Built-in capture actions</span></th>
+              <th scope="col"><span lang="ja" data-lang="ja">② ショートカット＋URLスキーム</span><span lang="en" data-lang="en">2. Shortcuts + URL scheme</span></th>
+              <th scope="col"><span lang="ja" data-lang="ja">③ 保管庫へ直接書くアプリ</span><span lang="en" data-lang="en">3. App writing to the vault</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">到達できるレベル</span><span lang="en" data-lang="en">Level reached</span></th>
+              <td data-label="① 内蔵アクション">Lv.1〜2</td>
+              <td data-label="② URLスキーム">Lv.1〜2</td>
+              <td data-label="③ 直接書き込み"><span class="mk-yes">Lv.3</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">Obsidianが開くか</span><span lang="en" data-lang="en">Does Obsidian open?</span></th>
+              <td data-label="① 内蔵アクション"><span class="mk-yes">開かない</span></td>
+              <td data-label="② URLスキーム"><span class="mk-no">毎回開く</span></td>
+              <td data-label="③ 直接書き込み"><span class="mk-yes">開かない</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">必要な準備</span><span lang="en" data-lang="en">Setup required</span></th>
+              <td data-label="① 内蔵アクション"><span lang="ja" data-lang="ja">アクションを1つ置く</span><span lang="en" data-lang="en">Drop in one action</span></td>
+              <td data-label="② URLスキーム"><span lang="ja" data-lang="ja">URL組み立て・日付書式・エンコード</span><span lang="en" data-lang="en">URL, date format, encoding</span></td>
+              <td data-label="③ 直接書き込み"><span lang="ja" data-lang="ja">フォルダを一度選ぶ</span><span lang="en" data-lang="en">Pick the folder once</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">声だけで完結</span><span lang="en" data-lang="en">Voice-only</span></th>
+              <td data-label="① 内蔵アクション"><span class="mk-part">△</span> <span lang="ja" data-lang="ja">Siri対応あり</span><span lang="en" data-lang="en">Siri supported</span></td>
+              <td data-label="② URLスキーム"><span class="mk-no">×</span> <span lang="ja" data-lang="ja">アプリが開く</span><span lang="en" data-lang="en">app opens</span></td>
+              <td data-label="③ 直接書き込み"><span class="mk-yes">◎</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">Apple Watchから</span><span lang="en" data-lang="en">From Apple Watch</span></th>
+              <td data-label="① 内蔵アクション"><span class="mk-no">×</span></td>
+              <td data-label="② URLスキーム"><span class="mk-no">×</span></td>
+              <td data-label="③ 直接書き込み"><span class="mk-part">△</span> <span lang="ja" data-lang="ja">Watchアプリがあるものに限る</span><span lang="en" data-lang="en">only apps with a watch app</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">圏外で書けるか</span><span lang="en" data-lang="en">Works offline?</span></th>
+              <td data-label="① 内蔵アクション"><span class="mk-yes">◎</span> <span lang="ja" data-lang="ja">保管庫が端末にあれば</span><span lang="en" data-lang="en">if the vault is local</span></td>
+              <td data-label="② URLスキーム"><span class="mk-yes">◎</span> <span lang="ja" data-lang="ja">同上</span><span lang="en" data-lang="en">same</span></td>
+              <td data-label="③ 直接書き込み"><span class="mk-yes">◎</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">壊れやすさ</span><span lang="en" data-lang="en">Fragility</span></th>
+              <td data-label="① 内蔵アクション"><span lang="ja" data-lang="ja">低い</span><span lang="en" data-lang="en">Low</span></td>
+              <td data-label="② URLスキーム"><span class="mk-no">高い</span> <span lang="ja" data-lang="ja">静かに壊れる</span><span lang="en" data-lang="en">breaks silently</span></td>
+              <td data-label="③ 直接書き込み"><span lang="ja" data-lang="ja">低い</span><span lang="en" data-lang="en">Low</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">① <span lang="ja" data-lang="ja">内蔵キャプチャアクション</span><span lang="en" data-lang="en">Built-in capture actions</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">Obsidianモバイル 1.11 以降で追加されたショートカットアクションです。ノートへの追記（キャプチャ）は<strong>アプリを前面に出さずに</strong>実行でき、URLを自分で組み立てる必要もありません。まずこれを試すのが最短です。1.11未満なら、App Storeで更新してください。</span><span lang="en" data-lang="en">Shortcuts actions added in Obsidian mobile 1.11. Capturing to a note runs <strong>without bringing the app forward</strong>, and there's no URL to assemble. Try this first. If you're below 1.11, update in the App Store.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">② <span lang="ja" data-lang="ja">ショートカット＋URLスキーム</span><span lang="en" data-lang="en">Shortcuts + URL scheme</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">従来からある方法で、細かい制御ができる反面、実行のたびObsidianが前面に開きます。日付書式・フォルダ・URLエンコードを自分で維持する必要があり、保管庫名を変えただけで静かに壊れます。今も有効なのは、内蔵アクションで届かない操作をしたい場合です。</span><span lang="en" data-lang="en">The long-standing approach. Fine-grained, but Obsidian surfaces on every run, and you own the date format, the folder and the encoding. Rename a vault and it breaks without saying so. It still earns its place for operations the built-in actions don't cover.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">③ <span lang="ja" data-lang="ja">保管庫へ直接書くアプリ</span><span lang="en" data-lang="en">An app that writes to the vault</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">キャプチャ専用アプリが、iCloud Drive上の保管庫フォルダへ直接追記します。ショートカットを自作しないぶん壊れにくく、声やApple Watchを入口にできるものもあります。<strong>Lv.3に到達できるのは実質このルートだけ</strong>です。</span><span lang="en" data-lang="en">A dedicated capture app appends straight into your vault folder in iCloud Drive. Nothing hand-built to break, and some offer voice or watch entry points. <strong>This is effectively the only route that reaches level 3.</strong></span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🧭 <span lang="ja" data-lang="ja">選び方の目安</span><span lang="en" data-lang="en">How to choose</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">机の前でのキャプチャが中心なら①で十分です。移動中・作業中に思いつくことが多い人ほど、③にしないと結局取りこぼします。②は「①でどうしても足りない操作がある」場合の選択肢と考えてください。</span><span lang="en" data-lang="en">If most of your capturing happens at a desk, route 1 is plenty. The more your ideas arrive while moving or with your hands busy, the more route 3 is what actually catches them. Treat route 2 as the answer when route 1 genuinely can't do what you need.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Why appends go missing -->
+      <section class="lp-section" id="missing">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">デイリーノートに入らない — 3大原因</span><span lang="en" data-lang="en">Why the append goes missing — the three big causes</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">どのルートでも共通して踏むのがここです。しかも<strong>大半のケースで書き込み自体は成功しています</strong>——ただ、あなたが見ているノートとは別のファイルに入っているだけです。エラーが出ないぶん、気づくのが数週間後になりがちな厄介な症状です。</span><span lang="en" data-lang="en">Every route trips on this, and the cruel part is that <strong>the write usually succeeded</strong> — just into a file you aren't looking at. Nothing errors, so people often notice weeks later.</span>
+        </p>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">原因 1 — 最頻</span><span lang="en" data-lang="en">CAUSE 1 — MOST COMMON</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">日付フォーマットが一致していない</span><span lang="en" data-lang="en">The date format doesn't match</span></h3>
+          <p><span lang="ja" data-lang="ja">Obsidianのデイリーノートは既定で <code>YYYY-MM-DD</code> ですが、これを <code>YYYY/MM/DD</code> や <code>YYYYMMDD</code>、あるいは曜日入りの書式に変えている人は少なくありません。送る側が既定のまま組み立てていると、<strong>存在しないファイル名を狙って新規作成してしまいます</strong>。</span><span lang="en" data-lang="en">Obsidian's daily note defaults to <code>YYYY-MM-DD</code>, but plenty of people switch it to <code>YYYY/MM/DD</code>, <code>YYYYMMDD</code> or something with a weekday in it. If the sending side still assumes the default, <strong>it aims at a filename that doesn't exist and creates it</strong>.</span></p>
+          <ol>
+            <li><span lang="ja" data-lang="ja">Obsidian の 設定 → デイリーノート を開く。</span><span lang="en" data-lang="en">Open Settings → Daily notes in Obsidian.</span></li>
+            <li><span lang="ja" data-lang="ja">「日付フォーマット」に表示されている書式を、そのまま控える。</span><span lang="en" data-lang="en">Note the exact date format string shown there.</span></li>
+            <li><span lang="ja" data-lang="ja">ショートカット側の日付フォーマットを、それと<strong>一字一句</strong>同じにする。</span><span lang="en" data-lang="en">Make your shortcut's date format <strong>character-for-character</strong> identical.</span></li>
+          </ol>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">原因 2</span><span lang="en" data-lang="en">CAUSE 2</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">保存先フォルダが抜けている</span><span lang="en" data-lang="en">The folder is missing from the path</span></h3>
+          <p><span lang="ja" data-lang="ja">デイリーノートを <code>日記/</code> や <code>Journal/</code> などのフォルダに置いているのに、送る側がファイル名だけを渡している場合です。結果として保管庫のルート直下に同名ノートが作られ、Obsidianのカレンダーからは見えない場所に毎日1枚ずつ増えていきます。</span><span lang="en" data-lang="en">Your daily notes live in <code>Journal/</code> or similar, but the sender passes only a filename. A same-named note gets created at the vault root instead, and one accumulates every day somewhere your calendar view never shows.</span></p>
+          <p><span lang="ja" data-lang="ja">対処は、ファイル名ではなく<strong>フォルダを含むパス</strong>を渡すこと。すでに増えてしまったノートは、保管庫をファイル名で検索すれば見つかります。中身が入っていることが多いので、消す前に確認してください。</span><span lang="en" data-lang="en">Fix it by passing <strong>the full path including the folder</strong>. Any strays are findable by searching the vault for the filename — check their contents before deleting, they usually aren't empty.</span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">原因 3</span><span lang="en" data-lang="en">CAUSE 3</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">その日のデイリーノートがまだ存在しない</span><span lang="en" data-lang="en">Today's note doesn't exist yet</span></h3>
+          <p><span lang="ja" data-lang="ja">「既存ノートへの追記」しか行わない設定だと、その日まだObsidianを開いていない朝いちばんのメモが行き場を失います。「昼からは動くのに朝だけ失敗する」という症状はこれです。テンプレートを使っている場合、自動作成されたノートにテンプレートが当たらないこともあります。</span><span lang="en" data-lang="en">A setup that only appends to an existing note has nowhere to put your first thought of the morning, before you've opened Obsidian that day. That's the "works from noon, fails at breakfast" pattern. If you use templates, an auto-created note may also skip the template.</span></p>
+          <p><span lang="ja" data-lang="ja">ノートが無ければ作ってから追記する経路を選ぶか、日付に依存しない<strong>固定のInboxノート</strong>に集める運用へ切り替えると、この原因は根本から消えます。</span><span lang="en" data-lang="en">Choose a route that creates the note before appending, or collect into a <strong>fixed inbox note</strong> that doesn't depend on the date — which removes this cause entirely.</span></p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">迷ったらInboxノートから始める</span><span lang="en" data-lang="en">WHEN IN DOUBT, START WITH AN INBOX NOTE</span></div>
+          <p><span lang="ja" data-lang="ja">運用が固まっていないうちは、デイリーノートより<strong>固定の1ファイル（Inboxノート）</strong>に集めるほうが安全です。日付フォーマットにもフォルダ設定にも依存しないため、上の3大原因すべてが構造的に起きません。時系列のログにしたくなってからデイリーノートへ切り替えても、それまでの記録は失われません。</span><span lang="en" data-lang="en">Until your workflow settles, collecting into <strong>one fixed file</strong> beats targeting daily notes. It depends on neither the date format nor the folder setting, so all three causes above become impossible. Switch to daily notes later if you want a chronological log — nothing captured so far is lost.</span></p>
+        </div>
+      </section>
+
+      <!-- Reaching Lv3 -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">レベル3に到達する — 声とApple Watchから</span><span lang="en" data-lang="en">Reaching level 3 — from your voice and your wrist</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">Obsidian連携シンプルメモは、ルート③にあたるアプリです。送信したメモが自分宛メールに届くと同時に、iCloud Drive上の保管庫フォルダのデイリーノートへ、<strong>Obsidianを開かずに</strong>1行ずつ追記されます。<strong>コミュニティプラグインもショートカットの自作も不要</strong>で、設定は保管庫フォルダを一度選ぶだけです。</span><span lang="en" data-lang="en">Simple Memo is a route 3 app. Each note you send arrives in your own inbox by email and is appended, one line at a time, to the daily note in your vault folder in iCloud Drive — <strong>without opening Obsidian</strong>. <strong>No community plugin, no shortcut to build</strong>; setup is picking the vault folder once.</span>
+        </p>
+        <pre class="note-sample"><code># 2026-08-11
+
+- 09:14 駅で思いついた記事の見出し案
+- 12:38 ランチで聞いた競合の新機能をあとで調べる
+- 21:05 読み終えた本の引用メモ</code></pre>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">🗣️ <span lang="ja" data-lang="ja">声だけで追記する</span><span lang="en" data-lang="en">Append by voice alone</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">「Hey Siri、シンプルメモで残す」と話しかけると、App Intents経由でアプリを前面に出さずに送信まで完了します。AirPodsを着けていればiPhoneはポケットのまま、画面も見ずに終わります。</span><span lang="en" data-lang="en">Say "Hey Siri, save with Simple Memo" and it completes through App Intents without surfacing the app. With AirPods in, your phone stays in your pocket and you never look at a screen.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">⌚ <span lang="ja" data-lang="ja">Apple Watchから追記する</span><span lang="en" data-lang="en">Append from Apple Watch</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">Watchアプリを開くと音声入力が自動で開き、話して送るだけ。書き込みはペアリング中のiPhoneが担当します（Watchが保管庫へ直接書くわけではありません）。</span><span lang="en" data-lang="en">Open the watch app and dictation starts on its own — speak and send. The paired iPhone performs the write; the watch never touches the vault itself.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">✈️ <span lang="ja" data-lang="ja">圏外でも追記される</span><span lang="en" data-lang="en">Appends even offline</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">保管庫フォルダへの書き込みはローカル処理なので、通信がなくてもその場で追記されます。メール送信のほうは暗号化された送信キューで待ち、オンラインに戻ると自動送信されます。</span><span lang="en" data-lang="en">Writing to the vault folder is local, so it happens with no signal. The email waits in an encrypted outbox and goes out when you're back online.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">📬 <span lang="ja" data-lang="ja">メールにも同じ内容が残る</span><span lang="en" data-lang="en">The same text lands in email</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">追記先の設定を間違えていても、同じメモが自分宛メールに残ります。「静かに消えて数週間後に気づく」という、このジャンル特有の事故が起きにくくなります。</span><span lang="en" data-lang="en">Even if you misconfigure the destination, the same note is in your inbox. The genre's signature failure — silent loss discovered weeks later — becomes much less likely.</span></div>
+          </div>
+        </div>
+        <ol class="steps-list">
+          <li><strong><span lang="ja" data-lang="ja">Obsidian連携をオンにする</span><span lang="en" data-lang="en">Turn on Obsidian integration</span></strong><br><span lang="ja" data-lang="ja">設定画面の「詳細設定」にある「Obsidian 連携」をオンにします。</span><span lang="en" data-lang="en">Settings → Advanced → Obsidian integration.</span></li>
+          <li><strong><span lang="ja" data-lang="ja">保管庫フォルダを選ぶ</span><span lang="en" data-lang="en">Pick your vault folder</span></strong><br><span lang="ja" data-lang="ja">iCloud Drive内にあるObsidian保管庫のフォルダを選択します。アプリはそのフォルダへのアクセス権だけを保存します。</span><span lang="en" data-lang="en">Choose your vault folder in iCloud Drive. The app stores access to that folder only.</span></li>
+          <li><strong><span lang="ja" data-lang="ja">追記先を選ぶ</span><span lang="en" data-lang="en">Choose the destination</span></strong><br><span lang="ja" data-lang="ja">「デイリーノート」か「Inboxノート」を選びます。デイリーノートを使う場合は、Obsidian側のファイル名が <code>yyyy-MM-dd.md</code> であることを確認してください。</span><span lang="en" data-lang="en">Daily note or a fixed inbox note. For daily notes, confirm Obsidian is naming files <code>yyyy-MM-dd.md</code>.</span></li>
+          <li><strong><span lang="ja" data-lang="ja">あとは送るだけ</span><span lang="en" data-lang="en">Then just send</span></strong><br><span lang="ja" data-lang="ja">以降、送信したメモが <code>- HH:mm メモ</code> の形で自動追記されます。iCloud同期のため、他の端末のObsidianに反映されるまで数秒かかることがあります。</span><span lang="en" data-lang="en">From then on, each note is appended as <code>- HH:mm note</code>. It can take a few seconds to appear in Obsidian on other devices while iCloud syncs.</span></li>
+        </ol>
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">正確なところ</span><span lang="en" data-lang="en">TO BE PRECISE</span></div>
+          <p><span lang="ja" data-lang="ja">デイリーノートの保存先フォルダや命名をカスタムしている場合は、追記先がズレる可能性があります。その場合は「Inboxノート」を選ぶと確実に1ファイルに届きます。対象フォルダはiCloud Driveまたは「このiPhone内」にあり、ファイルAppからアクセスできる必要があります。Obsidian Sync専用の保管庫はフォルダ選択に出ないことがあり、その場合はURLスキーム方式（送信時にObsidianが一瞬開いて追記）にフォールバックします。本アプリはObsidian公式のアプリ・プラグインではなく、株式会社ユリカが開発する独立アプリです。Obsidianは Dynalist Inc. の商標です。</span><span lang="en" data-lang="en">If you've customised where daily notes are stored or how they're named, the append may land elsewhere; choosing the fixed inbox note guarantees a single destination. The target folder must be in iCloud Drive or On My iPhone and reachable from the Files app. A vault kept only in Obsidian Sync may not appear in the picker, in which case the app falls back to the URL scheme (Obsidian briefly opens to append). This is not an official Obsidian app or plugin — it's an independent app by Yurica Inc. Obsidian is a trademark of Dynalist Inc.</span></p>
+        </div>
+        <div class="cta-box">
+          <div class="cta-box__title"><span lang="ja" data-lang="ja">その日のノートに、1行足すだけの手間で</span><span lang="en" data-lang="en">One line into today's note, and nothing more</span></div>
+          <p class="cta-box__desc"><span lang="ja" data-lang="ja">ダウンロードは無料。Obsidian連携の設定は約1分、保管庫フォルダを一度選ぶだけです。</span><span lang="en" data-lang="en">Free to download. Obsidian setup takes about a minute — pick your vault folder once.</span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ct=obsidian-daily-jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+          </a>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span>
+        </h2>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">追記したはずなのに、ノートに何も増えていません</span><span lang="en" data-lang="en">I appended, but nothing appeared in the note</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">多くの場合、書き込み自体は成功していて、あなたが見ているノートとは別のファイルに入っています。原因の大半は日付フォーマットか保存先フォルダの不一致です。Obsidianの設定→デイリーノートで「日付フォーマット」と「新規ファイルの作成場所」を確認し、送る側と一字一句合わせてください。保管庫全体をファイル名で検索すると、意図しない場所に同名ノートが増えていないかを確認できます。</span><span lang="en" data-lang="en">Usually the write succeeded — into a file you aren't looking at. Nearly always a mismatched date format or folder. Check Settings → Daily notes in Obsidian for the format and the new file location, and match the sending side exactly. Searching the whole vault for the filename will reveal strays created in the wrong place.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">その日のデイリーノートがまだ無いときはどうなりますか？</span><span lang="en" data-lang="en">What happens if today's note doesn't exist yet?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">経路によって変わります。ファイルを新規作成してから追記する方式なら、朝いちばんのメモでその日のノートが作られます。既存ノートへの追記しか行わない方式では、対象ファイルが無い時点で失敗するか、意図しない場所に新規ファイルが作られます。テンプレートを使っている場合、自動作成されたノートにテンプレートが適用されないことがある点にも注意してください。</span><span lang="en" data-lang="en">It depends on the route. One that creates the file before appending will make today's note with your first capture. One that only appends to an existing note either fails or creates a file somewhere you didn't intend. Also note that an auto-created note may not get your template applied.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">デイリーノートとInboxノート、どちらに集めるべきですか？</span><span lang="en" data-lang="en">Daily note or inbox note — which should I use?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">1日の流れを時系列のログとして残したいならデイリーノート、あとでまとめて仕分ける受信箱として使いたいなら固定のInboxノートが向いています。運用が安定しないうちはInboxノートのほうが安全です。日付に依存しないため、日付フォーマットの不一致で追記が迷子になる事故が起きません。慣れてからデイリーノートに切り替えても、過去の記録は失われません。</span><span lang="en" data-lang="en">Daily notes suit a chronological log of your day; a fixed inbox note suits a bucket you triage later. Until your workflow settles, the inbox note is safer — it doesn't depend on the date, so a format mismatch can't misplace anything. Switching to daily notes later loses nothing you've already captured.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">追記の位置を指定できますか（特定の見出しの下など）</span><span lang="en" data-lang="en">Can I control where in the note it lands?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">経路によります。ノートの末尾に追記するか先頭に挿入するかを選べる方式が一般的で、特定の見出しの直下に差し込みたい場合は、その機能を持つ専用のショートカットアクションやコミュニティプラグインが必要になります。多くの用途では、時刻付きの1行を末尾に積んでいく形にしておき、整理はあとからObsidian側で行うほうが破綻しにくくなります。</span><span lang="en" data-lang="en">It depends. Choosing between appending at the end and prepending at the top is common; inserting under a specific heading needs a dedicated Shortcuts action or a community plugin that supports it. For most uses, stacking timestamped lines at the end and organising later inside Obsidian holds up better.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">追記されたのに他の端末のObsidianに反映されません</span><span lang="en" data-lang="en">It appended but doesn't show on my other devices</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">iCloud Driveで同期している場合、書き込みそのものは即座に行われますが、他の端末に反映されるまで数秒から数十秒かかることがあります。まずiPhone側のObsidianでノートを開き、そこに反映されているかを確認してください。iPhoneでは見えていて別の端末で見えないなら同期の遅延、iPhoneでも見えないなら追記先そのものがズレています。</span><span lang="en" data-lang="en">With iCloud Drive the write is immediate, but propagation can take seconds to tens of seconds. Open the note in Obsidian on the iPhone first: visible there but not elsewhere means sync lag; not visible there either means the destination itself is wrong.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">プラグインを入れずにデイリーノートへ追記できますか？</span><span lang="en" data-lang="en">Can I append without installing a plugin?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">できます。この記事の3ルートはいずれもコミュニティプラグインを必要としません。Obsidian連携シンプルメモの場合、保管庫はiCloud Drive上のただのフォルダとして扱われ、アプリがそこへMarkdownファイルを直接書き込みます。Obsidian側の設定を変える必要もありません。</span><span lang="en" data-lang="en">Yes. None of the three routes here require a community plugin. With Simple Memo, your vault is treated as an ordinary folder in iCloud Drive and the app writes Markdown into it directly — no changes needed on the Obsidian side.</span></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/obsidian/"><span lang="ja" data-lang="ja">Obsidian連携の詳細</span><span lang="en" data-lang="en">Obsidian integration</span></a>
+          <a href="/obsidian/shortcuts-not-working/"><span lang="ja" data-lang="ja">ショートカットが動かないとき</span><span lang="en" data-lang="en">When Shortcuts won't work</span></a>
+          <a href="/obsidian/apple-watch-not-working/"><span lang="ja" data-lang="ja">Apple Watchから送れない理由</span><span lang="en" data-lang="en">Why Apple Watch can't send</span></a>
+          <a href="/blog/obsidian-iphone-memo"><span lang="ja" data-lang="ja">iPhoneからObsidianに送る方法6選</span><span lang="en" data-lang="en">6 ways to send to Obsidian</span></a>
+          <a href="/blog/obsidian-voice-input"><span lang="ja" data-lang="ja">Obsidianに音声入力する方法4選</span><span lang="en" data-lang="en">4 ways to dictate into Obsidian</span></a>
+          <a href="/siri/"><span lang="ja" data-lang="ja">SiriとAirPodsで音声メモ</span><span lang="en" data-lang="en">Voice notes with Siri</span></a>
+          <a href="/methods/second-brain/"><span lang="ja" data-lang="ja">セカンドブレイン</span><span lang="en" data-lang="en">Second brain</span></a>
+          <a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">参考文献</span><span lang="en" data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://help.obsidian.md/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help</a> — <span lang="ja" data-lang="ja">デイリーノートの日付フォーマット・保存先・テンプレートに関する公式ヘルプ</span><span lang="en" data-lang="en">Official help for daily note date formats, locations and templates</span></li>
+    <li><a href="https://obsidian.md/changelog/2026-01-12-mobile-v1.11.4/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian 1.11 Mobile changelog</a> — <span lang="ja" data-lang="ja">アプリを開かずにノートへ追記できるショートカットアクションが追加されたリリース</span><span lang="en" data-lang="en">The release that added Shortcuts actions able to append without opening the app</span></li>
+    <li><a href="https://help.obsidian.md/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Obsidian URI</a> — <span lang="ja" data-lang="ja">URLスキーム方式で使えるアクションとパラメータの公式ドキュメント</span><span lang="en" data-lang="en">Official reference for the URL scheme's actions and parameters</span></li>
+    <li><a href="https://support.apple.com/ja-jp/guide/shortcuts/welcome/ios" target="_blank" rel="noopener" style="color:var(--accent);">ショートカットユーザガイド（Apple）</a> — <span lang="ja" data-lang="ja">アクション・オートメーション・日付の書式指定についての公式ガイド</span><span lang="en" data-lang="en">Apple's official guide to actions, automations and date formatting</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja" data-lang="ja">App Storeのダウンロードページ</span><span lang="en" data-lang="en">App Store download page</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">関連コンテンツ</span><span lang="en" data-lang="en">Related content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">Methods</span></a></li>
+    <li><a href="/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ジャーナリング</span><span lang="en" data-lang="en">Journaling</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">Blog</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja" data-lang="ja">Apple Watch対応</span><span lang="en" data-lang="en">Apple Watch</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja" data-lang="ja">Obsidian連携</span><span lang="en" data-lang="en">Obsidian</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use cases</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to email</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
+</html>
