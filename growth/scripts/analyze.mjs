@@ -93,8 +93,29 @@ function ctrGap() {
  * actionable; "clicks fell while impressions held and position held" (a CTR
  * loss, usually a SERP-feature change) points somewhere quite different from
  * "impressions fell too" (demand or indexing). */
+/** Days two snapshots share, as a fraction of the newer window. */
+function windowOverlap(a, b) {
+  if (!a?.meta.period_start || !b?.meta.period_start) return null;
+  const d = (x) => new Date(`${x}T00:00:00Z`).getTime();
+  const start = Math.max(d(a.meta.period_start), d(b.meta.period_start));
+  const end = Math.min(d(a.meta.period_end), d(b.meta.period_end));
+  const day = 86400000;
+  const shared = Math.max(0, (end - start) / day + 1);
+  const span = (d(b.meta.period_end) - d(b.meta.period_start)) / day + 1;
+  return span > 0 ? shared / span : null;
+}
+
+/* Two windows that mostly cover the same days cannot show decay: nearly every
+ * click is in both totals, so the difference is the few days at the edges plus
+ * noise. Reading that as "this page is declining" is the error the whole
+ * snapshot store exists to prevent, so the number is withheld rather than
+ * printed with a caveat nobody reads. */
+const MAX_DECAY_OVERLAP = 0.5;
+const overlap = windowOverlap(prev, snap);
+
 function decay() {
   if (!prev) return null;
+  if (overlap != null && overlap > MAX_DECAY_OVERLAP) return 'overlapping';
   const before = new Map(prev.pages.map((r) => [r.page, r]));
   const rows = [];
   for (const r of snap.pages) {
@@ -260,7 +281,13 @@ if (show('unanswered')) {
 
 if (show('decay')) {
   console.log('── Decay (vs previous snapshot)');
-  if (result.decay === null) console.log('   needs a second snapshot\n');
+  if (result.decay === 'overlapping') {
+    console.log(`   withheld: ${prev.label} (${prev.meta.period_start}..${prev.meta.period_end}) and ${snap.label} (${snap.meta.period_start}..${snap.meta.period_end})`);
+    console.log(`   share ${(overlap * 100).toFixed(0)}% of their days. Almost every click is in both totals, so a`);
+    console.log('   difference here would be the window shift, not decay. Compare snapshots taken');
+    console.log('   at least one full period apart.\n');
+  }
+  else if (result.decay === null) console.log('   needs a second snapshot\n');
   else if (!result.decay.length) console.log('   no page lost meaningful clicks\n');
   else for (const r of result.decay) {
     console.log(`  ${String(r.delta_clicks).padStart(5)} clicks  ${r.page}`);

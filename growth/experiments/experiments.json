@@ -533,7 +533,8 @@
       "notes": [
         "2026-08-09: The page also carries frozen title test title-2026-07-01-002. Its measurement window (2026-07-01..07-29) has already elapsed and is banked in GSC, so this change cannot corrupt it retroactively — but that window is the ONLY period from which the title decision may be read. Do not evaluate the title test on post-08-09 data.",
         "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed.",
-        "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly."
+        "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly.",
+        "CORRECTION 2026-08-11 (query x page export): the target query lands on this page with 99 impressions, not the 139 recorded here — the site-wide query export does not say which page a query lands on. More important, it is a small corner of a cluster that looks structurally unwinnable: the page top 12 queries take 1,869 impressions for 7 clicks (0.37%), and the largest single query 「line keepメモ 終了」 is 710 imp / 1 click at position 9.4. These searchers are checking whether LINE Keep shut down and want LINE own announcement, not a third-party migration article. Keep the experiment running, but expect a small effect even if the FAQ works."
       ]
     },
     {
@@ -564,7 +565,8 @@
       "evaluated_at": null,
       "notes": [
         "No change ships with this entry — it exists so the regression stays visible. The title was kept by owner decision (title-2026-07-02-011); that ruled out one lever, not the problem.",
-        "On the next snapshot: if CTR is still near 4.5% at a flat position, the remaining lever is the meta description / snippet. Check the query x page export first to see whether the query mix widened."
+        "On the next snapshot: if CTR is still near 4.5% at a flat position, the remaining lever is the meta description / snippet. Check the query x page export first to see whether the query mix widened.",
+        "NEW HYPOTHESIS 2026-08-11 (query x page export), distinct from the refuted cannibalisation one: the queries actually landing here are how-to — 「obsidian 使い方 iphone」 66 imp / 6.06%, 「obsidian iphone 使い方」 46 imp / 6.52% — while the current title sells speed (「最速でメモを送る方法」). Demand is how-to, the pitch is speed. This is a wording mismatch on the page own queries, not traffic lost to neighbouring pages. Visible queries convert at 4.97% overall, so whatever costs the page CTR is outside this 302-impression slice."
       ]
     },
     {

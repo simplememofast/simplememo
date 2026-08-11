@@ -41,38 +41,87 @@ if (!fs.existsSync(inputDir)) {
   process.exit(2);
 }
 
-const files = fs.readdirSync(inputDir).filter((f) => /\.(csv|tsv)$/i.test(f));
-if (!files.length) {
-  console.error(`No .csv/.tsv files in ${inputDir}.\nSee growth/GSC_OWNER_ACTION.md — the whole export unzips straight into this directory.`);
-  process.exit(2);
+/**
+ * One export directory. Search Console has no query x page export — you filter
+ * the report to a page and export its queries — so a filtered export IS the
+ * query x page data, but only its `フィルタ.csv` says which page it belongs to.
+ *
+ * Every export also ships the same seven filenames, so filtered exports have to
+ * live in their own subdirectories and only their query file may be read: the
+ * rest (pages, devices, countries) describe one filtered slice and would be
+ * summed into the site totals as if they were the whole site.
+ */
+function readExportDir(dir) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const csvs = entries.filter((e) => e.isFile() && /\.(csv|tsv)$/i.test(e.name)).map((e) => e.name);
+  const subdirs = entries.filter((e) => e.isDirectory() && e.name !== '__MACOSX').map((e) => e.name);
+  return { csvs, subdirs };
+}
+
+/** The page a filtered export is scoped to, or null for a whole-site export. */
+function pageFilterOf(dir, csvs) {
+  const name = csvs.find((f) => /^(フィルタ|filters?)\.csv$/i.test(f));
+  if (!name) return null;
+  const text = fs.readFileSync(path.join(dir, name), 'utf8');
+  const m = text.match(/^\s*(?:ページ|Page)\s*,\s*\+?(.+?)\s*$/mi);
+  return m ? toPath(m[1]) : null;
 }
 
 const buckets = { queries: [], pages: [], 'query-pages': [], dates: [], devices: [], countries: [] };
 const skipped = [];
+const sourceFiles = [];
+let sawAnyCsv = false;
 
-for (const f of files) {
-  const text = fs.readFileSync(path.join(inputDir, f), 'utf8');
-  const { rows, columns, unmapped } = parseGscExport(text);
-  if (!rows.length) { skipped.push(`${f}: no data rows`); continue; }
+function ingestDir(dir, label) {
+  const { csvs, subdirs } = readExportDir(dir);
+  const scopedPage = pageFilterOf(dir, csvs);
 
-  const has = (c) => columns.includes(c);
-  let kind = null;
-  if (has('query') && has('page')) kind = 'query-pages';
-  else if (has('query')) kind = 'queries';
-  else if (has('page')) kind = 'pages';
-  else if (has('date')) kind = 'dates';
-  else if (has('device')) kind = 'devices';
-  else if (has('country')) kind = 'countries';
+  for (const f of csvs) {
+    sawAnyCsv = true;
+    const rel = label ? `${label}/${f}` : f;
+    sourceFiles.push(rel);
+    const text = fs.readFileSync(path.join(dir, f), 'utf8');
+    const { rows, columns, unmapped } = parseGscExport(text);
+    if (!rows.length) { skipped.push(`${rel}: no data rows`); continue; }
 
-  if (!kind) { skipped.push(`${f}: no recognised dimension (columns: ${columns.join(', ') || 'none'})`); continue; }
+    const has = (c) => columns.includes(c);
+    let kind = null;
+    if (has('query') && has('page')) kind = 'query-pages';
+    else if (has('query')) kind = 'queries';
+    else if (has('page')) kind = 'pages';
+    else if (has('date')) kind = 'dates';
+    else if (has('device')) kind = 'devices';
+    else if (has('country')) kind = 'countries';
 
-  // Normalise page URLs to site-relative paths so they join against the
-  // repo's own page inventory without every consumer re-parsing origins.
-  for (const r of rows) if (r.page) r.page = toPath(r.page);
+    if (!kind) { skipped.push(`${rel}: no recognised dimension (columns: ${columns.join(', ') || 'none'})`); continue; }
 
-  buckets[kind].push(...rows);
-  const extra = unmapped.length ? ` (unmapped columns kept out: ${unmapped.join(', ')})` : '';
-  console.log(`  ${f} → ${kind}: ${rows.length} rows${extra}`);
+    if (scopedPage) {
+      // A filtered export contributes its queries, attributed to the filtered
+      // page, and nothing else.
+      if (kind !== 'queries') { skipped.push(`${rel}: filtered to ${scopedPage}, only its queries are used`); continue; }
+      for (const r of rows) r.page = scopedPage;
+      buckets['query-pages'].push(...rows);
+      console.log(`  ${rel} → query-pages (${scopedPage}): ${rows.length} rows`);
+      continue;
+    }
+
+    // Normalise page URLs to site-relative paths so they join against the
+    // repo's own page inventory without every consumer re-parsing origins.
+    for (const r of rows) if (r.page) r.page = toPath(r.page);
+
+    buckets[kind].push(...rows);
+    const extra = unmapped.length ? ` (unmapped columns kept out: ${unmapped.join(', ')})` : '';
+    console.log(`  ${rel} → ${kind}: ${rows.length} rows${extra}`);
+  }
+
+  for (const sub of subdirs) ingestDir(path.join(dir, sub), label ? `${label}/${sub}` : sub);
+}
+
+ingestDir(inputDir, '');
+
+if (!sawAnyCsv) {
+  console.error(`No .csv/.tsv files under ${inputDir}.\nSee growth/GSC_OWNER_ACTION.md — unzip each export into its own subdirectory.`);
+  process.exit(2);
 }
 
 skipped.forEach((s) => console.log(`  skipped ${s}`));
@@ -125,7 +174,7 @@ const meta = {
   captured_at: new Date().toISOString().slice(0, 10),
   period_start: period ? period.split('..')[0] : null,
   period_end: period ? period.split('..').pop() : null,
-  source_files: files,
+  source_files: sourceFiles,
   row_counts: Object.fromEntries(Object.entries(buckets).map(([k, v]) => [k, v.length])),
   totals: {
     clicks: totals.clicks,
