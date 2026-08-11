@@ -109,8 +109,19 @@ for (const file of files) {
       // Our own published figures, so a number near one of them beside a rival's
       // name is probably ours a table cell away.
       const OURS_VALUES = measuredValues(B.apps['Simple Memo - for Obsidian']);
-      const looksLikeOurs = values.every((v) => OURS_VALUES.some((o) => Math.abs(v - o) < NEAR))
-        && !measuredValues(app).some((m) => OURS_VALUES.some((o) => Math.abs(m - o) < NEAR));
+      const nearOurFigures = values.every((v) => OURS_VALUES.some((o) => Math.abs(v - o) < NEAR));
+      // The value test alone is not enough once a rival measures close to one
+      // of our columns. Drafts' focus (0.9s) sits within NEAR of our first_char
+      // (0.6s), which was enough to push "Drafts | 入力開始まで | 0.4秒" — a
+      // header cell, our own row — into CONFLICTS. So also look just behind the
+      // match: a comparison table puts our name a cell or two before the
+      // rival's, and prose puts it at the head of the sentence. 60 characters
+      // is deliberately tight; it is short enough that a page-wide brand
+      // mention in the nav cannot reach a figure in the body.
+      const before = text.slice(Math.max(0, m.index - 60), m.index);
+      const looksLikeOurs = nearOurFigures
+        && (OURS.test(before)
+          || !measuredValues(app).some((m) => OURS_VALUES.some((o) => Math.abs(m - o) < NEAR)));
       // A range that straddles the measured value is loose, not wrong.
       if (values.length === 2
           && measuredValues(app).some((m) => values[0] <= m && m <= values[1])) continue;
