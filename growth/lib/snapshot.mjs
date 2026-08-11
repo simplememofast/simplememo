@@ -14,7 +14,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { GSC_DIR, buildCtrCurve, buildSegmentCurves } from './gsc.mjs';
 
-export const BUCKET_KINDS = ['queries', 'pages', 'query-pages', 'dates', 'devices', 'countries'];
+/**
+ * `pages-aio` holds the "Performance on Search Generative AI Features" export:
+ * a page table with impressions and nothing else — Google reports no clicks,
+ * CTR or position for AI surfaces. It is a separate kind rather than a flag on
+ * `pages` because everything downstream of `pages` divides clicks by
+ * impressions somewhere, and these rows have no clicks to divide.
+ */
+export const BUCKET_KINDS = ['queries', 'pages', 'pages-aio', 'query-pages', 'dates', 'devices', 'countries'];
 
 export const emptyBuckets = () => Object.fromEntries(BUCKET_KINDS.map((k) => [k, []]));
 
@@ -85,6 +92,19 @@ export function buildMeta({ label, buckets, period = null, source = 'csv-export'
       ctr: totals.impressions ? totals.clicks / totals.impressions : null,
       source: totalsSource.from,
     },
+    // AI-surface exposure, kept apart from `totals` on purpose. These rows
+    // carry impressions only, so they can never be divided into a CTR — the
+    // share of total impressions is the whole measurement, and the number to
+    // watch is whether it grows. Null when the source carries no AI rows at
+    // all, which is every BigQuery snapshot: the bulk export has no AI-surface
+    // table, so that dimension still arrives only by CSV drop.
+    aio: buckets['pages-aio']?.length ? {
+      impressions: sum(buckets['pages-aio']).impressions,
+      pages: buckets['pages-aio'].length,
+      impression_share: totals.impressions
+        ? sum(buckets['pages-aio']).impressions / totals.impressions
+        : null,
+    } : null,
     ctr_curve: curve,
     ctr_curve_source: curveFrom,
     // Share of total impressions the curve was fitted on. A low value means the

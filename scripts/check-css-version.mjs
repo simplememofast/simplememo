@@ -1,16 +1,24 @@
 #!/usr/bin/env node
 /**
- * Keep the stylesheet's cache-busting query in step with its contents.
+ * Keep every cache-busted asset's query in step with its contents.
  *
  *   node scripts/check-css-version.mjs [--write]
  *
- * The version is derived from a hash of the CSS itself, so it cannot be
+ * The version is derived from a hash of the file itself, so it cannot be
  * forgotten. It was, once: the QR styles shipped on 2026-08-10 with the query
  * still reading `?v=20260805-read`, so browsers and the CDN kept serving the
  * previous stylesheet. The markup was live and correct while none of its rules
  * applied — the desktop-only rule included, which put a QR in front of mobile
  * readers. Nothing failed; the page just quietly rendered against stale CSS,
  * and this environment cannot fetch the site to notice.
+ *
+ * The JS entry was added on 2026-08-11 for the same reason, before it could
+ * bite a second time. `js/app-store-tracking.js` was carrying a hand-written
+ * `?v=20260809` across 231 pages while `_headers` serves `/*.js` as
+ * `immutable, max-age=604800`. Adding the next_step_click handler to that file
+ * without moving the query would have published a week of pages whose card
+ * fires no event — and the resulting silence would have read as "readers
+ * ignored the card", which is the opposite of what happened.
  */
 
 import crypto from 'node:crypto';
@@ -20,50 +28,69 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const CSS = 'assets/css/style.min.css';
 const write = process.argv.includes('--write');
 
-const hash = crypto.createHash('sha256')
-  .update(fs.readFileSync(path.join(ROOT, CSS)))
-  .digest('hex')
-  .slice(0, 10);
+/** Every asset served with an immutable cache header and referenced with ?v=. */
+const ASSETS = [
+  'assets/css/style.min.css',
+  'js/app-store-tracking.js',
+  'js/lang.js',
+];
 
 const { collectHtmlFiles, toUrlPath } = createRequire(import.meta.url)('./lib/site-files.js');
 const files = collectHtmlFiles(ROOT, {
   skipDirs: ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'growth'],
 });
 
-// Any query at all, so a hand-written value is replaced rather than duplicated.
-const REF = /(\/assets\/css\/style\.min\.css)(\?v=[^"']*)?/g;
+const targets = ASSETS.filter((a) => fs.existsSync(path.join(ROOT, a))).map((asset) => ({
+  asset,
+  hash: crypto.createHash('sha256')
+    .update(fs.readFileSync(path.join(ROOT, asset)))
+    .digest('hex')
+    .slice(0, 10),
+  // Any query at all, so a hand-written value is replaced rather than duplicated.
+  re: new RegExp(`(/${asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(\\?v=[^"']*)?`, 'g'),
+}));
 
-const stale = [];
+const stale = new Map();
 let fixed = 0;
+
 for (const file of files) {
   const html = fs.readFileSync(file, 'utf8');
-  if (!html.includes(CSS)) continue;
-
-  const want = `/${CSS}?v=${hash}`;
-  const updated = html.replace(REF, want);
-  if (updated === html) continue;
-
-  if (write) { fs.writeFileSync(file, updated); fixed++; }
-  else stale.push(toUrlPath(ROOT, file));
+  let updated = html;
+  for (const t of targets) {
+    if (!updated.includes(t.asset)) continue;
+    const next = updated.replace(t.re, `/${t.asset}?v=${t.hash}`);
+    if (next !== updated) {
+      if (!stale.has(t.asset)) stale.set(t.asset, []);
+      stale.get(t.asset).push(toUrlPath(ROOT, file));
+      updated = next;
+    }
+  }
+  if (updated !== html && write) { fs.writeFileSync(file, updated); fixed++; }
 }
 
 if (write) {
-  console.log(`css version ${hash}: updated ${fixed} file(s)`);
+  console.log(`updated ${fixed} file(s):`);
+  for (const t of targets) console.log(`  ${t.asset} → ?v=${t.hash}`);
   process.exit(0);
 }
 
-if (stale.length) {
+if (stale.size) {
+  const lines = [];
+  for (const [asset, pages] of stale) {
+    const { hash } = targets.find((t) => t.asset === asset);
+    lines.push(`  ${asset} hashes to ${hash}; ${pages.length} page(s) request another version`);
+    lines.push(...pages.slice(0, 5).map((p) => `      ${p}`));
+    if (pages.length > 5) lines.push(`      … ${pages.length - 5} more`);
+  }
   console.error(
-    `FAIL: ${CSS} hashes to ${hash} but ${stale.length} page(s) still request another version.\n`
-    + `The stylesheet changed without its cache-busting query changing, so visitors keep the old CSS.\n\n`
-    + stale.slice(0, 10).map((p) => `  ${p}`).join('\n')
-    + (stale.length > 10 ? `\n  … ${stale.length - 10} more` : '')
-    + `\n\nFix:  node scripts/check-css-version.mjs --write\n`
+    'FAIL: an asset changed without its cache-busting query changing, so visitors keep the old file.\n\n'
+    + lines.join('\n')
+    + '\n\nFix:  node scripts/check-css-version.mjs --write\n'
   );
   process.exit(2);
 }
 
-console.log(`OK: every page requests style.min.css?v=${hash} (matches file contents)`);
+console.log('OK: every page requests the current version of '
+  + targets.map((t) => `${path.basename(t.asset)}?v=${t.hash}`).join(', '));

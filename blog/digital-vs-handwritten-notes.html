@@ -266,6 +266,28 @@
 
     <p lang="ja" style="font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem;" data-lang="ja">デジタルと手書きの両方を2年間併用してきた経験では、アイデアの初期段階は手書き、記録の蓄積と検索はデジタルという使い分けが最も効率的でした。Obsidian連携シンプルメモでの素早いキャプチャと、手帳への深い思考メモを組み合わせるハイブリッド運用が、自分にとってのベストバランスです。</p>
 
+    <!-- AIO answer block — docs/SEO_AIO_PLAN_2026-08.md §4 P0-1 (experiment aio-2026-08-11-answer-blocks).
+         The <h2> restates an AI Mode fan-out query verbatim; the first paragraph answers it
+         in two sentences or fewer. These queries rank ~6.8 with zero clicks by construction —
+         a model issues them, and a model does not click. Judge on position, never on CTR.
+         Do not move this below the fold and do not soften an answer that concedes to a rival:
+         the concession is why the answer is quotable. -->
+    <section class="lp-section" data-answer-block="digital-vs-handwritten-which-better">
+      <h2 class="lp-section__title"><span lang="ja" data-lang="ja">デジタルノートと手書きメモを比べるとどちらが優れていますか？</span><span lang="en" data-lang="en">Which is better, digital notes or handwriting?</span></h2>
+      <div lang="ja" data-lang="ja">
+        <p><strong>用途で分かれます。</strong>記憶への定着と理解の深さでは手書きが有利で、検索・共有・保存量・後からの再利用ではデジタルが圧倒的に有利です。どちらかが全面的に優れているという結論にはなりません。</p>
+        <p>選ぶときの判断基準は2つに絞れます。</p>
+        <ol style="padding-left:1.2rem"><li><strong>後で探すか？</strong> — 探すならデジタル。手書きは検索できないため、量が増えた時点で見つけられなくなります</li><li><strong>書くこと自体が目的か？</strong> — 考えを整理する・覚えることが目的なら手書き。書く速度が遅いこと自体が、要約と選別を強制するため有利に働きます</li></ol>
+        <p>実際には併用が最も多く、<strong>「その場で考えるのは手書き、残すのはデジタル」</strong>という分け方が定着しています。手書きの内容をあとで一度だけデジタルに要約して移すと、記憶の利点と検索性の両方が取れます。</p>
+      </div>
+      <div lang="en" data-lang="en">
+        <p><strong>It depends on the use.</strong> Handwriting wins on retention and depth of understanding; digital wins decisively on search, sharing, volume and later reuse. Neither is better across the board.</p>
+        <p>Two questions settle it:</p>
+        <ol style="padding-left:1.2rem"><li><strong>Will you look for it later?</strong> If yes, digital. Handwriting cannot be searched, so it stops being findable as volume grows</li><li><strong>Is the writing itself the point?</strong> If the goal is to think something through or remember it, handwrite. Being slower is the advantage — it forces you to summarise and select</li></ol>
+        <p>Most people end up doing both, split as <strong>handwrite to think, digital to keep.</strong> Summarising handwritten pages into digital form once, afterwards, captures the memory benefit and the searchability together.</p>
+      </div>
+    </section>
+
     <section class="lp-section">
       <h2 class="lp-section__title"><span lang="ja" data-lang="ja">比較表</span><span lang="en" data-lang="en">Comparison</span></h2>
       <div style="overflow-x:auto">
@@ -436,6 +458,23 @@
     </section>
   </div>
 <!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
 <section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
   <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
     <span lang="ja" data-lang="ja">関連コンテンツ</span>
@@ -506,7 +545,7 @@
       </nav><p class="footer__copyright">
         © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
       </p></div></footer>
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
 
   <script>
   // Close mobile nav when clicking a link
@@ -514,6 +553,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=20260809" defer></script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
 </body>
 </html>

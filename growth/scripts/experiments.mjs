@@ -6,7 +6,10 @@
  *   node growth/scripts/experiments.mjs due
  *   node growth/scripts/experiments.mjs show <id>
  *   node growth/scripts/experiments.mjs add --page /x/ --type title_test \
- *        --evaluate 2026-09-06 [--started 2026-08-09] [--hypothesis "..."]
+ *        --evaluate 2026-09-06 [--started 2026-08-09] [--hypothesis "..."] \
+ *        [--metric ctr] [--baseline-clicks N --baseline-impressions N \
+ *         --baseline-ctr 0.0x --baseline-position N \
+ *         --baseline-window YYYY-MM-DD..YYYY-MM-DD --baseline-source "..."]
  *   node growth/scripts/experiments.mjs evaluate <id> --decision keep [--note "..."]
  *   node growth/scripts/experiments.mjs reschedule <id> --evaluate 2026-09-06 --note "why"
  *
@@ -33,6 +36,14 @@ function flag(name, fallback = null) {
   return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : fallback;
 }
 function has(name) { return argv.includes(`--${name}`); }
+/** A flag read as a number. Absent stays null; a non-number is a typo, not a zero. */
+function numFlag(name) {
+  const raw = flag(name);
+  if (raw == null) return null;
+  const v = Number(raw);
+  if (!Number.isFinite(v)) die(`--${name} must be a number (got ${JSON.stringify(raw)})`);
+  return v;
+}
 function die(msg) { console.error(msg); process.exit(2); }
 
 const ledger = loadLedger();
@@ -123,7 +134,19 @@ switch (cmd) {
       evaluation_at: evaluate,
       status: 'running',
       before: null, after: null,
-      baseline: { clicks: null, impressions: null, ctr: null, position: null },
+      // Recorded at registration, not at evaluation. Three of the 2026-07-01
+      // retitles came due with every baseline field null, so there was nothing
+      // to compare the post-change numbers against and all three had to be
+      // closed `inconclusive` — the change may well have worked and it is now
+      // unknowable. An experiment without a before-value is not an experiment.
+      baseline: {
+        clicks: numFlag('baseline-clicks'),
+        impressions: numFlag('baseline-impressions'),
+        ctr: numFlag('baseline-ctr'),
+        position: numFlag('baseline-position'),
+        window: flag('baseline-window'),
+        source: flag('baseline-source'),
+      },
       target_metric: flag('metric', 'ctr'),
       decision: null, evaluated_at: null, notes: [],
     };
@@ -132,6 +155,13 @@ switch (cmd) {
     if (problems.length) die(`refusing to write:\n  ${problems.join('\n  ')}`);
     saveLedger(ledger);
     console.log(`added ${e.id} (${e.page}), evaluate on ${e.evaluation_at}`);
+    if (!Object.values(e.baseline).some((v) => v != null)) {
+      console.log(
+        `\n  WARNING: no baseline recorded. On ${e.evaluation_at} there will be nothing to compare against,\n` +
+        `  and this experiment can only close as inconclusive — which is how title-2026-07-01-001/003/004 ended.\n` +
+        `  Fix now:  experiments.mjs add … --baseline-impressions <n> --baseline-ctr <0.0x> --baseline-position <n> --baseline-window <YYYY-MM-DD..YYYY-MM-DD>`
+      );
+    }
     break;
   }
 
@@ -164,6 +194,7 @@ switch (cmd) {
     console.log(`${e.id} → evaluated / ${decision}${snaps.length ? ` (evidence: ${snaps.join(', ')})` : ' (NO EVIDENCE)'}`);
     if (decision === 'revert') console.log(`Next: restore the previous title on ${e.page}:\n  ${e.before?.title ?? '(no recorded before-title)'}`);
     if (decision === 'iterate') console.log(`Next: add the follow-up with \`experiments.mjs add --page ${e.page} --type title_test --evaluate <date>\``);
+    if (decision === 'abandoned') console.log(`Next: drop ${e.page} from the CTR working lists. The point of this decision is that there is no next round.`);
     break;
   }
 

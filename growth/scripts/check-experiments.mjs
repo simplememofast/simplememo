@@ -57,7 +57,7 @@ for (const { e, d } of rows) {
   // Annotation text is single-line by contract; GitHub renders \n as a literal.
   console.log(
     `::warning file=growth/experiments/experiments.json::${e.id} (${e.page}) is ${label}. ` +
-    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <keep|revert|iterate|inconclusive>`
+    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <keep|revert|iterate|inconclusive|abandoned>`
   );
 }
 
