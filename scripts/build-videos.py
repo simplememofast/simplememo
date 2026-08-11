@@ -199,6 +199,27 @@ def steps_scene(bg, heading, steps, revealed, accent=BLUE):
     return im
 
 
+def benchmark_rows():
+    """(label, seconds, caption) for every app, fastest first, from the ledger.
+
+    data/benchmark.json is the single source for competitor speed figures and
+    scripts/check-benchmark.mjs reports pages that drift from it. A video is a
+    page like any other, so it reads the same file instead of carrying a copy.
+    Captions round half-up: the Drafts median is exactly 1.45 and Python's
+    %.1f would print 1.4.
+    """
+    from decimal import Decimal, ROUND_HALF_UP
+    with open(os.path.join(ROOT, 'data/benchmark.json'), encoding='utf-8') as f:
+        apps = json.load(f)['apps']
+    label = {'Simple Memo - for Obsidian': 'Obsidian連携シンプルメモ'}
+    out = []
+    for name in sorted(apps, key=lambda a: apps[a]['ready']):
+        v = apps[name]['ready']
+        shown = Decimal(str(v)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP)
+        out.append((label.get(name, name), v, f'{shown}秒'))
+    return out
+
+
 def bars_scene(bg, heading, note, rows, progress, highlight=None):
     """Horizontal measured-value bars; `progress` 0→1 grows them."""
     im = bg.copy()
@@ -283,19 +304,16 @@ def build_launch(bg, icon, c):
         frames.append((steps_scene(bg, '3ステップだけ。設定も同期も挟まない。', steps, k), 1.1))
     frames.append((steps_scene(bg, '3ステップだけ。設定も同期も挟まない。', steps, 3), 1.4))
 
-    # Time-to-input, not launch time. The 2026-08-11 re-measurement moved this
-    # in our favour — Drafts was 0.8s and ahead of us on the retired March run,
-    # and is 1.2s behind us now — so the bars carry the median while the page
-    # they link to carries Drafts' 0.4-1.5s range beside it. A number that only
-    # ever flatters us is the thing this file exists to avoid.
-    rows = [('Obsidian連携シンプルメモ', 0.4, '0.4秒'),
-            ('Drafts', 1.2, '1.2秒'),
-            ('Apple Notes', 1.726, '1.7秒'),
-            ('Bear', 1.9, '1.9秒'),
-            ('Google Keep', 2.068, '2.1秒'),
-            ('Evernote', 2.5, '2.5秒'),
-            ('OneNote', 2.6, '2.6秒'),
-            ('Notion', 2.8, '2.8秒')]
+    # Time-to-input, not launch time, and read from data/benchmark.json rather
+    # than typed here. These bars were hard-coded once and went stale within
+    # three days: the 2026-08-11 re-recording moved Bear from 1.9s to 0.917s
+    # and Drafts from 1.2s to 1.45s, which reorders the chart. A frame that
+    # disagrees with the page it cites is worse than no frame.
+    #
+    # Note that the correction cuts against us — Bear is now the nearest rival
+    # at roughly 2.3x rather than 3x — and it is rendered anyway. A number that
+    # only ever flatters us is the thing this file exists to avoid.
+    rows = benchmark_rows()
     for p in [0.15, 0.35, 0.6, 0.85, 1.0]:
         frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
                                   '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・中央値）',
