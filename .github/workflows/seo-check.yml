@@ -40,6 +40,16 @@ jobs:
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
 
+      # Report-only, and it stays that way until a measurement run resolves the
+      # backlog. The site publishes four competitor speed tables that disagree,
+      # and no CI job can decide which is right — only an iPhone can. Failing
+      # the build on that would block unrelated work on a question the build
+      # cannot answer. What this does buy: the drift is now visible on every
+      # run instead of surfacing years later inside a comparison article that
+      # rated every rival faster than us and still called us the fastest.
+      - name: Competitor speed figures vs data/benchmark.json (report-only)
+        run: node scripts/check-benchmark.mjs
+
       - name: URL normalization rules
         run: node scripts/check-url-normalization.mjs
 
