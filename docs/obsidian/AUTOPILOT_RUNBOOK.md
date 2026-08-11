@@ -1,11 +1,15 @@
 # Obsidian Autopilot Runbook — 定期自動生成セッションの手順書
 
-**対象:** スケジュール起動される新規Claude Codeセッション（3日ごと・Simple Memo環境）
+**対象:** スケジュール起動される新規Claude Codeセッション（**毎日 06:00 JST**・Simple Memo環境）
 **目的:** Obsidian情報ハブをSEO/AIOの勝ち筋（CTR 6.5〜7.4%クラスタ）に沿って、
 **データが正当化する分だけ**自律的に育てる。量産はしない。
 
 **初回設定:** 2026-08-11（PR #470 と同時に導入）。
 初回の手動イテレーション（N1 = `/obsidian/compare/logseq/`）が本手順の実証例。
+**2026-08-11 改訂:** オーナー指示により3日ごと→毎日へ。**目標は毎日1記事**だが、
+§0の各ゲートが常に優先する。ゲートを通らない日のスキップは正常系であり、
+その理由は §5-2 のステータスJSON経由で日報メール（10:00 JST・Resend）に載る。
+「毎日出すために基準を下げる」は、この運用の失敗定義そのもの。
 
 ---
 
@@ -115,6 +119,34 @@ python3 scripts/generate_sitemap.py --dry-run
 5. `send_later` で60分後の自己チェックを仕込む（マージ確認まで面倒を見る）
 6. `docs/obsidian/AUTOPILOT_LOG.md` に1エントリ追記（同じPRに含める）
 
+### 5-2. ステータスJSON（日報メールのデータ源・毎回必須）
+
+`data/autopilot-status.json` を**毎回**その日の内容で上書きし、同じPRに含める。
+書いたか否かに関わらず必須 — **スキップした日もJSONは更新する**。
+これが更新されない日は、日報メールが「当日記録なし＝上流停止」と報告する
+仕組みになっており、静かなスキップと故障を区別する唯一の信号になる。
+
+スキーマ（`simplememo-api/src/autopilot-report.ts` の `AutopilotStatus` と対）:
+
+```json
+{
+  "date_jst": "YYYY-MM-DD",
+  "generated_at": "ISO8601",
+  "action": "new | refresh | wiring | maintenance | skip",
+  "article": {"url": "...", "title": "..."},      // 無い日は null
+  "pr": {"number": 123, "state": "merged|open"},  // 無い日は null
+  "reason": "実施/スキップの判断根拠（データ出典つき・1〜2文）",
+  "verified": "その回で実際に検証したこと（§28の範囲明示）",
+  "checks": {"seo_check": "...", "mobile_qa": "..."},
+  "owner_requests": ["Simulator撮影: ..."],
+  "next": "次回への申し送り"
+}
+```
+
+日報の流れ: 06:00 実行 → PR → auto-merge → Pagesデプロイ →
+**10:00 JST にWorkerがこのJSONを読み、Resendでオーナーへメール**
+（`simplememo-api` の `autopilot_report` cronジョブ）。
+
 ## 6. 「書かない回」の保守作業メニュー
 
 - 本番URLのライブ確認（新規ページ公開後の200/OG/構造化データ確認）
@@ -123,6 +155,18 @@ python3 scripts/generate_sitemap.py --dry-run
 - 依頼キューの整理: Simulator撮影が必要な案件を
   `AUTOPILOT_LOG.md` の「オーナー依頼」欄に一言で積む
   （実行は オーナーのMacで `simplememo-ios/scripts/qa/capture-article-screenshots.sh <slug>`）
+
+**書かない回でも出荷はある**: `data/autopilot-status.json`（action: "skip" か
+"maintenance"・reasonにスキップ根拠）と `AUTOPILOT_LOG.md` の追記だけのPRを
+必ず出す。docs+dataのみの変更はSEO Validationを素通りするので、
+auto-mergeまで数分で終わる。これを省くと日報が「上流停止」と誤報する。
+
+**毎日運転での枯渇時の手順**: キューに実行可能項目が無い日は、順に
+(1) `new-queue.json` の解禁条件（需要の再確認・ブロック解除）を最新データで見直す、
+(2) 比較横展開（`/obsidian/compare/<x>/`）の需要をクエリ実測で確認する
+（例:「memos vs obsidian」32imp・pos4.1 は 2026-08-11 時点で足切りを超える唯一の候補）、
+(3) それでも正当化できなければ堂々とスキップする。
+需要の無い記事を出すより、スキップの理由を日報に書く方がこのサイトの価値になる。
 
 ## 7. できないこと（正直に）
 
