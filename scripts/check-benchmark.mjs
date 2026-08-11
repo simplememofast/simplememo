@@ -71,8 +71,14 @@ const OURS = /Obsidian連携シンプルメモ|Captio式シンプルメモ|シ�
 /** A claim is only a conflict if no stated value is near a measured one. */
 const NEAR = 0.35;
 
+/** Every measured instant a page could legitimately be quoting for this app. */
+function measuredValues(app) {
+  return [app.focus, app.ready, app.first_char].filter((v) => typeof v === 'number');
+}
+
 function conflicts(app, values) {
-  return !values.some((v) => Math.abs(v - app.launch) < NEAR || Math.abs(v - app.ready) < NEAR);
+  const measured = measuredValues(app);
+  return !values.some((v) => measured.some((m) => Math.abs(v - m) < NEAR));
 }
 
 const findings = [];
@@ -100,17 +106,19 @@ for (const file of files) {
       // with our name just outside the window — a table cell away, or the far
       // side of "faster than Notion and Evernote". Attributing it to the rival
       // produced most of what was left after the name check.
-      const OUR_FIGURE = B.apps['Simple Memo - for Obsidian'].ready;
-      const looksLikeOurs = values.every((v) => Math.abs(v - OUR_FIGURE) < NEAR)
-        && Math.abs(app.launch - OUR_FIGURE) >= NEAR;
+      // Our own published figures, so a number near one of them beside a rival's
+      // name is probably ours a table cell away.
+      const OURS_VALUES = measuredValues(B.apps['Simple Memo - for Obsidian']);
+      const looksLikeOurs = values.every((v) => OURS_VALUES.some((o) => Math.abs(v - o) < NEAR))
+        && !measuredValues(app).some((m) => OURS_VALUES.some((o) => Math.abs(m - o) < NEAR));
       // A range that straddles the measured value is loose, not wrong.
-      if (values.length === 2 && values[0] <= app.launch && app.launch <= values[1]) continue;
-      if (values.length === 2 && values[0] <= app.ready && app.ready <= values[1]) continue;
+      if (values.length === 2
+          && measuredValues(app).some((m) => values[0] <= m && m <= values[1])) continue;
       if (!conflicts(app, values)) continue;
       findings.push({
         page: toUrlPath(ROOT, file), rel, ownRun, app: app.name,
         said: m[0].trim().slice(0, 64),
-        measured: `${app.launch}s launch / ${app.ready}s ready`,
+        measured: `focus ${app.focus}s / ready ${app.ready}s / first char ${app.first_char}s`,
         // Bucketed rather than dropped. Skipping these hid a real
         // "Bear 〜1秒" against a measured 1.8s, and a consistency checker
         // that silently swallows conflicts is worse than a noisy one.
