@@ -83,20 +83,48 @@
 `sitemap-ja.xml` / 内部リンク7か所の除去 / HTML 2ファイル削除 /
 `scripts/check-url-normalization.mjs` に6ケース追加。
 
-## 未着手（オーナー判断が必要な5件）
+## 残り5件の処理（2026-08-11 追記・オーナー判断済み）
 
-以下は「消すべきか残すべきか」がコンテンツ戦略の判断であり、
-機械的に決められないため保留した。
+方針は「2件統合・3件強化」。表示回数はすべて 2026-08-09 の GSC 実測。
 
-- `/blog/line-keep-migration` — 18,000文字の移行手順。「代替」とは検索
-  意図が異なるとも読めるが、実測はゼロ。統合するか、`/blog/line-keep-alternative`
-  へ手順セクションとして吸収するか。
-- `/vs/captioo/` — 同名別アプリ「Captioo」との区別ページ。正当な用途だが
-  Captioクラスタを1本増やしている。
-- `/vs/goodnotes/`, `/vs/mem/` — `/vs/` テンプレートの薄いページ。
-  GoodNotes（手書き）・Mem（AI、実質終息）は自社と検索意図が重ならない。
-- `/guides/draft-autosave/` — `/guides/` 配下が Gmail・iCloud・Proton など
-  メール連携ガイドで統一されている中、機能解説が1本だけ混在している。
+### 統合した2件
+
+| 統合元 | → 統合先 | 判断根拠 |
+|---|---|---|
+| `/blog/line-keep-migration` | `/blog/line-keep-alternative` | LINE Keep記事4本中の最下位（0表示）。統合先は45クリック/5,291表示 |
+| `/vs/mem/` | `/vs/` | Mem は実質終息。`/vs/` テンプレートの薄いページで0表示 |
+
+`/blog/line-keep-migration` は**単純削除していない**。統合先が本文中で
+「先に移行手順でデータを退避してから」と誘導しており、消すと導線が宙に浮き、
+データ退避手順そのものが失われるため、固有価値のあった「2. データエクスポート
+方法」（テキスト/画像・動画/リンク）を統合先の `#line-keep-export` に移設した
+うえで301している。統合先にしか無かった `.step-box` のCSSも併せて移設済み。
+重複していた章（比較表・他アプリ比較・ワークフロー・FAQ）は統合先が既に
+カバーしているため引き継いでいない。
+
+`/vs/mem/` の退避先を `/vs/` にしたのは、`/vs/whatsapp/`・`/vs/telegram/`・
+`/vs/trello/`・`/vs/slack-self-dm/` と同じ既存の扱いに揃えたため。
+
+参照の後始末: JSON-LD の `hasPart` 3件（`/vs/`・`/blog/`・`/comparison/`）、
+`llms.txt`、`sitemap-ja.xml`、内部リンク9か所。アンカーテキストが退避先でも
+成立するものは貼り替え、成立しないカードは除去した。
+`/blog/best-memo-apps-2026`（日英）の Mem 紹介カードは、記事本文としての
+価値があるためリンクだけ外してテキストは残している。
+
+### 強化した3件
+
+いずれも正当な用途があるため維持し、被リンクを増やした。
+
+| ページ | 被リンク | 追加元 |
+|---|---|---|
+| `/vs/captioo/` | 3 → 5 | `/captio-alternative/`, `/captio/` |
+| `/vs/goodnotes/` | 3 → 5 | `/use-cases/students/`, `/use-cases/reading-notes/` |
+| `/guides/draft-autosave/` | 7 → 9 | `/faq`, `/blog/instant-capture-workflow` |
+
+追加先は `docs/content-linking-rules.md` の「手動リンク推奨」に沿って、
+話題が実際に隣接するページの `internal-links` ブロックに限定した
+（Captioクラスタ→同名アプリの区別、手書き系ユースケース→GoodNotes比較、
+下書きが消えたか気にする文脈→自動保存の解説）。
 
 ## 参考: 併せて見つかった副次的な事象（今回は未対応）
 
