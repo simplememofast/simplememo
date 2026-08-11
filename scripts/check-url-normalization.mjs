@@ -172,6 +172,12 @@ await redirects("/blog/memo-app-free-guide?lang=ja", "/blog/free-memo-apps-ranki
 await redirects("/devlog/captio-alternative", "/captio-alternative/");
 await redirects("/devlog/captio-alternative.html", "/captio-alternative/");
 await redirects("/devlog/captio-alternative?lang=en", "/captio-alternative/");
+await redirects("/blog/line-keep-migration", "/blog/line-keep-alternative");
+await redirects("/blog/line-keep-migration.html", "/blog/line-keep-alternative");
+await redirects("/blog/line-keep-migration.html?lang=ja", "/blog/line-keep-alternative");
+await redirects("/vs/mem/", "/vs/");
+await redirects("/vs/mem/index.html", "/vs/");
+await redirects("/vs/mem/?lang=en", "/vs/");
 await redirects("/privacy-policy", "/privacy");
 await redirects("/privacy-policy/", "/privacy");
 await redirects("/vs/whatsapp/", "/vs/");

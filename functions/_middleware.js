@@ -154,6 +154,7 @@ export const onRequest = async (context) => {
   //    fallback if a Function deploy ever fails — keep the two in sync.
   const RETIRED = {
     "/blog/captio-alternatives-comparison": "/captio-alternative/",
+    "/blog/line-keep-migration": "/blog/line-keep-alternative",
     "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
     "/blog/memo-shuukan-tips": "/blog/memo-habit",
     "/devlog/captio-alternative": "/captio-alternative/",
@@ -163,6 +164,7 @@ export const onRequest = async (context) => {
     "/vs/whatsapp/": "/vs/",
     "/vs/telegram/": "/vs/",
     "/vs/trello/": "/vs/",
+    "/vs/mem/": "/vs/",
     "/vs/slack-self-dm/": "/vs/",
     // A backlink (featureupvote.com, DR72) carries a stray closing paren.
     // `_redirects` has caught the bare form since it was added, but only

@@ -222,6 +222,11 @@
     }
 
   </style>
+  <style>
+    /* Moved from /blog/line-keep-migration (consolidated 2026-08-11). */
+    .step-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem;margin:1rem 0}
+    .step-box__num{display:inline-block;background:var(--accent);color:#000;font-weight:700;width:28px;height:28px;line-height:28px;text-align:center;border-radius:50%;margin-right:.5rem;font-size:.875rem}
+  </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 
   <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
@@ -381,7 +386,7 @@
           </ul>
         </div></div>
         <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.9;margin:1.25rem 0">これが「<strong style="color:var(--text)">自分宛メールに残す</strong>」という新しいメモの型です。Obsidian連携シンプルメモは、この考え方を最短の操作（起動約1秒 → ワンタップ送信）で実現します。仕組みは<a href="/note-to-email/" style="color:var(--accent)">メモ→メールの解説</a>をご覧ください。</p>
-        <div style="background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:.9rem;line-height:1.8;color:var(--text-secondary)">💡 まだLINE Keepからの書き出しが済んでいない方は、先に<a href="/blog/line-keep-migration" style="color:var(--accent)">LINE Keepからの移行手順（データ退避）</a>で安全にデータを取り出してから、本記事の“受け皿”へ乗り換えるのがおすすめです。</div>
+        <div style="background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:.9rem;line-height:1.8;color:var(--text-secondary)">💡 まだLINE Keepからの書き出しが済んでいない方は、先に<a href="#line-keep-export" style="color:var(--accent)">LINE Keepからのデータ退避手順</a>で安全にデータを取り出してから、本記事の“受け皿”へ乗り換えるのがおすすめです。</div>
       </div>
       <div lang="en" data-lang="en">
         <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.9;margin-bottom:1.25rem">The lesson from LINE Keep is clear: <strong style="color:var(--text)">the app that holds your notes can shut down one day</strong>. So in 2026 the right choice isn't a "back up before it ends" tool — it's a <strong style="color:var(--text)">durable receptacle you can keep using for years</strong>. Pick a destination that meets these three criteria and you'll never scramble over a shutdown again.</p>
@@ -393,7 +398,66 @@
           </ul>
         </div></div>
         <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.9;margin:1.25rem 0">This is the new model of "<strong style="color:var(--text)">saving notes to your own email</strong>." Simple Memo - for Obsidian delivers it with the fewest possible steps (~1s launch → one-tap send). See <a href="/note-to-email/" style="color:var(--accent)">how note-to-email works</a>.</p>
-        <div style="background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:.9rem;line-height:1.8;color:var(--text-secondary)">💡 If you haven't exported your LINE Keep data yet, first follow the <a href="/blog/line-keep-migration" style="color:var(--accent)">LINE Keep migration steps</a> to retrieve it safely, then switch to the receptacle described here.</div>
+        <div style="background:rgba(100,180,255,.06);border:1px solid rgba(100,180,255,.18);border-radius:var(--radius-sm);padding:1rem 1.25rem;font-size:.9rem;line-height:1.8;color:var(--text-secondary)">💡 If you haven't exported your LINE Keep data yet, first follow the <a href="#line-keep-export" style="color:var(--accent)">LINE Keep export steps</a> to retrieve it safely, then switch to the receptacle described here.</div>
+      </div>
+    </section>
+
+    <!-- Section 3.6: LINE Keep data export (merged from /blog/line-keep-migration, 2026-08-11) -->
+    <section class="lp-section" id="line-keep-export">
+      <h2 class="lp-section__title"><span lang="ja" data-lang="ja">LINE Keepからのデータ退避手順</span><span lang="en" data-lang="en">How to Export Your LINE Keep Data</span></h2>
+
+      <div lang="ja" data-lang="ja">
+        <p>LINE Keepのサービスは既に終了していますが、終了前にエクスポートしたデータの活用方法や、LINE Keepメモに残っているデータの取り出し方について解説します。</p>
+
+        <h3>テキストメモの保存</h3>
+        <div class="step-box">
+          <p><span class="step-box__num">1</span><strong>LINE Keepメモを開く：</strong>LINEアプリのホームタブから「Keepメモ」をタップ</p>
+          <p><span class="step-box__num">2</span><strong>テキストを選択：</strong>保存したいメモを長押しして「コピー」を選択</p>
+          <p><span class="step-box__num">3</span><strong>メモアプリに貼り付け：</strong>Obsidian連携シンプルメモを開いて貼り付け、ワンタップで送信</p>
+        </div>
+
+        <h3>画像・動画の保存</h3>
+        <p>LINE Keepに保存していた画像・動画は、サービス終了前にダウンロードしていない場合は復元できません。今後はLINEトーク内の画像についても、以下の手順で早めに保存しておきましょう。</p>
+        <ul>
+          <li><strong>カメラロールに保存：</strong>画像を長押し → 「保存」を選択</li>
+          <li><strong>Google Photosに自動バックアップ：</strong>Google Photosアプリのバックアップ設定をONにしておけば自動保存</li>
+          <li><strong>iCloud Photosを活用：</strong>iPhoneの「設定」→「写真」→「iCloud写真」をONに</li>
+        </ul>
+
+        <h3>リンク・URLの保存</h3>
+        <p>LINE Keepでブックマーク代わりにリンクを保存していた方は、以下の代替手段がおすすめです。</p>
+        <ul>
+          <li><strong>Obsidian連携シンプルメモでメール送信：</strong>URLをObsidian連携シンプルメモにペーストして送信すれば、メールの受信ボックスで検索可能に</li>
+          <li><strong>ブラウザのブックマーク：</strong>Safariの「共有」→「ブックマークに追加」</li>
+          <li><strong>リーディングリスト：</strong>Safariの「共有」→「リーディングリストに追加」でオフライン閲覧も可能</li>
+        </ul>
+      </div>
+
+      <div lang="en" data-lang="en">
+        <p>LINE Keep has already shut down, but here is how to work with data you exported beforehand, and how to retrieve what is still sitting in LINE Keep Memo.</p>
+
+        <h3>Saving Text Memos</h3>
+        <div class="step-box">
+          <p><span class="step-box__num">1</span><strong>Open LINE Keep Memo:</strong> Tap "Keep Memo" from the LINE home tab</p>
+          <p><span class="step-box__num">2</span><strong>Select text:</strong> Long-press the memo and choose "Copy"</p>
+          <p><span class="step-box__num">3</span><strong>Paste to memo app:</strong> Open Simple Memo - for Obsidian, paste, and send with one tap</p>
+        </div>
+
+        <h3>Saving Images &amp; Videos</h3>
+        <p>Images and videos stored in LINE Keep cannot be recovered if they weren't downloaded before the shutdown. Going forward, save LINE chat images promptly using these steps.</p>
+        <ul>
+          <li><strong>Save to Camera Roll:</strong> Long-press image and select "Save"</li>
+          <li><strong>Auto-backup to Google Photos:</strong> Enable backup in Google Photos settings</li>
+          <li><strong>Use iCloud Photos:</strong> Turn on iCloud Photos in iPhone Settings</li>
+        </ul>
+
+        <h3>Saving Links &amp; URLs</h3>
+        <p>If you used LINE Keep as a bookmark tool for links, consider these alternatives.</p>
+        <ul>
+          <li><strong>Send via Simple Memo - for Obsidian:</strong> Paste URLs into Simple Memo - for Obsidian and send to make them searchable in your inbox</li>
+          <li><strong>Browser bookmarks:</strong> Use Safari's Share menu to add bookmarks</li>
+          <li><strong>Reading List:</strong> Safari's "Add to Reading List" enables offline reading</li>
+        </ul>
       </div>
     </section>
 
@@ -842,10 +906,6 @@
         <a href="/blog/best-memo-apps-2026">
           <span lang="ja" data-lang="ja">おすすめメモアプリ10選 2026</span>
           <span lang="en" data-lang="en">Best Memo Apps 2026</span>
-        </a>
-        <a href="/blog/line-keep-migration">
-          <span lang="ja" data-lang="ja">LINE Keepからの移行手順（データ退避）</span>
-          <span lang="en" data-lang="en">LINE Keep Migration Steps</span>
         </a>
       </div>
     </section>
