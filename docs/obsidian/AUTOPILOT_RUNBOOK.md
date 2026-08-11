@@ -31,12 +31,34 @@
    特に `/obsidian/` ハブ本体は `monitor-2026-08-09-obsidian-ctr`（評価日 2026-09-13）
    が終わるまで作り替え禁止（関連リンクの追記のみ可）。
 
+## 0-2. 実行基盤（2026-08-12改訂: GitHub Actions主・CCR Routine副）
+
+CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡ゼロ」で落ち、
+スケジュール起動セッションのログは外部から読めないことが分かった。以降:
+
+| 経路 | 時刻 | 実体 | 状態の見える場所 |
+|---|---|---|---|
+| **主: GitHub Actions** | 06:00 JST | `.github/workflows/obsidian-autopilot.yml`（claude-code-action） | Actionsのrunログ（全部読める） |
+| **副: CCR Routine** | 07:30 JST | Claudeの定期タスク（フォールバック） | 日報メールの結果のみ |
+
+- **冪等性（両経路の冒頭で必須）**: origin に `claude/obsidian-auto-<当日JST>` が
+  既にある、または本番 `data/autopilot-status.json` の `date_jst` が当日なら、
+  本日分は実行済み。**何もせず終了する。**
+- Actions側の有効化にはオーナー作業が1つ要る: ローカルで `claude setup-token` を
+  実行して出るトークンを repo secret **`CLAUDE_CODE_OAUTH_TOKEN`** に登録
+  （サブスク課金でActions内のClaudeが動く。API課金でよければ `ANTHROPIC_API_KEY` でも可）。
+  未設定の間はActionsは緑のままスキップし、CCR副系だけが動く。
+- どちらも動かなかった日は、日報メール（10:00 JST）が「当日記録なし＝上流停止」を
+  報せる。これが最後の網。
+
 ## 1. セッション開始時の把握
 
 ```
 cd /home/user/simplememo
 git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) origin/main
 ```
+（GitHub Actions環境ではチェックアウト済みのリポジトリルートで同名ブランチを切る。
+日付は必ず **JST** で取ること: `TZ=Asia/Tokyo date +%Y%m%d`）
 
 読むもの（この順）:
 1. `docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか・保留事項
