@@ -95,6 +95,10 @@ jobs:
       # 見えるため main push のたびに全ページ通知になっていた。内訳と送信結果は
       # ジョブサマリに出る。複数コミットの直接 push は最後の1コミット分のみに
       # なるので、必要なら手動で --since N を実行する。
+      #
+      # このステップが動くのは main への「直接 push」だけ。auto-merge の
+      # マージ push は GITHUB_TOKEN 起因でワークフローを発火させないため、
+      # そちらの通知は auto-merge.yml のマージ後ステップが行う。
       - name: IndexNow notification (on main push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: node scripts/indexnow-notify.js --since 1

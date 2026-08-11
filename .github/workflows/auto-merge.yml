@@ -37,6 +37,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Merge the validated commit
+        id: merge
         uses: actions/github-script@v7
         with:
           script: |
@@ -44,6 +45,7 @@ jobs:
             const branch = run.head_branch || '';
             const validatedSha = run.head_sha;
             const { owner, repo } = context.repo;
+            let mergedCount = 0;
 
             if (!branch.startsWith('claude/')) {
               core.info(`${branch} は claude/ ブランチではないため対象外`);
@@ -77,11 +79,38 @@ jobs:
                 continue;
               }
 
-              await github.rest.pulls.merge({
+              const { data: merged } = await github.rest.pulls.merge({
                 owner, repo,
                 pull_number: pr.number,
                 merge_method: 'squash',
                 sha: validatedSha,
               });
+              mergedCount++;
+              // merged.sha は main に積まれた squash コミット。後続の IndexNow
+              // 通知ステップがこの SHA を checkout して首親差分を通知する。
+              core.setOutput('merged_sha', merged.sha);
               core.notice(`#${pr.number} を ${validatedSha.slice(0, 7)} でマージした`);
             }
+            core.setOutput('merged_count', String(mergedCount));
+
+      # GITHUB_TOKEN によるマージ push はワークフローを発火させない（GitHub の
+      # 再帰防止仕様）ため、seo-check.yml の「main push で IndexNow 通知」は
+      # auto-merge 経由のデプロイでは一度も走らない。マージを実行したこの run が
+      # 通知まで責任を持つ。通知の失敗はマージ結果に影響させない。
+      - name: Checkout merged commit
+        if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.merge.outputs.merged_sha }}
+          fetch-depth: 10
+
+      - name: Setup Node
+        if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: IndexNow notify (merged diff)
+        if: steps.merge.outputs.merged_count != '0' && steps.merge.outputs.merged_count != ''
+        continue-on-error: true
+        run: node scripts/indexnow-notify.js --since ${{ steps.merge.outputs.merged_count }}

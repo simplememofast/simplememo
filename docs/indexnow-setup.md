@@ -41,12 +41,17 @@ CI の新規 checkout では全ファイルの mtime が checkout 時刻にな�
 
 ## CI自動通知
 
-`main` ブランチへのpush時に自動実行:
-- `seo-check.yml` の最後のステップで `--since 1` で通知（= そのpushのマージが変更した .html のみ）
-- checkout は `fetch-depth: 2` が前提（HEAD~1 との diff に親コミットが必要）
-- 変更ファイル数・noindex除外数・通知URL一覧・送信結果を**ジョブサマリに出力**
-- 失敗してもデプロイは止まらない (`continue-on-error: true`)
-- 複数コミットを一度に直接pushした場合は最後の1コミット分のみになるため、必要なら手動で `--since N` を実行
+経路は2つある（GITHUB_TOKEN によるマージ push はワークフローを発火させないという
+GitHub の再帰防止仕様のため、1つでは覆えない）:
+
+1. **auto-merge 経由のデプロイ（通常経路）**: `auto-merge.yml` がマージ成功後に
+   マージコミットを checkout し、`--since <マージ数>` で通知する。マージしなかった
+   run では動かない。通知失敗はマージ結果に影響しない (`continue-on-error: true`)
+2. **main への直接 push**: `seo-check.yml` の最後のステップで `--since 1` で通知。
+   checkout は `fetch-depth: 2` が前提。複数コミットを一度に push した場合は
+   最後の1コミット分のみになるため、必要なら手動で `--since N` を実行
+
+どちらも変更ファイル数・noindex除外数・通知URL一覧・送信結果を**ジョブサマリに出力**する。
 
 ## 注意事項
 
