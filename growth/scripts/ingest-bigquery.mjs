@@ -315,5 +315,21 @@ if (anonShare) {
 }
 console.log(`  query×page: ${buckets['query-pages'].length} rows — cannibalisation and "which page is already ranking" now have data.`);
 
+// The one dimension this path does NOT cover. "Performance on Search Generative
+// AI Features" is a separate CSV download in the Search Console UI, and no
+// column in the bulk export corresponds to it — the surfaces breakdown above is
+// search_type (WEB/DISCOVER/NEWS/…), which is a different cut. So a snapshot
+// taken here carries no `pages-aio`, and dropping the manual export entirely
+// would retire that dimension without anything reporting it.
+//
+// Said on every run rather than documented once, because the failure mode is a
+// field that quietly stops being populated — which reads as "AI surfaces sent
+// no impressions", not as "nobody is collecting this".
+if (!buckets['pages-aio'].length) {
+  console.log('\n  note: no `pages-aio` — the generative-AI export is UI-only and has no BigQuery');
+  console.log('        equivalent. Keep taking that one CSV if the AI-surface share matters.');
+  console.log('        (meta.bigquery.surfaces is search_type, which is a different cut.)');
+}
+
 console.log('\nNext:  node growth/scripts/analyze.mjs        # opportunities, CTR gaps, decay, cannibalisation');
 console.log('       node growth/scripts/weekly-report.mjs   # the report a human actually reads');
