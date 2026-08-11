@@ -162,6 +162,14 @@ export const onRequest = async (context) => {
     "/vs/telegram/": "/vs/",
     "/vs/trello/": "/vs/",
     "/vs/slack-self-dm/": "/vs/",
+    // A backlink (featureupvote.com, DR72) carries a stray closing paren.
+    // `_redirects` has caught the bare form since it was added, but only
+    // AFTER this middleware passed it through — so `/)?lang=ja` cost two
+    // hops (301 here to `/)`, then 301 from `_redirects` to `/`) and GSC
+    // counts every intermediate URL separately. Mirroring it here folds
+    // both variants into the single hop the rest of this map already gets.
+    "/)": "/",
+    "/%29": "/",
   };
   if (RETIRED[pathname]) {
     pathname = RETIRED[pathname];
