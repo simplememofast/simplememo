@@ -110,7 +110,7 @@ jobs:
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
 
-            0. 【冪等性・最初に必ず】`git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。
+            0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。
             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
             2. `docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録と保留事項を確認する。
             3. 目標は毎日1記事。ただしRunbook §0のゲート（ノイズフロア＝期待クリック3未満を根拠にしない・品質・検証・実験非干渉）が常に優先。ゲートを通る施策が無い日は堂々とスキップし、保守レーン（Runbook §6）に切り替える。基準を下げて書くことは失敗と定義されている。
