@@ -76,7 +76,8 @@
       "ready_range": [
         2.3,
         5.1
-      ]
+      ],
+      "range_note": "The 5.1s top of the range is one run out of five and it is real — the recording was confirmed good. Kept rather than dropped as an outlier: an app that occasionally takes five seconds to become typeable is telling you something the median hides."
     },
     "OneNote": {
       "ready": 2.6,
@@ -435,7 +436,13 @@
       },
       "headline": "Bear halves: 1.900s to 0.917s, and moves from 4th to 2nd. Drafts moves the other way, 1.200s to 1.450s, and drops behind Bear. Our own lead over the nearest rival therefore narrows from 3.0x (vs Drafts) to 2.3x (vs Bear).",
       "unresolved": "RESOLVED 2026-08-11 by the owner: the launches were WARM. Force quit plus a >5s dwell was performed for every run, and every relaunch was reviewed and came up warm regardless. That explains what the earlier note could not — this run landing tightly near the FAST mode of the full run rather than between the two modes — and it means the full run's bimodality was not cold-vs-warm at all. See launchCondition.",
-      "exposure": "Bear moved 2x between two sessions on the same device and OS, which is still unexplained by the warm finding: warm launches should not be twice as slow as other warm launches. The four apps still carrying wide ranges from the full run — Apple Notes 1.2-2.367s, Evernote 2.3-5.1s, OneNote 2.2-3.3s, Notion 2.5-3.5s — are the shape Bear had before it was re-recorded. An earlier version of this note read those ranges as a cold/warm mix; with the launches confirmed warm that reading is wrong, and the spread is within-warm variance instead. Either way the two apps with tight ranges (our own 0.366-0.433s, Google Keep 1.969-2.234s) are the two nobody has disputed, and re-recording the wide four would likely move them. It has not been done, and until it is, those four are the least trustworthy rows in the table."
+      "exposure": "RESOLVED 2026-08-11 by the owner: Apple Notes, Evernote, OneNote and Notion were recorded without incident and their figures stand as measured. An earlier version of this note called them the least trustworthy rows in the table because their ranges are wide (Evernote 2.3-5.1s, Apple Notes 1.2-2.367s, OneNote 2.2-3.3s, Notion 2.5-3.5s) and that is the shape Bear had before re-recording moved it by 2x. That inference was wrong, and retracting it changes what the ranges mean: they are not doubt about the measurement, they are how those apps behave. Evernote really does take five seconds on some warm launches. Publish the range with the median for exactly that reason.",
+      "bear_anomaly": {
+        "what": "Bear read 1.900s (bimodal, 0.7-0.8 and 1.9-2.3) in the full run and 0.917s (five runs inside 0.033s) on re-recording. Same device, same OS, same operator, days apart.",
+        "likely_cause": "The tap sequence, not the launch. Bear is the only app in readyDefinition.tapSequence with two ways into an editable note — + for a new note, or opening an existing one from the list — and the owner excluded a run from the re-recording *specifically* because it reached the editor via the list instead of +. A first session that mixed the two routes would produce the split that was seen: the list route skips the new-note transition and lands in the fast mode. Nothing else about that session is anomalous — the four apps recorded alongside it are confirmed good.",
+        "status": "INFERRED, not confirmed. The full run's recordings were not supplied, so the routes taken in it cannot be checked. Stated as the likely explanation rather than the established one.",
+        "implication": "If it holds, the published 0.917s is the correct figure and the 1.900s was a measurement artefact, which is how they are already treated. It also means Bear is the app most sensitive to how the protocol is followed, so a future re-run should record which route each launch took."
+      }
     }
   ],
   "readyDefinition": {
