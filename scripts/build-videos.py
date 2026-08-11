@@ -283,19 +283,25 @@ def build_launch(bg, icon, c):
         frames.append((steps_scene(bg, '3ステップだけ。設定も同期も挟まない。', steps, k), 1.1))
     frames.append((steps_scene(bg, '3ステップだけ。設定も同期も挟まない。', steps, 3), 1.4))
 
-    # Time-to-input, not launch time: it is the honest differentiator, and it is
-    # the column where the mainstream apps actually separate. Drafts is faster
-    # on both and is shown as faster — a comparison that hides its own losses
-    # is not usable as a citation.
-    rows = [('Drafts', 0.8, '0.8秒'), ('Obsidian連携シンプルメモ', 1.0, '約1秒'),
-            ('Apple Notes', 2.5, '2.5秒'), ('Google Keep', 2.8, '2.8秒'),
-            ('Notion', 6.5, '6.5秒'), ('Evernote', 7.0, '7.0秒')]
+    # Time-to-input, not launch time. The 2026-08-11 re-measurement moved this
+    # in our favour — Drafts was 0.8s and ahead of us on the retired March run,
+    # and is 1.2s behind us now — so the bars carry the median while the page
+    # they link to carries Drafts' 0.4-1.5s range beside it. A number that only
+    # ever flatters us is the thing this file exists to avoid.
+    rows = [('Obsidian連携シンプルメモ', 0.4, '0.4秒'),
+            ('Drafts', 1.2, '1.2秒'),
+            ('Apple Notes', 1.726, '1.7秒'),
+            ('Bear', 1.9, '1.9秒'),
+            ('Google Keep', 2.068, '2.1秒'),
+            ('Evernote', 2.5, '2.5秒'),
+            ('OneNote', 2.6, '2.6秒'),
+            ('Notion', 2.8, '2.8秒')]
     for p in [0.15, 0.35, 0.6, 0.85, 1.0]:
-        frames.append((bars_scene(bg, '入力を開始できるまで（実測）',
-                                  '出典: /blog/fastest-memo-app-benchmark の計測表。Draftsは本アプリより速い。',
+        frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
+                                  '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・中央値）',
                                   rows, p, highlight='Obsidian連携シンプルメモ'), 0.55))
-    frames.append((bars_scene(bg, '入力を開始できるまで（実測）',
-                              '出典: /blog/fastest-memo-app-benchmark の計測表。Draftsは本アプリより速い。',
+    frames.append((bars_scene(bg, 'タップから入力できるまで（実測）',
+                              '出典: /blog/fastest-memo-app-benchmark（iPhone 16e・各5回・中央値）',
                               rows, 1.0, highlight='Obsidian連携シンプルメモ'), 2.6))
     frames.append((outro_scene(bg, icon, '思いついた速さのまま、残す。'), 2.4))
     return frames
