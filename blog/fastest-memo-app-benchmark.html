@@ -696,7 +696,7 @@
             <p>表に「入力開始まで」と「フォーカスまで」の2つの列を設けた理由があります。多くのメモアプリは、起動してからメモを書き始めるまでに追加の操作が必要で、その操作ぶんの時間はどちらの列にも別々に現れるからです。以下の秒数はすべて<strong>アイコンをタップしてから打てるまで</strong>で、途中のタップを含みます。</p>
             <p style="margin-top:.75rem"><strong>Obsidian連携シンプルメモ（0.4秒）:</strong> 起動 = 入力可能。アプリを開いた瞬間にカーソルがフォーカスされ（0.2秒）、キーボードが表示されています。ナビゲーション操作は一切不要です。これがCaptioの思想を最も忠実に再現した設計です。</p>
             <p style="margin-top:.75rem"><strong>Drafts（0.9秒）:</strong> 設計思想は近く、起動と同時に新規ドラフトが開きます。掲載しているのは5回のうち最も速い0.90秒で、残る4回は1.4秒前後でした。速いときはBearと並びますが、いつもそうなるわけではありません。この1本だけ他アプリと集計が違うので明記しておきます。</p>
-            <p style="margin-top:.75rem"><strong>Bear（0.9秒）:</strong> 起動 → + → 入力。タップが1つ挟まりますが、それでも合計0.9秒。Draftsと並んで今回もっとも近い競合です。5回の実測が0.92〜0.95秒に収まり、8アプリ中もっともばらつきが小さいのはBearでした。Draftsの0.9秒が5回中1回なのに対し、Bearは毎回この速さです。</p>
+            <p style="margin-top:.75rem"><strong>Bear（0.9秒）:</strong> 起動すると、編集していたノートがそのまま開きます。キーボードも出たままなので<strong>タップは要りません</strong>。Draftsと並んで今回もっとも近い競合で、5回の実測が0.92〜0.95秒。8アプリ中もっともばらつきが小さいのはBearでした（Draftsの0.9秒が5回中1回なのに対し、Bearは毎回この速さです）。ただしこれは<strong>「開いたまま閉じた」状態から戻ったとき</strong>の速さです。ノート一覧から始まるときは右下の鉛筆をタップする必要があり、その分だけ遅くなります。Obsidian連携シンプルメモが常にこの状態なのに対して、Bearは前回の使い方しだい、という違いです。</p>
             <p style="margin-top:.75rem"><strong>Apple Notes（1.7秒）:</strong> 起動後にノート一覧が表示されます。ここから「新規メモ」をタップし、フォーカスが1.3秒、キーボードが出そろって打てるまで1.7秒。10回計測しても1.20〜2.37秒と幅があります。</p>
             <p style="margin-top:.75rem"><strong>Notion（2.8秒）:</strong> 新規ページ → ページの読み込み待ち → 入力開始。一つひとつは短くても、積み上がると2.8秒になります。「起動が速いか」ではなく「打ち始められるまで何秒か」で見ると、差はここに出ます。</p>
           </div>
@@ -710,7 +710,7 @@
             <p>There's a reason the table has two columns, "Ready to type" and "To focus." Most memo apps need navigation after launching before you can start typing, and that navigation shows up differently in each column. Every figure below is <strong>icon tap until you can type</strong>, taps included.</p>
             <p style="margin-top:.75rem"><strong>Simple Memo - for Obsidian (0.4s):</strong> Launch = input-ready. The cursor is focused (0.2s) and the keyboard is up the instant you open the app. Zero navigation required. This is the most faithful implementation of Captio's design philosophy.</p>
             <p style="margin-top:.75rem"><strong>Drafts (0.9s):</strong> Same philosophy — it opens straight into a new draft. The figure shown is its fastest of five runs, 0.90s; the other four sat around 1.4s. At its best it is level with Bear, but that is not the typical run — and it is the one row here aggregated differently from the rest, so we say so.</p>
-            <p style="margin-top:.75rem"><strong>Bear (0.9s):</strong> Launch, tap +, type. There is a tap in the way and it still totals 0.9s, level with Drafts at the top of the field behind us. It is also the steadiest app measured: five runs inside 0.92–0.95s. Where Drafts hit 0.9s once in five, Bear does it every time.</p>
+            <p style="margin-top:.75rem"><strong>Bear (0.9s):</strong> Launching reopens the note you were editing, keyboard still up, so <strong>there is no tap at all</strong>. It is level with Drafts at the top of the field behind us and the steadiest app measured: five runs inside 0.92–0.95s, where Drafts hit 0.9s once in five. The catch is that this is the speed of <strong>coming back to a note you left open</strong>. Start from the note list and you have to tap the pencil first, which costs you. Simple Memo is in that state every time; Bear is in it depending on how you left it.</p>
             <p style="margin-top:.75rem"><strong>Apple Notes (1.7s):</strong> Opens to a note list. Tap "New Note", focus lands at 1.3s, and the keyboard is fully up at 1.7s. Even over 10 runs it ranged 1.20–2.37s.</p>
             <p style="margin-top:.75rem"><strong>Notion (2.8s):</strong> New page, wait for the page to load, then type. No single step is long; stacked, they come to 2.8s. Measure "how long until I can type" rather than "how fast does it launch" and the difference lands here.</p>
           </div>
@@ -754,7 +754,7 @@
       <div lang="ja" data-lang="ja">
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">起動速度の計測方法は信頼できますか？</summary><div class="faq-answer"><p>iPhone 16e (A18)（iOS 26.5.2）で画面収録を行い、フレーム単位でアプリアイコンのタップから入力可能状態までを計測しています。各5回計測し、中央値を採用（Apple Notes 10回、Google Keep 4回、Drafts のみ速い側の実測値）。起動条件はウォーム起動（アプリスイッチャーから強制終了し5秒以上待ってから起動していますが、iOS 26.5.2 では実際にはウォームで立ち上がることを目視で確認しています）。ばらつきが大きかったBearとDraftsは、条件を揃えて再計測しました。それ以外の6アプリは収録に問題がなく、値はそのまま採用しています。つまり表の<strong>範囲</strong>は計測の粗さではなく<strong>アプリ側の実際のばらつき</strong>です。Evernoteが5.1秒かかった回や、Apple Notesが10回中2.37秒まで開いた回は実際に起きています。中央値だけでは消えてしまうので、範囲を併記しています。</p></div></details></div>
         <div class="faq-item"><details class="faq-details"><summary class="faq-summary">起動速度はアップデートで変わりますか？</summary><div class="faq-answer"><p>はい、アプリのアップデートやiOSのバージョンアップにより変動します。本記事のデータは2026年3月時点のものです。大きなアップデートがあった場合は再計測し、記事を更新します。なお、アプリの基本設計（起動時にナビゲーションが必要かどうか）は大きく変わらないため、順位が劇的に変動する可能性は低いと考えています。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">なぜ起動速度がメモアプリで最も重要なのですか？</summary><div class="faq-answer"><p>ワーキングメモリ（作業記憶）の研究によると、人間が思いついたアイデアを保持できる時間は約18秒です。起動に3秒以上かかるアプリでは、メモを書き始める前にアイデアの細部が失われます。起動約1秒のObsidian連携シンプルメモなら、思いついた瞬間に書き始められます。もちろん、メモの整理や検索も重要ですが、それは「キャプチャした後」の話。まずは書き留めなければ始まりません。</p></div></details></div>
+        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">なぜ起動速度がメモアプリで最も重要なのですか？</summary><div class="faq-answer"><p>ワーキングメモリ（作業記憶）の研究によると、人間が思いついたアイデアを保持できる時間は約18秒です。起動に3秒以上かかるアプリでは、メモを書き始める前にアイデアの細部が失われます。起動0.4秒のObsidian連携シンプルメモなら、思いついた瞬間に書き始められます。もちろん、メモの整理や検索も重要ですが、それは「キャプチャした後」の話。まずは書き留めなければ始まりません。</p></div></details></div>
       </div>
 
       <div lang="en" data-lang="en">
@@ -772,7 +772,7 @@
 
     <!-- CTA Box -->
     <div class="cta-box">
-      <div class="cta-box__title"><span lang="ja" data-lang="ja">約1秒で書き始める</span><span lang="en" data-lang="en">Start writing in about 1 second</span></div>
+      <div class="cta-box__title"><span lang="ja" data-lang="ja">0.4秒で書き始める</span><span lang="en" data-lang="en">Start writing in 0.4 seconds</span></div>
       <div class="cta-box__desc"><span lang="ja" data-lang="ja">ベンチマーク最速のメモアプリ。起動した瞬間に入力可能。ダウンロードは無料。</span><span lang="en" data-lang="en">The fastest memo app in our benchmark. Input-ready on launch. Free to download.</span></div>
       <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=blog-fastest-memo-app-benchmark-jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a>
       <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=blog-fastest-memo-app-benchmark-en__hero&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a>
@@ -855,7 +855,7 @@
   <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="48" height="48" loading="lazy" style="border-radius:50%;flex-shrink:0;margin-top:.2rem;">
   <div>
     <p style="font-weight:700;font-size:.95rem;margin-bottom:.3rem;">AI Ataka</p>
-    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">Simple Memo - for Obsidian開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動約1秒・メモ→メール特化」のObsidian連携シンプルメモを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
+    <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.7;margin-bottom:.5rem;">Simple Memo - for Obsidian開発者。iOS開発歴10年以上。Captio終了をきっかけに「起動0.4秒・メモ→メール特化」のObsidian連携シンプルメモを開発。プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。</p>
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
       <a href="/about/" style="font-size:.8rem;color:var(--accent);text-decoration:none;">プロフィール</a>
       <a href="https://x.com/simplememofast" rel="me noopener" target="_blank" style="font-size:.8rem;color:var(--accent);text-decoration:none;">X / Twitter</a>
