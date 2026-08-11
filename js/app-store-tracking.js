@@ -64,6 +64,38 @@
     } catch (err) { /* never break navigation */ }
   }, { capture: true, passive: true });
 
+  /*
+   * "Next step" card -> next_step_click / next_step_impression.
+   *
+   * The site serves 1.21 pages per session across 240 pages. The cause is not
+   * too few internal links — a single article carries 52 to 98 of them — it is
+   * that none of them is presented as *the* next one, and a reader given
+   * eighty equal choices makes none. Each page therefore names one destination
+   * and this pair of events measures whether naming it changes anything.
+   *
+   * The click event is what the experiment reads, and it is deliberately a
+   * count rather than a ratio: at ~1,600 sessions per 28 days a change in
+   * pages/session cannot be told apart from noise, but "the card was clicked
+   * N times" needs no statistical power at all — see
+   * growth/reports/2026-08-10-desktop-dead-end.md for the same reasoning.
+   */
+  var NEXT_SELECTOR = "a[data-next-step]";
+
+  function nextDims(a) {
+    return {
+      to: a.getAttribute("href") || "",
+      stage: a.getAttribute("data-next-step") || "(unset)",
+      page_path: location.pathname
+    };
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    var a = (t && t.closest) ? t.closest(NEXT_SELECTOR) : null;
+    if (!a) return;
+    try { push("event", "next_step_click", nextDims(a)); } catch (err) { /* never break navigation */ }
+  }, { capture: true, passive: true });
+
   // One impression per CTA per pageview, fired when at least half of it has
   // actually been on screen. Anything looser counts CTAs the reader scrolled
   // past too fast to see, which inflates the denominator it exists to provide.
@@ -78,13 +110,17 @@
           if (seen.has(a)) { observer.unobserve(a); continue; }
           seen.add(a);
         }
-        try { push("event", "seo_cta_impression", dims(a)); } catch (err) { /* ignore */ }
+        try {
+          var isNext = a.hasAttribute("data-next-step");
+          push("event", isNext ? "next_step_impression" : "seo_cta_impression",
+               isNext ? nextDims(a) : dims(a));
+        } catch (err) { /* ignore */ }
         observer.unobserve(a);
       }
     }, { threshold: 0.5 });
 
     var start = function () {
-      var links = document.querySelectorAll(SELECTOR);
+      var links = document.querySelectorAll(SELECTOR + "," + NEXT_SELECTOR);
       for (var i = 0; i < links.length; i++) observer.observe(links[i]);
     };
     if (document.readyState === "loading") {
