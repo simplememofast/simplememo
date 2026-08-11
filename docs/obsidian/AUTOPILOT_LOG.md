@@ -90,3 +90,18 @@
   functions/_middleware.js でAIクローラーUA（GPTBot/OAI-SearchBot/PerplexityBot/
   ClaudeBot/Google-Extended）のヒットをsimplememo-apiへwaitUntilビーコン→D1集計
   →「AIに読まれたページ」を日報へ。実装は小さいが1ホップ設計への追加なので要承認
+
+## 2026-08-12 — インシデント: 定期実行の初回不発 → 実行基盤をGHA主・CCR副へ
+
+- 事実: Routine trig_016ALpozNRuf2j7BYJo5cCqy は 2026-08-11T21:01:48Z に
+  発火した記録がある。しかしブランチ・PR・status JSON・セッション一覧の
+  いずれにも実行痕跡がない（スケジュール起動セッションは一覧非表示で
+  ログを外部から確認できない）。原因は特定不能（アカウントの7日レート制限が
+  警告域だったことは状況証拠として記録しておく）。
+- 対応: `.github/workflows/obsidian-autopilot.yml` を追加（06:00 JST・
+  claude-code-action・ログ全可視・秘密鍵未設定なら緑スキップ・GH_PAT優先で
+  SEO Validation起動を保証）。CCR Routineは 07:30 JST のフォールバックに変更し、
+  両経路に同一の冪等ガード（当日ブランチ existence / status date_jst）を入れた。
+- 本日: 記事はスキップ（maintenance）。status JSONに当日分を記録済み。
+- オーナー依頼: repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（`claude setup-token`）。
+  未設定の間はGHAは寝たままCCR副系のみで運転される。

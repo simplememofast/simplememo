@@ -1,0 +1,120 @@
+# Obsidianオートパイロットの実行基盤（GitHub Actions主・CCR Routine副）。
+#
+# 【なぜActionsか】2026-08-12朝、Claude側の定期タスク（CCR Routine）が
+# 「発火記録あり・実行痕跡ゼロ」で初回を落とした。スケジュール起動された
+# セッションはセッション一覧に出ず、外からログを確認できない。実行主体は
+# 「起動したか・何をしたか・なぜ失敗したか」が後から読める場所に置くべきで、
+# それがこのワークフロー。CCR Routine（07:30 JST）は本ワークフローが
+# 動かなかった日のフォールバックとして残す。
+#
+# 【二重実行の防止】主・副どちらも実行前に同じ2つを見る:
+#   (1) origin に claude/obsidian-auto-<当日JST> ブランチが既にある
+#   (2) 本番の data/autopilot-status.json の date_jst が当日
+# どちらかが真なら即終了。(1)は進行中/未マージを、(2)はマージ済みを検知する。
+#
+# 【秘密鍵が無い間は静かに寝る】CLAUDE_CODE_OAUTH_TOKEN（推奨・サブスク課金。
+# オーナーがローカルで `claude setup-token` → repo secret 登録）か
+# ANTHROPIC_API_KEY（API課金）のどちらかが必要。未設定の間は毎日緑のまま
+# スキップし、CCR側だけが動く。赤い通知を毎日出さないための設計。
+#
+# 【GH_PAT】checkout と PR 作成に GH_PAT を優先使用（seo-daily.yml と同じ理由:
+# GITHUB_TOKEN の push はSEO Validationを起動せず、auto-merge が永久に来ない）。
+
+name: Obsidian Autopilot
+
+on:
+  schedule:
+    # 06:00 JST = 前日21:00 UTC。seo-daily と同時刻だが別ジョブ・別関心。
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: '当日分の実行痕跡があっても実行する（検証用）'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: obsidian-autopilot
+  cancel-in-progress: false
+
+jobs:
+  autopilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Gate（秘密鍵・当日重複の事前チェック）
+        id: gate
+        env:
+          HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+          HAS_ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+          FORCE: ${{ inputs.force == true }}
+        run: |
+          today="$(TZ=Asia/Tokyo date +%Y%m%d)"
+          today_dash="$(TZ=Asia/Tokyo date +%Y-%m-%d)"
+          echo "today=$today" >> "$GITHUB_OUTPUT"
+          echo "today_dash=$today_dash" >> "$GITHUB_OUTPUT"
+
+          if [ "$HAS_CLAUDE_TOKEN" != "true" ] && [ "$HAS_ANTHROPIC_KEY" != "true" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Obsidian Autopilot::CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY が未設定のためスキップ（CCR Routineフォールバックのみ稼働）。有効化はオーナーがローカルで claude setup-token → repo secret CLAUDE_CODE_OAUTH_TOKEN を登録。"
+            exit 0
+          fi
+
+          if [ "$FORCE" != "true" ]; then
+            if git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/claude/obsidian-auto-${today}" >/dev/null 2>&1; then
+              echo "run=false" >> "$GITHUB_OUTPUT"
+              echo "::notice title=Obsidian Autopilot::claude/obsidian-auto-${today} が既に存在（進行中/実行済み）のためスキップ。"
+              exit 0
+            fi
+            status_date="$(curl -sS --max-time 20 "https://simplememofast.com/data/autopilot-status.json?d=${today}" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("date_jst",""))' 2>/dev/null || echo "")"
+            if [ "$status_date" = "$today_dash" ]; then
+              echo "run=false" >> "$GITHUB_OUTPUT"
+              echo "::notice title=Obsidian Autopilot::本番status JSONが当日分（${status_date}）のためスキップ（実行済み）。"
+              exit 0
+            fi
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout（GH_PAT優先・全履歴）
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@v4
+        with:
+          # GH_PAT が要る理由: GITHUB_TOKEN の push はワークフローを起動しない
+          # （GitHubの再帰防止）。それだと生成PRで SEO Validation が走らず
+          # auto-merge が永久に来ない。seo-daily.yml と同じフォールバック構成。
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          # sitemap の lastmod は git 履歴から引くため浅いと全ページ分が壊れる
+          fetch-depth: 0
+
+      - name: 日本語フォント（ページQAスクリーンショット用）
+        if: steps.gate.outputs.run == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+
+      - name: Claude Code（Runbook 1イテレーション実行）
+        if: steps.gate.outputs.run == 'true'
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          claude_args: "--max-turns 250"
+          prompt: |
+            simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
+
+            0. 【冪等性・最初に必ず】`git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。
+            1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
+            2. `docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録と保留事項を確認する。
+            3. 目標は毎日1記事。ただしRunbook §0のゲート（ノイズフロア＝期待クリック3未満を根拠にしない・品質・検証・実験非干渉）が常に優先。ゲートを通る施策が無い日は堂々とスキップし、保守レーン（Runbook §6）に切り替える。基準を下げて書くことは失敗と定義されている。
+            4. ブランチは claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)。Runbook §3の実装規約・§4の検証（seo-check等9チェック。ブラウザが要る工程は先に `npx playwright install --with-deps chromium` を実行し、OG生成スクリプトは PLAYWRIGHT のデフォルトパスで動く）を全て通してから commit・push する。
+            5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。作成後、SEO Validation が起動したことを `gh pr checks` で確認したら**それ以上は待たずに終了してよい**（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
+            6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
+            7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
