@@ -154,14 +154,26 @@ export const onRequest = async (context) => {
   //    fallback if a Function deploy ever fails — keep the two in sync.
   const RETIRED = {
     "/blog/captio-alternatives-comparison": "/captio-alternative/",
+    "/blog/line-keep-migration": "/blog/line-keep-alternative",
+    "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
     "/blog/memo-shuukan-tips": "/blog/memo-habit",
+    "/devlog/captio-alternative": "/captio-alternative/",
     "/en/blog/why-captio-died": "/en/captio-alternative/",
     "/privacy-policy": "/privacy",
     "/privacy-policy/": "/privacy",
     "/vs/whatsapp/": "/vs/",
     "/vs/telegram/": "/vs/",
     "/vs/trello/": "/vs/",
+    "/vs/mem/": "/vs/",
     "/vs/slack-self-dm/": "/vs/",
+    // A backlink (featureupvote.com, DR72) carries a stray closing paren.
+    // `_redirects` has caught the bare form since it was added, but only
+    // AFTER this middleware passed it through — so `/)?lang=ja` cost two
+    // hops (301 here to `/)`, then 301 from `_redirects` to `/`) and GSC
+    // counts every intermediate URL separately. Mirroring it here folds
+    // both variants into the single hop the rest of this map already gets.
+    "/)": "/",
+    "/%29": "/",
   };
   if (RETIRED[pathname]) {
     pathname = RETIRED[pathname];

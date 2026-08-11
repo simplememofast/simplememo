@@ -9,6 +9,14 @@
  * and `src` against the real filesystem AND the edge middleware, and fails on
  * anything that would not be served directly.
  *
+ * `href`/`src` are not the only crawlable URLs on a page. Googlebot also
+ * follows absolute URLs in JSON-LD (`url`, `@id`, `item`, …) and reads
+ * `<meta content="…">`. Those were unaudited until 2026-08-11 — which is how
+ * five `.html` URLs in /comparison/'s ItemList and two `apple-itunes-app`
+ * app-arguments sat pointing at 301s while this script reported "all clean",
+ * quietly feeding the GSC "Page with redirect" bucket. They are checked here
+ * under exactly the same rule.
+ *
  * Resolution mirrors Cloudflare Pages' static-asset behaviour:
  *   /foo/      → foo/index.html            (200)
  *   /foo       → foo.html                  (200)
@@ -94,6 +102,15 @@ const cache = new Map();
 const MAILTO_ANCHOR = /<a[^>]*href="mailto:[^"]*"[^>]*>/g;
 const EMAIL_OFF = "<!--email_off-->";
 
+// URL-valued JSON-LD keys Google resolves as links. `sameAs` is excluded on
+// purpose — it points off-site by definition.
+const JSONLD_URL =
+  /"(?:url|@id|item|contentUrl|mainEntityOfPage|target|image|logo|thumbnailUrl)"\s*:\s*"(https:\/\/simplememofast\.com[^"]*)"/g;
+const META_CONTENT = /<meta[^>]*\scontent="([^"]*)"/g;
+const ABSOLUTE_SELF = /https:\/\/simplememofast\.com[^\s"'<>)\]]*/g;
+
+let metaCount = 0;
+
 for (const file of files) {
   const html = readFileSync(file, "utf8");
   const from = path.relative(ROOT, file);
@@ -135,6 +152,29 @@ for (const file of files) {
     const problem = cache.get(key);
     if (problem) findings.push({ from, link: raw, problem });
   }
+
+  // Same check for the absolute self-URLs in JSON-LD and <meta content>.
+  const absolute = [];
+  for (const m of html.matchAll(JSONLD_URL)) absolute.push(m[1]);
+  for (const m of html.matchAll(META_CONTENT)) {
+    for (const u of m[1].matchAll(ABSOLUTE_SELF)) absolute.push(u[0]);
+  }
+
+  for (const raw of absolute) {
+    const [beforeHash] = raw.slice(ORIGIN.length).split("#");
+    const [pathPart, query] = (beforeHash || "/").split("?");
+    if (!pathPart || pathPart.includes("{")) continue;
+    metaCount++;
+    if (EDGE_ONLY.has(pathPart)) continue;
+
+    const key = query ? `${pathPart}?${query}` : pathPart;
+    if (!cache.has(key)) {
+      const viaEdge = await edge(key);
+      cache.set(key, viaEdge ?? staticResolve(pathPart));
+    }
+    const problem = cache.get(key);
+    if (problem) findings.push({ from, link: raw, problem });
+  }
 }
 
 if (findings.length) {
@@ -147,7 +187,8 @@ if (findings.length) {
   }
   console.error(
     `\nInternal links: ${findings.length} link(s) across ${byTarget.size} distinct target(s) ` +
-      `do not resolve to a direct 200 (${linkCount} internal links checked)\n`,
+      `do not resolve to a direct 200 ` +
+      `(${linkCount} href/src + ${metaCount} JSON-LD/meta URLs checked)\n`,
   );
   for (const [k, sources] of [...byTarget].sort((a, b) => b[1].length - a[1].length)) {
     const [link, problem] = k.split("\t");
@@ -159,4 +200,7 @@ if (findings.length) {
   }
   process.exit(1);
 }
-console.log(`Internal links: ${linkCount} checked, all resolve to a direct 200`);
+console.log(
+  `Internal links: ${linkCount} href/src + ${metaCount} JSON-LD/meta URLs checked, ` +
+    `all resolve to a direct 200`,
+);

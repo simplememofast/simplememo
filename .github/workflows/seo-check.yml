@@ -26,13 +26,29 @@ jobs:
       # Every URL shape GSC has reported must resolve in exactly one hop, and
       # no `X.html` may gain a sibling directory `X/` (which would make the
       # middleware's extension stripping ambiguous).
-      # The stylesheet's cache-busting query is derived from a hash of the CSS,
-      # so changing the CSS without changing the query is a hard failure. That
-      # combination shipped once (2026-08-10): the markup went live while the CDN
-      # and browsers kept serving the previous stylesheet, so none of the new
-      # rules applied and nothing reported an error.
-      - name: CSS cache-buster matches stylesheet contents
+      # Cache-busting queries are derived from a hash of the file, so changing
+      # an asset without changing its query is a hard failure. That combination
+      # shipped once (2026-08-10): the markup went live while the CDN and
+      # browsers kept serving the previous stylesheet, so none of the new rules
+      # applied and nothing reported an error.
+      #
+      # Extended to /js/* on 2026-08-11, which immediately found the same bug
+      # already live: js/lang.js was last changed 2026-07-10 while its query
+      # still read ?v=20260529-titlefix, and _headers serves /*.js as
+      # immutable/max-age=604800 — so returning visitors had been holding a
+      # month-old lang.js. Only CSS was covered, so nothing could report it.
+      - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
+
+      # Report-only, and it stays that way until a measurement run resolves the
+      # backlog. The site publishes four competitor speed tables that disagree,
+      # and no CI job can decide which is right — only an iPhone can. Failing
+      # the build on that would block unrelated work on a question the build
+      # cannot answer. What this does buy: the drift is now visible on every
+      # run instead of surfacing years later inside a comparison article that
+      # rated every rival faster than us and still called us the fastest.
+      - name: Competitor speed figures vs data/benchmark.json (report-only)
+        run: node scripts/check-benchmark.mjs
 
       - name: URL normalization rules
         run: node scripts/check-url-normalization.mjs

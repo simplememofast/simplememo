@@ -58,7 +58,7 @@
 
   <!-- JSON-LD: CollectionPage + BreadcrumbList (moved to top of head for consistency) -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"CollectionPage","@id":"https://simplememofast.com/devlog/#webpage","inLanguage":"ja","name":"開発日誌 - Obsidian連携シンプルメモ","description":"Obsidian連携シンプルメモの開発日誌。技術的な意思決定とCaptioの体験再現の記録。","url":"https://simplememofast.com/devlog/","hasPart":[{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"【開発日誌 Day1】Captioが好きすぎて、もう一度あの体験を作りたくなった","url":"https://simplememofast.com/devlog/day1"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Captio代替アプリを作った理由","url":"https://simplememofast.com/devlog/captio-alternative"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"UIKit vs SwiftUI：起動速度のための選択","url":"https://simplememofast.com/devlog/uikit-vs-swiftui"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Outboxアーキテクチャ：取りこぼしゼロ設計","url":"https://simplememofast.com/devlog/outbox-architecture"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Relay API：Cloudflare Workersでメール送信基盤を構築","url":"https://simplememofast.com/devlog/relay-api-design"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"プライバシーファースト設計：偏執的なこだわり","url":"https://simplememofast.com/devlog/privacy-first-design"}],"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  {"@context":"https://schema.org","@type":"CollectionPage","@id":"https://simplememofast.com/devlog/#webpage","inLanguage":"ja","name":"開発日誌 - Obsidian連携シンプルメモ","description":"Obsidian連携シンプルメモの開発日誌。技術的な意思決定とCaptioの体験再現の記録。","url":"https://simplememofast.com/devlog/","hasPart":[{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"【開発日誌 Day1】Captioが好きすぎて、もう一度あの体験を作りたくなった","url":"https://simplememofast.com/devlog/day1"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"UIKit vs SwiftUI：起動速度のための選択","url":"https://simplememofast.com/devlog/uikit-vs-swiftui"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Outboxアーキテクチャ：取りこぼしゼロ設計","url":"https://simplememofast.com/devlog/outbox-architecture"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"Relay API：Cloudflare Workersでメール送信基盤を構築","url":"https://simplememofast.com/devlog/relay-api-design"},{"@type":"Article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog.png","headline":"プライバシーファースト設計：偏執的なこだわり","url":"https://simplememofast.com/devlog/privacy-first-design"}],"breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
@@ -324,10 +324,6 @@
         </h2>
         <div lang="ja" data-lang="ja">
           <div class="topic-grid">
-            <a href="/devlog/captio-alternative" class="topic-card">
-              <div class="topic-card__title">Captio代替アプリを作った理由</div>
-              <div class="topic-card__desc">Captioがサービス終了した後、なぜ自分で代替アプリを作ることにしたのか。Captio体験の3要素を分解。</div>
-            </a>
             <a href="/devlog/uikit-vs-swiftui" class="topic-card">
               <div class="topic-card__title">UIKit vs SwiftUI：起動速度のための選択</div>
               <div class="topic-card__desc">2026年にUIKitを選んだ理由。Time-to-Text 500ms以下を実現するアーキテクチャ設計。</div>
@@ -348,10 +344,6 @@
         </div>
         <div lang="en" data-lang="en">
           <div class="topic-grid">
-            <a href="/devlog/captio-alternative" class="topic-card">
-              <div class="topic-card__title">Why We Built a Captio Alternative</div>
-              <div class="topic-card__desc">After Captio shut down, we decided to build our own. Deconstructing the 3 elements of the Captio experience.</div>
-            </a>
             <a href="/devlog/uikit-vs-swiftui" class="topic-card">
               <div class="topic-card__title">UIKit vs SwiftUI: Choosing for Launch Speed</div>
               <div class="topic-card__desc">Why UIKit in 2026. Architecture design to achieve Time-to-Text under 500ms.</div>
@@ -372,6 +364,23 @@
         </div>
       </div>
     </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
   </main>
 
   <footer class="footer">
@@ -404,7 +413,7 @@
     </div>
   </footer>
 
-  <script src="/js/lang.js?v=20260529-titlefix" defer></script>
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
 
   <script>
   // Close mobile nav when clicking a link
@@ -412,6 +421,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=20260809" defer></script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
 </body>
 </html>

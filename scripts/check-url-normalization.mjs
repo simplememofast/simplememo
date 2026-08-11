@@ -166,6 +166,18 @@ await redirects("/blog/memo-shuukan-tips", "/blog/memo-habit");
 await redirects("/blog/memo-shuukan-tips.html", "/blog/memo-habit");
 await redirects("/en/blog/why-captio-died", "/en/captio-alternative/");
 await redirects("/en/blog/why-captio-died.html", "/en/captio-alternative/");
+await redirects("/blog/memo-app-free-guide", "/blog/free-memo-apps-ranking");
+await redirects("/blog/memo-app-free-guide.html", "/blog/free-memo-apps-ranking");
+await redirects("/blog/memo-app-free-guide?lang=ja", "/blog/free-memo-apps-ranking");
+await redirects("/devlog/captio-alternative", "/captio-alternative/");
+await redirects("/devlog/captio-alternative.html", "/captio-alternative/");
+await redirects("/devlog/captio-alternative?lang=en", "/captio-alternative/");
+await redirects("/blog/line-keep-migration", "/blog/line-keep-alternative");
+await redirects("/blog/line-keep-migration.html", "/blog/line-keep-alternative");
+await redirects("/blog/line-keep-migration.html?lang=ja", "/blog/line-keep-alternative");
+await redirects("/vs/mem/", "/vs/");
+await redirects("/vs/mem/index.html", "/vs/");
+await redirects("/vs/mem/?lang=en", "/vs/");
 await redirects("/privacy-policy", "/privacy");
 await redirects("/privacy-policy/", "/privacy");
 await redirects("/vs/whatsapp/", "/vs/");
@@ -173,6 +185,15 @@ await redirects("/vs/telegram/", "/vs/");
 await redirects("/vs/trello/", "/vs/");
 await redirects("/vs/slack-self-dm/", "/vs/");
 await redirects("/vs/telegram/?lang=ja", "/vs/");
+
+// The stray-paren backlink, in both the raw and percent-encoded spellings.
+// `_redirects` has always caught the bare form, but only as a SECOND hop
+// after this middleware passed it through — so the `?lang=` variants cost
+// two 301s until the rule was mirrored into RETIRED.
+await redirects("/)", "/");
+await redirects("/%29", "/");
+await redirects("/)?lang=ja", "/");
+await redirects("/%29?lang=ja", "/");
 
 // ── 6. 410 Gone — fabricated slugs from injected backlinks ───────────────
 for (const slug of [

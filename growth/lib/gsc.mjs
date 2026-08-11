@@ -14,7 +14,21 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-export const GSC_DIR = path.join(ROOT, 'growth/data/gsc');
+
+/**
+ * Where snapshots live. Overridable so the daily job can ingest a fresh window,
+ * run the detectors against it and throw it away.
+ *
+ * Snapshots of record stay weekly and committed. Writing one every day would
+ * put ~180 MB of near-duplicate JSON a year into a repo that a static site is
+ * served from, and — worse — would break decay: `previousSnapshot` returns the
+ * label immediately before, so consecutive 28-day windows would be compared
+ * against a baseline sharing 27 of their 28 days. Every delta would collapse
+ * toward zero and the cause classification would be reading noise.
+ */
+export const GSC_DIR = process.env.GROWTH_GSC_DIR
+  ? path.resolve(ROOT, process.env.GROWTH_GSC_DIR)
+  : path.join(ROOT, 'growth/data/gsc');
 
 /**
  * Fallback CTR-by-position curve, used only until the site's own data can
@@ -59,6 +73,11 @@ export function loadSnapshot(label) {
     meta,
     queries: read('queries'),
     pages: read('pages'),
+    // Impressions-only rows from the generative-AI export. Deliberately a
+    // separate field rather than a flag on `pages`: everything that consumes
+    // `pages` divides clicks by impressions somewhere, and these rows have no
+    // clicks to divide.
+    pagesAio: read('pages-aio'),
     queryPages: read('query-pages'),
   };
 }

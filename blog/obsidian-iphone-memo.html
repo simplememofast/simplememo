@@ -281,6 +281,7 @@
 
         <h2>方法2：ショートカット＋Obsidian URI（obsidian://new）</h2>
         <p><a href="https://obsidian.md/help/Extending+Obsidian/Obsidian+URI" target="_blank" rel="noopener">Obsidian URI</a>を使うと、iOSショートカットから新規ノート作成や追記を直接呼び出せます。ホーム画面アイコン・背面タップ・アクションボタンを入口にできるのが強み。テキスト入力→URI起動の2段構成になる点と、エラー時の挙動を自分で作り込む必要がある点は覚悟してください。音声で入れたい場合は<a href="/blog/obsidian-voice-input">音声入力の4つの方法</a>で詳しく解説しています。</p>
+        <p>なお、Obsidianモバイル 1.11（公開版は2026年1月）以降は<strong>アプリ内蔵のショートカットアクション</strong>が用意されており、ノートへの追記はアプリを前面に出さずに実行できます。URIを自分で組み立てる必要がないぶん、本文の切れや保管庫違いといった事故が起きません。ネット上の解説の多くは1.11より前に書かれたURI方式のため、手元の画面と手順が食い違うことがあります。うまく動かないときは<a href="/obsidian/shortcuts-not-working/">ショートカットからObsidianにメモが入らないときの症状別の直し方</a>で切り分けてください。</p>
 
         <h2>方法3：ファイル経由（保管庫はただのフォルダ）</h2>
         <p>Obsidianの保管庫は実体としてはMarkdownファイルの入ったフォルダです。iCloud Drive内の保管庫フォルダに.mdファイルを置けば（または追記すれば）、それがそのままノートとして現れます。他のアプリからの書き込み連携は、みなこの性質を利用しています。直接使うことは少なくても、仕組みとして知っておくと応用が利きます。</p>
@@ -298,7 +299,7 @@
         <p>セットアップ手順やGmail・Outlook・iCloudメールでの動作は<a href="/blog/email-to-obsidian">メールでObsidianに送る方法</a>で解説しています。</p>
 
         <h2>方法6：Apple Watchから送る（手首で完結）</h2>
-        <p>iPhoneを取り出せない場面——移動中・家事中・運転前後——では、Apple Watchに話しかけて送る方法が補完になります。送ったメモはペアリングされたiPhone経由で保管庫に追記されます。詳しくは<a href="/apple-watch-obsidian/">Apple WatchからObsidianへ音声メモ</a>をご覧ください。</p>
+        <p>iPhoneを取り出せない場面——移動中・家事中・運転前後——では、Apple Watchに話しかけて送る方法が補完になります。送ったメモはペアリングされたiPhone経由で保管庫に追記されます。詳しくは<a href="/apple-watch-obsidian/">Apple WatchからObsidianへ音声メモ</a>をご覧ください。なお<strong>Obsidian自身にはwatchOSアプリがない</strong>ため、Watch単体で保管庫に書き込むことはできません。その理由と回避策は<a href="/obsidian/apple-watch-not-working/">Apple WatchからObsidianへ送れない理由</a>にまとめています。</p>
 
         <h2>6つの方法を比較</h2>
         <table>
@@ -313,6 +314,7 @@
 
         <h2>運用のコツ：入口は1つに決める</h2>
         <p>入口が複数あるとメモが分散し、どこに書いたか探す時間が増えます。おすすめは「<strong>キャプチャ用の入口を1つ→保管庫のInboxノートに集約→Obsidianで処理</strong>」という流れ。この「あとで処理する走り書き」の扱い方は<a href="/blog/fleeting-notes">フリーティングノートの書き方と運用3原則</a>で詳しく解説しています。</p>
+        <p>集約先をInboxノートではなくデイリーノートにしたい場合は、日付フォーマットと保存先フォルダの一致が前提になります。ここがズレると<strong>エラーは出ないのに追記だけが迷子になる</strong>ため、<a href="/obsidian/daily-note/">iPhoneを開かずデイリーノートへ追記する方法</a>で先に確認しておくと事故を防げます。</p>
 
         <h2>FAQ</h2>
         <p><strong>Obsidianのモバイルアプリは無料ですか？</strong><br>はい、個人利用は無料です。iCloud Drive上に保管庫を置けば追加費用なしでiPhone・iPad・Macと同期できます（公式のObsidian Syncは有料のオプションです）。</p>
@@ -324,6 +326,23 @@
 
       </div>
     </div>
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        次に読む
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        Obsidian連携で、メモを貯める場所を作る
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        メールで自分に送るだけで、Obsidianのノートに追記されます。
+      </span>
+    </a>
+  </aside>
+
   </main>
 
 
@@ -359,6 +378,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=20260809" defer></script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
 </body>
 </html>

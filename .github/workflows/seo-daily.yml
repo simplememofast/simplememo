@@ -1,0 +1,209 @@
+# 毎日のSEO測定ループ。BigQueryのサチコ一括エクスポートを読み、
+# 検出器を回して、結果をジョブサマリに出す。
+#
+# 【毎日と毎週で挙動が違う理由】
+#
+# 毎日: 取り込み → 検出 → ジョブサマリ。**何もコミットしない。**
+#   スナップショットを毎日コミットすると2つ壊れる。
+#   (1) 容量 — 28日窓のJSONを毎日積むと年180MB。静的サイトを配信する
+#       リポジトリに置くものではない。
+#   (2) decay検出 — previousSnapshot() は「直前のラベル」を返すので、
+#       毎日書くと「28日窓 vs 27日重なった28日窓」を比べることになる。
+#       差分はゼロに潰れ、原因分類はノイズを読むだけになる。
+#   毎日の価値は「今日の数字が見えること」であって、履歴を増やすことではない。
+#
+# 毎週(月): それに加えてスナップショットと週次レポートをコミットし、PRを作る。
+#   growth/README.md の「スナップショットはコミットする」設計はそのまま。
+#   28日窓・週1回という既存のリズムを変えていない。
+#
+# 【エクスポートが止まったときに気づけるようにしてある】
+#   preflight を最初に走らせ、鮮度が落ちていたら失敗させる。
+#   止まったパイプラインは「エラー」ではなく「小さい数字」として出てくるので、
+#   放っておくと「今週は静かだったね」で説明されてしまう。
+#   growth/README.md がそもそもその失敗のために書かれている。
+
+name: SEO Daily (BigQuery)
+
+on:
+  schedule:
+    # 06:00 JST = 21:00 UTC (前日)。サチコのデータ確定は2〜3日遅れなので
+    # 時刻そのものに意味はない。1日1回入ればよい。
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+    inputs:
+      snapshot:
+        description: '曜日に関係なくスナップショットをコミットしてPRを作る'
+        type: boolean
+        required: false
+        default: false
+      days:
+        description: '窓の日数（既定28）'
+        required: false
+        default: '28'
+
+permissions: {}
+
+concurrency:
+  group: seo-daily
+  cancel-in-progress: false
+
+env:
+  # 非機密の設定はリポジトリ変数で上書きできる。未設定なら既定値を使う。
+  GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'yurika-simplememo' }}
+  BQ_DATASET: ${{ vars.BQ_DATASET || 'searchconsole' }}
+  GSC_PROPERTY: ${{ vars.GSC_PROPERTY || 'sc-domain:simplememofast.com' }}
+  GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # PAT があればそれで checkout する。push に使う資格情報がこれで決まり、
+      # GITHUB_TOKEN による push は他のワークフローを起動しない（GitHubの
+      # 再帰防止）ため、PAT でないと SEO Validation が走らず auto-merge も
+      # 発火しない。未設定なら GITHUB_TOKEN に落ちて、PRは作られるが
+      # マージには手動の再実行が要る。
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 鍵が無い状態で走らせると BigQuery の認証エラーで落ちる。
+      # それは「設定がまだ」であって「壊れた」ではないので、区別して止める。
+      - name: Service account key is configured
+        run: |
+          if [ -z "${GOOGLE_SERVICE_ACCOUNT_JSON}" ]; then
+            {
+              echo "## SEO Daily — 未設定"
+              echo ""
+              echo "\`GCP_SERVICE_ACCOUNT_JSON\` シークレットが設定されていません。"
+              echo "設定手順: [growth/BIGQUERY_SETUP.md](../blob/main/growth/BIGQUERY_SETUP.md)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::GCP_SERVICE_ACCOUNT_JSON が未設定のため測定をスキップした"
+            exit 1
+          fi
+
+      # エクスポートが届いているか。--strict で、止まっていたらここで失敗する。
+      - name: Export preflight
+        id: preflight
+        run: |
+          {
+            echo "## エクスポートの状態"
+            echo ""
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          node growth/scripts/bq-preflight.mjs --strict 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          status=${PIPESTATUS[0]}
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+
+      # 毎日の取り込みは GROWTH_GSC_DIR で捨て場所に書く。
+      # コミットされるのは下の weekly ステップだけ。
+      - name: Ingest today's window (not committed)
+        env:
+          GROWTH_GSC_DIR: ${{ runner.temp }}/gsc
+        run: |
+          node growth/scripts/ingest-bigquery.mjs \
+            --days "${{ github.event.inputs.days || '28' }}" \
+            --label "$(date -u +%Y-%m-%d)"
+
+      # 検出器の出力をそのままサマリに出す。読むために別画面を開かせない。
+      - name: Detectors
+        env:
+          GROWTH_GSC_DIR: ${{ runner.temp }}/gsc
+        run: |
+          {
+            echo ""
+            echo "## 検出結果"
+            echo ""
+            echo '```'
+            node growth/scripts/analyze.mjs --top 10
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # ここから下は月曜だけ（または手動実行で snapshot=true のとき）。
+      - name: Is this a snapshot day?
+        id: when
+        run: |
+          if [ "${{ github.event.inputs.snapshot }}" = "true" ] || [ "$(date -u +%u)" = "1" ]; then
+            echo "snapshot=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "snapshot=false" >> "$GITHUB_OUTPUT"
+            echo "月曜ではないので、記録用スナップショットのコミットは行わない。" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Ingest snapshot of record
+        if: steps.when.outputs.snapshot == 'true'
+        id: snapshot
+        run: |
+          label="$(date -u +%Y-%m-%d)"
+          echo "label=$label" >> "$GITHUB_OUTPUT"
+          node growth/scripts/ingest-bigquery.mjs --days 28 --label "$label"
+          node growth/scripts/weekly-report.mjs --write
+
+      - name: Commit and open PR
+        if: steps.when.outputs.snapshot == 'true'
+        uses: actions/github-script@v7
+        env:
+          LABEL: ${{ steps.snapshot.outputs.label }}
+          HAS_PAT: ${{ secrets.GH_PAT != '' }}
+        with:
+          github-token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          script: |
+            const { execSync } = require('child_process');
+            const label = process.env.LABEL;
+            const branch = 'claude/seo-weekly-snapshot';
+            const sh = (cmd) => execSync(cmd, { encoding: 'utf8' }).trim();
+
+            sh('git config user.name "github-actions[bot]"');
+            sh('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
+            sh('git add growth/data growth/reports');
+
+            if (!sh('git status --porcelain -- growth/data growth/reports')) {
+              core.notice('スナップショットに差分が無いため何もしない');
+              return;
+            }
+
+            // ブランチは毎週作り直す。前週のPRがマージ済みなら、その履歴の上に
+            // 積むのではなく main から取り直すのが正しい。
+            sh(`git checkout -B ${branch}`);
+            sh(`git commit -m "chore(growth): GSC スナップショット ${label}（BigQuery 自動取り込み）"`);
+            sh(`git push -u origin ${branch} --force-with-lease`);
+
+            const { owner, repo } = context.repo;
+            const existing = await github.rest.pulls.list({ owner, repo, state: 'open', head: `${owner}:${branch}` });
+            if (existing.data.length) {
+              core.notice(`#${existing.data[0].number} は既に開いている`);
+              return;
+            }
+
+            const { data: pr } = await github.rest.pulls.create({
+              owner, repo, head: branch, base: 'main',
+              title: `chore(growth): GSC スナップショット ${label}`,
+              body:
+                `BigQuery の一括エクスポートから ${label} のスナップショットを取り込み、週次レポートを生成した。\n\n` +
+                `サイトの配信内容は変えていない（\`growth/data/\` と \`growth/reports/\` のみ）。\n\n` +
+                `検出結果はワークフローのジョブサマリを参照。\n\n` +
+                `---\n_Generated by [Claude Code](https://claude.ai/code)_`,
+            });
+            core.notice(`#${pr.number} を作成した`);
+
+            if (process.env.HAS_PAT === 'true') {
+              core.notice('PAT で push したため SEO Validation が走る。成功すれば auto-merge がマージする。');
+            } else {
+              // GITHUB_TOKEN による push / PR 作成は他のワークフローを起動しない
+              // （GitHub の再帰防止）。つまり SEO Validation が走らず、
+              // auto-merge.yml も発火しない。
+              core.warning(
+                'GH_PAT が未設定のため、このPRでは SEO Validation が自動で走らない' +
+                '（GITHUB_TOKEN の push はワークフローを起動しないため）。' +
+                'マージには手動の再実行が要る — growth/BIGQUERY_SETUP.md を参照。'
+              );
+            }

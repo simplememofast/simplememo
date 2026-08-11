@@ -26,7 +26,21 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const LEDGER_PATH = path.join(ROOT, 'growth/experiments/experiments.json');
 
 export const STATUSES = ['planned', 'running', 'frozen', 'evaluated', 'cancelled'];
-export const DECISIONS = ['keep', 'revert', 'iterate', 'inconclusive'];
+/**
+ * `abandoned` is the outcome the first four could not express: the lever was
+ * tested, and the metric is not reachable by any amount of further iteration.
+ *
+ * `/blog/line-keep-alternative` is the case that forced it. Its queries are
+ * confirmations — 「line keepメモ 終了」, 「line keepとkeepメモの違い」 — and the
+ * title already answers them 「LINE Keepは終了・Keepメモは継続中」, so the
+ * searcher is satisfied on the results page and never needs the click. Two
+ * rounds went in before that was understood. `keep` would have said the title
+ * is fine and implied the CTR is still open; `iterate` promised a third round;
+ * `inconclusive` invited someone to re-run it with more data. All three lead
+ * back to the same page. `abandoned` says the target is unreachable and the
+ * page should leave the CTR working lists — which is the actual finding.
+ */
+export const DECISIONS = ['keep', 'revert', 'iterate', 'inconclusive', 'abandoned'];
 /** Statuses whose evaluation date can come due. */
 export const OPEN_STATUSES = ['running', 'frozen'];
 

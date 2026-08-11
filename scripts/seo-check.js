@@ -49,14 +49,54 @@ function getMetaContent(html, key, value) {
   return null;
 }
 
+/**
+ * Every URL this site publishes, as canonical extension-less paths.
+ *
+ * Memoised: checkFile() runs per page and the hreflang rule needs to ask
+ * "does the other language exist?", which is a question about the whole site,
+ * not the file in hand. Walking the tree once and reusing the Set keeps that
+ * lookup O(1) instead of re-reading 240 directories per page.
+ */
+let siteUrlCache = null;
+function getSiteUrls() {
+  if (!siteUrlCache) {
+    siteUrlCache = new Set(
+      getAllHtmlFiles(ROOT_DIR).map((f) => toUrlPath(ROOT_DIR, f)),
+    );
+  }
+  return siteUrlCache;
+}
+
 function checkFile(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const rel = getRelative(filePath);
+  const pageUrl = toUrlPath(ROOT_DIR, filePath);
   const isNoindex = /content\s*=\s*["'][^"']*noindex/i.test(content);
 
   // Skip noindex pages for most checks
   if (isNoindex) {
     return;
+  }
+
+  // 0. Language-switch markup that nothing switches.
+  //
+  // `data-lang` spans are inert on their own: the stylesheet hides
+  // [data-lang="en"] and js/lang.js is what reveals the right one. A page
+  // carrying those spans WITHOUT that script renders the Japanese span and
+  // only the Japanese span — including on pages declaring <html lang="en">.
+  //
+  // This shipped on 2026-08-11: the next-step card was written with both
+  // spans and added site-wide, which put a Japanese-only card at the foot of
+  // 39 English pages. Every existing check passed, because none of them knew
+  // what language a page was supposed to be in. This one does.
+  if (/data-lang\s*=\s*["']ja["']/i.test(content) && !/lang\.js/i.test(content)) {
+    const langAttr = content.match(/<html[^>]*\blang\s*=\s*["']([^"']+)["']/i);
+    const declared = langAttr ? langAttr[1].toLowerCase() : '';
+    if (declared.startsWith('en')) {
+      errors.push(`[LANG] English page renders Japanese-only data-lang spans (no lang.js to switch them): ${rel}`);
+    } else {
+      warnings.push(`[LANG] data-lang spans present but no lang.js to switch them: ${rel}`);
+    }
   }
 
   // 1. Title tag
@@ -97,8 +137,30 @@ function checkFile(filePath) {
   }
 
   // 4. Hreflang tag
-  if (!content.includes('hreflang=')) {
-    warnings.push(`[HREFLANG] Missing hreflang tag: ${rel}`);
+  //
+  // Only meaningful when the other language actually exists as its own URL.
+  // hreflang declares "the same document lives at this other address"; on a
+  // page that has no counterpart there is no address to declare, so the tag
+  // cannot be added and the warning can never be cleared.
+  //
+  // Unconditional, this warned on 163 of 240 pages — every JA-only article,
+  // glossary entry, use-case and /vs/ comparison that has no /en/ twin. All
+  // 163 were unfixable, and they buried the checks that do need acting on
+  // (the run printed 163 warnings, 0 of them actionable). The 71 pages that
+  // DO have a counterpart already carry a correct ja/en/x-default triple, so
+  // the real gap this check exists to catch was, and is, empty.
+  //
+  // Note this is NOT the same thing as the site's bilingual `data-lang`
+  // markup: 158 pages ship both languages inline at ONE url. That is what
+  // check 0 above polices. Those pages are single-URL by design and are
+  // correctly silent here.
+  const counterpartUrl = pageUrl.startsWith('/en/')
+    ? pageUrl.slice('/en'.length)
+    : '/en' + pageUrl;
+  if (getSiteUrls().has(counterpartUrl) && !content.includes('hreflang=')) {
+    warnings.push(
+      `[HREFLANG] Missing hreflang tag (counterpart ${counterpartUrl} exists): ${rel}`,
+    );
   }
 
   // 5. Structured data (JSON-LD)
