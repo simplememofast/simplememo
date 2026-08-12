@@ -1,25 +1,19 @@
 {
-  "date_jst": "2026-08-12",
-  "generated_at": "2026-08-12T03:30:00Z",
-  "action": "refresh",
-  "article": {
-    "url": "https://simplememofast.com/obsidian/compare/logseq/",
-    "title": "ObsidianとLogseq、どちらを選ぶ？（回答ブロック追加）"
-  },
-  "pr": {
-    "number": 480,
-    "state": "merged"
-  },
-  "reason": "レーンB: 順位を持つ会話型クエリ「logseqとobsidian どちらが 良い」(23imp・pos9.2・GSC 2026-08-11)に対し、比較ページに質問文h2の回答が無かったため、先頭tip-boxをP0-1型のdata-answer-block（質問文h2＋2文断定）へ格上げ。レーンA新記事（memos比較）は実カーブのノイズフロア計算（期待0.56クリック<3）で棄却し、Runbook §6の「足切り超え」誤記を同PRで訂正した。※本ファイルの早朝maintenance記録は、オーナー指示による当日分の代走実行の記録で上書き",
-  "verified": "回答ブロックの内容は新規主張なし（全て2026-08-11 PR #470の実機検証済み事実の言い直し）。iPhoneビューポート(390×844 DPR3)実描画で水平スクロールなし・回答ブロックのファーストビュー内表示を確認。Mention Watch初回はWebSearch(米国ロケール)で6クエリ取得、attnoel記事本文はegress制限で未確認とverified:falseで明記",
+  "date_jst": "2026-08-13",
+  "generated_at": "2026-08-12T22:33:31Z",
+  "action": "maintenance",
+  "article": null,
+  "pr": null,
+  "reason": "冪等性チェック: 主系(GitHub Actions)の当日分ブランチ・status JSON更新なし→副系(CCR)で実行。新規GSCスナップショットが2026-08-11から増えておらず、レーンA/Bの実カーブ需要（analyze.mjs --only conversational/unanswered）はObsidianクラスタで既存対応済み（logseqとobsidian回答ブロックはPR#480で実施済み・他の会話型クエリはObsidian非関連）。レーンC（Evidence Asset）は前々回(PR#470)・前回(PR#483)ともに実機検証込みで直近2日以内のため今回は見送り。Mention Watchは前回2026-08-12取得で7日未満のため対象外。Lane E(Coverage)はオーナー明示指示がある回のみのため今回は対象外。よって新規記事は正当化できず、Runbook§6保守レーンへ切替",
+  "verified": "docs/ai-citation-strategy.md の主張監査（§6メニュー）を実施。Google AI Overviews節の✅4項目を実地検証してVERIFIED注記を付与: robots.txtのGoogle-Extended許可（grep実測）、FAQPage JSON-LD実装ページ数（grep実測62ページ・旧記載『7+』を大幅に上回ることを確認）、/about/のPerson+Organization構造化データ（JSON-LD実読）、全ブログ記事のdateModified（57本全件・欠落0件をgrep実測）。あわせて本番稼働中の直近2ページ（/obsidian/getting-started/・/obsidian/compare/logseq/・/obsidian/）のHTTP 200を確認",
   "checks": {
     "seo_check": "0 errors 0 warnings",
-    "content_graph": "16 entries OK",
-    "mobile_qa": "390x844 DPR3 pass (no h-scroll, answer block above fold)",
-    "experiments": "28 entries 0 overdue (aio-2026-08-12-logseq-answer-block追加)"
+    "content_graph": "変更なし（対象外）",
+    "mobile_qa": "対象外（コンテンツページ変更なし）",
+    "experiments": "変更なし・running実験に非干渉（/obsidian/・/obsidian/compare/logseq/には触れていない）"
   },
   "owner_requests": [
-    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（前日からの継続依頼）"
+    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から）"
   ],
-  "next": "会話型クエリ「2026年にチームでノートを共同作業するのに最適なアプリは何ですか？」(7imp・pos7.6)等の小粒レーンB候補が残存。memos比較はスナップショット更新（2026-09-06以降）で需要が足切りを超えてから。Mention Watchは次回2026-08-19以降、attnoel記事の本文確認も持ち越し"
+  "next": "新しいGSCスナップショットが入り次第、レーンA/Bを再判定。レーンC候補: プラグイン数の再計測（前回実測2026-08-11・鮮度維持）。Mention Watchは2026-08-19以降に次回。ai-citation-strategy.mdの残り監査項目（Perplexity以降の節）は次回以降数項目ずつ継続"
 }

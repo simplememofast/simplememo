@@ -161,3 +161,39 @@
 - 保留・オーナー依頼: PR #482（カバレッジ計画本体）がコンフリクトで
   auto-merge不可のまま。本PRとの重複2ファイルはこちらが新しい
   （C02 done反映済み）。#482側はrebaseまたはクローズの判断を推奨。
+
+## 2026-08-13 — 保守のみ（副系CCR代走・新規スナップショットなし）
+
+- 判断根拠: 冪等性チェックで主系(GitHub Actions)の当日分実行痕跡なし
+  （`claude/obsidian-auto-20260813` ブランチ不在・status JSONのdate_jstが
+  2026-08-12のまま）を確認し副系で実行。GSCスナップショットは2026-08-11から
+  増えておらず、`analyze.mjs --only conversational/unanswered` の出力は
+  前回と同一。会話型クエリでObsidian関連のものは「logseqとobsidian どちらが
+  良い」(23imp・pos9.2)のみで、これは既にPR #480で回答ブロック対応済み
+  （pos変化なし=再クロール未反映の可能性、需要側の新規性なし）。他の会話型
+  クエリ（チーム共同作業アプリ等）はObsidianブランドと無関係のため本ハブの
+  スコープ外。レーンC（Evidence Asset）は直近2回（PR #470・#483）とも実機
+  検証込みで直近48時間以内のため見送り。Mention Watchは前回2026-08-12取得で
+  7日未満のため対象外。Lane E(Coverage)はオーナー明示指示がある回限定のため
+  今回は対象外と判断。新規記事を正当化する根拠が無いため保守レーン(§6)へ。
+- やったこと: `docs/ai-citation-strategy.md` の主張監査（§6メニュー・
+  未着手だった4状態表記を導入）。Google AI Overviews節の✅4項目
+  （Google-Extended許可／FAQPage JSON-LD実装数／`/about/`のPerson+
+  Organization構造化データ／全ブログ記事のdateModified）を実地検証し
+  VERIFIED注記と根拠を付与。残りの節（Perplexity以降）は次回以降に持ち越し
+  （全量一括はしない、が方針）。
+- PR: （本エントリ作成時点で未作成・`docs/`+`data/`のみのdocs-onlyで
+  SEO Validationは素通り見込み）
+- 検証: `grep -rl "FAQPage" --include="*.html" .` で62ページ実測（旧記載の
+  下限見積り「7+」を大幅に上回ることを確認）。`about/index.html` のJSON-LD内
+  `Person`/`worksFor: Organization` を実読。`blog/*.html` 57本全件で
+  `dateModified` の存在をgrep実測（欠落0件）。`robots.txt:71` に
+  `User-agent: Google-Extended` を確認。本番稼働中ページの生存確認
+  （`/obsidian/`・`/obsidian/compare/logseq/`・`/obsidian/getting-started/`
+  いずれもHTTP 200）。`node scripts/seo-check.js` 0 errors 0 warnings。
+- 保留・オーナー依頼:
+  - GitHub Actions repo secret `CLAUDE_CODE_OAUTH_TOKEN` 登録（継続・
+    2026-08-11から）
+  - 次回、新しいGSCスナップショットが増えていればレーンA/Bを再判定
+  - レーンC候補: プラグイン数の再計測（前回実測2026-08-11・鮮度維持目的）
+  - `ai-citation-strategy.md` の残り監査（Perplexity〜Tier-2節）を数項目ずつ継続
