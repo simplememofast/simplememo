@@ -266,6 +266,8 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/glossary/aes-gcm/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"AES-GCMとは何ですか？","acceptedAnswer":{"@type":"Answer","text":"AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は、データの暗号化と認証を同時に行う暗号化方式です。暗号化によりデータを読めなくし、認証タグにより改ざんを検出します。米国政府の機密情報保護にも採用されている信頼性の高い方式です。"}},{"@type":"Question","name":"AES-GCMとAES-CBCの違いは何ですか？","acceptedAnswer":{"@type":"Answer","text":"AES-CBCは暗号化のみを行い、データの改ざん検出は別途MACなどが必要です。AES-GCMは暗号化と認証を一体化（AEAD）しており、より高速で安全です。また、GCMはパラレル処理が可能で、CBCより高いパフォーマンスを発揮します。"}},{"@type":"Question","name":"シンプルメモはどのようにAES-GCMを使っていますか？","acceptedAnswer":{"@type":"Answer","text":"オフライン時にデバイス上のOutbox（送信待ちキュー）にメモを保存する際、AES-256-GCMで暗号化します。暗号鍵はデバイスのKeychain/Secure Enclaveに保管され、サーバーには送信されません。デバイスを紛失してもメモ内容は保護されます。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
