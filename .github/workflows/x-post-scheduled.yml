@@ -6,14 +6,22 @@ name: X Auto Post (Scheduled)
 # 認証: GitHub Secret ADMIN_BASIC_AUTH (形式 "user:pass") を利用し、
 #       Cloudflare Pages の /admin/api/x-post エンドポイント経由で投稿。
 
+# 【運用停止 2026-08-11】scheduled 自動投稿はオーナー判断で停止した。
+# 理由: X日本語はClaude定期タスク（Cowork）でのバッチ運用に一本化したため、
+#       この経路（サイト管理画面 /admin/api/x-post 経由）からの自動投稿は
+#       二重運用になる。
+# 再開条件: Cowork運用を止めてこの経路へ戻す判断をしたとき。C2（8/7以降の
+#           scheduled失敗の修理）を済ませ、workflow_dispatch の dry_run=true で
+#           検証を通してから下の schedule ブロックを戻すこと。
+# workflow_dispatch（手動・dry_run可）は残している。
 on:
-  schedule:
-    # 08:00 JST = 23:00 UTC (prev day) / 15 分早めに打って GitHub cron jitter を吸収
-    - cron: '45 22 * * *'
-    # 12:30 JST = 03:30 UTC
-    - cron: '15 3 * * *'
-    # 20:00 JST = 11:00 UTC
-    - cron: '45 10 * * *'
+  # schedule:
+  #   # 08:00 JST = 23:00 UTC (prev day) / 15 分早めに打って GitHub cron jitter を吸収
+  #   - cron: '45 22 * * *'
+  #   # 12:30 JST = 03:30 UTC
+  #   - cron: '15 3 * * *'
+  #   # 20:00 JST = 11:00 UTC
+  #   - cron: '45 10 * * *'
   workflow_dispatch:
     inputs:
       index:
