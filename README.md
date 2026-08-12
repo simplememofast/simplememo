@@ -1,5 +1,15 @@
 # Captio式シンプルメモ (Simple Memo - Captio-style) Landing Page
 
+> **⏸ SNS自動投稿は運用停止中（2026-08-11〜）**
+> X日英・TikTokの scheduled 自動投稿（サイト管理画面 /admin/api 経由）はオーナー判断で停止。
+> - **X日本語**: Claude定期タスク（Cowork）でのバッチ運用に一本化したため（二重運用の防止）
+> - **X英語**: アカウントバン1回目を受けたため（回復とライブラリ鮮度化が先）
+> - **TikTok**: 画像系コンテンツの品質が基準未達のため（privacy_level問題も未解決）
+>
+> 詳細な理由・再開条件は各workflowファイル冒頭に記載:
+> `.github/workflows/x-post-scheduled.yml` / `x-post-en-scheduled.yml` / `auto-post-tiktok.yml`。
+> `workflow_dispatch` による手動実行（dry_run含む）は引き続き可能。
+
 A dark-themed, modern landing page for the Simple Memo iOS app, built with HTML, CSS, and Cloudflare Workers.
 
 
