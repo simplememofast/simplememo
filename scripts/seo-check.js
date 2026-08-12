@@ -18,6 +18,16 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git'];
 const SKIP_FILES = ['404.html'];
 
+/** The one node every page describing our app must converge on. See check 10. */
+const CANONICAL_APP_ID = 'https://simplememofast.com/#app';
+/** Read from the constants file so a rename lands in one place, not two. */
+const OWN_APP_NAMES = (() => {
+  const c = JSON.parse(
+    fs.readFileSync(path.join(ROOT_DIR, 'data/site-constants.json'), 'utf8'),
+  );
+  return new Set([c.appNameJa, c.appNameEn, ...c.alternateNames]);
+})();
+
 const errors = [];
 const warnings = [];
 
@@ -187,6 +197,38 @@ function checkFile(filePath) {
   // 9. Check for deprecated schema types
   if (content.includes('"@type": "HowTo"') || content.includes('"@type":"HowTo"')) {
     errors.push(`[SCHEMA] Deprecated HowTo schema found: ${rel}`);
+  }
+
+  // 10. Our own SoftwareApplication must carry the canonical @id.
+  //
+  // JSON-LD merges nodes by @id. A node naming our app without one is a
+  // SEPARATE entity as far as a consumer is concerned, so the same product
+  // gets published as several competing things — which is the exact condition
+  // brand-2026-08-11-entity-merge exists to undo.
+  //
+  // That experiment was recorded as "resolved inside and out" on 2026-08-11
+  // on the strength of a count over Organization nodes, all 223 of which did
+  // point at the canonical @id. Nobody had counted SoftwareApplication, and
+  // six of ours (ai-tags ja/en, apple-watch ja/en, voices,
+  // en/send-email-to-yourself) carried no @id at all. A check that runs over
+  // Organization cannot see that; this one looks at the node type that was
+  // actually broken.
+  //
+  // Competitor apps are the reason this matches on the NAME rather than on
+  // the type alone: /en/send-email-to-yourself/ lists seven rival apps as
+  // SoftwareApplication nodes, and those must stay separate entities with no
+  // @id of ours.
+  for (const m of content.matchAll(/"@type":\s?"SoftwareApplication"([\s\S]{0,400}?)"name":\s?"([^"]+)"/g)) {
+    const [between, name] = [m[1], m[2]];
+    if (!OWN_APP_NAMES.has(name)) continue;          // a rival's node
+    if (between.includes(CANONICAL_APP_ID)) continue; // @id already inside
+    // The @id may also sit after the name within the same node.
+    const after = content.slice(m.index, m.index + 1200);
+    if (after.includes(CANONICAL_APP_ID)) continue;
+    errors.push(
+      `[SCHEMA] SoftwareApplication "${name}" is missing @id "${CANONICAL_APP_ID}" ` +
+      `— it publishes as a separate entity: ${rel}`,
+    );
   }
 }
 
