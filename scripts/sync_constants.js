@@ -58,17 +58,25 @@ const RULES = [
   // byte-identical markup. Those nodes have no @id at all, ours always does,
   // and that is the only thing separating them.
   //
-  // Until 2026-08-12 nothing enforced these 12 blocks: the visible-rating
-  // rules below only run on OWN_VALUE_PAGES and the offers rules only match
-  // prices, so the structured rating — the copy Google actually reads — was
-  // the one number on the site free to drift.
+  // Until 2026-08-12 nothing enforced these blocks: the visible-rating rules
+  // below only run on OWN_VALUE_PAGES and the offers rules only match prices,
+  // so the structured rating — the copy Google actually reads — was the one
+  // number on the site free to drift.
+  //
+  // The `(?!"@type":\s?"SoftwareApplication")` guard is load-bearing, and it
+  // was added after this rule nearly corrupted a competitor's data. Our node
+  // on /en/send-email-to-yourself/ carries no aggregateRating of its own, so
+  // a forward scan from its @id ran straight past it into the NEXT app in the
+  // ItemList and offered to rewrite Boomerang's 4.9/206 to our 4.4/22.
+  // Refusing to cross another SoftwareApplication boundary makes the rule mean
+  // what it says: the rating belonging to the app whose @id we just matched.
   //
   // 4000 is the bound on the gap: the widest real span is 3,036 chars
   // (en/index.html, whose #app node carries a long description plus
   // featureList before the rating). Whitespace is optional throughout —
-  // two of the twelve blocks ship minified.
+  // two of the blocks ship minified.
   ['JSON-LD aggregateRating on #app',
-    /("@id":\s?"https:\/\/simplememofast\.com\/#app"[\s\S]{0,4000}?"ratingValue":\s?")(\d\.\d)("[\s\S]{0,200}?"ratingCount":\s?")(\d+)(")/g,
+    /("@id":\s?"https:\/\/simplememofast\.com\/#app"(?:(?!"@type":\s?"SoftwareApplication")[\s\S]){0,4000}?"aggregateRating"[\s\S]{0,120}?"ratingValue":\s?")(\d\.\d)("[\s\S]{0,200}?"ratingCount":\s?")(\d+)(")/g,
     (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c, false],
   // Visible rating pairs (value + count in one phrase), ours only
   // mid part may cross inline tags (<strong>4.4</strong> … 10件の評価)
