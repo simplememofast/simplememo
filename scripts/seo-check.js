@@ -50,6 +50,53 @@ function getMetaContent(html, key, value) {
 }
 
 /**
+ * ISO 8601 date-time carrying an explicit timezone — `Z` or `±hh:mm`.
+ * A bare `2026-08-11` fails, and so does a local time with no offset.
+ */
+const ISO_DATETIME_TZ =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})$/;
+
+/**
+ * Every JSON-LD node on a page, flattened: top-level objects, arrays of them,
+ * and the members of an `@graph`. Yields the nested objects too, since a
+ * VideoObject is as likely to hang off `video:` or `mainEntity:` as it is to
+ * be the block's root.
+ *
+ * A block that does not parse is reported and skipped rather than thrown on:
+ * the extraction below is a regex, and a page that defeats it should not be
+ * able to fail the build on its own.
+ */
+function jsonLdNodes(html, rel) {
+  const nodes = [];
+  const walk = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(walk);
+    } else if (value && typeof value === 'object') {
+      nodes.push(value);
+      Object.values(value).forEach(walk);
+    }
+  };
+  const blocks =
+    html.match(/<script[^>]*application\/ld\+json[^>]*>([\s\S]*?)<\/script>/gi) || [];
+  for (const block of blocks) {
+    const body = block.replace(/^<script[^>]*>/i, '').replace(/<\/script>$/i, '');
+    try {
+      walk(JSON.parse(body));
+    } catch (e) {
+      warnings.push(`[SCHEMA] Unparseable JSON-LD block (${e.message}): ${rel}`);
+    }
+  }
+  return nodes;
+}
+
+/** A node's `@type`, always as an array — schema.org allows one or many. */
+function nodeTypes(node) {
+  const type = node['@type'];
+  if (Array.isArray(type)) return type;
+  return type ? [type] : [];
+}
+
+/**
  * Every URL this site publishes, as canonical extension-less paths.
  *
  * Memoised: checkFile() runs per page and the hreflang rule needs to ask
@@ -187,6 +234,40 @@ function checkFile(filePath) {
   // 9. Check for deprecated schema types
   if (content.includes('"@type": "HowTo"') || content.includes('"@type":"HowTo"')) {
     errors.push(`[SCHEMA] Deprecated HowTo schema found: ${rel}`);
+  }
+
+  // 10. VideoObject date-time properties need a time AND a timezone.
+  //
+  // Schema.org accepts a bare Date for uploadDate; Google's video structured
+  // data does not, and reports anything without an offset as「日時値が無効
+  // です」/「タイムゾーンがありません」. The five explainer videos shipped on
+  // 2026-08-11 with `"uploadDate":"2026-08-11"`, and Search Console flagged
+  // all five on 2026-08-12 (WNC-10030322). Nothing here could have caught it:
+  // check 5 only asks whether a page has any JSON-LD at all, so a video whose
+  // publication date Google cannot read still passed.
+  //
+  // Non-critical today, which is exactly why it needs a guard — Google's own
+  // notice says non-critical issues get reclassified as critical, and by then
+  // the markup would be one copied template away from spreading to every new
+  // video page.
+  for (const node of jsonLdNodes(content, rel)) {
+    if (!nodeTypes(node).includes('VideoObject')) continue;
+    const name = node.name || node['@id'] || '(unnamed)';
+    if (node.uploadDate === undefined) {
+      errors.push(`[SCHEMA] VideoObject missing required uploadDate (${name}): ${rel}`);
+    }
+    // `expires` and the BroadcastEvent start/end pair are the other
+    // date-times Google reads off a video; same format rule applies.
+    for (const prop of ['uploadDate', 'expires', 'startDate', 'endDate']) {
+      const value = node[prop];
+      if (value === undefined) continue;
+      if (typeof value !== 'string' || !ISO_DATETIME_TZ.test(value)) {
+        errors.push(
+          `[SCHEMA] VideoObject ${prop} needs a time and a timezone offset ` +
+          `(got "${value}", want e.g. 2026-08-11T13:42:48+09:00) in ${name}: ${rel}`,
+        );
+      }
+    }
   }
 }
 
