@@ -149,7 +149,7 @@
   content-graph.json登録（obsidian-beginnerクラスタ新設）＋OG画像＋sitemap。
   PR #482が未マージ（コンフリクト）のため、coverage-queue.json と
   OBSIDIAN_COVERAGE_PLAN.md は本PRに同梱してC02をdone化。
-- PR: #TBD → pending
+- PR: #483 → **merged**（SEO Validation通過→auto-merge→本番200確認済み）
 - 検証: このLinux環境（Ubuntu 24.04・Xvfb）にObsidian 1.13.6公式AppImageを
   実際にインストール・日本語UIで起動し、保管庫作成→最初のノート→[[リンク]]→
   グラフビューまでを実操作で撮影（6枚掲載）。作成直後の保管庫の中身
