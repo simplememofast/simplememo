@@ -40,7 +40,9 @@ const PROVIDER_TOKEN = '128498560';
 
 /**
  * Pages carrying a desktop QR. `en: true` means the page ships both languages
- * in one document and needs a code per store front.
+ * in one document and needs a code per store front. `placement` defaults to
+ * `qr` — the code that sits under the page's closing CTA — and a page may
+ * repeat with another placement to carry a second code elsewhere.
  */
 export const QR_PAGES = [
   { slug: 'vs-logseq',                   en: true },
@@ -59,17 +61,38 @@ export const QR_PAGES = [
   // QR costs nothing and this is the page the whole measurement workstream feeds
   // into. Someone reading a launch-speed benchmark is already comparison shopping.
   { slug: 'blog-fastest-memo-app-benchmark', en: true },
+  // Added 2026-08-12 ahead of the 2026-08-18 PR TIMES release, which points
+  // readers at /siri/. This page gets two codes rather than the usual one: press
+  // release traffic skews desktop and lands on the hero, and /siri/ is long
+  // enough that the closing CTA is a full article away. A visitor who arrives
+  // from the release already wanting the app should not have to read to the end
+  // to find a way in. Separate placements so App Store Connect can say which of
+  // the two is actually scanned — the only place a QR is visible at all.
+  { slug: 'siri', en: true },
+  { slug: 'siri', en: true, placement: 'hero-qr' },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */
-export const storeUrl = (slug, lang) =>
+export const storeUrl = (slug, lang, placement = 'qr') =>
   `https://apps.apple.com/${lang === 'jp' ? 'jp' : 'us'}/app/${APP_ID}`
-  + `?pt=${PROVIDER_TOKEN}&ct=${slug}-${lang}__qr&mt=8`;
+  + `?pt=${PROVIDER_TOKEN}&ct=${slug}-${lang}__${placement}&mt=8`;
 
-const fileFor = (slug, lang) => `qr-${slug}-${lang === 'jp' ? 'ja' : 'en'}.svg`;
+/**
+ * `qr-<slug>-<lang>.svg`, with the placement in the middle when it is not the
+ * default: `hero-qr` → `qr-siri-hero-ja.svg`. The trailing `qr` is dropped
+ * because the prefix already carries it, and so the twelve codes that shipped
+ * before placements existed keep the filenames the pages reference.
+ */
+const fileFor = (slug, lang, placement = 'qr') => {
+  const where = placement.replace(/-?qr$/, '');
+  return `qr-${slug}${where ? `-${where}` : ''}-${lang === 'jp' ? 'ja' : 'en'}.svg`;
+};
 
-const targets = QR_PAGES.flatMap(({ slug, en }) =>
-  (en ? ['jp', 'en'] : ['jp']).map((lang) => ({ file: fileFor(slug, lang), url: storeUrl(slug, lang) }))
+const targets = QR_PAGES.flatMap(({ slug, en, placement }) =>
+  (en ? ['jp', 'en'] : ['jp']).map((lang) => ({
+    file: fileFor(slug, lang, placement),
+    url: storeUrl(slug, lang, placement),
+  }))
 );
 
 /* ── generate ──────────────────────────────────────────────────────────── */
