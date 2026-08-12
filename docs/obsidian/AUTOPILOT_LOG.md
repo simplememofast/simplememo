@@ -137,3 +137,27 @@
   - repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（前日からの継続）
   - 次回レーンB候補: 「チームでノートを共同作業」(7imp・pos7.6)等の小粒が残存
   - memos比較は2026-09-06以降の新スナップショットで需要再判定
+
+## 2026-08-12 — レーンE追加実行: C02（New・カバレッジ）
+
+- 判断根拠: オーナー明示指示（2026-08-12「まとめサイト化の加速」）による
+  レーンE（Coverage）実行。`growth/content/coverage-queue.json` C02
+  `/obsidian/getting-started/`（P1・入門系統・ノイズフロア非適用。ゲート＝
+  品質80点＋§28＋固有価値）。本日の定期実行（Refresh・PR #480）とは別枠。
+- やったこと: `/obsidian/getting-started/` 新設（実画面スクショ6枚）＋
+  被リンク3本配線（/obsidian/・/obsidian/daily-note/・/obsidian/compare/logseq/）＋
+  content-graph.json登録（obsidian-beginnerクラスタ新設）＋OG画像＋sitemap。
+  PR #482が未マージ（コンフリクト）のため、coverage-queue.json と
+  OBSIDIAN_COVERAGE_PLAN.md は本PRに同梱してC02をdone化。
+- PR: #TBD → pending
+- 検証: このLinux環境（Ubuntu 24.04・Xvfb）にObsidian 1.13.6公式AppImageを
+  実際にインストール・日本語UIで起動し、保管庫作成→最初のノート→[[リンク]]→
+  グラフビューまでを実操作で撮影（6枚掲載）。作成直後の保管庫の中身
+  （.obsidian＋ようこそ.mdのみ）とノートの.md実体もファイルシステムで実確認。
+  登録不要（メール入力ゼロ）で完結することを確認。配布形式（.exe/.dmg/
+  AppImage/deb/tar.gz）はv1.13.6公式リリースへのHEADリクエストで当日実測。
+  Windows/macOS/iOS版の実行は未検証（記事に明示）。llms.txtは見送り
+  （数値系一次情報が薄く、N1の前例でも追加していない基準に合わせた）。
+- 保留・オーナー依頼: PR #482（カバレッジ計画本体）がコンフリクトで
+  auto-merge不可のまま。本PRとの重複2ファイルはこちらが新しい
+  （C02 done反映済み）。#482側はrebaseまたはクローズの判断を推奨。

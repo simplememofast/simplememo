@@ -1,0 +1,633 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-12",
+  "note": "Obsidian情報まとめサイト化のカバレッジバックログ（docs/obsidian/OBSIDIAN_COVERAGE_PLAN.md）。ノイズフロアは適用しない（新規カバレッジのゲートは品質80点＋検証規約＋固有価値）。順序が優先度。実装時はcollides_withを確認し、既存ページが主題を持つ場合はRefreshへ切替。完了したらstatus: done。evidence.type: gsc=自サイト実測 / external=競合露出・外部実在需要 / canonical=まとめサイトとして不可欠な定番項目。",
+  "items": [
+    {
+      "id": "C01",
+      "url": "/obsidian/compare/",
+      "title_ja": "Obsidian比較ハブ — 乗り換え・併用先の選び方",
+      "cluster": "obsidian-compare",
+      "intent": "comparison",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「obsidian 比較」11imp/pos11.2・比較子ページの親receptacle不在"
+        }
+      ],
+      "unique_value": "既存logseq比較＋今後の比較子ページを束ねる。各比較の結論1行を実測データ付きで一覧化",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C02",
+      "url": "/obsidian/getting-started/",
+      "title_ja": "Obsidianの始め方 — インストールから最初のノートまで実画面で",
+      "cluster": "obsidian-beginner",
+      "intent": "how-to",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "入門はまとめサイトの必須系統。競合リスト記事（lifehacker等）が上位独占中"
+        },
+        {
+          "type": "external",
+          "detail": "「logseqとは」16impが実測されており同型の入門需要は実在"
+        }
+      ],
+      "unique_value": "Linux/デスクトップ実機でVault作成〜初ノートまでの実画面スクショ。iOS側は公式情報と明示区別（§28）",
+      "collides_with": null,
+      "status": "done",
+      "done_at": "2026-08-12"
+    },
+    {
+      "id": "C03",
+      "url": "/obsidian/what-is-vault/",
+      "title_ja": "ObsidianのVault（保管庫）とは — 実体はただのフォルダ",
+      "cluster": "obsidian-beginner",
+      "intent": "informational",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "Vault理解は全ての入門記事の前提。用語集文化（/glossary/）と同型"
+        }
+      ],
+      "unique_value": ".obsidian/の中身を実機で開いて見せる（既にPR #470で検証済みの素材を再利用可）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C04",
+      "url": "/obsidian/pricing/",
+      "title_ja": "Obsidianの料金 — 無料でどこまで使えるか【2026年版】",
+      "cluster": "obsidian-beginner",
+      "intent": "informational",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「logseq 料金」15imp/pos9.2が実測＝料金クエリの型は実在。Sync $4/$8は検証済み"
+        }
+      ],
+      "unique_value": "Sync/Publish/Catalyst/商用利用の現行価格を公式ソースから当日確認・日本円換算表・変更履歴を記録",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C05",
+      "url": "/obsidian/sync/",
+      "title_ja": "Obsidianの同期方法まとめ — iCloud/公式Sync/Git/Syncthingを比較",
+      "cluster": "obsidian-sync",
+      "intent": "how-to",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "Tier D Sync＝トピックマップ自身が「検索量が大きい」と明記した例外枠"
+        },
+        {
+          "type": "external",
+          "detail": "競合の同期解説記事が多数上位"
+        }
+      ],
+      "unique_value": "Git同期はこの環境で実機再現可能。iCloud/公式Syncは公式仕様＋既存daily-note検証の知見。方式別の「壊れ方」表",
+      "collides_with": "/obsidian/daily-note/（iCloud節）— ハブ側は選択の地図に徹し手順は子へ",
+      "status": "pending"
+    },
+    {
+      "id": "C06",
+      "url": "/obsidian/sync/icloud/",
+      "title_ja": "ObsidianをiCloudで同期する設定と注意点（iPhone×Mac）",
+      "cluster": "obsidian-sync",
+      "intent": "how-to",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "JAのObsidian×iPhone文脈で最頻の同期方式"
+        }
+      ],
+      "unique_value": "遅延・競合コピー（\"conflicted copy\"）の実例と対処。SimpleMemoのフォルダ直書きとの関係も正直に記載",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C07",
+      "url": "/obsidian/sync/official-sync/",
+      "title_ja": "Obsidian Sync（公式）は必要か — $4プランで足りる人・不要な人",
+      "cluster": "obsidian-sync",
+      "intent": "comparison",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "料金検証済み（Standard $4/Plus $8・年払い）。C04と相互リンク"
+        }
+      ],
+      "unique_value": "iCloud派/Git派との判断フローチャート。E2EEである点とSimpleMemo（非E2EE・SMTP）の違いを正直に対比",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C08",
+      "url": "/obsidian/compare/notion/",
+      "title_ja": "ObsidianとNotionどちらを選ぶ？ — データの持ち方が全てを分ける",
+      "cluster": "obsidian-compare",
+      "intent": "comparison",
+      "priority": "P1",
+      "evidence": [
+        {
+          "type": "external",
+          "detail": "notion-vs-obsidianはEN既存(7imp)・JA比較上位は外部記事のみ"
+        }
+      ],
+      "unique_value": "ローカルMarkdown vs クラウドDBの構造差を実ファイルで見せる。logseq比較（PR #470）と同じ実機検証型",
+      "collides_with": "/vs/notion-vs-obsidian/(EN)・/vs/notion/ — JA Obsidian軸は不在を確認済み",
+      "status": "pending"
+    },
+    {
+      "id": "C09",
+      "url": "/obsidian/compare/capacities/",
+      "title_ja": "ObsidianとCapacitiesの比較 — オブジェクト型PKMとの分岐点",
+      "cluster": "obsidian-compare",
+      "intent": "comparison",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「capacities vs obsidian」9imp/pos7.3・受け皿なし。capacities単独935impの流入資産あり"
+        }
+      ],
+      "unique_value": "Capacitiesのデスクトップ版を実機起動して検証（Linux版あり）",
+      "collides_with": "/vs/capacities/（SimpleMemo軸）— 意図分岐バナーで相互接続",
+      "status": "pending"
+    },
+    {
+      "id": "C10",
+      "url": "/obsidian/compare/memos/",
+      "title_ja": "Obsidianとmemosの比較 — セルフホスト派の分かれ道",
+      "cluster": "obsidian-compare",
+      "intent": "comparison",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「memos vs obsidian」31imp/pos4.1（既に4位で露出・受け皿ページ不明）"
+        }
+      ],
+      "unique_value": "memosはOSS・この環境でセルフホスト実機検証可能（バイナリ起動）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C11",
+      "url": "/obsidian/plugins/",
+      "title_ja": "Obsidianプラグイン入門 — 6,571個から最初に入れる10個【実測】",
+      "cluster": "obsidian-plugins",
+      "intent": "informational",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "Tier D Plugins＝トピックマップの例外枠（検索量大）。競合リスト記事が上位独占"
+        },
+        {
+          "type": "external",
+          "detail": "mentions/2026-08-12: おすすめ系リストに自社掲載ゼロ"
+        }
+      ],
+      "unique_value": "公式レジストリ実カウント（PR #470で6,571個確認済み・当日再計測）＋実際に入れて動かした画面。「プラグイン不要で済む範囲」も正直に書く（VISION整合）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C12",
+      "url": "/obsidian/plugins/dataview/",
+      "title_ja": "Dataviewの使い方 — ノートをデータベースにする定番プラグイン",
+      "cluster": "obsidian-plugins",
+      "intent": "how-to",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "DL数最上位帯の定番。JA解説の多くがスクショ古い"
+        }
+      ],
+      "unique_value": "実機インストール＋動くクエリ例（検証Vaultで実行した結果画面）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C13",
+      "url": "/obsidian/plugins/templater/",
+      "title_ja": "Templaterの使い方 — テンプレートで入力を自動化する",
+      "cluster": "obsidian-plugins",
+      "intent": "how-to",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "定番プラグイン。デイリーノート運用（既存記事）と直結"
+        }
+      ],
+      "unique_value": "実機検証＋既存/obsidian/daily-note/との接続（テンプレが当たらない事故の節を相互参照）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C14",
+      "url": "/obsidian/plugins/quickadd/",
+      "title_ja": "QuickAddの使い方 — Obsidian内キャプチャを最短にする",
+      "cluster": "obsidian-plugins",
+      "intent": "how-to",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "キャプチャ文脈＝サイトの主戦場と直結する定番プラグイン"
+        }
+      ],
+      "unique_value": "実機検証。アプリ外キャプチャ（SimpleMemo）との役割分担を正直に図解",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C15",
+      "url": "/obsidian/second-brain/",
+      "title_ja": "Obsidianでセカンドブレインを作る — CODE/PARAの実装手順",
+      "cluster": "obsidian-pkm",
+      "intent": "how-to",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「セカンドブレイン obsidian」42imp/0クリック（既存/methods/second-brain/はメール軸）"
+        }
+      ],
+      "unique_value": "検証VaultでPARA構造を実際に組んだ画面。既存メソッド記事とはIntent split（実装手順 vs 概念）",
+      "collides_with": "/methods/second-brain/ — URL_PLANの/obsidian/second-brain/新設案の実装。相互リンク必須",
+      "status": "pending"
+    },
+    {
+      "id": "C16",
+      "url": "/obsidian/journaling/",
+      "title_ja": "Obsidianでジャーナリング — 続く仕組みの作り方",
+      "cluster": "obsidian-pkm",
+      "intent": "how-to",
+      "priority": "P2",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「obsidian ジャーナリング」9imp/0クリック/pos11.7・受け皿なし"
+        }
+      ],
+      "unique_value": "デイリーノート検証済み知見の再利用＋テンプレ実例。/use-cases/journaling/と役割分担",
+      "collides_with": "/use-cases/journaling/（アプリ軸）",
+      "status": "pending"
+    },
+    {
+      "id": "C17",
+      "url": "/obsidian/zettelkasten/",
+      "title_ja": "ObsidianでZettelkasten — リンクで考えるノート術の実装",
+      "cluster": "obsidian-pkm",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "PKM定番。既存/methods/zettelkasten/はメール軸"
+        }
+      ],
+      "unique_value": "検証Vaultでの実装画面＋グラフビューの育ち方（実スクショ時系列）",
+      "collides_with": "/methods/zettelkasten/ — Intent split",
+      "status": "pending"
+    },
+    {
+      "id": "C18",
+      "url": "/obsidian/ai-plugins/",
+      "title_ja": "Obsidian×AIプラグインの現在地 — できること・危ういこと【2026】",
+      "cluster": "obsidian-ai",
+      "intent": "informational",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "Tier D AIクラスタ。検索面の鮮度需要が高い（2026年の状況が誰も書けていない）"
+        }
+      ],
+      "unique_value": "主要AIプラグインのプライバシー仕様（どこへ送信されるか）を公式ソースで実確認した表。VISION整合＝AI礼賛にしない",
+      "collides_with": "/ai-tags/（自社機能）— 混ぜない",
+      "status": "pending"
+    },
+    {
+      "id": "C19",
+      "url": "/obsidian/mobile/",
+      "title_ja": "ObsidianモバイルApp徹底ガイド — iPhoneでの現実解",
+      "cluster": "obsidian-mobile",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「obsidian iphone」26imp/pos11・「obsidian 使い方 iphone」68impは/obsidian/着地"
+        }
+      ],
+      "unique_value": "R4の統合判断とセットで実施（既存/blog/obsidian-iphone-memoの扱いを決めてから）。iOS実機検証はオーナー依頼枠",
+      "collides_with": "/blog/obsidian-iphone-memo（要統合判断・R4）",
+      "status": "blocked",
+      "blocked_by": "R4のクエリ×ページ確定（オーナーのGSCエクスポート）"
+    },
+    {
+      "id": "C20",
+      "url": "/obsidian/troubleshooting/sync-conflict/",
+      "title_ja": "Obsidianの同期コンフリクト — conflicted copyの原因と直し方",
+      "cluster": "obsidian-troubleshooting",
+      "intent": "troubleshooting",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "既存2本のトラブルページ（shortcuts/apple-watch）と同型・実証済みパターン"
+        }
+      ],
+      "unique_value": "コンフリクトファイルを実機で再現して見せる（Git/フォルダ同期で再現可能）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C21",
+      "url": "/obsidian/troubleshooting/slow-startup/",
+      "title_ja": "Obsidianが重い・起動が遅いときの切り分け手順",
+      "cluster": "obsidian-troubleshooting",
+      "intent": "troubleshooting",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "定番トラブル。プラグイン数実測（C11-14）と接続"
+        }
+      ],
+      "unique_value": "プラグイン数と起動の関係を検証Vaultで実測（同一環境比較なら公平に測れる）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C22",
+      "url": "/obsidian/uri-scheme/",
+      "title_ja": "obsidian:// URIスキーム完全ガイド — 全アクションと落とし穴",
+      "cluster": "obsidian-plugins",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "N4（URIジェネレータツール）の前提記事。既存shortcuts-not-workingが需要の存在を実証"
+        }
+      ],
+      "unique_value": "全パラメータを実機で叩いた結果表＋エンコードの罠実例。後続でN4ツール化",
+      "collides_with": "/obsidian/shortcuts-not-working/ — 相互リンク",
+      "status": "pending"
+    },
+    {
+      "id": "C23",
+      "url": "/tools/obsidian-uri-generator/",
+      "title_ja": "Obsidian URIジェネレータ（無料ツール）",
+      "cluster": "obsidian-tools",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "external",
+          "detail": "N4継承。被リンク獲得手段がPR TIMES単発依存という構造課題への答え"
+        }
+      ],
+      "unique_value": "C22の実測データを組み込んだ動くツール。生成URIの実機検証済みバリデーション",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C24",
+      "url": "/obsidian/markdown-guide/",
+      "title_ja": "ObsidianのMarkdown記法 — 標準との違いと拡張記法一覧",
+      "cluster": "obsidian-beginner",
+      "intent": "informational",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "入門系統の定番リファレンス（AIOで引用されやすい断定形の表になる）"
+        }
+      ],
+      "unique_value": "全記法を実機レンダリングしたスクショ対応表（wiki link/callout/embed等）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C25",
+      "url": "/obsidian/properties/",
+      "title_ja": "Obsidianのプロパティ（frontmatter）活用ガイド",
+      "cluster": "obsidian-beginner",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "Dataview（C12）の前提知識。定番"
+        }
+      ],
+      "unique_value": "実機検証＋Dataviewとの接続例",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C26",
+      "url": "/obsidian/graph-view/",
+      "title_ja": "Obsidianのグラフビュー — 飾りにしない使い方",
+      "cluster": "obsidian-beginner",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "入門定番。PR #470でグラフ実スクショ検証済み・素材再利用可"
+        }
+      ],
+      "unique_value": "ノート数の増加に伴うグラフの実変化（検証Vaultの時系列スクショ）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C27",
+      "url": "/obsidian/canvas/",
+      "title_ja": "Obsidian Canvasの使い方 — 無限キャンバスで考える",
+      "cluster": "obsidian-beginner",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "コア機能の定番解説"
+        }
+      ],
+      "unique_value": "実機検証＋.canvasファイルの中身（JSON）まで見せる",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C28",
+      "url": "/obsidian/publish/",
+      "title_ja": "Obsidian Publishは必要か — 料金と代替（Quartz/GitHub Pages）",
+      "cluster": "obsidian-sync",
+      "intent": "comparison",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "料金系統（C04）の子。代替手段の比較はAIOで引用されやすい"
+        }
+      ],
+      "unique_value": "Quartzをこの環境で実ビルドして手順を検証",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C29",
+      "url": "/obsidian/compare/craft/",
+      "title_ja": "ObsidianとCraftの比較 — 美しさと自由度のトレードオフ",
+      "cluster": "obsidian-compare",
+      "intent": "comparison",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「obsidian craft」9imp/pos5.3/0クリック・受け皿なし"
+        }
+      ],
+      "unique_value": "データ形式の実確認（Craftのエクスポート実仕様）",
+      "collides_with": "/vs/craft/",
+      "status": "pending"
+    },
+    {
+      "id": "C30",
+      "url": "/obsidian/compare/anytype/",
+      "title_ja": "ObsidianとAnytypeの比較 — ローカルファーストの2つの解釈",
+      "cluster": "obsidian-compare",
+      "intent": "comparison",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "比較系統の拡充。Anytypeはローカルファースト文脈で常連"
+        }
+      ],
+      "unique_value": "Anytype Linux版を実機起動して検証",
+      "collides_with": "/vs/anytype/",
+      "status": "pending"
+    },
+    {
+      "id": "C31",
+      "url": "/obsidian/import/",
+      "title_ja": "Obsidianへの移行ガイド — Notion/Evernote/Apple Notesから",
+      "cluster": "obsidian-beginner",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "乗り換え需要は比較系統の出口。公式Importerプラグインの実検証が可能"
+        }
+      ],
+      "unique_value": "公式Importerを実機で動かした結果（何が崩れるか実例）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C32",
+      "url": "/obsidian/backup/",
+      "title_ja": "Obsidianのバックアップ設計 — 同期はバックアップではない",
+      "cluster": "obsidian-sync",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "同期系統の必須補完。「同期≠バックアップ」は断定形でAIO向き"
+        }
+      ],
+      "unique_value": "Git/File Recovery/外部バックアップの実機検証",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C33",
+      "url": "/obsidian/templates/",
+      "title_ja": "Obsidianテンプレート集 — コピペで使える実用10種",
+      "cluster": "obsidian-pkm",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "「そのままコピーできる」資産はP0-1で実証済みの引用されやすい型"
+        }
+      ],
+      "unique_value": "全テンプレを検証Vaultで実機適用したスクショ付き",
+      "collides_with": "/templates/",
+      "status": "pending"
+    },
+    {
+      "id": "C34",
+      "url": "/obsidian/daily-note-plugins/",
+      "title_ja": "デイリーノートを強化するプラグイン — Calendar/Periodic Notes",
+      "cluster": "obsidian-plugins",
+      "intent": "how-to",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「obsidian iphone デイリーノート」25imp/CTR12%＝デイリーノート面の強さは実証済み"
+        }
+      ],
+      "unique_value": "実機検証。既存daily-note記事の子として配線",
+      "collides_with": "/obsidian/daily-note/",
+      "status": "pending"
+    },
+    {
+      "id": "C35",
+      "url": "/obsidian/community/",
+      "title_ja": "Obsidianの日本語コミュニティと情報源まとめ",
+      "cluster": "obsidian-beginner",
+      "intent": "informational",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "canonical",
+          "detail": "まとめサイトの締めに必要なハブ資産。外部リンク集は被リンクを呼びやすい"
+        }
+      ],
+      "unique_value": "各情報源の更新頻度を実確認した上で掲載（死んだリンク集にしない）",
+      "collides_with": null,
+      "status": "pending"
+    },
+    {
+      "id": "C36",
+      "url": "/obsidian/use-cases/",
+      "title_ja": "Obsidian活用事例ハブ — 職種別の実運用例",
+      "cluster": "obsidian-pkm",
+      "intent": "informational",
+      "priority": "P3",
+      "evidence": [
+        {
+          "type": "gsc",
+          "detail": "「obsidian 活用事例」9imp/CTR33%＝小さいが極めて濃い"
+        }
+      ],
+      "unique_value": "既存/use-cases/群のObsidian軸再編＋実測CTR33%の需要の受け皿化",
+      "collides_with": "/use-cases/",
+      "status": "pending"
+    }
+  ]
+}
