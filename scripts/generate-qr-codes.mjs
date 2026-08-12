@@ -54,6 +54,11 @@ export const QR_PAGES = [
   { slug: 'apple-watch',                 en: false },
   { slug: 'obsidian-logseq',             en: true },
   { slug: 'obsidian-getting-started',    en: true },
+  // Added 2026-08-11 on request. Fewer search clicks than the original nine
+  // (6 against 20-38 in the 2026-08-11 snapshot), so expect little volume — but a
+  // QR costs nothing and this is the page the whole measurement workstream feeds
+  // into. Someone reading a launch-speed benchmark is already comparison shopping.
+  { slug: 'blog-fastest-memo-app-benchmark', en: true },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */
