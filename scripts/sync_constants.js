@@ -29,6 +29,13 @@ const OWN_VALUE_PAGES = new Set([
   // /download/ shows the rating and the price table and names no competitor,
   // so every number on it is ours and belongs under enforcement.
   'download/index.html',
+  // Both show our rating in a hero block (visible text + aria-label) and
+  // neither quotes a competitor's rating or price, so free-text enforcement
+  // is safe here. Until 2026-08-12 they were outside it, and both still read
+  // 「21件の評価」 after the count moved to 22 — visibly contradicting their
+  // own JSON-LD.
+  'ai-tags/index.html', 'en/ai-tags/index.html',
+  'captio-alternative/index.html', 'en/captio-alternative/index.html',
   'index.html', 'en/index.html', 'voices/index.html',
   'ar/index.html', 'es/index.html', 'id/index.html', 'ko/index.html',
   'pt-BR/index.html', 'tr/index.html', 'zh/index.html', 'zh-Hant/index.html',
@@ -43,6 +50,26 @@ const RULES = [
   ['JSON-LD yearly offer price',
     /("name":\s?"Premium Yearly"[^}]{0,400}?"price":\s?")(\d+)(")/gs,
     (m, a, v, b) => a + C.priceYearlyJpy.replace(',', '') + b, false],
+  // JSON-LD aggregateRating on our own app node.
+  //
+  // Anchored on the `#app` @id, not on the shape of the aggregateRating,
+  // because /en/send-email-to-yourself/ publishes an ItemList carrying two
+  // COMPETITORS' ratings (Boomerang 4.9/206, Note To Self Mail 4.8/360) in
+  // byte-identical markup. Those nodes have no @id at all, ours always does,
+  // and that is the only thing separating them.
+  //
+  // Until 2026-08-12 nothing enforced these 12 blocks: the visible-rating
+  // rules below only run on OWN_VALUE_PAGES and the offers rules only match
+  // prices, so the structured rating — the copy Google actually reads — was
+  // the one number on the site free to drift.
+  //
+  // 4000 is the bound on the gap: the widest real span is 3,036 chars
+  // (en/index.html, whose #app node carries a long description plus
+  // featureList before the rating). Whitespace is optional throughout —
+  // two of the twelve blocks ship minified.
+  ['JSON-LD aggregateRating on #app',
+    /("@id":\s?"https:\/\/simplememofast\.com\/#app"[\s\S]{0,4000}?"ratingValue":\s?")(\d\.\d)("[\s\S]{0,200}?"ratingCount":\s?")(\d+)(")/g,
+    (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c, false],
   // Visible rating pairs (value + count in one phrase), ours only
   // mid part may cross inline tags (<strong>4.4</strong> … 10件の評価)
   ['rating pair JA 「4.4…10件の評価」',
