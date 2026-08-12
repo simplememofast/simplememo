@@ -124,6 +124,14 @@ node growth/scripts/analyze.mjs --only decay          # 2026-09-06以降のみ�
 - タイトル≤70字 / description 110〜160字（seo-check.jsの閾値）
 - CTA: Relevanceに応じて（`OBSIDIAN_CONVERSION_PLAN.md`）。
   `ct=<page-id>__<placement>` + `data-cta-placement/cluster/variant` を必ず付与
+- **デスクトップQR（cta-boxを置くページは必須）**: App Storeクリックの約35%は
+  PCで行き止まりになるため（2026-08-10実測）、cta-box内にQRを添える。
+  手順: ① `scripts/generate-qr-codes.mjs` の `QR_PAGES` にslug（=ct接頭辞から
+  `-jp`を除いたもの・二言語1文書なら `en: true`）を追加 →
+  ② `npm i --no-save qrcode jsqr && node scripts/generate-qr-codes.mjs && 同 --check`
+  （既存SVGはバイト同一で再生成される・新規分だけがuntrackedになる）→
+  ③ バッジ直後に `.cta-qr` div（`/vs/logseq/` のマークアップが原本。CSSは
+  共有style.min.cssに定義済み・モバイル非表示/デスクトップ表示）
 - 「次に読む」は1枚だけ。原則 `/obsidian/` へ（P1-1の集約原則）
 - 内部リンク: Parent 1本 + Sibling 1本以上。新ページへの被リンクを既存ページに
   最低2本配線（`/vs/logseq/` の意図分岐バナーが実例）

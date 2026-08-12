@@ -52,6 +52,8 @@ export const QR_PAGES = [
   { slug: 'method-second-brain',         en: true },
   { slug: 'vs-capacities',               en: true },
   { slug: 'apple-watch',                 en: false },
+  { slug: 'obsidian-logseq',             en: true },
+  { slug: 'obsidian-getting-started',    en: true },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */
