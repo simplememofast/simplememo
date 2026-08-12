@@ -78,7 +78,7 @@
 }
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -223,6 +223,8 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/fastest-memo-app-benchmark#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"起動速度の計測方法は信頼できますか？","acceptedAnswer":{"@type":"Answer","text":"iPhone 16e (A18)（iOS 26.5.2）で画面収録を行い、フレーム単位でアプリアイコンのタップから入力可能状態までを計測しています。各5回計測し、中央値を採用（Apple Notes 10回、Google Keep 4回、Drafts のみ速い側の実測値）。起動条件はウォーム起動（アプリスイッチャーから強制終了し5秒以上待ってから起動していますが、iOS 26.5.2 では実際にはウォームで立ち上がることを目視で確認しています）。ばらつきが大きかったBearとDraftsは、条件を揃えて再計測しました。それ以外の6アプリは収録に問題がなく、値はそのまま採用しています。つまり表の範囲は計測の粗さではなくアプリ側の実際のばらつきです。Evernoteが5.1秒かかった回や、Apple Notesが10回中2.37秒まで開いた回は実際に起きています。中央値だけでは消えてしまうので、範囲を併記しています。"}},{"@type":"Question","name":"起動速度はアップデートで変わりますか？","acceptedAnswer":{"@type":"Answer","text":"はい、アプリのアップデートやiOSのバージョンアップにより変動します。本記事のデータは2026年3月時点のものです。大きなアップデートがあった場合は再計測し、記事を更新します。なお、アプリの基本設計（起動時にナビゲーションが必要かどうか）は大きく変わらないため、順位が劇的に変動する可能性は低いと考えています。"}},{"@type":"Question","name":"なぜ起動速度がメモアプリで最も重要なのですか？","acceptedAnswer":{"@type":"Answer","text":"ワーキングメモリ（作業記憶）の研究によると、人間が思いついたアイデアを保持できる時間は約18秒です。起動に3秒以上かかるアプリでは、メモを書き始める前にアイデアの細部が失われます。起動0.4秒のObsidian連携シンプルメモなら、思いついた瞬間に書き始められます。もちろん、メモの整理や検索も重要ですが、それは「キャプチャした後」の話。まずは書き留めなければ始まりません。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -358,19 +360,19 @@
           <table class="comparison-table" style="display:table;min-width:600px;">
             <thead>
                             <tr>
-                <th>順位</th>
-                <th>アプリ名</th>
-                <th>入力開始まで</th>
-                <th>範囲</th>
-                <th>フォーカスまで</th>
-                <th>実測回数</th>
-                <th>評価</th>
+                <th scope="col">順位</th>
+                <th scope="col">アプリ名</th>
+                <th scope="col">入力開始まで</th>
+                <th scope="col">範囲</th>
+                <th scope="col">フォーカスまで</th>
+                <th scope="col">実測回数</th>
+                <th scope="col">評価</th>
               </tr>
             </thead>
             <tbody>
               
                                           <tr>
-                <td class="highlight-col"><strong>1</strong></td>
+                <th scope="row" class="highlight-col"><strong>1</strong></th>
                 <td class="highlight-col"><strong>Obsidian連携シンプルメモ</strong></td>
                 <td class="highlight-col"><strong>0.4秒</strong></td>
                 <td class="highlight-col"><strong>0.37–0.43</strong></td>
@@ -379,7 +381,7 @@
                 <td class="highlight-col"><strong>最速</strong></td>
               </tr>
               <tr>
-                <td>2</td>
+                <th scope="row">2</th>
                 <td>Drafts</td>
                 <td>0.9秒</td>
                 <td>0.90–1.57</td>
@@ -388,7 +390,7 @@
                 <td>高速</td>
               </tr>
               <tr>
-                <td>2</td>
+                <th scope="row">2</th>
                 <td>Bear</td>
                 <td>0.9秒</td>
                 <td>0.92–0.95</td>
@@ -397,7 +399,7 @@
                 <td>高速</td>
               </tr>
               <tr>
-                <td>4</td>
+                <th scope="row">4</th>
                 <td>Apple Notes</td>
                 <td>1.7秒</td>
                 <td>1.20–2.37</td>
@@ -406,7 +408,7 @@
                 <td>普通</td>
               </tr>
               <tr>
-                <td>5</td>
+                <th scope="row">5</th>
                 <td>Google Keep</td>
                 <td>2.1秒</td>
                 <td>1.97–2.23</td>
@@ -415,7 +417,7 @@
                 <td>普通</td>
               </tr>
               <tr>
-                <td>6</td>
+                <th scope="row">6</th>
                 <td>Evernote</td>
                 <td>2.5秒</td>
                 <td>2.30–5.10</td>
@@ -424,7 +426,7 @@
                 <td>やや遅い</td>
               </tr>
               <tr>
-                <td>7</td>
+                <th scope="row">7</th>
                 <td>OneNote</td>
                 <td>2.6秒</td>
                 <td>2.20–3.30</td>
@@ -433,7 +435,7 @@
                 <td>やや遅い</td>
               </tr>
               <tr>
-                <td>8</td>
+                <th scope="row">8</th>
                 <td>Notion</td>
                 <td>2.8秒</td>
                 <td>2.50–3.50</td>
@@ -452,19 +454,19 @@
           <table class="comparison-table" style="display:table;min-width:600px;">
             <thead>
                             <tr>
-                <th>Rank</th>
-                <th>App</th>
-                <th>Ready to type</th>
-                <th>Range</th>
-                <th>To focus</th>
-                <th>Runs</th>
-                <th>Rating</th>
+                <th scope="col">Rank</th>
+                <th scope="col">App</th>
+                <th scope="col">Ready to type</th>
+                <th scope="col">Range</th>
+                <th scope="col">To focus</th>
+                <th scope="col">Runs</th>
+                <th scope="col">Rating</th>
               </tr>
             </thead>
             <tbody>
               
                                           <tr>
-                <td class="highlight-col"><strong>1</strong></td>
+                <th scope="row" class="highlight-col"><strong>1</strong></th>
                 <td class="highlight-col"><strong>Simple Memo - for Obsidian</strong></td>
                 <td class="highlight-col"><strong>0.4s</strong></td>
                 <td class="highlight-col"><strong>0.37–0.43</strong></td>
@@ -473,7 +475,7 @@
                 <td class="highlight-col"><strong>Fastest</strong></td>
               </tr>
               <tr>
-                <td>2</td>
+                <th scope="row">2</th>
                 <td>Drafts</td>
                 <td>0.9s</td>
                 <td>0.90–1.57</td>
@@ -482,7 +484,7 @@
                 <td>Fast</td>
               </tr>
               <tr>
-                <td>2</td>
+                <th scope="row">2</th>
                 <td>Bear</td>
                 <td>0.9s</td>
                 <td>0.92–0.95</td>
@@ -491,7 +493,7 @@
                 <td>Fast</td>
               </tr>
               <tr>
-                <td>4</td>
+                <th scope="row">4</th>
                 <td>Apple Notes</td>
                 <td>1.7s</td>
                 <td>1.20–2.37</td>
@@ -500,7 +502,7 @@
                 <td>Average</td>
               </tr>
               <tr>
-                <td>5</td>
+                <th scope="row">5</th>
                 <td>Google Keep</td>
                 <td>2.1s</td>
                 <td>1.97–2.23</td>
@@ -509,7 +511,7 @@
                 <td>Average</td>
               </tr>
               <tr>
-                <td>6</td>
+                <th scope="row">6</th>
                 <td>Evernote</td>
                 <td>2.5s</td>
                 <td>2.30–5.10</td>
@@ -518,7 +520,7 @@
                 <td>Slower</td>
               </tr>
               <tr>
-                <td>7</td>
+                <th scope="row">7</th>
                 <td>OneNote</td>
                 <td>2.6s</td>
                 <td>2.20–3.30</td>
@@ -527,7 +529,7 @@
                 <td>Slower</td>
               </tr>
               <tr>
-                <td>8</td>
+                <th scope="row">8</th>
                 <td>Notion</td>
                 <td>2.8s</td>
                 <td>2.50–3.50</td>
@@ -891,6 +893,7 @@
     <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
         <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
         <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a>
         <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
@@ -907,6 +910,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
         <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
         <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
         <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>

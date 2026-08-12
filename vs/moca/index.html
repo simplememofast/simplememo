@@ -64,7 +64,7 @@
   <!-- JSON-LD: Speakable -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/moca/#webpage","inLanguage":"ja","name":"シンプルメモ vs Moca 比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".reason-card__title"]},"url":"https://simplememofast.com/vs/moca/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -253,7 +253,9 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-  </head>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/moca/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Mocaのメモはメール受信箱に届きますか？","acceptedAnswer":{"@type":"Answer","text":"Mocaは「自分にメールを送る」コンセプトですが、メモの保存先はアプリ内が中心です。シンプルメモはメール受信箱に直接届くため、メールの検索やクロスデバイスアクセスが可能です。"}},{"@type":"Question","name":"Mocaの端末を変更したらメモは引き継げますか？","acceptedAnswer":{"@type":"Answer","text":"Mocaはアプリ内保存のため、機種変更時にデータが引き継げない場合があります。シンプルメモで送ったメモはメール受信箱に残っているため、端末を変えても過去のメモに常にアクセスできます。"}},{"@type":"Question","name":"Mocaの編集・削除がないという設計思想はシンプルメモにもありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモも送信に特化していますが、Outbox内の未送信メモは確認・管理が可能です。Mocaの「書いたら送る、余計な機能はいらない」という思想を共有しつつ、AES-GCM暗号化とオフライン対応を追加しています。"}},{"@type":"Question","name":"Mocaからシンプルメモに移行する手順は？","acceptedAnswer":{"@type":"Answer","text":"App Storeからシンプルメモをダウンロードし、メールアドレスを設定するだけです。1分以内に使い始められます。Mocaと同じメールアドレスを設定すれば、受信箱でメモが統一されます。"}}]}</script>
+</head>
 <body>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
@@ -338,33 +340,33 @@
         </h2>
         <div style="overflow-x:auto">
           <table lang="ja" class="compare-table" data-lang="ja">
-            <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>Moca</th></tr></thead>
+            <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Moca</th></tr></thead>
             <tbody>
-              <tr><td>起動速度</td><td class="yes">0.4秒（即入力可）</td><td>速い</td></tr>
-              <tr><td>ワンタップ送信</td><td class="yes">あり（メール直送）</td><td class="yes">あり</td></tr>
-              <tr><td>送信速度</td><td class="yes">ワンタップ（Cloudflare Workers）</td><td>標準</td></tr>
-              <tr><td>アカウント不要</td><td class="yes">既存メールのみ</td><td class="yes">既存メールのみ</td></tr>
-              <tr><td>オフライン対応</td><td class="yes">Outbox自動再送</td><td class="no">なし</td></tr>
-              <tr><td>暗号化</td><td class="yes">AES-GCM（端末内）</td><td class="no">なし</td></tr>
-              <tr><td>編集・削除</td><td>Outbox内で管理可</td><td class="no">意図的になし</td></tr>
-              <tr><td>無料プラン</td><td class="yes">1日3通・機能制限なし</td><td class="yes">あり</td></tr>
-              <tr><td>多言語対応</td><td class="yes">日本語・英語</td><td>日本語</td></tr>
-              <tr><td>リレーインフラ</td><td class="yes">Cloudflare Workers + Resend</td><td>標準メール送信</td></tr>
+              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>速い</td></tr>
+              <tr><th scope="row">ワンタップ送信</th><td class="yes">あり（メール直送）</td><td class="yes">あり</td></tr>
+              <tr><th scope="row">送信速度</th><td class="yes">ワンタップ（Cloudflare Workers）</td><td>標準</td></tr>
+              <tr><th scope="row">アカウント不要</th><td class="yes">既存メールのみ</td><td class="yes">既存メールのみ</td></tr>
+              <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td class="no">なし</td></tr>
+              <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内）</td><td class="no">なし</td></tr>
+              <tr><th scope="row">編集・削除</th><td>Outbox内で管理可</td><td class="no">意図的になし</td></tr>
+              <tr><th scope="row">無料プラン</th><td class="yes">1日3通・機能制限なし</td><td class="yes">あり</td></tr>
+              <tr><th scope="row">多言語対応</th><td class="yes">日本語・英語</td><td>日本語</td></tr>
+              <tr><th scope="row">リレーインフラ</th><td class="yes">Cloudflare Workers + Resend</td><td>標準メール送信</td></tr>
             </tbody>
           </table>
           <table lang="en" class="compare-table" data-lang="en">
-            <thead><tr><th>Feature</th><th>Simple Memo</th><th>Moca</th></tr></thead>
+            <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Moca</th></tr></thead>
             <tbody>
-              <tr><td>Launch Speed</td><td class="yes">0.4s (type immediately)</td><td>Fast</td></tr>
-              <tr><td>One-Tap Send</td><td class="yes">Yes (direct email)</td><td class="yes">Yes</td></tr>
-              <tr><td>Send Speed</td><td class="yes">one-tap (Cloudflare Workers)</td><td>Standard</td></tr>
-              <tr><td>No Account Required</td><td class="yes">Use existing email</td><td class="yes">Use existing email</td></tr>
-              <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td class="no">No</td></tr>
-              <tr><td>Encryption</td><td class="yes">AES-GCM (on-device)</td><td class="no">No</td></tr>
-              <tr><td>Edit / Delete</td><td>Manageable in Outbox</td><td class="no">Intentionally none</td></tr>
-              <tr><td>Free Tier</td><td class="yes">3 sends/day, no feature gates</td><td class="yes">Available</td></tr>
-              <tr><td>Bilingual</td><td class="yes">Japanese / English</td><td>Japanese only</td></tr>
-              <tr><td>Relay Infrastructure</td><td class="yes">Cloudflare Workers + Resend</td><td>Standard email</td></tr>
+              <tr><th scope="row">Launch Speed</th><td class="yes">0.4s (type immediately)</td><td>Fast</td></tr>
+              <tr><th scope="row">One-Tap Send</th><td class="yes">Yes (direct email)</td><td class="yes">Yes</td></tr>
+              <tr><th scope="row">Send Speed</th><td class="yes">one-tap (Cloudflare Workers)</td><td>Standard</td></tr>
+              <tr><th scope="row">No Account Required</th><td class="yes">Use existing email</td><td class="yes">Use existing email</td></tr>
+              <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="no">No</td></tr>
+              <tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device)</td><td class="no">No</td></tr>
+              <tr><th scope="row">Edit / Delete</th><td>Manageable in Outbox</td><td class="no">Intentionally none</td></tr>
+              <tr><th scope="row">Free Tier</th><td class="yes">3 sends/day, no feature gates</td><td class="yes">Available</td></tr>
+              <tr><th scope="row">Bilingual</th><td class="yes">Japanese / English</td><td>Japanese only</td></tr>
+              <tr><th scope="row">Relay Infrastructure</th><td class="yes">Cloudflare Workers + Resend</td><td>Standard email</td></tr>
             </tbody>
           </table>
         </div>
@@ -624,6 +626,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
         <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
         <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">Use Cases</span></a>
         <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
@@ -636,6 +639,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
         <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
         <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
         <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
