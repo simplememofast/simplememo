@@ -1,14 +1,25 @@
 {
   "date_jst": "2026-08-12",
-  "generated_at": "2026-08-12T00:00:00Z",
-  "action": "maintenance",
-  "article": null,
-  "pr": null,
-  "reason": "初回の定期実行（06:00 JST）がCCR Routine側で不発（発火記録21:01 UTCあり・セッション出力ゼロ・スケジュール起動セッションのログは外部から確認不能）。本日は記事をスキップし、実行基盤をGitHub Actions主（06:00 JST・ログ可視）＋CCR Routine副（07:30 JST・冪等ガード付き）の二重系へ再構築した",
-  "verified": "トリガーのlast_fired_at（2026-08-11T21:01:48Z）と、ブランチ・PR・status JSONの実行痕跡ゼロを突合して不発を確認",
-  "checks": { "seo_check": "0 errors 0 warnings", "content_graph": "16 entries OK" },
+  "generated_at": "2026-08-12T03:30:00Z",
+  "action": "refresh",
+  "article": {
+    "url": "https://simplememofast.com/obsidian/compare/logseq/",
+    "title": "ObsidianとLogseq、どちらを選ぶ？（回答ブロック追加）"
+  },
+  "pr": {
+    "number": 480,
+    "state": "merged"
+  },
+  "reason": "レーンB: 順位を持つ会話型クエリ「logseqとobsidian どちらが 良い」(23imp・pos9.2・GSC 2026-08-11)に対し、比較ページに質問文h2の回答が無かったため、先頭tip-boxをP0-1型のdata-answer-block（質問文h2＋2文断定）へ格上げ。レーンA新記事（memos比較）は実カーブのノイズフロア計算（期待0.56クリック<3）で棄却し、Runbook §6の「足切り超え」誤記を同PRで訂正した。※本ファイルの早朝maintenance記録は、オーナー指示による当日分の代走実行の記録で上書き",
+  "verified": "回答ブロックの内容は新規主張なし（全て2026-08-11 PR #470の実機検証済み事実の言い直し）。iPhoneビューポート(390×844 DPR3)実描画で水平スクロールなし・回答ブロックのファーストビュー内表示を確認。Mention Watch初回はWebSearch(米国ロケール)で6クエリ取得、attnoel記事本文はegress制限で未確認とverified:falseで明記",
+  "checks": {
+    "seo_check": "0 errors 0 warnings",
+    "content_graph": "16 entries OK",
+    "mobile_qa": "390x844 DPR3 pass (no h-scroll, answer block above fold)",
+    "experiments": "28 entries 0 overdue (aio-2026-08-12-logseq-answer-block追加)"
+  },
   "owner_requests": [
-    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（サブスク課金で毎朝のActions内Claude実行が可能に。未設定の間はCCR副系のみで運転）"
+    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（前日からの継続依頼）"
   ],
-  "next": "明朝はGHA（鍵未設定ならスキップ）→07:30 CCR副系の順で試行。どちらの経路が動いたかは日報とActionsログで判別可能"
+  "next": "会話型クエリ「2026年にチームでノートを共同作業するのに最適なアプリは何ですか？」(7imp・pos7.6)等の小粒レーンB候補が残存。memos比較はスナップショット更新（2026-09-06以降）で需要が足切りを超えてから。Mention Watchは次回2026-08-19以降、attnoel記事の本文確認も持ち越し"
 }

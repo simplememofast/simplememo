@@ -105,3 +105,35 @@
 - 本日: 記事はスキップ（maintenance）。status JSONに当日分を記録済み。
 - オーナー依頼: repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（`claude setup-token`）。
   未設定の間はGHAは寝たままCCR副系のみで運転される。
+
+## 2026-08-12 — Refresh（レーンB回答ブロック・代走実行）
+
+- 経緯: 早朝の定期実行は基盤切替のmaintenanceのみ（上のインシデント記録参照）。
+  オーナー指示により当日分を代走で実行（status JSONのmaintenance記録を
+  本エントリの実行記録で上書き）。
+- 判断根拠: 会話型検出器で「logseqとobsidian どちらが 良い」23imp・pos9.2・
+  0クリック（growth/data/gsc/2026-08-11）。公開翌日の /obsidian/compare/logseq/ に
+  質問文h2の回答ブロックが無く、レーンBの条件（順位を持つ会話型クエリ×
+  質問文h2の不在）に合致。
+- **レーンA（memos比較の新記事）は棄却し、Runbookの誤記を訂正**:
+  §6の「『memos vs obsidian』32imp・pos4.1は足切りを超える」は、実カーブ
+  （expectedCtr: ENセグメント1.76%）では期待0.56クリックで足切り3を大きく
+  下回る誤判定だった。業界一般のCTR表（pos4≈10%）による暗算が原因とみられる。
+  §6の重複段落2組も整理。今後の需要判定は必ず実カーブで計算すること。
+- やったこと: 先頭tip-box「ひとことで言うと」を data-answer-block=
+  "logseq-or-obsidian"（質問文h2＋2文断定・JA/EN）へ格上げ（新規主張なし・
+  タイトル/description/FAQ JSON-LD不変更）＋実験台帳登録
+  （aio-2026-08-12-logseq-answer-block・評価2026-11-12）＋Mention &
+  Competitor Watch初回スナップショット（growth/data/mentions/2026-08-12.json）
+  ＋sitemap再生成（unshallow後）。
+- PR: #480 → **merged**（SEO Validation通過→auto-merge。status JSONとログ追記は
+  auto-merge発火後のpushとなったため、本追記PRで別送）
+- 検証: 回答ブロックは実機検証済み事実の言い直しのみ。Runbook §4の
+  9チェック全通過（seo-check 0/0）＋iPhoneビューポート実描画QA
+  （水平スクロールなし・回答ブロックはファーストビュー内 top=667px）。
+  Mention Watchは米国ロケールのWebSearchによる取得で、attnoel記事の本文は
+  egress制限で未確認（verified: false と明記）。
+- 保留・オーナー依頼:
+  - repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（前日からの継続）
+  - 次回レーンB候補: 「チームでノートを共同作業」(7imp・pos7.6)等の小粒が残存
+  - memos比較は2026-09-06以降の新スナップショットで需要再判定
