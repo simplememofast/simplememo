@@ -26,6 +26,9 @@ const C = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/site-constants.json')
 // competitor ratings/prices in identical formats and cannot be separated
 // reliably by context, so they are governed via JSON-LD only.
 const OWN_VALUE_PAGES = new Set([
+  // /download/ shows the rating and the price table and names no competitor,
+  // so every number on it is ours and belongs under enforcement.
+  'download/index.html',
   'index.html', 'en/index.html', 'voices/index.html',
   'ar/index.html', 'es/index.html', 'id/index.html', 'ko/index.html',
   'pt-BR/index.html', 'tr/index.html', 'zh/index.html', 'zh-Hant/index.html',

@@ -1008,6 +1008,37 @@
       ]
     },
     {
+      "id": "cta-2026-08-12-download-page",
+      "page": "/download/",
+      "type": "download_page",
+      "hypothesis": "A dedicated /download/ page with a 200px QR as the primary element, linked from the footer of 234 pages, gives desktop readers a route onto their phone that the App Store badge cannot. Desktop is 51% of search visits but only 35% of app_store_click.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-12",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 60,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": "2026-07-13..2026-08-09",
+        "source": "GA4 app_store_click, all devices (growth/reports/2026-08-10-desktop-dead-end.md §1); desktop 21 of 60"
+      },
+      "target_metric": "app_store_clicks",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-12: 計測できないことを先に書いておく。QRはスキャンされてもGA4の app_store_click は発火しない（指で押していないため）。効果が出る先は App Store Connect のキャンペーン別インストール（ct=download-jp__hero / download-jp__qr / download-jp__nav）だけで、growth/data/appstore/ は現在も空。2026-08-10 のPC限定QRと同じ制約であり、承知のうえで入れている。",
+        "2026-08-12: 進行中の cta-2026-08-10-desktop-qr（評価日同じ 2026-09-13）と 干渉する。あちらは9ページの締めCTA直下のQRを測るもので、こちらは全ページのフッターから新しいPC向け導線を足す。同日評価なので、どちらの寄与かは切り分けられない。切り分けが要るなら評価日をずらすこと。",
+        "2026-08-12: グローバルナビのCTAは触っていない。現状は全ページで App Store へ直リンクし ct=…__nav で測られている。PCだけ /download/ へ向ける案（.cta-qr と同じCSSの出し分けで可能）はオーナー判断待ち。実行するとPC分の __nav 計測が途切れ、上記2実験の期間中にPC側の挙動を変えることになる。"
+      ]
+    },
+    {
       "id": "title-2026-08-12-013",
       "page": "/blog/best-memo-apps-2026",
       "type": "title_test",
