@@ -75,20 +75,47 @@ jobs:
         with:
           node-version: '20'
 
-      # 鍵が無い状態で走らせると BigQuery の認証エラーで落ちる。
+      # 資格情報が無い状態で走らせると BigQuery の認証エラーで落ちる。
       # それは「設定がまだ」であって「壊れた」ではないので、区別して止める。
-      - name: Service account key is configured
+      #
+      # 受け付ける中身は2種類ある。サービスアカウント鍵だけだと思われがちだが、
+      # `gcloud auth application-default login` が書く OAuth ユーザー資格情報
+      # （authorized_user）でも動く。鍵を発行せずに済むので、そちらの方が
+      # 手数が少ないことも多い。どちらも同じシークレットに入れる。
+      - name: Credentials are configured
         run: |
           if [ -z "${GOOGLE_SERVICE_ACCOUNT_JSON}" ]; then
             {
               echo "## SEO Daily — 未設定"
               echo ""
               echo "\`GCP_SERVICE_ACCOUNT_JSON\` シークレットが設定されていません。"
+              echo ""
+              echo "中身は次のどちらでも構いません（JSONをそのまま貼る）。"
+              echo ""
+              echo "1. **サービスアカウント鍵** — \`client_email\` と \`private_key\` を持つJSON"
+              echo "2. **OAuthユーザー資格情報** — 手元で \`gcloud auth application-default login\` を"
+              echo "   実行済みなら \`~/.config/gcloud/application_default_credentials.json\` が"
+              echo "   それです（\`client_id\`/\`client_secret\`/\`refresh_token\`）。"
+              echo "   \`quota_project_id\` が入っていない場合は先に"
+              echo "   \`gcloud auth application-default set-quota-project <PROJECT_ID>\` を実行してください。"
+              echo ""
               echo "設定手順: [growth/BIGQUERY_SETUP.md](../blob/main/growth/BIGQUERY_SETUP.md)"
             } >> "$GITHUB_STEP_SUMMARY"
             echo "::warning::GCP_SERVICE_ACCOUNT_JSON が未設定のため測定をスキップした"
             exit 1
           fi
+          # 種別だけ出す。値は出さない。認証が通らないときに
+          # 「どちらの資格情報で試したのか」が分からないと切り分けができない。
+          node -e '
+            const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON.trim();
+            const text = raw.startsWith("{") ? raw : Buffer.from(raw, "base64").toString("utf8");
+            let c; try { c = JSON.parse(text); } catch { console.log("::error::シークレットがJSONとして読めない（base64も試した）"); process.exit(1); }
+            const kind = c.type ?? (c.private_key ? "service_account" : c.refresh_token ? "authorized_user" : "unknown");
+            console.log(`credential type: ${kind}`);
+            if (kind === "authorized_user" && !c.quota_project_id) {
+              console.log("::warning::authorized_user に quota_project_id がありません。GCP_PROJECT_ID で代用しますが、gcloud auth application-default set-quota-project を実行しておく方が確実です");
+            }
+          '
 
       # エクスポートが届いているか。--strict で、止まっていたらここで失敗する。
       - name: Export preflight

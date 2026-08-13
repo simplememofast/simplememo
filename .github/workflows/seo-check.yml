@@ -90,6 +90,15 @@ jobs:
       - name: Experiment evaluation dates
         run: node growth/scripts/check-experiments.mjs
 
+      # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
+      # （token エンドポイントは fetch を差し替えて潰してある）ので、
+      # 鍵の無いCIでも走る。ここが壊れると毎日の測定が丸ごと止まるが、
+      # 止まったことは「数字が小さい」という形でしか現れないため、
+      # 実際に一度、OAuthログイン済みの資格情報が「資格情報が無い」として
+      # 拒否される状態で2日間気づかれずに走っていた。
+      - name: BigQuery credential handling
+        run: node growth/lib/bigquery.test.mjs
+
       # Smoke test only (--dry-run writes nothing). Note: the shallow CI
       # checkout means git-derived lastmod dates collapse to one date here;
       # real sitemap generation happens locally with full history.

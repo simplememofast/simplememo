@@ -89,7 +89,34 @@ GitHub Actions からBigQueryを読むための鍵。サチコ側のアカウン
 データセットへの付与は BigQuery コンソール → `searchconsole` → **共有** →
 **権限を追加** から。
 
-## 3. 鍵をGitHubに登録する（3分）
+## 3. 資格情報をGitHubに登録する（3分）
+
+シークレット名は `GCP_SERVICE_ACCOUNT_JSON` の1つだけで、
+**中身は次の2種類のどちらでも動く。** 名前に "SERVICE_ACCOUNT" と入っているのは
+歴史的な経緯で、OAuthユーザー資格情報も同じ場所に入れる。
+
+### A. すでに `gcloud auth application-default login` を済ませている場合（最短）
+
+鍵を発行しなくてよい。手元のADCファイルをそのまま貼る。
+
+```sh
+# プロジェクトを紐づけてから（未設定だとBigQueryが403を返す）
+gcloud auth application-default set-quota-project yurika-simplememo
+
+# 中身を確認して、そのままコピーする
+cat ~/.config/gcloud/application_default_credentials.json
+```
+
+`{"client_id":…,"client_secret":…,"refresh_token":…,"type":"authorized_user",
+"quota_project_id":…}` という形をしている。これを丸ごと
+`GCP_SERVICE_ACCOUNT_JSON` に貼る。
+
+> **有効期限に注意。** リフレッシュトークンは失効する（Google Cloud プロジェクトが
+> テスト公開ステータスのままだと7日で切れる）。切れると
+> `OAuth token refresh failed … invalid_grant` で落ちるので、
+> 長く放置する運用にするなら B のサービスアカウント鍵にしておく方が堅い。
+
+### B. サービスアカウント鍵（長期運用向き）
 
 1. サービスアカウント → **キー** → **鍵を追加** → **新しい鍵を作成** → **JSON**
 2. JSONファイルがダウンロードされる
@@ -100,6 +127,17 @@ GitHub Actions からBigQueryを読むための鍵。サチコ側のアカウン
 
 > **鍵をリポジトリにコミットしない。** `growth/input/.gitignore` は
 > CSVしか見ていないので、鍵は自動では守られない。
+
+### ローカルで動かすだけなら、登録は要らない
+
+`gcloud auth application-default login` が済んでいれば、
+`growth/scripts/*` は `~/.config/gcloud/application_default_credentials.json` を
+自動で見つける。環境変数を設定する必要もない。
+
+```sh
+node growth/scripts/bq-preflight.mjs      # 認証と鮮度の確認
+node growth/scripts/ingest-bigquery.mjs --days 28 --label "$(date -u +%Y-%m-%d)"
+```
 
 ## 4. プロパティの文字列を確認する（1分）
 

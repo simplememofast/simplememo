@@ -60,13 +60,21 @@ let client;
 try {
   client = await connect();
 } catch (e) {
-  fail('Cannot authenticate to BigQuery.', `  ${e.message}\n\n` +
-    '  The key is read from GOOGLE_SERVICE_ACCOUNT_JSON (inline JSON or base64) or\n' +
-    '  GOOGLE_APPLICATION_CREDENTIALS (a path). See growth/BIGQUERY_SETUP.md step 3.');
+  // The loader's own message already lists every location it tried and the
+  // command that fixes each one, so repeating a shorter version here only
+  // gave the reader two answers to reconcile.
+  fail('Cannot authenticate to BigQuery.', `  ${e.message}`);
 }
 
 console.log(`Project ${client.projectId} · dataset ${dataset}`);
-console.log(`Service account ${client.clientEmail}\n`);
+// Naming the credential type matters here: the two failure modes look nothing
+// alike. A service account that lacks a role needs an IAM grant; an OAuth user
+// that lacks one needs the human to be granted it, or to switch accounts.
+console.log(client.credentialType === 'authorized_user'
+  ? `OAuth user credential from ${client.credentialOrigin ?? 'environment'}`
+    + (client.quotaProject ? ` · quota project ${client.quotaProject}` : '')
+    + '\n'
+  : `Service account ${client.clientEmail}\n`);
 
 /* ── 1. Dataset and tables ───────────────────────────────────────────── */
 let tables;
@@ -82,7 +90,7 @@ try {
   if (/permission|denied|access/i.test(e.message)) {
     fail(`The service account cannot read ${client.projectId}.${dataset}.`,
       `  ${e.message}\n\n` +
-      `  Grant ${client.clientEmail}:\n` +
+      `  Grant ${client.clientEmail ?? 'the account you authenticated as'}:\n` +
       '    roles/bigquery.dataViewer  on the dataset\n' +
       '    roles/bigquery.jobUser     on the project (needed to run any query at all)\n' +
       '  See growth/BIGQUERY_SETUP.md step 2.');
