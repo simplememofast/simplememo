@@ -1,19 +1,19 @@
 {
-  "date_jst": "2026-08-13",
-  "generated_at": "2026-08-12T22:33:31Z",
+  "date_jst": "2026-08-14",
+  "generated_at": "2026-08-13T22:48:05Z",
   "action": "maintenance",
   "article": null,
   "pr": null,
-  "reason": "冪等性チェック: 主系(GitHub Actions)の当日分ブランチ・status JSON更新なし→副系(CCR)で実行。新規GSCスナップショットが2026-08-11から増えておらず、レーンA/Bの実カーブ需要（analyze.mjs --only conversational/unanswered）はObsidianクラスタで既存対応済み（logseqとobsidian回答ブロックはPR#480で実施済み・他の会話型クエリはObsidian非関連）。レーンC（Evidence Asset）は前々回(PR#470)・前回(PR#483)ともに実機検証込みで直近2日以内のため今回は見送り。Mention Watchは前回2026-08-12取得で7日未満のため対象外。Lane E(Coverage)はオーナー明示指示がある回のみのため今回は対象外。よって新規記事は正当化できず、Runbook§6保守レーンへ切替",
-  "verified": "docs/ai-citation-strategy.md の主張監査（§6メニュー）を実施。Google AI Overviews節の✅4項目を実地検証してVERIFIED注記を付与: robots.txtのGoogle-Extended許可（grep実測）、FAQPage JSON-LD実装ページ数（grep実測62ページ・旧記載『7+』を大幅に上回ることを確認）、/about/のPerson+Organization構造化データ（JSON-LD実読）、全ブログ記事のdateModified（57本全件・欠落0件をgrep実測）。あわせて本番稼働中の直近2ページ（/obsidian/getting-started/・/obsidian/compare/logseq/・/obsidian/）のHTTP 200を確認",
+  "reason": "冪等性チェック: 主系(GitHub Actions)の当日分ブランチ・status JSON更新なし→副系(CCR)で実行。新規GSCスナップショットは2026-08-11から増えておらず、analyze.mjs --only unanswered/conversational の出力は前回(2026-08-13)と同一。Obsidian関連の会話型クエリ「logseqとobsidian どちらが良い」(23imp・pos9.2)はPR#480の回答ブロックで対応済み・新規性なし。よってレーンA/Bは正当化できず、前回ログの申し送りに従いレーンC（Evidence Asset・定点データの鮮度維持）を実行",
+  "verified": "/obsidian/compare/logseq/ のプラグイン・テーマ実カウントを再計測。Obsidian community-plugins.json 6,571→6,638個（+67）・community-css-themes.json 680→691種（+11）をraw.githubusercontent.com経由で直接取得しカウント。Logseq marketplaceはpackages/*/manifest.jsonの'theme':true件数から546個・66種で前回から変動なしを確認（git clone --sparseでpackages/のみ取得）。記事本文・比較表・FAQ（JSON-LD＋可視HTML）・出典欄・meta description・byline・dateModifiedを更新し、公開日・実機検証日（フォルダ実験・スクリーンショット）等の別日付は変更していない",
   "checks": {
     "seo_check": "0 errors 0 warnings",
-    "content_graph": "変更なし（対象外）",
-    "mobile_qa": "対象外（コンテンツページ変更なし）",
-    "experiments": "変更なし・running実験に非干渉（/obsidian/・/obsidian/compare/logseq/には触れていない）"
+    "content_graph": "17 entries OK（対象ページ登録済み・変更なし）",
+    "mobile_qa": "iPhone 390x844 DPR3実描画（Playwright）: 水平スクロールなし・比較表カード化・更新数値の表示を確認",
+    "experiments": "変更なし・running実験(monitor-2026-08-09-obsidian-ctr)に非干渉（回答ブロックは不変・数値の部分更新のみ）"
   },
   "owner_requests": [
     "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から）"
   ],
-  "next": "新しいGSCスナップショットが入り次第、レーンA/Bを再判定。レーンC候補: プラグイン数の再計測（前回実測2026-08-11・鮮度維持）。Mention Watchは2026-08-19以降に次回。ai-citation-strategy.mdの残り監査項目（Perplexity以降の節）は次回以降数項目ずつ継続"
+  "next": "新しいGSCスナップショットが入り次第、レーンA/Bを再判定。Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回。ai-citation-strategy.mdの残り監査項目（Perplexity以降の節）は次回以降数項目ずつ継続"
 }
