@@ -24,6 +24,7 @@ PAGES = {
     "blog/ios-quick-capture-comparison.html": ("/blog/ios-quick-capture-comparison", "/en/blog/ios-quick-capture-comparison"),
     "captio-alternative/index.html": ("/captio-alternative/", "/en/captio-alternative/"),
     "obsidian/index.html": ("/obsidian/", "/en/obsidian/"),
+    "siri/index.html": ("/siri/", "/en/siri/"),
     "note-to-email/index.html": ("/note-to-email/", "/en/note-to-email/"),
     "privacy.html": ("/privacy", "/en/privacy"),
     "terms.html": ("/terms", "/en/terms"),
