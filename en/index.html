@@ -580,6 +580,16 @@
       .hero__subtitle { margin-bottom: 12px; font-size: 0.9rem; }
     }
 
+    /* Hero announcement pill — newest release, kept in sync with the JA top
+       page. Wrapping the whole label in one .nb (white-space:nowrap) left it
+       unable to wrap: 392px measured inside a 390px viewport. body sets
+       overflow-x:hidden, so it did not scroll — the right edge was simply cut
+       off. Each phrase now carries its own .nb and the pill may wrap. */
+    .hero-pill { display: inline-flex; align-items: center; gap: .5rem; max-width: 100%; padding: .34rem .95rem .34rem .4rem; border-radius: 999px; font-size: .8rem; font-weight: 700; line-height: 1.6; text-align: left; text-decoration: none; color: #d8f4fb; background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.45); }
+    .hero-pill b { flex: none; font-size: .66rem; letter-spacing: .06em; color: #0a0c12; background: linear-gradient(135deg,#22d3ee,#3b82f6); padding: .16rem .55rem; border-radius: 999px; }
+    .hero-pill:hover { background: rgba(34,211,238,.2); border-color: rgba(34,211,238,.7); }
+    @media (max-width: 460px) { .hero-pill { border-radius: 18px; } }
+
     /* AI auto-tagging spotlight banner (NEW) */
     .aib { position: relative; overflow: hidden; border-radius: var(--radius-xl, 20px); border: 1px solid rgba(139,124,255,.34); background: linear-gradient(135deg,#080b16 0%,#0b1024 45%,#070a14 100%); box-shadow: 0 14px 44px rgba(88,60,200,.2); }
     .aib::before { content: ''; position: absolute; inset: 0; background: radial-gradient(52% 60% at 12% 18%, rgba(124,77,255,.2), transparent 68%), radial-gradient(46% 52% at 84% 42%, rgba(34,211,238,.13), transparent 70%); pointer-events: none; }
@@ -691,9 +701,9 @@
         <img src="/assets/img/app-icon-256.webp" alt="Simple Memo - for Obsidian app icon" width="256" height="256" fetchpriority="high">
       </div>
       <p style="margin:0 0 14px;">
-        <a href="/en/ai-tags/" style="display:inline-flex;align-items:center;gap:.5rem;padding:.32rem .9rem .32rem .4rem;font-size:.8rem;font-weight:700;color:#e9e2ff;background:rgba(124,77,255,.14);border:1px solid rgba(124,77,255,.45);border-radius:999px;text-decoration:none;">
-          <span style="font-size:.68rem;letter-spacing:.06em;color:#fff;background:linear-gradient(135deg,#7c4dff,#5856D6);padding:.14rem .55rem;border-radius:999px;">NEW</span>
-          <span class="nb">AI auto-tagging — available now. Just speak. AI files it. →</span>
+        <a href="/siri/" class="hero-pill">
+          <b>NEW</b>
+          <span><span class="nb">AirPods support — available now.</span> <span class="nb">Hands-free voice memo. →</span></span>
         </a>
       </p>
       <h1 class="hero__title">

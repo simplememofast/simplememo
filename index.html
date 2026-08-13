@@ -591,6 +591,20 @@
       .hero__subtitle { margin-bottom: 12px; font-size: 0.9rem; }
     }
 
+    /* Hero announcement pill — 最新リリースの告知。8/18のPR TIMESリリース
+       （AirPods × Siri）に合わせて /siri/ 行きに差し替えた。
+       文言全体を1つの .nb（white-space:nowrap）で包むと折り返せず、
+       390px幅で実測 392px になる。body に overflow-x:hidden があるので
+       横スクロールにはならず、代わりに右端が画面外で切れる（差し替え前が
+       その状態で、iPhoneでは末尾の「→」が見えていなかった）。
+       意味の切れ目ごとに .nb を分け、ピル自体は max-width:100% で
+       折り返せるようにしてある。 */
+    .hero-pill { display: inline-flex; align-items: center; gap: .5rem; max-width: 100%; padding: .34rem .95rem .34rem .4rem; border-radius: 999px; font-size: .8rem; font-weight: 700; line-height: 1.6; text-align: left; text-decoration: none; color: #d8f4fb; background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.45); }
+    .hero-pill b { flex: none; font-size: .66rem; letter-spacing: .06em; color: #0a0c12; background: linear-gradient(135deg,#22d3ee,#3b82f6); padding: .16rem .55rem; border-radius: 999px; }
+    .hero-pill:hover { background: rgba(34,211,238,.2); border-color: rgba(34,211,238,.7); }
+    /* 2行に折り返す幅では、999pxの角丸だと縦に膨らんで見えるので固定値に落とす */
+    @media (max-width: 460px) { .hero-pill { border-radius: 18px; } }
+
     /* AI auto-tagging banner — artwork above, crawlable copy below */
     .aib__badge { display: inline-flex; align-items: center; gap: .5rem; padding: .3rem .9rem .3rem .38rem; font-size: .78rem; font-weight: 700; color: #e9e2ff; background: rgba(124,77,255,.16); border: 1px solid rgba(124,77,255,.5); border-radius: 999px; }
     .aib__badge b { font-size: .66rem; letter-spacing: .06em; color: #fff; background: linear-gradient(135deg,#7c4dff,#5856D6); padding: .14rem .55rem; border-radius: 999px; }
@@ -670,9 +684,9 @@
         <img src="/assets/img/app-icon-256.webp" alt="Obsidian連携シンプルメモアプリアイコン" width="256" height="256" fetchpriority="high">
       </div>
       <p style="margin:0 0 14px;">
-        <a href="/ai-tags/" style="display:inline-flex;align-items:center;gap:.5rem;padding:.32rem .9rem .32rem .4rem;font-size:.8rem;font-weight:700;color:#e9e2ff;background:rgba(124,77,255,.14);border:1px solid rgba(124,77,255,.45);border-radius:999px;text-decoration:none;">
-          <span style="font-size:.68rem;letter-spacing:.06em;color:#fff;background:linear-gradient(135deg,#7c4dff,#5856D6);padding:.14rem .55rem;border-radius:999px;">NEW</span>
-          <span class="nb">AIタグ自動追加 — 提供中。声で残す。AIが整える。→</span>
+        <a href="/siri/" class="hero-pill">
+          <b>NEW</b>
+          <span><span class="nb">AirPods対応 — 提供中。</span><span class="nb">スマホを触らず、声だけでメモ。→</span></span>
         </a>
       </p>
       <h1 class="hero__title">
