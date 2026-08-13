@@ -57,6 +57,11 @@ JA_EN_PAIRS = [
     ("/vs/email-me-app/",                    "/en/vs/email-me-app/"),
     ("/vs/mail-to-self/",                    "/en/vs/mail-to-self/"),
     ("/vs/drafts/",                          "/en/vs/drafts/"),
+    ("/privacy-architecture/",               "/en/privacy-architecture/"),
+    ("/vs/obsidian-share-sheet/",            "/en/vs/obsidian-share-sheet/"),
+    ("/blog/fleeting-notes",                 "/en/blog/fleeting-notes"),
+    ("/blog/obsidian-iphone-memo",           "/en/blog/obsidian-iphone-memo"),
+    ("/blog/obsidian-voice-input",           "/en/blog/obsidian-voice-input"),
 ]
 # x-default for ja-en pairs points to the JA url (current site convention).
 JA_EN_XDEFAULT = "ja"  # "ja" or "en"
@@ -82,6 +87,8 @@ EN_ONLY_PAGES = [
 # /captio/ currently emits hreflang=ja+x-default both pointing to itself.
 JA_ONLY_CLEANUP = [
     "/captio/",
+    "/fastest-voice-memo/",
+    "/voice-input/",
 ]
 
 # Locale -> <html lang="..."> attribute value

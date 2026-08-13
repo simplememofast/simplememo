@@ -80,6 +80,14 @@ jobs:
       - name: CTA placement metadata
         run: node scripts/tag-cta-placements.js --check
 
+      # 163 pages are still dual-DOM (both languages at one URL, toggled by
+      # js/lang.js, defaulting to ja). No page under /en/ loads lang.js, so
+      # without this seed an English reader following any link into one of
+      # them lands in Japanese — which is how it behaved until 2026-08-13.
+      # A new /en/ page copied from a template would silently reintroduce it.
+      - name: /en/ pages seed the reader's locale
+        run: python3 scripts/inject_locale_seed.py --check
+
       # An experiment whose evaluation date has passed must not go unnoticed.
       # Deliberately NOT blocking: a green run here is what lets auto-merge
       # ship to production, so failing on an unevaluated retitle would also
