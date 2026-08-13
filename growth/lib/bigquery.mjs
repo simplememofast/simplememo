@@ -22,10 +22,31 @@
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const BQ_BASE = 'https://bigquery.googleapis.com/bigquery/v2';
 const SCOPE = 'https://www.googleapis.com/auth/bigquery';
+
+/**
+ * Where `gcloud auth application-default login` leaves its credentials.
+ *
+ * Supporting that file is the difference between "I authenticated" and "the
+ * pipeline runs". The owner's OAuth login produces an `authorized_user`
+ * credential — client_id / client_secret / refresh_token — and this module
+ * originally accepted only a service-account key, so a perfectly good login
+ * failed with "No service-account credentials" and read as if nothing had been
+ * set up at all.
+ */
+const ADC_RELATIVE = ['gcloud', 'application_default_credentials.json'];
+function adcPath() {
+  if (process.platform === 'win32' && process.env.APPDATA) {
+    return path.join(process.env.APPDATA, ...ADC_RELATIVE);
+  }
+  const home = os.homedir();
+  return home ? path.join(home, '.config', ...ADC_RELATIVE) : null;
+}
 
 /** Transient failures worth another attempt; everything else is a real answer. */
 const RETRY_STATUS = new Set([429, 500, 502, 503, 504]);
@@ -37,62 +58,157 @@ const b64url = (input) =>
   Buffer.from(input).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
 /**
- * Locate and parse the service-account key.
+ * Locate and parse a Google credential — either kind.
  *
- * Accepts the key inline (GitHub Actions secrets are strings, so this is how CI
- * passes it) or as a file path for local runs. The inline form is also accepted
- * base64-encoded, because a JSON blob with newlines in it survives some secret
- * stores badly and the base64 round-trip is the usual workaround.
+ * Four places are tried, in the order that puts the most deliberate choice
+ * first:
+ *   1. an inline JSON blob passed in, or in GOOGLE_SERVICE_ACCOUNT_JSON /
+ *      GCP_SERVICE_ACCOUNT_JSON (this is how CI passes it; Actions secrets are
+ *      strings). Also accepted base64-wrapped, because a JSON blob with
+ *      newlines survives some secret stores badly.
+ *   2. GOOGLE_APPLICATION_CREDENTIALS, a path.
+ *   3. the well-known ADC file written by `gcloud auth application-default
+ *      login`.
+ *
+ * Two credential shapes come out of that:
+ *   service_account  — client_email + private_key. Signs its own JWT.
+ *   authorized_user  — client_id + client_secret + refresh_token. A human's
+ *                      OAuth grant, which is what `gcloud auth
+ *                      application-default login` produces.
+ *
+ * The `type` field is authoritative when present; the key material is the
+ * fallback, because hand-assembled credential files often omit `type`.
  */
-export function loadServiceAccount({ json, file } = {}) {
+export function loadCredentials({ json, file } = {}) {
   const raw = json
     ?? process.env.GOOGLE_SERVICE_ACCOUNT_JSON
     ?? process.env.GCP_SERVICE_ACCOUNT_JSON
     ?? null;
-  const path = file ?? process.env.GOOGLE_APPLICATION_CREDENTIALS ?? null;
+  const explicitPath = file ?? process.env.GOOGLE_APPLICATION_CREDENTIALS ?? null;
 
   let text = null;
+  let origin = null;
   if (raw && raw.trim()) {
+    origin = 'environment';
     text = raw.trim();
-    // A key that is not JSON but decodes to JSON was base64-wrapped on the way in.
+    // A value that is not JSON but decodes to JSON was base64-wrapped on the way in.
     if (!text.startsWith('{')) {
       try {
         const decoded = Buffer.from(text, 'base64').toString('utf8').trim();
         if (decoded.startsWith('{')) text = decoded;
       } catch { /* fall through to the parse error below */ }
     }
-  } else if (path) {
-    if (!fs.existsSync(path)) throw new Error(`service-account key not found: ${path}`);
-    text = fs.readFileSync(path, 'utf8');
+  } else if (explicitPath) {
+    if (!fs.existsSync(explicitPath)) throw new Error(`credentials not found: ${explicitPath}`);
+    origin = explicitPath;
+    text = fs.readFileSync(explicitPath, 'utf8');
   } else {
+    const adc = adcPath();
+    if (adc && fs.existsSync(adc)) {
+      origin = adc;
+      text = fs.readFileSync(adc, 'utf8');
+    }
+  }
+
+  if (!text) {
     throw new Error(
-      'No service-account credentials.\n' +
-      '  Set GOOGLE_SERVICE_ACCOUNT_JSON to the key JSON, or GOOGLE_APPLICATION_CREDENTIALS to its path.\n' +
-      '  See growth/BIGQUERY_SETUP.md.'
+      'No Google credentials found. Looked in, in order:\n' +
+      '  1. GOOGLE_SERVICE_ACCOUNT_JSON / GCP_SERVICE_ACCOUNT_JSON (inline JSON, base64 also accepted)\n' +
+      '  2. GOOGLE_APPLICATION_CREDENTIALS (path to a key file)\n' +
+      `  3. ${adcPath() ?? '(no home directory)'} — written by \`gcloud auth application-default login\`\n` +
+      '\n' +
+      'Locally, the quickest fix is:\n' +
+      '  gcloud auth application-default login\n' +
+      '  gcloud auth application-default set-quota-project <PROJECT_ID>\n' +
+      'In CI, set one of the secrets above. See growth/BIGQUERY_SETUP.md.'
     );
   }
 
-  let sa;
+  let creds;
   try {
-    sa = JSON.parse(text);
+    creds = JSON.parse(text);
   } catch (e) {
-    throw new Error(`service-account key is not valid JSON: ${e.message}`);
+    throw new Error(`credentials at ${origin} are not valid JSON: ${e.message}`);
   }
-  for (const field of ['client_email', 'private_key']) {
-    if (!sa[field]) throw new Error(`service-account key is missing "${field}"`);
+
+  const kind = creds.type
+    ?? (creds.private_key ? 'service_account' : creds.refresh_token ? 'authorized_user' : null);
+
+  if (kind === 'service_account') {
+    for (const field of ['client_email', 'private_key']) {
+      if (!creds[field]) throw new Error(`service-account key at ${origin} is missing "${field}"`);
+    }
+  } else if (kind === 'authorized_user') {
+    for (const field of ['client_id', 'client_secret', 'refresh_token']) {
+      if (!creds[field]) throw new Error(`OAuth credentials at ${origin} are missing "${field}"`);
+    }
+  } else {
+    throw new Error(
+      `credentials at ${origin} are neither a service account nor an OAuth user credential ` +
+      `(type=${JSON.stringify(creds.type ?? null)}). ` +
+      'Expected a service-account key (client_email + private_key) or an authorized_user ' +
+      '(client_id + client_secret + refresh_token).'
+    );
   }
-  return sa;
+
+  return { ...creds, type: kind, _origin: origin };
 }
 
 /**
- * Service-account JWT → OAuth2 access token.
- *
- * `iat` is backdated by a minute. Google rejects a token whose `iat` is in the
- * future, and a runner clock that is a few seconds fast is common enough that
- * skipping this produces an occasional, unreproducible "Invalid JWT" on an
- * otherwise correct key.
+ * Back-compat: the same loader, but refusing anything that is not a service
+ * account. Kept because "service account" is a promise some callers rely on.
  */
-export async function accessToken(serviceAccount, { scope = SCOPE } = {}) {
+export function loadServiceAccount(opts = {}) {
+  const creds = loadCredentials(opts);
+  if (creds.type !== 'service_account') {
+    throw new Error(
+      `expected a service-account key but found an ${creds.type} credential at ${creds._origin}`
+    );
+  }
+  return creds;
+}
+
+/** Credential → OAuth2 access token, by whichever grant the credential implies. */
+export async function accessToken(credentials, { scope = SCOPE } = {}) {
+  if (credentials?.type === 'authorized_user') return userAccessToken(credentials);
+  return serviceAccountAccessToken(credentials, { scope });
+}
+
+/**
+ * OAuth user credential → access token, via the refresh-token grant.
+ *
+ * No scope is sent. The grant's scope was fixed when the human consented —
+ * `gcloud auth application-default login` asks for cloud-platform — and
+ * passing a narrower one here does not narrow anything; it only risks a
+ * mismatch against what was actually authorised.
+ */
+async function userAccessToken({ client_id, client_secret, refresh_token }) {
+  const res = await fetch(TOKEN_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id,
+      client_secret,
+      refresh_token,
+    }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // invalid_grant is the one worth naming: a revoked or expired refresh
+    // token looks identical to a typo otherwise, and the fix is different.
+    const hint = body.error === 'invalid_grant'
+      ? '\n  The refresh token was revoked or expired. Re-run: gcloud auth application-default login'
+      : '';
+    throw new Error(
+      `OAuth token refresh failed (${res.status} ${body.error || ''}): ` +
+      `${body.error_description || 'no detail'}${hint}`
+    );
+  }
+  return body.access_token;
+}
+
+async function serviceAccountAccessToken(serviceAccount, { scope = SCOPE } = {}) {
   const now = Math.floor(Date.now() / 1000);
   const header = { alg: 'RS256', typ: 'JWT' };
   const claims = {
@@ -168,7 +284,7 @@ function decodeRow(row, fields) {
   return out;
 }
 
-async function request(url, { token, method = 'GET', body } = {}) {
+async function request(url, { token, quotaProject = null, method = 'GET', body } = {}) {
   let lastError = null;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     let res;
@@ -177,6 +293,7 @@ async function request(url, { token, method = 'GET', body } = {}) {
         method,
         headers: {
           authorization: `Bearer ${token}`,
+          ...(quotaProject ? { 'x-goog-user-project': quotaProject } : {}),
           ...(body ? { 'content-type': 'application/json' } : {}),
         },
         ...(body ? { body: JSON.stringify(body) } : {}),
@@ -222,7 +339,7 @@ async function request(url, { token, method = 'GET', body } = {}) {
  * @param {string} [opts.location] dataset location — must match, or the job is not found
  */
 export async function query(client, { sql, params = {}, types = {}, location } = {}) {
-  const { token, projectId } = client;
+  const { projectId } = client;
   const loc = location ?? client.location ?? null;
 
   const queryParameters = Object.entries(params).map(([name, value]) => ({
@@ -232,7 +349,7 @@ export async function query(client, { sql, params = {}, types = {}, location } =
   }));
 
   let payload = await request(`${BQ_BASE}/projects/${encodeURIComponent(projectId)}/queries`, {
-    token,
+    ...auth(client),
     method: 'POST',
     body: {
       query: sql,
@@ -261,7 +378,7 @@ export async function query(client, { sql, params = {}, types = {}, location } =
     payload = await request(
       `${BQ_BASE}/projects/${encodeURIComponent(projectId)}/queries/${encodeURIComponent(jobId)}` +
       `?timeoutMs=60000${jobLocation ? `&location=${encodeURIComponent(jobLocation)}` : ''}`,
-      { token }
+      auth(client)
     );
   }
   collect(payload);
@@ -272,7 +389,7 @@ export async function query(client, { sql, params = {}, types = {}, location } =
       `${BQ_BASE}/projects/${encodeURIComponent(projectId)}/queries/${encodeURIComponent(jobId)}` +
       `?pageToken=${encodeURIComponent(pageToken)}&timeoutMs=60000` +
       `${jobLocation ? `&location=${encodeURIComponent(jobLocation)}` : ''}`,
-      { token }
+      auth(client)
     );
     collect(payload);
     pageToken = payload.pageToken;
@@ -287,12 +404,12 @@ export async function query(client, { sql, params = {}, types = {}, location } =
 
 /** Does a table exist? Used by the preflight to tell "not set up" from "no data". */
 export async function tableExists(client, { dataset, table }) {
-  const { token, projectId } = client;
+  const { projectId } = client;
   try {
     await request(
       `${BQ_BASE}/projects/${encodeURIComponent(projectId)}` +
       `/datasets/${encodeURIComponent(dataset)}/tables/${encodeURIComponent(table)}`,
-      { token }
+      auth(client)
     );
     return true;
   } catch (e) {
@@ -303,14 +420,14 @@ export async function tableExists(client, { dataset, table }) {
 
 /** Every table in the dataset, so the preflight can show what is actually there. */
 export async function listTables(client, { dataset }) {
-  const { token, projectId } = client;
+  const { projectId } = client;
   const out = [];
   let pageToken = null;
   do {
     const payload = await request(
       `${BQ_BASE}/projects/${encodeURIComponent(projectId)}/datasets/${encodeURIComponent(dataset)}/tables` +
       `?maxResults=1000${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`,
-      { token }
+      auth(client)
     );
     for (const t of payload.tables || []) {
       out.push({ id: t.tableReference?.tableId, type: t.type, expires: t.expirationTime ? Number(t.expirationTime) : null });
@@ -321,16 +438,42 @@ export async function listTables(client, { dataset }) {
 }
 
 /** Authenticate once; hand the result to `query` / `listTables` / `tableExists`. */
-export async function connect({ projectId, location, serviceAccount } = {}) {
-  const sa = serviceAccount ?? loadServiceAccount();
+export async function connect({ projectId, location, serviceAccount, credentials } = {}) {
+  const creds = credentials ?? serviceAccount ?? loadCredentials();
   const project = projectId
     ?? process.env.GCP_PROJECT_ID
-    ?? sa.project_id;
-  if (!project) throw new Error('No BigQuery project. Pass --project or set GCP_PROJECT_ID.');
+    ?? creds.project_id
+    ?? creds.quota_project_id;
+  if (!project) {
+    throw new Error(
+      'No BigQuery project. Pass --project, set GCP_PROJECT_ID, or run:\n' +
+      '  gcloud auth application-default set-quota-project <PROJECT_ID>'
+    );
+  }
+
+  // A user credential is not attached to a project, so Google needs to be told
+  // which one to bill and rate-limit against. Without this header BigQuery
+  // answers a valid OAuth token with "User Rate Limit Exceeded" or a bare 403,
+  // neither of which points at the missing quota project. Service accounts
+  // carry their own project and must NOT send it.
+  const quotaProject = creds.type === 'authorized_user'
+    ? (creds.quota_project_id ?? project)
+    : null;
+
   return {
     projectId: project,
     location: location ?? process.env.BQ_LOCATION ?? null,
-    token: await accessToken(sa),
-    clientEmail: sa.client_email,
+    token: await accessToken(creds),
+    quotaProject,
+    credentialType: creds.type,
+    credentialOrigin: creds._origin ?? null,
+    // Kept for callers that print who authenticated; null for OAuth users,
+    // whose identity is the human who ran `gcloud auth`.
+    clientEmail: creds.client_email ?? null,
   };
+}
+
+/** Per-request auth bits, so every call site carries the quota project too. */
+function auth(client) {
+  return { token: client.token, quotaProject: client.quotaProject };
 }
