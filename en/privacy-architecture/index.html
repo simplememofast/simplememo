@@ -67,7 +67,7 @@
   <!-- JSON-LD: Speakable -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/privacy-architecture/#webpage","inLanguage":"en","name":"Privacy Architecture","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".flow-step__title"]},"url":"https://simplememofast.com/en/privacy-architecture/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -141,6 +141,8 @@
     }
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/privacy-architecture/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is any external server involved in the Obsidian vault append?","acceptedAnswer":{"@type":"Answer","text":"No. The append is a direct file write into the vault folder on your device (URI fallback when direct access isn't available), with no plugin and no network involved. Local draft saves that don't involve sending an email also stay entirely on-device."}},{"@type":"Question","name":"Does AI tagging send my memo to Apple or anyone else's servers?","acceptedAnswer":{"@type":"Answer","text":"No. Tagging runs on-device via Apple Foundation Models with no network calls, and memos are not sent to an external server for tagging. On devices without Apple Intelligence, it falls back to on-device lightweight formatting — still with nothing sent externally. Details on the AI auto-tagging page."}},{"@type":"Question","name":"Why not make it E2EE?","acceptedAnswer":{"@type":"Answer","text":"Because the destination is your everyday email inbox. If your mail server can show you the memo, it can decrypt it — so E2EE is structurally impossible here. Choosing E2EE would require a dedicated client and give up the \"readable on any device, in any mail app\" property this app exists for. For E2EE-first needs we genuinely recommend Standard Notes and similar apps."}},{"@type":"Question","name":"How does this page relate to the Privacy Policy?","acceptedAnswer":{"@type":"Answer","text":"The legally binding text is the Privacy Policy (especially §12, \"Technical notes on encryption\"). This page rearranges the same facts as a route map, organized around what Obsidian users ask most — whether things stay local. If they ever disagree, the Privacy Policy wins."}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -209,14 +211,14 @@
         </h2>
         <div style="overflow-x:auto">
           <table class="compare-table">
-            <thead><tr><th>Data</th><th>Where</th><th>Retained?</th></tr></thead>
+            <thead><tr><th scope="col">Data</th><th scope="col">Where</th><th scope="col">Retained?</th></tr></thead>
             <tbody>
-              <tr><td>Memo body</td><td>Our servers (relay / delivery)</td><td class="yes">No — transit only during send, not logged</td></tr>
-              <tr><td>Memo body</td><td>Your email inbox</td><td>Yes (that is the point)</td></tr>
-              <tr><td>Memo body</td><td>Your Obsidian vault (if enabled)</td><td>Yes — local, on your device</td></tr>
-              <tr><td>Outbox &amp; send history</td><td>On-device only</td><td>Encrypted with AES-GCM-256</td></tr>
-              <tr><td>Email address</td><td>Cloudflare D1</td><td class="yes">Only a SHA-256 hash, and only if you opt into reminder emails (the raw address lives only in Resend's Contact API)</td></tr>
-              <tr><td>Tagging input (memo body)</td><td>External servers</td><td class="yes">Never sent — processing is on-device</td></tr>
+              <tr><th scope="row">Memo body</th><td>Our servers (relay / delivery)</td><td class="yes">No — transit only during send, not logged</td></tr>
+              <tr><th scope="row">Memo body</th><td>Your email inbox</td><td>Yes (that is the point)</td></tr>
+              <tr><th scope="row">Memo body</th><td>Your Obsidian vault (if enabled)</td><td>Yes — local, on your device</td></tr>
+              <tr><th scope="row">Outbox &amp; send history</th><td>On-device only</td><td>Encrypted with AES-GCM-256</td></tr>
+              <tr><th scope="row">Email address</th><td>Cloudflare D1</td><td class="yes">Only a SHA-256 hash, and only if you opt into reminder emails (the raw address lives only in Resend's Contact API)</td></tr>
+              <tr><th scope="row">Tagging input (memo body)</th><td>External servers</td><td class="yes">Never sent — processing is on-device</td></tr>
             </tbody>
           </table>
         </div>
@@ -323,6 +325,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">Product</p>
+        <a href="/download/" class="footer__link"><span>Download</span> </a>
         <a href="/en/" class="footer__link"><span>Home</span></a>
         <a href="/use-cases/" class="footer__link"><span>Use Cases</span></a>
         <a href="/guides/" class="footer__link"><span>Guides</span></a>
@@ -335,6 +338,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Support</p>
+        <a href="/devlog/" class="footer__link"><span>Dev log</span> </a>
+        <a href="/about/" class="footer__link"><span>About the developer</span> </a>
         <a href="/en/faq" class="footer__link"><span>FAQ</span></a>
         <a href="/en/privacy" class="footer__link"><span>Privacy</span></a>
         <a href="/contact" class="footer__link"><span>Contact</span></a>

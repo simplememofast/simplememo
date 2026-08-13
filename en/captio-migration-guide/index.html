@@ -77,7 +77,7 @@
   {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/captio-migration-guide/#webpage","inLanguage":"en","name":"How to Migrate from Captio: 7-Step Setup Guide","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub"]},"url":"https://simplememofast.com/en/captio-migration-guide/","isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -256,6 +256,8 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/en/captio-migration-guide/#faq","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Can I get a refund for my Captio purchase?","acceptedAnswer":{"@type":"Answer","text":"If you purchased Captio and it no longer works, you may be eligible for a refund from Apple. Go to reportaproblem.apple.com, sign in with your Apple ID, find the Captio purchase in your history, and select \"I'd like to request a refund.\" Apple's refund policy is handled on a case-by-case basis, but discontinued apps generally have a good chance of being refunded -- especially if the app stopped working shortly after purchase. Note that Apple typically only refunds purchases made within the last 90 days, but it is worth trying even for older purchases."}},{"@type":"Question","name":"What about my Captio data on other devices?","acceptedAnswer":{"@type":"Answer","text":"If you used Captio on multiple devices (iPhone, iPad, etc.), the same principle applies: all your memos are in your email inbox, not on the devices. Captio did not sync data between devices because there was no data to sync -- each memo was sent as an email the moment you tapped Send. As long as you have access to the email account you used with Captio, you have access to all your memos regardless of which device you sent them from."}},{"@type":"Question","name":"Does Simple Memo work with Gmail, Outlook, and iCloud?","acceptedAnswer":{"@type":"Answer","text":"Yes. Simple Memo works with any email address. You can set Gmail, Outlook (Hotmail), Yahoo Mail, iCloud Mail, corporate email addresses, or any other email provider as your destination. Unlike Captio, which is widely believed to have depended on a third-party email API, Simple Memo uses its own sending infrastructure (Cloudflare Workers + Resend API), so it is completely independent of your email provider. You just enter your email address and it works."}},{"@type":"Question","name":"Can I use Simple Memo offline?","acceptedAnswer":{"@type":"Answer","text":"Yes. This is actually one of the biggest upgrades over Captio. When you send a memo without an internet connection, Simple Memo encrypts it with AES-GCM and stores it in a local Outbox on your device. When your device reconnects to the internet, the memo is automatically sent in the background. You do not need to open the app again -- it handles everything automatically. This means you can capture thoughts in the subway, on a plane, or in any area with poor reception without worrying about losing them."}},{"@type":"Question","name":"Is there an Android alternative to Captio?","acceptedAnswer":{"@type":"Answer","text":"This guide focuses on iOS because Captio was an iOS-only app. For Android users looking for a similar send-to-email experience, there are some options available on the Google Play Store (such as \"Email Me\" or \"Note to Self\"). However, Simple Memo is currently iOS-only. If you are an Android user, we recommend searching the Play Store for \"email to self\" or \"send to email\" apps and reading recent reviews to find one that is actively maintained."}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -352,21 +354,21 @@
           <table class="compare-table">
             <thead>
               <tr>
-                <th>Feature</th>
-                <th>Simple Memo</th>
-                <th>Apple Notes + Share</th>
-                <th>Drafts</th>
+                <th scope="col">Feature</th>
+                <th scope="col">Simple Memo</th>
+                <th scope="col">Apple Notes + Share</th>
+                <th scope="col">Drafts</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Launch Speed</td><td class="yes">0.4 seconds</td><td>~1 second</td><td>~0.5 seconds</td></tr>
-              <tr><td>Taps to Send</td><td class="yes">1 tap</td><td class="no">4-5 taps</td><td>2-3 taps</td></tr>
-              <tr><td>Offline Support</td><td class="yes">Yes (Outbox)</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-              <tr><td>Dedicated Send Button</td><td class="yes">Yes</td><td class="no">No</td><td>Via action</td></tr>
-              <tr><td>Auto-Clear After Send</td><td class="yes">Yes</td><td class="no">No</td><td>Configurable</td></tr>
-              <tr><td>Widget</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-              <tr><td>Price</td><td>Free (3/day) or $2.99/mo</td><td class="yes">Free</td><td class="no">$1.99/month (Pro)</td></tr>
-              <tr><td>Captio-like Experience</td><td class="yes">Closest match</td><td class="no">Different workflow</td><td>Requires setup</td></tr>
+              <tr><th scope="row">Launch Speed</th><td class="yes">0.4 seconds</td><td>~1 second</td><td>~0.5 seconds</td></tr>
+              <tr><th scope="row">Taps to Send</th><td class="yes">1 tap</td><td class="no">4-5 taps</td><td>2-3 taps</td></tr>
+              <tr><th scope="row">Offline Support</th><td class="yes">Yes (Outbox)</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+              <tr><th scope="row">Dedicated Send Button</th><td class="yes">Yes</td><td class="no">No</td><td>Via action</td></tr>
+              <tr><th scope="row">Auto-Clear After Send</th><td class="yes">Yes</td><td class="no">No</td><td>Configurable</td></tr>
+              <tr><th scope="row">Widget</th><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+              <tr><th scope="row">Price</th><td>Free (3/day) or $2.99/mo</td><td class="yes">Free</td><td class="no">$1.99/month (Pro)</td></tr>
+              <tr><th scope="row">Captio-like Experience</th><td class="yes">Closest match</td><td class="no">Different workflow</td><td>Requires setup</td></tr>
             </tbody>
           </table>
         </div>
@@ -620,6 +622,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">Product</p>
+        <a href="/download/" class="footer__link">Download</a>
         <a href="/en/" class="footer__link">Home</a>
         <a href="/en/send-email-to-yourself/" class="footer__link">Email Yourself Apps</a>
         <a href="/use-cases/" class="footer__link">Use Cases</a>
@@ -637,6 +640,7 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Support</p>
+        <a href="/devlog/" class="footer__link">Dev log</a>
         <a href="/faq" class="footer__link">FAQ</a>
         <a href="/privacy" class="footer__link">Privacy</a>
         <a href="/contact" class="footer__link">Contact</a>

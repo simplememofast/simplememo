@@ -67,7 +67,7 @@
   <!-- JSON-LD: Speakable -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/notion/#webpage","inLanguage":"ja","name":"シンプルメモ vs Notion 比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".reason-card__title"]},"url":"https://simplememofast.com/vs/notion/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -259,7 +259,9 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-  </head>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/notion/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Notionからシンプルメモにメモを移行できますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモは「移行先」ではなく「キャプチャ入口」です。Notionの既存データを移行する必要はありません。シンプルメモで素早くキャプチャしたメモをメールで受信し、必要なものだけNotionに整理するワークフローが最適です。両方を併用することで、Notionの強みを活かしつつキャプチャ速度を劇的に改善できます。"}},{"@type":"Question","name":"Notion APIと連携してメモを自動的にNotionに送れますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモは直接Notion APIと連携する機能はありませんが、メール送信をトリガーにZapierやMake（旧Integromat）を使えば、シンプルメモ→メール→Notionデータベースという自動化が可能です。メールフィルタで特定の件名のメモをNotionに自動転送する設定も効果的です。"}},{"@type":"Question","name":"Notionの「クイックノート」機能ではダメですか？","acceptedAnswer":{"@type":"Answer","text":"Notion公式のクイックノート機能もありますが、アプリ自体の起動時間（約3秒）は変わりません。またクイックノートで作成したページの整理が後で必要になります。シンプルメモは0.4秒起動でメール送信するため、Notionのクイックノートよりはるかに速く、整理の手間もありません。"}},{"@type":"Question","name":"Notionが重くて起動が遅いのですが改善策はありますか？","acceptedAnswer":{"@type":"Answer","text":"Notionのモバイル起動速度はワークスペースのサイズやネットワーク状況に依存し、根本的な改善は難しいです。「素早くメモを取る」場面だけシンプルメモを使い、「整理・検索・共有」はNotionで行う二刀流が最も実用的な解決策です。"}},{"@type":"Question","name":"シンプルメモで送ったメモをNotionに効率的に移す方法は？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモからのメールをGmailやOutlookで受信し、重要なものだけNotionのWebクリッパーやコピペでNotionに移します。毎日のレビュー時間（5分程度）にまとめて処理するGTD方式が効果的です。すべてのメモをNotionに移す必要はなく、メールに残しておくだけで十分なものも多いです。"}}]}</script>
+</head>
 <body>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
@@ -352,19 +354,19 @@
         </h2>
         <div style="overflow-x:auto">
           <table class="compare-table">
-            <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>Notion</th></tr></thead>
+            <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Notion</th></tr></thead>
             <tbody>
-              <tr><td>起動速度</td><td class="yes">0.4秒</td><td class="no">〜3秒</td></tr>
-              <tr><td>学習コスト</td><td class="yes">ゼロ</td><td class="no">高い（習熟に数時間）</td></tr>
-              <tr><td>ワンタップ送信</td><td class="yes">あり（メール直送）</td><td class="no">なし</td></tr>
-              <tr><td>メール連携</td><td class="yes">直接送信・ワンタップ</td><td class="no">手動エクスポートのみ</td></tr>
-              <tr><td>オフライン対応</td><td class="yes">Outbox自動再送</td><td>制限あり</td></tr>
-              <tr><td>暗号化</td><td class="yes">AES-GCM</td><td class="no">なし（E2Eなし）</td></tr>
-              <tr><td>データベース</td><td class="no">なし（意図的）</td><td class="yes">あり</td></tr>
-              <tr><td>チーム共有</td><td class="no">なし</td><td class="yes">あり</td></tr>
-              <tr><td>テンプレート</td><td class="no">なし</td><td class="yes">数千件</td></tr>
-              <tr><td>無料プラン</td><td class="yes">1日3通</td><td>制限あり</td></tr>
-              <tr><td>モバイル最適化</td><td class="yes">iOS特化・超軽量</td><td>重い・操作複雑</td></tr>
+              <tr><th scope="row">起動速度</th><td class="yes">0.4秒</td><td class="no">〜3秒</td></tr>
+              <tr><th scope="row">学習コスト</th><td class="yes">ゼロ</td><td class="no">高い（習熟に数時間）</td></tr>
+              <tr><th scope="row">ワンタップ送信</th><td class="yes">あり（メール直送）</td><td class="no">なし</td></tr>
+              <tr><th scope="row">メール連携</th><td class="yes">直接送信・ワンタップ</td><td class="no">手動エクスポートのみ</td></tr>
+              <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td>制限あり</td></tr>
+              <tr><th scope="row">暗号化</th><td class="yes">AES-GCM</td><td class="no">なし（E2Eなし）</td></tr>
+              <tr><th scope="row">データベース</th><td class="no">なし（意図的）</td><td class="yes">あり</td></tr>
+              <tr><th scope="row">チーム共有</th><td class="no">なし</td><td class="yes">あり</td></tr>
+              <tr><th scope="row">テンプレート</th><td class="no">なし</td><td class="yes">数千件</td></tr>
+              <tr><th scope="row">無料プラン</th><td class="yes">1日3通</td><td>制限あり</td></tr>
+              <tr><th scope="row">モバイル最適化</th><td class="yes">iOS特化・超軽量</td><td>重い・操作複雑</td></tr>
             </tbody>
           </table>
           
@@ -649,6 +651,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span>ダウンロード</span> </a>
         <a href="/" class="footer__link"><span>ホーム</span></a>
         <a href="/use-cases/" class="footer__link"><span>使い方</span></a>
         <a href="/guides/" class="footer__link"><span>ガイド</span></a>
@@ -661,6 +664,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span>開発記録</span> </a>
+        <a href="/about/" class="footer__link"><span>開発者について</span> </a>
         <a href="/faq" class="footer__link"><span>FAQ</span></a>
         <a href="/privacy" class="footer__link"><span>プライバシー</span></a>
         <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>

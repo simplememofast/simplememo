@@ -78,7 +78,7 @@
 }
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -226,6 +226,8 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/memo-app-service-shutdown-risk#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Google Keepはサービス終了する？","acceptedAnswer":{"@type":"Answer","text":"現時点でGoogle Keepのサービス終了は予定されていません。Googleという世界最大級のテクノロジー企業が運営しており、短期的なリスクは低いと言えます。ただし、2021年にGoogle Keep Chrome版（Chrome App版）が廃止された実績があり、特定プラットフォーム向けの提供が終了する可能性はゼロではありません。また、GoogleにはGoogle Reader、Google+、Inboxなど、人気サービスを突然終了させた歴史があることも覚えておくべきでしょう。Google Keepの詳細な比較はこちら。"}},{"@type":"Question","name":"Evernoteは安全？","acceptedAnswer":{"@type":"Answer","text":"Evernoteの長期的な安全性には懸念があります。2023年にイタリアのBending Spoons社に買収された後、2024年に日本法人が解散し、大規模なリストラが行われました。無料プランは大幅に制限され（ノート数50、端末1台まで）、かつての勢いは失われています。サービスが突然終了する可能性は低いですが、長期的にはさらなる機能制限やサービス縮小のリスクがあると考えられます。Evernoteを使用している方は、定期的なデータエクスポートを強くおすすめします。"}},{"@type":"Question","name":"メモアプリが終了したらデータはどうなる？","acceptedAnswer":{"@type":"Answer","text":"サービス終了時のデータの行方は、アプリのデータ保存方式によって大きく異なります。クラウド専用アプリ（サーバーにのみデータを保存）の場合、サーバーの停止とともにデータにアクセスできなくなる可能性があります。多くの場合、終了前にデータエクスポート期間が設けられますが、通知を見逃すとデータを失うリスクがあります。ローカル保存型アプリ（Obsidianなど）の場合、ファイルがデバイスに残るため影響は最小限です。メールベース型アプリ（Simple Memoなど）の場合、データはメールボックスに保存されているため、アプリの終了による影響はゼロです。"}},{"@type":"Question","name":"サービス終了リスクが最も低いメモアプリは？","acceptedAnswer":{"@type":"Answer","text":"「サービス終了してもデータが残る」という観点では、ローカルファイル保存のObsidian（Markdownファイル）と、メールベースのSimple Memo（メールボックスに保存）が最もリスクが低いと言えます。Apple Notesも、Apple製品を使い続ける限りはiCloud連携で安全です。重要なのは「アプリとデータが分離されているかどうか」です。アプリが消えてもデータが別の場所に残る設計のアプリを選ぶことが、最善の対策です。"}},{"@type":"Question","name":"LINE Keepの代わりになるアプリは？","acceptedAnswer":{"@type":"Answer","text":"LINE Keepの「とりあえずメモを保存する」という用途には、いくつかの代替アプリがあります。手軽さを重視するならSimple Memo（ワンタップでメールに送信）、整理を重視するならApple NotesやGoogle Keep、高機能を求めるならNotionがおすすめです。詳しくはLINE Keep代替アプリの比較記事をご覧ください。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -286,45 +288,45 @@
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>アプリ</th>
-            <th>終了時期</th>
-            <th>原因</th>
-            <th>ユーザーデータの行方</th>
+            <th scope="col">アプリ</th>
+            <th scope="col">終了時期</th>
+            <th scope="col">原因</th>
+            <th scope="col">ユーザーデータの行方</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><a href="/blog/captio-discontinued" style="color:var(--accent);text-decoration:none;">Captio</a></td>
+            <th scope="row"><a href="/blog/captio-discontinued" style="color:var(--accent);text-decoration:none;">Captio</a></th>
             <td>2024年10月</td>
             <td>外部API依存（推測）</td>
             <td>メールに残存</td>
           </tr>
           <tr>
-            <td><a href="/blog/line-keep-alternative" style="color:var(--accent);text-decoration:none;">LINE Keep</a></td>
+            <th scope="row"><a href="/blog/line-keep-alternative" style="color:var(--accent);text-decoration:none;">LINE Keep</a></th>
             <td>2024年8月28日</td>
             <td>LINE社の戦略変更</td>
             <td>事前通知あり、エクスポート期間あり</td>
           </tr>
           <tr>
-            <td>Evernote日本法人</td>
+            <th scope="row">Evernote日本法人</th>
             <td>2024年</td>
             <td>Bending Spoons社による買収・リストラ</td>
             <td>サービス継続中だが縮小</td>
           </tr>
           <tr>
-            <td>Google Keep Chrome版</td>
+            <th scope="row">Google Keep Chrome版</th>
             <td>2021年</td>
             <td>Chrome App廃止</td>
             <td>Web版に移行</td>
           </tr>
           <tr>
-            <td>Wunderlist</td>
+            <th scope="row">Wunderlist</th>
             <td>2020年</td>
             <td>Microsoft買収→To Do移行</td>
             <td>データ移行ツール提供</td>
           </tr>
           <tr>
-            <td>Sunrise Calendar</td>
+            <th scope="row">Sunrise Calendar</th>
             <td>2016年</td>
             <td>Microsoft買収→Outlook統合</td>
             <td>データ消失</td>
@@ -366,39 +368,39 @@
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>アプリ</th>
-            <th>リスク</th>
-            <th>理由</th>
+            <th scope="col">アプリ</th>
+            <th scope="col">リスク</th>
+            <th scope="col">理由</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Apple Notes</td>
+            <th scope="row">Apple Notes</th>
             <td><span class="risk-very-low">極低</span></td>
             <td>Apple本体のOS標準アプリ。iCloud連携でデータも安全</td>
           </tr>
           <tr>
-            <td><a href="/vs/google-keep/" style="color:var(--accent);text-decoration:none;">Google Keep</a></td>
+            <th scope="row"><a href="/vs/google-keep/" style="color:var(--accent);text-decoration:none;">Google Keep</a></th>
             <td><span class="risk-low">低</span></td>
             <td>Google提供で安定。ただしChrome版は2021年に終了実績あり</td>
           </tr>
           <tr>
-            <td>Notion</td>
+            <th scope="row">Notion</th>
             <td><span class="risk-medium">中</span></td>
             <td>VC支援のスタートアップ。データはクラウド専用。エクスポート機能はあり</td>
           </tr>
           <tr>
-            <td>Obsidian</td>
+            <th scope="row">Obsidian</th>
             <td><span class="risk-very-low">極低</span></td>
             <td>ローカルファイル（Markdown）。サービス終了してもデータは残る</td>
           </tr>
           <tr>
-            <td>Evernote</td>
+            <th scope="row">Evernote</th>
             <td><span class="risk-high">中〜高</span></td>
             <td>Bending Spoons社による買収後の縮小傾向。無料プランの大幅制限</td>
           </tr>
           <tr>
-            <td class="highlight-col"><a href="/" style="color:var(--accent);text-decoration:none;">Simple Memo</a></td>
+            <th scope="row" class="highlight-col"><a href="/" style="color:var(--accent);text-decoration:none;">Simple Memo</a></th>
             <td class="highlight-col"><span class="risk-very-low">極低</span></td>
             <td class="highlight-col">メールに保存。サービス終了してもデータはメールボックスに永続</td>
           </tr>
@@ -609,6 +611,7 @@
     <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link">ダウンロード</a>
         <a href="/" class="footer__link">ホーム</a>
         <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a>
         <a href="/guides/" class="footer__link">設定ガイド</a>
@@ -625,6 +628,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
         <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
         <a href="/privacy" class="footer__link">プライバシー</a>
         <a href="/contact" class="footer__link">お問い合わせ</a>

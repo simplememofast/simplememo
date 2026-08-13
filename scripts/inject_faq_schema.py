@@ -1,16 +1,34 @@
 """
-Extract FAQ entries from each captio-alternative page's <details
-class="faq-details"> blocks and emit a FAQPage JSON-LD <script>
-in the page <head>.
+Extract FAQ entries from a page's <details class="faq-details"> blocks and
+emit a FAQPage JSON-LD <script> in the page <head>.
 
-The JA page (/captio-alternative/) carries both ja and en FAQ DOM
-(data-lang toggled). We emit only the ja FAQs in its FAQPage schema,
-matching the page's primary language. Same idea for the EN page.
+Pages carrying both languages in one document (data-lang toggled) contribute
+only the FAQs matching the page's primary language, so the schema and the
+declared inLanguage agree.
 
 Idempotent: if a managed FAQPage block already exists, replace it.
 
 Usage:
     python3 scripts/inject_faq_schema.py [--dry-run]
+
+Targets are DISCOVERED, not listed. The original version named three files.
+That was the whole coverage: a 2026-08-12 audit found 144 indexable pages
+carrying a visible FAQ section with no FAQPage schema at all — every /vs/
+comparison, every /glossary/ entry, every /use-cases/ page. The markup was
+already uniform (`faq-item > details.faq-details`), so the only thing standing
+between those pages and valid schema was a hardcoded list of three.
+
+A page that already has an UNMANAGED FAQPage block is left alone. Injecting
+beside it would publish two FAQPage nodes for one page, and the hand-written
+one is the one a human chose the wording for.
+
+Note on what this buys, so nobody re-measures it expecting the wrong thing:
+Google restricted FAQ rich results to authoritative government and health
+sites in 2023, so this will NOT put FAQ accordions in Google's results for
+this domain. It is worth doing for machine-readability — Bing still renders
+them, and the AI surfaces this site is actually winning on (3,164 Copilot
+citations) read structured data. Judge it on AI citations and Bing, not on
+Google rich results.
 """
 
 from __future__ import annotations
@@ -56,28 +74,32 @@ def strip_tags_and_normalize(html: str) -> str:
     return text
 
 
+LANG_ATTR_RE = re.compile(r'data-lang="(ja|en)"')
+
+
 def extract_faqs(html_text: str, target_lang: str) -> list[tuple[str, str]]:
-    """Find the data-lang=target_lang section that contains faq-item details
-    blocks and return a list of (question, answer) text tuples."""
-    # Walk every data-lang block; pick those that contain faq-details
+    """(question, answer) pairs belonging to target_lang, in document order.
+
+    Language comes from the nearest `data-lang` attribute BEFORE each FAQ,
+    not from trying to delimit the enclosing block. Delimiting was the first
+    approach and it silently failed on the bilingual pages: the block pattern
+    has to guess where a <div data-lang> ends, and `faq-item` nests a div
+    inside a div inside it, so on /vs/capacities/ no ja block matched at all.
+    The code then fell through to its "no data-lang shell" fallback, which
+    takes every FAQ on the page — publishing all 6 English Q&As inside a
+    FAQPage declaring inLanguage "ja". Scanning backwards for the last
+    data-lang attribute needs no notion of nesting and cannot mis-delimit.
+
+    A FAQ with no data-lang before it belongs to a single-language page and
+    is kept whatever target_lang is.
+    """
     candidates: list[tuple[str, str]] = []
     seen: set[str] = set()
-    for m in DATA_LANG_BLOCK_RE.finditer(html_text):
-        if m.group("lang") != target_lang:
-            continue
-        block = m.group("body")
-        for fm in FAQ_DETAILS_RE.finditer(block):
-            q = strip_tags_and_normalize(fm.group("q"))
-            a = strip_tags_and_normalize(fm.group("a"))
-            if q and a and q not in seen:
-                candidates.append((q, a))
-                seen.add(q)
-    if candidates:
-        return candidates
-
-    # Fallback: pages where FAQs are not wrapped in a data-lang block
-    # (the EN page emits FAQs directly without the data-lang shell).
     for fm in FAQ_DETAILS_RE.finditer(html_text):
+        marks = LANG_ATTR_RE.findall(html_text, 0, fm.start())
+        lang = marks[-1] if marks else None
+        if lang is not None and lang != target_lang:
+            continue
         q = strip_tags_and_normalize(fm.group("q"))
         a = strip_tags_and_normalize(fm.group("a"))
         if q and a and q not in seen:
@@ -145,33 +167,55 @@ def process_file(file_path: Path, page_url: str, lang: str, dry_run: bool) -> bo
     return True
 
 
+SITE_URL = "https://simplememofast.com"
+SKIP_DIRS = {".git", "node_modules", "scripts", "docs", "screenshots", "admin"}
+SKIP_FILES = {"404.html"}
+NOINDEX_RE = re.compile(r'content\s*=\s*["\'][^"\']*noindex', re.IGNORECASE)
+
+
+def page_url_for(path: Path) -> str:
+    """Canonical, extension-less URL — the same shape the sitemap publishes:
+    `foo/index.html` -> `/foo/`, `blog/bar.html` -> `/blog/bar`."""
+    rel = path.relative_to(REPO_ROOT).as_posix()
+    if rel.endswith("/index.html"):
+        return f"{SITE_URL}/{rel[: -len('index.html')]}"
+    if rel == "index.html":
+        return f"{SITE_URL}/"
+    return f"{SITE_URL}/{rel[: -len('.html')]}"
+
+
+def discover() -> list[tuple[Path, str, str]]:
+    """Every indexable page whose FAQ markup we may safely own."""
+    targets: list[tuple[Path, str, str]] = []
+    for path in sorted(REPO_ROOT.rglob("*.html")):
+        rel = path.relative_to(REPO_ROOT)
+        if any(p in SKIP_DIRS for p in rel.parts) or rel.name in SKIP_FILES:
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if NOINDEX_RE.search(text):
+            continue
+        if not FAQ_DETAILS_RE.search(text):
+            continue
+        if '"FAQPage"' in text and MANAGED_MARKER not in text:
+            print(f"[keep] {rel}: hand-written FAQPage left alone")
+            continue
+        lang = "en" if rel.parts[0] == "en" else "ja"
+        targets.append((path, page_url_for(path), lang))
+    return targets
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
-    targets = [
-        (
-            REPO_ROOT / "captio-alternative" / "index.html",
-            "https://simplememofast.com/captio-alternative/",
-            "ja",
-        ),
-        (
-            REPO_ROOT / "en" / "captio-alternative" / "index.html",
-            "https://simplememofast.com/en/captio-alternative/",
-            "en",
-        ),
-        (
-            REPO_ROOT / "blog" / "captio-discontinued.html",
-            "https://simplememofast.com/blog/captio-discontinued",
-            "ja",
-        ),
-    ]
+    targets = discover()
+    changed = 0
     for fp, url, lang in targets:
-        if not fp.exists():
-            print(f"[err] missing: {fp}")
-            return 1
-        process_file(fp, url, lang, args.dry_run)
+        if process_file(fp, url, lang, args.dry_run):
+            changed += 1
+    print(f"\n{len(targets)} page(s) with FAQ markup; "
+          f"{'would update' if args.dry_run else 'updated'} {changed}")
     return 0
 
 

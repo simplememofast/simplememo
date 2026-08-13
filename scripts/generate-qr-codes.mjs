@@ -70,6 +70,10 @@ export const QR_PAGES = [
   // the two is actually scanned — the only place a QR is visible at all.
   { slug: 'siri', en: true },
   { slug: 'siri', en: true, placement: 'hero-qr' },
+  // /download/ — the one page whose entire job is to hand a desktop reader a
+  // way onto their phone, so the QR is the primary element rather than a
+  // fallback under a badge. Ships both languages in one document.
+  { slug: 'download', en: true },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */

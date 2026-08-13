@@ -26,10 +26,10 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 - E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness) heuristics — about-author bio, citation chains, and updatedAt freshness matter
 
 **Levers we control:**
-- ✅ `Google-Extended` bot allowed in `/robots.txt`
-- ✅ FAQPage JSON-LD on `/faq` and 7+ high-impression pages
-- ✅ Author bio + organization schema on `/about/`
-- ✅ `dateModified` populated on every blog post
+- ✅ `Google-Extended` bot allowed in `/robots.txt` — **VERIFIED**（`robots.txt:71` に `User-agent: Google-Extended` を確認・2026-08-13監査）
+- ✅ FAQPage JSON-LD on `/faq` and 7+ high-impression pages — **VERIFIED**（`grep -rl "FAQPage" --include="*.html"` で実測62ページ。「7+」は当初の下限見積りで、実数はそれを大きく上回る・2026-08-13監査）
+- ✅ Author bio + organization schema on `/about/` — **VERIFIED**（`about/index.html` の AboutPage JSON-LD 内に `Person`（AI Ataka）と `worksFor: Organization` を確認・2026-08-13監査）
+- ✅ `dateModified` populated on every blog post — **VERIFIED**（`blog/*.html` 57本全件に `dateModified` を確認（欠落0件）・2026-08-13監査）
 - 🟡 **Action:** Audit top-10 highest-impression pages in GSC and ensure each leads with a 1-2 sentence direct answer to the implied query
 - 🟡 **Action:** Add `mainEntityOfPage` JSON-LD pointing comparison pages (`vs/*`) at the relevant Product entity
 

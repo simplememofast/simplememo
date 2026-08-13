@@ -68,7 +68,7 @@
     "description": "Offline-first memo apps compared. Simple Memo's Outbox queue, Apple Notes, Obsidian, Joplin, Standard Notes, Bear, and Google Keep offline modes analyzed.",
     "image": "https://simplememofast.com/assets/img/og/blog-offline-first-comparison.png",
     "datePublished": "2026-03-21",
-    "dateModified": "2026-06-05",
+    "dateModified": "2026-08-12",
     "url": "https://simplememofast.com/en/blog/offline-first-comparison",
     "author": {
       "@type": "Person",
@@ -150,7 +150,7 @@
   }
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -320,10 +320,17 @@
           Offline-First Memo Apps 2026
         </p>
         <h1 class="page-content__title" style="font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.3;margin-bottom:1rem;">Offline-First Memo Apps 2026:<br>Simple Memo vs Apple Notes vs Obsidian</h1>
-        <p style="font-size:.875rem;color:var(--text-muted);">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: <time datetime="2026-03-21">March 21, 2026</time> · Reading time: ~10 minutes</p>
+        <p style="font-size:.875rem;color:var(--text-muted);">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: <time datetime="2026-03-21">March 21, 2026</time> · Last updated: <time datetime="2026-08-12">August 12, 2026</time> · Reading time: ~10 minutes</p>
       </div>
 
       <div class="page-content__body" style="max-width:780px;margin:0 auto;line-height:1.8;">
+
+        <!-- TL;DR Summary for AI Citation. Answer-first, self-contained: the
+             conclusion of the matrix and the verdict section, stated up front. -->
+        <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
+          <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
+          <p style="color:var(--text-secondary);margin:0;">&ldquo;Offline&rdquo; is not one property. <strong>Offline-first</strong> apps treat your device as the source of truth (Obsidian, Standard Notes); <strong>offline-capable</strong> apps let you work offline but treat the cloud as primary (Apple Notes, Bear, Google Keep); and some are effectively online-only (Notion). For capture specifically, the question is not whether you can type without a signal but what happens to what you typed. <strong>Simple Memo - for Obsidian</strong> (SimpleMemoFast, iOS) answers it with an Outbox: the memo is encrypted with AES-GCM on the device, queued, and sent by itself once a network returns &mdash; ready to type 0.4s after launch, free for 3 sends a day, and what you send appends itself to your Obsidian vault.</p>
+        </div>
 
         <h2>Introduction: Why Offline Matters</h2>
 
@@ -389,17 +396,17 @@
         <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
           <thead>
             <tr>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">App</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Offline-First?</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Create Offline</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Edit Offline</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Sync on Reconnect</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Conflict Resolution</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">App</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Offline-First?</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Create Offline</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Edit Offline</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Sync on Reconnect</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;background:var(--surface);font-weight:700;">Conflict Resolution</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Simple Memo - for Obsidian</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Simple Memo - for Obsidian</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Outbox</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
@@ -407,7 +414,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">N/A (email)</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Apple Notes</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Apple Notes</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-capable</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
@@ -415,7 +422,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Last-write-wins</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Obsidian</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Obsidian</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">True offline-first</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
@@ -423,7 +430,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">File-level</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Joplin</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Joplin</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-first</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
@@ -431,7 +438,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Version history</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Standard Notes</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Standard Notes</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Offline-capable</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Yes</td>
@@ -439,7 +446,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Last-sync-wins</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Bear</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Bear</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">iCloud-dependent</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Limited</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Limited</td>
@@ -447,7 +454,7 @@
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Last-sync-wins</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Google Keep</strong></td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);font-weight:700;"><strong>Google Keep</strong></th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">Online-only</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">No</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);text-align:center;">No</td>
@@ -536,39 +543,39 @@
         <table style="width:100%;border-collapse:collapse;font-size:.875rem;margin:1.5rem 0;overflow-x:auto;display:block;">
           <thead>
             <tr>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">Your Priority</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">Best Choice</th>
-              <th style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">Why</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">Your Priority</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">Best Choice</th>
+              <th scope="col" style="padding:.6rem .5rem;border:1px solid var(--border);text-align:left;background:var(--surface);font-weight:700;">Why</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Fast offline capture</td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Fast offline capture</th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simple Memo - for Obsidian</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Outbox queuing + AES-GCM encryption + email delivery</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Complete offline independence</td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Complete offline independence</th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Obsidian</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">100% local files, no cloud required</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Offline-first with built-in sync</td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Offline-first with built-in sync</th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Joplin</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Multiple sync backends, conflict resolution, cross-platform</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple-only ecosystem</td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Apple-only ecosystem</th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple Notes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Native iOS, seamless iCloud, no setup</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Privacy + offline</td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Privacy + offline</th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simple Memo - for Obsidian or Joplin</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">E2E encryption + local-first architecture</td>
             </tr>
             <tr>
-              <td style="padding:.6rem .5rem;border:1px solid var(--border);">Simplicity</td>
+              <th scope="row" style="padding:.6rem .5rem;border:1px solid var(--border);">Simplicity</th>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">Apple Notes</td>
               <td style="padding:.6rem .5rem;border:1px solid var(--border);">No configuration, works out of the box</td>
             </tr>
@@ -609,6 +616,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">Product</p>
+        <a href="/download/" class="footer__link">Download</a>
         <a href="/en/" class="footer__link">Home</a>
         <a href="/en/send-email-to-yourself/" class="footer__link">Email Yourself Apps</a>
         <a href="/use-cases/" class="footer__link">Use Cases</a>
@@ -626,6 +634,7 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">Support</p>
+        <a href="/devlog/" class="footer__link">Dev log</a>
         <a href="/faq" class="footer__link">FAQ</a>
         <a href="/privacy" class="footer__link">Privacy</a>
         <a href="/contact" class="footer__link">Contact</a>

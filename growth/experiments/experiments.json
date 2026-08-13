@@ -864,7 +864,8 @@
       "decision": null,
       "evaluated_at": null,
       "notes": [
-        "2026-08-11: オーナーがサイト外（App Store・note・Zenn・X）の表示名統一を完了。サイト側はOrganizationを持つ223ページ全数が正準@id https://simplememofast.com/#organization を指しており元から連結済みだったため、施策案の「sameAsを全240ページに展開」は不要と判明していた（§4 P0-4追記）。これでエンティティ分割は内外とも解消し、施策は投入完了。あとは評価日にブランド検索表示数を読むだけ。"
+        "2026-08-11: オーナーがサイト外（App Store・note・Zenn・X）の表示名統一を完了。サイト側はOrganizationを持つ223ページ全数が正準@id https://simplememofast.com/#organization を指しており元から連結済みだったため、施策案の「sameAsを全240ページに展開」は不要と判明していた（§4 P0-4追記）。これでエンティティ分割は内外とも解消し、施策は投入完了。あとは評価日にブランド検索表示数を読むだけ。",
+        "2026-08-12: 「エンティティ分割は内外とも解消」は Organization については正しいが、SoftwareApplication では成り立っていなかった。自社の SoftwareApplication ノート6件（ai-tags 日英・apple-watch 日英・voices・en/send-email-to-yourself）が @id を持たず、#app と結合していない状態で残っていた。223ページの Organization を数えた確認はこの面を見ていない。2026-08-12 に6件へ #app を付与し、自社28ノート全数が#app に揃ったことを確認済み。評価日に読むときの注意: エンティティ統一が完全に効いていた期間は 08-12 以降であって08-11 以降ではない。施策投入日は面によって1日ずれている。"
       ]
     },
     {
@@ -976,6 +977,37 @@
       "notes": []
     },
     {
+      "id": "aio-2026-08-12-entity-attribution",
+      "page": "(4 articles: /blog/business-memo-apps-2026, /blog/memo-app-hikaku-matome, /en/blog/best-memo-apps-2026, /en/blog/offline-first-comparison)",
+      "type": "aio_entity",
+      "hypothesis": "属性つきの一貫した自社言及＋機械可読な比較表があれば、AIは引用するだけでなく推薦候補として自社を挙げやすくなる。現状は引用はされるが回答内での推薦に至るとは限らない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-12",
+      "evaluation_at": "2026-11-12",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": 1097,
+        "ctr": null,
+        "position": null,
+        "window": "累計（Bing Webmaster・2026-08-12時点）",
+        "source": "依頼④記載のAI引用数: business-memo-apps-2026 494 / memo-app-hikaku-matome 358 / en best-memo-apps-2026 142 / en offline-first-comparison 103。オーナー報告、リポジトリ内に一次データなし"
+      },
+      "target_metric": "ai_citations",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-12: 対象は依頼④の6記事のうち4記事。/blog/best-memo-apps-2026 と /blog/free-memo-apps-ranking は進行中の実験（title-2026-08-12-013 / snippet-2026-08-09-free-memo-ranking）と干渉するため除外した。つまりこの実験の対象群は「AI引用の多い順」ではなく「空いていた順」であり、効果量を6記事に外挿しないこと。",
+        "2026-08-12: baseline はオーナー申告の累計値で、リポジトリ内に一次データが無い。growth/data/ に Bing Webmaster の取り込み口が無いため、評価日には同じ画面を人が見て数字を控える必要がある。GSCと違い自動では埋まらない。",
+        "2026-08-12: 英語版 best-memo-apps には比較表を新設しており、「表記の統一」と「表の有無」という2つの変更が同じページに入っている。このページ単体では寄与を切り分けられない。"
+      ]
+    },
+    {
       "id": "aio-2026-08-12-logseq-answer-block",
       "page": "/obsidian/compare/logseq/",
       "type": "answer_block",
@@ -1005,6 +1037,138 @@
       ],
       "pages": [
         "/obsidian/compare/logseq/"
+      ]
+    },
+    {
+      "id": "cta-2026-08-12-download-page",
+      "page": "/download/",
+      "type": "download_page",
+      "hypothesis": "A dedicated /download/ page with a 200px QR as the primary element, linked from the footer of 234 pages, gives desktop readers a route onto their phone that the App Store badge cannot. Desktop is 51% of search visits but only 35% of app_store_click.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-12",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": 60,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": "2026-07-13..2026-08-09",
+        "source": "GA4 app_store_click, all devices (growth/reports/2026-08-10-desktop-dead-end.md §1); desktop 21 of 60"
+      },
+      "target_metric": "app_store_clicks",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-12: 計測できないことを先に書いておく。QRはスキャンされてもGA4の app_store_click は発火しない（指で押していないため）。効果が出る先は App Store Connect のキャンペーン別インストール（ct=download-jp__hero / download-jp__qr / download-jp__nav）だけで、growth/data/appstore/ は現在も空。2026-08-10 のPC限定QRと同じ制約であり、承知のうえで入れている。",
+        "2026-08-12: 進行中の cta-2026-08-10-desktop-qr（評価日同じ 2026-09-13）と 干渉する。あちらは9ページの締めCTA直下のQRを測るもので、こちらは全ページのフッターから新しいPC向け導線を足す。同日評価なので、どちらの寄与かは切り分けられない。切り分けが要るなら評価日をずらすこと。",
+        "2026-08-12: グローバルナビのCTAは触っていない。現状は全ページで App Store へ直リンクし ct=…__nav で測られている。PCだけ /download/ へ向ける案（.cta-qr と同じCSSの出し分けで可能）はオーナー判断待ち。実行するとPC分の __nav 計測が途切れ、上記2実験の期間中にPC側の挙動を変えることになる。"
+      ]
+    },
+    {
+      "id": "title-2026-08-12-013",
+      "page": "/blog/best-memo-apps-2026",
+      "type": "title_test",
+      "hypothesis": "Front-loading the exact query 「メモアプリおすすめ」 (was behind 【2026年版】) plus a visible 8月更新 stamp lifts CTR and position on the money query, which sits at pos 10.05 / CTR 1.00%.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-12",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "title": "【2026年版】メモアプリおすすめ10選｜用途別の本命と最速キャプチャ"
+      },
+      "after": {
+        "title": "メモアプリおすすめ20選 比較【2026年8月更新】速さ・料金・暗号化で選ぶ"
+      },
+      "baseline": {
+        "clicks": 35,
+        "impressions": 1208,
+        "ctr": 0.02897,
+        "position": 8.43,
+        "window": "2026-07-13..2026-08-09",
+        "source": "growth/data/gsc/2026-08-11 (pages.json)"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-12: cta-2026-08-10-desktop-qr がこのページを含み、同じ 2026-09-13 に評価される。タイトル変更は流入クエリの構成を動かすため、CTA側の数値は単独で読まず、この実験と併せて読むこと。",
+        "2026-08-12: 同日、このページの比較表と本文の競合起動速度を data/benchmark.json の正準値へ訂正した（Apple Notes 約1秒→1.7秒、Google Keep 約1.5秒→2.1秒、Notion 2〜3秒→2.8秒、Evernote 3〜5秒→2.5秒、Drafts 1.1秒→0.9秒、Bear/OneNote は「—」だったが実測値があるので 0.9秒/2.6秒、未計測の3アプリは「計測なし」と明記）。タイトル実験の target_metric は SERP の CTR なので、本文の数値訂正はタイトルにも description にも入らず交絡しない。ただし訂正は自社に不利な方向（Evernote は主張より速く、Bear は隠れていたが速い）で、「最速」の主張自体は 0.4秒 対 2位 0.9秒 で変わらない。"
+      ]
+    },
+    {
+      "id": "title-2026-08-12-014",
+      "page": "/blog/meeting-memo-template",
+      "type": "title_test",
+      "hypothesis": "Copy-paste templates hoisted above the rationale + 「コピペ可」 in the title match the フォーマット intent. Page sits at pos 12.9 (page 2), so position is the target metric, not CTR.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-12",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "title": "会議メモ・議事メモ テンプレート5選｜コピペで使えるフォーマットと書き方"
+      },
+      "after": {
+        "title": "会議メモ・議事メモテンプレート5選（コピペ可）｜書き方の型と共有まで【2026】"
+      },
+      "baseline": {
+        "clicks": 21,
+        "impressions": 891,
+        "ctr": 0.02357,
+        "position": 12.86,
+        "window": "2026-07-13..2026-08-09",
+        "source": "growth/data/gsc/2026-08-11 (pages.json)"
+      },
+      "target_metric": "position",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-12: タイトルと本文構成（コピペ用テンプレを冒頭へ移動）を同時に動かしている。分離した実験ではないので、効果はどちらの寄与か切り分けられない。cta-2026-08-10-mid-placement もこのページを含み、同日評価。"
+      ]
+    },
+    {
+      "id": "title-2026-08-12-015",
+      "page": "/vs/capacities/",
+      "type": "title_test",
+      "hypothesis": "Replacing the generic 「徹底比較」 promise with the concrete price (無料/Pro $9.99) answers the 料金 intent in the SERP. CTR is 1.6% against 3.2% expected at pos 7.3 — a +26 clicks/mo gap.",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-12",
+      "evaluation_at": "2026-09-13",
+      "status": "running",
+      "before": {
+        "title": "Capacitiesとは？特徴・料金・Obsidianとの違いまで徹底比較【2026】"
+      },
+      "after": {
+        "title": "Capacitiesとは？料金（無料/Pro $9.99）とObsidianとの違いを比較【2026】"
+      },
+      "baseline": {
+        "clicks": 25,
+        "impressions": 1593,
+        "ctr": 0.01569,
+        "position": 7.32,
+        "window": "2026-07-13..2026-08-09",
+        "source": "growth/data/gsc/2026-08-11 (pages.json)"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-12: 2026-07-29 に keep と判定された題を差し替える2回目の実験。当時（imp 1,605 / CTR 1.62% / pos 7.4）から imp は増えたが CTR は 1.57% に低下しており、keep の根拠は現在の数値では成り立たない。cta-2026-08-10-desktop-qr と cta-2026-08-10-mid-placement もこのページを含み、同日評価。",
+        "2026-08-12: 依頼①では 日本語対応 を題に入れる案だったが、ページに日本語対応の記述が無いため入れていない。題と中身を合わせるなら、先に本文へ節を足すこと。"
       ]
     }
   ]

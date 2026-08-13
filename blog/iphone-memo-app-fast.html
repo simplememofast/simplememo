@@ -78,7 +78,7 @@
 }
   </script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -221,6 +221,8 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/iphone-memo-app-fast#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"起動速度の計測方法は信頼できますか？","acceptedAnswer":{"@type":"Answer","text":"本テストではiPhoneのスローモーション撮影（240fps）を使用し、アプリアイコンのタップからテキスト入力カーソルが表示されるまでの時間をフレーム単位で計測しています。各アプリ10回計測の平均値を使用しており、外れ値は除外していません。計測方法の詳細はベンチマーク記事で公開しています。"}},{"@type":"Question","name":"Obsidian連携シンプルメモはなぜこんなに速いのですか？","acceptedAnswer":{"@type":"Answer","text":"3つの技術的な理由があります。(1) SwiftUIではなくUIKitで開発し、起動時の初期化処理を最小化、(2) 起動時にネットワーク通信を行わない設計、(3) 「メモを書いて送る」という一つの機能に特化し、不要なモジュールを排除。詳しくはUIKit vs SwiftUIの開発記録をご覧ください。"}},{"@type":"Question","name":"ウォームスタート（バックグラウンドからの復帰）の速度は？","acceptedAnswer":{"@type":"Answer","text":"ウォームスタートの場合、全アプリとも0.1〜約1秒で復帰します。差が最も大きいのはコールドスタート（完全停止状態からの起動）です。本記事ではより厳密な比較のため、コールドスタートの計測値を使用しています。"}},{"@type":"Question","name":"速いメモアプリは機能が少ないのでは？","acceptedAnswer":{"@type":"Answer","text":"その通りです。Obsidian連携シンプルメモは「速くメモを取って自分にメール送信する」ことに特化しており、フォルダ管理や検索機能はありません。ただし、メモの整理は送信先のメールアプリ（Gmail、Outlookなど）で行えるため、「キャプチャはObsidian連携シンプルメモ、整理はGmail」という使い分けが最も効率的です。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -298,44 +300,44 @@
         <table class="speed-table">
           <thead>
             <tr>
-              <th>順位</th>
-              <th>アプリ名</th>
-              <th>起動速度</th>
-              <th>入力までのタップ数</th>
-              <th>料金</th>
+              <th scope="col">順位</th>
+              <th scope="col">アプリ名</th>
+              <th scope="col">起動速度</th>
+              <th scope="col">入力までのタップ数</th>
+              <th scope="col">料金</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><span class="speed-rank">1位</span></td>
+              <th scope="row"><span class="speed-rank">1位</span></th>
               <td><strong>Obsidian連携シンプルメモ</strong></td>
               <td>約1秒 <span class="speed-bar" style="width:30px"></span></td>
               <td>1タップ</td>
               <td>無料〜500円/月</td>
             </tr>
             <tr>
-              <td><span class="speed-rank">2位</span></td>
+              <th scope="row"><span class="speed-rank">2位</span></th>
               <td><strong>Apple純正メモ</strong></td>
               <td>約0.8秒 <span class="speed-bar" style="width:80px;background:#3fb950"></span></td>
               <td>2タップ</td>
               <td>無料</td>
             </tr>
             <tr>
-              <td><span class="speed-rank">3位</span></td>
+              <th scope="row"><span class="speed-rank">3位</span></th>
               <td><strong>Google Keep</strong></td>
               <td>約1.0秒 <span class="speed-bar" style="width:100px;background:#f0b030"></span></td>
               <td>2タップ</td>
               <td>無料</td>
             </tr>
             <tr>
-              <td><span class="speed-rank">4位</span></td>
+              <th scope="row"><span class="speed-rank">4位</span></th>
               <td><strong>Notion</strong></td>
               <td>約1.5秒 <span class="speed-bar" style="width:150px;background:#f07030"></span></td>
               <td>3タップ以上</td>
               <td>無料〜$10/月</td>
             </tr>
             <tr>
-              <td><span class="speed-rank">5位</span></td>
+              <th scope="row"><span class="speed-rank">5位</span></th>
               <td><strong>Evernote</strong></td>
               <td>約2.0秒 <span class="speed-bar" style="width:200px;background:#f85149"></span></td>
               <td>2〜3タップ</td>
@@ -628,6 +630,7 @@
   <footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link">ダウンロード</a>
         <a href="/" class="footer__link">ホーム</a>
         <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a>
         <a href="/guides/" class="footer__link">設定ガイド</a>
@@ -644,6 +647,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
         <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
         <a href="/privacy" class="footer__link">プライバシー</a>
         <a href="/contact" class="footer__link">お問い合わせ</a>

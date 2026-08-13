@@ -67,7 +67,7 @@
   <!-- JSON-LD: Speakable -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/obsidian/#webpage","inLanguage":"ja","name":"シンプルメモ vs Obsidian 比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".reason-card__title"]},"url":"https://simplememofast.com/vs/obsidian/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -254,7 +254,9 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-  </head>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/obsidian/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"ObsidianのVaultにシンプルメモから直接書き込めますか？","acceptedAnswer":{"@type":"Answer","text":"直接のVault書き込みには対応していませんが、シンプルメモで送信したメールをObsidianのDaily Noteにコピー＆ペーストするワークフローが効果的です。メールのタイムスタンプがそのまま記録になるため、後からの整理も容易です。"}},{"@type":"Question","name":"Obsidianのクイックキャプチャ機能ではダメですか？","acceptedAnswer":{"@type":"Answer","text":"ObsidianにはQuick Capture系のプラグインがありますが、Vault読み込みとプラグイン初期化に1〜4秒かかるため、真の「瞬間キャプチャ」とは言えません。シンプルメモは0.4秒起動・ワンタップ送信で、Obsidianが立ち上がるまでにメモの送信が完了しています。"}},{"@type":"Question","name":"ObsidianのGraph Viewに相当する機能はシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"ありません。シンプルメモはPKM（個人知識管理）ツールではなく、瞬間キャプチャ専用ツールです。Graph ViewやバックリンクはObsidianの真骨頂であり、シンプルメモはその入口としての「高速インボックス」の役割に徹しています。"}},{"@type":"Question","name":"Obsidianのプラグインが多すぎて選べません。シンプルメモは設定が必要ですか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモには設定項目がメールアドレスの登録のみです。プラグインの概念がないため、「どれを入れるべきか」という悩みが存在しません。Obsidianのプラグイン選定に疲れた方にとって、設定ゼロの体験は新鮮に感じるはずです。"}},{"@type":"Question","name":"ObsidianからNotionに移行を検討中ですが、シンプルメモは選択肢になりますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモはObsidianやNotionの代替ではなく、補完ツールです。PKM機能が必要ならObsidianかNotionを続けつつ、「移動中の素早いメモ取り」にはシンプルメモを追加する使い方がおすすめです。書いたメモはメールで届くので、後からどのツールにも取り込めます。"}}]}</script>
+</head>
 <body>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
@@ -331,19 +333,19 @@
         </h2>
         <div style="overflow-x:auto">
           <table class="compare-table">
-            <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>Obsidian</th></tr></thead>
+            <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Obsidian</th></tr></thead>
             <tbody>
-              <tr><td>起動速度</td><td class="yes">0.4秒（即入力可）</td><td class="no">2〜4秒（Vault読込後）</td></tr>
-              <tr><td>ワンタップ送信</td><td class="yes">あり（メール直送）</td><td class="no">なし（ファイル保存のみ）</td></tr>
-              <tr><td>メール送信</td><td class="yes">ワンタップで直接送信</td><td class="no">機能なし</td></tr>
-              <tr><td>アカウント不要</td><td class="yes">既存メールのみ</td><td class="yes">アカウント不要（ローカル保存）</td></tr>
-              <tr><td>学習コスト</td><td class="yes">ゼロ（即使える）</td><td class="no">高い（Markdown・プラグイン習得）</td></tr>
-              <tr><td>同期機能</td><td class="yes">メール送信が同期の代替</td><td class="no">Obsidian Sync（有料）</td></tr>
-              <tr><td>オフライン対応</td><td class="yes">Outbox自動再送（無料）</td><td class="yes">完全ローカル動作</td></tr>
-              <tr><td>暗号化</td><td class="yes">AES-GCM（端末内）</td><td>なし（ローカルファイル）</td></tr>
-              <tr><td>バックリンク・グラフ</td><td class="no">なし</td><td class="yes">あり（PKMの核心機能）</td></tr>
-              <tr><td>プラグイン</td><td class="no">なし</td><td class="yes">1000+のコミュニティプラグイン</td></tr>
-              <tr><td>UIの複雑さ</td><td class="yes">最小限</td><td class="no">高機能・カスタマイズ多数</td></tr>
+              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td class="no">2〜4秒（Vault読込後）</td></tr>
+              <tr><th scope="row">ワンタップ送信</th><td class="yes">あり（メール直送）</td><td class="no">なし（ファイル保存のみ）</td></tr>
+              <tr><th scope="row">メール送信</th><td class="yes">ワンタップで直接送信</td><td class="no">機能なし</td></tr>
+              <tr><th scope="row">アカウント不要</th><td class="yes">既存メールのみ</td><td class="yes">アカウント不要（ローカル保存）</td></tr>
+              <tr><th scope="row">学習コスト</th><td class="yes">ゼロ（即使える）</td><td class="no">高い（Markdown・プラグイン習得）</td></tr>
+              <tr><th scope="row">同期機能</th><td class="yes">メール送信が同期の代替</td><td class="no">Obsidian Sync（有料）</td></tr>
+              <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送（無料）</td><td class="yes">完全ローカル動作</td></tr>
+              <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内）</td><td>なし（ローカルファイル）</td></tr>
+              <tr><th scope="row">バックリンク・グラフ</th><td class="no">なし</td><td class="yes">あり（PKMの核心機能）</td></tr>
+              <tr><th scope="row">プラグイン</th><td class="no">なし</td><td class="yes">1000+のコミュニティプラグイン</td></tr>
+              <tr><th scope="row">UIの複雑さ</th><td class="yes">最小限</td><td class="no">高機能・カスタマイズ多数</td></tr>
             </tbody>
           </table>
           
@@ -589,6 +591,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span>ダウンロード</span> </a>
         <a href="/" class="footer__link"><span>ホーム</span></a>
         <a href="/use-cases/" class="footer__link"><span>使い方</span></a>
         <a href="/guides/" class="footer__link"><span>ガイド</span></a>
@@ -601,6 +604,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span>開発記録</span> </a>
+        <a href="/about/" class="footer__link"><span>開発者について</span> </a>
         <a href="/faq" class="footer__link"><span>FAQ</span></a>
         <a href="/privacy" class="footer__link"><span>プライバシー</span></a>
         <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>

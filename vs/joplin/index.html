@@ -64,7 +64,7 @@
   <!-- JSON-LD: Speakable -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/vs/joplin/#webpage","inLanguage":"ja","name":"シンプルメモ vs Joplin 比較","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".reason-card__title"]},"url":"https://simplememofast.com/vs/joplin/","isPartOf":{"@id":"https://simplememofast.com/#website"}}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=83d28e7123">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -253,7 +253,9 @@
 
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
-  </head>
+  <!-- faq-schema: managed by scripts/inject_faq_schema.py -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/vs/joplin/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Joplinのセルフホストとシンプルメモのサーバーレスはどちらが安全ですか？","acceptedAnswer":{"@type":"Answer","text":"どちらも高いプライバシー水準です。Joplinはセルフホストでデータを完全に自己管理でき、E2E暗号化も利用できます。シンプルメモはそもそもサーバーにデータを保存しない設計で、メールとして直接送信します。技術的な管理力があればJoplin、管理不要の手軽さならシンプルメモが適しています。"}},{"@type":"Question","name":"Joplinのマークダウン機能はシンプルメモにありますか？","acceptedAnswer":{"@type":"Answer","text":"シンプルメモにはマークダウン機能はありません。プレーンテキストのみに対応しています。構造化されたノートにはJoplin、瞬間的な思いつきの記録にはシンプルメモという使い分けが効果的です。"}},{"@type":"Question","name":"Joplinの同期設定が難しいのですが、シンプルメモは簡単ですか？","acceptedAnswer":{"@type":"Answer","text":"はい。シンプルメモはメールアドレスを1つ設定するだけで即使い始められます。Nextcloud、WebDAV、暗号化キーの設定といった技術的なセットアップは一切不要です。"}},{"@type":"Question","name":"Joplinユーザーがシンプルメモを追加するメリットは？","acceptedAnswer":{"@type":"Answer","text":"Joplinは長文ノートやナレッジベースの管理に優れていますが、モバイルでの瞬間キャプチャは数ステップ必要です。シンプルメモを併用すると、移動中の思いつきを0.4秒でメール送信し、後でJoplinに整理するワークフローが可能になります。"}}]}</script>
+</head>
 <body>
   <!-- Global Navigation -->
   <nav class="global-nav" aria-label="メインナビゲーション">
@@ -353,37 +355,37 @@
         </h2>
         <div style="overflow-x:auto">
           <table lang="ja" class="compare-table" data-lang="ja">
-            <thead><tr><th>項目</th><th>Obsidian連携シンプルメモ</th><th>Joplin</th></tr></thead>
+            <thead><tr><th scope="col">項目</th><th scope="col">Obsidian連携シンプルメモ</th><th scope="col">Joplin</th></tr></thead>
             <tbody>
-              <tr><td>起動速度</td><td class="yes">0.4秒（即入力可）</td><td>2〜3秒（ノート一覧読み込み後）</td></tr>
-              <tr><td>ワンタップ送信</td><td class="yes">あり（メール直送）</td><td class="no">なし（メール送信機能なし）</td></tr>
-              <tr><td>メール送信</td><td class="yes">ワンタップで直接送信</td><td class="no">非対応（OS共有経由のみ）</td></tr>
-              <tr><td>Markdown</td><td class="no">なし（プレーンテキスト）</td><td class="yes">フル対応（エディタ＆プレビュー）</td></tr>
-              <tr><td>オフライン対応</td><td class="yes">Outbox自動再送</td><td class="yes">ローカルファースト設計</td></tr>
-              <tr><td>暗号化</td><td class="yes">AES-GCM（端末内）</td><td class="yes">E2E暗号化（全同期先）</td></tr>
-              <tr><td>オープンソース</td><td class="no">プロプライエタリ</td><td class="yes">GPL（完全オープン）</td></tr>
-              <tr><td>クロスプラットフォーム</td><td class="no">iOSのみ</td><td class="yes">iOS/Android/Win/Mac/Linux</td></tr>
-              <tr><td>同期方式</td><td class="yes">メール（サーバー保存なし）</td><td class="yes">Nextcloud/WebDAV/Joplin Cloud</td></tr>
-              <tr><td>プラグイン</td><td class="no">なし</td><td class="yes">豊富なエコシステム</td></tr>
-              <tr><td>Webクリッパー</td><td class="no">なし</td><td class="yes">ブラウザ拡張あり</td></tr>
-              <tr><td>無料プラン</td><td class="yes">1日3通まで（ずっと無料）</td><td class="yes">アプリ完全無料</td></tr>
+              <tr><th scope="row">起動速度</th><td class="yes">0.4秒（即入力可）</td><td>2〜3秒（ノート一覧読み込み後）</td></tr>
+              <tr><th scope="row">ワンタップ送信</th><td class="yes">あり（メール直送）</td><td class="no">なし（メール送信機能なし）</td></tr>
+              <tr><th scope="row">メール送信</th><td class="yes">ワンタップで直接送信</td><td class="no">非対応（OS共有経由のみ）</td></tr>
+              <tr><th scope="row">Markdown</th><td class="no">なし（プレーンテキスト）</td><td class="yes">フル対応（エディタ＆プレビュー）</td></tr>
+              <tr><th scope="row">オフライン対応</th><td class="yes">Outbox自動再送</td><td class="yes">ローカルファースト設計</td></tr>
+              <tr><th scope="row">暗号化</th><td class="yes">AES-GCM（端末内）</td><td class="yes">E2E暗号化（全同期先）</td></tr>
+              <tr><th scope="row">オープンソース</th><td class="no">プロプライエタリ</td><td class="yes">GPL（完全オープン）</td></tr>
+              <tr><th scope="row">クロスプラットフォーム</th><td class="no">iOSのみ</td><td class="yes">iOS/Android/Win/Mac/Linux</td></tr>
+              <tr><th scope="row">同期方式</th><td class="yes">メール（サーバー保存なし）</td><td class="yes">Nextcloud/WebDAV/Joplin Cloud</td></tr>
+              <tr><th scope="row">プラグイン</th><td class="no">なし</td><td class="yes">豊富なエコシステム</td></tr>
+              <tr><th scope="row">Webクリッパー</th><td class="no">なし</td><td class="yes">ブラウザ拡張あり</td></tr>
+              <tr><th scope="row">無料プラン</th><td class="yes">1日3通まで（ずっと無料）</td><td class="yes">アプリ完全無料</td></tr>
             </tbody>
           </table>
           <table lang="en" class="compare-table" data-lang="en">
-            <thead><tr><th>Feature</th><th>Simple Memo</th><th>Joplin</th></tr></thead>
+            <thead><tr><th scope="col">Feature</th><th scope="col">Simple Memo</th><th scope="col">Joplin</th></tr></thead>
             <tbody>
-              <tr><td>Launch Speed</td><td class="yes">0.4s (type immediately)</td><td>2–3s (loads note list first)</td></tr>
-              <tr><td>One-Tap Send</td><td class="yes">Yes (direct email)</td><td class="no">No (no native email send)</td></tr>
-              <tr><td>Email Send</td><td class="yes">one-tap direct send</td><td class="no">Not supported (OS share only)</td></tr>
-              <tr><td>Markdown</td><td class="no">No (plain text only)</td><td class="yes">Full support (editor & preview)</td></tr>
-              <tr><td>Offline Support</td><td class="yes">Outbox auto-resend</td><td class="yes">Local-first architecture</td></tr>
-              <tr><td>Encryption</td><td class="yes">AES-GCM (on-device)</td><td class="yes">E2E encryption (all sync targets)</td></tr>
-              <tr><td>Open Source</td><td class="no">Proprietary</td><td class="yes">GPL (fully open)</td></tr>
-              <tr><td>Cross-Platform</td><td class="no">iOS only</td><td class="yes">iOS/Android/Win/Mac/Linux</td></tr>
-              <tr><td>Sync Method</td><td class="yes">Email (no server storage)</td><td class="yes">Nextcloud/WebDAV/Joplin Cloud</td></tr>
-              <tr><td>Plugins</td><td class="no">None</td><td class="yes">Rich ecosystem</td></tr>
-              <tr><td>Web Clipper</td><td class="no">None</td><td class="yes">Browser extension</td></tr>
-              <tr><td>Free Plan</td><td class="yes">3 sends/day (free forever)</td><td class="yes">App completely free</td></tr>
+              <tr><th scope="row">Launch Speed</th><td class="yes">0.4s (type immediately)</td><td>2–3s (loads note list first)</td></tr>
+              <tr><th scope="row">One-Tap Send</th><td class="yes">Yes (direct email)</td><td class="no">No (no native email send)</td></tr>
+              <tr><th scope="row">Email Send</th><td class="yes">one-tap direct send</td><td class="no">Not supported (OS share only)</td></tr>
+              <tr><th scope="row">Markdown</th><td class="no">No (plain text only)</td><td class="yes">Full support (editor & preview)</td></tr>
+              <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="yes">Local-first architecture</td></tr>
+              <tr><th scope="row">Encryption</th><td class="yes">AES-GCM (on-device)</td><td class="yes">E2E encryption (all sync targets)</td></tr>
+              <tr><th scope="row">Open Source</th><td class="no">Proprietary</td><td class="yes">GPL (fully open)</td></tr>
+              <tr><th scope="row">Cross-Platform</th><td class="no">iOS only</td><td class="yes">iOS/Android/Win/Mac/Linux</td></tr>
+              <tr><th scope="row">Sync Method</th><td class="yes">Email (no server storage)</td><td class="yes">Nextcloud/WebDAV/Joplin Cloud</td></tr>
+              <tr><th scope="row">Plugins</th><td class="no">None</td><td class="yes">Rich ecosystem</td></tr>
+              <tr><th scope="row">Web Clipper</th><td class="no">None</td><td class="yes">Browser extension</td></tr>
+              <tr><th scope="row">Free Plan</th><td class="yes">3 sends/day (free forever)</td><td class="yes">App completely free</td></tr>
             </tbody>
           </table>
         </div>
@@ -633,6 +635,7 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
         <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
         <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">Use Cases</span></a>
         <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
@@ -645,6 +648,8 @@
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
         <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
         <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
         <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
