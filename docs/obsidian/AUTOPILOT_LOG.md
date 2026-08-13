@@ -197,3 +197,47 @@
   - 次回、新しいGSCスナップショットが増えていればレーンA/Bを再判定
   - レーンC候補: プラグイン数の再計測（前回実測2026-08-11・鮮度維持目的）
   - `ai-citation-strategy.md` の残り監査（Perplexity〜Tier-2節）を数項目ずつ継続
+
+## 2026-08-14 — レーンC（Evidence Asset・定点データの鮮度維持・副系CCR代走）
+
+- 判断根拠: 冪等性チェックで主系(GitHub Actions)の当日分実行痕跡なし
+  （`claude/obsidian-auto-20260814` ブランチ不在・status JSONのdate_jstが
+  2026-08-13のまま）を確認し副系で実行。GSCスナップショットは2026-08-11から
+  増えておらず、`analyze.mjs --only unanswered/conversational` の出力は前回
+  （2026-08-13）と同一。Obsidian関連の会話型クエリは「logseqとobsidian
+  どちらが良い」(23imp・pos9.2)のみでPR #480対応済み・新規性なし。よって
+  レーンA/Bは今回も正当化できず、前回ログの申し送り「レーンC候補: プラグイン
+  数の再計測（前回実測2026-08-11・鮮度維持目的）」を実行。
+- やったこと: `/obsidian/compare/logseq/` のプラグイン・テーマ実カウントを
+  再計測（obsidianmd/obsidian-releases・logseq/marketplace の両公式
+  レジストリを2026-08-14に直接カウント）。数値が変動していたため記事本文・
+  比較表・FAQ（JSON-LD＋可視HTML）・出典欄・meta description・byline・
+  dateModifiedを更新。文中の他の日付（公開日2026-08-11・同一フォルダでの
+  実機検証日2026-08-11・実験時のファイル名 `2026-08-11.md`
+  `journals/2026_08_11.md`）はその日に実際に行った検証・撮影の記録であり
+  未変更（数値のみの部分更新であることをbyline・table caption・footer
+  verification欄に明記）。sitemap再生成（`git fetch --unshallow`後）。
+- PR: （本エントリ作成時点で未作成）
+- 検証: Obsidian community-plugins.json 6,571→**6,638個**（+67）・
+  community-css-themes.json 680→**691種**（+11）を
+  `raw.githubusercontent.com/obsidianmd/obsidian-releases/master/` から
+  直接取得しNode.jsで配列長カウント。Logseq marketplace は
+  `packages/*/manifest.json` 612件中 `"theme": true` が66件・残り
+  **546個**でプラグイン数・テーマ数とも**前回から変動なし**（`git clone
+  --sparse` で packages/ のみ取得）。倍率「約12倍」は変わらず（6,638/546≈
+  12.2）。`node scripts/seo-check.js` 0 errors 0 warnings、
+  `check-css-version.mjs`/`check-benchmark.mjs`（本ページ無関係の既存
+  レポートのみ）/`check-url-normalization.mjs`/`check-internal-redirects.mjs`
+  /`sync_constants.js --check`/`tag-cta-placements.js --check`/
+  `growth/scripts/check-experiments.mjs`/`check-content-graph.mjs`
+  全て通過。iPhoneビューポート実描画QA（390×844 DPR3・Playwright、
+  実行後 `npm uninstall playwright` で後片付け）: 水平スクロールなし
+  （scrollWidth=clientWidth=390）、比較表はカード化されモバイルで縦積み
+  表示、更新後の数値（6,638個／691種）が正しく表示されることを確認。
+  回答ブロック（レーンB既存分）は不変であることも併せて確認。
+- 保留・オーナー依頼:
+  - GitHub Actions repo secret `CLAUDE_CODE_OAUTH_TOKEN` 登録（継続・
+    2026-08-11から）
+  - 次回、新しいGSCスナップショットが増えていればレーンA/Bを再判定
+  - `ai-citation-strategy.md` の残り監査（Perplexity〜Tier-2節）を数項目ずつ継続
+  - Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回
