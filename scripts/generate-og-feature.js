@@ -41,6 +41,20 @@ const CARDS = {
     tags: [['#obsidian'], ['#groceries', 'cyan'], ['#idea'], ['#ai', 'cyan'], ['#sync']],
     note: 'AI tagging runs entirely on your iPhone.<br>Your memos are never sent to an external server for it.',
   },
+  'siri-en': {
+    file: 'siri-en.png',
+    lang: 'en',
+    brand: 'Simple Memo - for Obsidian',
+    badge: 'AirPods \u00d7 Siri \u2014 hands-free',
+    title: 'From your <em class="c">AirPods</em>,<br>straight to <em class="v">Obsidian</em>.',
+    titleSize: '54px', // "straight to Obsidian." overflows the 640px column at 60px
+    sub: 'Say it \u2014 your phone <b>stays in your pocket</b>.',
+    tags: [['#airpods', 'cyan'], ['#siri'], ['#obsidian'], ['#handsfree', 'cyan']],
+    note: 'No app to open, no screen to look at.<br>Queued offline and sent when you are back in range.',
+    // Also used as the /en/siri/ hero (LCP), so emit the light banner pair
+    // next to the JA one. The 500KB OG png is fine for scrapers, not for a hero.
+    banner: 'siri-banner-en',
+  },
   index: {
     file: 'index.png',
     lang: 'ja',
@@ -201,6 +215,30 @@ async function main() {
       const out = path.join(OUTPUT_DIR, card.file);
       await page.screenshot({ path: out });
       console.log(`  ${card.file}`);
+
+      // Cards flagged with `banner` double as a page hero, where the OG png is
+      // far too heavy. Emit the same artwork as webp + jpg beside the JA pair.
+      if (card.banner) {
+        const png = fs.readFileSync(out).toString('base64');
+        for (const [ext, mime, quality] of [['webp', 'image/webp', 0.9], ['jpg', 'image/jpeg', 0.9]]) {
+          const dataUri = await page.evaluate(
+            async ([b64, m, q]) => {
+              const img = new Image();
+              img.src = 'data:image/png;base64,' + b64;
+              await img.decode();
+              const c = document.createElement('canvas');
+              c.width = img.width; c.height = img.height;
+              c.getContext('2d').drawImage(img, 0, 0);
+              return c.toDataURL(m, q);
+            },
+            [png, mime, quality]
+          );
+          const buf = Buffer.from(dataUri.split(',')[1], 'base64');
+          const bannerPath = path.join(ROOT_DIR, 'assets', 'img', `${card.banner}.${ext}`);
+          fs.writeFileSync(bannerPath, buf);
+          console.log(`  ${card.banner}.${ext} (${Math.round(buf.length / 1024)}KB)`);
+        }
+      }
       await page.close();
     }
   } finally {

@@ -47,6 +47,7 @@ TARGETS = [
     ("note-to-email/index.html", "ja"),
     ("hands-free/index.html", "ja"),
     ("en/obsidian/index.html", "en"),
+    ("en/siri/index.html", "en"),
 ]
 
 
