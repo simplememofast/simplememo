@@ -55,6 +55,15 @@ jobs:
       - name: Competitor speed figures vs data/benchmark.json (report-only)
         run: node scripts/check-benchmark.mjs
 
+      # seo-check.js は title/description/canonical を正規表現で読むので、
+      # 閉じていない <script> の内側に落ちたそれらも「有る」と判定してしまう。
+      # 2026-08-13 に実際そうなった: 新記事の head を既存記事から切り出した際に
+      # </script> を取りこぼし、title/description/canonical/og/BlogPosting が
+      # まるごとスクリプト本文に飲まれた状態で12ゲート全部が緑になり、本番へ出た。
+      # スクリーンショットでも崩れない（body は正常に描画される）。
+      - name: Script tags are closed
+        run: node scripts/check-script-tags.mjs
+
       - name: URL normalization rules
         run: node scripts/check-url-normalization.mjs
 
