@@ -241,3 +241,38 @@
   - 次回、新しいGSCスナップショットが増えていればレーンA/Bを再判定
   - `ai-citation-strategy.md` の残り監査（Perplexity〜Tier-2節）を数項目ずつ継続
   - Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回
+
+## 2026-08-15 — 保守のみ（副系CCR代走・新規スナップショットなし）
+
+- 判断根拠: 冪等性チェックで主系(GitHub Actions)の当日分実行痕跡なし
+  （`claude/obsidian-auto-20260815` ブランチ不在・status JSONのdate_jstが
+  2026-08-14のまま）を確認し副系で実行。GSCスナップショットは2026-08-11から
+  増えておらず、`analyze.mjs --only unanswered/conversational` の出力は前回
+  （2026-08-14）と同一。Obsidian関連の会話型クエリは「logseqとobsidian
+  どちらが良い」(23imp・pos9.2)のみでPR #480対応済み・新規性なし。他の
+  会話型クエリ（apple watchでメモを音声入力・議事録テンプレート等）は
+  Obsidianブランドと無関係のため本ハブのスコープ外。よってレーンA/Bは
+  今回も正当化できず、レーンC（Evidence Asset）は前々回（2026-08-14の
+  プラグイン数再計測）から24時間以内のため見送り。Mention Watchは前回
+  2026-08-12取得で7日未満のため対象外。GSC新規owner入力（AIプローブ・
+  App Store CSV）もgrowth/input/に無し。前回ログの申し送り「ai-citation-
+  strategy.mdの残り監査（Perplexity以降）を数項目ずつ継続」を実行。
+- やったこと: `docs/ai-citation-strategy.md` §2 Perplexityの✅3項目
+  （PerplexityBot/Perplexity-User許可・ベンチマーク記事2本・全vs/*ページの
+  比較表）を実地検証しVERIFIED注記を付与。
+- PR: （本エントリ作成時点で未作成・`docs/`+`data/`のみのdocs-onlyで
+  SEO Validationは素通り見込み）
+- 検証: `grep -n -i "perplexity" robots.txt` で `PerplexityBot`（57行目）・
+  `Perplexity-User`（64行目）を実測。`blog/fastest-memo-app-benchmark.html`・
+  `blog/benchmark-methodology.html` の実在とOG画像・QR資産の生成済みを
+  ファイルシステムで確認。`vs/*/index.html` 全38ページを走査し `<table` の
+  存在を実測（欠落0件）。`node scripts/seo-check.js` 0 errors 0 warnings
+  （本変更はdocs/のみでHTML非変更のためcontent-graph/mobile QA/experiments
+  チェックは対象外）。
+- 保留・オーナー依頼:
+  - GitHub Actions repo secret `CLAUDE_CODE_OAUTH_TOKEN` 登録（継続・
+    2026-08-11から）
+  - 次回、新しいGSCスナップショットが増えていればレーンA/Bを再判定
+  - `ai-citation-strategy.md` の残り監査（§3 Microsoft Copilot以降の節）を
+    数項目ずつ継続
+  - Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回

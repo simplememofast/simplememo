@@ -50,9 +50,9 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 - Penalizes thin "SEO answer pages" — prefers pages with original benchmarks, comparison tables, dated screenshots, or first-party data
 
 **Levers we control:**
-- ✅ `PerplexityBot` + `Perplexity-User` allowed in `/robots.txt`
-- ✅ First-party benchmark data on `/blog/fastest-memo-app-benchmark` and `/blog/benchmark-methodology`
-- ✅ Comparison tables on every `/vs/*` page
+- ✅ `PerplexityBot` + `Perplexity-User` allowed in `/robots.txt` — **VERIFIED**（`robots.txt:57,64` に両UAを確認・2026-08-15監査）
+- ✅ First-party benchmark data on `/blog/fastest-memo-app-benchmark` and `/blog/benchmark-methodology` — **VERIFIED**（両ファイルの存在とOG画像・QR資産の生成済みを確認・2026-08-15監査）
+- ✅ Comparison tables on every `/vs/*` page — **VERIFIED**（`vs/*/index.html` 全38ページに `<table` の存在をgrep実測（欠落0件）・2026-08-15監査）
 - 🟡 **Action:** Keep dated examples in every comparison page (e.g., "as of 2026-05-20, Notion's free plan...") — Perplexity weights freshness aggressively
 - 🟡 **Action:** Add a `lastReviewed` visible note at the top of high-traffic comparison pages
 - 🟡 **Action:** Cross-link from `/blog/captio-discontinued` to authoritative sources (App Store removal notice, developer X post) to inherit their authority signal
