@@ -26,7 +26,7 @@
     "experiments": "変更なし・非干渉（docs/のみの変更）"
   },
   "owner_requests": [
-    "【新規・最優先】BigQueryのサービスアカウント鍵を実行環境に設定: growth/BIGQUERY_SETUP.md の手順で鍵を作り、Secret『GOOGLE_SERVICE_ACCOUNT_JSON』に登録。現状 bq-preflight.mjs / ingest-bigquery.mjs はコンテナに資格情報が無く Cannot authenticate で落ちるため、autopilotが自力でGSCデータを取得できない",
+    "【新規・最優先】BigQueryのサービスアカウント鍵を実行環境に設定: growth/BIGQUERY_SETUP.md の手順で鍵を作り、Secret『GCP_SERVICE_ACCOUNT_JSON』（同書 §3-B の名称）に登録。現状 bq-preflight.mjs / ingest-bigquery.mjs はコンテナに資格情報が無く Cannot authenticate で落ちるため、autopilotが自力でGSCデータを取得できない",
     "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から）",
     "【新規・低優先】日報メール側(simplememo-api)の対応: status JSON に streak / data_freshness を追加した。simplememo-api/src/autopilot-report.ts が描画するまでは reason 先頭の【】が唯一の表示経路になる"
   ],

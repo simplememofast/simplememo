@@ -334,7 +334,7 @@
   `json.load` で確認
 - 保留・オーナー依頼:
   - **【最優先・新規】BigQueryのサービスアカウント鍵**を Secret
-    `GOOGLE_SERVICE_ACCOUNT_JSON` に登録（`growth/BIGQUERY_SETUP.md`）。
+    `GCP_SERVICE_ACCOUNT_JSON` に登録（`growth/BIGQUERY_SETUP.md` §3-B）。
     現状 `bq-preflight.mjs` / `ingest-bigquery.mjs` はコンテナに資格情報が無く
     `Cannot authenticate` で落ちるため、autopilotが自力でデータを取れない
   - GitHub Actions repo secret `CLAUDE_CODE_OAUTH_TOKEN` 登録（継続・2026-08-11から）
