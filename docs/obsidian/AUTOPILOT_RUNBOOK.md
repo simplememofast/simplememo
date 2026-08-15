@@ -68,7 +68,63 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 4. `growth/reports/` の最新レポート — 新しいデータ・訂正
 5. `docs/SEO_AIO_PLAN_2026-08.md` §6「やらないこと」
 
-新しいGSCスナップショットが `growth/data/gsc/` に増えていれば:
+### 1-2. データ鮮度の確認（毎回・`growth/data/gsc/` を見るだけでは足りない）
+
+**2026-08-15訂正:** 旧版のこの欄は「新しいGSCスナップショットが
+`growth/data/gsc/` に増えていれば」としか書いておらず、BigQuery一括
+エクスポートに一切触れていなかった。その結果、**エクスポートが
+2026-08-13に稼働を始めてから3日連続（08-13/14/15）で「新規データなし」と
+誤報した**。データ源は2つあり、**毎回この順で見る**。
+
+**① BigQuery一括エクスポート（一次・自動）**
+
+```
+node growth/scripts/bq-preflight.mjs   # 稼働状況と28日到達までの残り日数
+```
+
+このスクリプトは**このコンテナでは資格情報が無く落ちることがある**
+（`Cannot authenticate to BigQuery` / ADCも鍵も無い）。その場合は
+**BigQuery MCP で直接読む**（セッションのMCPは認証済み・プロジェクトは
+`yurika-simplememo`・データセットは `searchconsole`）:
+
+```sql
+-- 着弾状況（毎回これを見る）
+SELECT namespace, data_date,
+       FORMAT_TIMESTAMP('%Y-%m-%d %H:%M', publish_time, 'Asia/Tokyo') AS published_jst
+FROM `yurika-simplememo.searchconsole.ExportLog`
+ORDER BY publish_time DESC LIMIT 6;
+
+-- 蓄積日数（28日窓に必要な残りを数える）
+SELECT MIN(data_date) AS first_date, MAX(data_date) AS last_date,
+       COUNT(DISTINCT data_date) AS days
+FROM `yurika-simplememo.searchconsole.searchdata_site_impression`;
+```
+
+> **絶対にやらない誤り:** 認証失敗やスクリプトの実行不能を
+> 「新規データなし」と報告すること。**「取得できなかった」と
+> 「増えていない」は別の結論**で、前者は `reason` にそう書く。
+> これが08-13〜08-15の誤報の原因そのもの。
+
+`data_date` が28日ぶん貯まったら（`bq-preflight` が残り日数を表示する）:
+
+```
+node growth/scripts/ingest-bigquery.mjs --site sc-domain:simplememofast.com --days 28
+```
+
+で `growth/data/gsc/<label>/` に手動CSVと同形のスナップショットが入る。
+**28日未満のうちに部分期間でスナップショットを作らない** — 期間長が
+毎回違うと衰退検知が「実際の変化」と「期間差」を区別できなくなる
+（`GSC_OWNER_ACTION.md` の28日固定の理由と同じ）。それまでは
+「あと何日か」をログと status JSON の `next` に書くだけでよい。
+
+**② 手動CSVスナップショット（二次・移行が済むまで）**
+
+`growth/data/gsc/` に新しいラベルのディレクトリが増えていれば取り込み済み。
+なお手動CSVは**クエリ1,000行で打ち切られる**（2026-08-11分の
+`row_counts.queries` はちょうど1000＝切断済み）ため、①へ移行すると
+見えるクエリが増える。①と②で結論が食い違ったら①を採る。
+
+どちらかに新しいデータがあれば:
 ```
 node growth/scripts/analyze.mjs --only unanswered
 node growth/scripts/analyze.mjs --only clusters
@@ -95,7 +151,15 @@ node growth/scripts/analyze.mjs --only decay          # 2026-09-06以降のみ�
   公式レジストリ・公式リリースの実カウント/実測データ更新、`data/benchmark.json`
   系の定点データの鮮度維持、既存記事への実測表の注入。
   AIOで強いのは「測った・断定できる・数値と固有名詞を持つ」主張（§2-2実測）で、
-  このレーンはSEO需要ゼロでも成立する。**週に1回以上はこのレーンを検討する。**
+  このレーンはSEO需要ゼロでも成立する。
+  **「週に1回以上」は下限であって、クールダウンではない。**
+  2026-08-15訂正: 08-13は「直近48時間以内だから見送り」、08-15は「24時間以内
+  だから見送り」と、頻度の下限を上限として読む誤りが2回起きた（結果として
+  08-14に実行しているので下限は割っていないが、根拠の向きが逆）。正しい判定は:
+  - 前回レーンCから**7日以上**経っている → その日の**優先レーン**にする
+  - 7日未満 → 実施しても構わないが、同じ資産の再計測を短期間で繰り返さない
+    （例: プラグイン数を毎日数え直しても新しい主張は増えない。別の資産へ回す）
+  「最近やったから今日はやらない」は根拠として書かない。
 - **レーンD（Paid relevance例外）**: 検索需要は足切り未満だが productRelevance が
   highで製品の主訴求に直結する企画（例: N2 quick-capture）は、
   **四半期1本まで**・実験台帳に登録して評価日を切る条件で作ってよい。
@@ -193,6 +257,18 @@ python3 scripts/generate_sitemap.py --dry-run
   "action": "new | refresh | wiring | maintenance | skip",
   "article": {"url": "...", "title": "..."},      // 無い日は null
   "pr": {"number": 123, "state": "merged|open"},  // 無い日は null
+  "streak": {                                     // 2026-08-15追加・毎回必須
+    "consecutive_no_article_days": 4,             // 記事(new/refresh)が出ていない連続日数
+    "last_article_date_jst": "2026-08-11",        // 最後に記事が出た日
+    "last_production_change_date_jst": "2026-08-14", // 最後に本番HTMLが変わった日
+    "days_since_production_change": 1             // 上との差。docs/dataのみの日は増える
+  },
+  "data_freshness": {                             // 2026-08-15追加・毎回必須
+    "bq_export_last_data_date": "2026-08-12",     // ExportLogの最新data_date
+    "bq_export_days_accumulated": 3,              // 28に届いたらingest-bigqueryが回せる
+    "bq_checked": true,                           // false = 見に行けなかった（≠増えていない）
+    "manual_snapshot_label": "2026-08-11"         // growth/data/gsc/ の最新ラベル
+  },
   "reason": "実施/スキップの判断根拠（データ出典つき・1〜2文）",
   "verified": "その回で実際に検証したこと（§28の範囲明示）",
   "checks": {"seo_check": "...", "mobile_qa": "..."},
@@ -200,6 +276,15 @@ python3 scripts/generate_sitemap.py --dry-run
   "next": "次回への申し送り"
 }
 ```
+
+**`reason` の先頭1行は必ず状態サマリにする**（例:
+`【連続無記事4日目・本番最終変更 2026-08-14・BQ 3/28日】…`）。
+日報メールを出す `simplememo-api` は上の `streak` / `data_freshness` を
+まだ描画しないため、**この1行がオーナーの目に入る唯一の経路**になる。
+API側が対応したらこの重複は外してよい。
+
+`bq_checked: false` は「BigQueryを見に行けなかった」であって
+「新規データが無い」ではない。**この2つを混同した報告は誤報**（§1-2）。
 
 日報の流れ: 06:00 実行 → PR → auto-merge → Pagesデプロイ →
 **10:00 JST にWorkerがこのJSONを読み、Resendでオーナーへメール**
