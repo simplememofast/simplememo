@@ -276,3 +276,68 @@
   - `ai-citation-strategy.md` の残り監査（§3 Microsoft Copilot以降の節）を
     数項目ずつ継続
   - Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回
+
+## 2026-08-15（追記2） — オーナー依頼の追調査: 日報の評価と、BQエクスポート稼働の検出
+
+**これは定期セッションの回ではない。** 同日の日報メールに対するオーナーからの
+「どう評価するか」に答える中で、報告内容の追試と、その結果見つかった
+誤報の原因修正までを行った回。
+
+- 追試（今日の報告は正しかったか）: `ai-citation-strategy.md` §2 に付けた
+  VERIFIED 3項目を独立に全件追試し、**全て一致**（`robots.txt:57,64` の
+  PerplexityBot/Perplexity-User・ベンチマーク記事2本の実在・`vs/*/index.html`
+  38ページの `<table>` 欠落0件）。**「検証した」と書いた内容が実際に検証されている**
+  ことを確認した。スキップ判断そのものも妥当だった。
+- **見つかった誤報**: 「新規GSCスナップショットは2026-08-11から増えておらず」は
+  `growth/data/gsc/` だけを見た結論で、不正確だった。**BigQuery一括エクスポートは
+  2026-08-13から稼働している。** BigQuery MCP で `yurika-simplememo.searchconsole`
+  を実測:
+  - 3テーブル（`ExportLog` / `searchdata_site_impression` /
+    `searchdata_url_impression`）が実在
+  - `data_date` 2026-08-10〜08-12（3日・942行）
+  - 着弾（JST）: 08-13 04:20（08-10分）→ 08-13 17:11（08-11分）→
+    **08-14 16:39（08-12分）** と毎日
+  - 本日のセッション（07:35 JST）の**15時間前**に新データが入っていた。
+    08-13・08-14の回も同様で、**3日連続で同じ誤報**をしている
+- **原因はRunbookの欠陥**（autopilotの判断ミスではない）: §1は
+  「新しいGSCスナップショットが `growth/data/gsc/` に増えていれば」としか
+  書いておらず、BigQuery・`bq-preflight.mjs`・`ingest-bigquery.mjs` への言及が
+  grep実測で**ゼロ**だった。autopilotは古い手順書を忠実に実行していた。
+- 併せて実測した、新データにしか無い情報:
+  - ドイツ語クラスタ: `logseq obsidian vergleich` 6imp/pos26.5・
+    `logseq obsidian unterschiede` 2imp・`logseq vorteile` 2imp
+  - `email to obsidian` 8imp/pos10.1 ＋ `send email to obsidian` 3imp
+  - `/obsidian/compare/logseq/`（08-11公開）の**初実測** 4imp・1click。
+    08-11のログが「次回スナップショット（2026-09-06以降推奨）で確認」と
+    申し送っていた項目が、もう見られる状態になっていた
+  - いずれも3日分では足切り未満。**「記事を書くべきだった」ではない**。
+    正しかったのは「稼働を検知して報告し、28日到達までのカウントダウンを
+    開始する」で、スキップという結論自体は変わらない
+  - 手動CSVスナップショットは `row_counts.queries` が上限ちょうどの**1000行**で
+    切断されていることも確認（BQ移行でこの上限が外れる）
+- やったこと（本コミット）:
+  1. Runbook **§1-2「データ鮮度の確認」を新設** — BQを一次・手動CSVを二次とし、
+     `bq-preflight.mjs` が認証失敗する場合の BigQuery MCP 直読クエリを常備。
+     **「取得できなかった」を「増えていない」と報告するのは誤報**と明記
+  2. Runbook §2 レーンC — 「週に1回以上」は**下限でありクールダウンではない**と
+     明記。08-13「48時間以内だから見送り」・08-15「24時間以内だから見送り」は
+     根拠の向きが逆だった（結果として08-14に実行しており下限は割っていない）
+  3. Runbook §5-2 — status JSON に `streak` / `data_freshness` を追加。
+     日報API側が未対応のため、`reason` 先頭を状態サマリ1行にする規約も追加
+  4. `growth/BIGQUERY_SETUP.md` — 「届いていない」という記述が実態と逆に
+     なっていたため現況（実測値つき）に差し替え。旧記述はトラブルシュートとして温存
+  5. `data/autopilot-status.json` — 新フィールドを投入し、本日分の `reason` /
+     `verified` を追記形式で訂正（元の記録は消していない）
+- 検証: `node scripts/seo-check.js` 0 errors 0 warnings。本変更は
+  `docs/` + `growth/` + `data/` のみでHTML非変更のため content-graph /
+  モバイルQA / experiments チェックは対象外。status JSON のスキーマ妥当性を
+  `json.load` で確認
+- 保留・オーナー依頼:
+  - **【最優先・新規】BigQueryのサービスアカウント鍵**を Secret
+    `GCP_SERVICE_ACCOUNT_JSON` に登録（`growth/BIGQUERY_SETUP.md` §3-B）。
+    現状 `bq-preflight.mjs` / `ingest-bigquery.mjs` はコンテナに資格情報が無く
+    `Cannot authenticate` で落ちるため、autopilotが自力でデータを取れない
+  - GitHub Actions repo secret `CLAUDE_CODE_OAUTH_TOKEN` 登録（継続・2026-08-11から）
+  - `simplememo-api/src/autopilot-report.ts` が `streak` / `data_freshness` を
+    描画するまで、日報での可視化は `reason` 先頭の【】1行に依存する（別リポジトリ）
+  - 28日到達は **2026-09-06前後**。それまでは部分期間のスナップショットを作らない
