@@ -1,0 +1,185 @@
+name: Autopilot Health
+
+# オートパイロットが「緑のまま何もしていない」状態を検知する。
+#
+# 【なぜ cron-health.yml では足りないか】cron-health は
+# `event=schedule && conclusion=failure` だけを集計する。ところが
+# obsidian-autopilot.yml は秘密鍵が未設定のとき **Gateで正常終了（success）**
+# するよう意図的に設計されている（毎日赤い通知を出さないため）。つまり
+# 主系が一度も本稼働していなくても cron-health は永久に沈黙する。
+# 2026-08-16〜17 に2日連続で実行記録ゼロになった際、気づけた経路は
+# 10:00 JST の日報メールだけだった。人がメールを読むことが唯一の網、
+# という状態を解消するのがこのワークフロー。
+#
+# 【何を見るか】結果（＝status JSONが当日分に更新されたか）だけを見る。
+# 設定（秘密鍵の有無）ではなく成果物を見るので、主系・副系のどちらが
+# 動いたか、なぜ止まったかに依存せず「止まっている」を検知できる。
+#   ① デフォルトブランチの data/autopilot-status.json … 上流が動いたか
+#   ② 本番 https://simplememofast.com/data/autopilot-status.json … 出荷されたか
+# ①が古い → autopilot本体が止まっている（2026-08-16のケース）
+# ①が当日で②が古い → Pagesデプロイ側が止まっている
+# 記事を書かずスキップした日も date_jst は更新される設計なので、
+# 「当日でない」こと自体が異常のシグナルになる（Runbook §5-2）。
+#
+# 【時刻】12:00 JST。主系06:00・副系07:30・日報10:00 のすべてが終わり、
+# PRのマージとPagesデプロイが落ち着いた後に見る。
+#
+# 【Issue運用】label `ops/autopilot-stale` の open 1件に集約し、
+# 毎回コメントで追記、回復したらクローズする（cron-health.yml と同じ作法）。
+#
+# schedule はデフォルトブランチの定義でのみ動くため、このファイルの変更は
+# mainへマージされて初めて有効になる（cron-health.yml / auto-merge.yml と同じ性質）。
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 12:00 JST
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  actions: read
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const LABEL = 'ops/autopilot-stale';
+            const STATUS_PATH = 'data/autopilot-status.json';
+            const PROD_URL = 'https://simplememofast.com/data/autopilot-status.json';
+            const { owner, repo } = context.repo;
+
+            const ymdJst = (d) => new Intl.DateTimeFormat('en-CA', {
+              timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
+            }).format(d);
+            const jst = (ms) => new Date(ms).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false });
+            // YYYY-MM-DD 同士の日数差。どちらもJSTの暦日なのでUTC正午で比較する
+            const daysBehind = (dateStr, todayStr) => {
+              const a = Date.parse(`${dateStr}T12:00:00Z`);
+              const b = Date.parse(`${todayStr}T12:00:00Z`);
+              if (Number.isNaN(a) || Number.isNaN(b)) return null;
+              return Math.round((b - a) / 86400000);
+            };
+
+            const today = ymdJst(new Date());
+
+            // ① デフォルトブランチ上の status JSON
+            const { data: repoInfo } = await github.rest.repos.get({ owner, repo });
+            const branch = repoInfo.default_branch;
+            let repoStatus = null, repoErr = null;
+            try {
+              const { data } = await github.rest.repos.getContent({ owner, repo, path: STATUS_PATH, ref: branch });
+              repoStatus = JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
+            } catch (e) { repoErr = e.message; }
+
+            // ② 本番（Pages）に出ている status JSON
+            let prodStatus = null, prodErr = null;
+            try {
+              const res = await fetch(`${PROD_URL}?d=${Date.now()}`, { signal: AbortSignal.timeout(20000) });
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              prodStatus = JSON.parse(await res.text());
+            } catch (e) { prodErr = e.message; }
+
+            const describe = (label, status, err) => {
+              if (err) return { label, ok: false, line: `- **${label}**: 取得失敗 — ${err}` };
+              const d = status?.date_jst;
+              if (typeof d !== 'string') return { label, ok: false, line: `- **${label}**: date_jst が無い/不正` };
+              const behind = daysBehind(d, today);
+              const ok = d === today;
+              const suffix = ok ? '当日' : `**${behind ?? '?'}日前**`;
+              return { label, ok, line: `- **${label}**: \`${d}\`（${suffix}）` };
+            };
+
+            const sources = [
+              describe(`${branch} の ${STATUS_PATH}`, repoStatus, repoErr),
+              describe('本番 (Cloudflare Pages)', prodStatus, prodErr),
+            ];
+            const healthy = sources.every((s) => s.ok);
+
+            // 直近の Obsidian Autopilot run。緑でも数秒で終わっていれば
+            // Gate（秘密鍵未設定 or 当日重複）でスキップしている
+            let runLine = '- 直近の Obsidian Autopilot run: 取得できず';
+            try {
+              const { data } = await github.rest.actions.listWorkflowRuns({
+                owner, repo, workflow_id: 'obsidian-autopilot.yml', per_page: 1,
+              });
+              const r = data.workflow_runs[0];
+              if (r) {
+                const startedMs = Date.parse(r.run_started_at ?? r.created_at);
+                const sec = Math.round((Date.parse(r.updated_at) - startedMs) / 1000);
+                const gateSkipped = r.conclusion === 'success' && sec < 60;
+                // 注記するのは「上流が記録を残していない」ときだけ。デフォルト
+                // ブランチに当日分がある場合、Gateスキップは別経路で実行済みを
+                // 意味する正常系で、本番だけ古いならそれはPages側の問題
+                const hint = gateSkipped && !sources[0].ok
+                  ? ' — **Gateでスキップした可能性が高い**（秘密鍵 `CLAUDE_CODE_OAUTH_TOKEN` 未設定の疑い）' : '';
+                runLine = `- 直近の Obsidian Autopilot run: ${r.conclusion}（${jst(startedMs)} JST・${sec}秒）${hint}\n  ${r.html_url}`;
+              }
+            } catch (e) { runLine = `- 直近の Obsidian Autopilot run: 取得失敗 — ${e.message}`; }
+
+            const s = repoStatus ?? prodStatus;
+            const context_lines = [];
+            if (s?.streak) {
+              context_lines.push(`- 連続無記事: ${s.streak.consecutive_no_article_days ?? '?'}日 / 最終記事 ${s.streak.last_article_date_jst ?? '?'}`);
+            }
+            if (s?.data_freshness) {
+              context_lines.push(`- BQエクスポート: 蓄積 ${s.data_freshness.bq_export_days_accumulated ?? '?'}日 / 最新 data_date ${s.data_freshness.bq_export_last_data_date ?? '?'}`);
+            }
+
+            const body = [
+              `## ${jst(Date.now())} JST 時点（基準日 ${today} JST）`,
+              '',
+              ...sources.map((x) => x.line),
+              runLine,
+              ...(context_lines.length ? ['', '参考（最後に記録できた回の値）:', ...context_lines] : []),
+              '',
+              ...(healthy ? [] : [
+                '### 確認する順',
+                '1. `claude/obsidian-auto-<当日JST>` ブランチと open PR の有無',
+                '2. 主系: Actions の Obsidian Autopilot が Gate で止まっていないか（repo secret `CLAUDE_CODE_OAUTH_TOKEN`）',
+                '3. 副系: CCR Routine（07:30 JST）が存在し発火しているか',
+                '4. 上記が動いていて本番だけ古い場合は Cloudflare Pages のデプロイ',
+                '',
+                '運用ルール: `docs/obsidian/AUTOPILOT_RUNBOOK.md` / 履歴: `docs/obsidian/AUTOPILOT_LOG.md`',
+                '',
+              ]),
+              `_[autopilot-health.yml](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}) による自動投稿_`,
+            ].join('\n');
+
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: LABEL, per_page: 10,
+            });
+            const existing = openIssues[0];
+
+            if (!healthy) {
+              try { await github.rest.issues.getLabel({ owner, repo, name: LABEL }); }
+              catch { await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'B60205', description: 'autopilot の status JSON が当日分に更新されていない' }); }
+              if (existing) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: existing.number, body });
+                core.notice(`stale — #${existing.number} に追記`);
+              } else {
+                const { data: created } = await github.rest.issues.create({
+                  owner, repo, labels: [LABEL],
+                  title: 'autopilot監視: 当日分の実行記録がありません',
+                  body,
+                });
+                core.notice(`stale — #${created.number} を作成`);
+              }
+            } else if (existing) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: existing.number,
+                body: body + '\n\n当日分の記録を確認できたためクローズします。',
+              });
+              await github.rest.issues.update({ owner, repo, issue_number: existing.number, state: 'closed' });
+              core.notice(`回復 — #${existing.number} をクローズ`);
+            } else {
+              core.notice(`当日分あり（${today}）・open Issue なし`);
+            }
+
+            await core.summary
+              .addHeading('Autopilot Health — status JSON の鮮度', 2)
+              .addRaw(body, true)
+              .write();

@@ -341,3 +341,66 @@
   - `simplememo-api/src/autopilot-report.ts` が `streak` / `data_freshness` を
     描画するまで、日報での可視化は `reason` 先頭の【】1行に依存する（別リポジトリ）
   - 28日到達は **2026-09-06前後**。それまでは部分期間のスナップショットを作らない
+
+## 2026-08-17 — オーナー依頼の評価: 2日連続の実行記録ゼロ＝上流停止の切り分け
+
+**これは定期セッションの回ではない。** 日報（2026-08-17）の「当日記録なし
+（最新: 2026-08-15）」に対するオーナーからの「どう評価するか」に答え、
+その過程で見つかった**検知の穴**を塞いだ回。
+
+- 実測した事実:
+  - `origin/main` = `178d420`、`data/autopilot-status.json` の `date_jst` は
+    **2026-08-15 のまま**。`claude/obsidian-auto-20260816` / `-20260817` は
+    origin に**存在しない**。simplememo の open PR は **0件**。
+    → 08-16・08-17 は**記録ごと無い＝上流停止**で、品質ゲートによるスキップではない
+  - **主系（GitHub Actions）は一度も本稼働していない。** 今朝の run
+    （`2026-08-16T21:16:17Z` = 08-17 06:16 JST）は conclusion **success** だが
+    所要 **5秒**で、Checkout以降は全て `skipped`。ログの env が
+    `HAS_CLAUDE_TOKEN: false` / `HAS_ANTHROPIC_KEY: false`。08-13以降の5回すべて同じ
+  - **副系（CCR Routine）が消えている。** `list_triggers` を作成日
+    2026-08-11→07-25 まで確認したが日次cronのRoutineが1件も無く、
+    上の 2026-08-12 エントリに記録した `trig_016ALpozNRuf2j7BYJo5cCqy` も無い。
+    一方 08-13/14/15 の autopilot コミットは **07:35 / 07:49 / 07:35 JST** 着弾で、
+    副系の07:30スロットそのもの。→ Routineは **08-15 07:30 と 08-16 07:30 の間に停止**。
+    消えた理由は特定できない（削除/環境消滅/レート制限のいずれか）
+  - BigQuery はこのコンテナで依然 `Cannot authenticate`。加えて
+    **このセッションに BigQuery MCP は無い**（MCPは github と Claude_Code_Remote のみ）。
+    Runbook §1-2 が定めた「認証が落ちたら BigQuery MCP で直読」は
+    **セッションによっては存在しない**回避策である点を記録しておく
+- **見つかった検知の穴**: `cron-health.yml` は
+  `event=schedule && conclusion=failure` しか集計しない。ところが
+  obsidian-autopilot.yml は秘密鍵未設定時に **Gateで success** するよう
+  意図的に設計されている。よって主系が一度も動いていなくても cron-health は
+  永久に沈黙する。08-16の停止に気づけた経路は **10:00 JSTの日報メールだけ**
+  だった（人がメールを読むことが唯一の網）
+- やったこと（本コミット）: `.github/workflows/autopilot-health.yml` を新設。
+  設定ではなく**成果物**（status JSON が当日分に更新されたか）を12:00 JSTに見る。
+  ① デフォルトブランチの `data/autopilot-status.json` → 上流が動いたか
+  ② 本番（Pages）の同ファイル → 出荷されたか
+  ①が古ければautopilot本体の停止、①が当日で②が古ければPagesデプロイの停止、と
+  切り分けて label `ops/autopilot-stale` の open 1件に集約する
+  （作成/追記/回復でクローズは `cron-health.yml` と同じ作法）。
+  直近の Obsidian Autopilot run が「緑かつ数秒」なら Gate スキップの疑いを併記する
+  （ただし①が古い場合のみ。①が当日なら別経路で実行済みの正常系）
+- **`data/autopilot-status.json` は意図的に更新していない。** 今日は
+  autopilotのイテレーションではないので当日分として記録するのは虚偽になるし、
+  更新すると新設した監視が明日「正常」と判定して停止を隠してしまう
+- 検証: `node scripts/seo-check.js` 0 errors 0 warnings（`.github/` のみで
+  HTML非変更のため content-graph / モバイルQA / experiments は対象外）。
+  ワークフローYAMLを `yaml.safe_load` で、埋め込みJSを `node --check` で構文検証。
+  さらに github-script のAPIをスタブして3シナリオを空回しし、
+  ①main=08-15/本番取得失敗 → Issue作成、②両方当日 → Issue作らず、
+  ③main当日/本番のみ古い → Issue作成かつトークンの当たりは出さない、を確認
+- 保留・オーナー依頼:
+  - **【最優先】`CLAUDE_CODE_OAUTH_TOKEN` の登録**（継続・2026-08-11から7日目）。
+    ローカルで `claude setup-token` → repo secret に登録 → Actions の
+    "Run workflow" で `force` にチェックを入れれば翌朝を待たず確認できる。
+    トークンの発行はオーナー本人のブラウザ認証を伴い、repo secret の書き込み手段も
+    セッション側に無いため、**この1件だけは代行できない**
+  - 副系Routine（07:30 JST）の再作成は未実施（オーナー判断待ち）。
+    主系が生きれば冪等ガードで即終了するだけなので、あくまで保険
+  - `GCP_SERVICE_ACCOUNT_JSON`（BQ鍵）。効くのは28日到達の2026-09-06前後以降
+  - **schedule はデフォルトブランチの定義でしか動かない**ため、
+    本ワークフローはmainにマージされて初めて有効になる
+  - レーンA/Bはデータ待ちで塞がっているが、レーンC（前回08-14・08-21から優先レーン）
+    とレーンD・キューのN2/N4は生きている。09-06まで §6 だけで埋める理由は無い
