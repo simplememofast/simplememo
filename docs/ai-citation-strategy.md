@@ -74,10 +74,10 @@ For each platform below: (a) how it surfaces citations, (b) the specific levers 
 - Recency boost similar to Perplexity but less aggressive
 
 **Levers we control:**
-- ✅ `Bingbot` allowed in `/robots.txt` (single bot = three surfaces: Bing search + Copilot + ChatGPT Search index)
-- 🟡 **Action:** Submit `sitemap.xml` to Bing Webmaster Tools if not already (separate from GSC submission)
-- 🟡 **Action:** Add `<meta name="ms.locale" content="ja-JP">` on JP pages — Copilot uses this for locale-specific answers
-- 🟡 **Action:** IndexNow ping on every publish (we already have `scripts/indexnow-notify.js` — verify it's wired into the deploy hook)
+- ✅ `Bingbot` allowed in `/robots.txt` (single bot = three surfaces: Bing search + Copilot + ChatGPT Search index) — **VERIFIED**（`robots.txt:78` に `User-agent: Bingbot` を確認・2026-08-18監査）
+- 🟡 **Action:** Submit `sitemap.xml` to Bing Webmaster Tools if not already (separate from GSC submission) — **未検証**（Bing Webmaster Toolsダッシュボードはこの実行環境からアクセス不可。オーナー確認が必要・2026-08-18監査）
+- 🟡 **Action:** Add `<meta name="ms.locale" content="ja-JP">` on JP pages — Copilot uses this for locale-specific answers — **未実装**（`grep -rl "ms.locale" --include="*.html" .` で該当0件を実測。導入するなら全JPページへの横断編集になるため、本監査回のスコープ外として次回以降のアクション候補に残す・2026-08-18監査）
+- ✅ IndexNow ping on every publish (we already have `scripts/indexnow-notify.js` — verify it's wired into the deploy hook) — **VERIFIED**（`.github/workflows/auto-merge.yml:116` でマージ直後に `node scripts/indexnow-notify.js --since <merged_count>` を実行、`seo-check.yml:136` でも実行。スクリプト本体は `https://api.indexnow.org/indexnow` へ実際にPOSTしている（`scripts/indexnow-notify.js:35,165`）ことをソース実読で確認・2026-08-18監査）
 
 **Measurement signal:**
 - Bing Webmaster Tools "AI clicks" report (when available)
