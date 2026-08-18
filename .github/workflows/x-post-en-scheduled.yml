@@ -16,6 +16,30 @@ name: X EN Auto Post (Scheduled)
 #           フィールドと週次入替の運用）を実施した後、workflow_dispatch の
 #           dry_run=true で検証を通してから下の schedule ブロックを戻すこと。
 # workflow_dispatch（手動・dry_run可）は残している。
+#
+# 【C2の原因 — 2026-08-18 実測】再開の前提として書き残す。
+# 失敗は投稿内容ではなく**認証**で起きている。最後の scheduled 実行
+# （run 31565070619 / 2026-08-12 05:24 UTC）のログは、投稿本文を送る前に
+#   HTTP 302 / <center>cloudflare</center>
+# を受けて `管理 API が HTTP 302 を返しました` で落ちている＝Cloudflare Access の
+# ログイン画面へリダイレクトされている。
+#
+# 理由: `/admin/*` は 2026-05-08 の #207/#209 で **Cloudflare Access (Zero Trust)**
+# の背後に移り、`functions/admin/_middleware.js` は `Cf-Access-Jwt-Assertion` か
+# `Cf-Access-Authenticated-User-Email` が無い要求を通さない。一方このワークフローは
+# 今も `curl -u "$ADMIN_BASIC_AUTH"` の Basic 認証しか送っていない。Access は
+# Basic 認証を知らないので、認証前の 302 で終わる。
+#
+# したがって再開時に要るのは投稿ロジックの修理ではなく、次のどちらか:
+#   (a) Zero Trust で **サービストークン**を作り、Access アプリのポリシーに許可を足し、
+#       ここから `CF-Access-Client-Id` / `CF-Access-Client-Secret` ヘッダを送る
+#       （Access がトークンをJWTに交換するので middleware 側は無改修）
+#   (b) `/admin/api/*` を Access のバイパスにし、関数側で別の認証を持つ
+#
+# 未確定が1点: Access は 5月に入ったのに、scheduled が壊れたのは 8/7 以降。
+# その間に効いていたバイパス（ダッシュボード側のポリシー）が消えた可能性が高いが、
+# リポジトリ側のログからは決められない。Zero Trust の Access → Applications で
+# ポリシー履歴を見れば分かる。
 on:
   # schedule:
   #   # 13:00 UTC = 8am EST / 9am EDT (米国東部 朝)
