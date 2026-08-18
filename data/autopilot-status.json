@@ -1,24 +1,23 @@
 {
-  "date_jst": "2026-08-15",
-  "generated_at": "2026-08-14T22:33:35Z",
-  "amended_at": "2026-08-15T04:20:00Z",
+  "date_jst": "2026-08-18",
+  "generated_at": "2026-08-17T23:40:00Z",
   "action": "maintenance",
   "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 3,
+    "consecutive_no_article_days": 6,
     "last_article_date_jst": "2026-08-12",
     "last_production_change_date_jst": "2026-08-14",
-    "days_since_production_change": 1
+    "days_since_production_change": 4
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-12",
     "bq_export_days_accumulated": 3,
-    "bq_checked": true,
+    "bq_checked": false,
     "manual_snapshot_label": "2026-08-11"
   },
-  "reason": "【連続無記事3日目・本番最終変更 2026-08-14・BQ 3/28日】冪等性チェック: 主系(GitHub Actions)の当日分ブランチ・status JSON更新なし→副系(CCR)で実行。新規GSCスナップショットは2026-08-11から増えておらず、analyze.mjs --only unanswered/conversational の出力は前回(2026-08-14)と同一。Obsidian関連の会話型クエリ「logseqとobsidian どちらが良い」(23imp・pos9.2)はPR#480の回答ブロックで対応済み・新規性なし。他の会話型クエリはObsidianブランドと無関係のためスコープ外。よってレーンA/Bは正当化できず、Mention Watchも前回2026-08-12取得で7日未満のため対象外。前回ログの申し送りに従い保守レーン（ai-citation-strategy.mdの4状態監査継続・§2 Perplexity節）を実行 ／ 【2026-08-15 追記・オーナー依頼の追調査による訂正】上記「新規GSCスナップショットなし」は growth/data/gsc/ のみを見た結論であり不正確。BigQuery一括エクスポートは2026-08-13から稼働しており（ExportLog実測: 08-13 04:20 / 08-13 17:11 / 08-14 16:39 JST着弾・data_date 08-10〜08-12・942行）、本セッションの15時間前に新データが入っていた。08-13〜08-15の3回とも同じ誤りを報告している。原因はRunbook §1がBigQuery経路に一切言及していなかったこと（本PRで §1-2 として追加）。ただし3日分では28日窓の方法論に足りず足切りを超える行も無いため、スキップという結論自体は変わらない。",
-  "verified": "docs/ai-citation-strategy.md §2 Perplexityの✅3項目を実地検証しVERIFIED注記を付与。robots.txtのPerplexityBot/Perplexity-User UA存在（robots.txt:57,64）、/blog/fastest-memo-app-benchmarkと/blog/benchmark-methodologyの実在（OG画像・QR資産の生成済み含む）、vs/*/index.html 全38ページに<table>が存在すること（欠落0件）をgrepで実測。node scripts/seo-check.jsは0 errors 0 warnings（本変更はdocsのみでHTML非変更）／【追記】上記3項目はオーナー依頼の追調査で全件を独立に追試し一致を確認。加えてBigQuery MCPで yurika-simplememo.searchconsole の3テーブル（ExportLog/searchdata_site_impression/searchdata_url_impression）の実在・着弾時刻・蓄積日数を実測。新データにのみ現れる需要としてドイツ語クラスタ（logseq obsidian vergleich 6imp/pos26.5・unterschiede 2imp・logseq vorteile 2imp）、email to obsidian 8imp/pos10.1＋send email to obsidian 3imp、および /obsidian/compare/logseq/ の初実測(4imp・1click)を確認。いずれも3日分では足切り未満。手動CSVスナップショットは queries が上限ちょうどの1000行で切断されていることも確認（row_counts.queries=1000）",
+  "reason": "【連続無記事6日目・本番最終変更 2026-08-14・BQ未確認（前回実測3/28日から更新なし）・自動化に2日間の空白（08-16/08-17）を検知】冪等性チェック: origin に当日分ブランチ・status JSON更新なしを確認し副系(CCR)で実行。GitHub Actions側は毎日06:00 JSTに起動し `conclusion: success` で完走しているが（run 32070691341=08-18 06:21 JST・31972997422=08-17 06:16 JST）、ジョブの中身は『Gate』ステップ後に Checkout / Claude Code ステップが両日とも `skipped` — repo secret `CLAUDE_CODE_OAUTH_TOKEN` 未設定によるRunbook§0-2記載どおりの意図した緑スキップで、実処理は一度も走っていない（新規の障害ではない・継続依頼）。一方でCCR副系も08-16・08-17の2日間は branch・log・status JSONいずれにも実行痕跡が無く、この2日間はどちらの経路も実処理をしていない空白期間だった（原因はこのセッション外・スケジューラ側の可能性）。データ面: 手動CSVスナップショットは2026-08-11から変化なし（growth/data/gsc/ 確認）、analyze.mjs --only unanswered/conversational の出力は前回(2026-08-15)までと同一で、Obsidian関連の会話型クエリ「logseqとobsidian どちらが良い」(23imp・pos9.2)はPR#480で対応済み・新規性なし。BigQueryはこのセッションにBigQuery MCPが接続されておらず（前回まで使えていたツールが今回は無い）、bq-preflight.mjsもローカル資格情報なしで認証失敗するため『取得できなかった』(bq_checked=false)。よってレーンA/Bは正当化できず、Mention Watchも前回2026-08-12取得で7日未満（次回2026-08-19以降）のため対象外。前回ログの申し送り「ai-citation-strategy.mdの残り監査（§3 Microsoft Copilot以降）を数項目ずつ継続」を実行。",
+  "verified": "docs/ai-citation-strategy.md §3 Microsoft Copilotの4項目を実地監査。Bingbot許可（robots.txt:78）とIndexNow連携（.github/workflows/auto-merge.yml:116がマージ直後にscripts/indexnow-notify.jsを実行し、同スクリプトが実際にhttps://api.indexnow.org/indexnowへPOSTしていることをソース実読・scripts/indexnow-notify.js:35,165）をVERIFIEDに更新。ms.locale metaタグは全HTMLでgrep 0件＝未実装であることを確認し、実装は本回のスコープ外として次回候補に記録。Bing Webmaster Toolsへのsitemap submitはダッシュボード未接続のため検証不能と明記。GitHub Actions workflow run 32070691341/31972997422のjob stepsをAPIで直接取得し、Checkout/Claude Codeステップの conclusion が両日とも skipped であることを実測（＝secret未設定による意図した緑スキップと確認、単なる憶測ではない）。node scripts/seo-check.jsは0 errors 0 warnings（本変更はdocsのみでHTML非変更）。本番の/obsidian/・/obsidian/compare/logseq/・/obsidian/getting-started/はHTTP 200を実測。",
   "checks": {
     "seo_check": "0 errors 0 warnings",
     "content_graph": "対象外（docs/のみの変更・HTML非変更）",
@@ -26,9 +25,10 @@
     "experiments": "変更なし・非干渉（docs/のみの変更）"
   },
   "owner_requests": [
-    "【新規・最優先】BigQueryのサービスアカウント鍵を実行環境に設定: growth/BIGQUERY_SETUP.md の手順で鍵を作り、Secret『GCP_SERVICE_ACCOUNT_JSON』（同書 §3-B の名称）に登録。現状 bq-preflight.mjs / ingest-bigquery.mjs はコンテナに資格情報が無く Cannot authenticate で落ちるため、autopilotが自力でGSCデータを取得できない",
-    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から）",
-    "【新規・低優先】日報メール側(simplememo-api)の対応: status JSON に streak / data_freshness を追加した。simplememo-api/src/autopilot-report.ts が描画するまでは reason 先頭の【】が唯一の表示経路になる"
+    "【新規・重要】自動化に2026-08-16/08-17の2日間、実処理の空白があった: GitHub Actions主系はsecret未設定により毎日意図通りスキップ（継続依頼どおり）だが、CCR副系も両日ともブランチ・ログ・status JSONに実行痕跡が無い。日報メール(10:00 JST)がこの2日間どう報告したか確認を推奨。原因はこのリポジトリ側のログからは特定できず、スケジューラ側の可能性がある",
+    "BigQueryのサービスアカウント鍵を実行環境に設定: growth/BIGQUERY_SETUP.md の手順で鍵を作り、Secret『GCP_SERVICE_ACCOUNT_JSON』（同書 §3-B の名称）に登録（継続依頼・2026-08-15から）。加えて今回のセッションはBigQuery MCP自体が未接続だったため、bq-preflight.mjsのローカル認証とMCP接続の両方が必要",
+    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から。08-17/08-18の実行ログで未設定を再確認）",
+    "【低優先・継続】日報メール側(simplememo-api)の対応: status JSON の streak / data_freshness を simplememo-api/src/autopilot-report.ts がまだ描画しないため、reason 先頭の【】が唯一の表示経路になっている"
   ],
-  "next": "BigQuery一括エクスポートの28日到達は 2026-09-06 前後（2026-08-10開始・現在3/28日）。到達までは部分期間でスナップショットを作らず、毎回 ExportLog の着弾状況と蓄積日数だけを記録する（Runbook §1-2）。到達後に ingest-bigquery.mjs で初回スナップショットを作り、レーンA/Bを再判定。ドイツ語クラスタ（logseq obsidian vergleich 等）と email to obsidian は現時点で足切り未満だが、28日窓が揃った時点で再評価する候補。Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回。ai-citation-strategy.mdの残り監査項目（§3 Microsoft Copilot以降の節）は次回以降数項目ずつ継続"
+  "next": "ai-citation-strategy.mdの残り監査項目（§4 ChatGPT以降の節）を数項目ずつ継続。ms.locale meta タグ未実装（JP全ページ横断編集になるため独立レーンとして次回以降に検討）。Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回。BigQuery一括エクスポートの28日到達は2026-09-06前後（前回実測3/28日から更新なし・MCP未接続のため今回は再確認できず）。新しいGSCスナップショット（手動CSVまたはBigQuery経由）が増えていればレーンA/Bを再判定。"
 }

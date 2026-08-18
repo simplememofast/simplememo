@@ -451,3 +451,71 @@
   §1-2 が BigQuery について戒めている「取得できなかった」を「増えていない」と
   報告する誤りと同じ型を、別の道具で踏んだ。確認は `git fetch` してから
   `state: all` か対象PRの直接取得で行うこと
+- **【08-18の回との突き合わせ】** 下の 2026-08-18 エントリは、同じ2日間の空白を
+  独立に検知したうえで「原因はこのリポジトリのログからは特定できず、
+  スケジューラ側の可能性がある」と保留している。**その保留への回答が上の2点**
+  （Routine `trig_016ALpozNRuf2j7BYJo5cCqy` は存在確認で not found ／
+  同日2セッションがレート制限で失敗）で、いずれもリポジトリ外の情報源
+  （trigger API・セッションメタデータ）からしか取れない。次に同種の空白を
+  見たら、リポジトリ内だけで探さずこの2つを引くこと。
+- **ただし未確定が1つ残る。** 08-18 の回は「副系(CCR)で実行」と記録しており、
+  副系そのものは動いている。上の not found と両立させるには
+  「Routineが別IDで再作成された」か「Routine以外の経路で起動された」の
+  どちらかだが、**どちらかは確定していない**。副系の現状を前提にする判断を
+  する前に、`list_triggers` ではなく実際の起動経路を確認すること
+  （一覧は作成日順ではないので、見当たらないことを不在の根拠にしない）。
+
+## 2026-08-18 — 保守のみ（副系CCR代走・2日間の実行空白を検知）
+
+- 判断根拠: 冪等性チェックで当日分ブランチ・status JSON更新なしを確認し
+  副系で実行。手動CSVスナップショットは2026-08-11から変化なし
+  （`growth/data/gsc/` 確認）。`analyze.mjs --only unanswered/conversational`
+  の出力は前回（2026-08-15）までと同一で、Obsidian関連の会話型クエリ
+  「logseqとobsidian どちらが良い」(23imp・pos9.2)はPR #480で対応済み・
+  新規性なし。BigQueryはこのセッションにBigQuery MCPが接続されておらず
+  （前回まで使えていたツールが今回は無い）、`bq-preflight.mjs`もローカル
+  資格情報なしで認証失敗するため「取得できなかった」(`bq_checked: false`)。
+  よってレーンA/Bは正当化できず、Mention Watchも前回2026-08-12取得で
+  7日未満のため対象外。前回ログの申し送り「ai-citation-strategy.mdの
+  残り監査（§3 Microsoft Copilot以降）を数項目ずつ継続」を実行。
+- **見つけたこと（自動化の空白）**: GitHub Actions主系は毎日06:00 JSTに
+  起動し `conclusion: success` で完走しているが、GitHub Actions APIで
+  run 32070691341（08-18 06:21 JST）・31972997422（08-17 06:16 JST）の
+  jobステップを直接取得したところ、`Gate` ステップの後、`Checkout` と
+  `Claude Code` ステップが両日とも `skipped` だった。これは
+  Runbook §0-2記載どおり、repo secret `CLAUDE_CODE_OAUTH_TOKEN` 未設定に
+  よる意図された緑スキップであり、新規の障害ではない（継続依頼どおり）。
+  一方で**CCR副系も2026-08-16・08-17の2日間、branch・log・status JSON
+  いずれにも実行痕跡が無く**、この2日間はどちらの経路も実処理をして
+  いなかった。原因はこのリポジトリのログからは特定できず、スケジューラ
+  側の可能性がある。オーナー依頼に追加。
+- やったこと: `docs/ai-citation-strategy.md` §3 Microsoft Copilotの4項目
+  監査。Bingbot許可とIndexNow連携をVERIFIEDに更新（IndexNowは
+  `auto-merge.yml` のマージ直後フックで実際にIndexNow APIへPOSTしている
+  ことをソース実読で確認）。`ms.locale` metaタグは未実装（grep 0件）と
+  確認し、実装は全JPページ横断編集になるため本回のスコープ外として
+  次回候補に記録。Bing Webmaster Toolsへのsitemap submitはダッシュボード
+  未接続のため検証不能と明記。
+- PR: （本エントリ作成時点で未作成・`docs/`+`data/`のみのdocs-onlyで
+  SEO Validationは素通り見込み）
+- 検証: `grep -n -i "bingbot" robots.txt` で78行目を実測。
+  `.github/workflows/auto-merge.yml:116` と `seo-check.yml:136` が
+  `scripts/indexnow-notify.js` を実行することを確認し、スクリプト本体が
+  `https://api.indexnow.org/indexnow` へ実際にPOSTするコードであることを
+  ソース実読（`scripts/indexnow-notify.js:35,165`）。
+  `grep -rl "ms.locale" --include="*.html" .` で該当0件を実測。
+  `node scripts/seo-check.js` 0 errors 0 warnings（本変更はdocsのみで
+  HTML非変更）。本番稼働中ページ（`/obsidian/`・`/obsidian/compare/logseq/`・
+  `/obsidian/getting-started/`）いずれもHTTP 200を実測。
+- 保留・オーナー依頼:
+  - **【新規・重要】自動化の2日間空白（08-16/08-17）**: GitHub Actions主系は
+    意図通りスキップだったが、CCR副系も両日とも実行痕跡なし。日報メール
+    (10:00 JST)がこの2日間どう報告したか確認を推奨
+  - BigQueryのサービスアカウント鍵を `GCP_SERVICE_ACCOUNT_JSON` に登録
+    （継続・2026-08-15から）。加えて今回はBigQuery MCP自体が未接続
+    だったため、ローカル認証とMCP接続の両方が必要
+  - GitHub Actions repo secret `CLAUDE_CODE_OAUTH_TOKEN` 登録
+    （継続・2026-08-11から。08-17/08-18の実行ログで未設定を再確認）
+  - `ai-citation-strategy.md` の残り監査（§4 ChatGPT以降の節）を
+    数項目ずつ継続
+  - Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回
