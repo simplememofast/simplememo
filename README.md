@@ -6,6 +6,11 @@
 > - **X英語**: アカウントバン1回目を受けたため（回復とライブラリ鮮度化が先）
 > - **TikTok**: 画像系コンテンツの品質が基準未達のため（privacy_level問題も未解決）
 >
+> **C2（scheduled失敗）の原因は判明済み（2026-08-18）**: 投稿ロジックではなく認証。
+> `/admin/*` が Cloudflare Access の背後にあるのに、ワークフローは Basic 認証しか
+> 送っていないため、投稿本文を出す前に302でログイン画面へ飛ばされている。
+> 再開にはAccessのサービストークンが要る（詳細は `x-post-scheduled.yml` 冒頭）。
+>
 > 詳細な理由・再開条件は各workflowファイル冒頭に記載:
 > `.github/workflows/x-post-scheduled.yml` / `x-post-en-scheduled.yml` / `auto-post-tiktok.yml`。
 > `workflow_dispatch` による手動実行（dry_run含む）は引き続き可能。
