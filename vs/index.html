@@ -48,6 +48,9 @@
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/vs/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/vs/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/vs/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/vs/">
   <!-- Favicon -->
   <link rel="icon" href="/favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
@@ -71,7 +74,6 @@
   </script>
 
   <!-- JSON-LD: Speakable -->
-  
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
@@ -83,8 +85,6 @@
     .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
     .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
     .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
-    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
-    a.app-store-badge[data-lang].active{display:inline-flex}
 
     .lp-hero{text-align:center;padding:4rem 0 3rem}
     .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
@@ -267,22 +267,22 @@
   <nav class="global-nav" aria-label="メインナビゲーション">
     <div class="global-nav__inner">
       <a href="/" class="global-nav__logo">
-        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja">Obsidian連携シンプルメモ</span></a>
       <ul class="global-nav__links" id="navLinks">
-        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
-        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
-        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
-        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
-        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
-        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
-        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
-        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
-        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
-        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=vs-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+        <li><a href="/guides/"><span lang="ja">使い方</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja">活用事例</span></a></li>
+        <li><a href="/vs/"><span lang="ja">比較</span></a></li>
+        <li><a href="/methods/"><span lang="ja">メソッド</span></a></li>
+        <li><a href="/blog/"><span lang="ja">ブログ</span></a></li>
+        <li><a href="/glossary/"><span lang="ja">用語集</span></a></li>
+        <li><a href="/faq"><span lang="ja">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja">開発者</span></a></li>
+        <li><a href="/devlog/"><span lang="ja">開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=vs-jp__nav&amp;mt=8"><span lang="ja">ダウンロード</span></a></li>
       </ul>
-      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><a class="lang-switcher__btn active" href="/vs/" aria-current="page" hreflang="ja" aria-label="日本語" style="text-decoration:none">JA</a><a class="lang-switcher__btn" href="/en/vs/" hreflang="en" aria-label="Switch to English" style="text-decoration:none">EN</a></div>
         <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=vs-jp__nav&amp;mt=8" class="global-nav__cta">
-          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+          <span lang="ja">ダウンロード</span>
         </a>
         <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
       </div>
@@ -290,65 +290,54 @@
   </nav>
 
   <!-- Meta Templates for JS -->
-  <div class="meta-templates" style="display:none;">
-    <div lang="ja" class="meta-template" data-lang="ja">
-      <span class="meta-title">メモアプリ比較 — Obsidian連携シンプルメモ vs 他アプリ</span>
-      <span class="meta-og-title">メモアプリ比較 — Obsidian連携シンプルメモ vs 他アプリ</span>
-      <span class="meta-description">Apple Notes・Google Keep・Notion・LINEなど人気メモアプリをObsidian連携シンプルメモと徹底比較。起動速度・メール連携・オフライン対応などの観点で一覧表示。実測ベースの比較表と用途別の結論つきで、あなたに合う1本が見つかります。</span>
-    </div>
-    <div lang="en" class="meta-template" data-lang="en">
-      <span class="meta-title">Memo App Comparison — Simple Memo vs Other Apps</span>
-      <span class="meta-og-title">Memo App Comparison — Simple Memo vs Other Apps</span>
-      <span class="meta-description">Compare Simple Memo with Apple Notes, Google Keep, Notion, LINE and more. Launch speed, email integration, offline support compared side-by-side.</span>
-    </div>
-  </div>
+  
 <main class="page-content">
     <div class="container">
 
       <!-- Hero -->
       <div class="lp-hero">
         <div class="lp-hero__label">
-          <span lang="ja" data-lang="ja">メモアプリ 完全比較ガイド</span>
-          <span lang="en" data-lang="en">Complete Memo App Comparison Guide</span>
+          <span lang="ja">メモアプリ 完全比較ガイド</span>
+          
         </div>
         <h1 class="lp-hero__title">
-          <span lang="ja" data-lang="ja">メモアプリ比較<br>Obsidian連携シンプルメモ vs 16アプリ</span>
-          <span lang="en" data-lang="en">Memo App Comparison<br>Simple Memo vs 16 Popular Apps</span>
+          <span lang="ja">メモアプリ比較<br>Obsidian連携シンプルメモ vs 16アプリ</span>
+          
         </h1>
         <p class="lp-hero__sub">
-          <span lang="ja" data-lang="ja">Apple Notes・Google Keep・Notion・LINE Keepメモ・Slack・Bear・Note To Self Mail・Email Me App。8つのメモアプリをObsidian連携シンプルメモと多角的に比較します。あなたの用途に最適なアプリを見つけてください。</span>
-          <span lang="en" data-lang="en">Apple Notes, Google Keep, Notion, LINE Keep, Slack, Bear, Note To Self Mail, Email Me App — compared against Simple Memo across launch speed, email integration, offline support, privacy, and more.</span>
+          <span lang="ja">Apple Notes・Google Keep・Notion・LINE Keepメモ・Slack・Bear・Note To Self Mail・Email Me App。8つのメモアプリをObsidian連携シンプルメモと多角的に比較します。あなたの用途に最適なアプリを見つけてください。</span>
+          
         </p>
       </div>
 
       <!-- Atomic Answer Block (AI / LLM citation-friendly) -->
       <aside class="answer-block" aria-label="このページの要点" style="background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-left:3px solid var(--accent,#6ab4ff);border-radius:8px;padding:1.25rem 1.5rem;margin:0 auto 2rem;max-width:760px;font-size:.95rem;line-height:1.85;color:rgba(255,255,255,.75);">
-        <span lang="ja" data-lang="ja" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
-        <span lang="en" data-lang="en" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">TL;DR</span>
-        <p lang="ja" data-lang="ja" style="margin:0;"><strong style="color:#fff;">Simple Memo（Obsidian連携シンプルメモ）</strong>は、Captioが2024年10月にサービス終了した後の代替として開発されたiOSメモ→メール送信アプリ。起動 0.4秒・ワンタップ送信・AES-GCM端末内暗号化・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。株式会社ユリカ（日本）が開発・運営する独立アプリで、Captio公式後継ではありません。</p>
-        <p lang="en" data-lang="en" style="margin:0;"><strong style="color:#fff;">Simple Memo</strong> is an iOS memo-to-email app built as a successor to Captio (which shut down in October 2024). It launches in 0.4 seconds, sends with one tap, uses AES-GCM on-device encryption, stores zero memo content on servers, and includes offline Outbox auto-resend. Developed by YURIKA, K.K. (Japan) as an independent app — not Captio's official successor.</p>
+        <span lang="ja" style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">要点</span>
+        
+        <p lang="ja" style="margin:0;"><strong style="color:#fff;">Simple Memo（Obsidian連携シンプルメモ）</strong>は、Captioが2024年10月にサービス終了した後の代替として開発されたiOSメモ→メール送信アプリ。起動 0.4秒・ワンタップ送信・AES-GCM端末内暗号化・メモ本文をサーバーに保存しない設計・オフラインOutbox自動再送信。株式会社ユリカ（日本）が開発・運営する独立アプリで、Captio公式後継ではありません。</p>
+        
       </aside>
 
       <!-- Entity Definition -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">Obsidian連携シンプルメモとは</span>
-          <span lang="en" data-lang="en">What is Simple Memo - for Obsidian?</span>
+          <span lang="ja">Obsidian連携シンプルメモとは</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">Obsidian連携シンプルメモは、「思いついたことを0.4秒以内に入力し、ワンタップでメール送信する」ことに完全特化したiOSアプリです。メモ管理・フォルダ・タグといった機能を持たず、メール受信トレイをそのまま保存先とします。Outboxアーキテクチャによるオフライン対応、AES-GCM暗号化、ワンタップ送信を実現しています。2024年10月に廃止されたCaptioの後継として設計されました。</span>
-          <span lang="en" data-lang="en">Simple Memo - for Obsidian is an iOS app built entirely around one goal: capture a thought and send it to email in under one second. It has no folders, tags, or management features — your email inbox is the storage layer. Built with Outbox architecture for offline reliability, AES-GCM encryption, and one-tap send, it was designed as a replacement in the spirit of the discontinued Captio app.</span>
+          <span lang="ja">Obsidian連携シンプルメモは、「思いついたことを0.4秒以内に入力し、ワンタップでメール送信する」ことに完全特化したiOSアプリです。メモ管理・フォルダ・タグといった機能を持たず、メール受信トレイをそのまま保存先とします。Outboxアーキテクチャによるオフライン対応、AES-GCM暗号化、ワンタップ送信を実現しています。2024年10月に廃止されたCaptioの後継として設計されました。</span>
+          
         </p>
       </section>
 
       <!-- Full Comparison Matrix -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">全アプリ比較マトリクス</span>
-          <span lang="en" data-lang="en">Full App Comparison Matrix</span>
+          <span lang="ja">全アプリ比較マトリクス</span>
+          
         </h2>
         <div style="overflow-x:auto">
-          <table lang="ja" class="compare-table" data-lang="ja">
+          <table lang="ja" class="compare-table">
             <thead>
               <tr>
                 <th scope="col">アプリ</th>
@@ -624,867 +613,592 @@
               </tr>
             </tbody>
           </table>
-          <table lang="en" class="compare-table" data-lang="en">
-            <thead>
-              <tr>
-                <th scope="col">App</th>
-                <th scope="col">Ready to type</th>
-                <th scope="col">One-Tap Send</th>
-                <th scope="col">Offline</th>
-                <th scope="col">Email</th>
-                <th scope="col">Encryption</th>
-                <th scope="col">Free Plan</th>
-                <th scope="col">Simplicity</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="highlight">
-                <th scope="row">Simple Memo</th>
-                <td class="yes">0.4s*</td>
-                <td class="yes">Yes</td>
-                <td class="yes">Outbox</td>
-                <td class="yes">Direct send</td>
-                <td class="yes">AES-GCM</td>
-                <td class="yes">Yes</td>
-                <td class="yes">★★★★★</td>
-              </tr>
-              <tr>
-                <th scope="row">Apple Notes</th>
-                <td>1.7s*</td>
-                <td class="no">No</td>
-                <td class="yes">iCloud sync</td>
-                <td class="no">Manual share</td>
-                <td class="yes">iCloud E2E</td>
-                <td class="yes">Free</td>
-                <td>★★★☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Google Keep</th>
-                <td>2.1s*</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual share</td>
-                <td class="no">No</td>
-                <td class="yes">Free</td>
-                <td>★★★☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">LINE Keep</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">Discontinued</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Notion</th>
-                <td>2.8s*</td>
-                <td class="no">No</td>
-                <td>Limited</td>
-                <td class="no">Manual only</td>
-                <td class="no">No</td>
-                <td>Limited</td>
-                <td>★☆☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Slack DM to self</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">Slack only</td>
-                <td class="yes">TLS</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Bear</th>
-                <td>0.9s*</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual share</td>
-                <td class="yes">Yes</td>
-                <td>Limited</td>
-                <td>★★★☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Note To Self Mail</th>
-                <td>~0.5s</td>
-                <td class="yes">Yes</td>
-                <td class="no">No</td>
-                <td class="yes">Email send</td>
-                <td class="no">No</td>
-                <td class="yes">Ads</td>
-                <td>★★★★☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Email Me App</th>
-                <td>~0.5s</td>
-                <td class="yes">Yes</td>
-                <td class="no">No</td>
-                <td class="yes">Email send</td>
-                <td class="no">No</td>
-                <td>Limited</td>
-                <td>★★★★☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Todoist</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual only</td>
-                <td class="yes">TLS</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">TickTick</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual only</td>
-                <td class="yes">TLS</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">UpNote</th>
-                <td>~1s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual share</td>
-                <td class="yes">Yes</td>
-                <td>Limited</td>
-                <td>★★★☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">GoodNotes</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual share</td>
-                <td class="yes">iCloud</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Day One</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual share</td>
-                <td class="yes">E2E</td>
-                <td>Limited</td>
-                <td>★★★☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Craft</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual only</td>
-                <td class="yes">Yes</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Logseq</th>
-                <td>~3s</td>
-                <td class="no">No</td>
-                <td class="yes">Local</td>
-                <td class="no">No</td>
-                <td class="yes">Local</td>
-                <td class="yes">Free</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Roam Research</th>
-                <td>~3s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="yes">E2E</td>
-                <td class="no">No</td>
-                <td>★☆☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Dynalist</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td>★★★☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Drafts</th>
-                <td>0.9s*</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="yes">Actions</td>
-                <td class="yes">iCloud</td>
-                <td>Limited</td>
-                <td>★★★★☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Stock</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">Team only</td>
-                <td class="yes">TLS</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Trello</th>
-                <td>~3s</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">Manual only</td>
-                <td class="yes">TLS</td>
-                <td>Limited</td>
-                <td>★☆☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Capacities</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td>Limited</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Anytype</th>
-                <td>~3s</td>
-                <td class="no">No</td>
-                <td class="yes">P2P</td>
-                <td class="no">No</td>
-                <td class="yes">E2E</td>
-                <td class="yes">Free</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Heptabase</th>
-                <td>~3s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">No</td>
-                <td>★★☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Tana</th>
-                <td>~3s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td>Limited</td>
-                <td>★☆☆☆☆</td>
-              </tr>
-              <tr>
-                <th scope="row">Mem</th>
-                <td>~2s</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="no">No</td>
-                <td class="yes">Yes</td>
-                <td class="no">No</td>
-                <td>★★☆☆☆</td>
-              </tr>
-            </tbody>
-          </table>
+          
         </div>
         <p class="lp-section__lead" style="font-size:.8rem;color:var(--text-muted);margin-top:.75rem">
-          <span lang="ja" data-lang="ja">※ アイコンをタップしてから実際に入力できるまでの実測値（iPhone 16e (A18) / iOS 26.5.2、途中のタップを含む、各4〜10回の中央値、Drafts のみ最速値、2026年8月11日、ウォーム起動）。計測方法は<a href="/blog/fastest-memo-app-benchmark">速度ベンチマーク</a>に掲載しています。※のない行は編集部の目安値で、実測していません。</span>
-          <span lang="en" data-lang="en">* Measured from icon tap to the moment you can actually type (iPhone 16e (A18) / iOS 26.5.2, taps included, median of 4–10 runs, Drafts is its fastest run, 2026-08-11, warm launches). Method and full results: <a href="/blog/fastest-memo-app-benchmark">the speed benchmark</a>. Rows without * are editorial estimates and have not been measured.</span>
+          <span lang="ja">※ アイコンをタップしてから実際に入力できるまでの実測値（iPhone 16e (A18) / iOS 26.5.2、途中のタップを含む、各4〜10回の中央値、Drafts のみ最速値、2026年8月11日、ウォーム起動）。計測方法は<a href="/blog/fastest-memo-app-benchmark">速度ベンチマーク</a>に掲載しています。※のない行は編集部の目安値で、実測していません。</span>
+          
         </p>
       </section>
 
       <!-- Individual Comparison Cards -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">個別比較ページ</span>
-          <span lang="en" data-lang="en">Individual Comparison Pages</span>
+          <span lang="ja">個別比較ページ</span>
+          
         </h2>
         <p class="lp-section__lead">
-          <span lang="ja" data-lang="ja">各アプリとの詳細な比較ページをご覧ください。違い・ユースケース・乗り換え手順を詳しく解説しています。</span>
-          <span lang="en" data-lang="en">Detailed comparison pages for each app. In-depth analysis of differences, use cases, and migration steps.</span>
+          <span lang="ja">各アプリとの詳細な比較ページをご覧ください。違い・ユースケース・乗り換え手順を詳しく解説しています。</span>
+          
         </p>
         <div class="vs-cards">
           <a href="/vs/apple-notes/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Apple Notes</span>
-              <span lang="en" data-lang="en">Simple Memo vs Apple Notes</span>
+              <span lang="ja">シンプルメモ vs Apple Notes</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">長文メモに強いApple Notesと、瞬間キャプチャに特化したシンプルメモを比較。</span>
-              <span lang="en" data-lang="en">Apple Notes for long-form vs Simple Memo for instant capture. Who wins for quick thoughts?</span>
+              <span lang="ja">長文メモに強いApple Notesと、瞬間キャプチャに特化したシンプルメモを比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/google-keep/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Google Keep</span>
-              <span lang="en" data-lang="en">Simple Memo vs Google Keep</span>
+              <span lang="ja">シンプルメモ vs Google Keep</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">Googleアカウント不要・クラウド非依存のシンプルメモとGoogle Keepを比較。</span>
-              <span lang="en" data-lang="en">No Google account needed vs full Google ecosystem. Compare privacy and speed.</span>
+              <span lang="ja">Googleアカウント不要・クラウド非依存のシンプルメモとGoogle Keepを比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/line-keep-memo/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs LINE Keepメモ</span>
-              <span lang="en" data-lang="en">Simple Memo vs LINE Keep Memo</span>
+              <span lang="ja">シンプルメモ vs LINE Keepメモ</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">Keepメモは継続中（2024年8月に終了したのはLINE Keep）。違いと乗り換え先を比較。</span>
-              <span lang="en" data-lang="en">Keep Memo still works (LINE Keep ended in August 2024). See how the two compare.</span>
+              <span lang="ja">Keepメモは継続中（2024年8月に終了したのはLINE Keep）。違いと乗り換え先を比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/notion/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Notion</span>
-              <span lang="en" data-lang="en">Simple Memo vs Notion</span>
+              <span lang="ja">シンプルメモ vs Notion</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">多機能なNotionと、機能ゼロのシンプルメモ。「速さ」を求めるならどちらか。</span>
-              <span lang="en" data-lang="en">All-in-one Notion vs zero-friction Simple Memo. The ultimate simplicity showdown.</span>
+              <span lang="ja">多機能なNotionと、機能ゼロのシンプルメモ。「速さ」を求めるならどちらか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/ios-reminders/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs リマインダー</span>
-              <span lang="en" data-lang="en">Simple Memo vs iOS Reminders</span>
+              <span lang="ja">シンプルメモ vs リマインダー</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">リマインダーをメモ代わりに使っていませんか？専用アプリとの違いを比較。</span>
-              <span lang="en" data-lang="en">Misusing Reminders as a memo app? Compare with a purpose-built quick capture tool.</span>
+              <span lang="ja">リマインダーをメモ代わりに使っていませんか？専用アプリとの違いを比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/ios-shortcuts/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs iOSショートカット</span>
-              <span lang="en" data-lang="en">Simple Memo vs iOS Shortcuts</span>
+              <span lang="ja">シンプルメモ vs iOSショートカット</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">ショートカットで自作メール送信 vs 専用アプリ。オフライン対応の差が決め手。</span>
-              <span lang="en" data-lang="en">DIY email shortcut vs dedicated app. Offline support and reliability compared.</span>
+              <span lang="ja">ショートカットで自作メール送信 vs 専用アプリ。オフライン対応の差が決め手。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/joplin/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Joplin</span>
-              <span lang="en" data-lang="en">Simple Memo vs Joplin</span>
+              <span lang="ja">シンプルメモ vs Joplin</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">オープンソースのJoplin vs 軽量メール送信特化。プライバシー重視派の選択肢を比較。</span>
-              <span lang="en" data-lang="en">Open-source Joplin vs lightweight email capture. Privacy-first options compared.</span>
+              <span lang="ja">オープンソースのJoplin vs 軽量メール送信特化。プライバシー重視派の選択肢を比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/bear/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Bear</span>
-              <span lang="en" data-lang="en">Simple Memo vs Bear</span>
+              <span lang="ja">シンプルメモ vs Bear</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">Markdownと美しいUIのBearと、超シンプルなシンプルメモを比較。</span>
-              <span lang="en" data-lang="en">Beautiful Markdown editor Bear vs pure capture speed. Different tools for different needs.</span>
+              <span lang="ja">Markdownと美しいUIのBearと、超シンプルなシンプルメモを比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/note-to-self-mail/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Note To Self Mail</span>
-              <span lang="en" data-lang="en">Simple Memo vs Note To Self Mail</span>
+              <span lang="ja">シンプルメモ vs Note To Self Mail</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">同じメール送信アプリ同士を比較。オフライン対応・暗号化・広告の有無が決め手。</span>
-              <span lang="en" data-lang="en">Both send to email — but which is faster, safer, and ad-free?</span>
+              <span lang="ja">同じメール送信アプリ同士を比較。オフライン対応・暗号化・広告の有無が決め手。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/email-me-app/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Email Me App</span>
-              <span lang="en" data-lang="en">Simple Memo vs Email Me App</span>
+              <span lang="ja">シンプルメモ vs Email Me App</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">Email Me Appとシンプルメモを比較。価格・機能・プライバシーの違いを解説。</span>
-              <span lang="en" data-lang="en">Email Me App vs Simple Memo — pricing, features, and privacy compared.</span>
+              <span lang="ja">Email Me Appとシンプルメモを比較。価格・機能・プライバシーの違いを解説。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/evernote/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Evernote</span>
-              <span lang="en" data-lang="en">Simple Memo vs Evernote</span>
+              <span lang="ja">シンプルメモ vs Evernote</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">多機能すぎるEvernoteとシンプルメモ。クイックキャプチャに特化した使い分けを解説。</span>
-              <span lang="en" data-lang="en">Feature-heavy Evernote vs purpose-built Simple Memo. Quick capture specialization explained.</span>
+              <span lang="ja">多機能すぎるEvernoteとシンプルメモ。クイックキャプチャに特化した使い分けを解説。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/onenote/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs OneNote</span>
-              <span lang="en" data-lang="en">Simple Memo vs OneNote</span>
+              <span lang="ja">シンプルメモ vs OneNote</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">Microsoft OneNoteとシンプルメモ。デジタルノートブック vs ワンタップメモの違い。</span>
-              <span lang="en" data-lang="en">Microsoft OneNote vs Simple Memo. Digital notebook vs one-tap memo capture.</span>
+              <span lang="ja">Microsoft OneNoteとシンプルメモ。デジタルノートブック vs ワンタップメモの違い。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/obsidian/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Obsidian</span>
-              <span lang="en" data-lang="en">Simple Memo vs Obsidian</span>
+              <span lang="ja">シンプルメモ vs Obsidian</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">PKMツールObsidianとシンプルメモの使い分け。キャプチャ→整理の最適フロー。</span>
-              <span lang="en" data-lang="en">PKM tool Obsidian vs Simple Memo. The optimal capture-to-organize workflow.</span>
+              <span lang="ja">PKMツールObsidianとシンプルメモの使い分け。キャプチャ→整理の最適フロー。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/obsidian-share-sheet/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">vs Obsidian共有シート</span>
-              <span lang="en" data-lang="en">vs Obsidian Share Sheet</span>
+              <span lang="ja">vs Obsidian共有シート</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">公式1.13共有シート・ショートカット・QuickAddとの誠実比較。公式で足りるケースも明記。</span>
-              <span lang="en" data-lang="en">Official 1.13 share sheet vs Shortcuts vs QuickAdd vs Simple Memo — an honest comparison.</span>
+              <span lang="ja">公式1.13共有シート・ショートカット・QuickAddとの誠実比較。公式で足りるケースも明記。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/simplenote/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Simplenote</span>
-              <span lang="en" data-lang="en">Simple Memo vs Simplenote</span>
+              <span lang="ja">シンプルメモ vs Simplenote</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">同じ「シンプル」でも哲学が違う。アプリ内保存 vs メール送信の比較。</span>
-              <span lang="en" data-lang="en">Both value simplicity, but with different philosophies. In-app storage vs email delivery.</span>
+              <span lang="ja">同じ「シンプル」でも哲学が違う。アプリ内保存 vs メール送信の比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/standard-notes/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Standard Notes</span>
-              <span lang="en" data-lang="en">Simple Memo vs Standard Notes</span>
+              <span lang="ja">シンプルメモ vs Standard Notes</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">暗号化メモアプリ同士の比較。プライバシーファーストの2つのアプローチ。</span>
-              <span lang="en" data-lang="en">Two privacy-first approaches compared. Encrypted note-taking vs encrypted email memo.</span>
+              <span lang="ja">暗号化メモアプリ同士の比較。プライバシーファーストの2つのアプローチ。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/moca/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Moca</span>
-              <span lang="en" data-lang="en">Simple Memo vs Moca</span>
+              <span lang="ja">シンプルメモ vs Moca</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">同じ「自分にメール」コンセプトのMocaとシンプルメモ。暗号化・オフライン対応の違い。</span>
-              <span lang="en" data-lang="en">Both email memos to yourself — but Simple Memo adds encryption, offline Outbox, and one-tap speed.</span>
+              <span lang="ja">同じ「自分にメール」コンセプトのMocaとシンプルメモ。暗号化・オフライン対応の違い。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/captioo/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Captioo</span>
-              <span lang="en" data-lang="en">Simple Memo vs Captioo</span>
+              <span lang="ja">シンプルメモ vs Captioo</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">同名で混同されやすいCaptioo（808 inc.）との違い。Captio公式後継ではない別物の独立アプリ同士を比較。</span>
-              <span lang="en" data-lang="en">Same-name confusion vs Captioo (808 inc.). Two unrelated apps — neither is the official Captio successor.</span>
+              <span lang="ja">同名で混同されやすいCaptioo（808 inc.）との違い。Captio公式後継ではない別物の独立アプリ同士を比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/memo-post/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs メモポスト</span>
-              <span lang="en" data-lang="en">Simple Memo vs NotePost</span>
+              <span lang="ja">シンプルメモ vs メモポスト</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">AI機能のメモポストと速度特化のシンプルメモ。AI提案 vs 最速キャプチャの比較。</span>
-              <span lang="en" data-lang="en">NotePost's AI suggestions vs Simple Memo's speed and privacy. Different strengths compared.</span>
+              <span lang="ja">AI機能のメモポストと速度特化のシンプルメモ。AI提案 vs 最速キャプチャの比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/mail-to-self/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Mail to Self</span>
-              <span lang="en" data-lang="en">Simple Memo vs Mail to Self Apps</span>
+              <span lang="ja">シンプルメモ vs Mail to Self</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">自分にメールするアプリの総合比較。SMTP不要・暗号化・オフラインで差別化。</span>
-              <span lang="en" data-lang="en">The ultimate email-to-self comparison. No SMTP, AES-GCM encryption, and offline Outbox.</span>
+              <span lang="ja">自分にメールするアプリの総合比較。SMTP不要・暗号化・オフラインで差別化。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/todoist/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Todoist</span>
-              <span lang="en" data-lang="en">Simple Memo vs Todoist</span>
+              <span lang="ja">シンプルメモ vs Todoist</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">タスク管理ツール vs ワンタップメモ。思いつきの即時記録か、タスク管理か。</span>
-              <span lang="en" data-lang="en">Task manager vs one-tap memo. Instant capture or task management — which fits your flow?</span>
+              <span lang="ja">タスク管理ツール vs ワンタップメモ。思いつきの即時記録か、タスク管理か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/ticktick/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs TickTick</span>
-              <span lang="en" data-lang="en">Simple Memo vs TickTick</span>
+              <span lang="ja">シンプルメモ vs TickTick</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">多機能タスクアプリ vs 超シンプルメモ。機能の多さと速さ、どちらを選ぶか。</span>
-              <span lang="en" data-lang="en">Feature-rich task app vs ultra-simple memo. More features or more speed?</span>
+              <span lang="ja">多機能タスクアプリ vs 超シンプルメモ。機能の多さと速さ、どちらを選ぶか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/upnote/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs UpNote</span>
-              <span lang="en" data-lang="en">Simple Memo vs UpNote</span>
+              <span lang="ja">シンプルメモ vs UpNote</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">買い切りノートアプリ vs メール送信メモ。整理か即時送信か。</span>
-              <span lang="en" data-lang="en">One-time purchase note app vs email-send memo. Organize or send instantly?</span>
+              <span lang="ja">買い切りノートアプリ vs メール送信メモ。整理か即時送信か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/goodnotes/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs GoodNotes</span>
-              <span lang="en" data-lang="en">Simple Memo vs GoodNotes</span>
+              <span lang="ja">シンプルメモ vs GoodNotes</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">手書きノート vs テキストメモ。Apple Pencilでの記録かワンタップ送信か。</span>
-              <span lang="en" data-lang="en">Handwritten notes vs text memo. Apple Pencil writing or one-tap email send?</span>
+              <span lang="ja">手書きノート vs テキストメモ。Apple Pencilでの記録かワンタップ送信か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/day-one/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Day One</span>
-              <span lang="en" data-lang="en">Simple Memo vs Day One</span>
+              <span lang="ja">シンプルメモ vs Day One</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">日記アプリ vs 瞬間キャプチャ。振り返り記録か、即座のメモ送信か。</span>
-              <span lang="en" data-lang="en">Journal app vs instant capture. Reflective writing or lightning-fast memo send?</span>
+              <span lang="ja">日記アプリ vs 瞬間キャプチャ。振り返り記録か、即座のメモ送信か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/craft/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Craft</span>
-              <span lang="en" data-lang="en">Simple Memo vs Craft</span>
+              <span lang="ja">シンプルメモ vs Craft</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">リッチドキュメント vs ミニマルメモ。美しい文書作成か最速メモか。</span>
-              <span lang="en" data-lang="en">Rich documents vs minimal memo. Beautiful document creation or fastest capture?</span>
+              <span lang="ja">リッチドキュメント vs ミニマルメモ。美しい文書作成か最速メモか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/logseq/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Logseq</span>
-              <span lang="en" data-lang="en">Simple Memo vs Logseq</span>
+              <span lang="ja">シンプルメモ vs Logseq</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">アウトライナー vs ワンタップメモ。知識管理か瞬間記録か。</span>
-              <span lang="en" data-lang="en">Outliner vs one-tap memo. Knowledge management or instant capture?</span>
+              <span lang="ja">アウトライナー vs ワンタップメモ。知識管理か瞬間記録か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/roam-research/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Roam Research</span>
-              <span lang="en" data-lang="en">Simple Memo vs Roam Research</span>
+              <span lang="ja">シンプルメモ vs Roam Research</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">ネットワーク思考 vs 即座送信。双方向リンクか、メール直送か。</span>
-              <span lang="en" data-lang="en">Networked thought vs instant send. Bidirectional links or direct email delivery?</span>
+              <span lang="ja">ネットワーク思考 vs 即座送信。双方向リンクか、メール直送か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/dynalist/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Dynalist</span>
-              <span lang="en" data-lang="en">Simple Memo vs Dynalist</span>
+              <span lang="ja">シンプルメモ vs Dynalist</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">アウトライナー vs メール直送。階層構造整理か即座にメモを送るか。</span>
-              <span lang="en" data-lang="en">Outliner vs email direct. Hierarchical organization or send memos instantly?</span>
+              <span lang="ja">アウトライナー vs メール直送。階層構造整理か即座にメモを送るか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/drafts/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Drafts</span>
-              <span lang="en" data-lang="en">Simple Memo vs Drafts</span>
+              <span lang="ja">シンプルメモ vs Drafts</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">テキスト自動化 vs メール送信特化。アクション連携か、シンプルな一本道か。</span>
-              <span lang="en" data-lang="en">Text automation vs email-send focus. Action integrations or a simple one-way path?</span>
+              <span lang="ja">テキスト自動化 vs メール送信特化。アクション連携か、シンプルな一本道か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/stock/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Stock</span>
-              <span lang="en" data-lang="en">Simple Memo vs Stock</span>
+              <span lang="ja">シンプルメモ vs Stock</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">チーム情報共有 vs 個人メモ。チーム向けストックか、個人の即時メモか。</span>
-              <span lang="en" data-lang="en">Team info sharing vs personal memo. Team knowledge base or individual instant notes?</span>
+              <span lang="ja">チーム情報共有 vs 個人メモ。チーム向けストックか、個人の即時メモか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/google-keep-vs-apple-notes/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">VS比較</span>
-              <span lang="en" data-lang="en">Head-to-Head</span>
+              <span lang="ja">VS比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">Google Keep vs Apple Notes</span>
-              <span lang="en" data-lang="en">Google Keep vs Apple Notes</span>
+              <span lang="ja">Google Keep vs Apple Notes</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">第三者比較：GoogleとAppleのメモアプリを徹底比較。どちらが優れているか。</span>
-              <span lang="en" data-lang="en">Third-party comparison: Google's vs Apple's note app. Which one comes out on top?</span>
+              <span lang="ja">第三者比較：GoogleとAppleのメモアプリを徹底比較。どちらが優れているか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/notion-vs-obsidian/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">VS比較</span>
-              <span lang="en" data-lang="en">Head-to-Head</span>
+              <span lang="ja">VS比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">Notion vs Obsidian</span>
-              <span lang="en" data-lang="en">Notion vs Obsidian</span>
+              <span lang="ja">Notion vs Obsidian</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">第三者比較：クラウド型Notionとローカル型Obsidianを徹底比較。</span>
-              <span lang="en" data-lang="en">Third-party comparison: Cloud-based Notion vs local-first Obsidian. The definitive guide.</span>
+              <span lang="ja">第三者比較：クラウド型Notionとローカル型Obsidianを徹底比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/notion-vs-evernote/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">VS比較</span>
-              <span lang="en" data-lang="en">Head-to-Head</span>
+              <span lang="ja">VS比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">Notion vs Evernote</span>
-              <span lang="en" data-lang="en">Notion vs Evernote</span>
+              <span lang="ja">Notion vs Evernote</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">第三者比較：新興Notionと老舗Evernoteの機能・価格・使い勝手を比較。</span>
-              <span lang="en" data-lang="en">Third-party comparison: Rising Notion vs veteran Evernote. Features, pricing, and usability.</span>
+              <span lang="ja">第三者比較：新興Notionと老舗Evernoteの機能・価格・使い勝手を比較。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/capacities/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Capacities</span>
-              <span lang="en" data-lang="en">Simple Memo vs Capacities</span>
+              <span lang="ja">シンプルメモ vs Capacities</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">オブジェクト型ノート vs メモ。構造化データか、即座の記録か。</span>
-              <span lang="en" data-lang="en">Object-based notes vs memo. Structured data or instant capture?</span>
+              <span lang="ja">オブジェクト型ノート vs メモ。構造化データか、即座の記録か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/anytype/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Anytype</span>
-              <span lang="en" data-lang="en">Simple Memo vs Anytype</span>
+              <span lang="ja">シンプルメモ vs Anytype</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">分散型ノート vs メール送信。P2P同期か、メール直送か。</span>
-              <span lang="en" data-lang="en">Decentralized notes vs email send. P2P sync or direct email delivery?</span>
+              <span lang="ja">分散型ノート vs メール送信。P2P同期か、メール直送か。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/heptabase/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Heptabase</span>
-              <span lang="en" data-lang="en">Simple Memo vs Heptabase</span>
+              <span lang="ja">シンプルメモ vs Heptabase</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">ビジュアルノート vs ワンタップ。ホワイトボード思考か、最速メモか。</span>
-              <span lang="en" data-lang="en">Visual notes vs one-tap. Whiteboard thinking or fastest memo capture?</span>
+              <span lang="ja">ビジュアルノート vs ワンタップ。ホワイトボード思考か、最速メモか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
           <a href="/vs/tana/" class="vs-card">
             <div class="vs-card__label">
-              <span lang="ja" data-lang="ja">比較</span>
-              <span lang="en" data-lang="en">Comparison</span>
+              <span lang="ja">比較</span>
+              
             </div>
             <div class="vs-card__title">
-              <span lang="ja" data-lang="ja">シンプルメモ vs Tana</span>
-              <span lang="en" data-lang="en">Simple Memo vs Tana</span>
+              <span lang="ja">シンプルメモ vs Tana</span>
+              
             </div>
             <div class="vs-card__desc">
-              <span lang="ja" data-lang="ja">スーパータグ型 vs シンプル。高度な分類か、ゼロ設定メモか。</span>
-              <span lang="en" data-lang="en">Supertag-based vs simple. Advanced classification or zero-config memo?</span>
+              <span lang="ja">スーパータグ型 vs シンプル。高度な分類か、ゼロ設定メモか。</span>
+              
             </div>
             <span class="vs-card__arrow">詳細を見る →</span>
           </a>
@@ -1494,48 +1208,48 @@
       <!-- How to Choose -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">どのメモアプリを選ぶべきか</span>
-          <span lang="en" data-lang="en">Which Memo App Should You Choose?</span>
+          <span lang="ja">どのメモアプリを選ぶべきか</span>
+          
         </h2>
         <div class="reason-cards">
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">「速さ」重視 → シンプルメモ</span>
-              <span lang="en" data-lang="en">Speed First → Simple Memo</span>
+              <span lang="ja">「速さ」重視 → シンプルメモ</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">思いついた瞬間にメモしたい、起動に1秒もかけたくない方には圧倒的に最速。ワンタップでメール送信まで完了します。</span>
-              <span lang="en" data-lang="en">Fastest launch at 0.4s, one-tap email send. Built for people who think fast and want to capture every idea instantly.</span>
+              <span lang="ja">思いついた瞬間にメモしたい、起動に1秒もかけたくない方には圧倒的に最速。ワンタップでメール送信まで完了します。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">「整理」重視 → Apple Notes / Notion</span>
-              <span lang="en" data-lang="en">Organization First → Apple Notes / Notion</span>
+              <span lang="ja">「整理」重視 → Apple Notes / Notion</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">フォルダ・タグ・検索でメモを整理したい方はApple NotesやNotionが適しています。ただし起動速度とシンプルさは犠牲になります。</span>
-              <span lang="en" data-lang="en">Need folders, tags, search, and rich text editing? Apple Notes or Notion are better choices, though launch speed and simplicity suffer.</span>
+              <span lang="ja">フォルダ・タグ・検索でメモを整理したい方はApple NotesやNotionが適しています。ただし起動速度とシンプルさは犠牲になります。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">「プライバシー」重視 → シンプルメモ</span>
-              <span lang="en" data-lang="en">Privacy First → Simple Memo</span>
+              <span lang="ja">「プライバシー」重視 → シンプルメモ</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">Googleアカウント不要、サーバーにメモ本文を保存しない、AES-GCM暗号化。プライバシーファーストのアーキテクチャです。</span>
-              <span lang="en" data-lang="en">No Google account, memos never stored on server, AES-GCM encryption. Privacy-by-design architecture beats cloud-sync apps.</span>
+              <span lang="ja">Googleアカウント不要、サーバーにメモ本文を保存しない、AES-GCM暗号化。プライバシーファーストのアーキテクチャです。</span>
+              
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span lang="ja" data-lang="ja">「チーム共有」重視 → Notion / Slack</span>
-              <span lang="en" data-lang="en">Team Sharing → Notion / Slack</span>
+              <span lang="ja">「チーム共有」重視 → Notion / Slack</span>
+              
             </div>
             <div class="reason-card__desc">
-              <span lang="ja" data-lang="ja">チームでのリアルタイム共同編集やプロジェクト管理が必要な場合はNotion・Slackが適切です。シンプルメモは個人の即興メモ専用です。</span>
-              <span lang="en" data-lang="en">For team collaboration, real-time editing, and project management, Notion or Slack are purpose-built. Simple Memo is for personal instant capture only.</span>
+              <span lang="ja">チームでのリアルタイム共同編集やプロジェクト管理が必要な場合はNotion・Slackが適切です。シンプルメモは個人の即興メモ専用です。</span>
+              
             </div>
           </div>
         </div>
@@ -1544,69 +1258,61 @@
       <!-- FAQ -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">よくある質問</span>
-          <span lang="en" data-lang="en">FAQ</span>
+          <span lang="ja">よくある質問</span>
+          
         </h2>
-        <div lang="ja" data-lang="ja">
+        <div lang="ja">
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモアプリを選ぶときに最も重要な基準は何ですか？</summary><div class="faq-answer"><p>用途によります。素早いメモ捕捉が目的なら起動速度とワンタップ送信が最重要です。情報整理が目的ならフォルダ・タグ・検索機能を優先してください。チーム共有が目的ならコラボレーション機能を重視しましょう。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian連携シンプルメモは他のメモアプリと何が違いますか？</summary><div class="faq-answer"><p>Obsidian連携シンプルメモは「思いついたことを0.4秒以内に入力し、ワンタップでメール送信する」ことのみに特化しています。フォルダ・タグ・メモ管理機能は持ちません。メール受信トレイを唯一の保存先とするシンプルな設計です。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">複数のメモアプリを使い分けることはできますか？</summary><div class="faq-answer"><p>はい。多くのユーザーがObsidian連携シンプルメモを「即興メモ用」、Apple NotesやNotionを「長文・整理用」として使い分けています。用途別に使い分けることで、それぞれのツールの強みを活かせます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">LINE Keepメモから乗り換えたいのですが、何が違いますか？</summary><div class="faq-answer"><p>まず整理すると、Keepメモ自体は終了していません（2024年8月に終了したのは保存機能のLINE Keepです）。Obsidian連携シンプルメモは同様の「素早いメモ捕捉」機能を提供しつつ、メール送信によってLINEに依存しない恒久的な記録保存を実現しています。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料で使い続けられますか？</summary><div class="faq-answer"><p>はい。Freeプランなら1日3通まで、ずっと無料で使えます。Premiumプラン（月額500円/年額5,000円）で送信無制限になります。</p></div></details></div>
         </div>
-        <div lang="en" data-lang="en">
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the most important criterion when choosing a memo app?</summary><div class="faq-answer"><p>It depends on your use case. For quick capture, launch speed and one-tap sending matter most. For information organization, prioritize folders, tags, and search. For team collaboration, focus on sharing and real-time editing features.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is Simple Memo different from other memo apps?</summary><div class="faq-answer"><p>Simple Memo is purpose-built for one thing: capture a thought in 0.4 seconds and send it to email with one tap. It has no folders, tags, or management features. Your email inbox is the only storage layer.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can I use multiple memo apps together?</summary><div class="faq-answer"><p>Yes. Many users use Simple Memo for instant capture and Apple Notes or Notion for long-form writing and organization. Using tools for their strengths is a great productivity strategy.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">How is Simple Memo different from LINE Keep Memo?</summary><div class="faq-answer"><p>First, the facts: Keep Memo itself still works — what ended in August 2024 was LINE Keep, the storage feature. Simple Memo provides similar quick-capture functionality with the added benefit of email delivery, creating a permanent record outside of any single service's ecosystem.</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which memo app has the best offline support?</summary><div class="faq-answer"><p>Simple Memo uses Outbox architecture — memos written offline are encrypted with AES-GCM and auto-sent when connectivity returns. Apple Notes also has offline support via iCloud. Google Keep and Notion have limited offline capabilities.</p></div></details></div>
-        </div>
+        
       </section>
 
       <!-- CTA -->
       <div class="cta-box">
         <div class="cta-box__title">
-          <span lang="ja" data-lang="ja">最速のメモアプリを、今すぐ試す</span>
-          <span lang="en" data-lang="en">Try the fastest memo app today</span>
+          <span lang="ja">最速のメモアプリを、今すぐ試す</span>
+          
         </div>
         <div class="cta-box__desc">
-          <span lang="ja" data-lang="ja">ダウンロードは無料。起動0.4秒・ワンタップ送信を体験してください。</span>
-          <span lang="en" data-lang="en">Free to download. Experience 0.4s launch and one-tap email send.</span>
+          <span lang="ja">ダウンロードは無料。起動0.4秒・ワンタップ送信を体験してください。</span>
+          
         </div>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="bottom" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=vs-jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="bottom" lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=vs-jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
           <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
         </a>
-        <a data-cta-variant="v1" data-cta-cluster="vs" data-cta-placement="bottom" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=vs-en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store">
-          <img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy">
-        </a>
+        
       </div>
 
       <!-- Internal Links -->
       <section class="lp-section">
         <h2 class="lp-section__title">
-          <span lang="ja" data-lang="ja">関連ページ</span>
-          <span lang="en" data-lang="en">Related Pages</span>
+          <span lang="ja">関連ページ</span>
+          
         </h2>
         <div class="internal-links">
           <a href="/captio-alternative/">
-            <span lang="ja" data-lang="ja">Captio代替ガイド</span>
-            <span lang="en" data-lang="en">Captio Alternative</span>
+            <span lang="ja">Captio代替ガイド</span>
+            
           </a>
           <a href="/note-to-email/">
-            <span lang="ja" data-lang="ja">自分にメールするメモとは</span>
-            <span lang="en" data-lang="en">Note-to-Email Guide</span>
+            <span lang="ja">自分にメールするメモとは</span>
+            
           </a>
           <a href="/use-cases/">
-            <span lang="ja" data-lang="ja">使い方・ユースケース</span>
-            <span lang="en" data-lang="en">Use Cases</span>
+            <span lang="ja">使い方・ユースケース</span>
+            
           </a>
           <a href="/guides/">
-            <span lang="ja" data-lang="ja">ガイド一覧</span>
-            <span lang="en" data-lang="en">Guides</span>
+            <span lang="ja">ガイド一覧</span>
+            
           </a>
           <a href="/faq">
-            <span lang="ja" data-lang="ja">よくあるご質問</span>
-            <span lang="en" data-lang="en">FAQ</span>
+            <span lang="ja">よくあるご質問</span>
+            
           </a>
         </div>
       </section>
@@ -1618,13 +1324,13 @@
   <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
     <a data-next-step="compare" href="/blog/fastest-memo-app-benchmark" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
       <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
-        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+        <span lang="ja">次に読む</span>
       </span>
       <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
-        <span lang="ja" data-lang="ja">比較の次は、実測値を見る</span><span lang="en" data-lang="en">Next: the measured numbers</span>
+        <span lang="ja">比較の次は、実測値を見る</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span><span lang="en" data-lang="en">A table of actual launch and time-to-input measurements across major apps.</span>
+        <span lang="ja">主要メモアプリの起動と入力開始までを実際に計測した表があります。</span>
       </span>
     </a>
   </aside>
@@ -1636,24 +1342,24 @@
       <nav class="footer__nav" aria-label="Footer navigation">
       <div class="footer__col">
         <p class="footer__col-title">プロダクト</p>
-        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
-        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
-        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">Use Cases</span></a>
-        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">ガイド</span> <span lang="en" data-lang="en">Guides</span></a>
+        <a href="/download/" class="footer__link"><span lang="ja">ダウンロード</span></a>
+        <a href="/" class="footer__link"><span lang="ja">ホーム</span> </a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja">使い方</span> </a>
+        <a href="/guides/" class="footer__link"><span lang="ja">ガイド</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">比較・乗り換え</p>
-        <a href="/captio-alternative/" class="footer__link"><span lang="ja" data-lang="ja">Captio代替</span> <span lang="en" data-lang="en">Captio Alternative</span></a>
-        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span> <span lang="en" data-lang="en">Note to Email</span></a>
-        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">アプリ比較</span> <span lang="en" data-lang="en">Comparisons</span></a>
+        <a href="/captio-alternative/" class="footer__link"><span lang="ja">Captio代替</span> </a>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja">メモ→メール</span> </a>
+        <a href="/vs/" class="footer__link"><span lang="ja">アプリ比較</span> </a>
       </div>
       <div class="footer__col">
         <p class="footer__col-title">サポート</p>
-        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
-        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
-        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span> <span lang="en" data-lang="en">FAQ</span></a>
-        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span> <span lang="en" data-lang="en">Privacy</span></a>
-        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja">開発記録</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja">開発者について</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja">FAQ</span> </a>
+        <a href="/privacy" class="footer__link"><span lang="ja">プライバシー</span> </a>
+        <a href="/contact" class="footer__link"><span lang="ja">お問い合わせ</span> </a>
       </div>
       </nav>
       <p class="footer__copyright">
@@ -1661,8 +1367,6 @@
       </p>
     </div>
   </footer>
-
-  <script src="/js/lang.js?v=25811b2b9a" defer></script>
 
   <script>
   // Close mobile nav when clicking a link
