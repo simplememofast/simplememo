@@ -115,6 +115,83 @@ Investigation 節の有無。
 
 ---
 
+## 2026-08-18 (weekly)
+
+> **方法論メモ**: WebSearch ツールの返却件数はクエリあたり ~10 件（タスク仕様の 30 件には届かず）。US-based Google index を使用。JA キーワードの順位は google.co.jp と差が生じることがある（特に bare "captio" は Emburse 経費ソフトが US SERP を支配）。位置は返却リンクの順序から推定し「~N」表記。
+
+| Keyword | Lang | SimpleMemo pos (page) | attnoel | note2selfmail | emailmeapp | Δ vs last | Notes |
+|---|---|---|---|---|---|---|---|
+| captio | JA | not in top ~6 | not visible | not visible | not visible | flat | US SERP 全面 Emburse 経費ソフト；JA メモアプリ文脈は今月も不在 |
+| captio 代替 | JA | ~4 (/blog/captio-discontinued) | ~1 | not visible | not visible | SM: **+1** (prev ~5 /captio/) | attnoel #1 維持；note.com #2；Captioo App Store #3 |
+| captio なくなった | JA | ~4 (/blog/captio-discontinued) | ~2 | not visible | not visible | flat | note.com #1；Captioo App Store #3；構成は 2026-08-01 から変化なし |
+| captio 後継 | JA | ~5 (/blog/captio-discontinued) | not visible (prev ~3) | not visible | not visible | SM: flat；attnoel: 圏外へ | Captioo App Store #1；applion.jp #2；attnoel が top ~6 から消えた |
+| captio 使えない | JA | not visible (prev ~6) | ~2 (prev: 圏外) | not visible | not visible | SM: **dropped out**；attnoel: 急上昇 | **REGRESSION** Captioo App Store #1；attnoel #2；webcli.jp #3；progsoft.net #4 |
+| Obsidian メモ iPhone | JA | App Store listing ~1；website not in top ~5 | n/a | n/a | n/a | **baseline** | simplememofast.com サイト自体は不可視；qiita.com #2 |
+| Obsidian 音声入力 | JA | not in top ~7 | n/a | n/a | n/a | **baseline** | note.com のショートカット記事が #1-5 を占有 |
+| メモアプリ 音声 無料 | JA | not in top ~6 | n/a | n/a | n/a | **baseline** | plaud.ai が #1-2；文字起こしサービスが支配 |
+| 自分宛メール メモ | JA | not in top ~7 | n/a | n/a | n/a | **baseline** | メモメール App Store #1；SM 不在 |
+| Obsidian デイリーノート iPhone | JA | not in top ~7（開発者 Qiita が ~2） | n/a | n/a | n/a | **baseline** | note.com #1；developer の Qiita 記事 #2（サイトではない） |
+| obsidian quick capture ios | EN | not in top ~10 | n/a | n/a | n/a | **baseline** | "Quick Capture - Vault notes" / "Quick Draft" アプリが支配 |
+| email to obsidian | EN | ~6 (/en/blog/email-to-obsidian) | n/a | n/a | n/a | **baseline** | email2obsidian.com #5；GitHub plugin が #1 |
+| voice memo obsidian | EN | ~6 (/en/blog/obsidian-voice-input) | n/a | n/a | n/a | **baseline** | Obsidian Forum スレッドが #1-4；Voice Inbox app #5 |
+| captio alternative | EN | ~6 (/en/captio-alternative/) | n/a | ~4 (note-taking 文脈クエリ) | not visible | **improved** (prev: 圏外) | US bare keyword は Emburse 経費ソフト混在；note-taking 文脈クエリでは SM #1 |
+| note to self email app | EN | not visible | n/a | ~9 (note2selfmail.app) | ~8 (emailmeapp.net) | **baseline** | App Store 各アプリが #1-7；emailmeapp #8；note2selfmail #9 |
+
+**Take:** captio クラスタは JA-2/3/4 が #4-5 を保持し EN captio-alternative も先月の圏外から ~6 に復帰した一方、JA-5「captio 使えない」は圏外落ち（SimpleMemo）＋ attnoel が #2 急浮上という逆転が発生。Obsidian コンテンツ群（EN-12/13）は初登場で #6 と健闘。App Store 上の SimpleMemo アプリ名は「Obsidian メモ iPhone」で #1 を取るが、simplememofast.com サイト自体が不可視という乖離は要対処。
+
+### 調査 / Investigation
+
+**対象キーワード（2件のトリガー）:**
+1. **必須初回調査**: 2026-08-01 の全面後退 — captio 代替（SM: #1→~5）/ captio なくなった（#1→~4）/ captio 後継（#1→~5）/ captio 使えない（#1→~6）/ EN captio alternative（#1→圏外）
+2. **今週トリガー**: JA-5「captio 使えない」— SM が ~6→not visible（−2 以上）
+
+---
+
+**(a) 誰がポジションを取ったか**
+
+- **captio 代替**: attnoel #1（2026-07 の #3 から上昇して 8/1 以降 #1 固定）。note.com ユーザー記事 #2。**Captioo**（apps.apple.com/jp/app/captioo/id6449494395）#3 — 「Captio」の名称を継承した別開発者の iOS アプリで、App Store 公式ページが branded 検索で高権威評価を得ている。
+- **captio なくなった / 後継**: Captioo App Store が #1-3 に定着。attnoel は「後継」では今週 top ~6 から消えた（変動あり）。
+- **captio 使えない**: Captioo App Store #1、attnoel #2（先月 top 10 圏外→今週 #2 は急上昇。先月は "captio 使えない" で SM が #6 だった頃、attnoel が一時的に #9 に入ったが今月は圏外に戻っていた。今週は #2 と最大の上昇）。webcli.jp #3、progsoft.net #4、teineini.net #5 — いずれも 2019-2020 年の旧記事だが常駐。
+- **EN captio alternative**: US SERP で "Captio" ブランドは Emburse 経費管理ソフト（getapp / g2 / capterra）と混在。note-taking 文脈では alternativeto.net が #4 台、note2selfmail が #4、SM は ~6。
+
+**構造的原因**: Captioo アプリ（2023-2024 年 App Store 登録）が captio ブランド名で被リンクと評判を積み上げた結果、Google がブランド検索において App Store ページを最高権威として扱い始めた。これが captio 系全 JA キーワードの #1-3 を 2025 年末〜2026 年にかけて占有するようになった主因。SM ブログ記事はこの「ブランド直撃」に対して不利な位置にある。
+
+---
+
+**(b) インデックス状況**
+
+`site:simplememofast.com captio` を実行 → /en/captio-alternative/、/blog/captio-discontinued、/captio/、/vs/ などが表示されインデックスは**正常**。
+
+- `/blog/captio-discontinued` → HTTP **200 OK**、タイトル「Captioが使えなくなった理由と代替アプリ — 2026年の最新状況」✓
+- `/en/captio-alternative/` → HTTP **200 OK**、タイトル「Captio Alternative 2026: 6 Best Apps Compared (Fastest 0.4s)」✓
+
+デインデックスではない。順位低下は外部競合の上昇によるもの。
+
+---
+
+**(c) 自サイト側の変更**
+
+`git log --since=2026-08-01` で captio-alternative / blog/captio-discontinued に直接触れた PR は **0 件**。この期間のマージは Obsidian コンテンツ拡充（PR #470-483）、i18n バグ修正（#494-495）、ベンチマーク更新（#454-460）が中心。
+
+→ **自サイト側の変更は captio クラスタに影響していない。ポジション変動は全て外部要因（Captioo App Store の権威上昇＋attnoel のコンテンツ鮮度）による。**
+
+---
+
+**Next actions（記録のみ。実施しない）:**
+
+1. `/captio-alternative/`（JP）: 「captio 使えない」「captio 後継」を明示した H2 セクションと FAQPage エントリを追加する。このページは現在 JA captio 系キーワードで不可視であり、PR #186 の投資（JSON-LD / 7 列比較表）が JA SERP に反映されていない。
+2. `/blog/captio-discontinued`: 2026 年版の Captioo（新アプリ）との比較セクションを追加してコンテンツ鮮度を回復させる。「captio 使えない」圏外落ちの直接対処。
+3. `/en/captio-alternative/`: Captioo vs SimpleMemo の比較テーブルを追加し、EN "captio alternative" の note-taking 文脈での権威性をさらに高める（bare keyword での Emburse 混在は構造的課題で即効策は限られる）。
+
+**Morning brief JSON:**
+`{"type":"serp-weekly","date":"2026-08-18","regressed":1,"improved":2,"flat":3,"watch":["JA-5","JA-6","EN-14"],"investigation":true}`
+
+```json
+{"date":"2026-08-18","kw_tracked":15,"top3":0,"top10":6,"improved":2,"declined":1,"out_of_top30":1,"worst":{"kw":"JA-5 captio 使えない","from":"~6","to":"not visible"},"best":{"kw":"EN-14 captio alternative","from":"out","to":"~6"},"investigation":true,"take":"Captio cluster holds #4-5 for 3 JA keywords but JA-5 dropped out; EN captio-alternative returned to ~6; 9 new baseline keywords established."}
+```
+
+---
+
 ## YYYY-MM-DD（見本エントリ — 週次実行時にこのブロックを複製して日付を入れ、この行の括弧書きは消す）
 
 | # | Keyword | Our pos (URL) | Top competitor (pos) | Δ vs last | Notes |
