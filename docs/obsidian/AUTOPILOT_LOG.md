@@ -567,3 +567,71 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
 2. `enabled` / `last_fired_at` / `next_run_at` を見る。発火しているのに成果物が
    無いなら、Routineではなく**発火先の実行**を疑う
 3. セッションのメタデータでレート制限（`five_hour` / `seven_day`）を見る
+
+## 2026-08-19 — 原因特定: 無記事6日はゲートではなくRunbookの追記漏れ（オーナー依頼の調査）
+
+オーナーの問い「記事追加していくようにしたいけど何が悪い？」への回答。
+定期実行ではなく、その調査と修正のセッション（`data/autopilot-status.json` は
+**当日分として更新していない** — 当日の定期実行の枠を潰さないため）。
+
+**結論: 記事が出ない直接の原因は、レーンEがRunbookに載っていなかったこと。**
+
+- `growth/content/coverage-queue.json` は36項目・**34件がpending**で生きている。
+  この キューは「ノイズフロアを適用しない」と明記された新規カバレッジ用で
+  （`OBSIDIAN_COVERAGE_PLAN.md` §1）、本来ここが枯れない供給になるはずだった。
+- ところが `grep -n -i coverage docs/obsidian/AUTOPILOT_RUNBOOK.md` は**0件**、
+  `git log -S"レーンE" -- docs/obsidian/AUTOPILOT_RUNBOOK.md` も**空**。
+  レーンEはRunbookに一度も入っていない。
+- 経緯: レーンE解禁はPR #482として作られたが、中身はC02ワーカーのPR #483経由で
+  先にmainへ入り、#482は別内容（デスクトップQR適用漏れ）へ書き換えてマージされた
+  （#482本文の「⚠️ 履歴訂正（マージ後追記）」で本人が記録している）。
+  このとき `coverage-queue.json` と `OBSIDIAN_COVERAGE_PLAN.md` は main に入ったが、
+  **Runbook §1/§2 へのレーンE追記だけが落ちた**。
+- そのため08-13以降のセッションは、Runbookのレーン定義（A〜D）と§1の読むもの
+  （new-queue / refresh-queue のみ）に忠実に従い、データ駆動キューが枯れている
+  以上「保守のみ」と**正しく**判断し続けた。**セッションの判断ミスではなく、
+  セッションが読む唯一の手順書に指示が無かった。**
+
+**データ側の実測（今回のセッションで取得・`bq_checked` 相当は true）**
+
+- BigQuery MCPは**接続されている**（08-18の回は「未接続」と記録していたが、
+  今回は疎通した）。`searchdata_site_impression` は
+  `2026-08-10 〜 2026-08-16` の **7日**（28日窓まで残21日 ≒ 2026-09-06）。
+- したがってレーンA/Bが自力で復活するのは9月上旬。**この空白を埋めるのが
+  レーンEの役割**であり、今回の修正でその設計どおりに戻る。
+- 手動CSVは2026-08-11から変化なし（1,000行打ち切り済み）。
+
+**主系（GitHub Actions）は7回中7回とも実処理していない**
+
+- `obsidian-autopilot.yml` のschedule run 7本（08-12〜08-19）すべて
+  `conclusion: success`。ただし最新 run 32187173035（08-19 06:20 JST）の
+  jobステップを直接取得すると、`Gate` の後 `Checkout` / `Claude Code` が
+  `skipped`。repo secret `CLAUDE_CODE_OAUTH_TOKEN` 未設定による
+  意図された緑スキップ（Runbook §0-2）で、**主系はまだ一度も動いていない**。
+  記事の供給はすべて副系(CCR)に乗っている。
+
+**やったこと（本PR）**
+
+- `AUTOPILOT_RUNBOOK.md` §0原則2 — ノイズフロアの適用範囲はレーンA/Bのみと明記。
+- 同 §1「読むもの」 — `coverage-queue.json` + `OBSIDIAN_COVERAGE_PLAN.md` を追加
+  （以降の番号を繰り下げ）。
+- 同 §2 — **レーンE（Coverage）を追加**。ゲート4点・`collides_with` 確認・
+  完了時の `status: done` 化・「A/Bに案件が無い日は迷わずここへ来る」を明記。
+  「どれも正当化できない」行に、pendingが残る限りそこへ来ないという条件を付けた。
+- 同 §6 枯渇時の手順 — (3)をスキップからレーンEへ差し替え、スキップは(4)へ。
+- `OBSIDIAN_COVERAGE_PLAN.md` §5 — 「Runbookへ追加済み」が当時は事実でなかった
+  ことの訂正と、計画書に「反映済み」と書くだけでは反映されないという教訓。
+
+**次回（＝次の定期実行）から起きること**
+
+- レーンA/Bが正当化できない日は、`coverage-queue.json` の pending 先頭
+  （現在は **C01 `/obsidian/compare/`**・P1）を実装する。以降 C03/C04/C05… と続く。
+- 34本 × 1日1本で、キュー消化は9月下旬。P1の骨格は8月末（計画書§4の算段どおり）。
+
+**オーナー依頼（変わらず残るもの）**
+
+- repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（継続・08-11から）。
+  未登録の間は主系が動かず、副系のレート枠だけが供給元になる。
+- `GCP_SERVICE_ACCOUNT_JSON` の登録（継続・08-15から）。
+  BigQuery MCPが繋がらないセッションでも `bq-preflight.mjs` が回せるようにするため。
+
