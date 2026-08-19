@@ -635,3 +635,60 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
 - `GCP_SERVICE_ACCOUNT_JSON` の登録（継続・08-15から）。
   BigQuery MCPが繋がらないセッションでも `bq-preflight.mjs` が回せるようにするため。
 
+## 2026-08-19 — レーンE C01: /obsidian/compare/ 新設（レーンE復活後の1本目）
+
+- 判断根拠: 同日の調査PR #510 で、無記事6日の原因が「レーンE（Coverage）が
+  Runbookに一度も入っていなかったこと」と判明し、Runbook §0/§1/§2/§6 へ実際に
+  追記してmainへマージ済み。本エントリはその直後の**レーンE 1本目**で、
+  `growth/content/coverage-queue.json` の pending 先頭 **C01 `/obsidian/compare/`**
+  （P1・obsidian-compare）を実装した。
+  レーンA/Bは今回も正当化できない: **BigQuery MCPは接続されており**
+  `searchdata_site_impression` を実測したところ `data_date` は 2026-08-10〜08-16 の
+  **7日**で28日窓に届かない（到達は2026-09-06前後）。手動CSVも2026-08-11から変化なし。
+  レーンEはノイズフロア非適用（ゲート＝キュー掲載＋品質80点＋§28＋固有価値）なので、
+  この空白期間に記事を出せる唯一のレーンになる。
+- やったこと: `/obsidian/compare/` 新設。比較の分岐軸を「ノートの正本がどこに、
+  どんな形で残るか」に置き、3つの質問で比較先を絞る構成にした。
+  被リンク3本配線（`/obsidian/`・`/obsidian/compare/logseq/`・`/obsidian/getting-started/`）＋
+  `data/content-graph.json` 登録（parent=/obsidian/・siblings=logseq比較/始め方）＋
+  デスクトップQR（`QR_PAGES` に `obsidian-compare` 追加・`--check` で独立デコード検証）＋
+  OG画像（`generate-og-batch.js` にエントリ追加）＋sitemap再生成。
+  coverage-queue の C01 を `done` 化。
+- **固有価値（この回の一次情報）**: Obsidian公式レジストリ（GitHub
+  `obsidianmd/obsidian-releases`）の `community-plugins.json` /
+  `community-css-themes.json` を当日直接カウントし、**プラグイン6,739個・テーマ698種**
+  を実測。過去2回と同一方法（2026-08-11: 6,571/680、08-14: 6,638/691）なので
+  時系列として使える。**8日間で+168個＝1日あたり約21個**という増加ペースが、
+  「プラグイン数は比較の決め手にならない」という本ページの主張の根拠になっている。
+- **書かなかったこと**: Notion・Capacities・memos はこの環境でインストールして
+  動かしていないため、比較結果を一切書いていない。ページ本文に専用ブロックを置いて
+  「動かして確かめた時点で追加する」と明記した（§0-4）。他所の仕様を書き写した
+  比較表を作らないという判断。実機検証済みの結論（同一フォルダ実験・保管庫の実体）も
+  子ページからの参照にとどめ、二重掲載していない。
+- PR: #511
+- 検証: Runbook §4 の9チェック全通過 — `seo-check` 0 errors 0 warnings /
+  `check-css-version` OK / `check-benchmark` 新規CONFLICT・AMBIGUOUS増なし /
+  `check-url-normalization` 189 passed / `check-internal-redirects` 12,865 href+5,093
+  JSON-LD すべて直接200 / `sync_constants --check` OK / `tag-cta-placements --check` OK
+  （新規1件を `--write` で付与）/ `check-experiments` due 0・overdue 0 /
+  `generate_sitemap.py`。加えて **iPhone 390×844 DPR3 実描画QA**: 水平スクロールなし
+  （scrollWidth=clientWidth=390）・表は `overflow-x:auto` の内側でスクロール・
+  JS/HTTPエラー0・回答ブロックはファーストビュー内（top=729px）・QRはモバイル非表示／
+  デスクトップ表示を実測。QRは `generate-qr-codes.mjs --check` で29件を独立デコード検証
+  （既存27件はバイト同一）。
+- 見つけたこと（副作用）: `git fetch --unshallow` 後の `generate_sitemap.py` は、
+  スイープ判定された変更しか履歴に無いファイル（今回は `/download/`）の lastmod を
+  **TODAY にフォールバック**するため、再生成のたびに lastmod が今日へ動く。
+  本日変更していないので手で 2026-08-18 に戻した。恒久対応は別レーン。
+- 保留・オーナー依頼:
+  - **repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（最優先・継続）**。run 32187173035
+    （08-19 06:20 JST）も Checkout / Claude Code が `skipped`。未登録の間は主系が動かず、
+    供給が副系CCR1本になる。実際に08-16・08-17・**08-19（本日07:30 JSTに発火したが
+    成果物なし）** が空白日になっている
+  - `GCP_SERVICE_ACCOUNT_JSON` の登録（継続）。本日はBigQuery MCPで実測できたため
+    優先度は上より低いが、28日窓に届く2026-09-06前後までには必要
+  - llms.txt は見送り（N1・C02と同基準。レジストリ実カウントは持つが、訂正リストとしての
+    価値が増える性質ではないため）
+- 次回: レーンE継続。pending 先頭は **C03 `/obsidian/what-is-vault/`**（P1）。
+  C08 `/obsidian/compare/notion/` 以降を作るときは、本ページの「まだ検証していない比較」
+  ブロックから該当アプリを外して実機検証カードへ移すこと。

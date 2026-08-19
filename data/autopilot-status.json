@@ -1,34 +1,37 @@
 {
-  "date_jst": "2026-08-18",
-  "generated_at": "2026-08-17T23:40:00Z",
-  "action": "maintenance",
-  "article": null,
+  "date_jst": "2026-08-19",
+  "generated_at": "2026-08-19T01:45:00Z",
+  "action": "new",
+  "article": {
+    "url": "/obsidian/compare/",
+    "title": "Obsidianは何と比較すればいい？ — 決め手は「ノートの正本がどこに残るか」"
+  },
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 6,
-    "last_article_date_jst": "2026-08-12",
-    "last_production_change_date_jst": "2026-08-14",
-    "days_since_production_change": 4
+    "consecutive_no_article_days": 0,
+    "last_article_date_jst": "2026-08-19",
+    "last_production_change_date_jst": "2026-08-19",
+    "days_since_production_change": 0
   },
   "data_freshness": {
-    "bq_export_last_data_date": "2026-08-12",
-    "bq_export_days_accumulated": 3,
-    "bq_checked": false,
+    "bq_export_last_data_date": "2026-08-16",
+    "bq_export_days_accumulated": 7,
+    "bq_checked": true,
     "manual_snapshot_label": "2026-08-11"
   },
-  "reason": "【連続無記事6日目・本番最終変更 2026-08-14・BQ未確認（前回実測3/28日から更新なし）・自動化に2日間の空白（08-16/08-17）を検知】冪等性チェック: origin に当日分ブランチ・status JSON更新なしを確認し副系(CCR)で実行。GitHub Actions側は毎日06:00 JSTに起動し `conclusion: success` で完走しているが（run 32070691341=08-18 06:21 JST・31972997422=08-17 06:16 JST）、ジョブの中身は『Gate』ステップ後に Checkout / Claude Code ステップが両日とも `skipped` — repo secret `CLAUDE_CODE_OAUTH_TOKEN` 未設定によるRunbook§0-2記載どおりの意図した緑スキップで、実処理は一度も走っていない（新規の障害ではない・継続依頼）。一方でCCR副系も08-16・08-17の2日間は branch・log・status JSONいずれにも実行痕跡が無く、この2日間はどちらの経路も実処理をしていない空白期間だった（原因はこのセッション外・スケジューラ側の可能性）。データ面: 手動CSVスナップショットは2026-08-11から変化なし（growth/data/gsc/ 確認）、analyze.mjs --only unanswered/conversational の出力は前回(2026-08-15)までと同一で、Obsidian関連の会話型クエリ「logseqとobsidian どちらが良い」(23imp・pos9.2)はPR#480で対応済み・新規性なし。BigQueryはこのセッションにBigQuery MCPが接続されておらず（前回まで使えていたツールが今回は無い）、bq-preflight.mjsもローカル資格情報なしで認証失敗するため『取得できなかった』(bq_checked=false)。よってレーンA/Bは正当化できず、Mention Watchも前回2026-08-12取得で7日未満（次回2026-08-19以降）のため対象外。前回ログの申し送り「ai-citation-strategy.mdの残り監査（§3 Microsoft Copilot以降）を数項目ずつ継続」を実行。",
-  "verified": "docs/ai-citation-strategy.md §3 Microsoft Copilotの4項目を実地監査。Bingbot許可（robots.txt:78）とIndexNow連携（.github/workflows/auto-merge.yml:116がマージ直後にscripts/indexnow-notify.jsを実行し、同スクリプトが実際にhttps://api.indexnow.org/indexnowへPOSTしていることをソース実読・scripts/indexnow-notify.js:35,165）をVERIFIEDに更新。ms.locale metaタグは全HTMLでgrep 0件＝未実装であることを確認し、実装は本回のスコープ外として次回候補に記録。Bing Webmaster Toolsへのsitemap submitはダッシュボード未接続のため検証不能と明記。GitHub Actions workflow run 32070691341/31972997422のjob stepsをAPIで直接取得し、Checkout/Claude Codeステップの conclusion が両日とも skipped であることを実測（＝secret未設定による意図した緑スキップと確認、単なる憶測ではない）。node scripts/seo-check.jsは0 errors 0 warnings（本変更はdocsのみでHTML非変更）。本番の/obsidian/・/obsidian/compare/logseq/・/obsidian/getting-started/はHTTP 200を実測。",
+  "reason": "【連続無記事0日目（7日ぶりに記事・前回2026-08-12）・本番最終変更 2026-08-19・BQ 7/28日】オーナー依頼の調査で、無記事6日の原因がゲートでもデータ待ちでもなく『レーンE（Coverage）が AUTOPILOT_RUNBOOK.md に一度も入っていなかったこと』と判明（grep 0件・git log -S 空）。PR #510 でRunbookへ実際に追記しmainへマージ済み。本セッションはその直後のレーンE 1本目として coverage-queue.json の pending 先頭 C01 /obsidian/compare/ を実装。レーンA/Bは今回も正当化できない: BigQuery MCPは接続されており searchdata_site_impression を実測したところ 2026-08-10〜08-16 の7日ぶんで28日窓に届かず（到達は2026-09-06前後）、手動CSVも2026-08-11から変化なし。レーンEはノイズフロア非適用（ゲート＝キュー掲載＋品質80点＋§28＋固有価値）で、この空白期間に記事を出せる唯一のレーン。PR番号は AUTOPILOT_LOG.md に記録する。",
+  "verified": "Obsidian公式レジストリ（GitHub obsidianmd/obsidian-releases）の community-plugins.json / community-css-themes.json を当日直接カウントし、プラグイン6,739個・テーマ698種を実測（2026-08-11の6,571個・680種、08-14の6,638個・691種と同一方法。8日間で+168個＝1日あたり約21個）。この実測が本ページ固有の一次情報で、『プラグイン数は比較の決め手にならない』という主張の根拠。実機検証済みの結論（同一フォルダ実験・保管庫の実体）は既存の子ページからの参照にとどめ二重掲載していない。Notion・Capacities・memos はこの環境で動かしていないため比較を書かず、その旨をページ本文と検証環境ブロックに明記。BigQueryは data_date 2026-08-10〜2026-08-16・7日を実測（bq_checked=true）。GitHub Actions run 32187173035（08-19 06:20 JST）も Checkout / Claude Code が skipped で、CLAUDE_CODE_OAUTH_TOKEN 未設定を再確認。",
   "checks": {
     "seo_check": "0 errors 0 warnings",
-    "content_graph": "対象外（docs/のみの変更・HTML非変更）",
-    "mobile_qa": "対象外（docs/のみの変更・HTML非変更）",
-    "experiments": "変更なし・非干渉（docs/のみの変更）"
+    "content_graph": "18 entries OK（/obsidian/compare/ を obsidian-compare クラスタで登録）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画: 水平スクロールなし（scrollWidth=clientWidth=390）・表は overflow-x:auto の内側でスクロール・JS/HTTPエラー0・回答ブロックはファーストビュー内（top=729px）・QRはモバイル非表示/デスクトップ表示を実測",
+    "experiments": "33件中20 open・due 0・overdue 0。/obsidian/ ハブ本体は monitor-2026-08-09-obsidian-ctr が実験中のため関連リンク1本の追記のみで非干渉",
+    "other": "check-css-version / check-url-normalization(189) / check-internal-redirects(12,865+5,093 all 200) / sync_constants / tag-cta-placements / generate_sitemap いずれもOK。QRは generate-qr-codes.mjs --check で29件独立デコード検証済み"
   },
   "owner_requests": [
-    "【新規・重要】自動化に2026-08-16/08-17の2日間、実処理の空白があった: GitHub Actions主系はsecret未設定により毎日意図通りスキップ（継続依頼どおり）だが、CCR副系も両日ともブランチ・ログ・status JSONに実行痕跡が無い。日報メール(10:00 JST)がこの2日間どう報告したか確認を推奨。原因はこのリポジトリ側のログからは特定できず、スケジューラ側の可能性がある",
-    "BigQueryのサービスアカウント鍵を実行環境に設定: growth/BIGQUERY_SETUP.md の手順で鍵を作り、Secret『GCP_SERVICE_ACCOUNT_JSON』（同書 §3-B の名称）に登録（継続依頼・2026-08-15から）。加えて今回のセッションはBigQuery MCP自体が未接続だったため、bq-preflight.mjsのローカル認証とMCP接続の両方が必要",
-    "GitHub Actions版オートパイロットの有効化: ローカルで `claude setup-token` を実行し、出力されたトークンを simplememo リポジトリの Secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から。08-17/08-18の実行ログで未設定を再確認）",
+    "GitHub Actions版オートパイロットの有効化: ローカルで claude setup-token を実行し、出力された sk-ant-oat01- で始まるトークンを simplememo リポジトリの Repository secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から。08-19 06:20 JSTの run 32187173035 でも Checkout/Claude Code が skipped であることを再確認）。未登録の間は主系が動かず、供給が副系CCR1本になる。実際に08-16・08-17・08-19（本日07:30 JSTに発火したが成果物なし）が空白日になっている",
+    "BigQueryのサービスアカウント鍵『GCP_SERVICE_ACCOUNT_JSON』の登録（継続依頼・2026-08-15から）。ただし本日はBigQuery MCPが接続されており実測できたため、優先度は上のトークンより低い。28日窓に届く2026-09-06前後までに入っていればよい",
     "【低優先・継続】日報メール側(simplememo-api)の対応: status JSON の streak / data_freshness を simplememo-api/src/autopilot-report.ts がまだ描画しないため、reason 先頭の【】が唯一の表示経路になっている"
   ],
-  "next": "ai-citation-strategy.mdの残り監査項目（§4 ChatGPT以降の節）を数項目ずつ継続。ms.locale meta タグ未実装（JP全ページ横断編集になるため独立レーンとして次回以降に検討）。Mention Watchは前回2026-08-12取得のため2026-08-19以降に次回。BigQuery一括エクスポートの28日到達は2026-09-06前後（前回実測3/28日から更新なし・MCP未接続のため今回は再確認できず）。新しいGSCスナップショット（手動CSVまたはBigQuery経由）が増えていればレーンA/Bを再判定。"
+  "next": "レーンEを継続: coverage-queue.json の pending 先頭は C03 /obsidian/what-is-vault/（P1・入門系統。PR #470/#483の実機素材を再利用できる）。以降 C04 /obsidian/pricing/・C05 /obsidian/sync/ と続く。C08 /obsidian/compare/notion/ 以降の比較子ページを作るときは、本ページの『まだ検証していない比較』ブロックから該当アプリを外し、実機検証カードへ移すこと。sitemapのlastmodについて: /download/ のように「スイープ判定された変更しか履歴に無いファイル」は generate_sitemap.py が TODAY にフォールバックするため再生成のたび lastmod が今日へ動く。今回は本日変更していないので手で戻したが、恒久対応は別レーンで検討。Mention Watchは前回2026-08-12取得のため本日以降に実行可能（今回はレーンEを優先）。BigQuery 28日到達は2026-09-06前後（本日実測7日）。"
 }
