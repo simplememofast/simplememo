@@ -93,9 +93,30 @@ jobs:
           # sitemap の lastmod は git 履歴から引くため浅いと全ページ分が壊れる
           fetch-depth: 0
 
-      - name: 日本語フォント（ページQAスクリーンショット用）
+      # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
+      # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
+      # 21:21Z→22:52Z の90分（ジョブ上限）を使い切り、`Claude Code` は
+      # skipped のまま終わった。その日の記事はゼロ。
+      #
+      # 出力が皆無なので根本原因はログからは確定できない（updateで詰まったのか
+      # installで詰まったのかも区別できない）が、最も疑わしいのはランナー背後の
+      # unattended-upgrades が握る apt/dpkg ロックの待ち。そこで
+      # DPkg::Lock::Timeout で「待たずに諦める」ようにしてある。
+      #
+      # ただし本質はそこではない。**フォントは記事より優先されてはいけない。**
+      # あって綺麗になるだけのものが、無いと1日分の出荷を止められる構造が誤り
+      # なので、時間を区切り（5分）失敗を許容する（continue-on-error）。
+      # フォントが入らない日はQAスクリーンショットの和文が豆腐になるだけで、
+      # 記事は出る。逆にはしない。
+      - name: 日本語フォント（ページQAスクリーンショット用・失敗しても続行）
         if: steps.gate.outputs.run == 'true'
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+        timeout-minutes: 5
+        continue-on-error: true
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo apt-get -o DPkg::Lock::Timeout=120 update -qq
+          sudo apt-get -o DPkg::Lock::Timeout=120 install -y -qq --no-install-recommends fonts-noto-cjk
 
       - name: Claude Code（Runbook 1イテレーション実行）
         if: steps.gate.outputs.run == 'true'
@@ -114,7 +135,7 @@ jobs:
             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
             2. `docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録と保留事項を確認する。
             3. 目標は毎日1記事。ただしRunbook §0のゲート（ノイズフロア＝期待クリック3未満を根拠にしない・品質・検証・実験非干渉）が常に優先。ゲートを通る施策が無い日は堂々とスキップし、保守レーン（Runbook §6）に切り替える。基準を下げて書くことは失敗と定義されている。
-            4. ブランチは claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)。Runbook §3の実装規約・§4の検証（seo-check等9チェック。ブラウザが要る工程は先に `npx playwright install --with-deps chromium` を実行し、OG生成スクリプトは PLAYWRIGHT のデフォルトパスで動く）を全て通してから commit・push する。
+            4. ブランチは claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)。Runbook §3の実装規約・§4の検証（seo-check等9チェック。ブラウザが要る工程は先に `npx playwright install --with-deps chromium` を実行し、OG生成スクリプトは PLAYWRIGHT のデフォルトパスで動く）を全て通してから commit・push する。**apt を伴うコマンド（`--with-deps` を含む）が数分たっても出力を返さない場合は深追いしないこと。** `--with-deps` を外して再試行し、それでも駄目ならブラウザが要るQAだけを省略して、その旨を status JSON の `checks` に明記したうえで記事の出荷を優先する。2026-08-20に、この種の apt の停止がジョブ上限90分を食い尽くして1日分の出荷をゼロにした前例がある（run 32303452390）。**セットアップのために出荷を落とさない。**
             5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。作成後、SEO Validation が起動したことを `gh pr checks` で確認したら**それ以上は待たずに終了してよい**（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
             6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
