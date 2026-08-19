@@ -20,6 +20,11 @@
    根拠に記事を書かない。`growth/scripts/analyze.mjs --only unanswered` が足切り済みの
    出力を出す。0クリックは多くの場合「正常」である（`OBSIDIAN_CONTENT_QUEUE.md` の
    2026-08-09訂正を必読）。
+   **適用範囲はレーンA/Bだけ**（既存の露出を回収する施策）。**新規カバレッジ
+   （レーンE）には適用しない** — GSCは既に露出している需要しか観測できないため、
+   ページが無い領域に足切りを当てると「impが無いから書けない／書かないからimpが
+   出ない」の循環になる（`OBSIDIAN_COVERAGE_PLAN.md` §1）。レーンEは別のゲート
+   （キュー掲載＋品質80点＋§28＋固有価値）で守る。
 3. **書く理由がなければ書かない。** その回は保守作業（§6）とログ記録だけで終えてよい。
    「定期実行だから何か出す」はこのサイトの敵。
 4. **検証できない主張は書かない**（§28 3状態表記）。SimpleMemoの機能主張は
@@ -63,10 +68,13 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 読むもの（この順）:
 1. `docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか・保留事項
 2. `docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md` + `growth/content/new-queue.json` /
-   `refresh-queue.json` — キューの現在地
-3. `docs/obsidian/OBSIDIAN_90DAY_ROADMAP.md` — 今がMonth何で、何が解禁されているか
-4. `growth/reports/` の最新レポート — 新しいデータ・訂正
-5. `docs/SEO_AIO_PLAN_2026-08.md` §6「やらないこと」
+   `refresh-queue.json` — データ駆動キュー（レーンA/B）の現在地
+3. `growth/content/coverage-queue.json` + `docs/obsidian/OBSIDIAN_COVERAGE_PLAN.md`
+   — **カバレッジキュー（レーンE）**。`status: pending` の先頭がその日の既定アクション。
+   ここが空でない限り「書く候補が無い日」は存在しない
+4. `docs/obsidian/OBSIDIAN_90DAY_ROADMAP.md` — 今がMonth何で、何が解禁されているか
+5. `growth/reports/` の最新レポート — 新しいデータ・訂正
+6. `docs/SEO_AIO_PLAN_2026-08.md` §6「やらないこと」
 
 ### 1-2. データ鮮度の確認（毎回・`growth/data/gsc/` を見るだけでは足りない）
 
@@ -165,7 +173,20 @@ node growth/scripts/analyze.mjs --only decay          # 2026-09-06以降のみ�
   **四半期1本まで**・実験台帳に登録して評価日を切る条件で作ってよい。
   「GSCに出ていない＝需要がない」ではなく「まだ露出していない」の可能性を
   この上限付きレーンだけで扱う（無制限にすると量産圧に変わるため）。
-- **どれも正当化できない** → §6の保守作業＋ログのみ（これは失敗ではない）
+- **レーンE（Coverage・まとめサイト化）**: `growth/content/coverage-queue.json` の
+  `status: pending` 先頭を実装する。**ノイズフロアは適用しない**（§0 原則2）。
+  ゲートは ①キューに載っている ②品質80点 ③検証規約（§28） ④固有価値
+  （実機検証・実カウント・一次情報のいずれかを1つ以上持つ）の4点
+  （`OBSIDIAN_COVERAGE_PLAN.md` §1）。実装前に `collides_with` を確認し、
+  既存ページが同じ主題を持つならレーンA-1（Refresh）へ切り替える。
+  完了したらキューの `status` を `done` にして同じPRに含める。
+  **レーンA/Bに足切りを超える案件が無い日は、迷わずここへ来る**
+  （= 事実上毎日1本が出る。これがこのレーンの存在理由）。
+  型は PR #483（C02 `/obsidian/getting-started/`）。
+- **どれも正当化できない** → §6の保守作業＋ログのみ（これは失敗ではない）。
+  ただし**レーンEのキューに `pending` が残っている限り、この行には来ない**。
+  ここへ来てよいのは、キューが枯れたか、当日のキュー先頭が
+  検証不能（例: macOS/iOS実機が要る）でスキップ理由をログに書ける場合だけ。
 
 レーンの選択理由は必ずログとステータスJSONの `reason` に書く。
 
@@ -330,7 +351,9 @@ auto-mergeまで数分で終わる。これを省くと日報が「上流停止�
 ENセグメント1.76%で期待0.56クリック、最も甘いサイト全体カーブでも1.65で、
 足切り3を大きく下回る。一般的な業界CTR表（pos4≈10%）で暗算すると
 この種の誤判定が起きる）、
-(3) それでも正当化できなければ堂々とスキップする。
+(3) **レーンE（coverage-queue.json の `pending` 先頭）へ行く。** データ駆動キューの
+枯渇はレーンEへ落ちる合図であって、スキップの理由にはならない、
+(4) レーンEも枯れていて初めて、堂々とスキップする。
 需要の無い記事を出すより、スキップの理由を日報に書く方がこのサイトの価値になる。
 
 ## 7. できないこと（正直に）
