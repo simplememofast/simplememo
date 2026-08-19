@@ -21,11 +21,15 @@
  *      `query-pages: 0` in every snapshot on file means the cannibalisation
  *      detector has never once run against data. The export carries the join.
  *
- *   3. **Position is computed, not read.** The export stores `sum_top_position`
+ *   3. **Position is computed, not read.** The export stores a summed rank
  *      rather than an average, and average position is
- *      `SUM(sum_top_position)/SUM(impressions) + 1`. The `+ 1` is not cosmetic:
+ *      `SUM(<rank column>)/SUM(impressions) + 1`. The `+ 1` is not cosmetic:
  *      the stored value is zero-indexed, so omitting it moves every page one
  *      rank up the expected-CTR curve and manufactures a CTR gap on every row.
+ *      **The two tables do not spell that column the same way** —
+ *      `searchdata_site_impression` has `sum_top_position`,
+ *      `searchdata_url_impression` has `sum_position` — so the expression has
+ *      to follow the table it reads.
  *
  * What it does NOT change: anonymised queries are still withheld (the row is
  * counted, the string is NULL), so the query table still sums to less than the
@@ -162,8 +166,17 @@ if (daysAvailable < days) {
 /* ── Queries ─────────────────────────────────────────────────────────────
  * Average position must come from one pooled ratio over the whole window, not
  * from an average of per-day positions: a day with three impressions would
- * otherwise weigh as much as a day with three hundred. */
-const POSITION = 'SAFE_DIVIDE(SUM(sum_top_position), SUM(impressions)) + 1';
+ * otherwise weigh as much as a day with three hundred.
+ *
+ * The rank column is named per table (see the header, point 3), so there is one
+ * expression per table rather than one shared constant. A shared constant is
+ * what shipped first, and it made every run die at the first URL-table
+ * dimension with `Unrecognized name: sum_top_position; Did you mean
+ * sum_position?` — invisible until 2026-08-19, because until then the job had
+ * no credentials and failed two steps earlier. */
+const pooledPosition = (column) => `SAFE_DIVIDE(SUM(${column}), SUM(impressions)) + 1`;
+const POSITION_SITE = pooledPosition('sum_top_position'); // searchdata_site_impression
+const POSITION_URL = pooledPosition('sum_position');      // searchdata_url_impression
 const params = { site, start: effectiveStart, end, searchType };
 const types = { start: 'DATE', end: 'DATE' };
 
@@ -184,7 +197,7 @@ const buckets = emptyBuckets();
 
 buckets.dates = await dimension('dates      ', `
   SELECT CAST(data_date AS STRING) AS date,
-         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION} AS position
+         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION_SITE} AS position
   FROM ${fq(SITE_TABLE)}
   WHERE site_url = @site AND data_date BETWEEN @start AND @end AND search_type = @searchType
   GROUP BY date ORDER BY date`);
@@ -194,7 +207,7 @@ buckets.dates = await dimension('dates      ', `
 // the query table sums below the site total.
 buckets.queries = await dimension('queries    ', `
   SELECT query,
-         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION} AS position
+         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION_SITE} AS position
   FROM ${fq(SITE_TABLE)}
   WHERE site_url = @site AND data_date BETWEEN @start AND @end AND search_type = @searchType
     AND is_anonymized_query = FALSE AND query IS NOT NULL
@@ -202,24 +215,30 @@ buckets.queries = await dimension('queries    ', `
 
 buckets.pages = await dimension('pages      ', `
   SELECT url AS page,
-         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION} AS position
+         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION_URL} AS position
   FROM ${fq(URL_TABLE)}
   WHERE site_url = @site AND data_date BETWEEN @start AND @end AND search_type = @searchType
   GROUP BY page ORDER BY clicks DESC, impressions DESC`);
 
+/* The table alias is load-bearing. HAVING resolves names against the SELECT
+ * aliases first, so an unqualified `SUM(impressions)` there binds to the
+ * `SUM(impressions) AS impressions` above it and BigQuery rejects the query with
+ * "Aggregations of aggregations are not allowed". `src.impressions` names the
+ * column instead. This is the only dimension with a HAVING clause, which is why
+ * it is the only one that needs the alias. */
 buckets['query-pages'] = await dimension('query×page ', `
   SELECT query, url AS page,
-         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION} AS position
-  FROM ${fq(URL_TABLE)}
+         SUM(clicks) AS clicks, SUM(src.impressions) AS impressions, ${POSITION_URL} AS position
+  FROM ${fq(URL_TABLE)} AS src
   WHERE site_url = @site AND data_date BETWEEN @start AND @end AND search_type = @searchType
     AND is_anonymized_query = FALSE AND query IS NOT NULL
   GROUP BY query, page
-  HAVING SUM(impressions) >= @minImpressions
+  HAVING SUM(src.impressions) >= @minImpressions
   ORDER BY impressions DESC`, { minImpressions: minQueryPageImpressions }, { minImpressions: 'INT64' });
 
 buckets.devices = await dimension('devices    ', `
   SELECT device,
-         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION} AS position
+         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION_SITE} AS position
   FROM ${fq(SITE_TABLE)}
   WHERE site_url = @site AND data_date BETWEEN @start AND @end AND search_type = @searchType
   GROUP BY device ORDER BY impressions DESC`);
@@ -230,7 +249,7 @@ buckets.devices = await dimension('devices    ', `
 // a table that would need maintaining for no current reader.
 buckets.countries = await dimension('countries  ', `
   SELECT country,
-         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION} AS position
+         SUM(clicks) AS clicks, SUM(impressions) AS impressions, ${POSITION_SITE} AS position
   FROM ${fq(SITE_TABLE)}
   WHERE site_url = @site AND data_date BETWEEN @start AND @end AND search_type = @searchType
   GROUP BY country ORDER BY impressions DESC`);
