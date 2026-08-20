@@ -36,7 +36,7 @@
    特に `/obsidian/` ハブ本体は `monitor-2026-08-09-obsidian-ctr`（評価日 2026-09-13）
    が終わるまで作り替え禁止（関連リンクの追記のみ可）。
 
-## 0-2. 実行基盤（2026-08-12改訂: GitHub Actions主・CCR Routine副）
+## 0-2. 実行基盤（2026-08-20改訂: GitHub Actions主・CCR Routine 副＋再試行）
 
 CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡ゼロ」で落ち、
 スケジュール起動セッションのログは外部から読めないことが分かった。以降:
@@ -44,11 +44,26 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
 | 経路 | 時刻 | 実体 | 状態の見える場所 |
 |---|---|---|---|
 | **主: GitHub Actions** | 06:00 JST | `.github/workflows/obsidian-autopilot.yml`（claude-code-action） | Actionsのrunログ（全部読める） |
-| **副: CCR Routine** | 07:30 JST | Claudeの定期タスク（フォールバック） | 日報メールの結果のみ |
+| **副: CCR Routine** | 07:30 JST | `trig_01TRBdBgSA9646FS4LDQgJdt` | 日報メールの結果のみ |
+| **再試行: CCR Routine** | 09:20 JST | `trig_01ESF9AHax6buS9X1pdFv657` | 同上 |
 
-- **冪等性（両経路の冒頭で必須）**: origin に `claude/obsidian-auto-<当日JST>` が
-  既にある、または本番 `data/autopilot-status.json` の `date_jst` が当日なら、
-  本日分は実行済み。**何もせず終了する。**
+**2026-08-20訂正:** 旧版のこの表は副系の実体を「Claudeの定期タスク」としか
+書いておらず、trigger IDを持っていなかった。そのため副系Routineが**消えていても
+誰も気づけず**、08-16・08-17・08-19・08-20 の記録は「起動はしているが痕跡ゼロ」
+という誤った診断のまま4日続いた。実際にはRoutineが存在しなかった
+（同日、全triggerを走査して不在を確認し、上のIDで作り直した）。
+**経路を足したり作り直したときは、必ずこの表にIDを書くこと。**
+
+- **冪等性（全経路の冒頭で必須）**: origin に `claude/obsidian-auto-<当日JST>` が
+  既にある、本番 `data/autopilot-status.json` の `date_jst` が当日、または
+  当日作成のPRがあるなら、本日分は実行済み。**何もせず終了する。**
+- **主系がまだ走っているかも見る（2026-08-20追加）**: 主系は
+  `timeout-minutes: 90` で06:00に始まるため、**最悪ケースで07:30ちょうどまで
+  走っている**。副系の起動時刻と重なる。`obsidian-autopilot.yml` の最新runの
+  `status` が `queued` / `in_progress` なら主系は作業中なので、副系・再試行は
+  終了する。**ブランチが無いことは「主系が失敗した」ではなく「主系がまだ
+  書いていない」かもしれない。** 判定コマンドが失敗した場合も
+  「実行済み/実行中かもしれない」側に倒す。
 - Actions側の有効化にはオーナー作業が1つ要る: ローカルで `claude setup-token` を
   実行して出るトークンを repo secret **`CLAUDE_CODE_OAUTH_TOKEN`** に登録
   （サブスク課金でActions内のClaudeが動く。API課金でよければ `ANTHROPIC_API_KEY` でも可）。
