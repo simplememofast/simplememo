@@ -15,7 +15,9 @@
  * five `.html` URLs in /comparison/'s ItemList and two `apple-itunes-app`
  * app-arguments sat pointing at 301s while this script reported "all clean",
  * quietly feeding the GSC "Page with redirect" bucket. They are checked here
- * under exactly the same rule.
+ * under exactly the same rule. Sitemap <loc>s and their hreflang alternates
+ * joined on 2026-08-20 for the same reason: they were the last crawl source
+ * this audit did not read, and the one Google trusts most.
  *
  * Resolution mirrors Cloudflare Pages' static-asset behaviour:
  *   /foo/      → foo/index.html            (200)
@@ -28,7 +30,7 @@
  * Exit 0 = clean, 1 = findings.
  */
 
-import { readFileSync, existsSync, statSync } from "node:fs";
+import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
@@ -177,6 +179,45 @@ for (const file of files) {
   }
 }
 
+// Sitemaps are the crawl source Google trusts most, and until 2026-08-20 the
+// one this audit did not read: href/src and JSON-LD/meta are covered above,
+// but a redirecting or dead <loc> would have shipped silently — straight into
+// the GSC "Page with redirect" bucket from the highest-authority source there
+// is. Every <loc> and every hreflang alternate in sitemap*.xml must sit on
+// the canonical origin and resolve to a direct 200, same rule as everything
+// else here.
+let sitemapCount = 0;
+const sitemapFiles = readdirSync(ROOT).filter((f) => /^sitemap[\w-]*\.xml$/.test(f));
+for (const file of sitemapFiles) {
+  const xml = readFileSync(path.join(ROOT, file), "utf8");
+  const urls = [];
+  for (const m of xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)) urls.push(m[1]);
+  for (const m of xml.matchAll(/<xhtml:link[^>]*\shref="([^"]+)"/g)) urls.push(m[1]);
+
+  for (const raw of urls) {
+    sitemapCount++;
+    if (raw !== ORIGIN && !raw.startsWith(ORIGIN + "/")) {
+      findings.push({
+        from: file,
+        link: raw,
+        problem: `not on the canonical origin ${ORIGIN} (www/http/foreign hosts redirect)`,
+      });
+      continue;
+    }
+    const [beforeHash] = raw.slice(ORIGIN.length).split("#");
+    const [pathPart, query] = (beforeHash || "/").split("?");
+    if (EDGE_ONLY.has(pathPart)) continue;
+
+    const key = query ? `${pathPart}?${query}` : pathPart || "/";
+    if (!cache.has(key)) {
+      const viaEdge = await edge(key);
+      cache.set(key, viaEdge ?? staticResolve(pathPart || "/"));
+    }
+    const problem = cache.get(key);
+    if (problem) findings.push({ from: file, link: raw, problem });
+  }
+}
+
 if (findings.length) {
   // Group by the broken target: one stale URL usually appears on many pages.
   const byTarget = new Map();
@@ -188,7 +229,7 @@ if (findings.length) {
   console.error(
     `\nInternal links: ${findings.length} link(s) across ${byTarget.size} distinct target(s) ` +
       `do not resolve to a direct 200 ` +
-      `(${linkCount} href/src + ${metaCount} JSON-LD/meta URLs checked)\n`,
+      `(${linkCount} href/src + ${metaCount} JSON-LD/meta + ${sitemapCount} sitemap URLs checked)\n`,
   );
   for (const [k, sources] of [...byTarget].sort((a, b) => b[1].length - a[1].length)) {
     const [link, problem] = k.split("\t");
@@ -201,6 +242,6 @@ if (findings.length) {
   process.exit(1);
 }
 console.log(
-  `Internal links: ${linkCount} href/src + ${metaCount} JSON-LD/meta URLs checked, ` +
-    `all resolve to a direct 200`,
+  `Internal links: ${linkCount} href/src + ${metaCount} JSON-LD/meta + ` +
+    `${sitemapCount} sitemap URLs checked, all resolve to a direct 200`,
 );

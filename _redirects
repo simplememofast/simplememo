@@ -15,7 +15,11 @@
 # `X.html` → `X`), so if Functions ever fail to deploy those URLs still
 # resolve; they just cost a 308 instead of the 301 the middleware returns.
 
-# www -> apex (requires DNS CNAME for www to be configured in Cloudflare)
+# www -> apex (requires DNS CNAME for www to be configured in Cloudflare).
+# Mirrored in functions/_middleware.js (step 0) so a www URL that also needs
+# a path/query fix folds into ONE 301 — this rule runs after Functions, so on
+# its own it made such URLs cost two hops. Kept as the fallback, same as the
+# RETIRED paths below.
 https://www.simplememofast.com/*  https://simplememofast.com/:splat  301
 
 /privacy-policy  /privacy  301
