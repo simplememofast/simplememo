@@ -22,7 +22,18 @@
 // Normalizations, in order (all folded into a single 301 so no request ever
 // costs more than one hop):
 //
-//   0. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
+//   0. Host: `www.simplememofast.com` → apex. `_redirects` has the same rule,
+//      but `_redirects` runs AFTER Pages Functions — so before this was
+//      mirrored here, a www URL that also needed a path or query fix cost two
+//      hops (`https://www…/x.html` → 301 middleware, host kept → `https://www…/x`
+//      → 301 `_redirects` → apex) and the intermediate www URL became one more
+//      GSC "Page with redirect" row. The `_redirects` rule stays as the
+//      fallback if a Functions deploy ever fails. The `http://` leg of
+//      `http://www…` is out of our hands: the edge's Always Use HTTPS 301
+//      runs before anything in this repo, so that spelling always costs
+//      one extra hop.
+//
+//   0b. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
 //      Pages resolves the extra slashes and serves 200, so these are true
 //      duplicate URLs — the 2026-08-05 GSC snapshot had five of them parked
 //      in "Alternate page with proper canonical tag" (all `/en/vs/*//`).
@@ -68,12 +79,23 @@ export const onRequest = async (context) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
-  // Preserve Cloudflare Access auth chain for /admin/*.
+  // Preserve Cloudflare Access auth chain for /admin/*. On the www host this
+  // passes through too — `_redirects` still moves it to the apex afterwards,
+  // and auth-before-redirect is the safer order for those paths anyway.
   if (path.startsWith("/admin/")) {
     return context.next();
   }
 
-  // 0. Collapse runs of duplicate slashes before anything else inspects the
+  let needsRedirect = false;
+
+  // 0. Host: www → apex, folded into the same 301 as every fix below.
+  //    Exact-match so preview deployments (*.pages.dev) are untouched.
+  if (url.hostname === "www.simplememofast.com") {
+    url.hostname = "simplememofast.com";
+    needsRedirect = true;
+  }
+
+  // 0b. Collapse runs of duplicate slashes before anything else inspects the
   //    path. Pages treats `//docs//x` as `/docs/x`, so the internal-path
   //    block below has to reason about the collapsed form or it can be
   //    walked around with an extra slash.
@@ -104,8 +126,6 @@ export const onRequest = async (context) => {
       headers: { "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
     });
   }
-
-  let needsRedirect = false;
 
   // 1. Drop ?lang= (case-sensitive — URLSearchParams is, and we never use
   //    other casings either way).

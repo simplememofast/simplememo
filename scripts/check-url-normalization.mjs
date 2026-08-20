@@ -36,8 +36,11 @@ const { onRequest } = await import(
 const PASSTHROUGH = Symbol("passthrough");
 
 async function run(urlPath) {
+  // Accept either a path (checked against the canonical origin) or an
+  // absolute URL (for host-normalization cases, e.g. the www host).
+  const absolute = urlPath.startsWith("https://") ? urlPath : ORIGIN + urlPath;
   const res = await onRequest({
-    request: new Request(ORIGIN + urlPath),
+    request: new Request(absolute),
     next: async () => PASSTHROUGH,
   });
   if (res === PASSTHROUGH) return { kind: "pass" };
@@ -103,6 +106,29 @@ async function servesDirectly(urlPath) {
     fail(`${urlPath} → expected pass-through (200), got ${JSON.stringify(r)}`);
   }
 }
+
+// ── 0. Host: www → apex, folded into the same single 301 ─────────────────
+// GSC 2026-08-17 "Page with redirect" carries http://www.simplememofast.com/.
+// The http→https upgrade is the edge's own 301 (Always Use HTTPS, before
+// anything in this repo); what this middleware owns is that NOTHING after it
+// adds a second hop — a www URL that also needs a path or query fix must not
+// mint an intermediate `https://www…/fixed-path` URL for GSC to count.
+await redirects("https://www.simplememofast.com/", "/");
+await redirects("https://www.simplememofast.com/blog/meeting-memo-template.html", "/blog/meeting-memo-template");
+// Host + .html + ?lang= + retirement, all in ONE 301.
+await redirects(
+  "https://www.simplememofast.com/blog/captio-discontinued.html?lang=ja",
+  "/blog/captio-discontinued",
+);
+await redirects("https://www.simplememofast.com/vs/trello/?lang=en", "/vs/");
+// A www URL that needs no other fix still leaves via one hop (here the
+// middleware's own 301; _redirects remains the fallback if Functions fail).
+await redirects("https://www.simplememofast.com/vs/notion/", "/vs/notion/");
+// /admin/* keeps its Cloudflare Access auth chain even on the www host;
+// _redirects moves it to the apex after auth.
+await servesDirectly("https://www.simplememofast.com/admin/");
+// Preview/other hosts are untouched — the match is exact, not a suffix.
+await servesDirectly("https://claude-branch.simplememo.pages.dev/vs/notion/");
 
 // ── 1. Duplicate slashes ─────────────────────────────────────────────────
 // GSC 2026-08-05, "Alternate page with proper canonical tag" (5 of 7 rows).
