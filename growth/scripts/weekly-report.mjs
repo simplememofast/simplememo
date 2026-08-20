@@ -206,6 +206,44 @@ p();
 }
 p();
 
+/* ── AI-mediated traffic (GA4 side) ─────────────────────────────────────
+ * The densest channel on the site (75.9s average engagement — longest of any
+ * channel, v4 §2-5) and the only one nobody was measuring end-to-end: whether
+ * AI-referred sessions ever click through to the App Store. GA4 has no export
+ * pipeline into this repo, so the numbers are transcribed by hand from a GA4
+ * exploration into growth/data/ga4/ai-channel.json (README there). Rows are a
+ * fixed roster: the ai-assistant channel plus the five AI referral domains —
+ * a referrer that is not on the roster belongs in "other" rather than being
+ * silently dropped, so growth in a new AI surface still shows up. */
+p('## AI経由（ai-assistantチャネル＋AI参照ドメイン → app_store_click）');
+p();
+{
+  let ai = null;
+  try { ai = JSON.parse(fs.readFileSync(path.join(ROOT, 'growth/data/ga4/ai-channel.json'), 'utf8')); } catch { /* not transcribed yet */ }
+  const ROSTER = [
+    ['ai-assistant', 'AI Assistantチャネル（GA4定義）'],
+    ['copilot', 'copilot.com 参照'],
+    ['claude.ai', 'claude.ai 参照'],
+    ['gemini', 'gemini.google.com 参照'],
+    ['chatgpt', 'chatgpt.com 参照'],
+    ['openai', 'openai.com 参照'],
+    ['other', 'その他AI参照（発見次第rosterへ昇格）'],
+  ];
+  p(ai
+    ? `_窓: ${ai.window ?? '未記載'} · 出典: GA4探索（手動転記）_`
+    : '_値が未転記。GA4 → 探索 で「セッションのデフォルトチャネルグループ＝AI Assistant」と「セッションの参照元に copilot / claude.ai / gemini / chatgpt / openai を含む」の2軸を作り、セッション数と app_store_click を growth/data/ga4/ai-channel.json へ転記すると埋まる。_');
+  p();
+  p('| 経路 | セッション | app_store_click |');
+  p('|---|---:|---:|');
+  for (const [id, label] of ROSTER) {
+    const r = ai?.rows?.find((x) => x.id === id);
+    p(`| ${label} | ${r?.sessions ?? '—'} | ${r?.app_store_clicks ?? '—'} |`);
+  }
+  p();
+  p('_参考ベースライン（GA4 30日 2026-07-21..08-20・v4 §2-5）: copilot 13・claude.ai 4・gemini 4・chatgpt 3・openai 6 ≒ 約30セッション/月、平均エンゲージ 75.9秒＝全チャネル最長。app_store_click の計測はこの表が初——「AI経由が何install生むか」はまだ誰も知らない。_');
+}
+p();
+
 /* ── Ledger health ──────────────────────────────────────────────────── */
 p('## Experiment ledger');
 p();

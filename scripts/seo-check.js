@@ -539,6 +539,54 @@ function checkOrphanPages() {
   }
 }
 
+/**
+ * llms.txt freshness (report-only — a warning, never a build failure).
+ *
+ * AI assistants treat the file's own stamps as the freshness signal (the file
+ * says so), which cuts both ways: when the stamps go stale, every AI answer
+ * citing us repeats old facts with full confidence. That actually happened —
+ * the "Current facts" block still said v5.7.3 on 2026-08-20 while 97% of new
+ * installs were already on 5.7.8 (GROWTH_ROI_PLAN_2026-08-20.md §2-5). Nothing
+ * reported it, because nothing was looking.
+ *
+ * Why warn rather than fail: the correct values (store version, rating count,
+ * price) can only be read off the App Store listing, which CI cannot do. A
+ * red build here would block unrelated deploys on a fact only the owner can
+ * fetch. A *missing or unparseable* stamp is an error, though — an
+ * unreadable stamp would disable this check silently and forever.
+ */
+function checkLlmsFreshness() {
+  const STALE_DAYS = 30;
+  const llmsPath = path.join(ROOT_DIR, 'llms.txt');
+  if (!fs.existsSync(llmsPath)) {
+    errors.push('[LLMS] llms.txt not found at site root');
+    return;
+  }
+  const text = fs.readFileSync(llmsPath, 'utf8');
+  const stamps = [
+    // The file-level stamp the file itself declares authoritative (§Versioning).
+    ['Last updated', /\*\*Last updated:\*\*\s*(\d{4}-\d{2}-\d{2})/],
+    // The stamp on the facts AI answers actually quote (version/rating/price).
+    ['Current facts (as of …)', /\*\*Current facts \(as of (\d{4}-\d{2}-\d{2})\)/],
+  ];
+  for (const [name, re] of stamps) {
+    const m = text.match(re);
+    const date = m ? new Date(`${m[1]}T00:00:00Z`) : null;
+    if (!date || Number.isNaN(date.getTime())) {
+      errors.push(`[LLMS] llms.txt "${name}" stamp is missing or unparseable — the freshness check cannot run`);
+      continue;
+    }
+    const age = Math.floor((Date.now() - date.getTime()) / 86400000);
+    if (age > STALE_DAYS) {
+      warnings.push(
+        `[LLMS] llms.txt "${name}" is ${age} days old (> ${STALE_DAYS}): ` +
+        'AI assistants cite these facts as current. Refresh version / rating count / price ' +
+        'from the App Store listing (owner-verified values only) and bump the stamp.',
+      );
+    }
+  }
+}
+
 function main() {
   console.log('=== SEO Validation Report ===\n');
 
@@ -554,6 +602,7 @@ function main() {
   checkUrlHygiene();
   checkEdgeRules();
   checkOrphanPages();
+  checkLlmsFreshness();
 
   // Report
   if (errors.length > 0) {
