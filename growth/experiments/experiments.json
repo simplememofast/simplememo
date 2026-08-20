@@ -1170,6 +1170,42 @@
         "2026-08-12: 2026-07-29 に keep と判定された題を差し替える2回目の実験。当時（imp 1,605 / CTR 1.62% / pos 7.4）から imp は増えたが CTR は 1.57% に低下しており、keep の根拠は現在の数値では成り立たない。cta-2026-08-10-desktop-qr と cta-2026-08-10-mid-placement もこのページを含み、同日評価。",
         "2026-08-12: 依頼①では 日本語対応 を題に入れる案だったが、ページに日本語対応の記述が無いため入れていない。題と中身を合わせるなら、先に本文へ節を足すこと。"
       ]
+    },
+    {
+      "id": "title-2026-08-20-home-grammar",
+      "page": "/",
+      "type": "title_test",
+      "hypothesis": "トップページtitleの先頭が「AIタグ自動追加」でVISION §0とPR実測（AI前面回のPV 1/26・8/3=469PV）に逆行している。勝ち文法（話すだけ→宛先に残る）へ是正し、AI言及はdescription後半へ降格（削除はしない）。CTRは動かない見込み（指名検索が主imp源）——判定はブランド検索表示数とAIO表示数で行う。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-20",
+      "evaluation_at": "2026-11-20",
+      "status": "running",
+      "before": {
+        "title": "Obsidian連携シンプルメモ｜AIタグ自動追加・話すだけでメールとObsidianへ"
+      },
+      "after": {
+        "title": "Obsidian連携シンプルメモ｜話すだけで、メールとObsidianへ残る"
+      },
+      "baseline": {
+        "clicks": 187,
+        "impressions": 1720,
+        "ctr": 0.109,
+        "position": 7.6,
+        "window": "2026-05-18..2026-08-17",
+        "source": "GSC 3ヶ月ページ次元 / （docs/GROWTH_ROI_PLAN_2026-08-20.md §5-2）。併読指標: ブランド検索14クエリ 702imp（05-09..08-08・v3 §2-4）とAIO表示 約7.4千/3M"
+      },
+      "target_metric": "brand_search_impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-20: 主指標はブランド検索表示数とAIO表示数（v3ノーススター系）。CTRは主判定に使わない——ベースラインCTR 10.9%は指名検索が主imp源で、タイトル文言では動かない見込み（v4 §5-2で事前宣言）。期待する効果は AI引用文言の是正とブランド一貫性で、2〜3ヶ月遅れの指標。",
+        "2026-08-20: title・meta description・og:title/description・twitter:title/description を同型化した。H1「話すだけで、メールとObsidianへ。」は元から勝ち文法で不変更。og:image（assets/img/og/index.png）も主見出しが同文法・AIはバッジ格で降格済みのため再生成せず。AI言及はdescriptionの後半へ降格（削除はしない）。",
+        "2026-08-20: lang.jsのmeta-template経路を確認——トップ（/）はsingle-DOMで .meta-template ブロックを持たず、lang.js本体にもタイトル文字列は無いため、実行時にtitleが旧値へ戻る経路は存在しない。lang.jsは今回不変更なのでキャッシュバスタ ?v= も現行ハッシュのまま（check-css-version.mjs がCIで内容とバスタの一致を強制しており、v3 §9-5の再発はCIが検出する）。",
+        "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。"
+      ]
     }
   ]
 }
