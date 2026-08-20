@@ -1,37 +1,37 @@
 {
-  "date_jst": "2026-08-19",
-  "generated_at": "2026-08-19T01:45:00Z",
+  "date_jst": "2026-08-20",
+  "generated_at": "2026-08-20T02:00:00Z",
   "action": "new",
   "article": {
-    "url": "/obsidian/compare/",
-    "title": "Obsidianは何と比較すればいい？ — 決め手は「ノートの正本がどこに残るか」"
+    "url": "/obsidian/what-is-vault/",
+    "title": "Obsidianの保管庫（Vault）とは — 実体はただのフォルダ"
   },
   "pr": null,
   "streak": {
     "consecutive_no_article_days": 0,
-    "last_article_date_jst": "2026-08-19",
-    "last_production_change_date_jst": "2026-08-19",
+    "last_article_date_jst": "2026-08-20",
+    "last_production_change_date_jst": "2026-08-20",
     "days_since_production_change": 0
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-16",
     "bq_export_days_accumulated": 7,
-    "bq_checked": true,
+    "bq_checked": false,
     "manual_snapshot_label": "2026-08-11"
   },
-  "reason": "【連続無記事0日目（7日ぶりに記事・前回2026-08-12）・本番最終変更 2026-08-19・BQ 7/28日】オーナー依頼の調査で、無記事6日の原因がゲートでもデータ待ちでもなく『レーンE（Coverage）が AUTOPILOT_RUNBOOK.md に一度も入っていなかったこと』と判明（grep 0件・git log -S 空）。PR #510 でRunbookへ実際に追記しmainへマージ済み。本セッションはその直後のレーンE 1本目として coverage-queue.json の pending 先頭 C01 /obsidian/compare/ を実装。レーンA/Bは今回も正当化できない: BigQuery MCPは接続されており searchdata_site_impression を実測したところ 2026-08-10〜08-16 の7日ぶんで28日窓に届かず（到達は2026-09-06前後）、手動CSVも2026-08-11から変化なし。レーンEはノイズフロア非適用（ゲート＝キュー掲載＋品質80点＋§28＋固有価値）で、この空白期間に記事を出せる唯一のレーン。PR番号は AUTOPILOT_LOG.md に記録する。",
-  "verified": "Obsidian公式レジストリ（GitHub obsidianmd/obsidian-releases）の community-plugins.json / community-css-themes.json を当日直接カウントし、プラグイン6,739個・テーマ698種を実測（2026-08-11の6,571個・680種、08-14の6,638個・691種と同一方法。8日間で+168個＝1日あたり約21個）。この実測が本ページ固有の一次情報で、『プラグイン数は比較の決め手にならない』という主張の根拠。実機検証済みの結論（同一フォルダ実験・保管庫の実体）は既存の子ページからの参照にとどめ二重掲載していない。Notion・Capacities・memos はこの環境で動かしていないため比較を書かず、その旨をページ本文と検証環境ブロックに明記。BigQueryは data_date 2026-08-10〜2026-08-16・7日を実測（bq_checked=true）。GitHub Actions run 32187173035（08-19 06:20 JST）も Checkout / Claude Code が skipped で、CLAUDE_CODE_OAUTH_TOKEN 未設定を再確認。",
+  "reason": "【連続無記事0日目・本番最終変更 2026-08-20・BQ未確認】レーンE 2本目として coverage-queue の pending 先頭 C03 /obsidian/what-is-vault/ を実装。**主系・副系・再試行の3経路すべてが本日成果物ゼロだったため、オーナー依頼のセッションが代走した。** 主系(06:00)は秘密鍵登録後はじめてGateを通り Checkout まで成功したが、日本語フォント導入のaptが90分のジョブ上限を食い尽くして cancelled になり Claude Code は skipped（run 32303452390）。この構造はPR #513で封じ込め済みで明朝から有効。副系(07:30・last_fired 2026-08-19T22:30:59Z)と再試行(09:20・last_fired 2026-08-20T00:20:19Z)はいずれも発火記録はあるが、10:40時点で当日ブランチ・当日PR・status JSONのどれにも痕跡がなかった。二重実行の衝突は無し（実装前に3点を再確認済み）。レーンA/Bは28日窓（2026-09-06前後）まで正当化できないため今回もレーンE。",
+  "verified": "Obsidian 1.13.7（公式Linux AppImage・X-AppImage-Version で確認）をこの環境にダウンロードして展開し、Xvfb上のヘッドレスで**空のディレクトリを保管庫として実際に開かせて**、直後の中身をファイルシステムで実測した。作られたのは .obsidian/ 直下のJSON 4つのみで、app.json 2バイト（中身は {}）・appearance.json 2バイト（同じく {}）・core-plugins.json 696バイト・workspace.json 4,843バイト、合計5,543バイト。**Markdownファイルは0件**（「新しい保管庫を作成」で初期ノートが作られる挙動とは別であることを本文で区別した）。core-plugins.json の中身は31個で既定ON 21・OFF 10、OFFの10個も列挙。desktop-releases.json の latestVersion が 1.13.7 であることも当日確認。Windows/macOS/iOS版は実行しておらず、その旨を検証環境ブロックに明記。",
   "checks": {
     "seo_check": "0 errors 0 warnings",
-    "content_graph": "18 entries OK（/obsidian/compare/ を obsidian-compare クラスタで登録）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画: 水平スクロールなし（scrollWidth=clientWidth=390）・表は overflow-x:auto の内側でスクロール・JS/HTTPエラー0・回答ブロックはファーストビュー内（top=729px）・QRはモバイル非表示/デスクトップ表示を実測",
+    "content_graph": "19 entries OK（/obsidian/what-is-vault/ を obsidian-beginner クラスタで登録・productRelevance は台帳の businessRelevance に合わせて high）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画: 水平スクロールなし（scrollWidth=clientWidth=390）・表と<pre>コードブロックはいずれも overflow-x:auto の内側でスクロール・JS/HTTPエラー0・回答ブロックはファーストビュー内（top=698px）・QRはモバイル非表示/デスクトップ表示を実測",
     "experiments": "33件中20 open・due 0・overdue 0。/obsidian/ ハブ本体は monitor-2026-08-09-obsidian-ctr が実験中のため関連リンク1本の追記のみで非干渉",
-    "other": "check-css-version / check-url-normalization(189) / check-internal-redirects(12,865+5,093 all 200) / sync_constants / tag-cta-placements / generate_sitemap いずれもOK。QRは generate-qr-codes.mjs --check で29件独立デコード検証済み"
+    "other": "check-css-version / check-url-normalization(189) / check-internal-redirects(12,930 href + 5,113 JSON-LD すべて直接200) / sync_constants / tag-cta-placements / generate_sitemap いずれもOK。QRは generate-qr-codes.mjs --check で31件独立デコード検証済み"
   },
   "owner_requests": [
-    "GitHub Actions版オートパイロットの有効化: ローカルで claude setup-token を実行し、出力された sk-ant-oat01- で始まるトークンを simplememo リポジトリの Repository secret『CLAUDE_CODE_OAUTH_TOKEN』に登録（継続依頼・2026-08-11から。08-19 06:20 JSTの run 32187173035 でも Checkout/Claude Code が skipped であることを再確認）。未登録の間は主系が動かず、供給が副系CCR1本になる。実際に08-16・08-17・08-19（本日07:30 JSTに発火したが成果物なし）が空白日になっている",
-    "BigQueryのサービスアカウント鍵『GCP_SERVICE_ACCOUNT_JSON』の登録（継続依頼・2026-08-15から）。ただし本日はBigQuery MCPが接続されており実測できたため、優先度は上のトークンより低い。28日窓に届く2026-09-06前後までに入っていればよい",
-    "【低優先・継続】日報メール側(simplememo-api)の対応: status JSON の streak / data_freshness を simplememo-api/src/autopilot-report.ts がまだ描画しないため、reason 先頭の【】が唯一の表示経路になっている"
+    "【新規・要判断】副系Routine（trig_016ALpozNRuf2j7BYJo5cCqy・07:30 JST）の停止または作り直し: 2026-08-16・08-17・08-19・08-20 と**4日連続で成果物ゼロ**。last_fired_at は毎回更新されているので起動はしているが、ブランチ・PR・status JSON のいずれにも痕跡を残せていない。主系が復活した今、レート枠を食うだけの経路になっている可能性がある",
+    "【継続・低優先】日報メール側(simplememo-api)の対応: status JSON の streak / data_freshness を simplememo-api/src/autopilot-report.ts がまだ描画しないため、reason 先頭の【】が唯一の表示経路になっている",
+    "【確認待ち】GH_PAT が実際に効いているかは、Actions内部から push して作られるPRでしか判定できない。明朝06:00の主系運転で作られるPRに SEO Validation が起動するかを見ること。起動しなければ auto-merge が来ずPRが滞留するので、Secret名と Fine-grained token の Repository access を見直す"
   ],
-  "next": "レーンEを継続: coverage-queue.json の pending 先頭は C03 /obsidian/what-is-vault/（P1・入門系統。PR #470/#483の実機素材を再利用できる）。以降 C04 /obsidian/pricing/・C05 /obsidian/sync/ と続く。C08 /obsidian/compare/notion/ 以降の比較子ページを作るときは、本ページの『まだ検証していない比較』ブロックから該当アプリを外し、実機検証カードへ移すこと。sitemapのlastmodについて: /download/ のように「スイープ判定された変更しか履歴に無いファイル」は generate_sitemap.py が TODAY にフォールバックするため再生成のたび lastmod が今日へ動く。今回は本日変更していないので手で戻したが、恒久対応は別レーンで検討。Mention Watchは前回2026-08-12取得のため本日以降に実行可能（今回はレーンEを優先）。BigQuery 28日到達は2026-09-06前後（本日実測7日）。"
+  "next": "レーンE継続。coverage-queue の pending 先頭は C04 /obsidian/pricing/（P1）。sitemapの /download/ が generate_sitemap.py の TODAY フォールバックで再生成のたび当日へ動く件は2日連続で手戻ししており、恒久対応を独立レーンで検討する価値がある。BigQuery 28日到達は2026-09-06前後（前回実測7日・今回はセッションにBigQuery MCPがあったが記事作成を優先し再取得していないため bq_checked=false）。Mention Watchは前回2026-08-12取得のため実行可能。"
 }

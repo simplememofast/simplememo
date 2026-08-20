@@ -692,3 +692,95 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
 - 次回: レーンE継続。pending 先頭は **C03 `/obsidian/what-is-vault/`**（P1）。
   C08 `/obsidian/compare/notion/` 以降を作るときは、本ページの「まだ検証していない比較」
   ブロックから該当アプリを外して実機検証カードへ移すこと。
+
+## 2026-08-20 — レーンE C03: /obsidian/what-is-vault/（3経路すべて不発・オーナー依頼セッションが代走）
+
+- 判断根拠: `coverage-queue.json` の pending 先頭 **C03 `/obsidian/what-is-vault/`**（P1・
+  obsidian-beginner）を実装。レーンA/Bは28日窓（2026-09-06前後）まで正当化できないため
+  今回もレーンE。実装前に冪等性を3点（当日ブランチ・origin/main の status JSON・
+  当日作成PR）で再確認し、すべて偽であることを確かめてから着手した。**二重PR・
+  同名ブランチの衝突は無し。**
+
+- **本日は3経路すべてが成果物ゼロだった。** これがこの回の最重要の記録。
+
+  | 経路 | 発火 | 結果 |
+  |---|---|---|
+  | 主系 GHA 06:00 | ✅ run 32303452390 | **cancelled**（下記） |
+  | 副系 CCR 07:30 | ✅ `2026-08-19T22:30:59Z` | 痕跡ゼロ |
+  | 再試行 CCR 09:20 | ✅ `2026-08-20T00:20:19Z` | 痕跡ゼロ |
+
+- **主系が落ちた理由（実測）**: 秘密鍵 `CLAUDE_CODE_OAUTH_TOKEN` の登録により
+  **8日ぶりにGateを通過し `Checkout` が success**（＝①は確定）。ところが次の
+  「日本語フォント」ステップで `sudo apt-get update -qq && ...` が
+  **出力を1行も出さないまま21:21Z→22:52Z の90分（ジョブ上限）を使い切り**、
+  `Claude Code` は skipped のまま終わった。根本原因はログからは確定できない
+  （updateとinstallのどちらで詰まったかも不明）。**PR #513** で
+  `timeout-minutes: 5` + `continue-on-error: true` + `DPkg::Lock::Timeout=120`
+  により封じ込め済みで、schedule定義はデフォルトブランチが使われるため
+  **明朝06:00から有効**。
+
+- **副系の信頼性について（要判断）**: 副系Routine
+  `trig_016ALpozNRuf2j7BYJo5cCqy` は **08-16・08-17・08-19・08-20 と4日連続で
+  成果物ゼロ**。`last_fired_at` は毎回更新されているので起動はしているが、
+  ブランチ・PR・status JSON のいずれにも痕跡を残せていない。主系が復活した今、
+  レート枠を食うだけの経路になっている可能性がある。停止か作り直しの判断を
+  オーナー依頼に積んだ。
+
+- やったこと: `/obsidian/what-is-vault/` 新設。被リンク3本配線
+  （`/obsidian/`・`/obsidian/getting-started/`・`/obsidian/compare/`）＋
+  `content-graph.json` 登録（obsidian-beginner・parent=/obsidian/・
+  siblings=始め方/比較ハブ。productRelevance は台帳の businessRelevance に
+  合わせて high）＋デスクトップQR（`QR_PAGES` に `obsidian-vault` 追加）＋
+  OG画像＋sitemap再生成。coverage-queue の C03 を `done` 化。
+
+- **固有価値（この回の一次情報）**: Obsidian **1.13.7** の公式Linux AppImageを
+  この環境にダウンロード・展開し、Xvfb上のヘッドレスで**空のディレクトリを
+  保管庫として実際に開かせて**、直後の中身をファイルシステムで実測した。
+
+  ```
+  vault-demo/
+  └── .obsidian/
+      ├── app.json          2 bytes   （中身は {}）
+      ├── appearance.json   2 bytes   （同じく {}）
+      ├── core-plugins.json 696 bytes （コア31個・既定ON 21/OFF 10）
+      └── workspace.json    4,843 bytes（ペイン配置）
+                            ─────────
+                            5,543 bytes
+  ```
+
+  **Markdownファイルは0件。** 「新しい保管庫を作成」した場合に初期ノートが
+  作られる挙動（PR #483・2026-08-11・Obsidian 1.13.6）とは別であることを
+  本文で明示的に区別した。4つのうち**いちばん大きいのがUIの状態**という事実が
+  「保管庫は索引もDBも持たない」という主張の直接の根拠になっている。
+
+- 書かなかったこと: Windows/macOS/iOS版では実行していない（保管庫の構造は
+  プラットフォーム非依存とされているが、確かめたのはLinux版だと明記）。
+  `workspace.json` を同期から外す運用は「そういう選び方がある」までにとどめ、
+  衝突の頻度など未検証の主張は書いていない。
+
+- PR: #514
+
+- 検証: Runbook §4 の9チェック全通過 — `seo-check` 0 errors 0 warnings /
+  `check-css-version` OK / `check-benchmark` 新規CONFLICT・AMBIGUOUS増なし /
+  `check-url-normalization` 189 passed / `check-internal-redirects`
+  12,930 href + 5,113 JSON-LD すべて直接200 / `sync_constants --check` OK /
+  `tag-cta-placements --check` OK（新規1件を `--write` で付与）/
+  `check-experiments` due 0・overdue 0 / `generate_sitemap.py`。
+  QRは `--check` で31件を独立デコード検証（既存29件はバイト同一）。
+  **iPhone 390×844 DPR3 実描画QA**: 水平スクロールなし
+  （scrollWidth=clientWidth=390）・表と `<pre>` コードブロックはいずれも
+  `overflow-x:auto` の内側でスクロール・JS/HTTPエラー0・回答ブロックは
+  ファーストビュー内（top=698px）・QRはモバイル非表示／デスクトップ表示。
+
+- 副作用の記録（2日連続）: `generate_sitemap.py` が `/download/` の lastmod を
+  TODAY にフォールバックする件。今日も手で 2026-08-18 に戻した。2日続けて
+  同じ手戻しをしているので、恒久対応を独立レーンで検討する価値がある。
+
+- 保留・オーナー依頼:
+  - **副系Routineの停止または作り直しの判断**（上記・新規）
+  - **GH_PAT は依然として未判定**。Actions内部から push して作られるPRが
+    1本も無いため。明朝06:00の主系運転で作られるPRに SEO Validation が
+    起動するかが唯一の判定材料
+  - 日報メール側(simplememo-api)の streak / data_freshness 描画（継続・低優先）
+
+- 次回: レーンE継続。pending 先頭は **C04 `/obsidian/pricing/`**（P1）。

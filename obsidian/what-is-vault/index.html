@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/what-is-vault/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>Obsidianの保管庫（Vault）とは — 実体はただのフォルダ【2026】 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidianの保管庫（Vault）は独自のファイル形式でもデータベースでもなく、ただのフォルダです。空のフォルダを実際に保管庫として開いて確認したところ、作られたのは.obsidian/直下のJSON 4つ・合計5,543バイトだけで、ノートは1件も作られませんでした。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidianの保管庫（Vault）とは — 実体はただのフォルダ【2026】 | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="空のフォルダを実際に保管庫として開いて確認。作られるのは.obsidian/直下のJSON 4つ・合計5,543バイトだけです。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-20T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/what-is-vault/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-what-is-vault.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidianの保管庫（Vault）とは — 実体はただのフォルダ【2026】">
+  <meta name="twitter:description" content="空のフォルダを実際に開いて実測。作られるのは.obsidian/のJSON 4つ・5,543バイトだけ。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-what-is-vault.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/what-is-vault/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Obsidian連携", "item": "https://simplememofast.com/obsidian/"},
+      {"@type": "ListItem", "position": 3, "name": "保管庫（Vault）とは", "item": "https://simplememofast.com/obsidian/what-is-vault/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/what-is-vault/#article","inLanguage":"ja","headline":"Obsidianの保管庫（Vault）とは — 実体はただのフォルダ","description":"空のフォルダをObsidian 1.13.7で実際に保管庫として開き、作られたものをファイルシステムで実測した。中身は.obsidian/直下のJSON 4つ・合計5,543バイトのみ。","url":"https://simplememofast.com/obsidian/what-is-vault/","datePublished":"2026-08-20","dateModified":"2026-08-20","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-what-is-vault.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/what-is-vault/"}}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/what-is-vault/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidianの保管庫（Vault）とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"あなたが選んだ普通のフォルダそのものです。独自のファイル形式もデータベースもありません。空のフォルダをObsidian 1.13.7で実際に保管庫として開いたところ、作られたのは.obsidianという設定用フォルダと、その直下のJSONファイル4つ（app.json・appearance.json・core-plugins.json・workspace.json）だけで、合計5,543バイトでした。ノートは素のMarkdownファイルとしてフォルダに並びます。"}},{"@type":"Question","name":".obsidianフォルダを削除するとノートは消えますか？","acceptedAnswer":{"@type":"Answer","text":"消えません。.obsidianに入っているのは設定とUIの状態だけで、ノート本体は1バイトも含まれていないためです。実測では4ファイルの内訳がapp.json 2バイト（中身は{}）、appearance.json 2バイト（同じく{}）、core-plugins.json 696バイト、workspace.json 4,843バイトでした。削除すると設定が既定に戻り、開いていたペインの配置が失われるだけです。"}},{"@type":"Question","name":"保管庫を別のパソコンへ移すにはどうすればいいですか？","acceptedAnswer":{"@type":"Answer","text":"フォルダごとコピーするだけです。エクスポート機能を使う必要はありません。保管庫は普通のフォルダなので、コピー先でObsidianから「フォルダを開く」を選べばそのまま保管庫として認識されます。移行時に注意する点があるとすればworkspace.jsonで、これは4,843バイトのうちほぼ全てが開いていたペインの配置というUIの状態です。端末ごとに画面の広さが違うため、この1ファイルだけは移さない選び方もあります。"}},{"@type":"Question","name":"既存のフォルダを保管庫にすると、中身に何か追加されますか？","acceptedAnswer":{"@type":"Answer","text":".obsidianフォルダ以外は何も追加されません。実測では、空のフォルダを保管庫として開いてもMarkdownファイルは0件のままでした。一方、Obsidianの「新しい保管庫を作成」から作った場合は初期ノート（ようこそ.md）が1件作られます。既にファイルが入っているフォルダを保管庫にしたい場合は、後者ではなく「フォルダを開く」を選べば、既存のファイルはそのまま残ります。"}},{"@type":"Question","name":"core-plugins.jsonには何が書かれていますか？","acceptedAnswer":{"@type":"Answer","text":"Obsidianに最初から入っているコア機能のON/OFFです。実測では31個が並んでおり、既定でONが21個、OFFが10個でした。OFFだったのはfootnotes・slash-command・markdown-importer・zk-prefixer・random-note・slides・audio-recorder・workspaces・publish・webviewerの10個です。コミュニティプラグインとは別物で、こちらは追加インストールなしで設定から切り替えられます。"}}]}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/obsidian/what-is-vault/#webpage","inLanguage":"ja","name":"Obsidianの保管庫（Vault）とは — 実体はただのフォルダ【2026】 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/obsidian/what-is-vault/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/obsidian/daily-note/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+
+    /* ── 検証スクリーンショット ─────────────────────────
+       実UIの横長キャプチャ。掲載幅800pxで文字がつぶれないことを確認済み。
+       枠線は「これは図解ではなく画面の写し」であることを示す控えめな合図。 */
+    .shot{margin:1.5rem 0 2rem}
+    .shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}
+    .shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}
+    .shot-pair{display:grid;grid-template-columns:1fr;gap:1.25rem;margin:1.5rem 0 2rem}
+    @media(min-width:760px){.shot-pair{grid-template-columns:1fr 1fr}}
+    .shot-pair .shot{margin:0}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=obsidian-vault-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=obsidian-vault-jp__nav&amp;mt=8" class="global-nav__cta">
+          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span lang="ja" data-lang="ja">Obsidian入門 — 用語</span><span lang="en" data-lang="en">Obsidian basics — terms</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span lang="ja" data-lang="ja">Obsidianの保管庫（Vault）とは</span><span lang="en" data-lang="en">What is an Obsidian vault?</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span lang="ja" data-lang="ja">「保管庫」という名前のせいで、独自の入れ物や専用形式を想像しがちです。実際は<strong>あなたが選んだ普通のフォルダそのもの</strong>で、Obsidianはそこに設定用のフォルダを1つ足すだけです。このページでは、空のフォルダを実際に保管庫として開き、<strong>何が・何バイト作られたかをファイルシステムで数えました</strong>。</span><span lang="en" data-lang="en">The word &quot;vault&quot; suggests a proprietary container. It is <strong>an ordinary folder you picked</strong>, and Obsidian adds exactly one settings directory to it. For this page we opened an empty folder as a vault and <strong>counted, byte for byte, what appeared on disk</strong>.</span>
+        </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-20">2026年8月20日</time>・ 検証日: 2026年8月20日（Obsidian 1.13.7）</span><span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published <time datetime="2026-08-20">August 20, 2026</time> · Tested August 20, 2026 (Obsidian 1.13.7)</span>
+        </p>
+      </div>
+
+      <!-- Answer block (AIO): the <h2> restates the canonical beginner question almost
+           verbatim and the first paragraph answers it in two sentences. Keep above the fold. -->
+      <section class="lp-section" data-answer-block="what-is-obsidian-vault" style="padding-top:1rem;">
+        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">Obsidianの保管庫（Vault）とは何ですか？</span><span lang="en" data-lang="en">What is an Obsidian vault?</span></h2>
+        <div lang="ja" data-lang="ja">
+          <p><strong>あなたが選んだ普通のフォルダそのものです。</strong>独自のファイル形式もデータベースもなく、Obsidianはそこに <code>.obsidian</code> という設定用フォルダを1つ足すだけで、ノートは素のMarkdownファイルとしてフォルダに並びます。</p>
+          <p>空のフォルダを実際に保管庫として開いて数えたところ、作られたのは <code>.obsidian/</code> 直下のJSONファイル<strong>4つ・合計5,543バイト</strong>だけで、<strong>Markdownファイルは0件</strong>でした。</p>
+        </div>
+        <div lang="en" data-lang="en">
+          <p><strong>It is an ordinary folder you chose.</strong> There is no proprietary format and no database — Obsidian adds a single <code>.obsidian</code> settings directory, and your notes sit in the folder as plain Markdown files.</p>
+          <p>Opening an empty folder as a vault produced exactly <strong>four JSON files totalling 5,543 bytes</strong> under <code>.obsidian/</code>, and <strong>zero Markdown files</strong>.</p>
+        </div>
+      </section>
+
+      <!-- Measurement -->
+      <section class="lp-section" id="measured">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">実測 — 空のフォルダを保管庫にすると何が作られるか</span><span lang="en" data-lang="en">Measured: what appears when an empty folder becomes a vault</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">空のディレクトリを1つ用意し、Obsidian 1.13.7（Linux版）にそれを保管庫として開かせて、直後の中身を <code>find</code> で列挙しました。結果がこれです。</span><span lang="en" data-lang="en">We created one empty directory, had Obsidian 1.13.7 (Linux build) open it as a vault, and listed the result with <code>find</code>. This is all of it.</span>
+        </p>
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.8;margin:1.25rem 0;"><code>vault-demo/
+└── .obsidian/
+    ├── app.json
+    ├── appearance.json
+    ├── core-plugins.json
+    └── workspace.json</code></pre>
+        <div style="overflow-x:auto;margin:1.5rem 0 1rem;">
+          <table style="width:100%;border-collapse:collapse;font-size:.95rem;min-width:30rem;">
+            <thead>
+              <tr>
+                <th scope="col" style="text-align:left;padding:.75rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">ファイル</span><span lang="en" data-lang="en">File</span></th>
+                <th scope="col" style="text-align:left;padding:.75rem .9rem;border-bottom:1px solid var(--border); text-align:right;"><span lang="ja" data-lang="ja">サイズ</span><span lang="en" data-lang="en">Size</span></th>
+                <th scope="col" style="text-align:left;padding:.75rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">何が入っているか</span><span lang="en" data-lang="en">What it holds</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><code>app.json</code></td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border); text-align:right;">2</td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">中身は <code>{}</code>。既定から変えた設定だけが書かれる</span><span lang="en" data-lang="en">Literally <code>{}</code> — only settings you changed get written</span></td></tr>
+              <tr><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><code>appearance.json</code></td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border); text-align:right;">2</td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">同じく <code>{}</code>。テーマやフォントを変えると増える</span><span lang="en" data-lang="en">Also <code>{}</code> — grows once you change theme or font</span></td></tr>
+              <tr><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><code>core-plugins.json</code></td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border); text-align:right;">696</td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">コア機能31個のON/OFF（既定でON 21・OFF 10）</span><span lang="en" data-lang="en">On/off for 31 core features (21 on, 10 off by default)</span></td></tr>
+              <tr><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><code>workspace.json</code></td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border); text-align:right;">4,843</td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">開いていたペインの配置。<strong>4つのうちこれだけが大きい</strong></span><span lang="en" data-lang="en">Pane layout. <strong>The only large one of the four</strong></span></td></tr>
+              <tr><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><strong><span lang="ja" data-lang="ja">合計</span><span lang="en" data-lang="en">Total</span></strong></td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border); text-align:right;"><strong>5,543</strong></td><td style="padding:.7rem .9rem;border-bottom:1px solid var(--border);"><span lang="ja" data-lang="ja">単位はバイト。<strong>ノート本体は1バイトも含まれない</strong></span><span lang="en" data-lang="en">Bytes. <strong>Not one byte of it is your notes</strong></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          <span lang="ja" data-lang="ja">5,543バイトは、短いメモ1枚ぶんにも満たない量です。そして<strong>いちばん大きいファイルがUIの状態（どのペインを開いていたか）</strong>だという事実が、保管庫の性格をよく表しています。Obsidianは索引もデータベースも保管庫に置いていません。</span><span lang="en" data-lang="en">5,543 bytes is less than one short note. And the fact that <strong>the largest of the four is UI state</strong> — which panes were open — says what a vault is. Obsidian keeps no index and no database in there.</span>
+        </p>
+      </section>
+
+      <!-- What that buys you -->
+      <section class="lp-section" id="consequences">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">ここから言えること — 削除・移動・同期</span><span lang="en" data-lang="en">What follows: deleting, moving, syncing</span>
+        </h2>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title"><span lang="ja" data-lang="ja"><code>.obsidian</code> を消してもノートは消えない</span><span lang="en" data-lang="en">Deleting <code>.obsidian</code> does not touch your notes</span></div>
+            <p class="reason-card__desc"><span lang="ja" data-lang="ja">中身は設定とUIの状態だけで、ノート本体は含まれていません。消して開き直せば、設定が既定に戻り、ペインの配置が失われるだけです。</span><span lang="en" data-lang="en">It holds settings and UI state only. Delete it, reopen, and you are back to defaults with your pane layout gone — nothing else.</span></p>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><span lang="ja" data-lang="ja">移行はフォルダのコピーだけ</span><span lang="en" data-lang="en">Moving a vault is copying a folder</span></div>
+            <p class="reason-card__desc"><span lang="ja" data-lang="ja">エクスポート機能は要りません。コピー先で「フォルダを開く」を選べば、そのまま保管庫として認識されます。これが独自DBのアプリとの決定的な差です。</span><span lang="en" data-lang="en">No export step. Point Obsidian at the copy with &quot;Open folder as vault&quot; and it is a vault again. This is the decisive difference from apps with their own database.</span></p>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><span lang="ja" data-lang="ja">端末をまたぐと <code>workspace.json</code> だけ性格が違う</span><span lang="en" data-lang="en"><code>workspace.json</code> is the odd one out across devices</span></div>
+            <p class="reason-card__desc"><span lang="ja" data-lang="ja">4,843バイトのほぼ全部が「どのペインをどう開いていたか」です。画面の広さが違う端末で共有する意味は薄く、この1ファイルだけ同期対象から外す選び方があります。</span><span lang="en" data-lang="en">Nearly all of its 4,843 bytes describe which panes were open and how. Sharing that between devices with different screen sizes buys little, so some people exclude just this file from sync.</span></p>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title"><span lang="ja" data-lang="ja">「新規作成」と「既存フォルダを開く」は結果が違う</span><span lang="en" data-lang="en">&quot;Create new&quot; and &quot;Open folder&quot; differ</span></div>
+            <p class="reason-card__desc"><span lang="ja" data-lang="ja">既存の空フォルダを開いた今回はMarkdownが0件でした。一方「新しい保管庫を作成」で作ると初期ノートが1件置かれます（<a href="/obsidian/getting-started/">実画面の記録</a>）。既にファイルがあるフォルダなら後者を選ばないこと。</span><span lang="en" data-lang="en">Opening an existing empty folder produced zero Markdown files. &quot;Create new vault&quot; instead drops in a starter note (<a href="/obsidian/getting-started/">screenshots</a>). If the folder already has files, do not use the latter.</span></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- core-plugins -->
+      <section class="lp-section" id="core-plugins">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja"><code>core-plugins.json</code> の中身 — 既定でOFFの10個</span><span lang="en" data-lang="en">Inside <code>core-plugins.json</code>: the 10 that ship off</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">696バイトの正体は、Obsidianに最初から入っているコア機能のON/OFF表です。実測では<strong>31個</strong>が並び、<strong>既定でON 21個・OFF 10個</strong>でした。追加インストールなしで設定から切り替えられるので、「その機能を探してプラグインを入れる」前にここを見る価値があります。OFFだったのは次の10個です。</span><span lang="en" data-lang="en">Those 696 bytes are an on/off table for the features Obsidian ships with. We counted <strong>31</strong> of them — <strong>21 on, 10 off</strong> by default. They need no install, so it is worth checking here before hunting for a community plugin. These ten start off:</span>
+        </p>
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;overflow-x:auto;font-size:.85rem;line-height:1.8;margin:1.25rem 0;"><code>footnotes          slash-command      markdown-importer
+zk-prefixer        random-note        slides
+audio-recorder     workspaces         publish
+webviewer</code></pre>
+        <p>
+          <span lang="ja" data-lang="ja">これはコミュニティプラグイン（2026年8月19日時点で6,739個）とは別物です。数の話は<a href="/obsidian/compare/">Obsidian比較ハブ</a>に置いてあります。</span><span lang="en" data-lang="en">These are separate from community plugins (6,739 of them as of August 19, 2026). The counting is on the <a href="/obsidian/compare/">comparison hub</a>.</span>
+        </p>
+      </section>
+
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">フォルダだと分かった次の問題 — そこへ入れる速さ</span><span lang="en" data-lang="en">Once it is just a folder: how fast can you get into it?</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">保管庫がただのフォルダなら、「そこに1行足す」のは本来かんたんなはずです。ところが実際にiPhoneでやると、アプリを開いて同期を待って日付のノートを探して、という手数が挟まります。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、<strong>iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記</strong>します。SiriやApple Watchからも入ります。書き込む先は素のMarkdownファイルなので、この記事で見たとおり<strong>アプリをやめても残るのはあなたのフォルダ</strong>です。</span><span lang="en" data-lang="en">If a vault is just a folder, adding one line to it ought to be easy. On an iPhone it rarely is: open the app, wait for sync, find today&#39;s note. Simple Memo emails each note to you and <strong>appends it straight into the daily note inside your vault folder on iCloud Drive</strong>, including from Siri and Apple Watch. It writes plain Markdown, so — exactly as measured above — <strong>what survives you dropping the app is your own folder</strong>.</span>
+        </p>
+        <div class="cta-box">
+          <div class="cta-box__title"><span lang="ja" data-lang="ja">Obsidianを選んだ人の、入口をいちばん短くする</span><span lang="en" data-lang="en">If you chose Obsidian, shorten the way in</span></div>
+          <p class="cta-box__desc"><span lang="ja" data-lang="ja">思いついたら話すだけ。メールにもデイリーノートにも、同じ1行が残ります。ダウンロードは無料です。</span><span lang="en" data-lang="en">Say the thought and it lands in your inbox and your daily note alike. Free to download.</span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=obsidian-vault-jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+          </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-vault-ja.svg" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja" data-lang="ja">
+            <img src="/assets/img/qr-obsidian-vault-en.svg" width="132" height="132" alt="QR code to download on the App Store" loading="lazy" lang="en" data-lang="en">
+            <small><span lang="ja" data-lang="ja">PCの方はスマホで読み取り</span><span lang="en" data-lang="en">On desktop? Scan with your phone</span></small>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span>
+        </h2>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Obsidianの保管庫（Vault）とは何ですか？</span><span lang="en" data-lang="en">What is an Obsidian vault?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">あなたが選んだ普通のフォルダそのものです。独自形式もデータベースもありません。空のフォルダをObsidian 1.13.7で実際に開いたところ、作られたのは<code>.obsidian</code>と、その直下のJSON 4つ（<code>app.json</code>・<code>appearance.json</code>・<code>core-plugins.json</code>・<code>workspace.json</code>）だけで、合計<strong>5,543バイト</strong>でした。</span><span lang="en" data-lang="en">An ordinary folder you picked — no proprietary format, no database. Opening an empty folder with Obsidian 1.13.7 produced only <code>.obsidian</code> and four JSON files inside it (<code>app.json</code>, <code>appearance.json</code>, <code>core-plugins.json</code>, <code>workspace.json</code>) totalling <strong>5,543 bytes</strong>.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">.obsidianフォルダを削除するとノートは消えますか？</span><span lang="en" data-lang="en">Does deleting .obsidian delete my notes?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">消えません。中身は設定とUIの状態だけで、<strong>ノート本体は1バイトも含まれていません</strong>。実測の内訳は <code>app.json</code> 2バイト（<code>{}</code>）、<code>appearance.json</code> 2バイト（同じく<code>{}</code>）、<code>core-plugins.json</code> 696バイト、<code>workspace.json</code> 4,843バイトです。消しても設定が既定に戻り、ペインの配置が失われるだけです。</span><span lang="en" data-lang="en">No. It holds settings and UI state only — <strong>not one byte of it is your notes</strong>. Measured: <code>app.json</code> 2 bytes (<code>{}</code>), <code>appearance.json</code> 2 bytes (also <code>{}</code>), <code>core-plugins.json</code> 696 bytes, <code>workspace.json</code> 4,843 bytes. Delete it and you lose defaults and your pane layout, nothing more.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">保管庫を別のパソコンへ移すには？</span><span lang="en" data-lang="en">How do I move a vault to another machine?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">フォルダごとコピーするだけです。エクスポート機能は要りません。コピー先で「フォルダを開く」を選べばそのまま保管庫として認識されます。<code>workspace.json</code> だけは中身のほぼ全部が「どのペインをどう開いていたか」なので、画面の広さが違う端末へ持っていく意味は薄く、この1ファイルを外す選び方もあります。</span><span lang="en" data-lang="en">Copy the folder. There is no export step — point Obsidian at the copy with &quot;Open folder as vault&quot;. The one file worth thinking about is <code>workspace.json</code>, almost all of which describes which panes were open; carrying that to a device with a different screen buys little, so some people leave it behind.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">既存のフォルダを保管庫にすると、中身に何か足されますか？</span><span lang="en" data-lang="en">Does making an existing folder a vault add anything?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja"><code>.obsidian</code> 以外は何も足されません。実測でも、空のフォルダを開いた直後のMarkdownは<strong>0件</strong>でした。一方「新しい保管庫を作成」から作った場合は初期ノートが1件置かれます（<a href="/obsidian/getting-started/">実画面の記録</a>）。既にファイルが入っているフォルダなら、必ず「フォルダを開く」の側を選んでください。</span><span lang="en" data-lang="en">Nothing but <code>.obsidian</code>. Opening an empty folder left <strong>zero</strong> Markdown files. &quot;Create new vault&quot; instead drops in a starter note (<a href="/obsidian/getting-started/">screenshots</a>). If your folder already holds files, always take the &quot;open folder&quot; path.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">core-plugins.json には何が書かれていますか？</span><span lang="en" data-lang="en">What is in core-plugins.json?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">Obsidianに最初から入っているコア機能のON/OFFです。実測で<strong>31個</strong>が並び、既定でON 21個・OFF 10個でした。OFFだったのは footnotes / slash-command / markdown-importer / zk-prefixer / random-note / slides / audio-recorder / workspaces / publish / webviewer の10個です。追加インストール不要で設定から切り替えられます。</span><span lang="en" data-lang="en">On/off flags for the features Obsidian ships with. We counted <strong>31</strong>, of which 21 are on and 10 off by default: footnotes, slash-command, markdown-importer, zk-prefixer, random-note, slides, audio-recorder, workspaces, publish, webviewer. No install needed — they toggle in settings.</span></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Verification environment (§30) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="background:rgba(100,180,255,.05);border-color:rgba(100,180,255,.18);">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">検証環境と検証範囲</span><span lang="en" data-lang="en">TEST ENVIRONMENT &amp; SCOPE</span></div>
+          <p style="margin:0;"><span lang="ja" data-lang="ja">検証日: 2026年8月20日 ／ 対象: Obsidian 1.13.7（公式Linux AppImage・<code>X-AppImage-Version</code> で確認）／ 環境: Linux（Ubuntu 24.04・Xvfb上のヘッドレス）。空のディレクトリを1つ用意してObsidianに保管庫として開かせ、直後の中身を <code>find</code> と <code>ls -l</code> で列挙・計測した値をそのまま載せています。<strong>Windows版・macOS版・iOS版では実行していません</strong>（保管庫の構造はプラットフォーム非依存とされていますが、本ページで確かめたのはLinux版です）。「新しい保管庫を作成」した場合の挙動は<a href="/obsidian/getting-started/">別ページ</a>で2026年8月11日にObsidian 1.13.6で確認したもので、今回の再検証には含みません。バージョンにより既定値は変わりえます。</span><span lang="en" data-lang="en">Tested August 20, 2026 — Obsidian 1.13.7 (official Linux AppImage, confirmed via <code>X-AppImage-Version</code>) on Ubuntu 24.04 running headless under Xvfb. We created one empty directory, had Obsidian open it as a vault, and report exactly what <code>find</code> and <code>ls -l</code> showed afterwards. <strong>Windows, macOS and iOS builds were not exercised</strong>; the vault layout is understood to be platform-independent, but what we checked is the Linux build. The &quot;create new vault&quot; behaviour comes from <a href="/obsidian/getting-started/">a separate page</a>, measured on 2026-08-11 with Obsidian 1.13.6, and was not re-tested here. Defaults can change between versions.</span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/obsidian/getting-started/"><span lang="ja" data-lang="ja">Obsidianの始め方（実画面ガイド）</span><span lang="en" data-lang="en">Getting started with Obsidian</span></a>
+          <a href="/obsidian/compare/"><span lang="ja" data-lang="ja">Obsidian比較ハブ（何と比べるべきか）</span><span lang="en" data-lang="en">Obsidian comparison hub</span></a>
+          <a href="/obsidian/"><span lang="ja" data-lang="ja">Obsidian連携の詳細</span><span lang="en" data-lang="en">Obsidian integration</span></a>
+          <a href="/obsidian/daily-note/"><span lang="ja" data-lang="ja">デイリーノートへ追記する方法</span><span lang="en" data-lang="en">Appending to daily notes</span></a>
+          <a href="/obsidian/compare/logseq/"><span lang="ja" data-lang="ja">ObsidianとLogseqの比較</span><span lang="en" data-lang="en">Obsidian vs Logseq</span></a>
+          <a href="/blog/obsidian-iphone-memo"><span lang="ja" data-lang="ja">iPhoneからObsidianに送る方法6選</span><span lang="en" data-lang="en">6 ways to send to Obsidian</span></a>
+          <a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a>
+          <a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">参考文献・データの出典</span><span lang="en" data-lang="en">References &amp; data sources</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://github.com/obsidianmd/obsidian-releases" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-releases（GitHub）</a> — <span lang="ja" data-lang="ja">Obsidian公式の配布元。本ページで動かした 1.13.7 の AppImage はここから取得し、<code>desktop-releases.json</code> の <code>latestVersion</code> が 1.13.7 であることを2026-08-20に確認</span><span lang="en" data-lang="en">Obsidian&#39;s official distribution. The 1.13.7 AppImage used here came from it; <code>desktop-releases.json</code> listed <code>latestVersion</code> 1.13.7 on 2026-08-20</span></li>
+    <li><a href="https://help.obsidian.md/" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help</a> — <span lang="ja" data-lang="ja">保管庫の考え方と、コアプラグイン／コミュニティプラグインの区別についての公式ヘルプ</span><span lang="en" data-lang="en">Official help on what a vault is and how core plugins differ from community ones</span></li>
+    <li><a href="/obsidian/getting-started/" style="color:var(--accent);">Obsidianの始め方（当サイト）</a> — <span lang="ja" data-lang="ja">「新しい保管庫を作成」した場合に初期ノートが作られることの実画面記録（2026-08-11・Obsidian 1.13.6）</span><span lang="en" data-lang="en">Our screenshots of the &quot;create new vault&quot; path producing a starter note (2026-08-11, Obsidian 1.13.6)</span></li>
+    <li><a href="/obsidian/compare/" style="color:var(--accent);">Obsidian比較ハブ（当サイト）</a> — <span lang="ja" data-lang="ja">コミュニティプラグイン数の実カウントと、正本の置き場所で比較先を分ける考え方</span><span lang="en" data-lang="en">Our community-plugin counts and the &quot;where does the source of truth live&quot; framing</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=obsidian-vault-jp__bottom&amp;mt=8" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja" data-lang="ja">App Storeのダウンロードページ</span><span lang="en" data-lang="en">App Store download page</span></li>
+  </ul>
+  <p style="font-size:.8rem;color:var(--text-muted);margin-top:1rem;line-height:1.7;"><span lang="ja" data-lang="ja">ObsidianはDynalist Inc.の商標です。本サイトはObsidianプロジェクトと提携関係にない独立メディアで、Obsidian連携シンプルメモは株式会社ユリカが開発する独立アプリです。</span><span lang="en" data-lang="en">Obsidian is a trademark of Dynalist Inc. This site is independent of the Obsidian project; Simple Memo - for Obsidian is an independent app by Yurica Inc.</span></p>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. Adding a second defeats the purpose: the page
+       already offers dozens of links and none of them gets clicked. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">関連コンテンツ</span><span lang="en" data-lang="en">Related content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/vs/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メモアプリ比較一覧</span><span lang="en" data-lang="en">Compare</span></a></li>
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">Methods</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">Blog</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
+        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja" data-lang="ja">Apple Watch対応</span><span lang="en" data-lang="en">Apple Watch</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja" data-lang="ja">Obsidian連携</span><span lang="en" data-lang="en">Obsidian</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use cases</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to email</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
+</html>
