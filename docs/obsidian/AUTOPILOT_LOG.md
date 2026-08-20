@@ -681,12 +681,17 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
   **TODAY にフォールバック**するため、再生成のたびに lastmod が今日へ動く。
   本日変更していないので手で 2026-08-18 に戻した。恒久対応は別レーン。
 - 保留・オーナー依頼:
-  - **repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（最優先・継続）**。run 32187173035
-    （08-19 06:20 JST）も Checkout / Claude Code が `skipped`。未登録の間は主系が動かず、
-    供給が副系CCR1本になる。実際に08-16・08-17・**08-19（本日07:30 JSTに発火したが
-    成果物なし）** が空白日になっている
-  - `GCP_SERVICE_ACCOUNT_JSON` の登録（継続）。本日はBigQuery MCPで実測できたため
-    優先度は上より低いが、28日窓に届く2026-09-06前後までには必要
+  - ~~**repo secret `CLAUDE_CODE_OAUTH_TOKEN` の登録（最優先・継続）**~~
+    **【2026-08-20訂正・充足済み】** この依頼は誤りだった。根拠にした run 32187173035
+    は**前日（08-19 06:20 JST）**のもので、当日の run 32303452390（08-20 06:21 JST）は
+    Gateを通り Checkout が `success` している。シークレットは登録済みだった。
+    なお同runは記事を出せていないが、原因は未登録ではなく**aptが90分のジョブ上限を
+    食い尽くしたこと**（PR #513で修正済み）。判定手順を Runbook §1-3 に追加した
+  - ~~`GCP_SERVICE_ACCOUNT_JSON` の登録（継続）~~
+    **【2026-08-20訂正・充足済み】** 同じく誤り。seo-daily の run 32303828087
+    （08-20 06:25 JST）は `Credentials are configured` を `success` で通過し、
+    Export preflight / Ingest / Detectors まで完走している。08-14〜08-18 の連続失敗も
+    これで解消している
   - llms.txt は見送り（N1・C02と同基準。レジストリ実カウントは持つが、訂正リストとしての
     価値が増える性質ではないため）
 - 次回: レーンE継続。pending 先頭は **C03 `/obsidian/what-is-vault/`**（P1）。
@@ -784,3 +789,54 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
   - 日報メール側(simplememo-api)の streak / data_freshness 描画（継続・低優先）
 
 - 次回: レーンE継続。pending 先頭は **C04 `/obsidian/pricing/`**（P1）。
+
+## 2026-08-20（追記2・オーナー指摘） — 依頼欄が「登録済みのシークレット」を要求し続けていた構造を塞ぐ
+
+同日のC03セッション（上のエントリ）が本日分の依頼欄を実態に合わせて書き直したが、
+**そうなった仕組み自体は手つかず**だった。オーナーからの指摘
+（「`GCP_SERVICE_ACCOUNT_JSON` これはいっているはず」）を受けて、Runbookに手順を追加する。
+
+- 指摘の当否: **オーナーが正しく、10:00 JSTの日報が誤っていた。** 日報は
+  `CLAUDE_CODE_OAUTH_TOKEN` と `GCP_SERVICE_ACCOUNT_JSON` を両方「未登録」として
+  出していたが、実測では両方とも登録済みだった。
+
+  | ワークフロー | run | 決め手のステップ | 結果 |
+  |---|---|---|---|
+  | obsidian-autopilot | 32303452390（08-20 06:21 JST） | `Checkout` | `success`（＝Gate通過） |
+  | obsidian-autopilot | 32187173035（08-19 06:20 JST） | `Checkout` | `skipped`（**前日**の状態） |
+  | seo-daily | 32303828087（08-20 06:25 JST） | `Credentials are configured` | `success` |
+  | seo-daily | 32187624915（08-19 06:25 JST） | `Credentials are configured` | `failure`（**前日**の状態） |
+
+  seo-daily は08-14〜08-18が `Credentials are configured` で連続失敗していたが、
+  08-20の run は Export preflight / Ingest / Detectors まで完走している。
+
+- 原因（症状ではなく構造）: `owner_requests` を**前日のログから写して日付だけ
+  伸ばす**運用になっており、充足を確かめる手順がどこにも無かった。
+  本ログを遡ると同じ依頼が106行目から684行目まで10日以上引き継がれている。
+  **オーナーが対応しても依頼が消えない。** 08-19エントリはさらに、当日のrunが
+  存在するのに前日のrunを根拠にしていた。
+- やったこと: `AUTOPILOT_RUNBOOK.md` に **§1-3「オーナー依頼の棚卸し
+  （毎回・繰り越す前に実測する）」** を新設し、§5-2 の `owner_requests` から参照を張った。
+  08-19エントリの依頼2件も充足済みとして訂正した。
+  - 原則: 「継続」と書いてよいのは**その日の実測で未充足を確かめたとき**だけ。
+    実測手段が無い依頼（Simulator撮影など）は「実測手段が無いため未確認」と明記して
+    区別する。充足したら外し、外した事実をログに1行残す
+  - 判定表: `CLAUDE_CODE_OAUTH_TOKEN` → obsidian-autopilot の**最新**runで
+    `Checkout` が `skipped` でない／`GCP_SERVICE_ACCOUNT_JSON` → seo-daily の
+    **最新**runで `Credentials are configured` が `success`。どちらのワークフローも
+    シークレット欠如をその1ステップで止める作りなので、後続ステップが動いた事実が
+    そのまま判定になる
+  - 断定しすぎない点も明記: autopilot のGateは `CLAUDE_CODE_OAUTH_TOKEN`
+    **または** `ANTHROPIC_API_KEY` で通るため、Checkoutが走った事実が示すのは
+    「どちらかが入っている」であって前者単体の登録ではない
+- 触っていないもの: 本番HTML・`data/autopilot-status.json`・キュー類は一切変更していない
+  （本日の記事は上のエントリのPR #514で出荷済み）。docs 2ファイルのみの変更。
+- 未検証: PR #513 のapt修正が実際に効くかは明朝06:00の主系運転が初めての検証機会。
+  見るべきは「フォントのステップが5分以内で抜けること」と「`Claude Code` が
+  `skipped` でないこと」。オーナーと相談のうえ本日の force 実行は見送った
+  （本番に2本目の記事を出さない判断）。
+- 次回: 上のエントリの申し送り（レーンE C04 `/obsidian/pricing/`、副系Routineの
+  停止・作り直し判断、GH_PATの効き確認）は据え置き。加えて主系が完走した場合、
+  主系（06:00）と副系（07:30）の二重実行防止は当日ブランチが**pushされているか**
+  だけで判定しているため、主系が07:30までにpushへ到達しないと両方が走る。
+  主系は一度も完走していないのでこの経路は未検証。

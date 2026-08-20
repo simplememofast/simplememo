@@ -146,6 +146,55 @@ node growth/scripts/analyze.mjs --only decay          # 2026-09-06以降のみ�
 順位を持つ会話型クエリに対応ページが「名指しで答えて」いなければ、
 それがその日の最有力アクションになる（下の§2レーンB）。
 
+### 1-3. オーナー依頼の棚卸し（毎回・繰り越す前に実測する）
+
+**2026-08-20訂正:** 旧版はこの手順を持たず、`owner_requests` は前日のログを
+そのまま写して「継続・XX-XXから」と日付だけ伸ばす運用になっていた。その結果
+**オーナーが登録を済ませた後も依頼を出し続けた**。08-20の日報は
+`CLAUDE_CODE_OAUTH_TOKEN` と `GCP_SERVICE_ACCOUNT_JSON` を両方「未登録」と
+報告したが、同日06:21 JSTの run 32303452390 はGateを通っており、06:25 JSTの
+run 32303828087 は `Credentials are configured` を通っていた。**根拠にしたのが
+前日のrunだったことが原因**（08-19の run 32187173035 を引いていた）。
+
+**原則: 依頼を「継続」で繰り越してよいのは、その日の実測で未充足を確かめたときだけ。**
+実測手段が無い依頼（Simulator撮影など）は繰り越してよいが、
+**「実測手段が無いため未確認」と明記する**。「継続」と「未確認」を混ぜない。
+
+充足したものは `owner_requests` から**外す**。外した事実は `AUTOPILOT_LOG.md` に
+1行残す（いつ充足したかを後から辿れるように）。
+
+#### シークレット2件の判定（各1コールで確定する）
+
+**必ず「最新のrun」を見る。** 前日のrunは前日の状態しか示さない。
+
+| 依頼 | 見るもの | 充足の判定 |
+|---|---|---|
+| `CLAUDE_CODE_OAUTH_TOKEN` | `obsidian-autopilot.yml` の最新run | `Checkout` が `skipped` **でない** |
+| `GCP_SERVICE_ACCOUNT_JSON` | `seo-daily.yml` の最新run | `Credentials are configured` が `success` |
+
+```
+gh run list --workflow=obsidian-autopilot.yml -L 1 --json databaseId -q '.[0].databaseId'
+gh run view <ID> --json jobs -q '.jobs[0].steps[] | "\(.conclusion)\t\(.name)"'
+```
+
+（CCR側にこの `gh` は無い。GitHub MCP の `actions_list`
+method=`list_workflow_runs` / `list_workflow_jobs` で同じものが読める）
+
+どちらのワークフローも、シークレットが無ければ**その1ステップで止めて以降を
+全部 `skipped` にする**作りなので、後続ステップが動いた事実がそのまま判定になる。
+
+**断定しすぎない:** `obsidian-autopilot.yml` のGateは
+`CLAUDE_CODE_OAUTH_TOKEN` **または** `ANTHROPIC_API_KEY` のどちらかで通る。
+Checkoutが走った事実が示すのは「どちらかが入っている」であって
+`CLAUDE_CODE_OAUTH_TOKEN` 単体の登録ではない。依頼の目的は主系を動かすことなので
+実務上はそれで足りるが、報告でそこを断定しない。
+
+**Gateを通ったのに記事が出ない日は、依頼ではなくワークフロー側の障害。**
+`owner_requests` ではなく `reason` で報告する（例: 08-20の run 32303452390 は
+Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` が `skipped` の
+まま終わった → PR #513で修正）。
+
+
 ## 2. アクションの選び方（優先順）
 
 - **レーンA（SEO）**: 1. Refresh（足切りを超える未回答意図が既存ページに残っている）
@@ -303,6 +352,10 @@ python3 scripts/generate_sitemap.py --dry-run
 日報メールを出す `simplememo-api` は上の `streak` / `data_freshness` を
 まだ描画しないため、**この1行がオーナーの目に入る唯一の経路**になる。
 API側が対応したらこの重複は外してよい。
+
+`owner_requests` は**前日のコピーではなく、その日の実測の結果**を書く（§1-3）。
+シークレット2件は最新runのステップ結果で充足を判定でき、充足したものは外す。
+実測手段が無い依頼は「実測手段が無いため未確認」と添えて繰り越す。
 
 `bq_checked: false` は「BigQueryを見に行けなかった」であって
 「新規データが無い」ではない。**この2つを混同した報告は誤報**（§1-2）。
