@@ -34,6 +34,7 @@ const IMAGES = [
   { file: 'obsidian-logseq.png', title: 'Obsidian と Logseq\nどちらを選ぶ？', icon: '⚖️' },
   { file: 'obsidian-getting-started.png', title: 'Obsidianの始め方\n実画面でわかる入門', icon: '🚀' },
   { file: 'obsidian-compare.png', title: 'Obsidianは\n何と比較すればいい？', icon: '🧭' },
+  { file: 'obsidian-what-is-vault.png', title: 'Obsidianの保管庫とは\n実体はただのフォルダ', icon: '📁' },
 ];
 
 /**
