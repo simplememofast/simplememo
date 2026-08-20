@@ -164,6 +164,48 @@ if (snap) {
   }
 }
 
+/* ── CPP performance (App Store Connect side) ───────────────────────────
+ * The install numbers live in ASC, which has no export API this repo can
+ * reach, so the values are transcribed by hand into
+ * growth/data/appstore/cpp-weekly.json (see the README there). The table
+ * still renders without it — an empty skeleton that names every wired CPP is
+ * what reminds the reader the transcription is owed. v4 R1: the point of the
+ * ppid wiring is exactly this table. */
+p('## CPP別 閲覧数 / DL / CVR（ASC手動転記）');
+p();
+{
+  let cppMap = null;
+  let cppData = null;
+  try { cppMap = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/cpp-map.json'), 'utf8')); } catch { /* map absent */ }
+  try { cppData = JSON.parse(fs.readFileSync(path.join(ROOT, 'growth/data/appstore/cpp-weekly.json'), 'utf8')); } catch { /* not transcribed yet */ }
+  if (!cppMap) {
+    p('data/cpp-map.json が読めない — CPP配線の台帳が無いのでこの表は出せない。');
+  } else {
+    p(cppData
+      ? `_窓: ${cppData.window ?? '未記載'} · 出典: ASC App Analytics（手動転記）_`
+      : '_値が未転記。ASC → App Analytics → カスタムプロダクトページ の 閲覧数/DL を growth/data/appstore/cpp-weekly.json に転記すると埋まる（値はGA4からは取れない）。_');
+    p();
+    p('| CPP | ppid | 対象 | 閲覧数 | DL | CVR |');
+    p('|---|---|---|---:|---:|---:|');
+    const rowOf = (id) => cppData?.rows?.find((r) => r.id === id);
+    const cvr = (r) => (r && r.views > 0 && r.downloads != null ? pct(r.downloads / r.views) : '—');
+    // The default product page is the control group every CPP is judged
+    // against (baseline CVR 2.45% over the 90d to 2026-08-18).
+    const def = rowOf('(default)');
+    p(`| （デフォルト商品ページ） | — | 対応表外の全ページ | ${def?.views ?? '—'} | ${def?.downloads ?? '—'} | ${cvr(def)} |`);
+    for (const c of cppMap.cpps) {
+      const r = rowOf(c.id);
+      p(`| ${c.id} | ${c.ppid ? '✅' : 'TODO'} | \`${c.match.join('` `')}\` | ${r?.views ?? '—'} | ${r?.downloads ?? '—'} | ${cvr(r)} |`);
+    }
+    const todo = cppMap.cpps.filter((c) => !c.ppid).length;
+    if (todo) {
+      p();
+      p(`${todo} CPP(s) はppid未記入（オーナー入力待ち）。記入 → \`node scripts/apply-cpp-ppid.js --write\` で配線される。`);
+    }
+  }
+}
+p();
+
 /* ── Ledger health ──────────────────────────────────────────────────── */
 p('## Experiment ledger');
 p();

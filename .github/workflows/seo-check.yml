@@ -89,6 +89,12 @@ jobs:
       - name: CTA placement metadata
         run: node scripts/tag-cta-placements.js --check
 
+      # App Store CTA hrefs must match the CPP wiring table (data/cpp-map.json):
+      # a wired page carries exactly the mapped ppid, an unwired page carries
+      # none. Null ppids in the map are pending owner input and only notice.
+      - name: CPP ppid wiring matches data/cpp-map.json
+        run: node scripts/apply-cpp-ppid.js --check
+
       # 163 pages are still dual-DOM (both languages at one URL, toggled by
       # js/lang.js, defaulting to ja). No page under /en/ loads lang.js, so
       # without this seed an English reader following any link into one of
