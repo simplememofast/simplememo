@@ -1002,3 +1002,53 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
   実行だけで完結する項目（C12 Dataview・C17 Zettelkasten・C26 graph-view等）を
   優先候補として検討する。sitemapの`/download/`は今回2026-08-12まで戻したので、
   次回再生成時にまたTODAYへ動いていないか確認すること。
+
+## 2026-08-21（追記・副系v2） — 主系の「3秒でfailure」の中身が読めた・原因はactor拒否
+
+上のC11セッション（再試行Routine・09:20 JST）が依頼欄の筆頭に積んだ
+**「主系の新しい失敗モード。ログ本文はこのセッションから読めず要調査」**への回答。
+副系v2（`trig_01TRBdBgSA9646FS4LDQgJdt`・07:30 JST）は GitHub MCP の
+`get_job_logs` を持っており、run `32419185478` / job `96587195764` の
+ログ本文を実際に読めた。**この依頼は本エントリで充足**（オーナー作業は不要だった）。
+
+- 実際のエラー1行:
+
+  ```
+  Action failed with error: Workflow initiated by non-human actor: github-actions
+  (actor not found on GitHub). Add bot to allowed_bots list or use '*' to allow
+  all bots.
+  ```
+
+- 何が起きていたか: `anthropics/claude-code-action@v1` は**フローティングタグ**
+  なので、非人間アクターからの起動を拒否するガードが後から乗ってくる。
+  `obsidian-autopilot.yml` は schedule 起動で、直前にmainへ書き込んだのが
+  auto-merge（`github-actions[bot]`）だった場合、`triggering_actor` が
+  `github-actions` になり、そのユーザーはGitHub API上 404 なので弾かれる。
+  **ワークフロー側は何も変えていないのに、ある朝から突然落ちる**種類の壊れ方で、
+  08-20のapt詰まりとは無関係（同runでフォント導入は9秒・success）。
+- やったこと: `allowed_bots: "*"` を1行追加した。このワークフローは
+  schedule / workflow_dispatch でしか起動せず、`issue_comment` 等の外部から
+  踏ませる経路が無いため、`*` でも権限昇格にならない（その判断理由も
+  ワークフロー内のコメントに残した）。`.github/workflows/*.yml` を grep して、
+  claude-code-action を使うワークフローが他に無いことも確認済み。
+- **有効になるのはmainマージ後**（schedule起動のワークフロー定義はデフォルト
+  ブランチのものが使われる）。**明朝06:00 JSTの主系運転が唯一の検証機会**で、
+  見るべきは「同じ `non-human actor` が再発しないこと」と
+  「Claude Codeステップが3秒で終わらないこと」。
+- 触っていないもの: 本番HTML・content-graph・キュー類・当日の記事
+  （C11は上のセッションが既に出荷済み）。本エントリのPRは
+  ワークフロー1ファイル＋status JSONのowner_requests更新＋本ログのみ。
+- 副系v2としての自己記録: §0の冪等性チェックは着手時点で(a)(b)(c)とも偽
+  （当日ブランチ無し・本番status JSONは08-20分・当日PR無し）だったため実行に
+  進んだが、**作業中に再試行Routineがブランチとpush（PR #521）を作った**ため
+  途中で衝突した。§0のチェックは「着手時点のスナップショット」でしかなく、
+  07:30と09:20の実行が重なる時間帯では取りこぼす。今回は本日分の記事を
+  重複出荷せず、自分の固有の成果（actor拒否の特定）だけに絞って別PRにした。
+  同じ判断ができるよう、この構造をRunbook §0-2の申し送りに残す。
+- 副系v2の環境制約（次回の副系セッションへ）: このセッションでは
+  node経由の検証スクリプト（`scripts/seo-check.js`・`check-css-version.mjs`）が
+  auto modeクラシファイアにブロックされて実行できなかった
+  （`python3 scripts/generate_sitemap.py --dry-run` と `node --version` は実行可）。
+  今回はHTML変更が無いため影響していないが、**副系でHTML変更を伴うレーン
+  （A/B/E）に着手する前に、この制約が解けているかを最初に確かめること。**
+  解けていなければ§4を完走できないので、その回は記事を書かず保守レーンへ行く。
