@@ -118,6 +118,22 @@ jobs:
           sudo apt-get -o DPkg::Lock::Timeout=120 update -qq
           sudo apt-get -o DPkg::Lock::Timeout=120 install -y -qq --no-install-recommends fonts-noto-cjk
 
+      # 【2026-08-21】run 32419185478（06:23 JST）はこのステップが**3秒**で
+      # failure になり、その日の主系出荷がゼロになった。08-20 のapt詰まりとは
+      # 別物で（フォント導入は同runで9秒・success）、ジョブログの実際の1行は:
+      #
+      #   Action failed with error: Workflow initiated by non-human actor:
+      #   github-actions (actor not found on GitHub). Add bot to allowed_bots
+      #   list or use '*' to allow all bots.
+      #
+      # claude-code-action@v1 はフローティングタグなので、非人間アクターを
+      # 拒否するガードが後から乗ってくる。schedule 起動の triggering_actor は、
+      # 直前にmainへ書き込んだのが auto-merge（github-actions[bot]）だと
+      # `github-actions` になり、これに当たる。
+      #
+      # このワークフローは schedule と workflow_dispatch でしか起動せず、
+      # issue_comment 等の外部から起動される経路が無い。つまり第三者の投稿で
+      # ここを踏ませることはできないので、`*` で許可しても権限昇格にならない。
       - name: Claude Code（Runbook 1イテレーション実行）
         if: steps.gate.outputs.run == 'true'
         uses: anthropics/claude-code-action@v1
@@ -127,6 +143,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          allowed_bots: "*"
           claude_args: "--max-turns 250"
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
