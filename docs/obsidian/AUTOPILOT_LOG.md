@@ -1113,3 +1113,124 @@ Runbook §0-2に**当日ブランチの占有（claim）**を追加した。冪�
 - 上の1が効くのは `simplememo-api` のデプロイ後。それまでの日報は従来の表示のまま。
 - egressブロック（obsidian.md / notion.so）は未解決のまま残っている。
   レーンE前半（C04〜C08）は外部一次情報を要するため、次回もまずegressを確かめる。
+
+## 2026-08-22（副系CCR・07:30 JST） — C12 `/obsidian/plugins/dataview/` 出荷。主系「成功」の中身に新しい懸念
+
+### §0 冪等性チェック（すべて偽 → 実行に進んだ）
+
+- (a) `claude/obsidian-auto-20260822` ブランチ: 着手時点で無し
+- (b) 本番 `data/autopilot-status.json` の `date_jst`: `2026-08-21`
+- (c) `origin/main` の同ファイル: 同じく `2026-08-21`
+- (d) 当日作成PR: 無し（直近は08-21付けの#523まで）
+- (e) 主系（`obsidian-autopilot.yml`）の最新run: `status: completed`（実行中ではない）
+- → §0-2の占有手順に従い `claude/obsidian-auto-20260822` へ空コミットをpush・成功（衝突なし）
+
+### 【最優先・要確認】主系の当日run（06:20 JST開始）が「成功」しているのに成果物が無い
+
+run `32528028588` / job `96914156036`。`allowed_bots: "*"`（PR #522/#523）は効いており、
+`Checkout` 9秒・`Claude Code`ステップは**3分16秒**（08-20/08-21の「3秒で終わる」問題とは
+別物）動いた。ジョブ結果は `conclusion: success`。ところが:
+
+```
+"num_turns": 30, "total_cost_usd": 0.81, "permission_denials_count": 14
+```
+
+**14件のツール呼び出しが拒否**されており、結果として本日 (a)〜(d) はすべて「実行痕跡なし」
+のままだった。GitHub Actionsの `claude-code-action@v1` はSDK出力を
+`full output hidden for security` として隠しており、`get_job_logs` で読める範囲では
+どのツール呼び出しが拒否されたかまでは分からない（`session_id: fcf0c50e-3655-4c8c-a8cb-571cef95cdd0`
+のみ判明）。**推測だが、`git push` や `gh pr create` 相当の操作がワークフロー側の権限設定
+（`permissions:` ブロック・`additional_permissions` 未設定など）で拒否されている可能性が高い。**
+`Checkout（GH_PAT優先）` 自体は成功しているため、読み取り系トークンはある。書き込み系の
+どこかが締まっている、という切り分けまでしかこのセッションからはできない。
+
+これは08-20/08-21の「即座に落ちる」失敗より発見しにくい壊れ方（ジョブは毎朝緑のまま推移する）。
+**オーナー側で、`obsidian-autopilot.yml` の実行権限（`permissions:` / `additional_permissions`
+/ `claude_args` のツール許可リスト）を確認してほしい。** 明朝以降も同じ `permission_denials`
+が出るかは、次回の副系・再試行セッションが `get_job_logs` で追える。
+
+### レーンE — C05〜C10は今回もegressブロックでスキップ、C12へ
+
+`obsidian.md`・`notion.com` はこのセッションでも403（`curl`・`WebFetch`とも）。
+**新規確認**: `github.com`本体・`blacksmithgu.github.io`（Dataviewの公式ドキュメントサイト）
+・`en.wikipedia.org`・`www.google.com`・`cdn.jsdelivr.net`・`unpkg.com` も同様に403で、
+到達できるのは `api.github.com`・`raw.githubusercontent.com`・`objects.githubusercontent.com`・
+`npmjs.com` 程度だった（`curl`ベースの直接アクセス）。一方、**`WebFetch`/`WebSearch`ツール
+経由では `github.com` や第三者ブログ・YouTube等へ到達できた**（`obsidian.md`系ドメインだけは
+`WebFetch`でも `EGRESS_BLOCKED` で拒否）。この非対称性（curlは狭いアローリストのみ・
+WebFetch/WebSearchはより広く到達するがobsidian.md系だけは共通してブロック）を初めて確認した。
+
+C05〜C10（sync系・compare/notion）はobsidian.md/notion.comの一次情報を要するため見送り、
+前回ログの申し送り通りC12（Dataview）へ進んだ。
+
+C12の `unique_value` はキュー原文で「実機インストール＋動くクエリ例（検証Vaultで実行した
+結果画面）」を指定していたが、**この環境にObsidianを実行できるGUI/ディスプレイが無く、
+実機インストール検証は今回行っていない。** 代わりに Dataview公式リポジトリ
+（`blacksmithgu/obsidian-dataview` の `README.md`・`manifest.json`）と Obsidian公式レジストリ
+（`community-plugin-stats.json`・`community-plugins.json`）を `raw.githubusercontent.com` 経由
+で直接取得し、一次情報＋実カウントで固有価値ゲート（§2レーンE④）を満たした:
+
+- ダウンロード数 4,805,635件・登録6,840個中**3位**（前回08-21計測と完全一致、±0）
+- レジストリの `updated` タイムスタンプは2025-04-07 19:17 UTC — 計測時点で約16ヶ月更新なし
+- masterブランチの`manifest.json`は0.5.68、GitHub Releasesの最新タグは0.5.70（ベータ）で不一致
+- 4つのクエリモード（DQL/インライン式/DataviewJS/インラインJS式）は公式READMEのサンプルを
+  そのまま引用（実行検証はしていない旨をページ内の検証環境欄に明記）
+
+ページ内に「今回はキューが当初想定した検証水準（実機インストール）には届いていない」ことを
+正直に明記した。`growth/content/coverage-queue.json` のC12は `status: done` にし、
+`done_note` に上記の代替根拠を残した。
+
+- 実装: `/obsidian/plugins/dataview/`（新規）
+- 配線: Parent `/obsidian/plugins/`（ランキング表のDataview行にリンク追加）+
+  Sibling相当 `/obsidian/what-is-vault/`・`/obsidian/getting-started/`。
+  被リンク2本: `/obsidian/plugins/`（表内）・`/obsidian/getting-started/`（関連ページ欄に追加）
+- `data/content-graph.json` 登録済み（cluster: obsidian-plugins・parent: /obsidian/plugins/）
+- QR: `qr-obsidian-plugins-dataview-{ja,en}.svg` を新規生成、`--check`で35件全件デコード検証
+  （既存33件はバイト同一）
+- OG画像: `obsidian-plugins-dataview.png` を新規生成（`chromium_headless_shell-1234`が
+  存在しなかったため、`chromium-1194/chrome-linux/chrome`へのsymlinkで補った。Runbook §3の
+  既知の手順どおり）
+- モバイルQA（Playwright, 390×844 DPR3）: 初回実行で**横スクロールが発生**していた
+  （`.reason-card`内の`<pre>`コードブロックがCSS Gridのデフォルト`min-width:auto`で
+  トラックを押し広げていた）。ページローカルの`<style>`に`.reason-card{min-width:0}`を
+  追加して解消（サイト共通のstyle.min.cssには触れていない・このページだけのローカル修正）。
+  再検証: `scrollWidth === clientWidth === 390`・水平スクロールなし・QRコンテナは
+  `display:none`（モバイル）/`flex`（デスクトップ1280px）を実描画で確認・JA→EN切替も
+  `lang.js`経由で正常動作・コンソールエラーは外部analytics/preconnectのトンネル失敗のみ
+  （このサンドボックスのegress制限によるもので、本番では発生しない）
+
+### 検証: Runbook §4 の9チェック全通過
+
+`seo-check`（261ファイル・0 errors 0 warnings）/ `check-css-version` OK /
+`check-benchmark`（新規CONFLICT・AMBIGUOUSは増えていない。既存の警告はvs/notion系の
+既知分のみ）/ `check-url-normalization`（197 passed）/ `check-internal-redirects`
+（13,195 href/src + 5,203 JSON-LD/meta + 576 sitemap URL すべて直接200）/
+`sync_constants --check` OK / `tag-cta-placements --check` OK（49件がpage-level ct=保持）/
+`check-experiments`（35件中21 open・due 0・overdue 0）/ `check-content-graph`（23件OK）/
+`generate_sitemap.py`（コミット後に実行 — 未コミット状態で実行すると新規ページの
+lastmodが正しく解決できず、無関係な`/download/`のlastmodも巻き添えでズレる既知の挙動を
+再確認したため、コミット→sitemap再生成の順で実施した）
+
+### オーナー依頼の棚卸し（§1-3・前日08-21付けの4件を実測で判定）
+
+1. **【外す・充足済み】** `simplememo-api`の`streak`/`data_freshness`描画 —
+   08-21付けログに「あわせて streak / data_freshness の描画も入れた」と記録済み。
+   本番の日報メールへの反映有無は次回の実際のメール受信で確認できるため未検証だが、
+   コード側の対応は完了しているためこの依頼自体は外す。
+2. **【継続・実測で再確認】** obsidian.md/notion.com系のegressブロック — 
+   上述の通り本日も再現・むしろ対象ドメインが広いことが分かった。引き続き依頼として残す。
+3. **【新規・最優先】** 主系の当日run — `permission_denials_count: 14`で成果物ゼロ。
+   上記「最優先」欄を参照。ワークフローの権限設定確認を依頼。
+4. **【実測手段なし・繰越】** 前回ログにあった「CCR環境でnode系検証スクリプトが
+   auto modeクラシファイアにブロックされる」件は、**本セッションでは再現しなかった**
+   （`node scripts/seo-check.js`等すべて正常実行）。ただしこれはセッションごとに
+   変わりうる分類判定のため、依頼としては「解消済みとは断定しない」形で軽く触れるに留める。
+
+### 次回への申し送り
+
+- 主系の`permission_denials`が明日以降も続くか、`get_job_logs`で追うこと。続くなら
+  ワークフローの権限設定そのものが疑わしい。
+- egressブロックは変わらず。レーンEの次候補は前回同様C17（zettelkasten）・C26（graph-view）
+  など、GitHub/一般Web検索（WebFetch/WebSearch経由）で完結する項目を優先する。
+- C12で使った「WebFetch/WebSearchはcurlより広く到達できる」という知見は、今後の
+  レーンE候補選定で活用できる（curlで403でも即座に「検証不能」と諦めない）。
