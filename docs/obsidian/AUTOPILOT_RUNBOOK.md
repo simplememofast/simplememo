@@ -64,6 +64,32 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
   終了する。**ブランチが無いことは「主系が失敗した」ではなく「主系がまだ
   書いていない」かもしれない。** 判定コマンドが失敗した場合も
   「実行済み/実行中かもしれない」側に倒す。
+- **占有（2026-08-21追加・冪等性チェックを通った直後に必須）**: 上の冪等性
+  チェックは**着手時点のスナップショットでしかない**。2026-08-21、副系(07:30)と
+  再試行(09:20)が両方とも「当日分なし」と判定して**二重に着手した**
+  （PR #521 と #522。副系v2は作業中に再試行のpushとぶつかって初めて気づいた）。
+  一つ上の「主系がまだ走っているか」は**Actionsにしか効かない** — 副系・再試行は
+  どちらもCCR Routineで、この節の冒頭に書いたとおり**スケジュール起動セッションの
+  ログは外部から読めない**ため、CCR同士は相互観測では避けられない。唯一機能する
+  排他は「両方が書ける共有物を先に取ること」なので、**実装に入る前に当日ブランチを
+  取る**:
+
+  ```bash
+  DAY="claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)"
+  git checkout -B "$DAY"
+  # 経路名を入れるのは、同時起動した2経路が必ず別SHAになるようにするため。
+  # これが無い（＝mainと同じSHAをpushする）と後発のpushが「差分なし成功」に
+  # なって排他にならない。CIを蹴る目的の空コミットではない。
+  git commit --allow-empty -m "chore(autopilot): claim $DAY (lane: 主系06:00)"
+  git push -u origin "$DAY"
+  ```
+
+  **pushが非fast-forwardで弾かれたら、他の経路が先に取っている。何もせず終了する。**
+  `--force` / `--force-with-lease` は絶対に使わない — **弾かれること自体がこの
+  仕組みの出力**であって、障害ではない。これで既存の `git ls-remote` チェックが
+  初めて実際のロックとして機能する。claim コミットはそのまま残してよい
+  （その経路がいつ着手したかの記録になる）。
+
 - Actions側の有効化にはオーナー作業が1つ要る: ローカルで `claude setup-token` を
   実行して出るトークンを repo secret **`CLAUDE_CODE_OAUTH_TOKEN`** に登録
   （サブスク課金でActions内のClaudeが動く。API課金でよければ `ANTHROPIC_API_KEY` でも可）。
@@ -341,7 +367,7 @@ python3 scripts/generate_sitemap.py --dry-run
   "generated_at": "ISO8601",
   "action": "new | refresh | wiring | maintenance | skip",
   "article": {"url": "...", "title": "..."},      // 無い日は null
-  "pr": {"number": 123, "state": "merged|open"},  // 無い日は null
+  "pr": null,                                     // 自動運転では常にnull（下の注記）
   "streak": {                                     // 2026-08-15追加・毎回必須
     "consecutive_no_article_days": 4,             // 記事(new/refresh)が出ていない連続日数
     "last_article_date_jst": "2026-08-11",        // 最後に記事が出た日
@@ -362,11 +388,21 @@ python3 scripts/generate_sitemap.py --dry-run
 }
 ```
 
+**`pr` は自動運転では null のままでよい。** このJSONは記事と同じPRに入って
+初めて本番に出るため、セッションが自分のPRの merged 状態を書くことは原理的に
+できない（書ける時点ではPR番号すら決まっていない）。日報メール側は
+**「本番URLで当日分の `date_jst` が読めたこと」自体をマージ＋デプロイの証拠**
+として扱う（2026-08-21修正）。それ以前は `pr` の不在を未出荷と誤読し、
+記事を出荷した 08-19 / 08-20 / 08-21 を3日続けて「公開記事: 0 / 1」
+「1記事作成（PR pending）」と誤報していた。**ここを「PR番号を書き戻せば直る」と
+読み替えないこと** — 書き戻しても `state` は `open` にしかならない。
+
 **`reason` の先頭1行は必ず状態サマリにする**（例:
 `【連続無記事4日目・本番最終変更 2026-08-14・BQ 3/28日】…`）。
-日報メールを出す `simplememo-api` は上の `streak` / `data_freshness` を
-まだ描画しないため、**この1行がオーナーの目に入る唯一の経路**になる。
-API側が対応したらこの重複は外してよい。
+`simplememo-api` は2026-08-21に `streak` / `data_freshness` の描画へ対応した
+（`src/autopilot-report.ts` の `freshnessLines()`）ので、この1行はもう唯一の
+経路ではない。ただしキーを書き忘れた回・古い記録の回はメール側に何も出ないため、
+サマリ1行は保険として残す。
 
 `owner_requests` は**前日のコピーではなく、その日の実測の結果**を書く（§1-3）。
 シークレット2件は最新runのステップ結果で充足を判定でき、充足したものは外す。
