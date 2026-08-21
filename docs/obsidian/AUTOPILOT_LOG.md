@@ -877,3 +877,128 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
 - 注意（次回セッションへ）: 3経路のうち2つがCCR Routineで、どちらもこの環境から
   作られている。**経路を触ったら必ず §0-2 の表のIDを更新すること。**
   IDの無い経路は、消えても誰も気づけない。
+
+## 2026-08-21（再試行Routine・09:20 JST） — 主系は新しい壊れ方で失敗・副系も痕跡なし。C04はegressブロックでblocked化しC11へ振替
+
+- 冪等性チェック（§0の4点）: `git fetch origin` 後、(a) `claude/obsidian-auto-20260821`
+  ブランチなし (b) 本番 `data/autopilot-status.json` の `date_jst` は2026-08-20
+  (c) `origin/main` 側も同じく2026-08-20 (d) 本日作成のPRなし（`list_pull_requests`
+  で直近15件を確認、最新は前日2026-08-20 11:13 UTC作成のPR #519）。4つとも偽と
+  確認したため実装フェーズへ進んだ。
+
+- **主系(06:00, run 32419185478)の実測: フォント修正（PR #513）は効いているが、
+  別の場所で新しく落ちている。** Gate → Checkout（GH_PAT、9秒）→ 日本語フォント
+  導入（9秒で完了、従来の90分ジョブ上限問題は解消を確認）まで成功したが、続く
+  「Claude Code（Runbook 1イテレーション実行）」ステップ自体が**3秒で failure**。
+  Claude Codeの実質的な処理には短すぎる時間で、フォントタイムアウトとは別種の
+  障害（起動直後のクラッシュ・認証・設定エラー等が疑われるが、このセッションは
+  GitHub MCPの `actions_get`/`actions_list` ではジョブのステップ結果までしか読めず、
+  ログ本文（stdout/stderr）を取得する手段がないため特定できなかった）。
+  オーナー依頼に起票した。
+
+- **副系(07:30, `trig_01TRBdBgSA9646FS4LDQgJdt`)の初回発火は今日だったはずだが、
+  痕跡なし。** 08-20に作り直したこのRoutineの初回発火は本日07:30 JST想定
+  （前回ログの申し送り）。主系が06:24に完了（failure）しているため、07:30時点で
+  主系は「in_progress」ではなく、冪等性チェック(e)による見送りには当たらないはず
+  だが、ブランチ・PR・status JSONのいずれにも変化がなかった。Routineが発火せず
+  終わったのか、発火して途中で失敗したのかはログが読めず区別できない。
+  こちらもオーナー依頼に起票した。
+
+- **レーンE先頭のC04 `/obsidian/pricing/` は実装せず `blocked` にした。**
+  `WebFetch` で `obsidian.md` / `www.obsidian.md` / `help.obsidian.md` を試したところ
+  いずれも `EGRESS_BLOCKED`（このセッションのネットワークegressプロキシによる
+  ドメイン遮断）。`WebSearch` で代替を試みたが、返ってきたのはSEOアグリゲーター
+  サイトの二次情報のみで、しかも複数サイト間でSync料金体系の記述が食い違って
+  いた（「Standard/Plus tiers」対「単一プランに統合済み」）。Runbook §0原則4
+  「検証できない主張は書かない」に反するため、この情報を根拠に価格ページを
+  書くことはしなかった。念のため `notion.so` / `notion.com` も試したところ同じく
+  プロキシで403（`CONNECT tunnel failed`）——obsidian.md固有ではなく、外部の
+  マーケティング/SaaSサイト全般がこのセッションから遮断されている可能性が高い。
+  一方 `raw.githubusercontent.com` は到達可能（`curl` で200を確認）。
+  C04をコレクションキューで `status: blocked` とし、`blocked_by` に上記を記録した。
+  C05〜C07（sync/公式Sync系）も同クラスタの公式仕様・価格を要求するため
+  同様に影響を受ける可能性が高いが、今回は着手していないため未検証のまま
+  ログに申し送った。
+
+- **代わりにC11 `/obsidian/plugins/` を実装（優先度を繰り上げ）。** GitHub生
+  コンテンツ（`raw.githubusercontent.com/obsidianmd/obsidian-releases/`）は
+  遮断されていなかったため、レーンE本来のゲート（固有価値＝実カウント）を
+  別の一次情報で満たせると判断した。
+
+  **固有価値（一次情報・実カウント）**:
+  - `community-plugins.json`（プラグイン登録）を直接取得・カウント: **6,812個**
+  - `community-css-themes.json`（テーマ登録）を直接取得・カウント: **701種**
+  - 当サイトの過去3回の計測と並べて推移を記録:
+    2026-08-11: 6,571個 → 08-14: 6,638個・691種 → 08-19: 6,739個 → **本日: 6,812個・701種**
+    （10日で+241個）
+  - `community-plugin-stats.json`（公式が公開するダウンロード数データ・6,780件収録）
+    を取得し `downloads` で降順ソート。**実測トップ10**:
+    1位 Excalidraw 7,365,086 / 2位 Templater 5,336,051 / 3位 Dataview 4,805,635 /
+    4位 Tasks 4,061,506 / 5位 Advanced Tables 3,124,723 / 6位 Git 3,028,476 /
+    7位 Calendar 3,021,004 / 8位 Style Settings 2,604,959 / 9位 Kanban 2,568,158 /
+    10位 Iconize 2,180,911。プラグイン名・作者・説明文はレジストリの公式登録
+    データをそのまま引用（自分で言い換えていない）。
+  - 「プラグインなしで足りる範囲」（VISION整合・キューの `unique_value` が明記した
+    要件）: `/obsidian/what-is-vault/` で実測済みのコア機能31個（既定ON 21・OFF 10）
+    を根拠に、デイリーノート・表編集・バックアップ・見た目調整の4項目でコア機能
+    だけで足りることを具体的に書いた。
+
+  **書かなかったこと**: プラグインを実際にインストールして動かす画面検証は
+  今回行っていない（キューの `unique_value` が例示していたが、必須ゲートの
+  「実機検証・実カウント・一次情報のいずれか1つ以上」は実カウントのみで満たせる
+  と判断した）。検証環境ブロックとcoverage-queueの `note` に明記した。
+
+- やったこと: `/obsidian/plugins/` 新設。被リンク2本配線
+  （`/obsidian/what-is-vault/`・`/obsidian/getting-started/`の関連ページ欄。
+  what-is-vaultの本文中リンクも6,739→6,812の更新と合わせて張り替え）＋
+  `content-graph.json` 登録（新規cluster `obsidian-plugins` を `_meta.clusters`
+  に追加・parent=/obsidian/・siblings=what-is-vault/getting-started・
+  productRelevance は台帳の businessRelevance(1.0→high) に合わせて high）＋
+  デスクトップQR（`QR_PAGES` に `obsidian-plugins` 追加）＋OG画像＋sitemap再生成。
+  coverage-queueのC04を`blocked`・C11を`done`に更新。
+
+- 副作用の記録（sitemapのTODAYフォールバック、3回目以降の観測）:
+  `git fetch --unshallow` 後の `generate_sitemap.py` が、PR #519（本日未明に
+  マージ済み・22ファイルのCPP配線変更）に触れた24ページの一部と、無関係の
+  `/download/` の両方を今日の日付にした。前者はPR #519が実際に本日
+  マージされたコミットのため**正当**（`git log` で当該コミット2e177e99が
+  22個のhtmlファイルを実際に touch していることを確認）。後者は
+  `/download/` の最終実質編集が `git log` 上は2026-08-12（コミット21da470a）
+  なのに毎回TODAYへ丸められる**既知のフォールバック不具合**（08-19/08-20の
+  ログ既出）。今回は直近の運用（前日の値へ戻す）ではなく、`git log` で
+  突き止めた真の最終編集日 **2026-08-12** まで戻した（累積ドリフトの解消）。
+  恒久修正（`build_lastmod_index`/`git_lastmod`のファイルパス突き合わせを
+  見直す）は独立レーンで検討する価値があると`next`に申し送った。
+
+- PR: #521
+
+- 検証: Runbook §4 の9チェック全通過 — `seo-check` 0 errors 0 warnings /
+  `check-css-version` OK / `check-benchmark` 新規CONFLICT・AMBIGUOUS増なし /
+  `check-url-normalization` 197 passed / `check-internal-redirects`
+  13,134 href + 5,182 JSON-LD + 576 sitemap URL すべて直接200 /
+  `sync_constants --check` OK / `tag-cta-placements --check` OK /
+  `check-experiments` 35件中21 open・due 0・overdue 0 / `generate_sitemap.py`。
+  QRは `--check` で33件を独立デコード検証（既存31件はバイト同一・新規2件も
+  デコード一致）。**iPhone 390×844 DPR3 実描画QA**（Playwrightを`node_modules`
+  経由で実行、`CHROMIUM_PATH=/opt/pw-browsers/chromium` でバージョン差異を
+  回避）: 水平スクロールなし（scrollWidth=clientWidth=390）・比較表は
+  `overflow-x:auto` の内側でカード化・JS/HTTPエラー0・回答ブロックはファースト
+  ビュー内（top=667px）・QRは `display:none`（モバイル）を実測。
+
+- 保留・オーナー依頼:
+  - **【新規】主系の新しい失敗モード**（Claude Codeステップが3秒でfailure、
+    ログ本文はこのセッションから読めず要調査）
+  - **【新規】副系の初回発火が痕跡を残していない**（発火不発か失敗かの区別が
+    このセッションからは不能）
+  - **【新規】このセッションの実行環境はobsidian.md・notion.com等の外部
+    マーケティングサイトへのアクセスがegressプロキシでブロックされている**
+    （raw.githubusercontent.comは到達可）。主系・副系が同じ制限を共有するかは
+    未検証。レーンEのC04〜C10の多くがこの制限の影響を受ける可能性がある
+  - 日報メール側(simplememo-api)の streak / data_freshness 描画（継続・低優先・
+    コード変更が要るためこのRoutineでは充足を確認できない）
+
+- 次回: レーンEはC04〜C07がobsidian.mdブロックの影響を受ける可能性が高いため、
+  まずegress状況を再確認してから着手すること。変わらなければGitHub/ローカル
+  実行だけで完結する項目（C12 Dataview・C17 Zettelkasten・C26 graph-view等）を
+  優先候補として検討する。sitemapの`/download/`は今回2026-08-12まで戻したので、
+  次回再生成時にまたTODAYへ動いていないか確認すること。

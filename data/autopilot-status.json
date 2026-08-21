@@ -1,16 +1,16 @@
 {
-  "date_jst": "2026-08-20",
-  "generated_at": "2026-08-20T02:00:00Z",
+  "date_jst": "2026-08-21",
+  "generated_at": "2026-08-21T00:30:00Z",
   "action": "new",
   "article": {
-    "url": "/obsidian/what-is-vault/",
-    "title": "Obsidianの保管庫（Vault）とは — 実体はただのフォルダ"
+    "url": "/obsidian/plugins/",
+    "title": "Obsidianプラグイン入門 — 6,812個から実測トップ10"
   },
   "pr": null,
   "streak": {
     "consecutive_no_article_days": 0,
-    "last_article_date_jst": "2026-08-20",
-    "last_production_change_date_jst": "2026-08-20",
+    "last_article_date_jst": "2026-08-21",
+    "last_production_change_date_jst": "2026-08-21",
     "days_since_production_change": 0
   },
   "data_freshness": {
@@ -19,19 +19,20 @@
     "bq_checked": false,
     "manual_snapshot_label": "2026-08-11"
   },
-  "reason": "【連続無記事0日目・本番最終変更 2026-08-20・BQ未確認】レーンE 2本目として coverage-queue の pending 先頭 C03 /obsidian/what-is-vault/ を実装。**主系・副系・再試行の3経路すべてが本日成果物ゼロだったため、オーナー依頼のセッションが代走した。** 主系(06:00)は秘密鍵登録後はじめてGateを通り Checkout まで成功したが、日本語フォント導入のaptが90分のジョブ上限を食い尽くして cancelled になり Claude Code は skipped（run 32303452390）。この構造はPR #513で封じ込め済みで明朝から有効。副系(07:30・last_fired 2026-08-19T22:30:59Z)と再試行(09:20・last_fired 2026-08-20T00:20:19Z)はいずれも発火記録はあるが、10:40時点で当日ブランチ・当日PR・status JSONのどれにも痕跡がなかった。二重実行の衝突は無し（実装前に3点を再確認済み）。レーンA/Bは28日窓（2026-09-06前後）まで正当化できないため今回もレーンE。",
-  "verified": "Obsidian 1.13.7（公式Linux AppImage・X-AppImage-Version で確認）をこの環境にダウンロードして展開し、Xvfb上のヘッドレスで**空のディレクトリを保管庫として実際に開かせて**、直後の中身をファイルシステムで実測した。作られたのは .obsidian/ 直下のJSON 4つのみで、app.json 2バイト（中身は {}）・appearance.json 2バイト（同じく {}）・core-plugins.json 696バイト・workspace.json 4,843バイト、合計5,543バイト。**Markdownファイルは0件**（「新しい保管庫を作成」で初期ノートが作られる挙動とは別であることを本文で区別した）。core-plugins.json の中身は31個で既定ON 21・OFF 10、OFFの10個も列挙。desktop-releases.json の latestVersion が 1.13.7 であることも当日確認。Windows/macOS/iOS版は実行しておらず、その旨を検証環境ブロックに明記。",
+  "reason": "【連続無記事0日目・本番最終変更 2026-08-21・BQ未確認（取得できなかった、増えていないの意味ではない）】再試行Routine(09:20 JST)による実行。主系・副系とも当日分の実行痕跡が無かったことを§0の4点で確認済み（(a) claude/obsidian-auto-20260821 ブランチなし (b) 本番 date_jst=2026-08-20 (c) origin/main date_jst=2026-08-20 (d) 当日作成PRなし）。実測で判明した内訳: 主系(06:00, run 32419185478)はGate・Checkout（GH_PAT）・日本語フォント導入まで成功（フォントは9秒で完了しPR #513の90分ジョブ上限修正が有効と確認）したが、続く「Claude Code」ステップ自体が3秒でfailureになっており、これは従来のフォントタイムアウトとは別の新しい問題（ログ本文はこのセッションから参照不可）。副系(07:30, trig_01TRBdBgSA9646FS4LDQgJdt・08-20に作り直した後の初回発火)も本日はブランチ・PR・status JSONいずれにも痕跡なし。レーンE先頭のC04 /obsidian/pricing/ は obsidian.md（www./help.含む）が本セッションのegressプロキシでEGRESS_BLOCKEDのため一次情報を当日検証できず、§0原則4により実装を見送ってblockedへ変更。同クラスタ想定のNotion側（notion.so/notion.com）も403で同様に遮断されていたため、外部マーケティングサイト全般が制限されている可能性がある（GitHub生コンテンツのraw.githubusercontent.comは到達可能）。代わりにGitHub経由で完結するC11 /obsidian/plugins/ に切り替えて実装した。レーンA/Bは28日窓（2026-09-06前後）まで正当化できないため今回もレーンE。",
+  "verified": "Obsidian公式配布元（GitHub: obsidianmd/obsidian-releases）の community-plugins.json・community-css-themes.json・community-plugin-stats.json の3ファイルを raw.githubusercontent.com 経由で本日直接取得。community-plugins.json は6,812件・community-css-themes.json は701件で、配列要素数をそのままカウント。community-plugin-stats.json（6,780件・ダウンロード数データ）を downloads で降順ソートし、実測トップ10（1位Excalidraw 7,365,086件〜10位Iconize 2,180,911件）を確認。プラグイン名・作者・説明文はレジストリ登録データをそのまま引用。当サイトの過去3回の計測（2026-08-11: 6,571個／08-14: 6,638個・691種／08-19: 6,739個）と並べて推移を記録した。プラグインを実際にインストールして動かす検証は今回は行っていない（保管庫内部の実測は既存の/obsidian/what-is-vault/で実施済み）。",
   "checks": {
     "seo_check": "0 errors 0 warnings",
-    "content_graph": "19 entries OK（/obsidian/what-is-vault/ を obsidian-beginner クラスタで登録・productRelevance は台帳の businessRelevance に合わせて high）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画: 水平スクロールなし（scrollWidth=clientWidth=390）・表と<pre>コードブロックはいずれも overflow-x:auto の内側でスクロール・JS/HTTPエラー0・回答ブロックはファーストビュー内（top=698px）・QRはモバイル非表示/デスクトップ表示を実測",
-    "experiments": "33件中20 open・due 0・overdue 0。/obsidian/ ハブ本体は monitor-2026-08-09-obsidian-ctr が実験中のため関連リンク1本の追記のみで非干渉",
-    "other": "check-css-version / check-url-normalization(189) / check-internal-redirects(12,930 href + 5,113 JSON-LD すべて直接200) / sync_constants / tag-cta-placements / generate_sitemap いずれもOK。QRは generate-qr-codes.mjs --check で31件独立デコード検証済み"
+    "content_graph": "22 entries OK（/obsidian/plugins/ を新規cluster obsidian-plugins で登録・parent=/obsidian/・siblings=what-is-vault/getting-started・productRelevance は台帳の businessRelevance(1.0→high) に合わせて high）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画: 水平スクロールなし（scrollWidth=clientWidth=390）・比較表は overflow-x:auto の内側でカード化・JS/HTTPエラー0・回答ブロックはファーストビュー内（top=667px）・QRはモバイル非表示(display:none)/デスクトップ表示を実測",
+    "experiments": "35件中21 open・due 0・overdue 0。/obsidian/ ハブ本体は monitor-2026-08-09-obsidian-ctr が実験中のため触れていない（新ページからの関連リンク追記のみ）",
+    "other": "check-css-version / check-benchmark(新規CONFLICT・AMBIGUOUS増なし) / check-url-normalization(197) / check-internal-redirects(13,134 href + 5,182 JSON-LD + 576 sitemap URL すべて直接200) / sync_constants / tag-cta-placements / check-experiments / generate_sitemap.py いずれもOK。QRは generate-qr-codes.mjs --check で33件独立デコード検証済み（新規2件含む）"
   },
   "owner_requests": [
-    "【新規・要判断】副系Routine（trig_016ALpozNRuf2j7BYJo5cCqy・07:30 JST）の停止または作り直し: 2026-08-16・08-17・08-19・08-20 と**4日連続で成果物ゼロ**。last_fired_at は毎回更新されているので起動はしているが、ブランチ・PR・status JSON のいずれにも痕跡を残せていない。主系が復活した今、レート枠を食うだけの経路になっている可能性がある",
-    "【継続・低優先】日報メール側(simplememo-api)の対応: status JSON の streak / data_freshness を simplememo-api/src/autopilot-report.ts がまだ描画しないため、reason 先頭の【】が唯一の表示経路になっている",
-    "【確認待ち】GH_PAT が実際に効いているかは、Actions内部から push して作られるPRでしか判定できない。明朝06:00の主系運転で作られるPRに SEO Validation が起動するかを見ること。起動しなければ auto-merge が来ずPRが滞留するので、Secret名と Fine-grained token の Repository access を見直す"
+    "【新規・要調査】主系(06:00 JST)は本日Gate/Checkout/フォント導入まで成功（PR #513の修正は有効と確認）したのに、続く「Claude Code」実行ステップ自体が3秒でfailureになった（run 32419185478 / job 96587195764）。フォントタイムアウトとは別の新しい障害。このセッションはActions内部のログ本文を読む手段を持たないため、run 32419185478 のジョブログをブラウザかgh CLIで開いて原因を特定する必要がある",
+    "【新規・要調査】08-20に作り直した副系Routine（trig_01TRBdBgSA9646FS4LDQgJdt・07:30 JST）の初回発火が本日あったはずだが、主系の失敗を受けて拾うべき場面でもブランチ・PR・status JSONに痕跡が無かった。Routine自体が発火していないのか、発火して失敗したのかがログから区別できない",
+    "【新規・要判断】このRoutine（再試行・09:20 JST）の実行環境はobsidian.md（www./help.含む）とnotion.so/notion.comへの外部アクセスがegressプロキシでブロックされている（403/EGRESS_BLOCKED）。raw.githubusercontent.comは到達可能。レーンE前半（C04〜C10）の多くは比較・価格ページで外部一次情報を要求するため、このブロックが続く限り実装不能な項目が増える。オーナー側で意図した制限か、緩和できるか確認してほしい。主系(GitHub Actions)・副系(CCR)がこの制限を共有するかは未検証",
+    "【継続・低優先・実測手段なし】日報メール側(simplememo-api)の対応: status JSON の streak / data_freshness を simplememo-api/src/autopilot-report.ts がまだ描画しないため、reason 先頭の【】が唯一の表示経路になっている。コード変更が要る依頼のため、このRoutineでは充足を確認できない"
   ],
-  "next": "レーンE継続。coverage-queue の pending 先頭は C04 /obsidian/pricing/（P1）。sitemapの /download/ が generate_sitemap.py の TODAY フォールバックで再生成のたび当日へ動く件は2日連続で手戻ししており、恒久対応を独立レーンで検討する価値がある。BigQuery 28日到達は2026-09-06前後（前回実測7日・今回はセッションにBigQuery MCPがあったが記事作成を優先し再取得していないため bq_checked=false）。Mention Watchは前回2026-08-12取得のため実行可能。"
+  "next": "レーンEは C04〜C07（sync/pricing系）がobsidian.mdブロックの影響を受ける可能性が高いため、次回セッションはまずegress状況を再確認し、変わらなければC08(Notion比較・ただしnotion.comも本日403)を飛ばしてGitHub/ローカル実行だけで完結する項目（例: C12 Dataview・C17 Zettelkasten・C26 graph-view）を検討すること。sitemapの/download/ lastmodは今回 generate_sitemap.py の実行結果を鵜呑みにせず git log で真の最終編集日（2026-08-12・コミット21da470a）を確認し、そこまで手で戻した（TODAYフォールバックの累積ドリフトを解消）。恒久修正（build_lastmod_index/git_lastmodのファイルパス突き合わせ）は独立レーンで検討する価値がある。BigQuery 28日到達は2026-09-06前後（このセッションはBigQuery MCPを持たないため bq_checked=false・未取得）。"
 }
