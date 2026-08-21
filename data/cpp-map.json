@@ -1,0 +1,76 @@
+{
+  "$comment": [
+    "ページクラスタ → App Store Connect カスタムプロダクトページ（CPP）の対応表。",
+    "v4計画 R1（docs/GROWTH_ROI_PLAN_2026-08-20.md）: ASCに34本のCPPが作成済みなのに",
+    "サイトからの配線がゼロだった。唯一露出していた mail-to-self が CVR 5.42%",
+    "（デフォルト 2.45% の2.2倍・n=15）を出しており、配線自体が最も安い施策。",
+    "",
+    "使い方: scripts/apply-cpp-ppid.js がこの表を読み、match に一致するページの",
+    "App Store CTA href（ct= を持つ自社リンクのみ）へ ppid=<UUID> を付与する。",
+    "ppid が null の行は『オーナー入力待ち（TODO）』で、何も書き換えない。",
+    "ASC → アプリ → カスタムプロダクトページ → 各ページのURL末尾 ppid= が UUID。",
+    "",
+    "規律:",
+    "- 対応なし＝ppidなし。この表に無いページの CTA には ppid を付けない",
+    "  （デフォルト商品ページとの CVR 比較対照を保つため、全面配線はしない）。",
+    "- match は toUrlPath 形式のURLパスに対する正規表現。/en/ 等ロケール接頭辞付きの",
+    "  ページは意図的に対象外（CPPのEN localization が ASC で確認できるまで。",
+    "  対象化するときは match に ^/en/... を明示的に追加する）。",
+    "- 配線前にCPP側の中身（スクショ1枚目）がページの検索意図と一致しているかを",
+    "  ASCで1本ずつ確認すること（v4 R1）。",
+    "- ppid を記入したら node scripts/apply-cpp-ppid.js --write → CI が --check で守る。"
+  ],
+  "provider_token": "128498560",
+  "updated": "2026-08-20",
+  "cpps": [
+    {
+      "id": "vs-notion",
+      "asc_name": "vs-notion",
+      "ppid": "65666dba-3ce5-43bd-830e-da97de8eaf11",
+      "match": ["^/vs/notion"],
+      "note": "Notion比較クラスタ（/vs/notion/・/vs/notion-vs-evernote/・/vs/notion-vs-obsidian/）"
+    },
+    {
+      "id": "line-keep-alternative",
+      "asc_name": "LINE Keep Alternative",
+      "ppid": "0253a7f9-3c1a-4294-95bc-e6d800af5733",
+      "match": ["^/blog/line-keep-alternative$"],
+      "note": "サイト最大表示ページ（10,301imp/3M）。CTR改善対象外・ブランド露出資産（v3 §6）だが、来た読者のストア転換はCPPで受ける"
+    },
+    {
+      "id": "obsidian-vault",
+      "asc_name": "obsidian-vault",
+      "ppid": "1408d7a4-3249-4c87-a079-e13032312579",
+      "match": ["^/obsidian/"],
+      "note": "Obsidianハブ配下全ページ。最良コホート（設定済み新規の活性97.6%）の入口"
+    },
+    {
+      "id": "feat-siri-shortcuts",
+      "asc_name": "feat-siri-shortcuts",
+      "ppid": "45b35116-b5b3-4b97-9256-0c97289681b6",
+      "match": ["^/siri/", "^/hands-free/"],
+      "note": "Siri・ハンズフリー系（8/18リリース受け皿を含む）"
+    },
+    {
+      "id": "watch-capture",
+      "asc_name": "watch-capture",
+      "ppid": "4b75e642-3dd9-425c-8ff7-9db0cc859eb6",
+      "match": ["^/apple-watch"],
+      "note": "/apple-watch/ と /apple-watch-obsidian/ の両方に一致（依頼P1の指定どおり）"
+    },
+    {
+      "id": "mail-to-self",
+      "asc_name": "mail-to-self",
+      "ppid": "0dee88d1-7fcb-4ed8-b5cc-2b8ffa05f8ed",
+      "match": ["^/note-to-email/"],
+      "note": "実測のある唯一のCPP: 15DL・CVR 5.42%＝デフォルト2.45%の2.2倍（n=15・90日）"
+    },
+    {
+      "id": "tiktok",
+      "asc_name": "（R2.5用・予約）",
+      "ppid": null,
+      "match": ["^/tiktok/"],
+      "note": "【予約行・R2.5用】ショート動画30日検証の bio リンク用CPP。ASC側でCPP作成後に asc_name と ppid を記入する。/tiktok/ ページも同じCPPで受ける"
+    }
+  ]
+}

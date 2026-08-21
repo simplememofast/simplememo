@@ -1170,6 +1170,102 @@
         "2026-08-12: 2026-07-29 に keep と判定された題を差し替える2回目の実験。当時（imp 1,605 / CTR 1.62% / pos 7.4）から imp は増えたが CTR は 1.57% に低下しており、keep の根拠は現在の数値では成り立たない。cta-2026-08-10-desktop-qr と cta-2026-08-10-mid-placement もこのページを含み、同日評価。",
         "2026-08-12: 依頼①では 日本語対応 を題に入れる案だったが、ページに日本語対応の記述が無いため入れていない。題と中身を合わせるなら、先に本文へ節を足すこと。"
       ]
+    },
+    {
+      "id": "title-2026-08-20-home-grammar",
+      "page": "/",
+      "type": "title_test",
+      "hypothesis": "トップページtitleの先頭が「AIタグ自動追加」でVISION §0とPR実測（AI前面回のPV 1/26・8/3=469PV）に逆行している。勝ち文法（話すだけ→宛先に残る）へ是正し、AI言及はdescription後半へ降格（削除はしない）。CTRは動かない見込み（指名検索が主imp源）——判定はブランド検索表示数とAIO表示数で行う。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-20",
+      "evaluation_at": "2026-11-20",
+      "status": "running",
+      "before": {
+        "title": "Obsidian連携シンプルメモ｜AIタグ自動追加・話すだけでメールとObsidianへ"
+      },
+      "after": {
+        "title": "Obsidian連携シンプルメモ｜話すだけで、メールとObsidianへ残る"
+      },
+      "baseline": {
+        "clicks": 187,
+        "impressions": 1720,
+        "ctr": 0.109,
+        "position": 7.6,
+        "window": "2026-05-18..2026-08-17",
+        "source": "GSC 3ヶ月ページ次元 / （docs/GROWTH_ROI_PLAN_2026-08-20.md §5-2）。併読指標: ブランド検索14クエリ 702imp（05-09..08-08・v3 §2-4）とAIO表示 約7.4千/3M"
+      },
+      "target_metric": "brand_search_impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-20: 主指標はブランド検索表示数とAIO表示数（v3ノーススター系）。CTRは主判定に使わない——ベースラインCTR 10.9%は指名検索が主imp源で、タイトル文言では動かない見込み（v4 §5-2で事前宣言）。期待する効果は AI引用文言の是正とブランド一貫性で、2〜3ヶ月遅れの指標。",
+        "2026-08-20: title・meta description・og:title/description・twitter:title/description を同型化した。H1「話すだけで、メールとObsidianへ。」は元から勝ち文法で不変更。og:image（assets/img/og/index.png）も主見出しが同文法・AIはバッジ格で降格済みのため再生成せず。AI言及はdescriptionの後半へ降格（削除はしない）。",
+        "2026-08-20: lang.jsのmeta-template経路を確認——トップ（/）はsingle-DOMで .meta-template ブロックを持たず、lang.js本体にもタイトル文字列は無いため、実行時にtitleが旧値へ戻る経路は存在しない。lang.jsは今回不変更なのでキャッシュバスタ ?v= も現行ハッシュのまま（check-css-version.mjs がCIで内容とバスタの一致を強制しており、v3 §9-5の再発はCIが検出する）。",
+        "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。"
+      ]
+    },
+    {
+      "id": "pr-2026-multi-destination",
+      "page": "(PR TIMES配信 — 弾薬庫案2「Multi-Destination一括」。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "R3ストーリーゲート制の第1号弾。『明日牛乳』はリマインダーへ、『金曜15時 歯医者』はカレンダーへ——という市場語の見出しで、カテゴリ定義を変える初出ストーリーとして配信する。D-SCORE≥60が配信条件（v4 追記D-4）。乗車判定は配信後に参照元Google系比率とスマホ比率で二値記録する。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-20",
+      "evaluation_at": null,
+      "status": "planned",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": null,
+        "source": "PR実績ベースライン（n=5）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車3本=21-46・PV 217-1,347。転載の床は20-34本/回（v4 追記A・D-2バックテスト）"
+      },
+      "target_metric": "discover_boarding",
+      "decision": null,
+      "evaluated_at": null,
+      "d_score_pre": {
+        "$comment": "配信前採点（v4 追記D-1の基準・D-3の採点をそのまま登録）。配信決定時に見出し確定稿で再採点すること。",
+        "scored_at": "2026-08-20",
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-3（n=5バックテスト較正・合格60）",
+        "S1_novelty": 30,
+        "S2_entity_reach": 20,
+        "S3_concrete_nouns": 15,
+        "S4_transformation": 15,
+        "S5_timing": 5,
+        "S6_news_verb": 5,
+        "S7_launch_design": 5,
+        "total": 95,
+        "gates": {
+          "G1_thumbnail_1200px": null,
+          "G2_no_ai_or_clickbait_words": null,
+          "G3_prtimes_distribution": null,
+          "G4_weekday_morning": null,
+          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可"
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記（v4 追記A-5の判定方法）。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5 を目安に二値判定し、外した場合はどのSを読み違えたかをnotesに書いて重みを更新する",
+        "google_referral_ratio": null,
+        "mobile_ratio": null,
+        "syndication_count": null,
+        "pv": null,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": null
+      },
+      "notes": [
+        "2026-08-20: v4施策一括実装（P6）でレコード型を新設。pr_release型はページを凍結しない（page実験ではない）ため、既存のページ凍結規律とは独立。",
+        "配信前チェックリスト: ①見出しは市場語のみ（『Multi-Destination』等の社内語を見出し・本文リードに出さない——D-3'二層言語ルール。出せばS2 3/S3 0で60点前後に落ちる） ②リマインダーとカレンダーを別リリースに割らない（2本目が『同じ話の2回目』になり8/18と同じ死に方をする——追記B案2の小出し厳禁） ③『世界初』と書かない（TellDone・VoiseTask等の海外先行あり。日本語ニュース面での初出性が取り分） ④Apple週などのトレンド窓は待たない（E-3: 時間減衰リスクあり＝先行者の窓が閉じ得るため、S5は捨てて撃つ）。",
+        "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する（R12-3）。"
+      ]
     }
   ]
 }

@@ -35,6 +35,9 @@ const IMAGES = [
   { file: 'obsidian-getting-started.png', title: 'Obsidianの始め方\n実画面でわかる入門', icon: '🚀' },
   { file: 'obsidian-compare.png', title: 'Obsidianは\n何と比較すればいい？', icon: '🧭' },
   { file: 'obsidian-what-is-vault.png', title: 'Obsidianの保管庫とは\n実体はただのフォルダ', icon: '📁' },
+  { file: 'obsidian-airpods.png', title: 'AirPodsに話すだけで\nObsidianへ残す', icon: '🎧' },
+  { file: 'blog-obsidian-voice-fastest-route.png', title: 'Obsidianに音声で挿す\n最速の経路', icon: '🎙️' },
+  { file: 'data-voice-shift.png', title: '「音声シフト」定点調査\nメモは書くものから話すものへ', icon: '📊' },
 ];
 
 /**

@@ -60,6 +60,23 @@ GitHub の再帰防止仕様のため、1つでは覆えない）:
 - API制限: 1回のリクエストで最大10,000 URL
 - 失敗ログ: `scripts/indexnow-failed.log` に記録
 
+## 稼働確認の記録
+
+### 2026-08-20（P2定期確認）— 稼働中・復旧不要
+
+auto-merge 経由（上記経路1）の実ログで確認した。
+
+- 対象run: `Auto-merge Claude PRs` run 32342962897（job 96345595824）・2026-08-20 07:12 UTC・PR #518 のマージ
+- `IndexNow notify (merged diff)` ステップが実行され、通知URL一覧（/en/ 配下含む数十件）を出力し、
+  **「結果: 送信済み（HTTP 200）」** で完了
+- 直近30 runのうちマージを実行しなかった run では同ステップは skipped になるが、これは
+  `merged_count == 0` の設計どおり（通知対象が無いだけで停止ではない）
+- 補足: GitHub API 上、workflow_run 起動の run は `head_branch` が常に `main` と表示される。
+  claude/ ブランチ判定はスクリプト内の `payload.workflow_run.head_branch` で行われており、
+  API表示だけを見て「claude/ ブランチのマージが起きていない」と誤読しないこと
+
+次回確認時もこの節に追記する（runリンクとステップ結果の2点だけでよい）。
+
 ## TODO (人間の作業)
 
 - [x] `.indexnow-key` を `.gitignore` に追加するかどうか判断 → 追加済み（ローカル上書き用。CI は コミット済みの鍵検証ファイルから解決する）
