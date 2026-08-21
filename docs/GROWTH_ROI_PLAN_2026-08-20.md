@@ -862,3 +862,54 @@ Notion対応／Mac対応／Captio物語×1万DL——従来どおり
   その場合の2発目はS1続報リスクを負う——**基本は①に同梱**
 - Obsidian極め（Properties/Bases/複数Vault等の深掘り）は捨てない——新②の後、修正なし着弾率と
   MRR成長を見て「さらに深く」か「Notion/Macへ広く」かをゲート判定（合流案のゲートを踏襲）
+
+---
+
+## 追記G（2026-08-20）— 外部分析（Action Router案）の統合と追記Fの改訂
+
+外部分析を受領し、競合主張を独自に裏取りした上で**採用**する。追記Fの新①を一段進化させる。
+
+### G-1. 競合の裏取り結果（検証済み）
+
+| 主張 | 検証 | 含意 |
+|---|---|---|
+| Voice Inbox for Obsidian が音声→Obsidian＋カレンダーイベント自動作成を既に提供 | ✅ 実在（App Store id6452678291 / voiceinbox.com。文字起こしはクラウド） | 「音声→カレンダー」単体は初出にならない |
+| Remindian が Obsidian Tasks↔Apple Reminders の双方向同期（完了含む）を既に提供 | ✅ 実在（GitHub Santofer/Remindian。**macOSメニューバー常駐**・Obsidian Tasks記法前提・EventKitオンデバイス・OSS） | 「完了同期」概念も初出ではないが、**モバイル単体・音声起点は空白** |
+| iOS 26自体がスクショ→カレンダー作成を持つ | ✅（Apple Intelligence系） | 「スクショ→Calendar」単体では出さない（入力拡張として出す） |
+
+→ 追記Fの新①D-SCORE 93〜95は**過大だった**（「音声→標準アプリ」だけでは完全初出30を取れない）。
+差別化の芯は **iPhone/Watch音声の一瞬Capture→自動判定→Apple実行系→Obsidianへ完了状態が戻る、を
+モバイル単体（Mac常駐なし・プラグインなし）で一本化**すること。
+
+### G-2. 動詞の正本を更新（追記F表を置き換え）
+
+**残る**（Obsidian）→ **動く**（Reminders/Calendar）→ **終わる**（完了がObsidianへ戻る）→
+**積み上がる**（Bases/構造化）→ **蘇る**（必要な未来に再浮上）
+
+ポジション宣言: 高速メモアプリではなく **Capture → Action Infrastructure**。
+ObsidianはSystem of Recordとして残したまま、その外側の世界を動かす。
+
+### G-3. 改訂ロードマップ（追記F §F-2を置き換え）
+
+| 弾 | 中身 | 外部採点 | 当方の補正 |
+|---|---|---:|---|
+| **第1弾「言ったら、終わる。」** | Action Router: Obsidianに原文→Remindersに期日TODO→完了が`[x]`でObsidianへ戻る。Calendar同梱可だが**PRの主役にしない** | 95 | 採用。ただし実装リスクは8/10でなく**7/10**——iOSは常駐できないため完了同期は「アプリ起動時/BG更新時の突合」＝**結果整合**（Remindianのリアルタイムとは別物と正直に書く）。かつ現行Obsidian書込はappend-onlyで、`[x]`化は**既存行の特定と書換**（ブロックID付与が必要）＝新しい複雑性クラス。PRコピーで「即時反映」を約束しない |
+| **第2弾「言ったら、積み上がる。」** | Expense/Books/Peopleの3テンプレのみ。月次合計の書換ではなく**構造化Markdown＋Properties→Obsidian Bases→自動集計** | 92 | 採用。§9厳守（家計簿UI・CRM画面を持たない）。検索横断（obsidian expense tracker / voice expense logging…）は一次情報LPで取る |
+| **第3弾「忘れていい。」蘇る** | 曖昧な未来表現の再浮上。confidence gate必須（明示日時=自動/曖昧=提案/なし=保存のみ） | 89 | 採用。PRコピー最強候補だが誤浮上=UX破壊のためgate設計を先に |
+| **第4弾「見せたら、動く。」** | Share/スクショ/写真を**同じRouterへ**（入力拡張として。スクショ→Calendar単体では出さない） | 84 | 採用（旧・共有シート弾はここへ統合） |
+| 保留 | Personal CRM(81)は第2弾Peopleテンプレに縮退して吸収 / 記憶検索Q&A(78)は将来S候補 / 位置トリガー(74)・App Intents完全対応(71)は単独弾にしない / フォルダ仕分け(64)=第1弾の基盤 / Notion(55)=横展開 | — | 採用 |
+
+### G-4. 各リリースに「公開ベンチマーク」を付ける（採用・恒久ルール化）
+
+第1弾から「日本語・英語200命令で日時抽出／Reminder判定／Calendar判定の正解率を実測」をLPに掲載。
+PR転載では持てない一次研究＝Google/AIOの original・in-depth 要件に正面から乗る。
+D-SCORE運用に「G5: 公開ベンチマーク同梱」を推奨ゲートとして追加（必須にはしない）。
+※数値はVISION §10の規律どおり実測のみ・手順公開。
+
+### G-5. VISION整合チェック（第1弾）
+
+§13の6問: Capture Coverage/Zero-decision↑=YES（完了まで含めゼロ判断化）／整理UI增=NO／
+Destination所有=NO（Reminders/Calendarに送るだけ・完了状態は読むだけ）／共通Capture Object経由=YES／
+修正の学習資産化=Phase 2で必須実装／AI前面=NO（市場語「言ったら、終わる。」）。
+Routing Level: **Level 1→2を明示**。完了同期はRoutingではなく状態反映なのでLevel規律の対象外だが、
+誤`[x]`は信頼毀損のため「Reminders側の完了のみを反映・Obsidian側からの逆方向は第1弾でやらない」に限定する。
