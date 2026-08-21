@@ -970,7 +970,7 @@ funnel 2026-08-14 セッションが `list_triggers` で実測した。
   恒久修正（`build_lastmod_index`/`git_lastmod`のファイルパス突き合わせを
   見直す）は独立レーンで検討する価値があると`next`に申し送った。
 
-- PR: （このコミットで作成・番号は下記参照）
+- PR: #521
 
 - 検証: Runbook §4 の9チェック全通過 — `seo-check` 0 errors 0 warnings /
   `check-css-version` OK / `check-benchmark` 新規CONFLICT・AMBIGUOUS増なし /
