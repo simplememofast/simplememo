@@ -164,9 +164,10 @@
       "executor": "ai_autonomous",
       "evidence": [
         "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "../simplememo-api/test/rollout-guard.test.ts",
+        "docs/canary-testflight.md"
       ],
-      "note": "ガードレール指標が有意かつ実害を伴って悪化したら kill を自律実行する（承認を挟まない＝可逆で安全な方向のため）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた。バックログ差し戻しは未実装"
+      "note": "ガードレール指標が有意かつ実害を伴って悪化したら kill を自律実行する（承認を挟まない＝可逆で安全な方向のため）。2026-08-22実装。**同日、kill が実機まで届いて機能が消えることを TestFlight で実証した**（docs/canary-testflight.md の実測）。ただし**押したのは人であってガードではない**。ガードの自動判定は本番でまだ1回も発火していない — TestFlight の人数では min_installs_per_cohort:30 に届かない。**止められることと、判断できることは別**。バックログ差し戻しは未実装"
     },
     {
       "area": "① 次期機能開発",
@@ -318,9 +319,10 @@
       "executor": "ai_autonomous",
       "evidence": [
         "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "../simplememo-api/test/rollout-guard.test.ts",
+        "docs/canary-testflight.md"
       ],
-      "note": "露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた"
+      "note": "露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。2026-08-22実装。**同日、kill が実機まで届いて機能が消えることを TestFlight で実証した**（docs/canary-testflight.md の実測）。ただし**押したのは人であってガードではない**。ガードの自動判定は本番でまだ1回も発火していない — TestFlight の人数では min_installs_per_cohort:30 に届かない。**止められることと、判断できることは別**"
     },
     {
       "area": "② バグ修正",
