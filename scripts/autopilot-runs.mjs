@@ -5,6 +5,7 @@
  *   node scripts/autopilot-runs.mjs            # 指標サマリ
  *   node scripts/autopilot-runs.mjs --json     # 機械可読（status JSON / 日報用）
  *   node scripts/autopilot-runs.mjs --check    # CI: 台帳の形と整合を検証（壊れていたら exit 1）
+ *   node scripts/autopilot-runs.mjs --selftest # 検査そのものの自己検査（台帳を読まない）
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
  *   node scripts/autopilot-runs.mjs --append --run-id ... --date ... --route ... --outcome ...
  *
@@ -55,6 +56,48 @@ export const OUTCOMES = [
 const NOT_ATTEMPTED = new Set(['skipped_gate', 'skipped_duplicate', 'no_run']);
 /** 着手したが本番に何も出せなかった outcome。変更失敗率の分子。 */
 const FAILED = new Set(['no_artifact', 'failed', 'cancelled']);
+
+/**
+ * 台帳が何日ぶん書かれていないかの許容。**これを超えたら --check が落ちる。**
+ *
+ * 2026-08-23 にこの検査を足した理由:
+ * 主系が初めて自走出荷した（run 32599191984 → PR #538）のに、台帳には行が無く、
+ * `--check` は素通りした。**台帳は「主系 0/3 出荷」と言い続けていた。**
+ * 行の形はどれも正しかったので、既存の validate() は何も言えなかった。
+ *
+ * 壊れた行は検知できて、**書かれなかった行は検知できない**。
+ * 前者は指標を嘘にするが、後者は指標を止める — 止まった指標は、
+ * 「変化が無い」と見分けがつかないぶん質が悪い。
+ *
+ * 1日にしてあるのは、当日ぶんが夜になるまで書かれないのは普通だから。
+ * 2日連続で書かれていなければ、それは運用が止まっている。
+ */
+export const MAX_LEDGER_LAG_DAYS = 1;
+
+/** 今日（JST）。台帳の日付が JST なので、比較もJSTで揃える。 */
+export function todayJst(now = new Date()) {
+  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+/**
+ * 台帳が最後に書かれてから何日経ったか。
+ *
+ * **`days_behind` は「実行が無かった日数」ではない。**「記録が無い日数」。
+ * 実行が無い日も no_run として1行書く決まりなので、行が無い＝記録していない。
+ */
+export function staleness(doc, today = todayJst()) {
+  const dates = (doc.runs || []).map((r) => r.date_jst).filter(Boolean).sort();
+  const latest = dates.at(-1) ?? null;
+  const days = latest
+    ? Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${latest}T00:00:00Z`)) / 864e5)
+    : null;
+  return {
+    latest, today,
+    days_behind: days,
+    max_days: MAX_LEDGER_LAG_DAYS,
+    stale: days === null || days > MAX_LEDGER_LAG_DAYS,
+  };
+}
 
 export function load(file = RUNS_PATH) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -132,7 +175,7 @@ function timings(runs) {
 /** 主系（GitHub Actions）以外はすべて副系・代走とみなす。 */
 const isPrimary = (r) => r.route === 'actions';
 
-export function summarize(doc, { since = null, costDoc = null } = {}) {
+export function summarize(doc, { since = null, costDoc = null, today = undefined } = {}) {
   let runs = doc.runs;
   if (since) runs = runs.filter((r) => r.date_jst >= since);
 
@@ -204,6 +247,8 @@ export function summarize(doc, { since = null, costDoc = null } = {}) {
       (r.interventions || []).map((i) => ({ run_id: r.run_id, date_jst: r.date_jst, ...i }))),
     cost: costLinked,
     timings: timings(runs),
+    // 台帳そのものが書かれ続けているか。**壊れた行より、書かれなかった行のほうが見つけにくい。**
+    staleness: staleness(doc, today ?? todayJst()),
   };
 }
 
@@ -235,6 +280,18 @@ function render(s, doc) {
     o.push(`  ⚠ 無運転日 ${s.no_run_days.length} 日: ${s.no_run_days.join(', ')}`);
     o.push('    （どの経路も動かなかった日。Gateスキップと違い、これは正常系ではない）');
   }
+  const st = s.staleness;
+  o.push('');
+  o.push(`  最終記入: ${st.latest ?? 'なし'}（今日 ${st.today} / ${st.days_behind ?? '?'} 日前・許容 ${st.max_days} 日）`);
+  if (st.stale) {
+    o.push('  ⚠ 台帳が書かれていない。**指標は止まっているだけで、正しくはない。**');
+    o.push('    実行があったのに行が無いと、出荷しても「0/N 出荷」のままになる');
+    o.push('    （2026-08-23、主系の初出荷が実際にこれで落ちた）');
+    o.push('    追記: node scripts/autopilot-runs.mjs --append --run-id ap-<YYYYMMDD>-<route> \\');
+    o.push('            --date <YYYY-MM-DD> --route <actions|ccr-XXXX|owner-session> \\');
+    o.push('            --outcome <shipped|no_artifact|failed|cancelled|skipped_gate|skipped_duplicate|no_run> \\');
+    o.push('            --pr <n> --artifact <path> --external-ref <run id> --source <一次資料>');
+  }
   const tm = s.timings;
   if (tm.time_to_detect_hours.n || tm.time_to_repair_hours.n) {
     o.push('');
@@ -261,12 +318,58 @@ function render(s, doc) {
   return o.join('\n');
 }
 
+/**
+ * 陳腐化検知の自己検査。**台帳を読まない**ので、台帳の中身がどう変わっても壊れない。
+ *
+ * 元にした実害: 2026-08-23、主系が初めて自走出荷した（PR #538）のに
+ * `data/autopilot-runs.json` に行が無く、`--check` は素通りした。
+ * 台帳は「主系 0/3 出荷」と言い続けた。**その状態を落とせることを固定する。**
+ */
+function selftest() {
+  let n = 0, bad = 0;
+  const eq = (got, want, msg) => {
+    n++;
+    if (got !== want) { bad++; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); }
+  };
+  const doc = (...dates) => ({ runs: dates.map((d, i) => ({ run_id: `r${i}`, date_jst: d })) });
+
+  // 主系が残していった状態そのもの（最終記入 08-22・08-23 の出荷は未記入）
+  const asLeft = doc('2026-08-21', '2026-08-22');
+  eq(staleness(asLeft, '2026-08-23').stale, false, '出荷当日はまだ落とさない（当日ぶんが夜まで空くのは普通）');
+  eq(staleness(asLeft, '2026-08-24').stale, true,  '**翌日には落ちる** — これが 2026-08-23 に効かなかった検査');
+  eq(staleness(asLeft, '2026-08-24').days_behind, 2, '2日前と数える');
+
+  // 追記して直った状態
+  const fixed = doc('2026-08-22', '2026-08-23');
+  eq(staleness(fixed, '2026-08-23').stale, false, '当日に書けば通る');
+  eq(staleness(fixed, '2026-08-24').stale, false, '1日前までは許容');
+  eq(staleness(fixed, '2026-08-25').stale, true,  '2日空けば落ちる');
+
+  // 境界と異常系
+  eq(staleness(doc(), '2026-08-23').stale, true, '**空の台帳は「問題なし」ではない**');
+  eq(staleness(doc(), '2026-08-23').latest, null, '空なら latest は null');
+  eq(staleness(doc('2026-08-25'), '2026-08-23').days_behind, -2, '未来日付は負で出す（隠さない）');
+  eq(staleness(doc('2026-08-25'), '2026-08-23').stale, false, '未来日付は陳腐化ではない（別の異常）');
+  // 順序に依存しない — 台帳は sort されている前提だが、そこに寄りかからない
+  eq(staleness(doc('2026-08-23', '2026-08-11'), '2026-08-23').days_behind, 0, '並び順に依存しない');
+
+  // JST 換算。UTC 21:00 は JST では翌日の 06:00。
+  eq(todayJst(new Date('2026-08-22T21:18:07Z')), '2026-08-23', '主系の起動時刻(UTC 21:18)は JST では 08-23');
+  eq(todayJst(new Date('2026-08-22T14:59:59Z')), '2026-08-22', 'JST 23:59 はまだ当日');
+  eq(todayJst(new Date('2026-08-22T15:00:00Z')), '2026-08-23', 'JST 00:00 で日付が変わる');
+
+  console.log(bad ? `\n${bad}/${n} 失敗` : `selftest: ${n}/${n} 通過`);
+  if (bad) process.exit(1);
+}
+
 // --- CLI ---------------------------------------------------------------
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
   const has = (n) => argv.includes(`--${n}`);
   const val = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] !== undefined ? argv[i + 1] : d; };
+
+  if (has('selftest')) { selftest(); process.exit(0); }
 
   const doc = load();
   const problems = validate(doc);
@@ -330,5 +433,15 @@ if (isMain) {
   }
 
   console.log(render(s, doc));
-  if (has('check')) console.log('\n台帳の形と整合に問題なし。');
+  if (has('check')) {
+    // 形の検査（validate）はすでに上で通っている。ここで見るのは**書かれ続けているか**。
+    // validate() に入れていないのは、--append が validate を先に通すため。
+    // 陳腐化で validate が落ちると、それを直す唯一の手段（追記）まで塞がる。
+    if (s.staleness.stale) {
+      console.error(`\n台帳が ${s.staleness.days_behind ?? '?'} 日書かれていない（許容 ${s.staleness.max_days} 日）。`);
+      console.error('**行の形が正しいことと、行が在ることは別。** 上の追記コマンドで埋めること。');
+      process.exit(1);
+    }
+    console.log('\n台帳の形と整合に問題なし。');
+  }
 }

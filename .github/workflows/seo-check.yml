@@ -184,8 +184,16 @@ jobs:
       # AI完走率を静かにずらすので、PRの時点で止める。
       # 「shipped なのに PR番号が無い」「failed なのに理由が無い」も同様に落とす —
       # 検算できない出荷と、原因の無い失敗は、指標として存在しないのと同じ。
+      # 【2026-08-23追加】陳腐化も落とす。
+      # 主系が初めて自走出荷した日（PR #538）、台帳に行が書かれず、この --check は
+      # 素通りした。**行の形はすべて正しかったので、既存の検査は何も言えなかった。**
+      # 壊れた行は指標を嘘にするが、書かれなかった行は指標を止める。
+      # 止まった指標は「変化が無い」と見分けがつかないぶん質が悪い。
+      # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない。
       - name: Autopilot run ledger
-        run: node scripts/autopilot-runs.mjs --check
+        run: |
+          node scripts/autopilot-runs.mjs --selftest
+          node scripts/autopilot-runs.mjs --check
 
       # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
       #

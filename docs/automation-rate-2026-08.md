@@ -144,7 +144,7 @@
 
 | 実行者 | タスク | 状況・証跡 |
 |---|---|---|
-| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系0/3・副系10/10。冗長化が実際に効いた<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
+| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系1/4・副系10/10。冗長化が実際に効いた（主系の初出荷は2026-08-23で、それまでの11回は不発）<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
 | ゲート付き実行 | 冪等性 | 当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`scripts/autopilot-budget.mjs` |
 | ゲート付き実行 | 再試行 | 09:20の再試行経路・Resend 429の単発リトライ<br>`.github/workflows/obsidian-autopilot.yml`<br>`../simplememo-api/src/resend.ts` |
 | **未実装** | Circuit Breaker | 外部依存の障害パターンをまだ観測できていない |

@@ -464,7 +464,7 @@
       "interventions": [
         {
           "kind": "request",
-          "note": "obsidian-autopilot.yml の permissions / additional_permissions / claude_args のツール許可リスト確認を依頼（未対応）"
+          "note": "obsidian-autopilot.yml の permissions / additional_permissions / claude_args のツール許可リスト確認を依頼（**人は着手せず、AI自身が PR #526 で直した**。起票そのものが誤りだったが、依頼を出した事実は残す）"
         }
       ],
       "lane": null,
@@ -474,7 +474,8 @@
       "failure_class": "permissions",
       "failed_at": "2026-08-22T06:20+09:00",
       "detected_at": "2026-08-22T07:30+09:00",
-      "detected_note": "副系CCR(07:30)が get_job_logs で検知。**未解消**"
+      "detected_note": "副系CCR(07:30)が get_job_logs で検知。PR #526（14:00 JST マージ）が claude_args に --allowedTools を足して解消。**翌朝 06:18 JST の主系 run 32599191984 が実際に出荷できたことが、その修理が効いた直接証拠**（ap-20260823-actions）",
+      "resolved_at": "2026-08-22T14:00+09:00"
     },
     {
       "run_id": "ap-20260822-ccr0730",
@@ -490,6 +491,22 @@
       "interventions": [],
       "failure_reason": null,
       "external_ref": null
+    },
+    {
+      "run_id": "ap-20260823-actions",
+      "date_jst": "2026-08-23",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 538,
+      "artifact": "/obsidian/pricing/",
+      "failure_reason": null,
+      "external_ref": "32599191984",
+      "interventions": [],
+      "source": "actions-api+pr",
+      "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
     }
   ]
 }
