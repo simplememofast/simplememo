@@ -19,16 +19,29 @@
  * No secrets and no bindings are required here, so this deploys with the
  * static site and needs no Cloudflare Pages dashboard configuration.
  *
- * The upstream JSON is passed through verbatim. That is deliberate: when the
- * survey gate is off or the D1 migration has not been applied yet, the reader
- * is told the form is not accepting answers instead of watching a spinner
- * succeed into a void.
+ * Upstream JSON is passed through when the page has wording for it. That is
+ * deliberate: when the survey gate is off or the D1 migration has not been
+ * applied yet, the reader is told the form is not accepting answers instead of
+ * watching a spinner succeed into a void. Any other upstream failure collapses
+ * to `survey_unavailable` so it cannot surface as a misleading message.
  */
 
 const UPSTREAM = 'https://api.simplememofast.com/v1/survey/response';
 
 /** Matches the Worker's own ceiling; free text is capped at 1000 chars there. */
 const MAX_BODY_BYTES = 16 * 1024;
+
+/**
+ * Upstream error codes the page has its own wording for. Anything outside this
+ * set is collapsed to `survey_unavailable` rather than reaching the reader as
+ * an unexplained failure — see the note at the bottom of onRequestPost.
+ */
+const PAGE_HANDLED_ERRORS = new Set([
+  'survey_disabled',
+  'db_unavailable',
+  'rate_limited',
+  'empty_response',
+]);
 
 const JSON_HEADERS = {
   'Content-Type': 'application/json',
@@ -101,6 +114,20 @@ export async function onRequestPost(context) {
     // HTML error page from an edge would land in the reader's browser as our
     // own markup.
     return json({ ok: false, error: 'upstream_error' }, 502);
+  }
+
+  // Anything the page knows how to explain goes through untouched. Everything
+  // else that failed becomes one honest code the page maps to "not accepting
+  // answers right now".
+  //
+  // The case that made this necessary: the page shipped ahead of the Worker
+  // route, so /v1/survey/response answered 404 { error: 'not_found' }. The
+  // page had no branch for that code and fell through to its generic
+  // "check your connection and try again" — blaming the reader's network for
+  // an endpoint we had not deployed yet, and inviting them to retype a survey
+  // that could never send.
+  if (!upstream.ok && !PAGE_HANDLED_ERRORS.has(parsed && parsed.error)) {
+    return json({ ok: false, error: 'survey_unavailable' }, upstream.status);
   }
   return json(parsed, upstream.status);
 }

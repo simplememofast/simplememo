@@ -648,7 +648,7 @@
         }
         button.disabled = false;
         var code = data && data.error;
-        if (code === 'survey_disabled' || code === 'db_unavailable') say(COPY.disabled, 'error');
+        if (code === 'survey_disabled' || code === 'db_unavailable' || code === 'survey_unavailable') say(COPY.disabled, 'error');
         else if (code === 'rate_limited') say(COPY.rateLimited, 'error');
         else if (code === 'empty_response') say(COPY.empty, 'error');
         else say(COPY.failed, 'error');
