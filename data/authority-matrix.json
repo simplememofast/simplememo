@@ -266,8 +266,8 @@
       "human_only": [],
       "gate": "有意（z>1.96）かつ実害2pt以上の悪化が1指標でも出たときだけ kill。サンプル不足・正規近似の不成立・計測が読めない場合は kill も promote もしない（hold）",
       "evidence": [
-        "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "simplememo-api/src/rollout-guard.ts",
+        "simplememo-api/test/rollout-guard.test.ts"
       ],
       "status": "active",
       "note": "**止める方向だけを機械に渡してある。**可逆で安全な方向なので承認を挟まない。2026-08-22実装・本番でまだ1回も発火していない（段階公開中のフラグがゼロのため）"
@@ -285,8 +285,8 @@
       ],
       "gate": "/admin/rollout-guard に提案が積まれるだけ。POST /admin/flags/set を叩くのは人",
       "evidence": [
-        "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/API_SPEC.md"
+        "simplememo-api/src/rollout-guard.ts",
+        "simplememo-api/API_SPEC.md"
       ],
       "status": "active",
       "note": "**広げてから戻しても「見た人が見なかったことにはならない」**ので不可逆に分類した。撤回と拡大で権限を非対称にしてあり、逆にすると誤検知が『勝手に全員へ配る』形で顕在化する"

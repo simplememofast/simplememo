@@ -64,7 +64,11 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
       for (const rel of d.evidence) {
         // 他リポジトリ（simplememo-ios / simplememo-api）のパスはこのCIから見えないので
         // 存在確認をしない。**確認できないものを確認したことにしない。**
-        if (rel.startsWith('simplememo-')) continue;
+        //
+        // 表記が2通りある（`simplememo-api/...` と `../simplememo-api/...`）。
+        // 素の形だけを見ていたため、`../` 付きで書いた行が「存在しない」として
+        // CIを落とした（PR #530）。**表記ゆれで偽の失敗を出さない。**
+        if (/^(\.\.\/)?simplememo-/.test(rel)) continue;
         if (!exists(rel)) problems.push(`${at}: evidence "${rel}" が存在しない`);
       }
     }

@@ -2,7 +2,8 @@
 /**
  * ヒーロー画像生成の**前提条件**だけを検査する（画像は作らない）。
  *
- * Chromium を CI に持ち込まずに、生成器が守っている2つの約束を確かめる:
+ * Chromium を CI に持ち込まずに、生成器が守っている2つの約束を確かめる。
+ * 組みは pr-hero-layout.mjs に切り出してあるので、**playwright を読み込まない**:
  *   1. 見出しの「」内が1行に収まる（収まらないと画像で黙って切れる）
  *   2. 裏の取れていない主張があるとき、完成品が作れない仕組みが生きている
  *
@@ -12,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LEAD_MAX_GLYPHS, splitHeadline, buildHTML, WIDTH, HEIGHT } from './generate-pr-hero.mjs';
+import { LEAD_MAX_GLYPHS, splitHeadline, buildHTML, WIDTH, HEIGHT } from './pr-hero-layout.mjs';
 import { evaluate } from './check-pr-claims.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
