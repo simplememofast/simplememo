@@ -225,6 +225,11 @@
   
 
     /* ---- roadmap page ---- */
+    .rm-pre{border:1px solid var(--border-highlight);border-radius:var(--radius-sm);background:var(--surface-elevated);padding:1.25rem 1.4rem;margin:0 0 1.75rem}
+    .rm-pre__k{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--accent-neon);margin-bottom:.5rem}
+    .rm-pre__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .5rem}
+    .rm-pre__d{font-size:.92rem;line-height:1.85;color:var(--text-secondary);margin:0}
+    .rm-pre__d + .rm-pre__d{margin-top:.7rem}
     .rm-phase{display:grid;grid-template-columns:2.75rem minmax(0,1fr);gap:0 1rem;padding:1.4rem 0;border-top:1px solid var(--border)}
     .rm-phase:first-of-type{border-top:none}
     .rm-phase__n{font-size:1.35rem;font-weight:800;line-height:1.2;color:var(--accent);font-variant-numeric:tabular-nums}
@@ -321,6 +326,13 @@
           自分で決めたルールが効く。その順です。
         </p>
 
+        <div class="rm-pre">
+          <span class="rm-pre__k">その前に、先に固めること</span>
+          <p class="rm-pre__t">送信保証 — 「送ったつもり」を無くす</p>
+          <p class="rm-pre__d">送信済みの証明、失敗したときの理由、再送の状態、送ったものを後から検索できる台帳。書いたものが確かに届いたと、見て分かるようにします。</p>
+          <p class="rm-pre__d">これは当初の計画に入っていませんでした。国内18アプリのレビューを数え直したところ、どの機能要望よりも「消えた」「同期されない」の方が多かったためです。順番を変えるべきかどうかは、下のアンケートで聞いています。</p>
+        </div>
+
         <div class="rm-phase">
           <div class="rm-phase__n">1</div>
           <div>
@@ -380,6 +392,11 @@
           <li>あとで読むリスト。読むための画面をここに増やす気はありません。</li>
         </ul>
         <p class="intro-text" style="margin-top:1.25rem">
+          断っておくと、<strong>これらに需要が無いわけではありません</strong>。
+          下に書いた調査でも、PDF・手書き・フォルダ管理はいずれも上位に入っています。
+          需要があると分かったうえで作らない、という意味です。
+        </p>
+        <p class="intro-text" style="margin-top:1.25rem">
           このアプリは、思いついた場所と、最終的に置かれる場所の<strong>あいだ</strong>にいるつもりです。
           置き場所そのものを持つと、そこと競合してしまいます。
         </p>
@@ -398,10 +415,11 @@
             <legend>Q1. 次に出すなら、どれから欲しいですか</legend>
             <p class="survey__hint">3つまで選べます。</p>
             <div class="survey__opts" data-group="priorities" data-max="3">
+              <label class="opt"><input type="checkbox" name="priorities" value="delivery_receipt"><span><b>送信保証</b><span>確かに届いたと見て分かる。送信台帳と再送</span></span></label>
               <label class="opt"><input type="checkbox" name="priorities" value="routing_suggest"><span><b>保存先の候補を出す</b><span>決めるのは自分。勝手に動かない</span></span></label>
               <label class="opt"><input type="checkbox" name="priorities" value="routing_learn"><span><b>直したら覚える</b><span>同じ間違いを繰り返さない</span></span></label>
               <label class="opt"><input type="checkbox" name="priorities" value="rules"><span><b>自分でルールを決める</b><span>「この言葉が入っていたらここ」</span></span></label>
-              <label class="opt"><input type="checkbox" name="priorities" value="capture_share"><span><b>共有シート・Action Buttonから送る</b><span>他アプリで見ているものをそのまま</span></span></label>
+              <label class="opt"><input type="checkbox" name="priorities" value="capture_share"><span><b>写真・PDF・Web・音声を1タップで送る</b><span>共有シート／Action Button から、見ているものをそのまま</span></span></label>
               <label class="opt"><input type="checkbox" name="priorities" value="capture_mac"><span><b>Macから送る</b><span>PC作業中の思いつきも同じ場所へ</span></span></label>
               <label class="opt"><input type="checkbox" name="priorities" value="multi_destination"><span><b>送り先を増やす</b><span>リマインダー・カレンダー・メールなど</span></span></label>
             </div>
@@ -412,15 +430,16 @@
             <p class="survey__hint">1つだけ選んでください。</p>
             <div class="survey__opts">
               <label class="opt"><input type="radio" name="pain" value="sync"><span><b>端末をまたぐと同じメモが見られない</b></span></label>
-              <label class="opt"><input type="radio" name="pain" value="data_loss"><span><b>機種変更やクラッシュで消えるのが怖い</b></span></label>
-              <label class="opt"><input type="radio" name="pain" value="organize"><span><b>整理・フォルダ分けが面倒</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="attachments"><span><b>写真やPDFをメモに入れられない・扱いにくい</b></span></label>
               <label class="opt"><input type="radio" name="pain" value="search"><span><b>あとから探し出せない</b></span></label>
-              <label class="opt"><input type="radio" name="pain" value="speed"><span><b>書き始めるまでが遅い</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="organize"><span><b>整理・フォルダ分けが面倒</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="formatting"><span><b>見出し・文字サイズなど書式が足りない</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="data_loss"><span><b>機種変更やクラッシュで消えるのが怖い</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="sharing"><span><b>家族やチームと共有できない</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="speed"><span><b>重い・落ちる・書き始めるまでが遅い</b></span></label>
+              <label class="opt"><input type="radio" name="pain" value="pricing"><span><b>課金や広告が気になる</b></span></label>
               <label class="opt"><input type="radio" name="pain" value="widget"><span><b>ロック画面やウィジェットからすぐ書けない</b></span></label>
               <label class="opt"><input type="radio" name="pain" value="japanese_input"><span><b>日本語入力が崩れる・カーソルが飛ぶ</b></span></label>
-              <label class="opt"><input type="radio" name="pain" value="readability"><span><b>文字が小さい・読みにくい</b></span></label>
-              <label class="opt"><input type="radio" name="pain" value="sharing"><span><b>家族やチームと共有できない</b></span></label>
-              <label class="opt"><input type="radio" name="pain" value="pricing"><span><b>課金や広告が気になる</b></span></label>
               <label class="opt"><input type="radio" name="pain" value="other"><span><b>この中にはない</b><span>下の自由記述で教えてください</span></span></label>
             </div>
           </fieldset>
@@ -479,17 +498,24 @@
         <div class="intro-text">
           <p>
             2つあります。1つは、このアプリが最初から向かっている方向。
-            もう1つは、2026年8月に国内のメモアプリのレビューを横断で読んだ結果です。
+            もう1つは、2026年8月に<strong>国内App Storeの主要18アプリからレビュー7,279件</strong>を取得して
+            数えた結果です（うち直近24ヶ月の3,541件を中心に見ています）。
           </p>
           <p>
-            レビューを読んで一番はっきりしたのは、星が落ちる理由が
-            機能の多さではなく、<strong>「書いたものが失われないか」</strong>と
-            <strong>「書き始めるまでに何手かかるか」</strong>のほぼ2つだったことでした。
-            上のQ2の選択肢は、そのとき繰り返し出てきた不満をそのまま並べています。
+            数えて一番はっきりしたのは、星が落ちる理由が機能の多さではないことでした。
+            <strong>動作速度・安定性への言及が466件（うち★1〜2が259件、18アプリすべてで発生）</strong>、
+            <strong>データ保全・復元が340件（うち★1〜2が195件）</strong>。
+            どの機能要望よりも多く、そして「文字が消えた」「同期されない」「重くなった」で人は離れていました。
+            上の「送信保証」を先に置いたのは、この数字を見たからです。
           </p>
           <p>
-            なお、この読み取りは検索で表に出たレビューを読んだもので、全件を数えたものではありません。
-            件数として出せる数字ではないので、このページには割合を書いていません。
+            もう一つ、想定と逆だったこと。<strong>AIへの言及は105件で、肯定42件に対して否定・不満が63件</strong>ありました。
+            「AIを消せるように」「AIより軽快さを」という声のほうが多い。
+            このページでAIの話をしていないのは、そういう理由です。
+          </p>
+          <p>
+            断りとして、取得元はApple公開のレビューフィードで<strong>アプリごと最大500件</strong>、全履歴ではありません。
+            評価件数の合計（約99.3万）は人気性の代理指標であって、ダウンロード数の順位ではありません。
           </p>
         </div>
       </section>

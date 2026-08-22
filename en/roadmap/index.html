@@ -220,6 +220,11 @@
   
 
     /* ---- roadmap page ---- */
+    .rm-pre{border:1px solid var(--border-highlight);border-radius:var(--radius-sm);background:var(--surface-elevated);padding:1.25rem 1.4rem;margin:0 0 1.75rem}
+    .rm-pre__k{display:block;font-size:.72rem;font-weight:700;letter-spacing:.08em;color:var(--accent-neon);margin-bottom:.5rem}
+    .rm-pre__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .5rem}
+    .rm-pre__d{font-size:.92rem;line-height:1.85;color:var(--text-secondary);margin:0}
+    .rm-pre__d + .rm-pre__d{margin-top:.7rem}
     .rm-phase{display:grid;grid-template-columns:2.75rem minmax(0,1fr);gap:0 1rem;padding:1.4rem 0;border-top:1px solid var(--border)}
     .rm-phase:first-of-type{border-top:none}
     .rm-phase__n{font-size:1.35rem;font-weight:800;line-height:1.2;color:var(--accent);font-variant-numeric:tabular-nums}
@@ -314,6 +319,12 @@
           suggests. Then it learns from the corrections you make. And before it learns anything,
           the rules you write yourself take priority.
         </p>
+<div class="rm-pre">
+<span class="rm-pre__k">First, the thing underneath all of it</span>
+<p class="rm-pre__t">Delivery you can see — no more "I thought I sent that"</p>
+<p class="rm-pre__d">Proof it was delivered, the reason when it wasn't, the state of a retry, and a searchable log of everything you have sent. You should be able to look and know it arrived.</p>
+<p class="rm-pre__d">This was not in the original plan. It is here because counting reviews across 18 Japanese App Store apps put "it vanished" and "it didn't sync" above every single feature request. Whether it really should come first is one of the things the survey below asks.</p>
+</div>
 <div class="rm-phase">
 <div class="rm-phase__n">1</div>
 <div>
@@ -368,6 +379,11 @@
 <li>A read-later list. We are not adding another screen to read things in.</li>
 </ul>
 <p class="intro-text" style="margin-top:1.25rem">
+          To be clear: <strong>it is not that nobody wants these.</strong> In the survey described
+          below, PDF handling, handwriting and folder management all ranked high. We are choosing
+          not to build them knowing that.
+        </p>
+<p class="intro-text" style="margin-top:1.25rem">
           This app means to sit <strong>between</strong> the moment a thought appears and the place it
           finally lives. Owning the place it lives would put us in competition with it.
         </p>
@@ -384,10 +400,11 @@
 <legend>Q1. Which would you want first?</legend>
 <p class="survey__hint">Pick up to three.</p>
 <div class="survey__opts" data-group="priorities" data-max="3">
+<label class="opt"><input name="priorities" type="checkbox" value="delivery_receipt"/><span><b>Delivery you can see</b><span>Proof it arrived, a sent log, retries</span></span></label>
 <label class="opt"><input name="priorities" type="checkbox" value="routing_suggest"/><span><b>Suggest a destination</b><span>You still decide. Nothing moves on its own</span></span></label>
 <label class="opt"><input name="priorities" type="checkbox" value="routing_learn"/><span><b>Learn from my corrections</b><span>Stop making the same mistake twice</span></span></label>
 <label class="opt"><input name="priorities" type="checkbox" value="rules"/><span><b>Let me write the rules</b><span>"If it contains this word, send it here"</span></span></label>
-<label class="opt"><input name="priorities" type="checkbox" value="capture_share"/><span><b>Share sheet &amp; Action Button</b><span>Capture what you are already looking at</span></span></label>
+<label class="opt"><input name="priorities" type="checkbox" value="capture_share"/><span><b>Send a photo, PDF, web page or voice note in one tap</b><span>Straight from the share sheet or Action Button</span></span></label>
 <label class="opt"><input name="priorities" type="checkbox" value="capture_mac"/><span><b>Capture from a Mac</b><span>Same place, from the desk</span></span></label>
 <label class="opt"><input name="priorities" type="checkbox" value="multi_destination"/><span><b>More destinations</b><span>Reminders, Calendar, email and more</span></span></label>
 </div>
@@ -397,15 +414,16 @@
 <p class="survey__hint">Pick one.</p>
 <div class="survey__opts">
 <label class="opt"><input name="pain" type="radio" value="sync"/><span><b>The same note isn't on my other devices</b></span></label>
-<label class="opt"><input name="pain" type="radio" value="data_loss"/><span><b>I'm afraid of losing notes to a new phone or a crash</b></span></label>
-<label class="opt"><input name="pain" type="radio" value="organize"/><span><b>Filing and foldering is a chore</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="attachments"/><span><b>I can't put photos or PDFs into a note, or they're painful to handle</b></span></label>
 <label class="opt"><input name="pain" type="radio" value="search"/><span><b>I can't find things again afterwards</b></span></label>
-<label class="opt"><input name="pain" type="radio" value="speed"/><span><b>It takes too long to start writing</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="organize"/><span><b>Filing and foldering is a chore</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="formatting"/><span><b>Formatting is too limited — headings, text size, and the rest</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="data_loss"/><span><b>I'm afraid of losing notes to a new phone or a crash</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="sharing"/><span><b>I can't share notes with family or a team</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="speed"/><span><b>It's slow, it crashes, or it takes too long to start writing</b></span></label>
+<label class="opt"><input name="pain" type="radio" value="pricing"/><span><b>Pricing or ads bother me</b></span></label>
 <label class="opt"><input name="pain" type="radio" value="widget"/><span><b>I can't write straight from the lock screen or a widget</b></span></label>
 <label class="opt"><input name="pain" type="radio" value="japanese_input"/><span><b>Text input breaks — the cursor jumps, IME misbehaves</b></span></label>
-<label class="opt"><input name="pain" type="radio" value="readability"/><span><b>The text is too small or hard to read</b></span></label>
-<label class="opt"><input name="pain" type="radio" value="sharing"/><span><b>I can't share notes with family or a team</b></span></label>
-<label class="opt"><input name="pain" type="radio" value="pricing"/><span><b>Pricing or ads bother me</b></span></label>
 <label class="opt"><input name="pain" type="radio" value="other"/><span><b>None of these</b><span>Tell us below</span></span></label>
 </div>
 </fieldset>
@@ -458,18 +476,26 @@
 <div class="intro-text">
 <p>
             Two places. One is the direction this app has been heading since the start. The other is
-            a sweep of memo-app reviews across the Japanese App Store, read in August 2026.
+            <strong>7,279 reviews pulled from 18 leading apps on the Japanese App Store</strong> in
+            August 2026, with the analysis centred on the 3,541 from the last 24 months.
           </p>
 <p>
-            The clearest thing in those reviews: ratings drop for almost exactly two reasons, and
-            neither is a missing feature. They are <strong>"will what I wrote survive?"</strong> and
-            <strong>"how many steps before I can start writing?"</strong> The options in Q2 are the
-            complaints that kept recurring, written out as they were said.
+            The clearest result: ratings do not drop over missing features.
+            <strong>Speed and stability drew 466 mentions — 259 of them at one or two stars, and it
+            showed up in all 18 apps.</strong>
+            <strong>Losing or failing to restore data drew 340, with 195 at one or two stars.</strong>
+            Both outrank every feature request. People leave because something vanished, didn't sync,
+            or got slow. That is why delivery you can see sits ahead of the five above.
           </p>
 <p>
-            One caveat worth stating: that reading came from reviews surfaced by search, not from
-            counting every review. It does not support a percentage, so there are no percentages on
-            this page.
+            One result ran against expectation. <strong>AI came up 105 times: 42 positive against 63
+            negative or frustrated.</strong> "Let me turn the AI off" and "I'd rather have it fast"
+            were the louder half. That is why this page does not talk about AI.
+          </p>
+<p>
+            Caveats worth stating: the source is Apple's public review feed, capped at
+            <strong>500 reviews per app</strong>, so it is not the full history. And the combined
+            rating count (~993,000) stands in for popularity — it is not a download ranking.
           </p>
 </div>
 </section>
