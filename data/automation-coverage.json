@@ -72,9 +72,13 @@
     {
       "area": "① 次期機能開発",
       "task": "期待効果・確信度・工数・リスクによる自動優先順位付け",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "コンテンツ側のノイズフロアは有るが機能側は無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/feature-backlog.json",
+        "scripts/feature-score.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-22実装。**確信度は evidence_strength から機械的に決まり、手で置けない**（主観にすると順位はいくらでも動く）。リスクは点数を下げるのではなく承認を要求する — 掛け算にすると期待効果が大きければ危険な案が1位になる。根拠が弱い候補は「やらない」ではなく「まず測る」に落ちる"
     },
     {
       "area": "① 次期機能開発",
@@ -676,11 +680,12 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "審査項目・商標・プライバシー表示の整合確認",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/scripts/lib/app_metadata.rb"
+        "../simplememo-ios/scripts/lib/app_metadata.rb",
+        "../simplememo-ios/.github/workflows/qa-static.yml"
       ],
-      "note": "商標スキャンのみ実装"
+      "note": "2026-08-22に検査を拡張。名前・サブタイトル（5.2.5・商標）に加え、キーワード欄とリリースノート（長さ上限・3.1.2の語）も毎PRで見る。自己テスト20件追加。**キーワードの実値はまだASC内にあり移していない**ので、その分は NOTE として毎回出る"
     },
     {
       "area": "④ 自動本番デプロイ",

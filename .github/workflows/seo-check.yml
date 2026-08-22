@@ -187,6 +187,15 @@ jobs:
       - name: Autopilot run ledger
         run: node scripts/autopilot-runs.mjs --check
 
+      # 【機能バックログ】計測の結果が次に作るものを決めているか。
+      #
+      # 確信度は evidence_strength から機械的に決まる（手で置けない）。
+      # ここを主観にすると順位はいくらでも動かせるので台帳の意味が消える。
+      # リスクは点数を下げるのではなく承認を要求する — 掛け算にすると
+      # **期待効果が大きければ危険な案が1位になる**。
+      - name: Feature backlog
+        run: node scripts/feature-score.mjs --check
+
       # 【主張】プレスリリースの見出し・リード文を実装台帳に当てる。
       #
       # 原稿は実装より速く動く。リード文に「AIが一気通貫で循環」と書いた後で

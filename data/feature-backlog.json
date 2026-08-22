@@ -1,0 +1,106 @@
+{
+  "$comment": [
+    "機能バックログ。scripts/feature-score.mjs が順位を出す。",
+    "",
+    "**確信度を手で置かない。**evidence_strength（根拠の種類）から機械的に決まる。",
+    "ここを主観にすると順位はいくらでも動かせるので、台帳の意味が無くなる。",
+    "",
+    "evidence_strength:",
+    "  measured_ours     … 自前の実測（BigQuery / 運転台帳 / benchmark.json）",
+    "  measured_external … 外部の実測（GSC / ASC / ストアレビュー）",
+    "  observed          … 観察したが数えていない",
+    "  analogous         … 別の場所で効いた事例からの類推",
+    "  hypothesis        … 思いつき",
+    "",
+    "risks（承認が要るもの。**点数では消えない**）:",
+    "  irreversible / billing / privacy / review"
+  ],
+  "candidates": [
+    {
+      "id": "canary_first_loop",
+      "title": "カナリアガードを本番で1周させる（フラグ1つを1%→撤回か昇格まで）",
+      "expected_effect": 8,
+      "effort_days": 2,
+      "evidence_strength": "measured_ours",
+      "risks": [],
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "docs/autopilot-roadmap.md"
+      ],
+      "note": "**機能側の本番改善サイクルが0件**という事実そのものを潰す。実装は済んでいて、あとは回すだけ"
+    },
+    {
+      "id": "keywords_into_repo",
+      "title": "App Store キーワード欄をリポジトリ管理に移す",
+      "expected_effect": 5,
+      "effort_days": 0.5,
+      "evidence_strength": "measured_external",
+      "risks": ["review"],
+      "evidence": [
+        "../simplememo-ios/metadata/keywords/README.md",
+        "../simplememo-ios/scripts/lib/app_metadata.rb"
+      ],
+      "note": "サブタイトルが 5.2.5 で却下されたときと同じ状態。検査は用意済みで、実値を移すだけ"
+    },
+    {
+      "id": "asc_data_link",
+      "title": "App Store Connect のデータ連携（インプレッション・CVR・ランキング）",
+      "expected_effect": 7,
+      "effort_days": 3,
+      "evidence_strength": "measured_external",
+      "risks": [],
+      "evidence": ["../simplememo-ios/scripts/lib/asc_api.rb"],
+      "note": "鍵は既にある（fastlane 用）。ASO の効果測定がここ待ちで、CPP実験も同じ"
+    },
+    {
+      "id": "unbounded_retention",
+      "title": "残り10ストアの保持期間を決めて消す",
+      "expected_effect": 4,
+      "effort_days": 2,
+      "evidence_strength": "measured_ours",
+      "risks": ["privacy", "irreversible"],
+      "evidence": ["../simplememo-api/data/data-retention.json"],
+      "note": "棚卸しで場所は特定済み。消すのは不可逆なので窓の決定に承認が要る"
+    },
+    {
+      "id": "detection_time",
+      "title": "障害の検知時刻を自動記録する（統合監視）",
+      "expected_effect": 6,
+      "effort_days": 3,
+      "evidence_strength": "measured_ours",
+      "risks": [],
+      "evidence": ["data/autopilot-runs.json"],
+      "note": "検知の中央値2.1h・最大50.7h に対し修理は0.9h。**弱点は修理速度ではなく検知**で、それがこの実測から出ている"
+    },
+    {
+      "id": "vendor_register",
+      "title": "依存サービスの台帳（規約・データ処理・停止時の影響）",
+      "expected_effect": 3,
+      "effort_days": 1,
+      "evidence_strength": "observed",
+      "risks": [],
+      "evidence": ["data/credential-expiry.json"],
+      "note": "リード文の「契約は人が承認」に中身を与える。⑫事業継続性にも効く"
+    },
+    {
+      "id": "voice_vad",
+      "title": "音声入力の発話区間検出（端末側VAD）で無音自動停止を再挑戦",
+      "expected_effect": 6,
+      "effort_days": 5,
+      "evidence_strength": "measured_ours",
+      "risks": [],
+      "evidence": ["../simplememo-ios/SimpleMemo/FeatureFlags.swift"],
+      "note": "**三度外して打ち切った実績がある**（RMSレベルでは発話区間を判定できない）。判定器そのものを替えられると確認できるまで着手しない、と決めてある"
+    },
+    {
+      "id": "cpp_experiment",
+      "title": "App Store CPP（訴求別ページ）の実験を回す",
+      "expected_effect": 5,
+      "effort_days": 2,
+      "evidence_strength": "hypothesis",
+      "risks": ["review"],
+      "evidence": [],
+      "note": "34本作成済みだが実験として回っていない。**効果の根拠がまだ無い**ので、作るより先に測る対象"
+    }
+  ]
+}
