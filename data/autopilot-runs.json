@@ -474,7 +474,8 @@
       "failure_class": "permissions",
       "failed_at": "2026-08-22T06:20+09:00",
       "detected_at": "2026-08-22T07:30+09:00",
-      "detected_note": "副系CCR(07:30)が get_job_logs で検知。**未解消**"
+      "resolved_at": "2026-08-22T14:00+09:00",
+      "detected_note": "副系CCR(07:30)が get_job_logs で検知。PR #526 マージ（同日14:00 JST）が解消時刻。2026-08-23の主系run(ap-20260823-actions)がgit push/gh pr createの実地成功で修理を確認した"
     },
     {
       "run_id": "ap-20260822-ccr0730",
@@ -490,6 +491,24 @@
       "interventions": [],
       "failure_reason": null,
       "external_ref": null
+    },
+    {
+      "run_id": "ap-20260823-actions",
+      "date_jst": "2026-08-23",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 538,
+      "artifact": "/obsidian/pricing/",
+      "failure_reason": null,
+      "external_ref": "32599191984",
+      "interventions": [],
+      "source": "session",
+      "repair_of": [
+        "ap-20260822-actions"
+      ]
     }
   ]
 }
