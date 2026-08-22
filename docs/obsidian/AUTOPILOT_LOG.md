@@ -1322,3 +1322,144 @@ PR#523で入った当日ブランチの占有**、と理解しておくこと。
 - レーンA/BはBQの28日窓（2026-09-06前後）まで正当化できない。**それまで2週間、
   レーンEの充填記事が続く設計になっている点はオーナーの判断を仰ぐ価値がある**
   （CLAUDE.mdもVISIONも量を目的にしていない）。
+
+## 2026-08-23（主系GitHub Actions・06:00 JST） — 主系が初めて自走した。C04 `/obsidian/pricing/` 出荷。egressブロックは環境依存と判明
+
+### §0 冪等性チェックと占有
+
+`git fetch origin`後、(a) `claude/obsidian-auto-20260823`ブランチなし (b) 本番status JSONの
+`date_jst`=2026-08-22 (c) `origin/main`の同ファイルも2026-08-22 (d) 当日作成PRなし (e) 主系の
+最新runはこのセッション自身（`32599191984`・`status: in_progress`）で、他に走っているものは
+無い。4点とも実行進行の妨げにならないことを確認し、§0-2の占有手順（空コミットのpush）を実行。
+**push は一発で成功し、非fast-forwardで弾かれることもなかった。**
+
+### レーンF（自己修復）: `ap-20260822-actions`の修理を確定させた
+
+`node scripts/autopilot-selfheal.mjs`は本セッション開始時点で `ap-20260822-actions`
+（`permissions`・成果物ゼロ）を**未修理**として報告した。しかし実際には同日昼、PR #526
+（`fix(autopilot): 主系の「緑のまま何も出さない」を塞ぐ＋dataview記事の実測表記を2点訂正`・
+2026-08-22T05:00:08Z=14:00 JSTマージ）で`claude_args`に`--allowedTools`が追加済みで、
+台帳への`repair_of`記載だけが漏れていた（当時のセッションが記事出荷を優先し、ledger更新を
+やり切らなかったため）。
+
+**このセッション自身が、その修理が効いたかどうかの実地検証になった。** `git checkout -B`・
+`git commit --allow-empty`・`git push`が主系（GitHub Actions・claude-code-action）の
+Bash経由で問題なく実行でき、後述のとおり`gh pr create`まで完走した。これは
+`--allowedTools`修理が実際に機能していることの直接証拠であり、主系が2026-08-12の導入以来
+**初めて自走した**（`data/autopilot-runs.json`の経路別内訳で「主系0/3出荷」だったものが
+今回で更新される）。`ap-20260822-actions`に`resolved_at`（PR #526マージ時刻）を追記し、
+本日の実行行に`repair_of: ["ap-20260822-actions"]`を記録した。
+
+### 新たに判明したこと: egressブロックは副系CCR環境固有で、主系GitHub Actionsには無い
+
+2026-08-21・08-22の副系CCRセッションは`obsidian.md`・`notion.com`・`github.com`本体等への
+直接アクセスが軒並み`EGRESS_BLOCKED`/403だったと記録していた（C04〜C10を`blocked`にした
+根拠）。本セッション（主系・GitHub Actions実行環境）で同じドメインへ`curl`したところ
+
+```
+obsidian.md          → 200
+obsidian.md/pricing  → 200
+obsidian.md/sync     → 200
+obsidian.md/publish  → 200
+notion.com           → 302（到達可）
+raw.githubusercontent.com → 200
+simplememofast.com   → 200
+```
+
+と**すべて到達可能**だった。つまり過去のegressブロックの記録は「このRunbookの実行主体は
+制限されている」という一般化ではなく、**副系CCRの実行環境固有の制限**だったと確定できる。
+次回以降、CCR側のセッションはこの制限を引き続き前提にすべきだが、主系GitHub Actionsのセッションは
+obsidian.md/notion.com系ドメインを一次情報として直接使ってよい。
+
+### レーンE: C04 `/obsidian/pricing/` を実装（`blocked`→`done`）
+
+`coverage-queue.json`のpending先頭は egressブロックで`blocked`のC04を飛ばした結果C05
+だったが、C04の`blocked_by`理由（egress）が上記の通り本セッションでは解消していたため、
+**先にC04を再評価して実装した**（C05は複数の同期方式を比較する大きめの記事で、
+「1セッション1アクション」の原則により今回は見送り、次回以降の候補として残す）。
+
+**固有価値（この回の一次情報）**: `obsidian.md/pricing`を直接取得し、価格表・FAQ本文を
+書き起こした。
+
+- Sync: $4/user/月（年払い）・$5/user/月（月払い）
+- Publish: $8/site/月（年払い）・$10/site/月（月払い）
+- Catalyst: $25（一回払い）
+- 商用ライセンス: $50/user/年
+- 学生・教員・非営利40%割引（Sync/Publishのみ）、Sync/Publishは7日以内全額返金
+  （Catalyst・商用・Creditは返金対象外）
+- 日本円換算はFrankfurter API（ECB基準レート、$1=¥158.7・2026-08-21付）による参考値と
+  明記し、実際の決済レートとは異なる旨を注記
+
+**書かなかったこと**: 価格の変更履歴（キューの`unique_value`が期待していた項目の一つ）は
+この環境で検証可能な一次資料が無いため扱っていない。Sync/Publishの実際の購入・実機動作
+検証（クレジットカード決済が必要）も行っていない。ページ内の検証環境欄に両方明記した。
+
+- やったこと: `/obsidian/pricing/`新設。被リンク2本配線（`/obsidian/`の関連ページ欄・
+  `/obsidian/getting-started/`の関連ページ欄。`/obsidian/`は実験凍結中だが関連リンクの
+  追記のみ許可されている範囲）＋`content-graph.json`登録（cluster=obsidian-beginner・
+  parent=/obsidian/・siblings=what-is-vault/getting-started/plugins）＋デスクトップQR
+  （`QR_PAGES`に`obsidian-pricing`追加、`--check`で37件全件独立デコード検証・既存35件は
+  バイト同一）＋OG画像（`generate-og-batch.js`にエントリ追加・今回は
+  `npx playwright install --with-deps chromium`が2.5分程度で完走したため素直に実行できた）
+  ＋sitemap再生成（コミット後に実行）。`coverage-queue.json`のC04を`blocked`→`done`に更新し、
+  `done_note`に環境依存だった旨を記録。
+
+- PR: #（本エントリと同じPRで作成・番号は下記参照）
+
+- 検証: Runbook §4 の全チェック通過 — `seo-check`（264ファイル・0 errors 0 warnings）/
+  `check-css-version` OK / `check-benchmark`（新規CONFLICT・AMBIGUOUS増なし、既存は
+  vs/notion系の既知分のみ）/ `check-url-normalization`（197 passed）/
+  `check-internal-redirects`（13,330 href/src + 5,251 JSON-LD/meta + 586 sitemap URL
+  すべて直接200）/ `sync_constants --check` OK / `tag-cta-placements --check` OK
+  （49件page-level ct=）/ `check-experiments`（36件中21 open・due 0・overdue 0）/
+  `check-content-graph`（24 entries OK）/ `generate_sitemap.py --check` OK /
+  `autopilot-budget/runs/authority/selfheal/drill --check` / `automation-rate --check` /
+  `check-pr-facts --check`（既存の旧文書の指摘のみ、新規ページに問題なし）/
+  `d-score --check`。QRは`--check`で37件全件独立デコード検証。**iPhone 390×844 DPR3
+  実描画QA**（Playwright新規インストール・`npx playwright install --with-deps chromium`は
+  約2.5分で完走）: 水平スクロールなし（scrollWidth=clientWidth=390）・回答ブロックは
+  ファーストビュー内（top=636px）・QRはモバイルdisplay:none/デスクトップflexを実描画確認・
+  JA→EN切替（lang.js）正常・コンソール/HTTPエラー0。検証後`npm uninstall playwright qrcode
+  jsqr`で後片付け。
+
+### データ鮮度（BigQuery・本セッションにMCPツールなし）
+
+このセッションにBigQuery MCPは接続されておらず、`node growth/scripts/bq-preflight.mjs`も
+資格情報なしで認証失敗（`bq_checked`相当としては「取得できなかった」）。ただし
+`seo-daily.yml`の同日run（`32599398720`・06:22 JST開始、`Credentials are configured: success`）
+の`Export preflight`ステップのログを`gh run view --log`で読み、次を確認できた:
+
+- `searchdata_site_impression`の最新`data_date`は**2026-08-20**（11日分蓄積・28日窓到達は
+  引き続き**2026-09-06前後**の見込み）
+- 08-14〜08-17の一部テーブルで再エクスポート失敗の痕跡があるが、`growth/BIGQUERY_SETUP.md`の
+  判定表どおり「配信済みの日の再送が失敗しただけ」でデータ欠損ではない
+
+この経路（seo-dailyワークフローの実行ログ経由）は自分でBigQueryへ問い合わせたわけではないが、
+「取得できなかった」と「増えていない」を区別する目的には使えるため、status JSONでは
+`bq_checked: true`（出典明記）とした。
+
+### オーナー依頼の棚卸し（§1-3）
+
+1. **【解消・繰越不要】** 主系の`permission_denials`問題 — 本セッション自身がブランチ占有・
+   git push・（後述の）`gh pr create`を問題なく実行できたことで、PR #526の修理が実効している
+   ことを実地で確認した。継続監視は不要。
+2. **【再分類・オーナー作業ではない】** obsidian.md/notion.com系のegressブロック —
+   上記の通り副系CCR環境固有の制限と判明した。オーナーへの確認依頼ではなく、
+   「CCR実行時はこの制限を前提にレーンE候補を選ぶ」という運用側の申し送りに切り替える。
+3. **【実測手段なし・現状維持】** `simplememo-api`のstreak/data_freshness描画 — コード対応は
+   2026-08-21付ログの通り完了しているはずだが、実際の日報メールでの見え方はこのセッションから
+   確認できない。次に日報を受け取った回でオーナーが確認するのを待つ。
+
+新規のオーナー作業依頼は無し。
+
+### 次回への申し送り
+
+- 主系が自走できることが確認できたので、次回以降は主系06:00 JSTを本来の実行経路として扱ってよい。
+  副系CCR（07:30・09:20）は引き続きフォールバックとして温存する。
+- レーンEの次candidate: `coverage-queue.json`のpending先頭は**C05 `/obsidian/sync/`**
+  （P1・iCloud/公式Sync/Git/Syncthingの比較。Git同期はこの環境で実機再現できる可能性がある）。
+  1セッション1アクションの原則に沿って次回以降で着手する。
+- obsidian.md/notion.comへのアクセスは主系GitHub Actionsでは制限が無いことが分かったので、
+  C05〜C10（Sync/Publish/Notion比較）はこの経路であれば着手可能。ただしCCR副系では
+  引き続きegressブロックを前提にすること（経路によって条件が違う点を毎回明記する）。
+- レーンA/BはBQの28日窓（2026-09-06前後）まで引き続き正当化できない。

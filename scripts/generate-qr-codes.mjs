@@ -60,6 +60,7 @@ export const QR_PAGES = [
   { slug: 'obsidian-vault',             en: true },
   { slug: 'obsidian-plugins',           en: true },
   { slug: 'obsidian-plugins-dataview',  en: true },
+  { slug: 'obsidian-pricing',            en: true },
   // Added 2026-08-11 on request. Fewer search clicks than the original nine
   // (6 against 20-38 in the 2026-08-11 snapshot), so expect little volume — but a
   // QR costs nothing and this is the page the whole measurement workstream feeds

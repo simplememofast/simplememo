@@ -74,8 +74,9 @@
       ],
       "unique_value": "Sync/Publish/Catalyst/商用利用の現行価格を公式ソースから当日確認・日本円換算表・変更履歴を記録",
       "collides_with": null,
-      "status": "blocked",
-      "blocked_by": "2026-08-21実測: obsidian.md（www./help.obsidian.md含む）が本セッションのネットワークegressプロキシで遮断されており（EGRESS_BLOCKED）、価格ページの一次情報を当日検証できない。§0原則4（検証できない主張は書かない）によりこのセッションでは実装を見送った。同じクラスタのC05〜C07も同じドメインの公式仕様/価格を根拠に必要とするため、同様に影響を受ける可能性が高い（未検証）。次回セッションでegress制限の有無を再確認してから着手すること。代わりにC11（プラグイン公式レジストリ実カウント、GitHub生コンテンツ経由で検証可能）を本日実装した"
+      "status": "done",
+      "blocked_by": "2026-08-21実測: obsidian.md（www./help.obsidian.md含む）が副系CCRのネットワークegressプロキシで遮断されており（EGRESS_BLOCKED）、当時は価格ページの一次情報を検証できなかった（履歴として残す）。",
+      "done_note": "2026-08-23（主系GitHub Actions実行）: このセッションの環境ではobsidian.md（pricing/sync/publish配下含む）に直接到達可能（curl 200）だったため、08-21のblocked判定は環境依存だったと確定。obsidian.md/pricingを直接取得し、Sync $4-5/Publish $8-10/Catalyst $25/商用$50の現行価格・40%学生割引・7日返金規定を検証して実装。日本円換算はFrankfurter API(ECB基準レート)による参考値として明記。価格の変更履歴は検証可能な一次資料が無かったため今回は扱っていない。"
     },
     {
       "id": "C05",
