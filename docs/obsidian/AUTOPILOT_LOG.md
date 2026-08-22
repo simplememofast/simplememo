@@ -1234,3 +1234,91 @@ lastmodが正しく解決できず、無関係な`/download/`のlastmodも巻き
   など、GitHub/一般Web検索（WebFetch/WebSearch経由）で完結する項目を優先する。
 - C12で使った「WebFetch/WebSearchはcurlより広く到達できる」という知見は、今後の
   レーンE候補選定で活用できる（curlで403でも即座に「検証不能」と諦めない）。
+
+---
+
+## 2026-08-22（追記・オーナーの評価依頼） — 主系の権限不足を特定して修正。依頼#3は分類ミスだった
+
+オーナーから上記レポートの評価を求められたので、報告値を一次ソースで取り直した。
+**実測値はほぼ正確だった**（permission_denials=14・DL数3位・updated 2025-04-07 19:17 UTC・
+manifest 0.5.68・タグ0.5.70の存在・sitemap掲載、いずれも再現）。
+一方で**依頼の立て方と、実測の書き方に問題があった**。
+
+### 1. 主系の成果物ゼロは「オーナー確認案件」ではなく、自分で直せる案件だった
+
+上の欄は「obsidian-autopilot.ymlの実行権限を確認してほしい」とオーナーに投げていたが、
+根本原因はこのセッションから確定できた。証拠は3つ。
+
+1. ジョブログのSDK optionsに `allowedTools` も `permissionMode` も**無い**
+   （`maxTurns` と `systemPrompt` だけが渡っている）
+2. `settingSources: ["user","project","local"]` とあるが、
+   **リポジトリに `.claude/` ディレクトリが存在しない** → project層の許可はゼロ
+3. claude-code-action の公式ドキュメント —
+   *"Claude does **not** have access to execute arbitrary Bash commands by default"*
+
+そしてプロンプトが要求する動作は git の branch/commit/push・`gh pr create`・
+`npx playwright install`・node の検証スクリプトで、**全部Bash**。
+つまり出荷手段が最初から全部塞がれた状態で30ターン回り、$0.81を焼いて
+何も出せないまま success で終わっていた。謎の権限問題ではなく、
+`claude_args: "--max-turns 250"` に `--allowedTools` が無いという一点。
+
+**分類の誤り**: Runbook §7の owner_requests は「できないこと（iOS Simulator実行・
+オーナー作業）」のための欄。このワークフローファイルは PR#522・#523 で自分で2回
+書き換えて通している。**直せるものを依頼欄に積むと、直る日が翌朝以降に延びる。**
+以後、依頼として積む前に「自分のPRで直せるか」を先に確認すること。
+
+### 2. 直したもの（`.github/workflows/obsidian-autopilot.yml`）
+
+- **`--allowedTools` を追加**。Bash・Read/Write/Edit・Glob/Grep・WebFetch/WebSearch等。
+  allowed_bots と同じ理由で権限昇格にはならない（schedule と workflow_dispatch でしか
+  起動せず、外部から踏ませる経路が無い）。
+- **「成果物ゼロなら落とす」ステップを追加**。主系は08-18以降、毎日違う理由で不発に
+  なりながらjobは緑で終わってきた（実行空白 → aptで90分枯渇 → actor拒否で3秒failure →
+  ツール不許可で成果物ゼロ）。壊れ方は毎回違うが、**「緑なのに何も出ていない」を
+  検知できないという一点が共通**していて、それが毎回、気づくのを遅らせている。
+  PR#525でsitemapに入れた `--check` と同じ考え方を、1日分の出荷を落とした当の対象にも置く。
+  当日ブランチも本番status JSONの当日分も無ければ非ゼロで終わる。
+
+### 3. 記事の訂正（`/obsidian/plugins/dataview/`）
+
+実測を売りにしているページとしては見過ごせない2点。順位3位という結論は変わらない。
+
+- **分母の出典違い**。「登録6,840個中3位」を表で `community-plugin-stats.json` に
+  帰属させていたが、6,840は `community-plugins.json`（レジストリ一覧）の件数。
+  順位を計算した stats.json の収録数はこれより少ない（再取得時点で6,827件）。
+  表を2行に分け、本文・FAQ・JSON-LD・meta descriptionも書き分けた。
+  参考文献欄は元から正しく書き分けられていた。
+- **「前回計測との差 ±0件（完全一致）」の解釈が逆**。裏取りの証拠のように書かれて
+  いたが、実際は上流JSONが2回の取得の間に再生成されていなかっただけ。
+  同日13:00 JSTの再取得では4,818,936件で、約5時間で+13,301件動いている。
+  「24時間で増分ゼロ」と誤読されるので、そう読まないよう明記した。
+
+### 4. 新しく分かったこと（egressについて・依頼#2に追加）
+
+**`simplememofast.com` 自体もegressプロキシでブロックされている**（curl・WebFetch とも
+403 / EGRESS_BLOCKED）。つまり副系CCRは Runbook §0 の冪等チェック(b)「本番status JSONの
+date_jst」を**実行できない環境にいる**。今回は(c) `origin/main` のstatus JSONが同じ役割を
+果たしたので二重出荷は起きていないが、**(b)は best-effort、実質のガードは(c)と、
+PR#523で入った当日ブランチの占有**、と理解しておくこと。
+
+### 5. 検証
+
+`seo-check.js` 0 errors 0 warnings（261ファイル）/ `check-content-graph`（23件OK）/
+`check-css-version` OK / `check-script-tags`（262ファイル balanced）/
+`check-url-normalization`（197 passed）/ `sync_constants --check` OK /
+`tag-cta-placements --check` OK / `generate_sitemap.py --check` OK /
+`check-benchmark` は既存のvs/notion系警告のみで新規CONFLICTなし。
+ワークフローYAMLは `yaml.safe_load` でパース確認（5ステップ・`claude_args` に
+`--allowedTools` が入ることを確認）。編集したページのJSON-LD 4ブロックは全て
+`json.loads` を通り、`data-lang` の ja/en 増分も±同数（既存の1件差は編集前から同じ）。
+
+### 次回への申し送り
+
+- **明日（2026-08-23）06:00 JSTの主系runが最初の答え合わせ。** `--allowedTools` 追加後に
+  実際にブランチとPRを作れれば、主系は初めて自走したことになる。作れていなければ
+  「成果物ゼロなら落とす」が赤で知らせるので、ジョブログのresult行（`num_turns` /
+  `permission_denials_count`）を最初に読むこと。
+- 主系が自走を始めるまでは、副系CCRが実質の主系であり続ける前提で候補を選ぶこと。
+- レーンA/BはBQの28日窓（2026-09-06前後）まで正当化できない。**それまで2週間、
+  レーンEの充填記事が続く設計になっている点はオーナーの判断を仰ぐ価値がある**
+  （CLAUDE.mdもVISIONも量を目的にしていない）。
