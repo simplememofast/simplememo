@@ -267,16 +267,25 @@
     {
       "area": "② バグ修正",
       "task": "依存脆弱性・秘密情報・SBOM・署名検査",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "secret scanningは使えるがSBOM無し"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/scripts/check-supply-chain.mjs",
+        "../simplememo-api/data/sbom.json"
+      ],
+      "note": "2026-08-22実装（simplememo-api）。SBOM 259件（**実行時はわずか1件**、残り258は開発時）・integrity欠落0件・秘密情報スキャン。**値は出力しない**（出力に秘密を写したら意味が無い）。**既知脆弱性の照合（npm audit）は意図的に含めない** — 外部DB依存でCIの合否が日替わりになり、やがて無視されるため",
+      "since": "2026-08"
     },
     {
       "area": "② バグ修正",
       "task": "Fuzz / Property-based / Mutation Test",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "決定論的テストが先。この規模ではまだ費用対効果が読めない"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/property-tests.mjs",
+        "scripts/autopilot-gate.mjs",
+        "scripts/autopilot-budget.mjs"
+      ],
+      "note": "2026-08-22実装。実行判定と予算集計の**不変条件12件**を、種を固定した乱択400ケース／件で検査する。ドリル（26の具体例）が守れない**書かなかった組み合わせ**を踏むのが目的。変異テストで検出力を確認（forceが予算を飛び越える／認証切れが予算の陰に隠れる、をどちらも検出）。**アプリ側のfuzzは未実装**",
+      "since": "2026-08"
     },
     {
       "area": "② バグ修正",
@@ -849,9 +858,14 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "新モデル導入前の固定評価セット",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "評価セットを作る前に、まず何を評価すべきかが定まっていない"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/model-eval-set.json",
+        "scripts/check-model-eval.mjs",
+        "data/model-routing.json"
+      ],
+      "note": "2026-08-22実装。失敗分類の6ケースを固定し、合格ライン83%＋**「分からない」と答えられること2件を必須通過**にした。合格条件は決定論（ラベルの照合のみ）— AIにAIを採点させると採点側を替えた時点で履歴が無効になるため。**評価はまだ一度も走らせていない**ので policy.enforce は false（true にすると現行3モデルが未評価で落ちる）",
+      "since": "2026-08"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -1120,9 +1134,14 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "重大案件の有人移管",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "ルールが明文化されていない"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/escalation-rules.json",
+        "scripts/check-escalation.mjs",
+        "data/authority-matrix.json"
+      ],
+      "note": "2026-08-22実装。実行判定が返す故障・縮退コード5件と、運転台帳に**実際に現れた** failure_class 4件の全部に規則が要る（規則の無い種別があると落ちる）。危機領域は stop_automation: true を強制。**owner_direct の経路は未整備**で、名前が付いただけであることも台帳に書いてある",
+      "since": "2026-08"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1392,9 +1411,14 @@
     {
       "area": "⑪ データ・プライバシー",
       "task": "第三者SDKのデータ送信監査",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**前提の棚卸しは完了したがサーバ側のみ。**第三者SDKは端末側の話で、PrivacyInfo.xcprivacy はあるが実送信の監査は無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/check_third_party_egress.py",
+        "../simplememo-ios/data/third-party-egress.json",
+        "../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy"
+      ],
+      "note": "2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false",
+      "since": "2026-08"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1438,16 +1462,26 @@
     {
       "area": "⑫ 事業継続性",
       "task": "Circuit Breaker",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "外部依存の障害パターンをまだ観測できていない"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/circuit-breaker.ts",
+        "../simplememo-api/src/resend.ts",
+        "../simplememo-api/test/circuit-breaker.test.ts"
+      ],
+      "note": "2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**",
+      "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",
       "task": "Dead Letter Queue",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "Outbox（端末側）が実質これを担っている。サーバ側は未実装"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/dlq.ts",
+        "../simplememo-api/migrations/0018_email_dead_letters.sql",
+        "../simplememo-api/data/data-retention.json"
+      ],
+      "note": "2026-08-22実装（simplememo-api）。**本文も平文の宛先も保存しない** — 再送のために本文を貯めると、保持期間の議論をやり直さずに新しい個人データストアを作ることになる。テンプレート由来は再送できるが、**メモ中継は再送できない**（落ちた事実だけ残す）。種別が不明なときは再送しない側へ倒す。保持35日・剪定つき",
+      "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",

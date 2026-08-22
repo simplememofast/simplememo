@@ -11,32 +11,45 @@
 
 | 指標 | 値 | 分母 |
 |---|---:|---|
-| **総合自動化率** | **41.9%** | 定義タスク 172（未実装を含む・**最も厳しい**） |
-| AI実行率 | 58.1% | 実施中タスク 124（未実装を除く） |
-| AI関与率 | 84.7% | 同上（提案・下書きまで含める・**最も甘い**） |
-| カバー率 | 72.1% | そもそも誰かがやっているタスクの割合 |
+| **総合自動化率** | **45.9%** | 定義タスク 172（未実装を含む・**最も厳しい**） |
+| AI実行率 | 60.3% | 実施中タスク 131（未実装を除く） |
+| AI関与率 | 85.5% | 同上（提案・下書きまで含める・**最も甘い**） |
+| カバー率 | 76.2% | そもそも誰かがやっているタスクの割合 |
 
-内訳: 自律 6 / ゲート付き実行 66 / 提案 33 / 人間 19 / **未実装 48** / 意図的にやらない 2
+内訳: 自律 6 / ゲート付き実行 73 / 提案 33 / 人間 19 / **未実装 41** / 意図的にやらない 2
 
 **4つを必ず並べて出す。**分母を1つに決めると必ず都合のよい数字になる。
 **総合自動化率とカバー率を隠してAI関与率だけ出すのが、ここで一番やってはいけないこと。**
 
 ### 読み方
 
-- **AI関与率 84.7%** — 「誰かがやっているタスクの8割強にAIが関わっている」。**この数字だけ見ると誤解する**
-- **総合自動化率 41.9%** — 「あるべきタスクのうちAIが実行しているのは4割強」。**これが現在地**
-- **カバー率 72.1%** — 3割弱は**誰もやっていない**。自動化以前に未着手
-
-つまり **AIが関わっている領域では実際に手を動かしているが、そもそも手が付いていない領域が3割弱ある**。
+- **AI関与率 85.5%** — 「誰かがやっているタスクの8割強にAIが関わっている」。**この数字だけ見ると誤解する**
+- **総合自動化率 45.9%** — 「あるべきタスクのうちAIが実行しているのは4割半」。**これが現在地**
+- **カバー率 76.2%** — 4分の1弱は**誰もやっていない**。自動化以前に未着手
 
 ### 2026-08-22 の実装で動いた分
 
-37.2% → **41.9%**（AI実行タスク 64 → 72）。動かしたのは9項目で、内訳は
-⑩障害演習 / ⑤タスク単位の予算 / ⑤モデルルーター / ①実験基盤の対照群・停止条件 /
-⑥データ品質 / ⑦取引先の許可リスト / ①シグナルの統合台帳 / ⑧公開面の事実検査。
+37.2% → **45.9%**（AI実行タスク 64 → 79）。16項目を実装した。
+
+前半9件（障害演習・タスク単位の予算・モデルルーター・実験基盤の対照群・データ品質・
+取引先の許可リスト・シグナル統合台帳・公開面の事実検査）と、
+後半7件（性質テスト・モデル評価セット・有人移管・SBOM／秘密情報・
+Circuit Breaker・Dead Letter・第三者SDK送信監査）。
 
 **分類を書き換えたのではなく、動くものを足した。**証跡ファイルを指せないタスクを
 AI実行側に数えることはCIが禁止しているので、順序は常に実装 → 台帳になる。
+
+### この先の天井
+
+```
+  現在                        79 / 172 = 45.9%
+  未実装 41 件を全部埋めても            →  69.8%
+  提案どまり 33 件も実行へ上げたら        →  89.0%  ← **天井**
+```
+
+**89.0% が天井。**人間専任19件（実機での事前確認・App Store公開・価格変更・
+危機対応・アナログ領域の6件など）を人間に残す限り、AI実行に回せるのは最大153件。
+**90%超を数字として出すには、人間専任のどれかをAIに渡すしかない。**
 
 ---
 
@@ -44,29 +57,29 @@ AI実行側に数えることはCIが禁止しているので、順序は常に�
 
 | 領域 | 総合 | 実行 | 関与 | カバー | 自律/ゲート/提案/人間/未実装 |
 |---|---:|---:|---:|---:|---|
+| ⑤ AI予算・トークン管理 | **66.7%** | 76.9% | 92.3% | 86.7% | 0/10/2/1/2 |
 | ⑩ AgentOps・ガバナンス | **66.7%** | 80.0% | 100.0% | 83.3% | 0/8/2/0/2 |
-| ⑤ AI予算・トークン管理 | **60.0%** | 75.0% | 91.7% | 80.0% | 0/9/2/1/3 |
+| ⑫ 事業継続性 | **66.7%** | 75.0% | 100.0% | 88.9% | 0/6/2/0/1 |
+| ② バグ修正 | **64.7%** | 68.8% | 93.8% | 94.1% | 1/10/4/1/1 |
+| ⑪ データ・プライバシー | **60.0%** | 66.7% | 88.9% | 90.0% | 0/6/2/1/1 |
 | ③ 自律型マーケティング | **57.7%** | 75.0% | 90.0% | 76.9% | 2/13/3/2/6 |
 | ① 次期機能開発 | **57.1%** | 61.5% | 100.0% | 92.9% | 2/6/5/0/1 |
-| ② バグ修正 | **52.9%** | 64.3% | 92.9% | 82.4% | 1/8/4/1/3 |
-| ⑪ データ・プライバシー | **50.0%** | 62.5% | 87.5% | 80.0% | 0/5/2/1/2 |
-| ⑫ 事業継続性 | **44.4%** | 66.7% | 100.0% | 66.7% | 0/4/2/0/3 |
 | ④ 自動本番デプロイ | **42.9%** | 46.2% | 69.2% | 92.9% | 1/5/3/4/1 |
+| ⑧ カスタマーサポート | **37.5%** | 75.0% | 100.0% | 50.0% | 0/3/1/0/4 |
 | ⑥ アプリ運営意思決定 | **30.8%** | 50.0% | 87.5% | 61.5% | 0/4/3/1/5 |
-| ⑧ カスタマーサポート | **25.0%** | 66.7% | 100.0% | 37.5% | 0/2/1/0/5 |
 | ⑨ マネタイズ | **12.5%** | 25.0% | 75.0% | 50.0% | 0/1/2/1/4 |
 | ⑦ 法人経営 | **7.7%** | 20.0% | 80.0% | 38.5% | 0/1/3/1/8 |
 | ⑬ アナログ領域 | **0.0%** | 0.0% | 12.5% | 61.5% | 0/0/1/7/5 |
 
 ### この表から読めること
 
-1. **⑩AgentOpsと③マーケティングが先頭。**AgentOpsは運転台帳・権限表・自己修復・切替演習・
-   資格情報の期限監視・障害演習を集中実装した分。マーケは毎朝の記事ループが実際に回っているうえ、
-   **広報そのもの（事実検査・主張検査・ヒーロー画像・公開面の事実）が機械化された**から。
-2. **⑦法人経営が 0.0% を抜けた。**取引先・送金先の許可リストが実装され、13タスク中1つがAI実行に。
-   ただし**残る8つは未実装**で、経理・税務・労務・契約審査は依然として証跡ゼロ。
+1. **⑫事業継続性と⑩AgentOpsが先頭。**冗長化・自己修復・障害演習・Circuit Breaker・
+   Dead Letter が揃った領域。**運用が止まらないための機構は、いちばん自動化しやすい**
+   — 判断が要らず、正解が決定論的だから。
+2. **⑦法人経営は依然として最下位級。**13タスク中8が未実装で、
+   経理・税務・労務・契約審査は証跡ゼロ。**ここは実装の問題ではなく、
+   証跡の形をオーナーが決めるところから。**
 3. **⑬アナログ領域の総合0.0%は正常。**7タスクが `human_only` で、これは失敗ではなく**設計**。
-   ただし**AIが担える側が全部未実装**なので伸ばす余地は残る。
 4. **AI関与率は多くの領域で90%超。**「AIが関わっていない領域はほぼ無い」が
    「AIが実行まで持っている領域は少ない」。
 
@@ -75,6 +88,28 @@ AI実行側に数えることはCIが禁止しているので、順序は常に�
 ## 2. タスク単位（全174件）
 
 `node scripts/automation-rate.mjs --area <領域名の一部>` で同じものが出る。
+
+### ⑤ AI予算・トークン管理
+
+総合 **66.7%** ／ 実行 76.9% ／ 関与 92.3% ／ カバー 86.7%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| ゲート付き実行 | 実費の記録（月次台帳） | 2026-08-22実装<br>`data/autopilot-cost.json`<br>`scripts/autopilot-budget.mjs` |
+| ゲート付き実行 | 実費の抽出（実行ログから） | total_cost_usd を抽出しサマリと通知へ<br>`.github/workflows/obsidian-autopilot.yml` |
+| ゲート付き実行 | 上限超過での自己停止 | 予算ゲートが主系runを止める。副系は止められない<br>`.github/workflows/obsidian-autopilot.yml` |
+| 人間 | 月次上限の決定 | 現在 placeholder $40。実測由来ではない<br>`data/authority-matrix.json` |
+| ゲート付き実行 | 1記事あたり単価の算出 | usd_per_shipped。課金者あたりは無い<br>`scripts/autopilot-budget.mjs` |
+| ゲート付き実行 | タスク単位の予算 | 2026-08-22実装。article/repair/analysis/pr/qa_triage の5種別に月次枠。**合計が月次上限を超えるとCIが落ちる**（超えたら枠は装飾）。種別の枠切れでは主系全体を止めない — 記事の枠切れが修理まで巻き込むため。**枠も暫定**（月次上限が placeholder なので、そこから割った枠も placeholder）<br>`data/autopilot-cost.json`<br>`scripts/autopilot-budget.mjs`<br>`.github/workflows/obsidian-autopilot.yml` |
+| ゲート付き実行 | モデル別・再試行別の内訳 | 2026-08-22実装。実行ログの modelUsage から記録。**費用の按分はログに無いので回数しか言えない**<br>`data/autopilot-cost.json`<br>`scripts/autopilot-budget.mjs` |
+| ゲート付き実行 | 品質・速度・価格に応じたモデルルーター | 2026-08-22実装。種別→モデルを台帳化し、ワークフローが --resolve で引く。**引かれない表は装飾**なので、ワークフローが実際に呼んでいることをCIが見る。**不可逆なタスク（対外配信）を最安ティアに落とすことを禁止**（節約額より失う額が大きい）<br>`data/model-routing.json`<br>`scripts/check-model-routing.mjs`<br>`.github/workflows/obsidian-autopilot.yml` |
+| 提案のみ | 小型→大型→人間への段階的移管 | QA分類のみ実装（2モデル→不一致なら人間）<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
+| **未実装** | Prompt Cache・結果キャッシュ・コンテキスト圧縮 | 実費が月$25前後の見込みで、最適化の効果より実装コストが上回る段階 |
+| ゲート付き実行 | 無限ループ・重複実行の防止 | --max-turns 250・当日ブランチ占有・冪等性チェック<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
+| ゲート付き実行 | 異常消費の検知 | 2026-08-22実装。絶対額ではなく直近中央値との比。実績5件未満では『判定していない』と言う<br>`scripts/autopilot-budget.mjs`<br>`data/autopilot-cost.json` |
+| 提案のみ | モデル障害・レート制限時のフォールバック | QA分類は2モデル構成。autopilot 側も 2026-08-22 に fallback を台帳へ定義し、resolve が縮退先を返すようにした。**ただし使えないモデルを検知して渡す経路がまだ無い**ので、実行者は提案のまま<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
+| ゲート付き実行 | 新モデル導入前の固定評価セット | 2026-08-22実装。失敗分類の6ケースを固定し、合格ライン83%＋**「分からない」と答えられること2件を必須通過**にした。合格条件は決定論（ラベルの照合のみ）— AIにAIを採点させると採点側を替えた時点で履歴が無効になるため。**評価はまだ一度も走らせていない**ので policy.enforce は false（true にすると現行3モデルが未評価で落ちる）<br>`data/model-eval-set.json`<br>`scripts/check-model-eval.mjs`<br>`data/model-routing.json` |
+| **未実装** | 副系CCRの実費観測 | スケジュール起動セッションのログが外部から読めない。構造的に不可<br>`data/autopilot-cost.json` |
 
 ### ⑩ AgentOps・ガバナンス
 
@@ -95,27 +130,62 @@ AI実行側に数えることはCIが禁止しているので、順序は常に�
 | **未実装** | 自律システムとは別系統の監査AI | 監査対象のログが揃ってきたのは2026-08-22から。まず記録を貯める段階 |
 | ゲート付き実行 | 認証切れ・モデル障害・API障害の演習 | 2026-08-22実装。判定に4つの故障軸（資格情報の拒否・モデル全滅/縮退・GitHub API到達不能・egress遮断）を足し、26シナリオで固定。**「秘密鍵が無い」と「拒否された」を別コードにした** — 混ぜると期限切れが毎日「設計どおりのスキップ」として黙殺される。**本番を落とす本物の演習ではない**（判定の論理だけ）<br>`scripts/autopilot-gate.mjs`<br>`scripts/autopilot-drill.mjs` |
 
-### ⑤ AI予算・トークン管理
+### ⑫ 事業継続性
 
-総合 **60.0%** ／ 実行 75.0% ／ 関与 91.7% ／ カバー 80.0%
+総合 **66.7%** ／ 実行 75.0% ／ 関与 100.0% ／ カバー 88.9%
 
 | 実行者 | タスク | 状況・証跡 |
 |---|---|---|
-| ゲート付き実行 | 実費の記録（月次台帳） | 2026-08-22実装<br>`data/autopilot-cost.json`<br>`scripts/autopilot-budget.mjs` |
-| ゲート付き実行 | 実費の抽出（実行ログから） | total_cost_usd を抽出しサマリと通知へ<br>`.github/workflows/obsidian-autopilot.yml` |
-| ゲート付き実行 | 上限超過での自己停止 | 予算ゲートが主系runを止める。副系は止められない<br>`.github/workflows/obsidian-autopilot.yml` |
-| 人間 | 月次上限の決定 | 現在 placeholder $40。実測由来ではない<br>`data/authority-matrix.json` |
-| ゲート付き実行 | 1記事あたり単価の算出 | usd_per_shipped。課金者あたりは無い<br>`scripts/autopilot-budget.mjs` |
-| ゲート付き実行 | タスク単位の予算 | 2026-08-22実装。article/repair/analysis/pr/qa_triage の5種別に月次枠。**合計が月次上限を超えるとCIが落ちる**（超えたら枠は装飾）。種別の枠切れでは主系全体を止めない — 記事の枠切れが修理まで巻き込むため。**枠も暫定**（月次上限が placeholder なので、そこから割った枠も placeholder）<br>`data/autopilot-cost.json`<br>`scripts/autopilot-budget.mjs`<br>`.github/workflows/obsidian-autopilot.yml` |
-| ゲート付き実行 | モデル別・再試行別の内訳 | 2026-08-22実装。実行ログの modelUsage から記録。**費用の按分はログに無いので回数しか言えない**<br>`data/autopilot-cost.json`<br>`scripts/autopilot-budget.mjs` |
-| ゲート付き実行 | 品質・速度・価格に応じたモデルルーター | 2026-08-22実装。種別→モデルを台帳化し、ワークフローが --resolve で引く。**引かれない表は装飾**なので、ワークフローが実際に呼んでいることをCIが見る。**不可逆なタスク（対外配信）を最安ティアに落とすことを禁止**（節約額より失う額が大きい）<br>`data/model-routing.json`<br>`scripts/check-model-routing.mjs`<br>`.github/workflows/obsidian-autopilot.yml` |
-| 提案のみ | 小型→大型→人間への段階的移管 | QA分類のみ実装（2モデル→不一致なら人間）<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
-| **未実装** | Prompt Cache・結果キャッシュ・コンテキスト圧縮 | 実費が月$25前後の見込みで、最適化の効果より実装コストが上回る段階 |
-| ゲート付き実行 | 無限ループ・重複実行の防止 | --max-turns 250・当日ブランチ占有・冪等性チェック<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
-| ゲート付き実行 | 異常消費の検知 | 2026-08-22実装。絶対額ではなく直近中央値との比。実績5件未満では『判定していない』と言う<br>`scripts/autopilot-budget.mjs`<br>`data/autopilot-cost.json` |
-| 提案のみ | モデル障害・レート制限時のフォールバック | QA分類は2モデル構成。autopilot 側も 2026-08-22 に fallback を台帳へ定義し、resolve が縮退先を返すようにした。**ただし使えないモデルを検知して渡す経路がまだ無い**ので、実行者は提案のまま<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
-| **未実装** | 新モデル導入前の固定評価セット | 評価セットを作る前に、まず何を評価すべきかが定まっていない |
-| **未実装** | 副系CCRの実費観測 | スケジュール起動セッションのログが外部から読めない。構造的に不可<br>`data/autopilot-cost.json` |
+| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系0/3・副系10/10。冗長化が実際に効いた<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
+| ゲート付き実行 | 冪等性 | 当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`scripts/autopilot-budget.mjs` |
+| ゲート付き実行 | 再試行 | 09:20の再試行経路・Resend 429の単発リトライ<br>`.github/workflows/obsidian-autopilot.yml`<br>`../simplememo-api/src/resend.ts` |
+| ゲート付き実行 | Circuit Breaker | 2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**<br>`../simplememo-api/src/circuit-breaker.ts`<br>`../simplememo-api/src/resend.ts`<br>`../simplememo-api/test/circuit-breaker.test.ts` |
+| ゲート付き実行 | Dead Letter Queue | 2026-08-22実装（simplememo-api）。**本文も平文の宛先も保存しない** — 再送のために本文を貯めると、保持期間の議論をやり直さずに新しい個人データストアを作ることになる。テンプレート由来は再送できるが、**メモ中継は再送できない**（落ちた事実だけ残す）。種別が不明なときは再送しない側へ倒す。保持35日・剪定つき<br>`../simplememo-api/src/dlq.ts`<br>`../simplememo-api/migrations/0018_email_dead_letters.sql`<br>`../simplememo-api/data/data-retention.json` |
+| **未実装** | バックアップ・復元 | 本番データはCloudflare D1とApp Store側にあり、復元手順が未整備。**2026-08-22にベンダー台帳で代替の有無を明示** — Apple・Resend・レジストラの3社に代替が無い |
+| 提案のみ | 手動復旧手順 | 文書はある<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`../simplememo-api/DEPLOYMENT.md` |
+| ゲート付き実行 | 障害訓練 | 2026-08-22実装（切替ドリル）。認証切れ・モデル障害・API障害の演習はまだ<br>`scripts/autopilot-drill.mjs` |
+| 提案のみ | 外部サービス停止時の縮退運転 | autopilotは二重化。GitHub/Apple/Cloudflareは単一障害点<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
+
+### ② バグ修正
+
+総合 **64.7%** ／ 実行 68.8% ／ 関与 93.8% ／ カバー 94.1%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| ゲート付き実行 | 監視カバレッジの棚卸し | 2026-08-22実装。13系統を棚卸しし、**検知器が実在するか**と**実際に起きた障害種別に検知経路があるか**をCIが確かめる。『全部見ています』ではなく『何が空いているか』を言うための台帳<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs` |
+| 提案のみ | 統合監視（Crash/API/Watch/課金/問い合わせ） | **棚卸しで穴が特定できた。3系統は気づく経路が無い** — Apple Watchアプリ・課金・問い合わせ。クラッシュ率と送信成功率は指標があるが常時監視になっていない（段階公開中だけガードが見る／人が日次メールを読んだとき）。**executor を上げるのは穴が埋まってから**<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs` |
+| 提案のみ | 問い合わせから再現テストを自動生成 | 手動運用。ただしWatch同期は実績あり<br>`../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md` |
+| ゲート付き実行 | Unit / UI / 契約テストの実行 | XCTest/XCUITest＋Watchブリッジ契約テスト2コピー＋parity CI<br>`../simplememo-ios/.github/workflows/qa-ios.yml` |
+| **未実装** | Visual Regression Test | アプリ側に無い |
+| ゲート付き実行 | オフライン・タイムアウト・500・429の決定論再現 | QAStubURLProtocol。低速回線とバックグラウンド復帰は無い<br>`../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md` |
+| 人間 | 実機/シミュレータでの操作・撮影・計測 | macOS必須。Runbook §7「できないこと」の筆頭<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
+| 提案のみ | アクセシビリティ・文字切れ・多言語の自動検査 | サイト側のみ。アプリ側は無い<br>`scripts/seo-check.js` |
+| 提案のみ | 性能・起動時間の計測 | 定点実測。本番の継続監視ではない<br>`data/benchmark.json` |
+| ゲート付き実行 | 依存脆弱性・秘密情報・SBOM・署名検査 | 2026-08-22実装（simplememo-api）。SBOM 259件（**実行時はわずか1件**、残り258は開発時）・integrity欠落0件・秘密情報スキャン。**値は出力しない**（出力に秘密を写したら意味が無い）。**既知脆弱性の照合（npm audit）は意図的に含めない** — 外部DB依存でCIの合否が日替わりになり、やがて無視されるため<br>`../simplememo-api/scripts/check-supply-chain.mjs`<br>`../simplememo-api/data/sbom.json` |
+| ゲート付き実行 | Fuzz / Property-based / Mutation Test | 2026-08-22実装。実行判定と予算集計の**不変条件12件**を、種を固定した乱択400ケース／件で検査する。ドリル（26の具体例）が守れない**書かなかった組み合わせ**を踏むのが目的。変異テストで検出力を確認（forceが予算を飛び越える／認証切れが予算の陰に隠れる、をどちらも検出）。**アプリ側のfuzzは未実装**<br>`scripts/property-tests.mjs`<br>`scripts/autopilot-gate.mjs`<br>`scripts/autopilot-budget.mjs` |
+| ゲート付き実行 | 失敗の分類（独立2モデル監査） | 2026-08-22実装。割れたら人間に上げる<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
+| ゲート付き実行 | 回帰の合否判定（決定論的） | AIには判定させない設計<br>`../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md` |
+| ゲート付き実行 | セキュリティ監査と修正 | AIが発見しAIが修正。High 1件含む4件<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
+| **自律** | カナリア公開と自動ロールバック | 露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた<br>`../simplememo-api/src/rollout-guard.ts`<br>`../simplememo-api/test/rollout-guard.test.ts` |
+| ゲート付き実行 | 誤修正率・再発率・MTTRの計測 | 2026-08-22に検知時刻を投入。検知まで中央値2.1h/最大50.7h、修理まで中央値0.9h。誤修正率・再発率はまだ<br>`data/autopilot-runs.json`<br>`scripts/autopilot-runs.mjs` |
+| ゲート付き実行 | 基盤故障の検知と自己修復 | 2026-08-22実装。レーンF<br>`scripts/autopilot-selfheal.mjs` |
+
+### ⑪ データ・プライバシー
+
+総合 **60.0%** ／ 実行 66.7% ／ 関与 88.9% ／ カバー 90.0%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| ゲート付き実行 | データ分類（送信可否の allowlist） | CIで強制<br>`../simplememo-ios/scripts/qa/check_analytics_allowlist.py` |
+| 提案のみ | 収集同意 | App Analytics共有オプトイン依存 |
+| ゲート付き実行 | 保持期間の定義（棚卸しと逸脱検査） | 2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる）<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/test/data-retention.test.ts` |
+| ゲート付き実行 | 保持期間の自動削除 | 2026-08-22に app_analytics_events を90日で剪定するようにした（オーナー判断）。棚卸しで見つかった最大の穴がこれ。**23ストア中6つが自動削除つき**になった。**残る10ストアはまだ無期限**（重複送信防止の台帳が中心。email_suppression は意図的に無期限）<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/test/analytics-retention.test.ts`<br>`../simplememo-api/data/data-retention.json` |
+| 提案のみ | 削除要求への対応 | APIは実装済み。運用手順は未整備<br>`../simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md` |
+| ゲート付き実行 | AIへの送信可否の制御 | redact済み要約のみ。メモ本文fixtureは架空<br>`../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh` |
+| ゲート付き実行 | 端末内の暗号化 | AES-GCM-256・Keychain・Data Protection属性<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
+| **未実装** | アクセス履歴 | **前提の棚卸しは2026-08-22に完了**（どこに何があるかは特定済み）。誰がいつ読んだかの記録は未実装 |
+| ゲート付き実行 | 第三者SDKのデータ送信監査 | 2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false<br>`../simplememo-ios/scripts/qa/check_third_party_egress.py`<br>`../simplememo-ios/data/third-party-egress.json`<br>`../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy` |
+| 人間 | 推論をどこで回すかの決定 | VISION §14 未決定論点。Capture本文は個人情報そのもの<br>`../simplememo-ios/docs/VISION.md` |
 
 ### ③ 自律型マーケティング
 
@@ -173,63 +243,6 @@ AI実行側に数えることはCIが禁止しているので、順序は常に�
 | **自律** | 判断理由と結果のDecision Ledger | 機能開発の判断も入るようになった（カナリアガードが判定・根拠・実行有無を毎回KVへ記録する）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた<br>`docs/obsidian/AUTOPILOT_LOG.md`<br>`growth/experiments/experiments.json`<br>`data/autopilot-runs.json`<br>`../simplememo-api/src/rollout-guard.ts`<br>`../simplememo-api/test/rollout-guard.test.ts` |
 | **未実装** | 本番改善サイクルの完走（機能側） | コンテンツ側は完走。機能側0件 |
 
-### ② バグ修正
-
-総合 **52.9%** ／ 実行 64.3% ／ 関与 92.9% ／ カバー 82.4%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| ゲート付き実行 | 監視カバレッジの棚卸し | 2026-08-22実装。13系統を棚卸しし、**検知器が実在するか**と**実際に起きた障害種別に検知経路があるか**をCIが確かめる。『全部見ています』ではなく『何が空いているか』を言うための台帳<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs` |
-| 提案のみ | 統合監視（Crash/API/Watch/課金/問い合わせ） | **棚卸しで穴が特定できた。3系統は気づく経路が無い** — Apple Watchアプリ・課金・問い合わせ。クラッシュ率と送信成功率は指標があるが常時監視になっていない（段階公開中だけガードが見る／人が日次メールを読んだとき）。**executor を上げるのは穴が埋まってから**<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs` |
-| 提案のみ | 問い合わせから再現テストを自動生成 | 手動運用。ただしWatch同期は実績あり<br>`../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md` |
-| ゲート付き実行 | Unit / UI / 契約テストの実行 | XCTest/XCUITest＋Watchブリッジ契約テスト2コピー＋parity CI<br>`../simplememo-ios/.github/workflows/qa-ios.yml` |
-| **未実装** | Visual Regression Test | アプリ側に無い |
-| ゲート付き実行 | オフライン・タイムアウト・500・429の決定論再現 | QAStubURLProtocol。低速回線とバックグラウンド復帰は無い<br>`../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md` |
-| 人間 | 実機/シミュレータでの操作・撮影・計測 | macOS必須。Runbook §7「できないこと」の筆頭<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
-| 提案のみ | アクセシビリティ・文字切れ・多言語の自動検査 | サイト側のみ。アプリ側は無い<br>`scripts/seo-check.js` |
-| 提案のみ | 性能・起動時間の計測 | 定点実測。本番の継続監視ではない<br>`data/benchmark.json` |
-| **未実装** | 依存脆弱性・秘密情報・SBOM・署名検査 | secret scanningは使えるがSBOM無し |
-| **未実装** | Fuzz / Property-based / Mutation Test | 決定論的テストが先。この規模ではまだ費用対効果が読めない |
-| ゲート付き実行 | 失敗の分類（独立2モデル監査） | 2026-08-22実装。割れたら人間に上げる<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
-| ゲート付き実行 | 回帰の合否判定（決定論的） | AIには判定させない設計<br>`../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md` |
-| ゲート付き実行 | セキュリティ監査と修正 | AIが発見しAIが修正。High 1件含む4件<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
-| **自律** | カナリア公開と自動ロールバック | 露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた<br>`../simplememo-api/src/rollout-guard.ts`<br>`../simplememo-api/test/rollout-guard.test.ts` |
-| ゲート付き実行 | 誤修正率・再発率・MTTRの計測 | 2026-08-22に検知時刻を投入。検知まで中央値2.1h/最大50.7h、修理まで中央値0.9h。誤修正率・再発率はまだ<br>`data/autopilot-runs.json`<br>`scripts/autopilot-runs.mjs` |
-| ゲート付き実行 | 基盤故障の検知と自己修復 | 2026-08-22実装。レーンF<br>`scripts/autopilot-selfheal.mjs` |
-
-### ⑪ データ・プライバシー
-
-総合 **50.0%** ／ 実行 62.5% ／ 関与 87.5% ／ カバー 80.0%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| ゲート付き実行 | データ分類（送信可否の allowlist） | CIで強制<br>`../simplememo-ios/scripts/qa/check_analytics_allowlist.py` |
-| 提案のみ | 収集同意 | App Analytics共有オプトイン依存 |
-| ゲート付き実行 | 保持期間の定義（棚卸しと逸脱検査） | 2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる）<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/test/data-retention.test.ts` |
-| ゲート付き実行 | 保持期間の自動削除 | 2026-08-22に app_analytics_events を90日で剪定するようにした（オーナー判断）。棚卸しで見つかった最大の穴がこれ。**23ストア中6つが自動削除つき**になった。**残る10ストアはまだ無期限**（重複送信防止の台帳が中心。email_suppression は意図的に無期限）<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/test/analytics-retention.test.ts`<br>`../simplememo-api/data/data-retention.json` |
-| 提案のみ | 削除要求への対応 | APIは実装済み。運用手順は未整備<br>`../simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md` |
-| ゲート付き実行 | AIへの送信可否の制御 | redact済み要約のみ。メモ本文fixtureは架空<br>`../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh` |
-| ゲート付き実行 | 端末内の暗号化 | AES-GCM-256・Keychain・Data Protection属性<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
-| **未実装** | アクセス履歴 | **前提の棚卸しは2026-08-22に完了**（どこに何があるかは特定済み）。誰がいつ読んだかの記録は未実装 |
-| **未実装** | 第三者SDKのデータ送信監査 | **前提の棚卸しは完了したがサーバ側のみ。**第三者SDKは端末側の話で、PrivacyInfo.xcprivacy はあるが実送信の監査は無い |
-| 人間 | 推論をどこで回すかの決定 | VISION §14 未決定論点。Capture本文は個人情報そのもの<br>`../simplememo-ios/docs/VISION.md` |
-
-### ⑫ 事業継続性
-
-総合 **44.4%** ／ 実行 66.7% ／ 関与 100.0% ／ カバー 66.7%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系0/3・副系10/10。冗長化が実際に効いた<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
-| ゲート付き実行 | 冪等性 | 当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`scripts/autopilot-budget.mjs` |
-| ゲート付き実行 | 再試行 | 09:20の再試行経路・Resend 429の単発リトライ<br>`.github/workflows/obsidian-autopilot.yml`<br>`../simplememo-api/src/resend.ts` |
-| **未実装** | Circuit Breaker | 外部依存の障害パターンをまだ観測できていない |
-| **未実装** | Dead Letter Queue | Outbox（端末側）が実質これを担っている。サーバ側は未実装 |
-| **未実装** | バックアップ・復元 | 本番データはCloudflare D1とApp Store側にあり、復元手順が未整備。**2026-08-22にベンダー台帳で代替の有無を明示** — Apple・Resend・レジストラの3社に代替が無い |
-| 提案のみ | 手動復旧手順 | 文書はある<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`../simplememo-api/DEPLOYMENT.md` |
-| ゲート付き実行 | 障害訓練 | 2026-08-22実装（切替ドリル）。認証切れ・モデル障害・API障害の演習はまだ<br>`scripts/autopilot-drill.mjs` |
-| 提案のみ | 外部サービス停止時の縮退運転 | autopilotは二重化。GitHub/Apple/Cloudflareは単一障害点<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
-
 ### ④ 自動本番デプロイ
 
 総合 **42.9%** ／ 実行 46.2% ／ 関与 69.2% ／ カバー 92.9%
@@ -251,6 +264,21 @@ AI実行側に数えることはCIが禁止しているので、順序は常に�
 | **未実装** | AI・外部サービス停止時の独立した緊急停止経路 | AgentOps側のKill Switch設計と一体。副系を止める手段が無い問題と同根 |
 | 提案のみ | ChatOps によるリリース起動 | issue コメントで起動。コメントするのはオーナー<br>`../simplememo-ios/.github/workflows/release-command.yml` |
 
+### ⑧ カスタマーサポート
+
+総合 **37.5%** ／ 実行 75.0% ／ 関与 100.0% ／ カバー 50.0%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| **未実装** | 問い合わせの自動分類 | 問い合わせ基盤自体が未整備。件数も少なく分類器を作る母数が無い |
+| **未実装** | 回答・返金・障害案内 | 同上。加えて返金は不可逆で、承認境界の設計が先 |
+| **未実装** | App Store レビュー返信 | ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先 |
+| ゲート付き実行 | FAQとリリース内容の同期 | 2026-08-22実装。FAQ・トップ（日英）・llms.txt・運営者情報の**散文**を site-constants / benchmark と突き合わせ、旧アプリ名・古い起動時間・廃止済みトライアル・価格ドリフトで落とす。廃止済みトライアルは景表法・ストア審査上のリスク対応で消したもので、それまで「出現回数0」を確かめていたのは人の目視だった。**リリースノート本文との突き合わせは隣リポジトリのためCI外**<br>`scripts/check-public-facts.mjs`<br>`faq.html`<br>`data/site-constants.json` |
+| **未実装** | CSAT計測 | 計測する接点（問い合わせ・返信）が未整備 |
+| ゲート付き実行 | 重大案件の有人移管 | 2026-08-22実装。実行判定が返す故障・縮退コード5件と、運転台帳に**実際に現れた** failure_class 4件の全部に規則が要る（規則の無い種別があると落ちる）。危機領域は stop_automation: true を強制。**owner_direct の経路は未整備**で、名前が付いただけであることも台帳に書いてある<br>`data/escalation-rules.json`<br>`scripts/check-escalation.mjs`<br>`data/authority-matrix.json` |
+| 提案のみ | 問い合わせからIssueと回帰テストを作成 | 手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）<br>`../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md` |
+| ゲート付き実行 | ライフサイクルメール（歓迎・確認・リマインド） | cronで自動送信。DRY_RUN/KILL_SWITCH/DAILY_CAP付き<br>`../simplememo-api/src/lifecycle.ts`<br>`../simplememo-api/src/reminder.ts` |
+
 ### ⑥ アプリ運営意思決定
 
 総合 **30.8%** ／ 実行 50.0% ／ 関与 87.5% ／ カバー 61.5%
@@ -270,21 +298,6 @@ AI実行側に数えることはCIが禁止しているので、順序は常に�
 | ゲート付き実行 | 可逆／不可逆の承認レベル分け | 2026-08-22実装。13領域中9が承認制<br>`data/authority-matrix.json`<br>`scripts/check-authority.mjs` |
 | 人間 | 月次予算の決定 | — |
 | **未実装** | 資金繰りシナリオ（悲観・標準・楽観） | 法人経営領域と一体。証跡の形から未着手 |
-
-### ⑧ カスタマーサポート
-
-総合 **25.0%** ／ 実行 66.7% ／ 関与 100.0% ／ カバー 37.5%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| **未実装** | 問い合わせの自動分類 | 問い合わせ基盤自体が未整備。件数も少なく分類器を作る母数が無い |
-| **未実装** | 回答・返金・障害案内 | 同上。加えて返金は不可逆で、承認境界の設計が先 |
-| **未実装** | App Store レビュー返信 | ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先 |
-| ゲート付き実行 | FAQとリリース内容の同期 | 2026-08-22実装。FAQ・トップ（日英）・llms.txt・運営者情報の**散文**を site-constants / benchmark と突き合わせ、旧アプリ名・古い起動時間・廃止済みトライアル・価格ドリフトで落とす。廃止済みトライアルは景表法・ストア審査上のリスク対応で消したもので、それまで「出現回数0」を確かめていたのは人の目視だった。**リリースノート本文との突き合わせは隣リポジトリのためCI外**<br>`scripts/check-public-facts.mjs`<br>`faq.html`<br>`data/site-constants.json` |
-| **未実装** | CSAT計測 | 計測する接点（問い合わせ・返信）が未整備 |
-| **未実装** | 重大案件の有人移管 | ルールが明文化されていない |
-| 提案のみ | 問い合わせからIssueと回帰テストを作成 | 手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）<br>`../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md` |
-| ゲート付き実行 | ライフサイクルメール（歓迎・確認・リマインド） | cronで自動送信。DRY_RUN/KILL_SWITCH/DAILY_CAP付き<br>`../simplememo-api/src/lifecycle.ts`<br>`../simplememo-api/src/reminder.ts` |
 
 ### ⑨ マネタイズ
 

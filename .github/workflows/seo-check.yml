@@ -229,6 +229,24 @@ jobs:
       - name: Public-facing facts
         run: node scripts/check-public-facts.mjs --check
 
+      # 【性質テスト】ドリルは26の**具体例**を固定する。ここは**書かなかった
+      # 組み合わせ**を総当たりで踏む。2026-08-21の二重着手は、まさに
+      # 書かれていなかった組み合わせだった。種を固定して反例を再現可能にする。
+      - name: Property-based tests
+        run: node scripts/property-tests.mjs --check
+
+      # 【モデル評価セット】替えたあとに「前より良くなった気がする」で決めない。
+      # 入力と合格条件を先に固定し、**結果が無いことを空配列として持つ。**
+      # policy.enforce を true にすると、未評価モデルへのルーティングで落ちる。
+      - name: Model eval set
+        run: node scripts/check-model-eval.mjs --check
+
+      # 【有人移管】権限表には「止めて経営者へ移管する」と書いてあったが、
+      # **何が検知で、誰にどう渡すのか、いつまでにか**が決まっていなかった。
+      # 実行判定の故障コードと、実際に起きた failure_class の全部に規則が要る。
+      - name: Escalation rules
+        run: node scripts/check-escalation.mjs --check
+
       # 【監視】何が見張られていて、何が空いているか。
       #
       # 検知の中央値は2.1hだが最大は50.7h。その差は「見張られていない領域で
