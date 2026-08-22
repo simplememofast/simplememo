@@ -1,0 +1,428 @@
+{
+  "$comment": [
+    "運転台帳 — 1回のオートパイロット実行を1行で表す。**共通実行ID（run_id）が背骨。**",
+    "",
+    "【なぜ必要か】2026-08-22の外部レビューが指摘したとおり、この運用は",
+    "『1つの改善サイクルが完走したか』を機械的に言えなかった。AI完走率・人間介入率・",
+    "変更失敗率・改善サイクル時間は、どれも実行を一意に指す識別子が無ければ数えられず、",
+    "『手で数えた値』にしかならない。growth/README.md の冒頭が戒めている",
+    "『計画は散文の中に住んでいて、散文は手を挙げない』のは、指標についても同じ。",
+    "",
+    "【何を1行にするか】Issue/レーン選定 → ブランチ → PR → 検証 → 配信 → 費用 → 人間の介入。",
+    "run_id は `ap-<YYYYMMDD>-<route>`。GitHub Actions の run id は external_ref に持ち、",
+    "実費台帳（data/autopilot-cost.json）とはそのキーで結合する。**費用をここに複製しない**",
+    "（同じ数字の出所が2つあると必ず食い違う）。",
+    "",
+    "【attempted の意味】『着手したか』。秘密鍵未設定によるGateスキップと、",
+    "他経路が先行したことによる冪等スキップは attempted=false。**完走率の分母は attempted。**",
+    "着手していない回を失敗に数えると、意図した『静かに寝る』設計が失敗率として現れてしまう。",
+    "",
+    "【outcome の値】",
+    "  shipped           … 本番へ出荷（PRがマージされた）",
+    "  no_artifact       … 実行したが成果物ゼロ（費用は発生している）",
+    "  failed / cancelled… ジョブが落ちた／打ち切られた",
+    "  skipped_gate      … 秘密鍵未設定で意図的に寝た（attempted=false）",
+    "  skipped_duplicate … 他経路が先行していたので何もせず終了（attempted=false・正常系）",
+    "  no_run            … その日どの経路も動かなかった（**これは異常**）",
+    "",
+    "【source は必ず書く】どの一次資料から起こした行かを残す。後から検算できない行は、",
+    "指標としては存在しないのと同じ。"
+  ],
+  "seeded": {
+    "at": "2026-08-22",
+    "coverage": "2026-08-11（運転開始）〜2026-08-22",
+    "method": "主系11runはGitHub Actions APIで全数実測。日々の出荷はAUTOPILOT_LOG.mdのエントリとgit logのマージ済みPRを突き合わせて起こした。",
+    "known_gaps": [
+      "CCR経路の開始時刻が無いため、改善サイクル時間（着手→マージ）はActions経路でしか出せない。",
+      "CCR経路の実費は観測手段が無い（スケジュール起動セッションのログは外部から読めない）。cost は null で、0ではない。",
+      "1日に2アクション出た回（08-12のC02＝PR #483）は、Runbookが『1セッション1アクション』と定めているため代表1行のみを記録している。"
+    ]
+  },
+  "runs": [
+    {
+      "run_id": "ap-20260811-manual",
+      "date_jst": "2026-08-11",
+      "route": "manual",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 470,
+      "artifact": "/obsidian/compare/logseq/",
+      "source": "autopilot-log+git-log",
+      "interventions": [
+        {
+          "kind": "design",
+          "note": "初回は手動運転で手順を実証（Runbook導入と同時）"
+        }
+      ],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260812-ccr",
+      "date_jst": "2026-08-12",
+      "route": "ccr",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "B",
+      "action": "refresh",
+      "pr": 480,
+      "artifact": "/obsidian/compare/logseq/#回答ブロック",
+      "source": "autopilot-log+git-log",
+      "interventions": [
+        {
+          "kind": "incident",
+          "note": "主系の初回不発を受け、実行基盤をGHA主・CCR副の二重系へ（PR #478）"
+        }
+      ],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260813-actions",
+      "date_jst": "2026-08-13",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "31643630749",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260813-ccr",
+      "date_jst": "2026-08-13",
+      "route": "ccr",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": null,
+      "action": "maintenance",
+      "pr": 488,
+      "source": "autopilot-log+git-log",
+      "artifact": null,
+      "interventions": [],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260814-actions",
+      "date_jst": "2026-08-14",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "31746724152",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260814-ccr",
+      "date_jst": "2026-08-14",
+      "route": "ccr",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "C",
+      "action": "refresh",
+      "pr": 501,
+      "artifact": "/obsidian/compare/logseq/",
+      "source": "autopilot-log+git-log",
+      "interventions": [],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260815-actions",
+      "date_jst": "2026-08-15",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "31842048839",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260815-ccr",
+      "date_jst": "2026-08-15",
+      "route": "ccr",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": null,
+      "action": "maintenance",
+      "pr": 502,
+      "source": "autopilot-log+git-log",
+      "artifact": null,
+      "interventions": [],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260816-actions",
+      "date_jst": "2026-08-16",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "31909017447",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260816-none",
+      "date_jst": "2026-08-16",
+      "route": "none",
+      "attempted": false,
+      "outcome": "no_run",
+      "failure_reason": "全経路が不発。副系Routineは当時そもそも存在していなかった（2026-08-20に判明・PR #516）",
+      "source": "autopilot-log",
+      "interventions": [
+        {
+          "kind": "detection",
+          "note": "2日連続の実行記録ゼロを08-18のセッションが検知。恒久対処として autopilot-health.yml を新設（PR #504）"
+        }
+      ],
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260817-actions",
+      "date_jst": "2026-08-17",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "31972997422",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260817-none",
+      "date_jst": "2026-08-17",
+      "route": "none",
+      "attempted": false,
+      "outcome": "no_run",
+      "failure_reason": "同上",
+      "source": "autopilot-log",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": [],
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260818-actions",
+      "date_jst": "2026-08-18",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "32070691341",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260818-ccr",
+      "date_jst": "2026-08-18",
+      "route": "ccr",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": null,
+      "action": "maintenance",
+      "pr": 505,
+      "source": "autopilot-log+git-log",
+      "artifact": null,
+      "interventions": [],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260819-actions",
+      "date_jst": "2026-08-19",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）",
+      "external_ref": "32187173035",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260819-actions-manual",
+      "date_jst": "2026-08-19",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN / ANTHROPIC_API_KEY 未設定のためGateで終了（設計どおり静かに寝る）（workflow_dispatch）",
+      "external_ref": "32252996254",
+      "source": "actions-api",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "interventions": []
+    },
+    {
+      "run_id": "ap-20260819-ccr",
+      "date_jst": "2026-08-19",
+      "route": "ccr",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 511,
+      "artifact": "/obsidian/compare/",
+      "source": "autopilot-log+git-log",
+      "interventions": [
+        {
+          "kind": "fix",
+          "note": "無記事6日の原因はゲートではなくRunbookのレーンE追記漏れと判明（PR #510）"
+        }
+      ],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260820-actions",
+      "date_jst": "2026-08-20",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "cancelled",
+      "failure_reason": "apt がジョブ上限90分を消尽し Claude Code が skipped のまま終了。恒久対処は PR #513",
+      "external_ref": "32303452390",
+      "source": "actions-api",
+      "interventions": [
+        {
+          "kind": "fix",
+          "note": "オーナー指示でフォント導入に時間制限と continue-on-error を入れた（PR #513）"
+        }
+      ],
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null
+    },
+    {
+      "run_id": "ap-20260820-owner",
+      "date_jst": "2026-08-20",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 514,
+      "artifact": "/obsidian/what-is-vault/",
+      "source": "autopilot-log+git-log",
+      "interventions": [
+        {
+          "kind": "substitute",
+          "note": "3経路すべて不発のためオーナー依頼セッションが代走"
+        }
+      ],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260821-actions",
+      "date_jst": "2026-08-21",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "failure_reason": "claude-code-action が非人間アクターを拒否（allowed_bots）。3秒で failure。恒久対処は PR #522/#523",
+      "external_ref": "32419185478",
+      "source": "actions-api",
+      "interventions": [
+        {
+          "kind": "fix",
+          "note": "allowed_bots: '*' を追加（PR #522）"
+        }
+      ],
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null
+    },
+    {
+      "run_id": "ap-20260821-ccr0920",
+      "date_jst": "2026-08-21",
+      "route": "ccr-0920",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 521,
+      "artifact": "/obsidian/plugins/",
+      "source": "autopilot-log+git-log",
+      "interventions": [],
+      "failure_reason": null,
+      "external_ref": null
+    },
+    {
+      "run_id": "ap-20260822-actions",
+      "date_jst": "2026-08-22",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "no_artifact",
+      "failure_reason": "conclusion=success だが permission_denials_count=14 で成果物ゼロ（num_turns=30）",
+      "external_ref": "32528028588",
+      "source": "actions-api",
+      "interventions": [
+        {
+          "kind": "owner_request",
+          "note": "obsidian-autopilot.yml の permissions / additional_permissions / claude_args のツール許可リスト確認を依頼（未対応）"
+        }
+      ],
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null
+    },
+    {
+      "run_id": "ap-20260822-ccr0730",
+      "date_jst": "2026-08-22",
+      "route": "ccr-0730",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "E",
+      "action": "new",
+      "pr": 524,
+      "artifact": "/obsidian/plugins/dataview/",
+      "source": "autopilot-log+git-log",
+      "interventions": [],
+      "failure_reason": null,
+      "external_ref": null
+    }
+  ]
+}

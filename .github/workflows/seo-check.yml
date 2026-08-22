@@ -122,6 +122,25 @@ jobs:
       - name: Autopilot budget ledger
         run: node scripts/autopilot-budget.mjs --check
 
+      # 【権限表】不可逆な領域が承認制になっているか、根拠のファイルが実在するかを見る。
+      #
+      # 機械が守れる部分だけ機械に守らせる。実際に人が承認したかは見られないので、
+      # 見るのは (1) 不可逆なのに承認不要になっていないか (2) 稼働中の領域が
+      # 根拠ファイルを指せているか (3) 金額が動く領域が上限を持っているか の3つ。
+      # 「空欄」と「未設定と決めた」は違うので、後者は set_by: "unset" と書かせる。
+      - name: Authority matrix
+        run: node scripts/check-authority.mjs --check
+
+      # 【運転台帳】共通実行IDの一意性と、attempted／outcome の整合を見る。
+      #
+      # 壊れた台帳は「集計できない」ではなく **指標が黙って嘘になる**。
+      # とくに attempted と outcome の食い違い（Gateスキップなのに着手扱い等）は
+      # AI完走率を静かにずらすので、PRの時点で止める。
+      # 「shipped なのに PR番号が無い」「failed なのに理由が無い」も同様に落とす —
+      # 検算できない出荷と、原因の無い失敗は、指標として存在しないのと同じ。
+      - name: Autopilot run ledger
+        run: node scripts/autopilot-runs.mjs --check
+
       # 【D-SCORE】pr_release レコードの算数とゲートの矛盾を見る。
       #
       # 採点そのものは人（かセッション）が根拠つきで置く。ここが自動で点を

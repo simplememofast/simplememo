@@ -340,6 +340,7 @@ node scripts/sync_constants.js --check
 node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
 node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
+node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
@@ -468,6 +469,52 @@ node scripts/autopilot-budget.mjs --check    # 上限超過なら exit 1
 **上限値そのものはまだ暫定** （`cap_set_by: "placeholder"`）。実測が2週間
 貯まったら実測から決め直す。**決まるまで「予算に応じて配分している」と
 対外的に言わない**（速度・Zero-decision率と同じ基準）。
+
+### 5-4. 運転台帳（共通実行ID・2026-08-22追加・毎回必須）
+
+**この運用は長らく「1つの改善サイクルが完走したか」を機械的に言えなかった。**
+AI完走率・人間介入率・変更失敗率・改善サイクル時間は、どれも実行を一意に指す
+識別子が無ければ数えられず、「手で数えた値」にしかならない。
+
+台帳は `data/autopilot-runs.json`、集計は `scripts/autopilot-runs.mjs`。
+
+```
+node scripts/autopilot-runs.mjs           # 指標サマリ
+node scripts/autopilot-runs.mjs --json     # status JSON の runs に入れる形
+node scripts/autopilot-runs.mjs --check    # CI: 形と整合（seo-check.ymlに入っている）
+```
+
+**毎回の手順（status JSONを書くのと同じPRで）:**
+
+自分の回を1行追記する。`run_id` は `ap-<YYYYMMDD>-<route>`。
+
+```
+node scripts/autopilot-runs.mjs --append \
+  --run-id ap-$(TZ=Asia/Tokyo date +%Y%m%d)-<route> \
+  --date $(TZ=Asia/Tokyo date +%Y-%m-%d) --route <actions|ccr-0730|ccr-0920|owner-session> \
+  --attempted true --outcome <shipped|no_artifact|failed> \
+  --lane <A|B|C|D|E> --action <new|refresh|wiring|maintenance|skip> \
+  --pr <番号> --artifact </path/> --source session
+```
+
+- **`--pr` は shipped のとき必須**（出荷はPRのマージでしか成立しない）。
+  PR番号は `gh pr create` の直後に分かるので、その時点で追記する
+- **失敗の回にも必ず1行残す。** `--outcome` と `--failure-reason` を書く。
+  「なぜ落ちたか」の無い失敗は再発防止に使えない
+- **`interventions` は手で追記する**（オーナーへの依頼・オーナーによる修正・代走）。
+  ここが人間介入率の分子になる
+- **他経路が先行して何もせず終えた回も1行残す**（`--outcome skipped_duplicate
+  --attempted false`）。排他が機能した記録であって、失敗ではない
+
+**`attempted` の意味は「着手したか」。** 秘密鍵未設定のGateスキップと冪等スキップは
+`false`。**完走率の分母は attempted** で、着手していない回を失敗に数えると
+「静かに寝る」という正しい設計が失敗率として現れてしまう。
+
+**逆に、どの経路も動かなかった日（`no_run`）は正常系ではない。**
+完走率の分母には入れないが、サマリに別枠で必ず出す。隠すと稼働率100%に見える。
+
+**費用はここに書かない。** 実費は `data/autopilot-cost.json` が正で、
+`external_ref`（GitHub の run id）で結合する。同じ数字の出所を2つ作らない。
 
 ## 6. 「書かない回」の保守作業メニュー
 
