@@ -82,12 +82,24 @@
     },
     {
       "area": "① 次期機能開発",
-      "task": "ユーザー要望の受領と設計への落とし込み",
+      "task": "ユーザー要望の受領と未処理の検知",
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-ios/scripts/asc_metrics.rb",
+        "../simplememo-ios/.github/workflows/asc-metrics.yml",
+        "scripts/review-intake.mjs",
+        "data/review-intake.json"
+      ],
+      "note": "2026-08-22実装。App Store レビューを日次で取り込み、**未処理が14日を超えたらCIが落ちる**。受け取っただけで放置される状態を検知する。台帳は取り込みと同日に作ったので空から始まる — **空であること自体は異常ではなく、取り込みが動いたあとも空のままなのが異常**"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "受領した要望の設計への落とし込み",
       "executor": "ai_proposes",
       "evidence": [
         "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断"
+      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる"
     },
     {
       "area": "① 次期機能開発",
