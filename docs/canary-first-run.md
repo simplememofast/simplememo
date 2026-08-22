@@ -24,42 +24,97 @@
 **修正が入ったビルドが配信されていないと、この手順は何も起こさない。**
 実行前に、対象ビルドが 2026-08-22 以降のものであることを確認すること。
 
+→ **2026-08-22 23:35 UTC、v5.8.1 が `READY_FOR_DISTRIBUTION` になった**
+（[run 32605632454](https://github.com/simplememofast/simplememo-ios/actions/runs/32605632454)）。
+前提は満たされている。
+
+---
+
+## 0-2. 先に直したもの（2026-08-23）— **`max_stale_seconds: 3600` は誤り**
+
+初版のこの手順書は §1 で `max_stale_seconds: 3600` を指定し、理由を
+「kill は最長1時間で全端末に効く」と書いていた。**これは二重に誤っている。**
+
+クライアントの実装（`../simplememo-ios/SimpleMemo/`）はこうなっている。
+
+| | 値 | 出典 |
+|---|---|---|
+| 再取得のスロットル | **24時間** | `FeatureFlags.swift:394` `now - last > 24 * 60 * 60` |
+| キャッシュ期限切れ | rollout の付与だけ失効 | `FeatureFlagRollout.swift` 解決規則 3 → 4 |
+
+**1. kill は速くならない。** `killed` は取得して初めて端末に届く（規則2）。
+`max_stale` を縮めても取得の間隔は変わらないので、**kill の到達は速くならない。**
+
+**2. 露出群が露出しなくなる。** 規則3（rollout）は「キャッシュが新しい」ときだけ
+効く。`max_stale 3600` だと1時間後に規則3を抜け、`/v1/config` が既定OFFとして
+載せている `false` を規則4が拾って**フラグがオフに戻る**。次の取得は24時間後。
+
+> つまり露出群は **24時間のうち1時間しか露出しない（約4%）。**
+> その状態で貯めた install を「露出群」として対照群と比べても、
+> **測っているものが露出ではない。**
+
+`../simplememo/docs/canary-testflight.md` に同じ罠を書いていたが、
+あちらは kill 実証の文脈だけで、**本番カナリアの手順は直っていなかった。**
+
+**正しい値は `max_stale_seconds: 86400`**（再取得の間隔と揃える）。
+その代わり kill の自然な到達は最長24時間かかる。これは縮められない事実であって、
+数字を小さくして隠すものではない。
+
 ---
 
 ## 1. 定義する（0%）
 
 ```
-POST https://api.simplememofast.com/admin/flags/set
-Authorization: Bearer $ADMIN_API_KEY
-
-{ "key": "tf04_progress",
-  "definition": { "rollout": 0,
-                  "description": "今日 1/3 進捗表示のカナリア初回",
-                  "max_stale_seconds": 3600 } }
+Actions → Flag Ops → Run workflow
+  action: set
+  key: tf04_progress
+  rollout: 0
+  max_stale_seconds: 86400        ← 3600 にしない（§0-2）
+  description: 今日 1/3 進捗表示のカナリア初回
 ```
 
 0% で先に置くのは、**クライアント側が定義を受け取ってから配布を始める**ため。
-`max_stale_seconds` を 3600 にしてあるので、kill は最長1時間で全端末に効く。
 
-## 2. 1% に上げる
+## 2. 1% に上げる — **ここは人が押す**
 
 ```
-POST /admin/flags/set
-{ "key": "tf04_progress",
-  "definition": { "rollout": 1, "description": "...", "max_stale_seconds": 3600 } }
+Actions → Flag Ops → Run workflow
+  action: set
+  key: tf04_progress
+  rollout: 1
+  max_stale_seconds: 86400
+  description: 今日 1/3 進捗表示のカナリア初回（1%）
 ```
 
 **ここから待つ。** クライアントの取得は24時間スロットルなので、
 配布が行き渡るまで丸1日はかかる。
 
+`data/authority-matrix.json` の「段階公開の拡大」は
+`requires_approval: true` / `human_only: ["rollout を引き上げる操作そのもの"]`。
+**0 → 1 は引き上げなので、ここだけは AI が叩かない。**
+
 ## 3. 判定を見る
 
 ```
-GET /admin/rollout-guard
-Authorization: Bearer $ADMIN_API_KEY
+Actions → Flag Ops → Run workflow
+  action: guard
 ```
 
+`GET /admin/rollout-guard` と、**ガードの cron 実行ログ**
+（`/admin/cron/recent?job_name=rollout_guard`）を並べて出す。
+
 毎時 cron で回っている。最初は必ず `hold` になる。
+
+> **`last_run_at: null` を「cron が動いていない」と読まないこと。**
+> 段階公開中のフラグが無い間、ガードは KV を1回読んで
+> `reason: no_staged_flags` で終わり、**判定履歴を残さない**。
+> そのため `/admin/rollout-guard` だけを見ると「一度も走っていない」に見える。
+> 実際に走っているかは cron 実行ログでしか区別できない。
+> `action: guard` が両方出すのはこのため。
+>
+> 2026-08-22 23:38 UTC の実測: `rollout_guard_runs=8`・
+> 直近は 23:00:09 UTC・すべて `errors: 0` / `reason: no_staged_flags`。
+> **cron は生きている。**
 
 | 見えるもの | 意味 |
 |---|---|
@@ -97,6 +152,35 @@ Authorization: Bearer $ADMIN_API_KEY
 
 ---
 
+## 実測（2026-08-23）— どこまで進んだか
+
+| 手順 | 状態 | 証跡 |
+|---|---|---|
+| 0. v5.8.1 が本番公開 | ✅ | `READY_FOR_DISTRIBUTION`・[run 32605632454](https://github.com/simplememofast/simplememo-ios/actions/runs/32605632454) · 23:35 UTC |
+| ガードの cron が生きている | ✅ | `rollout_guard_runs=8`・直近 23:00:09 UTC・`errors: 0`／[run 32605768031](https://github.com/simplememofast/simplememo-api/actions/runs/32605768031) |
+| 1. 定義（rollout 0 / max_stale 86400） | ✅ | [run 32605886195](https://github.com/simplememofast/simplememo-api/actions/runs/32605886195) · 23:41 UTC |
+| **2. 1% に上げる** | ⏸ **人待ち** | 承認境界（`data/authority-matrix.json`） |
+| 3. 判定を見る | — | 配布後 |
+| 4. 段階的に上げる | — | 人 |
+| 5. 完走の記録 | — | |
+
+**1 の時点では誰にも配っていない**（rollout 0）。定義を置いただけ。
+
+### 2 を実行するときのコマンド
+
+```
+Actions → Flag Ops → Run workflow
+  action: set
+  key: tf04_progress
+  rollout: 1
+  max_stale_seconds: 86400
+  description: 今日 1/3 進捗表示のカナリア初回（1%）
+```
+
+押したあと、丸1日は `hold`（サンプル不足）が続く。**それは正常。**
+
+---
+
 ## やってはいけないこと
 
 | | 理由 |
@@ -110,6 +194,16 @@ Authorization: Bearer $ADMIN_API_KEY
 
 ## この手順を AI だけで完了できない理由
 
-`ADMIN_API_KEY` を使う本番操作で、`data/authority-matrix.json` の
-「段階公開の拡大」は**不可逆・承認制・人間のみ**に分類してある。
-1 と 2 と 4 は人が叩く。判定（3）と停止だけが機械の担当。
+`data/authority-matrix.json` の「段階公開の拡大」は
+**不可逆・承認制・人間のみ**に分類してある。
+
+| 手順 | 誰が | なぜ |
+|---|---|---|
+| 1. 定義（rollout 0） | **AI可** | 0% は誰にも配らない。引き上げではない |
+| **2. 1% に上げる** | **人のみ** | **0 → 1 は引き上げ。不可逆（見た人は見なかったことにならない）** |
+| 3. 判定を見る | AI可 | 読み取りのみ（`action: guard`） |
+| **4. 5% / 10% と上げる** | **人のみ** | 同上 |
+| kill | AI可 | 止める方向は可逆。`requires_approval: false` |
+| 5. 記録 | AI可 | |
+
+**この非対称は意図的。** 逆にすると、誤検知が「勝手に全員へ配る」形で出る。
