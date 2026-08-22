@@ -1,0 +1,133 @@
+#!/usr/bin/env node
+/**
+ * 依存ベンダー台帳の検査。
+ *
+ *   node scripts/check-vendors.mjs
+ *   node scripts/check-vendors.mjs --check
+ *   node scripts/check-vendors.mjs --json
+ *
+ * **「見ていない」を「問題なし」と書かないための検査。**
+ * 個人データを渡しているのに DPA を確認していないベンダーを名指しする。
+ *
+ * 資格情報の台帳（credential-expiry.json）とも突き合わせる。片方にしか
+ * 載っていないベンダーは、どちらかの棚卸しが古い。
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
+
+export const DATA_LEVELS = ['none', 'pseudonymous', 'personal'];
+
+export function audit(doc) {
+  const errors = [];
+  const unreviewed = [];
+  const noFallback = [];
+
+  for (const v of doc.vendors) {
+    if (!DATA_LEVELS.includes(v.personal_data)) {
+      errors.push(`${v.id}: personal_data が未定義の値: ${v.personal_data}`);
+    }
+    // 落ちたら何が止まるかを書いていないベンダーは、台帳に載っている意味が無い。
+    if (!v.breaks_if_down) errors.push(`${v.id}: breaks_if_down が空`);
+
+    // 代替が無いこと自体は問題ではない。**理由が書いていないのが問題。**
+    if (!v.fallback) {
+      if (!v.fallback_note) errors.push(`${v.id}: 代替が無いのに理由が書いていない`);
+      if (v.critical) noFallback.push(v);
+    }
+    // 個人データを渡していて未レビュー = 見ていないだけ。
+    if (v.personal_data !== 'none' && !v.dpa_reviewed) unreviewed.push(v);
+  }
+  return { errors, unreviewed, noFallback };
+}
+
+/**
+ * 資格情報の台帳と突き合わせる。片方が古くなるのを防ぐ。
+ *
+ * **名前の一致で推測しない。**credential 側に vendor を明示させる。
+ * 推測で当てると誤検出が出て、出力そのものが読まれなくなる
+ * （最初の実装がそうなり、Provisioning Profile と ASC キーを
+ *  「ベンダー台帳に無い」と誤って名指しした）。
+ */
+export function crossCheck(vendors, credentials) {
+  const ids = new Set(vendors.map((v) => v.id));
+  const missing = [];
+  for (const c of credentials) {
+    if (!c.vendor) { missing.push({ credential: c.id, label: c.label, reason: 'vendor 未記入' }); continue; }
+    if (!ids.has(c.vendor)) missing.push({ credential: c.id, label: c.label, reason: `未登録の vendor: ${c.vendor}` });
+  }
+  return missing;
+}
+
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  const argv = process.argv.slice(2);
+  const doc = readJSON('data/vendor-register.json');
+  const { errors, unreviewed, noFallback } = audit(doc);
+
+  if (argv.includes('--json')) {
+    console.log(JSON.stringify({
+      total: doc.vendors.length,
+      unreviewed: unreviewed.map((v) => v.id),
+      no_fallback: noFallback.map((v) => v.id),
+      errors,
+    }, null, 2));
+    process.exit(errors.length ? 1 : 0);
+  }
+
+  console.log(`依存ベンダー ${doc.vendors.length}社（data/vendor-register.json）\n`);
+
+  const byData = { personal: [], pseudonymous: [], none: [] };
+  for (const v of doc.vendors) (byData[v.personal_data] ??= []).push(v);
+
+  for (const level of ['personal', 'pseudonymous', 'none']) {
+    const list = byData[level] ?? [];
+    if (!list.length) continue;
+    console.log(`  [渡している個人データ: ${level}] ${list.length}社`);
+    for (const v of list) {
+      console.log(`    ${v.critical ? '★' : ' '} ${v.name}`);
+      console.log(`        止まると: ${v.breaks_if_down}`);
+      console.log(`        代替:     ${v.fallback ?? `**無し** — ${v.fallback_note}`}`);
+    }
+    console.log('');
+  }
+
+  if (noFallback.length) {
+    console.log(`  ★ 代替が無い critical ベンダー ${noFallback.length}社:`);
+    for (const v of noFallback) console.log(`    ${v.name} — ${v.fallback_note}`);
+    console.log('    **ここが止まると復旧手段が無い。**事業継続性（⑫）の中核。\n');
+  }
+
+  if (unreviewed.length) {
+    console.log(`  個人データを渡しているのに DPA 未確認 ${unreviewed.length}社:`);
+    for (const v of unreviewed) console.log(`    ${v.name}（${v.personal_data}）`);
+    console.log('    **「見ていない」であって「問題なし」ではない。**');
+    console.log('    確認したら dpa_reviewed に日付を入れる。全部埋めたら');
+    console.log('    policy.enforce_unreviewed を true にすると CI が守る。\n');
+  }
+
+  let cross = [];
+  try {
+    cross = crossCheck(doc.vendors, readJSON('data/credential-expiry.json').credentials);
+  } catch { /* 台帳が無い環境では飛ばす */ }
+  if (cross.length) {
+    console.log('  資格情報の台帳とベンダー台帳の食い違い:');
+    for (const c of cross) console.log(`    ${c.label} — ${c.reason}`);
+    console.log('');
+  }
+
+  errors.forEach((e) => console.log(`  NG: ${e}`));
+
+  if (argv.includes('--check')) {
+    const blocked = doc.policy.enforce_unreviewed ? unreviewed.length : 0;
+    if (errors.length || blocked) {
+      console.error(`ベンダー台帳の検査に失敗: 形の問題 ${errors.length}件 / 未レビュー ${blocked}社`);
+      process.exit(1);
+    }
+    console.log('ベンダー台帳の形に問題なし（未確認の件数は上に出ている。ゼロではない）。');
+  }
+}

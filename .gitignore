@@ -43,3 +43,9 @@ scripts/visual*.py
 # Python bytecode caches (generated when running scripts/*.py)
 __pycache__/
 *.pyc
+
+# 運営ダッシュボードの生成物。docs/ は robots で Disallow しているが
+# Cloudflare Pages は 200 で配信するため、コミットすると予算・障害・
+# 未解消件数が推測可能なURLで公開される。生成物は置かない
+# （生成器 scripts/dashboard.mjs だけをコミットする）。
+build/

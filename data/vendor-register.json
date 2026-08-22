@@ -1,0 +1,175 @@
+{
+  "$comment": [
+    "依存している外部サービスの台帳。scripts/check-vendors.mjs が検査する。",
+    "",
+    "**リード文の「契約は人が承認」に中身を与えるために作った。**",
+    "それまで AI は契約に一切触れておらず、「人が承認する」は真だが承認する",
+    "対象が無かった。ここに載せることで、AIが下ごしらえをして人が承認する形になる。",
+    "",
+    "⑦『AI事業者のDPA・データ利用・SLA・撤退計画の審査』と",
+    "⑫『事業継続性』の両方がここに依存する。",
+    "",
+    "personal_data:",
+    "  none        … 個人データを渡していない",
+    "  pseudonymous… ハッシュ・匿名ID",
+    "  personal    … メールアドレス・本文",
+    "",
+    "**dpa_reviewed が null は『問題なし』ではなく『見ていない』。**",
+    "個人データを渡しているのに未確認のものは検査が名指しする。"
+  ],
+  "policy": {
+    "enforce_unreviewed": false,
+    "$enforce_unreviewed": "true にすると、個人データを渡しているのに未レビューのベンダーがあるだけで exit 1。レビューを済ませてから有効にする"
+  },
+  "vendors": [
+    {
+      "id": "apple",
+      "name": "Apple（App Store / App Store Connect）",
+      "used_for": "配信・課金・審査",
+      "personal_data": "personal",
+      "$personal_data": "課金情報はAppleが保持し、こちらには渡ってこない。ユーザーとの契約主体はApple",
+      "critical": true,
+      "breaks_if_down": "配信と課金が止まる。既にインストール済みのアプリは動く",
+      "fallback": null,
+      "fallback_note": "**代替なし。**iOSアプリである以上ここは置き換えられない",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "../simplememo-ios/scripts/lib/asc_api.rb"
+      ]
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare（Workers / Pages / KV / D1）",
+      "used_for": "Relay API・サイト配信・データ保存",
+      "personal_data": "pseudonymous",
+      "critical": true,
+      "breaks_if_down": "**メモが送れなくなる。**端末側 Outbox が貯めて復旧後に再送する",
+      "fallback": "端末側 Outbox（暗号化キュー）が受け皿になる",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "../simplememo-api/wrangler.toml",
+        "../simplememo-api/data/data-retention.json"
+      ]
+    },
+    {
+      "id": "resend",
+      "name": "Resend",
+      "used_for": "全メール送信（メモ・認証・ライフサイクル）",
+      "personal_data": "personal",
+      "$personal_data": "宛先アドレスとメモ本文が渡る。**この台帳で最も重い**",
+      "critical": true,
+      "breaks_if_down": "アプリの主機能が止まる",
+      "fallback": null,
+      "fallback_note": "**代替なし。**送信経路が1本しかない",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "../simplememo-api/src/resend.ts"
+      ]
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic（Claude API / Claude Code）",
+      "used_for": "オートパイロット・QA判定・原稿執筆",
+      "personal_data": "none",
+      "$personal_data": "redact済み要約のみを送る。メモ本文のfixtureは架空で、device logは収集しない",
+      "critical": false,
+      "breaks_if_down": "自動運営が止まる。アプリ自体は動く",
+      "fallback": "副系（CCR Routines）が代走する。ただし同じ事業者なので同時に落ちる",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
+      ]
+    },
+    {
+      "id": "google_cloud",
+      "name": "Google Cloud（BigQuery / Search Console）",
+      "used_for": "検索データの取り込み・ファネル評価",
+      "personal_data": "pseudonymous",
+      "critical": false,
+      "breaks_if_down": "計測が止まる。出荷は続く",
+      "fallback": "無し。データが欠測する（『取得できなかった』として記録される）",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "scripts/autopilot-budget.mjs"
+      ]
+    },
+    {
+      "id": "firebase",
+      "name": "Firebase（App Check / Authentication）",
+      "used_for": "APIの不正利用防止・OAuth のトークン検証",
+      "personal_data": "pseudonymous",
+      "critical": true,
+      "breaks_if_down": "App Check が落ちると送信が弾かれうる",
+      "fallback": "App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "../simplememo-api/src/appcheck.ts",
+        "../simplememo-api/src/oauth.ts"
+      ]
+    },
+    {
+      "id": "appsflyer",
+      "name": "AppsFlyer",
+      "used_for": "広告アトリビューション",
+      "personal_data": "pseudonymous",
+      "critical": false,
+      "breaks_if_down": "効果測定が止まる。アプリは動く",
+      "fallback": "kill switch（FeatureFlags.appsFlyerEventEnabled）を false にするだけ",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "../simplememo-ios/SimpleMemo/FeatureFlags.swift"
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub（Actions / リポジトリ）",
+      "used_for": "ソース管理・主系オートパイロット・CI",
+      "personal_data": "none",
+      "critical": false,
+      "breaks_if_down": "主系が止まる。**副系（CCR）は別経路なので代走できる**",
+      "fallback": "CCR Routines（実績として日々の出荷はこちらが担っている）",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "data/autopilot-runs.json"
+      ]
+    },
+    {
+      "id": "prtimes",
+      "name": "PR TIMES",
+      "used_for": "プレスリリース配信",
+      "personal_data": "none",
+      "critical": false,
+      "breaks_if_down": "配信できない。原稿はリポジトリに残る",
+      "fallback": "他の配信手段（自社サイト・SNS）",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "docs/pr-autopilot-2026-09-plan.md"
+      ]
+    },
+    {
+      "id": "registrar",
+      "name": "ドメインレジストラ（simplememofast.com）",
+      "used_for": "サイト・API・メールのFrom・ディープリンクの土台",
+      "personal_data": "none",
+      "critical": true,
+      "breaks_if_down": "**全部止まる。**サイト・API・メール送信・アプリの通信",
+      "fallback": null,
+      "fallback_note": "**代替なし。**ドメインが切れると復旧まで全機能が止まる。自動更新でも支払い手段の期限切れで失敗する",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "data/credential-expiry.json"
+      ],
+      "note": "ベンダー台帳を作って初めて表に出た。資格情報の台帳には載っていたが、事業者として数えていなかった"
+    }
+  ]
+}

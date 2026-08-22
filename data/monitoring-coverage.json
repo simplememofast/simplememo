@@ -1,0 +1,180 @@
+{
+  "$comment": [
+    "統合監視の棚卸し。scripts/check-monitoring.mjs が検査する。",
+    "",
+    "**「全部見ています」と言うための台帳ではない。**",
+    "何が見張られていて、何が見張られていないかを言えるようにするための台帳。",
+    "検知の中央値は2.1hだが最大は50.7h — その差は『見張られていない領域で起きた』",
+    "ことによる。どこが空いているかを名指しできなければ、その差は縮まらない。",
+    "",
+    "detector が実在するか（ワークフロー/スクリプトのファイル）はCIが確かめる。",
+    "**実際に起きた failure_class に検知器が無いものも名指しする。**",
+    "起きたのに誰も見ていない種別が、次に長時間気づかれない候補。",
+    "",
+    "detection: automatic … 機械が気づいて通知まで出す",
+    "           derived   … 別の記録から後で分かる（気づくのは人）",
+    "           human     … 人が見て初めて分かる",
+    "           none      … 気づく経路が無い"
+  ],
+  "signals": [
+    {
+      "id": "autopilot_stale",
+      "domain": "オートパイロット",
+      "watches": "status JSON が当日分に更新されたか（上流と本番の両方）",
+      "detection": "automatic",
+      "detector": ".github/workflows/autopilot-health.yml",
+      "cadence": "毎日 12:00 JST",
+      "on_detect": "Issue（label ops/autopilot-stale）に集約、回復でクローズ",
+      "covers_failure_class": [
+        "route-absent",
+        "actor-rejected",
+        "runner-timeout",
+        "permissions"
+      ],
+      "note": "主系は秘密鍵が無いとGateで正常終了するので、cron-health では永久に沈黙する。**結果（成果物）を見る**ことでそこを埋めている。**拾い方は間接的** — 「出荷が無い」ことで気づくので、何が壊れたかまでは分からない。actor-rejected の検知に50.7hかかったのはこのワークフローが作られる前（2026-08-18新設・PR #504）だった",
+      "coverage_kind": "indirect"
+    },
+    {
+      "id": "cron_failure",
+      "domain": "スケジュール実行",
+      "watches": "scheduled な workflow の失敗",
+      "detection": "automatic",
+      "detector": ".github/workflows/cron-health.yml",
+      "cadence": "定期",
+      "on_detect": "Issue に集約",
+      "covers_failure_class": [
+        "runner-timeout"
+      ],
+      "note": "conclusion=failure だけを見る。成功して何もしていない場合は拾えない（autopilot-health の担当）"
+    },
+    {
+      "id": "ci_validation",
+      "domain": "サイト出荷",
+      "watches": "SEO Validation の18チェック",
+      "detection": "automatic",
+      "detector": ".github/workflows/seo-check.yml",
+      "cadence": "毎PR",
+      "on_detect": "マージを止める（auto-merge は検証済みSHAだけをマージする）",
+      "covers_failure_class": [],
+      "note": "検知というより**出荷前に止める**側。壊れたものが本番に出ないので、そもそも障害にならない"
+    },
+    {
+      "id": "budget_cap",
+      "domain": "AI予算",
+      "watches": "月次上限の超過",
+      "detection": "automatic",
+      "detector": "scripts/autopilot-budget.mjs",
+      "cadence": "実行のたび（Gate）",
+      "on_detect": "オートパイロットを起動しない",
+      "covers_failure_class": [],
+      "note": "異常消費の検知は**実績5件未満のため判定していない**（異常なしではない）"
+    },
+    {
+      "id": "selfheal_unrepaired",
+      "domain": "基盤の故障",
+      "watches": "修理されていない失敗と、同じ種別の修理3回",
+      "detection": "automatic",
+      "detector": "scripts/autopilot-selfheal.mjs",
+      "cadence": "毎PR",
+      "on_detect": "レーンFとして修理を起動。3回でエスカレーション",
+      "covers_failure_class": [
+        "route-absent",
+        "runner-timeout",
+        "permissions"
+      ],
+      "note": "台帳に記録が入って初めて動く。**記録が入らない失敗は見えない**"
+    },
+    {
+      "id": "credential_expiry",
+      "domain": "資格情報",
+      "watches": "証明書・Profile・ドメインの期限",
+      "detection": "automatic",
+      "detector": "scripts/check-expiry.mjs",
+      "cadence": "毎PR",
+      "on_detect": "30日前に警告、7日前でCIを落とす",
+      "covers_failure_class": [],
+      "note": "**critical 3件の期限日が未記入なので、その3件は実質 none。**台帳が埋まるまで監視できていない"
+    },
+    {
+      "id": "rollout_guard",
+      "domain": "段階公開",
+      "watches": "露出群と対照群のガードレール指標",
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/rollout-guard.ts",
+      "cadence": "毎時 cron",
+      "on_detect": "有意かつ実害を伴う悪化なら kill を自律実行",
+      "covers_failure_class": [],
+      "note": "**本番でまだ1回も発火していない**（段階公開中のフラグがゼロ）"
+    },
+    {
+      "id": "app_crash",
+      "domain": "アプリのクラッシュ",
+      "watches": "起動完走率（launch_incomplete）",
+      "detection": "derived",
+      "detector": "../simplememo-api/src/rollout-guard.ts",
+      "cadence": "段階公開中のみ",
+      "on_detect": "なし（段階公開していない期間は誰も見ていない）",
+      "covers_failure_class": [],
+      "note": "**指標は取れているが、常時の監視になっていない。**段階公開中だけガードが見る。平常時にクラッシュ率が上がっても気づく経路が無い"
+    },
+    {
+      "id": "send_failure",
+      "domain": "メール送信",
+      "watches": "email_sends_daily の accepted/attempted",
+      "detection": "derived",
+      "detector": "../simplememo-api/src/analytics.ts",
+      "cadence": "日次レポート",
+      "on_detect": "供給比アラート（人がメールを読む）",
+      "covers_failure_class": [],
+      "note": "**気づくのは人がメールを読んだとき。**読まなければ気づかない"
+    },
+    {
+      "id": "watch_app",
+      "domain": "Apple Watch アプリ",
+      "watches": "—",
+      "detection": "none",
+      "detector": null,
+      "cadence": null,
+      "on_detect": null,
+      "covers_failure_class": [],
+      "note": "**契約テストはあるが、本番で壊れたことを知る経路が無い。**ユーザーから言われて初めて分かる"
+    },
+    {
+      "id": "billing",
+      "domain": "課金",
+      "watches": "—",
+      "detection": "none",
+      "detector": null,
+      "cadence": null,
+      "on_detect": null,
+      "covers_failure_class": [],
+      "note": "**購入失敗イベントを受ける経路が未実装。**ASC未接続なので売上の異常も見えない"
+    },
+    {
+      "id": "support",
+      "domain": "問い合わせ",
+      "watches": "—",
+      "detection": "none",
+      "detector": null,
+      "cadence": null,
+      "on_detect": null,
+      "covers_failure_class": [],
+      "note": "**問い合わせ基盤そのものが未整備。**件数も少なく、受け皿が無い"
+    },
+    {
+      "id": "actor_rejection",
+      "domain": "AIの実行拒否",
+      "watches": "—",
+      "detection": "derived",
+      "detector": ".github/workflows/autopilot-health.yml",
+      "cadence": "毎日 12:00 JST（間接）",
+      "on_detect": "「出荷が無い」として Issue。原因の特定は人",
+      "covers_failure_class": [
+        "actor-rejected"
+      ],
+      "note": "実際に起きた（allowed_bots で弾かれた）。最大検知時間50.7hはこの種だが、それは autopilot-health.yml が無かった時期の話。いまは「出荷が無い」として間接的に拾える。**ただし「AIが拒否された」とは分からない**ので、原因の切り分けは人が行う",
+      "coverage_kind": "indirect"
+    }
+  ],
+  "$coverage_kind": "indirect = 症状（出荷が無い等）で気づく。原因までは分からないので切り分けは人が行う"
+}

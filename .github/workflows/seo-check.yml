@@ -113,6 +113,157 @@ jobs:
       - name: Experiment evaluation dates
         run: node growth/scripts/check-experiments.mjs
 
+      # 【予算】台帳の形と、当月が上限に達していないかを見る。
+      #
+      # 主系ワークフローの予算ゲートと同じスクリプトを使う。ここで落ちるのは
+      # 実質「台帳が壊れている」ときだけ（上限超過の日は主系がそもそも走らない）
+      # だが、壊れた台帳は「集計できない」ではなく **上限に永久に当たらない**
+      # ＝安全装置の停止を意味するので、PRの時点で止める。
+      - name: Autopilot budget ledger
+        run: node scripts/autopilot-budget.mjs --check
+
+      # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
+      #
+      # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を
+      # そのまま引き継いだ（旧アプリ名・起動時間・**廃止済みの無料トライアル**）。
+      # 人が読み直して初めて見つかった。3件目は廃止そのものが景表法・ストア審査
+      # 上のリスク対応だったので、書けば一度消したリスクを外向きに作り直す。
+      # **人の読み直しに依存している限り、次も同じことが起きる。**
+      #
+      # 正は data/site-constants.json と data/benchmark.json。値が変われば
+      # 検査も自動で追随する（スクリプトに数値を直書きしない）。
+      # docs/pr-*.md は draft / internal / archived のどれかを宣言する。
+      # 未宣言は落とす — 暗黙のファイル名規則にすると新しい原稿が黙って外れる。
+      - name: PR draft facts
+        run: node scripts/check-pr-facts.mjs --check
+
+      # 【切替演習】バックアップ経路が本当に引き継ぐかを、実行で確かめる。
+      #
+      # 主系は11回のうち一度も出荷しておらず、日々の出荷は副系が担っている。
+      # つまり切替は常態なのに、**正しく起きることを確かめたことは一度も無かった。**
+      # 観測（誰が出荷したか）と検証（正しく引き継ぐか）は別物で、
+      # 「結果として動いていた」は「壊れていない」の証明にならない。
+      #
+      # 予算の非対称性（上限到達で主系は止まるが副系は止まらない）も
+      # シナリオとして固定してある。既知の仕様なので、いつのまにか
+      # 変わっていたら落ちる。
+      - name: Failover drill
+        run: node scripts/autopilot-drill.mjs --check
+
+      # 【自動化カバレッジ】全領域の自動化率台帳の形と証跡を見る。
+      #
+      # ここが緩むと台帳が自己申告になり、「やっていることにする」だけで
+      # 数字が上がるようになる。だから ai_autonomous / ai_executes_gated は
+      # 証跡ファイルの実在を強制し、nobody は「なぜ無いか」を強制する。
+      # 理由の無い未実装は、次の棚卸しで拾えない。
+      - name: Automation coverage ledger
+        run: node scripts/automation-rate.mjs --check
+
+      # 【自己修復の境界】レーンFが越えてはいけない線が壊れていないかを見る。
+      #
+      # repair_of の指す run が実在するか、失敗行に failure_class があるか、
+      # may_modify が承認制領域を含んでいないか、停止条件があるか。
+      # 未修理の故障が残っていること自体では落とさない（それは運用の話であって、
+      # PRを止める理由ではない）。
+      - name: Self-repair boundary
+        run: node scripts/autopilot-selfheal.mjs --check
+
+      # 【権限表】不可逆な領域が承認制になっているか、根拠のファイルが実在するかを見る。
+      #
+      # 機械が守れる部分だけ機械に守らせる。実際に人が承認したかは見られないので、
+      # 見るのは (1) 不可逆なのに承認不要になっていないか (2) 稼働中の領域が
+      # 根拠ファイルを指せているか (3) 金額が動く領域が上限を持っているか の3つ。
+      # 「空欄」と「未設定と決めた」は違うので、後者は set_by: "unset" と書かせる。
+      - name: Authority matrix
+        run: node scripts/check-authority.mjs --check
+
+      # 【運転台帳】共通実行IDの一意性と、attempted／outcome の整合を見る。
+      #
+      # 壊れた台帳は「集計できない」ではなく **指標が黙って嘘になる**。
+      # とくに attempted と outcome の食い違い（Gateスキップなのに着手扱い等）は
+      # AI完走率を静かにずらすので、PRの時点で止める。
+      # 「shipped なのに PR番号が無い」「failed なのに理由が無い」も同様に落とす —
+      # 検算できない出荷と、原因の無い失敗は、指標として存在しないのと同じ。
+      - name: Autopilot run ledger
+        run: node scripts/autopilot-runs.mjs --check
+
+      # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
+      #
+      # 画像そのものは配信前に人が確認して出す。ここで見るのは、
+      # 見出しが1行に収まるかと、裏の取れていない主張で完成品が
+      # 作れない仕組みが生きているか。**切れた見出しの画像が配信される**のと
+      # **裏取り未完の画像が完成品として流通する**のが、この検査で防ぎたい2つ。
+      - name: PR hero guardrails
+        run: node scripts/check-pr-hero.mjs
+
+      # 【監視】何が見張られていて、何が空いているか。
+      #
+      # 検知の中央値は2.1hだが最大は50.7h。その差は「見張られていない領域で
+      # 起きた」ことによる。**どこが空いているかを名指しできなければ縮まらない。**
+      # 検知器と書いたファイルが実在するかと、**実際に起きた障害種別に
+      # 検知経路があるか**を見る（起きた実績があるものは、次も起きる）。
+      - name: Monitoring coverage
+        run: node scripts/check-monitoring.mjs --check
+
+      # 【ベンダー】依存している外部サービスの棚卸し。
+      #
+      # リード文の「契約は人が承認」に中身を与えるための台帳。
+      # 個人データを渡しているのに DPA を見ていないものを名指しする
+      # （**「見ていない」を「問題なし」と書かない**）。
+      # 資格情報の台帳との食い違いも見る — 片方だけ古くなるのを防ぐ。
+      - name: Vendor register
+        run: node scripts/check-vendors.mjs --check
+
+      # 【機能バックログ】計測の結果が次に作るものを決めているか。
+      #
+      # 確信度は evidence_strength から機械的に決まる（手で置けない）。
+      # ここを主観にすると順位はいくらでも動かせるので台帳の意味が消える。
+      # リスクは点数を下げるのではなく承認を要求する — 掛け算にすると
+      # **期待効果が大きければ危険な案が1位になる**。
+      - name: Feature backlog
+        run: node scripts/feature-score.mjs --check
+
+      # 【主張】プレスリリースの見出し・リード文を実装台帳に当てる。
+      #
+      # 原稿は実装より速く動く。リード文に「AIが一気通貫で循環」と書いた後で
+      # 台帳の該当タスクが未実装のままだと、**配信当日まで誰も気づかない**。
+      #
+      # 支持率が低いことでは落とさない — それは「まだ書けない」であって
+      # 「壊れている」ではない。落とすのは参照が解決できないとき
+      # （＝原稿と台帳のどちらかが古い）。赤い行を黙って消す道具にしない。
+      - name: PR claims vs ledger
+        run: node scripts/check-pr-claims.mjs --check
+
+      # 【期限】資格情報・証明書が切れる前に気づく。
+      #
+      # これが無い間は **切れた日に初めて分かる** 状態だった。証明書と
+      # Provisioning Profile は年1で切れ、切れるとリリースが一切できなくなる。
+      #
+      # 実行環境が中間者復号していると TLS の実測はプロキシの証明書を読む。
+      # 発行元が信用集合に無ければ期限を報告せず unverifiable にする
+      # （scripts/compute_spki_pins.sh が警告している罠と同じもの）。
+      #
+      # いまは fail_days を切ったときだけ落ちる。critical の未把握で落とすには
+      # 日付を埋めてから policy.enforce_unknown を true にする。
+      - name: Credential expiry
+        run: |
+          node scripts/check-expiry.mjs --selftest
+          node scripts/check-expiry.mjs --check --no-net
+
+      # 【D-SCORE】pr_release レコードの算数とゲートの矛盾を見る。
+      #
+      # 採点そのものは人（かセッション）が根拠つきで置く。ここが自動で点を
+      # 出し始めると、点を取るための見出しを機械が書くようになり、G2 が
+      # 防いでいるはずの「煽り語で点を稼ぐ」に自分から突っ込む。
+      # 機械が持つのは算数とゲートだけ:
+      #   - 各軸の合計と total のズレ（手で足した数字は検算されない）
+      #   - 満点超過
+      #   - status が running/evaluated なのにゲートが未判定・不合格
+      #   - 合格ライン60未満のまま running
+      # どれも「配信してから気づく」と取り返しがつかない。
+      - name: PR release D-SCORE consistency
+        run: node growth/scripts/d-score.mjs --check
+
       # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
       # （token エンドポイントは fetch を差し替えて潰してある）ので、
       # 鍵の無いCIでも走る。ここが壊れると毎日の測定が丸ごと止まるが、

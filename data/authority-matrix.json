@@ -1,0 +1,360 @@
+{
+  "$comment": [
+    "権限表 — 誰が何をどこまで決めてよいかの単一の正。",
+    "",
+    "【なぜファイルにするか】外部レビュー（2026-08-22）が Tier 1 の必須条件として",
+    "『広告・契約・支払い・公開に関する権限表』を挙げた。実態としては既にそう運用",
+    "されているが、**明文化されていないものは、次に判断する人（や次のセッション）に",
+    "とって存在しない**。growth/README.md が戒めている『散文は手を挙げない』と同じ。",
+    "",
+    "【機械が守れる部分だけ機械に守らせる】scripts/check-authority.mjs が見るのは3つ:",
+    "  1. 不可逆な領域（reversible: false）は必ず requires_approval: true であること",
+    "  2. active な領域は evidence（そう運用されている根拠のファイル）を持つこと",
+    "  3. 金額を伴う領域は threshold を持つこと（未設定なら未設定と明示されていること）",
+    "残り——実際に人が承認したか——は機械では見られない。そこは正直に書く。",
+    "",
+    "【status の意味】",
+    "  active          … その運用が現に動いている",
+    "  suspended       … 動いていた／止めた（理由を gate に書く）",
+    "  not_implemented … そもそも作っていない（『やらない』ではなく『まだ無い』）",
+    "  policy_only     … 方針だけあり、手順・手段が未整備",
+    "",
+    "【AIに与えていない権限が実体を持っている例】アプリのリリース連鎖は自動化されて",
+    "いるが、それを起動する actions: write をAIワークフローに与えていない。これは",
+    "この表の中で唯一、**技術的に強制されている境界**である。他は人間のルール。"
+  ],
+  "actors": {
+    "ai_autonomous": "AIが単独で実行してよい。ゲート（CI・上限・品質基準）が通ったときだけ通る",
+    "ai_proposes": "AIは提案・下書きまで。適用は人間の承認後",
+    "human_only": "AIは実行しない。提案もしない領域はその旨を human_only に書く"
+  },
+  "generated_note": "この表は手で維持する。CIが見るのは形式の整合だけで、内容の正しさは人が持つ。",
+  "domains": [
+    {
+      "domain": "サイトコンテンツの新設・更新",
+      "reversible": true,
+      "ai_may": [
+        "レーン選定",
+        "実装",
+        "内部リンク配線",
+        "OG/QR生成",
+        "PR作成"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "SEO Validation 13チェックに合格した**そのSHAだけ**をauto-mergeがマージする。落ちればマージされない",
+      "evidence": [
+        ".github/workflows/seo-check.yml",
+        ".github/workflows/auto-merge.yml"
+      ],
+      "status": "active",
+      "note": "mainへのマージ＝本番公開。出荷を保留したいときはdraft PRにする（auto-mergeはdraftを対象外にしている）"
+    },
+    {
+      "domain": "サイト構造の変更（URL・リダイレクト・実験中ページ）",
+      "reversible": false,
+      "ai_may": [
+        "提案",
+        "実装（実験対象外のページのみ）"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "実験中ページのタイトル/説明/主要コンテンツの変更"
+      ],
+      "gate": "check-url-normalization / check-internal-redirects / check-experiments。running の実験対象ページはRunbook §0原則5で変更禁止",
+      "evidence": [
+        "scripts/check-url-normalization.mjs",
+        "growth/experiments/experiments.json"
+      ],
+      "status": "active"
+    },
+    {
+      "domain": "アプリのビルド・TestFlight内部配信",
+      "reversible": true,
+      "ai_may": [],
+      "requires_approval": false,
+      "human_only": [
+        "タグ v* の作成"
+      ],
+      "gate": "Xcode Cloud が archive → attach-testflight-testers.yml が ASC API で内部グループへ自動アタッチ",
+      "evidence": [
+        "simplememo-ios/docs/release-automation.md"
+      ],
+      "status": "active",
+      "note": "AIワークフローに actions: write を与えていないため、AIはこの連鎖を起動できない（claude.yml 冒頭に理由あり）"
+    },
+    {
+      "domain": "App Review への提出",
+      "reversible": false,
+      "ai_may": [],
+      "requires_approval": true,
+      "human_only": [
+        "タグ submit-v* の作成",
+        "**実機での事前確認**"
+      ],
+      "gate": "Hard Rule: 実機で確認してから提出する。後ではなく先に（docs/release-automation.md）",
+      "evidence": [
+        "simplememo-ios/.github/workflows/submit-review.yml"
+      ],
+      "status": "active",
+      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない"
+    },
+    {
+      "domain": "App Store への公開（審査通過後）",
+      "reversible": false,
+      "ai_may": [],
+      "requires_approval": true,
+      "human_only": [
+        "App Store Connect での公開操作"
+      ],
+      "gate": "fastlane の automatic_release がハードコードで false。**恒久的に手動**",
+      "evidence": [
+        "simplememo-ios/fastlane/Fastfile"
+      ],
+      "status": "active"
+    },
+    {
+      "domain": "価格・プラン・無料枠の変更",
+      "reversible": false,
+      "ai_may": [],
+      "requires_approval": true,
+      "human_only": [
+        "すべて"
+      ],
+      "gate": "自動化していない。data/site-constants.json の値変更はCIが表示との整合だけ見る",
+      "evidence": [
+        "data/site-constants.json",
+        "scripts/sync_constants.js"
+      ],
+      "status": "active",
+      "threshold": {
+        "set_by": "unset",
+        "note": "変更幅の上限も承認フローも未設計。現行値は月額500円/年額5,000円/無料枠1日3通で data/site-constants.json が正。**AIは値を提案もしない**（課金は不可逆で、既存契約者への影響が読めないため）。設計するなら autopilot-maturity-backlog.md ⑨ から"
+      }
+    },
+    {
+      "domain": "AI実費（開発・運用のトークン費）",
+      "reversible": true,
+      "ai_may": [
+        "上限内での消費"
+      ],
+      "requires_approval": false,
+      "human_only": [
+        "monthly_usd_cap の決定"
+      ],
+      "gate": "当月実績が上限に達すると予算ゲートが主系runを止める（--check の非ゼロ終了）",
+      "evidence": [
+        "data/autopilot-cost.json",
+        "scripts/autopilot-budget.mjs"
+      ],
+      "status": "active",
+      "threshold": {
+        "monthly_usd_cap": 40,
+        "set_by": "placeholder",
+        "note": "暫定値。実測1点からの粗い外挿で、オーナー未確認。**副系CCRの実費は観測手段が無く、この上限では止められない**"
+      }
+    },
+    {
+      "domain": "広告出稿・広告予算の変更",
+      "reversible": false,
+      "ai_may": [],
+      "requires_approval": true,
+      "human_only": [
+        "すべて"
+      ],
+      "gate": "未実装。資格情報も無い",
+      "evidence": [
+        "simplememo-ios/docs/reports/APPLE_ADS_AUTOMATION_2026-08-17.md"
+      ],
+      "status": "not_implemented",
+      "threshold": {
+        "daily_cap_jpy": null,
+        "set_by": "unset",
+        "note": "レポート §1 は上限¥4,000/日を想定しているが未設定。実装時は Tier 0（無条件の上限死守）から作る"
+      }
+    },
+    {
+      "domain": "契約・支払い・送金",
+      "reversible": false,
+      "ai_may": [],
+      "requires_approval": true,
+      "human_only": [
+        "すべて"
+      ],
+      "gate": "自動化していない。証跡も無い",
+      "evidence": [],
+      "status": "not_implemented",
+      "threshold": {
+        "note": "支出上限と重要支出の二者承認は未設計。autopilot-maturity-backlog.md ⑦"
+      }
+    },
+    {
+      "domain": "プレスリリースの配信",
+      "reversible": false,
+      "ai_may": [
+        "原稿作成",
+        "D-SCORE採点の記録",
+        "素材の依頼文作成"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "PR TIMES管理画面からの配信操作",
+        "配信可否の判断"
+      ],
+      "gate": "D-SCORE >= 60 かつ G1〜G4 全通過。1つでも落ちたら配信しない。算数とゲートの矛盾はCIが落とす",
+      "evidence": [
+        "growth/scripts/d-score.mjs",
+        "growth/experiments/experiments.json"
+      ],
+      "status": "active",
+      "note": "**採点そのものは人が根拠つきで置く。**自動採点にすると点を取るための見出しを機械が書き始め、G2に自分から違反する"
+    },
+    {
+      "domain": "SNS投稿（X・TikTok）",
+      "reversible": true,
+      "ai_may": [],
+      "requires_approval": false,
+      "human_only": [
+        "再開の判断"
+      ],
+      "gate": "scheduled自動投稿は2026-08-11に運用停止。X英語はアカウントBAN1回目、TikTokは品質未達、scheduled経路は Cloudflare Access の認証で8/7から故障中",
+      "evidence": [
+        "README.md",
+        ".github/workflows/x-post-scheduled.yml"
+      ],
+      "status": "suspended"
+    },
+    {
+      "domain": "ユーザーデータの削除要求への対応",
+      "reversible": false,
+      "ai_may": [
+        "受付の検知"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "実行の承認"
+      ],
+      "gate": "アカウント削除APIは実装済み。運用手順は未整備",
+      "evidence": [
+        "simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md"
+      ],
+      "status": "active"
+    },
+    {
+      "domain": "個人情報事故・法的請求・重大障害・炎上",
+      "reversible": false,
+      "ai_may": [],
+      "requires_approval": true,
+      "human_only": [
+        "すべて"
+      ],
+      "gate": "**検知したら自動処理を止めて経営者へ移管する**。AIは判断も対外発信もしない",
+      "evidence": [],
+      "status": "policy_only",
+      "note": "移管の手順・連絡先・停止手段は未整備（autopilot-maturity-backlog.md ⑩⑫）"
+    },
+    {
+      "domain": "段階公開の撤回（カナリアガード）",
+      "reversible": true,
+      "ai_may": [
+        "ガードレール指標の計測",
+        "露出群/対照群の復元",
+        "有意性と実害の判定",
+        "kill の実行"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "有意（z>1.96）かつ実害2pt以上の悪化が1指標でも出たときだけ kill。サンプル不足・正規近似の不成立・計測が読めない場合は kill も promote もしない（hold）",
+      "evidence": [
+        "simplememo-api/src/rollout-guard.ts",
+        "simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "status": "active",
+      "note": "**止める方向だけを機械に渡してある。**可逆で安全な方向なので承認を挟まない。2026-08-22実装・本番でまだ1回も発火していない（段階公開中のフラグがゼロのため）"
+    },
+    {
+      "domain": "段階公開の拡大（rollout の引き上げ）",
+      "reversible": false,
+      "ai_may": [
+        "昇格の提案",
+        "根拠となる群間比較の提示"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "rollout を引き上げる操作そのもの"
+      ],
+      "gate": "/admin/rollout-guard に提案が積まれるだけ。POST /admin/flags/set を叩くのは人",
+      "evidence": [
+        "simplememo-api/src/rollout-guard.ts",
+        "simplememo-api/API_SPEC.md"
+      ],
+      "status": "active",
+      "note": "**広げてから戻しても「見た人が見なかったことにはならない」**ので不可逆に分類した。撤回と拡大で権限を非対称にしてあり、逆にすると誤検知が『勝手に全員へ配る』形で顕在化する"
+    }
+  ],
+  "self_repair": {
+    "$comment": [
+      "レーンF（自己修復）の境界。**AIが自分の実行基盤を直してよい範囲。**",
+      "",
+      "実測（2026-08-11〜08-22）では、人間の介入7件のうち4件が基盤の修理だった。",
+      "しかもその修理を書いたのはすべてAIセッションで、人間がやったのは",
+      "**『壊れていることに気づいて、直せと言うこと』だけ**。つまり足りないのは",
+      "能力ではなく起動条件だった。だからレーンFは『検知したら待たずに直す』にする。",
+      "",
+      "ただし自分のCIを自分で直す仕組みは、放っておくと",
+      "**『通らないチェックを消して緑にする』**に必ず流れる。must_not はそのための線。",
+      "required_ci_checks は scripts/check-authority.mjs が実在を検証するので、",
+      "自己修復PRがチェックを1つでも消すとCIが落ちる。"
+    ],
+    "may_modify": [
+      ".github/workflows/obsidian-autopilot.yml",
+      ".github/workflows/autopilot-health.yml",
+      ".github/workflows/cron-health.yml",
+      "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+      "docs/obsidian/AUTOPILOT_LOG.md",
+      "scripts/autopilot-budget.mjs",
+      "scripts/autopilot-runs.mjs",
+      "scripts/autopilot-selfheal.mjs",
+      "data/autopilot-runs.json",
+      "data/autopilot-cost.json",
+      "data/automation-coverage.json",
+      "scripts/autopilot-gate.mjs",
+      "scripts/autopilot-drill.mjs"
+    ],
+    "must_not": [
+      "検証を弱める変更（CIチェックの削除・スキップ・閾値の緩和）",
+      "自分の権限を広げる変更（permissions: の拡大・actions: write の追加）",
+      "auto-merge.yml の『検証済みSHAだけをマージする』条件の緩和",
+      "data/authority-matrix.json 自身の変更（権限表を自分で書き換えない）",
+      "他リポジトリ（simplememo-ios / simplememo-api）への変更"
+    ],
+    "stop_after_failed_repairs": 3,
+    "stop_note": "同じ failure_class を3回修理しても再発するなら、修理をやめて人間に上げる。直せないものを毎日直そうとするのが一番たちの悪い無限ループ。",
+    "forbidden_permissions": [
+      "actions: write"
+    ],
+    "forbidden_permission_files": [
+      ".github/workflows/obsidian-autopilot.yml"
+    ],
+    "required_ci_checks": [
+      "node scripts/seo-check.js",
+      "node scripts/check-css-version.mjs",
+      "node scripts/check-url-normalization.mjs",
+      "node scripts/check-internal-redirects.mjs",
+      "node scripts/sync_constants.js --check",
+      "node scripts/tag-cta-placements.js --check",
+      "node growth/scripts/check-experiments.mjs",
+      "node scripts/check-content-graph.mjs",
+      "node scripts/autopilot-budget.mjs --check",
+      "node scripts/autopilot-runs.mjs --check",
+      "node scripts/check-pr-facts.mjs --check",
+      "node scripts/autopilot-drill.mjs --check",
+      "node scripts/automation-rate.mjs --check",
+      "node scripts/autopilot-selfheal.mjs --check",
+      "node scripts/check-authority.mjs --check",
+      "node growth/scripts/d-score.mjs --check",
+      "node growth/lib/bigquery.test.mjs",
+      "python3 scripts/generate_sitemap.py --check"
+    ]
+  }
+}

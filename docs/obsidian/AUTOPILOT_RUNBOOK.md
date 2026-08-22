@@ -106,6 +106,11 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 （GitHub Actions環境ではチェックアウト済みのリポジトリルートで同名ブランチを切る。
 日付は必ず **JST** で取ること: `TZ=Asia/Tokyo date +%Y%m%d`）
 
+**最初に走らせるもの（読む前に）:**
+```
+node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンFが最優先
+```
+
 読むもの（この順）:
 1. `docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか・保留事項
 2. `docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md` + `growth/content/new-queue.json` /
@@ -238,6 +243,45 @@ Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` 
 
 ## 2. アクションの選び方（優先順）
 
+### レーンF（自己修復）— **A〜Eより先に、毎回これを見る**
+
+```
+node scripts/autopilot-selfheal.mjs
+```
+
+**未修理の故障が残っていれば、その日の最優先アクションは基盤の修理。**記事は書かない。
+
+**なぜ最優先か。** 2026-08-11〜08-22の実測で、人間の介入7件のうち**4件が基盤の修理**
+だった。しかもその修理を書いたのは**すべてAIセッション**で、人間がやったのは
+「壊れていることに気づいて、直せと言うこと」だけ。**足りなかったのは能力ではなく
+起動条件**なので、レーンFは「検知したら人の指示を待たずに直す」ことにする。
+
+手順:
+
+1. `autopilot-selfheal.mjs` が出す対象の `run_id` と `failure_class` を確認する
+2. GitHub MCP の `get_job_logs`（または Actions のrunログ）で**根本原因まで**特定する。
+   「flakeだと思う」で終わらせない
+3. `self_repair.may_modify` のファイルだけを直す。**`must_not` は絶対に越えない**
+   - **検証を弱めない**（CIチェックの削除・スキップ・閾値の緩和）
+   - **自分の権限を広げない**（`permissions:` の拡大・`actions: write` の追加）
+   - `auto-merge.yml` の「検証済みSHAだけをマージ」条件を緩めない
+   - `data/authority-matrix.json` 自身を書き換えない
+   この2つは文章ではなく**CIが実際に検出する**（`check-authority.mjs` が
+   `required_ci_checks` の実在と `forbidden_permissions` の不在を見ている）
+4. 通常どおり §4 の全チェックを通してPRを出す
+5. **`data/autopilot-runs.json` の自分の行に `repair_of: ["<直した run_id>"]` を書く。**
+   書かない限り、その故障は翌日も「未修理」として上がってくる
+
+**⛔ が出ている対象は直さない。** 同じ `failure_class` を3回修理しても再発している
+ということなので、**修理をやめて `owner_requests` に上げる**。直せないものを毎日
+直そうとするのが、この仕組みで一番たちの悪い無限ループになる。
+
+**レーンFで1日使い切ってよい。** その日の記事はゼロでよく、
+`action: "maintenance"`・`reason` に修理内容を書く。**壊れた基盤の上で記事を出しても、
+翌日また止まる。**
+
+---
+
 - **レーンA（SEO）**: 1. Refresh（足切りを超える未回答意図が既存ページに残っている）
   → 2. New（キュー未実装・解禁済み。URL既存でないか必ず確認）
   → 3. 配線（`OBSIDIAN_INTERNAL_LINK_PLAN.md` の未実施分でデータ根拠あり）
@@ -339,6 +383,14 @@ node scripts/check-internal-redirects.mjs
 node scripts/sync_constants.js --check
 node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
+node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
+node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
+node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止め
+node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
+node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
+node scripts/automation-rate.mjs --check     # 全領域の自動化率台帳
+node scripts/check-pr-facts.mjs --check      # PR原稿の事実と禁止表現
+node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
 
@@ -418,6 +470,101 @@ python3 scripts/generate_sitemap.py --dry-run
 **10:00 JST にWorkerがこのJSONを読み、Resendでオーナーへメール**
 （`simplememo-api` の `autopilot_report` cronジョブ）。
 
+### 5-3. AI実費の記録（2026-08-22追加・毎回必須）
+
+**この運用のトークン実費について、2026-08-22時点で言えたのは「一度だけ観測された
+0.8149 USD」だけだった**（主系 run 32528028588）。予算の話は全部その1点の周りの
+推測で、外に「予算に応じて配分している」と言える状態ではなかった。まず測る。
+
+台帳は `data/autopilot-cost.json`、集計と上限判定は `scripts/autopilot-budget.mjs`。
+
+```
+node scripts/autopilot-budget.mjs            # 当月の集計を見る
+node scripts/autopilot-budget.mjs --json     # status JSON の cost に入れる形
+node scripts/autopilot-budget.mjs --check    # 上限超過なら exit 1
+```
+
+**毎回の手順（status JSONを書くのと同じPRで）:**
+
+1. **前回runの実費を台帳へ入れる。** 主系ワークフローは実行後に
+   `total_cost_usd` をジョブサマリと `::notice::` に出しており、そこに
+   そのまま貼れる `--append` コマンドが1行で書かれている。GitHub MCP の
+   `get_job_logs` でも読める（2026-08-22のセッションが実際にそうやって
+   0.8149 を読んでいる）。
+   ```
+   node scripts/autopilot-budget.mjs --append --date <当日JST> --route actions \
+     --run-id <runId> --cost <total_cost_usd> --turns <num_turns> \
+     --outcome <shipped|no_artifact|failed>
+   ```
+   `--append` は `run_id` で冪等なので、遅れて追記しても二重計上にならない。
+   **実費が取得できなかった回は追記しない。0 を書くと「無料で動いた」になる**
+   （§1-2 の「取得できなかった」と「増えていない」の取り違えと同じ誤り）。
+2. **`node scripts/autopilot-budget.mjs --json` の出力を、status JSON の
+   `cost` セクションにそのまま入れる。** 日報メール側（`autopilot-report.ts` の
+   `costLines()`）がこれを描画する。
+
+**副系CCRの実費は台帳に入らない。** スケジュール起動セッションのログは外部から
+読めない（§0-2）ため、観測手段が無い。2026-08-22時点で実出荷はすべて副系が
+行っているので、**この台帳がカバーしているのは主系の消費だけ**であり、運用全体の
+実費ではない。`ccr_measured: false` は「副系がゼロ」ではなく「測れていない」で、
+日報はこの2つを分岐で区別する。**混同した報告は誤報。**
+
+**上限は表示用ではない。** 当月の実費が `budget.monthly_usd_cap` に達すると、
+主系ワークフローの予算ゲート（Checkout直後）が `--check` の非ゼロ終了を見て
+**その日の主系runを止める**。フォント導入は記事より優先されてはいけないが、
+上限は記事より優先される（そこだけ `continue-on-error` にしていない）。
+止められるのは主系だけで、副系は止まらない — これも正直に書いてある。
+
+**上限値そのものはまだ暫定** （`cap_set_by: "placeholder"`）。実測が2週間
+貯まったら実測から決め直す。**決まるまで「予算に応じて配分している」と
+対外的に言わない**（速度・Zero-decision率と同じ基準）。
+
+### 5-4. 運転台帳（共通実行ID・2026-08-22追加・毎回必須）
+
+**この運用は長らく「1つの改善サイクルが完走したか」を機械的に言えなかった。**
+AI完走率・人間介入率・変更失敗率・改善サイクル時間は、どれも実行を一意に指す
+識別子が無ければ数えられず、「手で数えた値」にしかならない。
+
+台帳は `data/autopilot-runs.json`、集計は `scripts/autopilot-runs.mjs`。
+
+```
+node scripts/autopilot-runs.mjs           # 指標サマリ
+node scripts/autopilot-runs.mjs --json     # status JSON の runs に入れる形
+node scripts/autopilot-runs.mjs --check    # CI: 形と整合（seo-check.ymlに入っている）
+```
+
+**毎回の手順（status JSONを書くのと同じPRで）:**
+
+自分の回を1行追記する。`run_id` は `ap-<YYYYMMDD>-<route>`。
+
+```
+node scripts/autopilot-runs.mjs --append \
+  --run-id ap-$(TZ=Asia/Tokyo date +%Y%m%d)-<route> \
+  --date $(TZ=Asia/Tokyo date +%Y-%m-%d) --route <actions|ccr-0730|ccr-0920|owner-session> \
+  --attempted true --outcome <shipped|no_artifact|failed> \
+  --lane <A|B|C|D|E> --action <new|refresh|wiring|maintenance|skip> \
+  --pr <番号> --artifact </path/> --source session
+```
+
+- **`--pr` は shipped のとき必須**（出荷はPRのマージでしか成立しない）。
+  PR番号は `gh pr create` の直後に分かるので、その時点で追記する
+- **失敗の回にも必ず1行残す。** `--outcome` と `--failure-reason` を書く。
+  「なぜ落ちたか」の無い失敗は再発防止に使えない
+- **`interventions` は手で追記する**（オーナーへの依頼・オーナーによる修正・代走）。
+  ここが人間介入率の分子になる
+- **他経路が先行して何もせず終えた回も1行残す**（`--outcome skipped_duplicate
+  --attempted false`）。排他が機能した記録であって、失敗ではない
+
+**`attempted` の意味は「着手したか」。** 秘密鍵未設定のGateスキップと冪等スキップは
+`false`。**完走率の分母は attempted** で、着手していない回を失敗に数えると
+「静かに寝る」という正しい設計が失敗率として現れてしまう。
+
+**逆に、どの経路も動かなかった日（`no_run`）は正常系ではない。**
+完走率の分母には入れないが、サマリに別枠で必ず出す。隠すと稼働率100%に見える。
+
+**費用はここに書かない。** 実費は `data/autopilot-cost.json` が正で、
+`external_ref`（GitHub の run id）で結合する。同じ数字の出所を2つ作らない。
+
 ## 6. 「書かない回」の保守作業メニュー
 
 - 本番URLのライブ確認（新規ページ公開後の200/OG/構造化データ確認）
@@ -432,6 +579,20 @@ python3 scripts/generate_sitemap.py --dry-run
 - `build-topic-map`（`OBSIDIAN_AUTOMATION_PLAN.md` A2・未実装）: スナップショットの
   クエリからObsidian関連の新出クエリ（imp≥5）を抽出して new-queue 候補に足す
   仕組み。実装できる回があれば1回で作りきる（作りかけを残さない）
+- **トレンドレーダー（毎回・所要3分・キー不要）**: `docs/trend-radar-prompt.md` の
+  プロンプト本文をそのまま実行する。3面（Googleトレンド急上昇・はてブ テクノロジー・
+  App Store 仕事効率化ランキング上位50）を見て、**指定の形式だけで報告する**。
+  - ヒットなしの日 → status JSON の `reason` に「トレンドレーダー: 本日ヒットなし」の
+    1行を足すだけ。**それ以上書かない**
+  - ヒットあり → 交点（勝ち筋クラスタ／LINE Keep資産／調査データ）を1行で書き、
+    対応SLAから選ぶ。**交点の無い波に記事を書かない**（混雑窓を避ける）
+  - 対応した場合は `growth/data/annotations.json` に `{date, type, label}` を追記し、
+    結果（PV/転載/順位）が出たら同じ行の note に足す。**検知だけで対応しなかった日は残さない**
+  - PR起案は「データか機能で語れる角度」があるときだけ。**60未満は撃たない**
+    （`node growth/scripts/d-score.mjs` で採点してから）
+  2026-08-22まで、この文書は「文面まで・実組み込みは未了」の状態で置かれていた。
+  ここに載せたことが組み込みそのものである
+
 - **Mention & Competitor Watch（週1回・キー不要）**: セッションのWebSearchで
   `growth/data/mentions/README.md` の固定クエリ群を検索し、スナップショットJSONを
   保存・前回差分を日報に載せる。前回ファイルの日付が7日以上前なら実行する
