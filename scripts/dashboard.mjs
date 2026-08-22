@@ -45,6 +45,14 @@ const authority = readJSON('data/authority-matrix.json');
 const expiry = await expiryRun({ net: false });
 const expiryBy = (s) => expiry.rows.filter((r) => r.state === s);
 
+// データ保持の棚卸しは simplememo-api 側にある（テーブルがあるリポジトリで
+// 自動検出させるため）。読めなければ描かない — 空欄で「無し」を意味させない。
+let retention = null;
+try {
+  retention = JSON.parse(fs.readFileSync(
+    path.join(ROOT, '../simplememo-api/data/data-retention.json'), 'utf8'));
+} catch { /* 隣のリポジトリが無い環境では省く */ }
+
 const domains = authority.domains ?? [];
 const gated = domains.filter((d) => d.requires_approval).length;
 
@@ -213,6 +221,30 @@ const expiryPanel = panel({
   人が日付を調べて埋めるまで監視は始まらない。</p>`,
   source: 'data/credential-expiry.json · scripts/check-expiry.mjs',
 });
+
+const retentionPanel = (() => {
+  if (!retention) return '';
+  const s = retention.stores;
+  const unbounded = s.filter((x) => x.enforcement === 'unbounded' && x.identifiability !== 'none');
+  const enforced = s.filter((x) => x.enforcement === 'pruned' || x.enforcement === 'ttl');
+  const personal = s.filter((x) => x.identifiability === 'personal');
+  return panel({
+    title: 'データ保持',
+    lede: '⑪の3件が「何をどこに保持しているかの棚卸しが先」で止まっていた。'
+        + '棚卸しを<strong>文書ではなく検査</strong>にした — 新しいテーブルは保持方針を書くまでCIを通らない。',
+    body: `<div class="readouts readouts--four">
+      ${readout({ label: '棚卸し済み', value: String(s.length), unit: 'ストア', note: 'D1テーブル ＋ KV。実装から毎回突き合わせる', state: 'ok' })}
+      ${readout({ label: '自動削除あり', value: String(enforced.length), unit: 'ストア', note: '時間で消すコード、またはKVのTTL', state: 'ok' })}
+      ${readout({ label: '無期限 × 個人紐づき', value: String(unbounded.length), unit: 'ストア', note: '最大は app_analytics_events', state: 'crit' })}
+      ${readout({ label: 'メモ本文・件名', value: String(personal.length), unit: 'ストア', note: `${personal.map((x) => x.id).join(' / ')}（8日）`, state: 'ok' })}
+    </div>
+    <p class="panel__foot"><strong>${unbounded.length} ストアが個人に紐づく識別子を無期限に持っている。</strong>
+    棚卸しで場所は特定できたが、<strong>窓を決めて消す実装はこれから</strong>。
+    ただし1つは意図的で、配信停止の記録（email_suppression）は消すと
+    止めたはずの人に再び送ることになる。</p>`,
+    source: '../simplememo-api/data/data-retention.json · test/data-retention.test.ts',
+  });
+})();
 
 const UNKNOWNS = [
   ['前月比', '前月の測定が存在しない（自動化率の初回測定が 2026-08-22）。増減は次回測定から'],
@@ -384,6 +416,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
   ${timings}
   ${cost}
   ${expiryPanel}
+  ${retentionPanel}
   ${unknowns}
 </div>`;
 

@@ -1283,10 +1283,20 @@
     },
     {
       "area": "⑪ データ・プライバシー",
-      "task": "保持期間の定義と自動削除",
+      "task": "保持期間の定義（棚卸しと逸脱検査）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/data/data-retention.json",
+        "../simplememo-api/test/data-retention.test.ts"
+      ],
+      "note": "2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる）"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "保持期間の自動削除",
       "executor": "nobody",
       "evidence": [],
-      "note": "何をどこに保持しているかの棚卸しが先"
+      "note": "**23ストア中5つだけ自動削除がある**（send_correlation 35日・recent_memo_subjects 8日・KV 3種のTTL）。**残る11ストアが個人に紐づく識別子を無期限に保持**。最大は app_analytics_events（anonymous_install_id を削除コード無しで蓄積）。棚卸しで場所は特定できたが、窓を決めて消す実装はこれから"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1320,14 +1330,14 @@
       "task": "アクセス履歴",
       "executor": "nobody",
       "evidence": [],
-      "note": "同上"
+      "note": "**前提の棚卸しは2026-08-22に完了**（どこに何があるかは特定済み）。誰がいつ読んだかの記録は未実装"
     },
     {
       "area": "⑪ データ・プライバシー",
       "task": "第三者SDKのデータ送信監査",
       "executor": "nobody",
       "evidence": [],
-      "note": "同上。PrivacyInfo.xcprivacy はあるが実送信の監査は無い"
+      "note": "**前提の棚卸しは完了したがサーバ側のみ。**第三者SDKは端末側の話で、PrivacyInfo.xcprivacy はあるが実送信の監査は無い"
     },
     {
       "area": "⑪ データ・プライバシー",

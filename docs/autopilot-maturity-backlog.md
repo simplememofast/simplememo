@@ -222,7 +222,7 @@
 |---|:--|
 | データ分類 | 🟡（analytics の allowlist・`check_analytics_allowlist.py`） |
 | 収集同意 | 🟡（App Analytics共有オプトイン依存） |
-| 保持期間 | ⬜ |
+| 保持期間 | 🟡（**定義は2026-08-22に完了**。23ストアを棚卸しし `test/data-retention.test.ts` がずれを落とす。**自動削除は23中5**で、11ストアが個人紐づき識別子を無期限保持） |
 | 削除要求 | 🟡（アカウント削除APIは実装済み） |
 | **AIへの送信可否** | ✅（`build-ai-triage-bundle.sh` がredact済み要約のみを送る。メモ本文fixtureは架空・device logは収集しない） |
 | 匿名化・暗号化・アクセス履歴 | 🟡（端末内AES-GCM-256・`anonymous_install_id`。アクセス履歴は無い） |
