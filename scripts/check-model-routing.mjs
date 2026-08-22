@@ -45,6 +45,18 @@ export function resolve(doc, kind, unavailable = []) {
   return { error: `${kind}: 主モデルも fallback も使えない。走らせない（故障として報告する）` };
 }
 
+/**
+ * 段階的移管 — 試行回数からその回に使うモデルを決める。
+ * **最後は必ず human。**モデルを並べただけだと失敗が無限に回る。
+ */
+export function escalate(doc, kind, attempt) {
+  const ladder = doc.escalation?.ladder?.[kind];
+  if (!ladder) return { error: `${kind} の ladder が無い` };
+  const i = Math.max(1, attempt) - 1;
+  if (i >= ladder.length) return { model: 'human', exhausted: true, attempt };
+  return { model: ladder[i], exhausted: ladder[i] === 'human', attempt };
+}
+
 export function validate(doc, { budgets = null, workflow = null } = {}) {
   const problems = [];
   const tiers = doc.tiers || [];
@@ -85,6 +97,34 @@ export function validate(doc, { budgets = null, workflow = null } = {}) {
     }
   }
 
+  // 段階的移管の梯子
+  const esc = doc.escalation;
+  if (!esc?.ladder) {
+    problems.push('escalation.ladder が無い — 失敗したときに何へ移すかが決まっていない');
+  } else {
+    for (const kind of Object.keys(doc.rules || {})) {
+      const l = esc.ladder[kind];
+      if (!Array.isArray(l) || !l.length) { problems.push(`escalation.ladder.${kind} が無い`); continue; }
+      if (l[l.length - 1] !== 'human') {
+        problems.push(`escalation.ladder.${kind} の最後が human でない`
+          + ' — **モデルを並べただけだと失敗が無限に回る**');
+      }
+      const models = l.filter((m) => m !== 'human' && m !== 'both');
+      if (new Set(models).size !== models.length) {
+        problems.push(`escalation.ladder.${kind} に同じモデルが2回 — 同じ盲点で同じ失敗をする`);
+      }
+      for (const m of models) {
+        if (!doc.models?.[m]) problems.push(`escalation.ladder.${kind}: 未知のモデル ${m}`);
+      }
+      if (l[0] !== 'human' && l[0] !== 'both' && l[0] !== doc.rules[kind].model) {
+        problems.push(`escalation.ladder.${kind} の1回目 (${l[0]}) が rules.${kind}.model (${doc.rules[kind].model}) と違う`);
+      }
+    }
+    if (typeof esc.max_attempts !== 'number' || esc.max_attempts < 2) {
+      problems.push('escalation.max_attempts は2以上');
+    }
+  }
+
   // **引かれない表は装飾。** ワークフローが実際に呼んでいることを見る。
   if (doc.policy?.require_workflow_consumption && workflow !== null) {
     if (!workflow.includes('check-model-routing.mjs --resolve')) {
@@ -101,6 +141,18 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   const argv = process.argv.slice(2);
   const doc = load();
+
+  const ei = argv.indexOf('--escalate');
+  if (ei >= 0) {
+    const kind = argv[ei + 1];
+    const ai = argv.indexOf('--attempt');
+    const attempt = ai >= 0 ? Number(argv[ai + 1]) : 1;
+    const out = escalate(doc, kind, attempt);
+    if (out.error) { console.error(out.error); process.exit(1); }
+    if (out.model === 'human') console.error(`${kind}: 試行 ${attempt} で梯子を使い切った。**人間へ渡す**`);
+    console.log(out.model);
+    process.exit(out.model === 'human' ? 3 : 0);
+  }
 
   const ri = argv.indexOf('--resolve');
   if (ri >= 0) {
@@ -128,6 +180,14 @@ if (isMain) {
       + ` / 1回 $${r.max_usd_per_run}${cap ? ` / 月枠 $${cap}` : ''}`);
     console.log(`  ${' '.repeat(11)} ${r.why}\n`);
   }
+  if (doc.escalation?.ladder) {
+    console.log('  段階的移管（試行順・最後は必ず human）:');
+    for (const [k, l] of Object.entries(doc.escalation.ladder)) {
+      console.log(`    ${k.padEnd(11)} ${l.join(' → ')}`);
+    }
+    console.log('');
+  }
+
   if (problems.length) {
     console.error('モデルルーター: 不整合');
     for (const p of problems) console.error(`  - ${p}`);

@@ -38,11 +38,11 @@
       "why": "故障の原因特定は難しく、**外すと同じ故障をもう一度直すことになる**。レーンFは同一 failure_class 3回で人間へ上げる設計なので、ここを安くすると人間へ上がる回数が増える"
     },
     "analysis": {
-      "model": "claude-sonnet-5",
-      "fallback": "claude-haiku-4-5-20251001",
+      "model": "claude-haiku-4-5-20251001",
+      "fallback": "claude-sonnet-5",
       "irreversible": false,
       "max_usd_per_run": 1.5,
-      "why": "集計と読み取り。数字の出どころはスクリプトが持っているので、モデルは説明を書く役"
+      "why": "**唯一 haiku から始める。**集計と読み取りで、数字の出どころはスクリプトが持っているのでモデルは説明を書く役。外しても安く、梯子の2段目（sonnet）で拾える。段階的移管の ladder と1回目を揃えてある（**ずれるとCIが落ちる** — 実際に落ちて気づいた）"
     },
     "pr": {
       "model": "claude-opus-5",
@@ -73,5 +73,52 @@
     "$forbid_note": "不可逆なタスクを最安ティアに落とすことを禁止する。安さで失う額が、節約額より大きいため",
     "require_workflow_consumption": true,
     "$require_note": "obsidian-autopilot.yml が --resolve を呼んでいることを検査する。呼ばれない表は装飾"
+  },
+  "escalation": {
+    "$note": [
+      "**小型 → 大型 → 人間の段階的移管。**1回目で失敗したら同じモデルで",
+      "もう一度回すのが一番もったいない — 同じ盲点で同じ失敗をする。",
+      "",
+      "ladder はタスク種別ごとの試行順。**最後は必ず human で終わる。**",
+      "モデルを並べただけで human が無いと、失敗が無限に回る。",
+      "",
+      "QA の失敗分類だけは形が違う（2モデル同時・割れたら人間）。",
+      "あちらは**多数決を取らない**ことが要点なので、ladder ではなく both で表す。"
+    ],
+    "max_attempts": 3,
+    "ladder": {
+      "article": [
+        "claude-sonnet-5",
+        "claude-opus-5",
+        "human"
+      ],
+      "repair": [
+        "claude-opus-5",
+        "human"
+      ],
+      "analysis": [
+        "claude-haiku-4-5-20251001",
+        "claude-sonnet-5",
+        "human"
+      ],
+      "pr": [
+        "claude-opus-5",
+        "human"
+      ],
+      "audit": [
+        "claude-sonnet-5",
+        "human"
+      ],
+      "qa_triage": [
+        "both",
+        "human"
+      ]
+    },
+    "$ladder_note": {
+      "repair": "**haiku も sonnet も挟まない。**故障の原因特定を安いモデルで外すと、レーンFの『同一 failure_class 3回で人間へ』に早く当たる。安いほうが高くつく",
+      "pr": "**不可逆。**1回目から最良で書き、駄目なら人間",
+      "analysis": "**唯一 haiku から始める。**集計はスクリプトが持っていて、モデルは説明を書く役なので、外しても安い",
+      "qa_triage": "2モデル同時。**平均も多数決も取らない**ので ladder ではなく both"
+    }
   }
 }

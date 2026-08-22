@@ -253,6 +253,29 @@ jobs:
       - name: Emergency stop wiring
         run: node scripts/check-emergency-stop.mjs --check
 
+      # 【注入面】外部の文字列が入ってくる口の棚卸し。
+      #
+      # Issue本文・PRタイトル・レビューコメント・検索結果・メール本文は
+      # **全部「他人が書いた命令」になりうる**。ワークフローの run: に
+      # ${{ github.event.* }} を直接埋めると、タイトルにシェルを書くだけで
+      # ランナーで実行できる（env: 経由で渡す形は安全なので除外する）。
+      #
+      # 口ごとに緩和策と**残存リスク**を書かせる。残存リスクが空の口は
+      # 「考えていない」であって「安全」ではないので落とす。
+      - name: Injection surface
+        run: node scripts/check-injection-surface.mjs --check
+
+      # 【最後の手段が空でないこと】緊急停止の台帳は「判定が壊れていても
+      # 資格情報を失効させれば止まる」と書いている。ところが 2026-08-22 に
+      # 数えたら、ワークフローが実際に読む secret 11件のうち**台帳にあったのは3件**で、
+      # **主系を止める鍵（GH_PAT）が入っていなかった。**最後の手段が指す先が空だった。
+      #
+      # ここが見るのは期限ではなく（それは Credential expiry の仕事）、
+      # 「止めたい経路ごとに、失効させる鍵を名指しできるか」。
+      # 新しい secret を使う経路が増えると落ちる。
+      - name: Credential scope and revocation
+        run: node scripts/check-credentials.mjs --check
+
       # 【金額の規則】変更幅・損失上限・撤回条件と、資金繰りのシナリオ。
       # **損失上限が現在の上限以下だと落ちる**（初日から発火する上限は上限ではない）。
       # 収入が未接続なのにランウェイを書いていたら落ちる。
@@ -278,6 +301,24 @@ jobs:
       # **接続していないのに接続している前提の数字を出していないか**を見る。
       - name: App Store Connect ingest
         run: node growth/scripts/ingest-asc.mjs --check
+
+      # 【KPIの定義】数字ではなく**定義**を凍結する。
+      #
+      # 「自動化率が上がった」の半分は計算を変えたから、という事故を防ぐ。
+      # 定義ごとに算出元ファイルの sha256 を持ち、算出コードが変われば落ちる。
+      # 直すには --bump <id> --why "..." が要る（履歴が残る）。
+      # **黙って定義を変えて数字を良くする経路をつぶすための検査。**
+      - name: KPI definitions vs source
+        run: node scripts/check-definitions.mjs --check
+
+      # 【季節性】上下を施策の成果と読む前に、曜日と外れ値を落とす。
+      #
+      # 金土は平日比 0.8 倍まで落ちるので、金曜に出した施策は何もしなくても
+      # 「効かなかった」ように見える。28日未満では判定を拒否する
+      # （**足りない標本で判定しないことを機械に強制する**）。
+      # 説明のつかない外れ値は注釈台帳と突き合わせて名指しする。
+      - name: Series decomposition
+        run: node growth/scripts/decompose-series.mjs --check
 
       # 【監視】何が見張られていて、何が空いているか。
       #

@@ -18,7 +18,7 @@
     "",
     "**さらに上の手段（この仕組みの外）:** 資格情報の失効。",
     "リポジトリが読めない・この判定が壊れている場合でも止まる、最後の手段。",
-    "credential-expiry.json に載っている鍵を無効化する。"
+    "`node scripts/check-credentials.mjs --stop <経路>` が、その経路を止める鍵と失効手順を出す。**2026-08-22まで、この最後の手段は指す先が空だった** — 主系を止める鍵（GH_PAT）が台帳に無く、ワークフローが使う secret 11件のうち台帳にあったのは3件だけだった。"
   ],
   "stopped": false,
   "reason": null,
@@ -33,5 +33,45 @@
     "ai_may_stop": true,
     "ai_may_resume": false,
     "$resume_note": "**AIは止められるが、解除できない。**非対称にしてある — 止める側の誤りは出荷が1日止まるだけだが、解除する側の誤りは止めたかった事象を素通りさせる"
+  },
+  "agents": {
+    "$note": [
+      "**経路ごとに止める。**全体停止（stopped）は乱暴すぎて使われなくなる — ",
+      "1つの経路が暴れているだけのときに全部止めると、止めること自体をためらう。",
+      "ためらわれる停止は、無い停止と同じ。",
+      "",
+      "各経路の stopped が true なら、その経路だけが着手前に終了する。",
+      "全体停止はこれらより強い（どれか1つでも生きている状態を作らない）。"
+    ],
+    "actions": {
+      "stopped": false,
+      "reason": null,
+      "$what": "主系（GitHub Actions の obsidian-autopilot）"
+    },
+    "ccr-0730": {
+      "stopped": false,
+      "reason": null,
+      "$what": "副系（CCR Routine・朝）"
+    },
+    "ccr-0920": {
+      "stopped": false,
+      "reason": null,
+      "$what": "副系（CCR Routine・再試行）"
+    },
+    "owner-session": {
+      "stopped": false,
+      "reason": null,
+      "$what": "オーナーのセッションからの代走"
+    },
+    "audit": {
+      "stopped": false,
+      "reason": null,
+      "$what": "独立監査（週1）"
+    },
+    "asc": {
+      "stopped": false,
+      "reason": null,
+      "$what": "App Store Connect の取得（毎日20:30 JST）"
+    }
   }
 }

@@ -118,18 +118,41 @@ jobs:
       # チェックアウト後に置いてあるのは、この判定がリポジトリのファイルだからで、
       # 主系（Actions）も副系（CCR）も作業前に必ずチェックアウトするため両方に効く。
       # ここより手前で走るのは checkout だけなので、止め損ねる範囲は無い。
+      # 全体停止と**この経路（actions）の停止**の両方を見る。片方だけだと、
+      # 「主系だけ止めたい」ときに止まらない。
       - name: 緊急停止の確認
         if: steps.gate.outputs.run == 'true'
         id: estop
         run: |
-          if node -e "process.exit(require('./data/emergency-stop.json').stopped ? 1 : 0)"; then
+          STOP="$(node -p "
+            const d = require('./data/emergency-stop.json');
+            const a = (d.agents || {}).actions || {};
+            d.stopped ? ('all:' + (d.reason || '理由未記入'))
+              : a.stopped ? ('actions:' + (a.reason || '理由未記入'))
+              : '';
+          ")"
+          if [ -z "$STOP" ]; then
             echo "stopped=false" >> "$GITHUB_OUTPUT"
           else
             echo "stopped=true" >> "$GITHUB_OUTPUT"
-            REASON="$(node -p "require('./data/emergency-stop.json').reason || '理由未記入'")"
-            echo "::warning title=Emergency stop::緊急停止が立っている: ${REASON}。data/emergency-stop.json"
+            echo "::warning title=Emergency stop::停止が立っている: ${STOP}。data/emergency-stop.json"
             exit 1
           fi
+
+      # 【封じ込め】同じ故障を上限回数直して再発しているなら、**この経路を走らせない。**
+      #
+      # これまでは「⛔ 人に上げる」と表示するだけだった。表示は翌朝の実行を
+      # 止めないので、上げた先が見ていない間、直せない故障を毎日直そうとする
+      # ループが回り続ける。着手前に止めるところまでを機械にやらせる。
+      #
+      # ここは --dry-run（書かずに落ちるだけ）。判定は data/autopilot-runs.json
+      # から毎回導出されるので、状態を残さなくても翌朝また同じ結論になる。
+      # 停止を台帳に書いて残す形にすると、このレーンに main への書き込み権限が
+      # 要る — self_repair.must_not の「自分の権限を広げない」に正面から反する。
+      # 台帳へ書くのは人かセッション（--contain）で、通常のPR経路を通る。
+      - name: 封じ込め（修理上限に達した経路は着手しない）
+        if: steps.gate.outputs.run == 'true' && steps.estop.outputs.stopped == 'false'
+        run: node scripts/autopilot-selfheal.mjs --contain --dry-run
 
       - name: 予算ゲート（当月の実費が上限を超えていたら走らない）
         if: steps.gate.outputs.run == 'true'

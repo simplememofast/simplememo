@@ -131,13 +131,14 @@
     {
       "id": "watch_app",
       "domain": "Apple Watch アプリ",
-      "watches": "—",
-      "detection": "none",
-      "detector": null,
-      "cadence": null,
-      "on_detect": null,
+      "watches": "watch_sync_push_failed / push_recovered / stuck / manual_repair の直近24hの件数",
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/watch-health.ts",
+      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
+      "on_detect": "日報に1行。手動修復が1件でもあれば「劣化」。分母不足のときは**判定不能**と書く",
       "covers_failure_class": [],
-      "note": "**契約テストはあるが、本番で壊れたことを知る経路が無い。**ユーザーから言われて初めて分かる"
+      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている。残る弱さ: **Watchアプリの起動失敗やクラッシュは見ていない**（同期だけ）",
+      "coverage_kind": "direct"
     },
     {
       "id": "billing",
@@ -153,13 +154,14 @@
     {
       "id": "support",
       "domain": "問い合わせ",
-      "watches": "—",
-      "detection": "none",
-      "detector": null,
-      "cadence": null,
-      "on_detect": null,
+      "watches": "未応答の問い合わせの件数・人の対応が要る件数・分類できなかった件数・最古の滞留時間",
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/inquiry.ts",
+      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
+      "on_detect": "日報に1行。**人の対応が要る件数は強調**。返信そのものは人（返信の自動化は未実装）",
       "covers_failure_class": [],
-      "note": "**問い合わせ基盤そのものが未整備。**件数も少なく、受け皿が無い"
+      "note": "2026-08-22。受け口（/v1/inquiry）と分類は実装済みだったが、**来たことに気づく経路が無かった** — 受け口があることと、来たと知ることは別。日報に滞留を1行載せる形で埋めた。**本文は載せない**（日報はメールで、メールは残る）。DBが読めなかった場合は 0件 ではなく「集計できず」と書く — ここを混ぜると監視の穴が「異常なし」に見える。残る弱さ: **返信が自動化されていないので CSAT は発火しない**。INQUIRY_ENABLED が false の間は受け口ごと 503 を返す",
+      "coverage_kind": "direct"
     },
     {
       "id": "actor_rejection",

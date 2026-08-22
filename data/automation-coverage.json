@@ -196,12 +196,18 @@
     {
       "area": "② バグ修正",
       "task": "統合監視（Crash/API/Watch/課金/問い合わせ）",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/monitoring-coverage.json",
-        "scripts/check-monitoring.mjs"
+        "scripts/check-monitoring.mjs",
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/src/watch-health.ts",
+        "../simplememo-api/src/autopilot-report.ts",
+        ".github/workflows/autopilot-health.yml",
+        ".github/workflows/cron-health.yml"
       ],
-      "note": "**棚卸しで穴が特定できた。3系統は気づく経路が無い** — Apple Watchアプリ・課金・問い合わせ。クラッシュ率と送信成功率は指標があるが常時監視になっていない（段階公開中だけガードが見る／人が日次メールを読んだとき）。**executor を上げるのは穴が埋まってから**"
+      "note": "2026-08-22。棚卸しで名指しした穴3系統のうち**2つを塞いだ。**問い合わせ＝受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた。Watch＝計測イベントは2026-07から流れていたのに誰も見ていなかったので、詰まり・手動修復を24h窓で判定する検知器を書いた。**どちらも「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。Watchは母数が小さいので分母20件未満では判定しない（毎日「異常」が出る検知器は読まれなくなる）。残る穴: **課金1系統。**購入失敗イベントを受ける経路がiOS側に無く、ASCの売上データも接続直後で降りてきていない",
+      "since": "2026-08"
     },
     {
       "area": "② バグ修正",
@@ -823,11 +829,15 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "小型→大型→人間への段階的移管",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "data/model-routing.json",
+        "scripts/check-model-routing.mjs",
+        ".github/workflows/obsidian-autopilot.yml",
         "../simplememo-ios/scripts/qa/ai_triage.sh"
       ],
-      "note": "QA分類のみ実装（2モデル→不一致なら人間）"
+      "note": "2026-08-22実装。種別ごとに小型→大型→人間のはしごを台帳で持ち、`--escalate <種別> --attempt N` が次の段を返す（人間に達すると exit 3）。**すべてのはしごが human で終わること**と、1段目が rules[種別].model と一致することを検査する（不一致を実際に1件検出して直した）。主系ワークフローは --resolve の結果でモデルを選ぶので、台帳が実行に効いている。残る弱さ: attempt を数えて自動で上げる呼び出し元がまだセッション側にしかない",
+      "since": "2026-08"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -870,11 +880,16 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "モデル障害・レート制限時のフォールバック",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "data/model-routing.json",
+        "scripts/check-model-routing.mjs",
+        "scripts/autopilot-gate.mjs",
+        "data/escalation-rules.json",
         "../simplememo-ios/scripts/qa/ai_triage.sh"
       ],
-      "note": "QA分類は2モデル構成。autopilot 側も 2026-08-22 に fallback を台帳へ定義し、resolve が縮退先を返すようにした。**ただし使えないモデルを検知して渡す経路がまだ無い**ので、実行者は提案のまま"
+      "note": "2026-08-22実装。縮退先を台帳に持ち、実行判定が DEGRADE_MODEL / FAIL_NO_MODEL を返す（使えるモデルが尽きたら走らない — 静かに寝ない）。両コードに移管規則がある。**不可逆な種別に最安のモデルを割り当てると落ちる。**残る弱さ: 使えないモデルを検知して渡す経路が無いので、縮退の起点は今も人かセッションの観測",
+      "since": "2026-08"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -919,11 +934,16 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "KPI定義と集計SQLのバージョン管理",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "data/kpi-definitions.json",
+        "scripts/check-definitions.mjs",
+        ".github/workflows/seo-check.yml",
         "growth/lib/",
         "../simplememo-api/docs/analytics-golden.md"
-      ]
+      ],
+      "note": "2026-08-22実装。KPI6件の定義と、**算出元ファイルの sha256** を台帳に持つ。計算コードが変われば version を上げるまでCIが落ちる（`--bump <id> --why` で履歴が残る）。狙いは数字ではなく**定義の凍結** — 「自動化率が上がった」の半分が計算を変えたからだった、を起こさないため。導入直後にRunbookの編集で実際に発火し、履歴に「定義は変えていない」と残した。残る弱さ: 集計SQLはまだ台帳に無い（BigQuery側は analytics-golden.md 止まり）",
+      "since": "2026-08"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -968,11 +988,14 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "季節性・外部要因の分離",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/data/annotations.json"
+        "growth/scripts/decompose-series.mjs",
+        "growth/data/annotations.json",
+        ".github/workflows/seo-check.yml"
       ],
-      "note": "系列台帳が下地"
+      "note": "2026-08-22実装。曜日係数を実測から出し（日1.17 月1.12 火0.97 水0.93 木1.05 金0.83 土0.81）、外れ値を注釈台帳と突き合わせて説明のつかないものを名指しする。**28日未満では判定を拒否する** — 足りない標本で「効いた/効かなかった」を言わせないため。金土は平日比0.8倍まで落ちるので、金曜に出した施策は何もしなくても効かなく見える。残る弱さ: 分離できるのは曜日だけで、季節・外部イベントは注釈頼み",
+      "since": "2026-08"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1130,11 +1153,16 @@
     {
       "area": "⑦ 法人経営",
       "task": "エージェントごとの権限・認証情報・失効手順",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/credential-expiry.json",
+        "scripts/check-credentials.mjs",
+        "data/emergency-stop.json",
+        "data/authority-matrix.json",
+        ".github/workflows/seo-check.yml"
       ],
-      "note": "権限表として一部定義。認証情報の失効手順は無い"
+      "note": "2026-08-22実装。鍵13件それぞれに**使う経路・失効のさせ方・失効させると何が止まるか**を持たせ、ワークフローが実際に読む secret を現物から走査して台帳との食い違いを落とす。`--stop <経路>` で「この経路を止めるにはどれを失効させるか」に答える。**この作業で穴が1つ出た** — 緊急停止の最終手段は「credential-expiry.json の鍵を無効化する」と書いてあったのに、主系を止める鍵（GH_PAT）が台帳に無く、使用中の secret 11件のうち載っていたのは3件だけだった。最後の手段が指す先が空だった。残る弱さ: **失効操作そのものは人**（各社コンソールへのログインが要る）。critical 5件のうち4件は期限が未把握のまま",
+      "since": "2026-08"
     },
     {
       "area": "⑦ 法人経営",
@@ -1331,11 +1359,15 @@
     {
       "area": "⑩ AgentOps・ガバナンス",
       "task": "Prompt Injection・Tool Poisoning対策",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "data/injection-surface.json",
+        "scripts/check-injection-surface.mjs",
+        ".github/workflows/seo-check.yml",
         "../simplememo-ios/.github/workflows/release-command.yml"
       ],
-      "note": "本文が一切シェルに渡らない設計。外部コンテンツを読む経路の対策は無い"
+      "note": "2026-08-22実装。外部文字列が入る口6件を台帳にし、口ごとに緩和策と**残存リスク**を必須にした（残存リスクが空＝考えていない、として落とす）。ワークフローの run: に ${{ github.event.* }} が直接埋まっていないかを走査する（env: 経由は安全なので除外）。自己検証で、脆弱なワークフローを差し込むと検出し、env: 経由では誤検出しないことを確認した。残る弱さ: **検査できるのは口の棚卸しとシェル注入だけ**で、モデルが読んだ本文に従ってしまう経路そのものは検査していない",
+      "since": "2026-08"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
@@ -1349,11 +1381,17 @@
     {
       "area": "⑩ AgentOps・ガバナンス",
       "task": "エージェント別 Kill Switch",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        ".github/workflows/obsidian-autopilot.yml"
+        ".github/workflows/obsidian-autopilot.yml",
+        "data/emergency-stop.json",
+        "scripts/check-emergency-stop.mjs",
+        "scripts/autopilot-gate.mjs",
+        "scripts/autopilot-selfheal.mjs",
+        "scripts/autopilot-drill.mjs"
       ],
-      "note": "予算ゲートが実質これ（主系のみ）。副系は止められない"
+      "note": "2026-08-22実装。経路6件（主系・副系2・代走・監査・ASC）を個別に止められる。実行判定が AGENT_STOPPED を返し、**全体停止は常にこれより強い**（両方立っているとき経路側が先に出たら落ちる）。主系ワークフローも全体と agents.actions の両方を見る。止めるのはAIができる（`--contain` / `--trip`、理由は escalation-rules の trigger に限定）が、**解除の関数はスクリプトに存在せず、追加すると検査が落ちる。**修理上限に達した経路は着手前に落ちる（--contain --dry-run）。残る弱さ: **本番で1回も止めていない**（止まることを確かめていない停止機構は、無いのと同じに近い）",
+      "since": "2026-08"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",

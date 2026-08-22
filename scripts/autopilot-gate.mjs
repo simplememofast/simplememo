@@ -31,6 +31,7 @@ export const CODES = {
   SKIP_PRIMARY_RUNNING: 'skip_primary_running',
   // --- 緊急停止。**どの理由よりも先に効く。** ------------------------------
   EMERGENCY_STOP: 'emergency_stop',
+  AGENT_STOPPED: 'agent_stopped',
   // --- 故障。**「静かに寝る」ではなく「報告して止まる」側** -----------------
   FAIL_CREDENTIAL: 'fail_credential',
   FAIL_API: 'fail_api',
@@ -74,6 +75,16 @@ export function decide(s) {
     return R(CODES.EMERGENCY_STOP,
       `緊急停止が立っている: ${s.emergencyStopReason ?? '理由未記入'}`
       + '。**AIの経路を介さずに止められることが、この仕組みの最後の歯止め**');
+  }
+
+  // -0.5. **経路ごとの停止。**全体停止の次に強い。
+  //      全体停止だけだと乱暴すぎて使われなくなる — 1つの経路が暴れている
+  //      だけのときに全部止めると、止めること自体をためらう。
+  //      **ためらわれる停止は、無い停止と同じ。**
+  if (s.agentStopped) {
+    return R(CODES.AGENT_STOPPED,
+      `この経路（${s.route}）が停止されている: ${s.agentStopReason ?? '理由未記入'}`
+      + '。他の経路は動く');
   }
 
   // 0. **資格情報が「拒否された」は、「無い」とは別物。**
@@ -180,6 +191,7 @@ export function baseState(overrides = {}) {
     prTodayExists: false, primaryRunStatus: 'completed', force: false,
     // --- 故障・縮退の軸。既定は「すべて健全」 ---
     emergencyStop: false, emergencyStopReason: null,
+    agentStopped: false, agentStopReason: null,
     credentialRejected: false, githubApiReachable: true,
     modelsAvailable: null, preferredModel: null, egressBlocked: false,
     ...overrides,

@@ -141,6 +141,15 @@
       "within_hours": 24,
       "stop_automation": false,
       "note": "証明書・Provisioning Profile・ドメインの期限が7日を切った。切れるとリリースが一切できなくなる。**critical 3件は期限日が未把握**なので、いまはこの規則が発火しない"
+    },
+    {
+      "trigger": "repair_limit",
+      "kind": "selfheal",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": true,
+      "note": "同じ failure_class を self_repair.stop_after_failed_repairs 回直して再発した。**表示だけでは翌朝また同じ経路が走る**ので、autopilot-selfheal.mjs --contain がその経路の停止を立てる（route が台帳に無い場合は全体停止）。AIが止め、解除は人だけ — 直せない故障を毎日直そうとするループを、人が見るまで確実に止めるため"
     }
   ]
 }

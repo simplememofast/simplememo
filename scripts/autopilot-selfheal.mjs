@@ -5,6 +5,7 @@
  *   node scripts/autopilot-selfheal.mjs          # 判定と、直すなら何を直すか
  *   node scripts/autopilot-selfheal.mjs --json   # 機械可読
  *   node scripts/autopilot-selfheal.mjs --check  # CI: 台帳と権限表の整合（未修理があっても落とさない）
+ *   node scripts/autopilot-selfheal.mjs --contain # 上限に達した故障があれば、その経路を止める
  *
  * 【なぜこれを作るか】
  * 実測（2026-08-11〜08-22）では、人間の介入7件のうち**4件が基盤の修理**だった。
@@ -27,7 +28,11 @@
  * 【このスクリプトがやらないこと】
  * 修理そのもの。ここが出すのは「今日レーンFに入るべきか」「対象はどれか」
  * 「何をしてはいけないか」だけで、原因の特定と実装はセッションが行う。
- * 判定と実装を同じスクリプトに入れると、判定側を都合よく変えられるようになる。
+ * 【--contain だけは例外】
+ * 「人に上げる」と表示するだけでは、**上げた先が見ていない間、同じ経路が
+ * 翌朝また走る。** 上限に達した故障は、その経路を止めるところまでを機械にやらせる。
+ * 止めるのは AI が自分でできるが（policy.ai_may_stop）、**解除はできない** —
+ * 止めすぎの損は出荷1日、解除しすぎの損は止めたかった事象の素通り。
  */
 
 import fs from 'node:fs';
@@ -139,6 +144,41 @@ if (isMain) {
   const matrix = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
   const problems = validate(runsDoc, matrix);
   const a = analyze(runsDoc, matrix);
+
+  if (process.argv.includes('--contain')) {
+    // 上限に達した故障の経路を止める。**表示ではなく状態を変える唯一の経路。**
+    //
+    // --dry-run では書かずに exit 1 だけを返す。ワークフローはこちらを使う。
+    // 判定は台帳（autopilot-runs.json）から**毎回導出される**ので、
+    // ランナーの書き込みを push しなくても翌朝また同じ結論になる。
+    // 逆に push で残そうとすると、自動運転レーンに main への書き込み権限が
+    // 要る — self_repair.must_not の「自分の権限を広げない」に正面から反する。
+    const dry = process.argv.includes('--dry-run');
+    const { applyTrip, STOP_PATH } = await import('./check-emergency-stop.mjs');
+    const stopDoc = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
+    const rules = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules || [];
+    if (!a.escalate.length) { console.log('上限に達した故障は無い — 止めない。'); process.exit(0); }
+    if (dry) {
+      for (const t of a.escalate) {
+        const route = t.route && stopDoc.agents?.[t.route] ? t.route : 'all';
+        console.error(`止めるべき: ${route} — ${t.failure_class} を ${t.repair_attempts_for_class} 回直して再発（上限 ${a.limit}）`);
+      }
+      console.error('**この判定は台帳から毎回導出される。**書き込みは行わない。');
+      process.exit(1);
+    }
+    let doc = stopDoc; let stoppedAny = false;
+    for (const t of a.escalate) {
+      const route = t.route && stopDoc.agents?.[t.route] ? t.route : 'all';
+      const r = applyTrip(doc, { agent: route, reason: 'repair_limit', by: 'ai', rules });
+      if (r.error) { console.error(`止められない: ${r.error}`); process.exit(2); }
+      if (r.already) { console.log(`${route} はすでに停止中（${t.failure_class}）`); continue; }
+      doc = r.doc; stoppedAny = true;
+      console.log(`止めた: ${route} — ${t.failure_class} を ${t.repair_attempts_for_class} 回直して再発（上限 ${a.limit}）`);
+    }
+    if (stoppedAny) fs.writeFileSync(STOP_PATH, `${JSON.stringify(doc, null, 2)}\n`);
+    console.log('**解除は人が data/emergency-stop.json を戻すことでしか行えない。**');
+    process.exit(stoppedAny ? 1 : 0);
+  }
 
   if (process.argv.includes('--json')) {
     console.log(JSON.stringify({ ...a, problems }, null, 2));
