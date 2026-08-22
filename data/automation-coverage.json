@@ -455,11 +455,13 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "PR原稿の事実・数値・引用元の検査",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "docs/pr-autopilot-2026-09.md"
+        "scripts/check-pr-facts.mjs",
+        "data/site-constants.json",
+        "data/benchmark.json"
       ],
-      "note": "本セッションで実施（旧アプリ名・起動時間・廃止済みトライアルを検出）。自動化されていない"
+      "note": "2026-08-22実装。site-constants.json と benchmark.json を正として、旧アプリ名・古い起動時間・廃止済みトライアル・誇大表現・価格ドリフトをCIが落とす。**引用元の確認（出典が実在するか）はまだ人**"
     },
     {
       "area": "③ 自律型マーケティング",

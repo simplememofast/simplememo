@@ -1,5 +1,7 @@
 # PR TIMES 原稿ドラフト — 自律型アプリ運営基盤
 
+<!-- fact-check: draft -->
+
 > **配信前ドラフト（社内レビュー用）。配信は PR TIMES 管理画面から手動。**
 > 根拠: `pr-autopilot-2026-09-evidence.md`（3リポジトリの実装からの裏取り台帳）
 > 段取り: `pr-autopilot-2026-09-plan.md` ／ 積み残し: `autopilot-maturity-backlog.md`

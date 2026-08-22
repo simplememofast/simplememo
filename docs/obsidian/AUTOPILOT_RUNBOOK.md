@@ -389,6 +389,7 @@ node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止
 node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
 node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
 node scripts/automation-rate.mjs --check     # 全領域の自動化率台帳
+node scripts/check-pr-facts.mjs --check      # PR原稿の事実と禁止表現
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
