@@ -25,6 +25,15 @@
   },
   "rules": [
     {
+      "trigger": "emergency_stop",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 1,
+      "stop_automation": true,
+      "note": "緊急停止が立っている。**AIは解除できない**（policy.ai_may_resume: false）ので、人が見るまで止まったまま。止める側の誤りは1日の出荷が止まるだけだが、解除する側の誤りは止めたかった事象を素通りさせる"
+    },
+    {
       "trigger": "fail_credential",
       "kind": "gate_code",
       "who": "owner",

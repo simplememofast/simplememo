@@ -57,6 +57,8 @@ function randomState(r) {
     modelsAvailable: pick(r, [null, [], ['claude-sonnet-5'], ['claude-opus-5', 'claude-sonnet-5']]),
     preferredModel: pick(r, [null, 'claude-opus-5', 'claude-sonnet-5']),
     egressBlocked: r() < 0.3,
+    emergencyStop: r() < 0.15,
+    emergencyStopReason: 'drill',
   });
 }
 
@@ -75,6 +77,7 @@ const PROPERTIES = [
     name: 'force は故障を飛び越えられない',
     why: '**force は冪等チェックのためのもの。**資格情報も API 到達性もモデルの有無も作り出さない',
     check: (s) => {
+      if (s.emergencyStop) return true;   // 緊急停止はさらに強い（別の性質で見る）
       const forced = decide({ ...s, force: true });
       if (!FAULTS.has(decide({ ...s, force: false }).code)) return true;
       return FAULTS.has(forced.code);
@@ -86,20 +89,31 @@ const PROPERTIES = [
     check: (s) => {
       if (s.route !== 'actions' || !s.budgetOver) return true;
       const d = decide({ ...s, force: true, secretsPresent: true, credentialRejected: false,
-        githubApiReachable: true, modelsAvailable: null });
+        githubApiReachable: true, modelsAvailable: null, emergencyStop: false });
       return d.code === CODES.SKIP_BUDGET;
     },
   },
   {
+    name: '緊急停止は、他のどの理由よりも先に出る',
+    why: '**止めたいときに止まらない停止**を作らない。2番目以降にあると条件つきの停止になる',
+    check: (s) => (s.emergencyStop ? decide(s).code === CODES.EMERGENCY_STOP : true),
+  },
+  {
+    name: '緊急停止中は絶対に走らない',
+    why: 'run が立つ経路が1つでもあれば、スイッチとして成立しない',
+    check: (s) => (s.emergencyStop ? decide(s).run === false : true),
+  },
+  {
     name: '資格情報の拒否は、他のどの理由よりも先に出る',
     why: '**報告すべき故障を、正常な安全装置の陰に隠さない。**予算で止まったと報告されると失効に気づかない',
-    check: (s) => (s.credentialRejected ? decide(s).code === CODES.FAIL_CREDENTIAL : true),
+    check: (s) => (s.credentialRejected && !s.emergencyStop
+      ? decide(s).code === CODES.FAIL_CREDENTIAL : true),
   },
   {
     name: '副系は「秘密鍵が無い」だけでは止まらない',
     why: '主系の秘密鍵の有無に副系が影響されると、二重化が二重化にならない',
     check: (s) => {
-      if (s.route === 'actions') return true;
+      if (s.route === 'actions' || s.emergencyStop) return true;
       const d = decide({ ...s, secretsPresent: false });
       return d.code !== CODES.SKIP_SECRETS;
     },
@@ -109,7 +123,7 @@ const PROPERTIES = [
     why: '欠陥ではなく仕様。**ここが変わったことを検知するために固定する**',
     check: (s) => {
       const base = { ...s, credentialRejected: false, githubApiReachable: true,
-        modelsAvailable: null, budgetOver: true, force: false };
+        modelsAvailable: null, budgetOver: true, force: false, emergencyStop: false };
       const main = decide({ ...base, route: 'actions', secretsPresent: true });
       const sub = decide({ ...base, route: 'ccr-0730' });
       return main.code === CODES.SKIP_BUDGET && sub.code !== CODES.SKIP_BUDGET;
@@ -120,7 +134,7 @@ const PROPERTIES = [
     why: '「使えるモデルが無い」を「今日は書くことが無い」と混ぜない',
     check: (s) => {
       if (!Array.isArray(s.modelsAvailable) || s.modelsAvailable.length) return true;
-      const d = decide({ ...s, credentialRejected: false });
+      const d = decide({ ...s, credentialRejected: false, emergencyStop: false });
       return !d.run;
     },
   },

@@ -100,6 +100,26 @@ const SCENARIOS = [
     { route: 'actions', budgetOver: true, force: true }, CODES.SKIP_BUDGET,
     '**上限は force より強い。** ここを飛ばせると上限が「お願い」になる'],
 
+  // --- 緊急停止（2026-08-22追加） ---------------------------------------
+  ['緊急停止: 立っていれば何よりも先に止まる',
+    { route: 'actions', emergencyStop: true, emergencyStopReason: 'test' }, CODES.EMERGENCY_STOP,
+    '**主系と副系を同時に、確実に止める唯一のスイッチ。**予算ゲートは主系しか止めず、'
+    + '秘密鍵の削除は「静かに寝る」ので止めたのか壊れたのか区別がつかない'],
+
+  ['緊急停止: 副系にも効く',
+    { route: 'ccr-0730', emergencyStop: true, emergencyStopReason: 'test' }, CODES.EMERGENCY_STOP,
+    'これまで副系を確実に止める手段が無かった。リポジトリのファイルなので両経路に効く'],
+
+  ['緊急停止: force で飛び越えられない',
+    { route: 'actions', emergencyStop: true, emergencyStopReason: 'test', force: true }, CODES.EMERGENCY_STOP,
+    '**force は冪等チェック用であって、停止の解除ではない**'],
+
+  ['緊急停止: 故障や予算超過の陰に隠れない',
+    { route: 'actions', emergencyStop: true, emergencyStopReason: 'test',
+      credentialRejected: true, budgetOver: true, githubApiReachable: false }, CODES.EMERGENCY_STOP,
+    '2番目以降に置くと「予算内で・鍵もあって・当日分も無い」ときだけ止まる停止になる。'
+    + '**止めたいときに止まらない**'],
+
   // --- 認証切れ（2026-08-22追加） ---------------------------------------
   // 「秘密鍵が無い」と「秘密鍵が拒否された」を**別のコードにしてある**。
   // 混ぜると、期限切れが毎日「設計どおりのスキップ」として黙殺される。

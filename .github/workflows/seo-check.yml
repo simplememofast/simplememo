@@ -247,6 +247,33 @@ jobs:
       - name: Escalation rules
         run: node scripts/check-escalation.mjs --check
 
+      # 【緊急停止】台帳ではなく**配線**を見る。判定・ワークフロー・Runbookの
+      # 3経路すべてがこれを読んでいること。新しい経路だけが読まない状態は
+      # 平常時に症状が出ず、**止めたい日に初めて分かる。**
+      - name: Emergency stop wiring
+        run: node scripts/check-emergency-stop.mjs --check
+
+      # 【金額の規則】変更幅・損失上限・撤回条件と、資金繰りのシナリオ。
+      # **損失上限が現在の上限以下だと落ちる**（初日から発火する上限は上限ではない）。
+      # 収入が未接続なのにランウェイを書いていたら落ちる。
+      - name: Financial policy
+        run: node scripts/check-financial-policy.mjs --check
+
+      # 【独立監査】監査の中身ではなく**独立**を守る。憲章と所見を自己修復レーンが
+      # 書き換えられないこと・監査が repair と別モデルであること・所見が消せないこと。
+      - name: Audit independence
+        run: node scripts/check-audit-independence.mjs --check
+
+      # 【法人の期限・記録・条項】**「把握していない」を「余裕がある」と読ませない。**
+      # 中身はオーナーしか埋められないので、未把握の件数は報告に留め、
+      # 落とすのは台帳の形（理由の無い未確認・ベンダー台帳との食い違い）だけ。
+      - name: Corporate obligations
+        run: node scripts/check-corporate.mjs --check
+
+      # 【毎朝の1枚】台帳6件を1枚に圧縮できること。生成できない＝どれかが読めていない。
+      - name: Daily brief
+        run: node scripts/daily-brief.mjs --check
+
       # 【監視】何が見張られていて、何が空いているか。
       #
       # 検知の中央値は2.1hだが最大は50.7h。その差は「見張られていない領域で

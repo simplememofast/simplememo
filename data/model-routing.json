@@ -11,7 +11,11 @@
     "レーンFの歯止めが『同じ故障を3回直したら人間へ』なのは、",
     "**安いモデルで3回失敗するほうが高くつく**からでもある。"
   ],
-  "tiers": ["haiku", "sonnet", "opus"],
+  "tiers": [
+    "haiku",
+    "sonnet",
+    "opus"
+  ],
   "models": {
     "claude-haiku-4-5-20251001": "haiku",
     "claude-sonnet-5": "sonnet",
@@ -54,6 +58,13 @@
       "max_usd_per_run": 1.0,
       "why": "失敗分類。**この2つは fallback ではなく同時に使う**（独立2モデル監査・割れたら人間へ）。ここでの最悪の誤りは environment_flake の誤判定で、そう分類された本物の回帰は再実行で流れて出荷まで通る",
       "both_models_always": true
+    },
+    "audit": {
+      "model": "claude-sonnet-5",
+      "fallback": "claude-haiku-4-5-20251001",
+      "irreversible": false,
+      "max_usd_per_run": 1.0,
+      "why": "**監査される側のうち、歯止めを触れる repair（opus）と違うモデルにする。**同じモデルは同じ盲点を共有し、自己修復レーンがCIや権限表を緩めたときに見逃す。article とは同じ sonnet になるが、article は成果物を書くだけで歯止めに触れないため利害の衝突が弱い（残る弱点は audit-charter.json の $model_note に明記）"
     }
   },
   "policy": {

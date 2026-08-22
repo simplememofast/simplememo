@@ -29,6 +29,8 @@ export const CODES = {
   SKIP_ALREADY_SHIPPED: 'skip_already_shipped',
   SKIP_PR_TODAY: 'skip_pr_today',
   SKIP_PRIMARY_RUNNING: 'skip_primary_running',
+  // --- 緊急停止。**どの理由よりも先に効く。** ------------------------------
+  EMERGENCY_STOP: 'emergency_stop',
   // --- 故障。**「静かに寝る」ではなく「報告して止まる」側** -----------------
   FAIL_CREDENTIAL: 'fail_credential',
   FAIL_API: 'fail_api',
@@ -63,6 +65,16 @@ const isPrimary = (route) => route === 'actions';
 export function decide(s) {
   const RUNNABLE = new Set([CODES.RUN, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS]);
   const R = (code, reason, extra = {}) => ({ run: RUNNABLE.has(code), code, reason, ...extra });
+
+  // -1. **緊急停止。**他のどの判定よりも先に見る。
+  //     ここが2番目以降にあると、「予算内で・鍵もあって・当日分も無い」ときだけ
+  //     止まる停止になり、**止めたいときに止まらない。**
+  //     force でも飛び越えられない（force は冪等チェック用であって、停止の解除ではない）。
+  if (s.emergencyStop) {
+    return R(CODES.EMERGENCY_STOP,
+      `緊急停止が立っている: ${s.emergencyStopReason ?? '理由未記入'}`
+      + '。**AIの経路を介さずに止められることが、この仕組みの最後の歯止め**');
+  }
 
   // 0. **資格情報が「拒否された」は、「無い」とは別物。**
   //    無い＝設計どおり静かに寝る。拒否された＝故障なので報告して止まる。
@@ -167,6 +179,7 @@ export function baseState(overrides = {}) {
     prodStatusDate: '2026-08-22', mainStatusDate: '2026-08-22',
     prTodayExists: false, primaryRunStatus: 'completed', force: false,
     // --- 故障・縮退の軸。既定は「すべて健全」 ---
+    emergencyStop: false, emergencyStopReason: null,
     credentialRejected: false, githubApiReachable: true,
     modelsAvailable: null, preferredModel: null, egressBlocked: false,
     ...overrides,

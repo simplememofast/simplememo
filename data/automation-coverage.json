@@ -718,9 +718,15 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "AI・外部サービス停止時の独立した緊急停止経路",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "AgentOps側のKill Switch設計と一体。副系を止める手段が無い問題と同根"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/emergency-stop.json",
+        "scripts/check-emergency-stop.mjs",
+        "scripts/autopilot-gate.mjs",
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "2026-08-22実装。**主系と副系を同時に、意図が残る形で止める唯一のスイッチ。**予算ゲートは主系しか止めず、秘密鍵の削除は「静かに寝る」ので止めたのか壊れたのか区別がつかなかった。他のどの判定よりも先に効き、force でも飛び越えられない。**AIは止められるが解除できない**（非対称）。CIは台帳ではなく**配線**を見る（判定・ワークフロー・Runbookの3経路）",
+      "since": "2026-08"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -822,10 +828,22 @@
     },
     {
       "area": "⑤ AI予算・トークン管理",
-      "task": "Prompt Cache・結果キャッシュ・コンテキスト圧縮",
-      "executor": "nobody",
+      "task": "Prompt Cache・結果キャッシュ",
+      "executor": "intentional_no",
       "evidence": [],
-      "note": "実費が月$25前後の見込みで、最適化の効果より実装コストが上回る段階"
+      "note": "**やらないと決めた。**Prompt Cache は毎朝のプロンプトが静的でAPI側のキャッシュが効く範囲にあり、こちらで持つと二重管理になる。結果キャッシュで重いのは内部リンクの200検証（13,273件）だが、これはCIの話でセッションのトークンではない — **節約したい対象が違う**"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "コンテキスト圧縮（毎朝の1枚）",
+      "executor": "ai_executes_gated",
+      "since": "2026-08",
+      "evidence": [
+        "scripts/daily-brief.mjs",
+        "data/emergency-stop.json",
+        "data/autopilot-runs.json"
+      ],
+      "note": "2026-08-22実装。毎朝のセッションは着手前に Runbook・status・運転台帳・実費台帳・自己修復の判定・緊急停止・移管規則を**それぞれ読んでいた。**同じことを毎日6ファイル分のトークンで再構成していたので、1枚にまとめた。**新しい情報を作らない** — 既存の集計関数を呼ぶだけで、数字は台帳が正。未修理の故障も自己修復の判定をそのまま使う（数え直すとレーンFと表示がずれる）"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -959,9 +977,14 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "予算変更幅・損失上限・撤回条件",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "動かす予算そのものが無い（広告未実装）"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/financial-policy.json",
+        "scripts/check-financial-policy.mjs",
+        "data/authority-matrix.json"
+      ],
+      "note": "2026-08-22実装。**動かす予算が小さいうちに書いた** — 大きくなってから書くと、そのときの都合に合わせた基準になる。AI実費は稼働中（変更幅25%・間隔14日・損失上限$60・撤回条件3件）、広告は未着手、価格はAI対象外。**損失上限が現在の上限以下だとCIが落ちる**（初日から発火する上限は上限ではない）",
+      "since": "2026-08"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -982,9 +1005,14 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "資金繰りシナリオ（悲観・標準・楽観）",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "法人経営領域と一体。証跡の形から未着手"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/financial-policy.json",
+        "scripts/check-financial-policy.mjs",
+        "data/vendor-register.json"
+      ],
+      "note": "2026-08-22実装。**出ていく側だけ**（悲観$150／標準$40／楽観$25）。収入はASC未接続で機械が読めないため、**ランウェイ（月数）は出さない** — 手元資金も収入も入っていないので月数を書くと嘘になる。CIが「収入未接続なのに runway_months を書いていないか」を見る",
+      "since": "2026-08"
     },
     {
       "area": "⑦ 法人経営",
@@ -996,9 +1024,12 @@
     {
       "area": "⑦ 法人経営",
       "task": "税務・給与・社会保険・法定期限の管理",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/corporate-obligations.json",
+        "scripts/check-corporate.mjs"
+      ],
+      "note": "2026-08-22に台帳と検査を実装。**ただし6件すべて未把握。**決算期・従業員の有無・課税事業者かどうかがリポジトリから取れず、**機械はいま何も見張っていない。**埋まれば期限計算はできる（決算期が入れば申告期限は機械が出せる）。**「把握していない」を「余裕がある」と読ませない**ための器であって、実行ではない"
     },
     {
       "area": "⑦ 法人経営",
@@ -1013,9 +1044,13 @@
     {
       "area": "⑦ 法人経営",
       "task": "責任上限・知財・個人情報・準拠法の条項検査",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/corporate-obligations.json",
+        "scripts/check-corporate.mjs",
+        "data/vendor-register.json"
+      ],
+      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること"
     },
     {
       "area": "⑦ 法人経営",
@@ -1055,9 +1090,12 @@
     {
       "area": "⑦ 法人経営",
       "task": "董事会・株主・規制・契約記録の保存",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/corporate-obligations.json",
+        "scripts/check-corporate.mjs"
+      ],
+      "note": "2026-08-22に台帳と検査を実装。5件中2件は所在があり（規約への同意・App Reviewのやり取り）、**3件は所在が決まっていない**（議事録・株主名簿・事故記録）。事故記録は「発生していない」のか「記録する場所が無い」のかを区別できていない"
     },
     {
       "area": "⑦ 法人経営",
@@ -1069,9 +1107,13 @@
     {
       "area": "⑦ 法人経営",
       "task": "倫理・評判・長期影響の独立監査",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/audit-charter.json",
+        "scripts/check-audit-independence.mjs"
+      ],
+      "note": "2026-08-22実装。独立監査の4観点のうち ethics_reputation がこれ（5項目）。利用者に見えない不利益変更・実在しない実績の装い・人間だと誤認させる自動投稿・競合を貶める言及・**AIが書いたと分かる形になっているか**。**短期の指標では絶対に検知できない**種類の劣化なので別系統に置いた。**まだ一度も走らせていない**",
+      "since": "2026-08"
     },
     {
       "area": "⑦ 法人経営",
@@ -1322,9 +1364,15 @@
     {
       "area": "⑩ AgentOps・ガバナンス",
       "task": "自律システムとは別系統の監査AI",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "監査対象のログが揃ってきたのは2026-08-22から。まず記録を貯める段階"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/audit-charter.json",
+        "data/audit-findings.json",
+        "scripts/check-audit-independence.mjs",
+        "data/model-routing.json"
+      ],
+      "note": "2026-08-22実装。**監査の中身ではなく独立を機械が守る**：①憲章と所見を自己修復レーンが書き換えられない ②監査は repair と別モデル ③所見は追記のみ（連番が飛ぶと落ちる）。監査AIは何も直さない（直す権限を持たせると「直したことにして所見を閉じる」が最短経路になる）。**まだ一度も走らせていない。**残る弱点（監査が article と同じモデル）も憲章に明記",
+      "since": "2026-08"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
@@ -1404,9 +1452,14 @@
     {
       "area": "⑪ データ・プライバシー",
       "task": "アクセス履歴",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**前提の棚卸しは2026-08-22に完了**（どこに何があるかは特定済み）。誰がいつ読んだかの記録は未実装"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/access-log.ts",
+        "../simplememo-api/migrations/0019_admin_access_log.sql",
+        "../simplememo-api/src/index.ts"
+      ],
+      "note": "2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日",
+      "since": "2026-08"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1486,9 +1539,14 @@
     {
       "area": "⑫ 事業継続性",
       "task": "バックアップ・復元",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "本番データはCloudflare D1とApp Store側にあり、復元手順が未整備。**2026-08-22にベンダー台帳で代替の有無を明示** — Apple・Resend・レジストラの3社に代替が無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/scripts/backup-d1.mjs",
+        "../simplememo-api/docs/RESTORE.md",
+        "../simplememo-api/data/data-retention.json"
+      ],
+      "note": "2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある",
+      "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",
@@ -1569,9 +1627,12 @@
     {
       "area": "⑬ アナログ領域",
       "task": "契約: 定型契約・条項比較・リスク抽出",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "未着手"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/corporate-obligations.json",
+        "scripts/check-corporate.mjs"
+      ],
+      "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ"
     },
     {
       "area": "⑬ アナログ領域",
