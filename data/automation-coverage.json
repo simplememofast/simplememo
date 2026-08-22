@@ -1556,9 +1556,11 @@
       "evidence": [
         "../simplememo-ios/scripts/qa/check_third_party_egress.py",
         "../simplememo-ios/data/third-party-egress.json",
-        "../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy"
+        "../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy",
+        "../simplememo-ios/scripts/qa/check_privacy_manifest.py",
+        "../simplememo-ios/data/privacy-manifest-policy.json"
       ],
-      "note": "2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false",
+      "note": "2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false [2026-08-22追記] **申告そのものと実装の突き合わせ**も足した。PrivacyInfo.xcprivacy は手で書いた宣言なので実装が増えても追随せず、**足りない申告は書いた本人には見えない。**突き合わせたら2種別が未申告だった（製品操作・クラッシュ）。**こちらでは申告を書き換えていない** — ASCの「App のプライバシー」への回答と揃える必要があり、片方だけ直すと逆に不整合になる。オーナー依頼に積んだ",
       "since": "2026-08"
     },
     {
