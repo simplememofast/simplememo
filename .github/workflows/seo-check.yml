@@ -223,6 +223,20 @@ jobs:
       - name: Feature backlog
         run: node scripts/feature-score.mjs --check
 
+      # 【レビュー】ユーザーの声を受け取ったかではなく、**捌いたか**を見る。
+      #
+      # 取り込みは機械化した（../simplememo-ios/scripts/asc_metrics.rb）が、
+      # 取り込んだだけのレビューは誰も見ない。growth/README.md 冒頭の
+      # 「散文は手を挙げない」と同じ構造なので、**未処理が14日を超えたら落とす**。
+      #
+      # レビュー本体は別リポジトリにあってこのCIからは見えない。そのときは
+      # judged=false を返し、台帳の整合だけを見る。**見えないことを
+      # 「未処理0件」と書かない**（check-monitoring と同じ扱い）。
+      - name: Review intake
+        run: |
+          node scripts/review-intake.mjs --selftest
+          node scripts/review-intake.mjs --check
+
       # 【主張】プレスリリースの見出し・リード文を実装台帳に当てる。
       #
       # 原稿は実装より速く動く。リード文に「AIが一気通貫で循環」と書いた後で
