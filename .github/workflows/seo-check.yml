@@ -83,6 +83,18 @@ jobs:
       - name: Site constants consistency
         run: node scripts/sync_constants.js --check
 
+      # 【公開表示の鮮度】評価と公開バージョンは、**JSON-LD の aggregateRating
+      # として12ページに出ている公開表示**なのに、どちらも人が App Store Connect を
+      # 見て手で書いた値だった。台帳のメモにも「NOT machine-verified」と書いてある。
+      # つまり**古くなっても誰も気づかない。**
+      #
+      # ここはネットに触らない —— PRのたびに外部APIを叩くと、向こうの不調で
+      # CIが赤くなり、やがて無視される（check-benchmark を報告のみにしたのと同じ理由）。
+      # 見るのは「いつ確認したか」だけで、45日を超えたら落とす。
+      # 実物との突き合わせは seo-daily.yml の --net。
+      - name: Store facts freshness (no network)
+        run: node scripts/check-store-facts.mjs --check
+
       # Every App Store CTA must carry placement/cluster/variant metadata. A new
       # page copied from an old template would otherwise silently reintroduce
       # unmeasurable CTAs, which is the state this replaced.
