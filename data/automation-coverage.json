@@ -1487,9 +1487,10 @@
         "../simplememo-api/data/data-retention.json",
         "../simplememo-api/test/data-retention.test.ts",
         "../simplememo-api/scripts/check-write-only-tables.mjs",
-        "../simplememo-api/src/webhook-redact.ts"
+        "../simplememo-api/src/webhook-redact.ts",
+        "../simplememo-api/scripts/check-retention-schema.mjs"
       ],
-      "note": "2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない）"
+      "note": "2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない） さらに、**台帳の記述そのものをスキーマと突き合わせる検査**を足した（2方向 — 存在しない列を書いていないか／書かれていない自由文の列が無いか）。**22表中14表がずれていた。**求めるのは TEXT/BLOB と身元を示唆する名前の列だけで、全列を書かせると台帳が読まれなくなる（読まれない台帳は無いのと同じ）"
     },
     {
       "area": "⑪ データ・プライバシー",
