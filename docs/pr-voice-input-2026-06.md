@@ -13,7 +13,7 @@
 >
 > **ボイラープレートを再利用するときは、必ず `data/site-constants.json` と
 > `data/benchmark.json` を正として突き合わせること。**
-> 最新の型は `docs/pr-rsi-2026-09.md`。
+> 最新の型は `docs/pr-autopilot-2026-09.md`。
 
 > 配信前ドラフト（社内レビュー用）。配信は PR TIMES 管理画面から手動。
 > 根拠: アプリ v3.0.0（CHANGELOG v3.0.0 Build1–3 / VoiceInputController / OnboardingVoiceInputPage）
