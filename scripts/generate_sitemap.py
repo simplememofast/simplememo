@@ -17,16 +17,17 @@ Strategy:
     paired pages).
 
 Usage:
-    python3 scripts/generate_sitemap.py [--dry-run]
+    python3 scripts/generate_sitemap.py [--dry-run] [--check]
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -49,7 +50,13 @@ SITEMAP_EN_PATH = REPO_ROOT / "sitemap-en.xml"
 SITEMAP_LOCALES_PATH = REPO_ROOT / "sitemap-locales.xml"
 
 MINOR_LOCALES = {"ar", "es", "id", "ko", "pt-BR", "tr", "zh", "zh-Hant"}
-TODAY = date.today().isoformat()
+# 【2026-08-22】JSTで取る。この日付は「gitに履歴がまだ無いファイル」の lastmod に
+# 使われるため、新規ページの公開日そのものになる。ランナーのローカル日付（＝UTC）で
+# 取っていた旧実装では、日本時間の朝に走る定期実行（主系06:00・副系08:30・再試行09:20
+# はいずれも UTC では前日）が、**その日公開した記事に前日の lastmod を付けていた**。
+# Runbook が「日付は必ず JST で取ること」と定めているのと同じ理由。
+JST = timezone(timedelta(hours=9))
+TODAY = datetime.now(JST).date().isoformat()
 
 # A commit that touches more than this many HTML pages at once is treated
 # as a mechanical sweep (cache-version bumps, meta cleanups, sitewide
@@ -65,9 +72,14 @@ NOINDEX_RE = re.compile(
 def build_lastmod_index() -> dict[str, str]:
     """Map repo-relative file path -> date of the last commit that touched
     it as part of a non-sweep change (see MECHANICAL_SWEEP_THRESHOLD)."""
+    # 【2026-08-22】%cs はコミットに記録されたタイムゾーンで日付を出す。GitHubの
+    # マージコミットはUTCなので、日本時間の朝に出荷した記事は前日の日付になっていた。
+    # TODAY をJSTにしたのと同じ理由で、git由来の日付もJSTへ揃える
+    # （--date=format-local は TZ を見るので、環境変数で明示する）。
+    env = {**os.environ, "TZ": "Asia/Tokyo"}
     out = subprocess.run(
-        ["git", "log", "--format=%x01%cs", "--name-only"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=True,
+        ["git", "log", "--format=%x01%cd", "--date=format-local:%Y-%m-%d", "--name-only"],
+        cwd=REPO_ROOT, capture_output=True, text=True, check=True, env=env,
     ).stdout
     lastmod: dict[str, str] = {}
     for chunk in out.split("\x01"):
@@ -111,13 +123,20 @@ def read_existing_lastmods() -> dict[str, str]:
 
 
 def git_lastmod(file_path: Path) -> str:
-    """Date (YYYY-MM-DD) of the last non-sweep commit touching the file.
-    Falls back to TODAY for untracked/new files."""
+    """Date (YYYY-MM-DD) of the last non-sweep commit touching the file,
+    or "" when git gives no signal (untracked, or every commit touching it
+    was classified as a mechanical sweep).
+
+    【2026-08-22】ここは TODAY を返していた。すると「スイープ判定される変更しか
+    履歴に無いファイル」（実例: /download/）は、**再生成のたびに lastmod が
+    その日へ動く**。実際には何も変わっていないので、クローラに嘘の更新日を
+    毎日配ることになり、2026-08-19 と 08-20 の2回、手でlastmodを戻している。
+    空文字を返し、TODAY を当てるかどうかは呼び出し側（main）が決める。"""
     global LASTMOD_INDEX
     if not LASTMOD_INDEX:
         LASTMOD_INDEX = build_lastmod_index()
     rel = file_path.relative_to(REPO_ROOT).as_posix()
-    return LASTMOD_INDEX.get(rel, TODAY)
+    return LASTMOD_INDEX.get(rel, "")
 
 # URL -> (locale_for_html_lang, url_path)
 TOP_CLUSTER_PATHS = {absolute_url(p): (loc, p) for loc, p in TOP_CLUSTER}
@@ -253,9 +272,61 @@ def render_sitemap_index(parts: list[tuple[str, str]]) -> str:
 
 # ---------------------------------------------------------------------------
 
+def urls_in(xml: str) -> set[str]:
+    return set(re.findall(r"<loc>([^<]+)</loc>", xml))
+
+
+def check_committed(rendered: dict[Path, str]) -> int:
+    """コミット済みのsitemapが、いまのページ構成と一致しているかを検査する。
+
+    【なぜ必要か】このスクリプトを回し忘れても、2026-08-22 までCIは緑のまま通った。
+    SEO Validation にあったのは `--dry-run`（件数を表示するだけで、コミット済みの
+    ファイルを一切見ない）で、seo-check.js の checkSitemap() が読むのは
+    sitemap.xml（3つの子sitemapを指すインデックス）だけだったため、**新しい記事が
+    sitemapに載っていなくても検知できなかった**。載っていない記事は、robots.txt が
+    指す先に存在しないまま公開されることになる。
+
+    【lastmodは比較しない】git履歴がスイープ判定される（＝LASTMOD_INDEX に載らない）
+    ファイルの lastmod は TODAY にフォールバックするので、再生成のたびに勝手に動く。
+    それを差分として扱うと毎日落ちる検査になり、誰も見なくなる。ここで守りたいのは
+    「URLが載っているか」なので、**比較対象はURLの集合だけ**にしてある。
+    """
+    problems = 0
+    for path, xml in rendered.items():
+        name = path.relative_to(REPO_ROOT)
+        if not path.exists():
+            print(f"  MISSING FILE  {name}")
+            problems += 1
+            continue
+        want = urls_in(xml)
+        have = urls_in(path.read_text(encoding="utf-8"))
+        for url in sorted(want - have):
+            print(f"  NOT LISTED    {name}: {url}")
+            problems += 1
+        for url in sorted(have - want):
+            print(f"  STALE ENTRY   {name}: {url}")
+            problems += 1
+
+    if problems:
+        print(
+            f"\nFAIL: {problems} 件のずれ。`python3 scripts/generate_sitemap.py` を"
+            f"実行して、生成された sitemap を同じコミットに含めてください。"
+        )
+        return 1
+
+    print("sitemap: コミット済みのURL集合は現在のページ構成と一致（lastmodは比較対象外）")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="コミット済みのsitemapに載っているURLの集合が、いま生成される集合と "
+             "一致するかだけを検査する。差があれば非ゼロで終わる。書き込みはしない。",
+    )
     args = parser.parse_args()
 
     url_files = collect_urls()
@@ -267,8 +338,11 @@ def main() -> int:
         computed = git_lastmod(url_files[url])
         published = existing.get(url, "")
         # Monotonic floor — ISO date strings compare lexicographically.
-        lastmod = max(published, computed)
-        if published > computed:
+        # 両方とも空になるのは「git履歴が無く、まだ公開もされていない」＝
+        # 本当に新規のページだけで、そのときだけ TODAY（JST）を当てる。
+        # git信号が無いだけの既存ページは、公開済みの日付をそのまま保つ。
+        lastmod = max(published, computed) or TODAY
+        if computed and published > computed:
             floored += 1
         entries[determine_target(url)].append((url, lastmod))
 
@@ -295,6 +369,14 @@ def main() -> int:
         f"lastmod floor:       kept {floored} published dates that git "
         f"history would have moved backward"
     )
+
+    if args.check:
+        return check_committed({
+            SITEMAP_JA_PATH: ja_xml,
+            SITEMAP_EN_PATH: en_xml,
+            SITEMAP_LOCALES_PATH: locales_xml,
+            SITEMAP_INDEX_PATH: index_xml,
+        })
 
     if args.dry_run:
         print("[dry-run] no files written")

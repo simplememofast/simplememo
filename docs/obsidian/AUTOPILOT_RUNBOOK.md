@@ -318,7 +318,10 @@ Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` 
   おり、この形式が効きうるのは他のAIクローラー向け。このサイトでの価値の実体は
   「誤り訂正リスト」と出典マップにある — その価値が増えるときだけ更新する
 - sitemap: **`git fetch --unshallow` してから** `python3 scripts/generate_sitemap.py`
-  （浅いままだと全ページのlastmodが壊れる）
+  （浅いままだと全ページのlastmodが壊れる）。
+  **2026-08-22からCIが強制する** — `generate_sitemap.py --check` が SEO Validation に
+  入っており、新しいページがコミット済みsitemapに載っていなければ `NOT LISTED` で
+  落ちる（＝auto-mergeも来ない）。それまでは回し忘れても緑で通っていた
 - OG画像: `scripts/generate-og-batch.js` にエントリ追加して実行。
   この環境ではPlaywrightのパス差異があるため、実行前に:
   `npm i --no-save playwright` と
