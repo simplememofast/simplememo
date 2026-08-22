@@ -187,6 +187,15 @@ jobs:
       - name: Autopilot run ledger
         run: node scripts/autopilot-runs.mjs --check
 
+      # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
+      #
+      # 画像そのものは配信前に人が確認して出す。ここで見るのは、
+      # 見出しが1行に収まるかと、裏の取れていない主張で完成品が
+      # 作れない仕組みが生きているか。**切れた見出しの画像が配信される**のと
+      # **裏取り未完の画像が完成品として流通する**のが、この検査で防ぎたい2つ。
+      - name: PR hero guardrails
+        run: node scripts/check-pr-hero.mjs
+
       # 【ベンダー】依存している外部サービスの棚卸し。
       #
       # リード文の「契約は人が承認」に中身を与えるための台帳。

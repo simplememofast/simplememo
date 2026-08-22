@@ -482,11 +482,12 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "ヒーロー画像の生成",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "docs/siri-hero-banner-brief.md"
+        "scripts/generate-pr-hero.mjs",
+        "data/pr-claims.json"
       ],
-      "note": "AIが依頼文を書き、生成は外部ツールで人が実行"
+      "note": "2026-08-22実装。1200x630（G1ゲート）をPlaywrightで生成し、**出力の実寸を検証する**（生成できたかではなく出た画像で判定）。文言は data/pr-claims.json から読むので、**主張検査を通っていない見出しの画像は原理的に作れない**。裏の取れていない主張があるときは既定で生成を拒否し、--allow-unsupported を付けた場合だけ DRAFT リボン付きで出る"
     },
     {
       "area": "③ 自律型マーケティング",
