@@ -1266,6 +1266,69 @@
         "配信前チェックリスト: ①見出しは市場語のみ（『Multi-Destination』等の社内語を見出し・本文リードに出さない——D-3'二層言語ルール。出せばS2 3/S3 0で60点前後に落ちる） ②リマインダーとカレンダーを別リリースに割らない（2本目が『同じ話の2回目』になり8/18と同じ死に方をする——追記B案2の小出し厳禁） ③『世界初』と書かない（TellDone・VoiseTask等の海外先行あり。日本語ニュース面での初出性が取り分） ④Apple週などのトレンド窓は待たない（E-3: 時間減衰リスクあり＝先行者の窓が閉じ得るため、S5は捨てて撃つ）。",
         "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する（R12-3）。"
       ]
+    },
+    {
+      "id": "pr-2026-rsi-autopilot",
+      "page": "(PR TIMES配信 — 自律運用/RSI。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "プロダクトの新機能ではなく『運営体制』を弾にする初の回。個人開発のiOSアプリが毎朝06:00に自分で施策を選び、9チェックを通し、検証に合格したコミットだけを本番へ出荷している事実と、AIに与えていない権限（actions: write）を理由つきで公開する。D-SCORE>=60が配信条件。乗車判定は配信後に参照元Google系比率とスマホ比率で二値記録する。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-22",
+      "evaluation_at": null,
+      "status": "planned",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": null,
+        "source": "PR実績ベースライン（n=5）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車3本=21-46・PV 217-1,347。転載の床は20-34本/回。RSIはS2（市場語）とS5（時流）が構造的に低いため、1万PV級は狙わず転載の床を取りにいく弾と位置づける"
+      },
+      "target_metric": "discover_boarding",
+      "decision": null,
+      "evaluated_at": null,
+      "d_score_pre": {
+        "$comment": "配信前採点（暫定）。見出し確定稿で必ず再採点する。採点根拠は docs/pr-rsi-2026-09-plan.md §2。S7はローンチ設計（受け皿ページ/autopilot/・図解・実行ログ抜粋）が揃った時点で0→5。",
+        "scored_at": "2026-08-22",
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-3（n=5バックテスト較正・合格60）※当該文書はリポジトリに未コミット（plan §3-1でオーナー依頼中）",
+        "S1_novelty": 26,
+        "S2_entity_reach": 12,
+        "S3_concrete_nouns": 13,
+        "S4_transformation": 10,
+        "S5_timing": 3,
+        "S6_news_verb": 2,
+        "S7_launch_design": 0,
+        "total": 66,
+        "total_note": "S7充足時66・未充足時61。合格ラインすれすれ。S7（受け皿ページ）を落とすと事実上ギリギリになる",
+        "gates": {
+          "G1_thumbnail_1200px": null,
+          "G2_no_ai_or_clickbait_words": null,
+          "G3_prtimes_distribution": null,
+          "G4_weekday_morning": null,
+          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。G2はオーナー判断待ち（plan §2）"
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5 を目安に二値判定し、外した場合はどのSを読み違えたかをnotesに書いて重みを更新する",
+        "google_referral_ratio": null,
+        "mobile_ratio": null,
+        "syndication_count": null,
+        "pv": null,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": null
+      },
+      "notes": [
+        "2026-08-22: 起案。原稿ドラフト docs/pr-rsi-2026-09.md / 主張の裏取り台帳 docs/pr-rsi-2026-09-evidence.md / 段取り docs/pr-rsi-2026-09-plan.md。",
+        "【G2が最大の論点】このゲートは PR④『AIタグ自動追加』の負け（469PV・D-SCORE 21・台帳ラベルに『AI前面タイトルの負け実証・G2違反』）から作られたもので、VISION §0『AIを前面に出さない』とも一致する。今回の主張はプロダクト機能ではなく運営体制なので同一視すべきかは自明でない。G2をそのまま適用するなら見出しからAI語を外す（原稿A/B案）。例外を作るなら『G2はプロダクト訴求のAIを禁じたものであり運営体制のニュースには適用しない』と明記して次回以降の判断材料として残す。オーナー判断待ち。",
+        "【枠の競合】pr-2026-multi-destination（事前95・planned）と9月上旬枠を取り合う。加えて9月上旬はAppleウィーク（trend-radar-prompt.md が『年間最大の窓』と明記）で、同文書は『混雑窓を避ける＝Appleイベント週に無関係弾を出さない』とも書いている。RSIはApple文脈と無関係なので、案2を9月上旬・RSIを9月下旬〜10月上旬の単独枠に分けるのが plan §0 の推奨。オーナー判断待ち。",
+        "配信前チェックリスト: ①見出しは市場語のみ（『RSI』『再帰的自己改善』『オートパイロット』は社内語。見出し・リードに出さない — 二層言語ルール） ②『完全自動化』『無人経営』『人間不要』と書かない（出荷の最終判断・実機確認・App Store公開は意図的に人間が持っている） ③『世界初』と書かない ④未実測の数値（Zero-decision率・ルーティング精度・CPI・トークン配分）を一切出さない ⑤台帳 §10『書けない』の11項目を原稿へ戻さない。",
+        "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する。"
+      ]
     }
   ]
 }
