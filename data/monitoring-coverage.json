@@ -109,13 +109,14 @@
     {
       "id": "app_crash",
       "domain": "アプリのクラッシュ",
-      "watches": "起動完走率（launch_incomplete）",
-      "detection": "derived",
-      "detector": "../simplememo-api/src/rollout-guard.ts",
-      "cadence": "段階公開中のみ",
-      "on_detect": "なし（段階公開していない期間は誰も見ていない）",
+      "watches": "起動完走率（launch_incomplete）の**前段ステージ**と、比率の前週比",
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/launch-health-monitor.ts",
+      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）＋段階公開中はガードが別途見る",
+      "on_detect": "日報に1行。前段ステージが**1件でも出たら分母を問わず劣化**として出す",
       "covers_failure_class": [],
-      "note": "**指標は取れているが、常時の監視になっていない。**段階公開中だけガードが見る。平常時にクラッシュ率が上がっても気づく経路が無い"
+      "note": "2026-08-22。**指標も読み方の文書も既にあり、無かったのは毎日それを見る仕組み**だった（POSTを叩いた日にしか読まれていなかった）。段階公開中だけガードが見る状態から、常時監視にした。**比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常に使った後でOSがkillしただけでも launch_incomplete が出る（scene_did_become_active は恒常的に最多バケットで、実害の証拠にならない）。判定は docs/launch_health.md の読み方をそのまま機械にした: **前段ステージ（launch_begin / did_finish_launching_enter / scene_will_connect）が1件でも出たら実クラッシュを疑う**。比率は水準ではなく前週比の跳ねだけに使う。残る弱さ: **クラッシュそのものは見ていない**（launch_incomplete は起動が完走しなかったことの記録で、Xcode Organizer のクラッシュログとは別物）",
+      "coverage_kind": "direct"
     },
     {
       "id": "send_failure",
@@ -176,6 +177,30 @@
       ],
       "note": "実際に起きた（allowed_bots で弾かれた）。最大検知時間50.7hはこの種だが、それは autopilot-health.yml が無かった時期の話。いまは「出荷が無い」として間接的に拾える。**ただし「AIが拒否された」とは分からない**ので、原因の切り分けは人が行う",
       "coverage_kind": "indirect"
+    },
+    {
+      "id": "admin_access",
+      "domain": "管理画面への不正アクセス",
+      "watches": "/admin/* の認証失敗の件数と経路（直近24h）",
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/access-log.ts",
+      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
+      "on_detect": "日報に1行。拒否0のときもそう書く（無音と区別する）",
+      "covers_failure_class": [],
+      "coverage_kind": "direct",
+      "note": "2026-08-22。記録は同日に作ったが、**その記録を読むコードが無かった** — 記録しただけの監査ログは監査ではない。書き込み専用テーブルの検査で自分の作った穴として出た"
+    },
+    {
+      "id": "email_dead_letter",
+      "domain": "メール送信の死信",
+      "watches": "直近24hに落ちた送信の件数・種別・再送可否",
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/dlq.ts",
+      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
+      "on_detect": "日報に1行。**再送が手動であることも毎回書く**（記録があることと戻せることは別）",
+      "covers_failure_class": [],
+      "coverage_kind": "direct",
+      "note": "2026-08-22。遮断器と死信は同日に作ったが、**死信を読むコードが1つも無かった。**「失われず後で戻せる」と書いていたのは、記録があることと戻せることの混同だった"
     }
   ],
   "$coverage_kind": "indirect = 症状（出荷が無い等）で気づく。原因までは分からないので切り分けは人が行う"
