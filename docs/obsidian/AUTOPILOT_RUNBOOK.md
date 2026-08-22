@@ -149,15 +149,33 @@ FROM `yurika-simplememo.searchconsole.ExportLog`
 ORDER BY publish_time DESC LIMIT 6;
 
 -- 蓄積日数（28日窓に必要な残りを数える）
+-- 2026-08-22追加: days は「最古〜最新の日数」ではなく COUNT(DISTINCT) なので、
+-- 途中が抜けていれば first/last の差より小さくなる。ここが食い違ったら穴がある。
 SELECT MIN(data_date) AS first_date, MAX(data_date) AS last_date,
-       COUNT(DISTINCT data_date) AS days
+       COUNT(DISTINCT data_date) AS days,
+       DATE_DIFF(MAX(data_date), MIN(data_date), DAY) + 1 AS span
 FROM `yurika-simplememo.searchconsole.searchdata_site_impression`;
+
+-- 落ちた試行の痕跡（2026-08-22追加）。行が返れば、その (テーブル, data_date) の
+-- エクスポートが落ちている。空の temp_ は残骸ではなく**唯一の失敗の証拠**で、
+-- 最新 data_date は動かないため上の2本だけでは絶対に見えない。
+-- 判定（配信済みの日の再エクスポート失敗か、本当の欠損か）は
+-- growth/BIGQUERY_SETUP.md「一括データ エクスポートに失敗しました」の表。
+SELECT table_id, row_count,
+       FORMAT_TIMESTAMP('%m-%d %H:%M', TIMESTAMP_MILLIS(creation_time), 'Asia/Tokyo') AS created_jst
+FROM `yurika-simplememo.searchconsole.__TABLES__`
+WHERE STARTS_WITH(table_id, 'temp_');
 ```
 
 > **絶対にやらない誤り:** 認証失敗やスクリプトの実行不能を
 > 「新規データなし」と報告すること。**「取得できなかった」と
 > 「増えていない」は別の結論**で、前者は `reason` にそう書く。
 > これが08-13〜08-15の誤報の原因そのもの。
+
+> **2026-08-22追加の誤り:** サチコからの失敗メールを受けてIAMや
+> エクスポート設定を触ること。**大半は配信済みの日の再エクスポートが
+> 落ちただけ**で、データは1日も欠けていない。上のクエリで欠損の有無を
+> 確かめてから動く（実測の根拠は `growth/BIGQUERY_SETUP.md` §失敗メール）。
 
 `data_date` が28日ぶん貯まったら（`bq-preflight` が残り日数を表示する）:
 
