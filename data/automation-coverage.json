@@ -942,11 +942,16 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "コホート分析（継続率・課金率）",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "../simplememo-api/src/cohort-report.ts",
+        "../simplememo-api/src/analytics.ts",
+        "../simplememo-api/src/index.ts",
+        "../simplememo-api/test/cohort-report.test.ts",
         "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"
       ],
-      "note": "都度レポート"
+      "note": "2026-08-22。**都度レポートから週次の自動実行へ。**計算も、週次サマリの中でそれを呼ぶ経路も既にあり、**無かったのは定期的に回して読む仕組み**だった（人が叩いた日にしか読まれていない）。運用報告なので ENABLED フラグでは止めず、宛先の有無だけで自己ゲートする（autopilot_report / analytics_daily_report と同じ流儀）。この領域は母数が小さいので、**成熟30件未満では変化を解釈しない**し、差が**1人ぶんの幅**に収まるなら「区別できない」と書く（前週の母数が小さければそちらの分解能を使う）。**言うことが無い週は送らない** — 読めるようになった週・言える差が出た週・集計できなかった週の3つだけ。毎週同じ行を送ると読まれなくなる。残る弱さ: **D28 は BQ の28日蓄積待ち**（9/6前後）。実際に「読める」判定が出るのは母数が30件に届いてからで、いまの規模ではしばらく『母数不足』が続く",
+      "since": "2026-08"
     },
     {
       "area": "⑥ アプリ運営意思決定",
