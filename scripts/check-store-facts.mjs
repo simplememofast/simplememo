@@ -145,8 +145,9 @@ if (isMain) {
   const { problems, rows } = validateOffline(doc);
 
   console.log('App Store 由来の公開表示 — **確認していない値を出し続けない**\n');
-  console.log('  「記載」はメモに書かれた日付。**確認日とは限らない**'
-    + '（価格は設定日しか分かっていない）。\n');
+  console.log('  「記載」はメモに書かれた日付。**機械が確認した日とは限らない** —');
+  console.log('  価格はオーナーの確認（App Store Connect を見た人の申告）で、'
+    + 'IAP の価格はAPIから取れない。\n');
   for (const r of rows) {
     console.log(`  ${r.label.padEnd(24)} ${String(r.value).padEnd(8)}`
       + ` 記載 ${r.when ?? '**日付なし**'}${r.age === null ? '' : `（${r.age}日前）`}`);
