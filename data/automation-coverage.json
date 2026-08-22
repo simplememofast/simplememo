@@ -141,20 +141,25 @@
     {
       "area": "① 次期機能開発",
       "task": "失敗機能の自動停止とバックログ差し戻し",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "Feature Flag待ち"
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "note": "ガードレール指標が有意かつ実害を伴って悪化したら kill を自律実行する（承認を挟まない＝可逆で安全な方向のため）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた。バックログ差し戻しは未実装"
     },
     {
       "area": "① 次期機能開発",
       "task": "判断理由と結果のDecision Ledger",
-      "executor": "ai_executes_gated",
+      "executor": "ai_autonomous",
       "evidence": [
         "docs/obsidian/AUTOPILOT_LOG.md",
         "growth/experiments/experiments.json",
-        "data/autopilot-runs.json"
+        "data/autopilot-runs.json",
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
       ],
-      "note": "機能開発の判断はまだ入っていない"
+      "note": "機能開発の判断も入るようになった（カナリアガードが判定・根拠・実行有無を毎回KVへ記録する）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた"
     },
     {
       "area": "① 次期機能開発",
@@ -277,9 +282,12 @@
     {
       "area": "② バグ修正",
       "task": "カナリア公開と自動ロールバック",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "②の閉ループが閉じない最大の理由"
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "note": "露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた"
     },
     {
       "area": "② バグ修正",
@@ -627,16 +635,22 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "段階公開への自動昇格",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "Hard Ruleの手前"
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる"
     },
     {
       "area": "④ 自動本番デプロイ",
       "task": "Crash-free率・送信成功率による自動停止",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "[2026-08-22訂正] 「止める手段が無い」は誤りだった（v4.7から /v1/config で遠隔キルができていた）。同日に段階公開とキャッシュ期限も入り機構は揃った。nobody のままなのは**指標を見て kill を叩くコードが無い**ため — 止める先ではなく、決める側が無い"
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "note": "起動完走率（launch_incomplete の裏返し＝クラッシュ代理指標）・送信成功率・エディタ→送信到達率の3本で判定。1指標でも割れたら止める。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた"
     },
     {
       "area": "④ 自動本番デプロイ",
