@@ -955,9 +955,11 @@
         "scripts/check-definitions.mjs",
         ".github/workflows/seo-check.yml",
         "growth/lib/",
-        "../simplememo-api/docs/analytics-golden.md"
+        "../simplememo-api/docs/analytics-golden.md",
+        "scripts/code-authorship.mjs",
+        "data/code-authorship.json"
       ],
-      "note": "2026-08-22実装。KPI6件の定義と、**算出元ファイルの sha256** を台帳に持つ。計算コードが変われば version を上げるまでCIが落ちる（`--bump <id> --why` で履歴が残る）。狙いは数字ではなく**定義の凍結** — 「自動化率が上がった」の半分が計算を変えたからだった、を起こさないため。導入直後にRunbookの編集で実際に発火し、履歴に「定義は変えていない」と残した。残る弱さ: 集計SQLはまだ台帳に無い（BigQuery側は analytics-golden.md 止まり）",
+      "note": "2026-08-22実装。KPI6件の定義と、**算出元ファイルの sha256** を台帳に持つ。計算コードが変われば version を上げるまでCIが落ちる（`--bump <id> --why` で履歴が残る）。狙いは数字ではなく**定義の凍結** — 「自動化率が上がった」の半分が計算を変えたからだった、を起こさないため。導入直後にRunbookの編集で実際に発火し、履歴に「定義は変えていない」と残した。残る弱さ: 集計SQLはまだ台帳に無い（BigQuery側は analytics-golden.md 止まり） [2026-08-22追記] **原稿の「変更行の98.8%」が再現できなかった**ので、数え方そのものを script にして凍結した（KPI定義7件目）。台帳の算数と、**headline が実測とずれていないこと**をCIが見る — 「数字だけ良くする」経路をつぶすため。窓の切り方1つで 94.2% ↔ 96.6% と 2.4pt 動くので、**計測日を窓に入れない**ことを定義に含めた",
       "since": "2026-08"
     },
     {
