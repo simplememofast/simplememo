@@ -1272,7 +1272,7 @@
       "id": "pr-2026-rsi-autopilot",
       "page": "(PR TIMES配信 — 自律運用/RSI。ページ実験ではなくPRリリース型レコード)",
       "type": "pr_release",
-      "hypothesis": "プロダクトの新機能ではなく『運営体制』を弾にする初の回。自動化の発表なのに見出しが『自動化しなかった部分』（AIにApp Storeへ出す権限を渡していない）にあるという逆説を主フックにする。n=5の実績が示すとおり勝敗を分けているのはAI語の有無ではなくS2（見出しの固有名詞）なので、App Store / Obsidian / Captio式シンプルメモ を必ず入れる。D-SCORE>=60が配信条件。乗車判定は配信後に参照元Google系比率とスマホ比率で二値記録する。",
+      "hypothesis": "プロダクトの新機能ではなく『運営体制』を弾にする初の回。自動化の発表なのに見出しが『自動化しなかった部分』（AIにApp Storeへ出す権限を渡していない）にあるという逆説を主フックにする。n=5の実績が示すとおり勝敗を分けているのはAI語の有無ではなくS2（見出しの固有名詞）なので、App Store / Obsidian を必ず入れる（現行のアプリ名『Obsidian連携シンプルメモ』自体がObsidianを含むため、アプリ名を書くだけでS2の主エンティティが見出しに乗る）。D-SCORE>=60が配信条件。乗車判定は配信後に参照元Google系比率とスマホ比率で二値記録する。",
       "source": {
         "pr": null,
         "commit": null
@@ -1294,7 +1294,7 @@
       "decision": null,
       "evaluated_at": null,
       "d_score_pre": {
-        "$comment": "配信前採点（改訂1・2026-08-22）。初回採点66から、実装3件と見出し方針の確定を受けて再採点した。見出し確定稿でもう一度 `node growth/scripts/d-score.mjs` を回すこと。採点根拠は docs/pr-rsi-2026-09-plan.md §2。S7はローンチ設計（受け皿ページ /autopilot/・1サイクル図解・D-SCOREバックテスト表）が揃った時点で0→5。",
+        "$comment": "配信前採点（改訂1・2026-08-22）。初回採点66から、実装3件・見出し方針の確定・現行アプリ名の反映を受けて再採点した（66→80→82）。見出し確定稿でもう一度 `node growth/scripts/d-score.mjs` を回すこと。採点根拠は docs/pr-rsi-2026-09-plan.md §2。S7はローンチ設計（受け皿ページ /autopilot/・1サイクル図解・D-SCOREバックテスト表）が揃った時点で0→5。",
         "scored_at": "2026-08-22",
         "rescored_from": {
           "total": 66,
@@ -1303,17 +1303,17 @@
         },
         "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-3（n=5バックテスト較正・合格60）※当該文書はリポジトリに未コミット（plan §3-1でオーナー依頼中）。較正そのものは growth/scripts/d-score.mjs --backtest で annotations.json から再現できる",
         "S1_novelty": 28,
-        "S2_entity_reach": 17,
+        "S2_entity_reach": 19,
         "S3_concrete_nouns": 15,
         "S4_transformation": 13,
         "S5_timing": 3,
         "S6_news_verb": 4,
         "S7_launch_design": 0,
-        "total": 80,
-        "total_note": "S7未充足で80・充足で85。乗車した2本は65と71なので、この採点が正しければ射程内。ただしS5=3（Appleウィークに無関係弾を当てる）は自分で引き受けたハンデであり、採点が当たらなかった場合に最初に疑うのはここ。",
+        "total": 82,
+        "total_note": "S7未充足で82・充足で87。乗車した2本は65と71なので、この採点が正しければ射程内。ただしS5=3（Appleウィークに無関係弾を当てる）は自分で引き受けたハンデであり、採点が当たらなかった場合に最初に疑うのはここ。",
         "score_rationale": {
           "S1_novelty": "26→28。予算上限での自己停止・2モデル不一致の人間エスカレーション・actions:write を与えない理由の明文化は、個別には見たことのない具体。30にしないのは『AIが開発する』というカテゴリ自体が2026年に新しくないため",
-          "S2_entity_reach": "12→17。見出しに App Store / Captio式シンプルメモ（C案ならObsidian）が入る方針を確定した。20にしないのは、いずれもニュースの主語ではないため（PR②のObsidianは主語だった）",
+          "S2_entity_reach": "12→17→19。17は見出し方針の確定ぶん。さらに+2は、現行のアプリ名が 『Obsidian連携シンプルメモ』（EN: Simple Memo - for Obsidian）であり、**アプリ名を書くだけで見出しにObsidianが入る**ことが分かったため。乗車した2本（65/71）を牽引したのがまさにこのエンティティ。20にしないのは、Obsidianがニュースの主語ではなくブランド名の一部にとどまるため（PR②ではObsidian連携そのものが主語だった）。なお旧名のままなら見出しに『Captio』——すでにApp Storeから削除されたアプリ名——が乗るところだった。data/site-constants.json が名前の正。",
           "S3_concrete_nouns": "13→15。11チェック・261ファイル・13,195リンク・実費$0.8149・4状態の不一致検出と、すべて一次実測の固有数値になった",
           "S4_transformation": "10→13。『人がやっていた→機械がやる』より『AIが自分の予算を見て自分を止める』のほうが変化として鋭い。15にしないのは受益者が読者ではなく自社であるため",
           "S5_timing": "3のまま。9月上旬はAppleウィークで、trend-radar-prompt.md は『Appleイベント週に無関係弾を出さない』と定めている。RSIはApple文脈と無関係。緩和策はイベントの前週に置くこと",
@@ -1344,7 +1344,8 @@
         "2026-08-22 改訂1【実装3件】この弾の主張を事実にするために実装した。(a) ⑤AI実費の自己制御: data/autopilot-cost.json + scripts/autopilot-budget.mjs + obsidian-autopilot.yml の予算ゲート + autopilot-report.ts の日報描画。上限到達で主系runが止まる。(b) ③D-SCOREの機械検算: growth/scripts/d-score.mjs（算数のズレ・満点超過・配信中のゲート矛盾・合格未満のrunningをCIが落とす。--backtest つき）。(c) ②独立2モデル監査: simplememo-ios の scripts/qa/ai_triage.sh を2モデル化し、判定が割れたら人間に上げる。",
         "2026-08-22 改訂1【実測で判明・原稿に反映済み】GitHub Actions の主系（obsidian-autopilot.yml）は全11runのうち**一度も記事を出荷していない**（1〜8 Gateスキップ / 9 apt詰まりでcancelled / 10 allowed_botsでfailure / 11 permission_denials 14で成果物ゼロ）。この12日間の出荷はすべて副系CCR。隠さず『主系・副系の二重化で維持している』と書く — 冗長化が実際に効いた実例なので話として強い。",
         "配信前チェックリスト: ①見出しは市場語＋固有名詞（『RSI』『再帰的自己改善』『オートパイロット』は社内語。見出し・リードに出さない — 二層言語ルール） ②見出しは短く（乗車した2本は28〜30字） ③『完全自動化』『無人経営』『人間不要』『AIが経営している』『予算に応じて最適配分』と書かない ④『世界初』と書かない ⑤未実測の数値（Zero-decision率・ルーティング精度・CPI）を出さない ⑥台帳 §10『まだ書けない』の10項目を原稿へ戻さない。",
-        "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する。"
+        "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する。",
+        "2026-08-22 改訂1b【アプリ名を現行へ】原稿が旧名『Captio式シンプルメモ』を製品名として使っていた。data/site-constants.json の正は『Obsidian連携シンプルメモ』/『Simple Memo - for Obsidian』で、旧名は alternateName に残る旧称。**この修正はS2を17→19に押し上げる** — アプリ名を書くだけで見出しにObsidianが入り、それは乗車した2本を牽引したエンティティそのもの。逆に旧名のままなら、見出しにApp Storeから削除された別アプリ『Captio』の名が乗っていた。あわせてボイラープレートの『起動 約1秒』を現行の実測値『起動0.4秒』（ウォーム起動・タップ→キーボード表示まで／iPhone 16e・iOS 26.5.2・v5.7.3・2026-08-11実測）へ更新した。"
       ]
     }
   ]

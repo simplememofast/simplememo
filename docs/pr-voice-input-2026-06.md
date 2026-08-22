@@ -1,5 +1,20 @@
 # PR TIMES 原稿ドラフト — 音声入力（音声自動入力）
 
+> ## ⚠ 【2026-08-22 追記】この文書の事実は古い。雛形としてコピーしないこと
+>
+> 2026-06-02時点の原稿であり、以下は**現在の事実と一致しない**。
+> 実際、本書を雛形にしたRSI原稿の初稿が3点とも同じ誤りを引き継いだ。
+>
+> | 本書の記述 | 現在 | 正 |
+> |---|---|---|
+> | Captio式シンプルメモ / Simple Memo - Captio-style | **旧名**（alternateName） | `Obsidian連携シンプルメモ` / `Simple Memo - for Obsidian` — `data/site-constants.json` |
+> | 起動 約1秒 | 古い測定 | **0.4秒**（iPhone 16e / iOS 26.5.2 / v5.7.3・2026-08-11実測）— `data/benchmark.json` |
+> | 7日間の無料トライアル付き | **廃止済み** | 初日から恒久的に「1日3通までずっと無料」。2026-06（iOS v3.3 Build 48）で廃止。景表法・ストア審査リスクとして削除された（`simplememo-ios/docs/reports/公式サイト_トライアル記述削除_修正指示書.md`）。公式サイトの「トライアル」出現回数は現在 **0** |
+>
+> **ボイラープレートを再利用するときは、必ず `data/site-constants.json` と
+> `data/benchmark.json` を正として突き合わせること。**
+> 最新の型は `docs/pr-rsi-2026-09.md`。
+
 > 配信前ドラフト（社内レビュー用）。配信は PR TIMES 管理画面から手動。
 > 根拠: アプリ v3.0.0（CHANGELOG v3.0.0 Build1–3 / VoiceInputController / OnboardingVoiceInputPage）
 > 関連ページ: https://simplememofast.com/voice-input/
