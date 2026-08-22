@@ -441,11 +441,14 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "App Store Connect のデータ連携",
-      "executor": "nobody",
+      "executor": "ai_autonomous",
       "evidence": [
-        "growth/data/appstore/"
+        "../simplememo-ios/scripts/asc_metrics.rb",
+        "../simplememo-ios/.github/workflows/asc-metrics.yml",
+        "../simplememo-ios/data/appstore/asc-metrics.json",
+        "growth/data/appstore/README.md"
       ],
-      "note": "受け皿だけ。鍵は既にある"
+      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済みで **instance は 0/15・Apple の生成待ち**（5日を超えたら『故障』としてジョブが落ちる）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない"
     },
     {
       "area": "③ 自律型マーケティング",

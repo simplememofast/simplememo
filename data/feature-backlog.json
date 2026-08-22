@@ -35,7 +35,9 @@
       "expected_effect": 5,
       "effort_days": 0.5,
       "evidence_strength": "measured_external",
-      "risks": ["review"],
+      "risks": [
+        "review"
+      ],
       "evidence": [
         "../simplememo-ios/metadata/keywords/README.md",
         "../simplememo-ios/scripts/lib/app_metadata.rb"
@@ -49,7 +51,9 @@
       "effort_days": 3,
       "evidence_strength": "measured_external",
       "risks": [],
-      "evidence": ["../simplememo-ios/scripts/lib/asc_api.rb"],
+      "evidence": [
+        "../simplememo-ios/scripts/lib/asc_api.rb"
+      ],
       "note": "鍵は既にある（fastlane 用）。ASO の効果測定がここ待ちで、CPP実験も同じ"
     },
     {
@@ -58,8 +62,13 @@
       "expected_effect": 4,
       "effort_days": 2,
       "evidence_strength": "measured_ours",
-      "risks": ["privacy", "irreversible"],
-      "evidence": ["../simplememo-api/data/data-retention.json"],
+      "risks": [
+        "privacy",
+        "irreversible"
+      ],
+      "evidence": [
+        "../simplememo-api/data/data-retention.json"
+      ],
       "note": "棚卸しで場所は特定済み。消すのは不可逆なので窓の決定に承認が要る"
     },
     {
@@ -69,7 +78,9 @@
       "effort_days": 3,
       "evidence_strength": "measured_ours",
       "risks": [],
-      "evidence": ["data/autopilot-runs.json"],
+      "evidence": [
+        "data/autopilot-runs.json"
+      ],
       "note": "検知の中央値2.1h・最大50.7h に対し修理は0.9h。**弱点は修理速度ではなく検知**で、それがこの実測から出ている"
     },
     {
@@ -79,7 +90,9 @@
       "effort_days": 1,
       "evidence_strength": "observed",
       "risks": [],
-      "evidence": ["data/credential-expiry.json"],
+      "evidence": [
+        "data/credential-expiry.json"
+      ],
       "note": "リード文の「契約は人が承認」に中身を与える。⑫事業継続性にも効く"
     },
     {
@@ -89,7 +102,9 @@
       "effort_days": 5,
       "evidence_strength": "measured_ours",
       "risks": [],
-      "evidence": ["../simplememo-ios/SimpleMemo/FeatureFlags.swift"],
+      "evidence": [
+        "../simplememo-ios/SimpleMemo/FeatureFlags.swift"
+      ],
       "note": "**三度外して打ち切った実績がある**（RMSレベルでは発話区間を判定できない）。判定器そのものを替えられると確認できるまで着手しない、と決めてある"
     },
     {
@@ -98,9 +113,63 @@
       "expected_effect": 5,
       "effort_days": 2,
       "evidence_strength": "hypothesis",
-      "risks": ["review"],
+      "risks": [
+        "review"
+      ],
       "evidence": [],
       "note": "34本作成済みだが実験として回っていない。**効果の根拠がまだ無い**ので、作るより先に測る対象"
+    },
+    {
+      "id": "folder_pick_ux",
+      "title": "フォルダ選択のUXを直す（階層フォルダ・選び直し）",
+      "expected_effect": 6,
+      "effort_days": 3,
+      "evidence_strength": "observed",
+      "risks": [],
+      "evidence": [
+        "data/review-intake.json",
+        "../simplememo-ios/data/appstore/asc-metrics.json"
+      ],
+      "note": "レビュー2件（2026-06-01 / 07-10）が同じ所を指している。片方は「Dailynoteを年・月の階層フォルダに入れているので格納形式を変えるか迷う」と、**自分のvault構成をアプリに合わせるか悩んでいる**。Capture OS としては逆で、合わせるのはこちら側"
+    },
+    {
+      "id": "undo_last_capture",
+      "title": "直前のCaptureをワンタップで取り消す",
+      "expected_effect": 6,
+      "effort_days": 2,
+      "evidence_strength": "observed",
+      "risks": [],
+      "evidence": [
+        "data/review-intake.json",
+        "../simplememo-ios/data/appstore/asc-metrics.json"
+      ],
+      "note": "「間違って入力したメモをワンタップで削除できると更に嬉しい」（2026-07-07・毎日利用者）。**Todo管理画面ではなくCapture経路のundo**なので VISION の「Destination のUIを作らない」とは衝突しない"
+    },
+    {
+      "id": "obsidian_append_format",
+      "title": "Obsidian 追記行の形式を選べるようにする（Markdown 準拠）",
+      "expected_effect": 5,
+      "effort_days": 2,
+      "evidence_strength": "observed",
+      "risks": [],
+      "evidence": [
+        "data/review-intake.json",
+        "../simplememo-ios/data/appstore/asc-metrics.json"
+      ],
+      "note": "「Obsidianに送れるのをうたうのであればMarkdownに対応して欲しい」（2026-07-22）。同レビューの Watch同期・タイムスタンプ選択は**ユーザー自身が7/31に解決を確認済み**で、残っているのはここだけ。MemoFormatter は行頭記法を壊さない設計で frontmatter 付き出力も持つが、**既定の追記行は中黒＋時刻**であって Markdown 構造ではない"
+    },
+    {
+      "id": "watch_icon_legibility",
+      "title": "Watch の小画面で潰れないアイコンにする",
+      "expected_effect": 3,
+      "effort_days": 1,
+      "evidence_strength": "observed",
+      "risks": [],
+      "evidence": [
+        "data/review-intake.json",
+        "../simplememo-ios/data/appstore/asc-metrics.json"
+      ],
+      "note": "「on a small screen, this high-resolution notepad looks a bit blurry」（2026-07-12・USA）。Watch から偶然見つけた導線なので、**発見面そのものの問題**"
     }
   ]
 }
