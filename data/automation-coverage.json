@@ -733,9 +733,12 @@
         "../simplememo-ios/SimpleMemo/FeatureFlagRollout.swift",
         "../simplememo-ios/SimpleMemoTests/FeatureFlagRolloutTests.swift",
         "../simplememo-ios/docs/feature-flag-client-spec.md",
-        "../simplememo-ios/release_notes/ja-JP/5.8.1.txt"
+        "../simplememo-ios/release_notes/ja-JP/5.8.1.txt",
+        "../simplememo-api/data/rollout-bucket-vectors.json",
+        "../simplememo-api/test/rollout-vectors.test.ts",
+        "../simplememo-ios/scripts/qa/check_rollout_vectors.py"
       ],
-      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**"
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした"
     },
     {
       "area": "④ 自動本番デプロイ",

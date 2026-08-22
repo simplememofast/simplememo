@@ -596,8 +596,12 @@ node scripts/autopilot-runs.mjs --append \
 
 ## 6. 「書かない回」の保守作業メニュー
 
-- **サーバ allowlist の写しを更新（3リポジトリが揃った回だけ・所要10秒）**:
-  `cd ../simplememo-ios && python3 scripts/qa/check_analytics_crossrepo.py --sync`
+- **サーバ側の写しを更新（3リポジトリが揃った回だけ・所要10秒）**:
+  ```sh
+  cd ../simplememo-ios
+  python3 scripts/qa/check_analytics_crossrepo.py --sync   # イベント名の allowlist
+  python3 scripts/qa/check_rollout_vectors.py --sync       # 段階公開のバケット契約
+  ```
   差分があればコミットする。
   **なぜセッションでやるか**: この写しは iOS のCIが単独で回るために置いてある。
   隣のリポジトリを見に行く形にすると、CIのチェックアウトには隣が無いので
