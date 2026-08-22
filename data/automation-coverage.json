@@ -958,9 +958,12 @@
     {
       "area": "⑦ 法人経営",
       "task": "定型／非定型契約の分類",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/vendor-register.json",
+        "scripts/check-vendors.mjs"
+      ],
+      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）"
     },
     {
       "area": "⑦ 法人経営",
@@ -993,9 +996,12 @@
     {
       "area": "⑦ 法人経営",
       "task": "AI事業者のDPA・データ利用・SLA・撤退計画の審査",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/vendor-register.json",
+        "scripts/check-vendors.mjs"
+      ],
+      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る"
     },
     {
       "area": "⑦ 法人経営",
@@ -1406,7 +1412,7 @@
       "task": "バックアップ・復元",
       "executor": "nobody",
       "evidence": [],
-      "note": "本番データはCloudflare D1とApp Store側にあり、復元手順が未整備"
+      "note": "本番データはCloudflare D1とApp Store側にあり、復元手順が未整備。**2026-08-22にベンダー台帳で代替の有無を明示** — Apple・Resend・レジストラの3社に代替が無い"
     },
     {
       "area": "⑫ 事業継続性",

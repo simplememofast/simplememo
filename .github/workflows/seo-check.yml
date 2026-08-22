@@ -187,6 +187,15 @@ jobs:
       - name: Autopilot run ledger
         run: node scripts/autopilot-runs.mjs --check
 
+      # 【ベンダー】依存している外部サービスの棚卸し。
+      #
+      # リード文の「契約は人が承認」に中身を与えるための台帳。
+      # 個人データを渡しているのに DPA を見ていないものを名指しする
+      # （**「見ていない」を「問題なし」と書かない**）。
+      # 資格情報の台帳との食い違いも見る — 片方だけ古くなるのを防ぐ。
+      - name: Vendor register
+        run: node scripts/check-vendors.mjs --check
+
       # 【機能バックログ】計測の結果が次に作るものを決めているか。
       #
       # 確信度は evidence_strength から機械的に決まる（手で置けない）。
