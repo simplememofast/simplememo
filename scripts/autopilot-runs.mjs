@@ -17,6 +17,18 @@
  *   経路別内訳   = 主系 vs 副系（＝バックアップ切替が起きたことの機械的な証拠）
  *   無運転日     = どの経路も動かなかった日（**これだけは正常系ではない**）
  *
+ * 【単位を1つにしない — 2026-08-22追記】
+ * `human_intervention_rate` は「その実行に人が1回でも触ったか」の**二値**で、
+ * YAMLの権限を1行直しただけの日も丸ごと「介入あり」になる。これは
+ * **AIの自律性を構造的に過少評価する。** 実測でも、run単位では 53.8% だが、
+ * 同期間の変更行の 98.8% はAI著者のコミットだった（git実測）。
+ *
+ * かといって都合のよい分母に乗り換えるのは goodharting そのものなので、
+ * **総計と内訳の両方を必ず出す**。とくに分けるべきは:
+ *   - **成果物への介入**（人が記事を書いた／書き直した）＝ AIの成果が信用されていない
+ *   - **基盤の修理**（ワークフロー・Runbook・スクリプト）＝ 基盤が脆い
+ * この2つは自律性について正反対のことを言っており、混ぜると両方見えなくなる。
+ *
  * 【分母を attempted にする理由】
  * 秘密鍵未設定によるGateスキップは「意図的に静かに寝る」設計で、着手していない。
  * これを失敗に数えると、正しく動いている安全装置が失敗率として現れる。
@@ -99,11 +111,24 @@ export function summarize(doc, { since = null, costDoc = null } = {}) {
   const failed = runs.filter((r) => FAILED.has(r.outcome));
   const noRun = runs.filter((r) => r.outcome === 'no_run');
   const withIntervention = attempted.filter((r) => (r.interventions || []).length > 0);
+  const rate0 = (n, d) => (d > 0 ? n / d : null);
+
+  // 介入の内訳。kind ごとに「その kind の介入を含む実行」を数える
+  // （1実行に複数kindがありうるので、合計が withIntervention と一致するとは限らない）。
+  const KINDS = ['artifact', 'infra', 'substitute', 'bootstrap', 'request'];
+  const byKind = {};
+  for (const k of KINDS) {
+    const runsWith = attempted.filter((r) => (r.interventions || []).some((i) => i.kind === k));
+    byKind[k] = { runs: runsWith.length, rate: rate0(runsWith.length, attempted.length) };
+  }
+  // 出荷物のうち、人が中身に手を入れたもの。**AIの自律性の中核はここ。**
+  const shippedWithArtifactIntervention = runs.filter(
+    (r) => r.outcome === 'shipped' && (r.interventions || []).some((i) => i.kind === 'artifact'));
 
   const days = [...new Set(runs.map((r) => r.date_jst))].sort();
   const shippedDays = new Set(shipped.map((r) => r.date_jst));
 
-  const rate = (n, d) => (d > 0 ? n / d : null);
+  const rate = rate0;
 
   const byRoute = {};
   for (const r of runs) {
@@ -136,6 +161,10 @@ export function summarize(doc, { since = null, costDoc = null } = {}) {
     completion_rate: rate(shipped.length, attempted.length),
     change_failure_rate: rate(failed.length, attempted.length),
     human_intervention_rate: rate(withIntervention.length, attempted.length),
+    // 内訳。総計だけ出すと過少評価、内訳だけ出すと都合のよい分母選びになる。両方出す。
+    intervention_by_kind: byKind,
+    // 出荷物のうち人が中身に手を入れた割合。**AIの自律性の中核。**
+    artifact_autonomy_rate: rate(shipped.length - shippedWithArtifactIntervention.length, shipped.length),
     shipping_day_rate: rate(shippedDays.size, days.length),
     no_run_days: noRun.map((r) => r.date_jst),
     by_route: byRoute,
@@ -156,6 +185,13 @@ function render(s, doc) {
   o.push(`  AI完走率      ${pct(s.completion_rate)}   (${s.totals.shipped} / ${s.totals.attempted} 着手)`);
   o.push(`  変更失敗率    ${pct(s.change_failure_rate)}   (${s.totals.failed} / ${s.totals.attempted} 着手)`);
   o.push(`  人間介入率    ${pct(s.human_intervention_rate)}   (${s.interventions.length} 件の介入)`);
+  const bk = s.intervention_by_kind ?? {};
+  o.push(`    ├ 成果物への介入   ${pct(bk.artifact?.rate)}  (${bk.artifact?.runs ?? 0} 実行)  ← AIの自律性の中核`);
+  o.push(`    ├ 基盤の修理       ${pct(bk.infra?.rate)}  (${bk.infra?.runs ?? 0} 実行)`);
+  o.push(`    ├ 代走             ${pct(bk.substitute?.rate)}  (${bk.substitute?.runs ?? 0} 実行)`);
+  o.push(`    ├ 立ち上げ         ${pct(bk.bootstrap?.rate)}  (${bk.bootstrap?.runs ?? 0} 実行・一度きり)`);
+  o.push(`    └ 起票のみ         ${pct(bk.request?.rate)}  (${bk.request?.runs ?? 0} 実行・未実行)`);
+  o.push(`  成果物のAI自律率 ${pct(s.artifact_autonomy_rate)}   (出荷 ${s.totals.shipped} 件のうち人が中身に触っていない割合)`);
   o.push(`  出荷日率      ${pct(s.shipping_day_rate)}   (${s.window.days} 日中)`);
   o.push('');
   o.push(`  経路別:  主系 ${s.by_route.primary?.shipped ?? 0}/${s.by_route.primary?.attempted ?? 0} 出荷` +
@@ -238,6 +274,8 @@ if (isMain) {
       completion_rate: s.completion_rate === null ? null : Number(s.completion_rate.toFixed(4)),
       change_failure_rate: s.change_failure_rate === null ? null : Number(s.change_failure_rate.toFixed(4)),
       human_intervention_rate: s.human_intervention_rate === null ? null : Number(s.human_intervention_rate.toFixed(4)),
+      intervention_by_kind: s.intervention_by_kind,
+      artifact_autonomy_rate: s.artifact_autonomy_rate === null ? null : Number(s.artifact_autonomy_rate.toFixed(4)),
       shipping_day_rate: s.shipping_day_rate === null ? null : Number(s.shipping_day_rate.toFixed(4)),
       totals: s.totals, by_route: s.by_route,
       primary_ever_shipped: s.primary_ever_shipped,

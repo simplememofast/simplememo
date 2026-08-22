@@ -122,6 +122,15 @@ jobs:
       - name: Autopilot budget ledger
         run: node scripts/autopilot-budget.mjs --check
 
+      # 【自己修復の境界】レーンFが越えてはいけない線が壊れていないかを見る。
+      #
+      # repair_of の指す run が実在するか、失敗行に failure_class があるか、
+      # may_modify が承認制領域を含んでいないか、停止条件があるか。
+      # 未修理の故障が残っていること自体では落とさない（それは運用の話であって、
+      # PRを止める理由ではない）。
+      - name: Self-repair boundary
+        run: node scripts/autopilot-selfheal.mjs --check
+
       # 【権限表】不可逆な領域が承認制になっているか、根拠のファイルが実在するかを見る。
       #
       # 機械が守れる部分だけ機械に守らせる。実際に人が承認したかは見られないので、

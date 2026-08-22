@@ -26,7 +26,31 @@
     "  no_run            … その日どの経路も動かなかった（**これは異常**）",
     "",
     "【source は必ず書く】どの一次資料から起こした行かを残す。後から検算できない行は、",
-    "指標としては存在しないのと同じ。"
+    "指標としては存在しないのと同じ。",
+    "",
+    "【interventions.kind — 「何への介入か」で分ける】",
+    "  artifact   … **出荷物そのものへの介入**（人が記事を書いた・書き直した）",
+    "  infra      … 実行基盤の修理（ワークフロー・Runbook・スクリプト）",
+    "  substitute … 全経路が不発で人が代走した",
+    "  bootstrap  … 立ち上げ時に人が通しで実演した（一度きり）",
+    "  request    … 人に起票しただけ（まだ実行されていない）",
+    "",
+    "この分類が無いと、YAMLの権限を1行直した日と、人が記事を書き直した日が",
+    "同じ『介入あり』になる。**両者はAIの自律性について正反対のことを言っている。**",
+    "前者は基盤が脆いという話で、後者は成果物が信用されていないという話。",
+    "集計（scripts/autopilot-runs.mjs）は総計と内訳の**両方**を出す。",
+    "総計だけ出すと過少評価になり、内訳だけ出すと都合のよい分母選びになる。",
+    "",
+    "【failure_class と repair_of — 自己修復のための2フィールド】",
+    "  failure_class … 故障の**種別**（permissions / runner-timeout / actor-rejected /",
+    "                  route-absent / runbook-gap）。同じ故障の再発を数えるために要る。",
+    "                  失敗の自由文（failure_reason）だけでは『前と同じ故障か』が判定できない。",
+    "  repair_of     … その実行が修理した run_id の配列。**修理が効いたかを後から追える。**",
+    "",
+    "この2つで scripts/autopilot-selfheal.mjs が『未修理の故障が残っているか』を判定し、",
+    "残っていればその日の最優先アクションをレーンF（自己修復）にする。",
+    "同じ failure_class を規定回数直しても再発するなら、**修理をやめて人間に上げる**",
+    "（直せないものを毎日直そうとするのが一番たちの悪い無限ループになる）。"
   ],
   "seeded": {
     "at": "2026-08-22",
@@ -52,7 +76,7 @@
       "source": "autopilot-log+git-log",
       "interventions": [
         {
-          "kind": "design",
+          "kind": "bootstrap",
           "note": "初回は手動運転で手順を実証（Runbook導入と同時）"
         }
       ],
@@ -72,7 +96,7 @@
       "source": "autopilot-log+git-log",
       "interventions": [
         {
-          "kind": "incident",
+          "kind": "infra",
           "note": "主系の初回不発を受け、実行基盤をGHA主・CCR副の二重系へ（PR #478）"
         }
       ],
@@ -194,7 +218,7 @@
       "source": "autopilot-log",
       "interventions": [
         {
-          "kind": "detection",
+          "kind": "infra",
           "note": "2日連続の実行記録ゼロを08-18のセッションが検知。恒久対処として autopilot-health.yml を新設（PR #504）"
         }
       ],
@@ -202,7 +226,8 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "external_ref": null
+      "external_ref": null,
+      "failure_class": "route-absent"
     },
     {
       "run_id": "ap-20260817-actions",
@@ -232,7 +257,8 @@
       "pr": null,
       "artifact": null,
       "interventions": [],
-      "external_ref": null
+      "external_ref": null,
+      "failure_class": "route-absent"
     },
     {
       "run_id": "ap-20260818-actions",
@@ -307,12 +333,16 @@
       "source": "autopilot-log+git-log",
       "interventions": [
         {
-          "kind": "fix",
+          "kind": "infra",
           "note": "無記事6日の原因はゲートではなくRunbookのレーンE追記漏れと判明（PR #510）"
         }
       ],
       "failure_reason": null,
-      "external_ref": null
+      "external_ref": null,
+      "repair_of": [
+        "ap-20260816-none",
+        "ap-20260817-none"
+      ]
     },
     {
       "run_id": "ap-20260820-actions",
@@ -325,14 +355,15 @@
       "source": "actions-api",
       "interventions": [
         {
-          "kind": "fix",
+          "kind": "infra",
           "note": "オーナー指示でフォント導入に時間制限と continue-on-error を入れた（PR #513）"
         }
       ],
       "lane": null,
       "action": null,
       "pr": null,
-      "artifact": null
+      "artifact": null,
+      "failure_class": "runner-timeout"
     },
     {
       "run_id": "ap-20260820-owner",
@@ -352,7 +383,10 @@
         }
       ],
       "failure_reason": null,
-      "external_ref": null
+      "external_ref": null,
+      "repair_of": [
+        "ap-20260820-actions"
+      ]
     },
     {
       "run_id": "ap-20260821-actions",
@@ -365,14 +399,15 @@
       "source": "actions-api",
       "interventions": [
         {
-          "kind": "fix",
+          "kind": "infra",
           "note": "allowed_bots: '*' を追加（PR #522）"
         }
       ],
       "lane": null,
       "action": null,
       "pr": null,
-      "artifact": null
+      "artifact": null,
+      "failure_class": "actor-rejected"
     },
     {
       "run_id": "ap-20260821-ccr0920",
@@ -387,7 +422,10 @@
       "source": "autopilot-log+git-log",
       "interventions": [],
       "failure_reason": null,
-      "external_ref": null
+      "external_ref": null,
+      "repair_of": [
+        "ap-20260821-actions"
+      ]
     },
     {
       "run_id": "ap-20260822-actions",
@@ -400,14 +438,15 @@
       "source": "actions-api",
       "interventions": [
         {
-          "kind": "owner_request",
+          "kind": "request",
           "note": "obsidian-autopilot.yml の permissions / additional_permissions / claude_args のツール許可リスト確認を依頼（未対応）"
         }
       ],
       "lane": null,
       "action": null,
       "pr": null,
-      "artifact": null
+      "artifact": null,
+      "failure_class": "permissions"
     },
     {
       "run_id": "ap-20260822-ccr0730",

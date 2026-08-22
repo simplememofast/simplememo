@@ -85,6 +85,36 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
       problems.push(`${at}: active なのに ai_may も human_only も空 — 誰が何をするのか書けていない`);
     }
   }
+
+  // --- レーンF（自己修復）の実効的な歯止め ------------------------------
+  //
+  // 自分のCIを自分で直す仕組みは、放っておくと必ず
+  // 「通らないチェックを消して緑にする」に流れる。must_not に書くだけでは
+  // 文章であって歯止めではないので、**実際に消えていないことをここで確かめる。**
+  const sr = doc.self_repair;
+  if (sr) {
+    const wf = 'checks/seo-check';
+    let seoYml = '';
+    try { seoYml = fs.readFileSync(path.join(ROOT, '.github/workflows/seo-check.yml'), 'utf8'); }
+    catch { problems.push('seo-check.yml が読めない — required_ci_checks を検証できない'); }
+    for (const cmd of sr.required_ci_checks || []) {
+      if (seoYml && !seoYml.includes(cmd)) {
+        problems.push(`必須CIチェック "${cmd}" が seo-check.yml から消えている — 自己修復が検証を弱めた可能性がある（self_repair.must_not 違反）`);
+      }
+    }
+    // 自分の権限を広げていないこと
+    for (const f of sr.forbidden_permission_files || []) {
+      let src = '';
+      try { src = fs.readFileSync(path.join(ROOT, f), 'utf8'); }
+      catch { problems.push(`forbidden_permission_files の "${f}" が読めない`); continue; }
+      for (const perm of sr.forbidden_permissions || []) {
+        // コメント行（#で始まる）での言及は許す — 「与えていない理由」を書くのは正しい
+        const hit = src.split('\n').some((line) => !line.trim().startsWith('#') && line.includes(perm));
+        if (hit) problems.push(`${f} に "${perm}" がある — 自己修復が自分の権限を広げた可能性がある（self_repair.must_not 違反）`);
+      }
+    }
+    void wf;
+  }
   return problems;
 }
 

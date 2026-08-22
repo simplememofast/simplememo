@@ -106,6 +106,11 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 （GitHub Actions環境ではチェックアウト済みのリポジトリルートで同名ブランチを切る。
 日付は必ず **JST** で取ること: `TZ=Asia/Tokyo date +%Y%m%d`）
 
+**最初に走らせるもの（読む前に）:**
+```
+node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンFが最優先
+```
+
 読むもの（この順）:
 1. `docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか・保留事項
 2. `docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md` + `growth/content/new-queue.json` /
@@ -238,6 +243,45 @@ Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` 
 
 ## 2. アクションの選び方（優先順）
 
+### レーンF（自己修復）— **A〜Eより先に、毎回これを見る**
+
+```
+node scripts/autopilot-selfheal.mjs
+```
+
+**未修理の故障が残っていれば、その日の最優先アクションは基盤の修理。**記事は書かない。
+
+**なぜ最優先か。** 2026-08-11〜08-22の実測で、人間の介入7件のうち**4件が基盤の修理**
+だった。しかもその修理を書いたのは**すべてAIセッション**で、人間がやったのは
+「壊れていることに気づいて、直せと言うこと」だけ。**足りなかったのは能力ではなく
+起動条件**なので、レーンFは「検知したら人の指示を待たずに直す」ことにする。
+
+手順:
+
+1. `autopilot-selfheal.mjs` が出す対象の `run_id` と `failure_class` を確認する
+2. GitHub MCP の `get_job_logs`（または Actions のrunログ）で**根本原因まで**特定する。
+   「flakeだと思う」で終わらせない
+3. `self_repair.may_modify` のファイルだけを直す。**`must_not` は絶対に越えない**
+   - **検証を弱めない**（CIチェックの削除・スキップ・閾値の緩和）
+   - **自分の権限を広げない**（`permissions:` の拡大・`actions: write` の追加）
+   - `auto-merge.yml` の「検証済みSHAだけをマージ」条件を緩めない
+   - `data/authority-matrix.json` 自身を書き換えない
+   この2つは文章ではなく**CIが実際に検出する**（`check-authority.mjs` が
+   `required_ci_checks` の実在と `forbidden_permissions` の不在を見ている）
+4. 通常どおり §4 の全チェックを通してPRを出す
+5. **`data/autopilot-runs.json` の自分の行に `repair_of: ["<直した run_id>"]` を書く。**
+   書かない限り、その故障は翌日も「未修理」として上がってくる
+
+**⛔ が出ている対象は直さない。** 同じ `failure_class` を3回修理しても再発している
+ということなので、**修理をやめて `owner_requests` に上げる**。直せないものを毎日
+直そうとするのが、この仕組みで一番たちの悪い無限ループになる。
+
+**レーンFで1日使い切ってよい。** その日の記事はゼロでよく、
+`action: "maintenance"`・`reason` に修理内容を書く。**壊れた基盤の上で記事を出しても、
+翌日また止まる。**
+
+---
+
 - **レーンA（SEO）**: 1. Refresh（足切りを超える未回答意図が既存ページに残っている）
   → 2. New（キュー未実装・解禁済み。URL既存でないか必ず確認）
   → 3. 配線（`OBSIDIAN_INTERNAL_LINK_PLAN.md` の未実施分でデータ根拠あり）
@@ -341,6 +385,8 @@ node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
 node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
 node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
+node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止め
+node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
