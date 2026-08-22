@@ -1,0 +1,46 @@
+{
+  "$comment": [
+    "オートパイロットの実費台帳。VISION/Runbookが『判断の根拠はファイルに落とす』",
+    "と定めているのと同じ理由で、AIの実費も散文ではなくファイルに置く。",
+    "",
+    "【なぜ必要か】2026-08-22時点で、この運用のトークン実費は『1回だけ観測された",
+    "0.81 USD』しか無かった。予算の話は全部その1点の周りの推測で行われており、",
+    "『予算に応じて配分する』と外に言える状態ではなかった。まず測る。",
+    "",
+    "【誰が書くか】obsidian-autopilot.yml の post ステップが、claude-code-action の",
+    "実行ログ（claude-execution-output.json）から total_cost_usd / num_turns を取って",
+    "1行追記する。手で書かない。追記に失敗しても出荷は止めない（continue-on-error）",
+    "— フォント導入と同じで、計測は記事より優先されてはいけない。",
+    "",
+    "【何を測れていないか（重要）】CCR Routine（副系07:30 / 再試行09:20）の実費は",
+    "ここに入らない。スケジュール起動セッションのログは外部から読めないため",
+    "（Runbook §0-2）。2026-08-22時点で実出荷はすべて副系が行っているので、",
+    "この台帳がカバーしているのは『主系の消費』だけであり、運用全体の実費ではない。",
+    "route フィールドでどちらか分かるようにしてあり、集計もrouteごとに出す。",
+    "measured_coverage に、その月に主系が何回動いたかを併記する。",
+    "",
+    "【上限の使われ方】scripts/autopilot-budget.mjs --check が当月実績を集計し、",
+    "monthly_usd_cap を超えていれば exit 1 を返す。obsidian-autopilot.yml の Gate が",
+    "これを見て run=false にする。つまり上限は表示用ではなく、実際に自分を止める。"
+  ],
+  "budget": {
+    "monthly_usd_cap": 40,
+    "cap_set_by": "placeholder",
+    "cap_note": "暫定値。オーナー未確認。観測済みは主系1回=0.8149 USDのみで、毎日1回なら月25 USD前後という粗い外挿から余裕を見て置いた。実績が2週間貯まったら実測から決め直す。決めるまで『予算に応じて配分している』とは対外的に言わない。",
+    "on_exceed": "skip_run",
+    "on_exceed_note": "上限超過時は当日の主系runをGateで止める。副系CCRは別経路なので止まらない（止める手段が無い — Runbook §0-2の『CCRのログは外部から読めない』と同じ制約）。ここも正直に書いておく。"
+  },
+  "runs": [
+    {
+      "date_jst": "2026-08-22",
+      "route": "actions",
+      "run_id": "32528028588",
+      "job_id": "96914156036",
+      "total_cost_usd": 0.8149038,
+      "num_turns": 30,
+      "outcome": "no_artifact",
+      "note": "permission_denials_count=14 で成果物ゼロのまま success 終了。modelUsage は claude-haiku-4-5 と claude-sonnet-5 の2つ。実費は発生しているが記事は出ていない — 『成功したのに何も出ていない』回のコストがここに残る。"
+    }
+  ],
+  "$backfill_note": "runs は 2026-08-22 の1件のみ。主系は run 1〜11 のうち 1〜8 が Gate スキップ（8〜12秒で終了・Claude Code未実行＝実費ゼロ）、9 が apt 詰まりで cancelled、10 が allowed_bots で failure、11 が上記。したがって主系で実費が発生したのは 11 だけであり、この台帳に欠落は無い（ゼロ円の回を省いているだけ）。"
+}

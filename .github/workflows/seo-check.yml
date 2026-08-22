@@ -113,6 +113,29 @@ jobs:
       - name: Experiment evaluation dates
         run: node growth/scripts/check-experiments.mjs
 
+      # 【予算】台帳の形と、当月が上限に達していないかを見る。
+      #
+      # 主系ワークフローの予算ゲートと同じスクリプトを使う。ここで落ちるのは
+      # 実質「台帳が壊れている」ときだけ（上限超過の日は主系がそもそも走らない）
+      # だが、壊れた台帳は「集計できない」ではなく **上限に永久に当たらない**
+      # ＝安全装置の停止を意味するので、PRの時点で止める。
+      - name: Autopilot budget ledger
+        run: node scripts/autopilot-budget.mjs --check
+
+      # 【D-SCORE】pr_release レコードの算数とゲートの矛盾を見る。
+      #
+      # 採点そのものは人（かセッション）が根拠つきで置く。ここが自動で点を
+      # 出し始めると、点を取るための見出しを機械が書くようになり、G2 が
+      # 防いでいるはずの「煽り語で点を稼ぐ」に自分から突っ込む。
+      # 機械が持つのは算数とゲートだけ:
+      #   - 各軸の合計と total のズレ（手で足した数字は検算されない）
+      #   - 満点超過
+      #   - status が running/evaluated なのにゲートが未判定・不合格
+      #   - 合格ライン60未満のまま running
+      # どれも「配信してから気づく」と取り返しがつかない。
+      - name: PR release D-SCORE consistency
+        run: node growth/scripts/d-score.mjs --check
+
       # BigQuery の資格情報まわり。ネットワークにもGCPにも触らない
       # （token エンドポイントは fetch を差し替えて潰してある）ので、
       # 鍵の無いCIでも走る。ここが壊れると毎日の測定が丸ごと止まるが、

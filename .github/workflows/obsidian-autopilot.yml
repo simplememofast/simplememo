@@ -93,6 +93,34 @@ jobs:
           # sitemap の lastmod は git 履歴から引くため浅いと全ページ分が壊れる
           fetch-depth: 0
 
+      # 【予算ゲート】当月の実費が上限に達していたら、今日の主系runを止める。
+      #
+      # 「可視化した」と「予算に応じて止まる」は別物で、外に言えるのは後者だけ。
+      # scripts/autopilot-budget.mjs --check が非ゼロを返し、この step の出力を
+      # 下の2ステップが見て実際に走らないところまで通っていて初めて自己制御になる。
+      # 表示だけなら「見ているが従っていない」であり、それは growth/README.md が
+      # 冒頭で戒めている「散文は手を挙げない」の別形態でしかない。
+      #
+      # 台帳（data/autopilot-cost.json）が壊れているときも止める。壊れた台帳は
+      # 「集計できない」ではなく「上限に永久に当たらない」＝安全装置の停止を意味する。
+      # continue-on-error にはしない — フォントは記事より優先されてはいけないが、
+      # 上限は記事より優先される。ここだけは逆にする。
+      #
+      # 止められるのは主系だけである。副系CCR Routineは別経路で、
+      # スケジュール起動セッションのログは外から読めない（Runbook §0-2）ため
+      # 観測も停止もできない。この非対称性はスクリプトの出力にも書いてある。
+      - name: 予算ゲート（当月の実費が上限を超えていたら走らない）
+        if: steps.gate.outputs.run == 'true'
+        id: budget
+        run: |
+          if node scripts/autopilot-budget.mjs --check; then
+            echo "within=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "within=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Obsidian Autopilot::当月のAI実費が上限に達したため主系をスキップ（data/autopilot-cost.json）。副系CCRは別経路のため止まらない。"
+          fi
+          node scripts/autopilot-budget.mjs >> "$GITHUB_STEP_SUMMARY"
+
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
       # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
       # 21:21Z→22:52Z の90分（ジョブ上限）を使い切り、`Claude Code` は
@@ -109,7 +137,7 @@ jobs:
       # フォントが入らない日はQAスクリーンショットの和文が豆腐になるだけで、
       # 記事は出る。逆にはしない。
       - name: 日本語フォント（ページQAスクリーンショット用・失敗しても続行）
-        if: steps.gate.outputs.run == 'true'
+        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
         timeout-minutes: 5
         continue-on-error: true
         env:
@@ -135,7 +163,8 @@ jobs:
       # issue_comment 等の外部から起動される経路が無い。つまり第三者の投稿で
       # ここを踏ませることはできないので、`*` で許可しても権限昇格にならない。
       - name: Claude Code（Runbook 1イテレーション実行）
-        if: steps.gate.outputs.run == 'true'
+        id: claude
+        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
         uses: anthropics/claude-code-action@v1
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
@@ -156,3 +185,58 @@ jobs:
             5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。作成後、SEO Validation が起動したことを `gh pr checks` で確認したら**それ以上は待たずに終了してよい**（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
             6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
+
+      # 【実費の記録】claude-code-action の実行ログから total_cost_usd を取り出し、
+      # runのサマリと通知に出す。
+      #
+      # 台帳（data/autopilot-cost.json）への追記をここでやらない理由: この時点で
+      # ワークスペースはセッションが作った当日ブランチの上にあり、ここから
+      # commit/push するとセッションのPRと競合しうる。実費1行のために出荷を
+      # 壊すのは本末転倒なので、**追記は翌日のセッションが status JSON と同じPRで行う**
+      # （Runbook §5-3）。セッションは `get_job_logs` で前回runのこの値を読める
+      # ——2026-08-22のセッションが実際にそうやって 0.8149 を読んでいる。
+      # `--append` は run_id で冪等なので、遅れて追記しても二重計上にならない。
+      #
+      # `if: always()` なのは、失敗した回にも実費が発生しているため。成功した回だけ
+      # 記録すると、上限判定が実態より甘くなる。
+      #
+      # 実行ログが見つからない場合は「0」ではなく「取得できなかった」と書く。
+      # 0を書くと「無料で動いた」になり、Runbookが繰り返し戒めている
+      # 「取得できなかった」と「増えていない」の取り違えと同じ誤りになる。
+      - name: 実費の抽出（台帳への追記は翌日のセッションが行う）
+        if: always() && steps.claude.conclusion != 'skipped'
+        continue-on-error: true
+        env:
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+        run: |
+          f="${EXEC_FILE:-}"
+          [ -n "$f" ] && [ -f "$f" ] || f="${RUNNER_TEMP}/claude-execution-output.json"
+          if [ ! -f "$f" ]; then
+            echo "::warning title=Autopilot cost::実行ログが見つからず実費を取得できなかった（0ではない）。path=$f"
+            echo "* AI実費: **取得できなかった**（0ではない）" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          python3 - "$f" <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import json, os, sys
+          try:
+              d = json.load(open(sys.argv[1], encoding='utf-8'))
+          except Exception as e:
+              print(f"* AI実費: 取得できなかった（実行ログのJSONを読めない: {e}）")
+              sys.exit(0)
+          if isinstance(d, list):
+              d = next((x for x in reversed(d) if isinstance(x, dict) and 'total_cost_usd' in x), {})
+          cost = d.get('total_cost_usd')
+          turns = d.get('num_turns')
+          denials = d.get('permission_denials_count')
+          run_id = os.environ.get('GITHUB_RUN_ID', '')
+          if cost is None:
+              print("* AI実費: 取得できなかった（total_cost_usd がログに無い）")
+              sys.exit(0)
+          print(f"* AI実費: **${cost:.4f}** / turns {turns} / permission_denials {denials}")
+          print("")
+          print("翌日のセッションはこの1行を台帳へ入れること（Runbook §5-3）:")
+          print("```")
+          print(f"node scripts/autopilot-budget.mjs --append --date <当日JST> --route actions \\")
+          print(f"  --run-id {run_id} --cost {cost} --turns {turns} --outcome <shipped|no_artifact|failed>")
+          print("```")
+          PY

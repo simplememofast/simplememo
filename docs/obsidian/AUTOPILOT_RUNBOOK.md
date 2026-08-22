@@ -339,6 +339,8 @@ node scripts/check-internal-redirects.mjs
 node scripts/sync_constants.js --check
 node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
+node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
+node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
 
@@ -417,6 +419,55 @@ python3 scripts/generate_sitemap.py --dry-run
 日報の流れ: 06:00 実行 → PR → auto-merge → Pagesデプロイ →
 **10:00 JST にWorkerがこのJSONを読み、Resendでオーナーへメール**
 （`simplememo-api` の `autopilot_report` cronジョブ）。
+
+### 5-3. AI実費の記録（2026-08-22追加・毎回必須）
+
+**この運用のトークン実費について、2026-08-22時点で言えたのは「一度だけ観測された
+0.8149 USD」だけだった**（主系 run 32528028588）。予算の話は全部その1点の周りの
+推測で、外に「予算に応じて配分している」と言える状態ではなかった。まず測る。
+
+台帳は `data/autopilot-cost.json`、集計と上限判定は `scripts/autopilot-budget.mjs`。
+
+```
+node scripts/autopilot-budget.mjs            # 当月の集計を見る
+node scripts/autopilot-budget.mjs --json     # status JSON の cost に入れる形
+node scripts/autopilot-budget.mjs --check    # 上限超過なら exit 1
+```
+
+**毎回の手順（status JSONを書くのと同じPRで）:**
+
+1. **前回runの実費を台帳へ入れる。** 主系ワークフローは実行後に
+   `total_cost_usd` をジョブサマリと `::notice::` に出しており、そこに
+   そのまま貼れる `--append` コマンドが1行で書かれている。GitHub MCP の
+   `get_job_logs` でも読める（2026-08-22のセッションが実際にそうやって
+   0.8149 を読んでいる）。
+   ```
+   node scripts/autopilot-budget.mjs --append --date <当日JST> --route actions \
+     --run-id <runId> --cost <total_cost_usd> --turns <num_turns> \
+     --outcome <shipped|no_artifact|failed>
+   ```
+   `--append` は `run_id` で冪等なので、遅れて追記しても二重計上にならない。
+   **実費が取得できなかった回は追記しない。0 を書くと「無料で動いた」になる**
+   （§1-2 の「取得できなかった」と「増えていない」の取り違えと同じ誤り）。
+2. **`node scripts/autopilot-budget.mjs --json` の出力を、status JSON の
+   `cost` セクションにそのまま入れる。** 日報メール側（`autopilot-report.ts` の
+   `costLines()`）がこれを描画する。
+
+**副系CCRの実費は台帳に入らない。** スケジュール起動セッションのログは外部から
+読めない（§0-2）ため、観測手段が無い。2026-08-22時点で実出荷はすべて副系が
+行っているので、**この台帳がカバーしているのは主系の消費だけ**であり、運用全体の
+実費ではない。`ccr_measured: false` は「副系がゼロ」ではなく「測れていない」で、
+日報はこの2つを分岐で区別する。**混同した報告は誤報。**
+
+**上限は表示用ではない。** 当月の実費が `budget.monthly_usd_cap` に達すると、
+主系ワークフローの予算ゲート（Checkout直後）が `--check` の非ゼロ終了を見て
+**その日の主系runを止める**。フォント導入は記事より優先されてはいけないが、
+上限は記事より優先される（そこだけ `continue-on-error` にしていない）。
+止められるのは主系だけで、副系は止まらない — これも正直に書いてある。
+
+**上限値そのものはまだ暫定** （`cap_set_by: "placeholder"`）。実測が2週間
+貯まったら実測から決め直す。**決まるまで「予算に応じて配分している」と
+対外的に言わない**（速度・Zero-decision率と同じ基準）。
 
 ## 6. 「書かない回」の保守作業メニュー
 
