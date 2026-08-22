@@ -39,6 +39,18 @@ kill を実証する」と何度も書いた。**それでは kill を実証で�
 
 ## 正しい手順
 
+> ⚠️ **先に済ませること: `ADMIN_API_KEY` を GitHub Secrets に登録する。**
+>
+> 下の 1・3・5 は `Flag Ops` ワークフローを使う。**2026-08-22 時点では
+> `simplememofast/simplememo-api` の secrets に `github_token` しか無く、
+> この手順は1手目で止まる**（`flag-ops.yml` が「未設定」で落ちる）。
+>
+> 鍵そのものは Cloudflare の Worker Secret として存在している（無ければ
+> `/admin/*` を使う16本のスクリプトと日次メールが全部401になる）。
+> **足りないのは GitHub 側の写しだけ。**
+>
+> 確認は `Flag Ops → action: diagnose`（鍵を使わない・値も出さない）。
+
 ### 1. 定義する（rollout 100）
 
 ```
