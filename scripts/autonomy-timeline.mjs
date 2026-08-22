@@ -178,8 +178,12 @@ export function rebuild() {
   const undated = [];
   for (const t of doc.tasks) {
     if (!AI_EXECUTES.has(t.executor)) continue;
+    // **since があればそれを優先する。**証跡に長寿命のデータ・コンテンツファイルを
+    // 含むタスクは、min(証跡の初出月) だと稼働前の月に付いてしまう
+    // （公開面の事実検査の証跡に faq.html が入っている、など）。
+    if (t.since) { dated.push({ area: t.area, task: t.task, month: t.since, source: 'since' }); continue; }
     const months = (t.evidence || []).map(firstMonth).filter(Boolean);
-    if (months.length) dated.push({ area: t.area, task: t.task, month: months.sort()[0] });
+    if (months.length) dated.push({ area: t.area, task: t.task, month: months.sort()[0], source: 'evidence' });
     else undated.push({ area: t.area, task: t.task });
   }
   const months = [...new Set(dated.map((d) => d.month))].sort();
