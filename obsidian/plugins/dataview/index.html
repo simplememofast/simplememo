@@ -23,7 +23,7 @@
     });
   </script>
   <title>Dataviewプラグインの使い方 — クエリで保管庫を検索する入門【2026】 | Obsidian連携シンプルメモ</title>
-  <meta name="description" content="Obsidianの人気プラグインDataviewを公式レジストリと公式リポジトリのREADMEから直接検証しました。ダウンロード数は6,840個中3位・480万件、公式リリースは16ヶ月止まっている実態、4つのクエリの書き方まで正直にまとめています。">
+  <meta name="description" content="Obsidianの人気プラグインDataviewを公式レジストリと公式リポジトリのREADMEから直接検証しました。ダウンロード数データで3位・480万件、公式リリースは16ヶ月止まっている実態、4つのクエリの書き方まで正直にまとめています。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
@@ -72,7 +72,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/plugins/dataview/#article","inLanguage":"ja","headline":"Dataviewプラグインの使い方 — クエリで保管庫を検索する入門","description":"Obsidianの人気プラグインDataviewを公式レジストリと公式リポジトリのREADMEから直接検証し、ダウンロード数・リリース状況・4つのクエリの書き方をまとめた。","url":"https://simplememofast.com/obsidian/plugins/dataview/","datePublished":"2026-08-22","dateModified":"2026-08-22","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-plugins-dataview.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/plugins/dataview/"}}</script>
 
   <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/plugins/dataview/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Dataviewは何をするプラグインですか？","acceptedAnswer":{"@type":"Answer","text":"保管庫（Vault）をデータベースのように検索できるようにするプラグインです。ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASKなどのクエリで一覧化できます。公式READMEは「data-obsessed（データに執着する人）のための複雑なデータビュー」と説明しています。"}},{"@type":"Question","name":"Dataviewはどれくらい使われていますか？","acceptedAnswer":{"@type":"Answer","text":"Obsidian公式のダウンロード数データ（community-plugin-stats.json）を2026年8月22日に直接取得したところ、480万5,635件で、登録プラグイン6,840個の中で3位でした（1位Excalidraw・2位Templater）。"}},{"@type":"Question","name":"Dataviewは今も開発されていますか？","acceptedAnswer":{"@type":"Answer","text":"公式ダウンロード数データの更新日時（updatedフィールド）は2025年4月7日で、本ページ計測時点から16ヶ月ほど新しい値の動きがありません。GitHubのリリースページには0.5.70というベータタグがありますが、リポジトリのmasterブランチのmanifest.jsonが示すバージョンは0.5.68のままです。目立った機能追加が止まっているのは事実ですが、Issueへの返信や小さな修正は続いており、動かなくなったわけではありません。"}},{"@type":"Question","name":"Dataviewの基本的な書き方は？","acceptedAnswer":{"@type":"Answer","text":"ノートのfrontmatter（YAML）か、本文中に「フィールド名:: 値」の形で書くインラインフィールドでメタデータを付けます。そのうえで dataview コードブロックにTABLE・LIST・TASKいずれかのクエリを書くと、条件に合うノートが一覧になります。公式READMEのサンプルをそのまま引用して本ページで紹介しています。"}},{"@type":"Question","name":"DataviewJSは安全に使えますか？","acceptedAnswer":{"@type":"Answer","text":"公式READMEが明記している注意点として、DataviewJSは他のObsidianプラグインと同じ権限で動くJavaScriptのため、ファイルの書き換え・削除やネットワーク通信も可能です。自分で書いたコードか、信頼できる配布元のスクリプトだけを使うことが推奨されています。通常のDQLクエリはサンドボックス化されており、保管庫に書き込みはできません。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/plugins/dataview/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Dataviewは何をするプラグインですか？","acceptedAnswer":{"@type":"Answer","text":"保管庫（Vault）をデータベースのように検索できるようにするプラグインです。ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASKなどのクエリで一覧化できます。公式READMEは「data-obsessed（データに執着する人）のための複雑なデータビュー」と説明しています。"}},{"@type":"Question","name":"Dataviewはどれくらい使われていますか？","acceptedAnswer":{"@type":"Answer","text":"Obsidian公式のダウンロード数データ（community-plugin-stats.json）を2026年8月22日に直接取得したところ、480万5,635件で、そのデータの中で3位でした（1位Excalidraw・2位Templater）。なお「登録プラグイン6,840個」はレジストリ一覧（community-plugins.json）の件数で、順位を計算したダウンロード数データとは別ファイルです。"}},{"@type":"Question","name":"Dataviewは今も開発されていますか？","acceptedAnswer":{"@type":"Answer","text":"公式ダウンロード数データの更新日時（updatedフィールド）は2025年4月7日で、本ページ計測時点から16ヶ月ほど新しい値の動きがありません。GitHubのリリースページには0.5.70というベータタグがありますが、リポジトリのmasterブランチのmanifest.jsonが示すバージョンは0.5.68のままです。目立った機能追加が止まっているのは事実ですが、Issueへの返信や小さな修正は続いており、動かなくなったわけではありません。"}},{"@type":"Question","name":"Dataviewの基本的な書き方は？","acceptedAnswer":{"@type":"Answer","text":"ノートのfrontmatter（YAML）か、本文中に「フィールド名:: 値」の形で書くインラインフィールドでメタデータを付けます。そのうえで dataview コードブロックにTABLE・LIST・TASKいずれかのクエリを書くと、条件に合うノートが一覧になります。公式READMEのサンプルをそのまま引用して本ページで紹介しています。"}},{"@type":"Question","name":"DataviewJSは安全に使えますか？","acceptedAnswer":{"@type":"Answer","text":"公式READMEが明記している注意点として、DataviewJSは他のObsidianプラグインと同じ権限で動くJavaScriptのため、ファイルの書き換え・削除やネットワーク通信も可能です。自分で書いたコードか、信頼できる配布元のスクリプトだけを使うことが推奨されています。通常のDQLクエリはサンドボックス化されており、保管庫に書き込みはできません。"}}]}</script>
 
   <!-- JSON-LD: WebPage with Speakable -->
   <script type="application/ld+json">
@@ -331,11 +331,11 @@
       <section class="lp-section" data-answer-block="obsidian-dataview-what-is-it" style="padding-top:1rem;">
         <h2 class="lp-section__title"><span lang="ja" data-lang="ja">Dataviewは何をするプラグインですか？</span><span lang="en" data-lang="en">What does the Dataview plugin do?</span></h2>
         <div lang="ja" data-lang="ja">
-          <p><strong>保管庫（Vault）をデータベースのように検索できるようにするプラグインです。</strong>ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASK・DataviewJSという4つのクエリモードで一覧化・集計できます。公式ダウンロード数データ（2026年8月22日取得）では登録6,840個中3位・480万5,635件でした。</p>
+          <p><strong>保管庫（Vault）をデータベースのように検索できるようにするプラグインです。</strong>ノートのfrontmatterやインラインフィールドに書いたメタデータを、TABLE・LIST・TASK・DataviewJSという4つのクエリモードで一覧化・集計できます。公式ダウンロード数データ（2026年8月22日取得）では480万5,635件で3位でした（レジストリの登録総数は6,840個ですが、順位はこれとは別ファイルのダウンロード数データの中での順位です）。</p>
           <p>ただし目立った機能追加は2025年4月を最後に止まって見えます（下の実測データで詳述）。壊れているわけではありませんが、「今も活発に開発が進んでいる」という前提では見ない方が正確です。</p>
         </div>
         <div lang="en" data-lang="en">
-          <p><strong>Dataview turns your vault into something you can query like a database.</strong> Metadata you write in a note&#39;s frontmatter or as inline fields becomes queryable through four modes: TABLE, LIST, TASK and DataviewJS. Per the official download-count data (fetched August 22, 2026), it ranks #3 among 6,840 registered plugins with 4,805,635 downloads.</p>
+          <p><strong>Dataview turns your vault into something you can query like a database.</strong> Metadata you write in a note&#39;s frontmatter or as inline fields becomes queryable through four modes: TABLE, LIST, TASK and DataviewJS. Per the official download-count data (fetched August 22, 2026), it has 4,805,635 downloads and ranks #3 within that data (the registry itself lists 6,840 plugins, but that is a separate file from the one the ranking is computed over).</p>
           <p>That said, visible feature work appears to have stopped after April 2025 (details below). It is not broken, but it is more accurate to think of it as stable rather than actively evolving.</p>
         </div>
       </section>
@@ -359,12 +359,17 @@
           <tbody>
             <tr>
               <th scope="row"><span lang="ja" data-lang="ja">ダウンロード数・順位</span><span lang="en" data-lang="en">Downloads &amp; rank</span></th>
-              <td data-label="Value">4,805,635<span lang="ja" data-lang="ja">（登録6,840個中<strong>3位</strong>）</span><span lang="en" data-lang="en"> (<strong>#3</strong> of 6,840 registered)</span></td>
+              <td data-label="Value">4,805,635<span lang="ja" data-lang="ja">（ダウンロード数データの中で<strong>3位</strong>。1位Excalidraw・2位Templater）</span><span lang="en" data-lang="en"> (<strong>#3</strong> within the download-count data; Excalidraw #1, Templater #2)</span></td>
               <td data-label="Source"><code>community-plugin-stats.json</code></td>
             </tr>
             <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">レジストリの登録プラグイン総数</span><span lang="en" data-lang="en">Plugins in the registry</span></th>
+              <td data-label="Value"><span lang="ja" data-lang="ja">6,840件。<strong>順位の母数とは別のファイル</strong>で、ダウンロード数データに載る件数はこれよりわずかに少ない（統計に現れないプラグインがあるため）。</span><span lang="en" data-lang="en">6,840. This is a <strong>different file from the one the ranking is computed over</strong> — slightly fewer plugins appear in the download-count data, since not every registered plugin shows up there.</span></td>
+              <td data-label="Source"><code>community-plugins.json</code></td>
+            </tr>
+            <tr>
               <th scope="row"><span lang="ja" data-lang="ja">前回計測（2026-08-21）との差</span><span lang="en" data-lang="en">Change vs. 2026-08-21</span></th>
-              <td data-label="Value"><span lang="ja" data-lang="ja">±0件（<a href="/obsidian/plugins/">前回ページ</a>と完全一致）</span><span lang="en" data-lang="en">±0 (exact match with <a href="/obsidian/plugins/">yesterday&#39;s page</a>)</span></td>
+              <td data-label="Value"><span lang="ja" data-lang="ja">±0件。ただしこれは「24時間で1件も増えなかった」という意味では<strong>ありません</strong>。配信されているJSON自体が2回の取得の間に再生成されておらず、<a href="/obsidian/plugins/">前回ページ</a>と同じスナップショットを読んだ、というのが正確な読み方です。</span><span lang="en" data-lang="en">±0 — but this does <strong>not</strong> mean downloads stood still for 24 hours. The published JSON itself had not been regenerated between the two fetches, so this read hit the same snapshot as <a href="/obsidian/plugins/">yesterday&#39;s page</a>.</span></td>
               <td data-label="Source"><code>community-plugin-stats.json</code></td>
             </tr>
             <tr>
@@ -487,7 +492,7 @@ You can also write [field:: inline fields]; multiple [field2:: on the same line]
         <div class="faq-item">
           <details class="faq-details">
             <summary class="faq-summary"><span lang="ja" data-lang="ja">Dataviewはどれくらい使われていますか？</span><span lang="en" data-lang="en">How widely used is Dataview?</span></summary>
-            <div class="faq-answer"><span lang="ja" data-lang="ja">Obsidian公式のダウンロード数データを2026年8月22日に直接取得したところ、480万5,635件で、登録プラグイン6,840個の中で<strong>3位</strong>でした（1位Excalidraw・2位Templater）。</span><span lang="en" data-lang="en">Fetching the official download-count data directly on August 22, 2026 gave 4,805,635 downloads — <strong>#3</strong> among 6,840 registered plugins (behind Excalidraw and Templater).</span></div>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">Obsidian公式のダウンロード数データを2026年8月22日に直接取得したところ、480万5,635件で、そのデータの中で<strong>3位</strong>でした（1位Excalidraw・2位Templater）。なお「登録プラグイン6,840個」はレジストリ一覧の件数で、順位を計算したダウンロード数データとは別ファイルです。</span><span lang="en" data-lang="en">Fetching the official download-count data directly on August 22, 2026 gave 4,805,635 downloads — <strong>#3</strong> within that data (behind Excalidraw and Templater). The often-quoted &quot;6,840 plugins&quot; is the registry listing, which is a separate file from the download-count data the ranking is computed over.</span></div>
           </details>
         </div>
         <div class="faq-item">
