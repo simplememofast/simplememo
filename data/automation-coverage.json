@@ -443,11 +443,14 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "App Store Connect のデータ連携",
-      "executor": "nobody",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/data/appstore/"
+        "growth/scripts/ingest-asc.mjs",
+        "../simplememo-ios/scripts/asc_analytics.rb",
+        "../simplememo-ios/.github/workflows/asc-analytics.yml"
       ],
-      "note": "受け皿だけ。鍵は既にある"
+      "note": "2026-08-22実装（オーナー承認を受けて着手）。**Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるので**オーナー作業ゼロで始められる。**鍵は fastlane が既に使っているものをそのまま使う。毎日20:30 JSTに取得。**行そのものは置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）。**本番でまだ一度も走っていない** — ONGOINGのレポート要求を作った当日はApple側が生成しておらず、初回の0件は失敗ではない",
+      "since": "2026-08"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -934,11 +937,12 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "売上・課金・返金・広告の照合",
-      "executor": "nobody",
+      "executor": "ai_proposes",
       "evidence": [
-        "growth/data/appstore/"
+        "growth/scripts/ingest-asc.mjs",
+        "data/financial-policy.json"
       ],
-      "note": "ASC未接続。鍵は既にある"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -954,9 +958,12 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "CAC・LTV・回収期間・粗利の統合",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "広告が未実装でCACが存在せず、ASC売上も未接続"
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/scripts/ingest-asc.mjs",
+        "data/financial-policy.json"
+      ],
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1066,9 +1073,14 @@
     {
       "area": "⑦ 法人経営",
       "task": "支出上限と重要支出の二者承認",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/spend-approvals.json",
+        "scripts/check-financial-policy.mjs",
+        "data/autopilot-cost.json"
+      ],
+      "note": "2026-08-22実装。**実際に効いている** — autopilot-cost.json の monthly_usd_cap は承認台帳の最新値と一致していないとCIが落ちる。つまり**承認記録を書かずに上限を動かせない。**変更幅が25%を超えるときは承認者2人。**AIは承認者になれない**（止めることは許しているが、金額を上げることは許さない）。3つの分岐を差し替えで検出確認。ただし**効いている対象はAI実費1件だけ**で、広告・契約は動く金額そのものがまだ無い",
+      "since": "2026-08"
     },
     {
       "area": "⑦ 法人経営",
@@ -1136,9 +1148,14 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "問い合わせの自動分類",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "問い合わせ基盤自体が未整備。件数も少なく分類器を作る母数が無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/migrations/0020_inquiries.sql",
+        "../simplememo-api/test/inquiry.test.ts"
+      ],
+      "note": "2026-08-22実装（simplememo-api・24テスト）。**AIに判定させず規則で分ける** — 回帰の合否をAIに判定させない設計と同じ理由で、分類の誤りは見落としとして静かに積み上がる。分けられないものは**「その他」ではなく unclassified**（その他は見返されないが、未分類は見返される）。重い用件（個人情報・退会・返金）を先に当て、当たったら自動で人へ上げる。**受け口は既定オフ**（INQUIRY_ENABLED）で、公開ページを mailto から切り替えるかは製品の判断。テストが実バグを検出した — 「送信できません」が「できな」に当たらず未分類に落ちていた",
+      "since": "2026-08"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1169,9 +1186,12 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "CSAT計測",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "計測する接点（問い合わせ・返信）が未整備"
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/scripts/ingest-asc.mjs",
+        "data/financial-policy.json"
+      ],
+      "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1232,9 +1252,12 @@
     {
       "area": "⑨ マネタイズ",
       "task": "解約理由分析",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "解約理由を取る導線が無い"
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/scripts/ingest-asc.mjs",
+        "data/financial-policy.json"
+      ],
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。Analytics Reports の Subscription 系に解約理由が含まれる見込みだが、**まだ取得していないので確認できていない。**含まれなければアプリ内の導線が要る"
     },
     {
       "area": "⑨ マネタイズ",

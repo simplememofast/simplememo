@@ -26,8 +26,64 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const POLICY_PATH = path.join(ROOT, 'data/financial-policy.json');
 const AUTHORITY_PATH = path.join(ROOT, 'data/authority-matrix.json');
 const COST_PATH = path.join(ROOT, 'data/autopilot-cost.json');
+export const APPROVALS_PATH = path.join(ROOT, 'data/spend-approvals.json');
 
 export const STATUSES = ['active', 'not_started', 'ai_excluded'];
+
+/**
+ * 二者承認 — **上限を動かした記録が無いと、上限を動かせない。**
+ *
+ * 承認記録の最新値と実際の上限が一致していなければ落ちる。つまり
+ * autopilot-cost.json の monthly_usd_cap を黙って書き換えることができない。
+ *
+ * 変更幅が max_step_pct を超える場合は承認者が2人要る。
+ * **AIは承認者になれない** — 止めることは許しているが、金額を上げることは許さない。
+ */
+export function validateApprovals(approvals, { policy = null, monthlyCap = null } = {}) {
+  const problems = [];
+  const rows = approvals.approvals || [];
+  rows.forEach((a, i) => {
+    const at = `approvals[seq=${a.seq}]`;
+    if (a.seq !== i + 1) problems.push(`${at}: 連番が飛んでいる — 承認記録は追記のみ`);
+    if (!Array.isArray(a.approved_by) || !a.approved_by.length) {
+      problems.push(`${at}: approved_by が空`);
+    } else if (a.approved_by.includes('ai')) {
+      problems.push(`${at}: approved_by に ai が入っている`
+        + ' — **AIは承認者になれない。**止めることは許しているが、金額を上げることは許さない');
+    }
+    if (!a.approved_at) problems.push(`${at}: approved_at が無い`);
+    if (typeof a.to_usd !== 'number') problems.push(`${at}: to_usd が数値でない`);
+    if (!a.note) problems.push(`${at}: note が無い — なぜその額なのかが残らない`);
+
+    // 上げ幅が規則を超えるなら承認者が2人要る
+    const limit = (policy?.change_limits || []).find((c) => c.domain === a.domain);
+    if (limit && typeof a.from_usd === 'number' && typeof limit.max_step_pct === 'number') {
+      const stepPct = ((a.to_usd - a.from_usd) / a.from_usd) * 100;
+      const needsTwo = stepPct > limit.max_step_pct;
+      if (needsTwo && (a.approved_by || []).length < 2) {
+        problems.push(`${at}: 変更幅 ${stepPct.toFixed(1)}% が上限 ${limit.max_step_pct}% を超えるのに承認者が1人`);
+      }
+      if (a.two_person_required !== needsTwo) {
+        problems.push(`${at}: two_person_required が実際の判定（${needsTwo}）と違う`);
+      }
+    } else if (a.two_person_required && (a.approved_by || []).length < 2) {
+      problems.push(`${at}: two_person_required なのに承認者が1人`);
+    }
+    if (a.two_person_required === false && !a.two_person_reason) {
+      problems.push(`${at}: 二者承認を不要とした理由が無い`);
+    }
+  });
+  if (approvals.next_seq !== rows.length + 1) {
+    problems.push(`next_seq=${approvals.next_seq} が記録数 ${rows.length} と合わない`);
+  }
+  // **実際の上限と、承認された最新値が一致していること。**
+  const latest = [...rows].reverse().find((a) => a.domain === 'AI実費（開発・運用のトークン費）');
+  if (monthlyCap !== null && latest && latest.to_usd !== monthlyCap) {
+    problems.push(`autopilot-cost.json の上限 $${monthlyCap} が、承認された最新値 $${latest.to_usd} と違う`
+      + ' — **承認記録を書かずに上限を動かせない**');
+  }
+  return problems;
+}
 
 export function validate(doc, { authorityDomains = new Set(), monthlyCap = null } = {}) {
   const problems = [];
@@ -98,7 +154,11 @@ if (isMain) {
   const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
   const domains = new Set((authority.domains || []).map((d) => d.domain));
   const cap = JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget?.monthly_usd_cap ?? null;
-  const problems = validate(doc, { authorityDomains: domains, monthlyCap: cap });
+  const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));
+  const problems = [
+    ...validate(doc, { authorityDomains: domains, monthlyCap: cap }),
+    ...validateApprovals(approvals, { policy: doc, monthlyCap: cap }),
+  ];
 
   console.log('金額を動かす規則\n');
   for (const c of doc.change_limits) {
@@ -118,6 +178,15 @@ if (isMain) {
     + ` / 楽観 $${s.monthly_outflow_usd.optimistic}`);
   console.log(`    収入の接続: ${s.revenue_connected ? 'あり' : '**無し**（App Store Connect 未接続）'}`);
   console.log('    **ランウェイ（月数）は出さない。**手元資金も収入も機械に入っていないため。');
+
+  console.log(`\n  上限を動かした記録 ${approvals.approvals.length}件（**追記のみ**）`);
+  for (const a of approvals.approvals) {
+    console.log(`    #${a.seq} ${a.domain}: ${a.from_usd === null ? '初期値' : `$${a.from_usd} →`} $${a.to_usd}`
+      + `  ${a.approved_at} / 承認者 ${a.approved_by.join(', ')}`
+      + `${a.two_person_required ? '  **二者承認**' : ''}`);
+  }
+  console.log('    **承認記録を書かずに上限を動かせない**（実際の上限と最新の承認値が一致しないと落ちる）。');
+  console.log('    **AIは承認者になれない。**止めることは許しているが、金額を上げることは許さない。');
 
   if (problems.length) {
     console.error('\n金額の規則: 不整合');

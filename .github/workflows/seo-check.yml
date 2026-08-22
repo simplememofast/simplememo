@@ -274,6 +274,11 @@ jobs:
       - name: Daily brief
         run: node scripts/daily-brief.mjs --check
 
+      # 【ASC】取得は隣のリポジトリ（鍵がある場所）。ここは受け側の形と、
+      # **接続していないのに接続している前提の数字を出していないか**を見る。
+      - name: App Store Connect ingest
+        run: node growth/scripts/ingest-asc.mjs --check
+
       # 【監視】何が見張られていて、何が空いているか。
       #
       # 検知の中央値は2.1hだが最大は50.7h。その差は「見張られていない領域で
