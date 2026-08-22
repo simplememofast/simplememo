@@ -125,8 +125,11 @@ jobs:
       # Smoke test only (--dry-run writes nothing). Note: the shallow CI
       # checkout means git-derived lastmod dates collapse to one date here;
       # real sitemap generation happens locally with full history.
-      - name: Generate sitemap (dry run)
-        run: python3 scripts/generate_sitemap.py --dry-run
+      # --dry-run は件数を表示するだけでコミット済みのファイルを見ないため、
+      # generate_sitemap.py の実行を忘れたPRを一度も止められなかった（2026-08-22）。
+      # --check はURLの集合を突き合わせ、新しいページが sitemap に載っていなければ落ちる。
+      - name: Sitemap lists every page (stale sitemap fails)
+        run: python3 scripts/generate_sitemap.py --check
 
       # --since 1 = HEAD~1..HEAD（マージは首親差分）で実際に変わった .html だけを
       # 通知する。以前は mtime 判定で、新規 checkout では全ファイルが「更新済み」に
