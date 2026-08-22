@@ -116,9 +116,13 @@
     {
       "area": "① 次期機能開発",
       "task": "遠隔操作できるFeature Flag",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "アプリ本体に無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/SimpleMemo/FeatureFlagRollout.swift",
+        "../simplememo-ios/SimpleMemo/FeatureFlags.swift",
+        "../simplememo-api/src/config.ts"
+      ],
+      "note": "[2026-08-22訂正] 「アプリ本体に無い」は誤りだった。v4.7から WPFlag 15個が /v1/config 経由で遠隔操作できていた。同日、段階公開・キャッシュ期限・取得経路のテストを追加。**④の同名タスクだけ訂正して、この①側を直し漏らしていた**"
     },
     {
       "area": "① 次期機能開発",
@@ -628,9 +632,13 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "証明書・APIキー・Provisioning Profile の期限監視",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "切れた日に初めて分かる"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/credential-expiry.json",
+        "scripts/check-expiry.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-22実装。CIが毎PRで検査し30日前に警告・7日前で落とす。TLSは実測するが、発行元が信用集合に無ければ**期限を報告しない**（中間者復号の環境でプロキシの証明書を本番の期限として書かないため）。**critical 3件（証明書・Profile・ドメイン）の期限日はまだ未把握** — 人が調べて埋めるまで、その3件は監視できていない"
     },
     {
       "area": "④ 自動本番デプロイ",

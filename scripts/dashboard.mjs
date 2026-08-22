@@ -21,6 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { summarize as rateSummarize } from './automation-rate.mjs';
 import { load as runsLoad, summarize as runsSummarize } from './autopilot-runs.mjs';
 import { loadLedger, summarize as budgetSummarize, modelUsage, detectAnomalies } from './autopilot-budget.mjs';
+import { run as expiryRun, STATES as EXPIRY } from './check-expiry.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
@@ -39,6 +40,10 @@ const models = modelUsage(ledger, MONTH);
 const anomaly = detectAnomalies(ledger, MONTH);
 const capProvisional = ledger.budget.cap_set_by === 'placeholder';
 const authority = readJSON('data/authority-matrix.json');
+// ネットワークは使わない（中間者復号の環境では実測が信用できないため、
+// ダッシュボードは台帳の値だけで描く）。
+const expiry = await expiryRun({ net: false });
+const expiryBy = (s) => expiry.rows.filter((r) => r.state === s);
 
 const domains = authority.domains ?? [];
 const gated = domains.filter((d) => d.requires_approval).length;
@@ -191,6 +196,24 @@ const cost = panel({
   source: 'data/autopilot-cost.json · scripts/autopilot-budget.mjs',
 });
 
+const criticalUnknown = expiryBy(EXPIRY.UNKNOWN).filter((r) => r.cred.critical);
+const expiryPanel = panel({
+  title: '資格情報の期限',
+  lede: 'これが無い間は<strong>切れた日に初めて分かる</strong>状態だった。'
+      + '証明書と Provisioning Profile は年1で切れ、切れるとリリースが一切できなくなる。',
+  body: `<div class="readouts readouts--four">
+    ${readout({ label: '期限切れ間近', value: String(expiryBy(EXPIRY.FAIL).length), unit: '件', note: `${expiry.policy.fail_days}日以内`, state: expiryBy(EXPIRY.FAIL).length ? 'crit' : 'ok' })}
+    ${readout({ label: '要更新', value: String(expiryBy(EXPIRY.WARN).length), unit: '件', note: `${expiry.policy.warn_days}日以内`, state: expiryBy(EXPIRY.WARN).length ? 'warn' : 'ok' })}
+    ${readout({ label: '期限を未把握', value: String(criticalUnknown.length), unit: '件', note: criticalUnknown.map((r) => r.cred.label).join(' / ') || 'なし', state: criticalUnknown.length ? 'unknown' : 'ok' })}
+    ${readout({ label: '期限の概念が無い', value: String(expiryBy(EXPIRY.NO_EXPIRY).length), unit: '件', note: '失効は別の監視で拾う', state: 'ok' })}
+  </div>
+  <p class="panel__foot"><strong>「未把握」を0件側に数えていない。</strong>
+  期限を知らないことは、余裕があることではない。critical の
+  ${criticalUnknown.length} 件は<strong>いまも「切れた日に初めて分かる」状態</strong>で、
+  人が日付を調べて埋めるまで監視は始まらない。</p>`,
+  source: 'data/credential-expiry.json · scripts/check-expiry.mjs',
+});
+
 const UNKNOWNS = [
   ['前月比', '前月の測定が存在しない（自動化率の初回測定が 2026-08-22）。増減は次回測定から'],
   ['機能改善の増分効果', '対照群が無い。「AIが継続率を上げた」は現時点で言えない'],
@@ -199,6 +222,7 @@ const UNKNOWNS = [
   ['Zero-decision Capture Rate', 'プロダクトの究極KPIだが未実測。実測が出るまで対外的に数値を書かない'],
   ['段階公開の実績', '機構は 2026-08-22 に両側実装。本番で1回も回していない'],
   ['カナリアガードの判定実績', '撤回の自動判定は実装済み。段階公開中のフラグがゼロのため、本番で1回も発火していない'],
+  ['証明書・Profile・ドメインの期限', '検査は動くが、期限日そのものが台帳に未記入。人が調べるまで監視できない'],
 ];
 const unknowns = panel({
   state: 'unknown',
@@ -359,6 +383,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
   ${areaPanel}
   ${timings}
   ${cost}
+  ${expiryPanel}
   ${unknowns}
 </div>`;
 

@@ -187,6 +187,22 @@ jobs:
       - name: Autopilot run ledger
         run: node scripts/autopilot-runs.mjs --check
 
+      # 【期限】資格情報・証明書が切れる前に気づく。
+      #
+      # これが無い間は **切れた日に初めて分かる** 状態だった。証明書と
+      # Provisioning Profile は年1で切れ、切れるとリリースが一切できなくなる。
+      #
+      # 実行環境が中間者復号していると TLS の実測はプロキシの証明書を読む。
+      # 発行元が信用集合に無ければ期限を報告せず unverifiable にする
+      # （scripts/compute_spki_pins.sh が警告している罠と同じもの）。
+      #
+      # いまは fail_days を切ったときだけ落ちる。critical の未把握で落とすには
+      # 日付を埋めてから policy.enforce_unknown を true にする。
+      - name: Credential expiry
+        run: |
+          node scripts/check-expiry.mjs --selftest
+          node scripts/check-expiry.mjs --check --no-net
+
       # 【D-SCORE】pr_release レコードの算数とゲートの矛盾を見る。
       #
       # 採点そのものは人（かセッション）が根拠つきで置く。ここが自動で点を
