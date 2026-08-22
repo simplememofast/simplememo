@@ -43,6 +43,13 @@ const APP_ID = '6758438948';
 
 /** 公開表示が「いつ確認されたか」の上限。超えたら落とす。 */
 export const MAX_AGE_DAYS = 45;
+/**
+ * 価格の上限。評価より長い —— 価格は滅多に変わらないので、
+ * 45日で落とすと**確認していないのに確認したことにする圧力**になる。
+ * ただし無期限にはしない: Apple は為替に応じて日本円の価格帯を調整することがあり、
+ * そのときサイトだけが古い価格を出し続ける。
+ */
+export const PRICE_MAX_AGE_DAYS = 180;
 
 const DATE_RE = /(\d{4})-(\d{2})-(\d{2})/g;
 
@@ -63,9 +70,16 @@ export function validateOffline(doc, today = new Date()) {
   const problems = [];
   const rows = [];
   const fields = [
-    { value: 'ratingValue', note: 'ratingNote', label: '評価（aggregateRating）' },
-    { value: 'ratingCount', note: 'ratingNote', label: '評価件数' },
-    { value: 'appVersion', note: 'appVersionNote', label: '公開バージョン' },
+    { value: 'ratingValue', note: 'ratingNote', label: '評価（aggregateRating）', maxAge: MAX_AGE_DAYS },
+    { value: 'ratingCount', note: 'ratingNote', label: '評価件数', maxAge: MAX_AGE_DAYS },
+    { value: 'appVersion', note: 'appVersionNote', label: '公開バージョン', maxAge: MAX_AGE_DAYS },
+    // 価格は滅多に変わらないので窓が長い。**変わらないことと、確認していることは別。**
+    // Apple は為替に応じて日本円の価格帯を調整することがあり、そのとき
+    // サイトだけが古い価格を出し続ける。景表法の観点で一番高くつく表示。
+    { value: 'priceMonthlyJpy', note: 'priceNote', label: '月額（円）', maxAge: PRICE_MAX_AGE_DAYS },
+    { value: 'priceYearlyJpy', note: 'priceNote', label: '年額（円）', maxAge: PRICE_MAX_AGE_DAYS },
+    { value: 'priceMonthlyUsd', note: 'priceNote', label: '月額（USD）', maxAge: PRICE_MAX_AGE_DAYS },
+    { value: 'priceYearlyUsd', note: 'priceNote', label: '年額（USD）', maxAge: PRICE_MAX_AGE_DAYS },
   ];
   for (const f of fields) {
     if (doc[f.value] === undefined) { problems.push(`${f.value} が無い`); continue; }
@@ -76,12 +90,28 @@ export function validateOffline(doc, today = new Date()) {
       problems.push(`${f.note} に確認日が無い — **古くなっても気づけない**`);
       continue;
     }
-    if (age > MAX_AGE_DAYS) {
-      problems.push(`${f.label} は ${when} に確認したきり（${age}日前・上限 ${MAX_AGE_DAYS}日）`
+    if (age > f.maxAge) {
+      problems.push(`${f.label} は ${when} 以降そのまま（${age}日前・上限 ${f.maxAge}日）`
         + ' — **公開している表示なので、確認していない値を出し続けない。**'
         + '`node scripts/check-store-facts.mjs --net` で確認して台帳を更新する');
     }
   }
+  // 【価格の筋が通っているか】年額が月額×12以上なら、年額を選ぶ理由が無い。
+  // 数字の打ち間違いはこの形で出るので、公開前に落とす。
+  const num = (v) => Number(String(v ?? '').replace(/[,\s]/g, ''));
+  for (const [m, y, cur] of [['priceMonthlyJpy', 'priceYearlyJpy', 'JPY'],
+    ['priceMonthlyUsd', 'priceYearlyUsd', 'USD']]) {
+    const mv = num(doc[m]); const yv = num(doc[y]);
+    if (!Number.isFinite(mv) || !Number.isFinite(yv) || mv <= 0 || yv <= 0) {
+      problems.push(`${cur} の価格が数値として読めない（${doc[m]} / ${doc[y]}）`);
+      continue;
+    }
+    if (yv >= mv * 12) {
+      problems.push(`${cur}: 年額 ${yv} が月額 ${mv} の12倍以上`
+        + ' — **年額を選ぶ理由が無い価格になっている。**打ち間違いを疑う');
+    }
+  }
+
   // 数として成立しているか
   const rv = Number(doc.ratingValue);
   const rc = Number(doc.ratingCount);
@@ -115,9 +145,11 @@ if (isMain) {
   const { problems, rows } = validateOffline(doc);
 
   console.log('App Store 由来の公開表示 — **確認していない値を出し続けない**\n');
+  console.log('  「記載」はメモに書かれた日付。**確認日とは限らない**'
+    + '（価格は設定日しか分かっていない）。\n');
   for (const r of rows) {
     console.log(`  ${r.label.padEnd(24)} ${String(r.value).padEnd(8)}`
-      + ` 確認 ${r.when ?? '**日付なし**'}${r.age === null ? '' : `（${r.age}日前）`}`);
+      + ` 記載 ${r.when ?? '**日付なし**'}${r.age === null ? '' : `（${r.age}日前）`}`);
   }
 
   if (process.argv.includes('--net')) {
