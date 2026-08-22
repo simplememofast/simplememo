@@ -19,7 +19,15 @@
   ],
   "policy": {
     "enforce_unreviewed": false,
-    "$enforce_unreviewed": "true にすると、個人データを渡しているのに未レビューのベンダーがあるだけで exit 1。レビューを済ませてから有効にする"
+    "$enforce_unreviewed": "true にすると、個人データを渡しているのに未レビューのベンダーがあるだけで exit 1。レビューを済ませてから有効にする",
+    "require_approver_for_money_flow": true,
+    "$allowlist_note": [
+      "**取引先・送金先の許可リスト。**金銭が動くベンダーは、承認者と上限の参照先を持つ。",
+      "ここに載っていない相手への支払いは、そもそも許可されていない状態にする。",
+      "",
+      "spend_cap_ref は data/authority-matrix.json の領域名を指す。",
+      "**未設定のときは 'unset' と書き、理由を残す**（空欄と『未設定と決めた』は違う）。"
+    ]
   },
   "vendors": [
     {
@@ -36,7 +44,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/scripts/lib/asc_api.rb"
-      ]
+      ],
+      "money_flow": "usage",
+      "payment_method": "apple_account",
+      "spend_cap_ref": "App Store への公開（審査通過後）",
+      "spend_cap_note": "手数料はAppleが売上から差し引く。こちらから送金しない",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "cloudflare",
@@ -51,7 +65,13 @@
       "evidence": [
         "../simplememo-api/wrangler.toml",
         "../simplememo-api/data/data-retention.json"
-      ]
+      ],
+      "money_flow": "subscription",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "無料枠中心。有料化する時点で上限を決める",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "resend",
@@ -67,7 +87,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-api/src/resend.ts"
-      ]
+      ],
+      "money_flow": "subscription",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "送信量課金。**主機能が止まる先**なので停止できず、上限より監視が先",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "anthropic",
@@ -82,7 +108,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
-      ]
+      ],
+      "money_flow": "usage",
+      "payment_method": "card",
+      "spend_cap_ref": "AI実費（開発・運用のトークン費）",
+      "spend_cap_note": "**唯一、機械が上限で自分を止める先**（autopilot-budget）",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "google_cloud",
@@ -96,7 +128,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "scripts/autopilot-budget.mjs"
-      ]
+      ],
+      "money_flow": "usage",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "BigQuery の従量課金。現状ほぼ無料枠内",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "firebase",
@@ -111,7 +149,13 @@
       "evidence": [
         "../simplememo-api/src/appcheck.ts",
         "../simplememo-api/src/oauth.ts"
-      ]
+      ],
+      "money_flow": "usage",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "同上",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "appsflyer",
@@ -125,7 +169,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/SimpleMemo/FeatureFlags.swift"
-      ]
+      ],
+      "money_flow": "subscription",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "無料プラン。有料化の予定なし",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "github",
@@ -139,7 +189,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "data/autopilot-runs.json"
-      ]
+      ],
+      "money_flow": "subscription",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "無料枠。Actions分数の超過時のみ課金",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "prtimes",
@@ -153,7 +209,13 @@
       "terms_accepted_by": "human",
       "evidence": [
         "docs/pr-autopilot-2026-09-plan.md"
-      ]
+      ],
+      "money_flow": "one_off",
+      "payment_method": "invoice",
+      "spend_cap_ref": "プレスリリースの配信",
+      "spend_cap_note": "配信ごと。配信可否の判断は人",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     },
     {
       "id": "registrar",
@@ -169,7 +231,13 @@
       "evidence": [
         "data/credential-expiry.json"
       ],
-      "note": "ベンダー台帳を作って初めて表に出た。資格情報の台帳には載っていたが、事業者として数えていなかった"
+      "note": "ベンダー台帳を作って初めて表に出た。資格情報の台帳には載っていたが、事業者として数えていなかった",
+      "money_flow": "subscription",
+      "payment_method": "card",
+      "spend_cap_ref": "unset",
+      "spend_cap_note": "**代替が無い critical。**失効するとドメインごと失う",
+      "approved_by": "human",
+      "approved_at": "2026-08-22"
     }
   ]
 }

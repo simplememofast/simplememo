@@ -99,6 +99,66 @@ const SCENARIOS = [
   ['force: ただし予算超過も飛ばせない',
     { route: 'actions', budgetOver: true, force: true }, CODES.SKIP_BUDGET,
     '**上限は force より強い。** ここを飛ばせると上限が「お願い」になる'],
+
+  // --- 認証切れ（2026-08-22追加） ---------------------------------------
+  // 「秘密鍵が無い」と「秘密鍵が拒否された」を**別のコードにしてある**。
+  // 混ぜると、期限切れが毎日「設計どおりのスキップ」として黙殺される。
+  ['認証切れ: 主系の資格情報が拒否された → 静かに寝ない',
+    { route: 'actions', credentialRejected: true }, CODES.FAIL_CREDENTIAL,
+    '**未設定と失効は別物。**未設定は設計だが、失効は故障。'
+    + '同じ skip に落とすと、証明書やトークンが切れた日も緑のまま通り過ぎる'],
+
+  ['認証切れ: 副系の資格情報が拒否された → こちらも止まる',
+    { route: 'ccr-0730', credentialRejected: true }, CODES.FAIL_CREDENTIAL,
+    '副系は秘密鍵の「有無」には影響されないが、「拒否」には影響される'],
+
+  ['認証切れ: force でも飛ばせない',
+    { route: 'actions', credentialRejected: true, force: true }, CODES.FAIL_CREDENTIAL,
+    'force は冪等チェックを飛ばすためのもので、失効した資格情報を有効にはしない'],
+
+  // --- モデル障害（2026-08-22追加） -------------------------------------
+  ['モデル障害: 全滅なら走らない',
+    { route: 'actions', modelsAvailable: [] }, CODES.FAIL_NO_MODEL,
+    '**「使えるモデルが無い」を「今日は書くことが無い」と区別する。**'
+    + '前者は故障、後者は正常系。日報で同じ行に出ると原因が消える'],
+
+  ['モデル障害: 代替があれば縮退して走る',
+    { route: 'actions', preferredModel: 'claude-opus-5', modelsAvailable: ['claude-sonnet-5'] },
+    CODES.DEGRADE_MODEL,
+    '止めるより出すほうがよい。ただし**縮退したことを日報に出す** — '
+    + '黙って別のモデルで書くと、品質が変わったときに原因が追えなくなる'],
+
+  ['モデル障害: 主モデルが使えるなら縮退しない',
+    { route: 'actions', preferredModel: 'claude-sonnet-5', modelsAvailable: ['claude-sonnet-5'] },
+    CODES.RUN,
+    '縮退コードが常時立つと、縮退の意味が消える'],
+
+  // --- API障害（2026-08-22追加） ----------------------------------------
+  ['API障害: GitHub APIが読めない日は着手しない',
+    { route: 'ccr-0730', githubApiReachable: false }, CODES.FAIL_API,
+    '冪等チェック（当日ブランチ・当日PR・主系の実行状態）は全部この API に乗っている。'
+    + '**読めないまま走ると、根拠なしに「当日分は無い」と決めることになる** — '
+    + '2026-08-21の二重着手と同じ事故を別の原因で起こす'],
+
+  ['API障害: force でも飛ばせない',
+    { route: 'ccr-0920', githubApiReachable: false, force: true }, CODES.FAIL_API,
+    '二重出荷の防止は force より強い'],
+
+  // --- egress遮断（2026-08-22に実際に起きた） ---------------------------
+  ['egress遮断: 止めずに、選べるレーンを減らす',
+    { route: 'ccr-0730', egressBlocked: true }, CODES.DEGRADE_EGRESS,
+    '**実績。**obsidian.md / notion.com / github.com 本体が403になり、'
+    + '一次情報の実測が要る C05〜C10 を見送って C12 に切り替えて出荷した。'
+    + '止めるのではなく**できることに絞る**のが正しい振る舞い'],
+
+  ['egress遮断: ただし冪等チェックのほうが先に効く',
+    { route: 'ccr-0920', egressBlocked: true, branchClaimed: true }, CODES.SKIP_BRANCH_CLAIMED,
+    '縮退より二重防止が優先。順序が入れ替わると、塞がれた日に二重着手しうる'],
+
+  ['故障の優先順: 認証切れは予算超過より先に出る',
+    { route: 'actions', credentialRejected: true, budgetOver: true }, CODES.FAIL_CREDENTIAL,
+    '**報告すべき故障を、正常な安全装置の陰に隠さない。**'
+    + '予算で止まったと報告されると、失効に何日も気づかない'],
 ];
 
 export function run() {

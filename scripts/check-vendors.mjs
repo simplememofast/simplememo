@@ -21,6 +21,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 export const DATA_LEVELS = ['none', 'pseudonymous', 'personal'];
+/** 金銭の動き方。none も明示させる（書いていない＝考えていない、を許さない）。 */
+export const MONEY_FLOWS = ['none', 'subscription', 'usage', 'one_off'];
 
 export function audit(doc) {
   const errors = [];
@@ -41,8 +43,30 @@ export function audit(doc) {
     }
     // 個人データを渡していて未レビュー = 見ていないだけ。
     if (v.personal_data !== 'none' && !v.dpa_reviewed) unreviewed.push(v);
+
+    // --- 取引先・送金先の許可リスト（2026-08-22追加） --------------------
+    //
+    // 「契約・支払い・送金」は権限表で human_only だが、**それだけでは
+    // 『誰に払ってよいか』が定義されていない。**ここに載っていない相手への
+    // 支払いは、そもそも許可されていない状態にする。
+    if (!MONEY_FLOWS.includes(v.money_flow)) {
+      errors.push(`${v.id}: money_flow が ${MONEY_FLOWS.join('/')} のいずれかで要る`);
+    } else if (v.money_flow !== 'none') {
+      if (v.approved_by !== 'human') {
+        errors.push(`${v.id}: 金銭が動く取引先は approved_by: "human" が要る`
+          + '（**AIが取引先を増やせる状態にしない**）');
+      }
+      if (!v.approved_at) errors.push(`${v.id}: approved_at が無い — いつ許可したかが残らない`);
+      if (!v.payment_method) errors.push(`${v.id}: payment_method が無い — どの経路で金が動くか分からない`);
+      // 上限は未設定でよい。**「未設定と決めた」と書かせる**のが要件。
+      if (!v.spend_cap_ref) {
+        errors.push(`${v.id}: spend_cap_ref が無い（上限が無いなら "unset" と書き、理由を残す）`);
+      } else if (v.spend_cap_ref === 'unset' && !v.spend_cap_note) {
+        errors.push(`${v.id}: spend_cap_ref が "unset" なのに理由が無い — 空欄と「未設定と決めた」は違う`);
+      }
+    }
   }
-  return { errors, unreviewed, noFallback };
+  return { errors, unreviewed, noFallback, money: doc.vendors.filter((v) => v.money_flow && v.money_flow !== 'none') };
 }
 
 /**
@@ -67,7 +91,7 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   const argv = process.argv.slice(2);
   const doc = readJSON('data/vendor-register.json');
-  const { errors, unreviewed, noFallback } = audit(doc);
+  const { errors, unreviewed, noFallback, money } = audit(doc);
 
   if (argv.includes('--json')) {
     console.log(JSON.stringify({
@@ -108,6 +132,17 @@ if (isMain) {
     console.log('    **「見ていない」であって「問題なし」ではない。**');
     console.log('    確認したら dpa_reviewed に日付を入れる。全部埋めたら');
     console.log('    policy.enforce_unreviewed を true にすると CI が守る。\n');
+  }
+
+  if (money.length) {
+    console.log(`  金銭が動く取引先（許可リスト）${money.length}社:`);
+    for (const v of money) {
+      const cap = v.spend_cap_ref === 'unset' ? `上限未設定 — ${v.spend_cap_note}` : `上限: ${v.spend_cap_ref}`;
+      console.log(`    ${v.name}  [${v.money_flow} / ${v.payment_method}]  承認 ${v.approved_at}`);
+      console.log(`      ${cap}`);
+    }
+    console.log('    **ここに無い相手への支払いは許可されていない。**');
+    console.log('    上限が設定されているのは AI実費と広報配信だけで、他は "unset"。\n');
   }
 
   let cross = [];

@@ -45,7 +45,41 @@
       "multiple": 4,
       "min_samples": 5,
       "min_absolute_usd": 2.0
-    }
+    },
+    "task_budgets": {
+      "article": {
+        "monthly_usd_cap": 20.0,
+        "note": "毎朝のレーンA〜E。この運用の本体で、枠の半分を置く"
+      },
+      "repair": {
+        "monthly_usd_cap": 8.0,
+        "note": "レーンF。**記事より先に走る**ので、記事の枠を使い切っても修理が止まらないよう独立させた"
+      },
+      "analysis": {
+        "monthly_usd_cap": 6.0,
+        "note": "計測・レポート・台帳の更新"
+      },
+      "pr": {
+        "monthly_usd_cap": 4.0,
+        "note": "広報原稿と素材。配信は月1回程度なので枠は小さい"
+      },
+      "qa_triage": {
+        "monthly_usd_cap": 2.0,
+        "note": "失敗分類の独立2モデル監査。1回あたりは小さいが2モデル分かかる"
+      }
+    },
+    "$task_budgets_note": [
+      "種別ごとの月次枠。**合計は monthly_usd_cap を超えてはいけない**（超えると枠が装飾になる）。",
+      "月次上限だけだと、記事で使い切った月に修理が走らない（あるいはその逆）が起きる。",
+      "",
+      "**この枠も暫定。** monthly_usd_cap 自体が placeholder なので、そこから割った枠も placeholder。",
+      "実測が貯まるまで『タスクごとに最適配分している』とは対外的に言わない。",
+      "",
+      "種別ごとの超過では**主系全体を止めない**。止めるのは月次上限の役目で、",
+      "ここは『この種別はもう枠を使い切っている』を日報と警告に出すためのもの。",
+      "種別の枠で全体を止めると、記事の枠切れが修理まで巻き込む。"
+    ],
+    "task_budgets_set_by": "derived_from_placeholder"
   },
   "runs": [
     {
@@ -60,7 +94,8 @@
       "models": [
         "claude-haiku-4-5-20251001",
         "claude-sonnet-5"
-      ]
+      ],
+      "task_kind": "article"
     }
   ],
   "$backfill_note": "runs は 2026-08-22 の1件のみ。主系は run 1〜11 のうち 1〜8 が Gate スキップ（8〜12秒で終了・Claude Code未実行＝実費ゼロ）、9 が apt 詰まりで cancelled、10 が allowed_bots で failure、11 が上記。したがって主系で実費が発生したのは 11 だけであり、この台帳に欠落は無い（ゼロ円の回を省いているだけ）。"

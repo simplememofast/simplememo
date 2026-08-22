@@ -61,6 +61,23 @@ export function validate(ledger) {
       problems.push(`budget.on_exceed must be "skip_run" or "warn_only" (got ${JSON.stringify(b.on_exceed)})`);
     }
   }
+  // 種別ごとの枠。**合計が月次上限を超えていたら、枠は装飾になる。**
+  const tb = ledger.budget?.task_budgets;
+  if (tb) {
+    let total = 0;
+    for (const [kind, v] of Object.entries(tb)) {
+      if (typeof v?.monthly_usd_cap !== 'number' || !(v.monthly_usd_cap > 0)) {
+        problems.push(`budget.task_budgets.${kind}.monthly_usd_cap must be a positive number`);
+      } else total += v.monthly_usd_cap;
+      if (!v?.note) problems.push(`budget.task_budgets.${kind}.note が無い — 枠を置いた理由が残らない`);
+    }
+    const cap = ledger.budget?.monthly_usd_cap;
+    if (typeof cap === 'number' && total > cap + 1e-9) {
+      problems.push(`budget.task_budgets の合計 $${total} が monthly_usd_cap $${cap} を超えている`
+        + ' — 種別の枠を全部使うと月次上限を超える状態は、枠が装飾になっている');
+    }
+  }
+
   const an = ledger.budget?.anomaly;
   if (an) {
     for (const k of ['median_window', 'multiple', 'min_samples', 'min_absolute_usd']) {
@@ -112,7 +129,28 @@ export function summarize(ledger, month = jstMonth()) {
     // 測れていない部分の明示。台帳にccr行が1件も無い月は、副系の消費が
     // ゼロなのではなく「観測手段が無い」。ここを取り違えると過少報告になる。
     ccr_measured: ccr.length > 0,
+    by_task: summarizeTasks(ledger, rows),
   };
+}
+
+/**
+ * 種別ごとの消化。**分類されていない run を落とさない。**
+ * 落とすと合計が合わなくなり、「使っていない」ように見える。
+ */
+export function summarizeTasks(ledger, rows) {
+  const caps = ledger.budget?.task_budgets ?? {};
+  const out = {};
+  for (const [kind, v] of Object.entries(caps)) {
+    out[kind] = { cap: v.monthly_usd_cap, spent: 0, runs: 0, over: false };
+  }
+  let unclassified = 0, unclassifiedRuns = 0;
+  for (const r of rows) {
+    const k = r.task_kind;
+    if (k && out[k]) { out[k].spent += r.total_cost_usd; out[k].runs += 1; }
+    else { unclassified += r.total_cost_usd; unclassifiedRuns += 1; }
+  }
+  for (const v of Object.values(out)) v.over = v.spent >= v.cap;
+  return { kinds: out, unclassified_usd: unclassified, unclassified_runs: unclassifiedRuns };
 }
 
 /**
@@ -212,6 +250,20 @@ function render(s, ledger) {
       }
     }
   }
+  const bt = s.by_task;
+  if (bt && Object.keys(bt.kinds).length) {
+    out.push('  種別ごとの枠:');
+    for (const [kind, v] of Object.entries(bt.kinds)) {
+      out.push(`    ${kind.padEnd(10)} ${fmt(v.spent)} / ${fmt(v.cap)}`
+        + `  ${v.over ? '**枠切れ**' : ''}  (${v.runs} runs)`);
+    }
+    if (bt.unclassified_runs) {
+      out.push(`    ${'(未分類)'.padEnd(10)} ${fmt(bt.unclassified_usd)}`
+        + `  ← 種別が付いていない run ${bt.unclassified_runs} 件。**落とさず出す**（合計が合わなくなるため）`);
+    }
+    out.push('    NOTE: 種別の枠を超えても主系全体は止まらない（止めるのは月次上限）。');
+  }
+
   if (ledger.budget.cap_set_by === 'placeholder') {
     out.push('  NOTE: monthly_usd_cap は暫定値（オーナー未確認）。実測が貯まるまで');
     out.push('        「予算に応じて配分している」と対外的に言わないこと。');
@@ -246,6 +298,7 @@ if (isMain) {
       job_id: val('job-id') || undefined,
       total_cost_usd: Number(val('cost')),
       num_turns: val('turns') !== undefined ? Number(val('turns')) : undefined,
+      task_kind: val('task-kind') || undefined,
       outcome: val('outcome') || undefined,
       note: val('note') || undefined,
     };
@@ -281,6 +334,23 @@ if (isMain) {
   }
 
   console.log(render(s, ledger));
+
+  // 種別ごとの枠の判定。**主系全体は止めない**（止めるのは月次上限の役目）。
+  // 記事の枠切れが修理まで巻き込むと、壊れた基盤の上で翌日も走ることになる。
+  if (flag('check') && val('task')) {
+    const kind = val('task');
+    const t = s.by_task.kinds[kind];
+    if (!t) {
+      console.error(`未知のタスク種別: ${kind}（budget.task_budgets に無い）`);
+      process.exit(1);
+    }
+    if (t.over) {
+      console.log(`::warning file=data/autopilot-cost.json::${kind} の月次枠 ${fmt(t.cap)} に対し ${fmt(t.spent)} を消化。この種別は枠切れ。`);
+      process.exit(1);
+    }
+    console.log(`${kind}: ${fmt(t.spent)} / ${fmt(t.cap)} — 枠内`);
+    process.exit(0);
+  }
 
   if (flag('check')) {
     if (s.over && ledger.budget.on_exceed === 'skip_run') {

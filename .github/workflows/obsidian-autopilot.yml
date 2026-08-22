@@ -121,6 +121,36 @@ jobs:
           fi
           node scripts/autopilot-budget.mjs >> "$GITHUB_STEP_SUMMARY"
 
+      # 【タスク種別とモデルの振り分け】
+      #
+      # その日が「記事を書く日」か「壊れた基盤を直す日」かで、要る能力が違う。
+      # 故障の原因特定を安いモデルにやらせると外し、レーンFの歯止め
+      # （同一 failure_class 3回で人間へ）に早く当たる。**安いほうが高くつく。**
+      #
+      # モデル名をここに直書きしない。直書きすると data/model-routing.json が
+      # 装飾になり、check-model-routing.mjs が守っている「不可逆なタスクを
+      # 最安ティアに落とさない」規則も効かなくなる。
+      #
+      # 種別ごとの残枠もここで見る。月次上限だけだと、記事で使い切った月に
+      # 修理が走らない（あるいはその逆）が起きる。
+      - name: タスク種別とモデルの振り分け
+        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+        id: route
+        run: |
+          if node scripts/autopilot-selfheal.mjs --json | grep -q '"lane_f_required": true'; then
+            KIND=repair
+          else
+            KIND=article
+          fi
+          MODEL="$(node scripts/check-model-routing.mjs --resolve "$KIND")"
+          echo "kind=$KIND"   >> "$GITHUB_OUTPUT"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Model routing::$KIND -> $MODEL"
+          # 種別ごとの枠。超えていても主系全体は止めない（月次上限がその役目）。
+          # ここは「この種別はもう枠を使い切っている」を日報へ出すための警告。
+          node scripts/autopilot-budget.mjs --check --task "$KIND" \
+            || echo "::warning title=Task budget::$KIND の月次枠を超過（月次上限には未到達）"
+
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
       # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
       # 21:21Z→22:52Z の90分（ジョブ上限）を使い切り、`Claude Code` は
@@ -193,6 +223,7 @@ jobs:
           # issue_comment 等の外部から起動される経路が無い。
           claude_args: |
             --max-turns 250
+            --model ${{ steps.route.outputs.model }}
             --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。

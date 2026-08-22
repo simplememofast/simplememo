@@ -65,9 +65,12 @@
     {
       "area": "① 次期機能開発",
       "task": "要望・レビュー・問い合わせ・競合情報の重複排除",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "統合台帳が無い。都度レポート"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/signal-ledger.json",
+        "scripts/check-signals.mjs"
+      ],
+      "note": "2026-08-22実装。要望・レビュー・問い合わせ・競合・利用実態を1台帳に統合し、dedupe_key で同じ話を1行にする。**声の大きさを「何回転記されたか」で測らないため。**実際「送信の確実性」は問い合わせ・レビュー実測・アンケートの3経路から来ており、台帳を作るまで別々の紙に載っていた。declined は理由が無いとCIが落ちる"
     },
     {
       "area": "① 次期機能開発",
@@ -131,11 +134,13 @@
     {
       "area": "① 次期機能開発",
       "task": "対照群・最低サンプル数・停止条件を持つ実験基盤",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/experiments/experiments.json"
+        "growth/experiments/experiments.json",
+        "growth/lib/ledger.mjs",
+        "growth/scripts/check-experiments.mjs"
       ],
-      "note": "サイト側のみ。評価日はCIが監視するが対照群の概念が無い"
+      "note": "2026-08-22実装。open な実験は control.kind（holdout/pre_post/none）・min_sample・stop_conditions が無いとCIが落ちる。**対照群が無いこと自体は禁じていない** — 無いのに書かないことを禁じている。pre_post には confounders を必須にした（書かないと因果を主張しているのと同じ）"
     },
     {
       "area": "① 次期機能開発",
@@ -764,9 +769,13 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "タスク単位の予算",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "月次のみ"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/autopilot-cost.json",
+        "scripts/autopilot-budget.mjs",
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "2026-08-22実装。article/repair/analysis/pr/qa_triage の5種別に月次枠。**合計が月次上限を超えるとCIが落ちる**（超えたら枠は装飾）。種別の枠切れでは主系全体を止めない — 記事の枠切れが修理まで巻き込むため。**枠も暫定**（月次上限が placeholder なので、そこから割った枠も placeholder）"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -781,9 +790,13 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "品質・速度・価格に応じたモデルルーター",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "タスク単位の予算（未実装）が前提。月次上限だけでは判断材料が足りない"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/model-routing.json",
+        "scripts/check-model-routing.mjs",
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "2026-08-22実装。種別→モデルを台帳化し、ワークフローが --resolve で引く。**引かれない表は装飾**なので、ワークフローが実際に呼んでいることをCIが見る。**不可逆なタスク（対外配信）を最安ティアに落とすことを禁止**（節約額より失う額が大きい）"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -827,7 +840,7 @@
       "evidence": [
         "../simplememo-ios/scripts/qa/ai_triage.sh"
       ],
-      "note": "QA分類は2モデル構成。autopilot本体は無い"
+      "note": "QA分類は2モデル構成。autopilot 側も 2026-08-22 に fallback を台帳へ定義し、resolve が縮退先を返すようにした。**ただし使えないモデルを検知して渡す経路がまだ無い**ので、実行者は提案のまま"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -894,11 +907,12 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "欠損・遅延・重複データの検査",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/scripts/bq-preflight.mjs"
+        "growth/scripts/check-data-quality.mjs",
+        "growth/scripts/ingest-gsc.mjs"
       ],
-      "note": "鮮度監視のみ"
+      "note": "2026-08-22実装。**作った直後の初回実行で実データの欠陥を検出した** — 2026-08-09スナップショットの /vs/ticktick/ が2行あり、クリックが二重に乗りうる状態だった（URL正規化で衝突した行を畳んでいなかった）。取り込み側に mergeByKey を入れて恒久対策。重複と内部不整合は落とし、日付の欠けと鮮度は報告のみ"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -987,9 +1001,12 @@
     {
       "area": "⑦ 法人経営",
       "task": "取引先・送金先・利用サービスの許可リスト",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/vendor-register.json",
+        "scripts/check-vendors.mjs"
+      ],
+      "note": "2026-08-22実装。10社すべてに money_flow / payment_method / approved_by / spend_cap_ref を持たせ、金銭が動く相手は human 承認と上限の参照先が無いとCIが落ちる。**ここに無い相手への支払いは許可されていない**という形。上限が設定されているのは AI実費と広報配信の2つだけで、残り8社は \"unset\"（理由つき）"
     },
     {
       "area": "⑦ 法人経営",
@@ -1078,11 +1095,13 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "FAQとリリース内容の同期",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "faq.html"
+        "scripts/check-public-facts.mjs",
+        "faq.html",
+        "data/site-constants.json"
       ],
-      "note": "FAQはある。リリースとの同期は手動"
+      "note": "2026-08-22実装。FAQ・トップ（日英）・llms.txt・運営者情報の**散文**を site-constants / benchmark と突き合わせ、旧アプリ名・古い起動時間・廃止済みトライアル・価格ドリフトで落とす。廃止済みトライアルは景表法・ストア審査上のリスク対応で消したもので、それまで「出現回数0」を確かめていたのは人の目視だった。**リリースノート本文との突き合わせは隣リポジトリのためCI外**"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1284,9 +1303,12 @@
     {
       "area": "⑩ AgentOps・ガバナンス",
       "task": "認証切れ・モデル障害・API障害の演習",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "演習の前に、切替が起きたことを観測する仕組みが要った（2026-08-22に実装）"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-gate.mjs",
+        "scripts/autopilot-drill.mjs"
+      ],
+      "note": "2026-08-22実装。判定に4つの故障軸（資格情報の拒否・モデル全滅/縮退・GitHub API到達不能・egress遮断）を足し、26シナリオで固定。**「秘密鍵が無い」と「拒否された」を別コードにした** — 混ぜると期限切れが毎日「設計どおりのスキップ」として黙殺される。**本番を落とす本物の演習ではない**（判定の論理だけ）"
     },
     {
       "area": "⑪ データ・プライバシー",

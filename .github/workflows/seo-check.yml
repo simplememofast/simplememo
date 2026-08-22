@@ -205,6 +205,30 @@ jobs:
       - name: Autonomy timeline
         run: node scripts/autonomy-timeline.mjs --check
 
+      # 【モデルの振り分け】タスク種別 → モデル。**引かれない表は装飾**なので、
+      # obsidian-autopilot.yml が実際に --resolve を呼んでいることまで見る。
+      # 不可逆なタスク（対外配信）を最安ティアに落とす変更もここで落ちる。
+      - name: Model routing
+        run: node scripts/check-model-routing.mjs --check
+
+      # 【データ品質】鮮度だけでは足りない。判断を狂わせるのは古いデータではなく
+      # **静かに欠けたデータ**。重複と内部不整合は落とす（数字が黙って嘘になる）。
+      # 日付の欠けと鮮度は報告のみ — 元データ側の遅れで無関係な出荷を止めない。
+      - name: Data quality (GSC snapshots)
+        run: node growth/scripts/check-data-quality.mjs --check
+
+      # 【シグナル台帳】要望・レビュー・問い合わせ・競合を1つの台帳に集め、
+      # **同じ話を1行にする**。声の大きさを「何回転記されたか」で測らないため。
+      # declined に理由が無いと落ちる（理由の無い却下は見落としと区別できない）。
+      - name: Signal ledger
+        run: node scripts/check-signals.mjs --check
+
+      # 【公開面の事実】check-pr-facts は配信原稿しか見ていない。
+      # 同じ古い事実は FAQ・トップ・llms.txt にも残る。**人の目視で消したものは、
+      # 次の追加を止められない。**廃止済みトライアルの再出現をここで止める。
+      - name: Public-facing facts
+        run: node scripts/check-public-facts.mjs --check
+
       # 【監視】何が見張られていて、何が空いているか。
       #
       # 検知の中央値は2.1hだが最大は50.7h。その差は「見張られていない領域で
