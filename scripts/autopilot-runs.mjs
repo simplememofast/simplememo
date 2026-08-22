@@ -99,6 +99,36 @@ export function validate(doc) {
   return problems;
 }
 
+/**
+ * 検知までの時間と修理までの時間。**別の指標として分けて出す。**
+ *
+ * 前者は監視の穴、後者は修理能力の話で、混ぜると改善先を間違える。
+ * 実測（2026-08-16の無運転）では検知まで50時間かかったが、気づいてからの
+ * 修理は1時間以内だった。**弱点は修理速度ではなく検知の穴**だと数字が言っている。
+ *
+ * 時刻が無い行は分母に入れない。n を必ず一緒に返す — 1件の中央値を
+ * 「MTTR」と呼ぶと、測っていないことを測ったことにしてしまう。
+ */
+function timings(runs) {
+  const hrs = (a, b) => (new Date(b) - new Date(a)) / 36e5;
+  const detect = [], repair = [];
+  for (const r of runs) {
+    if (r.failed_at && r.detected_at) detect.push(hrs(r.failed_at, r.detected_at));
+    if (r.detected_at && r.resolved_at) repair.push(hrs(r.detected_at, r.resolved_at));
+  }
+  const med = (xs) => {
+    if (!xs.length) return null;
+    const a = [...xs].sort((x, y) => x - y), m = Math.floor(a.length / 2);
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  };
+  const unresolved = runs.filter((r) => r.detected_at && !r.resolved_at);
+  return {
+    time_to_detect_hours: { median: med(detect), max: detect.length ? Math.max(...detect) : null, n: detect.length },
+    time_to_repair_hours: { median: med(repair), max: repair.length ? Math.max(...repair) : null, n: repair.length },
+    unresolved: unresolved.map((r) => ({ run_id: r.run_id, failure_class: r.failure_class ?? null })),
+  };
+}
+
 /** 主系（GitHub Actions）以外はすべて副系・代走とみなす。 */
 const isPrimary = (r) => r.route === 'actions';
 
@@ -173,6 +203,7 @@ export function summarize(doc, { since = null, costDoc = null } = {}) {
     interventions: withIntervention.flatMap((r) =>
       (r.interventions || []).map((i) => ({ run_id: r.run_id, date_jst: r.date_jst, ...i }))),
     cost: costLinked,
+    timings: timings(runs),
   };
 }
 
@@ -203,6 +234,18 @@ function render(s, doc) {
   if (s.no_run_days.length) {
     o.push(`  ⚠ 無運転日 ${s.no_run_days.length} 日: ${s.no_run_days.join(', ')}`);
     o.push('    （どの経路も動かなかった日。Gateスキップと違い、これは正常系ではない）');
+  }
+  const tm = s.timings;
+  if (tm.time_to_detect_hours.n || tm.time_to_repair_hours.n) {
+    o.push('');
+    const f = (t, label) => t.n
+      ? `  ${label}: 中央値 ${t.median.toFixed(1)}h / 最大 ${t.max.toFixed(1)}h (n=${t.n})`
+      : `  ${label}: 記録なし`;
+    o.push(f(tm.time_to_detect_hours, '検知まで'));
+    o.push(f(tm.time_to_repair_hours, '修理まで'));
+    if (tm.unresolved.length) {
+      o.push(`  ⚠ 未解消 ${tm.unresolved.length} 件: ${tm.unresolved.map((u) => `${u.run_id}[${u.failure_class}]`).join(', ')}`);
+    }
   }
   if (s.cost) {
     o.push('');
@@ -281,6 +324,7 @@ if (isMain) {
       primary_ever_shipped: s.primary_ever_shipped,
       no_run_days: s.no_run_days,
       intervention_count: s.interventions.length,
+      timings: s.timings,
     }, null, 2));
     process.exit(0);
   }

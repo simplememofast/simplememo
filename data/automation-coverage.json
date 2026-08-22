@@ -284,11 +284,12 @@
     {
       "area": "② バグ修正",
       "task": "誤修正率・再発率・MTTRの計測",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "data/autopilot-runs.json"
+        "data/autopilot-runs.json",
+        "scripts/autopilot-runs.mjs"
       ],
-      "note": "変更失敗率は算出可。MTTRは検知時刻が無い"
+      "note": "2026-08-22に検知時刻を投入。検知まで中央値2.1h/最大50.7h、修理まで中央値0.9h。誤修正率・再発率はまだ"
     },
     {
       "area": "② バグ修正",
@@ -426,11 +427,12 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "トレンドレーダー（Googleトレンド/はてブ/ランキング）",
-      "executor": "nobody",
+      "executor": "ai_proposes",
       "evidence": [
-        "docs/trend-radar-prompt.md"
+        "docs/trend-radar-prompt.md",
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
-      "note": "プロンプト文面まで。実組み込み未了"
+      "note": "2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -724,9 +726,12 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "モデル別・再試行別の内訳",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "run単位までしか無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/autopilot-cost.json",
+        "scripts/autopilot-budget.mjs"
+      ],
+      "note": "2026-08-22実装。実行ログの modelUsage から記録。**費用の按分はログに無いので回数しか言えない**"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -763,9 +768,12 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "異常消費の検知",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "実績1点しか無く、何を異常とするかの基準が作れない。2週間の実測待ち"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-budget.mjs",
+        "data/autopilot-cost.json"
+      ],
+      "note": "2026-08-22実装。絶対額ではなく直近中央値との比。実績5件未満では『判定していない』と言う"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -1209,9 +1217,11 @@
     {
       "area": "⑩ AgentOps・ガバナンス",
       "task": "バックアップ切替の演習",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "観測はできるが意図的に落として確かめたことは無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-drill.mjs"
+      ],
+      "note": "2026-08-22実装。判定の論理を15シナリオで検証。**実際のネットワーク・認証の挙動は証明しない**"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
@@ -1364,9 +1374,11 @@
     {
       "area": "⑫ 事業継続性",
       "task": "障害訓練",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "訓練の前に、障害を観測する仕組みが要った（2026-08-22に実装）"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-drill.mjs"
+      ],
+      "note": "2026-08-22実装（切替ドリル）。認証切れ・モデル障害・API障害の演習はまだ"
     },
     {
       "area": "⑫ 事業継続性",

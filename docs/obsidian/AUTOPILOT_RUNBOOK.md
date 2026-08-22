@@ -387,6 +387,8 @@ node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月�
 node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
 node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止め
 node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
+node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
+node scripts/automation-rate.mjs --check     # 全領域の自動化率台帳
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
@@ -576,6 +578,20 @@ node scripts/autopilot-runs.mjs --append \
 - `build-topic-map`（`OBSIDIAN_AUTOMATION_PLAN.md` A2・未実装）: スナップショットの
   クエリからObsidian関連の新出クエリ（imp≥5）を抽出して new-queue 候補に足す
   仕組み。実装できる回があれば1回で作りきる（作りかけを残さない）
+- **トレンドレーダー（毎回・所要3分・キー不要）**: `docs/trend-radar-prompt.md` の
+  プロンプト本文をそのまま実行する。3面（Googleトレンド急上昇・はてブ テクノロジー・
+  App Store 仕事効率化ランキング上位50）を見て、**指定の形式だけで報告する**。
+  - ヒットなしの日 → status JSON の `reason` に「トレンドレーダー: 本日ヒットなし」の
+    1行を足すだけ。**それ以上書かない**
+  - ヒットあり → 交点（勝ち筋クラスタ／LINE Keep資産／調査データ）を1行で書き、
+    対応SLAから選ぶ。**交点の無い波に記事を書かない**（混雑窓を避ける）
+  - 対応した場合は `growth/data/annotations.json` に `{date, type, label}` を追記し、
+    結果（PV/転載/順位）が出たら同じ行の note に足す。**検知だけで対応しなかった日は残さない**
+  - PR起案は「データか機能で語れる角度」があるときだけ。**60未満は撃たない**
+    （`node growth/scripts/d-score.mjs` で採点してから）
+  2026-08-22まで、この文書は「文面まで・実組み込みは未了」の状態で置かれていた。
+  ここに載せたことが組み込みそのものである
+
 - **Mention & Competitor Watch（週1回・キー不要）**: セッションのWebSearchで
   `growth/data/mentions/README.md` の固定クエリ群を検索し、スナップショットJSONを
   保存・前回差分を日報に載せる。前回ファイルの日付が7日以上前なら実行する

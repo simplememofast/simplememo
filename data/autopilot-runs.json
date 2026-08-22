@@ -50,7 +50,20 @@
     "この2つで scripts/autopilot-selfheal.mjs が『未修理の故障が残っているか』を判定し、",
     "残っていればその日の最優先アクションをレーンF（自己修復）にする。",
     "同じ failure_class を規定回数直しても再発するなら、**修理をやめて人間に上げる**",
-    "（直せないものを毎日直そうとするのが一番たちの悪い無限ループになる）。"
+    "（直せないものを毎日直そうとするのが一番たちの悪い無限ループになる）。",
+    "",
+    "【failed_at / detected_at / resolved_at — MTTRのための3点】",
+    "  failed_at   … 故障が起きた時刻",
+    "  detected_at … **誰かが気づいた時刻**。ここが無いとMTTRは出せない",
+    "  resolved_at … 修理が本番へ出た時刻（PRマージ）",
+    "",
+    "検知までの時間（detected_at - failed_at）と修理までの時間（resolved_at - detected_at）は",
+    "**別の指標**。前者は監視の穴、後者は修理能力の話で、混ぜると改善先を間違える。",
+    "実測では 2026-08-16 の無運転が検知まで**50時間**かかっている（副系Routineが",
+    "そもそも存在しなかった期間）。一方いったん気づいてからの修理は1時間以内。",
+    "**この運用の弱点は修理速度ではなく検知の穴だった、と数字が言っている。**",
+    "",
+    "推測で埋めない。分からない時刻は書かない（集計は n を明示して出す）。"
   ],
   "seeded": {
     "at": "2026-08-22",
@@ -227,7 +240,11 @@
       "pr": null,
       "artifact": null,
       "external_ref": null,
-      "failure_class": "route-absent"
+      "failure_class": "route-absent",
+      "failed_at": "2026-08-16T06:00+09:00",
+      "detected_at": "2026-08-18T08:43+09:00",
+      "resolved_at": "2026-08-19T10:21+09:00",
+      "detected_note": "2日連続の実行記録ゼロを08-18のセッションが検知。PR #510 マージが解消時刻"
     },
     {
       "run_id": "ap-20260817-actions",
@@ -363,7 +380,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "runner-timeout"
+      "failure_class": "runner-timeout",
+      "failed_at": "2026-08-20T06:21+09:00",
+      "detected_at": "2026-08-20T07:00+09:00",
+      "resolved_at": "2026-08-20T07:55+09:00",
+      "detected_note": "同日のオーナー依頼セッションが検知。PR #513 マージが解消時刻"
     },
     {
       "run_id": "ap-20260820-owner",
@@ -407,7 +428,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "actor-rejected"
+      "failure_class": "actor-rejected",
+      "failed_at": "2026-08-21T06:23+09:00",
+      "detected_at": "2026-08-21T09:20+09:00",
+      "resolved_at": "2026-08-21T10:05+09:00",
+      "detected_note": "再試行Routine(09:20)が検知。PR #522 マージが解消時刻"
     },
     {
       "run_id": "ap-20260821-ccr0920",
@@ -446,7 +471,10 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "permissions"
+      "failure_class": "permissions",
+      "failed_at": "2026-08-22T06:20+09:00",
+      "detected_at": "2026-08-22T07:30+09:00",
+      "detected_note": "副系CCR(07:30)が get_job_logs で検知。**未解消**"
     },
     {
       "run_id": "ap-20260822-ccr0730",

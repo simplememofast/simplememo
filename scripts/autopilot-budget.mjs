@@ -61,6 +61,13 @@ export function validate(ledger) {
       problems.push(`budget.on_exceed must be "skip_run" or "warn_only" (got ${JSON.stringify(b.on_exceed)})`);
     }
   }
+  const an = ledger.budget?.anomaly;
+  if (an) {
+    for (const k of ['median_window', 'multiple', 'min_samples', 'min_absolute_usd']) {
+      if (typeof an[k] !== 'number') problems.push(`budget.anomaly.${k} must be a number`);
+    }
+    if (an.min_samples < 2) problems.push('budget.anomaly.min_samples は2以上（1点では中央値に意味が無い）');
+  }
   if (!Array.isArray(ledger.runs)) problems.push('runs must be an array');
   else {
     ledger.runs.forEach((r, i) => {
@@ -108,6 +115,56 @@ export function summarize(ledger, month = jstMonth()) {
   };
 }
 
+/**
+ * 異常消費の検知。**絶対額のしきい値は置かない。**
+ *
+ * 実績が1点しか無い段階で「$5を超えたら異常」と決めると、それは推測であって
+ * 基準ではない。代わりに直近の中央値との比で見る。中央値は実績が増えるほど
+ * 正確になるので、**基準そのものが自己較正される。**
+ *
+ * min_samples 未満では判定しない。**判定できないことを「異常なし」とも
+ * 「異常あり」とも言わない** — Runbook が繰り返し戒めている
+ * 「取得できなかった」と「増えていない」の取り違えと同じ規律。
+ */
+export function detectAnomalies(ledger, month = jstMonth()) {
+  const cfg = ledger.budget?.anomaly;
+  if (!cfg) return { enabled: false, reason: 'budget.anomaly が未設定' };
+  const all = [...ledger.runs].sort((a, b) => (a.date_jst < b.date_jst ? -1 : 1));
+  const window = all.slice(-cfg.median_window);
+  if (window.length < cfg.min_samples) {
+    return {
+      enabled: true, judged: false,
+      reason: `実績 ${window.length} 件 < 判定に必要な ${cfg.min_samples} 件。判定していない（異常なしではない）`,
+      samples: window.length,
+    };
+  }
+  const sorted = window.map((r) => r.total_cost_usd).sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  const threshold = Math.max(median * cfg.multiple, cfg.min_absolute_usd);
+  const hits = all.filter((r) => r.date_jst.startsWith(month) && r.total_cost_usd > threshold);
+  return {
+    enabled: true, judged: true, median, threshold, samples: window.length,
+    anomalies: hits.map((r) => ({
+      run_id: r.run_id, date_jst: r.date_jst, cost: r.total_cost_usd,
+      times_median: Number((r.total_cost_usd / median).toFixed(1)),
+    })),
+  };
+}
+
+/** モデル別の出現回数。費用の按分はログに無いので**回数しか言えない**。 */
+export function modelUsage(ledger, month = jstMonth()) {
+  const rows = ledger.runs.filter((r) => r.date_jst.startsWith(month));
+  const counts = {};
+  let unknown = 0;
+  for (const r of rows) {
+    if (!Array.isArray(r.models) || r.models.length === 0) { unknown++; continue; }
+    for (const m of r.models) counts[m] = (counts[m] || 0) + 1;
+  }
+  // models が無い run を 0 と数えない。**未記録と未使用は別。**
+  return { counts, runs_with_models: rows.length - unknown, runs_without_models: unknown };
+}
+
 export function appendRun(ledger, run) {
   const required = ['date_jst', 'route', 'total_cost_usd'];
   for (const k of required) {
@@ -134,6 +191,26 @@ function render(s, ledger) {
   if (!s.ccr_measured) {
     out.push('  NOTE: CCR(副系)の実費は0ではなく未観測。スケジュール起動セッションの');
     out.push('        ログは外部から読めないため、この合計は運用全体の実費ではない。');
+  }
+  const mu = modelUsage(ledger, s.month);
+  if (mu.runs_with_models > 0) {
+    const line = Object.entries(mu.counts).map(([m, n]) => `${m} x${n}`).join(' / ');
+    out.push(`  モデル: ${line}`);
+    if (mu.runs_without_models > 0) {
+      out.push(`         （${mu.runs_without_models} run はモデル未記録。未使用ではない）`);
+    }
+  }
+  const an = detectAnomalies(ledger, s.month);
+  if (an.enabled && !an.judged) {
+    out.push(`  異常消費: 判定していない（${an.reason}）`);
+  } else if (an.enabled) {
+    if (an.anomalies.length === 0) {
+      out.push(`  異常消費: なし（中央値 ${fmt(an.median)} / しきい値 ${fmt(an.threshold)} / n=${an.samples}）`);
+    } else {
+      for (const a of an.anomalies) {
+        out.push(`  ⚠ 異常消費: ${a.date_jst} ${a.run_id} = ${fmt(a.cost)}（中央値の ${a.times_median} 倍）`);
+      }
+    }
   }
   if (ledger.budget.cap_set_by === 'placeholder') {
     out.push('  NOTE: monthly_usd_cap は暫定値（オーナー未確認）。実測が貯まるまで');
@@ -196,6 +273,8 @@ if (isMain) {
       runs: s.runs, shipped: s.shipped,
       usd_per_shipped: s.usd_per_shipped === null ? null : Number(s.usd_per_shipped.toFixed(4)),
       by_route: s.by_route, ccr_measured: s.ccr_measured,
+      models: modelUsage(ledger, s.month),
+      anomaly: detectAnomalies(ledger, s.month),
       cap_set_by: ledger.budget.cap_set_by ?? null,
     }, null, 2));
     process.exit(0);

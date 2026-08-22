@@ -39,6 +39,20 @@
       }
     },
     "ccr_measured": false,
+    "models": {
+      "counts": {
+        "claude-haiku-4-5-20251001": 1,
+        "claude-sonnet-5": 1
+      },
+      "runs_with_models": 1,
+      "runs_without_models": 0
+    },
+    "anomaly": {
+      "enabled": true,
+      "judged": false,
+      "reason": "実績 1 件 < 判定に必要な 5 件。判定していない（異常なしではない）",
+      "samples": 1
+    },
     "cap_set_by": "placeholder"
   },
   "runs": {
@@ -98,7 +112,25 @@
       "2026-08-16",
       "2026-08-17"
     ],
-    "intervention_count": 7
+    "intervention_count": 7,
+    "timings": {
+      "time_to_detect_hours": {
+        "median": 2.0583333333333336,
+        "max": 50.71666666666667,
+        "n": 4
+      },
+      "time_to_repair_hours": {
+        "median": 0.9166666666666666,
+        "max": 25.633333333333333,
+        "n": 3
+      },
+      "unresolved": [
+        {
+          "run_id": "ap-20260822-actions",
+          "failure_class": "permissions"
+        }
+      ]
+    }
   },
   "reason": "【連続無記事0日目・本番最終変更2026-08-22・BQ未確認（取得できなかった、増えていないの意味ではない）】副系Routine(07:30 JST)による実行。主系の当日runは status=completed / conclusion=success で成果物が無いことを§0の(a)〜(e)で確認済み（(a) claude/obsidian-auto-20260822 ブランチなし (b) 本番date_jst=2026-08-21 (c) origin/main date_jst=2026-08-21 (d) 当日作成PRなし (e) 主系の最新run=completed・作業中ではない）。実測: 主系run 32528028588／job 96914156036 はallowed_bots修正（PR#522/523）が効いてClaude Codeステップが3分16秒動いたが、num_turns=30・permission_denials_count=14で成果物ゼロのまま成功終了しており、新しい懸念としてowner_requestsの筆頭に積んだ。obsidian.md/notion.comのegressブロックは本日も再現（github.com本体・blacksmithgu.github.io等も同様にブロックされることを新たに確認。ただしWebFetch/WebSearchツール経由ではobsidian.md系以外により広く到達できることも判明）。レーンEのC05〜C10（sync系・compare/notion）はegressブロックで見送り、C12 /obsidian/plugins/dataview/ に切り替えて実装した。レーンA/Bは28日窓（2026-09-06前後）まで正当化できないため今回もレーンE。",
   "verified": "Dataviewプラグイン公式リポジトリ（GitHub: blacksmithgu/obsidian-dataview）のREADME.md・manifest.jsonと、Obsidian公式配布元（GitHub: obsidianmd/obsidian-releases）のcommunity-plugin-stats.json・community-plugins.jsonをraw.githubusercontent.com経由で本日直接取得。ダウンロード数4,805,635件・登録6,840個中3位（前回2026-08-21計測と完全一致）、レジストリのupdatedタイムスタンプ2025-04-07 19:17 UTC（計測時点で約16ヶ月更新なし）、masterのmanifestバージョン0.5.68とGitHub Releases最新タグ0.5.70（ベータ）の不一致を確認。4つのクエリモードのサンプルコードは公式READMEからの引用。コンテンツキューが当初unique_valueとして指定していた「実機インストール＋動くクエリ例」は、この環境にObsidianを実行できるGUIが無いため今回は実施していない（ページ内の検証環境欄に明記）。",
