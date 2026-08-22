@@ -102,17 +102,33 @@ ORDER BY data_date DESC, ns;
 **temp_ テーブルは消さない。** 自前で約7日の有効期限を持っていて放っておけば
 消えるうえ、リトライ中の試行が使っている可能性がある。
 
-### `ExportLog` は 2026-10-12 に消える
+### `ExportLog` の60日期限は外した（2026-08-22 実施）
 
 データセットの `defaultTableExpirationMs` が60日で、テーブル作成時に
-`ExportLog` に焼き付いている（`searchdata_*` は日付パーティションなので
-60日のローリング窓になるだけだが、`ExportLog` は非パーティションなので
-**テーブルごと消える**）。着弾状況の確認は全部ここを読んでいるので、
-消える前に外す:
+`ExportLog` へ焼き付いていた。`searchdata_*` は日付パーティションなので
+60日のローリング窓になるだけだが、**`ExportLog` は非パーティションなので
+テーブルごと 2026-10-12 に消える**ところだった。着弾状況の確認は
+（`bq-preflight` も Runbook §1-2 も）全部ここを読んでいる。
 
 ```sql
+-- 実行済み。再発したとき（データセットを作り直した等）はこれ
 ALTER TABLE `yurika-simplememo.searchconsole.ExportLog`
   SET OPTIONS (expiration_timestamp = NULL);
+```
+
+**データセット既定の60日はそのまま残してある。** つまり:
+
+- `searchdata_site_impression` / `searchdata_url_impression` は
+  **60日より古いパーティションが黙って消える**。データ開始が 2026-08-10 なので
+  **最初の1日が落ちるのは 2026-10-09**。28日窓には影響しないが、
+  前年同期比や「90日前と比べて」は永久に作れない
+- ここに**新しく非パーティションのテーブルを作ると、同じ60日期限が付く**
+
+保持を延ばす／無期限にするならデータセット側を変える（オーナー判断）:
+
+```sql
+ALTER SCHEMA `yurika-simplememo.searchconsole`
+  SET OPTIONS (default_partition_expiration_days = NULL, default_table_expiration_days = NULL);
 ```
 
 ---
