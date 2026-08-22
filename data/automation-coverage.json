@@ -189,12 +189,14 @@
     {
       "area": "② バグ修正",
       "task": "統合監視（Crash/API/Watch/課金/問い合わせ）",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/monitoring-coverage.json",
-        "scripts/check-monitoring.mjs"
+        "scripts/check-monitoring.mjs",
+        "../simplememo-api/src/analytics.ts",
+        "../simplememo-api/test/ops-alerts.test.ts"
       ],
-      "note": "**棚卸しで穴が特定できた。3系統は気づく経路が無い** — Apple Watchアプリ・課金・問い合わせ。クラッシュ率と送信成功率は指標があるが常時監視になっていない（段階公開中だけガードが見る／人が日次メールを読んだとき）。**executor を上げるのは穴が埋まってから**"
+      "note": "2026-08-22実装。13系統中**9系統を機械が検知**する。課金とWatch同期はこの日に追加（データは既に取れていて閾値と通知だけが無かった）。**残る盲点は問い合わせ1系統**で、これは基盤そのものが未整備。クラッシュ率は段階公開中だけカナリアガードが見る形で、常時監視ではない"
     },
     {
       "area": "② バグ修正",
