@@ -255,11 +255,15 @@
     {
       "area": "② バグ修正",
       "task": "アクセシビリティ・文字切れ・多言語の自動検査",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "../simplememo-ios/scripts/qa/check_localization.py",
+        "../simplememo-ios/data/localization-baseline.json",
+        "../simplememo-ios/.github/workflows/qa-static.yml",
         "scripts/seo-check.js"
       ],
-      "note": "サイト側のみ。アプリ側は無い"
+      "note": "2026-08-22。**多言語だけアプリ側にも入った。**初回の実行で3件出た（どれも目視では見つからない）: NSLocalizedString の直接呼び出し2箇所（キーが無い言語では`onboarding.page2.apple_signin.error_generic` という文字列がそのままエラーとして表示されていた）/ premium.* 5キーが全10言語で二重定義（50行、後の行が静かに勝つので先の行を直しても画面は変わらない）/ premium.unlimited がどの言語にも無い。全部直した。**未翻訳では落とさない**（8言語が46.3%なのは既知）が、基準線から下がると落ちる。残る弱さ: **文字切れとアクセシビリティはアプリ側で未検査。**文字切れは実機のフォントとレイアウトが要り、文字数比での近似は誤検出だらけになるので採らなかった（ドイツ語が日本語の3倍は正常）",
+      "since": "2026-08"
     },
     {
       "area": "② バグ修正",
@@ -1612,12 +1616,17 @@
     {
       "area": "⑫ 事業継続性",
       "task": "手動復旧手順",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-        "../simplememo-api/DEPLOYMENT.md"
+        "../simplememo-api/scripts/restore-drill.mjs",
+        "../simplememo-api/scripts/backup-d1.mjs",
+        "../simplememo-api/docs/RESTORE.md",
+        "../simplememo-api/test/restore.test.ts",
+        "../simplememo-api/.github/workflows/ci.yml",
+        "../simplememo-api/data/data-retention.json"
       ],
-      "note": "文書はある"
+      "note": "2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま",
+      "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",
@@ -1631,11 +1640,17 @@
     {
       "area": "⑫ 事業継続性",
       "task": "外部サービス停止時の縮退運転",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "scripts/check-degradation.mjs",
+        "data/vendor-register.json",
+        "scripts/autopilot-gate.mjs",
+        ".github/workflows/seo-check.yml",
+        "../simplememo-api/src/circuit-breaker.ts",
+        "../simplememo-ios/SimpleMemo/OutboxManager.swift"
       ],
-      "note": "autopilotは二重化。GitHub/Apple/Cloudflareは単一障害点"
+      "note": "2026-08-22。台帳の「代替がある」を**実際に動かして確かめる**ようにした。6つの実験（API到達不能で走らない / 副系の実在 / モデル縮退と全滅 / egress縮退 / 遮断器と死信 / 端末Outbox）を判定関数とファイルの実在で毎回通す。**代替と縮退を分けて数える** — 混ぜると resilience を過大に見積もる。Resendが落ちてもメールは送れない（代替なし）が、失われず後で戻せる（縮退あり）。この作業で台帳の4件を代替から降格した（回避策・停止・欠測は代替ではない）。現状: 代替2 / 縮退のみ2 / 単一障害点6。**単一障害点では落とさない**（分かっていることは壊れていることではない）。落とすのは代替を名乗って確かめられないときと、どの事業者も使っていない実験があるとき。残る弱さ: **実際にその事業者を落として試したことは無い。**確かめているのはこちら側の受け方だけ",
+      "since": "2026-08"
     },
     {
       "area": "⑬ アナログ領域",

@@ -71,7 +71,8 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "無料枠中心。有料化する時点で上限を決める",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "fallback_probe": "device_outbox"
     },
     {
       "id": "resend",
@@ -93,7 +94,11 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "送信量課金。**主機能が止まる先**なので停止できず、上限より監視が先",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "degradation_probes": [
+        "circuit_breaker"
+      ],
+      "degradation_note": "**送信は止まるが、失われない。**回路遮断器が呼び続けるのを止め、死信に残して復旧後に戻せる（本文と平文の宛先は持たない）"
     },
     {
       "id": "anthropic",
@@ -103,7 +108,7 @@
       "$personal_data": "redact済み要約のみを送る。メモ本文のfixtureは架空で、device logは収集しない",
       "critical": false,
       "breaks_if_down": "自動運営が止まる。アプリ自体は動く",
-      "fallback": "副系（CCR Routines）が代走する。ただし同じ事業者なので同時に落ちる",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -114,7 +119,13 @@
       "spend_cap_ref": "AI実費（開発・運用のトークン費）",
       "spend_cap_note": "**唯一、機械が上限で自分を止める先**（autopilot-budget）",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "$fallback_was": "副系（CCR Routines）が代走する。ただし同じ事業者なので同時に落ちる",
+      "fallback_note": "**代替なし。**副系（CCR Routines）は別経路だが**同じ事業者**なので、Anthropic 自体が落ちれば同時に落ちる。別事業者への代替は無い",
+      "degradation_probes": [
+        "model_fallback"
+      ],
+      "degradation_note": "使えるモデルが減れば縮退先へ移る。全滅したら**走らない**（静かに寝ない）"
     },
     {
       "id": "google_cloud",
@@ -123,7 +134,7 @@
       "personal_data": "pseudonymous",
       "critical": false,
       "breaks_if_down": "計測が止まる。出荷は続く",
-      "fallback": "無し。データが欠測する（『取得できなかった』として記録される）",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -134,7 +145,9 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "BigQuery の従量課金。現状ほぼ無料枠内",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "$fallback_was": "無し。データが欠測する（『取得できなかった』として記録される）",
+      "fallback_note": "**代替なし。**データが欠測する。欠測は「取得できなかった」として記録され、ゼロとは区別される"
     },
     {
       "id": "firebase",
@@ -143,7 +156,7 @@
       "personal_data": "pseudonymous",
       "critical": true,
       "breaks_if_down": "App Check が落ちると送信が弾かれうる",
-      "fallback": "App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -155,7 +168,9 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "同上",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "$fallback_was": "App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）",
+      "fallback_note": "**代替ではなく回避策。**App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）が、外している間は検証が効かない。落ちたときの選択肢であって、機能の代替ではない"
     },
     {
       "id": "appsflyer",
@@ -164,7 +179,7 @@
       "personal_data": "pseudonymous",
       "critical": false,
       "breaks_if_down": "効果測定が止まる。アプリは動く",
-      "fallback": "kill switch（FeatureFlags.appsFlyerEventEnabled）を false にするだけ",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -175,7 +190,9 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "無料プラン。有料化の予定なし",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "$fallback_was": "kill switch（FeatureFlags.appsFlyerEventEnabled）を false にするだけ",
+      "fallback_note": "**代替ではなく停止。**kill switch（FeatureFlags.appsFlyerEventEnabled）を false にすれば送信は止まるが、効果測定そのものは戻らない"
     },
     {
       "id": "github",
@@ -195,7 +212,13 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "無料枠。Actions分数の超過時のみ課金",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "fallback_probe": "dual_lane",
+      "degradation_probes": [
+        "gate_fails_closed_on_api",
+        "egress_degrade"
+      ],
+      "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた"
     },
     {
       "id": "prtimes",
@@ -204,7 +227,7 @@
       "personal_data": "none",
       "critical": false,
       "breaks_if_down": "配信できない。原稿はリポジトリに残る",
-      "fallback": "他の配信手段（自社サイト・SNS）",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -215,7 +238,9 @@
       "spend_cap_ref": "プレスリリースの配信",
       "spend_cap_note": "配信ごと。配信可否の判断は人",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "$fallback_was": "他の配信手段（自社サイト・SNS）",
+      "fallback_note": "**代替は同等ではない。**自社サイト・SNSへは出せるが、PR TIMESの配信網は置き換わらない。原稿はリポジトリに残る"
     },
     {
       "id": "registrar",
@@ -239,5 +264,10 @@
       "approved_by": "human",
       "approved_at": "2026-08-22"
     }
+  ],
+  "$fallback_fields": [
+    "fallback … **同等の代替がある場合だけ**書く。回避策・停止・欠測は代替ではない",
+    "fallback_probe … scripts/check-degradation.mjs の PROBES の id。**代替を名乗るなら、動かして確かめる手段が要る。**一度も動かしたことのない代替は代替ではない",
+    "fallback_note … 代替が無い場合の説明。**空にしない** — 「代替なし」と「考えていない」は別"
   ]
 }
