@@ -636,17 +636,20 @@
       "task": "Crash-free率・送信成功率による自動停止",
       "executor": "nobody",
       "evidence": [],
-      "note": "アプリ本体にRemote Feature Flagが無いため、止める手段そのものが無い"
+      "note": "[2026-08-22訂正] 「止める手段が無い」は誤りだった（v4.7から /v1/config で遠隔キルができていた）。同日に段階公開とキャッシュ期限も入り機構は揃った。nobody のままなのは**指標を見て kill を叩くコードが無い**ため — 止める先ではなく、決める側が無い"
     },
     {
       "area": "④ 自動本番デプロイ",
       "task": "Remote Feature Flag と緊急Kill Switch",
-      "executor": "ai_proposes",
+      "executor": "human_only",
       "evidence": [
         "../simplememo-api/src/flags.ts",
+        "../simplememo-api/src/config.ts",
+        "../simplememo-ios/SimpleMemo/FeatureFlagRollout.swift",
+        "../simplememo-ios/SimpleMemoTests/FeatureFlagRolloutTests.swift",
         "../simplememo-ios/docs/feature-flag-client-spec.md"
       ],
-      "note": "2026-08-22に**サーバ側を実装**（段階公開・緊急停止・fail closed・31テスト）。アプリ本体のクライアント実装は仕様書まで。**iOS側が入るまで実際には止められない**"
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し両側が揃った。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）"
     },
     {
       "area": "④ 自動本番デプロイ",
