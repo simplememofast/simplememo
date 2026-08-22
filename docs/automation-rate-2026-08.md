@@ -11,34 +11,34 @@
 
 | 指標 | 値 | 分母 |
 |---|---:|---|
-| **総合自動化率** | **58.7%** | 定義タスク 172（未実装を含む・**最も厳しい**） |
-| AI実行率 | 67.3% | 実施中タスク 150（未実装を除く） |
+| **総合自動化率** | **61.0%** | 定義タスク 172（未実装を含む・**最も厳しい**） |
+| AI実行率 | 70.0% | 実施中タスク 150（未実装を除く） |
 | AI関与率 | 87.3% | 同上（提案・下書きまで含める・**最も甘い**） |
 | カバー率 | 87.2% | そもそも誰かがやっているタスクの割合 |
 
-内訳: 自律 6 / ゲート付き実行 95 / 提案 30 / 人間 19 / **未実装 22** / 意図的にやらない 3
+内訳: 自律 6 / ゲート付き実行 99 / 提案 26 / 人間 19 / **未実装 22** / 意図的にやらない 3
 
 **4つを必ず並べて出す。**分母を1つに決めると必ず都合のよい数字になる。
 **総合自動化率とカバー率を隠してAI関与率だけ出すのが、ここで一番やってはいけないこと。**
 
 ### 読み方
 
-- **総合自動化率 58.7%** — 「あるべきタスクの6割弱をAIが実行している」。**これが現在地**
+- **総合自動化率 61.0%** — 「あるべきタスクの6割をAIが実行している」。**これが現在地**
 - **カバー率 87.2%** — 誰もやっていないタスクは**22件**（当初68件）
-- AI関与率 87.3% / AI実行率 67.3%
+- AI関与率 87.3% / AI実行率 70.0%
 
 ### 2026-08-22 の実装で動いた分
 
-**27.6% → 58.7%**（AI実行 45 → 101 / 未実装 68 → 22 / カバー率 60.0% → 87.2%）。
-1日で **38項目**を実装した。
+**27.6% → 61.0%**（AI実行 45 → 105 / 未実装 68 → 22 / カバー率 60.0% → 87.2%）。
+1日で **44項目**を実装した。
 
 ### この先の天井
 
 ```
-  現在                       101 / 172 = 58.7%
-  未実装 22 件を全部埋めても            →  71.5%
-  提案どまり 30 件も実行へ上げたら        →  89.0%  ← **天井**
-  95.3% に必要                          164 件（あと 63 件）
+  現在                       105 / 172 = 61.0%
+  未実装 22 件を全部埋めても            →  73.8%
+  提案どまり 26 件も実行へ上げたら        →  89.0%  ← **天井**
+  95.3% に必要                          164 件（あと 59 件）
 ```
 
 **89.0% が天井。**人間専任19件を人間に残す限り、AI実行に回せるのは最大153件。
@@ -59,11 +59,11 @@
 | ⑫ 事業継続性 | **100.0%** | 100.0% | 100.0% | 100.0% | 0/9/0/0/0 |
 | ⑩ AgentOps・ガバナンス | **91.7%** | 100.0% | 100.0% | 91.7% | 0/11/0/0/1 |
 | ⑤ AI予算・トークン管理 | **86.7%** | 92.9% | 92.9% | 93.3% | 0/13/0/1/1 |
-| ② バグ修正 | **76.5%** | 81.2% | 93.8% | 94.1% | 1/12/2/1/1 |
+| ② バグ修正 | **82.4%** | 87.5% | 93.8% | 94.1% | 1/13/1/1/1 |
 | ⑪ データ・プライバシー | **70.0%** | 70.0% | 90.0% | 100.0% | 0/7/2/1/0 |
-| ③ 自律型マーケティング | **61.5%** | 76.2% | 90.5% | 80.8% | 2/14/3/2/5 |
-| ⑥ アプリ運営意思決定 | **61.5%** | 66.7% | 91.7% | 92.3% | 0/8/3/1/1 |
-| ① 次期機能開発 | **57.1%** | 61.5% | 100.0% | 92.9% | 2/6/5/0/1 |
+| ⑥ アプリ運営意思決定 | **69.2%** | 75.0% | 91.7% | 92.3% | 0/9/2/1/1 |
+| ③ 自律型マーケティング | **65.4%** | 81.0% | 90.5% | 80.8% | 2/15/2/2/5 |
+| ① 次期機能開発 | **64.3%** | 69.2% | 100.0% | 92.9% | 2/7/4/0/1 |
 | ④ 自動本番デプロイ | **50.0%** | 50.0% | 71.4% | 100.0% | 1/6/3/4/0 |
 | ⑧ カスタマーサポート | **50.0%** | 66.7% | 100.0% | 75.0% | 0/4/2/0/2 |
 | ⑦ 法人経営 | **30.8%** | 40.0% | 90.0% | 76.9% | 0/4/5/1/3 |
@@ -136,19 +136,19 @@
 
 ### ② バグ修正
 
-総合 **76.5%** ／ 実行 81.2% ／ 関与 93.8% ／ カバー 94.1%
+総合 **82.4%** ／ 実行 87.5% ／ 関与 93.8% ／ カバー 94.1%
 
 | 実行者 | タスク | 状況・証跡 |
 |---|---|---|
 | ゲート付き実行 | 監視カバレッジの棚卸し | 2026-08-22実装。13系統を棚卸しし、**検知器が実在するか**と**実際に起きた障害種別に検知経路があるか**をCIが確かめる。『全部見ています』ではなく『何が空いているか』を言うための台帳<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs` |
-| ゲート付き実行 | 統合監視（Crash/API/Watch/課金/問い合わせ） | 2026-08-22。棚卸しで名指しした穴3系統のうち**2つを塞いだ。**問い合わせ＝受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた。Watch＝計測イベントは2026-07から流れていたのに誰も見ていなかったので、詰まり・手動修復を24h窓で判定する検知器を書いた。**どちらも「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。Watchは母数が小さいので分母20件未満では判定しない（毎日「異常」が出る検知器は読まれなくなる）。残る穴: **課金1系統。**購入失敗イベントを受ける経路がiOS側に無く、ASCの売上データも接続直後で降りてきていない<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs`<br>`../simplememo-api/src/inquiry.ts`<br>`../simplememo-api/src/watch-health.ts`<br>`../simplememo-api/src/autopilot-report.ts`<br>`.github/workflows/autopilot-health.yml`<br>`.github/workflows/cron-health.yml` |
+| ゲート付き実行 | 統合監視（Crash/API/Watch/課金/問い合わせ） | 2026-08-22。棚卸しで名指しした穴3系統のうち**2つを塞いだ。**問い合わせ＝受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた。Watch＝計測イベントは2026-07から流れていたのに誰も見ていなかったので、詰まり・手動修復を24h窓で判定する検知器を書いた。**どちらも「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。Watchは母数が小さいので分母20件未満では判定しない（毎日「異常」が出る検知器は読まれなくなる）。残る穴: **課金1系統。**購入失敗イベントを受ける経路がiOS側に無く、ASCの売上データも接続直後で降りてきていない [2026-08-22追記] **計測の事故が起きる境目**（iOS↔relay のイベント名）に検査を足した。従来の検査は「サーバに登録したのに iOS 側のセットに入れ忘れる」だけを見ており、**逆向き（iOSが送るのにサーバの allowlist に無い）は素通り**していた。その場合サーバは受け取って黙って捨て、端末には200が返るので送信側にも症状が出ない。サーバ allowlist の写しを iOS 側に置いたので**隣のリポジトリが無いCIでも動く** — 隣を見に行く形にすると検査が常にスキップされ、事故は起きたまま緑になる<br>`data/monitoring-coverage.json`<br>`scripts/check-monitoring.mjs`<br>`../simplememo-api/src/inquiry.ts`<br>`../simplememo-api/src/watch-health.ts`<br>`../simplememo-api/src/autopilot-report.ts`<br>`.github/workflows/autopilot-health.yml`<br>`.github/workflows/cron-health.yml`<br>`../simplememo-ios/scripts/qa/check_analytics_crossrepo.py`<br>`../simplememo-ios/data/analytics-server-allowlist.json` |
 | 提案のみ | 問い合わせから再現テストを自動生成 | 手動運用。ただしWatch同期は実績あり<br>`../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md` |
 | ゲート付き実行 | Unit / UI / 契約テストの実行 | XCTest/XCUITest＋Watchブリッジ契約テスト2コピー＋parity CI<br>`../simplememo-ios/.github/workflows/qa-ios.yml` |
 | **未実装** | Visual Regression Test | アプリ側に無い |
 | ゲート付き実行 | オフライン・タイムアウト・500・429の決定論再現 | QAStubURLProtocol。低速回線とバックグラウンド復帰は無い<br>`../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md` |
 | 人間 | 実機/シミュレータでの操作・撮影・計測 | macOS必須。Runbook §7「できないこと」の筆頭<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
 | ゲート付き実行 | アクセシビリティ・文字切れ・多言語の自動検査 | 2026-08-22。**多言語だけアプリ側にも入った。**初回の実行で3件出た（どれも目視では見つからない）: NSLocalizedString の直接呼び出し2箇所（キーが無い言語では`onboarding.page2.apple_signin.error_generic` という文字列がそのままエラーとして表示されていた）/ premium.* 5キーが全10言語で二重定義（50行、後の行が静かに勝つので先の行を直しても画面は変わらない）/ premium.unlimited がどの言語にも無い。全部直した。**未翻訳では落とさない**（8言語が46.3%なのは既知）が、基準線から下がると落ちる。残る弱さ: **文字切れとアクセシビリティはアプリ側で未検査。**文字切れは実機のフォントとレイアウトが要り、文字数比での近似は誤検出だらけになるので採らなかった（ドイツ語が日本語の3倍は正常）<br>`../simplememo-ios/scripts/qa/check_localization.py`<br>`../simplememo-ios/data/localization-baseline.json`<br>`../simplememo-ios/.github/workflows/qa-static.yml`<br>`scripts/seo-check.js` |
-| 提案のみ | 性能・起動時間の計測 | 定点実測。本番の継続監視ではない<br>`data/benchmark.json` |
+| ゲート付き実行 | 性能・起動時間の計測 | 2026-08-22。**本番の常時監視になった。**それまでは段階公開中だけガードが見ており、平常時に起動が壊れても気づく経路が無かった。指標も読み方の文書も既にあり、**無かったのは毎日それを見る仕組み**だけだった（POSTを叩いた日にしか読まれていなかった）。判定は文書の読み方をそのまま機械にした: **比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常利用後のkillでもlaunch_incomplete が出る（scene_did_become_active は恒常的に最多で実害の証拠にならない）。**前段ステージが1件でも出たら分母を問わず劣化**、比率は前週比の跳ねだけに使う。残る弱さ: **起動「時間」は測っていない。**0.4秒は今も定点実測で、本番の起動所要時間を集める経路はiOS側に無い。ここが監視しているのは完走したかどうかだけ<br>`../simplememo-api/src/launch-health-monitor.ts`<br>`../simplememo-api/src/autopilot-report.ts`<br>`../simplememo-api/test/launch-health-monitor.test.ts`<br>`../simplememo-api/docs/launch_health.md`<br>`data/monitoring-coverage.json` |
 | ゲート付き実行 | 依存脆弱性・秘密情報・SBOM・署名検査 | 2026-08-22実装（simplememo-api）。SBOM 259件（**実行時はわずか1件**、残り258は開発時）・integrity欠落0件・秘密情報スキャン。**値は出力しない**（出力に秘密を写したら意味が無い）。**既知脆弱性の照合（npm audit）は意図的に含めない** — 外部DB依存でCIの合否が日替わりになり、やがて無視されるため<br>`../simplememo-api/scripts/check-supply-chain.mjs`<br>`../simplememo-api/data/sbom.json` |
 | ゲート付き実行 | Fuzz / Property-based / Mutation Test | 2026-08-22実装。実行判定と予算集計の**不変条件12件**を、種を固定した乱択400ケース／件で検査する。ドリル（26の具体例）が守れない**書かなかった組み合わせ**を踏むのが目的。変異テストで検出力を確認（forceが予算を飛び越える／認証切れが予算の陰に隠れる、をどちらも検出）。**アプリ側のfuzzは未実装**<br>`scripts/property-tests.mjs`<br>`scripts/autopilot-gate.mjs`<br>`scripts/autopilot-budget.mjs` |
 | ゲート付き実行 | 失敗の分類（独立2モデル監査） | 2026-08-22実装。割れたら人間に上げる<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
@@ -166,7 +166,7 @@
 |---|---|---|
 | ゲート付き実行 | データ分類（送信可否の allowlist） | CIで強制<br>`../simplememo-ios/scripts/qa/check_analytics_allowlist.py` |
 | 提案のみ | 収集同意 | App Analytics共有オプトイン依存 |
-| ゲート付き実行 | 保持期間の定義（棚卸しと逸脱検査） | 2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる）<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/test/data-retention.test.ts` |
+| ゲート付き実行 | 保持期間の定義（棚卸しと逸脱検査） | 2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない） さらに、**台帳の記述そのものをスキーマと突き合わせる検査**を足した（2方向 — 存在しない列を書いていないか／書かれていない自由文の列が無いか）。**22表中14表がずれていた。**求めるのは TEXT/BLOB と身元を示唆する名前の列だけで、全列を書かせると台帳が読まれなくなる（読まれない台帳は無いのと同じ）<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/test/data-retention.test.ts`<br>`../simplememo-api/scripts/check-write-only-tables.mjs`<br>`../simplememo-api/src/webhook-redact.ts`<br>`../simplememo-api/scripts/check-retention-schema.mjs` |
 | ゲート付き実行 | 保持期間の自動削除 | 2026-08-22に app_analytics_events を90日で剪定するようにした（オーナー判断）。棚卸しで見つかった最大の穴がこれ。**23ストア中6つが自動削除つき**になった。**残る10ストアはまだ無期限**（重複送信防止の台帳が中心。email_suppression は意図的に無期限）<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/test/analytics-retention.test.ts`<br>`../simplememo-api/data/data-retention.json` |
 | 提案のみ | 削除要求への対応 | 2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。
 
@@ -175,13 +175,33 @@
 **オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない<br>`../simplememo-api/scripts/check-deletion-coverage.mjs`<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/src/index.ts`<br>`../simplememo-api/test/deletion-coverage.test.ts`<br>`../simplememo-api/.github/workflows/ci.yml`<br>`data/authority-matrix.json` |
 | ゲート付き実行 | AIへの送信可否の制御 | redact済み要約のみ。メモ本文fixtureは架空<br>`../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh` |
 | ゲート付き実行 | 端末内の暗号化 | AES-GCM-256・Keychain・Data Protection属性<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
-| ゲート付き実行 | アクセス履歴 | 2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日<br>`../simplememo-api/src/access-log.ts`<br>`../simplememo-api/migrations/0019_admin_access_log.sql`<br>`../simplememo-api/src/index.ts` |
-| ゲート付き実行 | 第三者SDKのデータ送信監査 | 2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false<br>`../simplememo-ios/scripts/qa/check_third_party_egress.py`<br>`../simplememo-ios/data/third-party-egress.json`<br>`../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy` |
+| ゲート付き実行 | アクセス履歴 | 2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない<br>`../simplememo-api/src/access-log.ts`<br>`../simplememo-api/migrations/0019_admin_access_log.sql`<br>`../simplememo-api/src/index.ts`<br>`../simplememo-api/scripts/check-write-only-tables.mjs` |
+| ゲート付き実行 | 第三者SDKのデータ送信監査 | 2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false [2026-08-22追記] **申告そのものと実装の突き合わせ**も足した。PrivacyInfo.xcprivacy は手で書いた宣言なので実装が増えても追随せず、**足りない申告は書いた本人には見えない。**突き合わせたら2種別が未申告だった（製品操作・クラッシュ）。**こちらでは申告を書き換えていない** — ASCの「App のプライバシー」への回答と揃える必要があり、片方だけ直すと逆に不整合になる。オーナー依頼に積んだ<br>`../simplememo-ios/scripts/qa/check_third_party_egress.py`<br>`../simplememo-ios/data/third-party-egress.json`<br>`../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy`<br>`../simplememo-ios/scripts/qa/check_privacy_manifest.py`<br>`../simplememo-ios/data/privacy-manifest-policy.json` |
 | 人間 | 推論をどこで回すかの決定 | VISION §14 未決定論点。Capture本文は個人情報そのもの<br>`../simplememo-ios/docs/VISION.md` |
+
+### ⑥ アプリ運営意思決定
+
+総合 **69.2%** ／ 実行 75.0% ／ 関与 91.7% ／ カバー 92.3%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| ゲート付き実行 | ファネル分析（インストール→初回メモ→継続→課金） | 4回連続の定点評価<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md` |
+| ゲート付き実行 | コホート分析（継続率・課金率） | 2026-08-22。**都度レポートから週次の自動実行へ。**計算も、週次サマリの中でそれを呼ぶ経路も既にあり、**無かったのは定期的に回して読む仕組み**だった（人が叩いた日にしか読まれていない）。運用報告なので ENABLED フラグでは止めず、宛先の有無だけで自己ゲートする（autopilot_report / analytics_daily_report と同じ流儀）。この領域は母数が小さいので、**成熟30件未満では変化を解釈しない**し、差が**1人ぶんの幅**に収まるなら「区別できない」と書く（前週の母数が小さければそちらの分解能を使う）。**言うことが無い週は送らない** — 読めるようになった週・言える差が出た週・集計できなかった週の3つだけ。毎週同じ行を送ると読まれなくなる。残る弱さ: **D28 は BQ の28日蓄積待ち**（9/6前後）。実際に「読める」判定が出るのは母数が30件に届いてからで、いまの規模ではしばらく『母数不足』が続く<br>`../simplememo-api/src/cohort-report.ts`<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/src/index.ts`<br>`../simplememo-api/test/cohort-report.test.ts`<br>`../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md` |
+| ゲート付き実行 | KPI定義と集計SQLのバージョン管理 | 2026-08-22実装。KPI6件の定義と、**算出元ファイルの sha256** を台帳に持つ。計算コードが変われば version を上げるまでCIが落ちる（`--bump <id> --why` で履歴が残る）。狙いは数字ではなく**定義の凍結** — 「自動化率が上がった」の半分が計算を変えたからだった、を起こさないため。導入直後にRunbookの編集で実際に発火し、履歴に「定義は変えていない」と残した。残る弱さ: 集計SQLはまだ台帳に無い（BigQuery側は analytics-golden.md 止まり） [2026-08-22追記] **原稿の「変更行の98.8%」が再現できなかった**ので、数え方そのものを script にして凍結した（KPI定義7件目）。台帳の算数と、**headline が実測とずれていないこと**をCIが見る — 「数字だけ良くする」経路をつぶすため。窓の切り方1つで 94.2% ↔ 96.6% と 2.4pt 動くので、**計測日を窓に入れない**ことを定義に含めた<br>`data/kpi-definitions.json`<br>`scripts/check-definitions.mjs`<br>`.github/workflows/seo-check.yml`<br>`growth/lib/`<br>`../simplememo-api/docs/analytics-golden.md`<br>`scripts/code-authorship.mjs`<br>`data/code-authorship.json` |
+| ゲート付き実行 | データ不足時に「何もしない」と判断 | ノイズフロア＝期待クリック3未満／28日窓未満でスナップショットを作らない<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
+| 提案のみ | 売上・課金・返金・広告の照合 | 2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**<br>`growth/scripts/ingest-asc.mjs`<br>`data/financial-policy.json` |
+| ゲート付き実行 | 欠損・遅延・重複データの検査 | 2026-08-22実装。**作った直後の初回実行で実データの欠陥を検出した** — 2026-08-09スナップショットの /vs/ticktick/ が2行あり、クリックが二重に乗りうる状態だった（URL正規化で衝突した行を畳んでいなかった）。取り込み側に mergeByKey を入れて恒久対策。重複と内部不整合は落とし、日付の欠けと鮮度は報告のみ<br>`growth/scripts/check-data-quality.mjs`<br>`growth/scripts/ingest-gsc.mjs` |
+| 提案のみ | CAC・LTV・回収期間・粗利の統合 | 2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる<br>`growth/scripts/ingest-asc.mjs`<br>`data/financial-policy.json` |
+| ゲート付き実行 | 季節性・外部要因の分離 | 2026-08-22実装。曜日係数を実測から出し（日1.17 月1.12 火0.97 水0.93 木1.05 金0.83 土0.81）、外れ値を注釈台帳と突き合わせて説明のつかないものを名指しする。**28日未満では判定を拒否する** — 足りない標本で「効いた/効かなかった」を言わせないため。金土は平日比0.8倍まで落ちるので、金曜に出した施策は何もしなくても効かなく見える。残る弱さ: 分離できるのは曜日だけで、季節・外部イベントは注釈頼み<br>`growth/scripts/decompose-series.mjs`<br>`growth/data/annotations.json`<br>`.github/workflows/seo-check.yml` |
+| **未実装** | 対照群に対する増分効果の評価 | 母数が小さく（App Storeクリック2.1件/日）、対照群を割ると両群とも検出力不足 |
+| ゲート付き実行 | 予算変更幅・損失上限・撤回条件 | 2026-08-22実装。**動かす予算が小さいうちに書いた** — 大きくなってから書くと、そのときの都合に合わせた基準になる。AI実費は稼働中（変更幅25%・間隔14日・損失上限$60・撤回条件3件）、広告は未着手、価格はAI対象外。**損失上限が現在の上限以下だとCIが落ちる**（初日から発火する上限は上限ではない）<br>`data/financial-policy.json`<br>`scripts/check-financial-policy.mjs`<br>`data/authority-matrix.json` |
+| ゲート付き実行 | 可逆／不可逆の承認レベル分け | 2026-08-22実装。13領域中9が承認制<br>`data/authority-matrix.json`<br>`scripts/check-authority.mjs` |
+| 人間 | 月次予算の決定 | — |
+| ゲート付き実行 | 資金繰りシナリオ（悲観・標準・楽観） | 2026-08-22実装。**出ていく側だけ**（悲観$150／標準$40／楽観$25）。収入はASC未接続で機械が読めないため、**ランウェイ（月数）は出さない** — 手元資金も収入も入っていないので月数を書くと嘘になる。CIが「収入未接続なのに runway_months を書いていないか」を見る<br>`data/financial-policy.json`<br>`scripts/check-financial-policy.mjs`<br>`data/vendor-register.json` |
 
 ### ③ 自律型マーケティング
 
-総合 **61.5%** ／ 実行 76.2% ／ 関与 90.5% ／ カバー 80.8%
+総合 **65.4%** ／ 実行 81.0% ／ 関与 90.5% ／ カバー 80.8%
 
 | 実行者 | タスク | 状況・証跡 |
 |---|---|---|
@@ -198,7 +218,7 @@
 | **未実装** | ahrefs / AppsFlyer / Firebase のデータ連携 | 自動連携なし。手動エクスポート |
 | ゲート付き実行 | App Store Connect のデータ連携 | 2026-08-22実装（オーナー承認を受けて着手）。**Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるので**オーナー作業ゼロで始められる。**鍵は fastlane が既に使っているものをそのまま使う。毎日20:30 JSTに取得。**行そのものは置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）。**本番でまだ一度も走っていない** — ONGOINGのレポート要求を作った当日はApple側が生成しておらず、初回の0件は失敗ではない<br>`growth/scripts/ingest-asc.mjs`<br>`../simplememo-ios/scripts/asc_analytics.rb`<br>`../simplememo-ios/.github/workflows/asc-analytics.yml` |
 | 人間 | AIプローブ（生成AI検索での露出確認） | 月1・オーナーが手動<br>`growth/input/AI_PROBE_PROTOCOL.md` |
-| 提案のみ | 言及・競合ウォッチ | 週1・WebSearch。スナップショット1件のみ<br>`growth/data/mentions/` |
+| ゲート付き実行 | 言及・競合ウォッチ | 2026-08-22。スナップショットが1件だけだった状態から、**2件目を実際に取り、やらなかった週に落ちる検査を入れた。**手順書は「週1回・前回が7日以上前なら実行」と書いていたが、**その条件を誰も検査しておらず、実際に10日空いていた**（3日の遅れは誰にも見えていなかった）。検査は (1) 最新の古さ (2) **過去の間隔**（最新だけ見ると途中の空白が隠れる）(3) READMEの固定クエリが欠けていないか — 一部だけ検索して「やった」ことにすると**系列は連続しているのに中身が変わり**、あとから「あの週から言及が減った」に見える (4) 前回との差分が書かれているか、を見る。5通りとも壊して落ちることを確認した。**検索そのものはセッションのWebSearchで行う**（CIからは実行しない）ので、実行はAI・遅れの検知はCI、という分担。残る弱さ: **本文はフェッチしていない**（この環境のegress制限）。mentions_us は検索結果の要約だけを根拠にしており、中身の妥当性は機械には判定できない<br>`growth/scripts/check-mentions.mjs`<br>`growth/data/mentions/`<br>`growth/data/mentions/README.md`<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`.github/workflows/seo-check.yml` |
 | 提案のみ | トレンドレーダー（Googleトレンド/はてブ/ランキング） | 2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人<br>`docs/trend-radar-prompt.md`<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
 | ゲート付き実行 | PR企画の採点とゲート判定 | 算数とゲートの矛盾をCIが落とす。採点は人が置く<br>`growth/scripts/d-score.mjs` |
 | **自律** | PR原稿の執筆 | 本原稿がその実例<br>`docs/pr-autopilot-2026-09.md` |
@@ -214,33 +234,13 @@
 | **未実装** | 対照群による増分効果測定 | 未実施 |
 | ゲート付き実行 | 紹介・レビュー促進・休眠復帰 | cronで自動送信<br>`../simplememo-api/src/lifecycle.ts`<br>`../simplememo-api/src/nudge.ts` |
 
-### ⑥ アプリ運営意思決定
-
-総合 **61.5%** ／ 実行 66.7% ／ 関与 91.7% ／ カバー 92.3%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| ゲート付き実行 | ファネル分析（インストール→初回メモ→継続→課金） | 4回連続の定点評価<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md` |
-| 提案のみ | コホート分析（継続率・課金率） | 都度レポート<br>`../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md` |
-| ゲート付き実行 | KPI定義と集計SQLのバージョン管理 | 2026-08-22実装。KPI6件の定義と、**算出元ファイルの sha256** を台帳に持つ。計算コードが変われば version を上げるまでCIが落ちる（`--bump <id> --why` で履歴が残る）。狙いは数字ではなく**定義の凍結** — 「自動化率が上がった」の半分が計算を変えたからだった、を起こさないため。導入直後にRunbookの編集で実際に発火し、履歴に「定義は変えていない」と残した。残る弱さ: 集計SQLはまだ台帳に無い（BigQuery側は analytics-golden.md 止まり）<br>`data/kpi-definitions.json`<br>`scripts/check-definitions.mjs`<br>`.github/workflows/seo-check.yml`<br>`growth/lib/`<br>`../simplememo-api/docs/analytics-golden.md` |
-| ゲート付き実行 | データ不足時に「何もしない」と判断 | ノイズフロア＝期待クリック3未満／28日窓未満でスナップショットを作らない<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md` |
-| 提案のみ | 売上・課金・返金・広告の照合 | 2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**<br>`growth/scripts/ingest-asc.mjs`<br>`data/financial-policy.json` |
-| ゲート付き実行 | 欠損・遅延・重複データの検査 | 2026-08-22実装。**作った直後の初回実行で実データの欠陥を検出した** — 2026-08-09スナップショットの /vs/ticktick/ が2行あり、クリックが二重に乗りうる状態だった（URL正規化で衝突した行を畳んでいなかった）。取り込み側に mergeByKey を入れて恒久対策。重複と内部不整合は落とし、日付の欠けと鮮度は報告のみ<br>`growth/scripts/check-data-quality.mjs`<br>`growth/scripts/ingest-gsc.mjs` |
-| 提案のみ | CAC・LTV・回収期間・粗利の統合 | 2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる<br>`growth/scripts/ingest-asc.mjs`<br>`data/financial-policy.json` |
-| ゲート付き実行 | 季節性・外部要因の分離 | 2026-08-22実装。曜日係数を実測から出し（日1.17 月1.12 火0.97 水0.93 木1.05 金0.83 土0.81）、外れ値を注釈台帳と突き合わせて説明のつかないものを名指しする。**28日未満では判定を拒否する** — 足りない標本で「効いた/効かなかった」を言わせないため。金土は平日比0.8倍まで落ちるので、金曜に出した施策は何もしなくても効かなく見える。残る弱さ: 分離できるのは曜日だけで、季節・外部イベントは注釈頼み<br>`growth/scripts/decompose-series.mjs`<br>`growth/data/annotations.json`<br>`.github/workflows/seo-check.yml` |
-| **未実装** | 対照群に対する増分効果の評価 | 母数が小さく（App Storeクリック2.1件/日）、対照群を割ると両群とも検出力不足 |
-| ゲート付き実行 | 予算変更幅・損失上限・撤回条件 | 2026-08-22実装。**動かす予算が小さいうちに書いた** — 大きくなってから書くと、そのときの都合に合わせた基準になる。AI実費は稼働中（変更幅25%・間隔14日・損失上限$60・撤回条件3件）、広告は未着手、価格はAI対象外。**損失上限が現在の上限以下だとCIが落ちる**（初日から発火する上限は上限ではない）<br>`data/financial-policy.json`<br>`scripts/check-financial-policy.mjs`<br>`data/authority-matrix.json` |
-| ゲート付き実行 | 可逆／不可逆の承認レベル分け | 2026-08-22実装。13領域中9が承認制<br>`data/authority-matrix.json`<br>`scripts/check-authority.mjs` |
-| 人間 | 月次予算の決定 | — |
-| ゲート付き実行 | 資金繰りシナリオ（悲観・標準・楽観） | 2026-08-22実装。**出ていく側だけ**（悲観$150／標準$40／楽観$25）。収入はASC未接続で機械が読めないため、**ランウェイ（月数）は出さない** — 手元資金も収入も入っていないので月数を書くと嘘になる。CIが「収入未接続なのに runway_months を書いていないか」を見る<br>`data/financial-policy.json`<br>`scripts/check-financial-policy.mjs`<br>`data/vendor-register.json` |
-
 ### ① 次期機能開発
 
-総合 **57.1%** ／ 実行 61.5% ／ 関与 100.0% ／ カバー 92.9%
+総合 **64.3%** ／ 実行 69.2% ／ 関与 100.0% ／ カバー 92.9%
 
 | 実行者 | タスク | 状況・証跡 |
 |---|---|---|
-| 提案のみ | ビジョン文書の維持（機能追加の必読ゲート） | 3リポジトリのCLAUDE.mdが強制参照。定期改訂の仕組みは無い<br>`../simplememo-ios/docs/VISION.md` |
+| ゲート付き実行 | ビジョン文書の維持（機能追加の必読ゲート） | 2026-08-22実装。**参照と鮮度を機械が守る。**3リポジトリの CLAUDE.md が「設計に入る前に読め」と指す唯一の文書なのに、**参照が壊れても誰も落ちなかった** — 壊れたことは「読んだ人が違う節を読んで帰る」という形でしか現れず、しかもその人は自分が違う節を読んだことに気づかない。初回の実行で1件出た: 冒頭が「最後の『12. 機能追加時のチェック』が実際のゲート」と書いていたが §12 は「現在地」で、チェックは §13。**読者を1つ手前の節へ送っていた**（3リポジトリのCLAUDE.mdはどれも §13 と正しく書いており、間違っていたのはこの文書の自分自身への参照だけだった）。節番号の解決・必須節の存在・**現在地が90日を超えたら落とす**・未決定が空でないこと、の4つ。4通りとも壊した状態を作って落ちることを確認した。残る弱さ: **中身が正しいかは見ていない**（ビジョンの正しさは機械には決められない）。定期改訂そのものは人が書く — 機械がやるのは古くなったことを言うところまで<br>`../simplememo-ios/scripts/qa/check_vision.py`<br>`../simplememo-ios/docs/VISION.md`<br>`../simplememo-ios/.github/workflows/qa-static.yml`<br>`CLAUDE.md`<br>`../simplememo-api/CLAUDE.md`<br>`../simplememo-ios/CLAUDE.md` |
 | ゲート付き実行 | AIが変更してはいけない安全原則の固定 | VISION §9「作らないもの」＋§13の6問。claude.ymlのactions:write非付与<br>`../simplememo-ios/docs/VISION.md`<br>`.github/workflows/seo-check.yml` |
 | ゲート付き実行 | 要望・レビュー・問い合わせ・競合情報の重複排除 | 2026-08-22実装。要望・レビュー・問い合わせ・競合・利用実態を1台帳に統合し、dedupe_key で同じ話を1行にする。**声の大きさを「何回転記されたか」で測らないため。**実際「送信の確実性」は問い合わせ・レビュー実測・アンケートの3経路から来ており、台帳を作るまで別々の紙に載っていた。declined は理由が無いとCIが落ちる<br>`data/signal-ledger.json`<br>`scripts/check-signals.mjs` |
 | ゲート付き実行 | 期待効果・確信度・工数・リスクによる自動優先順位付け | 2026-08-22実装。**確信度は evidence_strength から機械的に決まり、手で置けない**（主観にすると順位はいくらでも動く）。リスクは点数を下げるのではなく承認を要求する — 掛け算にすると期待効果が大きければ危険な案が1位になる。根拠が弱い候補は「やらない」ではなく「まず測る」に落ちる<br>`data/feature-backlog.json`<br>`scripts/feature-score.mjs`<br>`.github/workflows/seo-check.yml` |
@@ -285,7 +285,7 @@
 | ゲート付き実行 | 問い合わせの自動分類 | 2026-08-22実装（simplememo-api・24テスト）。**AIに判定させず規則で分ける** — 回帰の合否をAIに判定させない設計と同じ理由で、分類の誤りは見落としとして静かに積み上がる。分けられないものは**「その他」ではなく unclassified**（その他は見返されないが、未分類は見返される）。重い用件（個人情報・退会・返金）を先に当て、当たったら自動で人へ上げる。**受け口は既定オフ**（INQUIRY_ENABLED）で、公開ページを mailto から切り替えるかは製品の判断。テストが実バグを検出した — 「送信できません」が「できな」に当たらず未分類に落ちていた<br>`../simplememo-api/src/inquiry.ts`<br>`../simplememo-api/migrations/0020_inquiries.sql`<br>`../simplememo-api/test/inquiry.test.ts` |
 | **未実装** | 回答・返金・障害案内 | 同上。加えて返金は不可逆で、承認境界の設計が先 |
 | **未実装** | App Store レビュー返信 | ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先 |
-| ゲート付き実行 | FAQとリリース内容の同期 | 2026-08-22実装。FAQ・トップ（日英）・llms.txt・運営者情報の**散文**を site-constants / benchmark と突き合わせ、旧アプリ名・古い起動時間・廃止済みトライアル・価格ドリフトで落とす。廃止済みトライアルは景表法・ストア審査上のリスク対応で消したもので、それまで「出現回数0」を確かめていたのは人の目視だった。**リリースノート本文との突き合わせは隣リポジトリのためCI外**<br>`scripts/check-public-facts.mjs`<br>`faq.html`<br>`data/site-constants.json` |
+| ゲート付き実行 | FAQとリリース内容の同期 | 2026-08-22実装。FAQ・トップ（日英）・llms.txt・運営者情報の**散文**を site-constants / benchmark と突き合わせ、旧アプリ名・古い起動時間・廃止済みトライアル・価格ドリフトで落とす。廃止済みトライアルは景表法・ストア審査上のリスク対応で消したもので、それまで「出現回数0」を確かめていたのは人の目視だった。**リリースノート本文との突き合わせは隣リポジトリのためCI外** [2026-08-22追記] **公開表示の鮮度**も機械が見るようにした。評価（4.4）と件数（22）は JSON-LD の aggregateRating として12ページに出ているのに、どちらも人が App Store Connect を見て手で書いた値で、台帳のメモにも「NOT machine-verified」と書いてあった — **古くなっても誰も気づかない。**CIは45日を超えた確認日で落とす（ネットには触らない — PRのたびに外部APIを叩くと向こうの不調でCIが赤くなり、やがて無視される）。実物との突き合わせは日次ワークフローの --net で行う（**GitHubのランナーは itunes.apple.com に到達できる**が、エージェントのサンドボックスはプロキシがCONNECTを拒否するので確認できない）。**件数0で平均を出していないか**も見る — 実体の無い集計評価は公開してはいけない表示<br>`scripts/check-public-facts.mjs`<br>`faq.html`<br>`data/site-constants.json`<br>`scripts/check-store-facts.mjs`<br>`.github/workflows/seo-daily.yml` |
 | 提案のみ | CSAT計測 | 2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**<br>`growth/scripts/ingest-asc.mjs`<br>`data/financial-policy.json` |
 | ゲート付き実行 | 重大案件の有人移管 | 2026-08-22実装。実行判定が返す故障・縮退コード5件と、運転台帳に**実際に現れた** failure_class 4件の全部に規則が要る（規則の無い種別があると落ちる）。危機領域は stop_automation: true を強制。**owner_direct の経路は未整備**で、名前が付いただけであることも台帳に書いてある<br>`data/escalation-rules.json`<br>`scripts/check-escalation.mjs`<br>`data/authority-matrix.json` |
 | 提案のみ | 問い合わせからIssueと回帰テストを作成 | 手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）<br>`../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md` |
