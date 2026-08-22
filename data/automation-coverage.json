@@ -487,11 +487,16 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "言及・競合ウォッチ",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/data/mentions/"
+        "growth/scripts/check-mentions.mjs",
+        "growth/data/mentions/",
+        "growth/data/mentions/README.md",
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        ".github/workflows/seo-check.yml"
       ],
-      "note": "週1・WebSearch。スナップショット1件のみ"
+      "note": "2026-08-22。スナップショットが1件だけだった状態から、**2件目を実際に取り、やらなかった週に落ちる検査を入れた。**手順書は「週1回・前回が7日以上前なら実行」と書いていたが、**その条件を誰も検査しておらず、実際に10日空いていた**（3日の遅れは誰にも見えていなかった）。検査は (1) 最新の古さ (2) **過去の間隔**（最新だけ見ると途中の空白が隠れる）(3) READMEの固定クエリが欠けていないか — 一部だけ検索して「やった」ことにすると**系列は連続しているのに中身が変わり**、あとから「あの週から言及が減った」に見える (4) 前回との差分が書かれているか、を見る。5通りとも壊して落ちることを確認した。**検索そのものはセッションのWebSearchで行う**（CIからは実行しない）ので、実行はAI・遅れの検知はCI、という分担。残る弱さ: **本文はフェッチしていない**（この環境のegress制限）。mentions_us は検索結果の要約だけを根拠にしており、中身の妥当性は機械には判定できない",
+      "since": "2026-08"
     },
     {
       "area": "③ 自律型マーケティング",
