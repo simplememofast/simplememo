@@ -118,7 +118,19 @@ export function toSvg(doc) {
   const o = [];
   o.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" font-family="'Zen Kaku Gothic New','Hiragino Sans','Noto Sans JP',sans-serif" role="img" aria-label="運営タスクの自律度とコード変更のAI比率の月次推移">`);
   o.push(`<rect width="${W}" height="${H}" fill="${SURFACE}"/>`);
-  o.push(`<text x="${M.l}" y="27" fill="${INK}" font-size="17" font-weight="700">運営の自律度は4か月で10倍。コードは最初から高いまま。</text>`);
+  // 見出しの「か月」と「倍」は**系列から計算する。**手で書くと実装が進むたびに
+  // 古くなり、しかも「グラフは正しいのに見出しだけ嘘」という一番たちの悪い形で残る
+  // （実際に 10倍 と書いたまま 17倍 になっていた）。
+  // 起点はローンチ月（グラフの注記もそこを基準にしている）。
+  const launchIdx = Math.max(0, pts.findIndex((p) => p.month === doc.launch_month));
+  const from = pts[launchIdx]?.overall_automation_rate ?? null;
+  const to = pts[pts.length - 1]?.overall_automation_rate ?? null;
+  const months = pts.length - 1 - launchIdx;
+  const ratio = from && to ? Math.round(to / from) : null;
+  const headline = ratio
+    ? `運営の自律度は${months}か月で${ratio}倍。コードは最初から高いまま。`
+    : '運営の自律度とコード変更のAI比率';
+  o.push(`<text x="${M.l}" y="27" fill="${INK}" font-size="17" font-weight="700">${esc(headline)}</text>`);
   o.push(`<text x="${M.l}" y="46" fill="${INK2}" font-size="12">総合自動化率（未実装を分母に含む最も厳しい数え方）／ 2026-08 のみ実測・他は証跡の初出月からの再構成</text>`);
 
   // グリッドは1pxソリッド・面から1段だけ外す

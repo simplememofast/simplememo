@@ -1492,9 +1492,15 @@
       "task": "削除要求への対応",
       "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md"
+        "../simplememo-api/scripts/check-deletion-coverage.mjs",
+        "../simplememo-api/data/data-retention.json",
+        "../simplememo-api/src/index.ts",
+        "../simplememo-api/test/deletion-coverage.test.ts",
+        "../simplememo-api/.github/workflows/ci.yml",
+        "data/authority-matrix.json"
       ],
-      "note": "APIは実装済み。運用手順は未整備"
+      "note": "2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。\n\n実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。\n\n**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない",
+      "since": "2026-08"
     },
     {
       "area": "⑪ データ・プライバシー",
