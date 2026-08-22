@@ -1294,9 +1294,13 @@
     {
       "area": "⑪ データ・プライバシー",
       "task": "保持期間の自動削除",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**23ストア中5つだけ自動削除がある**（send_correlation 35日・recent_memo_subjects 8日・KV 3種のTTL）。**残る11ストアが個人に紐づく識別子を無期限に保持**。最大は app_analytics_events（anonymous_install_id を削除コード無しで蓄積）。棚卸しで場所は特定できたが、窓を決めて消す実装はこれから"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/analytics.ts",
+        "../simplememo-api/test/analytics-retention.test.ts",
+        "../simplememo-api/data/data-retention.json"
+      ],
+      "note": "2026-08-22に app_analytics_events を90日で剪定するようにした（オーナー判断）。棚卸しで見つかった最大の穴がこれ。**23ストア中6つが自動削除つき**になった。**残る10ストアはまだ無期限**（重複送信防止の台帳が中心。email_suppression は意図的に無期限）"
     },
     {
       "area": "⑪ データ・プライバシー",
