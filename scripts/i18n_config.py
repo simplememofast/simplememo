@@ -31,6 +31,7 @@ TOP_CLUSTER_XDEFAULT = "/"  # x-default points to ja root
 # Each entry MUST have both files present on disk for hreflang to be emitted.
 JA_EN_PAIRS = [
     ("/about/",                             "/en/about/"),
+    ("/roadmap/",                           "/en/roadmap/"),
     ("/faq",                                "/en/faq"),
     ("/ai-tags/",                           "/en/ai-tags/"),
     ("/apple-watch/",                       "/en/apple-watch/"),
