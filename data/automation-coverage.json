@@ -1,0 +1,1486 @@
+{
+  "$comment": [
+    "全領域の自動化カバレッジ台帳 — 開発以外もすべて同じ物差しで測る。",
+    "",
+    "【なぜ作るか】2026-08-22時点で、この運用の自動化率について言えたのは",
+    "**開発領域だけ**だった（AI完走率76.9% / 変更行のAI比率98.8%）。",
+    "マーケティングも経営も『部分実装』としか言えず、どのくらい部分なのかを",
+    "数で示せなかった。この台帳はそこを埋める。",
+    "",
+    "【executor の定義】タスクを**誰が実行しているか**で6分類する。",
+    "  ai_autonomous     … AIが起動から完了まで単独。人の承認もゲートも待たない",
+    "  ai_executes_gated … AIが実行するが、ゲート（CI・上限・品質基準）を通ったときだけ通る。",
+    "                      人の個別承認は不要。**この運用の主力はここ**",
+    "  ai_proposes       … AIは提案・下書き・検知まで。適用/実行は人間",
+    "  human_only        … 人間が実行。AIは関与しない（または意図的に関与させない）",
+    "  nobody            … 誰もやっていない（未実装）",
+    "  intentional_no    … 意図的にやらない。分母から外す",
+    "",
+    "【4つの率を必ず並べて出す】分母を1つに決めると必ず都合のよい数字になる。",
+    "  総合自動化率 = (autonomous + gated) / 定義タスク      … nobody を分母に含む。最も厳しい",
+    "  AI実行率     = (autonomous + gated) / 実施中タスク    … nobody を除いた分母",
+    "  AI関与率     = (上記 + proposes)    / 実施中タスク",
+    "  カバー率     = 実施中タスク         / 定義タスク      … そもそも誰かがやっている割合",
+    "**総合自動化率とカバー率を隠して AI関与率だけ出すのが、この台帳で一番やってはいけないこと。**",
+    "",
+    "【この測り方の限界（先に書く）】",
+    "  1. **タスク数の重み付けが粗い。**「記事の実装」と「SBOM生成」が同じ1として数えられる。",
+    "     開発領域には変更行という別の物差しがある（AI 98.8%）が、他領域には無い。",
+    "     したがって領域間の比較は**傾向**であって、精度のある比較ではない。",
+    "  2. **タスクの粒度が領域で揃っていない。** 法人経営は外部レビューの列挙をそのまま",
+    "     採ったため粒度が粗く、マーケは実装単位まで細かい。前者が低く出るのは事実だが、",
+    "     粒度の差も混ざっている。",
+    "  3. **evidence が無い分類は主張として弱い。** ai_autonomous / ai_executes_gated は",
+    "     証跡ファイルを持つことを CI が強制する（scripts/automation-rate.mjs --check）。",
+    "",
+    "【出典】タスクの列挙は docs/autopilot-maturity-backlog.md（外部レビュー由来）と、",
+    "本セッションで実測した内容。分類は3リポジトリの実装を1件ずつ当てて決めた。"
+  ],
+  "measured_at": "2026-08-22",
+  "known_limits": [
+    "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
+    "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
+    "開発領域の変更行比率98.8%に相当する客観指標が他領域には無い"
+  ],
+  "tasks": [
+    {
+      "area": "① 次期機能開発",
+      "task": "ビジョン文書の維持（機能追加の必読ゲート）",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/VISION.md"
+      ],
+      "note": "3リポジトリのCLAUDE.mdが強制参照。定期改訂の仕組みは無い"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "AIが変更してはいけない安全原則の固定",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/docs/VISION.md",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "VISION §9「作らないもの」＋§13の6問。claude.ymlのactions:write非付与"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "要望・レビュー・問い合わせ・競合情報の重複排除",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "統合台帳が無い。都度レポート"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "期待効果・確信度・工数・リスクによる自動優先順位付け",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "コンテンツ側のノイズフロアは有るが機能側は無い"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "ユーザー要望の受領と設計への落とし込み",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
+      ],
+      "note": "AIが設計文書まで。採否はオーナー判断"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "継続率データによる優先度判断",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"
+      ],
+      "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "PRD・受入条件・UX・多言語の作成",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/obsidian-only-mode-design.md"
+      ],
+      "note": "都度作成・定型化されていない"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "Issue→ブランチ→PR→テスト→配信を結ぶ共通実行ID",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/autopilot-runs.json",
+        "scripts/autopilot-runs.mjs"
+      ],
+      "note": "2026-08-22実装"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "遠隔操作できるFeature Flag",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "アプリ本体に無い"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "対照群・最低サンプル数・停止条件を持つ実験基盤",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/experiments/experiments.json"
+      ],
+      "note": "サイト側のみ。評価日はCIが監視するが対照群の概念が無い"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "D7/D28・課金・解約まで含む評価",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md"
+      ],
+      "note": "D28はBQ蓄積28日到達待ち（9/6前後）"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "失敗機能の自動停止とバックログ差し戻し",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "Feature Flag待ち"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "判断理由と結果のDecision Ledger",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_LOG.md",
+        "growth/experiments/experiments.json",
+        "data/autopilot-runs.json"
+      ],
+      "note": "機能開発の判断はまだ入っていない"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "本番改善サイクルの完走（機能側）",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "コンテンツ側は完走。機能側0件"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "統合監視（Crash/API/Watch/課金/問い合わせ）",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/src/cron.ts"
+      ],
+      "note": "個別にはある。統合ビューが無い"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "問い合わせから再現テストを自動生成",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md"
+      ],
+      "note": "手動運用。ただしWatch同期は実績あり"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "Unit / UI / 契約テストの実行",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/qa-ios.yml"
+      ],
+      "note": "XCTest/XCUITest＋Watchブリッジ契約テスト2コピー＋parity CI"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "Visual Regression Test",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "アプリ側に無い"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "オフライン・タイムアウト・500・429の決定論再現",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md"
+      ],
+      "note": "QAStubURLProtocol。低速回線とバックグラウンド復帰は無い"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "実機/シミュレータでの操作・撮影・計測",
+      "executor": "human_only",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "macOS必須。Runbook §7「できないこと」の筆頭"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "アクセシビリティ・文字切れ・多言語の自動検査",
+      "executor": "ai_proposes",
+      "evidence": [
+        "scripts/seo-check.js"
+      ],
+      "note": "サイト側のみ。アプリ側は無い"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "性能・起動時間の計測",
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/benchmark.json"
+      ],
+      "note": "定点実測。本番の継続監視ではない"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "依存脆弱性・秘密情報・SBOM・署名検査",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "secret scanningは使えるがSBOM無し"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "Fuzz / Property-based / Mutation Test",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "決定論的テストが先。この規模ではまだ費用対効果が読めない"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "失敗の分類（独立2モデル監査）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/ai_triage.sh"
+      ],
+      "note": "2026-08-22実装。割れたら人間に上げる"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "回帰の合否判定（決定論的）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md"
+      ],
+      "note": "AIには判定させない設計"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "セキュリティ監査と修正",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md"
+      ],
+      "note": "AIが発見しAIが修正。High 1件含む4件"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "カナリア公開と自動ロールバック",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "②の閉ループが閉じない最大の理由"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "誤修正率・再発率・MTTRの計測",
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/autopilot-runs.json"
+      ],
+      "note": "変更失敗率は算出可。MTTRは検知時刻が無い"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "基盤故障の検知と自己修復",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-selfheal.mjs"
+      ],
+      "note": "2026-08-22実装。レーンF"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "検索データの取り込み（GSC / BigQuery）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "growth/scripts/ingest-bigquery.mjs",
+        ".github/workflows/seo-daily.yml"
+      ],
+      "note": "日次自動"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "データ鮮度の監視",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "growth/scripts/bq-preflight.mjs"
+      ],
+      "note": "鮮度落ちで失敗する"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "OAuth切れ・API障害時の自動復旧",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "検知はする。復旧は人"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "施策の選定（レーンA〜E）",
+      "executor": "ai_autonomous",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "ノイズフロア・品質ゲートに基づきAIが単独で選ぶ"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "記事の実装と内部リンク配線",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_LOG.md"
+      ],
+      "note": "出荷10件すべてAIが執筆。人は中身に触っていない"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "OG画像の生成",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/generate-og-batch.js"
+      ],
+      "note": "Playwright。毎回自動"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "デスクトップQRの生成と検証",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/generate-qr-codes.mjs"
+      ],
+      "note": "35件を独立デコード検証"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "品質ゲート（ノイズフロア・品質80点・検証規約）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "「毎日出すために基準を下げる」を失敗と定義"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "本番デプロイ（検証済みSHAのみマージ）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/auto-merge.yml"
+      ],
+      "note": "SEO Validation合格時のみ"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "停止の検知（緑のまま何もしていない）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/autopilot-health.yml",
+        ".github/workflows/cron-health.yml"
+      ],
+      "note": "12:00と07:00の二重"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "ahrefs / AppsFlyer / Firebase のデータ連携",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "自動連携なし。手動エクスポート"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "App Store Connect のデータ連携",
+      "executor": "nobody",
+      "evidence": [
+        "growth/data/appstore/"
+      ],
+      "note": "受け皿だけ。鍵は既にある"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "AIプローブ（生成AI検索での露出確認）",
+      "executor": "human_only",
+      "evidence": [
+        "growth/input/AI_PROBE_PROTOCOL.md"
+      ],
+      "note": "月1・オーナーが手動"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "言及・競合ウォッチ",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/data/mentions/"
+      ],
+      "note": "週1・WebSearch。スナップショット1件のみ"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "トレンドレーダー（Googleトレンド/はてブ/ランキング）",
+      "executor": "nobody",
+      "evidence": [
+        "docs/trend-radar-prompt.md"
+      ],
+      "note": "プロンプト文面まで。実組み込み未了"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "PR企画の採点とゲート判定",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "growth/scripts/d-score.mjs"
+      ],
+      "note": "算数とゲートの矛盾をCIが落とす。採点は人が置く"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "PR原稿の執筆",
+      "executor": "ai_autonomous",
+      "evidence": [
+        "docs/pr-autopilot-2026-09.md"
+      ],
+      "note": "本原稿がその実例"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "PR原稿の事実・数値・引用元の検査",
+      "executor": "ai_proposes",
+      "evidence": [
+        "docs/pr-autopilot-2026-09.md"
+      ],
+      "note": "本セッションで実施（旧アプリ名・起動時間・廃止済みトライアルを検出）。自動化されていない"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "ヒーロー画像の生成",
+      "executor": "ai_proposes",
+      "evidence": [
+        "docs/siri-hero-banner-brief.md"
+      ],
+      "note": "AIが依頼文を書き、生成は外部ツールで人が実行"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "PR TIMES への配信操作",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "管理画面から手動。APIが無い"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "キャンペーンパラメータの付与",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/tag-cta-placements.js",
+        "data/cpp-map.json"
+      ],
+      "note": "CIが強制。49件がpage-level ct=保持"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "App Store CPP（訴求別ページ）の実験",
+      "executor": "nobody",
+      "evidence": [
+        "data/cpp-map.json"
+      ],
+      "note": "34本作成済みだが実験として回っていない"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "SNS投稿（X日本語）",
+      "executor": "ai_proposes",
+      "evidence": [
+        "admin/brand/docs/cowork-x-engagement-brief.md"
+      ],
+      "note": "Cowork定期タスクでバッチ運用"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "SNS投稿（X英語・TikTok）",
+      "executor": "intentional_no",
+      "evidence": [
+        "README.md"
+      ],
+      "note": "アカウントBAN／品質未達で運用停止中"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "リスティング広告の運用",
+      "executor": "nobody",
+      "evidence": [
+        "../simplememo-ios/docs/reports/APPLE_ADS_AUTOMATION_2026-08-17.md"
+      ],
+      "note": "調査レポートのみ。資格情報も無い"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "広告パフォーマンスの監視と自動調整",
+      "executor": "intentional_no",
+      "evidence": [
+        "../simplememo-ios/docs/reports/APPLE_ADS_AUTOMATION_2026-08-17.md"
+      ],
+      "note": "自社分析が『この予算規模ではやるべきでない』と結論"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "対照群による増分効果測定",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "未実施"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "紹介・レビュー促進・休眠復帰",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/lifecycle.ts",
+        "../simplememo-api/src/nudge.ts"
+      ],
+      "note": "cronで自動送信"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "サイトの本番デプロイ",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/auto-merge.yml"
+      ],
+      "note": "mainマージ＝Cloudflare Pagesが自動デプロイ"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "バージョン・価格・名称の単一情報源化",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/site-constants.json",
+        "scripts/sync_constants.js"
+      ],
+      "note": "CIがドリフトを落とす。App Store側とは繋がっていない"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "ビルドとTestFlight内部配信",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/release-automation.md"
+      ],
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "申請項目・リリースノート・サブタイトルの投入",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/prepare_app_store_version.rb"
+      ],
+      "note": "Apple商標スキャン込み。5.2.5リジェクトの恒久対策"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "App Review への提出",
+      "executor": "human_only",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/submit-review.yml"
+      ],
+      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "実機での事前確認",
+      "executor": "human_only",
+      "evidence": [
+        "../simplememo-ios/docs/release-automation.md"
+      ],
+      "note": "Hard Rule。技術的強制ではなく人間のルール"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "App Store への公開（審査通過後）",
+      "executor": "human_only",
+      "evidence": [
+        "../simplememo-ios/fastlane/Fastfile"
+      ],
+      "note": "automatic_release がハードコードで false。恒久的に手動"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "証明書・APIキー・Provisioning Profile の期限監視",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "切れた日に初めて分かる"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "段階公開への自動昇格",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "Hard Ruleの手前"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "Crash-free率・送信成功率による自動停止",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "アプリ本体にRemote Feature Flagが無いため、止める手段そのものが無い"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "Remote Feature Flag と緊急Kill Switch",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/src/env.ts"
+      ],
+      "note": "APIには *_KILL_SWITCH / *_DRY_RUN / *_DAILY_CAP の様式がある。アプリ本体は無い"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "審査項目・商標・プライバシー表示の整合確認",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/scripts/lib/app_metadata.rb"
+      ],
+      "note": "商標スキャンのみ実装"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "AI・外部サービス停止時の独立した緊急停止経路",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "AgentOps側のKill Switch設計と一体。副系を止める手段が無い問題と同根"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "ChatOps によるリリース起動",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/release-command.yml"
+      ],
+      "note": "issue コメントで起動。コメントするのはオーナー"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "実費の記録（月次台帳）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/autopilot-cost.json",
+        "scripts/autopilot-budget.mjs"
+      ],
+      "note": "2026-08-22実装"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "実費の抽出（実行ログから）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "total_cost_usd を抽出しサマリと通知へ"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "上限超過での自己停止",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "予算ゲートが主系runを止める。副系は止められない"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "月次上限の決定",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "現在 placeholder $40。実測由来ではない"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "1記事あたり単価の算出",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-budget.mjs"
+      ],
+      "note": "usd_per_shipped。課金者あたりは無い"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "タスク単位の予算",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "月次のみ"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "モデル別・再試行別の内訳",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "run単位までしか無い"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "品質・速度・価格に応じたモデルルーター",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "タスク単位の予算（未実装）が前提。月次上限だけでは判断材料が足りない"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "小型→大型→人間への段階的移管",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/ai_triage.sh"
+      ],
+      "note": "QA分類のみ実装（2モデル→不一致なら人間）"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "Prompt Cache・結果キャッシュ・コンテキスト圧縮",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "実費が月$25前後の見込みで、最適化の効果より実装コストが上回る段階"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "無限ループ・重複実行の防止",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "--max-turns 250・当日ブランチ占有・冪等性チェック"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "異常消費の検知",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "実績1点しか無く、何を異常とするかの基準が作れない。2週間の実測待ち"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "モデル障害・レート制限時のフォールバック",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/ai_triage.sh"
+      ],
+      "note": "QA分類は2モデル構成。autopilot本体は無い"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "新モデル導入前の固定評価セット",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "評価セットを作る前に、まず何を評価すべきかが定まっていない"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "副系CCRの実費観測",
+      "executor": "nobody",
+      "evidence": [
+        "data/autopilot-cost.json"
+      ],
+      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "ファネル分析（インストール→初回メモ→継続→課金）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/analytics.ts",
+        "../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md"
+      ],
+      "note": "4回連続の定点評価"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "コホート分析（継続率・課金率）",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"
+      ],
+      "note": "都度レポート"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "KPI定義と集計SQLのバージョン管理",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/lib/",
+        "../simplememo-api/docs/analytics-golden.md"
+      ]
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "データ不足時に「何もしない」と判断",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "ノイズフロア＝期待クリック3未満／28日窓未満でスナップショットを作らない"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "売上・課金・返金・広告の照合",
+      "executor": "nobody",
+      "evidence": [
+        "growth/data/appstore/"
+      ],
+      "note": "ASC未接続。鍵は既にある"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "欠損・遅延・重複データの検査",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/scripts/bq-preflight.mjs"
+      ],
+      "note": "鮮度監視のみ"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "CAC・LTV・回収期間・粗利の統合",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "広告が未実装でCACが存在せず、ASC売上も未接続"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "季節性・外部要因の分離",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/data/annotations.json"
+      ],
+      "note": "系列台帳が下地"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "対照群に対する増分効果の評価",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "母数が小さく（App Storeクリック2.1件/日）、対照群を割ると両群とも検出力不足"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "予算変更幅・損失上限・撤回条件",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "動かす予算そのものが無い（広告未実装）"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "可逆／不可逆の承認レベル分け",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/authority-matrix.json",
+        "scripts/check-authority.mjs"
+      ],
+      "note": "2026-08-22実装。13領域中9が承認制"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "月次予算の決定",
+      "executor": "human_only",
+      "evidence": []
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "資金繰りシナリオ（悲観・標準・楽観）",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "法人経営領域と一体。証跡の形から未着手"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "仕訳・請求・領収書・銀行・カード・月次締めの統合",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "税務・給与・社会保険・法定期限の管理",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "定型／非定型契約の分類",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "責任上限・知財・個人情報・準拠法の条項検査",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "取引先・送金先・利用サービスの許可リスト",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "支出上限と重要支出の二者承認",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "契約・請求・納品・支払いの照合",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "AI事業者のDPA・データ利用・SLA・撤退計画の審査",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "董事会・株主・規制・契約記録の保存",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "物理業務発注後の写真・受領・品質確認",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "倫理・評判・長期影響の独立監査",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "エージェントごとの権限・認証情報・失効手順",
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "権限表として一部定義。認証情報の失効手順は無い"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "法務・税務・労務・事故時の専門家エスカレーション",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "方針のみ。手順・連絡先・停止手段は未整備"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "問い合わせの自動分類",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "問い合わせ基盤自体が未整備。件数も少なく分類器を作る母数が無い"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "回答・返金・障害案内",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "同上。加えて返金は不可逆で、承認境界の設計が先"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "App Store レビュー返信",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "FAQとリリース内容の同期",
+      "executor": "ai_proposes",
+      "evidence": [
+        "faq.html"
+      ],
+      "note": "FAQはある。リリースとの同期は手動"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "CSAT計測",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "計測する接点（問い合わせ・返信）が未整備"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "重大案件の有人移管",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "ルールが明文化されていない"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "問い合わせからIssueと回帰テストを作成",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md"
+      ],
+      "note": "手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "ライフサイクルメール（歓迎・確認・リマインド）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/lifecycle.ts",
+        "../simplememo-api/src/reminder.ts"
+      ],
+      "note": "cronで自動送信。DRY_RUN/KILL_SWITCH/DAILY_CAP付き"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "価格・プラン・ペイウォールの実験",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "課金は不可逆で既存契約者への影響が読めない。権限表でAIは提案もしない扱い"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "オンボーディング改善（課金導線）",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/reports/ONBOARDING_REDESIGN_2026-08-06.md"
+      ],
+      "note": "データ起点の再設計。実施は人の判断"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "プレミアム機能の設計判断",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/docs/obsidian-only-mode-design.md"
+      ],
+      "note": "Obsidianのみモードをプレミアム限定にする判断はオーナー"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "解約理由分析",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "解約理由を取る導線が無い"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "課金失敗の回復",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "StoreKit側の失敗イベントを受ける経路が未実装"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "返金・不正課金・チャージバック対応",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "金銭が動く不可逆な操作。承認境界の設計が先"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "短期CVRよりLTVと信頼を守る制約",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/docs/VISION.md"
+      ],
+      "note": "VISION §0「AIを前面に出さない」・§9「所有しない」が実質この制約。§13の6問がゲート"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "価格の変更",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "AIは提案もしない（不可逆・既存契約者への影響が読めない）"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "実行の完全記録（主系）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "Actionsのrunログは全部読める"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "実行の完全記録（副系）",
+      "executor": "nobody",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "誰が何を変更したかの監査ログ",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/autopilot-runs.json"
+      ],
+      "note": "経路・結果・介入は機械可読。判断の根拠はまだ散文"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "最小権限（AIに与えない権限の明文化）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/claude.yml",
+        "scripts/check-authority.mjs"
+      ],
+      "note": "actions:write 非付与。CIが実際に検出する"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "Prompt Injection・Tool Poisoning対策",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/release-command.yml"
+      ],
+      "note": "本文が一切シェルに渡らない設計。外部コンテンツを読む経路の対策は無い"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "AIへの送信内容のredact",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
+      ],
+      "note": "PII無し・サイズ上限つき要約のみ"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "エージェント別 Kill Switch",
+      "executor": "ai_proposes",
+      "evidence": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "note": "予算ゲートが実質これ（主系のみ）。副系は止められない"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "失敗理由とバックアップ切替の観測",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/autopilot-runs.json",
+        "scripts/autopilot-runs.mjs"
+      ],
+      "note": "by_route・primary_ever_shipped・failure_class"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "基盤故障の自己修復と、その歯止め",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/autopilot-selfheal.mjs",
+        "scripts/check-authority.mjs"
+      ],
+      "note": "検証の弱体化・権限の拡大をCIが実検出"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "バックアップ切替の演習",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "観測はできるが意図的に落として確かめたことは無い"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "自律システムとは別系統の監査AI",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "監査対象のログが揃ってきたのは2026-08-22から。まず記録を貯める段階"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "認証切れ・モデル障害・API障害の演習",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "演習の前に、切替が起きたことを観測する仕組みが要った（2026-08-22に実装）"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "データ分類（送信可否の allowlist）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/check_analytics_allowlist.py"
+      ],
+      "note": "CIで強制"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "収集同意",
+      "executor": "ai_proposes",
+      "evidence": [],
+      "note": "App Analytics共有オプトイン依存"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "保持期間の定義と自動削除",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "何をどこに保持しているかの棚卸しが先"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "削除要求への対応",
+      "executor": "ai_proposes",
+      "evidence": [
+        "../simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md"
+      ],
+      "note": "APIは実装済み。運用手順は未整備"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "AIへの送信可否の制御",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
+      ],
+      "note": "redact済み要約のみ。メモ本文fixtureは架空"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "端末内の暗号化",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md"
+      ],
+      "note": "AES-GCM-256・Keychain・Data Protection属性"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "アクセス履歴",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "同上"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "第三者SDKのデータ送信監査",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "同上。PrivacyInfo.xcprivacy はあるが実送信の監査は無い"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "推論をどこで回すかの決定",
+      "executor": "human_only",
+      "evidence": [
+        "../simplememo-ios/docs/VISION.md"
+      ],
+      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "実行経路の二重化（主系・副系）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "data/autopilot-runs.json"
+      ],
+      "note": "主系0/3・副系10/10。冗長化が実際に効いた"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "冪等性",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "scripts/autopilot-budget.mjs"
+      ],
+      "note": "当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "再試行",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        ".github/workflows/obsidian-autopilot.yml",
+        "../simplememo-api/src/resend.ts"
+      ],
+      "note": "09:20の再試行経路・Resend 429の単発リトライ"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "Circuit Breaker",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "外部依存の障害パターンをまだ観測できていない"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "Dead Letter Queue",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "Outbox（端末側）が実質これを担っている。サーバ側は未実装"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "バックアップ・復元",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "本番データはCloudflare D1とApp Store側にあり、復元手順が未整備"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "手動復旧手順",
+      "executor": "ai_proposes",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "../simplememo-api/DEPLOYMENT.md"
+      ],
+      "note": "文書はある"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "障害訓練",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "訓練の前に、障害を観測する仕組みが要った（2026-08-22に実装）"
+    },
+    {
+      "area": "⑫ 事業継続性",
+      "task": "外部サービス停止時の縮退運転",
+      "executor": "ai_proposes",
+      "evidence": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "note": "autopilotは二重化。GitHub/Apple/Cloudflareは単一障害点"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "イベント: 候補選定・見積比較・発注・リード集計",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "AIが担える設計だが未着手"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "イベント: 現地設営・接客・実施",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "物理領域。人間が担う"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "人事: 募集・候補抽出・日程調整・書類作成",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "未着手"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "人事: 採用・解雇・評価・健康情報の判断",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "人間が担う"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "公的資金: 制度探索・期限管理・申請書下書き",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "未着手"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "公的資金: 表明・提出・面談・法的責任",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "人間が担う"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "契約: 定型契約・条項比較・リスク抽出",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "未着手"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "契約: 非定型・高額・海外・知財の承認",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "人間が担う"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "R&D: 調査・仮説・プロトタイプ・実験",
+      "executor": "ai_proposes",
+      "evidence": [],
+      "note": "本セッション自体がその実例（調査→実装→検証）"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "R&D: 安全性・知財・投資継続の判断",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "人間が担う"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "営業: リード選定・メール・提案書",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "未着手"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "営業: 交渉・信頼形成・重要契約",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "人間が担う"
+    },
+    {
+      "area": "⑬ アナログ領域",
+      "task": "危機対応: 個人情報事故・法的請求・重大障害・炎上",
+      "executor": "human_only",
+      "evidence": [
+        "data/authority-matrix.json"
+      ],
+      "note": "自動停止して経営者へ移管する方針。手順は未整備"
+    }
+  ]
+}

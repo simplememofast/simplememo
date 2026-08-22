@@ -122,6 +122,15 @@ jobs:
       - name: Autopilot budget ledger
         run: node scripts/autopilot-budget.mjs --check
 
+      # 【自動化カバレッジ】全領域の自動化率台帳の形と証跡を見る。
+      #
+      # ここが緩むと台帳が自己申告になり、「やっていることにする」だけで
+      # 数字が上がるようになる。だから ai_autonomous / ai_executes_gated は
+      # 証跡ファイルの実在を強制し、nobody は「なぜ無いか」を強制する。
+      # 理由の無い未実装は、次の棚卸しで拾えない。
+      - name: Automation coverage ledger
+        run: node scripts/automation-rate.mjs --check
+
       # 【自己修復の境界】レーンFが越えてはいけない線が壊れていないかを見る。
       #
       # repair_of の指す run が実在するか、失敗行に failure_class があるか、
