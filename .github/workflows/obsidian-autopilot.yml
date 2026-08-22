@@ -144,7 +144,27 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           allowed_bots: "*"
-          claude_args: "--max-turns 250"
+          # 【2026-08-22】run 32528028588 は Claude Code ステップが success で
+          # 終わりながら成果物がゼロだった。ジョブログの result 行は
+          # num_turns=30 / permission_denials_count=14 / cost $0.81。
+          #
+          # 原因は claude_args に `--allowedTools` が無かったこと。
+          # claude-code-action の既定はファイル操作・読み取り専用git・コメント
+          # 操作までで、**任意のBashは既定で不許可**。一方このプロンプトが要求
+          # するのは git のブランチ作成/commit/push・`gh pr create`・
+          # `npx playwright install`・node の検証スクリプトで、全てBash。
+          # つまり出荷手段が最初から全部塞がれた状態で30ターン回り、何も出せない
+          # まま success で終わっていた。
+          #
+          # リポジトリに `.claude/settings.json` が無いので、SDKの settingSources
+          # にある project 層でも補われない。ここで明示するのが唯一の経路。
+          #
+          # allowed_bots と同じ理由でBashの全面許可は権限昇格にならない。この
+          # ワークフローは schedule と workflow_dispatch でしか起動せず、
+          # issue_comment 等の外部から起動される経路が無い。
+          claude_args: |
+            --max-turns 250
+            --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
 
@@ -156,3 +176,47 @@ jobs:
             5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。作成後、SEO Validation が起動したことを `gh pr checks` で確認したら**それ以上は待たずに終了してよい**（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
             6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
+
+      # 【2026-08-22】主系は 08-18 以降、毎日違う理由で不発になりながら job は
+      # 緑で終わってきた（実行空白 → aptで90分枯渇 → actor拒否で3秒failure →
+      # ツール不許可で成果物ゼロ）。壊れ方は毎回違うが、**「緑なのに何も出て
+      # いない」を検知できないという一点が共通していて、それが毎回、気づくのを
+      # 翌朝以降に遅らせている。**
+      #
+      # PR #525 で sitemap に入れた `--check` と同じ考え方をここに置く。出荷した
+      # なら当日ブランチが必ず存在する（記事なしの日でも status JSON と LOG だけの
+      # PRを出す規約なので、ブランチが無い＝本当に何もしていない）。別経路の
+      # 副系CCRが先に出していた場合だけは正当なので、本番status JSONが当日分なら
+      # それも成功として扱う。
+      - name: 成果物ゼロなら落とす
+        if: steps.gate.outputs.run == 'true'
+        env:
+          TODAY: ${{ steps.gate.outputs.today }}
+          TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
+        run: |
+          # checkout済みなので origin を使う（認証ヘッダが入っており、privateでも読める）。
+          # --exit-code は「該当refなし」を2で返す。それ以外の非ゼロは通信/認証の失敗で、
+          # 「出荷していない」証拠にはならないため、赤くせず警告に留める。
+          # ここを取り違えると、ネットワークの瞬断で毎朝falseな赤が出て誰も見なくなる。
+          rc=0
+          git ls-remote --exit-code origin "refs/heads/claude/obsidian-auto-${TODAY}" >/dev/null 2>&1 || rc=$?
+
+          if [ "$rc" -eq 0 ]; then
+            echo "当日ブランチ claude/obsidian-auto-${TODAY} を確認。"
+            exit 0
+          fi
+
+          if [ "$rc" -ne 2 ]; then
+            echo "::warning title=Obsidian Autopilot::git ls-remote が exit ${rc} で終了し、当日ブランチの有無を判定できなかった。成果物チェックはスキップする。"
+            exit 0
+          fi
+
+          # 別経路（副系CCR）が先に出していた場合は正当。
+          status_date="$(curl -sS --max-time 20 "https://simplememofast.com/data/autopilot-status.json?d=${TODAY}" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("date_jst",""))' 2>/dev/null || echo "")"
+          if [ "$status_date" = "$TODAY_DASH" ]; then
+            echo "当日ブランチは無いが本番status JSONが当日分（${status_date}）。別経路で出荷済みとみなす。"
+            exit 0
+          fi
+
+          echo "::error title=Obsidian Autopilot::Claude Code は成功したが成果物がゼロ（claude/obsidian-auto-${TODAY} も本番status JSONの当日分も無い）。ジョブログの result 行にある permission_denials_count と num_turns を最初に見ること。"
+          exit 1
