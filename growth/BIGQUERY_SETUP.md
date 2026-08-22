@@ -45,6 +45,78 @@ ADCも無い）。**下の「鍵と権限」を入れるまで、スクリプト
 
 ---
 
+## 「一括データ エクスポートに失敗しました」メールが来たら
+
+**まずIAMを触らない。** このメールの大半は、権限でも設定でもなく、
+**すでに届いている日の再エクスポートが落ちた**だけで、その場合データは
+1日も欠けていない。メール本文は「データを失わないように早急に修正して
+ください」としか書かないので、区別は自分でつける。
+
+```
+node growth/scripts/bq-preflight.mjs        # §4 Integrity が判定を出す
+```
+
+判定は2種類しかない。
+
+| 出力 | 意味 | やること |
+|---|---|---|
+| `! ... an export attempt failed, but the day is already in the table` | 再エクスポートの失敗。その日の数字は前のepochのまま残っている | **何もしない。** Googleが約1週間リトライし、たいてい翌日までに入る |
+| `✗ ... the day is NOT in the table` / `✗ ... days missing inside the history` | その日が本当に落ちている | 約1週間でリトライが打ち切られ、**エクスポートは遡らない**。サチコ→設定→一括データエクスポートのエラーを見る |
+
+`bq-preflight` が資格情報で落ちるコンテナでは、BigQuery MCP で同じことを見る:
+
+```sql
+-- 失敗の痕跡（temp_ が残っていれば、その (テーブル, data_date) の試行が落ちた）
+SELECT table_id,
+       FORMAT_TIMESTAMP('%m-%d %H:%M', TIMESTAMP_MILLIS(creation_time), 'Asia/Tokyo') AS created_jst,
+       row_count
+FROM `yurika-simplememo.searchconsole.__TABLES__`
+WHERE STARTS_WITH(table_id, 'temp_');
+
+-- その日が実際に入っているか（入っていれば欠損ではない）
+SELECT 'site' AS ns, data_date, COUNT(*) AS rows_
+FROM `yurika-simplememo.searchconsole.searchdata_site_impression` GROUP BY data_date
+UNION ALL
+SELECT 'url', data_date, COUNT(*)
+FROM `yurika-simplememo.searchconsole.searchdata_url_impression` GROUP BY data_date
+ORDER BY data_date DESC, ns;
+```
+
+### 2026-08-21/22 の実測（この節が書かれた理由）
+
+5件の失敗メール（08-14/15/16 SITE・08-16/17 URL）が来た。実際に起きていたこと:
+
+| 調べたもの | 結果 |
+|---|---|
+| データの欠損 | **無し。** site は 08-10〜08-19、url は 08-10〜08-20 が穴なく入っていた |
+| 落ちた試行の痕跡 | 空の `temp_` テーブルが6つ（メールの5件＋UTC日付の切れ目で翌日分に回った SITE 08-17） |
+| BigQuery側のエラー | **0件。** `search-console-data-export@…` が 08-12 以降に投げたジョブは `INFORMATION_SCHEMA.JOBS_BY_PROJECT` で全数成功。**落ちた試行はジョブを1本も作っていない** |
+| 何が落ちていたか | `ExportLog` に epoch_version=1 の行が並んでいた＝**配信済みの日の再エクスポート**。08-13 site/url・08-14 url・08-15 url は再エクスポートに成功済み |
+
+**IAMではありえない理由:** 08-22 04:24 に URL 08-15 の再エクスポートが成功し、
+その16分後の 04:40／04:42 に SITE 08-16／URL 08-16 が落ちている。同じサービス
+アカウント・同じデータセット・同じ権限で、成功と失敗が交互に出る。権限が
+どの試行を落とすかを選ぶことはできない。失敗はBigQueryに届く前
+（Google側のエクスポート処理内）で起きている。**こちらの設定で直せるものは無い。**
+
+**temp_ テーブルは消さない。** 自前で約7日の有効期限を持っていて放っておけば
+消えるうえ、リトライ中の試行が使っている可能性がある。
+
+### `ExportLog` は 2026-10-12 に消える
+
+データセットの `defaultTableExpirationMs` が60日で、テーブル作成時に
+`ExportLog` に焼き付いている（`searchdata_*` は日付パーティションなので
+60日のローリング窓になるだけだが、`ExportLog` は非パーティションなので
+**テーブルごと消える**）。着弾状況の確認は全部ここを読んでいるので、
+消える前に外す:
+
+```sql
+ALTER TABLE `yurika-simplememo.searchconsole.ExportLog`
+  SET OPTIONS (expiration_timestamp = NULL);
+```
+
+---
+
 ## まだ届いていない場合の確認手順
 
 サチコの一括エクスポートが動くと、Search Console 自身が次の3つを作る。

@@ -21,15 +21,24 @@
  *                                                 export yet (up to 48 h)
  *   - tables present, no rows for this property → the site_url string is wrong
  *   - rows present but old                      → the export has stopped
+ *   - rows present and current, with holes      → single days failed to export
  *
- * `--strict` exits non-zero on a stale export; without it, staleness is
- * reported and the exit code stays 0 so a scheduled run can carry on and say so
- * in its summary rather than failing the whole workflow.
+ * That last one is why lib/export-health.mjs exists. Every check above reads
+ * the newest date, and Search Console's failures do not move it: it restates a
+ * day after the fact and re-exports it, and when *that* fails nothing gets
+ * older, nothing disappears, and the only trace is an orphaned staging table
+ * this script used to filter out by name as scratch. Five such failures were
+ * mailed to the owner on 2026-08-21 while every number here read healthy.
+ *
+ * `--strict` exits non-zero on a stale export or on a day that failed to land;
+ * without it both are reported and the exit code stays 0, so a scheduled run
+ * can carry on and say so in its summary rather than failing the whole
+ * workflow. A failed *restatement* of a day already in the table never fails
+ * the run — the day is there, and Google's own retry usually lands it.
  */
 
 import { connect, query, listTables } from '../lib/bigquery.mjs';
-
-const EXPORT_TABLES = ['searchdata_site_impression', 'searchdata_url_impression', 'ExportLog'];
+import { EXPORT_TABLES, classifyTables, exportHealth } from '../lib/export-health.mjs';
 
 /* Search Console finalises a day's data two to three days after the fact, and
  * the export then copies it. Four days is therefore still normal; a week means
@@ -98,20 +107,19 @@ try {
   throw e;
 }
 
-const present = new Set(tables.map((t) => t.id));
-const missing = EXPORT_TABLES.filter((t) => !present.has(t));
-
-// Running a query in the console leaves short-lived scratch tables in whichever
-// dataset it was pointed at. They are easy to mistake for the export — they
-// appear in the same dataset list, with plausible-looking timestamps — so they
-// are named here rather than left to be misread as "the export is working".
-const scratch = tables.filter((t) => /^temp_|^anon/i.test(t.id) || t.expires);
+// `temp_SEARCHDATA_*` tables are not scratch and not ours: the exporter stages
+// each day there before loading it, and drops it on success. One left behind is
+// an attempt that died, and it is the only local evidence that any did — so it
+// is carried down to the integrity section rather than discarded here.
+const { exported, staging, foreign } = classifyTables(tables);
+const missing = EXPORT_TABLES.filter((t) => !exported.includes(t));
 
 if (missing.length) {
   bad(`missing export tables: ${missing.join(', ')}`);
   console.log(`    dataset holds: ${tables.length ? tables.map((t) => t.id).join(', ') : '(nothing)'}`);
-  if (scratch.length) {
-    console.log(`    (${scratch.map((t) => t.id).join(', ')} ${scratch.length === 1 ? 'is' : 'are'} query scratch with an expiry, not the export)`);
+  if (staging.length) {
+    console.log(`    (${staging.map((t) => t.id).join(', ')} ${staging.length === 1 ? 'is a' : 'are'} half-finished export attempt${staging.length === 1 ? '' : 's'}:`);
+    console.log('     the connection is accepted and the exporter is running, but no day has landed yet)');
   }
   fail('The Search Console export has not created its tables.',
     '  Search Console creates all three itself on the first export after the BigQuery\n' +
@@ -129,7 +137,7 @@ if (missing.length) {
     '  growth/BIGQUERY_SETUP.md step 1.');
 }
 ok(`export tables present: ${EXPORT_TABLES.join(', ')}`);
-if (scratch.length) warn(`also present (query scratch, ignored): ${scratch.map((t) => t.id).join(', ')}`);
+if (foreign.length) warn(`also present, not part of the export: ${foreign.join(', ')}`);
 
 /* ── 2. Which properties are in there ────────────────────────────────── */
 const { rows: properties } = await query(client, {
@@ -193,8 +201,45 @@ if (historyDays < 28) {
   ok(`${historyDays} days of history — enough for a 28-day window`);
 }
 
+/* ── 4. Integrity ────────────────────────────────────────────────────── */
+/* Everything above reads the newest date. None of it can see a day that failed
+ * in the middle, and the export's own failure mail does not say whether a
+ * failure cost a day or only a restatement of one already delivered — so it is
+ * read here, from the days that are actually in the tables. Both tables are
+ * partitioned on data_date, so this is a scan of two small columns. */
+const whereSite = site ? 'WHERE site_url = @site' : '';
+const { rows: coverage } = await query(client, {
+  sql: `SELECT 'site' AS ns, CAST(data_date AS STRING) AS data_date
+        FROM \`${client.projectId}.${dataset}.searchdata_site_impression\` ${whereSite}
+        GROUP BY data_date
+        UNION ALL
+        SELECT 'url', CAST(data_date AS STRING)
+        FROM \`${client.projectId}.${dataset}.searchdata_url_impression\` ${whereSite}
+        GROUP BY data_date`,
+  ...(site ? { params: { site } } : {}),
+});
+
+const findings = exportHealth({
+  staging,
+  siteDates: coverage.filter((r) => r.ns === 'site').map((r) => r.data_date),
+  urlDates: coverage.filter((r) => r.ns === 'url').map((r) => r.data_date),
+});
+
+console.log('');
+if (!findings.length) {
+  ok('no gaps, no stalled table, no half-finished export attempt');
+} else {
+  for (const f of findings) {
+    (f.level === 'bad' ? bad : warn)(f.message);
+    for (const line of f.detail.match(/.{1,86}(\s|$)/g) ?? []) console.log(`    ${line.trim()}`);
+  }
+}
+
+const broken = findings.some((f) => f.level === 'bad');
 const stale = lagDays >= STALE_DAYS;
 console.log(stale
   ? '\nPreflight FAILED: the export is stale.'
-  : '\nPreflight passed.');
-process.exit(stale && strict ? 1 : 0);
+  : broken
+    ? '\nPreflight FAILED: the export is current but its history is not whole.'
+    : '\nPreflight passed.');
+process.exit((stale || broken) && strict ? 1 : 0);

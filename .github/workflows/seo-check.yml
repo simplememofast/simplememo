@@ -287,6 +287,16 @@ jobs:
       - name: BigQuery credential handling
         run: node growth/lib/bigquery.test.mjs
 
+      # 一括エクスポートの「届いているように見えて欠けている」判定。
+      # これもネットワークに触らない（テーブル名と日付の配列だけを渡す）。
+      # 2026-08-21、Search Console から5件の失敗メールが来たとき、
+      # bq-preflight の全チェックは緑だった — 失敗したのは配信済みの日の
+      # 再エクスポートで、最新日付は動かないため。唯一の痕跡である
+      # temp_ テーブルを、当時のコードは「クエリの残骸」として名前で
+      # 捨てていた。ここが緑のまま「エクスポートは健全」と言えなくする。
+      - name: Bulk export integrity verdicts
+        run: node growth/lib/export-health.test.mjs
+
       # Smoke test only (--dry-run writes nothing). Note: the shallow CI
       # checkout means git-derived lastmod dates collapse to one date here;
       # real sitemap generation happens locally with full history.
