@@ -95,11 +95,14 @@
     {
       "area": "① 次期機能開発",
       "task": "受領した要望の設計への落とし込み",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "data/feature-prd.json",
+        "scripts/check-prd.mjs",
+        "data/review-intake.json",
         "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる"
+      "note": "2026-08-23実装。**ストアレビュー → 候補 → PRD が機械可読で繋がった。**レビュー起点の4件をPRD化し、受入条件・やらないこと・VISION §13の6問まで書かせている。ゲートは `ready:true` にPRDを要求すること（PRD無しでは着手可にできない）。**採否そのものはオーナー判断のまま**で、ここが自動化したのは設計工程であって決定ではない"
     },
     {
       "area": "① 次期機能開発",
@@ -113,11 +116,13 @@
     {
       "area": "① 次期機能開発",
       "task": "PRD・受入条件・UX・多言語の作成",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
+        "data/feature-prd.json",
+        "scripts/check-prd.mjs",
         "../simplememo-ios/docs/obsidian-only-mode-design.md"
       ],
-      "note": "都度作成・定型化されていない"
+      "note": "2026-08-23に定型化。**旧note「都度作成・定型化されていない」がこの検査の設計理由。**受入条件は `verify`（どう確かめるか）を必須にしてあり、検証方法を書けないものは受け取らない。VISION §13 は `conflict` を選べる4択で、**衝突を書いたら解決方針が必須**。**答えの当否は機械が判定しない** — 判定できると称すると、ビジョン適合の判断を機械に渡したことになる"
     },
     {
       "area": "① 次期機能開発",

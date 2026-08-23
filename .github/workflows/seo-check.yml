@@ -231,6 +231,12 @@ jobs:
       - name: Feature backlog
         run: node scripts/feature-score.mjs --check
 
+      # 【PRD】「設計は書いた」を散文任せにしない。ready:true の候補に完全なPRDが
+      # 無ければ落ちる。**着手可の宣言とPRDを不可分にする**のがこの検査の役目で、
+      # 受入条件は verify（どう確かめるか）を必須にしてある。
+      - name: Feature PRDs
+        run: node scripts/check-prd.mjs --check
+
       # 【レビュー】ユーザーの声を受け取ったかではなく、**捌いたか**を見る。
       #
       # 取り込みは機械化した（../simplememo-ios/scripts/asc_metrics.rb）が、
