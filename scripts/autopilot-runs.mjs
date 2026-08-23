@@ -47,6 +47,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
 export const COST_PATH = path.join(ROOT, 'data/autopilot-cost.json');
+export const STATUS_PATH = path.join(ROOT, 'data/autopilot-status.json');
 
 export const OUTCOMES = [
   'shipped', 'no_artifact', 'failed', 'cancelled',
@@ -101,6 +102,76 @@ export function staleness(doc, today = todayJst()) {
 
 export function load(file = RUNS_PATH) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+/**
+ * 運転台帳と `data/autopilot-status.json` の突き合わせ。
+ *
+ * 2026-08-23 にこの検査を足した理由（`staleness()` とは別の実害）:
+ * 主系が初自走で `/obsidian/pricing/` を出荷し（PR #538・06:33 JST）、台帳にも
+ * `ap-20260823-actions / shipped` が入った。ところが **status JSON だけが
+ * 08-22 のまま**だった。10:00 JST の日報はその古いファイルを読み、
+ * 「公開記事: 0（当日分の実行記録なし）」と報告した。
+ * **初めて自走した日を、上流停止として報せたことになる。**
+ *
+ * なぜ既存の検査が黙っていたか:
+ *   - `validate()` は行の形しか見ない。status JSON を知らない
+ *   - `staleness()` は台帳が書かれているかしか見ない。台帳は正しかった
+ *   - `autopilot-health.yml` は「デフォルトブランチの status」と「本番の status」を
+ *     比べる。**両方が同じだけ古いと一致してしまう**（配信遅れは見えるが、
+ *     そもそも書かれなかったことは見えない）
+ *
+ * つまり status JSON の鮮度を、status JSON 以外の情報源から言える者がいなかった。
+ * 台帳がその独立した証人になる。両方向を見る:
+ *   - 台帳のほうが新しい → status JSON が書かれなかった（08-23 の実害）
+ *   - status JSON のほうが新しい → 台帳の行が書かれなかった（PR #540 の実害。
+ *     `staleness()` は許容1日ぶんは黙るので、当日中はこちらでしか捕まらない）
+ */
+export function statusAgreement(doc, statusDoc) {
+  const dates = (doc?.runs || []).map((r) => r.date_jst).filter(Boolean).sort();
+  const latest = dates.at(-1) ?? null;
+  const problems = [];
+  // 空の台帳は staleness の担当。ここで二重に鳴らさない。
+  if (!latest) return { checked: false, latest: null, status_date: null, problems };
+
+  if (!statusDoc) {
+    problems.push('data/autopilot-status.json が読めない — 日報の唯一のデータ源が無い');
+    return { checked: true, latest, status_date: null, problems };
+  }
+
+  const statusDate = statusDoc.date_jst ?? null;
+  const shipped = (doc.runs || []).filter(
+    (r) => r.date_jst === latest && r.outcome === 'shipped' && r.artifact);
+
+  if (statusDate !== latest) {
+    const behind = statusDate && statusDate < latest;
+    problems.push(
+      `台帳の最終記入は ${latest} なのに status JSON は ${statusDate ?? 'なし'}`
+      + (behind
+        ? ' — 実行はしたが status JSON を書いていない。日報はこの日を「実行記録なし」と報告する'
+        : ' — status JSON にある日の行が台帳に無い。指標がその実行を数えられない'));
+  } else if (shipped.length) {
+    const want = shipped.map((r) => normalizeArtifact(r.artifact));
+    const got = normalizeArtifact(statusDoc.article?.url ?? null);
+    if (!got || !want.includes(got)) {
+      problems.push(
+        `${latest} は ${want.join(' / ')} を出荷した記録なのに、status JSON の article は `
+        + `${got ?? 'なし'} — 日付だけ当日にして中身が前日のままだと、日報は前日の記事を今日の成果として出す`);
+    }
+  }
+
+  return {
+    checked: true, latest, status_date: statusDate,
+    shipped_artifacts: shipped.map((r) => r.artifact),
+    status_article: statusDoc.article?.url ?? null,
+    problems,
+  };
+}
+
+/** 絶対URLでも相対パスでも同じものとして比べる（どちらの書き方も実在する）。 */
+function normalizeArtifact(v) {
+  if (!v) return null;
+  try { return new URL(v).pathname; } catch { return v; }
 }
 
 /**
@@ -175,7 +246,7 @@ function timings(runs) {
 /** 主系（GitHub Actions）以外はすべて副系・代走とみなす。 */
 const isPrimary = (r) => r.route === 'actions';
 
-export function summarize(doc, { since = null, costDoc = null, today = undefined } = {}) {
+export function summarize(doc, { since = null, costDoc = null, statusDoc = null, today = undefined } = {}) {
   let runs = doc.runs;
   if (since) runs = runs.filter((r) => r.date_jst >= since);
 
@@ -249,6 +320,8 @@ export function summarize(doc, { since = null, costDoc = null, today = undefined
     timings: timings(runs),
     // 台帳そのものが書かれ続けているか。**壊れた行より、書かれなかった行のほうが見つけにくい。**
     staleness: staleness(doc, today ?? todayJst()),
+    // 台帳と status JSON が同じ実行を指しているか。**日報が読むのは status JSON のほう。**
+    status_agreement: statusAgreement(doc, statusDoc),
   };
 }
 
@@ -292,6 +365,19 @@ function render(s, doc) {
     o.push('            --outcome <shipped|no_artifact|failed|cancelled|skipped_gate|skipped_duplicate|no_run> \\');
     o.push('            --pr <n> --artifact <path> --external-ref <run id> --source <一次資料>');
   }
+  const sa = s.status_agreement;
+  if (sa?.checked) {
+    o.push(`  日報のデータ源: status JSON = ${sa.status_date ?? 'なし'}（台帳の最終記入 ${sa.latest}）`);
+    for (const p of sa.problems) {
+      o.push(`  ⚠ ${p}`);
+    }
+    if (sa.problems.length) {
+      o.push('    日報は status JSON しか読まない。**台帳が正しくても、ここが古いと出荷が無かったことになる**');
+      o.push('    （2026-08-23、主系の初出荷が実際にこれで「実行記録なし」と報告された）');
+      o.push('    直し: data/autopilot-status.json を Runbook §5-2 のスキーマで当日の内容に上書きし、同じPRに含める');
+    }
+  }
+
   const tm = s.timings;
   if (tm.time_to_detect_hours.n || tm.time_to_repair_hours.n) {
     o.push('');
@@ -353,6 +439,44 @@ function selftest() {
   // 順序に依存しない — 台帳は sort されている前提だが、そこに寄りかからない
   eq(staleness(doc('2026-08-23', '2026-08-11'), '2026-08-23').days_behind, 0, '並び順に依存しない');
 
+  // --- 台帳と status JSON の突き合わせ（statusAgreement）---
+  // ここも台帳ファイルを読まない。合成データだけで、両方向の食い違いを固定する。
+  const ledger = (date, extra = {}) => ({
+    runs: [{ run_id: 'r0', date_jst: '2026-08-22', outcome: 'shipped', artifact: '/a/' },
+           { run_id: 'r1', date_jst: date, ...extra }] });
+  const st = (date, url) => ({ date_jst: date, article: url ? { url } : null });
+  const probs = (d, sd) => statusAgreement(d, sd).problems.length;
+
+  // 2026-08-23 の実害そのもの: 出荷したのに status JSON が前日のまま
+  const shippedToday = ledger('2026-08-23', { outcome: 'shipped', artifact: '/obsidian/pricing/' });
+  eq(probs(shippedToday, st('2026-08-22', '/obsidian/plugins/dataview/')), 1,
+     '**出荷したのに status JSON が前日のまま → 落とす**（08-23 に日報を誤らせた状態）');
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/')), 0,
+     '当日ぶんを書けば通る');
+
+  // 逆向き（PR #540 の実害）: status は当日なのに台帳に行が無い。
+  // staleness は許容1日ぶん黙るので、当日中はこちらでしか捕まらない。
+  eq(staleness(ledger('2026-08-22', { outcome: 'shipped', artifact: '/a/' }), '2026-08-23').stale, false,
+     '前提: 台帳が1日遅れでも staleness は当日は黙る');
+  eq(probs(ledger('2026-08-22', { outcome: 'shipped', artifact: '/a/' }), st('2026-08-23', '/b/')), 1,
+     '**status のほうが新しい（台帳の行が無い）→ 落とす**');
+
+  // 日付だけ合わせて中身が前日、を通さない
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/plugins/dataview/')), 1,
+     '日付は当日でも article が別の記事なら落とす');
+  // 絶対URLと相対パスは同じものとして扱う（どちらの書き方も実在する）
+  eq(probs(shippedToday, st('2026-08-23', 'https://simplememofast.com/obsidian/pricing/')), 0,
+     '絶対URLでも一致とみなす');
+
+  // 出荷が無い日は article を問わない（スキップ日も status JSON は更新する決まり）
+  const skipToday = ledger('2026-08-23', { outcome: 'no_run' });
+  eq(probs(skipToday, st('2026-08-23', null)), 0, '無運転の日は article なしで通る');
+  eq(probs(skipToday, st('2026-08-22', null)), 1, 'スキップでも status JSON を書かなければ落ちる');
+
+  // 異常系
+  eq(probs(shippedToday, null), 1, '**status JSON が読めないのは「問題なし」ではない**');
+  eq(statusAgreement({ runs: [] }, null).checked, false, '空の台帳は staleness の担当・ここでは二重に鳴らさない');
+
   // JST 換算。UTC 21:00 は JST では翌日の 06:00。
   eq(todayJst(new Date('2026-08-22T21:18:07Z')), '2026-08-23', '主系の起動時刻(UTC 21:18)は JST では 08-23');
   eq(todayJst(new Date('2026-08-22T14:59:59Z')), '2026-08-22', 'JST 23:59 はまだ当日');
@@ -412,7 +536,10 @@ if (isMain) {
 
   let costDoc = null;
   try { costDoc = JSON.parse(fs.readFileSync(COST_PATH, 'utf8')); } catch { /* 任意 */ }
-  const s = summarize(doc, { since: val('since', null), costDoc });
+  // 読めないこと自体が異常なので握りつぶさない（statusAgreement が problem として言う）。
+  let statusDoc = null;
+  try { statusDoc = JSON.parse(fs.readFileSync(STATUS_PATH, 'utf8')); } catch { /* statusAgreement が報告する */ }
+  const s = summarize(doc, { since: val('since', null), costDoc, statusDoc });
 
   if (has('json')) {
     console.log(JSON.stringify({
@@ -440,6 +567,13 @@ if (isMain) {
     if (s.staleness.stale) {
       console.error(`\n台帳が ${s.staleness.days_behind ?? '?'} 日書かれていない（許容 ${s.staleness.max_days} 日）。`);
       console.error('**行の形が正しいことと、行が在ることは別。** 上の追記コマンドで埋めること。');
+      process.exit(1);
+    }
+    // 台帳が書かれていても、日報が読む status JSON が古ければ出荷は無かったことになる。
+    if (s.status_agreement.problems.length) {
+      console.error('\n運転台帳と data/autopilot-status.json が食い違っている:');
+      for (const p of s.status_agreement.problems) console.error(`  - ${p}`);
+      console.error('\n**日報が読むのは status JSON のほう。** 台帳だけ正しくても報告は嘘になる。');
       process.exit(1);
     }
     console.log('\n台帳の形と整合に問題なし。');

@@ -402,7 +402,7 @@ node scripts/sync_constants.js --check
 node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
 node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
-node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
+node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合＋status JSONとの突き合わせ
 node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止め
 node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
 node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
@@ -548,7 +548,9 @@ AI完走率・人間介入率・変更失敗率・改善サイクル時間は、
 ```
 node scripts/autopilot-runs.mjs           # 指標サマリ
 node scripts/autopilot-runs.mjs --json     # status JSON の runs に入れる形
-node scripts/autopilot-runs.mjs --check    # CI: 形と整合（seo-check.ymlに入っている）
+node scripts/autopilot-runs.mjs --check    # CI: 形と整合＋status JSONとの突き合わせ（seo-check.ymlに入っている）
+                                           # 台帳の最終記入と data/autopilot-status.json の date_jst が
+                                           # 食い違うと落ちる。§5-2を書き忘れた回を出荷させないため
 ```
 
 **毎回の手順（status JSONを書くのと同じPRで）:**

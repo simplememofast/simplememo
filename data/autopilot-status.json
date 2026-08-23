@@ -1,22 +1,22 @@
 {
-  "date_jst": "2026-08-22",
-  "generated_at": "2026-08-21T22:51:56Z",
+  "date_jst": "2026-08-23",
+  "generated_at": "2026-08-23T14:33:59Z",
   "action": "new",
   "article": {
-    "url": "/obsidian/plugins/dataview/",
-    "title": "Dataviewプラグインの使い方 — クエリで保管庫を検索する入門"
+    "url": "/obsidian/pricing/",
+    "title": "Obsidianの料金 — 無料でどこまで使えるか【2026年版】"
   },
   "pr": null,
   "streak": {
     "consecutive_no_article_days": 0,
-    "last_article_date_jst": "2026-08-22",
-    "last_production_change_date_jst": "2026-08-22",
+    "last_article_date_jst": "2026-08-23",
+    "last_production_change_date_jst": "2026-08-23",
     "days_since_production_change": 0
   },
   "data_freshness": {
-    "bq_export_last_data_date": "2026-08-16",
-    "bq_export_days_accumulated": 7,
-    "bq_checked": false,
+    "bq_export_last_data_date": "2026-08-20",
+    "bq_export_days_accumulated": 11,
+    "bq_checked": true,
     "manual_snapshot_label": "2026-08-11"
   },
   "cost": {
@@ -58,12 +58,12 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-08-22",
-      "days": 12
+      "to": "2026-08-23",
+      "days": 13
     },
-    "completion_rate": 0.7692,
-    "change_failure_rate": 0.2308,
-    "human_intervention_rate": 0.5385,
+    "completion_rate": 0.7857,
+    "change_failure_rate": 0.2143,
+    "human_intervention_rate": 0.5,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -71,27 +71,27 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.3076923076923077
+        "rate": 0.2857142857142857
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.07692307692307693
+        "rate": 0.07142857142857142
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.07692307692307693
+        "rate": 0.07142857142857142
       },
       "request": {
         "runs": 1,
-        "rate": 0.07692307692307693
+        "rate": 0.07142857142857142
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.8333,
+    "shipping_day_rate": 0.8462,
     "totals": {
-      "runs": 23,
-      "attempted": 13,
-      "shipped": 10,
+      "runs": 24,
+      "attempted": 14,
+      "shipped": 11,
       "failed": 3,
       "no_run": 2
     },
@@ -102,12 +102,12 @@
         "shipped": 10
       },
       "primary": {
-        "runs": 11,
-        "attempted": 3,
-        "shipped": 0
+        "runs": 12,
+        "attempted": 4,
+        "shipped": 1
       }
     },
-    "primary_ever_shipped": false,
+    "primary_ever_shipped": true,
     "no_run_days": [
       "2026-08-16",
       "2026-08-17"
@@ -120,31 +120,26 @@
         "n": 4
       },
       "time_to_repair_hours": {
-        "median": 0.9166666666666666,
+        "median": 3.7083333333333335,
         "max": 25.633333333333333,
-        "n": 3
+        "n": 4
       },
-      "unresolved": [
-        {
-          "run_id": "ap-20260822-actions",
-          "failure_class": "permissions"
-        }
-      ]
+      "unresolved": []
     }
   },
-  "reason": "【連続無記事0日目・本番最終変更2026-08-22・BQ未確認（取得できなかった、増えていないの意味ではない）】副系Routine(07:30 JST)による実行。主系の当日runは status=completed / conclusion=success で成果物が無いことを§0の(a)〜(e)で確認済み（(a) claude/obsidian-auto-20260822 ブランチなし (b) 本番date_jst=2026-08-21 (c) origin/main date_jst=2026-08-21 (d) 当日作成PRなし (e) 主系の最新run=completed・作業中ではない）。実測: 主系run 32528028588／job 96914156036 はallowed_bots修正（PR#522/523）が効いてClaude Codeステップが3分16秒動いたが、num_turns=30・permission_denials_count=14で成果物ゼロのまま成功終了しており、新しい懸念としてowner_requestsの筆頭に積んだ。obsidian.md/notion.comのegressブロックは本日も再現（github.com本体・blacksmithgu.github.io等も同様にブロックされることを新たに確認。ただしWebFetch/WebSearchツール経由ではobsidian.md系以外により広く到達できることも判明）。レーンEのC05〜C10（sync系・compare/notion）はegressブロックで見送り、C12 /obsidian/plugins/dataview/ に切り替えて実装した。レーンA/Bは28日窓（2026-09-06前後）まで正当化できないため今回もレーンE。",
-  "verified": "Dataviewプラグイン公式リポジトリ（GitHub: blacksmithgu/obsidian-dataview）のREADME.md・manifest.jsonと、Obsidian公式配布元（GitHub: obsidianmd/obsidian-releases）のcommunity-plugin-stats.json・community-plugins.jsonをraw.githubusercontent.com経由で本日直接取得。ダウンロード数4,805,635件・登録6,840個中3位（前回2026-08-21計測と完全一致）、レジストリのupdatedタイムスタンプ2025-04-07 19:17 UTC（計測時点で約16ヶ月更新なし）、masterのmanifestバージョン0.5.68とGitHub Releases最新タグ0.5.70（ベータ）の不一致を確認。4つのクエリモードのサンプルコードは公式READMEからの引用。コンテンツキューが当初unique_valueとして指定していた「実機インストール＋動くクエリ例」は、この環境にObsidianを実行できるGUIが無いため今回は実施していない（ページ内の検証環境欄に明記）。【追記・オーナーの評価依頼による再検証】一次ソースを取り直して実測の書き方を2点訂正した。(1)「登録6,840個中3位」は分母の出典が食い違っていた。6,840はcommunity-plugins.json（レジストリ一覧）の件数で、順位を計算したcommunity-plugin-stats.jsonの収録数はこれより少ない（再取得時点で6,827件）。3位という順位自体は変わらないが、表では出典を分けて書き直した。(2)「前回計測との差 ±0件（完全一致）」は裏取りの証拠のように読めたが、実際は上流JSONが2回の取得の間に再生成されていなかっただけ。同日13:00 JSTの再取得では4,818,936件で、約5時間で+13,301件動いている。「24時間で増分ゼロ」と誤読されるため書き換えた。",
+  "reason": "【連続無記事0日目・本番最終変更2026-08-23・BQ 11/28日】主系（GitHub Actions・06:00 JST）が2026-08-12の導入以来はじめて自走した。run 32599191984 は event=schedule / 06:18→06:36 JST（約18分）で、過去11回が10〜90秒で終わっていたのと所要時間から違う。PR #526 で claude_args に --allowedTools を足した修理が実効していたことの実地検証になっている（git の branch/commit/push と gh pr create が Bash 経由で通り、PR #538 が 06:33 JST に auto-merge）。レーンE: coverage-queue の C04 /obsidian/pricing/ を実装。C04 は egress ブロックを理由に blocked にしていたが、主系の実行環境では obsidian.md が 200 で到達でき、その制限が副系CCR環境固有だったと判明したため blocked を外して先に着手した。レーンA/BはBQの28日窓（2026-09-06前後）まで正当化できない。 ※このJSONは実行当日に書かれず、2026-08-23夜に AUTOPILOT_LOG.md の当日エントリと運転台帳から復元したもの。そのため10:00 JSTの日報は当日を「実行記録なし」と誤報している（後述の owner_requests 参照）。",
+  "verified": "obsidian.md/pricing を直接取得して価格表とFAQ本文を書き起こし（Sync $4/$5・Publish $8/$10・Catalyst $25・商用 $50/user/年・学生教員非営利40%割引・7日返金）。日本円換算は Frankfurter API（ECB基準・$1=¥158.7・2026-08-21付）による参考値と明記した。書かなかったこと: 価格の変更履歴（一次資料が無い）、Sync/Publishの実購入と実機動作（決済が必要）。両方ページ内の検証環境欄に明記済み。iPhone 390×844 DPR3 実描画QA: 水平スクロールなし（scrollWidth=clientWidth=390）・回答ブロックはファーストビュー内（top=636px）・QRはモバイルdisplay:none/デスクトップflexを実描画確認・JA→EN切替（lang.js）正常・コンソール/HTTPエラー0。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（261ファイル）",
-    "content_graph": "23 entries OK（/obsidian/plugins/dataview/ を新規登録・cluster=obsidian-plugins・parent=/obsidian/plugins/・siblings=what-is-vault/getting-started）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画: 初回は.reason-card内のpreコードブロックがCSS Gridのmin-width:autoでトラックを押し広げ横スクロールが発生。ページローカルCSSに.reason-card{min-width:0}を追加して解消（サイト共通CSSは無変更）。再検証でscrollWidth=clientWidth=390・QRはモバイルdisplay:none/デスクトップ1280pxでflexを実描画確認・JA→EN切替（lang.js）正常・コンソールエラーは外部analytics宛のサンドボックス起因のみ",
-    "experiments": "35件中21 open・due 0・overdue 0",
-    "other": "check-css-version / check-benchmark(新規CONFLICT・AMBIGUOUS増なし) / check-url-normalization(197) / check-internal-redirects(13,195 href/src + 5,203 JSON-LD/meta + 576 sitemap URL すべて直接200) / sync_constants --check / tag-cta-placements --check(49件page-level ct=) / check-experiments / generate_sitemap.py（コミット後に実行）いずれもOK。QRはgenerate-qr-codes.mjs --checkで35件全件独立デコード検証（既存33件はバイト同一・新規2件も一致）。OG画像はchromium_headless_shell-1234が無かったためchromium-1194へのsymlinkで補って生成（Runbook§3既知の手順）"
+    "seo_check": "0 errors 0 warnings（264ファイル）",
+    "content_graph": "24 entries OK（/obsidian/pricing/ を cluster=obsidian-beginner・parent=/obsidian/ で登録）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画・水平スクロールなし",
+    "qr": "generate-qr-codes.mjs --check で37件全件独立デコード（既存35件はバイト同一）",
+    "sitemap": "generate_sitemap.py --check OK",
+    "other": "check-css-version / check-benchmark / check-url-normalization(197) / check-internal-redirects(13,330 href+5,251 JSON-LD+586 sitemap すべて直接200) / sync_constants / tag-cta-placements / check-experiments(36件中21 open) / autopilot-budget / autopilot-runs / check-authority / autopilot-selfheal / autopilot-drill / automation-rate / check-pr-facts / d-score いずれもOK"
   },
   "owner_requests": [
-    "【解消済み・オーナー作業は不要】主系の当日run（32528028588／job 96914156036）がconclusion=successのまま成果物ゼロで終わった件は原因を特定し、本PRで修正した。原因はclaude_argsに`--allowedTools`が無かったこと。claude-code-actionの既定はファイル操作・読み取り専用git・コメント操作までで任意のBashは不許可だが、Runbookが要求するgitのbranch/commit/push・`gh pr create`・`npx playwright install`・node検証スクリプトは全てBash。つまり出荷手段が最初から塞がれた状態で30ターン回り、permission_denials_count=14を出して何も出せずsuccessで終わっていた（`.claude/settings.json`がリポジトリに無いためproject層でも補われない）。**これは当初オーナー依頼として積まれたが、Runbook §7の分類ミス。同じファイルはPR#522/523で自分で2回書き換えて通しており、自分で直せる案件だった。** 併せて、成果物ゼロのまま緑で終われる構造そのものを塞ぐため「成果物ゼロなら落とす」ステップを追加した（PR#525のsitemap `--check` と同じ考え方）",
-    "【継続・実測で再確認】このRoutineの実行環境はobsidian.md（help.含む）・notion.com系ドメインへの直接アクセスがegressプロキシでブロックされている（403/EGRESS_BLOCKED）。今回新たにgithub.com本体・blacksmithgu.github.io（Dataview公式ドキュメントサイト）・en.wikipedia.org・www.google.com等も同様にブロックされていることを確認した。到達できるのはapi.github.com・raw.githubusercontent.com・objects.githubusercontent.com・npmjs.com程度（curlベースの直接アクセス）。一方WebFetch/WebSearchツール経由ではgithub.comや第三者ブログへは到達できる（obsidian.md系ドメインのみWebFetchでも共通してブロック）。オーナー側で意図した制限か確認してほしい。【追記】再検証で**simplememofast.com自体もブロックされている**ことが分かった（curl・WebFetchとも403/EGRESS_BLOCKED）。つまり副系CCRはRunbook §0の冪等チェック(b)「本番status JSONのdate_jst」を実行できない環境にいる。今回は(c) origin/mainのstatus JSONが同じ役割を果たしたため二重出荷は起きていないが、(b)はbest-effortで、実質のガードは(c)とPR#523で入った当日ブランチの占有である、と理解しておく必要がある",
-    "【解消済み・繰越不要】前回ログの「CCR環境でnode系検証スクリプトがauto modeクラシファイアにブロックされる」件は本セッションでは再現せず、seo-check.js等すべて正常実行できた。セッションごとに変わりうる判定のため恒久解消と断定はしないが、今回は依頼として繰り越さない"
+    "【実測手段なし・現状維持】simplememo-api の streak / data_freshness 描画は 2026-08-21 にコード対応済みだが、実際の日報メールでの見え方はセッションから確認できない。次に日報を受け取った回に目視してほしい。",
+    "【報告済み・オーナー作業は不要】このJSONは実行当日（2026-08-23 06:33 JST の出荷時）に書かれなかった。そのため10:00 JSTの日報が「公開記事: 0（当日分の実行記録なし）」と誤報し、運転指標の窓も08-22で止まって「主系は一度も出荷していない」を出荷済みの状態で表示していた。再発防止として autopilot-runs.mjs --check に運転台帳とこのJSONの突き合わせを追加済み（CIで落ちる）。"
   ],
-  "next": "明日（2026-08-23）06:00 JSTの主系runが、`--allowedTools`追加後に実際にブランチとPRを作れるかを最初に確認する。作れていなければ「成果物ゼロなら落とす」ステップが赤で知らせるので、ジョブログのresult行（num_turns / permission_denials_count）を最初に読むこと。緑かつブランチありなら主系は初めて自走したことになる。レーンEはC05〜C10がegressブロックの影響を受け続けるため、次候補はC17（zettelkasten）・C26（graph-view）などGitHub/一般Web検索（WebFetch/WebSearch経由）で完結する項目を優先する。「WebFetch/WebSearchはcurlより広く到達できる」という今回の知見は、次回のレーンE候補選定でcurlの403だけを見て即座に見送らないために活用できる。"
+  "next": "主系が自走できることを確認できたので、次回以降は主系06:00 JSTを本来の実行経路として扱う。副系CCR（07:30・09:20）はフォールバックとして温存。レーンEの次候補は coverage-queue の pending 先頭 C05 /obsidian/sync/（iCloud/公式Sync/Git/Syncthing の比較）。obsidian.md/notion.com へのアクセス制限は副系CCR環境固有であり主系にはない。経路によって条件が違う点を毎回明記すること。レーンA/BはBQの28日窓（2026-09-06前後）まで引き続き正当化できない。"
 }
