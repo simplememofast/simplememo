@@ -70,6 +70,7 @@ const nonEmpty = (v) => typeof v === 'string' && v.trim().length > 0;
 
 export function checkContractTerms(doc) {
   const problems = [];
+  const reviewedNoFindings = [];
   const stats = { ok: 0, attention: 0, na: 0, unknown: 0, missing: 0 };
   const enforce = doc.policy?.enforce_clause_review === true;
 
@@ -117,27 +118,38 @@ export function checkContractTerms(doc) {
       }
     }
 
-    // dpa_reviewed と条項の整合。**片方だけ進んだ状態を放置しない。**
-    const anyReviewed = Object.keys(CLAUSES).some(
+    // dpa_reviewed と条項の整合。
+    //
+    // **ここは「不備」ではなく第3の状態として数える。** レビューは実際に行われたが
+    // 所見がリポジトリに入っていない、という状況は現実に起きる（人が読んで判断し、
+    // 結果を口頭で伝えた場合など）。これを落とすと「レビューしたのに怒られる」ので、
+    // 記録を残す動機が消える。かといって黙ると **「レビュー済み」だけが独り歩きする。**
+    //
+    //   未レビュー          … dpa_reviewed が無い
+    //   レビュー済み・所見なし … 人は見た。**だが何が書いてあったかは誰も参照できない**
+    //   レビュー済み・所見あり … 次に判断する人が根拠を辿れる
+    //
+    // 落とさないが、**必ず別枠で名指しする。**
+    const anyRecorded = Object.keys(CLAUSES).some(
       (k) => terms[k]?.verdict && terms[k].verdict !== 'unknown',
     );
-    if (v.dpa_reviewed && !anyReviewed) {
-      problems.push(`${v.id} — dpa_reviewed が入っているのに、条項が1つも確認されていない。`
-        + '**「レビュー済み」だけが独り歩きしている**');
-    }
+    if (v.dpa_reviewed && !anyRecorded) reviewedNoFindings.push(v);
   }
 
-  return { problems, stats, enforce };
+  return { problems, stats, enforce, reviewedNoFindings };
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
   const doc = readJSON('data/vendor-register.json');
-  const { problems, stats, enforce } = checkContractTerms(doc);
+  const { problems, stats, enforce, reviewedNoFindings } = checkContractTerms(doc);
 
   if (argv.includes('--json')) {
-    console.log(JSON.stringify({ stats, enforce, problems }, null, 2));
+    console.log(JSON.stringify({
+      stats, enforce, problems,
+      reviewed_no_findings: reviewedNoFindings.map((v) => v.id),
+    }, null, 2));
     process.exit(problems.length && argv.includes('--check') ? 1 : 0);
   }
 
@@ -162,6 +174,16 @@ if (isMain) {
   }
   console.log('\n  ● 確認済  ▲ 要確認  － 対象外  ○ 未確認  · 未記入');
   console.log(`  順: ${Object.values(CLAUSES).join(' / ')}`);
+
+  if (reviewedNoFindings.length) {
+    console.log(`\n  [レビュー済み・所見なし] ${reviewedNoFindings.length}社`);
+    console.log('    人は見た。**だが何が書いてあったかは誰も参照できない。**');
+    console.log('    レビュー自体は行われたので落とさないが、根拠を辿れない状態ではある。');
+    reviewedNoFindings.forEach((v) => {
+      const by = v.dpa_reviewed_by ? `・${v.dpa_reviewed_by}申告` : '';
+      console.log(`      ${v.id}（${v.dpa_reviewed}${by}）`);
+    });
+  }
 
   if (problems.length) {
     console.log(`\n  不備 ${problems.length}件`);

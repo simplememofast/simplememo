@@ -24,11 +24,24 @@
     "  source : unknown 以外では必須。**出典の無い『問題なし』は、見ていないのと区別がつかない。**",
     "",
     "初期値は全件 unknown。**これは失敗の記録ではなく、正しい現在地。**",
-    "オーナーのレビュー結果が届いた分から verdict と source を入れていく。"
+    "オーナーのレビュー結果が届いた分から verdict と source を入れていく。",
+    "",
+    "【2026-08-25 オーナーによるレビュー】10社すべてについて、オーナーから",
+    "「契約条件をレビュー済み」との申告を受けた。dpa_reviewed はその申告を記録したもので、",
+    "**申告の主体はオーナー本人**（この欄が記録するのは『人が見たかどうか』であり、",
+    "その一次情報源はレビューした本人以外にない）。",
+    "",
+    "**ただし所見は リポジトリ に入っていない。** contract_terms は全40件 unknown のままで、",
+    "『何を読んで、どう判断したか』はこのリポジトリのどこにも無い。したがって:",
+    "  - 「レビューされたか」→ **記録あり**（下の dpa_reviewed）",
+    "  - 「何が書いてあったか」→ **記録なし**（contract_terms が unknown）",
+    "この2つは別物で、混ぜると『レビュー済み』だけが独り歩きする。",
+    "scripts/check-contract-terms.mjs はこの状態を『レビュー済み・所見なし』として",
+    "**別枠で必ず表示する**（落としはしない。レビュー自体は実際に行われたため）。"
   ],
   "policy": {
-    "enforce_unreviewed": false,
-    "$enforce_unreviewed": "true にすると、個人データを渡しているのに未レビューのベンダーがあるだけで exit 1。レビューを済ませてから有効にする",
+    "enforce_unreviewed": true,
+    "$enforce_unreviewed": "2026-08-25 に有効化。10社すべてレビュー済みになったため。**以後、個人データを渡す事業者を未レビューで足すと CI が落ちる。**有効化の意味は「いま全部埋まっている」ではなく「次に足す人が素通りできない」こと。",
     "enforce_clause_review": false,
     "$enforce_clause_review": "true にすると、個人データを渡している事業者に未確認の条項があるだけで exit 1。enforce_unreviewed と同じで、リスクの大きいところから順に強制する。**全社を一度に必須にすると、埋まるまで CI が落ち続けて auto-merge が止まる。**"
   },
@@ -43,7 +56,7 @@
       "breaks_if_down": "配信と課金が止まる。既にインストール済みのアプリは動く",
       "fallback": null,
       "fallback_note": "**代替なし。**iOSアプリである以上ここは置き換えられない",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/scripts/lib/asc_api.rb"
@@ -61,7 +74,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "cloudflare",
@@ -71,7 +86,7 @@
       "critical": true,
       "breaks_if_down": "**メモが送れなくなる。**端末側 Outbox が貯めて復旧後に再送する",
       "fallback": "端末側 Outbox（暗号化キュー）が受け皿になる",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-api/wrangler.toml",
@@ -90,7 +105,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "resend",
@@ -102,7 +119,7 @@
       "breaks_if_down": "アプリの主機能が止まる",
       "fallback": null,
       "fallback_note": "**代替なし。**送信経路が1本しかない",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-api/src/resend.ts"
@@ -120,7 +137,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "anthropic",
@@ -131,7 +150,7 @@
       "critical": false,
       "breaks_if_down": "自動運営が止まる。アプリ自体は動く",
       "fallback": "副系（CCR Routines）が代走する。ただし同じ事業者なので同時に落ちる",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
@@ -149,7 +168,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "google_cloud",
@@ -159,7 +180,7 @@
       "critical": false,
       "breaks_if_down": "計測が止まる。出荷は続く",
       "fallback": "無し。データが欠測する（『取得できなかった』として記録される）",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "scripts/autopilot-budget.mjs"
@@ -177,7 +198,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "firebase",
@@ -187,7 +210,7 @@
       "critical": true,
       "breaks_if_down": "App Check が落ちると送信が弾かれうる",
       "fallback": "App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-api/src/appcheck.ts",
@@ -206,7 +229,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "appsflyer",
@@ -216,7 +241,7 @@
       "critical": false,
       "breaks_if_down": "効果測定が止まる。アプリは動く",
       "fallback": "kill switch（FeatureFlags.appsFlyerEventEnabled）を false にするだけ",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/SimpleMemo/FeatureFlags.swift"
@@ -234,7 +259,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "github",
@@ -244,7 +271,7 @@
       "critical": false,
       "breaks_if_down": "主系が止まる。**副系（CCR）は別経路なので代走できる**",
       "fallback": "CCR Routines（実績として日々の出荷はこちらが担っている）",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "data/autopilot-runs.json"
@@ -262,7 +289,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "prtimes",
@@ -272,7 +301,7 @@
       "critical": false,
       "breaks_if_down": "配信できない。原稿はリポジトリに残る",
       "fallback": "他の配信手段（自社サイト・SNS）",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "docs/pr-autopilot-2026-09-plan.md"
@@ -290,7 +319,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     },
     {
       "id": "registrar",
@@ -301,7 +332,7 @@
       "breaks_if_down": "**全部止まる。**サイト・API・メール送信・アプリの通信",
       "fallback": null,
       "fallback_note": "**代替なし。**ドメインが切れると復旧まで全機能が止まる。自動更新でも支払い手段の期限切れで失敗する",
-      "dpa_reviewed": null,
+      "dpa_reviewed": "2026-08-25",
       "terms_accepted_by": "human",
       "evidence": [
         "data/credential-expiry.json"
@@ -320,7 +351,9 @@
         "governing_law": {
           "verdict": "unknown"
         }
-      }
+      },
+      "dpa_reviewed_by": "owner",
+      "$dpa_reviewed": "オーナー申告（2026-08-25）。所見は未記録 — contract_terms を参照"
     }
   ]
 }
