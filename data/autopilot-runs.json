@@ -505,7 +505,9 @@
       "failure_reason": null,
       "external_ref": "32599191984",
       "interventions": [],
-      "repair_of": ["ap-20260822-actions"],
+      "repair_of": [
+        "ap-20260822-actions"
+      ],
       "source": "actions-api+pr",
       "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
     },
@@ -526,8 +528,7 @@
       "failure_reason": "Claude Code ステップが result.is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0 で即時失敗。実際の作業（ブランチ作成等）に入る前、初回のモデル呼び出し相当の時点で終わっている。full outputはshow_full_output未設定のためActionsログに出ておらず、正確なエラーメッセージは未特定",
       "external_ref": "32667079679",
       "interventions": [],
-      "source": "actions-api",
-      "failure_class": "auth_or_credential"
+      "source": "actions-api"
     },
     {
       "run_id": "ap-20260825-actions",
@@ -546,8 +547,22 @@
       "failure_reason": "前日(ap-20260824-actions)と同一シグネチャで2日連続失敗: is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0。時間・失敗の形が完全一致しており単発のflakeではない。CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEYいずれかの認証エラーが濃厚だが、full outputが伏せられておりログから断定はできない",
       "external_ref": "32779337325",
       "interventions": [],
-      "source": "actions-api",
-      "failure_class": "auth_or_credential"
+      "source": "actions-api"
+    },
+    {
+      "run_id": "ap-20260825-ccrfallback",
+      "date_jst": "2026-08-25",
+      "route": "ccr-fallback-v2",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "null",
+      "action": "maintenance",
+      "pr": 548,
+      "artifact": "data/autopilot-status.json,docs/obsidian/AUTOPILOT_LOG.md,.github/workflows/obsidian-autopilot.yml,data/autopilot-runs.json",
+      "failure_reason": null,
+      "external_ref": null,
+      "interventions": [],
+      "source": "session"
     }
   ]
 }
