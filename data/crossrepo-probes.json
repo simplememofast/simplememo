@@ -1,0 +1,65 @@
+{
+  "$comment": [
+    "隣のリポジトリにある「縮退の受け皿」を最後に確かめた記録。**手で書かない。**",
+    "  node scripts/check-degradation.mjs --sync",
+    "",
+    "なぜ写しを置くか: CIのチェックアウトには隣のリポジトリが無い。",
+    "直接 existsSync で見に行くと、**3リポジトリの揃ったセッションでは通り、",
+    "CIでは必ず落ちる** — 2026-08-22〜24 に実際そうなり、サイトのCIが赤で",
+    "固定され、auto-merge が動かずデプロイが止まった。",
+    "",
+    "逆に「隣が無ければスキップ」にすると、**ずれたまま緑になる。**",
+    "どちらもやらないために、写しで判定して写しだと出力に書く。",
+    "",
+    "写しの寿命は 60日。**古い写しは、無い検査と同じ。**",
+    "ファイルが消えていないことを継続的に見張るのは隣のCIの仕事で、ここではない。"
+  ],
+  "synced_at": "2026-08-24",
+  "max_age_days": 60,
+  "probes": {
+    "circuit_breaker": {
+      "repo": "simplememo-api",
+      "need": "all",
+      "label": "遮断器 + 死信 + 保管",
+      "files": [
+        {
+          "path": "src/circuit-breaker.ts",
+          "exists": true,
+          "bytes": 6464,
+          "sha256_12": "7bad4d02d542"
+        },
+        {
+          "path": "src/dlq.ts",
+          "exists": true,
+          "bytes": 7715,
+          "sha256_12": "71ee17d48e83"
+        },
+        {
+          "path": "migrations/0018_email_dead_letters.sql",
+          "exists": true,
+          "bytes": 1139,
+          "sha256_12": "8b4c107302f5"
+        }
+      ],
+      "present": 3
+    },
+    "device_outbox": {
+      "repo": "simplememo-ios",
+      "need": "any",
+      "label": "端末側 Outbox",
+      "files": [
+        {
+          "path": "SimpleMemo/OutboxManager.swift",
+          "exists": true,
+          "bytes": 15368,
+          "sha256_12": "5638900d7037"
+        },
+        {
+          "path": "SimpleMemo/Outbox.swift",
+          "exists": false
+        }
+      ],
+      "present": 1
+    }
+  }
+}

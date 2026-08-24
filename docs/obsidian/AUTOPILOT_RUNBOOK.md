@@ -596,16 +596,25 @@ node scripts/autopilot-runs.mjs --append \
 
 ## 6. 「書かない回」の保守作業メニュー
 
-- **サーバ側の写しを更新（3リポジトリが揃った回だけ・所要10秒）**:
+- **交差検査の写しを更新（3リポジトリが揃った回だけ・所要10秒）**:
   ```sh
   cd ../simplememo-ios
   python3 scripts/qa/check_analytics_crossrepo.py --sync   # イベント名の allowlist
   python3 scripts/qa/check_rollout_vectors.py --sync       # 段階公開のバケット契約
+  cd ../simplememo
+  node scripts/check-degradation.mjs --sync                # 縮退の受け皿（遮断器・死信・Outbox）
   ```
   差分があればコミットする。
-  **なぜセッションでやるか**: この写しは iOS のCIが単独で回るために置いてある。
-  隣のリポジトリを見に行く形にすると、CIのチェックアウトには隣が無いので
-  **検査が常にスキップされ、事故は起きたまま緑になる。**
+  **なぜセッションでやるか**: どの写しも、各リポジトリのCIが単独で回るために置いてある。
+  隣のリポジトリを見に行く形にすると、CIのチェックアウトには隣が無い。
+  そこで起きることは2通りあり、**どちらも起きた**:
+
+  - **黙ってスキップ** → ずれは起きたまま緑になる（イベント名・バケット契約で想定した形）
+  - **必ず落ちる** → 2026-08-22、`check-degradation.mjs` が
+    `../simplememo-api/src/dlq.ts` などを直接 existsSync で見ており、
+    セッションでは通りCIでは必ず落ちた。**CIが赤で固定され、auto-merge が
+    動かず、サイトのデプロイが3日止まった。**
+
   写しが60日を超えて古いと検査が落ちる（古い写しは無い検査と同じ）。
 
 - 本番URLのライブ確認（新規ページ公開後の200/OG/構造化データ確認）
