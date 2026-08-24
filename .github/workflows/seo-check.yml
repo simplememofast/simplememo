@@ -222,6 +222,11 @@ jobs:
       - name: Vendor register
         run: node scripts/check-vendors.mjs --check
 
+      # 【条項】「レビュー済み」という文字列があるかではなく、**何を読んでそう判断したか**を見る。
+      # unknown は失敗ではなく正しい記録。出典の無い ok だけを落とす。
+      - name: Contract terms
+        run: node scripts/check-contract-terms.mjs --check
+
       # 【機能バックログ】計測の結果が次に作るものを決めているか。
       #
       # 確信度は evidence_strength から機械的に決まる（手で置けない）。

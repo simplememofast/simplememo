@@ -15,11 +15,22 @@
     "  personal    … メールアドレス・本文",
     "",
     "**dpa_reviewed が null は『問題なし』ではなく『見ていない』。**",
-    "個人データを渡しているのに未確認のものは検査が名指しする。"
+    "個人データを渡しているのに未確認のものは検査が名指しする。",
+    "",
+    "【contract_terms（2026-08-23 追加）】scripts/check-contract-terms.mjs が検査する。",
+    "⑦『責任上限・知財・個人情報・準拠法の条項検査』のタスク名がそのまま項目になっている。",
+    "  verdict: ok（確認済・問題なし）/ attention（要確認・note必須）/ na（当該条項なし・note必須）",
+    "           / unknown（**まだ読んでいない。推測で埋めない**）",
+    "  source : unknown 以外では必須。**出典の無い『問題なし』は、見ていないのと区別がつかない。**",
+    "",
+    "初期値は全件 unknown。**これは失敗の記録ではなく、正しい現在地。**",
+    "オーナーのレビュー結果が届いた分から verdict と source を入れていく。"
   ],
   "policy": {
     "enforce_unreviewed": false,
-    "$enforce_unreviewed": "true にすると、個人データを渡しているのに未レビューのベンダーがあるだけで exit 1。レビューを済ませてから有効にする"
+    "$enforce_unreviewed": "true にすると、個人データを渡しているのに未レビューのベンダーがあるだけで exit 1。レビューを済ませてから有効にする",
+    "enforce_clause_review": false,
+    "$enforce_clause_review": "true にすると、個人データを渡している事業者に未確認の条項があるだけで exit 1。enforce_unreviewed と同じで、リスクの大きいところから順に強制する。**全社を一度に必須にすると、埋まるまで CI が落ち続けて auto-merge が止まる。**"
   },
   "vendors": [
     {
@@ -36,7 +47,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/scripts/lib/asc_api.rb"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "cloudflare",
@@ -51,7 +76,21 @@
       "evidence": [
         "../simplememo-api/wrangler.toml",
         "../simplememo-api/data/data-retention.json"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "resend",
@@ -67,7 +106,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-api/src/resend.ts"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "anthropic",
@@ -82,7 +135,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "google_cloud",
@@ -96,7 +163,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "scripts/autopilot-budget.mjs"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "firebase",
@@ -111,7 +192,21 @@
       "evidence": [
         "../simplememo-api/src/appcheck.ts",
         "../simplememo-api/src/oauth.ts"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "appsflyer",
@@ -125,7 +220,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-ios/SimpleMemo/FeatureFlags.swift"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "github",
@@ -139,7 +248,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "data/autopilot-runs.json"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "prtimes",
@@ -153,7 +276,21 @@
       "terms_accepted_by": "human",
       "evidence": [
         "docs/pr-autopilot-2026-09-plan.md"
-      ]
+      ],
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     },
     {
       "id": "registrar",
@@ -169,7 +306,21 @@
       "evidence": [
         "data/credential-expiry.json"
       ],
-      "note": "ベンダー台帳を作って初めて表に出た。資格情報の台帳には載っていたが、事業者として数えていなかった"
+      "note": "ベンダー台帳を作って初めて表に出た。資格情報の台帳には載っていたが、事業者として数えていなかった",
+      "contract_terms": {
+        "liability_cap": {
+          "verdict": "unknown"
+        },
+        "ip": {
+          "verdict": "unknown"
+        },
+        "personal_data_terms": {
+          "verdict": "unknown"
+        },
+        "governing_law": {
+          "verdict": "unknown"
+        }
+      }
     }
   ]
 }
