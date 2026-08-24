@@ -46,6 +46,8 @@
     "                  route-absent / runbook-gap）。同じ故障の再発を数えるために要る。",
     "                  失敗の自由文（failure_reason）だけでは『前と同じ故障か』が判定できない。",
     "  repair_of     … その実行が修理した run_id の配列。**修理が効いたかを後から追える。**",
+    "                  credential-invalid …2026-08-25追加。鍵はあるが認証が通らない。",
+    "                  **Gateは「在るか」しか見ないので素通りする**（既存の skipped_gate とは別物）。",
     "",
     "この2つで scripts/autopilot-selfheal.mjs が『未修理の故障が残っているか』を判定し、",
     "残っていればその日の最優先アクションをレーンF（自己修復）にする。",
@@ -507,6 +509,56 @@
       "interventions": [],
       "source": "actions-api+pr",
       "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
+    },
+    {
+      "run_id": "ap-20260824-actions",
+      "date_jst": "2026-08-24",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "CLAUDE_CODE_OAUTH_TOKEN は設定されているが認証が通らない。Gateを通過しClaude Codeは初期化まで進んだあと、最初のAPI呼び出しで is_error:true（486ms / 1turn / $0 / modelUsage 空）。ANTHROPIC_API_KEY は空でフォールバック先が無い",
+      "external_ref": "32667079679",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "CLAUDE_CODE_OAUTH_TOKEN の再発行はオーナー作業。AIからは鍵を差し替えられない"
+        }
+      ],
+      "source": "actions-api+job-log",
+      "failure_class": "credential-invalid",
+      "failed_at": "2026-08-24T06:17+09:00",
+      "detected_at": "2026-08-25T08:52+09:00",
+      "detected_note": "**26.6時間気づかれなかった。**主系の失敗は cron-health が拾うはずだが、気づいたのは別件（PR #543）のCIが運転台帳の陳腐化検査で落ちたため。「失敗そのもの」ではなく「台帳が書かれていないこと」経由の間接検知",
+      "resolved_at": null
+    },
+    {
+      "run_id": "ap-20260825-actions",
+      "date_jst": "2026-08-25",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "同上（2日連続）。run 32779337325。トークンの失効が濃厚だが、失効日は data/credential-expiry.json で「未把握」のまま",
+      "external_ref": "32779337325",
+      "interventions": [
+        {
+          "kind": "request",
+          "note": "CLAUDE_CODE_OAUTH_TOKEN の再発行はオーナー作業。AIからは鍵を差し替えられない"
+        }
+      ],
+      "source": "actions-api+job-log",
+      "failure_class": "credential-invalid",
+      "failed_at": "2026-08-25T06:24+09:00",
+      "detected_at": "2026-08-25T08:52+09:00",
+      "detected_note": "同じ検査で同時に検知。**2日連続の同一 failure_class**",
+      "resolved_at": null
     }
   ]
 }
