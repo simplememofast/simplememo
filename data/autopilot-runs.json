@@ -505,6 +505,7 @@
       "failure_reason": null,
       "external_ref": "32599191984",
       "interventions": [],
+      "repair_of": ["ap-20260822-actions"],
       "source": "actions-api+pr",
       "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
     },
@@ -518,13 +519,15 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "conclusion=failure（2026-08-23 21:17 UTC = 08-24 06:17 JST 起動）。原因は未診断 — このセッションはジョブログを読んでいない。**「調べていない」を「原因不明」と書かない**ため、診断待ちとして残す",
+      "failure_class": "auth_or_credential",
+      "failed_at": "2026-08-24T06:17+09:00",
+      "detected_at": "2026-08-25T08:48+09:00",
+      "detected_note": "副系v2フォールバック（本セッション）が obsidian-autopilot.yml の実行履歴を遡って発見。台帳に記録が無かった（成果物ゼロで落ちた回は台帳を書く主体がいない構造的な穴）",
+      "failure_reason": "Claude Code ステップが result.is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0 で即時失敗。実際の作業（ブランチ作成等）に入る前、初回のモデル呼び出し相当の時点で終わっている。full outputはshow_full_output未設定のためActionsログに出ておらず、正確なエラーメッセージは未特定",
       "external_ref": "32667079679",
       "interventions": [],
       "source": "actions-api",
-      "failure_class": "undiagnosed",
-      "failed_at": "2026-08-24T06:17+09:00",
-      "detected_note": "2026-08-25 のセッションが台帳の陳腐化検知で気づいた（実行から約41時間後）。**failure_class は undiagnosed。**ジョブログを読んでいないので、08-25 の zero-turn と同じ故障かどうかも分かっていない。推測を class に書くと「同じ故障の再発」の集計が嘘になる"
+      "failure_class": "auth_or_credential"
     },
     {
       "run_id": "ap-20260825-actions",
@@ -536,12 +539,15 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "conclusion=failure。実行ログ実測で total_cost_usd=0.0000 / num_turns=1 / permission_denials=None。**1ターンで費用ゼロ**なので、エージェントが実質何もせずに終わっている。PR #526 で入れた『成果物ゼロなら落とす』ガードが落としたものと整合するが、なぜ1ターンで終わったかは未診断",
+      "failure_class": "auth_or_credential",
+      "failed_at": "2026-08-25T06:24+09:00",
+      "detected_at": "2026-08-25T08:48+09:00",
+      "detected_note": "副系v2フォールバック（本セッション）が obsidian-autopilot.yml の実行履歴を遡って発見。前日分(ap-20260824-actions)と同時に台帳へ追記",
+      "failure_reason": "前日(ap-20260824-actions)と同一シグネチャで2日連続失敗: is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0。時間・失敗の形が完全一致しており単発のflakeではない。CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEYいずれかの認証エラーが濃厚だが、full outputが伏せられておりログから断定はできない",
       "external_ref": "32779337325",
       "interventions": [],
       "source": "actions-api",
-      "failure_class": "zero-turn",
-      "failed_at": "2026-08-25T06:24+09:00"
+      "failure_class": "auth_or_credential"
     }
   ]
 }

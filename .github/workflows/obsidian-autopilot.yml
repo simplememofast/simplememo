@@ -173,6 +173,14 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           allowed_bots: "*"
+          # 【2026-08-25追加・診断用】run 32667079679（08-24）・32779337325（08-25）が
+          # 2日連続で is_error:true / num_turns=1 / duration_ms=486 / cost=$0 という
+          # 同一シグネチャで即時失敗した（ap-20260824-actions・ap-20260825-actions）。
+          # 実際の作業に入る前の即時失敗＝認証系の疑いが強いが、full outputが
+          # 「hidden for security」で伏せられており、ジョブログから実際のエラー文言を
+          # 確認できない。原因を特定できるまでの暫定でtrueにする（may_modifyの範囲内・
+          # 検証を弱める変更ではない）。原因確定後はfalseへ戻すこと。
+          show_full_output: true
           # 【2026-08-22】run 32528028588 は Claude Code ステップが success で
           # 終わりながら成果物がゼロだった。ジョブログの result 行は
           # num_turns=30 / permission_denials_count=14 / cost $0.81。
