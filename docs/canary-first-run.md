@@ -159,25 +159,110 @@ Actions → Flag Ops → Run workflow
 | 0. v5.8.1 が本番公開 | ✅ | `READY_FOR_DISTRIBUTION`・[run 32605632454](https://github.com/simplememofast/simplememo-ios/actions/runs/32605632454) · 23:35 UTC |
 | ガードの cron が生きている | ✅ | `rollout_guard_runs=8`・直近 23:00:09 UTC・`errors: 0`／[run 32605768031](https://github.com/simplememofast/simplememo-api/actions/runs/32605768031) |
 | 1. 定義（rollout 0 / max_stale 86400） | ✅ | [run 32605886195](https://github.com/simplememofast/simplememo-api/actions/runs/32605886195) · 23:41 UTC |
-| **2. 1% に上げる** | ⏸ **人待ち** | 承認境界（`data/authority-matrix.json`） |
-| 3. 判定を見る | — | 配布後 |
-| 4. 段階的に上げる | — | 人 |
-| 5. 完走の記録 | — | |
+| **2. 1% に上げる（オーナーが実行）** | ✅ | [run 32608207762](https://github.com/simplememofast/simplememo-api/actions/runs/32608207762) · **2026-08-23 00:34 UTC** |
+| 3. 判定を見る | ✅ **判定が出た** | 30件・下記 |
+| **4. 25% まで上げる** | ⏸ **人待ち** | 1% では**構造的に判定できない**（下記） |
+| 5. 完走の記録 | — | `kill` 実行か `promote` 承認が要る |
 
-**1 の時点では誰にも配っていない**（rollout 0）。定義を置いただけ。
+**本番の段階公開が始まった。** 2 の応答:
 
-### 2 を実行するときのコマンド
+```json
+"after": { "rollout": 1,
+           "description": "今日 1/3 進捗表示のカナリア初回（1%）",
+           "max_stale_seconds": 86400,
+           "updated_at": "2026-08-23T00:34:33.631Z" }
+```
+
+`max_stale_seconds` は 86400。§0-2 の罠は踏んでいない
+（ジョブ要約の警告も出ていない）。
+
+**押したのは人。** 0 → 1 は `data/authority-matrix.json` で
+`human_only` に分類してあり、AI は叩いていない。
+
+### ここから何が起きるか
+
+| いつ | 何 |
+|---|---|
+| 〜5分 | CDN のキャッシュが切れて `/v1/config` が新しい定義を返し始める |
+| 〜24時間 | 端末が順に取得する（24時間スロットル・サーバから短縮できない） |
+| 毎時 | ガードの cron が回る。**サンプルが貯まるまで `hold`** |
+| 各群30 install 到達後 | 初めて `kill` / `promote` / `hold` の判定が出る |
+
+`hold` が5回続いたら `escalate`（露出が小さすぎる）で、5% へ上げる判断になる。
+**その引き上げも人の操作。**
+
+---
+
+## 実測 §3（2026-08-24 23:48 UTC）— **ガードが本番データで動いた**
+
+1% にしてから47時間。[run 32790936239](https://github.com/simplememofast/simplememo-api/actions/runs/32790936239) で読んだ結果。
+
+**判定履歴 30 件。すべて毎時 cron が実データに対して出したもの。**
+
+| | |
+|---|---|
+| `hold` | 24 件 |
+| `escalate` | 6 件 |
+| **`executed: true`** | **0 件** |
+| `awaiting_approval` | 空 |
+
+直近の群比較（`launch_ok`）:
+
+```json
+"exposed": { "installs": 3,   "successes": 0,  "rate": 0 },
+"control": { "installs": 243, "successes": 44, "rate": 0.181 },
+"z": null, "delta": null, "judged": false,
+"reason": "サンプル不足（露出 3 / 対照 243 < 30）。判定していない（異常なしではない）"
+```
+
+**ここで確認できたこと。**
+
+- **群の割り当ては正しく動いている。** 露出 3 / 全体 243 = 1.23%。rollout 1% の期待値 2.4 と一致する
+- **ガードは判定を拒否している。** `judged: false` で `z` も `delta` も `null`。
+  サンプル不足を「異常なし」に倒していない
+- **`escalate` が6回出た。**「5 回続けて判定できていない。露出が小さすぎるか
+  計測が壊れている。人の確認が要る」——設計どおりの分岐
+- **一度も自動実行していない**（`executed: false`）。escalate は提案であって実行ではない
+
+### 1% では永久に判定できない — 待っても無駄
+
+計測窓は**3日固定**（`src/rollout-guard.ts` `DEFAULT_WINDOW_DAYS = 3`）。
+累積ではないので、**待っても露出群は増えない**。実測でも47時間ずっと 3 のまま
+（対照群は 234〜252 で振動しており、母集団自体は動いている）。
+
+3日窓の母集団を実測の 243 とすると:
+
+| rollout | 露出群の期待値 | 判定 |
+|---:|---:|---|
+| 1% | 2.4 | ❌（実測 3） |
+| 5% | 12.2 | ❌ |
+| 10% | 24.3 | ❌ |
+| **25%** | **60.8** | ✅ |
+
+**`min_installs_per_cohort: 30` に届く最小の rollout は 12.3%。**
+`ROLLOUT_STEPS` は 1 / 5 / 10 / 25 / 50 / 100 なので、**25% が最初に届く段**。
+
+「1段ずつ上げる」原則を守ると **1 → 5 → 10 → 25 で人の操作が3回**要る。
+5% と 10% は判定に届かないと分かっているが、**分かっているからといって
+飛ばすと段階公開ではなくなる**（対照群が急に減り、異常が起きたときの
+巻き戻し幅が大きくなる）。
+
+> **これは閾値を下げて解決してはいけない。** 3人中2人の差は偶然と区別できない。
+> `min_installs_per_cohort` を下げるのは**都合のよい分母そのもの**で、
+> 「やってはいけないこと」に明記してある。
+
+### 次の操作（人）
 
 ```
 Actions → Flag Ops → Run workflow
   action: set
   key: tf04_progress
-  rollout: 1
+  rollout: 5
   max_stale_seconds: 86400
-  description: 今日 1/3 進捗表示のカナリア初回（1%）
+  description: カナリア 5%（1% では露出3で判定に届かなかったため）
 ```
 
-押したあと、丸1日は `hold`（サンプル不足）が続く。**それは正常。**
+上げたあと**3日**待つ（窓が3日なので、それ以前は前の rollout の残りが混ざる）。
 
 ---
 

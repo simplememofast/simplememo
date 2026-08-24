@@ -507,6 +507,41 @@
       "interventions": [],
       "source": "actions-api+pr",
       "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
+    },
+    {
+      "run_id": "ap-20260824-actions",
+      "date_jst": "2026-08-24",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "conclusion=failure（2026-08-23 21:17 UTC = 08-24 06:17 JST 起動）。原因は未診断 — このセッションはジョブログを読んでいない。**「調べていない」を「原因不明」と書かない**ため、診断待ちとして残す",
+      "external_ref": "32667079679",
+      "interventions": [],
+      "source": "actions-api",
+      "failure_class": "undiagnosed",
+      "failed_at": "2026-08-24T06:17+09:00",
+      "detected_note": "2026-08-25 のセッションが台帳の陳腐化検知で気づいた（実行から約41時間後）。**failure_class は undiagnosed。**ジョブログを読んでいないので、08-25 の zero-turn と同じ故障かどうかも分かっていない。推測を class に書くと「同じ故障の再発」の集計が嘘になる"
+    },
+    {
+      "run_id": "ap-20260825-actions",
+      "date_jst": "2026-08-25",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "conclusion=failure。実行ログ実測で total_cost_usd=0.0000 / num_turns=1 / permission_denials=None。**1ターンで費用ゼロ**なので、エージェントが実質何もせずに終わっている。PR #526 で入れた『成果物ゼロなら落とす』ガードが落としたものと整合するが、なぜ1ターンで終わったかは未診断",
+      "external_ref": "32779337325",
+      "interventions": [],
+      "source": "actions-api",
+      "failure_class": "zero-turn",
+      "failed_at": "2026-08-25T06:24+09:00"
     }
   ]
 }
