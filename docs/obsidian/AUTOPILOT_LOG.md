@@ -1463,3 +1463,110 @@ obsidian.md/notion.com系ドメインを一次情報として直接使ってよ�
   C05〜C10（Sync/Publish/Notion比較）はこの経路であれば着手可能。ただしCCR副系では
   引き続きegressブロックを前提にすること（経路によって条件が違う点を毎回明記する）。
 - レーンA/BはBQの28日窓（2026-09-06前後）まで引き続き正当化できない。
+
+## 2026-08-25（副系v2フォールバック） — レーンF最優先。主系が2日連続で即時失敗していることを発見・診断用フラグを追加。台帳の欠落2件をバックフィル
+
+このRoutineは「主系が当日分を出さなかった日にだけ動く副系フォールバック」の再設計版（v2）。
+旧副系（07:30 JST）は2026-08-16・17・19・20と4日連続で成果物ゼロのまま終わっており、
+v2の最優先事項は「記事を書くこと」ではなく「どう終わっても痕跡を残すこと」とされている。
+
+### §0 冪等性チェックと占有
+
+`git fetch origin`後、(a) `claude/obsidian-auto-20260825`ブランチなし (b) 本番status JSONの
+`date_jst`=2026-08-22 (c) `origin/main`の同ファイルも2026-08-22 (d) 当日作成PRなし。
+4点とも実行の妨げにならないことを確認し、§0-2の占有手順（空コミットのpush）を実行。
+push は一発で成功し、非fast-forwardで弾かれることもなかった（他経路の同時着手なし）。
+
+このセッションは接続子(connector)を持たずに起動しており、BigQuery MCPは使用不可。
+`growth/scripts/bq-preflight.mjs`もローカル資格情報が無く認証失敗する。GitHubの操作
+（Actions run/job logの参照・PR作成）は問題なく使用できた。
+
+### レーンF（自己修復）: 最優先で着手。2つの既知ギャップと1つの新規故障を発見
+
+`node scripts/autopilot-selfheal.mjs`は本セッション開始時点で`ap-20260822-actions`
+（`permissions`・成果物ゼロ）を**未修理**として報告した。しかし実際の修理（`claude_args`への
+`--allowedTools`追加）はPR #526（08-22 14:00 JSTマージ）で完了済みで、翌日PR #538
+（主系初出荷・`/obsidian/pricing/`）がその動作証拠になっていた——08-23付ログにも
+「本日の実行行にrepair_ofを記録した」と書かれていたが、**実際のPR #538の差分に
+`data/autopilot-runs.json`は含まれておらず、記載は実行されていなかった。**
+`ap-20260823-actions`の行へ`repair_of: ["ap-20260822-actions"]`を追記してこの穴を埋めた。
+
+その過程で `data/autopilot-runs.json` の最終記入が08-23で止まっており、08-24・08-25の
+主系runが台帳に一切記録されていないことに気づいた。GitHub Actionsの実行履歴を遡って
+確認したところ、**主系(obsidian-autopilot.yml)は2026-08-24・08-25と2日連続で失敗している**
+（run 32667079679・32779337325、どちらも`conclusion: failure`）。
+
+**この2件は過去に見た失敗と型が違う。** 過去の主系不発は「成功のまま成果物ゼロ」
+（08-18のapt枯渇・08-20のactor拒否・08-22のツール不許可）だったが、今回はステップ自体が
+`failure`で終わっている。ジョブログの`result`行を実測すると:
+
+```
+{"type":"result","subtype":"success","is_error":true,
+ "duration_ms":486,"num_turns":1,"total_cost_usd":0,
+ "permission_denials_count":0,"modelUsage":{}}
+```
+
+**2日とも1バイトも違わず同一。** `num_turns:1`・`duration_ms:486`（半秒未満）・
+`total_cost_usd:0`は、実際の作業（ブランチ作成やRunbookの読み込み）に入る前、
+初回のモデル呼び出し相当の時点で即座に失敗していることを示す。単発のflakeが
+2日連続で寸分違わず同じ数値になることは考えにくく、**認証エラー
+（`CLAUDE_CODE_OAUTH_TOKEN`の期限切れ、または`ANTHROPIC_API_KEY`の失効）が最有力**
+と判断した。ただし`claude-code-action`は`Running Claude Code via SDK (full output
+hidden for security)`と実際のCLI出力を伏せており、ジョブログから断定できる
+エラー文言までは確認できなかった。
+
+**この故障はコードでは直せない可能性が高い。** may_modify の範囲内でできる対処として、
+`obsidian-autopilot.yml`のClaude Codeステップに`show_full_output: true`を診断用に追加した
+（検証を弱める変更ではなく、単に次回runでエラー文言を可視化するだけ）。原因が確認でき次第
+`false`へ戻す。台帳には`ap-20260824-actions`・`ap-20260825-actions`を`failure_class:
+auth_or_credential`で追記し、`detected_at`を今回のセッション時刻にして未解消として可視化した
+（`repair_of`は付けていない——実際には直せていないため）。**この2件はオーナー確認が必要な
+筆頭案件としてstatus JSONのowner_requestsに積んだ。**
+
+### レーンE には着手していない
+
+`coverage-queue.json`のpendingは29件（次点C05 `/obsidian/sync/`）残っており枯渇していないが、
+Runbook §2レーンFの「レーンFで1日使い切ってよい。その日の記事はゼロでよい」という規定に従い、
+今回はレーンFの発見・診断を優先し、記事の実装には着手しなかった。次回セッションはレーンFの
+懸念（主系の即時失敗）が解消しているかを最初に確認したうえで、通常どおりレーンA〜Eへ進んでよい。
+
+### データ鮮度（BigQuery・本セッションにMCPツールなし）
+
+`bq-preflight.mjs`は資格情報なしで認証失敗するため、08-23の前例にならい`seo-daily.yml`の
+本日run（`32779860303`・06:30 JST開始・`Credentials are configured: success`）の
+`Export preflight`ジョブログを`get_job_logs`で読んだ。`data available: 2026-08-10 .. 2026-08-22`
+（13/28日蓄積・完全な28日窓は引き続き2026-09-06頃の見込み）を確認できたため、
+status JSONでは`bq_checked: true`（出典: seo-daily.yml run 32779860303）とした。
+
+### 検証
+
+`node scripts/seo-check.js`（264ファイル・0 errors 0 warnings・HTML非変更）/
+`node scripts/autopilot-runs.mjs --check`（台帳の形と整合に問題なし） /
+`node scripts/check-authority.mjs --check`（権限表の整合に問題なし） /
+`node scripts/autopilot-selfheal.mjs --check`（自己修復の境界に問題なし） /
+`node scripts/autopilot-drill.mjs --check`（切替演習15シナリオ全通過） /
+`node scripts/automation-rate.mjs --check`（全領域の自動化率台帳に問題なし） /
+`node scripts/autopilot-budget.mjs --check`（$0.8149 / $40・上限超過なし・当月）。
+このPRは`.github/workflows/obsidian-autopilot.yml`・`data/autopilot-runs.json`・
+`data/autopilot-status.json`・本ログのみを変更しており、本番HTML・記事・content-graph・
+実験・キューには一切触れていない。
+
+- やったこと: レーンF診断（主系の2日連続即時失敗を発見・台帳2件をバックフィル・
+  診断用`show_full_output: true`を追加）＋`data/autopilot-status.json`更新のみの保守PR
+- PR: #（本エントリと同じPRで作成・番号は下記参照）
+- 検証: 上記。iPhoneモバイルQAは対象外（HTML変更なし）
+- 保留・オーナー依頼: status JSON `owner_requests`を参照。**最優先は主系の認証系即時失敗
+  （2日連続・is_error/num_turns=1/cost=$0で完全一致）——ローカルでの`claude setup-token`
+  再実行、またはAPIキー有効性の確認をお願いしたい。**
+
+### 次回への申し送り
+
+- 明日06:00 JSTの主系runが`show_full_output: true`付きで実行される。まずジョブログの
+  full outputに実際のエラー文言が出ているかを確認すること。
+- 同じ即時失敗が3日連続で続くなら、`autopilot-selfheal.mjs`の`stop_after_failed_repairs`
+  （既定3回）に近づく。**コードでの再修理を試みる前に、まず認証系の対応状況を確認すること**
+  ——直せない種別の故障を繰り返し「修理」しようとするのが最も危険なループになる。
+- 主系が復旧すれば、通常どおりレーンA〜Eの判定に戻ってよい。レーンEはpendingが29件残っており
+  （次点C05 `/obsidian/sync/`・C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/`
+  など同期系が連続する）、枯渇の心配は無い。
+- レーンA/BはBQの28日窓（2026-09-06前後）まで引き続き正当化できない。
