@@ -56,11 +56,17 @@
       "id": "consumption-tax",
       "title": "消費税の申告",
       "recurrence": "annual",
-      "next_due": null,
-      "confirmed_by_owner": false,
-      "unconfirmed_reason": "**決算期（2月末）と資本金（10,000円）は判明した。**資本金1,000万円未満なので、設立当初2期の免税の規定が効く範囲に入る。**それでも確定しない理由が2つある。**\n(1) **インボイス（適格請求書発行事業者）の登録をしていれば、資本金や売上に関係なく課税事業者になる。**登録の有無はリポジトリから取れず、**これが判定をひっくり返す最大の要素。**\n(2) 特定期間（前事業年度の上半期）の課税売上高・給与支払額。App Store の売上は機械で読めるようになったが**課税売上高の一部でしかない。**\n**税理士への確認事項:** ①インボイス登録の有無 ②当期（2026-03〜2027-02）は課税事業者か。課税なら derive_from を法人税と同じにすれば期限は自動で出る。",
+      "next_due": "2027-04-30",
+      "confirmed_by_owner": true,
+      "unconfirmed_reason": null,
       "what_breaks": "同上",
-      "evidence": []
+      "evidence": [
+        "data/corporate-obligations.json (entity.invoice_registered, fiscal_year_end_month)",
+        "scripts/check-corporate.mjs (nextCorporateTaxDue)"
+      ],
+      "derive_from": "fiscal_year_end",
+      "filing_extension_months": 0,
+      "note": "**インボイス登録ありが確定した**（2026-08-25）ので課税事業者。したがって決算期2月末から法人税と同じ導出で期限が出る。**消費税の申告期限延長は法人税とは別に申請が要る**ので、既定は2か月（filing_extension_months: 0）。適用しているならこの値を1にする。**日付は手で書き換えない**（検査が導出と突き合わせる）。"
     },
     {
       "id": "social-insurance",
@@ -279,6 +285,8 @@
     "capital_jpy": 10000,
     "$capital": "オーナー確認（2026-08-25）。**登記事項なので公開情報**だが、この台帳自体は非公開扱い（data/publication-policy.json）。**資本金1,000万円未満**なので、設立当初2期の免税の規定が効く範囲に入る —— ただし**判定そのものは税理士の領域。**",
     "corporate_number": "6011001153219",
-    "$corporate_number": "gBizINFO に記載。**登記事項の照合に使えるが、この番号から資本金は取れなかった**"
+    "$corporate_number": "gBizINFO に記載。**登記事項の照合に使えるが、この番号から資本金は取れなかった**",
+    "invoice_registered": true,
+    "$invoice_registered": "オーナー確認（2026-08-25）。**適格請求書発行事業者の登録あり。**登録している以上、資本金や基準期間の売上に関係なく**課税事業者**になる。資本金10,000円（1,000万円未満）による設立当初の免税は、この登録によって効かない。"
   }
 }
