@@ -509,7 +509,7 @@
         "ap-20260822-actions"
       ],
       "source": "actions-api+pr",
-      "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため ／【2026-08-25 追記】**この回の実費 $7.2967（150ターン）は台帳に入っていなかった。**ワークフローは金額を出力して『翌日のセッションが入れること』と書くだけで、その翌日が即時失敗したため追記する主体がいなかった。当月の実費は $0.8149 ではなく **$8.1116**。article の1回上限 $2.00（model-routing.json）を3.6倍超えているが、**実行時に効く経路は無い。**"
+      "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
     },
     {
       "run_id": "ap-20260824-actions",
@@ -521,14 +521,19 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "auth_or_credential",
+      "failure_class": "upstream_action_regression",
       "failed_at": "2026-08-24T06:17+09:00",
       "detected_at": "2026-08-25T08:48+09:00",
       "detected_note": "副系v2フォールバック（本セッション）が obsidian-autopilot.yml の実行履歴を遡って発見。台帳に記録が無かった（成果物ゼロで落ちた回は台帳を書く主体がいない構造的な穴）",
-      "failure_reason": "Claude Code ステップが result.is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0 で即時失敗。実際の作業（ブランチ作成等）に入る前、初回のモデル呼び出し相当の時点で終わっている。full outputはshow_full_output未設定のためActionsログに出ておらず、正確なエラーメッセージは未特定 ／ 【2026-08-25 追調査】**権限ではない。**成功した08-23（run 32599191984）と、失敗した08-24・08-25のActionsログを ALL_INPUTS / CLAUDE_ARGS レベルで突き合わせたところ、**ワークフローに渡っている入力は完全に同一**だった（--allowedTools も allowed_bots も同じ）。permission_denials_count は両日とも **0**（08-22の14とは別の故障）。differ は1点だけ: claude-code-action@v1 が自動導入する Claude Code のバージョンが **v2.1.240（成功）→ v2.1.241（失敗2日とも）**。 modelUsage が空・total_cost_usd=0・486ms なので、**トークンを1つも使う前にサーバ側で弾かれている。** 残る候補は2つ: (a) サブスクリプションの利用上限 — 前日08-23の1回で **$7.2967** を消費している （data/autopilot-cost.json に2026-08-25へ後追いで記録）、(b) v2.1.241 の回帰。 **エラー本文はまだ確定していない。**当時 show_full_output が false だったため。 08-25に true へ変更済み（main反映済み）なので、次回の実行でログに出る。",
+      "failure_reason": "Claude Code ステップが result.is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0 で即時失敗。実際の作業（ブランチ作成等）に入る前、初回のモデル呼び出し相当の時点で終わっている。full outputはshow_full_output未設定のためActionsログに出ておらず、正確なエラーメッセージは未特定",
       "external_ref": "32667079679",
       "interventions": [],
-      "source": "actions-api"
+      "source": "actions-api",
+      "failure_class_original": "auth_or_credential",
+      "reclassified_at": "2026-08-25T15:40+09:00",
+      "reclassified_note": "当初 auth_or_credential と記録したが誤り。版の実測: 失敗した2回はどちらも claude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 / Agent SDK 0.3.241\"・2026-08-23T00:53Z）を引いていた。直前に出荷できた run 32599191984（08-23）は SHA 24dcd50c / CLI 2.1.240。ジョブログの Download action repository 行で直接確認できる。 秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う run 32816234185（08-25 15:16 JST・SHA 16b3b310 / CLI 2.1.245）が通っている。「2日とも完全同一シグネチャだから flake ではない＝認証系」という推論が誤りで、決定的な startup 失敗も同一の数値を出す——**同一シグネチャは依存が固定されていることの証拠**だった。なお GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めないため、08-24〜08-25 の間に鍵が回っていなかったことまでは repo からは断定できない（Runbook §7-3 と同じ制約）。 【2026-08-25 訂正】この行は当初「秘密鍵は一度も変えていない」を前提にしていたが、**それは誤り。** 本run(32816234185)を起動したCCRセッションの記録によれば、**オーナーは本runの直前に `claude setup-token` を再実行し CLAUDE_CODE_OAUTH_TOKEN を更新している。** したがって最後の失敗(08-25 06:24)と本runの成功(08-25 15:16)の間で **版とトークンの2つが同時に動いており、どちらが効いたかはこの観測からは分離できない。** 版の相関（2.1.240成功 → 2.1.241で2日連続失敗 → 2.1.245成功）は事実で示唆は強いが、排除ではない。決着させるには、新トークンのまま uses: を c81e3bc6 に固定して1回走らせる（落ちれば版が原因で確定・費用$0）。",
+      "resolved_at": "2026-08-25T15:40+09:00",
+      "reclassified_confidence": "inconclusive"
     },
     {
       "run_id": "ap-20260825-actions",
@@ -540,14 +545,39 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "auth_or_credential",
+      "failure_class": "upstream_action_regression",
       "failed_at": "2026-08-25T06:24+09:00",
       "detected_at": "2026-08-25T08:48+09:00",
       "detected_note": "副系v2フォールバック（本セッション）が obsidian-autopilot.yml の実行履歴を遡って発見。前日分(ap-20260824-actions)と同時に台帳へ追記",
-      "failure_reason": "前日(ap-20260824-actions)と同一シグネチャで2日連続失敗: is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0。時間・失敗の形が完全一致しており単発のflakeではない。CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEYいずれかの認証エラーが濃厚だが、full outputが伏せられておりログから断定はできない ／ 【2026-08-25 追調査】**権限ではない。**成功した08-23（run 32599191984）と、失敗した08-24・08-25のActionsログを ALL_INPUTS / CLAUDE_ARGS レベルで突き合わせたところ、**ワークフローに渡っている入力は完全に同一**だった（--allowedTools も allowed_bots も同じ）。permission_denials_count は両日とも **0**（08-22の14とは別の故障）。differ は1点だけ: claude-code-action@v1 が自動導入する Claude Code のバージョンが **v2.1.240（成功）→ v2.1.241（失敗2日とも）**。 modelUsage が空・total_cost_usd=0・486ms なので、**トークンを1つも使う前にサーバ側で弾かれている。** 残る候補は2つ: (a) サブスクリプションの利用上限 — 前日08-23の1回で **$7.2967** を消費している （data/autopilot-cost.json に2026-08-25へ後追いで記録）、(b) v2.1.241 の回帰。 **エラー本文はまだ確定していない。**当時 show_full_output が false だったため。 08-25に true へ変更済み（main反映済み）なので、次回の実行でログに出る。",
+      "failure_reason": "前日(ap-20260824-actions)と同一シグネチャで2日連続失敗: is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0。時間・失敗の形が完全一致しており単発のflakeではない。CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEYいずれかの認証エラーが濃厚だが、full outputが伏せられておりログから断定はできない",
       "external_ref": "32779337325",
       "interventions": [],
-      "source": "actions-api"
+      "source": "actions-api",
+      "failure_class_original": "auth_or_credential",
+      "reclassified_at": "2026-08-25T15:40+09:00",
+      "reclassified_note": "当初 auth_or_credential と記録したが誤り。版の実測: 失敗した2回はどちらも claude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 / Agent SDK 0.3.241\"・2026-08-23T00:53Z）を引いていた。直前に出荷できた run 32599191984（08-23）は SHA 24dcd50c / CLI 2.1.240。ジョブログの Download action repository 行で直接確認できる。 秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う run 32816234185（08-25 15:16 JST・SHA 16b3b310 / CLI 2.1.245）が通っている。「2日とも完全同一シグネチャだから flake ではない＝認証系」という推論が誤りで、決定的な startup 失敗も同一の数値を出す——**同一シグネチャは依存が固定されていることの証拠**だった。なお GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めないため、08-24〜08-25 の間に鍵が回っていなかったことまでは repo からは断定できない（Runbook §7-3 と同じ制約）。 【2026-08-25 訂正】この行は当初「秘密鍵は一度も変えていない」を前提にしていたが、**それは誤り。** 本run(32816234185)を起動したCCRセッションの記録によれば、**オーナーは本runの直前に `claude setup-token` を再実行し CLAUDE_CODE_OAUTH_TOKEN を更新している。** したがって最後の失敗(08-25 06:24)と本runの成功(08-25 15:16)の間で **版とトークンの2つが同時に動いており、どちらが効いたかはこの観測からは分離できない。** 版の相関（2.1.240成功 → 2.1.241で2日連続失敗 → 2.1.245成功）は事実で示唆は強いが、排除ではない。決着させるには、新トークンのまま uses: を c81e3bc6 に固定して1回走らせる（落ちれば版が原因で確定・費用$0）。",
+      "resolved_at": "2026-08-25T15:40+09:00",
+      "reclassified_confidence": "inconclusive"
+    },
+    {
+      "run_id": "ap-20260825-actions-force",
+      "date_jst": "2026-08-25",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 568,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "32816234185",
+      "interventions": [],
+      "source": "session",
+      "repair_of": [
+        "ap-20260824-actions",
+        "ap-20260825-actions"
+      ],
+      "note": "**主系の手動force実行（workflow_dispatch・triggering_actor=simplememofast）。** 同日の schedule run(ap-20260825-actions)が即時失敗した後の再走なので、run_id は route だけでは一意にならず -force を付けている。レーンFで1日を使い、記事は書いていない。修理の内容は claude-code-action を SHA 16b3b310（この run が実際に通した版）へpin したこと。**上流の壊れた版そのものは直せないが、勝手に乗り換える構造は直せる**——ここを固定しない限り、次の版が壊れていれば同じ2日が繰り返される。"
     }
   ]
 }
