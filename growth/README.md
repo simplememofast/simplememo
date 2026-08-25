@@ -20,7 +20,8 @@ growth/
   input/                drop zone for raw GSC CSVs — see GSC_OWNER_ACTION.md
   experiments/          experiments.json — the ledger
   reports/              generated weekly reports
-  lib/                  csv.mjs · bigquery.mjs · snapshot.mjs · gsc.mjs · ledger.mjs
+  lib/                  csv.mjs · bigquery.mjs · export-health.mjs · snapshot.mjs ·
+                        gsc.mjs · ledger.mjs · clusters.mjs
   scripts/              ingest-gsc · ingest-bigquery · bq-preflight · analyze ·
                         experiments · check-experiments · weekly-report
 ```
@@ -58,7 +59,7 @@ the day the source switched, and would be read as the site changing.
 
 ```sh
 # BigQuery bulk export — what CI runs daily. Setup: growth/BIGQUERY_SETUP.md
-node growth/scripts/bq-preflight.mjs                     # is the export landing?
+node growth/scripts/bq-preflight.mjs                     # is the export landing, and whole?
 node growth/scripts/ingest-bigquery.mjs --site sc-domain:simplememofast.com
 node growth/scripts/ingest-bigquery.mjs --days 7 --dry-run   # inspect without writing
 

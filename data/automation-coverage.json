@@ -92,12 +92,24 @@
     },
     {
       "area": "① 次期機能開発",
-      "task": "ユーザー要望の受領と設計への落とし込み",
+      "task": "ユーザー要望の受領と未処理の検知",
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-ios/scripts/asc_metrics.rb",
+        "../simplememo-ios/.github/workflows/asc-metrics.yml",
+        "scripts/review-intake.mjs",
+        "data/review-intake.json"
+      ],
+      "note": "2026-08-22実装。App Store レビューを日次で取り込み、**未処理が14日を超えたらCIが落ちる**。受け取っただけで放置される状態を検知する。台帳は取り込みと同日に作ったので空から始まる — **空であること自体は異常ではなく、取り込みが動いたあとも空のままなのが異常**。日次実行そのものは run 32599889435（2026-08-22 21:32 UTC・event=schedule）で発火を確認済み"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "受領した要望の設計への落とし込み",
       "executor": "ai_proposes",
       "evidence": [
         "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断"
+      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる"
     },
     {
       "area": "① 次期機能開発",
@@ -165,9 +177,10 @@
       "executor": "ai_autonomous",
       "evidence": [
         "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "../simplememo-api/test/rollout-guard.test.ts",
+        "docs/canary-testflight.md"
       ],
-      "note": "ガードレール指標が有意かつ実害を伴って悪化したら kill を自律実行する（承認を挟まない＝可逆で安全な方向のため）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた。バックログ差し戻しは未実装"
+      "note": "ガードレール指標が有意かつ実害を伴って悪化したら kill を自律実行する（承認を挟まない＝可逆で安全な方向のため）。2026-08-22実装。**同日、kill が実機まで届いて機能が消えることを TestFlight で実証した**（docs/canary-testflight.md の実測）。ただし**押したのは人であってガードではない**。ガードの自動判定は本番でまだ1回も発火していない — TestFlight の人数では min_installs_per_cohort:30 に届かない。**止められることと、判断できることは別**。バックログ差し戻しは未実装"
     },
     {
       "area": "① 次期機能開発",
@@ -208,13 +221,15 @@
         "scripts/check-monitoring.mjs",
         "../simplememo-api/src/inquiry.ts",
         "../simplememo-api/src/watch-health.ts",
+        "../simplememo-api/src/analytics.ts",
         "../simplememo-api/src/autopilot-report.ts",
+        "../simplememo-api/test/ops-alerts.test.ts",
         ".github/workflows/autopilot-health.yml",
         ".github/workflows/cron-health.yml",
         "../simplememo-ios/scripts/qa/check_analytics_crossrepo.py",
         "../simplememo-ios/data/analytics-server-allowlist.json"
       ],
-      "note": "2026-08-22。棚卸しで名指しした穴3系統のうち**2つを塞いだ。**問い合わせ＝受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた。Watch＝計測イベントは2026-07から流れていたのに誰も見ていなかったので、詰まり・手動修復を24h窓で判定する検知器を書いた。**どちらも「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。Watchは母数が小さいので分母20件未満では判定しない（毎日「異常」が出る検知器は読まれなくなる）。残る穴: **課金1系統。**購入失敗イベントを受ける経路がiOS側に無く、ASCの売上データも接続直後で降りてきていない [2026-08-22追記] **計測の事故が起きる境目**（iOS↔relay のイベント名）に検査を足した。従来の検査は「サーバに登録したのに iOS 側のセットに入れ忘れる」だけを見ており、**逆向き（iOSが送るのにサーバの allowlist に無い）は素通り**していた。その場合サーバは受け取って黙って捨て、端末には200が返るので送信側にも症状が出ない。サーバ allowlist の写しを iOS 側に置いたので**隣のリポジトリが無いCIでも動く** — 隣を見に行く形にすると検査が常にスキップされ、事故は起きたまま緑になる",
+      "note": "2026-08-22。棚卸しで名指しした穴3系統を、**2つの流れが別々に塞いだ。**main側で**課金とWatch同期**（データは既に取れていて閾値と通知だけが無かった）、こちら側で**問い合わせとWatch同期**（受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた）。合流時点で**3系統とも埋まっている。**\n\nWatchは検知器が2つになった。**毎時は install 単位**（件数で見ると3秒間隔でリトライする1台が群全体を動かす — 実測で7 installが712件）、**日報は24h窓の件数と手動修復**（分母20件未満では判定しない。毎日「異常」が出る検知器は読まれなくなる）。\n\n**どちらの検知器も「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。\n\n[2026-08-22追記] **計測の事故が起きる境目**（iOS↔relay のイベント名）に検査を足した。従来の検査は「サーバに登録したのに iOS 側のセットに入れ忘れる」だけを見ており、**逆向き（iOSが送るのにサーバの allowlist に無い）は素通り**していた。その場合サーバは受け取って黙って捨て、端末には200が返るので送信側にも症状が出ない。サーバ allowlist の写しを iOS 側に置いたので**隣のリポジトリが無いCIでも動く** — 隣を見に行く形にすると検査が常にスキップされ、事故は起きたまま緑になる",
       "since": "2026-08"
     },
     {
@@ -343,9 +358,10 @@
       "executor": "ai_autonomous",
       "evidence": [
         "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "../simplememo-api/test/rollout-guard.test.ts",
+        "docs/canary-testflight.md"
       ],
-      "note": "露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた"
+      "note": "露出群/対照群を bucketOf で復元して比較し、悪化なら自動で撤回する。2026-08-22実装。**同日、kill が実機まで届いて機能が消えることを TestFlight で実証した**（docs/canary-testflight.md の実測）。ただし**押したのは人であってガードではない**。ガードの自動判定は本番でまだ1回も発火していない — TestFlight の人数では min_installs_per_cohort:30 に届かない。**止められることと、判断できることは別**"
     },
     {
       "area": "② バグ修正",
@@ -466,13 +482,17 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "App Store Connect のデータ連携",
-      "executor": "ai_executes_gated",
+      "executor": "ai_autonomous",
       "evidence": [
-        "growth/scripts/ingest-asc.mjs",
+        "../simplememo-ios/scripts/asc_metrics.rb",
+        "../simplememo-ios/.github/workflows/asc-metrics.yml",
+        "../simplememo-ios/data/appstore/asc-metrics.json",
         "../simplememo-ios/scripts/asc_analytics.rb",
-        "../simplememo-ios/.github/workflows/asc-analytics.yml"
+        "../simplememo-ios/.github/workflows/asc-analytics.yml",
+        "growth/scripts/ingest-asc.mjs",
+        "growth/data/appstore/README.md"
       ],
-      "note": "2026-08-22実装（オーナー承認を受けて着手）。**Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるので**オーナー作業ゼロで始められる。**鍵は fastlane が既に使っているものをそのまま使う。毎日20:30 JSTに取得。**行そのものは置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）。**本番でまだ一度も走っていない** — ONGOINGのレポート要求を作った当日はApple側が生成しておらず、初回の0件は失敗ではない",
+      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済みで **instance は 0/15・Apple の生成待ち**（5日を超えたら『故障』としてジョブが落ちる）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）",
       "since": "2026-08"
     },
     {
@@ -1598,7 +1618,7 @@
         "docs/obsidian/AUTOPILOT_RUNBOOK.md",
         "data/autopilot-runs.json"
       ],
-      "note": "主系0/3・副系10/10。冗長化が実際に効いた"
+      "note": "主系1/4・副系10/10。冗長化が実際に効いた。**主系の初出荷は2026-08-23**（PR #538）で、それまでの11回は4種類の異なる理由で不発。1回出たことと任せられることは別なので、実行者は上げていない"
     },
     {
       "area": "⑫ 事業継続性",

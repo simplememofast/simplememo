@@ -82,7 +82,7 @@
 
 | 実行者 | タスク | 状況・証跡 |
 |---|---|---|
-| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系0/3・副系10/10。冗長化が実際に効いた<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
+| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系1/4・副系10/10。冗長化が実際に効いた（**主系の初出荷は2026-08-23**・PR #538。それまでの11回は4種類の異なる理由で不発。1回出たことと任せられることは別）<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
 | ゲート付き実行 | 冪等性 | 当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`scripts/autopilot-budget.mjs` |
 | ゲート付き実行 | 再試行 | 09:20の再試行経路・Resend 429の単発リトライ<br>`.github/workflows/obsidian-autopilot.yml`<br>`../simplememo-api/src/resend.ts` |
 | ゲート付き実行 | Circuit Breaker | 2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**<br>`../simplememo-api/src/circuit-breaker.ts`<br>`../simplememo-api/src/resend.ts`<br>`../simplememo-api/test/circuit-breaker.test.ts` |

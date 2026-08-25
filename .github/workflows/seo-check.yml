@@ -211,8 +211,16 @@ jobs:
       # AI完走率を静かにずらすので、PRの時点で止める。
       # 「shipped なのに PR番号が無い」「failed なのに理由が無い」も同様に落とす —
       # 検算できない出荷と、原因の無い失敗は、指標として存在しないのと同じ。
+      # 【2026-08-23追加】陳腐化も落とす。
+      # 主系が初めて自走出荷した日（PR #538）、台帳に行が書かれず、この --check は
+      # 素通りした。**行の形はすべて正しかったので、既存の検査は何も言えなかった。**
+      # 壊れた行は指標を嘘にするが、書かれなかった行は指標を止める。
+      # 止まった指標は「変化が無い」と見分けがつかないぶん質が悪い。
+      # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない。
       - name: Autopilot run ledger
-        run: node scripts/autopilot-runs.mjs --check
+        run: |
+          node scripts/autopilot-runs.mjs --selftest
+          node scripts/autopilot-runs.mjs --check
 
       # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
       #
@@ -404,6 +412,20 @@ jobs:
       - name: Feature backlog
         run: node scripts/feature-score.mjs --check
 
+      # 【レビュー】ユーザーの声を受け取ったかではなく、**捌いたか**を見る。
+      #
+      # 取り込みは機械化した（../simplememo-ios/scripts/asc_metrics.rb）が、
+      # 取り込んだだけのレビューは誰も見ない。growth/README.md 冒頭の
+      # 「散文は手を挙げない」と同じ構造なので、**未処理が14日を超えたら落とす**。
+      #
+      # レビュー本体は別リポジトリにあってこのCIからは見えない。そのときは
+      # judged=false を返し、台帳の整合だけを見る。**見えないことを
+      # 「未処理0件」と書かない**（check-monitoring と同じ扱い）。
+      - name: Review intake
+        run: |
+          node scripts/review-intake.mjs --selftest
+          node scripts/review-intake.mjs --check
+
       # 【主張】プレスリリースの見出し・リード文を実装台帳に当てる。
       #
       # 原稿は実装より速く動く。リード文に「AIが一気通貫で循環」と書いた後で
@@ -453,6 +475,16 @@ jobs:
       # 拒否される状態で2日間気づかれずに走っていた。
       - name: BigQuery credential handling
         run: node growth/lib/bigquery.test.mjs
+
+      # 一括エクスポートの「届いているように見えて欠けている」判定。
+      # これもネットワークに触らない（テーブル名と日付の配列だけを渡す）。
+      # 2026-08-21、Search Console から5件の失敗メールが来たとき、
+      # bq-preflight の全チェックは緑だった — 失敗したのは配信済みの日の
+      # 再エクスポートで、最新日付は動かないため。唯一の痕跡である
+      # temp_ テーブルを、当時のコードは「クエリの残骸」として名前で
+      # 捨てていた。ここが緑のまま「エクスポートは健全」と言えなくする。
+      - name: Bulk export integrity verdicts
+        run: node growth/lib/export-health.test.mjs
 
       # Smoke test only (--dry-run writes nothing). Note: the shallow CI
       # checkout means git-derived lastmod dates collapse to one date here;

@@ -27,10 +27,17 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 1,
-      "checksum": "65c6401c0423caed",
-      "changed_at": "2026-08-22",
-      "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）"
+      "version": 2,
+      "checksum": "3fe008a091b24494",
+      "changed_at": "2026-08-25",
+      "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。main の #540/#548（主系の初出荷を台帳へ・2日連続の即時失敗の検知）で autopilot-runs.mjs が変わったため checksum が動いた（完走率の算出は無変更）"
+        }
+      ]
     },
     {
       "id": "usd_per_shipped",
@@ -57,9 +64,9 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 5,
-      "checksum": "6715ab8ec5264743",
-      "changed_at": "2026-08-24",
+      "version": 6,
+      "checksum": "39eb4bb0214c4d18",
+      "changed_at": "2026-08-25",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
         {
@@ -81,6 +88,11 @@
           "version": 5,
           "at": "2026-08-24",
           "why": "定義は変えていない。§6 の保守メニューに check-degradation.mjs --sync を足し、隣を直接見に行った検査がCIで固定的に落ちた経緯を書いたため checksum が動いた（ノイズフロアの算出は無変更）"
+        },
+        {
+          "version": 6,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。main との合流で Runbook が変わったため checksum が動いた（ノイズフロアの算出は無変更）"
         }
       ]
     },

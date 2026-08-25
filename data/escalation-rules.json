@@ -43,6 +43,15 @@
       "note": "資格情報の失効。**AIには直せない**（新しい鍵を作れない）。放置すると全経路が同時に止まるので、予算超過などより短くしている"
     },
     {
+      "trigger": "auth_or_credential",
+      "kind": "failure_class",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "**運転台帳に実際に現れた分類。**gate_code の fail_credential は「判定が資格情報の失効に気づいた」場合だが、こちらは**判定を通り抜けて起動したあと即死する**形。2026-08-24・25 に主系が2日連続で is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=$0 の**完全同一シグネチャ**で落ちた（run 32667079679 / 32779337325）。単発のflakeではない。\\n\\nAIには直せない（新しい鍵を作れない）ので相手はオーナー。ただし **stop_automation は false にしてある** —— claude-code-action の full output が『hidden for security』で伏せられており、**エラー文言を読む唯一の手段が次のrun**だから。止めると診断もできなくなる。obsidian-autopilot.yml に show_full_output: true を入れてあるので、次の 06:00 JST run で文言が出る。**それでも同じ即時失敗が続くなら、そのときは止める判断に切り替える**（費用は$0だが、毎朝『動いているように見えて何も出ない』状態が常態化するほうが高い）"
+    },
+    {
       "trigger": "fail_api",
       "kind": "gate_code",
       "who": "owner",

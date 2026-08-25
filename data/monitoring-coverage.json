@@ -132,25 +132,25 @@
     {
       "id": "watch_app",
       "domain": "Apple Watch アプリ",
-      "watches": "watch_sync_push_failed / push_recovered / stuck / manual_repair の直近24hの件数",
+      "watches": "install単位の同期失敗率（毎時）／ watch_sync_push_failed・push_recovered・stuck・manual_repair の直近24h件数（日報）",
       "detection": "automatic",
-      "detector": "../simplememo-api/src/watch-health.ts",
-      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
-      "on_detect": "日報に1行。手動修復が1件でもあれば「劣化」。分母不足のときは**判定不能**と書く",
+      "detector": "../simplememo-api/src/analytics.ts / ../simplememo-api/src/watch-health.ts",
+      "cadence": "毎時 cron（ops_alerts）＋ 毎日 10:00 JST（日報に同梱）",
+      "on_detect": "毎時: 失敗した install の割合が閾値超でアラート。日報: 1行。手動修復が1件でもあれば「劣化」。分母不足のときは**判定不能**と書く",
       "covers_failure_class": [],
-      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている。残る弱さ: **Watchアプリの起動失敗やクラッシュは見ていない**（同期だけ）",
+      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。\n\n**検知器は2つある。**片方だけでは足りないことが分かったため。\n\n- **毎時（ops_alerts）は install 単位で見る。** 件数で見ると3秒間隔でリトライする1台が群全体を動かす —— 2026-08-15..19 の実測で **7 install が 712 件**を出していた。つまり件数ベースの閾値は、1台の不調を全体の障害に見せる\n- **日報は24h窓の件数と手動修復を見る。**母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。ただし「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている\n\n残る弱さ: **Watchアプリの起動失敗・クラッシュ・UI・課金表示は見ていない**（見ているのは同期だけ）",
       "coverage_kind": "direct"
     },
     {
       "id": "billing",
       "domain": "課金",
       "watches": "—",
-      "detection": "none",
-      "detector": null,
-      "cadence": null,
-      "on_detect": null,
+      "detection": "automatic",
+      "detector": "../simplememo-api/src/analytics.ts",
+      "cadence": "毎時 cron（ops_alerts）",
+      "on_detect": "閾値超過でアラートメール（種別ごとに冷却）",
       "covers_failure_class": [],
-      "note": "**購入失敗イベントを受ける経路が未実装。**ASC未接続なので売上の異常も見えない"
+      "note": "2026-08-22実装。**データは既に取れていて閾値と通知だけが無かった。**商品ロード失敗は1件でも鳴らす（カードが出ていない＝買えない状態で率の問題ではない）。成功率はサンプルが足りるまで判定せず、**鳴らないことを異常なしにしない**。売上側は 2026-08-22 に ASC を接続した（../simplememo-ios/scripts/asc_metrics.rb）。**購入・サブスクの件数は Analytics の COMMERCE レポートで取れる見込みだが instance がまだ0で、実際の異常検知はできていない。**入金額は vendor number 未登録のため取れない"
     },
     {
       "id": "support",
