@@ -16,6 +16,16 @@
  * こちらもそれ以上は持たない。**個人が特定できる列が将来増えたときに、
  * 気づかず貯め始めるのを防ぐ。**
  *
+ * 【⚠ CI ではこの検査はデータを見ていない】
+ * seo-check.yml の checkout は**このリポジトリだけ**なので、CI 上に
+ * `../simplememo-ios/data/asc/` は存在しない。つまり CI で走る --check は
+ * 常に「未取得」の枝に入り、**取得結果の中身を一度も検査しない。**
+ * ここで守れるのは「revenue_connected: true なのにデータが無い」だけ。
+ *
+ * **取得の健全性は取得側が持つ**（../simplememo-ios の asc-analytics.yml が
+ * `asc_analytics.rb --verify-status` で no_match / no_catalog を赤にする）。
+ * この分担を忘れて「CIがASCを見張っている」と思い込まないこと。
+ *
  * 【接続していないことを、接続しているように見せない】
  * `--check` は data/financial-policy.json の `revenue_connected` と
  * 実際のデータの有無が食い違っていたら落とす。
@@ -88,6 +98,30 @@ if (isMain) {
   } else {
     const n = normalize(src);
     console.log(`App Store Connect: ${n.date} 取得（${n.reports.length} レポート）`);
+
+    // [2026-08-25] **0件の理由を、待機と故障に分ける。**
+    // 取得側は `state` を書くようになった（../simplememo-ios/scripts/asc_analytics.rb）。
+    // それまでは 0件でも note が "取得完了" で、ここも「食い違いなし」と言って
+    // 通していた。実際には schedule 実行で取得対象が空になっており、
+    // **毎日0件を緑で出荷していた**（run 32844534637）。
+    // 待つべき状態（pending）は通す。設定の誤りは落とす。
+    const state = src.status.state;
+    const FAULTS = ['no_match', 'no_catalog'];
+    if (FAULTS.includes(state)) {
+      problems.push(`取得側が state: ${state} — ${src.status.note}`
+        + ` / 指定: ${(src.status.wanted_patterns || []).join(', ') || '(空)'}`
+        + ` / 利用可能 ${(n.available_reports || []).length} 件`
+        + ' — **待っても直らない。**取得側の指定を直すまでデータは降りてこない');
+    } else if (state === undefined && n.reports.length === 0 && (n.available_reports || []).length > 0) {
+      // 取得側がまだ state を書かない版のとき。**0件を黙って通さない。**
+      problems.push('取得側に state が無く、レポートも0件'
+        + ` — 利用可能は ${n.available_reports.length} 件ある。取得側の版が古い可能性`);
+    } else if (state === 'pending' || state === 'partial') {
+      const waiting = src.status.pending_reports || [];
+      console.log(`  状態: ${state} — 生成待ち ${waiting.length} 件`);
+      if (waiting.length) console.log(`    ${waiting.slice(0, 6).join(' / ')}`);
+    }
+
     for (const r of n.reports) {
       console.log(`  ${r.report}  ${r.row_count} 行  列 ${r.columns.length}`);
       const sums = Object.entries(r.sums || {}).slice(0, 4);

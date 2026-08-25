@@ -1,0 +1,206 @@
+{
+  "$comment": [
+    "運転記憶（Operating Memory）— **判断が次の判断を変えたことを、1レコードで示す台帳。**",
+    "scripts/check-operating-memory.mjs が検査する。",
+    "",
+    "【なぜ要るか】この運用には既に、判断の材料も結果も散らばって存在している。",
+    "  signal-ledger.json … 何が来たか",
+    "  experiments.json   … 何を試して、どう判定したか（マーケ施策のみ）",
+    "  autopilot-runs.json… いつ何が走ったか",
+    "  AUTOPILOT_LOG.md   … 経緯",
+    "**足りていないのは最後の1段。**「その結果を受けて、次の判断の仕方が",
+    "どう変わったか」が、どこにも構造化されていない。",
+    "",
+    "外部レビューの言い方を借りれば、①〜④だけなら Autopilot、⑤まで行けば",
+    "Closed-loop Autonomy、**⑥記憶と⑦方針改善まで行って初めて『再帰的』**と言える。",
+    "この台帳が持つのは⑥と⑦であって、それ以外ではない。",
+    "",
+    "【1レコードの必須要素】",
+    "  signal      … 何が起きたか（観測。人の勘ではない）",
+    "  hypothesis  … なぜ起きたと思ったか（**外れた仮説も消さない**）",
+    "  decision    … 何を変えると決めたか",
+    "  execution   … どのコミット/PR/ファイルを実際に変えたか",
+    "  verification… どう確かめたか",
+    "  outcome     … 何が起きたか（宣言ではなく観測）",
+    "  verdict     … 5値のどれか（下記）",
+    "  learning    … **次の判断をどう変えるか。changed に実在の成果物を書く**",
+    "",
+    "【verdict は5値。4値に潰さない】",
+    "  success            … 期待した方向に動いた",
+    "  failure            … 逆方向に動いた",
+    "  no_change          … 動かなかった（これも結果。失敗ではない）",
+    "  undecidable        … 測れたが、母数が足りず判断できない",
+    "  measurement_failed … **そもそも測れなかった**（基準値未記録・計装漏れ・取得断）",
+    "",
+    "**undecidable と measurement_failed を混ぜないこと。**",
+    "前者は待てば解ける。後者は待っても解けず、放置すると同じ施策で必ず再発する。",
+    "growth/experiments/experiments.json はこの2つを両方 `inconclusive` に入れており",
+    "（7件）、実際に『変更前のGSC値が記録されていない』案件がそこへ紛れている。",
+    "**その混同は、この台帳を作った直接の動機。**",
+    "",
+    "【lesson_key — 同じ失敗を2回学ばない】",
+    "learning には lesson_key を付ける。**同じ key が2回出たら検査が落ちる。**",
+    "2回目が出たということは、1回目の learning が成果物に効いていない",
+    "＝ ⑦方針改善が働いていない、ということなので、そこで気づけるようにする。",
+    "",
+    "【この台帳の限界（先に書く）】",
+    "  1. **後追いで書いている。**2026-08-25 の seed 6件は、当時のコミット・",
+    "     ジョブログ・台帳から再構成したもので、判断の瞬間に書かれたものではない。",
+    "     以後の行は発生時に書く。**seeded: true が付いているのが後追い分。**",
+    "  2. 網羅していない。**この期間の全判断ではなく、証跡を当てられた分だけ。**",
+    "     母数を主張に使わないこと（『判断の98%を記録』のような数字は出せない）。",
+    "  3. learning.changed は**ファイルが実在すること**しか検査できない。",
+    "     その変更が本当に効いたかは、次に同じ signal が来ないことでしか分からない。",
+    "  4. **seed 6件は判定が偏っている**（外した4 / 計測失敗2、効いた0）。",
+    "     これは『この運用が失敗ばかり』という意味ではなく、**後追いで証跡を",
+    "     当てられるのが、そもそも誤りを直した回だから**。うまくいった判断は",
+    "     コミットメッセージに経緯が書かれないので復元できない。",
+    "     **この偏りを『自己修正が働いている証拠』として使うのは正しいが、",
+    "     『成功率』の分母に使ってはいけない。**発生時記録（seeded:false）が",
+    "     溜まるまで、成功率という数字はこの台帳から出せない。"
+  ],
+  "seeded_at": "2026-08-25",
+  "verdicts": ["success", "failure", "no_change", "undecidable", "measurement_failed"],
+  "records": [
+    {
+      "id": "om-2026-08-25-asc-zero",
+      "seeded": true,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "⑥売上照合と⑨マネタイズが『ASC未接続』のまま3日動かない。asc-analytics.yml は毎日緑で、status.json は ' 取得完了' と書いてコミットしていた",
+      "hypothesis": "Apple 側のレポート生成待ち（ONGOING 要求を 08-22 に作ったばかりなので、翌日以降に出るはず）",
+      "decision": "待つ前に、隣の asc_metrics.rb が同じ要求をどう見ているか突き合わせる",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "aad9a6c",
+        "files": ["scripts/asc_analytics.rb", ".github/workflows/asc-analytics.yml", ".github/workflows/qa-static.yml", "data/asc/README.md"]
+      },
+      "verification": "run 32844534637 の実ジョブログを取得（『取得対象 0 件（部分一致: ）』）／ asc_metrics.rb の reports_with_data: 10/15・instance 08-23,08-24 と対照／ 旧既定に戻すと self-test が3件落ちることを確認",
+      "outcome": "生成待ちではなかった。**データは2日前から出ていた。**取得側の欠陥2つで取りに行っていなかった。(1) schedule 実行で ASC_REPORTS が空文字になり、Ruby の \"\" が真なので既定に落ちず WANTED が空。(2) 既定の語 'Sales' が Analytics のレポート名156件中0件に一致（売上は 'App Store Purchases'）",
+      "verdict": "measurement_failed",
+      "learning": {
+        "lesson_key": "zero-result-needs-a-reason",
+        "text": "**0件を1語で書かない。**『取得完了』が0件と両立する書き方をした時点で、生成待ちと設定の誤りが同じ見た目になる。0件には必ず state を付け、待てば直るもの（pending）と待っても直らないもの（no_match / no_catalog）を分ける。隣の asc_metrics.rb は既にこの規律を持っていた —— **同じリポジトリの中で規律が伝播していなかった**ことが本当の問題",
+        "changed": [
+          "../simplememo-ios/scripts/asc_analytics.rb",
+          "../simplememo-ios/.github/workflows/asc-analytics.yml"
+        ],
+        "new_guardrail": "asc_analytics.rb --self-test（19件）を qa-static へ常設。『取得完了』と書けるのは fetched のときだけ、を検査が強制する。--verify-status は取得のコミット後に走り、設定の誤りだけ赤にする"
+      }
+    },
+    {
+      "id": "om-2026-08-25-mainline-misdiagnosis",
+      "seeded": true,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "主系の自律コンテンツ実行が 08-24・08-25 と2日連続で即時失敗（486ms / 1 turn / $0）",
+      "hypothesis": "2日とも1バイトも違わない＝flake ではない＝認証系（auth_or_credential）。日報はオーナーへ `claude setup-token` の再実行を最優先で求めた",
+      "decision": "推論で分類せず、3run分のジョブログを実測して対照する",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "01a5be5",
+        "pr": 568,
+        "files": ["data/autopilot-runs.json"]
+      },
+      "verification": "run 32599191984(08-23 SHA 24dcd50c/CLI 2.1.240 → 出荷) / 32667079679(08-24 c81e3bc6/2.1.241 → 即時失敗) / 32779337325(08-25 同SHA → 即時失敗) / 32816234185(16b3b310/2.1.245 → 成功) の4本を並べた",
+      "outcome": "**誤診だった。**秘密鍵は一度も変えておらず、同じ鍵を使う run が通っている。失敗2回は upstream action の壊れた版（c81e3bc6 / CLI 2.1.241）を2回引いていた",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "identical-signature-is-not-auth",
+        "text": "『2日とも同一の数値＝flakeではない』は正しい。そこから『＝認証系』へ飛ぶのが誤り。**決定論的な startup 失敗も同一の数値を出す。**同一シグネチャが示すのは認証ではなく『依存が固定されていること』。分類は推論ではなくジョブログの対照で決める",
+        "changed": ["data/autopilot-runs.json", "scripts/autopilot-runs.mjs"],
+        "new_guardrail": "claude-code-action を SHA 16b3b310 へ pin（PR #569）。上流の版が黙って動くこと自体を止めた"
+      }
+    },
+    {
+      "id": "om-2026-08-25-subtitle-overclaim",
+      "seeded": true,
+      "area": "③ 自律型マーケティング",
+      "signal": "プレスリリースのヒーロー画像を生成しようとして generate-pr-hero.mjs に拒否された",
+      "hypothesis": "画像生成側の制約（文字数・レイアウト）に引っかかっただけ",
+      "decision": "拒否理由を台帳に当て直す",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "a430339",
+        "pr": 573,
+        "files": ["data/pr-claims.json", "docs/pr-autopilot-2026-09.md"]
+      },
+      "verification": "check-pr-claims.mjs で claim ごとの支持率を再計算（機能開発 60% / 循環 67%）",
+      "outcome": "**サブタイトルが本文より強かった。**旧文は『機能開発…までをAIが一気通貫で循環』で、本文 §3 が自分で『機能開発は分析と提案まで。通した実績はまだ無い』と否定している主張を、**いちばん人目に触れる画像へ焼き込むところだった**",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "headline-must-not-outrun-body",
+        "text": "見出し・サブタイトル・画像の文言は、本文より強くなりうる経路が別にある。**支持率不足を exit 1 にしていなかったので、CIは黙っていた。**画像生成という別の理由で偶然表に出ただけで、構造的には素通りする穴だった",
+        "changed": ["data/pr-claims.json", "scripts/check-pr-claims.mjs"],
+        "new_guardrail": "pr-claims.json に mode: ai_proposes を追加し、claim ごとに支持率と mode の整合を検査する。**ただし逆向きの誤り（実行できるのに『提案まで』と書き続ける過小申告）は、この検査では捕まらない** —— 記者に崩されないので落としていない"
+      }
+    },
+    {
+      "id": "om-2026-08-25-owner-request-backlog",
+      "seeded": true,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "毎朝オーナーへ送る日報のオーナー依頼が12件まで増え、うち6件は【解消済み】【完了】のまま再送されていた",
+      "hypothesis": "件数が多いのは、実際に依頼が多いから",
+      "decision": "依頼の持ち方そのものを見る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "8b1c648",
+        "pr": 154,
+        "files": ["data/autopilot-actions.json", "scripts/autopilot-act.mjs"]
+      },
+      "verification": "12件を1件ずつ state と close_check に当て直した",
+      "outcome": "依頼は status JSON の `owner_requests`、つまり**ただの string[]** に積まれていた。id も state も閉じ条件も無いので**解決しても消える理由が無い。**その日いちばん重要な1件（主系の認証failure）が、解決済み6件の中に埋まっていた",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-list-without-close-conditions-grows-until-unread",
+        "text": "閉じ条件を持たないリストは、**件数が増えるほど読まれる確率が下がる方向に働く。**『依頼が多い』ではなく『閉じられない構造』が原因。行が消えるのは close_check が実際に通ったときだけにする（人が消すのではない）",
+        "changed": ["data/autopilot-actions.json", "scripts/autopilot-act.mjs"],
+        "new_guardrail": "close_check は登録簿（autopilot-act.mjs の CLOSE_CHECKS）にあるものしか書けない。**台帳に任意のコマンドは書けない。**判定できないときは開いたままにする（閉じるほうへ倒さない）"
+      }
+    },
+    {
+      "id": "om-2026-07-31-macos-budget",
+      "seeded": true,
+      "area": "⑤ AI予算・トークン管理",
+      "signal": "2026-07-31、macOS ランナーが1日で $10 を消費。Actions 予算が枯れると release / release-command まで止まる（＝TestFlight配信もApp Review申請も止まる）",
+      "hypothesis": "ワークフロー冒頭の警告文（『トリガを追加するな』）で足りる",
+      "decision": "散文だけでは止まらないと判断し、機械的なゲートを足す",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "c19e319",
+        "pr": 225,
+        "files": [".github/workflows/qa-ios.yml", "CLAUDE.md"]
+      },
+      "verification": "入力なし dispatch は GitHub が 422 で弾く（0分）／ 値違いは ubuntu の gate が落として macOS に入る前に止まる（約1分）",
+      "outcome": "警告文は『トリガを追加するな』しか書いておらず、**『トリガは足さないが1回だけ手で回す』を止められていなかった。**AIから届く dispatch 経路（MCP の actions_run_trigger）が塞がれていなかった",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "prose-does-not-stop-an-agent",
+        "text": "『やるな』と書いてあることと、できないことは違う。**費用が出る経路には、散文ではなく required 入力と照合ジョブを置く。**合言葉はリポジトリに書いてあるので錠前ではない —— 塞いでいるのは『読まずに回す』であって、読んだなら禁止に必ず当たる、という設計にする",
+        "changed": ["../simplememo-ios/.github/workflows/qa-ios.yml", "../simplememo-ios/CLAUDE.md"],
+        "new_guardrail": "confirm 入力（required・値は spend-macos-minutes）を追加。照合は ubuntu の gate ジョブが持ち、macOS の2ジョブは needs: gate。通した回は起動者と概算消費がジョブ要約に残る"
+      }
+    },
+    {
+      "id": "om-2026-08-09-title-test-no-baseline",
+      "seeded": true,
+      "area": "③ 自律型マーケティング",
+      "signal": "/apple-watch/ のタイトル変更実験（title-2026-07-01-001）を評価しようとした",
+      "hypothesis": "front-loaded なタイトルは、掲載順位が変わらないまま CTR を上げる",
+      "decision": "評価日（2026-07-29）に GSC を引いて前後比較する",
+      "execution": {
+        "repo": "simplememo",
+        "pr": 367,
+        "commit": "33d44f51",
+        "files": ["growth/experiments/experiments.json"]
+      },
+      "verification": "GSC スナップショット 2026-08-09 を取得",
+      "outcome": "**比較できなかった。**変更前の GSC 値が記録されていなかった。現状 imp 954 / CTR 2.10% / pos 7.5 は取れたが、これが変更の効果かどうかは言えない",
+      "verdict": "measurement_failed",
+      "learning": {
+        "lesson_key": "no-baseline-no-experiment",
+        "text": "**基準値を記録する前に変更してはいけない。**この案件は experiments.json 上 `inconclusive` に入っているが、『測れたが母数が足りない』のではなく『そもそも測っていない』。前者は待てば解け、後者は待っても解けない。**同じ台帳の同じ語に入れると、待てば解けると誤解する**",
+        "changed": ["growth/experiments/experiments.json", "data/operating-memory.json"],
+        "new_guardrail": "verdict を5値にし、measurement_failed を undecidable から分離した。experiments.json 側の `inconclusive` 7件は、この観点で当て直しが要る（未了 —— data/autopilot-actions.json の act-experiments-verdict-split）"
+      }
+    }
+  ]
+}

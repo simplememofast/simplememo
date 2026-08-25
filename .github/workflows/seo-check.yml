@@ -359,6 +359,21 @@ jobs:
       - name: App Store Connect ingest
         run: node growth/scripts/ingest-asc.mjs --check
 
+      # 【運転記憶】判断→実行→結果→**次の判断がどう変わったか**を1レコードで持つ。
+      #
+      # ①〜④だけなら Autopilot、⑤停止・revert まで行けば Closed-loop、
+      # **⑥記憶と⑦方針改善まで行って初めて「再帰的」と言える。**
+      # ここが空でも他の検査は全部緑になるので、**自律性の主張だけが
+      # 中身なしで通る**経路になっていた。
+      #
+      # 検査の主眼は2つ:
+      #   - learning.changed が実在の成果物を指すこと（**感想を学習と呼ばせない**）
+      #   - 同じ lesson_key が2回出たら落とす（1回目の学習が効いていない）
+      - name: Operating memory
+        run: |
+          node scripts/check-operating-memory.mjs --selftest
+          node scripts/check-operating-memory.mjs --check
+
       # 【KPIの定義】数字ではなく**定義**を凍結する。
       #
       # 「自動化率が上がった」の半分は計算を変えたから、という事故を防ぐ。
