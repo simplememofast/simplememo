@@ -123,14 +123,15 @@
       "title": "成否を次回の判断へ残す",
       "status": "partial",
       "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-memory.mjs",
         "data/autopilot-runs.json",
         "data/audit-findings.json",
-        "data/review-intake.json",
-        "data/feature-backlog.json",
         "growth/experiments/experiments.json"
       ],
-      "missing": "**記録は在るが、連結していない。**共通の実行IDで着手・結果・PR・介入・費用までは1行になっているが、そこから先——**Outcome → Verdict → Learning → 次の判断がどう変わったか**——が同じレコードに入っていない。いまは実験台帳・所見台帳・要望台帳に別々に載っていて、**1つの改善を最初から最後まで追える形になっていない**",
-      "note": "外部調査が「再帰的自己改善を名乗れるかどうかの核心」と指摘した部分。**ここが最大の欠落**"
+      "missing": "**仕組みはできたが、網羅していない。**記録した改善は4件なのに対し、実際の出荷は11件・評価済み実験は12件ある。**「記録されていない改善」を機械が数えていない**ので、記憶が網羅的かどうかが分からない（対 `memory-covers-improvements` として登録済み・covered:false）。加えて実験台帳の12件は判定（decision）止まりで、そこから learning へ繋いだのは**まだ1件も無い**（seq=4 が結果待ち）",
+      "note": "2026-08-25 に実装。**写さずに指す**形（既存台帳をIDで参照し、Verdict・Learning・Policy change だけを持つ）。守っているのは4つ —— 参照が解決すること／順序（結果が出る前に学びは書けない）／**learning は必ず何かを変えるか変えない理由を持つ**／追記のみ。検出力は差し替えで確認した",
+      "measured": "運営記憶 4件（完了3 / 結果待ち1）。**うち規則そのものを変えたもの 3件**"
     },
     {
       "id": "policy_improvement",

@@ -1,0 +1,179 @@
+{
+  "$comment": [
+    "**運営記憶 — 1つの改善を、最初から最後まで1レコードで追える形にする。**",
+    "検査は `scripts/check-memory.mjs`。",
+    "",
+    "【なぜ作るか — 2026-08-25 の自己採点で、ここが最大の欠落だった】",
+    "記録は揃っていた。**連結していなかった。**",
+    "",
+    "  autopilot-runs.json      着手・結果・PR・介入・費用（run単位）",
+    "  experiments.json         仮説・結果・判定（**評価済み12件**）",
+    "  signal-ledger.json       要望・レビュー・問い合わせ・競合",
+    "  audit-findings.json      監査の所見",
+    "",
+    "どれも在るのに、**「この信号を見て、こう決めて、こう実行して、結果こうで、",
+    "だから次はこうする」を通しで追える形になっていなかった。**",
+    "実験台帳には `decision`（判定）まで在るが、**learning に相当する列が1つも無い** ——",
+    "12件が評価済みで、そのうち7件が inconclusive のまま、次に何を変えるかが",
+    "どこにも書かれていない。",
+    "",
+    "【写さない。指す。】",
+    "この台帳は既存の台帳の値を**コピーしない。**IDで参照する。",
+    "コピーすると必ずずれる —— それが 2026-08-25 に3回起きたことそのものだった。",
+    "ここが持つのは、**他のどこも持っていないもの**だけ:",
+    "**Verdict（判定）・Learning（次をどう変えるか）・Policy change（実際に変えたもの）。**",
+    "",
+    "【verdict は「数字が上がったか」ではない】",
+    "**意図が達成されたか**で判定する。seq=1 は総合自動化率が 61.3% → 54.9% と",
+    "**下がった**が、意図（在りもしない実装を数えるのをやめる）は達成されたので improved。",
+    "「数字が上がった＝成功」にすると、下げるべき数字を下げた仕事が失敗に見え、",
+    "**やがて誰も数字を下げなくなる。**",
+    "",
+    "【undetermined と measurement_failed を一級市民にする】",
+    "「判定していない」を「異常なし」と書かないのと同じ。",
+    "**分からなかったことは、分からなかったと残す。**実験12件のうち7件が",
+    "inconclusive だという事実は、隠すと消えるが、残すと『測定設計が弱い』",
+    "という次の仕事になる。",
+    "",
+    "【追記のみ】",
+    "連番が飛んだら落ちる。**都合の悪い記憶を消せる記憶は、記憶ではない。**"
+  ],
+  "$fields": {
+    "signal": "何が起きたか。**ref は既存台帳のエントリを指す**（値を写さない）",
+    "hypothesis": "なぜ起きたと思ったか",
+    "decision": "何を変えると決めたか",
+    "execution": "実際に何を変えたか。refs は実在するファイル・PR",
+    "verification": "どう確かめたか",
+    "outcome": "測った結果。**これが無いうちは verdict を書けない**",
+    "verdict": "improved / worsened / no_change / undetermined / measurement_failed。**意図が達成されたかで判定する。数字の上下ではない**",
+    "learning": "次回の判断をどう変えるか。**書いたら policy_change か no_policy_change_reason のどちらかが要る**",
+    "policy_change": "実際に変えた規則・閾値・検査。null なら理由を書く",
+    "status": "open（結果待ち） / closed（learning まで書いた）"
+  },
+  "$verdicts": [
+    "improved",
+    "worsened",
+    "no_change",
+    "undetermined",
+    "measurement_failed"
+  ],
+  "next_seq": 5,
+  "records": [
+    {
+      "seq": 1,
+      "opened_at": "2026-08-25",
+      "status": "closed",
+      "signal": {
+        "what": "プレスリリースの主張を実装台帳に当て直す作業中、隣リポジトリを指した証跡を1件ずつ開いたら、どれも存在しなかった",
+        "ref": "audit-findings.json#seq=1"
+      },
+      "hypothesis": "証跡の実在確認が、隣のリポジトリを指すパスだけ飛ばされているのではないか",
+      "decision": "`../` で始まる証跡も突き合わせる。隣が見えれば実物、無ければ写し、古い写しは落とす",
+      "execution": {
+        "what": "scripts/crossrepo.mjs を新設し、CIへ配線。18タスクの executor を実態へ戻した",
+        "refs": [
+          "scripts/crossrepo.mjs",
+          "data/crossrepo-probes.json",
+          "data/automation-coverage.json"
+        ]
+      },
+      "verification": "39ファイルが隣2リポジトリのgit履歴に一度も存在しないことを、全ブランチ・全履歴で確認した",
+      "outcome": {
+        "at": "2026-08-25",
+        "measured": "総合自動化率 61.3% → 54.9% / 未実装 22 → 31件 / ⑫事業継続性 100.0% → 55.6% / 監視の穴 1 → 3系統"
+      },
+      "verdict": "improved",
+      "$verdict_note": "**数字は下がったが improved。**意図は「在りもしない実装を数えるのをやめる」で、それは達成された。数字の上下で判定しない",
+      "learning": "**「確認できないから確認しない」は、「確認しない」としか読まれない。**確認できない場所を指せることが分かっているなら、確認できる形（写し）を先に作る。同じ問題を check-degradation.mjs が前日に解いていたのに、その解き方が隣の検査へ伝わっていなかった",
+      "policy_change": {
+        "what": "隣を指した証跡の実在確認を必須CIチェックへ追加。以後『隣が無ければスキップ』を禁止",
+        "refs": [
+          "data/authority-matrix.json",
+          ".github/workflows/seo-check.yml"
+        ]
+      }
+    },
+    {
+      "seq": 2,
+      "opened_at": "2026-08-25",
+      "status": "closed",
+      "signal": {
+        "what": "自前のD1バックアップを実装した直後、オーナーから『D1が適切なのでは』と指摘された",
+        "ref": "audit-findings.json#seq=2"
+      },
+      "hypothesis": "プラットフォーム側に既に復旧手段があり、それを確認せずに自前実装したのではないか",
+      "decision": "実機で確かめ、在るなら主たる復旧手段をそちらに戻し、自前は届かない範囲だけに絞る",
+      "execution": {
+        "what": "docs/RESTORE.md を Time Travel 先頭に書き直し、--time-travel を追加。場外コピーを日次→週1へ落とし、artifact 保管を既定オフにした",
+        "refs": [
+          "../simplememo-api/docs/RESTORE.md",
+          "../simplememo-api/scripts/backup-d1.mjs",
+          "../simplememo-api/.github/workflows/backup-d1.yml"
+        ]
+      },
+      "verification": "本番D1に対して実行し、ブックマークの取得と復元可能範囲（2026-07-26〜当日・分単位）を確認した",
+      "outcome": {
+        "at": "2026-08-25",
+        "measured": "Time Travel が本番で有効であることを実測。自前の日次コピーは、復旧時点・設定・費用・個人データの置き場所のすべてで劣っていた。復旧手順書に主たる復旧手段が一行も無い状態だった"
+      },
+      "verdict": "improved",
+      "learning": "**「無い」と結論したときこそ、作る前にもう一度確かめる。**seq=1 は『在ると書いてあるが無い』、seq=2 は『無いと結論したが在った』で、**同じ検査不足の裏表。**加えて、機能を足すより先に**プラットフォームが既に持っていないか**を見る手順が無かった",
+      "policy_change": {
+        "what": "claim-referent.json に `platform-capability` の対を登録（自前実装の主張 ↔ プラットフォームの実機能）。**機械では見られない対**として、監査の入力に載せた",
+        "refs": [
+          "data/claim-referent.json"
+        ]
+      }
+    },
+    {
+      "seq": 3,
+      "opened_at": "2026-08-25",
+      "status": "closed",
+      "signal": {
+        "what": "対の棚卸しを作る過程で、required_ci_checks の突き合わせが片方向しか無いことに気づいた",
+        "ref": "audit-findings.json#seq=3"
+      },
+      "hypothesis": "リストに載っていない検査は、ワークフローから消しても何も鳴らないのではないか",
+      "decision": "逆向き（ワークフロー → リスト）も突き合わせる",
+      "execution": {
+        "what": "check-authority.mjs に逆向きの検査を追加。10本を必須へ、検査でない1本は理由つきで除外",
+        "refs": [
+          "scripts/check-authority.mjs",
+          "data/authority-matrix.json"
+        ]
+      },
+      "verification": "1本をリストから外して実際に落ちることを確認した（差し替えによる検出力の確認）",
+      "outcome": {
+        "at": "2026-08-25",
+        "measured": "保護されていない検査 11本 → 0本。必須CIチェック 42 → 53本。うち check-monitoring / check-vendors / check-pr-claims / check-pr-hero が含まれていた"
+      },
+      "verdict": "improved",
+      "learning": "**片方向の突き合わせは、片方向の穴を残す。**しかも穴は『検査が無い』形ではなく『検査はあるが逆を見ていない』形で残るので、**検査の本数を数えても出てこない。**対を数えるときは必ず方向を書く",
+      "policy_change": {
+        "what": "claim-referent.json に direction を必須項目として置き、両方向を別の対として登録する形にした",
+        "refs": [
+          "data/claim-referent.json",
+          "scripts/check-claims.mjs"
+        ]
+      }
+    },
+    {
+      "seq": 4,
+      "opened_at": "2026-08-25",
+      "status": "open",
+      "signal": {
+        "what": "運営記憶を作るために実験台帳を数えたところ、**評価済み12件のうち7件が inconclusive** で、しかも learning に相当する列が1つも無かった",
+        "ref": "growth/experiments/experiments.json"
+      },
+      "hypothesis": "測定の設計が弱い。とくに変更前のベースラインを記録しないまま変更しているため、あとから比較できない（実際 title-2026-07-01-001 の baseline は全項目 null で『変更前のGSC値が記録されていない』と注記されている）",
+      "decision": "**まだ決めていない。**inconclusive の7件を読み直し、原因がベースライン未記録に集中しているのかを先に確かめる",
+      "execution": null,
+      "verification": null,
+      "outcome": null,
+      "verdict": null,
+      "learning": null,
+      "policy_change": null,
+      "$open_note": "**結果が出ていないので verdict も learning も書けない。**この状態のまま残すのが正しい。空欄を埋めるために推測を書くと、記憶が推測で汚れる"
+    }
+  ]
+}

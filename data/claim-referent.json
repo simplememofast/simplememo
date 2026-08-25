@@ -437,6 +437,24 @@
       "checked_by": null,
       "covered": false,
       "why_uncovered": "**まだやっていない。**measured は手で書いた文字列で、autopilot-runs / experiments から数え直して突き合わせてはいない。**今日3回出たのと同じ形の対**なので、次に塞ぐならここ"
+    },
+    {
+      "id": "memory-refs",
+      "claim": "operating-memory.json の signal.ref / execution.refs / policy_change.refs",
+      "referent": "既存台帳の実際のエントリ、実在するファイル",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-memory.mjs --check",
+      "covered": true,
+      "note": "**写さない。指す。**値をコピーすると必ずずれる —— 2026-08-25 に3回起きたのがそれ。参照が解決しない記憶は、書いた本人にしか読めない"
+    },
+    {
+      "id": "memory-covers-improvements",
+      "claim": "operating-memory.json が改善を記録している",
+      "referent": "実際に行われた改善の全体（出荷11件・実験36件・所見3件）",
+      "direction": "referent_to_claim",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**まだやっていない。**記録した改善が4件なのに対し、実際の出荷は11件・評価済み実験は12件ある。**「記録していない改善」を機械が数えていない**ので、記憶が網羅的かどうかは分からない。次に塞ぐならここ"
     }
   ],
   "exempt_sources": {
