@@ -124,24 +124,44 @@ jobs:
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # 同日に2回目が走ったとき（手動 dispatch・再実行）、main から切り直すと
-          # 既存の当日ブランチと分岐して push が非fast-forwardで弾かれる。
-          # このレーンの当日ブランチは占有ロックではない（占有は
-          # claude/obsidian-auto-* のほうで、こちらは別名）ので、
-          # **既にあるなら、その続きから書く**のが正しい。
-          git stash -q
-          if git fetch origin "$DAY" 2>/dev/null; then
+
+          # 【当日ブランチの扱い】**open なPRがあるかどうかだけで決める。**
+          #
+          #   open なPRがある  → まだ出荷されていない当日分がある。その続きから書く
+          #   open なPRが無い  → 前回のPRはマージ済み（か、そもそも無い）。
+          #                      **main から取り直す**
+          #
+          # 以前は「ブランチがあれば必ずその続き」にしていたが、main が進んだあとに
+          # 古いブランチをチェックアウトして stash pop すると、**衝突しても
+          # `|| true` が握り潰してコンフリクトマーカーごと commit しうる。**
+          # 実際 2回目の実走では main が2コミット進んでおり、たまたま衝突しなかった
+          # だけだった。台帳を壊す経路を運頼みにしない。
+          #
+          # 取り直しで捨てた差分は失われない —— この台帳は毎回 main の状態から
+          # 導出し直されるので、次の実行が同じ結論に到達する（実費の除外も
+          # append-cost が再度実測して積み直す）。**状態ではなく導出が正。**
+          if [ -n "$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')" ]; then
+            echo "open なPRがある → 当日ブランチの続きから書く"
+            git stash -q
+            git fetch origin "$DAY"
             git checkout -B "$DAY" FETCH_HEAD
+            # ここでの衝突は握り潰さない。**握り潰すとコンフリクトマーカーが
+            # 台帳に入って本番へ出る。**落として人が見るほうが安い。
+            git stash pop
           else
+            echo "open なPRが無い → main から取り直す"
             git checkout -B "$DAY"
           fi
-          git stash pop -q || true
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json 2>/dev/null || true
           git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
           # 同日に再実行した場合は追記されるだけ。強制pushはしない
           # （弾かれること自体が「先に誰かが書いた」という出力）。
-          git push -u origin "$DAY"
+          # 取り直した場合、リモートには古い当日ブランチが残っている。
+          # そのPRは既にマージ済み（open が無いことは上で確認済み）なので、
+          # **既マージ履歴の上書きにしかならない。**--force-with-lease にして
+          # 「読んだ時点から動いていたら落ちる」ようにしておく。
+          git push --force-with-lease -u origin "$DAY"
           # **open なPRだけを見る。**`gh pr view` はマージ済み・クローズ済みのPRも
           # 見つけてしまう。同日2回目が走ったとき、1回目のPRが既にマージされていると
           # 「PRはある」と判定して新しいPRを作らず、**pushしたコミットがどこにも
