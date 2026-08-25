@@ -1,13 +1,16 @@
 {
-  "date_jst": "2026-08-25",
-  "generated_at": "2026-08-25T06:55:00Z",
-  "action": "maintenance",
-  "article": null,
+  "date_jst": "2026-08-26",
+  "generated_at": "2026-08-25T21:46:29Z",
+  "action": "new",
+  "article": {
+    "url": "https://simplememofast.com/obsidian/sync/",
+    "title": "Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing"
+  },
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 2,
-    "last_article_date_jst": "2026-08-23",
-    "last_production_change_date_jst": "2026-08-25",
+    "consecutive_no_article_days": 0,
+    "last_article_date_jst": "2026-08-26",
+    "last_production_change_date_jst": "2026-08-26",
     "days_since_production_change": 0
   },
   "data_freshness": {
@@ -19,16 +22,16 @@
   "cost": {
     "month": "2026-08",
     "cap_usd": 40,
-    "spent_usd": 8.1116,
-    "remaining_usd": 31.8884,
+    "spent_usd": 20.0445,
+    "remaining_usd": 19.9555,
     "over": false,
-    "runs": 4,
-    "shipped": 1,
-    "usd_per_shipped": 8.1116,
+    "runs": 5,
+    "shipped": 2,
+    "usd_per_shipped": 10.0222,
     "by_route": {
       "actions": {
-        "runs": 4,
-        "spent": 8.111607600000001
+        "runs": 5,
+        "spent": 20.044477850000007
       },
       "ccr": {
         "runs": 0,
@@ -36,31 +39,72 @@
       }
     },
     "ccr_measured": false,
+    "run_caps": {
+      "overruns": [
+        {
+          "run_id": "32599191984",
+          "date_jst": "2026-08-23",
+          "task_kind": "article",
+          "cost": 7.296703800000001,
+          "cap": 6,
+          "times": 1.2,
+          "reviewed": true,
+          "why": "主系の初出荷回。前日の故障（ap-20260822-actions）の修理を含む150ターン・17分の実行で、内容そのものは妥当と判断した。上限$2.00は実績n=1（$0.8149）から置いた暫定値で、上限側が過小。実測5件で異常検知が自己較正されるので、そこから再導出する。オーナー承認 2026-08-25"
+        },
+        {
+          "run_id": "32816234185",
+          "date_jst": "2026-08-25",
+          "task_kind": "repair",
+          "cost": 11.932870250000008,
+          "cap": 3,
+          "times": 4,
+          "reviewed": true,
+          "why": "2026-08-25のセッションでオーナーが明示的に権限を委譲して解除（「権限を与えるのでやって」）。支出そのものは妥当と判断した: 104ターン・27分で ap-20260824/25 の2件を修理して出荷しており、内容に無駄な反復は無い。**ただし本質は支出ではなく上限の較正。** 実測5件のうち task_kind が付いた3件を見ると、実際に仕事をして出荷した run は2件（article $7.2967 / repair $11.9329）で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run（$0.8149）だけ。** 上限 $2.00/$3.00 は失敗runのn=1から外挿した placeholder で、成功runを一度も許容していない。さらに repair は monthly_usd_cap $8 に対し1回が $11.93 で、月枠が1回分に足りていない。上限の再設定は monthly_usd_cap の決定を含み権限表で human_only なので、ここでは解除だけを行い、較正は数値つきで台帳に残す（act-budget-recalibrate）"
+        }
+      ],
+      "unreviewed": [],
+      "runs_without_kind": 2
+    },
     "models": {
       "counts": {
-        "claude-haiku-4-5-20251001": 1,
-        "claude-sonnet-5": 1
+        "claude-haiku-4-5-20251001": 2,
+        "claude-sonnet-5": 2
       },
-      "runs_with_models": 1,
+      "runs_with_models": 2,
       "runs_without_models": 3
     },
     "anomaly": {
       "enabled": true,
-      "judged": false,
-      "reason": "実績 4 件 < 判定に必要な 5 件。判定していない（異常なしではない）",
-      "samples": 4
+      "judged": true,
+      "median": 0.8149038,
+      "threshold": 3.2596152,
+      "samples": 5,
+      "anomalies": [
+        {
+          "run_id": "32599191984",
+          "date_jst": "2026-08-23",
+          "cost": 7.296703800000001,
+          "times_median": 9
+        },
+        {
+          "run_id": "32816234185",
+          "date_jst": "2026-08-25",
+          "cost": 11.932870250000008,
+          "times_median": 14.6
+        }
+      ]
     },
     "cap_set_by": "placeholder"
   },
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-08-25",
-      "days": 15
+      "to": "2026-08-26",
+      "days": 16
     },
-    "completion_rate": 0.7059,
-    "change_failure_rate": 0.2941,
-    "human_intervention_rate": 0.4118,
+    "completion_rate": 0.7222,
+    "change_failure_rate": 0.2778,
+    "human_intervention_rate": 0.3889,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -68,27 +112,27 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.23529411764705882
+        "rate": 0.2222222222222222
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.058823529411764705
+        "rate": 0.05555555555555555
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.058823529411764705
+        "rate": 0.05555555555555555
       },
       "request": {
         "runs": 1,
-        "rate": 0.058823529411764705
+        "rate": 0.05555555555555555
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.8,
+    "shipping_day_rate": 0.8125,
     "totals": {
-      "runs": 27,
-      "attempted": 17,
-      "shipped": 12,
+      "runs": 28,
+      "attempted": 18,
+      "shipped": 13,
       "failed": 5,
       "no_run": 2
     },
@@ -99,9 +143,9 @@
         "shipped": 10
       },
       "primary": {
-        "runs": 15,
-        "attempted": 7,
-        "shipped": 2
+        "runs": 16,
+        "attempted": 8,
+        "shipped": 3
       }
     },
     "primary_ever_shipped": true,
@@ -124,22 +168,18 @@
       "unresolved": []
     }
   },
-  "reason": "【連続無記事2日目・本番最終変更2026-08-25・BQ確認済み(13/28日蓄積・2026-09-06頃到達見込み)】主系の手動force実行（run 32816234185・workflow_dispatch・FORCE_RUN=true）。レーンF（自己修復）で1日を使い、記事は書いていない。**08-24・08-25の主系2日連続の即時失敗について、前日に記録された『認証系（auth_or_credential）』は誤りだった。**実際の原因は claude-code-action@v1 が引いた上流の壊れた版。実測の対照: 出荷できた run 32599191984（08-23）は SHA 24dcd50c / Claude Code 2.1.240、失敗した run 32667079679・32779337325 はどちらも SHA c81e3bc6 / 2.1.241（upstream の『bump Claude Code to 2.1.241 and Agent SDK to 0.3.241』2026-08-23T00:53Z）。**秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う本run（SHA 16b3b310 / 2.1.245）が通っている。**前日の推論『2日とも1バイトも違わない＝flakeではない＝認証系』が外れた点が要で、決定論的な startup 失敗も同一の数値を出す——**同一シグネチャは認証の証拠ではなく、依存が固定されていることの証拠だった。**修理は2つ書き、**1つは適用できなかった**: (1) claude-code-action を本runが通した SHA 16b3b310 へ pin する変更は内容を確定したが、**主系の GH_PAT に workflow scope が無く push が remote rejected される**（GITHUB_TOKEN でも同じ）。**self_repair.may_modify はこのワークフローをレーンFが直してよいファイルとして挙げているのに、主系はそれを push する資格を持っていない**——「直してよい」と「直せる」がずれている構造的な穴で、主系が同じ修理を試みて初めて分かった（副系CCRは push でき、前日のPR #548 が同じファイルを変更している）。適用する2箇所は data/autopilot-actions.json の act-pin-claude-code-action に確定した形で積み、閉じ条件を file_contains{needle: 16b3b310…} にした。(2) scripts/autopilot-act.mjs の run 解釈が『Claude Codeステップが5秒未満で失敗＝auth_or_credential』と所要時間だけで断定していたのを止め、`immediate_failure`（観測された形）＋needs_triage に改めた——この断定が誤った台帳と、オーナーへの不要な作業依頼（claude setup-token の再実行）を生んでいた。診断用に前日入れた show_full_output も同じPRで戻す予定だったが、同じ理由で今回は適用できていない（pin と同じ act-pin-claude-code-action に含めた。リポジトリが public であること、および原因を割ったのが常時ログに出る Download action repository の SHA 行でこのフラグではないことが、戻す理由）。レーンA/BはBQ28日窓（2026-09-06頃）まで正当化できず、レーンE（coverage-queue.json pending 29件・次点C05 /obsidian/sync/）は当日候補だったがレーンFを優先した（Runbook §2『レーンFで1日使い切ってよい』）。トレンドレーダー: 本日ヒットなし。",
-  "verified": "GitHub Actions のジョブログ（zip）を3run分ダウンロードして実測した: run 32599191984（08-23・成功）/ 32667079679（08-24・失敗）/ 32779337325（08-25・失敗）。各runの `Download action repository 'anthropics/claude-code-action@v1' (SHA:…)` 行と `Installing Claude Code v…` 行を直接読み、成功回と失敗回で SHA・CLI版が違うことを確認した。3つのSHAは GitHub API（repos/anthropics/claude-code-action/commits/…）でコミット日時とメッセージまで裏を取り、v1 タグの現在値は git/ref/tags/v1 → 注釈タグ ae456065 → コミット 16b3b310（2026-08-25T05:14Z『bump Claude Code to 2.1.245 and Agent SDK to 0.3.245』）と確認。本runで実際に走っている CLI が 2.1.245 であることは `~/.local/bin/claude --version` で実測。失敗回のログは actor 判定（『Actor github-actions is in allowed_bots list, skipping human actor check』）が成功回と同一で、08-21のactor拒否の再発ではないことも確認した。§4の検証は17本すべて実行し全て通過（下記 checks）。scripts/autopilot-act.mjs の変更は --selftest 27項目で担保し、旧 auth_or_credential で書かれた既存行も導出に拾われ続けることをテストで固定した。**検証していないこと:** (1) 08-24〜08-25 の間に秘密鍵が回っていなかったこと——GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めない（Runbook §7-3 と同じ制約）。したがって『鍵が原因ではない』は、同じ鍵で本runが通ったことと版の対照から導いた推論であって、鍵の更新履歴を見た結論ではない。(2) pin の効果——**pin はまだリポジトリに入っていない**（主系のPATに workflow scope が無く push できなかった。実際に remote rejected を受けたところまでが実測）。したがって「16b3b310 なら通る」と言えるのは本run（workflow_dispatch）1回ぶんの観測であって、schedule 起動でも通ることも、pin後の挙動も未確認。(3) 上流 c81e3bc6 が具体的にどう壊れていたか（full outputが伏せられており、当時のエラー文言そのものは今も読めない）。(4) 記事・本番HTMLは一切変更していないため、iPhoneモバイルQAは対象外。",
+  "reason": "【連続無記事0日目・本番最終変更2026-08-26・BQ確認済み(13/28日蓄積・2026-09-06頃到達見込み)】レーンE。coverage-queue C05 `/obsidian/sync/` を実装し出荷（PR #586）。Obsidianの保管庫はただのMarkdownフォルダなので同期方法はiCloud Drive/公式Obsidian Sync/Git/Syncthingから選べるという前提で4方式を比較し、GitとSyncthingはこの環境で実際に2台のオフライン同時編集を衝突させて壊れ方を実測した（Git=本文に衝突マーカー挿入／Syncthing=sync-conflict別ファイルに自動退避、どちらもデータ消失なし）。iCloud DriveとObsidian Syncはこの環境にmacOS/iOSが無く実機検証できないため、Apple公式ヘルプとobsidian.md/help/syncを本セッションから直接取得して引用し、未検証部分は§28の3状態表記で明記した。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。coverage-queueの次点C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/` は本ページと主題が重なるため collides_with を追記し、次回は narrow した実装に切り替えるよう申し送った。トレンドレーダー: 本日ヒットなし（3面とも確認済み）。act-credential-actions（主系08-24〜08-25の即時失敗）については、本runが actions 経路として着手し即時失敗せず完走したことが、再発なしの実測1件として台帳に積まれた。",
+  "verified": "実測（このセッションで実際に動かした）: Git 2.x — 中央bareリポジトリ1つと2つのcloneで、オフライン同時編集→片方push成功→もう片方push拒否→pull時のマージ衝突→本文への衝突マーカー挿入までを再現し、実際の出力をそのまま記事に転載。Syncthing v1.27.2（apt経由でインストール）— ローカルTCPで直接ペアリングした2インスタンス間で同じシナリオを再現し、sync-conflict-*.md ファイルの生成をファイルシステムで確認。ネットワークアクセス: このセッション（GitHub Actions経由）から obsidian.md / support.apple.com へ直接到達できることを確認し、obsidian.md/help/sync・obsidian.md/help/sync/version-history を直接取得（2026年8月26日）。公式情報に基づく記載（未検証）: iCloud Drive上のドキュメント競合時の番号付きファイル名（Apple公式Macヘルプ）、Obsidian Syncのバージョン履歴保持期間（Standard 1か月・Plus 12か月・添付2週間）と他クラウド併用時の公式注意書き。検証できなかったこと: iCloud DriveとObsidianの組み合わせでの実際の競合挙動（macOS/iOS無し）、Obsidian Syncでの実際の競合再現（有料サービスのため未契約）。§4の17チェックすべて実行し全通過。iPhoneビューポート（390×844 DPR3）実描画QA: 水平スクロールなし（scrollWidth=clientWidth=390）・JS/HTTPエラー0・回答ブロック(tip-box)はファーストビュー内（top≈799px）・cta-qrはモバイル非表示（display:none）を確認。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（264ファイル・本runはHTML非変更）",
-    "content_graph": "変更なし（新規ページなし）",
-    "mobile_qa": "対象外（HTML変更なし。Playwright/aptは実行していない）",
+    "seo_check": "0 errors 0 warnings（266ファイル）",
+    "content_graph": "26 entries OK。/obsidian/sync/ を新規登録（cluster: obsidian-sync新設）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施。水平スクロールなし・JS/HTTPエラー0・回答ブロックはファーストビュー内・QRはモバイル非表示",
     "experiments": "36件中21 open・due 0・overdue 0",
-    "other": "check-css-version / check-benchmark / check-url-normalization / check-internal-redirects（13330 href+5251 JSON-LD+586 sitemap すべて直接200） / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check（$8.1116 / $40・over=false） / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / check-model-routing --check（ワークフローが --resolve を実際に引いていることも確認） / generate_sitemap.py --dry-run / autopilot-act --check / autopilot-act --selftest（27項目） いずれも問題なし"
+    "other": "check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（197 checks） / check-internal-redirects（13,432 href/src + 5,281 JSON-LD/meta + 587 sitemap URL、すべて直接200） / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / generate_sitemap.py --dry-run いずれも問題なし"
   },
   "owner_requests": [
-    "【訂正・2026-08-25】前日の日報が求めた `claude setup-token` の再実行について、本runは当初「原因は上流actionの版なので再発行は不要」と書いたが、**その判断は成り立たない。** **オーナーは本runの直前に再発行を完了している。** つまり最後の失敗と本runの成功の間で**版とトークンの2つが同時に動いており、どちらが効いたかは分離できていない。** 版の相関（2.1.240成功 → 2.1.241で2日連続失敗 → 2.1.245成功）は実測で確認済みだが、資格情報を排除する証拠にはならない（Secrets のメタデータは admin 権限が要り 403 で読めない）。**再発行は済んでいるので追加作業は不要**だが、「不要だった」とは言えない。決着させるなら act-pin-claude-code-action の適用後、新トークンのまま uses: を c81e3bc6 に固定して1回走らせる（費用$0で判定できる）。",
-    "【解消済み・2026-08-25・オーナー作業完了】App Store Connect の「App のプライバシー」と `PrivacyInfo.xcprivacy` が一致した。オーナーがASC側を入力し、6種別すべてで目的・関連付け・追跡が揃っていることを確認済み。この作業で申告漏れが1件見つかり修正した（simplememo-ios #226 — `RelayClient.sendEmail` が送る「メールまたはテキストメッセージ」がASCにはあり申告ファイルに無かった）。**この向きの漏れは検査では見つけられない** —— `check_privacy_manifest.py` は ASC を読めないため「申告ファイル→実装」しか見ておらず、「ASCにあるのに申告ファイルに無い」は構造的に不可視。ASC側を触った回は同スクリプトの出力と目で見比べるしかない。",
-    "【要オーナー判断・新規・根本的】**GH_PAT に `workflow` scope を足すかどうか。** 主系(GitHub Actions)は `.github/workflows/*` を含む push が GitHub 側で remote rejected される（GH_PAT・GITHUB_TOKEN とも）。一方 data/authority-matrix.json の self_repair.may_modify は obsidian-autopilot.yml をレーンFが直してよいファイルとして挙げている——**「直してよい」と「直せる」がずれており、主系は自分のワークフローの故障を最後まで直せない。**今日はまさにそれで、原因特定まで済んだ修理（上流actionのSHA pin）が適用できずに残った。副系CCRは push できるので運用は回るが、主系が自力で完走できない穴は残る。**これは権限を広げる変更なので、AIからは行わない**（self_repair.must_not「自分の権限を広げない」）。判断はオーナーに委ねる。当座は act-pin-claude-code-action を副系CCRセッションが適用すれば塞がる。**併せて念のため GH_PAT を回すことを勧める**——本run が push 拒否の原因を調べる過程で `git remote -v` を実行し、GH_PAT が埋め込まれた remote URL を出力させた。登録済み secret なので Actions ログでは `***` にマスクされるはずだが、**実行中のジョブログはダウンロードできずマスクを実地で確認できていない**（このリポジトリは public）。「マスクされるはず」は「マスクされた」ではない。実害の証拠は無いが、scope の判断でどのみち触るなら同じ機会に回すのが一番安い。詳細は act-gh-pat-scope-and-rotation。",
-    "【要オーナー判断・継続】権限表の「ユーザーデータの削除要求への対応」を (a) アプリ内の自己削除＝承認なし と (b) 個別連絡による削除要求＝承認あり の2つに分けるかを決めること。**権限表そのものの変更は self_repair.must_not なのでAIからは変更しない**（act-authority-split-deletion）。",
-    "【要確認・継続】副系CCRの egress 制限が意図どおりかの確認（act-egress-policy-confirm）。本runは主系(GitHub Actions)なのでこの制限は無く、GitHub API・上流リポジトリのAPIとも問題なく到達できた。この項目は副系の環境についてのものなので、主系からは実測できない。",
+    "【要オーナー判断・継続】GH_PATに workflow scope を足すかどうか（scopeは足さないと決定済み・残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。",
     "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。"
   ],
-  "next": "**最優先は pin の適用（act-pin-claude-code-action）。** 内容は確定しているが主系からは push できない——副系CCRセッションが入るか、オーナーが GH_PAT に workflow scope を足すかのどちらか。**未適用の間、主系は毎朝また上流の最新版を引く。**現時点で 16b3b310 が通ることは観測済みなので明日は動くはずだが、それは保証ではない。**そして pin が入るまで、明日06:00 JSTの schedule run は対照実験にならない**——版が固定されていなければ、成否がどちらでも「版のせいか否か」を切り分けられない。pin適用後に同じ即時失敗が出たときだけ、版の問題ではないと機械的に確定でき（同じSHAで結果が割れるため）、そのとき初めて資格情報へ進んでよい。これが前日のセッションが持てなかった対照。act-credential-actions の閉じ条件は「2026-08-25より後に actions が着手し immediate_failure が再発していないこと」で、着手ゼロでは閉じない。切り分け手順は autopilot-act.mjs の failure_reason にも埋めたので、次のセッションはジョブログの `Download action repository … (SHA:…)` を直近の成功runと比べるところから始めること。レーンFの記録上は解消済みなので、次回は通常どおりレーンA〜Eへ戻ってよい。レーンEは coverage-queue.json の pending が29件残っており（次点 C05 /obsidian/sync/・C06 /obsidian/sync/icloud/・C07 /obsidian/sync/official-sync/）、枯渇の心配は無い。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。トレンドレーダー(c)の「前日から10位以上動いた」は日次スナップショットを保存していないため構造的に毎日判定不能で、判定したいなら先に保存先を決める必要がある（今回は1セッション1アクションの原則から実装していない）。"
+  "next": "coverage-queueのpendingは引き続き潤沢（次点C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/`。どちらも本日のC05と主題が重なるため collides_with を追記済み——次回実装するなら比較の再掲を避け、C06は「iCloud一本の設定手順」、C07は「Standard/Plusどちらが要るかの判断フロー」まで narrow すること）。act-credential-actions の閉じ条件（2026-08-25より後にactionsが着手しimmediate_failureが再発していないこと）に対し、本runの正常完走が実測1件として積まれた——継続して閉じ条件が満たされるか見ること。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。"
 }
