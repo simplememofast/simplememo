@@ -135,10 +135,89 @@ export function validate(doc, { resolve = resolveRef } = {}) {
   return problems;
 }
 
+/**
+ * **記録があるべき改善のうち、記録されていないものを数える。**
+ *
+ * 記憶が在ることと、記憶が網羅していることは別。
+ * 4件書いた時点で「⑥は満たした」と言えてしまうと、**残り15件が消える。**
+ *
+ * 【何を「記録があるべき」とするか】
+ * **出荷を全部対象にしない。**毎日の記事1本ごとに Signal→Learning を書かせると、
+ * 「気をつける」で埋まった台帳ができる。**形だけの記憶は、無い記憶より悪い**
+ * （在ることになってしまうので）。対象は、**それ自体が1つの学びである出来事**だけ:
+ *
+ *   監査の所見     … 信号から規則の変更まで揃っている。**必ず書ける**
+ *   評価済みの実験 … 判定まで出ている。**learning だけが欠けている**
+ *   自己修理       … 故障を検知して直した。何を学んだかが要る
+ *
+ * 【落とし方を分ける】
+ * 所見だけを落とす。**残り2種は報告に留める。**
+ * 理由は、実験12件と修理4件の learning を書くには実際に読み直す作業が要り、
+ * ここで落とすと**CIが赤で固定される。**この運営には 2026-08-22〜24 に
+ * CIが3日赤で固定され、auto-merge が止まってデプロイごと止まった前例がある。
+ * **赤で固定された検査は、やがて外される。**
+ */
+export function coverage({ memory, findings, experiments, runs }) {
+  const refs = new Set((memory.records ?? []).map((r) => r.signal?.ref).filter(Boolean));
+  const covered = (ref) => refs.has(ref);
+
+  const required = [];
+  for (const f of findings.findings ?? []) {
+    required.push({ kind: 'finding', id: `seq=${f.seq}`, ref: `audit-findings.json#seq=${f.seq}`, blocking: true });
+  }
+  for (const e of (experiments.experiments ?? []).filter((x) => x.status === 'evaluated')) {
+    required.push({ kind: 'experiment', id: e.id, ref: `growth/experiments/experiments.json#id=${e.id}`, blocking: false });
+  }
+  for (const r of (runs.runs ?? []).filter((x) => x.repair_of)) {
+    required.push({ kind: 'repair', id: r.run_id, ref: `autopilot-runs.json#run_id=${r.run_id}`, blocking: false });
+  }
+
+  const missing = required.filter((r) => !covered(r.ref));
+  return {
+    required, missing,
+    blocking: missing.filter((r) => r.blocking),
+    rate: required.length ? (required.length - missing.length) / required.length : null,
+  };
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
   const doc = JSON.parse(fs.readFileSync(MEMORY_PATH, 'utf8'));
+
+  if (argv.includes('--coverage')) {
+    const r = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
+    const cov = coverage({
+      memory: doc,
+      findings: r('data/audit-findings.json'),
+      experiments: r('growth/experiments/experiments.json'),
+      runs: r('data/autopilot-runs.json'),
+    });
+    const pct = cov.rate === null ? 'n/a' : `${(cov.rate * 100).toFixed(1)}%`;
+    console.log('運営記憶の網羅 — **記録があるべき改善のうち、書かれているもの**\n');
+    console.log(`  ${cov.required.length - cov.missing.length} / ${cov.required.length} 件  = **${pct}**\n`);
+    const byKind = {};
+    for (const m of cov.missing) (byKind[m.kind] ??= []).push(m.id);
+    for (const [kind, ids] of Object.entries(byKind)) {
+      const label = { finding: '監査の所見', experiment: '評価済みの実験', repair: '自己修理' }[kind] ?? kind;
+      console.log(`  記録が無い ${label}: ${ids.length}件`);
+      console.log(`    ${ids.slice(0, 6).join(' , ')}${ids.length > 6 ? ' …' : ''}`);
+    }
+    console.log('\n  **出荷を全部対象にしていない。**毎日の記事ごとに書かせると');
+    console.log('  「気をつける」で埋まった台帳ができる。形だけの記憶は、無い記憶より悪い。');
+    console.log('  落とすのは所見だけ — 実験と修理は読み直す作業が要るので報告に留める');
+    console.log('  （**赤で固定された検査は、やがて外される**）。');
+
+    if (cov.blocking.length) {
+      console.error(`\n運営記憶の網羅: 所見 ${cov.blocking.length}件に記録が無い`);
+      for (const b of cov.blocking) console.error(`  - ${b.ref}`);
+      if (argv.includes('--check')) process.exit(1);
+    } else {
+      console.log('\n運営記憶の網羅: 所見はすべて記録されている（実験と修理は上のとおり未記録）');
+    }
+    process.exit(0);
+  }
+
   const problems = validate(doc);
   const records = doc.records ?? [];
   const closed = records.filter((r) => r.status === 'closed');
