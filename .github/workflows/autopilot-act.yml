@@ -142,7 +142,16 @@ jobs:
           # 同日に再実行した場合は追記されるだけ。強制pushはしない
           # （弾かれること自体が「先に誰かが書いた」という出力）。
           git push -u origin "$DAY"
-          if ! gh pr view "$DAY" --json number >/dev/null 2>&1; then
+          # **open なPRだけを見る。**`gh pr view` はマージ済み・クローズ済みのPRも
+          # 見つけてしまう。同日2回目が走ったとき、1回目のPRが既にマージされていると
+          # 「PRはある」と判定して新しいPRを作らず、**pushしたコミットがどこにも
+          # 取り込まれないまま残る**（2026-08-25 の2回目の実走で実際に起きた:
+          # 95a8e186 が当日ブランチに乗ったまま main に入らなかった）。
+          #
+          # 再実行は「何かがおかしかった日」にこそ起きるので、この壊れ方は
+          # **必要なときに限って届かない。**緑のまま何も出ないという、この運用が
+          # 繰り返し踏んできた形そのもの。
+          if [ -z "$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')" ]; then
             gh pr create --base main --head "$DAY" \
               --title "日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）" \
               --body "$(cat /tmp/act.txt)"
