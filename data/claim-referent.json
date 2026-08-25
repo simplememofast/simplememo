@@ -1,0 +1,431 @@
+{
+  "$comment": [
+    "**主張（claim）と、それが指しているもの（referent）の対を、全部数え上げる台帳。**",
+    "検査は `scripts/check-claims.mjs`。",
+    "",
+    "【なぜ作るか — 2026-08-25 に3件出た誤りの共通形】",
+    "  ① 台帳の証跡   → 隣リポジトリのファイル     … 存在を見ていなかった",
+    "  ② 復旧手順書   → プラットフォームの実機能   … 見にいかなかった",
+    "  ③ 保持台帳     → 本番のスキーマ             … migrations しか見ていなかった",
+    "",
+    "**3件とも「書いてあること」と「それが指しているもの」が別の場所にあり、",
+    "突き合わせていなかった。**深い洞察で見つかったものは一件も無く、",
+    "どれも開いて比べただけ。だから監査の一次入力は観点ではなく**対の一覧**にする。",
+    "",
+    "【この台帳が効くのは、一件ずつ潰すのではなく生成的だから】",
+    "このリポジトリは台帳が増え続ける（2026-08-25 の1日で12個）。",
+    "**台帳が増えるたびに対が増え、新しい対は既定で誰も見ていない。**",
+    "だから `data/*.json` を数え上げ、対が登録されていないものを落とす。",
+    "今日の3件は「たまたま見つかった未検査の対」でしかない。",
+    "",
+    "【方向を必ず書く】",
+    "片方向だけの突き合わせは、片方向の穴を残す。実例:",
+    "**required_ci_checks はリスト→ワークフローだけを見ていた。**逆向き",
+    "（ワークフローで走っているのにリストに無い）が 2026-08-25 まで空いており、",
+    "**11本が「消しても何も鳴らない検査」**になっていた。",
+    "",
+    "【covered:false を悪いことにしない】",
+    "機械では見られない対がある（人が実際に承認したか、など）。",
+    "**それを無理に covered にするほうが危ない。**",
+    "禁じているのは「見ていないのに、見ているつもりでいること」。"
+  ],
+  "$fields": {
+    "claim": "どの台帳の、どの主張か",
+    "referent": "その主張が指している実体。**別の場所にあるものを書く**",
+    "direction": "claim_to_referent / referent_to_claim / both",
+    "checked_by": "突き合わせている検査。null なら見ていない",
+    "covered": "機械が突き合わせているか",
+    "why_uncovered": "covered:false のとき必須。**「まだやっていない」と「原理的に無理」を区別する**",
+    "found_here": "この対の穴で実際に誤りが出た日（出たものだけ）",
+    "repo": "checked_by を実行するリポジトリ。省略時はこのリポジトリ"
+  },
+  "pairs": [
+    {
+      "id": "coverage-evidence-local",
+      "claim": "automation-coverage.json の tasks[].evidence（このリポジトリ内のパス）",
+      "referent": "そのパスのファイル",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/automation-rate.mjs --check",
+      "covered": true
+    },
+    {
+      "id": "coverage-evidence-crossrepo",
+      "claim": "automation-coverage.json の tasks[].evidence（`../` で始まるパス）",
+      "referent": "隣リポジトリのファイル",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/crossrepo.mjs --check",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**この対が空いていた。**`if (f.startsWith('../')) continue;` の1行で実在確認を飛ばしており、隣を指せば何でも「実装済み」として数えられた。18タスク・39ファイルが該当し、どれも隣のgit履歴に一度も存在しなかった。所見 seq=1"
+    },
+    {
+      "id": "coverage-executor",
+      "claim": "automation-coverage.json の executor（AIがやっている／人がやっている）",
+      "referent": "実際に誰が手を動かしたかという事実",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**原理的に見られない。**証跡ファイルの実在までは機械が見るが、「そのファイルをAIが書いた」ことまでは確かめられない。変更行のAI著者率（code-authorship.json）が別の物差しとして在るが、測っているものが違う"
+    },
+    {
+      "id": "monitoring-detector",
+      "claim": "monitoring-coverage.json の detector",
+      "referent": "検知器のファイル（このリポジトリ／隣）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-monitoring.mjs --check ・ node scripts/crossrepo.mjs --check",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "check-monitoring 側にも `!s.detector.startsWith('..')` の同じ除外があり、**検知器のファイルが無いまま detection:automatic と書かれた系統が5つ**残っていた"
+    },
+    {
+      "id": "monitoring-fires",
+      "claim": "monitoring-coverage.json の detection:automatic（機械が検知する）",
+      "referent": "実際にアラートが飛ぶこと",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**まだやっていない。**検知器のファイルが在ることは見ているが、それが発火することは確かめていない。合成イベントを流して確かめる形は作れる"
+    },
+    {
+      "id": "required-ci-to-workflow",
+      "claim": "authority-matrix.json の required_ci_checks",
+      "referent": ".github/workflows/seo-check.yml の実際のステップ",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-authority.mjs --check",
+      "covered": true
+    },
+    {
+      "id": "workflow-to-required-ci",
+      "claim": "seo-check.yml で実際に走っている検査",
+      "referent": "authority-matrix.json の required_ci_checks（守ると決めた一覧）",
+      "direction": "referent_to_claim",
+      "checked_by": "node scripts/check-authority.mjs --check",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**この逆向きが空いていた。**11本がリストに無く、自己修復レーンが消しても何も鳴らない状態だった（check-monitoring / check-vendors / check-pr-claims / check-pr-hero を含む）。憲章の guardrail_erosion は「本数が減っていないか」を見るが、**数えているのはリストであってワークフローではない**"
+    },
+    {
+      "id": "authority-human-only",
+      "claim": "authority-matrix.json の human_only 領域（人が承認する）",
+      "referent": "実際に人が承認したという事実",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**原理的に見られない。**表の側にもそう書いてある。機械が守れるのは「不可逆な領域が承認不要になっていないか」という形の側だけ"
+    },
+    {
+      "id": "credentials-to-workflows",
+      "claim": "credential-expiry.json の鍵一覧",
+      "referent": "ワークフローが実際に読んでいる secret",
+      "direction": "both",
+      "checked_by": "node scripts/check-credentials.mjs --check",
+      "covered": true,
+      "note": "2026-08-25 にバックアップ用の3件を捕まえた（台帳に無い secret をワークフローが読んでいた）。**検査が設計どおり働いた例**"
+    },
+    {
+      "id": "credentials-expiry",
+      "claim": "credential-expiry.json の expires_at",
+      "referent": "実際の失効日",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-expiry.mjs --check",
+      "covered": false,
+      "why_uncovered": "**部分的にしか見られない。**TLS証明書は実測できるが、Apple証明書・Provisioning Profile・ドメインは各社の管理画面にしか無く、critical 3件はいまも未把握。**「未把握」を ok 側に数えない**形にしてある"
+    },
+    {
+      "id": "kpi-definitions",
+      "claim": "kpi-definitions.json の各KPIの定義",
+      "referent": "計算元スクリプトの中身（checksum）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-definitions.mjs --check",
+      "covered": true,
+      "note": "リファクタでも一度止まる。**止まらないほうが危ない**"
+    },
+    {
+      "id": "site-constants",
+      "claim": "site-constants.json の評価・価格・公開バージョン",
+      "referent": "公開HTMLの表示（JSON-LD含む）",
+      "direction": "both",
+      "checked_by": "node scripts/sync_constants.js --check",
+      "covered": true
+    },
+    {
+      "id": "store-facts",
+      "claim": "site-constants.json の評価と公開バージョン",
+      "referent": "App Store Connect の実際の値",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-store-facts.mjs --net",
+      "covered": true,
+      "note": "PRのCIではネットに触らず「いつ確認したか」だけを見る（45日超で落とす）。実物との突き合わせは seo-daily.yml"
+    },
+    {
+      "id": "pr-claims-to-coverage",
+      "claim": "pr-claims.json（見出しが主張する工程）",
+      "referent": "automation-coverage.json の分類",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-pr-claims.mjs --check",
+      "covered": true,
+      "note": "**これは台帳↔台帳。**現実とは突き合わせていない。憲章の overclaim 観点が同じ形をしているのが、今日の3件を捕まえられなかった理由"
+    },
+    {
+      "id": "vendor-degradation",
+      "claim": "vendor-register.json の degradation_probes（縮退が効く）",
+      "referent": "受け皿の実在（隣リポジトリのファイル）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-degradation.mjs --check",
+      "covered": true,
+      "note": "隣が見えるなら実物・無ければ写し・古い写しは落とす。**「隣が無ければスキップ」をやらない**形の元祖"
+    },
+    {
+      "id": "vendor-outage",
+      "claim": "vendor-register.json の「止まると何が起きるか」",
+      "referent": "実際にその事業者を落としたときの挙動",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**まだやっていない。**確かめているのはこちら側の受け方（判定・別経路の実在）だけで、実際にその事業者を落として試したことは無い"
+    },
+    {
+      "id": "model-routing-consumed",
+      "claim": "model-routing.json のタスク種別→モデルの表",
+      "referent": "ワークフローが実際に `--resolve` で引いていること",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-model-routing.mjs --check",
+      "covered": true,
+      "note": "**引かれない表は装飾**なので、呼ばれていることまで見る"
+    },
+    {
+      "id": "model-eval-results",
+      "claim": "model-eval-set.json（新モデル導入前に通す固定評価）",
+      "referent": "実際に評価を走らせた結果",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-model-eval.mjs --check",
+      "covered": false,
+      "why_uncovered": "**まだ一度も走らせていない。**results は空配列で、enforce は false。「セットが在る」と「評価した」は別物だと台帳に書いてある"
+    },
+    {
+      "id": "spend-cap-approval",
+      "claim": "autopilot-cost.json の monthly_usd_cap",
+      "referent": "spend-approvals.json の承認記録の最新値",
+      "direction": "both",
+      "checked_by": "node scripts/check-financial-policy.mjs --check",
+      "covered": true,
+      "note": "**承認記録を書かずに上限を上げられない。**2026-08-25 に上限を書き換えて実際に落ちることを確認した"
+    },
+    {
+      "id": "corporate-deadlines",
+      "claim": "corporate-obligations.json の法定期限",
+      "referent": "実際の期限（決算期・従業員の有無など）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-corporate.mjs --check",
+      "covered": false,
+      "why_uncovered": "**リポジトリから取れない。**6件すべて未把握で、confirmed_by_owner は false。器だけが在ることを台帳が正直に持っている状態"
+    },
+    {
+      "id": "audit-independence",
+      "claim": "audit-charter.json の独立の担保3点",
+      "referent": "self_repair.may_modify と model-routing の実際の値",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-audit-independence.mjs --check",
+      "covered": true
+    },
+    {
+      "id": "audit-actually-runs",
+      "claim": "audit-charter.json の cadence（週1で監査する）",
+      "referent": "実際に監査を走らせた記録",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**まだ一度も走らせていない**（last_run_at が null）。所見2件はどちらも定期監査ではなく、別作業の途中とオーナーの指摘で出た。**found_by がそれを記録している**"
+    },
+    {
+      "id": "content-graph",
+      "claim": "content-graph.json のページ台帳",
+      "referent": "実在するページ",
+      "direction": "both",
+      "checked_by": "node scripts/check-content-graph.mjs",
+      "covered": true
+    },
+    {
+      "id": "autonomy-timeline-endpoint",
+      "claim": "autonomy-timeline.json の終点",
+      "referent": "automation-rate.mjs の現在値",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/autonomy-timeline.mjs --check",
+      "covered": true,
+      "note": "**ずれた系列はグラフとして存在してはいけない**ので落とす"
+    },
+    {
+      "id": "automation-rate-doc",
+      "claim": "docs/automation-rate-2026-08.md の §0〜§2",
+      "referent": "automation-coverage.json",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/automation-rate.mjs --doc --check",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**この文書は「機械生成」と名乗っていたが、生成器が存在しなかった。**手で書き写されていたので台帳が動くと古い数字が残った"
+    },
+    {
+      "id": "code-authorship",
+      "claim": "code-authorship.json の変更行AI比率",
+      "referent": "3リポジトリのgit履歴",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/code-authorship.mjs --check",
+      "covered": false,
+      "why_uncovered": "**CIでは再計測しない。**隣がチェックアウトに無く、浅いクローンでは履歴も足りない。見るのは算数と数え方の記述だけ。数え直しは3リポジトリの揃った完全な履歴の場所で `--write`"
+    },
+    {
+      "id": "retention-to-migrations",
+      "claim": "simplememo-api の data-retention.json",
+      "referent": "migrations/ のテーブル",
+      "direction": "both",
+      "checked_by": "npm test（test/data-retention.test.ts）",
+      "covered": true,
+      "repo": "simplememo-api"
+    },
+    {
+      "id": "retention-to-production",
+      "claim": "simplememo-api の data-retention.json",
+      "referent": "**本番D1の実際のスキーマ**",
+      "direction": "both",
+      "checked_by": "node scripts/backup-d1.mjs --audit-schema",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**この対が空いていた。**保持台帳は migrations としか突き合わせておらず、個人データを実際に持っているのは本番。孤児テーブル3件が見つかった。所見 seq=2",
+      "repo": "simplememo-api"
+    },
+    {
+      "id": "migrations-to-applied",
+      "claim": "simplememo-api の migrations/ のファイル",
+      "referent": "**本番の d1_migrations（適用記録）**",
+      "direction": "both",
+      "checked_by": "node scripts/backup-d1.mjs --audit-migrations",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**`wrangler d1 migrations list` はこの向きを表示しない。**wrangler が出すのは「ファイルがあるのに未適用」だけで、逆向き（適用済みなのにファイルが無い＝ソースが失われた）は出ない。0018 と 0020 がその状態だった",
+      "repo": "simplememo-api"
+    },
+    {
+      "id": "platform-capability",
+      "claim": "docs/RESTORE.md ほか、自前で実装したと書いてあるもの",
+      "referent": "**プラットフォームが既に提供している機能**",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**機械では見られない。**「D1 に Time Travel が在る」を検査で気づく方法が無い。所見 seq=2 はこの対で、外からの指摘で出た。**監査の観点として人／AIに問わせるしかない対**の代表例",
+      "found_here": "2026-08-25"
+    },
+    {
+      "id": "emergency-stop-wiring",
+      "claim": "emergency-stop.json（止める手段が在る）",
+      "referent": "判定・ワークフロー・手順書の3経路の配線",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-emergency-stop.mjs --check",
+      "covered": true,
+      "note": "**新しい経路だけが読まない状態は平常時に症状が出ず、止めたい日に初めて分かる**"
+    },
+    {
+      "id": "escalation-coverage",
+      "claim": "escalation-rules.json の移管規則",
+      "referent": "実行判定の故障コードと、運転台帳に実際に現れた failure_class",
+      "direction": "referent_to_claim",
+      "checked_by": "node scripts/check-escalation.mjs --check",
+      "covered": true,
+      "note": "**起きた実績があるものは次も起きる**ので、規則の無い故障種別が1つでもあると落ちる"
+    },
+    {
+      "id": "escalation-delivered",
+      "claim": "escalation-rules.json の channel（この経路で人へ届く）",
+      "referent": "実際に人へ届いたこと",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**まだやっていない。**owner_direct は台帳で名前が付いただけで経路が未整備だと書いてある。日報とIssueは実在するが、読まれたかは見ていない"
+    },
+    {
+      "id": "cpp-wiring",
+      "claim": "cpp-map.json の CPP ppid 配線",
+      "referent": "各ページの App Store CTA の href",
+      "direction": "both",
+      "checked_by": "node scripts/apply-cpp-ppid.js --check",
+      "covered": true
+    },
+    {
+      "id": "benchmark-figures",
+      "claim": "benchmark.json の競合速度",
+      "referent": "公開ページの比較表の数字",
+      "direction": "both",
+      "checked_by": "node scripts/check-benchmark.mjs",
+      "covered": true,
+      "note": "**報告のみで落とさない。**どの計測が正しいかはCIには決められず、iPhoneでしか決着しない。落とすと答えられない問いで無関係な作業まで止まる"
+    },
+    {
+      "id": "public-facts",
+      "claim": "公開ページ・llms.txt・FAQ の事実記述",
+      "referent": "site-constants.json / benchmark.json",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-public-facts.mjs --check",
+      "covered": true,
+      "note": "配信原稿だけを見ていた検査を公開面へ広げたもの。**人の目視は次の追加を止められない**"
+    },
+    {
+      "id": "signals-to-sources",
+      "claim": "signal-ledger.json の要望・レビュー・問い合わせ",
+      "referent": "その出どころ（レビュー実測・アンケート・問い合わせ）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-signals.mjs --check",
+      "covered": true
+    },
+    {
+      "id": "feature-backlog-confidence",
+      "claim": "feature-backlog.json の confidence",
+      "referent": "根拠の強さ（自社実測／外部実測／観察／類推／思いつき）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/feature-score.mjs --check",
+      "covered": true,
+      "note": "**確信度は根拠の種別から機械的に決まる。**主観にすると順位はいくらでも動く"
+    },
+    {
+      "id": "injection-surface",
+      "claim": "injection-surface.json の入口一覧",
+      "referent": "実際にAIが読む外部入力の入口",
+      "direction": "referent_to_claim",
+      "checked_by": "node scripts/check-injection-surface.mjs --check",
+      "covered": false,
+      "why_uncovered": "**入口を機械が数え上げてはいない。**台帳に書いた入口の評価が埋まっているかは見るが、「書かれていない入口」は見つけられない"
+    },
+    {
+      "id": "runs-to-github",
+      "claim": "autopilot-runs.json の各実行",
+      "referent": "GitHub 上の実際の run",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/autopilot-runs.mjs --check",
+      "covered": false,
+      "why_uncovered": "**部分的。**repair_of が指す run の実在と、行の形は見る。**GitHub API に問い合わせて実在を確かめてはいない。**副系（CCR）に至ってはログが外部から読めない"
+    },
+    {
+      "id": "financial-policy-to-cost",
+      "claim": "financial-policy.json の change_limits（現在額・変更幅・損失上限）",
+      "referent": "autopilot-cost.json の実際の上限",
+      "direction": "both",
+      "checked_by": "node scripts/check-financial-policy.mjs --check",
+      "covered": true,
+      "note": "**損失上限が現在の上限以下だと落ちる。**動かす予算が小さいうちに基準を書いたので、いま一番中立に決められる"
+    },
+    {
+      "id": "financial-policy-adherence",
+      "claim": "financial-policy.json の変更幅25%・間隔14日・撤回条件",
+      "referent": "実際の支出の推移",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**実績が足りない。**観測できている実費は1件（$0.8149）だけで、副系は観測手段が無い。中央値も撤回条件も、判定に足る母数が貯まっていない。**「判定していない」を「異常なし」と書かない**形にしてある"
+    }
+  ],
+  "exempt_sources": {
+    "audit-findings.json": "監査の所見そのもの。**主張ではなく記録**なので対を持たない（連番と dimension の整合は check-audit-independence が見る）",
+    "autopilot-status.json": "主系が毎朝書く実行結果の受け渡し。**主張ではなく出力**",
+    "crossrepo-probes.json": "対そのものを確かめるための写し。**これ自体が突き合わせの道具**",
+    "review-intake.json": "取り込んだ要望の生データ。整形と重複排除は review-intake.mjs が見る",
+    "autonomy-timeline.json": "coverage から再構成した系列。終点の一致は autonomy-timeline-endpoint の対で見ている"
+  }
+}

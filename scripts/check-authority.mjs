@@ -106,6 +106,26 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
         problems.push(`必須CIチェック "${cmd}" が seo-check.yml から消えている — 自己修復が検証を弱めた可能性がある（self_repair.must_not 違反）`);
       }
     }
+
+    // **逆向きも見る。**上はリスト→ワークフローで、「守ると決めたものが消えた」を捕まえる。
+    // ところが**ワークフローで走っているのにリストに入っていない検査**は、
+    // 消しても何も鳴らない。2026-08-25 まで11本がその状態で、
+    // check-monitoring / check-vendors / check-pr-claims / check-pr-hero が含まれていた。
+    //
+    // 憲章の guardrail_erosion は「必須CIチェックの本数が減っていないか」を見るが、
+    // **数えているのはリストであってワークフローではない**ので、この穴は出なかった。
+    // 片方向だけの突き合わせは、片方向の穴を残す。
+    const exempt = sr.ci_steps_not_required || {};
+    const running = [...seoYml.matchAll(/run:\s*(node|python3)\s+([^\n]+)/g)]
+      .map((m) => `${m[1]} ${m[2]}`.trim())
+      .filter((c) => !c.includes('||') && !c.startsWith('node -e'));
+    for (const cmd of [...new Set(running)]) {
+      if (sr.required_ci_checks?.includes(cmd)) continue;
+      if (cmd in exempt) continue;
+      problems.push(`seo-check.yml で走っている "${cmd}" が required_ci_checks に無い`
+        + ' — **消しても何も鳴らない検査**になっている。'
+        + '守る対象なら required_ci_checks へ、検査でないなら ci_steps_not_required へ理由つきで');
+    }
     // 自分の権限を広げていないこと
     for (const f of sr.forbidden_permission_files || []) {
       let src = '';

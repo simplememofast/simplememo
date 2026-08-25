@@ -378,7 +378,34 @@
       "node scripts/check-store-facts.mjs --check",
       "node growth/scripts/check-mentions.mjs --check",
       "node scripts/crossrepo.mjs --check",
-      "node scripts/automation-rate.mjs --doc --check"
+      "node scripts/automation-rate.mjs --doc --check",
+      "node scripts/check-benchmark.mjs",
+      "node scripts/check-script-tags.mjs",
+      "node scripts/apply-cpp-ppid.js --check",
+      "python3 scripts/inject_locale_seed.py --check",
+      "node scripts/check-pr-hero.mjs",
+      "node scripts/check-monitoring.mjs --check",
+      "node scripts/check-vendors.mjs --check",
+      "node scripts/feature-score.mjs --check",
+      "node scripts/check-pr-claims.mjs --check",
+      "node growth/lib/export-health.test.mjs",
+      "node scripts/check-claims.mjs --check"
+    ],
+    "ci_steps_not_required": {
+      "node scripts/indexnow-notify.js --since 1": "検査ではなく通知（検索エンジンへのping）。消えても検証は弱まらない — **弱まるのは反映の速さだけ**"
+    },
+    "$required_ci_checks_note": [
+      "**両方向を見る。**片方だけだと、片方向の穴が残る。",
+      "  リスト → ワークフロー … リストにあるものが seo-check.yml から消えていないか",
+      "  ワークフロー → リスト … **seo-check.yml で走っている検査がリストに入っているか**",
+      "",
+      "後者が 2026-08-25 まで空いていた。**11本がリストに無く、",
+      "自己修復レーンが消しても誰も気づかない状態**だった（check-monitoring /",
+      "check-vendors / check-pr-claims / check-pr-hero を含む）。",
+      "憲章の guardrail_erosion は「必須CIチェックの本数が減っていないか」を見るが、",
+      "**数えているのはリストであってワークフローではない**ので、この穴は出なかった。",
+      "",
+      "検査でないステップは ci_steps_not_required に理由つきで置く。"
     ]
   }
 }

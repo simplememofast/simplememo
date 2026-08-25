@@ -6,7 +6,7 @@
     "都合の悪い所見を消せるなら、監査は『消し忘れた所見の一覧』でしかない。",
     "対応済みにするときも行は残し、resolution を足す。"
   ],
-  "next_seq": 3,
+  "next_seq": 4,
   "findings": [
     {
       "seq": 1,
@@ -163,6 +163,61 @@
         ]
       },
       "lesson": "**「無い」と結論したときこそ、作る前にもう一度確かめる。**seq=1 は『在ると書いてあるが無い』で、seq=2 は『無いと結論したが在った』。**同じ検査不足の裏表**で、どちらも「書いてあること」と「実際にあること」を突き合わせていれば出た。加えて —— 所見2件はどちらも定期監査ではなく、**別作業の途中と、外からの一言**で見つかっている。憲章の週次監査を走らせていないことの実害がここに出ている。"
+    },
+    {
+      "seq": 3,
+      "dimension": "guardrail_erosion",
+      "observed_at": "2026-08-25",
+      "severity": "medium",
+      "found_by": "claim_referent_inventory",
+      "$found_by_note": "**対の棚卸しを作る作業そのものが見つけた。**seq=1/2 は事故と指摘で出たが、これは「対を数える」という作業から機械的に出た初めての所見。監査の設計としては、これが狙っていた出方。",
+      "summary": "seo-check.yml で走っている検査のうち**11本が required_ci_checks に無く**、自己修復レーンが消しても何も鳴らない状態だった（check-monitoring / check-vendors / check-pr-claims / check-pr-hero を含む）。",
+      "detail": [
+        "**片方向しか見ていなかった。**",
+        "  リスト → ワークフロー … 見ていた（守ると決めたものが消えたら落ちる）",
+        "  ワークフロー → リスト … **見ていなかった**",
+        "",
+        "後者が空いていると、リストに載っていない検査は消しても何も鳴らない。",
+        "しかも憲章の guardrail_erosion は「必須CIチェックの本数が減っていないか」を",
+        "見る設計だが、**数えているのはリストであってワークフローではない**ので、",
+        "この穴はその観点からも出なかった。",
+        "",
+        "**同じ形が今日3回目。**検査が現実ではなく現実の代理を見ている:",
+        "  automation-rate  証跡を見るが `../` は素通り  → 在りもしない実装",
+        "  data-retention   台帳と migrations/ を突合    → 本番の孤児テーブル",
+        "  check-authority  リスト→ワークフローだけ      → **消せる検査11本**"
+      ],
+      "evidence": [
+        "data/claim-referent.json",
+        "scripts/check-claims.mjs",
+        "scripts/check-authority.mjs",
+        "data/authority-matrix.json"
+      ],
+      "impact": {
+        "required_ci_checks": {
+          "before": 42,
+          "after": 53
+        },
+        "unprotected_checks": {
+          "before": 11,
+          "after": 0
+        }
+      },
+      "resolution": {
+        "at": "2026-08-25",
+        "what": [
+          "10本を required_ci_checks へ追加し、検査でない1本（indexnow 通知）は ci_steps_not_required に理由つきで除外",
+          "check-authority.mjs に**逆向きの突き合わせ**を追加。差し替えで実際に落ちることを確認した",
+          "data/claim-referent.json と scripts/check-claims.mjs を新設 — **主張と、それが指しているものの対を42件数え上げ、うち15件を「見ていない」と名指しした**",
+          "`data/*.json` に対が登録されていない台帳があれば落とす形にした（**新しい台帳は既定で誰も見ていない**ので、そこを生成的に塞ぐ）"
+        ],
+        "not_done": [
+          "**covered:false の15件はそのまま。**塞いだのではなく、名指ししただけ",
+          "とくに `monitoring-fires`（検知器が実際に発火するか）と `vendor-outage`（実際に事業者を落として試す）は、やる方法はあるのに未着手",
+          "`platform-capability`（プラットフォームが既に持っていないか）は**機械では見られない対**で、監査で人／AIに問わせるしかない"
+        ]
+      },
+      "lesson": "**片方向の突き合わせは、片方向の穴を残す。**そして穴は「検査が無い」形ではなく「検査はあるが逆を見ていない」形で残るので、検査の本数を数えても出てこない。対を数えるときは**必ず方向を書く。**"
     }
   ]
 }
