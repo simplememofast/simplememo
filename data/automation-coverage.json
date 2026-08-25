@@ -1105,9 +1105,11 @@
       "executor": "ai_proposes",
       "evidence": [
         "growth/scripts/ingest-asc.mjs",
-        "data/financial-policy.json"
+        "data/financial-policy.json",
+        "scripts/check-financial-policy.mjs",
+        "scripts/check-asc-landed.mjs"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**[2026-08-25 訂正] 「翌日以降に降りてくる」という見立ては誤りだった。**Apple 側は 08-23 から生成しており（App Store Purchases Standard に instance あり）、取れていなかったのは取得側の欠陥2件のため（data/operating-memory.json om-2026-08-25-asc-zero）。修正済みだが**次回の定時実行までは依然として照合できない。**広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**"
+      "note": "**2026-08-25、収入側が接続された**（オーナーの権限委譲を受けて revenue_connected を true）。App Store Purchases が Proceeds in USD / Sales in USD / Paying Users を返している。**ただし照合そのものはまだ。**見えているのは1日ぶん（課金1件 / 入金 $2.59 / 課金ユーザー1）で、月次にするには日次を積む必要がある。返金は Subscription Event に含まれる見込みだが未確認、広告は未実装なので**4つのうち照合できる材料が揃ったのは1つ（売上）だけ。**executor を上げないのはそのため。手元資金は依然として機械に入っていないので、ランウェイは出さない（足りない材料を検査が名指しする）"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1128,7 +1130,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる **[2026-08-25] 「ASCの売上が降りれば」の前提が違っていた** —— 降りない原因は Apple 側ではなく取得側の欠陥で、修正済み（om-2026-08-25-asc-zero）。"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。**2026-08-25 に売上が降りた**ので LTV・回収期間・粗利の材料は入り始めたが、**1日ぶんでは出せない。**LTV は継続期間が要り、Subscription State Report の Counts は State Metric を跨いだ合計なので契約者数として使えない（取り込みが行を持たず数値列の合計だけを保存する設計のため）"
     },
     {
       "area": "⑥ アプリ運営意思決定",

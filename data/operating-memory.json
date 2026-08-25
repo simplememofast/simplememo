@@ -326,6 +326,36 @@
         ],
         "new_guardrail": "measuresPageCtr() を growth/lib/ledger.mjs に置き、対象抽出をそこだけに集約した。self-test で brand_search_impressions・複数ページ集合・GA4起点の3種が対象に入らないことを固定。**そして stop-loss が掛かるのは進行中21件のうち7件だけ**であることを、台帳の note に明記した —— 3分の1にしか掛かっていない歯止めを『マーケに stop-loss がある』と読ませない"
       }
+    },
+    {
+      "id": "om-2026-08-25-revenue-connected",
+      "seeded": false,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "ASC の課金データが降りたので、financial-policy.json の revenue_connected（人が判断すると権限表が定めていた欄）を false から動かせる状態になった。オーナーが「権限付与します」と委譲した",
+      "hypothesis": "データが降りた以上、true にすればよい",
+      "decision": "true にする前に、その真偽値が何を開けるかを読む",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/financial-policy.json",
+          "scripts/check-financial-policy.mjs",
+          "growth/scripts/ingest-asc.mjs"
+        ]
+      },
+      "verification": "check-financial-policy.mjs の validate を5パターンで実行（現状 / 収入だけで runway / 手元資金も接続し履歴1日 / 全部揃う / cash_on_hand_connected 欠落）。ingest-asc.mjs は隣が見えない場合と本物の矛盾の2パターンで exit コードを確認",
+      "outcome": "**true にする作業そのものが、歯止めを1つ外す作業だった。**ランウェイの禁止は `!revenue_connected` だけを見ており、その値がずっと false だったから成立していた。収入を接続した瞬間、収入と手元資金の両方が要るはずの月数が**片方だけで通る**ようになる。さらに、素直に true にすると **CI が落ちる**ことも分かった —— seo-check.yml の checkout はこのリポジトリだけなので隣が見えず、ingest-asc が「true と言っているのにデータが無い」と判定していた",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "connecting-an-input-can-disarm-the-guard-that-depended-on-its-absence",
+        "text": "**「まだ無い」ことに依存している歯止めは、それが埋まった日に静かに外れる。**この歯止めは間違って書かれていたのではなく、**書かれた時点では正しかった。**入力を1つ繋ぐときは、その入力が false であることを前提にしている検査を先に洗い出す。真偽値1つに複数の条件を潰していると、この失効が見えない",
+        "changed": [
+          "scripts/check-financial-policy.mjs",
+          "data/financial-policy.json",
+          "growth/scripts/ingest-asc.mjs"
+        ],
+        "new_guardrail": "revenue_connected / cash_on_hand_connected / 収入の履歴日数 の3つを分け、runway は足りない材料を名指しして落とす。cash_on_hand_connected 欄そのものが無い場合も落とす（欄を消せば元の穴に戻るため）。ingest-asc は「隣が見えない」と「隣は在るがデータが無い」を分け、前者では落とさない"
+      }
     }
   ]
 }

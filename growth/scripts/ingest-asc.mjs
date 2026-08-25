@@ -91,9 +91,25 @@ if (isMain) {
     console.log(`  ${src.reason}`);
     console.log('  取得は ../simplememo-ios の asc-analytics.yml（毎日 20:30 JST）。');
     console.log('  **ONGOING のレポート要求を作った当日はデータが出ない。**初回の0件は失敗ではない。');
-    if (declaredConnected) {
+
+    // [2026-08-25] **「見えない」と「無い」を分ける。**
+    // seo-check.yml の checkout はこのリポジトリだけなので、CI では
+    // ../simplememo-ios/ というディレクトリ自体が存在しない。そこで
+    // 「revenue_connected: true なのにデータが無い」と落とすと、
+    // **隣が正常でも CI が赤くなる。**
+    //
+    // 隣のディレクトリが在るのに status.json が無い場合だけが本物の矛盾。
+    // ディレクトリごと無いなら、ここからは**確かめようがない**ので、
+    // 確かめられないことをそう言う（黙って通すのでも落とすのでもなく）。
+    const siblingVisible = fs.existsSync(SOURCE_DIR);
+    if (declaredConnected && siblingVisible) {
       problems.push('financial-policy.json が revenue_connected: true だが、取得結果が無い'
         + ' — **接続していないのに接続している前提の数字を出すことになる**');
+    } else if (declaredConnected) {
+      console.log('\n  NOTE: revenue_connected: true と宣言されているが、'
+        + '**この実行環境からは隣のリポジトリが見えない**ので照合できない。');
+      console.log('  （seo-check.yml の checkout はこのリポジトリだけ。'
+        + '取得の健全性は取得側の asc-analytics.yml が --verify-status で持つ）');
     }
   } else {
     const n = normalize(src);

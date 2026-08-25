@@ -140,9 +140,28 @@ export function validate(doc, { authorityDomains = new Set(), monthlyCap = null 
       problems.push('cash_scenarios: 標準が悲観より大きい');
     }
     // **出せない数字を出さない。**
-    if (!s.revenue_connected && s.runway_months !== null) {
-      problems.push('収入が未接続なのに runway_months を書いている'
-        + ' — 手元資金も収入も機械に入っていないので、月数を出すと嘘になる');
+    //
+    // [2026-08-25] ここは長く `revenue_connected` だけを見ていた。それで足りて
+    // いたのは、その値がずっと false だったから。**収入が接続された瞬間に、
+    // この歯止めは実質的に外れる** —— ランウェイには収入と手元資金の両方が
+    // 要るのに、片方だけで通ってしまう。
+    //
+    // 収入接続を true にする作業そのものが、この穴を開ける作業でもあった。
+    // **必要な材料を1つずつ数え、欠けているものを名指しする形にする。**
+    const missing = [];
+    if (!s.revenue_connected) missing.push('収入');
+    if (!s.cash_on_hand_connected) missing.push('手元資金');
+    // 履歴が1日しかない収入から月次は引けない。**日数も材料のうち。**
+    const days = s.revenue_history_days ?? (s.revenue_observed ? 1 : 0);
+    if (s.revenue_connected && days < 28) missing.push(`収入の履歴（${days}日 / 28日必要）`);
+
+    if (missing.length && s.runway_months !== null) {
+      problems.push(`runway_months を書いているが ${missing.join(' / ')} が機械に入っていない`
+        + ' — **足りない材料が1つでもあれば月数は嘘になる**');
+    }
+    if (s.cash_on_hand_connected === undefined) {
+      problems.push('cash_on_hand_connected が無い'
+        + ' — **収入だけで資金繰りを引ける形にしない**（この欄が無いと revenue_connected 単独で通る）');
     }
   }
   return problems;
@@ -176,8 +195,20 @@ if (isMain) {
   console.log('\n  月いくら出ていくか（**出ていく側だけ**）');
   console.log(`    悲観 $${s.monthly_outflow_usd.pessimistic} / 標準 $${s.monthly_outflow_usd.standard}`
     + ` / 楽観 $${s.monthly_outflow_usd.optimistic}`);
-  console.log(`    収入の接続: ${s.revenue_connected ? 'あり' : '**無し**（App Store Connect 未接続）'}`);
-  console.log('    **ランウェイ（月数）は出さない。**手元資金も収入も機械に入っていないため。');
+  const ro = s.revenue_observed;
+  console.log(`    収入の接続: ${s.revenue_connected ? 'あり（App Store Connect / Analytics）' : '**無し**（App Store Connect 未接続）'}`);
+  if (ro) {
+    console.log(`      観測 ${ro.as_of} / ${ro.window}: 課金 ${ro.purchases}件`
+      + ` / 入金 $${ro.proceeds_usd} / 課金ユーザー ${ro.paying_users}`);
+    console.log('      **月次収入ではない。**日次を積むまで月額に換算しない');
+  }
+  console.log(`    手元資金の接続: ${s.cash_on_hand_connected ? 'あり' : '**無し**（銀行・カードを読む経路が無い）'}`);
+  const need = [];
+  if (!s.revenue_connected) need.push('収入');
+  if (!s.cash_on_hand_connected) need.push('手元資金');
+  const d = s.revenue_history_days ?? (s.revenue_observed ? 1 : 0);
+  if (s.revenue_connected && d < 28) need.push(`収入の履歴（${d}/28日）`);
+  console.log(`    **ランウェイ（月数）は出さない。**足りない材料: ${need.join(' / ') || 'なし'}`);
 
   console.log(`\n  上限を動かした記録 ${approvals.approvals.length}件（**追記のみ**）`);
   for (const a of approvals.approvals) {
