@@ -143,10 +143,23 @@ export const CLOSE_CHECKS = {
       return { closed: false, evidence: 'GitHub Actions の実行履歴を取得できず判定不能（未同期という意味ではない）' };
     }
     const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
-    const missing = ctx.workflowRuns.filter((r) => !known.has(String(r.id)));
+    // **台帳に載せない決まりの run を「未同期」に数えない。**
+    // 数えると、記録対象外のものが1件あるだけでこの依頼が永久に開く
+    // ——閉じない依頼は、消えない依頼と同じ害を持つ（Runbook §7-1-1）。
+    // 除外したことは evidence に必ず出す（黙って消さない）。
+    const skipped = [];
+    const missing = [];
+    for (const r of ctx.workflowRuns) {
+      if (known.has(String(r.id))) continue;
+      const v = interpretRun(r);
+      if (v === null) continue;            // まだ走っている
+      if (v.skip) { skipped.push(r.id); continue; }
+      missing.push(r);
+    }
+    const note = skipped.length ? `（記録対象外 ${skipped.length}件を除外: ${skipped.join(', ')}）` : '';
     return missing.length === 0
-      ? { closed: true, evidence: `Actions run ${ctx.workflowRuns.length}件すべてが台帳にある` }
-      : { closed: false, evidence: `台帳に無い run が ${missing.length}件: ${missing.map((r) => r.id).join(', ')}` };
+      ? { closed: true, evidence: `Actions run ${ctx.workflowRuns.length}件すべてが台帳にある${note}` }
+      : { closed: false, evidence: `台帳に無い run が ${missing.length}件: ${missing.map((r) => r.id).join(', ')}${note}` };
   },
 
   /**
@@ -318,7 +331,12 @@ export function derive(ctx) {
   // Actions API は誰が落ちても読めるので、ここだけは機械で埋められる。
   if (ctx.workflowRuns) {
     const known = new Set(runs.map((r) => String(r.external_ref ?? '')));
-    const missing = ctx.workflowRuns.filter((r) => !known.has(String(r.id)));
+    // 記録対象外（人が止めた手動起動など）と走行中は数えない。閉じ条件と同じ基準。
+    const missing = ctx.workflowRuns.filter((r) => {
+      if (known.has(String(r.id))) return false;
+      const v = interpretRun(r);
+      return v !== null && !v.skip;
+    });
     if (missing.length > 0) {
       out.push({
         id: 'act-ledger-sync',
@@ -590,8 +608,22 @@ export function interpretRun(run) {
 
   if (run.status !== 'completed') return null; // まだ走っている
   if (run.conclusion === 'cancelled') {
+    // **人が止めた実行は運用の失敗ではない。**
+    //
+    // 2026-08-25、`workflow_dispatch` で起動して36秒で中止した run が1件出た
+    // （32817335365）。これを cancelled として台帳へ書くと FAILED 集合に入り、
+    // 変更失敗率に計上され、selfheal が「未修理の故障」として翌日の最優先を
+    // 修理に切り替える。**セッションが自分のテストを止めただけで、翌日の記事が
+    // 消える。** しかも failure_class `cancelled` には移管規則が無いのでCIも赤になる。
+    //
+    // schedule 起動の cancelled は別物で、**そちらは1日ぶんの出荷が消えている**
+    // （ジョブ上限・concurrency・runner喪失など）ので従来どおり失敗として扱う。
+    if (run.event === 'workflow_dispatch') {
+      return { skip: true,
+        skip_reason: `手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run ${run.id}）` };
+    }
     return { outcome: 'cancelled', attempted: true, failure_class: 'cancelled',
-      failure_reason: 'run が cancelled で終了' };
+      failure_reason: 'schedule 起動の run が cancelled で終了（1日ぶんの出荷が消えている）' };
   }
   // Claude Code に到達していない ＝ Gate/予算/緊急停止で止まった（正常系）
   if (!claude || claude.conclusion === 'skipped') {
@@ -605,8 +637,11 @@ export function interpretRun(run) {
     // 2026-08-25 の訂正: ここは即死を `auth_or_credential` と書いていた。
     // その断定で 08-24・08-25 の2件が「認証系」として台帳に載り、日報は
     // オーナーへ `claude setup-token` の再実行を求めた。**実際の原因は
-    // 認証ではなく、claude-code-action@v1 が引いた上流の壊れた版**
-    // （SHA c81e3bc6 / CLI 2.1.241）で、秘密鍵は一度も変わっていなかった。
+    // 認証ではなく、claude-code-action@v1 が引いた上流の壊れた版**の可能性が高い
+    // （SHA c81e3bc6 / CLI 2.1.241）。**ただし原因は確定していない** ——
+    // 復旧した回までの間に CLAUDE_CODE_OAUTH_TOKEN も更新されており、
+    // 版とトークンは分離できていない（data/autopilot-runs.json の reclassified_note）。
+    // だからこそ、ここで種別に原因を書いてはいけない。
     //
     // 即死する原因は少なくとも3つあり、所要時間では区別できない:
     //   - 資格情報の失効（401が即返る）
@@ -674,12 +709,17 @@ export const HANDLERS = {
       if (known.has(String(run.id))) continue;
       const v = interpretRun(run);
       if (!v) { log.push(`${run.id}: まだ完了していない`); continue; }
-      const runId = `ap-${run.jst_date.replace(/-/g, '')}-actions`;
-      if ((ctx.runsDoc?.runs ?? []).some((r) => r.run_id === runId)) {
-        // 同日に別の run が既に台帳にある（再実行など）。ID衝突を避けるため触らない。
-        log.push(`${run.id}: ${runId} が既にある（手で確認が要る）`);
-        continue;
-      }
+      if (v.skip) { log.push(`${run.id}: ${v.skip_reason}`); continue; }
+      // 同日に複数の run が走ると `ap-YYYYMMDD-actions` は一意にならない
+      // （2026-08-25 は schedule / force / 手動中止の3本が走った）。
+      // **以前はここで諦めて「手で確認が要る」と記録し続けていた**が、
+      // それだと ledger_covers_runs が永久に閉じない。run id を足して一意にする
+      // ——external_ref と重複するが、**run_id は人が読む識別子**なので
+      // 日付と経路が先頭に残る形を保つ。
+      let runId = `ap-${run.jst_date.replace(/-/g, '')}-actions`;
+      const taken = new Set((ctx.runsDoc?.runs ?? []).map((r) => r.run_id));
+      if (taken.has(runId)) runId = `${runId}-${run.id}`;
+      if (taken.has(runId)) { log.push(`${run.id}: ${runId} が既にある`); continue; }
       // shipped は PR 番号が要る（validate が落とす）。PRの特定は機械には荷が重いので
       // **成功した回は書かない**。書かないことで指標が甘くなることは無い
       //（shipped を落とすと完走率は下がる側に倒れる）。
@@ -967,6 +1007,28 @@ function selftest() {
   t('id は日付を含まない', !/\d{8}/.test(cred[0]?.id ?? ''));
 
   // run の解釈: 即死も遅い失敗も、原因は決めつけない
+  // --- 人が止めた手動起動を失敗に数えない（2026-08-25 追加）---
+  // workflow_dispatch を中止しただけで翌日の記事が消える、という経路を塞ぐ。
+  const cancelledManual = interpretRun({ status: 'completed', conclusion: 'cancelled',
+    event: 'workflow_dispatch', id: 1, steps: [] });
+  t('手動起動の中止は記録対象外', cancelledManual.skip === true);
+  const cancelledSchedule = interpretRun({ status: 'completed', conclusion: 'cancelled',
+    event: 'schedule', id: 2, steps: [] });
+  t('schedule の中止は失敗として残す',
+    cancelledSchedule.skip === undefined && cancelledSchedule.outcome === 'cancelled');
+
+  // 記録対象外の run が1件あるだけで台帳同期の依頼が永久に開かないこと
+  const covers = CLOSE_CHECKS.ledger_covers_runs({}, {
+    runsDoc: { runs: [] },
+    workflowRuns: [{ id: 1, status: 'completed', conclusion: 'cancelled',
+      event: 'workflow_dispatch', steps: [] }] });
+  t('記録対象外だけなら閉じる', covers.closed === true);
+  t('除外を隠さない', covers.evidence.includes('記録対象外 1件'));
+  // 走行中の run も未同期に数えない（まだ結果が無いだけ）
+  t('走行中は未同期に数えない', CLOSE_CHECKS.ledger_covers_runs({}, {
+    runsDoc: { runs: [] },
+    workflowRuns: [{ id: 9, status: 'in_progress', steps: [] }] }).closed === true);
+
   const fast = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
       started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:24:00.486Z' }] });
@@ -1004,7 +1066,7 @@ function selftest() {
     for (const f of fails) console.error(`  ✗ ${f}`);
     process.exit(1);
   }
-  console.log(`自己検査 OK（${27} 項目）`);
+  console.log(`自己検査 OK（${32} 項目）`);
 }
 
 // ============================================================
