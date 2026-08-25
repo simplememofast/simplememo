@@ -24,7 +24,7 @@
     });
   </script>
   <title>自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</title>
-  <meta name="description" content="Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値（AI完走率68.8%・人間介入率43.8%・成果物への介入0件）、15領域の権限表、まだできていないことの一覧を、集計スクリプトごと公開しています。">
+  <meta name="description" content="Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値、可逆／不可逆で分けた権限表、まだできていないことの一覧を、集計スクリプトと生きた台帳ごと公開しています。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
@@ -294,7 +294,7 @@
     <div lang="ja" class="meta-template" data-lang="ja">
       <span class="meta-title">自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</span>
       <span class="meta-og-title">自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</span>
-      <span class="meta-description">Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値（AI完走率68.8%・人間介入率43.8%・成果物への介入0件）、15領域の権限表、まだできていないことの一覧を、集計スクリプトごと公開しています。</span>
+      <span class="meta-description">Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値、可逆／不可逆で分けた権限表、まだできていないことの一覧を、集計スクリプトと生きた台帳ごと公開しています。</span>
     </div>
     <div lang="en" class="meta-template" data-lang="en">
       <span class="meta-title">How much of this app is run by AI | Simple Memo - for Obsidian</span>
@@ -314,7 +314,7 @@
       <p class="ap-lead">
         載せている数字はすべて台帳から出しています。<b>推定値と、まだ測れていないものは、そうと書いてあります。</b>
       </p>
-      <p class="ap-stamp">最終更新 2026-08-25 ／ 計測期間 2026-08-11 〜 2026-08-25（15日・26実行）</p>
+      <p class="ap-stamp">最終更新 2026-08-25 ／ 計測期間 2026-08-11 〜 2026-08-25（15日・27実行）／ <b>この節の率は上記時点のスナップショットです。</b>台帳（§9）は生きているので、日々動きます</p>
 
       <!-- 1. 1サイクル -->
       <section class="ap-sec">
@@ -347,7 +347,7 @@
         </table>
         </div>
         <p class="ap-note">
-          権限表は15領域あり、<b>そのうち11が稼働中・10が承認制</b>です。
+          権限表は16領域あり、<b>そのうち12が稼働中・11が承認制</b>です。
           可逆な操作はAIが単独で実行し、不可逆な操作は承認を挟みます。
           <b>CIが見ているのは「不可逆な領域が承認不要になっていないか」「稼働中の領域が根拠ファイルを指せているか」「金額が動く領域が上限を持っているか」の3点だけ</b>で、
           実際に人が承認したかどうかは機械では見られません。そこは表の側に書いてあります。
@@ -379,13 +379,13 @@
       <section class="ap-sec">
         <h2>3. 実測 — 何回動き、何回人が入ったか</h2>
         <div class="ap-kpis">
-          <div class="ap-kpi"><div class="ap-kpi__v">68.8%</div><div class="ap-kpi__l">AI完走率<br>（着手16回のうち出荷11回）</div></div>
-          <div class="ap-kpi"><div class="ap-kpi__v">43.8%</div><div class="ap-kpi__l">人間介入率<br>（人が1回でも触った実行）</div></div>
-          <div class="ap-kpi"><div class="ap-kpi__v">0件</div><div class="ap-kpi__l">成果物への介入<br>（出荷11件の中身に人が触った回数）</div></div>
-          <div class="ap-kpi"><div class="ap-kpi__v">73.3%</div><div class="ap-kpi__l">出荷日率<br>（15日のうち何かが出た日）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">70.6%</div><div class="ap-kpi__l">AI完走率<br>（着手17回のうち出荷12回）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">41.2%</div><div class="ap-kpi__l">人間介入率<br>（人が1回でも触った実行）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">0件</div><div class="ap-kpi__l">成果物への介入<br>（出荷12件の中身に人が触った回数）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">80.0%</div><div class="ap-kpi__l">出荷日率<br>（15日のうち何かが出た日）</div></div>
         </div>
         <p>
-          <b>人間介入率43.8%をそのまま出します。</b>4割強の実行に人が入っています。
+          <b>人間介入率41.2%をそのまま出します。</b>4割の実行に人が入っています。
           ただしこの数字は「その実行に人が1回でも触ったか」を数えたもので、ワークフローの設定を1行直しただけの日も丸ごと介入ありになります。
           そこで介入を種類で分けています。
         </p>
@@ -394,19 +394,19 @@
           <thead><tr><th>介入の種類</th><th class="num">実行数</th><th class="num">割合</th></tr></thead>
           <tbody>
             <tr><td><b>成果物への介入</b>（人が記事を書いた・書き直した）</td><td class="num"><b>0</b></td><td class="num"><b>0.0%</b></td></tr>
-            <tr><td>実行基盤の修理（ワークフロー・手順書・スクリプト）</td><td class="num">4</td><td class="num">25.0%</td></tr>
-            <tr><td>代走（全経路が不発で人が代わりに実行）</td><td class="num">1</td><td class="num">6.3%</td></tr>
-            <tr><td>立ち上げ（初回に人が通しで実演・一度きり）</td><td class="num">1</td><td class="num">6.3%</td></tr>
-            <tr><td>起票のみ（人に依頼したが、結局やらずに済んだ）</td><td class="num">1</td><td class="num">6.3%</td></tr>
+            <tr><td>実行基盤の修理（ワークフロー・手順書・スクリプト）</td><td class="num">4</td><td class="num">23.5%</td></tr>
+            <tr><td>代走（全経路が不発で人が代わりに実行）</td><td class="num">1</td><td class="num">5.9%</td></tr>
+            <tr><td>立ち上げ（初回に人が通しで実演・一度きり）</td><td class="num">1</td><td class="num">5.9%</td></tr>
+            <tr><td>起票のみ（人に依頼したが、結局やらずに済んだ）</td><td class="num">1</td><td class="num">5.9%</td></tr>
           </tbody>
         </table>
         </div>
         <p class="ap-note">
-          出荷された11件は、すべてAIが書いています。実質的な介入は「基盤の修理」25.0%の一点で、その修理を書いたのもAIでした。
+          出荷された12件は、すべてAIが書いています。実質的な介入は「基盤の修理」23.5%の一点で、その修理を書いたのもAIでした。
           人間がやったのは、壊れていることに気づいて直せと言うことです。
         </p>
         <p class="ap-note">
-          <b>経路別では、主系1/6・副系（代走）10/10。</b>主系は定時起動のワークフローで、成果物ゼロで終わった回が続いています。
+          <b>経路別では、主系2/7・副系（代走）10/10。</b>主系は定時起動のワークフローで、成果物ゼロで終わった回が続いています。
           日々の出荷は副系が担っており、<b>二重化していなければ止まっていました。</b>
           無運転日は2日（8月16日・17日）です。
         </p>
@@ -560,7 +560,7 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
           <a href="/data/autopilot-status.json"><b>稼働状況</b><span>いま何が動いていて、何が止まっているか</span></a>
           <a href="/data/autopilot-cost.json"><b>AI実費</b><span>月次上限と、種別ごとの枠。<b>上限値は暫定です</b></span></a>
           <a href="/data/automation-coverage.json"><b>自動化の棚卸し</b><span>176タスク・13領域を1件ずつ、誰が実行するかで分類</span></a>
-          <a href="/data/authority-matrix.json"><b>権限表</b><span>15領域。可逆／不可逆と、人間のみの操作</span></a>
+          <a href="/data/authority-matrix.json"><b>権限表</b><span>16領域。可逆／不可逆と、人間のみの操作</span></a>
           <a href="/data/code-authorship.json"><b>コード著者の台帳</b><span>数え方そのものを凍結してある</span></a>
         </div>
         <p class="ap-note">
