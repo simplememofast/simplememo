@@ -1,0 +1,104 @@
+# 週次の独立監査。**憲章（data/audit-charter.json）が言っていて、
+# 2026-08-25 まで一度も走っていなかったもの。**
+#
+# 【なぜ別のワークフローなのか】
+# 監査は、監査される側と別の系統に居ないと意味がない。同じパイプラインの中に
+# 置くと、**都合の悪い監査を止める権限も同じ側にある。**
+# 主系（obsidian-autopilot.yml）とは別の起動・別のモデル・別の権限で回す。
+#
+# 【モデルはここに直書きしない】
+# `check-model-routing.mjs --resolve audit` が引く。憲章は
+# **監査を repair と別のモデルにすること**を要求していて、直書きすると
+# その要求が装飾になる（同じモデルは同じ盲点を共有する）。
+#
+# 【入力は観点ではなく「未検査の対」】
+# 憲章の4観点だけを渡しても、2026-08-25 に出た誤り3件はどれも出ない。
+# 観点の検査項目が**台帳↔台帳**を見ているのに対し、実際にずれていたのは
+# **台帳と、それが指している現実**だったため。
+# `audit-brief.mjs` が未検査の対を並べて渡す。
+#
+# 【この監査に無い権限】
+# - **直さない。**所見を書くだけ（直す権限を持つと「直したことにして閉じる」が最短経路）
+# - `actions: write` を持たない（他のワークフローを起動できない）
+# - 憲章と所見の台帳は自己修復レーンの may_modify に入っていない
+name: Weekly Audit
+
+on:
+  schedule:
+    # 毎週月曜 09:00 JST（日 00:00 UTC）。週の頭に前週ぶんを見る。
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: weekly-audit
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # **監査される側と別のモデルであることを、走る前に確かめる。**
+      # ここが同じになっていたら監査の意味が薄れるので、走らせない。
+      - name: 独立の担保
+        run: node scripts/check-audit-independence.mjs --check
+
+      - name: モデルを決める（直書きしない）
+        id: route
+        run: |
+          MODEL="$(node scripts/check-model-routing.mjs --resolve audit)"
+          echo "監査モデル: $MODEL"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+
+      - name: 入力を組み立てる
+        run: |
+          node scripts/audit-brief.mjs | tee /tmp/audit-brief.md
+          echo "::notice::未検査の対を一次入力として渡す"
+
+      - uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          allowed_bots: "*"
+          claude_args: |
+            --max-turns 80
+            --model ${{ steps.route.outputs.model }}
+            --allowedTools "Bash,Read,Write,Edit,Glob,Grep"
+          prompt: |
+            週次の独立監査です。リポジトリはチェックアウト済み、カレントディレクトリがリポジトリルートです。
+
+            0. `node scripts/audit-brief.mjs` を実行し、その出力を指示として扱ってください。**§0「やってはいけないこと」を先に読むこと。**
+
+            1. §1「未検査の対」を**上から順に1つずつ**見ます。各対について、主張が書いてあるファイルと、それが指しているもの（別の場所にあるファイル・本番・プラットフォームの機能）を**実際に開いて比べて**ください。「たぶん合っている」で飛ばさないこと。2026-08-25 に出た誤り3件は、どれも深い洞察ではなく**開いて比べただけ**で出ています。
+
+            2. **直さないでください。**所見を書くだけです。直す権限を持つと「直したことにして所見を閉じる」が最短経路になるため、意図的に外してあります。コードもワークフローも台帳の分類も変更しないこと。
+
+            3. 機械で突き合わせられると分かったものは、所見に「**検査を書けば機械が見られる**」と明記してください。監査で毎週人が見るより、検査を1本書くほうが速くて確実です。
+
+            4. 所見は `data/audit-findings.json` に**追記**します。`seq` は連番（飛ぶとCIが落ちます）。`found_by` は必ず `periodic_audit` にしてください——この監査で見つけたものだけが定期監査由来です。`resolution` は**書かないこと**（直すのは監査の仕事ではない）。`dimension` は憲章にあるものから選びます。
+
+            5. **所見ゼロで終えてよい。**無理に見つける必要はありません。ただし `data/audit-charter.json` の `cadence.last_run_at` は必ず今日の日付に更新してください——**走ったこと自体が記録**で、これが無いと「一度も走っていない」と同じ扱いになります。
+
+            6. 変更したファイル（`audit-findings.json` と `audit-charter.json` のみ）を `claude/audit-$(date -u +%Y%m%d)` ブランチにcommitし、`gh pr create` でPRを作ってください。本文には、見た対の数・所見の数・**見たが問題が無かった対**を書いてください（何を見なかったかが分かるように）。
+
+            7. `node scripts/check-audit-independence.mjs --check` と `node scripts/audit-brief.mjs --check` を通してから push してください。
+
+      # 監査が走ったかどうかを、監査自身の出力で確かめる。
+      # **ここは落とす。**マージゲート側は報告のみだが、監査ワークフローの中で
+      # 「走ったのに last_run_at が更新されていない」を通すと、
+      # 次週も「一度も走っていない」のまま静かに続く。
+      - name: 走ったことが記録されたか
+        if: always()
+        run: node scripts/audit-brief.mjs --check --strict

@@ -230,6 +230,17 @@ jobs:
       - name: Autonomy conditions
         run: node scripts/check-autonomy-conditions.mjs --check
 
+      # 【週次監査の約束と実績】憲章が週1と言っているものが、実際に回っているか。
+      # あわせて**所見の出どころの内訳**を出す（監査が仕事をしているかを、
+      # 監査自身の出力で測る。2026-08-25 時点で定期監査由来は 0/3件）。
+      #
+      # **ここでは落とさない。**監査が滞っているだけで無関係な修正まで出荷
+      # できなくなると、「出荷を通すために監査を形だけ回す」方へ圧力がかかる。
+      # check-experiments.mjs を報告のみにしてあるのと同じ理由。
+      # 落とすのは監査ワークフロー自身の中だけ（audit.yml の --strict）。
+      - name: Weekly audit cadence (report-only)
+        run: node scripts/audit-brief.mjs --check
+
       # 【自動化率の文書】docs/automation-rate-2026-08.md が台帳と一致しているか。
       #
       # この文書は「機械生成」と名乗っていたが、**生成する側が存在しなかった。**

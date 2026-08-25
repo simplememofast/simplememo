@@ -233,9 +233,9 @@
       "claim": "audit-charter.json の cadence（週1で監査する）",
       "referent": "実際に監査を走らせた記録",
       "direction": "claim_to_referent",
-      "checked_by": null,
-      "covered": false,
-      "why_uncovered": "**まだ一度も走らせていない**（last_run_at が null）。所見2件はどちらも定期監査ではなく、別作業の途中とオーナーの指摘で出た。**found_by がそれを記録している**"
+      "checked_by": "node scripts/audit-brief.mjs --check",
+      "covered": true,
+      "note": "**約束（週1）と実績（last_run_at）を突き合わせる。**あわせて所見の found_by の内訳を出し、定期監査由来の件数をKPIにした。2026-08-25 時点で **0/3件** — 所見はすべて事故・別作業・外からの指摘で出ている。マージゲートでは報告のみ、落とすのは監査ワークフロー自身。"
     },
     {
       "id": "content-graph",
