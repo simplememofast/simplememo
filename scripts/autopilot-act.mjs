@@ -257,6 +257,28 @@ export const CLOSE_CHECKS = {
   },
 
   /**
+   * 節約策が実際に効いたら閉じる。**「変えた」では閉じない。**
+   *
+   * 実費を下げる変更は、入れた時点では**仮説**でしかない。効果が出たかは
+   * 次に同じ種別が走ったときの実測でしか言えないので、閉じ条件をそこに置く。
+   * 実測が出るまで開いたままにしておけば、「直したつもり」が消えずに残る。
+   */
+  cost_reduced({ task_kind, since, target }, ctx) {
+    if (!ctx.costDoc) return { closed: false, evidence: '実費台帳を読めず判定不能' };
+    const after = (ctx.costDoc.runs ?? [])
+      .filter((r) => r.task_kind === task_kind && r.date_jst > since);
+    // **走っていないことを「効果が出た」と読まない。**
+    if (after.length === 0) {
+      return { closed: false, evidence: `${since} 以降 ${task_kind} はまだ走っていない（実測が無い＝効果は不明）` };
+    }
+    const best = Math.min(...after.map((r) => r.total_cost_usd));
+    const fmt = (n) => `$${Number(n).toFixed(4)}`;
+    return best <= target
+      ? { closed: true, evidence: `${since} 以降の ${task_kind} は最安 ${fmt(best)}（目標 ${fmt(target)} 以下）・${after.length}件の実測` }
+      : { closed: false, evidence: `${since} 以降の ${task_kind} は最安でも ${fmt(best)} で、目標 ${fmt(target)} に届いていない（${after.length}件の実測）` };
+  },
+
+  /**
    * 自動では絶対に閉じない。
    *
    * リポジトリの外（App Store Connect・オーナーのローカル環境・課金コンソール）
@@ -1077,6 +1099,24 @@ function selftest() {
     runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === true);
   t('実費台帳が無ければ判定不能', CLOSE_CHECKS.cost_covers_runs({}, { runsDoc: { runs: [] } }).closed === false);
 
+  // 閉じ条件: 節約策は「変えた」ではなく「安くなった実測」で閉じる
+  const red = (runs) => CLOSE_CHECKS.cost_reduced(
+    { task_kind: 'article', since: '2026-08-25', target: 4 }, { costDoc: { runs } });
+  t('走っていなければ閉じない',
+    red([{ task_kind: 'article', date_jst: '2026-08-25', total_cost_usd: 0.1 }]).closed === false);
+  t('走っていないことを効果と読まない',
+    red([]).evidence.includes('まだ走っていない'));
+  t('目標を下回れば閉じる',
+    red([{ task_kind: 'article', date_jst: '2026-08-26', total_cost_usd: 3.5 }]).closed === true);
+  t('下回らなければ閉じない',
+    red([{ task_kind: 'article', date_jst: '2026-08-26', total_cost_usd: 6.0 }]).closed === false);
+  t('届いていない額を隠さない',
+    red([{ task_kind: 'article', date_jst: '2026-08-26', total_cost_usd: 6.0 }]).evidence.includes('$6.0000'));
+  t('他の種別は数えない',
+    red([{ task_kind: 'repair', date_jst: '2026-08-26', total_cost_usd: 1.0 }]).closed === false);
+  t('実費台帳が無ければ判定不能（節約）',
+    CLOSE_CHECKS.cost_reduced({ task_kind: 'article', since: '2026-08-25', target: 4 }, {}).closed === false);
+
   // 閉じ条件: 1回上限の超過は「人が見たか」で閉じる（manual にしない）
   const ovCtx = (rows) => ({ budget: { run_caps: { overruns: rows, unreviewed: rows.filter((r) => !r.reviewed) } } });
   t('実費ゲートを読めなければ判定不能',
@@ -1398,8 +1438,15 @@ async function main() {
       closed_today: sum.closed_today.map((a) => ({ id: a.id, title: a.title, evidence: a.evidence })),
       human: sum.human.map((a) => ({ id: a.id, title: a.title, detail: a.detail,
         age_days: a.age_days, why: a.owner_why, evidence: a.evidence })),
-      ai: sum.ai.map((a) => ({ id: a.id, title: a.title, age_days: a.age_days,
-        auto: a.auto, evidence: a.evidence })),
+      // detail は AI 行にも入れる。**日報メールだけの出力ではなくなったため。**
+      // 主系のプロンプトはこのレポートを「保留事項」の参照先にしており、
+      // AI が自分の行を実行するには detail（手順・解除コマンド・判断の根拠）が要る。
+      // 台帳そのもの（data/autopilot-actions.json）を読ませない理由は、
+      // **閉じた行が消えずに貯まる**から —— 2026-08-25 時点で 14行中9行が done で
+      // 22,533文字。AUTOPILOT_LOG.md と同じ「毎回読ませると増え続ける」形になる。
+      // こちらは open と当日クローズだけなので、**未処理の件数でしか増えない。**
+      ai: sum.ai.map((a) => ({ id: a.id, title: a.title, detail: a.detail,
+        age_days: a.age_days, auto: a.auto, evidence: a.evidence })),
       executed: applied.map((r) => ({ handler: r.handler, ok: r.ok, changed: r.changed, log: r.log })),
   };
 
