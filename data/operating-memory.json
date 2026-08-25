@@ -57,7 +57,7 @@
     "undetermined",
     "measurement_failed"
   ],
-  "next_seq": 6,
+  "next_seq": 7,
   "records": [
     {
       "seq": 1,
@@ -123,7 +123,14 @@
         "refs": [
           "data/claim-referent.json"
         ]
-      }
+      },
+      "refs_removed": [
+        {
+          "ref": "../simplememo-api/.github/workflows/backup-d1.yml",
+          "at": "2026-08-25",
+          "why": "同じ領域を main が独立に実装しており（#153・11:44）、`--restore` が復元演習と同じコードを通るという、こちらに無い性質を持っていた。重なった実装は main を採ったため、こちらにしか無かった週次ワークフローは落ちた（main の実装に無いモードを5つ使っており、そのままでは動かない）。**結果として場外コピーの定期実行は無くなっている。**automation-coverage.json ⑫ の訂正3に同じことを書いた"
+        }
+      ]
     },
     {
       "seq": 3,
@@ -211,6 +218,39 @@
         "what": "`check-autonomy-measured.mjs` を新設し必須CIチェックへ。**measured の数字を台帳から数え直して二段で縛る** —— 台帳が動くと measured_facts が落ち、facts を直すと今度は散文が落ちる。measured に数字があるのに measured_facts が無い条件も落とす（素通りにすると、書かないほうが検査を通る形になる）。あわせて `checkRepairSensitivity()` で seq=4 の壊れ方の再発を検出する",
         "ref": "scripts/check-autonomy-measured.mjs",
         "effect": "**追加した直後に効いた。**この検査を required_ci_checks に足したことで 57→58 になり、書いたばかりの検査が**自分の追加で古くなった⑦を即座に落とした。**差し替えではなく実地で発火したのはこれが初めて"
+      }
+    },
+    {
+      "seq": 6,
+      "opened_at": "2026-08-25",
+      "closed_at": "2026-08-25",
+      "status": "closed",
+      "signal": {
+        "what": "本番の孤児テーブル2つを `DROP` する手順をオーナーへ渡し、事前確認（`COUNT(*)`）まで通した。**適用の直前で、当ててはいけないことが分かった。**同じ日のうちに main が、その2つに所有者を与えていた（`src/inquiry.ts` が `INSERT`、公開経路 `POST /v1/inquiry` が結線済み）",
+        "ref": "../simplememo-api/docs/RESTORE.md"
+      },
+      "hypothesis": "事前確認が「落としてよいか」ではなく「空か」を見ていたのではないか。0行は所有者の有無と独立に成り立つので、それだけでは判断材料にならない",
+      "decision": "`0021` を取り下げてファイルごと削除する。そのうえで、**行数ではなく所有権を見る**ことを手順書に固定する",
+      "execution": {
+        "what": "`migrations/0021_drop_unowned_tables.sql` を削除。`docs/RESTORE.md` に「空のテーブルを見つけても、それだけで落とさない」を追加し、所有者の確かめ方（`git grep -n \"INSERT INTO <table>\" -- src/`）を書いた",
+        "refs": [
+          "../simplememo-api/docs/RESTORE.md"
+        ]
+      },
+      "verification": {
+        "what": "`src/inquiry.ts` の `INSERT INTO inquiries`、`src/dlq.ts` の `INSERT OR IGNORE INTO email_dead_letters`、および `src/index.ts` のルート結線（2384行・2387行）を実際に読んで確認した。両テーブルとも main の `data-retention.json` に所有者つきで登録されている",
+        "ref": "../simplememo-api/src/inquiry.ts"
+      },
+      "outcome": "**当てていれば、デプロイ済みのコードが書き込む表を消していた。**`POST /v1/inquiry` が壊れる。事前確認は両テーブルとも0行を返して**正常に通っていた**",
+      "verdict": "improved",
+      "learning": "**0行は「要らない」の証明ではない。**次の2つと同時に整合する。\n\n  所有者の居ない空の器\n  **所有者が付いたばかりで、まだ書き込まれていない表**\n\n行数では区別できない。見るべきは所有権 ——「このテーブルに書くコードが在るか」で、`git grep` 一発で分かることだった。\n\n**今日5件目の同じ形。**検査が現実ではなく現実の代理を見ている:\n  automation-rate  証跡ではなく証跡欄\n  check-authority  ワークフローではなくリスト\n  data-retention   本番ではなく migrations/\n  audit-brief      存在しないキー（いつも全部が該当する）\n  **0021 の事前確認  所有権ではなく行数**\n\n前4件は塞ぐ側だった。**5件目は自分が書いた手順の中に在り、しかもオーナーの手を一度動かしたあとで見つかった。**塞いだ直後がいちばん危ない —— 同じ形を4回名指しした日に、5回目を自分でやっている。\n\nもう一つ。`--audit-schema` は**落としさえすれば緑になる。**検査が緑になることと正しいことは別で、**「緑にする」を目的にすると、検査は消す方向の圧力になる。**",
+      "policy_change": {
+        "what": "`docs/RESTORE.md` に ⚠ 節を追加 —— 空のテーブルを見つけても、それだけで落とさない。所有者（書くコード）の確かめ方をコマンドで書いた。あわせて `--audit-schema` の失敗メッセージにも「空であることは、要らないことの証明ではない」を入れ、**検査が孤児を報告した地点で**同じ注意が出るようにした",
+        "refs": [
+          "../simplememo-api/docs/RESTORE.md",
+          "../simplememo-api/scripts/backup-d1.mjs"
+        ],
+        "effect": "**機械では止めていない。**止めたのは手順書と検査のメッセージだけで、「所有者の居ないテーブルを DROP しようとしたら落ちる」という検査は無い。`DROP` は人の手で本番へ当てる操作なので、CIの外に在る —— ここは**塞いだのではなく、名指ししただけ**"
       }
     }
   ]

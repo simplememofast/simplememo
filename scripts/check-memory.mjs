@@ -88,18 +88,40 @@ export function validate(doc, { resolve = resolveRef } = {}) {
     if (!r.hypothesis) problems.push(`${at}: hypothesis が無い`);
     if (!r.decision) problems.push(`${at}: decision が無い`);
 
-    // **写さない。指す。**参照が解決しない記憶は、書いた本人にしか読めない
-    if (r.signal?.ref) {
-      const res = resolve(r.signal.ref);
-      if (!res.ok) problems.push(`${at}: signal.ref が解決しない — ${res.why}`);
-    }
-    for (const f of r.execution?.refs ?? []) {
-      const res = resolve(f);
-      if (!res.ok) problems.push(`${at}: execution.refs が解決しない — ${res.why}`);
-    }
-    for (const f of r.policy_change?.refs ?? []) {
-      const res = resolve(f);
-      if (!res.ok) problems.push(`${at}: policy_change.refs が解決しない — ${res.why}`);
+    // **写さない。指す。**参照が解決しない記憶は、書いた本人にしか読めない。
+    //
+    // 【2026-08-25】**「一度も無かった」と「在ったが後で消えた」を分ける。**
+    // 記憶は履歴なので、指した先はあとから正当に消える —— 実際 seq=2 が指した
+    // `backup-d1.yml` は、同じ領域を main が独立に実装したため落とした。
+    // それを「解決しない」で落とすと、**履歴を持つ台帳が時間とともに必ず赤くなる。**
+    // かといって黙って通すと、一度も存在しなかった証跡（seq=1 の原因）が戻ってくる。
+    //
+    // なので `refs_removed` に **いつ・なぜ消えたかを書かせて**通す。
+    // **空欄では通らない** —— 空欄と「消したと決めた」は違う、という他と同じ規律。
+    const removed = new Map((r.refs_removed ?? []).map((x) => [x.ref, x]));
+    const checkRef = (ref, label) => {
+      const res = resolve(ref);
+      if (res.ok) return;
+      const gone = removed.get(ref);
+      if (!gone) {
+        problems.push(`${at}: ${label} が解決しない — ${res.why}`
+          + '（後で消したのなら refs_removed に at と why を書く）');
+        return;
+      }
+      if (!gone.at || !gone.why) {
+        problems.push(`${at}: refs_removed の "${ref}" に at か why が無い`
+          + ' — **空欄と「消したと決めた」は違う**');
+      }
+    };
+    if (r.signal?.ref) checkRef(r.signal.ref, 'signal.ref');
+    for (const f of r.execution?.refs ?? []) checkRef(f, 'execution.refs');
+    for (const f of r.policy_change?.refs ?? []) checkRef(f, 'policy_change.refs');
+
+    // **消したと書いたのに、実際には在る**のも間違い（消し忘れの記録が残る）
+    for (const x of r.refs_removed ?? []) {
+      if (resolve(x.ref).ok) {
+        problems.push(`${at}: refs_removed の "${x.ref}" は実在する — 記録のほうが古い`);
+      }
     }
 
     // **順序。**結果が出る前に学びは書けない
