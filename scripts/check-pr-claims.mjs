@@ -23,6 +23,21 @@ const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 const AI_EXECUTES = new Set(['ai_autonomous', 'ai_executes_gated']);
 const HUMAN_HELD = new Set(['human_only', 'ai_executes_gated', 'ai_proposes']);
+/**
+ * mode: 'ai_proposes' 用。**「AIがやる」と「AIが出す」を書き分けるために足した**
+ * （2026-08-25）。
+ *
+ * それまで mode は ai_executes と human_approves の2つしか無く、
+ * 「AIは提案までで、決めるのは人」という中間を表現できなかった。表現できないと
+ * どうなるかというと、**中間の工程が「AIが実行する」側に丸められる。**
+ * 実際そうなっていて、サブタイトルの「機能開発」は台帳で60%（設計への
+ * 落とし込みとPRD作成が ai_proposes）なのに、原稿は実行と読める書き方をしていた。
+ * 本文 §3 は「分析と提案はAI」と正しく書いており、**サブタイトルだけが強かった。**
+ *
+ * nobody / intentional_no は入れない。**提案すら出ていないものを「提案まで」とは
+ * 言えない。**
+ */
+const AI_INVOLVED = new Set(['ai_autonomous', 'ai_executes_gated', 'ai_proposes']);
 
 export function evaluate(claimsDoc, coverage) {
   const index = new Map(coverage.tasks.map((t) => [`${t.area}::${t.task}`, t]));
@@ -36,11 +51,10 @@ export function evaluate(claimsDoc, coverage) {
     });
 
     const found = rows.filter((r) => r.task);
-    const satisfied = found.filter((r) => (
-      c.mode === 'human_approves'
-        ? HUMAN_HELD.has(r.task.executor)
-        : AI_EXECUTES.has(r.task.executor)
-    ));
+    const modeSet = c.mode === 'human_approves' ? HUMAN_HELD
+      : c.mode === 'ai_proposes' ? AI_INVOLVED
+        : AI_EXECUTES;
+    const satisfied = found.filter((r) => modeSet.has(r.task.executor));
     const support = found.length ? satisfied.length / found.length : 0;
 
     return {
@@ -83,7 +97,7 @@ if (isMain) {
   for (const c of sorted) {
     const pct = (c.support * 100).toFixed(0).padStart(3);
     const mark = c.supported ? '書ける' : '**書けない**';
-    console.log(`  ${pct}%  ${mark}  「${c.phrase}」${c.mode === 'human_approves' ? '（人の承認）' : ''}`);
+    console.log(`  ${pct}%  ${mark}  「${c.phrase}」${c.mode === 'human_approves' ? '（人の承認）' : c.mode === 'ai_proposes' ? '（提案まで）' : ''}`);
     if (c.note) console.log(`         ${c.note}`);
     for (const r of c.weak) {
       console.log(`         ✗ [${LABEL[r.task.executor]}] ${r.ref.split('::')[1]}`);
