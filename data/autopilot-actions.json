@@ -44,11 +44,11 @@
         "kind": "manual",
         "params": {}
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-22",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "closed_jst": "2026-08-25",
+      "evidence": "完了。**機械で確かめた部分とオーナー報告の部分を分けて書く。**\n【機械で検証】simplememo-ios main（5dbcc5e）で `python3 scripts/qa/check_privacy_manifest.py` が「申告と実装が一致している」を出力。6種別（メールアドレス / メールまたはテキストメッセージ / その他のユーザコンテンツ / デバイスID / 製品の操作 / その他の診断データ）。申告漏れだった「メールまたはテキストメッセージ」は #226 で修正済み。\n【オーナー報告】ASC 側の6種別の入力を完了し、目的・関連付け・追跡が揃っていることを確認。入力内容は上記スクリプトの出力と一致している（data/autopilot-status.json に記録）。\n**ASC 側はリポジトリから検査できないので、ここは報告に依っている**（close_check が manual である理由）。\n【残る構造的な穴】check_privacy_manifest.py は ASC を読めないため「申告ファイル→実装」しか見ない。**「ASCにあるのに申告ファイルに無い」は構造的に不可視**で、今回の漏れもオーナーが画面を見せて初めて分かった。ASC 側を触った回は同スクリプトの出力と目で見比べるしかない（APIでは書けないことを 2026-08-25 に確認済み）。"
     },
     {
       "id": "act-authority-split-deletion",
@@ -75,8 +75,8 @@
     },
     {
       "id": "act-egress-policy-confirm",
-      "title": "副系CCRの egress 制限が意図どおりか確認する",
-      "detail": "副系の実行環境は obsidian.md / notion.com / github.com本体 / simplememofast.com への直接アクセスが 403 EGRESS_BLOCKED になる（到達できるのは api.github.com・raw.githubusercontent.com・objects.githubusercontent.com・npmjs.com 程度）。**本番 simplememofast.com が読めない**ため、副系は Runbook §0 の冪等チェック(b)「本番status JSONの date_jst」を実行できない。実質のガードは (c) origin/main の同ファイルと、当日ブランチの占有だけ、と理解しておく必要がある。",
+      "title": "副系CCRの egress 制限が意図どおりか確認する（2026-08-25 実測で更新）",
+      "detail": "**【2026-08-25 実測で訂正】以前の記述「simplememofast.com もブロックされている」は現在この環境では成り立たない。**本番 status JSON が curl で 200 で読める。\n\nつまり **Runbook §0 の冪等チェック(b)「本番 status JSON の date_jst」は副系でも実行できる。**以前の記録は「(b) は実行不能なので実質のガードは (c) と当日ブランチの占有だけ」としており、**ガードの強度を実際より低く見積もっていた。**\n\n同一セッション内で curl により実測（2026-08-25）:\n```\n200      https://simplememofast.com/data/autopilot-status.json   ← 以前は「ブロック」と記録\n200      https://simplememofast.com/robots.txt\n200      https://api.github.com/rate_limit\n200      https://raw.githubusercontent.com/…\n200      https://registry.npmjs.org/\n400      https://github.com/            ← curl は 400。WebFetch 経由では到達できる\nblocked  https://obsidian.md/ , https://help.obsidian.md/     ← WebFetch でも EGRESS_BLOCKED\nblocked  https://www.notion.com/ , https://en.wikipedia.org/ , https://www.google.com/\nblocked  https://api.indexnow.org/indexnow   ← indexnow-notify.js がこの環境で落ちる理由\n```\n\n**変わっていない部分:** obsidian.md 系は curl でも WebFetch でも一貫してブロックされる。レーンEで Obsidian 公式サイトを一次情報にする記事は、副系からは書けない（raw.githubusercontent.com 経由の公式レジストリは読めるので、そちらは使える）。\n\n**注意:** 到達性はセッションごと・ツールごとに違う。過去ログには curl・WebFetch ともブロックされたという記録があり、今回と食い違う。**1回の実測を恒久的な仕様として書かない**——次に判断するときは、そのセッションで測り直すこと。\n\nオーナーに確認したいのは「この制限が意図したものか」で、そこは変わらない。",
       "source": "manual",
       "domain": null,
       "touches": [],
