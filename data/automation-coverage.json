@@ -36,7 +36,7 @@
     "【出典】タスクの列挙は docs/autopilot-maturity-backlog.md（外部レビュー由来）と、",
     "本セッションで実測した内容。分類は3リポジトリの実装を1件ずつ当てて決めた。"
   ],
-  "measured_at": "2026-08-22",
+  "measured_at": "2026-08-25",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -201,6 +201,38 @@
       "executor": "nobody",
       "evidence": [],
       "note": "コンテンツ側は完走。機能側0件"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "North Star Metric（Zero-decision Capture Rate）の実測",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "**定義はあるが実測が無い。**`../simplememo-ios/docs/VISION.md` が究極KPIとして定義し、CLAUDE.md も「Zero-decision の数値はまだ実測が無い。実測が出るまでサイトに数値を書かない」と明記している。**つまり最上位のKPIだけが、他の全指標に課している基準を満たしていない。**優先順位付けは代理指標（継続率・課金率）で回っており、NSMは判断に効いていない"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "機能の削除・単純化・高速化の候補化",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "バックログ（data/feature-backlog.json）は**追加の候補しか持たない。**ビジョンは「作らない」を繰り返し定めている（Todo管理画面・Calendar UI・Knowledge Base を作らない）のに、**既にあるものを減らす提案が構造的に出てこない。**足すほうだけを採点する仕組みは、時間とともに必ず膨らむ方向に倒れる"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "週次・月次・四半期ロードマップの自己生成",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "いま存在するのは当日のアクション台帳（data/autopilot-actions.json）と個別のバックログだけ。**「次の四半期に何をやるか」を機械が組み立てる経路が無い。**日次の最適化だけが自動化されていると、**短期に効く施策へ寄る**（このリポジトリの実装が③に集中しているのは、その現れでもある）"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "過去の失敗を参照して同じ提案を繰り返さない",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-operating-memory.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。learning に lesson_key を持たせ、**同じ key が2回出たらCIが落ちる。**2回目が出た＝1回目の学習が成果物に効かなかった、ということなのでそこで気づける。**実際にこの仕組みが無かった間に、同じ失敗が7回並んだ**（growth の基準値未記録7件）。**seed 6件はすべて後追い記録**なので、発生時記録が溜まるまで「再発を防いだ実績」は主張できない"
     },
     {
       "area": "② バグ修正",
@@ -381,6 +413,13 @@
         "scripts/autopilot-selfheal.mjs"
       ],
       "note": "2026-08-22実装。レーンF"
+    },
+    {
+      "area": "② バグ修正",
+      "task": "flakyテスト・不要になったテストの整理",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "テストを**足す**経路はある（回帰テスト化の実績あり）が、**減らす／直す経路が無い。**flaky を検出する仕組みも、使われなくなったテストを見つける仕組みも3リポジトリに無い。放置すると『赤いのが普通』になり、②の検査群全体の信頼が落ちる"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -647,6 +686,38 @@
         "../simplememo-api/src/nudge.ts"
       ],
       "note": "cronで自動送信"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "コンテンツDecayの検出とRefresh Queue",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/content/refresh-queue.json",
+        "growth/content/new-queue.json",
+        "growth/content/coverage-queue.json"
+      ],
+      "note": "**キューは在るが、更新されていない。**refresh-queue.json は `generated_at: 2026-08-09` のままで、これを**書き直すスクリプトが存在しない**（参照しているのは docs 4件だけ）。つまり Decay の検出は当時1回やった手作業であって、継続的な検出ではない。ノイズフロアの規律（impressions×expectedCtr）はキューの note に書かれており、設計は良い —— **回っていないのは実装ではなく再生成**"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "検索意図（Search Intent）の変化検出",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "順位とCTRは追っているが、**同じクエリの意図が変わったことを検出する経路が無い。**順位が落ちていないのにCTRだけ落ちる形で表に出るため、現状の監視では『変化なし』に見える"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "施策の停止条件（Marketing stop-loss）",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "**開発側には stop-loss がある**（rollout-guard の kill、Crash-free率による自動停止）が、**マーケ側には無い。**experiments.json は評価日と判定は持つが、『悪化したら評価日を待たずに戻す』条件を持たない。AppDNA が traffic cap と instant rollback を、この位置に置いている（docs/competitors-autonomous-app-ops-2026-08.md §7）"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "SEOとASO間のカニバリゼーション判定",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "同じクエリに対して自社サイトとApp Storeページが同時に露出したとき、**どちらかがもう一方の流入を食っているかを見ていない。**広告は未実装なので3者間ではなく2者間の問題として立てる"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -961,6 +1032,20 @@
       "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可"
     },
     {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "採用された改善1件あたりのAI原価",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "**分子はあるが分母が無い。**実費（data/autopilot-cost.json）と1記事あたり単価は出せるが、『**採用された**改善1件あたり』は出せない —— 却下・revert・計測失敗に終わった分を分母から外す仕組みが無いため。この数字が無いと、AI費用の増加が成果の増加かどうかを判定できない"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "AI費用に対する粗利（AI原価の回収）",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "⑥の売上接続が前提。**ASC の課金レポートが降りていなかったので、そもそも分子が無かった**（2026-08-25 に取得側の欠陥2件を修正、data/operating-memory.json の om-2026-08-25-asc-zero）。降りたあとで初めて立てられる"
+    },
+    {
       "area": "⑥ アプリ運営意思決定",
       "task": "ファネル分析（インストール→初回メモ→継続→課金）",
       "executor": "ai_executes_gated",
@@ -1098,6 +1183,18 @@
       ],
       "note": "2026-08-22実装。**出ていく側だけ**（悲観$150／標準$40／楽観$25）。収入はASC未接続で機械が読めないため、**ランウェイ（月数）は出さない** — 手元資金も収入も入っていないので月数を書くと嘘になる。CIが「収入未接続なのに runway_months を書いていないか」を見る",
       "since": "2026-08"
+    },
+    {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "結果の5分類（成功／失敗／無変化／判断不能／計測失敗）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-operating-memory.mjs",
+        "growth/lib/ledger.mjs",
+        "growth/experiments/experiments.json"
+      ],
+      "note": "2026-08-25実装。**「判断不能」と「計測失敗」を分けるのが要点。**前者は待てば解け、後者は待っても解けない。分ける前は experiments.json の `inconclusive` 7件が**全件が実は計測失敗**（変更前の値を未記録）で、待てば解けるものとして扱われていた。CIは (a) 基準値が無いのに inconclusive と書く (b) 基準値を持たないまま実験を走らせる の両方を落とす"
     },
     {
       "area": "⑦ 法人経営",
@@ -1502,6 +1599,17 @@
       ],
       "note": "2026-08-22実装。判定に4つの故障軸（資格情報の拒否・モデル全滅/縮退・GitHub API到達不能・egress遮断）を足し、26シナリオで固定。**「秘密鍵が無い」と「拒否された」を別コードにした** — 混ぜると期限切れが毎日「設計どおりのスキップ」として黙殺される。**本番を落とす本物の演習ではない**（判定の論理だけ）",
       "since": "2026-08"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "判断→実行→結果→次の判断を結ぶ運転記憶",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-operating-memory.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。signal / hypothesis / decision / execution / verification / outcome / verdict / learning を1レコードで持ち、**learning.changed が実在の成果物を指さない行は落とす**（感想を学習と呼ばせない）。**率は出していない** —— 全判断の母数を持っていないので『判断の◯%を記録』は言えない。**seed 6件は後追いで、発生時記録はまだ0件**"
     },
     {
       "area": "⑪ データ・プライバシー",

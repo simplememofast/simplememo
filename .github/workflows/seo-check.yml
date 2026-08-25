@@ -369,6 +369,16 @@ jobs:
       # 検査の主眼は2つ:
       #   - learning.changed が実在の成果物を指すこと（**感想を学習と呼ばせない**）
       #   - 同じ lesson_key が2回出たら落とす（1回目の学習が効いていない）
+      # 【公開ページ × 台帳】一番人目に触れる数字が、検査の網の外にあった。
+      # 2026-08-25 に棚卸しへ13件足して 61.3% → 58.6% に動いたとき、
+      # /autopilot/ は 176タスク・61.3% のまま**誰にも落とされなかった。**
+      # 記者が最初にやるのは「その数字はどう数えましたか」なので、
+      # **ページと台帳が違うのがいちばん悪い。**
+      - name: Autopilot page vs ledger
+        run: |
+          node scripts/check-autopilot-page.mjs --selftest
+          node scripts/check-autopilot-page.mjs --check
+
       - name: Operating memory
         run: |
           node scripts/check-operating-memory.mjs --selftest

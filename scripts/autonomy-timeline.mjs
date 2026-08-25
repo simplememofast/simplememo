@@ -183,7 +183,39 @@ export function toSvg(doc) {
   return o.join('\n');
 }
 
+/**
+ * **浅いクローンで再計算してはいけない。**
+ *
+ * [2026-08-25] この関数は証跡ファイルの初出月を `git log` から取る。CI や
+ * Claude Code のセッションは既定で shallow clone（このリポジトリでは51コミット・
+ * 2026-08-22 まで）なので、**それより前の月が丸ごと取れない。**
+ *
+ * 実際に起きたこと: --check が「終点が現在値と一致しない、--rebuild を実行して
+ * 同じコミットに含めること」と指示し、その通り実行したら **7点あった系列が
+ * 2点（2026-07 と 2026-08）になった。**しかも --check はそれを通した ——
+ * 終点は正しく、`points.length >= 2` も満たすため。
+ * **指示どおりに直すと壊れ、壊れたことを検査が見逃す**形になっていた。
+ *
+ * `git fetch --unshallow` してから再実行すれば7点に戻る。
+ */
+function assertFullHistory() {
+  let shallow = '';
+  try {
+    shallow = execFileSync('git', ['rev-parse', '--is-shallow-repository'],
+      { cwd: ROOT, encoding: 'utf8' }).trim();
+  } catch {
+    shallow = ''; // git が無い環境では判定しない（黙って通す方が害が小さい）
+  }
+  if (shallow === 'true') {
+    throw new Error(
+      '**浅いクローンでは再計算しない。**証跡の初出月を git log から取るので、\n'
+      + '  クローンに無い月が系列から丸ごと消える（実際に7点→2点になった事故がある）。\n'
+      + '  先に `git fetch --unshallow` を実行すること。');
+  }
+}
+
 export function rebuild() {
+  assertFullHistory();
   const doc = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
   const defined = doc.tasks.filter((t) => t.executor !== 'intentional_no').length;
   const dated = [];
@@ -276,6 +308,26 @@ if (isMain) {
 
   const problems = [];
   if (!Array.isArray(doc.points) || doc.points.length < 2) problems.push('points が2点未満');
+
+  // [2026-08-25] **系列が痩せたことを検出する。**
+  // points.length >= 2 だけでは、浅いクローンで再計算して過去が消えた系列を
+  // 通してしまう（実際に7点→2点になっても、終点が合っていれば緑だった）。
+  // 初回リリース月からの連続を要求する —— **月が飛んでいたら、それは
+  // 「その月に何も無かった」ではなく「その月を見られていない」。**
+  if (Array.isArray(doc.points) && doc.points.length >= 2) {
+    const months = doc.points.map((p) => p.month);
+    const [y0, m0] = months[0].split('-').map(Number);
+    const [y1, m1] = months[months.length - 1].split('-').map(Number);
+    const span = (y1 - y0) * 12 + (m1 - m0) + 1;
+    if (span !== months.length) {
+      problems.push(`系列の月が飛んでいる（${months[0]}〜${months[months.length - 1]} は ${span} ヶ月なのに ${months.length} 点）`
+        + ' — **欠けた月は「何も無かった」ではなく「見られていない」。**浅いクローンで --rebuild していないか確認すること');
+    }
+    if (doc.first_release_month && months[0] > doc.first_release_month) {
+      problems.push(`系列が ${months[0]} から始まっているが、初回リリースは ${doc.first_release_month}`
+        + ' — 起点より後から始まる系列は「ローンチから何倍」を主張できない');
+    }
+  }
   let prev = -1;
   for (const p of doc.points) {
     if (p.cumulative < prev) problems.push(`${p.month}: 累計が減っている（AI実行タスクは取り消されない前提の系列）`);

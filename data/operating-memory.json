@@ -60,7 +60,13 @@
     "     溜まるまで、成功率という数字はこの台帳から出せない。"
   ],
   "seeded_at": "2026-08-25",
-  "verdicts": ["success", "failure", "no_change", "undecidable", "measurement_failed"],
+  "verdicts": [
+    "success",
+    "failure",
+    "no_change",
+    "undecidable",
+    "measurement_failed"
+  ],
   "records": [
     {
       "id": "om-2026-08-25-asc-zero",
@@ -72,7 +78,12 @@
       "execution": {
         "repo": "simplememo-ios",
         "commit": "aad9a6c",
-        "files": ["scripts/asc_analytics.rb", ".github/workflows/asc-analytics.yml", ".github/workflows/qa-static.yml", "data/asc/README.md"]
+        "files": [
+          "scripts/asc_analytics.rb",
+          ".github/workflows/asc-analytics.yml",
+          ".github/workflows/qa-static.yml",
+          "data/asc/README.md"
+        ]
       },
       "verification": "run 32844534637 の実ジョブログを取得（『取得対象 0 件（部分一致: ）』）／ asc_metrics.rb の reports_with_data: 10/15・instance 08-23,08-24 と対照／ 旧既定に戻すと self-test が3件落ちることを確認",
       "outcome": "生成待ちではなかった。**データは2日前から出ていた。**取得側の欠陥2つで取りに行っていなかった。(1) schedule 実行で ASC_REPORTS が空文字になり、Ruby の \"\" が真なので既定に落ちず WANTED が空。(2) 既定の語 'Sales' が Analytics のレポート名156件中0件に一致（売上は 'App Store Purchases'）",
@@ -98,7 +109,9 @@
         "repo": "simplememo",
         "commit": "01a5be5",
         "pr": 568,
-        "files": ["data/autopilot-runs.json"]
+        "files": [
+          "data/autopilot-runs.json"
+        ]
       },
       "verification": "run 32599191984(08-23 SHA 24dcd50c/CLI 2.1.240 → 出荷) / 32667079679(08-24 c81e3bc6/2.1.241 → 即時失敗) / 32779337325(08-25 同SHA → 即時失敗) / 32816234185(16b3b310/2.1.245 → 成功) の4本を並べた",
       "outcome": "**誤診だった。**秘密鍵は一度も変えておらず、同じ鍵を使う run が通っている。失敗2回は upstream action の壊れた版（c81e3bc6 / CLI 2.1.241）を2回引いていた",
@@ -106,7 +119,10 @@
       "learning": {
         "lesson_key": "identical-signature-is-not-auth",
         "text": "『2日とも同一の数値＝flakeではない』は正しい。そこから『＝認証系』へ飛ぶのが誤り。**決定論的な startup 失敗も同一の数値を出す。**同一シグネチャが示すのは認証ではなく『依存が固定されていること』。分類は推論ではなくジョブログの対照で決める",
-        "changed": ["data/autopilot-runs.json", "scripts/autopilot-runs.mjs"],
+        "changed": [
+          "data/autopilot-runs.json",
+          "scripts/autopilot-runs.mjs"
+        ],
         "new_guardrail": "claude-code-action を SHA 16b3b310 へ pin（PR #569）。上流の版が黙って動くこと自体を止めた"
       }
     },
@@ -121,7 +137,10 @@
         "repo": "simplememo",
         "commit": "a430339",
         "pr": 573,
-        "files": ["data/pr-claims.json", "docs/pr-autopilot-2026-09.md"]
+        "files": [
+          "data/pr-claims.json",
+          "docs/pr-autopilot-2026-09.md"
+        ]
       },
       "verification": "check-pr-claims.mjs で claim ごとの支持率を再計算（機能開発 60% / 循環 67%）",
       "outcome": "**サブタイトルが本文より強かった。**旧文は『機能開発…までをAIが一気通貫で循環』で、本文 §3 が自分で『機能開発は分析と提案まで。通した実績はまだ無い』と否定している主張を、**いちばん人目に触れる画像へ焼き込むところだった**",
@@ -129,7 +148,10 @@
       "learning": {
         "lesson_key": "headline-must-not-outrun-body",
         "text": "見出し・サブタイトル・画像の文言は、本文より強くなりうる経路が別にある。**支持率不足を exit 1 にしていなかったので、CIは黙っていた。**画像生成という別の理由で偶然表に出ただけで、構造的には素通りする穴だった",
-        "changed": ["data/pr-claims.json", "scripts/check-pr-claims.mjs"],
+        "changed": [
+          "data/pr-claims.json",
+          "scripts/check-pr-claims.mjs"
+        ],
         "new_guardrail": "pr-claims.json に mode: ai_proposes を追加し、claim ごとに支持率と mode の整合を検査する。**ただし逆向きの誤り（実行できるのに『提案まで』と書き続ける過小申告）は、この検査では捕まらない** —— 記者に崩されないので落としていない"
       }
     },
@@ -144,7 +166,10 @@
         "repo": "simplememo",
         "commit": "8b1c648",
         "pr": 154,
-        "files": ["data/autopilot-actions.json", "scripts/autopilot-act.mjs"]
+        "files": [
+          "data/autopilot-actions.json",
+          "scripts/autopilot-act.mjs"
+        ]
       },
       "verification": "12件を1件ずつ state と close_check に当て直した",
       "outcome": "依頼は status JSON の `owner_requests`、つまり**ただの string[]** に積まれていた。id も state も閉じ条件も無いので**解決しても消える理由が無い。**その日いちばん重要な1件（主系の認証failure）が、解決済み6件の中に埋まっていた",
@@ -152,7 +177,10 @@
       "learning": {
         "lesson_key": "a-list-without-close-conditions-grows-until-unread",
         "text": "閉じ条件を持たないリストは、**件数が増えるほど読まれる確率が下がる方向に働く。**『依頼が多い』ではなく『閉じられない構造』が原因。行が消えるのは close_check が実際に通ったときだけにする（人が消すのではない）",
-        "changed": ["data/autopilot-actions.json", "scripts/autopilot-act.mjs"],
+        "changed": [
+          "data/autopilot-actions.json",
+          "scripts/autopilot-act.mjs"
+        ],
         "new_guardrail": "close_check は登録簿（autopilot-act.mjs の CLOSE_CHECKS）にあるものしか書けない。**台帳に任意のコマンドは書けない。**判定できないときは開いたままにする（閉じるほうへ倒さない）"
       }
     },
@@ -167,7 +195,10 @@
         "repo": "simplememo-ios",
         "commit": "c19e319",
         "pr": 225,
-        "files": [".github/workflows/qa-ios.yml", "CLAUDE.md"]
+        "files": [
+          ".github/workflows/qa-ios.yml",
+          "CLAUDE.md"
+        ]
       },
       "verification": "入力なし dispatch は GitHub が 422 で弾く（0分）／ 値違いは ubuntu の gate が落として macOS に入る前に止まる（約1分）",
       "outcome": "警告文は『トリガを追加するな』しか書いておらず、**『トリガは足さないが1回だけ手で回す』を止められていなかった。**AIから届く dispatch 経路（MCP の actions_run_trigger）が塞がれていなかった",
@@ -175,7 +206,10 @@
       "learning": {
         "lesson_key": "prose-does-not-stop-an-agent",
         "text": "『やるな』と書いてあることと、できないことは違う。**費用が出る経路には、散文ではなく required 入力と照合ジョブを置く。**合言葉はリポジトリに書いてあるので錠前ではない —— 塞いでいるのは『読まずに回す』であって、読んだなら禁止に必ず当たる、という設計にする",
-        "changed": ["../simplememo-ios/.github/workflows/qa-ios.yml", "../simplememo-ios/CLAUDE.md"],
+        "changed": [
+          "../simplememo-ios/.github/workflows/qa-ios.yml",
+          "../simplememo-ios/CLAUDE.md"
+        ],
         "new_guardrail": "confirm 入力（required・値は spend-macos-minutes）を追加。照合は ubuntu の gate ジョブが持ち、macOS の2ジョブは needs: gate。通した回は起動者と概算消費がジョブ要約に残る"
       }
     },
@@ -190,7 +224,9 @@
         "repo": "simplememo",
         "pr": 367,
         "commit": "33d44f51",
-        "files": ["growth/experiments/experiments.json"]
+        "files": [
+          "growth/experiments/experiments.json"
+        ]
       },
       "verification": "GSC スナップショット 2026-08-09 を取得",
       "outcome": "**比較できなかった。**変更前の GSC 値が記録されていなかった。現状 imp 954 / CTR 2.10% / pos 7.5 は取れたが、これが変更の効果かどうかは言えない",
@@ -198,8 +234,39 @@
       "learning": {
         "lesson_key": "no-baseline-no-experiment",
         "text": "**基準値を記録する前に変更してはいけない。**この案件は experiments.json 上 `inconclusive` に入っているが、『測れたが母数が足りない』のではなく『そもそも測っていない』。前者は待てば解け、後者は待っても解けない。**同じ台帳の同じ語に入れると、待てば解けると誤解する**",
-        "changed": ["growth/experiments/experiments.json", "data/operating-memory.json"],
+        "changed": [
+          "growth/experiments/experiments.json",
+          "data/operating-memory.json"
+        ],
         "new_guardrail": "verdict を5値にし、measurement_failed を undecidable から分離した。experiments.json 側の `inconclusive` 7件は、この観点で当て直しが要る（未了 —— data/autopilot-actions.json の act-experiments-verdict-split）"
+      }
+    },
+    {
+      "id": "om-2026-08-25-shallow-rebuild",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "棚卸しへ13件足したら自律度の推移の検査が落ちた。検査は『終点 61.3% が現在値 58.6% と一致しない — `node scripts/autonomy-timeline.mjs --rebuild` を実行して同じコミットに含めること』と、直し方まで名指しした",
+      "hypothesis": "検査が指示したとおり --rebuild すれば直る",
+      "decision": "指示どおり --rebuild を実行した",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/autonomy-timeline.mjs",
+          "data/autonomy-timeline.json"
+        ]
+      },
+      "verification": "再計算の出力（『再計算: 2 点』）と、系列の表示を目視。git rev-parse --is-shallow-repository で環境を確認。--depth 1 の clone を作って再現",
+      "outcome": "**指示どおりに直したら壊れた。**7点あった系列（2026-02〜08）が2点（2026-07, 2026-08）になった。この作業ツリーは浅いクローン（51コミット・2026-08-22まで）で、証跡ファイルの初出月を git log から取る再計算が、**クローンに無い5か月を丸ごと落とした。**さらに悪いことに、**--check はその2点の系列を通した** —— 終点は現在値と一致し、points.length >= 2 も満たすため。`git fetch --unshallow`（726コミット・2026-01-30まで）してから再実行して7点に戻した",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-repair-instruction-must-state-its-preconditions",
+        "text": "**検査が直し方を名指しするなら、その手順の前提条件も検査が持たないといけない。**『--rebuild を実行せよ』は、完全な履歴があるときだけ正しい。前提が崩れた環境で同じ指示に従うと、指示に従ったのに壊れる。そして今回は**壊れたことを検査自身が見逃した**（終点だけを見ていたため）。**出力の一点ではなく、形の連続性を検査する。**欠けた月は『何も無かった』ではなく『見られていない』",
+        "changed": [
+          "scripts/autonomy-timeline.mjs",
+          "data/autonomy-timeline.json"
+        ],
+        "new_guardrail": "rebuild() の先頭で浅いクローンを検出して throw する（`git fetch --unshallow` を促す）。--check 側は月の連続性を検査し、初回リリース月より後から始まる系列も落とす。--depth 1 のクローンで実際に throw することと、月を1つ抜いた系列が落ちることの両方を確認済み"
       }
     }
   ]
