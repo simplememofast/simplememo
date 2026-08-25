@@ -1,0 +1,118 @@
+{
+  "$comment": [
+    "要望・レビュー・問い合わせ・競合情報を1つの台帳に集め、**同じ話を1行にする**。",
+    "scripts/check-signals.mjs が検査する。",
+    "",
+    "**なぜ要るか。**これまでは都度レポートだった。",
+    "ユーザー要望は simplememo-ios/docs/reports/、競合は growth/data/mentions/、",
+    "レビュー実測は /roadmap/ の本文、利用実態は simplememo-api の分析レポート — と",
+    "**4つの場所に散らばっていて、同じ話が別々に扱われていた。**",
+    "実際『送信の確実性』は問い合わせ・レビュー実測・ロードマップの3経路から来ている。",
+    "",
+    "dedupe_key は話題の正規化キー。**同じキーの行は作らない**（複数チャネルから",
+    "来たものは1行に sources を足す）。ここが効かないと、声の大きさが",
+    "『何回報告されたか』ではなく『何回転記されたか』になる。",
+    "",
+    "status:",
+    "  open     … 受けた。まだ採否を決めていない",
+    "  merged   … 機能・施策に落ちた（shipped_in か backlog_id が要る）",
+    "  declined … 採らないと決めた（why_not が要る。**空欄で放置しない**）"
+  ],
+  "signals": [
+    {
+      "id": "sig-delivery-reliability",
+      "dedupe_key": "delivery-reliability",
+      "title": "「ちゃんと送れたか分からない」— 送信の確実性",
+      "kinds": ["inquiry", "review", "survey"],
+      "first_seen": "2026-07-26",
+      "sources": [
+        "../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md",
+        "roadmap/index.html"
+      ],
+      "evidence_note": "問い合わせ（Apple Watch同期でメモが届かない・4往復）／国内18アプリのレビュー7,279件で動作速度・安定性466件（★1〜2が259件・18アプリ全部）とデータ保全340件（★1〜2が195件）／ロードマップで「送信保証」を5つの前に置いた",
+      "status": "open",
+      "note": "**3経路から同じ話が来ている。**台帳を作るまで別々の紙に載っていた。VISION §11 は Phase 1 を Routing から始める計画なので、方針と測定が食い違っている — 黙って寄せずロードマップに明記して票で見る"
+    },
+    {
+      "id": "sig-obsidian-destination",
+      "dedupe_key": "obsidian-destination",
+      "title": "Obsidian の送り先を自由に選べるようにしてほしい",
+      "kinds": ["request"],
+      "first_seen": "2026-07-31",
+      "sources": ["../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"],
+      "evidence_note": "★3レビュー起点でWatch同期を4回診断してくれたユーザーの要望。Obsidian設定済みinstallのD7継続が未設定の2.5〜3.7倍という実測と方向が一致",
+      "status": "merged",
+      "shipped_in": "v4.9.33 / v4.9.37（発見性の追補）",
+      "note": "Phase 2（フォルダ内サブパス）と Phase 3（複数登録）は未着手。**1行で「済」にしない**"
+    },
+    {
+      "id": "sig-mail-toggle",
+      "dedupe_key": "mail-optional",
+      "title": "メール送信をオフにできるようにしてほしい（Obsidianだけに送りたい）",
+      "kinds": ["request"],
+      "first_seen": "2026-07-31",
+      "sources": ["../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"],
+      "evidence_note": "同じユーザーからの2件目。メールを使っていない層が存在することの直接の証拠",
+      "status": "merged",
+      "shipped_in": "v4.9.48（Obsidianのみに保存）",
+      "note": "プレミアム限定にする判断はオーナーが行った"
+    },
+    {
+      "id": "sig-attachments",
+      "dedupe_key": "attachments",
+      "title": "写真・PDF をメモに入れられない／扱いにくい",
+      "kinds": ["review"],
+      "first_seen": "2026-08-22",
+      "sources": ["roadmap/index.html"],
+      "evidence_note": "レビュー実測で2位（189件）。初版のアンケートでは圏外に置いていた — テキストメモ前提の検索クエリで引いたため、**探し方が結論を作っていた**",
+      "status": "open",
+      "note": "アンケートQ1・Q2の選択肢に追加済み。票で見る"
+    },
+    {
+      "id": "sig-ai-skepticism",
+      "dedupe_key": "ai-visibility",
+      "title": "AIを前面に出すことへの否定的な反応",
+      "kinds": ["review"],
+      "first_seen": "2026-08-22",
+      "sources": ["roadmap/index.html", "growth/experiments/experiments.json"],
+      "evidence_note": "レビュー実測でAI言及105件のうち肯定42・否定63。「AIを消せるように」「AIより軽快さを」が多い。自社PR実績でもAI前面の回（PR④）が469PV・D-SCORE 21で最下位",
+      "status": "declined",
+      "why_not": "**機能の要望ではなく訴求の判断。**VISION §0『AIを前面に出さない』の裏づけとして扱い、バックログには積まない。ロードマップページと配信原稿の書き方に反映済み",
+      "note": "declined だが**捨てていない。**次に訴求を変えるときの反証としてここに残す"
+    },
+    {
+      "id": "sig-competitor-listicles",
+      "dedupe_key": "listicle-absence",
+      "title": "Obsidian関連のまとめ記事に自社が載っていない",
+      "kinds": ["competitor"],
+      "first_seen": "2026-08-12",
+      "sources": ["growth/data/mentions/2026-08-12.json"],
+      "evidence_note": "週1の言及ウォッチ。自社を含むのは自社資産（App Store・PR TIMES）のみで、第三者のまとめ記事には未掲載",
+      "status": "open",
+      "note": "スナップショットが1件しか無く、**増減が分からない。**2件目が貯まるまで施策の根拠にしない"
+    },
+    {
+      "id": "sig-d7-obsidian",
+      "dedupe_key": "obsidian-retention",
+      "title": "Obsidian設定済みの継続率が未設定の2.5〜3.7倍",
+      "kinds": ["usage"],
+      "first_seen": "2026-07-29",
+      "sources": ["../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"],
+      "evidence_note": "コホート分析。要望の優先度を決める根拠に実際に使われた",
+      "status": "merged",
+      "backlog_id": "keywords_into_repo",
+      "note": "**相関であって因果ではない。**Obsidianを設定する層がもともと継続しやすいだけの可能性を否定していない。自動化の増分効果とも混同しない"
+    },
+    {
+      "id": "sig-onboarding-dropoff",
+      "dedupe_key": "onboarding-dropoff",
+      "title": "オンボーディングの離脱（課金導線）",
+      "kinds": ["usage"],
+      "first_seen": "2026-08-06",
+      "sources": ["../simplememo-ios/docs/reports/ONBOARDING_REDESIGN_2026-08-06.md"],
+      "evidence_note": "ファネル分析起点のUI再設計案。実施は人の判断",
+      "status": "open",
+      "note": "母数が小さく（App Storeクリック2.1件/日）、対照群を割ると検出力が足りない。**作る前に測る側**"
+    }
+  ]
+}

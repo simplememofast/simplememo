@@ -1,0 +1,29 @@
+{
+  "$comment": [
+    "金額の上限を動かした記録。**追記のみ。**scripts/check-financial-policy.mjs が検査する。",
+    "",
+    "**二者承認をここで実際に効かせている。**data/autopilot-cost.json の",
+    "monthly_usd_cap は、この台帳の最新の承認値と一致していなければCIが落ちる。",
+    "つまり**承認記録を書かずに上限を上げることができない。**",
+    "",
+    "変更幅が financial-policy.json の max_step_pct を超える場合は、",
+    "**承認者が2人要る**（approved_by が2件以上）。",
+    "",
+    "**AIは承認者になれない。**approved_by に ai を書くとCIが落ちる。",
+    "止めることはAIに許しているが（emergency-stop）、金額を上げることは許さない。"
+  ],
+  "next_seq": 2,
+  "approvals": [
+    {
+      "seq": 1,
+      "domain": "AI実費（開発・運用のトークン費）",
+      "from_usd": null,
+      "to_usd": 40,
+      "approved_at": "2026-08-22",
+      "approved_by": ["human"],
+      "note": "**初期値。**実測1点（$0.8149）からの粗い外挿で置いた placeholder で、実測由来ではない。ここを実測に置き換えるのが最初の仕事",
+      "two_person_required": false,
+      "two_person_reason": "初期値の設定で、上げ幅の概念が無い（from が null）"
+    }
+  ]
+}

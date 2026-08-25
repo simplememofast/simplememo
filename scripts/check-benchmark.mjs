@@ -41,6 +41,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const B = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/benchmark.json'), 'utf8'));
+const C = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/site-constants.json'), 'utf8'));
 const includeOwnRuns = process.argv.includes('--all');
 
 /** Pages that publish their own measurement run; their numbers are theirs. */
@@ -158,6 +159,70 @@ function report(list, heading) {
     for (const f of items) console.log(`      "${f.said}"  —  ${f.app} measured ${f.measured}`);
   }
   console.log();
+}
+
+// ---------------------------------------------------------------------------
+// 測定そのものの鮮度。**figure ではなく、figure の後ろ盾を見る。**
+//
+// この script は「ページの数字が測定と食い違っていないか」だけを見ていて、
+// **測定自体がいつ・どのバージョンで取られたかは見ていなかった。**
+// ところが benchmark.json の _comment 自身がこう書いている:
+//   「March 2026 の数字は5メジャーバージョン前に測られており、
+//     このサイトの他の3つの表と食い違っていた」
+// つまり**これで一度焼かれている。**同じことが静かに再発する経路が空いていた。
+//
+// 2026-08-22 に v5.8.1 を出したとき、公開中の「起動0.4秒」の後ろ盾は
+// 5.7.3・2026-08-11 の測定のままだった。
+//
+// 落とすのは2つだけ:
+//   - 測定の刻印が読めない … 読めない刻印はこの検査を永久に無効化する
+//   - **メジャーバージョンが進んだのに ack が無い** … 起動経路が変わりうる規模。
+//     再測定できないなら「まだ有効」と一行書けば通る（判断の記録は残す）
+// マイナー・パッチのずれと日数は**報告のみ**。この環境にiPhoneは無く、
+// 再測定でしか解けない問いで無関係な出荷を止めない（この script の元からの方針）。
+// ---------------------------------------------------------------------------
+{
+  const m = B.measuredOn || {};
+  const parts = (v) => String(v || '').split('.').map(Number);
+  const problems = [];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(m.date || '')) {
+    problems.push('benchmark.json の measuredOn.date が読めない — **読めない刻印は、この検査を永久に無効化する**');
+  }
+  if (!/^\d+\.\d+/.test(m.ourAppVersion || '')) {
+    problems.push('benchmark.json の measuredOn.ourAppVersion が読めない — 同上');
+  }
+  if (!problems.length) {
+    const [pubMaj, pubMin] = parts(C.appVersion);
+    const [runMaj, runMin] = parts(m.ourAppVersion);
+    const days = Math.floor((Date.now() - Date.parse(`${m.date}T00:00:00Z`)) / 86400000);
+    const behind = pubMaj !== runMaj ? 'major' : pubMin !== runMin ? 'minor' : null;
+
+    console.log('測定の鮮度 — **数字ではなく、数字の後ろ盾を見る**\n');
+    console.log(`  公開中のアプリ  v${C.appVersion}`);
+    console.log(`  測定したのは    v${m.ourAppVersion} / ${m.date}（${days}日前・${m.device} / ${m.os}）`);
+    if (!behind) {
+      console.log('  → 同じマイナーバージョンで測っている。');
+    } else if (behind === 'minor') {
+      console.log(`  → **マイナーが進んでいる**（${runMaj}.${runMin} → ${pubMaj}.${pubMin}）。`);
+      console.log('     報告のみ。起動経路が変わっていなければ数字は生きているが、');
+      console.log('     **変わっていないことを確かめたわけではない。**');
+    } else {
+      console.log(`  → **メジャーが進んでいる**（${runMaj} → ${pubMaj}）。起動経路が変わりうる規模。`);
+    }
+    if (behind === 'major' && m.staleness_ack !== C.appVersion) {
+      problems.push(
+        `測定が v${m.ourAppVersion} のままでメジャーが進んだ（公開中 v${C.appVersion}）`
+        + ' — 再測定するか、まだ有効なら benchmark.json の'
+        + ` measuredOn.staleness_ack を "${C.appVersion}" にして理由を _comment に書く。`
+        + '**この表は一度、5メジャー前の数字を公開していた。**');
+    }
+    console.log();
+  }
+  if (problems.length) {
+    console.error('測定の鮮度: 問題');
+    for (const p of problems) console.error(`  - ${p}`);
+    process.exit(1);
+  }
 }
 
 report(findings.filter((f) => !f.ambiguous), 'CONFLICTS');

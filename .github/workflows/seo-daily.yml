@@ -141,6 +141,30 @@ jobs:
             --days "${{ github.event.inputs.days || '28' }}" \
             --label "$(date -u +%Y-%m-%d)"
 
+      # 【公開表示の突き合わせ】評価・件数・公開バージョンは JSON-LD の
+      # aggregateRating としてサイトに出ている。台帳の値は人が App Store Connect を
+      # 見て手で書いたもので、**古くなっても誰も気づかない**状態だった。
+      #
+      # ここで実物（iTunes Lookup）と突き合わせる。**GitHub のランナーは
+      # itunes.apple.com に到達できる**（エージェントのサンドボックスは
+      # プロキシが CONNECT を拒否するので、そちらでは確認できない）。
+      #
+      # ずれていても落とさない —— 値の更新は sync_constants.js での
+      # ページ反映とセットで行う必要があり、日次ジョブが勝手に公開表示を
+      # 書き換える形にはしない。ここは**気づくための経路**。
+      # 取得できなかったときも落とさないが、「ずれていない」とは書かない。
+      - name: Store facts vs App Store (report only)
+        continue-on-error: true
+        run: |
+          {
+            echo ""
+            echo "## App Store 由来の公開表示"
+            echo ""
+            echo '```'
+            node scripts/check-store-facts.mjs --net 2>&1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # 検出器の出力をそのままサマリに出す。読むために別画面を開かせない。
       - name: Detectors
         env:

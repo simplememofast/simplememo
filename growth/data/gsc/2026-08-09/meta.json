@@ -14,7 +14,7 @@
   ],
   "row_counts": {
     "queries": 1000,
-    "pages": 214,
+    "pages": 213,
     "query-pages": 0,
     "dates": 28,
     "devices": 3,
@@ -125,5 +125,14 @@
       "clicks": 62,
       "ctr": 0.006947557149260422
     }
-  }
+  },
+  "corrections": [
+    {
+      "at": "2026-08-22",
+      "what": "pages.json の重複キー1件を畳んだ（/vs/ticktick/ が impressions 4 と 1 の2行）",
+      "why": "toPath() の正規化でURLが衝突しても畳んでいなかったため、同じページのクリックが二重に乗りうる状態だった",
+      "found_by": "growth/scripts/check-data-quality.mjs（この検査を作った直後の初回実行で検出）",
+      "fixed_in_ingest": "growth/scripts/ingest-gsc.mjs の mergeByKey"
+    }
+  ]
 }

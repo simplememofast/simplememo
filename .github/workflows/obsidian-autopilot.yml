@@ -109,6 +109,51 @@ jobs:
       # 止められるのは主系だけである。副系CCR Routineは別経路で、
       # スケジュール起動セッションのログは外から読めない（Runbook §0-2）ため
       # 観測も停止もできない。この非対称性はスクリプトの出力にも書いてある。
+      # 【緊急停止】**他のどの判定よりも先に見る。**
+      #
+      # 予算ゲートは主系しか止めず、秘密鍵の削除は「静かに寝る」ので止めたのか
+      # 壊れたのか区別がつかない。ワークフローの無効化は GitHub が読める必要がある。
+      # **主系と副系を同時に、確実に、意図が残る形で止める手段が無かった。**
+      #
+      # チェックアウト後に置いてあるのは、この判定がリポジトリのファイルだからで、
+      # 主系（Actions）も副系（CCR）も作業前に必ずチェックアウトするため両方に効く。
+      # ここより手前で走るのは checkout だけなので、止め損ねる範囲は無い。
+      # 全体停止と**この経路（actions）の停止**の両方を見る。片方だけだと、
+      # 「主系だけ止めたい」ときに止まらない。
+      - name: 緊急停止の確認
+        if: steps.gate.outputs.run == 'true'
+        id: estop
+        run: |
+          STOP="$(node -p "
+            const d = require('./data/emergency-stop.json');
+            const a = (d.agents || {}).actions || {};
+            d.stopped ? ('all:' + (d.reason || '理由未記入'))
+              : a.stopped ? ('actions:' + (a.reason || '理由未記入'))
+              : '';
+          ")"
+          if [ -z "$STOP" ]; then
+            echo "stopped=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "stopped=true" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Emergency stop::停止が立っている: ${STOP}。data/emergency-stop.json"
+            exit 1
+          fi
+
+      # 【封じ込め】同じ故障を上限回数直して再発しているなら、**この経路を走らせない。**
+      #
+      # これまでは「⛔ 人に上げる」と表示するだけだった。表示は翌朝の実行を
+      # 止めないので、上げた先が見ていない間、直せない故障を毎日直そうとする
+      # ループが回り続ける。着手前に止めるところまでを機械にやらせる。
+      #
+      # ここは --dry-run（書かずに落ちるだけ）。判定は data/autopilot-runs.json
+      # から毎回導出されるので、状態を残さなくても翌朝また同じ結論になる。
+      # 停止を台帳に書いて残す形にすると、このレーンに main への書き込み権限が
+      # 要る — self_repair.must_not の「自分の権限を広げない」に正面から反する。
+      # 台帳へ書くのは人かセッション（--contain）で、通常のPR経路を通る。
+      - name: 封じ込め（修理上限に達した経路は着手しない）
+        if: steps.gate.outputs.run == 'true' && steps.estop.outputs.stopped == 'false'
+        run: node scripts/autopilot-selfheal.mjs --contain --dry-run
+
       - name: 予算ゲート（当月の実費が上限を超えていたら走らない）
         if: steps.gate.outputs.run == 'true'
         id: budget
@@ -120,6 +165,36 @@ jobs:
             echo "::notice title=Obsidian Autopilot::当月のAI実費が上限に達したため主系をスキップ（data/autopilot-cost.json）。副系CCRは別経路のため止まらない。"
           fi
           node scripts/autopilot-budget.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      # 【タスク種別とモデルの振り分け】
+      #
+      # その日が「記事を書く日」か「壊れた基盤を直す日」かで、要る能力が違う。
+      # 故障の原因特定を安いモデルにやらせると外し、レーンFの歯止め
+      # （同一 failure_class 3回で人間へ）に早く当たる。**安いほうが高くつく。**
+      #
+      # モデル名をここに直書きしない。直書きすると data/model-routing.json が
+      # 装飾になり、check-model-routing.mjs が守っている「不可逆なタスクを
+      # 最安ティアに落とさない」規則も効かなくなる。
+      #
+      # 種別ごとの残枠もここで見る。月次上限だけだと、記事で使い切った月に
+      # 修理が走らない（あるいはその逆）が起きる。
+      - name: タスク種別とモデルの振り分け
+        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+        id: route
+        run: |
+          if node scripts/autopilot-selfheal.mjs --json | grep -q '"lane_f_required": true'; then
+            KIND=repair
+          else
+            KIND=article
+          fi
+          MODEL="$(node scripts/check-model-routing.mjs --resolve "$KIND")"
+          echo "kind=$KIND"   >> "$GITHUB_OUTPUT"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Model routing::$KIND -> $MODEL"
+          # 種別ごとの枠。超えていても主系全体は止めない（月次上限がその役目）。
+          # ここは「この種別はもう枠を使い切っている」を日報へ出すための警告。
+          node scripts/autopilot-budget.mjs --check --task "$KIND" \
+            || echo "::warning title=Task budget::$KIND の月次枠を超過（月次上限には未到達）"
 
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
       # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
@@ -173,6 +248,14 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           allowed_bots: "*"
+          # 【2026-08-25追加・診断用】run 32667079679（08-24）・32779337325（08-25）が
+          # 2日連続で is_error:true / num_turns=1 / duration_ms=486 / cost=$0 という
+          # 同一シグネチャで即時失敗した（ap-20260824-actions・ap-20260825-actions）。
+          # 実際の作業に入る前の即時失敗＝認証系の疑いが強いが、full outputが
+          # 「hidden for security」で伏せられており、ジョブログから実際のエラー文言を
+          # 確認できない。原因を特定できるまでの暫定でtrueにする（may_modifyの範囲内・
+          # 検証を弱める変更ではない）。原因確定後はfalseへ戻すこと。
+          show_full_output: true
           # 【2026-08-22】run 32528028588 は Claude Code ステップが success で
           # 終わりながら成果物がゼロだった。ジョブログの result 行は
           # num_turns=30 / permission_denials_count=14 / cost $0.81。
@@ -193,6 +276,7 @@ jobs:
           # issue_comment 等の外部から起動される経路が無い。
           claude_args: |
             --max-turns 250
+            --model ${{ steps.route.outputs.model }}
             --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。

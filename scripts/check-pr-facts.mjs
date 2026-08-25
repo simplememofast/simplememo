@@ -64,6 +64,18 @@ const NEGATIONS = [
   '旧名', '旧称', '廃止', '誤り', '古い', '不一致', '訂正',
 ];
 
+/**
+ * 英語面の打ち消し語。llms.txt は英語で書かれており、
+ * `Former names "Captio…"` のような**正しい由来の説明**が日本語の打ち消し語に
+ * 当たらず偽陽性になった（2026-08-22・check-public-facts.mjs の初回実行で判明）。
+ * **打ち消し語を足したことは記録に残す**という規約どおり、ここに追記する。
+ */
+const NEGATIONS_EN = [
+  'former name', 'former names', 'formerly', 'previously named', 'old name',
+  'no longer', 'do not say', "don't say", 'never say', 'wrong:', 'incorrect',
+  'deprecated', 'discontinued', 'renamed',
+];
+
 /** 起動時間の実測値（data/benchmark.json が正）。 */
 const READY = BENCHMARK.apps?.[CONSTANTS.appNameEn]?.ready;
 
@@ -128,7 +140,8 @@ const RULES = [
   },
 ];
 
-const hasNegation = (s) => NEGATIONS.some((n) => s.includes(n));
+const hasNegation = (s) => NEGATIONS.some((n) => s.includes(n))
+  || NEGATIONS_EN.some((n) => s.toLowerCase().includes(n));
 
 /** 文書の種別を読む。未宣言は null。 */
 export function readMode(text) {

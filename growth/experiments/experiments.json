@@ -537,6 +537,24 @@
         "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed.",
         "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly.",
         "CORRECTION 2026-08-11 (query x page export): the target query lands on this page with 99 impressions, not the 139 recorded here — the site-wide query export does not say which page a query lands on. More important, it is a small corner of a cluster that looks structurally unwinnable: the page top 12 queries take 1,869 impressions for 7 clicks (0.37%), and the largest single query 「line keepメモ 終了」 is 710 imp / 1 click at position 9.4. These searchers are checking whether LINE Keep shut down and want LINE own announcement, not a third-party migration article. Keep the experiment running, but expect a small effect even if the FAQ works."
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -569,6 +587,24 @@
         "No change ships with this entry — it exists so the regression stays visible. The title was kept by owner decision (title-2026-07-02-011); that ruled out one lever, not the problem.",
         "On the next snapshot: if CTR is still near 4.5% at a flat position, the remaining lever is the meta description / snippet. Check the query x page export first to see whether the query mix widened.",
         "NEW HYPOTHESIS 2026-08-11 (query x page export), distinct from the refuted cannibalisation one: the queries actually landing here are how-to — 「obsidian 使い方 iphone」 66 imp / 6.06%, 「obsidian iphone 使い方」 46 imp / 6.52% — while the current title sells speed (「最速でメモを送る方法」). Demand is how-to, the pitch is speed. This is a wording mismatch on the page own queries, not traffic lost to neighbouring pages. Visible queries convert at 4.97% overall, so whatever costs the page CTR is outside this 302-impression slice."
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**実験ではなく監視。**変更を加えていないので対照群の概念が無い",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -605,6 +641,24 @@
         "The queries this page is shown for are dominated by qualifiers absent from the old title: メモアプリ 無料 (966 imp, 1 click, pos 8.4), メモアプリ 無料 シンプル (756 imp, 1 click, pos 9.3), メモ帳アプリ 広告なし 無料 (82 imp, 0 clicks). 「最強メモ環境」 answered none of them.",
         "Brand-suffix hypothesis is SUGGESTIVE, NOT ESTABLISHED. Site-wide, titles carrying 「| Obsidian連携シンプルメモ」 average 1.72% CTR (67 pages, 7,889 imp) against 2.17% without (146 pages, 31,431 imp) — but position and page type are not controlled for, so this is a reason to test one page, not to strip suffixes site-wide.",
         "Body untouched. If CTR moves, the cause is the snippet alone."
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -637,6 +691,24 @@
         "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
         "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too.",
         "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves."
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -673,6 +745,24 @@
         "The old title already carried the query words. The change adds the list signal (5選) the competing results carry, and moves the description off 「SimpleMemoを中心に」 — a comparison shopper reads a vendor-first description as a vendor page.",
         "Known dilution: some impressions are Android intent (「android メモアプリ オフライン」 31 imp, 0 clicks, pos 6.2) on an iOS-only app. Those clicks are unwinnable and unwanted, so the realised gain should land under +27.6 even if the hypothesis is right.",
         "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated."
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -713,6 +803,24 @@
         "Desktop converts worse than its traffic share (51% of search clicks, 35% of App Store clicks), which is expected: desktop visitors sensibly decline to click a badge they cannot install from. The waste is these 21 clicks, not half the audience.",
         "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
         "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input)."
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**対照群が無い。**QRの有無でページを割っていない",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 30,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -757,6 +865,24 @@
         "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). Not a violation of the one-variable rule: those measure GSC CTR (search to page), this measures App Store clicks per session (page to store). A body paragraph cannot move the first.",
         "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed).",
         "2026-08-11: 本実験の途中で、全ページ末尾に「次に読む」カード(P1-1)を挿入した。tag-cta-placements.js は placement を本文中の相対位置(frac)で決めるため、末尾にコンテンツが増えた結果 81件のCTAが bottom → mid に再分類された。**評価日 2026-09-13 に GA4 を placement 次元で見ると、実験と無関係に mid のクリックが増えて見える。**本実験の target_metric は app_store_click / session_start の集計比であり、ラベルの付け替えでは動かないため主判定は成立する。placement 別の内訳を見る場合のみ、08-11 以前と以後を分けて読むこと。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**対照群が無い。**同一ページに複数CTAを置いており、どの配置が効いたかを分離できていない",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 30,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -798,6 +924,24 @@
         "This page was excluded from the 2026-08-10 mid-CTA batch on the grounds of not using the strongest page as a test bed. That exclusion is revised here, and the reason it was wrong is worth recording: it was written to protect the page from title and snippet experiments, which move search performance. A body paragraph cannot move SERP CTR — it is not in the title, the description, or above the fold. Applying the rule to a body CTA left the highest-intent traffic on the site (relevance 1.0, CTR 10.9%, position 5.3) with no way to install without scrolling back to the header.",
         "Placed after 方法4, the section that already describes this app, so the link follows content the reader has just read rather than interrupting the comparison.",
         "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question."
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**対照群が無い。**同一ページに複数CTAを置いており、どの配置が効いたかを分離できていない",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 30,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -836,6 +980,24 @@
         "/blog/digital-vs-handwritten-notes",
         "/blog/meeting-memo-template",
         "/ai-tags/"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -866,6 +1028,24 @@
       "notes": [
         "2026-08-11: オーナーがサイト外（App Store・note・Zenn・X）の表示名統一を完了。サイト側はOrganizationを持つ223ページ全数が正準@id https://simplememofast.com/#organization を指しており元から連結済みだったため、施策案の「sameAsを全240ページに展開」は不要と判明していた（§4 P0-4追記）。これでエンティティ分割は内外とも解消し、施策は投入完了。あとは評価日にブランド検索表示数を読むだけ。",
         "2026-08-12: 「エンティティ分割は内外とも解消」は Organization については正しいが、SoftwareApplication では成り立っていなかった。自社の SoftwareApplication ノート6件（ai-tags 日英・apple-watch 日英・voices・en/send-email-to-yourself）が @id を持たず、#app と結合していない状態で残っていた。223ページの Organization を数えた確認はこの面を見ていない。2026-08-12 に6件へ #app を付与し、自社28ノート全数が#app に揃ったことを確認済み。評価日に読むときの注意: エンティティ統一が完全に効いていた期間は 08-12 以降であって08-11 以降ではない。施策投入日は面によって1日ずれている。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -893,7 +1073,25 @@
       "target_metric": "ctr",
       "decision": null,
       "evaluated_at": null,
-      "notes": []
+      "notes": [],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ]
     },
     {
       "id": "engage-2026-08-11-next-step",
@@ -920,7 +1118,25 @@
       "target_metric": "next_step_click",
       "decision": null,
       "evaluated_at": null,
-      "notes": []
+      "notes": [],
+      "control": {
+        "kind": "pre_post",
+        "note": "回遊は表示回数ではなくクリックで見る",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 30,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ]
     },
     {
       "id": "engage-2026-08-11-wait-test",
@@ -947,7 +1163,25 @@
       "target_metric": "impressions",
       "decision": null,
       "evaluated_at": null,
-      "notes": []
+      "notes": [],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 30,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ]
     },
     {
       "id": "video-2026-08-11-five-clips",
@@ -974,7 +1208,25 @@
       "target_metric": "rich_result_impressions",
       "decision": null,
       "evaluated_at": null,
-      "notes": []
+      "notes": [],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ]
     },
     {
       "id": "aio-2026-08-12-entity-attribution",
@@ -1005,6 +1257,24 @@
         "2026-08-12: 対象は依頼④の6記事のうち4記事。/blog/best-memo-apps-2026 と /blog/free-memo-apps-ranking は進行中の実験（title-2026-08-12-013 / snippet-2026-08-09-free-memo-ranking）と干渉するため除外した。つまりこの実験の対象群は「AI引用の多い順」ではなく「空いていた順」であり、効果量を6記事に外挿しないこと。",
         "2026-08-12: baseline はオーナー申告の累計値で、リポジトリ内に一次データが無い。growth/data/ に Bing Webmaster の取り込み口が無いため、評価日には同じ画面を人が見て数字を控える必要がある。GSCと違い自動では埋まらない。",
         "2026-08-12: 英語版 best-memo-apps には比較表を新設しており、「表記の統一」と「表の有無」という2つの変更が同じページに入っている。このページ単体では寄与を切り分けられない。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1037,6 +1307,24 @@
       ],
       "pages": [
         "/obsidian/compare/logseq/"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1068,6 +1356,24 @@
         "2026-08-12: 計測できないことを先に書いておく。QRはスキャンされてもGA4の app_store_click は発火しない（指で押していないため）。効果が出る先は App Store Connect のキャンペーン別インストール（ct=download-jp__hero / download-jp__qr / download-jp__nav）だけで、growth/data/appstore/ は現在も空。2026-08-10 のPC限定QRと同じ制約であり、承知のうえで入れている。",
         "2026-08-12: 進行中の cta-2026-08-10-desktop-qr（評価日同じ 2026-09-13）と 干渉する。あちらは9ページの締めCTA直下のQRを測るもので、こちらは全ページのフッターから新しいPC向け導線を足す。同日評価なので、どちらの寄与かは切り分けられない。切り分けが要るなら評価日をずらすこと。",
         "2026-08-12: グローバルナビのCTAは触っていない。現状は全ページで App Store へ直リンクし ct=…__nav で測られている。PCだけ /download/ へ向ける案（.cta-qr と同じCSSの出し分けで可能）はオーナー判断待ち。実行するとPC分の __nav 計測が途切れ、上記2実験の期間中にPC側の挙動を変えることになる。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同上",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 30,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1102,6 +1408,24 @@
       "notes": [
         "2026-08-12: cta-2026-08-10-desktop-qr がこのページを含み、同じ 2026-09-13 に評価される。タイトル変更は流入クエリの構成を動かすため、CTA側の数値は単独で読まず、この実験と併せて読むこと。",
         "2026-08-12: 同日、このページの比較表と本文の競合起動速度を data/benchmark.json の正準値へ訂正した（Apple Notes 約1秒→1.7秒、Google Keep 約1.5秒→2.1秒、Notion 2〜3秒→2.8秒、Evernote 3〜5秒→2.5秒、Drafts 1.1秒→0.9秒、Bear/OneNote は「—」だったが実測値があるので 0.9秒/2.6秒、未計測の3アプリは「計測なし」と明記）。タイトル実験の target_metric は SERP の CTR なので、本文の数値訂正はタイトルにも description にも入らず交絡しない。ただし訂正は自社に不利な方向（Evernote は主張より速く、Bear は隠れていたが速い）で、「最速」の主張自体は 0.4秒 対 2位 0.9秒 で変わらない。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同じページの変更前後で比べている。ホールドアウトは無い",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1135,6 +1459,24 @@
       "evaluated_at": null,
       "notes": [
         "2026-08-12: タイトルと本文構成（コピペ用テンプレを冒頭へ移動）を同時に動かしている。分離した実験ではないので、効果はどちらの寄与か切り分けられない。cta-2026-08-10-mid-placement もこのページを含み、同日評価。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同じページの変更前後で比べている。ホールドアウトは無い",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1169,6 +1511,24 @@
       "notes": [
         "2026-08-12: 2026-07-29 に keep と判定された題を差し替える2回目の実験。当時（imp 1,605 / CTR 1.62% / pos 7.4）から imp は増えたが CTR は 1.57% に低下しており、keep の根拠は現在の数値では成り立たない。cta-2026-08-10-desktop-qr と cta-2026-08-10-mid-placement もこのページを含み、同日評価。",
         "2026-08-12: 依頼①では 日本語対応 を題に入れる案だったが、ページに日本語対応の記述が無いため入れていない。題と中身を合わせるなら、先に本文へ節を足すこと。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同じページの変更前後で比べている。ホールドアウトは無い",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1205,6 +1565,24 @@
         "2026-08-20: title・meta description・og:title/description・twitter:title/description を同型化した。H1「話すだけで、メールとObsidianへ。」は元から勝ち文法で不変更。og:image（assets/img/og/index.png）も主見出しが同文法・AIはバッジ格で降格済みのため再生成せず。AI言及はdescriptionの後半へ降格（削除はしない）。",
         "2026-08-20: lang.jsのmeta-template経路を確認——トップ（/）はsingle-DOMで .meta-template ブロックを持たず、lang.js本体にもタイトル文字列は無いため、実行時にtitleが旧値へ戻る経路は存在しない。lang.jsは今回不変更なのでキャッシュバスタ ?v= も現行ハッシュのまま（check-css-version.mjs がCIで内容とバスタの一致を強制しており、v3 §9-5の再発はCIが検出する）。",
         "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "同じページの変更前後で比べている。ホールドアウトは無い",
+        "confounders": "季節性・検索アルゴリズム更新・他ページの変更を分離できない。ホールドアウトが無い以上、単独では因果を主張しない",
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 100,
+        "rationale": "期待クリック3件未満を根拠にしない、というRunbookのノイズフロアから逆算（CTR3%想定で表示100回）"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1266,6 +1644,24 @@
         "配信前チェックリスト: ①見出しは市場語のみ（『Multi-Destination』等の社内語を見出し・本文リードに出さない——D-3'二層言語ルール。出せばS2 3/S3 0で60点前後に落ちる） ②リマインダーとカレンダーを別リリースに割らない（2本目が『同じ話の2回目』になり8/18と同じ死に方をする——追記B案2の小出し厳禁） ③『世界初』と書かない（TellDone・VoiseTask等の海外先行あり。日本語ニュース面での初出性が取り分） ④Apple週などのトレンド窓は待たない（E-3: 時間減衰リスクあり＝先行者の窓が閉じ得るため、S5は捨てて撃つ）。",
         "配信時にこのレコードを status: running に変え、evaluation_at を配信日+14日で設定。配信後、PR TIMES分析の参照元一覧とデバイス比を discover_boarding_post へ転記して evaluate する。系列側は growth/data/annotations.json に配信日を追加する（R12-3）。",
         "2026-08-22【枠を譲る】オーナー判断により、9月上旬の枠は pr-2026-rsi-autopilot（運営体制の弾）へ譲る。本レコードは planned のまま10月以降の単独枠へ回す。**事前95のまま据え置き**であり、評価が下がったわけではない。ただしAppleウィーク（年間最大の窓・Reminders/Calendarと文脈が噛み合う）を1年見送ることになるので、次に狙う窓を決めるときは trend-radar-prompt.md の年間カレンダー（11月〜1月手帳シーズン／3〜4月新生活）と突き合わせること。小出し厳禁の原則（リマインダーとカレンダーを別リリースに割らない）は変わらない。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**対照群が置けない。**同じ日に同じ内容を配信しない版は作れない。n=5のバックテストで代用している",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "pageviews",
+        "threshold": 1,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     },
     {
@@ -1362,6 +1758,24 @@
         "2026-08-22 改訂2【外部レビュー反映・fix版】外部レビュー「自律型アプリ運営 現状整理と不足項目」を受領。結論に同意し、①〜⑦すべてが『部分実装または未実証』であることを原稿に反映した。主な変更: (a) **RSIの名乗りを取り下げ**。『ガードレール付き自律型アプリ運営基盤』『AIがアプリ改善サイクルを継続実行する仕組み』『再帰的プロダクト改善ループ』のいずれかを使う。表記も『再起的』ではなく『再帰的』だがそもそも対外文言に使わない。 (b) 革命性の置き所を『人がいない』→『人の位置が変わった』へ。担当分担表を本文冒頭に新設。 (c) 避けるべき表現9件を禁止表現へ追加（完全無人／全自動バグ修正／実機テスト完全自動化／法人経営の無人化／AIが売上を自動で伸ばした／RSI実現 ほか）。 (d) ⑧CS ⑨マネタイズ ⑩AgentOps ⑪データ・プライバシー ⑫事業継続性 と各領域の追加項目を docs/autopilot-maturity-backlog.md へ独立させた。 (e) **採点は 82→76 に下げた。**下がるのが正しく、誇張のぶんの点は1次確認で失う点でもある。 **レビューへの訂正2件**（evidence §12-2）: ①『8/21の記事公開は0/1件』は日報側の既知の誤報を読んだもので、実際は PR #521 `/obsidian/plugins/` を 08-21 09:44 JST に出荷済み（誤報の修正は PR #523・同日12:06 JST、日報配信10:00の2時間後）。②『主系失敗後のバックアップ実行の証跡が無い』は AUTOPILOT_LOG の 08-22 エントリに冪等性チェック(a)〜(e)・当日ブランチ占有・出荷まで全手順が残っている。ただし『自動フェイルオーバーではない／機械的に観測できない／切替演習が無い』というレビューの本質的指摘は正しく、plan §3 Tier 2 に積んだ。",
         "2026-08-22 改訂3【タイトル確定・実測KPI投入・権限表】オーナー確定のタイトルは 「アプリが、自ら育ち続ける。」Obsidian連携シンプルメモ、AIによる\"自律型アプリ運営\"を実現 / サブは「ユーザー行動の計測から機能開発、QA、SEO・ASO、PR制作、配信準備までをAIが一気通貫で循環。公開・予算・契約はリスクに応じて人が承認し、自律性と安全性を両立。」。**採点は76→80。主張は広げていない**（サブタイトルが承認制を明記・「できていないこと」表も据え置き）。**採用条件を3つ課した**（原稿 §1）: ①タイトル単独で流通させずサブとセットで出す ②本文の最初の見出しで仕組みを即座に具体化する ③本文でこの比喩を拡張しない（「アプリが自分で考えて」「AIが自己進化して」は禁止表現へ追加）。理由: このコピーは取り下げたRSIの主張とほぼ同じ形をしており、正確には「アプリ**を**、AIが育て続ける」だから。 あわせて実装2件: (a) **共通実行IDと運転台帳**（data/autopilot-runs.json / scripts/autopilot-runs.mjs）で AI完走率76.9%・変更失敗率23.1%・人間介入率53.8%・出荷日率83.3%・主系0/3副系10/10・無運転日2日を実測として出せるようにした。 (b) **機械可読な権限表**（data/authority-matrix.json / scripts/check-authority.mjs）で13領域の承認境界を定義し、不可逆↔承認制の整合をCIが見る。これで Tier 1 の #2/#4/#5/#6 が埋まった。",
         "2026-08-22 改訂3b【介入の内訳とレーンF】オーナー指摘「人間介入率53.8%を90%以上（＝自律側）にしたい。コーディング時間を考えるとすでにそうなっているのでは」を受けて実測し直した。**指摘は正しかった。** git実測では同期間の変更行の98.8%（56コミット中55件）がAI著者。現行の人間介入率は「その実行に人が1回でも触ったか」の二値で、YAMLを1行直した日も丸ごと介入ありになる。そこで介入を5種別（artifact/infra/substitute/bootstrap/request）に分けた: **成果物への介入 0件（0%）・基盤の修理4件（30.8%）・代走1件・立ち上げ1件・起票のみ1件。** 出荷10件すべてAIが書いており人は中身に触っていない（成果物のAI自律率100%）。**総計53.8%も併記して出す** — 都合のよい分母に乗り換えるのはgoodhartingそのものなので。 実質的な介入は基盤の修理の一点に集約され、その修理を書いたのも全部AIだった。人がやっていたのは『壊れていることに気づいて直せと言うこと』だけ＝**足りないのは能力ではなく起動条件**。そこで **レーンF（自己修復）** を実装: `scripts/autopilot-selfheal.mjs` が未修理の故障を検知し、その日の最優先を修理に切り替える（レーンA〜Eより先）。**歯止めは文章ではなくCIが実検出する** — 必須CIチェック15本が1本でも消えると落ち、対象ワークフローに actions: write が現れると落ちる（両方とも差し替えデータで実際に検出することを確認済み）。同一 failure_class を3回直しても再発するなら修理をやめて人間に上げる。判定スクリプトは修理を行わない（同じ場所に置くと判定側を都合よく変えられるため）。原稿に節を2つ追加した。**採点は80のまま** — 主張が増えたのではなく、既にあった事実の測り方が正確になっただけなので。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "**対照群が置けない。**同じ日に同じ内容を配信しない版は作れない。n=5のバックテストで代用している",
+        "confounders": null,
+        "filled_at": "2026-08-22",
+        "filled_by": "bulk",
+        "$filled_note": "**個別に決め直したのではなく、いま実際にやっている設計を型ごとに明示しただけ。**新規の実験は個別に置く"
+      },
+      "min_sample": {
+        "metric": "pageviews",
+        "threshold": 1,
+        "rationale": "クリック30件未満では±10ptの精度でCTRを推定できない"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
       ]
     }
   ]

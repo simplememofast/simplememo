@@ -1,0 +1,63 @@
+{
+  "$comment": [
+    "コード変更のAI著者率。**この script の出力そのもの。**手で書き換えない。",
+    "",
+    "原稿には長らく「変更行の98.8%（231,315行中228,498行）」と書いてあったが、",
+    "2026-08-22 に同じ窓で数え直したところ**どの数え方でも再現できなかった。**",
+    "再現できない数字は、記者に聞かれた瞬間にいちばん高くつく。",
+    "",
+    "数え方は scripts/code-authorship.mjs の冒頭に全部書いてある。",
+    "数え直すには 3リポジトリが揃った場所で --write を実行する。"
+  ],
+  "measured_at": "2026-08-22",
+  "from": "2026-08-11",
+  "to": "2026-08-21",
+  "all_branches": true,
+  "method": {
+    "ai_author_definition": "author に Claude を含む、または本文に Co-Authored-By: Claude",
+    "lines": "git show --numstat の 追加 + 削除（バイナリは0）",
+    "excludes_merges": true,
+    "dedupe": "SHA で一意化（--all は同じコミットを複数参照から拾う）",
+    "repos": [
+      "simplememo",
+      "simplememo-api",
+      "simplememo-ios"
+    ]
+  },
+  "known_limits": [
+    "**計測日そのものは窓に入れない。**計測日はAIが集中的に書いている日になりやすく、率を上げる方向に効く。実測では 08-22 を含めると 94.2% → 96.6% に動いた（+2.4pt）。「いちばん都合のよい日で締めた」と言われない窓の切り方にしてある",
+    "**生成物の行数が混じる。**lockfile・生成JSON・SVG はAI著者になるが、設計したことと同じではない",
+    "レビューで人が指示した内容は author に現れない。「壊れていると気づいて直せと言う」は行数に出ない",
+    "行数は「やった仕事の量」の近似でしかない。「やるべきことの種類」は data/automation-coverage.json"
+  ],
+  "per_repo": {
+    "simplememo": {
+      "commits_total": 106,
+      "commits_ai": 105,
+      "lines_total": 37108,
+      "lines_ai": 34291
+    },
+    "simplememo-api": {
+      "commits_total": 18,
+      "commits_ai": 18,
+      "lines_total": 2867,
+      "lines_ai": 2867
+    },
+    "simplememo-ios": {
+      "commits_total": 70,
+      "commits_ai": 70,
+      "lines_total": 9001,
+      "lines_ai": 9001
+    }
+  },
+  "total": {
+    "commits_total": 194,
+    "commits_ai": 193,
+    "lines_total": 48976,
+    "lines_ai": 46159
+  },
+  "headline": {
+    "commits_rate_pct": 99.5,
+    "lines_rate_pct": 94.2
+  }
+}
