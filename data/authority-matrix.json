@@ -108,7 +108,19 @@
         "set_by": "github_plan",
         "overage_policy": "bill_rather_than_stop",
         "overage_policy_set_by": "owner 2026-08-25",
-        "note": "2,000分/月は GitHub Free（simplememofast は個人アカウント）の付帯分で、こちらが決めた値ではない。130分は qa-ios.yml ヘッダの実測13分×10倍単価（watch ON なら +160分）。**超過時にどちらへ倒すかはオーナーが決めた（2026-08-25）: 止まるより課金されるほう。** $0 budget は枯れた瞬間に release / release-command と Flag Ops まで止めるので、そちらのほうが高くつく。金額側は小さい —— 超過分は Linux 約$0.008/分（200分で約$1.6）・macOS 約$0.08/分（7/31 の実績で$10）。**ただしこれは方針であって設定の確認ではない。** GitHub の budget 設定はリポジトリからは読めないので、実際にどちらに倒れるかをCIから検査する手段は無い"
+        "observed_2026_08_25": {
+          "gross_usd": 23.23,
+          "included_discount_usd": 23.15,
+          "net_usd": 0.08,
+          "by_repo_gross_usd": {
+            "simplememo": 12.12,
+            "simplememo-ios": 10.33,
+            "simplememo-api": 0.77
+          },
+          "payment_method": "有効なものが登録されていることを確認（内容はここに書かない。このリポジトリは public）",
+          "note": "**gross の最大は public の simplememo（$12.12・全額が discount 側に載る）。付帯分を実際に食っているのは simplememo-ios（$10.33）** で、simplememo-api は $0.77。純額が $0.08 立っていること自体が、付帯分を超えた分が課金されて通っている証拠になる（$0 budget なら止まって $0.00 のまま）。**未解決**: この金額と、8/25 の警告メールが言う『1,800/2,000分』は正確には突き合わない（Linux $0.008/分 換算だと private 側は約1,390分）。どちらが正でも純額が $0.08 である事実は動かないので、出どころは未解明のまま残す"
+        },
+        "note": "2,000分/月は GitHub Free（simplememofast は個人アカウント）の付帯分で、こちらが決めた値ではない。130分は qa-ios.yml ヘッダの実測13分×10倍単価（watch ON なら +160分）。**超過時にどちらへ倒すかはオーナーが決めた（2026-08-25）: 止まるより課金されるほう。** $0 budget は枯れた瞬間に release / release-command と Flag Ops まで止めるので、そちらのほうが高くつく。金額側は小さい —— 超過分は Linux 約$0.008/分（200分で約$1.6）・macOS 約$0.08/分（7/31 の実績で$10）。**budget の設定値そのものは依然としてAPIから読めない。** 課金画面を人が見るしかなく、CIで検査する手段は無い（observed_* は人が読んだ値の写しであって、機械が確かめた値ではない）"
       },
       "note": "**分数は戻らない**（リセットは翌月1日）ので不可逆に分類した。焼けるのは金額ではなく出荷で、枯れると release / release-command が止まり TestFlight配信もApp Review申請もできなくなる。2026-07-31 に1日で $10 を使い切った実績があり、そのときの経路は『AIが足した push トリガ』だった。表に無い支出は、次に判断するセッションからは存在しない"
     },
