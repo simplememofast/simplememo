@@ -8,6 +8,7 @@
  *   node scripts/autopilot-runs.mjs --selftest # 検査そのものの自己検査（台帳を読まない）
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
  *   node scripts/autopilot-runs.mjs --append --run-id ... --date ... --route ... --outcome ...
+ *        [--failure-class ... --failed-at ... --detected-at ... --needs-triage true]
  *
  * 【何を測るか】外部レビュー（2026-08-22）が求めた指標のうち、
  * 実行を一意に指す識別子があれば数えられるもの:
@@ -394,6 +395,17 @@ if (isMain) {
       interventions: [],
       source: val('source', 'session'),
     };
+    // 失敗の付帯情報。**種別が分からない回に種別を書かない**ため、
+    // --failure-class は渡されたときだけ入れる。ここに推測を書くと
+    // selfheal の「同じ failure_class を3回直したら人へ」という歯止めが
+    // 別の種別として数えられて効かなくなる（直せない故障を毎日直し続ける）。
+    if (val('failure-class')) run.failure_class = val('failure-class');
+    if (val('failed-at')) run.failed_at = val('failed-at');
+    if (val('detected-at')) run.detected_at = val('detected-at');
+    if (val('detected-note')) run.detected_note = val('detected-note');
+    // 種別を決められなかった失敗は、決められなかったことを台帳に残す。
+    // 空欄は「未記入」と「該当なし」の区別がつかない。
+    if (val('needs-triage') === 'true') run.needs_triage = true;
     if (doc.runs.some((r) => r.run_id === run.run_id)) {
       console.log(`skip: run_id ${run.run_id} already recorded`);
       process.exit(0);

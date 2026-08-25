@@ -222,6 +222,23 @@ jobs:
           node scripts/autopilot-runs.mjs --selftest
           node scripts/autopilot-runs.mjs --check
 
+      # 【アクション台帳】日次アクチュエータが読み書きする台帳の形を見る。
+      #
+      # ここが見るのは中身の正しさではなく、**閉じられる形をしているか**:
+      #   - close_check が無い行が無いこと（無い依頼は永久に残る）
+      #   - close_check が登録簿にある種別だけを指していること
+      #     （台帳に任意のコマンドを書けるようにすると、依頼リストが実行経路になる）
+      #   - done の行が evidence を持つこと（「閉じた」は根拠とセットでしか書けない）
+      #   - auto を持つ行が self_repair.may_modify の内側だけを触ること
+      #     **これを見ないと、権限の拡大が台帳の1行でできてしまう。**
+      #
+      # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない
+      # （autopilot-runs.mjs と同じ理由・同じ作法）。
+      - name: Autopilot action ledger
+        run: |
+          node scripts/autopilot-act.mjs --selftest
+          node scripts/autopilot-act.mjs --check
+
       # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
       #
       # 画像そのものは配信前に人が確認して出す。ここで見るのは、
