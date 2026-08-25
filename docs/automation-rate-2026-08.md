@@ -13,29 +13,29 @@
 
 | 指標 | 値 | 分母 |
 |---|---:|---|
-| **総合自動化率** | **54.9%** | 定義タスク 173（未実装を含む・**最も厳しい**） |
-| AI実行率 | 66.9% | 実施中タスク 142（未実装を除く） |
-| AI関与率 | 86.6% | 同上（提案・下書きまで含める・**最も甘い**） |
-| カバー率 | 82.1% | そもそも誰かがやっているタスクの割合 |
+| **総合自動化率** | **56.1%** | 定義タスク 173（未実装を含む・**最も厳しい**） |
+| AI実行率 | 67.4% | 実施中タスク 144（未実装を除く） |
+| AI関与率 | 86.8% | 同上（提案・下書きまで含める・**最も甘い**） |
+| カバー率 | 83.2% | そもそも誰かがやっているタスクの割合 |
 
-内訳: 自律 7 / ゲート付き実行 88 / 提案 28 / 人間 19 / **未実装 31** / 意図的にやらない 3
+内訳: 自律 7 / ゲート付き実行 90 / 提案 28 / 人間 19 / **未実装 29** / 意図的にやらない 3
 
 **4つを必ず並べて出す。**分母を1つに決めると必ず都合のよい数字になる。
 **総合自動化率とカバー率を隠してAI関与率だけ出すのが、ここで一番やってはいけないこと。**
 
 ### 読み方
 
-- **総合自動化率 54.9%** — あるべきタスクのうちAIが実行している割合。**これが現在地**
-- **カバー率 82.1%** — 誰もやっていないタスクは**31件**
-- AI関与率 86.6% / AI実行率 66.9%
+- **総合自動化率 56.1%** — あるべきタスクのうちAIが実行している割合。**これが現在地**
+- **カバー率 83.2%** — 誰もやっていないタスクは**29件**
+- AI関与率 86.8% / AI実行率 67.4%
 
 ### この先の天井
 
 ```
-  現在                        95 / 173 = 54.9%
-  未実装 31 件を全部埋めても            →  72.8%
+  現在                        97 / 173 = 56.1%
+  未実装 29 件を全部埋めても            →  72.8%
   提案どまり 28 件も実行へ上げたら        →  89.0%  ← **天井**
-  95.3% に必要                          165 件（あと 70 件）
+  95.3% に必要                          165 件（あと 68 件）
 ```
 
 **89.0% が天井。**人間専任19件を人間に残す限り、AI実行に回せるのは最大154件。
@@ -49,11 +49,11 @@
 |---|---:|---:|---:|---:|---|
 | ⑩ AgentOps・ガバナンス | **91.7%** | 100.0% | 100.0% | 91.7% | 0/11/0/0/1 |
 | ⑤ AI予算・トークン管理 | **86.7%** | 92.9% | 92.9% | 93.3% | 0/13/0/1/1 |
+| ⑫ 事業継続性 | **77.8%** | 100.0% | 100.0% | 77.8% | 0/7/0/0/2 |
 | ② バグ修正 | **70.6%** | 80.0% | 93.3% | 88.2% | 1/11/2/1/2 |
 | ③ 自律型マーケティング | **65.4%** | 81.0% | 90.5% | 80.8% | 2/15/2/2/5 |
 | ⑥ アプリ運営意思決定 | **61.5%** | 66.7% | 91.7% | 92.3% | 0/8/3/1/1 |
 | ① 次期機能開発 | **60.0%** | 69.2% | 100.0% | 86.7% | 3/6/4/0/2 |
-| ⑫ 事業継続性 | **55.6%** | 100.0% | 100.0% | 55.6% | 0/5/0/0/4 |
 | ④ 自動本番デプロイ | **50.0%** | 50.0% | 71.4% | 100.0% | 1/6/3/4/0 |
 | ⑪ データ・プライバシー | **50.0%** | 62.5% | 87.5% | 80.0% | 0/5/2/1/2 |
 | ⑧ カスタマーサポート | **37.5%** | 60.0% | 100.0% | 62.5% | 0/3/2/0/3 |
@@ -108,6 +108,22 @@
 | ゲート付き実行 | モデル障害・レート制限時のフォールバック | 2026-08-22実装。縮退先を台帳に持ち、実行判定が DEGRADE_MODEL / FAIL_NO_MODEL を返す（使えるモデルが尽きたら走らない — 静かに寝ない）。両コードに移管規則がある。**不可逆な種別に最安のモデルを割り当てると落ちる。**残る弱さ: 使えないモデルを検知して渡す経路が無いので、縮退の起点は今も人かセッションの観測<br>`data/model-routing.json`<br>`scripts/check-model-routing.mjs`<br>`scripts/autopilot-gate.mjs`<br>`data/escalation-rules.json`<br>`../simplememo-ios/scripts/qa/ai_triage.sh` |
 | ゲート付き実行 | 新モデル導入前の固定評価セット | 2026-08-22実装。失敗分類の6ケースを固定し、合格ライン83%＋**「分からない」と答えられること2件を必須通過**にした。合格条件は決定論（ラベルの照合のみ）— AIにAIを採点させると採点側を替えた時点で履歴が無効になるため。**評価はまだ一度も走らせていない**ので policy.enforce は false（true にすると現行3モデルが未評価で落ちる）<br>`data/model-eval-set.json`<br>`scripts/check-model-eval.mjs`<br>`data/model-routing.json` |
 | 未実装 | 副系CCRの実費観測 | スケジュール起動セッションのログが外部から読めない。構造的に不可<br>`data/autopilot-cost.json` |
+
+### ⑫ 事業継続性
+
+総合 **77.8%** ／ 実行 100.0% ／ 関与 100.0% ／ カバー 77.8%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系1/6・副系10/10。冗長化が実際に効いた。**主系の初出荷は2026-08-23**（PR #538）で、それまでの11回は4種類の異なる理由で不発。**その後 08-24・08-25 は2回続けて失敗しており、初出荷は再現していない。**1回出たことと任せられることは別なので、実行者は上げていない<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
+| ゲート付き実行 | 冪等性 | 当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`scripts/autopilot-budget.mjs` |
+| ゲート付き実行 | 再試行 | 09:20の再試行経路・Resend 429の単発リトライ<br>`.github/workflows/obsidian-autopilot.yml`<br>`../simplememo-api/src/resend.ts` |
+| 未実装 | Circuit Breaker | 2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**<br>**[2026-08-25 訂正]** **存在しない。**`circuit-breaker.ts` は隣のgit履歴に一度も無い。**送信先が落ちても呼び続ける状態のまま。**<br>落とした証跡: ../simplememo-api/src/circuit-breaker.ts , ../simplememo-api/test/circuit-breaker.test.ts<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/src/resend.ts` |
+| 未実装 | Dead Letter Queue | 2026-08-22実装（simplememo-api）。**本文も平文の宛先も保存しない** — 再送のために本文を貯めると、保持期間の議論をやり直さずに新しい個人データストアを作ることになる。テンプレート由来は再送できるが、**メモ中継は再送できない**（落ちた事実だけ残す）。種別が不明なときは再送しない側へ倒す。保持35日・剪定つき<br>**[2026-08-25 訂正]** **存在しない。**`dlq.ts` もマイグレーションも隣のgit履歴に無い。**落ちた送信は記録されず、失われる。**<br>落とした証跡: ../simplememo-api/src/dlq.ts , ../simplememo-api/migrations/0018_email_dead_letters.sql<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/data/data-retention.json` |
+| ゲート付き実行 | バックアップ・復元 | 2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある<br>**[2026-08-25 訂正]** **存在しない。**`backup-d1.mjs` も `RESTORE.md` も隣のgit履歴に無い。**本番D1のバックアップは取られていない。**⑫の中で最も重い欠落。<br>落とした証跡: ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md<br>executor: ai_executes_gated → nobody<br>**[2026-08-25 実装]** **今度は実在する。**対象は保持台帳の d1_table から導出（19テーブル）— 手で並べると新しい表が黙って対象外になり、症状は復元しようとした日にしか出ない。検証は「読めた」ではなく**「空のSQLiteへ実際に流し込めた」**で行う。台帳のテーブルが1つでも欠ければ落ちる。**鍵が無いときも落ちる**（静かにスキップしない）。個人データが入るので AES-256-GCM で暗号化し、artifact に上げる前に暗号化を確かめる。毎日 03:10 JST。<br>`../simplememo-api/scripts/backup-d1.mjs`<br>`../simplememo-api/.github/workflows/backup-d1.yml`<br>`../simplememo-api/test/backup-d1.test.ts`<br>`../simplememo-api/data/data-retention.json` |
+| ゲート付き実行 | 手動復旧手順 | 2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま<br>**[2026-08-25 訂正]** **存在しない。**復旧演習も手順書も隣のgit履歴に無い。<br>落とした証跡: ../simplememo-api/scripts/restore-drill.mjs , ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md , ../simplememo-api/test/restore.test.ts<br>executor: ai_executes_gated → nobody<br>**[2026-08-25 実装]** **復元演習は手元のバックアップファイルを入力に取る別の口。**取る側と確かめる側を同じ実行にまとめると、取れた日にしか復元を確かめない。**本番D1への通しの復元は未実施**で、RESTORE.md §5 に「まだやっていないこと」の表がある（通しの復元・復元時間の実測・世代管理・3日続けて取れていないことの検知・KV）。<br>`../simplememo-api/docs/RESTORE.md`<br>`../simplememo-api/scripts/restore-drill.mjs`<br>`../simplememo-api/test/backup-d1.test.ts` |
+| ゲート付き実行 | 障害訓練 | 2026-08-22実装（切替ドリル）。認証切れ・モデル障害・API障害の演習はまだ<br>`scripts/autopilot-drill.mjs` |
+| ゲート付き実行 | 外部サービス停止時の縮退運転 | 2026-08-22。台帳の「代替がある」を**実際に動かして確かめる**ようにした。6つの実験（API到達不能で走らない / 副系の実在 / モデル縮退と全滅 / egress縮退 / 遮断器と死信 / 端末Outbox）を判定関数とファイルの実在で毎回通す。**代替と縮退を分けて数える** — 混ぜると resilience を過大に見積もる。Resendが落ちてもメールは送れない（代替なし）が、失われず後で戻せる（縮退あり）。この作業で台帳の4件を代替から降格した（回避策・停止・欠測は代替ではない）。現状: 代替2 / 縮退のみ2 / 単一障害点6。**単一障害点では落とさない**（分かっていることは壊れていることではない）。落とすのは代替を名乗って確かめられないときと、どの事業者も使っていない実験があるとき。残る弱さ: **実際にその事業者を落として試したことは無い。**確かめているのはこちら側の受け方だけ<br>**[2026-08-25 訂正]** **検査そのものは実在する**（`check-degradation.mjs` ほか）。訂正したのは**受け皿の側** — Resend の縮退として数えていた遮断器と死信が存在しないので、**Resend は縮退の無い単一障害点**になった。<br>落とした証跡: ../simplememo-api/src/circuit-breaker.ts<br>`scripts/check-degradation.mjs`<br>`data/vendor-register.json`<br>`scripts/autopilot-gate.mjs`<br>`.github/workflows/seo-check.yml`<br>`../simplememo-ios/SimpleMemo/OutboxManager.swift` |
 
 ### ② バグ修正
 
@@ -209,22 +225,6 @@
 | 自律 | 失敗機能の自動停止とバックログ差し戻し | ガードレール指標が有意かつ実害を伴って悪化したら kill を自律実行する（承認を挟まない＝可逆で安全な方向のため）。2026-08-22実装。**同日、kill が実機まで届いて機能が消えることを TestFlight で実証した**（docs/canary-testflight.md の実測）。ただし**押したのは人であってガードではない**。ガードの自動判定は本番でまだ1回も発火していない — TestFlight の人数では min_installs_per_cohort:30 に届かない。**止められることと、判断できることは別**。バックログ差し戻しは未実装<br>`../simplememo-api/src/rollout-guard.ts`<br>`../simplememo-api/test/rollout-guard.test.ts`<br>`docs/canary-testflight.md` |
 | 自律 | 判断理由と結果のDecision Ledger | 機能開発の判断も入るようになった（カナリアガードが判定・根拠・実行有無を毎回KVへ記録する）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた<br>`docs/obsidian/AUTOPILOT_LOG.md`<br>`growth/experiments/experiments.json`<br>`data/autopilot-runs.json`<br>`../simplememo-api/src/rollout-guard.ts`<br>`../simplememo-api/test/rollout-guard.test.ts` |
 | 未実装 | 本番改善サイクルの完走（機能側） | コンテンツ側は完走。機能側0件 |
-
-### ⑫ 事業継続性
-
-総合 **55.6%** ／ 実行 100.0% ／ 関与 100.0% ／ カバー 55.6%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| ゲート付き実行 | 実行経路の二重化（主系・副系） | 主系1/6・副系10/10。冗長化が実際に効いた。**主系の初出荷は2026-08-23**（PR #538）で、それまでの11回は4種類の異なる理由で不発。**その後 08-24・08-25 は2回続けて失敗しており、初出荷は再現していない。**1回出たことと任せられることは別なので、実行者は上げていない<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`data/autopilot-runs.json` |
-| ゲート付き実行 | 冪等性 | 当日ブランチ占有・run_id冪等・messageId冪等・WatchRequestLedger<br>`docs/obsidian/AUTOPILOT_RUNBOOK.md`<br>`scripts/autopilot-budget.mjs` |
-| ゲート付き実行 | 再試行 | 09:20の再試行経路・Resend 429の単発リトライ<br>`.github/workflows/obsidian-autopilot.yml`<br>`../simplememo-api/src/resend.ts` |
-| 未実装 | Circuit Breaker | 2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**<br>**[2026-08-25 訂正]** **存在しない。**`circuit-breaker.ts` は隣のgit履歴に一度も無い。**送信先が落ちても呼び続ける状態のまま。**<br>落とした証跡: ../simplememo-api/src/circuit-breaker.ts , ../simplememo-api/test/circuit-breaker.test.ts<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/src/resend.ts` |
-| 未実装 | Dead Letter Queue | 2026-08-22実装（simplememo-api）。**本文も平文の宛先も保存しない** — 再送のために本文を貯めると、保持期間の議論をやり直さずに新しい個人データストアを作ることになる。テンプレート由来は再送できるが、**メモ中継は再送できない**（落ちた事実だけ残す）。種別が不明なときは再送しない側へ倒す。保持35日・剪定つき<br>**[2026-08-25 訂正]** **存在しない。**`dlq.ts` もマイグレーションも隣のgit履歴に無い。**落ちた送信は記録されず、失われる。**<br>落とした証跡: ../simplememo-api/src/dlq.ts , ../simplememo-api/migrations/0018_email_dead_letters.sql<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/data/data-retention.json` |
-| 未実装 | バックアップ・復元 | 2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある<br>**[2026-08-25 訂正]** **存在しない。**`backup-d1.mjs` も `RESTORE.md` も隣のgit履歴に無い。**本番D1のバックアップは取られていない。**⑫の中で最も重い欠落。<br>落とした証跡: ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/data/data-retention.json` |
-| 未実装 | 手動復旧手順 | 2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま<br>**[2026-08-25 訂正]** **存在しない。**復旧演習も手順書も隣のgit履歴に無い。<br>落とした証跡: ../simplememo-api/scripts/restore-drill.mjs , ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md , ../simplememo-api/test/restore.test.ts<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/.github/workflows/ci.yml`<br>`../simplememo-api/data/data-retention.json` |
-| ゲート付き実行 | 障害訓練 | 2026-08-22実装（切替ドリル）。認証切れ・モデル障害・API障害の演習はまだ<br>`scripts/autopilot-drill.mjs` |
-| ゲート付き実行 | 外部サービス停止時の縮退運転 | 2026-08-22。台帳の「代替がある」を**実際に動かして確かめる**ようにした。6つの実験（API到達不能で走らない / 副系の実在 / モデル縮退と全滅 / egress縮退 / 遮断器と死信 / 端末Outbox）を判定関数とファイルの実在で毎回通す。**代替と縮退を分けて数える** — 混ぜると resilience を過大に見積もる。Resendが落ちてもメールは送れない（代替なし）が、失われず後で戻せる（縮退あり）。この作業で台帳の4件を代替から降格した（回避策・停止・欠測は代替ではない）。現状: 代替2 / 縮退のみ2 / 単一障害点6。**単一障害点では落とさない**（分かっていることは壊れていることではない）。落とすのは代替を名乗って確かめられないときと、どの事業者も使っていない実験があるとき。残る弱さ: **実際にその事業者を落として試したことは無い。**確かめているのはこちら側の受け方だけ<br>**[2026-08-25 訂正]** **検査そのものは実在する**（`check-degradation.mjs` ほか）。訂正したのは**受け皿の側** — Resend の縮退として数えていた遮断器と死信が存在しないので、**Resend は縮退の無い単一障害点**になった。<br>落とした証跡: ../simplememo-api/src/circuit-breaker.ts<br>`scripts/check-degradation.mjs`<br>`data/vendor-register.json`<br>`scripts/autopilot-gate.mjs`<br>`.github/workflows/seo-check.yml`<br>`../simplememo-ios/SimpleMemo/OutboxManager.swift` |
 
 ### ④ 自動本番デプロイ
 
