@@ -186,6 +186,43 @@ export const CLOSE_CHECKS = {
       : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}` };
   },
 
+  /**
+   * 1回あたりの実費上限の超過が、人にレビューされたら閉じる。
+   *
+   * **manual にしない。**リポジトリの中（data/autopilot-cost.json の
+   * cap_review）で機械的に確かめられるものを manual にすると、承認が
+   * 入っても行が残り続ける——この台帳が潰したかった堆積そのものになる。
+   *
+   * 「超過として検出されなくなった」も閉じる理由にする。上限そのものを
+   * 見直した場合（model-routing.json 側が正）や、実費の行を訂正した場合で、
+   * どちらも「もう止めていない」という同じ状態に落ちる。
+   */
+  budget_overrun_reviewed({ run_id = null, date_jst = null, task_kind = null }, ctx) {
+    if (!ctx.budget) return { closed: false, evidence: '実費ゲートの判定を取得できず判定不能' };
+    // null は「判定していない」。**「上限内」と混ぜない** ——
+    // model-routing.json を消すだけで上限が消える、を防ぐ側の分岐。
+    if (!ctx.budget.run_caps) {
+      return { closed: false, evidence: '1回上限を判定していない（model-routing.json を読めなかった）。判定していない ≠ 上限内' };
+    }
+    // 実費台帳は run_id を必須にしていない（validate が要求していない）。
+    // **run_id 無しを String(null) で突き合わせると誰にも一致せず「超過が消えた」
+    // と読んで即座に閉じる**——止まっているのに閉じる、いちばん悪い倒れ方。
+    // 指定が run_id で来ていないときは日付＋種別で照合する。
+    const rows = ctx.budget.run_caps.overruns ?? [];
+    const label = run_id != null ? `run ${run_id}` : `${date_jst} の ${task_kind}`;
+    const o = run_id != null
+      ? rows.find((x) => x.run_id != null && String(x.run_id) === String(run_id))
+      : rows.find((x) => x.run_id == null && x.date_jst === date_jst && x.task_kind === task_kind);
+    if (!o) return { closed: true, evidence: `${label} は1回上限の超過として検出されなくなった（上限の見直しか実費行の訂正）` };
+    if (o.reviewed) return { closed: true, evidence: `${label} の超過はレビュー済: ${o.why ?? '（理由未記入）'}` };
+    const detail = `${o.task_kind} $${Number(o.cost).toFixed(4)} / 上限 $${Number(o.cap).toFixed(2)}`;
+    return o.run_id == null
+      // 解除コマンドが対象を指定できない状態。**閉じられない依頼**なので、
+      // 先にやることを証拠に書く（実費台帳はレーンFが直してよいファイル）。
+      ? { closed: false, evidence: `${label}（${detail}）は実費台帳に run_id が無く --ack-overrun で解除できない。先に run_id を入れる` }
+      : { closed: false, evidence: `${label}（${detail}）が未レビュー。主系はこの種別を選ぶと止まる` };
+  },
+
   /** 許可済みスクリプトが exit 0 を返せば閉じる。 */
   script_ok({ script, args = [] }, _ctx) {
     // 台帳から任意のパスを実行させない。scripts/ 配下の .mjs / .js のみ、
@@ -457,6 +494,53 @@ export function derive(ctx) {
         close_check: { kind: 'script_ok', params: { script: 'scripts/autopilot-act.mjs', args: ['--status-fresh'] } },
       });
     }
+  }
+
+  // --- D7: 1回上限の未レビュー超過（主系のその種別を止めている） ---
+  //
+  // 2026-08-25 に実際に起きた形: レーンFの修理 run が repair の1回上限 $3.00 に
+  // 対し $11.93（4倍）で終わり、`--check-run-cap --task repair` が非ゼロを返す
+  // 状態になった。**月次上限は通るので `--check` は exit 0** ——つまり
+  // 「予算は大丈夫」に見えるのに、主系が repair を選んだ瞬間だけ止まる。
+  // この状態は台帳のどこにも出ておらず、日報にも載らなかった。
+  //
+  // **止まっているのが repair である点が要。**主系は失敗すると次の日に
+  // レーンF（自己修復）を選ぶので、**いちばん走ってほしい種別が止まっている。**
+  // 解除は人間だけができる（下記）ので、気づかなければ黙って止まり続ける。
+  for (const o of ctx.budget?.run_caps?.unreviewed ?? []) {
+    // 実費台帳は run_id を必須にしていない。無い行は `--ack-overrun <run_id>` の
+    // 対象にできない＝**解除手段の無いゲート**なので、idを日付＋種別で作って
+    // 衝突を避け、先に run_id を入れることを本文の先頭に置く。
+    const noId = o.run_id == null;
+    const key = noId ? `${o.date_jst}-${o.task_kind}` : o.run_id;
+    out.push({
+      id: `act-budget-overrun-${key}`,
+      title: `1回上限の超過が未レビュー: ${o.date_jst} ${o.task_kind} $${Number(o.cost).toFixed(4)}`
+        + `（上限 $${Number(o.cap).toFixed(2)} の${o.times}倍）— 主系が ${o.task_kind} を選ぶと止まる`,
+      detail: (noId
+        ? `**この超過は実費台帳に run_id が無く、\`--ack-overrun <run_id>\` が対象を指定できない。**`
+          + `先に data/autopilot-cost.json の該当行へ run_id を入れること（実費台帳はレーンFが直してよい）。\n`
+        : `解除: \`node scripts/autopilot-budget.mjs --ack-overrun ${o.run_id} --why "…"\`\n`)
+        + `**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。`
+        + `上限は data/model-routing.json の rules.${o.task_kind}.max_usd_per_run が正で、`
+        + `実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、`
+        + `上限を直せば過去の判定も一緒に変わる）。\n`
+        + `**月次上限は通っている**ため \`--check\` は exit 0 で、"予算は大丈夫" に見える。`
+        + `止まるのは \`--check-run-cap --task ${o.task_kind}\` の側だけ。\n`
+        + `なお data/authority-matrix.json の「AI実費」は human_only に \`monthly_usd_cap の決定\` しか`
+        + `挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**`
+        + `（権限表の変更は self_repair.must_not なのでAIからは直せない）。`,
+      source: 'budget',
+      touches: ['data/autopilot-cost.json'],
+      force_owner: 'human',
+      force_owner_why: 'scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている'
+        + '（AIが自分の超過を自分で通せると、上限が「お願い」になる）',
+      auto: null,
+      close_check: {
+        kind: 'budget_overrun_reviewed',
+        params: noId ? { date_jst: o.date_jst, task_kind: o.task_kind } : { run_id: o.run_id },
+      },
+    });
   }
 
   return out;
@@ -908,7 +992,10 @@ function render(sum, applied, today) {
 // ============================================================
 function selftest() {
   const fails = [];
-  const t = (name, cond) => { if (!cond) fails.push(name); };
+  // 件数は数える。**リテラルで書かない** —— 検査を足しても数字が動かないと、
+  // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
+  let count = 0;
+  const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
   const matrix = {
     self_repair: { may_modify: ['data/autopilot-runs.json'], stop_after_failed_repairs: 3 },
     domains: [{ domain: '承認が要る領域', requires_approval: true }],
@@ -955,6 +1042,64 @@ function selftest() {
     costDoc: { runs: [{ run_id: '1' }] },
     runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === true);
   t('実費台帳が無ければ判定不能', CLOSE_CHECKS.cost_covers_runs({}, { runsDoc: { runs: [] } }).closed === false);
+
+  // 閉じ条件: 1回上限の超過は「人が見たか」で閉じる（manual にしない）
+  const ovCtx = (rows) => ({ budget: { run_caps: { overruns: rows, unreviewed: rows.filter((r) => !r.reviewed) } } });
+  t('実費ゲートを読めなければ判定不能',
+    CLOSE_CHECKS.budget_overrun_reviewed({ run_id: '1' }, {}).closed === false);
+  t('判定していないを上限内と混ぜない',
+    CLOSE_CHECKS.budget_overrun_reviewed({ run_id: '1' }, { budget: { run_caps: null } }).closed === false);
+  t('未レビューなら閉じない', CLOSE_CHECKS.budget_overrun_reviewed({ run_id: '1' },
+    ovCtx([{ run_id: '1', task_kind: 'repair', cost: 11.93, cap: 3, reviewed: false }])).closed === false);
+  t('レビュー済なら閉じる', CLOSE_CHECKS.budget_overrun_reviewed({ run_id: '1' },
+    ovCtx([{ run_id: '1', task_kind: 'repair', cost: 11.93, cap: 3, reviewed: true, why: 'ok' }])).closed === true);
+  t('超過でなくなれば閉じる',
+    CLOSE_CHECKS.budget_overrun_reviewed({ run_id: '1' }, ovCtx([])).closed === true);
+  t('run_id は文字列と数値を区別しない', CLOSE_CHECKS.budget_overrun_reviewed({ run_id: 1 },
+    ovCtx([{ run_id: '1', task_kind: 'repair', cost: 11.93, cap: 3, reviewed: true }])).closed === true);
+  // run_id 無しの超過。**String(null) で照合すると「消えた」と読んで閉じる**——
+  // 止まっているのに閉じる倒れ方なので、日付＋種別で照合する。
+  const noIdRow = { run_id: null, date_jst: '2026-08-25', task_kind: 'repair', cost: 11.93, cap: 3, reviewed: false };
+  t('run_id 無しを消えたと読まない',
+    CLOSE_CHECKS.budget_overrun_reviewed({ date_jst: '2026-08-25', task_kind: 'repair' },
+      ovCtx([noIdRow])).closed === false);
+  t('run_id 無しは解除できないと書く',
+    CLOSE_CHECKS.budget_overrun_reviewed({ date_jst: '2026-08-25', task_kind: 'repair' },
+      ovCtx([noIdRow])).evidence.includes('run_id が無く'));
+  t('run_id 無しでも消えれば閉じる',
+    CLOSE_CHECKS.budget_overrun_reviewed({ date_jst: '2026-08-25', task_kind: 'repair' },
+      ovCtx([])).closed === true);
+  t('run_id 指定は run_id 無しの行に一致しない',
+    CLOSE_CHECKS.budget_overrun_reviewed({ run_id: 'null' }, ovCtx([noIdRow])).closed === true);
+
+  // 導出D7: 主系を止めている未レビュー超過を起票する
+  const ovDerive = derive({
+    today: '2026-08-25', runsDoc: { runs: [] }, selfheal: { targets: [] },
+    statusDoc: null, costDoc: null,
+    budget: { run_caps: { overruns: [], unreviewed: [
+      { run_id: '32816234185', date_jst: '2026-08-25', task_kind: 'repair', cost: 11.9329, cap: 3, times: 4, reviewed: false }] } },
+  }).filter((d) => d.source === 'budget');
+  t('未レビュー超過を起票する', ovDerive.length === 1);
+  t('超過の承認は人に固定する', ovDerive[0]?.force_owner === 'human');
+  t('起票のidに日付を含めない', !/\d{8}-/.test(ovDerive[0]?.id ?? '') && ovDerive[0]?.id === 'act-budget-overrun-32816234185');
+  t('止まる種別を題に出す', (ovDerive[0]?.title ?? '').includes('repair を選ぶと止まる'));
+  t('解除コマンドを本文に出す', (ovDerive[0]?.detail ?? '').includes('--ack-overrun 32816234185'));
+  t('自動実行を付けない', ovDerive[0]?.auto == null);
+  t('実費ゲートが無い日は起票しない',
+    derive({ today: '2026-08-25', runsDoc: { runs: [] }, selfheal: { targets: [] },
+             statusDoc: null, costDoc: null }).filter((d) => d.source === 'budget').length === 0);
+  const noIdDerive = derive({
+    today: '2026-08-25', runsDoc: { runs: [] }, selfheal: { targets: [] }, statusDoc: null, costDoc: null,
+    budget: { run_caps: { overruns: [], unreviewed: [
+      { run_id: null, date_jst: '2026-08-25', task_kind: 'repair', cost: 11.93, cap: 3, times: 4, reviewed: false },
+      { run_id: null, date_jst: '2026-08-25', task_kind: 'article', cost: 9, cap: 2, times: 4.5, reviewed: false }] } },
+  }).filter((d) => d.source === 'budget');
+  t('run_id 無しでもidが衝突しない', new Set(noIdDerive.map((d) => d.id)).size === 2);
+  t('run_id 無しのidに null を出さない', noIdDerive.every((d) => !d.id.includes('null')));
+  t('run_id 無しは先に run_id を入れろと書く', (noIdDerive[0]?.detail ?? '').includes('run_id を入れる'));
+  t('run_id 無しの閉じ条件は日付と種別で照合する',
+    noIdDerive[0]?.close_check?.params?.date_jst === '2026-08-25'
+    && noIdDerive[0]?.close_check?.params?.task_kind === 'repair');
 
   // 閉じ条件: 実費が原理的に存在しない run は除外できる（除外しないと永久に閉じない）
   const costCtx = { costDoc: { runs: [] }, runsDoc: { runs: [
@@ -1066,7 +1211,7 @@ function selftest() {
     for (const f of fails) console.error(`  ✗ ${f}`);
     process.exit(1);
   }
-  console.log(`自己検査 OK（${32} 項目）`);
+  console.log(`自己検査 OK（${count} 項目）`);
 }
 
 // ============================================================
@@ -1093,8 +1238,17 @@ async function buildContext(today) {
   } catch (e) {
     console.error(`# selfheal の判定を取得できなかった: ${e.message}`);
   }
+  // 実費ゲートも自前で判定しない（selfheal と同じ理由）。上限の判定を
+  // 2箇所に持つと、片方だけ直される日が必ず来る。
+  let budget = null;
+  try {
+    budget = JSON.parse(execFileSync(process.execPath,
+      [path.join(ROOT, 'scripts/autopilot-budget.mjs'), '--json'], { cwd: ROOT, encoding: 'utf8' }));
+  } catch (e) {
+    console.error(`# 実費ゲートの判定を取得できなかった: ${e.message}`);
+  }
   const workflowRuns = await fetchWorkflowRuns(repo, token);
-  return { today, runsDoc, matrix, costDoc, statusDoc, selfheal, workflowRuns, repo, token };
+  return { today, runsDoc, matrix, costDoc, statusDoc, selfheal, budget, workflowRuns, repo, token };
 }
 
 async function main() {

@@ -460,6 +460,11 @@ if (isMain) {
       runs: s.runs, shipped: s.shipped,
       usd_per_shipped: s.usd_per_shipped === null ? null : Number(s.usd_per_shipped.toFixed(4)),
       by_route: s.by_route, ccr_measured: s.ccr_measured,
+      // 1回上限のゲート。**主系を実際に止めているのはここ**なのに、長らく
+      // --json から漏れていた。機械可読の出力に無いと、日次アクチュエータも
+      // 日報も「主系が予算ガードで止まっている」を言えない
+      // （null は「判定していない」であって「超過なし」ではない）。
+      run_caps: s.run_caps,
       models: modelUsage(ledger, s.month),
       anomaly: detectAnomalies(ledger, s.month),
       cap_set_by: ledger.budget.cap_set_by ?? null,

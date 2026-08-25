@@ -1,24 +1,41 @@
 {
   "as_of_jst": "2026-08-25",
-  "open_total": 7,
+  "open_total": 5,
   "oldest_open_days": 3,
   "acknowledged": 2,
   "closed_today": [
     {
+      "id": "act-asc-privacy-answers",
+      "title": "App Store Connect の「App のプライバシー」回答を PrivacyInfo.xcprivacy と揃える",
+      "evidence": "完了。**機械で確かめた部分とオーナー報告の部分を分けて書く。**\n【機械で検証】simplememo-ios main（5dbcc5e）で `python3 scripts/qa/check_privacy_manifest.py` が「申告と実装が一致している」を出力。6種別（メールアドレス / メールまたはテキストメッセージ / その他のユーザコンテンツ / デバイスID / 製品の操作 / その他の診断データ）。申告漏れだった「メールまたはテキストメッセージ」は #226 で修正済み。\n【オーナー報告】ASC 側の6種別の入力を完了し、目的・関連付け・追跡が揃っていることを確認。入力内容は上記スクリプトの出力と一致している（data/autopilot-status.json に記録）。\n**ASC 側はリポジトリから検査できないので、ここは報告に依っている**（close_check が manual である理由）。\n【残る構造的な穴】check_privacy_manifest.py は ASC を読めないため「申告ファイル→実装」しか見ない。**「ASCにあるのに申告ファイルに無い」は構造的に不可視**で、今回の漏れもオーナーが画面を見せて初めて分かった。ASC 側を触った回は同スクリプトの出力と目で見比べるしかない（APIでは書けないことを 2026-08-25 に確認済み）。"
+    },
+    {
+      "id": "act-status-freshness-ci",
+      "title": "status JSON の鮮度をCIで検証する（PR #544 が実装済み・draft保留中）",
+      "evidence": "scripts/autopilot-runs.mjs に「statusAgreement」がある"
+    },
+    {
+      "id": "act-selfheal-ap-20260824-actions",
+      "title": "未修理の故障: ap-20260824-actions（upstream_action_regression。起票時は auth_or_credential と記録していたが誤りで、data/autopilot-runs.json で訂正済み）",
+      "evidence": "ap-20260824-actions は selfheal の未修理リストから消えた"
+    },
+    {
+      "id": "act-selfheal-ap-20260825-actions",
+      "title": "未修理の故障: ap-20260825-actions（upstream_action_regression。起票時は auth_or_credential と記録していたが誤りで、data/autopilot-runs.json で訂正済み）",
+      "evidence": "ap-20260825-actions は selfheal の未修理リストから消えた"
+    },
+    {
       "id": "act-cost-sync",
       "title": "実費台帳に載っていない run が 2件",
       "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）"
+    },
+    {
+      "id": "act-pin-claude-code-action",
+      "title": "claude-code-action を SHA 16b3b310 へ pin する（主系のPATに workflow scope が無く、主系からは push できない）",
+      "evidence": ".github/workflows/obsidian-autopilot.yml に「16b3b310c3d7b5279df73130324d5205aeea8eac」がある"
     }
   ],
   "human": [
-    {
-      "id": "act-asc-privacy-answers",
-      "title": "App Store Connect の「App のプライバシー」回答を PrivacyInfo.xcprivacy と揃える",
-      "detail": "2026-08-22 に申告ファイル側へ3種別を追加した（Product Interaction / Device ID / Other Diagnostic Data）。ASC側の回答はリポジトリから見えないため検査できない。**片方だけ直すと逆に不整合になる。**次のビルドを出す前に揃えるのが安全。将来 iOS が client_send_id を送り始めた日に Linked が true になり、そのとき申告とASCの両方を変える。",
-      "age_days": 3,
-      "why": "リポジトリの外が対象（ここからは実行も検査もできない）",
-      "evidence": "リポジトリから検査できない（人が閉じる）"
-    },
     {
       "id": "act-authority-split-deletion",
       "title": "権限表の「ユーザーデータの削除要求への対応」を2つに分けるか決める",
@@ -29,50 +46,37 @@
     },
     {
       "id": "act-egress-policy-confirm",
-      "title": "副系CCRの egress 制限が意図どおりか確認する",
-      "detail": "副系の実行環境は obsidian.md / notion.com / github.com本体 / simplememofast.com への直接アクセスが 403 EGRESS_BLOCKED になる（到達できるのは api.github.com・raw.githubusercontent.com・objects.githubusercontent.com・npmjs.com 程度）。**本番 simplememofast.com が読めない**ため、副系は Runbook §0 の冪等チェック(b)「本番status JSONの date_jst」を実行できない。実質のガードは (c) origin/main の同ファイルと、当日ブランチの占有だけ、と理解しておく必要がある。",
+      "title": "副系CCRの egress 制限が意図どおりか確認する（2026-08-25 実測で更新）",
+      "detail": "**【2026-08-25 実測で訂正】以前の記述「simplememofast.com もブロックされている」は現在この環境では成り立たない。**本番 status JSON が curl で 200 で読める。\n\nつまり **Runbook §0 の冪等チェック(b)「本番 status JSON の date_jst」は副系でも実行できる。**以前の記録は「(b) は実行不能なので実質のガードは (c) と当日ブランチの占有だけ」としており、**ガードの強度を実際より低く見積もっていた。**\n\n同一セッション内で curl により実測（2026-08-25）:\n```\n200      https://simplememofast.com/data/autopilot-status.json   ← 以前は「ブロック」と記録\n200      https://simplememofast.com/robots.txt\n200      https://api.github.com/rate_limit\n200      https://raw.githubusercontent.com/…\n200      https://registry.npmjs.org/\n400      https://github.com/            ← curl は 400。WebFetch 経由では到達できる\nblocked  https://obsidian.md/ , https://help.obsidian.md/     ← WebFetch でも EGRESS_BLOCKED\nblocked  https://www.notion.com/ , https://en.wikipedia.org/ , https://www.google.com/\nblocked  https://api.indexnow.org/indexnow   ← indexnow-notify.js がこの環境で落ちる理由\n```\n\n**変わっていない部分:** obsidian.md 系は curl でも WebFetch でも一貫してブロックされる。レーンEで Obsidian 公式サイトを一次情報にする記事は、副系からは書けない（raw.githubusercontent.com 経由の公式レジストリは読めるので、そちらは使える）。\n\n**注意:** 到達性はセッションごと・ツールごとに違う。過去ログには curl・WebFetch ともブロックされたという記録があり、今回と食い違う。**1回の実測を恒久的な仕様として書かない**——次に判断するときは、そのセッションで測り直すこと。\n\nオーナーに確認したいのは「この制限が意図したものか」で、そこは変わらない。",
       "age_days": 3,
       "why": "リポジトリの外が対象（ここからは実行も検査もできない）",
       "evidence": "リポジトリから検査できない（人が閉じる）"
     },
     {
-      "id": "act-credential-actions",
-      "title": "actions が 2日連続で認証系の即時失敗（2026-08-24〜2026-08-25）",
-      "detail": "run 32667079679 / 32779337325。作業に入る前に落ちており、単発の flake ではない。復旧手順は `claude setup-token` で再取得 → リポジトリ secret CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）。**この経路が復活するまで、出荷は副系だけが担っている。**",
+      "id": "act-budget-overrun-32816234185",
+      "title": "1回上限の超過が未レビュー: 2026-08-25 repair $11.9329（上限 $3.00 の4倍）— 主系が repair を選ぶと止まる",
+      "detail": "解除: `node scripts/autopilot-budget.mjs --ack-overrun 32816234185 --why \"…\"`\n**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。上限は data/model-routing.json の rules.repair.max_usd_per_run が正で、実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる）。\n**月次上限は通っている**ため `--check` は exit 0 で、\"予算は大丈夫\" に見える。止まるのは `--check-run-cap --task repair` の側だけ。\nなお data/authority-matrix.json の「AI実費」は human_only に `monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**（権限表の変更は self_repair.must_not なのでAIからは直せない）。",
       "age_days": 0,
-      "why": "secret の再発行はリポジトリ外の操作（オーナーのローカル + GitHub Secrets）",
-      "evidence": "2026-08-25 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
+      "why": "scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている（AIが自分の超過を自分で通せると、上限が「お願い」になる）",
+      "evidence": "run 32816234185（repair $11.9329 / 上限 $3.00）が未レビュー。主系はこの種別を選ぶと止まる"
+    },
+    {
+      "id": "act-gh-pat-scope-and-rotation",
+      "title": "GH_PAT: `workflow` scope を足すか決める（＋念のため回す）",
+      "detail": "**2つを1件にしてある。**どちらも同じ秘密の話で、片方をやるならもう片方はついで。\n\n【1. scope — 判断が要る】主系(GitHub Actions)は `.github/workflows/*` を含む push が\nGitHub 側で remote rejected される（\"refusing to allow a Personal Access Token to\ncreate or update workflow ... without `workflow` scope\"）。GH_PAT でも GITHUB_TOKEN でも同じ。\n一方 data/authority-matrix.json の self_repair.may_modify は obsidian-autopilot.yml を\nレーンFが直してよいファイルとして挙げている。**「直してよい」と「直せる」がずれており、\n主系は自分のワークフローの故障を最後まで直せない。**2026-08-25 はまさにそれで、\n原因特定まで済んだ修理（act-pin-claude-code-action）が適用できずに残った。\n**権限を広げる変更なのでAIからは行わない**（self_repair.must_not）。\n足さない判断も正当——その場合、ワークフローの修理は副系CCR経由と決めておけばよい。\n\n【2. 回転 — 念のため】2026-08-25 のセッション（run 32816234185）が、push 拒否の\n原因を調べる過程で `git remote -v` を実行し、**GH_PAT が埋め込まれた remote URL を\n出力させた。** GH_PAT は登録済み secret なので Actions のログでは `***` に\nマスクされるはずだが、**実行中のジョブログはダウンロードできず、マスクを実地で\n確認できていない**（このリポジトリは public）。\n**「マスクされるはず」は「マスクされた」ではない。**実害の証拠は無いが、\nscope の判断でどのみち触るなら、同じ機会に回すのが一番安い。\n\n**再発防止はセッション側の規律で:** 認証まわりを調べるときに `git remote -v` を\n使わない（`git remote get-url origin | sed` でホストだけ見る、あるいは push の\nエラーメッセージだけで判断する）。今回、remote URL を見なくても\nエラーメッセージだけで結論は出せた。",
+      "age_days": 0,
+      "why": "GitHub Secrets の値と PAT の scope はリポジトリの外（AIからは実行も検査もできない）",
+      "evidence": "リポジトリから検査できない（人が閉じる）"
     }
   ],
   "ai": [
     {
-      "id": "act-selfheal-ap-20260824-actions",
-      "title": "未修理の故障: ap-20260824-actions（auth_or_credential）",
+      "id": "act-credential-actions",
+      "title": "主系が2日連続で即時失敗した件（2026-08-24〜08-25）— 原因は上流 action の版・pin 済み・schedule での再現なしを確認する",
       "age_days": 0,
       "auto": null,
-      "evidence": "ap-20260824-actions は未修理のまま（repair_of で名指しされていない）"
-    },
-    {
-      "id": "act-selfheal-ap-20260825-actions",
-      "title": "未修理の故障: ap-20260825-actions（auth_or_credential）",
-      "age_days": 0,
-      "auto": null,
-      "evidence": "ap-20260825-actions は未修理のまま（repair_of で名指しされていない）"
-    },
-    {
-      "id": "act-status-freshness-ci",
-      "title": "status JSON の鮮度をCIで検証する（再発防止・未実装）",
-      "age_days": 0,
-      "auto": null,
-      "evidence": ".github/workflows/seo-check.yml に「--shipping-pr-has-status」がまだ無い"
+      "evidence": "2026-08-25 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
     }
   ],
-  "executed": [
-    {
-      "handler": "append-cost",
-      "ok": true,
-      "changed": 0,
-      "log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む"
-    }
-  ]
+  "executed": []
 }

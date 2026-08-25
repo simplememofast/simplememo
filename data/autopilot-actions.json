@@ -116,11 +116,11 @@
           "needle": "statusAgreement"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": ".github/workflows/seo-check.yml に「--shipping-pr-has-status」がまだ無い"
+      "closed_jst": "2026-08-25",
+      "evidence": "scripts/autopilot-runs.mjs に「statusAgreement」がある"
     },
     {
       "id": "act-ccr-bigquery-connector",
@@ -166,7 +166,7 @@
     },
     {
       "id": "act-selfheal-ap-20260824-actions",
-      "title": "未修理の故障: ap-20260824-actions（auth_or_credential）",
+      "title": "未修理の故障: ap-20260824-actions（upstream_action_regression。起票時は auth_or_credential と記録していたが誤りで、data/autopilot-runs.json で訂正済み）",
       "detail": "2026-08-24 / actions / outcome=failed。Claude Code ステップが result.is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0 で即時失敗。実際の作業（ブランチ作成等）に入る前、初回のモデル呼び出し相当の時点で終わっている。full outputはshow_full_output未設定のためActionsログに出ておらず、正確なエラーメッセージは未特定",
       "source": "selfheal",
       "domain": null,
@@ -183,15 +183,15 @@
           "run_id": "ap-20260824-actions"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "ap-20260824-actions は未修理のまま（repair_of で名指しされていない）"
+      "closed_jst": "2026-08-25",
+      "evidence": "ap-20260824-actions は selfheal の未修理リストから消えた"
     },
     {
       "id": "act-selfheal-ap-20260825-actions",
-      "title": "未修理の故障: ap-20260825-actions（auth_or_credential）",
+      "title": "未修理の故障: ap-20260825-actions（upstream_action_regression。起票時は auth_or_credential と記録していたが誤りで、data/autopilot-runs.json で訂正済み）",
       "detail": "2026-08-25 / actions / outcome=failed。前日(ap-20260824-actions)と同一シグネチャで2日連続失敗: is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0。時間・失敗の形が完全一致しており単発のflakeではない。CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEYいずれかの認証エラーが濃厚だが、full outputが伏せられておりログから断定はできない",
       "source": "selfheal",
       "domain": null,
@@ -208,11 +208,11 @@
           "run_id": "ap-20260825-actions"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "ap-20260825-actions は未修理のまま（repair_of で名指しされていない）"
+      "closed_jst": "2026-08-25",
+      "evidence": "ap-20260825-actions は selfheal の未修理リストから消えた"
     },
     {
       "id": "act-cost-sync",
@@ -267,7 +267,7 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "2026-08-25 以降 actions はまだ着手していない（失敗が無いことは回復の証拠にならない）",
+      "evidence": "2026-08-25 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
       "last_run_jst": "2026-08-25",
       "last_run_log": "版の照合で原因を特定（ジョブログの Download action repository 行）。secret 一覧は HTTP 403 のままで、鍵が回っていないことまでは repo からは断定できない"
     },
@@ -291,11 +291,11 @@
           "needle": "16b3b310c3d7b5279df73130324d5205aeea8eac"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": ".github/workflows/obsidian-autopilot.yml に該当SHAがまだ無い"
+      "closed_jst": "2026-08-25",
+      "evidence": ".github/workflows/obsidian-autopilot.yml に「16b3b310c3d7b5279df73130324d5205aeea8eac」がある"
     },
     {
       "id": "act-gh-pat-scope-and-rotation",
@@ -317,6 +317,30 @@
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
       "evidence": "リポジトリから検査できない（人が閉じる）"
+    },
+    {
+      "id": "act-budget-overrun-32816234185",
+      "title": "1回上限の超過が未レビュー: 2026-08-25 repair $11.9329（上限 $3.00 の4倍）— 主系が repair を選ぶと止まる",
+      "detail": "解除: `node scripts/autopilot-budget.mjs --ack-overrun 32816234185 --why \"…\"`\n**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。上限は data/model-routing.json の rules.repair.max_usd_per_run が正で、実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる）。\n**月次上限は通っている**ため `--check` は exit 0 で、\"予算は大丈夫\" に見える。止まるのは `--check-run-cap --task repair` の側だけ。\nなお data/authority-matrix.json の「AI実費」は human_only に `monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**（権限表の変更は self_repair.must_not なのでAIからは直せない）。",
+      "source": "budget",
+      "domain": null,
+      "touches": [
+        "data/autopilot-cost.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている（AIが自分の超過を自分で通せると、上限が「お願い」になる）",
+      "auto": null,
+      "close_check": {
+        "kind": "budget_overrun_reviewed",
+        "params": {
+          "run_id": "32816234185"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": "run 32816234185（repair $11.9329 / 上限 $3.00）が未レビュー。主系はこの種別を選ぶと止まる"
     }
   ]
 }
