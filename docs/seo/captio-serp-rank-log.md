@@ -192,6 +192,83 @@ Investigation 節の有無。
 
 ---
 
+## 2026-08-25 (weekly)
+
+> **方法論メモ**: WebSearch ツールの返却件数はクエリあたり ~10 件（タスク仕様の 30 件には届かず）。US-based Google index を使用。JA キーワードの順位は google.co.jp と差が生じることがある。位置は返却リンクの順序から推定し「~N」表記。simplememofast.com の App Store リスティング（id6758438948）は自社ページではないため位置記録の主体は simplememofast.com ドメインの URL に限る。
+
+| Keyword | Lang | SimpleMemo pos (page) | attnoel | note2selfmail | emailmeapp | Δ vs last | Notes |
+|---|---|---|---|---|---|---|---|
+| captio | JA | not visible (App Store listing ~2 だが非対象) | not visible | not visible | not visible | flat | Captioo App Store #1；SimpleMemo App Store #2（公式サイトURL不可視）；Emburse混在なし |
+| captio 代替 | JA | ~4 (/blog/captio-discontinued) | **~2** (prev ~1) | not visible | not visible | SM: flat；attnoel: −1 | SM App Store listing #1（非対象）；attnoel #2；note.com #3；/blog/ #4；/captio/ #5 |
+| captio なくなった | JA | ~4 (/blog/captio-discontinued) | ~2 | not visible | not visible | flat | Captioo App Store #1；attnoel #2；webcli.jp #3；SM #4；teineini.net #5 |
+| captio 後継 | JA | **~3** (/blog/captio-discontinued) | ~2 (prev: not visible) | not visible | not visible | SM: **+2**；attnoel: 復帰 | Captioo App Store #1；attnoel #2；SM #3；teineini.net #4；progsoft.net #5 |
+| captio 使えない | JA | not visible | **~1** (prev ~2) | not visible | not visible | SM: flat；attnoel: **+1** | attnoel #1；note.com #2；webcli.jp #3；teineini.net #4；growrichslowly.net #5；SM圏外 |
+| Obsidian メモ iPhone | JA | App Store ~1；simplememofast.com not visible | n/a | n/a | n/a | flat | Obsidian公式 App Store #2；note.com #3；mac-ra.com #4；SM website 不可視 |
+| Obsidian 音声入力 | JA | not visible | n/a | n/a | n/a | flat | note.com ショートカット記事が #1-7 を占有；genspark.ai #6 |
+| メモアプリ 音声 無料 | JA | not visible | n/a | n/a | n/a | flat | jp.plaud.ai #1；notta.ai #2；mojiokoshi3.com #4；文字起こしサービスが支配 |
+| 自分宛メール メモ | JA | not visible | n/a | n/a | n/a | flat | メモメール App Store #1-2；Moca App Store #3；attnoel ~4（注: captio以外でも attnoel が露出）；SM不可視 |
+| Obsidian デイリーノート iPhone | JA | not visible；dev Qiita ~8 | n/a | n/a | n/a | flat | ipadworkers.substack.com #1；note.com #2-7；qiita.com/simplememo（開発者）~8；SM website 不可視 |
+| obsidian quick capture ios | EN | not visible | n/a | n/a | n/a | flat | Quick Draft / Quick Capture Vault Notes App 群が支配；quickcaptureobsidian.app #8；SM不可視 |
+| email to obsidian | EN | **not visible** (prev ~6) | n/a | n/a | n/a | **REGRESSION（圏外落ち）** | community.obsidian.md #1；obsidianstats.com #2；GitHub repos #4-5；email2obsidian.com #7；SM消失 |
+| voice memo obsidian | EN | **~4** (/en/blog/obsidian-voice-input) | n/a | n/a | n/a | **+2** | Obsidian Forum #1-3；SM #4；mdisbetter.com #5；Medium #6；drew.tech #7 |
+| captio alternative | EN | **~4** (/en/captio-alternative/) | n/a | ~6 (prev ~4) | not visible | SM: **+2**；note2self: −2 | IndieHackers SM紹介記事 #1；Note To Self Mail App Store #2；makeuseof.com #3；SM #4；/en/ #5 |
+| note to self email app | EN | **~4** (/en/send-email-to-yourself/) | n/a | ~5 (prev ~9) | ~6 (prev ~8) | SM: **新登場**；note2self: **+4**；emailme: **+2** | Note To Self App Store #1-3；SM #4（初ランクイン）；note2selfmail.app #5；emailmeapp.net #6 |
+
+**Take:** EN ページ群が今週堅調。voice memo obsidian が #4 へ 2 段上昇し、captio alternative も同じく #4 へ浮上、note-to-self-email-app ページが初めて #4 に登場した。JA では captio 後継が #3 に改善（+2）。一方 EN-12「email to obsidian」がトップ ~10 から完全に消え、community.obsidian.md / email2obsidian.com が SERP を占有しており調査が必要。
+
+### 調査 / Investigation
+
+**対象キーワード（トリガー）:**
+- EN-12「email to obsidian」— SM が ~6 → not visible（2 段以上の後退かつ圏外落ち）
+
+---
+
+**(a) 誰がポジションを取ったか**
+
+今週の email to obsidian SERP（上位 ~10）:
+1. community.obsidian.md/plugins/taskrobin（Sync Emails プラグイン公式ページ）
+2. obsidianstats.com/plugins/email-block-plugin
+3. forum.obsidian.md（Email client for Obsidian スレッド）
+4. github.com/anicholson/obsidian-google-mail
+5. github.com/tommll/obsidian-email-plugin
+6. forum.obsidian.md（Email forwarding to Obsidian スレッド）
+7. email2obsidian.com（専用サービス: メール転送で Obsidian Vault に保存）
+8. readmedium.com（Medium 記事）
+9-10. github.com Obsidian プラグイン関連
+
+**分析**: Obsidian 公式エコシステム（community.obsidian.md, forum.obsidian.md）と GitHub リポジトリが 1-6 位を独占。これらはプラットフォーム権威（Obsidian 公式ドメイン・GitHub）により従来から強固な位置を占める。email2obsidian.com は「メールを送ると Vault に届く」という直接競合サービスで 7 位に位置する。SM の /en/blog/email-to-obsidian は「ワークフロー解説ブログ」として公式プラグインページ群に競り負けている。
+
+**(b) インデックス状況**
+
+2026-08-18 の調査で `/en/blog/email-to-obsidian` は HTTP 200 OK・正常インデックスを確認済み。今週の結果から「デインデックス」ではなく「ランキング低下」と判断する（直前週に ~6 で可視だったページが今週のクエリでは返却されていない。US-based index での 10 件表示制限による変動可能性も排除できないが、常時可視から消えたのは実質的な後退）。
+
+**(c) 自サイト側の変更**
+
+`git log --since=2026-08-18` で /en/blog/email-to-obsidian に直接触れた PR は **0 件**。この期間のマージは以下が中心（いずれも email-to-obsidian 記事への影響は間接的）:
+- PR #518: EN ハブの内部リンク追加（email-to-obsidian へのリンクが含まれているか要確認）
+- PR #519: SEO/AIO 一括施策（v4 成長計画）
+- PR #521, #524: /obsidian/plugins/ 系の新設ページ（新設ページが内部リンクの重みを分散させた可能性）
+- PR #525: sitemap の CI バリデーション追加
+
+→ **自サイト側の直接変更なし。外部要因（Obsidian 公式エコシステムの安定上位）と、PR #521/524 の /obsidian/ 新設ページによる内部リンク構造変化が間接影響した可能性。**
+
+---
+
+**Next actions（記録のみ。実施しない）:**
+
+1. `/en/blog/email-to-obsidian`: HowTo JSON-LD と 2026 年最新ツール比較セクション（email2obsidian.com vs SimpleMemo workflow）を追加し、コンテンツ鮮度とページ権威を高める。
+2. `/en/blog/email-to-obsidian`: PR #518 で追加した EN ハブからこの記事への内部リンクが張られているか確認し、未リンクなら /en/、/en/captio-alternative/、/obsidian/ 各ハブからの文脈リンクを追加する。
+3. `sitemap.xml`: /en/blog/email-to-obsidian の lastmod が PR #525 後も最新に更新されているか確認し、Googlebot のクロール優先度を維持する。
+
+**Morning brief JSON:**
+`{"type":"serp-weekly","date":"2026-08-25","regressed":1,"improved":4,"flat":10,"watch":["EN-12","JA-5","JA-9"],"investigation":true}`
+
+```json
+{"date":"2026-08-25","kw_tracked":15,"top3":1,"top10":6,"improved":4,"declined":1,"out_of_top30":1,"worst":{"kw":"EN-12 email to obsidian","from":"~6","to":"not visible"},"best":{"kw":"EN-15 note to self email app","from":"not visible","to":"~4"},"investigation":true,"take":"EN voice/captio-alternative/note-to-self pages climbed to ~4; EN-12 email-to-obsidian dropped out; JA-4 captio-successor improved to #3."}
+```
+
+---
+
 ## YYYY-MM-DD（見本エントリ — 週次実行時にこのブロックを複製して日付を入れ、この行の括弧書きは消す）
 
 | # | Keyword | Our pos (URL) | Top competitor (pos) | Δ vs last | Notes |
