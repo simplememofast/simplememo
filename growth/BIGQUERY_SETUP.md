@@ -99,37 +99,54 @@ ORDER BY data_date DESC, ns;
 どの試行を落とすかを選ぶことはできない。失敗はBigQueryに届く前
 （Google側のエクスポート処理内）で起きている。**こちらの設定で直せるものは無い。**
 
-**temp_ テーブルは消さない。** 自前で約7日の有効期限を持っていて放っておけば
+**temp_ テーブルは消さない。** 自前で約6日の有効期限を持っていて放っておけば
 消えるうえ、リトライ中の試行が使っている可能性がある。
 
-### `ExportLog` の60日期限は外した（2026-08-22 実施）
+**その後（2026-08-25 確認）:** 何もしないまま自己復旧した。site / url とも
+**08-10〜08-22 が穴なく揃い、2テーブルのズレも0**。落ちた6件の temp_ は
+そのまま残っている（08-28 に自動失効）。**「メールが来ても、欠損を確かめて
+から動く」で正しかった**ことの実測。
 
-データセットの `defaultTableExpirationMs` が60日で、テーブル作成時に
-`ExportLog` へ焼き付いていた。`searchdata_*` は日付パーティションなので
-60日のローリング窓になるだけだが、**`ExportLog` は非パーティションなので
-テーブルごと 2026-10-12 に消える**ところだった。着弾状況の確認は
-（`bq-preflight` も Runbook §1-2 も）全部ここを読んでいる。
+### 保持期限は全部外した（2026-08-25 実施）
 
-```sql
--- 実行済み。再発したとき（データセットを作り直した等）はこれ
-ALTER TABLE `yurika-simplememo.searchconsole.ExportLog`
-  SET OPTIONS (expiration_timestamp = NULL);
-```
+データセットに `defaultTableExpirationMs` / `defaultPartitionExpirationMs` が
+60日で入っていて、テーブル作成時にそれぞれへ焼き付いていた。放っておくと:
 
-**データセット既定の60日はそのまま残してある。** つまり:
+- **`ExportLog` が 2026-10-12 にテーブルごと消える**（非パーティションなので
+  丸ごと）。着弾状況の確認は `bq-preflight` も Runbook §1-2 も全部ここを読む
+- `searchdata_*` は **60日より古い日が黙って消える**。データ開始が 2026-08-10
+  なので**最初の1日が落ちるのは 2026-10-09**。28日窓は無事だが、前年同期比や
+  「90日前と比べて」は永久に作れなくなる
 
-- `searchdata_site_impression` / `searchdata_url_impression` は
-  **60日より古いパーティションが黙って消える**。データ開始が 2026-08-10 なので
-  **最初の1日が落ちるのは 2026-10-09**。28日窓には影響しないが、
-  前年同期比や「90日前と比べて」は永久に作れない
-- ここに**新しく非パーティションのテーブルを作ると、同じ60日期限が付く**
-
-保持を延ばす／無期限にするならデータセット側を変える（オーナー判断）:
+3本流して外した。**この3本目までやらないと意味がない:**
 
 ```sql
+-- ① これから作られるテーブルの既定
 ALTER SCHEMA `yurika-simplememo.searchconsole`
   SET OPTIONS (default_partition_expiration_days = NULL, default_table_expiration_days = NULL);
+
+-- ② ExportLog 本体（テーブル期限）
+ALTER TABLE `yurika-simplememo.searchconsole.ExportLog`
+  SET OPTIONS (expiration_timestamp = NULL);
+
+-- ③ 既存の2テーブル（パーティション期限）
+ALTER TABLE `yurika-simplememo.searchconsole.searchdata_site_impression`
+  SET OPTIONS (partition_expiration_days = NULL);
+ALTER TABLE `yurika-simplememo.searchconsole.searchdata_url_impression`
+  SET OPTIONS (partition_expiration_days = NULL);
 ```
+
+> **①だけでは何も直らない。** データセット既定は**テーブル作成時にコピーされる**
+> だけで、既存テーブルは自分の `timePartitioning.expirationMs` を持ち続ける。
+> ①を実行した直後でも `searchdata_*` は60日で消え続ける。既存テーブルは
+> ②③で個別に外す。
+
+**temp_ テーブルは道連れにならない。** サチコ側が作成時に自前で約6日の期限を
+付けている（`temp_..._2026-08-14` は 08-21 18:40 作成→08-28 失効、
+`temp_..._2026-08-17` は 08-22 10:39 作成→08-28 失効）。60日の既定を外しても
+落ちた試行の痕跡が永久に溜まることはない。
+
+費用は無視できる。1日あたり約150KB・1年で約55MB で、無料枠10GBの0.5%。
 
 ---
 
