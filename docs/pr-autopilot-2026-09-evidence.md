@@ -163,7 +163,9 @@ GitHub Actions API で `obsidian-autopilot.yml` の全12runを実測した結果
 | 9 | 08-19 | **90分** | cancelled | aptがジョブ上限を食い尽くした（→ PR #513） |
 | 10 | 08-20 | 30秒 | **failure** | `allowed_bots` に非人間アクターが弾かれた（→ PR #522/#523） |
 | 11 | 08-22 | 4分 | success | **`permission_denials_count: 14` で成果物ゼロ**・実費 $0.8149 |
-| **12** | **08-23** | **18分** | **success** | **初出荷。`/obsidian/pricing/`（PR #538）** |
+| **12** | **08-23** | **18分** | **success** | **初出荷。`/obsidian/pricing/`（PR #538）**・実費 **$7.2967**（150ターン。台帳へは08-25に後追いで記録） |
+| 13 | 08-24 | 10秒 | **failure** | 初回モデル呼び出しの時点で即時失敗。`modelUsage` 空・$0・`permission_denials_count: 0` |
+| 14 | 08-25 | 10秒 | **failure** | 13と同一シグネチャ。**未解消** |
 
 **11回目までに出荷された記事・修正は、すべて副系CCR Routineによるもの。**
 主系は4種類の異なる理由で連続して不発だった。
