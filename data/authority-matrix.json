@@ -84,6 +84,35 @@
       "note": "AIワークフローに actions: write を与えていないため、AIはこの連鎖を起動できない（claude.yml 冒頭に理由あり）"
     },
     {
+      "domain": "macOSランナーの起動（GitHub Actions 分数の消費）",
+      "reversible": false,
+      "ai_may": [
+        "残枠と1回あたりの実費の提示",
+        "人間が名指しで指示したときの dispatch 代行"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "回すという判断そのもの",
+        "confirm 合言葉の入力"
+      ],
+      "gate": "qa-ios.yml は自動トリガを持たず、confirm 入力が required。値の照合は ubuntu の gate ジョブが持ち、macOSの2ジョブは needs: gate。入力なしの dispatch は GitHub が422で弾く",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/qa-ios.yml",
+        "../simplememo-ios/CLAUDE.md"
+      ],
+      "status": "active",
+      "threshold": {
+        "monthly_included_minutes": 2000,
+        "macos_multiplier": 10,
+        "per_run_equivalent_minutes": 130,
+        "set_by": "github_plan",
+        "overage_policy": "bill_rather_than_stop",
+        "overage_policy_set_by": "owner 2026-08-25",
+        "note": "2,000分/月は GitHub Free（simplememofast は個人アカウント）の付帯分で、こちらが決めた値ではない。130分は qa-ios.yml ヘッダの実測13分×10倍単価（watch ON なら +160分）。**超過時にどちらへ倒すかはオーナーが決めた（2026-08-25）: 止まるより課金されるほう。** $0 budget は枯れた瞬間に release / release-command と Flag Ops まで止めるので、そちらのほうが高くつく。金額側は小さい —— 超過分は Linux 約$0.008/分（200分で約$1.6）・macOS 約$0.08/分（7/31 の実績で$10）。**ただしこれは方針であって設定の確認ではない。** GitHub の budget 設定はリポジトリからは読めないので、実際にどちらに倒れるかをCIから検査する手段は無い"
+      },
+      "note": "**分数は戻らない**（リセットは翌月1日）ので不可逆に分類した。焼けるのは金額ではなく出荷で、枯れると release / release-command が止まり TestFlight配信もApp Review申請もできなくなる。2026-07-31 に1日で $10 を使い切った実績があり、そのときの経路は『AIが足した push トリガ』だった。表に無い支出は、次に判断するセッションからは存在しない"
+    },
+    {
       "domain": "App Review への提出",
       "reversible": false,
       "ai_may": [],
@@ -319,7 +348,10 @@
       "data/autopilot-cost.json",
       "data/automation-coverage.json",
       "scripts/autopilot-gate.mjs",
-      "scripts/autopilot-drill.mjs"
+      "scripts/autopilot-drill.mjs",
+      "data/autopilot-actions.json",
+      "scripts/autopilot-act.mjs",
+      ".github/workflows/autopilot-act.yml"
     ],
     "must_not": [
       "検証を弱める変更（CIチェックの削除・スキップ・閾値の緩和）",
@@ -376,7 +408,8 @@
       "node scripts/check-degradation.mjs --check",
       "node scripts/code-authorship.mjs --check",
       "node scripts/check-store-facts.mjs --check",
-      "node growth/scripts/check-mentions.mjs --check"
+      "node growth/scripts/check-mentions.mjs --check",
+      "node scripts/autopilot-act.mjs --check"
     ]
   }
 }

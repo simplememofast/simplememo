@@ -431,7 +431,7 @@ node scripts/sync_constants.js --check
 node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
 node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
-node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
+node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合＋status JSONとの突き合わせ
 node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止め
 node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
 node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
@@ -577,7 +577,9 @@ AI完走率・人間介入率・変更失敗率・改善サイクル時間は、
 ```
 node scripts/autopilot-runs.mjs           # 指標サマリ
 node scripts/autopilot-runs.mjs --json     # status JSON の runs に入れる形
-node scripts/autopilot-runs.mjs --check    # CI: 形と整合（seo-check.ymlに入っている）
+node scripts/autopilot-runs.mjs --check    # CI: 形と整合＋status JSONとの突き合わせ（seo-check.ymlに入っている）
+                                           # 台帳の最終記入と data/autopilot-status.json の date_jst が
+                                           # 食い違うと落ちる。§5-2を書き忘れた回を出荷させないため
 ```
 
 **毎回の手順（status JSONを書くのと同じPRで）:**
@@ -699,3 +701,95 @@ ENセグメント1.76%で期待0.56クリック、最も甘いサイト全体カ
   撮影依頼を積み、画像が `assets/img/<slug>/` に入ってから公開する
 - App Store Connect / GSCエクスポート等のオーナー作業
 - 判断に迷う場合（ブランド判断・大きな構造変更）は実装せずログに起票する
+
+### 7-1. 依頼はアクション台帳に積む（`owner_requests` は使わない）
+
+**2026-08-25 改訂。**それまで依頼は status JSON の `owner_requests`、つまり
+**ただの `string[]`** に積んでいた。id も state も閉じ条件も無いので、
+**解決しても消える理由が無い。** 実際、08-25 の日報は12件のうち6件が
+【解消済み】【完了】のまま再送されており、その日いちばん重要な1件
+（主系が2日連続で認証系の即時失敗を起こしていた）はその中に埋もれていた。
+**件数が増えるほど読まれる確率が下がるリスト**は、報告ではなく堆積である。
+
+積む先は `data/autopilot-actions.json`。書き方は
+`node scripts/autopilot-act.mjs --check` が検証する。
+
+- **閉じ条件（`close_check`）の無い行は書けない。** 検査で落ちる。
+  「いつ消えるか」を決められない依頼は、消えない依頼になる
+- 閉じ条件は `scripts/autopilot-act.mjs` の `CLOSE_CHECKS` にあるものだけ。
+  **台帳に任意のコマンドは書けない**（依頼リストを実行経路にしない）
+- リポジトリの外が対象のものは `outside_repo: true` + `close_check: manual`。
+  自動では絶対に閉じないが、`age_days` が出るので放置は放置として見える
+- **`owner` は書かない。** `data/authority-matrix.json` から毎回導出される
+
+### 7-1-1. 閉じ条件は「実在するもの」を指す（2026-08-25 追記）
+
+**導入当日に2回踏んだ。** どちらも「閉じ条件が、閉じたい当のものを指していない」形。
+
+| 事例 | 何が起きたか |
+|---|---|
+| 実費台帳 | 閉じ条件を `autopilot-budget.mjs --check` にしていた。あれは**上限超過**を見る検査で、台帳が空でも通る。閉じたいのは「載っているか」だった |
+| status JSON 鮮度 | 閉じ条件を `seo-check.yml` の `--shipping-pr-has-status` にしていた。**そんな名前は誰も実装しない。** 実装は PR #544 が `autopilot-runs.mjs` の `statusAgreement()` として既に書いていた |
+
+規則:
+
+1. **閉じ条件は、閉じたい当のものを検査する。** 近くにある通りやすい検査で
+   代用しない。代用した瞬間、その依頼は「閉じたことになる」か
+   「永久に閉じない」かのどちらかになる
+2. **`file_contains` の needle は、実在するか着手済みのものだけを書く。**
+   思いつきの名前を書くと、**誰も実装しないので永久に開く。**
+   既存PRがあるならその実装の名前を使い、`detail` にPR番号を書く
+3. **原理的に埋まらないものは、実測してから除外する。** 最初から諦めない。
+   除外したことは `evidence` に必ず出す（黙って消さない）
+
+**永久に開く依頼は、永久に消えない依頼と同じ害を持つ。** どちらもリストを
+読まれなくする方向に働く。この台帳が置き換えた `owner_requests` の失敗そのもの。
+
+### 7-2. 「オーナー依頼」にする前に、まずこれを見る
+
+**この判定を散文でやっていたことが、実際に分類ミスを生んでいる。**
+2026-08-22、`claude_args` に `--allowedTools` が無くて成果物ゼロになった件は
+オーナー依頼として積まれたが、同じファイルはセッション自身が PR #522/523 で
+2回書き換えて通しており、**最初から自分で直せる案件だった**（PR #526 の記述）。
+
+順に見る。上で決まったらそこで止める。
+
+1. **`data/emergency-stop.json`** — 停止中なら何もしない
+2. **リポジトリの外か。** App Store Connect・オーナーのローカル環境・
+   課金コンソール・GitHub Secrets の値。**検査できないものは実行もできない**
+   → `outside_repo: true` で人へ
+3. **`data/authority-matrix.json` の `domains`。** 該当領域の
+   `requires_approval` が true → 人へ。理由も台帳に写す
+4. **無人で走らせるのか（`auto` を付けるのか）。** 付けるなら
+   `self_repair.may_modify` の内側だけ。外を触るなら `auto` を付けない
+5. **ここまでで止まらなければ、それはAIがやる。**
+   `may_modify` は**レーンF（無人の自己修復）の境界であって、
+   セッションの境界ではない。** ここを取り違えると、
+   セッションが普通にできることまで人の依頼として積み上がる
+
+### 7-3. 日次アクチュエータ（`.github/workflows/autopilot-act.yml`）
+
+09:00 JST に走り、その日の結果から依頼を導出し、**自分でやってよいものは
+実際にやる**。モデルを呼ばないので、**主系が認証で落ちている日も動く。**
+
+自動で実行するのは、判断を要さないぶん毎日確実に漏れる種類の作業だけ:
+
+| handler | 何をするか | なぜ機械にやらせるか |
+|---|---|---|
+| `reconcile-runs` | Actions API の run を運転台帳へ落とす | **落ちた回は台帳を書く主体がいない。**08-24 の即死が台帳に載るまで50.7時間かかった |
+| `append-cost` | ジョブログの実費を台帳へ | §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる |
+| `contain` | 上限に達した経路を止める | 「⛔ 人に上げる」の表示は翌朝の実行を止めない |
+
+**外した handler:** `probe-secret`（secret の存在確認）。初回の実走で GitHub API が
+**HTTP 403** を返した——secret 一覧の読み取りは admin 権限が要り、GITHUB_TOKEN にも
+GH_PAT にも無い。**毎日「実行できず」を出すだけの handler は、この台帳が潰したかった
+ノイズそのもの**なので外した。存在確認を自動化したいなら、先に権限のあるPATが要る。
+
+**実費が存在しない run について。** Claude Code ステップに到達せず落ちた回
+（apt詰まり・actor拒否など）は実行ログ自体が無く、実費は**0ではなく発生していない**。
+`append-cost` は取得を実際に試みてから、埋まらないものを `close_check.params.exclude`
+に積む。積まないと「実費台帳に載っていない run がある」が**永久に閉じない依頼**になり、
+この台帳が潰したかった堆積に戻る。**最初から諦めず、実測してから除外する。**
+
+セッション側でやることは変わらない。**レーンFは引き続きセッションの仕事**で、
+アクチュエータは原因特定も実装もしない。台帳の同期と閉じ条件の判定だけを持つ。

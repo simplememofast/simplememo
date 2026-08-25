@@ -1,0 +1,78 @@
+{
+  "as_of_jst": "2026-08-25",
+  "open_total": 7,
+  "oldest_open_days": 3,
+  "acknowledged": 2,
+  "closed_today": [
+    {
+      "id": "act-cost-sync",
+      "title": "実費台帳に載っていない run が 2件",
+      "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）"
+    }
+  ],
+  "human": [
+    {
+      "id": "act-asc-privacy-answers",
+      "title": "App Store Connect の「App のプライバシー」回答を PrivacyInfo.xcprivacy と揃える",
+      "detail": "2026-08-22 に申告ファイル側へ3種別を追加した（Product Interaction / Device ID / Other Diagnostic Data）。ASC側の回答はリポジトリから見えないため検査できない。**片方だけ直すと逆に不整合になる。**次のビルドを出す前に揃えるのが安全。将来 iOS が client_send_id を送り始めた日に Linked が true になり、そのとき申告とASCの両方を変える。",
+      "age_days": 3,
+      "why": "リポジトリの外が対象（ここからは実行も検査もできない）",
+      "evidence": "リポジトリから検査できない（人が閉じる）"
+    },
+    {
+      "id": "act-authority-split-deletion",
+      "title": "権限表の「ユーザーデータの削除要求への対応」を2つに分けるか決める",
+      "detail": "権限表は requires_approval: true / human_only: [実行の承認] だが、実装はそれより広い。アプリ内の自己削除（POST /v1/account/delete）は承認を挟まずその場で完了する — App Store Guideline 5.1.1(v) がそれを要求しているため。つまり (a) アプリ内の自己削除＝自動・承認なし と (b) 個別の連絡による削除要求＝本人確認と承認が要る の2つが1行に束ねられ、表は (b) の書き方で (a) を覆っている。**分けるかどうかは権限そのものの話なのでAIは変更しない**（self_repair.must_not「権限表を自分で書き換えない」）。",
+      "age_days": 3,
+      "why": "権限表そのものの変更は self_repair.must_not で明示的に禁じられている",
+      "evidence": "リポジトリから検査できない（人が閉じる）"
+    },
+    {
+      "id": "act-egress-policy-confirm",
+      "title": "副系CCRの egress 制限が意図どおりか確認する",
+      "detail": "副系の実行環境は obsidian.md / notion.com / github.com本体 / simplememofast.com への直接アクセスが 403 EGRESS_BLOCKED になる（到達できるのは api.github.com・raw.githubusercontent.com・objects.githubusercontent.com・npmjs.com 程度）。**本番 simplememofast.com が読めない**ため、副系は Runbook §0 の冪等チェック(b)「本番status JSONの date_jst」を実行できない。実質のガードは (c) origin/main の同ファイルと、当日ブランチの占有だけ、と理解しておく必要がある。",
+      "age_days": 3,
+      "why": "リポジトリの外が対象（ここからは実行も検査もできない）",
+      "evidence": "リポジトリから検査できない（人が閉じる）"
+    },
+    {
+      "id": "act-credential-actions",
+      "title": "actions が 2日連続で認証系の即時失敗（2026-08-24〜2026-08-25）",
+      "detail": "run 32667079679 / 32779337325。作業に入る前に落ちており、単発の flake ではない。復旧手順は `claude setup-token` で再取得 → リポジトリ secret CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）。**この経路が復活するまで、出荷は副系だけが担っている。**",
+      "age_days": 0,
+      "why": "secret の再発行はリポジトリ外の操作（オーナーのローカル + GitHub Secrets）",
+      "evidence": "2026-08-25 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
+    }
+  ],
+  "ai": [
+    {
+      "id": "act-selfheal-ap-20260824-actions",
+      "title": "未修理の故障: ap-20260824-actions（auth_or_credential）",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "ap-20260824-actions は未修理のまま（repair_of で名指しされていない）"
+    },
+    {
+      "id": "act-selfheal-ap-20260825-actions",
+      "title": "未修理の故障: ap-20260825-actions（auth_or_credential）",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "ap-20260825-actions は未修理のまま（repair_of で名指しされていない）"
+    },
+    {
+      "id": "act-status-freshness-ci",
+      "title": "status JSON の鮮度をCIで検証する（再発防止・未実装）",
+      "age_days": 0,
+      "auto": null,
+      "evidence": ".github/workflows/seo-check.yml に「--shipping-pr-has-status」がまだ無い"
+    }
+  ],
+  "executed": [
+    {
+      "handler": "append-cost",
+      "ok": true,
+      "changed": 0,
+      "log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む"
+    }
+  ]
+}
