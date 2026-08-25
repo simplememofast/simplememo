@@ -155,14 +155,22 @@ export const CLOSE_CHECKS = {
    * **autopilot-budget.mjs --check で代用しない。**あれは「上限を超えたか」を
    * 見る検査で、台帳が空でも通る。閉じ条件は、閉じたい当のものを検査する。
    */
-  cost_covers_runs(_params, ctx) {
+  cost_covers_runs({ exclude = [] }, ctx) {
     if (!ctx.costDoc) return { closed: false, evidence: '実費台帳を読めず判定不能' };
     const costed = new Set((ctx.costDoc.runs ?? []).map((e) => String(e.run_id ?? '')));
+    // **実費が原理的に存在しない run がある。** Claude Code ステップに到達せず
+    // 落ちた回（apt詰まり・actor拒否など）は実行ログ自体が無いので、待っても
+    // 永久に埋まらない。ここを除外しないと、この依頼は**閉じない依頼**になる
+    // ——この台帳が潰したかった「堆積」そのものに戻る。
+    // 除外は handler が実測（取得を試みて失敗）してから積む。最初から諦めない。
+    const skip = new Set(exclude);
     const missing = (ctx.runsDoc?.runs ?? [])
-      .filter((r) => r.attempted && r.external_ref && !costed.has(String(r.external_ref)));
+      .filter((r) => r.attempted && r.external_ref
+        && !costed.has(String(r.external_ref)) && !skip.has(r.run_id));
+    const note = skip.size > 0 ? `（実費が存在しない ${skip.size}件を除外: ${[...skip].join(', ')}）` : '';
     return missing.length === 0
-      ? { closed: true, evidence: '着手した run はすべて実費台帳にある' }
-      : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}` };
+      ? { closed: true, evidence: `着手した run はすべて実費台帳にある${note}` }
+      : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}` };
   },
 
   /** 許可済みスクリプトが exit 0 を返せば閉じる。 */
@@ -379,7 +387,12 @@ export function derive(ctx) {
         // 更新で、どちらもリポジトリの中から実行できない。
         force_owner: 'human',
         force_owner_why: 'secret の再発行はリポジトリ外の操作（オーナーのローカル + GitHub Secrets）',
-        auto: 'probe-secret',
+        // 【2026-08-25】ここには当初 probe-secret（secretの存在確認）を付けていたが、
+        // 初回の実走で **GitHub API が HTTP 403** を返した——secret 一覧の読み取りは
+        // admin 権限が要り、GITHUB_TOKEN にも GH_PAT にも無い。
+        // **毎日「実行できず」を出すだけの handler は、この台帳が潰したかった
+        // ノイズそのもの**なので外した。存在確認をしたければ権限のあるPATが要る。
+        auto: null,
         close_check: {
           kind: 'no_failure_since',
           params: { route, failure_class: 'auth_or_credential', since: last.date_jst },
@@ -650,7 +663,7 @@ export const HANDLERS = {
    * 実費台帳の同期。ジョブログから total_cost_usd を読んで --append する。
    * **取得できなかった回は書かない**（0を書くと「無料で動いた」になる）。
    */
-  async 'append-cost'(ctx) {
+  async 'append-cost'(ctx, action) {
     if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: '認証情報が無く実費を取得できない' };
     const costed = new Set((ctx.costDoc?.runs ?? []).map((e) => String(e.run_id ?? '')));
     const targets = (ctx.runsDoc?.runs ?? [])
@@ -658,13 +671,25 @@ export const HANDLERS = {
       .slice(-10); // 一度に遡る上限。歴史全部を毎日取りに行かない
     const log = [];
     let changed = 0;
+    const unmeasurable = [];
     for (const r of targets) {
       const cost = await fetchRunCost(ctx.repo, ctx.token, r.external_ref);
-      if (cost == null) { log.push(`${r.run_id}: 実費を取得できなかった（0ではない）`); continue; }
+      if (cost == null) {
+        // ジョブログに実費行が無い ＝ Claude Code ステップに到達せず落ちた回。
+        // **0 を書かない**（「無料で動いた」になる）。代わりに、待っても埋まらない
+        // ものとして除外に積む。積まないと、この依頼が永久に開いたままになる。
+        log.push(`${r.run_id}: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む`);
+        unmeasurable.push(r.run_id);
+        continue;
+      }
       const args = ['--append', '--date', r.date_jst, '--route', r.route,
         '--run-id', String(r.external_ref), '--cost', String(cost.usd),
         '--outcome', r.outcome, '--note', '日次アクチュエータが自動追記（ジョブログの result 行）'];
       if (cost.turns != null) args.push('--turns', String(cost.turns));
+      // 種別は**分かるときだけ**書く。推測を入れると種別ごとの枠が静かに嘘になる。
+      const kind = r.lane === 'F' ? 'repair'
+        : ['new', 'refresh', 'wiring'].includes(r.action) ? 'article' : null;
+      if (kind) args.push('--task-kind', kind);
       try {
         const out = execFileSync(process.execPath,
           [path.join(ROOT, 'scripts/autopilot-budget.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' });
@@ -673,6 +698,11 @@ export const HANDLERS = {
       } catch (e) {
         log.push(`${r.run_id}: 追記に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
       }
+    }
+    if (unmeasurable.length > 0 && action?.close_check?.params) {
+      const cur = new Set(action.close_check.params.exclude ?? []);
+      for (const id of unmeasurable) cur.add(id);
+      action.close_check.params.exclude = [...cur].sort();
     }
     return { ok: true, changed, log: log.join('\n') || '対象なし' };
   },
@@ -692,35 +722,6 @@ export const HANDLERS = {
     }
   },
 
-  /**
-   * secret が存在するかだけを確かめる（値は読めない）。
-   *
-   * **これで「消えている」だけは即断できる。**存在するのに落ちているなら
-   * 期限切れ・失効で、そこはリポジトリからは区別できない。区別できないことを
-   * 区別できたように書かないために、結果の文面を2つに分ける。
-   */
-  async 'probe-secret'(ctx) {
-    if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: 'secret 一覧を取得できない' };
-    try {
-      const res = await fetch(`https://api.github.com/repos/${ctx.repo}/actions/secrets`, {
-        headers: { authorization: `Bearer ${ctx.token}`, accept: 'application/vnd.github+json',
-          'user-agent': 'simplememo-autopilot-act' },
-        signal: AbortSignal.timeout(20_000),
-      });
-      if (!res.ok) return { ok: false, changed: 0, log: `secret 一覧が HTTP ${res.status}（未設定という意味ではない）` };
-      const names = new Set(((await res.json()).secrets ?? []).map((s) => s.name));
-      const has = (n) => names.has(n);
-      if (!has('CLAUDE_CODE_OAUTH_TOKEN') && !has('ANTHROPIC_API_KEY')) {
-        return { ok: true, changed: 0, log: '**secret が両方とも存在しない。**これが原因で確定（再登録が復旧手順）' };
-      }
-      const present = ['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY'].filter(has).join(' / ');
-      return { ok: true, changed: 0,
-        log: `secret は存在する（${present}）。**存在と有効は別**で、期限切れ・失効はここからは区別できない。`
-          + '`claude setup-token` の再実行が最短の切り分け' };
-    } catch (e) {
-      return { ok: false, changed: 0, log: `secret 一覧の取得に失敗: ${e.message}` };
-    }
-  },
 };
 
 /** ジョブログから result 行の total_cost_usd / num_turns を拾う。 */
@@ -871,6 +872,14 @@ function selftest() {
     runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === true);
   t('実費台帳が無ければ判定不能', CLOSE_CHECKS.cost_covers_runs({}, { runsDoc: { runs: [] } }).closed === false);
 
+  // 閉じ条件: 実費が原理的に存在しない run は除外できる（除外しないと永久に閉じない）
+  const costCtx = { costDoc: { runs: [] }, runsDoc: { runs: [
+    { run_id: 'never', attempted: true, external_ref: '1' }] } };
+  t('除外前は閉じない', CLOSE_CHECKS.cost_covers_runs({}, costCtx).closed === false);
+  const excluded = CLOSE_CHECKS.cost_covers_runs({ exclude: ['never'] }, costCtx);
+  t('除外すれば閉じる', excluded.closed === true);
+  t('除外したことを隠さない', excluded.evidence.includes('実費が存在しない 1件'));
+
   // 閉じ条件: 入力が取れないときは閉じない
   const noApi = CLOSE_CHECKS.ledger_covers_runs({}, { workflowRuns: null, runsDoc: { runs: [] } });
   t('API未取得では閉じない', noApi.closed === false);
@@ -929,7 +938,7 @@ function selftest() {
     for (const f of fails) console.error(`  ✗ ${f}`);
     process.exit(1);
   }
-  console.log(`自己検査 OK（${24} 項目）`);
+  console.log(`自己検査 OK（${27} 項目）`);
 }
 
 // ============================================================
@@ -1006,16 +1015,13 @@ async function main() {
   if (has('apply')) {
     for (const a of ledger.actions) {
       if (a.state !== 'open' || !a.auto) continue;
-      const owner = classify(a, matrix).owner;
-      // **人の領域のアクションでも、診断だけの handler は動かしてよい。**
-      // probe-secret のように「調べるだけで何も変えない」ものがそれ。
-      // 変更を伴う handler は ai のときだけ。
-      const readOnly = a.auto === 'probe-secret';
-      if (owner !== 'ai' && !readOnly) continue;
+      // 自動実行は ai と判定されたものだけ。人の領域のアクションに
+      // handler を付けたくなったら、まず classify を通ることを確かめる。
+      if (classify(a, matrix).owner !== 'ai') continue;
       const h = HANDLERS[a.auto];
       if (!h) continue;
       let r;
-      try { r = await h(ctx); }
+      try { r = await h(ctx, a); }
       catch (e) { r = { ok: false, changed: 0, log: `handler が例外: ${e.message}` }; }
       applied.push({ handler: a.auto, ...r });
       a.last_run_jst = today;
