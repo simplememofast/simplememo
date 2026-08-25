@@ -374,6 +374,16 @@ jobs:
       # /autopilot/ は 176タスク・61.3% のまま**誰にも落とされなかった。**
       # 記者が最初にやるのは「その数字はどう数えましたか」なので、
       # **ページと台帳が違うのがいちばん悪い。**
+      # 【収入の履歴】日次の取り込みを足して「何日ぶん観測したか」を数える。
+      # **足せないものは足さない** —— date_range を持たない取り込みは飛ばす。
+      # 2026-08-25 に収入が接続されたが、月次にするには28日要る。
+      # ここが方針側の revenue_history_days とずれたら落とす
+      # （ずれたまま runway の材料に使われるのを防ぐ）。
+      - name: Revenue series
+        run: |
+          node growth/scripts/revenue-series.mjs --selftest
+          node growth/scripts/revenue-series.mjs --check
+
       # 【マーケ stop-loss】評価日を待たずに「戻す」判断だけを機械が出す。
       # 開発側には rollout-guard の kill があるのに**マーケ側だけ無く**、
       # 2026-07-01/02 の7件は6週間そのまま放置されていた。
