@@ -106,7 +106,9 @@
         "macos_multiplier": 10,
         "per_run_equivalent_minutes": 130,
         "set_by": "github_plan",
-        "note": "2,000分/月は GitHub Free（simplememofast は個人アカウント）の付帯分で、こちらが決めた値ではない。130分は qa-ios.yml ヘッダの実測13分×10倍単価（watch ON なら +160分）。**上限を止める仕組みは無い** — GitHub側の budget 設定はリポジトリから見えず、超過時に『止まる』か『課金される』かも確かめられない"
+        "overage_policy": "bill_rather_than_stop",
+        "overage_policy_set_by": "owner 2026-08-25",
+        "note": "2,000分/月は GitHub Free（simplememofast は個人アカウント）の付帯分で、こちらが決めた値ではない。130分は qa-ios.yml ヘッダの実測13分×10倍単価（watch ON なら +160分）。**超過時にどちらへ倒すかはオーナーが決めた（2026-08-25）: 止まるより課金されるほう。** $0 budget は枯れた瞬間に release / release-command と Flag Ops まで止めるので、そちらのほうが高くつく。金額側は小さい —— 超過分は Linux 約$0.008/分（200分で約$1.6）・macOS 約$0.08/分（7/31 の実績で$10）。**ただしこれは方針であって設定の確認ではない。** GitHub の budget 設定はリポジトリからは読めないので、実際にどちらに倒れるかをCIから検査する手段は無い"
       },
       "note": "**分数は戻らない**（リセットは翌月1日）ので不可逆に分類した。焼けるのは金額ではなく出荷で、枯れると release / release-command が止まり TestFlight配信もApp Review申請もできなくなる。2026-07-31 に1日で $10 を使い切った実績があり、そのときの経路は『AIが足した push トリガ』だった。表に無い支出は、次に判断するセッションからは存在しない"
     },
