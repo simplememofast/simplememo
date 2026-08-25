@@ -124,7 +124,18 @@ jobs:
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B "$DAY"
+          # 同日に2回目が走ったとき（手動 dispatch・再実行）、main から切り直すと
+          # 既存の当日ブランチと分岐して push が非fast-forwardで弾かれる。
+          # このレーンの当日ブランチは占有ロックではない（占有は
+          # claude/obsidian-auto-* のほうで、こちらは別名）ので、
+          # **既にあるなら、その続きから書く**のが正しい。
+          git stash -q
+          if git fetch origin "$DAY" 2>/dev/null; then
+            git checkout -B "$DAY" FETCH_HEAD
+          else
+            git checkout -B "$DAY"
+          fi
+          git stash pop -q || true
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json 2>/dev/null || true
           git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
