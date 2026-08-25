@@ -127,7 +127,7 @@ const autonomy = panel({
       + '「何件のタスクを自動化したか」ではなく<strong>「出したものに人が手を入れたか」</strong>。',
   body: `<div class="readouts readouts--two">
     ${readout({ label: '成果物のAI自律率', value: pct(runs.artifact_autonomy_rate), note: `出荷 ${runs.totals.shipped} 件のうち、人が中身に触っていない割合`, state: 'ok' })}
-    ${readout({ label: '変更行のAI比率', value: '98.8', note: '開発領域のみ。別の物差しなので他領域と足さない', state: 'ok' })}
+    ${readout({ label: '変更行のAI比率', value: '94.2', note: '開発領域のみ。別の物差しなので他領域と足さない（data/code-authorship.json の実測）', state: 'ok' })}
   </div>
   <p class="panel__foot">人間の介入は <strong>${pct(runs.human_intervention_rate)}%</strong> あるが、
   内訳を開くと<strong>成果物への介入は0件</strong>。人がやっていたのは基盤の修理と起動で、
