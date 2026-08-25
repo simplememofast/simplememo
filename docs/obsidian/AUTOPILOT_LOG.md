@@ -1819,3 +1819,112 @@ remote URL を出力させた。** GH_PAT は登録済み secret なので Actio
 **再発防止はセッション側の規律で足りる。**今回、remote URL を見なくても push の
 エラーメッセージだけで結論は出せた。認証まわりを調べるときに `git remote -v` を
 使わないこと（ホストだけ見たいなら `git remote get-url origin | sed` で足りる）。
+
+## 2026-08-26（主系・schedule） — レーンE。C05 `/obsidian/sync/` を出荷。Git/Syncthingは実際にコンフリクトを起こして壊れ方を実測
+
+### §0 冪等性・占有
+
+`git ls-remote origin refs/heads/claude/obsidian-auto-20260826` は空、本番 status JSON の
+`date_jst` は前日（2026-08-25）だったため、当日分は未着手と判断。Runbook §0-2の占有手順に
+従い、実装前に `claude/obsidian-auto-20260826` を空コミットでclaimしてpush（拒否されなかった
+＝他経路は未着手）。
+
+### レーンF
+
+`node scripts/autopilot-selfheal.mjs` — 未修理の故障なし。通常のレーンA〜Eへ。
+
+### レーン選択
+
+`data/autopilot-actions-report.json` の `as_of_jst` が前日（08-25）だったため（09:00 JSTの
+アクチュエータが当日まだ走っていない）、Runbook §1の例外規定に従い台帳側
+（`data/autopilot-actions.json`）を直接確認。open 3件（act-credential-actions / GH_PAT回転 /
+act-budget-recalibrate、いずれも human 待ちか実測待ちで本セッションが今すぐ動かせるものは無し）。
+BQ蓄積は13/28日（`seo-daily` run 32779860303 のログで確認・前回と変化なし）でレーンA/Bは
+引き続き正当化できず、coverage-queue.json の pending 先頭 **C05 `/obsidian/sync/`** へ。
+
+### 固有価値（このセッションの一次情報）
+
+キューの `unique_value` が要求する「Git同期の実機再現」と「方式別の壊れ方表」を、
+Git・Syncthingの両方で実際に手を動かして満たした。
+
+- **Git（実測）**: 中央bareリポジトリ1つ＋clone2つを2端末に見立て、両方を「オフライン」に
+  したまま同じノートの末尾へ別の1行を追記→片方push成功→もう片方push拒否→pull時に
+  マージ衝突→**ノート本文に `<<<<<<<`/`=======`/`>>>>>>>` の衝突マーカーがそのまま
+  挿入される**ことを確認。データ消失なし。実際の端末出力をそのまま記事の `<pre>` に転載。
+- **Syncthing v1.27.2（実測・apt経由でインストール）**: ローカルTCPで直接ペアリングした
+  2インスタンス間で同じシナリオを再現。**片方は元のファイル名のまま残り、もう片方は
+  `*.sync-conflict-日時-デバイスID.md` という別ファイルとして自動退避される**ことを
+  ファイルシステムで確認。マーカー混入なし・データ消失なし。
+- **ネットワーク到達性の発見**: このセッション（GitHub Actions経由）から `obsidian.md` /
+  `support.apple.com` へ直接到達できた（2026-08-25の副系セッションが記録した egress 遮断
+  ——CCR経由では `obsidian.md` 等が403——とは別の経路であることを実地で確認。`obsidian/pricing/`
+  記事のPR #センション時と同じ現象）。これを使い、`obsidian.md/help/sync` と
+  `obsidian.md/help/sync/version-history` を直接取得（2026年8月26日）。Version History
+  保持期間（Standard 1か月・Plus 12か月・添付2週間）と「他クラウドストレージとの併用は
+  同期の競合を招くためバックアップ推奨」という公式注意書きを一次情報として引用した。
+  iCloud Driveの競合時の番号付きファイル名（例:「Seven Wonders 2」）はApple公式Macヘルプ
+  （support.apple.com）から。ただしこのダイアログはApple文書バージョニングAPI対応アプリ
+  向けの挙動で、Obsidianのような直接ファイル読み書きアプリで同じ挙動になる保証はないと
+  明記し、macOS/iOSがこの環境に無いため実機検証はできていない旨も明記した（§28）。
+
+### 書かなかったこと
+
+- iCloud Drive＋Obsidianの実際の競合挙動（macOS/iOS無し）。Obsidian Syncでの実際の競合
+  再現（有料サービスのため未契約）。両方とも記事末の「検証環境と検証範囲」で明記。
+- SimpleMemo自体の訴求は現状の対応範囲（iCloud Drive上の保管庫への直接追記）に限定し、
+  Git/Syncthingのみで運用している（iCloud Driveを経由しない）保管庫は対象外と正直に書いた。
+  オーバークレームの回避（VISION.md §0）。
+
+### 配線・付帯変更
+
+- `/obsidian/`（内部リンク一覧に追加）・`/obsidian/daily-note/`（iCloud同期遅延のFAQ回答内に
+  リンク追加・「同期方法まとめ」への導線）・`/obsidian/getting-started/`（内部リンク一覧）
+  から被リンク3本。
+- `data/content-graph.json`: `/obsidian/sync/` 登録。cluster `obsidian-sync` を新設
+  （`_meta.clusters` に追加）。parent=`/obsidian/`・siblings=daily-note, what-is-vault。
+- `growth/content/coverage-queue.json`: C05を`done`化。次点 **C06 `/obsidian/sync/icloud/`**・
+  **C07 `/obsidian/sync/official-sync/`** は本ページと主題が重なることに気づき、
+  `collides_with` を追記（次回実装するなら比較の再掲を避け、C06は「iCloud一本の設定手順」、
+  C07は「Standard/Plusどちらが要るかの判断フロー」まで narrow するよう申し送った）。
+- OG画像（`obsidian-sync.png`）・QR（`qr-obsidian-sync-{ja,en}.svg`）を追加生成。
+- `sitemap-ja.xml` / `sitemap.xml`: 新URLのみ追加（既存lastmodは維持）。
+
+### 検証
+
+Runbook §4の全17チェック通過: `seo-check.js`（266ファイル・0 errors 0 warnings）/
+`check-css-version` / `check-benchmark`（新規CONFLICT/AMBIGUOUSなし）/
+`check-url-normalization`（197 checks）/ `check-internal-redirects`
+（13,432 href/src + 5,281 JSON-LD/meta + 587 sitemap URL、すべて直接200）/
+`sync_constants --check` / `tag-cta-placements --check` / `check-experiments`
+（36件中21 open・due 0・overdue 0）/ `check-content-graph`（26 entries OK）/
+`autopilot-budget --check` / `autopilot-runs --check` / `check-authority --check` /
+`autopilot-selfheal --check`（未修理の故障なし）/ `autopilot-drill --check`
+（15シナリオ全通過）/ `automation-rate --check` / `check-pr-facts --check` /
+`d-score --check` / `generate_sitemap.py --dry-run`。
+
+`npx playwright install --with-deps chromium` は約100秒で完了（前例のような90分詰まりは
+発生せず）。iPhoneビューポート（390×844 DPR3）実描画QA: ローカルに静的サーバを立てて
+実描画し、水平スクロールなし（scrollWidth=clientWidth=390）・JS/HTTPエラー0・回答ブロック
+（tip-box）はファーストビュー内（top≈799px）・`.cta-qr` はモバイルで非表示を確認。
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260826-actions`（route: actions・outcome: shipped・
+  lane: E・action: new・pr: 586・external_ref: 32900786201）を追記。
+- `data/autopilot-status.json` を当日の内容で上書き（cost/runsは
+  `autopilot-budget.mjs --json` / `autopilot-runs.mjs --json` の出力をそのまま埋め込み）。
+- `act-credential-actions`（主系08-24〜08-25の即時失敗の切り分け）は、本runが actions 経路
+  として着手し即時失敗せず完走したことで、再発なしの実測1件が積まれた。閉じ条件
+  （2026-08-25より後に着手・immediate_failure非再発）はまだ満たされていない（1件では
+  「再発していない」と結論するには早い）。
+
+- やったこと: `/obsidian/sync/` 新設（PR #586）。coverage-queue C05実装。
+- 検証: 上記17本＋iPhoneモバイルQA。
+- 保留・オーナー依頼: GH_PAT回転（scopeは足さないと決定済み・残るは回転のみ・急ぎではない）。
+  詳細は `data/autopilot-actions.json`。
+
+### 次回への申し送り
+
+coverage-queueのpendingは引き続き潤沢。次点C06/C07は本日のC05と主題が重なるため
+`collides_with` を追記済み——narrowした実装に切り替えること。act-credential-actionsの
+閉じ条件は継続監視。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。
