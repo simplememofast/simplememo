@@ -1633,9 +1633,10 @@
         "../simplememo-api/scripts/backup-d1.mjs",
         "../simplememo-api/.github/workflows/backup-d1.yml",
         "../simplememo-api/test/backup-d1.test.ts",
-        "../simplememo-api/data/data-retention.json"
+        "../simplememo-api/data/data-retention.json",
+        "../simplememo-api/docs/RESTORE.md"
       ],
-      "note": "2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある\n\n**[2026-08-25 訂正]** **存在しない。**`backup-d1.mjs` も `RESTORE.md` も隣のgit履歴に無い。**本番D1のバックアップは取られていない。**⑫の中で最も重い欠落。\n\n落とした証跡: ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md\n\nexecutor: ai_executes_gated → nobody\n\n**[2026-08-25 実装]** **今度は実在する。**対象は保持台帳の d1_table から導出（19テーブル）— 手で並べると新しい表が黙って対象外になり、症状は復元しようとした日にしか出ない。検証は「読めた」ではなく**「空のSQLiteへ実際に流し込めた」**で行う。台帳のテーブルが1つでも欠ければ落ちる。**鍵が無いときも落ちる**（静かにスキップしない）。個人データが入るので AES-256-GCM で暗号化し、artifact に上げる前に暗号化を確かめる。毎日 03:10 JST。",
+      "note": "2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある\n\n**[2026-08-25 訂正]** **存在しない。**`backup-d1.mjs` も `RESTORE.md` も隣のgit履歴に無い。**本番D1のバックアップは取られていない。**⑫の中で最も重い欠落。\n\n落とした証跡: ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md\n\nexecutor: ai_executes_gated → nobody\n\n**[2026-08-25 実装]** **今度は実在する。**対象は保持台帳の d1_table から導出（19テーブル）— 手で並べると新しい表が黙って対象外になり、症状は復元しようとした日にしか出ない。検証は「読めた」ではなく**「空のSQLiteへ実際に流し込めた」**で行う。台帳のテーブルが1つでも欠ければ落ちる。**鍵が無いときも落ちる**（静かにスキップしない）。個人データが入るので AES-256-GCM で暗号化し、artifact に上げる前に暗号化を確かめる。毎日 03:10 JST。\n\n**[2026-08-25 再訂正]** **主たる復旧手段は自前のバックアップではなく D1 Time Travel。**常時オン・設定不要・追加費用なしで、過去30日を分単位で巻き戻せる。**本番で効いていることを確認済み**（ブックマーク取得・復元可能範囲 07-26〜当日）。自前の場外コピーは、Time Travel が構造的に届かない3つ（DBごと消えた／30日より前／Cloudflareごと落ちた）だけを埋める**週1の副次的な備え**へ位置づけ直した。日次は過剰だった。",
       "since": "2026-08"
     },
     {
@@ -1647,7 +1648,7 @@
         "../simplememo-api/scripts/restore-drill.mjs",
         "../simplememo-api/test/backup-d1.test.ts"
       ],
-      "note": "2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま\n\n**[2026-08-25 訂正]** **存在しない。**復旧演習も手順書も隣のgit履歴に無い。\n\n落とした証跡: ../simplememo-api/scripts/restore-drill.mjs , ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md , ../simplememo-api/test/restore.test.ts\n\nexecutor: ai_executes_gated → nobody\n\n**[2026-08-25 実装]** **復元演習は手元のバックアップファイルを入力に取る別の口。**取る側と確かめる側を同じ実行にまとめると、取れた日にしか復元を確かめない。**本番D1への通しの復元は未実施**で、RESTORE.md §5 に「まだやっていないこと」の表がある（通しの復元・復元時間の実測・世代管理・3日続けて取れていないことの検知・KV）。",
+      "note": "2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま\n\n**[2026-08-25 訂正]** **存在しない。**復旧演習も手順書も隣のgit履歴に無い。\n\n落とした証跡: ../simplememo-api/scripts/restore-drill.mjs , ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md , ../simplememo-api/test/restore.test.ts\n\nexecutor: ai_executes_gated → nobody\n\n**[2026-08-25 実装]** **復元演習は手元のバックアップファイルを入力に取る別の口。**取る側と確かめる側を同じ実行にまとめると、取れた日にしか復元を確かめない。**本番D1への通しの復元は未実施**で、RESTORE.md §5 に「まだやっていないこと」の表がある（通しの復元・復元時間の実測・世代管理・3日続けて取れていないことの検知・KV）。\n\n**[2026-08-25 再訂正]** RESTORE.md を **Time Travel 先頭**に書き直した。前の版は障害時の第一手を伏せており、**遅くて危ない道へ誘導していた**。加えて `--audit-schema` を追加し、本番スキーマと保持台帳を突き合わせる（行は取り出さない）。初回実行で**コードもマイグレーションも無いテーブルが本番に3件**見つかった（admin_access_log / email_dead_letters / inquiries）。**未解決なので、この検査は落ち続ける。**",
       "since": "2026-08"
     },
     {
