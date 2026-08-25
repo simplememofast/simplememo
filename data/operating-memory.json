@@ -268,6 +268,35 @@
         ],
         "new_guardrail": "rebuild() の先頭で浅いクローンを検出して throw する（`git fetch --unshallow` を促す）。--check 側は月の連続性を検査し、初回リリース月より後から始まる系列も落とす。--depth 1 のクローンで実際に throw することと、月を1つ抜いた系列が落ちることの両方を確認済み"
       }
+    },
+    {
+      "id": "om-2026-08-25-asc-landed",
+      "seeded": false,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "取得側の欠陥2件を直したが、**直したことと降りたことは別**。閉じ条件を scripts/check-asc-landed.mjs に置いて開いたままにしてあった（act-asc-analytics-landed）",
+      "hypothesis": "欠陥2件（空文字の取得対象／カタログに当たらない語）が原因のすべてなら、修正版を回せば降りるはず。**外れていれば、まだ別の原因がある**",
+      "decision": "次の定時実行（約24時間後）を待たず、修正がまだ main に無いのでブランチ ref で workflow_dispatch する。ubuntu・GETのみ・出荷物を動かさない経路なので、実費と不可逆性の両面で回してよいと判断した",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "d35402a",
+        "files": [
+          "data/asc/2026-08-25/*.json",
+          "data/asc/status.json"
+        ]
+      },
+      "verification": "run 32856685354 のジョブログ（`状態: partial / 利用可能 156 件 / 選定 15 件 / 取得 10 件`）と、降りた10ファイルの中身。下流の growth/scripts/ingest-asc.mjs と scripts/check-asc-landed.mjs が exit 0 になることを確認",
+      "outcome": "**降りた。**課金（Purchases 1 / Proceeds in USD 2.59 / Sales in USD 3.05 / Paying Users 1）、解約イベント（Event Group・Event Name を持つ4行）、継続状態（101行・Counts 188）、ダウンロード（1,819）、ストア内接触（3,621 / ユニーク 2,624）、セッション（573 / 端末168）。**欠陥2件が原因のすべてだった。**残り5レポートは Apple の生成待ちで state は partial（＝正しく緑）",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "fix-then-verify-not-fix-then-assume",
+        "text": "**閉じ条件を「変えた」ではなく「効いた」に置いたから、ここで検証が起きた。**もし『欠陥を修正した』でアクションを閉じていたら、次の定時実行が失敗しても誰も見ておらず、原稿には『配線済み』とだけ残った。**この1件は、⑦方針改善の最初の実例でもある** —— 実費の節約策に対して既に持っていた規律（次の実測で閉じる）を、別領域へ移して適用した",
+        "changed": [
+          "scripts/check-asc-landed.mjs",
+          "data/autopilot-actions.json",
+          "../simplememo-ios/scripts/asc_metrics.rb"
+        ],
+        "new_guardrail": "降りたデータで sales_block の記述の誤りがもう1つ見つかった（入金額は salesReports にしか無い、が誤り）。**2回続けて『取れない』と書いて2回とも取れた**ので、APIの限界は叩いてから書く、を明記し、未確認の差分は未確認と書くようにした"
+      }
     }
   ]
 }
