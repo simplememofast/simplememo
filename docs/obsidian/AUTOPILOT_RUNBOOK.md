@@ -140,16 +140,36 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンFが最優先
 ```
 
-読むもの（この順）:
-1. `docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか・保留事項
+読むもの（この順）。**全文を読むものと一部だけ読むものを分けてある。**
+
+2026-08-25 に実測したところ、この一覧を素直に全文読むと **約 205,000 文字**
+あり、そのうち実際に要るのは **約 72,000 文字**だった。**入力はターンごとに
+付いて回るので、ここが1回あたりの実費のいちばん大きな部分。**
+しかも `AUTOPILOT_LOG.md` は毎日 +5,000 文字ずつ増えるので、
+**放っておくと1回あたりのコストが日々上がっていく。**
+
+1. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか。
+   **全文は読まない**（77,004文字・毎日+5,000）。
+   **保留事項はここから取らない** — `data/autopilot-actions.json` が
+   型付きで持っており、閉じ条件が通れば消える（§7-3）。散文の履歴から
+   拾うと、解消済みのものが混ざる
 2. `docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md` + `growth/content/new-queue.json` /
    `refresh-queue.json` — データ駆動キュー（レーンA/B）の現在地
-3. `growth/content/coverage-queue.json` + `docs/obsidian/OBSIDIAN_COVERAGE_PLAN.md`
-   — **カバレッジキュー（レーンE）**。`status: pending` の先頭がその日の既定アクション。
-   ここが空でない限り「書く候補が無い日」は存在しない
+3. **カバレッジキュー（レーンE）** — 先頭の pending 1件だけを出す:
+   ```
+   node -e 'const q=require("./growth/content/coverage-queue.json");
+   const p=(q.items||q.queue||[]).filter(x=>x.status==="pending");
+   console.log(p.length, JSON.stringify(p[0]))'
+   ```
+   `status: pending` の先頭がその日の既定アクション。ここが空でない限り
+   「書く候補が無い日」は存在しない。**19,474文字の全文は要らない。**
+   キューの設計そのものを見直すときだけ
+   `docs/obsidian/OBSIDIAN_COVERAGE_PLAN.md` を読む
 4. `docs/obsidian/OBSIDIAN_90DAY_ROADMAP.md` — 今がMonth何で、何が解禁されているか
 5. `growth/reports/` の最新レポート — 新しいデータ・訂正
-6. `docs/SEO_AIO_PLAN_2026-08.md` §6「やらないこと」
+6. `sed -n '/^## 6\. やらないこと/,/^## 7\./p' docs/SEO_AIO_PLAN_2026-08.md`
+   — §6「やらないこと」は **715文字**。この1節のために 45,841文字の全文を
+   読まない（§1〜5・§9以降は実装記録で、日々の判断には要らない）
 
 ### 1-2. データ鮮度の確認（毎回・`growth/data/gsc/` を見るだけでは足りない）
 
