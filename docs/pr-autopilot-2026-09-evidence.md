@@ -446,7 +446,7 @@ G2の扱いは `experiments.json` のレコードに**例外として明記**し
 | Apple Ads 資格情報 | APPLE_ADS_* / searchadsorg | 0件（レポート §12 が自ら確認済み） |
 | ASC 売上API | salesReports / financeReports / Analytics Reports API | 実装0件（「オーナー判断待ち」の言及のみ） |
 | 複数AIモデル監査 | Gemini / GPT- / Codex / 多重監査 / cross-model | 実装0件（`ai_triage.sh` は claude-sonnet-5 単独） |
-| `GROWTH_ROI_PLAN_2026-08-20.md` | ファイル存在確認 | **リポジトリに無い**（4箇所から参照されているだけ） |
+| `GROWTH_ROI_PLAN_2026-08-20.md` | ファイル存在確認 | **mainに無い。**→ **2026-08-25 に復元。**未マージブランチ `claude/activation-funnel-analytics-tamcod`（`dbe9cd01`）に933行の全文が残っていた。**「無い」ではなく「マージされていない」だった** —— `git log --all` を見ていれば初回調査で分かった |
 | 海外の近接事例 | AppDNA / OWA / PostHog / ByVeya | **0件。**競合分析そのものが存在しなかった（2026-08-25・§13-1で補った） |
 | Apple審査ガイドライン | 2.5.2 / App Review Guideline / 審査ガイドライン | **0件。**「アプリを自動更新」と読まれる余地を原稿側で塞いでいなかった（2026-08-25・§13-2で補った） |
 
