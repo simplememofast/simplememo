@@ -505,7 +505,9 @@
       "failure_reason": null,
       "external_ref": "32599191984",
       "interventions": [],
-      "repair_of": ["ap-20260822-actions"],
+      "repair_of": [
+        "ap-20260822-actions"
+      ],
       "source": "actions-api+pr",
       "note": "**主系（GitHub Actions）の初出荷。** 2026-08-12 の導入から12回目の schedule 起動で初めて成果物が出た。run 32599191984 は event=schedule / actor=github-actions[bot] / 06:18→06:36 JST（約18分）。過去11回は10〜90秒で終わっており、所要時間そのものが「回ったが何もしていない」との違いを示す。PR #538 は github-actions[bot] が 06:33 JST にマージ（SEO Validation 通過による auto-merge）。**この行は主系自身が書いていない。** #538 の本文は「台帳に resolved_at と repair_of を記録した」と書いているが、13ファイルの diff に data/autopilot-runs.json は含まれていない。出荷したのに台帳が 0/3 のままだったのはこのため"
     },
@@ -519,7 +521,7 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "auth_or_credential",
+      "failure_class": "upstream_action_regression",
       "failed_at": "2026-08-24T06:17+09:00",
       "detected_at": "2026-08-25T08:48+09:00",
       "detected_note": "副系v2フォールバック（本セッション）が obsidian-autopilot.yml の実行履歴を遡って発見。台帳に記録が無かった（成果物ゼロで落ちた回は台帳を書く主体がいない構造的な穴）",
@@ -527,7 +529,10 @@
       "external_ref": "32667079679",
       "interventions": [],
       "source": "actions-api",
-      "failure_class": "auth_or_credential"
+      "failure_class_original": "auth_or_credential",
+      "reclassified_at": "2026-08-25T15:40+09:00",
+      "reclassified_note": "当初 auth_or_credential と記録したが誤り。版の実測: 失敗した2回はどちらも claude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 / Agent SDK 0.3.241\"・2026-08-23T00:53Z）を引いていた。直前に出荷できた run 32599191984（08-23）は SHA 24dcd50c / CLI 2.1.240。ジョブログの Download action repository 行で直接確認できる。 秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う run 32816234185（08-25 15:16 JST・SHA 16b3b310 / CLI 2.1.245）が通っている。「2日とも完全同一シグネチャだから flake ではない＝認証系」という推論が誤りで、決定的な startup 失敗も同一の数値を出す——**同一シグネチャは依存が固定されていることの証拠**だった。なお GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めないため、08-24〜08-25 の間に鍵が回っていなかったことまでは repo からは断定できない（Runbook §7-3 と同じ制約）。",
+      "resolved_at": "2026-08-25T15:40+09:00"
     },
     {
       "run_id": "ap-20260825-actions",
@@ -539,7 +544,7 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_class": "auth_or_credential",
+      "failure_class": "upstream_action_regression",
       "failed_at": "2026-08-25T06:24+09:00",
       "detected_at": "2026-08-25T08:48+09:00",
       "detected_note": "副系v2フォールバック（本セッション）が obsidian-autopilot.yml の実行履歴を遡って発見。前日分(ap-20260824-actions)と同時に台帳へ追記",
@@ -547,7 +552,30 @@
       "external_ref": "32779337325",
       "interventions": [],
       "source": "actions-api",
-      "failure_class": "auth_or_credential"
+      "failure_class_original": "auth_or_credential",
+      "reclassified_at": "2026-08-25T15:40+09:00",
+      "reclassified_note": "当初 auth_or_credential と記録したが誤り。版の実測: 失敗した2回はどちらも claude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 / Agent SDK 0.3.241\"・2026-08-23T00:53Z）を引いていた。直前に出荷できた run 32599191984（08-23）は SHA 24dcd50c / CLI 2.1.240。ジョブログの Download action repository 行で直接確認できる。 秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う run 32816234185（08-25 15:16 JST・SHA 16b3b310 / CLI 2.1.245）が通っている。「2日とも完全同一シグネチャだから flake ではない＝認証系」という推論が誤りで、決定的な startup 失敗も同一の数値を出す——**同一シグネチャは依存が固定されていることの証拠**だった。なお GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めないため、08-24〜08-25 の間に鍵が回っていなかったことまでは repo からは断定できない（Runbook §7-3 と同じ制約）。",
+      "resolved_at": "2026-08-25T15:40+09:00"
+    },
+    {
+      "run_id": "ap-20260825-actions-force",
+      "date_jst": "2026-08-25",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 99999,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "32816234185",
+      "interventions": [],
+      "source": "session",
+      "repair_of": [
+        "ap-20260824-actions",
+        "ap-20260825-actions"
+      ],
+      "note": "**主系の手動force実行（workflow_dispatch・triggering_actor=simplememofast）。** 同日の schedule run(ap-20260825-actions)が即時失敗した後の再走なので、run_id は route だけでは一意にならず -force を付けている。レーンFで1日を使い、記事は書いていない。修理の内容は claude-code-action を SHA 16b3b310（この run が実際に通した版）へpin したこと。**上流の壊れた版そのものは直せないが、勝手に乗り換える構造は直せる**——ここを固定しない限り、次の版が壊れていれば同じ2日が繰り返される。"
     }
   ]
 }

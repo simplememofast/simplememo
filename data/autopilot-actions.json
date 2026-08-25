@@ -245,19 +245,21 @@
     },
     {
       "id": "act-credential-actions",
-      "title": "actions が 2日連続で認証系の即時失敗（2026-08-24〜2026-08-25）",
-      "detail": "run 32667079679 / 32779337325。作業に入る前に落ちており、単発の flake ではない。復旧手順は `claude setup-token` で再取得 → リポジトリ secret CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）。**この経路が復活するまで、出荷は副系だけが担っている。**",
+      "title": "主系が2日連続で即時失敗した件（2026-08-24〜08-25）— 原因は上流 action の版・pin 済み・schedule での再現なしを確認する",
+      "detail": "**当初「認証系」と記録したが誤り。** run 32667079679 / 32779337325 はどちらも\nclaude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 /\nAgent SDK 0.3.241\"）を引いていた。直前に出荷できた run 32599191984 は SHA 24dcd50c /\nCLI 2.1.240。**秘密鍵は一度も変えずに、同じ秘密鍵を使う run 32816234185\n（SHA 16b3b310 / CLI 2.1.245）が通っている。**\n\nつまり claude setup-token の再実行は要らない。この依頼は当初それをオーナー作業として\n求めており、日報でも最優先として2日ぶん送られていた——**誤った断定は、無記入より害が大きい。**\n要らない作業を求めるだけでなく、本当の原因を探す動きを止めるため。\n\n修理は .github/workflows/obsidian-autopilot.yml の action を SHA 16b3b310 へ pin したこと。\n\n**残っているのは確認だけ。** pin は workflow_dispatch の1回でしか通っていないので、\nschedule 起動（triggering_actor=github-actions）でも同じ結果になることを次の 06:00 JST で\n確かめる。閉じ条件は「2026-08-25 より後に actions が実際に着手し、immediate_failure が\n再発していないこと」——**着手ゼロでは閉じない**（失敗が無いことは回復の証拠にならない）。",
       "source": "credential",
       "domain": null,
-      "touches": [],
-      "force_owner": "human",
-      "force_owner_why": "secret の再発行はリポジトリ外の操作（オーナーのローカル + GitHub Secrets）",
+      "touches": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
       "auto": null,
       "close_check": {
         "kind": "no_failure_since",
         "params": {
           "route": "actions",
-          "failure_class": "auth_or_credential",
+          "failure_class": "immediate_failure",
           "since": "2026-08-25"
         }
       },
@@ -265,9 +267,35 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "2026-08-25 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "evidence": "2026-08-25 以降 actions はまだ着手していない（失敗が無いことは回復の証拠にならない）",
       "last_run_jst": "2026-08-25",
-      "last_run_log": "secret 一覧が HTTP 403（未設定という意味ではない）"
+      "last_run_log": "版の照合で原因を特定（ジョブログの Download action repository 行）。secret 一覧は HTTP 403 のままで、鍵が回っていないことまでは repo からは断定できない"
+    },
+    {
+      "id": "act-pin-claude-code-action",
+      "title": "claude-code-action を SHA 16b3b310 へ pin する（主系のPATに workflow scope が無く、主系からは push できない）",
+      "detail": "**内容は確定していて、適用できないだけ。** 主系(GitHub Actions)の GH_PAT に\n`workflow` scope が無く、`.github/workflows/*` を含む push が GitHub 側で\nremote rejected される（\"refusing to allow a Personal Access Token to create or\nupdate workflow ... without `workflow` scope\"）。GH_PAT でも GITHUB_TOKEN でも同じ。\n\n**皮肉だが構造的な穴:** data/authority-matrix.json の self_repair.may_modify は\n`.github/workflows/obsidian-autopilot.yml` をレーンFが直してよいファイルとして\n挙げているのに、**主系はそれを push する資格を持っていない。**「直してよい」と\n「直せる」がずれている。副系CCRは push できる（PR #548 が同じファイルを変更して\nマージされている）ので、レーンとして塞がっているのは主系だけ。\n\n【適用する変更（2箇所）】\n1. `uses: anthropics/claude-code-action@v1`\n   → `uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)`\n2. その下の `show_full_output: true` を削除（前日に診断用として入れたもの。\n   原因が確定したので戻す。このリポジトリは public であり、upstream が既定で\n   伏せている全出力を、必要が消えた後まで開けておく理由が無い）\n\n【なぜ pin するか】2026-08-24・08-25 の主系2日連続の即時失敗は、認証ではなく\nclaude-code-action@v1 が引いた上流の壊れた版（SHA c81e3bc6 / Claude Code 2.1.241）\nだった。フローティングタグはこれで2回目（08-21 は actor 拒否のガードが後から乗った）で、\n5日のうちに主系を丸ごと2回止めている。本番デプロイまで直結する経路が、実行のたびに\n上流の最新版へ勝手に乗り換える理由が無い。\n\n【誰がやれるか】(a) 次の副系CCRセッション（push できる）、または\n(b) オーナーが GH_PAT に `workflow` scope を足す（そうすれば主系が自分で直せるようになり、\nmay_modify との食い違いも消える）。**(b) のほうが根本的**だが、(a) で今日の穴は塞がる。\n\n【閉じ条件】obsidian-autopilot.yml に 16b3b310c3d7 が入ったら閉じる——\n**閉じたい当のものを検査している**（§7-1-1）。",
+      "source": "session",
+      "domain": null,
+      "touches": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": ".github/workflows/obsidian-autopilot.yml",
+          "needle": "16b3b310c3d7b5279df73130324d5205aeea8eac"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": ".github/workflows/obsidian-autopilot.yml に該当SHAがまだ無い"
     }
   ]
 }

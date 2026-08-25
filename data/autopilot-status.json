@@ -1,14 +1,14 @@
 {
   "date_jst": "2026-08-25",
-  "generated_at": "2026-08-24T23:50:25Z",
+  "generated_at": "2026-08-25T06:55:00Z",
   "action": "maintenance",
   "article": null,
   "pr": null,
   "streak": {
     "consecutive_no_article_days": 2,
     "last_article_date_jst": "2026-08-23",
-    "last_production_change_date_jst": "2026-08-23",
-    "days_since_production_change": 2
+    "last_production_change_date_jst": "2026-08-25",
+    "days_since_production_change": 0
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-22",
@@ -19,16 +19,16 @@
   "cost": {
     "month": "2026-08",
     "cap_usd": 40,
-    "spent_usd": 0.8149,
-    "remaining_usd": 39.1851,
+    "spent_usd": 8.1116,
+    "remaining_usd": 31.8884,
     "over": false,
-    "runs": 1,
-    "shipped": 0,
-    "usd_per_shipped": null,
+    "runs": 4,
+    "shipped": 1,
+    "usd_per_shipped": 8.1116,
     "by_route": {
       "actions": {
-        "runs": 1,
-        "spent": 0.8149038
+        "runs": 4,
+        "spent": 8.111607600000001
       },
       "ccr": {
         "runs": 0,
@@ -42,13 +42,13 @@
         "claude-sonnet-5": 1
       },
       "runs_with_models": 1,
-      "runs_without_models": 0
+      "runs_without_models": 3
     },
     "anomaly": {
       "enabled": true,
       "judged": false,
-      "reason": "実績 1 件 < 判定に必要な 5 件。判定していない（異常なしではない）",
-      "samples": 1
+      "reason": "実績 4 件 < 判定に必要な 5 件。判定していない（異常なしではない）",
+      "samples": 4
     },
     "cap_set_by": "placeholder"
   },
@@ -58,9 +58,9 @@
       "to": "2026-08-25",
       "days": 15
     },
-    "completion_rate": 0.6875,
-    "change_failure_rate": 0.3125,
-    "human_intervention_rate": 0.4375,
+    "completion_rate": 0.7059,
+    "change_failure_rate": 0.2941,
+    "human_intervention_rate": 0.4118,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -68,27 +68,27 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.25
+        "rate": 0.23529411764705882
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.0625
+        "rate": 0.058823529411764705
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.0625
+        "rate": 0.058823529411764705
       },
       "request": {
         "runs": 1,
-        "rate": 0.0625
+        "rate": 0.058823529411764705
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.7333,
+    "shipping_day_rate": 0.8,
     "totals": {
-      "runs": 26,
-      "attempted": 16,
-      "shipped": 11,
+      "runs": 27,
+      "attempted": 17,
+      "shipped": 12,
       "failed": 5,
       "no_run": 2
     },
@@ -99,9 +99,9 @@
         "shipped": 10
       },
       "primary": {
-        "runs": 14,
-        "attempted": 6,
-        "shipped": 1
+        "runs": 15,
+        "attempted": 7,
+        "shipped": 2
       }
     },
     "primary_ever_shipped": true,
@@ -117,44 +117,29 @@
         "n": 6
       },
       "time_to_repair_hours": {
-        "median": 3.7083333333333335,
+        "median": 6.683333333333334,
         "max": 25.633333333333333,
-        "n": 4
+        "n": 6
       },
-      "unresolved": [
-        {
-          "run_id": "ap-20260824-actions",
-          "failure_class": "auth_or_credential"
-        },
-        {
-          "run_id": "ap-20260825-actions",
-          "failure_class": "auth_or_credential"
-        }
-      ]
+      "unresolved": []
     }
   },
-  "reason": "【連続無記事2日目・本番最終変更2026-08-23・BQ確認済み(13/28日蓄積・2026-09-06頃到達見込み)】副系v2フォールバック（接続子なし起動・BigQuery MCP不可）。§0の(a)〜(d)を確認: (a) claude/obsidian-auto-20260825ブランチなし (b) 本番status JSON date_jst=2026-08-22 (c) origin/main同ファイルも2026-08-22 (d) 当日作成の主系PRなし。4点とも実行を妨げず、占有コミットのpushも一発で通ったため着手した。レーンF（自己修復）を最優先で実施し、記事は書いていない。判明した点: (1) 主系(GitHub Actions)が2026-08-24・08-25と2日連続で、実際の作業に入る前に即時失敗している（run 32667079679・32779337325。Claude Codeステップのresultはいずれもis_error=true/num_turns=1/duration_ms=486/total_cost_usd=$0で完全同一シグネチャ）。台帳(data/autopilot-runs.json)にこの2件の記録が無かったため追記し、selfheal対象として可視化した。認証系（CLAUDE_CODE_OAUTH_TOKENの期限切れ等）が濃厚だがfull outputが伏せられており断定できないため、診断用にobsidian-autopilot.ymlへshow_full_output: trueを追加した（may_modifyの範囲内・検証を弱める変更ではない）。(2) ap-20260822-actionsの`repair_of`記載漏れが未修理のまま残っていた——実際の修理はPR#526で08-22 14:00 JSTに完了済みで翌日PR#538の主系初出荷がその動作証拠だったが、台帳への記載だけが漏れていたため、ap-20260823-actionsの行にrepair_of: [\"ap-20260822-actions\"]を追記して解消した。(3) 2026-08-23 PR#538（主系初出荷・/obsidian/pricing/）がRunbook §5-2必須のdata/autopilot-status.json更新を含んでおらず、本番status JSONが08-22のまま3日間止まっていた——本PRでこの欠落を埋めた（AUTOPILOT_LOG.mdには当時の記事は既に記録済み）。レーンA/Bは28日窓（2026-09-06頃）まで正当化できず、レーンE（coverage-queue.json pending 29件・次点C05 /obsidian/sync/）は当日候補だったが、レーンFを優先したため今回は着手していない（Runbook §2「レーンFで1日使い切ってよい」に従う）。BigQuery: このセッションにMCP接続子は無くbq-preflight.mjsも認証失敗するため、seo-daily.ymlの本日run(32779860303)のExport preflightジョブログを直接読み、data_date 2026-08-10〜08-22（13/28日）を確認した（bq_checked: trueの根拠）。",
-  "verified": "GitHub Actions job logsを実際に取得し、ap-20260824-actions(run 32667079679)・ap-20260825-actions(run 32779337325)双方のClaude Codeステップのresult行（is_error/num_turns/duration_ms/total_cost_usd）を実測し、2日分が完全一致することを直接確認した。ap-20260822-actionsの修理（--allowedTools追加）が実際にPR#526の差分に含まれていることをgit logで確認。seo-daily.yml run 32779860303のExport preflightログからBigQuery蓄積状況（13/28日・2026-08-10〜08-22）を直接読んだ。data/autopilot-runs.jsonの整合性は追記の都度 autopilot-runs.mjs --check で検証（全て台帳の形と整合に問題なし）。data/authority-matrix.jsonの境界はcheck-authority.mjs --checkで、レーンFの境界はautopilot-selfheal.mjs --checkで、切替ドリル15シナリオはautopilot-drill.mjs --checkで、全領域の自動化率台帳はautomation-rate.mjs --checkでそれぞれ再検証し、いずれも問題なし。seo-check.jsは264ファイルに対し0 errors 0 warnings（本セッションはHTML・記事を一切変更していない）。coverage-queue.jsonを読み、pending 29件・次点C05 /obsidian/sync/を確認（実装はしていない）。検証していないこと: 主系の即時失敗の実際のエラー文言（full outputが伏せられておりこのセッションからは読めない。show_full_output: trueは次回run向けの診断であり今回のログには反映されない）。",
+  "reason": "【連続無記事2日目・本番最終変更2026-08-25・BQ確認済み(13/28日蓄積・2026-09-06頃到達見込み)】主系の手動force実行（run 32816234185・workflow_dispatch・FORCE_RUN=true）。レーンF（自己修復）で1日を使い、記事は書いていない。**08-24・08-25の主系2日連続の即時失敗について、前日に記録された『認証系（auth_or_credential）』は誤りだった。**実際の原因は claude-code-action@v1 が引いた上流の壊れた版。実測の対照: 出荷できた run 32599191984（08-23）は SHA 24dcd50c / Claude Code 2.1.240、失敗した run 32667079679・32779337325 はどちらも SHA c81e3bc6 / 2.1.241（upstream の『bump Claude Code to 2.1.241 and Agent SDK to 0.3.241』2026-08-23T00:53Z）。**秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う本run（SHA 16b3b310 / 2.1.245）が通っている。**前日の推論『2日とも1バイトも違わない＝flakeではない＝認証系』が外れた点が要で、決定論的な startup 失敗も同一の数値を出す——**同一シグネチャは認証の証拠ではなく、依存が固定されていることの証拠だった。**修理は2つ書き、**1つは適用できなかった**: (1) claude-code-action を本runが通した SHA 16b3b310 へ pin する変更は内容を確定したが、**主系の GH_PAT に workflow scope が無く push が remote rejected される**（GITHUB_TOKEN でも同じ）。**self_repair.may_modify はこのワークフローをレーンFが直してよいファイルとして挙げているのに、主系はそれを push する資格を持っていない**——「直してよい」と「直せる」がずれている構造的な穴で、主系が同じ修理を試みて初めて分かった（副系CCRは push でき、前日のPR #548 が同じファイルを変更している）。適用する2箇所は data/autopilot-actions.json の act-pin-claude-code-action に確定した形で積み、閉じ条件を file_contains{needle: 16b3b310…} にした。(2) scripts/autopilot-act.mjs の run 解釈が『Claude Codeステップが5秒未満で失敗＝auth_or_credential』と所要時間だけで断定していたのを止め、`immediate_failure`（観測された形）＋needs_triage に改めた——この断定が誤った台帳と、オーナーへの不要な作業依頼（claude setup-token の再実行）を生んでいた。診断用に前日入れた show_full_output も同じPRで戻す予定だったが、同じ理由で今回は適用できていない（pin と同じ act-pin-claude-code-action に含めた。リポジトリが public であること、および原因を割ったのが常時ログに出る Download action repository の SHA 行でこのフラグではないことが、戻す理由）。レーンA/BはBQ28日窓（2026-09-06頃）まで正当化できず、レーンE（coverage-queue.json pending 29件・次点C05 /obsidian/sync/）は当日候補だったがレーンFを優先した（Runbook §2『レーンFで1日使い切ってよい』）。トレンドレーダー: 本日ヒットなし。",
+  "verified": "GitHub Actions のジョブログ（zip）を3run分ダウンロードして実測した: run 32599191984（08-23・成功）/ 32667079679（08-24・失敗）/ 32779337325（08-25・失敗）。各runの `Download action repository 'anthropics/claude-code-action@v1' (SHA:…)` 行と `Installing Claude Code v…` 行を直接読み、成功回と失敗回で SHA・CLI版が違うことを確認した。3つのSHAは GitHub API（repos/anthropics/claude-code-action/commits/…）でコミット日時とメッセージまで裏を取り、v1 タグの現在値は git/ref/tags/v1 → 注釈タグ ae456065 → コミット 16b3b310（2026-08-25T05:14Z『bump Claude Code to 2.1.245 and Agent SDK to 0.3.245』）と確認。本runで実際に走っている CLI が 2.1.245 であることは `~/.local/bin/claude --version` で実測。失敗回のログは actor 判定（『Actor github-actions is in allowed_bots list, skipping human actor check』）が成功回と同一で、08-21のactor拒否の再発ではないことも確認した。§4の検証は17本すべて実行し全て通過（下記 checks）。scripts/autopilot-act.mjs の変更は --selftest 27項目で担保し、旧 auth_or_credential で書かれた既存行も導出に拾われ続けることをテストで固定した。**検証していないこと:** (1) 08-24〜08-25 の間に秘密鍵が回っていなかったこと——GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めない（Runbook §7-3 と同じ制約）。したがって『鍵が原因ではない』は、同じ鍵で本runが通ったことと版の対照から導いた推論であって、鍵の更新履歴を見た結論ではない。(2) pin の効果——**pin はまだリポジトリに入っていない**（主系のPATに workflow scope が無く push できなかった。実際に remote rejected を受けたところまでが実測）。したがって「16b3b310 なら通る」と言えるのは本run（workflow_dispatch）1回ぶんの観測であって、schedule 起動でも通ることも、pin後の挙動も未確認。(3) 上流 c81e3bc6 が具体的にどう壊れていたか（full outputが伏せられており、当時のエラー文言そのものは今も読めない）。(4) 記事・本番HTMLは一切変更していないため、iPhoneモバイルQAは対象外。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（264ファイル・本セッションはHTML非変更）",
+    "seo_check": "0 errors 0 warnings（264ファイル・本runはHTML非変更）",
     "content_graph": "変更なし（新規ページなし）",
-    "mobile_qa": "対象外（HTML変更なし）",
+    "mobile_qa": "対象外（HTML変更なし。Playwright/aptは実行していない）",
     "experiments": "36件中21 open・due 0・overdue 0",
-    "other": "autopilot-runs.mjs --check / check-authority.mjs --check / autopilot-selfheal.mjs --check / autopilot-drill.mjs --check（15シナリオ全通過） / automation-rate.mjs --check / autopilot-budget.mjs --check（$0.8149 / $40・over=false） いずれも問題なし"
+    "other": "check-css-version / check-benchmark / check-url-normalization / check-internal-redirects（13330 href+5251 JSON-LD+586 sitemap すべて直接200） / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check（$8.1116 / $40・over=false） / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / check-model-routing --check（ワークフローが --resolve を実際に引いていることも確認） / generate_sitemap.py --dry-run / autopilot-act --check / autopilot-act --selftest（27項目） いずれも問題なし"
   },
   "owner_requests": [
-    "【最優先・新規・要確認】主系(GitHub Actions)が2026-08-24・08-25と2日連続で、実際の作業（ブランチ作成等）に入る前に即時失敗している（run 32667079679 / 32779337325。Claude Codeステップのresultはいずれもis_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=$0で完全同一シグネチャ・単発のflakeではない）。この形は認証エラー（CLAUDE_CODE_OAUTH_TOKENの期限切れ、またはANTHROPIC_API_KEYの失効）が最有力の疑いだが、claude-code-actionのfull outputが『hidden for security』で伏せられておりログから実際のエラー文言を確認できていない。本PRで診断用にshow_full_output: trueをobsidian-autopilot.ymlに追加した（次回06:00 JST runでエラー文言が出るはず）。**もしローカルで`claude setup-token`を再実行していない、またはAPIキーの有効期限に心当たりがあれば、その時点で対応いただけると早い。** 次回runでも同じ即時失敗が続く場合は、まずジョブログのfull outputを読むこと。",
-    "【解消済み・2026-08-25】**本番D1へマイグレーション3件を適用した。**`0018_email_dead_letters` / `0019_admin_access_log` / `0020_inquiries`。`d1_migrations` にも記録済み（id 18/19/20・2026-08-25 02:43 UTC）。\\n\\n適用後に**中身を確認した** —— 3表とも列（8/8・8/8・11/11）と索引（各2/2）が migration と一致。本番の表は 21 → 24件。**「流した」と「入っている」は別**なので、流した結果ではなく実物を見た。\\n\\nそのうえで simplememo-api #153 をマージし、Workers Builds が本番へ出した。**新コードが載っていることも実応答で確認** —— `POST /v1/inquiry` が `INQUIRY_DISABLED` を返す（この経路は #153 で追加されたもので、`INQUIRY_ENABLED` が未設定なので受け口は閉じたまま）。ビルドが緑という表示ではなく、実際の応答で見ている。",
-    "【要オーナー作業・2026-08-25】**App Store Connect の「App のプライバシー」への回答を、新しい `PrivacyInfo.xcprivacy` と揃えること。**次のビルドを出す前に。\\n\\n**自動化を試したが、できないことが分かった。**Apple 自身のドキュメントデータで `apps` 配下165本を列挙したところ privacy / dataUsage / nutrition は**0件**。対照として `Read an app's encryption declarations` は在るので、列挙が空だったのではなく **Apple は暗号化申告はAPIで公開しているのに、プライバシー申告だけ公開していない。**ヘルプも Web UI の手順としてしか書いていない。\\n\\n    curl -s https://developer.apple.com/tutorials/data/documentation/appstoreconnectapi/apps.json\\n\\n**次のセッションはこの調査をやり直さなくてよい**（30秒で再確認だけできる。Apple が後で API を足したら列挙に現れる）。\\n\\n入れる答えは実装から導出済みで、`simplememo-ios` で\\n`python3 scripts/qa/check_privacy_manifest.py` を実行すると写せる形で出る:\\n\\n    Contact Info › Email Address         App Functionality / 結合あり / 追跡なし\\n    User Content › Other User Content    App Functionality / 結合あり / 追跡なし\\n    Usage Data › Product Interaction     Analytics         / 結合なし / 追跡なし\\n    Identifiers › Device ID              Analytics         / 結合なし / 追跡なし\\n    Diagnostics › Other Diagnostic Data  App Functionality / 結合なし / 追跡なし\\n\\n上記5種別**以外はすべて「収集していない」**、アプリ全体の追跡は**なし**。\\n\\n**ASC 側はリポジトリから見えないので検査できない。**片方だけ直すと逆に不整合になるため、申告ファイルを変えた回は必ずこちらも変える。それを担保できるのは「毎回この一覧が目に入ること」だけ（simplememo-ios #224）。",
-    "【解消済み・オーナー作業不要】ap-20260822-actionsの台帳`repair_of`記載漏れをバックフィルした。実際の修理はPR#526（08-22 14:00 JST）で完了済み・翌日PR#538の主系初出荷がその動作証拠だったが、台帳への記載自体が漏れていた。",
-    "【情報共有のみ・オーナー作業不要】2026-08-23 PR#538（主系初出荷・/obsidian/pricing/）がRunbook §5-2必須のdata/autopilot-status.json更新を含んでおらず、本番status JSONが3日間08-22のまま止まっていた（AUTOPILOT_LOG.mdへの記事記録自体は当時からある）。本PRでこのギャップを埋めた。再発防止（例: status JSON鮮度をCIで検証する仕組み）は未実装で、次回以降のセッションの検討候補として残す。",
-    "【継続】副系v2（本セッション）はBigQuery MCPへの接続子を持たずに起動する。bq-preflight.mjsも資格情報が無く認証失敗する。今回はseo-daily.ymlの本日runのジョブログから代替した（bq_checked: trueの根拠はこちら）が、この経路が使えない日は取得不能になる。",
-    "【再現・断続的・実害なし】`python3 -c`の単発実行や`node ... | tail`のようなパイプ付きコマンドが、このセッションのauto modeクラシファイアに一時的にブロックされる事象が今回も発生した（ヒアドキュメント形式のpython3や単独のnodeコマンドは問題なく通った）。過去ログにも同種の報告があり、セッションごとに再現有無が変わる。今回は代替手段（Read/Editツール・コマンド分割）で全て回避でき、成果物への影響はない。",
-    "【解消済み・2026-08-22】`PrivacyInfo.xcprivacy` の申告を実装に合わせた。オーナー指示「現状にあわせて」により、3種別を追加: **Product Interaction**（387種のイベント／目的: 分析）、**Device ID**（anonymous_install_id — UUIDをKeychainに保存するので削除しても残る／目的: 分析）、**Other Diagnostic Data**（launch_incomplete と last_stage／目的: App機能）。**Crash Data では申告していない** — クラッシュログは集めていないため。すべて Linked: false（analytics は email_hash を持たない設計）。検査の enforce も true にしたので、以降はずれた瞬間に落ちる。\n\n**残るオーナー作業:** App Store Connect の「App のプライバシー」への回答も同じ内容に揃えること。申告ファイルとASCの回答は別の場所にあり、**片方だけ直すと不整合になる。**リポジトリからASC側は見えないので検査できない。\n\n**将来の分岐:** relay 側には analytics → email の結合が実装済みで待っている（send_correlation.message_id × client_send_id）。**iOSが client_send_id を送り始めた日に Linked が true になる**ので、そのとき申告とASCの回答を両方変える。検査はその日に落ちる",
-    "【権限の確認・2026-08-22】権限表の「ユーザーデータの削除要求への対応」は requires_approval: true / human_only: [実行の承認] だが、**実装はそれより広い。** アプリ内の自己削除（POST /v1/account/delete）は承認を挟まずその場で完了する — App Store Guideline 5.1.1(v) がアプリ内から実際にサーバ側データを消せることを要求しているため、そうでなければ審査を通らない。つまりこの領域は2つの別物を1つに束ねている: (a) アプリ内の自己削除＝自動・承認なし、(b) 個別の連絡による削除要求＝本人確認と承認が要る。権限表は (b) の書き方で (a) を覆っている。**分けるかどうかは権限の話なので、こちらでは変えていない。** 自動化台帳の当該タスクは権限表に合わせて ai_proposes のままにしてある。（同日、削除の網羅性そのものは実装した: 対象を保持台帳から導出し、inquiries と email_dead_letters が削除経路から漏れていた穴を塞いだ）",
-    "【解消済み・オーナー作業は不要】主系の当日run（32528028588／job 96914156036）がconclusion=successのまま成果物ゼロで終わった件は原因を特定し、本PRで修正した。原因はclaude_argsに`--allowedTools`が無かったこと。claude-code-actionの既定はファイル操作・読み取り専用git・コメント操作までで任意のBashは不許可だが、Runbookが要求するgitのbranch/commit/push・`gh pr create`・`npx playwright install`・node検証スクリプトは全てBash。つまり出荷手段が最初から塞がれた状態で30ターン回り、permission_denials_count=14を出して何も出せずsuccessで終わっていた（`.claude/settings.json`がリポジトリに無いためproject層でも補われない）。**これは当初オーナー依頼として積まれたが、Runbook §7の分類ミス。同じファイルはPR#522/523で自分で2回書き換えて通しており、自分で直せる案件だった。** 併せて、成果物ゼロのまま緑で終われる構造そのものを塞ぐため「成果物ゼロなら落とす」ステップを追加した（PR#525のsitemap `--check` と同じ考え方）",
-    "【継続・実測で再確認】このRoutineの実行環境はobsidian.md（help.含む）・notion.com系ドメインへの直接アクセスがegressプロキシでブロックされている（403/EGRESS_BLOCKED）。今回新たにgithub.com本体・blacksmithgu.github.io（Dataview公式ドキュメントサイト）・en.wikipedia.org・www.google.com等も同様にブロックされていることを確認した。到達できるのはapi.github.com・raw.githubusercontent.com・objects.githubusercontent.com・npmjs.com程度（curlベースの直接アクセス）。一方WebFetch/WebSearchツール経由ではgithub.comや第三者ブログへは到達できる（obsidian.md系ドメインのみWebFetchでも共通してブロック）。オーナー側で意図した制限か確認してほしい。【追記】再検証で**simplememofast.com自体もブロックされている**ことが分かった（curl・WebFetchとも403/EGRESS_BLOCKED）。つまり副系CCRはRunbook §0の冪等チェック(b)「本番status JSONのdate_jst」を実行できない環境にいる。今回は(c) origin/mainのstatus JSONが同じ役割を果たしたため二重出荷は起きていないが、(b)はbest-effortで、実質のガードは(c)とPR#523で入った当日ブランチの占有である、と理解しておく必要がある",
-    "【解消済み・繰越不要】前回ログの「CCR環境でnode系検証スクリプトがauto modeクラシファイアにブロックされる」件は本セッションでは再現せず、seo-check.js等すべて正常実行できた。セッションごとに変わりうる判定のため恒久解消と断定はしないが、今回は依頼として繰り越さない"
+    "【取り下げ・2026-08-25】前日の日報が最優先として送った『主系の認証系即時失敗——ローカルでの claude setup-token 再実行、またはAPIキー有効性の確認をお願いしたい』は**不要**。原因は認証ではなく上流 claude-code-action の版（SHA c81e3bc6 / Claude Code 2.1.241）で、秘密鍵は一度も変えずに本run（SHA 16b3b310 / 2.1.245）が通っている。**鍵の再発行はしないでください。**依頼の本体は data/autopilot-actions.json の act-credential-actions に移し、内容を実際の原因と切り分け手順（安い順: 版の照合 → --model の解決 → 資格情報）に書き換えた。",
+    "【要オーナー判断・新規・根本的】**GH_PAT に `workflow` scope を足すかどうか。** 主系(GitHub Actions)は `.github/workflows/*` を含む push が GitHub 側で remote rejected される（GH_PAT・GITHUB_TOKEN とも）。一方 data/authority-matrix.json の self_repair.may_modify は obsidian-autopilot.yml をレーンFが直してよいファイルとして挙げている——**「直してよい」と「直せる」がずれており、主系は自分のワークフローの故障を最後まで直せない。**今日はまさにそれで、原因特定まで済んだ修理（上流actionのSHA pin）が適用できずに残った。副系CCRは push できるので運用は回るが、主系が自力で完走できない穴は残る。**これは権限を広げる変更なので、AIからは行わない**（self_repair.must_not「自分の権限を広げない」）。判断はオーナーに委ねる。当座は act-pin-claude-code-action を副系CCRセッションが適用すれば塞がる。",
+    "【要オーナー作業・継続】App Store Connect の「App のプライバシー」への回答を PrivacyInfo.xcprivacy と揃えること（次のビルドを出す前に）。写せる答えは simplememo-ios で `python3 scripts/qa/check_privacy_manifest.py` が出力する。ASC側はリポジトリから見えないため検査できない（act-asc-privacy-answers・実測手段が無いため未確認のまま繰り越し）。",
+    "【要オーナー判断・継続】権限表の「ユーザーデータの削除要求への対応」を (a) アプリ内の自己削除＝承認なし と (b) 個別連絡による削除要求＝承認あり の2つに分けるかを決めること。**権限表そのものの変更は self_repair.must_not なのでAIからは変更しない**（act-authority-split-deletion）。",
+    "【要確認・継続】副系CCRの egress 制限が意図どおりかの確認（act-egress-policy-confirm）。本runは主系(GitHub Actions)なのでこの制限は無く、GitHub API・上流リポジトリのAPIとも問題なく到達できた。この項目は副系の環境についてのものなので、主系からは実測できない。",
+    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。"
   ],
-  "next": "明日06:00 JSTの主系runがshow_full_output: true付きで実行されるはずなので、そこで実際のエラー文言が出ているかを最初に確認する。同じ即時失敗（is_error=true/num_turns=1/cost=$0）が3日連続で続くなら認証系の故障がほぼ確定し、selfheal の escalate 閾値（3回）にも近づく——その時点で репair_ofを付けずにオーナーへの起票を継続すること。もし今回のshow_full_output追加で原因が判明し主系が復旧すれば、通常どおりレーンA〜Eの判定に戻ってよい。レーンEはpendingが29件残っている（次点C05 /obsidian/sync/・C06 /obsidian/sync/icloud/・C07 /obsidian/sync/official-sync/など同期系が並ぶ）ため、レーンFの懸念が晴れ次第すぐに着手できる。"
+  "next": "**最優先は pin の適用（act-pin-claude-code-action）。** 内容は確定しているが主系からは push できない——副系CCRセッションが入るか、オーナーが GH_PAT に workflow scope を足すかのどちらか。**未適用の間、主系は毎朝また上流の最新版を引く。**現時点で 16b3b310 が通ることは観測済みなので明日は動くはずだが、それは保証ではない。**そして pin が入るまで、明日06:00 JSTの schedule run は対照実験にならない**——版が固定されていなければ、成否がどちらでも「版のせいか否か」を切り分けられない。pin適用後に同じ即時失敗が出たときだけ、版の問題ではないと機械的に確定でき（同じSHAで結果が割れるため）、そのとき初めて資格情報へ進んでよい。これが前日のセッションが持てなかった対照。act-credential-actions の閉じ条件は「2026-08-25より後に actions が着手し immediate_failure が再発していないこと」で、着手ゼロでは閉じない。切り分け手順は autopilot-act.mjs の failure_reason にも埋めたので、次のセッションはジョブログの `Download action repository … (SHA:…)` を直近の成功runと比べるところから始めること。レーンFの記録上は解消済みなので、次回は通常どおりレーンA〜Eへ戻ってよい。レーンEは coverage-queue.json の pending が29件残っており（次点 C05 /obsidian/sync/・C06 /obsidian/sync/icloud/・C07 /obsidian/sync/official-sync/）、枯渇の心配は無い。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。トレンドレーダー(c)の「前日から10位以上動いた」は日次スナップショットを保存していないため構造的に毎日判定不能で、判定したいなら先に保存先を決める必要がある（今回は1セッション1アクションの原則から実装していない）。"
 }

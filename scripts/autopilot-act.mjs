@@ -357,36 +357,54 @@ export function derive(ctx) {
     }
   }
 
-  // --- D5: 同一シグネチャの連続失敗 ＝ 資格情報の疑い ---
+  // --- D5: 作業に入る前の連続失敗 ＝ 主系が2日以上止まっている ---
   //
-  // 単発の flake と、認証切れのような**決定論的な故障**は形が違う。
-  // 後者は「作業に入る前に、毎回同じ時間で、同じ形で」落ちる。
-  // 2026-08-24/25 の2件は is_error/num_turns/duration_ms/cost が完全一致していた。
-  // ここを機械で言えれば、show_full_output を足して翌日を待つ必要が無くなる
-  // ——**2日目で確定でき、3日目を待たない。**
+  // 単発の flake と**決定論的な故障**は形が違う。後者は「作業に入る前に、
+  // 毎回同じ時間で、同じ形で」落ちる。ここを2日目で拾えば3日目を待たない。
+  //
+  // **2026-08-25 訂正: 拾ったものに原因を名乗らせない。**
+  // 旧版はこれを「認証系」と断定し、復旧手順を `claude setup-token` の再実行
+  // だけにしていた。08-24・08-25 の2件で実際に起きたのはそれではなく、
+  // claude-code-action@v1 が引いた上流の壊れた版（SHA c81e3bc6 / CLI 2.1.241）
+  // だった。**同一シグネチャが示すのは決定論であって、認証ではない。**
+  // 誤った断定は、オーナーに要らない作業（鍵の再発行）を求めるだけでなく、
+  // **本当の原因を探す動きを止める**ぶん、無記入より害が大きい。
+  //
+  // なので detail は「原因の候補」と「どの順で切り分けるか」を持つ。
+  // 順序は費用で決める——ログの版の照合はゼロ円、鍵の再発行はオーナーの時間。
   const byRoute = {};
   for (const r of runs) (byRoute[r.route] ??= []).push(r);
   for (const [route, rs] of Object.entries(byRoute)) {
     const sorted = [...rs].sort((a, b) => (a.date_jst < b.date_jst ? -1 : 1));
     let streak = [];
     for (const r of sorted) {
-      if (FAILED_OUTCOMES.has(r.outcome) && r.failure_class === 'auth_or_credential') streak.push(r);
+      // `auth_or_credential` も拾うのは、旧版が書いた行と人が手で書いた行が
+      // 台帳に残るため。新しく機械が書く種別は `immediate_failure` だけ。
+      if (FAILED_OUTCOMES.has(r.outcome)
+        && (r.failure_class === 'immediate_failure' || r.failure_class === 'auth_or_credential')) streak.push(r);
       else if (r.attempted) streak = [];
     }
     if (streak.length >= 2) {
       const first = streak[0], last = streak[streak.length - 1];
       out.push({
         id: `act-credential-${route}`,
-        title: `${route} が ${streak.length}日連続で認証系の即時失敗（${first.date_jst}〜${last.date_jst}）`,
-        detail: `run ${streak.map((r) => r.external_ref).join(' / ')}。作業に入る前に落ちており、`
-          + `単発の flake ではない。復旧手順は \`claude setup-token\` で再取得 → リポジトリ secret `
-          + `CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）。`
+        title: `${route} が ${streak.length}日連続で、作業に入る前に即時失敗（${first.date_jst}〜${last.date_jst}・原因未特定）`,
+        detail: `run ${streak.map((r) => r.external_ref).join(' / ')}。毎回同じ形で落ちており単発の flake ではないが、`
+          + `**決定論的であることは原因を特定しない。**この順で切り分ける（安い順）:\n`
+          + `1. **上流の版**（費用ゼロ）— ジョブログの \`Download action repository 'anthropics/claude-code-action@…' (SHA:…)\` と `
+          + `\`Installing Claude Code v…\` を、直近で出荷できた run のものと比べる。違っていれば版の破損で、`
+          + `.github/workflows/obsidian-autopilot.yml の pin を通った版へ戻すのがセッションの仕事（2026-08-24〜25 はこれだった）\n`
+          + `2. **--model 等の指定**（費用ゼロ）— data/model-routing.json の解決結果が実在するモデルか\n`
+          + `3. **資格情報**（オーナー作業）— 1と2が同一で説明がつかないときだけ。\`claude setup-token\` で再取得 → `
+          + `repo secret CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）\n`
           + `**この経路が復活するまで、出荷は副系だけが担っている。**`,
         source: 'credential',
-        // 復旧はオーナーのローカル環境（claude setup-token）と repo secret の
-        // 更新で、どちらもリポジトリの中から実行できない。
-        force_owner: 'human',
-        force_owner_why: 'secret の再発行はリポジトリ外の操作（オーナーのローカル + GitHub Secrets）',
+        // 1と2はセッションが自分で直せる。**ここを human に固定しない** ——
+        // 固定していたことが「自分で直せる案件をオーナー依頼に積む」誤り
+        // （Runbook §7-2・PR #526）を、この台帳の中で再現していた。
+        force_owner: null,
+        force_owner_why: null,
+        touches: ['.github/workflows/obsidian-autopilot.yml'],
         // 【2026-08-25】ここには当初 probe-secret（secretの存在確認）を付けていたが、
         // 初回の実走で **GitHub API が HTTP 403** を返した——secret 一覧の読み取りは
         // admin 権限が要り、GITHUB_TOKEN にも GH_PAT にも無い。
@@ -394,8 +412,10 @@ export function derive(ctx) {
         // ノイズそのもの**なので外した。存在確認をしたければ権限のあるPATが要る。
         auto: null,
         close_check: {
+          // 機械が新しく書く種別は `immediate_failure` だけなので、再発判定も
+          // それで見る（`auth_or_credential` は since より前の行にしか無い）。
           kind: 'no_failure_since',
-          params: { route, failure_class: 'auth_or_credential', since: last.date_jst },
+          params: { route, failure_class: 'immediate_failure', since: last.date_jst },
         },
       });
     }
@@ -580,17 +600,41 @@ export function interpretRun(run) {
       note: `Claude Code ステップ未実行（Gate=${gate?.conclusion ?? '不明'}）。秘密鍵未設定・当日重複・予算・緊急停止のいずれか` };
   }
   if (claude.conclusion === 'failure') {
-    // **作業に入る前に落ちたか**を所要時間で見る。認証系の即死は1秒未満で、
-    // 実作業中の失敗は分単位。ここだけは形が十分はっきりしている。
+    // **所要時間が言えるのは「作業に入る前に落ちた」までで、原因ではない。**
+    //
+    // 2026-08-25 の訂正: ここは即死を `auth_or_credential` と書いていた。
+    // その断定で 08-24・08-25 の2件が「認証系」として台帳に載り、日報は
+    // オーナーへ `claude setup-token` の再実行を求めた。**実際の原因は
+    // 認証ではなく、claude-code-action@v1 が引いた上流の壊れた版**
+    // （SHA c81e3bc6 / CLI 2.1.241）で、秘密鍵は一度も変わっていなかった。
+    //
+    // 即死する原因は少なくとも3つあり、所要時間では区別できない:
+    //   - 資格情報の失効（401が即返る）
+    //   - **上流の action / CLI の版が壊れている**（初回のモデル呼び出しで死ぬ）
+    //   - --model や入力ファイルの指定ミス（起動時に弾かれる）
+    // どれも 500ms 前後・num_turns=1・cost=$0 になる。
+    //
+    // **決定論的であることは、認証の証拠ではない。**「2日とも1バイトも
+    // 違わないから flake ではない＝認証系」という推論が実際に外れた回が
+    // これで、同一シグネチャが本当に示していたのは「同じ壊れた版を2回引いた」
+    // だった。種別を決められないときに決めない——これは autopilot-runs.mjs が
+    // `--failure-class` を渡されたときだけ書く理由と同じ規則で、ここだけが
+    // 破っていた。推測を種別に書くと selfheal の「同一 failure_class を3回
+    // 直したら人へ」が別種別として数えられ、歯止めが効かなくなる。
     const ms = claude.started_at && claude.completed_at
       ? new Date(claude.completed_at) - new Date(claude.started_at) : null;
     const immediate = ms != null && ms <= 5000;
     return {
       outcome: 'failed', attempted: true,
-      failure_class: immediate ? 'auth_or_credential' : null,
-      needs_triage: !immediate,
+      // 即死は「実作業に入る前に落ちた」という**観測された形**までを書く。
+      // 原因はここでは名指ししない（needs_triage でセッションへ回す）。
+      failure_class: immediate ? 'immediate_failure' : null,
+      needs_triage: true,
       failure_reason: immediate
-        ? `Claude Code ステップが ${ms}ms で失敗。実作業に入る前に落ちており、認証系の疑いが強い（自動判定）`
+        ? `Claude Code ステップが ${ms}ms で失敗。実作業に入る前（初回のモデル呼び出し相当）で落ちている。`
+          + `**原因は所要時間からは決まらない**（資格情報の失効／上流 action・CLI の版の破損／--model等の指定ミスは、どれも同じ形になる）。`
+          + `最初に見るのは費用ゼロで済む対照——ジョブログの \`Download action repository 'anthropics/claude-code-action@…' (SHA:…)\` と `
+          + `\`Installing Claude Code v…\` を、直近で出荷できた run のものと比べる。一致していて初めて資格情報を疑う（自動判定）`
         : `Claude Code ステップが失敗（所要 ${ms ?? '不明'}ms）。原因未特定・要トリアージ（自動判定）`,
     };
   }
@@ -890,26 +934,48 @@ function selftest() {
   t('script_ok は引数を検証する',
     CLOSE_CHECKS.script_ok({ script: 'scripts/autopilot-act.mjs', args: ['; rm -rf /'] }, {}).closed === false);
 
-  // 導出: 連続する認証失敗を1件にまとめる
+  // 導出: 連続する即時失敗を1件にまとめる
   const d = derive({
+    today: '2026-08-25', selfheal: { targets: [] }, statusDoc: null, costDoc: null,
+    runsDoc: { runs: [
+      { run_id: 'a', route: 'actions', date_jst: '2026-08-24', attempted: true, outcome: 'failed', failure_class: 'immediate_failure', external_ref: '1' },
+      { run_id: 'b', route: 'actions', date_jst: '2026-08-25', attempted: true, outcome: 'failed', failure_class: 'immediate_failure', external_ref: '2' },
+    ] },
+  });
+  const cred = d.filter((x) => x.source === 'credential');
+  t('連続即時失敗は1件に集約', cred.length === 1);
+  // **原因を名乗らせない。**旧版はここで force_owner:'human' を立て、
+  // 復旧手順を鍵の再発行だけにしていた。実際の原因（上流の版の破損）は
+  // セッションが直せるもので、人へ固定したぶん発見が遅れた。
+  t('即時失敗を人へ固定しない', cred[0]?.force_owner == null);
+  t('切り分けの順が安い順で入っている',
+    cred[0]?.detail.indexOf('上流の版') < cred[0]?.detail.indexOf('資格情報'));
+  t('再発判定は immediate_failure で見る',
+    cred[0]?.close_check?.params?.failure_class === 'immediate_failure');
+
+  // 旧種別で書かれた行も拾う（台帳に残っている過去の行が消えないように）
+  const legacy = derive({
     today: '2026-08-25', selfheal: { targets: [] }, statusDoc: null, costDoc: null,
     runsDoc: { runs: [
       { run_id: 'a', route: 'actions', date_jst: '2026-08-24', attempted: true, outcome: 'failed', failure_class: 'auth_or_credential', external_ref: '1' },
       { run_id: 'b', route: 'actions', date_jst: '2026-08-25', attempted: true, outcome: 'failed', failure_class: 'auth_or_credential', external_ref: '2' },
     ] },
-  });
-  const cred = d.filter((x) => x.source === 'credential');
-  t('連続認証失敗は1件に集約', cred.length === 1);
-  t('認証failureは人へ', cred[0]?.force_owner === 'human');
+  }).filter((x) => x.source === 'credential');
+  t('旧 auth_or_credential も拾う', legacy.length === 1);
 
   // 導出: id に日付を入れない（同じ故障が翌日も同じ id になる）
   t('id は日付を含まない', !/\d{8}/.test(cred[0]?.id ?? ''));
 
-  // run の解釈: 即死は認証系、遅い失敗は要トリアージ
+  // run の解釈: 即死も遅い失敗も、原因は決めつけない
   const fast = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
       started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:24:00.486Z' }] });
-  t('即死は auth_or_credential', fast.failure_class === 'auth_or_credential');
+  // 486ms は 2026-08-24/25 の実測値。当時これを auth_or_credential と書いたが、
+  // 実際は上流 action の版の破損だった。**形は書く、原因は書かない。**
+  t('即死は形だけ書く', fast.failure_class === 'immediate_failure');
+  t('即死も要トリアージ', fast.needs_triage === true);
+  t('即死の理由に原因を断定させない', !fast.failure_reason.includes('認証系の疑いが強い'));
+  t('即死の理由に最初の切り分けを書く', fast.failure_reason.includes('Download action repository'));
   const slow = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
       started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:44:00Z' }] });
