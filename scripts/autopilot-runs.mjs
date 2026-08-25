@@ -129,11 +129,30 @@ export function load(file = RUNS_PATH) {
  *   - status JSON のほうが新しい → 台帳の行が書かれなかった（PR #540 の実害。
  *     `staleness()` は許容1日ぶんは黙るので、当日中はこちらでしか捕まらない）
  */
+/**
+ * この検査が「実行した回」と見なす行。
+ *
+ * 【2026-08-25 統合時に追加】日次アクチュエータ（scripts/autopilot-act.mjs）が
+ * reconcile-runs で埋めた行（source が `act-` 始まり）は、**セッションが実行した
+ * 回ではない。** Actions API から機械的に写した「落ちた回の記録」で、成功した回は
+ * PR特定が要るため意図的に写さない。つまり status JSON に書くべき成果を持たない。
+ *
+ * ここを区別しないと、**主系が落ちた日にアクチュエータ自身が止まる**:
+ *   1. 主系が失敗する（セッションが status JSON を書けない）
+ *   2. 09:00 のアクチュエータが台帳へ ap-YYYYMMDD-actions/failed を追記する
+ *   3. 台帳の最終記入だけが翌日へ進み、status JSON は前日のまま
+ *   4. この検査が落ち、**アクチュエータのPRがマージされない**
+ * 台帳を埋めるための経路が、埋めた結果で自分を止めることになる。
+ * しかも主系が壊れている日にだけ起きるので、**要るときに限って効かない。**
+ */
+const isSessionAuthored = (r) => !String(r.source ?? '').startsWith('act-');
+
 export function statusAgreement(doc, statusDoc) {
-  const dates = (doc?.runs || []).map((r) => r.date_jst).filter(Boolean).sort();
+  const authored = (doc?.runs || []).filter(isSessionAuthored);
+  const dates = authored.map((r) => r.date_jst).filter(Boolean).sort();
   const latest = dates.at(-1) ?? null;
   const problems = [];
-  // 空の台帳は staleness の担当。ここで二重に鳴らさない。
+  // 空の台帳（およびアクチュエータの行しかない台帳）は staleness の担当。ここで二重に鳴らさない。
   if (!latest) return { checked: false, latest: null, status_date: null, problems };
 
   if (!statusDoc) {
@@ -142,7 +161,7 @@ export function statusAgreement(doc, statusDoc) {
   }
 
   const statusDate = statusDoc.date_jst ?? null;
-  const shipped = (doc.runs || []).filter(
+  const shipped = authored.filter(
     (r) => r.date_jst === latest && r.outcome === 'shipped' && r.artifact);
 
   if (statusDate !== latest) {
@@ -474,6 +493,25 @@ function selftest() {
   const skipToday = ledger('2026-08-23', { outcome: 'no_run' });
   eq(probs(skipToday, st('2026-08-23', null)), 0, '無運転の日は article なしで通る');
   eq(probs(skipToday, st('2026-08-22', null)), 1, 'スキップでも status JSON を書かなければ落ちる');
+
+  // --- 日次アクチュエータとの相互作用（2026-08-25 統合時に追加）---
+  // **主系が落ちた日にアクチュエータ自身を止めない。** reconcile-runs が埋めた行は
+  // 「セッションが実行した回」ではないので、status JSON の更新を要求しない。
+  // ここを取り違えると、台帳を埋めるための経路が埋めた結果で自分を止める。
+  const withActRow = { runs: [
+    { run_id: 'ap-20260825-ccr', date_jst: '2026-08-25', outcome: 'shipped', artifact: '/x/', source: 'session' },
+    { run_id: 'ap-20260826-actions', date_jst: '2026-08-26', outcome: 'failed', source: 'act-reconcile' }] };
+  eq(probs(withActRow, st('2026-08-25', '/x/')), 0,
+     '**アクチュエータが埋めた行だけが先行しても落とさない**（主系が落ちた日にactが止まる）');
+  // ただしセッションが書いた行なら、従来どおり落とす
+  const withSessionRow = { runs: [
+    { run_id: 'ap-20260825-ccr', date_jst: '2026-08-25', outcome: 'shipped', artifact: '/x/', source: 'session' },
+    { run_id: 'ap-20260826-ccr', date_jst: '2026-08-26', outcome: 'shipped', artifact: '/y/', source: 'session' }] };
+  eq(probs(withSessionRow, st('2026-08-25', '/x/')), 1,
+     'セッションが書いた行が先行しているなら従来どおり落とす');
+  // source 未記入は従来どおりセッション扱い（過去の行を素通りさせない）
+  eq(probs(ledger('2026-08-26', { outcome: 'shipped', artifact: '/y/' }), st('2026-08-25', '/a/')), 1,
+     'source 未記入の行はセッション扱い（既存の台帳を素通りさせない）');
 
   // 異常系
   eq(probs(shippedToday, null), 1, '**status JSON が読めないのは「問題なし」ではない**');
