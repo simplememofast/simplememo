@@ -708,9 +708,14 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "施策の停止条件（Marketing stop-loss）",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**開発側には stop-loss がある**（rollout-guard の kill、Crash-free率による自動停止）が、**マーケ側には無い。**experiments.json は評価日と判定は持つが、『悪化したら評価日を待たずに戻す』条件を持たない。AppDNA が traffic cap と instant rollback を、この位置に置いている（docs/competitors-autonomous-app-ops-2026-08.md §7）"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "growth/lib/stoploss.mjs",
+        "growth/scripts/check-stoploss.mjs",
+        "growth/lib/ledger.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。進行中の実験を評価日前に見て、**戻す判断だけ**を出す（expand は返さない —— rollout-guard.ts の kill/promote と同じ非対称）。判定は Wilson 95%区間が重ならないこと＋相対20%以上の低下＋表示200以上。**母数不足・基準値なし・スナップショット欠落は hold** で、CIは落とさない（判定できないことは異常ではない）。初回実行で**偽陽性を1件出した** —— 別の指標（brand_search_impressions）を測っている実験を CTR として判定していた。対象抽出を growth/lib/ledger.mjs の measuresPageCtr に集約し、self-test 16件で固定した。**現状の対象は進行中21件のうち7件**（残りは GA4起点・複数ページ集合・別指標）。つまりこの歯止めは**マーケ施策の3分の1にしか掛かっていない** —— GA4起点の施策に同じ歯止めは無い"
     },
     {
       "area": "③ 自律型マーケティング",

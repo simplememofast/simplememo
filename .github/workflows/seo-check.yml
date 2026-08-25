@@ -374,6 +374,16 @@ jobs:
       # /autopilot/ は 176タスク・61.3% のまま**誰にも落とされなかった。**
       # 記者が最初にやるのは「その数字はどう数えましたか」なので、
       # **ページと台帳が違うのがいちばん悪い。**
+      # 【マーケ stop-loss】評価日を待たずに「戻す」判断だけを機械が出す。
+      # 開発側には rollout-guard の kill があるのに**マーケ側だけ無く**、
+      # 2026-07-01/02 の7件は6週間そのまま放置されていた。
+      # revert のときだけ落とす。hold（母数不足・基準値なし）では落とさない ——
+      # **判定できないことは異常ではない。**ただし件数は必ず出す。
+      - name: Marketing stop-loss
+        run: |
+          node growth/scripts/check-stoploss.mjs --selftest
+          node growth/scripts/check-stoploss.mjs --check
+
       - name: Autopilot page vs ledger
         run: |
           node scripts/check-autopilot-page.mjs --selftest

@@ -297,6 +297,35 @@
         ],
         "new_guardrail": "降りたデータで sales_block の記述の誤りがもう1つ見つかった（入金額は salesReports にしか無い、が誤り）。**2回続けて『取れない』と書いて2回とも取れた**ので、APIの限界は叩いてから書く、を明記し、未確認の差分は未確認と書くようにした"
       }
+    },
+    {
+      "id": "om-2026-08-25-experiments-heterogeneous",
+      "seeded": false,
+      "area": "③ 自律型マーケティング",
+      "signal": "マーケ stop-loss を実装し、初回実行で1件が『戻せ』と出た —— aio-2026-08-11-answer-blocks（/blog/memo-app-security-comparison）で「CTR 13.53% → 1.70%、相対87.4%低下、95%区間が重ならない」",
+      "hypothesis": "実際に CTR が壊滅している。評価日（2026-11-11）を待たずに戻すべき",
+      "decision": "出す前に、その実験の定義そのものを読んで裏を取る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "growth/lib/ledger.mjs",
+          "growth/scripts/check-stoploss.mjs",
+          "growth/lib/stoploss.mjs"
+        ]
+      },
+      "verification": "experiments.json の当該レコードと、growth/data/gsc/2026-08-09・2026-08-11 の当該ページ行を突き合わせた。進行中21件の target_metric を列挙した",
+      "outcome": "**偽陽性だった。**あの baseline はそのページのGSCではなく『ブランド検索14クエリ合計(可視分)』で、target_metric は brand_search_impressions、窓は 2026-05-09..08-08。実験のノートは「クリックはこの面では発生しないため指標にしない」「判定はクリックではなくブランド検索表示数・AIO表示数で行う」と明記していた。**別のものを測っている行を、CTR として比べていた。**進行中21件の target_metric は8種類あり、baseline の出どころも GSC / GA4 / ブランド検索 / AI引用数とばらばら",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "experiments-ledger-is-heterogeneous",
+        "text": "**台帳の行が同じ形をしていることと、同じものを測っていることは違う。**この思い込みは**1セッションで2回**起きた —— 1回目は hasBaseline を GSC の4欄で書いて GA4起点の実験2件を『基準値なし』と誤判定、2回目がこの偽陽性。どちらも『experiments.json の行は均質』という前提から来ている。**前提は使う場所ごとに書かず、1箇所に閉じ込める**",
+        "changed": [
+          "growth/lib/ledger.mjs",
+          "growth/scripts/check-stoploss.mjs"
+        ],
+        "new_guardrail": "measuresPageCtr() を growth/lib/ledger.mjs に置き、対象抽出をそこだけに集約した。self-test で brand_search_impressions・複数ページ集合・GA4起点の3種が対象に入らないことを固定。**そして stop-loss が掛かるのは進行中21件のうち7件だけ**であることを、台帳の note に明記した —— 3分の1にしか掛かっていない歯止めを『マーケに stop-loss がある』と読ませない"
+      }
     }
   ]
 }
