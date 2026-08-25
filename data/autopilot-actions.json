@@ -227,15 +227,20 @@
       "auto": "append-cost",
       "close_check": {
         "kind": "cost_covers_runs",
-        "params": {}
+        "params": {
+          "exclude": [
+            "ap-20260820-actions",
+            "ap-20260821-actions"
+          ]
+        }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "実費が未記録の run が 2件: ap-20260820-actions, ap-20260821-actions",
+      "closed_jst": "2026-08-25",
+      "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）",
       "last_run_jst": "2026-08-25",
-      "last_run_log": "ap-20260820-actions: 実費を取得できなかった（0ではない）\nap-20260821-actions: 実費を取得できなかった（0ではない）\nap-20260823-actions: appended 2026-08-23 actions $7.2967\nap-20260824-actions: appended 2026-08-24 actions $0.0000\nap-20260825-actions: appended 2026-08-25 actions $0.0000"
+      "last_run_log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む"
     },
     {
       "id": "act-credential-actions",

@@ -1,9 +1,15 @@
 {
   "as_of_jst": "2026-08-25",
-  "open_total": 8,
+  "open_total": 7,
   "oldest_open_days": 3,
   "acknowledged": 2,
-  "closed_today": [],
+  "closed_today": [
+    {
+      "id": "act-cost-sync",
+      "title": "実費台帳に載っていない run が 2件",
+      "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）"
+    }
+  ],
   "human": [
     {
       "id": "act-asc-privacy-answers",
@@ -40,13 +46,6 @@
   ],
   "ai": [
     {
-      "id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 2件",
-      "age_days": 0,
-      "auto": "append-cost",
-      "evidence": "実費が未記録の run が 2件: ap-20260820-actions, ap-20260821-actions"
-    },
-    {
       "id": "act-selfheal-ap-20260824-actions",
       "title": "未修理の故障: ap-20260824-actions（auth_or_credential）",
       "age_days": 0,
@@ -72,14 +71,8 @@
     {
       "handler": "append-cost",
       "ok": true,
-      "changed": 3,
-      "log": "ap-20260820-actions: 実費を取得できなかった（0ではない）\nap-20260821-actions: 実費を取得できなかった（0ではない）\nap-20260823-actions: appended 2026-08-23 actions $7.2967\nap-20260824-actions: appended 2026-08-24 actions $0.0000\nap-20260825-actions: appended 2026-08-25 actions $0.0000"
-    },
-    {
-      "handler": "probe-secret",
-      "ok": false,
       "changed": 0,
-      "log": "secret 一覧が HTTP 403（未設定という意味ではない）"
+      "log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む"
     }
   ]
 }
