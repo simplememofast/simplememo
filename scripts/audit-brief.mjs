@@ -136,8 +136,24 @@ function brief() {
   out.push('');
   out.push('## 3. 静かに止まっていないか', '');
   const rows = runs.runs ?? [];
-  const unresolved = rows.filter((r) => r.failure_class && !rows.some((x) => (x.repair_of ?? []).includes(r.id)));
-  out.push(`- run ${rows.length}件 / **未修理の故障 ${unresolved.length}件**`);
+  // 【2026-08-25・所見 seq=4】ここは **`r.id` を見ていた。**行が持つのは `run_id`。
+  // `includes(undefined)` は例外にならず静かに false を返すので、
+  // **修理が一度も差し引かれず**、実体は「failure_class を持つ行の数」だった。
+  // 7と出ていたが、実際に未修理なのは2件。**直しても下がらない数字**で、
+  // 下がらない数字はやがて読み飛ばされる。
+  //
+  // 逆向きの穴も同時にあった。**failure_class の無い失敗は数に入らない**
+  // （ap-20260813〜19 の8件）。同じ1つの数字が多い側にも少ない側にもずれる。
+  // なので**分けて出す** —— 未修理と、そもそも分類が無くて経路に乗らないもの。
+  const repaired = new Set(rows.flatMap((r) => r.repair_of ?? []));
+  const failures = rows.filter((r) => r.failure_reason || r.failure_class);
+  const unresolved = failures.filter((r) => !repaired.has(r.run_id));
+  const unclassed = failures.filter((r) => !r.failure_class);
+  out.push(`- run ${rows.length}件 / 失敗 ${failures.length}件 / **未修理 ${unresolved.length}件**`);
+  if (unclassed.length) {
+    out.push(`- うち **failure_class が無い ${unclassed.length}件はレーンFに乗らない**`);
+    out.push(`  （分類が無い故障は自己修復の対象にならず、**故障として数えられもしない**）`);
+  }
   out.push('- 緑のまま成果物が出ていない日が続いていないか');
   out.push('- 「未観測」が「ゼロ」として扱われていないか');
   out.push('');
@@ -165,6 +181,35 @@ function brief() {
   return out.join('\n');
 }
 
+/**
+ * §3 の未修理数が**修理を実際に差し引いているか**を、数字の性質から確かめる。
+ *
+ * 所見 seq=4 の再発防止。あの壊れ方は「検査が無い」形ではなく
+ * **「いつも全部が該当する」**形で出た —— `r.id` という存在しないキーを見ており、
+ * `includes(undefined)` が静かに false を返して、修理が一度も引かれなかった。
+ * 例外は出ない。出力も自然に見える。**数字が下がらないことだけが症状**だった。
+ *
+ * なので数字の性質を主張する: **修理の実績が台帳にあるなら、未修理は失敗より少ない。**
+ * キー名を打ち間違えれば引き算が効かなくなり、両者が一致してここが鳴る。
+ */
+export function checkRepairSensitivity(runs) {
+  const rows = runs.runs ?? [];
+  const repaired = new Set(rows.flatMap((r) => r.repair_of ?? []));
+  const failures = rows.filter((r) => r.failure_reason || r.failure_class);
+  const unresolved = failures.filter((r) => !repaired.has(r.run_id));
+  const problems = [];
+  if (repaired.size > 0 && unresolved.length === failures.length) {
+    problems.push('§3 の未修理数が**修理を差し引けていない**'
+      + `（修理の名指し ${repaired.size}件があるのに、失敗 ${failures.length}件が丸ごと未修理のまま）`
+      + ' — run_id のキー名が実物とずれている可能性。所見 seq=4 と同じ壊れ方');
+  }
+  const orphan = [...repaired].filter((id) => !rows.some((r) => r.run_id === id));
+  if (orphan.length) {
+    problems.push(`repair_of が台帳に無い run を指している: ${orphan.join(', ')}`);
+  }
+  return problems;
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
@@ -173,6 +218,7 @@ if (isMain) {
 
   if (argv.includes('--check')) {
     const problems = validate({ charter, findings });
+    problems.push(...checkRepairSensitivity(read('data/autopilot-runs.json')));
     const kpi = auditKpi(findings);
     console.log('週次監査 — 約束と実績\n');
     console.log(`  前回: ${charter.cadence?.last_run_at ?? '**一度も走っていない**'}`);

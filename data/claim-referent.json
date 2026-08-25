@@ -434,9 +434,9 @@
       "claim": "autonomy-conditions.json の measured（実測値）",
       "referent": "台帳から数え直した実際の値",
       "direction": "claim_to_referent",
-      "checked_by": null,
-      "covered": false,
-      "why_uncovered": "**まだやっていない。**measured は手で書いた文字列で、autopilot-runs / experiments から数え直して突き合わせてはいない。**今日3回出たのと同じ形の対**なので、次に塞ぐならここ"
+      "checked_by": "node scripts/check-autonomy-measured.mjs",
+      "covered": true,
+      "note": "**第1回の定期監査（2026-08-25）で塞いだ。**資料の §1 が「今日3回出たのと同じ形の対なので、次に塞ぐならここ」と名指ししていたもの。数え直したら①〜⑥は合っていたが、**⑦だけ「必須CIチェック 40→53本」で止まっていた**（実際は57本）。合っていた5つも、合っていることを誰も守ってはいなかった —— 実験のベースラインと同じ形。\n\n二段で縛る。台帳が動くと measured_facts が落ち、facts を直すと今度は散文が落ちる。measured に数字があるのに measured_facts が無い条件も落とす（素通りにすると、**書かないほうが検査を通る**形になる）。\n\n差し替え4通りと、**監査が見つけた当日のずれの再現**で発火を確認した。さらに実地でも効いた —— この検査を required_ci_checks に足した結果 57→58 になり、**書いたばかりの検査が、自分の追加で古くなった⑦を即座に落とした。**"
     },
     {
       "id": "memory-refs",
@@ -465,6 +465,16 @@
       "covered": true,
       "found_here": "2026-08-25",
       "note": "**前が無い pre_post は実験ではなく矛盾。**2026-07のバッチ7件がこの形で、評価日に全部 inconclusive になった（判定不能が始まる前から確定していた）。\n\nこの対には**書き損じの履歴がある。**最初に足した規則は「値が無いなら baseline.note に理由を書けば通る」で、**あの7件はその形なら全部すり抜ける** —— 注記が\"No pre-change GSC value was recorded for this page.\" だったからだ。それは置けないと決めた理由ではなく**失敗そのものを文にしたもの**で、欄が埋まったことを見る検査は書いた内容を見ていない。**名前をつけた失敗を通す検査を書きかけた。**履歴に当てて気づいた。対を登録するときは「その検査は、名前の由来になった事件を落とすか」を必ず当てること"
+    },
+    {
+      "id": "audit-unrepaired-count",
+      "claim": "週次監査 §3 の「未修理の故障 N件」",
+      "referent": "autopilot-runs.json で実際に repair_of で名指しされていない失敗",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/audit-brief.mjs --check",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**第1回の定期監査が見つけた（所見 seq=4）。**`r.id` という存在しないキーを見ており、`includes(undefined)` が静かに false を返して修理が一度も引かれていなかった。例外も出ず出力も自然で、**数字が下がらないことだけが症状**だった。検査は数字の性質を主張する形にしてある —— 修理の実績が台帳にあるなら未修理は失敗より少ないはずで、キー名がずれれば引き算が効かなくなって鳴る"
     }
   ],
   "exempt_sources": {

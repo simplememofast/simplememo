@@ -57,7 +57,7 @@
     "undetermined",
     "measurement_failed"
   ],
-  "next_seq": 5,
+  "next_seq": 6,
   "records": [
     {
       "seq": 1,
@@ -184,6 +184,34 @@
         "effect": "現行21件はそのまま通る（pre_post 17件は全部実値を持つ）。落ちるのは、これから作られる「始まる前から判定不能な実験」だけ。あわせて網羅率の出力に「学べない件」を分けた。**永久に埋まらない7件を未記録に混ぜると、上がらない床を持つ数字になり、やがて「どうせ動かない指標」として読まれなくなる。**床が伸びない根拠も出力に書いた —— この形になる経路は2通りしか無く（pre_post で baseline 無し／control 欄が無い）、どちらも今は open にできない"
       },
       "closed_at": "2026-08-25"
+    },
+    {
+      "seq": 5,
+      "opened_at": "2026-08-25",
+      "closed_at": "2026-08-25",
+      "status": "closed",
+      "signal": {
+        "what": "**第1回の定期監査を実際に走らせた。**資料 §3 の「未修理の故障 7件」を数え直したら、修理が一度も差し引かれていなかった（実際に未修理なのは2件、かつ分類の無い失敗8件はそもそも数に入っていない）",
+        "ref": "audit-findings.json#seq=4"
+      },
+      "hypothesis": "`audit-brief.mjs` が `r.id` を見ているが、行が持つのは `run_id`。`includes(undefined)` は例外にならず静かに false を返すので、この数字の実体は「failure_class を持つ行の数」になっていたのではないか",
+      "decision": "キー名を直し、**分類の無い失敗を未修理と混ぜずに別行で出す。**そのうえで、同じ壊れ方が戻ったときに鳴る形を残す",
+      "execution": {
+        "what": "`r.id` → `run_id`。未修理と「failure_class が無くレーンFに乗らない件」を分けて出力。`checkRepairSensitivity()` を新設して `--check` から呼ぶ。さらに監査の第2の指摘（measured が手書きで誰も突き合わせていない）に対して`scripts/check-autonomy-measured.mjs` を新設した",
+        "ref": "scripts/audit-brief.mjs"
+      },
+      "verification": {
+        "what": "台帳に修理を1件足すと 10→9 と動くことを確認（**以前は動かなかった**）。`checkRepairSensitivity` は run_id を id に付け替えた台帳で発火。`check-autonomy-measured` は差し替え4通りと、**監査が見つけた当日のずれ（53 vs 57）の再現**で発火を確認した",
+        "ref": "scripts/audit-brief.mjs"
+      },
+      "outcome": "**監査は1周目で仕事をした。**KPI（定期監査由来の所見）が 0/3 → 1/4 へ動いた。所見1件（seq=4）と、measured の実測ずれ1件（⑦が「40→53本」で止まっていた。実際57本）。①〜⑥の measured は台帳と一致していた",
+      "verdict": "improved",
+      "learning": "**存在しないキーを見る検査は、落ちずに「全部該当」を返す。**`r.id` は例外を投げず undefined になり、`includes(undefined)` は静かに false を返す。検査が無い形ではなく、**いつも全部が該当する**形で壊れる。症状は「数字が下がらない」ことだけで、出力は最後まで自然に見える。\n\nもう一つ。**この所見は、監査を設計したときに狙っていた出方そのものだった。**資料 §1 が「次に塞ぐならここ」と名指ししていた対（autonomy-measured）から、実際にずれが出た。**観点を渡すのではなく、未検査の対を1つずつ開かせる**という入力の作り方が効いたということ（憲章の4観点は台帳↔台帳なので、これは出ない）。\n\nただし **1回では設計の証明にならない。**初回は棚卸し効果で出やすい。次回が0件なら、効いたのは監査ではなく「初めて全部を読み下したこと」だったと読む。\n\n加えて、今回は**自分が書いた仕組みを自分で監査した。**憲章は監査AIを別モデルにする独立性を担保しているが、それを使っていない。**seq=2（オーナーの指摘で出た形）は、この方法では出ない。**",
+      "policy_change": {
+        "what": "`check-autonomy-measured.mjs` を新設し必須CIチェックへ。**measured の数字を台帳から数え直して二段で縛る** —— 台帳が動くと measured_facts が落ち、facts を直すと今度は散文が落ちる。measured に数字があるのに measured_facts が無い条件も落とす（素通りにすると、書かないほうが検査を通る形になる）。あわせて `checkRepairSensitivity()` で seq=4 の壊れ方の再発を検出する",
+        "ref": "scripts/check-autonomy-measured.mjs",
+        "effect": "**追加した直後に効いた。**この検査を required_ci_checks に足したことで 57→58 になり、書いたばかりの検査が**自分の追加で古くなった⑦を即座に落とした。**差し替えではなく実地で発火したのはこれが初めて"
+      }
     }
   ]
 }

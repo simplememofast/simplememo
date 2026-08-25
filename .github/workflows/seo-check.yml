@@ -230,6 +230,20 @@ jobs:
       - name: Autonomy conditions
         run: node scripts/check-autonomy-conditions.mjs --check
 
+      # 【実測値】measured が台帳から数え直した値と合っているか。
+      #
+      # measured は手で書いた散文で、**誰も突き合わせていなかった。**
+      # 2026-08-25 の第1回定期監査で①〜⑥を数え直したら5つは合っていたが、
+      # **⑦だけ「必須CIチェック 40→53本」で止まっていた**（実際は57本）。
+      # 合っていた5つも、合っていることを誰も守ってはいなかった。
+      #
+      # 二段。台帳が動くと measured_facts が落ち、facts を直すと
+      # 今度は散文が落ちる —— **数字を更新しないと文が通らない。**
+      # measured に数字があるのに measured_facts が無い条件も落とす
+      # （素通りにすると、書かないほうが通る形になる）。
+      - name: Autonomy measured
+        run: node scripts/check-autonomy-measured.mjs
+
       # 【運営記憶】1つの改善を、最初から最後まで1レコードで追えるか。
       #
       # 2026-08-25 の自己採点で条件⑥が最大の欠落だった —— 記録は揃っていたが
