@@ -106,6 +106,52 @@ export function validate(ledger) {
     if (isOpen(e) && !e.evaluation_at) {
       problems.push(`${at}: status ${e.status} requires evaluation_at (otherwise it can never come due)`);
     }
+
+    // 【2026-08-25】変更前の値を記録していない実験は、**評価日が来ても判定できない。**
+    //
+    // 評価済み12件のうち**7件が inconclusive で、原因は全部これ1つ**だった
+    // （2026-07-01〜02 のバッチ。baseline の4項目が全部 null）。
+    // **半分以上の実験が、測る前に測定不能が確定していた。**
+    //
+    // evaluation_at が無い実験を落とすのと同じ理由でここに置く ——
+    // どちらも「評価日が来ても判定できない」ことが**始める前から分かっている**形。
+    //
+    // 【この規則は一度書き直している。理由は残す】
+    // 最初は「baseline の値、無いなら `baseline.note` に理由」で通した。
+    // **その形だと7件は全部すり抜ける。**あの7件の note には
+    // "No pre-change GSC value was recorded for this page." と書いてあり、
+    // これは「置けないと決めた理由」ではなく**失敗そのものを文にしたもの**だからだ。
+    // 何か書いてあれば通る検査は、書いた内容ではなく欄が埋まったことを見ている。
+    //
+    // なので **control.kind に紐付ける。**`pre_post` は「前と後を比べる」と
+    // 宣言した実験で、**前が無い pre_post は実験ではなく矛盾**である。
+    // ここは文章では抜けられない。値が要る。
+    // 前が本当に取れないなら、それは pre_post ではない —— `none` か `holdout` を
+    // 選ぶことになり、`control.note` でどう比べるのかを書くことが既に強制される。
+    // **「測れない」を宣言する場所は baseline の隅ではなく、比較設計のほう。**
+    //
+    // いま走っている21件は pre_post 17 / none 4 で、**pre_post は全部値を持っている。**
+    // 運用はすでに直っていて、直っていることを誰も守っていなかった。
+    // ここはその規律を固定するだけで、現状のどれも落とさない。
+    //
+    // 評価済みのものは見ない。**履歴は履歴**で、7件の note には
+    // 記録が無かったことがすでに書いてある（消すと同じ失敗の証拠が消える）。
+    if (isOpen(e)) {
+      const b = e.baseline;
+      const hasValue = b && Object.entries(b)
+        .some(([k, v]) => k !== 'note' && v !== null && v !== undefined);
+      if (e.control?.kind === 'pre_post' && !hasValue) {
+        problems.push(`${at}: control.kind が pre_post なのに baseline の値が無い`
+          + ' —— **前と後を比べると宣言して、前を記録していない。**'
+          + '評価日が来ても判定できないことが、始める前から確定している'
+          + '（2026-07のバッチはこれで7件が inconclusive になった）。'
+          + '前が本当に取れないなら pre_post ではない。control.kind を none か holdout にして、'
+          + '何と比べるのかを control.note に書くこと');
+      } else if (!hasValue && !b?.note) {
+        problems.push(`${at}: baseline が無い`
+          + ' —— 変更前の値か、置けない理由（baseline.note）のどちらかが要る');
+      }
+    }
     if (e.started_at && e.evaluation_at && e.evaluation_at < e.started_at) {
       problems.push(`${at}: evaluation_at precedes started_at`);
     }

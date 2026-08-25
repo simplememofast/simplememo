@@ -166,17 +166,54 @@ export function coverage({ memory, findings, experiments, runs }) {
     required.push({ kind: 'finding', id: `seq=${f.seq}`, ref: `audit-findings.json#seq=${f.seq}`, blocking: true });
   }
   for (const e of (experiments.experiments ?? []).filter((x) => x.status === 'evaluated')) {
-    required.push({ kind: 'experiment', id: e.id, ref: `growth/experiments/experiments.json#id=${e.id}`, blocking: false });
+    // **二度と学べない実験がある。**変更前を記録しないまま変えた実験は、
+    // 評価日が来ても仮説の可否が出ない（2026-07のバッチ7件）。
+    // これを「未記録」に混ぜると、網羅率に**永久に埋まらない床**ができて、
+    // やがて「どうせ上がらない数字」として読まれなくなる。
+    // かといって seq=4 で7件まとめて covered にするのは違う ——
+    // seq=4 が残したのは**測り方についての学び**であって、
+    // 「その改題がCTRを上げたか」は今も分からないし、これからも分からない。
+    // なので covered にはせず、**学べない件として別に数えて理由を書く。**
+    //
+    // **どの設計が baseline を要求していたかで判定する。**
+    // 「inconclusive かつ baseline 無し」だけで貼ると広すぎる ——
+    // holdout は同時期の対照群と比べる設計なので、そもそも変更前を要らない。
+    // その holdout が inconclusive になったのは母数不足など**別の理由**で、
+    // 「変更前が無いから永久に出ない」は**その実験については嘘**になる。
+    //
+    // 貼るのは、変更前が要る設計だったのに無い2通りだけ:
+    //   control.kind === 'pre_post'  … 前と後を比べると宣言している
+    //   control 欄が無い             … 2026-07のバッチはこの形（比較設計を書く規則より前）
+    // **この2通りはどちらも、いまは open にできない。**
+    //   前者 growth/lib/ledger.mjs の pre_post↔baseline 規則（2026-08-25）
+    //   後者 同ファイルの control.kind 必須規則（2026-08-22）
+    // evaluated には open を経ずに到達できないので、**この床はこれ以上伸びない。**
+    // 伸びたとしたらどちらかの規則が外れたということで、そのときは
+    // check-authority.mjs の逆向き突き合わせが検査の消失として鳴る。
+    const b = e.baseline;
+    const hasValue = b && Object.entries(b).some(([k, v]) => k !== 'note' && v !== null && v !== undefined);
+    const neededBaseline = e.control?.kind === 'pre_post' || !e.control?.kind;
+    const unlearnable = e.decision === 'inconclusive' && !hasValue && neededBaseline;
+    required.push({
+      kind: 'experiment', id: e.id, ref: `growth/experiments/experiments.json#id=${e.id}`,
+      blocking: false, unlearnable,
+      ...(unlearnable ? { unlearnable_reason: '変更前を要る設計なのに記録が無く、仮説の可否は永久に出ない' } : {}),
+    });
   }
   for (const r of (runs.runs ?? []).filter((x) => x.repair_of)) {
     required.push({ kind: 'repair', id: r.run_id, ref: `autopilot-runs.json#run_id=${r.run_id}`, blocking: false });
   }
 
   const missing = required.filter((r) => !covered(r.ref));
+  const unlearnable = missing.filter((r) => r.unlearnable);
+  const reachable = required.length - unlearnable.length;
   return {
-    required, missing,
+    required, missing, unlearnable,
     blocking: missing.filter((r) => r.blocking),
+    // **生の網羅率を主にする。**到達可能ぶんの率（reachable_rate）は
+    // 必ず見栄えが良くなるほうなので、単独では出さない。
     rate: required.length ? (required.length - missing.length) / required.length : null,
+    reachable_rate: reachable ? (reachable - (missing.length - unlearnable.length)) / reachable : null,
   };
 }
 
@@ -202,6 +239,20 @@ if (isMain) {
       const label = { finding: '監査の所見', experiment: '評価済みの実験', repair: '自己修理' }[kind] ?? kind;
       console.log(`  記録が無い ${label}: ${ids.length}件`);
       console.log(`    ${ids.slice(0, 6).join(' , ')}${ids.length > 6 ? ' …' : ''}`);
+    }
+
+    if (cov.unlearnable.length) {
+      const rpct = cov.reachable_rate === null ? 'n/a' : `${(cov.reachable_rate * 100).toFixed(1)}%`;
+      const reachable = cov.required.length - cov.unlearnable.length;
+      console.log(`\n  うち **${cov.unlearnable.length}件は書けない** — ${cov.unlearnable[0].unlearnable_reason}`);
+      console.log(`    ${cov.unlearnable.map((u) => u.id).slice(0, 8).join(' , ')}`);
+      console.log(`    **この分は永久に埋まらない。**混ぜたままにすると、上がらない床を持つ数字になり、`);
+      console.log(`    やがて「どうせ動かない指標」として読まれなくなるので、分けて出す。`);
+      console.log(`    到達可能ぶんだけなら ${cov.required.length - cov.missing.length} / ${reachable} 件 = ${rpct}`);
+      console.log(`    （**こちらは必ず見栄えが良くなる数字なので、単独では出さない。**上の生の率が主）`);
+      console.log(`    **床はこれ以上伸びない** — この形は2通りしか無く、どちらも open にできない:`);
+      console.log(`      pre_post なのに baseline 無し … growth/lib/ledger.mjs（2026-08-25）`);
+      console.log(`      control 欄が無い              … 同ファイルの control.kind 必須（2026-08-22）`);
     }
     console.log('\n  **出荷を全部対象にしていない。**毎日の記事ごとに書かせると');
     console.log('  「気をつける」で埋まった台帳ができる。形だけの記憶は、無い記憶より悪い。');

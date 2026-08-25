@@ -455,6 +455,16 @@
       "checked_by": "node scripts/check-memory.mjs --coverage --check",
       "covered": true,
       "note": "**記録があるべき改善**（監査の所見・評価済みの実験・自己修理）のうち、記憶が指しているものを数える。現在 **3/19件（15.8%）**。出荷を全部対象にはしない —— 毎日の記事ごとに書かせると「気をつける」で埋まった台帳ができ、**形だけの記憶は無い記憶より悪い**（在ることになってしまう）。落とすのは所見だけで、実験12件と修理4件は**報告に留める**（読み直す作業が要り、ここで落とすとCIが赤で固定される。この運営には 2026-08-22〜24 にCIが3日赤で固定されデプロイごと止まった前例がある）"
+    },
+    {
+      "id": "experiment-control-to-baseline",
+      "claim": "experiments.json の control.kind: \"pre_post\"（前と後を比べると宣言している）",
+      "referent": "同じ実験の baseline（変更前の実値）",
+      "direction": "claim_to_referent",
+      "checked_by": "node growth/scripts/check-experiments.mjs",
+      "covered": true,
+      "found_here": "2026-08-25",
+      "note": "**前が無い pre_post は実験ではなく矛盾。**2026-07のバッチ7件がこの形で、評価日に全部 inconclusive になった（判定不能が始まる前から確定していた）。\n\nこの対には**書き損じの履歴がある。**最初に足した規則は「値が無いなら baseline.note に理由を書けば通る」で、**あの7件はその形なら全部すり抜ける** —— 注記が\"No pre-change GSC value was recorded for this page.\" だったからだ。それは置けないと決めた理由ではなく**失敗そのものを文にしたもの**で、欄が埋まったことを見る検査は書いた内容を見ていない。**名前をつけた失敗を通す検査を書きかけた。**履歴に当てて気づいた。対を登録するときは「その検査は、名前の由来になった事件を落とすか」を必ず当てること"
     }
   ],
   "exempt_sources": {
