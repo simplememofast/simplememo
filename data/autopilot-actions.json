@@ -96,13 +96,14 @@
     },
     {
       "id": "act-status-freshness-ci",
-      "title": "status JSON の鮮度をCIで検証する（再発防止・未実装）",
-      "detail": "2026-08-23 PR#538（主系初出荷）が Runbook §5-2 必須の data/autopilot-status.json 更新を含まず、本番の日報データが3日間 08-22 のまま止まった。日報は「当日分が無い＝上流停止」と読む設計なので、**出荷した日ほど誤報する**壊れ方だった。記事を含むPRが status JSON を更新していなければ落とす検査を足す。 記事を含むPRが status JSON を更新していなければ落とす**差分スコープの**検査にすること。日次の鮮度そのものは autopilot-health.yml が 12:00 JST に見ているので、seo-check 側で日次鮮度を見ると autopilot が止まった日に無関係なPRまで赤くなる。",
+      "title": "status JSON の鮮度をCIで検証する（PR #544 が実装済み・draft保留中）",
+      "detail": "2026-08-23 PR#538（主系初出荷）が Runbook §5-2 必須の data/autopilot-status.json 更新を含まず、本番の日報データが3日間 08-22 のまま止まった。日報は「当日分が無い＝上流停止」と読む設計なので、**出荷した日ほど誤報する**壊れ方だった。\\n\\n**実装は既に PR #544 にある**（scripts/autopilot-runs.mjs に statusAgreement() を追加し、既存の --check で台帳と status JSON の両方向の食い違いを落とす。自己検査10ケース付き）。ただし draft で保留されており、base が古くコンフリクトしている。\\n\\n【2026-08-25 実測】#544 を現在の main にマージして検証した: scripts/autopilot-runs.mjs は**自動マージで衝突なし**（PR#554 で足した --failure-class と両立）、seo-check.yml と Runbook も自動マージ。唯一の衝突は data/autopilot-status.json で、#544 がこれを 08-23 に復元しようとするため —— **その復元は既に不要**（main は 08-25 で台帳と一致）。main 側を採用すれば selftest 24/24・--check OK・全57チェック通過（KPI checksum の --bump のみ別途必要）。",
       "source": "manual",
       "domain": "サイトコンテンツの新設・更新",
       "touches": [
+        "scripts/autopilot-runs.mjs",
         ".github/workflows/seo-check.yml",
-        "scripts/autopilot-act.mjs"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
       "outside_repo": false,
       "force_owner": null,
@@ -111,8 +112,8 @@
       "close_check": {
         "kind": "file_contains",
         "params": {
-          "file": ".github/workflows/seo-check.yml",
-          "needle": "--shipping-pr-has-status"
+          "file": "scripts/autopilot-runs.mjs",
+          "needle": "statusAgreement"
         }
       },
       "state": "open",
