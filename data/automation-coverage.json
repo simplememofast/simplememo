@@ -1939,6 +1939,18 @@
         "data/authority-matrix.json"
       ],
       "note": "自動停止して経営者へ移管する方針。手順は未整備"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "公開してよいデータの明示と、既定の非公開",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/publication-policy.json",
+        "scripts/check-publication.mjs",
+        "_redirects",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。**Cloudflare Pages はリポジトリの中身をそのまま配信する**ので、data/*.json は34件すべてが公開されていた（サイトが意図して参照しているのは6件）。鍵の棚卸し・攻撃面・取引先・法人情報が、静的ホスティングの副作用で外から読めていた。**秘密の値そのものは含まないが「何があるか」の地図。**全件を分類し、**新しいファイルは分類するまでCIが落ちる**（既定を非公開に倒す）。非公開は _redirects で404。**この穴は、自分が役員報酬の有無をそこへ書き込んだ直後に気づいた**"
     }
   ],
   "$since_note": [

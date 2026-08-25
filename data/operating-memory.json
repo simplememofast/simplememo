@@ -384,6 +384,37 @@
         ],
         "new_guardrail": "corporate-obligations.json に entity 欄を足し、形態・確認日・確認者・出どころを持たせた。**そのうえで「形態が分かったことと期限が分かったことは別」と明記** —— 決算期は定款にあり、形態からは出てこない。social-insurance の行は社会保険と労働保険で条件が違うことを書き分け、**判断は税理士・社労士の領域だとして台帳では確定させない**"
       }
+    },
+    {
+      "id": "om-2026-08-25-data-dir-public",
+      "seeded": false,
+      "area": "⑪ データ・プライバシー",
+      "signal": "⑦法人経営の欄を埋める作業で、役員報酬の有無を data/corporate-obligations.json に書き込んだ。その直後、資本金も同じファイルへ入れようとした",
+      "hypothesis": "台帳は内部の記録なので、事実を足していけばよい",
+      "decision": "入れる前に、そのファイルがどこから読めるのかを確かめる",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "_redirects",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "_headers / _redirects / .gitignore に data/ の除外が無いことを確認。サイトの HTML から実際に参照されている data ファイルを走査（6件）。34件との差を数えた",
+      "outcome": "**内部の記録ではなかった。**Cloudflare Pages はリポジトリの中身をそのまま配信し、除外設定は無い。`data/*.json` は**34件すべてが公開されていた。**サイトが意図して参照しているのは6件だけで、残り28件は静的ホスティングの副作用。その中に credential-expiry.json（**どんな資格情報が存在するかの一覧**）、injection-surface.json（**攻撃面の棚卸し**）、vendor-register.json（依存の地図）が含まれていた。**どれも秘密の値そのものは持っていないが、「何があるか」の地図である。**そして自分が数十分前に、登記事項ではない情報（役員報酬の有無）をそこへ確認せずに置いていた",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "static-hosting-publishes-by-default-not-by-choice",
+        "text": "**「内部の台帳」は置き場所の性質であって、ファイルの名前や意図では決まらない。**静的ホスティングは既定で全部配信する。除外を書かない限り、`data/` に置いた時点で公開したことになる。**公開の可否を、ホスティングの既定に決めさせない。**この運用は他のほぼ全ての値に「台帳と実装がずれたら落ちる」検査を持っていたのに、**そもそもどれが外から読めるのかを誰も持っていなかった**",
+        "changed": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "_redirects"
+        ],
+        "new_guardrail": "data/*.json を全件分類する方針ファイルを作り、**新しいファイルは分類するまで CI が落ちる**（既定を非公開に倒す）。非公開のものは _redirects で 404 にし、方針とブロックのずれも落とす。public と書いたのにサイトから参照されていないものも落とす（参照が消えたのに公開のまま忘れられるのを防ぐ）。self-test 9件"
+      }
     }
   ]
 }
