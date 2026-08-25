@@ -1,0 +1,172 @@
+{
+  "$comment": [
+    "**自律の段階を、宣言ではなく条件から計算する。**",
+    "検査は `scripts/check-autonomy-conditions.mjs`。",
+    "",
+    "【なぜ作るか】",
+    "「閉ループ」「再帰的自己改善」「自律運営」は、名乗った瞬間に強い言葉になる。",
+    "**だから名乗らせない。**7つの条件それぞれに証跡を要求し、",
+    "**段階は条件の充足から導出する。**level を手で書ける形にしない。",
+    "",
+    "外部調査（2026-08-25）が整理した段階分けを使う:",
+    "  ①〜④ が揃う … Autopilot",
+    "  ⑤ まで      … Closed-loop Autonomy",
+    "  ⑥⑦ まで     … 再帰的に運営能力が改善していると言える",
+    "",
+    "【lane を分ける理由】",
+    "この運用は**基盤側（記事・SEO・自分の修理）と機能側（アプリの機能）で",
+    "成熟度がまったく違う。**まとめて1つの段階を名乗ると、",
+    "強いほうの実績で弱いほうを覆い隠すことになる。",
+    "実際 ④⑤ は基盤側では実績があるが、**機能側は本番改善サイクルの完走が0件。**",
+    "",
+    "【partial を悪いことにしない】",
+    "禁じているのは、部分成立を met と書くこと。",
+    "**missing を必ず書かせる** —— 何が足りないかを言えないなら、それは",
+    "「部分的にできている」ではなく「測っていない」。"
+  ],
+  "$fields": {
+    "status": "met / partial / not_met",
+    "lanes": "基盤側（infra）と機能側（product）で状態が違う条件は、両方 {status, note} で書く。**段階は lane ごとに導出する**",
+    "evidence": "実在するファイル。met と partial は必須",
+    "missing": "met 以外では必須。**何が足りないかを言えないなら測っていない**",
+    "measured": "実測値があるものだけ"
+  },
+  "assessed_at": "2026-08-25",
+  "conditions": [
+    {
+      "id": "self_triggering",
+      "n": 1,
+      "title": "人が毎回promptしなくても、データから仕事を発見する",
+      "status": "met",
+      "evidence": [
+        ".github/workflows/obsidian-autopilot.yml",
+        "scripts/autopilot-selfheal.mjs",
+        "data/autopilot-runs.json"
+      ],
+      "measured": "26 run / 15日（2026-08-11〜08-25）。無運転日 2日",
+      "note": "毎朝6時に起動し、検索データを読んで当日の施策を1件だけ選ぶ。**着手前に運転台帳を読み、未修理の故障が残っていればその日は修理へ切り替える**（レーンF）。人のpromptは介在しない"
+    },
+    {
+      "id": "self_prioritization",
+      "n": 2,
+      "title": "次に何をするかをAIが選ぶ",
+      "status": "met",
+      "evidence": [
+        "scripts/feature-score.mjs",
+        "data/feature-backlog.json",
+        "scripts/autopilot-selfheal.mjs"
+      ],
+      "note": "期待効果 × 確信度 ÷ 工数。**確信度は根拠の種別から機械的に決まる**（自社実測1.0／外部実測0.7／観察0.5／類推0.3／思いつき0.15）ので、手で順位を動かせない。リスクは減点ではなく承認を要求する形にしてある — 掛け算で効かせると期待効果が大きいほど危険な案が上位に来る"
+    },
+    {
+      "id": "self_execution",
+      "n": 3,
+      "title": "コード・QA・マーケ等を実行する",
+      "status": "met",
+      "evidence": [
+        "data/autopilot-runs.json",
+        "data/code-authorship.json"
+      ],
+      "measured": "出荷11件 / 着手16件（完走率68.8%）。**成果物への人の介入 0件**。変更行のAI著者率 94.2%",
+      "note": "人の介入は7件あるが、**すべて基盤の修理・代走・立ち上げ・起票**で、成果物の中身には触れていない"
+    },
+    {
+      "id": "self_evaluation",
+      "n": 4,
+      "title": "結果を後から測る",
+      "status": "partial",
+      "lanes": {
+        "infra": {
+          "status": "met",
+          "note": "実験台帳36件のうち**12件が評価済み**。評価日を過ぎた実験はCIが名指しする"
+        },
+        "product": {
+          "status": "not_met",
+          "note": "**機能側の本番改善サイクルは完走0件**"
+        }
+      },
+      "evidence": [
+        "growth/experiments/experiments.json",
+        "growth/scripts/check-experiments.mjs",
+        "docs/canary-first-run.md"
+      ],
+      "measured": "実験 36件（評価済み12 / 実行中21 / 計画2 / 中止1）。機能側の完走 0件",
+      "missing": "**機能を段階公開して、指標を見て、継続か撤回かを決めた実績が1件も無い。**手順書（canary-first-run.md）は在るが、まだ1周していない"
+    },
+    {
+      "id": "self_correction",
+      "n": 5,
+      "title": "悪化なら停止・撤回・修正する",
+      "status": "partial",
+      "lanes": {
+        "infra": {
+          "status": "met",
+          "note": "**AIが自分の故障を修理した run が4件**（レーンF）。同一種別を3回直しても再発したら人間へ上げる歯止めつき"
+        },
+        "product": {
+          "status": "not_met",
+          "note": "機能側の kill を**本番で通した実績が無い**"
+        }
+      },
+      "evidence": [
+        "data/autopilot-runs.json",
+        "scripts/autopilot-selfheal.mjs",
+        "data/emergency-stop.json",
+        "../simplememo-api/src/rollout-guard.ts"
+      ],
+      "measured": "自己修理 4件。緊急停止の発動 0件。機能側 kill 0件",
+      "missing": "カナリアガードは実装済みで、撤回はAI自律・拡大は人間承認という非対称まで作ってあるが、**本番で一度も発火していない。**「実装がある」と「効くことを確かめた」は別"
+    },
+    {
+      "id": "persistent_memory",
+      "n": 6,
+      "title": "成否を次回の判断へ残す",
+      "status": "partial",
+      "evidence": [
+        "data/autopilot-runs.json",
+        "data/audit-findings.json",
+        "data/review-intake.json",
+        "data/feature-backlog.json",
+        "growth/experiments/experiments.json"
+      ],
+      "missing": "**記録は在るが、連結していない。**共通の実行IDで着手・結果・PR・介入・費用までは1行になっているが、そこから先——**Outcome → Verdict → Learning → 次の判断がどう変わったか**——が同じレコードに入っていない。いまは実験台帳・所見台帳・要望台帳に別々に載っていて、**1つの改善を最初から最後まで追える形になっていない**",
+      "note": "外部調査が「再帰的自己改善を名乗れるかどうかの核心」と指摘した部分。**ここが最大の欠落**"
+    },
+    {
+      "id": "policy_improvement",
+      "n": 7,
+      "title": "学習結果で、優先順位・閾値・検査・モデル選択そのものが変わる",
+      "status": "not_met",
+      "evidence": [
+        "data/audit-findings.json",
+        "data/claim-referent.json"
+      ],
+      "measured": "事例3件（所見 seq=1/2/3 から必須CIチェック 40→53本、検査2本を新設）",
+      "missing": "**事例はあるが、仕組みが無い。**2026-08-25 に検査が11本増えたのは事実だが、それは人とAIの対話の結果であって、**台帳の実績から自動で閾値や優先順位が変わる経路は存在しない。**⑦を満たすには、たとえば『同じ failure_class が3回出たら検査を1本増やす』が自動で起きる必要がある"
+    }
+  ],
+  "$levels": {
+    "autopilot": [
+      "self_triggering",
+      "self_prioritization",
+      "self_execution",
+      "self_evaluation"
+    ],
+    "closed_loop": [
+      "self_correction"
+    ],
+    "recursive": [
+      "persistent_memory",
+      "policy_improvement"
+    ]
+  },
+  "$level_note": [
+    "**level は書かない。導出する。**",
+    "手で書ける形にすると、実績ではなく気分で段階が上がる。",
+    "下位の段階が partial のまま上位を名乗ることも禁じる",
+    "（⑥が met でも④が partial なら、Autopilot 止まり）。",
+    "",
+    "**lane ごとに導出する。**まとめて1つにすると、",
+    "強いほう（基盤側）の実績で弱いほう（機能側）を覆い隠すことになる。"
+  ]
+}

@@ -419,6 +419,24 @@
       "checked_by": null,
       "covered": false,
       "why_uncovered": "**実績が足りない。**観測できている実費は1件（$0.8149）だけで、副系は観測手段が無い。中央値も撤回条件も、判定に足る母数が貯まっていない。**「判定していない」を「異常なし」と書かない**形にしてある"
+    },
+    {
+      "id": "autonomy-conditions",
+      "claim": "autonomy-conditions.json の7条件の充足状態",
+      "referent": "各条件が指す実績（実験の評価数・自己修理のrun・機能側の完走数）",
+      "direction": "claim_to_referent",
+      "checked_by": "node scripts/check-autonomy-conditions.mjs --check",
+      "covered": true,
+      "note": "**段階は導出であって宣言ではない。**level を台帳に書くと落ちる。lane を分けて出すのは、強いほう（基盤側）の実績で弱いほう（機能側）を覆わないため"
+    },
+    {
+      "id": "autonomy-measured",
+      "claim": "autonomy-conditions.json の measured（実測値）",
+      "referent": "台帳から数え直した実際の値",
+      "direction": "claim_to_referent",
+      "checked_by": null,
+      "covered": false,
+      "why_uncovered": "**まだやっていない。**measured は手で書いた文字列で、autopilot-runs / experiments から数え直して突き合わせてはいない。**今日3回出たのと同じ形の対**なので、次に塞ぐならここ"
     }
   ],
   "exempt_sources": {

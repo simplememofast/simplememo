@@ -215,6 +215,21 @@ jobs:
       - name: Claim-referent pairs
         run: node scripts/check-claims.mjs --check
 
+      # 【自律の段階】「閉ループ」「再帰的自己改善」を**名乗らせない。**
+      #
+      # 7条件それぞれに証跡を要求し、**段階は充足から導出する。**
+      # level を台帳に手で書くと落ちる —— 書ける形にすると、
+      # 実績ではなく気分で段階が上がる。
+      #
+      # lane を分けて出すのは、この運用が基盤側（記事・SEO・自分の修理）と
+      # 機能側（アプリの機能）で成熟度がまったく違うため。
+      # **まとめて名乗ると、強いほうの実績で弱いほうを覆い隠す。**
+      #
+      # partial / not_met では落とさない（現在地であって不具合ではない）。
+      # 落とすのは、証跡なしに met と書いたときと、missing を書かないとき。
+      - name: Autonomy conditions
+        run: node scripts/check-autonomy-conditions.mjs --check
+
       # 【自動化率の文書】docs/automation-rate-2026-08.md が台帳と一致しているか。
       #
       # この文書は「機械生成」と名乗っていたが、**生成する側が存在しなかった。**
