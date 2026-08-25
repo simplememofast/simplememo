@@ -161,7 +161,8 @@ Actions → Flag Ops → Run workflow
 | 1. 定義（rollout 0 / max_stale 86400） | ✅ | [run 32605886195](https://github.com/simplememofast/simplememo-api/actions/runs/32605886195) · 23:41 UTC |
 | **2. 1% に上げる（オーナーが実行）** | ✅ | [run 32608207762](https://github.com/simplememofast/simplememo-api/actions/runs/32608207762) · **2026-08-23 00:34 UTC** |
 | 3. 判定を見る | ✅ **判定が出た** | 30件・下記 |
-| **4. 25% まで上げる** | ⏸ **人待ち** | 1% では**構造的に判定できない**（下記） |
+| **4-a. 5% へ（オーナーが実行）** | ✅ | [run 32795470205](https://github.com/simplememofast/simplememo-api/actions/runs/32795470205) · **2026-08-25 00:54 UTC** |
+| **4-b. 10% → 25% へ** | ⏸ **人待ち** | 5% でも判定には届かない見込み（下記） |
 | 5. 完走の記録 | — | `kill` 実行か `promote` 承認が要る |
 
 **本番の段階公開が始まった。** 2 の応答:
@@ -251,18 +252,39 @@ Actions → Flag Ops → Run workflow
 > `min_installs_per_cohort` を下げるのは**都合のよい分母そのもの**で、
 > 「やってはいけないこと」に明記してある。
 
-### 次の操作（人）
+### 5% へ上げた（2026-08-25 00:54 UTC・オーナーが実行）
+
+```json
+"after": { "rollout": 5,
+           "description": "カナリア 5%（1% では露出3で判定に届かなかったため）",
+           "max_stale_seconds": 86400,
+           "updated_at": "2026-08-25T00:54:32.820Z" }
+```
+
+`max_stale_seconds` は 86400 のまま（フォームの既定値。警告も出ていない）。
+
+**ここから3日待つ。** 窓が3日なので、それ以前に読むと 1% だった期間の
+データが混ざる。**混ざった数字で「5%にしたのに増えない」と読まないこと。**
+
+| いつ | 何が見えるはず |
+|---|---|
+| 〜24時間 | 端末が順に取得し、露出群が 3 から増え始める |
+| 〜3日 | 窓が入れ替わり、露出群が 12 前後で落ち着く |
+| その間 | **`hold` と `escalate` が続く。**期待値12 < 30 なので判定は出ない |
+
+**5% は判定に届かないと分かったうえで踏む段。** 飛ばさないのは、
+いきなり広げると異常時の巻き戻し幅が大きくなるため。
+
+### 次の操作（人）— 5% を3日見たあと
 
 ```
 Actions → Flag Ops → Run workflow
   action: set
   key: tf04_progress
-  rollout: 5
+  rollout: 10        ← 次は 10。その次が 25
   max_stale_seconds: 86400
-  description: カナリア 5%（1% では露出3で判定に届かなかったため）
+  description: カナリア 10%
 ```
-
-上げたあと**3日**待つ（窓が3日なので、それ以前は前の rollout の残りが混ざる）。
 
 ---
 
