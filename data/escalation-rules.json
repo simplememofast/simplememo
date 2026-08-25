@@ -1,0 +1,164 @@
+{
+  "$comment": [
+    "**重大案件を人間へ渡す条件と経路。**scripts/check-escalation.mjs が検査する。",
+    "",
+    "これまで方針だけがあった — 権限表に「検知したら自動処理を止めて経営者へ移管する」と",
+    "書いてあるが、**何が検知で、誰にどう渡すのか、いつまでにかが決まっていなかった。**",
+    "決まっていない移管は起きない。",
+    "",
+    "**列挙は台帳から取る。**実行判定が返す故障コードと、運転台帳に実際に現れた",
+    "failure_class の全部に規則が要る。**起きた実績があるものは次も起きる**ので、",
+    "規則の無い故障種別が1つでもあるとCIが落ちる。",
+    "",
+    "stop_automation:",
+    "  true  … 自動処理を止めてから渡す。**戻せない領域と、原因が分からない領域**",
+    "  false … 走らせたまま知らせる。止めるほうが害が大きい領域"
+  ],
+  "policy": {
+    "default_within_hours": 24,
+    "$within_note": "検知から人へ届くまでの上限。実測の検知中央値は2.1時間だが最大は50.7時間で、**最大値のほうが実態**。ここを1時間にしても届く経路が無ければ嘘になるので、いまは経路の実在するものだけ短くしている",
+    "channels": {
+      "daily_report": "10:00 JST の日報メール（simplememo-api の autopilot_report cron）",
+      "gh_issue": "GitHub Issue（cron-health.yml / autopilot-health.yml が起票）",
+      "owner_direct": "オーナーへの直接連絡。**経路が未整備**（この台帳で初めて名前が付いた）"
+    }
+  },
+  "rules": [
+    {
+      "trigger": "emergency_stop",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 1,
+      "stop_automation": true,
+      "note": "緊急停止が立っている。**AIは解除できない**（policy.ai_may_resume: false）ので、人が見るまで止まったまま。止める側の誤りは1日の出荷が止まるだけだが、解除する側の誤りは止めたかった事象を素通りさせる"
+    },
+    {
+      "trigger": "fail_credential",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 4,
+      "stop_automation": true,
+      "note": "資格情報の失効。**AIには直せない**（新しい鍵を作れない）。放置すると全経路が同時に止まるので、予算超過などより短くしている"
+    },
+    {
+      "trigger": "auth_or_credential",
+      "kind": "failure_class",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "**運転台帳に実際に現れた分類。**gate_code の fail_credential は「判定が資格情報の失効に気づいた」場合だが、こちらは**判定を通り抜けて起動したあと即死する**形。2026-08-24・25 に主系が2日連続で is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=$0 の**完全同一シグネチャ**で落ちた（run 32667079679 / 32779337325）。単発のflakeではない。\\n\\nAIには直せない（新しい鍵を作れない）ので相手はオーナー。ただし **stop_automation は false にしてある** —— claude-code-action の full output が『hidden for security』で伏せられており、**エラー文言を読む唯一の手段が次のrun**だから。止めると診断もできなくなる。obsidian-autopilot.yml に show_full_output: true を入れてあるので、次の 06:00 JST run で文言が出る。**それでも同じ即時失敗が続くなら、そのときは止める判断に切り替える**（費用は$0だが、毎朝『動いているように見えて何も出ない』状態が常態化するほうが高い）"
+    },
+    {
+      "trigger": "fail_api",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": true,
+      "note": "GitHub API に到達できない。冪等チェックの根拠が消えるので、走らせたままにすると二重出荷になる"
+    },
+    {
+      "trigger": "fail_no_model",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": true,
+      "note": "使えるモデルが1つも無い。多くは一時的なので日報でよいが、走らせても何もできない"
+    },
+    {
+      "trigger": "degrade_model",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "縮退して走る。**止めるほうが害が大きい。**ただし黙って別のモデルで書くと品質の変化が原因不明になるので、日報には必ず出す"
+    },
+    {
+      "trigger": "degrade_egress",
+      "kind": "gate_code",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "外部到達が塞がれている。一次情報が要るレーンを避ければ出荷は続く（2026-08-22の実績）"
+    },
+    {
+      "trigger": "permissions",
+      "kind": "failure_class",
+      "who": "self_then_owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "権限不足で成果物ゼロ。**まずレーンFが自分で直しにいく。**同じ種別を3回直しても再発したら人間へ（self_repair.stop_after_failed_repairs）"
+    },
+    {
+      "trigger": "route-absent",
+      "kind": "failure_class",
+      "who": "self_then_owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "経路そのものが存在しなかった（副系Routineの未作成など）。二重化の片側が欠けている状態なので、残る側は走らせる"
+    },
+    {
+      "trigger": "runner-timeout",
+      "kind": "failure_class",
+      "who": "self_then_owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "ジョブ上限の消尽（2026-08-19のapt詰まり）。原因が実行環境側なので、次回の実行は試してよい"
+    },
+    {
+      "trigger": "actor-rejected",
+      "kind": "failure_class",
+      "who": "self_then_owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "実行主体の判定による拒否。検知に50.7時間かかった種別。**autopilot-health が間接的にしか拾えない**ので、ここは監視の穴と一体"
+    },
+    {
+      "trigger": "crisis",
+      "kind": "authority_domain",
+      "domain": "個人情報事故・法的請求・重大障害・炎上",
+      "who": "owner",
+      "channel": "owner_direct",
+      "within_hours": 1,
+      "stop_automation": true,
+      "note": "**AIは判断も対外発信もしない。**自動処理を止めて経営者へ渡す。**経路（owner_direct）はまだ整備されていない** — 名前が付いただけで、連絡先も停止手段も未定。ここを空欄のままにしないために台帳に載せている"
+    },
+    {
+      "trigger": "spend_over_cap",
+      "kind": "budget",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": true,
+      "note": "月次上限に到達。主系は自分で止まる（副系は止められない — 既知の非対称性）"
+    },
+    {
+      "trigger": "credential_expiry_critical",
+      "kind": "credential",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "証明書・Provisioning Profile・ドメインの期限が7日を切った。切れるとリリースが一切できなくなる。**critical 3件は期限日が未把握**なので、いまはこの規則が発火しない"
+    },
+    {
+      "trigger": "repair_limit",
+      "kind": "selfheal",
+      "who": "owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": true,
+      "note": "同じ failure_class を self_repair.stop_after_failed_repairs 回直して再発した。**表示だけでは翌朝また同じ経路が走る**ので、autopilot-selfheal.mjs --contain がその経路の停止を立てる（route が台帳に無い場合は全体停止）。AIが止め、解除は人だけ — 直せない故障を毎日直そうとするループを、人が見るまで確実に止めるため"
+    }
+  ]
+}

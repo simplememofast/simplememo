@@ -1,0 +1,125 @@
+{
+  "$comment": [
+    "**KPIの定義と、その計算がどのファイルにあるか。**scripts/check-definitions.mjs が検査する。",
+    "",
+    "**定義が黙って変わるのが、この種の運用でいちばん怖い。**率の出し方を少し変えれば",
+    "数字は動くし、動いたことは誰にも見えない。過去の数字と比較できなくなったことにも",
+    "気づけない。",
+    "",
+    "そこで計算元のファイルのチェックサムを持ち、**変わったら version を上げて",
+    "changed_at と why を書くまでCIが落ちる。**「直した」と「定義を変えた」を",
+    "区別させるための仕掛けで、リファクタでも一度は止まる（それでよい — 止まったときに",
+    "『定義は変えていない』と書けばいい）。"
+  ],
+  "definitions": [
+    {
+      "id": "overall_automation_rate",
+      "name": "総合自動化率",
+      "formula": "AI実行タスク ÷ 定義タスク（未実装を含む）",
+      "source_file": "scripts/automation-rate.mjs",
+      "version": 1,
+      "checksum": "f9340b64e9cace18",
+      "changed_at": "2026-08-22",
+      "why_it_matters": "分母を1つに決めると都合のよい数字になるので、4指標を常に同時に出す。ここを変えると過去の数字と比較できなくなる"
+    },
+    {
+      "id": "ai_completion_rate",
+      "name": "AI完走率",
+      "formula": "本番へ出荷できた実行 ÷ 着手した実行",
+      "source_file": "scripts/autopilot-runs.mjs",
+      "version": 3,
+      "checksum": "0871de585d4d7dd5",
+      "changed_at": "2026-08-25",
+      "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。main の #540/#548（主系の初出荷を台帳へ・2日連続の即時失敗の検知）で autopilot-runs.mjs が変わったため checksum が動いた（完走率の算出は無変更）"
+        },
+        {
+          "version": 3,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。ヘッダのコメントに書いてあった『変更行の98.8%』を実測の94.2%へ直したため checksum が動いた（98.8% はどの数え方でも再現できなかった値。完走率の算出は無変更）"
+        }
+      ]
+    },
+    {
+      "id": "usd_per_shipped",
+      "name": "1記事あたり単価",
+      "formula": "当月の実費 ÷ 当月の出荷数",
+      "source_file": "scripts/autopilot-budget.mjs",
+      "version": 1,
+      "checksum": "93ca44d6ae06152d",
+      "changed_at": "2026-08-22",
+      "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）"
+    },
+    {
+      "id": "gsc_weekday_factor",
+      "name": "曜日係数",
+      "formula": "曜日ごとの中央値 ÷ 全体中央値",
+      "source_file": "growth/scripts/decompose-series.mjs",
+      "version": 1,
+      "checksum": "d586507c0c3834f4",
+      "changed_at": "2026-08-22",
+      "why_it_matters": "平均ではなく中央値。少数の外れ値が係数を動かすため"
+    },
+    {
+      "id": "noise_floor",
+      "name": "ノイズフロア",
+      "formula": "期待クリック3件未満は根拠にしない",
+      "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+      "version": 6,
+      "checksum": "39eb4bb0214c4d18",
+      "changed_at": "2026-08-25",
+      "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-08-22",
+          "why": "定義は変えていない — 緊急停止の節に経路ごとの停止と --contain の手順を追記したため、同じファイルの checksum が動いた"
+        },
+        {
+          "version": 3,
+          "at": "2026-08-22",
+          "why": "定義は変えていない — §6の保守メニューにサーバallowlistの写し更新を追記したため、同じファイルの checksum が動いた"
+        },
+        {
+          "version": 4,
+          "at": "2026-08-22",
+          "why": "定義は変えていない — §6にバケット契約の写し更新を追記したため checksum が動いた"
+        },
+        {
+          "version": 5,
+          "at": "2026-08-24",
+          "why": "定義は変えていない。§6 の保守メニューに check-degradation.mjs --sync を足し、隣を直接見に行った検査がCIで固定的に落ちた経緯を書いたため checksum が動いた（ノイズフロアの算出は無変更）"
+        },
+        {
+          "version": 6,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。main との合流で Runbook が変わったため checksum が動いた（ノイズフロアの算出は無変更）"
+        }
+      ]
+    },
+    {
+      "id": "d_score",
+      "name": "D-SCORE",
+      "formula": "S1..S7 の合計（100点満点・合格60）",
+      "source_file": "growth/scripts/d-score.mjs",
+      "version": 1,
+      "checksum": "6e6fbc73141109ed",
+      "changed_at": "2026-08-22",
+      "why_it_matters": "合格ライン60は n=5 のバックテスト（乗車の最低65 / 非乗車の最高46）由来。較正を変えたら過去の採点は比較できない"
+    },
+    {
+      "id": "code_ai_line_rate",
+      "name": "コード変更のAI著者率",
+      "formula": "AI著者コミットの変更行（追加+削除）÷ 全変更行。マージ除く・SHAで一意化・**計測日は窓に入れない**",
+      "source_file": "scripts/code-authorship.mjs",
+      "version": 1,
+      "checksum": "e71817ffec1eeed1",
+      "changed_at": "2026-08-22",
+      "why_it_matters": "原稿の「98.8%」は**再現できなかった**（どの数え方でも 231,315行 にならない）。数字ではなく数え方を凍結する。窓の切り方1つで 94.2% ↔ 96.6% と 2.4pt 動くので、**いちばん都合のよい日で締めない**ことを定義に含めてある"
+    }
+  ]
+}

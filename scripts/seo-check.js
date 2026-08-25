@@ -15,7 +15,9 @@ const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
 const SITE_URL = 'https://simplememofast.com';
 const ROOT_DIR = path.resolve(__dirname, '..');
 
-const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git'];
+// build/ は dashboard.mjs の生成物（.gitignore 済み）。生成してから検査を回すと
+// 存在しないページの構造化データ欠落で落ちるので、走査から外す。
+const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'build'];
 const SKIP_FILES = ['404.html'];
 
 /** The one node every page describing our app must converge on. See check 10. */

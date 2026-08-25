@@ -165,6 +165,9 @@ def url_for_file(file_path: Path) -> str | None:
         "node_modules", "admin", "drafts", "docs", "scripts", "js",
         "assets", "functions", "screenshots", "tools", "tiktok", ".git",
         ".github", ".claude",
+        # build/ は dashboard.mjs の生成物（.gitignore 済み・本番へは出ない）。
+        # 生成してから --check を回すと「sitemap に無い」で落ちるので外す。
+        "build",
     }
     if parts[0] in excluded_top:
         return None

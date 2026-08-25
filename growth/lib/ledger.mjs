@@ -79,6 +79,9 @@ export function daysOverdue(exp, asOf = today()) {
  * loudly instead of being silently skipped by the overdue scan — an experiment
  * that cannot be parsed is an experiment that can never come due.
  */
+/** 対照群の型。**「無い」も選択肢だが、選んだと書かせる。** */
+export const CONTROL_KINDS = ['holdout', 'pre_post', 'none'];
+
 export function validate(ledger) {
   const problems = [];
   const seen = new Set();
@@ -114,6 +117,37 @@ export function validate(ledger) {
     }
     if (e.decision != null && !DECISIONS.includes(e.decision)) {
       problems.push(`${at}: decision ${JSON.stringify(e.decision)} not one of ${DECISIONS.join('/')}`);
+    }
+
+    // 対照群・最低サンプル数・停止条件（2026-08-22追加）
+    //
+    // ここを空欄にできると、実験は「変えて、あとで良かったことにする」装置になる。
+    // **対照群が無いこと自体は禁じていない** — 置けない実験のほうが多い。
+    // 禁じているのは**無いのに書かないこと**で、`kind: "none"` と理由を必ず書かせる。
+    // 空欄と「無いと決めた」は違う、という authority-matrix と同じ規律。
+    if (isOpen(e)) {
+      const c = e.control;
+      if (!c || !CONTROL_KINDS.includes(c.kind)) {
+        problems.push(`${at}: control.kind が ${CONTROL_KINDS.join('/')} のいずれかで要る`
+          + '（対照群が無いなら "none" と書く。空欄と「無いと決めた」は違う）');
+      } else {
+        if (!c.note) problems.push(`${at}: control.note が無い — どういう比較をしているかが残らない`);
+        if (c.kind === 'pre_post' && !c.confounders) {
+          problems.push(`${at}: pre_post なのに confounders が無い`
+            + '（季節性・アルゴリズム更新を分離できないことを明示しないと、因果を主張しているのと同じになる）');
+        }
+      }
+      const m = e.min_sample;
+      if (!m || typeof m.threshold !== 'number' || !m.metric) {
+        problems.push(`${at}: min_sample.metric と threshold が要る`
+          + '（母数の下限を決めずに評価日を迎えると、ノイズを結論にする）');
+      } else if (!m.rationale) {
+        problems.push(`${at}: min_sample.rationale が無い — その閾値の出どころが残らない`);
+      }
+      if (!Array.isArray(e.stop_conditions) || e.stop_conditions.length === 0) {
+        problems.push(`${at}: stop_conditions が空`
+          + '（**止める条件を決めていない実験は止まらない。**評価日が来ても「もう少し様子を見る」で延びる）');
+      }
     }
   }
   return problems;
