@@ -49,10 +49,17 @@
       "name": "1記事あたり単価",
       "formula": "当月の実費 ÷ 当月の出荷数",
       "source_file": "scripts/autopilot-budget.mjs",
-      "version": 1,
-      "checksum": "93ca44d6ae06152d",
-      "changed_at": "2026-08-22",
-      "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）"
+      "version": 2,
+      "checksum": "ef84ceaa76a41f2e",
+      "changed_at": "2026-08-25",
+      "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。1回あたりの上限（max_usd_per_run）を実行時に効かせるため autopilot-budget.mjs に overruns() / --check-run-cap / --ack-overrun を足した副作用でチェックサムが動いた。usd_per_shipped の算出（当月の実費合計 ÷ shipped）には一切触れていない"
+        }
+      ]
     },
     {
       "id": "gsc_weekday_factor",

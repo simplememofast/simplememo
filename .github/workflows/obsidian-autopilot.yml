@@ -196,6 +196,23 @@ jobs:
           node scripts/autopilot-budget.mjs --check --task "$KIND" \
             || echo "::warning title=Task budget::$KIND の月次枠を超過（月次上限には未到達）"
 
+          # 【1回あたりの上限】data/model-routing.json の max_usd_per_run は
+          # 2026-08-25 まで**宣言だけ**で、実行時に見る経路が無かった。08-23 の
+          # 1回は article の上限 $2.00 に対し $7.2967（3.6倍）を使い切って正常終了
+          # している。**上限は在ったが当たらなかった。**
+          #
+          # 費用は run が終わるまで確定しないので、走っている最中には止められない。
+          # 止められるのは次の1回で、ここがその経路。**種別ごとに見る**ので、
+          # 記事の超過が修理（レーンF）を止めることはない。
+          #
+          # 止まるのは主系だけ。副系CCRは別経路なので、人間のレビューを待つ間も
+          # 出荷は続く。**二重化が承認待ちを吸収する。**
+          if node scripts/autopilot-budget.mjs --check-run-cap --task "$KIND"; then
+            echo "run_cap_ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_cap_ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
       # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
       # 21:21Z→22:52Z の90分（ジョブ上限）を使い切り、`Claude Code` は
@@ -239,7 +256,9 @@ jobs:
       # ここを踏ませることはできないので、`*` で許可しても権限昇格にならない。
       - name: Claude Code（Runbook 1イテレーション実行）
         id: claude
-        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
         uses: anthropics/claude-code-action@v1
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
@@ -308,8 +327,15 @@ jobs:
       # PRを出す規約なので、ブランチが無い＝本当に何もしていない）。別経路の
       # 副系CCRが先に出していた場合だけは正当なので、本番status JSONが当日分なら
       # それも成功として扱う。
+      # 【2026-08-25】条件を Claude Code ステップと揃えた。以前は
+      # `steps.gate.outputs.run == 'true'` だけを見ており、**月次上限で
+      # 意図的にスキップした日も「成果物ゼロ」で赤くなる**状態だった
+      # （正常に止まったことが故障として報告される）。1回上限のスキップを
+      # 足すにあたって同じ穴を広げないよう、ここで揃えている。
       - name: 成果物ゼロなら落とす
-        if: steps.gate.outputs.run == 'true'
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
         env:
           TODAY: ${{ steps.gate.outputs.today }}
           TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
@@ -363,6 +389,7 @@ jobs:
         continue-on-error: true
         env:
           EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          TASK_KIND: ${{ steps.route.outputs.kind }}
         run: |
           f="${EXEC_FILE:-}"
           [ -n "$f" ] && [ -f "$f" ] || f="${RUNNER_TEMP}/claude-execution-output.json"
@@ -388,6 +415,23 @@ jobs:
               print("* AI実費: 取得できなかった（total_cost_usd がログに無い）")
               sys.exit(0)
           print(f"* AI実費: **${cost:.4f}** / turns {turns} / permission_denials {denials}")
+          print("")
+          # 【1回あたりの上限・その場での検知】台帳への追記は翌日のセッションが
+          # 行うので、そこに頼ると**追記する主体が落ちた日は超過も一緒に消える。**
+          # 実際に08-23の$7.2967は、翌日の主系が即時失敗したため丸ごと抜けた。
+          # 金額が手元にあるのはこのステップなので、判定もここで一度出す。
+          kind = os.environ.get('TASK_KIND') or ''
+          try:
+              rules = json.load(open('data/model-routing.json', encoding='utf-8'))['rules']
+              cap = rules.get(kind, {}).get('max_usd_per_run')
+          except Exception:
+              cap = None
+          if cap and cost > cap:
+              print(f"* ⛔ **1回あたりの上限を超過**: {kind} は上限 ${cap:.4f} に対し ${cost:.4f}"
+                    f"（{cost / cap:.1f}倍）。**次回の主系はこの超過がレビューされるまで走らない。**")
+              print(f"::error file=data/model-routing.json::1回上限の超過: {kind} ${cost:.4f} / 上限 ${cap:.4f}")
+          elif cap:
+              print(f"* 1回あたりの上限: ${cost:.4f} / ${cap:.4f} — 枠内")
           print("")
           print("翌日のセッションはこの1行を台帳へ入れること（Runbook §5-3）:")
           print("```")

@@ -133,6 +133,13 @@ export function validate(doc, { budgets = null, workflow = null } = {}) {
     if (!/--model\s+\$\{\{\s*steps\./.test(workflow)) {
       problems.push('ワークフローの --model が解決結果を使っていない（モデル名の直書きは規則を無効化する）');
     }
+    // max_usd_per_run も同じ。**2026-08-25 まで、この値を実行時に見る経路が
+    // 無かった。**08-23 の1回は article の上限 $2.00 に対し $7.2967 を使い切って
+    // 正常終了している。上限は在ったが、当たらなかった。
+    if (!workflow.includes('autopilot-budget.mjs --check-run-cap')) {
+      problems.push('obsidian-autopilot.yml が --check-run-cap を呼んでいない'
+        + ' — max_usd_per_run が実行時に効かない（宣言だけの上限は装飾）');
+    }
   }
   return problems;
 }
