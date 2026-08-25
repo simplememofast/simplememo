@@ -44,31 +44,31 @@
       "median_window": 14,
       "multiple": 4,
       "min_samples": 5,
-      "min_absolute_usd": 2.0
+      "min_absolute_usd": 2
     },
     "task_budgets": {
       "article": {
-        "monthly_usd_cap": 18.0,
+        "monthly_usd_cap": 18,
         "note": "毎朝のレーンA〜E。この運用の本体で、枠の半分を置く"
       },
       "repair": {
-        "monthly_usd_cap": 8.0,
+        "monthly_usd_cap": 8,
         "note": "レーンF。**記事より先に走る**ので、記事の枠を使い切っても修理が止まらないよう独立させた"
       },
       "analysis": {
-        "monthly_usd_cap": 6.0,
+        "monthly_usd_cap": 6,
         "note": "計測・レポート・台帳の更新"
       },
       "pr": {
-        "monthly_usd_cap": 4.0,
+        "monthly_usd_cap": 4,
         "note": "広報原稿と素材。配信は月1回程度なので枠は小さい"
       },
       "qa_triage": {
-        "monthly_usd_cap": 2.0,
+        "monthly_usd_cap": 2,
         "note": "失敗分類の独立2モデル監査。1回あたりは小さいが2モデル分かかる"
       },
       "audit": {
-        "monthly_usd_cap": 2.0,
+        "monthly_usd_cap": 2,
         "note": "独立監査。週1なので月4回程度"
       }
     },
@@ -100,6 +100,33 @@
         "claude-sonnet-5"
       ],
       "task_kind": "article"
+    },
+    {
+      "date_jst": "2026-08-23",
+      "route": "actions",
+      "run_id": "32599191984",
+      "total_cost_usd": 7.296703800000001,
+      "num_turns": 150,
+      "outcome": "shipped",
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行）"
+    },
+    {
+      "date_jst": "2026-08-24",
+      "route": "actions",
+      "run_id": "32667079679",
+      "total_cost_usd": 0,
+      "num_turns": 1,
+      "outcome": "failed",
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行）"
+    },
+    {
+      "date_jst": "2026-08-25",
+      "route": "actions",
+      "run_id": "32779337325",
+      "total_cost_usd": 0,
+      "num_turns": 1,
+      "outcome": "failed",
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行）"
     }
   ],
   "$backfill_note": "runs は 2026-08-22 の1件のみ。主系は run 1〜11 のうち 1〜8 が Gate スキップ（8〜12秒で終了・Claude Code未実行＝実費ゼロ）、9 が apt 詰まりで cancelled、10 が allowed_bots で failure、11 が上記。したがって主系で実費が発生したのは 11 だけであり、この台帳に欠落は無い（ゼロ円の回を省いているだけ）。"

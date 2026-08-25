@@ -41,10 +41,10 @@
   "ai": [
     {
       "id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 5件",
+      "title": "実費台帳に載っていない run が 2件",
       "age_days": 0,
       "auto": "append-cost",
-      "evidence": "実費が未記録の run が 5件: ap-20260820-actions, ap-20260821-actions, ap-20260823-actions, ap-20260824-actions, ap-20260825-actions"
+      "evidence": "実費が未記録の run が 2件: ap-20260820-actions, ap-20260821-actions"
     },
     {
       "id": "act-selfheal-ap-20260824-actions",
@@ -68,5 +68,18 @@
       "evidence": ".github/workflows/seo-check.yml に「--shipping-pr-has-status」がまだ無い"
     }
   ],
-  "executed": []
+  "executed": [
+    {
+      "handler": "append-cost",
+      "ok": true,
+      "changed": 3,
+      "log": "ap-20260820-actions: 実費を取得できなかった（0ではない）\nap-20260821-actions: 実費を取得できなかった（0ではない）\nap-20260823-actions: appended 2026-08-23 actions $7.2967\nap-20260824-actions: appended 2026-08-24 actions $0.0000\nap-20260825-actions: appended 2026-08-25 actions $0.0000"
+    },
+    {
+      "handler": "probe-secret",
+      "ok": false,
+      "changed": 0,
+      "log": "secret 一覧が HTTP 403（未設定という意味ではない）"
+    }
+  ]
 }
