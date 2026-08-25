@@ -19,7 +19,9 @@
       "confirmed_by_owner": false,
       "unconfirmed_reason": "加入日がリポジトリから取れない。**切れるとアプリが配信停止になる**ので、資格情報の中でも影響が大きい",
       "what_breaks": "App Store からアプリが消え、TestFlight も止まる",
-      "evidence": ["../simplememo-ios/docs/release-automation.md"]
+      "evidence": [
+        "../simplememo-ios/docs/release-automation.md"
+      ]
     },
     {
       "id": "domain-renewal",
@@ -29,7 +31,10 @@
       "confirmed_by_owner": false,
       "unconfirmed_reason": "レジストラの管理画面にしか無い。credential-expiry.json でも未把握のまま",
       "what_breaks": "サイト・メールの From ドメイン・Universal Link がすべて止まる。**代替が無い critical**",
-      "evidence": ["data/credential-expiry.json", "data/vendor-register.json"]
+      "evidence": [
+        "data/credential-expiry.json",
+        "data/vendor-register.json"
+      ]
     },
     {
       "id": "corporate-tax",
@@ -37,7 +42,7 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "**決算期がリポジトリから取れない。**申告期限は決算期の2か月後が原則なので、決算期が入れば機械が計算できる",
+      "unconfirmed_reason": "**法人であることは 2026-08-25 に確定した**（ひとり法人）。したがってこの行は該当する。**ただし決算期が依然として取れない。**申告期限は決算期の2か月後が原則なので、決算期が入れば機械が計算できる。決算期は定款で決まり、リポジトリにも freee のプラン名にも無い —— **オーナーか税理士しか埋められない。**",
       "what_breaks": "延滞税・加算税。**士業の領域**で、判断は無人化しない",
       "evidence": []
     },
@@ -47,18 +52,18 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "決算期と課税事業者かどうかがリポジトリから取れない",
+      "unconfirmed_reason": "**法人であることは確定した。**残る不明は決算期と、課税事業者かどうか。後者は資本金・設立時期・特定期間の売上で決まり、**いずれもリポジトリから取れない。**売上は 2026-08-25 に App Store 側が機械で読めるようになったが、**それは課税売上高の一部でしかない**（判定に使えると考えない）。税理士の領域。",
       "what_breaks": "同上",
       "evidence": []
     },
     {
       "id": "social-insurance",
-      "title": "社会保険・労働保険の年度更新",
+      "title": "社会保険（健康保険・厚生年金）／労働保険の年度更新",
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "**従業員がいるかどうかがリポジトリから取れない。**いなければこの行は不要になる（そのときは削除ではなく not_applicable にする）",
-      "what_breaks": "同上",
+      "unconfirmed_reason": "**[2026-08-25 訂正] この行の前提が誤っていた。**旧文は「従業員がいるかどうか。いなければこの行は不要」としていたが、**法人では社会保険と労働保険で発生条件が違う。**社会保険（健康保険・厚生年金）は法人が強制適用事業所で、**役員報酬が出ていれば従業員ゼロでも加入義務が生じる。**労働保険（雇用保険・労災）のほうが「従業員がいるか」で決まる。**旧文のままだと、ひとり法人を not_applicable に倒しかねなかった。**残る不明は役員報酬の有無と、従業員の有無。**税理士・社労士の領域なので、判断はここでしない。**",
+      "what_breaks": "社会保険は遡及して徴収されうる。**士業の領域で、判断は無人化しない**",
       "evidence": []
     },
     {
@@ -67,7 +72,7 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "外注・報酬の支払いがあるかどうかがリポジトリから取れない",
+      "unconfirmed_reason": "法人であることは確定した。残る不明は外注・報酬の支払いがあるかどうか。**freee の口座明細が読めるようになれば機械で当たりを付けられる**が、現状は資格情報が入っておらず読めていない（../simplememo-api/src/freee.ts）。",
       "what_breaks": "同上",
       "evidence": []
     }
@@ -123,7 +128,12 @@
       "unreviewed は**「問題なし」ではなく「見ていない」。**",
       "vendor-register.json の dpa_reviewed と同じ扱いで、独立した状態にしてある。"
     ],
-    "clauses": ["liability_cap", "ip", "personal_data", "governing_law"],
+    "clauses": [
+      "liability_cap",
+      "ip",
+      "personal_data",
+      "governing_law"
+    ],
     "$clause_note": {
       "liability_cap": "責任上限。**代替の無い critical ベンダーで効く** — 止まったときに何も請求できないなら、冗長化でしか守れない",
       "ip": "知財。生成物・投稿物の権利がどちらに残るか",
@@ -131,16 +141,115 @@
       "governing_law": "準拠法と管轄。海外事業者が大半なので、争えるかどうかがここで決まる"
     },
     "vendors": [
-      { "id": "apple", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://developer.apple.com/terms/", "reviewed_at": null },
-      { "id": "cloudflare", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://www.cloudflare.com/terms/", "reviewed_at": null },
-      { "id": "resend", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://resend.com/legal/terms-of-service", "reviewed_at": null },
-      { "id": "anthropic", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://www.anthropic.com/legal/commercial-terms", "reviewed_at": null },
-      { "id": "google_cloud", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://cloud.google.com/terms", "reviewed_at": null },
-      { "id": "firebase", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://firebase.google.com/terms", "reviewed_at": null },
-      { "id": "appsflyer", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://www.appsflyer.com/legal/services-agreement/", "reviewed_at": null },
-      { "id": "github", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://docs.github.com/site-policy/github-terms/github-terms-of-service", "reviewed_at": null },
-      { "id": "prtimes", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://prtimes.jp/main/html/terms", "reviewed_at": null },
-      { "id": "registrar", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": null, "reviewed_at": null }
+      {
+        "id": "apple",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://developer.apple.com/terms/",
+        "reviewed_at": null
+      },
+      {
+        "id": "cloudflare",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://www.cloudflare.com/terms/",
+        "reviewed_at": null
+      },
+      {
+        "id": "resend",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://resend.com/legal/terms-of-service",
+        "reviewed_at": null
+      },
+      {
+        "id": "anthropic",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://www.anthropic.com/legal/commercial-terms",
+        "reviewed_at": null
+      },
+      {
+        "id": "google_cloud",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://cloud.google.com/terms",
+        "reviewed_at": null
+      },
+      {
+        "id": "firebase",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://firebase.google.com/terms",
+        "reviewed_at": null
+      },
+      {
+        "id": "appsflyer",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://www.appsflyer.com/legal/services-agreement/",
+        "reviewed_at": null
+      },
+      {
+        "id": "github",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://docs.github.com/site-policy/github-terms/github-terms-of-service",
+        "reviewed_at": null
+      },
+      {
+        "id": "prtimes",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": "https://prtimes.jp/main/html/terms",
+        "reviewed_at": null
+      },
+      {
+        "id": "registrar",
+        "liability_cap": "unreviewed",
+        "ip": "unreviewed",
+        "personal_data": "unreviewed",
+        "governing_law": "unreviewed",
+        "source": null,
+        "reviewed_at": null
+      }
+    ]
+  },
+  "entity": {
+    "form": "法人（ひとり法人）",
+    "confirmed_at": "2026-08-25",
+    "confirmed_by": "owner",
+    "source": "オーナーの明言（freee のプラン確認の過程で判明）",
+    "accounting_saas": "freee 会計（ひとり法人プラン＝法人新プランに付帯）",
+    "tax_advisor": true,
+    "$note": [
+      "**2026-08-25 まで、法人か個人事業主かがリポジトリから取れなかった。**",
+      "そのため下の期限4件が全部 unconfirmed のままだった。",
+      "",
+      "**ここが埋まっても、期限そのものは埋まらない。**決算期は定款で決まり、",
+      "リポジトリにも freee のプラン名にも書いていない。**形態が分かったことと、",
+      "期限が分かったことは別。**",
+      "",
+      "税理士がついている（オーナー明言）。**期限と税額の判断はそちらの領域**で、",
+      "この台帳がやるのは「誰も見ていない状態を作らない」ことまで。"
     ]
   }
 }
