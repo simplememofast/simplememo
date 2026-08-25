@@ -415,6 +415,35 @@
         ],
         "new_guardrail": "data/*.json を全件分類する方針ファイルを作り、**新しいファイルは分類するまで CI が落ちる**（既定を非公開に倒す）。非公開のものは _redirects で 404 にし、方針とブロックのずれも落とす。public と書いたのにサイトから参照されていないものも落とす（参照が消えたのに公開のまま忘れられるのを防ぐ）。self-test 9件"
       }
+    },
+    {
+      "id": "om-2026-08-25-queue-crosses-ledgers",
+      "seeded": false,
+      "area": "③ 自律型マーケティング",
+      "signal": "自律コンテンツループが消化しているのは coverage-queue だけで、refresh / new は 2026-08-09 の生成時のまま消化0件。検出（analyze.mjs --only unanswered）は動いているのに、出力を待ち行列へ落とす経路が無かった",
+      "hypothesis": "分析の出力を待ち行列に書き出せばよい。dropped/done を key で引き継げば、人の判断は守れる",
+      "decision": "再生成を実装し、書き込む前に試走して差分を見る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "growth/scripts/build-queues.mjs",
+          "growth/content/refresh-queue.json",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "試走の出力を1件ずつ当たった。第1位の着地ページを experiments.json と突き合わせ、--depth 1 相当の再現（self-test 17件）で固定した",
+      "outcome": "**同じ台帳の中だけでは足りなかった。**試走の第1位（`line キープメモ サービス終了`・期待6.1クリック）の着地先 `/blog/line-keep-alternative` は、**別の台帳**（experiments.json）で 2026-08-11 に abandoned と判定済みだった —— クエリが確認型で、タイトルが既に答えを出しているため検索者は押す必要が無い、という結論。growth/lib/ledger.mjs は `abandoned` をまさにこの事例のために作ったと書いている（「inconclusive は誰かがデータを足して再実行することを誘う」）。**待ち行列を素直に作り直すと、その判定を跨いで同じページが最優先で戻ってくるところだった**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-decision-in-one-ledger-must-bind-another",
+        "text": "**台帳を分けると、片方の判断がもう片方から見えなくなる。**dropped/done を同じファイルの中で引き継ぐだけでは足りない —— 到達不能という判定は experiments.json にあり、待ち行列はそれを知らずに積み直す。**判断は観測より新しい情報なので、観測の側が譲る。**この運用が lesson_key で守っている『同じことを2回学ばない』は、1つの台帳の中だけでなく**台帳の間**でも要る",
+        "changed": [
+          "growth/scripts/build-queues.mjs",
+          "growth/content/refresh-queue.json"
+        ],
+        "new_guardrail": "build-queues が experiments.json の abandoned を読み、そのページへ着地する観測を積まない（どの実験の判断かを出力に残す）。dropped/done は key で引き継ぎ、観測から消えた行は削除せず stale にする（直ったのか窓から外れたのか区別できないため）。手作りの行（origin 無し）は機械が触らない"
+      }
     }
   ]
 }

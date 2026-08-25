@@ -394,6 +394,17 @@ jobs:
           node growth/scripts/revenue-series.mjs --selftest
           node growth/scripts/revenue-series.mjs --check
 
+      # 【待ち行列の再生成】検出は前からあったが、**出力を待ち行列へ落とす経路が無かった。**
+      # refresh-queue は 2026-08-09 に手で作られたまま更新されず、以後の観測が
+      # 反映されていなかった（自律コンテンツループが消化しているのは coverage だけ）。
+      # 核心は「落とした判断を復活させないこと」——
+      # dropped/done は再生成で戻らず、**別の台帳（experiments.json）で
+      # abandoned と判定されたページへも積み直さない。**
+      - name: Content queue rebuild
+        run: |
+          node growth/scripts/build-queues.mjs --selftest
+          node growth/scripts/build-queues.mjs --check
+
       # 【マーケ stop-loss】評価日を待たずに「戻す」判断だけを機械が出す。
       # 開発側には rollout-guard の kill があるのに**マーケ側だけ無く**、
       # 2026-07-01/02 の7件は6週間そのまま放置されていた。
