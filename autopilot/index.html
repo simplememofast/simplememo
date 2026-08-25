@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/autopilot/">
+    <!-- Google tag (gtag.js) -->
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値（AI完走率68.8%・人間介入率43.8%・成果物への介入0件）、15領域の権限表、まだできていないことの一覧を、集計スクリプトごと公開しています。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="自律型アプリ運営の実測値 | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="AIがどこまで実行し、どこから人間が判断しているか。運転台帳の実測値と、まだできていないことの一覧。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://simplememofast.com/autopilot/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/autopilot.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="自律型アプリ運営の実測値 | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="AIがどこまで実行し、どこから人間が判断しているか。運転台帳の実測値と、まだできていないことの一覧。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/autopilot.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/autopilot/">
+  <link rel="canonical" href="https://simplememofast.com/devlog/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: WebPage + BreadcrumbList -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/autopilot/#webpage","inLanguage":"ja","name":"自律型アプリ運営の実測値 - Obsidian連携シンプルメモ","description":"AIがどこまで運営を実行し、どこから人間が判断しているか。運転台帳から出した実測値と、まだできていないことの一覧。","url":"https://simplememofast.com/autopilot/","datePublished":"2026-08-25","dateModified":"2026-08-25","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"自律型アプリ運営","item":"https://simplememofast.com/autopilot/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"},"about":{"@id":"https://simplememofast.com/#app"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container { display: flex; justify-content: flex-end; padding: 1.25rem 0; }
+    .lang-switcher { display: inline-flex; background: rgba(18, 26, 46, 0.95); border: 1px solid rgba(82, 160, 255, 0.12); border-radius: 22px; padding: 3px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); }
+    .lang-switcher__btn { background: transparent; border: none; color: #c9d4ec; padding: 0.75rem 1.1rem;
+      min-height: 48px; border-radius: 19px; cursor: pointer; font-size: 0.8rem; font-weight: 400; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); letter-spacing: 0.02em; }
+    .lang-switcher__btn:hover { color: #f2f6ff; }
+    .lang-switcher__btn:focus-visible { outline: 2px solid #4da3ff; outline-offset: 2px; }
+    .lang-switcher__btn.active { background: rgba(82, 160, 255, 0.25); border: 1px solid rgba(82, 160, 255, 0.2); color: #fff; box-shadow: 0 0 12px rgba(82, 160, 255, 0.1); }
+    [data-lang="en"] { display: none; }
+    [data-lang].active { display: block; }
+    span[data-lang].active { display: inline; }
+    @media (prefers-reduced-motion: reduce) { .lang-switcher__btn { transition: none; } }
+
+    /* /autopilot/ — 台帳を読ませるページ。装飾より、行が読めることを優先する */
+    .ap-lead { color: var(--text-secondary); line-height: 1.9; font-size: 0.96rem; margin-bottom: 8px; }
+    .ap-stamp { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 36px; }
+    .ap-sec { margin-bottom: 52px; }
+    .ap-sec > h2 { font-size: 1.18rem; font-weight: 800; color: var(--text); letter-spacing: -0.01em;
+      margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .ap-sec > .ap-note { font-size: 0.86rem; color: var(--text-muted); line-height: 1.8; margin: 10px 0 18px; }
+    .ap-sec p { color: var(--text-secondary); line-height: 1.85; font-size: 0.92rem; }
+    .ap-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 4px 0 8px; }
+    table.ap-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 460px; }
+    table.ap-table th, table.ap-table td { text-align: left; padding: 9px 12px;
+      border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.65; }
+    table.ap-table th { color: var(--text-muted); font-weight: 700; font-size: 0.78rem;
+      letter-spacing: 0.02em; white-space: nowrap; }
+    table.ap-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    table.ap-table tr:last-child td { border-bottom: none; }
+    .ap-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 6px 0 18px; }
+    @media (min-width: 720px) { .ap-kpis { grid-template-columns: repeat(4, 1fr); } }
+    .ap-kpi { background: var(--surface-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; }
+    .ap-kpi__v { font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums; line-height: 1.2; }
+    .ap-kpi__l { font-size: 0.78rem; color: var(--text-muted); margin-top: 6px; line-height: 1.55; }
+    .ap-cycle { list-style: none; padding: 0; margin: 6px 0 0; counter-reset: ap; }
+    .ap-cycle li { position: relative; padding: 0 0 18px 42px; counter-increment: ap;
+      border-left: 1px solid var(--border); margin-left: 13px; }
+    .ap-cycle li:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .ap-cycle li::before { content: counter(ap); position: absolute; left: -13px; top: 0;
+      width: 26px; height: 26px; border-radius: 50%; background: var(--surface-elevated);
+      border: 1px solid var(--border-highlight); color: var(--accent);
+      font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+    .ap-cycle b { color: var(--text); font-weight: 800; font-size: 0.94rem; display: block; margin-bottom: 4px; }
+    .ap-cycle span { color: var(--text-secondary); font-size: 0.88rem; line-height: 1.75; }
+    blockquote.ap-quote { margin: 14px 0; padding: 14px 18px; border-left: 3px solid var(--accent);
+      background: var(--surface); border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      color: var(--text-secondary); font-size: 0.89rem; line-height: 1.85; }
+    blockquote.ap-quote cite { display: block; margin-top: 8px; font-style: normal;
+      font-size: 0.76rem; color: var(--text-muted); }
+    pre.ap-log { overflow-x: auto; background: #060a12; border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 16px; font-size: 0.78rem; line-height: 1.75;
+      color: #c9d4ec; margin: 6px 0 8px; }
+    .ap-links { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 6px; }
+    @media (min-width: 600px) { .ap-links { grid-template-columns: 1fr 1fr; } }
+    .ap-links a { display: block; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 14px 16px; text-decoration: none; color: inherit;
+      transition: border-color 0.25s, background 0.25s; }
+    .ap-links a:hover { border-color: var(--border-highlight); background: var(--surface-elevated); }
+    .ap-links b { display: block; font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+    .ap-links span { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.65; }
+    .ap-flag { color: var(--accent); font-weight: 700; }
+    .ap-qr { text-align: center; margin: 44px 0 0; padding: 26px 20px; background: var(--surface-elevated);
+      border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .ap-qr img { width: 148px; height: 148px; display: block; margin: 0 auto 12px; border-radius: 10px; background: #fff; padding: 8px; }
+    .ap-qr p { font-size: 0.86rem; color: var(--text-secondary); margin: 0; }
+    @media (max-width: 767px) { .ap-qr--desktop { display: none; } }
+  
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(7, 11, 20, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(82, 160, 255, 0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(7, 11, 20, 0.96);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(82, 160, 255, 0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=autopilot-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+        <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=autopilot-jp__nav&amp;mt=8" class="global-nav__cta">
+          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- Meta Templates for JS -->
+  <!-- Meta Templates for JS -->
+  <div class="meta-templates" style="display:none;">
+    <div lang="ja" class="meta-template" data-lang="ja">
+      <span class="meta-title">自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</span>
+      <span class="meta-og-title">自律型アプリ運営の実測値 | Obsidian連携シンプルメモ</span>
+      <span class="meta-description">Obsidian連携シンプルメモの運営を、AIがどこまで実行し、どこから人間が判断しているか。運転台帳から出した実測値（AI完走率68.8%・人間介入率43.8%・成果物への介入0件）、15領域の権限表、まだできていないことの一覧を、集計スクリプトごと公開しています。</span>
+    </div>
+    <div lang="en" class="meta-template" data-lang="en">
+      <span class="meta-title">How much of this app is run by AI | Simple Memo - for Obsidian</span>
+      <span class="meta-og-title">How much of this app is run by AI | Simple Memo - for Obsidian</span>
+      <span class="meta-description">Measured figures from the operations ledger: what AI executes, what a human still decides, and what does not work yet. Japanese only for now.</span>
+    </div>
+  </div>
+<main class="page-content">
+    <div class="container">
+      <h1 class="page-content__title">自律型アプリ運営 — どこまでAIが実行し、どこから人間が決めているか</h1>
+
+      <p class="ap-lead">
+        このアプリの日々の運営は、その大半をAIが実行しています。ただし「全部を自動でやっている」わけではありません。
+        <b>App Storeへの公開・実機での事前確認・価格の変更・広告・契約は、意図的に人間の操作として残してあります。</b>
+        このページは、その境界と、実際に何回動いて何回人が入ったかを、集計スクリプトごと公開するためのものです。
+      </p>
+      <p class="ap-lead">
+        載せている数字はすべて台帳から出しています。<b>推定値と、まだ測れていないものは、そうと書いてあります。</b>
+      </p>
+      <p class="ap-stamp">最終更新 2026-08-25 ／ 計測期間 2026-08-11 〜 2026-08-25（15日・26実行）</p>
+
+      <!-- 1. 1サイクル -->
+      <section class="ap-sec">
+        <h2>1. 1日のサイクル</h2>
+        <p class="ap-note">定時に起動し、次の順で回ります。人が毎回指示を出す起点はありません。</p>
+        <ol class="ap-cycle">
+          <li><b>観測</b><span>検索クエリの動き・サイトの実描画・実行台帳・費用・資格情報の期限を読む。前日までに解決していない不具合があれば、そこから拾う。</span></li>
+          <li><b>起案</b><span>その日にやることを1件だけ選ぶ。手順書が「1セッション1アクション」と定めているため、まとめて複数は出さない。</span></li>
+          <li><b>実装</b><span>ブランチを切って変更し、PRを出す。コード・記事・設定のどれであっても経路は同じ。</span></li>
+          <li><b>検証</b><span>CIが51種の検査を回す。<b>必須40本が通らない限りマージされない。</b>誇大表現の検査と、台帳の算数の検査もここに含まれる。</span></li>
+          <li><b>出荷</b><span>検証を通った時点のコミットだけがマージされる。マージ＝本番公開。<b>ただしこれはサイト側だけで、iOSアプリは別経路（§2）。</b></span></li>
+          <li><b>計測</b><span>出荷したものを実行IDで台帳に1行書く。着手・結果・PR・介入・費用が同じ行に載る。</span></li>
+          <li><b>次の判断へ戻す</b><span>失敗した回は失敗の種類ごと記録し、翌日以降の起案がそれを読む。<b>台帳が書かれなかった回を検知する検査も、あとから足している（§6）。</b></span></li>
+        </ol>
+      </section>
+
+      <!-- 2. 担当分担 -->
+      <section class="ap-sec">
+        <h2>2. 担当分担 — 即時に出せるものと、審査を通るもの</h2>
+        <p class="ap-note">
+          この2つを1つの「自動デプロイ」として説明すると、実態より強く聞こえます。分けて書きます。
+        </p>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th>経路</th><th>対象</th><th>AIが即時に本番へ出せるか</th></tr></thead>
+          <tbody>
+            <tr><td><b>Lane A</b></td><td>サイト・記事・サーバ設定・Feature Flag</td><td>出せる（CI検証を通ったものだけ）</td></tr>
+            <tr><td><b>Lane B</b></td><td>iOSアプリ本体</td><td><b>出せない。</b>TestFlight内部配信は提案どまり、審査提出・実機確認・App Store公開はいずれも人間</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="ap-note">
+          権限表は15領域あり、<b>そのうち11が稼働中・10が承認制</b>です。
+          可逆な操作はAIが単独で実行し、不可逆な操作は承認を挟みます。
+          <b>CIが見ているのは「不可逆な領域が承認不要になっていないか」「稼働中の領域が根拠ファイルを指せているか」「金額が動く領域が上限を持っているか」の3点だけ</b>で、
+          実際に人が承認したかどうかは機械では見られません。そこは表の側に書いてあります。
+        </p>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th>操作</th><th>可逆性</th><th>誰が決めるか</th></tr></thead>
+          <tbody>
+            <tr><td>サイトコンテンツの新設・更新</td><td>可逆</td><td>AIが単独で実行</td></tr>
+            <tr><td>段階公開の<b>撤回</b>（不具合を検知して止める）</td><td>可逆</td><td>AIが単独で実行</td></tr>
+            <tr><td>段階公開の<b>拡大</b>（配る割合を上げる）</td><td><b>不可逆</b></td><td>人間の承認</td></tr>
+            <tr><td>App Review への提出</td><td><b>不可逆</b></td><td>人間のみ（実機での事前確認も人間）</td></tr>
+            <tr><td>App Store への公開（審査通過後）</td><td><b>不可逆</b></td><td>人間のみ</td></tr>
+            <tr><td>価格・プラン・無料枠の変更</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（上限は未設定）</span></td></tr>
+            <tr><td>広告出稿・広告予算の変更</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（未実装）</span></td></tr>
+            <tr><td>契約・支払い・送金</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（未実装）</span></td></tr>
+            <tr><td>プレスリリースの配信</td><td><b>不可逆</b></td><td>人間のみ（配信操作と可否の判断）</td></tr>
+            <tr><td>個人情報事故・法的請求・重大障害・炎上</td><td><b>不可逆</b></td><td>人間のみ（方針のみ定義）</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="ap-note">
+          同じ機能の「引っ込める」と「広げる」を別の領域に分けてあります。広げてから戻しても、見た人が見なかったことにはならないためです。
+          <b>ただしこの判定は本番でまだ一度も発火していません</b>（現在、段階公開中の機能がゼロのため）。
+        </p>
+      </section>
+
+      <!-- 3. 実測 -->
+      <section class="ap-sec">
+        <h2>3. 実測 — 何回動き、何回人が入ったか</h2>
+        <div class="ap-kpis">
+          <div class="ap-kpi"><div class="ap-kpi__v">68.8%</div><div class="ap-kpi__l">AI完走率<br>（着手16回のうち出荷11回）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">43.8%</div><div class="ap-kpi__l">人間介入率<br>（人が1回でも触った実行）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">0件</div><div class="ap-kpi__l">成果物への介入<br>（出荷11件の中身に人が触った回数）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">73.3%</div><div class="ap-kpi__l">出荷日率<br>（15日のうち何かが出た日）</div></div>
+        </div>
+        <p>
+          <b>人間介入率43.8%をそのまま出します。</b>4割強の実行に人が入っています。
+          ただしこの数字は「その実行に人が1回でも触ったか」を数えたもので、ワークフローの設定を1行直しただけの日も丸ごと介入ありになります。
+          そこで介入を種類で分けています。
+        </p>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th>介入の種類</th><th class="num">実行数</th><th class="num">割合</th></tr></thead>
+          <tbody>
+            <tr><td><b>成果物への介入</b>（人が記事を書いた・書き直した）</td><td class="num"><b>0</b></td><td class="num"><b>0.0%</b></td></tr>
+            <tr><td>実行基盤の修理（ワークフロー・手順書・スクリプト）</td><td class="num">4</td><td class="num">25.0%</td></tr>
+            <tr><td>代走（全経路が不発で人が代わりに実行）</td><td class="num">1</td><td class="num">6.3%</td></tr>
+            <tr><td>立ち上げ（初回に人が通しで実演・一度きり）</td><td class="num">1</td><td class="num">6.3%</td></tr>
+            <tr><td>起票のみ（人に依頼したが、結局やらずに済んだ）</td><td class="num">1</td><td class="num">6.3%</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="ap-note">
+          出荷された11件は、すべてAIが書いています。実質的な介入は「基盤の修理」25.0%の一点で、その修理を書いたのもAIでした。
+          人間がやったのは、壊れていることに気づいて直せと言うことです。
+        </p>
+        <p class="ap-note">
+          <b>経路別では、主系1/6・副系（代走）10/10。</b>主系は定時起動のワークフローで、成果物ゼロで終わった回が続いています。
+          日々の出荷は副系が担っており、<b>二重化していなければ止まっていました。</b>
+          無運転日は2日（8月16日・17日）です。
+        </p>
+        <p class="ap-note">
+          コード側には別の物差しがあります。3リポジトリ・全ブランチ・マージ除く・2026-08-11〜08-21で、
+          <b>コミットの99.5%（194件中193件）、変更行の94.2%（48,976行中46,159行）がAI著者</b>です。
+          計測日そのものは窓に入れていません（率を上げる方向に効くため。8月22日を含めると94.2%→96.6%）。
+        </p>
+      </section>
+
+      <!-- 4. 領域別 -->
+      <section class="ap-sec">
+        <h2>4. 領域別の自動化率</h2>
+        <p class="ap-note">
+          176タスク・13領域を1件ずつ棚卸しして、誰が実行するかで数えたものです。
+          <b>総合自動化率61.3%、AI関与率87.4%。</b>「半分できていない」と自分から言える形で出しています。
+          タスクの粒度は領域間で揃っておらず、全タスクを等価に数えている点は限界として付記します。
+        </p>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th>領域</th><th class="num">総合</th><th class="num">AI関与</th></tr></thead>
+          <tbody>
+            <tr><td>⑫ 事業継続性</td><td class="num">100.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>⑩ AgentOps・ガバナンス</td><td class="num">91.7%</td><td class="num">100.0%</td></tr>
+            <tr><td>⑤ AI予算・トークン管理</td><td class="num">86.7%</td><td class="num">92.9%</td></tr>
+            <tr><td>② バグ修正</td><td class="num">82.4%</td><td class="num">93.8%</td></tr>
+            <tr><td>⑪ データ・プライバシー</td><td class="num">70.0%</td><td class="num">90.0%</td></tr>
+            <tr><td>⑥ アプリ運営意思決定</td><td class="num">69.2%</td><td class="num">91.7%</td></tr>
+            <tr><td>① 次期機能開発</td><td class="num">66.7%</td><td class="num">100.0%</td></tr>
+            <tr><td>③ 自律型マーケティング</td><td class="num">65.4%</td><td class="num">90.5%</td></tr>
+            <tr><td>④ 自動本番デプロイ</td><td class="num">50.0%</td><td class="num">71.4%</td></tr>
+            <tr><td>⑧ カスタマーサポート</td><td class="num">50.0%</td><td class="num">100.0%</td></tr>
+            <tr><td>⑦ 法人経営</td><td class="num">30.8%</td><td class="num">90.0%</td></tr>
+            <tr><td>⑨ マネタイズ</td><td class="num">12.5%</td><td class="num">80.0%</td></tr>
+            <tr><td>⑬ アナログ領域</td><td class="num"><b>0.0%</b></td><td class="num">22.2%</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </section>
+
+      <!-- 5. AIに与えていない権限 -->
+      <section class="ap-sec">
+        <h2>5. AIに与えていない権限を、理由つきで書いてある</h2>
+        <p>
+          公開したいのはできることの一覧ではなく、境界のほうです。
+          アプリのリリース経路そのものは自動化されていますが、<b>その連鎖を起動する権限を、開発用のAIワークフローには与えていません。</b>
+          設定ファイルには理由がこう書いてあります。
+        </p>
+        <blockquote class="ap-quote">
+          この権限があれば、確認を求めない設定のAIが出荷ワークフローを直接呼び出し、<b>人間を一切介さずApp Storeへ出荷できてしまう</b>。
+          この機能に必要な中核用途は無い — リポジトリの読み取り・コミット・push・PR作成・コメントはすべて権限なしで動く。
+          必要になったら、この権限を広げるのではなく、<b>用途を限定した別の経路を作れ</b>。
+          <cite>ワークフロー設定ファイルのコメントより</cite>
+        </blockquote>
+        <blockquote class="ap-quote">
+          <b>実機で確認してから提出する。後ではなく先に。</b>
+          <cite>リリース手順書の人間向けハードルールより</cite>
+        </blockquote>
+      </section>
+
+      <!-- 6. 実行ログ -->
+      <section class="ap-sec">
+        <h2>6. 実行ログの抜粋 — うまくいかなかった回も同じ形式で残す</h2>
+        <p class="ap-note">
+          台帳は1実行1行です。出荷した回と失敗した回を、同じ列で書きます。以下は実物からの抜粋です。
+        </p>
+        <pre class="ap-log">run_id      : ap-20260823-actions
+date_jst    : 2026-08-23
+route       : actions          outcome : shipped
+pr          : 538              artifact: /obsidian/pricing/
+repair_of   : ap-20260822-actions
+note        : 主系（GitHub Actions）の初出荷。導入から12回目の定時起動で
+              初めて成果物が出た。06:18→06:36 JST（約18分）。過去11回は
+              10〜90秒で終わっており、所要時間そのものが「回ったが何も
+              していない」との違いを示す。
+              この行は主系自身が書いていない。出荷したのに台帳が
+              0件のままだったのはこのため。
+
+run_id      : ap-20260825-actions
+date_jst    : 2026-08-25
+route       : actions          outcome : failed
+failure_class: auth_or_credential
+detected_by : 副系のフォールバックが実行履歴を遡って発見
+note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
+              「台帳を書く主体がいない」という構造的な穴がある。</pre>
+        <p class="ap-note">
+          <b>この2行が並んでいること自体が、いまの現在地です。</b>
+          初出荷は出たが、台帳を書く主体が落ちた回には存在しないという穴が残り、
+          8月24日・25日の失敗は<b>いずれも未解消のまま</b>台帳に載せてあります。
+          検知までの中央値は2.7時間、最大50.7時間。修理までの中央値は3.7時間です。
+        </p>
+      </section>
+
+      <!-- 7. できていないこと -->
+      <section class="ap-sec">
+        <h2>7. できていないこと</h2>
+        <p class="ap-note">この基盤は「全領域が自動で完結する」状態ではありません。手順書とレポートに書いてあるものをそのまま並べます。</p>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th>領域</th><th>現状</th></tr></thead>
+          <tbody>
+            <tr><td>機能開発</td><td>分析と提案はAI。<b>自動選定→段階公開→効果測定→継続／撤回まで通した実績はまだ無い</b></td></tr>
+            <tr><td>バグ修正</td><td>テストと分類は自動。<b>本番障害の検知→修正→カナリア公開→自動ロールバックの閉ループは未実装</b></td></tr>
+            <tr><td>実機テスト</td><td><b>iOSシミュレータ・実機iPhoneの操作、撮影、計測ができない</b>（macOS環境が必須）</td></tr>
+            <tr><td>広告運用</td><td><b>未実装。</b>この予算規模では日次の自動入札がノイズ最適化になるという自社分析があり、着手していない</td></tr>
+            <tr><td>予算配分</td><td>上限での自己停止まで。<b>配分の最適化はまだ。</b>上限値自体も暫定で、実測由来ではない</td></tr>
+            <tr><td>障害の検知</td><td><b>1系統（課金）に気づく経路が無い。</b>購入失敗イベントを受ける経路がiOS側に無く、ユーザーから言われて初めて分かる</td></tr>
+            <tr><td>売上データ</td><td>App Store側の売上・課金データと<b>未接続</b>。獲得単価も投資回収期間も、いま出せる形になっていない</td></tr>
+            <tr><td>カスタマーサポート</td><td>受け口と分類は実装したが、<b>返信の自動化が無い</b></td></tr>
+            <tr><td>法人領域</td><td>取引先・送金先の許可リストが動き始めたところ。経理・税務・労務・契約審査は<b>証跡ゼロ</b>。権限と承認境界の設計段階で、<b>無人化しない</b></td></tr>
+            <tr><td>広報の配信操作</td><td>原稿・採点・検査・画像までは自動。<b>配信そのものは管理画面から人間が行う</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="ap-note">
+          <b>「完全自動化できた」とは書きません。</b>言えるのは、AIが日々の運営を継続実行できる構造にしたことと、
+          自動化が止まったときに気づける形にしたことの2つです。
+        </p>
+      </section>
+
+      <!-- 8. 広報自身の採点 -->
+      <section class="ap-sec">
+        <h2>8. 広報の原稿も、同じ物差しで採点している</h2>
+        <p class="ap-note">
+          過去5本のプレスリリースの実績で採点式を較正しています。<b>n=5の較正であり、外挿の根拠にはなりません。</b>
+        </p>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th class="num">スコア</th><th class="num">PV</th><th class="num">転載</th><th>件名</th></tr></thead>
+          <tbody>
+            <tr><td class="num">21</td><td class="num">469</td><td class="num">22</td><td>AIタグ自動追加</td></tr>
+            <tr><td class="num">40</td><td class="num">1,347</td><td class="num">28</td><td>AirPodsに話すだけでObsidianへ（Siri対応）</td></tr>
+            <tr><td class="num">46</td><td class="num">217</td><td class="num">0</td><td>初回リリース</td></tr>
+            <tr><td class="num">65</td><td class="num">10,434</td><td class="num">28</td><td>話すだけでObsidianへ — Apple Watch初対応</td></tr>
+            <tr><td class="num">71</td><td class="num">12,188</td><td class="num">34</td><td>新機能「Obsidian連携」提供開始</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="ap-note">
+          いちばん沈んだのは、固有名詞が1つも入っていない回でした。
+          <b>配信原稿には、誇大表現が出たらCIが落とす検査を入れてあります。</b>
+        </p>
+      </section>
+
+      <!-- 9. 台帳 -->
+      <section class="ap-sec">
+        <h2>9. 生きている台帳</h2>
+        <p class="ap-note">このページの数字の出どころです。<b>更新されているかどうかも含めて、そのまま見られます。</b></p>
+        <div class="ap-links">
+          <a href="/data/autopilot-runs.json"><b>運転台帳</b><span>1実行1行。着手・結果・PR・介入・費用・未解消の不具合</span></a>
+          <a href="/data/autopilot-status.json"><b>稼働状況</b><span>いま何が動いていて、何が止まっているか</span></a>
+          <a href="/data/autopilot-cost.json"><b>AI実費</b><span>月次上限と、種別ごとの枠。<b>上限値は暫定です</b></span></a>
+          <a href="/data/automation-coverage.json"><b>自動化の棚卸し</b><span>176タスク・13領域を1件ずつ、誰が実行するかで分類</span></a>
+          <a href="/data/authority-matrix.json"><b>権限表</b><span>15領域。可逆／不可逆と、人間のみの操作</span></a>
+          <a href="/data/code-authorship.json"><b>コード著者の台帳</b><span>数え方そのものを凍結してある</span></a>
+        </div>
+        <p class="ap-note">
+          実費は現在<b>$0.8149（1実行分）</b>までしか観測できていません。副系10実行分は、
+          スケジュール起動セッションのログを外から読めないため<b>ゼロではなく未観測</b>です。
+          月次上限$40は<b>暫定値</b>で、実測由来ではありません。
+        </p>
+      </section>
+
+      <div class="ap-qr ap-qr--desktop">
+        <img src="/assets/img/qr-autopilot-ja.svg" alt="App Storeで開くQRコード" width="148" height="148" loading="lazy">
+        <p>スマートフォンのカメラで読み取ると、App Storeが開きます。</p>
+      </div>
+
+    </div>
+  </main>
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
+        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span> <span lang="en" data-lang="en">Home</span></a>
+        <a href="/how-to/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span> <span lang="en" data-lang="en">How to Use</span></a>
+        <a href="/templates/" class="footer__link"><span lang="ja" data-lang="ja">テンプレ</span> <span lang="en" data-lang="en">Templates</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/captio/" class="footer__link"><span lang="ja" data-lang="ja">Captio式</span> <span lang="en" data-lang="en">Captio Method</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">読みもの</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発日誌</span> <span lang="en" data-lang="en">Dev Log</span></a>
+        <a href="/autopilot/" class="footer__link"><span lang="ja" data-lang="ja">自律型アプリ運営</span> <span lang="en" data-lang="en">How this app is run</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
+        <a href="/terms" class="footer__link"><span lang="ja" data-lang="ja">利用規約</span> <span lang="en" data-lang="en">Terms</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシーポリシー</span> <span lang="en" data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span> <span lang="en" data-lang="en">Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
