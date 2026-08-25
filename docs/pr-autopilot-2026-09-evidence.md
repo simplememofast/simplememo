@@ -138,7 +138,7 @@ SEO Validation（9チェック）が通ったときだけ auto-merge.yml が**�
 | 要素 | 証跡 |
 |---|---|
 | 運転開始 | 2026-08-11（PR #470と同時導入）。**2026-08-23で13日目** |
-| **主系の実績（改訂2で更新）** | **主系GitHub Actionsは12回中1回だけ出荷した**（2026-08-23・PR #538）。11回は不発。下記 |
+| **主系の実績（改訂3で更新）** | **主系GitHub Actionsは14回中1回だけ出荷した**（2026-08-23・PR #538）。**その後 08-24・08-25 は2回続けて失敗**。下記 |
 | 手順書 | `docs/obsidian/AUTOPILOT_RUNBOOK.md`（473行）。原則5つ・レーンA〜E・実装規約・9チェック・出荷手順・§7「できないこと（正直に）」まで |
 | 実行ログ | `docs/obsidian/AUTOPILOT_LOG.md`（**1,236行**）。書かなかった回も記録 |
 | 状態の外形 | `data/autopilot-status.json`（`streak` / `data_freshness` / `reason` / `verified` / `checks` / `owner_requests` / `next`）を毎回上書き。**スキップした日も更新する**設計で、更新が無い日は日報が「上流停止」と報告する |
