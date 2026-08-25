@@ -36,7 +36,7 @@
     "【出典】タスクの列挙は docs/autopilot-maturity-backlog.md（外部レビュー由来）と、",
     "本セッションで実測した内容。分類は3リポジトリの実装を1件ずつ当てて決めた。"
   ],
-  "measured_at": "2026-08-22",
+  "measured_at": "2026-08-25",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -46,16 +46,15 @@
     {
       "area": "① 次期機能開発",
       "task": "ビジョン文書の維持（機能追加の必読ゲート）",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-ios/scripts/qa/check_vision.py",
         "../simplememo-ios/docs/VISION.md",
         "../simplememo-ios/.github/workflows/qa-static.yml",
         "CLAUDE.md",
         "../simplememo-api/CLAUDE.md",
         "../simplememo-ios/CLAUDE.md"
       ],
-      "note": "2026-08-22実装。**参照と鮮度を機械が守る。**3リポジトリの CLAUDE.md が「設計に入る前に読め」と指す唯一の文書なのに、**参照が壊れても誰も落ちなかった** — 壊れたことは「読んだ人が違う節を読んで帰る」という形でしか現れず、しかもその人は自分が違う節を読んだことに気づかない。初回の実行で1件出た: 冒頭が「最後の『12. 機能追加時のチェック』が実際のゲート」と書いていたが §12 は「現在地」で、チェックは §13。**読者を1つ手前の節へ送っていた**（3リポジトリのCLAUDE.mdはどれも §13 と正しく書いており、間違っていたのはこの文書の自分自身への参照だけだった）。節番号の解決・必須節の存在・**現在地が90日を超えたら落とす**・未決定が空でないこと、の4つ。4通りとも壊した状態を作って落ちることを確認した。残る弱さ: **中身が正しいかは見ていない**（ビジョンの正しさは機械には決められない）。定期改訂そのものは人が書く — 機械がやるのは古くなったことを言うところまで",
+      "note": "2026-08-22実装。**参照と鮮度を機械が守る。**3リポジトリの CLAUDE.md が「設計に入る前に読め」と指す唯一の文書なのに、**参照が壊れても誰も落ちなかった** — 壊れたことは「読んだ人が違う節を読んで帰る」という形でしか現れず、しかもその人は自分が違う節を読んだことに気づかない。初回の実行で1件出た: 冒頭が「最後の『12. 機能追加時のチェック』が実際のゲート」と書いていたが §12 は「現在地」で、チェックは §13。**読者を1つ手前の節へ送っていた**（3リポジトリのCLAUDE.mdはどれも §13 と正しく書いており、間違っていたのはこの文書の自分自身への参照だけだった）。節番号の解決・必須節の存在・**現在地が90日を超えたら落とす**・未決定が空でないこと、の4つ。4通りとも壊した状態を作って落ちることを確認した。残る弱さ: **中身が正しいかは見ていない**（ビジョンの正しさは機械には決められない）。定期改訂そのものは人が書く — 機械がやるのは古くなったことを言うところまで\n\n**[2026-08-25 訂正]** **この行は誤りだった。**`check_vision.py` は隣のリポジトリのgit履歴に一度も存在しない。つまり**参照と鮮度を機械が守っている事実は無い。**3リポジトリの CLAUDE.md が「設計に入る前に読め」と指しているのは本当だが、それは人向けの指示であって検査ではない。「初回の実行で1件出た」という記述も、走らせた実体が無いので裏が取れない。\n\n落とした証跡: ../simplememo-ios/scripts/qa/check_vision.py\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
@@ -219,17 +218,13 @@
       "evidence": [
         "data/monitoring-coverage.json",
         "scripts/check-monitoring.mjs",
-        "../simplememo-api/src/inquiry.ts",
-        "../simplememo-api/src/watch-health.ts",
         "../simplememo-api/src/analytics.ts",
         "../simplememo-api/src/autopilot-report.ts",
         "../simplememo-api/test/ops-alerts.test.ts",
         ".github/workflows/autopilot-health.yml",
-        ".github/workflows/cron-health.yml",
-        "../simplememo-ios/scripts/qa/check_analytics_crossrepo.py",
-        "../simplememo-ios/data/analytics-server-allowlist.json"
+        ".github/workflows/cron-health.yml"
       ],
-      "note": "2026-08-22。棚卸しで名指しした穴3系統を、**2つの流れが別々に塞いだ。**main側で**課金とWatch同期**（データは既に取れていて閾値と通知だけが無かった）、こちら側で**問い合わせとWatch同期**（受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた）。合流時点で**3系統とも埋まっている。**\n\nWatchは検知器が2つになった。**毎時は install 単位**（件数で見ると3秒間隔でリトライする1台が群全体を動かす — 実測で7 installが712件）、**日報は24h窓の件数と手動修復**（分母20件未満では判定しない。毎日「異常」が出る検知器は読まれなくなる）。\n\n**どちらの検知器も「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。\n\n[2026-08-22追記] **計測の事故が起きる境目**（iOS↔relay のイベント名）に検査を足した。従来の検査は「サーバに登録したのに iOS 側のセットに入れ忘れる」だけを見ており、**逆向き（iOSが送るのにサーバの allowlist に無い）は素通り**していた。その場合サーバは受け取って黙って捨て、端末には200が返るので送信側にも症状が出ない。サーバ allowlist の写しを iOS 側に置いたので**隣のリポジトリが無いCIでも動く** — 隣を見に行く形にすると検査が常にスキップされ、事故は起きたまま緑になる",
+      "note": "2026-08-22。棚卸しで名指しした穴3系統を、**2つの流れが別々に塞いだ。**main側で**課金とWatch同期**（データは既に取れていて閾値と通知だけが無かった）、こちら側で**問い合わせとWatch同期**（受け口はあったが来たことに気づく経路が無かったので、未応答の滞留を日報に載せた）。合流時点で**3系統とも埋まっている。**\n\nWatchは検知器が2つになった。**毎時は install 単位**（件数で見ると3秒間隔でリトライする1台が群全体を動かす — 実測で7 installが712件）、**日報は24h窓の件数と手動修復**（分母20件未満では判定しない。毎日「異常」が出る検知器は読まれなくなる）。\n\n**どちらの検知器も「読めなかった」を 0件 と書かない** — 混ぜると穴が「異常なし」に見える。\n\n[2026-08-22追記] **計測の事故が起きる境目**（iOS↔relay のイベント名）に検査を足した。従来の検査は「サーバに登録したのに iOS 側のセットに入れ忘れる」だけを見ており、**逆向き（iOSが送るのにサーバの allowlist に無い）は素通り**していた。その場合サーバは受け取って黙って捨て、端末には200が返るので送信側にも症状が出ない。サーバ allowlist の写しを iOS 側に置いたので**隣のリポジトリが無いCIでも動く** — 隣を見に行く形にすると検査が常にスキップされ、事故は起きたまま緑になる\n\n**[2026-08-25 訂正]** **範囲を訂正。**問い合わせ（`inquiry.ts`）とWatch日報（`watch-health.ts`）の検知器は隣に存在しない。**問い合わせは受け口ごと無い。**残っているのは自動運転・cron・CI・予算・資格情報・段階公開・クラッシュ・課金・Watch毎時（`analytics.ts` の ops_alerts）で、これらは実在する。\n\n落とした証跡: ../simplememo-api/src/inquiry.ts , ../simplememo-api/src/watch-health.ts , ../simplememo-ios/scripts/qa/check_analytics_crossrepo.py , ../simplememo-ios/data/analytics-server-allowlist.json",
       "since": "2026-08"
     },
     {
@@ -280,37 +275,30 @@
       "task": "アクセシビリティ・文字切れ・多言語の自動検査",
       "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/scripts/qa/check_localization.py",
-        "../simplememo-ios/data/localization-baseline.json",
         "../simplememo-ios/.github/workflows/qa-static.yml",
         "scripts/seo-check.js"
       ],
-      "note": "2026-08-22。**多言語だけアプリ側にも入った。**初回の実行で3件出た（どれも目視では見つからない）: NSLocalizedString の直接呼び出し2箇所（キーが無い言語では`onboarding.page2.apple_signin.error_generic` という文字列がそのままエラーとして表示されていた）/ premium.* 5キーが全10言語で二重定義（50行、後の行が静かに勝つので先の行を直しても画面は変わらない）/ premium.unlimited がどの言語にも無い。全部直した。**未翻訳では落とさない**（8言語が46.3%なのは既知）が、基準線から下がると落ちる。残る弱さ: **文字切れとアクセシビリティはアプリ側で未検査。**文字切れは実機のフォントとレイアウトが要り、文字数比での近似は誤検出だらけになるので採らなかった（ドイツ語が日本語の3倍は正常）",
+      "note": "2026-08-22。**多言語だけアプリ側にも入った。**初回の実行で3件出た（どれも目視では見つからない）: NSLocalizedString の直接呼び出し2箇所（キーが無い言語では`onboarding.page2.apple_signin.error_generic` という文字列がそのままエラーとして表示されていた）/ premium.* 5キーが全10言語で二重定義（50行、後の行が静かに勝つので先の行を直しても画面は変わらない）/ premium.unlimited がどの言語にも無い。全部直した。**未翻訳では落とさない**（8言語が46.3%なのは既知）が、基準線から下がると落ちる。残る弱さ: **文字切れとアクセシビリティはアプリ側で未検査。**文字切れは実機のフォントとレイアウトが要り、文字数比での近似は誤検出だらけになるので採らなかった（ドイツ語が日本語の3倍は正常）\n\n**[2026-08-25 訂正]** **題名より範囲が狭い。**`check_localization.py` は隣に存在しない。実在するのは qa-static.yml 内の `.strings` ユニコードエスケープ検査と、サイト側の `seo-check.js` だけ。**アクセシビリティと文字切れは、いま誰も検査していない。**\n\n落とした証跡: ../simplememo-ios/scripts/qa/check_localization.py , ../simplememo-ios/data/localization-baseline.json",
       "since": "2026-08"
     },
     {
       "area": "② バグ修正",
       "task": "性能・起動時間の計測",
-      "executor": "ai_executes_gated",
+      "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-api/src/launch-health-monitor.ts",
         "../simplememo-api/src/autopilot-report.ts",
-        "../simplememo-api/test/launch-health-monitor.test.ts",
         "../simplememo-api/docs/launch_health.md",
         "data/monitoring-coverage.json"
       ],
-      "note": "2026-08-22。**本番の常時監視になった。**それまでは段階公開中だけガードが見ており、平常時に起動が壊れても気づく経路が無かった。指標も読み方の文書も既にあり、**無かったのは毎日それを見る仕組み**だけだった（POSTを叩いた日にしか読まれていなかった）。判定は文書の読み方をそのまま機械にした: **比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常利用後のkillでもlaunch_incomplete が出る（scene_did_become_active は恒常的に最多で実害の証拠にならない）。**前段ステージが1件でも出たら分母を問わず劣化**、比率は前週比の跳ねだけに使う。残る弱さ: **起動「時間」は測っていない。**0.4秒は今も定点実測で、本番の起動所要時間を集める経路はiOS側に無い。ここが監視しているのは完走したかどうかだけ",
+      "note": "2026-08-22。**本番の常時監視になった。**それまでは段階公開中だけガードが見ており、平常時に起動が壊れても気づく経路が無かった。指標も読み方の文書も既にあり、**無かったのは毎日それを見る仕組み**だけだった（POSTを叩いた日にしか読まれていなかった）。判定は文書の読み方をそのまま機械にした: **比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常利用後のkillでもlaunch_incomplete が出る（scene_did_become_active は恒常的に最多で実害の証拠にならない）。**前段ステージが1件でも出たら分母を問わず劣化**、比率は前週比の跳ねだけに使う。残る弱さ: **起動「時間」は測っていない。**0.4秒は今も定点実測で、本番の起動所要時間を集める経路はiOS側に無い。ここが監視しているのは完走したかどうかだけ\n\n**[2026-08-25 訂正]** **格下げ。**`launch-health-monitor.ts` は隣に存在しない。指標（`analytics.ts`）と読み方の文書（`docs/launch_health.md`）はあるが、**毎日それを見る監視器が無い。**「平常時に起動が壊れても気づく経路が無かった」という問題は、**まだ解けていない。**\n\n落とした証跡: ../simplememo-api/src/launch-health-monitor.ts , ../simplememo-api/test/launch-health-monitor.test.ts\n\nexecutor: ai_executes_gated → ai_proposes",
       "since": "2026-08"
     },
     {
       "area": "② バグ修正",
       "task": "依存脆弱性・秘密情報・SBOM・署名検査",
-      "executor": "ai_executes_gated",
-      "evidence": [
-        "../simplememo-api/scripts/check-supply-chain.mjs",
-        "../simplememo-api/data/sbom.json"
-      ],
-      "note": "2026-08-22実装（simplememo-api）。SBOM 259件（**実行時はわずか1件**、残り258は開発時）・integrity欠落0件・秘密情報スキャン。**値は出力しない**（出力に秘密を写したら意味が無い）。**既知脆弱性の照合（npm audit）は意図的に含めない** — 外部DB依存でCIの合否が日替わりになり、やがて無視されるため",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "2026-08-22実装（simplememo-api）。SBOM 259件（**実行時はわずか1件**、残り258は開発時）・integrity欠落0件・秘密情報スキャン。**値は出力しない**（出力に秘密を写したら意味が無い）。**既知脆弱性の照合（npm audit）は意図的に含めない** — 外部DB依存でCIの合否が日替わりになり、やがて無視されるため\n\n**[2026-08-25 訂正]** **証跡が全部存在しない。**`check-supply-chain.mjs` も `sbom.json` も隣のgit履歴に無い。「259件・実行時1件」という数字も出どころが無い。\n\n落とした証跡: ../simplememo-api/scripts/check-supply-chain.mjs , ../simplememo-api/data/sbom.json\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
@@ -482,17 +470,15 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "App Store Connect のデータ連携",
-      "executor": "ai_autonomous",
+      "executor": "ai_executes_gated",
       "evidence": [
         "../simplememo-ios/scripts/asc_metrics.rb",
         "../simplememo-ios/.github/workflows/asc-metrics.yml",
         "../simplememo-ios/data/appstore/asc-metrics.json",
-        "../simplememo-ios/scripts/asc_analytics.rb",
-        "../simplememo-ios/.github/workflows/asc-analytics.yml",
         "growth/scripts/ingest-asc.mjs",
         "growth/data/appstore/README.md"
       ],
-      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済みで **instance は 0/15・Apple の生成待ち**（5日を超えたら『故障』としてジョブが落ちる）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）",
+      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済みで **instance は 0/15・Apple の生成待ち**（5日を超えたら『故障』としてジョブが落ちる）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）\n\n**[2026-08-25 訂正]** **自律→ゲート付きへ格下げ。**取得側で実在するのは `asc_metrics.rb` / `asc-metrics.yml` / `asc-metrics.json` で、これは動いている。**Analytics Reports 側（`asc_analytics.rb`）は存在しない**ので、売上・課金・返金はいまも機械に降りていない。\n\n落とした証跡: ../simplememo-ios/scripts/asc_analytics.rb , ../simplememo-ios/.github/workflows/asc-analytics.yml\n\nexecutor: ai_autonomous → ai_executes_gated",
       "since": "2026-08"
     },
     {
@@ -753,12 +739,9 @@
         "../simplememo-ios/SimpleMemo/FeatureFlagRollout.swift",
         "../simplememo-ios/SimpleMemoTests/FeatureFlagRolloutTests.swift",
         "../simplememo-ios/docs/feature-flag-client-spec.md",
-        "../simplememo-ios/release_notes/ja-JP/5.8.1.txt",
-        "../simplememo-api/data/rollout-bucket-vectors.json",
-        "../simplememo-api/test/rollout-vectors.test.ts",
-        "../simplememo-ios/scripts/qa/check_rollout_vectors.py"
+        "../simplememo-ios/release_notes/ja-JP/5.8.1.txt"
       ],
-      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした"
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした\n\n**[2026-08-25 訂正]** **実装は実在する**（`flags.ts` / `FeatureFlagRollout.swift` とそのテスト）。存在しないのは**バケット契約のベクタ**（`rollout-bucket-vectors.json` と両側の照合テスト）で、**サーバとクライアントが同じ install を同じ群に入れることは、まだ機械で確かめていない。**\n\n落とした証跡: ../simplememo-api/data/rollout-bucket-vectors.json , ../simplememo-api/test/rollout-vectors.test.ts , ../simplememo-ios/scripts/qa/check_rollout_vectors.py"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -971,15 +954,13 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "コホート分析（継続率・課金率）",
-      "executor": "ai_executes_gated",
+      "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-api/src/cohort-report.ts",
         "../simplememo-api/src/analytics.ts",
         "../simplememo-api/src/index.ts",
-        "../simplememo-api/test/cohort-report.test.ts",
         "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"
       ],
-      "note": "2026-08-22。**都度レポートから週次の自動実行へ。**計算も、週次サマリの中でそれを呼ぶ経路も既にあり、**無かったのは定期的に回して読む仕組み**だった（人が叩いた日にしか読まれていない）。運用報告なので ENABLED フラグでは止めず、宛先の有無だけで自己ゲートする（autopilot_report / analytics_daily_report と同じ流儀）。この領域は母数が小さいので、**成熟30件未満では変化を解釈しない**し、差が**1人ぶんの幅**に収まるなら「区別できない」と書く（前週の母数が小さければそちらの分解能を使う）。**言うことが無い週は送らない** — 読めるようになった週・言える差が出た週・集計できなかった週の3つだけ。毎週同じ行を送ると読まれなくなる。残る弱さ: **D28 は BQ の28日蓄積待ち**（9/6前後）。実際に「読める」判定が出るのは母数が30件に届いてからで、いまの規模ではしばらく『母数不足』が続く",
+      "note": "2026-08-22。**都度レポートから週次の自動実行へ。**計算も、週次サマリの中でそれを呼ぶ経路も既にあり、**無かったのは定期的に回して読む仕組み**だった（人が叩いた日にしか読まれていない）。運用報告なので ENABLED フラグでは止めず、宛先の有無だけで自己ゲートする（autopilot_report / analytics_daily_report と同じ流儀）。この領域は母数が小さいので、**成熟30件未満では変化を解釈しない**し、差が**1人ぶんの幅**に収まるなら「区別できない」と書く（前週の母数が小さければそちらの分解能を使う）。**言うことが無い週は送らない** — 読めるようになった週・言える差が出た週・集計できなかった週の3つだけ。毎週同じ行を送ると読まれなくなる。残る弱さ: **D28 は BQ の28日蓄積待ち**（9/6前後）。実際に「読める」判定が出るのは母数が30件に届いてからで、いまの規模ではしばらく『母数不足』が続く\n\n**[2026-08-25 訂正]** **格下げ。**`cohort-report.ts` は隣に存在しない。あるのは 2026-07-29 の分析レポート1本（人が書いたもの）で、**定期的に出る仕組みは無い。**\n\n落とした証跡: ../simplememo-api/src/cohort-report.ts , ../simplememo-api/test/cohort-report.test.ts\n\nexecutor: ai_executes_gated → ai_proposes",
       "since": "2026-08"
     },
     {
@@ -1229,13 +1210,9 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "問い合わせの自動分類",
-      "executor": "ai_executes_gated",
-      "evidence": [
-        "../simplememo-api/src/inquiry.ts",
-        "../simplememo-api/migrations/0020_inquiries.sql",
-        "../simplememo-api/test/inquiry.test.ts"
-      ],
-      "note": "2026-08-22実装（simplememo-api・24テスト）。**AIに判定させず規則で分ける** — 回帰の合否をAIに判定させない設計と同じ理由で、分類の誤りは見落としとして静かに積み上がる。分けられないものは**「その他」ではなく unclassified**（その他は見返されないが、未分類は見返される）。重い用件（個人情報・退会・返金）を先に当て、当たったら自動で人へ上げる。**受け口は既定オフ**（INQUIRY_ENABLED）で、公開ページを mailto から切り替えるかは製品の判断。テストが実バグを検出した — 「送信できません」が「できな」に当たらず未分類に落ちていた",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "2026-08-22実装（simplememo-api・24テスト）。**AIに判定させず規則で分ける** — 回帰の合否をAIに判定させない設計と同じ理由で、分類の誤りは見落としとして静かに積み上がる。分けられないものは**「その他」ではなく unclassified**（その他は見返されないが、未分類は見返される）。重い用件（個人情報・退会・返金）を先に当て、当たったら自動で人へ上げる。**受け口は既定オフ**（INQUIRY_ENABLED）で、公開ページを mailto から切り替えるかは製品の判断。テストが実バグを検出した — 「送信できません」が「できな」に当たらず未分類に落ちていた\n\n**[2026-08-25 訂正]** **証跡が全部存在しない。**受け口（`/v1/inquiry`）・分類（`inquiry.ts`）・テーブル・テストのどれも隣のgit履歴に無い。**問い合わせは現在も mailto のみ**で、来たことに気づく経路も無い。\n\n落とした証跡: ../simplememo-api/src/inquiry.ts , ../simplememo-api/migrations/0020_inquiries.sql , ../simplememo-api/test/inquiry.test.ts\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
@@ -1523,12 +1500,9 @@
       "executor": "ai_executes_gated",
       "evidence": [
         "../simplememo-api/data/data-retention.json",
-        "../simplememo-api/test/data-retention.test.ts",
-        "../simplememo-api/scripts/check-write-only-tables.mjs",
-        "../simplememo-api/src/webhook-redact.ts",
-        "../simplememo-api/scripts/check-retention-schema.mjs"
+        "../simplememo-api/test/data-retention.test.ts"
       ],
-      "note": "2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない） さらに、**台帳の記述そのものをスキーマと突き合わせる検査**を足した（2方向 — 存在しない列を書いていないか／書かれていない自由文の列が無いか）。**22表中14表がずれていた。**求めるのは TEXT/BLOB と身元を示唆する名前の列だけで、全列を書かせると台帳が読まれなくなる（読まれない台帳は無いのと同じ）"
+      "note": "2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない） さらに、**台帳の記述そのものをスキーマと突き合わせる検査**を足した（2方向 — 存在しない列を書いていないか／書かれていない自由文の列が無いか）。**22表中14表がずれていた。**求めるのは TEXT/BLOB と身元を示唆する名前の列だけで、全列を書かせると台帳が読まれなくなる（読まれない台帳は無いのと同じ）\n\n**[2026-08-25 訂正]** **範囲を訂正。**24ストアの棚卸し（`data-retention.json`）とテストは実在する。存在しないのは**書き込み専用テーブルの検査・webhookのredact・スキーマ照合**の3つで、「台帳とスキーマがずれたら落ちる」は**まだ成立していない。**\n\n落とした証跡: ../simplememo-api/scripts/check-write-only-tables.mjs , ../simplememo-api/src/webhook-redact.ts , ../simplememo-api/scripts/check-retention-schema.mjs"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1546,14 +1520,12 @@
       "task": "削除要求への対応",
       "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-api/scripts/check-deletion-coverage.mjs",
         "../simplememo-api/data/data-retention.json",
         "../simplememo-api/src/index.ts",
-        "../simplememo-api/test/deletion-coverage.test.ts",
         "../simplememo-api/.github/workflows/ci.yml",
         "data/authority-matrix.json"
       ],
-      "note": "2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。\n\n実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。\n\n**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない",
+      "note": "2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。\n\n実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。\n\n**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない\n\n**[2026-08-25 訂正]** **削除網羅の検査（`check-deletion-coverage.mjs`）は存在しない。**削除の入口と保持台帳はあるが、**新しいテーブルが削除対象から漏れても機械は気づかない。**\n\n落とした証跡: ../simplememo-api/scripts/check-deletion-coverage.mjs , ../simplememo-api/test/deletion-coverage.test.ts",
       "since": "2026-08"
     },
     {
@@ -1577,28 +1549,21 @@
     {
       "area": "⑪ データ・プライバシー",
       "task": "アクセス履歴",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-api/src/access-log.ts",
-        "../simplememo-api/migrations/0019_admin_access_log.sql",
-        "../simplememo-api/src/index.ts",
-        "../simplememo-api/scripts/check-write-only-tables.mjs"
+        "../simplememo-api/src/index.ts"
       ],
-      "note": "2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない",
+      "note": "2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない\n\n**[2026-08-25 訂正]** **証跡が存在しない。**`access-log.ts` もマイグレーションも隣のgit履歴に無い。`/admin/*` の経路自体は実在するが、**そこへのアクセスは記録されていない。**「一番強い権限の操作だけが記録の外にあった」という指摘は正しく、**いまも外にある。**\n\n落とした証跡: ../simplememo-api/src/access-log.ts , ../simplememo-api/migrations/0019_admin_access_log.sql , ../simplememo-api/scripts/check-write-only-tables.mjs\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
       "area": "⑪ データ・プライバシー",
       "task": "第三者SDKのデータ送信監査",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-ios/scripts/qa/check_third_party_egress.py",
-        "../simplememo-ios/data/third-party-egress.json",
-        "../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy",
-        "../simplememo-ios/scripts/qa/check_privacy_manifest.py",
-        "../simplememo-ios/data/privacy-manifest-policy.json"
+        "../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy"
       ],
-      "note": "2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false [2026-08-22追記] **申告そのものと実装の突き合わせ**も足した。PrivacyInfo.xcprivacy は手で書いた宣言なので実装が増えても追随せず、**足りない申告は書いた本人には見えない。**突き合わせたら2種別が未申告だった。**オーナー指示で申告を実装に合わせた**（同日）: Product Interaction（387種のイベント）／Device ID（anonymous_install_id は**Keychain保存なのでアプリを削除しても残る**）／Other Diagnostic Data。**Crash Data では申告していない** — クラッシュログは集めていないので、そこで申告すると過剰申告になる。すべて Linked: false（analytics は email_hash を持たない設計）。検査の enforce も true にした。**将来の分岐を検査が見張る**: relay 側には analytics → email の結合が実装済みで待っており（send_correlation × client_send_id）、iOSがそれを送り始めた日に Linked が true になる — 送り始めたのに false のままなら落ちる。残る作業: **ASCの「App のプライバシー」への回答**はリポジトリの外なので検査できない",
+      "note": "2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false [2026-08-22追記] **申告そのものと実装の突き合わせ**も足した。PrivacyInfo.xcprivacy は手で書いた宣言なので実装が増えても追随せず、**足りない申告は書いた本人には見えない。**突き合わせたら2種別が未申告だった。**オーナー指示で申告を実装に合わせた**（同日）: Product Interaction（387種のイベント）／Device ID（anonymous_install_id は**Keychain保存なのでアプリを削除しても残る**）／Other Diagnostic Data。**Crash Data では申告していない** — クラッシュログは集めていないので、そこで申告すると過剰申告になる。すべて Linked: false（analytics は email_hash を持たない設計）。検査の enforce も true にした。**将来の分岐を検査が見張る**: relay 側には analytics → email の結合が実装済みで待っており（send_correlation × client_send_id）、iOSがそれを送り始めた日に Linked が true になる — 送り始めたのに false のままなら落ちる。残る作業: **ASCの「App のプライバシー」への回答**はリポジトリの外なので検査できない\n\n**[2026-08-25 訂正]** **証跡が存在しない。**監査スクリプトも台帳も隣のgit履歴に無い。`PrivacyInfo.xcprivacy` はアプリの提出物であって監査ではない。「初回実行で AppsFlyerLib の記載漏れを自分で検出した」も、走らせた実体が無い。\n\n落とした証跡: ../simplememo-ios/scripts/qa/check_third_party_egress.py , ../simplememo-ios/data/third-party-egress.json , ../simplememo-ios/scripts/qa/check_privacy_manifest.py , ../simplememo-ios/data/privacy-manifest-policy.json\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
@@ -1643,52 +1608,42 @@
     {
       "area": "⑫ 事業継続性",
       "task": "Circuit Breaker",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-api/src/circuit-breaker.ts",
-        "../simplememo-api/src/resend.ts",
-        "../simplememo-api/test/circuit-breaker.test.ts"
+        "../simplememo-api/src/resend.ts"
       ],
-      "note": "2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**",
+      "note": "2026-08-22実装（simplememo-api・16テスト）。Resendはベンダー台帳で**代替が無い critical**。設計の芯は「開く条件」ではなく**「4xxでは開かない」**こと — 宛先不正やドメイン未認証で開くと1件の設定ミスが全ユーザーの送信を止める。KVが読めないときは閉じている扱い（**ブレーカー自身を単一障害点にしない**）。**本番でまだ1回も開いていない**\n\n**[2026-08-25 訂正]** **存在しない。**`circuit-breaker.ts` は隣のgit履歴に一度も無い。**送信先が落ちても呼び続ける状態のまま。**\n\n落とした証跡: ../simplememo-api/src/circuit-breaker.ts , ../simplememo-api/test/circuit-breaker.test.ts\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",
       "task": "Dead Letter Queue",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-api/src/dlq.ts",
-        "../simplememo-api/migrations/0018_email_dead_letters.sql",
         "../simplememo-api/data/data-retention.json"
       ],
-      "note": "2026-08-22実装（simplememo-api）。**本文も平文の宛先も保存しない** — 再送のために本文を貯めると、保持期間の議論をやり直さずに新しい個人データストアを作ることになる。テンプレート由来は再送できるが、**メモ中継は再送できない**（落ちた事実だけ残す）。種別が不明なときは再送しない側へ倒す。保持35日・剪定つき",
+      "note": "2026-08-22実装（simplememo-api）。**本文も平文の宛先も保存しない** — 再送のために本文を貯めると、保持期間の議論をやり直さずに新しい個人データストアを作ることになる。テンプレート由来は再送できるが、**メモ中継は再送できない**（落ちた事実だけ残す）。種別が不明なときは再送しない側へ倒す。保持35日・剪定つき\n\n**[2026-08-25 訂正]** **存在しない。**`dlq.ts` もマイグレーションも隣のgit履歴に無い。**落ちた送信は記録されず、失われる。**\n\n落とした証跡: ../simplememo-api/src/dlq.ts , ../simplememo-api/migrations/0018_email_dead_letters.sql\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",
       "task": "バックアップ・復元",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-api/scripts/backup-d1.mjs",
-        "../simplememo-api/docs/RESTORE.md",
         "../simplememo-api/data/data-retention.json"
       ],
-      "note": "2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある",
+      "note": "2026-08-22実装（simplememo-api）。**対象を手で並べない** — 並べると新しいテーブルが黙って対象外になり、症状は復元しようとした日にしか出ない。対象は保持台帳の d1_table から取るので、**保持方針を書いた時点で自動的にバックアップ対象になる。**1つでも失敗したら失敗として終わる（部分的なバックアップを成功と呼ばない）。**通しの復元演習は未実施**で、RESTORE.md の冒頭にそう書いてある\n\n**[2026-08-25 訂正]** **存在しない。**`backup-d1.mjs` も `RESTORE.md` も隣のgit履歴に無い。**本番D1のバックアップは取られていない。**⑫の中で最も重い欠落。\n\n落とした証跡: ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
       "area": "⑫ 事業継続性",
       "task": "手動復旧手順",
-      "executor": "ai_executes_gated",
+      "executor": "nobody",
       "evidence": [
-        "../simplememo-api/scripts/restore-drill.mjs",
-        "../simplememo-api/scripts/backup-d1.mjs",
-        "../simplememo-api/docs/RESTORE.md",
-        "../simplememo-api/test/restore.test.ts",
         "../simplememo-api/.github/workflows/ci.yml",
         "../simplememo-api/data/data-retention.json"
       ],
-      "note": "2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま",
+      "note": "2026-08-22。**手順書が証明に変わった。**それまで RESTORE.md の冒頭には「通しで試したことは一度も無い」と書いてあった。migrations から空のDBを作り、14テーブルを取得→JSON→DELETE→INSERT で往復させ、行が欠けず値が変わらないこと・**部分的に残った行と混ざらないこと**を毎回CIで確かめる。演習と本番の復元は**同じ関数（restoreStatements）を通る** — 別々に書くと、演習は通るのに本番だけ壊れている状態が作れる。`--selftest` が壊れた復元を落とせることも先に確かめる（落ちない検査は検査ではない）。残る弱さ: **本番D1への接続そのものは演習では確かめられない**（wrangler と資格情報が要る）。「どこまで戻すか」の判断基準は未決のまま\n\n**[2026-08-25 訂正]** **存在しない。**復旧演習も手順書も隣のgit履歴に無い。\n\n落とした証跡: ../simplememo-api/scripts/restore-drill.mjs , ../simplememo-api/scripts/backup-d1.mjs , ../simplememo-api/docs/RESTORE.md , ../simplememo-api/test/restore.test.ts\n\nexecutor: ai_executes_gated → nobody",
       "since": "2026-08"
     },
     {
@@ -1709,10 +1664,9 @@
         "data/vendor-register.json",
         "scripts/autopilot-gate.mjs",
         ".github/workflows/seo-check.yml",
-        "../simplememo-api/src/circuit-breaker.ts",
         "../simplememo-ios/SimpleMemo/OutboxManager.swift"
       ],
-      "note": "2026-08-22。台帳の「代替がある」を**実際に動かして確かめる**ようにした。6つの実験（API到達不能で走らない / 副系の実在 / モデル縮退と全滅 / egress縮退 / 遮断器と死信 / 端末Outbox）を判定関数とファイルの実在で毎回通す。**代替と縮退を分けて数える** — 混ぜると resilience を過大に見積もる。Resendが落ちてもメールは送れない（代替なし）が、失われず後で戻せる（縮退あり）。この作業で台帳の4件を代替から降格した（回避策・停止・欠測は代替ではない）。現状: 代替2 / 縮退のみ2 / 単一障害点6。**単一障害点では落とさない**（分かっていることは壊れていることではない）。落とすのは代替を名乗って確かめられないときと、どの事業者も使っていない実験があるとき。残る弱さ: **実際にその事業者を落として試したことは無い。**確かめているのはこちら側の受け方だけ",
+      "note": "2026-08-22。台帳の「代替がある」を**実際に動かして確かめる**ようにした。6つの実験（API到達不能で走らない / 副系の実在 / モデル縮退と全滅 / egress縮退 / 遮断器と死信 / 端末Outbox）を判定関数とファイルの実在で毎回通す。**代替と縮退を分けて数える** — 混ぜると resilience を過大に見積もる。Resendが落ちてもメールは送れない（代替なし）が、失われず後で戻せる（縮退あり）。この作業で台帳の4件を代替から降格した（回避策・停止・欠測は代替ではない）。現状: 代替2 / 縮退のみ2 / 単一障害点6。**単一障害点では落とさない**（分かっていることは壊れていることではない）。落とすのは代替を名乗って確かめられないときと、どの事業者も使っていない実験があるとき。残る弱さ: **実際にその事業者を落として試したことは無い。**確かめているのはこちら側の受け方だけ\n\n**[2026-08-25 訂正]** **検査そのものは実在する**（`check-degradation.mjs` ほか）。訂正したのは**受け皿の側** — Resend の縮退として数えていた遮断器と死信が存在しないので、**Resend は縮退の無い単一障害点**になった。\n\n落とした証跡: ../simplememo-api/src/circuit-breaker.ts",
       "since": "2026-08"
     },
     {

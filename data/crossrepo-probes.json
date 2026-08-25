@@ -12,37 +12,15 @@
     "どちらもやらないために、写しで判定して写しだと出力に書く。",
     "",
     "写しの寿命は 60日。**古い写しは、無い検査と同じ。**",
-    "ファイルが消えていないことを継続的に見張るのは隣のCIの仕事で、ここではない。"
+    "ファイルが消えていないことを継続的に見張るのは隣のCIの仕事で、ここではない。",
+    "",
+    "**この写しには書き手が2人いる。**`probes` はここ（縮退の受け皿）、",
+    "`evidence` は `scripts/crossrepo.mjs`（台帳が隣を指した証跡）。",
+    "**どちらの --sync も、相手の節を消さずに書く。**"
   ],
-  "synced_at": "2026-08-24",
+  "synced_at": "2026-08-25",
   "max_age_days": 60,
   "probes": {
-    "circuit_breaker": {
-      "repo": "simplememo-api",
-      "need": "all",
-      "label": "遮断器 + 死信 + 保管",
-      "files": [
-        {
-          "path": "src/circuit-breaker.ts",
-          "exists": true,
-          "bytes": 6464,
-          "sha256_12": "7bad4d02d542"
-        },
-        {
-          "path": "src/dlq.ts",
-          "exists": true,
-          "bytes": 7715,
-          "sha256_12": "71ee17d48e83"
-        },
-        {
-          "path": "migrations/0018_email_dead_letters.sql",
-          "exists": true,
-          "bytes": 1139,
-          "sha256_12": "8b4c107302f5"
-        }
-      ],
-      "present": 3
-    },
     "device_outbox": {
       "repo": "simplememo-ios",
       "need": "any",
@@ -60,6 +38,278 @@
         }
       ],
       "present": 1
+    }
+  },
+  "evidence": {
+    "../simplememo-api/.github/workflows/ci.yml": {
+      "exists": true,
+      "bytes": 1057,
+      "sha256_12": "fd79e8c657ce"
+    },
+    "../simplememo-api/CLAUDE.md": {
+      "exists": true,
+      "bytes": 2328,
+      "sha256_12": "8027d7ca9831"
+    },
+    "../simplememo-api/data/data-retention.json": {
+      "exists": true,
+      "bytes": 12799,
+      "sha256_12": "b51c112ca8f8"
+    },
+    "../simplememo-api/docs/analytics-golden.md": {
+      "exists": true,
+      "bytes": 5277,
+      "sha256_12": "dd1c5863ad61"
+    },
+    "../simplememo-api/docs/launch_health.md": {
+      "exists": true,
+      "bytes": 4203,
+      "sha256_12": "0549a6420be8"
+    },
+    "../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md": {
+      "exists": true,
+      "bytes": 19481,
+      "sha256_12": "8b3a8dd5122a"
+    },
+    "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md": {
+      "exists": true,
+      "bytes": 22664,
+      "sha256_12": "62813e71d020"
+    },
+    "../simplememo-api/scripts/analytics-launch-health.sh": {
+      "exists": true,
+      "bytes": 2897,
+      "sha256_12": "81a27aedbadb"
+    },
+    "../simplememo-api/src/analytics.ts": {
+      "exists": true,
+      "bytes": 407107,
+      "sha256_12": "8c8dc575c9b2"
+    },
+    "../simplememo-api/src/autopilot-report.ts": {
+      "exists": true,
+      "bytes": 23685,
+      "sha256_12": "6e325b38abc5"
+    },
+    "../simplememo-api/src/config.ts": {
+      "exists": true,
+      "bytes": 7291,
+      "sha256_12": "7268c16f08f9"
+    },
+    "../simplememo-api/src/flags.ts": {
+      "exists": true,
+      "bytes": 15951,
+      "sha256_12": "b3c0d90fcb06"
+    },
+    "../simplememo-api/src/index.ts": {
+      "exists": true,
+      "bytes": 115327,
+      "sha256_12": "ef7d42bd6932"
+    },
+    "../simplememo-api/src/lifecycle.ts": {
+      "exists": true,
+      "bytes": 28176,
+      "sha256_12": "2637274f4bb5"
+    },
+    "../simplememo-api/src/nudge.ts": {
+      "exists": true,
+      "bytes": 19714,
+      "sha256_12": "8ea8dfc6e0c5"
+    },
+    "../simplememo-api/src/reminder.ts": {
+      "exists": true,
+      "bytes": 45187,
+      "sha256_12": "05c4de84c921"
+    },
+    "../simplememo-api/src/resend.ts": {
+      "exists": true,
+      "bytes": 16948,
+      "sha256_12": "4b0819a8897a"
+    },
+    "../simplememo-api/src/rollout-guard.ts": {
+      "exists": true,
+      "bytes": 19398,
+      "sha256_12": "bec9bbaa6b2a"
+    },
+    "../simplememo-api/test/analytics-retention.test.ts": {
+      "exists": true,
+      "bytes": 4161,
+      "sha256_12": "1add892e8466"
+    },
+    "../simplememo-api/test/data-retention.test.ts": {
+      "exists": true,
+      "bytes": 7073,
+      "sha256_12": "d0ac5625cad3"
+    },
+    "../simplememo-api/test/ops-alerts.test.ts": {
+      "exists": true,
+      "bytes": 3727,
+      "sha256_12": "9599b5b35e7d"
+    },
+    "../simplememo-api/test/rollout-guard.test.ts": {
+      "exists": true,
+      "bytes": 7894,
+      "sha256_12": "77c154d4e129"
+    },
+    "../simplememo-ios/.github/workflows/asc-metrics.yml": {
+      "exists": true,
+      "bytes": 3832,
+      "sha256_12": "6372bb518f13"
+    },
+    "../simplememo-ios/.github/workflows/claude.yml": {
+      "exists": true,
+      "bytes": 5249,
+      "sha256_12": "c379f1e31393"
+    },
+    "../simplememo-ios/.github/workflows/qa-ios.yml": {
+      "exists": true,
+      "bytes": 10509,
+      "sha256_12": "6f4720aec5fe"
+    },
+    "../simplememo-ios/.github/workflows/qa-static.yml": {
+      "exists": true,
+      "bytes": 8773,
+      "sha256_12": "581a6a31721f"
+    },
+    "../simplememo-ios/.github/workflows/release-command.yml": {
+      "exists": true,
+      "bytes": 9874,
+      "sha256_12": "9b5c712ddb8a"
+    },
+    "../simplememo-ios/.github/workflows/submit-review.yml": {
+      "exists": true,
+      "bytes": 695,
+      "sha256_12": "686d90464151"
+    },
+    "../simplememo-ios/CLAUDE.md": {
+      "exists": true,
+      "bytes": 2390,
+      "sha256_12": "c148f1ea559f"
+    },
+    "../simplememo-ios/SimpleMemo/FeatureFlagRollout.swift": {
+      "exists": true,
+      "bytes": 10366,
+      "sha256_12": "05f10be4a3e5"
+    },
+    "../simplememo-ios/SimpleMemo/FeatureFlags.swift": {
+      "exists": true,
+      "bytes": 26753,
+      "sha256_12": "ccd2dbd1e784"
+    },
+    "../simplememo-ios/SimpleMemo/OutboxManager.swift": {
+      "exists": true,
+      "bytes": 15368,
+      "sha256_12": "5638900d7037"
+    },
+    "../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy": {
+      "exists": true,
+      "bytes": 4244,
+      "sha256_12": "95350e8e8f9d"
+    },
+    "../simplememo-ios/SimpleMemoTests/FeatureFlagRolloutTests.swift": {
+      "exists": true,
+      "bytes": 25214,
+      "sha256_12": "8ddf2feedea8"
+    },
+    "../simplememo-ios/data/appstore/asc-metrics.json": {
+      "exists": true,
+      "bytes": 9560,
+      "sha256_12": "d198697b260b"
+    },
+    "../simplememo-ios/docs/VISION.md": {
+      "exists": true,
+      "bytes": 16157,
+      "sha256_12": "b03dfca4dbe8"
+    },
+    "../simplememo-ios/docs/feature-flag-client-spec.md": {
+      "exists": true,
+      "bytes": 14172,
+      "sha256_12": "53a01f297ff3"
+    },
+    "../simplememo-ios/docs/obsidian-only-mode-design.md": {
+      "exists": true,
+      "bytes": 44095,
+      "sha256_12": "c5c9515fc7b4"
+    },
+    "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md": {
+      "exists": true,
+      "bytes": 7182,
+      "sha256_12": "694c05822c41"
+    },
+    "../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md": {
+      "exists": true,
+      "bytes": 2954,
+      "sha256_12": "426873f2c0af"
+    },
+    "../simplememo-ios/docs/release-automation.md": {
+      "exists": true,
+      "bytes": 34050,
+      "sha256_12": "07dc5cdcc3a0"
+    },
+    "../simplememo-ios/docs/reports/APPLE_ADS_AUTOMATION_2026-08-17.md": {
+      "exists": true,
+      "bytes": 41079,
+      "sha256_12": "3cc8ed0f9ff6"
+    },
+    "../simplememo-ios/docs/reports/ONBOARDING_REDESIGN_2026-08-06.md": {
+      "exists": true,
+      "bytes": 56481,
+      "sha256_12": "d704db25d617"
+    },
+    "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md": {
+      "exists": true,
+      "bytes": 10123,
+      "sha256_12": "ada4bc9e23aa"
+    },
+    "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md": {
+      "exists": true,
+      "bytes": 11509,
+      "sha256_12": "76217c227468"
+    },
+    "../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md": {
+      "exists": true,
+      "bytes": 9417,
+      "sha256_12": "677e655d9920"
+    },
+    "../simplememo-ios/fastlane/Fastfile": {
+      "exists": true,
+      "bytes": 2233,
+      "sha256_12": "e77b99096fc9"
+    },
+    "../simplememo-ios/release_notes/ja-JP/5.8.1.txt": {
+      "exists": true,
+      "bytes": 615,
+      "sha256_12": "32a60365cc10"
+    },
+    "../simplememo-ios/scripts/asc_metrics.rb": {
+      "exists": true,
+      "bytes": 18702,
+      "sha256_12": "cb73a02498d7"
+    },
+    "../simplememo-ios/scripts/lib/app_metadata.rb": {
+      "exists": true,
+      "bytes": 22869,
+      "sha256_12": "bdad2a173854"
+    },
+    "../simplememo-ios/scripts/prepare_app_store_version.rb": {
+      "exists": true,
+      "bytes": 22730,
+      "sha256_12": "c6c954452893"
+    },
+    "../simplememo-ios/scripts/qa/ai_triage.sh": {
+      "exists": true,
+      "bytes": 9722,
+      "sha256_12": "bc8b8939e8af"
+    },
+    "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh": {
+      "exists": true,
+      "bytes": 4476,
+      "sha256_12": "922c4c6e9332"
+    },
+    "../simplememo-ios/scripts/qa/check_analytics_allowlist.py": {
+      "exists": true,
+      "bytes": 8958,
+      "sha256_12": "c7a019d2caec"
     }
   }
 }

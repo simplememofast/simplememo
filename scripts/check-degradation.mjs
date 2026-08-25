@@ -135,14 +135,16 @@ export function crossRepo(id, repo, files, opts = {}) {
   };
 }
 
-/** 写しに載せる交差検査の定義。**probe と同じ場所から引く。** */
+/**
+ * 写しに載せる交差検査の定義。**probe と同じ場所から引く。**
+ *
+ * **[2026-08-25] `circuit_breaker` を削除した。**遮断器・死信・保管テーブルは
+ * 隣のリポジトリの**git履歴に一度も存在しなかった**（作業ツリーにだけあった状態で
+ * 台帳に書かれ、そのまま失われたと見られる）。写しには「3件とも在る」と
+ * 記録されていたので、**この実験は在りもしないものを確かめて緑を返していた。**
+ * Resend は代替も縮退も無い単一障害点へ戻した（`vendor-register.json`）。
+ */
 export const CROSS_REPO = {
-  circuit_breaker: {
-    repo: 'simplememo-api',
-    need: 'all',
-    label: '遮断器 + 死信 + 保管',
-    files: ['src/circuit-breaker.ts', 'src/dlq.ts', 'migrations/0018_email_dead_letters.sql'],
-  },
   device_outbox: {
     repo: 'simplememo-ios',
     need: 'any',
@@ -193,12 +195,6 @@ export const PROBES = {
       detail: `egressBlocked:true → ${r.code}（run=${r.run}・走るが選べるレーンが減る）`,
     };
   },
-  /**
-   * メール送信は回路遮断器と死信で受ける（送信先が落ちても呼び続けない）。
-   * 受け皿は simplememo-api にあるので、隣が無いCIでは写しで判定する。
-   */
-  circuit_breaker: () => crossRepo('circuit_breaker', CROSS_REPO.circuit_breaker.repo,
-    CROSS_REPO.circuit_breaker.files, CROSS_REPO.circuit_breaker),
   /**
    * 端末側 Outbox が貯めて復旧後に再送する。
    * 受け皿は simplememo-ios にあるので、隣が無いCIでは写しで判定する。
@@ -316,11 +312,19 @@ export function sync(today = new Date()) {
       '',
       `写しの寿命は ${SNAPSHOT_MAX_DAYS}日。**古い写しは、無い検査と同じ。**`,
       'ファイルが消えていないことを継続的に見張るのは隣のCIの仕事で、ここではない。',
+      '',
+      '**この写しには書き手が2人いる。**`probes` はここ（縮退の受け皿）、',
+      '`evidence` は `scripts/crossrepo.mjs`（台帳が隣を指した証跡）。',
+      '**どちらの --sync も、相手の節を消さずに書く。**',
     ],
     synced_at: today.toISOString().slice(0, 10),
     max_age_days: SNAPSHOT_MAX_DAYS,
     probes,
   };
+  // 相手の節を落とさない（--sync を片方だけ回したときに、もう片方の検査が
+  // 「写しに無い」で落ちるのを防ぐ）。
+  const prev = readSnapshot();
+  if (prev?.evidence) doc.evidence = prev.evidence;
   fs.writeFileSync(SNAPSHOT, `${JSON.stringify(doc, null, 2)}\n`);
   return { ok: true, doc };
 }

@@ -208,6 +208,18 @@ if (isMain) {
       console.error(`\n書き込まない: ${r.missing_repos.join(', ')} が無い。**部分的な計測を台帳にしない。**`);
       process.exit(1);
     }
+    // 浅いクローンでは窓の前半のコミットが存在せず、**少ない母数で高い率が出る。**
+    // 「リポジトリが無い」と同じ理由で書かない（部分的な計測を台帳にしない）。
+    // autonomy-timeline.mjs --rebuild が 2026-08-25 に同じ形で系列を潰した。
+    const shallow = ['.', '../simplememo-api', '../simplememo-ios']
+      .filter((p) => fs.existsSync(path.join(ROOT, p, '.git/shallow')))
+      .map((p) => (p === '.' ? 'simplememo' : p.replace('../', '')));
+    if (shallow.length) {
+      console.error(`\n書き込まない: 浅いクローン（${shallow.join(', ')}）。`
+        + '\n  窓の前半が履歴に無いまま数えると、**母数が減って率だけ上がる。**'
+        + '\n  `git fetch --unshallow` してから実行すること。');
+      process.exit(1);
+    }
     const doc = {
       $comment: [
         'コード変更のAI著者率。**この script の出力そのもの。**手で書き換えない。',

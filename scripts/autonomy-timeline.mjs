@@ -183,7 +183,36 @@ export function toSvg(doc) {
   return o.join('\n');
 }
 
+/**
+ * 浅いクローンでは再計算できない。**黙って短い系列を出すほうが危ない。**
+ *
+ * この系列は「証跡ファイルが最初にコミットされた月」を稼働開始月とみなして
+ * 遡る。`git clone --depth` された場所では、その月が**クローン境界まで
+ * 繰り上がる。**2026-08-25 に実際に起きた: 3リポジトリとも浅いセッションで
+ * `--rebuild` を回したところ、**7点の系列が2点に潰れ**、ローンチ月からの
+ * 推移がまるごと消えた（しかも「日付が取れなかったタスク 0件」と表示された
+ * ので、成功したように見えた）。
+ *
+ * 落とすほうを選ぶ。**短くなった系列は、間違っていることが見た目で分からない。**
+ */
+export function shallowRepos() {
+  return ['.', '../simplememo-api', '../simplememo-ios']
+    .filter((r) => fs.existsSync(path.join(ROOT, r)))
+    .filter((r) => fs.existsSync(path.join(ROOT, r, '.git/shallow')))
+    .map((r) => (r === '.' ? 'simplememo' : r.replace('../', '')));
+}
+
 export function rebuild() {
+  const shallow = shallowRepos();
+  if (shallow.length) {
+    throw new Error(
+      `浅いクローンでは再計算しない: ${shallow.join(', ')}\n`
+      + '  証跡の初出月がクローン境界まで繰り上がり、**過去の月がまるごと消える。**\n'
+      + '  完全な履歴のある場所で `git fetch --unshallow` してから実行すること。\n'
+      + '  終点（実測）だけを直したい場合は、この系列ではなく automation-rate.mjs の\n'
+      + '  現在値に合わせて points の最後の1点を更新する。',
+    );
+  }
   const doc = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
   const defined = doc.tasks.filter((t) => t.executor !== 'intentional_no').length;
   const dated = [];
@@ -250,7 +279,13 @@ if (isMain) {
   const argv = process.argv.slice(2);
 
   if (argv.includes('--rebuild')) {
-    const r = rebuild();
+    let r;
+    try {
+      r = rebuild();
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
     const doc = JSON.parse(fs.readFileSync(TIMELINE_PATH, 'utf8'));
     doc.denominator_tasks = r.defined;
     doc.points = r.points;

@@ -110,7 +110,14 @@ if (isMain) {
   console.log(`    所見は追記のみ              ${findings.next_seq === findings.findings.length + 1 ? 'OK' : 'NG'}`);
   console.log(`    監査AIに直す権限を渡さない  ${charter.independence.may_modify_anything ? 'NG' : 'OK'}`);
   console.log(`\n  実施: ${charter.cadence.last_run_at ?? '**まだ一度も走らせていない**（憲章と独立の担保ができただけ）'}`);
-  console.log('  所見ゼロは「問題なし」ではなく「まだ見ていない」。');
+  // 所見が在るのに「まだ見ていない」と出すと、**在る所見のほうが軽く見える。**
+  if (!findings.findings.length) {
+    console.log('  所見ゼロは「問題なし」ではなく「まだ見ていない」。');
+  } else {
+    const open = findings.findings.filter((f) => !f.resolution).length;
+    console.log(`  所見 ${findings.findings.length}件（未対応 ${open}件）。`
+      + '**定期監査が見つけたものとは限らない** — found_by を見ること。');
+  }
 
   if (problems.length) {
     console.error('\n独立監査: 独立が担保できていない');

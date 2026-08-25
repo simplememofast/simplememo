@@ -110,12 +110,12 @@
       "id": "app_crash",
       "domain": "アプリのクラッシュ",
       "watches": "起動完走率（launch_incomplete）の**前段ステージ**と、比率の前週比",
-      "detection": "automatic",
-      "detector": "../simplememo-api/src/launch-health-monitor.ts",
-      "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）＋段階公開中はガードが別途見る",
-      "on_detect": "日報に1行。前段ステージが**1件でも出たら分母を問わず劣化**として出す",
+      "detection": "derived",
+      "detector": "../simplememo-api/scripts/analytics-launch-health.sh",
+      "cadence": "人が叩いたとき（段階公開中はカナリアガードが別途見る）",
+      "on_detect": "読み方は docs/launch_health.md。**気づくのは人が叩いたとき。**叩かなければ気づかない",
       "covers_failure_class": [],
-      "note": "2026-08-22。**指標も読み方の文書も既にあり、無かったのは毎日それを見る仕組み**だった（POSTを叩いた日にしか読まれていなかった）。段階公開中だけガードが見る状態から、常時監視にした。**比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常に使った後でOSがkillしただけでも launch_incomplete が出る（scene_did_become_active は恒常的に最多バケットで、実害の証拠にならない）。判定は docs/launch_health.md の読み方をそのまま機械にした: **前段ステージ（launch_begin / did_finish_launching_enter / scene_will_connect）が1件でも出たら実クラッシュを疑う**。比率は水準ではなく前週比の跳ねだけに使う。残る弱さ: **クラッシュそのものは見ていない**（launch_incomplete は起動が完走しなかったことの記録で、Xcode Organizer のクラッシュログとは別物）",
+      "note": "2026-08-22。**指標も読み方の文書も既にあり、無かったのは毎日それを見る仕組み**だった（POSTを叩いた日にしか読まれていなかった）。段階公開中だけガードが見る状態から、常時監視にした。**比率をそのまま閾値にしない** — iOSは毎フォアグラウンド復帰で breadcrumb を上書きするので、正常に使った後でOSがkillしただけでも launch_incomplete が出る（scene_did_become_active は恒常的に最多バケットで、実害の証拠にならない）。判定は docs/launch_health.md の読み方をそのまま機械にした: **前段ステージ（launch_begin / did_finish_launching_enter / scene_will_connect）が1件でも出たら実クラッシュを疑う**。比率は水準ではなく前週比の跳ねだけに使う。残る弱さ: **クラッシュそのものは見ていない**（launch_incomplete は起動が完走しなかったことの記録で、Xcode Organizer のクラッシュログとは別物）\n\n**[2026-08-25 訂正]** **常時監視は存在しなかった。**`launch-health-monitor.ts` は隣のgit履歴に一度も無い。実在するのは指標（`analytics.ts` の launch_incomplete）・読み方の文書・**人が叩くスクリプト**（`analytics-launch-health.sh`）までで、**日報には載っていない。**つまり「段階公開中だけガードが見る」状態は解消されておらず、**平常時に起動が壊れても気づく経路は今も無い。**automatic → derived。",
       "coverage_kind": "direct"
     },
     {
@@ -134,11 +134,11 @@
       "domain": "Apple Watch アプリ",
       "watches": "install単位の同期失敗率（毎時）／ watch_sync_push_failed・push_recovered・stuck・manual_repair の直近24h件数（日報）",
       "detection": "automatic",
-      "detector": "../simplememo-api/src/analytics.ts / ../simplememo-api/src/watch-health.ts",
+      "detector": "../simplememo-api/src/analytics.ts",
       "cadence": "毎時 cron（ops_alerts）＋ 毎日 10:00 JST（日報に同梱）",
       "on_detect": "毎時: 失敗した install の割合が閾値超でアラート。日報: 1行。手動修復が1件でもあれば「劣化」。分母不足のときは**判定不能**と書く",
       "covers_failure_class": [],
-      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。\n\n**検知器は2つある。**片方だけでは足りないことが分かったため。\n\n- **毎時（ops_alerts）は install 単位で見る。** 件数で見ると3秒間隔でリトライする1台が群全体を動かす —— 2026-08-15..19 の実測で **7 install が 712 件**を出していた。つまり件数ベースの閾値は、1台の不調を全体の障害に見せる\n- **日報は24h窓の件数と手動修復を見る。**母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。ただし「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている\n\n残る弱さ: **Watchアプリの起動失敗・クラッシュ・UI・課金表示は見ていない**（見ているのは同期だけ）",
+      "note": "2026-08-22。**計測イベントは2026-07から流れていたのに、誰も見ていなかった** — 足りなかったのは計測ではなく検知器。v4.9.16 の watch_sync_stuck 自体が「同期が進まない」という問い合わせ（4往復）から生まれている。\n\n**検知器は2つある。**片方だけでは足りないことが分かったため。\n\n- **毎時（ops_alerts）は install 単位で見る。** 件数で見ると3秒間隔でリトライする1台が群全体を動かす —— 2026-08-15..19 の実測で **7 install が 712 件**を出していた。つまり件数ベースの閾値は、1台の不調を全体の障害に見せる\n- **日報は24h窓の件数と手動修復を見る。**母数が小さい領域なので、**分母が20件未満のときは正常とも異常とも言わない**（毎日「異常」が出る検知器は、そのうち誰も開かなくなる）。ただし「同期をやり直す」が押された場合だけは分母を問わず劣化にする — 押した人は既に困っている\n\n残る弱さ: **Watchアプリの起動失敗・クラッシュ・UI・課金表示は見ていない**（見ているのは同期だけ）\n\n**[2026-08-25 訂正]** **毎時（ops_alerts）は実在する** — `watchSyncAlertResult` が install 単位で失敗率を見る（件数で見ると3秒間隔でリトライする1台が群全体を動かすため）。**日報側の検知器（`watch-health.ts`）は存在しない**ので、24h窓の件数・手動修復・滞留は誰も見ていない。",
       "coverage_kind": "direct"
     },
     {
@@ -156,12 +156,11 @@
       "id": "support",
       "domain": "問い合わせ",
       "watches": "未応答の問い合わせの件数・人の対応が要る件数・分類できなかった件数・最古の滞留時間",
-      "detection": "automatic",
-      "detector": "../simplememo-api/src/inquiry.ts",
+      "detection": "none",
       "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
       "on_detect": "日報に1行。**人の対応が要る件数は強調**。返信そのものは人（返信の自動化は未実装）",
       "covers_failure_class": [],
-      "note": "2026-08-22。受け口（/v1/inquiry）と分類は実装済みだったが、**来たことに気づく経路が無かった** — 受け口があることと、来たと知ることは別。日報に滞留を1行載せる形で埋めた。**本文は載せない**（日報はメールで、メールは残る）。DBが読めなかった場合は 0件 ではなく「集計できず」と書く — ここを混ぜると監視の穴が「異常なし」に見える。残る弱さ: **返信が自動化されていないので CSAT は発火しない**。INQUIRY_ENABLED が false の間は受け口ごと 503 を返す",
+      "note": "2026-08-22。受け口（/v1/inquiry）と分類は実装済みだったが、**来たことに気づく経路が無かった** — 受け口があることと、来たと知ることは別。日報に滞留を1行載せる形で埋めた。**本文は載せない**（日報はメールで、メールは残る）。DBが読めなかった場合は 0件 ではなく「集計できず」と書く — ここを混ぜると監視の穴が「異常なし」に見える。残る弱さ: **返信が自動化されていないので CSAT は発火しない**。INQUIRY_ENABLED が false の間は受け口ごと 503 を返す\n\n**[2026-08-25 訂正]** **受け口ごと存在しない。**`/v1/inquiry` も `inquiry.ts` も隣のgit履歴に無い。問い合わせは現在も mailto のみで、**来たことに気づく経路が無い。**2026-08-22に「埋めた」と書いていたのは誤りだった。",
       "coverage_kind": "direct"
     },
     {
@@ -182,25 +181,23 @@
       "id": "admin_access",
       "domain": "管理画面への不正アクセス",
       "watches": "/admin/* の認証失敗の件数と経路（直近24h）",
-      "detection": "automatic",
-      "detector": "../simplememo-api/src/access-log.ts",
+      "detection": "none",
       "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
       "on_detect": "日報に1行。拒否0のときもそう書く（無音と区別する）",
       "covers_failure_class": [],
       "coverage_kind": "direct",
-      "note": "2026-08-22。記録は同日に作ったが、**その記録を読むコードが無かった** — 記録しただけの監査ログは監査ではない。書き込み専用テーブルの検査で自分の作った穴として出た"
+      "note": "2026-08-22。記録は同日に作ったが、**その記録を読むコードが無かった** — 記録しただけの監査ログは監査ではない。書き込み専用テーブルの検査で自分の作った穴として出た\n\n**[2026-08-25 訂正]** **記録そのものが存在しない。**`access-log.ts` もマイグレーションも隣のgit履歴に無い。`/admin/*` は実在するので、**一番強い権限の操作が記録の外にある**状態が続いている。"
     },
     {
       "id": "email_dead_letter",
       "domain": "メール送信の死信",
       "watches": "直近24hに落ちた送信の件数・種別・再送可否",
-      "detection": "automatic",
-      "detector": "../simplememo-api/src/dlq.ts",
+      "detection": "none",
       "cadence": "毎日 10:00 JST（autopilot_report の日報に同梱）",
       "on_detect": "日報に1行。**再送が手動であることも毎回書く**（記録があることと戻せることは別）",
       "covers_failure_class": [],
       "coverage_kind": "direct",
-      "note": "2026-08-22。遮断器と死信は同日に作ったが、**死信を読むコードが1つも無かった。**「失われず後で戻せる」と書いていたのは、記録があることと戻せることの混同だった"
+      "note": "2026-08-22。遮断器と死信は同日に作ったが、**死信を読むコードが1つも無かった。**「失われず後で戻せる」と書いていたのは、記録があることと戻せることの混同だった\n\n**[2026-08-25 訂正]** **死信の仕組み自体が存在しない。**`dlq.ts` もテーブルも隣のgit履歴に無い。落ちた送信は記録されないので、読む対象も無い。"
     }
   ],
   "$coverage_kind": "indirect = 症状（出荷が無い等）で気づく。原因までは分からないので切り分けは人が行う"

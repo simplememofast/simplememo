@@ -30,6 +30,9 @@ export function audit(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)) }
     // 検知器があると書いたなら、そのファイルが実在すること。
     if (s.detection === 'automatic' || s.detection === 'derived') {
       if (!s.detector) errors.push(`${s.id}: ${s.detection} なのに detector が空`);
+      // 隣を指した検知器は `scripts/crossrepo.mjs` が見る（ここで素通りさせて
+      // いたため、**検知器のファイルが無いまま automatic と書かれた系統が4つ**
+      // 残っていた。2026-08-25 に発見）。**ここへ戻さないこと。**
       else if (!s.detector.startsWith('..') && !exists(s.detector)) {
         errors.push(`${s.id}: detector が実在しない: ${s.detector}`);
       }
