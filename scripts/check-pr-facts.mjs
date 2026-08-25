@@ -79,6 +79,20 @@ const NEGATIONS_EN = [
 /** 起動時間の実測値（data/benchmark.json が正）。 */
 const READY = BENCHMARK.apps?.[CONSTANTS.appNameEn]?.ready;
 
+/** 監査の実績（data/audit-charter.json が正）。 */
+const AUDIT_RAN = (() => {
+  try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'data/audit-charter.json'), 'utf8')).cadence?.last_run_at ?? null; }
+  catch { return null; }
+})();
+
+/** 未充足の自律条件の数（data/autonomy-conditions.json が正）。 */
+const NOT_MET = (() => {
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/autonomy-conditions.json'), 'utf8'));
+    return (d.conditions ?? []).filter((c) => c.status === 'not_met').length;
+  } catch { return null; }
+})();
+
 const RULES = [
   {
     id: 'old-app-name',
@@ -138,6 +152,38 @@ const RULES = [
     check: (m) => m[1] !== CONSTANTS.freeSendsPerDay,
     message: (m) => `無料枠が「1日${m[1]}通」。正は ${CONSTANTS.freeSendsPerDay}通（data/site-constants.json）`,
   },
+  {
+    id: 'stale-audit-never-ran',
+    // 【2026-08-25】原稿が「週次監査はまだ一度も走っていない」と正直に書いていた。
+    // **その正直さが、走った瞬間に古い事実になる。**
+    // 原稿の主張（走っていない）と台帳（cadence.last_run_at）を突き合わせる。
+    // 数字の鮮度は見ていたが、**「まだやっていない」という自己申告の鮮度**は
+    // 誰も見ていなかった。取り下げ忘れは、誇張と逆向きの不正確さになる。
+    // 「まだ／一度も」を要求する。**過去形の語りは落とさない** ——
+    // 「しばらく走っていませんでした」は走ったあとでも正しい文で、
+    // ここで落とすと**正しい記述を消す**方向に圧力がかかる。
+    // 見たいのは「いまも走っていない」という現在の自己申告のほう。
+    // **段落で見る。**原稿は40字ほどで折り返すので、「週次監査は」と
+    // 「まだ一度も走っていません」が別の行に落ちる。行単位で見ていると
+    // **改行1つで検査をすり抜ける** —— 実際 L888 がそれで素通りしていた。
+    scope: 'paragraph',
+    subject: /監査/,
+    pattern: /(?:まだ|一度も)[^。\n]{0,16}?(?:走って|実施して)(?:いない|いません|おらず|いま(?!せんでした))/g,
+    check: () => AUDIT_RAN !== null,
+    message: () => `「監査はまだ走っていない」と書いてあるが、台帳では ${AUDIT_RAN} に実施済み`
+      + '（data/audit-charter.json の cadence.last_run_at が正）。'
+      + '**やっていないと書いたまま、やってしまっている。**',
+  },
+  {
+    id: 'stale-not-met-count',
+    // 「残るN条件が未充足」の N を、条件台帳の not_met の数に当てる。
+    // 条件が1つ partial へ上がると、この文は静かに古くなる。
+    pattern: /残る\s*([0-9０-９]+)\s*条件/g,
+    check: (m) => NOT_MET !== null
+      && Number(String(m[1]).replace(/[０-９]/g, (c) => '０１２３４５６７８９'.indexOf(c))) !== NOT_MET,
+    message: (m) => `「残る${m[1]}条件」と書いてあるが、台帳の not_met は ${NOT_MET}件`
+      + '（data/autonomy-conditions.json が正。**段階は導出であって宣言ではない**）',
+  },
 ];
 
 const hasNegation = (s) => NEGATIONS.some((n) => s.includes(n))
@@ -147,6 +193,24 @@ const hasNegation = (s) => NEGATIONS.some((n) => s.includes(n))
 export function readMode(text) {
   const m = /<!--\s*fact-check:\s*(draft|internal|archived)\s*-->/.exec(text);
   return m ? m[1] : null;
+}
+
+/**
+ * 空行で区切った段落を、開始行つきで返す。見出し行は段落に含めない。
+ *
+ * **行単位だけで見ていると、改行1つで検査をすり抜ける。**原稿は40字ほどで
+ * 折り返すので、主語と述語がふつうに別の行へ落ちる（2026-08-25、
+ * 「週次監査は／まだ一度も走っていません」がこれで素通りしていた）。
+ */
+export function paragraphs(lines) {
+  const out = [];
+  let cur = null;
+  lines.forEach((line, i) => {
+    if (!line.trim() || /^#{1,6}\s/.test(line)) { cur = null; return; }
+    if (!cur) { cur = { start: i + 1, lines: [] }; out.push(cur); }
+    cur.lines.push(line);
+  });
+  return out.map((p) => ({ start: p.start, text: p.lines.join(' ') }));
 }
 
 export function checkText(text) {
@@ -162,6 +226,7 @@ export function checkText(text) {
     if (hasNegation(line)) return;
 
     for (const rule of RULES) {
+      if (rule.scope === 'paragraph') continue;
       rule.pattern.lastIndex = 0;
       let m;
       while ((m = rule.pattern.exec(line)) !== null) {
@@ -170,6 +235,30 @@ export function checkText(text) {
       }
     }
   });
+
+  // 段落スコープの規則。**主語が段落内にあることを要求する**ので、
+  // 行をまたいでも拾えるかわりに、無関係な主語（カナリア等）には当たらない。
+  for (const para of paragraphs(lines)) {
+    for (const rule of RULES) {
+      if (rule.scope !== 'paragraph') continue;
+      // 主語は段落全体で見る（行をまたいで書かれるため）。
+      if (rule.subject && !rule.subject.test(para.text)) continue;
+      // **打ち消しは文単位で見る。**段落まるごとを対象にすると、
+      // 同じ段落のどこかに「〜ではありません」が1つあるだけで
+      // 段落全部が素通しになる（実際それでこの規則が黙った）。
+      // 打ち消しは「その主張を取り下げる」ためのもので、
+      // **隣の文の打ち消しは、この文の打ち消しではない。**
+      for (const sentence of para.text.split(/(?<=。)/)) {
+        if (!sentence.trim() || hasNegation(sentence)) continue;
+        rule.pattern.lastIndex = 0;
+        let m;
+        while ((m = rule.pattern.exec(sentence)) !== null) {
+          if (rule.check && !rule.check(m)) continue;
+          violations.push({ rule: rule.id, line: para.start, text: sentence.trim().slice(0, 100), message: rule.message(m) });
+        }
+      }
+    }
+  }
 
   // 現行のアプリ名が一度も出てこない配信原稿は、まず疑う（内部文書には求めない）
   const missingName = mode === 'draft'
