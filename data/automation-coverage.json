@@ -531,7 +531,7 @@
         "growth/scripts/ingest-asc.mjs",
         "growth/data/appstore/README.md"
       ],
-      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済みで **instance は 0/15・Apple の生成待ち**（5日を超えたら『故障』としてジョブが落ちる）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）",
+      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済み。**[2026-08-25] instance は 10/15 まで出ている**（08-23・08-24 の2日ぶん。asc_metrics.rb の reports_with_data）。**ただし取得側は1件も落とせていなかった** —— asc_analytics.rb の欠陥2件（schedule 実行で ASC_REPORTS が空文字になり取得対象が空／既定の語 \"Sales\" が156件のカタログに0件一致）で、**毎日0件を緑で出荷していた**（run 32844534637 の実ログ「取得対象 0 件（部分一致: ）」）。2026-08-25 に修正済みだが、**次回の定時実行までは依然として0件のまま。**この経路を ai_autonomous と数えているのは『日次で自動的に走ること』についてであって、『データが降りていること』についてではない（data/operating-memory.json om-2026-08-25-asc-zero）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）",
       "since": "2026-08"
     },
     {
@@ -1102,7 +1102,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**[2026-08-25 訂正] 「翌日以降に降りてくる」という見立ては誤りだった。**Apple 側は 08-23 から生成しており（App Store Purchases Standard に instance あり）、取れていなかったのは取得側の欠陥2件のため（data/operating-memory.json om-2026-08-25-asc-zero）。修正済みだが**次回の定時実行までは依然として照合できない。**広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1123,7 +1123,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる **[2026-08-25] 「ASCの売上が降りれば」の前提が違っていた** —— 降りない原因は Apple 側ではなく取得側の欠陥で、修正済み（om-2026-08-25-asc-zero）。"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1439,7 +1439,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。Analytics Reports の Subscription 系に解約理由が含まれる見込みだが、**まだ取得していないので確認できていない。**含まれなければアプリ内の導線が要る"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**[2026-08-25] Subscription 系のレポートが存在することは確認できた** —— App Store Subscription Event Report / State Report の Standard・Detailed 計4種がカタログにあり、うち Event Standard・State Standard・State Detailed の3種に instance が出ている（08-23・08-24）。**中身に解約理由が含まれるかは、まだ落とせていないので未確認。**取得側の欠陥2件を 2026-08-25 に修正した（om-2026-08-25-asc-zero）ので、次回の定時実行で分かる。含まれなければアプリ内の導線が要る"
     },
     {
       "area": "⑨ マネタイズ",

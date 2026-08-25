@@ -370,6 +370,33 @@
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
       "evidence": null
+    },
+    {
+      "id": "act-asc-analytics-landed",
+      "title": "ASC の課金レポートが実際に降りたことを確認する（取得側の欠陥2件を修正済み）",
+      "detail": "2026-08-25、asc_analytics.rb の欠陥2件を修正した。(1) schedule 実行で ASC_REPORTS が空文字になり取得対象が空になっていた（Ruby の \"\" は真なので既定に落ちない）。(2) 既定の語 \"Sales\" が Analytics のレポート名156件中0件に一致していた（売上に当たるのは App Store Purchases）。**どちらも workflow は緑で、status.json は「取得完了」と書いてコミットしていた。**Apple 側は 08-23 から生成済み（asc_metrics.rb が reports_with_data: 10/15 を報告）なので、次の定時実行（毎日 20:30 JST）で降りるはず。**「直した」と「降りた」は別のことなので、実測で閉じる。**降りたら ⑥売上・課金の照合、⑨解約理由分析、⑤AI費用に対する粗利 の前提が揃う。降りない場合は修正が不十分ということなので、その時点で再診断する。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "scripts/check-asc-landed.mjs",
+        "growth/scripts/ingest-asc.mjs"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "script_ok",
+        "params": {
+          "script": "scripts/check-asc-landed.mjs",
+          "args": []
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": null
     }
   ]
 }
