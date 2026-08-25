@@ -266,20 +266,41 @@
       "status": "suspended"
     },
     {
-      "domain": "ユーザーデータの削除要求への対応",
+      "domain": "ユーザーデータの削除（アプリ内の自己削除）",
+      "reversible": false,
+      "ai_may": [
+        "削除経路の実装と保守（data-retention.json を正として、カバレッジ検査に従う）"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "削除の実行 — **承認するのはアカウント本人**（設定画面での二段階確認）。運用側の承認は入らない"
+      ],
+      "gate": "アプリ内で本人が二段階確認（ActionSheet → Alert）したときだけ POST /v1/account/delete が走り、その場で完了する。運用側の承認を挟むことは App Store Guideline 5.1.1(v) が許さない。消し漏れは check-deletion-coverage.mjs が data-retention.json と実装の食い違いで落とす",
+      "evidence": [
+        "simplememo-ios/SimpleMemo/SettingsViewController.swift",
+        "simplememo-api/src/index.ts",
+        "simplememo-api/scripts/check-deletion-coverage.mjs"
+      ],
+      "status": "active",
+      "$note": "2026-08-25 に「ユーザーデータの削除要求への対応」を2つに分けたうちの片方。分割前は requires_approval: true / human_only: [実行の承認] とだけ書いており、**誰の承認かを言っていなかったため、運用側が承認する経路だと読めた。**実際はアカウント本人の二段階確認で、運用側は関与しない。**requires_approval を false にはしない** — 不可逆な領域を承認不要と書くと権限表の一番の存在理由が壊れる（check-authority.mjs の規則1）。承認は在る。主語が違うだけなので、主語を書いた"
+    },
+    {
+      "domain": "ユーザーデータの削除要求への対応（個別の連絡）",
       "reversible": false,
       "ai_may": [
         "受付の検知"
       ],
       "requires_approval": true,
       "human_only": [
+        "本人確認",
         "実行の承認"
       ],
-      "gate": "アカウント削除APIは実装済み。運用手順は未整備",
+      "gate": "アプリ内の経路を通らない依頼（問い合わせメール等）。**本人確認の手段がアプリ内経路と違う**ため承認が要る。運用手順は未整備",
       "evidence": [
         "simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md"
       ],
-      "status": "active"
+      "status": "active",
+      "$note": "2026-08-25 の分割のもう片方。分割前の記述はこちらの性質で書かれており、それが自己削除まで覆っていた"
     },
     {
       "domain": "個人情報事故・法的請求・重大障害・炎上",

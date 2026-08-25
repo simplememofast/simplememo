@@ -67,11 +67,11 @@
         "kind": "manual",
         "params": {}
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-22",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "closed_jst": "2026-08-25",
+      "evidence": "完了（2026-08-25・オーナーが権限を委譲したうえで実施。self_repair.must_not「権限表を自分で書き換えない」に対する明示の例外）。\n**分けただけでなく、分割前の記述が実態と逆だった点を直した。**\n【機械で検証】アプリ内の自己削除には二段階確認がある — SettingsViewController.swift の showDeleteAccountFinalConfirmation()（ActionSheet → Alert の2段）を通ってから performAccountDeletion() が走る。サーバ側 POST /v1/account/delete（simplememo-api/src/index.ts）は (deviceToken, toEmail) と KV の verified: だけで即時に実行し、運用側の承認は挟まない。\n【要点】分割前は requires_approval: true / human_only: [実行の承認] とだけ書いており、**誰の承認かを言っていなかったため運用側が承認する経路だと読めた。**実際の承認者はアカウント本人。\n【requires_approval を false にしなかった理由】check-authority.mjs の規則1「不可逆な領域は必ず承認制」に当たる。**承認は在る。主語が違うだけ**なので、規則を緩めず主語を書いた（規則を緩めるのは self_repair.must_not の「検証を弱める変更」）。\n【結果】17領域中13が稼働・12が承認制。check-authority.mjs --check 通過。"
     },
     {
       "id": "act-egress-policy-confirm",
@@ -88,11 +88,11 @@
         "kind": "manual",
         "params": {}
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-22",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "closed_jst": "2026-08-25",
+      "evidence": "完了（2026-08-25・オーナーが権限を委譲したうえで、構成を実測して判断）。\n【機械で確認】このセッションが載っている環境は env_01RmhZUdCQoTVYsGM6Ly45oP = **「Simple Memo」**。同じアカウントには別環境 **「Default」があり、その説明文は \"Default - trusted network access\"**。つまり**制限の緩い環境が存在していて、このプロジェクトはそれを選んでいない。**\n【機械で確認】遮断はエージェントプロキシの明示的なポリシー拒否として記録されている（`__agentproxy/status` の recentRelayFailures に `connect_rejected / gateway answered 403 to CONNECT (policy denial or upstream failure)` が obsidian.md・help.obsidian.md・www.notion.com・en.wikipedia.org 等で残っている）。**故障ではなく設定である**ことは、これで言える。\n【結論】egress 制限は構成によるもので、意図されたものと判断する。許可されている先（simplememofast.com / api.github.com / raw.githubusercontent.com / registry.npmjs.org）は運用に必要なものと一致しており、遮断されている先は一般Webの閲覧系。\n【この判断が示していないこと】どのホストを許すかの一覧そのものはここからは読めない。「意図した設定である」までは言えるが、「いまの一覧が最善である」は別の話。また**到達性はセッションごと・ツールごとに違う**（過去ログとの食い違いは残っている）。次に判断するときは、そのセッションで測り直すこと。"
     },
     {
       "id": "act-status-freshness-ci",
@@ -299,8 +299,8 @@
     },
     {
       "id": "act-gh-pat-scope-and-rotation",
-      "title": "GH_PAT: `workflow` scope を足すか決める（＋念のため回す）",
-      "detail": "**2つを1件にしてある。**どちらも同じ秘密の話で、片方をやるならもう片方はついで。\n\n【1. scope — 判断が要る】主系(GitHub Actions)は `.github/workflows/*` を含む push が\nGitHub 側で remote rejected される（\"refusing to allow a Personal Access Token to\ncreate or update workflow ... without `workflow` scope\"）。GH_PAT でも GITHUB_TOKEN でも同じ。\n一方 data/authority-matrix.json の self_repair.may_modify は obsidian-autopilot.yml を\nレーンFが直してよいファイルとして挙げている。**「直してよい」と「直せる」がずれており、\n主系は自分のワークフローの故障を最後まで直せない。**2026-08-25 はまさにそれで、\n原因特定まで済んだ修理（act-pin-claude-code-action）が適用できずに残った。\n**権限を広げる変更なのでAIからは行わない**（self_repair.must_not）。\n足さない判断も正当——その場合、ワークフローの修理は副系CCR経由と決めておけばよい。\n\n【2. 回転 — 念のため】2026-08-25 のセッション（run 32816234185）が、push 拒否の\n原因を調べる過程で `git remote -v` を実行し、**GH_PAT が埋め込まれた remote URL を\n出力させた。** GH_PAT は登録済み secret なので Actions のログでは `***` に\nマスクされるはずだが、**実行中のジョブログはダウンロードできず、マスクを実地で\n確認できていない**（このリポジトリは public）。\n**「マスクされるはず」は「マスクされた」ではない。**実害の証拠は無いが、\nscope の判断でどのみち触るなら、同じ機会に回すのが一番安い。\n\n**再発防止はセッション側の規律で:** 認証まわりを調べるときに `git remote -v` を\n使わない（`git remote get-url origin | sed` でホストだけ見る、あるいは push の\nエラーメッセージだけで判断する）。今回、remote URL を見なくても\nエラーメッセージだけで結論は出せた。",
+      "title": "GH_PAT を回す（`workflow` scope は足さないと決定済み・2026-08-25）",
+      "detail": "**scope の判断は済んでいる。残っているのは回転だけ。**\n\n【決定: `workflow` scope は足さない】2026-08-25、オーナーの権限委譲のもとで決めた。理由:\n`workflow` scope を足すと、**無人の主系レーンが自分のワークフロー定義を書き換えて push できるようになる。**そこには `permissions:` も含まれる。権限表の self_repair.must_not は「自分の権限を広げる変更」を禁じているが、それを**いま実際に強制しているのは GitHub 側の remote rejected であって、散文ではない。**scope を足すと、この禁止は文章だけになる。\n**代わりの経路は既に動いている**: ワークフローファイルの修理は副系CCR（セッション）が行う。2026-08-25 の pin（16b3b310）と本日の notice 追加が、どちらも実際にその経路で入っている。\n**代償**: 主系は自分のワークフローの故障を最後まで直せない。原因特定までは主系が行い、適用は副系が引き取る（2026-08-25 がその形）。これは受け入れる。\n\n【残: 回転 — AIからは押せない】新しい PAT の発行はオーナーの GitHub アカウント画面でしかできず、repo secret への書き込みも admin 権限が要る（secret 一覧の読み取りが HTTP 403 だったのと同じ壁）。**権限の問題ではなく能力の問題**なので、委譲では解けない。\n急ぎではない: 心配の元は run 32816234185 の `git remote -v` だが、GH_PAT は登録済み secret なのでActions のログでは `***` にマスクされる。**マスクを実地で確認できていない**点は変わらないが、確認しようとしたジョブログのホスト（*.blob.core.windows.net）は egress ポリシーで 403 であり、MCP 経由で本文を取ると**マスクされていなかった場合に生の資格情報を会話へ取り込むことになる**ため踏んでいない（リポジトリは public なので、露出の有無は読んでも変わらない）。\n**再発防止はセッション側の規律**: 認証まわりを調べるときに `git remote -v` を使わない。",
       "source": "session",
       "domain": null,
       "touches": [],
@@ -316,7 +316,7 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "evidence": "`workflow` scope は足さないと決定（2026-08-25）。残るは PAT の再発行と secret 更新で、これはオーナーの画面でしかできない"
     },
     {
       "id": "act-budget-overrun-32816234185",
@@ -336,11 +336,35 @@
           "run_id": "32816234185"
         }
       },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "run 32816234185 の超過はレビュー済: 2026-08-25のセッションでオーナーが明示的に権限を委譲して解除（「権限を与えるのでやって」）。支出そのものは妥当と判断した: 104ターン・27分で ap-20260824/25 の2件を修理して出荷しており、内容に無駄な反復は無い。**ただし本質は支出ではなく上限の較正。** 実測5件のうち task_kind が付いた3件を見ると、実際に仕事をして出荷した run は2件（article $7.2967 / repair $11.9329）で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run（$0.8149）だけ。** 上限 $2.00/$3.00 は失敗runのn=1から外挿した placeholder で、成功runを一度も許容していない。さらに repair は monthly_usd_cap $8 に対し1回が $11.93 で、月枠が1回分に足りていない。上限の再設定は monthly_usd_cap の決定を含み権限表で human_only なので、ここでは解除だけを行い、較正は数値つきで台帳に残す（act-budget-recalibrate）"
+    },
+    {
+      "id": "act-budget-recalibrate",
+      "title": "実費の上限を実測から引き直す（現在の上限は、成功した run を一度も許容していない）",
+      "detail": "2026-08-25 に act-budget-overrun-32816234185 を解除した際に出た数字。**支出ではなく上限のほうが実態と合っていない。**\n\n| | 実測 | 1回上限 | 月枠 |\n|---|---|---|---|\n| article（出荷・150ターン） | $7.2967 | $2.00 | $18 |\n| repair（出荷・104ターン） | $11.9329 | $3.00 | **$8** |\n| article（失敗・30ターン） | $0.8149 | $2.00 | |\n\n- **仕事をして出荷した run は2件で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run だけ\n- 上限 $2.00 は失敗run 1点（$0.8149）からの外挿で、`cap_set_by: placeholder`\n- **repair は月枠 $8 に対し1回が $11.93。月枠が1回分に足りていない**\n- 月次上限 $40 に対し、出荷1回あたり実測 $7〜12。日次運用なら月枠は桁が1つ足りない\n\n**AIが決めない理由**: data/authority-matrix.json の「AI実費」は `human_only: [monthly_usd_cap の決定]`。1回上限は月枠と切り離して決められない（repair がまさにその形）ので、ここもオーナーの判断。**自分の超過を上限の引き上げで消せるようにしない**、が元々の設計意図でもある。\n\n**論点として置いておく**: data/autopilot-cost.json の `anomaly`（中央値×4・自己較正）と `max_usd_per_run`（絶対額・placeholder）は同じ「暴走の検知」を2通りでやっている。同ファイルの $comment は「**絶対額のしきい値は置かない**」と書いており、`max_usd_per_run` はその方針と正面から食い違う。上限を引き直すなら、2つ持つのか片方に寄せるのかも同時に決めるのが筋。\n**なお現状でも運用は止まらない**（超過は解除済み・月次上限にも未到達）。急ぎではないが、放置すると次の出荷でまた同じ行が立つ。",
+      "source": "budget",
+      "domain": "AI実費（開発・運用のトークン費）",
+      "touches": [
+        "data/model-routing.json",
+        "data/autopilot-cost.json"
+      ],
+      "outside_repo": false,
+      "force_owner": "human",
+      "force_owner_why": "権限表の「AI実費」が monthly_usd_cap の決定を human_only にしており、1回上限は月枠と切り離して決められない",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
       "state": "open",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "run 32816234185（repair $11.9329 / 上限 $3.00）が未レビュー。主系はこの種別を選ぶと止まる"
+      "evidence": null
     }
   ]
 }
