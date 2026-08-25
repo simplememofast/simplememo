@@ -217,7 +217,12 @@ jobs:
       # 壊れた行は指標を嘘にするが、書かれなかった行は指標を止める。
       # 止まった指標は「変化が無い」と見分けがつかないぶん質が悪い。
       # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない。
-      - name: Autopilot run ledger
+      #
+      # 2026-08-23追加: 台帳と data/autopilot-status.json の突き合わせも同じ --check で見る。
+      # 同日、主系が初出荷したのに status JSON だけが前日のままで、10:00 JST の日報が
+      # 「当日分の実行記録なし」と報告した。**日報が読むのは status JSON のほう**なので、
+      # 台帳が正しくても、ここが古いと出荷が無かったことになる。
+      - name: Autopilot run ledger（＋日報データ源との突き合わせ）
         run: |
           node scripts/autopilot-runs.mjs --selftest
           node scripts/autopilot-runs.mjs --check

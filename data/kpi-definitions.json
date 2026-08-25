@@ -27,8 +27,8 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 4,
-      "checksum": "d16f1c308dd64abe",
+      "version": 6,
+      "checksum": "d413f662bda7ec93",
       "changed_at": "2026-08-25",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
@@ -46,6 +46,16 @@
           "version": 4,
           "at": "2026-08-25",
           "why": "定義は変えていない。scripts/autopilot-runs.mjs の --append に失敗の付帯情報（--failure-class / --failed-at / --detected-at / --needs-triage）を足しただけで、完走率の式（shipped / attempted）も分母の扱いも一切触っていない。日次アクチュエータが Actions API から台帳を埋めるときに、種別を書けるようにするための追加"
+        },
+        {
+          "version": 5,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。#544 が scripts/autopilot-runs.mjs に statusAgreement()（運転台帳と data/autopilot-status.json の突き合わせ）を追加しただけで、完走率の式（shipped / attempted）にも分母の扱いにも触れていない。統合により #554 の --failure-class と共存している"
+        },
+        {
+          "version": 6,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。statusAgreement() が『セッションが書いた行』だけを見るよう絞った統合修正（日次アクチュエータの reconcile-runs が埋めた行を除外）で、完走率の式（shipped / attempted）にも分母の扱いにも触れていない"
         }
       ]
     },
@@ -74,8 +84,8 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 9,
-      "checksum": "51827810cfeca03f",
+      "version": 10,
+      "checksum": "d705cd8e90911856",
       "changed_at": "2026-08-25",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
@@ -118,6 +128,11 @@
           "version": 9,
           "at": "2026-08-25",
           "why": "定義は変えていない。Runbook §7-1-1（閉じ条件は実在するものを指す）を追記しただけ。導入当日に2回踏んだ欠陥の規則化で、ノイズフロアの規定（§0原則2）には触れていない"
+        },
+        {
+          "version": 10,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。#544 が Runbook §4/§5-3 の実行コマンド一覧に『status JSONとの突き合わせ』の注記を足しただけで、ノイズフロアの規定（§0原則2）には触れていない"
         }
       ]
     },
