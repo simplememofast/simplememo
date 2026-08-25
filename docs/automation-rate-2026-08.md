@@ -13,29 +13,29 @@
 
 | 指標 | 値 | 分母 |
 |---|---:|---|
-| **総合自動化率** | **56.1%** | 定義タスク 173（未実装を含む・**最も厳しい**） |
-| AI実行率 | 67.4% | 実施中タスク 144（未実装を除く） |
-| AI関与率 | 86.8% | 同上（提案・下書きまで含める・**最も甘い**） |
-| カバー率 | 83.2% | そもそも誰かがやっているタスクの割合 |
+| **総合自動化率** | **56.6%** | 定義タスク 173（未実装を含む・**最も厳しい**） |
+| AI実行率 | 67.6% | 実施中タスク 145（未実装を除く） |
+| AI関与率 | 86.9% | 同上（提案・下書きまで含める・**最も甘い**） |
+| カバー率 | 83.8% | そもそも誰かがやっているタスクの割合 |
 
-内訳: 自律 7 / ゲート付き実行 90 / 提案 28 / 人間 19 / **未実装 29** / 意図的にやらない 3
+内訳: 自律 7 / ゲート付き実行 91 / 提案 28 / 人間 19 / **未実装 28** / 意図的にやらない 3
 
 **4つを必ず並べて出す。**分母を1つに決めると必ず都合のよい数字になる。
 **総合自動化率とカバー率を隠してAI関与率だけ出すのが、ここで一番やってはいけないこと。**
 
 ### 読み方
 
-- **総合自動化率 56.1%** — あるべきタスクのうちAIが実行している割合。**これが現在地**
-- **カバー率 83.2%** — 誰もやっていないタスクは**29件**
-- AI関与率 86.8% / AI実行率 67.4%
+- **総合自動化率 56.6%** — あるべきタスクのうちAIが実行している割合。**これが現在地**
+- **カバー率 83.8%** — 誰もやっていないタスクは**28件**
+- AI関与率 86.9% / AI実行率 67.6%
 
 ### この先の天井
 
 ```
-  現在                        97 / 173 = 56.1%
-  未実装 29 件を全部埋めても            →  72.8%
+  現在                        98 / 173 = 56.6%
+  未実装 28 件を全部埋めても            →  72.8%
   提案どまり 28 件も実行へ上げたら        →  89.0%  ← **天井**
-  95.3% に必要                          165 件（あと 68 件）
+  95.3% に必要                          165 件（あと 67 件）
 ```
 
 **89.0% が天井。**人間専任19件を人間に残す限り、AI実行に回せるのは最大154件。
@@ -54,8 +54,8 @@
 | ③ 自律型マーケティング | **65.4%** | 81.0% | 90.5% | 80.8% | 2/15/2/2/5 |
 | ⑥ アプリ運営意思決定 | **61.5%** | 66.7% | 91.7% | 92.3% | 0/8/3/1/1 |
 | ① 次期機能開発 | **60.0%** | 69.2% | 100.0% | 86.7% | 3/6/4/0/2 |
+| ⑪ データ・プライバシー | **60.0%** | 66.7% | 88.9% | 90.0% | 0/6/2/1/1 |
 | ④ 自動本番デプロイ | **50.0%** | 50.0% | 71.4% | 100.0% | 1/6/3/4/0 |
-| ⑪ データ・プライバシー | **50.0%** | 62.5% | 87.5% | 80.0% | 0/5/2/1/2 |
 | ⑧ カスタマーサポート | **37.5%** | 60.0% | 100.0% | 62.5% | 0/3/2/0/3 |
 | ⑦ 法人経営 | **30.8%** | 40.0% | 90.0% | 76.9% | 0/4/5/1/3 |
 | ⑨ マネタイズ | **12.5%** | 20.0% | 80.0% | 62.5% | 0/1/3/1/3 |
@@ -226,6 +226,23 @@
 | 自律 | 判断理由と結果のDecision Ledger | 機能開発の判断も入るようになった（カナリアガードが判定・根拠・実行有無を毎回KVへ記録する）。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた<br>`docs/obsidian/AUTOPILOT_LOG.md`<br>`growth/experiments/experiments.json`<br>`data/autopilot-runs.json`<br>`../simplememo-api/src/rollout-guard.ts`<br>`../simplememo-api/test/rollout-guard.test.ts` |
 | 未実装 | 本番改善サイクルの完走（機能側） | コンテンツ側は完走。機能側0件 |
 
+### ⑪ データ・プライバシー
+
+総合 **60.0%** ／ 実行 66.7% ／ 関与 88.9% ／ カバー 90.0%
+
+| 実行者 | タスク | 状況・証跡 |
+|---|---|---|
+| ゲート付き実行 | データ分類（送信可否の allowlist） | CIで強制<br>`../simplememo-ios/scripts/qa/check_analytics_allowlist.py` |
+| 提案 | 収集同意 | App Analytics共有オプトイン依存 |
+| ゲート付き実行 | 保持期間の定義（棚卸しと逸脱検査） | 2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない） さらに、**台帳の記述そのものをスキーマと突き合わせる検査**を足した（2方向 — 存在しない列を書いていないか／書かれていない自由文の列が無いか）。**22表中14表がずれていた。**求めるのは TEXT/BLOB と身元を示唆する名前の列だけで、全列を書かせると台帳が読まれなくなる（読まれない台帳は無いのと同じ）<br>**[2026-08-25 訂正]** **範囲を訂正。**24ストアの棚卸し（`data-retention.json`）とテストは実在する。存在しないのは**書き込み専用テーブルの検査・webhookのredact・スキーマ照合**の3つで、「台帳とスキーマがずれたら落ちる」は**まだ成立していない。**<br>落とした証跡: ../simplememo-api/scripts/check-write-only-tables.mjs , ../simplememo-api/src/webhook-redact.ts , ../simplememo-api/scripts/check-retention-schema.mjs<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/test/data-retention.test.ts` |
+| ゲート付き実行 | 保持期間の自動削除 | 2026-08-22に app_analytics_events を90日で剪定するようにした（オーナー判断）。棚卸しで見つかった最大の穴がこれ。**23ストア中6つが自動削除つき**になった。**残る10ストアはまだ無期限**（重複送信防止の台帳が中心。email_suppression は意図的に無期限）<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/test/analytics-retention.test.ts`<br>`../simplememo-api/data/data-retention.json` |
+| 提案 | 削除要求への対応 | 2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。<br>実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。<br>**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない<br>**[2026-08-25 訂正]** **削除網羅の検査（`check-deletion-coverage.mjs`）は存在しない。**削除の入口と保持台帳はあるが、**新しいテーブルが削除対象から漏れても機械は気づかない。**<br>落とした証跡: ../simplememo-api/scripts/check-deletion-coverage.mjs , ../simplememo-api/test/deletion-coverage.test.ts<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/src/index.ts`<br>`../simplememo-api/.github/workflows/ci.yml`<br>`data/authority-matrix.json` |
+| ゲート付き実行 | AIへの送信可否の制御 | redact済み要約のみ。メモ本文fixtureは架空<br>`../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh` |
+| ゲート付き実行 | 端末内の暗号化 | AES-GCM-256・Keychain・Data Protection属性<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
+| ゲート付き実行 | アクセス履歴 | 2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない<br>**[2026-08-25 訂正]** **証跡が存在しない。**`access-log.ts` もマイグレーションも隣のgit履歴に無い。`/admin/*` の経路自体は実在するが、**そこへのアクセスは記録されていない。**「一番強い権限の操作だけが記録の外にあった」という指摘は正しく、**いまも外にある。**<br>落とした証跡: ../simplememo-api/src/access-log.ts , ../simplememo-api/migrations/0019_admin_access_log.sql , ../simplememo-api/scripts/check-write-only-tables.mjs<br>executor: ai_executes_gated → nobody<br>**[2026-08-25 実装]** 今度は実在する。**router の1か所で拾う**（isAdminAuthorized の呼び出しは13ファイル43か所あり、そちらに足すと足し忘れた1か所が記録の穴になる）。読む側も同時に足した — **記録しただけの監査ログは監査ではない**ので、日報に1行出し、0件のときも書く。90日で刈る。<br>`../simplememo-api/src/access-log.ts`<br>`../simplememo-api/migrations/0019_admin_access_log.sql`<br>`../simplememo-api/src/index.ts`<br>`../simplememo-api/test/access-log.test.ts`<br>`../simplememo-api/data/data-retention.json` |
+| 未実装 | 第三者SDKのデータ送信監査 | 2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false [2026-08-22追記] **申告そのものと実装の突き合わせ**も足した。PrivacyInfo.xcprivacy は手で書いた宣言なので実装が増えても追随せず、**足りない申告は書いた本人には見えない。**突き合わせたら2種別が未申告だった。**オーナー指示で申告を実装に合わせた**（同日）: Product Interaction（387種のイベント）／Device ID（anonymous_install_id は**Keychain保存なのでアプリを削除しても残る**）／Other Diagnostic Data。**Crash Data では申告していない** — クラッシュログは集めていないので、そこで申告すると過剰申告になる。すべて Linked: false（analytics は email_hash を持たない設計）。検査の enforce も true にした。**将来の分岐を検査が見張る**: relay 側には analytics → email の結合が実装済みで待っており（send_correlation × client_send_id）、iOSがそれを送り始めた日に Linked が true になる — 送り始めたのに false のままなら落ちる。残る作業: **ASCの「App のプライバシー」への回答**はリポジトリの外なので検査できない<br>**[2026-08-25 訂正]** **証跡が存在しない。**監査スクリプトも台帳も隣のgit履歴に無い。`PrivacyInfo.xcprivacy` はアプリの提出物であって監査ではない。「初回実行で AppsFlyerLib の記載漏れを自分で検出した」も、走らせた実体が無い。<br>落とした証跡: ../simplememo-ios/scripts/qa/check_third_party_egress.py , ../simplememo-ios/data/third-party-egress.json , ../simplememo-ios/scripts/qa/check_privacy_manifest.py , ../simplememo-ios/data/privacy-manifest-policy.json<br>executor: ai_executes_gated → nobody<br>`../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy` |
+| 人間 | 推論をどこで回すかの決定 | VISION §14 未決定論点。Capture本文は個人情報そのもの<br>`../simplememo-ios/docs/VISION.md` |
+
 ### ④ 自動本番デプロイ
 
 総合 **50.0%** ／ 実行 50.0% ／ 関与 71.4% ／ カバー 100.0%
@@ -246,23 +263,6 @@
 | ゲート付き実行 | 審査項目・商標・プライバシー表示の整合確認 | 2026-08-22に検査を拡張。名前・サブタイトル（5.2.5・商標）に加え、キーワード欄とリリースノート（長さ上限・3.1.2の語）も毎PRで見る。自己テスト20件追加。**キーワードの実値はまだASC内にあり移していない**ので、その分は NOTE として毎回出る<br>`../simplememo-ios/scripts/lib/app_metadata.rb`<br>`../simplememo-ios/.github/workflows/qa-static.yml` |
 | ゲート付き実行 | AI・外部サービス停止時の独立した緊急停止経路 | 2026-08-22実装。**主系と副系を同時に、意図が残る形で止める唯一のスイッチ。**予算ゲートは主系しか止めず、秘密鍵の削除は「静かに寝る」ので止めたのか壊れたのか区別がつかなかった。他のどの判定よりも先に効き、force でも飛び越えられない。**AIは止められるが解除できない**（非対称）。CIは台帳ではなく**配線**を見る（判定・ワークフロー・Runbookの3経路）<br>`data/emergency-stop.json`<br>`scripts/check-emergency-stop.mjs`<br>`scripts/autopilot-gate.mjs`<br>`.github/workflows/obsidian-autopilot.yml` |
 | 提案 | ChatOps によるリリース起動 | issue コメントで起動。コメントするのはオーナー<br>`../simplememo-ios/.github/workflows/release-command.yml` |
-
-### ⑪ データ・プライバシー
-
-総合 **50.0%** ／ 実行 62.5% ／ 関与 87.5% ／ カバー 80.0%
-
-| 実行者 | タスク | 状況・証跡 |
-|---|---|---|
-| ゲート付き実行 | データ分類（送信可否の allowlist） | CIで強制<br>`../simplememo-ios/scripts/qa/check_analytics_allowlist.py` |
-| 提案 | 収集同意 | App Analytics共有オプトイン依存 |
-| ゲート付き実行 | 保持期間の定義（棚卸しと逸脱検査） | 2026-08-22実装。23ストアを棚卸しし、**ずれたらCIが落ちる**形にした（新テーブルは保持方針を書くまで通らない／保持期間を宣言したのに削除コードが無いと落ちる） [2026-08-22追記] 棚卸しの記述そのものが実態と違っていた例が1件出た — reminder_events は `holds: [email_hash, event, at]` と書いてあったが **email_hash 列は存在せず、webhook の生の本文（宛先の平文・件名）を無期限に持っていた。**許可リストで落とし、窓180日にして剪定へ入れた。**誰も読まないテーブルを検出する検査**も足した（DELETE は読者に数えない） さらに、**台帳の記述そのものをスキーマと突き合わせる検査**を足した（2方向 — 存在しない列を書いていないか／書かれていない自由文の列が無いか）。**22表中14表がずれていた。**求めるのは TEXT/BLOB と身元を示唆する名前の列だけで、全列を書かせると台帳が読まれなくなる（読まれない台帳は無いのと同じ）<br>**[2026-08-25 訂正]** **範囲を訂正。**24ストアの棚卸し（`data-retention.json`）とテストは実在する。存在しないのは**書き込み専用テーブルの検査・webhookのredact・スキーマ照合**の3つで、「台帳とスキーマがずれたら落ちる」は**まだ成立していない。**<br>落とした証跡: ../simplememo-api/scripts/check-write-only-tables.mjs , ../simplememo-api/src/webhook-redact.ts , ../simplememo-api/scripts/check-retention-schema.mjs<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/test/data-retention.test.ts` |
-| ゲート付き実行 | 保持期間の自動削除 | 2026-08-22に app_analytics_events を90日で剪定するようにした（オーナー判断）。棚卸しで見つかった最大の穴がこれ。**23ストア中6つが自動削除つき**になった。**残る10ストアはまだ無期限**（重複送信防止の台帳が中心。email_suppression は意図的に無期限）<br>`../simplememo-api/src/analytics.ts`<br>`../simplememo-api/test/analytics-retention.test.ts`<br>`../simplememo-api/data/data-retention.json` |
-| 提案 | 削除要求への対応 | 2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。<br>実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。<br>**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない<br>**[2026-08-25 訂正]** **削除網羅の検査（`check-deletion-coverage.mjs`）は存在しない。**削除の入口と保持台帳はあるが、**新しいテーブルが削除対象から漏れても機械は気づかない。**<br>落とした証跡: ../simplememo-api/scripts/check-deletion-coverage.mjs , ../simplememo-api/test/deletion-coverage.test.ts<br>`../simplememo-api/data/data-retention.json`<br>`../simplememo-api/src/index.ts`<br>`../simplememo-api/.github/workflows/ci.yml`<br>`data/authority-matrix.json` |
-| ゲート付き実行 | AIへの送信可否の制御 | redact済み要約のみ。メモ本文fixtureは架空<br>`../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh` |
-| ゲート付き実行 | 端末内の暗号化 | AES-GCM-256・Keychain・Data Protection属性<br>`../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md` |
-| 未実装 | アクセス履歴 | 2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない<br>**[2026-08-25 訂正]** **証跡が存在しない。**`access-log.ts` もマイグレーションも隣のgit履歴に無い。`/admin/*` の経路自体は実在するが、**そこへのアクセスは記録されていない。**「一番強い権限の操作だけが記録の外にあった」という指摘は正しく、**いまも外にある。**<br>落とした証跡: ../simplememo-api/src/access-log.ts , ../simplememo-api/migrations/0019_admin_access_log.sql , ../simplememo-api/scripts/check-write-only-tables.mjs<br>executor: ai_executes_gated → nobody<br>`../simplememo-api/src/index.ts` |
-| 未実装 | 第三者SDKのデータ送信監査 | 2026-08-22実装（simplememo-ios）。送信先ホスト4件・第三者SDK5件を棚卸しし、宣言していないホスト・SDKが増えると落ちる。宣言どうしの矛盾（台帳は「トラッキングしない」/ PrivacyInfoがtrue）も見る。**作った初回実行で AppsFlyerLib の記載漏れを自分で検出した。****実際に飛んでいるパケットは見ていない**（実機のプロキシ観測が要る）ので runtime_verified は全部 false [2026-08-22追記] **申告そのものと実装の突き合わせ**も足した。PrivacyInfo.xcprivacy は手で書いた宣言なので実装が増えても追随せず、**足りない申告は書いた本人には見えない。**突き合わせたら2種別が未申告だった。**オーナー指示で申告を実装に合わせた**（同日）: Product Interaction（387種のイベント）／Device ID（anonymous_install_id は**Keychain保存なのでアプリを削除しても残る**）／Other Diagnostic Data。**Crash Data では申告していない** — クラッシュログは集めていないので、そこで申告すると過剰申告になる。すべて Linked: false（analytics は email_hash を持たない設計）。検査の enforce も true にした。**将来の分岐を検査が見張る**: relay 側には analytics → email の結合が実装済みで待っており（send_correlation × client_send_id）、iOSがそれを送り始めた日に Linked が true になる — 送り始めたのに false のままなら落ちる。残る作業: **ASCの「App のプライバシー」への回答**はリポジトリの外なので検査できない<br>**[2026-08-25 訂正]** **証跡が存在しない。**監査スクリプトも台帳も隣のgit履歴に無い。`PrivacyInfo.xcprivacy` はアプリの提出物であって監査ではない。「初回実行で AppsFlyerLib の記載漏れを自分で検出した」も、走らせた実体が無い。<br>落とした証跡: ../simplememo-ios/scripts/qa/check_third_party_egress.py , ../simplememo-ios/data/third-party-egress.json , ../simplememo-ios/scripts/qa/check_privacy_manifest.py , ../simplememo-ios/data/privacy-manifest-policy.json<br>executor: ai_executes_gated → nobody<br>`../simplememo-ios/SimpleMemo/PrivacyInfo.xcprivacy` |
-| 人間 | 推論をどこで回すかの決定 | VISION §14 未決定論点。Capture本文は個人情報そのもの<br>`../simplememo-ios/docs/VISION.md` |
 
 ### ⑧ カスタマーサポート
 

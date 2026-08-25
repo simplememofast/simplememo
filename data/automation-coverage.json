@@ -1549,11 +1549,15 @@
     {
       "area": "⑪ データ・プライバシー",
       "task": "アクセス履歴",
-      "executor": "nobody",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-api/src/index.ts"
+        "../simplememo-api/src/access-log.ts",
+        "../simplememo-api/migrations/0019_admin_access_log.sql",
+        "../simplememo-api/src/index.ts",
+        "../simplememo-api/test/access-log.test.ts",
+        "../simplememo-api/data/data-retention.json"
       ],
-      "note": "2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない\n\n**[2026-08-25 訂正]** **証跡が存在しない。**`access-log.ts` もマイグレーションも隣のgit履歴に無い。`/admin/*` の経路自体は実在するが、**そこへのアクセスは記録されていない。**「一番強い権限の操作だけが記録の外にあった」という指摘は正しく、**いまも外にある。**\n\n落とした証跡: ../simplememo-api/src/access-log.ts , ../simplememo-api/migrations/0019_admin_access_log.sql , ../simplememo-api/scripts/check-write-only-tables.mjs\n\nexecutor: ai_executes_gated → nobody",
+      "note": "2026-08-22実装（simplememo-api）。保持の棚卸しで「どこに何があるか」は分かったが、**そこへ誰がいつ触ったかの記録が無かった。**/admin/* は本番D1を読み書きしCSVも取り込む — **一番強い権限の操作だけが記録の外にあった。****認証の失敗こそ残す**（成功だけだと総当たりが残らない）。リクエストボディは入れない（監査の記録が監査対象になってはいけない）。保持180日 [2026-08-22追記] **記録するだけで、その記録を読むコードが無かった。**書き込み専用テーブルの検査で自分の作った穴として出た。認証失敗の件数と経路を日報に出す読者を足した — 記録しただけの監査ログは監査ではない\n\n**[2026-08-25 訂正]** **証跡が存在しない。**`access-log.ts` もマイグレーションも隣のgit履歴に無い。`/admin/*` の経路自体は実在するが、**そこへのアクセスは記録されていない。**「一番強い権限の操作だけが記録の外にあった」という指摘は正しく、**いまも外にある。**\n\n落とした証跡: ../simplememo-api/src/access-log.ts , ../simplememo-api/migrations/0019_admin_access_log.sql , ../simplememo-api/scripts/check-write-only-tables.mjs\n\nexecutor: ai_executes_gated → nobody\n\n**[2026-08-25 実装]** 今度は実在する。**router の1か所で拾う**（isAdminAuthorized の呼び出しは13ファイル43か所あり、そちらに足すと足し忘れた1か所が記録の穴になる）。読む側も同時に足した — **記録しただけの監査ログは監査ではない**ので、日報に1行出し、0件のときも書く。90日で刈る。",
       "since": "2026-08"
     },
     {
