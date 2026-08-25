@@ -25,6 +25,7 @@ export const CODES = {
   RUN: 'run',
   SKIP_SECRETS: 'skip_secrets',
   SKIP_BUDGET: 'skip_budget',
+  SKIP_RUN_CAP: 'skip_run_cap',
   SKIP_BRANCH_CLAIMED: 'skip_branch_claimed',
   SKIP_ALREADY_SHIPPED: 'skip_already_shipped',
   SKIP_PR_TODAY: 'skip_pr_today',
@@ -113,6 +114,24 @@ export function decide(s) {
     // 副系はここを通過する。**通過することが仕様**なので理由を残す。
   }
 
+  // 2a. 1回あたりの上限。**月次上限とは別の故障を見ている。**
+  //     月次は「使いすぎた総量」、これは「1回が想定の何倍か」。
+  //     2026-08-23 の1回は article の上限 $2.00 に対し $7.2967 を使い切って
+  //     正常終了した —— 上限は在ったが、実行時に当たる経路が無かった。
+  //
+  //     費用は run が終わるまで確定しないので、走っている最中には止められない。
+  //     **止められるのは次の1回**で、ここがその経路。
+  //     予算と同じく主系だけを止める（副系CCRは別経路で観測も停止もできない）。
+  //     **そのおかげで、承認を待つ間も出荷は止まらない。**
+  if (s.runCapOverrun) {
+    if (isPrimary(s.route)) {
+      return R(CODES.SKIP_RUN_CAP,
+        'その種別の直近runが1回あたりの上限を超えたまま未レビュー。主系の次回を止める'
+        + '（解除は人間のみ。**AIが自分の超過を自分で通せると上限が「お願い」になる**）');
+    }
+    // 副系はここを通過する。**通過することが仕様。**
+  }
+
   // 2b. **モデルが1つも使えない日は走らない。** 代替があるなら縮退して走る。
   //     「使えるモデルが無い」を「今日は書くことが無い」と区別する
   //     （前者は故障、後者は正常系。日報で同じ行に出ると原因が消える）。
@@ -186,7 +205,7 @@ export function decide(s) {
 export function baseState(overrides = {}) {
   return {
     route: 'actions', todayJst: '2026-08-23',
-    secretsPresent: true, budgetOver: false, branchClaimed: false,
+    secretsPresent: true, budgetOver: false, runCapOverrun: false, branchClaimed: false,
     prodStatusDate: '2026-08-22', mainStatusDate: '2026-08-22',
     prTodayExists: false, primaryRunStatus: 'completed', force: false,
     // --- 故障・縮退の軸。既定は「すべて健全」 ---
