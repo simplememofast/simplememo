@@ -27,8 +27,8 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 3,
-      "checksum": "0871de585d4d7dd5",
+      "version": 4,
+      "checksum": "d16f1c308dd64abe",
       "changed_at": "2026-08-25",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
@@ -41,6 +41,11 @@
           "version": 3,
           "at": "2026-08-25",
           "why": "定義は変えていない。ヘッダのコメントに書いてあった『変更行の98.8%』を実測の94.2%へ直したため checksum が動いた（98.8% はどの数え方でも再現できなかった値。完走率の算出は無変更）"
+        },
+        {
+          "version": 4,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs の --append に失敗の付帯情報（--failure-class / --failed-at / --detected-at / --needs-triage）を足しただけで、完走率の式（shipped / attempted）も分母の扱いも一切触っていない。日次アクチュエータが Actions API から台帳を埋めるときに、種別を書けるようにするための追加"
         }
       ]
     },
@@ -69,8 +74,8 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 6,
-      "checksum": "39eb4bb0214c4d18",
+      "version": 7,
+      "checksum": "5ab3c654a5ed4d1b",
       "changed_at": "2026-08-25",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
@@ -98,6 +103,11 @@
           "version": 6,
           "at": "2026-08-25",
           "why": "定義は変えていない。main との合流で Runbook が変わったため checksum が動いた（ノイズフロアの算出は無変更）"
+        },
+        {
+          "version": 7,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。docs/obsidian/AUTOPILOT_RUNBOOK.md に §7-1〜7-3（アクション台帳・権限の判定手続き・日次アクチュエータ）を追記しただけで、ノイズフロアの規定（§0原則2・期待クリック3未満を根拠にしない／レーンA・Bのみに適用）は一字も触っていない"
         }
       ]
     },

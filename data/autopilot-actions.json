@@ -1,0 +1,167 @@
+{
+  "$comment": [
+    "アクション台帳 — 日報から起動する『やるべきこと』の単一の正。",
+    "",
+    "【なぜ作ったか】これまで依頼は status JSON の owner_requests、つまり",
+    "**ただの string[]** に積まれていた。id も state も閉じ条件も無いので、",
+    "**解決しても消える理由が無い。** 2026-08-25 時点で12件中6件が【解消済み】",
+    "【完了】のまま毎朝オーナーへ再送されており、その日いちばん重要な1件",
+    "（主系の認証failure）はその中に埋まっていた。件数が増えるほど、",
+    "**読まれる確率が下がる方向に働く**リストになっていた。",
+    "",
+    "【この台帳の約束】",
+    "  1. 行が消えるのは close_check が実際に通ったときだけ。人が消すのではない",
+    "  2. owner は書かない。data/authority-matrix.json から毎回導出する",
+    "     （散文の Runbook §7 で分類していた間に、自分で直せる案件を",
+    "      オーナー依頼に積む誤りが実際に起きている——PR #526 の記述）",
+    "  3. close_check は登録簿（scripts/autopilot-act.mjs の CLOSE_CHECKS）にある",
+    "     ものしか書けない。**台帳に任意のコマンドは書けない**",
+    "  4. 判定できないときは開いたままにする。閉じるほうへ倒さない",
+    "",
+    "【履歴はここに持たない】解決した行は state:done になり、日報から消える。",
+    "経緯は docs/obsidian/AUTOPILOT_LOG.md が持つ。同じ歴史を2箇所に置かない。",
+    "",
+    "【state】",
+    "  open         … 未処理。日報に出る",
+    "  done         … close_check が通った。evidence に根拠が入る",
+    "  acknowledged … 既知の制約。直す対象ではないので日報では件数だけ出す",
+    "                 （消すと『無い』ことになり、毎日出すとノイズになる）"
+  ],
+  "last_run_jst": null,
+  "actions": [
+    {
+      "id": "act-asc-privacy-answers",
+      "title": "App Store Connect の「App のプライバシー」回答を PrivacyInfo.xcprivacy と揃える",
+      "detail": "2026-08-22 に申告ファイル側へ3種別を追加した（Product Interaction / Device ID / Other Diagnostic Data）。ASC側の回答はリポジトリから見えないため検査できない。**片方だけ直すと逆に不整合になる。**次のビルドを出す前に揃えるのが安全。将来 iOS が client_send_id を送り始めた日に Linked が true になり、そのとき申告とASCの両方を変える。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": null
+    },
+    {
+      "id": "act-authority-split-deletion",
+      "title": "権限表の「ユーザーデータの削除要求への対応」を2つに分けるか決める",
+      "detail": "権限表は requires_approval: true / human_only: [実行の承認] だが、実装はそれより広い。アプリ内の自己削除（POST /v1/account/delete）は承認を挟まずその場で完了する — App Store Guideline 5.1.1(v) がそれを要求しているため。つまり (a) アプリ内の自己削除＝自動・承認なし と (b) 個別の連絡による削除要求＝本人確認と承認が要る の2つが1行に束ねられ、表は (b) の書き方で (a) を覆っている。**分けるかどうかは権限そのものの話なのでAIは変更しない**（self_repair.must_not「権限表を自分で書き換えない」）。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/authority-matrix.json"
+      ],
+      "outside_repo": false,
+      "force_owner": "human",
+      "force_owner_why": "権限表そのものの変更は self_repair.must_not で明示的に禁じられている",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": null
+    },
+    {
+      "id": "act-egress-policy-confirm",
+      "title": "副系CCRの egress 制限が意図どおりか確認する",
+      "detail": "副系の実行環境は obsidian.md / notion.com / github.com本体 / simplememofast.com への直接アクセスが 403 EGRESS_BLOCKED になる（到達できるのは api.github.com・raw.githubusercontent.com・objects.githubusercontent.com・npmjs.com 程度）。**本番 simplememofast.com が読めない**ため、副系は Runbook §0 の冪等チェック(b)「本番status JSONの date_jst」を実行できない。実質のガードは (c) origin/main の同ファイルと、当日ブランチの占有だけ、と理解しておく必要がある。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": null
+    },
+    {
+      "id": "act-status-freshness-ci",
+      "title": "status JSON の鮮度をCIで検証する（再発防止・未実装）",
+      "detail": "2026-08-23 PR#538（主系初出荷）が Runbook §5-2 必須の data/autopilot-status.json 更新を含まず、本番の日報データが3日間 08-22 のまま止まった。日報は「当日分が無い＝上流停止」と読む設計なので、**出荷した日ほど誤報する**壊れ方だった。記事を含むPRが status JSON を更新していなければ落とす検査を足す。 記事を含むPRが status JSON を更新していなければ落とす**差分スコープの**検査にすること。日次の鮮度そのものは autopilot-health.yml が 12:00 JST に見ているので、seo-check 側で日次鮮度を見ると autopilot が止まった日に無関係なPRまで赤くなる。",
+      "source": "manual",
+      "domain": "サイトコンテンツの新設・更新",
+      "touches": [
+        ".github/workflows/seo-check.yml",
+        "scripts/autopilot-act.mjs"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": ".github/workflows/seo-check.yml",
+          "needle": "--shipping-pr-has-status"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": null
+    },
+    {
+      "id": "act-ccr-bigquery-connector",
+      "title": "副系CCRは BigQuery MCP 接続子を持たずに起動する",
+      "detail": "bq-preflight.mjs も資格情報が無く認証失敗する。seo-daily.yml のジョブログから代替できる日はそれで足りるが、その経路が使えない日は取得不能になる。取得できなかった日は bq_checked: false で「増えていない」と区別して報告する運用でしのいでいる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "acknowledged",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": "既知の制約として受容。回避手順が Runbook にある"
+    },
+    {
+      "id": "act-ccr-command-classifier",
+      "title": "副系CCRで一部コマンドが auto mode クラシファイアに断続的にブロックされる",
+      "detail": "`python3 -c` の単発実行や `node ... | tail` のようなパイプ付きコマンドが一時的にブロックされることがある（ヒアドキュメント形式や単独の node は通る）。セッションごとに再現有無が変わる。代替手段（Read/Edit・コマンド分割）で回避でき、成果物への影響は観測されていない。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "acknowledged",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": "実害なし。回避可能な既知の制約として受容"
+    }
+  ]
+}

@@ -319,7 +319,10 @@
       "data/autopilot-cost.json",
       "data/automation-coverage.json",
       "scripts/autopilot-gate.mjs",
-      "scripts/autopilot-drill.mjs"
+      "scripts/autopilot-drill.mjs",
+      "data/autopilot-actions.json",
+      "scripts/autopilot-act.mjs",
+      ".github/workflows/autopilot-act.yml"
     ],
     "must_not": [
       "検証を弱める変更（CIチェックの削除・スキップ・閾値の緩和）",
@@ -376,7 +379,8 @@
       "node scripts/check-degradation.mjs --check",
       "node scripts/code-authorship.mjs --check",
       "node scripts/check-store-facts.mjs --check",
-      "node growth/scripts/check-mentions.mjs --check"
+      "node growth/scripts/check-mentions.mjs --check",
+      "node scripts/autopilot-act.mjs --check"
     ]
   }
 }

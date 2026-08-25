@@ -1,0 +1,149 @@
+# 日次アクチュエータ — その日の結果から「やるべきこと」を導出し、
+# **自分でやってよいものは実際にやって**、結果を日報メールへ渡す。
+#
+# 【なぜ別のワークフローか】
+# この運用の観測は非常に強く、作動がほぼ無かった。日報は毎朝、完走率も
+# 変更失敗率も未修理の故障も出しているのに、**そこから何かが起動することは
+# 無かった。** 実際に起きたこと:
+#
+#   - 2026-08-24 06:17 に主系が認証系で即死。台帳に載ったのは翌日 08:48。
+#     time_to_detect = 50.7時間。台帳の注記が理由を正確に書いている——
+#     「成果物ゼロで落ちた回は台帳を書く主体がいない構造的な穴」。
+#     **落ちた回ほど記録されない。壊れているときほど見えなくなる。**
+#   - owner_requests は string[] で、id も閉じ条件も無い。解決しても消えないので
+#     12件中6件が【解消済み】のまま毎朝再送され、生きている1件がその中に埋まった。
+#
+# 主系（obsidian-autopilot.yml）に足さないのは、**主系が落ちている日にこそ
+# 動く必要がある**から。同じジョブに入れると、認証が切れた日は同期も止まる。
+# 認証を必要としない（モデルを呼ばない）ので、主系が死んでいても動く。
+#
+# 【時刻】09:00 JST = 00:00 UTC。
+#   06:00 主系 → 07:30 副系 → 09:00 ここ → 09:20 再試行 → 10:00 日報メール
+# 日報の1時間前に置いてあるのは、PR → SEO Validation → auto-merge → Pages
+# デプロイが終わってから読まれる必要があるため。間に合わなかった日は
+# 日報側が「前日分」と明示する（隠して当日分に見せない）。
+#
+# 【ブランチ名】claude/autopilot-act-<date>。
+# **claude/obsidian-auto-<date> は絶対に使わない** — あれは Runbook §0-2 の
+# 当日占有ロックで、ここが取ると主系・副系が「今日は実行済み」と誤判定して
+# その日の記事が丸ごと落ちる。claude/ 始まりなのは SEO Validation と
+# auto-merge を通すため。
+
+name: Autopilot Act
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 09:00 JST
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '実行せず計画だけ出す'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read       # 運転台帳の同期に Actions API を読む。write は与えない
+
+concurrency:
+  group: autopilot-act
+  cancel-in-progress: false
+
+jobs:
+  act:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # GH_PAT が要る理由は seo-daily.yml / obsidian-autopilot.yml と同じ:
+          # GITHUB_TOKEN の push はワークフローを起動しないため、PRを作っても
+          # SEO Validation が走らず auto-merge が永久に来ない。
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 【緊急停止】主系と同じ位置・同じ理由。停止中はこの経路も動かない。
+      # 台帳の同期は無害に見えるが、**止めたい状況で唯一動き続ける経路**を
+      # 作らないほうがよい。止まっていることが観測できるほうが価値が高い。
+      - name: 緊急停止の確認
+        id: estop
+        run: |
+          STOP="$(node -p "
+            const d = require('./data/emergency-stop.json');
+            const a = (d.agents || {}).act || {};
+            d.stopped ? ('all:' + (d.reason || '理由未記入'))
+              : a.stopped ? ('act:' + (a.reason || '理由未記入'))
+              : '';
+          ")"
+          if [ -n "$STOP" ]; then
+            echo "::warning title=Emergency stop::停止が立っている: ${STOP}"
+            exit 1
+          fi
+
+      # 判定ロジックそのものの自己検査。台帳を読まないので、台帳が壊れていても
+      # ここは通る（＝壊れているのが判定側か台帳側かを切り分けられる）。
+      - name: 自己検査
+        run: node scripts/autopilot-act.mjs --selftest
+
+      - name: 実行（導出 → 突き合わせ → 自動実行）
+        id: act
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          MODE=--apply
+          [ "${{ inputs.dry_run }}" = "true" ] && MODE=""
+          node scripts/autopilot-act.mjs $MODE \
+            --emit-report data/autopilot-actions-report.json | tee /tmp/act.txt
+          cat /tmp/act.txt >> "$GITHUB_STEP_SUMMARY"
+
+      # 書き込んだ台帳がCIを通る形かをここで見る。**PRを出す前に見る** —
+      # 壊れた台帳をPRにすると、SEO Validation が落ちて auto-merge が来ず、
+      # 翌日も同じ壊れた状態から始まる。
+      - name: 台帳の検査
+        run: |
+          node scripts/autopilot-act.mjs --check
+          node scripts/autopilot-runs.mjs --check
+          node scripts/autopilot-budget.mjs --check
+
+      - name: 変更があればPRにする
+        if: inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "変更なし（同期も封じ込めも不要な日）。PRは作らない。"
+            exit 0
+          fi
+          DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # 同日に2回目が走ったとき（手動 dispatch・再実行）、main から切り直すと
+          # 既存の当日ブランチと分岐して push が非fast-forwardで弾かれる。
+          # このレーンの当日ブランチは占有ロックではない（占有は
+          # claude/obsidian-auto-* のほうで、こちらは別名）ので、
+          # **既にあるなら、その続きから書く**のが正しい。
+          git stash -q
+          if git fetch origin "$DAY" 2>/dev/null; then
+            git checkout -B "$DAY" FETCH_HEAD
+          else
+            git checkout -B "$DAY"
+          fi
+          git stash pop -q || true
+          git add data/autopilot-actions.json data/autopilot-actions-report.json \
+                  data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json 2>/dev/null || true
+          git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
+          # 同日に再実行した場合は追記されるだけ。強制pushはしない
+          # （弾かれること自体が「先に誰かが書いた」という出力）。
+          git push -u origin "$DAY"
+          if ! gh pr view "$DAY" --json number >/dev/null 2>&1; then
+            gh pr create --base main --head "$DAY" \
+              --title "日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）" \
+              --body "$(cat /tmp/act.txt)"
+          fi

@@ -1,0 +1,1077 @@
+#!/usr/bin/env node
+/**
+ * 日次アクチュエータ — その日の結果から「やるべきこと」を導出し、
+ * **自分でやってよいものは実際にやる。**
+ *
+ *   node scripts/autopilot-act.mjs             # 今日の判定（読むだけ・何も変えない）
+ *   node scripts/autopilot-act.mjs --json      # 機械可読（status JSON の actions ブロック用）
+ *   node scripts/autopilot-act.mjs --apply     # 自動実行してよいものを実行し、台帳を更新する
+ *   node scripts/autopilot-act.mjs --check     # CI: 台帳の形・権限・閉じ条件の整合
+ *   node scripts/autopilot-act.mjs --selftest  # 判定ロジックの自己検査（台帳を読まない）
+ *
+ * ============================================================
+ * 【なぜこれを作るか】
+ * ============================================================
+ * この運用は観測が非常に強く、作動がほぼ無かった。日報は毎朝
+ * 完走率・変更失敗率・介入率・実費・未修理の故障まで出しているのに、
+ * **そこから何かが起動することは無かった。** 実際に起きたこと:
+ *
+ *   - 2026-08-24 06:17 に主系が認証系で即死。台帳に載ったのは翌日 08:48。
+ *     time_to_detect = 50.7時間。台帳の注記が理由を正確に書いている——
+ *     「**成果物ゼロで落ちた回は台帳を書く主体がいない構造的な穴**」。
+ *     落ちた回ほど記録されない。壊れているときほど見えなくなる。
+ *   - その対応は「show_full_output を足して明日を待つ」。診断ループが
+ *     1日1回転しかないので、認証切れの確定に3日かかる。
+ *   - owner_requests は `string[]`。id も state も閉じ条件も無いので、
+ *     **解決しても消えない。** 2026-08-25 時点で12件中6件が【解消済み】
+ *     のまま毎朝再送されていた。生きている1件がその中に埋まる。
+ *
+ * どれも「気づけなかった」のではなく「気づいた先に起動するものが無かった」。
+ * このスクリプトはその起動側だけを持つ。
+ *
+ * ============================================================
+ * 【設計の3原則】
+ * ============================================================
+ * 1. **閉じ条件は機械が判定する。** 依頼が消えるのは、書いた人が消したから
+ *    ではなく、閉じ条件が実際に通ったとき。CLOSE_CHECKS がその登録簿で、
+ *    台帳には「どの検査をどの引数で」しか書けない。**台帳に任意のコマンドを
+ *    書けるようにはしない**（data/injection-surface.json が扱っている問題と
+ *    同じ穴を、自分の台帳で開けることになる）。
+ *
+ * 2. **誰がやるかは権限表から導く。** owner を手で書かせない。散文の
+ *    Runbook §7 で分類していた間に、実際に分類ミスが起きている——
+ *    「これは当初オーナー依頼として積まれたが、Runbook §7の分類ミス。
+ *    同じファイルは自分で2回書き換えて通しており、自分で直せる案件だった」
+ *    （PR #526 の記述）。data/authority-matrix.json が唯一の正。
+ *
+ * 3. **実行は自己修復の境界を越えない。** HANDLERS が触るのは
+ *    self_repair.may_modify に載っているファイルだけ。越える提案は
+ *    owner=human で積むだけで、実行しない。--apply でも越えない。
+ *
+ * ============================================================
+ * 【このスクリプトがやらないこと】
+ * ============================================================
+ * 記事を書くこと、故障の原因特定、実装。それはセッション（レーンA〜F）の仕事。
+ * ここがやるのは「台帳の同期」「閉じ条件の判定」「上限に達した経路の封じ込め」
+ * という、判断を要さないぶん**毎日確実に漏れる**種類の作業だけ。
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
+const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
+const COST_PATH = path.join(ROOT, 'data/autopilot-cost.json');
+const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
+const STATUS_PATH = path.join(ROOT, 'data/autopilot-status.json');
+
+export const STATES = ['open', 'done', 'acknowledged'];
+export const OWNERS = ['ai', 'human'];
+
+/** 台帳が失敗として扱う outcome（autopilot-selfheal.mjs と同じ集合）。 */
+const FAILED_OUTCOMES = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
+
+export function jstToday(now = new Date()) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(now);
+}
+
+export function daysBetween(a, b) {
+  const x = Date.parse(`${a}T12:00:00Z`), y = Date.parse(`${b}T12:00:00Z`);
+  if (Number.isNaN(x) || Number.isNaN(y)) return null;
+  return Math.round((y - x) / 86400000);
+}
+
+// ============================================================
+// 閉じ条件の登録簿
+// ============================================================
+// 台帳に書けるのは「どの検査を、どの引数で」だけ。任意のコマンド文字列を
+// 書けるようにすると、台帳が実行経路になる。**依頼リストは入力であって
+// コードではない。**
+//
+// 各検査は (params, ctx) -> { closed: boolean, evidence: string } を返す。
+// **判定できない場合は closed:false を返し、evidence にその旨を書く。**
+// 「確認できなかった」を「閉じた」に倒すと、この台帳は嘘をつき始める
+// （bq_checked:false を 0件 と書かないのと同じ規律）。
+
+export const CLOSE_CHECKS = {
+  /** 対象の run が selfheal の未修理リストから消えたら閉じる。 */
+  run_repaired({ run_id }, ctx) {
+    // **判定できないときは閉じない。** selfheal の出力が取れていないのに
+    // 「未修理リストに無い」を「直った」と読むと、判定不能が回復に化ける。
+    // これはこの運用が繰り返し戒めている bq_checked:false を 0件 と書く誤りと
+    // 同じもので、しかもこちらは**故障を消す方向**に効く。
+    if (!ctx.selfheal || !Array.isArray(ctx.selfheal.targets)) {
+      return { closed: false, evidence: 'selfheal の判定を取得できず判定不能（直ったという意味ではない）' };
+    }
+    if (!run_id) return { closed: false, evidence: 'run_id が指定されていない' };
+    const unrepaired = new Set(ctx.selfheal.targets.map((t) => t.run_id));
+    return unrepaired.has(run_id)
+      ? { closed: false, evidence: `${run_id} は未修理のまま（repair_of で名指しされていない）` }
+      : { closed: true, evidence: `${run_id} は selfheal の未修理リストから消えた` };
+  },
+
+  /** 指定経路が、指定日以降に同じ failure_class で落ちていなければ閉じる。 */
+  no_failure_since({ route, failure_class, since }, ctx) {
+    // `since` は起票の根拠になった最後の失敗日。**その日自身は含めない** —
+    // 含めると起票の原因が毎回ヒットして、この条件は永久に閉じない。
+    const runs = (ctx.runsDoc?.runs ?? []).filter((r) =>
+      r.route === route && r.date_jst > since && FAILED_OUTCOMES.has(r.outcome));
+    const same = runs.filter((r) => (r.failure_class ?? 'unknown') === failure_class);
+    if (same.length > 0) {
+      const last = same[same.length - 1];
+      return { closed: false, evidence: `${since} 以降も ${failure_class} で失敗（最新 ${last.run_id}）` };
+    }
+    // 落ちていないだけでは足りない。**走ってすらいない可能性を潰す。**
+    // 「失敗が無い」は「動いた」ではない——秘密鍵未設定で毎日 success を
+    // 返していた前例（Runbook §0-2）がここに効く。
+    const attempted = (ctx.runsDoc?.runs ?? []).filter((r) =>
+      r.route === route && r.date_jst > since && r.attempted);
+    if (attempted.length === 0) {
+      return { closed: false, evidence: `${since} 以降 ${route} は一度も着手していない（失敗が無いことは回復の証拠にならない）` };
+    }
+    return { closed: true, evidence: `${since} 以降 ${route} は ${attempted.length}回着手し ${failure_class} の再発なし` };
+  },
+
+  /** 既知の Actions run がすべて運転台帳に載っていれば閉じる。 */
+  ledger_covers_runs(_params, ctx) {
+    if (!ctx.workflowRuns) {
+      return { closed: false, evidence: 'GitHub Actions の実行履歴を取得できず判定不能（未同期という意味ではない）' };
+    }
+    const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
+    const missing = ctx.workflowRuns.filter((r) => !known.has(String(r.id)));
+    return missing.length === 0
+      ? { closed: true, evidence: `Actions run ${ctx.workflowRuns.length}件すべてが台帳にある` }
+      : { closed: false, evidence: `台帳に無い run が ${missing.length}件: ${missing.map((r) => r.id).join(', ')}` };
+  },
+
+  /**
+   * 着手した run がすべて実費台帳に載っていれば閉じる。
+   *
+   * **autopilot-budget.mjs --check で代用しない。**あれは「上限を超えたか」を
+   * 見る検査で、台帳が空でも通る。閉じ条件は、閉じたい当のものを検査する。
+   */
+  cost_covers_runs(_params, ctx) {
+    if (!ctx.costDoc) return { closed: false, evidence: '実費台帳を読めず判定不能' };
+    const costed = new Set((ctx.costDoc.runs ?? []).map((e) => String(e.run_id ?? '')));
+    const missing = (ctx.runsDoc?.runs ?? [])
+      .filter((r) => r.attempted && r.external_ref && !costed.has(String(r.external_ref)));
+    return missing.length === 0
+      ? { closed: true, evidence: '着手した run はすべて実費台帳にある' }
+      : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}` };
+  },
+
+  /** 許可済みスクリプトが exit 0 を返せば閉じる。 */
+  script_ok({ script, args = [] }, _ctx) {
+    // 台帳から任意のパスを実行させない。scripts/ 配下の .mjs / .js のみ、
+    // シェルを介さず execFileSync で起動する（引数がシェル解釈されない）。
+    if (!/^scripts\/[A-Za-z0-9._-]+\.(mjs|js)$/.test(script)) {
+      return { closed: false, evidence: `不正なスクリプト指定: ${script}` };
+    }
+    const abs = path.join(ROOT, script);
+    if (!fs.existsSync(abs)) return { closed: false, evidence: `${script} が存在しない` };
+    if (args.some((a) => typeof a !== 'string' || /[^A-Za-z0-9._=/-]/.test(a))) {
+      return { closed: false, evidence: `不正な引数: ${JSON.stringify(args)}` };
+    }
+    try {
+      execFileSync(process.execPath, [abs, ...args], { cwd: ROOT, stdio: 'pipe' });
+      return { closed: true, evidence: `${script} ${args.join(' ')} が exit 0` };
+    } catch (e) {
+      return { closed: false, evidence: `${script} ${args.join(' ')} が exit ${e.status ?? '?'}` };
+    }
+  },
+
+  /** ファイルに目印が入っていれば閉じる（「実装したか」の機械的な証拠）。 */
+  file_contains({ file, needle }, _ctx) {
+    if (typeof file !== 'string' || file.includes('..')) {
+      return { closed: false, evidence: `不正なファイル指定: ${file}` };
+    }
+    const abs = path.join(ROOT, file);
+    if (!fs.existsSync(abs)) return { closed: false, evidence: `${file} が存在しない` };
+    const hit = fs.readFileSync(abs, 'utf8').includes(needle);
+    return hit
+      ? { closed: true, evidence: `${file} に「${needle}」がある` }
+      : { closed: false, evidence: `${file} に「${needle}」がまだ無い` };
+  },
+
+  /**
+   * 自動では絶対に閉じない。
+   *
+   * リポジトリの外（App Store Connect・オーナーのローカル環境・課金コンソール）
+   * が対象のもの。**見えないものを「たぶん終わった」で閉じない。**
+   * 代わりに age_days を必ず出すので、放置は放置として見える。
+   */
+  manual(_params, _ctx) {
+    return { closed: false, evidence: 'リポジトリから検査できない（人が閉じる）' };
+  },
+};
+
+// ============================================================
+// 権限の導出 — owner を手で書かせない
+// ============================================================
+// Runbook §7 は3行の散文で、判定手続きを持っていなかった。その結果
+// 「自分で直せたものをオーナー依頼として積む」誤りが実際に起きている。
+// ここは data/authority-matrix.json だけを見る。
+//
+// 判定は2段:
+//   1. 触る対象が self_repair.may_modify に収まるか（＝レーンFの範囲）
+//   2. 対象領域が requires_approval を要求していないか
+// どちらも満たすときだけ ai。**判定できないときは human に倒す**
+// （権限の判定を迷ったら狭いほうへ、は不可逆な領域を持つ運用の基本）。
+
+export function classify(action, matrix) {
+  const sr = matrix.self_repair ?? {};
+  const mayModify = new Set(sr.may_modify ?? []);
+  const touches = action.touches ?? [];
+
+  // 1. 領域として人間に固定されているもの（値の判断・不可逆な操作）
+  if (action.force_owner === 'human') {
+    return { owner: 'human', why: action.force_owner_why ?? '領域として人間の判断が要る' };
+  }
+  // 2. リポジトリの外が対象（App Store Connect・オーナーのローカル・課金コンソール）。
+  //    **検査できないものは実行もできない。**
+  if (action.outside_repo) {
+    return { owner: 'human', why: 'リポジトリの外が対象（ここからは実行も検査もできない）' };
+  }
+  // 3. **このスクリプトが自動実行する**ものは、自己修復の範囲に収まっていること。
+  //    ここが may_modify を見る唯一の場所。無人で走る経路なので最も狭くする。
+  if (action.auto) {
+    const outside = touches.filter((f) => !mayModify.has(f));
+    if (touches.length === 0) return { owner: 'human', why: '自動実行の対象ファイルが特定できない' };
+    if (outside.length > 0) return { owner: 'human', why: `self_repair.may_modify の外: ${outside.join(', ')}` };
+    return { owner: 'ai', why: 'self_repair.may_modify の内側（無人実行の範囲）' };
+  }
+  // 4. セッションが実装するもの。判定は権限表の領域で行う——may_modify は
+  //    レーンF（無人の自己修復）の境界であって、セッション全体の境界ではない。
+  //    ここを取り違えると「AIが普通にできること」まで人の依頼として積み上がる。
+  if (action.domain) {
+    const d = (matrix.domains ?? []).find((x) => x.domain === action.domain);
+    if (!d) return { owner: 'human', why: `権限表に領域「${action.domain}」が無い` };
+    if (d.requires_approval) return { owner: 'human', why: `領域「${action.domain}」は承認が要る` };
+    return { owner: 'ai', why: `領域「${action.domain}」は承認不要（ai_may: ${(d.ai_may ?? []).join('/') || 'なし'}）` };
+  }
+  if (touches.length === 0) {
+    return { owner: 'human', why: '触る対象も領域も特定できない（不明なものは自動実行しない）' };
+  }
+  return { owner: 'ai', why: 'リポジトリ内の変更・承認を要する領域に該当しない' };
+}
+
+// ============================================================
+// 導出 — その日の結果から「やるべきこと」を作る
+// ============================================================
+// 純関数。ctx を受け取り、アクションの配列を返す。id は内容から決まる
+// （日付を含めない）ので、**同じ故障が翌日も残っていれば同じ id になり、
+// 台帳の同じ行が育つ。**日付入りにすると毎日新しい行が生えて、
+// 「12件のうち6件が解消済み」と同じ状態に戻る。
+
+export function derive(ctx) {
+  const out = [];
+  const runs = ctx.runsDoc?.runs ?? [];
+
+  // --- D1/D2: 未修理の故障（レーンF） ---
+  for (const t of ctx.selfheal?.targets ?? []) {
+    if (t.escalate) {
+      // 上限に達した種別。**直すのをやめて人に上げる**（self_repair.stop_note）。
+      out.push({
+        id: `act-selfheal-escalated-${t.failure_class}`,
+        title: `${t.failure_class} を上限回数（${t.repair_attempts_for_class}回）直しても再発している`,
+        detail: `対象 ${t.run_id}（${t.date_jst} / ${t.route}）。self_repair.stop_after_failed_repairs に達したため、`
+          + `修理をやめて人間に上げる。同時に該当経路の封じ込め（--contain）を実行する。`,
+        source: 'selfheal',
+        touches: ['data/emergency-stop.json'],
+        force_owner: 'human',
+        force_owner_why: '修理の上限に達した故障は人が原因を見るまで自動で触らない（policy.ai_may_resume:false）',
+        auto: 'contain',
+        close_check: { kind: 'run_repaired', params: { run_id: t.run_id } },
+      });
+    } else {
+      out.push({
+        id: `act-selfheal-${t.run_id}`,
+        title: `未修理の故障: ${t.run_id}（${t.failure_class}）`,
+        detail: `${t.date_jst} / ${t.route} / outcome=${t.outcome}。${t.failure_reason ?? '理由未記入'}`,
+        source: 'selfheal',
+        domain: null,
+        touches: ['data/autopilot-runs.json', '.github/workflows/obsidian-autopilot.yml'],
+        auto: null, // 原因特定と実装はセッションの仕事。ここは起票と可視化だけ
+        close_check: { kind: 'run_repaired', params: { run_id: t.run_id } },
+      });
+    }
+  }
+
+  // --- D3: 運転台帳の取りこぼし ---
+  //
+  // **この運用でいちばん効く1件。** 落ちた回は台帳を書く主体がいないので、
+  // 壊れているときほど記録が消える。2026-08-24 の即死が台帳に載るまで
+  // 50.7時間かかったのはこれが理由で、しかも載せたのは偶然走った副系だった。
+  // Actions API は誰が落ちても読めるので、ここだけは機械で埋められる。
+  if (ctx.workflowRuns) {
+    const known = new Set(runs.map((r) => String(r.external_ref ?? '')));
+    const missing = ctx.workflowRuns.filter((r) => !known.has(String(r.id)));
+    if (missing.length > 0) {
+      out.push({
+        id: 'act-ledger-sync',
+        title: `運転台帳に載っていない Actions run が ${missing.length}件`,
+        detail: missing.map((r) => `${r.id}（${r.jst_date} / ${r.conclusion}）`).join(', ')
+          + '。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。',
+        source: 'ledger',
+        touches: ['data/autopilot-runs.json'],
+        auto: 'reconcile-runs',
+        close_check: { kind: 'ledger_covers_runs', params: {} },
+      });
+    }
+  }
+
+  // --- D4: 実費台帳の取りこぼし ---
+  //
+  // Runbook §5-3 は「翌日のセッションが台帳へ入れる」と書いている。
+  // 人手（セッション手動）の手順は、忙しい日から順に落ちる。--append は
+  // run_id で冪等なので、機械が毎日やって害が無い。
+  if (ctx.costDoc) {
+    // 導出は運転台帳だけで完結させる（APIが読めない日でも「実費が未記録」は言える）。
+    // 実際の金額はジョブログにしか無いので、取りに行くのは handler の仕事。
+    const costed = new Set((ctx.costDoc.runs ?? []).map((e) => String(e.run_id ?? '')));
+    const missing = runs.filter((r) => r.attempted && r.external_ref && !costed.has(String(r.external_ref)));
+    if (missing.length > 0) {
+      out.push({
+        id: 'act-cost-sync',
+        title: `実費台帳に載っていない run が ${missing.length}件`,
+        detail: missing.map((r) => `${r.run_id}（run ${r.external_ref}）`).join(', ')
+          + '。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。',
+        source: 'cost',
+        touches: ['data/autopilot-cost.json'],
+        auto: 'append-cost',
+        close_check: { kind: 'cost_covers_runs', params: {} },
+      });
+    }
+  }
+
+  // --- D5: 同一シグネチャの連続失敗 ＝ 資格情報の疑い ---
+  //
+  // 単発の flake と、認証切れのような**決定論的な故障**は形が違う。
+  // 後者は「作業に入る前に、毎回同じ時間で、同じ形で」落ちる。
+  // 2026-08-24/25 の2件は is_error/num_turns/duration_ms/cost が完全一致していた。
+  // ここを機械で言えれば、show_full_output を足して翌日を待つ必要が無くなる
+  // ——**2日目で確定でき、3日目を待たない。**
+  const byRoute = {};
+  for (const r of runs) (byRoute[r.route] ??= []).push(r);
+  for (const [route, rs] of Object.entries(byRoute)) {
+    const sorted = [...rs].sort((a, b) => (a.date_jst < b.date_jst ? -1 : 1));
+    let streak = [];
+    for (const r of sorted) {
+      if (FAILED_OUTCOMES.has(r.outcome) && r.failure_class === 'auth_or_credential') streak.push(r);
+      else if (r.attempted) streak = [];
+    }
+    if (streak.length >= 2) {
+      const first = streak[0], last = streak[streak.length - 1];
+      out.push({
+        id: `act-credential-${route}`,
+        title: `${route} が ${streak.length}日連続で認証系の即時失敗（${first.date_jst}〜${last.date_jst}）`,
+        detail: `run ${streak.map((r) => r.external_ref).join(' / ')}。作業に入る前に落ちており、`
+          + `単発の flake ではない。復旧手順は \`claude setup-token\` で再取得 → リポジトリ secret `
+          + `CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）。`
+          + `**この経路が復活するまで、出荷は副系だけが担っている。**`,
+        source: 'credential',
+        // 復旧はオーナーのローカル環境（claude setup-token）と repo secret の
+        // 更新で、どちらもリポジトリの中から実行できない。
+        force_owner: 'human',
+        force_owner_why: 'secret の再発行はリポジトリ外の操作（オーナーのローカル + GitHub Secrets）',
+        auto: 'probe-secret',
+        close_check: {
+          kind: 'no_failure_since',
+          params: { route, failure_class: 'auth_or_credential', since: last.date_jst },
+        },
+      });
+    }
+  }
+
+  // --- D6: status JSON の鮮度 ---
+  //
+  // 2026-08-23 の主系初出荷が §5-2 必須の status JSON 更新を含んでおらず、
+  // 本番の日報データが3日間止まった。日報は「当日分が無い＝上流停止」と
+  // 読む設計なので、**出荷した日ほど誤報する**壊れ方だった。
+  if (ctx.statusDoc?.date_jst && ctx.today) {
+    const behind = daysBetween(ctx.statusDoc.date_jst, ctx.today);
+    if (behind != null && behind >= 2) {
+      out.push({
+        id: 'act-status-stale',
+        title: `data/autopilot-status.json が ${behind}日前（${ctx.statusDoc.date_jst}）のまま`,
+        detail: '日報の唯一のデータ源。当日分でないと「上流が止まった」と報告される（Runbook §5-2）。',
+        source: 'status',
+        touches: ['data/autopilot-status.json'],
+        auto: null,
+        close_check: { kind: 'script_ok', params: { script: 'scripts/autopilot-act.mjs', args: ['--status-fresh'] } },
+      });
+    }
+  }
+
+  return out;
+}
+
+/**
+ * 導出結果を台帳へ取り込む。**既存の行は上書きしない**（人が書いた detail や
+ * 承認メモを消さないため）。新規だけ足し、消えた導出は「閉じ条件が通れば閉じる」
+ * 通常経路に任せる。導出から消えたこと自体は閉じる理由にしない
+ * ——導出の入力（Actions API 等）が取れなかっただけかもしれない。
+ */
+export function merge(ledger, derived, today) {
+  const byId = new Map(ledger.actions.map((a) => [a.id, a]));
+  const added = [];
+  for (const d of derived) {
+    if (byId.has(d.id)) {
+      const cur = byId.get(d.id);
+      cur.last_seen_jst = today;
+      // 件数など、事実として動くものだけ追従させる
+      if (cur.state === 'open') { cur.title = d.title; cur.detail = d.detail; }
+      continue;
+    }
+    const a = {
+      id: d.id, title: d.title, detail: d.detail, source: d.source,
+      domain: d.domain ?? null, touches: d.touches ?? [],
+      force_owner: d.force_owner ?? null, force_owner_why: d.force_owner_why ?? null,
+      auto: d.auto ?? null, close_check: d.close_check,
+      state: 'open', created_jst: today, last_seen_jst: today,
+      closed_jst: null, evidence: null,
+    };
+    ledger.actions.push(a);
+    byId.set(a.id, a);
+    added.push(a);
+  }
+  return added;
+}
+
+// ============================================================
+// 突き合わせ — 閉じ条件を実際に走らせる
+// ============================================================
+// **ここが「解消済みが毎日メールに載る」を構造的に潰す場所。**
+// 依頼が消えるのは誰かが行を消したときではなく、閉じ条件が通ったとき。
+
+export function reconcile(ledger, ctx) {
+  const closed = [];
+  for (const a of ledger.actions) {
+    if (a.state !== 'open') continue;
+    const check = CLOSE_CHECKS[a.close_check?.kind];
+    if (!check) { a.evidence = `未知の閉じ条件: ${a.close_check?.kind}`; continue; }
+    let res;
+    try {
+      res = check(a.close_check.params ?? {}, ctx);
+    } catch (e) {
+      // 検査が壊れたときは**開いたまま**にする。閉じるほうへ倒さない。
+      a.evidence = `閉じ条件の実行に失敗: ${e.message}`;
+      continue;
+    }
+    a.evidence = res.evidence;
+    if (res.closed) {
+      a.state = 'done';
+      a.closed_jst = ctx.today;
+      closed.push(a);
+    }
+  }
+  return closed;
+}
+
+/** 表示・メール用の集計。age は「開いてから何日」。 */
+export function summarize(ledger, matrix, today) {
+  const open = ledger.actions.filter((a) => a.state === 'open');
+  const rows = open.map((a) => {
+    const c = classify(a, matrix);
+    return { ...a, owner: c.owner, owner_why: c.why, age_days: daysBetween(a.created_jst, today) ?? 0 };
+  });
+  rows.sort((a, b) => (b.age_days - a.age_days) || a.id.localeCompare(b.id));
+  return {
+    open_total: rows.length,
+    human: rows.filter((r) => r.owner === 'human'),
+    ai: rows.filter((r) => r.owner === 'ai'),
+    acknowledged: ledger.actions.filter((a) => a.state === 'acknowledged').length,
+    closed_today: ledger.actions.filter((a) => a.state === 'done' && a.closed_jst === today),
+    oldest_open_days: rows.length ? rows[0].age_days : 0,
+  };
+}
+
+// ============================================================
+// GitHub Actions の実行履歴
+// ============================================================
+// 台帳を埋めるための唯一の外部入力。**取れなかったときは null を返す**
+// （空配列を返すと「1件も無い」＝台帳は完全、という逆の結論になる）。
+
+const WORKFLOW_FILE = 'obsidian-autopilot.yml';
+
+async function fetchWorkflowRuns(repo, token, limit = 30) {
+  if (!token) return null;
+  const url = `https://api.github.com/repos/${repo}/actions/workflows/${WORKFLOW_FILE}/runs?per_page=${limit}`;
+  const headers = {
+    authorization: `Bearer ${token}`,
+    accept: 'application/vnd.github+json',
+    'user-agent': 'simplememo-autopilot-act',
+  };
+  let res;
+  try {
+    res = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+  } catch (e) {
+    console.error(`# Actions API に到達できず: ${e.message}（台帳が完全という意味ではない）`);
+    return null;
+  }
+  if (!res.ok) {
+    console.error(`# Actions API が HTTP ${res.status}（台帳が完全という意味ではない）`);
+    return null;
+  }
+  const body = await res.json();
+  const out = [];
+  for (const r of body.workflow_runs ?? []) {
+    // Gateでスキップした回（＝そもそも着手していない）と、着手して落ちた回を
+    // 区別するにはジョブの step まで見る必要がある。ここで一緒に取る。
+    let steps = null;
+    try {
+      const jr = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${r.id}/jobs`,
+        { headers, signal: AbortSignal.timeout(20_000) });
+      if (jr.ok) steps = ((await jr.json()).jobs ?? [])[0]?.steps ?? null;
+    } catch { /* step が読めなくても run 自体は記録する */ }
+    out.push({
+      id: r.id,
+      conclusion: r.conclusion,
+      status: r.status,
+      event: r.event,
+      created_at: r.created_at,
+      jst_date: jstToday(new Date(r.created_at)),
+      steps,
+      cost_usd: null, // 実費は step summary にしか出ない。ここでは取らない（0を書かない）
+    });
+  }
+  return out;
+}
+
+/**
+ * run の形から outcome / failure_class を決める。
+ *
+ * **推測を書かない。**判定できない部分は null にして needs_triage を立てる。
+ * 台帳の失敗行に嘘の failure_class が入ると、selfheal の
+ * 「同じ種別を3回直したら人へ」という歯止めが別の種別で数えられて効かなくなる。
+ */
+export function interpretRun(run) {
+  const step = (name) => (run.steps ?? []).find((s) => s.name?.includes(name));
+  const claude = step('Claude Code');
+  const gate = step('Gate');
+
+  if (run.status !== 'completed') return null; // まだ走っている
+  if (run.conclusion === 'cancelled') {
+    return { outcome: 'cancelled', attempted: true, failure_class: 'cancelled',
+      failure_reason: 'run が cancelled で終了' };
+  }
+  // Claude Code に到達していない ＝ Gate/予算/緊急停止で止まった（正常系）
+  if (!claude || claude.conclusion === 'skipped') {
+    return { outcome: 'skipped_gate', attempted: false, failure_class: null,
+      failure_reason: null,
+      note: `Claude Code ステップ未実行（Gate=${gate?.conclusion ?? '不明'}）。秘密鍵未設定・当日重複・予算・緊急停止のいずれか` };
+  }
+  if (claude.conclusion === 'failure') {
+    // **作業に入る前に落ちたか**を所要時間で見る。認証系の即死は1秒未満で、
+    // 実作業中の失敗は分単位。ここだけは形が十分はっきりしている。
+    const ms = claude.started_at && claude.completed_at
+      ? new Date(claude.completed_at) - new Date(claude.started_at) : null;
+    const immediate = ms != null && ms <= 5000;
+    return {
+      outcome: 'failed', attempted: true,
+      failure_class: immediate ? 'auth_or_credential' : null,
+      needs_triage: !immediate,
+      failure_reason: immediate
+        ? `Claude Code ステップが ${ms}ms で失敗。実作業に入る前に落ちており、認証系の疑いが強い（自動判定）`
+        : `Claude Code ステップが失敗（所要 ${ms ?? '不明'}ms）。原因未特定・要トリアージ（自動判定）`,
+    };
+  }
+  if (run.conclusion === 'failure') {
+    // Claude Code は通ったが後段（成果物ゼロ検査など）で落ちた
+    return { outcome: 'no_artifact', attempted: true, failure_class: 'no_artifact',
+      failure_reason: 'Claude Code は完了したが後続ステップが失敗（成果物ゼロ検査など）' };
+  }
+  return { outcome: 'shipped', attempted: true, failure_class: null, failure_reason: null,
+    needs_pr: true };
+}
+
+// ============================================================
+// 実行 — 自動でやってよいものを実際にやる
+// ============================================================
+// **--apply のときだけ動く。**それ以外は計画を出すだけ。
+//
+// ここに置いてよいのは「判断を要さないぶん、毎日確実に漏れる」種類の作業だけ。
+// 原因の特定・記事・実装は入れない。入れた瞬間に、このスクリプトは
+// レーンA〜Fを置き換えようとして必ず失敗する。
+//
+// 各 handler は { ok, changed, log } を返す。**失敗しても throw しない** —
+// 1つの handler の失敗で日次の同期が丸ごと止まると、止まったこと自体が
+// 見えなくなる（このファイル冒頭に書いた「壊れているときほど記録が消える」の再来）。
+
+export const HANDLERS = {
+  /**
+   * 運転台帳の同期。Actions API の run を台帳へ落とす。
+   * autopilot-runs.mjs --append を呼ぶ（検証を通す唯一の書き込み経路）。
+   */
+  async 'reconcile-runs'(ctx) {
+    if (!ctx.workflowRuns) return { ok: false, changed: 0, log: 'Actions API を読めず同期できない' };
+    const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
+    const log = [];
+    let changed = 0;
+    for (const run of ctx.workflowRuns) {
+      if (known.has(String(run.id))) continue;
+      const v = interpretRun(run);
+      if (!v) { log.push(`${run.id}: まだ完了していない`); continue; }
+      const runId = `ap-${run.jst_date.replace(/-/g, '')}-actions`;
+      if ((ctx.runsDoc?.runs ?? []).some((r) => r.run_id === runId)) {
+        // 同日に別の run が既に台帳にある（再実行など）。ID衝突を避けるため触らない。
+        log.push(`${run.id}: ${runId} が既にある（手で確認が要る）`);
+        continue;
+      }
+      // shipped は PR 番号が要る（validate が落とす）。PRの特定は機械には荷が重いので
+      // **成功した回は書かない**。書かないことで指標が甘くなることは無い
+      //（shipped を落とすと完走率は下がる側に倒れる）。
+      if (v.outcome === 'shipped') { log.push(`${run.id}: 成功回はPR特定が要るため自動追記しない`); continue; }
+      const args = ['--append', '--run-id', runId, '--date', run.jst_date, '--route', 'actions',
+        '--outcome', v.outcome, '--attempted', String(v.attempted),
+        '--external-ref', String(run.id), '--source', 'act-reconcile'];
+      if (v.failure_reason) args.push('--failure-reason', v.failure_reason);
+      if (v.failure_class) args.push('--failure-class', v.failure_class);
+      if (v.needs_triage) args.push('--needs-triage', 'true');
+      args.push('--detected-at', new Date().toISOString());
+      try {
+        const out = execFileSync(process.execPath,
+          [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' });
+        log.push(`${run.id} -> ${runId}: ${out.trim()}`);
+        changed += 1;
+      } catch (e) {
+        log.push(`${run.id}: 追記に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
+      }
+    }
+    return { ok: true, changed, log: log.join('\n') };
+  },
+
+  /**
+   * 実費台帳の同期。ジョブログから total_cost_usd を読んで --append する。
+   * **取得できなかった回は書かない**（0を書くと「無料で動いた」になる）。
+   */
+  async 'append-cost'(ctx) {
+    if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: '認証情報が無く実費を取得できない' };
+    const costed = new Set((ctx.costDoc?.runs ?? []).map((e) => String(e.run_id ?? '')));
+    const targets = (ctx.runsDoc?.runs ?? [])
+      .filter((r) => r.attempted && r.external_ref && !costed.has(String(r.external_ref)))
+      .slice(-10); // 一度に遡る上限。歴史全部を毎日取りに行かない
+    const log = [];
+    let changed = 0;
+    for (const r of targets) {
+      const cost = await fetchRunCost(ctx.repo, ctx.token, r.external_ref);
+      if (cost == null) { log.push(`${r.run_id}: 実費を取得できなかった（0ではない）`); continue; }
+      const args = ['--append', '--date', r.date_jst, '--route', r.route,
+        '--run-id', String(r.external_ref), '--cost', String(cost.usd),
+        '--outcome', r.outcome, '--note', '日次アクチュエータが自動追記（ジョブログの result 行）'];
+      if (cost.turns != null) args.push('--turns', String(cost.turns));
+      try {
+        const out = execFileSync(process.execPath,
+          [path.join(ROOT, 'scripts/autopilot-budget.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' });
+        log.push(`${r.run_id}: ${out.trim()}`);
+        if (!out.startsWith('skip')) changed += 1;
+      } catch (e) {
+        log.push(`${r.run_id}: 追記に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
+      }
+    }
+    return { ok: true, changed, log: log.join('\n') || '対象なし' };
+  },
+
+  /**
+   * 封じ込め。上限に達した故障の経路を止める。
+   * **止めるのはAIがやってよい（policy.ai_may_stop）。解除はしない。**
+   */
+  async contain(_ctx) {
+    try {
+      const out = execFileSync(process.execPath,
+        [path.join(ROOT, 'scripts/autopilot-selfheal.mjs'), '--contain'], { cwd: ROOT, encoding: 'utf8' });
+      return { ok: true, changed: 1, log: out.trim() };
+    } catch (e) {
+      // --contain は「止めた」ときに非ゼロで終わる設計でありうるので、出力は残す
+      return { ok: true, changed: 1, log: (e.stdout?.toString() ?? '') + (e.stderr?.toString() ?? '') };
+    }
+  },
+
+  /**
+   * secret が存在するかだけを確かめる（値は読めない）。
+   *
+   * **これで「消えている」だけは即断できる。**存在するのに落ちているなら
+   * 期限切れ・失効で、そこはリポジトリからは区別できない。区別できないことを
+   * 区別できたように書かないために、結果の文面を2つに分ける。
+   */
+  async 'probe-secret'(ctx) {
+    if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: 'secret 一覧を取得できない' };
+    try {
+      const res = await fetch(`https://api.github.com/repos/${ctx.repo}/actions/secrets`, {
+        headers: { authorization: `Bearer ${ctx.token}`, accept: 'application/vnd.github+json',
+          'user-agent': 'simplememo-autopilot-act' },
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (!res.ok) return { ok: false, changed: 0, log: `secret 一覧が HTTP ${res.status}（未設定という意味ではない）` };
+      const names = new Set(((await res.json()).secrets ?? []).map((s) => s.name));
+      const has = (n) => names.has(n);
+      if (!has('CLAUDE_CODE_OAUTH_TOKEN') && !has('ANTHROPIC_API_KEY')) {
+        return { ok: true, changed: 0, log: '**secret が両方とも存在しない。**これが原因で確定（再登録が復旧手順）' };
+      }
+      const present = ['CLAUDE_CODE_OAUTH_TOKEN', 'ANTHROPIC_API_KEY'].filter(has).join(' / ');
+      return { ok: true, changed: 0,
+        log: `secret は存在する（${present}）。**存在と有効は別**で、期限切れ・失効はここからは区別できない。`
+          + '`claude setup-token` の再実行が最短の切り分け' };
+    } catch (e) {
+      return { ok: false, changed: 0, log: `secret 一覧の取得に失敗: ${e.message}` };
+    }
+  },
+};
+
+/** ジョブログから result 行の total_cost_usd / num_turns を拾う。 */
+async function fetchRunCost(repo, token, runId) {
+  const headers = { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json',
+    'user-agent': 'simplememo-autopilot-act' };
+  try {
+    const jr = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${runId}/jobs`,
+      { headers, signal: AbortSignal.timeout(20_000) });
+    if (!jr.ok) return null;
+    const jobId = ((await jr.json()).jobs ?? [])[0]?.id;
+    if (!jobId) return null;
+    const lr = await fetch(`https://api.github.com/repos/${repo}/actions/jobs/${jobId}/logs`,
+      { headers, redirect: 'follow', signal: AbortSignal.timeout(30_000) });
+    if (!lr.ok) return null;
+    const text = await lr.text();
+    const cost = text.match(/"total_cost_usd"\s*:\s*([0-9.]+)/)
+      ?? text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/);
+    if (!cost) return null;
+    const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
+    return { usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null };
+  } catch { return null; }
+}
+
+// ============================================================
+// 台帳の検査（CI）
+// ============================================================
+export function validateLedger(ledger, matrix) {
+  const p = [];
+  if (!ledger || !Array.isArray(ledger.actions)) return ['actions must be an array'];
+  const seen = new Set();
+  const mayModify = new Set(matrix.self_repair?.may_modify ?? []);
+  ledger.actions.forEach((a, i) => {
+    const at = `actions[${i}]${a.id ? ` (${a.id})` : ''}`;
+    if (!a.id) p.push(`${at}: id is required`);
+    else if (seen.has(a.id)) p.push(`${at}: duplicate id`);
+    else seen.add(a.id);
+    if (!STATES.includes(a.state)) p.push(`${at}: state must be one of ${STATES.join('|')}`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(a.created_jst || '')) p.push(`${at}: created_jst must be YYYY-MM-DD`);
+    if (!a.title) p.push(`${at}: title is required`);
+    if (!a.close_check?.kind) p.push(`${at}: close_check.kind is required — 閉じ条件の無い依頼は永久に残る`);
+    else if (!CLOSE_CHECKS[a.close_check.kind]) p.push(`${at}: 未知の close_check: ${a.close_check.kind}`);
+    if (a.state === 'done' && !a.closed_jst) p.push(`${at}: done なのに closed_jst が無い`);
+    if (a.state === 'done' && !a.evidence) p.push(`${at}: done なのに evidence が無い — 「閉じた」は根拠とセットでしか書けない`);
+    if (a.auto && !HANDLERS[a.auto]) p.push(`${at}: 未知の handler: ${a.auto}`);
+    // **自動実行するなら、触る対象が自己修復の範囲に収まっていること。**
+    // ここを検査しないと、権限の拡大が台帳の1行で起きる。
+    if (a.auto && a.state === 'open') {
+      const outside = (a.touches ?? []).filter((f) => !mayModify.has(f));
+      if (outside.length > 0 && !a.force_owner) {
+        p.push(`${at}: auto=${a.auto} だが self_repair.may_modify の外を触る: ${outside.join(', ')}`);
+      }
+    }
+  });
+  return p;
+}
+
+// ============================================================
+// 表示
+// ============================================================
+function render(sum, applied, today) {
+  const L = [];
+  L.push(`日次アクチュエータ — ${today} (JST)`);
+  L.push('');
+  L.push(`未処理 ${sum.open_total}件（人 ${sum.human.length} / AI ${sum.ai.length}）`
+    + ` · 本日クローズ ${sum.closed_today.length}件 · 既知の制約 ${sum.acknowledged}件`);
+  if (sum.oldest_open_days >= 7) L.push(`  ⚠ 最古の未処理が ${sum.oldest_open_days}日前から開いている`);
+  if (sum.human.length > 0) {
+    L.push('', '■ 人がやること（AIの権限外）');
+    for (const a of sum.human) {
+      L.push(`  [${a.age_days}日] ${a.title}`);
+      L.push(`        なぜ人か: ${a.owner_why}`);
+      if (a.evidence) L.push(`        現状: ${a.evidence}`);
+    }
+  }
+  if (sum.ai.length > 0) {
+    L.push('', '■ AIがやること');
+    for (const a of sum.ai) {
+      L.push(`  [${a.age_days}日] ${a.title}${a.auto ? `  (自動: ${a.auto})` : '  (セッションが実装)'}`);
+      if (a.evidence) L.push(`        現状: ${a.evidence}`);
+    }
+  }
+  if (applied?.length) {
+    L.push('', '■ 今回このスクリプトが実行したこと');
+    for (const r of applied) {
+      L.push(`  ${r.handler} — ${r.ok ? `変更 ${r.changed}件` : '実行できず'}`);
+      for (const line of String(r.log).split('\n').filter(Boolean)) L.push(`        ${line}`);
+    }
+  }
+  if (sum.closed_today.length > 0) {
+    L.push('', '■ 本日クローズ（閉じ条件が通ったもの）');
+    for (const a of sum.closed_today) L.push(`  ${a.title}\n        根拠: ${a.evidence}`);
+  }
+  if (sum.open_total === 0) L.push('', '未処理なし。');
+  return L.join('\n');
+}
+
+// ============================================================
+// 自己検査 — 判定ロジックそのものを台帳無しで検証する
+// ============================================================
+function selftest() {
+  const fails = [];
+  const t = (name, cond) => { if (!cond) fails.push(name); };
+  const matrix = {
+    self_repair: { may_modify: ['data/autopilot-runs.json'], stop_after_failed_repairs: 3 },
+    domains: [{ domain: '承認が要る領域', requires_approval: true }],
+  };
+
+  // 権限の導出
+  t('自動実行は may_modify 内なら ai',
+    classify({ auto: 'reconcile-runs', touches: ['data/autopilot-runs.json'] }, matrix).owner === 'ai');
+  t('自動実行が may_modify 外なら human',
+    classify({ auto: 'reconcile-runs', touches: ['fastlane/Fastfile'] }, matrix).owner === 'human');
+  t('自動実行の対象不明は human', classify({ auto: 'reconcile-runs', touches: [] }, matrix).owner === 'human');
+  t('force_owner は最優先',
+    classify({ auto: 'reconcile-runs', touches: ['data/autopilot-runs.json'], force_owner: 'human' }, matrix).owner === 'human');
+  t('承認が要る領域は human', classify({ touches: ['x'], domain: '承認が要る領域' }, matrix).owner === 'human');
+  t('リポジトリ外は human', classify({ touches: ['x'], outside_repo: true }, matrix).owner === 'human');
+  // **may_modify はレーンFの境界であって、セッションの境界ではない。**
+  // ここを取り違えたことが「自分で直せたものをオーナー依頼に積む」誤りの原因。
+  t('セッション実装は may_modify 外でも ai',
+    classify({ touches: ['.github/workflows/seo-check.yml'] }, matrix).owner === 'ai');
+
+  // 閉じ条件: 失敗が無いだけでは閉じない（走っていない可能性を潰す）
+  const noRun = CLOSE_CHECKS.no_failure_since(
+    { route: 'actions', failure_class: 'auth_or_credential', since: '2026-08-25' },
+    { runsDoc: { runs: [] } });
+  t('着手ゼロでは閉じない', noRun.closed === false);
+  const recovered = CLOSE_CHECKS.no_failure_since(
+    { route: 'actions', failure_class: 'auth_or_credential', since: '2026-08-25' },
+    { runsDoc: { runs: [{ route: 'actions', date_jst: '2026-08-26', attempted: true, outcome: 'shipped' }] } });
+  t('着手して再発が無ければ閉じる', recovered.closed === true);
+
+  // 閉じ条件: 起票の根拠になった失敗日そのものは再発に数えない（数えると永久に閉じない）
+  const sameDay = CLOSE_CHECKS.no_failure_since(
+    { route: 'actions', failure_class: 'auth_or_credential', since: '2026-08-25' },
+    { runsDoc: { runs: [
+      { route: 'actions', date_jst: '2026-08-25', attempted: true, outcome: 'failed', failure_class: 'auth_or_credential' },
+      { route: 'actions', date_jst: '2026-08-26', attempted: true, outcome: 'shipped' }] } });
+  t('起票日の失敗は再発に数えない', sameDay.closed === true);
+
+  // 閉じ条件: 実費は「上限内か」ではなく「載っているか」で判定する
+  t('実費未記録なら閉じない', CLOSE_CHECKS.cost_covers_runs({}, {
+    costDoc: { runs: [] },
+    runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === false);
+  t('実費が揃えば閉じる', CLOSE_CHECKS.cost_covers_runs({}, {
+    costDoc: { runs: [{ run_id: '1' }] },
+    runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === true);
+  t('実費台帳が無ければ判定不能', CLOSE_CHECKS.cost_covers_runs({}, { runsDoc: { runs: [] } }).closed === false);
+
+  // 閉じ条件: 入力が取れないときは閉じない
+  const noApi = CLOSE_CHECKS.ledger_covers_runs({}, { workflowRuns: null, runsDoc: { runs: [] } });
+  t('API未取得では閉じない', noApi.closed === false);
+  t('manual は閉じない', CLOSE_CHECKS.manual({}, {}).closed === false);
+
+  // 閉じ条件: script_ok の入力検証
+  t('script_ok はパスを検証する', CLOSE_CHECKS.script_ok({ script: '../etc/passwd' }, {}).closed === false);
+  t('script_ok は引数を検証する',
+    CLOSE_CHECKS.script_ok({ script: 'scripts/autopilot-act.mjs', args: ['; rm -rf /'] }, {}).closed === false);
+
+  // 導出: 連続する認証失敗を1件にまとめる
+  const d = derive({
+    today: '2026-08-25', selfheal: { targets: [] }, statusDoc: null, costDoc: null,
+    runsDoc: { runs: [
+      { run_id: 'a', route: 'actions', date_jst: '2026-08-24', attempted: true, outcome: 'failed', failure_class: 'auth_or_credential', external_ref: '1' },
+      { run_id: 'b', route: 'actions', date_jst: '2026-08-25', attempted: true, outcome: 'failed', failure_class: 'auth_or_credential', external_ref: '2' },
+    ] },
+  });
+  const cred = d.filter((x) => x.source === 'credential');
+  t('連続認証失敗は1件に集約', cred.length === 1);
+  t('認証failureは人へ', cred[0]?.force_owner === 'human');
+
+  // 導出: id に日付を入れない（同じ故障が翌日も同じ id になる）
+  t('id は日付を含まない', !/\d{8}/.test(cred[0]?.id ?? ''));
+
+  // run の解釈: 即死は認証系、遅い失敗は要トリアージ
+  const fast = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
+    { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+      started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:24:00.486Z' }] });
+  t('即死は auth_or_credential', fast.failure_class === 'auth_or_credential');
+  const slow = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
+    { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+      started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:44:00Z' }] });
+  t('遅い失敗は種別を決めつけない', slow.failure_class === null && slow.needs_triage === true);
+  const gated = interpretRun({ status: 'completed', conclusion: 'success', steps: [
+    { name: 'Gate（秘密鍵・当日重複の事前チェック）', conclusion: 'success' },
+    { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'skipped' }] });
+  t('Gateスキップは着手にしない', gated.outcome === 'skipped_gate' && gated.attempted === false);
+  t('走行中は判定しない', interpretRun({ status: 'in_progress', steps: [] }) === null);
+
+  // merge: 同じ id は二重に生えない
+  const ledger = { actions: [] };
+  merge(ledger, d, '2026-08-25');
+  merge(ledger, d, '2026-08-26');
+  t('同じ導出は二重に生えない', ledger.actions.length === d.length);
+  t('last_seen が更新される', ledger.actions[0].last_seen_jst === '2026-08-26');
+
+  // reconcile: 検査が例外を投げても開いたまま
+  const broken = { actions: [{ id: 'x', state: 'open', created_jst: '2026-08-01',
+    close_check: { kind: 'run_repaired', params: {} } }] };
+  reconcile(broken, {});
+  t('検査が壊れても閉じない', broken.actions[0].state === 'open');
+
+  if (fails.length) {
+    console.error('自己検査に失敗:');
+    for (const f of fails) console.error(`  ✗ ${f}`);
+    process.exit(1);
+  }
+  console.log(`自己検査 OK（${24} 項目）`);
+}
+
+// ============================================================
+// CLI
+// ============================================================
+function readJson(p, fallback = null) {
+  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return fallback; }
+}
+
+async function buildContext(today) {
+  const runsDoc = readJson(RUNS_PATH, { runs: [] });
+  const matrix = readJson(MATRIX_PATH, {});
+  const costDoc = readJson(COST_PATH, null);
+  const statusDoc = readJson(STATUS_PATH, null);
+  const repo = process.env.GITHUB_REPOSITORY || 'simplememofast/simplememo';
+  const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
+
+  // selfheal は自前で持たず、既存スクリプトの --json をそのまま使う。
+  // 同じ判定を2箇所に持つと、必ず片方だけ直される日が来る。
+  let selfheal = null;
+  try {
+    selfheal = JSON.parse(execFileSync(process.execPath,
+      [path.join(ROOT, 'scripts/autopilot-selfheal.mjs'), '--json'], { cwd: ROOT, encoding: 'utf8' }));
+  } catch (e) {
+    console.error(`# selfheal の判定を取得できなかった: ${e.message}`);
+  }
+  const workflowRuns = await fetchWorkflowRuns(repo, token);
+  return { today, runsDoc, matrix, costDoc, statusDoc, selfheal, workflowRuns, repo, token };
+}
+
+async function main() {
+  const argv = process.argv.slice(2);
+  const has = (f) => argv.includes(`--${f}`);
+
+  if (has('selftest')) return selftest();
+
+  const today = jstToday();
+
+  // status JSON の鮮度だけを見るモード（閉じ条件から呼ばれる）。
+  if (has('status-fresh')) {
+    const s = readJson(STATUS_PATH, null);
+    const behind = s?.date_jst ? daysBetween(s.date_jst, today) : null;
+    if (behind == null) { console.error('status JSON を読めない'); process.exit(1); }
+    if (behind >= 2) { console.error(`status JSON が ${behind}日前（${s.date_jst}）`); process.exit(1); }
+    console.log(`status JSON は ${s.date_jst}（${behind}日前）`);
+    return;
+  }
+
+  const ledger = readJson(ACTIONS_PATH, null);
+  if (!ledger) {
+    console.error(`${ACTIONS_PATH} を読めない。台帳が無いと何も判定できない。`);
+    process.exit(1);
+  }
+  const matrix = readJson(MATRIX_PATH, {});
+
+  if (has('check')) {
+    const problems = validateLedger(ledger, matrix);
+    if (problems.length) {
+      console.error('アクション台帳が不正:');
+      for (const p of problems) console.error(`  - ${p}`);
+      console.error('\n閉じ条件の無い依頼は永久に残り、権限の検査を欠いた自動実行は権限の拡大になる。');
+      process.exit(1);
+    }
+    console.log(`アクション台帳 OK（${ledger.actions.length}件・未処理 ${ledger.actions.filter((a) => a.state === 'open').length}件）`);
+    return;
+  }
+
+  const ctx = await buildContext(today);
+  merge(ledger, derive(ctx), today);
+  reconcile(ledger, ctx);
+
+  // --apply のときだけ、実際に手を動かす。
+  const applied = [];
+  if (has('apply')) {
+    for (const a of ledger.actions) {
+      if (a.state !== 'open' || !a.auto) continue;
+      const owner = classify(a, matrix).owner;
+      // **人の領域のアクションでも、診断だけの handler は動かしてよい。**
+      // probe-secret のように「調べるだけで何も変えない」ものがそれ。
+      // 変更を伴う handler は ai のときだけ。
+      const readOnly = a.auto === 'probe-secret';
+      if (owner !== 'ai' && !readOnly) continue;
+      const h = HANDLERS[a.auto];
+      if (!h) continue;
+      let r;
+      try { r = await h(ctx); }
+      catch (e) { r = { ok: false, changed: 0, log: `handler が例外: ${e.message}` }; }
+      applied.push({ handler: a.auto, ...r });
+      a.last_run_jst = today;
+      a.last_run_log = String(r.log ?? '').slice(0, 2000);
+    }
+    // 実行で状態が変わっているので、台帳を読み直してもう一度突き合わせる。
+    // （reconcile-runs が台帳を書き換えた直後に ledger_covers_runs を通したい）
+    ctx.runsDoc = readJson(RUNS_PATH, { runs: [] });
+    ctx.costDoc = readJson(COST_PATH, null);
+    try {
+      ctx.selfheal = JSON.parse(execFileSync(process.execPath,
+        [path.join(ROOT, 'scripts/autopilot-selfheal.mjs'), '--json'], { cwd: ROOT, encoding: 'utf8' }));
+    } catch { /* 直前の値のまま */ }
+    merge(ledger, derive(ctx), today);
+    reconcile(ledger, ctx);
+
+    const problems = validateLedger(ledger, matrix);
+    if (problems.length) {
+      console.error('書き込み前の検査で台帳が不正になった。書かずに終了する:');
+      for (const p of problems) console.error(`  - ${p}`);
+      process.exit(1);
+    }
+    ledger.last_run_jst = today;
+    fs.writeFileSync(ACTIONS_PATH, JSON.stringify(ledger, null, 2) + '\n');
+  }
+
+  const sum = summarize(ledger, matrix, today);
+
+  // 日報メールが読む形。**status JSON には入れない。**
+  // 同じPRで status JSON を触ると、当日のオートパイロットPRがまだ開いている日に
+  // 衝突を起こす。別ファイルなら、片方が読めなくてももう片方は届く。
+  const payload = {
+      as_of_jst: today,
+      open_total: sum.open_total,
+      oldest_open_days: sum.oldest_open_days,
+      acknowledged: sum.acknowledged,
+      closed_today: sum.closed_today.map((a) => ({ id: a.id, title: a.title, evidence: a.evidence })),
+      human: sum.human.map((a) => ({ id: a.id, title: a.title, detail: a.detail,
+        age_days: a.age_days, why: a.owner_why, evidence: a.evidence })),
+      ai: sum.ai.map((a) => ({ id: a.id, title: a.title, age_days: a.age_days,
+        auto: a.auto, evidence: a.evidence })),
+      executed: applied.map((r) => ({ handler: r.handler, ok: r.ok, changed: r.changed, log: r.log })),
+  };
+
+  const emitTo = argv.includes('--emit-report') ? argv[argv.indexOf('--emit-report') + 1] : null;
+  if (emitTo) {
+    // 生成物であって台帳ではない。台帳（data/autopilot-actions.json）が正で、
+    // これはその日の描画結果。**2つの正を作らない。**
+    fs.writeFileSync(path.join(ROOT, emitTo), JSON.stringify(payload, null, 2) + '\n');
+  }
+
+  if (has('json')) { console.log(JSON.stringify(payload, null, 2)); return; }
+
+  console.log(render(sum, applied, today));
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((e) => { console.error(e); process.exit(1); });
+}
