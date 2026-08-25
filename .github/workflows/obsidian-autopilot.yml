@@ -259,7 +259,26 @@ jobs:
         if: >-
           steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
           && steps.route.outputs.run_cap_ok == 'true'
-        uses: anthropics/claude-code-action@v1
+      # 【2026-08-25 SHA pin】フローティングタグ @v1 をやめて版を固定する。
+      #
+      # **同じ穴を2回踏んだ。**1回目は上の allowed_bots（非人間アクターを拒否する
+      # ガードが後から乗ってきた）。2回目が 08-24・08-25 の2日連続の即時失敗で、
+      # 引いていたのは c81e3bc6（"bump Claude Code to 2.1.241 / Agent SDK 0.3.241"）。
+      # 直前に出荷できた 08-23 は 24dcd50c / 2.1.240、復旧した 08-25 15:16 は
+      # この 16b3b310 / 2.1.245 だった（ジョブログの Download action repository 行で実測）。
+      #
+      # **上流が壊れた版を配ること自体は直せない。直せるのは勝手に乗り換える構造のほう。**
+      # 固定しない限り、次に壊れた版が出れば同じ2日がまた消える。
+      #
+      # 代償は上流の修正も自動では入らないこと。**それは意図した代償**で、
+      # 版を上げるのは data/autopilot-actions.json に起票してから行う
+      # （いつ・なぜ上げたかが残る）。上げるときはこの行のSHAとコメントを一緒に直すこと。
+      #
+      # なお 08-24/08-25 の原因が版だと確定したわけではない。同じ区間で
+      # CLAUDE_CODE_OAUTH_TOKEN も更新されており、両者は分離できていない
+      # （data/autopilot-runs.json の reclassified_note）。**それでも pin は正しい** ——
+      # 版が原因でなかったとしても、依存を固定していない構造は残り続けるため。
+        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         with:
@@ -267,14 +286,6 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           allowed_bots: "*"
-          # 【2026-08-25追加・診断用】run 32667079679（08-24）・32779337325（08-25）が
-          # 2日連続で is_error:true / num_turns=1 / duration_ms=486 / cost=$0 という
-          # 同一シグネチャで即時失敗した（ap-20260824-actions・ap-20260825-actions）。
-          # 実際の作業に入る前の即時失敗＝認証系の疑いが強いが、full outputが
-          # 「hidden for security」で伏せられており、ジョブログから実際のエラー文言を
-          # 確認できない。原因を特定できるまでの暫定でtrueにする（may_modifyの範囲内・
-          # 検証を弱める変更ではない）。原因確定後はfalseへ戻すこと。
-          show_full_output: true
           # 【2026-08-22】run 32528028588 は Claude Code ステップが success で
           # 終わりながら成果物がゼロだった。ジョブログの result 行は
           # num_turns=30 / permission_denials_count=14 / cost $0.81。
