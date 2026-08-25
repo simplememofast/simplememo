@@ -64,8 +64,8 @@
       "name": "1記事あたり単価",
       "formula": "当月の実費 ÷ 当月の出荷数",
       "source_file": "scripts/autopilot-budget.mjs",
-      "version": 2,
-      "checksum": "ef84ceaa76a41f2e",
+      "version": 3,
+      "checksum": "0ef43c196209f3c1",
       "changed_at": "2026-08-25",
       "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）",
       "history": [
@@ -73,6 +73,11 @@
           "version": 2,
           "at": "2026-08-25",
           "why": "定義は変えていない。1回あたりの上限（max_usd_per_run）を実行時に効かせるため autopilot-budget.mjs に overruns() / --check-run-cap / --ack-overrun を足した副作用でチェックサムが動いた。usd_per_shipped の算出（当月の実費合計 ÷ shipped）には一切触れていない"
+        },
+        {
+          "version": 3,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。scripts/autopilot-budget.mjs の --json に run_caps（1回上限の判定）を足しただけで、usd_per_shipped の計算には触れていない"
         }
       ]
     },
@@ -91,8 +96,8 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 10,
-      "checksum": "d705cd8e90911856",
+      "version": 11,
+      "checksum": "988e56b85dd497a3",
       "changed_at": "2026-08-25",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
@@ -140,6 +145,11 @@
           "version": 10,
           "at": "2026-08-25",
           "why": "定義は変えていない。#544 が Runbook §4/§5-3 の実行コマンド一覧に『status JSONとの突き合わせ』の注記を足しただけで、ノイズフロアの規定（§0原則2）には触れていない"
+        },
+        {
+          "version": 11,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。AUTOPILOT_RUNBOOK.md §7-3 に実費ゲートが2段ある件を追記しただけで、noise_floor の定義文には触れていない"
         }
       ]
     },
