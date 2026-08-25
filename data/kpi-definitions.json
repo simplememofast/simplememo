@@ -74,8 +74,8 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 7,
-      "checksum": "5ab3c654a5ed4d1b",
+      "version": 8,
+      "checksum": "303952ad3c4b69f9",
       "changed_at": "2026-08-25",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
@@ -108,6 +108,11 @@
           "version": 7,
           "at": "2026-08-25",
           "why": "定義は変えていない。docs/obsidian/AUTOPILOT_RUNBOOK.md に §7-1〜7-3（アクション台帳・権限の判定手続き・日次アクチュエータ）を追記しただけで、ノイズフロアの規定（§0原則2・期待クリック3未満を根拠にしない／レーンA・Bのみに適用）は一字も触っていない"
+        },
+        {
+          "version": 8,
+          "at": "2026-08-25",
+          "why": "定義は変えていない。Runbook §7-3 の handler 表から probe-secret を外し（初回実走でGitHub APIが403を返し、secret一覧の読み取り権限が無いことが実測で判明したため）、実費が存在しない run の扱いを追記しただけ。ノイズフロアの規定（§0原則2）は一字も触っていない"
         }
       ]
     },
