@@ -150,9 +150,15 @@ node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンF
 
 1. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか。
    **全文は読まない**（77,004文字・毎日+5,000）。
-   **保留事項はここから取らない** — `data/autopilot-actions.json` が
+   **保留事項はここから取らない** — `data/autopilot-actions-report.json` が
    型付きで持っており、閉じ条件が通れば消える（§7-3）。散文の履歴から
-   拾うと、解消済みのものが混ざる
+   拾うと、解消済みのものが混ざる。
+   **台帳そのもの `data/autopilot-actions.json` は読まない** ——
+   閉じた行が消えずに貯まるので、LOG と同じく増え続ける
+   （2026-08-25 時点で14行中9行が done・22,533文字）。レポート側は
+   open と当日クローズだけなので、**未処理の件数でしか増えない。**
+   `as_of_jst` が当日でないときだけ（09:00 JST のアクチュエータが
+   まだ走っていない）、台帳側を見てよい
 2. `docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md` + `growth/content/new-queue.json` /
    `refresh-queue.json` — データ駆動キュー（レーンA/B）の現在地
 3. **カバレッジキュー（レーンE）** — 先頭の pending 1件だけを出す:

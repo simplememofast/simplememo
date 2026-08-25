@@ -1438,8 +1438,15 @@ async function main() {
       closed_today: sum.closed_today.map((a) => ({ id: a.id, title: a.title, evidence: a.evidence })),
       human: sum.human.map((a) => ({ id: a.id, title: a.title, detail: a.detail,
         age_days: a.age_days, why: a.owner_why, evidence: a.evidence })),
-      ai: sum.ai.map((a) => ({ id: a.id, title: a.title, age_days: a.age_days,
-        auto: a.auto, evidence: a.evidence })),
+      // detail は AI 行にも入れる。**日報メールだけの出力ではなくなったため。**
+      // 主系のプロンプトはこのレポートを「保留事項」の参照先にしており、
+      // AI が自分の行を実行するには detail（手順・解除コマンド・判断の根拠）が要る。
+      // 台帳そのもの（data/autopilot-actions.json）を読ませない理由は、
+      // **閉じた行が消えずに貯まる**から —— 2026-08-25 時点で 14行中9行が done で
+      // 22,533文字。AUTOPILOT_LOG.md と同じ「毎回読ませると増え続ける」形になる。
+      // こちらは open と当日クローズだけなので、**未処理の件数でしか増えない。**
+      ai: sum.ai.map((a) => ({ id: a.id, title: a.title, detail: a.detail,
+        age_days: a.age_days, auto: a.auto, evidence: a.evidence })),
       executed: applied.map((r) => ({ handler: r.handler, ok: r.ok, changed: r.changed, log: r.log })),
   };
 
