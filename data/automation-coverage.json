@@ -816,9 +816,11 @@
       "task": "上限超過での自己停止",
       "executor": "ai_executes_gated",
       "evidence": [
-        ".github/workflows/obsidian-autopilot.yml"
+        ".github/workflows/obsidian-autopilot.yml",
+        "scripts/autopilot-budget.mjs",
+        "scripts/autopilot-gate.mjs"
       ],
-      "note": "予算ゲートが主系runを止める。副系は止められない"
+      "note": "予算ゲートが主系runを止める。副系は止められない。**【2026-08-25】上限は2種類あり、長く効いていたのは月次だけだった。**model-routing.json の `max_usd_per_run`（1回あたり）は宣言だけで実行時に見る経路が無く、08-23の1回は article の上限 $2.00 に対し $7.2967（3.6倍）を使い切って正常終了している。`--check-run-cap` を route ステップに配線して塞いだ。費用はrunが終わるまで確定しないので**止められるのは次の1回**。種別ごとに見るので記事の超過が修理を止めることはなく、止まるのは主系だけなのでレビュー待ちの間も副系が出荷を続ける。解除は人間のみ（`--ack-overrun`）。**本番でまだ一度も発火していない。**"
     },
     {
       "area": "⑤ AI予算・トークン管理",

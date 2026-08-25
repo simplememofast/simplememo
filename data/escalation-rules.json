@@ -159,6 +159,24 @@
       "within_hours": 24,
       "stop_automation": true,
       "note": "同じ failure_class を self_repair.stop_after_failed_repairs 回直して再発した。**表示だけでは翌朝また同じ経路が走る**ので、autopilot-selfheal.mjs --contain がその経路の停止を立てる（route が台帳に無い場合は全体停止）。AIが止め、解除は人だけ — 直せない故障を毎日直そうとするループを、人が見るまで確実に止めるため"
+    },
+    {
+      "trigger": "upstream_action_regression",
+      "kind": "infra",
+      "who": "self_then_owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "上流の GitHub Action（claude-code-action@v1 のようなフローティングタグ）が壊れた版を配り、作業に入る前に落ちる。2026-08-24・08-25 に主系が2日連続で踏んだ（CLI 2.1.241）。**セッションが自分で直せる**——原因の切り分けはジョブログの `Download action repository … (SHA:…)` を直近の成功runと比べるだけで、費用ゼロ。修理は SHA の pin。ただし主系の GH_PAT には `workflow` scope が無く `.github/workflows/*` を push できないため、**主系だけは自力で完走できない**（副系CCRは push できる）。この非対称が解消するまで who は self_then_owner。止めない理由: 上流が直れば自然に復旧しうるうえ、副系が出荷を継続できるため"
+    },
+    {
+      "trigger": "immediate_failure",
+      "kind": "infra",
+      "who": "self_then_owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "Claude Code ステップが作業に入る前（5秒未満）に落ちた、という**観測された形**。**原因ではない**ので、この種別のまま放置せず切り分けて上書きすること。同じ形になる原因は少なくとも3つある: 上流actionの版の破損 / `--model` 等の指定ミス / 資格情報の失効。autopilot-act.mjs の interpretRun がこれを書き、needs_triage を立てる。**安い順に切り分ける**（版の照合 → モデル解決 → 資格情報）。2026-08-25 以前は同じ形を auth_or_credential と決めつけており、誤診とオーナーへの不要な依頼を生んだ"
     }
   ]
 }

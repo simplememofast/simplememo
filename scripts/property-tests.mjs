@@ -46,6 +46,7 @@ function randomState(r) {
     route: pick(r, ROUTES),
     secretsPresent: r() < 0.8,
     budgetOver: r() < 0.3,
+    runCapOverrun: r() < 0.25,
     branchClaimed: r() < 0.3,
     prodStatusDate: pick(r, ['2026-08-22', '2026-08-23']),
     mainStatusDate: pick(r, ['2026-08-22', '2026-08-23']),
@@ -91,6 +92,38 @@ const PROPERTIES = [
       const d = decide({ ...s, force: true, secretsPresent: true, credentialRejected: false,
         githubApiReachable: true, modelsAvailable: null, emergencyStop: false });
       return d.code === CODES.SKIP_BUDGET;
+    },
+  },
+  {
+    name: 'force は1回あたりの上限を飛び越えられない（主系）',
+    why: '**1回上限が force より弱いと、超過した翌日に force で押し切れる。**月次上限と同じ強さで置く',
+    check: (s) => {
+      if (s.route !== 'actions' || !s.runCapOverrun) return true;
+      const d = decide({ ...s, force: true, secretsPresent: true, credentialRejected: false,
+        githubApiReachable: true, modelsAvailable: null, emergencyStop: false, budgetOver: false });
+      return d.code === CODES.SKIP_RUN_CAP;
+    },
+  },
+  {
+    name: '1回上限で止まるのは主系だけ（二重化が承認待ちを吸収する）',
+    why: '**副系まで止めると、人間のレビュー待ちの間だけ出荷がゼロになる。**'
+      + '止めたいのは「同じ超過をもう一度やること」であって、出荷そのものではない',
+    check: (s) => {
+      const base = { ...s, credentialRejected: false, githubApiReachable: true,
+        modelsAvailable: null, budgetOver: false, runCapOverrun: true,
+        force: false, emergencyStop: false };
+      const main = decide({ ...base, route: 'actions', secretsPresent: true });
+      const sub = decide({ ...base, route: 'ccr-0730' });
+      return main.code === CODES.SKIP_RUN_CAP && sub.code !== CODES.SKIP_RUN_CAP;
+    },
+  },
+  {
+    name: '1回上限は、報告すべき故障の前に出てこない',
+    why: '**「上限で止まった」と報告されると、資格情報の失効に気づかない。**'
+      + '安全装置が故障を隠す形は、08-24の即時失敗が2日気づかれなかったのと同じ構図',
+    check: (s) => {
+      const d = decide({ ...s, runCapOverrun: true, credentialRejected: true, emergencyStop: false });
+      return d.code === CODES.FAIL_CREDENTIAL;
     },
   },
   {
