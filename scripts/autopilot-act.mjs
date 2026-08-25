@@ -709,11 +709,45 @@ export function interpretRun(run) {
     return { outcome: 'cancelled', attempted: true, failure_class: 'cancelled',
       failure_reason: 'schedule 起動の run が cancelled で終了（1日ぶんの出荷が消えている）' };
   }
-  // Claude Code に到達していない ＝ Gate/予算/緊急停止で止まった（正常系）
+  // Claude Code に到達していない ＝ 手前のどれかで止まった。
+  //
+  // **「いずれか」で書かない。**ここは長らく「秘密鍵未設定・当日重複・予算・
+  // 緊急停止のいずれか」という4択を毎回そのまま台帳へ書いていた。止まった日の
+  // 記録が推測のままなので、**どれで止まったのかを台帳から復元できない。**
+  // しかも 2026-08-25 に足した5つ目の理由（1回あたりの実費上限）が
+  // この文言に入っておらず、**新しい停止経路が古い4択に化けて記録される**
+  // 状態だった。理由はステップの実行結果から一意に決まるので、決めて書く。
+  //
+  // ワークフローの if: が作る形（.github/workflows/obsidian-autopilot.yml）:
+  //   Gate falseで止まった   … 緊急停止・予算・振り分け すべて skipped
+  //   緊急停止               … 緊急停止が failure（exit 1）で以降 skipped
+  //   月次上限               … 予算は成功、振り分けが skipped
+  //   1回あたりの上限        … 振り分けまで成功し、Claude だけ skipped
+  // 振り分けと Claude の間には run_cap_ok しか条件が無いので、最後の行は
+  // 消去法ではなく**一意**に決まる。
   if (!claude || claude.conclusion === 'skipped') {
+    const estop = step('緊急停止');
+    const budget = step('予算ゲート');
+    const route = step('振り分け');
+    const ran = (st) => st != null && st.conclusion !== 'skipped';
+    let note;
+    if (estop?.conclusion === 'failure') {
+      note = '緊急停止が立っていたため着手しなかった（data/emergency-stop.json）';
+    } else if (ran(route)) {
+      // **ここが 2026-08-25 まで名前を持っていなかった停止。**解除は人間のみ
+      // なので、気づかれないと毎日この形で静かに止まり続ける。
+      note = '1回あたりの実費上限が未レビューのため着手しなかった'
+        + '（node scripts/autopilot-budget.mjs --check-run-cap）。解除は人間のみ';
+    } else if (ran(budget)) {
+      note = '当月の実費が月次上限に達していたため着手しなかった（data/autopilot-cost.json）';
+    } else if (ran(estop) || gate != null) {
+      note = `Gate で止まった（秘密鍵未設定・当日重複のいずれか。Gate=${gate?.conclusion ?? '不明'}）`;
+    } else {
+      // ステップ情報が無い run（API の取得漏れなど）。**決まらないなら決めない。**
+      note = `Claude Code ステップ未実行。手前のどこで止まったかはステップ情報が無く判定できない（Gate=${gate?.conclusion ?? '不明'}）`;
+    }
     return { outcome: 'skipped_gate', attempted: false, failure_class: null,
-      failure_reason: null,
-      note: `Claude Code ステップ未実行（Gate=${gate?.conclusion ?? '不明'}）。秘密鍵未設定・当日重複・予算・緊急停止のいずれか` };
+      failure_reason: null, note };
   }
   if (claude.conclusion === 'failure') {
     // **所要時間が言えるのは「作業に入る前に落ちた」までで、原因ではない。**
@@ -1191,6 +1225,27 @@ function selftest() {
     { name: 'Gate（秘密鍵・当日重複の事前チェック）', conclusion: 'success' },
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'skipped' }] });
   t('Gateスキップは着手にしない', gated.outcome === 'skipped_gate' && gated.attempted === false);
+  // 止まった理由を「いずれか」で書かない。4通りはステップの実行結果で一意に決まる
+  const skipped = (steps) => interpretRun({ status: 'completed', conclusion: 'success',
+    steps: [...steps, { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'skipped' }] });
+  const GATE = { name: 'Gate（秘密鍵・当日重複の事前チェック）', conclusion: 'success' };
+  const ESTOP = (c) => ({ name: '緊急停止の確認', conclusion: c });
+  const BUDGET = (c) => ({ name: '予算ゲート（当月の実費が上限を超えていたら走らない）', conclusion: c });
+  const ROUTE = (c) => ({ name: 'タスク種別とモデルの振り分け', conclusion: c });
+  t('Gateで止まった日はGateと書く',
+    skipped([GATE, ESTOP('skipped'), BUDGET('skipped'), ROUTE('skipped')]).note.includes('Gate で止まった'));
+  t('緊急停止の日は緊急停止と書く',
+    skipped([GATE, ESTOP('failure')]).note.includes('緊急停止が立っていた'));
+  t('月次上限の日は月次上限と書く',
+    skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('skipped')]).note.includes('月次上限'));
+  t('1回上限の日は1回上限と書く',
+    skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).note.includes('1回あたりの実費上限'));
+  t('1回上限の日に解除が人間のみと書く',
+    skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).note.includes('人間のみ'));
+  t('1回上限の日も着手にしない',
+    skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).attempted === false);
+  t('ステップ情報が無ければ理由を断定しない',
+    interpretRun({ status: 'completed', conclusion: 'success', steps: [] }).note.includes('判定できない'));
   t('走行中は判定しない', interpretRun({ status: 'in_progress', steps: [] }) === null);
 
   // merge: 同じ id は二重に生えない

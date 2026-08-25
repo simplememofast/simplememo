@@ -211,6 +211,10 @@ jobs:
             echo "run_cap_ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "run_cap_ok=false" >> "$GITHUB_OUTPUT"
+            # 月次上限の分岐と同じ形で notice を出す。**止まった日が無音だと
+            # 「今日は書くことが無かった」と見分けがつかない。**解除は人間のみ
+            # なので、無音のまま毎日この形で止まり続けるのがいちばん悪い。
+            echo "::notice title=Obsidian Autopilot::$KIND の1回あたり実費上限が未レビューのため主系をスキップ。解除は node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why \"…\"（人間のみ）。副系CCRは別経路のため止まらない。"
           fi
 
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
