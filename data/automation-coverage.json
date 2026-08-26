@@ -146,14 +146,13 @@
     {
       "area": "① 次期機能開発",
       "task": "PRD・受入条件・UX・多言語の作成",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/obsidian-only-mode-design.md"
+        "docs/prd/TEMPLATE.md",
+        "docs/prd/undo-last-capture.md",
+        "scripts/check-prd.mjs"
       ],
-      "note": "都度作成・定型化されていない",
-      "blocker": "not_started",
-      "unblocked_by": "定型化されていない。テンプレートと検査を作れば実行側へ動く",
-      "unlock": "impl_product"
+      "note": "[2026-08-26] docs/prd/TEMPLATE.md に定型を置き、scripts/check-prd.mjs が守る。VISION §13 の6問は**見出しがあるだけでは通らない**（各問に本文が要る）。受入条件はチェックボックス、多言語は JA/EN 両方、§1 の主張には出典。\n\n**いちばん効くのは §6「決めていないこと」。**PRD は提案であって決定ではないので、ここが空だと PRD が黙ってオーナー判断を代行できる。本当に何も無いなら「無い」と書く —— **書かないことと、無いことを分ける。**\n\n**ゲート付き実行**なのは、PRD の中身の是非は人がPRで見るから。機械が守るのは「定型を満たしていること」まで。1本目は docs/prd/undo-last-capture.md（★5レビュー 2026-07-07 が根拠、オーナー判断4件を §6 に残してある）"
     },
     {
       "area": "① 次期機能開発",
