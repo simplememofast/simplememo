@@ -157,6 +157,18 @@ jobs:
       - name: AI unit cost (adopted improvements)
         run: node scripts/ai-unit-cost.mjs --check
 
+      # 【検査が落ちることの記録】data/stop-drills.json の検査版。
+      # 2026-08-26 の1日で、自分が書いた検査が黙って効いていないのを5回踏んだ。
+      # うち check-pr-facts.mjs は規則を足したのに一度も発火せず緑を出し続けていた。
+      #
+      # **推測しない** —— ソースを読んで「否定ケースがありそう」と判定する案は捨てた。
+      # demonstrated は実際に壊して落ちるのを見たときにしか書けない（at / broke 必須）。
+      #
+      # **ラチェット** —— 41本を一度に直すのは無理なので増える方向だけを止める。
+      # 新しい検査は自己テスト付きで入るしかない。**上限を上げて通さないこと。**
+      - name: Checks have been seen to fail
+        run: node scripts/check-selftests.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を
