@@ -42,7 +42,12 @@
     "**大半が実装量ではなく外部データ・鍵・権限境界・検出力で止まっている。**",
     "分類は scripts/autonomy-gap.mjs の BLOCKERS が正で、CI がそれ以外の値を落とす。",
     "policy_boundary と physical_human は **オーナーが境界を動かさない限り到達しない**。",
-    "この2つを到達可能側に数えるのが、この台帳で二番目にやってはいけないこと。"
+    "この2つを到達可能側に数えるのが、この台帳で二番目にやってはいけないこと。",
+    "",
+    "【unlock（2026-08-26追加）】到達可能なタスクを**解除条件でまとめる。**",
+    "1タスク＝1作業ではない — ASCのレポートが降りれば4件が同時に動き、",
+    "問い合わせの再現ファクトを1本出せば2件が動く。**個別に積むと順番を間違える。**",
+    "登録簿は scripts/autonomy-gap.mjs の UNLOCKS が正で、--plan が目標までの最短路を出す。"
   ],
   "measured_at": "2026-08-26",
   "known_limits": [
@@ -130,7 +135,8 @@
       ],
       "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人",
       "blocker": "external_data",
-      "unblocked_by": "継続率がリポジトリに無い（BigQuery/ASC側）。降りれば evidence_strength を機械が導出できる"
+      "unblocked_by": "継続率がリポジトリに無い（BigQuery/ASC側）。降りれば evidence_strength を機械が導出できる",
+      "unlock": "bq_28d"
     },
     {
       "area": "① 次期機能開発",
@@ -141,7 +147,8 @@
       ],
       "note": "都度作成・定型化されていない",
       "blocker": "not_started",
-      "unblocked_by": "定型化されていない。テンプレートと検査を作れば実行側へ動く"
+      "unblocked_by": "定型化されていない。テンプレートと検査を作れば実行側へ動く",
+      "unlock": "impl_product"
     },
     {
       "area": "① 次期機能開発",
@@ -185,7 +192,8 @@
       ],
       "note": "D28はBQ蓄積28日到達待ち（9/6前後）",
       "blocker": "external_data",
-      "unblocked_by": "BigQuery の28日蓄積待ち（9/6前後）"
+      "unblocked_by": "BigQuery の28日蓄積待ち（9/6前後）",
+      "unlock": "bq_28d"
     },
     {
       "area": "① 次期機能開発",
@@ -218,7 +226,8 @@
       "evidence": [],
       "note": "コンテンツ側は完走。機能側0件",
       "blocker": "not_started",
-      "unblocked_by": "カナリアガードを本番のフラグ1つで1周させる。実装済み（rollout-guard.ts）で、要るのは実行"
+      "unblocked_by": "カナリアガードを本番のフラグ1つで1周させる。実装済み（rollout-guard.ts）で、要るのは実行",
+      "unlock": "impl_product"
     },
     {
       "area": "② バグ修正",
@@ -259,7 +268,8 @@
       ],
       "note": "手動運用。ただしWatch同期は実績あり",
       "blocker": "external_data",
-      "unblocked_by": "問い合わせ本文が D1 にあり、リポジトリからは読めない"
+      "unblocked_by": "問い合わせ本文が D1 にあり、リポジトリからは読めない",
+      "unlock": "inquiry_facts"
     },
     {
       "area": "② バグ修正",
@@ -521,7 +531,8 @@
       "evidence": [],
       "note": "自動連携なし。手動エクスポート",
       "blocker": "external_credential",
-      "unblocked_by": "3社ぶんのAPI鍵と契約"
+      "unblocked_by": "3社ぶんのAPI鍵と契約",
+      "unlock": "analytics_vendors"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -548,7 +559,8 @@
       ],
       "note": "月1・オーナーが手動",
       "blocker": "external_credential",
-      "unblocked_by": "生成AI検索を叩く経路が無い"
+      "unblocked_by": "生成AI検索を叩く経路が無い",
+      "unlock": "analytics_vendors"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -574,7 +586,8 @@
       ],
       "note": "2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人",
       "blocker": "external_data",
-      "unblocked_by": "外部の順位・トレンドを取る経路が無い"
+      "unblocked_by": "外部の順位・トレンドを取る経路が無い",
+      "unlock": "trend_source"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -645,7 +658,8 @@
       ],
       "note": "34本作成済みだが実験として回っていない",
       "blocker": "external_data",
-      "unblocked_by": "露出データがASCから降りないと評価できない。feature-score も確信度0.15で「まず測る」判定"
+      "unblocked_by": "露出データがASCから降りないと評価できない。feature-score も確信度0.15で「まず測る」判定",
+      "unlock": "asc_reports"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -1095,7 +1109,8 @@
       ],
       "note": "2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**",
       "blocker": "external_data",
-      "unblocked_by": "ASC Analytics のレポートがまだ0件。降りれば照合は書ける"
+      "unblocked_by": "ASC Analytics のレポートがまだ0件。降りれば照合は書ける",
+      "unlock": "asc_reports"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1118,7 +1133,8 @@
       ],
       "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる",
       "blocker": "external_data",
-      "unblocked_by": "同上。CACは広告費ゼロのため定義上存在しない"
+      "unblocked_by": "同上。CACは広告費ゼロのため定義上存在しない",
+      "unlock": "asc_reports"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1190,7 +1206,8 @@
       "evidence": [],
       "note": "3リポジトリに証跡ゼロ",
       "blocker": "external_credential",
-      "unblocked_by": "freee の読み取りは入ったが、銀行・カードの明細連携が無い"
+      "unblocked_by": "freee の読み取りは入ったが、銀行・カードの明細連携が無い",
+      "unlock": "bank_feed"
     },
     {
       "area": "⑦ 法人経営",
@@ -1202,7 +1219,8 @@
       ],
       "note": "2026-08-22に台帳と検査を実装。**ただし6件すべて未把握。**決算期・従業員の有無・課税事業者かどうかがリポジトリから取れず、**機械はいま何も見張っていない。**埋まれば期限計算はできる（決算期が入れば申告期限は機械が出せる）。**「把握していない」を「余裕がある」と読ませない**ための器であって、実行ではない",
       "blocker": "external_data",
-      "unblocked_by": "決算期・従業員の有無・課税事業者かがリポジトリに無い。入れば期限計算は機械が出せる"
+      "unblocked_by": "決算期・従業員の有無・課税事業者かがリポジトリに無い。入れば期限計算は機械が出せる",
+      "unlock": "company_facts"
     },
     {
       "area": "⑦ 法人経営",
@@ -1214,7 +1232,8 @@
       ],
       "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）",
       "blocker": "missing_source_document",
-      "unblocked_by": "契約書がリポジトリに無い"
+      "unblocked_by": "契約書がリポジトリに無い",
+      "unlock": "contract_docs"
     },
     {
       "area": "⑦ 法人経営",
@@ -1227,7 +1246,8 @@
       ],
       "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること",
       "blocker": "missing_source_document",
-      "unblocked_by": "書面契約が無く各社規約への同意で成立。規約本文を読むのは人"
+      "unblocked_by": "書面契約が無く各社規約への同意で成立。規約本文を読むのは人",
+      "unlock": "vendor_terms"
     },
     {
       "area": "⑦ 法人経営",
@@ -1259,7 +1279,8 @@
       "evidence": [],
       "note": "3リポジトリに証跡ゼロ",
       "blocker": "missing_source_document",
-      "unblocked_by": "契約書と請求書がリポジトリに無い"
+      "unblocked_by": "契約書と請求書がリポジトリに無い",
+      "unlock": "contract_docs"
     },
     {
       "area": "⑦ 法人経営",
@@ -1271,7 +1292,8 @@
       ],
       "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る",
       "blocker": "missing_source_document",
-      "unblocked_by": "DPAの確認そのものが人の作業。6社が未確認"
+      "unblocked_by": "DPAの確認そのものが人の作業。6社が未確認",
+      "unlock": "vendor_terms"
     },
     {
       "area": "⑦ 法人経営",
@@ -1283,7 +1305,8 @@
       ],
       "note": "2026-08-22に台帳と検査を実装。5件中2件は所在があり（規約への同意・App Reviewのやり取り）、**3件は所在が決まっていない**（議事録・株主名簿・事故記録）。事故記録は「発生していない」のか「記録する場所が無い」のかを区別できていない",
       "blocker": "missing_source_document",
-      "unblocked_by": "議事録・株主名簿・事故記録の所在が決まっていない"
+      "unblocked_by": "議事録・株主名簿・事故記録の所在が決まっていない",
+      "unlock": "corp_records"
     },
     {
       "area": "⑦ 法人経営",
@@ -1349,7 +1372,8 @@
       "evidence": [],
       "note": "同上。加えて返金は不可逆で、承認境界の設計が先",
       "blocker": "approval_design_first",
-      "unblocked_by": "返金は不可逆。承認境界を決めるまで実装しない"
+      "unblocked_by": "返金は不可逆。承認境界を決めるまで実装しない",
+      "unlock": "reply_gate"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1358,7 +1382,8 @@
       "evidence": [],
       "note": "ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先",
       "blocker": "approval_design_first",
-      "unblocked_by": "公開される文面。承認境界を決めてから。ASC APIそのものは可能"
+      "unblocked_by": "公開される文面。承認境界を決めてから。ASC APIそのものは可能",
+      "unlock": "reply_gate"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1384,7 +1409,8 @@
       ],
       "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**",
       "blocker": "approval_design_first",
-      "unblocked_by": "返信の自動化が無いので発火しない。返信の承認境界が先"
+      "unblocked_by": "返信の自動化が無いので発火しない。返信の承認境界が先",
+      "unlock": "reply_gate"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1407,7 +1433,8 @@
       ],
       "note": "手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）",
       "blocker": "external_data",
-      "unblocked_by": "同上（問い合わせ本文がD1）"
+      "unblocked_by": "同上（問い合わせ本文がD1）",
+      "unlock": "inquiry_facts"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1460,7 +1487,8 @@
       ],
       "note": "2026-08-22にASC取得の配線が入った（③参照）。Analytics Reports の Subscription 系に解約理由が含まれる見込みだが、**まだ取得していないので確認できていない。**含まれなければアプリ内の導線が要る",
       "blocker": "external_data",
-      "unblocked_by": "ASC Analytics の Subscription 系がまだ降りていない"
+      "unblocked_by": "ASC Analytics の Subscription 系がまだ降りていない",
+      "unlock": "asc_reports"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1469,7 +1497,8 @@
       "evidence": [],
       "note": "StoreKit側の失敗イベントを受ける経路が未実装",
       "blocker": "not_started",
-      "unblocked_by": "StoreKit の失敗イベントを受ける経路を作れば動く"
+      "unblocked_by": "StoreKit の失敗イベントを受ける経路を作れば動く",
+      "unlock": "impl_product"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1478,7 +1507,8 @@
       "evidence": [],
       "note": "金銭が動く不可逆な操作。承認境界の設計が先",
       "blocker": "approval_design_first",
-      "unblocked_by": "金銭が動く不可逆操作"
+      "unblocked_by": "金銭が動く不可逆操作",
+      "unlock": "refund_boundary"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1856,7 +1886,8 @@
       "evidence": [],
       "note": "AIが担える設計だが未着手",
       "blocker": "not_started",
-      "unblocked_by": "AIが担える設計。着手していないだけ"
+      "unblocked_by": "AIが担える設計。着手していないだけ",
+      "unlock": "impl_analog"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1876,7 +1907,8 @@
       "evidence": [],
       "note": "未着手",
       "blocker": "not_started",
-      "unblocked_by": "同上。ただし現在は従業員がいない"
+      "unblocked_by": "同上。ただし現在は従業員がいない",
+      "unlock": "impl_analog"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1896,7 +1928,8 @@
       "evidence": [],
       "note": "未着手",
       "blocker": "not_started",
-      "unblocked_by": "制度の探索に外部検索が要るが、期限管理と下書きは作れる"
+      "unblocked_by": "制度の探索に外部検索が要るが、期限管理と下書きは作れる",
+      "unlock": "impl_analog"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1919,7 +1952,8 @@
       ],
       "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ",
       "blocker": "missing_source_document",
-      "unblocked_by": "契約書がリポジトリに無い"
+      "unblocked_by": "契約書がリポジトリに無い",
+      "unlock": "contract_docs"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1939,7 +1973,8 @@
       "evidence": [],
       "note": "本セッション自体がその実例（調査→実装→検証）",
       "blocker": "not_started",
-      "unblocked_by": "実例はあるが定型の実行経路が無い"
+      "unblocked_by": "実例はあるが定型の実行経路が無い",
+      "unlock": "impl_analog"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1959,7 +1994,8 @@
       "evidence": [],
       "note": "未着手",
       "blocker": "not_started",
-      "unblocked_by": "同上"
+      "unblocked_by": "同上",
+      "unlock": "impl_analog"
     },
     {
       "area": "⑬ アナログ領域",
