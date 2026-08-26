@@ -1,0 +1,244 @@
+{
+  "$comment": [
+    "**止める仕組みが、実際に止まることを確かめた記録。**",
+    "scripts/check-stop-drills.mjs が検査する。",
+    "",
+    "【なぜ要るか】台帳の note には既に散文でこう書いてあった ——",
+    "「本番でまだ1回も発火していない」「本番で kill を1回も通していない",
+    "（止まることを確かめていない停止機構は無いのと同じ）」。",
+    "**このリポジトリは prose-does-not-stop-an-agent を学びとして持っている。**",
+    "散文のままにせず、数えられる形にした。",
+    "",
+    "【この台帳が出す数】止める仕組みの総数と、**本番で止まることを確かめた件数**。",
+    "後者が 0 なら 0 と書く。**実装した件数で代用しない。**",
+    "",
+    "【段階を分ける理由】単体テストと本番を同じ語で呼ばないため。",
+    "「fail closed にテストがある」と「本番で引いたら止まった」は別の主張で、",
+    "後者だけが停止機構の存在証明になる。",
+    "",
+    "【訓練を促す台帳ではない】訓練するかは**止める対象が本番にあるか**で決まり、",
+    "それは人の判断（本番で kill を引けば利用者に影響が出る）。",
+    "ここが持つのは「確かめていない」を「確かめた」に見せない、という一点だけ。"
+  ],
+  "levels": {
+    "static": "配線があることを検査で確かめた（その経路が停止判定を参照している）",
+    "unit": "単体テストで「止まる側に倒れる」ことを確かめた",
+    "local": "**本番と同じ式・同じコマンド**を手元で通し、止まる出力を観測した",
+    "production": "本番の実行で実際に止まった（止めた対象が存在した）"
+  },
+  "measured_at": "2026-08-26",
+  "production_verified": 0,
+  "$production_verified": "**本番で止まることを確かめた仕組みは0件。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。",
+  "mechanisms": [
+    {
+      "id": "emergency-stop-all",
+      "stops": "主系（GitHub Actions）と副系（CCR）の自動運転すべて",
+      "evidence": [
+        "data/emergency-stop.json",
+        ".github/workflows/obsidian-autopilot.yml",
+        "scripts/check-emergency-stop.mjs",
+        "scripts/autopilot-gate.mjs"
+      ],
+      "how_to_drill": "data/emergency-stop.json の複製に stopped:true と reason を入れ、obsidian-autopilot.yml の『緊急停止の確認』step と同じ node -p 式を通す。STOP が非空になり step が exit 1 で落ちること、::warning に理由が出ることを見る。**本番の台帳は触らない。**",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "obsidian-autopilot.yml『緊急停止の確認』step の式を複製した台帳に対して実行",
+          "observed": "stopped:true・reason『訓練: 全体停止が効くか』で STOP='all:訓練: 全体停止が効くか'、step は exit 1、GITHUB_OUTPUT に stopped=true、::warning に理由が出た。停止を立てていない現行の台帳では STOP='' で exit 0。**理由を null にした場合も止まり、『all:理由未記入』と出た**（理由が無くても止まる側に倒れる）"
+        }
+      ],
+      "blocked_by": "本番で止める必要がまだ生じていない。**わざと立てて確かめるとその日の主系が止まる**ので、実行するかはオーナー判断（止まること自体は上の local で観測済み）"
+    },
+    {
+      "id": "emergency-stop-agent",
+      "stops": "経路ごとの自動運転（actions / ccr-0730 / ccr-0920 / owner-session / audit）",
+      "evidence": [
+        "data/emergency-stop.json",
+        ".github/workflows/obsidian-autopilot.yml",
+        "scripts/check-emergency-stop.mjs"
+      ],
+      "how_to_drill": "同上。agents.actions.stopped:true にして、全体停止ではなく経路名で止まることを見る（『主系だけ止めたい』が効くか）",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "同上",
+          "observed": "agents.actions.stopped:true で STOP='actions:訓練: 主系だけ止まるか'、exit 1。全体停止と区別された文字列で出るので、**どちらで止まったかがログから分かる**"
+        }
+      ],
+      "blocked_by": "同上"
+    },
+    {
+      "id": "budget-gate",
+      "stops": "当月のAI実費が上限に達したときの、主系のその日の run",
+      "evidence": [
+        "scripts/autopilot-budget.mjs",
+        "data/autopilot-cost.json",
+        ".github/workflows/obsidian-autopilot.yml",
+        ".github/workflows/autopilot-act.yml"
+      ],
+      "how_to_drill": "scripts/ と data/ を複製した先で autopilot-cost.json の runs に上限を超える total_cost_usd を足し、**本番と同じ `node scripts/autopilot-budget.mjs --check`** を実行する。非ゼロ終了と ::warning を見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "node <複製>/scripts/autopilot-budget.mjs --check",
+          "observed": "当月 $45.0445 / 上限 $40.0000 で exit 1、::warning『当月の実費 $45.0445 が上限 $40.0000 に到達。主系runをスキップする。』が出た。上限内の現行台帳（$20.0445）では exit 0。**副系CCRは別経路なので、この停止では止まらない**（台帳の on_exceed_note どおり）"
+        }
+      ],
+      "blocked_by": "当月の実費が上限に達していない（$20.04 / $40.00）。**到達を待つ性質のもので、作りに行くものではない**"
+    },
+    {
+      "id": "flag-kill",
+      "stops": "アプリの個別機能を、全端末で即座にオフ（rollout を無視する）",
+      "evidence": [
+        "../simplememo-api/src/flags.ts",
+        "../simplememo-api/test/flags.test.ts",
+        "../simplememo-api/src/config.ts"
+      ],
+      "how_to_drill": "本番: /admin/flags/kill に key を渡し、GET /v1/config の killed に載ること、端末が次の取得でオフになることを見る。**利用者に影響が出るので、訓練用のフラグを1つ用意してからにする**",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "test/flags.test.ts 40件が通る。kill が rollout 100 を無視すること、kill が rollout を保存したまま立ち降ろすと元の配布率に戻ること、存在しないフラグの kill が 404 になること、KV が読めない/壊れている/例外を投げる場合に全部オフへ倒れることを、**実物の handleRemoteConfig を通して**確かめている"
+        }
+      ],
+      "blocked_by": "本番で引くと利用者の機能が消える。**訓練用のフラグ（誰の挙動も変えないもの）を1つ用意すれば本番でも確かめられる** —— これが次の一手。オーナー判断"
+    },
+    {
+      "id": "flag-global-kill",
+      "stops": "アプリのリモートフラグ全部（最後の手段側）",
+      "evidence": [
+        "../simplememo-api/src/flags.ts",
+        "../simplememo-api/test/flags.test.ts"
+      ],
+      "how_to_drill": "REMOTE_FLAGS_JSON 相当の環境変数を 'true' にして /v1/config を叩き、既知の全キーが killed に入り max_stale_seconds が 60 に落ちることを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "globalKillPayload が既知キーを全部 killed に入れること（空 payload では足りない）、'True' や '1' では発動しないことをテストが固定している。**空 payload にしない理由が設計に書いてある** —— クライアントは rollout も killed も無いキーをコンパイル既定で解決するため"
+        }
+      ],
+      "blocked_by": "本番で引くと全機能が既定へ倒れる。flag-kill の訓練が先"
+    },
+    {
+      "id": "rollout-guard-kill",
+      "stops": "段階公開中の機能を、指標が割れたときに自動で",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "how_to_drill": "段階公開中のフラグを1つ用意し、観測値を閾値割れにして cron を回す。kill が立ち、履歴に by='guard' が残ることを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "test/rollout-guard.test.ts 24件が通る。起動完走率・送信成功率・エディタ→送信到達率のどれか1つでも割れたら止めること、凍結中でも kill は走ることを確かめている"
+        }
+      ],
+      "blocked_by": "**段階公開中のフラグがゼロなので、発火する対象そのものが存在しない。**v5.8.1 でクライアント側は本番に載ったので、フラグを1つ段階公開に載せた時点で初めて発火しうる状態になる"
+    },
+    {
+      "id": "rollout-guard-freeze",
+      "stops": "段階公開の昇格（promote）。kill は凍結中でも走る",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/src/daily-actions.ts"
+      ],
+      "how_to_drill": "凍結を立てた状態で判定を回し、promote が『昇格は凍結中のため提案しない』になり、kill 側は変わらないことを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "freeze.frozen のとき decide() が昇格を提案せず理由を返すこと、未配線の環境では frozen:false が返って**既存の挙動を変えない**ことがテストと実装に入っている"
+        }
+      ],
+      "blocked_by": "rollout-guard-kill と同じ。昇格する対象が無い"
+    },
+    {
+      "id": "marketing-stoploss",
+      "stops": "効いていないマーケ施策（revert / hold の提案。expand は返さない）",
+      "evidence": [
+        "growth/lib/stoploss.mjs",
+        "growth/scripts/check-stoploss.mjs",
+        "growth/experiments/experiments.json"
+      ],
+      "how_to_drill": "実データに対して --check を回す。judge が revert/hold を返す施策が出たら、その根拠（Wilson区間・観測期間）が出力に出ることを見る",
+      "drills": [
+        {
+          "at": "2026-08-25",
+          "level": "local",
+          "by": "ai",
+          "command": "node growth/scripts/check-stoploss.mjs --check",
+          "observed": "実データで1件に反応した（『line キープメモ サービス終了』）が、**これは誤検知だった** —— 対象ページは experiments.json で abandoned 済み。原因は台帳が均質だと仮定していたこと（進行中21件に target_metric が8種類ある）で、measuresPageCtr() で構造的に直した。**判定が動くことは観測できたが、正しい対象に当たることは1回目で外している**"
+        }
+      ],
+      "blocked_by": "**revert を実際に実行したことは一度も無い。**判定は出るが、施策を戻す操作は人が行う（広げる方向の非対称の裏返し）"
+    },
+    {
+      "id": "release-preflight",
+      "stops": "検査が緑でないコミットでのタグ作成（＝出荷）",
+      "evidence": [
+        "../simplememo-ios/scripts/release_preflight.rb",
+        "../simplememo-ios/.github/workflows/release.yml"
+      ],
+      "how_to_drill": "赤い check-run を持つ SHA を --sha に渡し、tag ジョブへ進まないことを見る。--override は理由必須で、通した回がジョブ要約に残ることも合わせて見る",
+      "drills": [
+        {
+          "at": "2026-08-25",
+          "level": "unit",
+          "by": "ai",
+          "observed": "self-test 16件。**未実行・API が引けない・検査が存在しない のいずれも緑ではない**ことと、同名の check-run が複数あるとき全部の緑を求めること（1つだけ緑にして通す経路を作らない）を固定している"
+        }
+      ],
+      "blocked_by": "赤いコミットで出荷しようとした機会がまだ無い（実装が 2026-08-25）。**機会を作りに行くものではない**"
+    },
+    {
+      "id": "auto-merge-verified-sha",
+      "stops": "検証を通っていない SHA が main に入ること（＝本番デプロイ）",
+      "evidence": [
+        ".github/workflows/auto-merge.yml",
+        ".github/workflows/seo-check.yml"
+      ],
+      "how_to_drill": "SEO Validation が落ちる PR を作り、auto-merge が発火しないことを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "observed": "auto-merge.yml を読んで配線を確認した: workflow_run で起動（L18）、`conclusion == 'success'` のときだけ走る（L28）、マージ対象を `run.head_sha` に固定（L46）、**検証後に push された PR は head.sha が違うので見送る**（L74）、draft は対象外（L67）。**ただし止まった実例は観測していない** —— 直近30件のPRはすべて merged_at を持っており、検証で止められた回が1件も無い。**通ったことは、止まることの証明にならない。**"
+        }
+      ],
+      "blocked_by": "検証が落ちる PR がまだ出ていない。**わざと落として確かめることはできるが、本番デプロイ経路で意図的に赤を作るので、やるならオーナー判断**"
+    },
+    {
+      "id": "credential-revocation",
+      "stops": "すべての自動運転（この仕組みの外側からの最後の手段）",
+      "evidence": [
+        "data/credential-expiry.json",
+        "scripts/check-credentials.mjs",
+        "data/emergency-stop.json"
+      ],
+      "how_to_drill": "`node scripts/check-credentials.mjs --stop <経路>` が、その経路を止める鍵と失効手順を出すことを見る。実際の失効は各社コンソールでの人の操作",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "observed": "`node scripts/check-credentials.mjs --stop actions` を実行した。主系を止める鍵3件（ANTHROPIC_API_KEY / CLAUDE_CODE_OAUTH_TOKEN / GH_PAT）と、それぞれの失効手順・失効したとき何が止まり何が生き残るかが出た（例: API キー単独では OAuth が残るので止まらない、GH_PAT は『静かに寝る』ではなく赤く落ちる）。**最後の手段が指す先が空でないことは確かめた。****失効そのものは一度も行っていないので、止まることは確かめていない** —— この記録が static に留まるのはそのため。"
+        }
+      ],
+      "blocked_by": "**失効操作は各社コンソールへのログインが要り、機械からは行えない。**加えて critical 5件のうち4件は期限日すら未把握なので、監視の側も完全ではない"
+    }
+  ]
+}

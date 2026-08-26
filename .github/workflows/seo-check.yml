@@ -405,6 +405,15 @@ jobs:
       # そこで真偽値を served_by_site に改名し、リポジトリ側の状態は
       # REPO_PRIVATE の実測と突き合わせる。**否定は script 側で三値のまま行う**
       # （`!private` を YAML で計算すると、値が空のとき「公開」を名乗る）。
+      # 【停止機構の訓練】④自動本番デプロイ。**「実装した」と「止まることを
+      # 確かめた」を同じ語で呼ばない。**台帳の note には散文で「本番でまだ1回も
+      # 発火していない」と書いてあったが、散文はこのリポジトリでは効かない
+      # （prose-does-not-stop-an-agent）。数えられる形にした。
+      - name: Stop-mechanism drills
+        run: |
+          node scripts/check-stop-drills.mjs --selftest
+          node scripts/check-stop-drills.mjs --check
+
       - name: Data publication policy
         env:
           REPO_PRIVATE: ${{ github.event.repository.private }}
