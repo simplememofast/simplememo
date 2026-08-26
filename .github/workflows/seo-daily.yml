@@ -118,6 +118,10 @@ jobs:
           '
 
       # エクスポートが届いているか。--strict で、止まっていたらここで失敗する。
+      #
+      # 出力を control フラグではなくファイルに落としているのは、下の復旧ステップが
+      # **失敗したときの本文そのもの**を分類に使うため。要約に出た文字列を
+      # 人が読んで判断していたのが、この経路が長く `nobody` だった理由。
       - name: Export preflight
         id: preflight
         run: |
@@ -126,10 +130,26 @@ jobs:
             echo ""
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          node growth/scripts/bq-preflight.mjs --strict 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          node growth/scripts/bq-preflight.mjs --strict 2>&1 | tee "${{ runner.temp }}/preflight.log" | tee -a "$GITHUB_STEP_SUMMARY"
           status=${PIPESTATUS[0]}
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           exit $status
+
+      # 【取り込み復旧】preflight が落ちた回を、機械が分類して1行残す。
+      #
+      # **落ちる/落ちないは変えていない。** 変えたのは、落ちた回が
+      # 「誰かが要約を読むまで何も起きない」状態だったこと。
+      # ここで分類（一過性 / 失効 / 設定誤り / 停止 / 欠測 / 不明）まで機械が決め、
+      # 退避先と、人にしかできない手が要るかどうかを台帳に置く。
+      # 翌朝のレーンF（自己修復）が未修理の故障としてこれを拾う。
+      #
+      # **人が要る回を「復旧した」と書かない。**その歯止めは
+      # scripts/recover-ingest.mjs の check() が持っていて、seo-check が回している。
+      - name: Ingest recovery (record + classify)
+        if: failure() && steps.preflight.outcome == 'failure'
+        run: |
+          node scripts/recover-ingest.mjs --record "$(tail -c 2000 '${{ runner.temp }}/preflight.log')" \
+            | tee -a "$GITHUB_STEP_SUMMARY"
 
       # 毎日の取り込みは GROWTH_GSC_DIR で捨て場所に書く。
       # コミットされるのは下の weekly ステップだけ。

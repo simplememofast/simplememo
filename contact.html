@@ -304,6 +304,83 @@
       }
     }
 
+
+    /* お問い合わせフォーム。既存トークン（--accent / --border / --text-muted）を使う。 */
+    .inquiry-form {
+      max-width: 640px;
+      margin: 0 auto 3rem;
+      text-align: left;
+    }
+    .inquiry-form__lead {
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+    .inquiry-form__label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .inquiry-form__textarea,
+    .inquiry-form__input {
+      width: 100%;
+      background: rgba(15, 20, 30, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #fff;
+      font: inherit;
+      padding: 0.85rem 1rem;
+      /* iOS が16px未満の入力欄でズームするのを避ける */
+      font-size: 16px;
+    }
+    .inquiry-form__textarea { resize: vertical; min-height: 9rem; }
+    .inquiry-form__textarea:focus-visible,
+    .inquiry-form__input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+    .inquiry-form__counter {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-align: right;
+      margin: 0.35rem 0 1.5rem;
+    }
+    .inquiry-form__hint {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin: 0.5rem 0 1.75rem;
+    }
+    .inquiry-form__submit {
+      background: var(--accent);
+      color: #04101f;
+      border: none;
+      border-radius: 999px;
+      font: inherit;
+      font-weight: 700;
+      padding: 0.9rem 2.5rem;
+      min-height: 48px;
+      cursor: pointer;
+    }
+    .inquiry-form__submit:disabled { opacity: 0.55; cursor: default; }
+    .inquiry-form__submit:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .inquiry-form__status {
+      margin: 1rem 0 0;
+      min-height: 1.5rem;
+      font-size: 0.95rem;
+    }
+    .inquiry-form__status--ok { color: #7ee0a5; }
+    /* 失敗は色だけで伝えない（色覚と、色が出ない環境の両方のため） */
+    .inquiry-form__status--error { color: #ff9b9b; font-weight: 700; }
+    .inquiry-form__status--error::before { content: "⚠ "; }
+    .inquiry-form__status--pending { color: var(--text-muted); }
+    .inquiry-form__privacy {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
   </style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
 </head>
@@ -358,10 +435,45 @@
         <span lang="en" data-lang="en">Contact Us</span>
       </h1>
       
+      <form id="inquiry-form" class="inquiry-form" novalidate>
+        <p class="inquiry-form__lead">
+          <span lang="ja" data-lang="ja">不具合のご報告、使い方のご質問、ご要望をお送りください。</span>
+          <span lang="en" data-lang="en">Send us a bug report, a question about how to use the app, or a request.</span>
+        </p>
+
+        <label class="inquiry-form__label" for="inquiry-body">
+          <span lang="ja" data-lang="ja">お問い合わせ内容</span>
+          <span lang="en" data-lang="en">Your message</span>
+        </label>
+        <textarea id="inquiry-body" class="inquiry-form__textarea" rows="8" maxlength="4000" required></textarea>
+        <p id="inquiry-counter" class="inquiry-form__counter">0 / 4000</p>
+
+        <label class="inquiry-form__label" for="inquiry-email">
+          <span lang="ja" data-lang="ja">返信先メールアドレス（任意）</span>
+          <span lang="en" data-lang="en">Email for our reply (optional)</span>
+        </label>
+        <input id="inquiry-email" class="inquiry-form__input" type="email" autocomplete="email" inputmode="email">
+        <p class="inquiry-form__hint">
+          <span lang="ja" data-lang="ja">未記入でも送信できます。その場合、こちらから返信はできません。</span>
+          <span lang="en" data-lang="en">You can send without it — but then we have no way to reply.</span>
+        </p>
+
+        <button id="inquiry-submit" class="inquiry-form__submit" type="submit">
+          <span lang="ja" data-lang="ja">送信する</span>
+          <span lang="en" data-lang="en">Send</span>
+        </button>
+        <p id="inquiry-status" class="inquiry-form__status" role="status" aria-live="polite"></p>
+
+        <p class="inquiry-form__privacy">
+          <span lang="ja" data-lang="ja">お問い合わせ内容は最大180日間保存し、その後削除します。メールアドレスは<strong>ハッシュ化して保存</strong>し、そのままの形では残しません。用件によっては自動で定型のご案内をお送りします（返金・退会・個人情報に関するご連絡は、必ず人が確認します）。</span>
+          <span lang="en" data-lang="en">Messages are kept for up to 180 days, then deleted. Your email address is <strong>stored as a hash</strong>, never in plain form. Some messages get an automatic templated reply — anything about refunds, account deletion, or privacy is always read by a person.</span>
+        </p>
+      </form>
+
       <div class="contact-info">
         <p class="contact-info__label">
-          <span lang="ja" data-lang="ja">連絡先</span>
-          <span lang="en" data-lang="en">Contact Info</span>
+          <span lang="ja" data-lang="ja">メールでのご連絡</span>
+          <span lang="en" data-lang="en">Or email us</span>
         </p>
         <!--email_off--><a href="mailto:support&#64;simplememofast.com" class="contact-info__email">support&#64;simplememofast.com</a><!--/email_off-->
       </div>
@@ -411,5 +523,6 @@
   });
   </script>
   <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+  <script src="/js/contact-form.js?v=a29c9ca3f4" defer></script>
 </body>
 </html>
