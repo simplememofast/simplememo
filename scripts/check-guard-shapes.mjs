@@ -205,6 +205,91 @@ export function scan(src) {
   return [...byKey.values()].sort((a, b) => a.line - b.line);
 }
 
+/**
+ * **第2の族: 仮引数に対する「無いかもしれない」判定。**
+ *
+ * 汚染の伝播は `const NAME = ...` を追うので、**関数の仮引数には付かない。**
+ * そのせいで同じ形を2度取り逃した:
+ *
+ *   #638  policyDrift(policy, series)         `declared === undefined` → return []
+ *   #639  validateApprovals(_, {monthlyCap})  上限の突き合わせが消える（**金額**）
+ *
+ * 引数まで汚染を広げるとほぼ全部に付くので、**形のほうで絞る** ——
+ * 仮引数に対する null/undefined 判定だけを拾う。25件（lib を除く）を
+ * 1件ずつ読んだところ、大半は `—` / `n/a` を出す表示整形で、
+ * **欠けていることを隠さず出している側**だった。本物は1件
+ * （check-model-routing の `workflow !== null`）。
+ */
+const FN_SIG = /function\s+[A-Za-z_$][\w$]*\s*\(([^)]*)\)|\(([^)]*)\)\s*=>/g;
+const NULL_TEST = /(?<![\w$.])([A-Za-z_$][\w$]*)\s*(?:!==?|===?)\s*(?:null|undefined)/g;
+
+function paramsOf(sig) {
+  const out = new Set();
+  let depth = 0; let cur = '';
+  for (const ch of `${sig},`) {
+    if ('{[('.includes(ch)) depth++;
+    else if ('}])'.includes(ch)) depth--;
+    if (ch === ',' && depth === 0) {
+      const m = cur.match(/^\s*([A-Za-z_$][\w$]*)/);
+      if (m) out.add(m[1]);
+      for (const m2 of cur.matchAll(/([A-Za-z_$][\w$]*)\s*=/g)) out.add(m2[1]);
+      cur = '';
+    } else cur += ch;
+  }
+  return out;
+}
+
+export function scanParams(src) {
+  const m = mask(src);
+  const params = new Set();
+  for (const mo of m.matchAll(FN_SIG)) {
+    for (const p of paramsOf(mo[1] ?? mo[2] ?? '')) params.add(p);
+  }
+  const lines = src.split('\n');
+  const byLine = new Map();
+  for (const g of m.matchAll(NULL_TEST)) {
+    if (!params.has(g[1])) continue;
+    const line = m.slice(0, g.index).split('\n').length;
+    if (!byLine.has(line)) byLine.set(line, { line, expr: g[1], text: lines[line - 1].trim() });
+  }
+  return [...byLine.values()].sort((a, b) => a.line - b.line);
+}
+
+export function scanAllParams() {
+  const out = [];
+  for (const rel of sources()) {
+    for (const s of scanParams(fs.readFileSync(path.join(ROOT, rel), 'utf8'))) {
+      out.push({ ...s, file: rel });
+    }
+  }
+  return out;
+}
+
+/**
+ * **検査が実際に見るもの全部**を1つの関数にまとめる。
+ *
+ * [2026-08-26] main ブロックに配線が散っていると、**--selftest から見えない。**
+ * この工程で3度踏んだ（check-generators の --write、check-financial-policy の
+ * 上限必須、そしてここ）。族を1つ足したのに main へ繋ぎ忘れても、
+ * 「比較する関数は動く」ほうのテストだけが通って緑になる。
+ * **配線そのものを1つの関数にして、自己テストから呼ぶ。**
+ */
+export function allProblems(led) {
+  const sites = scanAll();
+  const params = scanAllParams();
+  const cov = coverage();
+  return {
+    sites,
+    params,
+    cov,
+    problems: [
+      ...validate(sites, led.known),
+      ...checkCoverage(cov, led),
+      ...validate(params, led.param_guards || []),
+    ],
+  };
+}
+
 /** 台帳の鍵。行番号は動くので**ファイル＋式**で持つ。 */
 export const siteKey = (file, expr) => `${file}::${expr}`;
 
@@ -345,6 +430,26 @@ const SCENARIOS = [
     const src = '// aaaa\nconst a = 1;\n';
     assert(mask(src).length === src.length, '長さが変わった');
   }],
+  ['**仮引数の判定を拾う**（汚染では届かない族）', () => {
+    const hits = scanParams('function f(cap) { if (cap !== null && x) return 1; }\n');
+    assert(hits.some((h) => h.expr === 'cap'), JSON.stringify(hits));
+  }],
+  ['仮引数でない値は拾わない', () => {
+    const hits = scanParams('function f(a) { if (b !== null) return 1; }\n');
+    assert(hits.length === 0, JSON.stringify(hits));
+  }],
+  ['**実データの仮引数判定が台帳と合っている**', () => {
+    const led = readLedger(LEDGER_PATH);
+    const p = validate(scanAllParams(), led.param_guards || []);
+    assert(p.length === 0, `${p.length} 件: ${p.slice(0, 2).join(' / ')}`);
+  }],
+  ['**仮引数の族が本当に配線されている**（比較関数が動くだけでは足りない）', () => {
+    const led = readLedger(LEDGER_PATH);
+    assert(allProblems(led).problems.length === 0, '実データで問題が出た');
+    const short = { ...led, param_guards: (led.param_guards || []).slice(1) };
+    assert(allProblems(short).problems.length > 0,
+      '**仮引数の台帳から1件消しても通った** — main へ繋がっていない');
+  }],
   ['**実データが台帳と合っている**', () => {
     const led = readLedger(LEDGER_PATH, { onMissing: null, why: '読んだ記録が無い' });
     assert(led !== null, 'data/guard-shapes.json が無い');
@@ -399,13 +504,14 @@ if (isMain) {
     process.exit(1);
   }
   requireShape(led, ['known'], { what: 'data/guard-shapes.json', why: '読んだ記録と突き合わせられない' });
-  const cov = coverage();
-  const problems = [...validate(sites, led.known), ...checkCoverage(cov, led)];
+  const { params, cov, problems } = allProblems(led);
 
   console.log(`正が無いと消えうる規則の形 — ${sites.length} 箇所`
     + `（読んだ記録 ${led.known.length} 件）`);
   // **見た本数を必ず出す。**「候補0件」と「そのファイルを見ていない」は
   // 出力が同じになりうるので、母数のほうを毎回書く
+  console.log(`  仮引数の「無いかもしれない」判定 — ${params.length} 箇所`
+    + `（読んだ記録 ${(led.param_guards || []).length} 件）`);
   console.log(`  走査 ${cov.total} 本中 ${cov.seen.length} 本を実際に見た`
     + `（${cov.blind.length} 本は台帳由来の束縛なしと台帳に明記）\n`);
   if (problems.length) {
