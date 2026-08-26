@@ -124,6 +124,12 @@
       "ledger": "data/review-intake.json",
       "was": "`if (intakeIds.size && !intakeIds.has(id))` —— **捌いた台帳が空だと規則が丸ごと消える。**空 = 「1件も捌いていない」なので下書きが在れば全部が違反のはずだが、「照合する相手が無いから飛ばす」と読んでいた。守っていたのは『分類より先に文面を書かない』で、**返信の公開は取り消せない**",
       "now": "requireShape で {} を弾き、空の Set は「1件も捌いていない」として全部を違反にする。null（照合しない）とは別に扱う"
+    },
+    {
+      "script": "scripts/check-pr-facts.mjs",
+      "ledger": "data/benchmark.json",
+      "was": "`check: (m) => READY !== undefined && Number(m[1]) !== READY` —— **実測が読めないと、起動時間の規則が一度も発火しない。**benchmark.json を空にすると「起動 約9.9秒」がそのまま通ることを実測した。速度はこのプロダクトの訴求そのもので、公開面・配信原稿の両方をこの規則が守っている",
+      "now": "launchTimeSuspect() へ切り出し、正が無いときは「合っている」ではなく「**検証できない**」として出す。check-public-facts の自己テストから3方向を回す"
     }
   ],
   "remaining_corrupt_but_green": [
@@ -149,7 +155,7 @@
     "measured_at": "2026-08-26",
     "method": "scripts/lib/blindspot-silent.py（実データと空データで出力を突き合わせる）",
     "silent_before": 32,
-    "silent_after": 26,
+    "silent_after": 25,
     "visible": 13
   }
 }
