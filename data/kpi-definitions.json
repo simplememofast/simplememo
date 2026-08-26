@@ -76,8 +76,8 @@
       "name": "1記事あたり単価",
       "formula": "当月の実費 ÷ 当月の出荷数",
       "source_file": "scripts/autopilot-budget.mjs",
-      "version": 4,
-      "checksum": "ed6437b4f48b42a9",
+      "version": 5,
+      "checksum": "6fb2a556b15556ca",
       "changed_at": "2026-08-26",
       "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）",
       "history": [
@@ -95,6 +95,11 @@
           "version": 4,
           "at": "2026-08-26",
           "why": "定義は変えていない。scripts/autopilot-budget.mjs に --selftest を足しただけで、単価の計算式には触れていない"
+        },
+        {
+          "version": 5,
+          "at": "2026-08-26",
+          "why": "定義は変えていない。autopilot-budget.mjs の render に else を足しただけ（run_caps が null のとき「判定していない」と書く）。1出荷あたりの費用の計算式は同じ"
         }
       ]
     },
