@@ -1652,10 +1652,10 @@
         "../simplememo-ios/scripts/asc_analytics.rb",
         "../simplememo-ios/.github/workflows/asc-analytics.yml"
       ],
-      "note": "**[2026-08-26] 前提が間違っていた。**この欄は長らく「Apple が解約理由をくれるか未確認」と書いていたが、`Cancellation Reason` 列は **2026-08-25 の取得で既に届いていた**（Subscription Event Report / State Report のどちらの columns にも入っている）。読めなかった理由は Apple 側ではなく**こちらの保存の形**で、asc_analytics.rb が残すのは数値列の合計だけだった。解約理由は文字列なので合計対象に入らず、**列名だけが残って中身は1件も残っていなかった。**「取れない」と「捨てている」を取り違えていた（data/operating-memory.json om-2026-08-26-breakdown）。\n\n取得側に名指しの分類列 × 名指しの測定列の内訳を足し（BREAKDOWN_DIMENSIONS）、読む側を asc_subscription.rb として asc-analytics.yml の日次に配線した。**ただし 2026-08-26 時点で読めた項目は 0/3。**手元にある取得結果は内訳を持つ前の版なので no_breakdown を返す。**次の定時実行（毎日 20:30 JST）で決まる。**\n\n**空欄しか無い可能性は残る。**Apple 側で解約理由は任意項目であり、埋まらないほうが普通。読む側は空欄を捨てず `(空欄)` として数え、all_blank を readable と区別する ——**「解約理由が読めなかった」を「解約が無かった」と読ませないため。**空欄だった場合、⑨を実物にするにはアプリ内で理由を聞く導線が要る（未実装）。実施は引き続き人の判断なので ai_proposes のまま",
-      "blocker": "external_data",
-      "unblocked_by": "ASC Analytics の Subscription 系がまだ降りていない",
-      "unlock": "asc_reports"
+      "note": "**[2026-08-26] 前提が間違っていた。**この欄は長らく「Apple が解約理由をくれるか未確認」と書いていたが、`Cancellation Reason` 列は **2026-08-25 の取得で既に届いていた**（Subscription Event Report / State Report のどちらの columns にも入っている）。読めなかった理由は Apple 側ではなく**こちらの保存の形**で、asc_analytics.rb が残すのは数値列の合計だけだった。解約理由は文字列なので合計対象に入らず、**列名だけが残って中身は1件も残っていなかった。**「取れない」と「捨てている」を取り違えていた（data/operating-memory.json om-2026-08-26-breakdown）。\n\n取得側に名指しの分類列 × 名指しの測定列の内訳を足し（BREAKDOWN_DIMENSIONS）、読む側を asc_subscription.rb として asc-analytics.yml の日次に配線した。**ただし 2026-08-26 時点で読めた項目は 0/3。**手元にある取得結果は内訳を持つ前の版なので no_breakdown を返す。**次の定時実行（毎日 20:30 JST）で決まる。**\n\n**空欄しか無い可能性は残る。**Apple 側で解約理由は任意項目であり、埋まらないほうが普通。読む側は空欄を捨てず `(空欄)` として数え、all_blank を readable と区別する ——**「解約理由が読めなかった」を「解約が無かった」と読ませないため。**空欄だった場合、⑨を実物にするにはアプリ内で理由を聞く導線が要る（未実装）。実施は引き続き人の判断なので ai_proposes のまま\n\n**[2026-08-26 決着] 空欄だった。**予定の定時実行（20:30 JST）を待たずに asc-analytics.yml を手動で回して確かめた。取得は成功し、内訳つきで降りてきて、`asc_subscription.rb` は 3項目中2項目を読めた（契約の状態 155/33・契約イベント 4件）。**しかし `Cancellation Reason` は列も値も届くのに、値が全部空欄**（all_blank）。上に書いてあった「空欄しか無い可能性」がそのまま当たった。\n\n**したがってこの行はもう『データ待ち』ではない。**待っていたものは降りて、空だと分かった。実物にするには**アプリ内で理由を聞く導線**が要る（未実装）。ブロッカーを external_data から not_started へ移した —— **降りない物を待ち続ける行にしないため。**",
+      "blocker": "not_started",
+      "unblocked_by": "解約時にアプリ内で理由を聞く導線。**Appleの列は空欄でしか来ない**ことが2026-08-26の実取得で確定したので、待っても埋まらない",
+      "unlock": "impl_product"
     },
     {
       "area": "⑨ マネタイズ",
