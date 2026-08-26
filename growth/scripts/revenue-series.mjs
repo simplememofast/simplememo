@@ -117,6 +117,26 @@ export function readAll(dir = SRC_DIR) {
     .map((f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')));
 }
 
+/**
+ * 方針が名乗る日数と、実測の系列がずれていないか。
+ *
+ * [2026-08-26] **この判定は本体に直接書かれていて、自己テストが一度も通らなかった。**
+ * 実測すると、ここの problems.push を潰しても自己テストは緑のままだった ——
+ * 覆っているように見えるだけで、何も守っていない。
+ *
+ * ずれたまま出荷すると、資金繰りの欄が「28日ぶん見た」と名乗りながら
+ * 実際は数日しか見ていない、という形になる。**名乗りと実測は同じ数でなければならない。**
+ */
+export function policyDrift(policy, series) {
+  const declared = policy?.cash_scenarios?.revenue_history_days;
+  if (declared === undefined) return [];
+  if (declared !== series.covered_days) {
+    return [`financial-policy.json の revenue_history_days=${declared} が実測 ${series.covered_days} と違う`
+      + ' — `--write` を実行して同じコミットに含めること'];
+  }
+  return [];
+}
+
 function selftest() {
   let total = 0; const failures = [];
   const t = (name, cond) => { total += 1; if (!cond) failures.push(name);
@@ -144,6 +164,16 @@ function selftest() {
     observationOf(mk('2026-08-26', '2026-08-24', '2026-08-24', 1, 2.59)),
   ]);
   t('同じ範囲の再観測は後勝ちで二重計上しない', dup.proceeds_usd === 2.59 && dup.covered_days === 1);
+
+  // ── 方針と系列の整合（**ここまで一度も通っていなかった**） ──────
+  t('**名乗りが実測とずれたら落ちる**（28日と名乗って数日しか見ていない形）',
+    policyDrift({ cash_scenarios: { revenue_history_days: 28 } }, { covered_days: 3 }).length === 1);
+  t('名乗りが実測と一致すれば何も言わない（常に鳴る検査も何も見ていない）',
+    policyDrift({ cash_scenarios: { revenue_history_days: 3 } }, { covered_days: 3 }).length === 0);
+  t('名乗っていなければ何も言わない（宣言前は照合する相手がいない）',
+    policyDrift({ cash_scenarios: {} }, { covered_days: 3 }).length === 0);
+  t('**0 と undefined を混ぜない**（0日と名乗るのは宣言、未宣言とは別）',
+    policyDrift({ cash_scenarios: { revenue_history_days: 0 } }, { covered_days: 3 }).length === 1);
 
   const two = buildSeries([
     observationOf(mk('2026-08-25', '2026-08-24', '2026-08-24', 1, 2.59)),
@@ -195,12 +225,7 @@ if (isMain) {
   console.log('  **ランウェイは出さない。**手元資金が機械に入っていないため（別の欄が持つ）。');
 
   // 方針と系列の整合
-  const policy = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
-  const declared = policy.cash_scenarios?.revenue_history_days;
-  if (declared !== undefined && declared !== series.covered_days) {
-    problems.push(`financial-policy.json の revenue_history_days=${declared} が実測 ${series.covered_days} と違う`
-      + ' — `--write` を実行して同じコミットに含めること');
-  }
+  problems.push(...policyDrift(JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')), series));
 
   if (process.argv.includes('--write')) {
     const out = {
