@@ -169,6 +169,23 @@ jobs:
       - name: Checks have been seen to fail
         run: node scripts/check-selftests.mjs --check
 
+      # 【正が無いと消える規則】4つのPRで7件出た形を、機械で洗い出す。
+      #
+      #   intakeIds.size && !intakeIds.has(id)   空の台帳 → 規則が丸ごと消える
+      #   READY !== undefined && n !== READY     実測が無い → 速度の規則が発火しない
+      #   doc.production_verified !== undefined  宣言を消すと突き合わせも消える
+      #
+      # **7件目まで運で見つけていた。**コメント・文字列・正規表現を潰したうえで
+      # 台帳由来の束縛だけを追うので、以前 102件の誤検出を出した走査とは別物。
+      #
+      # **判定ではなく棚卸し。**`a.stopped && !a.reason` のように、その鍵が在ることが
+      # 規則の前提である書き方は正しい。だから data/guard-shapes.json に
+      # 1件ずつ読んだ記録を持ち、**新しく増えた分だけ**を止める。
+      - name: Guards that vanish without ground truth
+        run: |
+          node scripts/check-guard-shapes.mjs --selftest
+          node scripts/check-guard-shapes.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を

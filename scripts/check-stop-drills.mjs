@@ -140,6 +140,31 @@ export function tally(doc) {
   return { total: (doc.mechanisms || []).length, counts, production: counts.production };
 }
 
+/**
+ * 宣言と実測を突き合わせる。**宣言が無いときは「合っている」ではない。**
+ *
+ * [2026-08-26] ここは `doc.production_verified !== undefined && ...` と書かれていて、
+ * **宣言の鍵を消すとこの規則は一度も発火しなかった。**実測した:
+ *
+ *   宣言 2（実測どおり）    → 0件
+ *   宣言 99（実測とずれる） → 捕まる
+ *   **宣言の鍵を消す**      → **検出なし**
+ *
+ * この台帳の $production_verified には「公開文にこの数を書くなら、ここが正」と
+ * 書いてある。**正を消せば突き合わせも消える**のでは、正の意味が無い。
+ * #635 の `READY !== undefined &&` と同じ形。
+ */
+export function declarationProblem(declared, measured) {
+  if (declared === undefined || declared === null) {
+    return `production_verified の宣言が無い — **公開文に書く数の正が消える。**`
+      + `実測は ${measured} 件`;
+  }
+  if (declared !== measured) {
+    return `production_verified の宣言 ${declared} が実測 ${measured} と違う`;
+  }
+  return null;
+}
+
 function selftest() {
   let total = 0; const failures = [];
   const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
@@ -194,6 +219,14 @@ function selftest() {
   t('段階ごとに数える', counted.total === 4 && counted.production === 1 && counted.counts.none === 1);
   t('**確かめていないものを unit に混ぜない**', counted.counts.unit === 1);
 
+  // [2026-08-26] **宣言が無いと突き合わせが消える形**を固定する。
+  t('宣言が実測と合っていれば通る', declarationProblem(2, 2) === null);
+  t('宣言が実測とずれれば落ちる', (declarationProblem(99, 2) || '').includes('と違う'));
+  t('**宣言が無いのを「合っている」と読まない**',
+    (declarationProblem(undefined, 2) || '').includes('正が消える'));
+  t('null も同じ（未記入と欠測を分けない）',
+    (declarationProblem(null, 2) || '').includes('正が消える'));
+
   if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
   console.log(`\nselftest: 全${total}件 通過`);
   return 0;
@@ -226,9 +259,8 @@ if (isMain) {
   }
 
   // 宣言との突き合わせ。**公開文へ数を書いたあと、実態とずれるのを防ぐ。**
-  if (doc.production_verified !== undefined && doc.production_verified !== s.production) {
-    problems.push(`production_verified の宣言 ${doc.production_verified} が実測 ${s.production} と違う`);
-  }
+  const dp = declarationProblem(doc.production_verified, s.production);
+  if (dp) problems.push(dp);
 
   if (problems.length) {
     console.error('\n停止機構の訓練: 不整合');

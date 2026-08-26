@@ -250,6 +250,12 @@
       "broke": "知らない status／max_step_pct 欠落／min_days_between_changes 欠落 の3通りで落ちることを観測"
     },
     {
+      "script": "scripts/check-guard-shapes.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "走査を空にする（scan が即 return []）と、実際に見つけた3件の形（#634 intakeIds.size / #635 READY !== undefined / #636 vendorIds.size）を拾えず4件落ちた。台帳との突き合わせを潰すと「台帳から1件消すと落ちる」が落ち、コメントを潰す処理をやめると「コメント中の同じ形は拾わない」が落ちた"
+    },
+    {
       "script": "scripts/check-injection-surface.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
