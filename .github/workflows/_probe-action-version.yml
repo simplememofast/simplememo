@@ -1,0 +1,125 @@
+# 【一時的な実験装置】結果が出たら消す。
+#
+# 2026-08-24〜08-25 に主系を2日止めた即時失敗（is_error / num_turns=1 /
+# duration_ms=486 / cost $0）の原因が「上流actionの版」か
+# 「CLAUDE_CODE_OAUTH_TOKEN」かを分離する。
+#
+# ■ 埋まっていないマス
+#
+#   SHA        CLI      token   結果
+#   24dcd50c   2.1.240  旧      成功  (08-23 schedule)
+#   c81e3bc6   2.1.241  旧      失敗  (08-24 schedule)
+#   c81e3bc6   2.1.241  旧      失敗  (08-25 schedule)
+#   16b3b310   2.1.245  新      成功  (08-25 dispatch / 08-26 schedule)
+#
+# **最後の失敗と最初の成功の間で、版とトークンが同時に動いている。**
+# オーナーが run 32816234185 の直前に `claude setup-token` を再実行して
+# トークンを更新しているため（data/autopilot-runs.json の reclassified_note）、
+# 版の相関は示唆であって排除ではない。空いているマスは1つ:
+# **c81e3bc6 × 新トークン。**
+#
+#   落ちる → 版が原因で確定。pin 済みなので追加の対処は要らない
+#   通る   → 旧トークンが原因だった。**pin では防げない**ので、
+#            失効の監視を入れる必要がある（放置すれば再発する）
+#
+# ■ 上流の履歴は決着させてくれなかった（だから実測が要る）
+#
+# 24dcd50c..16b3b310 の5コミットは**全てバージョン更新で、バグ修正が無い。**
+# さらに上流は 2.1.243 から 2.1.241 へ**巻き戻している**
+# （b62c745 08-25T03:38Z / 6bcfb82 03:43Z）。上流にとって 2.1.241 は
+# 退避先＝既知の安全版だったことになる。起動時に決定論的に落ちる版なら
+# そこへ戻すのは不可解で、**この事実は版仮説をむしろ弱める。**
+#
+# ■ なぜ本番ワークフローを force で回さないか
+#
+# obsidian-autopilot.yml を回すと、通った場合に本番プロンプトが25分走って
+# 記事PRを作り auto-merge まで行く（実費 $6〜8）。分離したいだけなのに
+# 本番を1本出荷するのは代償が釣り合わない。見たいのは「即時に落ちるか」
+# だけなので1ターンで足りる。
+#
+# ■ 対照を必ず一緒に回す
+#
+# c81e3bc6 だけ回して落ちても、「版が壊れている」と「この簡略プロンプトが
+# 悪い」を区別できない。**同じプロンプト・同じトークンで 16b3b310 も回す。**
+#
+#   16b3b310 通る & c81e3bc6 落ちる → 版で確定
+#   両方通る                        → 旧トークンが原因だった
+#   両方落ちる                      → この装置側の誤り（版については何も言えない）
+#
+# 変えているのは SHA とプロンプトの2つだけで、プロンプトは両ジョブで同一。
+# 486ms の失敗は最初のモデル呼び出し相当の時点で起きており、プロンプトの
+# 中身がそこへ効く余地は無い。CLAUDE_CODE_VERSION は action.yml に
+# 実数で書かれている（2.1.241 / 2.1.245）ので、当時と同じCLIが入る。
+#
+# 権限は本番と同一。**狭めると、狭めたことが原因で両方落ちて何も分からない。**
+name: _probe action version
+
+on:
+  push:
+    branches:
+      - claude/simplememo-autopilot-eval-jesi78
+    paths:
+      - .github/workflows/_probe-action-version.yml
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: probe-action-version
+  cancel-in-progress: true
+
+jobs:
+  # 対照。いま本番が使っている版。ここが落ちたら装置の誤り。
+  control-16b3b310:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - id: claude
+        continue-on-error: true
+        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245)
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          allowed_bots: "*"
+          claude_args: |
+            --max-turns 1
+          prompt: |
+            Reply with exactly the word PROBE_OK and nothing else. Do not use any tools.
+      - name: 結果をジョブ要約へ
+        if: always()
+        run: |
+          echo "### control 16b3b310 — Claude Code 2.1.245" >> "$GITHUB_STEP_SUMMARY"
+          echo "outcome: \`${{ steps.claude.outcome }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+  # 本題。08-24/08-25 に主系を2日止めた版を、**新しいトークンで**引く。
+  suspect-c81e3bc6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - id: claude
+        continue-on-error: true
+        uses: anthropics/claude-code-action@c81e3bc69d1b18badbb63ba39581218f02421678 # Claude Code 2.1.241（08-24/08-25 に v1 が指していた版）
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          allowed_bots: "*"
+          claude_args: |
+            --max-turns 1
+          prompt: |
+            Reply with exactly the word PROBE_OK and nothing else. Do not use any tools.
+      - name: 結果をジョブ要約へ
+        if: always()
+        run: |
+          echo "### suspect c81e3bc6 — Claude Code 2.1.241" >> "$GITHUB_STEP_SUMMARY"
+          echo "outcome: \`${{ steps.claude.outcome }}\`" >> "$GITHUB_STEP_SUMMARY"
