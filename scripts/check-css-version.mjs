@@ -35,6 +35,7 @@ const ASSETS = [
   'assets/css/style.min.css',
   'js/app-store-tracking.js',
   'js/lang.js',
+  'js/contact-form.js',
   // /siri/ のアプリ内ガイド。2026-08-11 に3例目が出た。#462 が英語5枚を
   // onboarding-en-1..5.png で出し、その直後に #463 が同じURLへ別の画面を
   // 入れた（en-2 が phrase → invoke に変わる並び替え）。`/assets/*` は
