@@ -250,6 +250,12 @@
       "broke": "知らない status／max_step_pct 欠落／min_days_between_changes 欠落 の3通りで落ちることを観測"
     },
     {
+      "script": "scripts/check-generators.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "走査を空にすると「実データが台帳と合っている」が落ち、台帳との照合を潰すと「台帳に無い生成器は落ちる」が落ち、コメント/文字列を潰す処理をやめると「文字列の中の旗は拾わない」が落ちた。加えて --run 側は、revenue-series の ReferenceError を戻すと FAIL、autonomy-timeline.svg を「18倍」に戻すと「再生成で変わった」で落ちることを実測"
+    },
+    {
       "script": "scripts/check-guard-shapes.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
