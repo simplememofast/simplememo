@@ -43,8 +43,10 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readLedger, readLedgerScenarios } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
@@ -438,6 +440,12 @@ function selftest() {
     n++;
     if (got !== want) { bad++; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); }
   };
+  // **台帳の読み方そのもの**もここから走らせる。費用の台帳が壊れると
+  // 実費の行が消えるだけで、0とも未観測とも区別がつかなくなる。
+  for (const [name, fn] of readLedgerScenarios(fs, os)) {
+    n++;
+    try { fn(); } catch (e) { bad++; console.error(`  ✗ ${name}\n      ${e.message}`); }
+  }
   const doc = (...dates) => ({ runs: dates.map((d, i) => ({ run_id: `r${i}`, date_jst: d })) });
 
   // 主系が残していった状態そのもの（最終記入 08-22・08-23 の出荷は未記入）
@@ -585,12 +593,22 @@ if (isMain) {
     process.exit(0);
   }
 
+  // 費用の台帳は任意（この台帳は費用を持たない設計）。ただし
+  // **「無い」と「読めない」は分ける** —— 壊れていると実費の行が丸ごと消え、
+  // 0なのか未観測なのか読めないのかが、同じ見た目になる。
   let costDoc = null;
-  try { costDoc = JSON.parse(fs.readFileSync(COST_PATH, 'utf8')); } catch { /* 任意 */ }
+  let costUnreadable = null;
+  try {
+    costDoc = readLedger(COST_PATH,
+      { why: '実費の行が消えるだけで、0とも未観測とも区別がつかなくなる' });
+  } catch (e) {
+    costUnreadable = e.message;
+  }
   // 読めないこと自体が異常なので握りつぶさない（statusAgreement が problem として言う）。
   let statusDoc = null;
   try { statusDoc = JSON.parse(fs.readFileSync(STATUS_PATH, 'utf8')); } catch { /* statusAgreement が報告する */ }
   const s = summarize(doc, { since: val('since', null), costDoc, statusDoc });
+  if (costUnreadable) { console.error(costUnreadable); process.exit(1); }
 
   if (has('json')) {
     console.log(JSON.stringify({

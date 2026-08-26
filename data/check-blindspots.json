@@ -32,10 +32,10 @@
     "empty_but_green": 38
   },
   "after": {
-    "corrupt_but_green": 5,
+    "corrupt_but_green": 3,
     "empty_but_green": 45
   },
-  "$after_note": "壊れていても緑 が 12 → 5。空でも緑 が 38 → 45 に増えたのは、直した7件が**壊れたら落ちるが空では通る**へ移ったため（合計50は変わらない）。空で通ることは、それ自体は欠陥ではない",
+  "$after_note": "壊れていても緑 が 12 → 3。**残る3件は同じ1つの設計**で、autopilot-budget が run_caps: null（判定できなかった）を意図して返し、daily-brief と property-tests がその経路を通るため。コメントにも「超過なしと混ぜると routing を消すだけで上限が消える」と書いてある。**壊れても緑なのは正しく、問題は受け取る側が null を捨てていたこと**で、そちらは直した。空でも緑 が増えたのは、直した件が「壊れたら落ちるが空では通る」へ移ったため。空で通ることは、それ自体は欠陥ではない",
   "fixed": [
     {
       "script": "scripts/autopilot-act.mjs",
@@ -66,20 +66,24 @@
       "ledger": "data/model-routing.json",
       "was": "autopilot-budget は正しく run_caps: null（判定できなかった）を返していたのに、**1枚がその値を捨てていた。**記録して読まない値は、記録していないのと同じ",
       "now": "run_caps_judged を持ち、判定できなければ1枚に書く。通常時は超過件数も出す"
+    },
+    {
+      "script": "scripts/check-vendors.mjs",
+      "ledger": "data/credential-expiry.json",
+      "was": "catch が「無い」と「壊れている」を両方飲み込んでいた。壊すと**いま実際に出ている食い違い1件が節ごと消える**",
+      "now": "無い→飛ばすと明記して続行、読めない→止める"
+    },
+    {
+      "script": "scripts/autopilot-runs.mjs",
+      "ledger": "data/autopilot-cost.json",
+      "was": "`catch { /* 任意 */ }`。壊すと**実費の行が消えるだけ**で、0とも未観測とも読めなくなる",
+      "now": "同上"
     }
   ],
   "remaining_corrupt_but_green": [
     {
       "script": "scripts/autopilot-budget.mjs",
       "ledger": "data/model-routing.json"
-    },
-    {
-      "script": "scripts/autopilot-runs.mjs",
-      "ledger": "data/autopilot-cost.json"
-    },
-    {
-      "script": "scripts/check-vendors.mjs",
-      "ledger": "data/credential-expiry.json"
     },
     {
       "script": "scripts/daily-brief.mjs",
@@ -90,5 +94,9 @@
       "ledger": "data/model-routing.json"
     }
   ],
-  "$remaining_note": "残り5件は未着手。autopilot-budget の run_caps は**設計として null を返している**（「超過なしと混ぜると routing を消すだけで上限が消える」）ので、壊れても緑なのは正しい —— 受け取る側が null を捨てていたのが問題で、そちらは直した。他の4件は同じ形かどうかを1件ずつ読んでから決める"
+  "$remaining_note": "**この3件は直さない。**autopilot-budget は run_caps に null を返す設計で、それは「超過なし」と混ぜないための正しい判断（routing を消すだけで上限が消える形を避ける）。壊れても exit 0 なのはその帰結。**問題だったのは受け取る側が null を捨てていたこと**で、毎朝の1枚に「1回あたりの上限は判定できなかった」を出すようにした（2026-08-26）",
+  "helper": {
+    "path": "scripts/lib/read-ledger.mjs",
+    "$note": "6箇所に散らばっていた「無い/読めない」の分け方を1つにまとめた。**シナリオ5件は check-vendors と autopilot-runs の自己テストから実際に走る** —— helper 自体は CI 配線ではないので、使う側から回さないと落ちるのを見られない。既定値に落とす形へ戻すと、両方で3件ずつ落ちることを確認した"
+  }
 }
