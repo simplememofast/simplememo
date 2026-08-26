@@ -45,10 +45,30 @@ name: Autopilot Health
 # schedule はデフォルトブランチの定義でのみ動くため、このファイルの変更は
 # mainへマージされて初めて有効になる（cron-health.yml / auto-merge.yml と同じ性質）。
 
+# 【2026-08-26 追記 — 回復の追認を schedule から外す】
+# 頻度を1日3回に増やしたが、**回復の追認は依然として最大8時間遅れる。**
+# 実測: この日 #591 は 12:42 JST に正しく立ち、13:15 には復旧していたのに、
+# 手で dispatch するまで 23:31 JST まで open のままだった
+# （cron の変更が main に着いたのが 22:27 JST で、当日の窓は両方過ぎていた）。
+#
+# **`data/autopilot-status.json` が main に着くことが回復イベントそのもの。**
+# 窓を待つ理由が無いので push で拾う。8時間に縮めるのではなく、遅延を消す。
+#
+# **ただし push では「閉じる」しかしない。**判定は `date_jst == 今日(JST)` なので、
+# 0:00〜6:00 JST に別のPRがマージされた回に開く方向へ働かせると、
+# 新しい日の当日分がまだ無いのは当たり前なので**毎晩必ず誤検知する**
+# （窓の上限が 20:00 なのと同じ理由）。
+#
+# 縮退の方向だけ自動・広げる方向は承認、という rollout-guard と同じ非対称を、
+# ここでは「閉じるのは即時・開くのは窓の中だけ」として置く。
 on:
   schedule:
     - cron: '0 3,7,11 * * *' # 12:00 / 16:00 / 20:00 JST（窓の理由は上のコメント）
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'data/autopilot-status.json'
 
 permissions:
   issues: write
@@ -169,7 +189,13 @@ jobs:
             });
             const existing = openIssues[0];
 
-            if (!healthy) {
+            // **push で起動した回は閉じることしかしない。**（冒頭の追記を参照）
+            // 窓の外で開く方向へ働かせると、深夜のマージが毎晩 stale を立てる。
+            const mayOpen = context.eventName !== 'push';
+
+            if (!healthy && !mayOpen) {
+              core.notice(`stale だが push 起動なので開かない（判定は窓の中の schedule が持つ）`);
+            } else if (!healthy) {
               try { await github.rest.issues.getLabel({ owner, repo, name: LABEL }); }
               catch { await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'B60205', description: 'autopilot の status JSON が当日分に更新されていない' }); }
               if (existing) {
