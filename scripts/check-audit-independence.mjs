@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readLedger, requireShape } from './lib/read-ledger.mjs';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -118,7 +119,8 @@ if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const charter = JSON.parse(fs.readFileSync(CHARTER_PATH, 'utf8'));
   const findings = JSON.parse(fs.readFileSync(FINDINGS_PATH, 'utf8'));
-  const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
+  const authority = requireShape(readLedger(AUTHORITY_PATH), ['self_repair'],
+    { what: 'data/authority-matrix.json', why: '自己修復から守る対象を照合できない' });
   const routing = fs.existsSync(ROUTING_PATH) ? JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8')) : null;
   const mayModify = authority.self_repair?.may_modify ?? [];
   const problems = validate(charter, findings, { mayModify, routing });

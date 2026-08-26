@@ -48,6 +48,28 @@ export function readLedger(abs, { onMissing = null, why = '' } = {}) {
 }
 
 /**
+ * 台帳が**その形をしていること**を要求する。
+ *
+ * [2026-08-26] `authority.domains || []` / `authority.self_repair?.may_modify ?? []`
+ * のような書き方が3箇所あった。空の権限表 `{}` を渡すと空配列になり、
+ * 下流のループが0周して**「独立の3点が担保されている」「規則の無い故障種別なし」
+ * 「規則の形に問題なし」**が揃って出る。**照合する相手が無い状態は、照合ではない。**
+ *
+ * 空の配列（宣言として空）と、キーが無い（台帳の形をしていない）は別。
+ * ここが見るのは後者。
+ */
+export function requireShape(doc, keys, { what, why = '' } = {}) {
+  const missing = keys.filter((k) => doc?.[k] === undefined);
+  if (missing.length) {
+    throw new Error(`${what} に ${missing.join(' / ')} が無い`
+      + `${why ? ` — ${why}` : ''}`
+      + ' — **照合する相手が無い状態は、照合ではない。**'
+      + '空の一覧（宣言として空）とは別で、これは台帳の形をしていない');
+  }
+  return doc;
+}
+
+/**
  * この helper 自身のシナリオ。**使う検査の自己テストから呼ぶ。**
  * 1箇所で書いて、複数の CI 検査から実際に走らせる。
  */
@@ -77,6 +99,14 @@ export function readLedgerScenarios(fsMod = fs, os = null) {
       let got = '投げなかった';
       try { got = readLedger(mk('{ broken'), { onMissing: {} }); } catch { got = null; }
       if (got !== null) throw new Error('onMissing を返した — 無いのと同じ扱いになっている');
+    }],
+    ['**要る鍵が無ければ投げる**（空の権限表を「担保されている」と読まない）', () => {
+      let threw = false;
+      try { requireShape({}, ['domains'], { what: 'x' }); } catch { threw = true; }
+      if (!threw) throw new Error('形をしていない台帳を通した');
+    }],
+    ['鍵が在れば通る。**空配列は通す**（宣言として空は正当）', () => {
+      requireShape({ domains: [] }, ['domains'], { what: 'x' });
     }],
     ['読めなかった理由に「何が見えなくなるか」を添えられる', () => {
       try {
