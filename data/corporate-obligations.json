@@ -29,12 +29,15 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "レジストラの管理画面にしか無い。credential-expiry.json でも未把握のまま",
+      "unconfirmed_reason": "**[2026-08-26 訂正] 「管理画面にしか無い」は事実ではなかった。**gTLD の有効期限は RDAP で誰でも引ける公開情報で、ICANN が全レジストラに提供を義務づけている。誰も見ていない状態が「見られない」という誤った理由で続いていた。取得を seo-daily.yml に配線した（エージェント環境はプロキシが RDAP への CONNECT を拒否するので、取得はCI・解析は scripts/check-domain-expiry.mjs の純関数）。**次の日次実行で値が入る。**",
       "what_breaks": "サイト・メールの From ドメイン・Universal Link がすべて止まる。**代替が無い critical**",
       "evidence": [
         "data/credential-expiry.json",
         "data/vendor-register.json"
-      ]
+      ],
+      "source": "rdap",
+      "domain": "simplememofast.com",
+      "$derived": "next_due は手で書かない。scripts/check-domain-expiry.mjs --write が正"
     },
     {
       "id": "corporate-tax",
