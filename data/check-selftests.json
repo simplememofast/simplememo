@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 33,
+  "none_budget": 28,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -89,7 +89,9 @@
     },
     {
       "script": "scripts/check-audit-independence.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "may_modify_anything: true／reports_to が owner でない／守る対象の一覧が空 の3通りで落ちることを観測。**3つ目は検査に穴があり、規則を足して塞いだ**"
     },
     {
       "script": "scripts/check-authority.mjs",
@@ -119,7 +121,9 @@
     },
     {
       "script": "scripts/check-credentials.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "revocation 欠落／blast_radius 欠落／emergency-stop に無い経路 の3通りで落ちることを観測"
     },
     {
       "script": "scripts/check-css-version.mjs",
@@ -127,7 +131,9 @@
     },
     {
       "script": "scripts/check-definitions.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "id 重複／source_file 不在／version 0／checksum ずれ の4通りで落ちることを観測"
     },
     {
       "script": "scripts/check-degradation.mjs",
@@ -175,7 +181,9 @@
     },
     {
       "script": "scripts/check-model-routing.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "why 欠落／fallback 欠落／fallback が model と同じ／未知モデル の4通りで落ちることを観測"
     },
     {
       "script": "scripts/check-monitoring.mjs",
@@ -227,7 +235,9 @@
     },
     {
       "script": "scripts/check-signals.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "id 重複／dedupe_key 欠落／kinds 空／title 欠落 の4通りで落ちることを観測"
     },
     {
       "script": "scripts/check-stop-drills.mjs",

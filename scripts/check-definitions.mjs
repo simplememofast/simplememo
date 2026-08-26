@@ -20,6 +20,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const DEFS_PATH = path.join(ROOT, 'data/kpi-definitions.json');
@@ -54,8 +55,24 @@ export function validate(doc, { read = (p) => checksum(path.join(ROOT, p)), exis
   function at_(d) { return `definitions「${d.id}」`; }
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['id の重複は落ちる', (d) => { d.definitions.push({ ...d.definitions[0] }); }],
+  ['**計算元のファイルが存在しない**のは落ちる', (d) => { d.definitions[0].source_file = 'scripts/存在しない.mjs'; }],
+  ['version が1未満なら落ちる', (d) => { d.definitions[0].version = 0; }],
+  ['**checksum がずれたら落ちる**（計算元が変わったのに定義が古いまま）', (d) => { d.definitions[0].checksum = 'そのへんの値'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(DEFS_PATH, 'utf8')),
+  (d) => validate(d).problems,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = JSON.parse(fs.readFileSync(DEFS_PATH, 'utf8'));
 
