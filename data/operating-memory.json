@@ -777,6 +777,37 @@
         ],
         "new_guardrail": "exists を三値にして、隣が見えない実行では落とさず**確かめていない件数を出す**。「隣を指すパスは、この作業ツリーから見えること」という前提をコメントから消した —— 見えない実行が正常系にあるため。**手元で通ったことを CI の代わりにしない**（隔離した複製で再現するのが確実）"
       }
+    },
+    {
+      "id": "om-2026-08-26-the-block-never-blocked",
+      "seeded": false,
+      "area": "⑪ データ・プライバシー",
+      "signal": "PR をマージして Pages がデプロイされたので、`data/*.json` が実際に 404 になったかを確かめた。**新規ファイル stop-drills.json は 200 で返り（＝デプロイ済み）、遮断対象の financial-policy.json も 200 のままだった**",
+      "hypothesis": "まだデプロイが反映されていないか、CDN のキャッシュ",
+      "decision": "**対照実験をした。**ファイルが存在しないパス（/privacy-policy）は 301 になり、_redirects 自体は効いている。ファイルが存在するパス（/data/credential-expiry.json）は 200 のまま。middleware が担当する /growth/ は 404。**Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を無視する** —— 2026-08-25 に入れた遮断は一度も効いていなかった",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "functions/_middleware.js",
+          "scripts/check-publication.mjs",
+          "scripts/check-url-normalization.mjs",
+          "data/publication-policy.json"
+        ]
+      },
+      "verification": "遮断を functions/_middleware.js へ移した（Functions は静的アセットより先に走るので、実在しても止まる。/growth/ が実証している）。**確かめ方も変えた** —— check-url-normalization.mjs が middleware を実際に走らせ、publication-policy.json から一覧を読んで「配信しないものは 404」「**配信するものは通る**」の両方を見る（全部404にして「守った」ことにしない）。197 → 235 checks。_redirects 側は墓標にして、効かない理由を残したまま検査で固定した",
+      "outcome": "**率は動かない。**⑪の分類も変えていない。変わったのは、2026-08-25 から今日まで「遮断してある」と思っていた30件が、実際には配信され続けていたと分かったこと。**この件は3層あった** —— (1) 静的ホスティングが既定で全部配信する (2) リポジトリ自体が公開なので「非公開」は嘘 (3) **そして遮断そのものが効いていなかった**",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-config-check-does-not-check-the-effect",
+        "text": "**設定に書いてあることを確かめる検査は、効くことを確かめない。**check-publication.mjs は「_redirects にブロックが在ること」を毎回確かめて緑を出していた。在ることと効くことは別で、この差は**本番に1回リクエストを投げれば**分かった。\n\n同じ日に「止まることを確かめていない停止機構は無いのと同じ」と書いて台帳まで作りながら、**その隣で、効くかどうかを確かめていない遮断を緑にしていた。**規律は領域を跨いで適用しないと意味がない。",
+        "changed": [
+          "functions/_middleware.js",
+          "scripts/check-publication.mjs",
+          "scripts/check-url-normalization.mjs"
+        ],
+        "new_guardrail": "遮断を middleware へ移し、**middleware を実際に走らせて status を見る**検査にした。一覧は publication-policy.json から読むので、テストが方針とずれない。**配信すると決めたものが通ることも見る**（全部404にして「守った」ことにしない）。_redirects 側は墓標として残し、効かない理由を書いて検査で固定した（消すだけだと、次に同じ穴を見つけた人がまた同じ場所へ書く）"
+      }
     }
   ]
 }
