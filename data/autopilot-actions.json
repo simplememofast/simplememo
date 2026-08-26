@@ -27,7 +27,7 @@
     "  acknowledged … 既知の制約。直す対象ではないので日報では件数だけ出す",
     "                 （消すと『無い』ことになり、毎日出すとノイズになる）"
   ],
-  "last_run_jst": "2026-08-25",
+  "last_run_jst": "2026-08-26",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -237,7 +237,7 @@
       },
       "state": "done",
       "created_jst": "2026-08-25",
-      "last_seen_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-26",
       "closed_jst": "2026-08-25",
       "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）",
       "last_run_jst": "2026-08-25",
@@ -316,7 +316,7 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "`workflow` scope は足さないと決定（2026-08-25）。残るは PAT の再発行と secret 更新で、これはオーナーの画面でしかできない"
+      "evidence": "リポジトリから検査できない（人が閉じる）"
     },
     {
       "id": "act-budget-overrun-32816234185",
@@ -369,7 +369,31 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": null
+      "evidence": "2026-08-25 以降 article はまだ走っていない（実測が無い＝効果は不明）"
+    },
+    {
+      "id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "detail": "32900786201（2026-08-26 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "source": "ledger",
+      "domain": null,
+      "touches": [
+        "data/autopilot-runs.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": "reconcile-runs",
+      "close_check": {
+        "kind": "ledger_covers_runs",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-08-26",
+      "last_seen_jst": "2026-08-26",
+      "closed_jst": null,
+      "evidence": "台帳に無い run が 1件: 32900786201（記録対象外 1件を除外: 32817335365）",
+      "last_run_jst": "2026-08-26",
+      "last_run_log": "32900786201: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）"
     }
   ]
 }
