@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 16,
+  "none_budget": 14,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -39,7 +39,9 @@
     },
     {
       "script": "growth/scripts/d-score.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "軸が空欄（空欄のまま撃たない）／範囲外／負／手で足した total が合計と違う（散文の中の数字は検算されない）の4通りで落ちることを観測"
     },
     {
       "script": "growth/scripts/decompose-series.mjs",
@@ -291,7 +293,9 @@
     },
     {
       "script": "scripts/feature-score.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "未知の evidence_strength／工数0（ゼロ除算で無限大の価値にしない）／負の工数／確信度が低いのに「まず測る」へ送らない／承認が要るリスクを gated にしない／効果×確信度÷工数 の式の入れ替わり の6通りで落ちることを観測"
     },
     {
       "script": "scripts/property-tests.mjs",

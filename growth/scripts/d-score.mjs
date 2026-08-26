@@ -135,8 +135,56 @@ export function backtest(annotations) {
 }
 
 // --- CLI ---------------------------------------------------------------
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// この採点が守っているのは「空欄のまま撃たない」と「手で足した total が
+// 独り歩きしない」こと。**その2つが効かなくなったときに検出できること**を固定する。
+const SCENARIOS = [
+  ['**空欄のまま撃たない**（軸が数値でなければ problem）', () => {
+    const r = score({ d_score_pre: {} });
+    if (!r.problems.length) throw new Error('空欄が通った');
+    if (!r.problems.some((p) => p.includes('空欄のまま撃たない'))) {
+      throw new Error(`理由が違う: ${r.problems[0]}`);
+    }
+  }],
+  ['範囲外の点は落ちる', () => {
+    const [k, max] = AXES[0];
+    const r = score({ d_score_pre: { [k]: max + 1 } });
+    if (!r.problems.some((p) => p.includes('範囲外'))) throw new Error('範囲外が通った');
+  }],
+  ['負の点も落ちる', () => {
+    const [k] = AXES[0];
+    const r = score({ d_score_pre: { [k]: -1 } });
+    if (!r.problems.some((p) => p.includes('範囲外'))) throw new Error('負が通った');
+  }],
+  ['**手で足した total が合計と違えば落ちる**（散文の中の数字は検算されない）', () => {
+    const pre = {};
+    for (const [k] of AXES) pre[k] = 1;
+    pre.total = 999;
+    const r = score({ d_score_pre: pre });
+    if (!r.problems.some((p) => p.includes('手計算が古い'))) throw new Error('total のずれが通った');
+  }],
+  ['全軸が埋まって total が合っていれば problem 無し', () => {
+    const pre = {};
+    let sum = 0;
+    for (const [k] of AXES) { pre[k] = 1; sum += 1; }
+    pre.total = sum;
+    const r = score({ d_score_pre: pre });
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+  }],
+];
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) {
+    let failed = 0;
+    for (const [name, fn] of SCENARIOS) {
+      try { fn(); console.log(`  ok   ${name}`); }
+      catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+    }
+    console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+    process.exit(failed === 0 ? 0 : 1);
+  }
   const argv = process.argv.slice(2);
   const has = (n) => argv.includes(`--${n}`);
   const val = (n) => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : undefined; };
