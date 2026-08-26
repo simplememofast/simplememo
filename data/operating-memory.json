@@ -751,6 +751,32 @@
         ],
         "new_guardrail": "群から外した数（版が古い / 版が不明）を判定の理由に必ず出す。**版で絞っていない場合はそれ自体を出す**（fail-open の状態を黙らない）。版の比較は辞書順にしない（\"5.10.0\" < \"5.8.1\" になる）ことをテストで固定"
       }
+    },
+    {
+      "id": "om-2026-08-26-local-green-is-not-ci-green",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "PR #598 の初回 seo-check が落ちた。手元では同じコミットで全65検査が通っていて、この日ずっと「fail=0」と報告していた",
+      "hypothesis": "手元で全部通っているのだから、CI も通る",
+      "decision": "**落ちた step を特定して再現した。**check-operating-memory.mjs の既定の exists が `../simplememo-api/...` を素で見に行っていた。**手元には隣のリポジトリがあるが、CI はこのリポジトリしか checkout しない。**隣を指す learning.changed を書いた瞬間から CI だけが落ちる状態になっていた",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/check-operating-memory.mjs"
+        ]
+      },
+      "verification": "exists を三値（在る / 無い / **確かめていない**）にし、隣が見えない実行では落とさず「確かめられなかった成果物 N 件」を出すようにした。automation-rate.mjs と ingest-asc.mjs は既に同じ規律を持っていて、**ここだけ持っていなかった。**リポジトリを隔離した複製（隣が無い状態）で再現し、修正後に exit 0 と「確かめられなかった 17 件」の表示を確認した。self-test 9→11件",
+      "outcome": "**率は動かない。**CI が通るようになっただけ。得たのは、この日ずっと言っていた「手元で全65検査が通った」が**CI と同じ意味ではなかった**と分かったこと",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "local-green-is-not-ci-green",
+        "text": "**手元の緑と CI の緑は違う。**違いは環境で、いちばん効くのが「隣のリポジトリが見えるかどうか」。3リポジトリを並べて作業していると、手元だけが常に恵まれた条件になる。\n\nこの日、同じ規律（確かめられないものを確かめたことにしない）を2つの script に書きながら、3つ目に無いことに気づかなかった。**規律を足すときは、同じ判断をしている他の場所を数える。**",
+        "changed": [
+          "scripts/check-operating-memory.mjs"
+        ],
+        "new_guardrail": "exists を三値にして、隣が見えない実行では落とさず**確かめていない件数を出す**。「隣を指すパスは、この作業ツリーから見えること」という前提をコメントから消した —— 見えない実行が正常系にあるため。**手元で通ったことを CI の代わりにしない**（隔離した複製で再現するのが確実）"
+      }
     }
   ]
 }

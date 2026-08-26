@@ -39,7 +39,39 @@ export const NEEDS_GUARDRAIL = ['failure', 'measurement_failed'];
 const REQUIRED = ['id', 'area', 'signal', 'hypothesis', 'decision', 'execution',
   'verification', 'outcome', 'verdict', 'learning'];
 
-export function validate(doc, { exists = (p) => fs.existsSync(path.resolve(ROOT, p)) } = {}) {
+/**
+ * 隣のリポジトリが、この作業ツリーから見えるか。
+ *
+ * [2026-08-26] **CI はこのリポジトリしか checkout しない。**
+ * それなのに既定の exists は `../simplememo-api/...` を素で見に行っていたので、
+ * 隣を指す learning.changed を書いた瞬間に CI だけが落ちた
+ * （PR #598 の初回 run。手元では隣が見えるので通っていた）。
+ *
+ * automation-rate.mjs と ingest-asc.mjs は既に同じ規律を持っている ——
+ * **確かめられないものを、確かめたことにしない。**ここだけ持っていなかった。
+ */
+export function siblingVisible(p, root = ROOT) {
+  if (!String(p).startsWith('../')) return true;
+  return fs.existsSync(path.resolve(root, String(p).split('/').slice(0, 2).join('/')));
+}
+
+/** true = 在る / false = 無い / **null = 確かめていない**（隣が見えない）。 */
+export function defaultExists(root = ROOT) {
+  return (p) => (siblingVisible(p, root) ? fs.existsSync(path.resolve(root, p)) : null);
+}
+
+/** この実行から確かめられなかったパス。**0件のとき何も言わないため、呼ぶ側で使う。** */
+export function unverifiablePaths(doc, root = ROOT) {
+  const out = [];
+  for (const r of doc?.records ?? []) {
+    for (const f of r.learning?.changed ?? []) {
+      if (!siblingVisible(f, root)) out.push(`${r.id}: ${f}`);
+    }
+  }
+  return out;
+}
+
+export function validate(doc, { exists = defaultExists() } = {}) {
   const problems = [];
   const ids = new Set();
   const lessons = new Map();
@@ -86,7 +118,9 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.resolve(ROOT,
         + ' — **何も変わっていない学習は学習ではない**');
     }
     for (const f of changed) {
-      if (!exists(f)) {
+      // **null は「確かめていない」。**false（無い）とだけ区別して落とす。
+      // 隣のリポジトリが見えない実行（CI）で「無い」と断じない。
+      if (exists(f) === false) {
         problems.push(`${at}: learning.changed の "${f}" が実在しない`
           + '（隣のリポジトリを指すなら ../ 込みのパスで、この作業ツリーから見えること）');
       }
@@ -138,6 +172,14 @@ function selftest() {
     validate({ records: [noChanged] }, { exists: yes }).some((p) => p.includes('changed が空')));
 
   const ghost = base();
+  // [2026-08-26] **CI だけが落ちた。**隣のリポジトリは checkout されていないので、
+  // `../simplememo-api/...` を素で見に行くと「実在しない」になる。
+  const sibling = base(); sibling.learning.changed = ['../simplememo-api/src/x.ts'];
+  check('**隣が見えない実行では落とさない**（確かめられないものを「無い」と言わない）',
+    validate({ records: [sibling] }, { exists: () => null }).length === 0);
+  check('隣が見えて実在しなければ落とす',
+    validate({ records: [sibling] }, { exists: () => false }).some((p) => p.includes('実在しない')));
+
   check('changed のファイルが無いと落ちる',
     validate({ records: [ghost] }, { exists: () => false }).some((p) => p.includes('実在しない')));
 
@@ -179,6 +221,8 @@ if (isMain) {
 
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const problems = validate(doc);
+  // **確かめられなかったことを黙らない。**CI は隣のリポジトリを checkout しない。
+  const unchecked = unverifiablePaths(doc);
   const s = summarize(doc);
 
   const LABEL = {
@@ -199,6 +243,12 @@ if (isMain) {
     + ` ・ 学習が実際に変えた成果物 ${s.artifacts} 件`);
   console.log('\n  **率にしていない。**この台帳は全判断の母数を持っていないので、'
     + '\n  「判断の◯%を記録」は言えない（証跡を当てられた分だけが入っている）。');
+  if (unchecked.length) {
+    console.log(`\n  この実行から実在を確かめられなかった成果物 ${unchecked.length} 件（隣のリポジトリ）:`);
+    for (const u of unchecked.slice(0, 6)) console.log(`    ${u}`);
+    if (unchecked.length > 6) console.log(`    …ほか ${unchecked.length - 6} 件`);
+    console.log('  **確かめられなかったことを「在る」と書かない。**CI はこのリポジトリしか checkout しない。');
+  }
 
   if (problems.length) {
     console.error('\n運転記憶: 不整合');
