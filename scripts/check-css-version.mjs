@@ -48,6 +48,74 @@ const ASSETS = [
   ]),
 ];
 
+/**
+ * 資産1つぶんの照合器を作る。**純関数にしてある**ので、
+ * 「合っていない ?v= を落とすか」を自己テストで確かめられる。
+ *
+ * どんなクエリにも当てる（手書きの値を重複させず置き換えるため）。
+ */
+export function matcherFor(asset, hash) {
+  return {
+    asset,
+    hash,
+    re: new RegExp(`(/${asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(\\?v=[^"']*)?`, 'g'),
+  };
+}
+
+/** HTML 1枚を照合する。合っていれば null、ずれていれば直した HTML を返す。 */
+export function staleIn(html, matcher) {
+  if (!html.includes(matcher.asset)) return null;
+  const next = html.replace(matcher.re, `/${matcher.asset}?v=${matcher.hash}`);
+  return next === html ? null : next;
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 2026-08-10 に実際に本番へ出た形を固定する。markup が新しくなったのに
+// ?v= が据え置きで、CDNとブラウザは前のスタイルシートを配り続けた。
+// **新しい規則は1つも適用されず、何もエラーを報告しなかった。**
+// 2026-08-11 には js/lang.js で同じことが起きていた（1か月古いまま配布）。
+const SCENARIOS = [
+  ['**?v= が古いと検出する**（markup だけ新しくなり CDN が旧版を配り続ける形）', () => {
+    const m = matcherFor('assets/css/style.min.css', 'newhash123');
+    const out = staleIn('<link href="/assets/css/style.min.css?v=oldhash">', m);
+    if (out === null) throw new Error('ずれているのに検出しなかった（**この検査は何も見ていない**）');
+    if (!out.includes('?v=newhash123')) throw new Error(`直し方が違う: ${out}`);
+  }],
+  ['**?v= が無いのも検出する**（付け忘れは永久キャッシュと同義）', () => {
+    const m = matcherFor('js/lang.js', 'abc0123456');
+    if (staleIn('<script src="/js/lang.js"></script>', m) === null) {
+      throw new Error('クエリ無しを見逃した');
+    }
+  }],
+  ['合っていれば何も言わない（偽陽性を作らない）', () => {
+    const m = matcherFor('js/lang.js', 'abc0123456');
+    if (staleIn('<script src="/js/lang.js?v=abc0123456"></script>', m) !== null) {
+      throw new Error('合っているのに検出した');
+    }
+  }],
+  ['その資産を参照していないページは対象外', () => {
+    const m = matcherFor('js/lang.js', 'abc0123456');
+    if (staleIn('<p>なにもない</p>', m) !== null) throw new Error('無関係なページを拾った');
+  }],
+  ['**ファイル名の正規表現メタ文字で壊れない**（.min.css のドット）', () => {
+    const m = matcherFor('assets/css/style.min.css', 'h');
+    // ドットが任意1文字として効いていたら styleXminYcss にも当たってしまう
+    if (staleIn('<link href="/assets/css/styleXminYcss?v=z">', m) !== null) {
+      throw new Error('ドットが任意1文字として効いている');
+    }
+  }],
+];
+
+if (process.argv.includes('--selftest')) {
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 const { collectHtmlFiles, toUrlPath } = createRequire(import.meta.url)('./lib/site-files.js');
 const files = collectHtmlFiles(ROOT, {
   skipDirs: ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'growth'],
