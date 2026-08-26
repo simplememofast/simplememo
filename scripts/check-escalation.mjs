@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readLedger, requireShape } from './lib/read-ledger.mjs';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { CODES } from './autopilot-gate.mjs';
 
@@ -97,7 +98,8 @@ if (isMain) {
   const doc = JSON.parse(fs.readFileSync(RULES_PATH, 'utf8'));
   const runs = JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8')).runs || [];
   const seenClasses = [...new Set(runs.map((r) => r.failure_class).filter(Boolean))];
-  const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
+  const authority = requireShape(readLedger(AUTHORITY_PATH), ['domains'],
+    { what: 'data/authority-matrix.json', why: 'policy_only の領域を判定できない' });
   const policyOnly = (authority.domains || []).filter((d) => d.status === 'policy_only').map((d) => d.domain);
 
   const { problems, byTrigger } = validate(doc, { seenClasses, policyOnlyDomains: policyOnly });

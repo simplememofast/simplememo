@@ -29,6 +29,7 @@ import { fileURLToPath } from 'node:url';
 import { summarize as summarizeCoverage } from './automation-rate.mjs';
 import { summarize as summarizeBudget } from './autopilot-budget.mjs';
 import { analyze as analyzeSelfheal } from './autopilot-selfheal.mjs';
+import { requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
@@ -43,11 +44,30 @@ export function build() {
 
   // 未修理の故障は**自己修復の判定をそのまま使う。**ここで数え直すと、
   // レーンFの判定と1枚の表示がずれる — 「台帳と1枚のどちらが正か」を自分で作ることになる。
-  const heal = analyzeSelfheal(read('data/autopilot-runs.json'), read('data/authority-matrix.json'));
+  // 権限表が形をしていなければ、レーンFの判定は成り立たない。
+  // **空の権限表で「未修理の故障なし」と書かない。**
+  const heal = analyzeSelfheal(
+    read('data/autopilot-runs.json'),
+    requireShape(read('data/authority-matrix.json'), ['self_repair'],
+      { what: 'data/authority-matrix.json', why: 'レーンFの判定が成り立たない' }),
+  );
 
   return {
     date_jst: new Date().toISOString().slice(0, 10),
-    emergency_stop: { stopped: Boolean(stop.stopped), reason: stop.reason ?? null },
+    // **停止スイッチは「読めたか」を分けて持つ。**
+    //
+    // [2026-08-26] ここは Boolean(stop.stopped) だけだった。stop が {} でも
+    // false になり、1枚は「停止スイッチ: 稼働中」と書く ——
+    // **止まっているかどうかを読めていないのに、止まっていないと言う。**
+    // 止める仕組みそのものは無事で（ワークフローは require が投げれば
+    // set -e で落ちる／CI は空の台帳を弾く）、間違っていたのは表示のほう。
+    // それでも直す: この1枚は毎朝のセッションが最初に読むもので、
+    // ここに書いてあることが「確かめた」と受け取られる。
+    emergency_stop: {
+      readable: typeof stop?.stopped === 'boolean',
+      stopped: Boolean(stop?.stopped),
+      reason: stop?.reason ?? null,
+    },
     // 停止中なら以降は読む必要が無い。**1枚の最初に置く。**
     last_production_change: status.streak?.last_production_change_date_jst ?? null,
     consecutive_no_article_days: status.streak?.consecutive_no_article_days ?? null,
@@ -116,6 +136,10 @@ export function verify(b, sources = null) {
     }
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date_jst || '')) problems.push(`date_jst が日付でない（${b.date_jst}）`);
+  if (typeof b.emergency_stop?.readable !== 'boolean') {
+    problems.push('emergency_stop.readable が真偽値でない'
+      + ' — **読めたかどうかを1枚が持っていない**（読めないのを「稼働中」と書く形に戻っている）');
+  }
   if (typeof b.budget?.run_caps_judged !== 'boolean') {
     problems.push('budget.run_caps_judged が真偽値でない'
       + ' — **判定できたかどうかを1枚が持っていない**（null を「超過なし」と混ぜる形に戻っている）');
@@ -195,6 +219,18 @@ if (process.argv.includes('--selftest')) {
       const b = build();
       if (typeof b.budget.ccr_measured !== 'boolean') throw new Error('ccr_measured が真偽値でない');
     }],
+    ['**停止スイッチを読めたかを1枚が持つ**（読めないを「稼働中」と混ぜない）', () => {
+      const b = build();
+      if (typeof b.emergency_stop.readable !== 'boolean') throw new Error('readable が無い');
+      if (!b.emergency_stop.readable) throw new Error('実データで読めていない');
+    }],
+    ['**読めなかったことを落とす**（verify）', () => {
+      const b = clone(build());
+      delete b.emergency_stop.readable;
+      if (!verify(b).some((x) => x.includes('emergency_stop.readable'))) {
+        throw new Error('落とさなかった');
+      }
+    }],
     ['**1回上限を判定できたかを1枚が持つ**（null を「超過なし」と混ぜない）', () => {
       const b = build();
       if (typeof b.budget.run_caps_judged !== 'boolean') throw new Error('run_caps_judged が無い');
@@ -233,7 +269,13 @@ if (isMain) {
     console.log(L.join('\n'));
     process.exit(0);
   }
-  L.push(`  停止スイッチ: 稼働中`);
+  if (!b.emergency_stop.readable) {
+    L.push('  ■ **停止スイッチの状態を読めなかった**（emergency-stop.json に stopped が無い）');
+    L.push('    「稼働中」ではない。**止まっているかどうかが分からない状態を、動いていることにしない。**');
+    L.push('    data/emergency-stop.json を確かめること（CI の check-emergency-stop も落ちるはず）');
+  } else {
+    L.push(`  停止スイッチ: 稼働中`);
+  }
   L.push(`  本番最終変更: ${b.last_production_change} / 連続無記事 ${b.consecutive_no_article_days}日`);
   L.push(`  データ鮮度: BQ ${b.data_freshness?.bq_export_days_accumulated ?? '?'}/28日`
     + `（${b.data_freshness?.bq_checked ? '確認済み' : '**未確認 — 取得できなかった、の意味**'}）`);

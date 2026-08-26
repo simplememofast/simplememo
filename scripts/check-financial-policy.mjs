@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readLedger, requireShape } from './lib/read-ledger.mjs';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -186,7 +187,8 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
-  const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
+  const authority = requireShape(readLedger(AUTHORITY_PATH), ['domains'],
+    { what: 'data/authority-matrix.json', why: '領域の突き合わせができない' });
   const domains = new Set((authority.domains || []).map((d) => d.domain));
   const cap = JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget?.monthly_usd_cap ?? null;
   const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));

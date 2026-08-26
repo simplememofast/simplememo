@@ -60,6 +60,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
@@ -1519,7 +1520,10 @@ function readJson(p, fallback = null) {
 
 async function buildContext(today) {
   const runsDoc = readJson(RUNS_PATH, { runs: [] });
-  const matrix = readJson(MATRIX_PATH, {});
+  // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
+  // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
+  const matrix = requireShape(readJson(MATRIX_PATH, {}), ['self_repair'],
+    { what: 'data/authority-matrix.json', why: '所有者の判定が成り立たない' });
   const costDoc = readJson(COST_PATH, null);
   const statusDoc = readJson(STATUS_PATH, null);
   const repo = process.env.GITHUB_REPOSITORY || 'simplememofast/simplememo';
@@ -1570,7 +1574,10 @@ async function main() {
     console.error(`${ACTIONS_PATH} を読めない。台帳が無いと何も判定できない。`);
     process.exit(1);
   }
-  const matrix = readJson(MATRIX_PATH, {});
+  // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
+  // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
+  const matrix = requireShape(readJson(MATRIX_PATH, {}), ['self_repair'],
+    { what: 'data/authority-matrix.json', why: '所有者の判定が成り立たない' });
 
   if (has('check')) {
     const problems = validateLedger(ledger, matrix);
