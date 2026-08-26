@@ -118,6 +118,12 @@
       "ledger": "data/authority-matrix.json（空）",
       "was": "`readJson(MATRIX_PATH, {})` の {} で classify が全部 human を返す。安全側だが**権限表が無いまま「分類した」ことになる**",
       "now": "同上"
+    },
+    {
+      "script": "scripts/check-review-replies.mjs",
+      "ledger": "data/review-intake.json",
+      "was": "`if (intakeIds.size && !intakeIds.has(id))` —— **捌いた台帳が空だと規則が丸ごと消える。**空 = 「1件も捌いていない」なので下書きが在れば全部が違反のはずだが、「照合する相手が無いから飛ばす」と読んでいた。守っていたのは『分類より先に文面を書かない』で、**返信の公開は取り消せない**",
+      "now": "requireShape で {} を弾き、空の Set は「1件も捌いていない」として全部を違反にする。null（照合しない）とは別に扱う"
     }
   ],
   "remaining_corrupt_but_green": [
@@ -143,7 +149,7 @@
     "measured_at": "2026-08-26",
     "method": "scripts/lib/blindspot-silent.py（実データと空データで出力を突き合わせる）",
     "silent_before": 32,
-    "silent_after": 27,
+    "silent_after": 26,
     "visible": 13
   }
 }
