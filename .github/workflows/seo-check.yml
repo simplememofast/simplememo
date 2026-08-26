@@ -282,6 +282,12 @@ jobs:
       #
       # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない
       # （autopilot-runs.mjs と同じ理由・同じ作法）。
+      # 【監視Issueの取り込み】変換の自己検査だけをここで見る（**取得は毎朝のセッション**）。
+      # ここが守るのは3つ: 対象ラベル以外を運ばない / 二重に足さない /
+      # **取り込みが行を閉じない**（回復判定は issue_closed の仕事で、2箇所に散らさない）。
+      - name: Health intake
+        run: node scripts/health-intake.mjs --check
+
       - name: Autopilot action ledger
         run: |
           node scripts/autopilot-act.mjs --selftest
