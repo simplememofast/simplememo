@@ -285,8 +285,23 @@ export const CLOSE_CHECKS = {
    * が対象のもの。**見えないものを「たぶん終わった」で閉じない。**
    * 代わりに age_days を必ず出すので、放置は放置として見える。
    */
-  manual(_params, _ctx) {
-    return { closed: false, evidence: 'リポジトリから検査できない（人が閉じる）' };
+  manual({ observed } = {}, _ctx) {
+    // **手で観測したことを書く口を1つ開けてある。**閉じ条件は機械で判定
+    // できないが、「いま外はどうなっているか」は人が見れば書ける
+    // （例: GitHub の secrets 画面の Last updated）。
+    //
+    // これが無いと、台帳の `evidence` に手で書いた観測は**次の実行で生成値に
+    // 上書きされて消える** —— 2026-08-26 に実際にやった。書けて、通って、
+    // 消える。いちばん質の悪い形なので口を開ける。
+    //
+    // **observed を書いても閉じない。**閉じるのは人の操作だけで、ここは
+    // 状態の報告であって判定ではない。
+    return {
+      closed: false,
+      evidence: observed
+        ? `${observed}（リポジトリからは検査できない。閉じるのは人）`
+        : 'リポジトリから検査できない（人が閉じる）',
+    };
   },
 };
 
@@ -1299,6 +1314,15 @@ function selftest() {
   const noApi = CLOSE_CHECKS.ledger_covers_runs({}, { workflowRuns: null, runsDoc: { runs: [] } });
   t('API未取得では閉じない', noApi.closed === false);
   t('manual は閉じない', CLOSE_CHECKS.manual({}, {}).closed === false);
+  // **手で書いた観測が次の実行で消える**のを防ぐ口。2026-08-26 に
+  // evidence へ直接書いて消えたのが動機。
+  t('manual は observed を人向け出力へ通す',
+    CLOSE_CHECKS.manual({ observed: 'GH_PAT の Last updated は last week' }, {})
+      .evidence.includes('Last updated は last week'));
+  t('manual は observed があっても閉じない',
+    CLOSE_CHECKS.manual({ observed: '回した' }, {}).closed === false);
+  t('manual は observed 未指定なら従来の文面',
+    CLOSE_CHECKS.manual({}, {}).evidence === 'リポジトリから検査できない（人が閉じる）');
 
   // 閉じ条件: script_ok の入力検証
   t('script_ok はパスを検証する', CLOSE_CHECKS.script_ok({ script: '../etc/passwd' }, {}).closed === false);
