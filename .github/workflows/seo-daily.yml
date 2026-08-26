@@ -195,6 +195,21 @@ jobs:
           node scripts/check-domain-expiry.mjs --write 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
+      # ⑦法人経営。各社の規約本文を取りに行き、**改定されたら読み直しへ戻す。**
+      # 書き先は上と同じ data/corporate-obligations.json なので、下のコミットが拾う。
+      # **取得できなかった回は台帳を触らない**（読めなかった＝変わっていない、にしない）。
+      - name: Vendor terms (指紋の更新)
+        continue-on-error: true
+        run: |
+          {
+            echo ""
+            echo "## 規約本文の指紋"
+            echo ""
+            echo '```'
+            node scripts/vendor-terms.mjs --write 2>&1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Store facts vs App Store (report only)
         continue-on-error: true
         run: |
