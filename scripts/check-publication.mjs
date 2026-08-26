@@ -57,10 +57,13 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const POLICY_PATH = path.join(ROOT, 'data/publication-policy.json');
 export const REDIRECTS_PATH = path.join(ROOT, '_redirects');
+export const MIDDLEWARE_PATH = path.join(ROOT, 'functions/_middleware.js');
 const DATA_DIR = path.join(ROOT, 'data');
 
 export const BEGIN = '# BEGIN data-publication (scripts/check-publication.mjs --write)';
 export const END = '# END data-publication';
+export const JS_BEGIN = '// BEGIN data-publication (scripts/check-publication.mjs --write)';
+export const JS_END = '// END data-publication';
 
 export function listDataFiles(dir = DATA_DIR) {
   return fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
@@ -85,6 +88,16 @@ export function referencedFiles(root = ROOT) {
 }
 
 /** private のファイルを 404 にする _redirects ブロックを組む。 */
+/**
+ * _redirects 側は**墓標にする。**
+ *
+ * [2026-08-26] ここに `/data/x.json /404.html 404` を並べていたが、本番で
+ * **一度も効いていなかった。**Cloudflare Pages は実在する静的ファイルを優先し、
+ * そのパスの _redirects を無視する（対照実験は functions/_middleware.js のコメント）。
+ *
+ * 消すだけだと、次に同じ穴を見つけた人がまた同じ場所へ書く。
+ * **効かない理由を残し、検査でその状態を固定する。**実際の遮断は middleware。
+ */
 export function buildBlock(policy) {
   const priv = Object.entries(policy.files)
     .filter(([, v]) => !v.served_by_site)
@@ -92,11 +105,15 @@ export function buildBlock(policy) {
     .sort();
   const lines = [
     BEGIN,
-    '# **静的ホスティングは既定で全部配信する。**配信しないと決めたものは',
-    '# ここで明示的に 404 にする。一覧は data/publication-policy.json が正。',
-    '# **これは非公開化ではない。**リポジトリ自体が公開なので、同じ内容は',
-    '# GitHub 上で読める（publication-policy.json の repository_is_public）。',
-    ...priv.map((f) => `/data/${f}    /404.html    404`),
+    '# **data/*.json の遮断をここに書かないこと。**効かない。',
+    '#',
+    '# Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を',
+    '# 無視する。2026-08-25 にここへ404ルールを並べたが、本番で一度も効いていなかった',
+    '# （2026-08-26 の対照実験: /privacy-policy は301になるがファイルが無い。',
+    '#  /data/credential-expiry.json はファイルが在るので200のまま）。',
+    '#',
+    `# 実際の遮断は functions/_middleware.js（現在 ${priv.length} 件）。`,
+    '# 一覧は data/publication-policy.json が正で、--write が両方を書く。',
     END,
   ];
   return lines.join('\n');
@@ -135,6 +152,57 @@ export function checkRepoVisibility(policy, observed) {
     return [`リポジトリの公開状態が方針と違う（宣言 ${declared} / 実測 ${observed}）`
       + ' — **served_by_site: false の意味が変わる。**方針の repository_is_public と'
       + ' 各ファイルの why を見直すこと'];
+  }
+  return [];
+}
+
+/**
+ * middleware に埋める遮断リスト。
+ *
+ * [2026-08-26] **_redirects では止まらないことが本番で確定した。**
+ * Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を無視する。
+ * 対照実験（本番・2026-08-26）:
+ *
+ *   /privacy-policy               → 301  （ファイルが無い → _redirects が効く）
+ *   /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）
+ *   /growth/experiments/...json   → 404  （middleware は効く）
+ *
+ * つまり 2026-08-25 に入れた `_redirects` の404ブロックは**一度も効いていなかった。**
+ * それでもこの検査は「ブロックが _redirects に在ること」を確かめて緑を出していた ——
+ * **在ることと効くことは別。**Functions は静的アセットより先に走るので、こちらへ移す。
+ */
+export function buildJsBlock(policy) {
+  const unserved = Object.entries(policy.files)
+    .filter(([, v]) => !v.served_by_site)
+    .map(([f]) => f)
+    .sort();
+  return [
+    JS_BEGIN,
+    '// **サイトが配信しない data/*.json。**一覧は data/publication-policy.json が正。',
+    '// 手で編集しない —— `node scripts/check-publication.mjs --write` が書く。',
+    '//',
+    '// **これは非公開化ではない。**リポジトリ自体が公開なので、同じ内容は GitHub 上で',
+    '// 読める（publication-policy.json の repository_is_public）。ここで止めているのは',
+    '// サイト経由の配信・索引・キャッシュだけ。',
+    'const UNSERVED_DATA = new Set([',
+    ...unserved.map((f) => `  ${JSON.stringify(f)},`),
+    ']);',
+    JS_END,
+  ].join('\n');
+}
+
+/** middleware の遮断リストが方針と一致するか。**効く側なので、こちらが本体。** */
+export function checkMiddleware(policy, text) {
+  const block = buildJsBlock(policy);
+  if (!text.includes(JS_BEGIN)) {
+    return ['functions/_middleware.js に遮断ブロックが無い'
+      + ' — **_redirects では実在ファイルを止められない。**`--write` を実行すること'];
+  }
+  const start = text.indexOf(JS_BEGIN);
+  const end = text.indexOf(JS_END) + JS_END.length;
+  if (text.slice(start, end) !== block) {
+    return ['functions/_middleware.js の遮断ブロックが方針とずれている'
+      + ' — `node scripts/check-publication.mjs --write` を同じコミットに含めること'];
   }
   return [];
 }
@@ -221,8 +289,19 @@ function selftest() {
   t('公開のつもりが非公開になっても落ちる（意味が変わるので気づく）',
     checkRepoVisibility({ repository_is_public: true }, false).length === 1);
 
+  // middleware 側 — **_redirects は実在ファイルを止められない**ので、こちらが本体
+  const js = buildJsBlock(pol);
+  t('配信しないものだけを middleware に並べる',
+    js.includes('"b.json"') && !js.includes('"a.json"'));
+  t('middleware にブロックが無ければ落ちる',
+    checkMiddleware(pol, 'nothing').some((p) => p.includes('実在ファイルを止められない')));
+  t('middleware のずれを検出する',
+    checkMiddleware(pol, `${JS_BEGIN}\nwrong\n${JS_END}`).length === 1);
+  t('middleware が一致すれば通る', checkMiddleware(pol, `head\n${js}\ntail`).length === 0);
+
   const block = buildBlock(pol);
-  t('配信しないものだけが 404 になる', block.includes('/data/b.json') && !block.includes('/data/a.json'));
+  t('_redirects 側は墓標（ルールを書かない・理由を残す）',
+    !block.includes('/data/b.json') && block.includes('効かない'));
   t('遮断ブロックの欠落を検出する', checkRedirects(pol, 'nothing').length === 1);
   t('ずれを検出する', checkRedirects(pol, `${BEGIN}\nwrong\n${END}`).length === 1);
   t('一致すれば通る', checkRedirects(pol, `head\n${block}\ntail`).length === 0);
@@ -272,10 +351,25 @@ if (isMain) {
     }
     fs.writeFileSync(REDIRECTS_PATH, text);
     console.log('\n  → _redirects を更新');
+
+    // **効くのはこちら。**_redirects は実在ファイルには適用されない（本番で確認）。
+    let mw = fs.readFileSync(MIDDLEWARE_PATH, 'utf8');
+    const jsBlock = buildJsBlock(policy);
+    if (mw.includes(JS_BEGIN)) {
+      const s2 = mw.indexOf(JS_BEGIN);
+      const e2 = mw.indexOf(JS_END) + JS_END.length;
+      mw = mw.slice(0, s2) + jsBlock + mw.slice(e2);
+      fs.writeFileSync(MIDDLEWARE_PATH, mw);
+      console.log('  → functions/_middleware.js を更新');
+    } else {
+      console.error('  functions/_middleware.js に遮断ブロックの目印が無い');
+      process.exit(1);
+    }
     process.exit(0);
   }
 
   problems.push(...checkRedirects(policy, fs.readFileSync(REDIRECTS_PATH, 'utf8')));
+  problems.push(...checkMiddleware(policy, fs.readFileSync(MIDDLEWARE_PATH, 'utf8')));
   if (problems.length) {
     console.error('\n公開方針: 不整合');
     for (const p of problems) console.error(`  - ${p}`);

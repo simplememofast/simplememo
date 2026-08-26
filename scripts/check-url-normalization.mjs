@@ -248,6 +248,39 @@ await notFound("/growth/data/gsc/2026-08-09/queries.json");
 await notFound("//growth//experiments/experiments.json");
 await notFound("/growth/");
 
+// data/*.json のうち「配信しない」と決めたもの。
+//
+// [2026-08-26] **2026-08-25 にこれを _redirects へ書いたが、一度も効いていなかった。**
+// Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を無視する。
+// 本番での対照実験:
+//
+//   /privacy-policy               → 301  （ファイルが無い → _redirects が効く）
+//   /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）
+//   /growth/experiments/...json   → 404  （middleware は効く）
+//
+// **設定に書いてあることを確かめる検査は、効くことを確かめない。**
+// ここは middleware を実際に走らせて status を見るので、効果を確かめている。
+// 一覧は data/publication-policy.json から読む（テストが方針とずれない）。
+{
+  const policy = JSON.parse(
+    readFileSync(path.join(ROOT, "data/publication-policy.json"), "utf8"),
+  );
+  const entries = Object.entries(policy.files);
+  const unserved = entries.filter(([, v]) => !v.served_by_site).map(([f]) => f);
+  const served = entries.filter(([, v]) => v.served_by_site).map(([f]) => f);
+  if (unserved.length === 0) fail("publication-policy に「配信しない」が1件も無い");
+  if (served.length === 0) fail("publication-policy に「配信する」が1件も無い");
+  for (const f of unserved) await notFound(`/data/${f}`);
+  // **配信すると決めたものは通す。**全部404にして「守った」ことにしない。
+  for (const f of served) {
+    checked++;
+    const r = await run(`/data/${f}`);
+    if (r.kind !== "pass") {
+      fail(`/data/${f} は配信する分類なのに middleware が止めた（${JSON.stringify(r)}）`);
+    }
+  }
+}
+
 // ── 8. /admin/* keeps its Cloudflare Access auth chain ───────────────────
 await servesDirectly("/admin/");
 await servesDirectly("/admin/api/upload");

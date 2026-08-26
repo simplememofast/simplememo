@@ -81,39 +81,13 @@ https://www.simplememofast.com/*  https://simplememofast.com/:splat  301
 /%29  /  301
 
 # BEGIN data-publication (scripts/check-publication.mjs --write)
-# **静的ホスティングは既定で全部配信する。**配信しないと決めたものは
-# ここで明示的に 404 にする。一覧は data/publication-policy.json が正。
-# **これは非公開化ではない。**リポジトリ自体が公開なので、同じ内容は
-# GitHub 上で読める（publication-policy.json の repository_is_public）。
-/data/audit-charter.json    /404.html    404
-/data/audit-findings.json    /404.html    404
-/data/autonomy-timeline.json    /404.html    404
-/data/autopilot-actions-report.json    /404.html    404
-/data/autopilot-actions.json    /404.html    404
-/data/benchmark.json    /404.html    404
-/data/content-graph.json    /404.html    404
-/data/corporate-obligations.json    /404.html    404
-/data/cpp-map.json    /404.html    404
-/data/credential-expiry.json    /404.html    404
-/data/crossrepo-probes.json    /404.html    404
-/data/emergency-stop.json    /404.html    404
-/data/escalation-rules.json    /404.html    404
-/data/feature-backlog.json    /404.html    404
-/data/feature-outcomes.json    /404.html    404
-/data/financial-policy.json    /404.html    404
-/data/injection-surface.json    /404.html    404
-/data/kpi-definitions.json    /404.html    404
-/data/model-eval-set.json    /404.html    404
-/data/model-routing.json    /404.html    404
-/data/monitoring-coverage.json    /404.html    404
-/data/pr-claims.json    /404.html    404
-/data/publication-policy.json    /404.html    404
-/data/revenue-series.json    /404.html    404
-/data/review-intake.json    /404.html    404
-/data/review-replies.json    /404.html    404
-/data/signal-ledger.json    /404.html    404
-/data/site-constants.json    /404.html    404
-/data/spend-approvals.json    /404.html    404
-/data/stop-drills.json    /404.html    404
-/data/vendor-register.json    /404.html    404
+# **data/*.json の遮断をここに書かないこと。**効かない。
+#
+# Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を
+# 無視する。2026-08-25 にここへ404ルールを並べたが、本番で一度も効いていなかった
+# （2026-08-26 の対照実験: /privacy-policy は301になるがファイルが無い。
+#  /data/credential-expiry.json はファイルが在るので200のまま）。
+#
+# 実際の遮断は functions/_middleware.js（現在 31 件）。
+# 一覧は data/publication-policy.json が正で、--write が両方を書く。
 # END data-publication
