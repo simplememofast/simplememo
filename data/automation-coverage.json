@@ -200,7 +200,7 @@
       "task": "本番改善サイクルの完走（機能側）",
       "executor": "nobody",
       "evidence": [],
-      "note": "コンテンツ側は完走。機能側0件"
+      "note": "コンテンツ側は完走。**機能側0件。** [2026-08-25] 完走させるための台帳と検査は実装した（data/feature-outcomes.json / scripts/check-feature-outcomes.mjs）が、**executor は nobody のまま。**この行が数えているのは『完走したか』であって『完走できる仕組みがあるか』ではない。**出す前に測り方を決めた機能が、まだ1件も無い** —— v5.8.0 も v5.8.1 も出荷済みだが、どちらも指標を先に宣言していない。**さかのぼって埋めない**（全件 measurement_failed になるうえ、後から指標を選んだものになる）。次に出す機能から1行足す"
     },
     {
       "area": "① 次期機能開発",
@@ -1975,6 +1975,18 @@
         "../simplememo-ios/.github/workflows/qa-static.yml"
       ],
       "note": "2026-08-25実装。**release.yml はタグの機構には厳密だったが、そのコミットで検査が通ったかを一度も見ていなかった**（check-run / status / conclusion への参照が0件）。qa-static は main への push でも走るので、**検査が落ちたコミットも main に載り**、載っていれば出荷できた。サイト側の auto-merge が『検証済みSHAだけをマージ』を徹底しているのに、**iOS の出荷側だけ同じ規律が無かった。**タグ作成の前に止める —— タグ以降は Xcode Cloud が走り、**ビルド番号は再利用できない。**APIが引けない・未実行・検査が無いのは**いずれも緑ではない。**同名が複数ある場合は全部が緑を求める（1つだけ緑にして通す経路を作らない）。CI基盤が壊れたとき用の override は理由必須で要約に残る。self-test 16件"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "機能の効果測定の宣言（出す前に測り方を決める）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/feature-outcomes.json",
+        "scripts/check-feature-outcomes.mjs",
+        ".github/workflows/seo-check.yml",
+        "../simplememo-api/src/rollout-guard.ts"
+      ],
+      "note": "2026-08-25実装。**declared_at <= shipped_at を強制する** —— 出した後で指標を決めると、出た結果に合う指標を選べてしまう。指標は rollout-guard の MetricDefinition と同じ形（key / numerator / denominator / higher_is_better）で書き、段階公開の bucketOf が決める露出群・対照群の上で測る。**別のA/B基盤を建てない。****安全指標（launch_ok / send_success）を成功指標にできない** —— 壊していないことは効いたことではなく、混ぜると何を出しても成功になる（使うなら理由を書かせる）。判定は運転記憶と同じ5値で、**基準の数字が無いのに『効いた／外した』と書けない**（growth のタイトル実験7件が全件これで潰れた規律を、機能側へ移した）。self-test 13件"
     }
   ],
   "$since_note": [

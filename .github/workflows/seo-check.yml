@@ -359,6 +359,16 @@ jobs:
       - name: App Store Connect ingest
         run: node growth/scripts/ingest-asc.mjs --check
 
+      # 【機能の改善サイクル】コンテンツ側は experiments.json で完走しているが、
+      # **機能側には同じ台帳が無かった。**feature-backlog は採点だけで、
+      # rollout-guard の3指標は「壊していないか」の安全指標であって
+      # 「効いたか」ではない。**出す前に測り方を決めさせる**のが主眼で、
+      # declared_at <= shipped_at を強制する（後から指標を選べないように）。
+      - name: Feature outcome loop
+        run: |
+          node scripts/check-feature-outcomes.mjs --selftest
+          node scripts/check-feature-outcomes.mjs --check
+
       # 【運転記憶】判断→実行→結果→**次の判断がどう変わったか**を1レコードで持つ。
       #
       # ①〜④だけなら Autopilot、⑤停止・revert まで行けば Closed-loop、

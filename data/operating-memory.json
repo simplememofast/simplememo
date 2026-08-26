@@ -235,10 +235,12 @@
         "lesson_key": "no-baseline-no-experiment",
         "text": "**基準値を記録する前に変更してはいけない。**この案件は experiments.json 上 `inconclusive` に入っているが、『測れたが母数が足りない』のではなく『そもそも測っていない』。前者は待てば解け、後者は待っても解けない。**同じ台帳の同じ語に入れると、待てば解けると誤解する**",
         "changed": [
+          "data/feature-outcomes.json",
+          "data/operating-memory.json",
           "growth/experiments/experiments.json",
-          "data/operating-memory.json"
+          "scripts/check-feature-outcomes.mjs"
         ],
-        "new_guardrail": "verdict を5値にし、measurement_failed を undecidable から分離した。experiments.json 側の `inconclusive` 7件は、この観点で当て直しが要る（未了 —— data/autopilot-actions.json の act-experiments-verdict-split）"
+        "new_guardrail": "verdict を5値にし、measurement_failed を undecidable から分離した。experiments.json 側の `inconclusive` 7件は、この観点で当て直しが要る（未了 —— data/autopilot-actions.json の act-experiments-verdict-split） **[2026-08-25 追記] この規律は機能側に効いていなかった。**growth 側だけに基準値の検査を置いた結果、機能は指標を宣言しないまま出荷され続けていた（v5.8.0 / v5.8.1 とも宣言なし）。data/feature-outcomes.json と scripts/check-feature-outcomes.mjs で同じ規律を機能側へ移した —— declared_at <= shipped_at の強制と、基準の数字が無い『効いた／外した』の禁止。**同じ lesson_key で2件目を作らず、1件目の歯止めを広げた** —— 2件に分けると『学んだことが2つある』ように見えるが、実際は1つの学習が届いていなかっただけ。"
       }
     },
     {
