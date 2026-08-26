@@ -1118,6 +1118,35 @@
         ],
         "new_guardrail": "**生成器を `run`（再生成して比較）に登録する前に、出力がリポジトリの中だけで決まるかを確かめる。**ネット・時刻・外部APIが混ざるものは never_run に置き、書くのは日次側（seo-daily）に任せる。あわせて、**エージェント環境から取れたデータを台帳の初期値にしない** —— プロキシ越しの観測はランナーの観測と別物でありうる"
       }
+    },
+    {
+      "id": "om-2026-08-26-actions-quota-took-down-the-monitor-too",
+      "seeded": false,
+      "area": "⑫ 事業継続性",
+      "signal": "15:00 UTC 前後から非公開リポジトリの Actions が動かなくなった。run は作られるがジョブが割り当てられず、`get_workflow_run_usage` は `billable {}`（1秒も消費していない）。公開リポジトリ（simplememo）は79分の空白のあと回復した",
+      "hypothesis": "GitHub 側の一時的な事象。待てば直る",
+      "decision": "**待っても直らない。**オーナーが請求画面を確認して確定した:\n\n    gross    $27.30\n    included $27.22   ← 差は $0.08。**無料枠を使い切っている**\n    次回請求  なし     ← 超過は請求されず、止められる設定\n\n公開リポジトリは無料枠の外なので影響を受けない —— **観測された非対称と一致する。**\n\n内訳は simplememo $15.57 / simplememo-ios $10.46 / simplememo-api $1.27。**ios の $10.46 は macOS 1回でほぼ全部**で、../simplememo-ios/CLAUDE.md の「既定1回＝130分換算」に $0.08 を掛けた $10.40 と一致する。そこから **macOSの実時間1分 ≈ $0.80** が出た。\n\nこの単価で qa-ios.yml のコメントを見直すと、「100分＝$8相当」という旧見積りが**10倍を掛け忘れていて実際は約$80**だった。桁がひとつ違う見積りが、タイムアウトを緩める判断の根拠になっていた（訂正済み）。",
+      "execution": {
+        "repo": "simplememo-ios / simplememo",
+        "commit": "(this session)",
+        "files": [
+          "../simplememo-ios/.github/workflows/qa-ios.yml",
+          "../simplememo-ios/CLAUDE.md",
+          "data/operating-memory.json"
+        ]
+      },
+      "verification": "請求画面のスクリーンショット（オーナー提供）と、run 32984661197 の queued 状態・`billable {}` を突き合わせた。公開リポジトリ側は 16:18/16:26 に遅れて配送された push イベントで SEO Validation が両方 success し、#655 が 16:39 にマージされたことで「公開は無事」を確認",
+      "outcome": "原因が確定した。非公開2リポジトリの CI は 9/1 の月次リセットまで止まるか、支出上限を設定するまで動かない。**macOS 1回が約 $10.40 なので、上限を $10 未満にすると ubuntu の日次は通り macOS は1回も入らない** —— 不便ではなくもう一段の錠前として使える",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "the-monitor-shares-a-failure-mode-with-what-it-monitors",
+        "text": "**監視が、監視対象と同じ故障モードを共有していた。**\n\nこの日の午前に `health-intake.mjs` を入れて「気づく役を人から外した」——`autopilot-health.yml` が Issue を立て、それを台帳へ運ぶ経路を作った。**その監視自身が GitHub Actions で動いている。**\n\nActions が止まれば、出荷も止まり、**それを知らせる仕組みも止まる。**今回たまたま公開リポジトリだけが生きていたので気づけたが、**アカウント全体が止まっていたら、静かに止まったまま誰も気づかない。**\n\n「気づく役を外す」設計をするとき、**気づく側がどこで動くか**を見ていなかった。塞いだのは「人が読む」という一段で、**その下の土台は同じ**だった。",
+        "changed": [
+          "../simplememo-ios/.github/workflows/qa-ios.yml",
+          "../simplememo-ios/CLAUDE.md"
+        ],
+        "new_guardrail": "**監視は、被監視と別の実行基盤に置く。**この運用では GitHub Actions の外に CCR の Routine（スケジュール起動セッション）があり、そちらは別勘定で動く。Actions が止まったことを Actions で検知しようとしない。あわせて、**安全装置の設定値には金額を併記する** —— タイムアウトの分数は「いくらまで許すか」でもあり、単価の桁を間違えるとその値が間違う（実際に10倍ずれていた）"
+      }
     }
   ]
 }
