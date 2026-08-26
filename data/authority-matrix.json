@@ -386,6 +386,38 @@
       "scripts/autopilot-act.mjs",
       ".github/workflows/autopilot-act.yml"
     ],
+    "$comment_unattended_cannot_push": [
+      "**『直してよい』と『直せる』は別。**may_modify は権限の話だが、こちらは能力の話。",
+      "",
+      "2026-08-25、レーンFが上流actionのSHA pin を書き上げたところで push が",
+      "remote rejected された。主系(GitHub Actions)の GH_PAT に `workflow` scope が",
+      "無く、`.github/workflows/*` を含む push を GitHub が拒否するため",
+      "（GITHUB_TOKEN でも同じ）。**may_modify はこのファイルを挙げているのに、",
+      "主系はそれを push する資格を持っていない。**原因特定まで済んだ修理が、",
+      "適用の直前で捨てられた。",
+      "",
+      "`workflow` scope を足せば消える食い違いだが、**足さないと決めた**",
+      "（2026-08-25・オーナーの権限委譲のもと）。scope を足すと無人の主系が",
+      "自分のワークフロー定義を——`permissions:` を含めて——書き換えて push できる。",
+      "must_not の『自分の権限を広げる変更』を**いま実際に強制しているのは",
+      "GitHub 側の remote rejected であって、散文ではない。**",
+      "",
+      "つまりこの食い違いは残す。残すなら、**ぶつかる前に分かるようにする。**",
+      "ここに載っているパスを触るアクションは無人実行(auto)へ回らず、",
+      "push できる副系CCRセッションへ回る（classify() が判定・validateLedger() が検査）。",
+      "レーンFは原因特定までを担い、適用は副系が引き取る——2026-08-25 がその形。"
+    ],
+    "unattended_cannot_push": {
+      "paths": [
+        ".github/workflows/obsidian-autopilot.yml",
+        ".github/workflows/autopilot-health.yml",
+        ".github/workflows/cron-health.yml",
+        ".github/workflows/autopilot-act.yml"
+      ],
+      "why": "主系(GitHub Actions)の GH_PAT に `workflow` scope が無く、.github/workflows/* を含む push は GitHub が remote reject する（GITHUB_TOKEN でも同じ）。scope は意図的に足していない — must_not『自分の権限を広げる変更』を実際に強制しているのがこの拒否そのものであるため。",
+      "who_applies": "副系CCRセッション（push できる）",
+      "decided_jst": "2026-08-25"
+    },
     "must_not": [
       "検証を弱める変更（CIチェックの削除・スキップ・閾値の緩和）",
       "自分の権限を広げる変更（permissions: の拡大・actions: write の追加）",

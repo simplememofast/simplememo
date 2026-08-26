@@ -303,6 +303,21 @@ export const CLOSE_CHECKS = {
 // どちらも満たすときだけ ai。**判定できないときは human に倒す**
 // （権限の判定を迷ったら狭いほうへ、は不可逆な領域を持つ運用の基本）。
 
+/**
+ * **may_modify を通っても push できないファイルを返す。**
+ *
+ * may_modify は権限（直してよいか）、こちらは能力（直せるか）。主系の GH_PAT に
+ * `workflow` scope が無いため `.github/workflows/*` を含む push は GitHub 側で
+ * remote reject される。2026-08-25、レーンFはこれに適用の直前でぶつかり、
+ * 原因特定まで済んだ修理を捨てている。**scope は意図的に足していない**ので
+ * （権限表 self_repair.$comment_unattended_cannot_push）、食い違いは残る。
+ * 残すなら、ぶつかってから気づくのではなく判定で分ける。
+ */
+export function unattendedCannotPush(touches, matrix) {
+  const blocked = new Set(matrix.self_repair?.unattended_cannot_push?.paths ?? []);
+  return (touches ?? []).filter((f) => blocked.has(f));
+}
+
 export function classify(action, matrix) {
   const sr = matrix.self_repair ?? {};
   const mayModify = new Set(sr.may_modify ?? []);
@@ -323,6 +338,19 @@ export function classify(action, matrix) {
     const outside = touches.filter((f) => !mayModify.has(f));
     if (touches.length === 0) return { owner: 'human', why: '自動実行の対象ファイルが特定できない' };
     if (outside.length > 0) return { owner: 'human', why: `self_repair.may_modify の外: ${outside.join(', ')}` };
+    // 3-1. **範囲の内側でも、無人では push できないものがある。**
+    //      owner は 'ai' のまま——これは人の仕事ではなく、押せるレーンが違うだけ。
+    //      unattended_blocked を見て --apply が飛ばす（human に倒すと、
+    //      AIが普通にできることをオーナー依頼へ積み上げる元の誤りに戻る）。
+    const blocked = unattendedCannotPush(touches, matrix);
+    if (blocked.length > 0) {
+      const who = sr.unattended_cannot_push?.who_applies ?? '副系CCRセッション';
+      return {
+        owner: 'ai',
+        unattended_blocked: true,
+        why: `may_modify の内側だが無人では push できない（${blocked.join(', ')}）— ${who}が適用する`,
+      };
+    }
     return { owner: 'ai', why: 'self_repair.may_modify の内側（無人実行の範囲）' };
   }
   // 4. セッションが実装するもの。判定は権限表の領域で行う——may_modify は
@@ -998,6 +1026,13 @@ export function validateLedger(ledger, matrix) {
       if (outside.length > 0 && !a.force_owner) {
         p.push(`${at}: auto=${a.auto} だが self_repair.may_modify の外を触る: ${outside.join(', ')}`);
       }
+      // **無人で push できない対象に handler を付けない。**付いていると
+      // 「自動で直る」と読めるのに、実際は毎回 push で落ちて何も進まない。
+      // 気づくのが適用の直前になるのが最悪で、2026-08-25 はそれで1日を使った。
+      const blocked = unattendedCannotPush(a.touches, matrix);
+      if (blocked.length > 0 && !a.force_owner) {
+        p.push(`${at}: auto=${a.auto} だが無人では push できない対象を触る: ${blocked.join(', ')} — auto を外し、副系セッションが適用する形にする（self_repair.unattended_cannot_push）`);
+      }
     }
   });
   return p;
@@ -1053,7 +1088,14 @@ function selftest() {
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
   const matrix = {
-    self_repair: { may_modify: ['data/autopilot-runs.json'], stop_after_failed_repairs: 3 },
+    self_repair: {
+      may_modify: ['data/autopilot-runs.json', '.github/workflows/obsidian-autopilot.yml'],
+      unattended_cannot_push: {
+        paths: ['.github/workflows/obsidian-autopilot.yml'],
+        who_applies: '副系CCRセッション',
+      },
+      stop_after_failed_repairs: 3,
+    },
     domains: [{ domain: '承認が要る領域', requires_approval: true }],
   };
 
@@ -1071,6 +1113,27 @@ function selftest() {
   // ここを取り違えたことが「自分で直せたものをオーナー依頼に積む」誤りの原因。
   t('セッション実装は may_modify 外でも ai',
     classify({ touches: ['.github/workflows/seo-check.yml'] }, matrix).owner === 'ai');
+
+  // **『直してよい』と『直せる』のずれ。**may_modify を通っても主系は
+  // .github/workflows/* を push できない（GH_PAT に workflow scope が無い）。
+  // 2026-08-25、レーンFは修理を書き上げてから適用の直前でこれにぶつかった。
+  {
+    const wf = { auto: 'reconcile-runs', touches: ['.github/workflows/obsidian-autopilot.yml'] };
+    const c = classify(wf, matrix);
+    t('push できない対象は無人実行に回らない', c.unattended_blocked === true);
+    t('push できなくても owner は ai のまま（人の仕事ではない）', c.owner === 'ai');
+    t('誰が適用するかが why に出る', /副系CCRセッション/.test(c.why));
+    t('push できる対象は従来どおり無人実行',
+      classify({ auto: 'reconcile-runs', touches: ['data/autopilot-runs.json'] }, matrix).unattended_blocked !== true);
+    t('unattendedCannotPush は該当パスだけ返す',
+      unattendedCannotPush(['data/autopilot-runs.json', '.github/workflows/obsidian-autopilot.yml'], matrix).length === 1);
+    const probs = validateLedger({ actions: [{
+      id: 'x', state: 'open', created_jst: '2026-08-26', title: 't',
+      close_check: { kind: 'manual' }, auto: 'reconcile-runs',
+      touches: ['.github/workflows/obsidian-autopilot.yml'],
+    }] }, matrix);
+    t('台帳検査が auto+push不可を落とす', probs.some((m) => /無人では push できない対象/.test(m)));
+  }
 
   // 閉じ条件: 失敗が無いだけでは閉じない（走っていない可能性を潰す）
   const noRun = CLOSE_CHECKS.no_failure_since(
@@ -1394,7 +1457,11 @@ async function main() {
       if (a.state !== 'open' || !a.auto) continue;
       // 自動実行は ai と判定されたものだけ。人の領域のアクションに
       // handler を付けたくなったら、まず classify を通ることを確かめる。
-      if (classify(a, matrix).owner !== 'ai') continue;
+      const c = classify(a, matrix);
+      if (c.owner !== 'ai') continue;
+      // **押せないものは押しに行かない。**handler がファイルを書けても、
+      // その後の push が remote rejected になるだけで、書きかけが残る。
+      if (c.unattended_blocked) continue;
       const h = HANDLERS[a.auto];
       if (!h) continue;
       let r;
