@@ -1,0 +1,260 @@
+{
+  "$comment": [
+    "**落ちることを確かめていない検査は、無いのと同じ。**",
+    "scripts/check-selftests.mjs が読む。data/stop-drills.json の検査版。",
+    "",
+    "【なぜ要るか】2026-08-26 の1日で、自分が書いた検査が黙って効いていないのを",
+    "5回踏んだ。うち check-pr-facts.mjs は、規則を足したのに scan() が1行ずつしか",
+    "見ないせいで**一度も発火しない**状態で、緑を出し続けていた。",
+    "",
+    "【推測しない】ソースを正規表現で読んで「否定ケースがありそう」と判定する案は",
+    "捨てた。**推測で作った検査は、推測の分だけ効かない。**demonstrated は",
+    "『実際に壊して落ちるのを見た』ときにしか書けない（at と broke が必須）。",
+    "",
+    "【ラチェット】40本を一度に直すのは無理なので、**増える方向だけを止める。**",
+    "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
+    "この台帳は「現状を追認する表」になり、止める力を失う。"
+  ],
+  "none_budget": 39,
+  "checks": [
+    {
+      "script": "growth/scripts/build-queues.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "growth/scripts/check-data-quality.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/check-experiments.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/check-mentions.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/check-stoploss.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "growth/scripts/d-score.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/decompose-series.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/ingest-asc.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/revenue-series.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/ai-unit-cost.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/automation-rate.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/autonomy-timeline.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "終点 61.3% が現在値 61.9% と一致せず落ちた。加えて since を日付形式で書いた不正データで RangeError まで観測し、読めるメッセージを出す検査を足した"
+    },
+    {
+      "script": "scripts/autopilot-act.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/autopilot-budget.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/autopilot-drill.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/autopilot-runs.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/autopilot-selfheal.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-audit-independence.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-authority.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-autopilot-page.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "台帳の率を 61.9% に更新した状態で公開ページを 61.3% のまま残して落ちた。見出しだけ直して領域別の表を置き去りにした2回目も捕まえた"
+    },
+    {
+      "script": "scripts/check-benchmark.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-content-graph.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-corporate.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-credentials.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-css-version.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-definitions.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-degradation.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-emergency-stop.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-escalation.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-expiry.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/check-feature-outcomes.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/check-financial-policy.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-injection-surface.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-internal-redirects.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-model-eval.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-model-routing.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-monitoring.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-operating-memory.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "learning.changed に隣リポジトリのパスを ../ 無しで書いて「実在しない」で落ちた"
+    },
+    {
+      "script": "scripts/check-pr-claims.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-pr-facts.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "原稿の「段階公開中の機能がゼロ」を書き戻して exit 1 を観測。**最初の規則は1行ずつの走査に阻まれて一度も発火せず、それもこの手順で判明した**"
+    },
+    {
+      "script": "scripts/check-pr-hero.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-public-facts.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-publication.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
+    },
+    {
+      "script": "scripts/check-review-replies.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/check-script-tags.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-selftests.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "初回同期で none が 41 本になり、上限 40 のラチェットが実際に発火して落ちた"
+    },
+    {
+      "script": "scripts/check-signals.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-stop-drills.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "kill 訓練を level=production と誤記して「production なのに blocked_by が残っている」と production_verified の宣言ずれの2件で落ちた"
+    },
+    {
+      "script": "scripts/check-store-facts.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-url-normalization.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-vendors.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/code-authorship.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/daily-brief.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/feature-score.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/property-tests.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/review-intake.mjs",
+      "state": "selftest_only"
+    }
+  ],
+  "$baseline": "2026-08-26 の初回同期で数えた実測（39本）。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない: 持たせた分だけ、自己テスト無しの検査が黙って増える"
+}
