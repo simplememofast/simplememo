@@ -81,8 +81,10 @@ https://www.simplememofast.com/*  https://simplememofast.com/:splat  301
 /%29  /  301
 
 # BEGIN data-publication (scripts/check-publication.mjs --write)
-# **静的ホスティングは既定で全部配信する。**公開しないと決めたものは
+# **静的ホスティングは既定で全部配信する。**配信しないと決めたものは
 # ここで明示的に 404 にする。一覧は data/publication-policy.json が正。
+# **これは非公開化ではない。**リポジトリ自体が公開なので、同じ内容は
+# GitHub 上で読める（publication-policy.json の repository_is_public）。
 /data/audit-charter.json    /404.html    404
 /data/audit-findings.json    /404.html    404
 /data/autonomy-timeline.json    /404.html    404

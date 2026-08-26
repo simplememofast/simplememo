@@ -475,6 +475,99 @@
         ],
         "new_guardrail": "承認なしの posted_at と、**AIを承認者にした記録**を落とす（spend-approvals と同じ規律）。公開の場での期日・版の約束、個人情報、禁止表現を下書きの時点で落とす。文字数は2,000字 —— 業界で言われる5,970は**Appleの公式仕様ではなく有志の実測**なので、公表されていない上限の際どいところを狙わない設計にした"
       }
+    },
+    {
+      "id": "om-2026-08-26-discarded-not-missing",
+      "seeded": false,
+      "area": "⑨ マネタイズ",
+      "signal": "⑨マネタイズが13領域で最下位（12.5%）。台帳の「解約理由分析」は「中身に解約理由が含まれるかは、まだ落とせていないので未確認」で止まっていた",
+      "hypothesis": "Apple 側が解約理由をくれないのだろうから、アプリ内で理由を聞く導線を作るしかない",
+      "decision": "**導線を作る前に、自分が何を捨てているかを見た。**取得結果の columns を開いたら `Cancellation Reason` が Subscription Event / State のどちらにも入っていた —— **前日の取得で既に届いていた。**読めなかったのは asc_analytics.rb が数値列の合計しか保存せず、文字列である解約理由が合計対象に入らなかったため。列名だけが残り、中身は毎回捨てられていた",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "a21531d / f1df904 / c1cc126",
+        "files": [
+          "scripts/asc_analytics.rb",
+          "scripts/asc_subscription.rb",
+          "scripts/lib/asc_columns.rb",
+          ".github/workflows/asc-analytics.yml"
+        ]
+      },
+      "verification": "取得側に名指しの分類列×名指しの測定列の内訳を足し（self-test 26→38件）、読む側を asc_subscription.rb として日次に配線（self-test 34件）。**ただし手元の取得結果は内訳を持つ前の版なので、読みは 0/3 で no_breakdown。**値が実際に読めるかは次の定時実行（毎日20:30 JST）で決まる",
+      "outcome": "⑨マネタイズ 12.5% → 22.2%（観測の行を1件足し、gated 1→2 / 8→9タスク）。総合自動化率 60.8% → 61.1%。**「解約理由が読める」はまだ達成していない。**達成したのは「読めない理由が7状態で機械から返る」ところまでで、次の取得で all_blank（Apple 側で任意項目なので空欄のほうが普通）になる可能性は残る。その場合はアプリ内導線が要る、という結論自体は変わらない —— **変わったのは、それを推測ではなく観測から言えるようになったこと**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "absent-upstream-or-discarded-here",
+        "text": "**「無い」と書く前に、自分が捨てていないかを見る。**上流がくれないのか、こちらが落としているのかは、外から見ると同じ「無い」に見える。今回は保存の形（数値列だけ合計する）が、文字列の列を全部捨てていた。\n\n**これは3回目である。**om-2026-08-25-asc-landed が「2回続けて『取れない』と書いて2回とも取れた」ので「APIの限界は叩いてから書く」を**散文で**明記していた。翌日に3回目が出たということは、散文が効かなかったということ。この台帳には `prose-does-not-stop-an-agent` が既にある。**同じ学びを2度書くのではなく、機械にした。**",
+        "changed": [
+          "../simplememo-ios/scripts/asc_analytics.rb",
+          "../simplememo-ios/scripts/asc_subscription.rb",
+          "../simplememo-ios/scripts/lib/asc_columns.rb",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "**届いているのに読んでいない列を、日次の要約に毎回出す**（asc_subscription.rb の unread_columns）。次に「Apple はXをくれない」と書こうとしたとき、その日の要約に X が並んでいる状態にする。意図して読まない列は理由つきで除外し、毎日同じ行を並べて読まれなくなるのを防ぐ。初回の出力で Sessions / Total Session Duration / Unique Devices / Engagement Type / Unique Counts / Territory / Campaign / Page Title が「届いていて読んでいない」と出た —— ③ASO と⑥意思決定が「無い」と書いてきたものが含まれる"
+      }
+    },
+    {
+      "id": "om-2026-08-26-serving-is-not-privacy",
+      "seeded": false,
+      "area": "⑪ データ・プライバシー",
+      "signal": "⑨の読み（解約理由・課金失敗の件数）をどこに置くか決めるため、data/publication-policy.json の分類を見た。30件が `public: false` で _redirects により 404 になっていた",
+      "hypothesis": "404 にしてあるのだから、それらは非公開。契約の読みも同じ扱いにすれば置ける",
+      "decision": "**置く前に確かめた。**api.github.com/repos/simplememofast/simplememo が `private: false` を返す —— **このリポジトリは GitHub 上で公開されている**（simplememo-ios / simplememo-api は非公開）。つまり _redirects の 404 も functions/_middleware.js の遮断も、止めているのはサイト経由の閲覧だけで、同じファイルは GitHub 上で誰でも読める。`public: false` という名前が事実と違っていた",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "functions/_middleware.js",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "真偽値を `served_by_site` に改名（37件）。`repository_is_public` を実測と突き合わせる検査を足し、REPO_PRIVATE=false で通り true で exit 1 になることを確認。**否定は script 側で三値のまま行う** —— YAML で `!private` を計算すると、値が空のとき `!'' === true` になり、観測していない実行が「公開」を名乗る。self-test 9→17件",
+      "outcome": "**率は上がらない。**⑪データ・プライバシーの分類は変えていない（実行者は変わっていないため）。変わったのは、⑨の読みの置き場所がこの発見で決まったこと —— サイト側（公開）ではなく simplememo-ios 側（非公開）に置いた。**2026-08-25 に役員報酬を公開ディレクトリへ置いた件（om-2026-08-25-data-dir-public）の手当ては 404 化だったが、それでは非公開になっていなかった。**あの記録の outcome は、いま読むと強すぎる",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "blocking-a-path-is-not-making-it-private",
+        "text": "**経路を塞ぐことと、非公開にすることは別。**404 が止めるのは、サイト経由の閲覧・検索エンジンの索引・中間キャッシュであって、内容そのものではない。リポジトリが公開なら、同じファイルは別の経路で読める。\n\n**危険なのは、対策を打ったつもりで穴が残ること。**しかも今回、穴の存在を隠していたのは**真偽値の名前**だった（`public: false`）。名前が事実と違うと、コードを読んでも気づけない。",
+        "changed": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "functions/_middleware.js"
+        ],
+        "new_guardrail": "`repository_is_public` を方針に持ち、CI が github.event.repository.private の実測値と突き合わせる（リポジトリを非公開にしたときも、公開に戻したときも落ちる）。**観測値が渡ってこない実行では照合しない** —— 照合できなかったことを「一致」と書かない。真偽値は `served_by_site` に改名し、「非公開」を意味しないことを名前で示す"
+      }
+    },
+    {
+      "id": "om-2026-08-26-guard-coverage",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "⑨の実装で台帳が動いたので公開ページの検査（scripts/check-autopilot-page.mjs）を回したら、見出しの4つだけ不一致として出た。**同じページの領域別13行は「一致」とも「不一致」とも言われなかった**",
+      "hypothesis": "見出しが合っていれば、同じページの他の数字も同じ作業で直されているはず",
+      "decision": "**表の13行を手で台帳と突き合わせた。**9行がずれており、⑤AI予算はページ 86.7% に対し台帳 76.5%（10ポイント）。さらに、記者に実際に渡る `docs/pr-autopilot-2026-09-body.md` は総合自動化率 58.6% のまま（台帳 61.1%）で、**検査の対象ファイルにすら入っていなかった**",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/check-autopilot-page.mjs",
+          "autopilot/index.html",
+          "docs/pr-autopilot-2026-09-body.md"
+        ]
+      },
+      "verification": "領域別の全行と、配信本文の見出し・表・到達点を検査に足した。突き合わせる数字は 4件 → 38件。ずれを入れて exit 1 になること、台帳に無い領域名で落ちること、Markdown の表と `<b>` の両方を読めることを self-test で固定（6→16件）",
+      "outcome": "**率は上がらない。**⑩の分類は変えていない。変わったのは、公開ページ13行と配信本文12か所が台帳と一致することを機械が言えるようになったこと。**この検査自体が 2026-08-25 に「一番人目に触れる公開ページだけが網の外にあった」という理由で作られたもの**で、そのとき網に入れたのは見出しの4数字だけだった。1日で同じ穴の内側にもう一段の穴が見つかった形",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-guard-that-matches-nothing-is-not-a-pass",
+        "text": "**検査が「不一致なし」と言うとき、何件を見て言ったのかを併せて出す。**正規表現に当たらなければ0件照合でも緑になる —— それは「一致した」ではなく「見ていない」。\n\n細かいほうがずれるのは偶然ではない。**見出しは目に入るので直されるが、表の13行目は誰も見ない。**そして記者が1つ選んで聞いてくるのは、目に入らないほうから選ばれる（数が多いので確率もそちらが高い）。",
+        "changed": [
+          "scripts/check-autopilot-page.mjs",
+          "autopilot/index.html",
+          "docs/pr-autopilot-2026-09-body.md"
+        ],
+        "new_guardrail": "網に入れた文書が**1つも照合対象を持たなければ落とす**（表記が変わって素通りするのを防ぐ）。突き合わせた件数を毎回出力する。配信本文を対象に加える一方、「わざと間違った数字を載せている」numbers.md と、日付つきの断面である automation-rate-2026-08.md は**意図して外し、理由をコードに書いた**（外した理由が残っていないと、次に誰かが足してしまう）"
+      }
     }
   ]
 }

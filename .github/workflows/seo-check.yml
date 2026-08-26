@@ -399,7 +399,15 @@ jobs:
       # **data/*.json は放っておくと全件が公開される。**実際 34件中28件が
       # 意図せず公開されていた（鍵の棚卸し・攻撃面・法人情報を含む）。
       # 新しい data ファイルは分類するまで落ちる。**既定を非公開に倒す。**
+      #
+      # [2026-08-26] **配信を止めても非公開にはならない。**このリポジトリは
+      # GitHub 上で公開されている（api.github.com が private: false を返す）。
+      # そこで真偽値を served_by_site に改名し、リポジトリ側の状態は
+      # REPO_PRIVATE の実測と突き合わせる。**否定は script 側で三値のまま行う**
+      # （`!private` を YAML で計算すると、値が空のとき「公開」を名乗る）。
       - name: Data publication policy
+        env:
+          REPO_PRIVATE: ${{ github.event.repository.private }}
         run: |
           node scripts/check-publication.mjs --selftest
           node scripts/check-publication.mjs --check

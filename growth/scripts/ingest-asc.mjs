@@ -12,9 +12,14 @@
  * 取得は `../simplememo-ios/scripts/asc_analytics.rb`、ここは読む側。
  *
  * 【行そのものは扱わない】
- * 向こうが書いているのは列名・行数・数値列の合計だけ。
- * こちらもそれ以上は持たない。**個人が特定できる列が将来増えたときに、
- * 気づかず貯め始めるのを防ぐ。**
+ * 向こうが書いているのは列名・行数・日付範囲・数値列の合計・
+ * **名指しした分類列ごとの内訳**だけ。こちらもそれ以上は持たない。
+ * **個人が特定できる列が将来増えたときに、気づかず貯め始めるのを防ぐ。**
+ *
+ * [2026-08-26] 内訳を運ぶようになった。それまで運んでいたのは数値列の合計だけで、
+ * `Cancellation Reason` は文字列なので合計に入らず、**⑨解約理由分析が読むべき値が
+ * 1件も届いていなかった**（列名だけが届いていた）。読む側は
+ * growth/scripts/subscription-health.mjs。
  *
  * 【⚠ CI ではこの検査はデータを見ていない】
  * seo-check.yml の checkout は**このリポジトリだけ**なので、CI 上に
@@ -62,7 +67,7 @@ export function normalize(src) {
   return {
     $comment: [
       'App Store Connect の取得結果（../simplememo-ios/data/asc から）。',
-      '**行そのものは持たない。**列名・行数・数値列の合計だけ。',
+      '**行そのものは持たない。**列名・行数・日付範囲・数値列の合計・分類列ごとの内訳だけ。',
       'ここで新しい数字を作らない。向こうの集計をそのまま並べ替えている。',
     ],
     fetched_at: src.status.fetched_at,
@@ -73,7 +78,13 @@ export function normalize(src) {
       processing_date: r.processing_date,
       row_count: r.row_count,
       columns: r.columns,
+      date_range: r.date_range ?? null,
       sums: r.sums,
+      // **内訳は運ぶだけ。**ここで足したり率にしたりしない。
+      // 取得側が古い版だと undefined になる。**{} に潰さない** ——
+      // 「内訳が無い」と「内訳が空」を同じ形にすると、読む側が
+      // 『解約理由が読めなかった』を『解約が無かった』と取り違える。
+      breakdown: r.breakdown ?? null,
     })),
   };
 }
