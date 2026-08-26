@@ -309,6 +309,21 @@ export const CLOSE_CHECKS = {
     return { closed: false, evidence: `#${issue} がまだ open` };
   },
 
+  /**
+   * 取り残しが解消したら閉じる。**判定できないときは閉じない。**
+   * 走査が取れなかった回（null）を「取り残しは無い」と読むと、故障が消える方向に効く。
+   */
+  branch_caught_up({ pr }, ctx) {
+    if (!Number.isInteger(pr)) return { closed: false, evidence: 'PR番号が指定されていない' };
+    if (!Array.isArray(ctx.orphans)) {
+      return { closed: false, evidence: '取り残しの走査結果を取得できず判定不能（解消したという意味ではない）' };
+    }
+    const still = ctx.orphans.find((o) => o.pr === pr);
+    return still
+      ? { closed: false, evidence: `#${pr} はまだ ${still.ahead_by} 件先にある` }
+      : { closed: true, evidence: `#${pr} の取り残しは解消（走査に出てこない）` };
+  },
+
   manual({ observed } = {}, _ctx) {
     // **手で観測したことを書く口を1つ開けてある。**閉じ条件は機械で判定
     // できないが、「いま外はどうなっているか」は人が見れば書ける
@@ -475,6 +490,30 @@ export function derive(ctx) {
         close_check: { kind: 'ledger_covers_runs', params: {} },
       });
     }
+  }
+
+  // --- D3b: マージ後に取り残されたコミット ---
+  //
+  // **自動修復はさせない。**取り残しの中身は台帳のこともあれば書きかけのこともあり、
+  // 機械が中身を見ずに cherry-pick すると「訂正が生き残っているかの確認」を飛ばす。
+  // 検知して起票するところまでで、適用はセッションが行う。
+  for (const o of ctx.orphans ?? []) {
+    out.push({
+      id: `act-orphaned-pr-${o.pr}`,
+      title: `PR #${o.pr} のマージ後に ${o.ahead_by} コミットが取り残されている`,
+      detail: `ブランチ ${o.branch} が、マージ時の head（${o.merged_sha.slice(0, 7)}）より`
+        + `${o.ahead_by} 件先にあり、**それらは main にも無い**: ${o.commits.join(', ')}。`
+        + (o.landed_elsewhere ? `（別の${o.landed_elsewhere}件は後続PRで着地済みなので除外した）` : '')
+        + '\n\n'
+        + '**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**'
+        + 'PRが既に閉じているため、次の検証が拾う先が無い。\n\n'
+        + '**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。'
+        + '機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。',
+      source: 'orphan',
+      touches: [],
+      auto: null,
+      close_check: { kind: 'branch_caught_up', params: { pr: o.pr } },
+    });
   }
 
   // --- D4: 実費台帳の取りこぼし ---
@@ -728,6 +767,97 @@ export function summarize(ledger, matrix, today) {
 // ============================================================
 // 台帳を埋めるための唯一の外部入力。**取れなかったときは null を返す**
 // （空配列を返すと「1件も無い」＝台帳は完全、という逆の結論になる）。
+
+
+// ============================================================
+// マージ後に取り残されたコミット
+// ============================================================
+// **auto-merge は「検証済みSHAだけ」をマージする設計の帰結。**セッションが記事のPRを
+// 出した後に台帳を書くと、その push はマージ済みPRに届かず、拾う先が無くなる。
+// CLAUDE.md は「そのpushが起こす次の検証が拾う」と書いているが、
+// **PRが既に閉じていると次の検証が無い。**
+//
+// 2026-08-23 / 08-26 と2回起きており、08-26 は日報が出荷した日を
+// 「公開記事: 0」と誤報した（#591 の原因）。
+//
+// **「ブランチが main より進んでいるか」では駄目。**このリポジトリは squash マージなので、
+// マージ済みブランチの head は main の祖先にならず、`compare/main...branch` の
+// ahead_by は**全ての merged ブランチで > 0 になる**（実測: #547 のマージ済み head は
+// main の祖先ではない）。**マージ時点の head と、ブランチの現在地を比べる。**
+//
+// **さらに、マージ時 head との比較「だけ」でも足りない。**
+// 2026-08-26 に3件目で崩れた: PR #593 のブランチは merge 時 head より6件先にあるが、
+// **うち5件は後続PRで既に main へ着地している**（ブランチが複数PRで使い回された）。
+// マージ時 head との差だけを見ると、着地済みのコミットまで取り残し扱いになる。
+//
+// **正しいのは2つの積:**
+//   ① compare/{マージ時head}...{branch}  → マージ後に push されたもの（候補）
+//   ② compare/{base}...{branch}          → **main に無いもの**
+//   取り残し = ① ∩ ②
+//
+// 実測（2026-08-26・3件で誤検知ゼロ・見逃しゼロ）:
+//   PR #586  候補1 ∩ main無し3 = **1件**（ee4e37c）  ← 本物
+//   PR #547  候補0 ∩ main無し2 = 0件                  ← きれい
+//   PR #593  候補6 ∩ main無し1 = **1件**（2b0a702）   ← ①だけなら6件と誤検知していた
+
+/** 何日ぶんのマージ済みPRを見るか。**古い取り残しは拾っても直せない。** */
+export const ORPHAN_LOOKBACK_DAYS = 7;
+
+/**
+ * マージ後に push された取り残しを探す。**取れなかったら null**
+ * （空配列だと「取り残しは無い」＝逆の結論になる）。
+ */
+export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fetch } = {}) {
+  if (!token) return null;
+  const headers = {
+    authorization: `Bearer ${token}`,
+    accept: 'application/vnd.github+json',
+    'user-agent': 'simplememo-autopilot-act',
+  };
+  const get = async (url) => {
+    const res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
+    if (!res.ok) throw new Error(`${res.status}`);
+    return res.json();
+  };
+  try {
+    const since = new Date(Date.parse(`${today}T00:00:00Z`) - ORPHAN_LOOKBACK_DAYS * 86400000);
+    const prs = await get(`https://api.github.com/repos/${repo}/pulls`
+      + '?state=closed&sort=updated&direction=desc&per_page=30');
+    const out = [];
+    for (const pr of prs) {
+      if (!pr.merged_at || Date.parse(pr.merged_at) < since.getTime()) continue;
+      // ① マージ後に push されたもの ② main に無いもの —— **その積だけが取り残し。**
+      let after;
+      let notOnBase;
+      try {
+        [after, notOnBase] = await Promise.all([
+          get(`https://api.github.com/repos/${repo}/compare/`
+            + `${encodeURIComponent(pr.head.sha)}...${encodeURIComponent(pr.head.ref)}`),
+          get(`https://api.github.com/repos/${repo}/compare/`
+            + `${encodeURIComponent(pr.base.ref)}...${encodeURIComponent(pr.head.ref)}`),
+        ]);
+      } catch {
+        continue; // ブランチが消えている（＝取り残しは起こりえない）
+      }
+      const missing = new Set((notOnBase.commits ?? []).map((c) => c.sha));
+      const orphaned = (after.commits ?? []).filter((c) => missing.has(c.sha));
+      if (orphaned.length > 0) {
+        out.push({
+          pr: pr.number,
+          branch: pr.head.ref,
+          merged_sha: pr.head.sha,
+          ahead_by: orphaned.length,
+          landed_elsewhere: (after.commits ?? []).length - orphaned.length,
+          commits: orphaned.map((c) => c.sha.slice(0, 7)),
+        });
+      }
+    }
+    return out;
+  } catch (e) {
+    console.error('ORPHAN_SCAN_FAILED', { error: String(e).slice(0, 120) });
+    return null;
+  }
+}
 
 const WORKFLOW_FILE = 'obsidian-autopilot.yml';
 
@@ -1169,7 +1299,7 @@ function render(sum, applied, today) {
 // ============================================================
 // 自己検査 — 判定ロジックそのものを台帳無しで検証する
 // ============================================================
-function selftest() {
+async function selftest() {
   const fails = [];
   // 件数は数える。**リテラルで書かない** —— 検査を足しても数字が動かないと、
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
@@ -1237,6 +1367,75 @@ function selftest() {
     CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[9, {}]]) }).closed === true);
   t('issue 番号が無ければ閉じない',
     CLOSE_CHECKS.issue_closed({}, { issues: new Map() }).closed === false);
+  // --- 取り残しコミットの検知（走査そのもの） ---
+  //
+  // **2026-08-26 に3件目の実データで崩れた形を、そのまま検査にしてある。**
+  // マージ時 head との差だけを見ると、後続PRで着地済みのコミットまで取り残しになる。
+  {
+    const mk = (shas) => ({ commits: shas.map((sha) => ({ sha })) });
+    const routes = {
+      // PR #593 の実形: マージ後6件先 / うち main に無いのは 1件だけ
+      'compare/AAA...br': mk(['c1', 'c2', 'c3', 'c4', 'c5', 'orphan1']),
+      'compare/main...br': mk(['orphan1']),
+    };
+    const fakeFetch = async (url) => {
+      const key = Object.keys(routes).find((k) => url.includes(k.replace('compare/', 'compare/')));
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([{
+          number: 593, merged_at: '2026-08-26T04:15:00Z',
+          head: { sha: 'AAA', ref: 'br' }, base: { ref: 'main' },
+        }]) };
+      }
+      return { ok: true, json: async () => routes[key] };
+    };
+    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    t('**後続PRで着地済みのコミットを取り残しに数えない**',
+      found.length === 1 && found[0].ahead_by === 1 && found[0].commits[0] === 'orphan1');
+    t('着地済みの件数を別に持つ（なぜ除いたかが読める）', found[0].landed_elsewhere === 5);
+  }
+  {
+    // 全部 main に着地している＝取り残しゼロ。**行を立てない。**
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([{
+          number: 547, merged_at: '2026-08-26T04:15:00Z',
+          head: { sha: 'AAA', ref: 'br' }, base: { ref: 'main' },
+        }]) };
+      }
+      const after = url.includes('AAA...');
+      return { ok: true, json: async () => ({ commits: after ? [] : [{ sha: 'pre1' }] }) };
+    };
+    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    t('マージ後に push が無ければ取り残しゼロ', found.length === 0);
+  }
+  {
+    // **取得に失敗したら null。**空配列だと「取り残しは無い」になる
+    const boom = async () => { throw new Error('network'); };
+    t('**走査に失敗したら null（空配列にしない）**',
+      await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: boom }) === null);
+    t('トークンが無ければ null', await fetchOrphanedCommits('o/r', null, '2026-08-26') === null);
+  }
+
+  // --- 取り残しコミットの検知 ---
+  t('走査が取れなければ閉じない',
+    CLOSE_CHECKS.branch_caught_up({ pr: 586 }, {}).closed === false);
+  t('**走査の取得失敗を解消と読まない**',
+    /判定不能/.test(CLOSE_CHECKS.branch_caught_up({ pr: 586 }, {}).evidence));
+  t('まだ先にあれば閉じない',
+    CLOSE_CHECKS.branch_caught_up({ pr: 586 }, { orphans: [{ pr: 586, ahead_by: 1 }] }).closed === false);
+  t('走査に出てこなければ閉じる',
+    CLOSE_CHECKS.branch_caught_up({ pr: 586 }, { orphans: [] }).closed === true);
+  t('**空配列と未取得を区別する**（[] は「取り残し無し」）',
+    CLOSE_CHECKS.branch_caught_up({ pr: 586 }, { orphans: [] }).closed === true
+    && CLOSE_CHECKS.branch_caught_up({ pr: 586 }, { orphans: null }).closed === false);
+  {
+    const o = derive({ orphans: [{ pr: 586, branch: 'claude/x', merged_sha: 'abcdef1234', ahead_by: 1, commits: ['ee4e37c'] }] })
+      .filter((a) => a.source === 'orphan');
+    t('取り残しから行が立つ', o.length === 1 && o[0].id === 'act-orphaned-pr-586');
+    t('**取り残しに auto を付けない**（中身を見ずに cherry-pick しない）', o[0].auto === null);
+    t('取り残しの行に閉じ条件がある', o[0].close_check?.kind === 'branch_caught_up');
+    t('走査が未取得なら行を立てない', derive({ orphans: null }).filter((a) => a.source === 'orphan').length === 0);
+  }
   t('着手ゼロでは閉じない', noRun.closed === false);
   const recovered = CLOSE_CHECKS.no_failure_since(
     { route: 'actions', failure_class: 'auth_or_credential', since: '2026-08-25' },
@@ -1581,14 +1780,15 @@ async function buildContext(today) {
     console.error(`# 実費ゲートの判定を取得できなかった: ${e.message}`);
   }
   const workflowRuns = await fetchWorkflowRuns(repo, token);
-  return { today, runsDoc, matrix, costDoc, statusDoc, selfheal, budget, workflowRuns, repo, token };
+  const orphans = await fetchOrphanedCommits(repo, token, today);
+  return { today, runsDoc, matrix, costDoc, statusDoc, selfheal, budget, workflowRuns, orphans, repo, token };
 }
 
 async function main() {
   const argv = process.argv.slice(2);
   const has = (f) => argv.includes(`--${f}`);
 
-  if (has('selftest')) return selftest();
+  if (has('selftest')) return await selftest();
 
   const today = jstToday();
 

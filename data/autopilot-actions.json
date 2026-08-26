@@ -422,7 +422,7 @@
       "created_jst": "2026-08-26",
       "last_seen_jst": "2026-08-26",
       "closed_jst": null,
-      "evidence": null
+      "evidence": "2026-08-26 実装。scripts/autopilot-act.mjs の fetchOrphanedCommits + derive の D3b。**台帳が指定した設計は3件目の実データで崩れた。**マージ時 head との差だけを見ると、後続PRで既に main へ着地したコミットまで取り残しに数える（PR #593 で6件中5件が着地済み）。正しいのは ①compare/{マージ時head}...{branch} と ②compare/{base}...{branch} の**積**。実測3件で誤検知ゼロ・見逃しゼロ: #586→1件(ee4e37c) / #547→0件 / #593→1件(2b0a702)。**自動修復はさせない**（auto: null）—— 取り残しの中身は台帳のことも書きかけのこともあり、機械が中身を見ずに cherry-pick すると訂正の生存確認を飛ばす。検知と起票まで。自己検査118項目（積を外すと『後続PRで着地済みを取り残しに数えない』が落ちることを観測）"
     },
     {
       "id": "act-health-591",
