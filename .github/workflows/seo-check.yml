@@ -217,6 +217,18 @@ jobs:
           node scripts/roadmap.mjs --selftest
           node scripts/roadmap.mjs --check
 
+      # 【検索意図の変化】単一スナップショットの分析はあったが、
+      # **窓をまたいだ比較が無かった。**同じクエリに Google が別のページを
+      # 当てるようになったら、検索側が解釈している意図が動いている。
+      #
+      # **出現・消滅は使わない。**スナップショットは行数上限（1000/900）で
+      # 切れており、最小表示回数は両窓とも1。「消えた」と「上限より下に落ちた」を
+      # 区別できないので、**区別できない差を意図の変化と呼ばない。**
+      - name: Search intent shifts across windows
+        run: |
+          node growth/scripts/search-intent.mjs --selftest
+          node growth/scripts/search-intent.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を

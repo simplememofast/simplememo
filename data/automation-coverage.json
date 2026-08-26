@@ -800,14 +800,11 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "検索意図（Search Intent）の変化検出",
-      "executor": "ai_proposes",
+      "executor": "ai_autonomous",
       "evidence": [
-        "growth/scripts/analyze.mjs"
+        "growth/scripts/search-intent.mjs"
       ],
-      "note": "**[2026-08-25 訂正] 隣接する実装があった。**analyze.mjs は「Conversational queries（AI Mode fan-out fingerprint）」と「CTR gap（順位は良いのにCTRが期待の70%未満）」を持っており、**意図の変化はまずCTR gapの形で表に出る**（順位が落ちていないのにCTRだけ落ちる）。つまり検出の材料は在る。**無いのは時系列での比較** —— decay と同じ理由で、窓が重ならないスナップショットが2本要る（現状 08-09 と 08-11 は93%重複）。**待てば解ける種類の穴**なので nobody ではなく ai_proposes とする。",
-      "blocker": "not_started",
-      "unblocked_by": "材料は analyze.mjs にある（CTR gap）。**無いのは時系列での比較**で、decay と同じ窓の問題",
-      "unlock": "impl_seo"
+      "note": "[2026-08-26] growth/scripts/search-intent.mjs が窓をまたいで比べる。**いちばん強い信号は「当たるページが入れ替わったこと」** —— 同じクエリに Google が別のページを当てるようになったなら、検索側の解釈が動いている。実測（08-11 → 08-24）で9件。google keep 系4件が /blog/line-keep-alternatives → /blog/google-keep-shutdown で、順位 13.4 → 5.3。\n\n**出現・消滅は使っていない。**スナップショットは行数上限（1000/900）で切れており、**最小表示回数は両窓とも1**。「消えた533件」は意図の変化ではなく上限で落ちただけ。実測してからこの信号を捨てた。\n\n**窓の長さが違うので表示回数は比べない**（28日 → 13日）。比べるのは順位・CTR・当たるページという長さに依存しない量だけ。"
     },
     {
       "area": "③ 自律型マーケティング",
