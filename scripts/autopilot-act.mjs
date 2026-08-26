@@ -836,8 +836,12 @@ export function interpretRun(run) {
       failure_reason: immediate
         ? `Claude Code ステップが ${ms}ms で失敗。実作業に入る前（初回のモデル呼び出し相当）で落ちている。`
           + `**原因は所要時間からは決まらない**（資格情報の失効／上流 action・CLI の版の破損／--model等の指定ミスは、どれも同じ形になる）。`
-          + `最初に見るのは費用ゼロで済む対照——ジョブログの \`Download action repository 'anthropics/claude-code-action@…' (SHA:…)\` と `
-          + `\`Installing Claude Code v…\` を、直近で出荷できた run のものと比べる。一致していて初めて資格情報を疑う（自動判定）`
+          + `【2026-08-26 実測】08-24〜08-25 の同型の失敗は **資格情報が原因だった**。`
+          + `疑われた版（Claude Code 2.1.241）を有効なトークンで直接走らせたところ is_error=false / result=PROBE_OK で通っている（run 32919495397・実費 $0.04）。`
+          + `**SHAが違うことは版が原因である証拠にならない** —— @v1 のようなフローティングタグでは日をまたげばほぼ必ず違う値になるので、この対照は当たり前に「違い」を見つけてしまう。`
+          + `いまは版がSHAでpinしてあるので、**直近の成功runとSHAが同じなら版は機械的に外れる**。そのときは資格情報を先に疑ってよい。`
+          + `切り分けが要るなら費用$0.04で再現できる: ubuntu ランナーで \`curl -fsSL https://claude.ai/install.sh | bash -s -- <版>\` の後 `
+          + `\`claude -p '...' --max-turns 1 --output-format json\` を CLAUDE_CODE_OAUTH_TOKEN 付きで走らせ、is_error を見る（自動判定）`
         : `Claude Code ステップが失敗（所要 ${ms ?? '不明'}ms）。原因未特定・要トリアージ（自動判定）`,
     };
   }
@@ -1319,7 +1323,16 @@ function selftest() {
   t('即死は形だけ書く', fast.failure_class === 'immediate_failure');
   t('即死も要トリアージ', fast.needs_triage === true);
   t('即死の理由に原因を断定させない', !fast.failure_reason.includes('認証系の疑いが強い'));
-  t('即死の理由に最初の切り分けを書く', fast.failure_reason.includes('Download action repository'));
+  // 旧: `Download action repository` のSHA比較を最初の切り分けとして書かせていた。
+  // **2026-08-26 の実測でこれは外した。**@v1 のようなフローティングタグでは
+  // 日をまたげばSHAはほぼ必ず違うので、この対照は当たり前に「違い」を見つける。
+  // 実際それで版を原因と読み、資格情報という真の原因を1日見落とした。
+  t('即死の理由に、SHA差は版の証拠にならないと書く',
+    fast.failure_reason.includes('SHAが違うことは版が原因である証拠にならない'));
+  t('即死の理由に、実測で資格情報だったと書く',
+    fast.failure_reason.includes('資格情報が原因だった'));
+  t('即死の理由に、費用付きの再現手順を書く',
+    fast.failure_reason.includes('claude -p') && fast.failure_reason.includes('$0.04'));
   const slow = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
       started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:44:00Z' }] });
