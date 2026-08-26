@@ -38,6 +38,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
@@ -138,8 +139,20 @@ export function validate(runsDoc, matrix) {
 }
 
 // --- CLI ---------------------------------------------------------------
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**修理したと書いてあるのに対象が無い**のは落ちる', (d) => { d.runs[0] = { ...d.runs[0], repair_of: 'そんな故障は無い' }; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8')),
+  (d) => validate(d, JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'))),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const runsDoc = JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8'));
   const matrix = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
   const problems = validate(runsDoc, matrix);

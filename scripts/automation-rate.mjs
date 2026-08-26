@@ -26,6 +26,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
@@ -130,8 +131,23 @@ const MARK = {
   intentional_no: 'やらない',
 };
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['area が無ければ落ちる', (d) => { delete d.tasks[0].area; }],
+  ['task が無ければ落ちる', (d) => { delete d.tasks[0].task; }],
+  ['**同じ領域に同じタスクが2回**あれば落ちる（分母が水増しされる）', (d) => { d.tasks.push({ ...d.tasks[0] }); }],
+  ['知らない executor は落ちる', (d) => { d.tasks[0].executor = 'なんとなくAI'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
   const problems = validate(doc);
