@@ -334,6 +334,57 @@ jobs:
             6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
 
+      # 【2026-08-26】即死したときに、資格情報かどうかを**機械が**切り分ける。
+      #
+      # 08-24〜08-25 の2日連続の即時失敗は、検知そのものは初日に効いていた。
+      # 溶けたのは診断のほうで、台帳は「認証系」→「上流の版」→「やはり認証系」と
+      # 2回ひっくり返り、そのたびに1日を使った。**同じ形の失敗が来たら、
+      # 人にもセッションにも推測させずここで割る。**
+      #
+      # 理屈は単純で、失敗した回と同じトークンで1ターンだけ走らせるだけ:
+      #
+      #   ここも落ちる → トークンが通っていない（＝資格情報）
+      #   ここは通る   → 資格情報ではない（--model指定・MCP・プロンプト等の側）
+      #
+      # 上のステップと違って --model も MCP も渡さないので、切り分けたい変数
+      # （トークンが通るか）だけが残る。2026-08-26 に手で1回やったのがこれで、
+      # 実費は $0.04・所要3秒だった。**失敗した回にしか走らない。**
+      #
+      # `continue-on-error` は使わない。あれはステップの conclusion を success に
+      # 書き換えるので、**失敗が成功に見える**（この装置を手で組んだとき実際に
+      # 読み違えた）。ここでは終了コードそのものを判定に使い、
+      # scripts/autopilot-act.mjs の interpretRun が conclusion を読む。
+      #
+      # CLI が入る前に落ちた回（08-21 の actor 拒否のような形）では下の
+      # `command -v claude` が失敗し、判定ステップは skipped になる。
+      # **判定不能は「資格情報は無事」ではない**ので、そこは従来どおり
+      # needs_triage としてセッションへ回る。
+      - name: 切り分け用のCLIを確認
+        id: credprobe_ready
+        if: always() && steps.claude.outcome == 'failure'
+        run: command -v claude
+
+      - name: 即死が資格情報かを切り分ける
+        id: credprobe
+        if: always() && steps.credprobe_ready.outcome == 'success'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set +e
+          out="$(claude -p 'Reply with exactly the word PROBE_OK and nothing else.' \
+                   --max-turns 1 --output-format json 2>&1)"
+          code=$?
+          set -e
+          echo "$out" | head -c 2000
+
+          if [ "$code" -eq 0 ] && printf '%s' "$out" | grep -q '"is_error":false'; then
+            echo "::notice title=Obsidian Autopilot::切り分け: **資格情報は通っている。**同じトークンで1ターン完走した。即死の原因は資格情報以外（--model指定・MCP・プロンプト等）を見ること。"
+            exit 0
+          fi
+          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+          exit 1
+
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。
       # 競合ではなく補完関係なので両方残す。**順序に意味がある** —
       # 「成果物ゼロなら落とす」が job を失敗させても、実費の抽出は

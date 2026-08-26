@@ -495,13 +495,21 @@ export function derive(ctx) {
         id: `act-credential-${route}`,
         title: `${route} が ${streak.length}日連続で、作業に入る前に即時失敗（${first.date_jst}〜${last.date_jst}・原因未特定）`,
         detail: `run ${streak.map((r) => r.external_ref).join(' / ')}。毎回同じ形で落ちており単発の flake ではないが、`
-          + `**決定論的であることは原因を特定しない。**この順で切り分ける（安い順）:\n`
-          + `1. **上流の版**（費用ゼロ）— ジョブログの \`Download action repository 'anthropics/claude-code-action@…' (SHA:…)\` と `
-          + `\`Installing Claude Code v…\` を、直近で出荷できた run のものと比べる。違っていれば版の破損で、`
-          + `.github/workflows/obsidian-autopilot.yml の pin を通った版へ戻すのがセッションの仕事（2026-08-24〜25 はこれだった）\n`
-          + `2. **--model 等の指定**（費用ゼロ）— data/model-routing.json の解決結果が実在するモデルか\n`
-          + `3. **資格情報**（オーナー作業）— 1と2が同一で説明がつかないときだけ。\`claude setup-token\` で再取得 → `
-          + `repo secret CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）\n`
+          + `**決定論的であることは原因を特定しない。**\n\n`
+          + `**まずジョブの「即死が資格情報かを切り分ける」ステップを見る。**失敗した回に自動で走っており、`
+          + `同じトークンで1ターンだけ実行した結果が出ている（--model も MCP も渡さないので、残る変数はトークンだけ）:\n`
+          + `- そのステップが **failure** → **資格情報が通っていない。**オーナーが \`claude setup-token\` で再取得 → `
+          + `repo secret CLAUDE_CODE_OAUTH_TOKEN を更新（data/credential-expiry.json の renewal）。**セッション側の調査は不要**\n`
+          + `- そのステップが **success** → 資格情報は無事。--model の指定（data/model-routing.json の解決結果が実在するモデルか）・`
+          + `MCP・プロンプト・上流の版を見る\n`
+          + `- そのステップが **無い/skipped** → 判定不能（CLIが入る前に落ちた回か、この装置より前の run）。下の手順へ\n\n`
+          + `【装置が無い回の手順】\n`
+          + `1. **--model 等の指定**（費用ゼロ）— data/model-routing.json の解決結果が実在するモデルか\n`
+          + `2. **上流の版** — いまは SHA で pin してあるので、直近の成功runと同じSHAなら版は機械的に外れる。`
+          + `**SHAが違うこと自体は版が原因である証拠にならない**（@v1 のようなフローティングタグでは日をまたげばほぼ必ず違う。`
+          + `2026-08-25 はこの対照を決め手として読んで1日を失った）\n`
+          + `3. **資格情報**（オーナー作業）— \`curl -fsSL https://claude.ai/install.sh | bash -s -- <版>\` の後に `
+          + `\`claude -p '...' --max-turns 1 --output-format json\` を CLAUDE_CODE_OAUTH_TOKEN 付きで走らせれば $0.04 で再現できる\n\n`
           + `**この経路が復活するまで、出荷は副系だけが担っている。**`,
         source: 'credential',
         // 1と2はセッションが自分で直せる。**ここを human に固定しない** ——
@@ -802,14 +810,15 @@ export function interpretRun(run) {
   if (claude.conclusion === 'failure') {
     // **所要時間が言えるのは「作業に入る前に落ちた」までで、原因ではない。**
     //
-    // 2026-08-25 の訂正: ここは即死を `auth_or_credential` と書いていた。
-    // その断定で 08-24・08-25 の2件が「認証系」として台帳に載り、日報は
-    // オーナーへ `claude setup-token` の再実行を求めた。**実際の原因は
-    // 認証ではなく、claude-code-action@v1 が引いた上流の壊れた版**の可能性が高い
-    // （SHA c81e3bc6 / CLI 2.1.241）。**ただし原因は確定していない** ——
-    // 復旧した回までの間に CLAUDE_CODE_OAUTH_TOKEN も更新されており、
-    // 版とトークンは分離できていない（data/autopilot-runs.json の reclassified_note）。
-    // だからこそ、ここで種別に原因を書いてはいけない。
+    // 経緯: ここは元々、即死を所要時間だけで `auth_or_credential` と断定していた。
+    // 08-25 にその断定を外して「上流の版」へ倒したが、**08-26 の対照実験で
+    // それも誤りと分かった**（2.1.241 は有効なトークンで正常に完走する。
+    // run 32919495397）。**当初の「認証系」が結論としては正しく、根拠が無かった。**
+    //
+    // 2度とも同じ形の誤り —— **他の変数が同時に動いているのに断定した。**
+    // だから所要時間からも、SHAの差からも原因を書かない。**書いてよいのは
+    // 実験が答えを出したときだけ**で、それをワークフロー側に置いた
+    // （「即死が資格情報かを切り分ける」ステップ）。下でその結論を読む。
     //
     // 即死する原因は少なくとも3つあり、所要時間では区別できない:
     //   - 資格情報の失効（401が即返る）
@@ -827,6 +836,42 @@ export function interpretRun(run) {
     const ms = claude.started_at && claude.completed_at
       ? new Date(claude.completed_at) - new Date(claude.started_at) : null;
     const immediate = ms != null && ms <= 5000;
+
+    // **実験が答えを出しているなら、推測しない。**
+    // ワークフローが失敗した回だけ、同じトークンで1ターンだけ走らせている
+    // （--model も MCP も渡さないので、残る変数はトークンが通るかどうかだけ）。
+    // failure_class は観測された形（immediate_failure）のまま据え置く——
+    // 種別を変えると D5 の連続判定と close_check の再発判定が別種別として
+    // 数え直され、歯止めが効かなくなる。結論は failure_reason と
+    // needs_triage で伝える。
+    const probe = step('資格情報かを切り分ける');
+    if (probe?.conclusion === 'failure') {
+      return {
+        outcome: 'failed', attempted: true,
+        failure_class: immediate ? 'immediate_failure' : null,
+        // **セッションが調べ直す必要が無い。**答えは出ていて、残りはオーナー作業。
+        needs_triage: false,
+        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
+          + `**同じトークンでの単独実行（1ターン）も落ちた**（ワークフローの切り分けステップ）。`
+          + `--model も MCP も渡さない実行で落ちているので、**資格情報が通っていない。**`
+          + `オーナーがローカルで \`claude setup-token\` を再実行し repo secret `
+          + `CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある（自動判定・実験済み）`,
+      };
+    }
+    if (probe?.conclusion === 'success') {
+      return {
+        outcome: 'failed', attempted: true,
+        failure_class: immediate ? 'immediate_failure' : null,
+        needs_triage: true,
+        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗した一方、`
+          + `**同じトークンでの単独実行（1ターン）は完走している**（ワークフローの切り分けステップ）。`
+          + `**資格情報は通っているので、そこを疑わない。**残る候補は --model の指定`
+          + `（data/model-routing.json の解決結果が実在するモデルか）・MCP・プロンプト・上流の版（自動判定）`,
+      };
+    }
+    // 切り分けステップが無い / skipped ＝ **判定不能。**CLIが入る前に落ちた回
+    // （08-21 の actor 拒否のような形）や、この装置より前の run がここに来る。
+    // **判定不能は「資格情報は無事」ではない**ので、従来どおりセッションへ回す。
     return {
       outcome: 'failed', attempted: true,
       // 即死は「実作業に入る前に落ちた」という**観測された形**までを書く。
@@ -1271,11 +1316,21 @@ function selftest() {
   const cred = d.filter((x) => x.source === 'credential');
   t('連続即時失敗は1件に集約', cred.length === 1);
   // **原因を名乗らせない。**旧版はここで force_owner:'human' を立て、
-  // 復旧手順を鍵の再発行だけにしていた。実際の原因（上流の版の破損）は
-  // セッションが直せるもので、人へ固定したぶん発見が遅れた。
+  // 復旧手順を鍵の再発行だけにしていた。即死の原因には セッションが直せるもの
+  // （--model の指定・上流の版）も含まれるので、人へ固定すると発見が遅れる。
+  // 2026-08-26 の実測では実際の原因は資格情報だったが、**それは実験が
+  // 答えを出したからそう言えるのであって、固定してよい理由にはならない。**
   t('即時失敗を人へ固定しない', cred[0]?.force_owner == null);
-  t('切り分けの順が安い順で入っている',
-    cred[0]?.detail.indexOf('上流の版') < cred[0]?.detail.indexOf('資格情報'));
+  // 旧: 「上流の版」が「資格情報」より先に来ること（費用の安い順）。
+  // **08-26 に順序ごと入れ替えた。**いちばん安くて決定的なのは、失敗した回に
+  // 自動で走る切り分けステップの結論を読むことで、それが資格情報を直接答える。
+  t('切り分けは自動判定ステップから始まる',
+    cred[0]?.detail.indexOf('即死が資格情報かを切り分ける') >= 0
+    && cred[0]?.detail.indexOf('即死が資格情報かを切り分ける') < cred[0]?.detail.indexOf('装置が無い回の手順'));
+  t('切り分けに3つの分岐（failure/success/判定不能）がある',
+    cred[0]?.detail.includes('判定不能'));
+  t('SHA差を版の証拠として読ませない',
+    cred[0]?.detail.includes('SHAが違うこと自体は版が原因である証拠にならない'));
   t('再発判定は immediate_failure で見る',
     cred[0]?.close_check?.params?.failure_class === 'immediate_failure');
 
@@ -1333,6 +1388,35 @@ function selftest() {
     fast.failure_reason.includes('資格情報が原因だった'));
   t('即死の理由に、費用付きの再現手順を書く',
     fast.failure_reason.includes('claude -p') && fast.failure_reason.includes('$0.04'));
+  t('切り分けステップが無い回は要トリアージのまま', fast.needs_triage === true);
+
+  // **ワークフローの切り分けステップが答えを出しているときは推測しない。**
+  // 2026-08-26 に手で1回やった実験を、失敗した回に自動で走らせている。
+  const withProbe = (probeConclusion) => interpretRun({
+    status: 'completed', conclusion: 'failure',
+    steps: [
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+        started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:24:00.486Z' },
+      { name: '即死が資格情報かを切り分ける', conclusion: probeConclusion },
+    ],
+  });
+  const credBad = withProbe('failure');
+  t('単独実行も落ちたら資格情報と書く', credBad.failure_reason.includes('資格情報が通っていない'));
+  t('資格情報と分かったらトリアージへ回さない', credBad.needs_triage === false);
+  t('資格情報と分かってもオーナー作業を名指しする',
+    credBad.failure_reason.includes('claude setup-token'));
+  const credOk = withProbe('success');
+  t('単独実行が通ったら資格情報を疑わせない', credOk.failure_reason.includes('資格情報は通っている'));
+  t('資格情報以外は要トリアージ', credOk.needs_triage === true);
+  t('資格情報が無事なら次の候補を名指しする', credOk.failure_reason.includes('model-routing.json'));
+  // **判定不能を「無事」と混ぜない。**CLIが入る前に落ちた回はここに来る。
+  t('切り分けが skipped なら従来どおり要トリアージ', withProbe('skipped').needs_triage === true);
+  t('切り分けが skipped なら資格情報を無事と書かない',
+    !withProbe('skipped').failure_reason.includes('資格情報は通っている'));
+  // 形（failure_class）は据え置き。種別を動かすと D5 の連続判定と
+  // close_check の再発判定が別種別として数え直される。
+  t('切り分けの結果で failure_class は動かさない',
+    credBad.failure_class === 'immediate_failure' && credOk.failure_class === 'immediate_failure');
   const slow = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
       started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:44:00Z' }] });
