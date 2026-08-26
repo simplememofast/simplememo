@@ -243,6 +243,57 @@ export function selftest() {
   for (const [k, v] of Object.entries(BLOCKERS)) {
     if (!['reachable', 'owner_only', 'never'].includes(v.klass)) problems.push(`未知の klass: ${k}`);
   }
+
+  // ── check(doc) を実際に呼ぶ ─────────────────────────────────────
+  //
+  // [2026-08-26] **ここまで、この自己テストは check() を一度も呼んでいなかった。**
+  // 上で見ているのは analyse() の算数（上限・分母・譲渡）だけで、
+  // 台帳そのものを見る側 —— blocker が登録簿にあるか、unblocked_by が書いてあるか、
+  // 率が automation-rate.mjs と一致するか —— は素通りしていた。
+  // 実測すると、**check() の中の problems.push を10個すべて潰しても
+  // この自己テストは緑のままだった。**覆っているように見えるだけの半分。
+  const task = (over = {}) => ({
+    area: 'A', task: 'T', executor: 'nobody',
+    blocker: 'not_started', unblocked_by: '着手する', unlock: 'ship_it', ...over,
+  });
+  const reachableUnlock = Object.keys(UNLOCKS)[0];
+  const ok = (over) => ({ tasks: [task({ unlock: reachableUnlock, ...over })] });
+  const hit = (ps, needle) => ps.some((x) => x.includes(needle));
+
+  // **落とすべきものを落とすか。**
+  problems.push(...[
+    ['blocker が無い', ok({ blocker: null }), 'blocker が無い'],
+    ['未登録の blocker', ok({ blocker: 'そんな理由は無い' }), '未登録の blocker'],
+    ['unblocked_by が無い', ok({ unblocked_by: null }), 'unblocked_by が無い'],
+    ['到達可能なのに unlock が無い', ok({ unlock: null }), 'unlock が無い'],
+    ['未登録の unlock', ok({ unlock: 'そんな道は無い' }), '未登録の unlock'],
+    ['到達可能でないのに unlock がある',
+      { tasks: [task({ blocker: 'physical_human', unlock: reachableUnlock })] },
+      '到達可能でないのに unlock がある'],
+    ['AIが実行しているのに blocker がある',
+      { tasks: [task({ executor: 'ai_autonomous' })] },
+      'AIが実行しているのに blocker がある'],
+  ].flatMap(([label, doc, needle]) => {
+    let ps;
+    try { ps = check(doc); } catch (e) { return [`check: ${label} で例外: ${e.message}`]; }
+    return hit(ps, needle) ? [] : [`check が「${label}」を落とさない（**この判定は何も見ていない**）`];
+  }));
+
+  // **落としてはいけないものを落とさないか。**片方だけでは足りない。
+  try {
+    const clean = check({ tasks: [task({ blocker: 'physical_human', unlock: null })] });
+    if (clean.length) problems.push(`check が正しい台帳を落とした: ${clean[0]}`);
+  } catch (e) {
+    problems.push(`check: 正常な台帳で例外: ${e.message}`);
+  }
+
+  // **実データが通ること。**
+  try {
+    const real = check(JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8')));
+    if (real.length) problems.push(`実データで check が ${real.length} 件: ${real[0]}`);
+  } catch (e) {
+    problems.push(`実データで check が例外: ${e.message}`);
+  }
   return problems;
 }
 
