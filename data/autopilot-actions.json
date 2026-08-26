@@ -314,11 +314,12 @@
           "observed": "2026-08-26 時点で GH_PAT の Last updated は \"last week\" ＝ **未回転**（CLAUDE_CODE_OAUTH_TOKEN は \"yesterday\"）"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-26",
-      "closed_jst": null,
-      "evidence": "2026-08-26 時点で GH_PAT の Last updated は \"last week\" ＝ **未回転**（CLAUDE_CODE_OAUTH_TOKEN は \"yesterday\"）（リポジトリからは検査できない。閉じるのは人）"
+      "closed_jst": "2026-08-26",
+      "evidence": "2026-08-26 に回転完了（オーナー実施）。fine-grained PAT 「simplememo-autopilot」を発行し repo secret GH_PAT を更新。権限は Contents(RW) / Metadata(RO) / Pull requests(RW) の3件で、**Workflows は付けていない**（決定どおり）。有効期限 2026-11-24 を data/credential-expiry.json に記録したので、check-expiry の warn 30日 / fail 7日 が初めて機能する（それまでは critical かつ未把握だった）。**逸脱1件を note に記録: repository_access が All repositories のまま**（推奨は当該リポジトリのみ。危険度は低いが範囲は狭いほうがよい。fine-grained は作り直さず範囲だけ変更できる）",
+      "last_run_log": "オーナーが回転を実施。期限を台帳へ記録し、この依頼を閉じた"
     },
     {
       "id": "act-budget-overrun-32816234185",
