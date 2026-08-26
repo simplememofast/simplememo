@@ -65,6 +65,19 @@ export const END = '# END data-publication';
 export const JS_BEGIN = '// BEGIN data-publication (scripts/check-publication.mjs --write)';
 export const JS_END = '// END data-publication';
 
+/**
+ * 公開リポジトリに在ってよいか。**配信するかとは別の問い。**
+ *
+ * `ok`     … 在ってよい。多くは資産（数え方を公開していることが売り）
+ * `review` … 判断が要る。`public_repo_why` 必須で、検査が毎回列挙する
+ *
+ * **`no` を用意していない。**このリポジトリは作られたときから公開で、
+ * git の履歴が残る以上、ファイルを消しても公開されなかったことにはならない。
+ * 実行可能な対策は「これ以上ここへ機微情報を足さない」だけなので、
+ * review は「消す予定」ではなく「足す前に必ず読む」の印にしてある。
+ */
+export const PUBLIC_REPO_VALUES = ['ok', 'review'];
+
 export function listDataFiles(dir = DATA_DIR) {
   return fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
 }
@@ -222,6 +235,18 @@ export function validate(policy, { files, referenced }) {
     const v = policy.files[f];
     if (typeof v.served_by_site !== 'boolean') problems.push(`${f}: served_by_site を真偽値で書くこと`);
     if (!v.why) problems.push(`${f}: why が無い — **配信する/しない の理由を残す**`);
+
+    // [2026-08-26] **3本目の軸。**served_by_site は「サイトが配信するか」しか
+    // 聞いていない。このリポジトリが公開である以上、それでは足りない。
+    // 聞くべきは「そもそも公開リポジトリに在ってよいか」。
+    if (!PUBLIC_REPO_VALUES.includes(v.ok_in_public_repo)) {
+      problems.push(`${f}: ok_in_public_repo は ${PUBLIC_REPO_VALUES.join('|')} のいずれか`
+        + ' — **公開リポジトリに在ってよいかを、配信するかと別に決める**');
+    }
+    if (v.ok_in_public_repo === 'review' && !v.public_repo_why) {
+      problems.push(`${f}: ok_in_public_repo=review なのに public_repo_why が無い`
+        + ' — **何が引っかかるのかを書く。**「一応 review」は分類ではない');
+    }
     // 配信すると言っているのに、どこからも参照されていない
     if (v.served_by_site && !referenced.has(f) && !v.allow_unreferenced) {
       problems.push(`${f}: served_by_site だがサイトのどこからも参照されていない`
@@ -254,8 +279,8 @@ function selftest() {
   const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
 
   const pol = { files: {
-    'a.json': { served_by_site: true, why: 'サイトが読む' },
-    'b.json': { served_by_site: false, why: '内部だけ' },
+    'a.json': { served_by_site: true, why: 'サイトが読む', ok_in_public_repo: 'ok' },
+    'b.json': { served_by_site: false, why: '内部だけ', ok_in_public_repo: 'ok' },
   } };
   t('未分類のファイルは落ちる',
     validate(pol, { files: ['a.json', 'b.json', 'c.json'], referenced: new Set(['a.json']) })
@@ -267,11 +292,25 @@ function selftest() {
     validate(pol, { files: ['a.json', 'b.json'], referenced: new Set() })
       .some((p) => p.includes('参照されていない')));
   t('allow_unreferenced を書けば通る',
-    validate({ files: { 'a.json': { served_by_site: true, why: 'x', allow_unreferenced: true } } },
+    validate({ files: { 'a.json': { served_by_site: true, why: 'x', allow_unreferenced: true, ok_in_public_repo: 'ok' } } },
       { files: ['a.json'], referenced: new Set() }).length === 0);
   t('配信しないものは参照が無くても落ちない',
     !validate(pol, { files: ['a.json', 'b.json'], referenced: new Set(['a.json']) })
       .some((p) => p.includes('b.json') && p.includes('参照')));
+
+  // 公開リポジトリに在ってよいか — **配信するかとは別の問い**
+  const arg = { files: ['a.json'], referenced: new Set(['a.json']) };
+  const one = (over) => ({ files: { 'a.json': { served_by_site: true, why: 'x', ...over } } });
+  t('**3本目の軸が無ければ落ちる**（配信するかだけでは足りない）',
+    validate(one({}), arg).some((p) => p.includes('ok_in_public_repo')));
+  t('知らない値は落ちる',
+    validate(one({ ok_in_public_repo: 'maybe' }), arg).some((p) => p.includes('ok_in_public_repo')));
+  t('review は理由が要る（「一応 review」は分類ではない）',
+    validate(one({ ok_in_public_repo: 'review' }), arg).some((p) => p.includes('public_repo_why')));
+  t('review + 理由なら通る',
+    validate(one({ ok_in_public_repo: 'review', public_repo_why: 'y' }), arg).length === 0);
+  t('**no は用意しない**（消しても履歴には残るので、実行可能な選択肢ではない）',
+    !PUBLIC_REPO_VALUES.includes('no'));
 
   // リポジトリ自体の公開状態 — **配信の遮断と混ぜない**
   t('観測値が無ければ null（「観測していない」を false にしない）',
@@ -326,6 +365,14 @@ if (isMain) {
   console.log('  サイトが配信:');
   for (const f of pub) console.log(`    ${f}  — ${policy.files[f].why}`);
   console.log(`\n  配信しない（_redirects で 404）: ${priv.length} 件`);
+  const review = Object.entries(policy.files)
+    .filter(([, v]) => v.ok_in_public_repo === 'review');
+  if (review.length) {
+    console.log(`\n  **公開リポジトリに在ることを判断済み（要再読）: ${review.length} 件**`);
+    for (const [f, v] of review) console.log(`    ${f}\n      ${String(v.public_repo_why).slice(0, 120)}…`);
+    console.log('  **消しても履歴には残る。**ここへ新しい機微情報を足さない、が対策の全部。');
+  }
+
   const observed = repoVisibility();
   problems.push(...checkRepoVisibility(policy, observed));
   if (observed === null) {
