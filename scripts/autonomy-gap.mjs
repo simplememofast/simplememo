@@ -257,7 +257,8 @@ export function selftest() {
     blocker: 'not_started', unblocked_by: '着手する', unlock: 'ship_it', ...over,
   });
   const reachableUnlock = Object.keys(UNLOCKS)[0];
-  const ok = (over) => ({ tasks: [task({ unlock: reachableUnlock, ...over })] });
+  const ok = (over) => ({ blocked_on_missing_budget: 99,
+    tasks: [task({ unlock: reachableUnlock, ...over })] });
   const hit = (ps, needle) => ps.some((x) => x.includes(needle));
 
   // **落とすべきものを落とすか。**
@@ -268,10 +269,11 @@ export function selftest() {
     ['到達可能なのに unlock が無い', ok({ unlock: null }), 'unlock が無い'],
     ['未登録の unlock', ok({ unlock: 'そんな道は無い' }), '未登録の unlock'],
     ['到達可能でないのに unlock がある',
-      { tasks: [task({ blocker: 'physical_human', unlock: reachableUnlock })] },
+      { blocked_on_missing_budget: 99,
+        tasks: [task({ blocker: 'physical_human', unlock: reachableUnlock })] },
       '到達可能でないのに unlock がある'],
     ['AIが実行しているのに blocker がある',
-      { tasks: [task({ executor: 'ai_autonomous' })] },
+      { blocked_on_missing_budget: 99, tasks: [task({ executor: 'ai_autonomous' })] },
       'AIが実行しているのに blocker がある'],
   ].flatMap(([label, doc, needle]) => {
     let ps;
@@ -281,10 +283,69 @@ export function selftest() {
 
   // **落としてはいけないものを落とさないか。**片方だけでは足りない。
   try {
-    const clean = check({ tasks: [task({ blocker: 'physical_human', unlock: null })] });
+    const clean = check({ blocked_on_missing_budget: 99,
+      tasks: [task({ blocker: 'physical_human', unlock: null })] });
     if (clean.length) problems.push(`check が正しい台帳を落とした: ${clean[0]}`);
   } catch (e) {
     problems.push(`check: 正常な台帳で例外: ${e.message}`);
+  }
+
+  // ── blocked_on（届いたのに待ち続けていないか） ─────────────────
+  const covDoc = (over = {}) => ({
+    blocked_on_missing_budget: 99,
+    tasks: [{ area: 'A', task: 'T', executor: 'nobody',
+      blocker: 'external_data', unblocked_by: '待っている',
+      unlock: Object.keys(UNLOCKS)[0], ...over }],
+  });
+  const gotHere = { file: 'data/automation-coverage.json' };          // 必ず在る
+  const notYet = { file: 'data/そんなファイルは無い.json' };            // 必ず無い
+
+  problems.push(...[
+    ['**述語が全部満たされたら落ちる**（届いた材料を待ち続けない）',
+      covDoc({ blocked_on: [gotHere] }), true, '待っていた材料がもう在る'],
+    ['1つでも欠けていれば落ちない（まだ待っている）',
+      covDoc({ blocked_on: [gotHere, notYet] }), false, null],
+    ['**not_started では落ちない**（着手していないだけは待っていない）',
+      covDoc({ blocker: 'not_started', unblocked_by: 'やっていない', blocked_on: [gotHere] }), false, null],
+    ['述語が無ければ落ちない（上限の範囲内なら）',
+      covDoc({}), false, null],
+  ].flatMap(([label, doc, shouldFail, needle]) => {
+    let ps;
+    try { ps = check(doc); } catch (e) { return [`blocked_on: ${label} で例外: ${e.message}`]; }
+    const hit = needle ? ps.some((x) => x.includes(needle)) : ps.length > 0;
+    if (hit !== shouldFail) {
+      return [`blocked_on: 「${label}」が期待どおりでない（${JSON.stringify(ps)}）`];
+    }
+    return [];
+  }));
+
+  // 述語の形（path / atLeast / dir）が効いているか
+  const predCases = [
+    ['ファイルが在るだけの述語', { file: 'data/automation-coverage.json' }, true],
+    ['無いファイルは満たされない', { file: 'data/無い.json' }, false],
+    ['path が在れば満たされる', { file: 'data/automation-coverage.json', path: 'tasks' }, true],
+    ['path が無ければ満たされない', { file: 'data/automation-coverage.json', path: 'そんな.位置' }, false],
+    ['**atLeast は数で見る**（在るだけでは満たさない）',
+      { file: 'data/autopilot-status.json', path: 'data_freshness.bq_export_days_accumulated', atLeast: 99999 }, false],
+    ['ディレクトリの件数も見る', { dir: 'scripts', atLeast: 1 }, true],
+    ['無いディレクトリは満たされない', { dir: 'そんなディレクトリ', atLeast: 1 }, false],
+  ];
+  for (const [label, pred, want] of predCases) {
+    let got;
+    try { got = blockedOnSatisfied(pred); } catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
+    if (got !== want) problems.push(`述語「${label}」が ${got}（${want} のはず）`);
+  }
+
+  // ラチェット
+  const many = { blocked_on_missing_budget: 0, tasks: [
+    { area: 'A', task: 'T1', executor: 'nobody', blocker: 'external_data',
+      unblocked_by: 'x', unlock: Object.keys(UNLOCKS)[0] },
+  ] };
+  if (!check(many).some((x) => x.includes('述語の無い「待ち」'))) {
+    problems.push('述語の無い待ちが上限を超えても落ちない');
+  }
+  if (!check({ tasks: [] }).some((x) => x.includes('blocked_on_missing_budget が数でない'))) {
+    problems.push('上限を書き忘れても落ちない（**無ければ無制限、が一番危ない**）');
   }
 
   // **実データが通ること。**
@@ -296,6 +357,56 @@ export function selftest() {
   }
   return problems;
 }
+
+/**
+ * 「待っているもの」を機械が確かめられる形で書く。
+ *
+ * [2026-08-26] **台帳が、もう届いている材料を「待っている」と言い続けていた。**
+ * ⑦法人経営の税務行は `unblocked_by` に「決算期・従業員の有無・課税事業者かが
+ * リポジトリに無い」と書いてあるが、3つとも 2026-08-25 にオーナー確認で入っており、
+ * 指している検査（check-corporate.mjs）は法人税と消費税の期限を実際に出している。
+ * note のほうも「消費税は未把握」と書いたままだった。
+ *
+ * **「ブロックされている」と「ブロックされているか確かめていない」は違う。**
+ * 散文で書くかぎり、届いた日に誰も直さない。だから届いたことを機械が見られる形にする。
+ *
+ * 述語の形（すべて満たされたら、その行はもう待っていない）:
+ *   { file: 'data/x.json' }                       … ファイルが在る
+ *   { file: 'data/x.json', path: 'a.b.c' }        … その位置に値が在る（null/undefined 以外）
+ *   { file: 'data/x.json', path: 'a.b', atLeast: 28 } … 数がその値以上
+ *   { dir: 'growth/data/appstore', atLeast: 1 }   … ディレクトリに N 件以上
+ */
+export function blockedOnSatisfied(pred, { root = ROOT } = {}) {
+  const at = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+  if (pred.dir) {
+    const abs = path.join(root, pred.dir);
+    if (!fs.existsSync(abs)) return false;
+    const n = fs.readdirSync(abs).filter((f) => !f.startsWith('.')).length;
+    return n >= (pred.atLeast ?? 1);
+  }
+  const abs = path.join(root, pred.file);
+  if (!fs.existsSync(abs)) return false;
+  if (!pred.path) return true;
+  let doc;
+  try { doc = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { return false; }
+  const v = at(doc, pred.path);
+  if (v === undefined || v === null) return false;
+  if (pred.atLeast !== undefined) return typeof v === 'number' && v >= pred.atLeast;
+  return true;
+}
+
+/** その行がまだ待っているか。述語が1つも無ければ「確かめていない」。 */
+export function stillBlocked(task, opts = {}) {
+  const preds = task.blocked_on;
+  if (!Array.isArray(preds) || preds.length === 0) return { checkable: false };
+  const results = preds.map((pr) => ({ pred: pr, ok: blockedOnSatisfied(pr, opts) }));
+  return { checkable: true, results, satisfied: results.every((r) => r.ok) };
+}
+
+/** 「何かを待っている」種別。**着手していないだけ、は待っていない。** */
+export const WAITING_BLOCKERS = new Set([
+  'external_data', 'external_credential', 'missing_source_document', 'human_consent',
+]);
 
 export function check(doc) {
   const problems = [];
@@ -324,6 +435,38 @@ export function check(doc) {
     problems.push(`総合自動化率が automation-rate.mjs と一致しない: ${s.overall_automation_rate} vs ${a.now_rate}`);
   }
   if (a.ceiling < a.now) problems.push('上限が現在値を下回っている');
+
+  // **届いた材料を「待っている」と言い続けない。**
+  //
+  // 効くのは「何かを待っている」種別だけ。`not_started`（着手していないだけ）は
+  // **材料が在るのが前提**なので、揃っていても矛盾ではない。
+  for (const t of doc.tasks) {
+    if (!t.blocked_on || !WAITING_BLOCKERS.has(t.blocker)) continue;
+    const st = stillBlocked(t);
+    if (st.satisfied) {
+      problems.push(`待っていた材料がもう在る: ${t.area} / ${t.task}`
+        + ` — ${t.blocked_on.map((x) => x.path ? `${x.file}:${x.path}` : (x.dir ?? x.file)).join(', ')}`
+        + ' が揃っている。**blocker と unblocked_by を実際の状態に直すこと**'
+        + '（「ブロックされている」と「ブロックされているか確かめていない」は違う）');
+    }
+  }
+
+  // ラチェット。**述語の無い「待ち」を増やさない。**
+  //
+  // 述語が無い行は、届いたかどうかを誰も確かめていない。散文で「〜が無い」と
+  // 書いてあるだけなので、**届いた日に直る保証がゼロ。**実際この2行がそうなった。
+  // 上限は 2026-08-26 の実測。**上げて通さない。**
+  const waiting = doc.tasks.filter((t) => WAITING_BLOCKERS.has(t.blocker));
+  const noPred = waiting.filter((t) => !Array.isArray(t.blocked_on) || !t.blocked_on.length);
+  const budget = doc.blocked_on_missing_budget;
+  if (typeof budget !== 'number') {
+    problems.push('blocked_on_missing_budget が数でない — 無ければ無制限、が一番危ない');
+  } else if (noPred.length > budget) {
+    problems.push(`述語の無い「待ち」が ${noPred.length} 行で、上限 ${budget} を超えた`
+      + ' — **届いたかどうかを誰も確かめない行を増やさない。**'
+      + 'blocked_on に「何が在れば待たなくてよいか」を書く（上限を上げて通さない）');
+  }
+
   return problems;
 }
 

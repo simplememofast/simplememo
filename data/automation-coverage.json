@@ -134,7 +134,14 @@
       "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人",
       "blocker": "external_data",
       "unblocked_by": "継続率がリポジトリに無い（BigQuery/ASC側）。降りれば evidence_strength を機械が導出できる",
-      "unlock": "bq_28d"
+      "unlock": "bq_28d",
+      "blocked_on": [
+        {
+          "file": "data/autopilot-status.json",
+          "path": "data_freshness.bq_export_days_accumulated",
+          "atLeast": 28
+        }
+      ]
     },
     {
       "area": "① 次期機能開発",
@@ -191,7 +198,14 @@
       "note": "D28はBQ蓄積28日到達待ち（9/6前後）",
       "blocker": "external_data",
       "unblocked_by": "BigQuery の28日蓄積待ち（9/6前後）",
-      "unlock": "bq_28d"
+      "unlock": "bq_28d",
+      "blocked_on": [
+        {
+          "file": "data/autopilot-status.json",
+          "path": "data_freshness.bq_export_days_accumulated",
+          "atLeast": 28
+        }
+      ]
     },
     {
       "area": "① 次期機能開発",
@@ -1182,7 +1196,14 @@
       "note": "⑥の売上接続が前提。**ASC の課金レポートが降りていなかったので、そもそも分子が無かった**（2026-08-25 に取得側の欠陥2件を修正、data/operating-memory.json の om-2026-08-25-asc-zero）。降りたあとで初めて立てられる",
       "blocker": "external_data",
       "unblocked_by": "⑥の売上接続が前提。分子（課金レポート）が降りてから",
-      "unlock": "asc_reports"
+      "unlock": "asc_reports",
+      "blocked_on": [
+        {
+          "file": "data/revenue-series.json",
+          "path": "covered_days",
+          "atLeast": 28
+        }
+      ]
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1244,9 +1265,9 @@
         "scripts/check-asc-landed.mjs"
       ],
       "note": "**2026-08-25、収入側が接続された**（オーナーの権限委譲を受けて revenue_connected を true）。App Store Purchases が Proceeds in USD / Sales in USD / Paying Users を返している。**ただし照合そのものはまだ。**見えているのは1日ぶん（課金1件 / 入金 $2.59 / 課金ユーザー1）で、月次にするには日次を積む必要がある。返金は Subscription Event に含まれる見込みだが未確認、広告は未実装なので**4つのうち照合できる材料が揃ったのは1つ（売上）だけ。**executor を上げないのはそのため。手元資金は依然として機械に入っていないので、ランウェイは出さない（足りない材料を検査が名指しする）",
-      "blocker": "external_data",
-      "unblocked_by": "ASC Analytics のレポートがまだ0件。降りれば照合は書ける",
-      "unlock": "asc_reports"
+      "blocker": "not_started",
+      "unblocked_by": "**材料は降りた。**2026-08-25 の取得で10レポート（App Store Purchases / Subscription State / Downloads / Sessions ほか）が入っている。残るのは照合そのものの実装。[2026-08-26] それまで「ASC Analytics のレポートがまだ0件」と書いたままだった —— 同じ行の note には降りたと書いてあり、**行が自分自身と矛盾していた**",
+      "unlock": "impl_measurement"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1270,7 +1291,14 @@
       "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。**2026-08-25 に売上が降りた**ので LTV・回収期間・粗利の材料は入り始めたが、**1日ぶんでは出せない。**LTV は継続期間が要り、Subscription State Report の Counts は State Metric を跨いだ合計なので契約者数として使えない（取り込みが行を持たず数値列の合計だけを保存する設計のため）",
       "blocker": "external_data",
       "unblocked_by": "同上。CACは広告費ゼロのため定義上存在しない",
-      "unlock": "asc_reports"
+      "unlock": "asc_reports",
+      "blocked_on": [
+        {
+          "file": "data/revenue-series.json",
+          "path": "covered_days",
+          "atLeast": 28
+        }
+      ]
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1365,9 +1393,9 @@
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs"
       ],
-      "note": "2026-08-22に台帳と検査を実装。**2026-08-25、6件中1件が実際に動く期限になった** —— 決算期2月末がオーナー確認で入り、法人税・地方税の申告期限を機械が導けるようになった（2027-04-30）。**日付は台帳に直書きせず決算月から毎回計算する**ので、年をまたいでも古い日付が残らない（手で書き換えると検査が落ちる）。残る5件の未把握: Apple Developer の加入日・ドメイン更新日・消費税の課税事業者判定（資本金と設立日がリポジトリに無い）・社会保険の具体的な届出期限（社労士の領域）・法定調書の要否。**役員報酬ありも確定した**ので、社会保険が該当することは決まった（従業員の有無ではなく役員報酬で決まる）",
+      "note": "2026-08-22に台帳と検査を実装。**2026-08-25 に会社の事実が入り、6件中2件が実際に動く期限になった** —— 決算期2月末から法人税・地方税と消費税の申告期限を機械が導く（2027-04-30）。インボイス登録ありが確定したので、資本金や基準期間によらず課税事業者。**日付は台帳に直書きせず決算月から毎回計算する**ので、年をまたいでも古い日付が残らない。残る4件の未把握: Apple Developer の加入日・ドメイン更新日・社会保険の具体的な届出期限・法定調書の要否。**役員報酬ありも確定した**ので社会保険が該当することは決まった（従業員の有無ではなく役員報酬で決まる）。[2026-08-26] **この note と unblocked_by は、材料が届いた翌日から古いままだった。**「消費税は資本金と設立日が無いので未把握」と書いていたが、指している検査は既に期限を出していた。blocked_on を置いて、届いたことを機械が見るようにした",
       "blocker": "external_data",
-      "unblocked_by": "決算期・従業員の有無・課税事業者かがリポジトリに無い。入れば期限計算は機械が出せる",
+      "unblocked_by": "残るのは Apple Developer の加入日・ドメインの更新日・社会保険の具体的な届出期限（社労士の領域）・法定調書の要否。**決算期2月末・役員報酬あり・インボイス登録ありは 2026-08-25 に入り、法人税と消費税の申告期限は機械が出している**（2027-04-30）",
       "unlock": "company_facts"
     },
     {
@@ -2284,5 +2312,6 @@
     "たとえば公開面の事実検査は証跡に faq.html を含むが、faq.html 自体は2月からある。",
     "min(証跡の初出月) を使うと、2月から検査していたことになってしまう。",
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
-  ]
+  ],
+  "blocked_on_missing_budget": 16
 }
