@@ -7,8 +7,11 @@
  *
  * 【機械が守れる部分だけ機械に守らせる】ここが見るのは3つだけ:
  *
- *   1. **不可逆な領域は必ず承認制**（reversible:false → requires_approval:true）
- *      これが逆になっている行は、権限表の一番の存在理由が壊れている。
+ *   1. **不可逆な領域は承認制、または機械が強制するゲート**
+ *      （reversible:false → requires_approval:true **or** 検査を満たす machine_gate）
+ *      これが両方とも無い行は、権限表の一番の存在理由が壊れている。
+ *      ゲートで承認を外す条件は gateProblems() を読むこと ——
+ *      **「ゲートがあります」と書くだけでは外せない。**
  *   2. **active な領域は evidence を持つ**。そう運用されている根拠のファイルが
  *      実在すること。根拠を指せない「そうなっているはず」は、次に判断する人には
  *      存在しないのと同じ。
@@ -34,7 +37,62 @@ const MONEY = ['AI実費（開発・運用のトークン費）', '広告出稿�
                // **1日で$10を焼いた実績があるこちらだけ表に無かった。**
                'macOSランナーの起動（GitHub Actions 分数の消費）'];
 
-export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)) } = {}) {
+/**
+ * **不可逆な領域の例外 —— 機械が強制するゲート。**
+ *
+ * [2026-08-27] 元の規則は「不可逆 → 必ず承認制」の1本だった。
+ * オーナーが App Store レビュー返信を「品質ゲート通過で自動投稿」に決めたので、
+ * **不変条件を1条だけ広げる。**
+ *
+ *   不可逆 → 承認制 **または** 機械が強制するゲート
+ *
+ * 【広げ方を間違えると、これが抜け穴になる】
+ * 「ゲートがあります」と1行書けば承認を外せる、では表の存在理由が消える。
+ * だから**宣言ではなく検査可能な条件**にした。次を全部満たす行だけが例外になる:
+ *
+ *   checker            … 判定を実装したファイル。**実在すること**
+ *   function           … その中の関数名。**本当に export されていること**
+ *   kill_switch_path   … 止める場所（台帳のキー）
+ *   daily_cap          … 正の数。無制限のゲートは例外に使えない
+ *   holds_when_unknown … **true 必須。**材料が無いとき止まらないゲートは例外に使えない
+ *
+ * いちばん効くのは最後の2つと、**関数が実在するかを実際にソースで見る**ところ。
+ * **表に書いただけで実装が無い**状態を通さない。
+ */
+export const GATE_REQUIRED = ['checker', 'function', 'kill_switch_path', 'daily_cap', 'holds_when_unknown'];
+
+/** ゲートの体裁を見る。**満たさない理由を返す**（満たしていれば空配列）。 */
+export function gateProblems(d, { exists, readSource } = {}) {
+  const g = d.machine_gate;
+  if (!g || typeof g !== 'object') {
+    return ['machine_gate が無い — 承認を外すなら、何が止めるのかを機械が読める形で書く'];
+  }
+  const miss = GATE_REQUIRED.filter((k) => g[k] === undefined || g[k] === null || g[k] === '');
+  if (miss.length) return [`machine_gate に ${miss.join(' / ')} が無い`];
+  if (typeof g.daily_cap !== 'number' || !(g.daily_cap > 0)) {
+    return ['machine_gate.daily_cap が正の数でない — **上限の無いゲートは例外に使えない**'];
+  }
+  if (g.holds_when_unknown !== true) {
+    return ['machine_gate.holds_when_unknown が true でない'
+      + ' — **材料が無いとき止まらないゲートは例外に使えない**'];
+  }
+  if (exists && !exists(g.checker)) {
+    return [`machine_gate.checker「${g.checker}」が実在しない`];
+  }
+  if (readSource) {
+    const src = readSource(g.checker);
+    if (src !== null && !new RegExp(`export function ${g.function}\\b`).test(src)) {
+      return [`${g.checker} が ${g.function} を export していない`
+        + ' — **表に書いただけで実装が無い**'];
+    }
+  }
+  return [];
+}
+
+export function validate(doc, {
+  exists = (p) => fs.existsSync(path.join(ROOT, p)),
+  readSource = (p) => { try { return fs.readFileSync(path.join(ROOT, p), 'utf8'); } catch { return null; } },
+} = {}) {
   const problems = [];
   if (!doc || !Array.isArray(doc.domains)) return ['domains must be an array'];
   const seen = new Set();
@@ -48,7 +106,12 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
     if (typeof d.requires_approval !== 'boolean') problems.push(`${at}: requires_approval must be boolean`);
     // 1. 不可逆なのに承認不要 = 権限表が壊れている
     if (d.reversible === false && d.requires_approval === false) {
-      problems.push(`${at}: 不可逆（reversible:false）なのに requires_approval:false — 承認なしで取り返しがつかない変更ができることになる`);
+      // **承認を外せるのは、機械が強制するゲートを持つ行だけ。**（上の注記）
+      const gp = gateProblems(d, { exists, readSource });
+      if (gp.length) {
+        problems.push(`${at}: 不可逆（reversible:false）なのに requires_approval:false`
+          + ` — 承認なしで取り返しがつかない変更ができることになる。${gp[0]}`);
+      }
     }
     if (!STATUSES.includes(d.status)) {
       problems.push(`${at}: status must be one of ${STATUSES.join('|')} (got ${JSON.stringify(d.status)})`);
@@ -151,11 +214,23 @@ function render(doc) {
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 // 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
 // 壊し方は実データを複製して作る（固定フィクスチャだと台帳と形がずれても気づけない）。
+/** ゲート付き例外を持つ行。**壊し方はここを狙う。** */
+const gated = (d) => d.domains.find((x) => x.machine_gate);
+
 const SELFTEST_BREAKAGES = [
   ['**不可逆なのに承認不要**は落ちる（承認なしで取り返しがつかない変更ができる）', (d) => { d.domains[0].reversible = false; d.domains[0].requires_approval = false; }],
   ['知らない status は落ちる', (d) => { d.domains[0].status = 'たぶん動いてる'; }],
   ['domain 名の重複は落ちる', (d) => { d.domains.push({ ...d.domains[0] }); }],
   ['reversible が真偽値でなければ落ちる', (d) => { d.domains[0].reversible = 'yes'; }],
+  // ── ゲート付き例外が抜け穴にならないこと（2026-08-27） ──
+  // **「ゲートがあります」と書くだけで承認を外せる**形にしていないかを固定する。
+  ['**ゲートを消すと承認制に戻る**', (d) => { delete gated(d).machine_gate; }],
+  ['**材料が無いとき止まらないゲート**は例外に使えない', (d) => { gated(d).machine_gate.holds_when_unknown = false; }],
+  ['上限の無いゲートは例外に使えない', (d) => { gated(d).machine_gate.daily_cap = 0; }],
+  ['実在しない checker を指すと落ちる', (d) => { gated(d).machine_gate.checker = 'scripts/nope.mjs'; }],
+  ['**export していない関数名を指すと落ちる**（表に書いただけで実装が無い）',
+   (d) => { gated(d).machine_gate.function = 'thisIsNotExported'; }],
+  ['ゲートの必須欄が欠けると落ちる', (d) => { delete gated(d).machine_gate.kill_switch_path; }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8')),
