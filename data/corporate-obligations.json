@@ -146,7 +146,9 @@
       "unreviewed は**「問題なし」ではなく「見ていない」。**",
       "vendor-register.json の dpa_reviewed と同じ扱いで、独立した状態にしてある。",
       "",
-      "[2026-08-26] 指紋（fingerprint / fetched_at）は scripts/vendor-terms.mjs が毎日更新する。**追っているのは source が指すページであって条項本文ではない** —— apple の source は規約の一覧ページで、各契約の本文は別（PDFを含む）。changed は「読み直せ」の合図で、「条項が変わった」の断定ではない。**戻しすぎる誤りは読み直しで済み、戻さない誤りは嘘の ok が残る**ので、粗いほうへ倒してある。"
+      "[2026-08-26] 指紋（fingerprint / fetched_at）は scripts/vendor-terms.mjs が毎日更新する。**追っているのは source が指すページであって条項本文ではない** —— apple の source は規約の一覧ページで、各契約の本文は別（PDFを含む）。changed は「読み直せ」の合図で、「条項が変わった」の断定ではない。**戻しすぎる誤りは読み直しで済み、戻さない誤りは嘘の ok が残る**ので、粗いほうへ倒してある。",
+      "",
+      "**指紋の初期値は入れていない。**エージェント環境から届く2社ぶんは取れたが、あの経路は MITM プロキシ越しで、**ランナーが見る本文と同じである保証が無い。**違えば初回に偽の changed が出る。指紋は seo-daily（ランナー）が seed する。"
     ],
     "clauses": [
       "liability_cap",
@@ -168,9 +170,7 @@
         "personal_data": "unreviewed",
         "governing_law": "unreviewed",
         "source": "https://developer.apple.com/terms/",
-        "reviewed_at": null,
-        "fingerprint": "6b75d45e3e30",
-        "fetched_at": "2026-08-26"
+        "reviewed_at": null
       },
       {
         "id": "cloudflare",
@@ -206,9 +206,7 @@
         "personal_data": "unreviewed",
         "governing_law": "unreviewed",
         "source": "https://cloud.google.com/terms",
-        "reviewed_at": null,
-        "fingerprint": "771a58c7c6e2",
-        "fetched_at": "2026-08-26"
+        "reviewed_at": null
       },
       {
         "id": "firebase",

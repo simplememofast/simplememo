@@ -123,13 +123,6 @@
       ],
       "dated": true,
       "why": "週次。同上"
-    },
-    {
-      "cmd": "scripts/vendor-terms.mjs --write",
-      "writes": [
-        "data/corporate-obligations.json"
-      ],
-      "why": "各社の規約本文の指紋。**改定されたら reviewed を unreviewed へ戻す。**seo-daily が毎日実行し、週次のコミット回で拾う（check-domain-expiry と同じ配線・同じファイル）"
     }
   ],
   "never_run": [
@@ -179,6 +172,10 @@
     {
       "file": "scripts/check-domain-expiry.mjs",
       "why": "**取得にネットが要る。**RDAP はエージェント環境からも seo-check からも到達しない前提で書いてある（届かない回は unknown を返して台帳を据え置く）。**書くのは seo-daily の役目**で、あちらの取得ステップが --write を走らせ、週次のコミット回で data/corporate-obligations.json を拾う。期限は年1回しか動かないのでその頻度で足りる"
+    },
+    {
+      "file": "scripts/vendor-terms.mjs",
+      "why": "**取得にネットが要る。**check-domain-expiry と同じ理由だが、こちらは**CIから届いてしまうぶん質が悪い** —— seo-check のランナーは10社すべて取得でき、`--run`（再生成して比較する検査）が毎回新しい指紋を書いて「生成物が古い」で落ちる。実測 2026-08-26: PR #653 の seo-check が 10,355ms かけて全社を取得し、まさにこれで赤くなった。**改定を検知する仕掛けが、改定のたびにCIを赤くする**形になっていて、検知したい事象そのものを罰する検査になる。**書くのは seo-daily の役目**で、あちらの取得ステップが --write を走らせ、同じコミット回で data/corporate-obligations.json を拾う"
     }
   ]
 }
