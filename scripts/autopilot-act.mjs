@@ -286,6 +286,29 @@ export const CLOSE_CHECKS = {
    * が対象のもの。**見えないものを「たぶん終わった」で閉じない。**
    * 代わりに age_days を必ず出すので、放置は放置として見える。
    */
+  /**
+   * 監視ワークフローが立てた Issue が閉じたら閉じる。
+   *
+   * `autopilot-health.yml` と `cron-health.yml` は、故障を検知すると
+   * `ops/autopilot-stale` / `ops/cron-failure` の Issue を立て、**回復したら自分で閉じる。**
+   * つまり Issue の open/closed が、そのまま故障の有無を表している。
+   *
+   * **判定できないときは閉じない。**Issue の状態を取得できていないのに
+   * 「閉じている」と読むと、故障が消える方向に効く（run_repaired と同じ理由）。
+   */
+  issue_closed({ issue }, ctx) {
+    if (!Number.isInteger(issue)) return { closed: false, evidence: 'issue 番号が指定されていない' };
+    if (!ctx.issues || !(ctx.issues instanceof Map)) {
+      return { closed: false, evidence: 'Issue の状態を取得できず判定不能（閉じたという意味ではない）' };
+    }
+    if (!ctx.issues.has(issue)) {
+      // 取得できた一覧に**無い**＝ open ではない。健康ワークフローは回復時に閉じるので、
+      // 一覧が open だけを持つ前提ならこれは「閉じた」。**前提を明示しておく。**
+      return { closed: true, evidence: `#${issue} は open な監視Issueの一覧に無い（回復とみなす）` };
+    }
+    return { closed: false, evidence: `#${issue} がまだ open` };
+  },
+
   manual({ observed } = {}, _ctx) {
     // **手で観測したことを書く口を1つ開けてある。**閉じ条件は機械で判定
     // できないが、「いま外はどうなっているか」は人が見れば書ける
@@ -1204,6 +1227,16 @@ function selftest() {
   const noRun = CLOSE_CHECKS.no_failure_since(
     { route: 'actions', failure_class: 'auth_or_credential', since: '2026-08-25' },
     { runsDoc: { runs: [] } });
+  t('Issue の状態が取れなければ閉じない',
+    CLOSE_CHECKS.issue_closed({ issue: 7 }, {}).closed === false);
+  t('**判定不能を回復と読まない**',
+    /判定不能/.test(CLOSE_CHECKS.issue_closed({ issue: 7 }, {}).evidence));
+  t('open な Issue では閉じない',
+    CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[7, {}]]) }).closed === false);
+  t('open 一覧から消えたら閉じる',
+    CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[9, {}]]) }).closed === true);
+  t('issue 番号が無ければ閉じない',
+    CLOSE_CHECKS.issue_closed({}, { issues: new Map() }).closed === false);
   t('着手ゼロでは閉じない', noRun.closed === false);
   const recovered = CLOSE_CHECKS.no_failure_since(
     { route: 'actions', failure_class: 'auth_or_credential', since: '2026-08-25' },

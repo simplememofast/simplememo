@@ -173,6 +173,28 @@ jobs:
       # ページ反映とセットで行う必要があり、日次ジョブが勝手に公開表示を
       # 書き換える形にはしない。ここは**気づくための経路**。
       # 取得できなかったときも落とさないが、「ずれていない」とは書かない。
+      # 【ドメインの期限】RDAP から引いて台帳と突き合わせる。
+      #
+      # **エージェントのサンドボックスからは届かない**（プロキシが CONNECT を
+      # 403 で拒否する）が、GitHub のランナーからは届く —— 下の iTunes Lookup と
+      # 同じ事情。だから取得はここに置く。
+      #
+      # 落とさない: 取れなかった回は unknown を返して台帳を据え置く。
+      # **取れないことは期限が無いことではない。**
+      # 期限が変わっていたら --write の差分をコミットする回が要るので、
+      # ここは気づくための経路。
+      - name: Domain expiry (RDAP)
+        continue-on-error: true
+        run: |
+          {
+            echo ""
+            echo "## ドメインの有効期限"
+            echo ""
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          node scripts/check-domain-expiry.mjs --write 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Store facts vs App Store (report only)
         continue-on-error: true
         run: |
@@ -235,9 +257,12 @@ jobs:
 
             sh('git config user.name "github-actions[bot]"');
             sh('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
-            sh('git add growth/data growth/reports');
+            // data/corporate-obligations.json は上の RDAP ステップが --write で書く。
+            // **書く動作を誰も動かしていない状態を作らない**（data/generators.json の規律）。
+            // 期限は年1回しか動かないので、週次のこの回で拾えば足りる。
+            sh('git add growth/data growth/reports data/corporate-obligations.json');
 
-            if (!sh('git status --porcelain -- growth/data growth/reports')) {
+            if (!sh('git status --porcelain -- growth/data growth/reports data/corporate-obligations.json')) {
               core.notice('スナップショットに差分が無いため何もしない');
               return;
             }

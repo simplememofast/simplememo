@@ -168,6 +168,10 @@
       "file": "growth/scripts/check-data-quality.mjs",
       "flagless": true,
       "why": "旗ではなく取り込み経路から呼ばれて中間ファイルを書く。生成物ではなく作業ファイル"
+    },
+    {
+      "file": "scripts/check-domain-expiry.mjs",
+      "why": "**取得にネットが要る。**RDAP はエージェント環境からも seo-check からも到達しない前提で書いてある（届かない回は unknown を返して台帳を据え置く）。**書くのは seo-daily の役目**で、あちらの取得ステップが --write を走らせ、週次のコミット回で data/corporate-obligations.json を拾う。期限は年1回しか動かないのでその頻度で足りる"
     }
   ]
 }

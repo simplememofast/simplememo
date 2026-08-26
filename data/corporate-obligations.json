@@ -17,11 +17,14 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "加入日がリポジトリから取れない。**切れるとアプリが配信停止になる**ので、資格情報の中でも影響が大きい",
+      "unconfirmed_reason": "**[2026-08-26 調査] 機械では取れない。**加入日・有効期限は Apple Developer サイトの 「Membership details」にしかなく、App Store Connect API には見当たらない（確認した範囲。/v1/apps /v1/builds /v1/certificates 系に会員資格の経路は無い）。\n\n**ただし、期限を見張るより auto-renew を入れるほうが根本的。**Apple は Membership details で自動更新を提供しており、有効にすると期限日に既定のカードへ自動課金される。**入れれば、この期限は見張る対象でなくなる** —— 人の手数が「毎年思い出す」から「一度入れて終わり」に変わる。\n\n**監視を自動化するより、監視が要らない形にするほうが強い。**この台帳がやるべきなのは日付を当てにいくことではなく、auto-renew が入っているかどうかを1回確かめること。",
       "what_breaks": "App Store からアプリが消え、TestFlight も止まる",
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
-      ]
+      ],
+      "better_fix": "auto-renew を有効にする（Membership details）。有効なら期限監視そのものが不要になる",
+      "auto_renew_confirmed": null,
+      "$auto_renew_confirmed": "**null は「確かめていない」。**true/false はオーナーしか確かめられない（Apple のアカウント画面にしか無く、APIも無い）。**1回確かめれば、以後この行は閉じる。**false だった場合だけ、毎年の期限監視が要る形に戻る"
     },
     {
       "id": "domain-renewal",
@@ -29,12 +32,15 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "レジストラの管理画面にしか無い。credential-expiry.json でも未把握のまま",
+      "unconfirmed_reason": "**[2026-08-26 訂正] 「管理画面にしか無い」は事実ではなかった。**gTLD の有効期限は RDAP で誰でも引ける公開情報で、ICANN が全レジストラに提供を義務づけている。誰も見ていない状態が「見られない」という誤った理由で続いていた。取得を seo-daily.yml に配線した（エージェント環境はプロキシが RDAP への CONNECT を拒否するので、取得はCI・解析は scripts/check-domain-expiry.mjs の純関数）。**次の日次実行で値が入る。**",
       "what_breaks": "サイト・メールの From ドメイン・Universal Link がすべて止まる。**代替が無い critical**",
       "evidence": [
         "data/credential-expiry.json",
         "data/vendor-register.json"
-      ]
+      ],
+      "source": "rdap",
+      "domain": "simplememofast.com",
+      "$derived": "next_due は手で書かない。scripts/check-domain-expiry.mjs --write が正"
     },
     {
       "id": "corporate-tax",

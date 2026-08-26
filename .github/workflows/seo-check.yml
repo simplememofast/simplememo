@@ -342,6 +342,12 @@ jobs:
       #
       # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない
       # （autopilot-runs.mjs と同じ理由・同じ作法）。
+      # 【監視Issueの取り込み】変換の自己検査だけをここで見る（**取得は毎朝のセッション**）。
+      # ここが守るのは3つ: 対象ラベル以外を運ばない / 二重に足さない /
+      # **取り込みが行を閉じない**（回復判定は issue_closed の仕事で、2箇所に散らさない）。
+      - name: Health intake
+        run: node scripts/health-intake.mjs --check
+
       - name: Autopilot action ledger
         run: |
           node scripts/autopilot-act.mjs --selftest
@@ -676,6 +682,14 @@ jobs:
       #
       # いまは fail_days を切ったときだけ落ちる。critical の未把握で落とすには
       # 日付を埋めてから policy.enforce_unknown を true にする。
+      # 【ドメインの期限】解析だけをここで見る（**取得はネットが要るので seo-daily**）。
+      # 台帳の domain-renewal は長らく「レジストラの管理画面にしか無い」を理由に
+      # 未把握だったが、**それは事実ではない** —— gTLD の有効期限は RDAP で誰でも引ける。
+      # いちばん高くつく読み違えは registration を expiration と取り違えることなので、
+      # 自己検査がそれを名指しで落とす。
+      - name: Domain expiry parser
+        run: node scripts/check-domain-expiry.mjs --selftest
+
       - name: Credential expiry
         run: |
           node scripts/check-expiry.mjs --selftest
