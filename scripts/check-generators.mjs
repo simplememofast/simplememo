@@ -93,6 +93,49 @@ export function scanWriters() {
 }
 
 /**
+ * 出力が**リポジトリの外**（時計・ネット・子プロセス）で決まりうる書き手か。**純関数。**
+ *
+ * [2026-08-27] **同じ日に2回踏んだので機械にした。**
+ *
+ *   #653 … CIだけ10社の規約を取得できて、指紋が毎回変わり `--run` が落ちた
+ *   #655 … JSTの日付が回った瞬間 synced_at だけ変わって `--run` が落ちた
+ *
+ * #654 で「ネット・時刻・外部APIが混ざる生成器は再生成して比較に載せられない」と
+ * **散文で**書いたが、その数時間後に自分の生成器で2度目を踏んでいる。
+ * この台帳には `prose-does-not-stop-an-agent` という学びが既にあるので、規則にする。
+ *
+ * **落とすのではなく、宣言を要求する。**時計に触ること自体は悪くない ——
+ * 悪いのは**触っているのに考えていない**こと。run に載せるなら次のどちらかを書かせる:
+ *
+ *   dated: true       … 出力に日付が入る。**その分ファイルの鮮度検査は効かなくなる**
+ *   deterministic_why … 日付が入らない理由（例: 中身が変わった回しか書かない）
+ *
+ * 検出は粗くてよい（誤検知は宣言1行で済み、見逃しはCIが不定期に赤くなる）。
+ */
+export const NONDETERMINISTIC_CALLS = [
+  [/\bDate\.now\(\)/, 'Date.now()'],
+  [/new Date\(\)/, 'new Date()'],
+  [/\bfetch\(/, 'fetch()'],
+  [/execFileSync|execSync|spawnSync/, '子プロセス'],
+];
+
+export function nondeterministicCalls(src) {
+  return NONDETERMINISTIC_CALLS.filter(([re]) => re.test(String(src ?? ''))).map(([, n]) => n);
+}
+
+/** run の1件を見る。**宣言が無ければ理由を返す。** */
+export function undeclaredNondeterminism(entry, src) {
+  const hits = nondeterministicCalls(src);
+  if (!hits.length) return null;
+  if (entry?.dated === true) return null;
+  if (typeof entry?.deterministic_why === 'string' && entry.deterministic_why.trim()) return null;
+  return `台帳の run「${entry?.cmd ?? '?'}」は ${hits.join(' / ')} を使う`
+    + ' — **出力がリポジトリの外で決まりうる。**再生成して比べる検査に載せる以上、'
+    + 'dated: true（日付が入る／その分ファイルの鮮度検査は効かなくなる）か '
+    + 'deterministic_why（日付が入らない理由）のどちらかを書くこと';
+}
+
+/**
  * 台帳が全部を挙げているかだけ見る。**木を触らない。**
  * 走らせない判断（never_run）も、理由つきで挙がっていることを要求する。
  */
@@ -121,6 +164,15 @@ export function validate(writers, doc, { exists = (f) => fs.existsSync(path.join
       problems.push(`台帳の run「${f}」に書き出す旗が無い`
         + ' — 直したなら台帳からも消す。旗を持たない書き手なら flagless: true を書く');
     }
+  }
+  // **時計・ネットに触る run は、宣言を書かせる。**（上の注記）
+  for (const g of doc.run || []) {
+    const f = g.cmd.split(' ')[0];
+    let src = null;
+    try { src = fs.readFileSync(path.join(ROOT, f), 'utf8'); } catch { /* 実在しないのは下で見る */ }
+    if (src === null) continue;
+    const why = undeclaredNondeterminism(g, src);
+    if (why) problems.push(why);
   }
   // 台帳が腐るのは旗ではなくファイルの消失で見る（never_run も含めて全部）。
   for (const [f] of listed) {
@@ -209,6 +261,29 @@ const SCENARIOS = [
   }],
   ['書き出す旗の無いスクリプトは挙げない', () => {
     assert(writersIn("argv.includes('--check')").length === 0, '--check を書き出しに数えた');
+  }],
+  ['**時計やネットに触る run は宣言が要る**', () => {
+    const e = { cmd: 'x.mjs --write' };
+    assert(undeclaredNondeterminism(e, 'const t = Date.now();'), 'Date.now() を素通しした');
+    assert(undeclaredNondeterminism(e, 'await fetch(u);'), 'fetch() を素通しした');
+    assert(undeclaredNondeterminism(e, 'execFileSync("git", a);'), '子プロセスを素通しした');
+    assert(undeclaredNondeterminism(e, 'new Date()'), 'new Date() を素通しした');
+  }],
+  ['宣言があれば通る（**落とすのではなく考えさせる**）', () => {
+    const src = 'const t = Date.now();';
+    assert(!undeclaredNondeterminism({ cmd: 'x', dated: true }, src), 'dated: true を通していない');
+    assert(!undeclaredNondeterminism({ cmd: 'x', deterministic_why: '中身が同じなら書かない' }, src),
+      'deterministic_why を通していない');
+  }],
+  ['**空の理由は理由ではない**', () => {
+    assert(undeclaredNondeterminism({ cmd: 'x', deterministic_why: '  ' }, 'Date.now()'),
+      '空白だけの理由を通した');
+    assert(undeclaredNondeterminism({ cmd: 'x', dated: 'yes' }, 'Date.now()'),
+      'dated が真偽値でないものを通した');
+  }],
+  ['触っていないものは挙げない（**宣言を儀式にしない**）', () => {
+    assert(nondeterministicCalls('const a = 1 + 2;').length === 0, '無関係なソースを挙げた');
+    assert(!undeclaredNondeterminism({ cmd: 'x' }, 'const a = 1;'), '触っていないのに宣言を要求した');
   }],
   ['**台帳に無い生成器は落ちる**', () => {
     const p = validate([{ file: 'scripts/x.mjs', flags: ['--write'] }], { run: [], never_run: [] }, { exists: () => true });

@@ -41,7 +41,8 @@
       "why": "配信原稿が参照する図。**ここが4日遅れて 18倍 と 9倍 が並んでいた**",
       "skipped_flags": {
         "--rebuild": "git履歴と隣リポジトリを読み直す。CIの浅いクローンでは系列が痩せる"
-      }
+      },
+      "deterministic_why": "子プロセスは git のみ（rev-parse / log）。**同じチェックアウトなら同じ履歴**なので出力は決まる。時計もネットも出力に入らない。**浅いクローンだけが結果を変える**が、それは assertFullHistory が別途落とす（2026-08-26 に実際に踏んだ：8点が2点に潰れた）"
     },
     {
       "cmd": "scripts/check-css-version.mjs --write",
@@ -71,7 +72,8 @@
       "writes": [
         "data/constants.json"
       ],
-      "why": "ストアの事実（版・評価）を注記つきで書く。実物との突き合わせは --net 側"
+      "why": "ストアの事実（版・評価）を注記つきで書く。実物との突き合わせは --net 側",
+      "deterministic_why": "**ずれがある回しか書かない。**iTunes Lookup を叩くが、live と台帳が一致していれば writeFileSync に到達しない。日付（Machine-verified ... on YYYY-MM-DD）は**中身が変わった回にだけ**入るので、同じ日に2回走らせても差分は出ない"
     },
     {
       "cmd": "scripts/code-authorship.mjs --write",
@@ -98,7 +100,8 @@
       "writes": [
         "growth/content/refresh-queue.json"
       ],
-      "why": "検索データを更新の待ち行列へ落とす"
+      "why": "検索データを更新の待ち行列へ落とす",
+      "deterministic_why": "子プロセスは同じリポジトリの analyze.mjs --json を node で呼ぶだけ。**外へは出ない**ので、入力が同じなら出力も同じ"
     },
     {
       "cmd": "growth/scripts/revenue-series.mjs --write",
@@ -106,7 +109,8 @@
         "data/revenue-series.json",
         "data/financial-policy.json"
       ],
-      "why": "収入の履歴と、方針側の日数。**2026-08-26 まで後半が一度も実行されていなかった**"
+      "why": "収入の履歴と、方針側の日数。**2026-08-26 まで後半が一度も実行されていなかった**",
+      "deterministic_why": "**中身が同じなら書かない。**todayJst() は synced_at に入るが、sameMirror() が synced_at を除いて比べ、差が無ければ writeFileSync に到達しない（2026-08-27 00:52 JST に、日付が回っただけで`--run` が落ちたのを直した回）。**隣（simplememo-ios）が無いCIではそもそも書かない**"
     },
     {
       "cmd": "growth/scripts/full-funnel.mjs --write",
