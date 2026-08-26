@@ -27,8 +27,8 @@
     "production": "本番の実行で実際に止まった（止めた対象が存在した）"
   },
   "measured_at": "2026-08-26",
-  "production_verified": 0,
-  "$production_verified": "**本番で止まることを確かめた仕組みは0件。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。",
+  "production_verified": 1,
+  "$production_verified": "**2026-08-26 訂正: 0 → 1。**flag-kill は 2026-08-22 に本番で実証済みだった（/admin/flags の history が証跡）。**この台帳を作った当日、実物を見ずに台帳の散文から0 と書いていた。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。",
   "mechanisms": [
     {
       "id": "emergency-stop-all",
@@ -115,9 +115,16 @@
           "by": "ai",
           "command": "wrangler dev（verify スキルの shim-entry 回避策）で本番と同じ src/index.ts を起動し、/admin/flags/set → /admin/flags/kill → GET /v1/config を実HTTPで通した",
           "observed": "訓練用フラグ drill_kill_probe を rollout 100 で作成 → /v1/config の rollouts に載る（killed は空）。kill を引くと killed:[\"drill_kill_probe\"] に入り、**rollout 100 はそのまま残った**（降ろせば元の配布率に戻る設計どおり）。kill を降ろすと killed が空に戻り、rollout 100 が復帰。認証ヘッダ無しの kill は **401**、存在しないフラグの kill は **404**（黙って作らない）。**副作用を1つ観測した**: このフラグに max_stale_seconds:300 を付けたところ、/v1/config 全体の max_stale_seconds が 86400 → 300 に落ちた（最短のフラグが全体を縛る設計）。フラグを削除すると 86400 に戻った。**『誰も読まないフラグは誰の挙動も変えない』は誤り** —— 短い max_stale を付けると全クライアントの再取得間隔が縮む"
+        },
+        {
+          "at": "2026-08-22",
+          "level": "production",
+          "by": "human",
+          "where": "本番 relay（Flag Ops workflow run #14〜#17）",
+          "observed": "**2026-08-26 に /admin/flags の history を読んで判明した。**`tf04_progress` を 14:44:53Z に rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布。実証後に rollout 0 へ戻す」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に killed: false → 15:01:10Z に rollout 0 へ戻し、description を**「kill の実証完了（2026-08-22）」**に書き換えている。作成→kill→解除→撤収がサーバ側の監査履歴にそのまま残っており、rollout 100 は kill 中も保存されていた。\n\n**端末側は確かめられていない。**残っているのはサーバの状態遷移で、実際に端末で機能がオフになったことを示す記録は無い（TestFlight での実証とあるので人は見た可能性が高いが、**見たという記録が無いものを見たことにしない**）。"
         }
       ],
-      "blocked_by": "本番で引くと利用者の機能が消えるので、AIは実行しない。**訓練用フラグを使えば影響を出さずに確かめられ、手順は docs/stop-drill-runbook.md §1 に置いた**（Flag Ops ワークフローで完結。鍵は GitHub Secrets にあるので手元に要らない）。実施はオーナー判断"
+      "blocked_by": null
     },
     {
       "id": "flag-global-kill",
@@ -158,9 +165,16 @@
           "level": "unit",
           "by": "ai",
           "observed": "test/rollout-guard.test.ts 24件が通る。起動完走率・送信成功率・エディタ→送信到達率のどれか1つでも割れたら止めること、凍結中でも kill は走ることを確かめている"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "where": "Flag Ops run #29（action: guard）",
+          "observed": "本番の判定を読んだ。cron は生きている（last_run_at 2026-08-26T04:00:01.777Z / decisions 30件 / promotion_frozen false / awaiting_approval 0）。最新判定は action: hold・executed: false で、理由は3指標すべて「サンプル不足（露出 12 / 対照 236 < 30）。判定していない（異常なしではない）」。**ガードは走っていて、正しく『判定していない』と言っている。**kill が出ていないのは対象が無いからではなく、判定に届いていないから"
         }
       ],
-      "blocked_by": "**段階公開中のフラグがゼロなので、発火する対象そのものが存在しない。**v5.8.1 でクライアント側は本番に載ったので、フラグを1つ段階公開に載せた時点で初めて発火しうる状態になる"
+      "blocked_by": "**「段階公開中のフラグがゼロ」は誤りだった（2026-08-26 訂正）。**`tf04_progress` が本番で **rollout 5%** で動いている（08-22 に 0% で定義 → 08-23 に 1% → 08-25 に 5%。5% へ上げた理由が description に「1% では露出3で判定に届かなかったため」と書いてある）。ガードも動いている —— last_run_at 2026-08-26T04:00:01Z、decisions 30件。\n\n発火しない本当の理由は**サンプル不足**。3指標とも judged: false で 「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」と返している（露出群は 5〜12 installs）。**待てば解けるものではない** —— 露出を上げるのは authority-matrix domain 16（不可逆・承認要）なので、人の判断が要る。"
     },
     {
       "id": "rollout-guard-freeze",
@@ -178,7 +192,7 @@
           "observed": "freeze.frozen のとき decide() が昇格を提案せず理由を返すこと、未配線の環境では frozen:false が返って**既存の挙動を変えない**ことがテストと実装に入っている"
         }
       ],
-      "blocked_by": "rollout-guard-kill と同じ。昇格する対象が無い"
+      "blocked_by": "**「段階公開中のフラグがゼロ」は誤りだった（2026-08-26 訂正）。**`tf04_progress` が本番で **rollout 5%** で動いている（08-22 に 0% で定義 → 08-23 に 1% → 08-25 に 5%。5% へ上げた理由が description に「1% では露出3で判定に届かなかったため」と書いてある）。ガードも動いている —— last_run_at 2026-08-26T04:00:01Z、decisions 30件。\n\n発火しない本当の理由は**サンプル不足**。3指標とも judged: false で 「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」と返している（露出群は 5〜12 installs）。**待てば解けるものではない** —— 露出を上げるのは authority-matrix domain 16（不可逆・承認要）なので、人の判断が要る。 凍結側は promotion_frozen: false で、理由は「daily-actions はドライランなので昇格に影響しない」（日次アクションエンジンが既定オフ）。"
     },
     {
       "id": "marketing-stoploss",

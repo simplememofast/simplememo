@@ -660,6 +660,36 @@
         ],
         "new_guardrail": "**訓練の記録には「何を観測したか」が要る**（「実行した」は観測ではない）。production を名乗るには日付と観測が要り、単体テストからは昇格できない。production に届いていない仕組みには**なぜ届いていないか**が要る（「まだ」は理由ではない）。公開文へ書く件数がずれたら落ちる。**次の一手も台帳に書いた** —— 誰の挙動も変えない訓練用フラグを1つ用意すれば、利用者に影響を出さずに flag-kill を本番で確かめられる"
       }
+    },
+    {
+      "id": "om-2026-08-26-ledger-outran-reality",
+      "seeded": false,
+      "area": "④ 自動本番デプロイ",
+      "signal": "オーナーから「なぜあなたが実行できないの？」と聞かれた。停止訓練を5手のボタン操作としてオーナーに渡していたが、**自分に dispatch 代行の権限があることを確かめていなかった**（authority-matrix domain 3 の ai_may に「人間が名指しで指示したときの dispatch 代行」と明記されている）",
+      "hypothesis": "承認を得たので、手順どおり訓練用フラグを作って kill を引けばよい",
+      "decision": "**実行の前に list を叩いた。**/admin/flags の history に、2026-08-22 の `tf04_progress` が「TestFlight で kill の実証を行うための一時配布」として作られ、killed: true → 解除 → 「**kill の実証完了（2026-08-22）**」と書き換えられて残っていた。**本番の kill は既に済んでいた。**さらに同じ応答から、`tf04_progress` が現在 **rollout 5% で稼働中**であることも分かった。訓練は中止した",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/stop-drills.json",
+          "data/automation-coverage.json",
+          "data/authority-matrix.json"
+        ]
+      },
+      "verification": "Flag Ops の list（run #28）と guard（run #29）を叩いた。guard は last_run_at 2026-08-26T04:00:01.777Z / decisions 30件 / promotion_frozen false を返し、最新判定は action: hold・executed: false、理由は3指標すべて「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」。**ガードは走っていて、正しく判定を保留している**",
+      "outcome": "**率は動かない。**停止機構の production を 0 → **1** に訂正し、rollout-guard 2件の blocked_by を「対象がゼロ」から「サンプル不足（露出 5〜12・判定には各群 30）」へ差し替えた。automation-coverage の④3行と authority-matrix domain 15 の note も同じ誤りを持っていたので直した。**本番のフラグは1つも触っていない**（訓練を中止したため）",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "i-copied-the-prose-i-was-warning-about",
+        "text": "**歯止めを作った当日に、その歯止めが指す誤りを自分で踏んだ。**\n\n同じ日に3回、「『無い』と書く前に自分が捨てていないか見る」「散文は agent を止めない」と記録した。そのうえで data/stop-drills.json を作るとき、**11件すべての blocked_by を台帳の散文から写した。**実物（/admin/flags と /admin/rollout-guard）は一度も叩いていない。結果、「本番で kill を1回も通していない」と「段階公開中のフラグがゼロ」の2つを、4日前の記述のまま新しい台帳へ複製した。\n\n**新しい台帳を作る作業は、古い記述を検証する機会でもある。**写す前に叩く。とくに「〜が無い」「〜していない」を写すときは、**それが観測なのか伝聞なのかを確かめる。**",
+        "changed": [
+          "data/stop-drills.json",
+          "data/automation-coverage.json",
+          "data/authority-matrix.json"
+        ],
+        "new_guardrail": "**stop-drills.json の各 blocked_by に、いつ・どこで確かめたかを持たせた**（rollout-guard の2件は Flag Ops run #29 の実測に差し替え済み）。加えて、この台帳が新設された経緯そのものを残す —— 停止機構の一覧を作るときは、**列挙より先に実物を1回ずつ叩く**。叩けないものは「叩けない」を blocked_by に書く（それが static 段階の意味）"
+      }
     }
   ]
 }
