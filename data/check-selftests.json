@@ -30,13 +30,32 @@
     "none が 0 になった日に、新しい検査はすべて selftest_only へ落ちるようになり、",
     "**そこに上限が無いので同じ滞留がひとつ下の段で始まる。**",
     "段を下ろしただけでは、止める力は移らない。selftest_only_budget を足した。",
-    "どちらの上限も実測値で、余裕は持たせていない。"
+    "どちらの上限も実測値で、余裕は持たせていない。",
+    "",
+    "【2026-08-26: 58/58 に到達】CI 配線の全検査について、**判定を壊すと自己テストが",
+    "落ちること**を観測した。やり方は「検査本体の判定だけを潰し、自己テストを走らせる」。",
+    "",
+    "**この工程で、計測器のほうを3回間違えた。**記録しておく ——",
+    "  1. 自己テスト自身の報告器（`const t = (n,c) => { if (!c) failures.push(n) }`）を",
+    "     潰していた。測っていたのは被験者ではなく計測器。4件が誤って「無反応」",
+    "  2. 境界に docstring 中の `--selftest` を使った。1行目付近にあるので",
+    "     **ほぼ何も潰さずに緑**が出た。2件が誤って「反応なし」",
+    "  3. 失敗の検出に `FAIL` の字面を使った。`✗` で出す検査を見落とし、",
+    "     2件が誤って「crash?」",
+    "どれも「測れていない」を「異常なし」と読む形で、**この工程が探していたものと同じ。**",
+    "",
+    "【0/0 が意味しないこと】**「検査が正しい」ではない。**",
+    "見たのは『壊れたら気づく』ことだけで、『見るべきものを見ている』かは別問題。",
+    "実際この工程では、落ちるのを見た検査のほうから穴が7件出ている",
+    "（抽出が0件でも all clean、面が消えても古い事実なし、等）。"
   ],
   "none_budget": 0,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "merge() が既存の状態を無視して観測をそのまま並べるようにすると、**「dropped は再生成で戻らない」が落ちる**ことを観測 —— 人が落とした行を機械の再生成が復活させる、権限境界の破れ"
     },
     {
       "script": "growth/scripts/check-data-quality.mjs",
@@ -58,7 +77,9 @@
     },
     {
       "script": "growth/scripts/check-stoploss.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "growth/lib/stoploss.mjs の evaluate() を常に continue にすると 16件中7件 落ちることを観測。**「大きく悪化したら revert」を含む** —— ここが効かないと、評価日までの悪化を誰も止めない"
     },
     {
       "script": "growth/scripts/d-score.mjs",
@@ -86,7 +107,9 @@
     },
     {
       "script": "scripts/ai-unit-cost.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "検査本体の problems.push を潰すと自己テストが4件落ちることを観測"
     },
     {
       "script": "scripts/automation-rate.mjs",
@@ -108,7 +131,9 @@
     },
     {
       "script": "scripts/autopilot-act.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "classify() が常に owner:\"ai\" を返すようにすると7件落ちることを観測。**7件すべてが「人の権限をAIが名乗る」方向**（may_modify 外／対象不明／force_owner／承認が要る領域／リポジトリ外／push できない対象が無人実行へ回る／why に誰が適用するか出ない）"
     },
     {
       "script": "scripts/autopilot-budget.mjs",
@@ -124,7 +149,9 @@
     },
     {
       "script": "scripts/autopilot-runs.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "検査本体の problems.push を潰すと 27件中7件 落ちることを観測（出荷したのに status JSON が前日のまま／status のほうが新しい／別の記事／スキップでも status を書かない／セッションの行が先行／source 未記入／**status JSON が読めないのは「問題なし」ではない**）"
     },
     {
       "script": "scripts/autopilot-selfheal.mjs",
@@ -206,11 +233,15 @@
     },
     {
       "script": "scripts/check-expiry.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "classify() を常に state:\"ok\" にすると9件落ちることを観測。発行元の検査（中間者・発行元不明は期限を返さない）も含む"
     },
     {
       "script": "scripts/check-feature-outcomes.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "検査本体の problems.push を潰すと自己テストが8件落ちることを観測"
     },
     {
       "script": "scripts/check-financial-policy.mjs",
@@ -286,7 +317,9 @@
     },
     {
       "script": "scripts/check-review-replies.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "検査本体の problems.push を潰すと自己テストが14件落ちることを観測"
     },
     {
       "script": "scripts/check-script-tags.mjs",
@@ -356,13 +389,17 @@
     },
     {
       "script": "scripts/recover-ingest.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "検査本体の problems.push を潰すと「検査が人の仕事の混入を見逃す」で落ちることを観測"
     },
     {
       "script": "scripts/review-intake.mjs",
-      "state": "selftest_only"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "検査本体の problems.push を潰すと自己テストが7件落ちることを観測"
     }
   ],
-  "$baseline": "2026-08-26 の実測。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない。初回 41 → 自己テストを入れるたびに下げ、同日に 0 へ到達した。**0 は「CI 配線の検査すべてが、壊して落ちるのを実際に見た」という意味であって、「検査が正しい」ではない。**残っているのは selftest_only 12本 —— 自己テストは書いてあるが、壊して落ちるのを観測していないもの。次はそこを 0 にする。上限が 0 になった以上、**自己テストの無い検査を CI へ足すと、その時点で落ちる。**",
-  "selftest_only_budget": 10
+  "$baseline": "2026-08-26 の実測。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない。初回 none=41 → 同日に none=0、続けて selftest_only=0 まで下げた。**両方 0 は「CI 配線 58 本すべてについて、壊して落ちるのを実際に見た」という意味であって、「検査が正しい」ではない。**見たのは『壊れたら気づく』ことだけで、『見るべきものを見ている』かは別問題。次に測るならそこ。",
+  "selftest_only_budget": 0
 }
