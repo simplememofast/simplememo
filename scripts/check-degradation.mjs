@@ -152,6 +152,51 @@ export const CROSS_REPO = {
 };
 
 /**
+ * 隣が見えるときに、**写しが実物と食い違っていないか**を確かめる。
+ *
+ * [2026-08-26] 写しは `sha256_12` と `bytes` をファイルごとに記録している。
+ * ところが判定は `present`（在る本数）しか読んでいなかった。
+ * **記録して読まない値は、記録していないのと同じ。**
+ *
+ * 効くのは片側だけである。CIのチェックアウトには隣が無いので、
+ * **食い違いを見つけられる場所は3リポジトリの揃ったここしかない。**
+ * ここで黙ると、CIは最大60日、実物と違う写しを「確かめた」として使い続ける。
+ * 60日の上限が守るのは古さであって、正しさではない。
+ *
+ * 存在のずれは落とす —— 写しの `present` が嘘になり、CIは作り話を検査する。
+ * 中身のずれは落とさず報告する —— 判定は存在で決まるので、隣を1行直すたびに
+ * サイトのCIが赤くなると `--sync` が機械的な儀式になる。
+ * **「写しが古い」と「写しが違う」を混ぜない。**
+ */
+export function snapshotDrift(id, spec, snapshot, root = ROOT) {
+  const base = path.join(root, '..', spec.repo);
+  if (!fs.existsSync(base)) return null; // 比べる相手がいない
+  const snap = snapshot?.probes?.[id];
+  if (!snap) return { missing: true, existence: [], content: [] };
+
+  const existence = [];
+  const content = [];
+  const byPath = new Map((snap.files || []).map((f) => [f.path, f]));
+  for (const rel of spec.files) {
+    const abs = path.join(base, rel);
+    const live = fs.existsSync(abs);
+    const rec = byPath.get(rel);
+    if (!rec) { existence.push(`${rel}: 写しに載っていない`); continue; }
+    if (live !== rec.exists) {
+      existence.push(`${rel}: 実物は${live ? '在る' : '無い'}が、写しは${rec.exists ? '在る' : '無い'}`);
+      continue;
+    }
+    if (!live) continue;
+    const buf = fs.readFileSync(abs);
+    const sha = crypto.createHash('sha256').update(buf).digest('hex').slice(0, 12);
+    if (buf.length !== rec.bytes || sha !== rec.sha256_12) {
+      content.push(`${rel}: 写し ${rec.bytes}b/${rec.sha256_12} → 実物 ${buf.length}b/${sha}`);
+    }
+  }
+  return { missing: false, existence, content };
+}
+
+/**
  * 代替の効きを確かめる実験。**文言ではなく振る舞い。**
  * 各 probe は { ok, detail } を返す。
  */
@@ -207,7 +252,8 @@ export const PROBES = {
     CROSS_REPO.device_outbox.files, CROSS_REPO.device_outbox),
 };
 
-export function validate(doc, probes = PROBES) {
+export function validate(doc, probes = PROBES, opts = {}) {
+  const { crossRepoSpecs = CROSS_REPO, snapshot = readSnapshot() } = opts;
   const problems = [];
   const rows = [];
   const used = new Set();
@@ -269,7 +315,26 @@ export function validate(doc, probes = PROBES) {
         + ' — 使われない実験は、覆っているように見えるだけで何も守っていない');
     }
   }
-  return { problems, rows, sources };
+
+  // 隣が見えるなら、**CIが使う写しが実物と合っているか**をここで確かめる。
+  // ここが唯一その比較ができる場所（CIには隣が無い）。
+  const drifts = [];
+  for (const [id, spec] of Object.entries(crossRepoSpecs)) {
+    const d = snapshotDrift(id, spec, snapshot);
+    if (!d) continue;
+    if (d.missing) {
+      problems.push(`${id}: 隣は見えているが、写しに項目が無い`
+        + ' — **この状態は隣の無いCIでだけ落ちる。**`--sync` して写しを作る');
+      continue;
+    }
+    for (const e of d.existence) {
+      problems.push(`${id}: 写しが実物とずれている（${e}）`
+        + ' — **CIはこの写しで判定する。**`--sync` して更新する');
+    }
+    if (d.content.length) drifts.push({ id, content: d.content });
+  }
+
+  return { problems, rows, sources, drifts };
 }
 
 /** 隣が揃っている場所で写しを更新する。**手で書かない。** */
@@ -325,6 +390,133 @@ export function sync(today = new Date()) {
   return { ok: true, doc };
 }
 
+// ── 自己テスト（**この検査が落ちることを確かめる**） ─────────────────
+//
+// ここが守っているのは「代替がある」という**文章**を振る舞いに突き合わせること。
+// 突き合わせが効かなくなると、台帳は自分で自分を保証する紙になる。
+//
+// 特に見ているのは**写しの扱い**で、この検査には非対称がある ——
+// CIには隣のリポジトリが無いので写しで判定し、隣が揃うこの場所では実物を見る。
+// つまり **写しが間違っていることを検出できる場所はここしかない。**
+const OK_VENDOR = {
+  id: 'v', breaks_if_down: '止まると困る',
+  fallback: '代替あり', fallback_probe: 'always_ok', degradation_probes: [],
+};
+const STUB = { always_ok: () => ({ ok: true, detail: 'ok' }) };
+const vdoc = (over = {}) => ({ vendors: [{ ...OK_VENDOR, ...over }] });
+const NO_CROSS = { crossRepoSpecs: {}, snapshot: null };
+const val = (doc, probes = STUB, opts = NO_CROSS) => validate(doc, probes, opts).problems;
+const hit = (problems, needle) => problems.some((x) => x.includes(needle));
+
+const SNAP_SPEC = CROSS_REPO.circuit_breaker;
+const liveSnapshot = () => JSON.parse(JSON.stringify(readSnapshot()));
+
+const SCENARIOS = [
+  ['実データが検査を通る', () => {
+    const doc = JSON.parse(fs.readFileSync(VENDORS, 'utf8'));
+    const { problems } = validate(doc);
+    if (problems.length) throw new Error(problems[0]);
+  }],
+  ['**代替を名乗るのに probe が無ければ落ちる**（一度も動かしたことのない代替は代替ではない）', () => {
+    const p = val(vdoc({ fallback_probe: null }));
+    if (!hit(p, 'fallback_probe が無い')) throw new Error(JSON.stringify(p));
+  }],
+  ['**代替も理由も無ければ落ちる**（「代替なし」と「考えていない」は別）', () => {
+    const p = val(vdoc({ fallback: null, fallback_probe: null, fallback_note: null }));
+    if (!hit(p, 'fallback_note が空')) throw new Error(JSON.stringify(p));
+  }],
+  ['単一障害点は落とさない（分かっていることは壊れていることではない）', () => {
+    // probe 集合も空にする。**代替を持たない事業者しか居ないなら、使われる probe も無い**
+    // ——ここで STUB を渡すと「誰も参照しない probe」で落ちる（実際に踏んだ）。
+    const p = val(vdoc({ fallback: null, fallback_probe: null, fallback_note: '代替なし。理由はこれ' }), {});
+    if (p.length) throw new Error(JSON.stringify(p));
+  }],
+  ['breaks_if_down が空なら落ちる', () => {
+    const p = val(vdoc({ breaks_if_down: '' }));
+    if (!hit(p, 'breaks_if_down が空')) throw new Error(JSON.stringify(p));
+  }],
+  ['**probe が未実装なら落ちる**（名前だけの代替を通さない）', () => {
+    const p = val(vdoc({ fallback_probe: 'そんな probe は無い' }));
+    if (!hit(p, '実装されていない')) throw new Error(JSON.stringify(p));
+  }],
+  ['**誰も参照しない probe は落ちる**（覆っているように見えるだけの死んだコード）', () => {
+    const p = val(vdoc(), { ...STUB, 誰も使わない: () => ({ ok: true, detail: '' }) });
+    if (!hit(p, 'どの事業者も参照していない')) throw new Error(JSON.stringify(p));
+  }],
+  ['**probe が false を返せば落ちる**（常に通る検査は何も見ていない）', () => {
+    const p = val(vdoc(), { always_ok: () => ({ ok: false, detail: '効かない' }) });
+    if (!hit(p, '代替が効かない')) throw new Error(JSON.stringify(p));
+  }],
+  ['**写しが実物と存在でずれたら落ちる**（CIはこの写しで判定する）', () => {
+    const snap = liveSnapshot();
+    snap.probes.circuit_breaker.files[0].exists = false;
+    const d = snapshotDrift('circuit_breaker', SNAP_SPEC, snap);
+    if (!d || !d.existence.length) throw new Error('存在のずれを検出しなかった');
+    const p = validate(vdoc(), STUB, { crossRepoSpecs: { circuit_breaker: SNAP_SPEC }, snapshot: snap });
+    if (!hit(p.problems, '写しが実物とずれている')) throw new Error(JSON.stringify(p.problems));
+  }],
+  ['**写しに項目が無ければ落ちる**（隣が見えているのに、CIでだけ落ちる状態）', () => {
+    const p = validate(vdoc(), STUB,
+      { crossRepoSpecs: { circuit_breaker: SNAP_SPEC }, snapshot: { probes: {} } });
+    if (!hit(p.problems, '写しに項目が無い')) throw new Error(JSON.stringify(p.problems));
+  }],
+  ['**中身のずれは落とさず報告する**（判定は存在で決まる。--sync を儀式にしない）', () => {
+    const snap = liveSnapshot();
+    snap.probes.circuit_breaker.files[0].sha256_12 = '000000000000';
+    const d = snapshotDrift('circuit_breaker', SNAP_SPEC, snap);
+    if (!d.content.length) throw new Error('中身のずれを検出しなかった');
+    if (d.existence.length) throw new Error('中身のずれを存在のずれとして数えた');
+    const r = validate(vdoc(), STUB, { crossRepoSpecs: { circuit_breaker: SNAP_SPEC }, snapshot: snap });
+    if (r.problems.length) throw new Error(`中身のずれで落ちた: ${r.problems[0]}`);
+    if (!r.drifts.length) throw new Error('報告もされない（**黙って通すのは駄目**）');
+  }],
+  ['写しが実物と合っていれば何も言わない（常に鳴る検査も何も見ていない）', () => {
+    const d = snapshotDrift('circuit_breaker', SNAP_SPEC, liveSnapshot());
+    if (d.missing || d.existence.length || d.content.length) throw new Error(JSON.stringify(d));
+  }],
+  ['隣が無いときは突き合わせない（比べる相手がいない）', () => {
+    const d = snapshotDrift('x', { repo: 'そんなリポジトリは無い', files: ['a'] }, liveSnapshot());
+    if (d !== null) throw new Error('隣が無いのに比べた');
+  }],
+  ['**隣も写しも無ければ落ちる**（判定できなかったを異常なしと呼ばない）', () => {
+    const r = crossRepo('x', 'そんなリポジトリは無い', ['a'], { snapshot: null });
+    if (r.ok || r.source !== 'none') throw new Error(JSON.stringify(r));
+  }],
+  ['**写しが上限より古ければ落ちる**（古い写しは、無い検査と同じ）', () => {
+    const old = { synced_at: '2020-01-01', probes: { x: { present: 1 } } };
+    const r = crossRepo('x', 'そんなリポジトリは無い', ['a'],
+      { snapshot: old, today: new Date('2026-08-26T00:00:00Z') });
+    if (r.ok || r.source !== 'stale') throw new Error(JSON.stringify(r));
+  }],
+  ['上限内の写しは通り、**写しで判定したと書く**（確かめたと混ぜない）', () => {
+    const fresh = { synced_at: '2026-08-24', probes: { x: { present: 1 } } };
+    const r = crossRepo('x', 'そんなリポジトリは無い', ['a'],
+      { snapshot: fresh, today: new Date('2026-08-26T00:00:00Z'), need: 'all', label: 'L' });
+    if (!r.ok || r.source !== 'snapshot') throw new Error(JSON.stringify(r));
+    if (!r.detail.includes('写し')) throw new Error(`写しだと書いていない: ${r.detail}`);
+  }],
+  ['**写しでも本数が足りなければ落ちる**（写しは判定を甘くしない）', () => {
+    const fresh = { synced_at: '2026-08-24', probes: { x: { present: 1 } } };
+    const r = crossRepo('x', 'そんなリポジトリは無い', ['a', 'b'],
+      { snapshot: fresh, today: new Date('2026-08-26T00:00:00Z'), need: 'all' });
+    if (r.ok) throw new Error('不足なのに通った');
+  }],
+  ['ageDays: 読めない日付は null（0日前にしない）', () => {
+    if (ageDays('だめな日付') !== null) throw new Error('null にならない');
+    if (ageDays('2026-08-20', new Date('2026-08-26T00:00:00Z')) !== 6) throw new Error('日数が合わない');
+  }],
+];
+
+if (process.argv.includes('--selftest')) {
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--sync')) {
@@ -342,7 +534,7 @@ if (isMain) {
   }
 
   const doc = JSON.parse(fs.readFileSync(VENDORS, 'utf8'));
-  const { problems, rows, sources } = validate(doc);
+  const { problems, rows, sources, drifts } = validate(doc);
   const n = (s) => rows.filter((r) => r.state === s).length;
 
   console.log('縮退運転 — **「代替がある」を実際に動かして確かめる**\n');
@@ -378,6 +570,16 @@ if (isMain) {
       console.log(`    写しは ${snap.synced_at} 時点（上限 ${SNAPSHOT_MAX_DAYS}日）。`
         + '3リポジトリが揃った場所で --sync して更新する');
     }
+  }
+
+  // **中身のずれは落とさないが、黙らない。**判定は存在で決まるので赤くはしない。
+  if (drifts?.length) {
+    console.log('');
+    console.log('  写しと実物で中身がずれている（判定は存在で決まるので落とさない）:');
+    for (const d of drifts) {
+      for (const line of d.content) console.log(`    ${d.id.padEnd(18)} ${line}`);
+    }
+    console.log('    → `--sync` すると、確かめた時点の記録が実物に揃う');
   }
 
   if (problems.length) {
