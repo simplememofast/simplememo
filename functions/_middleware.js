@@ -101,6 +101,7 @@ const UNSERVED_DATA = new Set([
   "feature-backlog.json",
   "feature-outcomes.json",
   "financial-policy.json",
+  "guard-shapes.json",
   "ingest-recovery.json",
   "injection-surface.json",
   "kpi-definitions.json",

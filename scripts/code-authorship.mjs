@@ -136,7 +136,16 @@ export function validateLedger(doc) {
     problems.push('AI分が合計を超えている');
   }
   // 原稿が使う数字は台帳から取る。**丸めた値を別に持たない。**
-  if (doc.headline && doc.headline.lines_rate_pct !== undefined) {
+  //
+  // [2026-08-26] ここは `doc.headline && doc.headline.lines_rate_pct !== undefined &&`
+  // だった。**headline の鍵を消すと突き合わせが丸ごと消える**（実測: 消して --check
+  // → exit 0）。この率（94.2%）は index.html / en/index.html / /autopilot/ と
+  // 配信原稿が引いている数字で、**正を消せば公開面が野放しになる。**
+  // #635 の `READY !== undefined &&` と同じ形。
+  if (!doc.headline || doc.headline.lines_rate_pct === undefined) {
+    problems.push('headline.lines_rate_pct が無い — **公開面が引く数字の正が消える。**'
+      + `実測は ${Number((rate(sum.lines_ai, sum.lines_total) * 100).toFixed(1))}%`);
+  } else {
     const want = Number((rate(sum.lines_ai, sum.lines_total) * 100).toFixed(1));
     if (Math.abs(doc.headline.lines_rate_pct - want) > 0.05) {
       problems.push(`headline.lines_rate_pct ${doc.headline.lines_rate_pct}% が実測 ${want}% と違う`);
@@ -149,6 +158,11 @@ export function validateLedger(doc) {
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 const SELFTEST_BREAKAGES = [
   ['**合計が内訳と一致しない**のは落ちる', (d) => { const k = Object.keys(d.total)[0]; d.total[k] = (d.total[k] || 0) + 12345; }],
+  // [2026-08-26] **正を消すと突き合わせも消える形**を固定する。
+  // 消して --check したら exit 0 だった（この率は公開面が引いている）。
+  ['**見出しの率の鍵を消すと落ちる**（正が無いのを「合っている」と読まない）',
+    (d) => { delete d.headline; }],
+  ['見出しの率が実測とずれれば落ちる', (d) => { d.headline.lines_rate_pct = 99.9; }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(LEDGER, 'utf8')),
