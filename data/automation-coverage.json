@@ -536,7 +536,7 @@
         "growth/scripts/ingest-asc.mjs",
         "growth/data/appstore/README.md"
       ],
-      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済み。**[2026-08-25] instance は 10/15 まで出ている**（08-23・08-24 の2日ぶん。asc_metrics.rb の reports_with_data）。**ただし取得側は1件も落とせていなかった** —— asc_analytics.rb の欠陥2件（schedule 実行で ASC_REPORTS が空文字になり取得対象が空／既定の語 \"Sales\" が156件のカタログに0件一致）で、**毎日0件を緑で出荷していた**（run 32844534637 の実ログ「取得対象 0 件（部分一致: ）」）。2026-08-25 に修正済みだが、**次回の定時実行までは依然として0件のまま。**この経路を ai_autonomous と数えているのは『日次で自動的に走ること』についてであって、『データが降りていること』についてではない（data/operating-memory.json om-2026-08-25-asc-zero）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・日付範囲・数値列の合計・名指しした分類列ごとの内訳だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）。**[2026-08-26] 内訳を足した** —— それまで保存していたのは数値列の合計だけで、`Cancellation Reason` のような文字列の列は**列名だけが残って中身は毎回捨てられていた**（om-2026-08-26-discarded-not-missing）",
+      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済み。**[2026-08-25] instance は 10/15 まで出ている**（08-23・08-24 の2日ぶん。asc_metrics.rb の reports_with_data）。**ただし取得側は1件も落とせていなかった** —— asc_analytics.rb の欠陥2件（schedule 実行で ASC_REPORTS が空文字になり取得対象が空／既定の語 \"Sales\" が156件のカタログに0件一致）で、**毎日0件を緑で出荷していた**（run 32844534637 の実ログ「取得対象 0 件（部分一致: ）」）。2026-08-25 に修正済みだが、**次回の定時実行までは依然として0件のまま。**この経路を ai_autonomous と数えているのは『日次で自動的に走ること』についてであって、『データが降りていること』についてではない（data/operating-memory.json om-2026-08-25-asc-zero）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・日付範囲・数値列の合計・名指しした分類列ごとの内訳だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）。**[2026-08-26] 内訳を足した** —— それまで保存していたのは数値列の合計だけで、`Cancellation Reason` のような文字列の列は**列名だけが残って中身は毎回捨てられていた**（om-2026-08-26-discarded-not-missing）\n\n**[2026-08-26] 読む側が付いた。**それまでこの行が指していたのは取得だけで、落ちてきた列のうち実際に読んでいたのは数値列の合計だけだった。`Event` / `Source Type` / `Page Type` / `Download Type` / `Territory` は**届いたまま毎日捨てていた**（⑨解約理由と同じ欠陥。名指しした分類列に③の分を入れ忘れていた）。取得側の内訳に③⑥の列を足し、読む側を ../simplememo-ios/scripts/asc_funnel.rb として日次に配線した（別行「ストア内漏斗の観測」）",
       "since": "2026-08"
     },
     {
@@ -731,6 +731,18 @@
       "executor": "nobody",
       "evidence": [],
       "note": "**サイト内のカニバリゼーション（1クエリ×複数URL）は実装済み**（growth/scripts/analyze.mjs --only cannibalisation。表示数のフロアつき）。**この行が指しているのは自社サイトとApp Storeページの間**で、そちらは未実装。同じクエリに両方が露出したときにどちらが食っているかを見ていない。**サイト内の分と混同しない**ため、行の題を SEOとASO間と明示してある。"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "ストア内漏斗の観測（表示→ダウンロード→利用）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/asc_funnel.rb",
+        "../simplememo-ios/scripts/lib/asc_reading.rb",
+        "../simplememo-ios/scripts/lib/asc_columns.rb",
+        "../simplememo-ios/.github/workflows/asc-analytics.yml"
+      ],
+      "note": "2026-08-26実装。日次で自動的に走り、人の承認を挟まない。ゲートは**どれも「言い過ぎ」を止める向き**。(1) **Apple の Event 名を先に決めない** —— 表示に当たる名前を当てられなければ率を出さず、観測した名前をそのまま出す（次に当てられるように）。このリポジトリは「上流の仕様を叩く前に書く」を3回繰り返しているので、同じことを別の領域でやり直さない (2) **窓が違うものを割らない** —— 分子（ダウンロード）と分母（ストア表示）は別のレポートから来る。date_range が一致しなければ率を出さない。1日ぶんを28日ぶんで割ると桁が変わる (3) 分母が 20 に届かなければ率を出さない（⑨と同じ下限）。self-test 23件\n\n**2026-08-26 時点で読めているのは利用だけ** —— Sessions 573 / Unique Devices 168 / Total Session Duration 47,223（これは数値列なので以前から合計に入っていた。**入っていたのに誰も読んでいなかった**）。表示・入口・地域は手元の取得結果が内訳を持つ前の版なので no_breakdown。**次の定時取得（毎日20:30 JST）で決まる。**利用の窓は不明（この取り込みは date_range を持たない）ので、**1セッションあたりの秒数を出していない**"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -1066,7 +1078,7 @@
         "../simplememo-api/src/analytics.ts",
         "../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md"
       ],
-      "note": "4回連続の定点評価"
+      "note": "4回連続の定点評価\n\n**[2026-08-26] ストア側の手前が繋がった。**この行が見ているのはアプリ内（インストール以降）で、その手前の「ストアで見られた → ダウンロードされた」はどこも見ていなかった。asc_funnel.rb がそこを読む（③の別行）。**まだ繋いでいない** —— 2つは別の窓・別の分母で、**繋ぐには同じ窓に揃える必要がある**（asc_funnel.rb は窓が違えば率を出さない）"
     },
     {
       "area": "⑥ アプリ運営意思決定",

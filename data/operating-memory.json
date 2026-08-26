@@ -568,6 +568,67 @@
         ],
         "new_guardrail": "網に入れた文書が**1つも照合対象を持たなければ落とす**（表記が変わって素通りするのを防ぐ）。突き合わせた件数を毎回出力する。配信本文を対象に加える一方、「わざと間違った数字を載せている」numbers.md と、日付つきの断面である automation-rate-2026-08.md は**意図して外し、理由をコードに書いた**（外した理由が残っていないと、次に誰かが足してしまう）"
       }
+    },
+    {
+      "id": "om-2026-08-26-allowlist-blindspot",
+      "seeded": false,
+      "area": "③ 自律型マーケティング",
+      "signal": "⑨のために足した「届いているのに読んでいない列」の**初回出力**が、10レポートぶんの列を挙げた —— Sessions / Total Session Duration / Unique Devices / Engagement Type / Unique Counts / Territory / Source Type / Campaign / Page Title。③ASO と ⑥意思決定 が「無い」と書いてきたものが含まれていた",
+      "hypothesis": "⑨の欠陥（文字列の列を捨てていた）は⑨に固有のもので、直したので終わり",
+      "decision": "**同じ欠陥が③と⑥にも掛かっていたと認めた。**内訳を足したときに名指ししたのは⑨に要る分類列だけで、③⑥の列は届いたまま毎日捨て続ける形になっていた。**一覧は、作った目的の外側を必ず取りこぼす**",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "539f8fa",
+        "files": [
+          "scripts/lib/asc_columns.rb",
+          "scripts/lib/asc_reading.rb",
+          "scripts/asc_funnel.rb",
+          ".github/workflows/asc-analytics.yml"
+        ]
+      },
+      "verification": "③⑥の列を一覧に足し、残った未読列は理由つきで除外（Source Info は**外部が入れた文字列**なので、読む前に扱いを決める）。読む側 asc_funnel.rb を日次に配線（self-test 23件）。**実データで既に Sessions 573 / Unique Devices 168 / Total Session Duration 47,223 が読めた** —— これは数値列なので以前から合計に入っており、**入っていたのに誰も読んでいなかった**",
+      "outcome": "③自律型マーケティング 63.3% → 64.5%（観測の行を1件追加）。総合自動化率 61.1% → 61.3%。**表示・入口・地域はまだ読めない**（手元の取得結果が内訳を持つ前の版）。利用の窓が不明なので**1セッションあたりの秒数は出していない**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "an-allowlist-misses-what-it-was-not-written-for",
+        "text": "**名指しの一覧は、書いた目的の外側を必ず取りこぼす。**⑨のために書いた一覧は⑨には正しく、③⑥には空だった。既定を「出さない」に倒すのは正しい（個人を絞れる列を黙って貯めないため）が、**倒したぶんだけ、載っていないものを見る手段が要る。**\n\n**そしてその手段は前の記録で作ったばかりだった。**om-2026-08-26-discarded-not-missing の歯止め（届いているのに読んでいない列を毎日出す）が、**足した当日にこれを指した。**散文で書いていたら、③も⑥も同じまま何か月か過ぎていた。",
+        "changed": [
+          "../simplememo-ios/scripts/lib/asc_columns.rb",
+          "../simplememo-ios/scripts/asc_funnel.rb",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "既存の歯止め（未読列の日次出力）をそのまま使う。**新しい歯止めは足していない** —— 足すのではなく、既にあるものが効いたことを記録するのがこの行の役目。加えて、内訳の値を公開リポジトリ側へ運ぶのをやめた（growth/scripts/ingest-asc.mjs は列名だけを運ぶ）"
+      }
+    },
+    {
+      "id": "om-2026-08-26-refactor-broke-wiring",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "共通部分を scripts/lib/asc_reading.rb へ出したあと、self-test は34件すべて通った",
+      "hypothesis": "self-test が全件通ったので、移動は挙動を変えていない",
+      "decision": "**通ったあとに実行もした。**出力が「取得結果が無い」に変わっていた —— `File.expand_path(\"../data/asc\", __dir__)` が lib/ で1段ずれ、`scripts/data/asc` を指していた。**self-test が固定していたのは純粋関数だけで、置き場所の解決は誰も見ていなかった**",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "539f8fa",
+        "files": [
+          "scripts/lib/asc_reading.rb",
+          "scripts/asc_subscription.rb",
+          "scripts/asc_funnel.rb"
+        ]
+      },
+      "verification": "パスを直し、**「置き場所ごと無い」を「まだ取得していない」と別の状態にした**（asc_dir_missing?）。前者は待っても直らないので exit 1。ASC_OUT_DIR=/nonexistent で exit 1、既定で exit 0 を確認。既定の置き場所が実在することを self-test にも入れた",
+      "outcome": "**率は動かない。**壊れていた時間は数分で、コミット前に見つかった。残ったのは、**同じ壊れ方をしたときに黙らない形**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "green-tests-do-not-prove-the-wiring",
+        "text": "**self-test が全件通ることは、実行が正しいことを意味しない。**固定していたのは純粋関数で、外界との接点（パス・環境変数・checkout）はどのテストも触っていなかった。移動は挙動を変えないという思い込みが、ちょうどその接点だけを壊した。\n\n**症状の出方が悪い。**壊れた結果は例外ではなく「データが無い」で、それはこの領域で毎日出る正常な状態と**同じ文面**だった。",
+        "changed": [
+          "../simplememo-ios/scripts/lib/asc_reading.rb",
+          "../simplememo-ios/scripts/asc_subscription.rb",
+          "../simplememo-ios/scripts/asc_funnel.rb"
+        ],
+        "new_guardrail": "「置き場所が無い」を独立した状態にして exit 1 にする（待てば直るものではない）。既定の置き場所が実在することを self-test で確かめる。**リファクタの後は self-test だけでなく実行の出力を見る**"
+      }
     }
   ]
 }

@@ -16,10 +16,13 @@
  * **名指しした分類列ごとの内訳**だけ。こちらもそれ以上は持たない。
  * **個人が特定できる列が将来増えたときに、気づかず貯め始めるのを防ぐ。**
  *
- * [2026-08-26] 内訳を運ぶようになった。それまで運んでいたのは数値列の合計だけで、
- * `Cancellation Reason` は文字列なので合計に入らず、**⑨解約理由分析が読むべき値が
- * 1件も届いていなかった**（列名だけが届いていた）。読む側は
- * growth/scripts/subscription-health.mjs。
+ * [2026-08-26] **内訳の値はここへ持ってこないと決めた。**
+ * 取得側は内訳を持つようになったが（`Cancellation Reason` は文字列なので
+ * 数値列の合計には入らず、⑨解約理由分析が読むべき値が1件も残っていなかった）、
+ * **このリポジトリは GitHub 上で公開されている。**契約者が1桁のいま、
+ * 解約理由や課金失敗の件数を公開側へ日次で積むのは「広げる」方向の変更になる。
+ * 読む側は非公開の ../simplememo-ios/scripts/asc_subscription.rb と asc_funnel.rb。
+ * ここが運ぶのは**内訳の列名だけ**で、値は持たない。
  *
  * 【⚠ CI ではこの検査はデータを見ていない】
  * seo-check.yml の checkout は**このリポジトリだけ**なので、CI 上に
@@ -67,7 +70,8 @@ export function normalize(src) {
   return {
     $comment: [
       'App Store Connect の取得結果（../simplememo-ios/data/asc から）。',
-      '**行そのものは持たない。**列名・行数・日付範囲・数値列の合計・分類列ごとの内訳だけ。',
+      '**行そのものは持たない。**列名・行数・日付範囲・数値列の合計だけ。',
+      '**分類列ごとの内訳の値は持たない**（このリポジトリは公開。読む側は simplememo-ios）。',
       'ここで新しい数字を作らない。向こうの集計をそのまま並べ替えている。',
     ],
     fetched_at: src.status.fetched_at,
@@ -80,11 +84,18 @@ export function normalize(src) {
       columns: r.columns,
       date_range: r.date_range ?? null,
       sums: r.sums,
-      // **内訳は運ぶだけ。**ここで足したり率にしたりしない。
-      // 取得側が古い版だと undefined になる。**{} に潰さない** ——
-      // 「内訳が無い」と「内訳が空」を同じ形にすると、読む側が
-      // 『解約理由が読めなかった』を『解約が無かった』と取り違える。
-      breakdown: r.breakdown ?? null,
+      // **内訳の値はこちらへ持ってこない。**列名だけ運ぶ。
+      //
+      // [2026-08-26] 一度は内訳をそのまま運んでいた。**置き場所として誤り。**
+      // このリポジトリは GitHub 上で公開されており（api.github.com が private: false。
+      // data/publication-policy.json の repository_is_public）、契約者が1桁のいま
+      // 解約理由や課金失敗の件数を公開側へ日次で積むのは「広げる」方向の変更になる。
+      // 読む側は非公開の ../simplememo-ios/scripts/asc_subscription.rb と
+      // asc_funnel.rb に移した（あちらは日次で実際に動く）。
+      //
+      // 列名だけ残すのは、**「内訳が届いていない」と「内訳はあるが読んでいない」を
+      // こちら側でも区別できるようにする**ため。値は持たない。
+      breakdown_dimensions: r.breakdown ? Object.keys(r.breakdown) : null,
     })),
   };
 }
