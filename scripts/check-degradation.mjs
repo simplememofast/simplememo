@@ -83,7 +83,14 @@ export function ageDays(iso, today = new Date()) {
 
 function readSnapshot() {
   if (!fs.existsSync(SNAPSHOT)) return null;
-  try { return JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8')); } catch { return null; }
+  try {
+    return JSON.parse(fs.readFileSync(SNAPSHOT, 'utf8'));
+  } catch (e) {
+    // 写しが壊れているのは「写しが無い」とは別。**無いなら作れと言えるが、
+    // 壊れているのは気づかないと直らない。**
+    throw new Error(`${SNAPSHOT} を読めない（${e.message}）`
+      + ' — 壊れた写しを「写しが無い」と同じ扱いにしない');
+  }
 }
 
 /**

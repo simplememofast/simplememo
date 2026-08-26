@@ -58,6 +58,14 @@ export function build() {
       by_task: Object.fromEntries(Object.entries(budget.by_task.kinds)
         .map(([k, v]) => [k, { spent: Number(v.spent.toFixed(4)), cap: v.cap, over: v.over }])),
       ccr_measured: budget.ccr_measured,
+      // **1回あたりの上限を判定できたか。**null は「超過なし」ではなく
+      // 「model-routing.json が読めず判定できなかった」。
+      // [2026-08-26] ここまで1枚はこの値を落としていた。autopilot-budget は
+      // 正しく null を返していて（「超過なしと混ぜると routing を消すだけで
+      // 上限が消える」）、**受け取る側が捨てていた。**
+      // 記録して読まない値は、記録していないのと同じ。
+      run_caps_judged: budget.run_caps !== null && budget.run_caps !== undefined,
+      run_caps_overruns: budget.run_caps?.overruns?.length ?? null,
     },
     lane_f_required: Boolean(heal.lane_f_required),
     unrepaired_failures: (heal.targets || []).map((r) => ({
@@ -108,6 +116,10 @@ export function verify(b, sources = null) {
     }
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date_jst || '')) problems.push(`date_jst が日付でない（${b.date_jst}）`);
+  if (typeof b.budget?.run_caps_judged !== 'boolean') {
+    problems.push('budget.run_caps_judged が真偽値でない'
+      + ' — **判定できたかどうかを1枚が持っていない**（null を「超過なし」と混ぜる形に戻っている）');
+  }
 
   // 2. 台帳が正であること。1枚の数字は、集計関数の返り値と一致する。
   const eq = (got, want, k) => {
@@ -183,6 +195,17 @@ if (process.argv.includes('--selftest')) {
       const b = build();
       if (typeof b.budget.ccr_measured !== 'boolean') throw new Error('ccr_measured が真偽値でない');
     }],
+    ['**1回上限を判定できたかを1枚が持つ**（null を「超過なし」と混ぜない）', () => {
+      const b = build();
+      if (typeof b.budget.run_caps_judged !== 'boolean') throw new Error('run_caps_judged が無い');
+    }],
+    ['**判定できていない1枚は verify が落とす**', () => {
+      const b = clone(build());
+      delete b.budget.run_caps_judged;
+      if (!verify(b).some((x) => x.includes('run_caps_judged'))) {
+        throw new Error('落とさなかった（**判定できなかったことを落として緑になる**）');
+      }
+    }],
     ['一致していれば何も言わない（常に鳴る検査も何も見ていない）', () => {
       if (verify(build()).length) throw new Error('素の1枚で鳴った');
     }],
@@ -221,6 +244,12 @@ if (isMain) {
     L.push(`    ${k.padEnd(10)} $${v.spent.toFixed(4)} / $${v.cap.toFixed(2)}${v.over ? '  **枠切れ**' : ''}`);
   }
   if (!b.budget.ccr_measured) L.push('    （副系の実費は0ではなく**未観測**）');
+  if (!b.budget.run_caps_judged) {
+    L.push('    **1回あたりの上限は判定できなかった**（model-routing.json が読めない）');
+    L.push('      — 「超過なし」ではない。routing を消すだけで上限が消える形を作らない');
+  } else if (b.budget.run_caps_overruns) {
+    L.push(`    1回上限の超過 ${b.budget.run_caps_overruns}件（未レビューがあれば主系は止まる）`);
+  }
   L.push('');
   if (b.unrepaired_failures.length) {
     L.push(`  ■ 未修理の故障 ${b.unrepaired_failures.length}件 — **記事より先にレーンFへ**`);

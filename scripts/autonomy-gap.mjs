@@ -454,7 +454,15 @@ export function blockedOnSatisfied(pred, { root = ROOT } = {}) {
   if (pred.contains) return hasText(abs, pred.contains);
   if (!pred.path) return true;
   let doc;
-  try { doc = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { return false; }
+  try {
+    doc = JSON.parse(fs.readFileSync(abs, 'utf8'));
+  } catch (e) {
+    // [2026-08-26] **ここは自分で書いた飲み込みだった。**壊れたファイルを
+    // 「まだ届いていない」と読むと、待ち続ける側へ倒れるので安全に見えるが、
+    // **壊れていることを誰も知らない。**判定できないことを、判定できたことにしない。
+    throw new Error(`${pred.file} を読めない（${e.message}）`
+      + ' — **届いたかどうかを判定できない。**「まだ」と混ぜない');
+  }
   const v = at(doc, pred.path);
   if (v === undefined || v === null) return false;
   if (pred.atLeast !== undefined) return typeof v === 'number' && v >= pred.atLeast;

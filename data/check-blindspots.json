@@ -1,0 +1,94 @@
+{
+  "$comment": [
+    "**「判定できなかった」を「異常なし」と報告する形**を、運ではなく機械で当たった記録。",
+    "",
+    "【なぜ】自己テストが 58/58 になっても、それは『壊れたら気づく』の証明であって",
+    "『見るべきものを見ている』の証明ではない。実際この工程では、",
+    "**落ちるのを見た検査のほうから穴が7件出ている。**そこで探し方を変えた。",
+    "",
+    "【やり方】scripts/lib/blindspot-scan.py",
+    "  1. fs.readFileSync を計装して、各検査が**実際に中身を読んだ**台帳を記録する",
+    "  2. その台帳を空にして走らせる → exit 0 なら「空でも緑」",
+    "  3. その台帳を壊して走らせる → exit 0 なら「壊れていても緑」",
+    "",
+    "【空でも緑 は欠陥とは限らない】欠測を報告のみにする設計は正しいことがある。",
+    "**壊れていても緑**のほうが強い信号 —— 構文エラーは「値が無い」ではなく「読めない」で、",
+    "既定値に落とすと縮退したまま静かに走り続ける。",
+    "",
+    "【計測器を2回間違えた】記録しておく。",
+    "  1. ソースにファイル名が現れるかで当てた → コメントの言及まで拾って 102 件",
+    "  2. existsSync も「読んだ」に数えた → evidence の存在確認まで拾って 116 件",
+    "どちらも**測る対象を間違えると、候補が本物に見える。**",
+    "読んだ中身だけに絞った実測が下の数字。",
+    "",
+    "**CI には載せていない。**全検査×全台帳を回すので10分近くかかる。",
+    "載せるなら、下の残り5件を名指しで回す形にする（それなら数十秒）。",
+    "載せていないことを、載せたことにしない。"
+  ],
+  "measured_at": "2026-08-26",
+  "method": "scripts/lib/blindspot-scan.py（fs.readFileSync を計装 → 空／壊して再実行）",
+  "before": {
+    "corrupt_but_green": 12,
+    "empty_but_green": 38
+  },
+  "after": {
+    "corrupt_but_green": 5,
+    "empty_but_green": 45
+  },
+  "$after_note": "壊れていても緑 が 12 → 5。空でも緑 が 38 → 45 に増えたのは、直した7件が**壊れたら落ちるが空では通る**へ移ったため（合計50は変わらない）。空で通ることは、それ自体は欠陥ではない",
+  "fixed": [
+    {
+      "script": "scripts/autopilot-act.mjs",
+      "ledger": "data/authority-matrix.json",
+      "was": "readJson(p, {}) が構文エラーを既定値に落としていた。**権限表が壊れていても --check は exit 0。**空の権限表では classify が全部 human を返すので安全側ではあるが、壊れていることを誰も知らない",
+      "now": "無い→既定、読めない→止める"
+    },
+    {
+      "script": "scripts/review-intake.mjs",
+      "ledger": "data/review-intake.json",
+      "was": "壊れた台帳を null に落とすと「まだ何も無い」と同じ扱いになる",
+      "now": "同上"
+    },
+    {
+      "script": "scripts/check-degradation.mjs",
+      "ledger": "data/crossrepo-probes.json",
+      "was": "壊れた写しを「写しが無い」と同じ扱いにしていた",
+      "now": "同上"
+    },
+    {
+      "script": "scripts/autonomy-gap.mjs",
+      "ledger": "blocked_on の述語が読むファイル",
+      "was": "**自分が同じ日に書いた飲み込み。**壊れたファイルを「まだ届いていない」と読んでいた",
+      "now": "判定できないことを、判定できたことにしない"
+    },
+    {
+      "script": "scripts/daily-brief.mjs",
+      "ledger": "data/model-routing.json",
+      "was": "autopilot-budget は正しく run_caps: null（判定できなかった）を返していたのに、**1枚がその値を捨てていた。**記録して読まない値は、記録していないのと同じ",
+      "now": "run_caps_judged を持ち、判定できなければ1枚に書く。通常時は超過件数も出す"
+    }
+  ],
+  "remaining_corrupt_but_green": [
+    {
+      "script": "scripts/autopilot-budget.mjs",
+      "ledger": "data/model-routing.json"
+    },
+    {
+      "script": "scripts/autopilot-runs.mjs",
+      "ledger": "data/autopilot-cost.json"
+    },
+    {
+      "script": "scripts/check-vendors.mjs",
+      "ledger": "data/credential-expiry.json"
+    },
+    {
+      "script": "scripts/daily-brief.mjs",
+      "ledger": "data/model-routing.json"
+    },
+    {
+      "script": "scripts/property-tests.mjs",
+      "ledger": "data/model-routing.json"
+    }
+  ],
+  "$remaining_note": "残り5件は未着手。autopilot-budget の run_caps は**設計として null を返している**（「超過なしと混ぜると routing を消すだけで上限が消える」）ので、壊れても緑なのは正しい —— 受け取る側が null を捨てていたのが問題で、そちらは直した。他の4件は同じ形かどうかを1件ずつ読んでから決める"
+}
