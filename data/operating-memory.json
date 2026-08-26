@@ -1,0 +1,782 @@
+{
+  "$comment": [
+    "運転記憶（Operating Memory）— **判断が次の判断を変えたことを、1レコードで示す台帳。**",
+    "scripts/check-operating-memory.mjs が検査する。",
+    "",
+    "【なぜ要るか】この運用には既に、判断の材料も結果も散らばって存在している。",
+    "  signal-ledger.json … 何が来たか",
+    "  experiments.json   … 何を試して、どう判定したか（マーケ施策のみ）",
+    "  autopilot-runs.json… いつ何が走ったか",
+    "  AUTOPILOT_LOG.md   … 経緯",
+    "**足りていないのは最後の1段。**「その結果を受けて、次の判断の仕方が",
+    "どう変わったか」が、どこにも構造化されていない。",
+    "",
+    "外部レビューの言い方を借りれば、①〜④だけなら Autopilot、⑤まで行けば",
+    "Closed-loop Autonomy、**⑥記憶と⑦方針改善まで行って初めて『再帰的』**と言える。",
+    "この台帳が持つのは⑥と⑦であって、それ以外ではない。",
+    "",
+    "【1レコードの必須要素】",
+    "  signal      … 何が起きたか（観測。人の勘ではない）",
+    "  hypothesis  … なぜ起きたと思ったか（**外れた仮説も消さない**）",
+    "  decision    … 何を変えると決めたか",
+    "  execution   … どのコミット/PR/ファイルを実際に変えたか",
+    "  verification… どう確かめたか",
+    "  outcome     … 何が起きたか（宣言ではなく観測）",
+    "  verdict     … 5値のどれか（下記）",
+    "  learning    … **次の判断をどう変えるか。changed に実在の成果物を書く**",
+    "",
+    "【verdict は5値。4値に潰さない】",
+    "  success            … 期待した方向に動いた",
+    "  failure            … 逆方向に動いた",
+    "  no_change          … 動かなかった（これも結果。失敗ではない）",
+    "  undecidable        … 測れたが、母数が足りず判断できない",
+    "  measurement_failed … **そもそも測れなかった**（基準値未記録・計装漏れ・取得断）",
+    "",
+    "**undecidable と measurement_failed を混ぜないこと。**",
+    "前者は待てば解ける。後者は待っても解けず、放置すると同じ施策で必ず再発する。",
+    "growth/experiments/experiments.json はこの2つを両方 `inconclusive` に入れており",
+    "（7件）、実際に『変更前のGSC値が記録されていない』案件がそこへ紛れている。",
+    "**その混同は、この台帳を作った直接の動機。**",
+    "",
+    "【lesson_key — 同じ失敗を2回学ばない】",
+    "learning には lesson_key を付ける。**同じ key が2回出たら検査が落ちる。**",
+    "2回目が出たということは、1回目の learning が成果物に効いていない",
+    "＝ ⑦方針改善が働いていない、ということなので、そこで気づけるようにする。",
+    "",
+    "【この台帳の限界（先に書く）】",
+    "  1. **後追いで書いている。**2026-08-25 の seed 6件は、当時のコミット・",
+    "     ジョブログ・台帳から再構成したもので、判断の瞬間に書かれたものではない。",
+    "     以後の行は発生時に書く。**seeded: true が付いているのが後追い分。**",
+    "  2. 網羅していない。**この期間の全判断ではなく、証跡を当てられた分だけ。**",
+    "     母数を主張に使わないこと（『判断の98%を記録』のような数字は出せない）。",
+    "  3. learning.changed は**ファイルが実在すること**しか検査できない。",
+    "     その変更が本当に効いたかは、次に同じ signal が来ないことでしか分からない。",
+    "  4. **seed 6件は判定が偏っている**（外した4 / 計測失敗2、効いた0）。",
+    "     これは『この運用が失敗ばかり』という意味ではなく、**後追いで証跡を",
+    "     当てられるのが、そもそも誤りを直した回だから**。うまくいった判断は",
+    "     コミットメッセージに経緯が書かれないので復元できない。",
+    "     **この偏りを『自己修正が働いている証拠』として使うのは正しいが、",
+    "     『成功率』の分母に使ってはいけない。**発生時記録（seeded:false）が",
+    "     溜まるまで、成功率という数字はこの台帳から出せない。"
+  ],
+  "seeded_at": "2026-08-25",
+  "verdicts": [
+    "success",
+    "failure",
+    "no_change",
+    "undecidable",
+    "measurement_failed"
+  ],
+  "records": [
+    {
+      "id": "om-2026-08-25-asc-zero",
+      "seeded": true,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "⑥売上照合と⑨マネタイズが『ASC未接続』のまま3日動かない。asc-analytics.yml は毎日緑で、status.json は ' 取得完了' と書いてコミットしていた",
+      "hypothesis": "Apple 側のレポート生成待ち（ONGOING 要求を 08-22 に作ったばかりなので、翌日以降に出るはず）",
+      "decision": "待つ前に、隣の asc_metrics.rb が同じ要求をどう見ているか突き合わせる",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "aad9a6c",
+        "files": [
+          "scripts/asc_analytics.rb",
+          ".github/workflows/asc-analytics.yml",
+          ".github/workflows/qa-static.yml",
+          "data/asc/README.md"
+        ]
+      },
+      "verification": "run 32844534637 の実ジョブログを取得（『取得対象 0 件（部分一致: ）』）／ asc_metrics.rb の reports_with_data: 10/15・instance 08-23,08-24 と対照／ 旧既定に戻すと self-test が3件落ちることを確認",
+      "outcome": "生成待ちではなかった。**データは2日前から出ていた。**取得側の欠陥2つで取りに行っていなかった。(1) schedule 実行で ASC_REPORTS が空文字になり、Ruby の \"\" が真なので既定に落ちず WANTED が空。(2) 既定の語 'Sales' が Analytics のレポート名156件中0件に一致（売上は 'App Store Purchases'）",
+      "verdict": "measurement_failed",
+      "learning": {
+        "lesson_key": "zero-result-needs-a-reason",
+        "text": "**0件を1語で書かない。**『取得完了』が0件と両立する書き方をした時点で、生成待ちと設定の誤りが同じ見た目になる。0件には必ず state を付け、待てば直るもの（pending）と待っても直らないもの（no_match / no_catalog）を分ける。隣の asc_metrics.rb は既にこの規律を持っていた —— **同じリポジトリの中で規律が伝播していなかった**ことが本当の問題",
+        "changed": [
+          "../simplememo-ios/scripts/asc_analytics.rb",
+          "../simplememo-ios/.github/workflows/asc-analytics.yml"
+        ],
+        "new_guardrail": "asc_analytics.rb --self-test（19件）を qa-static へ常設。『取得完了』と書けるのは fetched のときだけ、を検査が強制する。--verify-status は取得のコミット後に走り、設定の誤りだけ赤にする"
+      }
+    },
+    {
+      "id": "om-2026-08-25-mainline-misdiagnosis",
+      "seeded": true,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "主系の自律コンテンツ実行が 08-24・08-25 と2日連続で即時失敗（486ms / 1 turn / $0）",
+      "hypothesis": "2日とも1バイトも違わない＝flake ではない＝認証系（auth_or_credential）。日報はオーナーへ `claude setup-token` の再実行を最優先で求めた",
+      "decision": "推論で分類せず、3run分のジョブログを実測して対照する",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "01a5be5",
+        "pr": 568,
+        "files": [
+          "data/autopilot-runs.json"
+        ]
+      },
+      "verification": "run 32599191984(08-23 SHA 24dcd50c/CLI 2.1.240 → 出荷) / 32667079679(08-24 c81e3bc6/2.1.241 → 即時失敗) / 32779337325(08-25 同SHA → 即時失敗) / 32816234185(16b3b310/2.1.245 → 成功) の4本を並べた",
+      "outcome": "**誤診だった。**秘密鍵は一度も変えておらず、同じ鍵を使う run が通っている。失敗2回は upstream action の壊れた版（c81e3bc6 / CLI 2.1.241）を2回引いていた",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "identical-signature-is-not-auth",
+        "text": "『2日とも同一の数値＝flakeではない』は正しい。そこから『＝認証系』へ飛ぶのが誤り。**決定論的な startup 失敗も同一の数値を出す。**同一シグネチャが示すのは認証ではなく『依存が固定されていること』。分類は推論ではなくジョブログの対照で決める",
+        "changed": [
+          "data/autopilot-runs.json",
+          "scripts/autopilot-runs.mjs"
+        ],
+        "new_guardrail": "claude-code-action を SHA 16b3b310 へ pin（PR #569）。上流の版が黙って動くこと自体を止めた"
+      }
+    },
+    {
+      "id": "om-2026-08-25-subtitle-overclaim",
+      "seeded": true,
+      "area": "③ 自律型マーケティング",
+      "signal": "プレスリリースのヒーロー画像を生成しようとして generate-pr-hero.mjs に拒否された",
+      "hypothesis": "画像生成側の制約（文字数・レイアウト）に引っかかっただけ",
+      "decision": "拒否理由を台帳に当て直す",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "a430339",
+        "pr": 573,
+        "files": [
+          "data/pr-claims.json",
+          "docs/pr-autopilot-2026-09.md"
+        ]
+      },
+      "verification": "check-pr-claims.mjs で claim ごとの支持率を再計算（機能開発 60% / 循環 67%）",
+      "outcome": "**サブタイトルが本文より強かった。**旧文は『機能開発…までをAIが一気通貫で循環』で、本文 §3 が自分で『機能開発は分析と提案まで。通した実績はまだ無い』と否定している主張を、**いちばん人目に触れる画像へ焼き込むところだった**",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "headline-must-not-outrun-body",
+        "text": "見出し・サブタイトル・画像の文言は、本文より強くなりうる経路が別にある。**支持率不足を exit 1 にしていなかったので、CIは黙っていた。**画像生成という別の理由で偶然表に出ただけで、構造的には素通りする穴だった",
+        "changed": [
+          "data/pr-claims.json",
+          "scripts/check-pr-claims.mjs"
+        ],
+        "new_guardrail": "pr-claims.json に mode: ai_proposes を追加し、claim ごとに支持率と mode の整合を検査する。**ただし逆向きの誤り（実行できるのに『提案まで』と書き続ける過小申告）は、この検査では捕まらない** —— 記者に崩されないので落としていない"
+      }
+    },
+    {
+      "id": "om-2026-08-25-owner-request-backlog",
+      "seeded": true,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "毎朝オーナーへ送る日報のオーナー依頼が12件まで増え、うち6件は【解消済み】【完了】のまま再送されていた",
+      "hypothesis": "件数が多いのは、実際に依頼が多いから",
+      "decision": "依頼の持ち方そのものを見る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "8b1c648",
+        "pr": 154,
+        "files": [
+          "data/autopilot-actions.json",
+          "scripts/autopilot-act.mjs"
+        ]
+      },
+      "verification": "12件を1件ずつ state と close_check に当て直した",
+      "outcome": "依頼は status JSON の `owner_requests`、つまり**ただの string[]** に積まれていた。id も state も閉じ条件も無いので**解決しても消える理由が無い。**その日いちばん重要な1件（主系の認証failure）が、解決済み6件の中に埋まっていた",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-list-without-close-conditions-grows-until-unread",
+        "text": "閉じ条件を持たないリストは、**件数が増えるほど読まれる確率が下がる方向に働く。**『依頼が多い』ではなく『閉じられない構造』が原因。行が消えるのは close_check が実際に通ったときだけにする（人が消すのではない）",
+        "changed": [
+          "data/autopilot-actions.json",
+          "scripts/autopilot-act.mjs"
+        ],
+        "new_guardrail": "close_check は登録簿（autopilot-act.mjs の CLOSE_CHECKS）にあるものしか書けない。**台帳に任意のコマンドは書けない。**判定できないときは開いたままにする（閉じるほうへ倒さない）"
+      }
+    },
+    {
+      "id": "om-2026-07-31-macos-budget",
+      "seeded": true,
+      "area": "⑤ AI予算・トークン管理",
+      "signal": "2026-07-31、macOS ランナーが1日で $10 を消費。Actions 予算が枯れると release / release-command まで止まる（＝TestFlight配信もApp Review申請も止まる）",
+      "hypothesis": "ワークフロー冒頭の警告文（『トリガを追加するな』）で足りる",
+      "decision": "散文だけでは止まらないと判断し、機械的なゲートを足す",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "c19e319",
+        "pr": 225,
+        "files": [
+          ".github/workflows/qa-ios.yml",
+          "CLAUDE.md"
+        ]
+      },
+      "verification": "入力なし dispatch は GitHub が 422 で弾く（0分）／ 値違いは ubuntu の gate が落として macOS に入る前に止まる（約1分）",
+      "outcome": "警告文は『トリガを追加するな』しか書いておらず、**『トリガは足さないが1回だけ手で回す』を止められていなかった。**AIから届く dispatch 経路（MCP の actions_run_trigger）が塞がれていなかった",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "prose-does-not-stop-an-agent",
+        "text": "『やるな』と書いてあることと、できないことは違う。**費用が出る経路には、散文ではなく required 入力と照合ジョブを置く。**合言葉はリポジトリに書いてあるので錠前ではない —— 塞いでいるのは『読まずに回す』であって、読んだなら禁止に必ず当たる、という設計にする",
+        "changed": [
+          "../simplememo-ios/.github/workflows/qa-ios.yml",
+          "../simplememo-ios/CLAUDE.md"
+        ],
+        "new_guardrail": "confirm 入力（required・値は spend-macos-minutes）を追加。照合は ubuntu の gate ジョブが持ち、macOS の2ジョブは needs: gate。通した回は起動者と概算消費がジョブ要約に残る"
+      }
+    },
+    {
+      "id": "om-2026-08-09-title-test-no-baseline",
+      "seeded": true,
+      "area": "③ 自律型マーケティング",
+      "signal": "/apple-watch/ のタイトル変更実験（title-2026-07-01-001）を評価しようとした",
+      "hypothesis": "front-loaded なタイトルは、掲載順位が変わらないまま CTR を上げる",
+      "decision": "評価日（2026-07-29）に GSC を引いて前後比較する",
+      "execution": {
+        "repo": "simplememo",
+        "pr": 367,
+        "commit": "33d44f51",
+        "files": [
+          "growth/experiments/experiments.json"
+        ]
+      },
+      "verification": "GSC スナップショット 2026-08-09 を取得",
+      "outcome": "**比較できなかった。**変更前の GSC 値が記録されていなかった。現状 imp 954 / CTR 2.10% / pos 7.5 は取れたが、これが変更の効果かどうかは言えない",
+      "verdict": "measurement_failed",
+      "learning": {
+        "lesson_key": "no-baseline-no-experiment",
+        "text": "**基準値を記録する前に変更してはいけない。**この案件は experiments.json 上 `inconclusive` に入っているが、『測れたが母数が足りない』のではなく『そもそも測っていない』。前者は待てば解け、後者は待っても解けない。**同じ台帳の同じ語に入れると、待てば解けると誤解する**",
+        "changed": [
+          "data/feature-outcomes.json",
+          "data/operating-memory.json",
+          "growth/experiments/experiments.json",
+          "scripts/check-feature-outcomes.mjs"
+        ],
+        "new_guardrail": "verdict を5値にし、measurement_failed を undecidable から分離した。experiments.json 側の `inconclusive` 7件は、この観点で当て直しが要る（未了 —— data/autopilot-actions.json の act-experiments-verdict-split） **[2026-08-25 追記] この規律は機能側に効いていなかった。**growth 側だけに基準値の検査を置いた結果、機能は指標を宣言しないまま出荷され続けていた（v5.8.0 / v5.8.1 とも宣言なし）。data/feature-outcomes.json と scripts/check-feature-outcomes.mjs で同じ規律を機能側へ移した —— declared_at <= shipped_at の強制と、基準の数字が無い『効いた／外した』の禁止。**同じ lesson_key で2件目を作らず、1件目の歯止めを広げた** —— 2件に分けると『学んだことが2つある』ように見えるが、実際は1つの学習が届いていなかっただけ。"
+      }
+    },
+    {
+      "id": "om-2026-08-25-shallow-rebuild",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "棚卸しへ13件足したら自律度の推移の検査が落ちた。検査は『終点 61.3% が現在値 58.6% と一致しない — `node scripts/autonomy-timeline.mjs --rebuild` を実行して同じコミットに含めること』と、直し方まで名指しした",
+      "hypothesis": "検査が指示したとおり --rebuild すれば直る",
+      "decision": "指示どおり --rebuild を実行した",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/autonomy-timeline.mjs",
+          "data/autonomy-timeline.json"
+        ]
+      },
+      "verification": "再計算の出力（『再計算: 2 点』）と、系列の表示を目視。git rev-parse --is-shallow-repository で環境を確認。--depth 1 の clone を作って再現",
+      "outcome": "**指示どおりに直したら壊れた。**7点あった系列（2026-02〜08）が2点（2026-07, 2026-08）になった。この作業ツリーは浅いクローン（51コミット・2026-08-22まで）で、証跡ファイルの初出月を git log から取る再計算が、**クローンに無い5か月を丸ごと落とした。**さらに悪いことに、**--check はその2点の系列を通した** —— 終点は現在値と一致し、points.length >= 2 も満たすため。`git fetch --unshallow`（726コミット・2026-01-30まで）してから再実行して7点に戻した",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-repair-instruction-must-state-its-preconditions",
+        "text": "**検査が直し方を名指しするなら、その手順の前提条件も検査が持たないといけない。**『--rebuild を実行せよ』は、完全な履歴があるときだけ正しい。前提が崩れた環境で同じ指示に従うと、指示に従ったのに壊れる。そして今回は**壊れたことを検査自身が見逃した**（終点だけを見ていたため）。**出力の一点ではなく、形の連続性を検査する。**欠けた月は『何も無かった』ではなく『見られていない』",
+        "changed": [
+          "scripts/autonomy-timeline.mjs",
+          "data/autonomy-timeline.json"
+        ],
+        "new_guardrail": "rebuild() の先頭で浅いクローンを検出して throw する（`git fetch --unshallow` を促す）。--check 側は月の連続性を検査し、初回リリース月より後から始まる系列も落とす。--depth 1 のクローンで実際に throw することと、月を1つ抜いた系列が落ちることの両方を確認済み"
+      }
+    },
+    {
+      "id": "om-2026-08-25-asc-landed",
+      "seeded": false,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "取得側の欠陥2件を直したが、**直したことと降りたことは別**。閉じ条件を scripts/check-asc-landed.mjs に置いて開いたままにしてあった（act-asc-analytics-landed）",
+      "hypothesis": "欠陥2件（空文字の取得対象／カタログに当たらない語）が原因のすべてなら、修正版を回せば降りるはず。**外れていれば、まだ別の原因がある**",
+      "decision": "次の定時実行（約24時間後）を待たず、修正がまだ main に無いのでブランチ ref で workflow_dispatch する。ubuntu・GETのみ・出荷物を動かさない経路なので、実費と不可逆性の両面で回してよいと判断した",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "d35402a",
+        "files": [
+          "data/asc/2026-08-25/*.json",
+          "data/asc/status.json"
+        ]
+      },
+      "verification": "run 32856685354 のジョブログ（`状態: partial / 利用可能 156 件 / 選定 15 件 / 取得 10 件`）と、降りた10ファイルの中身。下流の growth/scripts/ingest-asc.mjs と scripts/check-asc-landed.mjs が exit 0 になることを確認",
+      "outcome": "**降りた。**課金（Purchases 1 / Proceeds in USD 2.59 / Sales in USD 3.05 / Paying Users 1）、解約イベント（Event Group・Event Name を持つ4行）、継続状態（101行・Counts 188）、ダウンロード（1,819）、ストア内接触（3,621 / ユニーク 2,624）、セッション（573 / 端末168）。**欠陥2件が原因のすべてだった。**残り5レポートは Apple の生成待ちで state は partial（＝正しく緑）",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "fix-then-verify-not-fix-then-assume",
+        "text": "**閉じ条件を「変えた」ではなく「効いた」に置いたから、ここで検証が起きた。**もし『欠陥を修正した』でアクションを閉じていたら、次の定時実行が失敗しても誰も見ておらず、原稿には『配線済み』とだけ残った。**この1件は、⑦方針改善の最初の実例でもある** —— 実費の節約策に対して既に持っていた規律（次の実測で閉じる）を、別領域へ移して適用した",
+        "changed": [
+          "scripts/check-asc-landed.mjs",
+          "data/autopilot-actions.json",
+          "../simplememo-ios/scripts/asc_metrics.rb"
+        ],
+        "new_guardrail": "降りたデータで sales_block の記述の誤りがもう1つ見つかった（入金額は salesReports にしか無い、が誤り）。**2回続けて『取れない』と書いて2回とも取れた**ので、APIの限界は叩いてから書く、を明記し、未確認の差分は未確認と書くようにした"
+      }
+    },
+    {
+      "id": "om-2026-08-25-experiments-heterogeneous",
+      "seeded": false,
+      "area": "③ 自律型マーケティング",
+      "signal": "マーケ stop-loss を実装し、初回実行で1件が『戻せ』と出た —— aio-2026-08-11-answer-blocks（/blog/memo-app-security-comparison）で「CTR 13.53% → 1.70%、相対87.4%低下、95%区間が重ならない」",
+      "hypothesis": "実際に CTR が壊滅している。評価日（2026-11-11）を待たずに戻すべき",
+      "decision": "出す前に、その実験の定義そのものを読んで裏を取る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "growth/lib/ledger.mjs",
+          "growth/scripts/check-stoploss.mjs",
+          "growth/lib/stoploss.mjs"
+        ]
+      },
+      "verification": "experiments.json の当該レコードと、growth/data/gsc/2026-08-09・2026-08-11 の当該ページ行を突き合わせた。進行中21件の target_metric を列挙した",
+      "outcome": "**偽陽性だった。**あの baseline はそのページのGSCではなく『ブランド検索14クエリ合計(可視分)』で、target_metric は brand_search_impressions、窓は 2026-05-09..08-08。実験のノートは「クリックはこの面では発生しないため指標にしない」「判定はクリックではなくブランド検索表示数・AIO表示数で行う」と明記していた。**別のものを測っている行を、CTR として比べていた。**進行中21件の target_metric は8種類あり、baseline の出どころも GSC / GA4 / ブランド検索 / AI引用数とばらばら",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "experiments-ledger-is-heterogeneous",
+        "text": "**台帳の行が同じ形をしていることと、同じものを測っていることは違う。**この思い込みは**1セッションで2回**起きた —— 1回目は hasBaseline を GSC の4欄で書いて GA4起点の実験2件を『基準値なし』と誤判定、2回目がこの偽陽性。どちらも『experiments.json の行は均質』という前提から来ている。**前提は使う場所ごとに書かず、1箇所に閉じ込める**",
+        "changed": [
+          "growth/lib/ledger.mjs",
+          "growth/scripts/check-stoploss.mjs"
+        ],
+        "new_guardrail": "measuresPageCtr() を growth/lib/ledger.mjs に置き、対象抽出をそこだけに集約した。self-test で brand_search_impressions・複数ページ集合・GA4起点の3種が対象に入らないことを固定。**そして stop-loss が掛かるのは進行中21件のうち7件だけ**であることを、台帳の note に明記した —— 3分の1にしか掛かっていない歯止めを『マーケに stop-loss がある』と読ませない"
+      }
+    },
+    {
+      "id": "om-2026-08-25-revenue-connected",
+      "seeded": false,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "ASC の課金データが降りたので、financial-policy.json の revenue_connected（人が判断すると権限表が定めていた欄）を false から動かせる状態になった。オーナーが「権限付与します」と委譲した",
+      "hypothesis": "データが降りた以上、true にすればよい",
+      "decision": "true にする前に、その真偽値が何を開けるかを読む",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/financial-policy.json",
+          "scripts/check-financial-policy.mjs",
+          "growth/scripts/ingest-asc.mjs"
+        ]
+      },
+      "verification": "check-financial-policy.mjs の validate を5パターンで実行（現状 / 収入だけで runway / 手元資金も接続し履歴1日 / 全部揃う / cash_on_hand_connected 欠落）。ingest-asc.mjs は隣が見えない場合と本物の矛盾の2パターンで exit コードを確認",
+      "outcome": "**true にする作業そのものが、歯止めを1つ外す作業だった。**ランウェイの禁止は `!revenue_connected` だけを見ており、その値がずっと false だったから成立していた。収入を接続した瞬間、収入と手元資金の両方が要るはずの月数が**片方だけで通る**ようになる。さらに、素直に true にすると **CI が落ちる**ことも分かった —— seo-check.yml の checkout はこのリポジトリだけなので隣が見えず、ingest-asc が「true と言っているのにデータが無い」と判定していた",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "connecting-an-input-can-disarm-the-guard-that-depended-on-its-absence",
+        "text": "**「まだ無い」ことに依存している歯止めは、それが埋まった日に静かに外れる。**この歯止めは間違って書かれていたのではなく、**書かれた時点では正しかった。**入力を1つ繋ぐときは、その入力が false であることを前提にしている検査を先に洗い出す。真偽値1つに複数の条件を潰していると、この失効が見えない",
+        "changed": [
+          "scripts/check-financial-policy.mjs",
+          "data/financial-policy.json",
+          "growth/scripts/ingest-asc.mjs"
+        ],
+        "new_guardrail": "revenue_connected / cash_on_hand_connected / 収入の履歴日数 の3つを分け、runway は足りない材料を名指しして落とす。cash_on_hand_connected 欄そのものが無い場合も落とす（欄を消せば元の穴に戻るため）。ingest-asc は「隣が見えない」と「隣は在るがデータが無い」を分け、前者では落とさない"
+      }
+    },
+    {
+      "id": "om-2026-08-25-entity-form",
+      "seeded": false,
+      "area": "⑦ 法人経営",
+      "signal": "freee のプランを尋ねたら「スターターのはず」と返ってきた。スターターは freee 会計の個人事業主向けプラン名（スターター/スタンダード/プレミアム）で、法人向けの名前ではない",
+      "hypothesis": "個人事業主なのではないか。だとすれば corporate-obligations の未把握6件のうち3件（法人税の要否・決算期12/31・消費税）が一度に埋まる",
+      "decision": "埋める前に本人へ確認する（**推測では埋めない**と明示して聞いた）",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/corporate-obligations.json",
+          "../simplememo-api/docs/freee-setup.md"
+        ]
+      },
+      "verification": "オーナーの回答（「ひとり法人プランでした」）。ひとり法人プランが法人新プランに付帯するものであることを検索で確認。社会保険の発生条件も一次記述に当てた",
+      "outcome": "**推測が外れていた。**法人（ひとり法人）で、ひとり法人プランは単独のプランではなく法人新プランに付帯するもの。**聞かずに埋めていたら、法人税の行を『該当せず』、決算期を『12/31』と書いていた。**\n\nそして確認の過程で、**台帳の前提そのものの誤りが1件見つかった。**social-insurance の行は「従業員がいるかどうか。いなければこの行は不要」としていたが、法人では社会保険（健保・厚年）と労働保険（雇用・労災）で発生条件が違う。前者は**役員報酬が出ていれば従業員ゼロでも加入義務が生じる。**旧文のままだと、ひとり法人を not_applicable に倒しかねなかった",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-proxy-is-not-the-thing-it-stands-for",
+        "text": "**製品のプラン名は事業形態の証拠にならない。**「スターター」から個人事業主を導いたのは、SaaSの商品名という代理指標を、法的な事業形態そのものと取り違えたもの。**同じ取り違えが台帳の中にも埋まっていた** —— 「従業員の有無」を社会保険の有無の代理にしていた行がそれで、法人ではその代理が成り立たない。**代理指標で埋めた欄は、代理が成り立つ範囲を併記しないと、後から見て区別できなくなる**",
+        "changed": [
+          "data/corporate-obligations.json",
+          "../simplememo-api/docs/freee-setup.md"
+        ],
+        "new_guardrail": "corporate-obligations.json に entity 欄を足し、形態・確認日・確認者・出どころを持たせた。**そのうえで「形態が分かったことと期限が分かったことは別」と明記** —— 決算期は定款にあり、形態からは出てこない。social-insurance の行は社会保険と労働保険で条件が違うことを書き分け、**判断は税理士・社労士の領域だとして台帳では確定させない**"
+      }
+    },
+    {
+      "id": "om-2026-08-25-data-dir-public",
+      "seeded": false,
+      "area": "⑪ データ・プライバシー",
+      "signal": "⑦法人経営の欄を埋める作業で、役員報酬の有無を data/corporate-obligations.json に書き込んだ。その直後、資本金も同じファイルへ入れようとした",
+      "hypothesis": "台帳は内部の記録なので、事実を足していけばよい",
+      "decision": "入れる前に、そのファイルがどこから読めるのかを確かめる",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "_redirects",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "_headers / _redirects / .gitignore に data/ の除外が無いことを確認。サイトの HTML から実際に参照されている data ファイルを走査（6件）。34件との差を数えた",
+      "outcome": "**内部の記録ではなかった。**Cloudflare Pages はリポジトリの中身をそのまま配信し、除外設定は無い。`data/*.json` は**34件すべてが公開されていた。**サイトが意図して参照しているのは6件だけで、残り28件は静的ホスティングの副作用。その中に credential-expiry.json（**どんな資格情報が存在するかの一覧**）、injection-surface.json（**攻撃面の棚卸し**）、vendor-register.json（依存の地図）が含まれていた。**どれも秘密の値そのものは持っていないが、「何があるか」の地図である。**そして自分が数十分前に、登記事項ではない情報（役員報酬の有無）をそこへ確認せずに置いていた",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "static-hosting-publishes-by-default-not-by-choice",
+        "text": "**「内部の台帳」は置き場所の性質であって、ファイルの名前や意図では決まらない。**静的ホスティングは既定で全部配信する。除外を書かない限り、`data/` に置いた時点で公開したことになる。**公開の可否を、ホスティングの既定に決めさせない。**この運用は他のほぼ全ての値に「台帳と実装がずれたら落ちる」検査を持っていたのに、**そもそもどれが外から読めるのかを誰も持っていなかった**",
+        "changed": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "_redirects"
+        ],
+        "new_guardrail": "data/*.json を全件分類する方針ファイルを作り、**新しいファイルは分類するまで CI が落ちる**（既定を非公開に倒す）。非公開のものは _redirects で 404 にし、方針とブロックのずれも落とす。public と書いたのにサイトから参照されていないものも落とす（参照が消えたのに公開のまま忘れられるのを防ぐ）。self-test 9件"
+      }
+    },
+    {
+      "id": "om-2026-08-25-queue-crosses-ledgers",
+      "seeded": false,
+      "area": "③ 自律型マーケティング",
+      "signal": "自律コンテンツループが消化しているのは coverage-queue だけで、refresh / new は 2026-08-09 の生成時のまま消化0件。検出（analyze.mjs --only unanswered）は動いているのに、出力を待ち行列へ落とす経路が無かった",
+      "hypothesis": "分析の出力を待ち行列に書き出せばよい。dropped/done を key で引き継げば、人の判断は守れる",
+      "decision": "再生成を実装し、書き込む前に試走して差分を見る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "growth/scripts/build-queues.mjs",
+          "growth/content/refresh-queue.json",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "試走の出力を1件ずつ当たった。第1位の着地ページを experiments.json と突き合わせ、--depth 1 相当の再現（self-test 17件）で固定した",
+      "outcome": "**同じ台帳の中だけでは足りなかった。**試走の第1位（`line キープメモ サービス終了`・期待6.1クリック）の着地先 `/blog/line-keep-alternative` は、**別の台帳**（experiments.json）で 2026-08-11 に abandoned と判定済みだった —— クエリが確認型で、タイトルが既に答えを出しているため検索者は押す必要が無い、という結論。growth/lib/ledger.mjs は `abandoned` をまさにこの事例のために作ったと書いている（「inconclusive は誰かがデータを足して再実行することを誘う」）。**待ち行列を素直に作り直すと、その判定を跨いで同じページが最優先で戻ってくるところだった**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-decision-in-one-ledger-must-bind-another",
+        "text": "**台帳を分けると、片方の判断がもう片方から見えなくなる。**dropped/done を同じファイルの中で引き継ぐだけでは足りない —— 到達不能という判定は experiments.json にあり、待ち行列はそれを知らずに積み直す。**判断は観測より新しい情報なので、観測の側が譲る。**この運用が lesson_key で守っている『同じことを2回学ばない』は、1つの台帳の中だけでなく**台帳の間**でも要る",
+        "changed": [
+          "growth/scripts/build-queues.mjs",
+          "growth/content/refresh-queue.json"
+        ],
+        "new_guardrail": "build-queues が experiments.json の abandoned を読み、そのページへ着地する観測を積まない（どの実験の判断かを出力に残す）。dropped/done は key で引き継ぎ、観測から消えた行は削除せず stale にする（直ったのか窓から外れたのか区別できないため）。手作りの行（origin 無し）は機械が触らない"
+      }
+    },
+    {
+      "id": "om-2026-08-25-review-reply-boundary",
+      "seeded": false,
+      "area": "⑧ カスタマーサポート",
+      "signal": "⑧カスタマーサポートが50%で止まっており、内訳は「受け口も分類も台帳もあるが、返信だけが無い」。App Store レビュー返信は ASC API で技術的には可能",
+      "hypothesis": "APIがあるのだから、返信の自動投稿を作れば率が上がる",
+      "decision": "**投稿から作らない。**先に承認境界と、公開してよい文面の条件を作る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/check-review-replies.mjs",
+          "data/review-replies.json",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "実レビュー2件に下書きを当てて通ることを確認。次いで(1)期日の約束 (2)メールアドレスの混入 (3)承認なしの投稿記録 の3つを実際に入れて、いずれも exit 1 になることを確認。self-test 18件",
+      "outcome": "**率は上がらなかった。**⑧は nobody → ai_proposes になったが、ai_proposes は総合自動化率の分子に入らないので 59.9% のまま（カバー率 84.5%→85.0% / AI関与率 88.0%→88.1%）。**これは失敗ではなく、選んだ結果。**投稿を自律にすれば率は上がったが、レビュー返信は書いた相手だけでなくストアを見る全員に対する会社の発言で、取り消しても見た人が見なかったことにはならない。**ASC への POST はどこにも実装していない**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "build-the-boundary-before-the-actuator",
+        "text": "**機構を先に作り、実行を後から足す。**逆にすると承認境界が後付けになり、「動くものがあるのだから通そう」という圧力の下で設計することになる。今回それが具体的に効いたのは下書きの検査で —— 期日の約束・個人情報・禁止表現は、**投稿する経路が無いうちに条件として書けた。**率が動かないことを理由に順序を変えない",
+        "changed": [
+          "scripts/check-review-replies.mjs",
+          "data/review-replies.json"
+        ],
+        "new_guardrail": "承認なしの posted_at と、**AIを承認者にした記録**を落とす（spend-approvals と同じ規律）。公開の場での期日・版の約束、個人情報、禁止表現を下書きの時点で落とす。文字数は2,000字 —— 業界で言われる5,970は**Appleの公式仕様ではなく有志の実測**なので、公表されていない上限の際どいところを狙わない設計にした"
+      }
+    },
+    {
+      "id": "om-2026-08-26-discarded-not-missing",
+      "seeded": false,
+      "area": "⑨ マネタイズ",
+      "signal": "⑨マネタイズが13領域で最下位（12.5%）。台帳の「解約理由分析」は「中身に解約理由が含まれるかは、まだ落とせていないので未確認」で止まっていた",
+      "hypothesis": "Apple 側が解約理由をくれないのだろうから、アプリ内で理由を聞く導線を作るしかない",
+      "decision": "**導線を作る前に、自分が何を捨てているかを見た。**取得結果の columns を開いたら `Cancellation Reason` が Subscription Event / State のどちらにも入っていた —— **前日の取得で既に届いていた。**読めなかったのは asc_analytics.rb が数値列の合計しか保存せず、文字列である解約理由が合計対象に入らなかったため。列名だけが残り、中身は毎回捨てられていた",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "a21531d / f1df904 / c1cc126",
+        "files": [
+          "scripts/asc_analytics.rb",
+          "scripts/asc_subscription.rb",
+          "scripts/lib/asc_columns.rb",
+          ".github/workflows/asc-analytics.yml"
+        ]
+      },
+      "verification": "取得側に名指しの分類列×名指しの測定列の内訳を足し（self-test 26→38件）、読む側を asc_subscription.rb として日次に配線（self-test 34件）。**ただし手元の取得結果は内訳を持つ前の版なので、読みは 0/3 で no_breakdown。**値が実際に読めるかは次の定時実行（毎日20:30 JST）で決まる",
+      "outcome": "⑨マネタイズ 12.5% → 22.2%（観測の行を1件足し、gated 1→2 / 8→9タスク）。総合自動化率 60.8% → 61.1%。**「解約理由が読める」はまだ達成していない。**達成したのは「読めない理由が7状態で機械から返る」ところまでで、次の取得で all_blank（Apple 側で任意項目なので空欄のほうが普通）になる可能性は残る。その場合はアプリ内導線が要る、という結論自体は変わらない —— **変わったのは、それを推測ではなく観測から言えるようになったこと**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "absent-upstream-or-discarded-here",
+        "text": "**「無い」と書く前に、自分が捨てていないかを見る。**上流がくれないのか、こちらが落としているのかは、外から見ると同じ「無い」に見える。今回は保存の形（数値列だけ合計する）が、文字列の列を全部捨てていた。\n\n**これは3回目である。**om-2026-08-25-asc-landed が「2回続けて『取れない』と書いて2回とも取れた」ので「APIの限界は叩いてから書く」を**散文で**明記していた。翌日に3回目が出たということは、散文が効かなかったということ。この台帳には `prose-does-not-stop-an-agent` が既にある。**同じ学びを2度書くのではなく、機械にした。**",
+        "changed": [
+          "../simplememo-ios/scripts/asc_analytics.rb",
+          "../simplememo-ios/scripts/asc_subscription.rb",
+          "../simplememo-ios/scripts/lib/asc_columns.rb",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "**届いているのに読んでいない列を、日次の要約に毎回出す**（asc_subscription.rb の unread_columns）。次に「Apple はXをくれない」と書こうとしたとき、その日の要約に X が並んでいる状態にする。意図して読まない列は理由つきで除外し、毎日同じ行を並べて読まれなくなるのを防ぐ。初回の出力で Sessions / Total Session Duration / Unique Devices / Engagement Type / Unique Counts / Territory / Campaign / Page Title が「届いていて読んでいない」と出た —— ③ASO と⑥意思決定が「無い」と書いてきたものが含まれる"
+      }
+    },
+    {
+      "id": "om-2026-08-26-serving-is-not-privacy",
+      "seeded": false,
+      "area": "⑪ データ・プライバシー",
+      "signal": "⑨の読み（解約理由・課金失敗の件数）をどこに置くか決めるため、data/publication-policy.json の分類を見た。30件が `public: false` で _redirects により 404 になっていた",
+      "hypothesis": "404 にしてあるのだから、それらは非公開。契約の読みも同じ扱いにすれば置ける",
+      "decision": "**置く前に確かめた。**api.github.com/repos/simplememofast/simplememo が `private: false` を返す —— **このリポジトリは GitHub 上で公開されている**（simplememo-ios / simplememo-api は非公開）。つまり _redirects の 404 も functions/_middleware.js の遮断も、止めているのはサイト経由の閲覧だけで、同じファイルは GitHub 上で誰でも読める。`public: false` という名前が事実と違っていた",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "functions/_middleware.js",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "真偽値を `served_by_site` に改名（37件）。`repository_is_public` を実測と突き合わせる検査を足し、REPO_PRIVATE=false で通り true で exit 1 になることを確認。**否定は script 側で三値のまま行う** —— YAML で `!private` を計算すると、値が空のとき `!'' === true` になり、観測していない実行が「公開」を名乗る。self-test 9→17件",
+      "outcome": "**率は上がらない。**⑪データ・プライバシーの分類は変えていない（実行者は変わっていないため）。変わったのは、⑨の読みの置き場所がこの発見で決まったこと —— サイト側（公開）ではなく simplememo-ios 側（非公開）に置いた。**2026-08-25 に役員報酬を公開ディレクトリへ置いた件（om-2026-08-25-data-dir-public）の手当ては 404 化だったが、それでは非公開になっていなかった。**あの記録の outcome は、いま読むと強すぎる",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "blocking-a-path-is-not-making-it-private",
+        "text": "**経路を塞ぐことと、非公開にすることは別。**404 が止めるのは、サイト経由の閲覧・検索エンジンの索引・中間キャッシュであって、内容そのものではない。リポジトリが公開なら、同じファイルは別の経路で読める。\n\n**危険なのは、対策を打ったつもりで穴が残ること。**しかも今回、穴の存在を隠していたのは**真偽値の名前**だった（`public: false`）。名前が事実と違うと、コードを読んでも気づけない。",
+        "changed": [
+          "data/publication-policy.json",
+          "scripts/check-publication.mjs",
+          "functions/_middleware.js"
+        ],
+        "new_guardrail": "`repository_is_public` を方針に持ち、CI が github.event.repository.private の実測値と突き合わせる（リポジトリを非公開にしたときも、公開に戻したときも落ちる）。**観測値が渡ってこない実行では照合しない** —— 照合できなかったことを「一致」と書かない。真偽値は `served_by_site` に改名し、「非公開」を意味しないことを名前で示す"
+      }
+    },
+    {
+      "id": "om-2026-08-26-guard-coverage",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "⑨の実装で台帳が動いたので公開ページの検査（scripts/check-autopilot-page.mjs）を回したら、見出しの4つだけ不一致として出た。**同じページの領域別13行は「一致」とも「不一致」とも言われなかった**",
+      "hypothesis": "見出しが合っていれば、同じページの他の数字も同じ作業で直されているはず",
+      "decision": "**表の13行を手で台帳と突き合わせた。**9行がずれており、⑤AI予算はページ 86.7% に対し台帳 76.5%（10ポイント）。さらに、記者に実際に渡る `docs/pr-autopilot-2026-09-body.md` は総合自動化率 58.6% のまま（台帳 61.1%）で、**検査の対象ファイルにすら入っていなかった**",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/check-autopilot-page.mjs",
+          "autopilot/index.html",
+          "docs/pr-autopilot-2026-09-body.md"
+        ]
+      },
+      "verification": "領域別の全行と、配信本文の見出し・表・到達点を検査に足した。突き合わせる数字は 4件 → 38件。ずれを入れて exit 1 になること、台帳に無い領域名で落ちること、Markdown の表と `<b>` の両方を読めることを self-test で固定（6→16件）",
+      "outcome": "**率は上がらない。**⑩の分類は変えていない。変わったのは、公開ページ13行と配信本文12か所が台帳と一致することを機械が言えるようになったこと。**この検査自体が 2026-08-25 に「一番人目に触れる公開ページだけが網の外にあった」という理由で作られたもの**で、そのとき網に入れたのは見出しの4数字だけだった。1日で同じ穴の内側にもう一段の穴が見つかった形",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-guard-that-matches-nothing-is-not-a-pass",
+        "text": "**検査が「不一致なし」と言うとき、何件を見て言ったのかを併せて出す。**正規表現に当たらなければ0件照合でも緑になる —— それは「一致した」ではなく「見ていない」。\n\n細かいほうがずれるのは偶然ではない。**見出しは目に入るので直されるが、表の13行目は誰も見ない。**そして記者が1つ選んで聞いてくるのは、目に入らないほうから選ばれる（数が多いので確率もそちらが高い）。",
+        "changed": [
+          "scripts/check-autopilot-page.mjs",
+          "autopilot/index.html",
+          "docs/pr-autopilot-2026-09-body.md"
+        ],
+        "new_guardrail": "網に入れた文書が**1つも照合対象を持たなければ落とす**（表記が変わって素通りするのを防ぐ）。突き合わせた件数を毎回出力する。配信本文を対象に加える一方、「わざと間違った数字を載せている」numbers.md と、日付つきの断面である automation-rate-2026-08.md は**意図して外し、理由をコードに書いた**（外した理由が残っていないと、次に誰かが足してしまう）"
+      }
+    },
+    {
+      "id": "om-2026-08-26-allowlist-blindspot",
+      "seeded": false,
+      "area": "③ 自律型マーケティング",
+      "signal": "⑨のために足した「届いているのに読んでいない列」の**初回出力**が、10レポートぶんの列を挙げた —— Sessions / Total Session Duration / Unique Devices / Engagement Type / Unique Counts / Territory / Source Type / Campaign / Page Title。③ASO と ⑥意思決定 が「無い」と書いてきたものが含まれていた",
+      "hypothesis": "⑨の欠陥（文字列の列を捨てていた）は⑨に固有のもので、直したので終わり",
+      "decision": "**同じ欠陥が③と⑥にも掛かっていたと認めた。**内訳を足したときに名指ししたのは⑨に要る分類列だけで、③⑥の列は届いたまま毎日捨て続ける形になっていた。**一覧は、作った目的の外側を必ず取りこぼす**",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "539f8fa",
+        "files": [
+          "scripts/lib/asc_columns.rb",
+          "scripts/lib/asc_reading.rb",
+          "scripts/asc_funnel.rb",
+          ".github/workflows/asc-analytics.yml"
+        ]
+      },
+      "verification": "③⑥の列を一覧に足し、残った未読列は理由つきで除外（Source Info は**外部が入れた文字列**なので、読む前に扱いを決める）。読む側 asc_funnel.rb を日次に配線（self-test 23件）。**実データで既に Sessions 573 / Unique Devices 168 / Total Session Duration 47,223 が読めた** —— これは数値列なので以前から合計に入っており、**入っていたのに誰も読んでいなかった**",
+      "outcome": "③自律型マーケティング 63.3% → 64.5%（観測の行を1件追加）。総合自動化率 61.1% → 61.3%。**表示・入口・地域はまだ読めない**（手元の取得結果が内訳を持つ前の版）。利用の窓が不明なので**1セッションあたりの秒数は出していない**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "an-allowlist-misses-what-it-was-not-written-for",
+        "text": "**名指しの一覧は、書いた目的の外側を必ず取りこぼす。**⑨のために書いた一覧は⑨には正しく、③⑥には空だった。既定を「出さない」に倒すのは正しい（個人を絞れる列を黙って貯めないため）が、**倒したぶんだけ、載っていないものを見る手段が要る。**\n\n**そしてその手段は前の記録で作ったばかりだった。**om-2026-08-26-discarded-not-missing の歯止め（届いているのに読んでいない列を毎日出す）が、**足した当日にこれを指した。**散文で書いていたら、③も⑥も同じまま何か月か過ぎていた。",
+        "changed": [
+          "../simplememo-ios/scripts/lib/asc_columns.rb",
+          "../simplememo-ios/scripts/asc_funnel.rb",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "既存の歯止め（未読列の日次出力）をそのまま使う。**新しい歯止めは足していない** —— 足すのではなく、既にあるものが効いたことを記録するのがこの行の役目。加えて、内訳の値を公開リポジトリ側へ運ぶのをやめた（growth/scripts/ingest-asc.mjs は列名だけを運ぶ）"
+      }
+    },
+    {
+      "id": "om-2026-08-26-refactor-broke-wiring",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "共通部分を scripts/lib/asc_reading.rb へ出したあと、self-test は34件すべて通った",
+      "hypothesis": "self-test が全件通ったので、移動は挙動を変えていない",
+      "decision": "**通ったあとに実行もした。**出力が「取得結果が無い」に変わっていた —— `File.expand_path(\"../data/asc\", __dir__)` が lib/ で1段ずれ、`scripts/data/asc` を指していた。**self-test が固定していたのは純粋関数だけで、置き場所の解決は誰も見ていなかった**",
+      "execution": {
+        "repo": "simplememo-ios",
+        "commit": "539f8fa",
+        "files": [
+          "scripts/lib/asc_reading.rb",
+          "scripts/asc_subscription.rb",
+          "scripts/asc_funnel.rb"
+        ]
+      },
+      "verification": "パスを直し、**「置き場所ごと無い」を「まだ取得していない」と別の状態にした**（asc_dir_missing?）。前者は待っても直らないので exit 1。ASC_OUT_DIR=/nonexistent で exit 1、既定で exit 0 を確認。既定の置き場所が実在することを self-test にも入れた",
+      "outcome": "**率は動かない。**壊れていた時間は数分で、コミット前に見つかった。残ったのは、**同じ壊れ方をしたときに黙らない形**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "green-tests-do-not-prove-the-wiring",
+        "text": "**self-test が全件通ることは、実行が正しいことを意味しない。**固定していたのは純粋関数で、外界との接点（パス・環境変数・checkout）はどのテストも触っていなかった。移動は挙動を変えないという思い込みが、ちょうどその接点だけを壊した。\n\n**症状の出方が悪い。**壊れた結果は例外ではなく「データが無い」で、それはこの領域で毎日出る正常な状態と**同じ文面**だった。",
+        "changed": [
+          "../simplememo-ios/scripts/lib/asc_reading.rb",
+          "../simplememo-ios/scripts/asc_subscription.rb",
+          "../simplememo-ios/scripts/asc_funnel.rb"
+        ],
+        "new_guardrail": "「置き場所が無い」を独立した状態にして exit 1 にする（待てば直るものではない）。既定の置き場所が実在することを self-test で確かめる。**リファクタの後は self-test だけでなく実行の出力を見る**"
+      }
+    },
+    {
+      "id": "om-2026-08-26-stop-drills",
+      "seeded": false,
+      "area": "④ 自動本番デプロイ",
+      "signal": "④が53.3%で、上の領域と比べて低い。しかし内訳を見ると**残る非ゲート行はすべて意図的な境界**だった（提出・実機確認・公開・kill・タグ作成）。カバー率は100%で、未実装は0件",
+      "hypothesis": "低い領域なので、どれかを gated に上げれば率が上がる",
+      "decision": "**上げなかった。**上げるには境界を渡すしかなく、それは numbers.md が「人間専任19件のうち11件をAIに渡すと境界が消える」と警告している行為そのもの。代わりに、**率を上げずに強くできるところ**を探した —— 台帳の note が既に「本番で kill を1回も通していない（止まることを確かめていない停止機構は無いのと同じ）。**次に確かめるべきはこれ**」と名指ししていた。**散文で。**",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/stop-drills.json",
+          "scripts/check-stop-drills.mjs",
+          ".github/workflows/seo-check.yml",
+          "data/automation-coverage.json"
+        ]
+      },
+      "verification": "止める仕組み11件を列挙し、確かめた段階を static / unit / local / production に分けた（self-test 20件）。**そのうえで実際に訓練を4件走らせた** —— 緊急停止（全体）は obsidian-autopilot.yml の『緊急停止の確認』step と**同じ node -p 式**を複製台帳に対して通し、STOP='all:訓練: 全体停止が効くか' で exit 1・::warning に理由が出ることを観測。経路別も同様に STOP='actions:…' で止まった。予算ゲートは複製した scripts/data に対し**本番と同じ `node scripts/autopilot-budget.mjs --check`** を実行し、$45.04 / 上限 $40.00 で exit 1 と警告文を観測。**本番の台帳は一切触っていない**",
+      "outcome": "**率は下がった。**④ 53.3% → 52.9%、総合 61.3% → 61.1%（分母が194→196）。停止機構の棚卸しで、やるべきことが2件増えたため。**実装が減ったのではない。**得たのは「止める仕組みは11ある。**本番で止まることを確かめたのは0件**」という、機械が数える1行。うち4件は local まで上がった",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "passing-is-not-proof-of-stopping",
+        "text": "**通ったことは、止まることの証明にならない。**auto-merge は毎日動いていて直近30件のPRを全部マージしているが、それは「検証で止められた回が0件」でもある。止める仕組みの動作確認は、**止まった実例でしか取れない。**\n\nそして率で測れない領域がある。④は非ゲート行がすべて意図的な境界なので、**率を上げる＝境界を渡す**になる。低い数字を見て上げに行くと、この領域では設計を壊す方向にしか動けない。**数字が動かないことを理由に、動かしてはいけないものを動かさない。**",
+        "changed": [
+          "data/stop-drills.json",
+          "scripts/check-stop-drills.mjs",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "**訓練の記録には「何を観測したか」が要る**（「実行した」は観測ではない）。production を名乗るには日付と観測が要り、単体テストからは昇格できない。production に届いていない仕組みには**なぜ届いていないか**が要る（「まだ」は理由ではない）。公開文へ書く件数がずれたら落ちる。**次の一手も台帳に書いた** —— 誰の挙動も変えない訓練用フラグを1つ用意すれば、利用者に影響を出さずに flag-kill を本番で確かめられる"
+      }
+    },
+    {
+      "id": "om-2026-08-26-ledger-outran-reality",
+      "seeded": false,
+      "area": "④ 自動本番デプロイ",
+      "signal": "オーナーから「なぜあなたが実行できないの？」と聞かれた。停止訓練を5手のボタン操作としてオーナーに渡していたが、**自分に dispatch 代行の権限があることを確かめていなかった**（authority-matrix domain 3 の ai_may に「人間が名指しで指示したときの dispatch 代行」と明記されている）",
+      "hypothesis": "承認を得たので、手順どおり訓練用フラグを作って kill を引けばよい",
+      "decision": "**実行の前に list を叩いた。**/admin/flags の history に、2026-08-22 の `tf04_progress` が「TestFlight で kill の実証を行うための一時配布」として作られ、killed: true → 解除 → 「**kill の実証完了（2026-08-22）**」と書き換えられて残っていた。**本番の kill は既に済んでいた。**さらに同じ応答から、`tf04_progress` が現在 **rollout 5% で稼働中**であることも分かった。訓練は中止した",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/stop-drills.json",
+          "data/automation-coverage.json",
+          "data/authority-matrix.json"
+        ]
+      },
+      "verification": "Flag Ops の list（run #28）と guard（run #29）を叩いた。guard は last_run_at 2026-08-26T04:00:01.777Z / decisions 30件 / promotion_frozen false を返し、最新判定は action: hold・executed: false、理由は3指標すべて「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」。**ガードは走っていて、正しく判定を保留している**",
+      "outcome": "**率は動かない。**停止機構の production を 0 → **1** に訂正し、rollout-guard 2件の blocked_by を「対象がゼロ」から「サンプル不足（露出 5〜12・判定には各群 30）」へ差し替えた。automation-coverage の④3行と authority-matrix domain 15 の note も同じ誤りを持っていたので直した。**本番のフラグは1つも触っていない**（訓練を中止したため）",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "i-copied-the-prose-i-was-warning-about",
+        "text": "**歯止めを作った当日に、その歯止めが指す誤りを自分で踏んだ。**\n\n同じ日に3回、「『無い』と書く前に自分が捨てていないか見る」「散文は agent を止めない」と記録した。そのうえで data/stop-drills.json を作るとき、**11件すべての blocked_by を台帳の散文から写した。**実物（/admin/flags と /admin/rollout-guard）は一度も叩いていない。結果、「本番で kill を1回も通していない」と「段階公開中のフラグがゼロ」の2つを、4日前の記述のまま新しい台帳へ複製した。\n\n**新しい台帳を作る作業は、古い記述を検証する機会でもある。**写す前に叩く。とくに「〜が無い」「〜していない」を写すときは、**それが観測なのか伝聞なのかを確かめる。**",
+        "changed": [
+          "data/stop-drills.json",
+          "data/automation-coverage.json",
+          "data/authority-matrix.json"
+        ],
+        "new_guardrail": "**stop-drills.json の各 blocked_by に、いつ・どこで確かめたかを持たせた**（rollout-guard の2件は Flag Ops run #29 の実測に差し替え済み）。加えて、この台帳が新設された経緯そのものを残す —— 停止機構の一覧を作るときは、**列挙より先に実物を1回ずつ叩く**。叩けないものは「叩けない」を blocked_by に書く（それが static 段階の意味）"
+      }
+    },
+    {
+      "id": "om-2026-08-26-escalation-had-nowhere-to-go",
+      "seeded": false,
+      "area": "④ 自動本番デプロイ",
+      "signal": "ガードが hold を返し続けているのを見て、max_consecutive_holds が 5 なのに escalate が出ているのか確かめようとした。**確かめられなかった** —— decisions は新しい順に積まれるので、いちばん新しい判定は配列の先頭にあり、ログの末尾しか取れない読み手には永久に届かない",
+      "hypothesis": "ガードは判定できずに hold のまま止まっている",
+      "decision": "**要約に latest_action を足してから、もう一度叩いた。**返ってきたのは `escalate` で、理由は「5 回続けて判定できていない。露出が小さすぎるか計測が壊れている。**人の確認が要る**」。ガードは止まっていなかった —— **要求を出していて、受け取る先が無かった**",
+      "execution": {
+        "repo": "simplememo-api",
+        "commit": "e1dd686 / 9cad3aa",
+        "files": [
+          "src/autopilot-report.ts",
+          "src/rollout-guard.ts",
+          ".github/workflows/flag-ops.yml",
+          "test/guard-escalation-report.test.ts"
+        ]
+      },
+      "verification": "`escalate` を全 src に grep して、rollout-guard.ts の外に1件も無いことを確認した。awaiting_approval は promote だけを積み、日報も見ていない。consecutive_holds はエスカレーションのたびに 0 へ戻るので、**5時間ごとに同じ要求を出しては消えていた**（実測: consecutive_holds={\"tf04_progress\":0} / latest_action=escalate）。日報へ出す経路を実装し、0件・読めない・件名・ステータス不明日の4条件をテストで固定（16件追加・全1,458件通過）",
+      "outcome": "④自動本番デプロイ 52.9% → 55.6%、総合 61.1% → 61.3%（197タスク）。**本番のフラグは1つも触っていない。**併せて、サンプル不足の理由に「何をすれば届くか」を書くようにした —— 実データで「rollout 13% 以上、または窓を約8日」。3指標すべてを判定させるには rollout 50% が要ることも計算で出た（送信成功率の母数が 71 しかない）。**それはもうカナリアではない**、と数字で言えるようになった",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "an-escalation-with-no-recipient-is-not-an-escalation",
+        "text": "**機械が「人の確認が要る」と判断できることと、人がそれを知ることは別。**このリポジトリは「止める仕組みは、止まることを確かめて初めて存在する」を今日書いたばかりだが、**上げる仕組みにも同じことが要る** —— 上がった先が無ければ、上げる仕組みは無いのと同じ。\n\nしかも今回、要求は**消えていた**。consecutive_holds がエスカレーションのたびに 0 へ戻る設計なので、5時間ごとに1回出しては次の hold で上書きされる。**溜まらない要求は、見逃したときに取り返せない。**",
+        "changed": [
+          "../simplememo-api/src/autopilot-report.ts",
+          "../simplememo-api/src/rollout-guard.ts",
+          "data/automation-coverage.json",
+          "data/stop-drills.json"
+        ],
+        "new_guardrail": "日報（オーナーに毎朝届く唯一の経路）に節を足し、件名にも件数を出す。**0件のときは何も出さない**（「なし」を毎日出すとその語が背景になる）。**読めなかったを0件と混ぜない。****ステータスが読めない日にも出す**（最も壊れている日に消えない）。加えて、Flag Ops の要約に latest_action / latest_reason / consecutive_holds と、list に rollouts を足した —— **後者が無かったせいで、台帳が4日ずれていたことに気づけなかった**"
+      }
+    },
+    {
+      "id": "om-2026-08-26-guard-failed-open",
+      "seeded": false,
+      "area": "④ 自動本番デプロイ",
+      "signal": "オーナーから判断を任された。選択肢は (a) 窓を8日に広げる（露出は増えない・こちらの担当）か (b) rollout を上げる（オーナーの操作）。任された以上 (a) を選ぶのが自然だった",
+      "hypothesis": "窓を広げれば起動完走率だけは 5% のまま判定できる。実装して終わり",
+      "decision": "**広げる前に、広げる前提を確かめた。**splitByBucket を読んだら、群を install_id のハッシュだけで割っていて**アプリの版を見ていなかった。**リモート段階公開を解釈できるのは 5.8.1 以降なので、それより古い版の install は bucket が rollout 未満でも機能を受け取っていない。露出群に混ざれば指標は対照群へ引き寄せられる —— **歪んだ測定を広い窓で取っても、大きい歪んだ測定になるだけ。**窓の変更は先送りし、群の定義を先に直した",
+      "execution": {
+        "repo": "simplememo-api",
+        "commit": "74cea01",
+        "files": [
+          "src/rollout-guard.ts",
+          "test/rollout-guard.test.ts"
+        ]
+      },
+      "verification": "app_analytics_events の app_version から install ごとの**最小**版を採る（max だと窓の途中で上げた install が「ずっと露出していた」ことになる）。版が不明な install も外す。外した数は理由に必ず出す。テスト10件追加・全1,468件通過。**既存テスト3件が落ちて、「配線が無い」と「版が不明」を混ぜていたことを教えてくれた** —— 前者で全員を外すと、取得側が版を渡さない版に戻った瞬間にガードが永久沈黙する",
+      "outcome": "**率は動かない。**④の分類は変えていない。変わったのは、ガードが「止めない側に倒れる」欠陥を持たなくなること —— **ただし本番にはまだ載っていない**（relay は main から出荷され、この変更は未マージ）。副作用として、判定に要る rollout の見積り（13%）は過小評価と分かった。露出群は版で絞ると減るので、次の実測を待つ",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-safety-guard-that-fails-open-is-worse-than-none",
+        "text": "**このガードは「止まる側に倒れる」を設計原理として冒頭に書いている。**それでも、群の作り方という一段下のところで逆向きに倒れていた。原理を文書の頭に書くことと、コードのすべての枝がそれに従うことは別。\n\n**そして、歪みの向きが最悪だった。**露出群に「機能を受け取っていない install」が混ざると、悪化は薄まって見える。つまり本当に壊れているときほど、ガードは「差が無い」と言う。**無いより悪い** —— 無ければ人が見るが、あると人は見ない。\n\n任された判断を実行する前に前提を確かめたのが効いた。窓を広げていたら、歪みを保ったまま「判定できるようになった」と記録していた。",
+        "changed": [
+          "../simplememo-api/src/rollout-guard.ts",
+          "data/stop-drills.json",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "群から外した数（版が古い / 版が不明）を判定の理由に必ず出す。**版で絞っていない場合はそれ自体を出す**（fail-open の状態を黙らない）。版の比較は辞書順にしない（\"5.10.0\" < \"5.8.1\" になる）ことをテストで固定"
+      }
+    },
+    {
+      "id": "om-2026-08-26-local-green-is-not-ci-green",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "PR #598 の初回 seo-check が落ちた。手元では同じコミットで全65検査が通っていて、この日ずっと「fail=0」と報告していた",
+      "hypothesis": "手元で全部通っているのだから、CI も通る",
+      "decision": "**落ちた step を特定して再現した。**check-operating-memory.mjs の既定の exists が `../simplememo-api/...` を素で見に行っていた。**手元には隣のリポジトリがあるが、CI はこのリポジトリしか checkout しない。**隣を指す learning.changed を書いた瞬間から CI だけが落ちる状態になっていた",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/check-operating-memory.mjs"
+        ]
+      },
+      "verification": "exists を三値（在る / 無い / **確かめていない**）にし、隣が見えない実行では落とさず「確かめられなかった成果物 N 件」を出すようにした。automation-rate.mjs と ingest-asc.mjs は既に同じ規律を持っていて、**ここだけ持っていなかった。**リポジトリを隔離した複製（隣が無い状態）で再現し、修正後に exit 0 と「確かめられなかった 17 件」の表示を確認した。self-test 9→11件",
+      "outcome": "**率は動かない。**CI が通るようになっただけ。得たのは、この日ずっと言っていた「手元で全65検査が通った」が**CI と同じ意味ではなかった**と分かったこと",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "local-green-is-not-ci-green",
+        "text": "**手元の緑と CI の緑は違う。**違いは環境で、いちばん効くのが「隣のリポジトリが見えるかどうか」。3リポジトリを並べて作業していると、手元だけが常に恵まれた条件になる。\n\nこの日、同じ規律（確かめられないものを確かめたことにしない）を2つの script に書きながら、3つ目に無いことに気づかなかった。**規律を足すときは、同じ判断をしている他の場所を数える。**",
+        "changed": [
+          "scripts/check-operating-memory.mjs"
+        ],
+        "new_guardrail": "exists を三値にして、隣が見えない実行では落とさず**確かめていない件数を出す**。「隣を指すパスは、この作業ツリーから見えること」という前提をコメントから消した —— 見えない実行が正常系にあるため。**手元で通ったことを CI の代わりにしない**（隔離した複製で再現するのが確実）"
+      }
+    }
+  ]
+}

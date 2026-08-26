@@ -36,7 +36,7 @@
     "【出典】タスクの列挙は docs/autopilot-maturity-backlog.md（外部レビュー由来）と、",
     "本セッションで実測した内容。分類は3リポジトリの実装を1件ずつ当てて決めた。"
   ],
-  "measured_at": "2026-08-22",
+  "measured_at": "2026-08-26",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -200,7 +200,39 @@
       "task": "本番改善サイクルの完走（機能側）",
       "executor": "nobody",
       "evidence": [],
-      "note": "コンテンツ側は完走。機能側0件"
+      "note": "コンテンツ側は完走。**機能側0件。** [2026-08-25] 完走させるための台帳と検査は実装した（data/feature-outcomes.json / scripts/check-feature-outcomes.mjs）が、**executor は nobody のまま。**この行が数えているのは『完走したか』であって『完走できる仕組みがあるか』ではない。**出す前に測り方を決めた機能が、まだ1件も無い** —— v5.8.0 も v5.8.1 も出荷済みだが、どちらも指標を先に宣言していない。**さかのぼって埋めない**（全件 measurement_failed になるうえ、後から指標を選んだものになる）。次に出す機能から1行足す"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "North Star Metric（Zero-decision Capture Rate）の実測",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "**定義はあるが実測が無い。**`../simplememo-ios/docs/VISION.md` が究極KPIとして定義し、CLAUDE.md も「Zero-decision の数値はまだ実測が無い。実測が出るまでサイトに数値を書かない」と明記している。**つまり最上位のKPIだけが、他の全指標に課している基準を満たしていない。**優先順位付けは代理指標（継続率・課金率）で回っており、NSMは判断に効いていない"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "機能の削除・単純化・高速化の候補化",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "バックログ（data/feature-backlog.json）は**追加の候補しか持たない。**ビジョンは「作らない」を繰り返し定めている（Todo管理画面・Calendar UI・Knowledge Base を作らない）のに、**既にあるものを減らす提案が構造的に出てこない。**足すほうだけを採点する仕組みは、時間とともに必ず膨らむ方向に倒れる"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "週次・月次・四半期ロードマップの自己生成",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "いま存在するのは当日のアクション台帳（data/autopilot-actions.json）と個別のバックログだけ。**「次の四半期に何をやるか」を機械が組み立てる経路が無い。**日次の最適化だけが自動化されていると、**短期に効く施策へ寄る**（このリポジトリの実装が③に集中しているのは、その現れでもある）"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "過去の失敗を参照して同じ提案を繰り返さない",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-operating-memory.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。learning に lesson_key を持たせ、**同じ key が2回出たらCIが落ちる。**2回目が出た＝1回目の学習が成果物に効かなかった、ということなのでそこで気づける。**実際にこの仕組みが無かった間に、同じ失敗が7回並んだ**（growth の基準値未記録7件）。**seed 6件はすべて後追い記録**なので、発生時記録が溜まるまで「再発を防いだ実績」は主張できない"
     },
     {
       "area": "② バグ修正",
@@ -253,9 +285,14 @@
     {
       "area": "② バグ修正",
       "task": "Visual Regression Test",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "アプリ側に無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/check_screenshot_baseline.py",
+        "../simplememo-ios/scripts/qa/verify-screenshots.py",
+        "../simplememo-ios/data/screenshot-baseline.json",
+        "../simplememo-ios/.github/workflows/qa-static.yml"
+      ],
+      "note": "2026-08-25実装。**撮影と内在的な検査は前からあったが、前回と比べる経路が無かった** —— artifacts/ は .gitignore で追跡0件なので基準が1回も残らず、ボタンが動いても文字が切れても「PNGとして妥当で寸法が揃っている」限り通っていた。画像ではなく**指紋（12x24の平均輝度・288整数）**を置く（重さと差分の読めなさを避ける）。sha256 は1画素で別物になるので使えない。**Pillow も足していない**（同じファイルの純Python PNGデコーダに載せた）。しきい値6.0は self-test で実測 —— 1画素 0.00 で鳴らず、ボタン大の矩形 8.96 で鳴る。**撮影は macOS が要るので ubuntu の CI からは見えない。**見えないときは形だけ検査し、**『差が無い』とは書かない**（review-intake の judged と同じ）。**基準はまだ空** —— 次に Mac か Xcode Cloud で撮って --update を1度回すと入る。変化＝失敗ではなく、落ちるのは『動いたのに基準を更新していない』場合だけ"
     },
     {
       "area": "② バグ修正",
@@ -383,6 +420,13 @@
       "note": "2026-08-22実装。レーンF"
     },
     {
+      "area": "② バグ修正",
+      "task": "flakyテスト・不要になったテストの整理",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "テストを**足す**経路はある（回帰テスト化の実績あり）が、**減らす／直す経路が無い。**flaky を検出する仕組みも、使われなくなったテストを見つける仕組みも3リポジトリに無い。放置すると『赤いのが普通』になり、②の検査群全体の信頼が落ちる"
+    },
+    {
       "area": "③ 自律型マーケティング",
       "task": "検索データの取り込み（GSC / BigQuery）",
       "executor": "ai_executes_gated",
@@ -492,7 +536,7 @@
         "growth/scripts/ingest-asc.mjs",
         "growth/data/appstore/README.md"
       ],
-      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済みで **instance は 0/15・Apple の生成待ち**（5日を超えたら『故障』としてジョブが落ちる）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・数値列の合計だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）",
+      "note": "2026-08-22実装。日次で取り込む（GETのみ）。**受け皿だけだったのは「ASCにエクスポートAPIが無い」という誤った前提が README に書かれていたため。**実測: レビュー8件・平均4.63を取得。ASO漏斗と購入は Analytics のレポート15種を要求済み。**[2026-08-25] instance は 10/15 まで出ている**（08-23・08-24 の2日ぶん。asc_metrics.rb の reports_with_data）。**ただし取得側は1件も落とせていなかった** —— asc_analytics.rb の欠陥2件（schedule 実行で ASC_REPORTS が空文字になり取得対象が空／既定の語 \"Sales\" が156件のカタログに0件一致）で、**毎日0件を緑で出荷していた**（run 32844534637 の実ログ「取得対象 0 件（部分一致: ）」）。2026-08-25 に修正済みだが、**次回の定時実行までは依然として0件のまま。**この経路を ai_autonomous と数えているのは『日次で自動的に走ること』についてであって、『データが降りていること』についてではない（data/operating-memory.json om-2026-08-25-asc-zero）。入金額（proceeds）だけは /v1/salesReports が必要で vendor number 未登録のため取れない。**「日次」は 2026-08-22 21:32 UTC に初めて実際に発火して裏が取れた**（run 32599889435 / event=schedule → コミット 35b8df4）。それまでは手動1回しか実績が無く、この欄の『日次』は書いただけの状態だった。この回で Analytics 要求は作り直されず既存を再利用している（created_now: false・要求IDは同一）ので、**毎日新しい ONGOING 要求が積み上がる形にはなっていない**。\n\n経路は2本ある。**metrics（asc_metrics.rb）が上記の実測を出している側**で、**Analytics Reports（asc_analytics.rb → growth/scripts/ingest-asc.mjs）は読む側の配線**。後者は **Sales and Trends ではなく Analytics Reports を使う** — 前者は vendorNumber が要り管理画面にしか無いが、後者はアプリIDだけで足りるのでオーナー作業ゼロで始められる。取り込みは**行そのものを置かず、列名・行数・日付範囲・数値列の合計・名指しした分類列ごとの内訳だけ**（個人が特定できる列が将来増えたときに気づかず貯め始めるのを防ぐ）。**[2026-08-26] 内訳を足した** —— それまで保存していたのは数値列の合計だけで、`Cancellation Reason` のような文字列の列は**列名だけが残って中身は毎回捨てられていた**（om-2026-08-26-discarded-not-missing）\n\n**[2026-08-26] 読む側が付いた。**それまでこの行が指していたのは取得だけで、落ちてきた列のうち実際に読んでいたのは数値列の合計だけだった。`Event` / `Source Type` / `Page Type` / `Download Type` / `Territory` は**届いたまま毎日捨てていた**（⑨解約理由と同じ欠陥。名指しした分類列に③の分を入れ忘れていた）。取得側の内訳に③⑥の列を足し、読む側を ../simplememo-ios/scripts/asc_funnel.rb として日次に配線した（別行「ストア内漏斗の観測」）",
       "since": "2026-08"
     },
     {
@@ -649,6 +693,58 @@
       "note": "cronで自動送信"
     },
     {
+      "area": "③ 自律型マーケティング",
+      "task": "コンテンツDecayの検出とRefresh Queue",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "growth/scripts/analyze.mjs",
+        "growth/scripts/build-queues.mjs",
+        "growth/content/refresh-queue.json",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "**2026-08-25、検出と待ち行列がつながった。**検出は前からあった（analyze.mjs --only decay / unanswered。ノイズフロアつき、窓が93%重なるときは比較を差し控える）が、**出力を待ち行列へ落とす経路が無く**、refresh-queue.json は 2026-08-09 に手で作られたまま更新されていなかった。build-queues.mjs が再生成する。**核心は落とした判断を復活させないこと** —— dropped/done は key で引き継いで戻さず、観測から消えた行も削除せず stale にする（直ったのか窓から外れたのか区別できないため）。**さらに experiments.json で abandoned と判定されたページへは積み直さない** —— 初回試走で実際に踏んだ（未回答クエリの第1位が、到達不能と判定済みのページへ着地していた）。self-test 17件"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "検索意図（Search Intent）の変化検出",
+      "executor": "ai_proposes",
+      "evidence": [
+        "growth/scripts/analyze.mjs"
+      ],
+      "note": "**[2026-08-25 訂正] 隣接する実装があった。**analyze.mjs は「Conversational queries（AI Mode fan-out fingerprint）」と「CTR gap（順位は良いのにCTRが期待の70%未満）」を持っており、**意図の変化はまずCTR gapの形で表に出る**（順位が落ちていないのにCTRだけ落ちる）。つまり検出の材料は在る。**無いのは時系列での比較** —— decay と同じ理由で、窓が重ならないスナップショットが2本要る（現状 08-09 と 08-11 は93%重複）。**待てば解ける種類の穴**なので nobody ではなく ai_proposes とする。"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "施策の停止条件（Marketing stop-loss）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "growth/lib/stoploss.mjs",
+        "growth/scripts/check-stoploss.mjs",
+        "growth/lib/ledger.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。進行中の実験を評価日前に見て、**戻す判断だけ**を出す（expand は返さない —— rollout-guard.ts の kill/promote と同じ非対称）。判定は Wilson 95%区間が重ならないこと＋相対20%以上の低下＋表示200以上。**母数不足・基準値なし・スナップショット欠落は hold** で、CIは落とさない（判定できないことは異常ではない）。初回実行で**偽陽性を1件出した** —— 別の指標（brand_search_impressions）を測っている実験を CTR として判定していた。対象抽出を growth/lib/ledger.mjs の measuresPageCtr に集約し、self-test 16件で固定した。**現状の対象は進行中21件のうち7件**（残りは GA4起点・複数ページ集合・別指標）。つまりこの歯止めは**マーケ施策の3分の1にしか掛かっていない** —— GA4起点の施策に同じ歯止めは無い"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "SEOとASO間のカニバリゼーション判定",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "**サイト内のカニバリゼーション（1クエリ×複数URL）は実装済み**（growth/scripts/analyze.mjs --only cannibalisation。表示数のフロアつき）。**この行が指しているのは自社サイトとApp Storeページの間**で、そちらは未実装。同じクエリに両方が露出したときにどちらが食っているかを見ていない。**サイト内の分と混同しない**ため、行の題を SEOとASO間と明示してある。"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "ストア内漏斗の観測（表示→ダウンロード→利用）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/asc_funnel.rb",
+        "../simplememo-ios/scripts/lib/asc_reading.rb",
+        "../simplememo-ios/scripts/lib/asc_columns.rb",
+        "../simplememo-ios/.github/workflows/asc-analytics.yml"
+      ],
+      "note": "2026-08-26実装。日次で自動的に走り、人の承認を挟まない。ゲートは**どれも「言い過ぎ」を止める向き**。(1) **Apple の Event 名を先に決めない** —— 表示に当たる名前を当てられなければ率を出さず、観測した名前をそのまま出す（次に当てられるように）。このリポジトリは「上流の仕様を叩く前に書く」を3回繰り返しているので、同じことを別の領域でやり直さない (2) **窓が違うものを割らない** —— 分子（ダウンロード）と分母（ストア表示）は別のレポートから来る。date_range が一致しなければ率を出さない。1日ぶんを28日ぶんで割ると桁が変わる (3) 分母が 20 に届かなければ率を出さない（⑨と同じ下限）。self-test 23件\n\n**2026-08-26 時点で読めているのは利用だけ** —— Sessions 573 / Unique Devices 168 / Total Session Duration 47,223（これは数値列なので以前から合計に入っていた。**入っていたのに誰も読んでいなかった**）。表示・入口・地域は手元の取得結果が内訳を持つ前の版なので no_breakdown。**次の定時取得（毎日20:30 JST）で決まる。**利用の窓は不明（この取り込みは date_range を持たない）ので、**1セッションあたりの秒数を出していない**"
+    },
+    {
       "area": "④ 自動本番デプロイ",
       "task": "サイトの本番デプロイ",
       "executor": "ai_executes_gated",
@@ -674,7 +770,7 @@
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
       ],
-      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ"
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。**"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -731,7 +827,7 @@
         "../simplememo-api/src/rollout-guard.ts",
         "../simplememo-api/test/rollout-guard.test.ts"
       ],
-      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）"
+      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）\n\n**[2026-08-26] 判断は実際に発生している。**`tf04_progress` が 5% で稼働中で、ガードは毎時判定を出している（decisions 30件）。ただし現在の判定は hold で、理由はサンプル不足（露出 5〜12 / 判定に要る 30 に未達）。**昇格の提案はまだ1件も積まれていない**（awaiting_approval 0）"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -739,9 +835,10 @@
       "executor": "ai_autonomous",
       "evidence": [
         "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "../simplememo-api/test/rollout-guard.test.ts",
+        "data/stop-drills.json"
       ],
-      "note": "起動完走率（launch_incomplete の裏返し＝クラッシュ代理指標）・送信成功率・エディタ→送信到達率の3本で判定。1指標でも割れたら止める。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた。同日 v5.8.1 でクライアント側の段階公開が本番に載ったので、**フラグを一つ段階公開に載せた時点で初めて発火しうる状態になる**。それまではガードが見る対象そのものが存在しない"
+      "note": "起動完走率（launch_incomplete の裏返し＝クラッシュ代理指標）・送信成功率・エディタ→送信到達率の3本で判定。1指標でも割れたら止める。**2026-08-22実装。本番でまだ1回も発火していない**（段階公開中のフラグがゼロのため）。実装した≠動いた。同日 v5.8.1 でクライアント側の段階公開が本番に載ったので、**フラグを一つ段階公開に載せた時点で初めて発火しうる状態になる**。それまではガードが見る対象そのものが存在しない\n\n**[2026-08-26 訂正] 「段階公開中のフラグがゼロ」は事実と違っていた。**`tf04_progress` が本番で稼働している —— 08-22 に 0% で定義、08-23 に 1%、08-25 に **5%**（引き上げの description に「1% では露出3で判定に届かなかったため」と書いてある）。ガードも走っている: last_run_at 2026-08-26T04:00:01Z / decisions 30件 / promotion_frozen false。**発火しない本当の理由はサンプル不足** —— 3指標とも judged: false で、「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」を返している。**待てば解けるものではない**（露出を上げるのは authority-matrix domain 16 で承認要）。この欄が 08-22 の記述のまま4日間止まっていたのは、**実物を叩かずに台帳の散文を引き継いだから**（data/operating-memory.json om-2026-08-26-ledger-outran-reality）\n\n**[2026-08-26] 群の作り方に fail-open の欠陥。**splitByBucket がinstall_id のハッシュだけで割っていて、版を見ていなかった。5.8.1 未満の install は機能を受け取っていないのに、bucket 次第で露出群に入る —— **差が消える＝止めない方向にだけ歪む。**版で絞る修正を実装済み（未マージ・本番未反映）。**この行を ai_autonomous と数えているのは『指標が割れたら止めること』についてであって、『正しい群で測れていること』についてではない**"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -756,9 +853,10 @@
         "../simplememo-ios/release_notes/ja-JP/5.8.1.txt",
         "../simplememo-api/data/rollout-bucket-vectors.json",
         "../simplememo-api/test/rollout-vectors.test.ts",
-        "../simplememo-ios/scripts/qa/check_rollout_vectors.py"
+        "../simplememo-ios/scripts/qa/check_rollout_vectors.py",
+        "data/stop-drills.json"
       ],
-      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした"
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした\n\n**[2026-08-26 訂正] 「本番で kill を1回も通していない」は事実と違っていた。**/admin/flags の history に残っている: 2026-08-22 14:44:53Z に `tf04_progress` を rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に解除 → 15:01:10Z に rollout 0 へ戻し description を「**kill の実証完了（2026-08-22）**」へ。**この欄を書いた日と同じ日に、実証は済んでいた。**ただし残っているのはサーバ側の状態遷移だけで、**端末で実際にオフになったことの記録は無い**（data/stop-drills.json の flag-kill）"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -961,6 +1059,20 @@
       "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可"
     },
     {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "採用された改善1件あたりのAI原価",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "**分子はあるが分母が無い。**実費（data/autopilot-cost.json）と1記事あたり単価は出せるが、『**採用された**改善1件あたり』は出せない —— 却下・revert・計測失敗に終わった分を分母から外す仕組みが無いため。この数字が無いと、AI費用の増加が成果の増加かどうかを判定できない"
+    },
+    {
+      "area": "⑤ AI予算・トークン管理",
+      "task": "AI費用に対する粗利（AI原価の回収）",
+      "executor": "nobody",
+      "evidence": [],
+      "note": "⑥の売上接続が前提。**ASC の課金レポートが降りていなかったので、そもそも分子が無かった**（2026-08-25 に取得側の欠陥2件を修正、data/operating-memory.json の om-2026-08-25-asc-zero）。降りたあとで初めて立てられる"
+    },
+    {
       "area": "⑥ アプリ運営意思決定",
       "task": "ファネル分析（インストール→初回メモ→継続→課金）",
       "executor": "ai_executes_gated",
@@ -968,7 +1080,7 @@
         "../simplememo-api/src/analytics.ts",
         "../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md"
       ],
-      "note": "4回連続の定点評価"
+      "note": "4回連続の定点評価\n\n**[2026-08-26] ストア側の手前が繋がった。**この行が見ているのはアプリ内（インストール以降）で、その手前の「ストアで見られた → ダウンロードされた」はどこも見ていなかった。asc_funnel.rb がそこを読む（③の別行）。**まだ繋いでいない** —— 2つは別の窓・別の分母で、**繋ぐには同じ窓に揃える必要がある**（asc_funnel.rb は窓が違えば率を出さない）"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1015,9 +1127,11 @@
       "executor": "ai_proposes",
       "evidence": [
         "growth/scripts/ingest-asc.mjs",
-        "data/financial-policy.json"
+        "data/financial-policy.json",
+        "scripts/check-financial-policy.mjs",
+        "scripts/check-asc-landed.mjs"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**"
+      "note": "**2026-08-25、収入側が接続された**（オーナーの権限委譲を受けて revenue_connected を true）。App Store Purchases が Proceeds in USD / Sales in USD / Paying Users を返している。**ただし照合そのものはまだ。**見えているのは1日ぶん（課金1件 / 入金 $2.59 / 課金ユーザー1）で、月次にするには日次を積む必要がある。返金は Subscription Event に含まれる見込みだが未確認、広告は未実装なので**4つのうち照合できる材料が揃ったのは1つ（売上）だけ。**executor を上げないのはそのため。手元資金は依然として機械に入っていないので、ランウェイは出さない（足りない材料を検査が名指しする）"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1038,7 +1152,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。**2026-08-25 に売上が降りた**ので LTV・回収期間・粗利の材料は入り始めたが、**1日ぶんでは出せない。**LTV は継続期間が要り、Subscription State Report の Counts は State Metric を跨いだ合計なので契約者数として使えない（取り込みが行を持たず数値列の合計だけを保存する設計のため）"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1100,11 +1214,23 @@
       "since": "2026-08"
     },
     {
+      "area": "⑥ アプリ運営意思決定",
+      "task": "結果の5分類（成功／失敗／無変化／判断不能／計測失敗）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-operating-memory.mjs",
+        "growth/lib/ledger.mjs",
+        "growth/experiments/experiments.json"
+      ],
+      "note": "2026-08-25実装。**「判断不能」と「計測失敗」を分けるのが要点。**前者は待てば解け、後者は待っても解けない。分ける前は experiments.json の `inconclusive` 7件が**全件が実は計測失敗**（変更前の値を未記録）で、待てば解けるものとして扱われていた。CIは (a) 基準値が無いのに inconclusive と書く (b) 基準値を持たないまま実験を走らせる の両方を落とす"
+    },
+    {
       "area": "⑦ 法人経営",
       "task": "仕訳・請求・領収書・銀行・カード・月次締めの統合",
       "executor": "nobody",
       "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "note": "**2026-08-25、読み取り側だけ実装した**（../simplememo-api/src/freee.ts / test 20件）。口座残高を取り、up_to_date でない口座を合計に入れない形。**仕訳の作成・支払の実行は経路そのものを作っていない**（テストがモジュールに書き込み系の関数名が無いことを固定している）。**executor は nobody のまま** —— 資格情報が入っておらず一度も動いていない。「実装した≠動いた」。オーナーは freee を利用中で税理士もついている。**残る不確定はプラン**（スターターでAPIが使えるかは記述が食い違い確定できない）。手順は ../simplememo-api/docs/freee-setup.md、設計は docs/freee-integration-plan.md"
     },
     {
       "area": "⑦ 法人経営",
@@ -1114,7 +1240,7 @@
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs"
       ],
-      "note": "2026-08-22に台帳と検査を実装。**ただし6件すべて未把握。**決算期・従業員の有無・課税事業者かどうかがリポジトリから取れず、**機械はいま何も見張っていない。**埋まれば期限計算はできる（決算期が入れば申告期限は機械が出せる）。**「把握していない」を「余裕がある」と読ませない**ための器であって、実行ではない"
+      "note": "2026-08-22に台帳と検査を実装。**2026-08-25、6件中1件が実際に動く期限になった** —— 決算期2月末がオーナー確認で入り、法人税・地方税の申告期限を機械が導けるようになった（2027-04-30）。**日付は台帳に直書きせず決算月から毎回計算する**ので、年をまたいでも古い日付が残らない（手で書き換えると検査が落ちる）。残る5件の未把握: Apple Developer の加入日・ドメイン更新日・消費税の課税事業者判定（資本金と設立日がリポジトリに無い）・社会保険の具体的な届出期限（社労士の領域）・法定調書の要否。**役員報酬ありも確定した**ので、社会保険が該当することは決まった（従業員の有無ではなく役員報酬で決まる）"
     },
     {
       "area": "⑦ 法人経営",
@@ -1226,7 +1352,7 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "方針のみ。手順・連絡先・停止手段は未整備"
+      "note": "方針のみ。手順・連絡先・停止手段は未整備。 **[2026-08-25] 税理士と社会保険労務士の両方がついていることをオーナーが明言した。**「士業が居るか」は未把握でなくなり、**領域ごとの向き先も決まった**（税務→税理士 / 社会保険→社労士）。**ただし連絡先・エスカレーション手順・停止手段は依然として未整備。**居ることと、機械が繋げることは別。実際 corporate-obligations の未把握5件のうち2件は「士業に聞けば埋まる」状態で止まっている"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1250,9 +1376,14 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "App Store レビュー返信",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先"
+      "executor": "ai_proposes",
+      "evidence": [
+        "data/review-replies.json",
+        "scripts/check-review-replies.mjs",
+        "data/review-intake.json",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "**2026-08-25、下書きと承認境界を実装した。投稿はまだ人。**返信は公開されるので、書いた相手だけでなくストアを見る全員に対する会社の発言になる —— rollout-guard の promote を人に残しているのと同じ理由で、**公開だけを人が承認する。**下書きの時点で落とすもの: 捌いていないレビューへの返信 / **期日・版の約束**（公開の場での約束は取り消せない）/ 個人情報（**返信は公開されるので相手の連絡先も書けない**）/ 禁止表現と古い事実（配信原稿と同じ物差し）。承認なしの posted_at と、**AIを承認者にした記録**も落ちる。**ASC への POST はどこにも実装していない** —— 機構を先に作り、実行を後から足す（逆にすると承認境界が後付けになる）。文字数上限は2,000字。業界で言われる5,970は**Appleの公式仕様ではなく有志の実測**なので、その際どいところを狙わない。self-test 18件"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1276,7 +1407,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**"
+      "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない** **[2026-08-25] 返信の下書きまでは出るようになった**が、CSAT は answered のものだけを受ける設計なので、**投稿が人の手で行われるまで依然として発火しない。**"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1339,17 +1470,18 @@
       "task": "解約理由分析",
       "executor": "ai_proposes",
       "evidence": [
-        "growth/scripts/ingest-asc.mjs",
-        "data/financial-policy.json"
+        "../simplememo-ios/scripts/asc_subscription.rb",
+        "../simplememo-ios/scripts/asc_analytics.rb",
+        "../simplememo-ios/.github/workflows/asc-analytics.yml"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。Analytics Reports の Subscription 系に解約理由が含まれる見込みだが、**まだ取得していないので確認できていない。**含まれなければアプリ内の導線が要る"
+      "note": "**[2026-08-26] 前提が間違っていた。**この欄は長らく「Apple が解約理由をくれるか未確認」と書いていたが、`Cancellation Reason` 列は **2026-08-25 の取得で既に届いていた**（Subscription Event Report / State Report のどちらの columns にも入っている）。読めなかった理由は Apple 側ではなく**こちらの保存の形**で、asc_analytics.rb が残すのは数値列の合計だけだった。解約理由は文字列なので合計対象に入らず、**列名だけが残って中身は1件も残っていなかった。**「取れない」と「捨てている」を取り違えていた（data/operating-memory.json om-2026-08-26-breakdown）。\n\n取得側に名指しの分類列 × 名指しの測定列の内訳を足し（BREAKDOWN_DIMENSIONS）、読む側を asc_subscription.rb として asc-analytics.yml の日次に配線した。**ただし 2026-08-26 時点で読めた項目は 0/3。**手元にある取得結果は内訳を持つ前の版なので no_breakdown を返す。**次の定時実行（毎日 20:30 JST）で決まる。**\n\n**空欄しか無い可能性は残る。**Apple 側で解約理由は任意項目であり、埋まらないほうが普通。読む側は空欄を捨てず `(空欄)` として数え、all_blank を readable と区別する ——**「解約理由が読めなかった」を「解約が無かった」と読ませないため。**空欄だった場合、⑨を実物にするにはアプリ内で理由を聞く導線が要る（未実装）。実施は引き続き人の判断なので ai_proposes のまま"
     },
     {
       "area": "⑨ マネタイズ",
       "task": "課金失敗の回復",
       "executor": "nobody",
       "evidence": [],
-      "note": "StoreKit側の失敗イベントを受ける経路が未実装"
+      "note": "StoreKit側の失敗イベントを受ける経路が未実装。**[2026-08-26] 検知の側だけ配線が入った** ——Subscription State Report の `State Metric` に Billing Retry / Grace Period が入るので、asc_subscription.rb がそれを課金失敗として拾う（別行「課金失敗・解約の観測」）。**この行は nobody のまま。**数えているのは『回復させたか』であって『気づけるか』ではない。回復（アプリ内での告知・支払い方法の更新導線）は1つも実装していない。**気づけることを回復と数えない。**"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1375,6 +1507,17 @@
         "data/authority-matrix.json"
       ],
       "note": "AIは提案もしない（不可逆・既存契約者への影響が読めない）"
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "課金失敗・解約の観測（内訳の取得と読み）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/asc_subscription.rb",
+        "../simplememo-ios/scripts/asc_analytics.rb",
+        "../simplememo-ios/.github/workflows/asc-analytics.yml"
+      ],
+      "note": "2026-08-26実装。取得（日次・GETのみ）から読みまで人の承認を挟まない。ゲートは3つで、**どれも「言い過ぎ」を止める向き**に置いてある。(1) 読めない理由を1語に潰さず7状態に分け、**数を出してよいのは readable のときだけ** (2) 分母が 20 に届かないうちは率を出さない（解約1件から解約率100%を作らない。simplememo-api の CLAUDE.md「単日の率では何も決めない」と同じ下限） (3) 知らない State Metric を健全側に寄せず unclassified として名前ごと残す ——**寄せると Apple が新しい失敗状態を足した日に課金失敗が消える。**内部矛盾（readable なのに値が無い／分母不足で率がある）は exit 1 で日次を赤にする。\n\n**この行が数えているのは『毎日走ること』であって『値が降りていること』ではない。**2026-08-26 時点の読みは 0/3（手元の取得結果は内訳を持つ前の版）。self-test 28件。\n\n**読みは非公開リポジトリ側に置いた。**一度サイト側（growth/scripts/）に書いたが、simplememofast/simplememo は GitHub 上で公開されており（api.github.com が private: false）、契約者が1桁のいま解約・課金失敗の件数を公開リポジトリへ日次で積むのは「広げる」方向の変更になる。加えてあちらの CI からは隣のリポジトリが見えず**日次では動かない。**動かない場所に検査を置かない"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
@@ -1502,6 +1645,17 @@
       ],
       "note": "2026-08-22実装。判定に4つの故障軸（資格情報の拒否・モデル全滅/縮退・GitHub API到達不能・egress遮断）を足し、26シナリオで固定。**「秘密鍵が無い」と「拒否された」を別コードにした** — 混ぜると期限切れが毎日「設計どおりのスキップ」として黙殺される。**本番を落とす本物の演習ではない**（判定の論理だけ）",
       "since": "2026-08"
+    },
+    {
+      "area": "⑩ AgentOps・ガバナンス",
+      "task": "判断→実行→結果→次の判断を結ぶ運転記憶",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/operating-memory.json",
+        "scripts/check-operating-memory.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。signal / hypothesis / decision / execution / verification / outcome / verdict / learning を1レコードで持ち、**learning.changed が実在の成果物を指さない行は落とす**（感想を学習と呼ばせない）。**率は出していない** —— 全判断の母数を持っていないので『判断の◯%を記録』は言えない。**seed 6件は後追いで、発生時記録はまだ0件**"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1824,6 +1978,74 @@
         "data/authority-matrix.json"
       ],
       "note": "自動停止して経営者へ移管する方針。手順は未整備"
+    },
+    {
+      "area": "⑪ データ・プライバシー",
+      "task": "公開してよいデータの明示と、既定の非公開",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/publication-policy.json",
+        "scripts/check-publication.mjs",
+        "_redirects",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-25実装。**Cloudflare Pages はリポジトリの中身をそのまま配信する**ので、data/*.json は34件すべてが公開されていた（サイトが意図して参照しているのは6件）。鍵の棚卸し・攻撃面・取引先・法人情報が、静的ホスティングの副作用で外から読めていた。**秘密の値そのものは含まないが「何があるか」の地図。**全件を分類し、**新しいファイルは分類するまでCIが落ちる**（既定を非公開に倒す）。非公開は _redirects で404。**この穴は、自分が役員報酬の有無をそこへ書き込んだ直後に気づいた**"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "出荷前のCI緑判定（赤いコミットでタグを打たせない）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/release_preflight.rb",
+        "../simplememo-ios/.github/workflows/release.yml",
+        "../simplememo-ios/.github/workflows/qa-static.yml"
+      ],
+      "note": "2026-08-25実装。**release.yml はタグの機構には厳密だったが、そのコミットで検査が通ったかを一度も見ていなかった**（check-run / status / conclusion への参照が0件）。qa-static は main への push でも走るので、**検査が落ちたコミットも main に載り**、載っていれば出荷できた。サイト側の auto-merge が『検証済みSHAだけをマージ』を徹底しているのに、**iOS の出荷側だけ同じ規律が無かった。**タグ作成の前に止める —— タグ以降は Xcode Cloud が走り、**ビルド番号は再利用できない。**APIが引けない・未実行・検査が無いのは**いずれも緑ではない。**同名が複数ある場合は全部が緑を求める（1つだけ緑にして通す経路を作らない）。CI基盤が壊れたとき用の override は理由必須で要約に残る。self-test 16件"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "停止機構の列挙と、確かめた段階の記録",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/stop-drills.json",
+        "scripts/check-stop-drills.mjs",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "2026-08-26実装。**この領域は率を上げられない** —— 残る非ゲート行（提出・実機確認・公開・kill・タグ作成）はすべて意図的な境界で、executor を動かすには境界を渡すしかない。そこで**率を上げずに強くできるところ**を探した。\n\n台帳の note には既に散文で「本番でまだ1回も発火していない」「本番で kill を1回も通していない（止まることを確かめていない停止機構は無いのと同じ）。**次に確かめるべきはこれ**」と書いてあった。つまり台帳自身が次の一手を名指ししていたのに、**散文なので誰も動かなかった**（`prose-does-not-stop-an-agent`）。数えられる形にした。\n\n止める仕組みを11件列挙し、確かめた段階を static / unit / local / production の4語に分ける。**単体テストと本番を同じ語で呼ばないためだけに、この語彙がある。**検査が守るのは(1) 証跡ファイルの実在 (2) **訓練には「何を観測したか」が要る**（「実行した」は観測ではない）(3) production は日付と観測が要り、単体テストからは昇格できない (4) production に届いていない仕組みには**なぜ届いていないかが要る**（「まだ」は理由ではない）(5) 公開文へ書く件数が実測とずれたら落ちる。self-test 20件"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "本番で停止機構を実際に通す（訓練）",
+      "executor": "human_only",
+      "evidence": [
+        "data/stop-drills.json",
+        "docs/stop-drill-runbook.md"
+      ],
+      "note": "**11件中 1件（2026-08-26 訂正）。**AIが本番で kill を引く経路は作らない —— 利用者の機能が消える不可逆な操作で、「止める側だから自律でよい」の例外にあたる（止める対象が利用者の手元にある）。\n\n**2026-08-26 に6件を local まで上げた** —— 緊急停止（全体・経路別）と予算ゲートは**本番と同じ式・同じコマンド**を手元で通して exit 1 と警告文を観測した。マーケ stop-loss は実データで1回反応している（ただし誤検知）。残る7件のうち、rollout-guard の2件は**段階公開中のフラグがゼロなので発火する対象そのものが無い。**\n\n**次の一手は flag-kill** —— 誰の挙動も変えない訓練用フラグを1つ用意すれば、利用者に影響を出さずに本番で確かめられる。実施はオーナー判断\n\n**[2026-08-26 訂正] この欄を 0件 と書いたのは誤りだった。**flag-kill は 2026-08-22 に本番で実証済みで、証跡は /admin/flags の history にある。**台帳の散文を実物で確かめずに写した。**今日 `Flag Ops` の list / guard を叩いて判明した"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "ガードの判定を人へ届ける（エスカレーション）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/autopilot-report.ts",
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/guard-escalation-report.test.ts",
+        "data/stop-drills.json"
+      ],
+      "note": "2026-08-26実装。**それまで、ガードが出した『人の確認が要る』は誰にも届いていなかった。**rollout-guard は判定できない状態が5回続くと action: escalate を返すが、`escalate` という語は rollout-guard.ts の外に1つも無く、承認待ちは promote だけを積み、日報も見ていない。consecutive_holds はエスカレーションのたびに0へ戻るので、**5時間ごとに同じ要求を出しては消えていた。**08-23 の段階公開開始から続いていて、知る経路は「Flag Ops を手で叩いてログを読む」しか無かった（そのログも、いちばん新しい判定は末尾から取れなかった）。\n\n**止める仕組みと同じで、上げる仕組みも、上がった先が無ければ無いのと同じ。**オーナーに毎朝届く唯一の経路（autopilot_report）へ節を足した。フラグごとに**いちばん新しい判定だけ**を見る（古い escalate が残っていても、その後 hold や kill に変わっていれば現在の要求ではない）。0件のときは何も出さない／読めなかったを0件と混ぜない／件名にも件数を出す／ステータスが読めない日にも出す（**最も壊れている日に消えない**）。\n\n併せて、サンプル不足の理由に**何をすれば届くか**を同じ行で書くようにした —— 「rollout 13% 以上、または窓を約8日」。窓は転がるので待っても解けない、も明記する。self-test 16件追加"
+    },
+    {
+      "area": "① 次期機能開発",
+      "task": "機能の効果測定の宣言（出す前に測り方を決める）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/feature-outcomes.json",
+        "scripts/check-feature-outcomes.mjs",
+        ".github/workflows/seo-check.yml",
+        "../simplememo-api/src/rollout-guard.ts"
+      ],
+      "note": "2026-08-25実装。**declared_at <= shipped_at を強制する** —— 出した後で指標を決めると、出た結果に合う指標を選べてしまう。指標は rollout-guard の MetricDefinition と同じ形（key / numerator / denominator / higher_is_better）で書き、段階公開の bucketOf が決める露出群・対照群の上で測る。**別のA/B基盤を建てない。****安全指標（launch_ok / send_success）を成功指標にできない** —— 壊していないことは効いたことではなく、混ぜると何を出しても成功になる（使うなら理由を書かせる）。判定は運転記憶と同じ5値で、**基準の数字が無いのに『効いた／外した』と書けない**（growth のタイトル実験7件が全件これで潰れた規律を、機能側へ移した）。self-test 13件"
     }
   ],
   "$since_note": [

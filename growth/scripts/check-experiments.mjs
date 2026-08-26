@@ -25,7 +25,7 @@
  */
 
 import fs from 'node:fs';
-import { loadLedger, validate, summarize, daysOverdue, today } from '../lib/ledger.mjs';
+import { loadLedger, validate, summarize, daysOverdue, today, DECISIONS } from '../lib/ledger.mjs';
 
 const strict = process.argv.includes('--strict');
 const asOf = today();
@@ -57,7 +57,7 @@ for (const { e, d } of rows) {
   // Annotation text is single-line by contract; GitHub renders \n as a literal.
   console.log(
     `::warning file=growth/experiments/experiments.json::${e.id} (${e.page}) is ${label}. ` +
-    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <keep|revert|iterate|inconclusive|abandoned>`
+    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <${DECISIONS.join('|')}>`
   );
 }
 

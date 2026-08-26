@@ -109,7 +109,15 @@ export const onRequest = async (context) => {
   //
   // /growth/ matters more than the others: it holds committed Search Console
   // snapshots and App Store Connect exports. Without this block, click,
-  // impression and revenue figures would be readable at a guessable URL.
+  // impression and revenue figures would be readable at a guessable URL,
+  // indexable by search engines and cacheable by intermediaries.
+  //
+  // 2026-08-26: this block does NOT make those files private. The repository
+  // itself is public (api.github.com/repos/simplememofast/simplememo returns
+  // private: false), so every path 404'd here is still readable on GitHub.
+  // What the block buys is that the site does not serve, link or expose them
+  // to crawlers — not confidentiality. See data/publication-policy.json
+  // (`repository_is_public`); do not read these 404s as "not public".
   if (
     pathname === "/docs" ||
     pathname.startsWith("/docs/") ||
