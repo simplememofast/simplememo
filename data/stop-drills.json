@@ -172,9 +172,16 @@
           "by": "ai",
           "where": "Flag Ops run #29（action: guard）",
           "observed": "本番の判定を読んだ。cron は生きている（last_run_at 2026-08-26T04:00:01.777Z / decisions 30件 / promotion_frozen false / awaiting_approval 0）。最新判定は action: hold・executed: false で、理由は3指標すべて「サンプル不足（露出 12 / 対照 236 < 30）。判定していない（異常なしではない）」。**ガードは走っていて、正しく『判定していない』と言っている。**kill が出ていないのは対象が無いからではなく、判定に届いていないから"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "where": "Flag Ops run #30（action: guard・要約に latest_action を足した後）",
+          "observed": "**ガードは escalate を返していた。**latest_action=escalate / latest_reason「5 回続けて判定できていない。露出が小さすぎるか計測が壊れている。**人の確認が要る**」/ latest_at 2026-08-26T04:00:01.777Z。consecutive_holds は escalate のたびに 0 へ戻るので、**5時間ごとに同じ要求を出しては消えていた。**\n\n`escalate` という語は rollout-guard.ts の外に1つも無く、awaiting_approval は promote だけを積み、日報も見ていない。**08-23 の段階公開開始から、この要求は一度も人に届いていない。**日報へ出す経路を同日に実装した（simplememo-api の autopilot-report.ts）。"
         }
       ],
-      "blocked_by": "**「段階公開中のフラグがゼロ」は誤りだった（2026-08-26 訂正）。**`tf04_progress` が本番で **rollout 5%** で動いている（08-22 に 0% で定義 → 08-23 に 1% → 08-25 に 5%。5% へ上げた理由が description に「1% では露出3で判定に届かなかったため」と書いてある）。ガードも動いている —— last_run_at 2026-08-26T04:00:01Z、decisions 30件。\n\n発火しない本当の理由は**サンプル不足**。3指標とも judged: false で 「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」と返している（露出群は 5〜12 installs）。**待てば解けるものではない** —— 露出を上げるのは authority-matrix domain 16（不可逆・承認要）なので、人の判断が要る。"
+      "blocked_by": "**判定に届いていない。**3日の転がる窓・各群30が要るのに、rollout 5% では露出 5〜12。母数 248 なら **rollout 13% 以上**、露出を変えないなら **窓を約8日**（現在3日）。**窓は転がるので待っても母数は貯まらない。**露出を上げるのは authority-matrix domain 16 （不可逆・`human_only: rollout を引き上げる操作そのもの`）なので、AIは代行もしない。\n\n3指標すべてを判定させるには **rollout 50%** が要る（送信成功率の母数が 71 しかなく、30/71 = 42.3% 以上。同時に対照群30も要るので上限 57.7%。刻みは [1,5,10,25,50,100] なので 50% だけが入る）。**それはもうカナリアではない。**起動完走率（クラッシュ代理指標）だけなら 13% で足りる。"
     },
     {
       "id": "rollout-guard-freeze",

@@ -690,6 +690,38 @@
         ],
         "new_guardrail": "**stop-drills.json の各 blocked_by に、いつ・どこで確かめたかを持たせた**（rollout-guard の2件は Flag Ops run #29 の実測に差し替え済み）。加えて、この台帳が新設された経緯そのものを残す —— 停止機構の一覧を作るときは、**列挙より先に実物を1回ずつ叩く**。叩けないものは「叩けない」を blocked_by に書く（それが static 段階の意味）"
       }
+    },
+    {
+      "id": "om-2026-08-26-escalation-had-nowhere-to-go",
+      "seeded": false,
+      "area": "④ 自動本番デプロイ",
+      "signal": "ガードが hold を返し続けているのを見て、max_consecutive_holds が 5 なのに escalate が出ているのか確かめようとした。**確かめられなかった** —— decisions は新しい順に積まれるので、いちばん新しい判定は配列の先頭にあり、ログの末尾しか取れない読み手には永久に届かない",
+      "hypothesis": "ガードは判定できずに hold のまま止まっている",
+      "decision": "**要約に latest_action を足してから、もう一度叩いた。**返ってきたのは `escalate` で、理由は「5 回続けて判定できていない。露出が小さすぎるか計測が壊れている。**人の確認が要る**」。ガードは止まっていなかった —— **要求を出していて、受け取る先が無かった**",
+      "execution": {
+        "repo": "simplememo-api",
+        "commit": "e1dd686 / 9cad3aa",
+        "files": [
+          "src/autopilot-report.ts",
+          "src/rollout-guard.ts",
+          ".github/workflows/flag-ops.yml",
+          "test/guard-escalation-report.test.ts"
+        ]
+      },
+      "verification": "`escalate` を全 src に grep して、rollout-guard.ts の外に1件も無いことを確認した。awaiting_approval は promote だけを積み、日報も見ていない。consecutive_holds はエスカレーションのたびに 0 へ戻るので、**5時間ごとに同じ要求を出しては消えていた**（実測: consecutive_holds={\"tf04_progress\":0} / latest_action=escalate）。日報へ出す経路を実装し、0件・読めない・件名・ステータス不明日の4条件をテストで固定（16件追加・全1,458件通過）",
+      "outcome": "④自動本番デプロイ 52.9% → 55.6%、総合 61.1% → 61.3%（197タスク）。**本番のフラグは1つも触っていない。**併せて、サンプル不足の理由に「何をすれば届くか」を書くようにした —— 実データで「rollout 13% 以上、または窓を約8日」。3指標すべてを判定させるには rollout 50% が要ることも計算で出た（送信成功率の母数が 71 しかない）。**それはもうカナリアではない**、と数字で言えるようになった",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "an-escalation-with-no-recipient-is-not-an-escalation",
+        "text": "**機械が「人の確認が要る」と判断できることと、人がそれを知ることは別。**このリポジトリは「止める仕組みは、止まることを確かめて初めて存在する」を今日書いたばかりだが、**上げる仕組みにも同じことが要る** —— 上がった先が無ければ、上げる仕組みは無いのと同じ。\n\nしかも今回、要求は**消えていた**。consecutive_holds がエスカレーションのたびに 0 へ戻る設計なので、5時間ごとに1回出しては次の hold で上書きされる。**溜まらない要求は、見逃したときに取り返せない。**",
+        "changed": [
+          "../simplememo-api/src/autopilot-report.ts",
+          "../simplememo-api/src/rollout-guard.ts",
+          "data/automation-coverage.json",
+          "data/stop-drills.json"
+        ],
+        "new_guardrail": "日報（オーナーに毎朝届く唯一の経路）に節を足し、件名にも件数を出す。**0件のときは何も出さない**（「なし」を毎日出すとその語が背景になる）。**読めなかったを0件と混ぜない。****ステータスが読めない日にも出す**（最も壊れている日に消えない）。加えて、Flag Ops の要約に latest_action / latest_reason / consecutive_holds と、list に rollouts を足した —— **後者が無かったせいで、台帳が4日ずれていたことに気づけなかった**"
+      }
     }
   ]
 }
