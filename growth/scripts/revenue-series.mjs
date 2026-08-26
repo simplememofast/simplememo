@@ -35,6 +35,24 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 export const SRC_DIR = path.join(ROOT, 'growth/data/appstore');
 export const OUT_PATH = path.join(ROOT, 'data/revenue-series.json');
 const POLICY_PATH = path.join(ROOT, 'data/financial-policy.json');
+/**
+ * **積む場所は隣（非公開）へ移った。**
+ *
+ * [2026-08-26] この script の入力 `growth/data/appstore/` は
+ * `growth/scripts/ingest-asc.mjs` が書くが、その ingest は
+ * `../simplememo-ios/data/asc/` を読む —— **あちらの CI にこのリポジトリは無い**
+ * （ingest-asc.mjs の冒頭が自分でそう書いている）。つまり取り込みは
+ * **両方をローカルに checkout した人が手で走らせたときだけ**動いていた。
+ *
+ * 実測: growth/data/appstore/ は 2026-08-25.json の1件だけ、
+ * data/revenue-series.json は covered_days: 0。08-25 に人が1回走らせ、それきり。
+ * **台帳が⑤粗利・⑥LTVを「28日たまる待ち」に分類していたが、待っても貯まらなかった。**
+ *
+ * 積む処理は取得が毎日走る側（../simplememo-ios/scripts/asc_revenue.rb）へ移した。
+ * ここは**写し**を持つ。写しの流儀は data/crossrepo-probes.json と同じで、
+ * **隣が無いCIでは判定に使い、隣が在る場所で更新する。**
+ */
+export const IOS_SERIES = path.join(ROOT, '..', 'simplememo-ios', 'data/revenue/series.json');
 
 /** 月次を名乗るのに要る日数。GSC の28日窓と揃える。 */
 export const DAYS_FOR_MONTHLY = 28;
@@ -131,6 +149,56 @@ export function readAll(dir = SRC_DIR) {
  * @param {object|null} policy  方針の台帳。**null は「突き合わせない」**（呼ぶ側が明示する）。
  *   鍵が無い方針オブジェクトは別で、**それは台帳の形をしていない**ので落とす。
  */
+/**
+ * 隣の実測から**写し**を作る。**金額は運ばない。**
+ *
+ * このリポジトリは GitHub 上で公開されている（data/publication-policy.json）。
+ * `blocked_on` が読むのは `covered_days` だけなので、**判定に要らない実額を
+ * 公開側へ日次で積む理由が無い。**金額は非公開の隣が持つ。
+ *
+ * 隣が読めなければ **null**（0 ではない）。「読めなかった」を「0日」と書かない。
+ */
+export function mirrorFrom(iosDoc, syncedAt) {
+  if (!iosDoc || typeof iosDoc.covered_days !== 'number') return null;
+  return {
+    $comment: [
+      '収入の観測日数の**写し**。growth/scripts/revenue-series.mjs --write が書く。**手で編集しない。**',
+      '**実測は ../simplememo-ios/data/revenue/series.json**（取得が毎日走る側で積んでいる）。',
+      '**金額は運ばない。**このリポジトリは公開されており、blocked_on が読むのは covered_days だけ。',
+      '写しなので、隣が見える場所で更新する（data/crossrepo-probes.json と同じ流儀）。',
+    ],
+    source: 'simplememo-ios/data/revenue/series.json',
+    synced_at: syncedAt,
+    covered_days: iosDoc.covered_days,
+    days_for_monthly: iosDoc.days_for_monthly ?? DAYS_FOR_MONTHLY,
+    monthly_ready: Boolean(iosDoc.monthly_ready),
+    first_day: iosDoc.first_day ?? null,
+    last_day: iosDoc.last_day ?? null,
+    spans: Array.isArray(iosDoc.spans) ? iosDoc.spans.length : null,
+    $spans: '区間の**本数**だけ。範囲と金額は隣が持つ',
+  };
+}
+
+/**
+ * **観測日数を減らす書き込みを拒む。**
+ *
+ * 隣が見えない場所で `--write` を走らせると、入力が空なので covered_days 0 が
+ * 出る。それをそのまま書くと、**写しが 0 で潰れる。**
+ * check-domain-expiry が「取得失敗で台帳の値を消さない」としているのと同じ形で、
+ * ここでも**読めなかったことを『0日』として上書きしない。**
+ *
+ * 作り直したいときはファイルを消してから走らせる（意図的な操作を要求する）。
+ */
+export function refusesToShrink(existing, next) {
+  const before = existing?.covered_days;
+  const after = next?.covered_days;
+  if (typeof before !== 'number' || typeof after !== 'number') return null;
+  if (after >= before) return null;
+  return `既にある写しは ${before} 日で、書こうとしているのは ${after} 日`
+    + ' — **減らす書き込みは拒む。**隣（simplememo-ios）が見えない場所で走らせると 0 になる。'
+    + '作り直すならファイルを消してから走らせること';
+}
+
 export function policyDrift(policy, series) {
   if (policy === null || policy === undefined) return [];   // 突き合わせない、と呼ぶ側が言った
   const declared = policy?.cash_scenarios?.revenue_history_days;
@@ -215,10 +283,44 @@ function selftest() {
 
   t('ランウェイは作らない', !('runway_months' in long) && !('runway' in long));
 
+  // --- 写し（積む場所は隣へ移った） ---
+  const iosDoc = { covered_days: 3, days_for_monthly: 28, monthly_ready: false,
+    first_day: '2026-08-23', last_day: '2026-08-25', spans: [1, 2],
+    totals: { purchases: 1, proceeds_usd: 2.59, sales_usd: 3.05 } };
+  const mir = mirrorFrom(iosDoc, '2026-08-26');
+  t('写しに観測日数が入る', mir.covered_days === 3);
+  // **金額を公開側へ運ばない。**判定に要るのは covered_days だけ
+  t('**写しに金額を運ばない**', !JSON.stringify(mir).includes('2.59')
+    && !JSON.stringify(mir).includes('3.05') && !('totals' in mir));
+  t('区間は本数だけ運ぶ', mir.spans === 2);
+  // **「読めなかった」を「0日」と書かない**
+  t('隣が読めなければ写しを作らない（0日にしない）', mirrorFrom(null, 'x') === null);
+  t('形が違うものを写しにしない', mirrorFrom({ covered_days: 'three' }, 'x') === null);
+
+  // **観測日数を減らす書き込みを拒む**（隣が見えない場所で走らせると 0 になる）
+  t('**減らす書き込みを拒む**', typeof refusesToShrink({ covered_days: 5 }, { covered_days: 0 }) === 'string');
+  t('増える書き込みは通す', refusesToShrink({ covered_days: 1 }, { covered_days: 5 }) === null);
+  t('同じ日数は通す', refusesToShrink({ covered_days: 5 }, { covered_days: 5 }) === null);
+  t('写しがまだ無ければ拒まない', refusesToShrink(null, { covered_days: 1 }) === null);
+
+  // 写しと方針の突き合わせは、写しの covered_days で行う
+  t('写しと方針がずれたら言う',
+    policyDrift({ cash_scenarios: { revenue_history_days: 9 } }, { covered_days: 3 }).length === 1);
+  t('写しと方針が揃っていれば黙る',
+    policyDrift({ cash_scenarios: { revenue_history_days: 3 } }, { covered_days: 3 }).length === 0);
+
   if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
   console.log(`\nselftest: 全${total}件 通過`);
   return 0;
 }
+
+/** 隣の実測を読む。**無ければ null**（0 ではない）。 */
+export function readIosSeries(p = IOS_SERIES) {
+  if (!fs.existsSync(p)) return null;
+  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
+}
+
+const todayJst = () => new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
@@ -250,29 +352,32 @@ if (isMain) {
   // [2026-08-26] ここで読んだ方針を束縛していなかったため、下の --write が
   // `ReferenceError: policy is not defined` で落ちていた。**一度も成功していない。**
   const policy = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
-  problems.push(...policyDrift(policy, series));
+  // **突き合わせる相手は写し**であって、この場では作れない再構築ではない。
+  // [2026-08-26] 入力（growth/data/appstore/）は人が手で走らせたときしか増えない
+  // ので、再構築と突き合わせると CI が常に「実測0日」と言う。
+  const existing = fs.existsSync(OUT_PATH) ? JSON.parse(fs.readFileSync(OUT_PATH, 'utf8')) : null;
+  problems.push(...policyDrift(policy, existing ?? series));
 
   if (process.argv.includes('--write')) {
-    const out = {
-      $comment: [
-        '収入の履歴。growth/scripts/revenue-series.mjs が書く。**手で編集しない。**',
-        '**日ごとの内訳は持たない。**取り込みが範囲ごとの合計しか持たないため、按分もしない。',
-        'ランウェイはここでは作らない（手元資金が機械に入っていないので、月数を出すと嘘になる）。',
-      ],
-      generated_at: series.spans.length ? series.spans[series.spans.length - 1].fetched : null,
-      covered_days: series.covered_days,
-      days_for_monthly: DAYS_FOR_MONTHLY,
-      monthly_ready: series.monthly_ready,
-      first_day: series.first_day,
-      last_day: series.last_day,
-      totals: { purchases: series.purchases, proceeds_usd: series.proceeds_usd, sales_usd: series.sales_usd },
-      spans: series.spans,
-      skipped: series.skipped,
-    };
+    // **積むのは隣。ここは写し。**（IOS_SERIES の注記を参照）
+    const ios = readIosSeries();
+    const out = mirrorFrom(ios, todayJst());
+    if (!out) {
+      console.log('\n  → **書かない。**隣の実測が読めない'
+        + `（${IOS_SERIES.replace(`${ROOT}/`, '')}）`);
+      console.log('     3リポジトリの揃った場所で走らせること。'
+        + '**読めなかったことを「0日」として書かない。**');
+      process.exit(0);
+    }
+    const shrink = refusesToShrink(existing, out);
+    if (shrink) {
+      console.error(`\n  → **書かない。**${shrink}`);
+      process.exit(1);
+    }
     fs.writeFileSync(OUT_PATH, `${JSON.stringify(out, null, 2)}\n`);
-    console.log(`\n  → data/revenue-series.json`);
+    console.log(`\n  → data/revenue-series.json（写し・観測 ${out.covered_days} 日）`);
     // 方針側の日数も同時に合わせる（ずれたままにしない）
-    policy.cash_scenarios.revenue_history_days = series.covered_days;
+    policy.cash_scenarios.revenue_history_days = out.covered_days;
     fs.writeFileSync(POLICY_PATH, `${JSON.stringify(policy, null, 2)}\n`);
     console.log('  → data/financial-policy.json の revenue_history_days を更新');
     process.exit(0);

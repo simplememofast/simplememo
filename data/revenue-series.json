@@ -1,26 +1,17 @@
 {
   "$comment": [
-    "収入の履歴。growth/scripts/revenue-series.mjs が書く。**手で編集しない。**",
-    "**日ごとの内訳は持たない。**取り込みが範囲ごとの合計しか持たないため、按分もしない。",
-    "ランウェイはここでは作らない（手元資金が機械に入っていないので、月数を出すと嘘になる）。"
+    "収入の観測日数の**写し**。growth/scripts/revenue-series.mjs --write が書く。**手で編集しない。**",
+    "**実測は ../simplememo-ios/data/revenue/series.json**（取得が毎日走る側で積んでいる）。",
+    "**金額は運ばない。**このリポジトリは公開されており、blocked_on が読むのは covered_days だけ。",
+    "写しなので、隣が見える場所で更新する（data/crossrepo-probes.json と同じ流儀）。"
   ],
-  "generated_at": null,
-  "covered_days": 0,
+  "source": "simplememo-ios/data/revenue/series.json",
+  "synced_at": "2026-08-26",
+  "covered_days": 1,
   "days_for_monthly": 28,
   "monthly_ready": false,
-  "first_day": null,
-  "last_day": null,
-  "totals": {
-    "purchases": 0,
-    "proceeds_usd": 0,
-    "sales_usd": 0
-  },
-  "spans": [],
-  "skipped": [
-    {
-      "skipped": true,
-      "reason": "date_range が無い（この取り込みは何日ぶんか分からない）",
-      "fetched": "2026-08-25"
-    }
-  ]
+  "first_day": "2026-08-23",
+  "last_day": "2026-08-23",
+  "spans": 1,
+  "$spans": "区間の**本数**だけ。範囲と金額は隣が持つ"
 }
