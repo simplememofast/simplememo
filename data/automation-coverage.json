@@ -1201,9 +1201,9 @@
       "task": "AI費用に対する粗利（AI原価の回収）",
       "executor": "nobody",
       "evidence": [],
-      "note": "⑥の売上接続が前提。**ASC の課金レポートが降りていなかったので、そもそも分子が無かった**（2026-08-25 に取得側の欠陥2件を修正、data/operating-memory.json の om-2026-08-25-asc-zero）。降りたあとで初めて立てられる",
+      "note": "⑥の売上接続が前提。**ASC の課金レポートが降りていなかったので、そもそも分子が無かった**（2026-08-25 に取得側の欠陥2件を修正、data/operating-memory.json の om-2026-08-25-asc-zero）。降りたあとで初めて立てられる。[2026-08-26] **分子が無かったのではなく、積む場所が動いていなかった。**取得側で積み始めたので、ここからは実際に日数が増える",
       "blocker": "external_data",
-      "unblocked_by": "**レポートは降りている。**たまっていないのは日数のほうで、date_range を持つ取得は 2026-08-25 22:20 以降。28日ぶんの観測が要る",
+      "unblocked_by": "**「28日たまる待ち」は成立していなかった。**積む側（growth/scripts/revenue-series.mjs）が読むのは ingest-asc.mjs の出力で、その ingest は `../simplememo-ios/data/asc/` を読む —— **このリポジトリの CI に隣は無い**（ingest-asc.mjs の冒頭が自分でそう書いている）。実測 2026-08-26: growth/data/appstore/ は1件、data/revenue-series.json は covered_days 0。08-25 に人が1回走らせたきりだった。**2026-08-26 に積む処理を取得側（../simplememo-ios/scripts/asc_revenue.rb・asc-analytics.yml が毎日実行）へ移し、ここは金額を運ばない写しにした。**待ちが本物になったのはこの日からで、28日ぶんが揃うのは 2026-09-19 前後",
       "unlock": "revenue_28d",
       "blocked_on": [
         {
@@ -1265,17 +1265,19 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "売上・課金・返金・広告の照合",
-      "executor": "ai_proposes",
+      "executor": "ai_autonomous",
       "evidence": [
-        "growth/scripts/ingest-asc.mjs",
-        "data/financial-policy.json",
-        "scripts/check-financial-policy.mjs",
-        "scripts/check-asc-landed.mjs"
+        "../simplememo-ios/scripts/asc_revenue.rb",
+        "../simplememo-ios/data/revenue/series.json",
+        "growth/scripts/revenue-series.mjs",
+        "data/revenue-series.json",
+        "data/financial-policy.json"
       ],
-      "note": "**2026-08-25、収入側が接続された**（オーナーの権限委譲を受けて revenue_connected を true）。App Store Purchases が Proceeds in USD / Sales in USD / Paying Users を返している。**ただし照合そのものはまだ。**見えているのは1日ぶん（課金1件 / 入金 $2.59 / 課金ユーザー1）で、月次にするには日次を積む必要がある。返金は Subscription Event に含まれる見込みだが未確認、広告は未実装なので**4つのうち照合できる材料が揃ったのは1つ（売上）だけ。**executor を上げないのはそのため。手元資金は依然として機械に入っていないので、ランウェイは出さない（足りない材料を検査が名指しする）",
-      "blocker": "not_started",
-      "unblocked_by": "**材料は降りた。**2026-08-25 の取得で10レポート（App Store Purchases / Subscription State / Downloads / Sessions ほか）が入っている。残るのは照合そのものの実装。[2026-08-26] それまで「ASC Analytics のレポートがまだ0件」と書いたままだった —— 同じ行の note には降りたと書いてあり、**行が自分自身と矛盾していた**",
-      "unlock": "impl_measurement"
+      "note": "2026-08-26 に照合を実装（../simplememo-ios/scripts/asc_revenue.rb、asc-analytics.yml で毎日実行）。**4つの現況を実データで確かめた:** **売上・課金** … App Store Purchases Standard の Purchases / Proceeds / Sales を重ならないスパンで積む（ONGOING レポートは過去日を含めて再送されるので、重なりを足すと二重計上）。**手数料** … 実データ $3.05 / $2.59 から帯 [0.1473, 0.1544] を出し Small Business 15% と同定。セント丸めがあるので1点では比べない。30% へ移ったら（＝制度から外れたら）検知する。**返金** … Apple は負の Purchases / Sales で返す。1件も観測していないが、**範囲合計では課金と相殺されるので「返金が無かった」とは言えない**（言えるのは「返金が課金を上回る範囲は無かった」まで）。**広告** … 0 は実測（未出稿）。Campaign 列は取得側が既に読んでいるので出稿した日に現れる。CAC は広告費ゼロである以上**定義上存在しない** —— 0除算を「CAC 0円」と書かない。**まだできないこと:** レポート間の件数突き合わせ（Purchases 1件 vs Subscription Event 4件）は**窓が違う**（08-23 のみ / 08-22..08-23）うえ、保存している内訳が範囲の合計で日別ではないため構造的に不可能。日別の内訳を取得側に足すのが前提",
+      "blocker": null,
+      "unblocked_by": null,
+      "unlock": null,
+      "$prev_note_2026_08_26": "**この行は自分自身と矛盾していた。**note が「4つのうち材料が揃ったのは1つだけ」と書く一方で unblocked_by は「材料は降りた。残るのは実装」と書いていた。2026-08-26 に一次資料（data/asc/2026-08-26 の10レポート）を読んで解消した。**同じ形の食い違いはこの行で2度目**（1度目は「レポートが0件」と「降りた」の同居）"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1296,7 +1298,7 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。**2026-08-25 に売上が降りた**ので LTV・回収期間・粗利の材料は入り始めたが、**1日ぶんでは出せない。**LTV は継続期間が要り、Subscription State Report の Counts は State Metric を跨いだ合計なので契約者数として使えない（取り込みが行を持たず数値列の合計だけを保存する設計のため）",
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。**2026-08-25 に売上が降りた**ので LTV・回収期間・粗利の材料は入り始めたが、**1日ぶんでは出せない。**LTV は継続期間が要り、Subscription State Report の Counts は State Metric を跨いだ合計なので契約者数として使えない（取り込みが行を持たず数値列の合計だけを保存する設計のため）。[2026-08-26] 収入の積み上げが動き出した（上の⑤と同じ配線）。LTV に要る継続期間は Subscription State を跨いだ合計では出せないという制約は変わらない",
       "blocker": "external_data",
       "unblocked_by": "同上。**CACは広告費ゼロのため定義上存在しない**ので、出すのは LTV と回収期間と粗利",
       "unlock": "revenue_28d",

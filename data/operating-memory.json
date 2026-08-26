@@ -1032,6 +1032,37 @@
         ],
         "new_guardrail": "**緑になったPRには push しない。**足すものがあるなら、マージを待ってmain から新しく起こす。squash マージなのでブランチを main にマージし直すこともできない（コミットが祖先にならない）—— 差分を取って再適用する"
       }
+    },
+    {
+      "id": "om-2026-08-26-revenue-wait-was-a-broken-wire",
+      "seeded": false,
+      "area": "⑥ アプリ運営意思決定",
+      "signal": "⑤粗利と⑥LTV が「収入の観測が28日たまる」待ちに分類されていた。台帳の文面は「レポートは降りている。たまっていないのは日数のほう」で、待てば解けるように読めた",
+      "hypothesis": "2026-08-25 に収入が接続されたので、9月下旬には28日ぶんが揃う",
+      "decision": "**揃わない。**積む側を辿った:\n\n    growth/scripts/revenue-series.mjs … growth/data/appstore/ を読む\n    growth/scripts/ingest-asc.mjs     … `../simplememo-ios/data/asc/` を読む\n\n**このリポジトリの CI に隣は無い。**ingest-asc.mjs の冒頭が自分でそう書いている（「seo-check.yml の checkout はこのリポジトリだけなので、CI 上に ../simplememo-ios/data/asc/ は存在しない」）。つまり取り込みは**両方をローカルに checkout した人が手で走らせたときだけ**動いていた。\n\n実測: growth/data/appstore/ は 2026-08-25.json の1件だけ、data/revenue-series.json は covered_days 0（その1件も date_range を持たない版で skipped）。**08-25 に人が1回走らせ、それきり。**\n\n積む処理を取得が毎日走る側（../simplememo-ios/scripts/asc_revenue.rb、asc-analytics.yml）へ移し、公開側は**金額を運ばない写し**にした。",
+      "execution": {
+        "repo": "simplememo-ios / simplememo",
+        "commit": "(this session)",
+        "files": [
+          "../simplememo-ios/scripts/asc_revenue.rb",
+          "../simplememo-ios/.github/workflows/asc-analytics.yml",
+          "growth/scripts/revenue-series.mjs",
+          "data/revenue-series.json",
+          "data/automation-coverage.json"
+        ]
+      },
+      "verification": "実データで通した。data/asc/2026-08-26 の App Store Purchases Standard から 08-23 の1日ぶんを積み、手数料の帯 [0.1473, 0.1544] から Small Business 15% を同定（$3.05 / $2.59）。自己検査は ios 側39件・公開側26件で、**歯止めを外して落ちるところまで観測した**（重なり判定を同一範囲だけに→5件、両方残す→2件、手数料を1点で比べる→3件、28日未満で月額→1件、縮小拒否を外す→1件）",
+      "outcome": "covered_days が 0 → 1 になり、以後は毎日増える。28日ぶんが揃うのは 2026-09-19 前後",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-wait-can-be-a-broken-wire",
+        "text": "**「外部データ待ち」と分類したものは、待つ前に経路を最後まで辿ること。**\n\nこの台帳が同じ形を踏むのは3回目で、前2回は相手側だと思っていたものがこちら側だった:\n\n    「Apple が解約理由をくれない」   → `Cancellation Reason` 列は前日から届いていた\n    「ドメイン期限は管理画面にしか無い」→ RDAP で誰でも引ける\n    「収入が28日たまるのを待つ」     → **積む処理が動く場所に無かった**（今回）\n\n今回が前2回と違うのは、**塞がっていたのが外部ではなく自分の配線**だったこと。しかも配線が切れていることは ingest-asc.mjs の冒頭に**自分で書いてあった** —— 読んだうえで「待ち」に分類していた。\n\n**待ちに見える状態は、進捗が無いことと区別がつかない。**だから「待ち」と書くときは、待てば動くものが**どこで**動くのかを名指しできるかを確かめる。名指しできないなら、それは待ちではない。",
+        "changed": [
+          "growth/scripts/revenue-series.mjs",
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "**積む処理は、データが毎日降りてくる場所に置く。**隣のリポジトリを読む処理は、その隣が CI に存在するかを先に確かめる。公開側は金額を運ばない写しを持ち、`--write` は**観測日数を減らす書き込みを拒む**（隣が見えない場所で走らせても 0 で潰れない）"
+      }
     }
   ]
 }
