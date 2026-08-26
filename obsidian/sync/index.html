@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing【2026】 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidianの同期方法を4つ比較。iCloud Drive・公式Sync・Git・Syncthingについて、費用・対応OS・コンフリクト時の挙動を整理しました。GitとSyncthingは実際に競合編集を起こし、壊れ方をこの環境で実測しています。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing【2026】 | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="4つの同期方法を費用・対応OS・コンフリクト時の挙動で比較。GitとSyncthingは実際に競合編集を起こし、壊れ方をこの環境で実測しています。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-26T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/sync/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing【2026】 | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="4つの同期方法を費用・対応OS・コンフリクト時の挙動で比較。GitとSyncthingは実際に競合編集を起こし、壊れ方をこの環境で実測しています。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/sync/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Obsidian連携", "item": "https://simplememofast.com/obsidian/"},
+      {"@type": "ListItem", "position": 3, "name": "同期方法まとめ", "item": "https://simplememofast.com/obsidian/sync/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/sync/#article","inLanguage":"ja","headline":"Obsidianの同期方法まとめ — iCloud/公式Sync/Git/Syncthingを比較","description":"Obsidianの同期方法4つ（iCloud Drive・公式Obsidian Sync・Git・Syncthing）を費用・対応OS・コンフリクト時の挙動で比較し、GitとSyncthingは実際に競合編集を再現して壊れ方を検証した。","url":"https://simplememofast.com/obsidian/sync/","datePublished":"2026-08-26","dateModified":"2026-08-26","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-sync.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/sync/"}}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/sync/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"結局どれを選べばいいですか？","acceptedAnswer":{"@type":"Answer","text":"Apple製品だけで使うなら、既にオンのiCloud Driveがいちばん手間がありません。Windows/Androidも使う、またはバージョン履歴やサポートを公式に求めるなら有料のObsidian Sync。Gitに慣れていて、コミット履歴として保管庫の変化も残したいならGit。無料でクロスプラットフォームかつクラウド事業者を介したくないならSyncthingです。"}},{"@type":"Question","name":"Obsidian Syncを使わずに複数端末で同期できますか？","acceptedAnswer":{"@type":"Answer","text":"できます。保管庫は特別な形式を持たないただのMarkdownファイルの集まりなので、iCloud Drive・Dropbox・Google DriveなどOS標準のファイル同期や、GitやSyncthingのような汎用の同期ツールがそのまま使えます。Obsidian Syncは同期方法の選択肢の一つであって、必須ではありません。"}},{"@type":"Question","name":"同時に2台で編集するとどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"方式によって壊れ方が違います。本記事で実測したところ、Gitは同じファイルに衝突マーカー（&lt;&lt;&lt;&lt;&lt;&lt;&lt;）が直接書き込まれ手動での解決が必要でした。Syncthingは自動で片方を採用しつつ、もう片方を「sync-conflict」という別ファイルとして保存し、データの消失はありませんでした。iCloud DriveとObsidian Syncはこの環境（Linux・macOS/iOSなし）では実機検証できていません。"}},{"@type":"Question","name":"複数の同期方法を同時に使ってもいいですか？","acceptedAnswer":{"@type":"Answer","text":"Obsidian公式ヘルプは、Obsidian SyncをDropbox・Google Drive・OneDriveなど他のクラウドストレージと併用すると同期の競合（sync conflicts）が起きるとして、保管庫のバックアップを推奨しています。二重の同期の仕組みを同じフォルダに重ねがけするのは避け、1つの保管庫には1つの同期方法にとどめるのが安全です。"}},{"@type":"Question","name":"Obsidian Syncで間違って上書きしたら元に戻せますか？","acceptedAnswer":{"@type":"Answer","text":"公式ヘルプによると、Version History機能でノートごとの過去バージョンを閲覧・復元できます。保持期間はStandardプランで1か月、Plusプランで12か月、添付ファイルは2週間です（2026年8月26日に公式ヘルプで確認）。復元はファイルを選んで「Open version history」から行います。"}}]}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/obsidian/sync/#webpage","inLanguage":"ja","name":"Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing【2026】 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/obsidian/sync/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* 原因/事象ブロック（コンフリクトの実測結果を並べる） */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:20%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-jp__nav&amp;mt=8" class="global-nav__cta">
+          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span lang="ja" data-lang="ja">Obsidian 同期方法の比較</span><span lang="en" data-lang="en">Obsidian sync methods compared</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span lang="ja" data-lang="ja">Obsidianを複数端末で同期する4つの方法</span><span lang="en" data-lang="en">Four ways to sync your Obsidian vault across devices</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span lang="ja" data-lang="ja">保管庫は特別な形式を持たない、ただのMarkdownフォルダです。だから同期方法はObsidian自身に縛られず、<strong>iCloud DriveのようなOS標準の同期、有料の公式Obsidian Sync、Gitのようなバージョン管理、Syncthingのような自己ホスト型の同期ツール</strong>まで自由に選べます。ここでは4方式を費用・対応OS・コンフリクト時の挙動で比較し、<strong>GitとSyncthingは実際に2台のオフライン編集をぶつけて壊れ方を確かめました</strong>。</span><span lang="en" data-lang="en">A vault has no special format — it's just a folder of Markdown files. That means the sync method isn't locked to Obsidian itself: OS-native sync like iCloud Drive, the paid official Obsidian Sync, version control like Git, or a self-hosted tool like Syncthing all work. This page compares the four on cost, platform support, and what happens when a conflict hits — and for Git and Syncthing, <strong>we actually collided two offline edits and recorded how each one broke</strong>.</span>
+        </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-26">2026年8月26日</time></span><span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published <time datetime="2026-08-26">August 26, 2026</time></span>
+        </p>
+      </div>
+
+      <!-- Answer-first (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">ひとことで言うと</span><span lang="en" data-lang="en">SHORT ANSWER</span></div>
+          <p><span lang="ja" data-lang="ja">Apple製品だけで完結するなら<strong>iCloud Drive</strong>（既定で動いており追加費用なし）で十分です。Windows/Androidもまたぐ、または公式のバージョン履歴やサポートが欲しいなら<strong>Obsidian Sync</strong>（有料）。Gitに慣れていて変更履歴もコミットとして残したいなら<strong>Git</strong>（無料・要セットアップ）。クラウド事業者を介さずクロスプラットフォームで無料にしたいなら<strong>Syncthing</strong>（無料・要セットアップ）。<strong>実測して分かった違いは「コンフリクト（競合編集）が起きたときの壊れ方」</strong>で、Gitはノート本文に衝突マーカーが直接挿入され手動解決が要り、Syncthingは自動で片方を残しもう片方を別ファイルとして保存します。</span><span lang="en" data-lang="en">If you're Apple-only, <strong>iCloud Drive</strong> is already on and costs nothing extra. Crossing into Windows/Android, or wanting official version history and support, points to <strong>Obsidian Sync</strong> (paid). Comfortable with Git and want change history as commits? Use <strong>Git</strong> (free, needs setup). Want free, cross-platform, no cloud vendor in the loop? <strong>Syncthing</strong> (free, needs setup). <strong>What we actually measured is how each one breaks on conflict</strong>: Git inserts conflict markers straight into the note body and needs a manual resolve; Syncthing keeps one version under the original name and saves the other as a separate file automatically.</span></p>
+        </div>
+      </section>
+
+      <!-- Four methods overview -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">4つの同期方法</span><span lang="en" data-lang="en">The four methods</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">どれも「保管庫フォルダの中身を複数端末で揃える」という同じ仕事をしますが、仕組みが違います。</span><span lang="en" data-lang="en">All four do the same job — keeping a vault folder identical across devices — but the mechanism differs.</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">☁️ <span lang="ja" data-lang="ja">iCloud Drive</span><span lang="en" data-lang="en">iCloud Drive</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">Apple純正のファイル同期。保管庫フォルダをiCloud Drive内に置くだけで、Mac/iPhone/iPad間は追加設定なしに揃います。Windows/Android/Linuxには届きません。</span><span lang="en" data-lang="en">Apple's own file sync. Put the vault folder inside iCloud Drive and Mac/iPhone/iPad stay in sync with no extra setup. Doesn't reach Windows, Android, or Linux.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔄 <span lang="ja" data-lang="ja">Obsidian Sync（公式・有料）</span><span lang="en" data-lang="en">Obsidian Sync (official, paid)</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">Obsidian開発元が提供する公式サービス。E2E暗号化・Version History機能を持ち、全プラットフォームに対応します。料金は<a href="/obsidian/pricing/">別記事で実測済み</a>です。</span><span lang="en" data-lang="en">The official service from Obsidian's own developers. Offers end-to-end encryption and a version-history feature, and reaches every platform. Pricing is <a href="/obsidian/pricing/">measured in a separate article</a>.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🌿 <span lang="ja" data-lang="ja">Git</span><span lang="en" data-lang="en">Git</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">保管庫をGitリポジトリとして扱い、コミット・push・pullで同期する方式です。コミュニティプラグイン（Obsidian Git等）を使えば自動化もできます。全変更が履歴として残る一方、コンフリクト解決にはGitの知識が要ります。</span><span lang="en" data-lang="en">Treats the vault as a Git repository, syncing via commit/push/pull. Community plugins (e.g. Obsidian Git) can automate it. Every change lives in history, but resolving a conflict requires knowing Git.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔁 <span lang="ja" data-lang="ja">Syncthing</span><span lang="en" data-lang="en">Syncthing</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">オープンソースの自己ホスト型ファイル同期。クラウド事業者を介さず端末同士が直接（P2P）で同期します。無料・全プラットフォーム対応ですが、各端末にアプリを入れてペアリングする手間があります。</span><span lang="en" data-lang="en">Open-source, self-hosted file sync. Devices talk directly (P2P) with no cloud provider in between. Free and cross-platform, but you install it on every device and pair them yourself.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Comparison table -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">比較表</span><span lang="en" data-lang="en">Comparison table</span>
+        </h2>
+        <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col"><span lang="ja" data-lang="ja">項目</span><span lang="en" data-lang="en">Aspect</span></th>
+              <th scope="col">iCloud Drive</th>
+              <th scope="col"><span lang="ja" data-lang="ja">Obsidian Sync（公式）</span><span lang="en" data-lang="en">Obsidian Sync</span></th>
+              <th scope="col">Git</th>
+              <th scope="col">Syncthing</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">費用</span><span lang="en" data-lang="en">Cost</span></th>
+              <td data-label="iCloud Drive"><span class="mk-yes"><span lang="ja" data-lang="ja">無料</span><span lang="en" data-lang="en">Free</span></span> <span lang="ja" data-lang="ja">（既定のiCloud容量内）</span><span lang="en" data-lang="en">(within default iCloud storage)</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-no"><span lang="ja" data-lang="ja">有料</span><span lang="en" data-lang="en">Paid</span></span> <span lang="ja" data-lang="ja">（<a href="/obsidian/pricing/">料金詳細</a>）</span><span lang="en" data-lang="en">(<a href="/obsidian/pricing/">pricing</a>)</span></td>
+              <td data-label="Git"><span class="mk-yes"><span lang="ja" data-lang="ja">無料</span><span lang="en" data-lang="en">Free</span></span> <span lang="ja" data-lang="ja">（ホスト先の容量次第）</span><span lang="en" data-lang="en">(depends on host storage)</span></td>
+              <td data-label="Syncthing"><span class="mk-yes"><span lang="ja" data-lang="ja">無料</span><span lang="en" data-lang="en">Free</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">セットアップの手間</span><span lang="en" data-lang="en">Setup effort</span></th>
+              <td data-label="iCloud Drive"><span class="mk-yes"><span lang="ja" data-lang="ja">ほぼ無し</span><span lang="en" data-lang="en">Minimal</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span lang="ja" data-lang="ja">低い</span><span lang="en" data-lang="en">Low</span></span> <span lang="ja" data-lang="ja">（アプリ内で完結）</span><span lang="en" data-lang="en">(inside the app)</span></td>
+              <td data-label="Git"><span class="mk-no"><span lang="ja" data-lang="ja">高い</span><span lang="en" data-lang="en">High</span></span> <span lang="ja" data-lang="ja">（リポジトリ・プラグイン設定）</span><span lang="en" data-lang="en">(repo + plugin config)</span></td>
+              <td data-label="Syncthing"><span class="mk-part"><span lang="ja" data-lang="ja">中</span><span lang="en" data-lang="en">Medium</span></span> <span lang="ja" data-lang="ja">（端末ごとにペアリング）</span><span lang="en" data-lang="en">(pair every device)</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">対応プラットフォーム</span><span lang="en" data-lang="en">Platforms</span></th>
+              <td data-label="iCloud Drive"><span class="mk-no">Apple<span lang="ja" data-lang="ja">のみ</span><span lang="en" data-lang="en"> only</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span lang="ja" data-lang="ja">全プラットフォーム</span><span lang="en" data-lang="en">All platforms</span></span></td>
+              <td data-label="Git"><span class="mk-yes"><span lang="ja" data-lang="ja">全プラットフォーム</span><span lang="en" data-lang="en">All platforms</span></span> <span lang="ja" data-lang="ja">（モバイルはプラグイン次第）</span><span lang="en" data-lang="en">(mobile depends on plugins)</span></td>
+              <td data-label="Syncthing"><span class="mk-yes"><span lang="ja" data-lang="ja">全プラットフォーム</span><span lang="en" data-lang="en">All platforms</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">コンフリクト時の挙動</span><span lang="en" data-lang="en">On conflict</span></th>
+              <td data-label="iCloud Drive"><span lang="ja" data-lang="ja">番号付き重複ファイル（Apple公式ヘルプ・Obsidianでの実機検証は未実施）</span><span lang="en" data-lang="en">Numbered duplicate file (per Apple's own help doc; not tested with Obsidian here)</span></td>
+              <td data-label="Obsidian Sync"><span lang="ja" data-lang="ja">具体的な処理は公式ヘルプに記載なし。Version Historyで復元可能</span><span lang="en" data-lang="en">Exact mechanism undocumented; recoverable via Version History</span></td>
+              <td data-label="Git"><span class="mk-part"><span lang="ja" data-lang="ja">本文に衝突マーカーを挿入（実測）</span><span lang="en" data-lang="en">Inserts conflict markers in the note (measured)</span></span></td>
+              <td data-label="Syncthing"><span class="mk-part"><span lang="ja" data-lang="ja">別ファイルとして両方保存（実測）</span><span lang="en" data-lang="en">Keeps both as separate files (measured)</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">バージョン履歴</span><span lang="en" data-lang="en">Version history</span></th>
+              <td data-label="iCloud Drive"><span class="mk-no"><span lang="ja" data-lang="ja">無し</span><span lang="en" data-lang="en">None</span></span> <span lang="ja" data-lang="ja">（Markdownファイル単体では）</span><span lang="en" data-lang="en">(for plain Markdown files)</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span lang="ja" data-lang="ja">あり</span><span lang="en" data-lang="en">Yes</span></span> <span lang="ja" data-lang="ja">（Standard 1か月・Plus 12か月保持）</span><span lang="en" data-lang="en">(Standard: 1 month, Plus: 12 months)</span></td>
+              <td data-label="Git"><span class="mk-yes"><span lang="ja" data-lang="ja">あり</span><span lang="en" data-lang="en">Yes</span></span> <span lang="ja" data-lang="ja">（無期限・コミット単位）</span><span lang="en" data-lang="en">(unlimited, per commit)</span></td>
+              <td data-label="Syncthing"><span class="mk-part"><span lang="ja" data-lang="ja">既定は無効</span><span lang="en" data-lang="en">Off by default</span></span> <span lang="ja" data-lang="ja">（設定で有効化可能）</span><span lang="en" data-lang="en">(can be enabled)</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">通信の暗号化</span><span lang="en" data-lang="en">Transport encryption</span></th>
+              <td data-label="iCloud Drive"><span class="mk-yes"><span lang="ja" data-lang="ja">あり</span><span lang="en" data-lang="en">Yes</span></span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes"><span lang="ja" data-lang="ja">E2E暗号化</span><span lang="en" data-lang="en">End-to-end encrypted</span></span></td>
+              <td data-label="Git"><span class="mk-part"><span lang="ja" data-lang="ja">ホスト依存</span><span lang="en" data-lang="en">Depends on host</span></span> <span lang="ja" data-lang="ja">（HTTPS/SSH）</span><span lang="en" data-lang="en">(HTTPS/SSH)</span></td>
+              <td data-label="Syncthing"><span class="mk-yes"><span lang="ja" data-lang="ja">TLS・P2P直結</span><span lang="en" data-lang="en">TLS, direct P2P</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">オフラインで書けるか</span><span lang="en" data-lang="en">Works offline?</span></th>
+              <td data-label="iCloud Drive"><span class="mk-yes">◎</span></td>
+              <td data-label="Obsidian Sync"><span class="mk-yes">◎</span></td>
+              <td data-label="Git"><span class="mk-yes">◎</span></td>
+              <td data-label="Syncthing"><span class="mk-yes">◎</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="ja" data-lang="ja">※ 「コンフリクト時の挙動」「バージョン履歴」の一部セルは検証範囲が異なります。詳しくは次章と、末尾の「検証環境と検証範囲」をご覧ください。</span><span lang="en" data-lang="en">※ Rows on conflict behavior and version history mix directly-tested and documentation-based cells. See the next section and the test-scope box at the end.</span></p>
+      </section>
+
+      <!-- Failure modes — the unique value of this article -->
+      <section class="lp-section" id="conflicts">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">壊れ方を比べる — 実際にコンフリクトを起こしてみた</span><span lang="en" data-lang="en">Comparing failure modes — we actually triggered a conflict</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">同期方式のカタログ的な比較はよく見かけますが、<strong>「同時に2台で編集したら実際どうなるか」まで手を動かして確かめた記事は多くありません。</strong>ここでは、この検証環境（Ubuntu 24.04・GitHub Actions）でGitとSyncthingを実際にセットアップし、2台の端末を模したフォルダに<strong>オフラインで別々の1行を追記してから同期を再開</strong>させました。iCloud DriveとObsidian Syncは、この環境にmacOS/iOSが無いため実機では再現できておらず、公式ヘルプの記載に基づいています。</span><span lang="en" data-lang="en">Feature-comparison tables for sync tools are common; articles that actually collide two devices and record what happens are not. In this test environment (Ubuntu 24.04, GitHub Actions) we set up real Git and Syncthing instances, wrote a different line to each of two folders standing in for two devices while offline, then let them sync again. iCloud Drive and Obsidian Sync couldn't be reproduced hands-on — no macOS/iOS is available here — so those two rely on official documentation instead.</span>
+        </p>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">実測 — Git</span><span lang="en" data-lang="en">MEASURED — Git</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">ノート本文に衝突マーカーがそのまま挿入される</span><span lang="en" data-lang="en">Conflict markers land directly inside the note body</span></h3>
+          <p><span lang="ja" data-lang="ja">中央リポジトリを1つ作り、2つのcloneをそれぞれ別端末に見立てました。両方を「オフライン」にしたまま同じノートの末尾に別の1行を追記してコミットし、順番にpushさせています。</span><span lang="en" data-lang="en">We created one bare repository and cloned it twice, standing in for two devices. With both "offline", each appended a different line to the same note and committed, then pushed one after the other.</span></p>
+          <pre class="note-sample"><code># デバイスAを先にpush → 成功
+$ git push origin master
+   ba48c62..f0be52e  master -> master
+
+# デバイスBをpush → 拒否される
+$ git push origin master
+ ! [rejected]  master -> master (fetch first)
+
+# デバイスBがpull（マージを試み、衝突）
+$ git pull origin master --no-rebase
+Auto-merging Daily Notes/2026-08-26.md
+CONFLICT (content): Merge conflict in Daily Notes/2026-08-26.md
+
+# ノートの中身（Obsidianで開くとこのまま見える）
+# 2026-08-26
+
+- 08:00 起床
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 09:15 買い物メモ
+=======
+- 09:00 会議メモ
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; f0be52e...</code></pre>
+          <p><span lang="ja" data-lang="ja"><strong>データは失われません</strong>が、衝突マーカーの入った状態のノートがそのままObsidianで開けてしまいます。気づかずに読むと自分の文章だと誤読しかねず、解決には <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> / <code>=======</code> / <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> の意味を理解したうえで手動編集し、コミットし直す必要があります。Obsidian Git のようなプラグインを使っていても、この最終的な衝突解決はGitの知識が要る作業です。</span><span lang="en" data-lang="en"><strong>No data is lost</strong>, but the note opens in Obsidian with the conflict markers still in it — easy to misread as your own text if you don't notice. Resolving it means understanding what <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> mean, editing by hand, and committing again. Even with a plugin like Obsidian Git handling the sync, this final resolve step still requires knowing Git.</span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">実測 — Syncthing</span><span lang="en" data-lang="en">MEASURED — Syncthing</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">片方を残し、もう片方を別ファイルに退避する</span><span lang="en" data-lang="en">Keeps one version, exiles the other to a separate file</span></h3>
+          <p><span lang="ja" data-lang="ja">同じ手順（apt経由でインストールしたSyncthing v1.27.2を2インスタンス起動し、ローカルのTCPで直接ペアリング）で試すと、Gitとはまったく違う壊れ方をしました。</span><span lang="en" data-lang="en">Running the same scenario — two Syncthing v1.27.2 instances (installed via apt) paired directly over local TCP — broke in a completely different way from Git.</span></p>
+          <pre class="note-sample"><code># 同期再開後のvault-a
+Daily Notes/2026-08-26.md
+Daily Notes/2026-08-26.sync-conflict-20260825-212901-P2RW67Y.md
+
+# 2026-08-26.md（採用された側）
+# 2026-08-26
+
+- 08:00 起床
+- 09:15 買い物メモ（デバイスBで追記）
+
+# 2026-08-26.sync-conflict-....md（退避された側）
+# 2026-08-26
+
+- 08:00 起床
+- 09:00 会議メモ（デバイスAで追記）</code></pre>
+          <p><span lang="ja" data-lang="ja">Syncthingは自動でどちらか一方を元のファイル名のまま残し、もう一方を <code>*.sync-conflict-日時-デバイスID.md</code> という<strong>別のノートとして保存</strong>します。本文にマーカーが混ざることはなく、Git知識も不要です。ただし<strong>自動でマージはされない</strong>ため、退避されたノートに気づかず放置すると、同じ話題のメモが2つのファイルに分裂したままになります。保管庫の検索結果に見慣れないファイル名が増える点は、運用上のノイズになり得ます。</span><span lang="en" data-lang="en">Syncthing automatically keeps one version under the original filename and saves the other as <strong>a separate note</strong> named <code>*.sync-conflict-timestamp-deviceID.md</code>. No markers end up mixed into the text, and no Git knowledge is needed. But <strong>nothing gets merged automatically</strong> — miss the exiled note and the same topic stays split across two files. Unfamiliar filenames piling up in vault search is a real, if minor, cost of this approach.</span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">公式情報・未検証 — iCloud Drive</span><span lang="en" data-lang="en">OFFICIAL DOCS, NOT HANDS-ON — iCloud Drive</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">Apple公式ヘルプ上は番号付きの重複ファイル</span><span lang="en" data-lang="en">Apple's own guide describes numbered duplicate files</span></h3>
+          <p><span lang="ja" data-lang="ja">Apple公式のMacヘルプは、iCloud Drive上でドキュメントのバージョンが競合したとき、コンフリクト解決ダイアログで各バージョンを選んで保持でき、複数保持した場合は「Seven Wonders」「Seven Wonders 2」のように<strong>末尾に番号が付いたファイル名</strong>で残る、と説明しています。ただしこのダイアログはAppleの文書バージョニングAPIに対応したアプリ（Pages等）向けの挙動で、<strong>Obsidianのようにファイルシステムへ直接読み書きするアプリで同じダイアログが出るとは限りません</strong>。この環境にはmacOS/iOSが無く、Obsidian＋iCloud Driveでの実機検証はできていません。</span><span lang="en" data-lang="en">Apple's own Mac Help guide describes a conflict-resolution dialog for iCloud Drive documents: you can keep multiple versions, and each gets a numbered filename like "Seven Wonders" and "Seven Wonders 2". That dialog, however, is documented for apps using Apple's document-versioning API (e.g. Pages) — <strong>there's no guarantee the same dialog appears for an app like Obsidian that reads and writes the filesystem directly.</strong> This environment has no macOS/iOS, so we could not test Obsidian plus iCloud Drive hands-on.</span></p>
+          <p><span lang="ja" data-lang="ja">既存記事の<a href="/obsidian/daily-note/#missing">「デイリーノートに入らない」章</a>で扱った同期遅延（書き込みは即座でも反映まで数秒〜数十秒かかる）は、この競合とは別の現象です。両方を知っておくと、iCloud経由のトラブルの切り分けが早くなります。</span><span lang="en" data-lang="en">The sync-lag issue covered in <a href="/obsidian/daily-note/#missing">the daily-note article</a> — where the write is instant but propagation takes seconds — is a separate phenomenon from a true conflict. Knowing both speeds up diagnosing iCloud trouble.</span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">公式情報・未検証 — Obsidian Sync</span><span lang="en" data-lang="en">OFFICIAL DOCS, NOT HANDS-ON — Obsidian Sync</span></div>
+          <h3 class="cz__t"><span lang="ja" data-lang="ja">競合の解決アルゴリズムは非公開。頼れるのはVersion History</span><span lang="en" data-lang="en">The resolution algorithm isn't published; Version History is the safety net</span></h3>
+          <p><span lang="ja" data-lang="ja">公式ヘルプ（obsidian.md/help/sync、2026年8月26日取得）には、同時編集時にどちらのバージョンを採用するかという具体的なアルゴリズムの記載が見当たりませんでした。一方で<strong>「Obsidian SyncをDropbox・Google Drive・OneDriveなど他のクラウドストレージと併用すると同期の競合（sync conflicts）が起きるおそれがあるため、保管庫をバックアップしてください」</strong>という公式の注意書きがあり、Obsidian Syncにも競合という概念自体は存在します。回復手段として明記されているのは<strong>Version History</strong>機能で、ノート単位で過去のバージョンを一覧から選んで復元できます。保持期間はStandardプランで1か月、Plusプランで12か月、添付ファイルはプランによらず2週間です。</span><span lang="en" data-lang="en">The official help (obsidian.md/help/sync, fetched August 26, 2026) doesn't spell out which version wins on simultaneous edits. It does warn, in its own words, that <strong>"if you are using Obsidian Sync alongside other cloud storage providers, such as Dropbox, Google Drive, or OneDrive, please back up your vault to prevent sync conflicts"</strong> — so the concept of a conflict clearly exists here too. The documented recovery path is <strong>Version History</strong>: pick a past version of a note from a list and restore it. Retention is 1 month on Standard, 12 months on Plus, and 2 weeks for attachments regardless of plan.</span></p>
+          <p><span lang="ja" data-lang="ja">この環境では支払いが要るためObsidian Syncのアカウントを作れず、実際の競合再現はできていません。</span><span lang="en" data-lang="en">Obsidian Sync requires payment to sign up, so we could not create an account or reproduce a real conflict in this environment.</span></p>
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">共通の教訓</span><span lang="en" data-lang="en">THE COMMON LESSON</span></div>
+          <p><span lang="ja" data-lang="ja">4方式のうち、実測できたGit・Syncthingはどちらも<strong>データを失いませんでした</strong>。壊れ方の違いは「マーカーが本文に混ざるか」「別ファイルに分裂するか」で、どちらも<strong>気づかなければ静かに放置される</strong>という点は共通しています。1つの保管庫を複数の同期方式で二重に同期しない（Obsidian公式が明示的に注意しているのもこの点）のが、いちばん確実な予防策です。</span><span lang="en" data-lang="en">Of the four, the two we could measure — Git and Syncthing — both preserved every byte of data. The difference is where the mess lands: markers mixed into the text, or a split into two files. Both share the same risk: <strong>nothing forces you to notice</strong>. The single most reliable precaution is not layering two sync methods onto the same vault at once — which is exactly what Obsidian's own warning calls out.</span></p>
+        </div>
+      </section>
+
+      <!-- How to choose -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">選び方の目安</span><span lang="en" data-lang="en">How to choose</span>
+        </h2>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">🍎 <span lang="ja" data-lang="ja">Apple製品だけで使う</span><span lang="en" data-lang="en">Apple devices only</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">iCloud Driveで十分です。既にオンになっており、追加の費用もセットアップも要りません。</span><span lang="en" data-lang="en">iCloud Drive is enough — it's already on, costs nothing extra, and needs no setup.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🖥️ <span lang="ja" data-lang="ja">Windows/Androidもまたぐ</span><span lang="en" data-lang="en">You also use Windows/Android</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">公式サポートとバージョン履歴を技術知識なしで得たいなら Obsidian Sync。無料でよいならSyncthingが対抗馬です。</span><span lang="en" data-lang="en">Want official support and version history with no technical setup? Obsidian Sync. Fine with free instead? Syncthing is the alternative.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🌿 <span lang="ja" data-lang="ja">Gitに慣れている</span><span lang="en" data-lang="en">You already know Git</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">保管庫の変化そのものをコミット履歴として残したいなら Git。コンフリクト解決を自分でできることが前提です。</span><span lang="en" data-lang="en">Want the vault's own change history as commits? Git — on the assumption you can resolve a conflict yourself.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🔒 <span lang="ja" data-lang="ja">クラウド事業者を介したくない</span><span lang="en" data-lang="en">No third-party cloud in the loop</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">端末同士が直接同期するSyncthingが唯一の選択肢です。無料・全プラットフォームですが、各端末へのセットアップは自分で行います。</span><span lang="en" data-lang="en">Syncthing is the only option where devices talk directly. Free and cross-platform, but you set up every device yourself.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SimpleMemo tie-in -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">どの同期方式でも、保管庫はただのフォルダ</span><span lang="en" data-lang="en">Whatever you choose, the vault is still just a folder</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">同期方式をどれにするかは、保管庫フォルダの「揃え方」を決めるだけの話です。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、<strong>iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記</strong>します。iCloud Driveで同期している保管庫が対象で、GitやSyncthingだけで運用している（iCloud Driveを経由しない）保管庫フォルダは、現時点では対象外です。</span><span lang="en" data-lang="en">Choosing a sync method only decides how the vault folder stays identical across devices. Simple Memo emails each note to you and <strong>appends it directly into the daily note inside your vault folder on iCloud Drive</strong>. That means vaults synced via iCloud Drive; a vault run purely through Git or Syncthing, with no iCloud Drive in the picture, is out of scope today.</span>
+        </p>
+        <div class="cta-box">
+          <div class="cta-box__title"><span lang="ja" data-lang="ja">どの同期方式でも、届く先は同じフォルダ</span><span lang="en" data-lang="en">Whichever sync method you use, it lands in the same folder</span></div>
+          <p class="cta-box__desc"><span lang="ja" data-lang="ja">ダウンロードは無料。iCloud Drive上の保管庫フォルダを一度選ぶだけで設定は完了します。</span><span lang="en" data-lang="en">Free to download. Setup is picking your vault folder in iCloud Drive once.</span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+          </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-ja.svg" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja" data-lang="ja">
+            <img src="/assets/img/qr-obsidian-sync-en.svg" width="132" height="132" alt="QR code to download on the App Store" loading="lazy" lang="en" data-lang="en">
+            <small><span lang="ja" data-lang="ja">PCの方はスマホで読み取り</span><span lang="en" data-lang="en">On desktop? Scan with your phone</span></small>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span>
+        </h2>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">結局どれを選べばいいですか？</span><span lang="en" data-lang="en">Which one should I actually pick?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">Apple製品だけで使うなら、既にオンのiCloud Driveがいちばん手間がありません。Windows/Androidも使う、またはバージョン履歴やサポートを公式に求めるなら有料のObsidian Sync。Gitに慣れていて、コミット履歴として保管庫の変化も残したいならGit。無料でクロスプラットフォームかつクラウド事業者を介したくないならSyncthingです。</span><span lang="en" data-lang="en">Apple-only: iCloud Drive, already on, least effort. Also on Windows/Android, or want official version history and support: paid Obsidian Sync. Comfortable with Git and want the vault's history as commits: Git. Free, cross-platform, no cloud vendor: Syncthing.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Obsidian Syncを使わずに複数端末で同期できますか？</span><span lang="en" data-lang="en">Can I sync across devices without Obsidian Sync?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">できます。保管庫は特別な形式を持たないただのMarkdownファイルの集まりなので、iCloud Drive・Dropbox・Google DriveなどOS標準のファイル同期や、GitやSyncthingのような汎用の同期ツールがそのまま使えます。Obsidian Syncは同期方法の選択肢の一つであって、必須ではありません。</span><span lang="en" data-lang="en">Yes. A vault has no special format — it's just Markdown files — so OS-native sync (iCloud Drive, Dropbox, Google Drive) or general-purpose tools like Git and Syncthing all work as-is. Obsidian Sync is one option among several, not a requirement.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">同時に2台で編集するとどうなりますか？</span><span lang="en" data-lang="en">What happens if I edit from two devices at once?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">方式によって壊れ方が違います。本記事で実測したところ、Gitは同じファイルに衝突マーカー（&lt;&lt;&lt;&lt;&lt;&lt;&lt;）が直接書き込まれ手動での解決が必要でした。Syncthingは自動で片方を採用しつつ、もう片方を「sync-conflict」という別ファイルとして保存し、データの消失はありませんでした。iCloud DriveとObsidian Syncはこの環境（Linux・macOS/iOSなし）では実機検証できていません。</span><span lang="en" data-lang="en">The failure mode differs by tool. We measured Git inserting conflict markers (&lt;&lt;&lt;&lt;&lt;&lt;&lt;) straight into the file, needing a manual resolve. Syncthing auto-picked one version and saved the other as a separate "sync-conflict" file — no data lost either way. iCloud Drive and Obsidian Sync couldn't be tested hands-on in this environment (Linux, no macOS/iOS).</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">複数の同期方法を同時に使ってもいいですか？</span><span lang="en" data-lang="en">Can I run more than one sync method at once?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">Obsidian公式ヘルプは、Obsidian SyncをDropbox・Google Drive・OneDriveなど他のクラウドストレージと併用すると同期の競合（sync conflicts）が起きるとして、保管庫のバックアップを推奨しています。二重の同期の仕組みを同じフォルダに重ねがけするのは避け、1つの保管庫には1つの同期方法にとどめるのが安全です。</span><span lang="en" data-lang="en">Obsidian's own help says pairing Obsidian Sync with other cloud storage like Dropbox, Google Drive, or OneDrive can cause sync conflicts, and recommends backing up your vault. Stick to one sync method per vault rather than layering two onto the same folder.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Obsidian Syncで間違って上書きしたら元に戻せますか？</span><span lang="en" data-lang="en">If Obsidian Sync overwrites something by mistake, can I undo it?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">公式ヘルプによると、Version History機能でノートごとの過去バージョンを閲覧・復元できます。保持期間はStandardプランで1か月、Plusプランで12か月、添付ファイルは2週間です（2026年8月26日に公式ヘルプで確認）。復元はファイルを選んで「Open version history」から行います。</span><span lang="en" data-lang="en">Per the official help, Version History lets you view and restore past versions of a note. Retention is 1 month on Standard, 12 months on Plus, and 2 weeks for attachments (checked against the official help on August 26, 2026). Restore by selecting the file and choosing "Open version history".</span></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">検証環境と検証範囲</span><span lang="en" data-lang="en">TEST ENVIRONMENT &amp; SCOPE</span></div>
+          <p style="margin:0;"><span lang="ja" data-lang="ja">検証日: 2026年8月26日 ／ 環境: Linuxデスクトップ（Ubuntu 24.04・GitHub Actions実行環境）。<strong>実測（このセッションで実際に動かして確認）</strong>: Git 2.x — 中央リポジトリ1つと2つのcloneでオフライン同時編集→pushの拒否→pull時のマージ衝突→本文への衝突マーカー挿入までを再現。Syncthing v1.27.2（apt経由でインストール）— ローカルTCPで直接ペアリングした2インスタンス間で同じシナリオを再現し、<code>sync-conflict-*.md</code> ファイルの生成を確認。<strong>公式情報に基づく記載（未検証）</strong>: Obsidian Syncのバージョン履歴の保持期間・他クラウド併用時の注意（obsidian.md/help/sync を本セッションから直接取得・2026年8月26日）、iCloud Drive上のドキュメント競合時の番号付きファイル名（Apple公式Macヘルプ）。<strong>この環境で検証できなかったこと</strong>: iCloud DriveとObsidianの組み合わせでの実際の競合挙動（macOS/iOSが無い）、Obsidian Syncでの実際の競合再現（有料サービスのため未契約）。Obsidianのバージョンや各ツールの挙動は将来変わる可能性があるため、最新情報は各公式サイトでご確認ください。</span><span lang="en" data-lang="en">Tested August 26, 2026 on Linux desktop (Ubuntu 24.04, GitHub Actions runner). <strong>Hands-on (actually run in this session)</strong>: Git 2.x — one bare repo with two clones reproduced an offline concurrent edit, a rejected push, a merge conflict on pull, and conflict markers landing in the note body. Syncthing v1.27.2 (installed via apt) — two instances paired directly over local TCP reproduced the same scenario and produced a <code>sync-conflict-*.md</code> file. <strong>Based on official documentation (not hands-on)</strong>: Obsidian Sync's version-history retention and its warning about combining with other cloud storage (obsidian.md/help/sync, fetched directly from this session on August 26, 2026); iCloud Drive's numbered-filename behavior on document conflicts (Apple's own Mac Help). <strong>Not testable in this environment</strong>: actual conflict behavior for Obsidian plus iCloud Drive (no macOS/iOS here) and an actual conflict on Obsidian Sync (a paid service we don't have an account for). Tool behavior can change over time — check each official site for the latest.</span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/obsidian/"><span lang="ja" data-lang="ja">Obsidian連携の詳細</span><span lang="en" data-lang="en">Obsidian integration</span></a>
+          <a href="/obsidian/daily-note/"><span lang="ja" data-lang="ja">デイリーノートへ追記する方法</span><span lang="en" data-lang="en">Appending to your daily note</span></a>
+          <a href="/obsidian/what-is-vault/"><span lang="ja" data-lang="ja">保管庫（Vault）とは — 実体はただのフォルダ</span><span lang="en" data-lang="en">What is a vault</span></a>
+          <a href="/obsidian/pricing/"><span lang="ja" data-lang="ja">Obsidianの料金 — 無料でどこまで使えるか</span><span lang="en" data-lang="en">Obsidian pricing</span></a>
+          <a href="/obsidian/getting-started/"><span lang="ja" data-lang="ja">Obsidianの始め方（実画面ガイド）</span><span lang="en" data-lang="en">Getting started with Obsidian</span></a>
+          <a href="/obsidian/compare/logseq/"><span lang="ja" data-lang="ja">Obsidian vs Logseq 比較検証</span><span lang="en" data-lang="en">Obsidian vs Logseq</span></a>
+          <a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">参考文献</span><span lang="en" data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/help/sync" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Sync</a> — <span lang="ja" data-lang="ja">Obsidian Syncの公式ヘルプ。2026年8月26日に本セッションから直接取得</span><span lang="en" data-lang="en">Official help for Obsidian Sync, fetched directly from this session on August 26, 2026</span></li>
+    <li><a href="https://obsidian.md/help/sync/version-history" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Version History</a> — <span lang="ja" data-lang="ja">バージョン履歴の保持期間・復元方法の公式ヘルプ</span><span lang="en" data-lang="en">Official help on version-history retention and restore</span></li>
+    <li><a href="https://support.apple.com/en-in/guide/mac-help/mh40780/mac" target="_blank" rel="noopener" style="color:var(--accent);">If document versions conflict in iCloud Drive on Mac — Apple Support</a> — <span lang="ja" data-lang="ja">iCloud Drive上のドキュメント競合時の挙動に関する公式ガイド</span><span lang="en" data-lang="en">Apple's own guide to what happens when iCloud Drive documents conflict</span></li>
+    <li><a href="https://git-scm.com/docs/git-merge" target="_blank" rel="noopener" style="color:var(--accent);">git-merge — Git公式ドキュメント</a> — <span lang="ja" data-lang="ja">マージ衝突の仕組みに関する公式リファレンス</span><span lang="en" data-lang="en">Official reference for how merge conflicts work</span></li>
+    <li><a href="https://docs.syncthing.net/users/syncing.html" target="_blank" rel="noopener" style="color:var(--accent);">Syncthing Documentation — File Versioning &amp; Conflicts</a> — <span lang="ja" data-lang="ja">Syncthingの競合ファイル命名規則に関する公式ドキュメント</span><span lang="en" data-lang="en">Official documentation on Syncthing's conflict-file naming</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja" data-lang="ja">App Storeのダウンロードページ</span><span lang="en" data-lang="en">App Store download page</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">関連コンテンツ</span><span lang="en" data-lang="en">Related content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">Methods</span></a></li>
+    <li><a href="/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ジャーナリング</span><span lang="en" data-lang="en">Journaling</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">Blog</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
+        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja" data-lang="ja">Apple Watch対応</span><span lang="en" data-lang="en">Apple Watch</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja" data-lang="ja">Obsidian連携</span><span lang="en" data-lang="en">Obsidian</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use cases</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to email</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
+</html>

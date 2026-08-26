@@ -109,6 +109,51 @@ jobs:
       # 止められるのは主系だけである。副系CCR Routineは別経路で、
       # スケジュール起動セッションのログは外から読めない（Runbook §0-2）ため
       # 観測も停止もできない。この非対称性はスクリプトの出力にも書いてある。
+      # 【緊急停止】**他のどの判定よりも先に見る。**
+      #
+      # 予算ゲートは主系しか止めず、秘密鍵の削除は「静かに寝る」ので止めたのか
+      # 壊れたのか区別がつかない。ワークフローの無効化は GitHub が読める必要がある。
+      # **主系と副系を同時に、確実に、意図が残る形で止める手段が無かった。**
+      #
+      # チェックアウト後に置いてあるのは、この判定がリポジトリのファイルだからで、
+      # 主系（Actions）も副系（CCR）も作業前に必ずチェックアウトするため両方に効く。
+      # ここより手前で走るのは checkout だけなので、止め損ねる範囲は無い。
+      # 全体停止と**この経路（actions）の停止**の両方を見る。片方だけだと、
+      # 「主系だけ止めたい」ときに止まらない。
+      - name: 緊急停止の確認
+        if: steps.gate.outputs.run == 'true'
+        id: estop
+        run: |
+          STOP="$(node -p "
+            const d = require('./data/emergency-stop.json');
+            const a = (d.agents || {}).actions || {};
+            d.stopped ? ('all:' + (d.reason || '理由未記入'))
+              : a.stopped ? ('actions:' + (a.reason || '理由未記入'))
+              : '';
+          ")"
+          if [ -z "$STOP" ]; then
+            echo "stopped=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "stopped=true" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Emergency stop::停止が立っている: ${STOP}。data/emergency-stop.json"
+            exit 1
+          fi
+
+      # 【封じ込め】同じ故障を上限回数直して再発しているなら、**この経路を走らせない。**
+      #
+      # これまでは「⛔ 人に上げる」と表示するだけだった。表示は翌朝の実行を
+      # 止めないので、上げた先が見ていない間、直せない故障を毎日直そうとする
+      # ループが回り続ける。着手前に止めるところまでを機械にやらせる。
+      #
+      # ここは --dry-run（書かずに落ちるだけ）。判定は data/autopilot-runs.json
+      # から毎回導出されるので、状態を残さなくても翌朝また同じ結論になる。
+      # 停止を台帳に書いて残す形にすると、このレーンに main への書き込み権限が
+      # 要る — self_repair.must_not の「自分の権限を広げない」に正面から反する。
+      # 台帳へ書くのは人かセッション（--contain）で、通常のPR経路を通る。
+      - name: 封じ込め（修理上限に達した経路は着手しない）
+        if: steps.gate.outputs.run == 'true' && steps.estop.outputs.stopped == 'false'
+        run: node scripts/autopilot-selfheal.mjs --contain --dry-run
+
       - name: 予算ゲート（当月の実費が上限を超えていたら走らない）
         if: steps.gate.outputs.run == 'true'
         id: budget
@@ -120,6 +165,57 @@ jobs:
             echo "::notice title=Obsidian Autopilot::当月のAI実費が上限に達したため主系をスキップ（data/autopilot-cost.json）。副系CCRは別経路のため止まらない。"
           fi
           node scripts/autopilot-budget.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      # 【タスク種別とモデルの振り分け】
+      #
+      # その日が「記事を書く日」か「壊れた基盤を直す日」かで、要る能力が違う。
+      # 故障の原因特定を安いモデルにやらせると外し、レーンFの歯止め
+      # （同一 failure_class 3回で人間へ）に早く当たる。**安いほうが高くつく。**
+      #
+      # モデル名をここに直書きしない。直書きすると data/model-routing.json が
+      # 装飾になり、check-model-routing.mjs が守っている「不可逆なタスクを
+      # 最安ティアに落とさない」規則も効かなくなる。
+      #
+      # 種別ごとの残枠もここで見る。月次上限だけだと、記事で使い切った月に
+      # 修理が走らない（あるいはその逆）が起きる。
+      - name: タスク種別とモデルの振り分け
+        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+        id: route
+        run: |
+          if node scripts/autopilot-selfheal.mjs --json | grep -q '"lane_f_required": true'; then
+            KIND=repair
+          else
+            KIND=article
+          fi
+          MODEL="$(node scripts/check-model-routing.mjs --resolve "$KIND")"
+          echo "kind=$KIND"   >> "$GITHUB_OUTPUT"
+          echo "model=$MODEL" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Model routing::$KIND -> $MODEL"
+          # 種別ごとの枠。超えていても主系全体は止めない（月次上限がその役目）。
+          # ここは「この種別はもう枠を使い切っている」を日報へ出すための警告。
+          node scripts/autopilot-budget.mjs --check --task "$KIND" \
+            || echo "::warning title=Task budget::$KIND の月次枠を超過（月次上限には未到達）"
+
+          # 【1回あたりの上限】data/model-routing.json の max_usd_per_run は
+          # 2026-08-25 まで**宣言だけ**で、実行時に見る経路が無かった。08-23 の
+          # 1回は article の上限 $2.00 に対し $7.2967（3.6倍）を使い切って正常終了
+          # している。**上限は在ったが当たらなかった。**
+          #
+          # 費用は run が終わるまで確定しないので、走っている最中には止められない。
+          # 止められるのは次の1回で、ここがその経路。**種別ごとに見る**ので、
+          # 記事の超過が修理（レーンF）を止めることはない。
+          #
+          # 止まるのは主系だけ。副系CCRは別経路なので、人間のレビューを待つ間も
+          # 出荷は続く。**二重化が承認待ちを吸収する。**
+          if node scripts/autopilot-budget.mjs --check-run-cap --task "$KIND"; then
+            echo "run_cap_ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run_cap_ok=false" >> "$GITHUB_OUTPUT"
+            # 月次上限の分岐と同じ形で notice を出す。**止まった日が無音だと
+            # 「今日は書くことが無かった」と見分けがつかない。**解除は人間のみ
+            # なので、無音のまま毎日この形で止まり続けるのがいちばん悪い。
+            echo "::notice title=Obsidian Autopilot::$KIND の1回あたり実費上限が未レビューのため主系をスキップ。解除は node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why \"…\"（人間のみ）。副系CCRは別経路のため止まらない。"
+          fi
 
       # 【2026-08-20】この1行が主系の初回本番運転を丸ごと潰した。秘密鍵を入れて
       # 初めてGateを通った run 32303452390 で、apt が**一切出力しないまま**
@@ -164,8 +260,38 @@ jobs:
       # ここを踏ませることはできないので、`*` で許可しても権限昇格にならない。
       - name: Claude Code（Runbook 1イテレーション実行）
         id: claude
-        if: steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
-        uses: anthropics/claude-code-action@v1
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
+      # 【2026-08-25 SHA pin】フローティングタグ @v1 をやめて版を固定する。
+      #
+      # 発端は 08-24・08-25 の2日連続の即時失敗で、そのとき @v1 が指していたのは
+      # c81e3bc6（Claude Code 2.1.241）だった。直前に出荷できた 08-23 は
+      # 24dcd50c / 2.1.240、復旧した 08-25 15:16 は 16b3b310 / 2.1.245。
+      #
+      # 【2026-08-26 実測】**あの2日の原因は版ではなく資格情報だった。**
+      # 2.1.241 を現在の有効なトークンで直接走らせたら正常に完走している
+      # （run 32919495397 / is_error=false / result="PROBE_OK" / 実費 $0.04）。
+      # 上流の差分も clone して読んだ: c81e3bc6→16b3b310 の src/ の違いは
+      # `const claudeCodeVersion = "2.1.241" → "2.1.245"` の1文字列だけで、
+      # ラッパーのロジックは同一。**版が失敗を説明できる余地が無かった。**
+      #
+      # **それでも pin は残す。理由が変わっただけ。**
+      # 当時の「壊れた版を引いた」という理由は実測で否定されたが、08-21 の
+      # allowed_bots は本当にフローティングタグが原因で（非人間アクターを拒否する
+      # ガードが後から乗ってきた）、本番デプロイまで直結する経路が実行のたびに
+      # 上流の最新版へ勝手に乗り換える構造そのものは残っている。
+      #
+      # **pin が副産物として効くのはこちら:** 版が固定されていれば、次に同じ形の
+      # 即時失敗が出たとき「直近の成功と同じSHAか」を見るだけで版を機械的に外せる。
+      # 08-25 に版を疑って1日を使ったのは、@v1 では**SHAが常に違って見える**ため
+      # だった（フローティングタグでは日をまたげばほぼ必ず変わる。あの対照は
+      # 原因が何であれ必ず「違い」を見つける）。pin はこの誤読を構造的に塞ぐ。
+      #
+      # 代償は上流の修正も自動では入らないこと。**それは意図した代償**で、
+      # 版を上げるのは data/autopilot-actions.json に起票してから行う
+      # （いつ・なぜ上げたかが残る）。上げるときはこの行のSHAとコメントを一緒に直すこと。
+        uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
         with:
@@ -193,19 +319,71 @@ jobs:
           # issue_comment 等の外部から起動される経路が無い。
           claude_args: |
             --max-turns 250
+            --model ${{ steps.route.outputs.model }}
             --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
           prompt: |
             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
 
             0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。
             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
-            2. `docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録と保留事項を確認する。
+            2. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録を確認する。**全文は読まないこと**（77,000文字あり毎日+5,000増える。入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因）。**保留事項は LOG からではなく `data/autopilot-actions-report.json` を見る**（型付きで、閉じ条件が通れば消える。散文の履歴から拾うと解消済みが混ざる）。**台帳そのもの `data/autopilot-actions.json` は読まないこと** — 閉じた行が消えずに貯まるので、LOG と同じく増え続ける（レポート側は open と当日クローズだけなので未処理の件数でしか増えない）。レポートの `as_of_jst` が当日でない場合だけ、09:00 JST のアクチュエータがまだ走っていないということなので台帳側を見てよい。Runbook §0の「読むもの」も、全文を読むものと一部だけ読むものを分けてある——そちらの指定に従うこと。
             2-1. 【レーンF・A〜Eより先】`node scripts/autopilot-selfheal.mjs` を実行する。未修理の故障が出たら、**その日の最優先アクションは基盤の修理**で、記事は書かない。触ってよいファイルとやってはいけない変更はスクリプトが出力する（検証を弱めない・自分の権限を広げない。これはCIが実際に検出する）。直したら `data/autopilot-runs.json` の自分の行に `repair_of` を書くこと——書かない限り翌日も未修理として上がってくる。⛔ が出ている対象は直さず `owner_requests` に上げる。
             3. 目標は毎日1記事。ただしRunbook §0のゲート（ノイズフロア＝期待クリック3未満を根拠にしない・品質・検証・実験非干渉）が常に優先。ゲートを通る施策が無い日は堂々とスキップし、保守レーン（Runbook §6）に切り替える。基準を下げて書くことは失敗と定義されている。
             4. ブランチは claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)。Runbook §3の実装規約・§4の検証（seo-check等9チェック。ブラウザが要る工程は先に `npx playwright install --with-deps chromium` を実行し、OG生成スクリプトは PLAYWRIGHT のデフォルトパスで動く）を全て通してから commit・push する。**apt を伴うコマンド（`--with-deps` を含む）が数分たっても出力を返さない場合は深追いしないこと。** `--with-deps` を外して再試行し、それでも駄目ならブラウザが要るQAだけを省略して、その旨を status JSON の `checks` に明記したうえで記事の出荷を優先する。2026-08-20に、この種の apt の停止がジョブ上限90分を食い尽くして1日分の出荷をゼロにした前例がある（run 32303452390）。**セットアップのために出荷を落とさない。**
             5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。作成後、SEO Validation が起動したことを `gh pr checks` で確認したら**それ以上は待たずに終了してよい**（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
             6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
+
+      # 【2026-08-26】即死したときに、資格情報かどうかを**機械が**切り分ける。
+      #
+      # 08-24〜08-25 の2日連続の即時失敗は、検知そのものは初日に効いていた。
+      # 溶けたのは診断のほうで、台帳は「認証系」→「上流の版」→「やはり認証系」と
+      # 2回ひっくり返り、そのたびに1日を使った。**同じ形の失敗が来たら、
+      # 人にもセッションにも推測させずここで割る。**
+      #
+      # 理屈は単純で、失敗した回と同じトークンで1ターンだけ走らせるだけ:
+      #
+      #   ここも落ちる → トークンが通っていない（＝資格情報）
+      #   ここは通る   → 資格情報ではない（--model指定・MCP・プロンプト等の側）
+      #
+      # 上のステップと違って --model も MCP も渡さないので、切り分けたい変数
+      # （トークンが通るか）だけが残る。2026-08-26 に手で1回やったのがこれで、
+      # 実費は $0.04・所要3秒だった。**失敗した回にしか走らない。**
+      #
+      # `continue-on-error` は使わない。あれはステップの conclusion を success に
+      # 書き換えるので、**失敗が成功に見える**（この装置を手で組んだとき実際に
+      # 読み違えた）。ここでは終了コードそのものを判定に使い、
+      # scripts/autopilot-act.mjs の interpretRun が conclusion を読む。
+      #
+      # CLI が入る前に落ちた回（08-21 の actor 拒否のような形）では下の
+      # `command -v claude` が失敗し、判定ステップは skipped になる。
+      # **判定不能は「資格情報は無事」ではない**ので、そこは従来どおり
+      # needs_triage としてセッションへ回る。
+      - name: 切り分け用のCLIを確認
+        id: credprobe_ready
+        if: always() && steps.claude.outcome == 'failure'
+        run: command -v claude
+
+      - name: 即死が資格情報かを切り分ける
+        id: credprobe
+        if: always() && steps.credprobe_ready.outcome == 'success'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set +e
+          out="$(claude -p 'Reply with exactly the word PROBE_OK and nothing else.' \
+                   --max-turns 1 --output-format json 2>&1)"
+          code=$?
+          set -e
+          echo "$out" | head -c 2000
+
+          if [ "$code" -eq 0 ] && printf '%s' "$out" | grep -q '"is_error":false'; then
+            echo "::notice title=Obsidian Autopilot::切り分け: **資格情報は通っている。**同じトークンで1ターン完走した。即死の原因は資格情報以外（--model指定・MCP・プロンプト等）を見ること。"
+            exit 0
+          fi
+          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+          exit 1
 
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。
       # 競合ではなく補完関係なので両方残す。**順序に意味がある** —
@@ -224,8 +402,15 @@ jobs:
       # PRを出す規約なので、ブランチが無い＝本当に何もしていない）。別経路の
       # 副系CCRが先に出していた場合だけは正当なので、本番status JSONが当日分なら
       # それも成功として扱う。
+      # 【2026-08-25】条件を Claude Code ステップと揃えた。以前は
+      # `steps.gate.outputs.run == 'true'` だけを見ており、**月次上限で
+      # 意図的にスキップした日も「成果物ゼロ」で赤くなる**状態だった
+      # （正常に止まったことが故障として報告される）。1回上限のスキップを
+      # 足すにあたって同じ穴を広げないよう、ここで揃えている。
       - name: 成果物ゼロなら落とす
-        if: steps.gate.outputs.run == 'true'
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
         env:
           TODAY: ${{ steps.gate.outputs.today }}
           TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
@@ -279,6 +464,7 @@ jobs:
         continue-on-error: true
         env:
           EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          TASK_KIND: ${{ steps.route.outputs.kind }}
         run: |
           f="${EXEC_FILE:-}"
           [ -n "$f" ] && [ -f "$f" ] || f="${RUNNER_TEMP}/claude-execution-output.json"
@@ -304,6 +490,23 @@ jobs:
               print("* AI実費: 取得できなかった（total_cost_usd がログに無い）")
               sys.exit(0)
           print(f"* AI実費: **${cost:.4f}** / turns {turns} / permission_denials {denials}")
+          print("")
+          # 【1回あたりの上限・その場での検知】台帳への追記は翌日のセッションが
+          # 行うので、そこに頼ると**追記する主体が落ちた日は超過も一緒に消える。**
+          # 実際に08-23の$7.2967は、翌日の主系が即時失敗したため丸ごと抜けた。
+          # 金額が手元にあるのはこのステップなので、判定もここで一度出す。
+          kind = os.environ.get('TASK_KIND') or ''
+          try:
+              rules = json.load(open('data/model-routing.json', encoding='utf-8'))['rules']
+              cap = rules.get(kind, {}).get('max_usd_per_run')
+          except Exception:
+              cap = None
+          if cap and cost > cap:
+              print(f"* ⛔ **1回あたりの上限を超過**: {kind} は上限 ${cap:.4f} に対し ${cost:.4f}"
+                    f"（{cost / cap:.1f}倍）。**次回の主系はこの超過がレビューされるまで走らない。**")
+              print(f"::error file=data/model-routing.json::1回上限の超過: {kind} ${cost:.4f} / 上限 ${cap:.4f}")
+          elif cap:
+              print(f"* 1回あたりの上限: ${cost:.4f} / ${cap:.4f} — 枠内")
           print("")
           print("翌日のセッションはこの1行を台帳へ入れること（Runbook §5-3）:")
           print("```")

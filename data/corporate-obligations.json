@@ -1,0 +1,146 @@
+{
+  "$comment": [
+    "法人としての期限・記録・契約条項の棚卸し。scripts/check-corporate.mjs が検査する。",
+    "",
+    "**ここは器であって、中身の大半はまだ空。**期限の実日付・議事録の所在・",
+    "契約書の本文は、リポジトリの外にあってオーナーしか埋められない。",
+    "**それを隠さずに持つ**のがこの台帳の役目で、資格情報の期限監視",
+    "（credential-expiry.json）が critical 3件を「未把握」として持っているのと同じ形。",
+    "",
+    "**「把握していない」は「余裕がある」ではない。**confirmed_by_owner が false の",
+    "行は、期限が来るまで誰も気づかない状態にある。"
+  ],
+  "deadlines": [
+    {
+      "id": "apple-developer-program",
+      "title": "Apple Developer Program の年次更新",
+      "recurrence": "annual",
+      "next_due": null,
+      "confirmed_by_owner": false,
+      "unconfirmed_reason": "加入日がリポジトリから取れない。**切れるとアプリが配信停止になる**ので、資格情報の中でも影響が大きい",
+      "what_breaks": "App Store からアプリが消え、TestFlight も止まる",
+      "evidence": ["../simplememo-ios/docs/release-automation.md"]
+    },
+    {
+      "id": "domain-renewal",
+      "title": "simplememofast.com の更新",
+      "recurrence": "annual",
+      "next_due": null,
+      "confirmed_by_owner": false,
+      "unconfirmed_reason": "レジストラの管理画面にしか無い。credential-expiry.json でも未把握のまま",
+      "what_breaks": "サイト・メールの From ドメイン・Universal Link がすべて止まる。**代替が無い critical**",
+      "evidence": ["data/credential-expiry.json", "data/vendor-register.json"]
+    },
+    {
+      "id": "corporate-tax",
+      "title": "法人税・地方税の申告",
+      "recurrence": "annual",
+      "next_due": null,
+      "confirmed_by_owner": false,
+      "unconfirmed_reason": "**決算期がリポジトリから取れない。**申告期限は決算期の2か月後が原則なので、決算期が入れば機械が計算できる",
+      "what_breaks": "延滞税・加算税。**士業の領域**で、判断は無人化しない",
+      "evidence": []
+    },
+    {
+      "id": "consumption-tax",
+      "title": "消費税の申告",
+      "recurrence": "annual",
+      "next_due": null,
+      "confirmed_by_owner": false,
+      "unconfirmed_reason": "決算期と課税事業者かどうかがリポジトリから取れない",
+      "what_breaks": "同上",
+      "evidence": []
+    },
+    {
+      "id": "social-insurance",
+      "title": "社会保険・労働保険の年度更新",
+      "recurrence": "annual",
+      "next_due": null,
+      "confirmed_by_owner": false,
+      "unconfirmed_reason": "**従業員がいるかどうかがリポジトリから取れない。**いなければこの行は不要になる（そのときは削除ではなく not_applicable にする）",
+      "what_breaks": "同上",
+      "evidence": []
+    },
+    {
+      "id": "legal-record-statutory",
+      "title": "法定調書・支払調書の提出",
+      "recurrence": "annual",
+      "next_due": null,
+      "confirmed_by_owner": false,
+      "unconfirmed_reason": "外注・報酬の支払いがあるかどうかがリポジトリから取れない",
+      "what_breaks": "同上",
+      "evidence": []
+    }
+  ],
+  "records": [
+    {
+      "id": "board-minutes",
+      "title": "取締役会・株主総会の議事録",
+      "retention_years": 10,
+      "where": null,
+      "exists": false,
+      "note": "**所在が決まっていない。**会社法上の保存義務がある種類だが、リポジトリの外にある"
+    },
+    {
+      "id": "shareholder-register",
+      "title": "株主名簿",
+      "retention_years": null,
+      "where": null,
+      "exists": false,
+      "note": "同上。保存期間は会社が存続する限り"
+    },
+    {
+      "id": "vendor-contracts",
+      "title": "取引先との契約・規約",
+      "retention_years": 10,
+      "where": "各ベンダーの管理画面（利用規約への同意という形）",
+      "exists": true,
+      "note": "**書面の契約書は無く、規約への同意で成立している。**だから条項検査の対象は規約本文になる（下の contract_review）"
+    },
+    {
+      "id": "app-review-correspondence",
+      "title": "App Review とのやり取り（リジェクトと対応）",
+      "retention_years": 3,
+      "where": "App Store Connect ＋ ../simplememo-ios/docs/reports/",
+      "exists": true,
+      "note": "2026-08-10 の Guideline 5.2.5 リジェクトは恒久対策までリポジトリに残っている"
+    },
+    {
+      "id": "incident-records",
+      "title": "個人情報事故・重大障害の記録",
+      "retention_years": 5,
+      "where": null,
+      "exists": false,
+      "note": "**発生していないので記録が無い**のか、**記録する場所が無い**のか区別できていない。移管規則の crisis と同じで、経路が未整備"
+    }
+  ],
+  "contract_review": {
+    "$note": [
+      "**書面の契約書は無く、各社の利用規約への同意で成立している。**",
+      "だから条項検査の対象は規約本文で、確認は人が規約を読むことでしか進まない。",
+      "ここが持つのは『どの観点を、いつ、誰が見たか』だけ。",
+      "",
+      "unreviewed は**「問題なし」ではなく「見ていない」。**",
+      "vendor-register.json の dpa_reviewed と同じ扱いで、独立した状態にしてある。"
+    ],
+    "clauses": ["liability_cap", "ip", "personal_data", "governing_law"],
+    "$clause_note": {
+      "liability_cap": "責任上限。**代替の無い critical ベンダーで効く** — 止まったときに何も請求できないなら、冗長化でしか守れない",
+      "ip": "知財。生成物・投稿物の権利がどちらに残るか",
+      "personal_data": "個人データの取り扱い（DPA・越境移転・再委託）",
+      "governing_law": "準拠法と管轄。海外事業者が大半なので、争えるかどうかがここで決まる"
+    },
+    "vendors": [
+      { "id": "apple", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://developer.apple.com/terms/", "reviewed_at": null },
+      { "id": "cloudflare", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://www.cloudflare.com/terms/", "reviewed_at": null },
+      { "id": "resend", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://resend.com/legal/terms-of-service", "reviewed_at": null },
+      { "id": "anthropic", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://www.anthropic.com/legal/commercial-terms", "reviewed_at": null },
+      { "id": "google_cloud", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://cloud.google.com/terms", "reviewed_at": null },
+      { "id": "firebase", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://firebase.google.com/terms", "reviewed_at": null },
+      { "id": "appsflyer", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://www.appsflyer.com/legal/services-agreement/", "reviewed_at": null },
+      { "id": "github", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://docs.github.com/site-policy/github-terms/github-terms-of-service", "reviewed_at": null },
+      { "id": "prtimes", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": "https://prtimes.jp/main/html/terms", "reviewed_at": null },
+      { "id": "registrar", "liability_cap": "unreviewed", "ip": "unreviewed", "personal_data": "unreviewed", "governing_law": "unreviewed", "source": null, "reviewed_at": null }
+    ]
+  }
+}

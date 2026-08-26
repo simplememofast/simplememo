@@ -61,6 +61,7 @@ export const QR_PAGES = [
   { slug: 'obsidian-plugins',           en: true },
   { slug: 'obsidian-plugins-dataview',  en: true },
   { slug: 'obsidian-pricing',            en: true },
+  { slug: 'obsidian-sync',               en: true },
   // Added 2026-08-11 on request. Fewer search clicks than the original nine
   // (6 against 20-38 in the 2026-08-11 snapshot), so expect little volume — but a
   // QR costs nothing and this is the page the whole measurement workstream feeds
@@ -79,6 +80,12 @@ export const QR_PAGES = [
   // way onto their phone, so the QR is the primary element rather than a
   // fallback under a badge. Ships both languages in one document.
   { slug: 'download', en: true },
+  // /autopilot/ — the landing page the press release points at. Release traffic
+  // skews desktop, and a reader who gets to the bottom of the ledger has already
+  // decided whether the app is worth a look. Japanese only: the page ships no
+  // English body copy, so a second code would send `en` readers to a page they
+  // cannot read.
+  { slug: 'autopilot', en: false },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */

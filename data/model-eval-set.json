@@ -1,0 +1,75 @@
+{
+  "$comment": [
+    "新しいモデルへ切り替える前に必ず通す固定評価セット。",
+    "scripts/check-model-eval.mjs が検査し、--run で実行する（APIキーが要る）。",
+    "",
+    "**なぜ固定なのか。**モデルを替えたときに『前より良くなった／悪くなった』を",
+    "感想で決めると、替えるたびに基準が動く。**入力と合格条件を先に固定しておく**",
+    "ことでしか、比較にならない。",
+    "",
+    "**なぜ合格条件を決定論にするのか。**AIの出力をAIに採点させると、",
+    "採点側のモデルを替えたときに全部の履歴が無効になる。ここでは",
+    "『どのラベルを返したか』という**照合可能な1点だけ**を見る。",
+    "",
+    "**未評価のモデルにはルーティングできない。**policy.enforce を true にすると、",
+    "model-routing.json が評価結果の無いモデルを指した時点でCIが落ちる。",
+    "いまは false — **評価をまだ一度も走らせていない**ので、true にすると",
+    "現行の2モデルで即座に落ちる。走らせてから有効にする。"
+  ],
+  "version": "2026-08-22.1",
+  "$version_note": "この版を変えたら、記録済みの結果は無効になる（results.set_version と突き合わせる）",
+  "policy": {
+    "enforce": false,
+    "$enforce_note": "true にすると、評価結果の無いモデルへのルーティングでCIが落ちる。初回の評価を走らせてから有効にする",
+    "pass_threshold": 0.83,
+    "$pass_note": "6問中5問。**満点を求めない** — 1問落としただけで使えないとすると、実運用の揺れで毎回落ちる",
+    "must_pass_ids": ["triage-insufficient-1", "triage-insufficient-2"],
+    "$must_pass_note": "**『分からない』と答えられることは、合格率とは別に必須。**推測で断定するモデルは、この用途では合格率が高くても使えない"
+  },
+  "cases": [
+    {
+      "id": "triage-regression-1",
+      "task_kind": "qa_triage",
+      "input": "XCTest: testFreeLimitBlocksFourthSend が失敗。差分は RateLimitManager.swift の日跨ぎ判定。前回のCIでは成功、同じシミュレータ・同じOSバージョン。",
+      "expect": "app_regression",
+      "why": "アプリ側の変更が直前にあり、環境は同一。**これを environment_flake と誤分類するのが、この用途で最悪の誤り**"
+    },
+    {
+      "id": "triage-flake-1",
+      "task_kind": "qa_triage",
+      "input": "XCUITest: 起動スモークが1回だけタイムアウト。同じコミットで再実行すると成功。シミュレータの起動に42秒かかった記録あり。アプリ側の差分なし。",
+      "expect": "environment_flake",
+      "why": "アプリ差分ゼロ・再実行で成功・環境側の遅延記録あり"
+    },
+    {
+      "id": "triage-testdefect-1",
+      "task_kind": "qa_triage",
+      "input": "テストが固定日付 2026-08-01 を前提にしており、今日の日付で実行すると必ず失敗する。アプリの挙動は仕様どおり。",
+      "expect": "test_defect",
+      "why": "アプリではなくテスト側の欠陥。ここを app_regression にすると、無い不具合を直しにいく"
+    },
+    {
+      "id": "triage-infra-1",
+      "task_kind": "qa_triage",
+      "input": "ジョブが checkout の段階で失敗。テスト本体は1つも実行されていない。ランナーのディスク不足のエラー。",
+      "expect": "infrastructure",
+      "why": "テスト本体が走っていない失敗を、テストの失敗として扱わない"
+    },
+    {
+      "id": "triage-insufficient-1",
+      "task_kind": "qa_triage",
+      "input": "テストが失敗した。ログは添付されていない。",
+      "expect": "insufficient_evidence",
+      "why": "**根拠が無いときに『分からない』と言えること。**推測で断定するモデルはこの用途に使えない"
+    },
+    {
+      "id": "triage-insufficient-2",
+      "task_kind": "qa_triage",
+      "input": "3件のテストが同時に失敗。うち1件はアプリ差分に関係し、2件は無関係に見えるが、無関係の判断に足る情報がログに無い。",
+      "expect": "insufficient_evidence",
+      "why": "**部分的に分かるときほど断定したくなる。**分かる部分だけで全体を決めないこと"
+    }
+  ],
+  "results": [],
+  "$results_note": "1件 = { model, set_version, ran_at, score, must_pass_ok, per_case: {id: 返したラベル} }。**まだ1件も無い。**評価を走らせていないことを、空配列として正直に持つ"
+}

@@ -28,7 +28,10 @@ export const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
 const STATUSES = ['active', 'suspended', 'not_implemented', 'policy_only'];
 /** 金額が動く領域。threshold の有無を強制する。 */
 const MONEY = ['AI実費（開発・運用のトークン費）', '広告出稿・広告予算の変更', '契約・支払い・送金',
-               '価格・プラン・無料枠の変更'];
+               '価格・プラン・無料枠の変更',
+               // [2026-08-25] Actions分数も金。トークン費に上限を書いておきながら、
+               // **1日で$10を焼いた実績があるこちらだけ表に無かった。**
+               'macOSランナーの起動（GitHub Actions 分数の消費）'];
 
 export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)) } = {}) {
   const problems = [];

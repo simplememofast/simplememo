@@ -83,6 +83,18 @@ jobs:
       - name: Site constants consistency
         run: node scripts/sync_constants.js --check
 
+      # 【公開表示の鮮度】評価と公開バージョンは、**JSON-LD の aggregateRating
+      # として12ページに出ている公開表示**なのに、どちらも人が App Store Connect を
+      # 見て手で書いた値だった。台帳のメモにも「NOT machine-verified」と書いてある。
+      # つまり**古くなっても誰も気づかない。**
+      #
+      # ここはネットに触らない —— PRのたびに外部APIを叩くと、向こうの不調で
+      # CIが赤くなり、やがて無視される（check-benchmark を報告のみにしたのと同じ理由）。
+      # 見るのは「いつ確認したか」だけで、45日を超えたら落とす。
+      # 実物との突き合わせは seo-daily.yml の --net。
+      - name: Store facts freshness (no network)
+        run: node scripts/check-store-facts.mjs --check
+
       # Every App Store CTA must carry placement/cluster/variant metadata. A new
       # page copied from an old template would otherwise silently reintroduce
       # unmeasurable CTAs, which is the state this replaced.
@@ -112,6 +124,21 @@ jobs:
       # unparseable entry can never come due and would disable this check.
       - name: Experiment evaluation dates
         run: node growth/scripts/check-experiments.mjs
+
+      # 【定点観測】言及・競合ウォッチを**やらなかった週に気づく。**
+      #
+      # 手順書には「週1回・前回が7日以上前なら実行する」と書いてあったが、
+      # **その条件を誰も検査していなかった。**2026-08-22 に数えたら前回は
+      # 08-12 で、10日空いていた。
+      #
+      # この種の作業はやらなくても何も壊れない。壊れないので後回しになり、
+      # 後回しが続くと**やらないことが常態になる。**
+      #
+      # 固定クエリが欠けていても落とす —— 忙しい回に一部だけ検索して
+      # 「やった」ことにすると、系列は連続しているのに中身が変わる。
+      # あとから見ると「あの週から言及が減った」に見えるが、減ったのは検索のほう。
+      - name: Mention watch cadence
+        run: node growth/scripts/check-mentions.mjs --check
 
       # 【予算】台帳の形と、当月が上限に達していないかを見る。
       #
@@ -190,10 +217,32 @@ jobs:
       # 壊れた行は指標を嘘にするが、書かれなかった行は指標を止める。
       # 止まった指標は「変化が無い」と見分けがつかないぶん質が悪い。
       # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない。
-      - name: Autopilot run ledger
+      #
+      # 2026-08-23追加: 台帳と data/autopilot-status.json の突き合わせも同じ --check で見る。
+      # 同日、主系が初出荷したのに status JSON だけが前日のままで、10:00 JST の日報が
+      # 「当日分の実行記録なし」と報告した。**日報が読むのは status JSON のほう**なので、
+      # 台帳が正しくても、ここが古いと出荷が無かったことになる。
+      - name: Autopilot run ledger（＋日報データ源との突き合わせ）
         run: |
           node scripts/autopilot-runs.mjs --selftest
           node scripts/autopilot-runs.mjs --check
+
+      # 【アクション台帳】日次アクチュエータが読み書きする台帳の形を見る。
+      #
+      # ここが見るのは中身の正しさではなく、**閉じられる形をしているか**:
+      #   - close_check が無い行が無いこと（無い依頼は永久に残る）
+      #   - close_check が登録簿にある種別だけを指していること
+      #     （台帳に任意のコマンドを書けるようにすると、依頼リストが実行経路になる）
+      #   - done の行が evidence を持つこと（「閉じた」は根拠とセットでしか書けない）
+      #   - auto を持つ行が self_repair.may_modify の内側だけを触ること
+      #     **これを見ないと、権限の拡大が台帳の1行でできてしまう。**
+      #
+      # --selftest は台帳を読まないので、台帳の中身が変わっても壊れない
+      # （autopilot-runs.mjs と同じ理由・同じ作法）。
+      - name: Autopilot action ledger
+        run: |
+          node scripts/autopilot-act.mjs --selftest
+          node scripts/autopilot-act.mjs --check
 
       # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
       #
@@ -203,6 +252,143 @@ jobs:
       # **裏取り未完の画像が完成品として流通する**のが、この検査で防ぎたい2つ。
       - name: PR hero guardrails
         run: node scripts/check-pr-hero.mjs
+
+      # 【自律度の推移】プレスリリースに出すグラフの系列。
+      #
+      # 月次で測っていた期間は無く、**実測は最新の1点だけ**。それ以前は
+      # 証跡ファイルの初出月から遡った再構成なので、**終点が台帳の現在値と
+      # ずれた瞬間にグラフ全体が嘘になる。**そこだけは機械が見る
+      # （分母のタスク数と、累計が減っていないことも同時に見る）。
+      - name: Autonomy timeline
+        run: node scripts/autonomy-timeline.mjs --check
+
+      # 【モデルの振り分け】タスク種別 → モデル。**引かれない表は装飾**なので、
+      # obsidian-autopilot.yml が実際に --resolve を呼んでいることまで見る。
+      # 不可逆なタスク（対外配信）を最安ティアに落とす変更もここで落ちる。
+      - name: Model routing
+        run: node scripts/check-model-routing.mjs --check
+
+      # 【データ品質】鮮度だけでは足りない。判断を狂わせるのは古いデータではなく
+      # **静かに欠けたデータ**。重複と内部不整合は落とす（数字が黙って嘘になる）。
+      # 日付の欠けと鮮度は報告のみ — 元データ側の遅れで無関係な出荷を止めない。
+      - name: Data quality (GSC snapshots)
+        run: node growth/scripts/check-data-quality.mjs --check
+
+      # 【シグナル台帳】要望・レビュー・問い合わせ・競合を1つの台帳に集め、
+      # **同じ話を1行にする**。声の大きさを「何回転記されたか」で測らないため。
+      # declined に理由が無いと落ちる（理由の無い却下は見落としと区別できない）。
+      - name: Signal ledger
+        run: node scripts/check-signals.mjs --check
+
+      # 【公開面の事実】check-pr-facts は配信原稿しか見ていない。
+      # 同じ古い事実は FAQ・トップ・llms.txt にも残る。**人の目視で消したものは、
+      # 次の追加を止められない。**廃止済みトライアルの再出現をここで止める。
+      - name: Public-facing facts
+        run: node scripts/check-public-facts.mjs --check
+
+      # 【性質テスト】ドリルは26の**具体例**を固定する。ここは**書かなかった
+      # 組み合わせ**を総当たりで踏む。2026-08-21の二重着手は、まさに
+      # 書かれていなかった組み合わせだった。種を固定して反例を再現可能にする。
+      - name: Property-based tests
+        run: node scripts/property-tests.mjs --check
+
+      # 【モデル評価セット】替えたあとに「前より良くなった気がする」で決めない。
+      # 入力と合格条件を先に固定し、**結果が無いことを空配列として持つ。**
+      # policy.enforce を true にすると、未評価モデルへのルーティングで落ちる。
+      - name: Model eval set
+        run: node scripts/check-model-eval.mjs --check
+
+      # 【有人移管】権限表には「止めて経営者へ移管する」と書いてあったが、
+      # **何が検知で、誰にどう渡すのか、いつまでにか**が決まっていなかった。
+      # 実行判定の故障コードと、実際に起きた failure_class の全部に規則が要る。
+      - name: Escalation rules
+        run: node scripts/check-escalation.mjs --check
+
+      # 【緊急停止】台帳ではなく**配線**を見る。判定・ワークフロー・Runbookの
+      # 3経路すべてがこれを読んでいること。新しい経路だけが読まない状態は
+      # 平常時に症状が出ず、**止めたい日に初めて分かる。**
+      - name: Emergency stop wiring
+        run: node scripts/check-emergency-stop.mjs --check
+
+      # 【注入面】外部の文字列が入ってくる口の棚卸し。
+      #
+      # Issue本文・PRタイトル・レビューコメント・検索結果・メール本文は
+      # **全部「他人が書いた命令」になりうる**。ワークフローの run: に
+      # ${{ github.event.* }} を直接埋めると、タイトルにシェルを書くだけで
+      # ランナーで実行できる（env: 経由で渡す形は安全なので除外する）。
+      #
+      # 口ごとに緩和策と**残存リスク**を書かせる。残存リスクが空の口は
+      # 「考えていない」であって「安全」ではないので落とす。
+      - name: Injection surface
+        run: node scripts/check-injection-surface.mjs --check
+
+      # 【最後の手段が空でないこと】緊急停止の台帳は「判定が壊れていても
+      # 資格情報を失効させれば止まる」と書いている。ところが 2026-08-22 に
+      # 数えたら、ワークフローが実際に読む secret 11件のうち**台帳にあったのは3件**で、
+      # **主系を止める鍵（GH_PAT）が入っていなかった。**最後の手段が指す先が空だった。
+      #
+      # ここが見るのは期限ではなく（それは Credential expiry の仕事）、
+      # 「止めたい経路ごとに、失効させる鍵を名指しできるか」。
+      # 新しい secret を使う経路が増えると落ちる。
+      - name: Credential scope and revocation
+        run: node scripts/check-credentials.mjs --check
+
+      # 【金額の規則】変更幅・損失上限・撤回条件と、資金繰りのシナリオ。
+      # **損失上限が現在の上限以下だと落ちる**（初日から発火する上限は上限ではない）。
+      # 収入が未接続なのにランウェイを書いていたら落ちる。
+      - name: Financial policy
+        run: node scripts/check-financial-policy.mjs --check
+
+      # 【独立監査】監査の中身ではなく**独立**を守る。憲章と所見を自己修復レーンが
+      # 書き換えられないこと・監査が repair と別モデルであること・所見が消せないこと。
+      - name: Audit independence
+        run: node scripts/check-audit-independence.mjs --check
+
+      # 【法人の期限・記録・条項】**「把握していない」を「余裕がある」と読ませない。**
+      # 中身はオーナーしか埋められないので、未把握の件数は報告に留め、
+      # 落とすのは台帳の形（理由の無い未確認・ベンダー台帳との食い違い）だけ。
+      - name: Corporate obligations
+        run: node scripts/check-corporate.mjs --check
+
+      # 【毎朝の1枚】台帳6件を1枚に圧縮できること。生成できない＝どれかが読めていない。
+      - name: Daily brief
+        run: node scripts/daily-brief.mjs --check
+
+      # 【ASC】取得は隣のリポジトリ（鍵がある場所）。ここは受け側の形と、
+      # **接続していないのに接続している前提の数字を出していないか**を見る。
+      - name: App Store Connect ingest
+        run: node growth/scripts/ingest-asc.mjs --check
+
+      # 【KPIの定義】数字ではなく**定義**を凍結する。
+      #
+      # 「自動化率が上がった」の半分は計算を変えたから、という事故を防ぐ。
+      # 定義ごとに算出元ファイルの sha256 を持ち、算出コードが変われば落ちる。
+      # 直すには --bump <id> --why "..." が要る（履歴が残る）。
+      # **黙って定義を変えて数字を良くする経路をつぶすための検査。**
+      - name: KPI definitions vs source
+        run: node scripts/check-definitions.mjs --check
+
+      # 【コード著者率】原稿の「変更行の98.8%」は**再現できなかった。**
+      #
+      # 2026-08-22 に同じ窓で数え直したところ、どの数え方をしても
+      # 231,315行 にも 98.8% にもならなかった。再現できない数字は、
+      # 記者に聞かれた瞬間にいちばん高くつく。
+      #
+      # ここは再計測しない（隣のリポジトリはCIのチェックアウトに無く、
+      # 浅いクローンでは履歴も足りない）。見るのは算数と、数え方が
+      # 書いてあること、そして **headline が実測とずれていないこと** —
+      # 「数字だけ良くする」経路をつぶすための検査。
+      - name: Code authorship ledger
+        run: node scripts/code-authorship.mjs --check
+
+      # 【季節性】上下を施策の成果と読む前に、曜日と外れ値を落とす。
+      #
+      # 金土は平日比 0.8 倍まで落ちるので、金曜に出した施策は何もしなくても
+      # 「効かなかった」ように見える。28日未満では判定を拒否する
+      # （**足りない標本で判定しないことを機械に強制する**）。
+      # 説明のつかない外れ値は注釈台帳と突き合わせて名指しする。
+      - name: Series decomposition
+        run: node growth/scripts/decompose-series.mjs --check
 
       # 【監視】何が見張られていて、何が空いているか。
       #
@@ -221,6 +407,23 @@ jobs:
       # 資格情報の台帳との食い違いも見る — 片方だけ古くなるのを防ぐ。
       - name: Vendor register
         run: node scripts/check-vendors.mjs --check
+
+      # 【縮退運転】台帳が「代替がある」と書いていることを、**実際に動かして確かめる。**
+      #
+      # 文章は書いた時点では正しくても、経路が変われば黙って嘘になる。
+      # 一番まずいのは「代替がある」と書いてあるものが効かない場合で、
+      # それは**その事業者が落ちた日に初めて分かる。**
+      #
+      # 代替（肩代わりする）と縮退（被害の範囲を限る）を分けて数える。
+      # 混ぜると resilience を過大に見積もる — Resend が落ちてもメールは
+      # 送れない（代替なし）が、遮断器と死信があるので失われず後で戻せる。
+      #
+      # **単一障害点では落とさない。**分かっていることは壊れていることではない。
+      # 落とすのは、代替を名乗っているのに動かして確かめられないときと、
+      # **どの事業者にも使われていない probe があるとき**（覆っているように
+      # 見えるだけの死んだ実験）。
+      - name: Degradation probes
+        run: node scripts/check-degradation.mjs --check
 
       # 【機能バックログ】計測の結果が次に作るものを決めているか。
       #

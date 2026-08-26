@@ -1,0 +1,79 @@
+{
+  "$comment": [
+    "**外部コンテンツがこの運用に入ってくる場所の棚卸し。**",
+    "scripts/check-injection-surface.mjs が検査する。",
+    "",
+    "Prompt Injection の対策は「気をつける」では成立しない。**どこから入るかを",
+    "数え上げて、各入口に何が効いているかを書く**ところからしか始まらない。",
+    "",
+    "いちばん危ないのは GitHub Actions の script injection —",
+    "`${{ github.event.* }}` を run: の中に展開すると、**第三者が書いた文字列が",
+    "そのままシェルとして実行される。**これは機械で検出できるので検出する。",
+    "",
+    "trust:",
+    "  none     … 第三者が自由に書ける（Issueコメント・レビュー・問い合わせ本文）",
+    "  partial  … 第三者のコンテンツだが構造が決まっている（GSC・ASCのレポート）",
+    "  own      … 自分たちが書いたもの"
+  ],
+  "entry_points": [
+    {
+      "id": "webfetch-websearch",
+      "what": "毎朝のセッションが WebFetch / WebSearch で読む外部ページ",
+      "trust": "none",
+      "mitigations": [
+        "読んだ内容を**シェルに渡さない**（Runbookの実装規約）",
+        "記事に引用するときは一次情報のURLを併記し、**取得日を書く**"
+      ],
+      "residual_risk": "**セッションの判断そのものは汚染されうる。**『この手順に従え』と書かれたページを読んだときに従わない保証は、モデルの側にしか無い"
+    },
+    {
+      "id": "github-issue-comment",
+      "what": "release-command.yml / claude.yml が読む Issue コメント",
+      "trust": "none",
+      "mitigations": [
+        "起動はオーナー本人のコメントに限定（allowed actors）",
+        "先頭一致のコマンド語だけを読み、**本文はシェルに渡さない**",
+        "`actions: write` を与えていないので、ワークフローの連鎖起動ができない"
+      ],
+      "residual_risk": "コマンド語の後ろの引数は本文由来。**版数のような限定的な値のみ**を受ける設計に依存している"
+    },
+    {
+      "id": "gsc-bigquery",
+      "what": "Google Search Console / BigQuery のクエリ文字列",
+      "trust": "partial",
+      "mitigations": [
+        "検索クエリは**データとして集計するだけ**で、プロンプトへ素通しにしない",
+        "重複・欠損は check-data-quality.mjs が見る"
+      ],
+      "residual_risk": "クエリ文字列を記事の見出しに使う経路では、**第三者が検索して作った語**が入りうる"
+    },
+    {
+      "id": "asc-reports",
+      "what": "App Store Connect の Analytics Reports",
+      "trust": "partial",
+      "mitigations": [
+        "**行そのものを保存しない**（列名・行数・数値列の合計だけ）",
+        "文字列の列は合計しない"
+      ],
+      "residual_risk": "レビュー本文を取る経路を将来足すなら、そこは trust: none として別に扱う"
+    },
+    {
+      "id": "inquiry-body",
+      "what": "問い合わせの本文（/v1/inquiry）",
+      "trust": "none",
+      "mitigations": [
+        "分類は**決定論の正規表現**で、モデルに渡していない",
+        "4000字で切る",
+        "**既定オフ**（INQUIRY_ENABLED）"
+      ],
+      "residual_risk": "将来 AI に要約や返信下書きをさせるなら、**そこが最初の本物の注入面**になる。いまは無い"
+    },
+    {
+      "id": "mentions-watch",
+      "what": "言及・競合ウォッチで読む第三者の記事",
+      "trust": "none",
+      "mitigations": ["読むだけで、実行も出荷もしない"],
+      "residual_risk": "同上（判断の汚染）"
+    }
+  ]
+}

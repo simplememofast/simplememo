@@ -36,6 +36,35 @@
    特に `/obsidian/` ハブ本体は `monitor-2026-08-09-obsidian-ctr`（評価日 2026-09-13）
    が終わるまで作り替え禁止（関連リンクの追記のみ可）。
 
+
+## §0-0 緊急停止（**他のどの手順よりも先に見る**）
+
+`data/emergency-stop.json` の `stopped` が `true` なら、**何もせずに終了する。**
+理由は `reason` に書いてある。冪等チェックも予算ゲートも見る前に、ここで止まること。
+
+**全体停止だけでなく、自分の経路も見る。**`agents.<経路>.stopped` が `true` なら、
+その経路だけが終了する（副系セッションは `ccr-0730` / `ccr-0920`、
+オーナーの代走は `owner-session`）。経路ごとに止められないと、1つが暴れている
+だけのときに全部を止めることになり、**止めること自体をためらうようになる。**
+ためらわれる停止は、無い停止と同じ。
+
+この判定は主系（GitHub Actions のワークフロー）と副系（このセッション）の**両方に効く**。
+リポジトリのファイルなので、どちらの経路も作業前に必ず読む位置にある。
+
+- **`force` で飛び越えない。**force は冪等チェックを飛ばすためのもので、停止の解除ではない
+- **AIは止めてよいが、解除してはいけない。**（`policy.ai_may_resume: false`）
+  止める側の誤りは1日の出荷が止まるだけだが、解除する側の誤りは
+  止めたかった事象を素通りさせる
+- 自己修復が同じ故障で3回失敗したときは、**自分でここを立てて人間に上げる**。
+  手で書かずに `node scripts/autopilot-selfheal.mjs --contain` を使う
+  （理由は `escalation-rules.json` の `trigger` に限定される。自由文の停止は
+  解除してよいかの判断ができない）。主系は着手前に `--contain --dry-run` を
+  通っているので、**上限に達した経路はそもそも走らない**
+
+この仕組みの外にある最後の手段は**資格情報の失効**。リポジトリが読めない・
+この判定が壊れている場合でも止まる。
+
+
 ## 0-2. 実行基盤（2026-08-20改訂: GitHub Actions主・CCR Routine 副＋再試行）
 
 CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡ゼロ」で落ち、
@@ -111,16 +140,42 @@ git fetch origin main && git checkout -B claude/obsidian-auto-$(date +%Y%m%d) or
 node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンFが最優先
 ```
 
-読むもの（この順）:
-1. `docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか・保留事項
+読むもの（この順）。**全文を読むものと一部だけ読むものを分けてある。**
+
+2026-08-25 に実測したところ、この一覧を素直に全文読むと **約 205,000 文字**
+あり、そのうち実際に要るのは **約 72,000 文字**だった。**入力はターンごとに
+付いて回るので、ここが1回あたりの実費のいちばん大きな部分。**
+しかも `AUTOPILOT_LOG.md` は毎日 +5,000 文字ずつ増えるので、
+**放っておくと1回あたりのコストが日々上がっていく。**
+
+1. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` — 前回までに何をしたか。
+   **全文は読まない**（77,004文字・毎日+5,000）。
+   **保留事項はここから取らない** — `data/autopilot-actions-report.json` が
+   型付きで持っており、閉じ条件が通れば消える（§7-3）。散文の履歴から
+   拾うと、解消済みのものが混ざる。
+   **台帳そのもの `data/autopilot-actions.json` は読まない** ——
+   閉じた行が消えずに貯まるので、LOG と同じく増え続ける
+   （2026-08-25 時点で14行中9行が done・22,533文字）。レポート側は
+   open と当日クローズだけなので、**未処理の件数でしか増えない。**
+   `as_of_jst` が当日でないときだけ（09:00 JST のアクチュエータが
+   まだ走っていない）、台帳側を見てよい
 2. `docs/obsidian/OBSIDIAN_CONTENT_QUEUE.md` + `growth/content/new-queue.json` /
    `refresh-queue.json` — データ駆動キュー（レーンA/B）の現在地
-3. `growth/content/coverage-queue.json` + `docs/obsidian/OBSIDIAN_COVERAGE_PLAN.md`
-   — **カバレッジキュー（レーンE）**。`status: pending` の先頭がその日の既定アクション。
-   ここが空でない限り「書く候補が無い日」は存在しない
+3. **カバレッジキュー（レーンE）** — 先頭の pending 1件だけを出す:
+   ```
+   node -e 'const q=require("./growth/content/coverage-queue.json");
+   const p=(q.items||q.queue||[]).filter(x=>x.status==="pending");
+   console.log(p.length, JSON.stringify(p[0]))'
+   ```
+   `status: pending` の先頭がその日の既定アクション。ここが空でない限り
+   「書く候補が無い日」は存在しない。**19,474文字の全文は要らない。**
+   キューの設計そのものを見直すときだけ
+   `docs/obsidian/OBSIDIAN_COVERAGE_PLAN.md` を読む
 4. `docs/obsidian/OBSIDIAN_90DAY_ROADMAP.md` — 今がMonth何で、何が解禁されているか
 5. `growth/reports/` の最新レポート — 新しいデータ・訂正
-6. `docs/SEO_AIO_PLAN_2026-08.md` §6「やらないこと」
+6. `sed -n '/^## 6\. やらないこと/,/^## 7\./p' docs/SEO_AIO_PLAN_2026-08.md`
+   — §6「やらないこと」は **715文字**。この1節のために 45,841文字の全文を
+   読まない（§1〜5・§9以降は実装記録で、日々の判断には要らない）
 
 ### 1-2. データ鮮度の確認（毎回・`growth/data/gsc/` を見るだけでは足りない）
 
@@ -402,7 +457,7 @@ node scripts/sync_constants.js --check
 node scripts/tag-cta-placements.js --check
 node growth/scripts/check-experiments.mjs
 node scripts/autopilot-budget.mjs --check     # 予算台帳の整合＋当月の上限判定
-node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合
+node scripts/autopilot-runs.mjs --check      # 運転台帳の形と整合＋status JSONとの突き合わせ
 node scripts/check-authority.mjs --check     # 権限表＋自己修復の歯止め
 node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
 node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
@@ -548,7 +603,9 @@ AI完走率・人間介入率・変更失敗率・改善サイクル時間は、
 ```
 node scripts/autopilot-runs.mjs           # 指標サマリ
 node scripts/autopilot-runs.mjs --json     # status JSON の runs に入れる形
-node scripts/autopilot-runs.mjs --check    # CI: 形と整合（seo-check.ymlに入っている）
+node scripts/autopilot-runs.mjs --check    # CI: 形と整合＋status JSONとの突き合わせ（seo-check.ymlに入っている）
+                                           # 台帳の最終記入と data/autopilot-status.json の date_jst が
+                                           # 食い違うと落ちる。§5-2を書き忘れた回を出荷させないため
 ```
 
 **毎回の手順（status JSONを書くのと同じPRで）:**
@@ -584,6 +641,27 @@ node scripts/autopilot-runs.mjs --append \
 `external_ref`（GitHub の run id）で結合する。同じ数字の出所を2つ作らない。
 
 ## 6. 「書かない回」の保守作業メニュー
+
+- **交差検査の写しを更新（3リポジトリが揃った回だけ・所要10秒）**:
+  ```sh
+  cd ../simplememo-ios
+  python3 scripts/qa/check_analytics_crossrepo.py --sync   # イベント名の allowlist
+  python3 scripts/qa/check_rollout_vectors.py --sync       # 段階公開のバケット契約
+  cd ../simplememo
+  node scripts/check-degradation.mjs --sync                # 縮退の受け皿（遮断器・死信・Outbox）
+  ```
+  差分があればコミットする。
+  **なぜセッションでやるか**: どの写しも、各リポジトリのCIが単独で回るために置いてある。
+  隣のリポジトリを見に行く形にすると、CIのチェックアウトには隣が無い。
+  そこで起きることは2通りあり、**どちらも起きた**:
+
+  - **黙ってスキップ** → ずれは起きたまま緑になる（イベント名・バケット契約で想定した形）
+  - **必ず落ちる** → 2026-08-22、`check-degradation.mjs` が
+    `../simplememo-api/src/dlq.ts` などを直接 existsSync で見ており、
+    セッションでは通りCIでは必ず落ちた。**CIが赤で固定され、auto-merge が
+    動かず、サイトのデプロイが3日止まった。**
+
+  写しが60日を超えて古いと検査が落ちる（古い写しは無い検査と同じ）。
 
 - 本番URLのライブ確認（新規ページ公開後の200/OG/構造化データ確認）
 - `analyze.mjs` 各検出器の実行と、キューJSON/ログへの反映
@@ -649,3 +727,176 @@ ENセグメント1.76%で期待0.56クリック、最も甘いサイト全体カ
   撮影依頼を積み、画像が `assets/img/<slug>/` に入ってから公開する
 - App Store Connect / GSCエクスポート等のオーナー作業
 - 判断に迷う場合（ブランド判断・大きな構造変更）は実装せずログに起票する
+
+### 7-1. 依頼はアクション台帳に積む（`owner_requests` は使わない）
+
+**2026-08-25 改訂。**それまで依頼は status JSON の `owner_requests`、つまり
+**ただの `string[]`** に積んでいた。id も state も閉じ条件も無いので、
+**解決しても消える理由が無い。** 実際、08-25 の日報は12件のうち6件が
+【解消済み】【完了】のまま再送されており、その日いちばん重要な1件
+（主系が2日連続で認証系の即時失敗を起こしていた）はその中に埋もれていた。
+**件数が増えるほど読まれる確率が下がるリスト**は、報告ではなく堆積である。
+
+積む先は `data/autopilot-actions.json`。書き方は
+`node scripts/autopilot-act.mjs --check` が検証する。
+
+- **閉じ条件（`close_check`）の無い行は書けない。** 検査で落ちる。
+  「いつ消えるか」を決められない依頼は、消えない依頼になる
+- 閉じ条件は `scripts/autopilot-act.mjs` の `CLOSE_CHECKS` にあるものだけ。
+  **台帳に任意のコマンドは書けない**（依頼リストを実行経路にしない）
+- リポジトリの外が対象のものは `outside_repo: true` + `close_check: manual`。
+  自動では絶対に閉じないが、`age_days` が出るので放置は放置として見える
+- **`owner` は書かない。** `data/authority-matrix.json` から毎回導出される
+
+### 7-1-1. 閉じ条件は「実在するもの」を指す（2026-08-25 追記）
+
+**導入当日に2回踏んだ。** どちらも「閉じ条件が、閉じたい当のものを指していない」形。
+
+| 事例 | 何が起きたか |
+|---|---|
+| 実費台帳 | 閉じ条件を `autopilot-budget.mjs --check` にしていた。あれは**上限超過**を見る検査で、台帳が空でも通る。閉じたいのは「載っているか」だった |
+| status JSON 鮮度 | 閉じ条件を `seo-check.yml` の `--shipping-pr-has-status` にしていた。**そんな名前は誰も実装しない。** 実装は PR #544 が `autopilot-runs.mjs` の `statusAgreement()` として既に書いていた |
+
+規則:
+
+1. **閉じ条件は、閉じたい当のものを検査する。** 近くにある通りやすい検査で
+   代用しない。代用した瞬間、その依頼は「閉じたことになる」か
+   「永久に閉じない」かのどちらかになる
+2. **`file_contains` の needle は、実在するか着手済みのものだけを書く。**
+   思いつきの名前を書くと、**誰も実装しないので永久に開く。**
+   既存PRがあるならその実装の名前を使い、`detail` にPR番号を書く
+3. **原理的に埋まらないものは、実測してから除外する。** 最初から諦めない。
+   除外したことは `evidence` に必ず出す（黙って消さない）
+
+**永久に開く依頼は、永久に消えない依頼と同じ害を持つ。** どちらもリストを
+読まれなくする方向に働く。この台帳が置き換えた `owner_requests` の失敗そのもの。
+
+### 7-2. 「オーナー依頼」にする前に、まずこれを見る
+
+**この判定を散文でやっていたことが、実際に分類ミスを生んでいる。**
+2026-08-22、`claude_args` に `--allowedTools` が無くて成果物ゼロになった件は
+オーナー依頼として積まれたが、同じファイルはセッション自身が PR #522/523 で
+2回書き換えて通しており、**最初から自分で直せる案件だった**（PR #526 の記述）。
+
+順に見る。上で決まったらそこで止める。
+
+1. **`data/emergency-stop.json`** — 停止中なら何もしない
+2. **リポジトリの外か。** App Store Connect・オーナーのローカル環境・
+   課金コンソール・GitHub Secrets の値。**検査できないものは実行もできない**
+   → `outside_repo: true` で人へ
+3. **`data/authority-matrix.json` の `domains`。** 該当領域の
+   `requires_approval` が true → 人へ。理由も台帳に写す
+4. **無人で走らせるのか（`auto` を付けるのか）。** 付けるなら
+   `self_repair.may_modify` の内側だけ。外を触るなら `auto` を付けない
+5. **ここまでで止まらなければ、それはAIがやる。**
+   `may_modify` は**レーンF（無人の自己修復）の境界であって、
+   セッションの境界ではない。** ここを取り違えると、
+   セッションが普通にできることまで人の依頼として積み上がる
+
+#### オーナーが権限を委譲したとき（2026-08-25 に実際に起きた）
+
+「権限を与えるのでやって」と言われても、**この手続きを飛ばさない。**
+委譲で変わるのは 2〜3 の答えであって、1（緊急停止）と
+「記録を偽らない」は変わらない。実際に起きた4件の扱いを残す。
+
+- **権限表そのものの変更**（`must_not`）… 委譲があれば行える。ただし
+  **`must_not` に対する明示の例外であることを台帳と表の `$note` に書く。**
+  書かないと、次のセッションが「前もやっていた」を根拠に自己承認する
+- **`check-*` の規則を緩める変更** … **委譲があっても行わない。**
+  削除領域の分割では `requires_approval: false` にすれば検査を通せたが、
+  それは「不可逆な領域は必ず承認制」を壊す。**承認は在って主語が違うだけ**
+  だったので、規則ではなく記述のほうを直した
+- **自分の実費超過の解除** … 委譲があれば行える。`--why` に
+  **「オーナーが委譲した」と明記する。**`cap_review.by` は `owner` 固定なので、
+  経緯を書かないと表に残る記録が実際より強くなる
+- **能力が無いもの** … PATの再発行・secretの書き込み・ASCの入力は、
+  権限ではなく**能力**の問題。委譲では解けないので、そう書いて人に残す
+
+**上限そのものを引き上げて自分の超過を消さない。** 解除は記録が残るが、
+上限の引き上げは記録を消す。較正が必要なら、解除と別に起票して人へ渡す。
+
+### 7-3. 日次アクチュエータ（`.github/workflows/autopilot-act.yml`）
+
+09:00 JST に走り、その日の結果から依頼を導出し、**自分でやってよいものは
+実際にやる**。モデルを呼ばないので、**主系が認証で落ちている日も動く。**
+
+自動で実行するのは、判断を要さないぶん毎日確実に漏れる種類の作業だけ:
+
+| handler | 何をするか | なぜ機械にやらせるか |
+|---|---|---|
+| `reconcile-runs` | Actions API の run を運転台帳へ落とす | **落ちた回は台帳を書く主体がいない。**08-24 の即死が台帳に載るまで50.7時間かかった |
+| `append-cost` | ジョブログの実費を台帳へ | §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる |
+| `contain` | 上限に達した経路を止める | 「⛔ 人に上げる」の表示は翌朝の実行を止めない |
+
+**外した handler:** `probe-secret`（secret の存在確認）。初回の実走で GitHub API が
+**HTTP 403** を返した——secret 一覧の読み取りは admin 権限が要り、GITHUB_TOKEN にも
+GH_PAT にも無い。**毎日「実行できず」を出すだけの handler は、この台帳が潰したかった
+ノイズそのもの**なので外した。存在確認を自動化したいなら、先に権限のあるPATが要る。
+
+**ただし、オーナーからは1タップで見える。**この403は権限の壁であって、手間の壁ではない:
+
+    https://github.com/simplememofast/simplememo/settings/secrets/actions
+
+リポジトリの Settings → Secrets and variables → Actions。**アカウントの Settings
+ではない**（2026-08-26、この取り違えで1往復した。AIが「GitHub → Settings →」とだけ
+書いたのが原因なので、依頼文には必ずリポジトリのURLを貼ること）。
+
+`Repository secrets` の表の **Last updated 列が回転日**。値そのものは誰にも読めない
+（GitHubの仕様）。**回転日は期限ではない** —— OAuthトークンの期限は
+`claude auth status` にも `claude setup-token --help` にも出ず、どこにも露出していない
+ことを 2026-08-26 に実測済み（data/credential-expiry.json の note）。
+
+だから資格情報の依頼を人へ上げるときは、**「secretを更新してください」で止めない。**
+更新後に読める値（Last updated）と、それを書き戻す先
+（`data/credential-expiry.json` の `last_rotated_at`）まで書く。回転日が積めば
+観測寿命が出て、**期限を読まずに寿命を判定できる**ようになる。
+
+**実費が存在しない run について。** Claude Code ステップに到達せず落ちた回
+（apt詰まり・actor拒否など）は実行ログ自体が無く、実費は**0ではなく発生していない**。
+`append-cost` は取得を実際に試みてから、埋まらないものを `close_check.params.exclude`
+に積む。積まないと「実費台帳に載っていない run がある」が**永久に閉じない依頼**になり、
+この台帳が潰したかった堆積に戻る。**最初から諦めず、実測してから除外する。**
+
+**実費ゲートは2段あり、片方しか見ないと「予算は大丈夫」に見える。**
+`autopilot-budget.mjs --check`（月次上限）と `--check-run-cap --task <種別>`
+（1回あたりの上限）は別物で、**主系を止めるのは後者のことがある**。
+2026-08-25 に実際にこの形になった: レーンFの修理 run が `repair` の1回上限
+$3.00 に対し $11.93 で終わり、月次上限（$40）には遠いので `--check` は exit 0、
+つまり日報にも予算表示にも異常が出ないまま、**主系が `repair` を選んだ瞬間だけ
+止まる**状態になっていた。失敗した翌日の主系はレーンFを選ぶので、
+**いちばん走ってほしい種別が黙って止まる。**
+
+アクチュエータはこれを毎日起票する（`act-budget-overrun-<run_id>`）。
+解除は `--ack-overrun` で**人間のみ**——AIが自分の超過を自分で通せると、
+上限が「お願い」になる。閉じ条件は `budget_overrun_reviewed` で、
+`data/autopilot-cost.json` の `cap_review` を読む機械判定であって `manual` ではない
+（承認が入れば翌日消える）。**求めているのは承認そのものではなく、
+上限を見直すか支出を認めるかの判断**で、上限側が過小なら
+`data/model-routing.json` の `max_usd_per_run` を直すのが筋。超過の判定は
+保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる。
+
+なお `data/authority-matrix.json` の「AI実費」は `human_only` に
+`monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみで
+あることは権限表に書かれていない**（強制しているのはスクリプト側）。
+権限表の変更は `self_repair.must_not` なのでAIからは直せない。
+
+**止まった日の理由を「いずれか」で書かない。** 運転台帳の `interpretRun` は、
+Claude Code ステップに到達しなかった日を長らく「秘密鍵未設定・当日重複・予算・
+緊急停止のいずれか」という4択のまま記録していた。推測を事実として台帳へ書くと
+**どれで止まったのかを後から復元できない**うえ、1回上限という5つ目の停止経路が
+増えたときに**古い4択に化けて記録される**。理由はワークフローのステップの
+実行結果から一意に決まるので、決めて書く。
+
+| 止まり方 | 緊急停止 | 予算ゲート | 振り分け |
+|---|---|---|---|
+| Gate（秘密鍵未設定・当日重複） | skipped | skipped | skipped |
+| 緊急停止 | **failure** | skipped | skipped |
+| 月次上限 | success | success | skipped |
+| **1回あたりの上限** | success | success | **success** |
+
+振り分けと Claude の間には `run_cap_ok` しか条件が無いので、最終行は消去法では
+なく**一意**に決まる。ステップ情報が取れなかった run は「判定できない」と書く
+——ここでも決まらないなら決めない。
+
+セッション側でやることは変わらない。**レーンFは引き続きセッションの仕事**で、
+アクチュエータは原因特定も実装もしない。台帳の同期と閉じ条件の判定だけを持つ。

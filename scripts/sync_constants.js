@@ -121,10 +121,34 @@ const RULES = [
  * saying nothing. Its own instruction ("Do NOT infer or extrapolate … version
  * numbers beyond these published values") is what gives the wrong number teeth.
  */
+/**
+ * 「as of」の日付は、**この行が名乗る事実のうち最も古い確認日**にする。
+ *
+ * 2026-08-22、5.8.1 の反映でこの穴が実際に出た: version だけを書き換える
+ * 規則だったので、リリース当日に llms.txt が
+ *   「**Current facts (as of 2026-08-09):** version 5.8.1」
+ * になった。**リリースの13日前に 5.8.1 が現行だったと名乗る**形で、
+ * この文書の冒頭が警告している「権威ありげな誤情報」そのもの。
+ *
+ * 今日の日付にはしない。この行はバージョンだけでなく評価・価格も名乗るので、
+ * **一番古い事実より新しい鮮度を主張できない。**（評価が10日前なら、
+ * バージョンを今日更新しても、この行全体としては10日前が正しい）
+ */
+function stampDate() {
+  const dates = [C.appVersionNote, C.ratingNote, C.priceNote]
+    .map((n) => {
+      const all = [...String(n || '').matchAll(/(\d{4}-\d{2}-\d{2})/g)].map((m) => m[1]).sort();
+      return all.length ? all[all.length - 1] : null;
+    })
+    .filter(Boolean)
+    .sort();
+  return dates.length ? dates[0] : null;
+}
+
 const LLMS_RULES = [
   ['llms.txt Current facts version',
-    /(\*\*Current facts \(as of \d{4}-\d{2}-\d{2}\):\*\* version )([0-9][0-9.]*)/,
-    (m, a, v) => a + C.appVersion],
+    /(\*\*Current facts \(as of )(\d{4}-\d{2}-\d{2})(\):\*\* version )([0-9][0-9.]*)/,
+    (m, a, d, b, v) => a + (stampDate() || d) + b + C.appVersion],
   ['llms.txt rating',
     /(App Store rating )(\d\.\d)( \()(\d+)( ratings\))/,
     (m, a, rv, b, rc, c) => a + C.ratingValue + b + C.ratingCount + c],

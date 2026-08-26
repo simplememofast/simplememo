@@ -1,0 +1,401 @@
+{
+  "$comment": [
+    "アクション台帳 — 日報から起動する『やるべきこと』の単一の正。",
+    "",
+    "【なぜ作ったか】これまで依頼は status JSON の owner_requests、つまり",
+    "**ただの string[]** に積まれていた。id も state も閉じ条件も無いので、",
+    "**解決しても消える理由が無い。** 2026-08-25 時点で12件中6件が【解消済み】",
+    "【完了】のまま毎朝オーナーへ再送されており、その日いちばん重要な1件",
+    "（主系の認証failure）はその中に埋まっていた。件数が増えるほど、",
+    "**読まれる確率が下がる方向に働く**リストになっていた。",
+    "",
+    "【この台帳の約束】",
+    "  1. 行が消えるのは close_check が実際に通ったときだけ。人が消すのではない",
+    "  2. owner は書かない。data/authority-matrix.json から毎回導出する",
+    "     （散文の Runbook §7 で分類していた間に、自分で直せる案件を",
+    "      オーナー依頼に積む誤りが実際に起きている——PR #526 の記述）",
+    "  3. close_check は登録簿（scripts/autopilot-act.mjs の CLOSE_CHECKS）にある",
+    "     ものしか書けない。**台帳に任意のコマンドは書けない**",
+    "  4. 判定できないときは開いたままにする。閉じるほうへ倒さない",
+    "",
+    "【履歴はここに持たない】解決した行は state:done になり、日報から消える。",
+    "経緯は docs/obsidian/AUTOPILOT_LOG.md が持つ。同じ歴史を2箇所に置かない。",
+    "",
+    "【state】",
+    "  open         … 未処理。日報に出る",
+    "  done         … close_check が通った。evidence に根拠が入る",
+    "  acknowledged … 既知の制約。直す対象ではないので日報では件数だけ出す",
+    "                 （消すと『無い』ことになり、毎日出すとノイズになる）"
+  ],
+  "last_run_jst": "2026-08-26",
+  "actions": [
+    {
+      "id": "act-asc-privacy-answers",
+      "title": "App Store Connect の「App のプライバシー」回答を PrivacyInfo.xcprivacy と揃える",
+      "detail": "2026-08-22 に申告ファイル側へ3種別を追加した（Product Interaction / Device ID / Other Diagnostic Data）。ASC側の回答はリポジトリから見えないため検査できない。**片方だけ直すと逆に不整合になる。**次のビルドを出す前に揃えるのが安全。将来 iOS が client_send_id を送り始めた日に Linked が true になり、そのとき申告とASCの両方を変える。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "done",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "完了。**機械で確かめた部分とオーナー報告の部分を分けて書く。**\n【機械で検証】simplememo-ios main（5dbcc5e）で `python3 scripts/qa/check_privacy_manifest.py` が「申告と実装が一致している」を出力。6種別（メールアドレス / メールまたはテキストメッセージ / その他のユーザコンテンツ / デバイスID / 製品の操作 / その他の診断データ）。申告漏れだった「メールまたはテキストメッセージ」は #226 で修正済み。\n【オーナー報告】ASC 側の6種別の入力を完了し、目的・関連付け・追跡が揃っていることを確認。入力内容は上記スクリプトの出力と一致している（data/autopilot-status.json に記録）。\n**ASC 側はリポジトリから検査できないので、ここは報告に依っている**（close_check が manual である理由）。\n【残る構造的な穴】check_privacy_manifest.py は ASC を読めないため「申告ファイル→実装」しか見ない。**「ASCにあるのに申告ファイルに無い」は構造的に不可視**で、今回の漏れもオーナーが画面を見せて初めて分かった。ASC 側を触った回は同スクリプトの出力と目で見比べるしかない（APIでは書けないことを 2026-08-25 に確認済み）。"
+    },
+    {
+      "id": "act-authority-split-deletion",
+      "title": "権限表の「ユーザーデータの削除要求への対応」を2つに分けるか決める",
+      "detail": "権限表は requires_approval: true / human_only: [実行の承認] だが、実装はそれより広い。アプリ内の自己削除（POST /v1/account/delete）は承認を挟まずその場で完了する — App Store Guideline 5.1.1(v) がそれを要求しているため。つまり (a) アプリ内の自己削除＝自動・承認なし と (b) 個別の連絡による削除要求＝本人確認と承認が要る の2つが1行に束ねられ、表は (b) の書き方で (a) を覆っている。**分けるかどうかは権限そのものの話なのでAIは変更しない**（self_repair.must_not「権限表を自分で書き換えない」）。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/authority-matrix.json"
+      ],
+      "outside_repo": false,
+      "force_owner": "human",
+      "force_owner_why": "権限表そのものの変更は self_repair.must_not で明示的に禁じられている",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "done",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "完了（2026-08-25・オーナーが権限を委譲したうえで実施。self_repair.must_not「権限表を自分で書き換えない」に対する明示の例外）。\n**分けただけでなく、分割前の記述が実態と逆だった点を直した。**\n【機械で検証】アプリ内の自己削除には二段階確認がある — SettingsViewController.swift の showDeleteAccountFinalConfirmation()（ActionSheet → Alert の2段）を通ってから performAccountDeletion() が走る。サーバ側 POST /v1/account/delete（simplememo-api/src/index.ts）は (deviceToken, toEmail) と KV の verified: だけで即時に実行し、運用側の承認は挟まない。\n【要点】分割前は requires_approval: true / human_only: [実行の承認] とだけ書いており、**誰の承認かを言っていなかったため運用側が承認する経路だと読めた。**実際の承認者はアカウント本人。\n【requires_approval を false にしなかった理由】check-authority.mjs の規則1「不可逆な領域は必ず承認制」に当たる。**承認は在る。主語が違うだけ**なので、規則を緩めず主語を書いた（規則を緩めるのは self_repair.must_not の「検証を弱める変更」）。\n【結果】17領域中13が稼働・12が承認制。check-authority.mjs --check 通過。"
+    },
+    {
+      "id": "act-egress-policy-confirm",
+      "title": "副系CCRの egress 制限が意図どおりか確認する（2026-08-25 実測で更新）",
+      "detail": "**【2026-08-25 実測で訂正】以前の記述「simplememofast.com もブロックされている」は現在この環境では成り立たない。**本番 status JSON が curl で 200 で読める。\n\nつまり **Runbook §0 の冪等チェック(b)「本番 status JSON の date_jst」は副系でも実行できる。**以前の記録は「(b) は実行不能なので実質のガードは (c) と当日ブランチの占有だけ」としており、**ガードの強度を実際より低く見積もっていた。**\n\n同一セッション内で curl により実測（2026-08-25）:\n```\n200      https://simplememofast.com/data/autopilot-status.json   ← 以前は「ブロック」と記録\n200      https://simplememofast.com/robots.txt\n200      https://api.github.com/rate_limit\n200      https://raw.githubusercontent.com/…\n200      https://registry.npmjs.org/\n400      https://github.com/            ← curl は 400。WebFetch 経由では到達できる\nblocked  https://obsidian.md/ , https://help.obsidian.md/     ← WebFetch でも EGRESS_BLOCKED\nblocked  https://www.notion.com/ , https://en.wikipedia.org/ , https://www.google.com/\nblocked  https://api.indexnow.org/indexnow   ← indexnow-notify.js がこの環境で落ちる理由\n```\n\n**変わっていない部分:** obsidian.md 系は curl でも WebFetch でも一貫してブロックされる。レーンEで Obsidian 公式サイトを一次情報にする記事は、副系からは書けない（raw.githubusercontent.com 経由の公式レジストリは読めるので、そちらは使える）。\n\n**注意:** 到達性はセッションごと・ツールごとに違う。過去ログには curl・WebFetch ともブロックされたという記録があり、今回と食い違う。**1回の実測を恒久的な仕様として書かない**——次に判断するときは、そのセッションで測り直すこと。\n\nオーナーに確認したいのは「この制限が意図したものか」で、そこは変わらない。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "done",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "完了（2026-08-25・オーナーが権限を委譲したうえで、構成を実測して判断）。\n【機械で確認】このセッションが載っている環境は env_01RmhZUdCQoTVYsGM6Ly45oP = **「Simple Memo」**。同じアカウントには別環境 **「Default」があり、その説明文は \"Default - trusted network access\"**。つまり**制限の緩い環境が存在していて、このプロジェクトはそれを選んでいない。**\n【機械で確認】遮断はエージェントプロキシの明示的なポリシー拒否として記録されている（`__agentproxy/status` の recentRelayFailures に `connect_rejected / gateway answered 403 to CONNECT (policy denial or upstream failure)` が obsidian.md・help.obsidian.md・www.notion.com・en.wikipedia.org 等で残っている）。**故障ではなく設定である**ことは、これで言える。\n【結論】egress 制限は構成によるもので、意図されたものと判断する。許可されている先（simplememofast.com / api.github.com / raw.githubusercontent.com / registry.npmjs.org）は運用に必要なものと一致しており、遮断されている先は一般Webの閲覧系。\n【この判断が示していないこと】どのホストを許すかの一覧そのものはここからは読めない。「意図した設定である」までは言えるが、「いまの一覧が最善である」は別の話。また**到達性はセッションごと・ツールごとに違う**（過去ログとの食い違いは残っている）。次に判断するときは、そのセッションで測り直すこと。"
+    },
+    {
+      "id": "act-status-freshness-ci",
+      "title": "status JSON の鮮度をCIで検証する（PR #544 が実装済み・draft保留中）",
+      "detail": "2026-08-23 PR#538（主系初出荷）が Runbook §5-2 必須の data/autopilot-status.json 更新を含まず、本番の日報データが3日間 08-22 のまま止まった。日報は「当日分が無い＝上流停止」と読む設計なので、**出荷した日ほど誤報する**壊れ方だった。\\n\\n**実装は既に PR #544 にある**（scripts/autopilot-runs.mjs に statusAgreement() を追加し、既存の --check で台帳と status JSON の両方向の食い違いを落とす。自己検査10ケース付き）。ただし draft で保留されており、base が古くコンフリクトしている。\\n\\n【2026-08-25 実測】#544 を現在の main にマージして検証した: scripts/autopilot-runs.mjs は**自動マージで衝突なし**（PR#554 で足した --failure-class と両立）、seo-check.yml と Runbook も自動マージ。唯一の衝突は data/autopilot-status.json で、#544 がこれを 08-23 に復元しようとするため —— **その復元は既に不要**（main は 08-25 で台帳と一致）。main 側を採用すれば selftest 24/24・--check OK・全57チェック通過（KPI checksum の --bump のみ別途必要）。",
+      "source": "manual",
+      "domain": "サイトコンテンツの新設・更新",
+      "touches": [
+        "scripts/autopilot-runs.mjs",
+        ".github/workflows/seo-check.yml",
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": "scripts/autopilot-runs.mjs",
+          "needle": "statusAgreement"
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "scripts/autopilot-runs.mjs に「statusAgreement」がある"
+    },
+    {
+      "id": "act-ccr-bigquery-connector",
+      "title": "副系CCRは BigQuery MCP 接続子を持たずに起動する",
+      "detail": "bq-preflight.mjs も資格情報が無く認証失敗する。seo-daily.yml のジョブログから代替できる日はそれで足りるが、その経路が使えない日は取得不能になる。取得できなかった日は bq_checked: false で「増えていない」と区別して報告する運用でしのいでいる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "acknowledged",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": "既知の制約として受容。回避手順が Runbook にある"
+    },
+    {
+      "id": "act-ccr-command-classifier",
+      "title": "副系CCRで一部コマンドが auto mode クラシファイアに断続的にブロックされる",
+      "detail": "`python3 -c` の単発実行や `node ... | tail` のようなパイプ付きコマンドが一時的にブロックされることがある（ヒアドキュメント形式や単独の node は通る）。セッションごとに再現有無が変わる。代替手段（Read/Edit・コマンド分割）で回避でき、成果物への影響は観測されていない。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "acknowledged",
+      "created_jst": "2026-08-22",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": "実害なし。回避可能な既知の制約として受容"
+    },
+    {
+      "id": "act-selfheal-ap-20260824-actions",
+      "title": "未修理の故障: ap-20260824-actions（upstream_action_regression。起票時は auth_or_credential と記録していたが誤りで、data/autopilot-runs.json で訂正済み）",
+      "detail": "2026-08-24 / actions / outcome=failed。Claude Code ステップが result.is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0 で即時失敗。実際の作業（ブランチ作成等）に入る前、初回のモデル呼び出し相当の時点で終わっている。full outputはshow_full_output未設定のためActionsログに出ておらず、正確なエラーメッセージは未特定",
+      "source": "selfheal",
+      "domain": null,
+      "touches": [
+        "data/autopilot-runs.json",
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "run_repaired",
+        "params": {
+          "run_id": "ap-20260824-actions"
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "ap-20260824-actions は selfheal の未修理リストから消えた"
+    },
+    {
+      "id": "act-selfheal-ap-20260825-actions",
+      "title": "未修理の故障: ap-20260825-actions（upstream_action_regression。起票時は auth_or_credential と記録していたが誤りで、data/autopilot-runs.json で訂正済み）",
+      "detail": "2026-08-25 / actions / outcome=failed。前日(ap-20260824-actions)と同一シグネチャで2日連続失敗: is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=0。時間・失敗の形が完全一致しており単発のflakeではない。CLAUDE_CODE_OAUTH_TOKEN/ANTHROPIC_API_KEYいずれかの認証エラーが濃厚だが、full outputが伏せられておりログから断定はできない",
+      "source": "selfheal",
+      "domain": null,
+      "touches": [
+        "data/autopilot-runs.json",
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "run_repaired",
+        "params": {
+          "run_id": "ap-20260825-actions"
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "ap-20260825-actions は selfheal の未修理リストから消えた"
+    },
+    {
+      "id": "act-cost-sync",
+      "title": "実費台帳に載っていない run が 2件",
+      "detail": "ap-20260820-actions（run 32303452390）, ap-20260821-actions（run 32419185478）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。",
+      "source": "cost",
+      "domain": null,
+      "touches": [
+        "data/autopilot-cost.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": "append-cost",
+      "close_check": {
+        "kind": "cost_covers_runs",
+        "params": {
+          "exclude": [
+            "ap-20260820-actions",
+            "ap-20260821-actions"
+          ]
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-26",
+      "closed_jst": "2026-08-25",
+      "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）",
+      "last_run_jst": "2026-08-25",
+      "last_run_log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む"
+    },
+    {
+      "id": "act-credential-actions",
+      "title": "主系が2日連続で即時失敗した件（2026-08-24〜08-25）— **実測で決着: 原因は資格情報。版は容疑から外れた**",
+      "detail": "**2026-08-26 に対照実験で決着した。原因は資格情報で、版ではない。**\n\n疑われていた版（Claude Code 2.1.241 = claude-code-action c81e3bc6 が入れる版）を、**現在の有効なトークンで**直接走らせたところ正常に完走した:\n\n    suspect-2.1.241  exit=0  is_error=false  num_turns=1  result=\"PROBE_OK\"\n    control-2.1.245  exit=0  is_error=false  num_turns=1  result=\"PROBE_OK\"\n    （run 32919495397 / 実費 $0.04 / 同一プロンプト・同一トークン）\n\n対照も通っているので装置側の誤りではない。2.1.241 × 旧トークン = 失敗、2.1.241 × 新トークン = 成功。**動いている変数はトークンだけ。**\n\n上流の差分も実測した。c81e3bc6→16b3b310 の src/ の違いは\n`const claudeCodeVersion = \"2.1.241\" → \"2.1.245\"` の1文字列のみで、ラッパーのロジックは完全に同一。**版が失敗を説明できる余地がそもそも無かった。**\n\n**当初の『auth_or_credential』が正しく、08-25 の訂正のほうが誤りだった。**\n誤りの原因は「失敗runと成功runでSHAが違う」を版の証拠として読んだこと。@v1 はフローティングタグなので日をまたげばSHAはほぼ必ず違う——**あの対照は、原因が何であれ必ず『違い』を見つける。**\n\n【残る留保】旧トークンが無効だったことは直接観測していない（旧トークンは既に無く、Secrets のメタデータは admin 権限が要り 403）。消去法による結論。上流の一時障害も完全には排除していないが、2日とも 486ms で完全同一という決定論的な形は、一時障害より資格情報の拒否と整合する。\n\n【運用上の帰結】**pin ではこの故障を防げない。**同じ形でまた止まりうる。\n\n**溶けたのは検知ではなく診断だった。**失敗は初日に検知できていて、2日を使ったのは原因の取り違え（認証系→版→やはり認証系）。そこで 2026-08-26、その切り分けをワークフローに入れた——即死した回だけ、同じトークンで1ターン走らせる（`即死が資格情報かを切り分ける` ステップ・$0.04・失敗日のみ）。落ちれば資格情報、通れば資格情報以外と機械的に割れる。interpretRun がこの結論を読み、資格情報と確定した回は needs_triage を立てずオーナー作業として出す。\n\n【**拒否の機構は未特定**——2026-08-26 訂正】当初この欄は「トークンが失効すれば同じ2日がまた消える。事前予測に要るのは expires_at 1つ」と書いていたが、**それは確かめずに書いた。**日付が合わない:\n\n    2026-08-19  登録（この日、主系の Gate が8日ぶりに通過）\n    2026-08-24  初回の即時失敗（06:17 JST）\n    = 約5日\n\n`claude setup-token` は \"Set up a **long-lived** authentication token\" と説明される。**long-lived が5日で切れるとは考えにくい。**対照実験が示したのは (a) 版は無罪 (b) 古い資格情報が拒否された、の2つだけで、**なぜ拒否されたかは示していない。**候補は失効（claude.ai 側のセッション無効化）・アカウント側の制限（08-11 の別の失敗では『7日レート制限が警告域』が状況証拠として残っている）・期限切れ。\n\n**期限は3か所とも露出していない**（実測）: `claude auth status` は loggedIn/authMethod/apiProvider のみ、`claude setup-token -h` はオプション無し、GitHub Secrets は値が読めず Updated 日時のみ（＝回転日であって期限ではない）。したがって **expires_at を埋めてもこの故障が捕まるとは限らない。**\n\n**次に効く手は、期限を探すことではなく回転日を積むこと。**data/credential-expiry.json に last_rotated_at と observed_lifetimes を置いた。**2026-08-26、last_rotated_at: 2026-08-25 は推論から観測に変わった** —— repository secrets 画面（https://github.com/simplememofast/simplememo/settings/secrets/actions）で \"yesterday\" を直接確認したため。2回目の寿命が出れば、5日が異常値だったのか一定なのかを期限を読まずに判定できる。",
+      "source": "credential",
+      "domain": null,
+      "touches": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "no_failure_since",
+        "params": {
+          "route": "actions",
+          "failure_class": "immediate_failure",
+          "since": "2026-08-25"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-26",
+      "closed_jst": null,
+      "evidence": "2026-08-26 の対照実験 run 32919495397 で、2.1.241 が有効トークンで is_error=false / result=PROBE_OK。08-26 の schedule run も出荷済み（PR #586）",
+      "last_run_jst": "2026-08-26",
+      "last_run_log": "版 vs トークンを対照実験で分離し「資格情報」と確定。切り分けをワークフローへ自動化。**ただし拒否の機構（失効/制限/期限切れ）は未特定** ——観測寿命5日は期限切れ説と整合しない"
+    },
+    {
+      "id": "act-pin-claude-code-action",
+      "title": "claude-code-action を SHA 16b3b310 へ pin する（主系のPATに workflow scope が無く、主系からは push できない）",
+      "detail": "**内容は確定していて、適用できないだけ。** 主系(GitHub Actions)の GH_PAT に\n`workflow` scope が無く、`.github/workflows/*` を含む push が GitHub 側で\nremote rejected される（\"refusing to allow a Personal Access Token to create or\nupdate workflow ... without `workflow` scope\"）。GH_PAT でも GITHUB_TOKEN でも同じ。\n\n**皮肉だが構造的な穴:** data/authority-matrix.json の self_repair.may_modify は\n`.github/workflows/obsidian-autopilot.yml` をレーンFが直してよいファイルとして\n挙げているのに、**主系はそれを push する資格を持っていない。**「直してよい」と\n「直せる」がずれている。副系CCRは push できる（PR #548 が同じファイルを変更して\nマージされている）ので、レーンとして塞がっているのは主系だけ。\n\n【適用する変更（2箇所）】\n1. `uses: anthropics/claude-code-action@v1`\n   → `uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)`\n2. その下の `show_full_output: true` を削除（前日に診断用として入れたもの。\n   原因が確定したので戻す。このリポジトリは public であり、upstream が既定で\n   伏せている全出力を、必要が消えた後まで開けておく理由が無い）\n\n【なぜ pin するか】2026-08-24・08-25 の主系2日連続の即時失敗は、認証ではなく\nclaude-code-action@v1 が引いた上流の壊れた版（SHA c81e3bc6 / Claude Code 2.1.241）\nだった。フローティングタグはこれで2回目（08-21 は actor 拒否のガードが後から乗った）で、\n5日のうちに主系を丸ごと2回止めている。本番デプロイまで直結する経路が、実行のたびに\n上流の最新版へ勝手に乗り換える理由が無い。\n\n【誰がやれるか】(a) 次の副系CCRセッション（push できる）、または\n(b) オーナーが GH_PAT に `workflow` scope を足す（そうすれば主系が自分で直せるようになり、\nmay_modify との食い違いも消える）。**(b) のほうが根本的**だが、(a) で今日の穴は塞がる。\n\n【閉じ条件】obsidian-autopilot.yml に 16b3b310c3d7 が入ったら閉じる——\n**閉じたい当のものを検査している**（§7-1-1）。",
+      "source": "session",
+      "domain": null,
+      "touches": [
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": ".github/workflows/obsidian-autopilot.yml",
+          "needle": "16b3b310c3d7b5279df73130324d5205aeea8eac"
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": ".github/workflows/obsidian-autopilot.yml に「16b3b310c3d7b5279df73130324d5205aeea8eac」がある"
+    },
+    {
+      "id": "act-gh-pat-scope-and-rotation",
+      "title": "GH_PAT を回す（`workflow` scope は足さないと決定済み・2026-08-25）",
+      "detail": "**scope の判断は済んでいる。残っているのは回転だけ。**\n\n【決定: `workflow` scope は足さない】2026-08-25、オーナーの権限委譲のもとで決めた。理由:\n`workflow` scope を足すと、**無人の主系レーンが自分のワークフロー定義を書き換えて push できるようになる。**そこには `permissions:` も含まれる。権限表の self_repair.must_not は「自分の権限を広げる変更」を禁じているが、それを**いま実際に強制しているのは GitHub 側の remote rejected であって、散文ではない。**scope を足すと、この禁止は文章だけになる。\n**代わりの経路は既に動いている**: ワークフローファイルの修理は副系CCR（セッション）が行う。2026-08-25 の pin（16b3b310）と本日の notice 追加が、どちらも実際にその経路で入っている。\n**代償**: 主系は自分のワークフローの故障を最後まで直せない。原因特定までは主系が行い、適用は副系が引き取る（2026-08-25 がその形）。これは受け入れる。\n\n【確認先】https://github.com/simplememofast/simplememo/settings/secrets/actions（リポジトリのSettings。**アカウントのSettingsではない**）。Last updated 列が回転日で、値そのものは誰にも読めない。2026-08-26 時点で GH_PAT は \"last week\" ＝ **未回転。**\n\n【残: 回転 — AIからは押せない】新しい PAT の発行はオーナーの GitHub アカウント画面でしかできず、repo secret への書き込みも admin 権限が要る（secret 一覧の読み取りが HTTP 403 だったのと同じ壁）。**権限の問題ではなく能力の問題**なので、委譲では解けない。\n急ぎではない: 心配の元は run 32816234185 の `git remote -v` だが、GH_PAT は登録済み secret なのでActions のログでは `***` にマスクされる。**マスクを実地で確認できていない**点は変わらないが、確認しようとしたジョブログのホスト（*.blob.core.windows.net）は egress ポリシーで 403 であり、MCP 経由で本文を取ると**マスクされていなかった場合に生の資格情報を会話へ取り込むことになる**ため踏んでいない（リポジトリは public なので、露出の有無は読んでも変わらない）。\n**再発防止はセッション側の規律**: 認証まわりを調べるときに `git remote -v` を使わない。",
+      "source": "session",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": "human",
+      "force_owner_why": "GitHub Secrets の値と PAT の scope はリポジトリの外（AIからは実行も検査もできない）。**回転日はオーナーなら1タップで読める: https://github.com/simplememofast/simplememo/settings/secrets/actions の Last updated 列**（リポジトリのSettings。アカウントのSettingsではない）。AIは同じものが API で 403",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {
+          "observed": "2026-08-26 時点で GH_PAT の Last updated は \"last week\" ＝ **未回転**（CLAUDE_CODE_OAUTH_TOKEN は \"yesterday\"）"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-26",
+      "closed_jst": null,
+      "evidence": "2026-08-26 時点で GH_PAT の Last updated は \"last week\" ＝ **未回転**（CLAUDE_CODE_OAUTH_TOKEN は \"yesterday\"）（リポジトリからは検査できない。閉じるのは人）"
+    },
+    {
+      "id": "act-budget-overrun-32816234185",
+      "title": "1回上限の超過が未レビュー: 2026-08-25 repair $11.9329（上限 $3.00 の4倍）— 主系が repair を選ぶと止まる",
+      "detail": "解除: `node scripts/autopilot-budget.mjs --ack-overrun 32816234185 --why \"…\"`\n**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。上限は data/model-routing.json の rules.repair.max_usd_per_run が正で、実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる）。\n**月次上限は通っている**ため `--check` は exit 0 で、\"予算は大丈夫\" に見える。止まるのは `--check-run-cap --task repair` の側だけ。\nなお data/authority-matrix.json の「AI実費」は human_only に `monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**（権限表の変更は self_repair.must_not なのでAIからは直せない）。",
+      "source": "budget",
+      "domain": null,
+      "touches": [
+        "data/autopilot-cost.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている（AIが自分の超過を自分で通せると、上限が「お願い」になる）",
+      "auto": null,
+      "close_check": {
+        "kind": "budget_overrun_reviewed",
+        "params": {
+          "run_id": "32816234185"
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": "2026-08-25",
+      "evidence": "run 32816234185 の超過はレビュー済: 2026-08-25のセッションでオーナーが明示的に権限を委譲して解除（「権限を与えるのでやって」）。支出そのものは妥当と判断した: 104ターン・27分で ap-20260824/25 の2件を修理して出荷しており、内容に無駄な反復は無い。**ただし本質は支出ではなく上限の較正。** 実測5件のうち task_kind が付いた3件を見ると、実際に仕事をして出荷した run は2件（article $7.2967 / repair $11.9329）で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run（$0.8149）だけ。** 上限 $2.00/$3.00 は失敗runのn=1から外挿した placeholder で、成功runを一度も許容していない。さらに repair は monthly_usd_cap $8 に対し1回が $11.93 で、月枠が1回分に足りていない。上限の再設定は monthly_usd_cap の決定を含み権限表で human_only なので、ここでは解除だけを行い、較正は数値つきで台帳に残す（act-budget-recalibrate）"
+    },
+    {
+      "id": "act-budget-recalibrate",
+      "title": "1回あたりの実費を下げる — 毎回読ませていた205,000文字を72,000文字に減らした。効果は次の article 実測で確かめる",
+      "detail": "**オーナーの判断（2026-08-25）: 上限を上げるのではなく、1回のコストを下げる。**\n月次上限を実測に合わせる案（日次出荷なら $280/月）を出したが、「一回のコストがかかりすぎるから節約を先にしたい」との回答。上限は据え置き。\n\n**実測した無駄。** Runbook §0 の「読むもの」を素直に全文読むと 約205,000文字。そのうち実際に要るのは約72,000文字だった。**入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因。**\n\n| 読ませていたもの | 現在 | 必要な部分 | 削減 |\n|---|---|---|---|\n| AUTOPILOT_LOG.md | 77,004字 | 末尾200行 約7,900字 | -69,100 |\n| SEO_AIO_PLAN_2026-08.md | 45,841字 | §6 のみ **715字** | -45,126 |\n| coverage-queue.json | 19,474字 | pending 先頭1件 | -18,500 |\n\nさらに **AUTOPILOT_LOG.md は毎日 +5,000字ずつ増える**ので、放っておくと1回あたりのコストが日々上がる構造だった。\n\n**入れた変更**（どちらも指示の側で、モデルもターン上限も触っていない）:\n- Runbook §0「読むもの」に**全文を読むものと一部だけ読むものの区別**を書いた（tail / sed で節抽出 / node で先頭1件）\n- 主系プロンプト手順2を `tail -n 200` にし、**保留事項は LOG ではなく data/autopilot-actions.json から取る**ようにした（この台帳が型付きで持っており、散文の履歴から拾うと解消済みが混ざる）\n\n**触らなかったもの**: `--max-turns 250`（成功した run が150ターン使っており、下げると正当な長さの run を殺す）。モデルの割り当て（repair の opus は「安いほうが高くつく」の設計判断で、実測なしに下げない）。\n\n**目標 $4.50。** article の実測 $7.2967 に対し、入力が実費の約6割・その入力を約65%削減という前提からの見積り（$7.30 x (1 - 0.6 x 0.65) = 約$4.45）。**前提のほうが外れる可能性があるので、閉じ条件は見積りではなく実測に置いた** —次に article が走って $4.50 以下なら閉じ、超えていれば額とともに開いたまま残る。\n\n**残っている論点**（今回は触っていない）: `anomaly`（中央値x4・自己較正）と `max_usd_per_run`（絶対額）は役割が違う——前者は検知して報告、後者は次の1回を止める。同じ値を2箇所に置いているのではないので両方残す。ただし `max_usd_per_run` の値そのものは今も placeholder のままで、**成功した run を許容していない**（article $2.00 / repair $3.00 に対し実測 $7.30 / $11.93）。節約後の実測が出たら、そこから引き直すのが筋。",
+      "source": "budget",
+      "domain": "AI実費（開発・運用のトークン費）",
+      "touches": [
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        ".github/workflows/obsidian-autopilot.yml",
+        "data/autopilot-cost.json"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "cost_reduced",
+        "params": {
+          "task_kind": "article",
+          "since": "2026-08-25",
+          "target": 4.5
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-25",
+      "last_seen_jst": "2026-08-25",
+      "closed_jst": null,
+      "evidence": "2026-08-25 以降 article はまだ走っていない（実測が無い＝効果は不明）"
+    },
+    {
+      "id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "detail": "32900786201（2026-08-26 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "source": "ledger",
+      "domain": null,
+      "touches": [
+        "data/autopilot-runs.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": "reconcile-runs",
+      "close_check": {
+        "kind": "ledger_covers_runs",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-08-26",
+      "last_seen_jst": "2026-08-26",
+      "closed_jst": null,
+      "evidence": "台帳に無い run が 1件: 32900786201（記録対象外 1件を除外: 32817335365）",
+      "last_run_jst": "2026-08-26",
+      "last_run_log": "32900786201: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）"
+    }
+  ]
+}

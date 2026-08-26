@@ -84,6 +84,47 @@
       "note": "AIワークフローに actions: write を与えていないため、AIはこの連鎖を起動できない（claude.yml 冒頭に理由あり）"
     },
     {
+      "domain": "macOSランナーの起動（GitHub Actions 分数の消費）",
+      "reversible": false,
+      "ai_may": [
+        "残枠と1回あたりの実費の提示",
+        "人間が名指しで指示したときの dispatch 代行"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "回すという判断そのもの",
+        "confirm 合言葉の入力"
+      ],
+      "gate": "qa-ios.yml は自動トリガを持たず、confirm 入力が required。値の照合は ubuntu の gate ジョブが持ち、macOSの2ジョブは needs: gate。入力なしの dispatch は GitHub が422で弾く",
+      "evidence": [
+        "../simplememo-ios/.github/workflows/qa-ios.yml",
+        "../simplememo-ios/CLAUDE.md"
+      ],
+      "status": "active",
+      "threshold": {
+        "monthly_included_minutes": 2000,
+        "macos_multiplier": 10,
+        "per_run_equivalent_minutes": 130,
+        "set_by": "github_plan",
+        "overage_policy": "bill_rather_than_stop",
+        "overage_policy_set_by": "owner 2026-08-25",
+        "observed_2026_08_25": {
+          "gross_usd": 23.23,
+          "included_discount_usd": 23.15,
+          "net_usd": 0.08,
+          "by_repo_gross_usd": {
+            "simplememo": 12.12,
+            "simplememo-ios": 10.33,
+            "simplememo-api": 0.77
+          },
+          "payment_method": "有効なものが登録されていることを確認（内容はここに書かない。このリポジトリは public）",
+          "note": "**gross の最大は public の simplememo（$12.12・全額が discount 側に載る）。付帯分を実際に食っているのは simplememo-ios（$10.33）** で、simplememo-api は $0.77。純額が $0.08 立っていること自体が、付帯分を超えた分が課金されて通っている証拠になる（$0 budget なら止まって $0.00 のまま）。**未解決**: この金額と、8/25 の警告メールが言う『1,800/2,000分』は正確には突き合わない（Linux $0.008/分 換算だと private 側は約1,390分）。どちらが正でも純額が $0.08 である事実は動かないので、出どころは未解明のまま残す"
+        },
+        "note": "2,000分/月は GitHub Free（simplememofast は個人アカウント）の付帯分で、こちらが決めた値ではない。130分は qa-ios.yml ヘッダの実測13分×10倍単価（watch ON なら +160分）。**超過時にどちらへ倒すかはオーナーが決めた（2026-08-25）: 止まるより課金されるほう。** $0 budget は枯れた瞬間に release / release-command と Flag Ops まで止めるので、そちらのほうが高くつく。金額側は小さい —— 超過分は Linux 約$0.008/分（200分で約$1.6）・macOS 約$0.08/分（7/31 の実績で$10）。**budget の設定値そのものは依然としてAPIから読めない。** 課金画面を人が見るしかなく、CIで検査する手段は無い（observed_* は人が読んだ値の写しであって、機械が確かめた値ではない）"
+      },
+      "note": "**分数は戻らない**（リセットは翌月1日）ので不可逆に分類した。焼けるのは金額ではなく出荷で、枯れると release / release-command が止まり TestFlight配信もApp Review申請もできなくなる。2026-07-31 に1日で $10 を使い切った実績があり、そのときの経路は『AIが足した push トリガ』だった。表に無い支出は、次に判断するセッションからは存在しない"
+    },
+    {
       "domain": "App Review への提出",
       "reversible": false,
       "ai_may": [],
@@ -225,20 +266,41 @@
       "status": "suspended"
     },
     {
-      "domain": "ユーザーデータの削除要求への対応",
+      "domain": "ユーザーデータの削除（アプリ内の自己削除）",
+      "reversible": false,
+      "ai_may": [
+        "削除経路の実装と保守（data-retention.json を正として、カバレッジ検査に従う）"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "削除の実行 — **承認するのはアカウント本人**（設定画面での二段階確認）。運用側の承認は入らない"
+      ],
+      "gate": "アプリ内で本人が二段階確認（ActionSheet → Alert）したときだけ POST /v1/account/delete が走り、その場で完了する。運用側の承認を挟むことは App Store Guideline 5.1.1(v) が許さない。消し漏れは check-deletion-coverage.mjs が data-retention.json と実装の食い違いで落とす",
+      "evidence": [
+        "simplememo-ios/SimpleMemo/SettingsViewController.swift",
+        "simplememo-api/src/index.ts",
+        "simplememo-api/scripts/check-deletion-coverage.mjs"
+      ],
+      "status": "active",
+      "$note": "2026-08-25 に「ユーザーデータの削除要求への対応」を2つに分けたうちの片方。分割前は requires_approval: true / human_only: [実行の承認] とだけ書いており、**誰の承認かを言っていなかったため、運用側が承認する経路だと読めた。**実際はアカウント本人の二段階確認で、運用側は関与しない。**requires_approval を false にはしない** — 不可逆な領域を承認不要と書くと権限表の一番の存在理由が壊れる（check-authority.mjs の規則1）。承認は在る。主語が違うだけなので、主語を書いた"
+    },
+    {
+      "domain": "ユーザーデータの削除要求への対応（個別の連絡）",
       "reversible": false,
       "ai_may": [
         "受付の検知"
       ],
       "requires_approval": true,
       "human_only": [
+        "本人確認",
         "実行の承認"
       ],
-      "gate": "アカウント削除APIは実装済み。運用手順は未整備",
+      "gate": "アプリ内の経路を通らない依頼（問い合わせメール等）。**本人確認の手段がアプリ内経路と違う**ため承認が要る。運用手順は未整備",
       "evidence": [
         "simplememo-api/docs/reports/API_PATCH_REQUEST_v2_4_7_account_delete.md"
       ],
-      "status": "active"
+      "status": "active",
+      "$note": "2026-08-25 の分割のもう片方。分割前の記述はこちらの性質で書かれており、それが自己削除まで覆っていた"
     },
     {
       "domain": "個人情報事故・法的請求・重大障害・炎上",
@@ -319,8 +381,43 @@
       "data/autopilot-cost.json",
       "data/automation-coverage.json",
       "scripts/autopilot-gate.mjs",
-      "scripts/autopilot-drill.mjs"
+      "scripts/autopilot-drill.mjs",
+      "data/autopilot-actions.json",
+      "scripts/autopilot-act.mjs",
+      ".github/workflows/autopilot-act.yml"
     ],
+    "$comment_unattended_cannot_push": [
+      "**『直してよい』と『直せる』は別。**may_modify は権限の話だが、こちらは能力の話。",
+      "",
+      "2026-08-25、レーンFが上流actionのSHA pin を書き上げたところで push が",
+      "remote rejected された。主系(GitHub Actions)の GH_PAT に `workflow` scope が",
+      "無く、`.github/workflows/*` を含む push を GitHub が拒否するため",
+      "（GITHUB_TOKEN でも同じ）。**may_modify はこのファイルを挙げているのに、",
+      "主系はそれを push する資格を持っていない。**原因特定まで済んだ修理が、",
+      "適用の直前で捨てられた。",
+      "",
+      "`workflow` scope を足せば消える食い違いだが、**足さないと決めた**",
+      "（2026-08-25・オーナーの権限委譲のもと）。scope を足すと無人の主系が",
+      "自分のワークフロー定義を——`permissions:` を含めて——書き換えて push できる。",
+      "must_not の『自分の権限を広げる変更』を**いま実際に強制しているのは",
+      "GitHub 側の remote rejected であって、散文ではない。**",
+      "",
+      "つまりこの食い違いは残す。残すなら、**ぶつかる前に分かるようにする。**",
+      "ここに載っているパスを触るアクションは無人実行(auto)へ回らず、",
+      "push できる副系CCRセッションへ回る（classify() が判定・validateLedger() が検査）。",
+      "レーンFは原因特定までを担い、適用は副系が引き取る——2026-08-25 がその形。"
+    ],
+    "unattended_cannot_push": {
+      "paths": [
+        ".github/workflows/obsidian-autopilot.yml",
+        ".github/workflows/autopilot-health.yml",
+        ".github/workflows/cron-health.yml",
+        ".github/workflows/autopilot-act.yml"
+      ],
+      "why": "主系(GitHub Actions)の GH_PAT に `workflow` scope が無く、.github/workflows/* を含む push は GitHub が remote reject する（GITHUB_TOKEN でも同じ）。scope は意図的に足していない — must_not『自分の権限を広げる変更』を実際に強制しているのがこの拒否そのものであるため。",
+      "who_applies": "副系CCRセッション（push できる）",
+      "decided_jst": "2026-08-25"
+    },
     "must_not": [
       "検証を弱める変更（CIチェックの削除・スキップ・閾値の緩和）",
       "自分の権限を広げる変更（permissions: の拡大・actions: write の追加）",
@@ -350,11 +447,34 @@
       "node scripts/check-pr-facts.mjs --check",
       "node scripts/autopilot-drill.mjs --check",
       "node scripts/automation-rate.mjs --check",
+      "node scripts/autonomy-timeline.mjs --check",
       "node scripts/autopilot-selfheal.mjs --check",
       "node scripts/check-authority.mjs --check",
       "node growth/scripts/d-score.mjs --check",
       "node growth/lib/bigquery.test.mjs",
-      "python3 scripts/generate_sitemap.py --check"
+      "python3 scripts/generate_sitemap.py --check",
+      "node scripts/check-model-routing.mjs --check",
+      "node growth/scripts/check-data-quality.mjs --check",
+      "node scripts/check-signals.mjs --check",
+      "node scripts/check-public-facts.mjs --check",
+      "node scripts/property-tests.mjs --check",
+      "node scripts/check-model-eval.mjs --check",
+      "node scripts/check-escalation.mjs --check",
+      "node scripts/check-emergency-stop.mjs --check",
+      "node scripts/check-financial-policy.mjs --check",
+      "node scripts/check-audit-independence.mjs --check",
+      "node scripts/check-corporate.mjs --check",
+      "node scripts/daily-brief.mjs --check",
+      "node growth/scripts/ingest-asc.mjs --check",
+      "node scripts/check-injection-surface.mjs --check",
+      "node scripts/check-definitions.mjs --check",
+      "node growth/scripts/decompose-series.mjs --check",
+      "node scripts/check-credentials.mjs --check",
+      "node scripts/check-degradation.mjs --check",
+      "node scripts/code-authorship.mjs --check",
+      "node scripts/check-store-facts.mjs --check",
+      "node growth/scripts/check-mentions.mjs --check",
+      "node scripts/autopilot-act.mjs --check"
     ]
   }
 }

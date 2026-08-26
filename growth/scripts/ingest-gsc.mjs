@@ -138,6 +138,42 @@ if (!totalRows) {
   process.exit(2);
 }
 
+// 正規化でキーが衝突した行を畳む。
+//
+// toPath() は `https://…/vs/ticktick/` と `https://www…/vs/ticktick/?x=1` を
+// 同じ `/vs/ticktick/` にする。畳まないと**同じページが2行残り、クリックが
+// 二重に乗る**。2026-08-09 のスナップショットに実際に1件あった
+// （/vs/ticktick/ が impressions 4 と 1 の2行）。
+//
+// 位置は表示回数で重みづける。単純平均だと、表示1回・順位4.0 の行が
+// 表示100回・順位10.5 の行と同じ重さになる。
+function mergeByKey(rows, key) {
+  const out = new Map();
+  for (const r of rows) {
+    const k = r[key];
+    if (k === undefined || k === null) continue;
+    const cur = out.get(k);
+    if (!cur) { out.set(k, { ...r }); continue; }
+    const ci = (cur.impressions || 0), ri = (r.impressions || 0);
+    cur.clicks = (cur.clicks || 0) + (r.clicks || 0);
+    cur.impressions = ci + ri;
+    if (cur.position != null && r.position != null && ci + ri > 0) {
+      cur.position = Number((((cur.position * ci) + (r.position * ri)) / (ci + ri)).toFixed(2));
+    }
+    cur.ctr = cur.impressions > 0 ? cur.clicks / cur.impressions : 0;
+  }
+  return [...out.values()];
+}
+
+for (const [kind, key] of [['pages', 'page'], ['queries', 'query'], ['dates', 'date'],
+                           ['devices', 'device'], ['countries', 'country']]) {
+  if (!Array.isArray(buckets[kind])) continue;
+  const before = buckets[kind].length;
+  buckets[kind] = mergeByKey(buckets[kind], key);
+  const merged = before - buckets[kind].length;
+  if (merged > 0) console.log(`  merged ${merged} duplicate ${kind} row(s) after path normalisation`);
+}
+
 // Totals rule, CTR curve and meta shape are shared with the BigQuery ingest —
 // see lib/snapshot.mjs for why they cannot live in either script.
 const meta = buildMeta({ label, buckets, period, source: 'csv-export', sourceFiles: files });

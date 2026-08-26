@@ -99,6 +99,96 @@ const SCENARIOS = [
   ['force: ただし予算超過も飛ばせない',
     { route: 'actions', budgetOver: true, force: true }, CODES.SKIP_BUDGET,
     '**上限は force より強い。** ここを飛ばせると上限が「お願い」になる'],
+
+  // --- 緊急停止（2026-08-22追加） ---------------------------------------
+  ['緊急停止: 立っていれば何よりも先に止まる',
+    { route: 'actions', emergencyStop: true, emergencyStopReason: 'test' }, CODES.EMERGENCY_STOP,
+    '**主系と副系を同時に、確実に止める唯一のスイッチ。**予算ゲートは主系しか止めず、'
+    + '秘密鍵の削除は「静かに寝る」ので止めたのか壊れたのか区別がつかない'],
+
+  ['緊急停止: 副系にも効く',
+    { route: 'ccr-0730', emergencyStop: true, emergencyStopReason: 'test' }, CODES.EMERGENCY_STOP,
+    'これまで副系を確実に止める手段が無かった。リポジトリのファイルなので両経路に効く'],
+
+  ['緊急停止: force で飛び越えられない',
+    { route: 'actions', emergencyStop: true, emergencyStopReason: 'test', force: true }, CODES.EMERGENCY_STOP,
+    '**force は冪等チェック用であって、停止の解除ではない**'],
+
+  ['緊急停止: 故障や予算超過の陰に隠れない',
+    { route: 'actions', emergencyStop: true, emergencyStopReason: 'test',
+      credentialRejected: true, budgetOver: true, githubApiReachable: false }, CODES.EMERGENCY_STOP,
+    '2番目以降に置くと「予算内で・鍵もあって・当日分も無い」ときだけ止まる停止になる。'
+    + '**止めたいときに止まらない**'],
+
+  ['経路ごとの停止: その経路だけが止まる',
+    { route: 'ccr-0730', agentStopped: true, agentStopReason: 'test' }, CODES.AGENT_STOPPED,
+    '**全体停止だけだと乱暴すぎて使われなくなる。**1つの経路が暴れているときに'
+    + '全部止めると、止めること自体をためらう。**ためらわれる停止は、無い停止と同じ**'],
+
+  ['経路ごとの停止: 全体停止のほうが強い',
+    { route: 'actions', emergencyStop: true, agentStopped: true,
+      emergencyStopReason: 'x', agentStopReason: 'y' }, CODES.EMERGENCY_STOP,
+    '両方立っているときに経路側が出ると、全体停止が弱く見える。**最強は常に全体停止**'],
+
+  // --- 認証切れ（2026-08-22追加） ---------------------------------------
+  // 「秘密鍵が無い」と「秘密鍵が拒否された」を**別のコードにしてある**。
+  // 混ぜると、期限切れが毎日「設計どおりのスキップ」として黙殺される。
+  ['認証切れ: 主系の資格情報が拒否された → 静かに寝ない',
+    { route: 'actions', credentialRejected: true }, CODES.FAIL_CREDENTIAL,
+    '**未設定と失効は別物。**未設定は設計だが、失効は故障。'
+    + '同じ skip に落とすと、証明書やトークンが切れた日も緑のまま通り過ぎる'],
+
+  ['認証切れ: 副系の資格情報が拒否された → こちらも止まる',
+    { route: 'ccr-0730', credentialRejected: true }, CODES.FAIL_CREDENTIAL,
+    '副系は秘密鍵の「有無」には影響されないが、「拒否」には影響される'],
+
+  ['認証切れ: force でも飛ばせない',
+    { route: 'actions', credentialRejected: true, force: true }, CODES.FAIL_CREDENTIAL,
+    'force は冪等チェックを飛ばすためのもので、失効した資格情報を有効にはしない'],
+
+  // --- モデル障害（2026-08-22追加） -------------------------------------
+  ['モデル障害: 全滅なら走らない',
+    { route: 'actions', modelsAvailable: [] }, CODES.FAIL_NO_MODEL,
+    '**「使えるモデルが無い」を「今日は書くことが無い」と区別する。**'
+    + '前者は故障、後者は正常系。日報で同じ行に出ると原因が消える'],
+
+  ['モデル障害: 代替があれば縮退して走る',
+    { route: 'actions', preferredModel: 'claude-opus-5', modelsAvailable: ['claude-sonnet-5'] },
+    CODES.DEGRADE_MODEL,
+    '止めるより出すほうがよい。ただし**縮退したことを日報に出す** — '
+    + '黙って別のモデルで書くと、品質が変わったときに原因が追えなくなる'],
+
+  ['モデル障害: 主モデルが使えるなら縮退しない',
+    { route: 'actions', preferredModel: 'claude-sonnet-5', modelsAvailable: ['claude-sonnet-5'] },
+    CODES.RUN,
+    '縮退コードが常時立つと、縮退の意味が消える'],
+
+  // --- API障害（2026-08-22追加） ----------------------------------------
+  ['API障害: GitHub APIが読めない日は着手しない',
+    { route: 'ccr-0730', githubApiReachable: false }, CODES.FAIL_API,
+    '冪等チェック（当日ブランチ・当日PR・主系の実行状態）は全部この API に乗っている。'
+    + '**読めないまま走ると、根拠なしに「当日分は無い」と決めることになる** — '
+    + '2026-08-21の二重着手と同じ事故を別の原因で起こす'],
+
+  ['API障害: force でも飛ばせない',
+    { route: 'ccr-0920', githubApiReachable: false, force: true }, CODES.FAIL_API,
+    '二重出荷の防止は force より強い'],
+
+  // --- egress遮断（2026-08-22に実際に起きた） ---------------------------
+  ['egress遮断: 止めずに、選べるレーンを減らす',
+    { route: 'ccr-0730', egressBlocked: true }, CODES.DEGRADE_EGRESS,
+    '**実績。**obsidian.md / notion.com / github.com 本体が403になり、'
+    + '一次情報の実測が要る C05〜C10 を見送って C12 に切り替えて出荷した。'
+    + '止めるのではなく**できることに絞る**のが正しい振る舞い'],
+
+  ['egress遮断: ただし冪等チェックのほうが先に効く',
+    { route: 'ccr-0920', egressBlocked: true, branchClaimed: true }, CODES.SKIP_BRANCH_CLAIMED,
+    '縮退より二重防止が優先。順序が入れ替わると、塞がれた日に二重着手しうる'],
+
+  ['故障の優先順: 認証切れは予算超過より先に出る',
+    { route: 'actions', credentialRejected: true, budgetOver: true }, CODES.FAIL_CREDENTIAL,
+    '**報告すべき故障を、正常な安全装置の陰に隠さない。**'
+    + '予算で止まったと報告されると、失効に何日も気づかない'],
 ];
 
 export function run() {

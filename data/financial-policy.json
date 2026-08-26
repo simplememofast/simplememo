@@ -1,0 +1,89 @@
+{
+  "$comment": [
+    "動かせる金額の幅・損失の上限・撤回の条件と、資金繰りのシナリオ。",
+    "scripts/check-financial-policy.mjs が検査する。",
+    "",
+    "**動かす予算がまだ小さいうちに書く。**大きくなってから書くと、",
+    "そのときの都合に合わせた基準になる。いま実際に動いているのは AI実費だけで、",
+    "広告は未実装・価格は人間専任。**だから今が一番中立に決められる。**",
+    "",
+    "**収入は入っていない。**App Store Connect が未接続で、売上・課金・返金を",
+    "機械が読めない。したがって資金繰りは**出ていく側だけ**のシナリオで、",
+    "ランウェイではなく『月いくら出ていくか』の見通しにすぎない。",
+    "これを『資金繰りを自動化した』と読まないこと。"
+  ],
+  "change_limits": [
+    {
+      "domain": "AI実費（開発・運用のトークン費）",
+      "authority_domain": "AI実費（開発・運用のトークン費）",
+      "current_monthly_usd": 40,
+      "cap_set_by": "placeholder",
+      "max_step_pct": 25,
+      "max_step_note": "1回の変更幅は現在額の25%まで。**倍にしない。**倍にすると、効いたかどうかが分かる前に次の判断が来る",
+      "min_days_between_changes": 14,
+      "min_days_note": "実費の中央値が動いたと言える最小の窓。異常消費の検知が min_samples 5件を要求するのと同じ理由",
+      "loss_limit_usd": 60,
+      "loss_limit_note": "**1か月の実費がここを超えたら、増額の判断を止めて元に戻す。**上限40の1.5倍",
+      "withdraw_conditions": [
+        "成果物ゼロの run が3回続いた（金を使って何も出ていない）",
+        "1記事あたり単価が直近中央値の3倍を超えた",
+        "異常消費の検知が2週連続で発火した"
+      ],
+      "who_decides": "human",
+      "status": "active"
+    },
+    {
+      "domain": "広告出稿・広告予算",
+      "authority_domain": "広告出稿・広告予算の変更",
+      "current_monthly_usd": 0,
+      "cap_set_by": "unset",
+      "max_step_pct": 25,
+      "max_step_note": "同上。**ただし広告は未実装**なので、この行は「始めるときの初期条件」であって運用中の規則ではない",
+      "min_days_between_changes": 30,
+      "min_days_note": "自社分析（APPLE_ADS_AUTOMATION_2026-08-17）が『1KWの良し悪しの判定に15〜50日かかる』と結論している。**14日では足りない**",
+      "loss_limit_usd": null,
+      "loss_limit_note": "**未設定と決めた。**動かす予算がまだ無いので、額を決めても根拠が無い。開始時に決める",
+      "withdraw_conditions": [
+        "CPI が判定に足るタップ数（1KWあたり30〜50）に届かないまま30日経過 → 出稿を止めて設計に戻る"
+      ],
+      "who_decides": "human",
+      "status": "not_started"
+    },
+    {
+      "domain": "価格・プラン・無料枠",
+      "authority_domain": "価格・プラン・無料枠の変更",
+      "current_monthly_usd": null,
+      "cap_set_by": "unset",
+      "max_step_pct": null,
+      "max_step_note": "**AIは提案もしない**（権限表で human_only）。不可逆で既存契約者への影響が読めない",
+      "min_days_between_changes": null,
+      "min_days_note": "同上",
+      "loss_limit_usd": null,
+      "loss_limit_note": "同上",
+      "withdraw_conditions": [],
+      "who_decides": "human",
+      "status": "ai_excluded"
+    }
+  ],
+  "cash_scenarios": {
+    "$note": [
+      "**出ていく側だけ。**収入は App Store Connect が未接続で機械が読めない。",
+      "ベンダー台帳の money_flow から、月次で出ていく可能性のあるものを並べたもの。",
+      "実額が入っているのは AI実費だけで、残りは**無料枠にいるか、額を把握していない**。"
+    ],
+    "revenue_connected": false,
+    "assumptions": {
+      "pessimistic": "無料枠を全部外れ、AI実費が損失上限まで伸びる",
+      "standard": "現状維持。AI実費は上限の範囲、他は無料枠内",
+      "optimistic": "AI実費が実測どおり（月$25前後の見込み）に収まる"
+    },
+    "monthly_outflow_usd": {
+      "pessimistic": 150,
+      "standard": 40,
+      "optimistic": 25
+    },
+    "$outflow_note": "悲観の150は、AI実費の損失上限60＋Cloudflare/Firebase/Resend が有料枠に入った場合の粗い見積り。**実測ではない。**実測が入ったらこの3つを置き換える",
+    "runway_months": null,
+    "$runway_note": "**計算しない。**手元資金と収入の両方が機械に入っていないので、月数を出すと嘘になる。出せるのは『月いくら出ていくか』まで"
+  }
+}
