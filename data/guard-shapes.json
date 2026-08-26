@@ -42,7 +42,23 @@
     "増えたら落ちる**（母数を黙って縮めさせない）。",
     "",
     "**この走査は1ファイル単位。**他モジュールから import した helper 経由の読み出しは",
-    "追えない。no_ledger_binding の理由に、どちらなのかを書いてある。"
+    "追えない。no_ledger_binding の理由に、どちらなのかを書いてある。",
+    "",
+    "【2026-08-26 続き: 引数由来のガードは、この走査から構造的に見えない】",
+    "汚染の伝播は `const NAME = ...` を追う。**関数の仮引数には付かない。**",
+    "そのせいで同じ形を2度取り逃した:",
+    "",
+    "  policyDrift(policy, series)         `declared === undefined` → return []",
+    "  validateApprovals(_, {monthlyCap})  `monthlyCap !== null &&` → 上限の突き合わせが消える",
+    "",
+    "**後者は金額**だった。実測: 上限を $40 → $999 に書き換える → 捕まる。",
+    "**鍵ごと削除する → exit 0。**止めたい行為が「黙って上限を動かす」なので、",
+    "削除で外せては止めたことにならない。読み出し側で number を要求して塞いだ。",
+    "",
+    "仮引数に対する null/undefined 判定を形で数えると **34件（lib を除くと24件）。**",
+    "**まだ1件ずつ読んでいない。**読んでいないので、ここに載せていない。",
+    "「見ていない」を「異常なし」と書かないため、**数だけ先に置く。**",
+    "次の対象はこれ（scripts/lib/param-guard-scan.py を参照）。"
   ],
   "measured_at": "2026-08-26",
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
@@ -236,5 +252,16 @@
     "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
     "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
     "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）"
+  },
+  "param_guards_measured_at": "2026-08-26",
+  "param_guards": {
+    "total": 34,
+    "outside_lib": 24,
+    "triaged": 0,
+    "confirmed": [
+      "growth/scripts/revenue-series.mjs policyDrift（#638 で修正）",
+      "scripts/check-financial-policy.mjs validateApprovals monthlyCap（本PRで修正）"
+    ],
+    "$note": "**走査に載せていない。**載せるなら24件を1件ずつ読んでからで、読む前に載せると『台帳にある＝読んだ』が嘘になる"
   }
 }
