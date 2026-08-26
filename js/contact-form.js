@@ -22,6 +22,19 @@
 
   var ENDPOINT = 'https://api.simplememofast.com/v1/inquiry';
   var MAX_BODY = 4000;
+  /**
+   * 端末・OSの上限。relay 側も 64 字で刈る（src/inquiry.ts の fact()）。
+   *
+   * **UAから作らない。** ブラウザが知っているのは「フォームを開いた環境」で、
+   * 「不具合が起きている端末」ではない。iOSアプリの不具合をMacから報告されたら
+   * `os: macOS` という**間違った事実**が入る —— 欠測より悪い。
+   * さらに Apple は型番をUAに出さない（どのiPhoneも "iPhone"）ので、
+   * それを device に入れると日報が「端末は取れている」と読める一方、
+   * どの機種かは分からないまま。**数字だけ埋まって再現できない。**
+   *
+   * 埋まらない日は relay 側が「N件中 端末0件」と正直に出す。
+   */
+  var MAX_FACT = 64;
 
   var form = document.getElementById('inquiry-form');
   if (!form) return;
@@ -31,6 +44,9 @@
   var submitEl = document.getElementById('inquiry-submit');
   var statusEl = document.getElementById('inquiry-status');
   var counterEl = document.getElementById('inquiry-counter');
+  // 再現ファクト。**UAから作らない**（下の MAX_FACT のコメント参照）
+  var deviceEl = document.getElementById('inquiry-device');
+  var osEl = document.getElementById('inquiry-os');
 
   /** 表示言語。lang.js が <html lang> を切り替えるので、送信時点の値を読む。 */
   function currentLocale() {
@@ -58,6 +74,12 @@
       failed: "Couldn't send. Please email support@simplememofast.com instead."
     }
   };
+
+  /** 任意欄を1つ整える。空白だけは送らない（「取れた」に数えさせない）。 */
+  function factOf(el) {
+    if (!el) return '';
+    return (el.value || '').trim().slice(0, MAX_FACT);
+  }
 
   function say(kind, key) {
     var m = MESSAGES[currentLocale()][key];
@@ -89,7 +111,9 @@
       body: JSON.stringify({
         body: body,
         email: (emailEl.value || '').trim(),
-        locale: currentLocale()
+        locale: currentLocale(),
+        device: factOf(deviceEl),
+        os: factOf(osEl)
       })
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {

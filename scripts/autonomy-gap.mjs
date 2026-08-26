@@ -157,7 +157,10 @@ export const UNLOCKS = {
   refund_boundary:   { kind: 'owner_decision', label: '返金・チャージバックの承認境界を決める',
                        needs: '金銭が動く不可逆操作。**上限額を決めない限り自動側へ置けない**' },
   inquiry_facts:     { kind: 'implement', label: '問い合わせの再現ファクトを非個人情報として出す',
-                       needs: '本文はD1にあり個人情報。端末・OS・版・エラー種別だけを取り出す経路を作る' },
+                       needs: '**取り出す経路は 2026-08-26 に作った**（relay の summarizeReproFacts）。'
+                            + '残るのは、それが日報の文面ではなく**リポジトリ側から読める形**で出ること。'
+                            + 'あと移行0027の適用と、母数 — inquiries は現在0件で、'
+                            + '**来ていない本文の書式を想像して抽出を書かない**' },
   vendor_terms:      { kind: 'implement', label: '各社の規約本文を取り込んで条項検査に載せる',
                        needs: '書面契約は無く規約への同意で成立。現状40マスすべて unreviewed' },
   impl_product:      { kind: 'implement', label: 'プロダクト側を作る',
