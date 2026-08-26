@@ -70,6 +70,17 @@ export function outliers(rows, key = 'clicks') {
     return { ...r, adjusted: f > 0 ? r[key] / f : r[key] };
   });
   const base = median(adjusted.map((r) => r.adjusted));
+  // **0 を基準に比は作れない。**全期間0クリックの系列で `base > 0` を
+  // 満たさないまま items を空にすると、`judged: true` のまま「外れ値なし」を出す。
+  // それは「見た結果なにも無かった」ではなく「見られなかった」。
+  if (!(base > 0)) {
+    return {
+      judged: false,
+      reason: `基準（曜日調整後の中央値）が ${base} — **比を作れないので判定していない。**`
+        + '全期間0の系列は「異常なし」ではなく「この方法では読めない」',
+      items: [],
+    };
+  }
   const items = adjusted
     .filter((r) => base > 0 && (r.adjusted / base >= OUTLIER_RATIO || r.adjusted / base <= 1 / OUTLIER_RATIO))
     .map((r) => ({
@@ -99,6 +110,93 @@ function latestSnapshot() {
   const f = path.join(GSC_DIR, labels[labels.length - 1], 'dates.json');
   if (!fs.existsSync(f)) return null;
   return { label: labels[labels.length - 1], rows: JSON.parse(fs.readFileSync(f, 'utf8')) };
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+//
+// この道具が守っているのは **「判定していない」と「異常なし」を分ける**こと。
+// 母数が足りない系列に判定を出すと、数十件の系列で中央値比2倍という
+// 珍しくもない揺れが「異変」になる。
+if (process.argv.includes('--selftest')) {
+  /** n日ぶんの系列。fn(i) でその日のクリック数を決める。 */
+  const series = (n, fn) => Array.from({ length: n }, (_, i) => {
+    const d = new Date('2026-01-01T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + i);
+    return { date: d.toISOString().slice(0, 10), clicks: fn(i) };
+  });
+
+  const SCENARIOS = [
+    ['**28日未満は判定しない**（異常なしではない）', () => {
+      const r = outliers(series(27, () => 10));
+      if (r.judged) throw new Error('母数不足で判定を出した');
+      if (!r.reason.includes('判定していない')) throw new Error(`理由が違う: ${r.reason}`);
+      if (r.items.length) throw new Error('判定していないのに外れ値を出した');
+    }],
+    ['28日あれば判定する（**常に判定しないのは、判定できないのと同じ**）', () => {
+      if (!outliers(series(28, () => 10)).judged) throw new Error('母数が足りても判定しない');
+    }],
+    ['**全期間0の系列は判定しない**（0を基準に比は作れない）', () => {
+      const r = outliers(series(28, () => 0));
+      if (r.judged) throw new Error('**「異常なし」として通した**——見られなかっただけ');
+      if (!r.reason.includes('比を作れない')) throw new Error(`理由が違う: ${r.reason}`);
+    }],
+    ['平坦な系列に外れ値は出ない（偽陽性を作らない）', () => {
+      const r = outliers(series(28, () => 10));
+      if (r.items.length) throw new Error(`平坦なのに ${r.items.length} 件`);
+    }],
+    ['**跳ねた日は外れ値になる**（上向き）', () => {
+      const r = outliers(series(28, (i) => (i === 14 ? 100 : 10)));
+      const hit = r.items.find((x) => x.direction === 'up');
+      if (!hit) throw new Error('跳ねた日を拾わなかった');
+      if (hit.value !== 100) throw new Error(`値が違う: ${hit.value}`);
+    }],
+    ['**落ちた日も外れ値になる**（下向きを見落とさない）', () => {
+      const r = outliers(series(28, (i) => (i === 14 ? 1 : 20)));
+      if (!r.items.some((x) => x.direction === 'down')) throw new Error('落ちた日を拾わなかった');
+    }],
+    ['**曜日効果は外れ値にしない**（土日に落ちるのは季節性）', () => {
+      // 日曜(0)と土曜(6)だけ半分。毎週同じなので、これは異変ではない。
+      const r = outliers(series(56, (i) => {
+        const d = new Date('2026-01-01T00:00:00Z');
+        d.setUTCDate(d.getUTCDate() + i);
+        const dow = d.getUTCDay();
+        return dow === 0 || dow === 6 ? 10 : 20;
+      }));
+      if (r.items.length) throw new Error(`曜日効果を異変にした: ${JSON.stringify(r.items)}`);
+    }],
+    ['曜日係数が中央値で出ている（平均だと1日の跳ねで歪む）', () => {
+      const rows = series(28, (i) => (i === 0 ? 1000 : 10));
+      const { overall } = weekdayFactors(rows);
+      if (overall !== 10) throw new Error(`中央値が ${overall}（平均なら 45 付近になる）`);
+    }],
+    ['**外れ値と同じ日の注記を結びつける**（説明がつくかの仕分け）', () => {
+      const items = [{ date: '2026-08-18', value: 100, adjusted: 100, ratio: 3, direction: 'up' }];
+      const out = explain(items, [{ date: '2026-08-18', type: 'pr', label: '配信' }]);
+      if (!out[0].annotation) throw new Error('同日の注記を結びつけなかった');
+    }],
+    ['前日の注記も結びつける（配信は翌日に効きうる）', () => {
+      const items = [{ date: '2026-08-18', value: 100, adjusted: 100, ratio: 3, direction: 'up' }];
+      const out = explain(items, [{ date: '2026-08-17', type: 'release', label: '配信' }]);
+      if (!out[0].annotation) throw new Error('前日の注記を結びつけなかった');
+    }],
+    ['**関係ない日の注記は結びつけない**（説明がついたことにしない）', () => {
+      const items = [{ date: '2026-08-18', value: 100, adjusted: 100, ratio: 3, direction: 'up' }];
+      const out = explain(items, [{ date: '2026-01-01', type: 'pr', label: '別の日' }]);
+      if (out[0].annotation) throw new Error('無関係な注記を結びつけた（**因果を作っている**）');
+    }],
+    ['実データで例外なく走る', () => {
+      const snap = latestSnapshot();
+      if (!snap) return;
+      outliers(snap.rows);
+    }],
+  ];
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

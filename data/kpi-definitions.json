@@ -98,10 +98,17 @@
       "name": "曜日係数",
       "formula": "曜日ごとの中央値 ÷ 全体中央値",
       "source_file": "growth/scripts/decompose-series.mjs",
-      "version": 1,
-      "checksum": "d586507c0c3834f4",
-      "changed_at": "2026-08-22",
-      "why_it_matters": "平均ではなく中央値。少数の外れ値が係数を動かすため"
+      "version": 2,
+      "checksum": "70a2d14a2817b03f",
+      "changed_at": "2026-08-26",
+      "why_it_matters": "平均ではなく中央値。少数の外れ値が係数を動かすため",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-08-26",
+          "why": "定義は変えていない。decompose-series.mjs に (a) 基準（曜日調整後の中央値）が0のときは judged:false を返す番人 と (b) 自己テスト12件 を足しただけで、曜日係数の出し方・外れ値比 2.0・28日の下限はどれも同じ。実データの判定結果も変わらない（観測13日 < 28日で「判定していない」のまま）"
+        }
+      ]
     },
     {
       "id": "noise_floor",

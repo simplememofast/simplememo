@@ -38,7 +38,9 @@ export const MAX_GAP_DAYS = 10;
 
 /** README のコードブロックから固定クエリを読む。**script に書き写さない。** */
 export function queriesFromReadme(text) {
-  const m = /```\n([\s\S]*?)```/.exec(text);
+  // 言語タグ（```text など）を許す。**タグを1つ足しただけで固定クエリが0件になり、
+  // 下の照合が丸ごと消える**——それが起きても出力は「定点観測が続いている」になる。
+  const m = /```[a-z]*\n([\s\S]*?)```/.exec(text);
   if (!m) return [];
   return m[1].split('\n')
     .map((l) => /^\s*"([^"]+)"/.exec(l)?.[1])
@@ -51,6 +53,18 @@ const norm = (s) => String(s).replace(/["“”\s]/g, '').toLowerCase();
 export function validate(snapshots, wantQueries, today = new Date()) {
   const problems = [];
   if (!snapshots.length) return { problems: ['スナップショットが1件も無い'], rows: [] };
+
+  // **空の一覧は「守っている」ではなく「何も守っていない」。**
+  //
+  // [2026-08-26] wantQueries が空でも、この検査は黙って通っていた。
+  // 固定クエリの照合（下の missing）は空配列に対して常に空を返すので、
+  // **この検査が存在する理由——「固定クエリを縮めさせない」——が丸ごと消える。**
+  // README のコードブロックに言語タグを1つ足すだけでそうなる。
+  if (!wantQueries.length) {
+    problems.push('固定クエリを1件も読めていない（README のコードブロック）'
+      + ' — **照合する相手が無い状態は、照合したことにならない。**'
+      + 'この検査が在る理由がそのまま消えるので、通さない');
+  }
 
   const rows = snapshots.map((s) => ({
     date: s.date,
@@ -99,6 +113,80 @@ export function validate(snapshots, wantQueries, today = new Date()) {
     }
   }
   return { problems, rows };
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+if (process.argv.includes('--selftest')) {
+  const WANT = ['シンプルメモ Obsidian', 'simplememofast'];
+  const SNAP = (over = {}) => ({
+    date: '2026-08-22',
+    diff_from_last: '前回比',
+    queries: WANT.map((q) => ({ q, new_mentions: [], competitor_listicles: [] })),
+    ...over,
+  });
+  const NOW = new Date('2026-08-26T00:00:00Z');
+  const has = (list, needle) => list.some((x) => x.includes(needle));
+
+  const SCENARIOS = [
+    ['実データが検査を通る', () => {
+      const files = fs.existsSync(DIR)
+        ? fs.readdirSync(DIR).filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort() : [];
+      const snaps = files.map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
+      const want = queriesFromReadme(fs.readFileSync(README, 'utf8'));
+      if (!want.length) throw new Error('README から固定クエリを読めていない');
+      const { problems } = validate(snaps, want);
+      if (problems.length) throw new Error(problems[0]);
+    }],
+    ['**固定クエリが0件なら落ちる**（照合する相手が無い状態は照合ではない）', () => {
+      const { problems } = validate([SNAP()], [], NOW);
+      if (!has(problems, '照合したことにならない')) throw new Error(JSON.stringify(problems));
+    }],
+    ['**言語タグつきのコードブロックからも読める**（タグ1つで0件にならない）', () => {
+      const withTag = queriesFromReadme('```text\n"あ"\n"い"\n```');
+      if (withTag.length !== 2) throw new Error(`${withTag.length}件（2件のはず）`);
+      const bare = queriesFromReadme('```\n"あ"\n"い"\n```');
+      if (bare.length !== 2) throw new Error('素のフェンスが読めなくなった');
+    }],
+    ['**固定クエリが欠けたら落ちる**（一部だけ検索して「やった」ことにしない）', () => {
+      const short = SNAP({ queries: [{ q: WANT[0], new_mentions: [] }] });
+      const { problems } = validate([short], WANT, NOW);
+      if (!has(problems, '固定クエリが欠けている')) throw new Error(JSON.stringify(problems));
+    }],
+    ['**間隔が空きすぎたら落ちる**（やらないことが常態になる）', () => {
+      const { problems } = validate([SNAP({ date: '2026-07-01' })], WANT, NOW);
+      if (!has(problems, '日前')) throw new Error(JSON.stringify(problems));
+    }],
+    ['**途中の空白も落ちる**（最新だけ見ると隠れる）', () => {
+      const snaps = [SNAP({ date: '2026-07-01' }), SNAP({ date: '2026-08-22' })];
+      const { problems } = validate(snaps, WANT, NOW);
+      if (!has(problems, '空いている')) throw new Error(JSON.stringify(problems));
+    }],
+    ['**diff_from_last が無ければ落ちる**（前回と比べていないなら定点観測ではない）', () => {
+      const { problems } = validate([SNAP({ diff_from_last: null })], WANT, NOW);
+      if (!has(problems, 'diff_from_last')) throw new Error(JSON.stringify(problems));
+    }],
+    ['mentions_us が真偽値でなければ落ちる', () => {
+      const bad = SNAP({ queries: WANT.map((q) => ({
+        q, new_mentions: [{ url: 'https://x', mentions_us: 'yes' }] })) });
+      const { problems } = validate([bad], WANT, NOW);
+      if (!has(problems, 'mentions_us')) throw new Error(JSON.stringify(problems));
+    }],
+    ['スナップショットが1件も無ければ落ちる', () => {
+      const { problems } = validate([], WANT, NOW);
+      if (!problems.length) throw new Error('通した');
+    }],
+    ['揃っていれば何も言わない（常に鳴る検査も何も見ていない）', () => {
+      const { problems } = validate([SNAP()], WANT, NOW);
+      if (problems.length) throw new Error(problems.join(' / '));
+    }],
+  ];
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
