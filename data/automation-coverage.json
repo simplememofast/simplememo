@@ -285,9 +285,14 @@
     {
       "area": "② バグ修正",
       "task": "Visual Regression Test",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "アプリ側に無い"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/qa/check_screenshot_baseline.py",
+        "../simplememo-ios/scripts/qa/verify-screenshots.py",
+        "../simplememo-ios/data/screenshot-baseline.json",
+        "../simplememo-ios/.github/workflows/qa-static.yml"
+      ],
+      "note": "2026-08-25実装。**撮影と内在的な検査は前からあったが、前回と比べる経路が無かった** —— artifacts/ は .gitignore で追跡0件なので基準が1回も残らず、ボタンが動いても文字が切れても「PNGとして妥当で寸法が揃っている」限り通っていた。画像ではなく**指紋（12x24の平均輝度・288整数）**を置く（重さと差分の読めなさを避ける）。sha256 は1画素で別物になるので使えない。**Pillow も足していない**（同じファイルの純Python PNGデコーダに載せた）。しきい値6.0は self-test で実測 —— 1画素 0.00 で鳴らず、ボタン大の矩形 8.96 で鳴る。**撮影は macOS が要るので ubuntu の CI からは見えない。**見えないときは形だけ検査し、**『差が無い』とは書かない**（review-intake の judged と同じ）。**基準はまだ空** —— 次に Mac か Xcode Cloud で撮って --update を1度回すと入る。変化＝失敗ではなく、落ちるのは『動いたのに基準を更新していない』場合だけ"
     },
     {
       "area": "② バグ修正",
