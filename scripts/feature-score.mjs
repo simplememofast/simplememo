@@ -73,8 +73,52 @@ export function rank(doc) {
   return { ranked: ok, errors };
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// この採点が守っているのは「根拠が弱いものを『やらない』ではなく『まず測る』へ
+// 送る」ことと、「承認が要るリスクを黙って通さない」こと。
+// **その2つが効かなくなったときに検出できること**を固定する。
+const SCENARIOS = [
+  ['知らない evidence_strength は error を返す（0点で通さない）', () => {
+    const r = score({ evidence_strength: 'なんとなく', expected_effect: 1, effort_days: 1 });
+    if (!r.error) throw new Error('未知の確信度が通った');
+  }],
+  ['**工数0は error**（ゼロ除算で無限大の価値にしない）', () => {
+    const r = score({ evidence_strength: 'analogous', expected_effect: 1, effort_days: 0 });
+    if (!r.error) throw new Error('effort_days=0 が通った');
+  }],
+  ['工数が負でも error', () => {
+    const r = score({ evidence_strength: 'analogous', expected_effect: 1, effort_days: -3 });
+    if (!r.error) throw new Error('負の工数が通った');
+  }],
+  ['**確信度が低いと「まず測る」へ送る**（この確信度で作ると効いたかも判定できない）', () => {
+    const r = score({ evidence_strength: 'analogous', expected_effect: 10, effort_days: 1 });
+    if (!r.next_step.includes('まず測る')) throw new Error(`next_step=${r.next_step}`);
+  }],
+  ['**承認が要るリスクは gated になる**（黙って着手可にしない）', () => {
+    const risky = [...GATED_RISKS][0];
+    const r = score({ evidence_strength: 'measured_ours', expected_effect: 10, effort_days: 1, risks: [risky] });
+    if (!r.gated) throw new Error(`${risky} が gated にならない`);
+    if (!r.next_step.includes('承認')) throw new Error(`next_step=${r.next_step}`);
+  }],
+  ['効果 × 確信度 ÷ 工数（式が入れ替わっていない）', () => {
+    const a = score({ evidence_strength: 'measured_ours', expected_effect: 10, effort_days: 1 });
+    const b = score({ evidence_strength: 'measured_ours', expected_effect: 10, effort_days: 2 });
+    if (!(a.value > b.value)) throw new Error('工数が増えても価値が下がらない');
+  }],
+];
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) {
+    let failed = 0;
+    for (const [name, fn] of SCENARIOS) {
+      try { fn(); console.log(`  ok   ${name}`); }
+      catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+    }
+    console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+    process.exit(failed === 0 ? 0 : 1);
+  }
   const argv = process.argv.slice(2);
   const doc = readJSON('data/feature-backlog.json');
   const { ranked, errors } = rank(doc);
