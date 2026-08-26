@@ -149,6 +149,14 @@ jobs:
       - name: Autopilot budget ledger
         run: node scripts/autopilot-budget.mjs --check
 
+      # 【採用1件あたりのAI原価】分子（実費）はあるが分母（採用数）が無い、が
+      # 長らくこの行を nobody にしていた理由。outcome は既にあったので、
+      # 残っていたのは revert の扱いだけ。出荷後に戻した run を分母から外し、
+      # **費用は分子に残す**（失敗は採用1件の原価の一部）。
+      # 分母が MIN_ADOPTED に届くまで measured を名乗らない。
+      - name: AI unit cost (adopted improvements)
+        run: node scripts/ai-unit-cost.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を

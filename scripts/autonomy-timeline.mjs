@@ -225,7 +225,17 @@ export function rebuild() {
     // **since があればそれを優先する。**証跡に長寿命のデータ・コンテンツファイルを
     // 含むタスクは、min(証跡の初出月) だと稼働前の月に付いてしまう
     // （公開面の事実検査の証跡に faq.html が入っている、など）。
-    if (t.since) { dated.push({ area: t.area, task: t.task, month: t.since, source: 'since' }); continue; }
+    if (t.since) {
+      // **形を先に見る。**since は月キー（YYYY-MM）。日付まで書くと下の
+      // 月送りループの `key === last` が永久に一致せず、配列長が溢れるまで回る
+      // （2026-08-26 に実際に踏んだ。RangeError で落ちるので気づけたが、
+      // 「なぜ落ちたか」がスタックからは読めなかった）。
+      if (!/^\d{4}-\d{2}$/.test(t.since)) {
+        throw new Error(`since は YYYY-MM（月）で書く: 「${t.since}」（${t.area} / ${t.task}）`);
+      }
+      dated.push({ area: t.area, task: t.task, month: t.since, source: 'since' });
+      continue;
+    }
     const months = (t.evidence || []).map(firstMonth).filter(Boolean);
     if (months.length) dated.push({ area: t.area, task: t.task, month: months.sort()[0], source: 'evidence' });
     else undated.push({ area: t.area, task: t.task });
