@@ -174,8 +174,8 @@
     {
       "script": "scripts/check-authority.mjs",
       "state": "demonstrated",
-      "at": "2026-08-26",
-      "broke": "不可逆なのに承認不要／知らない status／domain 重複／reversible が真偽値でない の4通りで落ちることを観測"
+      "at": "2026-08-27",
+      "broke": "[2026-08-27] 「不可逆→承認制」を「承認制 **または** 機械が強制するゲート」へ広げ、**例外が抜け穴にならないこと**を壊して確かめた。ゲートの中身を見ずに有れば通す版 → 5件が落ちる／規則1からゲート判定を外して旧規則に戻す版 → 7件が落ちる。**いちばん効くのは「export していない関数名を指すと落ちる」** —— 表に「ゲートがあります」と書いただけで承認を外せる形を潰している"
     },
     {
       "script": "scripts/check-autopilot-page.mjs",
@@ -348,8 +348,8 @@
     {
       "script": "scripts/check-review-replies.mjs",
       "state": "demonstrated",
-      "at": "2026-08-26",
-      "broke": "検査本体の problems.push を潰すと自己テストが14件落ちることを観測"
+      "at": "2026-08-27",
+      "broke": "[2026-08-27] 自動投稿ゲート evaluateAutoPost を足し、壊し5通りを実測: **既存の検査を床にしない**（validate の問題を無視）→1件／**rating が無くても通す**→2件／**低評価を通す**→2件／下書き側の重い話題を見ない→1件／上限の無い台帳を通す→1件。**人が全件読まなくなる境界なので、材料が無いときに止まることを名指しで固定してある**"
     },
     {
       "script": "scripts/check-script-tags.mjs",

@@ -378,6 +378,35 @@
       ],
       "status": "active",
       "note": "2026-08-26・オーナー判断「品質ゲート通過で自動送信」。**個別承認は要らないが、requires_approval は true。**承認の粒度がテンプレート単位というだけで、人の承認が無くなったわけではない。ここを false にすると、権限表は『承認なしで取り消せないメールを送ってよい』と読める —— 実際にやっていることより強い主張になる"
+    },
+    {
+      "domain": "App Store レビュー返信の投稿",
+      "reversible": false,
+      "ai_may": [
+        "下書きを書く",
+        "品質ゲートを通ったものを投稿する（★3以上・重い話題でない・日次上限内）",
+        "kill_switch を立てて自動投稿を止める"
+      ],
+      "requires_approval": false,
+      "human_only": [
+        "★2以下への返信",
+        "返金・法務・個人情報・保安・データ消失に触れるレビューへの返信",
+        "auto_post.enabled を立てる操作そのもの"
+      ],
+      "gate": "**2026-08-27 にオーナーが「品質ゲート通過で自動投稿」へ決めた。**それ以前は「公開は不可逆なので人が承認する」設計で、実装側も2度その方針を推していた。判定は scripts/check-review-replies.mjs の evaluateAutoPost()。**既存の検査（validate）が床**で、1件でも問題があれば自動では出さない。**判断材料（rating / review_text）が無ければ止める** —— 「たぶん大丈夫」で公開しない。人の承認経路（approved_by）は残してあり、自動で出たものは auto_posted_at に入るので**どちらで公開されたかが後から区別できる。**既定は enabled: false / dry_run: true —— **ASCへのPOSTが入って1周見てから立てる。**",
+      "evidence": [
+        "data/review-replies.json",
+        "scripts/check-review-replies.mjs"
+      ],
+      "status": "active",
+      "machine_gate": {
+        "checker": "scripts/check-review-replies.mjs",
+        "function": "evaluateAutoPost",
+        "kill_switch_path": "data/review-replies.json#policy.kill_switch",
+        "daily_cap": 3,
+        "holds_when_unknown": true,
+        "$holds_when_unknown": "**rating / review_text が下書きに無ければ hold。**星の数もレビュー本文も分からないものを「たぶん大丈夫」で公開しない"
+      }
     }
   ],
   "self_repair": {
