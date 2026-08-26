@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 8,
+  "none_budget": 7,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -155,7 +155,9 @@
     },
     {
       "script": "scripts/check-degradation.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "18通りで落ちることを観測（代替を名乗るのに probe 無し／代替も理由も無し／breaks_if_down 空／probe 未実装／誰も参照しない probe／probe が false／隣も写しも無い／写しが上限より古い／写しでも本数不足／読めない日付）。加えて **記録して読まない値を読むようにした** —— 写しはファイルごとに sha256_12 と bytes を記録しているのに、判定は present しか読んでいなかった。CI には隣が無いので、**写しが実物とずれていることを検出できる場所は3リポジトリの揃った場所しかない。**存在のずれは落とし（CIは作り話を検査する）、中身のずれは落とさず報告する（判定は存在で決まる。--sync を機械的な儀式にしない）。写しの dlq.ts を改名すると exit 1 になること、隣が無い側では従来どおり写しで通ることを確かめた"
     },
     {
       "script": "scripts/check-emergency-stop.mjs",
