@@ -304,6 +304,13 @@ function selftest() {
   t('写しがまだ無ければ拒まない', refusesToShrink(null, { covered_days: 1 }) === null);
 
   // 写しと方針の突き合わせは、写しの covered_days で行う
+  // **時刻だけの差分で書かない。**（今日の教訓がこの生成器自身に当たっていた）
+  const m1 = { covered_days: 1, synced_at: '2026-08-26', first_day: 'a' };
+  const m2 = { covered_days: 1, synced_at: '2026-08-27', first_day: 'a' };
+  t('**同期した日だけ違うものを同じと見る**', sameMirror(m1, m2));
+  t('中身が違えば違うと見る', !sameMirror(m1, { ...m2, covered_days: 2 }));
+  t('写しがまだ無い場合も落ちない', !sameMirror(null, m2));
+
   t('写しと方針がずれたら言う',
     policyDrift({ cash_scenarios: { revenue_history_days: 9 } }, { covered_days: 3 }).length === 1);
   t('写しと方針が揃っていれば黙る',
@@ -315,6 +322,29 @@ function selftest() {
 }
 
 /** 隣の実測を読む。**無ければ null**（0 ではない）。 */
+/**
+ * 同期した日を除いて比べる。**時刻だけの差分で書かないため。**
+ *
+ * [2026-08-27 00:52 JST] **自分で書いた歯止めに自分が当たった。**
+ * 同じ日（2026-08-26）の om-2026-08-26-network-generator-vs-regenerate-check で
+ * 「ネット・**時刻**・外部APIが混ざる生成器は再生成して比較に載せられない」と
+ * 書いておきながら、この --write は synced_at に todayJst() を入れていた。
+ * JST の日付が回った瞬間、中身が同じでも `check-generators --run` が
+ * 「生成物が古い」で落ちる —— **毎日 15:00 UTC 以降ずっと赤いまま**になる。
+ *
+ * しかも **CI では緑になる。**あちらに隣のリポジトリが無いので --write が
+ * そもそも書かないため。つまり**3リポジトリの揃ったセッションでだけ赤い**という、
+ * いちばん追いにくい形をしていた。
+ *
+ * asc_revenue.rb では generated_at で同じ穴を潰してある。**同じ手当てをここにも。**
+ * synced_at は「最後に**中身が**揃った日」になる（covered_days は毎日増える見込みなので、
+ * 実質は最後に確認した日と近い値のまま）。
+ */
+export function sameMirror(a, b) {
+  const strip = (d) => JSON.stringify({ ...(d ?? {}), synced_at: null });
+  return strip(a) === strip(b);
+}
+
 export function readIosSeries(p = IOS_SERIES) {
   if (!fs.existsSync(p)) return null;
   try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
@@ -367,6 +397,11 @@ if (isMain) {
         + `（${IOS_SERIES.replace(`${ROOT}/`, '')}）`);
       console.log('     3リポジトリの揃った場所で走らせること。'
         + '**読めなかったことを「0日」として書かない。**');
+      process.exit(0);
+    }
+    // **中身が同じなら書かない。**synced_at だけの差分で毎日赤くしない（上の注記）
+    if (existing && sameMirror(existing, out)) {
+      console.log(`\n  → 中身が同じなので書かない（観測 ${out.covered_days} 日・synced_at だけの差分を作らない）`);
       process.exit(0);
     }
     const shrink = refusesToShrink(existing, out);
