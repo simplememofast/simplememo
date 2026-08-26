@@ -34,9 +34,9 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 6,
-      "checksum": "d413f662bda7ec93",
-      "changed_at": "2026-08-25",
+      "version": 7,
+      "checksum": "5cbc9adeae5e765f",
+      "changed_at": "2026-08-26",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
         {
@@ -63,6 +63,11 @@
           "version": 6,
           "at": "2026-08-25",
           "why": "定義は変えていない。statusAgreement() が『セッションが書いた行』だけを見るよう絞った統合修正（日次アクチュエータの reconcile-runs が埋めた行を除外）で、完走率の式（shipped / attempted）にも分母の扱いにも触れていない"
+        },
+        {
+          "version": 7,
+          "at": "2026-08-26",
+          "why": "定義は変えていない。autopilot-runs.mjs に (a) 費用の台帳を readLedger 経由にする（無い→null、読めない→止める）と (b) helper のシナリオ5件を自己テストへ連結、を足しただけ。完走率の分子・分母・outcome の集合はどれも同じで、実データの出力も変わらない"
         }
       ]
     },
