@@ -865,6 +865,36 @@
         ],
         "new_guardrail": "梯子の段を全部残す（読めなかった段は null で、0 と区別する）。`pickWindow` は null を候補にしない。広げて母数が減ったら `ladderShrinkNote()` が理由に書く。**「窓を広げれば届く」と書かない** —— 版フィルタの窓内 MIN がある限り、min_version の公開日が窓より古くなるまで梯子は効かない"
       }
+    },
+    {
+      "id": "om-2026-08-26-fire-it-yourself",
+      "seeded": false,
+      "area": "⑤ 段階公開・カナリア",
+      "signal": "オーナーから「発火させればいいのでは」。カナリアの kill を本番で1回も見ていない件について、私は「実データで判定が出るまで待つしかない」と書いていた",
+      "hypothesis": "kill を本番で立てるには実データの悪化が要る。それには各群30が要り、rollout 50% が要り、それは domain 16 の human_only なのでオーナー待ち",
+      "decision": "**待つ必要はなかった。**2つを混同していた ——\n\n  (a) 実データで判定が出ること … 母数が要る。rollout 引き上げが要る（human_only）\n  (b) kill が本番で立つのを見ること … **(a) を待つ必要がない**\n\nしかも権限は最初からあった。domain 15 は `ai_may: [..., \"kill の実行\"]` / `requires_approval: false` / `human_only: []`。承認が要るのは広げる側だけ。台帳の `how_to_drill` にも手順が最初から書いてあった（「観測値を閾値割れにして cron を回す」）。**読んでいたのに使っていなかった。**\n\n本番に通っていないのは `decide() が kill を返す → killFlag() が実行する`区間だけなので、入口の `readEventSets` だけを合成に差し替え、残りは本物を通す訓練を作った。",
+      "execution": {
+        "repo": "simplememo-api",
+        "commit": "dc3c171",
+        "files": [
+          "../simplememo-api/src/rollout-guard.ts",
+          "../simplememo-api/src/index.ts",
+          "../simplememo-api/.github/workflows/flag-ops.yml"
+        ]
+      },
+      "verification": "**本番で kill が立った。**`drill_guard_probe` を rollout 50 で作成（07:38 UTC）→ `POST /admin/rollout-guard/drill`（07:40 UTC）→ 本番 `/v1/config` が `killed: [\"drill_guard_probe\"]` を返し、`rollouts` の 50 は保存されたまま。手で kill は一度も叩いていない。訓練後に delete し、`killed: []` に戻ったことを確認した。\n\n取り違え防止: 的は `drill_` 接頭辞のみ（KVを読む前に落とす）／cron からは呼ばれない／決定に `drill: true`／actor は `rollout-guard-drill`。\n\n実装中、`bucketOf` の引数順を逆に呼ぶバグをテストが捕まえた（合成した「露出群だけ悪い」が実際の分割とずれ、両群 0.779 vs 0.764 で kill に届かなかった）。vitest 69ファイル 1,490件通過。",
+      "outcome": "**`production_verified` が 1 → 2。今日はじめて動いた数。**rollout-guard-kill の段階が unit → production。\n\n**自動化率は動かない**（61.3% のまま）。増えたのは「止まることを確かめた」件数だけ。実データでの発火はいまも0回で、そちらはサンプル不足のまま。",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "check-the-authority-before-declaring-a-blocker",
+        "text": "**「オーナー待ち」と書く前に、権限表を実際に引く。**kill の実行は domain 15 で最初から `ai_may` にあり、`human_only` は空だった。私はそれを4日ぶん「待ち」として台帳に書いていた。\n\n混同していたのは「実データで判定が出ること」と「機構が動くのを見ること」。前者は母数が要るが、**後者は訓練で足りる。**しかも訓練の手順は台帳の `how_to_drill` に最初から書いてあった —— **書いてある手順を読んでいても、実行しなければ無いのと同じ。**\n\n止まることを確かめていない停止機構は無いのと同じ、と書いておきながら、確かめる手段が手元にあることに気づかずに待っていた。",
+        "changed": [
+          "../simplememo-api/src/rollout-guard.ts",
+          "data/stop-drills.json",
+          "data/authority-matrix.json"
+        ],
+        "new_guardrail": "`runRolloutGuardDrill` と Flag Ops の `guard-drill`。**的は `drill_` 接頭辞のキーのみ**で本物のフラグは的にできない（テストで固定）。決定に `drill: true` を必ず立て、応答の `proves` に「証明したのは止まることであって悪化を見つけられることではない」と書く（合成観測の訓練を、本物の発火と数え間違えないため）"
+      }
     }
   ]
 }
