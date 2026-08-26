@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 39,
+  "none_budget": 33,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -93,7 +93,9 @@
     },
     {
       "script": "scripts/check-authority.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "不可逆なのに承認不要／知らない status／domain 重複／reversible が真偽値でない の4通りで落ちることを観測"
     },
     {
       "script": "scripts/check-autopilot-page.mjs",
@@ -111,7 +113,9 @@
     },
     {
       "script": "scripts/check-corporate.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "what_breaks 欠落／id と title 欠落／confirmed なのに日付不正 の3通りで落ちることを観測"
     },
     {
       "script": "scripts/check-credentials.mjs",
@@ -131,11 +135,15 @@
     },
     {
       "script": "scripts/check-emergency-stop.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "停止中に reason 無し／policy.ai_may_resume: true／経路の stopped が真偽値でない の3通りで落ちることを観測"
     },
     {
       "script": "scripts/check-escalation.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "who が無い／within_hours が無い／知らない channel／trigger 重複 の4通りで落ちることを観測"
     },
     {
       "script": "scripts/check-expiry.mjs",
@@ -147,11 +155,15 @@
     },
     {
       "script": "scripts/check-financial-policy.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "知らない status／max_step_pct 欠落／min_days_between_changes 欠落 の3通りで落ちることを観測"
     },
     {
       "script": "scripts/check-injection-surface.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "mitigations 空／residual_risk 欠落／知らない trust／id 重複 の4通りで落ちることを観測"
     },
     {
       "script": "scripts/check-internal-redirects.mjs",
@@ -256,5 +268,5 @@
       "state": "selftest_only"
     }
   ],
-  "$baseline": "2026-08-26 の初回同期で数えた実測（39本）。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない: 持たせた分だけ、自己テスト無しの検査が黙って増える"
+  "$baseline": "2026-08-26 の実測。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない。初回 41 → 自己テストを入れるたびに下げている"
 }

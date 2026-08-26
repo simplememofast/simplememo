@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const POLICY_PATH = path.join(ROOT, 'data/financial-policy.json');
@@ -167,8 +168,23 @@ export function validate(doc, { authorityDomains = new Set(), monthlyCap = null 
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['知らない status は落ちる', (d) => { d.change_limits[0].status = 'たぶん平気'; }],
+  ['**変更幅の上限が無い**のは落ちる（無制限に上げられる）', (d) => { delete d.change_limits[0].max_step_pct; }],
+  ['**変更の間隔が無い**のは落ちる（同日に何度でも上げられる）', (d) => { delete d.change_limits[0].min_days_between_changes; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
   const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
   const domains = new Set((authority.domains || []).map((d) => d.domain));
@@ -224,5 +240,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n規則の形に問題なし。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n規則の形に問題なし。');
+  }
 }

@@ -25,6 +25,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const SURFACE_PATH = path.join(ROOT, 'data/injection-surface.json');
@@ -99,8 +100,25 @@ export function validate(doc) {
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+// 壊し方は実データを複製して作る（固定フィクスチャだと台帳と形がずれても気づけない）。
+const SELFTEST_BREAKAGES = [
+  ['**緩和策の空の入口**は落ちる（入口として認識していないのと同じ）', (d) => { d.entry_points[0].mitigations = []; }],
+  ['残存リスクの記載が無ければ落ちる', (d) => { delete d.entry_points[0].residual_risk; }],
+  ['知らない trust は落ちる', (d) => { d.entry_points[0].trust = 'たぶん安全'; }],
+  ['id の重複は落ちる', (d) => { d.entry_points.push({ ...d.entry_points[0] }); }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(SURFACE_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(SURFACE_PATH, 'utf8'));
   const problems = validate(doc);
 
@@ -131,5 +149,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n入口の棚卸しと、機械で見える範囲に問題なし。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n入口の棚卸しと、機械で見える範囲に問題なし。');
+  }
 }
