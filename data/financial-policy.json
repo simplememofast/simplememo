@@ -7,9 +7,10 @@
     "そのときの都合に合わせた基準になる。いま実際に動いているのは AI実費だけで、",
     "広告は未実装・価格は人間専任。**だから今が一番中立に決められる。**",
     "",
-    "**収入は入っていない。**App Store Connect が未接続で、売上・課金・返金を",
-    "機械が読めない。したがって資金繰りは**出ていく側だけ**のシナリオで、",
-    "ランウェイではなく『月いくら出ていくか』の見通しにすぎない。",
+    "**[2026-08-25] 収入が入った。**App Store Connect の Analytics から",
+    "売上・課金が機械で読めるようになった（返金は未確認）。ただし**資金繰りは",
+    "まだ引けない** —— 手元資金が機械に入っておらず、収入の履歴も足りない。",
+    "出せるのは引き続き『月いくら出ていくか』までで、ランウェイではない。",
     "これを『資金繰りを自動化した』と読まないこと。"
   ],
   "change_limits": [
@@ -67,11 +68,29 @@
   ],
   "cash_scenarios": {
     "$note": [
-      "**出ていく側だけ。**収入は App Store Connect が未接続で機械が読めない。",
+      "**2026-08-25、収入側が接続された。**それまでは出ていく側だけだった。",
       "ベンダー台帳の money_flow から、月次で出ていく可能性のあるものを並べたもの。",
-      "実額が入っているのは AI実費だけで、残りは**無料枠にいるか、額を把握していない**。"
+      "実額が入っているのは AI実費だけで、残りは**無料枠にいるか、額を把握していない**。",
+      "",
+      "**収入が読めることと、資金繰りが引けることは別。**下の3つを分けてある —",
+      "revenue_connected（読めるか）／ revenue_observed（何日ぶん見えているか）／",
+      "cash_on_hand_connected（手元資金が入っているか）。",
+      "**1つの真偽値に潰すと、片方が埋まっただけで月数を出せることになる。**"
     ],
-    "revenue_connected": false,
+    "revenue_connected": true,
+    "$revenue_connected": "2026-08-25、オーナーの権限委譲を受けて true にした。**根拠は実データ。**App Store Purchases Standard が Proceeds in USD / Sales in USD / Paying Users を返し、Subscription Event / State も降りている（../simplememo-ios/data/asc/2026-08-25/）。それまで false だったのは Apple 側の都合ではなく取得側の欠陥2件によるもので、誤診の経緯は data/operating-memory.json の om-2026-08-25-asc-zero にある。",
+    "revenue_observed": {
+      "as_of": "2026-08-25",
+      "window": "**未確認**（DAILY instance 1本ぶん。ただし実際に何日を含むかは確かめていない）",
+      "$window": "2026-08-25 の時点でこの欄は「1日」と書いていたが、**確かめずに書いていた。**当時の取り込みは列名・行数・数値列の合計しか保存しておらず、`Date` は文字列なので合計されない —— つまりどの日を含むかがどこにも残っていなかった。同じファイルの App Downloads Standard が Counts 1,819 を返しており、CLAUDE.md の「新規 install は 5〜15/日」と桁が合わないので、1日ぶんとは考えにくい。取得側に date_range（min / max / distinct_days）を足したので、**次の取り込みから確定する。**それまでこの窓を根拠に月額へ換算しない。",
+      "purchases": 1,
+      "proceeds_usd": 2.59,
+      "sales_usd": 3.05,
+      "paying_users": 1,
+      "$note": "**これは月次収入ではない。**DAILY の instance 1本ぶんの合計で、**何日を含むかは上の $window のとおり未確認。**月次を出すには日次を積む必要があり、data/revenue-series.json が数えている（現在 0/28日 —— この取り込みは date_range を持たないので足せず、飛ばして数えている）。**この $2.59 を12倍も30倍もしない。**なお Subscription State Report の Counts 188 は101行の合計で、State Metric（Active / Grace Period / Cancelled …）を跨いで足した数なので、**契約者数ではない。**取り込みは行を持たず数値列の合計だけを保存する設計なので、内訳はここからは出せない。"
+    },
+    "cash_on_hand_connected": false,
+    "$cash_on_hand_connected": "**手元資金は機械に入っていない。**銀行・カードの残高を読む経路が無い（⑦法人経営の未実装分）。収入が接続されても、これが false の間はランウェイを出せない。",
     "assumptions": {
       "pessimistic": "無料枠を全部外れ、AI実費が損失上限まで伸びる",
       "standard": "現状維持。AI実費は上限の範囲、他は無料枠内",
@@ -84,6 +103,7 @@
     },
     "$outflow_note": "悲観の150は、AI実費の損失上限60＋Cloudflare/Firebase/Resend が有料枠に入った場合の粗い見積り。**実測ではない。**実測が入ったらこの3つを置き換える",
     "runway_months": null,
-    "$runway_note": "**計算しない。**手元資金と収入の両方が機械に入っていないので、月数を出すと嘘になる。出せるのは『月いくら出ていくか』まで"
+    "$runway_note": "**まだ計算しない。**収入は 2026-08-25 に接続されたが、(1) 手元資金が機械に入っていない (2) 収入の履歴が足りない（data/revenue-series.json が実測した covered_days が revenue_history_days に入る。現在 0日 / 28日必要）、の2点が残る。**片方が埋まっただけで月数を出すと嘘になる。**出せるのは引き続き『月いくら出ていくか』まで",
+    "revenue_history_days": 0
   }
 }

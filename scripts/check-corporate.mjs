@@ -24,6 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const OBLIGATIONS_PATH = path.join(ROOT, 'data/corporate-obligations.json');
@@ -33,6 +34,38 @@ export const CLAUSE_STATES = ['ok', 'risk', 'unreviewed', 'not_applicable'];
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** これより近い期限は警告。資格情報の30日と揃える。 */
 export const WARN_DAYS = 30;
+
+/**
+ * 決算期（何月末で締めるか）から、法人税・地方税の申告期限を導く。
+ *
+ * **手で書かない。**日付を台帳に直書きすると、翌年になっても誰も直さず
+ * 「期限を過ぎている」か「もう過ぎた日付が next_due に残る」のどちらかになる。
+ * このリポジトリが数字ではなく数え方を凍結しているのと同じ理由で、
+ * ここも**決算月だけを持って、期限は毎回計算する。**
+ *
+ * 原則は事業年度終了日の翌日から2か月以内。
+ * **申告期限の延長特例（1か月）を適用している場合は、この計算より1か月遅い。**
+ * 適用の有無はリポジトリから取れないので、`filing_extension_months` を明示で持つ。
+ *
+ * @param fyEndMonth 決算月（1〜12）。2 なら2月末締め
+ * @param today      YYYY-MM-DD
+ * @param extraMonths 延長特例の月数（既定0）
+ */
+export function nextCorporateTaxDue(fyEndMonth, today, extraMonths = 0) {
+  if (!Number.isInteger(fyEndMonth) || fyEndMonth < 1 || fyEndMonth > 12) return null;
+  const t = new Date(`${today}T00:00:00Z`);
+  if (Number.isNaN(t.getTime())) return null;
+
+  // 決算期末の候補を年ごとに作り、**今日より後に来る最初の申告期限**を返す。
+  for (let y = t.getUTCFullYear() - 1; y <= t.getUTCFullYear() + 2; y += 1) {
+    // 決算期末＝その月の末日（UTCの月末は翌月0日で取れる）
+    const fyEnd = new Date(Date.UTC(y, fyEndMonth, 0));
+    // 期限＝末日の (2 + 延長) か月後の同日。月末締めなので月末に落ちる。
+    const due = new Date(Date.UTC(y, fyEndMonth + 2 + extraMonths, 0));
+    if (due > t && fyEnd <= due) return due.toISOString().slice(0, 10);
+  }
+  return null;
+}
 
 export function validate(doc, { vendorIds = new Set(), today = new Date().toISOString().slice(0, 10) } = {}) {
   const problems = [];
@@ -49,6 +82,19 @@ export function validate(doc, { vendorIds = new Set(), today = new Date().toISOS
         const days = Math.round((new Date(d.next_due) - new Date(today)) / 86400000);
         if (days < 0) problems.push(`${at}: 期限を ${-days} 日過ぎている`);
         else if (days <= WARN_DAYS) warnings.push(`${at}: あと ${days} 日`);
+      }
+      // **決算期から導ける期限は、導いた値と一致することを強制する。**
+      // 手で書き換えて年をまたぎ忘れる経路をつぶす。
+      if (d.derive_from === 'fiscal_year_end') {
+        const m = doc.entity?.fiscal_year_end_month;
+        const ext = d.filing_extension_months ?? 0;
+        const derived = nextCorporateTaxDue(m, today, ext);
+        if (!derived) {
+          problems.push(`${at}: derive_from: fiscal_year_end だが entity.fiscal_year_end_month が無い/不正`);
+        } else if (derived !== d.next_due) {
+          problems.push(`${at}: next_due ${d.next_due} が決算期${m}月からの導出 ${derived} と違う`
+            + '（延長特例は filing_extension_months で明示すること。**手で日付を書き換えない**）');
+        }
       }
     } else if (!d.unconfirmed_reason) {
       problems.push(`${at}: 未確認なのに理由が無い`
@@ -92,8 +138,23 @@ export function validate(doc, { vendorIds = new Set(), today = new Date().toISOS
   return { problems, warnings };
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['**切れたら何が止まるか**が無い期限は落ちる（優先順位が付かない）', (d) => { delete d.deadlines[0].what_breaks; }],
+  ['id と title が無ければ落ちる', (d) => { delete d.deadlines[0].id; delete d.deadlines[0].title; }],
+  ['confirmed なのに日付が不正なら落ちる', (d) => { d.deadlines[0].confirmed_by_owner = true; d.deadlines[0].next_due = 'そのうち'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8')),
+  (d) => validate(d).problems,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
   const vendors = JSON.parse(fs.readFileSync(VENDOR_PATH, 'utf8'));
   const vendorIds = new Set((vendors.vendors || []).map((v) => v.id));

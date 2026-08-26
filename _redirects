@@ -79,3 +79,15 @@ https://www.simplememofast.com/*  https://simplememofast.com/:splat  301
 # closing parenthesis in the URL and lands on a 404. Reclaim it with a 301.
 /)    /  301
 /%29  /  301
+
+# BEGIN data-publication (scripts/check-publication.mjs --write)
+# **data/*.json の遮断をここに書かないこと。**効かない。
+#
+# Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を
+# 無視する。2026-08-25 にここへ404ルールを並べたが、本番で一度も効いていなかった
+# （2026-08-26 の対照実験: /privacy-policy は301になるがファイルが無い。
+#  /data/credential-expiry.json はファイルが在るので200のまま）。
+#
+# 実際の遮断は functions/_middleware.js（現在 32 件）。
+# 一覧は data/publication-policy.json が正で、--write が両方を書く。
+# END data-publication

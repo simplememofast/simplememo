@@ -40,7 +40,74 @@ export const STATUSES = ['planned', 'running', 'frozen', 'evaluated', 'cancelled
  * back to the same page. `abandoned` says the target is unreachable and the
  * page should leave the CTR working lists — which is the actual finding.
  */
-export const DECISIONS = ['keep', 'revert', 'iterate', 'inconclusive', 'abandoned'];
+/**
+ * `measurement_failed` は 2026-08-25 に足した。**`inconclusive` が2種類を飲んでいた。**
+ *
+ * 当時 `inconclusive` は7件あり、**7件すべてが `baseline` 全欄 null**、
+ * つまり「変更前の値を記録しないまま変えた」だった。1件も
+ * 「測れたが母数が足りない」ではなかった。
+ *
+ * この2つは待ったときの挙動が正反対になる。母数不足は**待てば解ける**が、
+ * 基準値の未記録は**待っても永久に解けない**（過去の GSC は遡って取れない）。
+ * 同じ語に入れると、後者を前者と思って待ち続けることになり、実際に
+ * 6週間そうなっていた（このファイル冒頭の経緯）。
+ *
+ * さらに悪いことに、7件が同じ理由で潰れていたのに、**同じ理由が7回並んでいる
+ * こと自体を誰も検出できなかった。**`data/operating-memory.json` の
+ * lesson_key はその検出を持つために作った。
+ */
+export const DECISIONS = ['keep', 'revert', 'iterate', 'inconclusive', 'measurement_failed', 'abandoned'];
+/**
+ * 基準値を1つでも持っているか。**測っている指標の名前で判定しない。**
+ *
+ * 最初この関数は GSC の4欄（clicks / impressions / ctr / position）を見ていたが、
+ * それだと **GA4 起点の実験2件を「基準値なし」と誤判定した。**
+ * `cta-2026-08-10-*` は app_store_click / sessions / session_to_app_store など
+ * GA4 と App Store Connect の値で基準を取っており、GSC の欄は使っていない。
+ * 指標名を固定すると、**測り方が違うだけの実験を「測っていない」ことにする。**
+ *
+ * 判定は「数値が1つでも入っているか」だけにする。実際にこれで
+ * 2026-07-01/02 の7件（全欄 null・数値ゼロ）だけが残り、
+ * 進行中21件は全件が基準値ありになる —— 誤検知ゼロで意図した7件を捕まえる。
+ */
+/**
+ * **この実験は「そのページの GSC クリック率」を測っているか。**
+ *
+ * [2026-08-25] この台帳は**均質ではない。**進行中21件の target_metric は
+ * ctr / brand_search_impressions / ai_citations / app_store_click /
+ * next_step_click / position / impressions / rich_result_impressions と
+ * 8種類あり、baseline の出どころも GSC・GA4・ブランド検索クエリ合計・
+ * AI引用数とばらばら。**「baseline に数値がある」は「同じものを測っている」ではない。**
+ *
+ * この判定を関数にしたのは、**同じ思い込みが1セッションで2回起きたから。**
+ *
+ *   1回目: hasBaseline を GSC の4欄で書き、GA4起点の実験2件を
+ *          「基準値なし」と誤判定した
+ *   2回目: stop-loss の対象抽出で baseline をページCTRとみなし、
+ *          `aio-2026-08-11-answer-blocks` に「CTR 13.53% → 1.70%、
+ *          相対87.4%低下」という**偽陽性**を出した。実際にはあの baseline は
+ *          ブランド検索14クエリの合計で、target_metric は
+ *          brand_search_impressions、判定日は 2026-11-11。
+ *          **測っているものがそもそも違った。**
+ *
+ * どちらも「台帳の行は同じ形をしている」という前提から来ている。
+ * **前提のほうを1箇所に閉じ込める。**
+ */
+export function measuresPageCtr(exp) {
+  if (!exp || exp.target_metric !== 'ctr') return false;
+  // ページ集合（"(9 pages: …)"）は GSC の1行に対応しない。
+  if (typeof exp.page !== 'string' || !exp.page.startsWith('/')) return false;
+  const b = exp.baseline;
+  if (!b) return false;
+  // クリックと表示の両方が要る。CTR だけ書いてある行からは区間が作れない。
+  return Number.isFinite(b.clicks) && Number.isFinite(b.impressions) && b.impressions > 0;
+}
+
+export function hasBaseline(exp) {
+  const b = exp?.baseline;
+  if (!b || typeof b !== 'object') return false;
+  return Object.values(b).some((v) => typeof v === 'number' && Number.isFinite(v));
+}
 /** Statuses whose evaluation date can come due. */
 export const OPEN_STATUSES = ['running', 'frozen'];
 
@@ -117,6 +184,25 @@ export function validate(ledger) {
     }
     if (e.decision != null && !DECISIONS.includes(e.decision)) {
       problems.push(`${at}: decision ${JSON.stringify(e.decision)} not one of ${DECISIONS.join('/')}`);
+    }
+
+    // [2026-08-25] **基準値の未記録を `inconclusive` に隠さない。**
+    // 母数不足は待てば解けるが、基準値未記録は待っても解けない。
+    // 同じ語に入れると、後者を前者と思って待ち続けることになる。
+    if (e.decision === 'inconclusive' && !hasBaseline(e)) {
+      problems.push(`${at}: decision が inconclusive だが baseline に数値が1つも無い`
+        + ' — これは「測れたが判断できない」ではなく「測っていない」。'
+        + ' measurement_failed を使うこと（待っても解けないことを、待てば解けるように見せない）');
+    }
+
+    // **これが7件の再発を止める歯止め。**走り出す時点で基準値を要求する。
+    // 評価時に「記録されていませんでした」と分かるのでは遅い —— 過去の
+    // GSC は遡れないので、その実験は最初から情報を生まない。
+    if (isOpen(e) && !hasBaseline(e)) {
+      problems.push(`${at}: status ${e.status} なのに baseline に数値が1つも無い`
+        + ' — **変更前の値を記録する前に変えると、その実験は評価日に必ず'
+        + ' measurement_failed になる。**2026-07-01/02 の7件がこれで潰れた。'
+        + ' 測れないと決めたなら baseline.note に理由を書き、control.kind を "none" にすること');
     }
 
     // 対照群・最低サンプル数・停止条件（2026-08-22追加）

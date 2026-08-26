@@ -1,0 +1,211 @@
+#!/usr/bin/env node
+/**
+ * **落ちることを確かめていない検査は、無いのと同じ。**
+ *
+ *   node scripts/check-selftests.mjs            # 一覧
+ *   node scripts/check-selftests.mjs --check    # 台帳の整合とラチェット（CI）
+ *   node scripts/check-selftests.mjs --sync     # CI配線の増減を台帳へ取り込む
+ *   node scripts/check-selftests.mjs --selftest # 境界の固定
+ *
+ * 【なぜ要るか】
+ * 2026-08-26 の1日で、**自分が書いた検査が黙って効いていない**のを5回踏んだ。
+ * うち1件（check-pr-facts.mjs）は、規則を足したのに `scan()` が1行ずつしか
+ * 見ないせいで**一度も発火しない**状態だった。緑は出続けていた。
+ *
+ * data/stop-drills.json が停止機構に対してやっていることを、検査に対してやる ——
+ * 「実装した」と「**落ちるのを見た**」を同じ語で呼ばない。
+ *
+ * 【推測しない】
+ * ソースを正規表現で読んで「否定ケースがありそう」と判定する案を捨てた。
+ * **推測で作った検査は、推測の分だけ効かない。**台帳が持つのは観測だけで、
+ * `demonstrated` は「実際に壊して落ちるのを見た」ときにしか書けない
+ * （日付と、何を壊したかが必須）。
+ *
+ * 【ラチェット】
+ * 40本を今日直すのは無理なので、**増える方向だけを止める。**
+ * `none` の本数が台帳の `none_budget` を超えたら落ちる。新しい検査は
+ * 自己テスト付きで入るしかなく、既存の借金は減る方向にしか動かせない。
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+export const LEDGER_PATH = path.join(ROOT, 'data/check-selftests.json');
+const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
+
+/**
+ * `none`         … 自己テストが無い
+ * `selftest_only`… 自己テストはあるが、**落ちるのを見た記録が無い**
+ * `demonstrated` … 壊して落ちるのを実際に見た（`broke` と `at` が必須）
+ */
+export const STATES = ['none', 'selftest_only', 'demonstrated'];
+
+/** CI（seo-check.yml）が実際に走らせている node 検査。**配線が正。** */
+export function wiredChecks(workflow = WORKFLOW) {
+  const text = fs.readFileSync(workflow, 'utf8');
+  const found = new Set();
+  for (const m of text.matchAll(/node\s+((?:growth\/)?scripts\/[\w.-]+\.mjs)/g)) found.add(m[1]);
+  return [...found].sort();
+}
+
+export function loadLedger(file = LEDGER_PATH) {
+  return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+export function validate(doc, { wired = wiredChecks(), exists = (p) => fs.existsSync(path.join(ROOT, p)) } = {}) {
+  const problems = [];
+  const rows = doc?.checks;
+  if (!Array.isArray(rows)) return ['checks が配列でない'];
+
+  const seen = new Map();
+  for (const r of rows) {
+    const at = `checks[${r.script ?? '?'}]`;
+    if (!r.script) { problems.push('script が無い行がある'); continue; }
+    if (seen.has(r.script)) problems.push(`${at}: 重複`);
+    seen.set(r.script, r);
+    if (!STATES.includes(r.state)) {
+      problems.push(`${at}: 知らない state 「${r.state}」（${STATES.join(' / ')}）`);
+    }
+    // **demonstrated は証跡を要求する。**日付と「何を壊したか」が無ければ、
+    // あとから誰でも「見た」と書けてしまう。
+    if (r.state === 'demonstrated') {
+      if (!r.at) problems.push(`${at}: demonstrated には at（観測日）が要る`);
+      if (!r.broke) problems.push(`${at}: demonstrated には broke（何を壊して落としたか）が要る`);
+    }
+    if (r.state !== 'demonstrated' && (r.at || r.broke)) {
+      problems.push(`${at}: state が ${r.state} なのに観測の記録がある`);
+    }
+    if (exists(r.script) === false) problems.push(`${at}: ファイルが無い`);
+  }
+
+  // **配線と台帳がずれたら落とす。**新しい検査が黙って台帳の外へ出るのを防ぐ。
+  for (const s of wired) {
+    if (!seen.has(s)) problems.push(`CI が走らせているのに台帳に無い: ${s}（--sync で取り込む）`);
+  }
+  for (const r of rows) {
+    if (!wired.includes(r.script)) problems.push(`台帳にあるが CI が走らせていない: ${r.script}（--sync で外す）`);
+  }
+
+  // ラチェット。**増える方向だけを止める。**
+  const none = rows.filter((r) => r.state === 'none').length;
+  const budget = doc.none_budget;
+  if (typeof budget !== 'number') problems.push('none_budget が数でない');
+  else if (none > budget) {
+    problems.push(`自己テストの無い検査が ${none} 本で、上限 ${budget} を超えた。`
+      + '**新しい検査は自己テスト付きで入れること**（上限を上げて通さない）');
+  }
+  return problems;
+}
+
+export function summarize(doc) {
+  const rows = doc?.checks ?? [];
+  const by = {};
+  for (const s of STATES) by[s] = rows.filter((r) => r.state === s).length;
+  return { total: rows.length, by, none_budget: doc?.none_budget ?? null };
+}
+
+export function render(doc) {
+  const s = summarize(doc);
+  const L = ['検査が落ちることを確かめた記録（data/check-selftests.json）', ''];
+  L.push(`  CI 配線 ${s.total} 本`);
+  L.push(`    落ちるのを見た           ${s.by.demonstrated}`);
+  L.push(`    自己テストのみ（未観測） ${s.by.selftest_only}`);
+  L.push(`    自己テスト無し           ${s.by.none}（上限 ${s.none_budget}）`);
+  L.push('');
+  const dem = (doc.checks ?? []).filter((r) => r.state === 'demonstrated');
+  if (dem.length) {
+    L.push('  落ちるのを見た検査:');
+    for (const r of dem) L.push(`    ${r.script} — ${r.at} ${r.broke}`);
+    L.push('');
+  }
+  L.push('  **「実装した」と「落ちるのを見た」を同じ語で呼ばない。**');
+  L.push('  自己テストがあることは、落ちることの証明にならない');
+  L.push('  （2026-08-26、規則を足したのに一度も発火しない検査を実際に踏んだ）。');
+  return L.join('\n');
+}
+
+// ── 自己テスト（この検査自身が落ちることを固定する） ──────────────
+const SCENARIOS = [
+  ['CI が走らせているのに台帳に無ければ落ちる', () => {
+    const p = validate({ checks: [], none_budget: 0 }, { wired: ['scripts/x.mjs'], exists: () => true });
+    assert(p.some((x) => x.includes('台帳に無い')), p.join(' / '));
+  }],
+  ['台帳にあるのに CI が走らせていなければ落ちる', () => {
+    const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'none' }], none_budget: 9 },
+      { wired: [], exists: () => true });
+    assert(p.some((x) => x.includes('CI が走らせていない')), p.join(' / '));
+  }],
+  ['**demonstrated に証跡が無ければ落ちる**（誰でも「見た」と書けてしまう）', () => {
+    const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'demonstrated' }], none_budget: 0 },
+      { wired: ['scripts/x.mjs'], exists: () => true });
+    assert(p.some((x) => x.includes('at（観測日）')), p.join(' / '));
+    assert(p.some((x) => x.includes('broke')), p.join(' / '));
+  }],
+  ['**ラチェット: none が上限を超えたら落ちる**', () => {
+    const rows = [{ script: 'a.mjs', state: 'none' }, { script: 'b.mjs', state: 'none' }];
+    const opt = { wired: ['a.mjs', 'b.mjs'], exists: () => true };
+    assert(validate({ checks: rows, none_budget: 2 }, opt).length === 0, '上限ちょうどは通る');
+    assert(validate({ checks: rows, none_budget: 1 }, opt).some((x) => x.includes('上限')), '超えたら落ちる');
+  }],
+  ['知らない state は落ちる', () => {
+    const p = validate({ checks: [{ script: 'a.mjs', state: 'たぶん大丈夫' }], none_budget: 0 },
+      { wired: ['a.mjs'], exists: () => true });
+    assert(p.some((x) => x.includes('知らない state')), p.join(' / '));
+  }],
+  ['state が demonstrated でないのに観測記録があれば落ちる', () => {
+    const p = validate({ checks: [{ script: 'a.mjs', state: 'none', at: '2026-08-26' }], none_budget: 1 },
+      { wired: ['a.mjs'], exists: () => true });
+    assert(p.some((x) => x.includes('観測の記録がある')), p.join(' / '));
+  }],
+  ['実データが検査を通る', () => {
+    const p = validate(loadLedger());
+    assert(p.length === 0, p.join(' / '));
+  }],
+];
+
+function assert(cond, msg) { if (!cond) throw new Error(msg); }
+
+function selftest() {
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  return failed;
+}
+
+const isMain = process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]));
+if (isMain) {
+  const argv = process.argv.slice(2);
+  if (argv.includes('--selftest')) process.exit(selftest() === 0 ? 0 : 1);
+
+  if (argv.includes('--sync')) {
+    const doc = loadLedger();
+    const wired = wiredChecks();
+    const byScript = new Map((doc.checks ?? []).map((r) => [r.script, r]));
+    doc.checks = wired.map((s) => byScript.get(s) ?? {
+      script: s,
+      state: fs.readFileSync(path.join(ROOT, s), 'utf8').includes('--selftest') ? 'selftest_only' : 'none',
+    });
+    doc.checks.sort((a, b) => a.script.localeCompare(b.script));
+    fs.writeFileSync(LEDGER_PATH, `${JSON.stringify(doc, null, 2)}\n`);
+    console.log(`同期: ${doc.checks.length} 本`);
+    process.exit(0);
+  }
+
+  const doc = loadLedger();
+  console.log(render(doc));
+  const problems = validate(doc);
+  if (problems.length) {
+    console.log('\n検査の自己テスト台帳: 不整合');
+    for (const p of problems) console.log(`  - ${p}`);
+    process.exit(1);
+  }
+  if (argv.includes('--check')) {
+    if (selftest() !== 0) process.exit(1);
+    console.log('\n列挙・証跡・ラチェットに問題なし。');
+  }
+}

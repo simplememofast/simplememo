@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { CODES } from './autopilot-gate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -74,8 +75,25 @@ export function validate(doc, { seenClasses = [], policyOnlyDomains = [] } = {})
   return { problems, byTrigger };
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+// 壊し方は実データを複製して作る（固定フィクスチャだと台帳と形がずれても気づけない）。
+const SELFTEST_BREAKAGES = [
+  ['**who の無い規則**は落ちる（誰に渡すか決まっていない移管は起きない）', (d) => { delete d.rules[0].who; }],
+  ['**期限の無い移管**は落ちる（within_hours が無いと延びる）', (d) => { delete d.rules[0].within_hours; }],
+  ['知らない channel は落ちる', (d) => { d.rules[0].channel = '念力'; }],
+  ['trigger の重複は落ちる', (d) => { d.rules.push({ ...d.rules[0] }); }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(RULES_PATH, 'utf8')),
+  (d) => validate(d).problems,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(RULES_PATH, 'utf8'));
   const runs = JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8')).runs || [];
   const seenClasses = [...new Set(runs.map((r) => r.failure_class).filter(Boolean))];
@@ -104,5 +122,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n規則の無い故障種別なし。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n規則の無い故障種別なし。');
+  }
 }

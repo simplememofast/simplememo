@@ -24,6 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { decide, baseState, CODES } from './autopilot-gate.mjs';
 
 
@@ -174,8 +175,23 @@ export function validate(doc, { workflow = '', runbook = '', rules = [] } = {}) 
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['**止まっているのに理由が無い**のは落ちる', (d) => { d.stopped = true; d.reason = ''; d.stopped_by = ''; }],
+  ['**AIによる解除を許す設定**は落ちる', (d) => { d.policy = { ...(d.policy || {}), ai_may_resume: true }; }],
+  ['経路の stopped が真偽値でなければ落ちる', (d) => { const k = Object.keys(d.agents).find((x) => !x.startsWith('\$')); d.agents[k] = { ...d.agents[k], stopped: 'たぶん' }; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(STOP_PATH, 'utf8')),
+  (d) => validate(d, { rules: JSON.parse(fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules || [] }),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
   const workflow = fs.existsSync(WORKFLOW) ? fs.readFileSync(WORKFLOW, 'utf8') : '';
   const runbook = fs.existsSync(RUNBOOK) ? fs.readFileSync(RUNBOOK, 'utf8') : '';
@@ -236,5 +252,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n全経路が緊急停止を見ている。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n全経路が緊急停止を見ている。');
+  }
 }

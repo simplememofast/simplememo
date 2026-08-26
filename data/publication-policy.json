@@ -1,0 +1,270 @@
+{
+  "$comment": [
+    "**data/*.json のどれをサイトが配信するか。**scripts/check-publication.mjs が検査する。",
+    "",
+    "【⚠ ここで決まるのは配信であって、非公開ではない — 2026-08-26 に確かめた】",
+    "**このリポジトリ（simplememofast/simplememo）は GitHub 上で公開されている**",
+    "（api.github.com が `private: false` を返す。simplememo-ios / simplememo-api は非公開）。",
+    "したがって _redirects の 404 も functions/_middleware.js の遮断も、**止めているのは",
+    "サイト経由の閲覧だけ**で、同じファイルは GitHub 上で誰でも読める。",
+    "",
+    "**旧版はこの欄を `public: false` と書いていた。**404 にすれば非公開になったつもりでいたが、",
+    "実際には非公開になっていない。**名前が事実と違うと、対策を打ったつもりで穴が残る。**",
+    "そこで `served_by_site` に改名した。真偽値の意味は「サイトが配信するか」だけ。",
+    "",
+    "【⚠ 遮断は _redirects では効かない — 2026-08-26 に本番で確定】",
+    "2026-08-25 に `_redirects` へ `/data/x.json /404.html 404` を並べたが、",
+    "**一度も効いていなかった。**Cloudflare Pages は実在する静的ファイルを優先し、",
+    "そのパスの _redirects を無視する。本番での対照実験:",
+    "",
+    "  /privacy-policy               → 301  （ファイルが無い → _redirects が効く）",
+    "  /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）",
+    "  /growth/experiments/....json  → 404  （functions/_middleware.js は効く）",
+    "",
+    "**検査は「_redirects にブロックが在ること」を確かめて緑を出していた。**",
+    "在ることと効くことは別。設定を grep する検査は、効果を確かめない。",
+    "遮断は functions/_middleware.js へ移し、scripts/check-url-normalization.mjs が",
+    "**middleware を実際に走らせて status を見る**（この一覧から読むので、テストが方針とずれない）。",
+    "",
+    "【なぜ配信の制御自体は要るか】Cloudflare Pages は**リポジトリの中身をそのまま配信する。**",
+    "除外設定は無い。したがって data/*.json は全件が",
+    "https://simplememofast.com/data/... で読める状態にあった。",
+    "**サイトが意図して参照しているのは7件だけ**で、残りは静的ホスティングの",
+    "副作用で配信されていた。検索に載る・リンクされる・キャッシュされるのは配信側だけなので、",
+    "遮断に意味が無いわけではない。**「非公開にした」と読み替えないこと。**",
+    "",
+    "**2026-08-25 に実際にこの穴を踏んだ。**⑦法人経営の欄を埋める作業で",
+    "役員報酬の有無を corporate-obligations.json に書き込んだ ——",
+    "**登記事項ではない情報を、配信ディレクトリへ、確認せずに置いた。**",
+    "そのときの手当ては 404 化だったが、上のとおり**それでは非公開になっていない。**",
+    "",
+    "【既定は配信しない】新しい data ファイルは、この一覧に載るまで検査が落ちる。",
+    "**配信してよいかを静的ホスティングの既定で決めさせない。**",
+    "",
+    "【served_by_site にしたものは、参照が消えたら落ちる】",
+    "サイトから参照されなくなった配信ファイルは、配信のまま忘れられる。",
+    "意図してURLだけ残すなら allow_unreferenced: true を明示する。",
+    "",
+    "【3本目の軸 — 2026-08-26】`served_by_site` は「サイトが配信するか」しか聞いていない。",
+    "**このリポジトリが公開である以上、それは足りない。**聞くべきは",
+    "「そもそも公開リポジトリに在ってよいか」で、それが `ok_in_public_repo`。",
+    "",
+    "  ok     … 在ってよい。多くは**資産**（数え方を公開していることが売りなので）",
+    "  review … 判断が要る。`public_repo_why` 必須。検査が毎回列挙する",
+    "",
+    "**消すという選択肢は無い。**このリポジトリは作られたときから公開で、",
+    "git の履歴が残る以上、ファイルを消しても公開されなかったことにはならない。",
+    "実行可能な対策は**「これ以上ここへ機微情報を足さない」**だけ。",
+    "だから review は「消す予定」ではなく「足す前に必ず読む」の印。",
+    "",
+    "**リポジトリを非公開にする案は採らなかった。**",
+    "operating-memory.json はオーナーが 2026-08-25 に意図して公開したもので、",
+    "理由は「この原稿の唯一の売りが『数え方を公開していること』」。",
+    "非公開にするとその主張を作り直すことになる。得るものより失うものが大きい。"
+  ],
+  "repository_is_public": true,
+  "$repository_is_public": "2026-08-26 に api.github.com/repos/simplememofast/simplememo を叩いて確かめた（private: false）。**この欄が true である限り、served_by_site: false は『非公開』を意味しない。**CI は seo-check.yml が REPO_PRIVATE として github.event.repository.private の生の値を渡し、ここと食い違ったら落ちる（リポジトリを非公開にしたときも、公開に戻したときも気づける）。**観測値が渡ってこない実行では照合しない** —— 照合できなかったことを『一致』と書かない。",
+  "files": {
+    "audit-charter.json": {
+      "served_by_site": false,
+      "why": "監査の設計。攻撃面に準ずる",
+      "ok_in_public_repo": "ok"
+    },
+    "audit-findings.json": {
+      "served_by_site": false,
+      "why": "監査で出た所見",
+      "ok_in_public_repo": "ok"
+    },
+    "authority-matrix.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ が権限表として参照。**人が承認する境界を見せることが訴求そのもの**",
+      "ok_in_public_repo": "ok"
+    },
+    "automation-coverage.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ が棚卸しとして参照。数え方を外から再現できることが売り",
+      "ok_in_public_repo": "ok"
+    },
+    "autonomy-timeline.json": {
+      "served_by_site": false,
+      "why": "自律度の系列。**グラフに使うなら公開へ移す**が、現状は参照されていない",
+      "ok_in_public_repo": "ok"
+    },
+    "autopilot-actions-report.json": {
+      "served_by_site": false,
+      "why": "同上の日次レポート",
+      "ok_in_public_repo": "ok"
+    },
+    "autopilot-actions.json": {
+      "served_by_site": false,
+      "why": "アクション台帳。オーナー依頼の中身を含む",
+      "ok_in_public_repo": "ok"
+    },
+    "autopilot-cost.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ が実費として参照。AI原価を公開している",
+      "ok_in_public_repo": "ok"
+    },
+    "autopilot-runs.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ が運転台帳として参照。失敗も含めて出している",
+      "ok_in_public_repo": "ok"
+    },
+    "autopilot-status.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ が現在地として参照",
+      "ok_in_public_repo": "ok"
+    },
+    "benchmark.json": {
+      "served_by_site": false,
+      "why": "競合ベンチマーク。内部の見立て",
+      "ok_in_public_repo": "ok"
+    },
+    "check-selftests.json": {
+      "served_by_site": false,
+      "why": "内部の運転台帳。サイトのどのページも読まない",
+      "ok_in_public_repo": "ok"
+    },
+    "code-authorship.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ がAI著者率として参照。導出をscriptで再現できる",
+      "ok_in_public_repo": "ok"
+    },
+    "content-graph.json": {
+      "served_by_site": false,
+      "why": "内部リンク構造。運用データ",
+      "ok_in_public_repo": "ok"
+    },
+    "corporate-obligations.json": {
+      "served_by_site": false,
+      "why": "**法人の期限・記録・事業形態。**登記事項でないもの（役員報酬の有無・決算期・顧問の有無）を含む。公開する理由が無い",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "**登記事項でない事業情報**（税理士の有無・会計SaaSのプラン・決算期の運用メモ）が入る。決算期と法人形態は登記で誰でも取れるが、それ以外は取れない。2026-08-25 に役員報酬をここへ書いた事故と同じファイル。**消しても履歴には残るので、実行可能な対策は「これ以上ここへ足さない」だけ。**移すかどうかはオーナー判断"
+    },
+    "cpp-map.json": {
+      "served_by_site": false,
+      "why": "App Store CPP の対応表。運用データ",
+      "ok_in_public_repo": "ok"
+    },
+    "credential-expiry.json": {
+      "served_by_site": false,
+      "why": "**どんな資格情報が存在するかの一覧。**鍵の値は入っていないが、「何があるか」の地図は出さない",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "**どんな資格情報が存在するか**の一覧（値は無い）。失効手順と「失効させると何が止まるか」を持つ。可用性の地図ではあるが、iOSアプリなら Apple の証明書と ASC の鍵を使っていることは自明。**値が入った瞬間に review では済まなくなる**ので、実値の混入を検査で止め続けること"
+    },
+    "crossrepo-probes.json": {
+      "served_by_site": false,
+      "why": "リポジトリ横断の検査。内部構造",
+      "ok_in_public_repo": "ok"
+    },
+    "emergency-stop.json": {
+      "served_by_site": false,
+      "why": "停止機構の在処。攻撃面と同じ扱い",
+      "ok_in_public_repo": "ok"
+    },
+    "escalation-rules.json": {
+      "served_by_site": false,
+      "why": "誰にどう上げるかの規則。連絡経路は出さない",
+      "ok_in_public_repo": "ok"
+    },
+    "feature-backlog.json": {
+      "served_by_site": false,
+      "why": "未発表の機能候補",
+      "ok_in_public_repo": "ok"
+    },
+    "feature-outcomes.json": {
+      "served_by_site": false,
+      "why": "**未発表の機能と、その狙い。**出す前の指標宣言を含むので公開しない（feature-backlog と同じ扱い）",
+      "ok_in_public_repo": "ok"
+    },
+    "financial-policy.json": {
+      "served_by_site": false,
+      "why": "上限・損失限度・観測した売上。**金額の内訳は公開しない**",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "上限・損失限度・観測した売上。**実額が入る**（現時点で $2.59）。/autopilot/ で率は公開しているので方針の存在自体は既知だが、実額は別"
+    },
+    "injection-surface.json": {
+      "served_by_site": false,
+      "why": "**攻撃面の棚卸し。**同上の理由でより強く",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "攻撃面の自己申告と**残存リスク**が入る。入口そのものは公開ワークフローから推測できるので追加開示は小さいが、「まだ塞げていない」を明示する文書ではある。**公開したまま持つのは意図的な選択**（正直さが売りなので）。年1回は読み直す"
+    },
+    "kpi-definitions.json": {
+      "served_by_site": false,
+      "why": "KPIの定義とハッシュ。内部運用",
+      "ok_in_public_repo": "ok"
+    },
+    "model-eval-set.json": {
+      "served_by_site": false,
+      "why": "評価セット。内部運用",
+      "ok_in_public_repo": "ok"
+    },
+    "model-routing.json": {
+      "served_by_site": false,
+      "why": "モデルの振り分け。内部運用",
+      "ok_in_public_repo": "ok"
+    },
+    "monitoring-coverage.json": {
+      "served_by_site": false,
+      "why": "監視の穴がどこにあるかを含む",
+      "ok_in_public_repo": "ok"
+    },
+    "operating-memory.json": {
+      "served_by_site": true,
+      "why": "**オーナー判断で公開（2026-08-25）。**判断→実行→結果→次の判断がどう変わったかを、失敗も含めてそのまま出す。この原稿の唯一の売りが『数え方を公開していること』なので、**うまくいかなかった回こそ出す価値がある**（海外4社はどこも出していない）。",
+      "ok_in_public_repo": "ok"
+    },
+    "pr-claims.json": {
+      "served_by_site": false,
+      "why": "配信前の原稿の主張。**出す前の文面**なので公開しない",
+      "ok_in_public_repo": "ok"
+    },
+    "publication-policy.json": {
+      "served_by_site": false,
+      "why": "この方針そのもの。**どれを隠しているかの一覧**なので、内部に置く",
+      "ok_in_public_repo": "ok"
+    },
+    "revenue-series.json": {
+      "served_by_site": false,
+      "why": "収入の履歴。同上",
+      "ok_in_public_repo": "ok"
+    },
+    "review-intake.json": {
+      "served_by_site": false,
+      "why": "レビューの取り込み。同上",
+      "ok_in_public_repo": "ok"
+    },
+    "review-replies.json": {
+      "served_by_site": false,
+      "why": "**投稿前の文面。**公開する前の下書きを外から読める場所に置かない（pr-claims.json と同じ理由）",
+      "ok_in_public_repo": "ok"
+    },
+    "signal-ledger.json": {
+      "served_by_site": false,
+      "why": "ユーザー要望・問い合わせ由来。**第三者の声を含むので出さない**",
+      "ok_in_public_repo": "ok"
+    },
+    "site-constants.json": {
+      "served_by_site": false,
+      "why": "サイト定数。**公開面へは sync_constants が値を撒く**ので、原本を出す必要が無い",
+      "ok_in_public_repo": "ok"
+    },
+    "spend-approvals.json": {
+      "served_by_site": false,
+      "why": "支出の承認記録。金額と承認者を含む",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "支出の承認記録。**誰がいつ何を承認したか。**金額の桁は小さいが、承認の運用そのものが見える"
+    },
+    "stop-drills.json": {
+      "served_by_site": false,
+      "why": "停止機構の一覧と、どこまで確かめたか。**配信はしない** —— どの経路をどう止められるかの地図なので、サイトから引ける形にはしない（リポジトリが公開なので非公開にはならないが、既定を配信にはしない）",
+      "ok_in_public_repo": "ok"
+    },
+    "vendor-register.json": {
+      "served_by_site": false,
+      "why": "取引先と、何を渡しているか。**依存の地図**なので出さない",
+      "ok_in_public_repo": "review",
+      "public_repo_why": "取引先と月額の枠。**金額は入るが、無料枠かどうかの粗い区分まで。**請求書・契約番号は入れない"
+    }
+  }
+}

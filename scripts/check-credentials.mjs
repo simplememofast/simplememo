@@ -27,6 +27,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CRED_PATH = path.join(ROOT, 'data/credential-expiry.json');
@@ -113,8 +114,22 @@ export function validate(doc, stopDoc, inUse) {
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**失効手順が無い**のは落ちる（更新手順は失効手順ではない）', (d) => { delete d.credentials[0].revocation; }],
+  ['**止めたとき何が止まるかが無い**のは落ちる', (d) => { delete d.credentials[0].blast_radius; }],
+  ['emergency-stop に無い経路を名乗ったら落ちる', (d) => { d.credentials[0].agents = ['そんな経路は無い']; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(CRED_PATH, 'utf8')),
+  (d) => validate(d, JSON.parse(fs.readFileSync(STOP_PATH, 'utf8')), secretsInUse()),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(CRED_PATH, 'utf8'));
   const stopDoc = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
   const inUse = secretsInUse();
@@ -156,5 +171,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n止めたい経路ごとに、失効させる鍵が名指しできる。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n止めたい経路ごとに、失効させる鍵が名指しできる。');
+  }
 }

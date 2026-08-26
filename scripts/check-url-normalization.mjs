@@ -107,6 +107,61 @@ async function servesDirectly(urlPath) {
   }
 }
 
+// ── 自己テスト（**この検査が落ちることを確かめる**） ─────────────────
+//
+// 本体は本番の middleware をそのまま走らせているので、「middleware が正しいか」は
+// 見ている。だが **判定そのものが効いているか**は別で、helper が黙って何も
+// 見ていなければ全部緑になる —— check-pr-facts で実際に踏んだ形（行ごとの走査
+// だったので、折り返された文には規則が一度も当たらなかった）。
+//
+// そこで**わざと逆の期待を当てて、失敗が増えることを確かめる。**
+// 期待どおりのときに増えないことも同時に見る（片方だけでは足りない。
+// 常に落ちる検査も、常に通る検査と同じく何も見ていない）。
+if (process.argv.includes("--selftest")) {
+  const policy = JSON.parse(
+    readFileSync(path.join(ROOT, "data/publication-policy.json"), "utf8"),
+  );
+  const entries = Object.entries(policy.files);
+  const servedName = entries.find(([, v]) => v.served_by_site)?.[0];
+  const blockedName = entries.find(([, v]) => !v.served_by_site)?.[0];
+  if (!servedName || !blockedName) {
+    console.error(
+      "自己テストの前提が崩れている: 配信・遮断の両方が publication-policy に要る",
+    );
+    process.exit(1);
+  }
+  const served = `/data/${servedName}`;
+  const blocked = `/data/${blockedName}`;
+
+  let bad = 0;
+  const expect = async (name, fn, shouldFail) => {
+    failures.length = 0;
+    await fn();
+    const failed = failures.length > 0;
+    if (failed !== shouldFail) {
+      bad += 1;
+      const why = shouldFail
+        ? "落ちるべきなのに落ちなかった（**この判定は何も見ていない**）"
+        : `落ちてはいけないのに落ちた: ${failures[0]}`;
+      console.log(`  FAIL ${name}\n       ${why}`);
+    } else {
+      console.log(`  ok   ${name}`);
+    }
+    failures.length = 0;
+  };
+
+  await expect(`配信するものは通る（${served}）`, () => servesDirectly(served), false);
+  await expect(`**配信するものを404扱いすると落ちる**（${served}）`, () => notFound(served), true);
+  await expect(`遮断するものは404（${blocked}）`, () => notFound(blocked), false);
+  await expect(`**遮断するものを配信扱いすると落ちる**（${blocked}）`, () => servesDirectly(blocked), true);
+  await expect("正しい行き先の 301 は通る（/faq.html → /faq）", () => redirects("/faq.html", "/faq"), false);
+  await expect("**行き先が違う 301 は落ちる**（301 が出たことだけで通さない）", () => redirects("/faq.html", "/そんなページは無い"), true);
+  await expect("**410 でないものを gone 扱いすると落ちる**", () => gone(served), true);
+
+  console.log(`\n  自己テスト 7 件中 ${bad} 件失敗`);
+  process.exit(bad === 0 ? 0 : 1);
+}
+
 // ── 0. Host: www → apex, folded into the same single 301 ─────────────────
 // GSC 2026-08-17 "Page with redirect" carries http://www.simplememofast.com/.
 // The http→https upgrade is the edge's own 301 (Always Use HTTPS, before
@@ -247,6 +302,39 @@ await notFound("/CLAUDE.md");
 await notFound("/growth/data/gsc/2026-08-09/queries.json");
 await notFound("//growth//experiments/experiments.json");
 await notFound("/growth/");
+
+// data/*.json のうち「配信しない」と決めたもの。
+//
+// [2026-08-26] **2026-08-25 にこれを _redirects へ書いたが、一度も効いていなかった。**
+// Cloudflare Pages は実在する静的ファイルを優先し、そのパスの _redirects を無視する。
+// 本番での対照実験:
+//
+//   /privacy-policy               → 301  （ファイルが無い → _redirects が効く）
+//   /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）
+//   /growth/experiments/...json   → 404  （middleware は効く）
+//
+// **設定に書いてあることを確かめる検査は、効くことを確かめない。**
+// ここは middleware を実際に走らせて status を見るので、効果を確かめている。
+// 一覧は data/publication-policy.json から読む（テストが方針とずれない）。
+{
+  const policy = JSON.parse(
+    readFileSync(path.join(ROOT, "data/publication-policy.json"), "utf8"),
+  );
+  const entries = Object.entries(policy.files);
+  const unserved = entries.filter(([, v]) => !v.served_by_site).map(([f]) => f);
+  const served = entries.filter(([, v]) => v.served_by_site).map(([f]) => f);
+  if (unserved.length === 0) fail("publication-policy に「配信しない」が1件も無い");
+  if (served.length === 0) fail("publication-policy に「配信する」が1件も無い");
+  for (const f of unserved) await notFound(`/data/${f}`);
+  // **配信すると決めたものは通す。**全部404にして「守った」ことにしない。
+  for (const f of served) {
+    checked++;
+    const r = await run(`/data/${f}`);
+    if (r.kind !== "pass") {
+      fail(`/data/${f} は配信する分類なのに middleware が止めた（${JSON.stringify(r)}）`);
+    }
+  }
+}
 
 // ── 8. /admin/* keeps its Cloudflare Access auth chain ───────────────────
 await servesDirectly("/admin/");

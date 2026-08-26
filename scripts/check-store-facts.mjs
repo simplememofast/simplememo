@@ -36,6 +36,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONSTANTS = path.join(ROOT, 'data/site-constants.json');
@@ -139,8 +140,22 @@ async function fetchStore(country = 'jp') {
   };
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**確認日の無い公開値**は落ちる（古くなっても誰も気づかない）', (d) => { d.ratingNote = 'App Store より'; }],
+  ['公開値そのものが無ければ落ちる', (d) => { delete d.ratingValue; }],
+  ['**確認日が古すぎる**のは落ちる（確認していない値を出し続けない）', (d) => { d.ratingNote = '2020-01-01 に確認'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(CONSTANTS, 'utf8')),
+  (d) => validateOffline(d).problems,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(CONSTANTS, 'utf8'));
   const { problems, rows } = validateOffline(doc);
 

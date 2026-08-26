@@ -16,6 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
@@ -87,8 +88,22 @@ export function crossCheck(vendors, credentials) {
   return missing;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**落ちたとき何が止まるかが空**なら落ちる', (d) => { delete d.vendors[0].breaks_if_down; }],
+  ['知らない personal_data は落ちる', (d) => { d.vendors[0].personal_data = 'たぶん渡してない'; }],
+  ['**代替が無いのに理由が書いていない**のは落ちる', (d) => { d.vendors[0].fallback = null; delete d.vendors[0].fallback_note; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => readJSON('data/vendor-register.json'),
+  (d) => audit(d).errors,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = readJSON('data/vendor-register.json');
   const { errors, unreviewed, noFallback, money } = audit(doc);

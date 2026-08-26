@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const CHARTER_PATH = path.join(ROOT, 'data/audit-charter.json');
@@ -33,6 +34,14 @@ export function validate(charter, findings, { mayModify = [], routing = null } =
   const ind = charter.independence || {};
 
   // 1. 自己修復が触れないこと。**ここが破れると、他の2つは無意味。**
+  //
+  // **空の一覧は「守っている」ではなく「何も守っていない」。**
+  // 2026-08-26、この検査に自己テストを入れようとして空にしたら通ってしまった。
+  // 列挙が空なら下のループは一度も回らず、守りが消えたことが誰にも見えない。
+  if (!(ind.must_not_be_modifiable_by_self_repair || []).length) {
+    problems.push('independence.must_not_be_modifiable_by_self_repair が空 — '
+      + '**自己修復から守る対象が1つも無い。**空にすれば通る状態は、守っていないのと同じ');
+  }
   for (const f of ind.must_not_be_modifiable_by_self_repair || []) {
     if (mayModify.includes(f)) {
       problems.push(`${f} が self_repair.may_modify に入っている`
@@ -90,8 +99,23 @@ export function validate(charter, findings, { mayModify = [], routing = null } =
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**監査AIに直す権限を渡したら落ちる**（直したことにして所見を閉じるのが最短経路になる）',
+   (d) => { d.independence.may_modify_anything = true; }],
+  ['報告先が owner でなければ落ちる', (d) => { d.independence.reports_to = '自分'; }],
+  ['**自己修理が触れてはいけない一覧が空**なら落ちる', (d) => { d.independence.must_not_be_modifiable_by_self_repair = []; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(CHARTER_PATH, 'utf8')),
+  (d) => validate(d, JSON.parse(fs.readFileSync(FINDINGS_PATH, 'utf8')), { mayModify: JSON.parse(fs.readFileSync(path.join(ROOT, 'data/audit-charter.json'), 'utf8')).self_repair?.may_modify || [] }),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const charter = JSON.parse(fs.readFileSync(CHARTER_PATH, 'utf8'));
   const findings = JSON.parse(fs.readFileSync(FINDINGS_PATH, 'utf8'));
   const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
@@ -117,5 +141,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n独立の3点が担保されている。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n独立の3点が担保されている。');
+  }
 }

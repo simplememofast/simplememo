@@ -75,6 +75,54 @@
 // We must pass those requests through unmodified — root middleware runs
 // FIRST, and a 301 here would prevent the Access auth from being checked.
 
+// BEGIN data-publication (scripts/check-publication.mjs --write)
+// **サイトが配信しない data/*.json。**一覧は data/publication-policy.json が正。
+// 手で編集しない —— `node scripts/check-publication.mjs --write` が書く。
+//
+// **これは非公開化ではない。**リポジトリ自体が公開なので、同じ内容は GitHub 上で
+// 読める（publication-policy.json の repository_is_public）。ここで止めているのは
+// サイト経由の配信・索引・キャッシュだけ。
+const UNSERVED_DATA = new Set([
+  "audit-charter.json",
+  "audit-findings.json",
+  "autonomy-timeline.json",
+  "autopilot-actions-report.json",
+  "autopilot-actions.json",
+  "benchmark.json",
+  "check-selftests.json",
+  "content-graph.json",
+  "corporate-obligations.json",
+  "cpp-map.json",
+  "credential-expiry.json",
+  "crossrepo-probes.json",
+  "emergency-stop.json",
+  "escalation-rules.json",
+  "feature-backlog.json",
+  "feature-outcomes.json",
+  "financial-policy.json",
+  "injection-surface.json",
+  "kpi-definitions.json",
+  "model-eval-set.json",
+  "model-routing.json",
+  "monitoring-coverage.json",
+  "pr-claims.json",
+  "publication-policy.json",
+  "revenue-series.json",
+  "review-intake.json",
+  "review-replies.json",
+  "signal-ledger.json",
+  "site-constants.json",
+  "spend-approvals.json",
+  "stop-drills.json",
+  "vendor-register.json",
+]);
+// END data-publication
+
+function isBlockedDataPath(pathname) {
+  if (!pathname.startsWith("/data/")) return false;
+  return UNSERVED_DATA.has(pathname.slice("/data/".length));
+}
+
 export const onRequest = async (context) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
@@ -109,7 +157,15 @@ export const onRequest = async (context) => {
   //
   // /growth/ matters more than the others: it holds committed Search Console
   // snapshots and App Store Connect exports. Without this block, click,
-  // impression and revenue figures would be readable at a guessable URL.
+  // impression and revenue figures would be readable at a guessable URL,
+  // indexable by search engines and cacheable by intermediaries.
+  //
+  // 2026-08-26: this block does NOT make those files private. The repository
+  // itself is public (api.github.com/repos/simplememofast/simplememo returns
+  // private: false), so every path 404'd here is still readable on GitHub.
+  // What the block buys is that the site does not serve, link or expose them
+  // to crawlers — not confidentiality. See data/publication-policy.json
+  // (`repository_is_public`); do not read these 404s as "not public".
   if (
     pathname === "/docs" ||
     pathname.startsWith("/docs/") ||
@@ -119,7 +175,21 @@ export const onRequest = async (context) => {
     pathname.startsWith("/tools/") ||
     pathname === "/growth" ||
     pathname.startsWith("/growth/") ||
-    pathname === "/CLAUDE.md"
+    pathname === "/CLAUDE.md" ||
+    // 【2026-08-26】**data/*.json の遮断はここでしか効かない。**
+    //
+    // 2026-08-25 に _redirects へ `/data/x.json /404.html 404` を並べたが、
+    // **一度も効いていなかった。**Cloudflare Pages は実在する静的ファイルを
+    // 優先し、そのパスの _redirects を無視する。対照実験（2026-08-26・本番）:
+    //
+    //   /privacy-policy               → 301  （ファイルが無い → _redirects が効く）
+    //   /data/credential-expiry.json  → 200  （ファイルが在る → 無視される）
+    //   /growth/experiments/...json   → 404  （この middleware は効く）
+    //
+    // Functions は静的アセットより先に走るので、ここに置けば実在しても止まる。
+    // check-publication.mjs は「_redirects にブロックが在ること」を検査していたが、
+    // **在ることと効くことは別だった。**設定を grep する検査は、効果を確かめない。
+    isBlockedDataPath(pathname)
   ) {
     return new Response("Not Found", {
       status: 404,

@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ROUTING_PATH = path.join(ROOT, 'data/model-routing.json');
@@ -144,8 +145,24 @@ export function validate(doc, { budgets = null, workflow = null } = {}) {
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['**理由の無い振り分け**は落ちる', (d) => { const k = Object.keys(d.rules)[0]; delete d.rules[k].why; }],
+  ['**fallback が無い**のは落ちる（障害時に落ちる先が無い）', (d) => { const k = Object.keys(d.rules)[0]; delete d.rules[k].fallback; }],
+  ['**fallback が model と同じ**なら落ちる（同じ場所へ落ちる）', (d) => { const k = Object.keys(d.rules)[0]; d.rules[k].fallback = d.rules[k].model; }],
+  ['models に無いモデルを指したら落ちる', (d) => { const k = Object.keys(d.rules)[0]; d.rules[k].model = 'gpt-とても賢い'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = load();
 

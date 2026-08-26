@@ -138,6 +138,37 @@ const RULES = [
     check: (m) => m[1] !== CONSTANTS.freeSendsPerDay,
     message: (m) => `無料枠が「1日${m[1]}通」。正は ${CONSTANTS.freeSendsPerDay}通（data/site-constants.json）`,
   },
+  {
+    // 2026-08-26 に実際に踏んだ。原稿が「段階公開中の機能がゼロ」と書いていたが、
+    // tf04_progress が rollout 5% で動いていた。08-22 から4日間、誤りのまま残った。
+    //
+    // **このリポジトリはリレーのフラグを読めない。**だから「ゼロだ」は
+    // ここでは確かめようがなく、確かめようのない断定は、外れても誰も気づかない。
+    // 数を持たない検査にしてあるのはそのためで、禁じているのは「ゼロ」という値ではなく
+    // **「このリポジトリから検証できないことを断定する」形**そのもの。
+    id: 'unverifiable-staged-flag-count',
+    multiline: true,
+    // **改行を跨げること。**この原稿は日本語を手で折り返してあるので、
+    // 「段階公開中の\n機能がゼロ」と割れる。最初に書いた版は [^。\n] で
+    // 改行を外していたため、**戻した誤りを検知できなかった**（検査を検査して判明）。
+    pattern: /段階公開中の\s*(?:機能|フラグ)[^。]{0,10}?(?:ゼロ|0件|無い|ない|存在しない)/g,
+    // **逃げ道は実装してある。**読んだ日付と、読んだ経路を近くに書いてあれば通す
+    // ——「いつ時点の話か」が本文に残る形なら、断定してよい。
+    // 逃げ道をメッセージで約束しておいて実装しないと、直しようのない検査になる
+    // （最初に書いた版がそうだった）。
+    check: (m) => {
+      const around = String(m.input ?? '').slice(Math.max(0, m.index - 120), m.index + m[0].length + 120);
+      const dated = /\d{4}-\d{2}-\d{2}/.test(around);
+      const sourced = /Flag Ops|\/admin\/flags|list で|確認/.test(around);
+      return !(dated && sourced); // 日付と出典が揃っていれば違反にしない
+    },
+    message: () => '**段階公開中のフラグ数を、このリポジトリは読めない。**'
+      + 'フラグはリレー（Cloudflare Workers）のKVにあり、site 側に取得経路が無い。'
+      + '2026-08-26 の実測では tf04_progress が rollout 5% で動いており、'
+      + '「ゼロ」と書いた原稿は4日間そのままだった。'
+      + '書くなら Flag Ops の list で読んだ日付と件数を同じ行に添えること'
+      + '（data/stop-drills.json の rollout-guard-freeze に訂正の経緯がある）',
+  },
 ];
 
 const hasNegation = (s) => NEGATIONS.some((n) => s.includes(n))
@@ -170,6 +201,49 @@ export function checkText(text) {
       }
     }
   });
+
+  // **改行を跨ぐ主張のための2周目。**上の走査は1行ずつなので、
+  // 日本語を手で折り返した原稿では「段階公開中の\n機能がゼロ」のように
+  // 割れた断定を**どの規則も検知できない**（2026-08-26、規則を足したあとに
+  // 誤りを戻す検査をして判明。規則は在るのに一度も発火しない状態だった）。
+  //
+  // 既定は1行のまま。multiline を宣言した規則だけがここへ来る
+  // （全規則を全文に当てると、離れた行が偶然つながって偽陽性になる）。
+  const skipLine = [];
+  let sectSkip = false;
+  lines.forEach((line, i) => {
+    if (/^#{1,6}\s/.test(line)) sectSkip = hasNegation(line);
+    skipLine[i] = sectSkip || hasNegation(line);
+  });
+  // 行頭オフセット。一致位置から行番号を引くために持つ。
+  const lineStart = [];
+  let off = 0;
+  for (const line of lines) { lineStart.push(off); off += line.length + 1; }
+  const lineOf = (idx) => {
+    let lo = 0, hi = lineStart.length - 1;
+    while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (lineStart[mid] <= idx) lo = mid; else hi = mid - 1; }
+    return lo;
+  };
+
+  for (const rule of RULES) {
+    if (!rule.multiline) continue;
+    rule.pattern.lastIndex = 0;
+    let m;
+    while ((m = rule.pattern.exec(text)) !== null) {
+      const from = lineOf(m.index);
+      const to = lineOf(m.index + m[0].length - 1);
+      // **跨いだ行のどれかに打ち消し語があれば素通し。**1行版と同じ扱いにする。
+      let skipped = false;
+      for (let i = from; i <= to; i++) if (skipLine[i]) skipped = true;
+      if (skipped) continue;
+      if (rule.check && !rule.check(m)) continue;
+      violations.push({
+        rule: rule.id, line: from + 1,
+        text: m[0].replace(/\n/g, ' ').trim().slice(0, 100),
+        message: rule.message(m),
+      });
+    }
+  }
 
   // 現行のアプリ名が一度も出てこない配信原稿は、まず疑う（内部文書には求めない）
   const missingName = mode === 'draft'

@@ -48,6 +48,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { load as loadRouting } from './check-model-routing.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -369,8 +370,22 @@ function render(s, ledger) {
 }
 
 // --- CLI ---------------------------------------------------------------
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**上限超過時の動作が知らない値**なら落ちる', (d) => { d.budget.on_exceed = 'たぶん止まる'; }],
+  ['月次上限が数でなければ落ちる', (d) => { d.budget.monthly_usd_cap = 'たくさん'; }],
+  ['run の費用が数でなければ落ちる', (d) => { d.runs[0].total_cost_usd = '高かった'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const flag = (name) => argv.includes(`--${name}`);
   const val = (name, dflt = undefined) => {

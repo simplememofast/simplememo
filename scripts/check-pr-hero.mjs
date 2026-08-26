@@ -19,6 +19,56 @@ import { evaluate } from './check-pr-claims.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// この検査が守っているのは「裏の取れていない主張で完成品を作らせない」仕組み。
+// **その仕組みが効かなくなったときに落ちること**を、ここで固定する。
+const SCENARIOS = [
+  ['**DRAFT リボンが draft フラグに連動する**（切れると裏取り未完の画像が完成品として流通する）', () => {
+    const RIBBON = '<div class="draft">';
+    const draft = buildHTML({ headline: 'あ「い」う', subhead: 'x', appName: 'x', draft: true });
+    const final = buildHTML({ headline: 'あ「い」う', subhead: 'x', appName: 'x', draft: false });
+    if (!draft.includes(RIBBON)) throw new Error('draft:true なのにリボンが無い');
+    if (final.includes(RIBBON)) throw new Error('draft:false なのにリボンがある');
+  }],
+  ['**文字列 DRAFT では判定しない**（CSS のコメントに当たって常に真になる — 実際に踏んだ）', () => {
+    const final = buildHTML({ headline: 'あ「い」う', subhead: 'x', appName: 'x', draft: false });
+    if (!final.includes('DRAFT')) return; // CSS に DRAFT が無いなら罠自体が無い
+    // 罠がある以上、要素で見ていることを固定する
+    if (final.includes('<div class="draft">')) throw new Error('要素で見ていない');
+  }],
+  ['寸法が PR TIMES の G1 ゲートに合う', () => {
+    const h = buildHTML({ headline: 'あ「い」う', subhead: 'x', appName: 'x', draft: true });
+    if (!h.includes(`width:${WIDTH}px`) || !h.includes(`height:${HEIGHT}px`)) {
+      throw new Error(`寸法が ${WIDTH}x${HEIGHT} でない`);
+    }
+  }],
+  ['**見出しの「」が長すぎれば検出できる**（画像で黙って切れる形）', () => {
+    const longLead = 'あ'.repeat(LEAD_MAX_GLYPHS + 5);
+    const { lead } = splitHeadline(`「${longLead}」のあと`);
+    if (lead.length + 2 <= LEAD_MAX_GLYPHS) throw new Error('長すぎる見出しを長いと判定できていない');
+  }],
+  ['「」の無い見出しは rest が空になる（検出できる）', () => {
+    const { rest } = splitHeadline('かぎかっこの無い見出し');
+    if (rest.length > 0) throw new Error('「」が無いのに rest が埋まっている');
+  }],
+  ['実データが検査を通る', () => {
+    const doc = readJSON('data/pr-claims.json');
+    const { lead, rest } = splitHeadline(doc.headline);
+    if (lead.length + 2 > LEAD_MAX_GLYPHS) throw new Error('実データの見出しが長い');
+    if (!rest.length) throw new Error('実データの rest が空');
+  }],
+];
+
+if (process.argv.includes('--selftest')) {
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 const claimsDoc = readJSON('data/pr-claims.json');
 const coverage = readJSON('data/automation-coverage.json');
 let failed = 0;

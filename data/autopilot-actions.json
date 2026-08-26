@@ -318,8 +318,8 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-26",
       "closed_jst": "2026-08-26",
-      "evidence": "2026-08-26 に回転完了（オーナー実施）。fine-grained PAT 「simplememo-autopilot」を発行し repo secret GH_PAT を更新。権限は Contents(RW) / Metadata(RO) / Pull requests(RW) の3件で、**Workflows は付けていない**（決定どおり）。有効期限 2026-11-24 を data/credential-expiry.json に記録したので、check-expiry の warn 30日 / fail 7日 が初めて機能する（それまでは critical かつ未把握だった）。**逸脱1件を note に記録: repository_access が All repositories のまま**（推奨は当該リポジトリのみ。危険度は低いが範囲は狭いほうがよい。fine-grained は作り直さず範囲だけ変更できる）",
-      "last_run_log": "オーナーが回転を実施。期限を台帳へ記録し、この依頼を閉じた"
+      "evidence": "2026-08-26 に回転完了（オーナー実施）。fine-grained PAT 「simplememo-autopilot」を発行し repo secret GH_PAT を更新。権限は Contents(RW) / Metadata(RO) / Pull requests(RW) の3件で、**Workflows は付けていない**（決定どおり）。13:41 JST の autopilot-act run 32931151082 が checkout と PR作成（#594）を実際に通しており、必要な権限が揃っていることは実測済み。有効期限 2026-11-24 を data/credential-expiry.json に記録したので、check-expiry の warn 30日 / fail 7日 が初めて機能する。**repository_access は All repositories のまま維持する（2026-08-26 オーナー判断）** ——逸脱ではなく決定。再提案しないこと。",
+      "last_run_log": "オーナーが回転を実施。期限を台帳へ記録し閉じた。repository_access を絞らない判断も同日に確定"
     },
     {
       "id": "act-budget-overrun-32816234185",
@@ -397,6 +397,32 @@
       "evidence": "Actions run 17件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
       "last_run_jst": "2026-08-26",
       "last_run_log": "32900786201: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）"
+    },
+    {
+      "id": "act-detect-orphaned-post-merge-commits",
+      "title": "マージ済みPRのブランチに取り残されたコミットを検知する（2026-08-26 と 08-23 の実害）",
+      "detail": "**同じ取りこぼしが2回起きている。**セッションが記事のPRを出した後に台帳を書くと、その push はマージ済みPRに届かず、拾う先が無くなる。\n\n    2026-08-26  #586 が 06:45 マージ → ee4e37c を 06:47 push → 取り残し\n    2026-08-23  同じ形（PR #544 が statusAgreement を入れる契機になった回）\n\nauto-merge は「検証済みSHAだけをマージする」設計なので、**これは事故ではなく仕様の帰結。**CLAUDE.md も「検証後にpushした場合はマージされず、そのpushが起こす次の検証が拾う」と書いているが、**PRが既に閉じていると拾う先が無い。**\n\n【実害】日報が出荷した日を「公開記事: 0（当日分の実行記録なし）」と誤報する。さらに autopilot-runs の鮮度ガードが翌日落ち、**無関係なPRまで止まる**（2026-08-24 の #547 が2日止まったのがこれ）。\n\n【既存の検査が黙っている理由】statusAgreement は台帳と status JSON を突き合わせるが、**両方とも main に届かなければ一致してしまう。**片方が欠けた 08-23 の形は捕まえられるが、両方まとめて取り残された 08-26 の形は素通りする。\n\n【検知方法 — 2026-08-26 に実測で確認済み】\n**「ブランチが main より進んでいるか」では駄目。**このリポジトリは squash マージなので、マージ済みブランチの head は main の祖先にならず、`compare/main...branch` の ahead_by は**全ての merged ブランチで > 0 になる**（実測: #547 のマージ済み head a798322 は main の祖先ではない）。\n\n正しいのは **PRのマージ時 head と、ブランチの現在地を比べる**こと:\n\n    GET /repos/{o}/{r}/pulls/{n}         → head.sha（マージ時点）, head.ref\n    GET /repos/{o}/{r}/compare/{head.sha}...{head.ref}\n    ahead_by > 0  → マージ後に push された取り残しがある\n\n実測（2026-08-26）:\n\n    PR #586  claude/obsidian-auto-20260826   ahead_by=1  ← 取り残し（ee4e37c）\n    PR #547  claude/seo-weekly-snapshot      ahead_by=0  ← きれい\n\n**既知の2件で誤検知ゼロ・見逃しゼロ。**\n\n【実装の置き場所】scripts/autopilot-act.mjs の derive()。日次アクチュエータは既に Actions API を叩いており（reconcile-runs）、GH_TOKEN も持っている。直近N日のマージ済みPRを走査して ahead_by > 0 のものを起票する。\n\n**自動修復はさせない。**取り残しの中身は台帳のこともあれば書きかけのこともあり、機械が中身を見ずに cherry-pick すると、**今日私が手でやった「訂正が生き残っているかの確認」**を飛ばすことになる。検知して起票するところまでで、適用はセッションが行う。",
+      "source": "session",
+      "domain": null,
+      "touches": [
+        "scripts/autopilot-act.mjs"
+      ],
+      "outside_repo": false,
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": "scripts/autopilot-act.mjs",
+          "needle": "orphaned-post-merge"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-26",
+      "last_seen_jst": "2026-08-26",
+      "closed_jst": null,
+      "evidence": null
     }
   ]
 }

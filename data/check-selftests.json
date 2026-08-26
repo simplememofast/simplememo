@@ -1,0 +1,312 @@
+{
+  "$comment": [
+    "**落ちることを確かめていない検査は、無いのと同じ。**",
+    "scripts/check-selftests.mjs が読む。data/stop-drills.json の検査版。",
+    "",
+    "【なぜ要るか】2026-08-26 の1日で、自分が書いた検査が黙って効いていないのを",
+    "5回踏んだ。うち check-pr-facts.mjs は、規則を足したのに scan() が1行ずつしか",
+    "見ないせいで**一度も発火しない**状態で、緑を出し続けていた。",
+    "",
+    "【推測しない】ソースを正規表現で読んで「否定ケースがありそう」と判定する案は",
+    "捨てた。**推測で作った検査は、推測の分だけ効かない。**demonstrated は",
+    "『実際に壊して落ちるのを見た』ときにしか書けない（at と broke が必須）。",
+    "",
+    "【ラチェット】40本を一度に直すのは無理なので、**増える方向だけを止める。**",
+    "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
+    "この台帳は「現状を追認する表」になり、止める力を失う。"
+  ],
+  "none_budget": 13,
+  "checks": [
+    {
+      "script": "growth/scripts/build-queues.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "growth/scripts/check-data-quality.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/check-experiments.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/check-mentions.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/check-stoploss.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "growth/scripts/d-score.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "軸が空欄（空欄のまま撃たない）／範囲外／負／手で足した total が合計と違う（散文の中の数字は検算されない）の4通りで落ちることを観測"
+    },
+    {
+      "script": "growth/scripts/decompose-series.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/ingest-asc.mjs",
+      "state": "none"
+    },
+    {
+      "script": "growth/scripts/revenue-series.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/ai-unit-cost.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/automation-rate.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "area 欠落／task 欠落／同一タスク重複（分母の水増し）／知らない executor の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/autonomy-timeline.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "終点 61.3% が現在値 61.9% と一致せず落ちた。加えて since を日付形式で書いた不正データで RangeError まで観測し、読めるメッセージを出す検査を足した"
+    },
+    {
+      "script": "scripts/autopilot-act.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/autopilot-budget.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "on_exceed が知らない値／月次上限が数でない／run の費用が数でない の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/autopilot-drill.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/autopilot-runs.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/autopilot-selfheal.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "repair_of が存在しない故障を指す 1通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-audit-independence.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "may_modify_anything: true／reports_to が owner でない／守る対象の一覧が空 の3通りで落ちることを観測。**3つ目は検査に穴があり、規則を足して塞いだ**"
+    },
+    {
+      "script": "scripts/check-authority.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "不可逆なのに承認不要／知らない status／domain 重複／reversible が真偽値でない の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-autopilot-page.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "台帳の率を 61.9% に更新した状態で公開ページを 61.3% のまま残して落ちた。見出しだけ直して領域別の表を置き去りにした2回目も捕まえた"
+    },
+    {
+      "script": "scripts/check-benchmark.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-content-graph.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "ページ不在／親の自己参照／兄弟5件以上（§13 無差別リンク防止）／未宣言の cluster・intent・funnel／関連度が gsc.mjs とずれる／_meta.clusters が空 の6通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-corporate.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "what_breaks 欠落／id と title 欠落／confirmed なのに日付不正 の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-credentials.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "revocation 欠落／blast_radius 欠落／emergency-stop に無い経路 の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-css-version.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "?v= が古い（2026-08-10 に本番へ出た形）／?v= が無い（2026-08-11 の lang.js）／.min.css のドットが任意1文字として効く を落とし、合っている場合と無関係なページでは検出しないことも固定"
+    },
+    {
+      "script": "scripts/check-definitions.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "id 重複／source_file 不在／version 0／checksum ずれ の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-degradation.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-emergency-stop.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "停止中に reason 無し／policy.ai_may_resume: true／経路の stopped が真偽値でない の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-escalation.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "who が無い／within_hours が無い／知らない channel／trigger 重複 の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-expiry.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/check-feature-outcomes.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/check-financial-policy.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "知らない status／max_step_pct 欠落／min_days_between_changes 欠落 の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-injection-surface.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "mitigations 空／residual_risk 欠落／知らない trust／id 重複 の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-internal-redirects.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-model-eval.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "id 重複／input 欠落 の2通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-model-routing.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "why 欠落／fallback 欠落／fallback が model と同じ／未知モデル の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-monitoring.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "detector が実在しない／知らない detection／cadence 欠落 の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-operating-memory.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "learning.changed に隣リポジトリのパスを ../ 無しで書いて「実在しない」で落ちた"
+    },
+    {
+      "script": "scripts/check-pr-claims.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-pr-facts.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "原稿の「段階公開中の機能がゼロ」を書き戻して exit 1 を観測。**最初の規則は1行ずつの走査に阻まれて一度も発火せず、それもこの手順で判明した**"
+    },
+    {
+      "script": "scripts/check-pr-hero.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "DRAFT リボンが draft フラグから切れる／文字列 DRAFT で判定してしまう罠／寸法ずれ／見出しの「」が長すぎる を落とすことを観測"
+    },
+    {
+      "script": "scripts/check-public-facts.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/check-publication.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
+    },
+    {
+      "script": "scripts/check-review-replies.mjs",
+      "state": "selftest_only"
+    },
+    {
+      "script": "scripts/check-script-tags.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "閉じ忘れた <script>（2026-08-13 に本番へ出た形）／属性つき開始タグ／</script > の空白ゆらぎ を落とし、createElement(\"script\") には当たらないことも固定"
+    },
+    {
+      "script": "scripts/check-selftests.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "初回同期で none が 41 本になり、上限 40 のラチェットが実際に発火して落ちた"
+    },
+    {
+      "script": "scripts/check-signals.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "id 重複／dedupe_key 欠落／kinds 空／title 欠落 の4通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-stop-drills.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "kill 訓練を level=production と誤記して「production なのに blocked_by が残っている」と production_verified の宣言ずれの2件で落ちた"
+    },
+    {
+      "script": "scripts/check-store-facts.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "ratingNote から確認日を消す／ratingValue を消す／確認日を 2020-01-01 にする の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/check-url-normalization.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "fail() を無効化すると 7 件中 4 件が落ちることを観測。**判定そのものが効いているか**を、わざと逆の期待を当てて確かめている — 配信する data/*.json を404扱い／遮断するものを配信扱い／行き先の違う 301／410 でないものを gone 扱い。期待どおりのとき落ちないことも同時に見る（常に落ちる検査も、常に通る検査と同じく何も見ていない）"
+    },
+    {
+      "script": "scripts/check-vendors.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "breaks_if_down 欠落／知らない personal_data／代替が無いのに fallback_note 欠落 の3通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/code-authorship.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "total が内訳の合計と一致しない 1通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/daily-brief.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/feature-score.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "未知の evidence_strength／工数0（ゼロ除算で無限大の価値にしない）／負の工数／確信度が低いのに「まず測る」へ送らない／承認が要るリスクを gated にしない／効果×確信度÷工数 の式の入れ替わり の6通りで落ちることを観測"
+    },
+    {
+      "script": "scripts/property-tests.mjs",
+      "state": "none"
+    },
+    {
+      "script": "scripts/review-intake.mjs",
+      "state": "selftest_only"
+    }
+  ],
+  "$baseline": "2026-08-26 の実測。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない。初回 41 → 自己テストを入れるたびに下げている"
+}

@@ -1,0 +1,300 @@
+{
+  "$comment": [
+    "**止める仕組みが、実際に止まることを確かめた記録。**",
+    "scripts/check-stop-drills.mjs が検査する。",
+    "",
+    "【なぜ要るか】台帳の note には既に散文でこう書いてあった ——",
+    "「本番でまだ1回も発火していない」「本番で kill を1回も通していない",
+    "（止まることを確かめていない停止機構は無いのと同じ）」。",
+    "**このリポジトリは prose-does-not-stop-an-agent を学びとして持っている。**",
+    "散文のままにせず、数えられる形にした。",
+    "",
+    "【この台帳が出す数】止める仕組みの総数と、**本番で止まることを確かめた件数**。",
+    "後者が 0 なら 0 と書く。**実装した件数で代用しない。**",
+    "",
+    "【段階を分ける理由】単体テストと本番を同じ語で呼ばないため。",
+    "「fail closed にテストがある」と「本番で引いたら止まった」は別の主張で、",
+    "後者だけが停止機構の存在証明になる。",
+    "",
+    "【訓練を促す台帳ではない】訓練するかは**止める対象が本番にあるか**で決まり、",
+    "それは人の判断（本番で kill を引けば利用者に影響が出る）。",
+    "ここが持つのは「確かめていない」を「確かめた」に見せない、という一点だけ。"
+  ],
+  "levels": {
+    "static": "配線があることを検査で確かめた（その経路が停止判定を参照している）",
+    "unit": "単体テストで「止まる側に倒れる」ことを確かめた",
+    "local": "**本番と同じ式・同じコマンド**を手元で通し、止まる出力を観測した",
+    "production": "本番の実行で実際に止まった（止めた対象が存在した）"
+  },
+  "measured_at": "2026-08-26",
+  "production_verified": 2,
+  "$production_verified": "**2026-08-26 訂正: 0 → 1。**flag-kill は 2026-08-22 に本番で実証済みだった（/admin/flags の history が証跡）。**この台帳を作った当日、実物を見ずに台帳の散文から0 と書いていた。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。",
+  "mechanisms": [
+    {
+      "id": "emergency-stop-all",
+      "stops": "主系（GitHub Actions）と副系（CCR）の自動運転すべて",
+      "evidence": [
+        "data/emergency-stop.json",
+        ".github/workflows/obsidian-autopilot.yml",
+        "scripts/check-emergency-stop.mjs",
+        "scripts/autopilot-gate.mjs"
+      ],
+      "how_to_drill": "data/emergency-stop.json の複製に stopped:true と reason を入れ、obsidian-autopilot.yml の『緊急停止の確認』step と同じ node -p 式を通す。STOP が非空になり step が exit 1 で落ちること、::warning に理由が出ることを見る。**本番の台帳は触らない。**",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "obsidian-autopilot.yml『緊急停止の確認』step の式を複製した台帳に対して実行",
+          "observed": "stopped:true・reason『訓練: 全体停止が効くか』で STOP='all:訓練: 全体停止が効くか'、step は exit 1、GITHUB_OUTPUT に stopped=true、::warning に理由が出た。停止を立てていない現行の台帳では STOP='' で exit 0。**理由を null にした場合も止まり、『all:理由未記入』と出た**（理由が無くても止まる側に倒れる）"
+        }
+      ],
+      "blocked_by": "本番で止める必要がまだ生じていない。**わざと立てて確かめるとその日の主系が止まる**ので、実行するかはオーナー判断（止まること自体は上の local で観測済み）"
+    },
+    {
+      "id": "emergency-stop-agent",
+      "stops": "経路ごとの自動運転（actions / ccr-0730 / ccr-0920 / owner-session / audit）",
+      "evidence": [
+        "data/emergency-stop.json",
+        ".github/workflows/obsidian-autopilot.yml",
+        "scripts/check-emergency-stop.mjs"
+      ],
+      "how_to_drill": "同上。agents.actions.stopped:true にして、全体停止ではなく経路名で止まることを見る（『主系だけ止めたい』が効くか）",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "同上",
+          "observed": "agents.actions.stopped:true で STOP='actions:訓練: 主系だけ止まるか'、exit 1。全体停止と区別された文字列で出るので、**どちらで止まったかがログから分かる**"
+        }
+      ],
+      "blocked_by": "同上"
+    },
+    {
+      "id": "budget-gate",
+      "stops": "当月のAI実費が上限に達したときの、主系のその日の run",
+      "evidence": [
+        "scripts/autopilot-budget.mjs",
+        "data/autopilot-cost.json",
+        ".github/workflows/obsidian-autopilot.yml",
+        ".github/workflows/autopilot-act.yml"
+      ],
+      "how_to_drill": "scripts/ と data/ を複製した先で autopilot-cost.json の runs に上限を超える total_cost_usd を足し、**本番と同じ `node scripts/autopilot-budget.mjs --check`** を実行する。非ゼロ終了と ::warning を見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "node <複製>/scripts/autopilot-budget.mjs --check",
+          "observed": "当月 $45.0445 / 上限 $40.0000 で exit 1、::warning『当月の実費 $45.0445 が上限 $40.0000 に到達。主系runをスキップする。』が出た。上限内の現行台帳（$20.0445）では exit 0。**副系CCRは別経路なので、この停止では止まらない**（台帳の on_exceed_note どおり）"
+        }
+      ],
+      "blocked_by": "当月の実費が上限に達していない（$20.04 / $40.00）。**到達を待つ性質のもので、作りに行くものではない**"
+    },
+    {
+      "id": "flag-kill",
+      "stops": "アプリの個別機能を、全端末で即座にオフ（rollout を無視する）",
+      "evidence": [
+        "../simplememo-api/src/flags.ts",
+        "../simplememo-api/test/flags.test.ts",
+        "../simplememo-api/src/config.ts",
+        "docs/stop-drill-runbook.md"
+      ],
+      "how_to_drill": "**鍵は要らない。**simplememo-api の Actions → Flag Ops → Run workflow を5回（diagnose → list → set → kill → list → delete）。手順は docs/stop-drill-runbook.md §1。**max_stale_seconds は既定の 86400 から下げない** —— 下げると誰も読まないフラグでも/v1/config 全体の再取得間隔が縮む（2026-08-26 の local 訓練で観測）",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "test/flags.test.ts 40件が通る。kill が rollout 100 を無視すること、kill が rollout を保存したまま立ち降ろすと元の配布率に戻ること、存在しないフラグの kill が 404 になること、KV が読めない/壊れている/例外を投げる場合に全部オフへ倒れることを、**実物の handleRemoteConfig を通して**確かめている"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "wrangler dev（verify スキルの shim-entry 回避策）で本番と同じ src/index.ts を起動し、/admin/flags/set → /admin/flags/kill → GET /v1/config を実HTTPで通した",
+          "observed": "訓練用フラグ drill_kill_probe を rollout 100 で作成 → /v1/config の rollouts に載る（killed は空）。kill を引くと killed:[\"drill_kill_probe\"] に入り、**rollout 100 はそのまま残った**（降ろせば元の配布率に戻る設計どおり）。kill を降ろすと killed が空に戻り、rollout 100 が復帰。認証ヘッダ無しの kill は **401**、存在しないフラグの kill は **404**（黙って作らない）。**副作用を1つ観測した**: このフラグに max_stale_seconds:300 を付けたところ、/v1/config 全体の max_stale_seconds が 86400 → 300 に落ちた（最短のフラグが全体を縛る設計）。フラグを削除すると 86400 に戻った。**『誰も読まないフラグは誰の挙動も変えない』は誤り** —— 短い max_stale を付けると全クライアントの再取得間隔が縮む"
+        },
+        {
+          "at": "2026-08-22",
+          "level": "production",
+          "by": "human",
+          "where": "本番 relay（Flag Ops workflow run #14〜#17）",
+          "observed": "**2026-08-26 に /admin/flags の history を読んで判明した。**`tf04_progress` を 14:44:53Z に rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布。実証後に rollout 0 へ戻す」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に killed: false → 15:01:10Z に rollout 0 へ戻し、description を**「kill の実証完了（2026-08-22）」**に書き換えている。作成→kill→解除→撤収がサーバ側の監査履歴にそのまま残っており、rollout 100 は kill 中も保存されていた。\n\n**端末側は確かめられていない。**残っているのはサーバの状態遷移で、実際に端末で機能がオフになったことを示す記録は無い（TestFlight での実証とあるので人は見た可能性が高いが、**見たという記録が無いものを見たことにしない**）。"
+        }
+      ],
+      "blocked_by": null
+    },
+    {
+      "id": "flag-global-kill",
+      "stops": "アプリのリモートフラグ全部（最後の手段側）",
+      "evidence": [
+        "../simplememo-api/src/flags.ts",
+        "../simplememo-api/test/flags.test.ts"
+      ],
+      "how_to_drill": "REMOTE_FLAGS_JSON 相当の環境変数を 'true' にして /v1/config を叩き、既知の全キーが killed に入り max_stale_seconds が 60 に落ちることを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "globalKillPayload が既知キーを全部 killed に入れること（空 payload では足りない）、'True' や '1' では発動しないことをテストが固定している。**空 payload にしない理由が設計に書いてある** —— クライアントは rollout も killed も無いキーをコンパイル既定で解決するため"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "同じ worker を FLAGS_GLOBAL_KILL_SWITCH=true で別ポートに起動し、GET /v1/config を比較した",
+          "observed": "グローバルキル ON で **既知の15キー全部が killed に入り**、rollouts は全部 0、max_stale_seconds が **60** に落ちた（オフラインの端末が『オン』を1分以上持てない）。同じ KV 状態のまま OFF の worker では killed 0件・max_stale 86400。**空 payload ではなく全キーを killed に入れる**という設計の理由（クライアントはrollout も killed も無いキーをコンパイル既定で解決する）が、実際の応答で確認できた"
+        }
+      ],
+      "blocked_by": "本番で引くと全機能が既定へ倒れる。**止まること自体は local で観測済み**（15キー全部が killed、max_stale 60）。本番での実施はオーナー判断で、flag-kill の訓練が先"
+    },
+    {
+      "id": "rollout-guard-kill",
+      "stops": "段階公開中の機能を、指標が割れたときに自動で",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/test/rollout-guard.test.ts"
+      ],
+      "how_to_drill": "段階公開中のフラグを1つ用意し、観測値を閾値割れにして cron を回す。kill が立ち、履歴に by='guard' が残ることを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "test/rollout-guard.test.ts 24件が通る。起動完走率・送信成功率・エディタ→送信到達率のどれか1つでも割れたら止めること、凍結中でも kill は走ることを確かめている"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "where": "Flag Ops run #29（action: guard）",
+          "observed": "本番の判定を読んだ。cron は生きている（last_run_at 2026-08-26T04:00:01.777Z / decisions 30件 / promotion_frozen false / awaiting_approval 0）。最新判定は action: hold・executed: false で、理由は3指標すべて「サンプル不足（露出 12 / 対照 236 < 30）。判定していない（異常なしではない）」。**ガードは走っていて、正しく『判定していない』と言っている。**kill が出ていないのは対象が無いからではなく、判定に届いていないから"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "where": "Flag Ops run #30（action: guard・要約に latest_action を足した後）",
+          "observed": "**ガードは escalate を返していた。**latest_action=escalate / latest_reason「5 回続けて判定できていない。露出が小さすぎるか計測が壊れている。**人の確認が要る**」/ latest_at 2026-08-26T04:00:01.777Z。consecutive_holds は escalate のたびに 0 へ戻るので、**5時間ごとに同じ要求を出しては消えていた。**\n\n`escalate` という語は rollout-guard.ts の外に1つも無く、awaiting_approval は promote だけを積み、日報も見ていない。**08-23 の段階公開開始から、この要求は一度も人に届いていない。**日報へ出す経路を同日に実装した（simplememo-api の autopilot-report.ts）。"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "where": "コード読解（src/rollout-guard.ts splitByBucket / measure）",
+          "observed": "**群の作り方が fail-open だった。**splitByBucket は install_id のハッシュだけで露出/対照を割り、アプリの版を見ていない。リモート段階公開をクライアントが解釈できるのは 5.8.1 以降なので、それより古い版の install は bucket が rollout 未満でも機能を受け取っていない。露出群に混ざると露出群の指標は対照群へ引き寄せられ、**差が消える＝kill しない方向にだけ歪む。**版で絞る修正を同日に実装した（app_analytics_events の app_version から install ごとの最小版を採る。max ではなく min —— 窓の途中で上げた install は窓の一部で機能を持っていない）。**版の配線が無い場合は絞らず、絞っていないことを言う**（全員を外すと、取得側が版を渡さない版に戻った瞬間にガードが永久沈黙する）。テスト10件追加。**本番へはまだ載っていない。**"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "where": "Flag Ops run #31（action: guard・版フィルタと窓の梯子が本番に載った後の初回）",
+          "observed": "**版で絞った実測が初めて取れた。****本番の状態を読んだだけで、kill は observed していない**（だから static）。latest_at 2026-08-26T06:00:16.602Z / latest_window_days=3 / latest_action=hold。3指標とも「サンプル不足」で、理由に除外数と必要 rollout が出た:\n\n  launch_ok    露出 4 / 対照 108（版が古い 117 を除外）母数 112 → 露出30には rollout 27% 以上\n  send_success 露出 2 / 対照  33（版が古い  29 を除外）母数  35 → 露出30には rollout 86% 以上\n  activation   露出 2 / 対照  74（版が古い  66 を除外）母数  76 → 露出30には rollout 40% 以上\n\n**除外が母数の半分を超えている**（229 のうち 117）。5.8.1 は 08-22 公開なので、まだ入れ替わっていない。予告どおり必要 rollout は 13% → 27% へ上がった。\n\n**窓の梯子は届かせなかった。**window_days=3 が選ばれている。ただし「7/14/28 を試して全部0だった」のか「読めずに飛ばした」のかが決定から区別できず、**この実測では梯子が効いたかどうかを判定できない**（判定できなかったのであって、効いたのではない）。区別を残す修正を同日に入れた。"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "production",
+          "by": "ai",
+          "where": "Flag Ops（set -> guard-drill -> delete）／本番 /v1/config を直接観測",
+          "observed": "**本番で kill が立った。**訓練用フラグ `drill_guard_probe` を rollout 50 で作成し（07:38 UTC）、`POST /admin/rollout-guard/drill` を叩いた（07:40 UTC）。直後に**本番の `/v1/config` が `killed: [\"drill_guard_probe\"]` を返した**（`rollouts` の 50 は保存されたまま —— unkill で元の配布率に戻る設計どおり）。\n\n手で `kill` は一度も叩いていない。作成と削除のあいだに走ったのは `guard-drill` だけで、その中で `decide()` が kill を返し `killFlag()` が本番KVへ書いた。\n\n**この訓練が証明したのは「止まること」だけ。**観測は合成なので「悪化を見つけられること」は証明していない（入口の `readEventSets` だけを差し替え、`measure` / `observe` / `decide` / `killFlag` は本物を通している）。検知の側は毎時の実行が実データを読み、正しく「サンプル不足」と返しているのが別途観測できている。\n\n**証跡は `/v1/config` の直接観測で、フラグ履歴の `actor` は読んでいない。**訓練後に `delete` で片づけ、`killed: []` かつ rollouts から消えたことを確認した（本番は訓練前の状態に戻っている）。"
+        }
+      ]
+    },
+    {
+      "id": "rollout-guard-freeze",
+      "stops": "段階公開の昇格（promote）。kill は凍結中でも走る",
+      "evidence": [
+        "../simplememo-api/src/rollout-guard.ts",
+        "../simplememo-api/src/daily-actions.ts"
+      ],
+      "how_to_drill": "凍結を立てた状態で判定を回し、promote が『昇格は凍結中のため提案しない』になり、kill 側は変わらないことを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "unit",
+          "by": "ai",
+          "observed": "freeze.frozen のとき decide() が昇格を提案せず理由を返すこと、未配線の環境では frozen:false が返って**既存の挙動を変えない**ことがテストと実装に入っている"
+        }
+      ],
+      "blocked_by": "**「段階公開中のフラグがゼロ」は誤りだった（2026-08-26 訂正）。**`tf04_progress` が本番で **rollout 5%** で動いている（08-22 に 0% で定義 → 08-23 に 1% → 08-25 に 5%。5% へ上げた理由が description に「1% では露出3で判定に届かなかったため」と書いてある）。ガードも動いている —— last_run_at 2026-08-26T04:00:01Z、decisions 30件。\n\n発火しない本当の理由は**サンプル不足**。3指標とも judged: false で 「サンプル不足（露出 12 / 対照 236 < 30）。**判定していない（異常なしではない）**」と返している（露出群は 5〜12 installs）。**待てば解けるものではない** —— 露出を上げるのは authority-matrix domain 16（不可逆・承認要）なので、人の判断が要る。 凍結側は promotion_frozen: false で、理由は「daily-actions はドライランなので昇格に影響しない」（日次アクションエンジンが既定オフ）。"
+    },
+    {
+      "id": "marketing-stoploss",
+      "stops": "効いていないマーケ施策（revert / hold の提案。expand は返さない）",
+      "evidence": [
+        "growth/lib/stoploss.mjs",
+        "growth/scripts/check-stoploss.mjs",
+        "growth/experiments/experiments.json"
+      ],
+      "how_to_drill": "実データに対して --check を回す。judge が revert/hold を返す施策が出たら、その根拠（Wilson区間・観測期間）が出力に出ることを見る",
+      "drills": [
+        {
+          "at": "2026-08-25",
+          "level": "local",
+          "by": "ai",
+          "command": "node growth/scripts/check-stoploss.mjs --check",
+          "observed": "実データで1件に反応した（『line キープメモ サービス終了』）が、**これは誤検知だった** —— 対象ページは experiments.json で abandoned 済み。原因は台帳が均質だと仮定していたこと（進行中21件に target_metric が8種類ある）で、measuresPageCtr() で構造的に直した。**判定が動くことは観測できたが、正しい対象に当たることは1回目で外している**"
+        }
+      ],
+      "blocked_by": "**revert を実際に実行したことは一度も無い。**判定は出るが、施策を戻す操作は人が行う（広げる方向の非対称の裏返し）"
+    },
+    {
+      "id": "release-preflight",
+      "stops": "検査が緑でないコミットでのタグ作成（＝出荷）",
+      "evidence": [
+        "../simplememo-ios/scripts/release_preflight.rb",
+        "../simplememo-ios/.github/workflows/release.yml"
+      ],
+      "how_to_drill": "赤い check-run を持つ SHA を --sha に渡し、tag ジョブへ進まないことを見る。--override は理由必須で、通した回がジョブ要約に残ることも合わせて見る",
+      "drills": [
+        {
+          "at": "2026-08-25",
+          "level": "unit",
+          "by": "ai",
+          "observed": "self-test 16件。**未実行・API が引けない・検査が存在しない のいずれも緑ではない**ことと、同名の check-run が複数あるとき全部の緑を求めること（1つだけ緑にして通す経路を作らない）を固定している"
+        }
+      ],
+      "blocked_by": "赤いコミットで出荷しようとした機会がまだ無い（実装が 2026-08-25）。**機会を作りに行くものではない**"
+    },
+    {
+      "id": "auto-merge-verified-sha",
+      "stops": "検証を通っていない SHA が main に入ること（＝本番デプロイ）",
+      "evidence": [
+        ".github/workflows/auto-merge.yml",
+        ".github/workflows/seo-check.yml"
+      ],
+      "how_to_drill": "SEO Validation が落ちる PR を作り、auto-merge が発火しないことを見る",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "observed": "auto-merge.yml を読んで配線を確認した: workflow_run で起動（L18）、`conclusion == 'success'` のときだけ走る（L28）、マージ対象を `run.head_sha` に固定（L46）、**検証後に push された PR は head.sha が違うので見送る**（L74）、draft は対象外（L67）。**ただし止まった実例は観測していない** —— 直近30件のPRはすべて merged_at を持っており、検証で止められた回が1件も無い。**通ったことは、止まることの証明にならない。**"
+        }
+      ],
+      "blocked_by": "検証が落ちる PR がまだ出ていない。**わざと落として確かめることはできるが、本番デプロイ経路で意図的に赤を作るので、やるならオーナー判断**"
+    },
+    {
+      "id": "credential-revocation",
+      "stops": "すべての自動運転（この仕組みの外側からの最後の手段）",
+      "evidence": [
+        "data/credential-expiry.json",
+        "scripts/check-credentials.mjs",
+        "data/emergency-stop.json"
+      ],
+      "how_to_drill": "`node scripts/check-credentials.mjs --stop <経路>` が、その経路を止める鍵と失効手順を出すことを見る。実際の失効は各社コンソールでの人の操作",
+      "drills": [
+        {
+          "at": "2026-08-26",
+          "level": "static",
+          "by": "ai",
+          "observed": "`node scripts/check-credentials.mjs --stop actions` を実行した。主系を止める鍵3件（ANTHROPIC_API_KEY / CLAUDE_CODE_OAUTH_TOKEN / GH_PAT）と、それぞれの失効手順・失効したとき何が止まり何が生き残るかが出た（例: API キー単独では OAuth が残るので止まらない、GH_PAT は『静かに寝る』ではなく赤く落ちる）。**最後の手段が指す先が空でないことは確かめた。****失効そのものは一度も行っていないので、止まることは確かめていない** —— この記録が static に留まるのはそのため。"
+        }
+      ],
+      "blocked_by": "**失効操作は各社コンソールへのログインが要り、機械からは行えない。**加えて critical 5件のうち4件は期限日すら未把握なので、監視の側も完全ではない"
+    }
+  ]
+}
