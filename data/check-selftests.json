@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 5,
+  "none_budget": 3,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -23,7 +23,9 @@
     },
     {
       "script": "growth/scripts/check-data-quality.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "14通りで落ちることを観測。加えて **この検査自身が、冒頭に引いた規律を破っていた** —— dates / queries / pages がすべて空の写しは重複も不整合も起こしようがないので fatal 0 / warn 0 で「重複・内部不整合なし」を出していた。「取得できなかった」と「増えていない」を取り違えない、が守れていない。さらに meta.period_* が無ければ日付の欠けの判定が、meta.row_counts が無ければ内部整合の判定が、どちらも黙って丸ごと消えていた。3つとも fatal にした（実データ3件はすべて持っているので誤検出にならない）。欠け・鮮度・queries/pages が0行は報告のみのまま"
     },
     {
       "script": "growth/scripts/check-experiments.mjs",
@@ -51,7 +53,9 @@
     },
     {
       "script": "growth/scripts/ingest-asc.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "14通りで落ちることを観測。**判定が if (isMain) の中に埋まっていて一度も試せなかった**ので assess() へ切り出し、本体もそこを通すようにした（並行実装を持たない）。2026-08-25 に直した「0件を待機と故障に分ける」——それまでは0件でも note が「取得完了」で、毎日0件を緑で出荷していた（run 32844534637）——がここに在る。no_match / no_catalog は落とす（待っても直らない）、pending / partial は通す（待てば解ける）、state が無く0件で利用可能ありも落とす。隣が見えないときは落とさず「照合できない」と言う（CIで隣が正常でも赤くしない）。内訳の値と行そのものを運ばないことも固定した"
     },
     {
       "script": "growth/scripts/revenue-series.mjs",
