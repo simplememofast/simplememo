@@ -1367,13 +1367,28 @@
     },
     {
       "area": "⑧ カスタマーサポート",
-      "task": "回答・返金・障害案内",
+      "task": "問い合わせへの自動回答（承認済みテンプレート）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/reply-gate.ts",
+        "../simplememo-api/data/reply-policy.json",
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/test/reply-gate.test.ts",
+        "../simplememo-api/migrations/0026_inquiry_auto_replied.sql"
+      ],
+      "note": "2026-08-26実装（オーナー判断: 品質ゲート通過で自動送信）。**承認はテンプレート単位で先に取る** — メールは取り消せず、権限表の一番の規則が「不可逆な領域は承認制」なので生成文をそのまま送る形は取れない。data/reply-policy.json の編集（レビュー付きPR）がその承認で、個別送信の承認は要らない。ライフサイクルメールと同じ構造。\n\n**受付時に返す。あとから返さない。**inquiries は宛先を平文で持たない（email_hash のみ）ため、後追い返信にすると宛先を保存することになりプライバシー設計の後退になる。\n\n判定は全部決定論。返金・退会・個人情報はテンプレートを置いていない（分類器が先に弾くが登録簿でも二重に落ちる）。落ちた問い合わせは open のまま残る — **当たらなかったことを「返した」にしない。**\n\n**まだ1件も送っていない。**上の『問い合わせの自動分類』と同じく受け口が既定オフ（INQUIRY_ENABLED）で、さらに INQUIRY_AUTOREPLY_DRY_RUN が既定オン。昇格順は既存と同じ ENABLED→soak→DRY_RUN=false。**空の実績を「安定している」と読まないこと。**",
+      "since": "2026-08"
+    },
+    {
+      "area": "⑧ カスタマーサポート",
+      "task": "障害案内の一斉配信",
       "executor": "nobody",
       "evidence": [],
-      "note": "同上。加えて返金は不可逆で、承認境界の設計が先",
-      "blocker": "approval_design_first",
-      "unblocked_by": "返金は不可逆。承認境界を決めるまで実装しない",
-      "unlock": "reply_gate"
+      "note": "**旧行から切り出した。**旧行は「回答・返金・障害案内」で、自動化できた回答と、権限表で人に残した返金（⑨に別行がある）と、未実装の障害案内が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。障害案内は宛先の名簿と配信基準の設計が要る",
+      "blocker": "not_started",
+      "unblocked_by": "配信対象の決め方（全員か影響範囲か）と、送ってよい閾値を決めれば作れる",
+      "unlock": "impl_product",
+      "since": null
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1402,15 +1417,13 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "CSAT計測",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/scripts/ingest-asc.mjs",
-        "data/financial-policy.json"
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/src/reply-gate.ts",
+        "growth/scripts/ingest-asc.mjs"
       ],
-      "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**",
-      "blocker": "approval_design_first",
-      "unblocked_by": "返信の自動化が無いので発火しない。返信の承認境界が先",
-      "unlock": "reply_gate"
+      "note": "2026-08-22実装、2026-08-26に**発火経路がつながった。**CSAT は answered のものだけ受ける設計で、返信の自動化が無いあいだ一度も発火しなかった。自動回答が status を answered にするようになり、経路としては閉じた。auto_replied 列で「自動で返した件」と「人が返した件」を分けて読める — **混ぜると自動返信を入れてよかったのかが永久に分からない。****まだ1件も測っていない**（受け口が既定オフ・DRY_RUN既定オン）"
     },
     {
       "area": "⑧ カスタマーサポート",

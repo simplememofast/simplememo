@@ -352,6 +352,30 @@
       ],
       "status": "active",
       "note": "**広げてから戻しても「見た人が見なかったことにはならない」**ので不可逆に分類した。撤回と拡大で権限を非対称にしてあり、逆にすると誤検知が『勝手に全員へ配る』形で顕在化する"
+    },
+    {
+      "domain": "問い合わせへの自動回答（承認済みテンプレート）",
+      "reversible": false,
+      "ai_may": [
+        "分類の結果と承認済みテンプレートの突き合わせ",
+        "ゲートを通った定型返信の送信（個別承認なし）",
+        "当たらなかった問い合わせを open のまま人へ残すこと"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "テンプレートの追加・変更（data/reply-policy.json の編集＝レビュー付きPR）",
+        "テンプレートに当たらない用件への回答",
+        "受け口とDRY_RUNの昇格（INQUIRY_ENABLED / INQUIRY_AUTOREPLY_DRY_RUN）"
+      ],
+      "gate": "**承認はテンプレート単位で先に取る形。**メールは取り消せないので生成文は送らない。送信の判定は決定論（reply-gate.ts）で、緊急停止→needs_human→テンプレート未該当→禁止語→許可外リンク→長さ→日次上限30→DRY_RUN の順に落ちる。DRY_RUN は既定オンで、**\"false\" と明示したときだけ実送信**（タイプミスは送らない側へ倒れる）。返金・退会・個人情報はテンプレートを置いておらず、分類器と登録簿の食い違いはテストが落とす",
+      "evidence": [
+        "../simplememo-api/src/reply-gate.ts",
+        "../simplememo-api/data/reply-policy.json",
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/test/reply-gate.test.ts"
+      ],
+      "status": "active",
+      "note": "2026-08-26・オーナー判断「品質ゲート通過で自動送信」。**個別承認は要らないが、requires_approval は true。**承認の粒度がテンプレート単位というだけで、人の承認が無くなったわけではない。ここを false にすると、権限表は『承認なしで取り消せないメールを送ってよい』と読める —— 実際にやっていることより強い主張になる"
     }
   ],
   "self_repair": {
