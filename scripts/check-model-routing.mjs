@@ -64,6 +64,24 @@ export function validate(doc, { budgets = null, workflow = null } = {}) {
   const tierOf = (m) => doc.models?.[m];
   const cheapest = doc.policy?.cheapest_tier;
 
+  // [2026-08-26] **鍵を消すと規則が消える**形が2つあった。実測:
+  //
+  //   不可逆タスクを最安ティアへ                     → 捕まる
+  //   同じ違反のまま forbid_cheapest_for_irreversible を消す → **検出なし**
+  //   require_workflow_consumption を消す            → **exit 0**
+  //
+  // どちらも「切りたければ false と書く」ための旗で、**無いことは off ではない。**
+  // 宣言として false（レビューに残る）と、鍵が消えている（誰も気づかない）を分ける。
+  // 消えるのが「安さで失う額のほうが大きい」規則と「引かれない表は装飾」の検査なので、
+  // 黙って外れる側へ倒さない。
+  for (const flag of ['forbid_cheapest_for_irreversible', 'require_workflow_consumption']) {
+    if (typeof doc.policy?.[flag] !== 'boolean') {
+      problems.push(`policy.${flag} を true/false で明示すること`
+        + ' — **鍵が無いのは「切った」ではない。**'
+        + '切るならレビューに残る形（false）で書く');
+    }
+  }
+
   for (const [kind, r] of Object.entries(doc.rules || {})) {
     const at = `rules.${kind}`;
     if (!r.why) problems.push(`${at}: why が無い — 理由の書かれていない振り分けは、次に見直せない`);
@@ -153,12 +171,31 @@ const SELFTEST_BREAKAGES = [
   ['**fallback が無い**のは落ちる（障害時に落ちる先が無い）', (d) => { const k = Object.keys(d.rules)[0]; delete d.rules[k].fallback; }],
   ['**fallback が model と同じ**なら落ちる（同じ場所へ落ちる）', (d) => { const k = Object.keys(d.rules)[0]; d.rules[k].fallback = d.rules[k].model; }],
   ['models に無いモデルを指したら落ちる', (d) => { const k = Object.keys(d.rules)[0]; d.rules[k].model = 'gpt-とても賢い'; }],
+  // [2026-08-26] **鍵を消すと規則が消える**形を固定する。
+  // 実測: 不可逆タスクを最安ティアへ → 捕まる。同じ違反のまま鍵を消す → **検出なし**。
+  ['**不可逆の禁止の鍵を消すと落ちる**（無いことは off ではない）',
+    (d) => { delete d.policy.forbid_cheapest_for_irreversible; }],
+  ['**ワークフロー消費の鍵を消すと落ちる**（引かれない表は装飾）',
+    (d) => { delete d.policy.require_workflow_consumption; }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8')),
   (d) => validate(d),
   SELFTEST_BREAKAGES,
 );
+
+// **宣言として false は通る。**壊し方の一覧（上）へ入れると
+// 「壊したのに問題が出ない」と言われるので、通ることを直接確かめる。
+// ここを一緒くたにすると、他の壊し方のせいで落ちているのに
+// 「false を受け付けた」と読めてしまう。
+SCENARIOS.push(['**false と書いてあれば通る**（切るならレビューに残る形で）', () => {
+  const d = JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8'));
+  d.policy.forbid_cheapest_for_irreversible = false;
+  d.policy.require_workflow_consumption = false;
+  const p = validate(d);
+  assert(!p.some((x) => x.includes('を true/false で明示')),
+    `false を宣言したのに落ちた: ${p.join(' / ')}`);
+}]);
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {

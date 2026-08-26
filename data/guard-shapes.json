@@ -28,48 +28,213 @@
     "",
     "【measured】2026-08-26 に scripts/check-guard-shapes.mjs で走査し、21箇所を1件ずつ読んだ。",
     "疑わしい4件は**実測**した（違反を入れて捕まることを見てから、正を消して消えるかを見た）。",
-    "消えた4件は同じPRで直してあるので、この一覧には残っていない。"
+    "消えた4件は同じPRで直してあるので、この一覧には残っていない。",
+    "",
+    "【2026-08-26 続き: 自分の走査が12本を黙って飛ばしていた】",
+    "scan は台帳由来の束縛が1つも無いと即 [] を返す。つまり**見なかったファイルも",
+    "「候補0件」と同じ形で出る**。実測すると 73本中12本がそれで、その中に",
+    "check-public-facts / review-intake / autopilot-runs が入っていた。",
+    "出力は「新しく増えた箇所は無い」のままだった。**探していた形を、自分の検査がしていた。**",
+    "",
+    "原因は `const NAME = ...` しか汚染源にしていなかったこと。これらは",
+    "`function load() { return JSON.parse(fs.readFileSync(...)) }` の形で読んでいた。",
+    "局所の読み出し関数を汚染源に足して 12 → 8本。**残る8本は下に名指しで置き、",
+    "増えたら落ちる**（母数を黙って縮めさせない）。",
+    "",
+    "**この走査は1ファイル単位。**他モジュールから import した helper 経由の読み出しは",
+    "追えない。no_ledger_binding の理由に、どちらなのかを書いてある。"
   ],
   "measured_at": "2026-08-26",
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
-    { "file": "growth/scripts/build-queues.mjs", "expr": "queue.generated_at",
-      "disposition": "報告のみ", "note": "待ち行列が観測より古いことを ⚠ で出すだけ。判定していない" },
-    { "file": "growth/scripts/check-data-quality.mjs", "expr": "meta.period_start",
-      "disposition": "別に検出", "note": "**直前の 0b ブロックが period_* の欠落を fatal に入れている。**「判定を黙って消す meta の欠落」として明示的に見ている、この形の正しい書き方の見本" },
-    { "file": "growth/scripts/d-score.mjs", "expr": "bt.boarded_min_score",
-      "disposition": "報告のみ", "note": "較正の説明を console.log するだけ。n=5 の但し書き付き" },
-    { "file": "growth/scripts/experiments.mjs", "expr": "snaps",
-      "disposition": "前提", "note": "`!snaps.length &&` の否定形。**空のとき発火する側**なので向きが逆" },
-    { "file": "scripts/autopilot-act.mjs", "expr": "x.run_id",
-      "disposition": "前提", "note": "run_id で行を突き合わせる。id の無い行は照合対象ではない" },
-    { "file": "scripts/autopilot-act.mjs", "expr": "behind",
-      "disposition": "報告のみ", "note": "計算値のガード。behind が出せなければ遅れの判定自体が無い" },
-    { "file": "scripts/autopilot-act.mjs", "expr": "claude.started_at",
-      "disposition": "前提", "note": "所要時間の計算。両端が無ければ時間は出ない" },
-    { "file": "scripts/autopilot-act.mjs", "expr": "ms",
-      "disposition": "前提", "note": "上と同じ値の続き" },
-    { "file": "scripts/autopilot-act.mjs", "expr": "a.auto",
-      "disposition": "前提", "note": "auto を宣言した行にだけ handler を要求する。手動の行に handler は要らない" },
-    { "file": "scripts/autopilot-budget.mjs", "expr": "run.run_id",
-      "disposition": "前提", "note": "重複判定。id の無い run は重複判定の対象外" },
-    { "file": "scripts/autopilot-budget.mjs", "expr": "an.enabled",
-      "disposition": "前提", "note": "有効な注記だけが判定対象" },
-    { "file": "scripts/autopilot-budget.mjs", "expr": "s.over",
-      "disposition": "前提", "note": "超過した回にだけ on_exceed を見る" },
-    { "file": "scripts/check-content-graph.mjs", "expr": "f",
-      "disposition": "前提", "note": "解決できたパスにだけ existsSync を当てる" },
-    { "file": "scripts/check-degradation.mjs", "expr": "snap?.synced_at",
-      "disposition": "報告のみ", "note": "写しの日付を出すだけ。判定は存在で決まると本文に書いてある" },
-    { "file": "scripts/check-emergency-stop.mjs", "expr": "a.stopped",
-      "disposition": "前提", "note": "停止中の行にだけ理由を要求する" },
-    { "file": "scripts/check-financial-policy.mjs", "expr": "s.revenue_connected",
-      "disposition": "前提", "note": "収入が接続されている場合にだけ28日を要求する。未接続に履歴要求は無い（2箇所とも同じ）" },
-    { "file": "scripts/check-model-eval.mjs", "expr": "r.set_version",
-      "disposition": "別に検出", "note": "**直前の行が `if (!r.set_version) problems.push(...)` で欠落を捕まえている。**冗長だが安全" },
-    { "file": "scripts/check-publication.mjs", "expr": "v.served_by_site",
-      "disposition": "前提", "note": "配信面に出す宣言をした台帳にだけ参照を要求する" },
-    { "file": "scripts/daily-brief.mjs", "expr": "budget.run_caps",
-      "disposition": "別に検出", "note": "**#631 で意図してこう書いた。**「判定できたか」を run_caps_judged として記録する側で、null を捨てていない" }
-  ]
+    {
+      "file": "growth/scripts/build-queues.mjs",
+      "expr": "queue.generated_at",
+      "disposition": "報告のみ",
+      "note": "待ち行列が観測より古いことを ⚠ で出すだけ。判定していない"
+    },
+    {
+      "file": "growth/scripts/check-data-quality.mjs",
+      "expr": "meta.period_start",
+      "disposition": "別に検出",
+      "note": "**直前の 0b ブロックが period_* の欠落を fatal に入れている。**「判定を黙って消す meta の欠落」として明示的に見ている、この形の正しい書き方の見本"
+    },
+    {
+      "file": "growth/scripts/d-score.mjs",
+      "expr": "bt.boarded_min_score",
+      "disposition": "報告のみ",
+      "note": "較正の説明を console.log するだけ。n=5 の但し書き付き"
+    },
+    {
+      "file": "growth/scripts/experiments.mjs",
+      "expr": "snaps",
+      "disposition": "前提",
+      "note": "`!snaps.length &&` の否定形。**空のとき発火する側**なので向きが逆"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "x.run_id",
+      "disposition": "前提",
+      "note": "run_id で行を突き合わせる。id の無い行は照合対象ではない"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "behind",
+      "disposition": "報告のみ",
+      "note": "計算値のガード。behind が出せなければ遅れの判定自体が無い"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "claude.started_at",
+      "disposition": "前提",
+      "note": "所要時間の計算。両端が無ければ時間は出ない"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "ms",
+      "disposition": "前提",
+      "note": "上と同じ値の続き"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "a.auto",
+      "disposition": "前提",
+      "note": "auto を宣言した行にだけ handler を要求する。手動の行に handler は要らない"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "run.run_id",
+      "disposition": "前提",
+      "note": "重複判定。id の無い run は重複判定の対象外"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "an.enabled",
+      "disposition": "前提",
+      "note": "有効な注記だけが判定対象"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "s.over",
+      "disposition": "前提",
+      "note": "超過した回にだけ on_exceed を見る"
+    },
+    {
+      "file": "scripts/check-content-graph.mjs",
+      "expr": "f",
+      "disposition": "前提",
+      "note": "解決できたパスにだけ existsSync を当てる"
+    },
+    {
+      "file": "scripts/check-degradation.mjs",
+      "expr": "snap?.synced_at",
+      "disposition": "報告のみ",
+      "note": "写しの日付を出すだけ。判定は存在で決まると本文に書いてある"
+    },
+    {
+      "file": "scripts/check-emergency-stop.mjs",
+      "expr": "a.stopped",
+      "disposition": "前提",
+      "note": "停止中の行にだけ理由を要求する"
+    },
+    {
+      "file": "scripts/check-financial-policy.mjs",
+      "expr": "s.revenue_connected",
+      "disposition": "前提",
+      "note": "収入が接続されている場合にだけ28日を要求する。未接続に履歴要求は無い（2箇所とも同じ）"
+    },
+    {
+      "file": "scripts/check-model-eval.mjs",
+      "expr": "r.set_version",
+      "disposition": "別に検出",
+      "note": "**直前の行が `if (!r.set_version) problems.push(...)` で欠落を捕まえている。**冗長だが安全"
+    },
+    {
+      "file": "scripts/check-publication.mjs",
+      "expr": "v.served_by_site",
+      "disposition": "前提",
+      "note": "配信面に出す宣言をした台帳にだけ参照を要求する"
+    },
+    {
+      "file": "scripts/daily-brief.mjs",
+      "expr": "budget.run_caps",
+      "disposition": "別に検出",
+      "note": "**#631 で意図してこう書いた。**「判定できたか」を run_caps_judged として記録する側で、null を捨てていない"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "ctx.statusDoc?.date_jst",
+      "disposition": "前提",
+      "note": "D6 の**行動提案**を出すかどうか。status が読めた回に鮮度を見る。status そのものが無い状態は上流の別の規則が見る"
+    },
+    {
+      "file": "scripts/check-model-routing.mjs",
+      "expr": "rule.fallback",
+      "disposition": "別に検出",
+      "note": "**直前が `if (!r.fallback) problems.push(...)` で欠落を捕まえている**（else 節がこれ）。冗長だが安全"
+    },
+    {
+      "file": "scripts/check-model-routing.mjs",
+      "expr": "doc.policy?.forbid_cheapest_for_irreversible",
+      "disposition": "別に検出",
+      "note": "[2026-08-26] **本物だった。**鍵を消すと「不可逆なタスクを最安ティアへ」が消えることを実測（違反を入れて捕まることを見てから、鍵を消して消えるのを見た）。policy の2つの旗を boolean 必須にして、**無いことを off と読まない**ようにした。宣言として false は通る"
+    },
+    {
+      "file": "scripts/check-model-routing.mjs",
+      "expr": "doc.policy?.require_workflow_consumption",
+      "disposition": "別に検出",
+      "note": "[2026-08-26] **本物だった。**鍵を消すと exit 0（「引かれない表は装飾」の検査が丸ごと消える。--check-run-cap の呼び出し確認も含む）。同上の boolean 必須で塞いだ"
+    },
+    {
+      "file": "scripts/review-intake.mjs",
+      "expr": "spec.note_required",
+      "disposition": "前提",
+      "note": "spec は KINDS（ソース中の定数）。**台帳ではなくコードが決める**ので、鍵が消えることは無い。汚染は d.kind 経由で付いただけ"
+    },
+    {
+      "file": "scripts/review-intake.mjs",
+      "expr": "spec.needs_ref",
+      "disposition": "前提",
+      "note": "同上（KINDS 由来）"
+    },
+    {
+      "file": "scripts/review-intake.mjs",
+      "expr": "a1.judged",
+      "disposition": "別に検出",
+      "note": "**judged は「判定できたか」を明示的に持つ設計**（冒頭に「judged を必ず分ける」と書いてある）。見えないときは judged=false を返し、台帳そのものの整合だけを検査する。daily-brief の run_caps_judged と同じ形で、null を捨てていない側"
+    },
+    {
+      "file": "scripts/review-intake.mjs",
+      "expr": "a4.judged",
+      "disposition": "別に検出",
+      "note": "同上（自己テスト）"
+    },
+    {
+      "file": "scripts/review-intake.mjs",
+      "expr": "a.judged",
+      "disposition": "別に検出",
+      "note": "同上（--check 本体）"
+    }
+  ],
+  "coverage_measured_at": "2026-08-26",
+  "no_ledger_binding": [
+    "growth/scripts/analyze.mjs",
+    "growth/scripts/bq-preflight.mjs",
+    "growth/scripts/ingest-bigquery.mjs",
+    "scripts/autopilot-drill.mjs",
+    "scripts/autopilot-gate.mjs",
+    "scripts/check-asc-landed.mjs",
+    "scripts/generate-qr-codes.mjs",
+    "scripts/property-tests.mjs"
+  ],
+  "$no_ledger_binding": {
+    "growth/scripts/analyze.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot など）。この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
+    "growth/scripts/bq-preflight.mjs": "読むのは BigQuery で、JSONの台帳ではない（readFileSync が0箇所）",
+    "growth/scripts/ingest-bigquery.mjs": "同上。読むのは BigQuery、書くのはスナップショット",
+    "scripts/autopilot-drill.mjs": "純粋な論理。decide() に状態オブジェクトを渡すだけ（readFileSync 0箇所）",
+    "scripts/autopilot-gate.mjs": "同上。decide(s) は引数の状態だけを見る",
+    "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
+    "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
+    "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）"
+  }
 }

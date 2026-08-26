@@ -126,11 +126,39 @@ export function mask(src) {
 const READ_FN = /\b(readLedger|readJson|readFileSync|JSON\.parse|loadLedger)\b/;
 const DECL = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;]*)/g;
 
+/**
+ * 台帳を読んで**返す**局所関数。`const doc = load()` の load がこれ。
+ *
+ * [2026-08-26] これを見ていなかったので、**73本中12本を丸ごと飛ばしていた。**
+ * check-public-facts / review-intake などは
+ * `return JSON.parse(fs.readFileSync(...))` の形で読んでいて、
+ * `const NAME = ...` に現れないため束縛が1つも見つからず、
+ * scan が即 `[]` を返していた。**それが出力では「新しく増えた箇所は無い」になる。**
+ * 自分の検査が、探していた形そのものをしていた。
+ */
+const READER_FN = /(?:function\s+([A-Za-z_$][\w$]*)\s*\(|(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\()/g;
+
+function readerNames(masked) {
+  const out = new Set();
+  for (const m of masked.matchAll(READER_FN)) {
+    const name = m[1] || m[2];
+    if (!name) continue;
+    // 本体を大まかに切り出す（次の関数定義まで）。厳密な括弧対応は要らない ——
+    // **広めに取って偽陽性側へ倒す。**見落とすほうが害が大きい
+    const body = masked.slice(m.index, m.index + 1200);
+    if (READ_FN.test(body)) out.add(name);
+  }
+  return out;
+}
+
 /** 台帳由来の束縛を、代入をたどって伝播させる（不動点まで）。 */
 export function taintedNames(masked) {
   const decls = [];
   for (const m of masked.matchAll(DECL)) decls.push([m[1], m[2]]);
-  const t = new Set(decls.filter(([, r]) => READ_FN.test(r)).map(([n]) => n));
+  const readers = readerNames(masked);
+  const t = new Set(decls
+    .filter(([, r]) => READ_FN.test(r) || [...readers].some((fn) => new RegExp(`\\b${fn}\\s*\\(`).test(r)))
+    .map(([n]) => n));
   let changed = true;
   while (changed) {
     changed = false;
@@ -224,6 +252,46 @@ export function scanAll() {
   return sites;
 }
 
+/**
+ * **この走査が実際に見られた本数。**
+ *
+ * [2026-08-26] scan は台帳由来の束縛が1つも無いと即 `[]` を返す。
+ * つまり**見なかったファイルも「候補0件」と同じ形で出る。**
+ * 実測すると 73本中12本がそれで、その中に check-public-facts / review-intake /
+ * autopilot-runs が入っていた。出力は「新しく増えた箇所は無い」のままだった。
+ *
+ * **探していた形を、自分の検査がしていた。**
+ * 局所の読み出し関数（`function load() { return JSON.parse(...) }`）を
+ * 汚染源に足して 12 → 8本にし、残りは台帳に名指しで置く。
+ */
+export function coverage() {
+  const seen = []; const blind = [];
+  for (const rel of sources()) {
+    const t = taintedNames(mask(fs.readFileSync(path.join(ROOT, rel), 'utf8')));
+    (t.size ? seen : blind).push(rel);
+  }
+  return { total: seen.length + blind.length, seen, blind };
+}
+
+/** 見えていないファイルが**増えていない**ことを見る。上限を上げて通さない。 */
+export function checkCoverage(cov, doc) {
+  const declared = new Set(doc.no_ledger_binding || []);
+  const problems = [];
+  for (const f of cov.blind) {
+    if (!declared.has(f)) {
+      problems.push(`${f} は台帳由来の束縛が1つも見つからない — **この走査から見えていない。**`
+        + '読み方が新しいなら汚染源を足す。本当に台帳を読まないなら'
+        + ' no_ledger_binding へ理由とともに足す');
+    }
+  }
+  for (const f of declared) {
+    if (!cov.blind.includes(f)) {
+      problems.push(`no_ledger_binding の「${f}」は今は見えている — 台帳から消す`);
+    }
+  }
+  return problems;
+}
+
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 // 実際に見つけた6件の形を、そのまま検体にしている。
 // 走査を骨抜きにすると、ここが落ちる。
@@ -284,6 +352,28 @@ const SCENARIOS = [
     const p = validate(scanAll(), led.known);
     assert(p.length === 0, `${p.length} 件: ${p.slice(0, 2).join(' / ')}`);
   }],
+  ['**見えていないファイルが増えたら落ちる**（母数を黙って縮めさせない）', () => {
+    const p = checkCoverage({ total: 2, seen: ['a.mjs'], blind: ['b.mjs'] }, { no_ledger_binding: [] });
+    assert(p.some((x) => x.includes('見えていない')), JSON.stringify(p));
+  }],
+  ['台帳に明記した分は通る', () => {
+    const p = checkCoverage({ total: 2, seen: ['a.mjs'], blind: ['b.mjs'] }, { no_ledger_binding: ['b.mjs'] });
+    assert(p.length === 0, JSON.stringify(p));
+  }],
+  ['**見えるようになったのに台帳に残っていたら落ちる**（記録が実体と合わなくなる）', () => {
+    const p = checkCoverage({ total: 1, seen: ['a.mjs'], blind: [] }, { no_ledger_binding: ['a.mjs'] });
+    assert(p.some((x) => x.includes('今は見えている')), JSON.stringify(p));
+  }],
+  ['**実データの母数が台帳と合っている**', () => {
+    const led = readLedger(LEDGER_PATH);
+    const p = checkCoverage(coverage(), led);
+    assert(p.length === 0, `${p.length} 件: ${p.slice(0, 2).join(' / ')}`);
+  }],
+  ['**局所の読み出し関数も汚染源になる**（return JSON.parse(...) の形）', () => {
+    const t = taintedNames(mask('function load() { return JSON.parse(fs.readFileSync(P, "utf8")); }\n'
+      + 'const doc = load();\n'));
+    assert(t.has('doc'), '**73本中12本を飛ばしていた形。**再発したらここで落ちる');
+  }],
   ['**台帳から1件消すと落ちる**（読んだ記録が無い箇所を素通りさせない）', () => {
     const led = readLedger(LEDGER_PATH);
     assert(led.known.length > 0, '台帳が空');
@@ -309,10 +399,15 @@ if (isMain) {
     process.exit(1);
   }
   requireShape(led, ['known'], { what: 'data/guard-shapes.json', why: '読んだ記録と突き合わせられない' });
-  const problems = validate(sites, led.known);
+  const cov = coverage();
+  const problems = [...validate(sites, led.known), ...checkCoverage(cov, led)];
 
   console.log(`正が無いと消えうる規則の形 — ${sites.length} 箇所`
-    + `（読んだ記録 ${led.known.length} 件）\n`);
+    + `（読んだ記録 ${led.known.length} 件）`);
+  // **見た本数を必ず出す。**「候補0件」と「そのファイルを見ていない」は
+  // 出力が同じになりうるので、母数のほうを毎回書く
+  console.log(`  走査 ${cov.total} 本中 ${cov.seen.length} 本を実際に見た`
+    + `（${cov.blind.length} 本は台帳由来の束縛なしと台帳に明記）\n`);
   if (problems.length) {
     console.error('照合できていない箇所:');
     for (const p of problems) console.error(`  - ${p}`);
