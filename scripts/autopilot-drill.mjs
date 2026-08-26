@@ -191,19 +191,122 @@ const SCENARIOS = [
     + '予算で止まったと報告されると、失効に何日も気づかない'],
 ];
 
-export function run() {
-  const results = SCENARIOS.map(([name, patch, expected, why]) => {
+// --- 1回あたりの上限（2026-08-26 に足した） ------------------------------
+// **このコードだけ、一度も演習されていなかった。**gate は15コードを出しうるのに
+// ドリルが期待に使っていたのは14で、抜けていたのが skip_run_cap。
+// 下の被覆判定は、この抜けを二度作らないために置いてある。
+SCENARIOS.push(
+  ['1回上限: 超過が未レビューなら主系は止まる',
+    { route: 'actions', runCapOverrun: true }, CODES.SKIP_RUN_CAP,
+    '**AIが自分の超過を自分で通せると、上限が「お願い」になる。**解除は人間のみ'],
+
+  ['1回上限: force でも越えられない',
+    { route: 'actions', runCapOverrun: true, force: true }, CODES.SKIP_RUN_CAP,
+    'force は冪等チェックのためのもので、上限を作り直す道具ではない'],
+
+  ['1回上限: 止まるのは主系だけ（副系は動く）',
+    { route: 'ccr-0730', runCapOverrun: true }, CODES.RUN,
+    '**副系まで止めると、人のレビュー待ちのあいだ出荷がゼロになる。**'
+    + '止めたいのは同じ超過の再発であって、出荷そのものではない'],
+);
+
+/**
+ * gate が出しうるコードのうち、**一度も演習していないもの**。
+ *
+ * [2026-08-26] 例ベースのドリルが静かに無力になる道はこれ。
+ * シナリオを消しても `passed === total` は成り立つので、
+ * **2件のドリルも26件のドリルも同じ「全シナリオが期待どおり」を出す。**
+ * 実際 skip_run_cap は、gate に在るのにここに無かった。
+ *
+ * 数ではなく**被覆**で見る。新しいコードを gate に足した瞬間にここが落ちる。
+ */
+export function uncoveredCodes(scenarios = SCENARIOS) {
+  const expected = new Set(scenarios.map(([, , code]) => code));
+  return Object.entries(CODES)
+    .filter(([, code]) => !expected.has(code))
+    .map(([name, code]) => `${name}(${code})`);
+}
+
+export function run(scenarios = SCENARIOS) {
+  const results = scenarios.map(([name, patch, expected, why]) => {
     const state = baseState(patch);
     const got = decide(state);
     return { name, expected, got: got.code, pass: got.code === expected, why, reason: got.reason };
   });
-  return { results, passed: results.filter((r) => r.pass).length, total: results.length };
+  const uncovered = uncoveredCodes(scenarios);
+  return {
+    results,
+    passed: results.filter((r) => r.pass).length,
+    total: results.length,
+    uncovered,
+  };
+}
+
+// ── 自己テスト（**このドリルが落ちることを確かめる**） ────────────────
+if (process.argv.includes('--selftest')) {
+  const SELF = [
+    ['実データの全シナリオが期待どおり', () => {
+      const { results, passed, total } = run();
+      if (passed !== total) {
+        const bad = results.find((r) => !r.pass);
+        throw new Error(`${bad.name}: 期待 ${bad.expected} / 実際 ${bad.got}`);
+      }
+    }],
+    ['**gate の全コードに、それを出す状態がある**（skip_run_cap が抜けていた）', () => {
+      const u = uncoveredCodes();
+      if (u.length) throw new Error(`演習していないコード: ${u.join(', ')}`);
+    }],
+    ['**被覆の判定が効いている**（シナリオを削ると落ちる）', () => {
+      const trimmed = SCENARIOS.filter(([, , code]) => code !== CODES.EMERGENCY_STOP);
+      const u = uncoveredCodes(trimmed);
+      if (!u.some((x) => x.includes('EMERGENCY_STOP'))) {
+        throw new Error('消しても気づかない（**2件のドリルも26件のドリルも同じ緑になる**）');
+      }
+    }],
+    ['**期待コードを間違えれば落ちる**（常に通るドリルは何も見ていない）', () => {
+      // **本番の run() にそのまま食わせる。**ここで別の突き合わせを書くと、
+      // 自己テストだけ通ってドリル本体が無力になりうる。
+      const wrong = SCENARIOS.map(([name, patch, code, why], i) =>
+        (i === 0 ? [name, patch, CODES.EMERGENCY_STOP, why] : [name, patch, code, why]));
+      const r = run(wrong);
+      if (r.passed === r.total) throw new Error('期待を差し替えても全部通った（**突き合わせが効いていない**）');
+      if (r.results[0].pass) throw new Error('差し替えた1件が通った');
+    }],
+    ['**緊急停止は他のどの理由よりも先に出る**（止めたいときに止まる）', () => {
+      const r = decide(baseState({ route: 'actions', emergencyStop: true, budgetOver: true,
+        credentialRejected: true, emergencyStopReason: 'drill' }));
+      if (r.code !== CODES.EMERGENCY_STOP) throw new Error(`${r.code} が先に出た`);
+      if (r.run) throw new Error('緊急停止なのに走る');
+    }],
+    ['**1回上限は force で越えられない**（越えられると上限が「お願い」になる）', () => {
+      const r = decide(baseState({ route: 'actions', runCapOverrun: true, force: true }));
+      if (r.code !== CODES.SKIP_RUN_CAP) throw new Error(`force で ${r.code} になった`);
+    }],
+    ['1回上限で止まるのは主系だけ（レビュー待ちで出荷をゼロにしない）', () => {
+      const r = decide(baseState({ route: 'ccr-0730', runCapOverrun: true }));
+      if (r.code === CODES.SKIP_RUN_CAP) throw new Error('副系まで止まった');
+    }],
+    ['シナリオの形が揃っている（期待コードが CODES の値である）', () => {
+      const valid = new Set(Object.values(CODES));
+      for (const [name, , code] of SCENARIOS) {
+        if (!valid.has(code)) throw new Error(`${name}: 期待 ${code} は CODES に無い`);
+      }
+    }],
+  ];
+  let failed = 0;
+  for (const [name, fn] of SELF) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SELF.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
 }
 
 const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop());
 if (isMain) {
-  const { results, passed, total } = run();
-  console.log(`切替演習（ドリル）: ${passed} / ${total} シナリオ`);
+  const { results, passed, total, uncovered } = run();
+  console.log(`切替演習（ドリル）: ${passed} / ${total} シナリオ`
+    + `（gate の ${Object.keys(CODES).length} コードを被覆）`);
   console.log('');
   for (const r of results) {
     console.log(`  ${r.pass ? 'OK  ' : 'FAIL'}  ${r.name}`);
@@ -217,6 +320,15 @@ if (isMain) {
   console.log('  このドリルが証明しないこと: 実際のネットワーク・認証・GitHub APIの挙動。');
   console.log('  ここが通っても「本番で切替が成功する」証明にはならない。判定の論理だけを言う。');
   console.log('  主系を意図的に落として副系の出荷を確かめる本物の演習は、まだ無い。');
-  if (passed !== total) process.exit(1);
-  if (process.argv.includes('--check')) console.log('\n全シナリオが期待どおり。');
+  if (uncovered.length) {
+    console.error('');
+    console.error(`gate が出しうるのに一度も演習していないコード: ${uncovered.join(', ')}`);
+    console.error('  **例ベースのドリルは、シナリオを消しても緑のまま。**'
+      + '数ではなく被覆で見る。そのコードを出す状態を1つ足すこと');
+  }
+  if (passed !== total || uncovered.length) process.exit(1);
+  if (process.argv.includes('--check')) {
+    console.log(`\n全シナリオが期待どおり。gate の ${Object.keys(CODES).length} コードすべてに`
+      + '、それを出す状態が1つ以上ある。');
+  }
 }

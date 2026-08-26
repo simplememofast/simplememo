@@ -69,6 +69,36 @@ const strip = (html) => html
 /** Our own product, under every name it is written by. */
 const OURS = /Obsidian連携シンプルメモ|Captio式シンプルメモ|シンプルメモ|Simple ?Memo|SimpleMemoFast/i;
 
+/**
+ * 正規表現のメタ文字を逃がす。
+ *
+ * [2026-08-26] **これはテンプレートリテラルの中に直接書かれていて、
+ * 二重に逃がされ、何も逃がしていなかった。**
+ *
+ *     /[.*+?^${}()|[\\]\\\\]/g   ← 実際に書かれていたもの
+ *
+ * `\\]` でクラスが閉じるので、この正規表現は「メタ文字1つ + 円記号2つ + ]」
+ * を要求する。そんな並びは来ないので `a.b` は `a.b` のまま出てくる。
+ * 今の競合名にメタ文字が無いので**まだ実害が出ていないだけ**で、
+ * 「Notion (Web)」のような名前を1つ足せば new RegExp が例外で落ちるし、
+ * 「Bear 2.0」なら黙って別のものに当たる。
+ *
+ * **関数に出したのは、同じ間違いが起きる場所を無くすため。**
+ * テンプレートリテラルの中に正規表現リテラルを書かなければ、二重にならない。
+ */
+export function escapeRe(name) {
+  return name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** 競合名の近く（70文字以内）にある「秒つきの数字」を拾う。 */
+export function rivalRe(name) {
+  return new RegExp(
+    `${escapeRe(name)}[^.。<]{0,70}?`
+    + `(\\d+\\.?\\d*)\\s*(?:[-–~〜]\\s*(\\d+\\.?\\d*)\\s*)?(?:seconds?|秒)`,
+    'gi',
+  );
+}
+
 /** A claim is only a conflict if no stated value is near a measured one. */
 const NEAR = 0.35;
 
@@ -82,35 +112,34 @@ function conflicts(app, values) {
   return !values.some((v) => measured.some((m) => Math.abs(v - m) < NEAR));
 }
 
-const findings = [];
-for (const file of files) {
-  const rel = path.relative(ROOT, file);
-  const ownRun = OWN_RUN_PAGES.has(rel);
-  if (ownRun && !includeOwnRuns) continue;
+/** 自社の実測値。**一致ごとに計算し直していたのを一度に。** */
+const OURS_VALUES = measuredValues(B.apps['Simple Memo - for Obsidian']);
 
-  const text = strip(fs.readFileSync(file, 'utf8'));
-  for (const app of RIVALS) {
-    // Rival name, then within a short span a figure with a seconds unit.
-    const re = new RegExp(
-      `${app.name.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}[^.。<]{0,70}?` +
-      `(\\d+\\.?\\d*)\\s*(?:[-–~〜]\\s*(\\d+\\.?\\d*)\\s*)?(?:seconds?|秒)`, 'gi');
-    let m;
-    while ((m = re.exec(text)) !== null) {
+/**
+ * 本文1つぶんの走査。**純関数にしてある**ので、
+ * 当たるべきものに当たり、当たってはいけないものに当たらないことを確かめられる。
+ *
+ * 返すのは { said, values, ambiguous }。ページの情報は呼び出し側で足す。
+ */
+export function scanText(text, app, ourValues = OURS_VALUES) {
+  const out = [];
+  const re = rivalRe(app.name);
+  let m;
+  while ((m = re.exec(text)) !== null) {
       // Our own figure sitting near a rival's name is ours, not theirs. In a
       // comparison table "Notion … → Obsidian連携シンプルメモ（約1秒" the 1s
       // belongs to us; without this the report is mostly false positives and
       // stops being read.
-      if (OURS.test(m[0])) continue;
-      const values = [Number(m[1])].concat(m[2] ? [Number(m[2])] : []);
+    if (OURS.test(m[0])) continue;
+    const values = [Number(m[1])].concat(m[2] ? [Number(m[2])] : []);
       // "about 1 second" / 「約1秒」 is our own published figure and no rival
       // measures anywhere near it, so a lone ~1s beside a rival's name is ours
       // with our name just outside the window — a table cell away, or the far
       // side of "faster than Notion and Evernote". Attributing it to the rival
       // produced most of what was left after the name check.
-      // Our own published figures, so a number near one of them beside a rival's
-      // name is probably ours a table cell away.
-      const OURS_VALUES = measuredValues(B.apps['Simple Memo - for Obsidian']);
-      const nearOurFigures = values.every((v) => OURS_VALUES.some((o) => Math.abs(v - o) < NEAR));
+    // Our own published figures, so a number near one of them beside a rival's
+    // name is probably ours a table cell away.
+    const nearOurFigures = values.every((v) => ourValues.some((o) => Math.abs(v - o) < NEAR));
       // The value test alone is not enough once a rival measures close to one
       // of our columns. Drafts' focus (0.9s) sits within NEAR of our first_char
       // (0.6s), which was enough to push "Drafts | 入力開始まで | 0.4秒" — a
@@ -119,22 +148,134 @@ for (const file of files) {
       // rival's, and prose puts it at the head of the sentence. 60 characters
       // is deliberately tight; it is short enough that a page-wide brand
       // mention in the nav cannot reach a figure in the body.
-      const before = text.slice(Math.max(0, m.index - 60), m.index);
-      const looksLikeOurs = nearOurFigures
-        && (OURS.test(before)
-          || !measuredValues(app).some((m) => OURS_VALUES.some((o) => Math.abs(m - o) < NEAR)));
-      // A range that straddles the measured value is loose, not wrong.
-      if (values.length === 2
-          && measuredValues(app).some((m) => values[0] <= m && m <= values[1])) continue;
-      if (!conflicts(app, values)) continue;
+    const before = text.slice(Math.max(0, m.index - 60), m.index);
+    const looksLikeOurs = nearOurFigures
+      && (OURS.test(before)
+        || !measuredValues(app).some((v) => ourValues.some((o) => Math.abs(v - o) < NEAR)));
+    // A range that straddles the measured value is loose, not wrong.
+    if (values.length === 2
+        && measuredValues(app).some((v) => values[0] <= v && v <= values[1])) continue;
+    if (!conflicts(app, values)) continue;
+    out.push({
+      said: m[0].trim().slice(0, 64),
+      values,
+      // Bucketed rather than dropped. Skipping these hid a real
+      // "Bear 〜1秒" against a measured 1.8s, and a consistency checker
+      // that silently swallows conflicts is worse than a noisy one.
+      ambiguous: looksLikeOurs,
+    });
+  }
+  return out;
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+//
+// この検査が守っているのは、2026-08-11 の英語比較ページ ——
+// Apple Notes 0.4-0.5s / Drafts 0.6-0.7s / Google Keep 0.7-0.8s と並べた2行下で
+// 自社を「the fastest of the bunch」と書いていた —— の再発。
+// 効かなくなる形は2つで、どちらも静かである。
+//
+//   当たらなくなる … 報告0件。**サイトが直ったのと見分けがつかない**
+//   当たりすぎる   … 偽陽性だらけで読まれなくなり、本物が埋もれる
+//
+// なので両方向を固定する。「当たるべきものに当たる」だけでは足りない。
+//
+// **ここに本番の件数の下限は置かない。**内部リンクの検査とは違って、
+// 0件はこの検査の目標状態（全ページが実測に揃った状態）だから。
+// 代わりに、合成した入力で matcher が生きていることを見る。
+if (process.argv.includes('--selftest')) {
+  const APP = (name, focus, ready, first_char) => ({ name, focus, ready, first_char });
+  const NOTION = APP('Notion', 2.5, 2.8, 3.3);
+  const SLOW_BEAR = APP('Bear', 1.8, 1.8, 1.8); // 2026-08-11 当時の Bear の実測
+
+  const SCENARIOS = [
+    ['**測定と食い違う数字は報告される**', () => {
+      const out = scanText('Notion takes 9 seconds', NOTION);
+      if (out.length !== 1) throw new Error(`${out.length}件（**当たっていない**）`);
+      if (out[0].ambiguous) throw new Error('CONFLICT のはずが AMBIGUOUS');
+    }],
+    ['測定と合っている数字は報告されない（偽陽性を作らない）', () => {
+      const out = scanText('Notion takes 2.5 seconds', NOTION);
+      if (out.length) throw new Error(`合っているのに報告した: ${out[0].said}`);
+    }],
+    ['**測定値をまたぐ範囲は報告されない**（loose であって wrong ではない）', () => {
+      if (scanText('Notion takes 2-4 seconds', NOTION).length) throw new Error('またぐ範囲を報告した');
+    }],
+    ['両端とも遠い範囲は報告される', () => {
+      if (scanText('Notion takes 8-9 seconds', NOTION).length !== 1) throw new Error('報告しなかった');
+    }],
+    ['**自社名を含む一致は除く**（その数字はこちらのもの）', () => {
+      const out = scanText('Notion → Obsidian連携シンプルメモ 0.4秒', NOTION);
+      if (out.length) throw new Error(`自社の数字を競合に付けた: ${out[0].said}`);
+    }],
+    ['**〜1秒 を黙って飲み込まない**（測定1.8sに対して報告する）', () => {
+      const out = scanText('Bear 〜1秒', SLOW_BEAR);
+      if (!out.length) throw new Error('飲み込んだ（**静かに矛盾を捨てる検査は、無いより悪い**）');
+    }],
+    ['**~1秒は AMBIGUOUS へ**（自社の数字が1セル隣にあることが多い）', () => {
+      const out = scanText('Notion Inbox, 0.4 Seconds', NOTION);
+      if (out.length !== 1) throw new Error(`${out.length}件`);
+      if (!out[0].ambiguous) throw new Error('CONFLICT に入れた（偽陽性で読まれなくなる）');
+    }],
+    ['**2つのバケツが同じになっていない**（片方しか無いなら分けた意味が無い）', () => {
+      const conflict = scanText('Notion takes 9 seconds', NOTION)[0];
+      const ambiguous = scanText('Notion Inbox, 0.4 Seconds', NOTION)[0];
+      if (conflict.ambiguous === ambiguous.ambiguous) throw new Error('振り分けが効いていない');
+    }],
+    ['70文字より遠い数字は拾わない（窓が効いている）', () => {
+      const far = `Notion ${'あ'.repeat(80)} 9 seconds`;
+      if (scanText(far, NOTION).length) throw new Error('窓の外を拾った');
+    }],
+    ['秒の単位が無ければ拾わない', () => {
+      if (scanText('Notion 9', NOTION).length) throw new Error('単位無しを拾った');
+    }],
+    ['**メタ文字を含む競合名で壊れない**（2026-08-26 まで逃がせていなかった）', () => {
+      for (const name of ['Notion (Web)', 'Bear 2.0', 'C++']) {
+        let re;
+        try { re = rivalRe(name); } catch (e) { throw new Error(`${name} で例外: ${e.message}`); }
+        if (!re.test(`${name} 9秒`)) throw new Error(`${name} が自分自身に当たらない`);
+      }
+    }],
+    ['**メタ文字が正規表現として効いてしまわない**', () => {
+      if (rivalRe('Be.r').test('Bear 9秒')) throw new Error('ドットが任意1文字として効いている');
+      if (escapeRe('a.b') !== 'a\\.b') throw new Error(`逃がせていない: ${escapeRe('a.b')}`);
+    }],
+    ['**strip が本文を落とさない**（全部落とせば報告は常に0件になる）', () => {
+      const t = strip('<p>Notion takes 9 seconds</p>');
+      if (!t.includes('Notion takes 9 seconds')) throw new Error('本文まで落ちている');
+      if (strip('<script>Notion 9 seconds</script>').includes('Notion')) {
+        throw new Error('スクリプトの中を残している');
+      }
+    }],
+    ['実データの走査が例外なく終わる（競合名は全件）', () => {
+      const text = strip(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
+      for (const app of RIVALS) scanText(text, app);
+    }],
+  ];
+
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
+const findings = [];
+for (const file of files) {
+  const rel = path.relative(ROOT, file);
+  const ownRun = OWN_RUN_PAGES.has(rel);
+  if (ownRun && !includeOwnRuns) continue;
+
+  const text = strip(fs.readFileSync(file, 'utf8'));
+  for (const app of RIVALS) {
+    for (const hit of scanText(text, app)) {
       findings.push({
         page: toUrlPath(ROOT, file), rel, ownRun, app: app.name,
-        said: m[0].trim().slice(0, 64),
+        said: hit.said,
         measured: `focus ${app.focus}s / ready ${app.ready}s / first char ${app.first_char}s`,
-        // Bucketed rather than dropped. Skipping these hid a real
-        // "Bear 〜1秒" against a measured 1.8s, and a consistency checker
-        // that silently swallows conflicts is worse than a noisy one.
-        ambiguous: looksLikeOurs,
+        ambiguous: hit.ambiguous,
       });
     }
   }
