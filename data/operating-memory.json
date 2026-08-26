@@ -1063,6 +1063,33 @@
         ],
         "new_guardrail": "**積む処理は、データが毎日降りてくる場所に置く。**隣のリポジトリを読む処理は、その隣が CI に存在するかを先に確かめる。公開側は金額を運ばない写しを持ち、`--write` は**観測日数を減らす書き込みを拒む**（隣が見えない場所で走らせても 0 で潰れない）"
       }
+    },
+    {
+      "id": "om-2026-08-26-schedule-change-not-live-yet",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "autopilot-health の cron を 1日1回 → 3回（12/16/20 JST）に増やし、**「16:00 / 20:00 JST で自動クローズされるか実地試験する」と利用者に伝えた。**その2つの窓に run は1件も無かった",
+      "hypothesis": "頻度を増やしたので、当日の16:00と20:00に走る",
+      "decision": "**走らない。**cron の変更を載せた #645 が main に着いたのは 13:27 UTC（22:27 JST）で、07:00 UTC / 11:00 UTC の窓は**両方とも過ぎた後**だった。schedule はデフォルトブランチの定義でのみ動く —— これはワークフロー自身の冒頭コメントにも CLAUDE.md（auto-merge の項）にも書いてある性質で、**知らなかったのではなく、当日の時刻に当てはめなかった。**\n\n手で dispatch したところ #591 は1分で閉じた（14:31:44 UTC・github-actions[bot]）。**閉じる経路は正しく動いていて、効いていなかったのはスケジュールだけ。**\n\nそれで分かったのは、頻度を上げても回復の追認は最大8時間遅れるということ。`data/autopilot-status.json` が main に着くことが回復イベントそのものなので、**push で拾って遅延を消した。**ただし push では**閉じることしかしない** —— 0:00〜6:00 JST のマージで開く方向へ働かせると、新しい日の当日分がまだ無いのは当たり前なので毎晩誤検知する。",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          ".github/workflows/autopilot-health.yml",
+          "data/operating-memory.json"
+        ]
+      },
+      "verification": "#591 は 14:31:44 UTC に github-actions[bot] がクローズ（手で閉じていない —— 故障を消す判断の所有者を1箇所に保つため）。push 経路は分岐8通りを机上で通し、「回復・push・Issueあり → close」「故障・push → skip」を確認。YAML と埋め込みスクリプトの構文も確認",
+      "outcome": "回復の追認が最大8時間 → 即時に。開く方向は窓の中の schedule が持ったまま",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-schedule-change-is-not-live-until-it-merges",
+        "text": "**schedule の変更は、mainに着くまで効かない。**だから「次の窓で確かめる」と言う前に、**変更が着いた時刻と次の窓の時刻を並べること。**\n\n今回は性質を知っていた（同じファイルの冒頭に自分でそう書いてある）のに、**当日の時計に当てはめなかった。**知識としては持っていて、適用を飛ばした形なので、散文をもう1行足しても再発は止まらない。\n\n止まるのは**確かめ方を変えたとき** —— 遅延そのものを消す経路（push で拾う）を足したので、「次の窓を待つ」という状況自体が減る。",
+        "changed": [
+          ".github/workflows/autopilot-health.yml"
+        ],
+        "new_guardrail": "**回復の追認をスケジュールだけに依存させない。**回復イベント（ここでは status JSON が main に着くこと）を直接拾う。ただし**閉じる方向だけ** —— 開く方向は誤検知が誤検知のまま固定されるので、窓の中の schedule に残す（rollout-guard と同じ非対称）"
+      }
     }
   ]
 }
