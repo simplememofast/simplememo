@@ -444,6 +444,35 @@
         ],
         "new_guardrail": "build-queues が experiments.json の abandoned を読み、そのページへ着地する観測を積まない（どの実験の判断かを出力に残す）。dropped/done は key で引き継ぎ、観測から消えた行は削除せず stale にする（直ったのか窓から外れたのか区別できないため）。手作りの行（origin 無し）は機械が触らない"
       }
+    },
+    {
+      "id": "om-2026-08-25-review-reply-boundary",
+      "seeded": false,
+      "area": "⑧ カスタマーサポート",
+      "signal": "⑧カスタマーサポートが50%で止まっており、内訳は「受け口も分類も台帳もあるが、返信だけが無い」。App Store レビュー返信は ASC API で技術的には可能",
+      "hypothesis": "APIがあるのだから、返信の自動投稿を作れば率が上がる",
+      "decision": "**投稿から作らない。**先に承認境界と、公開してよい文面の条件を作る",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/check-review-replies.mjs",
+          "data/review-replies.json",
+          ".github/workflows/seo-check.yml"
+        ]
+      },
+      "verification": "実レビュー2件に下書きを当てて通ることを確認。次いで(1)期日の約束 (2)メールアドレスの混入 (3)承認なしの投稿記録 の3つを実際に入れて、いずれも exit 1 になることを確認。self-test 18件",
+      "outcome": "**率は上がらなかった。**⑧は nobody → ai_proposes になったが、ai_proposes は総合自動化率の分子に入らないので 59.9% のまま（カバー率 84.5%→85.0% / AI関与率 88.0%→88.1%）。**これは失敗ではなく、選んだ結果。**投稿を自律にすれば率は上がったが、レビュー返信は書いた相手だけでなくストアを見る全員に対する会社の発言で、取り消しても見た人が見なかったことにはならない。**ASC への POST はどこにも実装していない**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "build-the-boundary-before-the-actuator",
+        "text": "**機構を先に作り、実行を後から足す。**逆にすると承認境界が後付けになり、「動くものがあるのだから通そう」という圧力の下で設計することになる。今回それが具体的に効いたのは下書きの検査で —— 期日の約束・個人情報・禁止表現は、**投稿する経路が無いうちに条件として書けた。**率が動かないことを理由に順序を変えない",
+        "changed": [
+          "scripts/check-review-replies.mjs",
+          "data/review-replies.json"
+        ],
+        "new_guardrail": "承認なしの posted_at と、**AIを承認者にした記録**を落とす（spend-approvals と同じ規律）。公開の場での期日・版の約束、個人情報、禁止表現を下書きの時点で落とす。文字数は2,000字 —— 業界で言われる5,970は**Appleの公式仕様ではなく有志の実測**なので、公表されていない上限の際どいところを狙わない設計にした"
+      }
     }
   ]
 }
