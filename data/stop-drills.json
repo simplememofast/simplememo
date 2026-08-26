@@ -98,18 +98,26 @@
       "evidence": [
         "../simplememo-api/src/flags.ts",
         "../simplememo-api/test/flags.test.ts",
-        "../simplememo-api/src/config.ts"
+        "../simplememo-api/src/config.ts",
+        "docs/stop-drill-runbook.md"
       ],
-      "how_to_drill": "本番: /admin/flags/kill に key を渡し、GET /v1/config の killed に載ること、端末が次の取得でオフになることを見る。**利用者に影響が出るので、訓練用のフラグを1つ用意してからにする**",
+      "how_to_drill": "本番の手順は docs/stop-drill-runbook.md §1 に copy-paste できる形で置いてある（誰も読まないフラグを作る → kill を引く → killed に載ることを見る → 消す）。**max_stale_seconds は既存の最小値と同じにする** —— 短い値は全クライアントの再取得間隔を縮める",
       "drills": [
         {
           "at": "2026-08-26",
           "level": "unit",
           "by": "ai",
           "observed": "test/flags.test.ts 40件が通る。kill が rollout 100 を無視すること、kill が rollout を保存したまま立ち降ろすと元の配布率に戻ること、存在しないフラグの kill が 404 になること、KV が読めない/壊れている/例外を投げる場合に全部オフへ倒れることを、**実物の handleRemoteConfig を通して**確かめている"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "wrangler dev（verify スキルの shim-entry 回避策）で本番と同じ src/index.ts を起動し、/admin/flags/set → /admin/flags/kill → GET /v1/config を実HTTPで通した",
+          "observed": "訓練用フラグ drill_kill_probe を rollout 100 で作成 → /v1/config の rollouts に載る（killed は空）。kill を引くと killed:[\"drill_kill_probe\"] に入り、**rollout 100 はそのまま残った**（降ろせば元の配布率に戻る設計どおり）。kill を降ろすと killed が空に戻り、rollout 100 が復帰。認証ヘッダ無しの kill は **401**、存在しないフラグの kill は **404**（黙って作らない）。**副作用を1つ観測した**: このフラグに max_stale_seconds:300 を付けたところ、/v1/config 全体の max_stale_seconds が 86400 → 300 に落ちた（最短のフラグが全体を縛る設計）。フラグを削除すると 86400 に戻った。**『誰も読まないフラグは誰の挙動も変えない』は誤り** —— 短い max_stale を付けると全クライアントの再取得間隔が縮む"
         }
       ],
-      "blocked_by": "本番で引くと利用者の機能が消える。**訓練用のフラグ（誰の挙動も変えないもの）を1つ用意すれば本番でも確かめられる** —— これが次の一手。オーナー判断"
+      "blocked_by": "本番で引くと利用者の機能が消える。**訓練用フラグを使えば本番でも確かめられるが、max_stale_seconds は既存の最小値（現在 86400）以上にすること** —— 短い値を付けると誰も読まないフラグでも全クライアントの再取得間隔が縮む（2026-08-26 の local 訓練で観測）。実施はオーナー判断"
     },
     {
       "id": "flag-global-kill",
@@ -125,9 +133,16 @@
           "level": "unit",
           "by": "ai",
           "observed": "globalKillPayload が既知キーを全部 killed に入れること（空 payload では足りない）、'True' や '1' では発動しないことをテストが固定している。**空 payload にしない理由が設計に書いてある** —— クライアントは rollout も killed も無いキーをコンパイル既定で解決するため"
+        },
+        {
+          "at": "2026-08-26",
+          "level": "local",
+          "by": "ai",
+          "command": "同じ worker を FLAGS_GLOBAL_KILL_SWITCH=true で別ポートに起動し、GET /v1/config を比較した",
+          "observed": "グローバルキル ON で **既知の15キー全部が killed に入り**、rollouts は全部 0、max_stale_seconds が **60** に落ちた（オフラインの端末が『オン』を1分以上持てない）。同じ KV 状態のまま OFF の worker では killed 0件・max_stale 86400。**空 payload ではなく全キーを killed に入れる**という設計の理由（クライアントはrollout も killed も無いキーをコンパイル既定で解決する）が、実際の応答で確認できた"
         }
       ],
-      "blocked_by": "本番で引くと全機能が既定へ倒れる。flag-kill の訓練が先"
+      "blocked_by": "本番で引くと全機能が既定へ倒れる。**止まること自体は local で観測済み**（15キー全部が killed、max_stale 60）。本番での実施はオーナー判断で、flag-kill の訓練が先"
     },
     {
       "id": "rollout-guard-kill",
