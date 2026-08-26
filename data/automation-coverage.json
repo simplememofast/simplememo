@@ -753,7 +753,7 @@
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
       ],
-      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ"
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。**"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -1959,6 +1959,17 @@
         ".github/workflows/seo-check.yml"
       ],
       "note": "2026-08-25実装。**Cloudflare Pages はリポジトリの中身をそのまま配信する**ので、data/*.json は34件すべてが公開されていた（サイトが意図して参照しているのは6件）。鍵の棚卸し・攻撃面・取引先・法人情報が、静的ホスティングの副作用で外から読めていた。**秘密の値そのものは含まないが「何があるか」の地図。**全件を分類し、**新しいファイルは分類するまでCIが落ちる**（既定を非公開に倒す）。非公開は _redirects で404。**この穴は、自分が役員報酬の有無をそこへ書き込んだ直後に気づいた**"
+    },
+    {
+      "area": "④ 自動本番デプロイ",
+      "task": "出荷前のCI緑判定（赤いコミットでタグを打たせない）",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-ios/scripts/release_preflight.rb",
+        "../simplememo-ios/.github/workflows/release.yml",
+        "../simplememo-ios/.github/workflows/qa-static.yml"
+      ],
+      "note": "2026-08-25実装。**release.yml はタグの機構には厳密だったが、そのコミットで検査が通ったかを一度も見ていなかった**（check-run / status / conclusion への参照が0件）。qa-static は main への push でも走るので、**検査が落ちたコミットも main に載り**、載っていれば出荷できた。サイト側の auto-merge が『検証済みSHAだけをマージ』を徹底しているのに、**iOS の出荷側だけ同じ規律が無かった。**タグ作成の前に止める —— タグ以降は Xcode Cloud が走り、**ビルド番号は再利用できない。**APIが引けない・未実行・検査が無いのは**いずれも緑ではない。**同名が複数ある場合は全部が緑を求める（1つだけ緑にして通す経路を作らない）。CI基盤が壊れたとき用の override は理由必須で要約に残る。self-test 16件"
     }
   ],
   "$since_note": [
