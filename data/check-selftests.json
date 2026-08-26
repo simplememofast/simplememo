@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 14,
+  "none_budget": 13,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -273,7 +273,9 @@
     },
     {
       "script": "scripts/check-url-normalization.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "fail() を無効化すると 7 件中 4 件が落ちることを観測。**判定そのものが効いているか**を、わざと逆の期待を当てて確かめている — 配信する data/*.json を404扱い／遮断するものを配信扱い／行き先の違う 301／410 でないものを gone 扱い。期待どおりのとき落ちないことも同時に見る（常に落ちる検査も、常に通る検査と同じく何も見ていない）"
     },
     {
       "script": "scripts/check-vendors.mjs",
