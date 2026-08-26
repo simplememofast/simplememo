@@ -1061,9 +1061,14 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "採用された改善1件あたりのAI原価",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**分子はあるが分母が無い。**実費（data/autopilot-cost.json）と1記事あたり単価は出せるが、『**採用された**改善1件あたり』は出せない —— 却下・revert・計測失敗に終わった分を分母から外す仕組みが無いため。この数字が無いと、AI費用の増加が成果の増加かどうかを判定できない"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/ai-unit-cost.mjs",
+        "data/autopilot-cost.json",
+        ".github/workflows/seo-check.yml"
+      ],
+      "note": "**[2026-08-26] 実装した。**以前ここに書いていた「分母が無い」は半分が古かった —— run には既に `outcome`（shipped / no_artifact / failed）があり、却下と計測失敗は分母から外せていた。**残っていたのは revert だけ**で、出荷したあとで戻した変更が採用として数えられていた。`outcome: reverted`（`reverted_why` 必須）を足し、分母から外すようにした。\n\n**分子には失敗した run の費用も残す。**採用1件の原価は、うまくいかなかった試行を含めた額であって、成功分だけを割った額ではない。\n\n**値はまだ名乗れない。**採用2件 < MIN_ADOPTED 10 なので `measured: false` を返す（費用の分散が大きく 0〜11.93 USD、数件の平均は方向すら示さない）。参考値 $10.02 は出力に出るが「未測定」と明示している —— **「まだ測れていない」であって「原価が低い」ではない。**",
+      "since": "2026-08"
     },
     {
       "area": "⑤ AI予算・トークン管理",
