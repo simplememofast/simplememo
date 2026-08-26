@@ -17,10 +17,17 @@
       "name": "総合自動化率",
       "formula": "AI実行タスク ÷ 定義タスク（未実装を含む）",
       "source_file": "scripts/automation-rate.mjs",
-      "version": 1,
-      "checksum": "f9340b64e9cace18",
-      "changed_at": "2026-08-22",
-      "why_it_matters": "分母を1つに決めると都合のよい数字になるので、4指標を常に同時に出す。ここを変えると過去の数字と比較できなくなる"
+      "version": 2,
+      "checksum": "e328cc341288fae5",
+      "changed_at": "2026-08-26",
+      "why_it_matters": "分母を1つに決めると都合のよい数字になるので、4指標を常に同時に出す。ここを変えると過去の数字と比較できなくなる",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-08-26",
+          "why": "定義は変えていない。scripts/automation-rate.mjs に --selftest（落ちることを確かめる自己テスト）を足しただけで、率の計算式には触れていない"
+        }
+      ]
     },
     {
       "id": "ai_completion_rate",
@@ -64,9 +71,9 @@
       "name": "1記事あたり単価",
       "formula": "当月の実費 ÷ 当月の出荷数",
       "source_file": "scripts/autopilot-budget.mjs",
-      "version": 3,
-      "checksum": "0ef43c196209f3c1",
-      "changed_at": "2026-08-25",
+      "version": 4,
+      "checksum": "ed6437b4f48b42a9",
+      "changed_at": "2026-08-26",
       "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）",
       "history": [
         {
@@ -78,6 +85,11 @@
           "version": 3,
           "at": "2026-08-25",
           "why": "定義は変えていない。scripts/autopilot-budget.mjs の --json に run_caps（1回上限の判定）を足しただけで、usd_per_shipped の計算には触れていない"
+        },
+        {
+          "version": 4,
+          "at": "2026-08-26",
+          "why": "定義は変えていない。scripts/autopilot-budget.mjs に --selftest を足しただけで、単価の計算式には触れていない"
         }
       ]
     },

@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const EVAL_PATH = path.join(ROOT, 'data/model-eval-set.json');
@@ -78,8 +79,21 @@ export function validate(evalDoc, routing) {
   return { problems, routed: [...routed], unevaluated, failing, evaluated };
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['id の重複は落ちる', (d) => { d.cases.push({ ...d.cases[0] }); }],
+  ['**入力の無い評価**は落ちる', (d) => { delete d.cases[0].input; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(EVAL_PATH, 'utf8')),
+  (d) => validate(d, JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8'))).problems,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   if (argv.includes('--run')) {
     console.error('--run は未実装。**APIキーを使う実行はこのCIでは回さない**（費用が発生し、');

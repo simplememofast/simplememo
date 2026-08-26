@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 28,
+  "none_budget": 24,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -59,7 +59,9 @@
     },
     {
       "script": "scripts/automation-rate.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "area 欠落／task 欠落／同一タスク重複（分母の水増し）／知らない executor の4通りで落ちることを観測"
     },
     {
       "script": "scripts/autonomy-timeline.mjs",
@@ -73,7 +75,9 @@
     },
     {
       "script": "scripts/autopilot-budget.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "on_exceed が知らない値／月次上限が数でない／run の費用が数でない の3通りで落ちることを観測"
     },
     {
       "script": "scripts/autopilot-drill.mjs",
@@ -85,7 +89,9 @@
     },
     {
       "script": "scripts/autopilot-selfheal.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "repair_of が存在しない故障を指す 1通りで落ちることを観測"
     },
     {
       "script": "scripts/check-audit-independence.mjs",
@@ -177,7 +183,9 @@
     },
     {
       "script": "scripts/check-model-eval.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "id 重複／input 欠落 の2通りで落ちることを観測"
     },
     {
       "script": "scripts/check-model-routing.mjs",
