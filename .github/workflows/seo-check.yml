@@ -703,6 +703,12 @@ jobs:
       - name: Domain expiry parser
         run: node scripts/check-domain-expiry.mjs --selftest
 
+      # ⑦法人経営。**規約は改定される。**一度 ok と書いた判定が、改定後も ok のまま
+      # 残るのを止める（unreviewed より悪い —— 見た記録が嘘を守る）。
+      # 取得はCIの seo-daily 側で、ここは解析の自己検査だけ。
+      - name: Vendor terms parser
+        run: node scripts/vendor-terms.mjs --selftest
+
       - name: Credential expiry
         run: |
           node scripts/check-expiry.mjs --selftest
