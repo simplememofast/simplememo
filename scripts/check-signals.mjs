@@ -23,6 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/signal-ledger.json');
@@ -79,8 +80,24 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
   return problems;
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['id の重複は落ちる', (d) => { d.signals.push({ ...d.signals[0] }); }],
+  ['**dedupe_key が無い**のは落ちる（同じ信号を何度も新規として拾う）', (d) => { delete d.signals[0].dedupe_key; }],
+  ['kinds が空なら落ちる', (d) => { d.signals[0].kinds = []; }],
+  ['title が無ければ落ちる', (d) => { delete d.signals[0].title; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const backlogIds = new Set(
     fs.existsSync(BACKLOG_PATH)
@@ -109,5 +126,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n重複・出どころ・採否の理由に問題なし。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n重複・出どころ・採否の理由に問題なし。');
+  }
 }
