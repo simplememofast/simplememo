@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
@@ -146,8 +147,25 @@ function render(doc) {
   return o.join('\n');
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+// 壊し方は実データを複製して作る（固定フィクスチャだと台帳と形がずれても気づけない）。
+const SELFTEST_BREAKAGES = [
+  ['**不可逆なのに承認不要**は落ちる（承認なしで取り返しがつかない変更ができる）', (d) => { d.domains[0].reversible = false; d.domains[0].requires_approval = false; }],
+  ['知らない status は落ちる', (d) => { d.domains[0].status = 'たぶん動いてる'; }],
+  ['domain 名の重複は落ちる', (d) => { d.domains.push({ ...d.domains[0] }); }],
+  ['reversible が真偽値でなければ落ちる', (d) => { d.domains[0].reversible = 'yes'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8')),
+  (d) => validate(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
   const problems = validate(doc);
   console.log(render(doc));
@@ -156,5 +174,8 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n権限表の整合に問題なし。');
+  if (process.argv.includes('--check')) {
+    if (run(SCENARIOS) !== 0) process.exit(1);
+    console.log('\n権限表の整合に問題なし。');
+  }
 }

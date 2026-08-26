@@ -24,6 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const OBLIGATIONS_PATH = path.join(ROOT, 'data/corporate-obligations.json');
@@ -137,8 +138,23 @@ export function validate(doc, { vendorIds = new Set(), today = new Date().toISOS
   return { problems, warnings };
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
+const SELFTEST_BREAKAGES = [
+  ['**切れたら何が止まるか**が無い期限は落ちる（優先順位が付かない）', (d) => { delete d.deadlines[0].what_breaks; }],
+  ['id と title が無ければ落ちる', (d) => { delete d.deadlines[0].id; delete d.deadlines[0].title; }],
+  ['confirmed なのに日付が不正なら落ちる', (d) => { d.deadlines[0].confirmed_by_owner = true; d.deadlines[0].next_due = 'そのうち'; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8')),
+  (d) => validate(d).problems,
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
   const vendors = JSON.parse(fs.readFileSync(VENDOR_PATH, 'utf8'));
   const vendorIds = new Set((vendors.vendors || []).map((v) => v.id));
