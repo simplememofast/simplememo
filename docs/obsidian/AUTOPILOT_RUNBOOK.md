@@ -833,6 +833,24 @@ ENセグメント1.76%で期待0.56クリック、最も甘いサイト全体カ
 GH_PAT にも無い。**毎日「実行できず」を出すだけの handler は、この台帳が潰したかった
 ノイズそのもの**なので外した。存在確認を自動化したいなら、先に権限のあるPATが要る。
 
+**ただし、オーナーからは1タップで見える。**この403は権限の壁であって、手間の壁ではない:
+
+    https://github.com/simplememofast/simplememo/settings/secrets/actions
+
+リポジトリの Settings → Secrets and variables → Actions。**アカウントの Settings
+ではない**（2026-08-26、この取り違えで1往復した。AIが「GitHub → Settings →」とだけ
+書いたのが原因なので、依頼文には必ずリポジトリのURLを貼ること）。
+
+`Repository secrets` の表の **Last updated 列が回転日**。値そのものは誰にも読めない
+（GitHubの仕様）。**回転日は期限ではない** —— OAuthトークンの期限は
+`claude auth status` にも `claude setup-token --help` にも出ず、どこにも露出していない
+ことを 2026-08-26 に実測済み（data/credential-expiry.json の note）。
+
+だから資格情報の依頼を人へ上げるときは、**「secretを更新してください」で止めない。**
+更新後に読める値（Last updated）と、それを書き戻す先
+（`data/credential-expiry.json` の `last_rotated_at`）まで書く。回転日が積めば
+観測寿命が出て、**期限を読まずに寿命を判定できる**ようになる。
+
 **実費が存在しない run について。** Claude Code ステップに到達せず落ちた回
 （apt詰まり・actor拒否など）は実行ログ自体が無く、実費は**0ではなく発生していない**。
 `append-cost` は取得を実際に試みてから、埋まらないものを `close_check.params.exclude`

@@ -265,23 +265,32 @@ jobs:
           && steps.route.outputs.run_cap_ok == 'true'
       # 【2026-08-25 SHA pin】フローティングタグ @v1 をやめて版を固定する。
       #
-      # **同じ穴を2回踏んだ。**1回目は上の allowed_bots（非人間アクターを拒否する
-      # ガードが後から乗ってきた）。2回目が 08-24・08-25 の2日連続の即時失敗で、
-      # 引いていたのは c81e3bc6（"bump Claude Code to 2.1.241 / Agent SDK 0.3.241"）。
-      # 直前に出荷できた 08-23 は 24dcd50c / 2.1.240、復旧した 08-25 15:16 は
-      # この 16b3b310 / 2.1.245 だった（ジョブログの Download action repository 行で実測）。
+      # 発端は 08-24・08-25 の2日連続の即時失敗で、そのとき @v1 が指していたのは
+      # c81e3bc6（Claude Code 2.1.241）だった。直前に出荷できた 08-23 は
+      # 24dcd50c / 2.1.240、復旧した 08-25 15:16 は 16b3b310 / 2.1.245。
       #
-      # **上流が壊れた版を配ること自体は直せない。直せるのは勝手に乗り換える構造のほう。**
-      # 固定しない限り、次に壊れた版が出れば同じ2日がまた消える。
+      # 【2026-08-26 実測】**あの2日の原因は版ではなく資格情報だった。**
+      # 2.1.241 を現在の有効なトークンで直接走らせたら正常に完走している
+      # （run 32919495397 / is_error=false / result="PROBE_OK" / 実費 $0.04）。
+      # 上流の差分も clone して読んだ: c81e3bc6→16b3b310 の src/ の違いは
+      # `const claudeCodeVersion = "2.1.241" → "2.1.245"` の1文字列だけで、
+      # ラッパーのロジックは同一。**版が失敗を説明できる余地が無かった。**
+      #
+      # **それでも pin は残す。理由が変わっただけ。**
+      # 当時の「壊れた版を引いた」という理由は実測で否定されたが、08-21 の
+      # allowed_bots は本当にフローティングタグが原因で（非人間アクターを拒否する
+      # ガードが後から乗ってきた）、本番デプロイまで直結する経路が実行のたびに
+      # 上流の最新版へ勝手に乗り換える構造そのものは残っている。
+      #
+      # **pin が副産物として効くのはこちら:** 版が固定されていれば、次に同じ形の
+      # 即時失敗が出たとき「直近の成功と同じSHAか」を見るだけで版を機械的に外せる。
+      # 08-25 に版を疑って1日を使ったのは、@v1 では**SHAが常に違って見える**ため
+      # だった（フローティングタグでは日をまたげばほぼ必ず変わる。あの対照は
+      # 原因が何であれ必ず「違い」を見つける）。pin はこの誤読を構造的に塞ぐ。
       #
       # 代償は上流の修正も自動では入らないこと。**それは意図した代償**で、
       # 版を上げるのは data/autopilot-actions.json に起票してから行う
       # （いつ・なぜ上げたかが残る）。上げるときはこの行のSHAとコメントを一緒に直すこと。
-      #
-      # なお 08-24/08-25 の原因が版だと確定したわけではない。同じ区間で
-      # CLAUDE_CODE_OAUTH_TOKEN も更新されており、両者は分離できていない
-      # （data/autopilot-runs.json の reclassified_note）。**それでも pin は正しい** ——
-      # 版が原因でなかったとしても、依存を固定していない構造は残り続けるため。
         uses: anthropics/claude-code-action@16b3b310c3d7b5279df73130324d5205aeea8eac # v1 (Claude Code 2.1.245 / Agent SDK 0.3.245)
         env:
           GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
@@ -324,6 +333,57 @@ jobs:
             5. PR作成は `gh pr create`（GH_TOKEN 設定済み）。本文の型はマージ済みPR #470を踏襲。作成後、SEO Validation が起動したことを `gh pr checks` で確認したら**それ以上は待たずに終了してよい**（マージは auto-merge が行い、結果は翌朝の日報メールが拾う。CCR用ツール subscribe_pr_activity / send_later はこの環境には無いので使わない）。
             6. 【毎回必須】`data/autopilot-status.json` をRunbook §5-2のスキーマで当日の内容に上書きし、`AUTOPILOT_LOG.md` の追記と合わせて同じPRに含める（記事なしの日はこの2ファイルだけのPR）。これが10:00 JSTの日報メールのデータ源。
             7. できないこと（iOS Simulator実行・オーナー作業）は偽装せず、Runbook §7に従って owner_requests として積む。
+
+      # 【2026-08-26】即死したときに、資格情報かどうかを**機械が**切り分ける。
+      #
+      # 08-24〜08-25 の2日連続の即時失敗は、検知そのものは初日に効いていた。
+      # 溶けたのは診断のほうで、台帳は「認証系」→「上流の版」→「やはり認証系」と
+      # 2回ひっくり返り、そのたびに1日を使った。**同じ形の失敗が来たら、
+      # 人にもセッションにも推測させずここで割る。**
+      #
+      # 理屈は単純で、失敗した回と同じトークンで1ターンだけ走らせるだけ:
+      #
+      #   ここも落ちる → トークンが通っていない（＝資格情報）
+      #   ここは通る   → 資格情報ではない（--model指定・MCP・プロンプト等の側）
+      #
+      # 上のステップと違って --model も MCP も渡さないので、切り分けたい変数
+      # （トークンが通るか）だけが残る。2026-08-26 に手で1回やったのがこれで、
+      # 実費は $0.04・所要3秒だった。**失敗した回にしか走らない。**
+      #
+      # `continue-on-error` は使わない。あれはステップの conclusion を success に
+      # 書き換えるので、**失敗が成功に見える**（この装置を手で組んだとき実際に
+      # 読み違えた）。ここでは終了コードそのものを判定に使い、
+      # scripts/autopilot-act.mjs の interpretRun が conclusion を読む。
+      #
+      # CLI が入る前に落ちた回（08-21 の actor 拒否のような形）では下の
+      # `command -v claude` が失敗し、判定ステップは skipped になる。
+      # **判定不能は「資格情報は無事」ではない**ので、そこは従来どおり
+      # needs_triage としてセッションへ回る。
+      - name: 切り分け用のCLIを確認
+        id: credprobe_ready
+        if: always() && steps.claude.outcome == 'failure'
+        run: command -v claude
+
+      - name: 即死が資格情報かを切り分ける
+        id: credprobe
+        if: always() && steps.credprobe_ready.outcome == 'success'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set +e
+          out="$(claude -p 'Reply with exactly the word PROBE_OK and nothing else.' \
+                   --max-turns 1 --output-format json 2>&1)"
+          code=$?
+          set -e
+          echo "$out" | head -c 2000
+
+          if [ "$code" -eq 0 ] && printf '%s' "$out" | grep -q '"is_error":false'; then
+            echo "::notice title=Obsidian Autopilot::切り分け: **資格情報は通っている。**同じトークンで1ターン完走した。即死の原因は資格情報以外（--model指定・MCP・プロンプト等）を見ること。"
+            exit 0
+          fi
+          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+          exit 1
 
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。
       # 競合ではなく補完関係なので両方残す。**順序に意味がある** —
