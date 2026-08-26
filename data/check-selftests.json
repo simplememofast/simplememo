@@ -66,6 +66,10 @@
       "broke": "area 欠落／task 欠落／同一タスク重複（分母の水増し）／知らない executor の4通りで落ちることを観測"
     },
     {
+      "script": "scripts/autonomy-gap.mjs",
+      "state": "selftest_only"
+    },
+    {
       "script": "scripts/autonomy-timeline.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
@@ -304,6 +308,10 @@
       "state": "demonstrated",
       "at": "2026-08-26",
       "broke": "壊した判定器8通り（run を常に立てる／コードを常に RUN／緊急停止を無視／資格情報の拒否を無視／force が予算超過を飛び越える／force が1回上限を飛び越える／1回上限を副系にも当てる／判定が呼ぶたびに揺れる）を、**名指しした性質が**捕まえることを観測。加えて **空虚な真**を実測 —— 生成器の budgetOver を false に固定すると 400ケース中0件になり、性質は「OK」と表示したまま、force が予算を飛び越える壊し方を誰も捕まえなくなった。この被覆判定を run() 本体へ入れ、自己テストは本番側が落ちることを見ている"
+    },
+    {
+      "script": "scripts/recover-ingest.mjs",
+      "state": "selftest_only"
     },
     {
       "script": "scripts/review-intake.mjs",
