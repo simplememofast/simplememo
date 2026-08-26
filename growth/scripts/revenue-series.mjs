@@ -127,9 +127,23 @@ export function readAll(dir = SRC_DIR) {
  * ずれたまま出荷すると、資金繰りの欄が「28日ぶん見た」と名乗りながら
  * 実際は数日しか見ていない、という形になる。**名乗りと実測は同じ数でなければならない。**
  */
+/**
+ * @param {object|null} policy  方針の台帳。**null は「突き合わせない」**（呼ぶ側が明示する）。
+ *   鍵が無い方針オブジェクトは別で、**それは台帳の形をしていない**ので落とす。
+ */
 export function policyDrift(policy, series) {
+  if (policy === null || policy === undefined) return [];   // 突き合わせない、と呼ぶ側が言った
   const declared = policy?.cash_scenarios?.revenue_history_days;
-  if (declared === undefined) return [];
+  // [2026-08-26] ここは `if (declared === undefined) return [];` だった。
+  // **宣言の鍵を消すと、この突き合わせが丸ごと消える**（実測: 宣言17 vs 実測0 は
+  // 捕まるのに、鍵を消すと exit 0）。しかも同じファイルの --write が
+  // その鍵を書く側で、**その --write は ReferenceError で一度も成功していなかった。**
+  // 「書けていない」と「ずれていない」が同じ見た目になっていた。
+  if (declared === undefined) {
+    return ['financial-policy.json に cash_scenarios.revenue_history_days が無い'
+      + ` — **実測 ${series.covered_days} 日と突き合わせる相手が消える。**`
+      + '`--write` を実行して同じコミットに含めること'];
+  }
   if (declared !== series.covered_days) {
     return [`financial-policy.json の revenue_history_days=${declared} が実測 ${series.covered_days} と違う`
       + ' — `--write` を実行して同じコミットに含めること'];
@@ -170,8 +184,16 @@ function selftest() {
     policyDrift({ cash_scenarios: { revenue_history_days: 28 } }, { covered_days: 3 }).length === 1);
   t('名乗りが実測と一致すれば何も言わない（常に鳴る検査も何も見ていない）',
     policyDrift({ cash_scenarios: { revenue_history_days: 3 } }, { covered_days: 3 }).length === 0);
-  t('名乗っていなければ何も言わない（宣言前は照合する相手がいない）',
-    policyDrift({ cash_scenarios: {} }, { covered_days: 3 }).length === 0);
+  // [2026-08-26] ここは「名乗っていなければ何も言わない（宣言前は照合する相手が
+  // いない）」を確かめていた。**その理由づけごと間違っていた。**
+  // 鍵を書く側は同じファイルの --write で、その --write は
+  // `ReferenceError: policy is not defined` により**一度も成功していなかった。**
+  // つまり「まだ宣言していない」と「書き込みが壊れている」が同じ見た目になる。
+  // 方針そのものを渡さない（null）＝突き合わせない、鍵が無い＝台帳の形をしていない。
+  t('**鍵が無い方針は落ちる**（「まだ宣言していない」と「書けていない」を混ぜない）',
+    policyDrift({ cash_scenarios: {} }, { covered_days: 3 }).length === 1);
+  t('null は「突き合わせない」（鍵が無いのとは別）',
+    policyDrift(null, { covered_days: 3 }).length === 0);
   t('**0 と undefined を混ぜない**（0日と名乗るのは宣言、未宣言とは別）',
     policyDrift({ cash_scenarios: { revenue_history_days: 0 } }, { covered_days: 3 }).length === 1);
 
@@ -225,7 +247,10 @@ if (isMain) {
   console.log('  **ランウェイは出さない。**手元資金が機械に入っていないため（別の欄が持つ）。');
 
   // 方針と系列の整合
-  problems.push(...policyDrift(JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')), series));
+  // [2026-08-26] ここで読んだ方針を束縛していなかったため、下の --write が
+  // `ReferenceError: policy is not defined` で落ちていた。**一度も成功していない。**
+  const policy = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
+  problems.push(...policyDrift(policy, series));
 
   if (process.argv.includes('--write')) {
     const out = {

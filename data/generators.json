@@ -1,0 +1,173 @@
+{
+  "$comment": [
+    "**書き出す側のコードが、まだ動くか。**scripts/check-generators.mjs が読む。",
+    "",
+    "【なぜ要るか】2026-08-26 に2つ踏んだ。どちらも **CI が --write を一度も",
+    "走らせていなかった**ために生きていた。",
+    "",
+    "  1. revenue-series --write が `ReferenceError: policy is not defined` で落ちていた。",
+    "     **一度も成功していない。**落ちる場所が「方針側の日数も同時に合わせる",
+    "     （ずれたままにしない）」の行で、**ずれたままにしないための行が、",
+    "     ずれたままにしていた。**",
+    "",
+    "  2. autonomy-timeline.svg が台帳から4日ぶん遅れていた。見出しが「4か月で18倍」、",
+    "     台帳から作ると「9倍」。**倍近い過大**が配信原稿の参照先に乗っていた。",
+    "",
+    "CI は各検査の --selftest と --check を回すが、**--write は回さない。**",
+    "生成器は「書いた結果」だけが検査されていて、「書く動作そのもの」は",
+    "誰も動かしていなかった。実測で11本 4秒なので、回す。",
+    "",
+    "【この検査の範囲】`--write / --sync / --svg / --rebuild` を持つものだけ。",
+    "**autopilot-act / autopilot-selfheal / recover-ingest / ingest-asc は行動する側**で、",
+    "`--record` `--contain` などで状態を書き換える。回したら本当に行動するので、",
+    "検出も実行もしない。never_run に理由つきで挙げてある。",
+    "**「全部の書き手を見ている」とは読まないこと。**",
+    "",
+    "【dated】再生成すると必ず変わるもの（measured_at / synced_at を今日にする）。",
+    "古いから変わるのではないので、差分が出ても落とさない。",
+    "**dated を増やすときは、それが本当に「日付だけ」かを確かめること** ——",
+    "ここへ逃がすと、遅れている生成物を遅れていないことにできる。",
+    "",
+    "【needs: siblings】隣リポジトリが揃っていないと**書かずに非0で拒否する**もの。",
+    "CI（隣が無い）では「拒否したこと」を確かめ、揃った場所では exit 0 を確かめる。",
+    "**拒否を免除しない** —— 免除にすると、揃っていない場所で書いても気づけなくなる。"
+  ],
+  "run": [
+    {
+      "cmd": "scripts/autonomy-timeline.mjs --svg",
+      "writes": [
+        "assets/img/autopilot/autonomy-timeline.svg"
+      ],
+      "why": "配信原稿が参照する図。**ここが4日遅れて 18倍 と 9倍 が並んでいた**",
+      "skipped_flags": {
+        "--rebuild": "git履歴と隣リポジトリを読み直す。CIの浅いクローンでは系列が痩せる"
+      }
+    },
+    {
+      "cmd": "scripts/check-css-version.mjs --write",
+      "writes": [
+        "*.html",
+        "en/*.html"
+      ],
+      "why": "資産のバージョン文字列。ずれるとブラウザが古いCSSを掴む"
+    },
+    {
+      "cmd": "scripts/check-publication.mjs --write",
+      "writes": [
+        "_redirects",
+        "functions/_middleware.js"
+      ],
+      "why": "公開方針から遮断ブロックを作る。**ずれると非公開のつもりの台帳が配信される**"
+    },
+    {
+      "cmd": "scripts/check-selftests.mjs --sync",
+      "writes": [
+        "data/check-selftests.json"
+      ],
+      "why": "CI配線の増減を取り込む。ずれると新しい検査が自己テスト無しで入る"
+    },
+    {
+      "cmd": "scripts/check-store-facts.mjs --write",
+      "writes": [
+        "data/constants.json"
+      ],
+      "why": "ストアの事実（版・評価）を注記つきで書く。実物との突き合わせは --net 側"
+    },
+    {
+      "cmd": "scripts/code-authorship.mjs --write",
+      "writes": [
+        "data/code-authorship.json"
+      ],
+      "dated": true,
+      "why": "AI著者率。公開面と配信原稿が引く 94.2% の正",
+      "$dated_note": "隣リポジトリが揃った場所では measured_at が今日になる。加えて **同じ窓でも数が動く** —— --all-branches なので、squashされて消えたブランチは後から数えられない（2026-08-26 実測: 194 → 164 コミット）。**率は動かない**（99.5% → 99.4% / 行 94.2% は同じ）ので公開値には効かないが、絶対数を引くときは measured_at を併記すること",
+      "needs": "siblings"
+    },
+    {
+      "cmd": "scripts/check-degradation.mjs --sync",
+      "writes": [
+        "data/crossrepo-probes.json"
+      ],
+      "dated": true,
+      "why": "隣リポジトリの写しを更新。写しの寿命は60日で、**古い写しは無い検査と同じ**",
+      "$dated_note": "隣が揃っていれば synced_at が今日になる。中身が同じでも日付だけ動く",
+      "needs": "siblings"
+    },
+    {
+      "cmd": "growth/scripts/build-queues.mjs --write",
+      "writes": [
+        "growth/content/refresh-queue.json"
+      ],
+      "why": "検索データを更新の待ち行列へ落とす"
+    },
+    {
+      "cmd": "growth/scripts/revenue-series.mjs --write",
+      "writes": [
+        "data/revenue-series.json",
+        "data/financial-policy.json"
+      ],
+      "why": "収入の履歴と、方針側の日数。**2026-08-26 まで後半が一度も実行されていなかった**"
+    },
+    {
+      "cmd": "growth/scripts/full-funnel.mjs --write",
+      "writes": [
+        "growth/reports/YYYY-MM-full-funnel.md"
+      ],
+      "dated": true,
+      "why": "月次ファネル。**新しい日付のファイルを作る**ので差分ではなく追加になる"
+    },
+    {
+      "cmd": "growth/scripts/weekly-report.mjs --write",
+      "writes": [
+        "growth/reports/YYYY-MM-DD-weekly.md"
+      ],
+      "dated": true,
+      "why": "週次。同上"
+    }
+  ],
+  "never_run": [
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "why": "**行動する側。**--emit-report と位置引数で行動台帳を書き、handler が実際に動く。CIで回したら本当に実行される"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "why": "**実費を記録する側。**回すと run が1件増えて上限判定の分母が動く"
+    },
+    {
+      "file": "scripts/autopilot-runs.mjs",
+      "why": "**実行履歴の台帳。**回した回そのものが記録になる"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "why": "**--contain が停止スイッチを倒す。**検査のつもりで本番を止めない"
+    },
+    {
+      "file": "scripts/recover-ingest.mjs",
+      "why": "**--record が復旧の実績を書く。**やっていない復旧を実績にしない"
+    },
+    {
+      "file": "growth/scripts/ingest-asc.mjs",
+      "why": "**Apple のAPIを叩く。**鍵と外部通信が要り、取り込み台帳も増える"
+    },
+    {
+      "file": "scripts/check-definitions.mjs",
+      "why": "**--bump はKPI定義の版を上げる。**理由（--why）を人が書くための操作で、機械が回すものではない"
+    },
+    {
+      "file": "scripts/dashboard.mjs",
+      "flagless": true,
+      "why": "旗を持たず無条件に書く。出力は生成物だが、**旗が無いので自動検出できない** —— ここに手で挙げてある。中身は他の台帳の再表示なので、遅れても主張には効かない"
+    },
+    {
+      "file": "scripts/generate-qr-codes.mjs",
+      "flagless": true,
+      "why": "npm の qrcode / jsqr が要る。**このリポジトリに package.json が無い**ので CI では動かせない（--check も exit 2 になる）"
+    },
+    {
+      "file": "growth/scripts/check-data-quality.mjs",
+      "flagless": true,
+      "why": "旗ではなく取り込み経路から呼ばれて中間ファイルを書く。生成物ではなく作業ファイル"
+    }
+  ]
+}

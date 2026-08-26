@@ -186,6 +186,25 @@ jobs:
           node scripts/check-guard-shapes.mjs --selftest
           node scripts/check-guard-shapes.mjs --check
 
+      # 【書き出す側が、まだ動くか】CI は各検査の --selftest と --check を回すが、
+      # **--write は回さない。**生成器は「書いた結果」だけが検査されていて、
+      # 「書く動作そのもの」は誰も動かしていなかった。2026-08-26 に2件出た:
+      #
+      #   revenue-series --write が ReferenceError で落ちていた（**一度も成功していない**）
+      #   autonomy-timeline.svg が台帳から4日遅れ（見出し 18倍 / 台帳 9倍）
+      #
+      # **--run は作業ツリーを触る。**クリーンでなければ拒否し、走らせた後は
+      # 追跡下のファイルを戻し、作った新規ファイルも消す。CIのチェックアウトは
+      # 使い捨てなので安全側。実測で11本 1.3秒。
+      #
+      # 隣リポジトリが要るものは、**隣が無いとき非0で拒否するのが正しい。**
+      # CI では「拒否したこと」を確かめる（免除にしない）。
+      - name: Generators still run, artifacts not stale
+        run: |
+          node scripts/check-generators.mjs --selftest
+          node scripts/check-generators.mjs --check
+          node scripts/check-generators.mjs --run
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を
