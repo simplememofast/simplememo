@@ -1090,6 +1090,34 @@
         ],
         "new_guardrail": "**回復の追認をスケジュールだけに依存させない。**回復イベント（ここでは status JSON が main に着くこと）を直接拾う。ただし**閉じる方向だけ** —— 開く方向は誤検知が誤検知のまま固定されるので、窓の中の schedule に残す（rollout-guard と同じ非対称）"
       }
+    },
+    {
+      "id": "om-2026-08-26-network-generator-vs-regenerate-check",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "PR #653 の seo-check が落ちた。**手元では 79本すべて緑**で、CIでだけ赤くなった",
+      "hypothesis": "手元で全部通ったので、CIでも通る",
+      "decision": "**通らない。**推測せず CI のログを読んだ:\n\n    scripts/vendor-terms.mjs --write   10,355ms\n    生成器: 不整合 — data/corporate-obligations.json が再生成で変わった\n\n`check-generators --run` は書き出す側を実際に走らせて、出力がコミット済みと一致するかを見る。ところが vendor-terms の出力は**ネットの向こう側で決まる**:\n\n    手元 … 2社だけ取得できる（残り7社はプロキシが 403）→ 差分なし → 緑\n    CI   … **10社すべて取得できる** → 新しい指紋 → 「生成物が古い」→ 赤\n\n**一度直せば済む話ではない。**規約が改定されるたびに、無関係なPRのCIまで赤くなる。改定を検知する仕掛けが、**検知したい事象そのものを罰する検査**になっていた。\n\nnever_run へ移した。書くのは seo-daily の役目で、あちらが同じコミット回で拾う。\n\nあわせて、プロキシ越しに取れた2社ぶんの指紋も台帳から落とした。**MITM プロキシ越しの観測を、ランナーの観測と同じものとして置かない** —— 違えば初回に偽の changed が出る。",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "data/generators.json",
+          "data/corporate-obligations.json",
+          "data/operating-memory.json"
+        ]
+      },
+      "verification": "一次資料は CI のジョブログ（run 32982397888）。直った側は `--run` の実行対象が12本→11本になり vendor-terms が消えたことで確認。79本の検査を再実行して全通過。**手元での再現は諦めた** —— プロキシが7社を弾くので、手元では構造的に再現できない",
+      "outcome": "#653 がマージされた。改定検知は seo-daily 側で動き、CIは巻き込まれない",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "regenerate-and-compare-cannot-hold-a-network-dependent-generator",
+        "text": "**外部状態に依存する生成器は「再生成して比較」に載せられない。**\n\n載せると2つ壊れる。(1) 手元とCIで到達できる範囲が違えば、**手元で全部緑でもCIで落ちる。**(2) より悪いのは、**検知したい事象が起きるたびにCIが赤くなる**こと —— 規約が改定されたら、その改定と無関係なPRまで止まる。\n\n`check-domain-expiry` は先に never_run に入っていたが、理由は「ネットが要る」までで、**RDAP が CI から届かないので、たまたま差分が出ていなかっただけ**でもある。同じ棚に置いたものの、危なさの度合いは違った。\n\nもう一つ: **手元の環境で全部緑だったことを「通る」と読んだ。**このプロキシは外向きを部分的に塞ぐので、**手元の緑は「届かなかったから緑」でありうる。**届く・届かないが結果を変える検査では、手元の緑は証拠にならない。",
+        "changed": [
+          "data/generators.json"
+        ],
+        "new_guardrail": "**生成器を `run`（再生成して比較）に登録する前に、出力がリポジトリの中だけで決まるかを確かめる。**ネット・時刻・外部APIが混ざるものは never_run に置き、書くのは日次側（seo-daily）に任せる。あわせて、**エージェント環境から取れたデータを台帳の初期値にしない** —— プロキシ越しの観測はランナーの観測と別物でありうる"
+      }
     }
   ]
 }
