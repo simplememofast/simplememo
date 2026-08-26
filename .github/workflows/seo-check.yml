@@ -229,6 +229,19 @@ jobs:
           node growth/scripts/search-intent.mjs --selftest
           node growth/scripts/search-intent.mjs --check
 
+      # 【PRD の定型】都度作成で定型が無く、**書かれていないことに気づけなかった。**
+      #
+      # いちばん効くのは §6「決めていないこと」。PRD は提案であって決定ではないので、
+      # ここが空だと **PRD が黙ってオーナー判断を代行できる**（取り消し可能時間・
+      # 課金の置き場所・本文を残すか、はどれもオーナーの判断）。
+      # 本当に何も無いなら「無い」と書く —— 書かないことと、無いことを分ける。
+      #
+      # VISION §13 の6問は**見出しがあるだけでは通さない**（各問に本文が要る）。
+      - name: PRDs follow the template
+        run: |
+          node scripts/check-prd.mjs --selftest
+          node scripts/check-prd.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を

@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';
 import { readLedger, requireShape } from './lib/read-ledger.mjs';
 import { planTo, UNLOCKS } from './autonomy-gap.mjs';
+import { EVIDENCE_STRENGTH } from './feature-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const WEEKS = 13;
@@ -70,21 +71,28 @@ export function dated(experiments, today, weeks = WEEKS) {
  * 証拠の強さを落とさない —— 推測を実測と同じ列に並べない。
  */
 export function ranked(candidates) {
-  const strength = { measured_ours: 3, measured_external: 2, reported: 1, guess: 0 };
+  // [2026-08-26] ここで語彙を**自分で書き直していた**（reported / guess）。
+  // 実際の語彙は observed / analogous / hypothesis で、**書いた2つは台帳に存在しない。**
+  // 知らない値は 0 に落ちるので、**未知を「いちばん弱い」と同じ扱い**にしていた。
+  // feature-score.mjs が正で、そちらは未知を error で返す（0点で通さない）。
+  // 語彙は1箇所に持ち、**知らない値はここでも通さない。**
+  const strength = EVIDENCE_STRENGTH;
   return [...candidates]
     .map((c) => ({
       id: c.id,
       title: c.title,
       effect: c.expected_effect ?? null,
       days: c.effort_days ?? null,
-      evidence: c.evidence_strength ?? 'guess',
+      evidence: c.evidence_strength ?? null,
+      // **知らない語は 0 にしない。**null のまま出して、validate が落とす
+      evidence_known: Object.prototype.hasOwnProperty.call(EVIDENCE_STRENGTH, c.evidence_strength),
       // 効果 ÷ 日数。**どちらかが無ければ順位を付けない**（0 で埋めない）
       ratio: (c.expected_effect != null && c.effort_days > 0)
         ? c.expected_effect / c.effort_days : null,
     }))
     .sort((a, b) => {
       if ((a.ratio === null) !== (b.ratio === null)) return a.ratio === null ? 1 : -1;
-      const s = (strength[b.evidence] ?? 0) - (strength[a.evidence] ?? 0);
+      const s = (strength[b.evidence] ?? -1) - (strength[a.evidence] ?? -1);
       return s !== 0 ? s : (b.ratio ?? 0) - (a.ratio ?? 0);
     });
 }
@@ -136,6 +144,13 @@ export function validate(r) {
     if (b.ratio === null && b.effect !== null && b.days !== null) {
       problems.push(`${b.id}: 効果と日数があるのに順位が付いていない`);
     }
+    // **知らない evidence_strength を「いちばん弱い」として通さない。**
+    // feature-score.mjs が「0点で通さない」と決めているのと同じ扱いにする
+    if (!b.evidence_known) {
+      problems.push(`${b.id}: evidence_strength「${b.evidence}」は語彙に無い`
+        + ` — ${Object.keys(EVIDENCE_STRENGTH).join(' / ')} のいずれか。`
+        + '**知らない語を最弱として並べない**（順位が黙って動く）');
+    }
   }
   if (!r.dated.length && !r.machine.length) {
     problems.push('日付のあるものも機械の仕事も0件 — **台帳を読めていない疑い**');
@@ -185,11 +200,22 @@ export function render(r) {
   }
 
   o.push('\n■ 機能バックログ（**順位のみ。日付は持っていない**）');
-  for (const b of r.backlog.slice(0, 6)) {
-    o.push(`    ${b.ratio === null ? ' — ' : b.ratio.toFixed(1).padStart(4)}  ${b.title.slice(0, 46)}`
-      + `  （${b.evidence}${b.days != null ? ` / ${b.days}日` : ''}）`);
+  // [2026-08-26] 1列に並べていたら、**効果比 10.0 が 1.2 の下に出て**
+  // 「壊れている」ようにしか読めなかった。並びの第一鍵は証拠の強さで、
+  // それが列に見えていなかったのが原因。**並べ替えの根拠を見せる。**
+  // 語は feature-score.mjs が正。**ここで増やさない**
+  const LABEL = { measured_ours: '自社で実測', measured_external: '外部の実測',
+    observed: '観察したが数えていない', analogous: '別の事例からの類推', hypothesis: '思いつき' };
+  const seen = new Set();
+  for (const b of r.backlog) {
+    if (!seen.has(b.evidence)) {
+      seen.add(b.evidence);
+      o.push(`    ── ${LABEL[b.evidence] ?? b.evidence}`);
+    }
+    o.push(`      ${b.ratio === null ? '  — ' : b.ratio.toFixed(1).padStart(4)}`
+      + `  ${b.title.slice(0, 44)}${b.days != null ? `  （${b.days}日）` : ''}`);
   }
-  o.push(`    … 全 ${r.backlog.length}件`);
+  o.push('    **証拠の強い側が先。**効果比だけで並べると、推測を実測と同じ列に置くことになる');
 
   o.push('\n  **日付を発明していない。**台帳に日付があるものだけを暦に置いた。');
   o.push('  順番しか決まらないものは順番だけ出している。');
@@ -224,12 +250,28 @@ const SCENARIOS = [
     const r = ranked([{ id: 'x', title: 't', expected_effect: 8 }]);
     assert(r[0].ratio === null, '欠測を 0 として順位に混ぜた');
   }],
-  ['**証拠の強い側を先に置く**（推測を実測と同じ列に並べない）', () => {
+  ['**証拠の強い側を先に置く**（思いつきを実測と同じ列に並べない）', () => {
     const r = ranked([
-      { id: 'guess', title: 'g', expected_effect: 9, effort_days: 1, evidence_strength: 'guess' },
+      { id: 'h', title: 'g', expected_effect: 9, effort_days: 1, evidence_strength: 'hypothesis' },
       { id: 'ours', title: 'o', expected_effect: 4, effort_days: 1, evidence_strength: 'measured_ours' },
     ]);
-    assert(r[0].id === 'ours', `推測(${r[0].id})が先に来た`);
+    assert(r[0].id === 'ours', `思いつき(${r[0].id})が先に来た`);
+  }],
+  ['**知らない evidence_strength は落とす**（最弱として黙って並べない）', () => {
+    const r = ranked([{ id: 'x', title: 't', expected_effect: 1, effort_days: 1, evidence_strength: 'なんとなく' }]);
+    const p = validate({ window: { to: '2099-01-01' }, dated: [], machine: [], owner: [], deferred: [], backlog: r });
+    assert(p.some((x) => x.includes('語彙に無い')), JSON.stringify(p));
+  }],
+  ['**語彙は feature-score.mjs のものを実際に使っている**（書き写していない）', () => {
+    // observed(0.5) と analogous(0.3) は**正の語彙にしか無い**。
+    // 自前で書き直した表ではどちらも未知になり、順位が効果比へ落ちる。
+    // 効果比は analogous 側を高くしてあるので、**書き写すと順序が入れ替わる。**
+    const r = ranked([
+      { id: 'ana', title: 'a', expected_effect: 9, effort_days: 1, evidence_strength: 'analogous' },
+      { id: 'obs', title: 'o', expected_effect: 1, effort_days: 1, evidence_strength: 'observed' },
+    ]);
+    assert(r[0].id === 'obs',
+      '**observed が analogous より先に来ない** — feature-score.mjs の語彙を使っていない疑い');
   }],
   ['**オーナー待ちを機械側に混ぜない**', () => {
     const s = split([{ id: 'reply_gate', kind: 'owner_decision', tasks: [1] },
