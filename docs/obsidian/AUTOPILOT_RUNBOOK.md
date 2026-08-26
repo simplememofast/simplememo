@@ -318,6 +318,21 @@ Gate通過後にaptが90分のジョブ上限を食い尽くし、`Claude Code` 
 
 ### レーンF（自己修復）— **A〜Eより先に、毎回これを見る**
 
+**取り込み経路の故障も、ここで拾う（2026-08-26追加）。**
+`data/ingest-recovery.json` に `human_action_required: true` の行が残っていたら、
+**その日の最優先は再同意・鍵の再発行の依頼**（アクション台帳へ上げる）。
+`degraded: true` の行が残っている間は、**新規記事を書かない** —
+退避データが7日より古い状態で書いた記事は、間違っていても出た瞬間には分からず、
+順位が付いてから分かる。**気づくのが遅い失敗のほうが高い。**
+
+```
+node scripts/recover-ingest.mjs            # 退避先の鮮度と、壊れ方ごとに取る手
+node scripts/recover-ingest.mjs --check    # CI（seo-check.yml に入っている）
+```
+
+**この経路はまだ本番で発火していない。**台帳が空なのは「安定している」ではなく
+「まだ確かめていない」。確かめてあるのは判断の論理だけ（`--selftest`）。
+
 ```
 node scripts/autopilot-selfheal.mjs
 ```

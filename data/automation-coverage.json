@@ -34,9 +34,17 @@
     "     証跡ファイルを持つことを CI が強制する（scripts/automation-rate.mjs --check）。",
     "",
     "【出典】タスクの列挙は docs/autopilot-maturity-backlog.md（外部レビュー由来）と、",
-    "本セッションで実測した内容。分類は3リポジトリの実装を1件ずつ当てて決めた。"
+    "本セッションで実測した内容。分類は3リポジトリの実装を1件ずつ当てて決めた。",
+    "",
+    "【blocker / unblocked_by（2026-08-26追加）】",
+    "AI が実行していないタスクには **なぜ実行していないか** を必ず持たせる。",
+    "無いと『61.3%』は『あと38.7%ぶん頑張れば埋まる』と読まれるが、実際には",
+    "**大半が実装量ではなく外部データ・鍵・権限境界・検出力で止まっている。**",
+    "分類は scripts/autonomy-gap.mjs の BLOCKERS が正で、CI がそれ以外の値を落とす。",
+    "policy_boundary と physical_human は **オーナーが境界を動かさない限り到達しない**。",
+    "この2つを到達可能側に数えるのが、この台帳で二番目にやってはいけないこと。"
   ],
-  "measured_at": "2026-08-22",
+  "measured_at": "2026-08-26",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -109,7 +117,9 @@
       "evidence": [
         "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる"
+      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる",
+      "blocker": "policy_boundary",
+      "unblocked_by": "採否はオーナー判断。設計文書までは機械が出している"
     },
     {
       "area": "① 次期機能開発",
@@ -118,7 +128,9 @@
       "evidence": [
         "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"
       ],
-      "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人"
+      "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人",
+      "blocker": "external_data",
+      "unblocked_by": "継続率がリポジトリに無い（BigQuery/ASC側）。降りれば evidence_strength を機械が導出できる"
     },
     {
       "area": "① 次期機能開発",
@@ -127,7 +139,9 @@
       "evidence": [
         "../simplememo-ios/docs/obsidian-only-mode-design.md"
       ],
-      "note": "都度作成・定型化されていない"
+      "note": "都度作成・定型化されていない",
+      "blocker": "not_started",
+      "unblocked_by": "定型化されていない。テンプレートと検査を作れば実行側へ動く"
     },
     {
       "area": "① 次期機能開発",
@@ -169,7 +183,9 @@
       "evidence": [
         "../simplememo-api/docs/reports/FUNNEL_EVALUATION_2026-08-20.md"
       ],
-      "note": "D28はBQ蓄積28日到達待ち（9/6前後）"
+      "note": "D28はBQ蓄積28日到達待ち（9/6前後）",
+      "blocker": "external_data",
+      "unblocked_by": "BigQuery の28日蓄積待ち（9/6前後）"
     },
     {
       "area": "① 次期機能開発",
@@ -200,7 +216,9 @@
       "task": "本番改善サイクルの完走（機能側）",
       "executor": "nobody",
       "evidence": [],
-      "note": "コンテンツ側は完走。機能側0件"
+      "note": "コンテンツ側は完走。機能側0件",
+      "blocker": "not_started",
+      "unblocked_by": "カナリアガードを本番のフラグ1つで1周させる。実装済み（rollout-guard.ts）で、要るのは実行"
     },
     {
       "area": "② バグ修正",
@@ -239,7 +257,9 @@
       "evidence": [
         "../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md"
       ],
-      "note": "手動運用。ただしWatch同期は実績あり"
+      "note": "手動運用。ただしWatch同期は実績あり",
+      "blocker": "external_data",
+      "unblocked_by": "問い合わせ本文が D1 にあり、リポジトリからは読めない"
     },
     {
       "area": "② バグ修正",
@@ -255,7 +275,9 @@
       "task": "Visual Regression Test",
       "executor": "nobody",
       "evidence": [],
-      "note": "アプリ側に無い"
+      "note": "アプリ側に無い",
+      "blocker": "physical_human",
+      "unblocked_by": "アプリ画面の撮影に macOS ランナーが要る。qa-ios.yml は予算保護で人間の名指し起動のみ"
     },
     {
       "area": "② バグ修正",
@@ -273,7 +295,9 @@
       "evidence": [
         "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
-      "note": "macOS必須。Runbook §7「できないこと」の筆頭"
+      "note": "macOS必須。Runbook §7「できないこと」の筆頭",
+      "blocker": "physical_human",
+      "unblocked_by": "macOSランナーが要り、予算保護で人間の名指し起動のみ"
     },
     {
       "area": "② バグ修正",
@@ -403,10 +427,28 @@
     },
     {
       "area": "③ 自律型マーケティング",
-      "task": "OAuth切れ・API障害時の自動復旧",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "検知はする。復旧は人"
+      "task": "API障害・停止・欠測からの自動復旧",
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/recover-ingest.mjs",
+        "data/ingest-recovery.json",
+        ".github/workflows/seo-daily.yml"
+      ],
+      "note": "2026-08-26実装。**分類はもう出来ていた**（bq-preflight.mjs が6通りに分ける）のに、その分類ごとに手を打つ側が無く、落ちた回は要約を人が読むまで何も起きなかった。機械が取るのは4つ: 再試行（指数バックオフ）／退避（直近のgoodスナップショット）／劣化継続（退避先が7日より古ければ新規記事を止めて保守回へ）／欠測の記録。**preflight の落ちる・落ちないは変えていない** — 変えたのは落ちた後。翌朝のレーンFが未修理の故障としてこれを拾う。**まだ本番で発火していない**（data/ingest-recovery.json は空）。確かめてあるのは判断の論理だけで、`--selftest` が9通りの分類と「退避先が無いのに退避したことにしない」「鮮度が足りていれば止めない」を実際に落として確認する",
+      "since": "2026-08"
+    },
+    {
+      "area": "③ 自律型マーケティング",
+      "task": "資格情報失効からの復旧（再同意・鍵の再発行）",
+      "executor": "human_only",
+      "evidence": [
+        "scripts/recover-ingest.mjs",
+        "data/credential-expiry.json"
+      ],
+      "note": "**1行に潰さないために分けた。**旧行は「OAuth切れ・API障害時の自動復旧」で、機械が最後まで出来る側（API障害）と、人にしか出来ない側（再同意）が同じ1行に入っていた。混ぜると、どちらかが出来た時点で行が動いてしまう。機械が取るのは退避と自動起票まで。**ブラウザ同意と鍵の再発行は人の操作**で、そこを「自動復旧しました」と書くと嘘になる。recover-ingest.mjs の check() は `human_action_required` の回が `recovered` になっていたら落とす",
+      "blocker": "human_consent",
+      "unblocked_by": "**解けない。**ブラウザ同意と鍵の再発行に人の操作が要る。機械側は退避と起票まで",
+      "since": "2026-08"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -477,7 +519,9 @@
       "task": "ahrefs / AppsFlyer / Firebase のデータ連携",
       "executor": "nobody",
       "evidence": [],
-      "note": "自動連携なし。手動エクスポート"
+      "note": "自動連携なし。手動エクスポート",
+      "blocker": "external_credential",
+      "unblocked_by": "3社ぶんのAPI鍵と契約"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -502,7 +546,9 @@
       "evidence": [
         "growth/input/AI_PROBE_PROTOCOL.md"
       ],
-      "note": "月1・オーナーが手動"
+      "note": "月1・オーナーが手動",
+      "blocker": "external_credential",
+      "unblocked_by": "生成AI検索を叩く経路が無い"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -526,7 +572,9 @@
         "docs/trend-radar-prompt.md",
         "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
-      "note": "2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人"
+      "note": "2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人",
+      "blocker": "external_data",
+      "unblocked_by": "外部の順位・トレンドを取る経路が無い"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -574,7 +622,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "管理画面から手動。APIが無い"
+      "note": "管理画面から手動。APIが無い",
+      "blocker": "policy_boundary",
+      "unblocked_by": "配信は不可逆。管理画面からの操作を人に残す"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -593,7 +643,9 @@
       "evidence": [
         "data/cpp-map.json"
       ],
-      "note": "34本作成済みだが実験として回っていない"
+      "note": "34本作成済みだが実験として回っていない",
+      "blocker": "external_data",
+      "unblocked_by": "露出データがASCから降りないと評価できない。feature-score も確信度0.15で「まず測る」判定"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -602,7 +654,9 @@
       "evidence": [
         "admin/brand/docs/cowork-x-engagement-brief.md"
       ],
-      "note": "Cowork定期タスクでバッチ運用"
+      "note": "Cowork定期タスクでバッチ運用",
+      "blocker": "policy_boundary",
+      "unblocked_by": "権限表で suspended。再開の判断が人"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -620,7 +674,9 @@
       "evidence": [
         "../simplememo-ios/docs/reports/APPLE_ADS_AUTOMATION_2026-08-17.md"
       ],
-      "note": "調査レポートのみ。資格情報も無い"
+      "note": "調査レポートのみ。資格情報も無い",
+      "blocker": "policy_boundary",
+      "unblocked_by": "自社分析が『この予算規模では日次自動入札がノイズ最適化になる』と結論済み。着手しないと決めた側"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -636,7 +692,9 @@
       "task": "対照群による増分効果測定",
       "executor": "nobody",
       "evidence": [],
-      "note": "未実施"
+      "note": "未実施",
+      "blocker": "statistical_power",
+      "unblocked_by": "App Storeのクリックが2.1件/日。分割すると両群とも検出力が出ない"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -674,7 +732,9 @@
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
       ],
-      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ"
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ",
+      "blocker": "policy_boundary",
+      "unblocked_by": "タグpushを意図的に拒否している（claude.yml に actions: write を与えない設計の一部）"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -692,7 +752,9 @@
       "evidence": [
         "../simplememo-ios/.github/workflows/submit-review.yml"
       ],
-      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先"
+      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先",
+      "blocker": "policy_boundary",
+      "unblocked_by": "実機確認を経ていない提出を止めるための人間ゲート"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -701,7 +763,9 @@
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
       ],
-      "note": "Hard Rule。技術的強制ではなく人間のルール"
+      "note": "Hard Rule。技術的強制ではなく人間のルール",
+      "blocker": "physical_human",
+      "unblocked_by": "実機の操作"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -710,7 +774,9 @@
       "evidence": [
         "../simplememo-ios/fastlane/Fastfile"
       ],
-      "note": "automatic_release がハードコードで false。恒久的に手動"
+      "note": "automatic_release がハードコードで false。恒久的に手動",
+      "blocker": "policy_boundary",
+      "unblocked_by": "releaseType を MANUAL に変更して恒久的に人へ残した"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -731,7 +797,9 @@
         "../simplememo-api/src/rollout-guard.ts",
         "../simplememo-api/test/rollout-guard.test.ts"
       ],
-      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）"
+      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）",
+      "blocker": "policy_boundary",
+      "unblocked_by": "露出を広げる方向は不可逆。撤回はAI単独・拡大は承認制という非対称そのもの"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -758,7 +826,9 @@
         "../simplememo-api/test/rollout-vectors.test.ts",
         "../simplememo-ios/scripts/qa/check_rollout_vectors.py"
       ],
-      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした"
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした",
+      "blocker": "policy_boundary",
+      "unblocked_by": "緊急停止は人が握る"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -790,7 +860,9 @@
       "evidence": [
         "../simplememo-ios/.github/workflows/release-command.yml"
       ],
-      "note": "issue コメントで起動。コメントするのはオーナー"
+      "note": "issue コメントで起動。コメントするのはオーナー",
+      "blocker": "policy_boundary",
+      "unblocked_by": "起動コメントを打つのがオーナー。ここが人間ゲート"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -829,7 +901,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "現在 placeholder $40。実測由来ではない"
+      "note": "現在 placeholder $40。実測由来ではない",
+      "blocker": "policy_boundary",
+      "unblocked_by": "支出上限の決定"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -958,7 +1032,9 @@
       "evidence": [
         "data/autopilot-cost.json"
       ],
-      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可"
+      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可",
+      "blocker": "structural",
+      "unblocked_by": "スケジュール起動セッションのログが外部から読めない。セッション自身も自分のトークン費を知らない"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1017,7 +1093,9 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**データが降りてくるのは翌日以降**で、まだ照合していない。広告は未実装なので4つのうち3つが対象。降りたら financial-policy.json の revenue_connected を人が true にする — **売上が取れているかはレポートの中身を見て判断する**",
+      "blocker": "external_data",
+      "unblocked_by": "ASC Analytics のレポートがまだ0件。降りれば照合は書ける"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1038,7 +1116,9 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。LTV・回収期間・粗利はASCの売上が降りれば出せる",
+      "blocker": "external_data",
+      "unblocked_by": "同上。CACは広告費ゼロのため定義上存在しない"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1057,7 +1137,9 @@
       "task": "対照群に対する増分効果の評価",
       "executor": "nobody",
       "evidence": [],
-      "note": "母数が小さく（App Storeクリック2.1件/日）、対照群を割ると両群とも検出力不足"
+      "note": "母数が小さく（App Storeクリック2.1件/日）、対照群を割ると両群とも検出力不足",
+      "blocker": "statistical_power",
+      "unblocked_by": "同上"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1085,7 +1167,9 @@
       "area": "⑥ アプリ運営意思決定",
       "task": "月次予算の決定",
       "executor": "human_only",
-      "evidence": []
+      "evidence": [],
+      "blocker": "policy_boundary",
+      "unblocked_by": "同上"
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1104,7 +1188,9 @@
       "task": "仕訳・請求・領収書・銀行・カード・月次締めの統合",
       "executor": "nobody",
       "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "note": "3リポジトリに証跡ゼロ",
+      "blocker": "external_credential",
+      "unblocked_by": "freee の読み取りは入ったが、銀行・カードの明細連携が無い"
     },
     {
       "area": "⑦ 法人経営",
@@ -1114,7 +1200,9 @@
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs"
       ],
-      "note": "2026-08-22に台帳と検査を実装。**ただし6件すべて未把握。**決算期・従業員の有無・課税事業者かどうかがリポジトリから取れず、**機械はいま何も見張っていない。**埋まれば期限計算はできる（決算期が入れば申告期限は機械が出せる）。**「把握していない」を「余裕がある」と読ませない**ための器であって、実行ではない"
+      "note": "2026-08-22に台帳と検査を実装。**ただし6件すべて未把握。**決算期・従業員の有無・課税事業者かどうかがリポジトリから取れず、**機械はいま何も見張っていない。**埋まれば期限計算はできる（決算期が入れば申告期限は機械が出せる）。**「把握していない」を「余裕がある」と読ませない**ための器であって、実行ではない",
+      "blocker": "external_data",
+      "unblocked_by": "決算期・従業員の有無・課税事業者かがリポジトリに無い。入れば期限計算は機械が出せる"
     },
     {
       "area": "⑦ 法人経営",
@@ -1124,7 +1212,9 @@
         "data/vendor-register.json",
         "scripts/check-vendors.mjs"
       ],
-      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）"
+      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）",
+      "blocker": "missing_source_document",
+      "unblocked_by": "契約書がリポジトリに無い"
     },
     {
       "area": "⑦ 法人経営",
@@ -1135,7 +1225,9 @@
         "scripts/check-corporate.mjs",
         "data/vendor-register.json"
       ],
-      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること"
+      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること",
+      "blocker": "missing_source_document",
+      "unblocked_by": "書面契約が無く各社規約への同意で成立。規約本文を読むのは人"
     },
     {
       "area": "⑦ 法人経営",
@@ -1165,7 +1257,9 @@
       "task": "契約・請求・納品・支払いの照合",
       "executor": "nobody",
       "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "note": "3リポジトリに証跡ゼロ",
+      "blocker": "missing_source_document",
+      "unblocked_by": "契約書と請求書がリポジトリに無い"
     },
     {
       "area": "⑦ 法人経営",
@@ -1175,7 +1269,9 @@
         "data/vendor-register.json",
         "scripts/check-vendors.mjs"
       ],
-      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る"
+      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る",
+      "blocker": "missing_source_document",
+      "unblocked_by": "DPAの確認そのものが人の作業。6社が未確認"
     },
     {
       "area": "⑦ 法人経営",
@@ -1185,14 +1281,18 @@
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs"
       ],
-      "note": "2026-08-22に台帳と検査を実装。5件中2件は所在があり（規約への同意・App Reviewのやり取り）、**3件は所在が決まっていない**（議事録・株主名簿・事故記録）。事故記録は「発生していない」のか「記録する場所が無い」のかを区別できていない"
+      "note": "2026-08-22に台帳と検査を実装。5件中2件は所在があり（規約への同意・App Reviewのやり取り）、**3件は所在が決まっていない**（議事録・株主名簿・事故記録）。事故記録は「発生していない」のか「記録する場所が無い」のかを区別できていない",
+      "blocker": "missing_source_document",
+      "unblocked_by": "議事録・株主名簿・事故記録の所在が決まっていない"
     },
     {
       "area": "⑦ 法人経営",
       "task": "物理業務発注後の写真・受領・品質確認",
       "executor": "nobody",
       "evidence": [],
-      "note": "3リポジトリに証跡ゼロ"
+      "note": "3リポジトリに証跡ゼロ",
+      "blocker": "physical_human",
+      "unblocked_by": "現物の受領確認"
     },
     {
       "area": "⑦ 法人経営",
@@ -1226,7 +1326,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "方針のみ。手順・連絡先・停止手段は未整備"
+      "note": "方針のみ。手順・連絡先・停止手段は未整備",
+      "blocker": "physical_human",
+      "unblocked_by": "対人・法的責任"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1245,14 +1347,18 @@
       "task": "回答・返金・障害案内",
       "executor": "nobody",
       "evidence": [],
-      "note": "同上。加えて返金は不可逆で、承認境界の設計が先"
+      "note": "同上。加えて返金は不可逆で、承認境界の設計が先",
+      "blocker": "approval_design_first",
+      "unblocked_by": "返金は不可逆。承認境界を決めるまで実装しない"
     },
     {
       "area": "⑧ カスタマーサポート",
       "task": "App Store レビュー返信",
       "executor": "nobody",
       "evidence": [],
-      "note": "ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先"
+      "note": "ASC APIで可能だが未着手。レビュー返信は公開されるので文面の承認境界が先",
+      "blocker": "approval_design_first",
+      "unblocked_by": "公開される文面。承認境界を決めてから。ASC APIそのものは可能"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1276,7 +1382,9 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**"
+      "note": "2026-08-22。**計測する接点のうち「問い合わせ」はできた**（inquiry.ts）が、返信の自動化が無いので発火しない。answered のものだけ受ける設計にしてあり、返信を人がやった件だけ測れる。**まだ1件も測っていない**",
+      "blocker": "approval_design_first",
+      "unblocked_by": "返信の自動化が無いので発火しない。返信の承認境界が先"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1297,7 +1405,9 @@
       "evidence": [
         "../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md"
       ],
-      "note": "手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）"
+      "note": "手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）",
+      "blocker": "external_data",
+      "unblocked_by": "同上（問い合わせ本文がD1）"
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -1314,7 +1424,9 @@
       "task": "価格・プラン・ペイウォールの実験",
       "executor": "nobody",
       "evidence": [],
-      "note": "課金は不可逆で既存契約者への影響が読めない。権限表でAIは提案もしない扱い"
+      "note": "課金は不可逆で既存契約者への影響が読めない。権限表でAIは提案もしない扱い",
+      "blocker": "policy_boundary",
+      "unblocked_by": "権限表で AI は提案もしない（既存契約者への影響が読めない）"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1323,7 +1435,9 @@
       "evidence": [
         "../simplememo-ios/docs/reports/ONBOARDING_REDESIGN_2026-08-06.md"
       ],
-      "note": "データ起点の再設計。実施は人の判断"
+      "note": "データ起点の再設計。実施は人の判断",
+      "blocker": "policy_boundary",
+      "unblocked_by": "課金導線の変更判断が人"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1332,7 +1446,9 @@
       "evidence": [
         "../simplememo-ios/docs/obsidian-only-mode-design.md"
       ],
-      "note": "Obsidianのみモードをプレミアム限定にする判断はオーナー"
+      "note": "Obsidianのみモードをプレミアム限定にする判断はオーナー",
+      "blocker": "policy_boundary",
+      "unblocked_by": "何を有料にするかはオーナー判断"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1342,21 +1458,27 @@
         "growth/scripts/ingest-asc.mjs",
         "data/financial-policy.json"
       ],
-      "note": "2026-08-22にASC取得の配線が入った（③参照）。Analytics Reports の Subscription 系に解約理由が含まれる見込みだが、**まだ取得していないので確認できていない。**含まれなければアプリ内の導線が要る"
+      "note": "2026-08-22にASC取得の配線が入った（③参照）。Analytics Reports の Subscription 系に解約理由が含まれる見込みだが、**まだ取得していないので確認できていない。**含まれなければアプリ内の導線が要る",
+      "blocker": "external_data",
+      "unblocked_by": "ASC Analytics の Subscription 系がまだ降りていない"
     },
     {
       "area": "⑨ マネタイズ",
       "task": "課金失敗の回復",
       "executor": "nobody",
       "evidence": [],
-      "note": "StoreKit側の失敗イベントを受ける経路が未実装"
+      "note": "StoreKit側の失敗イベントを受ける経路が未実装",
+      "blocker": "not_started",
+      "unblocked_by": "StoreKit の失敗イベントを受ける経路を作れば動く"
     },
     {
       "area": "⑨ マネタイズ",
       "task": "返金・不正課金・チャージバック対応",
       "executor": "nobody",
       "evidence": [],
-      "note": "金銭が動く不可逆な操作。承認境界の設計が先"
+      "note": "金銭が動く不可逆な操作。承認境界の設計が先",
+      "blocker": "approval_design_first",
+      "unblocked_by": "金銭が動く不可逆操作"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1374,7 +1496,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "AIは提案もしない（不可逆・既存契約者への影響が読めない）"
+      "note": "AIは提案もしない（不可逆・既存契約者への影響が読めない）",
+      "blocker": "policy_boundary",
+      "unblocked_by": "不可逆・既存契約者に影響"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
@@ -1392,7 +1516,9 @@
       "evidence": [
         "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
-      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可"
+      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可",
+      "blocker": "structural",
+      "unblocked_by": "同上（セッションログが外部から読めない）"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
@@ -1517,7 +1643,9 @@
       "task": "収集同意",
       "executor": "ai_proposes",
       "evidence": [],
-      "note": "App Analytics共有オプトイン依存"
+      "note": "App Analytics共有オプトイン依存",
+      "blocker": "policy_boundary",
+      "unblocked_by": "App Analytics 共有オプトイン依存。ユーザー本人の同意"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1556,7 +1684,9 @@
         "data/authority-matrix.json"
       ],
       "note": "2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。\n\n実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。\n\n**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない",
-      "since": "2026-08"
+      "since": "2026-08",
+      "blocker": "policy_boundary",
+      "unblocked_by": "権限表が human_only[実行の承認] と定めている"
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -1610,7 +1740,9 @@
       "evidence": [
         "../simplememo-ios/docs/VISION.md"
       ],
-      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの"
+      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの",
+      "blocker": "policy_boundary",
+      "unblocked_by": "VISION §14 の未決定論点。決めてから着手する"
     },
     {
       "area": "⑫ 事業継続性",
@@ -1722,7 +1854,9 @@
       "task": "イベント: 候補選定・見積比較・発注・リード集計",
       "executor": "nobody",
       "evidence": [],
-      "note": "AIが担える設計だが未着手"
+      "note": "AIが担える設計だが未着手",
+      "blocker": "not_started",
+      "unblocked_by": "AIが担える設計。着手していないだけ"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1731,14 +1865,18 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "物理領域。人間が担う"
+      "note": "物理領域。人間が担う",
+      "blocker": "physical_human",
+      "unblocked_by": "現地作業"
     },
     {
       "area": "⑬ アナログ領域",
       "task": "人事: 募集・候補抽出・日程調整・書類作成",
       "executor": "nobody",
       "evidence": [],
-      "note": "未着手"
+      "note": "未着手",
+      "blocker": "not_started",
+      "unblocked_by": "同上。ただし現在は従業員がいない"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1747,14 +1885,18 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "人間が担う"
+      "note": "人間が担う",
+      "blocker": "physical_human",
+      "unblocked_by": "対人・法的責任"
     },
     {
       "area": "⑬ アナログ領域",
       "task": "公的資金: 制度探索・期限管理・申請書下書き",
       "executor": "nobody",
       "evidence": [],
-      "note": "未着手"
+      "note": "未着手",
+      "blocker": "not_started",
+      "unblocked_by": "制度の探索に外部検索が要るが、期限管理と下書きは作れる"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1763,7 +1905,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "人間が担う"
+      "note": "人間が担う",
+      "blocker": "physical_human",
+      "unblocked_by": "法的責任を伴う表明"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1773,7 +1917,9 @@
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs"
       ],
-      "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ"
+      "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ",
+      "blocker": "missing_source_document",
+      "unblocked_by": "契約書がリポジトリに無い"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1782,14 +1928,18 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "人間が担う"
+      "note": "人間が担う",
+      "blocker": "policy_boundary",
+      "unblocked_by": "高額・不可逆"
     },
     {
       "area": "⑬ アナログ領域",
       "task": "R&D: 調査・仮説・プロトタイプ・実験",
       "executor": "ai_proposes",
       "evidence": [],
-      "note": "本セッション自体がその実例（調査→実装→検証）"
+      "note": "本セッション自体がその実例（調査→実装→検証）",
+      "blocker": "not_started",
+      "unblocked_by": "実例はあるが定型の実行経路が無い"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1798,14 +1948,18 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "人間が担う"
+      "note": "人間が担う",
+      "blocker": "policy_boundary",
+      "unblocked_by": "投資判断"
     },
     {
       "area": "⑬ アナログ領域",
       "task": "営業: リード選定・メール・提案書",
       "executor": "nobody",
       "evidence": [],
-      "note": "未着手"
+      "note": "未着手",
+      "blocker": "not_started",
+      "unblocked_by": "同上"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1814,7 +1968,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "人間が担う"
+      "note": "人間が担う",
+      "blocker": "physical_human",
+      "unblocked_by": "対人交渉"
     },
     {
       "area": "⑬ アナログ領域",
@@ -1823,7 +1979,9 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "自動停止して経営者へ移管する方針。手順は未整備"
+      "note": "自動停止して経営者へ移管する方針。手順は未整備",
+      "blocker": "policy_boundary",
+      "unblocked_by": "事故対応は自動停止して人へ移管する設計"
     }
   ],
   "$since_note": [

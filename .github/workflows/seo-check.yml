@@ -183,6 +183,29 @@ jobs:
       # 数字が上がるようになる。だから ai_autonomous / ai_executes_gated は
       # 証跡ファイルの実在を強制し、nobody は「なぜ無いか」を強制する。
       # 理由の無い未実装は、次の棚卸しで拾えない。
+      # 【自律度の到達可能上限】61.5% という数字は、放っておくと
+      # 「あと38.5%ぶん実装すれば埋まる」と読まれる。実際にはAIが実行していない
+      # 67タスクのうち実装量で解けるのは32件で、22件は**意図的に人へ残した境界**、
+      # 14件は物理・対人・観測不能・検出力不足で、渡しても実行できない。
+      #
+      # ここが見るのは、その分類が**全件あること**と、
+      # **境界と不能を到達可能側に数えていないこと**。
+      # この2つを緩めると、この台帳は「頑張れば95%に行けます」と言う道具になり、
+      # 目標値を置いたときに達成する方法が「境界を渡す」しか無くなる。
+      - name: Autonomy gap ledger
+        run: |
+          node scripts/autonomy-gap.mjs --selftest
+          node scripts/autonomy-gap.mjs --check
+
+      # 【取り込み復旧】落ちた回に機械が取る手の判断を、実行で確かめる。
+      # --selftest は台帳を読まないので、記録が増えても壊れない。
+      # check() の本体は「人にしかできない手が要る回を recovered: true にしていないか」で、
+      # ここを緩めると自動復旧率が**人が直した回を数えた数字**になる。
+      - name: Ingest recovery
+        run: |
+          node scripts/recover-ingest.mjs --selftest
+          node scripts/recover-ingest.mjs --check
+
       - name: Automation coverage ledger
         run: node scripts/automation-rate.mjs --check
 
