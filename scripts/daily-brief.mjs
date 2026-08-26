@@ -73,6 +73,129 @@ export function build() {
   };
 }
 
+/**
+ * 1枚が台帳と一致していることを確かめる。
+ *
+ * [2026-08-26] **これまでの `--check` は構造的に落ちなかった。**
+ *
+ *     if (!b.date_jst || b.automation.overall === undefined)
+ *
+ * `date_jst` は `new Date()` から作るので常に真、`automation.overall` は
+ * 壊れた台帳でも `Number(NaN.toFixed(1))` = NaN になり **undefined にはならない**。
+ * つまりこの条件は片方も成立しえず、「生成できた」と出すだけの行だった。
+ *
+ * 代わりに、この1枚が自分で掲げている不変条件をそのまま検査する ——
+ * **新しい情報を作らない。数字はすべて台帳が正。**
+ * 手で書き足した数字はここで台帳と食い違う。
+ */
+export function verify(b, sources = null) {
+  const problems = [];
+  const src = sources ?? {
+    coverage: summarizeCoverage(read('data/automation-coverage.json')),
+    budget: summarizeBudget(read('data/autopilot-cost.json')),
+    heal: analyzeSelfheal(read('data/autopilot-runs.json'), read('data/authority-matrix.json')),
+  };
+
+  // 1. 数が数であること。**NaN を「生成できた」と呼ばない。**
+  for (const [k, v] of [
+    ['budget.spent', b.budget?.spent], ['budget.cap', b.budget?.cap],
+    ['automation.overall', b.automation?.overall],
+    ['automation.coverage', b.automation?.coverage],
+    ['automation.nobody', b.automation?.nobody],
+  ]) {
+    if (!Number.isFinite(v)) {
+      problems.push(`${k} が有限の数でない（${v}）— **台帳のどれかが読めていない**`);
+    }
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date_jst || '')) problems.push(`date_jst が日付でない（${b.date_jst}）`);
+
+  // 2. 台帳が正であること。1枚の数字は、集計関数の返り値と一致する。
+  const eq = (got, want, k) => {
+    if (!Number.isFinite(got) || !Number.isFinite(want)) return; // 1 で報告済み
+    if (Math.abs(got - want) > 1e-6) {
+      problems.push(`${k}: 1枚 ${got} / 台帳 ${want}`
+        + ' — **手で書き足すと、台帳と1枚のどちらが正か分からなくなる**');
+    }
+  };
+  eq(b.budget?.spent, src.budget.spent, 'budget.spent');
+  eq(b.budget?.cap, src.budget.cap, 'budget.cap');
+  eq(b.automation?.overall,
+    Number((src.coverage.overall.overall_automation_rate * 100).toFixed(1)), 'automation.overall');
+  eq(b.automation?.coverage,
+    Number((src.coverage.overall.coverage_rate * 100).toFixed(1)), 'automation.coverage');
+  eq(b.automation?.nobody, src.coverage.overall.counts.nobody, 'automation.nobody');
+  const healN = (src.heal.targets || []).length;
+  if ((b.unrepaired_failures || []).length !== healN) {
+    problems.push(`unrepaired_failures: 1枚 ${(b.unrepaired_failures || []).length} 件 / 判定 ${healN} 件`
+      + ' — **数え直すと、レーンFの判定と1枚の表示がずれる**');
+  }
+  return problems;
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+if (process.argv.includes('--selftest')) {
+  const clone = (x) => JSON.parse(JSON.stringify(x));
+  const SCENARIOS = [
+    ['実データの1枚が台帳と一致する', () => {
+      const p = verify(build());
+      if (p.length) throw new Error(p.join(' / '));
+    }],
+    ['**実費を手で書き換えたら落ちる**（台帳が正）', () => {
+      const b = clone(build());
+      b.budget.spent += 1;
+      if (!verify(b).some((x) => x.includes('budget.spent'))) {
+        throw new Error('食い違いを見逃した（**どちらが正か分からなくなる**）');
+      }
+    }],
+    ['**自動化率を手で書き換えたら落ちる**', () => {
+      const b = clone(build());
+      b.automation.overall = 99.9;
+      if (!verify(b).some((x) => x.includes('automation.overall'))) throw new Error('見逃した');
+    }],
+    ['**未実装の件数を手で減らしたら落ちる**', () => {
+      const b = clone(build());
+      b.automation.nobody -= 1;
+      if (!verify(b).some((x) => x.includes('automation.nobody'))) throw new Error('見逃した');
+    }],
+    ['**未修理の故障を数え直したら落ちる**（レーンFの判定とずれる）', () => {
+      const b = clone(build());
+      b.unrepaired_failures = [...b.unrepaired_failures, { run_id: 'x' }];
+      if (!verify(b).some((x) => x.includes('unrepaired_failures'))) throw new Error('見逃した');
+    }],
+    ['**NaN を「生成できた」と呼ばない**（旧 --check が落ちなかった形）', () => {
+      const b = clone(build());
+      b.automation.overall = Number((undefined * 100).toFixed(1)); // NaN
+      if (b.automation.overall === undefined) throw new Error('前提が違う: undefined になった');
+      if (!verify(b).some((x) => x.includes('有限の数でない'))) {
+        throw new Error('NaN を通した（**旧実装はここで「生成できた」と出していた**）');
+      }
+    }],
+    ['date_jst が日付でなければ落ちる', () => {
+      const b = clone(build());
+      b.date_jst = 'きょう';
+      if (!verify(b).some((x) => x.includes('date_jst'))) throw new Error('見逃した');
+    }],
+    ['**緊急停止が1枚の先頭に出る**（停止中なら以降を読む必要が無い）', () => {
+      const b = build();
+      if (typeof b.emergency_stop?.stopped !== 'boolean') throw new Error('停止スイッチが真偽値でない');
+    }],
+    ['**副系の実費が0ではなく未観測だと分かる**', () => {
+      const b = build();
+      if (typeof b.budget.ccr_measured !== 'boolean') throw new Error('ccr_measured が真偽値でない');
+    }],
+    ['一致していれば何も言わない（常に鳴る検査も何も見ていない）', () => {
+      if (verify(build()).length) throw new Error('素の1枚で鳴った');
+    }],
+  ];
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const b = build();
@@ -121,10 +244,12 @@ if (isMain) {
   console.log(L.join('\n'));
 
   if (process.argv.includes('--check')) {
-    if (!b.date_jst || b.automation.overall === undefined) {
-      console.error('1枚を生成できない — 台帳のどれかが読めていない');
+    const problems = verify(b);
+    if (problems.length) {
+      console.error('\n1枚が台帳と食い違っている:');
+      for (const p of problems) console.error(`  - ${p}`);
       process.exit(1);
     }
-    console.log('\n  生成できた（台帳6件を1枚に圧縮）。');
+    console.log('\n  生成できた（台帳6件を1枚に圧縮）。**数字は台帳と一致している。**');
   }
 }
