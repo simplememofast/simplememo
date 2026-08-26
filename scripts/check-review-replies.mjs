@@ -35,6 +35,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkText } from './check-pr-facts.mjs';
+import { requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const REPLIES_PATH = path.join(ROOT, 'data/review-replies.json');
@@ -70,7 +71,11 @@ const PROMISE_PATTERNS = [
   { re: /v?\d+\.\d+(\.\d+)?\s*で(対応|修正|追加)/, what: '版を名指しで約束している' },
 ];
 
-export function validate(doc, { intakeIds = new Set() } = {}) {
+/**
+ * @param {Set|null} intakeIds  捌いたレビューの id。**null は「照合しない」**で、
+ *   空の Set は「捌いたレビューが1件も無い」。この2つは違う。
+ */
+export function validate(doc, { intakeIds = null } = {}) {
   const problems = [];
   const seen = new Set();
 
@@ -81,7 +86,14 @@ export function validate(doc, { intakeIds = new Set() } = {}) {
     seen.add(r.review_id);
 
     // 捌いていないレビューに返信しない。**分類より先に文面を書かない。**
-    if (intakeIds.size && !intakeIds.has(r.review_id)) {
+    //
+    // [2026-08-26] ここは `intakeIds.size && !intakeIds.has(...)` だった。
+    // **捌いた台帳が空だと、この規則が丸ごと消える。**
+    // 空 = 「1件も捌いていない」なので、下書きが在るなら全部が違反のはず。
+    // それを「照合する相手が無いから飛ばす」と読んでいた。
+    // 公開は取り消せない（見た人が見なかったことにはならない）ので、
+    // **ここを緩める方向の既定は置かない。**
+    if (intakeIds && !intakeIds.has(r.review_id)) {
       problems.push(`${at}: review-intake.json に無いレビューへの下書き`
         + ' — **どう処理するかを決める前に文面を書かない**');
     }
@@ -137,6 +149,13 @@ function selftest() {
   const has = (doc, needle) => validate(doc, { intakeIds: ids }).some((p) => p.includes(needle));
 
   t('普通の下書きは通る', validate(base(), { intakeIds: ids }).length === 0);
+  // [2026-08-26] **空の台帳で規則が消える形**を固定する。
+  t('**捌いた台帳が空なら下書きは全部違反**（空を「照合しない」と読まない）',
+    validate(base(), { intakeIds: new Set() })
+      .some((p) => p.includes('review-intake.json に無い')));
+  t('null は「照合しない」（空の Set とは別）',
+    validate(base(), { intakeIds: null })
+      .every((p) => !p.includes('review-intake.json に無い')));
   t('捌いていないレビューへの下書きは落ちる',
     has({ replies: [{ review_id: 'zzz', draft: 'x' }] }, 'review-intake.json に無い'));
 
@@ -180,7 +199,9 @@ if (isMain) {
 
   const doc = JSON.parse(fs.readFileSync(REPLIES_PATH, 'utf8'));
   const intake = JSON.parse(fs.readFileSync(INTAKE_PATH, 'utf8'));
-  const intakeIds = new Set((intake.dispositions || []).map((d) => d.review_id));
+  requireShape(intake, ['dispositions'], { what: 'data/review-intake.json',
+    why: '捌いたかどうかを照合できない（**公開は取り消せない**）' });
+  const intakeIds = new Set(intake.dispositions.map((d) => d.review_id));
   const problems = validate(doc, { intakeIds });
 
   const drafted = (doc.replies || []).filter((r) => !r.posted_at);

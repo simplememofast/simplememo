@@ -79,6 +79,20 @@ const NEGATIONS_EN = [
 /** 起動時間の実測値（data/benchmark.json が正）。 */
 const READY = BENCHMARK.apps?.[CONSTANTS.appNameEn]?.ready;
 
+/**
+ * 起動時間の主張を、実測に当てる。**正が無いときは「合っている」ではない。**
+ *
+ * [2026-08-26] ここは `READY !== undefined && ...` と書かれていて、
+ * **実測が読めないとこの規則は一度も発火しなかった。**
+ * benchmark.json を空にすると「起動 約9.9秒」がそのまま通ることを実測した。
+ * 速度はこのプロダクトの訴求そのものなので、
+ * **実測が読めないまま数字を書かせる側へ倒さない。**
+ */
+export function launchTimeSuspect(claimed, ready) {
+  if (ready === undefined || ready === null) return true;  // 検証できない
+  return claimed !== ready;
+}
+
 const RULES = [
   {
     id: 'old-app-name',
@@ -91,10 +105,19 @@ const RULES = [
     id: 'stale-launch-time',
     // 起動 + 秒 の組み合わせで、実測値と違う数字。
     pattern: /起動[^。\n]{0,12}?([0-9]+(?:\.[0-9]+)?)\s*秒/g,
-    check: (m) => READY !== undefined && Number(m[1]) !== READY,
-    message: (m) => `起動時間が「${m[1]}秒」。実測は ${READY}秒`
-      + `（${BENCHMARK.measuredOn?.device} / ${BENCHMARK.measuredOn?.os} / v${BENCHMARK.measuredOn?.ourAppVersion}`
-      + ` / ${BENCHMARK.measuredOn?.date}実測・data/benchmark.json が正）`,
+    // [2026-08-26] ここは `READY !== undefined && ...` だった。
+    // **実測が読めないと、この規則は一度も発火しない。**
+    // benchmark.json を空にすると「起動 約9.9秒」がそのまま通ることを実測した。
+    // 正が無いなら「合っている」ではなく「**検証できない**」。
+    // 速度はこのプロダクトの訴求そのものなので、
+    // 実測が読めないまま数字を書かせる側へ倒さない。
+    check: (m) => launchTimeSuspect(Number(m[1]), READY),
+    message: (m) => (READY === undefined
+      ? `起動時間「${m[1]}秒」を**検証できない** — data/benchmark.json に`
+        + ` ${CONSTANTS.appNameEn} の ready が無い。**実測が読めないまま速度を書かない**`
+      : `起動時間が「${m[1]}秒」。実測は ${READY}秒`
+        + `（${BENCHMARK.measuredOn?.device} / ${BENCHMARK.measuredOn?.os} / v${BENCHMARK.measuredOn?.ourAppVersion}`
+        + ` / ${BENCHMARK.measuredOn?.date}実測・data/benchmark.json が正）`),
   },
   {
     id: 'abolished-trial',

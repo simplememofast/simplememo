@@ -60,6 +60,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
@@ -1529,13 +1530,33 @@ function selftest() {
 // ============================================================
 // CLI
 // ============================================================
+/**
+ * 台帳を読む。**「無い」と「読めない」を混ぜない。**
+ *
+ * [2026-08-26] これまでは `try { JSON.parse(...) } catch { return fallback }` で、
+ * **構文が壊れたファイルを既定値に落としていた。**実測すると
+ * `data/authority-matrix.json` を壊しても `--check` は exit 0 を返した ——
+ * 権限表が空になると classify は全部 human を返す（安全側ではある）が、
+ * **壊れていることを誰も知らないまま縮退で走り続ける。**
+ *
+ * 無い（初回など）は既定でよい。読めないのは止める。
+ */
 function readJson(p, fallback = null) {
-  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return fallback; }
+  if (!fs.existsSync(p)) return fallback;
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (e) {
+    throw new Error(`${p} を読めない（${e.message}）`
+      + ' — **壊れた台帳を既定値に落とさない。**「無い」と「読めない」は違う');
+  }
 }
 
 async function buildContext(today) {
   const runsDoc = readJson(RUNS_PATH, { runs: [] });
-  const matrix = readJson(MATRIX_PATH, {});
+  // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
+  // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
+  const matrix = requireShape(readJson(MATRIX_PATH, {}), ['self_repair'],
+    { what: 'data/authority-matrix.json', why: '所有者の判定が成り立たない' });
   const costDoc = readJson(COST_PATH, null);
   const statusDoc = readJson(STATUS_PATH, null);
   const repo = process.env.GITHUB_REPOSITORY || 'simplememofast/simplememo';
@@ -1586,7 +1607,10 @@ async function main() {
     console.error(`${ACTIONS_PATH} を読めない。台帳が無いと何も判定できない。`);
     process.exit(1);
   }
-  const matrix = readJson(MATRIX_PATH, {});
+  // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
+  // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
+  const matrix = requireShape(readJson(MATRIX_PATH, {}), ['self_repair'],
+    { what: 'data/authority-matrix.json', why: '所有者の判定が成り立たない' });
 
   if (has('check')) {
     const problems = validateLedger(ledger, matrix);

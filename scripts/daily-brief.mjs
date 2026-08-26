@@ -29,6 +29,7 @@ import { fileURLToPath } from 'node:url';
 import { summarize as summarizeCoverage } from './automation-rate.mjs';
 import { summarize as summarizeBudget } from './autopilot-budget.mjs';
 import { analyze as analyzeSelfheal } from './autopilot-selfheal.mjs';
+import { requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
@@ -43,11 +44,30 @@ export function build() {
 
   // 未修理の故障は**自己修復の判定をそのまま使う。**ここで数え直すと、
   // レーンFの判定と1枚の表示がずれる — 「台帳と1枚のどちらが正か」を自分で作ることになる。
-  const heal = analyzeSelfheal(read('data/autopilot-runs.json'), read('data/authority-matrix.json'));
+  // 権限表が形をしていなければ、レーンFの判定は成り立たない。
+  // **空の権限表で「未修理の故障なし」と書かない。**
+  const heal = analyzeSelfheal(
+    read('data/autopilot-runs.json'),
+    requireShape(read('data/authority-matrix.json'), ['self_repair'],
+      { what: 'data/authority-matrix.json', why: 'レーンFの判定が成り立たない' }),
+  );
 
   return {
     date_jst: new Date().toISOString().slice(0, 10),
-    emergency_stop: { stopped: Boolean(stop.stopped), reason: stop.reason ?? null },
+    // **停止スイッチは「読めたか」を分けて持つ。**
+    //
+    // [2026-08-26] ここは Boolean(stop.stopped) だけだった。stop が {} でも
+    // false になり、1枚は「停止スイッチ: 稼働中」と書く ——
+    // **止まっているかどうかを読めていないのに、止まっていないと言う。**
+    // 止める仕組みそのものは無事で（ワークフローは require が投げれば
+    // set -e で落ちる／CI は空の台帳を弾く）、間違っていたのは表示のほう。
+    // それでも直す: この1枚は毎朝のセッションが最初に読むもので、
+    // ここに書いてあることが「確かめた」と受け取られる。
+    emergency_stop: {
+      readable: typeof stop?.stopped === 'boolean',
+      stopped: Boolean(stop?.stopped),
+      reason: stop?.reason ?? null,
+    },
     // 停止中なら以降は読む必要が無い。**1枚の最初に置く。**
     last_production_change: status.streak?.last_production_change_date_jst ?? null,
     consecutive_no_article_days: status.streak?.consecutive_no_article_days ?? null,
@@ -58,6 +78,14 @@ export function build() {
       by_task: Object.fromEntries(Object.entries(budget.by_task.kinds)
         .map(([k, v]) => [k, { spent: Number(v.spent.toFixed(4)), cap: v.cap, over: v.over }])),
       ccr_measured: budget.ccr_measured,
+      // **1回あたりの上限を判定できたか。**null は「超過なし」ではなく
+      // 「model-routing.json が読めず判定できなかった」。
+      // [2026-08-26] ここまで1枚はこの値を落としていた。autopilot-budget は
+      // 正しく null を返していて（「超過なしと混ぜると routing を消すだけで
+      // 上限が消える」）、**受け取る側が捨てていた。**
+      // 記録して読まない値は、記録していないのと同じ。
+      run_caps_judged: budget.run_caps !== null && budget.run_caps !== undefined,
+      run_caps_overruns: budget.run_caps?.overruns?.length ?? null,
     },
     lane_f_required: Boolean(heal.lane_f_required),
     unrepaired_failures: (heal.targets || []).map((r) => ({
@@ -71,6 +99,160 @@ export function build() {
     },
     owner_requests: status.owner_requests ?? [],
   };
+}
+
+/**
+ * 1枚が台帳と一致していることを確かめる。
+ *
+ * [2026-08-26] **これまでの `--check` は構造的に落ちなかった。**
+ *
+ *     if (!b.date_jst || b.automation.overall === undefined)
+ *
+ * `date_jst` は `new Date()` から作るので常に真、`automation.overall` は
+ * 壊れた台帳でも `Number(NaN.toFixed(1))` = NaN になり **undefined にはならない**。
+ * つまりこの条件は片方も成立しえず、「生成できた」と出すだけの行だった。
+ *
+ * 代わりに、この1枚が自分で掲げている不変条件をそのまま検査する ——
+ * **新しい情報を作らない。数字はすべて台帳が正。**
+ * 手で書き足した数字はここで台帳と食い違う。
+ */
+export function verify(b, sources = null) {
+  const problems = [];
+  const src = sources ?? {
+    coverage: summarizeCoverage(read('data/automation-coverage.json')),
+    budget: summarizeBudget(read('data/autopilot-cost.json')),
+    heal: analyzeSelfheal(read('data/autopilot-runs.json'), read('data/authority-matrix.json')),
+  };
+
+  // 1. 数が数であること。**NaN を「生成できた」と呼ばない。**
+  for (const [k, v] of [
+    ['budget.spent', b.budget?.spent], ['budget.cap', b.budget?.cap],
+    ['automation.overall', b.automation?.overall],
+    ['automation.coverage', b.automation?.coverage],
+    ['automation.nobody', b.automation?.nobody],
+  ]) {
+    if (!Number.isFinite(v)) {
+      problems.push(`${k} が有限の数でない（${v}）— **台帳のどれかが読めていない**`);
+    }
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(b.date_jst || '')) problems.push(`date_jst が日付でない（${b.date_jst}）`);
+  if (typeof b.emergency_stop?.readable !== 'boolean') {
+    problems.push('emergency_stop.readable が真偽値でない'
+      + ' — **読めたかどうかを1枚が持っていない**（読めないのを「稼働中」と書く形に戻っている）');
+  }
+  if (typeof b.budget?.run_caps_judged !== 'boolean') {
+    problems.push('budget.run_caps_judged が真偽値でない'
+      + ' — **判定できたかどうかを1枚が持っていない**（null を「超過なし」と混ぜる形に戻っている）');
+  }
+
+  // 2. 台帳が正であること。1枚の数字は、集計関数の返り値と一致する。
+  const eq = (got, want, k) => {
+    if (!Number.isFinite(got) || !Number.isFinite(want)) return; // 1 で報告済み
+    if (Math.abs(got - want) > 1e-6) {
+      problems.push(`${k}: 1枚 ${got} / 台帳 ${want}`
+        + ' — **手で書き足すと、台帳と1枚のどちらが正か分からなくなる**');
+    }
+  };
+  eq(b.budget?.spent, src.budget.spent, 'budget.spent');
+  eq(b.budget?.cap, src.budget.cap, 'budget.cap');
+  eq(b.automation?.overall,
+    Number((src.coverage.overall.overall_automation_rate * 100).toFixed(1)), 'automation.overall');
+  eq(b.automation?.coverage,
+    Number((src.coverage.overall.coverage_rate * 100).toFixed(1)), 'automation.coverage');
+  eq(b.automation?.nobody, src.coverage.overall.counts.nobody, 'automation.nobody');
+  const healN = (src.heal.targets || []).length;
+  if ((b.unrepaired_failures || []).length !== healN) {
+    problems.push(`unrepaired_failures: 1枚 ${(b.unrepaired_failures || []).length} 件 / 判定 ${healN} 件`
+      + ' — **数え直すと、レーンFの判定と1枚の表示がずれる**');
+  }
+  return problems;
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+if (process.argv.includes('--selftest')) {
+  const clone = (x) => JSON.parse(JSON.stringify(x));
+  const SCENARIOS = [
+    ['実データの1枚が台帳と一致する', () => {
+      const p = verify(build());
+      if (p.length) throw new Error(p.join(' / '));
+    }],
+    ['**実費を手で書き換えたら落ちる**（台帳が正）', () => {
+      const b = clone(build());
+      b.budget.spent += 1;
+      if (!verify(b).some((x) => x.includes('budget.spent'))) {
+        throw new Error('食い違いを見逃した（**どちらが正か分からなくなる**）');
+      }
+    }],
+    ['**自動化率を手で書き換えたら落ちる**', () => {
+      const b = clone(build());
+      b.automation.overall = 99.9;
+      if (!verify(b).some((x) => x.includes('automation.overall'))) throw new Error('見逃した');
+    }],
+    ['**未実装の件数を手で減らしたら落ちる**', () => {
+      const b = clone(build());
+      b.automation.nobody -= 1;
+      if (!verify(b).some((x) => x.includes('automation.nobody'))) throw new Error('見逃した');
+    }],
+    ['**未修理の故障を数え直したら落ちる**（レーンFの判定とずれる）', () => {
+      const b = clone(build());
+      b.unrepaired_failures = [...b.unrepaired_failures, { run_id: 'x' }];
+      if (!verify(b).some((x) => x.includes('unrepaired_failures'))) throw new Error('見逃した');
+    }],
+    ['**NaN を「生成できた」と呼ばない**（旧 --check が落ちなかった形）', () => {
+      const b = clone(build());
+      b.automation.overall = Number((undefined * 100).toFixed(1)); // NaN
+      if (b.automation.overall === undefined) throw new Error('前提が違う: undefined になった');
+      if (!verify(b).some((x) => x.includes('有限の数でない'))) {
+        throw new Error('NaN を通した（**旧実装はここで「生成できた」と出していた**）');
+      }
+    }],
+    ['date_jst が日付でなければ落ちる', () => {
+      const b = clone(build());
+      b.date_jst = 'きょう';
+      if (!verify(b).some((x) => x.includes('date_jst'))) throw new Error('見逃した');
+    }],
+    ['**緊急停止が1枚の先頭に出る**（停止中なら以降を読む必要が無い）', () => {
+      const b = build();
+      if (typeof b.emergency_stop?.stopped !== 'boolean') throw new Error('停止スイッチが真偽値でない');
+    }],
+    ['**副系の実費が0ではなく未観測だと分かる**', () => {
+      const b = build();
+      if (typeof b.budget.ccr_measured !== 'boolean') throw new Error('ccr_measured が真偽値でない');
+    }],
+    ['**停止スイッチを読めたかを1枚が持つ**（読めないを「稼働中」と混ぜない）', () => {
+      const b = build();
+      if (typeof b.emergency_stop.readable !== 'boolean') throw new Error('readable が無い');
+      if (!b.emergency_stop.readable) throw new Error('実データで読めていない');
+    }],
+    ['**読めなかったことを落とす**（verify）', () => {
+      const b = clone(build());
+      delete b.emergency_stop.readable;
+      if (!verify(b).some((x) => x.includes('emergency_stop.readable'))) {
+        throw new Error('落とさなかった');
+      }
+    }],
+    ['**1回上限を判定できたかを1枚が持つ**（null を「超過なし」と混ぜない）', () => {
+      const b = build();
+      if (typeof b.budget.run_caps_judged !== 'boolean') throw new Error('run_caps_judged が無い');
+    }],
+    ['**判定できていない1枚は verify が落とす**', () => {
+      const b = clone(build());
+      delete b.budget.run_caps_judged;
+      if (!verify(b).some((x) => x.includes('run_caps_judged'))) {
+        throw new Error('落とさなかった（**判定できなかったことを落として緑になる**）');
+      }
+    }],
+    ['一致していれば何も言わない（常に鳴る検査も何も見ていない）', () => {
+      if (verify(build()).length) throw new Error('素の1枚で鳴った');
+    }],
+  ];
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -87,7 +269,13 @@ if (isMain) {
     console.log(L.join('\n'));
     process.exit(0);
   }
-  L.push(`  停止スイッチ: 稼働中`);
+  if (!b.emergency_stop.readable) {
+    L.push('  ■ **停止スイッチの状態を読めなかった**（emergency-stop.json に stopped が無い）');
+    L.push('    「稼働中」ではない。**止まっているかどうかが分からない状態を、動いていることにしない。**');
+    L.push('    data/emergency-stop.json を確かめること（CI の check-emergency-stop も落ちるはず）');
+  } else {
+    L.push(`  停止スイッチ: 稼働中`);
+  }
   L.push(`  本番最終変更: ${b.last_production_change} / 連続無記事 ${b.consecutive_no_article_days}日`);
   L.push(`  データ鮮度: BQ ${b.data_freshness?.bq_export_days_accumulated ?? '?'}/28日`
     + `（${b.data_freshness?.bq_checked ? '確認済み' : '**未確認 — 取得できなかった、の意味**'}）`);
@@ -98,6 +286,12 @@ if (isMain) {
     L.push(`    ${k.padEnd(10)} $${v.spent.toFixed(4)} / $${v.cap.toFixed(2)}${v.over ? '  **枠切れ**' : ''}`);
   }
   if (!b.budget.ccr_measured) L.push('    （副系の実費は0ではなく**未観測**）');
+  if (!b.budget.run_caps_judged) {
+    L.push('    **1回あたりの上限は判定できなかった**（model-routing.json が読めない）');
+    L.push('      — 「超過なし」ではない。routing を消すだけで上限が消える形を作らない');
+  } else if (b.budget.run_caps_overruns) {
+    L.push(`    1回上限の超過 ${b.budget.run_caps_overruns}件（未レビューがあれば主系は止まる）`);
+  }
   L.push('');
   if (b.unrepaired_failures.length) {
     L.push(`  ■ 未修理の故障 ${b.unrepaired_failures.length}件 — **記事より先にレーンFへ**`);
@@ -121,10 +315,12 @@ if (isMain) {
   console.log(L.join('\n'));
 
   if (process.argv.includes('--check')) {
-    if (!b.date_jst || b.automation.overall === undefined) {
-      console.error('1枚を生成できない — 台帳のどれかが読めていない');
+    const problems = verify(b);
+    if (problems.length) {
+      console.error('\n1枚が台帳と食い違っている:');
+      for (const p of problems) console.error(`  - ${p}`);
       process.exit(1);
     }
-    console.log('\n  生成できた（台帳6件を1枚に圧縮）。');
+    console.log('\n  生成できた（台帳6件を1枚に圧縮）。**数字は台帳と一致している。**');
   }
 }

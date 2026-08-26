@@ -24,7 +24,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkText } from './check-pr-facts.mjs';
+import { checkText, launchTimeSuspect } from './check-pr-facts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -125,6 +125,18 @@ const SCENARIOS = [
   ['script / style の中は見ない', () => {
     const r = scanText('x.html', '<script>var s = "7日間無料トライアル";</script>');
     if (r.violations.length) throw new Error('スクリプトの中を拾った');
+  }],
+  ['**実測が読めないときは「検証できない」**（合っていることにしない）', () => {
+    if (!launchTimeSuspect(0.4, undefined)) {
+      throw new Error('正が無いのに通した — **実測が読めないまま速度を書ける**');
+    }
+    if (!launchTimeSuspect(0.4, null)) throw new Error('null も同様に扱うこと');
+  }],
+  ['実測と一致すれば疑わない（常に鳴る検査も何も見ていない）', () => {
+    if (launchTimeSuspect(0.4, 0.4)) throw new Error('一致しているのに疑った');
+  }],
+  ['**実測と違えば疑う**', () => {
+    if (!launchTimeSuspect(9.9, 0.4)) throw new Error('違うのに通した');
   }],
   ['**toText が本文を落とさない**（全部落とせば何も検出できない）', () => {
     const t = toText('<div class="a"><p>本文はここ</p></div>');

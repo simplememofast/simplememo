@@ -89,12 +89,29 @@ export function validate(doc, { wired = wiredChecks(), exists = (p) => fs.exists
   }
 
   // ラチェット。**増える方向だけを止める。**
-  const none = rows.filter((r) => r.state === 'none').length;
-  const budget = doc.none_budget;
-  if (typeof budget !== 'number') problems.push('none_budget が数でない');
-  else if (none > budget) {
-    problems.push(`自己テストの無い検査が ${none} 本で、上限 ${budget} を超えた。`
-      + '**新しい検査は自己テスト付きで入れること**（上限を上げて通さない）');
+  //
+  // [2026-08-26] **上限は none にしか無かった。**none が 0 になった日に、
+  // 新しい検査はすべて selftest_only へ落ちるようになった —— そこに上限が
+  // 無いので、**同じ滞留がひとつ下の段で始まる。**
+  // 「自己テストを書いた」で止まり、「落ちるのを見た」まで行かない状態が
+  // 無制限に積める。段を下ろしただけでは、止める力は移らない。
+  const counts = {
+    none: rows.filter((r) => r.state === 'none').length,
+    selftest_only: rows.filter((r) => r.state === 'selftest_only').length,
+  };
+  const RATCHETS = [
+    ['none', 'none_budget', '自己テストの無い検査',
+      '**新しい検査は自己テスト付きで入れること**'],
+    ['selftest_only', 'selftest_only_budget', '落ちるのを見ていない検査',
+      '**壊して落ちるのを観測してから demonstrated にすること**'],
+  ];
+  for (const [state, key, label, advice] of RATCHETS) {
+    const budget = doc[key];
+    if (typeof budget !== 'number') { problems.push(`${key} が数でない`); continue; }
+    if (counts[state] > budget) {
+      problems.push(`${label}が ${counts[state]} 本で、上限 ${budget} を超えた。`
+        + `${advice}（上限を上げて通さない）`);
+    }
   }
   return problems;
 }
@@ -103,7 +120,11 @@ export function summarize(doc) {
   const rows = doc?.checks ?? [];
   const by = {};
   for (const s of STATES) by[s] = rows.filter((r) => r.state === s).length;
-  return { total: rows.length, by, none_budget: doc?.none_budget ?? null };
+  return {
+    total: rows.length, by,
+    none_budget: doc?.none_budget ?? null,
+    selftest_only_budget: doc?.selftest_only_budget ?? null,
+  };
 }
 
 export function render(doc) {
@@ -111,7 +132,7 @@ export function render(doc) {
   const L = ['検査が落ちることを確かめた記録（data/check-selftests.json）', ''];
   L.push(`  CI 配線 ${s.total} 本`);
   L.push(`    落ちるのを見た           ${s.by.demonstrated}`);
-  L.push(`    自己テストのみ（未観測） ${s.by.selftest_only}`);
+  L.push(`    自己テストのみ（未観測） ${s.by.selftest_only}（上限 ${s.selftest_only_budget}）`);
   L.push(`    自己テスト無し           ${s.by.none}（上限 ${s.none_budget}）`);
   L.push('');
   const dem = (doc.checks ?? []).filter((r) => r.state === 'demonstrated');
@@ -129,16 +150,16 @@ export function render(doc) {
 // ── 自己テスト（この検査自身が落ちることを固定する） ──────────────
 const SCENARIOS = [
   ['CI が走らせているのに台帳に無ければ落ちる', () => {
-    const p = validate({ checks: [], none_budget: 0 }, { wired: ['scripts/x.mjs'], exists: () => true });
+    const p = validate({ checks: [], none_budget: 0, selftest_only_budget: 0 }, { wired: ['scripts/x.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('台帳に無い')), p.join(' / '));
   }],
   ['台帳にあるのに CI が走らせていなければ落ちる', () => {
-    const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'none' }], none_budget: 9 },
+    const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'none' }], none_budget: 9, selftest_only_budget: 0 },
       { wired: [], exists: () => true });
     assert(p.some((x) => x.includes('CI が走らせていない')), p.join(' / '));
   }],
   ['**demonstrated に証跡が無ければ落ちる**（誰でも「見た」と書けてしまう）', () => {
-    const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'demonstrated' }], none_budget: 0 },
+    const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'demonstrated' }], none_budget: 0, selftest_only_budget: 0 },
       { wired: ['scripts/x.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('at（観測日）')), p.join(' / '));
     assert(p.some((x) => x.includes('broke')), p.join(' / '));
@@ -146,16 +167,33 @@ const SCENARIOS = [
   ['**ラチェット: none が上限を超えたら落ちる**', () => {
     const rows = [{ script: 'a.mjs', state: 'none' }, { script: 'b.mjs', state: 'none' }];
     const opt = { wired: ['a.mjs', 'b.mjs'], exists: () => true };
-    assert(validate({ checks: rows, none_budget: 2 }, opt).length === 0, '上限ちょうどは通る');
-    assert(validate({ checks: rows, none_budget: 1 }, opt).some((x) => x.includes('上限')), '超えたら落ちる');
+    const doc = (n) => ({ checks: rows, none_budget: n, selftest_only_budget: 0 });
+    assert(validate(doc(2), opt).length === 0, '上限ちょうどは通る');
+    assert(validate(doc(1), opt).some((x) => x.includes('上限')), '超えたら落ちる');
+  }],
+  ['**ラチェット: selftest_only にも上限がある**（段を下ろしただけでは止める力は移らない）', () => {
+    const rows = [{ script: 'a.mjs', state: 'selftest_only' },
+      { script: 'b.mjs', state: 'selftest_only' }];
+    const opt = { wired: ['a.mjs', 'b.mjs'], exists: () => true };
+    const doc = (n) => ({ checks: rows, none_budget: 0, selftest_only_budget: n });
+    assert(validate(doc(2), opt).length === 0, '上限ちょうどは通る');
+    const over = validate(doc(1), opt);
+    assert(over.some((x) => x.includes('落ちるのを見ていない検査')), over.join(' / '));
+  }],
+  ['**上限を書き忘れたら落ちる**（無ければ無制限、が一番危ない）', () => {
+    const opt = { wired: [], exists: () => true };
+    assert(validate({ checks: [], none_budget: 0 }, opt)
+      .some((x) => x.includes('selftest_only_budget が数でない')), 'selftest_only_budget の欠落');
+    assert(validate({ checks: [], selftest_only_budget: 0 }, opt)
+      .some((x) => x.includes('none_budget が数でない')), 'none_budget の欠落');
   }],
   ['知らない state は落ちる', () => {
-    const p = validate({ checks: [{ script: 'a.mjs', state: 'たぶん大丈夫' }], none_budget: 0 },
+    const p = validate({ checks: [{ script: 'a.mjs', state: 'たぶん大丈夫' }], none_budget: 0, selftest_only_budget: 0 },
       { wired: ['a.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('知らない state')), p.join(' / '));
   }],
   ['state が demonstrated でないのに観測記録があれば落ちる', () => {
-    const p = validate({ checks: [{ script: 'a.mjs', state: 'none', at: '2026-08-26' }], none_budget: 1 },
+    const p = validate({ checks: [{ script: 'a.mjs', state: 'none', at: '2026-08-26' }], none_budget: 1, selftest_only_budget: 0 },
       { wired: ['a.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('観測の記録がある')), p.join(' / '));
   }],

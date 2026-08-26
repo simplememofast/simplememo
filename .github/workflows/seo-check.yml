@@ -169,6 +169,66 @@ jobs:
       - name: Checks have been seen to fail
         run: node scripts/check-selftests.mjs --check
 
+      # 【正が無いと消える規則】4つのPRで7件出た形を、機械で洗い出す。
+      #
+      #   intakeIds.size && !intakeIds.has(id)   空の台帳 → 規則が丸ごと消える
+      #   READY !== undefined && n !== READY     実測が無い → 速度の規則が発火しない
+      #   doc.production_verified !== undefined  宣言を消すと突き合わせも消える
+      #
+      # **7件目まで運で見つけていた。**コメント・文字列・正規表現を潰したうえで
+      # 台帳由来の束縛だけを追うので、以前 102件の誤検出を出した走査とは別物。
+      #
+      # **判定ではなく棚卸し。**`a.stopped && !a.reason` のように、その鍵が在ることが
+      # 規則の前提である書き方は正しい。だから data/guard-shapes.json に
+      # 1件ずつ読んだ記録を持ち、**新しく増えた分だけ**を止める。
+      - name: Guards that vanish without ground truth
+        run: |
+          node scripts/check-guard-shapes.mjs --selftest
+          node scripts/check-guard-shapes.mjs --check
+
+      # 【書き出す側が、まだ動くか】CI は各検査の --selftest と --check を回すが、
+      # **--write は回さない。**生成器は「書いた結果」だけが検査されていて、
+      # 「書く動作そのもの」は誰も動かしていなかった。2026-08-26 に2件出た:
+      #
+      #   revenue-series --write が ReferenceError で落ちていた（**一度も成功していない**）
+      #   autonomy-timeline.svg が台帳から4日遅れ（見出し 18倍 / 台帳 9倍）
+      #
+      # **--run は作業ツリーを触る。**クリーンでなければ拒否し、走らせた後は
+      # 追跡下のファイルを戻し、作った新規ファイルも消す。CIのチェックアウトは
+      # 使い捨てなので安全側。実測で11本 1.3秒。
+      #
+      # 隣リポジトリが要るものは、**隣が無いとき非0で拒否するのが正しい。**
+      # CI では「拒否したこと」を確かめる（免除にしない）。
+      - name: Generators still run, artifacts not stale
+        run: |
+          node scripts/check-generators.mjs --selftest
+          node scripts/check-generators.mjs --check
+          node scripts/check-generators.mjs --run
+
+      # 【中期ロードマップ】日次のアクション台帳と個別バックログしか無く、
+      # **「次の四半期に何をやるか」を機械が組み立てる経路が無かった。**
+      # 日次の最適化だけが自動化されていると、短期に効く施策へ寄る。
+      #
+      # **日付を発明しない。**台帳に評価日があるものだけを暦に置き、
+      # 順番しか決まらないものは順番だけ出す。オーナーの手数が要るものを
+      # 機械の側と混ぜない（混ぜると「機械だけで届く」の主張が壊れる）。
+      - name: Mid-term roadmap is assembled, not invented
+        run: |
+          node scripts/roadmap.mjs --selftest
+          node scripts/roadmap.mjs --check
+
+      # 【検索意図の変化】単一スナップショットの分析はあったが、
+      # **窓をまたいだ比較が無かった。**同じクエリに Google が別のページを
+      # 当てるようになったら、検索側が解釈している意図が動いている。
+      #
+      # **出現・消滅は使わない。**スナップショットは行数上限（1000/900）で
+      # 切れており、最小表示回数は両窓とも1。「消えた」と「上限より下に落ちた」を
+      # 区別できないので、**区別できない差を意図の変化と呼ばない。**
+      - name: Search intent shifts across windows
+        run: |
+          node growth/scripts/search-intent.mjs --selftest
+          node growth/scripts/search-intent.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を

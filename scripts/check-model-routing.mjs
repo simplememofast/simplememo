@@ -47,6 +47,32 @@ export function resolve(doc, kind, unavailable = []) {
 }
 
 /**
+ * 「引かれない表は装飾」を要求しているなら、**引く側が実在すること。**
+ *
+ * [2026-08-26] `require_workflow_consumption && workflow !== null` の
+ * 後半に穴があった。実測:
+ *
+ *   ワークフローの --resolve 呼び出しを壊す → 捕まる
+ *   **ワークフローごと消す**                → **素通り（exit 0）**
+ *
+ * 配線を壊すのは止まるのに、丸ごと消すのは通る、では止めたことにならない。
+ * `require_workflow_consumption: true` は「引かれていること」の主張なので、
+ * **引く側が無いなら、その主張は確かめられない。**
+ *
+ * （前半の穴 —— 旗そのものを消す —— は #639 で boolean 必須にして塞いだ。
+ * 同じ条件に扉が2つあった。**片方だけ閉めても閉めたことにならない。**）
+ */
+export function workflowProblem(policy, workflowExists) {
+  if (!policy?.require_workflow_consumption) return null;
+  if (!workflowExists) {
+    return '.github/workflows/obsidian-autopilot.yml が無い'
+      + ' — **require_workflow_consumption が true なのに、引く側が実在しない。**'
+      + '「引かれない表は装飾」の検査が丸ごと消える';
+  }
+  return null;
+}
+
+/**
  * 段階的移管 — 試行回数からその回に使うモデルを決める。
  * **最後は必ず human。**モデルを並べただけだと失敗が無限に回る。
  */
@@ -63,6 +89,24 @@ export function validate(doc, { budgets = null, workflow = null } = {}) {
   const tiers = doc.tiers || [];
   const tierOf = (m) => doc.models?.[m];
   const cheapest = doc.policy?.cheapest_tier;
+
+  // [2026-08-26] **鍵を消すと規則が消える**形が2つあった。実測:
+  //
+  //   不可逆タスクを最安ティアへ                     → 捕まる
+  //   同じ違反のまま forbid_cheapest_for_irreversible を消す → **検出なし**
+  //   require_workflow_consumption を消す            → **exit 0**
+  //
+  // どちらも「切りたければ false と書く」ための旗で、**無いことは off ではない。**
+  // 宣言として false（レビューに残る）と、鍵が消えている（誰も気づかない）を分ける。
+  // 消えるのが「安さで失う額のほうが大きい」規則と「引かれない表は装飾」の検査なので、
+  // 黙って外れる側へ倒さない。
+  for (const flag of ['forbid_cheapest_for_irreversible', 'require_workflow_consumption']) {
+    if (typeof doc.policy?.[flag] !== 'boolean') {
+      problems.push(`policy.${flag} を true/false で明示すること`
+        + ' — **鍵が無いのは「切った」ではない。**'
+        + '切るならレビューに残る形（false）で書く');
+    }
+  }
 
   for (const [kind, r] of Object.entries(doc.rules || {})) {
     const at = `rules.${kind}`;
@@ -153,12 +197,43 @@ const SELFTEST_BREAKAGES = [
   ['**fallback が無い**のは落ちる（障害時に落ちる先が無い）', (d) => { const k = Object.keys(d.rules)[0]; delete d.rules[k].fallback; }],
   ['**fallback が model と同じ**なら落ちる（同じ場所へ落ちる）', (d) => { const k = Object.keys(d.rules)[0]; d.rules[k].fallback = d.rules[k].model; }],
   ['models に無いモデルを指したら落ちる', (d) => { const k = Object.keys(d.rules)[0]; d.rules[k].model = 'gpt-とても賢い'; }],
+  // [2026-08-26] **鍵を消すと規則が消える**形を固定する。
+  // 実測: 不可逆タスクを最安ティアへ → 捕まる。同じ違反のまま鍵を消す → **検出なし**。
+  ['**不可逆の禁止の鍵を消すと落ちる**（無いことは off ではない）',
+    (d) => { delete d.policy.forbid_cheapest_for_irreversible; }],
+  ['**ワークフロー消費の鍵を消すと落ちる**（引かれない表は装飾）',
+    (d) => { delete d.policy.require_workflow_consumption; }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8')),
   (d) => validate(d),
   SELFTEST_BREAKAGES,
 );
+
+// **宣言として false は通る。**壊し方の一覧（上）へ入れると
+// 「壊したのに問題が出ない」と言われるので、通ることを直接確かめる。
+// ここを一緒くたにすると、他の壊し方のせいで落ちているのに
+// 「false を受け付けた」と読めてしまう。
+SCENARIOS.push(
+  ['**引く側が無ければ落ちる**（配線を壊すのは止まるのに、消すのは通る、では止めていない）', () => {
+    const p = workflowProblem({ require_workflow_consumption: true }, false);
+    assert(p && p.includes('引く側が実在しない'), String(p));
+  }],
+  ['引く側が在れば通る', () => {
+    assert(workflowProblem({ require_workflow_consumption: true }, true) === null, '在るのに落とした');
+  }],
+  ['**要求していないなら、無くても落とさない**（false は宣言として正当）', () => {
+    assert(workflowProblem({ require_workflow_consumption: false }, false) === null,
+      '切ると宣言してあるのに落とした');
+  }]);
+SCENARIOS.push(['**false と書いてあれば通る**（切るならレビューに残る形で）', () => {
+  const d = JSON.parse(fs.readFileSync(ROUTING_PATH, 'utf8'));
+  d.policy.forbid_cheapest_for_irreversible = false;
+  d.policy.require_workflow_consumption = false;
+  const p = validate(d);
+  assert(!p.some((x) => x.includes('を true/false で明示')),
+    `false を宣言したのに落ちた: ${p.join(' / ')}`);
+}]);
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
@@ -192,8 +267,11 @@ if (isMain) {
 
   const budgets = fs.existsSync(COST_PATH)
     ? JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget?.task_budgets ?? null : null;
-  const workflow = fs.existsSync(WORKFLOW_PATH) ? fs.readFileSync(WORKFLOW_PATH, 'utf8') : null;
+  const workflowExists = fs.existsSync(WORKFLOW_PATH);
+  const workflow = workflowExists ? fs.readFileSync(WORKFLOW_PATH, 'utf8') : null;
   const problems = validate(doc, { budgets, workflow });
+  const wp = workflowProblem(doc.policy, workflowExists);
+  if (wp) problems.push(wp);
 
   console.log('モデルルーター — タスク種別 → モデル\n');
   for (const [kind, r] of Object.entries(doc.rules)) {

@@ -14,9 +14,11 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { readLedger, readLedgerScenarios } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
@@ -101,6 +103,10 @@ const SCENARIOS = ledgerScenarios(
   SELFTEST_BREAKAGES,
 );
 
+// **台帳の読み方そのもの**も、この検査から走らせる。
+// 壊れた台帳を既定値に落とすと、突き合わせが消えて「食い違いなし」と同じ見た目になる。
+SCENARIOS.push(...readLedgerScenarios(fs, os));
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
@@ -160,10 +166,27 @@ if (isMain) {
     console.log('    上限が設定されているのは AI実費と広報配信だけで、他は "unset"。\n');
   }
 
+  // **「無い」と「読めない」を分ける。**
+  //
+  // [2026-08-26] ここは catch で両方を飲み込んでいた。実測すると、
+  // credential-expiry.json を壊しただけで**この節が丸ごと消えた** ——
+  // いま実際に出ている食い違い1件も一緒に消える。
+  // 読めなかったことを、食い違いが無いことと同じ見た目にしない。
   let cross = [];
-  try {
-    cross = crossCheck(doc.vendors, readJSON('data/credential-expiry.json').credentials);
-  } catch { /* 台帳が無い環境では飛ばす */ }
+  const CRED = 'data/credential-expiry.json';
+  if (!fs.existsSync(path.join(ROOT, CRED))) {
+    console.log(`  （${CRED} が無い環境なので、資格情報との突き合わせは飛ばした）\n`);
+  } else {
+    let creds;
+    try {
+      creds = readLedger(path.join(ROOT, CRED),
+        { why: '突き合わせを飛ばすと「食い違いなし」と同じ見た目になる' }).credentials;
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
+    cross = crossCheck(doc.vendors, creds);
+  }
   if (cross.length) {
     console.log('  資格情報の台帳とベンダー台帳の食い違い:');
     for (const c of cross) console.log(`    ${c.label} — ${c.reason}`);

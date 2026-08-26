@@ -31,6 +31,9 @@ import { summarize } from './automation-rate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TIMELINE_PATH = path.join(ROOT, 'data/autonomy-timeline.json');
+export const SVG_OUT = 'assets/img/autopilot/autonomy-timeline.svg';
+/** 系列から引いた数字を載せている面。**増えたらここに足す。** */
+export const CLAIM_SURFACES = ['docs/pr-autopilot-2026-09-body.md'];
 const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
 const AI_EXECUTES = new Set(['ai_autonomous', 'ai_executes_gated']);
 
@@ -98,6 +101,83 @@ export function codeRatios() {
 }
 
 /**
+ * 台帳から見出しの事実（何か月で何倍）を出す。**図と配信原稿で同じ関数を使う。**
+ *
+ * [2026-08-26] ここは `Math.max(0, findIndex(...))` だった。**起点が見つからないと
+ * 黙って系列の先頭が起点になる。**実測すると「4か月で9倍」が「7か月で123倍」になった。
+ * 起点が無いことは「先頭が起点」ではないので、**見出しを作らない側へ倒す。**
+ */
+export function headlineFacts(doc) {
+  const pts = doc.points || [];
+  const launchIdx = pts.findIndex((p) => p.month === doc.launch_month);
+  if (launchIdx < 0) return { launchIdx, months: null, ratio: null, from: null, to: null };
+  const from = pts[launchIdx]?.overall_automation_rate ?? null;
+  const to = pts[pts.length - 1]?.overall_automation_rate ?? null;
+  return {
+    launchIdx,
+    months: pts.length - 1 - launchIdx,
+    ratio: from && to ? Math.round(to / from) : null,
+    from,
+    to,
+  };
+}
+
+/**
+ * 配信原稿が系列から引いた数字を、台帳と突き合わせる。
+ *
+ * [2026-08-26] **実測してから足した。**原稿の数字を1つずつ書き換えて
+ * CI の node 検査 75本を回したところ、落ちたのは「62.8%」だけだった:
+ *
+ *   見出しの「18倍」  → どれも落ちない（台帳は **9倍**）
+ *   要約の「1.6%」    → どれも落ちない（台帳は **1.5%**）
+ *   表の「10.8%」     → どれも落ちない（台帳は **10.7%**）
+ *   表の「6.7%」      → どれも落ちない（台帳は **6.6%**）
+ *   注記の「194タスク」 → どれも落ちない（台帳は **196**）
+ *
+ * **倍率は記者がいちばん引用する数字**で、しかも同じ節の表と食い違っていた
+ * （見出し18倍 / 表 6.7%→62.8% ＝ 9倍台）。原稿の中で2つの値が並ぶ形は
+ * #618 のコミットメッセージが名指しで警告していたもの。
+ */
+export function timelineClaims(text, doc) {
+  const problems = [];
+  const { months, ratio } = headlineFacts(doc);
+  const pct1 = (v) => (v * 100).toFixed(1);
+
+  for (const m of text.matchAll(/(\d+)か月で、?\s*運営の自律度は(\d+)倍|運営の自律度は(\d+)か月で(\d+)倍/g)) {
+    const mo = Number(m[1] ?? m[3]);
+    const ra = Number(m[2] ?? m[4]);
+    if (months === null || ratio === null) {
+      problems.push(`「${mo}か月で${ra}倍」と書いてあるが、台帳から起点を決められない`
+        + '（launch_month が系列に無い） — **検証できない数字を配信原稿に置かない**');
+      continue;
+    }
+    if (mo !== months || ra !== ratio) {
+      problems.push(`「${mo}か月で${ra}倍」が台帳と違う（台帳では ${months}か月で${ratio}倍）`
+        + ' — **記者がいちばん引用する数字。**同じ節の表とも食い違う');
+    }
+  }
+
+  // 系列の表（「2026-04（ローンチ）    6.7%」のような行）
+  const byMonth = new Map((doc.points || []).map((p) => [p.month, p.overall_automation_rate]));
+  // 行頭に限らない（「2026-02時点の1.6%」のような地の文も拾う）。
+  // 原稿で当たる6箇所を実測して、誤検出が無いことを確かめてある。
+  for (const m of text.matchAll(/(20\d{2}-\d{2})[^\d\n%]{0,20}([\d.]+)%/g)) {
+    const want = byMonth.get(m[1]);
+    if (want === undefined) continue;
+    if (m[2] !== pct1(want)) {
+      problems.push(`${m[1]} を ${m[2]}% と書いているが、台帳は ${pct1(want)}%`);
+    }
+  }
+
+  for (const m of text.matchAll(/分母（(\d+)\s*タスク）/g)) {
+    if (Number(m[1]) !== doc.denominator_tasks) {
+      problems.push(`分母を ${m[1]} タスクと書いているが、台帳は ${doc.denominator_tasks}`);
+    }
+  }
+  return problems;
+}
+
+/**
  * 配布用のSVG（ライト固定）。プレスリリースの図はライト面で使うため、
  * ここではテーマ切り替えをしない。テーマ対応が要る面では描画側で持つ。
  * 色は dataviz の検証済みカテゴリカル 1・2（#2a78d6 / #eb6834）。
@@ -122,11 +202,7 @@ export function toSvg(doc) {
   // 古くなり、しかも「グラフは正しいのに見出しだけ嘘」という一番たちの悪い形で残る
   // （実際に 10倍 と書いたまま 17倍 になっていた）。
   // 起点はローンチ月（グラフの注記もそこを基準にしている）。
-  const launchIdx = Math.max(0, pts.findIndex((p) => p.month === doc.launch_month));
-  const from = pts[launchIdx]?.overall_automation_rate ?? null;
-  const to = pts[pts.length - 1]?.overall_automation_rate ?? null;
-  const months = pts.length - 1 - launchIdx;
-  const ratio = from && to ? Math.round(to / from) : null;
+  const { months, ratio } = headlineFacts(doc);
   const headline = ratio
     ? `運営の自律度は${months}か月で${ratio}倍。コードは最初から高いまま。`
     : '運営の自律度とコード変更のAI比率';
@@ -308,7 +384,7 @@ if (isMain) {
 
   const si = argv.indexOf('--svg');
   if (si >= 0) {
-    const out = argv[si + 1] || 'assets/img/autopilot/autonomy-timeline.svg';
+    const out = argv[si + 1] || SVG_OUT;
     const abs = path.join(ROOT, out);
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, `${toSvg(doc)}\n`);
@@ -333,8 +409,19 @@ if (isMain) {
       problems.push(`系列の月が飛んでいる（${months[0]}〜${months[months.length - 1]} は ${span} ヶ月なのに ${months.length} 点）`
         + ' — **欠けた月は「何も無かった」ではなく「見られていない」。**浅いクローンで --rebuild していないか確認すること');
     }
-    if (doc.first_release_month && months[0] > doc.first_release_month) {
-      problems.push(`系列が ${months[0]} から始まっているが、初回リリースは ${doc.first_release_month}`
+    // [2026-08-26] ここは `doc.first_release_month` を見ていた。**台帳にその鍵は無い**
+    // （在るのは launch_month）ので、**この規則は一度も発火できなかった。**
+    // しかも無いと `&&` が偽になるので、飛ばしたことも出力に出ない。
+    // 見出しの「ローンチから何倍」はこの起点で決まるから、ここが死ぬと
+    // **起点の取り違えを誰も見ていない状態**になる。
+    if (!doc.launch_month) {
+      problems.push('launch_month が無い — **「ローンチから何倍」の起点が決まらない。**'
+        + '起点が無いまま見出しを作ると、系列の先頭が黙って起点になる');
+    } else if (!months.includes(doc.launch_month)) {
+      problems.push(`launch_month ${doc.launch_month} が系列に無い（${months[0]}〜${months[months.length - 1]}）`
+        + ' — **見出しは系列の先頭を起点にしてしまう。**倍率が実際より大きく出る');
+    } else if (months[0] > doc.launch_month) {
+      problems.push(`系列が ${months[0]} から始まっているが、ローンチは ${doc.launch_month}`
         + ' — 起点より後から始まる系列は「ローンチから何倍」を主張できない');
     }
   }
@@ -355,6 +442,48 @@ if (isMain) {
     problems.push(`分母 ${doc.denominator_tasks} が現在の定義タスク数 ${live.overall.defined} と違う（--rebuild）`);
   }
   if (!doc.known_limits?.length) problems.push('known_limits が空 — 再構成の系列を限界なしで出さない');
+
+  // [2026-08-26] **配信原稿の数字も、62.8% 以外は誰も見ていなかった。**
+  // 原稿の数字を1つずつ書き換えて CI の node 検査 75本を回した結果は
+  // timelineClaims のコメントに書いてある。倍率・系列の表・分母が素通りしていた。
+  for (const rel of CLAIM_SURFACES) {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) {
+      problems.push(`${rel} が無い — **系列から引いた数字を突き合わせる相手が消える**`);
+      continue;
+    }
+    for (const c of timelineClaims(fs.readFileSync(abs, 'utf8'), doc)) problems.push(`${rel}: ${c}`);
+  }
+
+  // [2026-08-26] **生成物が台帳から遅れているのを、誰も見ていなかった。**
+  //
+  // 終点が現在値と合っているかは上で見ているのに、そこから作った SVG が
+  // 台帳と合っているかは検査が1本も無かった。実測（CI の node 検査 75本に
+  // 見出しを「4か月で9999倍」に書き換えた SVG を食わせた）→ **1本も落ちない。**
+  //
+  // 実際にずれていた: #550 で出した図は「4か月で18倍」で、当時は正しかった
+  // （ローンチ月 3.5% → 61.3%）。#618 が台帳を組み直して 6.6% → 62.8% になり、
+  // 正しい見出しは **9倍**。図だけが 18倍 のまま残っていた。**倍近い過大。**
+  // その #618 のコミットメッセージ自身が「ずれたグラフはグラフとして
+  // 存在してはいけない」と書いている —— 同じ壊れ方が1段下で再発していた。
+  //
+  // この図は docs/pr-autopilot-2026-09-body.md が参照している配信物。
+  // **数字だけ更新して図を置き去りにする**のを、ここで止める。
+  const svgAbs = path.join(ROOT, SVG_OUT);
+  if (!fs.existsSync(svgAbs)) {
+    problems.push(`${SVG_OUT} が無い — 配信原稿が参照している図が存在しない`);
+  } else if (fs.readFileSync(svgAbs, 'utf8') !== `${toSvg(doc)}\n`) {
+    const cur = (fs.readFileSync(svgAbs, 'utf8').match(/運営の自律度は[^<]*/) || ['(見出し無し)'])[0];
+    const want = (toSvg(doc).match(/運営の自律度は[^<]*/) || ['(見出し無し)'])[0];
+    // [2026-08-26] 見出しだけを出していたので、**見出しが同じで中身が違うとき
+    // 「同じものが2つ並ぶ」意味不明なメッセージ**になっていた（実際に踏んだ）。
+    // 差が見出しに出ていないなら、そう言う。
+    problems.push(cur === want
+      ? `${SVG_OUT} が台帳と違う — **見出しは同じだが中身が違う**（系列の点・目盛りなど）`
+        + '\n      **数字だけ更新して図を置き去りにしない。**`--svg` を実行して同じコミットに含めること'
+      : `${SVG_OUT} が台帳と違う — 図の見出し「${cur}」/ 台帳から作ると「${want}」`
+        + '\n      **数字だけ更新して図を置き去りにしない。**`--svg` を実行して同じコミットに含めること');
+  }
 
   console.log(render(doc));
   if (problems.length) {

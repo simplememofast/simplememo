@@ -25,6 +25,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const OBLIGATIONS_PATH = path.join(ROOT, 'data/corporate-obligations.json');
@@ -67,7 +68,11 @@ export function nextCorporateTaxDue(fyEndMonth, today, extraMonths = 0) {
   return null;
 }
 
-export function validate(doc, { vendorIds = new Set(), today = new Date().toISOString().slice(0, 10) } = {}) {
+/**
+ * @param {Set|null} vendorIds  ベンダー台帳の id。**null は「照合しない」**で、
+ *   空の Set は「ベンダー台帳が空」。この2つは違う。
+ */
+export function validate(doc, { vendorIds = null, today = new Date().toISOString().slice(0, 10) } = {}) {
   const problems = [];
   const warnings = [];
 
@@ -114,7 +119,13 @@ export function validate(doc, { vendorIds = new Set(), today = new Date().toISOS
     const seen = new Set();
     for (const v of cr.vendors || []) {
       const at = `contract_review「${v.id}」`;
-      if (vendorIds.size && !vendorIds.has(v.id)) {
+      // [2026-08-26] ここは `vendorIds.size && !vendorIds.has(...)` だった。
+      // **ベンダー台帳が空だと、この規則が丸ごと消える。**
+      // 実測: 台帳に無い id を contract_review へ足す → 捕まる。
+      // そのまま vendor-register.json を空にする → **検出なし**。
+      // 消える規則の文面が「片方だけ増えると照合が素通りする」で、
+      // **素通りさせる条件を自分で持っていた。**
+      if (vendorIds && !vendorIds.has(v.id)) {
         problems.push(`${at}: ベンダー台帳に無い id — 片方だけ増えると照合が素通りする`);
       }
       if (seen.has(v.id)) problems.push(`${at}: id が重複`);
@@ -131,7 +142,7 @@ export function validate(doc, { vendorIds = new Set(), today = new Date().toISOS
       }
     }
     // ベンダー台帳にあるのにここに無い＝検査対象から漏れている
-    for (const id of vendorIds) {
+    for (const id of vendorIds || []) {
       if (!seen.has(id)) problems.push(`contract_review に「${id}」が無い — ベンダー台帳にあるのに条項を見る対象から漏れている`);
     }
   }
@@ -152,12 +163,31 @@ const SCENARIOS = ledgerScenarios(
   SELFTEST_BREAKAGES,
 );
 
+// [2026-08-26] **空の台帳で規則が消える形**を固定する。
+// `vendorIds.size &&` だった頃は、vendor-register.json を空にすると
+// 「ベンダー台帳に無い id」が1件も出なかった（実測済み）。
+SCENARIOS.push(
+  ['**ベンダー台帳が空なら contract_review は全部照合できない**（空を「照合しない」と読まない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const p = validate(d, { vendorIds: new Set() }).problems;
+    assert(p.some((x) => x.includes('ベンダー台帳に無い id')),
+      '空のベンダー台帳を通した — **片方だけ増えたのを検出できない**');
+  }],
+  ['null は「照合しない」（空の Set とは別）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const p = validate(d, { vendorIds: null }).problems;
+    assert(!p.some((x) => x.includes('ベンダー台帳に無い id')), '照合しない指定で照合した');
+  }],
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
   const vendors = JSON.parse(fs.readFileSync(VENDOR_PATH, 'utf8'));
-  const vendorIds = new Set((vendors.vendors || []).map((v) => v.id));
+  requireShape(vendors, ['vendors'], { what: 'data/vendor-register.json',
+    why: '契約条項を見る対象と突き合わせられない（**片側だけ増えたのを検出できない**）' });
+  const vendorIds = new Set(vendors.vendors.map((v) => v.id));
   const { problems, warnings } = validate(doc, { vendorIds });
 
   const unconfirmed = (doc.deadlines || []).filter((d) => !d.confirmed_by_owner);

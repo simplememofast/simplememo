@@ -119,7 +119,14 @@ export function assess(ledger, metrics, { now = Date.now() } = {}) {
 }
 
 function readJSON(p) {
-  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
+  if (!fs.existsSync(p)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (e) {
+    // **「無い」と「読めない」を混ぜない。**壊れた台帳を null に落とすと、
+    // 「まだ何も無い」と同じ扱いになって静かに素通りする。
+    throw new Error(`${p} を読めない（${e.message}）— 壊れた台帳を null に落とさない`);
+  }
 }
 
 function render(ledger, a) {

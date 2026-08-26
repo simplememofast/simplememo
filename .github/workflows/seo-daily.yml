@@ -192,7 +192,7 @@ jobs:
             echo ""
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          node scripts/check-domain-expiry.mjs 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+          node scripts/check-domain-expiry.mjs --write 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Store facts vs App Store (report only)
@@ -257,9 +257,12 @@ jobs:
 
             sh('git config user.name "github-actions[bot]"');
             sh('git config user.email "41898282+github-actions[bot]@users.noreply.github.com"');
-            sh('git add growth/data growth/reports');
+            // data/corporate-obligations.json は上の RDAP ステップが --write で書く。
+            // **書く動作を誰も動かしていない状態を作らない**（data/generators.json の規律）。
+            // 期限は年1回しか動かないので、週次のこの回で拾えば足りる。
+            sh('git add growth/data growth/reports data/corporate-obligations.json');
 
-            if (!sh('git status --porcelain -- growth/data growth/reports')) {
+            if (!sh('git status --porcelain -- growth/data growth/reports data/corporate-obligations.json')) {
               core.notice('スナップショットに差分が無いため何もしない');
               return;
             }

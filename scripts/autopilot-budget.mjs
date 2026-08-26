@@ -296,7 +296,7 @@ export function appendRun(ledger, run) {
 
 function fmt(n) { return n === null ? 'n/a' : `$${n.toFixed(4)}`; }
 
-function render(s, ledger) {
+export function render(s, ledger) {
   const out = [];
   out.push(`Autopilot budget ${s.month}: ${fmt(s.spent)} / ${fmt(s.cap)} (remaining ${fmt(s.remaining)})`);
   out.push(`  runs ${s.runs} · shipped ${s.shipped} · per shipped ${fmt(s.usd_per_shipped)}`);
@@ -346,6 +346,15 @@ function render(s, ledger) {
       out.push(`    NOTE: task_kind が無い run ${runs_without_kind} 件は1回上限を判定していない`
         + '（判定していない ≠ 上限内）');
     }
+  } else {
+    // [2026-08-26] ここに else が無かった。**値のほうは null を保っていたのに
+    // （#631 で直した）、表示のほうが黙って節ごと消えていた。**
+    // 実測: model-routing.json を壊すと、この節だけでなく
+    // **実在する超過2件（08-23 article $7.2967 / 08-25 repair $11.9329）が
+    // 報告から消える。**読む側には「超過なし」と区別がつかない。
+    // 判定できなかったことは、判定して問題が無かったことと同じ見た目にしない。
+    out.push('  1回あたりの上限: **判定していない**'
+      + '（data/model-routing.json を読めない — **判定していない ≠ 上限内**）');
   }
 
   const bt = s.by_task;
@@ -381,6 +390,29 @@ const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8')),
   (d) => validate(d),
   SELFTEST_BREAKAGES,
+);
+
+// [2026-08-26] **判定できなかったことが、報告から消えていた。**
+// 値は #631 で null を保つようにしたが、render 側に else が無く、
+// model-routing.json を壊すと**実在する超過2件ごと**節が消えていた。
+// 読む側には「超過なし」と区別がつかない。
+// **実データの形で確かめる。**手で組んだ骨だけの s では、render が読む欄が
+// 足りずに別の理由で落ちる（一度やった）。summarize の結果の run_caps だけ差し替える。
+const budgetDoc = () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+SCENARIOS.push(
+  ['**判定できなかったら、そう書く**（節ごと消さない）', () => {
+    const d = budgetDoc();
+    const out = render({ ...summarize(d), run_caps: null }, d);
+    assert(out.includes('判定していない'),
+      '**判定できなかったことが報告に出ない** — 読む側は「超過なし」と区別できない');
+  }],
+  ['超過なしのときは「超過なし」と書く（両者を同じ語にしない）', () => {
+    const d = budgetDoc();
+    const out = render({ ...summarize(d),
+      run_caps: { overruns: [], unreviewed: [], runs_without_kind: 0 } }, d);
+    assert(out.includes('超過なし'), out.slice(0, 300));
+    assert(!out.includes('1回あたりの上限: **判定していない**'), '両者が同じ語になっている');
+  }],
 );
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

@@ -24,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { readLedger, requireShape } from './lib/read-ledger.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/signal-ledger.json');
@@ -32,7 +33,11 @@ const BACKLOG_PATH = path.join(ROOT, 'data/feature-backlog.json');
 export const STATUSES = ['open', 'merged', 'declined'];
 export const KINDS = ['request', 'review', 'inquiry', 'competitor', 'usage', 'survey'];
 
-export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)), backlogIds = new Set() } = {}) {
+/**
+ * @param {Set|null} backlogIds  棚卸しの id。**null は「照合しない」**で、
+ *   空の Set は「棚卸しが空」。この2つは違う。
+ */
+export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)), backlogIds = null } = {}) {
   const problems = [];
   const keys = new Set(), ids = new Set();
   for (const s of doc.signals || []) {
@@ -69,7 +74,12 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
     if (s.status === 'merged' && !s.shipped_in && !s.backlog_id) {
       problems.push(`${at}: merged なのに shipped_in も backlog_id も無い — どこへ落ちたか分からない`);
     }
-    if (s.backlog_id && backlogIds.size && !backlogIds.has(s.backlog_id)) {
+    // [2026-08-26] ここは `backlogIds.size && !backlogIds.has(...)` だった。
+    // **棚卸しが空だと、この規則が丸ごと消える。**
+    // 実測: 台帳に無い backlog_id を足す → 捕まる。
+    // そのまま feature-backlog.json を空にする → **検出なし**。
+    // 空 =「棚卸しに1件も無い」なので、参照が在るならそれは全部行き先が無い。
+    if (s.backlog_id && backlogIds && !backlogIds.has(s.backlog_id)) {
       problems.push(`${at}: backlog_id "${s.backlog_id}" が data/feature-backlog.json に無い`);
     }
     if (s.status === 'declined' && !s.why_not) {
@@ -95,14 +105,39 @@ const SCENARIOS = ledgerScenarios(
   SELFTEST_BREAKAGES,
 );
 
+// [2026-08-26] **空の台帳で規則が消える形**を固定する。
+// `backlogIds.size &&` だった頃は、feature-backlog.json を空にすると
+// 「data/feature-backlog.json に無い」が1件も出なかった（実測済み）。
+SCENARIOS.push(
+  ['**棚卸しが空なら backlog_id は全部行き先が無い**（空を「照合しない」と読まない）', () => {
+    const d = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    const p = validate(d, { backlogIds: new Set() });
+    assert(p.some((x) => x.includes('data/feature-backlog.json に無い')),
+      '空の棚卸しを通した — **merged の行き先を誰も確かめていない**');
+  }],
+  ['null は「照合しない」（空の Set とは別）', () => {
+    const d = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    const p = validate(d, { backlogIds: null });
+    assert(!p.some((x) => x.includes('data/feature-backlog.json に無い')), '照合しない指定で照合した');
+  }],
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
-  const backlogIds = new Set(
-    fs.existsSync(BACKLOG_PATH)
-      ? (JSON.parse(fs.readFileSync(BACKLOG_PATH, 'utf8')).candidates || []).map((c) => c.id)
-      : []);
+  // [2026-08-26] ここは存在しなければ空の Set にしていた。空の Set は
+  // 下の規則を丸ごと消すので、**棚卸しが消えたことが誰にも見えなかった。**
+  const backlog = readLedger(BACKLOG_PATH, { onMissing: null,
+    why: 'backlog_id の行き先を確かめられない' });
+  if (backlog === null) {
+    console.error('data/feature-backlog.json が無い — **backlog_id の照合ができない。**'
+      + '照合できないことを「異常なし」と同じ見た目にしない');
+    process.exit(1);
+  }
+  requireShape(backlog, ['candidates'], { what: 'data/feature-backlog.json',
+    why: 'merged したシグナルの行き先を確かめられない' });
+  const backlogIds = new Set(backlog.candidates.map((c) => c.id));
   const problems = validate(doc, { backlogIds });
 
   const by = (st) => doc.signals.filter((s) => s.status === st);

@@ -100,64 +100,188 @@ export function normalize(src) {
   };
 }
 
+/** 待っても直らない状態。**設定の誤りなので、時間では解けない。** */
+export const FAULT_STATES = ['no_match', 'no_catalog'];
+
+/**
+ * 取得結果と宣言を突き合わせて、**落とすもの／待つもの／確かめられないもの**に分ける。
+ *
+ * [2026-08-26] **この判定は `if (isMain)` の中に埋まっていて、一度も試せなかった。**
+ * 2026-08-25 に直した「0件を待機と故障に分ける」という一番効く部分がそこにある。
+ * それまでは 0件でも note が "取得完了" で、ここも「食い違いなし」と言って
+ * **毎日0件を緑で出荷していた**（run 32844534637）。
+ * 同じことがもう一度起きても、埋まったままなら誰も気づけない。
+ */
+export function assess(src, opts = {}) {
+  const {
+    declaredConnected = false,
+    siblingVisible = fs.existsSync(SOURCE_DIR),
+  } = opts;
+  const problems = [];
+  const notes = [];
+
+  if (!src.present) {
+    // **「見えない」と「無い」を分ける。**隣のディレクトリが在るのに
+    // status.json が無い場合だけが本物の矛盾。ディレクトリごと無いなら
+    // ここからは確かめようがないので、確かめられないことをそう言う。
+    if (declaredConnected && siblingVisible) {
+      problems.push('financial-policy.json が revenue_connected: true だが、取得結果が無い'
+        + ' — **接続していないのに接続している前提の数字を出すことになる**');
+    } else if (declaredConnected) {
+      notes.push('revenue_connected: true と宣言されているが、'
+        + '**この実行環境からは隣のリポジトリが見えない**ので照合できない');
+    }
+    return { present: false, problems, notes, state: null, waiting: [] };
+  }
+
+  const n = normalize(src);
+  const state = src.status.state;
+  const waiting = src.status.pending_reports || [];
+
+  if (FAULT_STATES.includes(state)) {
+    problems.push(`取得側が state: ${state} — ${src.status.note}`
+      + ` / 指定: ${(src.status.wanted_patterns || []).join(', ') || '(空)'}`
+      + ` / 利用可能 ${(n.available_reports || []).length} 件`
+      + ' — **待っても直らない。**取得側の指定を直すまでデータは降りてこない');
+  } else if (state === undefined && n.reports.length === 0
+             && (n.available_reports || []).length > 0) {
+    // 取得側がまだ state を書かない版のとき。**0件を黙って通さない。**
+    problems.push('取得側に state が無く、レポートも0件'
+      + ` — 利用可能は ${n.available_reports.length} 件ある。取得側の版が古い可能性`);
+  }
+
+  if (!declaredConnected) {
+    notes.push('取得結果はあるが financial-policy.json は revenue_connected: false のまま');
+  }
+  return { present: true, problems, notes, state, waiting, normalized: n };
+}
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+if (process.argv.includes('--selftest')) {
+  const src = (status, reports = []) => ({ present: true, status, reports });
+  const STATUS = (over = {}) => ({
+    fetched_at: '2026-08-25T11:52:24Z', date: '2026-08-25',
+    wanted_patterns: ['App Store Purchases'],
+    available_reports: ['App Store Purchases Standard'],
+    pending_reports: [], note: '', ...over,
+  });
+  const has = (list, needle) => list.some((x) => x.includes(needle));
+
+  const SCENARIOS = [
+    ['**設定の誤り（no_match）は落ちる**（待っても直らない）', () => {
+      const r = assess(src(STATUS({ state: 'no_match', wanted_patterns: ['Sales'] })));
+      if (!has(r.problems, '待っても直らない')) throw new Error(JSON.stringify(r.problems));
+    }],
+    ['**no_catalog も落ちる**', () => {
+      const r = assess(src(STATUS({ state: 'no_catalog' })));
+      if (!r.problems.length) throw new Error('通した');
+    }],
+    ['**生成待ち（pending）は落とさない**（待てば解ける）', () => {
+      const r = assess(src(STATUS({ state: 'pending', pending_reports: ['x'] })));
+      if (r.problems.length) throw new Error(`落とした: ${r.problems[0]}`);
+      if (r.waiting.length !== 1) throw new Error('待ち件数が出ていない');
+    }],
+    ['partial も落とさない', () => {
+      if (assess(src(STATUS({ state: 'partial' }))).problems.length) throw new Error('落とした');
+    }],
+    ['**state が無くレポート0件・利用可能ありは落ちる**（0件を黙って通さない）', () => {
+      const r = assess(src(STATUS()));
+      if (!has(r.problems, '取得側に state が無く')) throw new Error(JSON.stringify(r.problems));
+    }],
+    ['state が無くても利用可能が0件なら落とさない（本当に何も無い日）', () => {
+      const r = assess(src(STATUS({ available_reports: [] })));
+      if (r.problems.length) throw new Error(`落とした: ${r.problems[0]}`);
+    }],
+    ['取得できた（fetched）は落とさない', () => {
+      const st = STATUS({ state: 'fetched', matched_reports: ['App Store Purchases Standard'] });
+      const r = assess(src(st, [{ report: 'x', row_count: 2, columns: ['a'], sums: {} }]));
+      if (r.problems.length) throw new Error(`落とした: ${r.problems[0]}`);
+    }],
+    ['**接続していると宣言しているのにデータが無ければ落ちる**（隣が見えるとき）', () => {
+      const r = assess({ present: false, reason: 'no status' },
+        { declaredConnected: true, siblingVisible: true });
+      if (!has(r.problems, '接続している前提の数字')) throw new Error(JSON.stringify(r.problems));
+    }],
+    ['**隣が見えないときは落とさず「照合できない」と言う**（CIで隣が正常でも赤くしない）', () => {
+      const r = assess({ present: false, reason: 'no status' },
+        { declaredConnected: true, siblingVisible: false });
+      if (r.problems.length) throw new Error(`落とした: ${r.problems[0]}`);
+      if (!has(r.notes, '照合できない')) throw new Error('黙って通した（**確かめられないことをそう言う**）');
+    }],
+    ['接続していないと宣言していれば、データが無くても落とさない', () => {
+      const r = assess({ present: false, reason: 'x' },
+        { declaredConnected: false, siblingVisible: true });
+      if (r.problems.length) throw new Error(`落とした: ${r.problems[0]}`);
+    }],
+    ['**内訳の値は運ばない**（公開リポジトリへ解約理由を日次で積まない）', () => {
+      const n = normalize(src(STATUS({ state: 'fetched' }), [{
+        report: 'x', row_count: 1, columns: ['a'], sums: {},
+        breakdown: { 'Cancellation Reason': { '価格': 3 } },
+      }]));
+      const row = n.reports[0];
+      if (JSON.stringify(row).includes('価格')) throw new Error('内訳の値を運んだ');
+      if (!row.breakdown_dimensions?.includes('Cancellation Reason')) {
+        throw new Error('列名まで落としている（届いていないと読んでいないを区別できない）');
+      }
+    }],
+    ['内訳が無ければ breakdown_dimensions は null（届いていないと区別できる）', () => {
+      const n = normalize(src(STATUS(), [{ report: 'x', row_count: 1, columns: [], sums: {} }]));
+      if (n.reports[0].breakdown_dimensions !== null) throw new Error('null でない');
+    }],
+    ['**行そのものを持たない**（個人が特定できる列を気づかず貯め始めない）', () => {
+      const n = normalize(src(STATUS(), [{
+        report: 'x', row_count: 1, columns: ['a'], sums: { a: 1 },
+        rows: [{ a: 1, email: 'x@example.com' }],
+      }]));
+      if (JSON.stringify(n).includes('example.com')) throw new Error('行を運んだ');
+    }],
+    ['実データの取得結果があれば、それも通る（隣が見えるときだけ）', () => {
+      const real = readSource();
+      if (!real.present) return; // CI では隣が無い。そこは上の2件で見ている
+      const r = assess(real, { declaredConnected: false, siblingVisible: true });
+      if (r.problems.length) throw new Error(r.problems[0]);
+    }],
+  ];
+
+  let failed = 0;
+  for (const [name, fn] of SCENARIOS) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${SCENARIOS.length} 件中 ${failed} 件失敗`);
+  process.exit(failed === 0 ? 0 : 1);
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const check = process.argv.includes('--check');
   const src = readSource();
   const policy = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
   const declaredConnected = Boolean(policy.cash_scenarios?.revenue_connected);
-  const problems = [];
+
+  // **判定は assess() が持つ。**ここは表示と書き出しだけ。
+  // 判定を if (isMain) の中に書くと、一度も試せないまま出荷することになる。
+  const verdict = assess(src, { declaredConnected });
+  const problems = verdict.problems;
 
   if (!src.present) {
     console.log('App Store Connect: **未取得**');
     console.log(`  ${src.reason}`);
     console.log('  取得は ../simplememo-ios の asc-analytics.yml（毎日 20:30 JST）。');
     console.log('  **ONGOING のレポート要求を作った当日はデータが出ない。**初回の0件は失敗ではない。');
-
-    // [2026-08-25] **「見えない」と「無い」を分ける。**
-    // seo-check.yml の checkout はこのリポジトリだけなので、CI では
-    // ../simplememo-ios/ というディレクトリ自体が存在しない。そこで
-    // 「revenue_connected: true なのにデータが無い」と落とすと、
-    // **隣が正常でも CI が赤くなる。**
-    //
-    // 隣のディレクトリが在るのに status.json が無い場合だけが本物の矛盾。
-    // ディレクトリごと無いなら、ここからは**確かめようがない**ので、
-    // 確かめられないことをそう言う（黙って通すのでも落とすのでもなく）。
-    const siblingVisible = fs.existsSync(SOURCE_DIR);
-    if (declaredConnected && siblingVisible) {
-      problems.push('financial-policy.json が revenue_connected: true だが、取得結果が無い'
-        + ' — **接続していないのに接続している前提の数字を出すことになる**');
-    } else if (declaredConnected) {
+    if (verdict.notes.some((x) => x.includes('照合できない'))) {
       console.log('\n  NOTE: revenue_connected: true と宣言されているが、'
         + '**この実行環境からは隣のリポジトリが見えない**ので照合できない。');
       console.log('  （seo-check.yml の checkout はこのリポジトリだけ。'
         + '取得の健全性は取得側の asc-analytics.yml が --verify-status で持つ）');
     }
   } else {
-    const n = normalize(src);
+    const n = verdict.normalized;
     console.log(`App Store Connect: ${n.date} 取得（${n.reports.length} レポート）`);
 
-    // [2026-08-25] **0件の理由を、待機と故障に分ける。**
-    // 取得側は `state` を書くようになった（../simplememo-ios/scripts/asc_analytics.rb）。
-    // それまでは 0件でも note が "取得完了" で、ここも「食い違いなし」と言って
-    // 通していた。実際には schedule 実行で取得対象が空になっており、
-    // **毎日0件を緑で出荷していた**（run 32844534637）。
-    // 待つべき状態（pending）は通す。設定の誤りは落とす。
-    const state = src.status.state;
-    const FAULTS = ['no_match', 'no_catalog'];
-    if (FAULTS.includes(state)) {
-      problems.push(`取得側が state: ${state} — ${src.status.note}`
-        + ` / 指定: ${(src.status.wanted_patterns || []).join(', ') || '(空)'}`
-        + ` / 利用可能 ${(n.available_reports || []).length} 件`
-        + ' — **待っても直らない。**取得側の指定を直すまでデータは降りてこない');
-    } else if (state === undefined && n.reports.length === 0 && (n.available_reports || []).length > 0) {
-      // 取得側がまだ state を書かない版のとき。**0件を黙って通さない。**
-      problems.push('取得側に state が無く、レポートも0件'
-        + ` — 利用可能は ${n.available_reports.length} 件ある。取得側の版が古い可能性`);
-    } else if (state === 'pending' || state === 'partial') {
-      const waiting = src.status.pending_reports || [];
-      console.log(`  状態: ${state} — 生成待ち ${waiting.length} 件`);
-      if (waiting.length) console.log(`    ${waiting.slice(0, 6).join(' / ')}`);
+    if (verdict.state === 'pending' || verdict.state === 'partial') {
+      console.log(`  状態: ${verdict.state} — 生成待ち ${verdict.waiting.length} 件`);
+      if (verdict.waiting.length) console.log(`    ${verdict.waiting.slice(0, 6).join(' / ')}`);
     }
 
     for (const r of n.reports) {
@@ -175,7 +299,7 @@ if (isMain) {
       fs.writeFileSync(out, `${JSON.stringify(n, null, 2)}\n`);
       console.log(`\n  → growth/data/appstore/${n.date}.json`);
     }
-    if (!declaredConnected) {
+    if (verdict.notes.some((x) => x.includes('revenue_connected: false'))) {
       console.log('\n  NOTE: 取得結果はあるが financial-policy.json は revenue_connected: false のまま。');
       console.log('  **売上そのものが取れているかは、レポートの中身を見て人が判断する。**');
       console.log('  判断したら revenue_connected を true にする（そのとき資金繰りに収入側が入る）。');

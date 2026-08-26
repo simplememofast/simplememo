@@ -924,6 +924,34 @@
       }
     },
     {
+      "id": "om-2026-08-26-my-own-check-had-the-shape",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "「正が無いと規則が消える」形を機械で探す検査（check-guard-shapes）を入れた翌バッチで、その形の8件目が出た。**自分の検査は拾えなかった。**",
+      "hypothesis": "引数由来なので取り逃した。走査の対象を広げれば済む",
+      "decision": "**広げる前に、いま何本見えているかを測った。**scan は台帳由来の束縛が1つも無いと即 `[]` を返す。つまり**見なかったファイルも「候補0件」と同じ形で出る。**実測すると 73本中12本がそれで、その中に check-public-facts / review-intake / autopilot-runs が入っていた。出力は「新しく増えた箇所は無い」のままだった。\n\n**この工程がずっと追いかけてきた形を、自分の検査がしていた。**「判定できなかった」を「異常なし」と同じ見た目で報告する、という形。",
+      "execution": {
+        "repo": "simplememo",
+        "pr": "https://github.com/simplememofast/simplememo/pull/637",
+        "files": [
+          "scripts/check-guard-shapes.mjs",
+          "data/guard-shapes.json"
+        ]
+      },
+      "verification": "局所の読み出し関数（`function load() { return JSON.parse(...) }`）を汚染源に足して 12 → 8本。見えた側から2件の欠陥が出た（check-model-routing の policy 2つ。片方は**不可逆タスクを最安モデルへ回す禁止**、もう片方は `--check-run-cap` の呼び出し確認を含む）。残る8本は台帳に名指しで置き、**増えたら落ちる**。走査を骨抜きにすると自己テストが3方向で落ちることを確認した。",
+      "outcome": "**率は動かさない。**62.8% のまま。動いたのは検査の母数で、61本 → 65本（73本中）。**「見た本数」を毎回出すようにした** —— 母数を書かない検査は、見ていないことを見えなくする。",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-scan-that-sees-nothing-reports-nothing-wrong",
+        "text": "**何も見つからなかった、と、何も見なかったは、出力が同じになりうる。**\n\ncheck-guard-shapes は「候補0件」と「そのファイルを解析できなかった」を区別せずに `[]` を返し、**73本中12本を黙って飛ばしたまま「新しく増えた箇所は無い」と書いていた。**\n\n皮肉なのは、この検査が探していたのがまさにその形（正が無いときに規則が消える）だったこと。**探し方を作った側が、同じ穴を持っていた。**\n\n一般化すると: **走査・検査・レポートは、分母を必ず出す。**「0件」だけでは、見たうえでの0なのか、見ていないための0なのかが読む側に伝わらない。この工程では同じ日に6回、計測器のほうを間違えている（コメントを拾う／existsSync を読み出しに数える／自己テストの reporter を潰す／FAIL の字面で判定する／共有ローダの読み出しを消費側の依存と数える／そして今回）。**計測器を疑う頻度が足りていない。**",
+        "changed": [
+          "scripts/check-guard-shapes.mjs",
+          "data/guard-shapes.json"
+        ],
+        "new_guardrail": "checkCoverage() を足した。**見えていないファイルが台帳に明記されていなければ落ちる**（no_ledger_binding に理由つきで挙げる）。加えて --check が毎回「走査 N 本中 M 本を実際に見た」を出す。母数を黙って縮めることも、母数を書かずに「異常なし」と言うこともできない"
+      }
+    },
+    {
       "id": "om-2026-08-26-bridging-makes-latency-cost",
       "seeded": false,
       "area": "⑩ AgentOps・ガバナンス",
