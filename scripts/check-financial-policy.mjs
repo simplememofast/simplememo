@@ -33,6 +33,22 @@ export const APPROVALS_PATH = path.join(ROOT, 'data/spend-approvals.json');
 export const STATUSES = ['active', 'not_started', 'ai_excluded'];
 
 /**
+ * 上限そのものが読めているか。**「上限を消す」で「上限の検査」を外せないようにする。**
+ *
+ * [2026-08-26] 突き合わせ2つが `monthlyCap !== null &&` で守られていたため、
+ * 書き換え（$40 → $999）は捕まるのに**鍵ごと削除すると exit 0** だった。
+ * 止めたい行為が「黙って上限を動かす」なので、削除で外せては止めたことにならない。
+ */
+export function capProblem(cap) {
+  if (typeof cap !== 'number') {
+    return 'data/autopilot-cost.json に budget.monthly_usd_cap が無い'
+      + ' — **承認記録との突き合わせが丸ごと消える。**'
+      + '上限を消すことで上限の検査を外せるようにしない';
+  }
+  return null;
+}
+
+/**
  * 二者承認 — **上限を動かした記録が無いと、上限を動かせない。**
  *
  * 承認記録の最新値と実際の上限が一致していなければ落ちる。つまり
@@ -183,6 +199,38 @@ const SCENARIOS = ledgerScenarios(
   SELFTEST_BREAKAGES,
 );
 
+// [2026-08-26] **上限を消すと、上限の検査が消えていた。**
+// 突き合わせは2つとも `monthlyCap !== null &&` で守られていて、
+// 書き換え（$40 → $999）は捕まるのに、**鍵ごと削除すると exit 0** だった。
+// 止めたい行為が「黙って上限を動かす」なので、削除で外せては止めたことにならない。
+// 読み出し側（COST_PATH）で number を要求する形にしたが、
+// **突き合わせそのものが効いていること**もここで固定する。
+SCENARIOS.push(
+  ['**承認された最新値と違う上限は落ちる**', () => {
+    const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));
+    const rows = approvals.approvals || [];
+    const latest = [...rows].reverse().find((a) => a.domain === 'AI実費（開発・運用のトークン費）');
+    assert(latest, '突き合わせる承認記録が無い — この検査は何も見ていない');
+    const p = validateApprovals(approvals, { policy: JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')),
+      monthlyCap: latest.to_usd + 959 });
+    assert(p.some((x) => x.includes('承認された最新値')), JSON.stringify(p));
+  }],
+  ['**上限が数でなければ落ちる**（削除で検査を外せないように）', () => {
+    assert(capProblem(null), 'null を通した — **上限を消せば検査も消える**');
+    assert(capProblem(undefined), 'undefined を通した');
+    assert(capProblem('たくさん'), '数でない値を通した');
+    assert(capProblem(40) === null, '正しい上限を落とした');
+  }],
+  ['**null（上限を読めない）を「一致」と読まない**', () => {
+    // validateApprovals は null を「突き合わせない」として扱う（呼ぶ側が明示する）。
+    // **その代わり、呼ぶ側が null を通さない**ことを下で確かめる。
+    const cost = JSON.parse(fs.readFileSync(COST_PATH, 'utf8'));
+    assert(typeof cost.budget?.monthly_usd_cap === 'number',
+      '実データの autopilot-cost.json に budget.monthly_usd_cap が無い'
+      + ' — **上限を消すことで上限の検査を外せる状態**');
+  }],
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
@@ -190,7 +238,20 @@ if (isMain) {
   const authority = requireShape(readLedger(AUTHORITY_PATH), ['domains'],
     { what: 'data/authority-matrix.json', why: '領域の突き合わせができない' });
   const domains = new Set((authority.domains || []).map((d) => d.domain));
-  const cap = JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget?.monthly_usd_cap ?? null;
+  // [2026-08-26] ここは `.budget?.monthly_usd_cap ?? null` だった。
+  // 下の2つの突き合わせは両方 `monthlyCap !== null &&` で守られているので、
+  // **鍵を消すと「承認記録を書かずに上限を動かせない」規則が丸ごと消える。**実測:
+  //
+  //   上限を $40 → $999 に黙って書き換える → 捕まる
+  //   **上限の鍵ごと消す**                  → **素通り（exit 0）**
+  //
+  // 書き換えは止まるのに削除は通る、では止めたことにならない。
+  // **金額の規則なので、緩む方向の既定を置かない。**
+  const costDoc = requireShape(readLedger(COST_PATH), ['budget'],
+    { what: 'data/autopilot-cost.json', why: '承認された上限と突き合わせられない' });
+  const cap = costDoc.budget?.monthly_usd_cap ?? null;
+  const capIssue = capProblem(cap);
+  if (capIssue) { console.error(capIssue); process.exit(1); }
   const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));
   const problems = [
     ...validate(doc, { authorityDomains: domains, monthlyCap: cap }),
