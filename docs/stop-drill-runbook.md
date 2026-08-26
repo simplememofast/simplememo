@@ -8,70 +8,68 @@
 
 ---
 
-## 1. いま一手で 0/11 → 1/11 にできるもの: `flag-kill`
+## 1. いま 0/11 → 1/11 にできるもの: `flag-kill`
 
 **AIはこれを実行しない。**本番のフラグを引く操作は利用者の手元に影響が出るので、
 権限表の「止める側だから自律でよい」の例外にあたる。以下はオーナーが実行する手順。
 
-### 前提
+> **[2026-08-26 訂正] 鍵は要らない。**この節は当初 curl と `ADMIN_API_KEY` を前提に
+> 書いていたが、**`simplememo-api` に `Flag Ops` ワークフローが既にあった。**
+> 鍵は GitHub Secrets にあり、手元に持っている必要はない。
+> **手順書を書く前に、既にある経路を探していなかった。**
 
-- `ADMIN_API_KEY`（本番 relay の管理トークン）
-- 本番 relay の URL
+### 場所
 
-### 手順
+`simplememofast/simplememo-api` → **Actions** → **Flag Ops** → **Run workflow**
 
-```bash
-API=https://<本番relayのホスト>
-KEY=<ADMIN_API_KEY>
+操作のたびに workflow run が1本残る（誰が・いつ・何を・どの値にしたか）。
+手元の shell から叩くと残らないもの。
 
-# [0] 現在の max_stale_seconds を確認する（次の手順で使う）
-curl -s "$API/v1/config" | jq '{killed, max_stale_seconds}'
-#   → 例: {"killed": [], "max_stale_seconds": 86400}
+### 手順（Run workflow を5回）
 
-# [1] 訓練用フラグを作る。**max_stale_seconds は [0] の値と同じにする。**
-#     短い値を付けると、誰も読まないフラグでも全クライアントの再取得間隔が縮む
-#     （2026-08-26 のローカル訓練で観測 — 86400 が 300 に落ちた）。
-curl -s -X POST "$API/admin/flags/set" \
-  -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
-  -d '{"key":"drill_kill_probe","definition":{"rollout":100,
-       "description":"停止訓練用。クライアントは一切読まない。kill が届くことの確認だけに使う",
-       "max_stale_seconds":86400}}' | jq '{ok, key}'
+| # | action | 入力 | 見るもの |
+|---|---|---|---|
+| 0 | `diagnose` | — | `✅ ADMIN_API_KEY は見えている` と指紋。**401 の履歴があるので最初にこれ** |
+| 1 | `list` | — | 現状（baseline）。`killed` が空であること。**何かが既に kill されているなら訓練しない** |
+| 2 | `set` | key=`drill_kill_probe` / rollout=`100` / max_stale_seconds=`86400`（既定のまま） / description=`停止訓練用。クライアントは一切読まない` | HTTP 200 |
+| 3 | **`kill`** | key=`drill_kill_probe` | **これが訓練の本体。**HTTP 200 |
+| 4 | `list` | — | `drill_kill_probe` が `killed` に入り、**`rollout` は 100 のまま**であること |
+| 5 | `delete` | key=`drill_kill_probe` | 後片づけ。`list` で消えていること |
 
-# [2] /v1/config に載ったことを見る（killed は空のはず）
-curl -s "$API/v1/config" | jq '{rollouts, killed, max_stale_seconds}'
+**`max_stale_seconds` は既定の 86400 から下げない。**下げると、誰も読まないフラグでも
+`/v1/config` 全体の `max_stale_seconds` がその値まで落ち、全クライアントの
+再取得間隔が縮む（2026-08-26 のローカル訓練で 86400 → 300 に落ちるのを観測）。
+ワークフロー側の既定が 86400 なので、**触らなければ正しい。**
 
-# [3] kill を引く ← **これが訓練の本体**
-curl -s -X POST "$API/admin/flags/kill" \
-  -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
-  -d '{"key":"drill_kill_probe"}' | jq '{ok, key, killed}'
+> **`delete` は 2026-08-26 に足したもの**（`claude/simplememo-self-improving-pr-ki8vgo`）。
+> main にマージされるまでは、Run workflow の「Use workflow from」でそのブランチを選ぶ。
+> マージ後は既定のままで出る。それも面倒なら手順5を `unkill` → `set rollout=0` で
+> 代用できる（フラグは残るが、誰にも配られない）。
 
-# [4] killed に入り、rollout が保存されたままであることを見る
-curl -s "$API/v1/config" | jq '{rollouts, killed, max_stale_seconds}'
-#   期待: killed に "drill_kill_probe"、rollouts の値は 100 のまま
+### 確かめていること
 
-# [5] 後片づけ — フラグごと消す
-curl -s -X POST "$API/admin/flags/set" \
-  -H "authorization: Bearer $KEY" -H 'content-type: application/json' \
-  -d '{"key":"drill_kill_probe","definition":null}' | jq '{ok, key}'
-curl -s "$API/v1/config" | jq '{rollouts, killed, max_stale_seconds}'
-#   期待: [0] と同じ状態に戻る
-```
+- kill が `/v1/config` の `killed` に載る（＝端末に届く形になる）
+- **`rollout` が保存されたまま**残る（kill を降ろせば元の配布率に戻る）
+- 端末に届くまでの時間がワークフローの要約に出る
+  （CDN 最大300秒 ＋ 端末キャッシュ最大 86400 秒 ＋ 再取得は24時間スロットル）
 
-### 記録のしかた
+**すぐ見たい端末はアプリを入れ直す。**スロットルは端末側にあり、サーバからは短縮できない。
 
-`data/stop-drills.json` の `flag-kill` の `drills` に1件足し、`blocked_by` を `null` にする。
+### 終わったら
+
+`data/stop-drills.json` の `flag-kill` に1件足し、`blocked_by` を `null` にする。
 
 ```json
 { "at": "YYYY-MM-DD", "level": "production", "by": "human",
-  "where": "本番 relay",
-  "observed": "[4] で killed に drill_kill_probe が入り、rollouts は 100 のまま。[5] で元に戻った。…" }
+  "where": "本番 relay（Flag Ops workflow run #<番号>）",
+  "observed": "手順4の list で killed に drill_kill_probe が入り、rollout は 100 のまま。手順5の後は list から消えた。…" }
 ```
 
-`observed` に**実際に見た値を書く。**「実行した」は観測ではない（検査が落とす）。
+`observed` には**実際に見た値を書く。**「実行した」は観測ではない（検査が落とす）。
 `production` が1件になると `production_verified` の宣言もずれるので、そこも直す
-（検査が実測と突き合わせて落とす）。
+（検査が実測と突き合わせて落とす）。**run の番号を残せば、あとから誰でも中身を確かめられる。**
 
----
+セッションに「Flag Ops の run #N を見て台帳に入れて」と言えば、そこは機械側でやる。
 
 ## 2. 本番で確かめられないもの、とその理由
 

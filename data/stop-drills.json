@@ -101,7 +101,7 @@
         "../simplememo-api/src/config.ts",
         "docs/stop-drill-runbook.md"
       ],
-      "how_to_drill": "本番の手順は docs/stop-drill-runbook.md §1 に copy-paste できる形で置いてある（誰も読まないフラグを作る → kill を引く → killed に載ることを見る → 消す）。**max_stale_seconds は既存の最小値と同じにする** —— 短い値は全クライアントの再取得間隔を縮める",
+      "how_to_drill": "**鍵は要らない。**simplememo-api の Actions → Flag Ops → Run workflow を5回（diagnose → list → set → kill → list → delete）。手順は docs/stop-drill-runbook.md §1。**max_stale_seconds は既定の 86400 から下げない** —— 下げると誰も読まないフラグでも/v1/config 全体の再取得間隔が縮む（2026-08-26 の local 訓練で観測）",
       "drills": [
         {
           "at": "2026-08-26",
@@ -117,7 +117,7 @@
           "observed": "訓練用フラグ drill_kill_probe を rollout 100 で作成 → /v1/config の rollouts に載る（killed は空）。kill を引くと killed:[\"drill_kill_probe\"] に入り、**rollout 100 はそのまま残った**（降ろせば元の配布率に戻る設計どおり）。kill を降ろすと killed が空に戻り、rollout 100 が復帰。認証ヘッダ無しの kill は **401**、存在しないフラグの kill は **404**（黙って作らない）。**副作用を1つ観測した**: このフラグに max_stale_seconds:300 を付けたところ、/v1/config 全体の max_stale_seconds が 86400 → 300 に落ちた（最短のフラグが全体を縛る設計）。フラグを削除すると 86400 に戻った。**『誰も読まないフラグは誰の挙動も変えない』は誤り** —— 短い max_stale を付けると全クライアントの再取得間隔が縮む"
         }
       ],
-      "blocked_by": "本番で引くと利用者の機能が消える。**訓練用フラグを使えば本番でも確かめられるが、max_stale_seconds は既存の最小値（現在 86400）以上にすること** —— 短い値を付けると誰も読まないフラグでも全クライアントの再取得間隔が縮む（2026-08-26 の local 訓練で観測）。実施はオーナー判断"
+      "blocked_by": "本番で引くと利用者の機能が消えるので、AIは実行しない。**訓練用フラグを使えば影響を出さずに確かめられ、手順は docs/stop-drill-runbook.md §1 に置いた**（Flag Ops ワークフローで完結。鍵は GitHub Secrets にあるので手元に要らない）。実施はオーナー判断"
     },
     {
       "id": "flag-global-kill",
