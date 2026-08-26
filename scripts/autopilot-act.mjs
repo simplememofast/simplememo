@@ -1496,8 +1496,25 @@ function selftest() {
 // ============================================================
 // CLI
 // ============================================================
+/**
+ * 台帳を読む。**「無い」と「読めない」を混ぜない。**
+ *
+ * [2026-08-26] これまでは `try { JSON.parse(...) } catch { return fallback }` で、
+ * **構文が壊れたファイルを既定値に落としていた。**実測すると
+ * `data/authority-matrix.json` を壊しても `--check` は exit 0 を返した ——
+ * 権限表が空になると classify は全部 human を返す（安全側ではある）が、
+ * **壊れていることを誰も知らないまま縮退で走り続ける。**
+ *
+ * 無い（初回など）は既定でよい。読めないのは止める。
+ */
 function readJson(p, fallback = null) {
-  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return fallback; }
+  if (!fs.existsSync(p)) return fallback;
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (e) {
+    throw new Error(`${p} を読めない（${e.message}）`
+      + ' — **壊れた台帳を既定値に落とさない。**「無い」と「読めない」は違う');
+  }
 }
 
 async function buildContext(today) {
