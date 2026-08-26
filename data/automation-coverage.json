@@ -723,9 +723,9 @@
         "data/cpp-map.json"
       ],
       "note": "34本作成済みだが実験として回っていない",
-      "blocker": "external_data",
-      "unblocked_by": "露出データがASCから降りないと評価できない。feature-score も確信度0.15で「まず測る」判定",
-      "unlock": "asc_reports"
+      "blocker": "not_started",
+      "unblocked_by": "**列は降りている。**2026-08-25 の10レポートに Page Type / Source Type / Territory があり、内訳も取得側が持つようになった（2026-08-26）。ただし**値はこの公開リポジトリに運ばない決定**なので、評価は ../simplememo-ios 側に置く。[2026-08-26] それまで「露出データがASCから降りない」と書いたままだった —— 降りていないのではなく、運んでいない",
+      "unlock": "asc_dimension_read"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -829,8 +829,14 @@
       "evidence": [],
       "note": "**サイト内のカニバリゼーション（1クエリ×複数URL）は実装済み**（growth/scripts/analyze.mjs --only cannibalisation。表示数のフロアつき）。**この行が指しているのは自社サイトとApp Storeページの間**で、そちらは未実装。同じクエリに両方が露出したときにどちらが食っているかを見ていない。**サイト内の分と混同しない**ため、行の題を SEOとASO間と明示してある。",
       "blocker": "external_data",
-      "unblocked_by": "同じクエリへのApp Store側の露出がASCから降りないと、どちらが食っているか見られない",
-      "unlock": "asc_reports"
+      "unblocked_by": "**降りている10本のどれにも検索語の列が無い**（2026-08-26 に列名で確認）。Discovery and Engagement が持つのは Page Type / Source Type / Territory まで。「同じクエリへのApp Store側の露出」は別のレポートが要る",
+      "unlock": "asc_search_terms",
+      "blocked_on": [
+        {
+          "dir": "growth/data/appstore",
+          "contains": "Search Term"
+        }
+      ]
     },
     {
       "area": "③ 自律型マーケティング",
@@ -1195,8 +1201,8 @@
       "evidence": [],
       "note": "⑥の売上接続が前提。**ASC の課金レポートが降りていなかったので、そもそも分子が無かった**（2026-08-25 に取得側の欠陥2件を修正、data/operating-memory.json の om-2026-08-25-asc-zero）。降りたあとで初めて立てられる",
       "blocker": "external_data",
-      "unblocked_by": "⑥の売上接続が前提。分子（課金レポート）が降りてから",
-      "unlock": "asc_reports",
+      "unblocked_by": "**レポートは降りている。**たまっていないのは日数のほうで、date_range を持つ取得は 2026-08-25 22:20 以降。28日ぶんの観測が要る",
+      "unlock": "revenue_28d",
       "blocked_on": [
         {
           "file": "data/revenue-series.json",
@@ -1290,8 +1296,8 @@
       ],
       "note": "2026-08-22にASC取得の配線が入った（③参照）。**CACは依然として存在しない**（広告費ゼロ）。**2026-08-25 に売上が降りた**ので LTV・回収期間・粗利の材料は入り始めたが、**1日ぶんでは出せない。**LTV は継続期間が要り、Subscription State Report の Counts は State Metric を跨いだ合計なので契約者数として使えない（取り込みが行を持たず数値列の合計だけを保存する設計のため）",
       "blocker": "external_data",
-      "unblocked_by": "同上。CACは広告費ゼロのため定義上存在しない",
-      "unlock": "asc_reports",
+      "unblocked_by": "同上。**CACは広告費ゼロのため定義上存在しない**ので、出すのは LTV と回収期間と粗利",
+      "unlock": "revenue_28d",
       "blocked_on": [
         {
           "file": "data/revenue-series.json",
@@ -2313,5 +2319,5 @@
     "min(証跡の初出月) を使うと、2月から検査していたことになってしまう。",
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
   ],
-  "blocked_on_missing_budget": 16
+  "blocked_on_missing_budget": 14
 }

@@ -122,12 +122,31 @@ export function analyse(doc, { target = 0.95 } = {}) {
  *          external_contract … 外部の鍵・契約が要る
  */
 export const UNLOCKS = {
-  asc_reports:       { kind: 'wait', label: 'App Store Connect の Analytics レポートが降りる',
-                       needs: '現在0件。取得の配線は済んでいて、Apple側のレポート生成待ち' },
+  asc_search_terms:  { kind: 'wait', label: 'App Store の検索語レポートが要る',
+                       needs: '**降りている10本のどれにも検索語の列が無い**（2026-08-26 に列名で確認）。'
+                            + 'Discovery and Engagement が持つのは Page Type / Source Type / Territory までで、'
+                            + '「どのクエリから来たか」は別のレポート。**降りていないのはレポートであって、配線ではない**' },
+  asc_dimension_read: { kind: 'implement', label: '内訳の値を非公開側で読む経路を作る',
+                       needs: '**列（Page Type ほか）は降りている**が、値はこの公開リポジトリに運ばない'
+                            + '（2026-08-26 の決定・data/publication-policy.json）。'
+                            + '読む側は ../simplememo-ios の asc_subscription.rb / asc_funnel.rb と同じ場所に置く' },
+  revenue_28d:       { kind: 'wait', label: '収入の観測が28日たまる',
+                       needs: '**レポートは降りている**（2026-08-25に10本）。'
+                            + 'たまっていないのは日数のほうで、date_range を持つ取得は 2026-08-25 22:20 以降。'
+                            + '月額へ換算するには28日ぶんの観測が要る（推定で埋めない）',
+                       satisfied_when: [{ file: 'data/revenue-series.json', path: 'covered_days', atLeast: 28 }] },
   bq_28d:            { kind: 'wait', label: 'BigQuery の28日蓄積が到達する',
-                       needs: '9/6前後。D28が測れるようになる' },
+                       needs: '9/6前後。D28が測れるようになる',
+                       satisfied_when: [{ file: 'data/autopilot-status.json',
+                                          path: 'data_freshness.bq_export_days_accumulated', atLeast: 28 }] },
   company_facts:     { kind: 'owner_input', label: '会社の基礎事実を台帳に入れる',
-                       needs: '決算期・従業員の有無・課税事業者かどうかの3つ。**入れば申告期限は機械が出せる**' },
+                       needs: '**決算期・役員報酬・インボイス登録は 2026-08-25 に入り、'
+                            + '法人税と消費税の申告期限は機械が出している。**残るのは '
+                            + 'Apple Developer の加入日・ドメインの更新日・社会保険の具体的な届出期限・法定調書の要否',
+                       satisfied_when: [
+                         { file: 'data/credential-expiry.json', path: 'apple_developer_enrolled_at' },
+                         { file: 'data/credential-expiry.json', path: 'domain_renewal_at' },
+                       ] },
   contract_docs:     { kind: 'owner_input', label: '契約書・請求書をリポジトリに置く',
                        needs: '現在ゼロ。書面が無いと分類も照合も対象が存在しない' },
   corp_records:      { kind: 'owner_input', label: '議事録・株主名簿・事故記録の所在を決める',
@@ -329,11 +348,46 @@ export function selftest() {
       { file: 'data/autopilot-status.json', path: 'data_freshness.bq_export_days_accumulated', atLeast: 99999 }, false],
     ['ディレクトリの件数も見る', { dir: 'scripts', atLeast: 1 }, true],
     ['無いディレクトリは満たされない', { dir: 'そんなディレクトリ', atLeast: 1 }, false],
+    ['**contains: 在る語は満たす**', { dir: 'growth/data/appstore', contains: 'Page Type' }, true],
+    ['**contains: 無い語は満たさない**（在ることと、要るものが在ることは違う）',
+      { dir: 'growth/data/appstore', contains: 'Search Term' }, false],
+    ['contains はファイル単位でも効く',
+      { file: 'data/automation-coverage.json', contains: 'そんな語は入っていない' }, false],
   ];
   for (const [label, pred, want] of predCases) {
     let got;
     try { got = blockedOnSatisfied(pred); } catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
     if (got !== want) problems.push(`述語「${label}」が ${got}（${want} のはず）`);
+  }
+
+  // 入口の述語（開いた入口を待ち続けない）。**両方向を見る。**
+  {
+    if (!Object.values(UNLOCKS).some((u) => u.satisfied_when)) {
+      problems.push('satisfied_when を持つ入口が1つも無い（**この判定は空回りしている**）');
+    }
+    const taskAt = (unlock, over = {}) => ({ blocked_on_missing_budget: 99, tasks: [
+      { area: 'A', task: 'T', executor: 'nobody', blocker: 'external_data',
+        unblocked_by: 'x', unlock, blocked_on: [{ file: 'data/無い.json' }], ...over },
+    ] });
+    const OPEN = { kind: 'wait', label: '開いた入口', needs: 'x',
+      satisfied_when: [{ file: 'data/automation-coverage.json' }] };
+    const SHUT = { kind: 'wait', label: 'まだの入口', needs: 'x',
+      satisfied_when: [{ file: 'data/そんなファイルは無い.json' }] };
+
+    const fired = check(taskAt('u'), { unlocks: { u: OPEN } });
+    if (!fired.some((x) => x.includes('もう開いている'))) {
+      problems.push('**開いた入口を待ち扱いのままにしても鳴らない**（計画が古い材料を待てと言い続ける）');
+    }
+    const quiet = check(taskAt('u'), { unlocks: { u: SHUT } });
+    if (quiet.some((x) => x.includes('もう開いている'))) {
+      problems.push('まだ開いていない入口で「もう開いている」と言った（常に鳴る検査も何も見ていない）');
+    }
+    // 待ち種別でなければ鳴らない
+    const notWaiting = check(taskAt('u', { blocker: 'not_started', unblocked_by: 'やっていない' }),
+      { unlocks: { u: OPEN } });
+    if (notWaiting.some((x) => x.includes('もう開いている'))) {
+      problems.push('not_started の行で「もう開いている」と言った');
+    }
   }
 
   // ラチェット
@@ -375,17 +429,29 @@ export function selftest() {
  *   { file: 'data/x.json', path: 'a.b.c' }        … その位置に値が在る（null/undefined 以外）
  *   { file: 'data/x.json', path: 'a.b', atLeast: 28 } … 数がその値以上
  *   { dir: 'growth/data/appstore', atLeast: 1 }   … ディレクトリに N 件以上
+ *   { dir: '...', contains: 'Search Term' }       … その語がどれかのファイルに現れた
+ *
+ * `contains` は「**待っている次元が届いたか**」を書くためにある。
+ * 「ファイルが在る」では足りない場合がある —— 例えば ASC のレポートは降りているが、
+ * 検索語の列を持つレポートはまだ無い。**在ることと、要るものが在ることは違う。**
  */
 export function blockedOnSatisfied(pred, { root = ROOT } = {}) {
   const at = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+  const hasText = (abs, needle) => {
+    try { return fs.readFileSync(abs, 'utf8').includes(needle); } catch { return false; }
+  };
   if (pred.dir) {
     const abs = path.join(root, pred.dir);
     if (!fs.existsSync(abs)) return false;
-    const n = fs.readdirSync(abs).filter((f) => !f.startsWith('.')).length;
-    return n >= (pred.atLeast ?? 1);
+    const files = fs.readdirSync(abs).filter((f) => !f.startsWith('.'));
+    if (pred.contains) {
+      return files.some((f) => hasText(path.join(abs, f), pred.contains));
+    }
+    return files.length >= (pred.atLeast ?? 1);
   }
   const abs = path.join(root, pred.file);
   if (!fs.existsSync(abs)) return false;
+  if (pred.contains) return hasText(abs, pred.contains);
   if (!pred.path) return true;
   let doc;
   try { doc = JSON.parse(fs.readFileSync(abs, 'utf8')); } catch { return false; }
@@ -408,7 +474,7 @@ export const WAITING_BLOCKERS = new Set([
   'external_data', 'external_credential', 'missing_source_document', 'human_consent',
 ]);
 
-export function check(doc) {
+export function check(doc, { unlocks = UNLOCKS } = {}) {
   const problems = [];
   for (const t of doc.tasks) {
     if (!NON_AI.has(t.executor)) {
@@ -448,6 +514,23 @@ export function check(doc) {
         + ` — ${t.blocked_on.map((x) => x.path ? `${x.file}:${x.path}` : (x.dir ?? x.file)).join(', ')}`
         + ' が揃っている。**blocker と unblocked_by を実際の状態に直すこと**'
         + '（「ブロックされている」と「ブロックされているか確かめていない」は違う）');
+    }
+  }
+
+  // **開いた入口を「待っている」と言い続けない。**
+  //
+  // [2026-08-26] `--plan` が最短路の**先頭**で「App Store Connect の Analytics
+  // レポートが降りる（現在0件）」を出していた。実際には 2026-08-25 に10本降りている。
+  // **オーナーへ渡す計画が、もう届いたものを待てと言っていた。**
+  // 行だけでなく入口（UNLOCKS）にも述語を置く。
+  for (const [id, u] of Object.entries(unlocks)) {
+    if (!Array.isArray(u.satisfied_when) || !u.satisfied_when.length) continue;
+    if (!u.satisfied_when.every((pr) => blockedOnSatisfied(pr))) continue;
+    const still = doc.tasks.filter((t) => t.unlock === id && WAITING_BLOCKERS.has(t.blocker));
+    if (still.length) {
+      problems.push(`入口「${u.label}」はもう開いているのに、${still.length} 件が待ち扱いのまま`
+        + ` — ${still.map((t) => t.task).join(' / ')}`
+        + '（**計画がオーナーに、もう届いたものを待てと言うことになる**）');
     }
   }
 
