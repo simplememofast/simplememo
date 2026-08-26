@@ -15,7 +15,7 @@
     "none_budget を超えたら落ちる。**上限を上げて通さないこと** —— 上げた瞬間に",
     "この台帳は「現状を追認する表」になり、止める力を失う。"
   ],
-  "none_budget": 10,
+  "none_budget": 8,
   "checks": [
     {
       "script": "growth/scripts/build-queues.mjs",
@@ -27,7 +27,9 @@
     },
     {
       "script": "growth/scripts/check-experiments.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "台帳の14通り（評価日欠落・baseline 空・stop_conditions 空・control.kind 空欄・confounders 欠落・min_sample 欠落・inconclusive に baseline 無し・id 重複・未知 status・期日判定）で落ちることを観測。加えて **冒頭の docstring が事実でなかった** —— 「A malformed ledger DOES fail, always」は壊れた「項目」の話でしかなく、`experiments` のキーを1文字打ち間違えた「台帳」は素通りし、36件を載せたまま「評価日を過ぎた実験は無い」と報告して exit 0 した。validate に配列判定を足し、打ち間違いで落ちること・空の配列は通ることを確かめた"
     },
     {
       "script": "growth/scripts/check-mentions.mjs",
@@ -189,7 +191,9 @@
     },
     {
       "script": "scripts/check-internal-redirects.mjs",
-      "state": "none"
+      "state": "demonstrated",
+      "at": "2026-08-26",
+      "broke": "抽出器・staticResolve・mailto の12通りで落ちることを観測。加えて **実在した穴を実測して塞いだ** —— JSON-LD の正規表現を壊すと「0 JSON-LD/meta ... all resolve to a direct 200」と報告して exit 0 した。0件のURLからは0件の指摘しか出ないため。これは 2026-08-11（JSON-LD/meta 未読で /comparison/ の .html 5本と apple-itunes-app 2本が301のまま出荷）と 08-20（sitemap 未読）に 実際に起きた形。拾えた件数に種別ごとの下限を置き、@id を落とすと exit 1 になることを確かめた"
     },
     {
       "script": "scripts/check-model-eval.mjs",

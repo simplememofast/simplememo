@@ -151,6 +151,23 @@ export const CONTROL_KINDS = ['holdout', 'pre_post', 'none'];
 
 export function validate(ledger) {
   const problems = [];
+
+  // **台帳そのものが読めていないことを「実験が無い」と混ぜない。**
+  //
+  // [2026-08-26] `experiments` を1文字打ち間違えるだけで、以降のループは
+  // 0周し、validate は 0 件、summarize は total 0 を返した。CI の出力は
+  // 「No experiment is past its evaluation date」で exit 0 —— **この門は
+  // 黙って開く。**36件の実験が台帳に載ったままそうなることを実測した。
+  // このファイルの冒頭が「壊れた台帳は必ず落ちる」と書いているのは
+  // 壊れた**項目**のことで、壊れた**台帳**は素通りしていた。
+  //
+  // 空の配列は正当（まだ実験が無い）。**無いのと読めないのは違う。**
+  if (!Array.isArray(ledger?.experiments)) {
+    problems.push('ledger.experiments が配列でない — 台帳が読めていない状態を'
+      + '「実験が無い」と混ぜない（キーの打ち間違い1つで、この門は黙って開く）');
+    return problems;
+  }
+
   const seen = new Set();
   const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
