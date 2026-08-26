@@ -256,10 +256,17 @@
       "task": "機能の削除・単純化・高速化の候補化",
       "executor": "nobody",
       "evidence": [],
-      "note": "バックログ（data/feature-backlog.json）は**追加の候補しか持たない。**ビジョンは「作らない」を繰り返し定めている（Todo管理画面・Calendar UI・Knowledge Base を作らない）のに、**既にあるものを減らす提案が構造的に出てこない。**足すほうだけを採点する仕組みは、時間とともに必ず膨らむ方向に倒れる",
-      "blocker": "not_started",
-      "unblocked_by": "バックログが追加候補しか持たない。減らす提案を採点対象に入れる",
-      "unlock": "impl_backlog"
+      "note": "バックログ（data/feature-backlog.json）は**追加の候補しか持たない。**ビジョンは「作らない」を繰り返し定めている（Todo管理画面・Calendar UI・Knowledge Base を作らない）のに、**既にあるものを減らす提案が構造的に出てこない。**足すほうだけを採点する仕組みは、時間とともに必ず膨らむ方向に倒れる\n\n[2026-08-26] blocker を not_started → external_data へ。**「着手していないだけ」ではない。**器（採点の仕組み）は足せるが、減らす候補を出す根拠が無い。実測して確かめたうえで、数字のために推測で候補を作ることはしない。",
+      "blocker": "external_data",
+      "unblocked_by": "**採点の器ではなく、減らす根拠のほうが無い。**2026-08-26 に測った: 利用状況データ（D7/D28）は BigQuery 28日蓄積待ち（9/6前後）で、data/benchmark.json は起動0.4秒で競合の最速（Drafts 0.9秒）より速く、「速くする候補」が実測から出てこない。**根拠の無い削除提案は推測**なので、BigQuery が28日たまってから",
+      "unlock": "impl_backlog",
+      "blocked_on": [
+        {
+          "file": "data/autopilot-status.json",
+          "path": "data_freshness.bq_export_days_accumulated",
+          "atLeast": 28
+        }
+      ]
     },
     {
       "area": "① 次期機能開発",
@@ -476,9 +483,9 @@
       "task": "flakyテスト・不要になったテストの整理",
       "executor": "nobody",
       "evidence": [],
-      "note": "テストを**足す**経路はある（回帰テスト化の実績あり）が、**減らす／直す経路が無い。**flaky を検出する仕組みも、使われなくなったテストを見つける仕組みも3リポジトリに無い。放置すると『赤いのが普通』になり、②の検査群全体の信頼が落ちる",
+      "note": "テストを**足す**経路はある（回帰テスト化の実績あり）が、**減らす／直す経路が無い。**flaky を検出する仕組みも、使われなくなったテストを見つける仕組みも3リポジトリに無い。放置すると『赤いのが普通』になり、②の検査群全体の信頼が落ちる\n\n[2026-08-26] blocker を not_started → statistical_power へ。未使用テスト検出は**対象が0件**（.test.mjs 2本は両方CI配線済み）で、作っても一度も発火しない検査になる。flaky 検出は反復実行の履歴が要る。**母数が無いものを「検出できる」と数えない。**",
       "blocker": "not_started",
-      "unblocked_by": "足す経路はあるが減らす／直す経路が無い。flaky検出と未使用テストの検出を作る",
+      "unblocked_by": "**器ではなく母数が無い。**2026-08-26 に測った: 未使用テスト検出は**対象が0件**（`.test.mjs` は2本で両方CI配線済み。実体の試験面は62本の `--selftest` で、そちらは check-selftests がラチェットで守っている）。flaky 検出は**同一コミットの反復実行の履歴**が要り、いまその履歴を持っていない",
       "unlock": "impl_qa"
     },
     {
