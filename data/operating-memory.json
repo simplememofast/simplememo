@@ -836,6 +836,35 @@
         ],
         "new_guardrail": "`ok_in_public_repo`（ok / review）を全38件に必須化。review は `public_repo_why` 必須で、検査が毎回列挙する。**`no` は用意しない**（消しても履歴には残るので、選択肢として嘘になる）。秘密の実値が混入した瞬間は review では済まないので、値の検査は別に持ち続ける"
       }
+    },
+    {
+      "id": "om-2026-08-26-two-guards-cancel",
+      "seeded": false,
+      "area": "⑤ 段階公開・カナリア",
+      "signal": "#161（窓の梯子）を本番で読んだ。window_days=3 が選ばれ、3指標とも「サンプル不足」。梯子は載っているのに判定へ届いていない",
+      "hypothesis": "母数が足りないだけで、窓を広げる仕組みそのものは効いている",
+      "decision": "**効いていなかった。しかも、効いていないことに気づけない形だった。**\n\n(1) `if (!st) continue` で読めない窓を黙って捨てていたので、「7/14/28 を試して全部0」と「読めずに飛ばした」がどちらも window_days=3 として出る。**壊れた梯子と、上っても届かない梯子が、同じ姿をしていた。**\n\n(2) より重いのは版フィルタとの相互作用。版の判定は**窓内の最小版**で行う（readEventSets の MIN）ので、窓を広げると同じ install の「もっと古かった頃」まで見にいって外れる。5.8.1 の公開（08-22）が窓より新しいあいだ、**広げるほど母数が減る。**窓を広げる修正（#161）と版で絞る修正（#160）は、どちらも単体では正しく、**合わさると互いを打ち消していた。**",
+      "execution": {
+        "repo": "simplememo-api",
+        "commit": "4bcca25",
+        "files": [
+          "../simplememo-api/src/rollout-guard.ts",
+          "../simplememo-api/test/rollout-guard.test.ts",
+          "../simplememo-api/.github/workflows/flag-ops.yml"
+        ]
+      },
+      "verification": "試した段を `Decision.window_ladder` に残す（judged/eligible が null = 読めなかった。0 とは別）。`pickWindow` は null の段を候補にしない。`ladderShrinkNote()` が段を比べて、広げて母数が減っていたらそう書く。Flag Ops の要約に `latest_window_ladder`。jq は3形（梯子あり／旧コードの応答／decisions 空）で実行し、いずれも落ちない。vitest 69ファイル 1,479件（+6）／typecheck 通過。\n\n**実測（2026-08-26 06:00 UTC・版フィルタ後）**: launch_ok 母数112 → rollout 27%以上 ／ activation 母数76 → 40%以上 ／ send_success 母数35 → **どの rollout でも判定できない**（露出30＋対照30＝60 が母数を超える）。除外は 229 中 117 で、母数の半分以上が 5.8.1 未満だった。",
+      "outcome": "**率は動かない。**kill はいまも本番で1回も発火していない。変わったのは、届いていないことが**理由つきで読める**ようになったこと。以前ここに書いていた「rollout 13% で足りる」は版フィルタ前の過小評価で、実測は 27%。残る道は露出を上げることだけで、それは domain 16 の `human_only`。**代行もしない。**",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "two-correct-guards-can-cancel-each-other",
+        "text": "**単体で正しい安全装置を2つ足すと、打ち消し合うことがある。**「窓を広げて母数を稼ぐ」と「窓内の最小版で絞る」は、どちらも単体では正しい。並べると、広げた窓が古い版を連れてきて、絞りが外す —— **広げるほど母数が減る。**\n\nしかもこの打ち消しは**沈黙する。**梯子は毎時走り、決定も残り、「梯子がある」ことは検査で確かめられる。届いていないことだけが、どこにも出ない。`a-config-check-does-not-check-the-effect` と同じ形が、今度は自分が前の PR で足した機構に出た。\n\n**新しい機構を足したら、その機構が効かなかったときの姿を先に決めること。**効いた姿しか設計していないと、効かない姿は「静かな正常」として出てくる。",
+        "changed": [
+          "../simplememo-api/src/rollout-guard.ts",
+          "../simplememo-api/.github/workflows/flag-ops.yml"
+        ],
+        "new_guardrail": "梯子の段を全部残す（読めなかった段は null で、0 と区別する）。`pickWindow` は null を候補にしない。広げて母数が減ったら `ladderShrinkNote()` が理由に書く。**「窓を広げれば届く」と書かない** —— 版フィルタの窓内 MIN がある限り、min_version の公開日が窓より古くなるまで梯子は効かない"
+      }
     }
   ]
 }
