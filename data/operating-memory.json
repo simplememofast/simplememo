@@ -978,6 +978,60 @@
         ],
         "new_guardrail": "監視の周期を変えるときは `date_jst == 今日(JST)` の判定と衝突しない窓（12:00〜20:00 JST）の中に収める。**0:00〜6:00 は毎晩必ず誤検知する**ので、増やす方向でもこの帯には入れない。理由をワークフローのコメントに書いてあり、増やす人が読む場所に置いてある"
       }
+    },
+    {
+      "id": "om-2026-08-26-two-cases-is-not-validation",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "台帳が『既知の2件で誤検知ゼロ・見逃しゼロ』と書いた設計を、そのまま実装して3件目に当てたら誤検知が出た",
+      "hypothesis": "実測で検証済みと書いてある設計は、書いてある通りに実装すればよい",
+      "decision": "**2件は検証ではなく、2件の観測。**PR #593 のブランチは merge 時 head より6件先にあるが、**うち5件は後続PRで既に main へ着地していた**（ブランチが複数PRで使い回された形）。マージ時 head との差だけを見ると、着地済みまで取り残し扱いになる。\n\n設計を ①compare/{マージ時head}...{branch} と ②compare/{base}...{branch} の**積**に直した。①だけだと『マージ後に push された』、②だけだと『squashなので全ブランチが該当』。**どちらか片方では必ず外れる。**",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/autopilot-act.mjs",
+          "data/autopilot-actions.json"
+        ]
+      },
+      "verification": "実測3件: #586 候補1∩main無し3=1件(ee4e37c) / #547 候補0=0件 / #593 候補6∩main無し1=1件(2b0a702)。**①だけなら #593 で6件と誤検知していた。**積を外すと自己検査『後続PRで着地済みのコミットを取り残しに数えない』が落ちることも観測",
+      "outcome": "誤検知ゼロ・見逃しゼロ（実測3件）。走査の失敗は null を返し、空配列にしない",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "two-observations-are-not-a-validated-design",
+        "text": "**n=2 の『誤検知ゼロ』は、検証ではなく2件の観測。**しかも今回の2件は『取り残しあり』と『取り残しなし』で、**分岐を1本ずつ通しただけ**だった。崩したのは3件目の『取り残しはあるが、別経路で着地済み』という第3の形。\n\n台帳や前任セッションが『実測で確認済み』と書いていても、**件数と、どの形を通したかを見る。**件数が少ないほど、通っていない形が残っている。実装する前に『この設計が外れるのはどんな形か』を1つ挙げてから当てにいく",
+        "changed": [
+          "scripts/autopilot-act.mjs"
+        ],
+        "new_guardrail": "前任の設計を実装するときは、**書かれた実測件数をそのまま信頼度として使わない。**n が3未満なら、実装前に自分で1件追加で当てる。今回それをやったから3件目で見つかった"
+      }
+    },
+    {
+      "id": "om-2026-08-26-orphan-detector-got-orphaned",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "取り残し検知を実装した a90dfdad を push した直後に PR #645 が auto-merge され、**マージされたのは1つ前の d28767fd だった**。CI完了通知の head_sha がそれを指していた",
+      "hypothesis": "CIが緑になったPRにあとから push しても、次の検証が拾う",
+      "decision": "**拾わない。**CLAUDE.md が書いているとおり auto-merge は「検証済みSHAだけ」をマージし、マージした時点でPRが閉じるので**次の検証を起こす先が無い。**\n\nこの日4回目の再発（08-23 / 08-26朝 / #593 / これ）で、**取り残し検知を実装したコミットが、まさにその機構で取り残された。**\n\n実装したばかりのアルゴリズムを自分のPRに当てて確認した:\n\n    PR #645  候補1件 ∩ mainに無い7件 = **取り残し1件**（a90dfda）\n\n候補が1件なのは push が1回だったから、mainに無いが7件なのは squash マージでブランチのコミットが main の祖先にならないから。**積を取っていなければ7件と誤検知していた。**\n\nsquash マージなので main へ戻すマージは使えない。**main から起こし直して差分を再適用した。**",
+      "execution": {
+        "repo": "simplememo",
+        "commit": "(this session)",
+        "files": [
+          "scripts/autopilot-act.mjs",
+          "data/operating-memory.json"
+        ]
+      },
+      "verification": "git show origin/main:scripts/autopilot-act.mjs に fetchOrphanedCommits が無いことを確認（grep -c = 0）。compare API でも取り残し1件と一致。**検知器が自分の取り残しを正しく1件だけ指した**",
+      "outcome": "再投入した。検知そのものは実地で当たった —— 実装直後に、作った本人のPRで発火する形になった",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "pushing-after-green-loses-the-commit",
+        "text": "**CIが緑になったPRにあとから push したら、そのコミットは落ちると思ったほうがいい。**\n\nauto-merge は検証済みSHAだけをマージする（正しい設計）。その帰結として、緑の後の push は**マージされないまま、拾う先を失う。**「次の検証が拾う」はPRが開いている間だけ成り立つ。\n\nこの日4回目で、しかも**取り残し検知を書いたコミット自身が取り残された。**仕組みを作ったことと、自分がその罠を踏まないことは別問題だった。",
+        "changed": [
+          "scripts/autopilot-act.mjs"
+        ],
+        "new_guardrail": "**緑になったPRには push しない。**足すものがあるなら、マージを待ってmain から新しく起こす。squash マージなのでブランチを main にマージし直すこともできない（コミットが祖先にならない）—— 差分を取って再適用する"
+      }
     }
   ]
 }
