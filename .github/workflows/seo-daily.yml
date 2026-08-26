@@ -195,21 +195,6 @@ jobs:
           node scripts/check-domain-expiry.mjs --write 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-      # ⑦法人経営。各社の規約本文を取りに行き、**改定されたら読み直しへ戻す。**
-      # 書き先は上と同じ data/corporate-obligations.json なので、下のコミットが拾う。
-      # **取得できなかった回は台帳を触らない**（読めなかった＝変わっていない、にしない）。
-      - name: Vendor terms (指紋の更新)
-        continue-on-error: true
-        run: |
-          {
-            echo ""
-            echo "## 規約本文の指紋"
-            echo ""
-            echo '```'
-            node scripts/vendor-terms.mjs --write 2>&1 || true
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Store facts vs App Store (report only)
         continue-on-error: true
         run: |
@@ -246,6 +231,35 @@ jobs:
             echo "snapshot=false" >> "$GITHUB_OUTPUT"
             echo "月曜ではないので、記録用スナップショットのコミットは行わない。" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # ⑦法人経営。各社の規約本文を取りに行き、**改定されたら読み直しへ戻す。**
+      #
+      # [2026-08-27] **ここへ移した。**元は上の「取得」群に並べて毎日走らせていたが、
+      # 書き先の data/corporate-obligations.json を拾う `Commit and open PR` は
+      # **月曜だけ**（すぐ上の when ステップ）。つまり火〜日は
+      # **16秒かけて10社を取得し、書いて、捨てていた。**
+      #
+      # 配線した当人が、配線先の commit ゲートを読んでいなかった。
+      # **出力が残らない日に走らせない** —— 規約は毎日は改定されないので、
+      # 検知が週1でも遅すぎることはない。
+      #
+      # **取得できなかった回は台帳を触らない**（読めなかった＝変わっていない、にしない）。
+      #
+      # なお上の「Domain expiry (RDAP)」も同じ性質を持つ（毎日走って月曜しか残らない）。
+      # あちらは前任が「期限は年1回しか動かないのでその頻度で足りる」と明記して
+      # 選んだ配置なので、**こちらの都合で動かさない。**
+      - name: Vendor terms (指紋の更新)
+        if: steps.when.outputs.snapshot == 'true'
+        continue-on-error: true
+        run: |
+          {
+            echo ""
+            echo "## 規約本文の指紋"
+            echo ""
+            echo '```'
+            node scripts/vendor-terms.mjs --write 2>&1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Ingest snapshot of record
         if: steps.when.outputs.snapshot == 'true'
