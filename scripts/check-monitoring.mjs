@@ -16,6 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
@@ -58,8 +59,22 @@ export function uncoveredFailures(doc, runs) {
     .map(([failure_class, count]) => ({ failure_class, count }));
 }
 
+
+// ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+const SELFTEST_BREAKAGES = [
+  ['**検知手段が実在しない**のは落ちる', (d) => { d.signals[0].detector = 'scripts/そんな検知器は無い.mjs'; }],
+  ['知らない detection は落ちる', (d) => { d.signals[0].detection = 'なんとなく気づく'; }],
+  ['**頻度が書いていない**のは落ちる（いつ見るか決まっていない監視は見ない）', (d) => { delete d.signals[0].cadence; }],
+];
+const SCENARIOS = ledgerScenarios(
+  () => readJSON('data/monitoring-coverage.json'),
+  (d) => audit(d),
+  SELFTEST_BREAKAGES,
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = readJSON('data/monitoring-coverage.json');
   const runs = readJSON('data/autopilot-runs.json');
