@@ -122,18 +122,37 @@ export function analyse(doc, { target = 0.95 } = {}) {
  *          external_contract … 外部の鍵・契約が要る
  */
 export const UNLOCKS = {
-  asc_search_terms:  { kind: 'wait', label: 'App Store の検索語レポートが要る',
-                       needs: '**降りている10本のどれにも検索語の列が無い**（2026-08-26 に列名で確認）。'
-                            + 'Discovery and Engagement が持つのは Page Type / Source Type / Territory までで、'
-                            + '「どのクエリから来たか」は別のレポート。**降りていないのはレポートであって、配線ではない**' },
+  // [2026-08-26] **`wait` から外した。**「待つだけ」は待てば来るものに使う語で、これは来ない。
+  // Apple の Analytics Reports カタログ **156本を全部読んだ**（../simplememo-ios/data/asc/status.json
+  // の available_reports）。検索語のレポートは**1本も無い** —— 名前に search / term / query を
+  // 含むのは `Spotlight Query Performance` と `Visual Intelligence Image Search Usage` の2本で、
+  // どちらもストア検索語ではない。
+  //
+  // **確かめたのはこの経路だけ。**「Apple がくれない」と書く前に叩く、というのが
+  // om-2026-08-25-asc-landed の学びなので、まだ叩いていない面（Sales and Trends /
+  // Apple Search Ads / ASCのWeb UI）を到達不能と書かない。次にやることは探索であって待機ではない。
+  asc_search_terms:  { kind: 'implement', label: 'ストア検索語を取る面を探す（Analytics には無い）',
+                       needs: '**Analytics Reports のカタログ156本に検索語のレポートは無い**'
+                            + '（2026-08-26 に available_reports を全件確認）。'
+                            + 'Discovery and Engagement が持つのは Page Type / Source Type / Territory まで。'
+                            + '**待っても降りてこない** —— 残る面（Sales and Trends / Apple Search Ads / '
+                            + 'ASCのWeb UI）のどれが organic の検索語を返すかを叩いて確かめる。'
+                            + '**どれも返さないと分かった時点で never 側へ落とす**（それまでは推測で落とさない）' },
   asc_dimension_read: { kind: 'implement', label: '内訳の値を非公開側で読む経路を作る',
                        needs: '**列（Page Type ほか）は降りている**が、値はこの公開リポジトリに運ばない'
                             + '（2026-08-26 の決定・data/publication-policy.json）。'
                             + '読む側は ../simplememo-ios の asc_subscription.rb / asc_funnel.rb と同じ場所に置く' },
   revenue_28d:       { kind: 'wait', label: '収入の観測が28日たまる',
-                       needs: '**レポートは降りている**（2026-08-25に10本）。'
-                            + 'たまっていないのは日数のほうで、date_range を持つ取得は 2026-08-25 22:20 以降。'
-                            + '月額へ換算するには28日ぶんの観測が要る（推定で埋めない）',
+                       // [2026-08-26] **08-26 まで、これは待ちではなかった。**積む側
+                       // （growth/scripts/revenue-series.mjs）が読むのは ingest-asc.mjs の出力で、
+                       // その ingest は `../simplememo-ios/data/asc/` を読む —— **このリポジトリの
+                       // CI に隣は無い。**実測 covered_days は 0 のまま動いていなかった。
+                       // 積む処理を取得側（../simplememo-ios/scripts/asc_revenue.rb、毎日実行）へ移し、
+                       // **08-26 から実際に増える。**待ちが本物になったのはこの日から。
+                       needs: '**08-26 に積み始めた**（それまでは配線が切れていて、待っても増えなかった）。'
+                            + '積むのは ../simplememo-ios/scripts/asc_revenue.rb で、'
+                            + 'ここが持つのは金額を運ばない写し。月額へ換算するには28日ぶんの観測が要る'
+                            + '（推定で埋めない）。28日そろうのは 2026-09-19 前後',
                        satisfied_when: [{ file: 'data/revenue-series.json', path: 'covered_days', atLeast: 28 }] },
   bq_28d:            { kind: 'wait', label: 'BigQuery の28日蓄積が到達する',
                        needs: '9/6前後。D28が測れるようになる',
