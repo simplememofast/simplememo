@@ -205,6 +205,18 @@ jobs:
           node scripts/check-generators.mjs --check
           node scripts/check-generators.mjs --run
 
+      # 【中期ロードマップ】日次のアクション台帳と個別バックログしか無く、
+      # **「次の四半期に何をやるか」を機械が組み立てる経路が無かった。**
+      # 日次の最適化だけが自動化されていると、短期に効く施策へ寄る。
+      #
+      # **日付を発明しない。**台帳に評価日があるものだけを暦に置き、
+      # 順番しか決まらないものは順番だけ出す。オーナーの手数が要るものを
+      # 機械の側と混ぜない（混ぜると「機械だけで届く」の主張が壊れる）。
+      - name: Mid-term roadmap is assembled, not invented
+        run: |
+          node scripts/roadmap.mjs --selftest
+          node scripts/roadmap.mjs --check
+
       # 【PR原稿の事実検査】古い事実と誇大表現を機械が落とす。
       #
       # 2026-08-22、2026-06の原稿を雛形にした新しい原稿が3件の古い事実を
