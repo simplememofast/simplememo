@@ -355,7 +355,8 @@
       "task": "オフライン・タイムアウト・500・429の決定論再現",
       "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md"
+        "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md",
+        "../simplememo-ios/SimpleMemo/QA/QAStubURLProtocol.swift"
       ],
       "note": "QAStubURLProtocol。低速回線とバックグラウンド復帰は無い"
     },
@@ -434,7 +435,9 @@
       "task": "回帰の合否判定（決定論的）",
       "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md"
+        "../simplememo-ios/docs/qa/AUTOMATED_QA_ARCHITECTURE.md",
+        "../simplememo-ios/SimpleMemoTests/QATestCase.swift",
+        "../simplememo-ios/SimpleMemoTests/RelayClientContractTests.swift"
       ],
       "note": "AIには判定させない設計"
     },
@@ -443,9 +446,12 @@
       "task": "セキュリティ監査と修正",
       "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md"
+        "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md",
+        "../simplememo-ios/SimpleMemo/AnalyticsClient.swift",
+        "../simplememo-ios/SimpleMemo/DraftManager.swift",
+        "../simplememo-ios/SimpleMemo/ObsidianManager.swift"
       ],
-      "note": "AIが発見しAIが修正。High 1件含む4件"
+      "note": "AIが発見しAIが修正。High 1件含む4件 **[2026-08-27] 証跡を報告書から修正した実物へ移した。**報告書は「見つけた」の記録であって「直した」の記録ではない。3ファイルは報告書 §が名指ししている修正先"
     },
     {
       "area": "② バグ修正",
@@ -536,9 +542,11 @@
       "task": "施策の選定（レーンA〜E）",
       "executor": "ai_autonomous",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "scripts/autopilot-gate.mjs",
+        "growth/scripts/build-queues.mjs"
       ],
-      "note": "ノイズフロア・品質ゲートに基づきAIが単独で選ぶ"
+      "note": "ノイズフロア・品質ゲートに基づきAIが単独で選ぶ **[2026-08-27] 証跡を手順書から選定を実際に行うスクリプトへ移した。**RUNBOOK は「こう選ぶ」であって「選んだ」ではない"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -572,9 +580,10 @@
       "task": "品質ゲート（ノイズフロア・品質80点・検証規約）",
       "executor": "ai_executes_gated",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "growth/scripts/build-queues.mjs"
       ],
-      "note": "「毎日出すために基準を下げる」を失敗と定義"
+      "note": "「毎日出すために基準を下げる」を失敗と定義 **[2026-08-27] ノイズフロアを実際に計算しているのは build-queues.mjs。**RUNBOOK は基準の記述"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -674,9 +683,11 @@
       "task": "PR原稿の執筆",
       "executor": "ai_autonomous",
       "evidence": [
-        "docs/pr-autopilot-2026-09.md"
+        "docs/pr-autopilot-2026-09.md",
+        "scripts/check-pr-facts.mjs",
+        "data/code-authorship.json"
       ],
-      "note": "本原稿がその実例"
+      "note": "本原稿がその実例 **[2026-08-27] 執行面の証跡は「生成器」ではない。**原稿を書くのはセッションであってスクリプトではないので、機械側に残るのは (a) 原稿を落とす事実検査と (b) 著者がAIであることの台帳の2つ。**生成器が無いことをここに書いておく**"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -1133,7 +1144,8 @@
       "task": "無限ループ・重複実行の防止",
       "executor": "ai_executes_gated",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "scripts/autopilot-gate.mjs"
       ],
       "note": "--max-turns 250・当日ブランチ占有・冪等性チェック"
     },
@@ -1258,7 +1270,9 @@
       "task": "データ不足時に「何もしない」と判断",
       "executor": "ai_executes_gated",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "scripts/autopilot-gate.mjs",
+        "growth/scripts/build-queues.mjs"
       ],
       "note": "ノイズフロア＝期待クリック3未満／28日窓未満でスナップショットを作らない"
     },
@@ -1705,12 +1719,10 @@
         "../simplememo-ios/scripts/asc_subscription.rb",
         "../simplememo-ios/scripts/asc_analytics.rb",
         "../simplememo-ios/.github/workflows/asc-analytics.yml",
-        "../simplememo-api/src/cancel-flow.ts",
-        "../simplememo-api/test/cancel-flow.test.ts",
         "../simplememo-api/src/autopilot-report.ts",
         "../simplememo-ios/SimpleMemo/CancelFlowManager.swift"
       ],
-      "note": "**[2026-08-26] 前提が間違っていた。**この欄は長らく「Apple が解約理由をくれるか未確認」と書いていたが、`Cancellation Reason` 列は **2026-08-25 の取得で既に届いていた**（Subscription Event Report / State Report のどちらの columns にも入っている）。読めなかった理由は Apple 側ではなく**こちらの保存の形**で、asc_analytics.rb が残すのは数値列の合計だけだった。解約理由は文字列なので合計対象に入らず、**列名だけが残って中身は1件も残っていなかった。**「取れない」と「捨てている」を取り違えていた（data/operating-memory.json om-2026-08-26-breakdown）。\n\n取得側に名指しの分類列 × 名指しの測定列の内訳を足し（BREAKDOWN_DIMENSIONS）、読む側を asc_subscription.rb として asc-analytics.yml の日次に配線した。**ただし 2026-08-26 時点で読めた項目は 0/3。**手元にある取得結果は内訳を持つ前の版なので no_breakdown を返す。**次の定時実行（毎日 20:30 JST）で決まる。**\n\n**空欄しか無い可能性は残る。**Apple 側で解約理由は任意項目であり、埋まらないほうが普通。読む側は空欄を捨てず `(空欄)` として数え、all_blank を readable と区別する ——**「解約理由が読めなかった」を「解約が無かった」と読ませないため。**空欄だった場合、⑨を実物にするにはアプリ内で理由を聞く導線が要る（未実装）。実施は引き続き人の判断なので ai_proposes のまま\n\n**[2026-08-26 決着] 空欄だった。**予定の定時実行（20:30 JST）を待たずに asc-analytics.yml を手動で回して確かめた。取得は成功し、内訳つきで降りてきて、`asc_subscription.rb` は 3項目中2項目を読めた（契約の状態 155/33・契約イベント 4件）。**しかし `Cancellation Reason` は列も値も届くのに、値が全部空欄**（all_blank）。上に書いてあった「空欄しか無い可能性」がそのまま当たった。\n\n**したがってこの行はもう『データ待ち』ではない。**待っていたものは降りて、空だと分かった。実物にするには**アプリ内で理由を聞く導線**が要る（未実装）。ブロッカーを external_data から not_started へ移した —— **降りない物を待ち続ける行にしないため。**\n\n**[2026-08-26 実装] 詰まっていたのは聞く側ではなく読む側だった。**上の unblocked_by は「解約時にアプリ内で理由を聞く導線」が要ると書いていたが、**その導線は既にあった** —— CancelFlowManager が v5.7.9 からイベントを送り、v5.7.11 で `reason` も乗るようになっている（SceneDelegate から配線済み）。本当に無かったのは**集計する経路**で、`cancel_flow_*` は `src/analytics.ts` の allowlist とコメントにしか名前が出てこなかった —— 2026-08-15 から入っているのに、**11日間、誰も読んでいなかった。**\n\n`src/cancel-flow.ts` を作って日報へ配線した。本番D1を引くと11日ぶんで9行あり、**2026-08-24 に引き止めが1件成立していた**（reason=price → offer=free_plan → exit=stay）。フロー導入後の初めての成功で、誰も知らなかった。\n\n**率は出さない。**実データは表示4件 / 理由を答えた1件で、CLAUDE.md の運転規則（根拠にしてよいのは 0/非0 の事実か、分母20の累積）に従い分母が20に届くまで率を1つも出さず「分母 4 < 20」と足りないことごと書く。引き止めの成立件数だけは率ではなく事実なので n=1 でも出す。`reason:\"none\"`（未選択の番人の値）は理由の内訳に混ぜない。\n\n**分類を ai_proposes → ai_executes_gated へ。**集計は毎朝の日報として出て、人が手を動かして初めて分析が走る段は無い。「読めなかった / 出ていない / 答えが無い」を別々の文面で出し、13通りの壊し方すべてで検査が落ちることを確認した。**「何を作るか」の判断は人のまま**で、それはこの行ではなくプロダクト側の行が数えている"
+      "note": "**[2026-08-26] 前提が間違っていた。**この欄は長らく「Apple が解約理由をくれるか未確認」と書いていたが、`Cancellation Reason` 列は **2026-08-25 の取得で既に届いていた**（Subscription Event Report / State Report のどちらの columns にも入っている）。読めなかった理由は Apple 側ではなく**こちらの保存の形**で、asc_analytics.rb が残すのは数値列の合計だけだった。解約理由は文字列なので合計対象に入らず、**列名だけが残って中身は1件も残っていなかった。**「取れない」と「捨てている」を取り違えていた（data/operating-memory.json om-2026-08-26-breakdown）。\n\n取得側に名指しの分類列 × 名指しの測定列の内訳を足し（BREAKDOWN_DIMENSIONS）、読む側を asc_subscription.rb として asc-analytics.yml の日次に配線した。**ただし 2026-08-26 時点で読めた項目は 0/3。**手元にある取得結果は内訳を持つ前の版なので no_breakdown を返す。**次の定時実行（毎日 20:30 JST）で決まる。**\n\n**空欄しか無い可能性は残る。**Apple 側で解約理由は任意項目であり、埋まらないほうが普通。読む側は空欄を捨てず `(空欄)` として数え、all_blank を readable と区別する ——**「解約理由が読めなかった」を「解約が無かった」と読ませないため。**空欄だった場合、⑨を実物にするにはアプリ内で理由を聞く導線が要る（未実装）。実施は引き続き人の判断なので ai_proposes のまま\n\n**[2026-08-26 決着] 空欄だった。**予定の定時実行（20:30 JST）を待たずに asc-analytics.yml を手動で回して確かめた。取得は成功し、内訳つきで降りてきて、`asc_subscription.rb` は 3項目中2項目を読めた（契約の状態 155/33・契約イベント 4件）。**しかし `Cancellation Reason` は列も値も届くのに、値が全部空欄**（all_blank）。上に書いてあった「空欄しか無い可能性」がそのまま当たった。\n\n**したがってこの行はもう『データ待ち』ではない。**待っていたものは降りて、空だと分かった。実物にするには**アプリ内で理由を聞く導線**が要る（未実装）。ブロッカーを external_data から not_started へ移した —— **降りない物を待ち続ける行にしないため。**\n\n**[2026-08-26 実装] 詰まっていたのは聞く側ではなく読む側だった。**上の unblocked_by は「解約時にアプリ内で理由を聞く導線」が要ると書いていたが、**その導線は既にあった** —— CancelFlowManager が v5.7.9 からイベントを送り、v5.7.11 で `reason` も乗るようになっている（SceneDelegate から配線済み）。本当に無かったのは**集計する経路**で、`cancel_flow_*` は `src/analytics.ts` の allowlist とコメントにしか名前が出てこなかった —— 2026-08-15 から入っているのに、**11日間、誰も読んでいなかった。**\n\n`src/cancel-flow.ts` を作って日報へ配線した。本番D1を引くと11日ぶんで9行あり、**2026-08-24 に引き止めが1件成立していた**（reason=price → offer=free_plan → exit=stay）。フロー導入後の初めての成功で、誰も知らなかった。\n\n**率は出さない。**実データは表示4件 / 理由を答えた1件で、CLAUDE.md の運転規則（根拠にしてよいのは 0/非0 の事実か、分母20の累積）に従い分母が20に届くまで率を1つも出さず「分母 4 < 20」と足りないことごと書く。引き止めの成立件数だけは率ではなく事実なので n=1 でも出す。`reason:\"none\"`（未選択の番人の値）は理由の内訳に混ぜない。\n\n**分類を ai_proposes → ai_executes_gated へ。**集計は毎朝の日報として出て、人が手を動かして初めて分析が走る段は無い。「読めなかった / 出ていない / 答えが無い」を別々の文面で出し、13通りの壊し方すべてで検査が落ちることを確認した。**「何を作るか」の判断は人のまま**で、それはこの行ではなくプロダクト側の行が数えている **[2026-08-27] 証跡から2件落とした** —— `../simplememo-api/src/cancel-flow.ts` と その検査は**存在しない**（解約フローの実装は iOS 側の CancelFlowManager.swift / CancelFlowViewController.swift で、API 側に同名のものは無い）。**CIが `../` の実在を見ていなかったので、誰にも気づかれずに残っていた。**見える場所（3リポジトリが揃ったセッション）では見るようにした。"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1770,9 +1782,10 @@
       "task": "短期CVRよりLTVと信頼を守る制約",
       "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/VISION.md"
+        "../simplememo-ios/docs/VISION.md",
+        "scripts/check-prd.mjs"
       ],
-      "note": "VISION §0「AIを前面に出さない」・§9「所有しない」が実質この制約。§13の6問がゲート"
+      "note": "VISION §0「AIを前面に出さない」・§9「所有しない」が実質この制約。§13の6問がゲート **[2026-08-27] §13の6問を実際に検査しているのは check-prd.mjs。**VISION は制約の本文で、読むだけでは1件も止まらない"
     },
     {
       "area": "⑨ マネタイズ",
@@ -2009,7 +2022,9 @@
       "task": "端末内の暗号化",
       "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md"
+        "../simplememo-ios/docs/reports/SECURITY_HARDENING_2026-07.md",
+        "../simplememo-ios/SimpleMemo/CryptoStorage.swift",
+        "../simplememo-ios/SimpleMemoTests/CryptoStorageTests.swift"
       ],
       "note": "AES-GCM-256・Keychain・Data Protection属性"
     },
