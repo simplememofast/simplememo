@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/icloud/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>ObsidianをiCloudで同期する設定手順 — iPhoneとMac【2026】 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="ObsidianをiCloud Driveで同期する手順を公式ドキュメントの原文にあたって整理しました。保管庫はiCloud Drive内のObsidianフォルダに置く、macOS 15以降は「ダウンロードを維持」を選ぶ、同期方式は重ねがけしない。日本語版ヘルプの内容も実測しています。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="ObsidianをiCloudで同期する設定手順 — iPhoneとMac【2026】 | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="iCloud一本で同期するときの手順とつまずきどころ。置き場所・ダウンロード維持・重ねがけ禁止を、公式ドキュメントの原文にあたって整理しました。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-27T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/sync/icloud/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="ObsidianをiCloudで同期する設定手順 — iPhoneとMac【2026】 | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="iCloud一本で同期するときの手順とつまずきどころ。置き場所・ダウンロード維持・重ねがけ禁止を、公式ドキュメントの原文にあたって整理しました。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/sync/icloud/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Obsidian連携", "item": "https://simplememofast.com/obsidian/"},
+      {"@type": "ListItem", "position": 3, "name": "同期方法まとめ", "item": "https://simplememofast.com/obsidian/sync/"},
+      {"@type": "ListItem", "position": 4, "name": "iCloudで同期する", "item": "https://simplememofast.com/obsidian/sync/icloud/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/sync/icloud/#article","inLanguage":"ja","headline":"ObsidianをiCloudで同期する設定手順 — iPhoneとMac","description":"ObsidianをiCloud Driveで同期する設定手順と、置き場所・ダウンロード維持・重ねがけ禁止というつまずきどころを、公式ドキュメントのソースにあたって整理した。","url":"https://simplememofast.com/obsidian/sync/icloud/","datePublished":"2026-08-27","dateModified":"2026-08-27","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-sync-icloud.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/sync/icloud/"}}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/sync/icloud/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"保管庫はiCloud Driveのどこに置けばいいですか？","acceptedAnswer":{"@type":"Answer","text":"iCloud Drive直下ではなく、iCloud Drive の中の「Obsidian」フォルダの中です。公式ドキュメントは iCloud Drive/[保管庫名] という場所を明示し、Obsidianのアプリアイコンが付いたフォルダを使うこと、アイコンのないプレーンなフォルダは使わないことを警告しています。ファイルAppで「ブラウズ → iCloud Drive」を開き、保管庫がObsidianフォルダの中にあるか確認してください。"}},{"@type":"Question","name":"iPhoneでノートが空だったり最新でなかったりします","acceptedAnswer":{"@type":"Answer","text":"iCloudがファイルを端末から退避（オフロード）している可能性があります。公式ドキュメントのFAQは、iCloudの「Macストレージを最適化」やOneDriveのFiles On-Demandでファイルが退避されるとObsidianがファイルにアクセスできず同期の問題になると説明しています。macOS 15以降はObsidianフォルダを右クリックして「ダウンロードを維持」、macOS 14以前は「Macストレージを最適化」をオフにしてください。"}},{"@type":"Question","name":"iCloudと公式Obsidian Syncを両方使ってもいいですか？","acceptedAnswer":{"@type":"Answer","text":"公式ドキュメントは「同期サービスの混在を避ける」として、同じ保管庫を複数のサービス（例: Obsidian SyncとiCloudの同時利用）で同期しないよう案内しています。理由はデータの競合や破損を防ぐためです。1つの保管庫には1つの同期方法にとどめてください。"}},{"@type":"Question","name":"WindowsのiCloud Driveでも同期できますか？","acceptedAnswer":{"@type":"Answer","text":"公式ドキュメントは、iCloudの推奨システムを macOS・iOS・iPadOS とし、Windows上のiCloud Driveではファイルの重複や破損が発生する可能性があると明記しています。WindowsやAndroidを含めたいなら、iCloud以外の同期方法を選んでください。"}},{"@type":"Question","name":"Obsidian連携シンプルメモはiCloud上の保管庫に書き込めますか？","acceptedAnswer":{"@type":"Answer","text":"書き込めます。ファイルAppからアクセスできるフォルダを一度選ぶと、以後はObsidianを開かずにその日のデイリーノート（yyyy-MM-dd.md）またはInboxノートへ追記します。書き込みはNSFileCoordinatorを通して行い、iCloudの同期プロセスやObsidian本体と競合しないようにしています。iCloud同期のため、Obsidian側の画面に出るまで数秒のラグがあります。"}}]}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/obsidian/sync/icloud/#webpage","inLanguage":"ja","name":"ObsidianをiCloudで同期する設定手順 — iPhoneとMac【2026】 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/obsidian/sync/icloud/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    /* 注意ブロック（つまずきどころを並べる） */
+    .cz{background:var(--surface);border:1px solid var(--border);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.35rem 1.3rem;margin:1rem 0}
+    .cz__n{font-size:.72rem;font-weight:700;letter-spacing:.08em;color:#ffc76b;margin-bottom:.4rem}
+    .cz__t{font-size:1.05rem;font-weight:700;line-height:1.6;margin:0 0 .55rem}
+    .cz p{font-size:.95rem;line-height:1.9;color:var(--text-secondary);margin:0 0 .7rem}
+    .cz p:last-child{margin-bottom:0}
+    .cz ol,.cz ul{margin:.2rem 0 .7rem;padding-left:1.35rem;font-size:.95rem;line-height:1.9;color:var(--text-secondary)}
+    .cz li{margin-bottom:.3rem}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:28%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-icloud-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-icloud-jp__nav&amp;mt=8" class="global-nav__cta">
+          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span lang="ja" data-lang="ja">Obsidian × iCloud の設定手順</span><span lang="en" data-lang="en">Setting up Obsidian with iCloud</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span lang="ja" data-lang="ja">ObsidianをiCloudで同期する設定手順</span><span lang="en" data-lang="en">How to sync your Obsidian vault with iCloud</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span lang="ja" data-lang="ja">iPhoneとMacだけなら、追加の契約も別アプリも要りません。要るのは<strong>保管庫を正しい場所に置くこと</strong>と、<strong>ファイルを端末に置いたままにしておくこと</strong>の2つだけです。公式ドキュメントの原文にあたって手順を並べます（<a href="/obsidian/sync/">方式の比較</a>は再掲しません）。</span><span lang="en" data-lang="en">On an iPhone and a Mac, iCloud needs no extra subscription and no extra app. Two things matter: <strong>putting the vault in the right place</strong> and <strong>keeping its files on the device</strong>. Here is the setup, taken from Obsidian's own documentation (the <a href="/obsidian/sync/">method comparison</a> is not repeated here).</span>
+        </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-27">2026年8月27日</time></span><span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published <time datetime="2026-08-27">August 27, 2026</time></span>
+        </p>
+      </div>
+
+      <!-- Answer block (AIO) -->
+      <section class="lp-section" data-answer-block="obsidian-icloud-sync" style="padding-top:1rem;">
+        <h2 class="lp-section__title"><span lang="ja" data-lang="ja">ObsidianをiCloudで同期するにはどうすればいいですか？</span><span lang="en" data-lang="en">How do I sync Obsidian with iCloud?</span></h2>
+        <div class="tip-box" lang="ja" data-lang="ja">
+          <div class="tip-box__title">ひとことで言うと</div>
+          <p style="margin:0 0 .6rem;"><strong>iCloud Driveをオンにしたうえで、保管庫を「iCloud Drive → Obsidian」フォルダの中に作ります。</strong>iPhoneなら保管庫の新規作成時に「iCloudに保存」をオンにするだけ、Macならファイルピッカーで iCloud Drive の中の Obsidian フォルダを選ぶだけです。</p>
+          <p style="margin:0;">2台目では「保管庫としてフォルダを開く」から同じフォルダを指定します。公式ドキュメントが警告しているのは<strong>置き場所</strong>で、<code>iCloud Drive/Obsidian/[保管庫名]</code> の外に作ると同期の問題が起きます。</p>
+        </div>
+        <div class="tip-box" lang="en" data-lang="en">
+          <div class="tip-box__title">SHORT ANSWER</div>
+          <p style="margin:0 0 .6rem;"><strong>Turn on iCloud Drive, then create the vault inside the "Obsidian" folder in iCloud Drive.</strong> On iPhone that means toggling "Store in iCloud" while creating the vault; on Mac it means picking the Obsidian folder inside iCloud Drive in the file picker.</p>
+          <p style="margin:0;">On the second device, choose "Open folder as vault" and point it at the same folder. What Obsidian's documentation warns about is <strong>the location</strong>: create it outside <code>iCloud Drive/Obsidian/[Your Vault Name]</code> and you will hit syncing issues.</p>
+        </div>
+      </section>
+
+      <!-- Step 0: enable iCloud Drive -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">手順1: iCloud Driveをオンにする</span><span lang="en" data-lang="en">Step 1: Turn on iCloud Drive</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">ほとんどの端末では既にオンですが、確認しておきます。オフのままだとフォルダは作れても同期は始まりません。</span><span lang="en" data-lang="en">It's usually already on, but check. With it off you can still create the folder — it just never syncs.</span>
+        </p>
+        <ol class="steps-list">
+          <li><strong><span lang="ja" data-lang="ja">iPhone / iPad</span><span lang="en" data-lang="en">iPhone / iPad</span></strong><br><span lang="ja" data-lang="ja">「設定」→「[自分の名前]」→「iCloud」→「iCloud Drive」をオンにします。</span><span lang="en" data-lang="en">Settings → [Your Name] → iCloud → iCloud Drive.</span></li>
+          <li><strong><span lang="ja" data-lang="ja">Mac</span><span lang="en" data-lang="en">Mac</span></strong><br><span lang="ja" data-lang="ja">「システム設定」→「Apple ID」→「iCloud」→「iCloud Drive」をオンにします。</span><span lang="en" data-lang="en">System Settings → Apple ID → iCloud → iCloud Drive.</span></li>
+        </ol>
+      </section>
+
+      <!-- Step: create vault -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">手順2: iCloudの中に保管庫を作る</span><span lang="en" data-lang="en">Step 2: Create the vault inside iCloud</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">最初の1台で作ります。iPhoneとMacのどちらから作っても構いませんが、<strong>作り方が違います</strong>。iPhoneはトグル1つ、Macはフォルダを自分で選びます。</span><span lang="en" data-lang="en">Do this once, on your first device. Either platform works, but <strong>the flow differs</strong>: iPhone gives you a toggle, Mac makes you pick the folder yourself.</span>
+        </p>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 .5rem;"><span lang="ja" data-lang="ja">iPhone / iPad で作る場合</span><span lang="en" data-lang="en">Creating it on iPhone / iPad</span></h3>
+        <ol class="steps-list">
+          <li><span lang="ja" data-lang="ja">Obsidianを開き、<strong>「保管庫を新規作成」</strong>をタップします。</span><span lang="en" data-lang="en">Open Obsidian and tap <strong>Create new vault</strong>.</span></li>
+          <li><span lang="ja" data-lang="ja">保管庫の名前を入力します。</span><span lang="en" data-lang="en">Enter a name for the vault.</span></li>
+          <li><span lang="ja" data-lang="ja"><strong>「iCloudに保存」をオンに切り替えます。</strong>ここが本体です。オフのまま作ると、その保管庫は端末の中だけに残ります。</span><span lang="en" data-lang="en"><strong>Toggle on "Store in iCloud".</strong> This is the whole trick. Leave it off and the vault stays on that one device.</span></li>
+          <li><span lang="ja" data-lang="ja">「作成」をタップします。</span><span lang="en" data-lang="en">Tap Create.</span></li>
+        </ol>
+
+        <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 .5rem;"><span lang="ja" data-lang="ja">Mac で作る場合</span><span lang="en" data-lang="en">Creating it on Mac</span></h3>
+        <ol class="steps-list">
+          <li><span lang="ja" data-lang="ja">Obsidianを開き、<strong>「保管庫を新規作成」</strong>を選びます。</span><span lang="en" data-lang="en">Open Obsidian and choose <strong>Create new vault</strong>.</span></li>
+          <li><span lang="ja" data-lang="ja">ファイルピッカーで <strong>iCloud Drive → Obsidian</strong> に移動します。</span><span lang="en" data-lang="en">In the file picker, navigate to <strong>iCloud Drive → Obsidian</strong>.</span></li>
+          <li><span lang="ja" data-lang="ja">保管庫用のフォルダを作り、名前を付けます。</span><span lang="en" data-lang="en">Create a folder for the vault and name it.</span></li>
+          <li><span lang="ja" data-lang="ja">「作成」を選んで完了です。</span><span lang="en" data-lang="en">Select Create to finish.</span></li>
+        </ol>
+
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">なぜ「Obsidian」フォルダの中なのか</span><span lang="en" data-lang="en">WHY INSIDE THE "OBSIDIAN" FOLDER</span></div>
+          <p style="margin:0;"><span lang="ja" data-lang="ja">iCloud Driveの中には、アプリが自分用に持つ領域があります。Obsidianのアプリアイコンが付いた「Obsidian」フォルダがそれで、iOS版のObsidianが読み書きするのはこの中です。同じ名前で自分で作ったプレーンなフォルダは別物で、公式ドキュメントは<strong>「アプリアイコンのないプレーンなフォルダは使用しないでください」</strong>と名指しで警告しています。</span><span lang="en" data-lang="en">iCloud Drive gives apps their own area. The "Obsidian" folder carrying the app's icon is that area, and it is where Obsidian on iOS reads and writes. A plain folder you created yourself with the same name is a different thing — Obsidian's documentation says in so many words: <strong>do not use the plain folder without the app icon</strong>.</span></p>
+        </div>
+      </section>
+
+      <!-- Step: open on second device -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">手順3: 2台目で同じ保管庫を開く</span><span lang="en" data-lang="en">Step 3: Open the same vault on your second device</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">2台目では<strong>新規作成しません</strong>。既にあるフォルダを開きにいきます。ここで新規作成してしまうと、同じ名前の保管庫が2つ並ぶことになります。</span><span lang="en" data-lang="en">On the second device you <strong>do not create a vault</strong> — you open the existing folder. Creating one here leaves you with two vaults of the same name sitting side by side.</span>
+        </p>
+        <ol class="steps-list">
+          <li><span lang="ja" data-lang="ja">2台目のMacまたはiPhoneでObsidianを開きます。</span><span lang="en" data-lang="en">Open Obsidian on the other Mac or iPhone.</span></li>
+          <li><span lang="ja" data-lang="ja">保管庫スイッチャーを開き、<strong>「保管庫としてフォルダを開く」</strong>を選びます。</span><span lang="en" data-lang="en">Open the vault switcher and choose <strong>Open folder as vault</strong>.</span></li>
+          <li><span lang="ja" data-lang="ja"><strong>iCloud Drive → Obsidian</strong> に移動し、1台目で作った保管庫フォルダを選びます。</span><span lang="en" data-lang="en">Navigate to <strong>iCloud Drive → Obsidian</strong> and select the vault folder you created on the first device.</span></li>
+        </ol>
+      </section>
+
+      <!-- Pitfalls -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">つまずくのはだいたいこの3つ</span><span lang="en" data-lang="en">Three traps, and that's mostly the list</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">「iCloudで同期できない」の相談は、手順そのものより<strong>置き場所・退避・重ねがけ</strong>のどれかに当たっていることが多いです。3つとも公式ドキュメントが名指しで警告しています。</span><span lang="en" data-lang="en">"iCloud sync isn't working" usually isn't about the steps. It's one of three things — <strong>location, offloading, or layering</strong> — and Obsidian's own documentation calls out all three by name.</span>
+        </p>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">つまずき 1</span><span lang="en" data-lang="en">TRAP 1</span></div>
+          <p class="cz__t"><span lang="ja" data-lang="ja">保管庫が「Obsidian」フォルダの外にある</span><span lang="en" data-lang="en">The vault sits outside the "Obsidian" folder</span></p>
+          <p><span lang="ja" data-lang="ja">正しい場所は <code>iCloud Drive/Obsidian/[保管庫名]</code> です。iCloud Drive直下や「書類」の中に作った保管庫は、iOS版のObsidianから見えないか、同期の問題を起こします。確かめ方は次のとおりです。</span><span lang="en" data-lang="en">The correct location is <code>iCloud Drive/Obsidian/[Your Vault Name]</code>. A vault created directly in iCloud Drive, or inside Documents, either isn't visible to Obsidian on iOS or causes syncing problems. Here's how to check.</span></p>
+          <ol>
+            <li><span lang="ja" data-lang="ja">iPhoneで「ファイル」App を開きます。</span><span lang="en" data-lang="en">Open the Files app on iPhone.</span></li>
+            <li><span lang="ja" data-lang="ja">「ブラウズ」をタップし、「場所」の下の <strong>iCloud Drive</strong> を選びます。</span><span lang="en" data-lang="en">Tap Browse, then select <strong>iCloud Drive</strong> under Locations.</span></li>
+            <li><span lang="ja" data-lang="ja">保管庫が <strong>Obsidian</strong> フォルダの中にあることを確認します。別の場所にあるなら、Obsidianフォルダの中へ移動します。</span><span lang="en" data-lang="en">Confirm the vault is inside the <strong>Obsidian</strong> folder. If it's somewhere else, move it in.</span></li>
+          </ol>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">つまずき 2</span><span lang="en" data-lang="en">TRAP 2</span></div>
+          <p class="cz__t"><span lang="ja" data-lang="ja">iCloudがファイルを端末から退避している</span><span lang="en" data-lang="en">iCloud has offloaded the files</span></p>
+          <p><span lang="ja" data-lang="ja">iCloudには、使っていないファイルの実体を端末から追い出してクラウドだけに残す仕組みがあります。<strong>Obsidianは保管庫の中身に直接アクセスするので、実体が無いとファイルが見つからない扱いになります。</strong>公式ドキュメントのFAQは、この退避が同期の問題の原因になると明記しています。対処はmacOSのバージョンで違います。</span><span lang="en" data-lang="en">iCloud can push the contents of unused files off the device and keep them only in the cloud. <strong>Obsidian reads the vault's files directly, so when the contents aren't there, the files read as missing.</strong> The official FAQ states plainly that this offloading causes sync issues. The fix depends on your macOS version.</span></p>
+          <table class="rt-table">
+            <thead>
+              <tr>
+                <th scope="col"><span lang="ja" data-lang="ja">環境</span><span lang="en" data-lang="en">Environment</span></th>
+                <th scope="col"><span lang="ja" data-lang="ja">やること</span><span lang="en" data-lang="en">What to do</span></th>
+                <th scope="col"><span lang="ja" data-lang="ja">影響範囲</span><span lang="en" data-lang="en">Scope</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row"><span lang="ja" data-lang="ja">macOS 15（Sequoia）以降</span><span lang="en" data-lang="en">macOS 15 (Sequoia) or later</span></th>
+                <td data-label="やること"><span lang="ja" data-lang="ja">iCloud Drive内の <strong>Obsidian</strong> フォルダを右クリックし、<strong>「ダウンロードを維持」</strong>を選ぶ</span><span lang="en" data-lang="en">Right-click the <strong>Obsidian</strong> folder in iCloud Drive and choose <strong>Keep Downloaded</strong></span></td>
+                <td data-label="影響範囲"><span class="mk-yes"><span lang="ja" data-lang="ja">Obsidianのフォルダだけ</span><span lang="en" data-lang="en">Only the Obsidian folder</span></span></td>
+              </tr>
+              <tr>
+                <th scope="row"><span lang="ja" data-lang="ja">macOS 14（Sonoma）以前</span><span lang="en" data-lang="en">macOS 14 (Sonoma) or earlier</span></th>
+                <td data-label="やること"><span lang="ja" data-lang="ja">iCloud設定の<strong>「Macストレージを最適化」をオフ</strong>にする</span><span lang="en" data-lang="en">Turn <strong>Optimize Mac Storage off</strong> in iCloud settings</span></td>
+                <td data-label="影響範囲"><span class="mk-part"><span lang="ja" data-lang="ja">端末上のすべてのiCloudストレージ</span><span lang="en" data-lang="en">All iCloud storage on that device</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p><span lang="ja" data-lang="ja">公式ドキュメントはこれを「任意だが、読み込みを速く保つために強く推奨」と位置づけています。<strong>macOS 14以前の設定はObsidian以外にも効いてしまう</strong>ので、そこは承知のうえで切る必要があります。</span><span lang="en" data-lang="en">Obsidian's documentation calls this optional but strongly recommended for keeping load times fast. Note that <strong>on macOS 14 and earlier the switch reaches beyond Obsidian</strong> — it affects everything iCloud stores on that Mac.</span></p>
+        </div>
+
+        <div class="cz">
+          <div class="cz__n"><span lang="ja" data-lang="ja">つまずき 3</span><span lang="en" data-lang="en">TRAP 3</span></div>
+          <p class="cz__t"><span lang="ja" data-lang="ja">同期方式を重ねがけしている</span><span lang="en" data-lang="en">Two sync methods layered on one vault</span></p>
+          <p><span lang="ja" data-lang="ja">公式ドキュメントは<strong>「同期サービスの混在を避ける」</strong>という項目を立て、同じ保管庫を複数のサービス（例としてObsidian SyncとiCloudの同時利用）で同期しないよう案内しています。理由はデータの競合や破損を防ぐためです。無料のiCloudで足りているところに公式Syncを試したくなったら、<strong>どちらか一方に寄せてから</strong>切り替えてください。</span><span lang="en" data-lang="en">Obsidian's documentation has a dedicated note — <strong>avoid mixing sync services</strong> — telling you not to sync one vault through several services at once, giving Obsidian Sync plus iCloud as the example. The reason is data conflicts and corruption. If you're on iCloud and want to try the official Sync, <strong>move to one or the other</strong> rather than running both.</span></p>
+          <p><span lang="ja" data-lang="ja">同じ理由で、<strong>WindowsのiCloud Driveは避けます</strong>。公式ドキュメントはiCloudの推奨システムを macOS・iOS・iPadOS とし、Windows上のiCloud Driveでは<strong>ファイルの重複や破損が発生する可能性がある</strong>と明記しています。WindowsやAndroidも使うなら、iCloud以外の方式を選ぶことになります。</span><span lang="en" data-lang="en">For the same reason, <strong>skip iCloud Drive on Windows</strong>. The documentation lists iCloud's recommended systems as macOS, iOS, and iPadOS, and states that iCloud Drive on Windows <strong>may lead to file duplication or corruption</strong>. If Windows or Android is in your mix, iCloud isn't the method to pick.</span></p>
+        </div>
+      </section>
+
+      <!-- What actually syncs -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">iCloudが運ぶのは「フォルダまるごと」</span><span lang="en" data-lang="en">iCloud carries the whole folder, settings included</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">保管庫は<a href="/obsidian/what-is-vault/">ただのフォルダ</a>で、中には書いたMarkdownファイルのほかに、設定を収めた <code>.obsidian</code> フォルダが入っています。iCloud Driveはフォルダ単位で同期するので、<strong>ノートだけでなく設定も一緒に運ばれます</strong>。多くの人にとってはこれが便利な既定です（テーマもホットキーも2台で揃う）。</span><span lang="en" data-lang="en">A vault is <a href="/obsidian/what-is-vault/">just a folder</a>, and alongside your Markdown files it holds a <code>.obsidian</code> folder with your settings. iCloud Drive syncs at the folder level, so <strong>your settings ride along with your notes</strong>. For most people that's the convenient default — same theme, same hotkeys, both devices.</span>
+        </p>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">端末ごとに設定を分けたい場合は、公式ドキュメントが<strong>設定フォルダを端末ごとに変える機能</strong>を案内しています（Syncthingの項でも「端末ごとに設定を分けたいなら <code>.obsidian</code> を同期対象から外す」と書かれており、設定が保管庫の中にあることが前提になっています）。iCloudには除外指定がないので、分けたいならこの機能を使うことになります。</span><span lang="en" data-lang="en">If you'd rather keep settings separate per device, the documentation points to a <strong>per-device configuration folder</strong> feature. (The Syncthing section says to exclude <code>.obsidian</code> from syncing when you want separate settings — which is also confirmation that settings live inside the vault.) iCloud has no exclude list, so on iCloud that feature is the way to do it.</span>
+        </p>
+      </section>
+
+      <!-- JA docs parity — measured this session -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">日本語の公式ヘルプは、英語版と同じ内容か</span><span lang="en" data-lang="en">Is the Japanese documentation the same as the English?</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">翻訳ドキュメントは英語版から遅れることがあるので、<strong>この記事を書いた日に両方を取得して突き合わせました</strong>。結果は「同じ」です。日本語で読んで問題ありません。</span><span lang="en" data-lang="en">Translated docs can lag the English original, so <strong>we pulled both on the day this article was written and compared them</strong>. They match. Reading the Japanese version is fine.</span>
+        </p>
+        <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col"><span lang="ja" data-lang="ja">比べたもの</span><span lang="en" data-lang="en">Compared</span></th>
+              <th scope="col"><span lang="ja" data-lang="ja">英語版</span><span lang="en" data-lang="en">English</span></th>
+              <th scope="col"><span lang="ja" data-lang="ja">日本語版</span><span lang="en" data-lang="en">Japanese</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">見出し（h2/h3）</span><span lang="en" data-lang="en">Headings (h2/h3)</span></th>
+              <td data-label="英語版">10</td>
+              <td data-label="日本語版"><span class="mk-yes">10<span lang="ja" data-lang="ja">（1対1で対応）</span><span lang="en" data-lang="en"> (1:1)</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">注意書き（コールアウト）</span><span lang="en" data-lang="en">Callouts</span></th>
+              <td data-label="英語版">12</td>
+              <td data-label="日本語版"><span class="mk-yes">12</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">iCloudの節の中身</span><span lang="en" data-lang="en">Contents of the iCloud section</span></th>
+              <td data-label="英語版"><span lang="ja" data-lang="ja">手順・場所の警告・ダウンロード維持</span><span lang="en" data-lang="en">Steps, location warning, keep-downloaded</span></td>
+              <td data-label="日本語版"><span class="mk-yes"><span lang="ja" data-lang="ja">同じ（訳語も対応）</span><span lang="en" data-lang="en">Same (terms map across)</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">ファイルサイズ</span><span lang="en" data-lang="en">File size</span></th>
+              <td data-label="英語版">12,796 bytes</td>
+              <td data-label="日本語版">17,355 bytes</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:.95rem;color:var(--text-secondary);line-height:1.9;">
+          <span lang="ja" data-lang="ja">バイト数の差は日本語がUTF-8で1文字3バイトになるためで、内容の差ではありません。なお公式リポジトリは<strong>英語版を正</strong>と定め、全ページを各言語に1対1で用意する方針を明記しています。翻訳の遅れが起きうるのはその方針の運用上の話なので、疑わしいときは英語版を見るのが確実です。</span><span lang="en" data-lang="en">The byte difference is UTF-8 (Japanese characters take three bytes), not a difference in content. The official repository states that the English locale is the source of truth and that every page should exist 1:1 in every locale — so when in doubt, the English page is the one to check.</span>
+        </p>
+      </section>
+
+      <!-- SimpleMemo tie-in -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">iCloud上の保管庫に、外から書き込むということ</span><span lang="en" data-lang="en">Writing into an iCloud vault from outside Obsidian</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">iCloudで同期している保管庫は、Obsidian以外のアプリからも「ただのフォルダ」として書き込めます。ただし<strong>iCloudの同期プロセスとObsidian本体が同じファイルを触っている場所</strong>なので、雑に書くと取りこぼしが出ます。Obsidian連携シンプルメモがそこで何をしているかを、実装から正直に書きます。</span><span lang="en" data-lang="en">A vault synced through iCloud is still just a folder, so other apps can write into it. But it is a folder <strong>where iCloud's sync process and Obsidian itself are already touching the same files</strong>, so a careless write drops data. Here is what Simple Memo actually does about that, straight from the implementation.</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">📁 <span lang="ja" data-lang="ja">選ぶのは一度だけ</span><span lang="en" data-lang="en">Pick the folder once</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">保管庫フォルダをファイルAppのピッカーで一度選ぶと、そのアクセス権をブックマークとして保持します。以後は<strong>Obsidianを開かずに</strong>追記します。条件は、そのフォルダがiCloud Driveか「このiPhone内」にあり、ファイルAppからアクセスできることです。</span><span lang="en" data-lang="en">You pick the vault folder once in the Files picker and the app keeps that access as a bookmark. After that it appends <strong>without opening Obsidian</strong>. The requirement: the folder lives in iCloud Drive or On My iPhone and is reachable from the Files app.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">📝 <span lang="ja" data-lang="ja">書き込み先</span><span lang="en" data-lang="en">Where it writes</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">その日のデイリーノート <code>yyyy-MM-dd.md</code>、または固定のInboxノート <code>&lt;Inbox名&gt;.md</code> の末尾に1行足します。ファイルが無ければ作ります。<a href="/obsidian/daily-note/">デイリーノートへの追記</a>の詳細は別ページにあります。</span><span lang="en" data-lang="en">It appends one line to that day's daily note <code>yyyy-MM-dd.md</code>, or to a fixed Inbox note <code>&lt;Inbox&gt;.md</code>, creating the file if it isn't there. More on <a href="/obsidian/daily-note/">appending to the daily note</a> in its own page.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">🤝 <span lang="ja" data-lang="ja">iCloudと衝突しない書き方</span><span lang="en" data-lang="en">Writing without racing iCloud</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">書き込みは <code>NSFileCoordinator</code> を通します。これはiCloudの同期プロセスやObsidian本体と<strong>協調して読み書きするためのApple標準の仕組み</strong>で、同じファイルを同時に触ったときの取りこぼしを防ぐためのものです。連続送信も専用のキューで直列に処理します。</span><span lang="en" data-lang="en">Writes go through <code>NSFileCoordinator</code> — Apple's own mechanism for <strong>coordinating reads and writes with other processes</strong> such as iCloud's sync daemon and Obsidian itself, so simultaneous access doesn't lose an entry. Rapid-fire sends are serialized on a dedicated queue.</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">⏳ <span lang="ja" data-lang="ja">書けなかった分</span><span lang="en" data-lang="en">When the write can't happen</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">その場で書けなかったメモは端末内のキューに退避し、次にアプリが前面に戻ったときに<strong>元の受付時刻のまま</strong>追記します。退避中の本文はAES-GCMで暗号化して保存します。<strong>iCloud同期のぶん、Obsidianの画面に出るまで数秒のラグがあります。</strong></span><span lang="en" data-lang="en">A note that can't be written right then is queued on the device and appended <strong>with its original timestamp</strong> the next time the app comes to the foreground. Queued text is stored encrypted with AES-GCM. <strong>Because iCloud has to sync, expect a few seconds before it shows up in Obsidian.</strong></span></div>
+          </div>
+        </div>
+        <div class="cta-box">
+          <div class="cta-box__title"><span lang="ja" data-lang="ja">保管庫を一度選べば、あとは書くだけ</span><span lang="en" data-lang="en">Pick the vault once, then just write</span></div>
+          <p class="cta-box__desc"><span lang="ja" data-lang="ja">ダウンロードは無料。iCloud Drive上の保管庫フォルダを一度選ぶだけで設定は終わりです。</span><span lang="en" data-lang="en">Free to download. Setup is picking your vault folder in iCloud Drive, once.</span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-icloud-jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+          </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-icloud-ja.svg" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja" data-lang="ja">
+            <img src="/assets/img/qr-obsidian-sync-icloud-en.svg" width="132" height="132" alt="QR code to download on the App Store" loading="lazy" lang="en" data-lang="en">
+            <small><span lang="ja" data-lang="ja">PCの方はスマホで読み取り</span><span lang="en" data-lang="en">On desktop? Scan with your phone</span></small>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span>
+        </h2>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">保管庫はiCloud Driveのどこに置けばいいですか？</span><span lang="en" data-lang="en">Where in iCloud Drive should the vault live?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">iCloud Drive直下ではなく、iCloud Drive の中の「Obsidian」フォルダの中です。公式ドキュメントは <code>iCloud Drive/Obsidian/[保管庫名]</code> という場所を明示し、Obsidianのアプリアイコンが付いたフォルダを使うこと、アイコンのないプレーンなフォルダは使わないことを警告しています。ファイルAppで「ブラウズ → iCloud Drive」を開き、保管庫がObsidianフォルダの中にあるか確認してください。</span><span lang="en" data-lang="en">Not at the top level of iCloud Drive — inside the "Obsidian" folder within it. The official documentation spells out <code>iCloud Drive/Obsidian/[Your Vault Name]</code>, tells you to use the folder carrying the Obsidian app icon, and warns against the plain folder without it. Check in the Files app: Browse → iCloud Drive, and confirm your vault is inside the Obsidian folder.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">iPhoneでノートが空だったり最新でなかったりします</span><span lang="en" data-lang="en">Notes look empty or stale on my iPhone</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">iCloudがファイルを端末から退避（オフロード）している可能性があります。公式ドキュメントのFAQは、iCloudの「Macストレージを最適化」やOneDriveのFiles On-Demandでファイルが退避されるとObsidianがファイルにアクセスできず同期の問題になると説明しています。macOS 15以降はObsidianフォルダを右クリックして「ダウンロードを維持」、macOS 14以前は「Macストレージを最適化」をオフにしてください。</span><span lang="en" data-lang="en">iCloud may have offloaded the files. The official FAQ explains that when services offload content — iCloud's Optimize Mac Storage, OneDrive's Files On-Demand — Obsidian can't access the files and sync problems follow. On macOS 15 and later, right-click the Obsidian folder and choose Keep Downloaded; on macOS 14 and earlier, turn off Optimize Mac Storage.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">iCloudと公式Obsidian Syncを両方使ってもいいですか？</span><span lang="en" data-lang="en">Can I run iCloud and Obsidian Sync together?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">公式ドキュメントは「同期サービスの混在を避ける」として、同じ保管庫を複数のサービス（例: Obsidian SyncとiCloudの同時利用）で同期しないよう案内しています。理由はデータの競合や破損を防ぐためです。1つの保管庫には1つの同期方法にとどめてください。方式そのものの比較は<a href="/obsidian/sync/">同期方法まとめ</a>にあります。</span><span lang="en" data-lang="en">The official documentation says to avoid mixing sync services, naming Obsidian Sync plus iCloud as the example, to prevent data conflicts and corruption. Keep one sync method per vault. For a comparison of the methods themselves, see our <a href="/obsidian/sync/">sync methods overview</a>.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">WindowsのiCloud Driveでも同期できますか？</span><span lang="en" data-lang="en">Does iCloud Drive on Windows work?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">公式ドキュメントは、iCloudの推奨システムを macOS・iOS・iPadOS とし、Windows上のiCloud Driveではファイルの重複や破損が発生する可能性があると明記しています。WindowsやAndroidを含めたいなら、iCloud以外の同期方法を選んでください。</span><span lang="en" data-lang="en">The official documentation lists iCloud's recommended systems as macOS, iOS, and iPadOS, and states that iCloud Drive on Windows may lead to file duplication or corruption. If Windows or Android needs to be in the loop, pick a different sync method.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモはiCloud上の保管庫に書き込めますか？</span><span lang="en" data-lang="en">Can Simple Memo write into an iCloud vault?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">書き込めます。ファイルAppからアクセスできるフォルダを一度選ぶと、以後はObsidianを開かずにその日のデイリーノート（<code>yyyy-MM-dd.md</code>）またはInboxノートへ追記します。書き込みは <code>NSFileCoordinator</code> を通して行い、iCloudの同期プロセスやObsidian本体と競合しないようにしています。iCloud同期のため、Obsidian側の画面に出るまで数秒のラグがあります。</span><span lang="en" data-lang="en">Yes. Pick a folder reachable from the Files app once, and from then on it appends to that day's daily note (<code>yyyy-MM-dd.md</code>) or your Inbox note without opening Obsidian. Writes go through <code>NSFileCoordinator</code> so they don't race iCloud's sync process or Obsidian itself. Because iCloud has to sync, there's a few-second lag before it appears in Obsidian.</span></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">検証環境と検証範囲</span><span lang="en" data-lang="en">TEST ENVIRONMENT &amp; SCOPE</span></div>
+          <p style="margin:0;"><span lang="ja" data-lang="ja">検証日: 2026年8月27日 ／ 環境: Linux（macOS・iOS実機なし）。<strong>実測（このセッションで実際に取得・突き合わせた）</strong>: Obsidian公式ドキュメントのソースリポジトリ <code>obsidianmd/obsidian-help</code> から、英語版 <code>en/Getting started/Sync your notes across devices.md</code>（12,796バイト）と日本語版 <code>ja/はじめに/デバイス間でノートを同期する.md</code>（17,355バイト）を直接取得し、見出し10個・コールアウト12個が1対1で対応することを機械的に照合。本文中の手順・警告文はこの原文から引用しています。<strong>公式情報に基づく記載（実機未検証）</strong>: iPhone/Macの設定画面の遷移、「ダウンロードを維持」「Macストレージを最適化」の挙動、Windows上のiCloud Driveの注意。いずれも上記の公式ドキュメント記載であり、この環境に該当OSが無いため画面では確かめていません。<strong>一次情報（自社実装）</strong>: Obsidian連携シンプルメモの書き込み方式（NSFileCoordinator経由の追記・書き込み先のファイル名・端末内キューのAES-GCM暗号化）は、当該アプリの実装から記載しています。<strong>この環境で検証できなかったこと</strong>: iCloud Driveの実際の同期挙動・競合時の挙動（macOS/iOSが無い）。競合時の壊れ方については<a href="/obsidian/sync/">同期方法まとめ</a>で扱っており、そちらもiCloudは実機検証できていません。公式ドキュメントは更新されるため、最新は公式サイトでご確認ください。</span><span lang="en" data-lang="en">Checked August 27, 2026, on Linux (no macOS or iOS hardware here). <strong>Hands-on (actually fetched and compared in this session)</strong>: the English source <code>en/Getting started/Sync your notes across devices.md</code> (12,796 bytes) and the Japanese <code>ja/はじめに/デバイス間でノートを同期する.md</code> (17,355 bytes) were pulled directly from Obsidian's documentation repository <code>obsidianmd/obsidian-help</code>, and their 10 headings and 12 callouts were matched 1:1 programmatically. The steps and warnings quoted above come from that source. <strong>Based on official documentation (not verified on device)</strong>: the iPhone/Mac settings paths, the behavior of Keep Downloaded and Optimize Mac Storage, and the Windows caveat — all documented by Obsidian, none of it confirmed on screen here. <strong>First-party (our own implementation)</strong>: how Simple Memo writes (appending via NSFileCoordinator, the target filenames, AES-GCM encryption of the on-device queue) is taken from the app's implementation. <strong>Not testable in this environment</strong>: actual iCloud Drive sync and conflict behavior (no macOS/iOS). Conflict behavior is covered in our <a href="/obsidian/sync/">sync methods overview</a>, where iCloud is likewise untested on device. Documentation changes over time — check the official site for the current version.</span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/obsidian/sync/"><span lang="ja" data-lang="ja">同期方法まとめ（4方式の比較）</span><span lang="en" data-lang="en">Sync methods compared</span></a>
+          <a href="/obsidian/"><span lang="ja" data-lang="ja">Obsidian連携の詳細</span><span lang="en" data-lang="en">Obsidian integration</span></a>
+          <a href="/obsidian/daily-note/"><span lang="ja" data-lang="ja">デイリーノートへ追記する方法</span><span lang="en" data-lang="en">Appending to your daily note</span></a>
+          <a href="/obsidian/what-is-vault/"><span lang="ja" data-lang="ja">保管庫（Vault）とは — 実体はただのフォルダ</span><span lang="en" data-lang="en">What is a vault</span></a>
+          <a href="/obsidian/getting-started/"><span lang="ja" data-lang="ja">Obsidianの始め方（実画面ガイド）</span><span lang="en" data-lang="en">Getting started with Obsidian</span></a>
+          <a href="/obsidian/pricing/"><span lang="ja" data-lang="ja">Obsidianの料金 — 無料でどこまで使えるか</span><span lang="en" data-lang="en">Obsidian pricing</span></a>
+          <a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">参考文献</span><span lang="en" data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/en/Getting%20started/Sync%20your%20notes%20across%20devices.md" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Sync your notes across devices（英語・原文ソース）</a> — <span lang="ja" data-lang="ja">公式ドキュメントのソースリポジトリ。2026年8月27日に本セッションから直接取得。公開版は obsidian.md/help の同名ページ</span><span lang="en" data-lang="en">Source repository for the official documentation, fetched directly in this session on August 27, 2026. The published version is the same page on obsidian.md/help</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help/blob/master/ja/%E3%81%AF%E3%81%98%E3%82%81%E3%81%AB/%E3%83%87%E3%83%90%E3%82%A4%E3%82%B9%E9%96%93%E3%81%A7%E3%83%8E%E3%83%BC%E3%83%88%E3%82%92%E5%90%8C%E6%9C%9F%E3%81%99%E3%82%8B.md" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian ヘルプ — デバイス間でノートを同期する（日本語版）</a> — <span lang="ja" data-lang="ja">同リポジトリの日本語版。英語版との突き合わせに使用</span><span lang="en" data-lang="en">The Japanese locale of the same document, used for the parity comparison</span></li>
+    <li><a href="https://github.com/obsidianmd/obsidian-help" target="_blank" rel="noopener" style="color:var(--accent);">obsidianmd/obsidian-help</a> — <span lang="ja" data-lang="ja">「英語版を正とし、全ページを各言語に1対1で用意する」という翻訳方針の出典</span><span lang="en" data-lang="en">Source for the policy that English is the source of truth and every page exists 1:1 per locale</span></li>
+    <li><a href="/obsidian/sync/" style="color:var(--accent);"><span lang="ja" data-lang="ja">Obsidianの同期方法比較（当サイト）</span><span lang="en" data-lang="en">Obsidian sync methods compared (this site)</span></a> — <span lang="ja" data-lang="ja">GitとSyncthingの競合時の壊れ方を実測した記事。iCloudとの比較の位置づけはこちら</span><span lang="en" data-lang="en">Where we measured how Git and Syncthing break on conflict, and where iCloud sits among the options</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja" data-lang="ja">App Storeのダウンロードページ</span><span lang="en" data-lang="en">App Store download page</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">関連コンテンツ</span><span lang="en" data-lang="en">Related content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">Methods</span></a></li>
+    <li><a href="/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ジャーナリング</span><span lang="en" data-lang="en">Journaling</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">Blog</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
+        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja" data-lang="ja">Apple Watch対応</span><span lang="en" data-lang="en">Apple Watch</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja" data-lang="ja">Obsidian連携</span><span lang="en" data-lang="en">Obsidian</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use cases</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to email</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
+</html>

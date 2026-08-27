@@ -1928,3 +1928,107 @@ Runbook §4の全17チェック通過: `seo-check.js`（266ファイル・0 erro
 coverage-queueのpendingは引き続き潤沢。次点C06/C07は本日のC05と主題が重なるため
 `collides_with` を追記済み——narrowした実装に切り替えること。act-credential-actionsの
 閉じ条件は継続監視。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。
+
+## 2026-08-27（再試行・ccr-0920） — レーンC。`/obsidian/plugins/` にキャプチャ系キーワード分析を追加
+
+### §0 冪等性・占有
+
+主系(06:00)・副系A(07:30)・副系B(08:30)のいずれも当日分の実行痕跡が無いことを(a)〜(e)で確認:
+(a) `git ls-remote origin refs/heads/claude/obsidian-auto-20260827` は空。(b) 本番
+`autopilot-status.json` は取得できたが `date_jst` は前日08-26（egressは今回は通った）。
+(c) `git show origin/main:data/autopilot-status.json` も同じく前日08-26。(d) head ブランチが
+`claude/obsidian-auto-20260827` のPRは無し（当日は日次アクチュエータ等の別ブランチのPRのみ
+存在し、判定対象から正しく除外した）。(e) `obsidian-autopilot.yml` の最新runは前日分
+（32900786201・completed/success）で in_progress ではない。すべて偽だったため実行と判断し、
+Runbook §0-2の占有手順で `claude/obsidian-auto-20260827` を空コミットでclaim（拒否されずpush
+成功＝他経路は未着手）。
+
+### レーンF
+
+`node scripts/autopilot-selfheal.mjs` — 未修理の故障なし。`health-intake.mjs` はこの経路に
+`GITHUB_TOKEN` が無く読めなかった（台帳は触っていない）ため、GitHub MCPの`list_issues`で
+`ops/autopilot-stale`・`ops/cron-failure` を直接確認し、open 0件を独立に確認した。
+`recover-ingest.mjs` は記録0件（退避先の鮮度は3日前・degraded無し）。通常のレーンA〜Eへ。
+
+### レーン選択
+
+`data/autopilot-actions-report.json` の open は2件（GH_PAT回転＝human待ち、
+budget-recalibrate＝実測待ち）でどちらも本セッションが今すぐ動かせるものは無し。前回レーンC
+実施が2026-08-14で13日経過していたため、Runbook §2「7日以上経っていれば優先レーン」に従い
+レーンCへ。ただし「同じ資産の再計測ではなく別資産へ」の指示に従い、プラグイン・テーマの
+登録数再カウント（既存資産）ではなく、`community-plugins.json` の `name`/`description`
+フィールドをキーワードで集計する新しい切り口を選んだ。
+
+### 固有価値（このセッションの一次情報）
+
+`raw.githubusercontent.com` 経由で `community-plugins.json`（2026-08-27時点で6,982件）を
+直接取得し、6種のキーワード（capture / daily note / template / voice・dictation / inbox /
+clipper・web clip）の部分一致件数をNodeスクリプトで集計した: capture 82件(1.2%)・daily note
+133件(1.9%)・template 108件(1.5%)・voice/dictation 64件(0.9%)・inbox 40件(0.6%)・
+clipper/web clip 15件(0.2%)。`/obsidian/plugins/` に新セクション・FAQ（本文＋JSON-LD）を
+追加し、文字列部分一致による概算であり厳密な機能分類ではない旨を本文・FAQ・検証環境ブロックの
+3箇所に明記した。既存の登録数6,812・トップ10（2026-08-21計測）は変更せず、新データは
+日付を分けて引用（数値の混同を避けた）。
+
+この環境（CCR経路）では `obsidian.md` と `api.github.com` への到達はcurlで403を確認し、
+`raw.githubusercontent.com` のみ200だったため、一次情報の範囲をレジストリJSONに限定した。
+
+### 検証
+
+Runbook §4相当の18本を実行し全通過: `seo-check.js`（266ファイル・0 errors 0 warnings）/
+`check-css-version` / `check-benchmark`（新規CONFLICT/AMBIGUOUSなし）/
+`check-url-normalization`（240 checks）/ `check-internal-redirects` / `sync_constants --check`
+/ `tag-cta-placements --check` / `check-experiments`（0 overdue）/
+`check-content-graph`（26 entries OK・URL変更なしのため登録変更なし）/
+`autopilot-budget --check` / `autopilot-runs --check` / `check-authority --check` /
+`autopilot-selfheal --check` / `autopilot-drill --check`（全シナリオ）/
+`automation-rate --check` / `check-pr-facts --check` / `d-score --check` /
+`check-model-routing --check` / `generate_sitemap.py --dry-run`。
+
+`npm i --no-save playwright` を実行し、`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+を指定してiPhoneビューポート（390×844 DPR3）実描画QAを実施: 水平スクロールなし
+（scrollWidth=clientWidth=390）・新セクション正常描画・表がビューポート内に収まる・
+JS/HTTPエラーはAhrefs/GTMの2件のみ（この環境のegress制限によるブロックで、ページ内容とは
+無関係）。
+
+`git fetch --unshallow` 後に `generate_sitemap.py` を再実行し、`/obsidian/plugins/` の
+lastmodを2026-08-27へ更新。副産物として、shallow cloneでは見えていなかった5ページ
+（/contact・/obsidian/・/obsidian/daily-note/・/obsidian/getting-started/・/autopilot/）の
+実コミット日（PR #586/#648/#652）も同時に反映された。git_lastmod()の該当コミットを
+individually確認し、TODAYフォールバックのバグ（2026-08-22に修正済み）ではなく実履歴である
+ことを確認した。
+
+本PRは`obsidian/plugins/index.html`・`sitemap*.xml`・本ログ・台帳のみで、content-graph・
+実験・キューには触れていない。
+
+### データ鮮度
+
+主系にBigQuery資格情報は無く、BigQuery MCPもこの経路では未接続。§0-4の③に従い、本日07:04
+JSTのseo-daily run（33018038649・workflow_dispatch）のジョブログをGitHub MCP
+`get_job_logs` で読み `data available: 2026-08-10..2026-08-24`（15/28日）を確認
+（`bq_checked: true`の根拠）。完全な28日窓は引き続き2026-09-06頃の見込み。レーンCは
+GSCデータを使わないため、これはブロッカーではない。
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260827-ccr0920`（route: ccr-0920・outcome: shipped・
+  lane: C・action: refresh・pr: 660・artifact: /obsidian/plugins/）を追記。
+- `data/autopilot-status.json` を当日の内容で上書き（cost/runsは
+  `autopilot-budget.mjs --json` / `autopilot-runs.mjs --json` の出力をそのまま埋め込み）。
+- 費用: 副系CCRの実費はこの経路からは観測できない（スケジュール起動セッションのログが外部から
+  読めないため）ため、`data/autopilot-cost.json` への追記は行っていない（0ではなく未観測）。
+
+- やったこと: `/obsidian/plugins/` にキャプチャ系キーワード分析を追加（PR #660）。
+- 検証: 上記18本＋iPhoneモバイルQA。
+- 保留・オーナー依頼: GH_PAT回転（scopeは足さないと決定済み・残るは回転のみ・急ぎではない。
+  本セッションはGitHub Secretsの値・回転日を検査する権限が無く実測手段が無い）。
+
+### 次回への申し送り
+
+coverage-queueのpendingは引き続き潤沢（次点C06/C07はC05と主題が重なるためcollides_with
+追記済み）。次回レーンCは今回とは別の資産へ（今回はプラグインのキーワード分析を使ったので、
+テーマ側の一次情報か別カテゴリの集計を検討）。act-credential-actionsの閉じ条件は継続監視。
+レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが
+未了。§5-5（配信の種）のRunbook同期は未着手（Runbookにまだ§5-5が無く、
+`claude/autopilot-distribution-seed`ブランチも空だったことを確認済み）。本日分の出荷後、
+別ブランチ・別PRで実施する。
