@@ -1581,21 +1581,20 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "App Store レビュー返信",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/review-replies.json",
         "scripts/check-review-replies.mjs",
         "data/review-intake.json",
         "data/authority-matrix.json",
+        "data/review-gate-pin.json",
         ".github/workflows/seo-check.yml",
         "../simplememo-ios/scripts/asc_review_reply.rb",
+        "../simplememo-ios/data/review-responses.json",
         "../simplememo-ios/data/review-reply-gate.json",
         "../simplememo-ios/.github/workflows/asc-review-reply.yml"
       ],
-      "note": "**2026-08-25 に下書きと承認境界、08-27 に境界の変更と投稿経路。**下書きの時点で落とすもの: 捌いていないレビューへの返信 / **期日・版の約束**（公開の場での約束は取り消せない）/ 個人情報（**返信は公開されるので相手の連絡先も書けない**）/ 禁止表現と古い事実（配信原稿と同じ物差し）。承認なしの posted_at と、**AIを承認者にした記録**も落ちる。文字数上限は2,000字（業界で言われる5,970は**Appleの公式仕様ではなく有志の実測**なので際どいところを狙わない）。 **[2026-08-27] 境界が「公開だけを人が承認する」から「品質ゲートを通れば自動投稿」へ変わった**（オーナーの決定。権限表にゲート付き例外として入っている）。ゲートは evaluateAutoPost、実行側へ渡す計画は planAutoPost。**判断は公開側、実行は非公開側**（ASCの鍵があちらにしか無い）で、**ゲートの写しはあちらに置いていない** —— 写しは必ずずれ、緩いほうが動けば事故は公開されるが、**厳しいほうが動かなくなっても誰も気づかない。** 計画がゲート単体に足しているのは3つ: **すでに返信が付いているレビューには出さない**（Apple の POST は上書きで、\"If a response already exists, this endpoint updates the response by overwriting it.\" —— **人が書いた公開返信を機械が黙って置き換えないための唯一の防壁**）／**星と本文は台帳ではなく ASC の実物を採る**（台帳の数字が間違っていても★1は通らない）／**上限は1回の実行の中でも効く**。 **[2026-08-27] dry_run を1周見た（run 33028844739）。**ゲートの指紋一致、ASC のレビュー8件（**返信済み5件**）を読み、**下書き2件はどちらも hold** —— 理由は「ASC 側にすでに返信が付いている」。 ⚠ **その前にここへ『倒すと既存の下書き2件はそのまま公開される』と書いた。誤り。**has_response=false と自分で置いた作り物の観測から出した判断で、**実物は逆**だった。2件とも返信済みで、guard が無ければ**人が書いた公開返信を上書きしていた** —— Apple のドキュメントから設計したこの防壁が、初回の実データで発火した。 **台帳の posted_at は当てにならない**（2件とも null なのに ASC には返信が付いている）。二重投稿を防いでいるのは台帳ではなく ASC の has_response。 **would_post は実データで一度も見ていない**（全件が has_response で止まるため）ので、最初の実投稿は無人で起きる。歯止めは上限3件/日と話題・星の除外。 **executor はまだ動かさない** —— 1件も投稿していない。「機構が動いた」と「投稿した」を同じ語で書かない。 **いまの本当の穴**: ASC の8件のうち**返信も下書きも無いものが3件**ある。下書きが store に追いついていない。 self-test はゲート側57件・実行側34件",
-      "blocker": "verification_pending",
-      "unblocked_by": "実投稿が1件通るのを見る。**動かせない理由はもう無い**（enabled / dry_run=false で日次が回っている）。いま止めているのは実務の事実で、返信していないレビュー3件に下書きが無いこと",
-      "unlock": "reply_gate"
+      "note": "**2026-08-27、実際に投稿した。**run 33059048323 で3件 —— レビュー返信を機械が公開したのはこれが最初。記録は ../simplememo-ios/data/review-responses.json（response_id は Apple が返した値）。state は3件とも PENDING_PUBLISH で、**「POSTが通った」と「App Store に出た」は別。** **上書きしないことも実測した** —— 投稿直後に取り直したら ASC は 8/8 返信済みを返した。**PENDING_PUBLISH でも has_response=true になる**ので、翌日以降の実行は全件 hold する。 【境界】2026-08-27 にオーナーが「公開だけを人が承認する」から**「品質ゲートを通れば自動投稿」**へ変えた（権限表にゲート付き例外）。判断は公開側（evaluateAutoPost / planAutoPost）、実行は非公開側（ASCの鍵があちらにしかない）で、**ゲートの写しはあちらに置いていない。**指紋で留め、両側のCIで照合する。 【落とすもの】捌いていないレビュー / 期日・版の約束 / 個人情報 / 禁止表現と古い事実 / ★2以下 / 返金・法務・個人情報・保安・データ消失 / 日次上限3 / kill_switch / **すでに返信が付いているレビュー**（Apple の POST は上書きで、人が書いた公開返信を消しうる —— この防壁は初回の実データで実際に2件を止めた）。 【止まった回も残す】最初の実投稿は**ゲートの指紋がずれていて止まった**（run 33058628758）。公開側の写しだけ更新して非公開側を忘れたため。鳴子は「2か所に書け」と名指ししていたが**散文は止める力を持たなかった**ので、ios の qa-static に機械の照合（--check-gate）を足した。 self-test はゲート側57件・実行側34件"
     },
     {
       "area": "⑧ カスタマーサポート",
