@@ -358,6 +358,12 @@
       "broke": "[2026-08-27] 自動投稿ゲート evaluateAutoPost を足し、壊し5通りを実測: **既存の検査を床にしない**（validate の問題を無視）→1件／**rating が無くても通す**→2件／**低評価を通す**→2件／下書き側の重い話題を見ない→1件／上限の無い台帳を通す→1件。**人が全件読まなくなる境界なので、材料が無いときに止まることを名指しで固定してある** **[2026-08-27 追記]** 実行側（simplememo-ios）に渡す投稿計画 planAutoPost を足し、壊し6通りを実測: **すでに返信が付いているのを見ない**→1件（Apple の POST は上書きなので、人が書いた公開返信を消しうる）／**上限を1回の実行の中で足さない**→1件（cap 3 の日に何件でも出る）／**星と本文を ASC ではなく台帳から採る**→5件／台帳の検査を床にしない→1件／星の食い違いを見ない→1件／observed が配列でなくても回す→1件"
     },
     {
+      "script": "scripts/check-rollout-promotion.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-27",
+      "broke": "9通りを実測。**self-test 側（28件）** —— 材料が無いときの hold を promote に変える → 3件が落ちる（`holds_when_unknown` の実体。13欄を1つずつ落とす回帰が全部ここに乗っている）／`max_auto_rollout` を見ない → 1件／ガードの判定が promote でなくても通す → 2件／各群の母数の下限を見ない → 2件。 **--check 側** —— 台帳の上限を 100% にする／`required_metrics` を空にする／**上限を超えた昇格を記録に紛れ込ませる** → いずれも exit 1。 **いちばん効くのは残り2つで、落ちるのは別のスクリプト** —— このファイルを消すと check-authority が「不可逆（reversible:false）なのに requires_approval:false」で落ち、`evaluatePromotion` を1文字リネームすると「export していない — **表に書いただけで実装が無い**」で落ちる。つまり**ゲートを黙って外すと段階公開の拡大は承認制へ戻る**。それが確かめたかったこと"
+    },
+    {
       "script": "scripts/check-script-tags.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",

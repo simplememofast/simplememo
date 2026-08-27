@@ -958,12 +958,15 @@
       "executor": "ai_proposes",
       "evidence": [
         "../simplememo-api/src/rollout-guard.ts",
-        "../simplememo-api/test/rollout-guard.test.ts"
+        "../simplememo-api/test/rollout-guard.test.ts",
+        "scripts/check-rollout-promotion.mjs",
+        "data/rollout-promotion.json",
+        "data/authority-matrix.json"
       ],
-      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）\n\n**[2026-08-26] 判断は実際に発生している。**`tf04_progress` が 5% で稼働中で、ガードは毎時判定を出している（decisions 30件）。ただし現在の判定は hold で、理由はサンプル不足（露出 5〜12 / 判定に要る 30 に未達）。**昇格の提案はまだ1件も積まれていない**（awaiting_approval 0）",
+      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）\n\n**[2026-08-26] 判断は実際に発生している。**`tf04_progress` が 5% で稼働中で、ガードは毎時判定を出している（decisions 30件）。ただし現在の判定は hold で、理由はサンプル不足（露出 5〜12 / 判定に要る 30 に未達）。**昇格の提案はまだ1件も積まれていない**（awaiting_approval 0）\n\n**[2026-08-27] 機械ゲートを作った。executor は動かさない。**オーナー判断で境界が外れたが、権限表は不可逆な領域の承認を外すのに machine_gate を要求するので、宣言ではなく実装で外した（`scripts/check-rollout-promotion.mjs` の `evaluatePromotion` / `data/rollout-promotion.json`）。落とすもの: ガードの判定が promote でない／判定が120分より古い／3指標のどれかが各群30の母数に届かない／梯子を飛ばす／50% を超える（**100% への最終段は人**）／48時間寝ていない／直近7日に kill／日次上限1／`drill_`／killed。**材料が欠けたら必ず hold**（13欄を1つずつ落として確かめた）。\n\n**この門は今日のボタンを押せない。設計どおり。**ガードは rollout 5% では判定に届かず、自分で『露出30には rollout 19% 以上』と計算している（run 33076125334）。**判定に届かない露出から踏み出す最初の一歩は証拠で正当化できない**ので、そこは人が押す。門が効くのは25%以降。\n\n**executor は `ai_proposes` のまま動かさない。**残っているのは (1) 実行側（simplememo-api が `--plan` を読んでフラグを設定する経路）と (2) オーナーが `auto_promote.enabled` を立てること。**「門ができた」を「昇格した」と数えない** —— レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準",
       "blocker": "not_started",
       "unlock": "impl_machine_gate",
-      "unblocked_by": "露出を広げる方向は不可逆。撤回はAI単独・拡大は承認制という非対称そのもの"
+      "unblocked_by": "**機械ゲートは 2026-08-27 に実装した**（evaluatePromotion）。残るのは実行側の経路（simplememo-api が --plan を読んでフラグを設定する）と、オーナーが auto_promote.enabled を立てること。ブートストラップの一歩（母数が判定に届かない段からの引き上げ）は門が必ず hold するので、そこは人のまま"
     },
     {
       "area": "④ 自動本番デプロイ",

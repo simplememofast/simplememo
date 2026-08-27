@@ -115,6 +115,7 @@ const UNSERVED_DATA = new Set([
   "review-gate-pin.json",
   "review-intake.json",
   "review-replies.json",
+  "rollout-promotion.json",
   "signal-ledger.json",
   "site-constants.json",
   "spend-approvals.json",
