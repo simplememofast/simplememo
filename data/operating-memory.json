@@ -1365,6 +1365,52 @@
         ],
         "new_guardrail": "**見本の形の出どころを、見本の隣に書く。**実物の応答を1回見て写したのか、似た名前の別APIから連れてきたのか。後者なら検査は推測の一貫性しか見ていないので、**実物に当たるまで「取れる」と書かない。**取り出しに失敗したときは、応答の**鍵の名前**を出す（値は出さない）"
       }
+    },
+    {
+      "id": "om-2026-08-27-a-check-verified-in-only-one-direction",
+      "seeded": false,
+      "area": "⑨ マネタイズ",
+      "signal": "⑨の検証器を作る過程で、**自分で書いた検査が2つとも中身を持っていなかった。**どちらもその場では緑に見えていた",
+      "hypothesis": "壊し試験（壊したら落ちるか）を通したので、検査は効いている",
+      "decision": "**片方向しか見ていなかった。**\n\n**(1) 通ることが起こりえない検査。**root の自己署名を\n`[ \"$(openssl … -subject)\" != \"$(openssl … -issuer)\" ]` で見ていた。openssl は\n`subject=CN = …` / `issuer=CN = …` と**接頭辞ごと**出すので、\n**どんな自己署名証明書でも必ず違う。**実物の Apple Root CA - G3 を渡して初めて落ちた ——\n中身は一字一句同じなのに。一見いちばん厳しく、実は確かめる力がゼロだった。\n\n**(2) 壊れていない壊し試験。**「署名の対象は元の文字列であって、復号して詰め直した\nものではない」を押さえたつもりで、実装を『詰め直す』に変えても検査が通った。\nApple のヘッダは `{\"alg\":\"ES256\",\"x5c\":[…]}` で、**生バイトを詰め直しても\nJSON を組み直しても元と同じ文字列に戻る**（実測）。**恒等写像で壊しても何も起きない。**\n\n2つは裏表。(1) は良い入力で通ることを見ていない。(2) は悪い入力で落ちることを\n見たつもりで、入力が悪くなっていなかった。",
+      "execution": {
+        "pr": "simplememofast/simplememo-api#185, #186",
+        "commit": "32547ef, a2bbe4a"
+      },
+      "verification": "(1) 直したあと**実物の root で通ること**と**実物の中間証明書で落ちること**の両方を見た。(2) 詰め直すと形が変わるヘッダ（`{\"alg\": \"ES256\"}`・空白入り）を1つ作り、そこで初めて壊し試験が落ちた",
+      "outcome": "検証器の壊し試験は7通り。6つは狙った検査が落ち、落ちなかった1つ（詰め直し）は見本を作り直して落とした。root 取得側は通ったときも1行出すようにした —— **黙って通ると、効いているかどうかが分からない**",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-check-verified-in-only-one-direction",
+        "text": "**検査は両方向で見る。**壊したら落ちるか（これはずっとやってきた）に加えて、\n**本物で通るか。**片方だけだと、次の2つを見逃す:\n\n  - **通ることが起こりえない検査** … 常に落ちるので最も厳しく見えるが、\n    何も確かめていない。「落ちたら飛ばす」場所に置けば、自分で自分を無効化する\n  - **何も壊していない壊し試験** … 壊したつもりの変更が恒等写像だと、\n    検査は通ったままで「効いている」に見える\n\n見分ける問いは1つ: **その検査を、いま通るはずの入力に当てたことがあるか。**\nそして壊し試験のあとに: **その壊しは、本当に振る舞いを変えたか。**\n（今日この形は3回出た。der.ts で2回、ここで2回。**壊し試験が落ちないときは、\n検査が余計なのではなく、壊しが弱いことのほうが多い。**）",
+        "changed": [
+          "../simplememo-api/.github/workflows/apple-root-pin.yml",
+          "../simplememo-api/test/apple-jws.test.ts"
+        ],
+        "new_guardrail": "**新しい検査を入れるときは、落ちる例と通る例の両方を、その場で1回ずつ走らせる。**通る例を走らせていない検査は「厳しい」ではなく「未検証」。壊し試験が落ちなかったときは、まず**壊しが恒等写像でないこと**を確かめてから、検査を疑う"
+      }
+    },
+    {
+      "id": "om-2026-08-27-a-cleared-blocker-revealed-a-boundary",
+      "seeded": false,
+      "area": "⑨ マネタイズ",
+      "signal": "⑨の「返金要求への消費情報の応答」は `external_credential`（人が ASC で通知URLを1回設定する）で止めてあった。オーナーが設定し、実測で 200 / `notification_url_configured: true` / Apple の実配信 SUCCESS まで取れた",
+      "hypothesis": "塞ぎが外れた。残るのは実装（受け口・検証器・応答）で、そこは機械の仕事",
+      "decision": "**受け口と検証器までは、その通りだった。**実物の Apple 署名を検証できるところまで作った。\n\n**応答は機械の仕事ではなかった。**Send Consumption Information のドキュメントを取って読んだ:\n\n  「If the customer provided consent, respond by calling this API …\n   **If not, don't respond to the CONSUMPTION_REQUEST notification.**」\n  「The App Store server **rejects requests that have a customerConsented value\n   other than `true`** by returning an HTTP 400 …」\n\n**取りに行かなければ `customerConsented: false` を送っていた。**\n「同意が無いのだから false が正直な値」と考えていたが、それは**400 で弾かれる**。\n応答したつもりで毎回弾かれる機械ができ、しかも緑に見えたはず。\n\n応答するには**顧客がアプリ内で明示的に opt-in している**必要があり、Apple は\n撤回の手段と privacy label への記載まで求めている。つまり本当の門は\n**「顧客の利用状況を Apple に渡して、その顧客の返金要求に反論してよいか」を\n顧客に問うかどうか**という製品の判断で、しかも現時点の実績は購入1件。",
+      "execution": {
+        "commit": "7b4b96f1"
+      },
+      "verification": "Apple の一次資料（Send Consumption Information / ConsumptionRequest / notificationType の各 .md）を取って読んだ。同時に、返金の検出のほうは**逆に解けた** —— 取引IDの出どころを探す必要はなく、`REFUND` / `REFUND_DECLINED` / `REFUND_REVERSED` が通知として押されてくる",
+      "outcome": "この行の blocker を `external_credential` から `policy_boundary` に変えた。**率は動いていない**（65.3% のまま）—— 動いたのは、止まっている理由のほう",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-cleared-blocker-can-reveal-a-boundary-not-a-todo",
+        "text": "**塞ぎが1つ外れても、その先が自動側とは限らない。**\n\n台帳の blocker は「いま止めているもの」を書く欄で、**その先に何があるかは書いていない。**\nだから外れた瞬間に「残るは実装」と読みたくなるが、外れた先にもう一段の門が\n立っていることがある。今回はそれが**顧客の同意**という、実装では作れないものだった。\n\n合わせて危なかったのが「同意が無いなら false が正直な値」という推し方。\n**欠けている値の『正直な既定』を、仕様を見ずに決めない。**\nそこは仕様が決めることで、今回の仕様は「false を送る」ではなく「送らない」だった。\n1回取りに行けば分かることを推測で埋めると、**弾かれ続ける機械が緑で回る。**",
+        "changed": [
+          "data/automation-coverage.json"
+        ],
+        "new_guardrail": "**blocker が外れたら、その先を一次資料で1回確かめてから executor を動かす。**とくに外部サービスへ何かを送る行は、送る前に「送ってよい条件」の記述を取ってくる。欠けている値の既定を自分で決めない"
+      }
     }
   ]
 }
