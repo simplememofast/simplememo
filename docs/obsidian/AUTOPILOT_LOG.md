@@ -2032,3 +2032,184 @@ coverage-queueのpendingは引き続き潤沢（次点C06/C07はC05と主題が�
 未了。§5-5（配信の種）のRunbook同期は未着手（Runbookにまだ§5-5が無く、
 `claude/autopilot-distribution-seed`ブランチも空だったことを確認済み）。本日分の出荷後、
 別ブランチ・別PRで実施する。
+
+## 2026-08-27（代走・owner-session） — レーンE。C06 `/obsidian/sync/icloud/` を出荷。同日 ccr-0920 の取り残しも拾った
+
+オーナーから「正常に記事を書いてほしい」と直接指示があったための代走
+（route: `owner-session`）。当日ブランチの占有は取らず、指定された作業ブランチ
+`claude/obsidian-sync-implementation-5g9fs1` で作業した。
+
+### §0 冪等性 —— 「当日分は実行済み」だが、実行済みになっていなかった
+
+`git ls-remote` は `claude/obsidian-auto-20260827` を返した。中を見ると **09:20 JST の
+再試行経路(ccr-0920)が本日すでに着手し、`/obsidian/plugins/` のレーンC更新を PR #660 として
+09:32 JST にマージ済み**だった。冪等判定としては「実行済み」で正しい。
+
+**ところが日報（10:00 JST）は「公開記事: 0（当日分の実行記録なし）」と報告していた。**
+理由はブランチを見れば分かった:
+
+    dd0e6a5  09:21  chore(autopilot): claim ... (lane: ccr-0920)
+    6bfc4e4  09:30  obsidian/plugins: キーワード分析を追加        ← PR #660 としてマージ済み
+    c51306e  09:31  sitemap: lastmod 反映                        ← **取り残し**
+    813b335  09:35  autopilot: 台帳・ログ・ステータスJSONを更新   ← **取り残し**
+
+**マージ済みのPRは、その後に同じブランチへpushしても再オープンされない。**
+PR #660 は6bfc4e4の時点でマージされ、あとの2commitを拾うPRは作られなかった。
+結果、`data/autopilot-status.json` は本番で 08-26 のまま残り、日報はそれを読んで
+「当日記録なし＝上流停止」と報告した。**出荷そのものは成功していたのに、
+出荷を報せるファイルだけが宙に浮いた。**
+
+対処として 813b335 を本ブランチへ cherry-pick し、`ap-20260827-ccr0920` の台帳行と
+当該LOGエントリを本PRに含めた（sitemapは自分で再生成するので c51306e は取らなかった）。
+
+**⚠️ 訂正: この節を最初に書いたとき「再発防止は順序の話でしかない」としたが、誤りだった。
+Runbook §5 の順序どおりにやった本セッション自身が、同じ形で取り残しを出した。**
+
+Runbook §5 は「PR番号は `gh pr create` の直後に分かるので、その時点で台帳へ追記する」と
+書いてあり、そのとおりにやった。ところが:
+
+    01:33:53Z  記事コミット(87923216)をpush → SEO Validation 起動
+    01:34:34Z  PR #668 作成
+    01:35:04Z  87923216 の検証が success
+    01:35:0xZ  台帳コミット(ef0d2170)をpush        ← 間に合っていない
+    01:35:13Z  auto-merge が **検証済みSHA 87923216** でマージ → PRはクローズ
+
+**auto-merge は最初に検証を通ったSHAで即マージする。**「検証済みSHAだけをマージ」は
+意図した設計（CLAUDE.md）なので、これ自体は正しい。問題は、台帳にPR番号を書くには
+PRが要り、PRを作った瞬間から**検証〜マージまでの1〜2分の窓しかない**という順序の
+矛盾のほうにある。ccr-0920 の取り残しも、原因は不注意ではなくこの窓だった。
+
+**実際に効く手当ては draft PR。** CLAUDE.md が明記しているとおり
+**draft PR は auto-merge の対象外**なので、
+
+    1. 記事コミットを push
+    2. **draft** で PR を作る（番号が確定する。auto-merge は来ない）
+    3. その番号で台帳・status JSON・LOG を書いてコミット・push
+    4. Ready にする → 次の検証成功でマージされる
+
+これなら窓が無い。本セッションは 2 を通常PRでやったため取り残しを出し、
+**同じ日に同じ故障を2回起こした**（ccr-0920 と自分）。回収は別PR（#669）で行った。
+
+### レーンF
+
+`autopilot-selfheal.mjs --check` は未修理の故障なし。`health-intake.mjs` は
+**この環境に GITHUB_TOKEN が無く読めなかった**ので、規約どおり台帳は触っていない
+（「Issueが無い」と「Issueを読めなかった」を混ぜない）。代わりに GitHub MCP の
+`list_issues` で直接見て、open は #497（i18n・無関係）1件のみ、
+`ops/autopilot-stale` と `ops/cron-failure` は0件であることを確認した。
+
+`recover-ingest.mjs` は退避先3日前・`human_action_required` / `degraded` ともに0件。
+
+### データ鮮度
+
+BigQuery MCP で直接クエリ。`searchdata_site_impression` は
+`2026-08-10〜2026-08-24 / COUNT(DISTINCT)=15 / span=15`（**欠損なし**）。
+28日窓の到達は 2026-09-06 前後で、レーンA/Bは引き続き正当化できない。
+
+### 固有価値（このセッションの一次情報）
+
+**先に egress を測ったことが、そのまま手段の選択になった。**
+
+    obsidian.md            HTTP 000（到達不可）
+    help.obsidian.md       HTTP 000
+    support.apple.com      HTTP 000
+    api.github.com         403
+    codeload.github.com    403
+    raw.githubusercontent.com  200   ← ここだけ通る
+
+08-26 の主系（GitHub Actions）は `obsidian.md` に直接到達できていたので、
+**経路によって届く先が違う**ことが改めて実測された。到達できないものを引用しない、
+という一点のために、公開版ヘルプではなく**公式ドキュメントのソースリポジトリ**
+`obsidianmd/obsidian-help` から取得する形にした。
+
+- **英日の照合（実測）**: `en/Getting started/Sync your notes across devices.md`
+  （12,796バイト）と `ja/はじめに/デバイス間でノートを同期する.md`（17,355バイト）を取得し、
+  **h2/h3見出し10個・コールアウト12個が1対1で一致**することをスクリプトで照合した。
+  日本語話者にとって「日本語版で読んでよいか」は実際に効く問いなので、記事に表として載せた。
+  バイト差はUTF-8の3バイト分であって内容差ではないことも明記している。
+- **自社実装の一次情報**: `ObsidianManager.swift` から、NSFileCoordinator (.forMerging) 経由の
+  追記（cloudd / Obsidian と協調する read-modify-write）・書き込み先（`yyyy-MM-dd.md` /
+  `<Inbox名>.md`）・専用シリアルキューでの直列化・端末内ペンディングキューのAES-GCM暗号化
+  （`obsidian_pending.enc`）を記載の根拠にした。
+
+### 書かなかったこと
+
+キューの `unique_value` が求めていた「iCloudの競合コピーの実例」は、**macOS/iOS実機が
+この環境に無いため実施できなかった。** 代わりに上の2種類の一次情報で固有価値ゲートを満たし、
+未実施であることを記事末の検証範囲欄（§28の3状態）と coverage-queue の `done_note` の
+両方に書いた。Apple公式ヘルプは本日到達できなかったので引用していない
+（C05で引用済みの範囲はそちらへリンクする形にした）。
+
+### 配線・付帯変更
+
+- 被リンク3本: `/obsidian/sync/`（本文の iCloud カード＋関連ページ）・`/obsidian/daily-note/`・
+  `/obsidian/getting-started/`。**実験中の `/obsidian/` ハブ本体には触れていない**
+  （`monitor-2026-08-09-obsidian-ctr`・評価日 2026-09-13）。
+- `data/content-graph.json`: `/obsidian/sync/icloud/` 登録（cluster `obsidian-sync`・
+  parent `/obsidian/sync/`・siblings what-is-vault, daily-note・nextStep `/obsidian/`）。
+- `growth/content/coverage-queue.json`: C06 を `done` 化。次点は C07。
+- `data/distribution-queue.json`: 配信の種を1件追加（§5-5）。`x_post_ja` 116字。
+- OG画像（`obsidian-sync-icloud.png`）・QR（`qr-obsidian-sync-icloud-{ja,en}.svg`）を生成。
+- sitemap再生成（`git fetch --unshallow` 後）。新URL追加と `/autopilot/` の lastmod 更新のみで、
+  後者は本日 PR #665 で実際に変更されているので正しい反映。
+
+**Playwrightの環境差の回避（次回のために書いておく）**: `npm i --no-save playwright` で入る
+1.62.1 は chromium revision **1234** を要求するが、この環境の `/opt/pw-browsers` にあるのは
+**1194**。さらに headless shell のディレクトリ構成が変わっており
+（旧 `chrome-linux/headless_shell` → 新 `chrome-headless-shell-linux64/chrome-headless-shell`）、
+リビジョンのsymlinkだけでは足りない。両方を張って通した:
+
+    /opt/pw-browsers/chromium-1234/chrome-linux                     → 1194のchrome-linux
+    /opt/pw-browsers/chromium_headless_shell-1234/chrome-headless-shell-linux64/
+        chrome-headless-shell                                       → 1194のheadless_shell
+
+### 検証
+
+**SEO Validation がCIで回すコマンドを workflow から機械的に抽出して95本ローカル実行し、失敗0。**
+`seo-check.js` は 267ファイル 0 errors 0 warnings。**初回は HowTo の JSON-LD を入れていて
+`[SCHEMA] Deprecated HowTo schema` で落ちた**ので削除した（Googleが HowTo リッチリザルトを
+廃止しているため、このリポジトリは検出して落とす作りになっている）。
+
+iPhone 390×844 DPR3 実描画QA（Playwright + Chromium）: 水平スクロールなし
+（scrollWidth=clientWidth=390）・はみ出す要素0・JSエラー0・`.cta-qr` はモバイル非表示。
+**回答ブロックは初回計測で top=867px とファーストビュー（844px）から出ていた**ので、
+ヒーローの導入文を1文削って top=743px に収めた。デスクトップ1280pxではQRが表示され、
+`naturalWidth 264 / 描画132px` でデコードまで確認。QR自体は `--check` で42件を独立デコードして
+0 failed。
+
+なお QA スクリプトの初版は SVG の `naturalWidth` だけを見ており、遅延読み込み中の画像を
+「壊れた画像」と誤判定していた。**既に出荷済みの `/obsidian/sync/` を対照に回したら同じ判定が
+出た**ので、ページ側ではなく計測側の誤りと分かった。描画ボックス幅も併せて見るように直した。
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260827-owner-session`（route: owner-session・
+  outcome: shipped・lane: E・action: new・pr: 668・artifact: /obsidian/sync/icloud/）を追記。
+  cherry-pickで入った `ap-20260827-ccr0920` と合わせ、本日は2行になる。
+- `data/autopilot-status.json` を当日の内容で上書き（cost/runsは `--json` の出力をそのまま埋め込み）。
+- 費用: **この経路（owner-session）の実費は観測手段が無い**ため `data/autopilot-cost.json` への
+  追記は行っていない（0ではなく未観測）。台帳がカバーしているのは主系の消費だけ。
+
+- やったこと: `/obsidian/sync/icloud/` 新設（PR #668・10:35 JST auto-merge 済み）。
+  coverage-queue C06 実装。同日 ccr-0920 の取り残し（台帳・LOG・status JSON）の回収。
+  **本セッション自身の台帳・status JSON・LOG は #668 のマージ窓に間に合わず、別PR #669 で出した。**
+- 検証: 上記95本＋iPhone/デスクトップの実描画QA。
+- 保留・オーナー依頼: GH_PAT回転（実測手段が無いため未確認のまま繰り越し）。
+
+### 次回への申し送り
+
+**日報の「やること: 取得できなかった（http_404）」は上流停止ではない。**
+`data/autopilot-actions-report.json` は `functions/_middleware.js` の `UNSERVED_DATA`
+（`data/publication-policy.json` が正）に載っていて、**サイトが意図的に配信していない**。
+日報側が取りに行く限り構造的に必ず404になるので、直すなら日報生成側
+（`simplememo-api`）で非配信ファイルを取りに行かないようにするか、配信方針側で
+このファイルだけ公開するかの判断が要る。**アクション台帳へ上げる候補**。
+
+coverage-queueのpendingは27件。次点 C07 `/obsidian/sync/official-sync/` は
+`collides_with` のとおり「Standard/Plusどちらが要るかの判断フロー」まで narrow すること
+（料金の再掲は `/obsidian/pricing/` と `/obsidian/sync/` に譲る）。
+**CCR/owner-session経路からは obsidian.md に到達できない**ので、公式の料金・機能差を
+一次情報として使うなら `raw.githubusercontent.com` 経由の `obsidianmd/obsidian-help`
+（`en/Obsidian Sync/` 配下）を使うこと —— 本日それが実際に機能することを確認した。
+
+レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。

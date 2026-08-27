@@ -1,10 +1,10 @@
 {
   "date_jst": "2026-08-27",
-  "generated_at": "2026-08-27T00:33:09Z",
-  "action": "refresh",
+  "generated_at": "2026-08-27T01:43:00Z",
+  "action": "new",
   "article": {
-    "url": "https://simplememofast.com/obsidian/plugins/",
-    "title": "Obsidianプラグイン入門 — 6,812個から実測トップ10【2026】"
+    "url": "https://simplememofast.com/obsidian/sync/icloud/",
+    "title": "ObsidianをiCloudで同期する設定手順 — iPhoneとMac"
   },
   "pr": null,
   "streak": {
@@ -102,9 +102,9 @@
       "to": "2026-08-27",
       "days": 17
     },
-    "completion_rate": 0.7368,
-    "change_failure_rate": 0.2632,
-    "human_intervention_rate": 0.3684,
+    "completion_rate": 0.75,
+    "change_failure_rate": 0.25,
+    "human_intervention_rate": 0.35,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -112,35 +112,35 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.21052631578947367
+        "rate": 0.2
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.05263157894736842
+        "rate": 0.05
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.05263157894736842
+        "rate": 0.05
       },
       "request": {
         "runs": 1,
-        "rate": 0.05263157894736842
+        "rate": 0.05
       }
     },
     "artifact_autonomy_rate": 1,
     "shipping_day_rate": 0.8235,
     "totals": {
-      "runs": 29,
-      "attempted": 19,
-      "shipped": 14,
+      "runs": 30,
+      "attempted": 20,
+      "shipped": 15,
       "failed": 5,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 13,
-        "attempted": 11,
-        "shipped": 11
+        "runs": 14,
+        "attempted": 12,
+        "shipped": 12
       },
       "primary": {
         "runs": 16,
@@ -168,18 +168,19 @@
       "unresolved": []
     }
   },
-  "reason": "【連続無記事0日目・本番最終変更2026-08-27・BQ確認済み(15/28日蓄積・2026-09-06頃到達見込み)】再試行 Routine(09:20 JST・ccr-0920)による実行。主系・副系A・副系Bのいずれにも当日分の実行痕跡が無いことを§0の(a)〜(e)で確認済み（当日ブランチ無し・本番status JSONは前日08-26・当日head のPR無し・主系の最新runは前日分で in_progress ではない）。占有コミットで当日ブランチをclaimしてから着手（拒否されずclaim成功）。レーンF: 未修理の故障なし（selfheal --check・GitHub MCP list_issuesでops/autopilot-stale・ops/cron-failureも0件を直接確認）。前回レーンC実施が2026-08-14で13日経過していたため、Runbook §2「7日以上経っていれば優先レーン」に従いレーンCを選択。同じ資産（登録数の再計測）ではなく別資産として、community-plugins.json（2026-08-27時点で6,982件）の name/description フィールドをキーワード（capture / daily note / template / voice・dictation / inbox / clipper・web clip）で部分一致集計し、`/obsidian/plugins/` に新セクション・FAQを追加した。captureを名指しするプラグインは1.2%（82件）にとどまり最多はdaily note関連1.9%（133件）——文字列一致による概算であり厳密な機能分類ではない旨を3箇所に明記。既存の6,812・トップ10（08-21計測）はそのまま維持し、新データは日付を分けて引用（数値混同を避けた）。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。",
-  "verified": "実測（このセッションで直接取得・集計）: community-plugins.json（raw.githubusercontent.com経由・2026-08-27・6,982件）に対し、name/descriptionフィールドの英語キーワード部分一致（大文字小文字を区別しない）をNodeスクリプトで集計。capture 82件(1.2%)・daily note 133件(1.9%)・template 108件(1.5%)・voice/dictation 64件(0.9%)・inbox 40件(0.6%)・clipper/web clip 15件(0.2%)。この経路ではobsidian.md・api.github.comへの到達は403でブロックされることを実際にcurlで確認し（raw.githubusercontent.comのみ200）、それを理由に一次情報の範囲をレジストリJSONに限定した。検証できなかったこと・書かなかったこと: 各プラグインの実際の機能内容（文字列一致は誤検出・見落としの両方があり得るため、ページ本文とFAQの両方に明記）。データ鮮度は本日07:04 JSTのseo-daily run(33018038649)のジョブログをGitHub MCP get_job_logsで読み `data available: 2026-08-10..2026-08-24`（15/28日）を確認（bq-preflight.mjsはこの経路でも認証失敗・BigQuery MCP未接続のため③の手段で確認）。§4の18チェックすべて実行し全通過。iPhoneビューポート（390×844 DPR3）実描画QA: playwright+Chromiumで実際にレンダリングし、水平スクロールなし（scrollWidth=clientWidth=390）・新セクションが正しく描画・表がビューポート内に収まることを確認。JS/HTTPエラーはAhrefs/GTMの2件のみで、この環境のegress制限によるブロック（ページ内容とは無関係）。",
+  "reason": "【連続無記事0日目・本番最終変更2026-08-27・BQ確認済み(15/28日蓄積・2026-09-06頃到達見込み)】オーナーからの直接依頼による代走（route: owner-session）。本日は09:20 JSTの再試行経路(ccr-0920)が既に `/obsidian/plugins/` のレーンC更新を出荷している（PR #660・09:32 JSTマージ）が、**その台帳・ログ・status JSONの3ファイルだけがブランチ claude/obsidian-auto-20260827 に取り残され、PRが無いまま本番のstatus JSONは08-26のままだった。** 本日10:00 JSTの日報が「当日分の実行記録なし」と報告した原因はこれで、本PRで取り残し分をcherry-pickして一緒に出した（ap-20260827-ccr0920 の行と当該LOGエントリを含む）。本体のアクションはレーンE: coverage-queueのpending先頭 C06 `/obsidian/sync/icloud/` を実装（PR #668）。前回C05の申し送りどおり4方式の比較は再掲せず「iCloud一本の設定手順」へnarrowした。固有価値は2つ: (1) この経路からobsidian.md/support.apple.comへは到達できない（curlで000）ことを実測したうえで、到達できたraw.githubusercontent.com経由で公式ドキュメントのソースリポジトリ obsidianmd/obsidian-help から英語版・日本語版を直接取得し、見出し10・コールアウト12の1対1一致を機械照合した。(2) SimpleMemoがiCloud上の保管庫へ書き込む実装（NSFileCoordinator経由・書き込み先ファイル名・端末内キューのAES-GCM暗号化）を自社実装の一次情報として記載した。キューのunique_valueが求める「競合コピーの実例」はmacOS/iOS実機が無く実施できないため、§28の3状態表記で未検証範囲を明記して代替した。レーンF: 未修理の故障なし（selfheal --check ＋ GitHub MCPで ops/autopilot-stale・ops/cron-failure が0件であることを直接確認。health-intake.mjs はこの環境にGITHUB_TOKENが無く読めなかったので台帳は触っていない）。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。**日報の「やること: 取得できなかった（http_404）」は上流停止ではない** —— data/autopilot-actions-report.json は functions/_middleware.js の UNSERVED_DATA（publication-policy）に載っており、サイトが意図的に配信していないファイルなので、日報側の取得は構造的に必ず404になる。",
+  "verified": "実測（このセッションで実際に実行した）: (a) egressの実測 —— obsidian.md / help.obsidian.md / support.apple.com へは curl で HTTP 000（到達不可）、raw.githubusercontent.com は 200、api.github.com と codeload.github.com は 403。これを根拠に一次情報の取得先を公式ドキュメントのソースリポジトリに限定した。(b) obsidianmd/obsidian-help から `en/Getting started/Sync your notes across devices.md`（12,796バイト）と `ja/はじめに/デバイス間でノートを同期する.md`（17,355バイト）を直接取得し、h2/h3見出し10個・コールアウト（> [!）12個が英日で1対1に一致することをスクリプトで照合。記事の手順・警告文はこの原文からの引用に限定した。(c) BigQuery MCP で searchdata_site_impression を直接クエリし、data_date 2026-08-10〜2026-08-24・COUNT(DISTINCT)=15・span=15（欠損なし）を確認。一次情報（自社実装）: SimpleMemo iOS の ObsidianManager.swift を読み、NSFileCoordinator (.forMerging) 経由の追記・書き込み先（yyyy-MM-dd.md / <Inbox名>.md）・専用シリアルキューでの直列化・端末内ペンディングキューのAES-GCM暗号化（obsidian_pending.enc）を記載の根拠にした。検証できなかったこと: iCloud Driveの実際の同期挙動と競合時の挙動（この環境にmacOS/iOSが無い）。Apple公式ヘルプは本日到達できなかったため引用していない（C05で引用済みの範囲はそちらへリンク）。§4の全チェック（SEO Validationが回す95本）をローカルで全通過。初回は HowTo の JSON-LD が `[SCHEMA] Deprecated HowTo schema` で落ちたので削除した。iPhoneビューポート（390×844 DPR3）実描画QA: Playwright+Chromiumで実描画し、水平スクロールなし（scrollWidth=clientWidth=390）・はみ出す要素0・JSエラー0・回答ブロックはファーストビュー内（top=743px）・cta-qrはモバイル非表示。デスクトップ1280pxではQRが表示され（132px描画・naturalWidth 264でデコード確認）、水平スクロールなし・ローカル4xx 0件。外部のahrefs/GTMはこの環境のegress制限で失敗するが、既存ページでも同じでページ側の問題ではない。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（266ファイル）",
-    "content_graph": "26 entries OK（URL変更なしのため登録変更なし）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施（playwright+Chromium）。水平スクロールなし・新セクション正常描画・表がビューポート内に収まる・JS/HTTPエラーはegress制限起因の2件のみ",
+    "seo_check": "0 errors 0 warnings（267ファイル）",
+    "content_graph": "27 entries OK。/obsidian/sync/icloud/ を新規登録（cluster: obsidian-sync・parent: /obsidian/sync/）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施。水平スクロールなし・はみ出す要素0・JSエラー0・回答ブロックはファーストビュー内（top=743px）・QRはモバイル非表示。デスクトップ1280pxではQR表示（naturalWidth 264でデコード確認）",
     "experiments": "36件中21 open・due 0・overdue 0",
-    "other": "check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（240 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（全シナリオ） / automation-rate --check / check-pr-facts --check / d-score --check / check-model-routing --check / generate_sitemap.py --dry-run いずれも問題なし。git fetch --unshallow後にgenerate_sitemap.pyを実行し/obsidian/plugins/のlastmodを更新（副産物として他5ページの実コミット日も反映）"
+    "other": "SEO Validation がCIで回す95本をローカルで全通過（seo-check.js と indexnow-notify を除く全コマンドを機械的に抽出して実行・失敗0）。内訳の主なもの: check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（242 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / check-publication --check / check-model-routing --check / generate_sitemap.py --check。QRは42件を独立デコードして0 failed"
   },
   "owner_requests": [
-    "【要オーナー判断・継続】GH_PATに workflow scope を足すかどうか（scopeは足さないと決定済み・残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。本セッションはGitHub Secretsの値・回転日を検査する権限が無いため実測手段が無く、前日の記録をそのまま繰り越す。",
-    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。"
+    "【要オーナー判断・継続】GH_PATの回転（workflow scope は足さないと決定済み・2026-08-25。残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。本セッションはGitHub Secretsの値・回転日を検査する権限が無く**実測手段が無いため未確認**で、前日の記録をそのまま繰り越す。",
+    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。",
+    "【オーナー作業不要・情報共有】日報の「やること: 取得できなかった（http_404）」は上流停止ではなく、data/autopilot-actions-report.json が publication-policy でサイト非配信に指定されているため。日報側の取得は構造的に必ず404になる。直すなら日報生成側（simplememo-api）か配信方針のどちらかで、本セッションは1セッション1アクションの原則により触っていない。"
   ],
-  "next": "coverage-queueのpendingは引き続き潤沢（次点C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/`。C05と主題が重なるため collides_with 追記済み——narrowした実装に切り替えること）。act-credential-actionsの閉じ条件は継続監視。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。次回レーンCは今回とは別の資産へ（今回はキーワード分析を使ったので、テーマ側の一次情報や別カテゴリの集計を検討）。§5-5（配信の種）のRunbook同期は未着手のため、本日分の出荷後に別ブランチ（claude/autopilot-distribution-seed）で実施する。"
+  "next": "**取り残しの真因は不注意ではなく、auto-merge の窓だった（本日2回起きた）。** Runbook §5 は「PR作成直後に台帳へPR番号を追記」と書いているが、auto-merge は最初に検証を通ったSHAで即マージするため、PR作成から1〜2分しか窓が無い。ccr-0920 も本セッションも、その窓に間に合わずに台帳・status JSON が宙に浮いた（本セッション分は別PR #669 で回収）。**効く手当ては draft PR**: CLAUDE.md のとおり draft は auto-merge の対象外なので、①記事をpush ②draftでPRを作り番号を得る ③その番号で台帳・status JSON・LOGを書いてpush ④Ready にする、の順にすれば窓が消える。**Runbook §5 にこの手順を書き足すことが次回の最優先候補。** coverage-queueのpendingは27件で潤沢。次点は C07 `/obsidian/sync/official-sync/`（collides_with 記載どおり 「Standard/Plusどちらが要るかの判断フロー」まで narrow すること。料金の再掲は /obsidian/pricing/ と /obsidian/sync/ に譲る）。**この経路（CCR/owner-session）からは obsidian.md に到達できない**ので、C07で公式の料金・機能差を一次情報として使うなら raw.githubusercontent.com 経由の obsidianmd/obsidian-help （`en/Obsidian Sync/` 配下）を使うこと —— 本日それが実際に機能することを確認した。**日報の http_404 は要対処**: data/autopilot-actions-report.json は publication-policy で非配信なので、日報側が取りに行く限り必ず404になる。日報生成側で「非配信のファイルを取りに行かない」か、配信方針側でこのファイルだけ公開するかの判断が要る（アクション台帳へ上げる候補）。**取り残しの再発防止も要検討**: 本日 ccr-0920 は PR #660 がマージされた後に同じブランチへ追加pushしており、マージ済みPRは再オープンされないため台帳・status JSONが宙に浮いた。「記事と台帳を1つのPRに入れる」順序（先に全部コミットしてから1回だけPRを作る）が守られていれば起きない。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。"
 }
