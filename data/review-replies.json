@@ -76,10 +76,10 @@
   "policy": {
     "auto_post": {
       "enabled": true,
-      "dry_run": true,
+      "dry_run": false,
       "daily_cap": 3
     },
-    "$auto_post": "**2026-08-27: enabled を立てた。dry_run は立てたまま。**投稿の実装（ASCへのPOST）が入ったので、次の段は「1周見る」。dry_run のうちは計画が would_post を返すだけで**外には何も出ない** —— この状態で1回動いたのを見てから dry_run を false にする。**実装が入った日に一気に倒さない**（rollout-guard の promote と同じ段取り）。 ⚠ 倒すと**既存の下書き2件はそのまま公開される。**「rating が無いから止まる」は evaluateAutoPost 単体の話で、計画は ASC の実物で埋めるため通る。 **まだ1周も見ていない。**投稿側は simplememo-ios の日次（asc-review-reply.yml / 21:40 UTC）で、そこが1回 would_post を出すのを見るまでは dry_run を落とさない。**訂正（同日）: ここに一度「あちらの Actions が storage 上限で止まっているので動かない」と書いたが、08-27 00:25Z にはもう動いていた。止まっていたのは前日の観測で、書く前に確かめ直していない。**",
+    "$auto_post": "**2026-08-27: enabled を立て、dry_run を落とした。**実運転は simplememo-ios の日次（asc-review-reply.yml / 21:40 UTC）。 【1周見た結果 — run 33028844739】ゲートの指紋一致、ASC のレビュー8件（**返信済み5件**）を読み、**下書き2件はどちらも hold**。理由は「ASC 側にすでに返信が付いている」。 ⚠ **ここに一度『倒すと既存の下書き2件はそのまま公開される』と書いた。誤り。**その判断は has_response=false と自分で置いた作り物の観測から出したもので、**実物は逆だった** —— 2件とも返信済みで、上書きになるところだった。**guard が想定どおり実データで発火した。** 【この台帳の posted_at は当てにならない】2件とも posted_at は null なのに ASC には返信が付いている。**「台帳が未投稿」は「投稿していない」を意味しない。**二重投稿を防いでいるのは台帳ではなく ASC の has_response のほう（data/review-responses.json の $comment に同じことが書いてある）。 【まだ見ていないもの】**would_post を実データで一度も見ていない。**いまは全件が has_response で止まるため、post に至る経路が動いていない。したがって**最初の実投稿は無人で起きる。**上限3件/日と、★2以下・返金/法務/個人情報/保安/データ消失の除外がその場での歯止め。 【いまの本当の穴】ASC のレビュー8件のうち**返信も下書きも無いものが3件ある。**下書きが store に追いついていない。",
     "never_auto_post": {
       "rating_at_most": 2
     },
