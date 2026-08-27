@@ -509,12 +509,24 @@ jobs:
       # 【レビュー返信の承認境界】返信は**公開される**ので、書いた相手だけでなく
       # ストアを見る全員に対する会社の発言になる。取り消しても
       # 「見た人が見なかったことにはならない」——段階公開の promote と同じ性質。
-      # 下書きと検査はAIが実行し、**投稿だけを人が承認する。**
+      # **[2026-08-27] 境界が変わった** —— 「投稿だけを人が承認する」から
+      # 「品質ゲートを通れば自動投稿」へ（オーナーの決定）。下書き・検査に加えて
+      # 投稿もAIが実行する。落とすものは変わらない:
       # 期日・版の約束、個人情報、禁止表現は下書きの時点で落とす。
       - name: Review reply approval boundary
         run: |
           node scripts/check-review-replies.mjs --selftest
           node scripts/check-review-replies.mjs --check
+
+      # 【ゲートが変わったことを、変えたPRの中で気づかせる】
+      # 実際に投稿を止めているのは隣の非公開リポジトリの指紋照合。
+      # ここで check-review-replies.mjs を1文字直すと**あちらの指紋が黙って古くなり、
+      # 翌朝の日次が落ちて初めて分かる。**#659 で留め、#661 が直し、実際にそうなった。
+      # 止まる方向なので事故にはならないが、**止まったことに誰も気づかない。**
+      - name: Review reply gate pin (隣の指紋が古くなっていないか)
+        run: |
+          node scripts/check-review-gate-pin.mjs --selftest
+          node scripts/check-review-gate-pin.mjs --check
 
       # 【公開してよいものだけ公開する】
       # Cloudflare Pages はリポジトリの中身をそのまま配信する。除外設定は無いので、

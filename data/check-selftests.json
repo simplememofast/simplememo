@@ -346,6 +346,12 @@
       "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
     },
     {
+      "script": "scripts/check-review-gate-pin.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-27",
+      "broke": "[2026-08-27] **壊す前に、守るべき事故が実際に起きていた。**#659 でゲートの指紋を隣（simplememo-ios）に留め、#661 が同じ check-review-replies.mjs の表示文言を直し、翌日の初回実行が「ゲートが留めた指紋と違う」で停止した（run 33028173021・実測 685ed8e049ec ≠ 留め c7a42b1f2872）。止まる方向なので事故ではないが、**止まったことは翌朝まで誰も知らなかった。** この検査を入れた上で、実際に check-review-replies.mjs へ1行足して --check を回し、赤くなって両方の台帳に書く値が出るのを確認した。self-test 側は14件で、うち「留めた後にゲートを1文字直したら鳴る」は #661 で起きた指紋の組をそのまま固定してある"
+    },
+    {
       "script": "scripts/check-review-replies.mjs",
       "state": "demonstrated",
       "at": "2026-08-27",
