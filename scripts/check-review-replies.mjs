@@ -227,6 +227,85 @@ export function validate(doc, { intakeIds = null } = {}) {
   return problems;
 }
 
+/**
+ * **投稿計画。**ゲートを1件ずつ通して「何を出すか」を決める。
+ *
+ * 実行する側（simplememo-ios の scripts/asc_review_reply.rb）はこの出力だけを見る。
+ * **判断はこちらに集めてある** —— 実行側にゲートの写しを置くと、
+ * 厳しいほうが動かなくなったときに誰も気づけない。
+ *
+ * observed は ASC の実物:
+ *   [{ review_id, rating, review_text, has_response }]
+ *
+ * **star と本文は台帳ではなく ASC を採る。**台帳の数字が間違っていても
+ * ★1 が通らないようにするため。台帳が星を持っていて ASC と食い違うときは
+ * 「同じレビューの話をしていない」ので止める。
+ *
+ * has_response が要るのは礼儀ではない。**POST は上書きである**
+ * （Apple: "If a response already exists, this endpoint updates the response
+ * by overwriting it."）—— 人が書いた公開返信を機械が黙って置き換えうる。
+ */
+export function planAutoPost({ doc, intakeIds = null, observed = [], postedToday = 0 }) {
+  const policy = doc.policy || {};
+  const docProblems = validate(doc, { intakeIds });
+  const byId = new Map();
+  for (const o of Array.isArray(observed) ? observed : []) {
+    if (o && typeof o.review_id === 'string') byId.set(o.review_id, o);
+  }
+
+  // **上限は1回の実行の中でも効かせる。**呼び出し側が渡す「今日の投稿数」は
+  // 実行前の値なので、これを足していかないと cap 3 の日に10件出る。
+  let used = postedToday;
+  const decisions = [];
+
+  for (const r of doc.replies || []) {
+    const hold = (why) => ({ review_id: r.review_id ?? null, decision: 'hold', why, response_body: null });
+
+    if (docProblems.length) {
+      decisions.push(hold(`台帳に検査の問題が ${docProblems.length} 件`
+        + ' — **不整合のある台帳から公開しない**'));
+      continue;
+    }
+    const obs = byId.get(r.review_id);
+    if (!obs) {
+      decisions.push(hold('ASC に該当のレビューが無い — **実物を見ずに公開しない**'));
+      continue;
+    }
+    if (obs.has_response) {
+      decisions.push(hold('ASC 側にすでに返信が付いている'
+        + ' — **POST は上書きなので、人が書いた返信を消しうる**'));
+      continue;
+    }
+    if (typeof r.rating === 'number' && r.rating !== obs.rating) {
+      decisions.push(hold(`台帳の★${r.rating} と ASC の★${obs.rating} が食い違う`
+        + ' — **同じレビューの話をしていない**'));
+      continue;
+    }
+
+    const merged = { ...r, rating: obs.rating, review_text: obs.review_text };
+    const ev = evaluateAutoPost({ reply: merged, policy, problems: docProblems, postedToday: used });
+    if (ev.decision === 'post') used += 1;
+    decisions.push({
+      review_id: r.review_id, decision: ev.decision, why: ev.why,
+      response_body: ev.decision === 'hold' ? null : r.draft,
+    });
+  }
+
+  const ap = policy.auto_post || {};
+  return {
+    generated_by: 'scripts/check-review-replies.mjs --auto-post-plan',
+    policy: {
+      enabled: ap.enabled === true,
+      dry_run: ap.dry_run !== false,
+      daily_cap: typeof ap.daily_cap === 'number' ? ap.daily_cap : 0,
+      kill_switch: policy.kill_switch === true,
+    },
+    doc_problems: docProblems,
+    posted_today_before: postedToday,
+    decisions,
+  };
+}
+
 function selftest() {
   let total = 0; const failures = [];
   const t = (n, c) => { total += 1; if (!c) failures.push(n); console.log(`  ${c ? 'ok  ' : 'FAIL'} ${n}`); };
@@ -327,6 +406,54 @@ function selftest() {
   // 理由が残る
   t('止めた理由が文字列で残る', typeof ev({ reply: { rating: 1 } }).why === 'string');
 
+  // ── 投稿計画（実行側 simplememo-ios に渡す形） ─────────────
+  const planIds = new Set(['r1', 'r2']);
+  const planDoc = (over = {}) => ({
+    policy: { ...okPolicy, ...(over.policy || {}) },
+    replies: over.replies || [{ review_id: 'r1', draft: 'ご利用ありがとうございます。' }],
+  });
+  const obs = (o = {}) => ({ review_id: 'r1', rating: 5, review_text: '使いやすいです',
+                             has_response: false, ...o });
+  const plan = (over = {}, observed = [obs()], postedToday = 0) =>
+    planAutoPost({ doc: planDoc(over), intakeIds: planIds, observed, postedToday });
+  const d1 = (...a) => plan(...a).decisions[0];
+
+  t('**台帳に星が無くても ASC の実物で判定できる**', d1().decision === 'post');
+  t('通ったものには本文が付く', typeof d1().response_body === 'string');
+  t('ASC に無いレビューは止める', d1({}, []).decision === 'hold');
+  t('**すでに返信が付いていれば止める**（POST は上書きなので人の返信を消しうる）',
+    d1({}, [obs({ has_response: true })]).why.includes('上書き'));
+  t('**台帳が星を持っていなくても ASC が★1なら止まる**',
+    d1({}, [obs({ rating: 1 })]).why.includes('★1'));
+  t('台帳の星と ASC の星が食い違えば止める',
+    d1({ replies: [{ review_id: 'r1', draft: 'ありがとうございます。', rating: 5 }] },
+       [obs({ rating: 4 })]).why.includes('食い違う'));
+  t('**observed が配列でなければ全部止まる**（落ちるのではなく止まる）', (() => {
+    try { return d1({}, { r1: obs() }).decision === 'hold'; } catch { return false; }
+  })());
+  t('台帳に検査の問題があれば全部止まる',
+    d1({ replies: [{ review_id: 'zzz', draft: 'ありがとうございます。' }] },
+       [obs({ review_id: 'zzz' })]).why.includes('不整合のある台帳'));
+  t('止めたものに本文は付かない', d1({}, []).response_body === null);
+  t('dry_run では would_post', d1({ policy: { auto_post: { ...okPolicy.auto_post, dry_run: true } } })
+    .decision === 'would_post');
+
+  // **1回の実行の中でも上限が効く。**渡される「今日の投稿数」は実行前の値なので、
+  // 足していかないと cap 1 の日に何件でも出る。
+  const two = plan({
+    policy: { auto_post: { enabled: true, dry_run: false, daily_cap: 1 } },
+    replies: [{ review_id: 'r1', draft: 'ありがとうございます。' },
+              { review_id: 'r2', draft: 'ご報告ありがとうございます。' }],
+  }, [obs(), obs({ review_id: 'r2' })]);
+  t('**上限は1回の実行の中でも効く**（cap 1 で2件目は止まる）',
+    two.decisions[0].decision === 'post' && two.decisions[1].decision === 'hold'
+    && two.decisions[1].why.includes('上限'));
+  t('すでに今日の上限に達していれば1件目から止まる',
+    plan({ policy: { auto_post: { enabled: true, dry_run: false, daily_cap: 1 } } },
+         [obs()], 1).decisions[0].decision === 'hold');
+  t('計画は方針の実効値を書き出す（実行側が読み違えないように）',
+    plan().policy.enabled === true && plan().policy.daily_cap === 3);
+
 
   if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗 — ${failures.join(' / ')}`); return 1; }
   console.log(`\nselftest: 全${total}件 通過`);
@@ -342,6 +469,28 @@ if (isMain) {
   requireShape(intake, ['dispositions'], { what: 'data/review-intake.json',
     why: '捌いたかどうかを照合できない（**公開は取り消せない**）' });
   const intakeIds = new Set(intake.dispositions.map((d) => d.review_id));
+
+  // **実行側（simplememo-ios）に渡す計画。**stdout は JSON だけにする。
+  // 入力が壊れていたら計画を出さずに落ちる —— **読めなかったものを
+  // 「観測ゼロ」として扱うと、全部 hold ではなく全部 post になりうる形が残る。**
+  if (process.argv.includes('--auto-post-plan')) {
+    const raw = fs.readFileSync(0, 'utf8');
+    let input;
+    try {
+      input = raw.trim() ? JSON.parse(raw) : {};
+    } catch (e) {
+      console.error(`--auto-post-plan: 標準入力が JSON として読めない — ${e.message}`);
+      process.exit(2);
+    }
+    const plan = planAutoPost({
+      doc, intakeIds,
+      observed: input.observed,
+      postedToday: typeof input.posted_today === 'number' ? input.posted_today : 0,
+    });
+    process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`);
+    process.exit(0);
+  }
+
   const problems = validate(doc, { intakeIds });
 
   const drafted = (doc.replies || []).filter((r) => !r.posted_at && !r.auto_posted_at);
