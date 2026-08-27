@@ -1319,6 +1319,52 @@
         ],
         "new_guardrail": "**作り物の入力から出た結果を、外部の状態についての主張に使わない。**通し試験の報告には、どの欄が実測でどの欄が手置きかを書く。とくに「その欄が守っている当のもの」を手で置いたときは、結論を書かずに1回叩く"
       }
+    },
+    {
+      "id": "om-2026-08-27-a-green-run-that-discarded-its-measurement",
+      "seeded": false,
+      "area": "⑨ 返金対応",
+      "signal": "通知URLの伝播を確かめるために probe を回した（run 33066601324）。ジョブは成功。台帳を見に行くと `notification_url_configured: false` のまま、`probed_at` も前回のままだった",
+      "hypothesis": "まだ伝播していない。前回（11:05Z）と同じ 404 が返ったので、台帳が変わらなかった",
+      "decision": "**ログを開いたら、404 ではなく 200 だった。**\n\n    Server API: HTTP 200 / 鍵 通った / 通知URL 設定あり\n    → data/asc-server-api.json\n    変化なし — コミットしない          ← **404 から 200 に変わっている**\n\n判定も書き込みも正しかった。捨てたのはコミット段の1行:\n\n    git add data/asc-server-api.json data/asc-test-notification.jws 2>/dev/null || true\n\n**git add は pathspec がひとつでも合わないと、何も stage しない。**\n`.jws` は署名の実物が取れた回にしか出来ないので、取れなかったこの回は\n`fatal: pathspec ... did not match` で**台帳のほうまで stage されなかった。**\n`2>/dev/null` がその一行を捨て、`|| true` が終了コードを消した。\n\n**その1行を書いたのは自分で、`.jws` が「取れたら残す」ものだと知っていた。**\n取れない回があることを前提にしながら、取れない回に何が起きるかを見ていない。",
+      "execution": {
+        "pr": "simplememofast/simplememo-ios#238",
+        "commit": "5c55388"
+      },
+      "verification": "手元の空リポジトリで同じ形を作って再現した —— `git add a.json b.jws`（b 無し）は `fatal: pathspec ... did not match` を出し、**a.json も stage されない**。在るものだけ別々に足す形に変えると a.json が stage される。**推測で直さずに、同じ失敗を作ってから直した**",
+      "outcome": "在るものだけを別々に `git add` する形に変え、stderr を捨てるのをやめた。あわせて、機能ブランチから dispatch したとき `git push origin HEAD:main` が**そのブランチを main へ早送りする**ことにも気づき、main から回した回だけ push するようにした",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-green-run-can-throw-away-what-it-measured",
+        "text": "**「成功で終わった」は「記録された」ではない。**\n\n測る仕組みを作るとき、測る部分ばかり検査していた。実際に壊れたのは\n**測ったものを残す部分**で、そこは shell の1行だったので self-test の外にあった。\nしかも `2>/dev/null || true` は、**その1行が壊れていることを見えなくするために**\n書かれている（当時は「.jws が無い回もあるから」と思って書いた）。\n\n危ないのは、握り潰しが「在るかもしれないファイル」への配慮の顔をしているとき。\n**在るかどうか分からないものは、在るか確かめてから触る** —— 触ってから\n失敗を黙らせるのではなく。\n\n見つかったのは、台帳が変わらないことを「伝播していない証拠」として読もうとして、\n**その前にログを開いたから**だった。開かなければ、404 のままの台帳を根拠に\n「まだ設定が効いていない」と書いていた —— **自分で捨てた事実の不在を、事実として。**",
+        "changed": [
+          "../simplememo-ios/.github/workflows/asc-server-api-probe.yml"
+        ],
+        "new_guardrail": "**在るかどうか分からないファイルは、在るか確かめてから `git add` する。**失敗を握り潰す形（`2>/dev/null || true`）を、複数 pathspec と一緒に書かない —— その2つが揃うと、**在るほうまで黙って落ちる**。あわせて `git push origin HEAD:main` を持つ workflow_dispatch は、`GITHUB_REF_NAME` が main の回だけ push する（機能ブランチからの早送りを塞ぐ）"
+      }
+    },
+    {
+      "id": "om-2026-08-27-another-apis-envelope-in-my-fixture",
+      "seeded": false,
+      "area": "⑨ 返金対応",
+      "signal": "同じ run のログに `##[warning]200 だが testNotificationToken が無い（応答の形が想定と違う）`。**鍵も通知URLも揃った初回**なのに、検証器の材料（Apple が署名した実物の JWS）が取れなかった",
+      "hypothesis": "Apple 側の応答が想定と違う形で返っている",
+      "decision": "**違っていたのは自分の想定のほうだった。**\n\n`test_token` を `body.dig(\"data\", \"attributes\", \"testNotificationToken\")` と書いていた ——\nこれは App Store **Connect** API（api.appstoreconnect.apple.com）の封筒の形。\nいま叩いているのは App Store **Server** API（api.storekit.apple.com）で、\n`SendTestNotificationResponse` は `{ \"testNotificationToken\": \"...\" }` だけの平らな形。\n\n**別のAPIの形を、確かめずに持ち込んでいた。**\n\nそして自己検査は通っていた —— 見本を\n`{ \"data\" => { \"attributes\" => { ... } } }` と、**同じ推測で書いていた**から。\n検査していたのは Apple の応答ではなく、**自分の推測の一貫性**だった。",
+      "execution": {
+        "pr": "simplememofast/simplememo-ios#238",
+        "commit": "5c55388"
+      },
+      "verification": "見本を実物の平らな形に直し、「**ASC API の封筒では取れない**」ほうを検査に足した。壊し試験で元の `dig` に戻すと、その2件が落ちることを見た（29 → 34件）",
+      "outcome": "取れなかったときは**応答の鍵の名前を出す**ようにした（値は出さない。トークンは実質の取っ手）。「形が想定と違う」だけでは、次に見た人も同じ推測をやり直すことになる",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "a-fixture-built-from-my-guess-tests-my-guess",
+        "text": "**見本を自分の推測で作ると、検査は推測の一貫性を検査する。**\n\nこれは前に書いた「見本が実物より易しい」（a-fixture-simpler-than-production…）と\n別の型。あちらは**同じ形で軽い**見本だった。こちらは**形そのものが違う**見本で、\n易しさの問題ではなく**出どころ**の問題。\n\n見分け方が1つある: **その見本の形は、どこから来たか。**\n実物の応答を1回見て写したのか、似た名前の別のAPIから連れてきたのか。\n後者なら、検査が何件通っても実物に当てるまで何も分かっていない。\n\n`aud` が同じで鍵も同じ（実測済み）だったので「同じAPI族」と扱ってしまったが、\n**認証が同じことは、封筒が同じことを意味しない。**",
+        "changed": [
+          "../simplememo-ios/scripts/asc_refund_probe.rb"
+        ],
+        "new_guardrail": "**見本の形の出どころを、見本の隣に書く。**実物の応答を1回見て写したのか、似た名前の別APIから連れてきたのか。後者なら検査は推測の一貫性しか見ていないので、**実物に当たるまで「取れる」と書かない。**取り出しに失敗したときは、応答の**鍵の名前**を出す（値は出さない）"
+      }
     }
   ]
 }
