@@ -27,6 +27,12 @@ decision, not a mechanical edit.
 
 Idempotent: a page already linking /download/ anywhere is skipped, so this can
 be re-run after new pages are added.
+
+An href may be a (ja, en) pair. The site's rule is "a link under /en/ points at
+the EN page when one exists, JA otherwise" (set when /siri/ was split, re-applied
+across 314 hrefs on 2026-08-20). /devlog/ has no EN twin so it stays a single
+href; /roadmap/ has one, so it is a pair. The dedup check tests both spellings,
+so a page already carrying either is left alone.
 """
 import re
 import sys
@@ -58,8 +64,22 @@ LINKS = [
     # so on 240-odd article pages the operator was not identifiable without
     # scrolling back up. /about/ names the company and tells the developer
     # story; /devlog/ is the dated build record behind it.
-    ('/about/', '開発者について', 'About the developer', ('サポート', 'Support')),
+    # /en/about/ exists, so EN pages must point at it — the site's rule since
+    # the /siri/ split. Left as a bare '/about/' this entry appended the JA
+    # page to the five EN pages that already linked /en/about/: the dedup
+    # test looks for the literal href, and '/en/about/' does not contain it.
+    (('/about/', '/en/about/'), '開発者について', 'About the developer',
+     ('サポート', 'Support')),
     ('/devlog/', '開発記録', 'Dev log', ('サポート', 'Support')),
+    # Indexing: /roadmap/ sat in GSC "Crawled — currently not indexed" (crawled
+    # 2026-08-23) with exactly one in-body inlink site-wide — /devlog/, itself a
+    # 1-impression page — and no nav or footer entry, while /devlog/ /about/
+    # /methods/ /glossary/ all had one. It was in the sitemap and returned 200
+    # with a self-canonical, so nothing was technically wrong; it was simply not
+    # reachable enough to be worth indexing. Sits next to /devlog/ because they
+    # are the same promise read in two directions: what was built, what is next.
+    (('/roadmap/', '/en/roadmap/'), '公開ロードマップ', 'Public roadmap',
+     ('サポート', 'Support')),
 ]
 
 
@@ -100,8 +120,9 @@ def patch(html: str, rel: pathlib.Path):
     reasons = []
     changed = False
     for href, ja, en, headings in LINKS:
-        if f'href="{href}"' in footer:
-            continue  # already linked from the footer
+        hrefs = href if isinstance(href, tuple) else (href,)
+        if any(f'href="{h}"' in footer for h in hrefs):
+            continue  # already linked from the footer, in either spelling
         cm = pick_column(footer, headings)
         if not cm:
             reasons.append(f'{href}: no column matching {headings}')
@@ -116,7 +137,8 @@ def patch(html: str, rel: pathlib.Path):
         # Language: the heading usually says it, but /en/about/ and /en/faq.html
         # head an English column with 「プロダクト」, so the path is the tiebreak.
         is_en = 'Product' in tm.group(0) or 'Support' in tm.group(0) or rel.parts[0] == 'en'
-        anchor = (f'\n{indent}<a href="{href}" class="footer__link">'
+        target = hrefs[-1] if is_en else hrefs[0]
+        anchor = (f'\n{indent}<a href="{target}" class="footer__link">'
                   f'{label_like(inner, is_en, ja, en)}</a>')
         new_col = col[:tm.end()] + anchor + col[tm.end():]
         footer = footer[:cm.start()] + new_col + footer[cm.end():]
