@@ -1387,12 +1387,23 @@
     },
     {
       "area": "⑦ 法人経営",
-      "task": "仕訳・請求・領収書・銀行・カード・月次締めの統合",
+      "task": "銀行・カード残高の読み取り（日次）",
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-api/src/freee.ts",
+        "../simplememo-api/test/freee.test.ts",
+        "../simplememo-api/docs/freee-setup.md"
+      ],
+      "note": "**2026-08-27 10:00 JST、cron `freee_balance` が本番で初めて走った**（`0 1 * * *`・eligible=3 sent=2 errors=0・reason `days_left=90 complete=true counted=2 unreadable=0`）。同日、freee の画面と突き合わせて **cash_jpy 638,593 / card_jpy -1,600,509 が完全一致**することを人が確認した。カードは負債なので手元資金に足さず別枠にしてある。**書き込み経路は無い**（テストがモジュールに書き込み系の関数名が無いことを固定している）。**ただし残高の鮮度は機械には言えない** —— freee の `/api/1/walletables` は「その残高がいつ時点か」を返さない（`freshness_verifiable: false`）。鮮度の判定は2回間違えている（`up_to_date` は存在しないフィールド／`update_date` は口座レコードの更新日で残高の日付ではない）。どちらも実物を叩かずに書いた結果で、経緯は ../simplememo-api/src/freee.ts の該当コメントにある。"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "仕訳・請求・領収書・月次締めの統合",
       "executor": "nobody",
       "evidence": [],
-      "note": "**2026-08-25、読み取り側だけ実装した**（../simplememo-api/src/freee.ts / test 20件）。口座残高を取り、up_to_date でない口座を合計に入れない形。**仕訳の作成・支払の実行は経路そのものを作っていない**（テストがモジュールに書き込み系の関数名が無いことを固定している）。**executor は nobody のまま** —— 資格情報が入っておらず一度も動いていない。「実装した≠動いた」。オーナーは freee を利用中で税理士もついている。**残る不確定はプラン**（スターターでAPIが使えるかは記述が食い違い確定できない）。手順は ../simplememo-api/docs/freee-setup.md、設計は docs/freee-integration-plan.md",
+      "note": "**残高の読み取りだけが別タスクとして実装済み**（同領域の「銀行・カード残高の読み取り（日次）」）。こちらは手つかず。**分けたのは、片方が動いたことで全体が動いたように数えないため。** 仕訳の作成・支払の実行は不可逆で、`data/authority-matrix.json` の「契約・支払い・送金」が `human_only: [\"すべて\"]` / `status: \"not_implemented\"`。しかも `threshold.note` が**二者承認は未設計**と書いている。着手するなら、実装より先にその承認機構から。",
       "blocker": "external_credential",
-      "unblocked_by": "freee の読み取りは入ったが、銀行・カードの明細連携が無い",
+      "unblocked_by": "残高は読めるようになった。明細（wallet_txns）と仕訳側は未着手",
       "unlock": "bank_feed"
     },
     {
