@@ -1147,6 +1147,77 @@
         ],
         "new_guardrail": "**監視は、被監視と別の実行基盤に置く。**この運用では GitHub Actions の外に CCR の Routine（スケジュール起動セッション）があり、そちらは別勘定で動く。Actions が止まったことを Actions で検知しようとしない。あわせて、**安全装置の設定値には金額を併記する** —— タイムアウトの分数は「いくらまで許すか」でもあり、単価の桁を間違えるとその値が間違う（実際に10倍ずれていた）。**加えて: 集計値が整合していることは、内訳を見ない理由にならない。**$27.30 − $27.22 = $0.08 は正しい計算だが、その $27.22 に何が入っているかは別の画面にある"
       }
+    },
+    {
+      "id": "om-2026-08-27-create-endpoint-overwrites",
+      "seeded": false,
+      "area": "⑧ カスタマーサポート",
+      "signal": "レビュー返信を自動投稿する経路を作るにあたり、「すでに返信が付いているレビューは飛ばす」を**礼儀の判定**として設計しかけた（二重に返すのは失礼だから、という程度の理由）",
+      "hypothesis": "POST /v1/customerReviewResponses は作成なので、既に返信があれば 409 か 4xx で弾かれる。だから has_response は「無駄な呼び出しを減らす」最適化にすぎない",
+      "decision": "**Apple のドキュメントを実際に取って読んだ。**原文はこう書いてある:\n\n    \"Use this endpoint to create a response to a customer review and publish it\n     in the App Store. **If a response already exists, this endpoint updates the\n     response by overwriting it.**\"\n\n弾かれない。**上書きされる。**つまり has_response を落としたら、機械が\n**人が書いた公開返信を黙って置き換える。**取り消しても、見た人が見なかったことにはならない。\n\n礼儀の判定ではなく、**この経路で唯一それを止めている防壁**だった。設計上の位置づけが変わったので、\n落とし方も変えた: `relationships.response.data` に id があれば「返信あり」と読む\n（`included` を引けなかったときに「返信なし」へ倒れるのが一番まずい）。",
+      "execution": {
+        "pr": "simplememofast/simplememo#659, simplememofast/simplememo-ios#232",
+        "commit": "393813b7bc5eac3085e76e0f9f35ef36154c6ef3"
+      },
+      "verification": "planAutoPost の has_response を外す壊し試験で self-test が1件落ちる。実データ通しでも、片方に返信を付けた回はその1件だけ hold になり、もう1件は post のまま（＝止めているのが上限や方針ではなく、この判定であることが見える）",
+      "outcome": "上書きの事故が起きる前に塞がった。**起きていたら、公開されている返信が書き換わったことに誰も気づかない**（差分がどこにも残らない）",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-create-endpoint-can-be-an-upsert",
+        "text": "**「作成」と名のついたエンドポイントが上書きだった。**\n\nHTTPの動詞と資源名から意味を推測して設計に入ると、こういうものを踏む。POST + \"create\" と\n書いてあれば、既存があれば失敗する——というのは**こちらの習慣であって、相手の仕様ではない。**\n\n効いたのは「一次資料を読め」という一般則ではなく、もっと狭い形:\n**不可逆な副作用を持つ呼び出しは、その1本の説明文を読むまで設計を確定しない。**\nスキーマ（body の形）は読んでいた。読んでいなかったのは Discussion の2文目で、\n**危険はスキーマではなくそこに書いてあった。**\n\nもう一つ: **「最適化」と分類した検査は、レビューで軽く扱われる。**\nhas_response を「無駄な呼び出しを減らす」と書いていたら、あとで誰かが\n「呼び出し回数は問題ではない」と言って外しうる。**同じコードでも、名前が防壁を守る。**",
+        "changed": [
+          "scripts/check-review-replies.mjs",
+          "data/review-replies.json",
+          "../simplememo-ios/scripts/asc_review_reply.rb"
+        ],
+        "new_guardrail": "**不可逆な副作用を持つ外部APIは、叩く前にそのエンドポイント自身の説明文を取って読む**（スキーマだけでは足りない）。読んだ原文は、判定を書いたコードの真上に引用ごと残す —— **要約に置き換えると、次に読む人は「上書き」を復元できない。**"
+      }
+    },
+    {
+      "id": "om-2026-08-27-child-process-inherits-secrets",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "投稿の可否を決めるのは公開リポジトリのコード、実行するのは ASC の鍵を持つ非公開リポジトリ。実行側が `Open3.capture3(\"node\", …)` で隣のコードを起動する形になった",
+      "hypothesis": "隣のコードは指紋で留めてある（1バイトでも違えば落ちる）ので、読んだコードと同じものが動く。だから起動の仕方は問題ではない",
+      "decision": "**指紋が守るのは中身であって、渡すものではない。**素で spawn すると、その node は\nステップの環境をそのまま引き継ぐ —— つまり **ASC_KEY_P8（署名鍵）が判断する側に見えている。**\n\n判断に鍵は要らない。要るのはレビューの実物と台帳だけ。だから環境から落とした\n（`Open3.capture3({\"ASC_KEY_P8\"=>nil, …}, …)`）。\n\n**「読んだから渡してよい」ではない。**指紋は「次に変わったら気づく」ための仕掛けで、\n**変わるまでの間に渡していたものを取り戻す力は無い。**",
+      "execution": {
+        "pr": "simplememofast/simplememo-ios#232",
+        "commit": "9e38f24"
+      },
+      "verification": "self-test を対で置いた。(1) `child_env` 経由で node を起こし、3つの鍵がすべて null に見えること（**実際に子プロセスを起こして確かめる**）。(2) 素で起こせば同じ3つが見えること —— これが無いと (1) が正しい理由で通っているか分からない",
+      "outcome": "鍵は判断する側に渡らない。どちらの検査も実測で通る",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "pinning-code-does-not-limit-what-you-hand-it",
+        "text": "**コードを留めることと、そのコードに渡すものを絞ることは別の仕事。**\n\n指紋・署名・バージョン固定は「**何が動くか**」を決める。環境変数・引数・作業ディレクトリは\n「**それに何を渡すか**」を決める。前者を厳しくすると、後者を考えたつもりになる。\n\nここでは3つ揃っていた: 隣のリポジトリのコード、指紋の照合、そして**署名鍵の入った環境**。\n照合を先に書いたので「安全側は済んだ」という感触があり、**spawn の1行は素通りした。**\n\n子プロセスは既定で親の環境を丸ごと受け取る —— これは Ruby でも Node でもシェルでも同じで、\n**「渡す」と書かなかったものが渡っている**唯一の場所。",
+        "changed": [
+          "../simplememo-ios/scripts/asc_review_reply.rb"
+        ],
+        "new_guardrail": "**他所のコードを子プロセスで起こすときは、環境から秘密を落とす。**そして落ちていることを**実際に子プロセスを起こして確かめる**（落とさなければ見えることを示す検査と対で置く。片方だけだと、通っている理由が分からない）"
+      }
+    },
+    {
+      "id": "om-2026-08-27-fixture-simpler-than-production",
+      "seeded": false,
+      "area": "⑩ AgentOps・ガバナンス",
+      "signal": "隣のコードの import 閉包を辿る関数に self-test を21件書き、全部通った。その直後、**実物のリポジトリに対して同じ関数を走らせたら `invalid byte sequence in US-ASCII` で落ちた**",
+      "hypothesis": "self-test が通ったので、この関数は動く",
+      "decision": "**見本が実物より易しかった。**self-test の中で作っていた .mjs は ASCII だけで、\n実物は日本語のコメントを持つ。この環境の既定の外部エンコーディングは US-ASCII なので、\n`File.read` が US-ASCII で読み、`scan` が例外で落ちた。\n\n**21件は「正しい理由で」通っていない** —— 実物が必ず通る経路（多バイト）を、\n見本は一度も通らなかった。\n\n直したのは2つ: `File.read(path, encoding: \"UTF-8\")` と、**日本語コメントを持つ見本の追加。**\n指紋のほうも `File.binread` にした（読み方で指紋が変わってはいけない）。",
+      "execution": {
+        "pr": "simplememofast/simplememo-ios#232",
+        "commit": "9e38f24"
+      },
+      "verification": "UTF-8 指定を外す壊し試験で、新しい1件だけが落ちる（他の21件は通ったまま＝**元の見本では捕まらない**ことの実測）",
+      "outcome": "CI へ持ち込む前に落ちた。持ち込んでいたら、**このスクリプトは毎朝落ち続ける**（実物は常に日本語を含む）",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-fixture-simpler-than-production-tests-another-path",
+        "text": "**見本が実物より易しいと、self-test は実物が通る経路を一度も通らない。**\n\n件数は安心の材料にならない。21件あっても、全部が同じ易しい入力の別の面を見ていれば、\n**実物の1バイト目で落ちる。**\n\n見分け方はひとつ: **実物が必ず持っていて、見本が持っていない性質**を挙げてみる。\nここでは「多バイト文字」だった。他にも、実物にあって見本に無いものは大抵ある ——\n長さ、空行、BOM、CRLF、巨大さ、順序の乱れ。\n\n既存の学び（`green-tests-do-not-prove-the-wiring`）は**配線**の話で、これは**入力**の話。\n配線が繋がっていても、流すものが違えば同じことが起きる。",
+        "changed": [
+          "../simplememo-ios/scripts/asc_review_reply.rb"
+        ],
+        "new_guardrail": "**純粋関数の self-test を書いたら、実物を1回通してから終わりにする。**通らなければ見本が易しい。合成した見本には、実物が必ず持つ性質（このリポジトリでは日本語）を最低1つ入れる"
+      }
     }
   ]
 }

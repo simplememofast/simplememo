@@ -43,6 +43,13 @@ export const BLOCKERS = {
   external_credential:     { klass: 'reachable',  label: '外部サービスの鍵・契約' },
   missing_source_document: { klass: 'reachable',  label: '対象の書類がリポジトリに無い' },
   approval_design_first:   { klass: 'reachable',  label: '承認境界の設計が先' },
+  // [2026-08-27] **「作った」と「動いた」を分けるための枠。**
+  // 実装も配線も済んでいて、あとは1周動いたのを見るだけ、という行がここに入る。
+  // これが無いと `not_started`（着手していないだけ）に入れるしかなく、**その語は嘘**。
+  // 嘘を避けるためにもう一方へ倒すと、今度は**動いたのを見ずに executor を
+  // AI側へ動かす**ことになる。このリポジトリが何度も踏んでいるのはそちら側なので、
+  // 「作ったが見ていない」を名前のある状態にしておく。
+  verification_pending:    { klass: 'reachable',  label: '作ったが、まだ1周も動いたのを見ていない' },
   policy_boundary:         { klass: 'owner_only', label: '意図的に人へ残した境界' },
   physical_human:          { klass: 'never',      label: '物理・対人・法的責任' },
   human_consent:           { klass: 'never',      label: '人の同意・操作が要る（ブラウザ同意・鍵の再発行）' },
@@ -170,9 +177,20 @@ export const UNLOCKS = {
                        needs: '現在ゼロ。書面が無いと分類も照合も対象が存在しない' },
   corp_records:      { kind: 'owner_input', label: '議事録・株主名簿・事故記録の所在を決める',
                        needs: '「発生していない」のか「記録する場所が無い」のかが区別できていない' },
-  reply_gate:        { kind: 'owner_decision', label: '返信文面の承認境界を決める',
-                       needs: '**品質ゲート通過で自動投稿にするか、1件ずつ承認にするか。**'
-                            + '後者を選ぶと ai_proposes 止まりで、実装しても総合自動化率は動かない' },
+  // [2026-08-27] **決まった。**オーナーが「品質ゲート通過で自動投稿」を選び、
+  // 権限表にゲート付き例外として入り（data/authority-matrix.json）、
+  // 実行側も入った（../simplememo-ios/scripts/asc_review_reply.rb）。
+  // したがってこれはもう owner_decision ではない。**残っているのは1周見ること。**
+  reply_gate:        { kind: 'wait', label: '自動投稿が1周 dry_run で動いたのを見る',
+                       needs: '**判断も実行も入っている**（planAutoPost / asc_review_reply.rb）。'
+                            + '台帳は enabled=true / dry_run=true。あとは1回動いて would_post が'
+                            + '出るのを見て dry_run を落とすだけ。'
+                            + '**動かないのは ../simplememo-ios の Actions が storage 上限で'
+                            + 'ジョブを割り当てられないため**（あちらの CLAUDE.md / 2026-08-27）。'
+                            + '9/1のリセットか支出上限で解ける。'
+                            + '**満たされたことをこのリポジトリから機械で確かめる経路は無い** ——'
+                            + '証跡（data/review-responses.json）は非公開側にあり、'
+                            + '非公開→公開へ push する経路は作っていない' },
   refund_boundary:   { kind: 'owner_decision', label: '返金・チャージバックの承認境界を決める',
                        needs: '金銭が動く不可逆操作。**上限額を決めない限り自動側へ置けない**' },
   inquiry_facts:     { kind: 'implement', label: '問い合わせの再現ファクトを非個人情報として出す',
