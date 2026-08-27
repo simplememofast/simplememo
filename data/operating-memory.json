@@ -1270,6 +1270,55 @@
         ],
         "new_guardrail": "**別リポジトリの成果物を指紋で留めたら、留められた側のCIにも同じ指紋の照合を置く。**留めた側だけに置くと、変更したPRは緑で通り、無人の実行が翌朝落ちる。照合の出力は**更新すべき台帳を全部名指しする**（片方だけ直すと、こちらは緑であちらが止まる）"
       }
+    },
+    {
+      "id": "om-2026-08-27-a-blocker-that-named-a-knob",
+      "seeded": false,
+      "area": "⑨ マネタイズ",
+      "signal": "⑨の返金の行は、長らく blocker=approval_design_first / unlock=refund_boundary で「金銭が動く不可逆操作。**上限額を決めない限り自動側へ置けない**」と書いてあった",
+      "hypothesis": "オーナーが上限額（1件いくらまで機械が返金してよいか）を決めれば、この行は実装に進める",
+      "decision": "**Apple のドキュメントを取って読んだら、返金を発行するエンドポイントが存在しなかった。**\nあるのは Get Refund History（履歴）／Refund lookup（照会）／\nSend Consumption Information（消費情報の送信）の3つだけ。\n\n**機械は返金できない。**だから「上限額」は何も止めていなかった ——\n止めていたのは、決まらないまま置かれた語のほうだった。\n\n実在する意思決定は別のところにあった: 顧客の返金要求に対して Apple が\nCONSUMPTION_REQUEST を送ってくる。返す `ConsumptionRequest` の必須欄3つは\nどれも事実（同意・配信できたか・購入前に無料で試せたか）で、判断が入るのは\n`refundPreference`（DECLINE / GRANT_FULL / GRANT_PRORATED）**1欄だけ、しかも必須ではない。**\n\n**境界は「いくらまで返金してよいか」ではなく「機械が『この客に返金しないでほしい』と\nAppleに言ってよいか」だった。**まったく別の問いで、答えも違う。\n行を3つに割り、実装（検出・応答）と境界（意見表明）を分けた。",
+      "execution": {
+        "pr": "simplememofast/simplememo#665",
+        "commit": "15f25884"
+      },
+      "verification": "Apple のドキュメント（App Store Server API のエンドポイント一覧・ConsumptionRequest・refundPreference・send-consumption-information）を取得して確認。返金を発行する面は一覧に無い。期限「受信から12時間以内」も同エンドポイントの記述で確認",
+      "outcome": "⑨の1行が3行になり、率は 65.3% → 64.6% に下がった。**下がったのは、混ぜてあったものが見えたから**",
+      "verdict": "success",
+      "learning": {
+        "lesson_key": "a-blocker-naming-a-knob-assumes-the-operation-exists",
+        "text": "**「上限額を決めないと自動化できない」は、返金できることを前提していた。**\n\n見分け方がある: **blocker が「決定」ではなく「つまみ」を名指ししていたら疑う。**\n上限額・閾値・件数・許容範囲 —— こういう語は、それを設定する対象の操作が\n**存在することを含意する。**しかも「リスクを絞る話」に聞こえるので、\n慎重な判断のように読めてしまい、何ヶ月も疑われない。\n\n実際には順序が逆だった。**まず相手の面に何があるかを見る。**\nそれから、その中のどれが不可逆かを見る。境界の議論はその後。\n先に境界を語ると、**在りもしない操作の境界を設計してしまう。**\n\n（`check-the-authority-before-declaring-a-blocker` は「こちらの権限表を引け」という話。\nこれは**相手のAPIに何があるかを引け**という話で、引く先が違う。）",
+        "changed": [
+          "data/automation-coverage.json",
+          "scripts/autonomy-gap.mjs"
+        ],
+        "new_guardrail": "**外部サービス絡みの blocker を書くときは、まずそのサービスのエンドポイント一覧を取って読む。**「◯◯を決めないと自動化できない」と書く前に、**◯◯を設定する対象の操作が実在するか**を確かめる。つまみを名指しした blocker は、その一点で疑う"
+      }
+    },
+    {
+      "id": "om-2026-08-27-invented-observation-became-a-fact",
+      "seeded": false,
+      "area": "⑧ カスタマーサポート",
+      "signal": "レビュー返信の自動投稿を実装し、実データでの通しを確かめた。台帳を enabled にしたときに何が起きるかを、PRの本文と台帳とユーザーへの報告に「**2件とも公開される**」と書いた",
+      "hypothesis": "ローカルの通し試験で、下書き2件は post 判定になった。だから enabled にすれば2件とも公開される",
+      "decision": "**その通し試験の入力は、自分で書いた作り物だった。**\n`has_response: false` と手で置いた observed を planAutoPost に渡していた。\nASC を叩いてはいない。\n\n初回の実運転（run 33028844739）が実物を返した:\n\n    ASC: レビュー 8件（**返信済み 5件**）\n    [hold] …4aed… — ASC 側にすでに返信が付いている\n    [hold] …586f… — 同上\n\n**2件とも返信済みだった。**つまり「公開される」ではなく、guard が無ければ\n**人が書いた公開返信を機械が上書きしていた。**予測が外れただけでなく、\n**符号が逆**だった。\n\n作り物と実物の差は1フィールド（has_response）で、それは\n**自分が「ここが一番まずい」と言って設計した当の欄**だった。\nその欄に、確かめずに安全な側の値を置いて、そこから結論を出した。",
+      "execution": {
+        "pr": "simplememofast/simplememo#665",
+        "commit": "15f25884"
+      },
+      "verification": "run 33028844739 のログ（ゲート指紋一致・ASC 8件中5件が返信済み・下書き2件とも hold）。台帳の posted_at は2件とも null のままで、**台帳とストアが食い違っている**ことも同時に分かった",
+      "outcome": "台帳・PR本文・ユーザーへの報告を訂正した。dry_run は落としたが、**would_post を実データで一度も見ていない**ことも明記した",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "an-invented-observation-became-a-stated-fact",
+        "text": "**自分で置いた入力から出した結論を、実測のように書いた。**\n\n通し試験そのものは正しかった —— 経路は全部動いた。壊れていたのは\n**入力の出どころ**で、そこが作り物であることが、結論を書くときに落ちた。\n「実データで通しも確認した」と書いたが、実データだったのは**台帳のほう**で、\n**ASC の観測は手で書いていた。**\n\n危ないのは、作り物の欄が「安全な既定」に見えるとき。`has_response: false` は\n**何も起きていない状態**を表すので、置いても嘘をついている感じがしない。\nしかしその欄こそ、自分で「ここが唯一の防壁」と設計した場所だった。\n\n**外部の状態を仮定して自動化の結果を語らない。**\n語るなら「叩いていないので分からない」と書く。1回叩けば済むことを、\n作り物で埋めて先に進むと、**その仮定が報告の中で事実に化ける。**",
+        "changed": [
+          "data/review-replies.json",
+          "data/automation-coverage.json",
+          "scripts/check-review-replies.mjs"
+        ],
+        "new_guardrail": "**作り物の入力から出た結果を、外部の状態についての主張に使わない。**通し試験の報告には、どの欄が実測でどの欄が手置きかを書く。とくに「その欄が守っている当のもの」を手で置いたときは、結論を書かずに1回叩く"
+      }
     }
   ]
 }
