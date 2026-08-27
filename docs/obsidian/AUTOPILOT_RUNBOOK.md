@@ -43,7 +43,7 @@
 理由は `reason` に書いてある。冪等チェックも予算ゲートも見る前に、ここで止まること。
 
 **全体停止だけでなく、自分の経路も見る。**`agents.<経路>.stopped` が `true` なら、
-その経路だけが終了する（副系セッションは `ccr-0730` / `ccr-0920`、
+その経路だけが終了する（副系セッションは `ccr-0730` / `ccr-0830` / `ccr-0920`、
 オーナーの代走は `owner-session`）。経路ごとに止められないと、1つが暴れている
 だけのときに全部を止めることになり、**止めること自体をためらうようになる。**
 ためらわれる停止は、無い停止と同じ。
@@ -73,7 +73,8 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
 | 経路 | 時刻 | 実体 | 状態の見える場所 |
 |---|---|---|---|
 | **主: GitHub Actions** | 06:00 JST | `.github/workflows/obsidian-autopilot.yml`（claude-code-action） | Actionsのrunログ（全部読める） |
-| **副: CCR Routine** | 07:30 JST | `trig_01TRBdBgSA9646FS4LDQgJdt` | 日報メールの結果のみ |
+| **副系A: CCR Routine** | 07:30 JST | `trig_01TRBdBgSA9646FS4LDQgJdt` | 日報メールの結果のみ |
+| **副系B: CCR Routine** | 08:30 JST | `trig_01RC44fYy1D5TGryJ36ixCU1` | 同上 |
 | **再試行: CCR Routine** | 09:20 JST | `trig_01ESF9AHax6buS9X1pdFv657` | 同上 |
 
 **2026-08-20訂正:** 旧版のこの表は副系の実体を「Claudeの定期タスク」としか
@@ -85,7 +86,14 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
 
 - **冪等性（全経路の冒頭で必須）**: origin に `claude/obsidian-auto-<当日JST>` が
   既にある、本番 `data/autopilot-status.json` の `date_jst` が当日、または
-  当日作成のPRがあるなら、本日分は実行済み。**何もせず終了する。**
+  **head ブランチが `claude/obsidian-auto-<当日JST>` である PR**（`state: all` で見る）
+  があるなら、本日分は実行済み。**何もせず終了する。**
+  **2026-08-26訂正:** 旧版は「当日作成のPRがあるなら」とだけ書いており、
+  09:00 JST の日次アクチュエータ（`claude/autopilot-act-<日付>`）や月曜のSEO週次
+  ジョブが毎日/毎週別ブランチのPRを作るため、「当日のPRがある」が常に真になって
+  この判定が機能しなくなっていた（この判定に従っていた09:20経路が、毎朝09:00の
+  アクチュエータPRを見て永久にスキップしていた実例）。head ブランチで絞ることで
+  日次アクチュエータ等の無関係なPRを数えないようにする。
 - **主系がまだ走っているかも見る（2026-08-20追加）**: 主系は
   `timeout-minutes: 90` で06:00に始まるため、**最悪ケースで07:30ちょうどまで
   走っている**。副系の起動時刻と重なる。`obsidian-autopilot.yml` の最新runの
@@ -647,7 +655,7 @@ node scripts/autopilot-runs.mjs --check    # CI: 形と整合＋status JSONと�
 ```
 node scripts/autopilot-runs.mjs --append \
   --run-id ap-$(TZ=Asia/Tokyo date +%Y%m%d)-<route> \
-  --date $(TZ=Asia/Tokyo date +%Y-%m-%d) --route <actions|ccr-0730|ccr-0920|owner-session> \
+  --date $(TZ=Asia/Tokyo date +%Y-%m-%d) --route <actions|ccr-0730|ccr-0830|ccr-0920|owner-session> \
   --attempted true --outcome <shipped|no_artifact|failed> \
   --lane <A|B|C|D|E> --action <new|refresh|wiring|maintenance|skip> \
   --pr <番号> --artifact </path/> --source session
@@ -671,6 +679,16 @@ node scripts/autopilot-runs.mjs --append \
 
 **費用はここに書かない。** 実費は `data/autopilot-cost.json` が正で、
 `external_ref`（GitHub の run id）で結合する。同じ数字の出所を2つ作らない。
+
+### 5-5. 配信の種（distribution seed・2026-08-26追加・記事/一次データを出荷した回は必須）
+
+**なぜ要るか。** 2026-08-11 以降に新設した `/obsidian/` 配下 9 ページ（自動運転のレーンE 6本を含む）について、X・note・Reddit・PR TIMES への展開記録はゼロだった（AUTOPILOT_LOG 全文に配信の記録が無い）。第三者言及は AlternativeTo の1件のみ。記事は「書いたら終わり」になっており、勝ち筋クラスタの露出を作る作業が他チャネルに接続されていない。Ahrefs の75,000ブランド調査（2025-12）では AI 可視性との相関は第三者ウェブ言及 0.66／被リンク 0.2 で、言及を生む配信は記事と同じ資産である。
+
+**何をするか。** 記事（new/refresh）またはレーンCの一次データを出荷した回は、同じPRで `data/distribution-queue.json` の `items` 先頭に1件追記する。配信そのものはこのセッションの仕事ではない — Cowork 側の X／note／Reddit／Indie Hackers の定期タスクが `https://simplememofast.com/data/distribution-queue.json` を読んで消費し、各自の state で重複を避ける。**このファイルは本番に公開される。** 社内語（Capture OS / Multi-Destination 等）・未公開情報・オーナー依頼は書かない。
+
+スキーマ（1件）: `id`（`YYYYMMDD-<slug>`）／`date_jst`／`url`／`title`／`lang`／`cluster`（content-graph の cluster 名）／`kind`（`article` | `evidence` | `refresh`）／`answer_1line`（検索者の質問への1文の断定回答。60〜120字・数字か固有名詞を1つ以上）／`quotable_facts`（実測・実カウント・一次確認の事実を3つまで。各60字以内・日付つき）／`x_post_ja`（そのまま投稿できる日本語原稿。**全角120字以内**（X は日本語を2字換算で140字が上限。URL 23字分を消費側が足す）。勝ち文法「場面が主語→話すだけ/書くだけ→正しい場所に残る」。AI語を先頭に置かない。ハッシュタグ0〜1。URLは含めない）／`note_angle`（note向けの別角度を1行。本文転載は禁止）／`reddit_queries`（`site:reddit.com …` 形式を2〜3本）／`en_answer_1line`（任意）／`verified_scope`（§28 の3状態表記で検証範囲を1行）。
+
+規律: 数字は記事本文にあるものだけ／`quotable_facts` は記事の「検証環境」ブロックと矛盾させない／`x_post_ja` は `scripts/check-pr-facts.mjs` が検出する表現（旧アプリ名・起動0.3秒・無料トライアル・世界初・完全自動化 等）とブランドブックの禁句（爆速・神・革命・圧倒的）を含めない／出荷しなかった回は触らない／100件を超えたら古い順に削る（消費側は id で重複判定する）。
 
 ## 6. 「書かない回」の保守作業メニュー
 

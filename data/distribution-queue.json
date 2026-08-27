@@ -1,0 +1,216 @@
+{
+  "$comment": [
+    "Runbook §5-5 参照。本番に公開される。",
+    "X/note/Reddit/Indie Hackersの定期配信タスクがここを読んで消費する。",
+    "社内語・未公開情報・オーナー依頼は書かない。"
+  ],
+  "items": [
+    {
+      "id": "20260827-sync",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/sync/",
+      "title": "Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing",
+      "lang": "ja",
+      "cluster": "obsidian-sync",
+      "kind": "article",
+      "answer_1line": "Obsidianの同期はApple製品だけならiCloud Drive、複数OS混在ならGitかSyncthingが選択肢になる。",
+      "quotable_facts": [
+        "2026-08-26実測: Gitは衝突時、本文に衝突マーカーがそのまま挿入される",
+        "2026-08-26実測: Syncthingは衝突時、別ファイルに自動退避されデータ消失なし",
+        "Obsidian Syncは有料のため本環境では競合再現を検証できていない"
+      ],
+      "x_post_ja": "Obsidianの同期方法をGitとSyncthingで実際に衝突させて比べた。Gitは本文に衝突マーカーが混入、Syncthingは別ファイルに自動退避。どちらもデータは消えなかった。",
+      "note_angle": "「同期方式で消える／消えないの分かれ目」を、実際に衝突を起こした一次データとして深掘りする角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian sync conflict Git vs Syncthing",
+        "site:reddit.com Obsidian iCloud sync conflict"
+      ],
+      "en_answer_1line": "For Obsidian sync, iCloud Drive suits Apple-only setups; Git or Syncthing suit mixed-OS setups.",
+      "verified_scope": "OBSERVED: Git・Syncthingの衝突挙動は本環境で実際に再現。HYPOTHESIS外: Obsidian Sync自体の競合挙動は未契約のため未検証。"
+    },
+    {
+      "id": "20260827-plugins",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/plugins/",
+      "title": "Obsidianプラグイン入門 — 6,812個から実測トップ10【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-plugins",
+      "kind": "refresh",
+      "answer_1line": "Obsidianの公式プラグイン6,982件のうち、名前や説明文で「capture」を名指しするのは1.2%にとどまる。",
+      "quotable_facts": [
+        "2026-08-27実測: capture系プラグインは82件/6,982件（1.2%）",
+        "2026-08-27実測: daily note系プラグインは133件（1.9%）で最多",
+        "2026-08-21実測: 公式レジストリは6,812個・トップ1位はExcalidraw(736万DL)"
+      ],
+      "x_post_ja": "Obsidianの公式プラグイン6,982件を名前と説明文で数えたら「capture」は82件・1.2%のみ。最多は「daily note」関連133件・1.9%。書いた後どこに残すかを扱うプラグインの方が多い。",
+      "note_angle": "「プラグインの数は多いのに、キャプチャ体験そのものを扱うものは少数派」という分布の意外性を掘り下げる角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian plugin quick capture",
+        "site:reddit.com Obsidian daily note plugin"
+      ],
+      "en_answer_1line": "Only 1.2% of Obsidian's 6,982 community plugins explicitly name \"capture\" in their name or description.",
+      "verified_scope": "OBSERVED: community-plugins.jsonの部分一致集計。文字列一致であり厳密な機能分類ではない旨を本文に明記。"
+    },
+    {
+      "id": "20260827-what-is-vault",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/what-is-vault/",
+      "title": "Obsidianの保管庫（Vault）とは — 実体はただのフォルダ【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-beginner",
+      "kind": "article",
+      "answer_1line": "Obsidianの保管庫は独自形式ではなく、選んだ普通のフォルダに.obsidian設定フォルダが1つ増えるだけで、中身は普通のMarkdownファイルのまま。",
+      "quotable_facts": [
+        "2026-08-20実測: .obsidian配下にJSON4個・計5,543バイトのみ生成",
+        "この時点でMarkdownファイルは0個",
+        "実測はfindコマンドで保管庫作成直後のファイル構成を直接確認"
+      ],
+      "x_post_ja": "Obsidianの「保管庫」は名前だけ聞くとデータベースっぽいが、空フォルダを保管庫にして中身を見ると.obsidian配下にJSON4個・計5,543バイト増えるだけ。ノートはただのフォルダの中の普通のファイル。",
+      "note_angle": "「保管庫」という用語が生む誤解と、実際にフォルダの中身を開けて確認した一次データのギャップを軸にする角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian vault what is it folder",
+        "site:reddit.com Obsidian vault file structure"
+      ],
+      "en_answer_1line": "An Obsidian vault is just an ordinary folder plus one small .obsidian config folder — nothing proprietary.",
+      "verified_scope": "OBSERVED: 空保管庫の実ファイル構成を本環境で直接計測。"
+    },
+    {
+      "id": "20260827-compare",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/compare/",
+      "title": "Obsidianは何と比較すべき？決め手は「正本の置き場所」【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-compare",
+      "kind": "article",
+      "answer_1line": "Obsidian比較で先に見るべきは機能やプラグイン数ではなく、ノートの正本がどこにどんな形式で残るか。プラグイン数は増え続けるため決め手にならない。",
+      "quotable_facts": [
+        "公式レジストリ実測: プラグイン数は6,571件(08-11)→6,739件(08-19)、8日で+168件",
+        "実測ペースは1日あたり約21件増",
+        "テーマ数も680種→698種に増加（同期間）"
+      ],
+      "x_post_ja": "Obsidianのプラグイン数は8日で6,571件→6,739件、+168件・1日約21件増。でも比較で効くのは数の多さでなく、ノートの正本がどこにどんな形で残るかだ。",
+      "note_angle": "増え続けるプラグイン数という「分かりやすい指標」が実は比較の決め手にならない理由を、実測の推移データで説明する角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian vs Notion which to choose",
+        "site:reddit.com Obsidian comparison plugin count"
+      ],
+      "en_answer_1line": "The decisive factor when comparing Obsidian to alternatives is where the canonical note file lives, not plugin count.",
+      "verified_scope": "OBSERVED: プラグイン登録数の推移は公式レジストリの直接カウント。VERIFIED外: Notion・Capacities・memosとの実機比較は未実施と本文に明記。"
+    },
+    {
+      "id": "20260827-compare-logseq",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/compare/logseq/",
+      "title": "ObsidianとLogseqどちらを選ぶ？同じフォルダで両方動かして比較【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-compare",
+      "kind": "article",
+      "answer_1line": "同じフォルダでObsidianとLogseqを両方開いても中身は壊れず、Logseqはlogseq/等の専用フォルダを追加するだけで既存ファイルは変更されなかった。",
+      "quotable_facts": [
+        "2026-08-11実測: 同一フォルダでLogseqはlogseq/等を追加するだけで既存ファイルを削除・変換しない",
+        "2026-08-14実測: プラグイン数はObsidian 6,638件 vs Logseq 546件（約12倍差）",
+        "Logseq 2.0はDB版へ移行中でMarkdown中心ではなくなりつつある"
+      ],
+      "x_post_ja": "ObsidianとLogseqを同じフォルダで両方開いて試した。Logseqはlogseq/等を追加するだけで既存ファイルは消えも変換もされない。ただしLogseq 2.0はDB版へ移行中で選び方が変わる。",
+      "note_angle": "「同じフォルダで共存できるか」という実務上の疑問を、実際に両方インストールして確かめた一次実験として書く角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian vs Logseq same folder",
+        "site:reddit.com Logseq 2.0 database markdown"
+      ],
+      "en_answer_1line": "Opening the same folder in both Obsidian and Logseq is safe — Logseq only adds its own subfolders, nothing is deleted or converted.",
+      "verified_scope": "OBSERVED: 同一フォルダ共存実験を本環境で実施（Obsidian 1.13.6 / Logseq 0.10.15・2.0.1）。"
+    },
+    {
+      "id": "20260827-getting-started",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/getting-started/",
+      "title": "Obsidianの始め方 — インストールから最初のノートまで実画面で解説【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-beginner",
+      "kind": "article",
+      "answer_1line": "Obsidianはインストール後アカウント登録なしでノート作成から最初のリンク・グラフ表示まで、実測15分未満で完了する。",
+      "quotable_facts": [
+        "2026-08-12実測(Linux AppImage): 保管庫は.obsidian(設定5個)+ようこそ.mdのみ",
+        "インストール→ノート作成→リンク→グラフ表示までを実測し15分未満で完了",
+        "手順中メールアドレス等の入力を一度も求められなかった"
+      ],
+      "x_post_ja": "Obsidianを実際にインストールしてノートを作るところまで通しでやってみた。アカウント登録は一度も求められず、最初のノート作成からリンク・グラフ表示まで15分未満。新規保管庫の中身は設定ファイル数個とようこそノート1枚だけだった。",
+      "note_angle": "「アカウント登録なしで始められる」を実際の操作時間つきで検証した一次レポートとしての角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian getting started no account",
+        "site:reddit.com Obsidian first vault setup"
+      ],
+      "en_answer_1line": "Obsidian requires no account — install, create a vault, and reach your first linked note and graph view in under 15 minutes.",
+      "verified_scope": "OBSERVED: インストールから初回ノートまでの実操作を本環境で実施（Linux AppImage）。VERIFIED外: Windows/macOSインストーラーは配布の存在確認のみで実行未検証。"
+    },
+    {
+      "id": "20260827-plugins-dataview",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/plugins/dataview/",
+      "title": "Dataviewプラグインの使い方 — クエリで保管庫を検索する入門【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-plugins",
+      "kind": "article",
+      "answer_1line": "Dataviewは480万ダウンロード超で人気3位のObsidianプラグインだが、目立った機能追加は2025年4月以降止まっている。",
+      "quotable_facts": [
+        "2026-08-22実測: ダウンロード数480万5,635件・全体3位",
+        "同日の登録数実測は6,840件",
+        "リポジトリ確認: 2025年4月以降、目立つ機能追加は見つからない"
+      ],
+      "x_post_ja": "Obsidianの人気プラグインDataviewはダウンロード数480万超で全体3位。ただしリポジトリを見ると目立った機能追加は2025年4月以降見つからない。壊れてはいないが活発な開発中でもない。",
+      "note_angle": "「人気プラグイン＝活発に更新されている」とは限らないというギャップを、ダウンロード数と更新履歴の両方から示す角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian Dataview plugin maintained",
+        "site:reddit.com Obsidian Dataview alternative"
+      ],
+      "en_answer_1line": "Dataview is Obsidian's #3 plugin by downloads (4.8M+), but its repository shows no notable feature additions since April 2025.",
+      "verified_scope": "OBSERVED: ダウンロード数・登録数はcommunity-plugin-stats.json/community-plugins.jsonを直接取得。更新停止の判定はリポジトリの公開履歴を確認。"
+    },
+    {
+      "id": "20260827-pricing",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/pricing/",
+      "title": "Obsidianの料金 — 無料でどこまで使えるか【2026年版】",
+      "lang": "ja",
+      "cluster": "obsidian-beginner",
+      "kind": "article",
+      "answer_1line": "Obsidian本体は登録不要かつ無料で無期限に使え、有料なのはSync・Publish・Catalyst・商用ライセンスの4つだけ。",
+      "quotable_facts": [
+        "2026-08-23実測: 公式サイト直接取得で該当の無料表記を確認",
+        "有料オプションはSync・Publish・Catalyst・商用ライセンスの4種のみ",
+        "本体機能に無料版の期限や機能制限は無い"
+      ],
+      "x_post_ja": "Obsidianは本体が無料で登録も不要。公式サイトに「Free without limits. No sign-up required.」と明記。有料はSync・Publish・Catalyst・商用ライセンスの4つだけ。",
+      "note_angle": "「無料の範囲がどこまでか」を公式サイトの一次確認つきで整理する角度。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian free forever pricing",
+        "site:reddit.com Obsidian Sync worth it price"
+      ],
+      "en_answer_1line": "Obsidian's core app is free with no sign-up required; only Sync, Publish, Catalyst, and a commercial license are paid.",
+      "verified_scope": "OBSERVED: obsidian.mdの公式料金ページを本セッションから直接取得して確認（2026-08-23）。"
+    },
+    {
+      "id": "20260827-airpods",
+      "date_jst": "2026-08-27",
+      "url": "https://simplememofast.com/obsidian/airpods/",
+      "title": "AirPodsに話すだけでObsidianへ残す — ハンズフリー実践ガイド【2026】",
+      "lang": "ja",
+      "cluster": "obsidian-voice",
+      "kind": "article",
+      "answer_1line": "AirPodsを着けたままSiriを2回呼ぶだけで、話した内容がメールとObsidianのデイリーノートの両方に自動で残る。",
+      "quotable_facts": [
+        "2026-08-20実機確認: セットアップ後の日常操作はSiri2回呼びかけ（起動→内容を話す）のみ",
+        "オフラインで話した内容はキューに残り再接続後に自動送信される",
+        "対応OSはiOS 16.4以降"
+      ],
+      "x_post_ja": "AirPodsを着けたまま画面を見ずにSiriを2回呼びかけるだけでメモが残せるか実機確認。同じ内容がメールとObsidianのデイリーノート両方に書き込まれ、オフラインでも後で自動送信される。",
+      "note_angle": "「画面を見ない状態でのキャプチャ」を実機で確認した手順として、ハンズフリー運用の実務角度で書く。",
+      "reddit_queries": [
+        "site:reddit.com Obsidian Siri voice note AirPods",
+        "site:reddit.com Obsidian hands free capture iPhone"
+      ],
+      "en_answer_1line": "With AirPods, two Siri turns are enough to land a spoken note in both your inbox and your Obsidian daily note — no screen needed.",
+      "verified_scope": "OBSERVED: Siri経由の操作フローとメール・デイリーノート両方への反映を実機（iOS）で確認。"
+    }
+  ]
+}
