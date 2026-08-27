@@ -199,6 +199,19 @@ export const UNLOCKS = {
   //
   // 残った本当の境界（refundPreference をAppleに出すか）は owner_only なので
   // unlock を持てない —— 行の note に書いてある。ここに残るのは実装のほう。
+  // [2026-08-27] **実測で分かれた。**鍵は通る（probe が 404 を返した ＝ 認証は抜けた）が、
+  // 通知URLが設定されていない。そして**設定する面が機械に無い** ——
+  // App Store Connect API の webhooks は BUILD_UPLOAD_STATE_UPDATED などの
+  // ビルド・審査の事象だけで、CONSUMPTION_REQUEST は入っていない。
+  // Server API の索引にも無い。**両方数えた上で、人の画面操作しか残らなかった。**
+  refund_notification_url: { kind: 'owner_input',
+                       label: 'App Store Connect で通知URLを1回設定する',
+                       needs: '**機械にはこの面が無い**（ASC API・Server API の索引を'
+                            + '両方数えて確認）。人が App Store Connect の画面で1回設定する。'
+                            + '**設定さえ済めば、受け口も応答も機械側で完結する** ——'
+                            + 'これは繰り返し人が要る類の壁ではなく、一度きりの錠',
+                       satisfied_when: [{ file: '../simplememo-ios/data/asc-server-api.json',
+                                          contains: '"notification_url_configured": true' }] },
   refund_observe:    { kind: 'implement', label: '返金の観測と、消費情報の応答を作る',
                        needs: '**面が別。**返金まわりは App Store Server API'
                             + '（api.storekit.apple.com/inApps）で、いま使っている'
