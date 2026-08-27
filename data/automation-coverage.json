@@ -1716,21 +1716,34 @@
       "area": "⑨ マネタイズ",
       "task": "返金の検出（Get Refund History）",
       "executor": "nobody",
-      "evidence": [],
-      "note": "**旧行から切り出した。**旧行は「返金・不正課金・チャージバック対応」で、検出・応答・意見表明が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。 これは**観測だけ**で、外に何も出ない可逆な操作 —— 権限表の非対称でいえばAI側。落ちているのは技術の壁ではなく**配線**: (1) 面は App Store Server API（api.storekit.apple.com）で、いま使っている App Store Connect API（api.appstoreconnect.apple.com）とは**別の面。** (2) **JWTの形が違う** —— Server API のペイロードは `bid`（bundle ID）クレームを要求する（Apple の例で確認）。scripts/lib/asc_api.rb の jwt_token は iss/iat/exp/aud しか出さないので**そのままでは通らない。**aud は同じ appstoreconnect-v1。 (3) **同じ鍵で通るかは未確認** —— ドキュメントは「Users and Access → Keys」としか書いておらず、In-App Purchase 用の別鍵が要るかどうかをこの面から確かめていない。**叩いて確かめる前に「別の鍵が要る」と書かない**",
+      "evidence": [
+        "../simplememo-ios/data/asc-server-api.json",
+        "../simplememo-ios/scripts/asc_refund_probe.rb",
+        "../simplememo-ios/scripts/lib/asc_api.rb"
+      ],
+      "note": "**旧行から切り出した。**旧行は「返金・不正課金・チャージバック対応」で、検出・応答・意見表明が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。 これは**観測だけ**で、外に何も出ない可逆な操作 —— 権限表の非対称でいえばAI側。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 残っているのは実装だけ: `GET /inApps/v2/refund/lookup/{transactionId}` は**取引IDを要求する**ので、まず取引を1つ手に入れる経路が要る（Get Transaction History / 通知）。**そこは叩いていないので、取引IDの出どころが実在するかはまだ書かない。**",
       "blocker": "not_started",
-      "unblocked_by": "asc_api.rb に bid クレームと storekit のベースURLを足し、実際に1回叩いて 200 が返るか 401 が返るかを見る。401 なら鍵の問題だと**その時点で**分かる",
+      "unblocked_by": "鍵は通ることが分かったので、残るのは実装。refund/lookup は取引IDを要求するため、取引IDの出どころ（Get Transaction History か通知）を先に1回叩いて確かめる",
       "unlock": "refund_observe"
     },
     {
       "area": "⑨ マネタイズ",
       "task": "返金要求への消費情報の応答（CONSUMPTION_REQUEST）",
       "executor": "nobody",
-      "evidence": [],
-      "note": "**旧行の「上限額を決めない限り自動側へ置けない」という前提は誤りだった。**2026-08-27 に Apple のドキュメントを取って確かめた —— **返金を発行するエンドポイントは存在しない。**あるのは Get Refund History（履歴）、Refund lookup（照会）、Send Consumption Information（消費情報の送信）の3つで、**機械が返金できないので上限額は何も止めない。** 実在するのはこちら: 顧客が返金を要求すると Apple が CONSUMPTION_REQUEST を送り、開発者は `PUT /inApps/v2/transactions/consumption/{transactionId}` で応える。**期限は「受信から12時間以内」**（同エンドポイントのドキュメントに明記）。応えなければ Apple はこちらのデータ無しで判断する。 **12時間は人が確実に守れる窓ではない**（個人開発・時差・睡眠）。だから自動化の利得は「速さ」ではなく**「窓を落とさないこと」**にある。 ⚠ **受け口がどこにも無い。**simplememo-api の /v1/* にASC通知のエンドポイントは1本も無い（2026-08-27 に確認）。App Store Connect 側に通知URLが設定されているかは**リポジトリからは見えないので未確認。**つまりこの行の blocker は境界の設計ではなく、**受け口が無いこと**",
-      "blocker": "not_started",
-      "unblocked_by": "simplememo-api に App Store Server Notifications V2 の受け口（signedPayload の検証つき）を作る。あわせて ASC 側の通知URL設定が実在するかを確かめる",
-      "unlock": "refund_observe"
+      "evidence": [
+        "../simplememo-ios/data/asc-server-api.json",
+        "../simplememo-ios/scripts/asc_refund_probe.rb"
+      ],
+      "note": "**旧行の「上限額を決めない限り自動側へ置けない」という前提は誤りだった。**2026-08-27 に Apple のドキュメントを取って確かめた —— **返金を発行するエンドポイントが存在しない。**あるのは Get Refund History（履歴）、Refund lookup（照会）、Send Consumption Information（消費情報の送信）の3つで、**機械が返金できないので上限額は何も止めない。** 実在するのはこちら: 顧客が返金を要求すると Apple が CONSUMPTION_REQUEST を送り、開発者は `PUT /inApps/v2/transactions/consumption/{transactionId}` で応える。**期限は「受信から12時間以内」**（同エンドポイントのドキュメントに明記）。応えなければ Apple はこちらのデータ無しで判断する。**12時間は人が確実に守れる窓ではない**（個人開発・時差・睡眠）。だから自動化の利得は「速さ」ではなく**「窓を落とさないこと」**にある。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 **通知URLを設定する経路が機械には無い。**App Store Connect API の索引（webhooks は BUILD_UPLOAD_STATE_UPDATED など**ビルド・審査の事象だけ**で、CONSUMPTION_REQUEST は入っていない）と App Store Server API の索引の**両方を数えた**が、通知URLを設定する面はどちらにも無かった。**人が App Store Connect の画面で1回設定する**しかない。設定さえ済めば、受け口も応答も機械側で完結する。 受け口自体もまだ無い（simplememo-api の /v1/* にASC通知の口は1本も無い）。 **述語について**: 待ちが解けたかどうかは、隣の実測台帳（../simplememo-ios/data/asc-server-api.json）を probe が書き直したときに分かる。**このリポジトリのCIには隣が無いので、CIからは常に「まだ待っている」と読める** —— 3リポジトリの揃ったセッションでだけ「もう届いている」と鳴る。散文で「未設定」と書いておくよりはましだが、**片側でしか鳴らない述語であることは承知の上**（隣が無ければ満たされない側に倒れるので、見落とす方向ではなく待ち続ける方向に外れる）。",
+      "blocker": "external_credential",
+      "unblocked_by": "**人が App Store Connect で通知URLを1回設定する**（機械にはその面が無い。ASC API・Server API の両方の索引を数えて確認）。それが済んだら simplememo-api に受け口（signedPayload の検証つき）を作る —— そちらは機械の仕事",
+      "unlock": "refund_notification_url",
+      "blocked_on": [
+        {
+          "file": "../simplememo-ios/data/asc-server-api.json",
+          "contains": "\"notification_url_configured\": true"
+        }
+      ]
     },
     {
       "area": "⑨ マネタイズ",
