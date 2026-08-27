@@ -1,0 +1,35 @@
+{
+  "$comment": [
+    "**段階公開を広げてよいかを決めているコードの指紋（公開側の写し）。**",
+    "scripts/check-rollout-gate-pin.mjs が seo-check で照合する。",
+    "",
+    "【これは門ではない。鳴子である】",
+    "実際に本番へ書くのを止めているのは simplememo-api/data/rollout-gate-pin.json のほう。",
+    "あちらは管理トークンを持っていて、留めた指紋と実物が違えばフラグを書かずに落ちる。",
+    "",
+    "**この写しが要るのは、留めた側と留められた側が別のリポジトリにいるから。**",
+    "レビュー返信でまったく同じ穴を踏んでいる（2026-08-27・#659 で留め、#661 が",
+    "同じファイルを直し、翌朝の日次が落ちて初めて分かった）。",
+    "",
+    "**こちらはもう一段たちが悪い。**このリポジトリの `claude/` ブランチは",
+    "CI が緑なら自動マージされるので、ゲートを直したPRはそのまま main へ入り、",
+    "次の cron が**人の目を通さずに新しいゲートで本番へ書きうる。**",
+    "レビュー返信は「気づかないうちに止まる」だったが、こちらは",
+    "「気づかないうちに実行される」向き。",
+    "",
+    "【更新するときは2か所】",
+    "  1. ここ（公開側の写し）",
+    "  2. simplememo-api/data/rollout-gate-pin.json（**実際に止めている側**）",
+    "",
+    "**指紋だけ機械的に貼り替えるなら、この仕組みは何もしていない。**",
+    "変わったのが判断に効く変更なのかを読んでから書くこと。"
+  ],
+  "entry": "scripts/check-rollout-promotion.mjs",
+  "mirror": "simplememo-api/data/rollout-gate-pin.json",
+  "reviewed_at": "2026-08-27",
+  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない",
+  "files": {
+    "scripts/check-rollout-promotion.mjs": "d8a959ccdc94",
+    "scripts/lib/selftest.mjs": "498def1338f8"
+  }
+}
