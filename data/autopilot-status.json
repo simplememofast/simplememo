@@ -1,21 +1,21 @@
 {
-  "date_jst": "2026-08-26",
-  "generated_at": "2026-08-25T21:46:29Z",
-  "action": "new",
+  "date_jst": "2026-08-27",
+  "generated_at": "2026-08-27T00:33:09Z",
+  "action": "refresh",
   "article": {
-    "url": "https://simplememofast.com/obsidian/sync/",
-    "title": "Obsidianの同期方法比較 — iCloud・Sync・Git・Syncthing"
+    "url": "https://simplememofast.com/obsidian/plugins/",
+    "title": "Obsidianプラグイン入門 — 6,812個から実測トップ10【2026】"
   },
   "pr": null,
   "streak": {
     "consecutive_no_article_days": 0,
-    "last_article_date_jst": "2026-08-26",
-    "last_production_change_date_jst": "2026-08-26",
+    "last_article_date_jst": "2026-08-27",
+    "last_production_change_date_jst": "2026-08-27",
     "days_since_production_change": 0
   },
   "data_freshness": {
-    "bq_export_last_data_date": "2026-08-22",
-    "bq_export_days_accumulated": 13,
+    "bq_export_last_data_date": "2026-08-24",
+    "bq_export_days_accumulated": 15,
     "bq_checked": true,
     "manual_snapshot_label": "2026-08-11"
   },
@@ -99,12 +99,12 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-08-26",
-      "days": 16
+      "to": "2026-08-27",
+      "days": 17
     },
-    "completion_rate": 0.7222,
-    "change_failure_rate": 0.2778,
-    "human_intervention_rate": 0.3889,
+    "completion_rate": 0.7368,
+    "change_failure_rate": 0.2632,
+    "human_intervention_rate": 0.3684,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -112,35 +112,35 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.2222222222222222
+        "rate": 0.21052631578947367
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.05555555555555555
+        "rate": 0.05263157894736842
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.05555555555555555
+        "rate": 0.05263157894736842
       },
       "request": {
         "runs": 1,
-        "rate": 0.05555555555555555
+        "rate": 0.05263157894736842
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.8125,
+    "shipping_day_rate": 0.8235,
     "totals": {
-      "runs": 28,
-      "attempted": 18,
-      "shipped": 13,
+      "runs": 29,
+      "attempted": 19,
+      "shipped": 14,
       "failed": 5,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 12,
-        "attempted": 10,
-        "shipped": 10
+        "runs": 13,
+        "attempted": 11,
+        "shipped": 11
       },
       "primary": {
         "runs": 16,
@@ -168,18 +168,18 @@
       "unresolved": []
     }
   },
-  "reason": "【連続無記事0日目・本番最終変更2026-08-26・BQ確認済み(13/28日蓄積・2026-09-06頃到達見込み)】レーンE。coverage-queue C05 `/obsidian/sync/` を実装し出荷（PR #586）。Obsidianの保管庫はただのMarkdownフォルダなので同期方法はiCloud Drive/公式Obsidian Sync/Git/Syncthingから選べるという前提で4方式を比較し、GitとSyncthingはこの環境で実際に2台のオフライン同時編集を衝突させて壊れ方を実測した（Git=本文に衝突マーカー挿入／Syncthing=sync-conflict別ファイルに自動退避、どちらもデータ消失なし）。iCloud DriveとObsidian Syncはこの環境にmacOS/iOSが無く実機検証できないため、Apple公式ヘルプとobsidian.md/help/syncを本セッションから直接取得して引用し、未検証部分は§28の3状態表記で明記した。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。coverage-queueの次点C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/` は本ページと主題が重なるため collides_with を追記し、次回は narrow した実装に切り替えるよう申し送った。トレンドレーダー: 本日ヒットなし（3面とも確認済み）。act-credential-actions（主系08-24〜08-25の即時失敗）については、本runが actions 経路として着手し即時失敗せず完走したことが、再発なしの実測1件として台帳に積まれた。",
-  "verified": "実測（このセッションで実際に動かした）: Git 2.x — 中央bareリポジトリ1つと2つのcloneで、オフライン同時編集→片方push成功→もう片方push拒否→pull時のマージ衝突→本文への衝突マーカー挿入までを再現し、実際の出力をそのまま記事に転載。Syncthing v1.27.2（apt経由でインストール）— ローカルTCPで直接ペアリングした2インスタンス間で同じシナリオを再現し、sync-conflict-*.md ファイルの生成をファイルシステムで確認。ネットワークアクセス: このセッション（GitHub Actions経由）から obsidian.md / support.apple.com へ直接到達できることを確認し、obsidian.md/help/sync・obsidian.md/help/sync/version-history を直接取得（2026年8月26日）。公式情報に基づく記載（未検証）: iCloud Drive上のドキュメント競合時の番号付きファイル名（Apple公式Macヘルプ）、Obsidian Syncのバージョン履歴保持期間（Standard 1か月・Plus 12か月・添付2週間）と他クラウド併用時の公式注意書き。検証できなかったこと: iCloud DriveとObsidianの組み合わせでの実際の競合挙動（macOS/iOS無し）、Obsidian Syncでの実際の競合再現（有料サービスのため未契約）。§4の17チェックすべて実行し全通過。iPhoneビューポート（390×844 DPR3）実描画QA: 水平スクロールなし（scrollWidth=clientWidth=390）・JS/HTTPエラー0・回答ブロック(tip-box)はファーストビュー内（top≈799px）・cta-qrはモバイル非表示（display:none）を確認。",
+  "reason": "【連続無記事0日目・本番最終変更2026-08-27・BQ確認済み(15/28日蓄積・2026-09-06頃到達見込み)】再試行 Routine(09:20 JST・ccr-0920)による実行。主系・副系A・副系Bのいずれにも当日分の実行痕跡が無いことを§0の(a)〜(e)で確認済み（当日ブランチ無し・本番status JSONは前日08-26・当日head のPR無し・主系の最新runは前日分で in_progress ではない）。占有コミットで当日ブランチをclaimしてから着手（拒否されずclaim成功）。レーンF: 未修理の故障なし（selfheal --check・GitHub MCP list_issuesでops/autopilot-stale・ops/cron-failureも0件を直接確認）。前回レーンC実施が2026-08-14で13日経過していたため、Runbook §2「7日以上経っていれば優先レーン」に従いレーンCを選択。同じ資産（登録数の再計測）ではなく別資産として、community-plugins.json（2026-08-27時点で6,982件）の name/description フィールドをキーワード（capture / daily note / template / voice・dictation / inbox / clipper・web clip）で部分一致集計し、`/obsidian/plugins/` に新セクション・FAQを追加した。captureを名指しするプラグインは1.2%（82件）にとどまり最多はdaily note関連1.9%（133件）——文字列一致による概算であり厳密な機能分類ではない旨を3箇所に明記。既存の6,812・トップ10（08-21計測）はそのまま維持し、新データは日付を分けて引用（数値混同を避けた）。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。",
+  "verified": "実測（このセッションで直接取得・集計）: community-plugins.json（raw.githubusercontent.com経由・2026-08-27・6,982件）に対し、name/descriptionフィールドの英語キーワード部分一致（大文字小文字を区別しない）をNodeスクリプトで集計。capture 82件(1.2%)・daily note 133件(1.9%)・template 108件(1.5%)・voice/dictation 64件(0.9%)・inbox 40件(0.6%)・clipper/web clip 15件(0.2%)。この経路ではobsidian.md・api.github.comへの到達は403でブロックされることを実際にcurlで確認し（raw.githubusercontent.comのみ200）、それを理由に一次情報の範囲をレジストリJSONに限定した。検証できなかったこと・書かなかったこと: 各プラグインの実際の機能内容（文字列一致は誤検出・見落としの両方があり得るため、ページ本文とFAQの両方に明記）。データ鮮度は本日07:04 JSTのseo-daily run(33018038649)のジョブログをGitHub MCP get_job_logsで読み `data available: 2026-08-10..2026-08-24`（15/28日）を確認（bq-preflight.mjsはこの経路でも認証失敗・BigQuery MCP未接続のため③の手段で確認）。§4の18チェックすべて実行し全通過。iPhoneビューポート（390×844 DPR3）実描画QA: playwright+Chromiumで実際にレンダリングし、水平スクロールなし（scrollWidth=clientWidth=390）・新セクションが正しく描画・表がビューポート内に収まることを確認。JS/HTTPエラーはAhrefs/GTMの2件のみで、この環境のegress制限によるブロック（ページ内容とは無関係）。",
   "checks": {
     "seo_check": "0 errors 0 warnings（266ファイル）",
-    "content_graph": "26 entries OK。/obsidian/sync/ を新規登録（cluster: obsidian-sync新設）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施。水平スクロールなし・JS/HTTPエラー0・回答ブロックはファーストビュー内・QRはモバイル非表示",
+    "content_graph": "26 entries OK（URL変更なしのため登録変更なし）",
+    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施（playwright+Chromium）。水平スクロールなし・新セクション正常描画・表がビューポート内に収まる・JS/HTTPエラーはegress制限起因の2件のみ",
     "experiments": "36件中21 open・due 0・overdue 0",
-    "other": "check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（197 checks） / check-internal-redirects（13,432 href/src + 5,281 JSON-LD/meta + 587 sitemap URL、すべて直接200） / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / generate_sitemap.py --dry-run いずれも問題なし"
+    "other": "check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（240 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（全シナリオ） / automation-rate --check / check-pr-facts --check / d-score --check / check-model-routing --check / generate_sitemap.py --dry-run いずれも問題なし。git fetch --unshallow後にgenerate_sitemap.pyを実行し/obsidian/plugins/のlastmodを更新（副産物として他5ページの実コミット日も反映）"
   },
   "owner_requests": [
-    "【要オーナー判断・継続】GH_PATに workflow scope を足すかどうか（scopeは足さないと決定済み・残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。",
+    "【要オーナー判断・継続】GH_PATに workflow scope を足すかどうか（scopeは足さないと決定済み・残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。本セッションはGitHub Secretsの値・回転日を検査する権限が無いため実測手段が無く、前日の記録をそのまま繰り越す。",
     "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。"
   ],
-  "next": "coverage-queueのpendingは引き続き潤沢（次点C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/`。どちらも本日のC05と主題が重なるため collides_with を追記済み——次回実装するなら比較の再掲を避け、C06は「iCloud一本の設定手順」、C07は「Standard/Plusどちらが要るかの判断フロー」まで narrow すること）。act-credential-actions の閉じ条件（2026-08-25より後にactionsが着手しimmediate_failureが再発していないこと）に対し、本runの正常完走が実測1件として積まれた——継続して閉じ条件が満たされるか見ること。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。"
+  "next": "coverage-queueのpendingは引き続き潤沢（次点C06 `/obsidian/sync/icloud/`・C07 `/obsidian/sync/official-sync/`。C05と主題が重なるため collides_with 追記済み——narrowした実装に切り替えること）。act-credential-actionsの閉じ条件は継続監視。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。次回レーンCは今回とは別の資産へ（今回はキーワード分析を使ったので、テーマ側の一次情報や別カテゴリの集計を検討）。§5-5（配信の種）のRunbook同期は未着手のため、本日分の出荷後に別ブランチ（claude/autopilot-distribution-seed）で実施する。"
 }
