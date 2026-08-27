@@ -320,6 +320,21 @@ jobs:
       - name: Authority matrix
         run: node scripts/check-authority.mjs --check
 
+      # 【段階公開の機械ゲート】権限表がこのスクリプトの evaluatePromotion を
+      # 名指ししていて、**そこが実在しなければ「段階公開の拡大」は承認制へ戻る**
+      # （check-authority の gateProblems が checker と export を実際に見る）。
+      #
+      # 見ているのは台帳の形 —— 上限が 100% 未満か、日次上限が正か、
+      # required_metrics が空でないか、梯子が昇順か、
+      # そして**上限を超えた昇格が記録に紛れていないか**。
+      #
+      # self-test の主眼は「条件が揃えば通る」ではなく、
+      # **材料を1つずつ落として必ず hold になる**ことのほう（holds_when_unknown の実体）。
+      - name: Rollout promotion gate
+        run: |
+          node scripts/check-rollout-promotion.mjs --selftest
+          node scripts/check-rollout-promotion.mjs --check
+
       # 【運転台帳】共通実行IDの一意性と、attempted／outcome の整合を見る。
       #
       # 壊れた台帳は「集計できない」ではなく **指標が黙って嘘になる**。

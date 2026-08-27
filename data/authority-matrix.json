@@ -341,19 +341,33 @@
       "reversible": false,
       "ai_may": [
         "昇格の提案",
-        "根拠となる群間比較の提示"
+        "根拠となる群間比較の提示",
+        "**ゲートを通った昇格の実行**（ガードが判定を出せた段のみ・上限 50% まで・1日1段）"
       ],
-      "requires_approval": true,
+      "requires_approval": false,
       "human_only": [
-        "rollout を引き上げる操作そのもの"
+        "**判定に届かない露出からの引き上げ**（母数不足のブートストラップ。ゲートは必ず hold する）",
+        "max_auto_rollout を超える引き上げ（100% への最終段 — 対照群が消える判断）",
+        "auto_promote.enabled を立てる操作そのもの",
+        "訓練用フラグ（drill_）の引き上げ"
       ],
-      "gate": "/admin/rollout-guard に提案が積まれるだけ。POST /admin/flags/set を叩くのは人",
+      "gate": "evaluatePromotion() が唯一の関門。ガードの判定が promote で、3指標すべてが各群30以上の母数で判定でき、判定が120分以内で、現在の配布率で48時間寝ていて、直近7日に kill が無く、梯子を飛ばさず、50% を超えず、本日まだ1段も上げていないときだけ通る。**どれか1つでも材料が無ければ hold**",
       "evidence": [
         "simplememo-api/src/rollout-guard.ts",
-        "simplememo-api/API_SPEC.md"
+        "simplememo-api/API_SPEC.md",
+        "scripts/check-rollout-promotion.mjs",
+        "data/rollout-promotion.json"
       ],
       "status": "active",
-      "note": "**広げてから戻しても「見た人が見なかったことにはならない」**ので不可逆に分類した。撤回と拡大で権限を非対称にしてあり、逆にすると誤検知が『勝手に全員へ配る』形で顕在化する"
+      "note": "**広げてから戻しても「見た人が見なかったことにはならない」**ので不可逆に分類した。撤回と拡大で権限を非対称にしてあり、逆にすると誤検知が『勝手に全員へ配る』形で顕在化する。\n\n**[2026-08-27] オーナー判断（お金周りを除いて境界を渡す）でこの領域の境界が外れた。**ただし不可逆な領域の承認を外すには machine_gate が要る（GATE_REQUIRED）ので、宣言ではなく実装で外している。非対称は消していない —— **撤回はガードが単独で引き、拡大はゲートを通ったものだけ。**そして『判定できないから広げてよい』にはならないよう、材料不足は必ず hold にした。**enabled は false のまま置いてある。**立てるのはオーナーで、そこは human_only に残した",
+      "machine_gate": {
+        "checker": "scripts/check-rollout-promotion.mjs",
+        "function": "evaluatePromotion",
+        "kill_switch_path": "data/rollout-promotion.json#policy.kill_switch",
+        "daily_cap": 1,
+        "holds_when_unknown": true,
+        "$holds_when_unknown": "**ガードの判定・観測の母数・フラグの現状のどれが欠けても hold。**とくに『判定できる母数が無い』は hold であって『悪化していない』ではない —— 2026-08-27 の実測（run 33076125334）で tf04_progress が rollout 5% のまま4回連続 hold し、ガード自身が『露出を30にするには rollout 19% 以上』と計算した。**判定に届かない段から踏み出す最初の一歩は、この門を通らない。**そこは人が押す"
+      }
     },
     {
       "domain": "問い合わせへの自動回答（承認済みテンプレート）",

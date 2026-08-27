@@ -236,6 +236,12 @@
       "expr": "r.dated",
       "disposition": "向きが逆",
       "note": "`!r.dated.length && !r.machine.length` の否定形。**両方空のときに発火する**側で、「台帳を読めていない疑い」を出すための判定。消える方向ではない"
+    },
+    {
+      "file": "scripts/check-rollout-promotion.mjs",
+      "expr": "p?.to",
+      "disposition": "別に検出",
+      "note": "**直前のループが `['at','flag','from','to','why']` の欠落を全部 problems に入れている。**ここの `p?.to` は「在るのに数でない」と「在って上限超え」を分けるためだけの分岐で、欠落側は消えない。上限そのものは `cap` で fail closed にしてある（`ap.max_auto_rollout && …` と書いていて、この検査に捕まって直した形）"
     }
   ],
   "coverage_measured_at": "2026-08-26",
