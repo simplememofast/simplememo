@@ -37,6 +37,41 @@ export const EXECUTORS = [
 ];
 /** AIが実際に実行しているもの。率の分子。 */
 const AI_EXECUTES = new Set(['ai_autonomous', 'ai_executes_gated']);
+
+/**
+ * **執行面の証跡**（実行しているものだけが持てる種類のファイル）。
+ *
+ * 【なぜ要るか — 2026-08-27 に踏んだ穴】
+ * それまでの規則は「`ai_autonomous` / `ai_executes_gated` は evidence を持て」だけで、
+ * **evidence が何であるかは見ていなかった。**ところが AI は提案・下書きの段階でも
+ * 文書を作るので、**提案側のファイルが証跡欄に入っている行が大量にある。**
+ *
+ * 実測: `blocker: policy_boundary` の24件のうち **20件は既に evidence が埋まっていた。**
+ * その状態で executor を書き換えると、**検査を一度も落とさずに総合自動化率が
+ * 65.2% → 77.3% に上がる**（実際に台帳を倒して計測した）。
+ * 原稿は「証跡ファイルを指せないタスクをAI側に数えることはCIが禁止している」と
+ * 書いていたが、**指せてしまうので禁止できていなかった。**
+ *
+ * 【この規則が見ているもの】
+ * 「手順書・方針・設計書・報告書」と「ワークフロー・スクリプト・実装・テスト・台帳・
+ * 実行ログ」を分ける。前者は**やると決めた**ことの証跡で、後者は**やっている**ことの証跡。
+ * RUNBOOK も VISION も設計文書も、**読んだだけでは1件も実行されない。**
+ *
+ * 【これで捕まらないもの】
+ * スクリプトを証跡欄に置きさえすれば通るので、**「そのスクリプトが実際に走ったか」は
+ * 見ていない。**種類の判定であって、実行の判定ではない。次に強くするならそこ
+ * （実行の記録＝run_id や台帳の行を指させる）。**今できたのは、散文だけで
+ * 「AIが実行している」と数える経路を塞いだところまで。**
+ *
+ * 他リポジトリのパス（`../`）も**種類だけは判定できる**ので同じ規則を当てる
+ * （実在確認は下の理由でしない）。
+ */
+const EXECUTION_SURFACE = [
+  /\.(mjs|cjs|js|ts|tsx|py|rb|swift|yml|yaml|sh|sql)$/i, // ワークフロー・スクリプト・実装・テスト・マイグレーション
+  /(^|\/)data\/[^/]+\.json$/i,                      // 台帳（機械が書く／機械が読む）
+  /(^|\/)[^/]*LOG[^/]*\.[a-z]+$/i,                   // 実行ログ（AUTOPILOT_LOG.md 等）
+];
+export const isExecutionSurface = (p) => EXECUTION_SURFACE.some((re) => re.test(p));
 /** 誰かがやっているもの =「実施中タスク」。 */
 const DOING = new Set(['ai_autonomous', 'ai_executes_gated', 'ai_proposes', 'human_only']);
 
@@ -62,6 +97,11 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
       // 「AIがやっている」は証跡なしに主張しない
       if (AI_EXECUTES.has(t.executor) && t.evidence.length === 0) {
         problems.push(`${at}: executor=${t.executor} なのに evidence が空 — 証跡なしに「AIがやっている」と数えない`);
+      } else if (AI_EXECUTES.has(t.executor) && !t.evidence.some(isExecutionSurface)) {
+        // **散文だけで「実行している」と数えない。**手順書・方針・設計書は
+        // 「やると決めた」の証跡であって「やっている」の証跡ではない
+        problems.push(`${at}: executor=${t.executor} なのに執行面の証跡が1つも無い（${t.evidence.join(' , ')}）`
+          + ' — ワークフロー・スクリプト・実装・テスト・台帳・実行ログのいずれかを指すこと');
       }
       for (const f of t.evidence) {
         if (typeof f !== 'string') { problems.push(`${at}: evidence の要素が文字列でない`); continue; }
@@ -138,6 +178,17 @@ const SELFTEST_BREAKAGES = [
   ['task が無ければ落ちる', (d) => { delete d.tasks[0].task; }],
   ['**同じ領域に同じタスクが2回**あれば落ちる（分母が水増しされる）', (d) => { d.tasks.push({ ...d.tasks[0] }); }],
   ['知らない executor は落ちる', (d) => { d.tasks[0].executor = 'なんとなくAI'; }],
+  // 2026-08-27 に足した規則。**この穴は実際に踏んだ**（policy_boundary 24件のうち
+  // 20件が提案側の証跡を既に持っていて、executor を倒すだけで 65.2% → 77.3% になった）
+  ['**散文だけを証跡にしてAI実行に数える**と落ちる', (d) => {
+    const t = d.tasks.find((x) => AI_EXECUTES.has(x.executor));
+    t.evidence = ['docs/obsidian/AUTOPILOT_RUNBOOK.md'];
+  }],
+  ['提案どまりの行を、証跡を変えずにAI実行へ倒すと落ちる', (d) => {
+    const t = d.tasks.find((x) => x.executor === 'ai_proposes' && !x.evidence.some(isExecutionSurface));
+    if (!t) throw new Error('前提が崩れた: 散文だけを証跡に持つ ai_proposes が台帳から消えている');
+    t.executor = 'ai_executes_gated';
+  }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8')),
