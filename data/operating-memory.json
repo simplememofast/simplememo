@@ -1218,6 +1218,32 @@
         ],
         "new_guardrail": "**純粋関数の self-test を書いたら、実物を1回通してから終わりにする。**通らなければ見本が易しい。合成した見本には、実物が必ず持つ性質（このリポジトリでは日本語）を最低1つ入れる"
       }
+    },
+    {
+      "id": "om-2026-08-27-stale-outage-written-in-present-tense",
+      "seeded": false,
+      "area": "⑫ 事業継続性",
+      "signal": "⑧の投稿経路を台帳に書くにあたり、「1周も動いたのを見ていない」の理由として **../simplememo-ios の Actions が storage 上限で止まっているため** と3か所（review-replies.json / automation-coverage.json / autonomy-gap.mjs）に書いた",
+      "hypothesis": "前日（08-26 15:18Z）に run が queued のまま割り当てられないのを実測している。翌朝も同じはず",
+      "decision": "**書いた時点で、すでに動いていた。**同じ日の 00:25Z に simplememo-ios#232 の CI が\n12秒で緑を返している（static / parity）。\n\n悪いのは外していたことより**順序**で: その緑は**台帳を書く前から画面にあった。**\n自分で作ったPRのCIで、確認は API 1回。にもかかわらず、前日のメモを現在形で写した。\n\n3つの台帳を直し、原因については何も書かないことにした ——\n復帰の直前にオーナーが支出上限 $20 を設定しているが、**時間の前後が合うだけ**で、\n日次の再計算やストレージの掃除も同じ観測と矛盾しない。",
+      "execution": {
+        "pr": "simplememofast/simplememo#662, simplememofast/simplememo-ios#232",
+        "commit": "c845922b"
+      },
+      "verification": "simplememo-ios#232 の check runs が success（static 98369835657 / 12秒、parity 98369835802 / 7秒、いずれも 08-27 00:25Z）。ジョブが割り当てられなかった前日の run（32984661197・billable {}）と対照",
+      "outcome": "台帳3か所とPR本文を訂正。**この誤りは公開リポジトリの main に一度入っている**（#661）ので、訂正も差分として残した",
+      "verdict": "failure",
+      "learning": {
+        "lesson_key": "an-outage-is-a-state-not-a-fact",
+        "text": "**障害は事実ではなく状態。**「A は止まっている」は観測した瞬間についての文で、\n書き写した瞬間についての文ではない。にもかかわらず、メモから台帳へ運ぶときに\n**時刻が落ちて、現在形だけが残る。**\n\nここで効くのは「一次資料を見よ」より狭い規則:\n**止まっている・落ちている・使えない、を現在形で書くなら、その場で1回見る。**\n見る手段が無いなら現在形で書かない（「08-26 15:18Z の時点では」と時刻を付ける）。\n\nこの案件では確認コストがほぼゼロだった —— 自分で作ったPRのCIを1回読むだけ。\n**安いのに省いたのは、前日の観測が強く残っていたから。**\n直近に自分で実測したものほど、次の日に確かめ直す動機が弱くなる。\n\n(前日の `om-2026-08-26-actions-quota-took-down-the-monitor-too` は\n**内訳を読み違えた**話で、これは**時刻を落とした**話。原因は別で、対象が同じ。)",
+        "changed": [
+          "data/review-replies.json",
+          "data/automation-coverage.json",
+          "scripts/autonomy-gap.mjs",
+          "../simplememo-ios/CLAUDE.md"
+        ],
+        "new_guardrail": "**外部システムの不調を現在形で台帳に書くときは、書く直前に1回観測する。**観測できないなら現在形をやめて観測時刻を添える（「08-26 15:18Z の時点では割り当てられなかった」）。**復旧の原因は、時間の前後が合うだけでは書かない**"
+      }
     }
   ]
 }

@@ -79,7 +79,7 @@
       "dry_run": true,
       "daily_cap": 3
     },
-    "$auto_post": "**2026-08-27: enabled を立てた。dry_run は立てたまま。**投稿の実装（ASCへのPOST）が入ったので、次の段は「1周見る」。dry_run のうちは計画が would_post を返すだけで**外には何も出ない** —— この状態で1回動いたのを見てから dry_run を false にする。**実装が入った日に一気に倒さない**（rollout-guard の promote と同じ段取り）。 ⚠ 倒すと**既存の下書き2件はそのまま公開される。**「rating が無いから止まる」は evaluateAutoPost 単体の話で、計画は ASC の実物で埋めるため通る。 **まだ1周も見ていない。**simplememo-ios の Actions が storage 上限でジョブを割り当てられない状態にある（あちらの CLAUDE.md / 2026-08-27）。解けるまでこの dry_run は動かない。",
+    "$auto_post": "**2026-08-27: enabled を立てた。dry_run は立てたまま。**投稿の実装（ASCへのPOST）が入ったので、次の段は「1周見る」。dry_run のうちは計画が would_post を返すだけで**外には何も出ない** —— この状態で1回動いたのを見てから dry_run を false にする。**実装が入った日に一気に倒さない**（rollout-guard の promote と同じ段取り）。 ⚠ 倒すと**既存の下書き2件はそのまま公開される。**「rating が無いから止まる」は evaluateAutoPost 単体の話で、計画は ASC の実物で埋めるため通る。 **まだ1周も見ていない。**投稿側は simplememo-ios の日次（asc-review-reply.yml / 21:40 UTC）で、そこが1回 would_post を出すのを見るまでは dry_run を落とさない。**訂正（同日）: ここに一度「あちらの Actions が storage 上限で止まっているので動かない」と書いたが、08-27 00:25Z にはもう動いていた。止まっていたのは前日の観測で、書く前に確かめ直していない。**",
     "never_auto_post": {
       "rating_at_most": 2
     },
