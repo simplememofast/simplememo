@@ -193,8 +193,24 @@ export const UNLOCKS = {
                             + '**満たされたことをこのリポジトリから機械で確かめる経路は無い** ——'
                             + '証跡（data/review-responses.json）は非公開側にあり、'
                             + '非公開→公開へ push する経路は作っていない' },
-  refund_boundary:   { kind: 'owner_decision', label: '返金・チャージバックの承認境界を決める',
-                       needs: '金銭が動く不可逆操作。**上限額を決めない限り自動側へ置けない**' },
+  // [2026-08-27] **`refund_boundary` を消した。**「上限額を決めない限り自動側へ置けない」と
+  // 書いてあったが、Apple のドキュメントを取って読んだら**返金を発行するエンドポイントが
+  // 存在しない。**機械が返金できないので、上限額は何も止めていなかった。
+  //
+  // 残った本当の境界（refundPreference をAppleに出すか）は owner_only なので
+  // unlock を持てない —— 行の note に書いてある。ここに残るのは実装のほう。
+  refund_observe:    { kind: 'implement', label: '返金の観測と、消費情報の応答を作る',
+                       needs: '**面が別。**返金まわりは App Store Server API'
+                            + '（api.storekit.apple.com/inApps）で、いま使っている'
+                            + 'App Store Connect API とは違う。**JWTの形も違う** ——'
+                            + 'ペイロードに `bid`（bundle ID）クレームが要る'
+                            + '（aud は同じ appstoreconnect-v1）。'
+                            + '../simplememo-ios/scripts/lib/asc_api.rb の jwt_token は'
+                            + 'それを出さないので、そのままでは通らない。'
+                            + '**同じ鍵で通るかは未確認** —— 叩いて 401 が返って初めて'
+                            + '「別の鍵が要る」と分かる（推測で書かない）。'
+                            + 'あわせて simplememo-api に通知の受け口が要る'
+                            + '（CONSUMPTION_REQUEST の期限は受信から12時間）' },
   inquiry_facts:     { kind: 'implement', label: '問い合わせの再現ファクトを非個人情報として出す',
                        needs: '**取り出す経路は 2026-08-26 に作った**（relay の summarizeReproFacts）。'
                             + '残るのは、それが日報の文面ではなく**リポジトリ側から読める形**で出ること。'
