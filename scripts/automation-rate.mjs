@@ -105,9 +105,22 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
       }
       for (const f of t.evidence) {
         if (typeof f !== 'string') { problems.push(`${at}: evidence の要素が文字列でない`); continue; }
-        // 他リポジトリのパスはこのCIから見えないので存在確認しない
-        // （確認できないものを、確認したことにしない）
-        if (f.startsWith('../')) continue;
+        // **他リポジトリは、見える場所でだけ見る。**
+        // GitHub Actions は1リポジトリしかチェックアウトしないので、そこでは
+        // 確認しようがない（確認できないものを、確認したことにしない）。
+        // ただし3リポジトリが揃ったセッションでは確認できる —— そして
+        // **確認していなかったせいで、取り下げたファイルを指す証跡が
+        // 3件、誰にも気づかれずに残った**（2026-08-27 実測）。
+        // 隣が無ければ黙って飛ばし、在れば見る。**片側でしか鳴らないが、
+        // 鳴らない側は「無い」ではなく「見えない」**。
+        if (f.startsWith('../')) {
+          const sibling = f.split('/').slice(0, 2).join('/');   // ../simplememo-ios
+          if (!exists(sibling)) continue;
+          if (!exists(f)) {
+            problems.push(`${at}: evidence "${f}" が存在しない（隣のリポジトリは在るのに）`);
+          }
+          continue;
+        }
         if (!exists(f)) problems.push(`${at}: evidence "${f}" が存在しない`);
       }
     }
@@ -183,6 +196,21 @@ const SELFTEST_BREAKAGES = [
   ['**散文だけを証跡にしてAI実行に数える**と落ちる', (d) => {
     const t = d.tasks.find((x) => AI_EXECUTES.has(x.executor));
     t.evidence = ['docs/obsidian/AUTOPILOT_RUNBOOK.md'];
+  }],
+  // 2026-08-27。**隣のリポジトリが在るときだけ鳴る規則**なので、
+  // 自己テストも隣が在るときだけ意味を持つ（CI では実データが通ることだけ見る）。
+  ['**隣のリポジトリに無いファイルを証跡にする**と落ちる（隣が見えるときだけ）', (d) => {
+    const t = d.tasks.find((x) => x.evidence.some((e) => e.startsWith('../')));
+    if (!t) throw new Error('前提が崩れた: 他リポジトリを指す証跡が台帳から消えている');
+    const repo = t.evidence.find((e) => e.startsWith('../')).split('/').slice(0, 2).join('/');
+    if (!fs.existsSync(path.join(ROOT, repo))) {
+      // 隣が無い場所（CI）では、この壊し方は落ちなくて正しい。
+      // **落ちないことを「通った」と呼ばない**ので、代わりに別の壊し方を当てる
+      d.tasks[0].evidence = [];
+      d.tasks[0].executor = 'ai_executes_gated';
+      return;
+    }
+    t.evidence.push(`${repo}/src/この-ファイルは-存在しない.ts`);
   }],
   ['提案どまりの行を、証跡を変えずにAI実行へ倒すと落ちる', (d) => {
     const t = d.tasks.find((x) => x.executor === 'ai_proposes' && !x.evidence.some(isExecutionSurface));
