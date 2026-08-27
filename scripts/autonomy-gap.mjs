@@ -185,9 +185,11 @@ export const UNLOCKS = {
                        needs: '**判断も実行も入っている**（planAutoPost / asc_review_reply.rb）。'
                             + '台帳は enabled=true / dry_run=true。あとは1回動いて would_post が'
                             + '出るのを見て dry_run を落とすだけ。'
-                            + '**動かないのは ../simplememo-ios の Actions が storage 上限で'
-                            + 'ジョブを割り当てられないため**（あちらの CLAUDE.md / 2026-08-27）。'
-                            + '9/1のリセットか支出上限で解ける。'
+                            + '回すのは ../simplememo-ios の asc-review-reply.yml（日次 21:40 UTC）。'
+                            // [2026-08-27] ここに一度「あちらの Actions が storage 上限で
+                            // 止まっているので動かない」と書いた。**同じ日に動いていた**
+                            // （00:25Z の #232 の CI が12秒で緑）。前日の観測を、
+                            // 確かめ直さずに現在形で書いた。
                             + '**満たされたことをこのリポジトリから機械で確かめる経路は無い** ——'
                             + '証跡（data/review-responses.json）は非公開側にあり、'
                             + '非公開→公開へ push する経路は作っていない' },
