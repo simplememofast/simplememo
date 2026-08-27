@@ -35,6 +35,7 @@ export const TARGETS = [
   ['en/index.html', 'トップ（英語）'],
   ['llms.txt', '生成AI向けの引用元。**ここが古いと、古い事実が引用として拡散する**'],
   ['about/index.html', '運営者情報'],
+  ['data/distribution-queue.json', '配信の種（X にそのまま投稿される公開ファイル）'],
 ];
 
 /** HTMLのタグを落として本文だけにする。属性値の中の語には反応させない。 */
