@@ -27,7 +27,7 @@
     "  acknowledged … 既知の制約。直す対象ではないので日報では件数だけ出す",
     "                 （消すと『無い』ことになり、毎日出すとノイズになる）"
   ],
-  "last_run_jst": "2026-08-26",
+  "last_run_jst": "2026-08-27",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -237,7 +237,7 @@
       },
       "state": "done",
       "created_jst": "2026-08-25",
-      "last_seen_jst": "2026-08-26",
+      "last_seen_jst": "2026-08-27",
       "closed_jst": "2026-08-25",
       "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）",
       "last_run_jst": "2026-08-25",
@@ -392,7 +392,7 @@
       },
       "state": "done",
       "created_jst": "2026-08-26",
-      "last_seen_jst": "2026-08-26",
+      "last_seen_jst": "2026-08-27",
       "closed_jst": "2026-08-26",
       "evidence": "Actions run 17件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
       "last_run_jst": "2026-08-26",
@@ -422,7 +422,7 @@
       "created_jst": "2026-08-26",
       "last_seen_jst": "2026-08-26",
       "closed_jst": null,
-      "evidence": "2026-08-26 実装。scripts/autopilot-act.mjs の fetchOrphanedCommits + derive の D3b。**台帳が指定した設計は3件目の実データで崩れた。**マージ時 head との差だけを見ると、後続PRで既に main へ着地したコミットまで取り残しに数える（PR #593 で6件中5件が着地済み）。正しいのは ①compare/{マージ時head}...{branch} と ②compare/{base}...{branch} の**積**。実測3件で誤検知ゼロ・見逃しゼロ: #586→1件(ee4e37c) / #547→0件 / #593→1件(2b0a702)。**自動修復はさせない**（auto: null）—— 取り残しの中身は台帳のことも書きかけのこともあり、機械が中身を見ずに cherry-pick すると訂正の生存確認を飛ばす。検知と起票まで。自己検査118項目（積を外すと『後続PRで着地済みを取り残しに数えない』が落ちることを観測）"
+      "evidence": "scripts/autopilot-act.mjs に「orphaned-post-merge」がまだ無い"
     },
     {
       "id": "act-health-591",
@@ -444,7 +444,205 @@
       "created_jst": "2026-08-26",
       "last_seen_jst": "2026-08-26",
       "closed_jst": null,
-      "evidence": "出荷が止まっている（status JSON が当日分に更新されていない）。**判定は監視ワークフローが持つ** —— この行はそれをレーンFの視界に運んでいるだけで、回復の判定もあちらが Issue を閉じることで行う。\nhttps://github.com/simplememofast/simplememo/issues/591"
+      "evidence": "Issue の状態を取得できず判定不能（閉じたという意味ではない）"
+    },
+    {
+      "id": "act-orphaned-pr-670",
+      "title": "PR #670 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/obsidian-sync-implementation-5g9fs1 が、マージ時の head（9a8b489）より1 件先にあり、**それらは main にも無い**: 4d56858。（別の1件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 670
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#670 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-669",
+      "title": "PR #669 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/obsidian-sync-implementation-5g9fs1 が、マージ時の head（2b91511）より1 件先にあり、**それらは main にも無い**: 4d56858。（別の2件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 669
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#669 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-668",
+      "title": "PR #668 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/obsidian-sync-implementation-5g9fs1 が、マージ時の head（8792321）より1 件先にあり、**それらは main にも無い**: 4d56858。（別の3件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 668
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#668 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-660",
+      "title": "PR #660 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/obsidian-auto-20260827 が、マージ時の head（c51306e）より1 件先にあり、**それらは main にも無い**: 813b335。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 660
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#660 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-648",
+      "title": "PR #648 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/simplememo-self-improving-pr-ki8vgo が、マージ時の head（26c0014）より1 件先にあり、**それらは main にも無い**: fb12596。（別の2件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 648
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#648 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-647",
+      "title": "PR #647 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/simplememo-self-improving-pr-ki8vgo が、マージ時の head（7726888）より1 件先にあり、**それらは main にも無い**: fb12596。（別の3件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 647
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#647 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-644",
+      "title": "PR #644 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/simplememo-self-improving-pr-ki8vgo が、マージ時の head（8f581f4）より1 件先にあり、**それらは main にも無い**: fb12596。（別の6件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 644
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#644 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-643",
+      "title": "PR #643 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/simplememo-self-improving-pr-ki8vgo が、マージ時の head（6dd10c3）より1 件先にあり、**それらは main にも無い**: fb12596。（別の7件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 643
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#643 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-pr-642",
+      "title": "PR #642 のマージ後に 1 コミットが取り残されている",
+      "detail": "ブランチ claude/simplememo-self-improving-pr-ki8vgo が、マージ時の head（070cae1）より1 件先にあり、**それらは main にも無い**: fb12596。（別の8件は後続PRで着地済みなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "pr": 642
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-08-27",
+      "last_seen_jst": "2026-08-27",
+      "closed_jst": null,
+      "evidence": "#642 はまだ 1 件先にある"
     }
   ]
 }
