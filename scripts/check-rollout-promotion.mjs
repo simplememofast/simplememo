@@ -86,6 +86,7 @@ export function evaluatePromotion({
 
   // --- フラグの現状 -------------------------------------------------------
   if (!flagState || typeof flagState !== 'object') return unknown(`flags[${flag}]`);
+  if (flagState.globally_killed) return hold('全体キルが立っている — 止めたものを広げない');
   if (flagState.killed) return hold(`${flag} は killed — 止めたものを広げない`);
   if (typeof flagState.rollout !== 'number') return unknown(`flags[${flag}].rollout`);
   if (typeof flagState.updated_at !== 'string') return unknown(`flags[${flag}].updated_at`);
@@ -247,16 +248,19 @@ function readJsonArg(name) {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
-export function planAll({ guard, flags, doc, now, promotedToday = 0 }) {
+export function planAll({ guard, flags, doc, now, promotedToday }) {
   const policy = doc.policy;
-  const keys = Object.keys(flags?.rollouts ?? flags?.flags ?? {});
+  // **数えられなければ上限に当たる側へ倒す。**引数で渡されたときだけそちらを使う。
+  const used = promotedToday === undefined ? countPromotionsToday(flags, now) : promotedToday;
+  const keys = Object.keys(flags?.flags ?? {});
   const plans = keys.map((flag) => {
     const state = normalizeFlagState(flags, flag);
-    return { flag, ...evaluatePromotion({ guard, flag, flagState: state, policy, promotedToday, now }) };
+    return { flag, ...evaluatePromotion({ guard, flag, flagState: state, policy, promotedToday: used, now }) };
   });
   return {
     generated_by: 'scripts/check-rollout-promotion.mjs --plan',
     generated_at: now,
+    promoted_today: used,
     // **通ったものだけでなく、止めたものと理由も返す。**
     // 実行側のログに「なぜ動かなかったか」が残らないと、止まっていることに誰も気づかない。
     plans,
@@ -273,9 +277,26 @@ export function normalizeFlagState(flags, flag) {
       rollout: typeof detail.rollout === 'number' ? detail.rollout : undefined,
       updated_at: detail.updated_at,
       killed: Array.isArray(flags.killed) ? flags.killed.includes(flag) : Boolean(detail.killed),
+      globally_killed: Boolean(flags.globally_killed),
     };
   }
   return null;
+}
+
+/**
+ * **その日すでに露出が広がった回数。**誰が広げたかは見ない。
+ *
+ * 上限が守っているのは「1段目の観測期間」であって「AIの手数」ではない。
+ * 人が朝に一段上げた日に、機械が夕方もう一段上げてよい理由が無い。
+ * 材料（history）が読めなければ **Infinity**（＝必ず上限に当たる）を返す。
+ */
+export function countPromotionsToday(flags, now) {
+  const hist = flags?.history;
+  if (!Array.isArray(hist)) return Number.POSITIVE_INFINITY;
+  const day = String(now).slice(0, 10);
+  return hist.filter((h) => typeof h?.at === 'string' && h.at.slice(0, 10) === day
+    && typeof h?.before?.rollout === 'number' && typeof h?.after?.rollout === 'number'
+    && h.after.rollout > h.before.rollout).length;
 }
 
 // ============================================================
@@ -399,6 +420,9 @@ function selftest() {
     ['killed なフラグは広げない', () => {
       held(broken(fixture(), (f) => { f.flagState.killed = true; }), 'killed');
     }],
+    ['**全体キルが立っていたら広げない**', () => {
+      held(broken(fixture(), (f) => { f.flagState.globally_killed = true; }), '全体キル');
+    }],
     ['drill_ 接頭辞は通さない', () => {
       held(broken(fixture(), (f) => {
         f.flag = 'drill_x';
@@ -432,6 +456,44 @@ function selftest() {
         assert(r.why.startsWith('材料が無い') || r.why.includes('有効になっていない'),
           `${what} を落としたときの理由が「材料が無い」でない: ${r.why}`);
       }
+    }],
+
+    // --- 実行側へ渡す形 ---------------------------------------------------
+    ['**日次の回数は history から数える。誰が広げたかは見ない**', () => {
+      const flags = { history: [
+        { at: '2026-09-10T02:00:00.000Z', key: 'a', before: { rollout: 10 }, after: { rollout: 25 } },
+        { at: '2026-09-10T03:00:00.000Z', key: 'b', before: { rollout: 25 }, after: { rollout: 10 } },
+        { at: '2026-09-09T02:00:00.000Z', key: 'c', before: { rollout: 10 }, after: { rollout: 25 } },
+      ] };
+      const n = countPromotionsToday(flags, NOW);
+      assert(n === 1, `前日ぶんと引き下げを除いて1件のはずが ${n}`);
+    }],
+    ['**history が読めなければ上限に当たる側へ倒す**', () => {
+      assert(countPromotionsToday({}, NOW) === Number.POSITIVE_INFINITY, 'Infinity でない');
+      assert(countPromotionsToday(null, NOW) === Number.POSITIVE_INFINITY, 'Infinity でない');
+    }],
+    ['plan は止めたものと理由も返す（止まっていることに気づけるように）', () => {
+      const f = fixture();
+      const flags = {
+        globally_killed: false,
+        flags: {
+          tf04_progress: { rollout: 25, description: 'canary', updated_at: '2026-09-05T00:00:00.000Z' },
+          drill_x: { rollout: 50, description: 'drill', updated_at: '2026-09-01T00:00:00.000Z' },
+        },
+        history: [],
+      };
+      const plan = planAll({ guard: f.guard, flags, doc: { policy: f.policy }, now: NOW });
+      assert(plan.plans.length === 2, `2件のはずが ${plan.plans.length}`);
+      assert(plan.promote.length === 1 && plan.promote[0].flag === 'tf04_progress', JSON.stringify(plan.promote));
+      const drill = plan.plans.find((p) => p.flag === 'drill_x');
+      assert(drill.decision === 'hold' && drill.why.includes('訓練用フラグ'), drill.why);
+      assert(plan.promoted_today === 0, `promoted_today が ${plan.promoted_today}`);
+    }],
+    ['**実データ（enabled:false）では plan が1件も promote を返さない**', () => {
+      const f = fixture();
+      const flags = { flags: { tf04_progress: { rollout: 25, description: 'c', updated_at: '2026-09-05T00:00:00.000Z' } }, history: [] };
+      const plan = planAll({ guard: f.guard, flags, doc, now: NOW });
+      assert(plan.promote.length === 0, '既定の台帳で promote が出た');
     }],
 
     // --- 台帳の検査 -------------------------------------------------------
