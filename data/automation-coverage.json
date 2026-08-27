@@ -1401,12 +1401,23 @@
     },
     {
       "area": "⑦ 法人経営",
-      "task": "仕訳・請求・領収書・銀行・カード・月次締めの統合",
+      "task": "銀行・カード残高の読み取り（日次）",
+      "executor": "ai_autonomous",
+      "evidence": [
+        "../simplememo-api/src/freee.ts",
+        "../simplememo-api/test/freee.test.ts",
+        "../simplememo-api/docs/freee-setup.md"
+      ],
+      "note": "**2026-08-27 10:00 JST、cron `freee_balance` が本番で初めて走った**（`0 1 * * *`・eligible=3 sent=2 errors=0・reason `days_left=90 complete=true counted=2 unreadable=0`）。同日、freee の画面と突き合わせて **cash_jpy 638,593 / card_jpy -1,600,509 が完全一致**することを人が確認した。カードは負債なので手元資金に足さず別枠にしてある。**書き込み経路は無い**（テストがモジュールに書き込み系の関数名が無いことを固定している）。**2026-08-27、鮮度も機械が言えるようになった。**一覧APIに `with_last_synced_at` / `with_sync_status` を渡すと `last_synced_at` / `sync_status` が返る（freee が2024-11-05に追加）。渡していなかったので7フィールドしか返っていなかった、というのが真相。本番の実測値は口座ごとに3種類に割れた —— GMOあおぞら（API連携）は `success` で `2026-08-26T23:54:28+0900`、楽天カード（CSV手入力）は `disabled`、現金は `unsupported`。**この区別が要点で**、楽天カードに同期時刻が無いのは「古い」からではなく「同期していない」から。区別せずに「時刻が無い＝古い」とすると、同期していない口座を古いと呼ぶ誤判定になる。API は真偽値1つではなく内訳（`synced` / `stale` / `not_syncing` / `no_sync` / `unknown`）を返す —— 潰すと「銀行は今朝同期済み・カードは3週間前の手入力」がどちらに倒しても嘘になる。しきい値（7日）は**分布から出した値ではない**（観測1点）。日次cronが `oldest_sync_age` を残すので、貯まってから狭める。**読み方を4回間違えた記録**は ../simplememo-api/docs/freee-setup.md にある（`up_to_date` は存在しないフィールド／`update_date` は口座レコードの更新日／`wallet_txns.date` は取引日／詳細の404を「エンドポイントが無い」と読んだが実際はパス違い）。"
+    },
+    {
+      "area": "⑦ 法人経営",
+      "task": "仕訳・請求・領収書・月次締めの統合",
       "executor": "nobody",
       "evidence": [],
-      "note": "**2026-08-25、読み取り側だけ実装した**（../simplememo-api/src/freee.ts / test 20件）。口座残高を取り、up_to_date でない口座を合計に入れない形。**仕訳の作成・支払の実行は経路そのものを作っていない**（テストがモジュールに書き込み系の関数名が無いことを固定している）。**executor は nobody のまま** —— 資格情報が入っておらず一度も動いていない。「実装した≠動いた」。オーナーは freee を利用中で税理士もついている。**残る不確定はプラン**（スターターでAPIが使えるかは記述が食い違い確定できない）。手順は ../simplememo-api/docs/freee-setup.md、設計は docs/freee-integration-plan.md",
+      "note": "**残高の読み取りだけが別タスクとして実装済み**（同領域の「銀行・カード残高の読み取り（日次）」）。こちらは手つかず。**分けたのは、片方が動いたことで全体が動いたように数えないため。** 仕訳の作成・支払の実行は不可逆で、`data/authority-matrix.json` の「契約・支払い・送金」が `human_only: [\"すべて\"]` / `status: \"not_implemented\"`。しかも `threshold.note` が**二者承認は未設計**と書いている。着手するなら、実装より先にその承認機構から。",
       "blocker": "external_credential",
-      "unblocked_by": "freee の読み取りは入ったが、銀行・カードの明細連携が無い",
+      "unblocked_by": "残高は読めるようになった。明細（wallet_txns）と仕訳側は未着手",
       "unlock": "bank_feed"
     },
     {
@@ -1728,13 +1739,17 @@
       "task": "返金の検出（Get Refund History）",
       "executor": "nobody",
       "evidence": [
+        "../simplememo-api/src/apple-asn.ts",
+        "../simplememo-api/src/apple-jws.ts",
+        "../simplememo-api/src/der.ts",
+        "../simplememo-api/test/fixtures/asc-test-notification.jws",
         "../simplememo-ios/data/asc-server-api.json",
         "../simplememo-ios/scripts/asc_refund_probe.rb",
         "../simplememo-ios/scripts/lib/asc_api.rb"
       ],
-      "note": "**旧行から切り出した。**旧行は「返金・不正課金・チャージバック対応」で、検出・応答・意見表明が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。 これは**観測だけ**で、外に何も出ない可逆な操作 —— 権限表の非対称でいえばAI側。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 残っているのは実装だけ: `GET /inApps/v2/refund/lookup/{transactionId}` は**取引IDを要求する**ので、まず取引を1つ手に入れる経路が要る（Get Transaction History / 通知）。**そこは叩いていないので、取引IDの出どころが実在するかはまだ書かない。**",
+      "note": "**旧行から切り出した。**旧行は「返金・不正課金・チャージバック対応」で、検出・応答・意見表明が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。 これは**観測だけ**で、外に何も出ない可逆な操作 —— 権限表の非対称でいえばAI側。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 残っているのは実装だけ: `GET /inApps/v2/refund/lookup/{transactionId}` は**取引IDを要求する**ので、まず取引を1つ手に入れる経路が要る（Get Transaction History / 通知）。**そこは叩いていないので、取引IDの出どころが実在するかはまだ書かない。**\n\n**[2026-08-27 追記 — 取引IDの出どころは、探さなくてよかった]** 上で「取引IDの出どころが実在するかはまだ書かない」と保留していた点が解けた。Apple の notificationType の一覧を取って確かめたところ、返金は**通知として押されてくる**: `REFUND`（返金した）／`REFUND_DECLINED`（アプリ内の要求を却下した）／`REFUND_REVERSED`（争議で返金を取り消した）。つまり `refund/lookup` に渡す取引IDを別経路で先に手に入れる必要は無く、**通知が運んでくる。** \n\n同日、その通知を受ける側が揃った: 受け口（simplememo-api の `/webhooks/apple-asn`）、通知URLの設定（Apple の実配信が `first_attempt_result: SUCCESS`）、そして **signedPayload の検証器**（`src/apple-jws.ts`）。検証器は**Apple が実際に署名した TEST 通知**で通ることを確かめてある。信頼の起点は通知に入っていた root ではなく、Apple の公開ページからランナーが取った実物（`data/apple-root-pin.json`・583 bytes / sha256 63343abf…。両者はバイト単位で一致した）。\n\n**残っているのは、受け口が検証器を呼ぶ配線と、通知を残す部分。**後者は simplememo-api の保持台帳（`data/data-retention.json`）に何をどれだけ持つかを書いてからでないと着手しない —— 受け口はいま**意図的に env を取らない**形で、書き込む手段そのものを持っていない。",
       "blocker": "not_started",
-      "unblocked_by": "鍵は通ることが分かったので、残るのは実装。refund/lookup は取引IDを要求するため、取引IDの出どころ（Get Transaction History か通知）を先に1回叩いて確かめる",
+      "unblocked_by": "受け口・通知URL・検証器は揃った（実物のApple署名で検証できることまで確認済み）。取引IDは REFUND 通知が運んでくるので、別経路を探す必要はもう無い。残るのは (1) 受け口から検証器を呼ぶ配線（検証に失敗したとき 200 と 401 のどちらを返すかで Apple の再送の挙動が変わるので、そこを先に決める）と (2) 保持台帳に載せてから残す部分",
       "unlock": "refund_observe"
     },
     {
@@ -1744,23 +1759,14 @@
       "evidence": [
         "../simplememo-api/src/apple-asn.ts",
         "../simplememo-api/src/apple-jws.ts",
-        "../simplememo-api/src/der.ts",
-        "../simplememo-api/src/consumption.ts",
         "../simplememo-api/data/apple-root-pin.json",
-        "../simplememo-api/data/apple-consumption-contract.json",
-        "../simplememo-api/test/apple-asn.test.ts",
-        "../simplememo-api/test/consumption.test.ts"
+        "../simplememo-ios/data/asc-server-api.json",
+        "../simplememo-ios/scripts/asc_refund_probe.rb"
       ],
-      "note": "**旧行の「上限額を決めない限り自動側へ置けない」という前提は誤りだった。**2026-08-27 に Apple のドキュメントを取って確かめた —— **返金を発行するエンドポイントが存在しない。**あるのは Get Refund History（履歴）、Refund lookup（照会）、Send Consumption Information（消費情報の送信）の3つで、**機械が返金できないので上限額は何も止めない。** 実在するのはこちら: 顧客が返金を要求すると Apple が CONSUMPTION_REQUEST を送り、開発者は `PUT /inApps/v2/transactions/consumption/{transactionId}` で応える。**期限は「受信から12時間以内」**（同エンドポイントのドキュメントに明記）。応えなければ Apple はこちらのデータ無しで判断する。**12時間は人が確実に守れる窓ではない**（個人開発・時差・睡眠）。だから自動化の利得は「速さ」ではなく**「窓を落とさないこと」**にある。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 **通知URLを設定する経路が機械には無い。**App Store Connect API の索引（webhooks は BUILD_UPLOAD_STATE_UPDATED など**ビルド・審査の事象だけ**で、CONSUMPTION_REQUEST は入っていない）と App Store Server API の索引の**両方を数えた**が、通知URLを設定する面はどちらにも無かった。**人が App Store Connect の画面で1回設定する**しかない。設定さえ済めば、受け口も応答も機械側で完結する。 受け口自体もまだ無い（simplememo-api の /v1/* にASC通知の口は1本も無い）。 **述語について**: 待ちが解けたかどうかは、隣の実測台帳（../simplememo-ios/data/asc-server-api.json）を probe が書き直したときに分かる。**このリポジトリのCIには隣が無いので、CIからは常に「まだ待っている」と読める** —— 3リポジトリの揃ったセッションでだけ「もう届いている」と鳴る。散文で「未設定」と書いておくよりはましだが、**片側でしか鳴らない述語であることは承知の上**（隣が無ければ満たされない側に倒れるので、見落とす方向ではなく待ち続ける方向に外れる）。 **[2026-08-27] 通知URLは設定された**（`notification_url_configured: true`。実物のTEST通知も1通取得済み）。受け口・署名検証・応答の組み立てまで実装が揃った —— 受け口は `POST /webhooks/apple-asn`、検証は `apple-jws.ts`（**実物のチェーンで確かめてある**）、root は `apple-root-pin.json` に留めてある。応答の組み立ては `consumption.ts` で、**`refundPreference` を出さないことを3本の検査が守っている**（結果に現れない／ソースに代入行が無い／契約ファイルに定数も無い）。 **executor は nobody のまま。**実物の通知は `notificationType: TEST` だけで、**CONSUMPTION_REQUEST の枝は一度も通っていない。**加えて実送信は `CONSUMPTION_RESPONSE_DRY_RUN` が既定で止めており、`ASC_SERVER_API_*` も未投入。**「実装した」と「応答した」を同じ語で呼ばない。** **同意が無いので、届いても送るのは `customerConsented: false` の1欄だけ**（下の「返金の消費データ共有の同意」を参照）。",
-      "blocker": "external_credential",
-      "unblocked_by": "**実際に CONSUMPTION_REQUEST が1通届いて、期限内に応答できたとき。**その手前に人の操作が2つ残る —— PR #190 のマージと、`ASC_SERVER_API_*` の投入＋`CONSUMPTION_RESPONSE_DRY_RUN` を降ろす判断。**降ろすのは外向きの操作なので機械の側では決めない。**",
-      "unlock": "refund_notification_url",
-      "blocked_on": [
-        {
-          "file": "../simplememo-ios/data/asc-server-api.json",
-          "contains": "\"notification_url_configured\": true"
-        }
-      ]
+      "note": "**旧行の「上限額を決めない限り自動側へ置けない」という前提は誤りだった。**2026-08-27 に Apple のドキュメントを取って確かめた —— **返金を発行するエンドポイントが存在しない。**あるのは Get Refund History（履歴）、Refund lookup（照会）、Send Consumption Information（消費情報の送信）の3つで、**機械が返金できないので上限額は何も止めない。** 実在するのはこちら: 顧客が返金を要求すると Apple が CONSUMPTION_REQUEST を送り、開発者は `PUT /inApps/v2/transactions/consumption/{transactionId}` で応える。**期限は「受信から12時間以内」**（同エンドポイントのドキュメントに明記）。応えなければ Apple はこちらのデータ無しで判断する。**12時間は人が確実に守れる窓ではない**（個人開発・時差・睡眠）。だから自動化の利得は「速さ」ではなく**「窓を落とさないこと」**にある。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 **通知URLを設定する経路が機械には無い。**App Store Connect API の索引（webhooks は BUILD_UPLOAD_STATE_UPDATED など**ビルド・審査の事象だけ**で、CONSUMPTION_REQUEST は入っていない）と App Store Server API の索引の**両方を数えた**が、通知URLを設定する面はどちらにも無かった。**人が App Store Connect の画面で1回設定する**しかない。設定さえ済めば、受け口も応答も機械側で完結する。 受け口自体もまだ無い（simplememo-api の /v1/* にASC通知の口は1本も無い）。 **述語について**: 待ちが解けたかどうかは、隣の実測台帳（../simplememo-ios/data/asc-server-api.json）を probe が書き直したときに分かる。**このリポジトリのCIには隣が無いので、CIからは常に「まだ待っている」と読める** —— 3リポジトリの揃ったセッションでだけ「もう届いている」と鳴る。散文で「未設定」と書いておくよりはましだが、**片側でしか鳴らない述語であることは承知の上**（隣が無ければ満たされない側に倒れるので、見落とす方向ではなく待ち続ける方向に外れる）。\n\n**[2026-08-27 追記 — 待っていた設定は済んだ。そして本当の門は別にあった]** オーナーが App Store Connect で通知URLを設定した（`https://api.simplememofast.com/webhooks/apple-asn`）。実測で裏が取れている: `POST /inApps/v1/notifications/test` が HTTP 200、`notification_url_configured: true`、そして **Apple の実配信が `first_attempt_result: SUCCESS`**（../simplememo-ios/data/asc-server-api.json・run 33067382043）。受け口も検証器も揃い、**Apple が実際に署名した通知を検証できることまで確かめた。**\n\n**それでもこの行は機械に渡せない。**Send Consumption Information のドキュメントを取って読んだ:\n\n  「If the customer provided consent, respond by calling this API … **If not, don't respond to the CONSUMPTION_REQUEST notification.**」\n  「The App Store server **rejects requests that have a customerConsented value other than `true`** by returning an HTTP 400 error with an InvalidCustomerConsentedError」\n\n**`customerConsented: false` は「正直な応答」ではなく、400 で弾かれる。**応答するには**顧客がアプリ内で明示的に opt-in している**必要があり、Apple は「いつでも撤回できること」「撤回の方法を示すこと」「privacy label に書くこと」まで要求している。SimpleMemo にはその同意フローが無い。\n\n**ここで止まるのは実装が足りないからではない。**「顧客の利用状況を Apple に渡して、その顧客の返金要求に反論してよいか」を顧客に opt-in で問う、という製品の判断が先にある。プロダクトの立て付け（何も所有しない・整理させない）と正面から擦れる話で、**しかも現時点の実績は購入1件**（../simplememo-ios/data/revenue/series.json）。得られるものが小さく、聞くこと自体に costs がある。**だから機械の側で既成事実にしない。**\n\n（前の版はここを external_credential と書いていた。設定が済んだのでその塞ぎは外れたが、外れた先に出てきたのは実装ではなく境界だった。**塞ぎが1つ外れても、その先が自動側とは限らない。**）",
+      "blocker": "policy_boundary",
+      "unblocked_by": "**顧客に「利用状況を Apple に渡してよいか」を opt-in で聞く同意フローを作るかどうか**、というオーナーの判断。Apple は同意なしの応答を 400 で弾くので、同意フローが無い限り**正しい振る舞いは「応答しない」**（ドキュメントの明文）。通知URL・受け口・検証器は揃っているので、判断が「作る」に倒れたときの残作業は アプリ側の同意UI＋privacy label と、relay 側の応答実装だけ",
+      "unlock": null
     },
     {
       "area": "⑨ マネタイズ",
@@ -2374,16 +2380,6 @@
         "../simplememo-api/src/rollout-guard.ts"
       ],
       "note": "2026-08-25実装。**declared_at <= shipped_at を強制する** —— 出した後で指標を決めると、出た結果に合う指標を選べてしまう。指標は rollout-guard の MetricDefinition と同じ形（key / numerator / denominator / higher_is_better）で書き、段階公開の bucketOf が決める露出群・対照群の上で測る。**別のA/B基盤を建てない。****安全指標（launch_ok / send_success）を成功指標にできない** —— 壊していないことは効いたことではなく、混ぜると何を出しても成功になる（使うなら理由を書かせる）。判定は運転記憶と同じ5値で、**基準の数字が無いのに『効いた／外した』と書けない**（growth のタイトル実験7件が全件これで潰れた規律を、機能側へ移した）。self-test 13件"
-    },
-    {
-      "area": "⑨ マネタイズ",
-      "task": "返金の消費データ共有の同意（customerConsented）",
-      "executor": "intentional_no",
-      "evidence": [
-        "../simplememo-api/src/apple-asn.ts",
-        "../simplememo-api/src/consumption.ts"
-      ],
-      "note": "**取らないと決めた（2026-08-27）。**Apple は `customerConsented: false` のとき**ほかの欄を一切使わない**ので、同意が無ければ応答は情報を運ばない。それでも取らないのは、取り方がどれも成立しないため —— **既定ONは同意ではない**（Apple 自身が \"only if the customer consented\" と書いている）／**既定OFFのトグルは誰も触らない**（返金するとき用の設定を事前に入れる人はいない）／**返金申請中に聞くのは敵対的**（こちらが知るのは通知が来た後で、送るデータは相手の返金に不利に働きうる）。UIを1つ増やすこと自体が VISION と逆行する。 **⑪「収集同意」とは別物**（あちらは App Analytics の共有オプトイン）。 **決定であって、できないことではない。**同意ができた日に効く配線は既に入っていて、`lookupConsumptionConsent()` の1関数を変えるだけで動く（無いことを1か所に置いてある）。**この行は分母から外れるので、率は動かない**（65.2% のまま）。"
     }
   ],
   "$since_note": [
