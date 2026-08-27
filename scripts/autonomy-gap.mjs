@@ -233,6 +233,22 @@ export const UNLOCKS = {
                        needs: '書面契約は無く規約への同意で成立。現状40マスすべて unreviewed' },
   impl_product:      { kind: 'implement', label: 'プロダクト側を作る',
                        needs: 'PRDの定型化 / カナリアを本番で1周 / 課金失敗の回復 / 障害案内の一斉配信' },
+  // [2026-08-27] オーナー判断「お金周りを除いて渡す」で、境界24件のうち15件が
+  // policy_boundary から外れた。**外れた先は自動側ではなく実装側。**
+  // 下の2つは、その15件が「何をすれば動くか」を分けたもの。
+  impl_machine_gate: { kind: 'implement', label: '不可逆な領域の機械ゲートを作る',
+                       needs: '**承認を外すには権限表が machine_gate を要求する** —— '
+                            + '実在する checker / export された関数 / kill switch の経路 / '
+                            + '正の日次上限 / 材料が無いときは止まる（holds_when_unknown）。'
+                            + '**「ゲートがあります」と1行書いても外れない。**'
+                            + '対象は App Store公開・App Review提出・段階公開の拡大・'
+                            + 'PR TIMES配信・削除要求への対応・危機対応・ChatOps起動・'
+                            + '収集同意・本番での停止訓練' },
+  impl_granted:      { kind: 'implement', label: '境界が外れた可逆な領域を実装する',
+                       needs: '権限は渡ったので、あとは作るだけ —— SNS投稿の経路復旧 / '
+                            + 'タグ作成からTestFlight配信まで / Kill Switch を機械が叩く経路 / '
+                            + '要望から設計への落とし込み / 課金導線の改善 / '
+                            + '推論をどこで回すか（VISION §14 の決着が先）' },
   impl_backlog:      { kind: 'implement', label: 'バックログの作り方を直す',
                        needs: '**追加の候補しか持っていない。**減らす提案を採点対象に入れ、中期のロードマップを組み立てる経路を作る' },
   impl_measurement:  { kind: 'implement', label: 'North Star Metric を実測する',
