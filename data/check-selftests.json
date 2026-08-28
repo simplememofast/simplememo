@@ -498,8 +498,8 @@
     {
       "script": "scripts/vendor-terms.mjs",
       "state": "demonstrated",
-      "at": "2026-08-26",
-      "broke": "壊し5通りを実測。**script/style を落とさない**と「script の中身を本文に数えている」で落ちる（殻を弾く仕掛けを自分で無効にする形）／**取得失敗で指紋を null にする**と「取得失敗で台帳の指紋を消している」／**改定で判定を戻さない**と4件／**not_applicable まで戻す**と2件。**1つは最初、落ちなかった** —— 長さの下限を 0 にしても、殻の検体に規約らしい語が無く語の判定が代わりに弾いていた（テストが正しい理由で通っていた）。現実の殻は <title>Terms of Service</title> を持つので looksLikeTerms(\"Terms of Service\") を検体に足し、下限を 0 にすると落ちることを確認した"
+      "at": "2026-08-28",
+      "broke": "壊し6通り目を追加。**改定で判定を戻すときに `reviewed_by` を落とさない**と「改定後も reviewed_by が残っている」が落ちる（`draft_note` / `risk_note` も同じ）。判定だけ戻して読み手の記録を残すと、**中身の無い『AIの下書きどまり』の印が付いたまま**になり、check-corporate の集計にも出続ける。`reviewed_at` を null にするのと同じ理由なので、同じ場所で落とすようにした。\n\n以下は 2026-08-26 の記録。壊し5通りを実測。**script/style を落とさない**と「script の中身を本文に数えている」で落ちる（殻を弾く仕掛けを自分で無効にする形）／**取得失敗で指紋を null にする**と「取得失敗で台帳の指紋を消している」／**改定で判定を戻さない**と4件／**not_applicable まで戻す**と2件。**1つは最初、落ちなかった** —— 長さの下限を 0 にしても、殻の検体に規約らしい語が無く語の判定が代わりに弾いていた（テストが正しい理由で通っていた）。現実の殻は <title>Terms of Service</title> を持つので looksLikeTerms(\"Terms of Service\") を検体に足し、下限を 0 にすると落ちることを確認した"
     },
     {
       "script": "scripts/vendor-clause-worksheet.mjs",

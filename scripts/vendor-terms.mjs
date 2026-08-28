@@ -152,6 +152,14 @@ export function applyVerdict(row, r, today) {
     }
     if (reset.length) {
       next.reviewed_at = null;
+      // [2026-08-28] **判定と一緒に「誰が読んだか」も落とす。**
+      // reviewed_by / draft_note / risk_note は**前の本文に対する記録**なので、
+      // 判定だけ戻して残すと「AIの下書きどまり」の表示や risk の理由だけが
+      // 生き残り、**中身の無い印が付いたまま**になる。
+      // reviewed_at を null にするのと同じ理由で、同じ場所で落とす。
+      delete next.reviewed_by;
+      delete next.draft_note;
+      delete next.risk_note;
       next.reset_reason = `本文が改定された（${r.before} → ${r.fingerprint}・${today}）`
         + ' — **前の判定は前の本文に対するもの。**読み直すまで unreviewed';
     }
@@ -225,10 +233,16 @@ export function selftest() {
 
   // --- 改定を受けた書き換え ---
   const row = { id: 'x', liability_cap: 'ok', ip: 'risk', personal_data: 'unreviewed',
-                governing_law: 'not_applicable', reviewed_at: '2026-08-01', fingerprint: 'aaa' };
+                governing_law: 'not_applicable', reviewed_at: '2026-08-01', fingerprint: 'aaa',
+                reviewed_by: 'ai_draft', draft_note: '前の本文を読んだ記録', risk_note: '前の本文への理由' };
   const changed = applyVerdict(row, { verdict: 'changed', fingerprint: 'bbb', before: 'aaa' }, '2026-08-26');
   eq(changed.row.liability_cap, 'unreviewed', '**改定後も ok のまま**（前の本文への判定が残る）');
   eq(changed.row.ip, 'unreviewed', '改定後も risk のまま');
+  // [2026-08-28] **誰が読んだかも、前の本文に対する記録。**判定だけ戻して残すと
+  // 「AIの下書きどまり」の表示や risk の理由だけが生き残り、中身の無い印が付いたままになる。
+  eq(changed.row.reviewed_by, undefined, '**改定後も reviewed_by が残っている**（中身の無い印が付いたままになる）');
+  eq(changed.row.draft_note, undefined, '改定後も draft_note が残っている');
+  eq(changed.row.risk_note, undefined, '改定後も risk_note が残っている');
   // **not_applicable は戻さない。**戻すと毎回の改定で全社が赤くなり、読まれなくなる
   eq(changed.row.governing_law, 'not_applicable', 'not_applicable まで戻している');
   eq(changed.row.reviewed_at, null, '読み直し前なのに reviewed_at が残っている');
