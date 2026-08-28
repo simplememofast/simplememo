@@ -115,6 +115,27 @@ jobs:
       - name: /en/ pages seed the reader's locale
         run: python3 scripts/inject_locale_seed.py --check
 
+      # 【DL意図 × 課金意図】**1つの数字がDLと課金の両方を表すのをやめる。**
+      #
+      # Premium が売っているのは機能ではなく送信回数の上限（Free 1日3通 → 無制限）。
+      # だから課金するのは「毎日何度もキャプチャする人」だけで、
+      # **「無料のメモアプリを探している人」をいくら集めてもそこは増えない。**
+      #
+      # 課金意図は**宣言**（手入力）である。ct= 別のインストール／課金は
+      # このリポジトリに無い（公開なので分類列ごとの内訳を置かない方針で、
+      # ASCの列も Source Type / Page Type までで Campaign が無い）。
+      # だから**今日から反証できる実測を1つ持たせてある** —— クエリ文字列から数える
+      # 「無料狙い」の割合。高く宣言した面がそこで無料狙いに寄っていたら、
+      # --check が落ちる。
+      #
+      # ここで走らせるのは自己テストと --check の両方。--check が守るのは
+      # 「宣言が実測に殴られていないこと」だけで、宣言の中身そのものは守らない
+      # （守れない —— 実測が無い）。
+      - name: Intent axes (DL vs monetization)
+        run: |
+          node growth/scripts/intent-axes.mjs --selftest
+          node growth/scripts/intent-axes.mjs --check
+
       # 【獲得面ミックス】「SEOが伸びている」を、事業の言葉に割ったまま保つ。
       #
       # 総クリックだけを見ていると、情報記事だけが伸びている状態と獲得面が

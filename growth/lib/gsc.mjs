@@ -384,7 +384,19 @@ export const BUSINESS_RELEVANCE = [
   [/^\/(captio|captio-alternative)\//, 1.0],
   [/^\/blog\/captio/, 1.0],
   [/^\/(apple-watch|note-to-email|templates)\//, 0.9],
+  // **自分宛メール族。**製品の中核機能そのものを扱う記事群で、`/note-to-email/`（0.9）と
+  // 同じ検索意図に応える。規則が無く既定 0.5 に落ちていた —— 2026-08-24窓で
+  // /en/iphone-shortcuts-email-guide/ だけで1,813表示あり、**未宣言の中で最大**だった。
+  [/^\/(send-email-to-yourself|iphone-shortcuts-email-guide)\//, 0.9],
+  [/^\/blog\/(email-yourself|email-self-task|how-to-email-yourself)/, 0.9],
+  // メール経由でObsidianへ入れる話は Obsidian クラスタ（`/blog/obsidian-` と同じ扱い）。
+  // スラッグが `obsidian-` で始まらないので既存規則に当たっていなかった。
+  [/^\/blog\/email-to-obsidian/, 1.0],
   [/^\/vs\//, 0.7],
+  // **カテゴリ比較・ランキング。**「どのメモアプリにするか」を今決めている読者なので、
+  // インストールへの距離は `/vs/` と同じ 0.7。**課金意図は別軸で 0.2 に置いてある**
+  // （無料狙いが実測95.6%）。この2つが割れることが、2軸目を足した理由そのもの。
+  [/^\/blog\/(free-memo-apps|best-memo-apps|offline-memo-apps|ios-quick-capture-comparison|google-keep-shutdown)/, 0.7],
   [/^\/(use-cases|guides|methods|comparison|how-to)\//, 0.7],
   // LINE Keep readers are asking where a LINE feature went, not shopping for a
   // memo app — information-only by the brief's own read, so 0.3. This single
@@ -422,4 +434,123 @@ export function businessRelevance(pagePath) {
   const p = String(pagePath).replace(LOCALE_PREFIX, '') || '/';
   for (const [re, v] of BUSINESS_RELEVANCE) if (re.test(p)) return v;
   return 0.5;
+}
+
+/**
+ * 課金相当性 — **その面の読者が「1日3通」の天井に当たる使い方をするか。**
+ *
+ * businessRelevance は「インストールにどれだけ近いか」の1次元で、**DLと課金を
+ * 同じ数字で表している。**この2つは実際には割れる。いちばん分かりやすいのが
+ * 「メモアプリ 無料」で、DLの母数としては優秀だが、**Free（1日3通）で
+ * 足りる読者を集めている可能性が高い。**
+ *
+ * 値の根拠は値付けそのもの（data/site-constants.json）:
+ *
+ *     Free     1日3通
+ *     Premium  月500円 / 年5,000円 — 送信無制限
+ *
+ * **Premium が売っているのは機能ではなく回数の上限**なので、課金するのは
+ * 「毎日何度もキャプチャする習慣を持つ人」だけである。したがってこの軸が
+ * 見ているのは題材への関心ではなく、**捕捉の頻度**。
+ *
+ * **段は3つしか置かない（1.0 / 0.5 / 0.2）。**最初 0.7 や 0.3 を混ぜて5段にしたが、
+ * 実測すると 218ページ中129ページが businessRelevance との差 0.1〜0.2 に収まり、
+ * **2軸目のほとんどが「1軸目から少し引いた値」になっていた。**
+ * 差が 0.1 の2つの手入力値に意味は無い。刻めるだけの根拠が無いところは刻まない。
+ *
+ * ⚠ **この軸は宣言であって実測ではない。**
+ *
+ * 検証には ct= 別のインストール／課金が要るが、**このリポジトリには無い。**
+ * growth/data/appstore は列名と合計しか持たず（公開リポジトリなので分類列ごとの
+ * 内訳を置かない方針）、`App Downloads Standard` の列も Source Type / Page Type までで
+ * Campaign が無い。突合するなら生データを持つ simplememo-ios 側でやる。
+ *
+ * **代わりに、今日から反証できる実測を1つ用意してある** —— freeSeekingShare()。
+ * 「無料」「広告なし」等を含むクエリからの表示が、その面の何割かを数える。
+ * 課金相当性を高く宣言した面が実際には無料狙いのクエリで出ているなら、
+ * **その宣言は間違っている。**intent-axes.mjs がこの矛盾を出す。
+ */
+export const MONETIZATION_RELEVANCE = [
+  // ── 高 1.0：使い方そのものが「1日に何度も」を含む ────────────────
+  // ここだけは根拠が値付けから直接引ける。Premium が売っているのは回数の上限で、
+  // **画面を見ないキャプチャと保管庫への日次追記は、1回で終わらない。**
+  // （VISION §3.2 の Tier 1「画面を見ない Capture」がそのままこの層）
+  [/^\/$/, 1.0],
+  [/^\/(obsidian|apple-watch-obsidian)\//, 1.0],
+  [/^\/blog\/obsidian-/, 1.0],
+  [/^\/(siri|hands-free|voice-input|fastest-voice-memo|apple-watch)\//, 1.0],
+  // 自分宛メールで捕まえ続ける流儀を名指しで探している人は、**既にその回数を出している。**
+  [/^\/(captio|captio-alternative)\//, 1.0],
+  [/^\/blog\/captio/, 1.0],
+
+  // ── 低 0.2：無料狙い、または一度きりの答え探し ───────────────────
+  // **この層のうち /blog/free-memo-apps だけが実測に裏づけられている**
+  // （freeSeekingShare 95.6% / 2026-08-24窓）。残りは宣言。
+  [/^\/blog\/free-memo-apps/, 0.2],
+  [/^\/blog\/(best-memo-apps|memo-app-hikaku|how-to-choose|open-source-memo|student-memo)/, 0.2],
+  [/^\/blog\/(offline-memo-apps|ios-quick-capture-comparison|google-keep-shutdown)/, 0.2],
+  // LINE Keep の行き先を訊いているだけ。保存先を1つ決めたら終わる。
+  [/^\/(line-keep|vs\/line-keep-memo)\//, 0.2],
+  [/^\/blog\/line-keep/, 0.2],
+  [/^\/(glossary|devlog|about|faq|contact|privacy|terms|legal|voices)\//, 0.2],
+
+  // ── 中 0.5：道具の常用者だが、頻度は分からない ──────────────────
+  // **ここを 0.7 や 0.6 に刻まない。**刻めるだけの根拠が無い。
+  // 乗り換え検討者も手法の実践者も「よく書く人」ではあるが、
+  // 1日3通を超えるかは測っていない。
+  [/^\/(note-to-email|ai-tags|templates)\//, 0.5],
+  // 自分宛メール族。**DLは 0.9 だが課金は 0.5。**「自分にメールする方法」を
+  // 一度知りたいだけの読者と、毎日それをやる読者を、この軸は区別できない。
+  [/^\/(send-email-to-yourself|iphone-shortcuts-email-guide)\//, 0.5],
+  [/^\/blog\/(email-yourself|email-self-task|how-to-email-yourself)/, 0.5],
+  [/^\/blog\/email-to-obsidian/, 1.0],
+  // 暗号化・セキュリティ・プライバシーの比較。道具を真剣に選んでいる読者だが、
+  // **捕捉の頻度は分からない。**DL側は既存の `memo-app-` 規則で 0.5。
+  [/^\/blog\/(memo-app-encryption|memo-app-security|memo-app-privacy)/, 0.5],
+  [/^\/methods\//, 0.5],
+  [/^\/vs\//, 0.5],
+  [/^\/(use-cases|guides|how-to|comparison)\//, 0.5],
+];
+
+export function monetizationRelevance(pagePath) {
+  // 既定は「中」。**既定だけの段を作らない** —— 判断していないことを
+  // 独自の値で表すと、あとから「そう決めた」と読めてしまう。
+  if (!pagePath) return 0.5;
+  const p = String(pagePath).replace(LOCALE_PREFIX, '') || '/';
+  for (const [re, v] of MONETIZATION_RELEVANCE) if (re.test(p)) return v;
+  return 0.5;
+}
+
+/**
+ * **無料を明示して探しているクエリ。**課金相当性の宣言を反証するための実測。
+ *
+ * 語をここに固定してあるのは、**あとから語を足して都合のよい割合を作れないように**
+ * するため。増やすときは kpi-definitions.json の version を上げることになる
+ * （check-definitions.mjs が計算元のチェックサムを見ている）。
+ */
+export const FREE_SEEKING = /無料|むりょう|広告なし|課金なし|0円|フリーソフト|\bfree\b/i;
+
+/**
+ * ページごとの「無料狙いクエリからの表示」割合。**query-pages の可視分のみ。**
+ *
+ * GSC は下位クエリを匿名化して返さない（2026-08-24窓では表示の約64%が匿名化）。
+ * だから**これは下限ではなく、可視スライスの中の割合**であって、
+ * ページ全体の割合ではない。**0% を「無料狙いが無い」と読まないこと。**
+ */
+export function freeSeekingShare(queryPages, { minImpressions = 100 } = {}) {
+  const agg = new Map();
+  for (const r of queryPages || []) {
+    const p = toPath(r.page);
+    const cur = agg.get(p) || { impressions: 0, free: 0 };
+    cur.impressions += r.impressions;
+    if (FREE_SEEKING.test(r.query)) cur.free += r.impressions;
+    agg.set(p, cur);
+  }
+  const out = new Map();
+  for (const [p, v] of agg) {
+    // **母数が足りない面では割合を作らない。**1クエリで跳ねる。
+    if (v.impressions < minImpressions) continue;
+    out.set(p, { ...v, share: v.free / v.impressions });
+  }
+  return out;
 }
