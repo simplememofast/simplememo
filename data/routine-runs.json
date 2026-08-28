@@ -68,7 +68,7 @@
     "副系のプロンプトには運用の中身がそのまま入っていて、ここが要るのは",
     "「走ったか」だけ。**要らないものを持つと、置き場所の判断が別の問題になる。**"
   ],
-  "observed_at": "2026-08-28T04:45:16Z",
+  "observed_at": "2026-08-28T10:14:58Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -104,10 +104,28 @@
       "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
       "found_at": "2026-08-28",
       "why": "**副系B（08:30 JST・ccr-0830）。副系Aと同じ判断・同じ根拠。**副系Bは「主系と副系Aの両方が不発の日」だけ動く3段目なので、Aを止めたままにする以上こちらを単独で戻す意味は無い。**戻すときはAから先に**（名前にもそう書いた）"
+    },
+    {
+      "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
+      "found_at": "2026-08-28",
+      "why": "**副系の写しの取り直しを Routines UI で作った回。実測で不可と分かって止めた。**この写し（列挙そのもの）が根拠になっている: `created_via: \"http_api\"` で、`derived_state.folders_state` が `FOLDERS_STATE_NONE` —— **発火するセッションにリポジトリが付かない。**実走は `last_run` のとおり SUCCEEDED（05:42:56Z → 05:46:33Z・3分36秒）だが、**ブランチもPRも作られなかった。**\n\n**「成功」表示を根拠にしないこと**が、この行の要点。status は「セッションが最後まで走った」しか言っておらず、**やるはずのことをやったかは何も言っていない。**判定はブランチ・PR・`observed_at` の3つで、そのどれも動いていない。\n\n止めた理由は「壊れているから」ではなく「**この経路では届かないから**」。毎日 03:00 に走らせても写しは古いままで、`max_snapshot_age_days` の側だけが将来赤くなる —— **直す手立てが誰にも無い検査を、日次で立て続けることになる。**\n\n**戻すのは、経路が変わったとき。**残っている未検証は 「既存の副系Routine（環境IDを持ち、現にPRを作っている）のセッションが MCP を持つか」と「自己バインド（既存セッションへ配信されるので、そのセッションのMCPが使える）」の2つ（`data/automation-coverage.json` の ⑩「実行の完全記録（副系）」と同じ2つ）。どちらかが通れば、この Routine ではなくそちらを主体にする"
     }
   ],
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",
   "routines": [
+    {
+      "id": "trig_01155FSgJxnmFUjncRWnddZy",
+      "name": "審査結果と App Crashes の到着待ち",
+      "cron_expression": null,
+      "run_once_at": "2026-08-28T10:50:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-08-28T10:50:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
+    },
     {
       "id": "trig_012yF8RNZ3seSbKL1dRpxhGY",
       "name": "カナリア48時間後 — 判定を見て…",
@@ -133,6 +151,19 @@
       "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-07-31T23:49:27.905934572Z",
       "last_run_finished_at": "2026-07-31T23:53:00.199446Z"
+    },
+    {
+      "id": "trig_018h8v63BhVwqmqcmeuFoAZN",
+      "name": "item 1: Source Info の実測を読む",
+      "cron_expression": null,
+      "run_once_at": "2026-08-28T12:30:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-08-28T12:30:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     },
     {
       "id": "trig_01ESF9AHax6buS9X1pdFv657",
@@ -175,7 +206,7 @@
     },
     {
       "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
-      "name": "SimpleMemo マーケデータ 週次スナップショット",
+      "name": "SimpleMemo 週次 BigQuery退避＋有効期限監視（クラウド／ブラウザ分はMacのローカルタスク）",
       "cron_expression": "45 23 * * 1",
       "run_once_at": null,
       "enabled": true,
@@ -200,6 +231,19 @@
       "last_run_finished_at": "2026-08-25T23:35:54.069791Z"
     },
     {
+      "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
+      "name": "【停止 2026-08-28・実測で不可】副系の写しの取り直し（Routineはリポジトリを持てない）",
+      "cron_expression": "0 3 * * *",
+      "run_once_at": null,
+      "enabled": false,
+      "bound_session": false,
+      "next_run_at": "2026-08-29T03:02:41.351439633Z",
+      "last_fired_at": "2026-08-28T05:42:56.590228Z",
+      "last_run_status": "SUCCEEDED",
+      "last_run_fired_at": "2026-08-28T05:42:56.566743626Z",
+      "last_run_finished_at": "2026-08-28T05:46:33.007462Z"
+    },
+    {
       "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
       "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系A v3（07:30 JST・ccr-0730）— 主系+再試行で空白日ゼロ／週次利用上限に実際に当たっているため有料の副系は戻さない",
       "cron_expression": "30 22 * * *",
@@ -211,19 +255,6 @@
       "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-08-25T22:33:17.840682217Z",
       "last_run_finished_at": "2026-08-25T22:34:24.794429Z"
-    },
-    {
-      "id": "trig_01Vj9QQ4nur8vHTfiHXrkuan",
-      "name": "#244 のマージ待ち確認",
-      "cron_expression": null,
-      "run_once_at": "2026-08-28T05:12:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-08-28T05:12:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
     }
   ]
 }
