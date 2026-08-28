@@ -643,6 +643,27 @@
       "last_seen_jst": "2026-08-27",
       "closed_jst": null,
       "evidence": "#642 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-subscription-age-bucket-off-by-one",
+      "title": "SubscriptionTelemetry の経過日数バケットが境界で1日ずれる（simplememo-ios）",
+      "detail": "**2026-08-28、FastUnit を PR Check に載せた初回の実行で出た実バグ。**\n\n```\nSimpleMemoTests/SubscriptionTelemetryTests.swift:51\nXCTAssertEqual failed: (\"Optional(\\\"d0_7\\\")\") is not equal to (\"Optional(\\\"d8_30\\\")\")\n  - 経過 8 日は d8_30 に入ること\n```\n\n**なぜ効くか。** `d31_60` は月額リテンションが 88% → 50% に落ちる区間（ASC実測 2026-08-04）で、L-2 が測ろうとしている崖そのもの。**境界が1日ずれたまま集計すると、崖の位置を1日ずらして読む。**\n\n**分かっていること。** 分岐の表（`case 8...30: \"d8_30\"`）は正しい。`QATestCase` は `continueAfterFailure = false` なので (0,7) は通り (8) が最初の失敗 —— 壊れているのは `days` の導出側で、8日前に作った日付から 7 が出ている。`Build - iOS` は同じビルドで SUCCEEDED。\n\n**仮説（未検証）。** `SubscriptionTelemetry` は開始日を UserDefaults に `Double` で往復させる。`Date` の内部は参照日基準（≈7.8e8）で `timeIntervalSince1970` は ≈1.787e9 —— 指数が変わるので **この往復は厳密には可逆でない**（誤差サブマイクロ秒）。復元後がわずかに後ろへずれると経過が8日に届かず `dateComponents([.day])` が 7 を返す。観測と一致する。\n\n**確かめていない。**このセッションの環境に Swift ツールチェーンが無く実行できない。**辻褄が合うことを原因の証明に使わない。**\n\n**直す向き（仮説が正しければ）。** 保存または読み出しで **floor** する。`start` を切り捨てると復元後は必ず真の開始日以前になり、経過は8日以上になって `.day` が 8 を返す。\n\n⚠️ **`rounded()` では直らない。**四捨五入は 0.5 秒まで**後ろにもずれる**ので、境界の失敗が「毎回」から「入力次第」に変わるだけで、悪化しうる。（PR #240 のコメントで最初 `rounded()` を挙げたのは誤り。同PRで訂正済み）\n\n**最初にやるべきは原因の確定。** `XCTAssertEqual` の前に `dateComponents` の実測値を出す1行を足し、7 が出ることを見てから直す。",
+      "source": "manual",
+      "domain": "② バグ修正",
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": "human",
+      "force_owner_why": "Swift のコンパイル・実行に Mac が要る（`scripts/qa/preflight.sh --fast`）。この環境にツールチェーンが無く、**推測でSwiftを書き換えるのは直したことにならない**",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-28",
+      "closed_jst": null,
+      "evidence": "一次証拠: xcode-cloud-diagnose run 33133151277（GET のみ）。ビルド 0ac7c876-e3c6-4f1f-86c8-116a14eb0852 の issues。PR simplememofast/simplememo-ios#240 のコメントに全文。**FastUnit は PR Check に載ったままにしてある** —— 外すと「テストが落ちたので外した」になる"
     }
   ]
 }
