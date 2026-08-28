@@ -53,6 +53,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, broken, run } from './lib/selftest.mjs';
+import { MONEY_FLOWS } from './check-vendors.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const REGISTER_PATH = path.join(ROOT, 'data/vendor-register.json');
@@ -82,7 +83,14 @@ export function exposure(clause, v) {
       return (v.critical ? 1 : 0) + (v.fallback ? 0 : 1);
     case 'governing_law':
       // 争う実益（金銭が動く）と、相手が事業の根幹か。
-      return (v.money_flow && v.money_flow !== 'none' ? 1 : 0) + (v.critical ? 1 : 0);
+      //
+      // [2026-08-28] **`v.money_flow && …` だった。check-guard-shapes に捕まった。**
+      // 欄が欠けたベンダーは falsy で 0 になり、**「金銭が動かない」と同じ扱い**に
+      // なっていた。露出が小さく見えるので読む順序が後ろへ下がる ——
+      // **欠けているほど安全に見える**という、いちばん悪い向きの丸め。
+      // personal_data と同じく、**登録簿に無い値は null**（順位を作らない）。
+      if (!MONEY_FLOWS.includes(v.money_flow)) return null;
+      return (v.money_flow !== 'none' ? 1 : 0) + (v.critical ? 1 : 0);
     default:
       return null;
   }
@@ -136,10 +144,16 @@ export function build({ register, obligations }) {
     }
     for (const clause of cr.clauses) {
       const state = row[clause];
-      if (state !== 'unreviewed') continue; // 見たものは順序に出さない
+      // **人が見たものだけを順序から外す。**
+      // [2026-08-28] `state !== 'unreviewed'` だけで外していたが、それだと
+      // **AIが下書きした瞬間にマスが一覧から消える。**消えれば人は読みに来ない ——
+      // それは「見ていない」を隠しただけで、`$note` が言う
+      // 「見たという記録が嘘を守る」に自分から寄っていく。**人が見るまでが未読。**
+      const draft = row.reviewed_by === 'ai_draft';
+      if (state !== 'unreviewed' && !draft) continue;
       const score = exposure(clause, v);
       const cell = {
-        vendor: row.id, name: v.name ?? row.id, clause, state,
+        vendor: row.id, name: v.name ?? row.id, clause, state, draft,
         exposure: score, source: row.source ?? null, stakes: stakes(clause, v),
       };
       (score === null ? unranked : cells).push(cell);
@@ -216,6 +230,26 @@ function selftest() {
         '登録簿に無い語が数になった（0 に丸めると「渡していない」と同じ扱いになる）');
     }],
 
+    ['**money_flow が欠けたら順位を作らない**（欠けているほど安全に見える丸めを作らない）', () => {
+      assert(exposure('governing_law', { critical: true }) === null,
+        'money_flow 欠落が数になった — 「金銭が動かない」と同じ扱いになり、露出が小さく見えて読む順序が後ろへ下がる');
+      assert(exposure('governing_law', { money_flow: 'なにか', critical: true }) === null,
+        '登録簿に無い money_flow が数になった');
+      assert(exposure('governing_law', { money_flow: 'subscription', critical: true }) === 2,
+        '登録済みの値で露出が出ない');
+    }],
+
+    ['**AIの下書きは順序に残る**（下書きで一覧から消えると、人が読みに来ない）', () => {
+      const doc = fixture();
+      const row = doc.obligations.contract_review.vendors.find((v) => v.id === 'a');
+      row.personal_data = 'ok';
+      row.reviewed_by = 'ai_draft';
+      const { cells } = build(doc);
+      const c = cells.find((x) => x.vendor === 'a' && x.clause === 'personal_data');
+      assert(c, '下書き済みのマスが順序から消えた — それは未読を隠しただけ');
+      assert(c.draft === true, 'draft の印が付いていない');
+    }],
+
     ['見たマスは順序に出ない', () => {
       const doc = fixture();
       // **添字ではなく id で指す。**検体の並びは「並べ替えが効いていること」を
@@ -265,7 +299,7 @@ function report() {
       console.log(`  ${label}`);
       last = c.exposure;
     }
-    console.log(`    ${c.clause.padEnd(14)} ${c.name}`);
+    console.log(`    ${c.clause.padEnd(14)} ${c.name}${c.draft ? '  **AIの下書きあり — 人はまだ見ていない**' : ''}`);
     for (const s of c.stakes) console.log(`        ${s}`);
     if (c.source) console.log(`        読む先: ${c.source}`);
   }

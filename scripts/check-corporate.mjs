@@ -32,6 +32,28 @@ export const OBLIGATIONS_PATH = path.join(ROOT, 'data/corporate-obligations.json
 const VENDOR_PATH = path.join(ROOT, 'data/vendor-register.json');
 
 export const CLAUSE_STATES = ['ok', 'risk', 'unreviewed', 'not_applicable'];
+
+/**
+ * **誰がその読みを出したか。**
+ *
+ * [2026-08-28] オーナーが条項検査を「おまかせ」と委ねた日に足した。
+ * それまで `reviewed_at`（いつ見たか）はあったが、**誰が見たかは無かった。**
+ * 人が読んだ `ok` と、AIが読んだ `ok` が、台帳の上で同じ字面になる。
+ *
+ * **同じ日に、その危険が実際に出た。**Apple の規約を機械で読みに行ったところ、
+ * §13（責任の制限）と §14.10（準拠法）は本文が取得できなかったのに、
+ * 要約器が「通常はカリフォルニア州法」と**一般論で埋めて返してきた。**
+ * これをそのまま `ok` にしていたら、台帳は「読んだ」と言い続ける。
+ * `$note` が言う「**見たという記録が嘘を守る**」の、新しい形。
+ *
+ *   human     … 人が本文を読んで決めた
+ *   ai_draft  … AIが本文を読んで下書きした。**まだ人は見ていない**
+ *
+ * **ai_draft は「見た」に数えない。**ワークシート（vendor-clause-worksheet.mjs）は
+ * ai_draft のマスを読む順序に残し続ける —— 下書きが済んだ瞬間に一覧から
+ * 消えるなら、それは unreviewed を隠しただけになる。
+ */
+export const REVIEWERS = ['human', 'ai_draft'];
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** これより近い期限は警告。資格情報の30日と揃える。 */
 export const WARN_DAYS = 30;
@@ -137,6 +159,15 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
       }
       const anyReviewed = (cr.clauses || []).some((c) => v[c] !== 'unreviewed');
       if (anyReviewed && !v.reviewed_at) problems.push(`${at}: 確認した観点があるのに reviewed_at が無い`);
+      // **いつ見たかだけでは足りない。誰が見たかが要る。**
+      if (anyReviewed && !REVIEWERS.includes(v.reviewed_by)) {
+        problems.push(`${at}: 確認した観点があるのに reviewed_by が ${REVIEWERS.join('/')} のいずれでもない — 人の読みとAIの下書きが同じ字面になる`);
+      }
+      // 下書きは**何を読めなかったか**を必ず持つ。部分的な読みで断定するのが、
+      // この欄を足すきっかけになった失敗そのもの（2026-08-28 の Apple §13 / §14.10）。
+      if (v.reviewed_by === 'ai_draft' && !v.draft_note) {
+        problems.push(`${at}: ai_draft なのに draft_note が無い — 何を読んで何を読めなかったかが残らない`);
+      }
       if (v.liability_cap === 'risk' && !v.risk_note) {
         problems.push(`${at}: risk と書いたのに risk_note が無い — 何が危ないか残らない`);
       }
@@ -166,7 +197,36 @@ const SCENARIOS = ledgerScenarios(
 // [2026-08-26] **空の台帳で規則が消える形**を固定する。
 // `vendorIds.size &&` だった頃は、vendor-register.json を空にすると
 // 「ベンダー台帳に無い id」が1件も出なかった（実測済み）。
+// [2026-08-28] **誰が読んだかの欄。**人の読みとAIの下書きが同じ字面になるのを止める。
 SCENARIOS.push(
+  ['**読んだのに reviewed_by が無ければ落ちる**（人の読みとAIの下書きが同じ字面になる）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const v = d.contract_review.vendors[0];
+    v[d.contract_review.clauses[0]] = 'ok';
+    v.reviewed_at = '2026-08-28';
+    delete v.reviewed_by;
+    assert(validate(d).problems.some((x) => x.includes('reviewed_by')),
+      'reviewed_by 無しの読みが素通りした');
+  }],
+  ['**登録されていない読み手は落ちる**（"claude" や "auto" を勝手に足させない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const v = d.contract_review.vendors[0];
+    v[d.contract_review.clauses[0]] = 'ok';
+    v.reviewed_at = '2026-08-28';
+    v.reviewed_by = 'claude';
+    assert(validate(d).problems.some((x) => x.includes('reviewed_by')),
+      '未登録の読み手が素通りした');
+  }],
+  ['**ai_draft なのに何を読めなかったかが無ければ落ちる**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const v = d.contract_review.vendors[0];
+    v[d.contract_review.clauses[0]] = 'ok';
+    v.reviewed_at = '2026-08-28';
+    v.reviewed_by = 'ai_draft';
+    delete v.draft_note;
+    assert(validate(d).problems.some((x) => x.includes('draft_note')),
+      '読めた範囲を書かない下書きが素通りした — 部分的な読みで断定するのが、この欄を足したきっかけ');
+  }],
   ['**ベンダー台帳が空なら contract_review は全部照合できない**（空を「照合しない」と読まない）', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
     const p = validate(d, { vendorIds: new Set() }).problems;
@@ -195,6 +255,9 @@ if (isMain) {
   const cr = doc.contract_review || {};
   const unreviewedVendors = (cr.vendors || []).filter(
     (v) => (cr.clauses || []).every((c) => v[c] === 'unreviewed'));
+  // **下書きは別勘定で出す。**「確認済み」に混ぜると、人が見ていないものが
+  // 見たものとして数えられる。件数を分けておけば、混ぜようがない。
+  const draftVendors = (cr.vendors || []).filter((v) => v.reviewed_by === 'ai_draft');
 
   console.log('法人としての期限・記録・契約条項\n');
   console.log(`  期限 ${doc.deadlines.length}件 — うち**未把握 ${unconfirmed.length}件**`);
@@ -209,6 +272,10 @@ if (isMain) {
   }
   console.log(`\n  契約条項 ${cr.vendors?.length ?? 0}社 × ${cr.clauses?.length ?? 0}観点`);
   console.log(`    **全観点が未確認のベンダー ${unreviewedVendors.length}社**`);
+  if (draftVendors.length) {
+    console.log(`    **AIの下書きどまり ${draftVendors.length}社** — 人はまだ見ていない（reviewed_by: ai_draft）`);
+    for (const v of draftVendors) console.log(`      ${v.id}: ${v.draft_note}`);
+  }
   console.log('    書面の契約書は無く、各社の規約への同意で成立している。');
   console.log('    **unreviewed は「問題なし」ではなく「見ていない」。**');
 
