@@ -1510,12 +1510,21 @@
       "executor": "ai_proposes",
       "evidence": [
         "data/vendor-register.json",
-        "scripts/check-vendors.mjs"
+        "scripts/check-vendors.mjs",
+        "../simplememo-api/scripts/check-contracts.mjs",
+        "../simplememo-api/data/contract-register.json"
       ],
-      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）",
+      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）\n\n**[2026-08-28] 置き場所が決まった。オーナー判断で `simplememo-api`（非公開）。**公開リポジトリは最初から候補外（`data/publication-policy.json` —— **消しても公開されなかったことにはならない**ので、実行可能な対策は「これ以上ここへ機微情報を足さない」だけ）。\n\n受け皿は同日に置いた —— `../simplememo-api/contracts/`（書面）、`../simplememo-api/data/contract-register.json`（台帳）、`../simplememo-api/scripts/check-contracts.mjs`（両方向の検査・CI配線済み）、`../simplememo-api/docs/contracts.md`（手順）。\n\n**それでもこの行は動かない。**止めているのは書面そのもので、台帳はいま空。**空の受け皿を「できるようになった」と数えない** —— このリポジトリが「門を作った」を「動いた」と数えないのと同じ基準。\n\n`blocked_on` を足したので、**1件目が入った日に検査が鳴る**（隣が見えるセッションでのみ。CIは1リポジトリしかチェックアウトしないので評価されない —— evidence の扱いと同じ非対称で、**鳴らない側は「無い」ではなく「見えない」**）。",
       "blocker": "missing_source_document",
-      "unblocked_by": "契約書がリポジトリに無い",
-      "unlock": "contract_docs"
+      "unblocked_by": "**置き場所は決まった**（2026-08-28・`../simplememo-api/contracts/`）。残るのは書面そのもの。1件目が台帳に入れば、定型／非定型の分類と承認者の要求は`check-contracts.mjs` が持っている",
+      "unlock": "contract_docs",
+      "blocked_on": [
+        {
+          "file": "../simplememo-api/data/contract-register.json",
+          "path": "contracts.length",
+          "atLeast": 1
+        }
+      ]
     },
     {
       "area": "⑦ 法人経営",
@@ -1560,11 +1569,27 @@
       "area": "⑦ 法人経営",
       "task": "契約・請求・納品・支払いの照合",
       "executor": "nobody",
-      "evidence": [],
-      "note": "3リポジトリに証跡ゼロ",
+      "evidence": [
+        "../simplememo-api/scripts/check-contracts.mjs",
+        "../simplememo-api/data/contract-register.json",
+        "../simplememo-api/docs/contracts.md"
+      ],
+      "note": "3リポジトリに証跡ゼロ\n\n**[2026-08-28] 置き場所が決まった。オーナー判断で `simplememo-api`（非公開）。**公開リポジトリは最初から候補外（`data/publication-policy.json` —— **消しても公開されなかったことにはならない**ので、実行可能な対策は「これ以上ここへ機微情報を足さない」だけ）。\n\n受け皿は同日に置いた —— `../simplememo-api/contracts/`（書面）、`../simplememo-api/data/contract-register.json`（台帳）、`../simplememo-api/scripts/check-contracts.mjs`（両方向の検査・CI配線済み）、`../simplememo-api/docs/contracts.md`（手順）。\n\n**それでもこの行は動かない。**止めているのは書面そのもので、台帳はいま空。**空の受け皿を「できるようになった」と数えない** —— このリポジトリが「門を作った」を「動いた」と数えないのと同じ基準。\n\n`blocked_on` を足したので、**1件目が入った日に検査が鳴る**（隣が見えるセッションでのみ。CIは1リポジトリしかチェックアウトしないので評価されない —— evidence の扱いと同じ非対称で、**鳴らない側は「無い」ではなく「見えない」**）。\n\n**この行だけ、もう1つ足りない。**金額の照合には明細（銀行・カード）が要り、それは `bank_feed` の側。書面が入っても**骨格の照合まで**で、「金額が合っている」はここでは言えない。",
       "blocker": "missing_source_document",
-      "unblocked_by": "契約書と請求書がリポジトリに無い",
-      "unlock": "contract_docs"
+      "unblocked_by": "**置き場所は決まった**（2026-08-28）。照合の骨格（契約を指しているか・納品したか・支払ったか）は `check-contracts.mjs` に在る。残るのは契約と請求の書面。**金額の突合はここに入っていない** —— 明細の連携（bank_feed）が別に要る",
+      "unlock": "contract_docs",
+      "blocked_on": [
+        {
+          "file": "../simplememo-api/data/contract-register.json",
+          "path": "contracts.length",
+          "atLeast": 1
+        },
+        {
+          "file": "../simplememo-api/data/contract-register.json",
+          "path": "invoices.length",
+          "atLeast": 1
+        }
+      ]
     },
     {
       "area": "⑦ 法人経営",
@@ -2331,12 +2356,21 @@
       "executor": "ai_proposes",
       "evidence": [
         "data/corporate-obligations.json",
-        "scripts/check-corporate.mjs"
+        "scripts/check-corporate.mjs",
+        "../simplememo-api/scripts/check-contracts.mjs",
+        "../simplememo-api/data/contract-register.json"
       ],
-      "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ",
+      "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ\n\n**[2026-08-28] 置き場所が決まった。オーナー判断で `simplememo-api`（非公開）。**公開リポジトリは最初から候補外（`data/publication-policy.json` —— **消しても公開されなかったことにはならない**ので、実行可能な対策は「これ以上ここへ機微情報を足さない」だけ）。\n\n受け皿は同日に置いた —— `../simplememo-api/contracts/`（書面）、`../simplememo-api/data/contract-register.json`（台帳）、`../simplememo-api/scripts/check-contracts.mjs`（両方向の検査・CI配線済み）、`../simplememo-api/docs/contracts.md`（手順）。\n\n**それでもこの行は動かない。**止めているのは書面そのもので、台帳はいま空。**空の受け皿を「できるようになった」と数えない** —— このリポジトリが「門を作った」を「動いた」と数えないのと同じ基準。\n\n`blocked_on` を足したので、**1件目が入った日に検査が鳴る**（隣が見えるセッションでのみ。CIは1リポジトリしかチェックアウトしないので評価されない —— evidence の扱いと同じ非対称で、**鳴らない側は「無い」ではなく「見えない」**）。",
       "blocker": "missing_source_document",
-      "unblocked_by": "契約書がリポジトリに無い",
-      "unlock": "contract_docs"
+      "unblocked_by": "**置き場所は決まった**（2026-08-28）。条項の4観点は`corporate-obligations.json` の contract_review と同じ列で、**ok/risk を書けるのは人だけ**という規則も同じ。残るのは書面",
+      "unlock": "contract_docs",
+      "blocked_on": [
+        {
+          "file": "../simplememo-api/data/contract-register.json",
+          "path": "contracts.length",
+          "atLeast": 1
+        }
+      ]
     },
     {
       "area": "⑬ アナログ領域",
@@ -2492,7 +2526,8 @@
     "min(証跡の初出月) を使うと、2月から検査していたことになってしまう。",
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
   ],
-  "blocked_on_missing_budget": 14,
+  "blocked_on_missing_budget": 11,
   "authority_absent_budget": 7,
-  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。"
+  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。",
+  "$blocked_on_missing_budget": "**[2026-08-28] 14 → 11。**⑦⑬の契約3行に述語が付いたので同じ差分で下げた。**上げて通さない**のと対に、**減ったら下げる** —— 余った枠は、次に述語の無い待ちを黙って飲み込む（routine-runs の open_budget と同じ形）。"
 }

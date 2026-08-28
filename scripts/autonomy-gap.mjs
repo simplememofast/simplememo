@@ -173,8 +173,23 @@ export const UNLOCKS = {
                          { file: 'data/credential-expiry.json', path: 'apple_developer_enrolled_at' },
                          { file: 'data/credential-expiry.json', path: 'domain_renewal_at' },
                        ] },
-  contract_docs:     { kind: 'owner_input', label: '契約書・請求書をリポジトリに置く',
-                       needs: '現在ゼロ。書面が無いと分類も照合も対象が存在しない' },
+  // [2026-08-28] **置き場所が決まった。**オーナー判断で `simplememo-api`（非公開）。
+  // 公開リポジトリは最初から候補外（publication-policy.json が
+  // 「これ以上ここへ機微情報を足さない」を唯一の実行可能な対策と書いている）。
+  // 受け皿は同日に置いた。**それでも kind は owner_input のまま** ——
+  // 止めているのは書面そのもので、受け皿を作ったことは書面ではない。
+  contract_docs:     { kind: 'owner_input', label: '契約書・請求書を置く（場所は決まった）',
+                       needs: '**[2026-08-28] 置き場所はオーナーが決めた** —— '
+                            + '`../simplememo-api/contracts/`（非公開）。'
+                            + '受け皿も同日に置いてある（台帳 `data/contract-register.json`・'
+                            + '両方向の検査 `scripts/check-contracts.mjs`・手順 `docs/contracts.md`）。'
+                            + '\n\n**残っているのは書面そのもの。**いま契約0件・請求0件で、'
+                            + '書面が無ければ分類も照合も対象が存在しない。'
+                            + '**空の受け皿を「できるようになった」と数えない。**'
+                            + '\n\n入れやすいのは請求書のほう（毎月届く）。'
+                            + '契約は「規約への同意」の形しか無く、書面が発生していない',
+                       satisfied_when: [{ file: '../simplememo-api/data/contract-register.json',
+                                          path: 'contracts.length', atLeast: 1 }] },
   corp_records:      { kind: 'owner_input', label: '議事録・株主名簿・事故記録の所在を決める',
                        needs: '「発生していない」のか「記録する場所が無い」のかが区別できていない' },
   // [2026-08-27] **決まった。**オーナーが「品質ゲート通過で自動投稿」を選び、
