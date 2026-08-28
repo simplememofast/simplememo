@@ -85,7 +85,9 @@ export function fold(snapshot, { reassign = null } = {}) {
 }
 
 const perDay = (v, days) => (days ? v / days : null);
-const growth = (a, b) => (a > 0 && b != null && a != null ? b / a - 1 : null);
+// 基準が 0 のとき伸び率は作れない（0→5 は「+∞%」ではなく「比べられない」）。
+// null は ordering() が拾い、validate() が「順位を作らない」と言う。**黙って0にしない。**
+const growth = (a, b) => (a > 0 && b != null ? b / a - 1 : null);
 
 /** 面ごとの日次クリック伸び率。分類を差し替えても呼べるように分けてある。 */
 function rates(prev, curr, opts) {

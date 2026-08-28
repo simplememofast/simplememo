@@ -246,6 +246,7 @@
   ],
   "coverage_measured_at": "2026-08-26",
   "no_ledger_binding": [
+    "growth/scripts/acquisition-mix.mjs",
     "growth/scripts/analyze.mjs",
     "growth/scripts/bq-preflight.mjs",
     "growth/scripts/ingest-bigquery.mjs",
@@ -265,7 +266,8 @@
     "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
     "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
     "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
-    "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）"
+    "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
+    "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く"
   },
   "param_guards_measured_at": "2026-08-26",
   "$param_guards_note": [
@@ -290,6 +292,66 @@
     "（読めない値を null にする）で、判定ではなかった。**対象外だと書いておく。**"
   ],
   "param_guards": [
+    {
+      "file": "growth/scripts/acquisition-mix.mjs",
+      "expr": "b",
+      "disposition": "向きが逆",
+      "note": "`growth(a, b)` の `a > 0 && b != null`。**基準が無いときに規則が消えるのではなく、比べられないことを null で明示する側。**0→5 を「+∞%」や「+0%」にしない。この null は握り潰されない —— ordering() が null を返し、validate() が「順位を作らない」と問題に出す。自己テスト「片方の面にデータが無ければ順位を作らない」で固定"
+    },
+    {
+      "file": "growth/scripts/acquisition-mix.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`num(v, d)` が `—` を出す。同上"
+    },
+    {
+      "file": "growth/scripts/acquisition-mix.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`pct(v)` が `—` を出す。欠けていることを 0% と書かない"
+    },
+    {
+      "file": "growth/scripts/analyze.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`—` を出す（2箇所とも）"
+    },
+    {
+      "file": "growth/scripts/experiments.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`—` を出す。158行目は否定形で、**全部 null のとき発火する**側"
+    },
+    {
+      "file": "growth/scripts/full-funnel.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`—` を出す（2箇所とも）"
+    },
+    {
+      "file": "growth/scripts/revenue-series.mjs",
+      "expr": "policy",
+      "disposition": "別に検出",
+      "note": "#638 の policyDrift。**null は「突き合わせない」で、鍵が無いのは落とす**"
+    },
+    {
+      "file": "growth/scripts/search-intent.mjs",
+      "expr": "x",
+      "disposition": "表示整形",
+      "note": "`—` を出す。**gap が出せなかったことを 0.0% と書かない**ための整形で、欠けていることを隠さず出している側"
+    },
+    {
+      "file": "growth/scripts/weekly-report.mjs",
+      "expr": "cur",
+      "disposition": "向きが逆",
+      "note": "差分の計算。**片方でも欠けたら差分は出せない**ので null を返し、表示側が `—` にする。判定ではない"
+    },
+    {
+      "file": "growth/scripts/weekly-report.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`—` を出す（2箇所とも）"
+    },
     {
       "file": "scripts/ai-unit-cost.mjs",
       "expr": "n",
@@ -339,6 +401,18 @@
       "note": "null は「台帳が無い」で、そのまま落とす側"
     },
     {
+      "file": "scripts/check-generators.mjs",
+      "expr": "src",
+      "disposition": "別の規則が同じ条件を捕まえる",
+      "note": "`src === null` になるのは**台帳に載っているファイルが実在しないとき**だけ。そこで continue すると「時計・ネットに触るか」の判定は確かに消えるが、**同じ関数の下にある「台帳の『f』が実在しない」が必ず落とす**ので、消えたまま素通りにはならない。逆に読めないソースを空文字として扱うと「触っていない」と判定してしまい、**実在しないファイルが決定的だと名乗る**ことになる"
+    },
+    {
+      "file": "scripts/check-guard-shapes.mjs",
+      "expr": "led",
+      "disposition": "別に検出",
+      "note": "null は「台帳が無い」で、そのまま落とす側（自己テストの assert と main の exit 1）。**この2件は allProblems を切り出したときに増えたもので、ラチェットが自分の変更を捕まえた**"
+    },
+    {
       "file": "scripts/check-model-routing.mjs",
       "expr": "workflow",
       "disposition": "別に検出",
@@ -373,60 +447,6 @@
       "expr": "v",
       "disposition": "表示整形",
       "note": "`—` を出す"
-    },
-    {
-      "file": "growth/scripts/analyze.mjs",
-      "expr": "v",
-      "disposition": "表示整形",
-      "note": "`—` を出す（2箇所とも）"
-    },
-    {
-      "file": "growth/scripts/experiments.mjs",
-      "expr": "v",
-      "disposition": "表示整形",
-      "note": "`—` を出す。158行目は否定形で、**全部 null のとき発火する**側"
-    },
-    {
-      "file": "growth/scripts/full-funnel.mjs",
-      "expr": "v",
-      "disposition": "表示整形",
-      "note": "`—` を出す（2箇所とも）"
-    },
-    {
-      "file": "growth/scripts/revenue-series.mjs",
-      "expr": "policy",
-      "disposition": "別に検出",
-      "note": "#638 の policyDrift。**null は「突き合わせない」で、鍵が無いのは落とす**"
-    },
-    {
-      "file": "growth/scripts/weekly-report.mjs",
-      "expr": "v",
-      "disposition": "表示整形",
-      "note": "`—` を出す（2箇所とも）"
-    },
-    {
-      "file": "growth/scripts/weekly-report.mjs",
-      "expr": "cur",
-      "disposition": "向きが逆",
-      "note": "差分の計算。**片方でも欠けたら差分は出せない**ので null を返し、表示側が `—` にする。判定ではない"
-    },
-    {
-      "file": "scripts/check-guard-shapes.mjs",
-      "expr": "led",
-      "disposition": "別に検出",
-      "note": "null は「台帳が無い」で、そのまま落とす側（自己テストの assert と main の exit 1）。**この2件は allProblems を切り出したときに増えたもので、ラチェットが自分の変更を捕まえた**"
-    },
-    {
-      "file": "growth/scripts/search-intent.mjs",
-      "expr": "x",
-      "disposition": "表示整形",
-      "note": "`—` を出す。**gap が出せなかったことを 0.0% と書かない**ための整形で、欠けていることを隠さず出している側"
-    },
-    {
-      "file": "scripts/check-generators.mjs",
-      "expr": "src",
-      "disposition": "別の規則が同じ条件を捕まえる",
-      "note": "`src === null` になるのは**台帳に載っているファイルが実在しないとき**だけ。そこで continue すると「時計・ネットに触るか」の判定は確かに消えるが、**同じ関数の下にある「台帳の『f』が実在しない」が必ず落とす**ので、消えたまま素通りにはならない。逆に読めないソースを空文字として扱うと「触っていない」と判定してしまい、**実在しないファイルが決定的だと名乗る**ことになる"
     }
   ]
 }
