@@ -463,6 +463,12 @@
       "expr": "h",
       "disposition": "fail-closed",
       "note": "**出荷前に捕まった1件目。**`hoursSince` の戻りで、読めなければ null。`if (h === null) return unknown(...)` は hold へ倒すので fail-closed。\n**ただし外側に本物の欠陥があった** —— `last_kill_at !== null && !== undefined` で囲っており、null（killは無かったという主張）と欄が無い（読めていない）を同じに扱って、**読めないときに公開へ落ちる**形だった。`'last_kill_at' in guard` を先に要求する形へ直し、`guard: {}` で hold することを自己テストで固定した。**この検査が無ければ、App Store 公開の門に fail-open が入ったまま出ていた。**"
+    },
+    {
+      "file": "scripts/release-gate-run.mjs",
+      "expr": "materials",
+      "disposition": "向きが正しい",
+      "note": "`inventory(materials)` の `materials === null ? false : …`。**材料が無いときに規則が消えるのではなく、全項目を `present: false` に倒す側。**null を「揃っている」に読み替えないためにここで明示している。呼び出し側（`loadMaterials`）は無い・古い・未来・壊れているのすべてを null に集約するので、**ここへ来る null は「使ってはいけない材料」を意味する**"
     }
   ]
 }

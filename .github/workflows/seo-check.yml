@@ -233,6 +233,16 @@ jobs:
           node scripts/check-module-entry.mjs --selftest
           node scripts/check-module-entry.mjs --check
 
+      # 【出荷の門に、材料が届いているか】
+      # 門（check-release-gate）は判定規則だけを持っていて、材料を集める側が無い。
+      # **ASC へは何も送らない。**読んで判定して、足りない材料を出どころ別に出す。
+      # ここが落ちるのは「材料が無いのに hold 以外を返した」＝門が抜けたときだけで、
+      # **hold であることは失敗ではない**（材料が無いのだから hold が正しい）。
+      - name: Release gate against real data
+        run: |
+          node scripts/release-gate-run.mjs --selftest
+          node scripts/release-gate-run.mjs --check
+
       # 【書き出す側が、まだ動くか】CI は各検査の --selftest と --check を回すが、
       # **--write は回さない。**生成器は「書いた結果」だけが検査されていて、
       # 「書く動作そのもの」は誰も動かしていなかった。2026-08-26 に2件出た:
