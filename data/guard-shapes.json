@@ -250,6 +250,7 @@
     "growth/scripts/analyze.mjs",
     "growth/scripts/bq-preflight.mjs",
     "growth/scripts/ingest-bigquery.mjs",
+    "growth/scripts/intent-axes.mjs",
     "growth/scripts/search-intent.mjs",
     "scripts/autopilot-drill.mjs",
     "scripts/autopilot-gate.mjs",
@@ -267,7 +268,8 @@
     "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
     "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
     "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
-    "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く"
+    "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
+    "growth/scripts/intent-axes.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / businessRelevance / monetizationRelevance / freeSeekingShare）。acquisition-mix.mjs・analyze.mjs と同じ形で、1ファイル単位の走査からは追えない"
   },
   "param_guards_measured_at": "2026-08-26",
   "$param_guards_note": [
@@ -327,6 +329,12 @@
       "expr": "v",
       "disposition": "表示整形",
       "note": "`—` を出す（2箇所とも）"
+    },
+    {
+      "file": "growth/scripts/intent-axes.mjs",
+      "expr": "v",
+      "disposition": "表示整形",
+      "note": "`pct(v)` が `—` を出す。**無料狙いの実測が無いことを 0% と書かない** —— この区別はこのファイルの主題そのもので、`free_seeking_share === null`（母数不足・未取得）と `0`（可視クエリに無い）は別の意味を持つ。自己テスト「実測が無い面は『根拠なし』に入れない」で固定"
     },
     {
       "file": "growth/scripts/revenue-series.mjs",
