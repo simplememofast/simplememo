@@ -134,6 +134,19 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
     if (typeof r.exists !== 'boolean') problems.push(`${at}: exists を明示すること`);
     if (r.exists && !r.where) problems.push(`${at}: あると書いているのに所在が無い`);
     if (!r.exists && !r.note) problems.push(`${at}: 無いのに理由が無い`);
+    // [2026-08-28] **所在を決めたのに実在が未確認の行は、確かめた日を書ける欄を持つこと。**
+    //
+    // `exists: false` は「無い」と「確かめていない」を同じ値にする。
+    // だから**確かめても値が変わらず、機械は永久に気づかない** ——
+    // 同じ日に autonomy-gap の company_facts で直したのと同じ罠で、
+    // あちらは「満たされようがない述語」が2日間「まだです」の顔で残っていた。
+    //
+    // 欄は null でよい（null は「見ていない」）。**無いのが困る。**
+    if (r.where && !r.exists && !('existence_confirmed_at' in r)) {
+      problems.push(`${at}: 所在は決まったのに existence_confirmed_at が無い`
+        + ' — **確かめても値が変わらないので、誰も検知できない**'
+        + '（null で置くこと。無かったと確かめた場合も日付を入れる）');
+    }
   }
 
   const cr = doc.contract_review;
@@ -229,6 +242,32 @@ SCENARIOS.push(
     assert(validate(d).problems.some((x) => x.includes('reviewed_by')),
       'reviewed_by 無しの読みが素通りした');
   }],
+  // [2026-08-28] **確かめた日を書ける欄が消えたら落ちる。**
+  // `exists: false` は「無い」と「確かめていない」を潰す。潰れたまま所在だけ決めると、
+  // **オーナーが本店を見に行っても台帳の値が動かない。**
+  ['**所在は決まったのに確認日の欄が無ければ落ちる**（確かめても値が変わらない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const r = (d.records || []).find((x) => x.where && !x.exists);
+    assert(r, '所在は決まったが実在未確認の行が実データに無い — **この検査が空回りしている**');
+    delete r.existence_confirmed_at;
+    assert(validate(d).problems.some((x) => x.includes('existence_confirmed_at')),
+      '確認日の欄が無い行が素通りした');
+  }],
+  ['**確認日が null なのは正当**（null は「見ていない」であって欠落ではない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const r = (d.records || []).find((x) => x.where && !x.exists);
+    r.existence_confirmed_at = null;
+    assert(!validate(d).problems.some((x) => x.includes('existence_confirmed_at')),
+      'null の確認日を欠落と読んだ — **常に鳴る検査は何も見ていない**');
+  }],
+  ['**実在する記録には確認日を求めない**（所在があって在るなら、それで足りている）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const r = (d.records || []).find((x) => x.exists);
+    assert(r, '実在する記録が実データに無い');
+    delete r.existence_confirmed_at;
+    assert(!validate(d).problems.some((x) => x.includes('existence_confirmed_at')),
+      '在る記録にまで確認日を求めた');
+  }],
   ['**登録されていない読み手は落ちる**（"claude" や "auto" を勝手に足させない）', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
     const v = d.contract_review.vendors[0];
@@ -302,7 +341,14 @@ if (isMain) {
   const { problems, warnings } = validate(doc, { vendorIds });
 
   const unconfirmed = (doc.deadlines || []).filter((d) => !d.confirmed_by_owner);
-  const missingRecords = (doc.records || []).filter((r) => !r.exists);
+  // [2026-08-28] **「所在が決まっていない」と「実在を確かめていない」を分けた。**
+  // ここは長らく `!r.exists` を数えて「所在が決まっていない N件」と書いていたが、
+  // **数えているものと言っていることが違った。**所在を決めても件数が減らないので、
+  // 決めた日にレポートが「まだ決まっていない」と言い続ける。
+  // （incident-records の note がまさに「発生していないのか場所が無いのか
+  //   区別できていない」と書いていた。**レポート自身も区別していなかった。**）
+  const noPlace = (doc.records || []).filter((r) => !r.where);
+  const unverified = (doc.records || []).filter((r) => r.where && !r.exists);
   const cr = doc.contract_review || {};
   const unreviewedVendors = (cr.vendors || []).filter(
     (v) => (cr.clauses || []).every((c) => v[c] === 'unreviewed'));
@@ -317,10 +363,13 @@ if (isMain) {
     console.log(`    ${d.confirmed_by_owner ? d.next_due : '**未把握**'.padEnd(10)}  ${d.title}`);
     if (!d.confirmed_by_owner) console.log(`                ${d.unconfirmed_reason}`);
   }
-  console.log(`\n  記録 ${doc.records.length}件 — うち**所在が決まっていない ${missingRecords.length}件**`);
+  console.log(`\n  記録 ${doc.records.length}件 — **所在が未定 ${noPlace.length}件`
+    + ` / 所在は決まったが実在は未確認 ${unverified.length}件**`);
   for (const r of doc.records) {
-    console.log(`    ${r.exists ? 'あり  ' : '**無し**'}  ${r.title}`);
-    if (!r.exists) console.log(`              ${r.note}`);
+    const mark = !r.where ? '**所在未定**' : (r.exists ? 'あり      ' : '**実在未確認**');
+    console.log(`    ${mark}  ${r.title}`);
+    if (r.where) console.log(`                  所在: ${r.where}`);
+    if (!r.exists) console.log(`                  ${r.note}`);
   }
   console.log(`\n  契約条項 ${cr.vendors?.length ?? 0}社 × ${cr.clauses?.length ?? 0}観点`);
   console.log(`    **全観点が未確認のベンダー ${unreviewedVendors.length}社**`);
