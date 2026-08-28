@@ -368,9 +368,9 @@
       "evidence": [
         "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
-      "note": "macOS必須。Runbook §7「できないこと」の筆頭",
+      "note": "macOS必須。Runbook §7「できないこと」の筆頭\n\n**[2026-08-28] 前提が広すぎた。ただし覆ってはいない。**「macOSが要る＝人間だけ」と書いてあるが、**macOSの経路は2つある** —— GitHub Actions の macOSランナー（予算保護でAIは起動しない）と、**Xcode Cloud（Apple側の課金で、GitHubの予算とは別勘定）**。後者は自動で走っている: simplememo-ios#239（2026-08-27）に `SimpleMemo | PR Check | Build - iOS` が success で出ており、**人は何も触っていない。**起動と診断のAPI経路も在る（scripts/xcode_cloud_start_build.rb / xcode_cloud_diagnose.rb）。\n\n**それでも覆せない。**同じPRに出たのは Build だけで、**UIテスト（SimpleMemoQA / SimpleMemo-iOS-PR）は出ていない。**docs/qa/XCODE_CLOUD_ONE_TIME_SETUP.md はそれを『PR Check の合格に必要』と書いているので、**書いてあることと実際が食い違っている**（変更ファイルで起動条件が絞られているのか、アクションが外れているのかは、ASCの鍵が無いのでここでは確かめられない）。撮影のほうは docs/qa/ARTICLE_SCREENSHOTS.md が『ローカルMac』での通し実行しか記録していない。\n\n**したがって分類は動かさない。**言えるのは「人間だけ」の理由が予算保護だけではないことと、**この食い違い自体が確かめるべき対象**だということ",
       "blocker": "physical_human",
-      "unblocked_by": "macOSランナーが要り、予算保護で人間の名指し起動のみ"
+      "unblocked_by": "macOSランナーが要り、予算保護で人間の名指し起動のみ。**[2026-08-28] Xcode Cloud（Apple課金）は自動で走っており、そちらには予算保護が効かない。**覆すのに要るのは (1) UIテストのアクションが実際にPRで起動しているかの確認（ASCの鍵が要る。設定書は『合格に必要』と書いているが simplememo-ios#239 では Build しか出ていない）と (2) 撮影を Xcode Cloud 側で完結させ、成果物を取り出す経路"
     },
     {
       "area": "② バグ修正",
