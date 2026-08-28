@@ -384,7 +384,19 @@ export const BUSINESS_RELEVANCE = [
   [/^\/(captio|captio-alternative)\//, 1.0],
   [/^\/blog\/captio/, 1.0],
   [/^\/(apple-watch|note-to-email|templates)\//, 0.9],
+  // **自分宛メール族。**製品の中核機能そのものを扱う記事群で、`/note-to-email/`（0.9）と
+  // 同じ検索意図に応える。規則が無く既定 0.5 に落ちていた —— 2026-08-24窓で
+  // /en/iphone-shortcuts-email-guide/ だけで1,813表示あり、**未宣言の中で最大**だった。
+  [/^\/(send-email-to-yourself|iphone-shortcuts-email-guide)\//, 0.9],
+  [/^\/blog\/(email-yourself|email-self-task|how-to-email-yourself)/, 0.9],
+  // メール経由でObsidianへ入れる話は Obsidian クラスタ（`/blog/obsidian-` と同じ扱い）。
+  // スラッグが `obsidian-` で始まらないので既存規則に当たっていなかった。
+  [/^\/blog\/email-to-obsidian/, 1.0],
   [/^\/vs\//, 0.7],
+  // **カテゴリ比較・ランキング。**「どのメモアプリにするか」を今決めている読者なので、
+  // インストールへの距離は `/vs/` と同じ 0.7。**課金意図は別軸で 0.2 に置いてある**
+  // （無料狙いが実測95.6%）。この2つが割れることが、2軸目を足した理由そのもの。
+  [/^\/blog\/(free-memo-apps|best-memo-apps|offline-memo-apps|ios-quick-capture-comparison|google-keep-shutdown)/, 0.7],
   [/^\/(use-cases|guides|methods|comparison|how-to)\//, 0.7],
   // LINE Keep readers are asking where a LINE feature went, not shopping for a
   // memo app — information-only by the brief's own read, so 0.3. This single
@@ -476,6 +488,7 @@ export const MONETIZATION_RELEVANCE = [
   // （freeSeekingShare 95.6% / 2026-08-24窓）。残りは宣言。
   [/^\/blog\/free-memo-apps/, 0.2],
   [/^\/blog\/(best-memo-apps|memo-app-hikaku|how-to-choose|open-source-memo|student-memo)/, 0.2],
+  [/^\/blog\/(offline-memo-apps|ios-quick-capture-comparison|google-keep-shutdown)/, 0.2],
   // LINE Keep の行き先を訊いているだけ。保存先を1つ決めたら終わる。
   [/^\/(line-keep|vs\/line-keep-memo)\//, 0.2],
   [/^\/blog\/line-keep/, 0.2],
@@ -486,6 +499,14 @@ export const MONETIZATION_RELEVANCE = [
   // 乗り換え検討者も手法の実践者も「よく書く人」ではあるが、
   // 1日3通を超えるかは測っていない。
   [/^\/(note-to-email|ai-tags|templates)\//, 0.5],
+  // 自分宛メール族。**DLは 0.9 だが課金は 0.5。**「自分にメールする方法」を
+  // 一度知りたいだけの読者と、毎日それをやる読者を、この軸は区別できない。
+  [/^\/(send-email-to-yourself|iphone-shortcuts-email-guide)\//, 0.5],
+  [/^\/blog\/(email-yourself|email-self-task|how-to-email-yourself)/, 0.5],
+  [/^\/blog\/email-to-obsidian/, 1.0],
+  // 暗号化・セキュリティ・プライバシーの比較。道具を真剣に選んでいる読者だが、
+  // **捕捉の頻度は分からない。**DL側は既存の `memo-app-` 規則で 0.5。
+  [/^\/blog\/(memo-app-encryption|memo-app-security|memo-app-privacy)/, 0.5],
   [/^\/methods\//, 0.5],
   [/^\/vs\//, 0.5],
   [/^\/(use-cases|guides|how-to|comparison)\//, 0.5],

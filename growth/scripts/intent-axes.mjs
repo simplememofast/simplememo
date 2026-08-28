@@ -30,12 +30,66 @@
  * この非対称ゆえに、--check は「高く宣言 × 実測が高い」だけを矛盾として扱い、
  * 「高く宣言 × 実測 0%」は矛盾に数えない。**片側だけが反証になる。**
  */
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  listSnapshots, loadSnapshot, toPath,
+  ROOT, listSnapshots, loadSnapshot, toPath,
+  BUSINESS_RELEVANCE, MONETIZATION_RELEVANCE,
   businessRelevance, monetizationRelevance, freeSeekingShare,
 } from '../lib/gsc.mjs';
+
+export const UNDECIDED_PATH = path.join(ROOT, 'data/relevance-undecided.json');
+
+/** ロケール接頭辞。gsc.mjs の LOCALE_PREFIX と同じ集合（あちらは非公開）。 */
+const LOCALE = /^\/(en|zh-Hant|zh|ko|es|pt-BR|id|ar|tr)(?=\/|$)/;
+
+/** 規則に当たったか。**当たらなければ既定値** = 「誰も決めていない」。 */
+export const declared = (p) => {
+  const q = String(p).replace(LOCALE, '') || '/';
+  return {
+    dl: BUSINESS_RELEVANCE.some(([re]) => re.test(q)),
+    pay: MONETIZATION_RELEVANCE.some(([re]) => re.test(q)),
+  };
+};
+
+/**
+ * **流入があるのに宣言が無いページ。**
+ *
+ * 門を流入で切るのは意図的。ページ数を上限にすると記事を足すたびに落ちるので、
+ * **読まれずに上限だけが上がる。**流入が付いた時点で判断を迫る形にしてある。
+ */
+export function coverage(snapshot, ledger, { threshold = ledger?.threshold_impressions ?? 100 } = {}) {
+  const listed = new Set((ledger?.pages || []).map((x) => x.page));
+  const undeclared = [];
+  let clicks = 0; let undeclaredClicks = 0;
+  for (const r of snapshot.pages || []) {
+    const p = toPath(r.page);
+    const d = declared(p);
+    clicks += r.clicks;
+    if (d.dl && d.pay) continue;
+    undeclaredClicks += r.clicks;
+    if (r.impressions >= threshold) {
+      undeclared.push({ page: p, impressions: r.impressions, clicks: r.clicks, ...d, listed: listed.has(p) });
+    }
+  }
+  undeclared.sort((a, b) => b.impressions - a.impressions);
+  return {
+    threshold,
+    undeclared,
+    // **台帳にも載っていないもの。**ここだけが門。
+    unlisted: undeclared.filter((r) => !r.listed),
+    undeclared_click_share: clicks ? undeclaredClicks / clicks : null,
+    // 台帳にあるのに、もう流入が無い／宣言が付いた行。**古い記録を残さない。**
+    stale: (ledger?.pages || [])
+      .map((x) => x.page)
+      .filter((p) => !undeclared.some((r) => r.page === p)),
+  };
+}
+
+export const readUndecided = () => {
+  try { return JSON.parse(fs.readFileSync(UNDECIDED_PATH, 'utf8')); } catch { return null; }
+};
 
 /** 宣言が実測に殴られたと呼ぶ線。可視スライスの3割が無料狙いなら、高い宣言は保てない。 */
 export const CONTRADICTION_FREE_SHARE = 0.3;
@@ -104,8 +158,22 @@ export function axes(snapshot, {
 }
 
 /** 結論に使えない状態を黙って通さない。 */
-export function validate(a) {
+export function validate(a, cov = null) {
   const problems = [];
+  for (const r of cov?.unlisted || []) {
+    problems.push(
+      `${r.page}: ${r.impressions}表示あるのに relevance が未宣言`
+      + `（DL規則=${r.dl ? '有' : '無'} 課金規則=${r.pay ? '有' : '無'}）`
+      + ' — **既定値は「中くらい」ではなく「誰も決めていない」。**'
+      + ' 規則を置くか、data/relevance-undecided.json へ理由つきで載せること',
+    );
+  }
+  for (const p of cov?.stale || []) {
+    problems.push(
+      `${p}: data/relevance-undecided.json に載っているが、もう未宣言ではない`
+      + '（宣言が付いたか、流入が閾値を下回った） — **古い記録を残さない。**台帳から外すこと',
+    );
+  }
   for (const r of a.contradictions) {
     problems.push(
       `${r.page}: 課金意図を ${r.pay} と宣言しているが、可視クエリの `
@@ -120,7 +188,7 @@ const pct = (v) => (v == null ? '  —  ' : `${(100 * v).toFixed(1)}%`);
 const width = (s) => [...s].reduce((n, ch) => n + (/[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹯＀-｠￠-￦]/.test(ch) ? 2 : 1), 0);
 const padTo = (s, n) => s + ' '.repeat(Math.max(0, n - width(s)));
 
-export function render(a) {
+export function render(a, cov = null) {
   const L = [];
   L.push(`DL意図 × 課金意図 — ${a.label}`);
   L.push('  課金意図は**宣言**（Free 1日3通 / Premium 無制限 から逆算した手入力）。');
@@ -148,6 +216,12 @@ export function render(a) {
     }
   } else {
     L.push('  宣言と実測の食い違いは無し（**ただし可視スライスの中での話**）。');
+  }
+  if (cov) {
+    L.push('');
+    L.push(`  未宣言（既定値のまま）のクリック: ${pct(cov.undeclared_click_share)}`);
+    L.push(`  ${cov.threshold}表示以上で未宣言: ${cov.undeclared.length}ページ`
+      + `（うち台帳に理由あり ${cov.undeclared.length - cov.unlisted.length}）`);
   }
   return L.join('\n');
 }
@@ -219,11 +293,39 @@ function selftest() {
   t('差が小さければどちら向きでも出さない',
     axes(oneSided, { dl: () => 0.5, pay: () => 0.6 }).diverging.length === 0);
 
+  // 未宣言の門
+  const LEDGER = { threshold_impressions: 100, pages: [{ page: '/blog/zzz', reason: 'r' }] };
+  const covSnap = (pages) => ({ label: 'T', meta: {}, pages, queryPages: [] });
+  t('宣言があるページは未宣言に数えない',
+    coverage(covSnap([P('/obsidian/', 1, 500)]), LEDGER).undeclared.length === 0);
+  t('**流入がある未宣言ページを拾う**',
+    coverage(covSnap([P('/blog/qqq', 1, 500)]), LEDGER).unlisted.length === 1);
+  t('**流入が閾値未満なら門にしない**（記事を足すたびに落ちない）',
+    coverage(covSnap([P('/blog/qqq', 1, 50)]), LEDGER).unlisted.length === 0);
+  t('台帳に理由つきで載っていれば門を通す',
+    coverage(covSnap([P('/blog/zzz', 1, 500)]), LEDGER).unlisted.length === 0);
+  t('載っていても未宣言としては数え続ける（**免罪ではない**）',
+    coverage(covSnap([P('/blog/zzz', 1, 500)]), LEDGER).undeclared.length === 1);
+  t('**台帳の古い行を落とす**（宣言が付いた／流入が消えた行を残さない）',
+    coverage(covSnap([P('/obsidian/', 1, 500)]), LEDGER).stale.length === 1);
+  t('未宣言クリックの割合を出す',
+    Math.abs(coverage(covSnap([P('/blog/qqq', 3, 500), P('/obsidian/', 1, 500)]), LEDGER).undeclared_click_share - 0.75) < 1e-9);
+  const covProblems = validate({ contradictions: [] }, coverage(covSnap([P('/blog/qqq', 1, 500)]), LEDGER));
+  t('未宣言は検査に出る', covProblems.some((x) => x.includes('未宣言')));
+  t('**古い台帳の行も同時に出る**（片方だけ直して通らない）',
+    covProblems.some((x) => x.includes('古い記録を残さない')));
+  t('**片方の軸だけ未宣言でも拾う**',
+    coverage(covSnap([P('/blog/digital-vs-handwritten-notes', 1, 500)]), LEDGER).undeclared.length === 1);
+
   const labels = listSnapshots();
   if (labels.length) {
-    const a = axes(loadSnapshot(labels[labels.length - 1]));
+    const sn = loadSnapshot(labels[labels.length - 1]);
+    const a = axes(sn);
     t('**実データで2軸が出る**', a.rows.length > 0);
     t('実データに食い違う面がある（**2軸目が何かを足している**）', a.diverging.length > 0);
+    const c = coverage(sn, readUndecided());
+    t('**実データで台帳が門を通る**（未宣言はすべて理由つき）', c.unlisted.length === 0);
+    t('実データで台帳に古い行が無い', c.stale.length === 0);
   } else {
     t('**スナップショットが無い**', false);
   }
@@ -238,12 +340,14 @@ if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest());
   const labels = listSnapshots();
   if (!labels.length) { console.error('スナップショットが無い'); process.exit(1); }
-  const a = axes(loadSnapshot(labels[labels.length - 1]));
-  if (process.argv.includes('--json')) { console.log(JSON.stringify(a, null, 2)); process.exit(0); }
-  console.log(render(a));
-  const problems = validate(a);
+  const snap = loadSnapshot(labels[labels.length - 1]);
+  const a = axes(snap);
+  const cov = coverage(snap, readUndecided());
+  if (process.argv.includes('--json')) { console.log(JSON.stringify({ ...a, coverage: cov }, null, 2)); process.exit(0); }
+  console.log(render(a, cov));
+  const problems = validate(a, cov);
   if (problems.length) {
-    console.error('\n宣言と実測の矛盾:');
+    console.error('\n宣言まわりの問題:');
     for (const p of problems) console.error(`  - ${p}`);
     if (process.argv.includes('--check')) process.exit(1);
   }

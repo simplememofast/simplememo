@@ -227,7 +227,9 @@ function selftest() {
   t('**0.5 の既定は mid ではなく low 側**（0.6未満）', bucketOf(0.5) === 'low');
 
   t('規則に当たるページは既定扱いしない', fellToDefault('/obsidian/') === false);
-  t('**規則に当たらないページは既定として数える**', fellToDefault('/blog/free-memo-apps-ranking') === true);
+  // **検体に実在スラッグを使わない。**規則を1つ足すと落ちる検査になる
+  // （2026-08-28、/blog/free-memo-apps-ranking に規則を置いた時点で実際に落ちた）。
+  t('**規則に当たらないページは既定として数える**', fellToDefault('/blog/no-such-rule-here') === true);
 
   // 窓の長さが違っても、1日あたりが同じなら「伸びていない」と読む。
   const a = snap('A', '2026-07-01', '2026-07-28', [P('/obsidian/', 28, 280)]);
