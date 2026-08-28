@@ -22,6 +22,22 @@
  * これは check-monitoring / ops-alerts と同じ扱い方で、理由も同じ:
  * 「判定した結果0件」と「判定できなかった」を同じ0にすると、
  * **仕組みが死んでいる状態が正常に見える。**
+ *
+ * 【asc-metrics.json は遅れる。無い＝存在しない、ではない】
+ * [2026-08-28 実測] ASC の画面に出ているレビューが、API にはまだ無い状態が
+ * ある。この日、前日 17:45 JST に付いた★4が
+ *
+ *     10:50Z の取得 … 8件。最新は 2026-07-30（＝入っていない）
+ *     22:33Z の取得 … 9件。ここで初めて入った
+ *
+ * という出方をした。**同じ日のうちに埋まった。**
+ * 取り直しは `asc-metrics.yml` を workflow_dispatch するだけでよい
+ * （既定は GET のみ・ubuntu・1分未満。create_request を渡さない限り POST は無い）。
+ *
+ * **「API が構造的に取りこぼしている」と読まない。**この日それを一度書いて外した。
+ * 8件が全部 has_response=true だったので「返信済みしか返さないのでは」と
+ * 見えたが、単に**未返信のレビューがまだ1件も無かった**だけだった。
+ * 1回取り直せば済む話に、仕組みの欠陥という説明を当てていた。
  */
 
 import fs from 'node:fs';
@@ -136,13 +152,30 @@ function render(ledger, a) {
     o.push('  **これは「未処理0件」ではない。**台帳の整合だけを検査した。');
   } else {
     o.push(`  レビュー ${a.total}件 中 ${a.handled}件を処理済み・${a.unhandled.length}件が未処理`);
-    if (a.overdue.length) {
-      o.push(`  うち ${a.overdue.length}件 が ${ledger.max_unhandled_days}日を超えて放置:`);
-      for (const x of a.overdue.slice(0, 10)) {
-        o.push(`    ★${x.rating} ${x.created?.slice(0, 10) ?? '(日付不明)'} ${(x.title || '').slice(0, 40)}`);
+    if (a.unhandled.length) {
+      // **review_id を必ず出す。**ここが「見つけた」と「捌ける」の境目になる。
+      //
+      // [2026-08-28] 旧実装は、14日を超えたものだけを ★星・日付・タイトルで
+      // 並べていた。**期限内は件数しか出さず、超過分も id を出していない。**
+      // ところが下書きを書くのに要るのは id で（review-intake / review-replies の
+      // 両方が id で引く）、タイトルからは引けない。
+      // 結果、この日レビューに返信しようとしたセッションは、この出力を読んでも
+      // **どこから id を採るのか分からず**、非公開リポジトリの
+      // asc-metrics.json を自分で見つけるまで動けなかった。
+      // 検知は出来ていたのに、**次の一手に必要なものを渡していなかった。**
+      const overdueIds = new Set(a.overdue.map((x) => x.id));
+      o.push(a.overdue.length
+        ? `  うち ${a.overdue.length}件 が ${ledger.max_unhandled_days}日を超えて放置:`
+        : `  期限内（${ledger.max_unhandled_days}日以内）。未処理の内訳:`);
+      for (const x of a.unhandled.slice(0, 10)) {
+        const mark = overdueIds.has(x.id) ? '[放置] ' : '';
+        o.push(`    ${mark}★${x.rating} ${x.created?.slice(0, 10) ?? '(日付不明)'} ${(x.title || '').slice(0, 40)}`);
+        o.push(`      ${x.id}`);
       }
-    } else if (a.unhandled.length) {
-      o.push(`  期限内（${ledger.max_unhandled_days}日以内）`);
+      if (a.unhandled.length > 10) o.push(`    …ほか ${a.unhandled.length - 10}件`);
+      o.push('');
+      o.push('  この id を review-intake.json の disposition と data/review-replies.json の');
+      o.push('  下書きの両方に使う。**分類より先に文面を書かない**（validate が弾く）。');
     }
   }
   const byKind = {};
