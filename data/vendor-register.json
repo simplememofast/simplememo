@@ -127,7 +127,8 @@
       "degradation_probes": [
         "model_fallback"
       ],
-      "degradation_note": "使えるモデルが減れば縮退先へ移る。全滅したら**走らない**（静かに寝ない）"
+      "degradation_note": "使えるモデルが減れば縮退先へ移る。全滅したら**走らない**（静かに寝ない）",
+      "$used_for": "**認証経路が2つあり、適用される契約が違う**（2026-08-29 の調査で判明）:\n\n  `anthropic_api_key`        … オートパイロット主系 → **Commercial Terms**\n  `claude_code_oauth_token`  … GitHub Actions の Claude Code。`claude setup-token` で取るので\n                               Pro/Max 経路 → **Consumer Terms**。**critical: true**\n\nAnthropic 自身の Claude Code 文書がこの区別を明記している。\n\n**contract_review の anthropic 行は Commercial Terms 側しか読めていない。**非EEA向けの Consumer Terms 本文が公式サイトから取得できなかった（取れた版は本文自身が EEA/スイス限定と書いている）。**重いほうの経路の契約が未確定** —— 詳細はあちらの `$two_contracts`。\n\n**行を割るかどうかは未決**（割るとマスが 40 → 44 になり、追ってきた数字が動く）。"
     },
     {
       "id": "google_cloud",
