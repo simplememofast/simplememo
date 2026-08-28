@@ -374,6 +374,11 @@ export function toPath(url) {
  * information-only.
  */
 export const BUSINESS_RELEVANCE = [
+  // **ホームページに規則が無かった。**`/` はどのパターンにも当たらず既定の 0.5、
+  // つまり「判断がついていないページ」と同じ重みで並んでいた。実測では
+  // 34クリック / 437表示 / CTR 7.8%（2026-08-24窓）で、サイト内で最も
+  // インストールに近い面である。既定に落ちていたので誰も決めていなかった。
+  [/^\/$/, 1.0],
   [/^\/(obsidian|apple-watch-obsidian|siri|voice-input|hands-free|fastest-voice-memo|ai-tags)\//, 1.0],
   [/^\/blog\/obsidian-/, 1.0],
   [/^\/(captio|captio-alternative)\//, 1.0],
@@ -392,7 +397,29 @@ export const BUSINESS_RELEVANCE = [
   [/^\/(about|faq|contact|privacy|terms|legal|voices)\//, 0.3],
 ];
 
+/**
+ * ロケール接頭辞は落としてから照合する。**落とさないと非日本語ページが全滅する。**
+ *
+ * BUSINESS_RELEVANCE の全パターンは `^\/` で始まっているので、`/en/note-to-email/`
+ * はどの行にも当たらず既定の 0.5 になる。2026-08-24 スナップショットで測ると、
+ * **規則に当たらず既定へ落ちていたのは 101ページ・クリックの38.2%・表示の49.3%**で、
+ * その中身は「分類が難しいページ」ではなく、**英語ミラーがまるごと**だった:
+ *
+ *   /en/iphone-shortcuts-email-guide/     13クリック 1,813表示   （JA側は規則あり）
+ *   /en/note-to-email/                     6クリック   126表示   （JA側は 0.9）
+ *   /en/vs/google-keep-vs-apple-notes/     2クリック   778表示   （JA側は 0.7）
+ *
+ * つまり英語サイトは**丸ごと「中くらい」に沈められていた。**キューは相対順位で
+ * 動くので、これは英語ページを一律に過小評価する方向にだけ効く。
+ *
+ * segmentOfPath と同じロケール集合を使う。**片方だけ増やすと静かにズレる。**
+ */
+const LOCALE_PREFIX = /^\/(en|zh-Hant|zh|ko|es|pt-BR|id|ar|tr)(?=\/|$)/;
+
 export function businessRelevance(pagePath) {
-  for (const [re, v] of BUSINESS_RELEVANCE) if (re.test(pagePath)) return v;
+  if (!pagePath) return 0.5;
+  // `/en` → `/`、`/en/obsidian/` → `/obsidian/`。JAのパスは素通りする。
+  const p = String(pagePath).replace(LOCALE_PREFIX, '') || '/';
+  for (const [re, v] of BUSINESS_RELEVANCE) if (re.test(p)) return v;
   return 0.5;
 }

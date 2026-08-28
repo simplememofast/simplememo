@@ -115,6 +115,22 @@ jobs:
       - name: /en/ pages seed the reader's locale
         run: python3 scripts/inject_locale_seed.py --check
 
+      # 【獲得面ミックス】「SEOが伸びている」を、事業の言葉に割ったまま保つ。
+      #
+      # 総クリックだけを見ていると、情報記事だけが伸びている状態と獲得面が
+      # 伸びている状態が同じ数字に見える。この道具は BUSINESS_RELEVANCE で
+      # 面を3つに割り、**1日あたり**で比べる（窓の長さが揃わないため）。
+      #
+      # ここで走らせるのは自己テストだけで、レポートそのものは走らせない ——
+      # 出力の中身はスナップショットで変わるので、PRごとの合否にできない。
+      # 守っているのは計算のほう: 総数で比べていないこと、窓の長さが取れなければ
+      # 「1日あたり」を勝手に作らないこと、そして**分類を差し替えると順位が
+      # 入れ替わる場合に robust=false を返すこと。**
+      # 最後の1つが効かなくなると、この道具は「どの面が伸びているか」を
+      # 常に断言する装置になる —— 既定0.5のページがクリックの3割を占めたままで。
+      - name: Acquisition mix decomposition (selftest)
+        run: node growth/scripts/acquisition-mix.mjs --selftest
+
       # An experiment whose evaluation date has passed must not go unnoticed.
       # Deliberately NOT blocking: a green run here is what lets auto-merge
       # ship to production, so failing on an unevaluated retitle would also

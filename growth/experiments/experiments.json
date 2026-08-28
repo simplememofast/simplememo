@@ -647,7 +647,9 @@
         "Two changes, one experiment: title and meta description both moved. At 33 clicks/28d they cannot be separated, and both are the same surface (the SERP snippet).",
         "The queries this page is shown for are dominated by qualifiers absent from the old title: メモアプリ 無料 (966 imp, 1 click, pos 8.4), メモアプリ 無料 シンプル (756 imp, 1 click, pos 9.3), メモ帳アプリ 広告なし 無料 (82 imp, 0 clicks). 「最強メモ環境」 answered none of them.",
         "Brand-suffix hypothesis is SUGGESTIVE, NOT ESTABLISHED. Site-wide, titles carrying 「| Obsidian連携シンプルメモ」 average 1.72% CTR (67 pages, 7,889 imp) against 2.17% without (146 pages, 31,431 imp) — but position and page type are not controlled for, so this is a reason to test one page, not to strip suffixes site-wide.",
-        "Body untouched. If CTR moves, the cause is the snippet alone."
+        "Body untouched. If CTR moves, the cause is the snippet alone.",
+        "2026-08-28 中間読み（**評価ではない。評価日は 2026-09-13 のまま**）: 2026-08-24スナップショット（08-10..08-22）で 13クリック / 2,084表示 / CTR 0.62% / 順位 8.22。基準は CTR 0.82% / 順位 9.19 なので、**CTRは下がり、順位は約1つ上がっている。****このままCTRだけを読むと『retitle失敗・revert』になるが、それは誤読になりうる。**同じ窓で表示は 144→160回/日 に増えており、順位が上がった面ほど「まだ買う気のない検索」まで拾い始める。CTRは分母の広がりでも下がる。9/13には最低限、(a) 順位を揃えたときの期待CTR（expectedCtr）との差、(b) クリック**数**の日次、(c) 流入クエリ構成の3つを併せて読むこと。**CTR単独での keep/revert 判定は、この実験については禁止。**",
+        "2026-08-28: 手元のGSC分析（〜08-25の直近7日）では 15クリック / 2,298表示 / CTR 0.65% / 順位 8.78 で、**表示は 328回/日**とさらに広がっている。窓が違うので上の数字とは直接比べない（重ねない）が、「表示が増えてCTRが下がる」という向きは両方の窓で一致している。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1787,6 +1789,59 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ]
+    },
+    {
+      "id": "link-2026-08-28-feed-strongest-page",
+      "page": "/blog/obsidian-voice-input",
+      "type": "internal_link",
+      "hypothesis": "サイト最強ページの制約はCTRではなく表示回数である。最大の表示プール4本から本文リンクを通せば、表示回数が増える。CTR 9.5% / 順位 5.8 は既に高く、伸ばす余地は流入の入口側にしか無い。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-08-28",
+      "evaluation_at": "2026-10-12",
+      "status": "running",
+      "before": {
+        "inbound_internal_links_from_top_impression_pages": 0,
+        "note": "/blog/{free-memo-apps-ranking, best-memo-apps-2026, offline-memo-apps, line-keep-alternative} の 4本はいずれもこのページへのリンクを1本も持っていなかった（実測 grep -c = 0）。被リンクはObsidianクラスタ内部の12ファイルのみ、つまり**既にObsidianを見ている読者からしか流れて来ない。**"
+      },
+      "after": {
+        "inbound_internal_links_from_top_impression_pages": 4,
+        "note": "各ページの既存 internal-links（関連記事）ブロック先頭に1本ずつ。title / description / next-step は触っていない。"
+      },
+      "baseline": {
+        "clicks": 21,
+        "impressions": 222,
+        "ctr": 0.0946,
+        "position": 5.77,
+        "window": "2026-08-10..2026-08-22 (13d)",
+        "source": "growth/data/gsc/2026-08-24 (pages.json)",
+        "note": "日次に直すと 1.62クリック/日・17.1表示/日。比較は日次で行う（窓の長さが揃わないため）。"
+      },
+      "target_metric": "impressions",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-08-28: **CTRを目標にしていない。**このページは CTR 9.46% / 順位 5.77 で、サイト内で最も高い。伸びない理由はSERPでの見え方ではなく、そもそも表示が 17回/日 しかないこと。同じ窓で /blog/free-memo-apps-ranking は 160表示/日 ある。**桁が違うのは順位ではなく面の広さ。**",
+        "2026-08-28: リンク先を本文ではなく既存の関連記事ブロックにしたのは、**走っている実験を汚さないため。**このページには cta-2026-08-10-strongest-page-inline が走っており、4本の受け側にも snippet-2026-08-09-free-memo-ranking / title-2026-08-12-013 / engage-2026-08-11-next-step が乗っている。title・description・next-step のいずれも動かしていない。",
+        "2026-08-28: **効果が出ない可能性のほうが高い、という前提で置いている。**内部リンク1本で表示回数が動く保証は無く、6週間後に「変わらなかった」で終わる公算が大きい。それでも記録するのは、**やったことを記録せずに『内部リンクは効かない』と言えるようにしないため。**"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "ホールドアウトが無い。4本同時に入れたので、どのリンクが効いたかも分離できない。**分離できないことを承知で、まとめて1回の変更として記録する。**",
+        "confounders": null
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 300,
+        "rationale": "基準は 17.1表示/日。評価窓が13日なら約222表示。**変化を読むには基準と同程度の母数が要る**ので、評価窓で300表示に届かなければ結論を出さない。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
+        "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
+        "受け側4本のいずれかで title / description が変わった → **表示回数の変化をこの実験の効果と読まない**"
       ]
     }
   ]
