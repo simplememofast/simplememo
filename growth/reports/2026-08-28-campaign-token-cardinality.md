@@ -92,3 +92,71 @@ Web referrer 12。ただしこの内訳は更新を含む全ダウンロード�
   長さ制限が無く、クリックまでは今のまま測れる。ct= が要るのは**インストールと課金**だけ
 - **トークンを変えると履歴が切れる。**`tag-cta-placements.js` の既存コメントが
   「一度きりの回復可能なコスト」と書いているとおりで、変えるなら一度でまとめて変えるのが安い
+
+---
+
+# 追記 2026-08-28 — 畳んだ
+
+上の §6 で「どこまで粗くするかは決めていない」と書いた分の実装記録。
+**`{言語}__{配置}` の8トークン**にした。
+
+    670 → 8
+
+    446  jp__nav      102  en__bottom
+    122  jp__mid       87  en__mid
+     86  jp__bottom    73  en__nav
+     22  jp__hero      25  en__hero
+
+最長10文字（Apple の上限30に対して十分）。**30文字超のトークンは0件になった**
+（畳む前は182種類・最長42文字）。
+
+## 副次的に、取り残されていた266件のCTAに配置が付いた
+
+畳む前は `{ページ}-{言語}__{配置}` が上限を超えるページで、
+**スクリプトが配置の付与を諦めてページ単位トークンのまま残していた**（266 CTA）。
+base が消えて長さの制約が無くなったので、**全963 CTAが配置を持つ**ようになった。
+
+    畳む前: OK: every App Store CTA carries placement/... (266 keep page-level ct=)
+    畳んだ後: OK: every App Store CTA carries placement/... (0 keep page-level ct=)
+
+## 途中で、既に一度直されていた欠陥を踏み直した
+
+`--write` が**毎回1件だけラベルを変え、`--check` と永久に食い違った**。
+`vs/line-keep-memo/` の CTA が1つ、mid ↔ bottom で振動していた。
+
+原因はスクリプト自身のコメントに既に書いてある:
+
+> Measuring the live document is not idempotent: adding data-cta-* makes the HTML
+> longer, which shifts every later anchor's byte offset, which moves its position
+> fraction. … **Normalising first** means the same page always yields the same placements
+
+**正規化が `data-cta-*` だけで、ct= を含んでいなかった。**
+トークンの長さが 25文字→7文字 と変われば、同じことが起きる。
+`stripCtaAttrs` が ct= の中身も固定長へ潰すようにした。
+**以後どんなトークン設計へ変えても位置は動かない。**
+
+## 走っている実験2件に触れた（どちらも評価日 2026-09-13）
+
+**`cta-2026-08-10-strongest-page-inline`** — target_metric が
+`ct=blog-obsidian-voice-input-jp__mid` を名指ししていた。
+**測定は失われていない** —— GA4 は `page_path` と `data-cta-placement` を
+ct= とは別の列で記録しているので、
+`page_path=/blog/obsidian-voice-input AND placement=mid` で同じ系列が読める。
+**フィルタする列が変わっただけ。**target_metric を書き換え、
+9/13 の読み方を注記した。
+
+**`cta-2026-08-10-desktop-qr`** — こちらは**現状のままでは評価できない**ことが分かった。
+target_metric が名指しする `__qr` トークンは**サイトに1つも存在しない**（実測0件）で、
+仮に有っても閾値5に届かない。この実験のノート自身が
+「**NOT MEASURABLE IN GA4** … The only readout is App Store Connect campaign data」
+と書いており、**その唯一の読み口が塞がっている。**
+決定は書いていない（評価日は 9/13、判断は持ち主のもの）が、
+**待っても出ない**ことは今分かっている。
+
+## 直していないもの
+
+**トークンの言語とページのロケールの食い違い 210件**
+（root(JA) に別言語 179 / `/en/` に別言語 31）。
+dual-DOM の言語別CTAで説明が付く部分もあるが**確かめていない。**
+ここで直すと粒度の変更と言語の付け替えが同じ変更に混ざるので、
+**言語は今の値を保った。**`--check` が報告のみで数える。
