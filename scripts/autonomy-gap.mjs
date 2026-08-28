@@ -165,13 +165,31 @@ export const UNLOCKS = {
                        needs: '9/6前後。D28が測れるようになる',
                        satisfied_when: [{ file: 'data/autopilot-status.json',
                                           path: 'data_freshness.bq_export_days_accumulated', atLeast: 28 }] },
+  // [2026-08-28] **述語を書き直した。旧版は構造的に真になれなかった。**
+  // `data/credential-expiry.json` の `apple_developer_enrolled_at` /
+  // `domain_renewal_at` を見ていたが、**その名前のフィールドはリポジトリのどこにも無く、
+  // 書く経路も無かった。**（grep して、この述語の中にしか出てこないことを確かめた。）
+  // つまりこの入口は「オーナーが埋めても、機械は永久に開いたと言わない」形をしていた。
+  // **満たされない述語は、満たされていない状態と見分けがつかない。**2日気づかなかった。
+  //
+  // Apple 側は日付そのものを追うのをやめた。台帳自身が
+  // 「監視を自動化するより、監視が要らない形にするほうが強い」と結論していて
+  // （deadlines[apple-developer-program].better_fix）、**根の問いは加入日ではなく
+  // auto-renew が入っているか。**`auto_renew_confirmed` は true/false どちらでも
+  // 「確かめた」なので述語は真になる —— false なら毎年の期限監視が要る形に戻るだけで、
+  // **確かめたことは確かめたこと。**
   company_facts:     { kind: 'owner_input', label: '会社の基礎事実を台帳に入れる',
                        needs: '**決算期・役員報酬・インボイス登録は 2026-08-25 に入り、'
                             + '法人税と消費税の申告期限は機械が出している。**残るのは '
-                            + 'Apple Developer の加入日・ドメインの更新日・社会保険の具体的な届出期限・法定調書の要否',
+                            + 'Apple Developer の auto-renew が入っているかの確認（1回で閉じる）・'
+                            + 'ドメインの更新日（RDAP から機械が入れる。seo-daily の commit 段が'
+                            + '月曜ゲートなので最初の機会は 2026-08-31）・'
+                            + '社会保険の具体的な届出期限・法定調書の要否',
                        satisfied_when: [
-                         { file: 'data/credential-expiry.json', path: 'apple_developer_enrolled_at' },
-                         { file: 'data/credential-expiry.json', path: 'domain_renewal_at' },
+                         { file: 'data/corporate-obligations.json',
+                           path: 'deadlines[id=apple-developer-program].auto_renew_confirmed' },
+                         { file: 'data/corporate-obligations.json',
+                           path: 'deadlines[id=domain-renewal].next_due' },
                        ] },
   contract_docs:     { kind: 'owner_input', label: '契約書・請求書をリポジトリに置く',
                        needs: '現在ゼロ。書面が無いと分類も照合も対象が存在しない' },
@@ -479,11 +497,72 @@ export function selftest() {
       { dir: 'growth/data/appstore', contains: 'Search Term' }, false],
     ['contains はファイル単位でも効く',
       { file: 'data/automation-coverage.json', contains: 'そんな語は入っていない' }, false],
+    // [2026-08-28] 配列の引き当て。**これが無い間、company_facts の述語は
+    // 構造的に真になれなかった。**
+    ['**配列を id で引ける**',
+      { file: 'data/corporate-obligations.json', path: 'deadlines[id=corporate-tax].next_due' }, true],
+    ['引き当たらない id は満たさない',
+      { file: 'data/corporate-obligations.json', path: 'deadlines[id=そんな行は無い].next_due' }, false],
+    ['**引き当たっても値が null なら満たさない**（在ることと埋まっていることは違う）',
+      { file: 'data/corporate-obligations.json',
+        path: 'deadlines[id=domain-renewal].next_due' }, false],
+    // **false は「確かめた」なので満たす。**null（確かめていない）と混ぜない。
+    // company_facts が Apple の auto_renew_confirmed をこの形で見る ——
+    // 自動更新が入っていなかった（false）としても、**確かめたことは確かめたこと。**
+    ['**false は「確かめた」なので満たす**（null と混ぜない）',
+      { file: 'data/corporate-obligations.json',
+        path: 'deadlines[id=domain-renewal].confirmed_by_owner' }, true],
   ];
   for (const [label, pred, want] of predCases) {
     let got;
     try { got = blockedOnSatisfied(pred); } catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
     if (got !== want) problems.push(`述語「${label}」が ${got}（${want} のはず）`);
+  }
+
+  // **満たされようがない述語を見つけるか。**
+  //
+  // [2026-08-28] ここが空いていたので `company_facts` が2日間、
+  // 存在しないフィールドを見ていた。**「まだです」と言い続ける誤りは静かで、
+  // 出力だけを見ていると正しく動いているのと区別がつかない。**
+  {
+    const REAL = 'data/corporate-obligations.json';
+    const cases = [
+      ['**書かれる予定の null は正当な待ち**（誤検出しない）',
+        { file: REAL, path: 'deadlines[id=domain-renewal].next_due' }, false],
+      ['**存在しないフィールドは幻**（誰も書かない）',
+        { file: REAL, path: 'そんなフィールドは無い' }, true],
+      ['引き当たらない配列要素も幻',
+        { file: REAL, path: 'deadlines[id=そんな行は無い].next_due' }, true],
+      ['途中の段が無ければ幻',
+        { file: REAL, path: 'entity.そんな段.値' }, true],
+      ['**まだ生成されていないファイルは判定しない**（確かめようがない）',
+        { file: 'data/そんなファイルは無い.json', path: 'x' }, false],
+      ['path の無い述語は対象外', { file: REAL }, false],
+      ['dir の述語は対象外', { dir: 'scripts', atLeast: 1 }, false],
+    ];
+    for (const [label, pred, wantBad] of cases) {
+      let why;
+      try { why = predicateUnreachable(pred); } catch (e) {
+        problems.push(`到達性: ${label} で例外: ${e.message}`); continue;
+      }
+      if (Boolean(why) !== wantBad) {
+        problems.push(`到達性「${label}」が ${JSON.stringify(why)}（${wantBad ? '鳴るはず' : '鳴らないはず'}）`);
+      }
+    }
+    // **check() から鳴ること。**関数が正しくても呼ばれていなければ何も起きない
+    //（この自己テストは 2026-08-26 に「check() を一度も呼んでいなかった」をやっている）。
+    const phantom = { kind: 'wait', label: '幻の入口', needs: 'x',
+      satisfied_when: [{ file: REAL, path: 'そんなフィールドは無い' }] };
+    const doc = { blocked_on_missing_budget: 99, tasks: [] };
+    if (!check(doc, { unlocks: { u: phantom } }).some((x) => x.includes('満たされようがない'))) {
+      problems.push('**満たされようがない述語を check() が落とさない**'
+        + '（永久に開かない入口が「まだです」の顔で残る）');
+    }
+    if (check(doc, { unlocks: { u: { ...phantom,
+      satisfied_when: [{ file: REAL, path: 'deadlines[id=domain-renewal].next_due' }] } } })
+      .some((x) => x.includes('満たされようがない'))) {
+      problems.push('正当な待ち（null）を「満たされようがない」と言った（常に鳴る検査）');
+    }
   }
 
   // 入口の述語（開いた入口を待ち続けない）。**両方向を見る。**
@@ -562,7 +641,22 @@ export function selftest() {
  * 検索語の列を持つレポートはまだ無い。**在ることと、要るものが在ることは違う。**
  */
 export function blockedOnSatisfied(pred, { root = ROOT } = {}) {
-  const at = (obj, dotted) => dotted.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
+  // [2026-08-28] **配列の引き当てを足した。**足すまでは `company_facts` の述語が
+  // `data/credential-expiry.json` の最上位に `domain_renewal_at` があることを期待して
+  // いたが、**その名前のフィールドはどのファイルにも無い。**実際に書かれているのは
+  // `data/corporate-obligations.json` の `deadlines[]` の中で、ドット記法では届かなかった。
+  // **述語が構造的に真になれない状態が、誰にも気づかれずに残っていた。**
+  //
+  // ここで「読める場所に写しを置く」ほうへ倒さない。写しは正が2つになり、
+  // 片方が古くなったときに**述語が嘘をつく側**へ倒れる。読めない側を直す。
+  const at = (obj, dotted) => dotted.split('.').reduce((o, k) => {
+    if (o == null) return o;
+    const m = /^([^[\]]+)\[([A-Za-z_$][\w$]*)=([^\]]+)\]$/.exec(k);
+    if (!m) return o[k];
+    const arr = o[m[1]];
+    if (!Array.isArray(arr)) return undefined;
+    return arr.find((e) => e && e[m[2]] === m[3]);
+  }, obj);
   const hasText = (abs, needle) => {
     try { return fs.readFileSync(abs, 'utf8').includes(needle); } catch { return false; }
   };
@@ -593,6 +687,63 @@ export function blockedOnSatisfied(pred, { root = ROOT } = {}) {
   if (v === undefined || v === null) return false;
   if (pred.atLeast !== undefined) return typeof v === 'number' && v >= pred.atLeast;
   return true;
+}
+
+/**
+ * **その述語は、そもそも満たされうるか。**
+ *
+ * [2026-08-28] `company_facts` の述語が `data/credential-expiry.json` の
+ * `apple_developer_enrolled_at` / `domain_renewal_at` を見ていた。
+ * **どちらのフィールドも、どのファイルにも存在せず、書く経路も無かった。**
+ * 入口は「オーナーが埋めれば開く」顔をして、実際には**永久に開かない**。
+ *
+ * 効いたのはこの非対称: **満たされない述語と、まだ満たされていない述語は、
+ * 出力が同じ `false` で見分けがつかない。**「まだです」と言い続けるので静かに正しく見える。
+ * 2日誰も気づかなかったのは怠慢ではなく、**気づける形をしていなかったから。**
+ *
+ * 見分け方は構造にある。この台帳の作法では、**埋まる予定のフィールドは `null` で先に
+ * 置いてある**（`auto_renew_confirmed: null` ＋ `$auto_renew_confirmed` の由来書き）。
+ * だから「キーが在って値が null」は正当な待ちで、**「キーそのものが無い」は誤記か幻。**
+ *
+ * ファイルがまだ無い場合は判定しない —— これから生成されるファイルを指す述語は正当で、
+ * **中身の形は確かめようがない。**確かめられないものを確かめたことにしない。
+ */
+export function predicateUnreachable(pred, { root = ROOT } = {}) {
+  if (!pred.file || !pred.path) return null;
+  const abs = path.join(root, pred.file);
+  if (!fs.existsSync(abs)) return null;
+  let doc;
+  try {
+    doc = JSON.parse(fs.readFileSync(abs, 'utf8'));
+  } catch {
+    return null;   // 壊れている件は blockedOnSatisfied が例外で鳴らす。二重に鳴らさない
+  }
+  const keys = pred.path.split('.');
+  const leaf = keys.pop();
+  let cur = doc;
+  for (const k of keys) {
+    const m = /^([^[\]]+)\[([A-Za-z_$][\w$]*)=([^\]]+)\]$/.exec(k);
+    if (m) {
+      const arr = cur?.[m[1]];
+      if (!Array.isArray(arr)) return `${pred.file}: ${m[1]} が配列でない`;
+      cur = arr.find((e) => e && e[m[2]] === m[3]);
+      if (cur === undefined) return `${pred.file}: ${k} に当たる要素が無い`;
+      continue;
+    }
+    cur = cur?.[k];
+    if (cur === undefined) return `${pred.file}: ${k} が無い`;
+  }
+  const m = /^([^[\]]+)\[([A-Za-z_$][\w$]*)=([^\]]+)\]$/.exec(leaf);
+  if (m) {
+    const arr = cur?.[m[1]];
+    if (!Array.isArray(arr)) return `${pred.file}: ${m[1]} が配列でない`;
+    return arr.some((e) => e && e[m[2]] === m[3]) ? null : `${pred.file}: ${leaf} に当たる要素が無い`;
+  }
+  if (cur === null || typeof cur !== 'object') return `${pred.file}: ${keys.join('.')} がオブジェクトでない`;
+  return (leaf in cur) ? null
+    : `${pred.file}: ${pred.path} というフィールドが無い`
+      + '（**埋まる予定なら `null` で置いてある**のがこの台帳の作法。'
+      + '無いということは、誰も書かない ―― この述語は満たされようがない）';
 }
 
 /** その行がまだ待っているか。述語が1つも無ければ「確かめていない」。 */
@@ -657,6 +808,20 @@ export function check(doc, { unlocks = UNLOCKS } = {}) {
   // レポートが降りる（現在0件）」を出していた。実際には 2026-08-25 に10本降りている。
   // **オーナーへ渡す計画が、もう届いたものを待てと言っていた。**
   // 行だけでなく入口（UNLOCKS）にも述語を置く。
+  // **満たされようがない述語を持っていないか。**（predicateUnreachable の由来を参照）
+  // これは上の「もう開いている」と**反対向きの誤り**で、同じ `false` に化ける。
+  // 片方だけ見ていると、永久に開かない入口が「まだです」の顔で残る。
+  for (const [id, u] of Object.entries(unlocks)) {
+    for (const pr of u.satisfied_when || []) {
+      const why = predicateUnreachable(pr);
+      if (why) {
+        problems.push(`入口「${u.label}」(${id}) の述語が満たされようがない — ${why}`
+          + '。**オーナーが埋めても機械は開いたと言わない。**'
+          + '見る先を実際に書かれている場所へ直すこと');
+      }
+    }
+  }
+
   for (const [id, u] of Object.entries(unlocks)) {
     if (!Array.isArray(u.satisfied_when) || !u.satisfied_when.length) continue;
     if (!u.satisfied_when.every((pr) => blockedOnSatisfied(pr))) continue;
