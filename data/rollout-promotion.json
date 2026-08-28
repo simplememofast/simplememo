@@ -56,8 +56,8 @@
     "kill_switch": false,
     "$kill_switch": "立てると即座に全フラグの自動昇格が止まる。**理由は問わない。**",
     "auto_promote": {
-      "enabled": false,
-      "$enabled": "オーナーが立てる。立てる操作そのものが human_only（authority-matrix）",
+      "enabled": true,
+      "$enabled": "**2026-08-28 にオーナーが立てた**（それまで false・authority-matrix で human_only だった）。立てる前に読み取り専用で実機確認した（simplememo-api の run 33132559234・`apply: false`）: 指紋照合→本番の状態読み→門、まで通り、tf04_progress は `hold / 自動昇格が有効になっていない` で止まっていた。**止めていたのはこのフラグだけ。**立てた後に効くのは実検査のほう —— カナリアは 2026-08-27 に 25% へ上げたばかりなので、**48時間の寝かせで 2026-08-29 まで必ず hold する。**その先も3指標が各群30以上で判定できなければ hold",
       "daily_cap": 1,
       "$daily_cap": "1日1段。**同じ日に2段上げると、1段目の観測期間がゼロになる。**",
       "max_auto_rollout": 50,
@@ -70,8 +70,19 @@
       "$cooldown_after_kill_days": "kill が出たフラグを、翌日また広げない",
       "max_state_age_seconds": 7200,
       "$max_state_age_seconds": "ガードは毎時走る。2時間より古い判定は『いま悪化していない』の証拠にならない",
-      "required_metrics": ["launch_ok", "send_success", "activation"],
-      "steps": [1, 5, 10, 25, 50, 100],
+      "required_metrics": [
+        "launch_ok",
+        "send_success",
+        "activation"
+      ],
+      "steps": [
+        1,
+        5,
+        10,
+        25,
+        50,
+        100
+      ],
       "$steps": "../simplememo-api/src/rollout-guard.ts の ROLLOUT_STEPS と同じ。**飛ばさない**"
     }
   },

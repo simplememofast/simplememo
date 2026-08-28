@@ -247,8 +247,21 @@ function selftest() {
       const p = validate(real, { obligations });
       assert(p.length === 0, p.join(' / '));
     }],
-    ['**既定は enabled:false** — 実台帳のまま評価すると必ず止まる', () => {
-      held(ev(real), '有効になっていない');
+    // **[2026-08-28] enabled が立ったので「必ず止まる」は成り立たなくなった。**
+    // この行が守っていたのは「出荷している台帳のまま評価しても、実際には送らない」
+    // ことで、その錠前は enabled から dry_run へ移っただけ。**性質のほうをピンし直す**
+    // （フラグの値をピンすると、値が変わった日に検査ごと消える）。
+    ['**実台帳のまま評価しても send にはならない**（最後の錠前は dry_run）', () => {
+      const r = ev(real);
+      assert(r.decision !== 'send', `実台帳で send が出た: ${JSON.stringify(r)}`);
+      assert(r.decision === 'would_send' && /dry_run/.test(r.why),
+        `dry_run で止まっていない: ${JSON.stringify(r)}`);
+    }],
+    ['**dry_run を倒すと、実台帳がそのまま send になる**（錠前が1枚であることを隠さない）', () => {
+      const d = JSON.parse(JSON.stringify(real));
+      d.policy.auto_send.dry_run = false;
+      const r = ev(d);
+      assert(r.decision === 'send', `dry_run を倒しても send にならない: ${JSON.stringify(r)}`);
     }],
     ['条件が揃えば送る', () => {
       const r = ev(on());
