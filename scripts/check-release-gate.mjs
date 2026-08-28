@@ -247,7 +247,12 @@ function selftest() {
         device_verified_by: 'owner', device_verified_at: ago(3), device_verified_sha: 'abc123',
       },
       ci: { conclusion: 'success', sha: 'abc123' },
-      releaseNotes: { 'ja-JP': 'あ', 'en-US': 'a' },
+      // **`ja` であって `ja-JP` ではない。**このアプリの実際の ASC ロケール。
+      // ここを台帳から取らずに直書きしていたので、台帳の値を直したときに
+      // 自己テストだけが古い値のまま通り続ける形だった（2026-08-28 に実際にそうなった）。
+      releaseNotes: Object.fromEntries(
+        doc.policy.require_release_notes_locales.map((loc) => [loc, 'x']),
+      ),
       doneToday: 0, now: NOW, ...over,
     };
   };
@@ -297,7 +302,16 @@ function selftest() {
     ['**CI が緑でなければ出さない**', () => heldS({ ci: { conclusion: 'failure', sha: 'abc123' } }, 'CI')],
     ['**別のコミットの緑で出さない**', () => heldS({ ci: { conclusion: 'success', sha: 'zzz' } }, '別物の緑')],
     ['CI が読めなければ hold（緑と読み替えない）', () => heldS({ ci: undefined }, '材料が無い')],
-    ['リリースノートが片方だけなら出さない', () => heldS({ releaseNotes: { 'ja-JP': 'あ' } }, 'en-US')],
+    ['リリースノートが片方だけなら出さない', () => {
+      const [first, second] = doc.policy.require_release_notes_locales;
+      heldS({ releaseNotes: { [first]: 'x' } }, second);
+    }],
+    ['**要求ロケールは台帳から取る**（直書きしない）', () => {
+      // 台帳を書き換えたら、そのロケールが要求されること。**直書きだとここが素通りする。**
+      const locales = doc.policy.require_release_notes_locales;
+      assert(locales.includes('ja') && !locales.includes('ja-JP'),
+        `ASC の実ロケールは ja（release_notes/ja-JP/ はフォルダ名）: ${JSON.stringify(locales)}`);
+    }],
     ['TestFlight が VALID でなければ出さない', () => heldS({ build: { ...subOk().build, testflight_state: 'PROCESSING' } }, 'VALID')],
     ['**寝かせが足りなければ出さない**', () => {
       const b = { ...subOk().build, testflight_available_at: ago(1) };

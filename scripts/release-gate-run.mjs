@@ -75,7 +75,12 @@ export const REQUIRED = [
   { key: 'build.device_verified_sha', gate: 'submission', source: 'human', why: '**何を**確かめたか' },
   { key: 'ci.conclusion', gate: 'submission', source: 'github', why: 'CI が緑か' },
   { key: 'ci.sha', gate: 'submission', source: 'github', why: '別物の緑で出さないため' },
-  { key: 'releaseNotes.ja-JP', gate: 'submission', source: 'asc', why: '日本語のリリースノート' },
+  // **`ja-JP` ではなく `ja`。**このアプリの実際の ASC ロケールは `ja`。
+  // `release_notes/ja-JP/` はリポジトリ側のフォルダ名で、
+  // `prepare_app_store_version.rb` の `LOCALE_MAP` が `ja-JP => ja` に写している。
+  // 2026-08-28 に `ja-JP` と書いていて、日次の実データで `releaseNotes.ja` が
+  // 返ってきて気づいた。**隣のスクリプトが大文字で警告していたのを読まずに書いた。**
+  { key: 'releaseNotes.ja', gate: 'submission', source: 'asc', why: '日本語のリリースノート（ASC のロケールは ja）' },
   { key: 'releaseNotes.en-US', gate: 'submission', source: 'asc', why: '英語のリリースノート' },
   { key: 'review.state', gate: 'release', source: 'asc', why: '審査が「開発者の公開待ち」か' },
   { key: 'review.version', gate: 'release', source: 'asc', why: '公開しようとしている版数' },
