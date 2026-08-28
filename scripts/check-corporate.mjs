@@ -168,6 +168,27 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
       if (v.reviewed_by === 'ai_draft' && !v.draft_note) {
         problems.push(`${at}: ai_draft なのに draft_note が無い — 何を読んで何を読めなかったかが残らない`);
       }
+      // [2026-08-28] **読みは観点ごとに起きるが、`reviewed_by` は行に1つしかない。**
+      // 4観点のうち3つを人が確認し、1つがAIの下書きのまま、という状態が実際に出た
+      // （apple の ip を後から足したとき）。行を `human` にすると下書きまで
+      // 人が見たことになり、`ai_draft` に戻すと確認済みの3つが下書き扱いになる。
+      // **どちらも嘘なので、例外を名指しで持つ欄を足した。**
+      if (v.draft_clauses !== undefined) {
+        if (!Array.isArray(v.draft_clauses) || v.draft_clauses.length === 0) {
+          problems.push(`${at}: draft_clauses は空でない配列で書く（無いなら欄ごと消す）`);
+        } else {
+          for (const c of v.draft_clauses) {
+            if (!(cr.clauses || []).includes(c)) {
+              problems.push(`${at}: draft_clauses に知らない観点「${c}」`);
+            } else if (v[c] === 'unreviewed') {
+              problems.push(`${at}: draft_clauses の「${c}」が unreviewed — 下書きが無いのに下書き扱いにしている`);
+            }
+          }
+          if (!v.draft_note) {
+            problems.push(`${at}: draft_clauses があるのに draft_note が無い — 何を読んで何を読めなかったかが残らない`);
+          }
+        }
+      }
       if (v.liability_cap === 'risk' && !v.risk_note) {
         problems.push(`${at}: risk と書いたのに risk_note が無い — 何が危ないか残らない`);
       }
@@ -227,6 +248,36 @@ SCENARIOS.push(
     assert(validate(d).problems.some((x) => x.includes('draft_note')),
       '読めた範囲を書かない下書きが素通りした — 部分的な読みで断定するのが、この欄を足したきっかけ');
   }],
+  ['**draft_clauses に unreviewed の観点を入れたら落ちる**（下書きが無いのに下書き扱い）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const cr = d.contract_review;
+    const v = cr.vendors[0];
+    v[cr.clauses[0]] = 'ok'; v.reviewed_at = '2026-08-28'; v.reviewed_by = 'human';
+    v.draft_note = 'x';
+    v.draft_clauses = [cr.clauses.find((c) => v[c] === 'unreviewed') ?? cr.clauses[1]];
+    v[v.draft_clauses[0]] = 'unreviewed';
+    assert(validate(d).problems.some((x) => x.includes('draft_clauses')),
+      '下書きの無い観点を下書き扱いにしたのが素通りした');
+  }],
+  ['**draft_clauses に知らない観点を入れたら落ちる**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const v = d.contract_review.vendors[0];
+    v[d.contract_review.clauses[0]] = 'ok'; v.reviewed_at = '2026-08-28';
+    v.reviewed_by = 'human'; v.draft_note = 'x'; v.draft_clauses = ['なにか'];
+    assert(validate(d).problems.some((x) => x.includes('知らない観点')),
+      '登録簿に無い観点名が素通りした');
+  }],
+  ['**draft_clauses があるのに draft_note が無ければ落ちる**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const cr = d.contract_review;
+    const v = cr.vendors[0];
+    for (const c of cr.clauses) v[c] = 'ok';
+    v.reviewed_at = '2026-08-28'; v.reviewed_by = 'human';
+    v.draft_clauses = [cr.clauses[1]];
+    delete v.draft_note;
+    assert(validate(d).problems.some((x) => x.includes('draft_note')),
+      '読めた範囲を書かない下書きが素通りした');
+  }],
   ['**ベンダー台帳が空なら contract_review は全部照合できない**（空を「照合しない」と読まない）', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
     const p = validate(d, { vendorIds: new Set() }).problems;
@@ -257,7 +308,8 @@ if (isMain) {
     (v) => (cr.clauses || []).every((c) => v[c] === 'unreviewed'));
   // **下書きは別勘定で出す。**「確認済み」に混ぜると、人が見ていないものが
   // 見たものとして数えられる。件数を分けておけば、混ぜようがない。
-  const draftVendors = (cr.vendors || []).filter((v) => v.reviewed_by === 'ai_draft');
+  const draftVendors = (cr.vendors || []).filter(
+    (v) => v.reviewed_by === 'ai_draft' || (v.draft_clauses || []).length);
 
   console.log('法人としての期限・記録・契約条項\n');
   console.log(`  期限 ${doc.deadlines.length}件 — うち**未把握 ${unconfirmed.length}件**`);
@@ -274,7 +326,10 @@ if (isMain) {
   console.log(`    **全観点が未確認のベンダー ${unreviewedVendors.length}社**`);
   if (draftVendors.length) {
     console.log(`    **AIの下書きどまり ${draftVendors.length}社** — 人はまだ見ていない（reviewed_by: ai_draft）`);
-    for (const v of draftVendors) console.log(`      ${v.id}: ${v.draft_note}`);
+    for (const v of draftVendors) {
+      const which = v.reviewed_by === 'ai_draft' ? '全観点' : `${v.draft_clauses.join(' / ')} のみ`;
+      console.log(`      ${v.id}（${which}）: ${v.draft_note}`);
+    }
   }
   console.log('    書面の契約書は無く、各社の規約への同意で成立している。');
   console.log('    **unreviewed は「問題なし」ではなく「見ていない」。**');

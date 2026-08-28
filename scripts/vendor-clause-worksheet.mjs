@@ -149,8 +149,16 @@ export function build({ register, obligations }) {
       // **AIが下書きした瞬間にマスが一覧から消える。**消えれば人は読みに来ない ——
       // それは「見ていない」を隠しただけで、`$note` が言う
       // 「見たという記録が嘘を守る」に自分から寄っていく。**人が見るまでが未読。**
-      const draft = row.reviewed_by === 'ai_draft';
-      if (state !== 'unreviewed' && !draft) continue;
+      // [2026-08-28] **行ぜんぶが下書き**（reviewed_by: ai_draft）と、
+      // **その観点だけが下書き**（draft_clauses に名指し）の両方を拾う。
+      // 後者は「4観点のうち3つを人が確認し、1つが下書きのまま」で実際に出た形。
+      // **下書きの印は、下書きが在るマスにだけ付ける。**
+      // 行ぜんぶが `ai_draft` でも、その中の未読のマスには下書きが無い。
+      // 印だけ付けると「読んだのか読んでいないのか」が一覧から判らなくなる。
+      const reviewed = state !== 'unreviewed';
+      const draft = reviewed
+        && (row.reviewed_by === 'ai_draft' || (row.draft_clauses || []).includes(clause));
+      if (reviewed && !draft) continue;
       const score = exposure(clause, v);
       const cell = {
         vendor: row.id, name: v.name ?? row.id, clause, state, draft,
@@ -248,6 +256,33 @@ function selftest() {
       const c = cells.find((x) => x.vendor === 'a' && x.clause === 'personal_data');
       assert(c, '下書き済みのマスが順序から消えた — それは未読を隠しただけ');
       assert(c.draft === true, 'draft の印が付いていない');
+    }],
+
+    ['**未読のマスに下書きの印を付けない**（行が ai_draft でも、読んでいないものは読んでいない）', () => {
+      const doc = fixture();
+      const row = doc.obligations.contract_review.vendors.find((v) => v.id === 'a');
+      row.liability_cap = 'ok';       // これは下書き
+      row.reviewed_by = 'ai_draft';   // 行ぜんぶが下書き扱い
+      const { cells } = build(doc);   // personal_data は unreviewed のまま
+      const drafted = cells.find((x) => x.vendor === 'a' && x.clause === 'liability_cap');
+      const untouched = cells.find((x) => x.vendor === 'a' && x.clause === 'personal_data');
+      assert(drafted && drafted.draft === true, '下書きのマスに印が付いていない');
+      assert(untouched && untouched.draft === false,
+        '**未読のマスに下書きの印が付いた** — 読んだのか読んでいないのかが一覧から判らなくなる');
+    }],
+
+    ['**観点ごとの下書きも順序に残る**（人が確認済みの行に1つだけ下書きが混じる形）', () => {
+      const doc = fixture();
+      const row = doc.obligations.contract_review.vendors.find((v) => v.id === 'a');
+      row.liability_cap = 'ok'; row.personal_data = 'ok';
+      row.reviewed_by = 'human';
+      row.draft_clauses = ['personal_data'];
+      const { cells } = build(doc);
+      assert(!cells.some((x) => x.vendor === 'a' && x.clause === 'liability_cap'),
+        '人が確認した観点が順序に残った');
+      const c = cells.find((x) => x.vendor === 'a' && x.clause === 'personal_data');
+      assert(c && c.draft === true,
+        '観点ごとの下書きが順序から消えた — 行が human なだけで、その観点は誰も見ていない');
     }],
 
     ['見たマスは順序に出ない', () => {
