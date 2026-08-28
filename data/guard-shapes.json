@@ -255,20 +255,24 @@
     "scripts/autopilot-gate.mjs",
     "scripts/check-asc-landed.mjs",
     "scripts/generate-qr-codes.mjs",
-    "scripts/property-tests.mjs"
+    "scripts/property-tests.mjs",
+    "scripts/preflight.mjs"
   ],
-  "$no_ledger_binding": {
-    "growth/scripts/analyze.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot など）。この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
-    "growth/scripts/bq-preflight.mjs": "読むのは BigQuery で、JSONの台帳ではない（readFileSync が0箇所）",
-    "growth/scripts/ingest-bigquery.mjs": "同上。読むのは BigQuery、書くのはスナップショット",
-    "scripts/autopilot-drill.mjs": "純粋な論理。decide() に状態オブジェクトを渡すだけ（readFileSync 0箇所）",
-    "scripts/autopilot-gate.mjs": "同上。decide(s) は引数の状態だけを見る",
-    "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
-    "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
-    "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
-    "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
-    "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く"
-  },
+  "$no_ledger_binding": [
+    {
+      "growth/scripts/analyze.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot など）。この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
+      "growth/scripts/bq-preflight.mjs": "読むのは BigQuery で、JSONの台帳ではない（readFileSync が0箇所）",
+      "growth/scripts/ingest-bigquery.mjs": "同上。読むのは BigQuery、書くのはスナップショット",
+      "scripts/autopilot-drill.mjs": "純粋な論理。decide() に状態オブジェクトを渡すだけ（readFileSync 0箇所）",
+      "scripts/autopilot-gate.mjs": "同上。decide(s) は引数の状態だけを見る",
+      "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
+      "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
+      "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
+      "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
+      "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く"
+    },
+    "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
+  ],
   "param_guards_measured_at": "2026-08-26",
   "$param_guards_note": [
     "**第2の族: 仮引数に対する「無いかもしれない」判定。**",
