@@ -90,7 +90,7 @@
       "recurrence": "annual",
       "next_due": null,
       "confirmed_by_owner": false,
-      "unconfirmed_reason": "法人であることは確定した。残る不明は外注・報酬の支払いがあるかどうか。**freee の口座明細が読めるようになれば機械で当たりを付けられる**が、現状は資格情報が入っておらず読めていない（../simplememo-api/src/freee.ts）。",
+      "unconfirmed_reason": "法人であることは確定した。残る不明は**外注・報酬の支払いがあるかどうか。**\n\n**[2026-08-28 訂正] ここは『freee の口座明細が読めるようになれば機械で当たりを付けられるが、現状は資格情報が入っておらず読めていない』と書いていた。2つとも誤り。**\n\n(1) **資格情報は入っている。**`wrangler secret list --env production` に FREEE_CLIENT_ID / FREEE_CLIENT_SECRET / FREEE_COMPANY_ID の3つがある。freee は 2026-08-27 に実際に読めていて、3口座の同期状態まで取れている（simplememo-api の freee.ts に実測が書いてある）。**読めていないのは資格情報のせいではない。**\n\n(2) **口座明細では当たりが付かない。**`/admin/freee/txn-probe` は設計上**金額も摘要も返さない**（freee.ts の3箇所に『要らないものを外へ出さない』と明記）。そのうえ wallet_txns は銀行明細の行なので、**仕訳される前は勘定科目を持たない。**外注費・報酬に計上があるかは、そもそも口座明細からは出てこない。\n\n**当たりが付くのは試算表（`/api/1/reports/trial_pl`）か勘定科目別の集計。**そちらなら『外注費に計上があるか / 何件か』だけを、相手先も個別金額も出さずに答えられる。**未実装。**実装するなら freee.ts の流儀どおり、まず叩いて何が返るかを見る probe から（あのファイルは推測で3回外した記録を持っている）。\n\n**いちばん速いのは税理士に聞くこと** —— 記帳を見ている側は答えを既に持っている。data/expert-escalation.json の legal-record-statutory がその質問。",
       "what_breaks": "同上",
       "evidence": []
     }
