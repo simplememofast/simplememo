@@ -349,6 +349,24 @@ jobs:
           node scripts/check-rollout-gate-pin.mjs --selftest
           node scripts/check-rollout-gate-pin.mjs --check
 
+      # 【副系が走ったかを外から確かめる】
+      # 主系（Actions）は run を全部列挙できるので記録が完結するが、副系は
+      # **セッションが自分で書いたときだけ**行が残る（autopilot-runs.json の
+      # source:session）。**書かずに死んだ回はどこにも現れない。**
+      #
+      # 台帳の⑩は「ログが外部から読めない。構造的に不可」と書いていたが、
+      # **走ったかどうかは読める** —— Routines API の last_run。
+      # 2026-08-28 に初めて読んだら、その場で4件見つかった
+      # （副系A/Bが2日以上停止・週次2本が4日前から失敗のまま）。
+      #
+      # list_triggers はCIから叩けないので、セッションが写しを置きCIが検査する。
+      # **だから写しの鮮度そのものを検査する** —— 古い写しを緑にすると
+      # 「読めているつもり」で止まる。
+      - name: Routine runs (副系が止まっていないか)
+        run: |
+          node scripts/check-routine-runs.mjs --selftest
+          node scripts/check-routine-runs.mjs --check
+
       # 【運転台帳】共通実行IDの一意性と、attempted／outcome の整合を見る。
       #
       # 壊れた台帳は「集計できない」ではなく **指標が黙って嘘になる**。

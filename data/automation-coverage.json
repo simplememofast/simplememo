@@ -368,9 +368,9 @@
       "evidence": [
         "docs/obsidian/AUTOPILOT_RUNBOOK.md"
       ],
-      "note": "macOS必須。Runbook §7「できないこと」の筆頭",
+      "note": "macOS必須。Runbook §7「できないこと」の筆頭\n\n**[2026-08-28] 前提が広すぎた。ただし覆ってはいない。**「macOSが要る＝人間だけ」と書いてあるが、**macOSの経路は2つある** —— GitHub Actions の macOSランナー（予算保護でAIは起動しない）と、**Xcode Cloud（Apple側の課金で、GitHubの予算とは別勘定）**。後者は自動で走っている: simplememo-ios#239（2026-08-27）に `SimpleMemo | PR Check | Build - iOS` が success で出ており、**人は何も触っていない。**起動と診断のAPI経路も在る（scripts/xcode_cloud_start_build.rb / xcode_cloud_diagnose.rb）。\n\n**それでも覆せない。**同じPRに出たのは Build だけで、**UIテスト（SimpleMemoQA / SimpleMemo-iOS-PR）は出ていない。**docs/qa/XCODE_CLOUD_ONE_TIME_SETUP.md はそれを『PR Check の合格に必要』と書いているので、**書いてあることと実際が食い違っている**（変更ファイルで起動条件が絞られているのか、アクションが外れているのかは、ASCの鍵が無いのでここでは確かめられない）。撮影のほうは docs/qa/ARTICLE_SCREENSHOTS.md が『ローカルMac』での通し実行しか記録していない。\n\n**したがって分類は動かさない。**言えるのは「人間だけ」の理由が予算保護だけではないことと、**この食い違い自体が確かめるべき対象**だということ",
       "blocker": "physical_human",
-      "unblocked_by": "macOSランナーが要り、予算保護で人間の名指し起動のみ"
+      "unblocked_by": "macOSランナーが要り、予算保護で人間の名指し起動のみ。**[2026-08-28] Xcode Cloud（Apple課金）は自動で走っており、そちらには予算保護が効かない。**覆すのに要るのは (1) UIテストのアクションが実際にPRで起動しているかの確認（ASCの鍵が要る。設定書は『合格に必要』と書いているが simplememo-ios#239 では Build しか出ていない）と (2) 撮影を Xcode Cloud 側で完結させ、成果物を取り出す経路"
     },
     {
       "area": "② バグ修正",
@@ -1846,11 +1846,15 @@
       "task": "実行の完全記録（副系）",
       "executor": "nobody",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "scripts/check-routine-runs.mjs",
+        "data/routine-runs.json",
+        ".github/workflows/seo-check.yml"
       ],
-      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可",
-      "blocker": "structural",
-      "unblocked_by": "同上（セッションログが外部から読めない）"
+      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可\n\n**[2026-08-28] 「構造的に不可」は半分だけ正しかった。**セッションの中身（transcript）は依然として外から読めないが、**走ったかどうかは読める** —— Routines API の `last_run` が status / fired_at / finished_at / session_id を返す。**読む側を一度も試さずに不能と書いていた。**\n\n**読んだ瞬間に4件見つかった。**副系A（07:30）と副系B（08:30）が 2026-08-25 を最後に停止したまま2日以上、週次2本（SEO Weekly / マーケデータ）が 08-24 に FAILED のまま次の発火は 08-31。**どれも次の発火まで誰も気づかない形だった。**これが「完全な記録が無い」ということそのもの。\n\n**主系と副系で、記録の完結の仕方が違う。**主系（Actions）は run を全部列挙できるので記録が完結する。副系は**セッションが自分で書いたときだけ**行が残る（autopilot-runs.json の source:session）ので、**書かずに死んだ回はどこにも現れない。**自己申告だけでは完全にならない。\n\n実装は scripts/check-routine-runs.mjs（写しの鮮度・列挙の網羅・ラチェット）。list_triggers はCIから叩けないので、セッションが data/routine-runs.json へ写しを置きCIが検査する（ASCのレポートと同じ形）。**executor はまだ動かさない** —— 写しを取り直す経路がまだ人の手で、そこが自動になって初めて『記録が完結している』と言える。鮮度検査が3日で赤くなるので放置はできない",
+      "blocker": "not_started",
+      "unlock": "impl_routine_snapshot",
+      "unblocked_by": "**2026-08-28 に「読めない」が崩れた。**Routines API の last_run で発火・成否・時刻が外から読める。残るのは**写しを定期的に取り直す経路**（list_triggers はCIから叩けないので、セッションが取る）。取り直しが自動になれば、記録は主系と同じ意味で完結する"
     },
     {
       "area": "⑩ AgentOps・ガバナンス",
