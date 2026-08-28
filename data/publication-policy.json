@@ -120,6 +120,12 @@
       "why": "競合ベンチマーク。内部の見立て",
       "ok_in_public_repo": "ok"
     },
+    "check-blindspots.json": {
+      "served_by_site": false,
+      "why": "**検査の弱点の一覧。**どの検査が何を見落とすかが書いてある。攻撃面に準ずるので配信しない（audit-charter / injection-surface と同じ扱い）",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "リポジトリは公開だが、**弱点は既に直したものが中心**で、残り5件も「壊れても緑」という性質であって秘密の鍵ではない。配信面に置かないことで、少なくとも既定の経路には出さない"
+    },
     "check-selftests.json": {
       "served_by_site": false,
       "why": "内部の運転台帳。サイトのどのページも読まない",
@@ -173,6 +179,12 @@
       "why": "誰にどう上げるかの規則。連絡経路は出さない",
       "ok_in_public_repo": "ok"
     },
+    "expert-escalation.json": {
+      "served_by_site": false,
+      "why": "**士業へ送る質問の下書きと、窓口の有無。**送る前の文面を外から読める場所に置かない（review-replies.json と同じ理由）",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "**連絡先そのものは入っていない。**顧問税理士のアドレスは第三者の個人情報なので Worker の secret に置き、ここが持つのは `secret:EXPERT_TAX_EMAIL` という在り処だけ。検査（check-expert-escalation.mjs）が address_source に `@` が入っていたら落とす"
+    },
     "feature-backlog.json": {
       "served_by_site": false,
       "why": "未発表の機能候補",
@@ -188,6 +200,18 @@
       "why": "上限・損失限度・観測した売上。**金額の内訳は公開しない**",
       "ok_in_public_repo": "review",
       "public_repo_why": "上限・損失限度・観測した売上。**実額が入る**（現時点で $2.59）。/autopilot/ で率は公開しているので方針の存在自体は既知だが、実額は別"
+    },
+    "generators.json": {
+      "served_by_site": false,
+      "why": "内部の運転台帳。**どの書き手を回すか／回さないか**の一覧で、サイトのどのページも読まない",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "never_run の理由に「回すと本当に課金する／停止スイッチを倒す」と書いてあるが、これは公開ワークフローから読み取れる範囲。**回してはいけないものを明記するほうが、暗黙にしておくより安全**という判断"
+    },
+    "guard-shapes.json": {
+      "served_by_site": false,
+      "why": "**規則が消えうる箇所の一覧。**「この鍵を消せばこの検査は黙る」と読める形なので、check-blindspots と同じく攻撃面に準ずる。配信しない",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "リポジトリは公開だが、載っている21箇所は**読んで「前提」「別に検出」「報告のみ」と判定済み**のものだけ。消えると困る7件は同じPRで直してあり、一覧に残っていない。**直していないものをここに置かない**のが運用条件"
     },
     "ingest-recovery.json": {
       "served_by_site": false,
@@ -235,14 +259,14 @@
       "why": "この方針そのもの。**どれを隠しているかの一覧**なので、内部に置く",
       "ok_in_public_repo": "ok"
     },
+    "relevance-undecided.json": {
+      "served_by_site": false,
+      "why": "流入があるのに relevance を宣言していないページの一覧と、その理由。**中身は自社サイトのURLと、こちらが書いた判断理由だけ。**第三者のデータも、収益額も、資格情報も入らない",
+      "ok_in_public_repo": "ok"
+    },
     "revenue-series.json": {
       "served_by_site": false,
       "why": "収入の**観測日数の写し**（実測は非公開の simplememo-ios/data/revenue/series.json）。**金額は運ばない** — blocked_on が読むのは covered_days だけ",
-      "ok_in_public_repo": "ok"
-    },
-    "review-intake.json": {
-      "served_by_site": false,
-      "why": "レビューの取り込み。同上",
       "ok_in_public_repo": "ok"
     },
     "review-gate-pin.json": {
@@ -250,22 +274,15 @@
       "why": "隣（非公開）が留めているゲートの指紋の写し。**中身はこのリポジトリの公開ファイルのハッシュだけ**で秘密は無いが、サイトが参照しないので配信しない",
       "ok_in_public_repo": "ok"
     },
+    "review-intake.json": {
+      "served_by_site": false,
+      "why": "レビューの取り込み。同上",
+      "ok_in_public_repo": "ok"
+    },
     "review-replies.json": {
       "served_by_site": false,
       "why": "**投稿前の文面。**公開する前の下書きを外から読める場所に置かない（pr-claims.json と同じ理由）",
       "ok_in_public_repo": "ok"
-    },
-    "expert-escalation.json": {
-      "served_by_site": false,
-      "why": "**士業へ送る質問の下書きと、窓口の有無。**送る前の文面を外から読める場所に置かない（review-replies.json と同じ理由）",
-      "ok_in_public_repo": "ok",
-      "$ok_note": "**連絡先そのものは入っていない。**顧問税理士のアドレスは第三者の個人情報なので Worker の secret に置き、ここが持つのは `secret:EXPERT_TAX_EMAIL` という在り処だけ。検査（check-expert-escalation.mjs）が address_source に `@` が入っていたら落とす"
-    },
-    "routine-runs.json": {
-      "served_by_site": false,
-      "why": "**副系の routine 一覧と発火記録の写し。**routine の名前・cron・停止の理由が並ぶので、何をいつ自動で回しているかがそのまま読める。サイトが参照しないので配信しない",
-      "ok_in_public_repo": "ok",
-      "$ok_note": "リポジトリは公開だが、**中身は cron と発火時刻と状態だけ**でセッションの本文は入らない（そこは元から外から読めない）。プロンプトも写していない"
     },
     "rollout-gate-pin.json": {
       "served_by_site": false,
@@ -276,6 +293,12 @@
       "served_by_site": false,
       "why": "**自動昇格の門の設定値。**kill_switch の在り処と各しきい値がそのまま書いてある。サイトから配信する理由が無い（/autopilot/ が見せるのは権限表のほう）",
       "ok_in_public_repo": "ok"
+    },
+    "routine-runs.json": {
+      "served_by_site": false,
+      "why": "**副系の routine 一覧と発火記録の写し。**routine の名前・cron・停止の理由が並ぶので、何をいつ自動で回しているかがそのまま読める。サイトが参照しないので配信しない",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "リポジトリは公開だが、**中身は cron と発火時刻と状態だけ**でセッションの本文は入らない（そこは元から外から読めない）。プロンプトも写していない"
     },
     "signal-ledger.json": {
       "served_by_site": false,
@@ -303,24 +326,6 @@
       "why": "取引先と、何を渡しているか。**依存の地図**なので出さない",
       "ok_in_public_repo": "review",
       "public_repo_why": "取引先と月額の枠。**金額は入るが、無料枠かどうかの粗い区分まで。**請求書・契約番号は入れない"
-    },
-    "check-blindspots.json": {
-      "served_by_site": false,
-      "why": "**検査の弱点の一覧。**どの検査が何を見落とすかが書いてある。攻撃面に準ずるので配信しない（audit-charter / injection-surface と同じ扱い）",
-      "ok_in_public_repo": "ok",
-      "$ok_note": "リポジトリは公開だが、**弱点は既に直したものが中心**で、残り5件も「壊れても緑」という性質であって秘密の鍵ではない。配信面に置かないことで、少なくとも既定の経路には出さない"
-    },
-    "guard-shapes.json": {
-      "served_by_site": false,
-      "why": "**規則が消えうる箇所の一覧。**「この鍵を消せばこの検査は黙る」と読める形なので、check-blindspots と同じく攻撃面に準ずる。配信しない",
-      "ok_in_public_repo": "ok",
-      "$ok_note": "リポジトリは公開だが、載っている21箇所は**読んで「前提」「別に検出」「報告のみ」と判定済み**のものだけ。消えると困る7件は同じPRで直してあり、一覧に残っていない。**直していないものをここに置かない**のが運用条件"
-    },
-    "generators.json": {
-      "served_by_site": false,
-      "why": "内部の運転台帳。**どの書き手を回すか／回さないか**の一覧で、サイトのどのページも読まない",
-      "ok_in_public_repo": "ok",
-      "$ok_note": "never_run の理由に「回すと本当に課金する／停止スイッチを倒す」と書いてあるが、これは公開ワークフローから読み取れる範囲。**回してはいけないものを明記するほうが、暗黙にしておくより安全**という判断"
     }
   }
 }

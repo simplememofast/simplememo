@@ -112,6 +112,7 @@ const UNSERVED_DATA = new Set([
   "monitoring-coverage.json",
   "pr-claims.json",
   "publication-policy.json",
+  "relevance-undecided.json",
   "revenue-series.json",
   "review-gate-pin.json",
   "review-intake.json",
