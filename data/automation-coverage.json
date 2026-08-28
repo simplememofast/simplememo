@@ -1624,7 +1624,7 @@
       "task": "障害案内の一斉配信",
       "executor": "nobody",
       "evidence": [],
-      "note": "**旧行から切り出した。**旧行は「回答・返金・障害案内」で、自動化できた回答と、権限表で人に残した返金（⑨に別行がある）と、未実装の障害案内が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。障害案内は宛先の名簿と配信基準の設計が要る",
+      "note": "**旧行から切り出した。**旧行は「回答・返金・障害案内」で、自動化できた回答と、権限表で人に残した返金（⑨に別行がある）と、未実装の障害案内が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。障害案内は宛先の名簿と配信基準の設計が要る\n\n**[2026-08-28] この行の性格が変わった。プロダクトの機能ではなく、契約上の義務になった。**⑦の条項検査で Apple Developer Program License Agreement §3.3.3(C) を読んだところ、**利用者へのデータ侵害通知が契約で約束されている**（You agree to notify Your users ... in the event of a data breach）。\n\n**つまり「まだ作っていない機能」ではなく「約束したのに実行できない動作」。**優先順位の意味が変わるので、ここに書いておく。経路が2つとも閉じている事実（下記 unblocked_by）は変わらない —— 変わったのは、開けないままでよいかどうかの判断材料のほう。data/corporate-obligations.json の contract_review.apple.$personal_data に同じことが書いてある。",
       "blocker": "not_started",
       "unblocked_by": "**[2026-08-27 実測] 「決めれば作れる」ではなかった。**経路が2つしかなく、どちらも決定では開かない。**(a) メール** —— 宛先になりうる名簿は reminder_optin_invites だけで、同意文言は『メモが途切れた日に、そっと1通』『お届けは週2通まで』とリマインダーに限定してある。障害案内はその範囲外で、**送ると同意を超える。** **(b) アプリ内** —— /v1/config の RemoteFlagPayload は flags / rollouts / killed / maxStaleSeconds / refreshSeconds しか運ばず、**文言を運ぶ欄も表示するUIも無い。**足すには iOS 側の実装（payload の欄・バナー・テスト）が要る。したがって開くのは『閾値を決める』ではなく **(a) 障害案内という別の同意を取る**か **(b) iOS に通知面を作る**か",
       "unlock": "impl_product",
@@ -2340,7 +2340,7 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "自動停止して経営者へ移管する方針。手順は未整備",
+      "note": "自動停止して経営者へ移管する方針。手順は未整備\n\n**[2026-08-28] 移管したあとに実行できない手順が1つあることが分かった。**⑦の条項検査で Apple Developer Program License Agreement §3.3.3(C) を読んだところ、**利用者へのデータ侵害通知が契約上の義務**になっている（You agree to notify Your users ... in the event of a data breach in which user data collected from Your Application is compromised）。\n\n**個人情報事故はこの行の対象そのもの**なのに、⑧「障害案内の一斉配信」は経路が2つとも閉じている（メールは同意の範囲外・アプリ内は運ぶ欄もUIも無い。2026-08-27 実測）。つまり **『人へ移管する』の先に、人でも実行できない一歩がある。**手順を整備するときは、通知経路が無いことを前提に書くか、経路を先に作るかを決める必要がある。",
       "blocker": "not_started",
       "unlock": "impl_machine_gate",
       "unblocked_by": "事故対応は自動停止して人へ移管する設計"
