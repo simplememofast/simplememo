@@ -130,8 +130,8 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 20,
-      "checksum": "ca87f7d236ca047f",
+      "version": 21,
+      "checksum": "9aff8d5b4efde28e",
       "changed_at": "2026-08-28",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
@@ -229,6 +229,11 @@
           "version": 20,
           "at": "2026-08-28",
           "why": "**定義は変えていない。**AUTOPILOT_RUNBOOK.md に §0-3（list_triggers が呼べるかを1回だけ確かめる一時的な節・2026-08-29まで）を足したことによる checksum の変化。ノイズフロア（期待クリック数3未満を根拠にしない／適用はレーンA/Bのみ）の本文には触れていない"
+        },
+        {
+          "version": 21,
+          "at": "2026-08-28",
+          "why": "**定義は変えていない。**§0-3（一時的な確認）に「結果を AUTOPILOT_LOG.md にも1行残す」を足したことによる checksum の変化。理由は、get_session が成功セッションの要約を返すとは限らず、観測がセッションの中に閉じ込められるため。ノイズフロアの本文には触れていない"
         }
       ]
     },
