@@ -131,6 +131,15 @@
   ],
   "never_run": [
     {
+      "file": "growth/scripts/check-data-quality.mjs",
+      "flagless": true,
+      "why": "旗ではなく取り込み経路から呼ばれて中間ファイルを書く。生成物ではなく作業ファイル"
+    },
+    {
+      "file": "growth/scripts/ingest-asc.mjs",
+      "why": "**Apple のAPIを叩く。**鍵と外部通信が要り、取り込み台帳も増える"
+    },
+    {
       "file": "scripts/autopilot-act.mjs",
       "why": "**行動する側。**--emit-report と位置引数で行動台帳を書き、handler が実際に動く。CIで回したら本当に実行される"
     },
@@ -147,16 +156,16 @@
       "why": "**--contain が停止スイッチを倒す。**検査のつもりで本番を止めない"
     },
     {
-      "file": "scripts/recover-ingest.mjs",
-      "why": "**--record が復旧の実績を書く。**やっていない復旧を実績にしない"
-    },
-    {
-      "file": "growth/scripts/ingest-asc.mjs",
-      "why": "**Apple のAPIを叩く。**鍵と外部通信が要り、取り込み台帳も増える"
-    },
-    {
       "file": "scripts/check-definitions.mjs",
       "why": "**--bump はKPI定義の版を上げる。**理由（--why）を人が書くための操作で、機械が回すものではない"
+    },
+    {
+      "file": "scripts/check-domain-expiry.mjs",
+      "why": "**取得にネットが要る。**RDAP はエージェント環境からも seo-check からも到達しない前提で書いてある（届かない回は unknown を返して台帳を据え置く）。**書くのは seo-daily の役目**で、あちらの取得ステップが --write を走らせ、週次のコミット回で data/corporate-obligations.json を拾う。期限は年1回しか動かないのでその頻度で足りる"
+    },
+    {
+      "file": "scripts/check-routine-runs.mjs",
+      "why": "**CIでは回せない。**`--sync` の材料は `list_triggers`（セッションのMCPツール）の応答で、ランナーからは取れない。ASCのレポートと同じ形で、**セッションが写しを置きCIは検査だけする。**回そうとしても引数が無くて落ちるが、そもそも「取れないものを取ったことにする」経路を作らないためここに置く"
     },
     {
       "file": "scripts/dashboard.mjs",
@@ -169,13 +178,8 @@
       "why": "npm の qrcode / jsqr が要る。**このリポジトリに package.json が無い**ので CI では動かせない（--check も exit 2 になる）"
     },
     {
-      "file": "growth/scripts/check-data-quality.mjs",
-      "flagless": true,
-      "why": "旗ではなく取り込み経路から呼ばれて中間ファイルを書く。生成物ではなく作業ファイル"
-    },
-    {
-      "file": "scripts/check-domain-expiry.mjs",
-      "why": "**取得にネットが要る。**RDAP はエージェント環境からも seo-check からも到達しない前提で書いてある（届かない回は unknown を返して台帳を据え置く）。**書くのは seo-daily の役目**で、あちらの取得ステップが --write を走らせ、週次のコミット回で data/corporate-obligations.json を拾う。期限は年1回しか動かないのでその頻度で足りる"
+      "file": "scripts/recover-ingest.mjs",
+      "why": "**--record が復旧の実績を書く。**やっていない復旧を実績にしない"
     },
     {
       "file": "scripts/vendor-terms.mjs",

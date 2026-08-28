@@ -5,6 +5,7 @@
  *   node scripts/check-routine-runs.mjs           # 表示
  *   node scripts/check-routine-runs.mjs --check   # CI
  *   node scripts/check-routine-runs.mjs --selftest
+ *   node scripts/check-routine-runs.mjs --sync <list_triggers の生JSON>   # 写しを取り直す
  *
  * 【台帳の「構造的に不可」は半分だけ正しかった】
  * `data/automation-coverage.json` の ⑩「実行の完全記録（副系）」は
@@ -155,6 +156,48 @@ export function validate(doc, { now = Date.now() } = {}) {
   return { problems, warnings, unhealthy };
 }
 
+/**
+ * `list_triggers` の生応答から、写しに残す形へ落とす。**純関数。**
+ *
+ * **プロンプト（job_config / derived_state.prompt）は写さない。**
+ * 副系のプロンプトには運用の中身がそのまま入っていて、この台帳が要るのは
+ * 「走ったか」だけ。**要らないものを持つと、置き場所の判断が別の問題になる。**
+ */
+export function normalizeRoutines(payload) {
+  const rows = Array.isArray(payload?.data) ? payload.data
+    : Array.isArray(payload?.triggers) ? payload.triggers
+    : Array.isArray(payload) ? payload : null;
+  if (!rows) return null;
+  return rows.map((t) => {
+    const lr = t.last_run ?? {};
+    return {
+      id: t.id ?? null,
+      name: t.name ?? null,
+      cron_expression: t.cron_expression ?? null,
+      run_once_at: t.run_once_at ?? null,
+      enabled: Boolean(t.enabled),
+      bound_session: Boolean(t.persistent_session_id),
+      next_run_at: t.next_run_at ?? null,
+      last_fired_at: t.last_fired_at ?? null,
+      last_run_status: (lr.status ?? '').replace('ROUTINE_RUN_STATUS_', '') || null,
+      last_run_fired_at: lr.fired_at ?? null,
+      last_run_finished_at: lr.finished_at ?? null,
+    };
+  }).sort((a, b) => String(a.id).localeCompare(String(b.id)));
+}
+
+/**
+ * 写しを差し替える。**判断（open_findings / intentional_stops / budget）は
+ * 触らない** —— 取り直しで異常が消えたり増えたりしたら、`--check` が
+ * 「どちらの一覧にも無い」「健全になっている」で落として人に書かせる。
+ * **取り直しが判断を上書きすると、この台帳は現状を追認する表になる。**
+ */
+export function applySync(doc, payload, { now = new Date() } = {}) {
+  const routines = normalizeRoutines(payload);
+  if (!routines) return null;
+  return { ...doc, observed_at: now.toISOString().replace(/\.\d+Z$/, 'Z'), routines };
+}
+
 // ============================================================
 
 function selftest() {
@@ -258,6 +301,36 @@ function selftest() {
       assert(p.some((x) => x.includes('open_budget')), p.join(' / '));
     }],
 
+    // --- 取り直し（--sync） ---------------------------------------------
+    ['**生の応答から写しを作れる**（実物の形で確かめる）', () => {
+      const raw = { data: [{
+        id: 'trig_z', name: 'z', cron_expression: '0 0 * * *',
+        enabled: true, next_run_at: '2026-08-29T00:00:00Z',
+        last_fired_at: '2026-08-28T00:00:00Z',
+        last_run: { status: 'ROUTINE_RUN_STATUS_SUCCEEDED', fired_at: 'a', finished_at: 'b' },
+        job_config: { ccr: { events: [{ data: { message: { content: '副系のプロンプト本文' } } }] } },
+        derived_state: { prompt: '副系のプロンプト本文' },
+      }] };
+      const rs = normalizeRoutines(raw);
+      assert(rs.length === 1 && rs[0].last_run_status === 'SUCCEEDED', JSON.stringify(rs));
+      // **プロンプトを写さない。**要らないものを持つと置き場所が別の問題になる
+      assert(!JSON.stringify(rs).includes('プロンプト本文'), 'プロンプトが写しに入っている');
+    }],
+    ['list_triggers の応答に見えないものは null（黙って空にしない）', () => {
+      assert(normalizeRoutines({ ok: true }) === null);
+      assert(normalizeRoutines(null) === null);
+    }],
+    ['**取り直しは判断を上書きしない**（現状を追認する表にしない）', () => {
+      const after = applySync(real, { data: [] }, { now: new Date('2026-08-29T00:00:00Z') });
+      assert(after.routines.length === 0, '写しは差し替わる');
+      assert(after.open_findings.length === real.open_findings.length, 'open_findings が消えている');
+      assert(after.open_budget === real.open_budget, 'open_budget が動いている');
+      assert(after.observed_at === '2026-08-29T00:00:00Z', after.observed_at);
+      // 異常が消えたら --check が「健全になっている」で落として人に書かせる
+      const p = validate(after, { now: Date.parse('2026-08-29T00:00:00Z') }).problems;
+      assert(p.some((x) => x.includes('健全になっている')), p.join(' / '));
+    }],
+
     // --- 写しの鮮度 -----------------------------------------------------
     ['**写しが古いと落とす**（読めているつもりを緑にしない）', () => {
       const p = validate(real, { now: NOW + 10 * DAY }).problems;
@@ -280,6 +353,25 @@ function selftest() {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest() === 0 ? 0 : 1);
+
+  const syncAt = process.argv.indexOf('--sync');
+  if (syncAt >= 0) {
+    const src = process.argv[syncAt + 1];
+    if (!src) {
+      console.error('--sync には list_triggers の生JSONのパスが要る');
+      console.error('  セッションで mcp list_triggers を呼び、応答をファイルへ落として渡す');
+      process.exit(1);
+    }
+    const before = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    const payload = JSON.parse(fs.readFileSync(src, 'utf8'));
+    const after = applySync(before, payload);
+    if (!after) { console.error(`${src} が list_triggers の応答に見えない`); process.exit(1); }
+    fs.writeFileSync(LEDGER_PATH, `${JSON.stringify(after, null, 2)}\n`);
+    console.log(`写しを取り直した: routine ${after.routines.length} 本 / observed_at ${after.observed_at}`);
+    console.log('**判断（open_findings / intentional_stops / open_budget）は触っていない。**');
+    console.log('続けて --check を回すこと。増えた異常はそこで落ちる。');
+    process.exit(0);
+  }
 
   const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const { problems, warnings, unhealthy } = validate(doc);
