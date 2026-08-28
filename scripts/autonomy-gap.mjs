@@ -212,25 +212,33 @@ export const UNLOCKS = {
                             + 'これは繰り返し人が要る類の壁ではなく、一度きりの錠',
                        satisfied_when: [{ file: '../simplememo-ios/data/asc-server-api.json',
                                           contains: '"notification_url_configured": true' }] },
-  refund_observe:    { kind: 'implement', label: '返金の観測と、消費情報の応答を作る',
-                       needs: '**面が別。**返金まわりは App Store Server API'
-                            + '（api.storekit.apple.com/inApps）で、いま使っている'
-                            + 'App Store Connect API とは違う。**JWTの形も違う** ——'
-                            + 'ペイロードに `bid`（bundle ID）クレームが要る'
-                            + '（aud は同じ appstoreconnect-v1）。'
-                            + '../simplememo-ios/scripts/lib/asc_api.rb の jwt_token は'
-                            + 'それを出さないので、そのままでは通らない。'
-                            + '**同じ鍵で通るかは未確認** —— 叩いて 401 が返って初めて'
-                            + '「別の鍵が要る」と分かる（推測で書かない）。'
-                            + 'あわせて simplememo-api に通知の受け口が要る'
-                            + '（CONSUMPTION_REQUEST の期限は受信から12時間）' },
+  refund_observe:    { kind: 'wait', label: '実際の返金が1件届くのを待つ（受け口は本番に在る）',
+                       needs: '**[2026-08-28] `implement` から `wait` へ移した。作るものが無くなった。**'
+                            + 'ここには「鍵が通るか未確認」「受け口が要る」と書いてあったが、'
+                            + 'どちらも解決済み —— 鍵は通り（`bid` クレームを足すだけだった）、'
+                            + '通知URLは設定済み（asc-server-api.json の '
+                            + '`notification_url_configured: true`・Apple のテスト配信が SUCCESS）、'
+                            + '受け口・検証器・記録・保持は simplememo-api#193 で main に入った。'
+                            + '**残っているのは、実際の返金が1件届くこと**だけで、これは実装では早められない。'
+                            + '\n\n**この欄が古いまま `implement` だったことの害は、件数ではなく向きに出る** —— '
+                            + '`--plan` が「作れば進む」と言い続け、**既に在るものを作る計画**を毎回先頭付近に置く。'
+                            + '到達可能の分類（reachable）は変えていない。変えたのは「誰が動かすか」だけ' },
   inquiry_facts:     { kind: 'implement', label: '問い合わせの再現ファクトを非個人情報として出す',
                        needs: '**取り出す経路は 2026-08-26 に作った**（relay の summarizeReproFacts）。'
                             + '残るのは、それが日報の文面ではなく**リポジトリ側から読める形**で出ること。'
                             + 'あと移行0027の適用と、母数 — inquiries は現在0件で、'
                             + '**来ていない本文の書式を想像して抽出を書かない**' },
-  vendor_terms:      { kind: 'implement', label: '各社の規約本文を取り込んで条項検査に載せる',
-                       needs: '書面契約は無く規約への同意で成立。現状40マスすべて unreviewed' },
+  vendor_terms:      { kind: 'owner_input', label: '人が10社の規約を読んで40マスを埋める',
+                       needs: '**[2026-08-28] `implement` から `owner_input` へ移した。取り込む側は既に在る。**'
+                            + 'ラベルは「規約本文を取り込んで条項検査に載せる」だったが、'
+                            + '**取り込みと改定検知は 2026-08-26 に機械へ移っている**'
+                            + '（scripts/vendor-terms.mjs・seo-daily が毎日取得し、'
+                            + '本文の指紋が変われば reviewed を unreviewed へ戻す）。'
+                            + '2行の note がどちらも「**本文を読んで ok / risk を決めるのは法的判断で、'
+                            + 'そこは人のまま**」と明記しており、これは 2026-08-26 に下した判断。'
+                            + '\n\n**したがって実装量では動かない。**現状40マスすべて unreviewed で、'
+                            + '埋めたあと `policy.enforce_unreviewed` を true にすると CI が守る。'
+                            + '書面契約は無く、規約への同意で成立している' },
   impl_product:      { kind: 'implement', label: 'プロダクト側を作る',
                        needs: 'PRDの定型化 / カナリアを本番で1周 / 課金失敗の回復 / 障害案内の一斉配信' },
   // [2026-08-27] オーナー判断「お金周りを除いて渡す」で、境界24件のうち15件が
@@ -240,12 +248,23 @@ export const UNLOCKS = {
   // 「セッションのログが外部から読めない」は transcript については正しいが、
   // **走ったかどうかは Routines API の last_run が返す。**読む側を一度も
   // 試さずに不能と書いていた。読んだ瞬間に4件の停止・失敗が見つかっている。
-  impl_routine_snapshot: { kind: 'implement', label: '副系の発火記録を定期的に取り直す',
+  // [2026-08-28 夕] **`implement` から `owner_input` へ移した。作って回して確かめた。**
+  // `create_trigger` で日次 Routine を作り `fire_trigger` で1回走らせたところ、
+  // **`environment_id` は引き継がれた**（＝sources は明示すれば付く）が、
+  // **`mcp__*` は引き継がれない**（作成時に警告が返り、allowed_tools にも1つも無い）。
+  // `list_triggers` が呼べない以上、Routine 側からは写しを取り直せない。
+  // 実走は SUCCEEDED で終わり、ブランチもPRも作られなかった（`cse_015iYEg3GrcfQ2A55jv9aZD1`）。
+  // **日次で失敗し続けて未対応枠を食うので Routine は削除した。**
+  // 残る未検証の面は1つ —— claude.ai の Routines UI から作れば connector を持てるか。
+  // **そこを叩くまでは never へ落とさない。**
+  impl_routine_snapshot: { kind: 'owner_input', label: '副系の発火記録を定期的に取り直す（UI から Routine を作る）',
                            needs: '検査は実装済み（scripts/check-routine-runs.mjs）で、'
-                                + '写しの鮮度・列挙の網羅・ラチェットを見る。'
-                                + '**残るのは写しを取り直す経路** —— `list_triggers` は'
-                                + 'セッションのMCPツールでCIのランナーからは叩けないので、'
-                                + 'ASCのレポートと同じくセッションが取って置く。'
+                                + '写しの鮮度・列挙の網羅・ラチェットを見る。**取り直しの `--sync` も実装済み。**'
+                                + '**残るのは写しを取り直す主体** —— `list_triggers` は'
+                                + 'セッションのMCPツールでCIのランナーからは叩けず、'
+                                + '**`create_trigger` で作った Routine も持てない**（2026-08-28 に実測）。'
+                                + '作成時の警告が案内する唯一の道は「claude.ai の Routines UI から作る」で、'
+                                + 'そこはオーナーの画面操作。'
                                 + '取り直しが自動になれば、記録は主系（Actions の run 列挙）と'
                                 + '同じ意味で完結する' },
   impl_machine_gate: { kind: 'implement', label: '不可逆な領域の機械ゲートを作る',
