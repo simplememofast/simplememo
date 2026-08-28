@@ -26,10 +26,10 @@
   ],
   "entry": "scripts/check-rollout-promotion.mjs",
   "mirror": "simplememo-api/data/rollout-gate-pin.json",
-  "reviewed_at": "2026-08-27",
-  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない",
+  "reviewed_at": "2026-08-28",
+  "reviewed_note": "初回。evaluatePromotion / planAll / countPromotionsToday を留めた。**この時点で auto_promote.enabled は false** なので、実行側は指紋が合っても1件も昇格しない\n\n2026-08-28 に留め直した。**変わったのは自己テスト2件だけで、evaluatePromotion / planAll / countPromotionsToday の判定ロジックは1行も動いていない**（差分は selftest() の中）。理由: オーナーが auto_promote.enabled を立てたので、『実台帳のまま評価すると必ず止まる』を前提にした自己テスト2件が成り立たなくなった。**フラグの値をピンしていた自己テストを、性質のピンへ書き直した** —— 出荷している policy の数字（寝かせ48h・各群30）が実際に効くこと、材料（ガードの判定・指標の判定・フラグの現状）が欠けたら promote を返さないこと。後者は machine_gate の holds_when_unknown そのもので、**enabled が立った今、plan を守っているのはここだけになった。**",
   "files": {
-    "scripts/check-rollout-promotion.mjs": "d8a959ccdc94",
+    "scripts/check-rollout-promotion.mjs": "cc0276295a16",
     "scripts/lib/selftest.mjs": "498def1338f8"
   }
 }

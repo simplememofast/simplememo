@@ -35,10 +35,10 @@
     "kill_switch": false,
     "$kill_switch": "立てると即座に全部止まる。**理由は問わない。**",
     "auto_send": {
-      "enabled": false,
-      "$enabled": "オーナーが立てる。**最初の1通は人が見てから**にしたいので false で置いてある",
+      "enabled": true,
+      "$enabled": "**2026-08-28 にオーナーが立てた**（それまで false）。同時に simplememo-api の Worker secret `EXPERT_TAX_EMAIL` も設定され、宛先が引ける状態になった。**ただし dry_run は true のまま** —— 立てたのは経路であって送信ではない。最初の1通は人が文面を見てから",
       "dry_run": true,
-      "$dry_run": "false と書いたときだけ実送信。未設定もタイプミスも送らない側へ倒れる",
+      "$dry_run": "false と書いたときだけ実送信。未設定もタイプミスも送らない側へ倒れる。**Worker 側にも同じ二重化がある**（EXPERT_ESCALATION_DRY_RUN が 'false' のときだけ送る）ので、実送信には台帳とWorkerの両方を倒す必要がある。**片方だけでは出ない**",
       "daily_cap": 1,
       "$daily_cap": "1日1通。**士業への連絡は溜めて出すものではない**",
       "min_days_between_asks": 7,
