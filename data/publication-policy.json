@@ -255,6 +255,12 @@
       "why": "**投稿前の文面。**公開する前の下書きを外から読める場所に置かない（pr-claims.json と同じ理由）",
       "ok_in_public_repo": "ok"
     },
+    "expert-escalation.json": {
+      "served_by_site": false,
+      "why": "**士業へ送る質問の下書きと、窓口の有無。**送る前の文面を外から読める場所に置かない（review-replies.json と同じ理由）",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "**連絡先そのものは入っていない。**顧問税理士のアドレスは第三者の個人情報なので Worker の secret に置き、ここが持つのは `secret:EXPERT_TAX_EMAIL` という在り処だけ。検査（check-expert-escalation.mjs）が address_source に `@` が入っていたら落とす"
+    },
     "routine-runs.json": {
       "served_by_site": false,
       "why": "**副系の routine 一覧と発火記録の写し。**routine の名前・cron・停止の理由が並ぶので、何をいつ自動で回しているかがそのまま読める。サイトが参照しないので配信しない",

@@ -367,6 +367,23 @@ jobs:
           node scripts/check-routine-runs.mjs --selftest
           node scripts/check-routine-runs.mjs --check
 
+      # 【士業への確認】判断は人のまま、運ぶところだけを機械が持つ。
+      # ⑧の返信ゲートと同じ形で、**宛先が外部の専門家なので閾値は厳しい** ——
+      # 送るのは台帳にある reviewed な文面だけ（送信時に作らない）／
+      # 向き先が実在すること／元の未把握がまだ未把握であること／
+      # 金額・資格情報・利用者の識別子が本文に入っていたら落とす。
+      #
+      # **この検査が塞いだ穴は実際に開いていた** —— corporate-obligations の
+      # social-insurance は「社労士がついているので期限はそちらに確認する」と
+      # 書いていたが、社労士は雇っていない（2026-08-28 オーナー確認）。
+      # **居ない相手を向き先にしていた。**確認先の実在を誰も検査していなかった。
+      #
+      # **アドレスは台帳に置かない**（このリポジトリは公開）。secret の在り処だけ。
+      - name: Expert escalation (士業への確認)
+        run: |
+          node scripts/check-expert-escalation.mjs --selftest
+          node scripts/check-expert-escalation.mjs --check
+
       # 【運転台帳】共通実行IDの一意性と、attempted／outcome の整合を見る。
       #
       # 壊れた台帳は「集計できない」ではなく **指標が黙って嘘になる**。
