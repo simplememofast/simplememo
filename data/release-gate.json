@@ -53,8 +53,11 @@
     "require_phased_release": true,
     "$require_phased_release": "**一度に全員へ出さない。**Apple の段階リリースでなければ通さない",
     "require_ci_green": true,
-    "require_release_notes_locales": ["ja-JP", "en-US"],
-    "$require_release_notes_locales": "この2つが揃っていないものは提出しない。**片方だけの版は出さない**"
+    "require_release_notes_locales": [
+      "ja",
+      "en-US"
+    ],
+    "$require_release_notes_locales": "この2つが揃っていないものは提出しない。**片方だけの版は出さない**。**`ja-JP` ではなく `ja`。**このアプリの実際の ASC ロケールは `ja` で、`release_notes/ja-JP/` はリポジトリ側のフォルダ名にすぎない（`scripts/prepare_app_store_version.rb` の LOCALE_MAP が `ja-JP => ja` に写している）。2026-08-28、ここに `ja-JP` と書いていたため材料が永久に埋まらない状態だった —— 隣のスクリプトが大文字で『this app's real Japanese locale code is \"ja\", not \"ja-JP\"』と書いてあるのを読まずに書いた。"
   },
   "releases": [],
   "$releases": [

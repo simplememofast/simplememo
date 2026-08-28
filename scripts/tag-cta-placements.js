@@ -36,12 +36,78 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'admin', 'tools', 'growth'];
 
 /**
- * Apple's campaign-token length ceiling is not something this repo can verify
- * from here, so the check is conservative and explicit rather than trusting a
- * remembered number: 40 chars, enforced in --check. If a token would exceed it
- * the script refuses instead of silently shipping a token Apple may truncate.
+ * Apple's campaign-token length ceiling. **30, and this is now verified, not
+ * guessed.**
+ *
+ * [2026-08-28] この定数は長らく 40 で、すぐ上のコメントが
+ * 「Apple の上限はここからは確かめられないので、控えめに 40」と書いていた。
+ * **確かめた。**Apple の一次情報（App Store Connect Help / Campaign links）に
+ * こうある:
+ *
+ *   > You can use up to 30 alphanumeric characters and spaces, and the
+ *   > following punctuation marks and characters:
+ *   > [ ] / \ - ~ + = <> : ; , . _ ' " * & $ % # @ ? ! | { } ( )
+ *
+ * 40 は 30 より緩いので、**この推測値は上限を10文字ぶん見逃していた。**
+ * 30 へ直す。既存ファイルは1つも変わらない（下の置換は既に `__placement` を
+ * 持つトークンには何もしないので冪等）。効くのは**これから生成される分**だけ。
+ *
+ * **既に上限を超えているトークンは別に数えて報告する**（OVERSIZED の節）。
+ * 直すと App Store Connect 側の履歴が切れるので、直すかどうかは持ち主の判断。
+ * ただし「見えていない」状態にはしない。
  */
-const CT_MAX = 40;
+const CT_MAX = 30;
+
+/**
+ * 出荷済みトークンのうち、Apple の上限を超えているもの。**報告のみ。**
+ *
+ * 失敗にしないのは、直すこと自体にコストがある（トークンを変えると ASC が
+ * 集計する単位が変わり、それまでの履歴と繋がらなくなる）から。
+ * check-benchmark.mjs と同じ「報告のみ」の扱いで、判断は持ち主に残す。
+ */
+const oversized = [];
+
+/**
+ * **キャンペーントークンの言語。ページ単位の base は載せない。**
+ *
+ * [2026-08-28] それまでのトークンは `{ページ}-{言語}__{配置}` で、670種類あった。
+ * **Apple の閾値がそれを許さない**（App Store Connect Help / Campaign links）:
+ *
+ *   > Data for a particular campaign will appear in the dashboard once it has
+ *   > generated **first-time downloads from at least five individual users.**
+ *
+ * 実測の初回DLは 4.5〜5.0/日 ＝ 月およそ150件。1キャンペーンに5件要るので、
+ * **月に閾値を越えられるのは理想条件でも最大30トークン。670個は2桁多い。**
+ * 実際 ASC が返した Campaign 列は 5,018 Counts すべて空欄だった
+ * （growth/reports/2026-08-28-campaign-token-cardinality.md）。
+ *
+ * **失う履歴は無い。**このファイル冒頭は「ct= を書き換えると ASC の継続性が
+ * 切れる」と書いていて、それ自体は正しい。だが今回に限っては
+ * **切れる履歴が存在しない** —— 旧トークンは1件も集計に現れていない。
+ *
+ * **ページ単位の粒度は失われない。**GA4 は `page_path` と
+ * `data-cta-placement/cluster/variant` を別ディメンションで記録している
+ * （js/app-store-tracking.js の dims()）。ct= に求めるのは、
+ * **クリックではなくインストールと課金に届く粗い軸**だけ。
+ *
+ * **言語はページの位置ではなく既存トークンから引く。**実測すると
+ * root(JA) のページに `-en` トークンが151件、`/en/` に `-jp` が31件あり、
+ * **トークンの言語とページのロケールは一致していない。**dual-DOM の
+ * 言語別CTAで説明が付く部分もあるが、確かめていない。
+ * ここで直すと**粒度の変更と言語の付け替えが同じ変更に混ざる**ので、
+ * 言語は今の値を保ち、食い違いは別に数えて報告する。
+ */
+const langOf = (token, rel) => {
+  const base = String(token).split('__')[0];
+  if (/^(jp|en)$/.test(base)) return base;          // 既に畳んだ形（冪等）
+  const m = base.match(/-(jp|en)$/);
+  if (m) return m[1];
+  // 接尾辞を持たないトークンだけ、ページの位置から決める
+  return rel.startsWith('en/') ? 'en' : 'jp';
+};
+
+/** トークンの言語とページのロケールが食い違っている CTA。**報告のみ。** */
+const langMismatch = [];
 
 const args = new Set(process.argv.slice(2));
 const WRITE = args.has('--write');
@@ -74,7 +140,19 @@ function clusterOf(urlPath) {
  * against the same baseline document. See the call site for why this matters.
  */
 function stripCtaAttrs(html) {
-  return html.replace(/\s+data-cta-(?:placement|cluster|variant)="[^"]*"/g, '');
+  return html
+    .replace(/\s+data-cta-(?:placement|cluster|variant)="[^"]*"/g, '')
+    // **ct= の中身も正規化する。**属性を剥がすだけでは足りない ——
+    // トークンの長さが変わると後続アンカーのバイト位置がずれ、0.25/0.75 の
+    // 境界にいる CTA が mid ↔ bottom で振動する。
+    //
+    // [2026-08-28] 実際にそうなった。670種類のページ別トークンを
+    // `{言語}__{配置}` の8種類へ畳んだとき、`vs/line-keep-memo/` の1件が
+    // **毎回ラベルを変え、--write と --check が永久に食い違った。**
+    // すぐ上のコメントが data-cta-* について書いているのと同じ欠陥で、
+    // **同じ理由が ct= にも掛かっていることを、長さが変わるまで誰も踏めなかった。**
+    // 固定長へ潰すので、以後どんなトークン設計へ変えても位置は動かない。
+    .replace(/((?:[?&]|&amp;)ct=)[^"&]*/g, '$1x');
 }
 
 /**
@@ -209,8 +287,7 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
     // ct= gains the placement suffix; a token already carrying one is left alone
     // so re-running is idempotent.
     tag = tag.replace(/((?:[?&]|&amp;)ct=)([^"&]*)/, (m, pre, token) => {
-      const base = token.split('__')[0];
-      const next = `${base}__${a.placement}`;
+      const next = `${langOf(token, rel)}__${a.placement}`;
       if (next.length > CT_MAX) {
         // Accepted, not a failure. These pages keep their page-level token and
         // lose only the App-Store-side placement split; GA4 still receives the
@@ -253,6 +330,18 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
   // "not enough data" for ninety days rather than an error — the tracking looked
   // installed and was inert. Note the provider token is NOT the vendor number;
   // it comes from App Store Connect's own campaign-link generator.
+  // 出荷済みトークンの長さを数える。**新規生成の門とは別の話** ——
+  // CT_MAX を下げても既存は変わらないので、数えないと存在ごと消える。
+  for (const a of anchors) {
+    if (!a.isCta) continue;
+    const m = a.tag.match(/(?:[?&]|&amp;)ct=([^"&]*)/);
+    if (!m) continue;
+    if (m[1].length > CT_MAX) oversized.push({ page: rel, token: m[1], length: m[1].length });
+    const tokenLang = langOf(m[1], rel);
+    const pathLang = rel.startsWith('en/') ? 'en' : 'jp';
+    if (tokenLang !== pathLang) langMismatch.push({ page: rel, tokenLang, pathLang });
+  }
+
   const missingPt = anchors.filter((a) => a.isCta && !PARAM_PT.test(a.tag));
   if (missingPt.length) {
     problems.push(`${rel}: ${missingPt.length} CTA(s) carry ct= without pt= — App Analytics will not record them`);
@@ -260,6 +349,21 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
 }
 
 problems.forEach((p) => console.log(`  ${p}`));
+if (oversized.length) {
+  const worst = [...oversized].sort((a, b) => b.length - a.length)[0];
+  const uniq = new Set(oversized.map((o) => o.token)).size;
+  console.log(`  note(報告のみ): 出荷済みの ct= で Apple の上限 ${CT_MAX} 文字を超えているもの`
+    + ` — ${oversized.length} CTA / ${uniq} トークン（最長 ${worst.length} 文字: "${worst.token}"）。`);
+  console.log('    **直すと App Store Connect 側の集計単位が変わり、それまでの履歴と繋がらない。**'
+    + '判断は持ち主に残すが、見えていない状態にはしない');
+}
+if (langMismatch.length) {
+  const byPath = langMismatch.reduce((acc, x) => { acc[x.pathLang] = (acc[x.pathLang] || 0) + 1; return acc; }, {});
+  console.log(`  note(報告のみ): トークンの言語がページのロケールと食い違う CTA — ${langMismatch.length} 件`
+    + `（${Object.entries(byPath).map(([k, v]) => `path=${k} に別言語 ${v}`).join(' / ')}）。`);
+  console.log('    **粒度の変更とは別の話なので、この変更では直していない。**'
+    + 'dual-DOM の言語別CTAで説明が付く部分もあるが、確かめていない');
+}
 if (notices.length) {
   console.log(`  note: ${notices.length} CTA(s) keep a page-level ct= (token length); GA4 placement is unaffected`);
 }

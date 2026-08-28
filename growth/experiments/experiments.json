@@ -811,7 +811,8 @@
         "NOT MEASURABLE IN GA4. A scan is not a click, so app_store_click will not rise — it may fall as desktop visitors scan instead of clicking. The only readout is App Store Connect campaign data for the __qr tokens, which is an owner action; growth/data/appstore/ is still empty.",
         "Desktop converts worse than its traffic share (51% of search clicks, 35% of App Store clicks), which is expected: desktop visitors sensibly decline to click a badge they cannot install from. The waste is these 21 clicks, not half the audience.",
         "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
-        "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input)."
+        "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input).",
+        "2026-08-28: **この実験は現状のままでは評価できない。**2つ別々の理由がある。\n\n1. **`__qr` のトークンがサイトに1つも存在しない。**実測（`grep -roh 'ct=[^&\"]*' --include=*.html`）で0件。target_metric が名指ししている集計単位が、そもそも出荷されていない。\n2. **仮に存在しても ASC には現れない。**Apple の閾値は「1キャンペーンにつき初回DL 5人以上」で、初回DLの実測は 4.5〜5.0/日。詳細は growth/reports/2026-08-28-campaign-token-cardinality.md。\n\nこの実験のノート自身が「**NOT MEASURABLE IN GA4** … The only readout is App Store Connect campaign data」と書いている。**その唯一の読み口が塞がっている。**\n\n**ここでは決定を書かない**（評価日は 2026-09-13、判断は持ち主のもの）。ただし 9/13 に「データが足りない」と読むのは誤りで、**待っても出ない**ことは今分かっている。`measurement_failed`（測れたが判断できない、ではなく測っていない）に近い形。"
       ],
       "control": {
         "kind": "none",
@@ -926,13 +927,14 @@
         "window": "2026-07-11..2026-08-07 (28d)",
         "source": "growth/data/gsc/2026-08-09"
       },
-      "target_metric": "app_store_click attributed to ct=blog-obsidian-voice-input-jp__mid",
+      "target_metric": "app_store_click on /blog/obsidian-voice-input with placement=mid （GA4。2026-08-28 まで ct=blog-obsidian-voice-input-jp__mid で読んでいた）",
       "decision": null,
       "evaluated_at": null,
       "notes": [
         "This page was excluded from the 2026-08-10 mid-CTA batch on the grounds of not using the strongest page as a test bed. That exclusion is revised here, and the reason it was wrong is worth recording: it was written to protect the page from title and snippet experiments, which move search performance. A body paragraph cannot move SERP CTR — it is not in the title, the description, or above the fold. Applying the rule to a body CTA left the highest-intent traffic on the site (relevance 1.0, CTR 10.9%, position 5.3) with no way to install without scrolling back to the header.",
         "Placed after 方法4, the section that already describes this app, so the link follows content the reader has just read rather than interrupting the comparison.",
-        "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question."
+        "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question.",
+        "2026-08-28: **ct= を読み替える。**キャンペーントークンを `{ページ}-{言語}__{配置}` の670種類から `{言語}__{配置}` の8種類へ畳んだので、このページの mid CTA は `jp__mid` になった。**ページ単位では区別できなくなる。**\n\n**測定は失われていない。**GA4 の app_store_click は `page_path` と `data-cta-placement` を ct= とは別のディメンションで記録している（js/app-store-tracking.js の dims()）。したがって `page_path=/blog/obsidian-voice-input AND placement=mid` で同じ系列が読める。**フィルタする列が変わっただけで、母数も定義も変わらない。**\n\n9/13 に読むときは ct= ではなくこの2列で絞ること。**08-28 より前は ct= 側にしか値が無く、以後は両方に有る**ので、窓をまたぐなら page_path+placement で通して読むのが安全。"
       ],
       "control": {
         "kind": "none",
