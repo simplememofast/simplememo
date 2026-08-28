@@ -351,6 +351,21 @@ jobs:
           node scripts/check-rollout-promotion.mjs --selftest
           node scripts/check-rollout-promotion.mjs --check
 
+      # 【出荷の門 — App Review 提出 / App Store 公開】
+      # 2026-08-28 にオーナーが渡した。**渡っただけでは外れない** ——
+      # 権限表は不可逆な領域の承認を外すのに machine_gate を要求する。
+      #
+      # self-test の主眼はここでも「揃えば通る」ではなく、
+      # **材料を1つずつ落として必ず hold になる**こと。とくに
+      #   ・実機確認の記録が無ければ出さない（機械には代われない）
+      #   ・実機で見たのが別のコミットなら出さない
+      #   ・段階リリースでなければ公開しない（一度に全員へ出さない）
+      #   ・クラッシュ率の母数が足りなければ「判定していない」（異常なしではない）
+      - name: Release gate (App Review / App Store)
+        run: |
+          node scripts/check-release-gate.mjs --selftest
+          node scripts/check-release-gate.mjs --check
+
       # 【段階公開のゲートが変わったことを、変えたPRの中で気づかせる】
       # 判断は公開側（ここ）、実行は非公開側（simplememo-api の Rollout Promote）。
       # あちらは留めた指紋と実物が違えば**本番に書かずに落ちる。**
