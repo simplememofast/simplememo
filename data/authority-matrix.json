@@ -127,32 +127,62 @@
     {
       "domain": "App Review への提出",
       "reversible": false,
-      "ai_may": [],
-      "requires_approval": true,
-      "human_only": [
-        "タグ submit-v* の作成",
-        "**実機での事前確認**"
+      "ai_may": [
+        "提出の提案",
+        "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）"
       ],
-      "gate": "Hard Rule: 実機で確認してから提出する。後ではなく先に（docs/release-automation.md）",
+      "requires_approval": false,
+      "human_only": [
+        "**実機での事前確認そのもの**（機械には代われない。門はその記録を要求する）",
+        "`policy.enabled` を立てる操作そのもの",
+        "kill_switch を倒す操作"
+      ],
+      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold**",
       "evidence": [
+        "scripts/check-release-gate.mjs",
+        "data/release-gate.json",
         "simplememo-ios/.github/workflows/submit-review.yml"
       ],
       "status": "active",
-      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない"
+      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない\n\n**[2026-08-28] オーナーが名指しで渡した。**旧 note は「技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない」だった。\n\n**Hard Rule（実機で確認してから提出する）は外していない。**機械には代われないので、**門がその記録を要求する形に変えた** —— `device_verified_by` / `device_verified_at` / `device_verified_sha` が無ければ hold。sha を要求するのは、**見たものと出すものを一致させる**ため（別のビルドを見て出せてしまうと、記録があること自体が意味を失う）。\n\n**enabled は false で置いてある。**実行側（ASCへの提出の呼び出し・タグ作成の権限）もまだ無い。",
+      "machine_gate": {
+        "checker": "scripts/check-release-gate.mjs",
+        "function": "evaluateSubmission",
+        "kill_switch_path": "data/release-gate.json#policy.kill_switch",
+        "daily_cap": 1,
+        "holds_when_unknown": true,
+        "$holds_when_unknown": "**CI・リリースノート・TestFlightの状態と経過・ブロッカー件数・実機確認の記録・審査の進行状況のどれが欠けても hold。**とくに実機確認は『たぶん誰か見ただろう』で通さない"
+      }
     },
     {
       "domain": "App Store への公開（審査通過後）",
       "reversible": false,
-      "ai_may": [],
-      "requires_approval": true,
-      "human_only": [
-        "App Store Connect での公開操作"
+      "ai_may": [
+        "審査を通ったビルドの公開の提案",
+        "**ゲートを通った公開の実行**（段階リリース限定・1日1回・クラッシュ率とkillの確認つき）"
       ],
-      "gate": "fastlane の automatic_release がハードコードで false。**恒久的に手動**",
+      "requires_approval": false,
+      "human_only": [
+        "段階リリースによらない一括公開（全員へ一度に出す判断）",
+        "`policy.enabled` を立てる操作そのもの",
+        "kill_switch を倒す操作"
+      ],
+      "gate": "evaluateRelease() が唯一の関門。審査が PENDING_DEVELOPER_RELEASE で、段階リリースが有効で、承認から6時間以上経っていて、クラッシュ率が母数100以上で判定でき悪化1.0pt以内で、直近7日にカナリアの kill が無く、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold**",
       "evidence": [
+        "scripts/check-release-gate.mjs",
+        "data/release-gate.json",
         "simplememo-ios/fastlane/Fastfile"
       ],
-      "status": "active"
+      "status": "active",
+      "note": "\n\n**[2026-08-28] オーナーが名指しで渡した。**それまでここは human_only で、gate に「fastlane の automatic_release がハードコードで false。**恒久的に手動**」と書いてあった。**渡っただけでは外れない** —— 権限表は不可逆な領域の承認を外すのに machine_gate を要求する（GATE_REQUIRED）ので、宣言ではなく実装で外した（`scripts/check-release-gate.mjs`）。\n\n非対称は消していない —— **止める側（取り下げ・段階リリースの停止）は軽く、出す側は重い。**段階リリースは門の側で**必須**にしてある（`require_phased_release`）。一度に全員へ出す設定は validate が落とす。\n\n**enabled は false で置いてある。**先例2つ（段階公開の門・レビュー返信の門）と同じで、実装した日には立てない。ここは影響がその2つより大きいので同じかそれ以上に慎重にする。**そして実行側（ASCへの提出・公開の呼び出し）がまだ無い** —— 門だけでは何も動かない。",
+      "machine_gate": {
+        "checker": "scripts/check-release-gate.mjs",
+        "function": "evaluateRelease",
+        "kill_switch_path": "data/release-gate.json#policy.kill_switch",
+        "daily_cap": 1,
+        "holds_when_unknown": true,
+        "$holds_when_unknown": "**審査状態・段階リリースの設定・クラッシュ率・その母数・カナリアの状態のどれが欠けても hold。**とくに『母数が足りない』は hold であって『異常なし』ではない"
+      }
     },
     {
       "domain": "価格・プラン・無料枠の変更",

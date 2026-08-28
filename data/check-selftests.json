@@ -364,6 +364,12 @@
       "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
     },
     {
+      "script": "scripts/check-release-gate.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-28",
+      "broke": "**壊し5通り＋出荷前に捕まった本物の欠陥1件。**\n(1) `enabled` の判定を消す → 1件落ちる（実台帳のままでは提出も公開もしない、が崩れる）。\n(2) **別コミットの緑を許す**（`ci.sha !== build.sha` を無効化）→ 1件。これが効かないと、通っていない変更を『CIが緑だった』で審査に出せる。\n(3) **段階リリースの必須を外す** → 2件。一度に全員へ出す設定が通ってしまう。validate 側でも落とすようにしてあるので2件になる。\n(4) **クラッシュ率の母数不足でも判定する** → 1件。母数10で『異常なし』と読む形（hold であって異常なしではない）。\n(5) **読めないブロッカー件数を0で埋める** → 1件。分からないものを『無い』と読み替える形。\n\n**加えて、check-guard-shapes が出荷前に本物の fail-open を捕まえた。**`guard.last_kill_at !== null && !== undefined` で囲っており、null（killは無かったという主張）と欄が無い（読めていない）を同じに扱って、**読めないときに公開へ落ちる**形だった。`'last_kill_at' in guard` を先に要求する形へ直し、`guard: {}` で hold することを固定した（`data/guard-shapes.json` の param_guards に記録）。\n\n**もう1つ、CIに配線する前に見つけた。**`process.exit(selftest() ? 0 : 1)` と書いていて、`run()` は失敗件数を返すので**0件失敗のとき exit 1**になっていた。配線したら常に赤になる形。`=== 0` に直し、通るとき0・壊すと1を両方確認した。"
+    },
+    {
       "script": "scripts/check-review-gate-pin.mjs",
       "state": "demonstrated",
       "at": "2026-08-27",
