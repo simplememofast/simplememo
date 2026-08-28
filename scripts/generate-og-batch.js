@@ -40,6 +40,7 @@ const IMAGES = [
   { file: 'obsidian-pricing.png', title: 'Obsidianの料金\n無料でどこまで使える？', icon: '💰' },
   { file: 'obsidian-sync.png', title: 'Obsidianの同期方法\niCloud/Sync/Git/Syncthing', icon: '🔄' },
   { file: 'obsidian-sync-icloud.png', title: 'ObsidianをiCloudで同期\n設定手順とつまずきどころ', icon: '☁️' },
+  { file: 'obsidian-sync-official.png', title: 'Obsidian SyncのStandard/Plus\n必要なのはどちらか', icon: '🔄' },
   { file: 'obsidian-airpods.png', title: 'AirPodsに話すだけで\nObsidianへ残す', icon: '🎧' },
   { file: 'blog-obsidian-voice-fastest-route.png', title: 'Obsidianに音声で挿す\n最速の経路', icon: '🎙️' },
   { file: 'data-voice-shift.png', title: '「音声シフト」定点調査\nメモは書くものから話すものへ', icon: '📊' },

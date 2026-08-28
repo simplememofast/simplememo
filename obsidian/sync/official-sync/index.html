@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/sync/official-sync/">
+  <script>
+    window.addEventListener('load', function() {
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>Obsidian SyncのStandardとPlus、必要なのはどちらか【2026】 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidian Syncの公式ヘルプで確認できるStandard/Plusの違いはバージョン履歴の保持期間（Standard 1か月・Plus 12か月）だけです。同期・E2E暗号化など主要機能は共通。判断基準と、確認できていない点を正直に整理しました。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="Obsidian SyncのStandardとPlus、必要なのはどちらか【2026】 | Obsidian連携シンプルメモ">
+  <meta property="og:description" content="公式ヘルプで確認できる違いはバージョン履歴の保持期間だけ（Standard 1か月・Plus 12か月）。判断基準と、確認できていない点を正直に整理しました。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-08-28T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/sync/official-sync/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-official.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidian SyncのStandardとPlus、必要なのはどちらか【2026】 | Obsidian連携シンプルメモ">
+  <meta name="twitter:description" content="公式ヘルプで確認できる違いはバージョン履歴の保持期間だけ（Standard 1か月・Plus 12か月）。判断基準と、確認できていない点を正直に整理しました。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-sync-official.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/sync/official-sync/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://simplememofast.com/"},
+      {"@type": "ListItem", "position": 2, "name": "Obsidian連携", "item": "https://simplememofast.com/obsidian/"},
+      {"@type": "ListItem", "position": 3, "name": "同期方法まとめ", "item": "https://simplememofast.com/obsidian/sync/"},
+      {"@type": "ListItem", "position": 4, "name": "Standard/Plusの選び方", "item": "https://simplememofast.com/obsidian/sync/official-sync/"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/sync/official-sync/#article","inLanguage":"ja","headline":"Obsidian SyncのStandardとPlus、必要なのはどちらか","description":"Obsidian Syncの公式ヘルプで確認できるStandard/Plusの違いはバージョン履歴の保持期間だけであることを検証し、判断基準と未確認点を整理した。","url":"https://simplememofast.com/obsidian/sync/official-sync/","datePublished":"2026-08-28","dateModified":"2026-08-28","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-sync-official.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/sync/official-sync/"}}</script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/sync/official-sync/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidian SyncのPlusはいくらですか？","acceptedAnswer":{"@type":"Answer","text":"本サイトが直接確認できているのはObsidian Sync基本料金の$4/user/月（年払い）・$5/user/月（月払い）のみです（obsidian.md/pricingを2026年8月23日に直接取得）。Plus単体の追加料金は同じページの取得内容からは読み取れず、本セッションでも別途確認できていません。正確な金額は公式サイトの最新情報でご確認ください。"}},{"@type":"Question","name":"StandardとPlusの違いは何ですか？","acceptedAnswer":{"@type":"Answer","text":"公式ヘルプ（obsidian.md/help/sync/version-history、2026年8月26日に確認）で確認できる違いはバージョン履歴の保持期間だけです。Standardは1か月、Plusは12か月、添付ファイルはプランによらず2週間です。同期・E2E暗号化・共有保管庫での共同編集といった主要機能は両プランに共通です。"}},{"@type":"Question","name":"Standardで十分なのはどんな人ですか？","acceptedAnswer":{"@type":"Answer","text":"誤って上書き・削除したノートに、だいたい1か月以内に気づいて戻せる人です。日々のノートを日常的に見返す使い方であれば、1か月の保持期間で実用上困る場面は多くありません。"}},{"@type":"Question","name":"Plusが必要なのはどんな人ですか？","acceptedAnswer":{"@type":"Answer","text":"数か月〜1年単位でしか見返さない重要な記録（議事録・研究ノート・契約関連の下書きなど）を保管庫に持つ人です。編集ミスや意図しない上書きに気づくのが1か月を超えて遅れる可能性がある場合に、12か月の保持期間が効きます。"}},{"@type":"Question","name":"無料でバージョン履歴に近いことはできますか？","acceptedAnswer":{"@type":"Answer","text":"できます。保管庫をGitリポジトリとして管理すれば、コミット単位で無期限の変更履歴を無料で持てます。ただしコンフリクト解決にはGitの知識が要ります（実測比較は/obsidian/sync/のGit実測セクション）。"}}]}</script>
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/obsidian/sync/official-sync/#webpage","inLanguage":"ja","name":"Obsidian SyncのStandardとPlus、必要なのはどちらか【2026】 | Obsidian連携シンプルメモ","url":"https://simplememofast.com/obsidian/sync/official-sync/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  </script>
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    .decision-flow{list-style:none;counter-reset:q;margin:1.5rem 0 2rem;padding-left:0}
+    .decision-flow li{counter-increment:q;position:relative;padding:1.25rem 1.4rem 1.25rem 3.6rem;margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm)}
+    .decision-flow li::before{content:'Q'counter(q);position:absolute;left:1rem;top:1.25rem;font-size:.8rem;font-weight:700;color:#4fdcf0;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);border-radius:8px;padding:.2rem .5rem}
+    .decision-flow__q{font-size:1rem;font-weight:700;line-height:1.7;margin-bottom:.5rem}
+    .decision-flow__a{font-size:.92rem;line-height:1.85;color:var(--text-secondary);display:flex;gap:.6rem;flex-wrap:wrap}
+    .decision-flow__a span{padding:.3rem .7rem;border-radius:8px;background:rgba(100,180,255,.07);border:1px solid rgba(100,180,255,.15)}
+
+    /* 未確認の注記ブロック */
+    .unverified-note{background:rgba(255,183,52,.06);border:1px solid rgba(255,183,52,.22);border-left:3px solid rgba(255,183,52,.55);border-radius:var(--radius-sm);padding:1.1rem 1.3rem;margin:1rem 0;font-size:.9rem;line-height:1.85}
+    .unverified-note__title{font-weight:700;color:#ffc76b;margin-bottom:.35rem;font-size:.78rem;letter-spacing:.05em}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+
+    /* ── 比較表 ──────────────────────────────────────── */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモ</span><span lang="en" data-lang="en">Simple Memo - for Obsidian</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Guides</span></a></li>
+        <li><a href="/use-cases/"><span lang="ja" data-lang="ja">活用事例</span><span lang="en" data-lang="en">Use Cases</span></a></li>
+        <li><a href="/vs/"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a></li>
+        <li><a href="/methods/"><span lang="ja" data-lang="ja">メソッド</span><span lang="en" data-lang="en">Methods</span></a></li>
+        <li><a href="/blog/"><span lang="ja" data-lang="ja">ブログ</span><span lang="en" data-lang="en">Blog</span></a></li>
+        <li><a href="/glossary/"><span lang="ja" data-lang="ja">用語集</span><span lang="en" data-lang="en">Glossary</span></a></li>
+        <li><a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a></li>
+        <li><a href="/about/"><span lang="ja" data-lang="ja">開発者</span><span lang="en" data-lang="en">About</span></a></li>
+        <li><a href="/devlog/"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev Log</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-official-jp__nav&amp;mt=8"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a></li>
+      </ul>
+      <div class="global-nav__actions"><div class="lang-switcher lang-switcher--nav" id="navLangSwitcher"><button class="lang-switcher__btn" data-lang-btn="ja" aria-label="日本語に切替">JA</button><button class="lang-switcher__btn" data-lang-btn="en" aria-label="Switch to English">EN</button></div>
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-official-jp__nav&amp;mt=8" class="global-nav__cta">
+          <span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+    <div class="container">
+
+      <!-- Hero -->
+      <div class="lp-hero">
+        <div class="lp-hero__label">
+          <span lang="ja" data-lang="ja">Obsidian Sync — Standard / Plus</span><span lang="en" data-lang="en">Obsidian Sync — Standard vs. Plus</span>
+        </div>
+        <h1 class="lp-hero__title">
+          <span lang="ja" data-lang="ja">Obsidian SyncのStandardとPlus、必要なのはどちらか</span><span lang="en" data-lang="en">Obsidian Sync: do you need Standard or Plus?</span>
+        </h1>
+        <p class="lp-hero__sub">
+          <span lang="ja" data-lang="ja">Obsidian Syncは<a href="/obsidian/pricing/">$4/user/月（年払い）から</a>の有料オプションですが、公式ヘルプにはその中に<strong>StandardとPlusという2つのプラン</strong>が存在すると書かれています。ここでは公式ヘルプで実際に確認できた違い（バージョン履歴の保持期間）だけを根拠に、<strong>どちらを選ぶべきかの判断基準</strong>を整理しました。<strong>Plus単体の追加料金は本サイトでは確認できていません</strong>——分からないことは分からないと明記します。</span><span lang="en" data-lang="en">Obsidian Sync is a paid add-on <a href="/obsidian/pricing/">starting at $4/user/month (billed annually)</a>, and its official help describes two tiers within it: <strong>Standard and Plus</strong>. This page works only from the one difference we could confirm in the official help — version-history retention — to lay out <strong>a decision guide for which one you need</strong>. <strong>We have not been able to confirm Plus's exact price</strong>, and we say so rather than guess.</span>
+        </p>
+        <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
+          <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> ・ 公開: <time datetime="2026-08-28">2026年8月28日</time></span><span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published <time datetime="2026-08-28">August 28, 2026</time></span>
+        </p>
+      </div>
+
+      <!-- Answer-first (AIO) -->
+      <section class="lp-section" style="padding-top:1rem;">
+        <div class="tip-box" style="font-size:.95rem;">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">ひとことで言うと</span><span lang="en" data-lang="en">SHORT ANSWER</span></div>
+          <p><span lang="ja" data-lang="ja">公式ヘルプで確認できるStandardとPlusの違いは<strong>バージョン履歴の保持期間だけ</strong>です（Standard 1か月・Plus 12か月、添付ファイルはどちらも2週間）。同期・E2E暗号化・共有保管庫での共同編集といった主要機能は両プランに共通です。<strong>1か月より前の状態に戻す必要が想定されるならPlus、そうでなければStandardで足ります。</strong>ストレージ容量など他にも違いがある可能性はありますが、本サイトが直接確認できたのは保持期間だけです。</span><span lang="en" data-lang="en">The only difference the official help actually documents between Standard and Plus is <strong>version-history retention</strong> (1 month on Standard, 12 months on Plus; attachments are 2 weeks on both). Core features — sync, end-to-end encryption, collaboration on shared vaults — are the same on both. <strong>If you might need to restore something from more than a month ago, get Plus; otherwise Standard covers it.</strong> There may be other differences (e.g. storage caps), but retention is the only one we could directly confirm.</span></p>
+        </div>
+      </section>
+
+      <!-- What's actually confirmed -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">確認できていること・できていないこと</span><span lang="en" data-lang="en">What we could confirm — and what we couldn't</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">Obsidianの公式サイトは料金ページ（obsidian.md/pricing）でSyncの基本料金として「$4/user/月（年払い）・$5/user/月（月払い）」を掲示していますが、このページの記載単体からはStandard/Plusという2つのプラン名までは読み取れません（<a href="/obsidian/pricing/">検証済みの料金記事</a>を参照）。一方、Sync専用のヘルプページ（obsidian.md/help/sync/version-history）は明確にStandard/Plusという2つのプラン名を挙げ、バージョン履歴の保持期間がプランによって異なると説明しています。</span><span lang="en" data-lang="en">Obsidian's official pricing page (obsidian.md/pricing) lists Sync's base price as "$4/user/month billed annually, $5/user/month billed monthly," but that page alone doesn't spell out two named tiers (see our <a href="/obsidian/pricing/">verified pricing article</a>). The dedicated Sync help page (obsidian.md/help/sync/version-history), on the other hand, explicitly names Standard and Plus and describes different version-history retention for each.</span>
+        </p>
+        <div class="reason-cards">
+          <div class="reason-card">
+            <div class="reason-card__title">✅ <span lang="ja" data-lang="ja">確認できたこと</span><span lang="en" data-lang="en">Confirmed</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">バージョン履歴の保持期間: Standard 1か月・Plus 12か月・添付ファイルは共通2週間（obsidian.md/help/sync/version-history、2026年8月26日確認）。Sync基本料金: $4/user/月（年払い）・$5/user/月（月払い）（obsidian.md/pricing、2026年8月23日取得）。</span><span lang="en" data-lang="en">Version-history retention: 1 month on Standard, 12 months on Plus, 2 weeks for attachments on both (obsidian.md/help/sync/version-history, checked August 26, 2026). Sync's base price: $4/user/month annual, $5/user/month monthly (obsidian.md/pricing, fetched August 23, 2026).</span></div>
+          </div>
+          <div class="reason-card">
+            <div class="reason-card__title">❓ <span lang="ja" data-lang="ja">確認できていないこと</span><span lang="en" data-lang="en">Not confirmed</span></div>
+            <div class="reason-card__desc"><span lang="ja" data-lang="ja">Plus単体の追加料金。保存容量（ストレージ上限）がプランで違うかどうか。本セッションの実行環境からはobsidian.md本体・obsidianの公式ヘルプ倉庫のどちらにも到達できず、再取得して埋めることができませんでした。</span><span lang="en" data-lang="en">Plus's exact additional price. Whether storage caps differ between plans. This session's environment couldn't reach either obsidian.md itself or the official help source to re-verify and fill these gaps.</span></div>
+          </div>
+        </div>
+        <div class="unverified-note">
+          <div class="unverified-note__title"><span lang="ja" data-lang="ja">正直に書いておくこと</span><span lang="en" data-lang="en">BEING UPFRONT</span></div>
+          <span lang="ja" data-lang="ja">「Standard $4・Plus $8」という数字の組み合わせは、本サイトの社内メモに一度だけ記載がありましたが、その出典を遡ると根拠が確認できませんでした（Sync $4とPublish $8という<a href="/obsidian/pricing/">別々の製品の価格</a>を混同した可能性があります）。本ページではその数字を採用せず、確認できた事実だけを書いています。Plusの正確な価格は<a href="https://obsidian.md/pricing" target="_blank" rel="noopener">公式サイト</a>で直接ご確認ください。</span><span lang="en" data-lang="en">The pairing "Standard $4 / Plus $8" appeared once in this site's internal notes, but tracing it back turned up no actual source (it may have conflated <a href="/obsidian/pricing/">two different products' prices</a> — Sync at $4 and Publish at $8). This page does not use that number and states only what we could confirm. Check <a href="https://obsidian.md/pricing" target="_blank" rel="noopener">the official site</a> directly for Plus's exact price.</span>
+        </div>
+      </section>
+
+      <!-- Decision flow -->
+      <section class="lp-section" id="decision">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">どちらを選ぶか — 判断基準</span><span lang="en" data-lang="en">Which one should you pick?</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">確認できている唯一の違いがバージョン履歴の保持期間である以上、判断基準もそこに絞られます。次の質問に答えてください。</span><span lang="en" data-lang="en">Since retention is the one confirmed difference, the decision comes down to it. Answer the questions below.</span>
+        </p>
+        <ul class="decision-flow">
+          <li>
+            <div class="decision-flow__q"><span lang="ja" data-lang="ja">誤って上書き・削除したノートに気づくまで、1か月以上かかることがありそうですか？</span><span lang="en" data-lang="en">Could it take you more than a month to notice a note was overwritten or deleted by mistake?</span></div>
+            <div class="decision-flow__a"><span lang="ja" data-lang="ja">はい → Plusを検討</span><span lang="en" data-lang="en">Yes → Consider Plus</span><span lang="ja" data-lang="ja">いいえ → Standardで足りる</span><span lang="en" data-lang="en">No → Standard is enough</span></div>
+          </li>
+          <li>
+            <div class="decision-flow__q"><span lang="ja" data-lang="ja">議事録・研究ノートなど、数か月〜1年単位でしか見返さない重要な記録が保管庫にありますか？</span><span lang="en" data-lang="en">Do you keep important records — meeting notes, research logs — that you only revisit every few months to a year?</span></div>
+            <div class="decision-flow__a"><span lang="ja" data-lang="ja">はい → Plus寄り</span><span lang="en" data-lang="en">Yes → Leans toward Plus</span><span lang="ja" data-lang="ja">いいえ → Standardで足りる</span><span lang="en" data-lang="en">No → Standard is enough</span></div>
+          </li>
+          <li>
+            <div class="decision-flow__q"><span lang="ja" data-lang="ja">上の2つに当てはまらず、日々のノートを日常的に見返す使い方ですか？</span><span lang="en" data-lang="en">Neither applies, and you revisit your notes on an everyday basis?</span></div>
+            <div class="decision-flow__a"><span lang="ja" data-lang="ja">はい → Standardで足りる（1か月保持で実用上困る場面は多くない）</span><span lang="en" data-lang="en">Yes → Standard is enough (a month of retention rarely falls short in practice)</span></div>
+          </li>
+        </ul>
+        <p style="font-size:.85rem;color:var(--text-muted);line-height:1.8;"><span lang="ja" data-lang="ja">※ どちらのプランでも同期・E2E暗号化・共有保管庫での共同編集は同じように使えます。この判断基準は「バージョン履歴をどれだけ長く持つか」だけを扱っています。</span><span lang="en" data-lang="en">※ Sync, end-to-end encryption, and collaboration on shared vaults work the same on either plan. This decision guide covers only how long you keep version history.</span></p>
+      </section>
+
+      <!-- Comparison table -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">Standard / Plus 比較表</span><span lang="en" data-lang="en">Standard vs. Plus</span>
+        </h2>
+        <table class="rt-table">
+          <thead>
+            <tr>
+              <th scope="col"><span lang="ja" data-lang="ja">項目</span><span lang="en" data-lang="en">Aspect</span></th>
+              <th scope="col">Standard</th>
+              <th scope="col">Plus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">バージョン履歴の保持期間</span><span lang="en" data-lang="en">Version-history retention</span></th>
+              <td data-label="Standard"><span class="mk-part">1<span lang="ja" data-lang="ja">か月</span><span lang="en" data-lang="en"> month</span></span></td>
+              <td data-label="Plus"><span class="mk-yes">12<span lang="ja" data-lang="ja">か月</span><span lang="en" data-lang="en"> months</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">添付ファイルの保持期間</span><span lang="en" data-lang="en">Attachment retention</span></th>
+              <td data-label="Standard"><span lang="ja" data-lang="ja">2週間</span><span lang="en" data-lang="en">2 weeks</span></td>
+              <td data-label="Plus"><span lang="ja" data-lang="ja">2週間（共通）</span><span lang="en" data-lang="en">2 weeks (same)</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">同期・E2E暗号化・共同編集</span><span lang="en" data-lang="en">Sync, E2E encryption, collaboration</span></th>
+              <td data-label="Standard"><span class="mk-yes"><span lang="ja" data-lang="ja">あり</span><span lang="en" data-lang="en">Yes</span></span></td>
+              <td data-label="Plus"><span class="mk-yes"><span lang="ja" data-lang="ja">あり（共通）</span><span lang="en" data-lang="en">Yes (same)</span></span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">保存容量の違い</span><span lang="en" data-lang="en">Storage cap difference</span></th>
+              <td data-label="Standard"><span lang="ja" data-lang="ja">未確認</span><span lang="en" data-lang="en">Not confirmed</span></td>
+              <td data-label="Plus"><span lang="ja" data-lang="ja">未確認</span><span lang="en" data-lang="en">Not confirmed</span></td>
+            </tr>
+            <tr>
+              <th scope="row"><span lang="ja" data-lang="ja">追加料金</span><span lang="en" data-lang="en">Extra cost</span></th>
+              <td data-label="Standard"><span lang="ja" data-lang="ja">$4/user/月〜（<a href="/obsidian/pricing/">Sync基本料金</a>）</span><span lang="en" data-lang="en">From $4/user/mo (<a href="/obsidian/pricing/">Sync base price</a>)</span></td>
+              <td data-label="Plus"><span lang="ja" data-lang="ja">未確認（<a href="https://obsidian.md/pricing" target="_blank" rel="noopener">公式サイトで確認</a>）</span><span lang="en" data-lang="en">Not confirmed (<a href="https://obsidian.md/pricing" target="_blank" rel="noopener">check official site</a>)</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CTA -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">どちらのプランでも、届く先は同じフォルダ</span><span lang="en" data-lang="en">Either plan, it lands in the same folder</span>
+        </h2>
+        <p class="lp-section__lead">
+          <span lang="ja" data-lang="ja">StandardかPlusかは、あくまで「バージョン履歴をどれだけ長く持つか」の選択です。Obsidian連携シンプルメモは、送信したメモを自分宛メールに残しつつ、iCloud Drive上の保管庫フォルダのデイリーノートへ直接追記します。Syncの課金プランに関係なく、保管庫のあるフォルダに届きます。</span><span lang="en" data-lang="en">Standard vs. Plus is only a choice about how long you keep version history. Simple Memo emails each note to you and appends it straight into the daily note inside your vault folder on iCloud Drive — landing there regardless of which Sync plan you pay for.</span>
+        </p>
+        <div class="cta-box">
+          <div class="cta-box__title"><span lang="ja" data-lang="ja">ダウンロードは無料</span><span lang="en" data-lang="en">Free to download</span></div>
+          <p class="cta-box__desc"><span lang="ja" data-lang="ja">iCloud Drive上の保管庫フォルダを一度選ぶだけで設定は完了します。</span><span lang="en" data-lang="en">Setup is picking your vault folder in iCloud Drive once.</span></p>
+          <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=obsidian-sync-official-jp__mid&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
+            <img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy">
+          </a>
+          <div class="cta-qr">
+            <img src="/assets/img/qr-obsidian-sync-official-ja.svg" width="132" height="132" alt="App StoreダウンロードQRコード" loading="lazy" lang="ja" data-lang="ja">
+            <img src="/assets/img/qr-obsidian-sync-official-en.svg" width="132" height="132" alt="QR code to download on the App Store" loading="lazy" lang="en" data-lang="en">
+            <small><span lang="ja" data-lang="ja">PCの方はスマホで読み取り</span><span lang="en" data-lang="en">On desktop? Scan with your phone</span></small>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span>
+        </h2>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Obsidian SyncのPlusはいくらですか？</span><span lang="en" data-lang="en">How much does Obsidian Sync Plus cost?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">本サイトが直接確認できているのはObsidian Sync基本料金の$4/user/月（年払い）・$5/user/月（月払い）のみです（obsidian.md/pricingを2026年8月23日に直接取得）。Plus単体の追加料金は同じページの取得内容からは読み取れず、本セッションでも別途確認できていません。正確な金額は公式サイトの最新情報でご確認ください。</span><span lang="en" data-lang="en">The only price we've directly confirmed is Sync's base rate: $4/user/month billed annually, $5/user/month billed monthly (fetched from obsidian.md/pricing on August 23, 2026). Plus's additional cost isn't spelled out on that same page and we couldn't confirm it separately in this session either. Check the official site for the current figure.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">StandardとPlusの違いは何ですか？</span><span lang="en" data-lang="en">What's the difference between Standard and Plus?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">公式ヘルプ（obsidian.md/help/sync/version-history、2026年8月26日に確認）で確認できる違いはバージョン履歴の保持期間だけです。Standardは1か月、Plusは12か月、添付ファイルはプランによらず2週間です。同期・E2E暗号化・共有保管庫での共同編集といった主要機能は両プランに共通です。</span><span lang="en" data-lang="en">The only documented difference, per the official help (obsidian.md/help/sync/version-history, checked August 26, 2026), is version-history retention: 1 month on Standard, 12 months on Plus, 2 weeks for attachments regardless of plan. Core features — sync, end-to-end encryption, collaboration on shared vaults — are identical on both.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Standardで十分なのはどんな人ですか？</span><span lang="en" data-lang="en">Who does Standard work for?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">誤って上書き・削除したノートに、だいたい1か月以内に気づいて戻せる人です。日々のノートを日常的に見返す使い方であれば、1か月の保持期間で実用上困る場面は多くありません。</span><span lang="en" data-lang="en">Anyone who'd notice — and want to restore — an accidental overwrite or deletion within roughly a month. If you revisit your notes on an everyday basis, a month of retention rarely falls short in practice.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">Plusが必要なのはどんな人ですか？</span><span lang="en" data-lang="en">Who needs Plus?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">数か月〜1年単位でしか見返さない重要な記録（議事録・研究ノート・契約関連の下書きなど）を保管庫に持つ人です。編集ミスや意図しない上書きに気づくのが1か月を超えて遅れる可能性がある場合に、12か月の保持期間が効きます。</span><span lang="en" data-lang="en">Anyone keeping important records — meeting notes, research logs, contract drafts — that they only revisit every few months to a year. The 12-month window matters if you might not notice a bad edit or overwrite until more than a month has passed.</span></div>
+          </details>
+        </div>
+        <div class="faq-item">
+          <details class="faq-details">
+            <summary class="faq-summary"><span lang="ja" data-lang="ja">無料でバージョン履歴に近いことはできますか？</span><span lang="en" data-lang="en">Can I get something like version history for free?</span></summary>
+            <div class="faq-answer"><span lang="ja" data-lang="ja">できます。保管庫をGitリポジトリとして管理すれば、コミット単位で無期限の変更履歴を無料で持てます。ただしコンフリクト解決にはGitの知識が要ります（実測比較は<a href="/obsidian/sync/">/obsidian/sync/のGit実測セクション</a>）。</span><span lang="en" data-lang="en">Yes. Managing your vault as a Git repository gives you unlimited change history per commit, for free. Resolving a conflict does require knowing Git, though — see the <a href="/obsidian/sync/">hands-on Git section on /obsidian/sync/</a> for what that looks like in practice.</span></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- Verification scope -->
+      <section class="lp-section">
+        <div class="tip-box">
+          <div class="tip-box__title"><span lang="ja" data-lang="ja">検証環境と検証範囲</span><span lang="en" data-lang="en">TEST ENVIRONMENT &amp; SCOPE</span></div>
+          <p style="margin:0;"><span lang="ja" data-lang="ja">検証日: 2026年8月28日。<strong>公式情報に基づく記載（このセッションでの再取得はできず、既存記事の確認済み内容を引用）</strong>: Sync基本料金（obsidian.md/pricing、2026年8月23日に別セッションが直接取得・<a href="/obsidian/pricing/">/obsidian/pricing/</a>参照）、Standard/Plusのバージョン履歴保持期間（obsidian.md/help/sync/version-history、2026年8月26日に別セッションが直接取得・<a href="/obsidian/sync/">/obsidian/sync/</a>参照）。<strong>この環境で確認できなかったこと</strong>: 本セッションの実行環境からはobsidian.md本体にも、公式ヘルプのソースリポジトリ（過去セッションが利用したraw.githubusercontent.com経由の取得）にも到達できず、Plus単体の追加料金・保存容量の違いを新たに検証することはできませんでした。ネットワーク到達性は実行環境によって変わることが過去にも確認されており（GitHub Actions環境ではobsidian.mdへ直接到達できた記録がある）、次回それらの環境で再確認できる可能性があります。</span><span lang="en" data-lang="en">Tested August 28, 2026. <strong>Based on official documentation (not re-fetched in this session; cited from prior articles' confirmed content)</strong>: Sync's base price (obsidian.md/pricing, fetched directly by a prior session on August 23, 2026 — see <a href="/obsidian/pricing/">/obsidian/pricing/</a>); Standard/Plus version-history retention (obsidian.md/help/sync/version-history, fetched directly by a prior session on August 26, 2026 — see <a href="/obsidian/sync/">/obsidian/sync/</a>). <strong>Not verifiable in this environment</strong>: this session's runtime couldn't reach either obsidian.md itself or the official help's source repository (which a prior session reached via raw.githubusercontent.com), so we couldn't newly confirm Plus's exact price or any storage-cap difference. Network reachability has varied by runtime before — a GitHub Actions run reached obsidian.md directly — so a future session running there may be able to fill this in.</span></p>
+        </div>
+      </section>
+
+      <!-- Internal Links -->
+      <section class="lp-section">
+        <h2 class="lp-section__title">
+          <span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related pages</span>
+        </h2>
+        <div class="internal-links">
+          <a href="/obsidian/sync/"><span lang="ja" data-lang="ja">Obsidianの同期方法比較（4方式）</span><span lang="en" data-lang="en">Comparing four sync methods</span></a>
+          <a href="/obsidian/sync/icloud/"><span lang="ja" data-lang="ja">iCloudで同期する設定手順（iPhone×Mac）</span><span lang="en" data-lang="en">Syncing with iCloud (setup)</span></a>
+          <a href="/obsidian/pricing/"><span lang="ja" data-lang="ja">Obsidianの料金 — 無料でどこまで使えるか</span><span lang="en" data-lang="en">Obsidian pricing</span></a>
+          <a href="/obsidian/"><span lang="ja" data-lang="ja">Obsidian連携の詳細</span><span lang="en" data-lang="en">Obsidian integration</span></a>
+          <a href="/obsidian/daily-note/"><span lang="ja" data-lang="ja">デイリーノートへ追記する方法</span><span lang="en" data-lang="en">Appending to your daily note</span></a>
+          <a href="/obsidian/what-is-vault/"><span lang="ja" data-lang="ja">保管庫（Vault）とは — 実体はただのフォルダ</span><span lang="en" data-lang="en">What is a vault</span></a>
+          <a href="/faq"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        </div>
+      </section>
+
+    </div>
+
+<section class="references" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);">
+  <div class="container">
+  <h2 style="font-size:1.1rem;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">参考文献</span><span lang="en" data-lang="en">References</span>
+  </h2>
+  <ul style="font-size:.875rem;color:var(--text-muted);list-style:decimal;padding-left:1.5rem;line-height:1.8;">
+    <li><a href="https://obsidian.md/pricing" target="_blank" rel="noopener" style="color:var(--accent);">obsidian.md/pricing（公式）</a> — <span lang="ja" data-lang="ja">Syncの現行料金。Plusの正確な追加料金はここで直接ご確認ください</span><span lang="en" data-lang="en">Sync's current pricing. Check here directly for Plus's exact additional cost</span></li>
+    <li><a href="https://obsidian.md/help/sync/version-history" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian Help — Version History</a> — <span lang="ja" data-lang="ja">Standard/Plusのバージョン履歴保持期間に関する公式ヘルプ</span><span lang="en" data-lang="en">Official help on Standard/Plus version-history retention</span></li>
+    <li><a href="/obsidian/pricing/" style="color:var(--accent);">/obsidian/pricing/</a> — <span lang="ja" data-lang="ja">本サイトによるObsidian料金の実測記事（2026年8月23日）</span><span lang="en" data-lang="en">This site's own measured pricing article (August 23, 2026)</span></li>
+    <li><a href="/obsidian/sync/" style="color:var(--accent);">/obsidian/sync/</a> — <span lang="ja" data-lang="ja">同期方法4種の比較。Standard/Plusのバージョン履歴引用元</span><span lang="en" data-lang="en">Comparison of four sync methods; source of the Standard/Plus retention citation</span></li>
+    <li><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="reference" href="https://apps.apple.com/jp/app/id6758438948" target="_blank" rel="noopener" style="color:var(--accent);">Obsidian連携シンプルメモ — App Store</a> — <span lang="ja" data-lang="ja">App Storeのダウンロードページ</span><span lang="en" data-lang="en">App Store download page</span></li>
+  </ul>
+  </div>
+</section>
+
+<!-- SEO: Auto-generated related content links -->
+  <!-- One named next step — scripts/add-next-step.py, docs/SEO_AIO_PLAN_2026-08.md §4 P1-1.
+       Exactly one destination per page. -->
+  <aside class="next-step" style="margin:3rem auto 0;max-width:800px;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;">
+      <span style="display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;">
+        <span lang="ja" data-lang="ja">次に読む</span><span lang="en" data-lang="en">Read next</span>
+      </span>
+      <span style="display:block;font-size:1.05rem;font-weight:700;line-height:1.6;margin-bottom:.3rem;">
+        <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
+      </span>
+      <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
+        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+      </span>
+    </a>
+  </aside>
+
+<section class="related-links" style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border,rgba(100,160,220,0.10));">
+  <div class="container">
+  <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">
+    <span lang="ja" data-lang="ja">関連コンテンツ</span><span lang="en" data-lang="en">Related content</span>
+  </h3>
+  <ul style="list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+    <li><a href="/methods/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">メソッド一覧</span><span lang="en" data-lang="en">Methods</span></a></li>
+    <li><a href="/use-cases/journaling/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ジャーナリング</span><span lang="en" data-lang="en">Journaling</span></a></li>
+    <li><a href="/blog/" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">ブログ記事一覧</span><span lang="en" data-lang="en">Blog</span></a></li>
+    <li><a href="/faq" style="display:inline-flex;align-items:center;padding:8px 16px;font-size:.875rem;color:var(--accent,#6ab4ff);border:1px solid var(--border-highlight,rgba(100,180,255,0.22));border-radius:8px;text-decoration:none;min-height:48px;transition:all .25s ease;"><span lang="ja" data-lang="ja">よくあるご質問</span><span lang="en" data-lang="en">FAQ</span></a></li>
+  </ul>
+  </div>
+</section>
+</main>
+
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span lang="ja" data-lang="ja">ダウンロード</span><span lang="en" data-lang="en">Download</span></a>
+        <a href="/" class="footer__link"><span lang="ja" data-lang="ja">ホーム</span><span lang="en" data-lang="en">Home</span></a>
+        <a href="/apple-watch/" class="footer__link"><span lang="ja" data-lang="ja">Apple Watch対応</span><span lang="en" data-lang="en">Apple Watch</span></a>
+        <a href="/obsidian/" class="footer__link"><span lang="ja" data-lang="ja">Obsidian連携</span><span lang="en" data-lang="en">Obsidian</span></a>
+        <a href="/use-cases/" class="footer__link"><span lang="ja" data-lang="ja">使い方</span><span lang="en" data-lang="en">Use cases</span></a>
+        <a href="/guides/" class="footer__link"><span lang="ja" data-lang="ja">設定ガイド</span><span lang="en" data-lang="en">Guides</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span lang="ja" data-lang="ja">メモ→メール</span><span lang="en" data-lang="en">Note to email</span></a>
+        <a href="/vs/" class="footer__link"><span lang="ja" data-lang="ja">比較</span><span lang="en" data-lang="en">Compare</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/roadmap/" class="footer__link"><span lang="ja" data-lang="ja">公開ロードマップ</span><span lang="en" data-lang="en">Public roadmap</span></a>
+        <a href="/devlog/" class="footer__link"><span lang="ja" data-lang="ja">開発記録</span><span lang="en" data-lang="en">Dev log</span></a>
+        <a href="/about/" class="footer__link"><span lang="ja" data-lang="ja">開発者について</span><span lang="en" data-lang="en">About the developer</span></a>
+        <a href="/faq" class="footer__link"><span lang="ja" data-lang="ja">FAQ</span><span lang="en" data-lang="en">FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span lang="ja" data-lang="ja">プライバシー</span><span lang="en" data-lang="en">Privacy</span></a>
+        <a href="/contact" class="footer__link"><span lang="ja" data-lang="ja">お問い合わせ</span><span lang="en" data-lang="en">Contact</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script src="/js/lang.js?v=25811b2b9a" defer></script>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+</body>
+</html>
