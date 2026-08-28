@@ -255,6 +255,12 @@
       "why": "**投稿前の文面。**公開する前の下書きを外から読める場所に置かない（pr-claims.json と同じ理由）",
       "ok_in_public_repo": "ok"
     },
+    "routine-runs.json": {
+      "served_by_site": false,
+      "why": "**副系の routine 一覧と発火記録の写し。**routine の名前・cron・停止の理由が並ぶので、何をいつ自動で回しているかがそのまま読める。サイトが参照しないので配信しない",
+      "ok_in_public_repo": "ok",
+      "$ok_note": "リポジトリは公開だが、**中身は cron と発火時刻と状態だけ**でセッションの本文は入らない（そこは元から外から読めない）。プロンプトも写していない"
+    },
     "rollout-gate-pin.json": {
       "served_by_site": false,
       "why": "実行側（非公開）が留めているゲート指紋の写し。**中身は公開ファイルのハッシュだけ**で秘密は無いが、サイトが参照しないので配信しない（review-gate-pin.json と同じ扱い）",
