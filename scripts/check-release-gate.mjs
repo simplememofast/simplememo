@@ -385,6 +385,12 @@ function selftest() {
 
 // ============================================================
 
+// **import されたときに走らせない。**export しているものを import した側が
+// `--check` を持っていると、ここが `process.exit()` を呼んで
+// **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
+// 検査は scripts/check-module-entry.mjs。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 const args = process.argv.slice(2);
 if (args.includes('--selftest')) {
   // **run() は失敗件数を返す。**真偽で読むと、0件失敗のときに exit 1 になる
@@ -413,4 +419,5 @@ if (args.includes('--selftest')) {
     for (const x of problems) console.log(`  - ${x}`);
   }
   if (args.includes('--check')) process.exit(problems.length ? 1 : 0);
+}
 }

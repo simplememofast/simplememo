@@ -316,6 +316,12 @@
       "broke": "why 欠落／fallback 欠落／fallback が model と同じ／未知モデル の4通りで落ちることを観測"
     },
     {
+      "script": "scripts/check-module-entry.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-28",
+      "broke": "実リポジトリの8本（check-release-gate / preflight / check-benchmark / check-content-graph / check-css-version / check-internal-redirects / check-script-tags / generate-qr-codes）を直す前は「実リポジトリが通る」が落ちた。実物 check-pr-claims.mjs からガードを抜いた複製で「壊すと落ちる」を確認。isMain ブロックの中身を数えるようにすると『中の process.exit は数えない』が落ち、走査ディレクトリを空にすると『走査が空でない』が落ちる（0件走査で緑になる形を止めている）"
+    },
+    {
       "script": "scripts/check-monitoring.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",

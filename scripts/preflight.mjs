@@ -71,6 +71,12 @@ export function extractCommands(yamlText) {
   });
 }
 
+// **import されたときに走らせない。**export しているものを import した側が
+// `--check` を持っていると、ここが `process.exit()` を呼んで
+// **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
+// 検査は scripts/check-module-entry.mjs。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 const argv = process.argv.slice(2);
 const only = (() => {
   const i = argv.indexOf('--only');
@@ -121,3 +127,4 @@ if (failed.length) {
   console.log('分類を持つと、本当に落ちたものがそこに紛れる。');
 }
 process.exit(failed.length ? 1 : 0);
+}

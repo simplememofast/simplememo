@@ -220,6 +220,12 @@ const tally = (items) => {
 };
 
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
+// **import されたときに走らせない。**export しているものを import した側が
+// `--check` を持っていると、ここが `process.exit()` を呼んで
+// **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
+// 検査は scripts/check-module-entry.mjs。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 if (process.argv.includes("--selftest")) {
   const SCENARIOS = [
     ["**抽出が0件なら落ちる**（2026-08-11 と 08-20 に実際に起きた形）", () => {
@@ -425,4 +431,5 @@ for (const [kind, floor] of EXTRACTION_FLOORS) {
 console.log("  下限を置かない種別（実測が一桁で、0 を異常と断定できない）:");
 for (const [kind] of UNFLOORED) {
   console.log(`    ${String(census.get(kind) ?? 0).padStart(6)}  ${kind}`);
+}
 }
