@@ -101,7 +101,14 @@ export const REQUIRED = [
   { key: 'health.sessions', gate: 'release', source: 'asc', why: 'クラッシュ率の母数（App Sessions）' },
   { key: 'health.crash_free_pct', gate: 'release', source: 'asc', why: '**いま出ている版**のクラッシュ率（App Crashes ÷ Sessions）' },
   { key: 'health.baseline_pct', gate: 'release', source: 'asc', why: '比較するベースライン（同上の過去分）' },
-  { key: 'guard.last_kill_at', gate: 'release', source: 'api', why: '直近の kill（無いなら null と書く）' },
+  // **隣の日次収集はこれを集めない（2026-08-28 決定）。**値は simplememo-api の
+  // `/admin/flags` にあり実装済みだが、呼ぶには `ADMIN_API_KEY` が要る。
+  // **本番の管理鍵を、日次の可視化のためだけに ios の CI へ広げない**と決めた。
+  // したがって `data/appstore/release-materials.json` は 20/21 が上限で、
+  // **この1件は「送る側」が自分で集める。**
+  // 送る側を書くときに最初に要るのがこれ ——「materials 20/21 だから未完成」
+  // ではなく、**設計どおり**である。
+  { key: 'guard.last_kill_at', gate: 'release', source: 'api', why: '直近の kill（無いなら null と書く）— **送る側が集める**' },
 ];
 
 /** `a.b.c` を辿る。**無い鍵は undefined**（0 や null で埋めない）。 */
