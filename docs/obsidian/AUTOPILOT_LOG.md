@@ -2299,3 +2299,68 @@ main への push で走るが、このセッションにはコミット単位の
 
 **運用への教訓: cron しか触らない変更ほど、この version を上げる理由が強い。**
 公開応答が動かない変更は、デプロイの成否が観測できないまま「たぶん出た」で終わる。
+
+## 2026-08-28（再試行・ccr-0920） — レーンE。C07 `/obsidian/sync/official-sync/` を出荷。キューの evidence が出典不明だったので訂正した
+
+### §0 冪等性・占有
+
+(a)〜(e) すべて偽（当日ブランチ無し・本番status JSONは前日08-27・当日head PR無し・主系当日run無し）。
+`check-routine-runs.mjs`（本日main合流・PR#693/#694）で**副系A(ccr-0730)・副系B(ccr-0830)のRoutine自体がstopped**と判明——今日これらが動かなかったのは時間帯の重なりではなく停止によるもの。自分のタスク範囲外のため触っていない（open_findings予算4/4内）。
+`claude/obsidian-auto-20260828` を空コミットで占有。非fast-forward拒否なく通過（他経路の同時着手なし）。
+
+### レーンF
+
+`autopilot-selfheal.mjs` --check: 未修理の故障なし。
+
+### レーン選択
+
+前回レーンC実施が前日08-27（`/obsidian/plugins/`）で7日未満のため、Cは優先レーンにならず。coverage-queueのpending先頭 C07 `/obsidian/sync/official-sync/` へ（レーンE）。
+
+### 訂正（このセッションで発見した固有価値）
+
+C07のevidenceは「料金検証済み（Standard $4/Plus $8・年払い）」としていたが、書く前にAUTOPILOT_LOG.md全文とcoverage-queue.json自体をgrepしたところ、**この数字の出典がどこにも存在しなかった**。/obsidian/pricing/はSync基本料金を「$4/user/月（年払い）・$5/月（月払い）」とだけ記載し、Standard/Plusという2プラン名には触れていない。プラン名が実際に登場するのは/obsidian/sync/のVersion HistoryのFAQ（バージョン履歴保持: Standard1か月・Plus12か月、2026-08-26にobsidian.md/help/sync/version-historyから直接取得）だけで、そこにも価格の記載は無い。**「$8」はPublishの価格（別製品）と混同した疑いが強い。**
+
+この数字は採用せず、確認できる唯一の差（バージョン履歴保持期間）だけを根拠に判断フローを組み、Plus単体の価格・保存容量差は「未確認」と本文・FAQ・検証範囲の3箇所に明記した。coverage-queueのC07自体もevidence/unique_valueを訂正内容ごと書き換えてdone化した。
+
+### 固有価値（このセッションの一次情報）
+
+egress実測: obsidian.mdはcurlで403（CONNECT tunnel failed）。前回セッション（08-26/08-27）が到達できたraw.githubusercontent.com/obsidianmd/obsidian-helpも、本日は複数パス（`en/Getting started/Sync your notes across devices.md`等、既知の成功パス含む）すべて404——**同じ経路でも日によって到達性が変わる**ことを実測した。一方raw.githubusercontent.com/obsidianmd/obsidian-releasesは200で到達できた（ホスト単位ではなくリポジトリ単位で挙動が違う可能性）。api.github.comはルートは200だが、設定リポジトリ外へのAPI呼び出しは403（セッションスコープの制限）。
+
+データ鮮度はbq-preflight.mjsが資格情報無しで失敗したため、GitHub MCP `get_job_logs`でseo-daily.yml最新run（08-27 09:30 JST）のExport preflightログを読んで代替: `2026-08-10..2026-08-24`・15/28日蓄積・28日窓到達2026-09-06頃（Runbook §0-4の③の方法）。
+
+### 書かなかったこと
+
+Plus単体の追加料金・保存容量の違い。上記のとおりこの環境からは一次情報に到達できず、既存記事（/obsidian/pricing/・/obsidian/sync/）が確認済みの範囲を超える主張はしていない。
+
+### 配線・付帯変更
+
+- 被リンク2本: `/obsidian/sync/`（reason-cardの説明文＋internal-links）・`/obsidian/pricing/`（Sync FAQの回答内）。**実験中の`/obsidian/`ハブ本体には触れていない**。
+- `data/content-graph.json`: `/obsidian/sync/official-sync/` 登録（cluster `obsidian-sync`・parent `/obsidian/sync/`・siblings icloud, pricing・nextStep `/obsidian/`）。
+- `growth/content/coverage-queue.json`: C07を`done`化。evidence/unique_valueを訂正内容ごと書き換え、`done_note`に理由を記載。
+- `data/distribution-queue.json`: 配信の種を1件追加（§5-5）。「社内の思い込み数字を遡ったら出典が無かった」という角度。`x_post_ja`は全角約107字。
+- OG画像（`obsidian-sync-official.png`）・QR（`qr-obsidian-sync-official-{ja,en}.svg`）を生成。
+- sitemap再生成（`git fetch --unshallow`後）。新URL1件の追加のみ、`/download/`等の副作用なし。
+
+### 検証
+
+Runbook §4 の全チェックをローカルで通過（`seo-check.js` 0 errors 0 warnings・268ファイル／`check-content-graph.mjs` 28 entries OK／`check-css-version`／`check-benchmark`新規CONFLICT・AMBIGUOUSなし／`check-url-normalization` 245 checks／`check-internal-redirects`／`sync_constants --check`／`tag-cta-placements --check`／`check-experiments` overdue 0／`autopilot-budget --check`／`autopilot-runs --check`／`check-authority --check`／`autopilot-selfheal --check`／`autopilot-drill --check` 15シナリオ全通過／`automation-rate --check`／`check-pr-facts --check`／`d-score --check`／`check-public-facts.mjs` distribution-queue.json含め6面OK／`generate_sitemap.py --dry-run`）。QRは44件（新規2件含む）を独立デコードして0 failed、既存42件はバイト同一。
+
+iPhone 390×844 DPR3 実描画QA（Playwright + Chromium）: 水平スクロールなし（scrollWidth=clientWidth=390）・表は`overflow-x:auto`内に収まる・回答ブロック(tip-box) top=807px（ファーストビュー内）・`.cta-qr`はモバイル非表示。JSエラーは外部analytics(ahrefs/GTM)のトンネル失敗2件のみで、既存の`/obsidian/sync/`ページを同条件で対照させても同じ2件が出たため、本ページ固有の問題ではないと確認した。
+
+**Playwrightの環境差**: `npm i --no-save playwright`は前回と同じくrevision 1234（chrome-linux64/chrome-headless-shell-linux64/chrome-headless-shell）を要求し、この環境の`/opt/pw-browsers`は1194（chrome-linux/headless_shell）のまま。前回のsymlink手当てを踏襲して両方張った。**ここに落とし穴が1つあった**: headless shellのバイナリ名自体が`headless_shell`から`chrome-headless-shell`に変わっているため、ディレクトリのsymlinkだけでは足りず、バイナリ名のsymlinkも別途必要だった。**さらに、package.jsonが無いこの環境ではnode_modulesの内容が`npm i --no-save`のたびに総入れ替えになる**（qrcode/jsqrをインストールし直すとplaywrightが消え、playwrightを入れ直すとqrcode/jsqrが消えた）。`/opt/pw-browsers`側のsymlinkはnode_modulesの外にあるため、入れ替え後も再利用できる。
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260828-ccr0920`（route: ccr-0920・outcome: shipped・lane: E・action: new・pr: 696・artifact: /obsidian/sync/official-sync/）を追記。
+- `data/autopilot-status.json` を当日の内容で上書き（cost/runsは`--json`の出力をそのまま埋め込み）。
+- 費用: この経路（ccr-0920）の実費は観測手段が無いため`data/autopilot-cost.json`への追記は行っていない（0ではなく未観測）。
+- PR: #696（draft→ready。auto-mergeの窓を避けるため、記事本体を先にpushしてdraft PRを作り、PR番号を得てから台帳・status JSON・本エントリを追いコミットする手順を踏んだ）。
+- 保留・オーナー依頼: GH_PAT回転（実測手段が無いため未確認のまま繰り越し）。**新規**: 副系A/B(ccr-0730/ccr-0830)のRoutineがstopped——再開の要否はオーナー判断（本セッションでは経緯不明）。
+
+### 次回への申し送り
+
+**キューのevidenceに書かれた数字は無検証のことがある。** 執筆前にAUTOPILOT_LOG.md全文とキュー自体をgrepして出典の有無を確かめること。今回のC07がその実例。
+
+**ネットワーク到達性は同じ経路・同じ日でも一定しない。** obsidian-help（過去に到達実績あり）が本日は404、obsidian-releasesは200だった。一次情報を使う記事は、執筆前に対象ホスト・リポジトリへの到達性を都度実測すること。
+
+coverage-queueのpendingは残り26件。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。
