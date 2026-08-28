@@ -75,9 +75,21 @@ export const REQUIRED = [
   { key: 'review.version', gate: 'release', source: 'asc', why: '公開しようとしている版数' },
   { key: 'review.phased_release', gate: 'release', source: 'asc', why: '段階リリースか（必須）' },
   { key: 'review.approved_at', gate: 'release', source: 'asc', why: '承認後の寝かせ時間の起点' },
-  { key: 'health.sessions', gate: 'release', source: 'asc', why: 'クラッシュ率の母数' },
-  { key: 'health.crash_free_pct', gate: 'release', source: 'asc', why: 'いまのクラッシュ率' },
-  { key: 'health.baseline_pct', gate: 'release', source: 'asc', why: '比較するベースライン' },
+  // health.* は **Analytics レポート**から作る（2026-08-28 に出どころを確認）。
+  // `data/asc/status.json` の matched_reports に `App Sessions Standard/Detailed`
+  // `App Crashes` `App Crashes Expanded` が入っている ——
+  // **この app で取得対象になっていることは確認済み。**
+  // ただし `App Crashes` は同日時点で pending_reports にもあり（「残りは生成待ち」）、
+  // **中身の形はまだ見ていない。**列名や粒度は取れてから確かめること。
+  //
+  // ⚠️ **これは「これから出す版」の健康ではない。**Analytics は日次で数日遅れる
+  // （status.json の waited_days=5）ので、審査通過から6時間で出す判断に、
+  // 新しい版のクラッシュ率は存在しない。ここが見るのは
+  // **いま出ている版の健康**で、「燃えている上に重ねて出さない」ための材料。
+  // 新しい版の数字を入れると、常に材料不足になるか、無関係な数字で通る。
+  { key: 'health.sessions', gate: 'release', source: 'asc', why: 'クラッシュ率の母数（App Sessions）' },
+  { key: 'health.crash_free_pct', gate: 'release', source: 'asc', why: '**いま出ている版**のクラッシュ率（App Crashes ÷ Sessions）' },
+  { key: 'health.baseline_pct', gate: 'release', source: 'asc', why: '比較するベースライン（同上の過去分）' },
   { key: 'guard.last_kill_at', gate: 'release', source: 'api', why: '直近の kill（無いなら null と書く）' },
 ];
 
