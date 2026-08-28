@@ -10,12 +10,32 @@
     "**走ったかどうかについては誤り** —— Routines API の last_run が",
     "status / fired_at / finished_at / session_id を返す。2026-08-28 に確かめた。",
     "",
-    "【読んだ瞬間に3つ見つかった】",
+    "【読んだ瞬間に4つ見つかり、翌日に原因まで届いた】",
     "主系（GitHub Actions）は run を全部列挙できるので記録が完結するが、",
     "副系は**セッションが自分で書いたときだけ行が残る**（autopilot-runs.json の",
     "source:session）。**書かずに死んだ回は、どこにも現れない。**",
     "実際その状態だった —— 副系A/Bが2日以上止まり、週次2本が失敗のまま",
     "次の発火（1週間後）まで誰も気づかない形になっていた。",
+    "",
+    "【週次2本が落ちた原因 — 2026-08-28 に確定した】",
+    "`last_run.session_id` を get_session に渡すと、拒否の理由がそのまま出た。",
+    "マーケデータ週次のセッション（cse_01PEHaBP24CJJU57oMQxQnpd）:",
+    "",
+    "    post_turn_summary.status_detail:",
+    "      \"You've hit your weekly limit · resets 11pm (UTC)\"",
+    "    rate_limit_info: { rateLimitType: \"seven_day\", status: \"rejected\",",
+    "                       resetsAt: 1787612400 = 2026-08-24T23:00Z（月曜） }",
+    "",
+    "**コードの不具合ではない。週次の利用枠を使い切った状態で発火した。**",
+    "2本とも `0 0 * * 1`（月曜 00:00 UTC）で、これは枠のリセット（月曜 23:00 UTC）の",
+    "**23時間前** —— 週のうちで最も枯れている瞬間に、週次の2本を並べて置いていた。",
+    "9秒と12秒で終わったのはそのため（拒否は即返る）。",
+    "",
+    "**対処**: マーケデータ週次を `45 23 * * 1`（リセット直後）へ移した。",
+    "SEO Weekly は `created_via: http_api` でエージェントからは変更できない",
+    "（update_trigger が拒否する）。**オーナー操作としてここに残す。**",
+    "リセット時刻は1回の観測から読んだ推定で、固定の曜日であることは確かめていない。",
+    "外れたらこの検査がまた立てる —— **そこが安全網。**",
     "",
     "【なぜ snapshot なのか】",
     "list_triggers はセッションのMCPツールで、**CIのランナーからは叩けない。**",
@@ -27,12 +47,14 @@
     "見つかった未対応は open_findings に書き、件数の上限を open_budget が持つ。",
     "**新しく止まったものが増えると赤くなる。**直して減らすときは budget も",
     "同じPRで下げる。**上げる方向には動かさない** —— 上げた瞬間、この検査は",
-    "上げる方向には動かさない** —— 上げた瞬間、この検査は現状を追認する表になり、止める力を失う（check-selftests.json と同じ）。",
+    "現状を追認する表になり、止める力を失う（check-selftests.json と同じ）。",
     "",
     "【意図的に止めたものと、黙って止まったものを分ける】",
     "intentional_stops は「止めてよい」と決めたもので、件数に数えない。",
     "**ただし列挙は required** —— 書かずに済ませられるなら、黙って止まったものが",
     "そこに紛れる。健全でない routine は、必ずどちらかの一覧に居ること。",
+    "**「たぶん意図的だろう」で移さない** —— 移すのは判断を下したときだけで、",
+    "その判断と根拠を why に書く（誰かの過去の意図を推測して書かない）。",
     "",
     "【取り直しかた】セッションで `mcp list_triggers` を呼び、応答をファイルへ落として:",
     "    node scripts/check-routine-runs.mjs --sync <その JSON>",
@@ -46,37 +68,25 @@
     "副系のプロンプトには運用の中身がそのまま入っていて、ここが要るのは",
     "「走ったか」だけ。**要らないものを持つと、置き場所の判断が別の問題になる。**"
   ],
-  "observed_at": "2026-08-28T00:36:47Z",
+  "observed_at": "2026-08-28T01:02:18Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 4,
-  "$open_budget": "2026-08-28 の実測（副系A/B の停止 + 週次2本の失敗）。**下げる方向にしか動かさない**",
+  "open_budget": 2,
+  "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**",
   "open_findings": [
-    {
-      "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
-      "what": "stopped",
-      "found_at": "2026-08-28",
-      "why": "**副系A（07:30 JST・ccr-0730）が一時停止のまま。**enabled が立っておらず next_run_at が 2026-08-26T22:32 で止まっている。最後の発火は 08-25T22:33。updated_at が 08-26T06:14 なので、その時に止めたまま戻っていない。**再開するかはオーナー判断**（副系は主系不発時の予備なので、主系が出ているなら止めたままでよいという読みもありうる）"
-    },
-    {
-      "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
-      "what": "stopped",
-      "found_at": "2026-08-28",
-      "why": "**副系B（08:30 JST・ccr-0830）が一時停止のまま。**副系Aと同じ形（next_run_at 2026-08-26T23:34・最後の発火 08-25T23:35・updated_at 08-26T06:21）。2つ同時に止まっているので、意図的な操作である可能性が高い —— **が、記録が無いので確かめられない。**それがこの検査を作った理由"
-    },
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
       "what": "failed",
       "found_at": "2026-08-28",
-      "why": "**SEO Weekly が 2026-08-24 に FAILED のまま。**週次（月曜0時）なので次は 08-31 で、**失敗が1週間気づかれない形。**同じ日に『SimpleMemo マーケデータ 週次スナップショット』も FAILED しており（trig_01QZb1NYgNfpSuot97dZZJpD）、**同時刻の週次が2本とも落ちている**ので共通原因を疑う。原因はセッションの中身を読まないと分からず、そこは依然として外から読めない"
+      "why": "**SEO Weekly が 2026-08-24 に FAILED。原因は確定した** —— 同じ月曜0時台に落ちた『マーケデータ週次』のセッションに `rate_limit_info: {seven_day, rejected}` と \"You've hit your weekly limit\" がそのまま残っていた（$comment 参照）。**残っているのは対処のほう** —— このRoutineは `created_via: http_api` で、エージェントからは cron を変更できない（update_trigger が「Agents can only update routines they created」で拒否）。**オーナーが `0 0 * * 1` → `30 23 * * 1` に変える**（週次枠のリセット直後）。なお**この週の作業自体は落ちていない**: セッション cse_01DVcNLCyxfhTW3yfxPibBa6 は拒否のあと 08-25 に再開されて branch `claude/seo-serp-weekly-2026-08-25` を出しており、トリガの FAILED だけが残っている"
     },
     {
       "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
       "what": "failed",
       "found_at": "2026-08-28",
-      "why": "**『SimpleMemo マーケデータ 週次スナップショット』が 2026-08-24 に FAILED のまま。**SEO Weekly と**同じ日・同じ月曜0時台**に落ちているので共通原因を疑う（0:03 と 0:11）。週次なので次は 08-31。原因はセッションの中身を読まないと分からず、そこは依然として外から読めない"
+      "why": "**『SimpleMemo マーケデータ 週次スナップショット』が 2026-08-24 に FAILED。原因の一次証拠はこのセッション**（cse_01PEHaBP24CJJU57oMQxQnpd）にある —— 週次利用枠の拒否（$comment に文言と数値を引いてある）。**cron は `0 0 * * 1` → `45 23 * * 1` へ移した**（枠のリセット 23:00 UTC の45分後）。次の発火は 2026-08-31T23:45Z。**この行は、その回が SUCCEEDED になるまで残す** —— 移しただけでは直ったことにならない。SEO Weekly と別枠にするため15分ずらしてある"
     }
   ],
   "intentional_stops": [
@@ -84,6 +94,16 @@
       "id": "trig_018EyeYcJiVLFQeAHArMpGtM",
       "found_at": "2026-08-28",
       "why": "**名前に「停止:クラウドでは動作不可→PCで再作成を」と書いてある。**止めた判断が名前に残っている唯一の例で、これが本来の形。他の4件はこれが無かったので、止まっていることに誰も気づかなかった"
+    },
+    {
+      "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
+      "found_at": "2026-08-28",
+      "why": "**副系A（07:30 JST・ccr-0730）。止めたままにする判断を 2026-08-28 にここで下した** —— 08-26T06:14 に誰が何のために止めたかは分からないままで、**それを推測して「意図的だった」と書くのではなく、今あらためて決めた。**根拠2つ: (1) 停止後も空白日はゼロ（08-26 は主系 actions、08-27 は ccr-0920 とオーナー、08-28 は ccr-0920 が SUCCEEDED）。主系＋再試行の2段で足りている。(2) **週次利用枠に実際に当たっている**（open_findings の2件がそれ）。有料セッションを毎日2本戻す方向は、その枠をさらに削って週次を落としやすくする。**戻すならこの2点が変わったとき。**判断が名前にも載るよう、Routine 名を【停止 2026-08-28・意図的】に改名した"
+    },
+    {
+      "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
+      "found_at": "2026-08-28",
+      "why": "**副系B（08:30 JST・ccr-0830）。副系Aと同じ判断・同じ根拠。**副系Bは「主系と副系Aの両方が不発の日」だけ動く3段目なので、Aを止めたままにする以上こちらを単独で戻す意味は無い。**戻すときはAから先に**（名前にもそう書いた）"
     }
   ],
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",
@@ -123,9 +143,9 @@
       "bound_session": false,
       "next_run_at": "2026-08-29T00:20:00Z",
       "last_fired_at": "2026-08-28T00:20:23.551065Z",
-      "last_run_status": "PENDING",
+      "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-08-28T00:20:23.531357768Z",
-      "last_run_finished_at": null
+      "last_run_finished_at": "2026-08-28T00:45:40.115601Z"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -156,11 +176,11 @@
     {
       "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
       "name": "SimpleMemo マーケデータ 週次スナップショット",
-      "cron_expression": "0 0 * * 1",
+      "cron_expression": "45 23 * * 1",
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-31T00:08:31.461757848Z",
+      "next_run_at": "2026-08-31T23:45:00Z",
       "last_fired_at": "2026-08-24T00:11:04.093475Z",
       "last_run_status": "FAILED",
       "last_run_fired_at": "2026-08-24T00:11:04.060200853Z",
@@ -168,7 +188,7 @@
     },
     {
       "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
-      "name": "Obsidianオートパイロット副系B v3（08:30 JST・ccr-0830・主系/副系A不発時のみ・無音で終わらない）",
+      "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系B v3（08:30 JST・ccr-0830）— 副系Aと同じ判断。戻すときはAから先に",
       "cron_expression": "30 23 * * *",
       "run_once_at": null,
       "enabled": false,
@@ -181,7 +201,7 @@
     },
     {
       "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
-      "name": "Obsidianオートパイロット副系A v3（07:30 JST・ccr-0730・主系不発時のみ・配信の種）",
+      "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系A v3（07:30 JST・ccr-0730）— 主系+再試行で空白日ゼロ／週次利用上限に実際に当たっているため有料の副系は戻さない",
       "cron_expression": "30 22 * * *",
       "run_once_at": null,
       "enabled": false,

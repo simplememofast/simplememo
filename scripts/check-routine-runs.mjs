@@ -210,11 +210,11 @@ function selftest() {
       const { problems } = V(real);
       assert(problems.length === 0, problems.join(' / '));
     }],
-    ['**実データで4件が未対応として立っている**（緑＝異常が無い、ではない）', () => {
+    ['**実データで5件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
       assert(unhealthy.length === 5, `健全でないのは5件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 4, '未対応は4件');
-      assert(real.intentional_stops.length === 1, '意図的な停止は1件');
+      assert(real.open_findings.length === 2, '未対応は2件（週次2本）');
+      assert(real.intentional_stops.length === 3, '意図的な停止は3件（Reddit監視・副系A・副系B）');
     }],
 
     // --- 黙って止まったものを通さない -----------------------------------
@@ -236,9 +236,14 @@ function selftest() {
       })).problems;
       assert(p.some((x) => x.includes('overdue')), p.join(' / '));
     }],
+    // **実データに PENDING が居ることを前提にしない。**居るかどうかは
+    // 取り直した瞬間に走っている回があるかで決まり、こちらの都合では決まらない。
+    // 検べたいのは diagnose の規則なので、行はここで組む。
     ['走っている最中（PENDING）は健全に数える', () => {
-      const r = real.routines.find((x) => x.last_run_status === 'PENDING');
-      assert(r, 'PENDING の実データが要る');
+      const r = {
+        id: 'x', name: 'x', enabled: true, cron_expression: '0 0 * * *',
+        next_run_at: '2026-08-29T00:00:00Z', last_run_status: 'PENDING',
+      };
       assert(diagnose(r, { now: NOW }) === null, 'PENDING を異常にしている');
     }],
     ['cron があるのに一度も走っていなければ立つ', () => {
@@ -281,11 +286,11 @@ function selftest() {
 
     // --- ラチェット -----------------------------------------------------
     ['**上限を超えたら落とす**（上限を上げて通さない）', () => {
-      const p = V(broken(real, (d) => { d.open_budget = 3; })).problems;
-      assert(p.some((x) => x.includes('上限 3 を超えた')), p.join(' / '));
+      const p = V(broken(real, (d) => { d.open_budget = 1; })).problems;
+      assert(p.some((x) => x.includes('上限 1 を超えた')), p.join(' / '));
     }],
     ['**上限を先に上げておくのも落とす**（余った枠は次の停止を黙って飲む）', () => {
-      const p = V(broken(real, (d) => { d.open_budget = 5; })).problems;
+      const p = V(broken(real, (d) => { d.open_budget = 3; })).problems;
       assert(p.some((x) => x.includes('枠が余っている')), p.join(' / '));
     }],
     ['直して減らしたら、上限も同じPRで下げさせる', () => {
