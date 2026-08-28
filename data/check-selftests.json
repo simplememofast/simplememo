@@ -494,6 +494,12 @@
       "state": "demonstrated",
       "at": "2026-08-26",
       "broke": "壊し5通りを実測。**script/style を落とさない**と「script の中身を本文に数えている」で落ちる（殻を弾く仕掛けを自分で無効にする形）／**取得失敗で指紋を null にする**と「取得失敗で台帳の指紋を消している」／**改定で判定を戻さない**と4件／**not_applicable まで戻す**と2件。**1つは最初、落ちなかった** —— 長さの下限を 0 にしても、殻の検体に規約らしい語が無く語の判定が代わりに弾いていた（テストが正しい理由で通っていた）。現実の殻は <title>Terms of Service</title> を持つので looksLikeTerms(\"Terms of Service\") を検体に足し、下限を 0 にすると落ちることを確認した"
+    },
+    {
+      "script": "scripts/check-module-entry.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-28",
+      "broke": "実リポジトリの8本（check-release-gate / preflight / check-benchmark / check-content-graph / check-css-version / check-internal-redirects / check-script-tags / generate-qr-codes）を直す前は「実リポジトリが通る」が落ちた。実物 check-pr-claims.mjs からガードを抜いた複製で「壊すと落ちる」を確認。isMain ブロックの中身を数えるようにすると『中の process.exit は数えない』が落ち、走査ディレクトリを空にすると『走査が空でない』が落ちる（0件走査で緑になる形を止めている）"
     }
   ],
   "$baseline": "2026-08-26 の実測。**通すために上げた値ではない。**以後この数は下げる方向にしか動かさない —— 上げた瞬間に、この台帳は現状を追認する表になり、止める力を失う。余裕（slack）も持たせない。初回 none=41 → 同日に none=0、続けて selftest_only=0 まで下げた。**両方 0 は「CI 配線 58 本すべてについて、壊して落ちるのを実際に見た」という意味であって、「検査が正しい」ではない。**見たのは『壊れたら気づく』ことだけで、『見るべきものを見ている』かは別問題。次に測るならそこ。",

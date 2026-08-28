@@ -146,6 +146,12 @@ const SCENARIOS = [
   }],
 ];
 
+// **import されたときに走らせない。**export しているものを import した側が
+// `--check` を持っていると、ここが `process.exit()` を呼んで
+// **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
+// 検査は scripts/check-module-entry.mjs。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 if (process.argv.includes('--selftest')) {
   let failed = 0;
   for (const [name, fn] of SCENARIOS) {
@@ -184,3 +190,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 console.log(`content-graph: ${entries.length} entries OK (URL/parent/siblings/nextStep/vocabulary/relevance/coverage)`);
+}

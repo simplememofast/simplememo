@@ -203,6 +203,12 @@ async function check() {
   return bad;
 }
 
+// **import されたときに走らせない。**export しているものを import した側が
+// `--check` を持っていると、ここが `process.exit()` を呼んで
+// **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
+// 検査は scripts/check-module-entry.mjs。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 const mode = process.argv.includes('--check') ? 'check' : 'generate';
 try {
   if (mode === 'generate') { await generate(); console.log(`\n${targets.length} code(s) written. Now run with --check.`); }
@@ -213,4 +219,5 @@ try {
     process.exit(2);
   }
   throw e;
+}
 }

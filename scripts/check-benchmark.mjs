@@ -183,6 +183,12 @@ export function scanText(text, app, ourValues = OURS_VALUES) {
 // **ここに本番の件数の下限は置かない。**内部リンクの検査とは違って、
 // 0件はこの検査の目標状態（全ページが実測に揃った状態）だから。
 // 代わりに、合成した入力で matcher が生きていることを見る。
+// **import されたときに走らせない。**export しているものを import した側が
+// `--check` を持っていると、ここが `process.exit()` を呼んで
+// **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
+// 検査は scripts/check-module-entry.mjs。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
 if (process.argv.includes('--selftest')) {
   const APP = (name, focus, ready, first_char) => ({ name, focus, ready, first_char });
   const NOTION = APP('Notion', 2.5, 2.8, 3.3);
@@ -374,3 +380,4 @@ console.log(`  ${B.methodologyPage} documents the protocol. Update data/benchmar
 // Report-only on purpose: see the header. Exit 0 so CI surfaces this without
 // blocking unrelated work on a question only a device can answer.
 process.exit(0);
+}

@@ -223,6 +223,16 @@ jobs:
           node scripts/check-guard-shapes.mjs --selftest
           node scripts/check-guard-shapes.mjs --check
 
+      # 【export したものが、import で勝手に走らないか】
+      # 2026-08-28、check-release-gate.mjs が evaluateSubmission を export しながら
+      # トップレベルで process.exit() を呼んでいた。**import した側が `--check` を
+      # 持っていると、呼び出し側のコードを1行も走らせずに exit 0 する** ——
+      # 呼び出し側が検査なら、何も見ずに緑になる。8本が同じ形だった。
+      - name: Modules that run when imported
+        run: |
+          node scripts/check-module-entry.mjs --selftest
+          node scripts/check-module-entry.mjs --check
+
       # 【書き出す側が、まだ動くか】CI は各検査の --selftest と --check を回すが、
       # **--write は回さない。**生成器は「書いた結果」だけが検査されていて、
       # 「書く動作そのもの」は誰も動かしていなかった。2026-08-26 に2件出た:
