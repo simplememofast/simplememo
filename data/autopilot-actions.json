@@ -646,24 +646,27 @@
     },
     {
       "id": "act-subscription-age-bucket-off-by-one",
-      "title": "SubscriptionTelemetry の経過日数バケットが境界で1日ずれる（simplememo-ios）",
-      "detail": "**2026-08-28、FastUnit を PR Check に載せた初回の実行で出た実バグ。**\n\n```\nSimpleMemoTests/SubscriptionTelemetryTests.swift:51\nXCTAssertEqual failed: (\"Optional(\\\"d0_7\\\")\") is not equal to (\"Optional(\\\"d8_30\\\")\")\n  - 経過 8 日は d8_30 に入ること\n```\n\n**なぜ効くか。** `d31_60` は月額リテンションが 88% → 50% に落ちる区間（ASC実測 2026-08-04）で、L-2 が測ろうとしている崖そのもの。**境界が1日ずれたまま集計すると、崖の位置を1日ずらして読む。**\n\n**分かっていること。** 分岐の表（`case 8...30: \"d8_30\"`）は正しい。`QATestCase` は `continueAfterFailure = false` なので (0,7) は通り (8) が最初の失敗 —— 壊れているのは `days` の導出側で、8日前に作った日付から 7 が出ている。`Build - iOS` は同じビルドで SUCCEEDED。\n\n**仮説（未検証）。** `SubscriptionTelemetry` は開始日を UserDefaults に `Double` で往復させる。`Date` の内部は参照日基準（≈7.8e8）で `timeIntervalSince1970` は ≈1.787e9 —— 指数が変わるので **この往復は厳密には可逆でない**（誤差サブマイクロ秒）。復元後がわずかに後ろへずれると経過が8日に届かず `dateComponents([.day])` が 7 を返す。観測と一致する。\n\n**確かめていない。**このセッションの環境に Swift ツールチェーンが無く実行できない。**辻褄が合うことを原因の証明に使わない。**\n\n**直す向き（仮説が正しければ）。** 保存または読み出しで **floor** する。`start` を切り捨てると復元後は必ず真の開始日以前になり、経過は8日以上になって `.day` が 8 を返す。\n\n⚠️ **`rounded()` では直らない。**四捨五入は 0.5 秒まで**後ろにもずれる**ので、境界の失敗が「毎回」から「入力次第」に変わるだけで、悪化しうる。（PR #240 のコメントで最初 `rounded()` を挙げたのは誤り。同PRで訂正済み）\n\n**最初にやるべきは原因の確定。** `XCTAssertEqual` の前に `dateComponents` の実測値を出す1行を足し、7 が出ることを見てから直す。",
+      "title": "SubscriptionTelemetry の経過日数が保存の往復で1日減る（simplememo-ios・原因確定・修正push済み）",
+      "detail": "**2026-08-28、FastUnit を PR Check に載せた初回の実行で出た実バグ。**\n\n```\nSimpleMemoTests/SubscriptionTelemetryTests.swift:51\nXCTAssertEqual failed: (\"Optional(\\\"d0_7\\\")\") is not equal to (\"Optional(\\\"d8_30\\\")\")\n  - 経過 8 日は d8_30 に入ること\n```\n\n落ちる境界は実行ごとに変わった（8日 → 31日と61日 → …）。**この非決定性が手がかりだった。**\n\n**原因（確定）。** epoch 変換で仮数が1ビット落ちる。`Date` の内部表現は 2001 年基準で 2026年なら ≈8.1e8 秒、2進の指数は `[2^29, 2^30)` なので 1 刻み（ULP）は `2^-23` ≒ **119.2 ns**。`UserDefaults` へ書く `timeIntervalSince1970` は ≈1.79e9 で `[2^30, 2^31)` に入り、**指数が1つ上がって** 1 刻みが `2^-22` ≒ **238.4 ns** になる。目盛りが半分に粗くなるので 往復で1ビット落ち、繰り上がる側だと復元後の開始日が **119.2 ns 後ろへ動く**。`dateComponents([.day])` は切り捨てなので、ちょうど N 日前が **N-1 日**になる。\n\n繰り上がる確率は約 **25%**（このセッションの数値実験 24.5% / オーナー側の独立検証 24.9%）。境界テストは `makePremium` が**ケースごとに `Date()` を取り直す**ので 4 つの下限（8 / 31 / 61 / 91 日）が独立に判定され、少なくとも1つ落ちる確率は `1 - 0.75⁴` ≒ **68%**（独立検証の実測 68.2%）。**どれが落ちるかが毎回変わる**のはそのため。`UserDefaults` は容疑者ではない（`Double` 2万件の往復で不一致 0 件）。\n\n**⚠️ この台帳がここに書いていた「なぜ効くか」は誤りだった。**\n\n> 境界が1日ずれたまま集計すると、崖の位置を1日ずらして読む。\n\n**成り立たない。**ずれは 119.2 ns で、本番の `now` は開始日ちょうど N 日後ではないため、バケットが変わる確率は 1 評価あたり ≒**1.4e-12**（任意経過 30 万件のシミュレーションで 誤バケット 0 件）。**テスト専用の失敗**で、実費は「PR が赤い」ことと Xcode Cloud の分数だけ。指摘はオーナー側の独立検証による。**症状が深刻に見えることを、影響が大きい証拠に使った。**\n\n唯一の例外は `Calendar.startOfDay` による正規化が経路にある場合だが、**リポジトリ全体で `startOfDay` は 2 か所**（`SubscriptionManager` の無料枠カウンタ `remainingSendsToday` / `incrementSendCount`）で、**バケットの経路には 1 つも無い**（grep 実施済み）。\n\n**直し方（2026-08-28 に push 済み）。** `record` で保存する前と `startDate` で読む時の**両方**で秒未満を切り捨てる（`.rounded(.down)`）。整数秒は `Double` で厳密に表せるので往復誤差が消える。読み側にも入れているのは、**修正前のビルドが書いた値が既に端末に残っている**ため —— 購読中の端末は再課金まで `record` を通らない。\n\n| 直し方 | 1日ずれる確率 | 境界テストが赤くなる確率 |\n|---|---:|---:|\n| 修正前 | 22.5% | 68.2% |\n| `.rounded()` | 48.6% | — **悪化する** |\n| **`.rounded(.down)`（採用）** | **0.000%** | **0.00%** |\n\n⚠️ **`rounded()` では直らない。**四捨五入は 0.5 秒まで**後ろにもずれる**ので、上表のとおり現状より悪くなる。（PR #240 のコメントで最初 `rounded()` を挙げたのは誤り。同PRで訂正済み）\n\n🚫 **`case 8...30` を `8...31` のようにずらして直さないこと。**落ちた境界に合わせて範囲を動かすと、動く的を追うことになり、正しかった境界を壊す。分岐の表は最初から正しい。\n\n回帰テストを2本足した。往復で開始日が後ろへ動かないこと（内部表現の 1 刻みずつ 256 点）と、修正前の書き方（`nextUp`）で書かれた値でも 31 日が保てること。**どちらも修正前なら必ず落ちる**ことを数値実験で確認済み（300/300・3000/3000）。",
       "source": "manual",
       "domain": "② バグ修正",
       "touches": [],
       "outside_repo": true,
-      "force_owner": "human",
-      "force_owner_why": "Swift のコンパイル・実行に Mac が要る（`scripts/qa/preflight.sh --fast`）。この環境にツールチェーンが無く、**推測でSwiftを書き換えるのは直したことにならない**",
+      "force_owner": null,
+      "force_owner_why": "2026-08-28 に外した。**「Mac が要る」はもう成り立たない** —— FastUnit が PR Check に載ったので、Swift の実行は Xcode Cloud が持っている。「推測でSwiftを書き換えるのは直したことにならない」も、機構が2つの独立な数値実験で確定し、修正前後の両方向を確認したので当たらない。**確定していないのは実機での実行結果だけ**で、それは PR Check が返す",
       "auto": null,
       "close_check": {
         "kind": "manual",
-        "params": {}
+        "params": {
+          "condition": "simplememofast/simplememo-ios の PR で **Test - SimpleMemoQA（FastUnit）が SUCCEEDED** になること",
+          "note": "**「修正をpushした」では閉じない。**機構は数値で確定したが、Swift の実行結果はまだ見ていない。確認は `xcode-cloud-diagnose`（GET のみ・ubuntu）で読む"
+        }
       },
       "state": "open",
       "created_jst": "2026-08-28",
       "last_seen_jst": "2026-08-28",
       "closed_jst": null,
-      "evidence": "一次証拠: xcode-cloud-diagnose run 33133151277（GET のみ）。ビルド 0ac7c876-e3c6-4f1f-86c8-116a14eb0852 の issues。PR simplememofast/simplememo-ios#240 のコメントに全文。**FastUnit は PR Check に載ったままにしてある** —— 外すと「テストが落ちたので外した」になる"
+      "evidence": "一次証拠: xcode-cloud-diagnose run 33133151277（GET のみ）。ビルド 0ac7c876-e3c6-4f1f-86c8-116a14eb0852 の issues。PR simplememofast/simplememo-ios#240 のコメントに全文。**FastUnit は PR Check に載ったままにしてある** —— 外すと「テストが落ちたので外した」になる。修正は simplememo-ios の 2a6d24e。機構の再現は数値実験（このセッション 24.5% / 独立検証 24.9%）で、**Swift での実行はまだ**"
     }
   ]
 }
