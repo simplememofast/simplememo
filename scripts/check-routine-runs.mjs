@@ -49,14 +49,29 @@ export const OVERDUE_GRACE_HOURS = 6;
  * 1つの routine の健全性。**純関数。**
  * 返すのは `null`（健全）か、`what`（何が起きているか）。
  */
-export function diagnose(r, { now }) {
+export function diagnose(r, { now, observedAt = now }) {
   if (!r || typeof r !== 'object') return 'malformed';
   if (r.enabled !== true) return 'stopped';
   if (r.last_run_status === 'FAILED') return 'failed';
   // 予定を過ぎているのに発火していない。**PENDING は走っている最中なので健全。**
+  //
+  // [2026-08-28] **基準を壁時計から写しの観測時刻へ移した。**
+  // ここは `now - due` を見ていたが、`last_fired_at` を持っているのは**写し**であって
+  // 現在ではない。**写しより後に発火予定のものは、その写しからは判定しようがない。**
+  //
+  // 実際に踏んだ形（このコミットのきっかけ）:
+  //   写しの observed_at … 2026-08-28T04:45:16Z
+  //   「#244 のマージ待ち確認」の next_run_at … 2026-08-28T05:12:00Z  ← **27分あと**
+  // 写しの時点では発火時刻すら来ていないので `last_fired_at: null` は正常。
+  // それを壁時計（16:32Z）と比べて **overdue と呼び、CIを赤にしていた。**
+  // 写しを取り直すまで永久に赤いので、**直しようのない赤**だった。
+  //
+  // **「発火しなかった」と「発火したか写しからは分からない」は違う。**
+  // 後者は写しの鮮度の問題で、それは `max_snapshot_age_days` が別に見ている ——
+  // **行ごとの偽の overdue で言うことではない。**
   if (typeof r.next_run_at === 'string') {
     const due = Date.parse(r.next_run_at);
-    if (Number.isFinite(due) && now - due > OVERDUE_GRACE_HOURS * 3600 * 1000) return 'overdue';
+    if (Number.isFinite(due) && observedAt - due > OVERDUE_GRACE_HOURS * 3600 * 1000) return 'overdue';
   }
   // 一度も走っていない。**一度だけの routine（run_once_at）は、まだ発火して
   // いないのが正常。**逆に cron の有無で分けると、cron_expression が欠けた行で
@@ -111,9 +126,14 @@ export function validate(doc, { now = Date.now() } = {}) {
   for (const id of both) problems.push(`${id} が open_findings と intentional_stops の両方に居る`);
 
   // --- 実体との突き合わせ ---
+  // **判定の基準は写しの観測時刻。**`last_fired_at` を持っているのは写しなので、
+  // 写しより後の予定について「発火していない」とは言えない（diagnose の由来を参照）。
+  // 読めない observed_at は上で既に problems に入っているので、ここでは now へ落とす。
+  const observedAt = Date.parse(doc.observed_at ?? '');
+  const ref = Number.isFinite(observedAt) ? observedAt : now;
   const unhealthy = [];
   for (const r of doc.routines) {
-    const what = diagnose(r, { now });
+    const what = diagnose(r, { now, observedAt: ref });
     if (!what) continue;
     unhealthy.push({ id: r.id, name: r.name, what });
     if (!openIds.has(r.id) && !intentionalIds.has(r.id)) {
@@ -239,6 +259,37 @@ function selftest() {
     // **実データに PENDING が居ることを前提にしない。**居るかどうかは
     // 取り直した瞬間に走っている回があるかで決まり、こちらの都合では決まらない。
     // 検べたいのは diagnose の規則なので、行はここで組む。
+    // [2026-08-28] **写しより後の予定を overdue と呼ばない。**
+    // これを踏んで CI が赤くなった。写しは 04:45:16Z、予定は 05:12:00Z で27分あと。
+    // 写しの時点では発火時刻すら来ていないのに、壁時計（16:32Z）と比べて
+    // 「止まっている」と言っていた。**写しを取り直すまで永久に赤い＝直しようがない赤。**
+    ['**写しより後に発火予定のものを overdue にしない**（写しからは判定しようがない）', () => {
+      const r = {
+        id: 'x', name: 'x', enabled: true, run_once_at: '2026-08-28T05:12:00Z',
+        next_run_at: '2026-08-28T05:12:00Z', last_fired_at: null, last_run_status: null,
+      };
+      const observedAt = Date.parse('2026-08-28T04:45:16Z');
+      assert(diagnose(r, { now: Date.parse('2026-08-28T16:32:00Z'), observedAt }) === null,
+        '**写しが知りようのないことを「止まっている」と言った**');
+    }],
+    ['**写しより前の予定なら overdue になる**（甘くして見逃さない）', () => {
+      const r = {
+        id: 'x', name: 'x', enabled: true, cron_expression: '0 0 * * *',
+        next_run_at: '2026-08-27T00:00:00Z', last_run_status: 'SUCCEEDED',
+      };
+      const observedAt = Date.parse('2026-08-28T04:45:16Z');
+      assert(diagnose(r, { now: observedAt, observedAt }) === 'overdue',
+        '写しより前に予定を過ぎたものを見逃した — **常に null を返す検査は何も見ていない**');
+    }],
+    // **この検査は一度、素通りしていた。**`V` の now は 2026-08-28T00:30:00Z 固定で、
+    // 実データの予定（05:12Z）より前。だから壁時計に戻しても overdue にならず、
+    // **欠陥を戻しても緑のままだった。**now を予定より後に置いて初めて効く。
+    ['**validate が写しの観測時刻で判定する**（壁時計に戻したら落ちる）', () => {
+      const LATER = Date.parse('2026-08-28T16:32:00Z');   // 予定より後・写しより後
+      const p = validate(real, { now: LATER }).problems;
+      assert(!p.some((x) => x.includes('#244')),
+        `**壁時計で判定している。**写しより後の予定を「止まっている」と呼んだ: ${p.join(' / ')}`);
+    }],
     ['走っている最中（PENDING）は健全に数える', () => {
       const r = {
         id: 'x', name: 'x', enabled: true, cron_expression: '0 0 * * *',
@@ -383,8 +434,12 @@ if (isMain) {
 
   const age = ((Date.now() - Date.parse(doc.observed_at)) / DAY).toFixed(1);
   console.log(`副系の実行記録 — routine ${doc.routines.length} 本（写しは ${age} 日前）\n`);
+  // **表と検査で違う基準を使わない。**片方だけ壁時計で見ると、
+  // 一覧に overdue と出ているのに検査は黙る（またはその逆）が起きる。
+  const shownAt = Date.parse(doc.observed_at ?? '');
   for (const r of doc.routines) {
-    const what = diagnose(r, { now: Date.now() });
+    const what = diagnose(r, { now: Date.now(),
+      observedAt: Number.isFinite(shownAt) ? shownAt : Date.now() });
     const mark = what ? `**${what}**` : 'ok';
     console.log(`  ${mark.padEnd(14)} ${(r.name ?? '').slice(0, 40)}`);
   }
