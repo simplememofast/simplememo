@@ -265,6 +265,16 @@
           "why": "定義は変えていない。code-authorship.mjs の headline 突き合わせを「鍵が無ければ落とす」へ直しただけ（正が無いのを合っていると読まない）。率の計算式は同じ"
         }
       ]
+    },
+    {
+      "id": "monetization_relevance",
+      "name": "課金相当性（宣言）",
+      "formula": "URL → 0.2 / 0.5 / 1.0 の3段。基準は「その面の読者が Free の1日3通の天井に当たる使い方をするか」",
+      "source_file": "growth/lib/gsc.mjs",
+      "version": 1,
+      "checksum": "122988b3d2f322b9",
+      "changed_at": "2026-08-28",
+      "why_it_matters": "**businessRelevance がDLと課金を同じ数字で表していた。**Premium が売っているのは機能ではなく送信回数の上限（Free 1日3通 → 無制限・月500円）なので、課金するのは「毎日何度もキャプチャする人」だけ。「メモアプリ 無料」はDLの母数として優秀でも課金には効きにくい、という割れ方をここで表す。**これは実測ではなく宣言。**ct=別のインストール／課金はこのリポジトリに無い（公開リポジトリなので分類列ごとの内訳を置かず、ASCの列も Source Type / Page Type までで Campaign が無い）。反証は growth/scripts/intent-axes.mjs の freeSeekingShare が担い、高く宣言した面が無料狙いクエリで出ていればCIが落ちる。段を3つに絞ってあるのは、最初5段で書いたら218ページ中129ページが businessRelevance との差0.1〜0.2に収まり、**2軸目のほとんどが1軸目の写しになっていた**ため"
     }
   ]
 }
