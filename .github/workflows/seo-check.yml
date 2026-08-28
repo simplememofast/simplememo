@@ -377,6 +377,22 @@ jobs:
       - name: Authority matrix
         run: node scripts/check-authority.mjs --check
 
+      # 【2つの台帳の食い違い】coverage 台帳（なぜAIが実行していないか）と
+      # 権限表（誰が実行してよいか）は同じことを2か所に書いているので、片方だけ動く。
+      #
+      # 2026-08-28 に両方向の食い違いが実際に出た ——
+      # **境界なのに実装待ちと書いていた12件**（天井が 6.0pt 高く出る）と、
+      # **渡されたのに古い前提のままだった2件**（やれることを隠す）。
+      # どちらも読めば分かる状態で数日残っていた。
+      #
+      # 突き合わせるのは領域ではなく**条項の文字列**。同じ領域の中に
+      # 渡した側と残した側が並ぶ（段階公開の撤回がそれ）ので、領域まるごとでは
+      # 部分的な委譲を扱えない。表から条項が消えたらその場で落ちる。
+      - name: Coverage x authority
+        run: |
+          node scripts/check-coverage-authority.mjs --selftest
+          node scripts/check-coverage-authority.mjs --check
+
       # 【段階公開の機械ゲート】権限表がこのスクリプトの evaluatePromotion を
       # 名指ししていて、**そこが実在しなければ「段階公開の拡大」は承認制へ戻る**
       # （check-authority の gateProblems が checker と export を実際に見る）。

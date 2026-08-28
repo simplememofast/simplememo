@@ -210,11 +210,16 @@ function selftest() {
       const { problems } = V(real);
       assert(problems.length === 0, problems.join(' / '));
     }],
-    ['**実データで5件が健全でない**（緑＝異常が無い、ではない）', () => {
+    // [2026-08-28] 5件 → 6件。**写しを取り直したら1本増えた** ——
+    // Routines UI で作った「副系の写しの取り直し」が止まっていて、
+    // どちらの一覧にも入っていなかった（列挙の網羅がそのまま鳴った）。
+    // **ここは実データに固定してある。**写しが動いたら同じ変更で直すこと。
+    ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
-      assert(unhealthy.length === 5, `健全でないのは5件のはずが ${unhealthy.length}`);
+      assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
       assert(real.open_findings.length === 2, '未対応は2件（週次2本）');
-      assert(real.intentional_stops.length === 3, '意図的な停止は3件（Reddit監視・副系A・副系B）');
+      assert(real.intentional_stops.length === 4,
+        '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],
 
     // --- 黙って止まったものを通さない -----------------------------------

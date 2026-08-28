@@ -214,6 +214,12 @@
       "broke": "what_breaks 欠落／id と title 欠落／confirmed なのに日付不正 の3通りで落ちることを観測\n\n**[2026-08-28] `reviewed_by` を足し、壊し3通りを追加して全部落ちることを観測。**（1）読んだのに `reviewed_by` が無い（2）登録簿に無い読み手（\"claude\" 等）を勝手に書く（3）`ai_draft` なのに `draft_note` が無い。\n\n足した理由は実測。オーナーが条項検査を「おまかせ」と委ねた日に Apple の規約を機械で読みに行ったところ、§13（責任の制限）と §14.10（準拠法）は**本文が取得できなかったのに、要約器が「通常はカリフォルニア州法」と一般論で埋めて返してきた。**そのまま `ok` にしていたら、台帳は「読んだ」と言い続ける。`$note` が言う『見たという記録が嘘を守る』の新しい形で、**いつ見たか（reviewed_at）はあったが、誰が見たかが無かった。**\n\n**[2026-08-28 追記] `draft_clauses` を足し、壊し3通りをさらに追加して全部落ちることを観測。**（4）`draft_clauses` に unreviewed の観点を入れる（下書きが無いのに下書き扱い）（5）知らない観点名を入れる（6）`draft_clauses` があるのに `draft_note` が無い。\n\nこれも実測で必要になった。**読みは観点ごとに起きるのに、`reviewed_by` は行に1つしかない。**apple の4観点のうち3つを人が確認したあとで `ip` を追加で下書きしたとき、**行を human にすると下書きまで人が見たことになり、ai_draft に戻すと確認済みの3つが下書き扱いになる。どちらも嘘。**例外を名指しで持つ欄にした。"
     },
     {
+      "script": "scripts/check-coverage-authority.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-28",
+      "broke": "壊し11通りを実測。**両方向を要求している**のが要点で、片方だけだと「境界を実装待ちに書く」か「渡されたものを境界に書く」のどちらかが素通りする。実際に落としたもの: (1) 権限表の human_only から条項を消す（＝渡された）／(2) coverage の blocker を policy_boundary → not_started + unlock（＝2026-08-28 に12件やっていた形）／(3) 渡された行（App Review 提出）の blocker を policy_boundary にする（逆向き）／(4) ai_may から条項を消す（取り上げられた）／(5) 領域名を1文字変える（**照合が黙って空回りするのを止める**。「プレスリリース」の長音を全角ハイフンに替えて確認）／(6) human_only を名指ししたまま executor を ai_executes_gated にする／(7) $authority_absent を削る（表も指さず理由も書かない境界）／(8) 理由を空白だけにする（欄を作っただけで通さない）／(9) authority_absent_budget を 0 に下げる（ラチェット）／(10) budget のキーごと消す（無ければ無制限、を通さない）／(11) human_only と ai_may を両方書く（どちら側の主張か決まらない）。\n\n**実データが通ることも同じ harness で確かめている**（ledgerScenarios の第1件）。"
+    },
+    {
       "script": "scripts/check-credentials.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
