@@ -580,6 +580,22 @@
       "note": "**主系の手動force実行（workflow_dispatch・triggering_actor=simplememofast）。** 同日の schedule run(ap-20260825-actions)が即時失敗した後の再走なので、run_id は route だけでは一意にならず -force を付けている。レーンFで1日を使い、記事は書いていない。修理の内容は claude-code-action を SHA 16b3b310（この run が実際に通した版）へpin したこと。**上流の壊れた版そのものは直せないが、勝手に乗り換える構造は直せる**——ここを固定しない限り、次の版が壊れていれば同じ2日が繰り返される。"
     },
     {
+      "run_id": "ap-20260825-ccrfallback",
+      "date_jst": "2026-08-25",
+      "route": "ccr-fallback-v2",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": null,
+      "action": "maintenance",
+      "pr": 548,
+      "artifact": "data/autopilot-status.json,docs/obsidian/AUTOPILOT_LOG.md,.github/workflows/obsidian-autopilot.yml,data/autopilot-runs.json",
+      "failure_reason": null,
+      "external_ref": null,
+      "interventions": [],
+      "source": "session",
+      "$recovered": "**[2026-08-28] 取り残しブランチからの復旧。**この行は当時のセッションが claude/obsidian-auto-20260825 に書いたが、PR #548 のマージ後だったため main に入らなかった（auto-merge は検証済みSHAだけをマージする設計の帰結）。2026-08-28 に取り残し5件を読み直したとき、内容が別経路で着地していない唯一の行だったので拾い上げた。\n\n**AI完走率が 76.2% → 77.3% に上がる追記なので、オーナーの明示の許可を得てから入れた。**数字が有利な方向に動く追記を拾った側の一存で入れない、という原則のため。\n\n元の記録は lane が文字列 \"null\" だった（値としては無意味なので、本来の null にした）。それ以外は当時の記録のまま。"
+    },
+    {
       "run_id": "ap-20260826-actions",
       "date_jst": "2026-08-26",
       "route": "actions",
