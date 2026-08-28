@@ -347,11 +347,28 @@ function selftest() {
       const p = validate(doc);
       assert(p.length === 0, p.join(' / '));
     }],
-    ['**既定は enabled:false** — 実台帳のまま評価すると必ず止まる', () => {
+    // **[2026-08-28] enabled が立ったので「実台帳のまま必ず止まる」は成り立たない。**
+    // この行が守っていたのは「出荷している policy が検体より緩くない」ことなので、
+    // **出荷している数字そのものをピンする**（フラグの値をピンすると、値が変わった日に
+    // 検査ごと消える。enabled:false に寄りかかっていたぶん、数字は一度も試されていなかった）。
+    ['**出荷している policy の数字が実際に効いている**（寝かせ・各群の母数）', () => {
+      const ap = doc.policy.auto_promote;
+
+      const shortSoak = new Date(
+        Date.parse(NOW) - (ap.min_hours_at_current_rollout - 1) * 3600 * 1000,
+      ).toISOString();
+      const a = evaluatePromotion({
+        ...fixture(),
+        policy: doc.policy,
+        flagState: { rollout: 25, updated_at: shortSoak, killed: false },
+      });
+      assert(a.decision === 'hold', `寝かせ ${ap.min_hours_at_current_rollout}h に1時間足りないのに止まっていない（${a.decision}: ${a.why}）`);
+
       const f = fixture();
       f.policy = doc.policy;
-      const r = evaluatePromotion(f);
-      assert(r.decision === 'hold' && r.why.includes('有効になっていない'), r.why);
+      f.guard.decisions[0].observations[0].exposed.installs = ap.min_sample_per_arm - 1;
+      const b = evaluatePromotion(f);
+      assert(b.decision === 'hold', `母数 ${ap.min_sample_per_arm} に1つ足りないのに止まっていない（${b.decision}: ${b.why}）`);
     }],
     ['条件が揃えば promote', () => {
       const r = ev();
@@ -489,11 +506,26 @@ function selftest() {
       assert(drill.decision === 'hold' && drill.why.includes('訓練用フラグ'), drill.why);
       assert(plan.promoted_today === 0, `promoted_today が ${plan.promoted_today}`);
     }],
-    ['**実データ（enabled:false）では plan が1件も promote を返さない**', () => {
-      const f = fixture();
+    // **材料が欠けたときに止まることが、この門の中身そのもの**（machine_gate の
+    // holds_when_unknown）。enabled が立った今、plan を守っているのはここだけになる。
+    ['**材料が無ければ plan は promote を返さない**（holds_when_unknown）', () => {
       const flags = { flags: { tf04_progress: { rollout: 25, description: 'c', updated_at: '2026-09-05T00:00:00.000Z' } }, history: [] };
-      const plan = planAll({ guard: f.guard, flags, doc, now: NOW });
-      assert(plan.promote.length === 0, '既定の台帳で promote が出た');
+
+      const noDecision = planAll({ guard: { decisions: [] }, flags, doc, now: NOW });
+      assert(noDecision.promote.length === 0, 'ガードの判定が1件も無いのに promote が出た');
+
+      const unjudged = fixture();
+      for (const o of unjudged.guard.decisions[0].observations) { o.judged = false; }
+      const p2 = planAll({ guard: unjudged.guard, flags, doc, now: NOW });
+      assert(p2.promote.length === 0, '指標が未判定なのに promote が出た');
+
+      const noFlagState = planAll({ guard: fixture().guard, flags: { flags: {}, history: [] }, doc, now: NOW });
+      assert(noFlagState.promote.length === 0, 'フラグの現状が無いのに promote が出た');
+    }],
+    ['**材料が揃えば plan は promote を返す**（止まりっぱなしを「安全」と読み違えない）', () => {
+      const flags = { flags: { tf04_progress: { rollout: 25, description: 'c', updated_at: '2026-09-05T00:00:00.000Z' } }, history: [] };
+      const plan = planAll({ guard: fixture().guard, flags, doc, now: NOW });
+      assert(plan.promote.length === 1, `材料が揃っているのに promote が出ない: ${JSON.stringify(plan.plans)}`);
     }],
 
     // --- 台帳の検査 -------------------------------------------------------
