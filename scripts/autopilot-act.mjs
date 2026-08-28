@@ -533,7 +533,21 @@ export function derive(ctx) {
         + '**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**'
         + 'PRが既に閉じているため、次の検証が拾う先が無い。\n\n'
         + '**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。'
-        + '機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。',
+        + '機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n'
+        // [2026-08-28] **内訳をここに出す。**無いと拾う側が毎回ブランチを取り直して
+        // git show --stat を叩く。**判断に要る材料が起票に載っていないと、判断は起きない。**
+        + (o.paths === null || o.paths === undefined
+          ? '**触ったパスは取れなかった。**中身は自分で見ること（内訳が無いことを「台帳だけ」と読まない）。'
+          : `触ったパス: ${o.paths.join(' / ')}\n\n`
+            + (o.ledger_only
+              ? '**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、'
+                + '**再投入してよいかは別問題** —— 状態を持つ台帳'
+                + '（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。'
+                + '追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n'
+                + '**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで'
+                + '着地していることがある —— 取り残しの判定はSHAで行うので、'
+                + '**内容が着地済みでも行は立つ。**'
+              : '**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。')),
       source: 'orphan',
       touches: [],
       auto: null,
@@ -916,6 +930,62 @@ export const ORPHAN_LOOKBACK_DAYS = 7;
 export const ORPHAN_MAX_PAGES = 10;
 
 /**
+ * **運転そのものが毎日書き換える台帳。**ここだけを触る取り残しは「再投入の候補」で、
+ * それ以外を含むものは書きかけかもしれないので中身を読むしかない。
+ *
+ * [2026-08-28] この一覧を足したのは、**拾う側が毎回同じ手作業をしていた**から。
+ * 起票には「N コミット取り残し」としか書いておらず、
+ * 台帳の更新なのか書きかけなのかを知るには、ブランチを取り直して
+ * `git show --stat` を叩くしかない。実際この日、5ブランチぶん手で叩いた。
+ * **判断に要る材料が起票に載っていないと、判断は起きない。**
+ *
+ * **この一覧は「自動で適用してよい」の意味ではない。**適用の可否は別問題で、
+ * 現に `data/autopilot-status.json` は self_repair.may_modify に入っていない
+ * （＝無人ハンドラは触れない）。ここが答えるのは「読む前に見当がつくか」だけ。
+ */
+export const OPERATING_LEDGERS = [
+  'data/autopilot-runs.json',
+  'data/autopilot-status.json',
+  'data/autopilot-cost.json',
+  'data/autopilot-actions.json',
+  'docs/obsidian/AUTOPILOT_LOG.md',
+  'growth/content/coverage-queue.json',
+];
+
+/** 内訳を読むために叩くコミット数の上限。**超えたら断定しない**（下記）。 */
+export const ORPHAN_MAX_COMMIT_READS = 20;
+
+/**
+ * 台帳だけを触っているか。**paths が取れていなければ `null`。**
+ *
+ * `false`（＝中身を読む必要がある）と混ぜないこと。取れなかったことを
+ * 「読む必要がある」に倒すのは安全側だが、**理由が消える** ——
+ * 「読んだら書きかけだった」と「そもそも読めなかった」は次の一手が違う。
+ */
+export function classifyOrphanPaths(paths) {
+  if (!Array.isArray(paths) || paths.length === 0) return null;
+  return paths.every((p) => OPERATING_LEDGERS.includes(p));
+}
+
+/**
+ * 取り残しコミットが触ったパスを集める。**1つでも取れなければ null。**
+ * 部分的な一覧は「台帳だけ」と読まれうるので、途中経過を返さない。
+ */
+async function fetchOrphanPaths(get, repo, commits) {
+  if (commits.length > ORPHAN_MAX_COMMIT_READS) return null;
+  const out = new Set();
+  for (const c of commits) {
+    let detail;
+    try {
+      detail = await get(`https://api.github.com/repos/${repo}/commits/${encodeURIComponent(c.sha)}`);
+    } catch { return null; }
+    if (!Array.isArray(detail?.files)) return null;
+    for (const f of detail.files) if (f?.filename) out.add(f.filename);
+  }
+  return [...out].sort();
+}
+
+/**
  * 行ID用にブランチ名を均す。**衝突しないことだけが要件**で、可逆である必要はない。
  * 万一衝突したら derive 側が PR 番号を足して分ける（黙って畳まない）。
  */
@@ -996,6 +1066,9 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
       const missing = new Set((notOnBase.commits ?? []).map((c) => c.sha));
       const orphaned = (after.commits ?? []).filter((c) => missing.has(c.sha));
       if (orphaned.length === 0) continue;
+      // ③ **中身の内訳。**「台帳の更新なら再投入、書きかけなら捨てる」を決めるのに
+      // 要るのはこの一覧で、無いと拾う側がブランチを取り直して git show を叩く。
+      const paths = await fetchOrphanPaths(get, repo, orphaned);
       // **1ブランチ = 1件。**PRごとに返すと、使い回されたブランチが
       // PRの数だけ行になる（derive 側の【なぜブランチ単位か】を見ること）。
       out.push({
@@ -1006,6 +1079,8 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
         ahead_by: orphaned.length,
         landed_elsewhere: (after.commits ?? []).length - orphaned.length,
         commits: orphaned.map((c) => c.sha.slice(0, 7)),
+        paths,
+        ledger_only: classifyOrphanPaths(paths),
       });
     }
     return out;
@@ -1548,6 +1623,60 @@ async function selftest() {
     t('**後続PRで着地済みのコミットを取り残しに数えない**',
       found.length === 1 && found[0].ahead_by === 1 && found[0].commits[0] === 'orphan1');
     t('着地済みの件数を別に持つ（なぜ除いたかが読める）', found[0].landed_elsewhere === 5);
+    t('**内訳が取れなければ paths は null**（false と混ぜない）',
+      found[0].paths === null && found[0].ledger_only === null);
+  }
+  // [2026-08-28] **触ったパスの内訳。**無いと拾う側が毎回 git show --stat を叩く。
+  {
+    const mkOrphanFetch = (filesBySha) => async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([{
+          number: 700, merged_at: '2026-08-28T04:00:00Z',
+          head: { sha: 'AAA', ref: 'br' }, base: { ref: 'main' },
+        }]) };
+      }
+      const m = url.match(/\/commits\/([^/?]+)$/);
+      if (m) {
+        const files = filesBySha[m[1]];
+        if (files === undefined) throw new Error('404');
+        return { ok: true, json: async () => ({ files: files.map((filename) => ({ filename })) }) };
+      }
+      if (url.includes('compare/AAA...br')) {
+        return { ok: true, json: async () => ({ commits: [{ sha: 'o1' }, { sha: 'o2' }] }) };
+      }
+      return { ok: true, json: async () => ({ commits: [{ sha: 'o1' }, { sha: 'o2' }] }) };
+    };
+    const ledger = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+      fetchImpl: mkOrphanFetch({
+        o1: ['data/autopilot-runs.json', 'docs/obsidian/AUTOPILOT_LOG.md'],
+        o2: ['data/autopilot-status.json'],
+      }),
+    });
+    t('**触ったパスを重複なく並べて持つ**',
+      ledger[0].paths.join(',')
+        === 'data/autopilot-runs.json,data/autopilot-status.json,docs/obsidian/AUTOPILOT_LOG.md');
+    t('**運転台帳だけなら ledger_only: true**', ledger[0].ledger_only === true);
+
+    const mixed = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+      fetchImpl: mkOrphanFetch({
+        o1: ['data/autopilot-runs.json'],
+        o2: ['blog/new-article.html'],
+      }),
+    });
+    t('**台帳の外を1つでも触っていれば false**（書きかけを台帳扱いしない）',
+      mixed[0].ledger_only === false);
+
+    const partial = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+      fetchImpl: mkOrphanFetch({ o1: ['data/autopilot-runs.json'] }), // o2 は 404
+    });
+    t('**1コミットでも読めなければ全体を null**（部分的な一覧を「台帳だけ」と読ませない）',
+      partial[0].paths === null && partial[0].ledger_only === null);
+
+    t('空の一覧は判定しない（true にしない）', classifyOrphanPaths([]) === null);
+    t('配列でなければ判定しない', classifyOrphanPaths(undefined) === null);
+    t('**上限を超えたら断定しない**',
+      classifyOrphanPaths(null) === null
+      && ORPHAN_MAX_COMMIT_READS > 0);
   }
   {
     // 全部 main に着地している＝取り残しゼロ。**行を立てない。**
