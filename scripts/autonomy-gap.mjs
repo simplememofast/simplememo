@@ -236,6 +236,18 @@ export const UNLOCKS = {
   // [2026-08-27] オーナー判断「お金周りを除いて渡す」で、境界24件のうち15件が
   // policy_boundary から外れた。**外れた先は自動側ではなく実装側。**
   // 下の2つは、その15件が「何をすれば動くか」を分けたもの。
+  // [2026-08-28] **`structural`（不能）から出てきた最初の行。**
+  // 「セッションのログが外部から読めない」は transcript については正しいが、
+  // **走ったかどうかは Routines API の last_run が返す。**読む側を一度も
+  // 試さずに不能と書いていた。読んだ瞬間に4件の停止・失敗が見つかっている。
+  impl_routine_snapshot: { kind: 'implement', label: '副系の発火記録を定期的に取り直す',
+                           needs: '検査は実装済み（scripts/check-routine-runs.mjs）で、'
+                                + '写しの鮮度・列挙の網羅・ラチェットを見る。'
+                                + '**残るのは写しを取り直す経路** —— `list_triggers` は'
+                                + 'セッションのMCPツールでCIのランナーからは叩けないので、'
+                                + 'ASCのレポートと同じくセッションが取って置く。'
+                                + '取り直しが自動になれば、記録は主系（Actions の run 列挙）と'
+                                + '同じ意味で完結する' },
   impl_machine_gate: { kind: 'implement', label: '不可逆な領域の機械ゲートを作る',
                        needs: '**承認を外すには権限表が machine_gate を要求する** —— '
                             + '実在する checker / export された関数 / kill switch の経路 / '

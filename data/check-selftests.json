@@ -370,6 +370,12 @@
       "broke": "12通りを実測。**self-test 側（33件）** —— 材料が無いときの hold を promote に変える → 3件が落ちる（`holds_when_unknown` の実体。13欄を1つずつ落とす回帰が全部ここに乗っている）／`max_auto_rollout` を見ない → 1件／ガードの判定が promote でなくても通す → 2件／各群の母数の下限を見ない → 2件／**全体キルを見ない** → 1件／**history が読めないときに 0 を返す（fail open）** → 1件／引き下げも「広げた」と数える → 1件。 **--check 側** —— 台帳の上限を 100% にする／`required_metrics` を空にする／**上限を超えた昇格を記録に紛れ込ませる** → いずれも exit 1。 **いちばん効くのは残り2つで、落ちるのは別のスクリプト** —— このファイルを消すと check-authority が「不可逆（reversible:false）なのに requires_approval:false」で落ち、`evaluatePromotion` を1文字リネームすると「export していない — **表に書いただけで実装が無い**」で落ちる。つまり**ゲートを黙って外すと段階公開の拡大は承認制へ戻る**。それが確かめたかったこと"
     },
     {
+      "script": "scripts/check-routine-runs.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-28",
+      "broke": "自己テスト20件。**self-test 側** —— 停止を健全に数える／写しの鮮度を見ない／ラチェットを外す／直った行が残っていても通す、の4通りでそれぞれ1件落ちる。 **--check 側（実データを壊す）** —— 未対応から1件消すと 「副系A がどちらの一覧にも無い」で exit 1。 **壊して確かめたら穴が1つ開いていた** —— 当初のラチェットは `open.length > budget` だけを見ており、**上限を先に 4→5 に上げておくと exit 0 で通った**（次に止まったものを黙って飲む枠が残る）。`open.length !== budget` の一致要求へ直し、同じ壊し方で exit 1 になることを再実測した。**上限の変更が必ず findings の変更と同じ差分になる**ので、理由の書かれた1行を足さずに枠だけ広げることができない。この2件（先に上げる／直して減らしたのに下げない）を self-test に足してある **さらに check-guard-shapes が1件捕まえた** —— `r.cron_expression && !r.last_run_status` はcron の欄が欠けた行で『一度も走っていない』の規則ごと消える。`run_once_at` があるときだけ一度きり扱いにする形（**分かっているとき以外は cron 扱い**）へ直し、cron の欄が無くても never_ran が立つことを self-test で固定した"
+    },
+    {
       "script": "scripts/check-script-tags.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
