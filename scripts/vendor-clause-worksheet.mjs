@@ -1,0 +1,310 @@
+#!/usr/bin/env node
+/**
+ * 条項検査の40マスを、**読む順序**に変える。
+ *
+ *   node scripts/vendor-clause-worksheet.mjs           # 順序と、各マスの材料を出す
+ *   node scripts/vendor-clause-worksheet.mjs --json    # 機械可読
+ *   node scripts/vendor-clause-worksheet.mjs --check   # CI: 2つの台帳の整合
+ *   node scripts/vendor-clause-worksheet.mjs --selftest # 導出そのものの自己検査
+ *
+ * 【なぜ要るか】
+ * `check-corporate.mjs` は「全観点が未確認のベンダー 10社」と出す。正しいが、
+ * **40マスが等価に見える。**実際には等価ではない —— resend には宛先アドレスと
+ * メモ本文が渡っていて代替が無く、prtimes には個人データが渡っていない。
+ * それでも台帳の上では同じ `unreviewed` が40個並ぶ。
+ *
+ * **等価に見える一覧は、着手されない。**この行が 2026-08-22 から動いていないのは
+ * 判断が重いからではなく、**どこから読めばいいかが出ていない**からでもある。
+ *
+ * 【この script が決めないこと】
+ * **ok / risk は決めない。**それは法的判断で、`data/corporate-obligations.json` の
+ * $note が「確認は人が規約を読むことでしか進まない」と書いたとおり人の領域。
+ * ここが出すのは**順序と材料**だけ —— どのマスから読むと露出が大きいか、
+ * そのマスで何が賭かっているか（何を渡しているか・止まると何が起きるか・代替はあるか）。
+ *
+ * 【順序の作り方 — 台帳に記録された事実だけから導く】
+ * 推測を混ぜない。使うのは vendor-register.json の4欄だけ:
+ *
+ *   personal_data … personal 2 / pseudonymous 1 / none 0
+ *   critical      … 落ちると何が止まるか
+ *   fallback      … 代替が在るか
+ *   money_flow    … 金銭が動くか
+ *
+ * マスごとの露出:
+ *
+ *   personal_data … personal_data の水準そのもの（0〜2）
+ *   liability_cap … critical + 代替が無い（0〜2）
+ *                   **止まったときに請求できるかは、代替が無いほど効く。**
+ *                   代替が在るなら冗長化で守れるので、条項に賭かるものが小さい
+ *   governing_law … 金銭が動く + critical（0〜2）
+ *                   **争う実益と、争う相手が事業の根幹かどうか**
+ *   ip            … **導出しない。**下記
+ *
+ * 【ip に順序をつけない理由】
+ * 「著作物・生成物を誰が抱えているか」を表す欄が vendor-register.json に無い。
+ * `used_for` は自由文（「オートパイロット・QA判定・原稿執筆」等）で、
+ * **自由文を正規表現で読んで順位にすると、書き方が変わった日に順序が黙って変わる。**
+ * 材料が欠けたら順位を作らない —— `check-rollout-promotion` の
+ * holds_when_unknown と同じ側に倒してある。**これは欠落の報告であって、
+ * 「ip は重要でない」ではない。**
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { assert, broken, run } from './lib/selftest.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+export const REGISTER_PATH = path.join(ROOT, 'data/vendor-register.json');
+export const OBLIGATIONS_PATH = path.join(ROOT, 'data/corporate-obligations.json');
+
+/** personal_data の水準を数にする。**登録簿に無い語は 0 にしない**（null で落とす）。 */
+export const DATA_WEIGHT = { none: 0, pseudonymous: 1, personal: 2 };
+
+/** 順序をつけない条項。**材料が台帳に無いものをここに置く。** */
+export const UNRANKED_CLAUSES = new Set(['ip']);
+
+/**
+ * 1ベンダー1条項の露出。**純関数。**
+ * 返すのは 0〜2 の数か、`null`（順序をつけない／つけられない）。
+ */
+export function exposure(clause, v) {
+  if (UNRANKED_CLAUSES.has(clause)) return null;
+  if (!v || typeof v !== 'object') return null;
+
+  switch (clause) {
+    case 'personal_data': {
+      const w = DATA_WEIGHT[v.personal_data];
+      return w === undefined ? null : w;
+    }
+    case 'liability_cap':
+      // **代替が無いほど条項に賭かる。**在るなら冗長化で守れる。
+      return (v.critical ? 1 : 0) + (v.fallback ? 0 : 1);
+    case 'governing_law':
+      // 争う実益（金銭が動く）と、相手が事業の根幹か。
+      return (v.money_flow && v.money_flow !== 'none' ? 1 : 0) + (v.critical ? 1 : 0);
+    default:
+      return null;
+  }
+}
+
+/** そのマスで何が賭かっているかを、台帳の言葉のまま並べる。**要約しない。** */
+export function stakes(clause, v) {
+  const out = [];
+  if (clause === 'personal_data') {
+    out.push(`渡しているもの: ${v.personal_data}`);
+    if (v.$personal_data) out.push(v.$personal_data);
+  }
+  if (clause === 'liability_cap') {
+    if (v.breaks_if_down) out.push(`止まると: ${v.breaks_if_down}`);
+    out.push(v.fallback ? `代替: ${v.fallback}` : `代替: **無し**${v.fallback_note ? ` — ${v.fallback_note}` : ''}`);
+  }
+  if (clause === 'governing_law') {
+    out.push(`金銭: ${v.money_flow}${v.payment_method ? `（${v.payment_method}）` : ''}`);
+    if (v.spend_cap_ref) out.push(`上限の参照先: ${v.spend_cap_ref}`);
+  }
+  return out;
+}
+
+export function load() {
+  return {
+    register: JSON.parse(fs.readFileSync(REGISTER_PATH, 'utf8')),
+    obligations: JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8')),
+  };
+}
+
+/**
+ * 2つの台帳を突き合わせて、順序つきのマス一覧を作る。
+ * **片方にしか居ないベンダーは problems に出す**（黙って落とさない）。
+ */
+export function build({ register, obligations }) {
+  const problems = [];
+  const cr = obligations?.contract_review;
+  if (!cr || !Array.isArray(cr.vendors) || !Array.isArray(cr.clauses)) {
+    return { problems: ['contract_review が読めない'], cells: [], unranked: [] };
+  }
+
+  const byId = new Map((register?.vendors ?? []).map((v) => [v.id, v]));
+  const cells = [];
+  const unranked = [];
+
+  for (const row of cr.vendors) {
+    const v = byId.get(row.id);
+    if (!v) {
+      problems.push(`vendor-register.json に「${row.id}」が無い — 順序をつける材料が取れない`);
+      continue;
+    }
+    for (const clause of cr.clauses) {
+      const state = row[clause];
+      if (state !== 'unreviewed') continue; // 見たものは順序に出さない
+      const score = exposure(clause, v);
+      const cell = {
+        vendor: row.id, name: v.name ?? row.id, clause, state,
+        exposure: score, source: row.source ?? null, stakes: stakes(clause, v),
+      };
+      (score === null ? unranked : cells).push(cell);
+    }
+  }
+
+  // 露出の大きい順。同点は台帳の並び（＝人が決めた重要度順）を保つので安定ソート。
+  cells.sort((a, b) => b.exposure - a.exposure);
+  return { problems, cells, unranked };
+}
+
+/**
+ * CI が見るもの。**新しい赤を足さない** —— 未確認であること自体は
+ * check-corporate.mjs が既に報告していて、二重に落とす意味が無い。
+ * ここが落とすのは**2つの台帳がずれたとき**だけ。
+ */
+export function check(doc) {
+  const { problems } = build(doc);
+  const cr = doc.obligations?.contract_review;
+  for (const clause of cr?.clauses ?? []) {
+    const sample = doc.register?.vendors?.[0];
+    if (sample && exposure(clause, sample) === null && !UNRANKED_CLAUSES.has(clause)) {
+      problems.push(`条項「${clause}」に露出の導出が無い — UNRANKED_CLAUSES に入れるか、導出を書く`);
+    }
+  }
+  return problems;
+}
+
+function fixture() {
+  return {
+    register: { vendors: [
+      { id: 'a', name: 'A', personal_data: 'personal', critical: true, fallback: null,
+        fallback_note: '代替なし', breaks_if_down: '主機能が止まる', money_flow: 'subscription' },
+      { id: 'b', name: 'B', personal_data: 'none', critical: false, fallback: '別経路',
+        breaks_if_down: '何も止まらない', money_flow: 'none' },
+    ] },
+    obligations: { contract_review: {
+      clauses: ['liability_cap', 'ip', 'personal_data', 'governing_law'],
+      // **露出の低い b を先に置く。**a を先に置くと、並べ替えを消しても
+      // 「先頭が a」が通ってしまい、**テストが正しい理由で通らなくなる。**
+      // （実際に一度そうなっていた: 並べ替えを消しても9件とも緑だった）
+      vendors: [
+        { id: 'b', liability_cap: 'unreviewed', ip: 'unreviewed', personal_data: 'unreviewed', governing_law: 'unreviewed', source: 'https://b' },
+        { id: 'a', liability_cap: 'unreviewed', ip: 'unreviewed', personal_data: 'unreviewed', governing_law: 'unreviewed', source: 'https://a' },
+      ],
+    } },
+  };
+}
+
+function selftest() {
+  const scenarios = [
+    ['実データで問題が出ない', () => assert(check(load()).length === 0, check(load()).join(' / '))],
+
+    ['露出の大きいマスが先に来る', () => {
+      const { cells } = build(fixture());
+      assert(cells[0].vendor === 'a', `先頭が a でない: ${cells[0]?.vendor}`);
+      assert(cells[cells.length - 1].vendor === 'b', '末尾が b でない');
+    }],
+
+    ['ip には順序をつけない（材料が台帳に無い）', () => {
+      const { cells, unranked } = build(fixture());
+      assert(cells.every((c) => c.clause !== 'ip'), 'ip が順序つきに混ざった');
+      assert(unranked.length === 2, `unranked が 2 でない: ${unranked.length}`);
+    }],
+
+    ['**代替が在ると liability_cap の露出は下がる**', () => {
+      const withFb = exposure('liability_cap', { critical: true, fallback: '別経路' });
+      const without = exposure('liability_cap', { critical: true, fallback: null });
+      assert(without > withFb, `代替の有無で差が出ない: ${without} vs ${withFb}`);
+    }],
+
+    ['**知らない personal_data の語を 0 にしない**', () => {
+      assert(exposure('personal_data', { personal_data: 'なにか' }) === null,
+        '登録簿に無い語が数になった（0 に丸めると「渡していない」と同じ扱いになる）');
+    }],
+
+    ['見たマスは順序に出ない', () => {
+      const doc = fixture();
+      // **添字ではなく id で指す。**検体の並びは「並べ替えが効いていること」を
+      // 見るために入れ替えてあるので、添字で指すと検体をいじった日に黙ってずれる。
+      doc.obligations.contract_review.vendors.find((v) => v.id === 'a').personal_data = 'ok';
+      const { cells } = build(doc);
+      assert(!cells.some((c) => c.vendor === 'a' && c.clause === 'personal_data'),
+        'reviewed 済みのマスが残った');
+    }],
+
+    // --- 壊すと落ちる側 -----------------------------------------------------
+    ['壊し: 片方の台帳にしか居ないベンダーを見逃さない', () => {
+      const p = broken(fixture(), (d) => { d.register.vendors = d.register.vendors.filter((v) => v.id !== 'b'); });
+      const { problems } = build(p);
+      assert(problems.some((x) => x.includes('b')), '片側だけのベンダーが素通りした');
+    }],
+
+    ['壊し: 露出の導出が無い条項を見逃さない', () => {
+      const p = broken(fixture(), (d) => { d.obligations.contract_review.clauses.push('新しい観点'); });
+      assert(check(p).length > 0, '導出の無い条項が素通りした');
+    }],
+
+    ['壊し: contract_review が読めなければ落とす', () => {
+      const p = broken(fixture(), (d) => { delete d.obligations.contract_review; });
+      assert(build(p).problems.length > 0, '読めない台帳が素通りした');
+    }],
+  ];
+  return run(scenarios, { label: '条項ワークシート' });
+}
+
+function report() {
+  const doc = load();
+  const { problems, cells, unranked } = build(doc);
+
+  console.log('\n条項検査の読む順序 — 未確認のマスだけを、台帳の事実で並べた\n');
+  if (problems.length) {
+    for (const p of problems) console.log(`  **問題** ${p}`);
+    console.log('');
+  }
+
+  let last = null;
+  for (const c of cells) {
+    if (c.exposure !== last) {
+      const label = c.exposure === 2 ? '露出 2 — ここから読む'
+                  : c.exposure === 1 ? '露出 1'
+                  : '露出 0 — 台帳の事実の上では賭かるものが小さい';
+      console.log(`  ${label}`);
+      last = c.exposure;
+    }
+    console.log(`    ${c.clause.padEnd(14)} ${c.name}`);
+    for (const s of c.stakes) console.log(`        ${s}`);
+    if (c.source) console.log(`        読む先: ${c.source}`);
+  }
+
+  // **読む先が無いマスは、順序の中に紛れると見えない。**露出が大きいほど害が出るので
+  // 別立てで出す。埋まっていない理由が「見ていない」ではなく「読む先が台帳に無い」なら、
+  // それは人が読めば済む話ではなく、**先に台帳を直す話**になる。
+  const noSource = cells.filter((c) => !c.source);
+  if (noSource.length) {
+    console.log(`\n  **読む先が台帳に無い ${noSource.length} マス** — 読もうとしても読めない`);
+    for (const c of noSource) {
+      console.log(`    露出 ${c.exposure}  ${c.clause.padEnd(14)} ${c.name}`);
+    }
+    console.log('    `contract_review` の `source` が null。**人が読めば済む話ではない** ——');
+    console.log('    先に読む先を台帳へ入れるところまでがオーナーの作業になる。');
+  }
+
+  if (unranked.length) {
+    console.log(`\n  順序をつけていない ${unranked.length} マス（${[...new Set(unranked.map((u) => u.clause))].join(' / ')}）`);
+    console.log('    **材料が台帳に無い。**「著作物・生成物を誰が抱えているか」を表す欄が');
+    console.log('    vendor-register.json に無く、used_for は自由文なので順位に使えない。');
+    console.log('    **これは欠落の報告であって、重要でないという意味ではない。**');
+  }
+
+  console.log('\n  **この一覧は ok / risk を決めない。**決めるのは人で、ここが出すのは順序と材料だけ。');
+  console.log('  埋め終えたら data/vendor-register.json の policy.enforce_unreviewed を true にすると CI が守る。\n');
+  return problems.length;
+}
+
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  if (process.argv.includes('--selftest')) process.exit(selftest() ? 1 : 0);
+  if (process.argv.includes('--json')) { console.log(JSON.stringify(build(load()), null, 2)); process.exit(0); }
+  if (process.argv.includes('--check')) {
+    const problems = check(load());
+    for (const p of problems) console.error(`  **問題** ${p}`);
+    if (problems.length) process.exit(1);
+    console.log('条項ワークシート: 2つの台帳は揃っている。');
+    process.exit(0);
+  }
+  process.exit(report() ? 1 : 0);
+}

@@ -1479,11 +1479,12 @@
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs",
         "data/vendor-register.json",
-        "scripts/vendor-terms.mjs"
+        "scripts/vendor-terms.mjs",
+        "scripts/vendor-clause-worksheet.mjs"
       ],
       "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily が毎日取得）。一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ",
       "blocker": "missing_source_document",
-      "unblocked_by": "**本文そのものは依然リポジトリに無い**（公開リポジトリなので他社の規約本文は運ばない）。人が10社の規約を読んで40マスを埋めるところは変わらない。2026-08-26 に移せたのは**改定の検知**で、埋めたあとが腐るのを止める側",
+      "unblocked_by": "**本文そのものは依然リポジトリに無い**（公開リポジトリなので他社の規約本文は運ばない）。人が10社の規約を読んで40マスを埋めるところは変わらない。2026-08-26 に移せたのは**改定の検知**で、埋めたあとが腐るのを止める側\n\n**[2026-08-28] 埋める順序を機械に出させた**（`scripts/vendor-clause-worksheet.mjs`）。判定は相変わらず人だが、**40マスが等価に見える状態はやめた** —— 未確認の30マスを台帳の事実（personal_data の水準・critical・代替の有無・金銭の有無）だけで並べると、露出2が11・1が14・0が5。**先頭は Apple と Resend の liability_cap / personal_data。**\n\n出したことで欠落が2つ表に出た: (1) **ip の10マスには順序をつけられない** —— 「著作物・生成物を誰が抱えているか」を表す欄が vendor-register.json に無く、`used_for` は自由文なので順位に使えない。(2) **registrar の3マスは読む先が null** —— `critical` かつ代替なしで露出2なのに、読む対象が台帳に無い。**人が読めば済む話ではなく、先に台帳を直す話。**",
       "unlock": "vendor_terms"
     },
     {
@@ -1526,11 +1527,12 @@
       "evidence": [
         "data/vendor-register.json",
         "scripts/check-vendors.mjs",
-        "scripts/vendor-terms.mjs"
+        "scripts/vendor-terms.mjs",
+        "scripts/vendor-clause-worksheet.mjs"
       ],
       "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily が毎日取得）。一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ",
       "blocker": "missing_source_document",
-      "unblocked_by": "同上。DPAの確認そのものは人の作業で、いま6社が未確認。確認したら policy.enforce_unreviewed を true にすると CI が守る",
+      "unblocked_by": "同上。DPAの確認そのものは人の作業で、いま6社が未確認。確認したら policy.enforce_unreviewed を true にすると CI が守る\n\n**[2026-08-28] 未確認の6社は、個人データを渡している6社と一致する**（apple / resend が personal、cloudflare / google_cloud / firebase / appsflyer が pseudonymous。残る4社は none）。`scripts/vendor-clause-worksheet.mjs` が同じ事実で順序を出すので、**DPA を見る順序も personal_data の露出順**で足りる —— apple と resend が先頭",
       "unlock": "vendor_terms"
     },
     {
@@ -1847,6 +1849,7 @@
       "executor": "nobody",
       "evidence": [
         "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "docs/routine-snapshot-setup.md",
         "scripts/check-routine-runs.mjs",
         "data/routine-runs.json",
         ".github/workflows/seo-check.yml"
