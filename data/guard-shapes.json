@@ -184,6 +184,12 @@
       "note": "D6 の**行動提案**を出すかどうか。status が読めた回に鮮度を見る。status そのものが無い状態は上流の別の規則が見る"
     },
     {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "last?.updated_at",
+      "disposition": "前提",
+      "note": "closed PR 一覧のページ送りを止める条件。**消えても「もう1ページ読む」側に倒れる**（無ければ条件が偽 → 続行 → 上限で null）ので、規則が消える方向には効かない。実測 2026-08-28: `pulls?state=closed&sort=updated&per_page=100` の100件すべてに updated_at が在り、マージ済み100件すべてで `merged_at <= updated_at`（＝この鍵で止めても窓の中を取りこぼさない）"
+    },
+    {
       "file": "scripts/check-model-routing.mjs",
       "expr": "rule.fallback",
       "disposition": "別に検出",
