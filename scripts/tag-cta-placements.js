@@ -36,12 +36,36 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const SKIP_DIRS = ['node_modules', 'scripts', 'docs', 'screenshots', '.git', 'admin', 'tools', 'growth'];
 
 /**
- * Apple's campaign-token length ceiling is not something this repo can verify
- * from here, so the check is conservative and explicit rather than trusting a
- * remembered number: 40 chars, enforced in --check. If a token would exceed it
- * the script refuses instead of silently shipping a token Apple may truncate.
+ * Apple's campaign-token length ceiling. **30, and this is now verified, not
+ * guessed.**
+ *
+ * [2026-08-28] この定数は長らく 40 で、すぐ上のコメントが
+ * 「Apple の上限はここからは確かめられないので、控えめに 40」と書いていた。
+ * **確かめた。**Apple の一次情報（App Store Connect Help / Campaign links）に
+ * こうある:
+ *
+ *   > You can use up to 30 alphanumeric characters and spaces, and the
+ *   > following punctuation marks and characters:
+ *   > [ ] / \ - ~ + = <> : ; , . _ ' " * & $ % # @ ? ! | { } ( )
+ *
+ * 40 は 30 より緩いので、**この推測値は上限を10文字ぶん見逃していた。**
+ * 30 へ直す。既存ファイルは1つも変わらない（下の置換は既に `__placement` を
+ * 持つトークンには何もしないので冪等）。効くのは**これから生成される分**だけ。
+ *
+ * **既に上限を超えているトークンは別に数えて報告する**（OVERSIZED の節）。
+ * 直すと App Store Connect 側の履歴が切れるので、直すかどうかは持ち主の判断。
+ * ただし「見えていない」状態にはしない。
  */
-const CT_MAX = 40;
+const CT_MAX = 30;
+
+/**
+ * 出荷済みトークンのうち、Apple の上限を超えているもの。**報告のみ。**
+ *
+ * 失敗にしないのは、直すこと自体にコストがある（トークンを変えると ASC が
+ * 集計する単位が変わり、それまでの履歴と繋がらなくなる）から。
+ * check-benchmark.mjs と同じ「報告のみ」の扱いで、判断は持ち主に残す。
+ */
+const oversized = [];
 
 const args = new Set(process.argv.slice(2));
 const WRITE = args.has('--write');
@@ -253,6 +277,14 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
   // "not enough data" for ninety days rather than an error — the tracking looked
   // installed and was inert. Note the provider token is NOT the vendor number;
   // it comes from App Store Connect's own campaign-link generator.
+  // 出荷済みトークンの長さを数える。**新規生成の門とは別の話** ——
+  // CT_MAX を下げても既存は変わらないので、数えないと存在ごと消える。
+  for (const a of anchors) {
+    if (!a.isCta) continue;
+    const m = a.tag.match(/(?:[?&]|&amp;)ct=([^"&]*)/);
+    if (m && m[1].length > CT_MAX) oversized.push({ page: rel, token: m[1], length: m[1].length });
+  }
+
   const missingPt = anchors.filter((a) => a.isCta && !PARAM_PT.test(a.tag));
   if (missingPt.length) {
     problems.push(`${rel}: ${missingPt.length} CTA(s) carry ct= without pt= — App Analytics will not record them`);
@@ -260,6 +292,14 @@ for (const file of collectHtmlFiles(ROOT_DIR, { skipDirs: SKIP_DIRS, skipFiles: 
 }
 
 problems.forEach((p) => console.log(`  ${p}`));
+if (oversized.length) {
+  const worst = [...oversized].sort((a, b) => b.length - a.length)[0];
+  const uniq = new Set(oversized.map((o) => o.token)).size;
+  console.log(`  note(報告のみ): 出荷済みの ct= で Apple の上限 ${CT_MAX} 文字を超えているもの`
+    + ` — ${oversized.length} CTA / ${uniq} トークン（最長 ${worst.length} 文字: "${worst.token}"）。`);
+  console.log('    **直すと App Store Connect 側の集計単位が変わり、それまでの履歴と繋がらない。**'
+    + '判断は持ち主に残すが、見えていない状態にはしない');
+}
 if (notices.length) {
   console.log(`  note: ${notices.length} CTA(s) keep a page-level ct= (token length); GA4 placement is unaffected`);
 }
