@@ -857,6 +857,25 @@ jobs:
       - name: Vendor terms parser
         run: node scripts/vendor-terms.mjs --selftest
 
+      # ⑦法人経営。40マスを**読む順序**に変える。
+      #
+      # check-corporate.mjs は「全観点が未確認のベンダー 10社」と出す。正しいが
+      # **40マスが等価に見える。**実際には resend には宛先とメモ本文が渡っていて
+      # 代替が無く、prtimes には個人データが渡っていない。**等価に見える一覧は
+      # 着手されない。**この行が 08-22 から動いていないのは、判断が重いからだけでなく
+      # どこから読めばいいかが出ていないからでもある。
+      #
+      # **ok / risk は決めない**（法的判断。台帳の $note が「人が規約を読むことでしか
+      # 進まない」と書いたとおり）。出すのは順序と材料だけ。
+      #
+      # **新しい赤は足さない。**未確認であること自体は check-corporate.mjs が既に
+      # 報告していて、二重に落とす意味が無い。ここが落とすのは
+      # **2つの台帳がずれたとき**（片方にしか居ないベンダー・導出の無い観点）だけ。
+      - name: Vendor clause worksheet
+        run: |
+          node scripts/vendor-clause-worksheet.mjs --selftest
+          node scripts/vendor-clause-worksheet.mjs --check
+
       - name: Credential expiry
         run: |
           node scripts/check-expiry.mjs --selftest

@@ -148,7 +148,20 @@
       "",
       "[2026-08-26] 指紋（fingerprint / fetched_at）は scripts/vendor-terms.mjs が毎日更新する。**追っているのは source が指すページであって条項本文ではない** —— apple の source は規約の一覧ページで、各契約の本文は別（PDFを含む）。changed は「読み直せ」の合図で、「条項が変わった」の断定ではない。**戻しすぎる誤りは読み直しで済み、戻さない誤りは嘘の ok が残る**ので、粗いほうへ倒してある。",
       "",
-      "**指紋の初期値は入れていない。**エージェント環境から届く2社ぶんは取れたが、あの経路は MITM プロキシ越しで、**ランナーが見る本文と同じである保証が無い。**違えば初回に偽の changed が出る。指紋は seo-daily（ランナー）が seed する。"
+      "**指紋の初期値は入れていない。**エージェント環境から届く2社ぶんは取れたが、あの経路は MITM プロキシ越しで、**ランナーが見る本文と同じである保証が無い。**違えば初回に偽の changed が出る。指紋は seo-daily（ランナー）が seed する。",
+      "",
+      "**[2026-08-28] AIに読ませようとして、4経路とも本文に届かなかった。**オーナーが「おまかせ」と委ねたので実際に試した記録。同じ経路を次の人に踏ませないために残す。",
+      "",
+      "  Resend        curl・WebFetch とも egress proxy が遮断（status 000）。**1文字も読めない**",
+      "  Apple HTML    到達はする。§2.5（所有権）は本文が返ったが、**§13（責任の制限）と §14.10（準拠法）は目次だけ。**ページが途中で truncate されている",
+      "  Apple PDF     1.2MB を取得できたが、埋め込みフォントの符号化で**文字化け**。pypdf は環境の cryptography が壊れていて import 不可。標準ライブラリで content stream を展開しても、グリフ番号のままで読めない",
+      "  Apple 再取得   同じURLに「本文が在るかだけ答えよ・推測禁止」で聞き直したら **「本文なし」**。truncate が確定した",
+      "",
+      "**この過程で、いちばん危ないものが出た。**§13 と §14.10 の本文が無いのに、要約器が**「通常はカリフォルニア州法」と一般論で埋めて返してきた。**そのまま ok にしていたら、台帳は「読んだ」と言い続ける。上の $note が言う『**見たという記録が嘘を守る**』の新しい形で、**いつ見たか（reviewed_at）はあったが、誰が見たかが無かった。**",
+      "",
+      "そこで `reviewed_by`（human / ai_draft）を足した。ai_draft は `draft_note`（何を読んで何を読めなかったか）を必ず持ち、**ワークシートの読む順序から消えない** —— 下書きで一覧から消えるなら、それは未読を隠しただけになる。**人が見るまでが未読。**",
+      "",
+      "したがって40マスは**まだ1つも埋めていない。**読めた範囲だけで断定するより、空いているままのほうが安い。"
     ],
     "clauses": [
       "liability_cap",
@@ -165,12 +178,19 @@
     "vendors": [
       {
         "id": "apple",
-        "liability_cap": "unreviewed",
-        "ip": "unreviewed",
-        "personal_data": "unreviewed",
-        "governing_law": "unreviewed",
+        "liability_cap": "risk",
+        "ip": "ok",
+        "personal_data": "risk",
+        "governing_law": "risk",
+        "$ip": "**[2026-08-28 追加・オーナー確認済み]** オーナーが §2.5 Ownership の本文を貼った。The parties acknowledge that this Agreement does not give Apple any ownership interest in Your Covered Products or Corresponding Products. 逆向きに Apple retains all rights ... in and to the Apple Software, Services, and any Updates。\n\n**線が両方向にはっきり引かれているので ok。**アプリはこちらのもの、Apple のソフトウェアは Apple のもの。この欄（生成物・投稿物の権利がどちらに残るか）に対する答えとして、曖昧さが無い。付随義務は「Apple のソフトウェアに関する権利主張を知ったら速やかに通知する」程度で、こちらの資産を削るものではない。\n\n**一時的に `draft_clauses: [\"ip\"]` で下書き扱いにしていた**（ほかの3観点は先に人が確認済みで、行の `reviewed_by` ひとつでは表せなかったため）。同日中にオーナーが確認したので外した。**この欄が必要になった経緯そのものは残しておく** —— 読みは観点ごとに起きるので、次も同じ形は出る。\n\n**なお、この本文は 08-28 の取得ツールが返してきた引用と一致した。**当時は「同じ取得で §13 と §14.10 を一般論で埋めてきたので根拠に使わない」と判断して unreviewed に置いた。**結果として引用は正しかったが、その判断は変えない** —— 当たっていたことは、当てにしてよかったことの証明にならない。",
         "source": "https://developer.apple.com/terms/",
-        "reviewed_at": null
+        "reviewed_at": "2026-08-28",
+        "reviewed_by": "human",
+        "$reviewed_by": "**経緯をそのまま残す。**(1) オーナーが Apple のページを開き、§13 / §14.10 / §3.3.3 の本文を貼った。(2) AIがその本文を読んで3観点を下書きした（`ai_draft`）。(3) オーナーが判定を確認し「これでいい」と応答したので `human` に上げた（2026-08-28）。\n\n**『人が本文を読んで決めた』の厳密な意味からは少しずれる** —— 本文を機械が読み、人が結論を承認した形。責任の所在は人にあるので `human` で正しいが、**読解そのものは機械がやっている**ことをここに書いておく。次に誰かがこの `risk` を根拠に何かを決めるなら、そこを知った上で決めるべき。\n\n**`governing_law` は判断が分かれる箇所として提示した上での承認。**「iOS開発者に一律で交渉の余地が無いのだから ok」という読みも示した上で、オーナーは `risk` のままを選んだ。",
+        "draft_note": "オーナーが Apple Developer Program License Agreement の §13 / §14.10 / §3.3.3 を画面から貼り、その本文を読んで下書きした。**この欄は下書き時点の記録として残す**（何を読んで、何を読めなかったか）。\n\n**読めた:** §13 LIMITATION OF LIABILITY（全文）／§14.10 Dispute Resolution; Governing Law（全文・Exhibit C §13 の参照込み）／§3.3.3 Data and Privacy（A〜R 全文）。\n\n**読めていない: `ip`。**§2.5 Ownership の本文は貼られていないので unreviewed のまま残した。**取得ツールで一度それらしい引用が返ってきたが、根拠に使わない** —— 同じ取得で §13 と §14.10 は本文が無いのに、要約器が『通常はカリフォルニア州法』と一般論で埋めて返してきた。実際の §14.10 は下記のとおりカリフォルニアだったが、**当たっていたことは根拠にならない。**\n\n**判定に迷いがある箇所を明示しておく。**(1) `governing_law` を risk にしたが、条項は iOS 開発者に一律で交渉の余地が無く、『標準だから ok』という読みも成り立つ。risk にしたのはこの欄の趣旨が「争えるかどうか」だから。(2) `personal_data` は、§3.3.3 が**こちらの義務**を課すもので Apple 側の処理を定める DPA ではない。**DPA の有無という問いには、この本文では答えられていない。**それでも risk にしたのは、課された義務のうち1つを現に果たせないため（$personal_data 参照）。",
+        "risk_note": "**Apple の総責任額の上限は $50。**§13 の末尾: In no event shall Apple's total liability to You under this Agreement for all damages (other than as may be required by applicable law in cases involving personal injury) exceed the amount of fifty dollars ($50.00). 加えて逸失利益・データ喪失・事業中断は**種類として全部除外**されている（大文字の段落）。\n\n**この欄が効くのは、代替が無いから。**ベンダー台帳は apple を critical / fallback なし（「配信と課金が止まる」「iOSアプリである以上ここは置き換えられない」）と記録している。$50 が意味するのは**金銭では回復しないということ**で、$clause_note が言う「止まったときに何も請求できないなら、冗長化でしか守れない」の冗長化が、この相手には存在しない。\n\nしたがってこれは**是正できる risk ではなく、抱えていることを知っておく risk。**下げる手立てがあるとすれば契約側ではなく運用側（端末Outboxのような、Appleが止まっても失われない作り）で、そこは既に一部ある。",
+        "$governing_law": "§14.10: 管轄は **Northern District of California の州・連邦裁判所に専属**、準拠法は合衆国法およびカリフォルニア州法（抵触法を除く）。**European Relationship の例外はアイルランドだが、日本法人には適用されない。**Exhibit C §13 も §14.10 を参照するので、出口は1つ。\n\n実務上の意味: **争うにはカリフォルニアへ行くしかない。**費用・代理人・時間のどれを取っても一人法人には現実的でない。この欄の趣旨（$clause_note「海外事業者が大半なので、争えるかどうかがここで決まる」）に照らすと、答えは**「争えない」。**\n\n**$50 の上限と合わせて読むこと。**請求できる額が $50 で、請求する場所がカリフォルニア。2つ合わせて初めて『契約による救済は無いに等しい』という1つの事実になる。",
+        "$personal_data": "**§3.3.3(C) が、利用者へのデータ侵害通知を契約上の義務にしている。**原文: You agree to notify Your users, in accordance with applicable law, in the event of a data breach in which user data collected from Your Application is compromised (e.g., You will send an email notifying Your users if there has been an unintentional disclosure or misuse of their user data).\n\n**その経路が無い。**⑧「障害案内の一斉配信」は `nobody` で、2026-08-27 の実測が経路を2つとも閉じている —— (a) **メール**: 宛先になりうる名簿は reminder_optin_invites だけで、同意文言が『メモが途切れた日に、そっと1通』とリマインダーに限定されており、**障害案内を送ると同意を超える。**(b) **アプリ内**: /v1/config の RemoteFlagPayload は flags / rollouts / killed / maxStaleSeconds / refreshSeconds しか運ばず、**文言を運ぶ欄も表示するUIも無い。**\n\nつまり**契約で約束した動作を、事故が起きた日に実行できない。**⑦（この行）と⑧（配信経路）と⑬（危機対応）が同じ穴を指している。**条項検査がこれを出したのは、この台帳を作った目的そのもの。**\n\nなお §3.3.3 のその他の義務（プライバシーポリシーの掲示・収集前の同意・目的外利用の禁止・Face Data / HealthKit の制限）は、現在の作りでは抵触しそうな箇所が見当たらない —— 収集しているものが少ないため。**ただしこれは本文と現況を突き合わせた結果であって、監査ではない。**"
       },
       {
         "id": "cloudflare",
@@ -183,12 +203,17 @@
       },
       {
         "id": "resend",
-        "liability_cap": "unreviewed",
+        "liability_cap": "risk",
         "ip": "unreviewed",
-        "personal_data": "unreviewed",
+        "personal_data": "risk",
         "governing_law": "unreviewed",
         "source": "https://resend.com/legal/terms-of-service",
-        "reviewed_at": null
+        "reviewed_at": "2026-08-28",
+        "reviewed_by": "human",
+        "$reviewed_by": "**経緯をそのまま残す。**(1) オーナーが Resend の Terms §21 と Privacy Policy 全文を貼った。(2) AIがその本文を読んで `liability_cap` と `personal_data` を下書きした（`ai_draft`）。(3) オーナーが判定を確認し「これでいい」と応答したので `human` に上げた（2026-08-28）。\n\napple と同じく、**本文を機械が読み、人が結論を承認した形。**責任の所在は人にあるので `human` で正しいが、**読解そのものは機械がやっている。**\n\n**`ip` と `governing_law` は `unreviewed` のまま。**該当節が貼られていないので、この行の `human` はその2つには及ばない。",
+        "draft_note": "オーナーが Terms §21 と Privacy Policy 全文を画面から貼り、それを読んで下書きした。**この欄は下書き時点の記録として残す**（何を読んで、何を読めなかったか）。\n\n**読めた:** §21 Limitation Of Liability（全文）／Privacy Policy 全19節（2026-08-27 更新版）。\n\n**読めていない:** `ip`（Terms の該当節が貼られていない）と `governing_law`（同）。**そして personal_data については、読むべき文書がそもそも別にある**（下記）。\n\n**この読みで分かった事業者の実体:** Resend の運営主体は **Plus Five Five, Inc.**（2261 Market Street #5039, San Francisco, CA 94114）。ベンダー台帳には「Resend」としか書いていなかった。",
+        "risk_note": "**上限は「支払った額」。**§21: IF THERE IS LIABILITY FOUND ON THE PART OF COMPANY, IT WILL BE LIMITED TO THE AMOUNT PAID FOR THE PRODUCTS AND/OR SERVICES, AND UNDER NO CIRCUMSTANCES WILL THERE BE CONSEQUENTIAL OR PUNITIVE DAMAGES.\n\n**Apple の $50 より弱い可能性がある。**Apple は金額が固定だが、こちらは**支払額に連動**する。ベンダー台帳の `spend_cap_note` は「送信量課金」で、無料枠中心の月なら**上限はほぼゼロ**になる。**安く使っているほど、救済も小さくなる。**\n\n**さらに §21 の前段は責任制限ではなく免責の引き受け。**YOU WILL HOLD US ... HARMLESS FOR ANY INDIRECT, PUNITIVE, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGE, HOWEVER IT ARISES (INCLUDING ATTORNEYS' FEES ...)。**こちらが Resend を免責する側**に立つ条項なので、「上限が低い」だけの話ではない。\n\n**この欄が効くのは代替が無いから。**ベンダー台帳は resend を critical / fallback なし（「代替なし。送信経路が1本しかない」「アプリの主機能が止まる」）と記録している。**渡しているのは宛先アドレスとメモ本文で、台帳が「最も重い」と書いている行。**そこに実質ゼロの上限が乗っている。",
+        "$personal_data": "**貼られた Privacy Policy は、読むべき文書ではなかった。**これが今回いちばん重要な発見。\n\n冒頭が範囲を明示している —— Our Privacy Policy governs your visit to https://resend.com, and explains how we collect, safeguard and disclose information that results from your use of our Service. そして §2 で **For the purpose of this Privacy Policy, we are a Data Controller of your data.**\n\nつまりこの文書が扱うのは**こちらがResendの顧客として渡すアカウント情報**（氏名・メールアドレス・住所・Cookie・Usage Data）であって、**こちらがResend経由で送る宛先アドレスとメモ本文ではない。**後者について Resend は Processor の立場になるはずで、それを定めるのは DPA。**この文書には無い。**\n\n**それでも risk にしたのは、読めた範囲だけで3つの事実が出たため:**\n\n1. **越境移転はある。**§7: If you are located outside the United States and choose to provide information to us, please note that we transfer the data, including Personal Data, **to the United States** and process it there.\n2. **再委託はある。**§13 Service Providers ／ §14 Analytics（Plausible・Mixpanel）／ §15 Payments（Stripe）。**Subprocessors の一覧は別ページ**（https://resend.com/legal/subprocessors）。\n3. **DPA は未読。**ベンダー台帳の `dpa_reviewed` も null。**台帳で最も重いデータを渡している相手について、その扱いを定める文書をまだ1度も読んでいない。**\n\n**次に読むべきもの（この順）:** https://resend.com/legal/subprocessors ／ https://resend.com/security/gdpr ／ https://resend.com/security/soc-2 ／ そこから辿れる DPA。**Privacy Policy をもう一度読んでも、この問いには答えが無い。**"
       },
       {
         "id": "anthropic",
@@ -250,7 +275,8 @@
         "ip": "unreviewed",
         "personal_data": "unreviewed",
         "governing_law": "unreviewed",
-        "source": null,
+        "source": "https://muumuu-domain.com/?mode=kiyaku",
+        "$source": "**[2026-08-28] オーナーが画面で開いて渡したURL。**この作業環境からは muumuu-domain.com に到達できない（curl / WebFetch の両方が egress proxy に遮断された）ので、**機械側では未確認のまま入っている。**確かめるのは 08-31（月）の seo-daily —— scripts/vendor-terms.mjs が取得し、本文らしさ（長さと語）を見て指紋を置く。**取れなければ指紋は付かない**ので、そこが空のままなら URL か到達性のどちらかが違う、と読める",
         "reviewed_at": null
       }
     ]

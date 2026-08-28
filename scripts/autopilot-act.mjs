@@ -313,15 +313,25 @@ export const CLOSE_CHECKS = {
    * 取り残しが解消したら閉じる。**判定できないときは閉じない。**
    * 走査が取れなかった回（null）を「取り残しは無い」と読むと、故障が消える方向に効く。
    */
-  branch_caught_up({ pr }, ctx) {
-    if (!Number.isInteger(pr)) return { closed: false, evidence: 'PR番号が指定されていない' };
+  branch_caught_up({ pr, branch }, ctx) {
+    const byBranch = typeof branch === 'string' && branch.length > 0;
+    if (!byBranch && !Number.isInteger(pr)) {
+      return { closed: false, evidence: 'ブランチ名もPR番号も指定されていない' };
+    }
     if (!Array.isArray(ctx.orphans)) {
       return { closed: false, evidence: '取り残しの走査結果を取得できず判定不能（解消したという意味ではない）' };
     }
-    const still = ctx.orphans.find((o) => o.pr === pr);
+    // **PR番号でも引けるようにしておく。**ブランチ単位へ畳む前（〜2026-08-28）に
+    // 立った行は params が {pr} のまま台帳に残る。走査がブランチ単位を返すように
+    // なった後、pr だけで探すと**必ず見つからず「解消」と読まれて未解決のまま閉じる。**
+    // 閉じる方向へ倒れる誤りなので、ここは互換を残す側にする。
+    const still = byBranch
+      ? ctx.orphans.find((o) => o.branch === branch)
+      : ctx.orphans.find((o) => o.pr === pr || (o.prs ?? []).includes(pr));
+    const label = byBranch ? branch : `#${pr}`;
     return still
-      ? { closed: false, evidence: `#${pr} はまだ ${still.ahead_by} 件先にある` }
-      : { closed: true, evidence: `#${pr} の取り残しは解消（走査に出てこない）` };
+      ? { closed: false, evidence: `${label} はまだ ${still.ahead_by} 件先にある` }
+      : { closed: true, evidence: `${label} の取り残しは解消（走査に出てこない）` };
   },
 
   manual({ observed } = {}, _ctx) {
@@ -497,22 +507,68 @@ export function derive(ctx) {
   // **自動修復はさせない。**取り残しの中身は台帳のこともあれば書きかけのこともあり、
   // 機械が中身を見ずに cherry-pick すると「訂正が生き残っているかの確認」を飛ばす。
   // 検知して起票するところまでで、適用はセッションが行う。
+  //
+  // **行はブランチ単位。**PR単位で立てると、使い回されたブランチが
+  // PRの数だけ行になる（fetchOrphanedCommits の【なぜブランチ単位か】）。
+  //
+  // 【2026-08-28 決定: auto を付ける前に1周見る】
+  // この日 `paths` / `ledger_only` を足し、オーナーが
+  // `data/autopilot-status.json` を self_repair.may_modify へ入れた（明示の委譲）。
+  // **権限と材料は揃ったが、auto はまだ付けない。**
+  // 「作った」と「動いた」を分ける —— まず日次runが実際に内訳を出すのを見る。
+  //
+  // 付けるときの形（この順で、飛ばさない）:
+  //   1. 対象は `ledger_only === true` の行だけ（false と null は人が読む）
+  //   2. **追記型と状態型を分ける。**runs.json は --append（run_id で冪等）、
+  //      AUTOPILOT_LOG.md は追記、**status.json は載せ直さず再生成**
+  //      —— 現在値を持つ台帳なので、古い写しを当てると巻き戻る
+  //   3. **まず「本当に欠けているか」を見る。**取り残しの判定はSHAで行うので、
+  //      内容が別コミットで着地済みでも行は立つ（08-28 の実測で4件中3件がそれ）
+  //   4. PRを出して SEO Validation → auto-merge に乗せる。直接 main を触らない
+  const orphanIds = new Set();
   for (const o of ctx.orphans ?? []) {
+    const id = `act-orphaned-branch-${orphanSlug(o.branch)}`;
+    // ブランチ名を均した結果が衝突したら**畳まずに分ける。**黙って1行に
+    // まとめると、別々の取り残しが片方の閉じ条件で消える。
+    const uniq = orphanIds.has(id) ? `${id}-${o.pr}` : id;
+    orphanIds.add(uniq);
+    const all = (o.prs ?? [o.pr]).filter((n) => Number.isInteger(n));
     out.push({
-      id: `act-orphaned-pr-${o.pr}`,
-      title: `PR #${o.pr} のマージ後に ${o.ahead_by} コミットが取り残されている`,
-      detail: `ブランチ ${o.branch} が、マージ時の head（${o.merged_sha.slice(0, 7)}）より`
+      id: uniq,
+      title: `ブランチ ${o.branch} に ${o.ahead_by} コミットが取り残されている`
+        + `（PR #${o.pr}${all.length > 1 ? ` ほか${all.length - 1}件` : ''} のマージ後）`,
+      detail: `ブランチ ${o.branch} が、最後のマージ（PR #${o.pr} / head ${o.merged_sha.slice(0, 7)}）より`
         + `${o.ahead_by} 件先にあり、**それらは main にも無い**: ${o.commits.join(', ')}。`
-        + (o.landed_elsewhere ? `（別の${o.landed_elsewhere}件は後続PRで着地済みなので除外した）` : '')
+        + (o.landed_elsewhere ? `（別の${o.landed_elsewhere}件は main 側のコミットなので除外した）` : '')
+        + (all.length > 1
+          ? `\n\nこのブランチは ${all.map((n) => `#${n}`).join(' ')} で使い回されている。`
+            + '**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**'
+          : '')
         + '\n\n'
         + '**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**'
         + 'PRが既に閉じているため、次の検証が拾う先が無い。\n\n'
         + '**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。'
-        + '機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。',
+        + '機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n'
+        // [2026-08-28] **内訳をここに出す。**無いと拾う側が毎回ブランチを取り直して
+        // git show --stat を叩く。**判断に要る材料が起票に載っていないと、判断は起きない。**
+        + (o.paths === null || o.paths === undefined
+          ? '**触ったパスは取れなかった。**中身は自分で見ること（内訳が無いことを「台帳だけ」と読まない）。'
+          : `触ったパス: ${o.paths.join(' / ')}\n\n`
+            + (o.ledger_only
+              ? '**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、'
+                + '**再投入してよいかは別問題** —— 状態を持つ台帳'
+                + '（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。'
+                + '追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n'
+                + '**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで'
+                + '着地していることがある —— 取り残しの判定はSHAで行うので、'
+                + '**内容が着地済みでも行は立つ。**'
+              : '**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。')),
       source: 'orphan',
       touches: [],
       auto: null,
-      close_check: { kind: 'branch_caught_up', params: { pr: o.pr } },
+      // 台帳には載せない（旧IDの行を引き当てるためだけの手掛かり）
+      prs: all,
+      close_check: { kind: 'branch_caught_up', params: { branch: o.branch } },
     });
   }
 
@@ -690,10 +746,23 @@ export function derive(ctx) {
  */
 export function merge(ledger, derived, today) {
   const byId = new Map(ledger.actions.map((a) => [a.id, a]));
+  // **行IDの付け替え（取り残し: PR単位 → ブランチ単位・2026-08-28）を、行を増やさずに渡す。**
+  // 旧IDの行は閉じ条件 {pr} のまま生きている（互換は branch_caught_up 側にある）ので、
+  // 同じ取り残しに新IDで行を立てると**2行並ぶ** —— 畳むための変更で1行増える。
+  // 既存の行があればそこへ流し、閉じるのは今までどおり閉じ条件に任せる。
+  const legacyByPr = new Map();
+  for (const a of ledger.actions) {
+    if (a.state !== 'open' || a.close_check?.kind !== 'branch_caught_up') continue;
+    const n = a.close_check?.params?.pr;
+    if (Number.isInteger(n)) legacyByPr.set(n, a);
+  }
   const added = [];
   for (const d of derived) {
-    if (byId.has(d.id)) {
-      const cur = byId.get(d.id);
+    const legacy = d.source === 'orphan' && !byId.has(d.id)
+      ? (d.prs ?? []).map((n) => legacyByPr.get(n)).find(Boolean)
+      : null;
+    const cur = byId.get(d.id) ?? legacy;
+    if (cur) {
       cur.last_seen_jst = today;
       // 件数など、事実として動くものだけ追従させる
       if (cur.state === 'open') { cur.title = d.title; cur.detail = d.detail; }
@@ -770,8 +839,13 @@ export function summarize(ledger, matrix, today) {
 
 
 // ============================================================
-// マージ後に取り残されたコミット
+// マージ後に取り残されたコミット（orphaned-post-merge）
 // ============================================================
+// ※ 括弧内はこの機能の識別子。台帳 act-detect-orphaned-post-merge-commits の
+//   閉じ条件（file_contains）がこの文字列を探す。**実装が入っても文字列が
+//   無いと「まだ無い」と報告し続ける** —— 実際 08-26 の実装から2日、
+//   「scripts/autopilot-act.mjs に「orphaned-post-merge」がまだ無い」を
+//   出し続けていた。消さないこと。
 // **auto-merge は「検証済みSHAだけ」をマージする設計の帰結。**セッションが記事のPRを
 // 出した後に台帳を書くと、その push はマージ済みPRに届かず、拾う先が無くなる。
 // CLAUDE.md は「そのpushが起こす次の検証が拾う」と書いているが、
@@ -799,9 +873,140 @@ export function summarize(ledger, matrix, today) {
 //   PR #586  候補1 ∩ main無し3 = **1件**（ee4e37c）  ← 本物
 //   PR #547  候補0 ∩ main無し2 = 0件                  ← きれい
 //   PR #593  候補6 ∩ main無し1 = **1件**（2b0a702）   ← ①だけなら6件と誤検知していた
+//
+// ============================================================
+// 【なぜブランチ単位か】2026-08-28 に3件目の崩れ方が出た
+// ============================================================
+// 上の②は「コミットの重複」を潰したが、**行の重複は潰していなかった。**
+// 走査はマージ済みPRごとに回るので、**1本のブランチが複数PRで使い回されると、
+// 同じ取り残しがPRの数だけ行になる。** 08-28 の日報がその形で出た:
+//
+//   claude/simplememo-self-improving-pr-ki8vgo  fb12596  → #642 #643 #644 #647 #648（5行）
+//   claude/obsidian-sync-implementation-5g9fs1  4d56858  → #668 #669 #670（3行）
+//   claude/obsidian-auto-20260827               813b335  → #660（1行）
+//
+// **人間キューは9件と表示されたが、人が下す判断は3つしかない。**
+// ブランチ使い回しは②を足したときの根拠そのもの（「PR #593 のブランチが
+// 複数PRで使い回された」）で、**同じ事実を知っていながら片側だけ直していた。**
+//
+// 実態の3倍で出るキューは「多すぎて読まれない」方向に壊れる。取り残しは
+// **ブランチ1本＝人の判断1回**なので、行もブランチ単位で立てる。
+// PR番号は消さずに `prs` に全部載せる（どのマージから来たかは追える）。
+//
+// **畳むとき、和を取ってはいけない。**最初にそう書いて実データで外した。
+// 理屈のうえでは「②はブランチ側の性質でPRに依らないから、古いPRの積は
+// 新しいPRの積の上位集合。和＝いちばん古いPRの積」に見える。**②の意味を
+// 取り違えている。**このリポジトリは squash マージなので、
+// **ブランチのコミットは main に着地しても sha としては main に残らない。**
+// ②「main に無い」は「まだ着地していない」ではなく「sha が一致しない」しか
+// 言っておらず、squash 済みのコミットも②に残り続ける。
+//
+// 実測（2026-08-28・claude/obsidian-memo-automation-tqsd8z・PR #688〜#717 の25本）:
+//
+//   ②（main に無い）                  … 21件   ← squash 済みのぶんが全部残る
+//   ①（最新 #717 のマージ head 以降）  … 2件（1c6163e, a3949d1）
+//   ① ∩ ②                             … **1件**（a3949d1）
+//   和を取ると                          … 21件と報告する（20件が嘘）
+//
+// **最後のマージより前のコミットは、どれかのPRで着地している**
+// （マージ時 head はその時点のブランチ先端なので、それ以前は全部その中に入る）。
+// したがって候補は**最後のマージ以降だけ**で、ブランチ単位の答えは
+// **最新マージPRの積そのもの。**古いPRの結果は使わない。
+//
+// ============================================================
+// 【1ページでは覆えない】同じ日に測って出た2つ目の穴
+// ============================================================
+// 走査は closed PR を `per_page=30` の**1ページだけ**読んでいた。
+// ブランチ使い回しは「1行が何行にもなる」だけでなく、**PR一覧を溢れさせる。**
+//
+// 実測（2026-08-28）: 当日 #688〜#717 の25本が1本のブランチからマージされ、
+// 30件のページを埋めた。結果、前日まで取り残しが載っていた
+//
+//   claude/obsidian-auto-20260827               813b335  ← **今も取り残しあり**
+//   claude/obsidian-sync-implementation-5g9fs1  2e9d8c8  ← **今も取り残しあり**
+//
+// の2本が**一覧から溢れて走査に出てこなくなった。**閉じ条件は
+// 「走査に出てこない＝解消」なので、**未解決のまま2件が閉じる。**
+// 溢れさせたのは、同じブランチを25回マージしたこと自体である。
+//
+// 対処は2つ:
+//   - 窓（7日）を覆うまでページを辿る。**覆えなければ null**（途中までの
+//     一覧は「載らなかったブランチ＝解消」に化けるので、返してはいけない）
+//   - compare は**ブランチ1本につき1回**。答えは最新マージPRの積なので、
+//     PRごとに叩く必要が最初から無い（25本の日に50回叩いて24回捨てていた）
 
 /** 何日ぶんのマージ済みPRを見るか。**古い取り残しは拾っても直せない。** */
 export const ORPHAN_LOOKBACK_DAYS = 7;
+
+/**
+ * closed PR を何ページまで辿るか（1ページ100件）。**上限に当たったら null を返す**
+ * ——途中までの一覧は「載らなかったブランチ＝解消」に化ける。
+ */
+export const ORPHAN_MAX_PAGES = 10;
+
+/**
+ * **運転そのものが毎日書き換える台帳。**ここだけを触る取り残しは「再投入の候補」で、
+ * それ以外を含むものは書きかけかもしれないので中身を読むしかない。
+ *
+ * [2026-08-28] この一覧を足したのは、**拾う側が毎回同じ手作業をしていた**から。
+ * 起票には「N コミット取り残し」としか書いておらず、
+ * 台帳の更新なのか書きかけなのかを知るには、ブランチを取り直して
+ * `git show --stat` を叩くしかない。実際この日、5ブランチぶん手で叩いた。
+ * **判断に要る材料が起票に載っていないと、判断は起きない。**
+ *
+ * **この一覧は「自動で適用してよい」の意味ではない。**適用の可否は別問題で、
+ * 現に `data/autopilot-status.json` は self_repair.may_modify に入っていない
+ * （＝無人ハンドラは触れない）。ここが答えるのは「読む前に見当がつくか」だけ。
+ */
+export const OPERATING_LEDGERS = [
+  'data/autopilot-runs.json',
+  'data/autopilot-status.json',
+  'data/autopilot-cost.json',
+  'data/autopilot-actions.json',
+  'docs/obsidian/AUTOPILOT_LOG.md',
+  'growth/content/coverage-queue.json',
+];
+
+/** 内訳を読むために叩くコミット数の上限。**超えたら断定しない**（下記）。 */
+export const ORPHAN_MAX_COMMIT_READS = 20;
+
+/**
+ * 台帳だけを触っているか。**paths が取れていなければ `null`。**
+ *
+ * `false`（＝中身を読む必要がある）と混ぜないこと。取れなかったことを
+ * 「読む必要がある」に倒すのは安全側だが、**理由が消える** ——
+ * 「読んだら書きかけだった」と「そもそも読めなかった」は次の一手が違う。
+ */
+export function classifyOrphanPaths(paths) {
+  if (!Array.isArray(paths) || paths.length === 0) return null;
+  return paths.every((p) => OPERATING_LEDGERS.includes(p));
+}
+
+/**
+ * 取り残しコミットが触ったパスを集める。**1つでも取れなければ null。**
+ * 部分的な一覧は「台帳だけ」と読まれうるので、途中経過を返さない。
+ */
+async function fetchOrphanPaths(get, repo, commits) {
+  if (commits.length > ORPHAN_MAX_COMMIT_READS) return null;
+  const out = new Set();
+  for (const c of commits) {
+    let detail;
+    try {
+      detail = await get(`https://api.github.com/repos/${repo}/commits/${encodeURIComponent(c.sha)}`);
+    } catch { return null; }
+    if (!Array.isArray(detail?.files)) return null;
+    for (const f of detail.files) if (f?.filename) out.add(f.filename);
+  }
+  return [...out].sort();
+}
+
+/**
+ * 行ID用にブランチ名を均す。**衝突しないことだけが要件**で、可逆である必要はない。
+ * 万一衝突したら derive 側が PR 番号を足して分ける（黙って畳まない）。
+ */
+export function orphanSlug(branch) {
+  return String(branch).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
 
 /**
  * マージ後に push された取り残しを探す。**取れなかったら null**
@@ -821,36 +1026,77 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
   };
   try {
     const since = new Date(Date.parse(`${today}T00:00:00Z`) - ORPHAN_LOOKBACK_DAYS * 86400000);
-    const prs = await get(`https://api.github.com/repos/${repo}/pulls`
-      + '?state=closed&sort=updated&direction=desc&per_page=30');
+    // **窓の中のマージ済みPRを全部拾う。**1ページ固定だと覆えない（下の
+    // 【1ページでは覆えない】）。updated desc なので、ページ末尾が窓より古く
+    // なった時点で以降も全部古い（merged_at <= updated_at なので取りこぼさない）。
+    const merged = [];
+    let covered = false;
+    for (let page = 1; page <= ORPHAN_MAX_PAGES; page++) {
+      const batch = await get(`https://api.github.com/repos/${repo}/pulls`
+        + `?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`);
+      if (!Array.isArray(batch) || batch.length === 0) { covered = true; break; }
+      for (const pr of batch) {
+        if (pr.merged_at && Date.parse(pr.merged_at) >= since.getTime()) merged.push(pr);
+      }
+      // 覆えたと言えるのは**positive に判定できたときだけ。**
+      if (batch.length < 100) { covered = true; break; } // 一覧の終端
+      const last = batch[batch.length - 1];
+      if (last?.updated_at && Date.parse(last.updated_at) < since.getTime()) { covered = true; break; }
+    }
+    // **覆いきれなかったら null。**途中までの結果を返すと、載らなかった
+    // ブランチが「走査に出てこない＝解消」と読まれて**未解決のまま閉じる。**
+    if (!covered) {
+      console.error('ORPHAN_SCAN_INCOMPLETE',
+        { pages: ORPHAN_MAX_PAGES, note: '7日窓を覆えなかった（解消と読ませない）' });
+      return null;
+    }
+    // **ブランチごとに、最後のマージだけ見る。**答えは最新マージPRの積なので、
+    // compare はブランチ1本につき1回でよい。PRごとに回すと、1日25本の日に
+    // 50回叩いたうえで同じ答えを24回捨てることになる。
+    const latest = new Map();
+    const prsOf = new Map();
+    for (const pr of merged) {
+      const br = pr.head?.ref;
+      if (!br) continue;
+      if (!prsOf.has(br)) prsOf.set(br, []);
+      prsOf.get(br).push(pr.number);
+      const cur = latest.get(br);
+      if (!cur || Date.parse(pr.merged_at) > Date.parse(cur.merged_at)) latest.set(br, pr);
+    }
     const out = [];
-    for (const pr of prs) {
-      if (!pr.merged_at || Date.parse(pr.merged_at) < since.getTime()) continue;
-      // ① マージ後に push されたもの ② main に無いもの —— **その積だけが取り残し。**
+    for (const [branch, pr] of latest) {
+      // ① 最後のマージ後に push されたもの ② main に無いもの —— **その積だけが取り残し。**
       let after;
       let notOnBase;
       try {
         [after, notOnBase] = await Promise.all([
           get(`https://api.github.com/repos/${repo}/compare/`
-            + `${encodeURIComponent(pr.head.sha)}...${encodeURIComponent(pr.head.ref)}`),
+            + `${encodeURIComponent(pr.head.sha)}...${encodeURIComponent(branch)}`),
           get(`https://api.github.com/repos/${repo}/compare/`
-            + `${encodeURIComponent(pr.base.ref)}...${encodeURIComponent(pr.head.ref)}`),
+            + `${encodeURIComponent(pr.base.ref)}...${encodeURIComponent(branch)}`),
         ]);
       } catch {
         continue; // ブランチが消えている（＝取り残しは起こりえない）
       }
       const missing = new Set((notOnBase.commits ?? []).map((c) => c.sha));
       const orphaned = (after.commits ?? []).filter((c) => missing.has(c.sha));
-      if (orphaned.length > 0) {
-        out.push({
-          pr: pr.number,
-          branch: pr.head.ref,
-          merged_sha: pr.head.sha,
-          ahead_by: orphaned.length,
-          landed_elsewhere: (after.commits ?? []).length - orphaned.length,
-          commits: orphaned.map((c) => c.sha.slice(0, 7)),
-        });
-      }
+      if (orphaned.length === 0) continue;
+      // ③ **中身の内訳。**「台帳の更新なら再投入、書きかけなら捨てる」を決めるのに
+      // 要るのはこの一覧で、無いと拾う側がブランチを取り直して git show を叩く。
+      const paths = await fetchOrphanPaths(get, repo, orphaned);
+      // **1ブランチ = 1件。**PRごとに返すと、使い回されたブランチが
+      // PRの数だけ行になる（derive 側の【なぜブランチ単位か】を見ること）。
+      out.push({
+        pr: pr.number,
+        prs: prsOf.get(branch).slice().sort((a, b) => a - b),
+        branch,
+        merged_sha: pr.head.sha,
+        ahead_by: orphaned.length,
+        landed_elsewhere: (after.commits ?? []).length - orphaned.length,
+        commits: orphaned.map((c) => c.sha.slice(0, 7)),
+        paths,
+        ledger_only: classifyOrphanPaths(paths),
+      });
     }
     return out;
   } catch (e) {
@@ -1392,6 +1638,60 @@ async function selftest() {
     t('**後続PRで着地済みのコミットを取り残しに数えない**',
       found.length === 1 && found[0].ahead_by === 1 && found[0].commits[0] === 'orphan1');
     t('着地済みの件数を別に持つ（なぜ除いたかが読める）', found[0].landed_elsewhere === 5);
+    t('**内訳が取れなければ paths は null**（false と混ぜない）',
+      found[0].paths === null && found[0].ledger_only === null);
+  }
+  // [2026-08-28] **触ったパスの内訳。**無いと拾う側が毎回 git show --stat を叩く。
+  {
+    const mkOrphanFetch = (filesBySha) => async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([{
+          number: 700, merged_at: '2026-08-28T04:00:00Z',
+          head: { sha: 'AAA', ref: 'br' }, base: { ref: 'main' },
+        }]) };
+      }
+      const m = url.match(/\/commits\/([^/?]+)$/);
+      if (m) {
+        const files = filesBySha[m[1]];
+        if (files === undefined) throw new Error('404');
+        return { ok: true, json: async () => ({ files: files.map((filename) => ({ filename })) }) };
+      }
+      if (url.includes('compare/AAA...br')) {
+        return { ok: true, json: async () => ({ commits: [{ sha: 'o1' }, { sha: 'o2' }] }) };
+      }
+      return { ok: true, json: async () => ({ commits: [{ sha: 'o1' }, { sha: 'o2' }] }) };
+    };
+    const ledger = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+      fetchImpl: mkOrphanFetch({
+        o1: ['data/autopilot-runs.json', 'docs/obsidian/AUTOPILOT_LOG.md'],
+        o2: ['data/autopilot-status.json'],
+      }),
+    });
+    t('**触ったパスを重複なく並べて持つ**',
+      ledger[0].paths.join(',')
+        === 'data/autopilot-runs.json,data/autopilot-status.json,docs/obsidian/AUTOPILOT_LOG.md');
+    t('**運転台帳だけなら ledger_only: true**', ledger[0].ledger_only === true);
+
+    const mixed = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+      fetchImpl: mkOrphanFetch({
+        o1: ['data/autopilot-runs.json'],
+        o2: ['blog/new-article.html'],
+      }),
+    });
+    t('**台帳の外を1つでも触っていれば false**（書きかけを台帳扱いしない）',
+      mixed[0].ledger_only === false);
+
+    const partial = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+      fetchImpl: mkOrphanFetch({ o1: ['data/autopilot-runs.json'] }), // o2 は 404
+    });
+    t('**1コミットでも読めなければ全体を null**（部分的な一覧を「台帳だけ」と読ませない）',
+      partial[0].paths === null && partial[0].ledger_only === null);
+
+    t('空の一覧は判定しない（true にしない）', classifyOrphanPaths([]) === null);
+    t('配列でなければ判定しない', classifyOrphanPaths(undefined) === null);
+    t('**上限を超えたら断定しない**',
+      classifyOrphanPaths(null) === null
+      && ORPHAN_MAX_COMMIT_READS > 0);
   }
   {
     // 全部 main に着地している＝取り残しゼロ。**行を立てない。**
@@ -1407,6 +1707,128 @@ async function selftest() {
     };
     const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
     t('マージ後に push が無ければ取り残しゼロ', found.length === 0);
+  }
+  {
+    // **2026-08-28 の実データの形。**1本のブランチを5つのPRで使い回しており、
+    // PR単位で行を立てると同じ取り残し（fb12596）が5行になる。
+    const mk = (shas) => ({ commits: shas.map((sha) => ({ sha })) });
+    const routes = {
+      // 古いマージ #642 から見ると9件先（見ないほうの窓）
+      'compare/A642...ki8vgo': mk(['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'fb12596']),
+      // 最後のマージ #648 から見ると3件先
+      'compare/A648...ki8vgo': mk(['c7', 'c8', 'fb12596']),
+      'compare/main...ki8vgo': mk(['fb12596']),
+    };
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([
+          { number: 648, merged_at: '2026-08-26T01:00:00Z', head: { sha: 'A648', ref: 'ki8vgo' }, base: { ref: 'main' } },
+          { number: 642, merged_at: '2026-08-25T01:00:00Z', head: { sha: 'A642', ref: 'ki8vgo' }, base: { ref: 'main' } },
+        ]) };
+      }
+      return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
+    };
+    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    t('**同じブランチの複数PRを1件に畳む**（08-28 は9行＝3判断で出た）', found.length === 1);
+    t('畳んでも取り残しの中身は変わらない',
+      found[0].ahead_by === 1 && found[0].commits.join() === 'fb12596');
+    t('どのPRから来たかを全部残す', found[0].prs.join() === '642,648');
+    t('代表は**最後にマージされたPR**（マージ時 head もそこから）',
+      found[0].pr === 648 && found[0].merged_sha === 'A648');
+    t('着地済みは最新マージの①から数える', found[0].landed_elsewhere === 2);
+  }
+  {
+    // **畳むときに和を取ってはいけない。**2026-08-28 の実データの形をそのまま置く
+    // （claude/obsidian-memo-automation-tqsd8z・PR #688〜#717）。squash マージでは
+    // 着地済みのコミットも②に残るので、和を取ると 1件が 21件に化ける。
+    const mk = (shas) => ({ commits: shas.map((sha) => ({ sha })) });
+    const routes = {
+      // 古いマージ以降＝squash 済みが大量に見える
+      'compare/B700...br2': mk(['landed1', 'landed2', 'landed3', 'orphanB']),
+      // 最新マージ以降＝main の squash コミットと、まだ着地していない1件
+      'compare/B701...br2': mk(['onmain1', 'orphanB']),
+      // ②は「sha が main に無い」しか言わない（着地済みの3件もここに残る）
+      'compare/main...br2': mk(['landed1', 'landed2', 'landed3', 'orphanB']),
+    };
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([
+          { number: 701, merged_at: '2026-08-26T01:00:00Z', head: { sha: 'B701', ref: 'br2' }, base: { ref: 'main' } },
+          { number: 700, merged_at: '2026-08-24T01:00:00Z', head: { sha: 'B700', ref: 'br2' }, base: { ref: 'main' } },
+        ]) };
+      }
+      return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
+    };
+    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    t('**squash 済みを取り残しに数えない**（和なら4件と誤報していた）',
+      found.length === 1 && found[0].ahead_by === 1 && found[0].commits.join() === 'orphanB');
+    t('答えは**最新マージPRの積**（古いPRの結果は使わない）',
+      found[0].pr === 701 && found[0].merged_sha === 'B701');
+    t('着地済みの件数も最新マージから数える', found[0].landed_elsewhere === 1);
+  }
+  {
+    // **最新マージで解消していればゼロ件。**古いPRの結果が居座らないこと。
+    const mk = (shas) => ({ commits: shas.map((sha) => ({ sha })) });
+    const routes = {
+      'compare/C1...br3': mk(['gone1']),
+      'compare/C2...br3': mk([]),
+      'compare/main...br3': mk(['gone1']),
+    };
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => ([
+          { number: 811, merged_at: '2026-08-26T01:00:00Z', head: { sha: 'C2', ref: 'br3' }, base: { ref: 'main' } },
+          { number: 810, merged_at: '2026-08-24T01:00:00Z', head: { sha: 'C1', ref: 'br3' }, base: { ref: 'main' } },
+        ]) };
+      }
+      return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
+    };
+    t('**後のマージが拾っていれば行を立てない**（古いPRの結果を残さない）',
+      (await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch })).length === 0);
+  }
+  {
+    // **一覧は7日窓を覆うまで辿る。**2026-08-28、1本のブランチから25本が
+    // マージされて1ページ（30件）を埋め、**取り残しが残っている別の2本が
+    // 一覧から溢れた。**溢れた行は「走査に出てこない＝解消」で閉じる。
+    const mk = (shas) => ({ commits: shas.map((sha) => ({ sha })) });
+    const page1 = Array.from({ length: 100 }, (_, i) => ({
+      number: 1000 + i, merged_at: '2026-08-26T01:00:00Z', updated_at: '2026-08-26T01:00:00Z',
+      head: { sha: 'NOISY', ref: 'noisy' }, base: { ref: 'main' },
+    }));
+    const page2 = [{
+      number: 660, merged_at: '2026-08-25T01:00:00Z', updated_at: '2026-08-25T01:00:00Z',
+      head: { sha: 'QUIET', ref: 'quiet' }, base: { ref: 'main' },
+    }];
+    const routes = {
+      'compare/NOISY...noisy': mk([]),
+      'compare/main...noisy': mk([]),
+      'compare/QUIET...quiet': mk(['813b335']),
+      'compare/main...quiet': mk(['813b335']),
+    };
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) {
+        const p2 = url.includes('page=2');
+        return { ok: true, json: async () => (p2 ? page2 : page1) };
+      }
+      return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
+    };
+    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', { fetchImpl: fakeFetch });
+    t('**1ページ目に収まらないブランチを取りこぼさない**',
+      found.length === 1 && found[0].branch === 'quiet' && found[0].commits.join() === '813b335');
+  }
+  {
+    // **窓を覆えなかったら null。**途中までの一覧を返すと、載らなかった
+    // ブランチが解消と読まれて閉じる（空配列を返さないのと同じ理由）。
+    const full = Array.from({ length: 100 }, (_, i) => ({
+      number: 2000 + i, merged_at: '2026-08-28T01:00:00Z', updated_at: '2026-08-28T01:00:00Z',
+      head: { sha: 'X', ref: 'x' }, base: { ref: 'main' },
+    }));
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) return { ok: true, json: async () => full };
+      return { ok: true, json: async () => ({ commits: [] }) };
+    };
+    t('**窓を覆えなかったら null（途中までを返さない）**',
+      await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', { fetchImpl: fakeFetch }) === null);
   }
   {
     // **取得に失敗したら null。**空配列だと「取り残しは無い」になる
@@ -1428,13 +1850,71 @@ async function selftest() {
   t('**空配列と未取得を区別する**（[] は「取り残し無し」）',
     CLOSE_CHECKS.branch_caught_up({ pr: 586 }, { orphans: [] }).closed === true
     && CLOSE_CHECKS.branch_caught_up({ pr: 586 }, { orphans: null }).closed === false);
+  // ブランチ単位で引く（新しい行）
+  t('ブランチ名で引ける',
+    CLOSE_CHECKS.branch_caught_up({ branch: 'claude/x' }, { orphans: [{ branch: 'claude/x', ahead_by: 2 }] }).closed === false);
+  t('ブランチが走査に出てこなければ閉じる',
+    CLOSE_CHECKS.branch_caught_up({ branch: 'claude/x' }, { orphans: [{ branch: 'claude/y', ahead_by: 1 }] }).closed === true);
+  t('ブランチ名もPR番号も無ければ閉じない',
+    CLOSE_CHECKS.branch_caught_up({}, { orphans: [] }).closed === false);
+  // **畳む前に立った行（params が {pr}）を、畳んだ後の走査でも引けること。**
+  // ここが抜けると、未解決のまま「解消」と書いて閉じる —— 閉じる方向の誤り。
+  t('**旧い {pr} の行を、畳んだ後の走査でも解消と読まない**',
+    CLOSE_CHECKS.branch_caught_up({ pr: 642 },
+      { orphans: [{ pr: 648, prs: [642, 643, 648], branch: 'claude/x', ahead_by: 1 }] }).closed === false);
+  t('旧い {pr} の行も、本当に解消すれば閉じる',
+    CLOSE_CHECKS.branch_caught_up({ pr: 642 }, { orphans: [] }).closed === true);
   {
-    const o = derive({ orphans: [{ pr: 586, branch: 'claude/x', merged_sha: 'abcdef1234', ahead_by: 1, commits: ['ee4e37c'] }] })
+    const o = derive({ orphans: [{ pr: 586, prs: [586], branch: 'claude/x', merged_sha: 'abcdef1234', ahead_by: 1, commits: ['ee4e37c'] }] })
       .filter((a) => a.source === 'orphan');
-    t('取り残しから行が立つ', o.length === 1 && o[0].id === 'act-orphaned-pr-586');
+    t('取り残しから行が立つ', o.length === 1 && o[0].id === 'act-orphaned-branch-claude-x');
     t('**取り残しに auto を付けない**（中身を見ずに cherry-pick しない）', o[0].auto === null);
     t('取り残しの行に閉じ条件がある', o[0].close_check?.kind === 'branch_caught_up');
+    t('閉じ条件はブランチで引く', o[0].close_check?.params?.branch === 'claude/x');
     t('走査が未取得なら行を立てない', derive({ orphans: null }).filter((a) => a.source === 'orphan').length === 0);
+  }
+  {
+    // **行IDはブランチ由来なので、PRが何本あっても1行。**
+    const o = derive({ orphans: [{
+      pr: 648, prs: [642, 643, 644, 647, 648], branch: 'claude/simplememo-self-improving-pr-ki8vgo',
+      merged_sha: '26c0014aa', ahead_by: 1, landed_elsewhere: 8, commits: ['fb12596'],
+    }] }).filter((a) => a.source === 'orphan');
+    t('使い回されたブランチでも行は1本', o.length === 1);
+    t('題は「PR #N のマージ後」ではなくブランチを主語にする', /^ブランチ claude\//.test(o[0].title));
+    t('**PRの一覧を detail に残す**（どのマージから来たかを追える）',
+      /#642 #643 #644 #647 #648/.test(o[0].detail));
+    t('畳んだことを明示する', /PRの数だけあるわけではない/.test(o[0].detail));
+  }
+  {
+    // **旧ID（PR単位）の行があれば、そこへ流して行を増やさない。**
+    // 増やすと「畳むための変更で1行増える」ことになる。
+    const ledger = { actions: [{
+      id: 'act-orphaned-pr-660', title: '旧', detail: '旧', source: 'orphan', state: 'open',
+      created_jst: '2026-08-27', last_seen_jst: '2026-08-27', closed_jst: null,
+      close_check: { kind: 'branch_caught_up', params: { pr: 660 } },
+    }] };
+    const d = derive({ orphans: [{
+      pr: 660, prs: [660], branch: 'claude/obsidian-auto-20260827',
+      merged_sha: 'c51306ea', ahead_by: 1, commits: ['813b335'],
+    }] }).filter((a) => a.source === 'orphan');
+    const added = merge(ledger, d, '2026-08-28');
+    t('**旧IDの行があれば新IDで増やさない**', ledger.actions.length === 1 && added.length === 0);
+    t('旧IDの行の中身は新しい書き方に追従する', /^ブランチ claude\//.test(ledger.actions[0].title));
+    t('旧IDの行を閉じない（閉じるのは閉じ条件だけ）', ledger.actions[0].state === 'open');
+    // 旧IDが**無い**ブランチはふつうに新IDで立つ
+    const fresh = { actions: [] };
+    merge(fresh, d, '2026-08-28');
+    t('旧IDが無ければブランチ単位のIDで立つ',
+      fresh.actions.length === 1 && fresh.actions[0].id === 'act-orphaned-branch-claude-obsidian-auto-20260827');
+  }
+  {
+    // ブランチ名を均した結果が衝突したら**分ける。**黙って1行に畳むと、
+    // 別々の取り残しが片方の閉じ条件で消える。
+    const o = derive({ orphans: [
+      { pr: 1, prs: [1], branch: 'claude/a-b', merged_sha: 'aaaaaaa', ahead_by: 1, commits: ['x1'] },
+      { pr: 2, prs: [2], branch: 'claude/a/b', merged_sha: 'bbbbbbb', ahead_by: 1, commits: ['x2'] },
+    ] }).filter((a) => a.source === 'orphan');
+    t('**slug が衝突しても行を潰さない**', o.length === 2 && o[0].id !== o[1].id);
   }
   t('着手ゼロでは閉じない', noRun.closed === false);
   const recovered = CLOSE_CHECKS.no_failure_since(
