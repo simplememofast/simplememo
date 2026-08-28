@@ -63,7 +63,13 @@ export const REQUIRED = [
   { key: 'build.in_review', gate: 'submission', source: 'asc', why: '審査が進行中か（二重に出さない）' },
   { key: 'build.testflight_state', gate: 'submission', source: 'asc', why: 'TestFlight に載っているか' },
   { key: 'build.testflight_available_at', gate: 'submission', source: 'asc', why: '寝かせ時間の起点' },
-  { key: 'build.open_blockers', gate: 'submission', source: 'github', why: '未解決のブロッカー件数' },
+  // **「ブロッカー」の定義が無い。**2026-08-28 に3リポジトリのラベルを実見したが、
+  // `blocker` 相当は1つも無い（GitHub 既定 + simplememo の `ops/autopilot-stale` /
+  // `ops/cron-failure` だけ）。`data/autopilot-actions.json` の `state: open` は
+  // 「未解決の仕事」であって「出荷を止めるもの」ではなく、そのまま数えると
+  // **常に > 0 になって門が永久に通らない。**
+  // 数える対象を決めるのは人。決まるまで材料は空けておく。
+  { key: 'build.open_blockers', gate: 'submission', source: 'human', why: '**何をブロッカーと数えるかが未定**（該当ラベルも運用も無い）' },
   { key: 'build.device_verified_by', gate: 'submission', source: 'human', why: '実機で確かめた人' },
   { key: 'build.device_verified_at', gate: 'submission', source: 'human', why: 'いつ確かめたか' },
   { key: 'build.device_verified_sha', gate: 'submission', source: 'human', why: '**何を**確かめたか' },
@@ -290,8 +296,12 @@ function selftest() {
     }],
     ['**人にしか出せない材料が消えていない**', () => {
       const human = REQUIRED.filter((f) => f.source === 'human').map((f) => f.key);
-      assert(human.length === 3, `実機確認の3項目が ${human.length} 件になっている`);
-      assert(human.every((k) => k.startsWith('build.device_verified')), `human が実機確認以外を含む: ${human}`);
+      assert(human.length === 4, `人にしか出せない項目が ${human.length} 件になっている`);
+      const device = human.filter((k) => k.startsWith('build.device_verified'));
+      assert(device.length === 3, `実機確認の3項目が ${device.length} 件になっている`);
+      // ブロッカーの定義が決まったら source を github へ戻す。**そのとき必ずここが落ちる。**
+      assert(human.includes('build.open_blockers'),
+        'ブロッカーの定義が決まったなら、この行と why を同じ PR で直すこと');
     }],
   ];
   return run(scenarios, { label: '門の材料' });
