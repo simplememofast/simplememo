@@ -510,6 +510,21 @@ export function derive(ctx) {
   //
   // **行はブランチ単位。**PR単位で立てると、使い回されたブランチが
   // PRの数だけ行になる（fetchOrphanedCommits の【なぜブランチ単位か】）。
+  //
+  // 【2026-08-28 決定: auto を付ける前に1周見る】
+  // この日 `paths` / `ledger_only` を足し、オーナーが
+  // `data/autopilot-status.json` を self_repair.may_modify へ入れた（明示の委譲）。
+  // **権限と材料は揃ったが、auto はまだ付けない。**
+  // 「作った」と「動いた」を分ける —— まず日次runが実際に内訳を出すのを見る。
+  //
+  // 付けるときの形（この順で、飛ばさない）:
+  //   1. 対象は `ledger_only === true` の行だけ（false と null は人が読む）
+  //   2. **追記型と状態型を分ける。**runs.json は --append（run_id で冪等）、
+  //      AUTOPILOT_LOG.md は追記、**status.json は載せ直さず再生成**
+  //      —— 現在値を持つ台帳なので、古い写しを当てると巻き戻る
+  //   3. **まず「本当に欠けているか」を見る。**取り残しの判定はSHAで行うので、
+  //      内容が別コミットで着地済みでも行は立つ（08-28 の実測で4件中3件がそれ）
+  //   4. PRを出して SEO Validation → auto-merge に乗せる。直接 main を触らない
   const orphanIds = new Set();
   for (const o of ctx.orphans ?? []) {
     const id = `act-orphaned-branch-${orphanSlug(o.branch)}`;
