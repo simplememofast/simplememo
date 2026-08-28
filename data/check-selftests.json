@@ -484,6 +484,12 @@
       "broke": "検査本体の problems.push を潰すと「検査が人の仕事の混入を見逃す」で落ちることを観測"
     },
     {
+      "script": "scripts/release-gate-run.mjs",
+      "state": "demonstrated",
+      "at": "2026-08-28",
+      "broke": "自己テストが実バグを1件捕まえた —— doneToday が now だけ JST に直して行は UTC の まま比べており、JST 0:00〜9:00 の実績が前日ぶんに数えられて**日次上限がその時間帯だけ 2 回に緩む**形だった。ほかに壊し5通りで落ちることを観測: 古い材料を捨てないと「古い材料は全部捨てる」／未来の collected_at を通すと「未来も使わない」／壊れた JSON を「無い」に混ぜると「壊れたJSONを混ぜない」／pick が undefined を null で埋めると「無い鍵は undefined」／REQUIRED の件数がずれると「要求項目を数え漏らさない」"
+    },
+    {
       "script": "scripts/review-intake.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
