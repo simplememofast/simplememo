@@ -255,16 +255,24 @@ export const UNLOCKS = {
   // `list_triggers` が呼べない以上、Routine 側からは写しを取り直せない。
   // 実走は SUCCEEDED で終わり、ブランチもPRも作られなかった（`cse_015iYEg3GrcfQ2A55jv9aZD1`）。
   // **日次で失敗し続けて未対応枠を食うので Routine は削除した。**
-  // 残る未検証の面は1つ —— claude.ai の Routines UI から作れば connector を持てるか。
-  // **そこを叩くまでは never へ落とさない。**
-  impl_routine_snapshot: { kind: 'owner_input', label: '副系の発火記録を定期的に取り直す（UI から Routine を作る）',
+  // [2026-08-28 夕] **UI の経路も叩いた。閉じた。**オーナーが Routines UI から作って
+  // 1回走らせたが、ブランチ0・PR0。原因は connector ではなく**リポジトリ**のほうで、
+  // **編集画面にリポジトリを指定する欄が無い**（名前/手順/頻度/権限の4つだけ）。
+  // 発火するのは Cowork のセッション（folders_state: NONE・sources 無し）。
+  //
+  // **それでも never へは落とさない。**叩いていない面が2つ残っている:
+  //   (1) 既存の副系Routine（環境IDを持ち、現にPRを作っている）のセッションが MCP を持つか
+  //   (2) 自己バインドの Routine（既存セッションへ配信されるので、そのMCPが使える）
+  // 2回とも last_run は SUCCEEDED だった。**成功表示を根拠にしないこと。**
+  impl_routine_snapshot: { kind: 'owner_input', label: '副系の発火記録を定期的に取り直す（主体がまだ居ない）',
                            needs: '検査は実装済み（scripts/check-routine-runs.mjs）で、'
                                 + '写しの鮮度・列挙の網羅・ラチェットを見る。**取り直しの `--sync` も実装済み。**'
                                 + '**残るのは写しを取り直す主体** —— `list_triggers` は'
                                 + 'セッションのMCPツールでCIのランナーからは叩けず、'
-                                + '**`create_trigger` で作った Routine も持てない**（2026-08-28 に実測）。'
-                                + '作成時の警告が案内する唯一の道は「claude.ai の Routines UI から作る」で、'
-                                + 'そこはオーナーの画面操作。'
+                                + '**`create_trigger` で作った Routine は MCP を持てず**、'
+                                + '**Routines UI で作った Routine はリポジトリを持てない**'
+                                + '（2026-08-28 に両方とも実走で確認）。'
+                                + '残る未検証は「既存の副系Routineが MCP を持つか」と「自己バインド」の2つ。'
                                 + '取り直しが自動になれば、記録は主系（Actions の run 列挙）と'
                                 + '同じ意味で完結する' },
   impl_machine_gate: { kind: 'implement', label: '不可逆な領域の機械ゲートを作る',
