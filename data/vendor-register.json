@@ -132,8 +132,8 @@
     },
     {
       "id": "google_cloud",
-      "name": "Google Cloud（BigQuery / Search Console）",
-      "used_for": "検索データの取り込み・ファネル評価",
+      "name": "Google Cloud（BigQuery）",
+      "used_for": "ファネル評価のためのデータ蓄積・集計（BigQuery）",
       "personal_data": "pseudonymous",
       "critical": false,
       "breaks_if_down": "計測が止まる。出荷は続く",
@@ -150,7 +150,29 @@
       "approved_by": "human",
       "approved_at": "2026-08-22",
       "$fallback_was": "無し。データが欠測する（『取得できなかった』として記録される）",
-      "fallback_note": "**代替なし。**データが欠測する。欠測は「取得できなかった」として記録され、ゼロとは区別される"
+      "fallback_note": "**代替なし。**データが欠測する。欠測は「取得できなかった」として記録され、ゼロとは区別される",
+      "$name": "**[2026-08-29] Search Console をこの行から分離した。**1行で「BigQuery / Search Console」を束ねていたが、**適用される契約が違う。**Google 公式のサービス別一覧が Search Console の適用文書として**Google 一般利用規約1件だけを列挙**しており、GCP Terms は入っていない。→ `search_console` の行を参照。\n\n**「同じ Google だから同じ規約」という仮定を、確かめずに1行にしていた。**確かめたら違った。ムームードメインの `personal_data: none` と同じ形の誤り。"
+    },
+    {
+      "id": "search_console",
+      "name": "Google Search Console",
+      "used_for": "検索クエリ・表示回数・順位の取得（SEO評価）",
+      "$used_for": "**[2026-08-29] google_cloud から分離して作った行。**適用契約は **Google 一般利用規約**（GCP Terms ではない）。Search Console API を使う場合は Search Console API Terms と Google APIs Terms が**追加で乗る** —— **API を実際に使っているかは未確認。**",
+      "personal_data": "pseudonymous",
+      "$personal_data": "検索クエリ・表示回数・順位。個人を直接特定しないが、**Google 一般利用規約には Search Console 専用の DPA も Processor 条項も無い**（探した上で見つからなかった）。契約上の位置づけが GCP 側とは違う。",
+      "critical": false,
+      "breaks_if_down": "SEOの計測が止まる。サイトもアプリも動く",
+      "fallback": null,
+      "fallback_note": "**代替なし。**検索側の実データはここにしか無い。止まると欠測になり、ゼロとは区別して記録される（google_cloud と同じ扱い）",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "data/corporate-obligations.json"
+      ],
+      "money_flow": "none",
+      "$money_flow": "**無料。**だから責任上限の計算式（直前12か月料金の125%）が0になり、**500米ドルの下限だけが残る** —— contract_review の $liability_cap 参照。",
+      "approved_by": "human",
+      "approved_at": "2026-08-29"
     },
     {
       "id": "firebase",
@@ -201,7 +223,7 @@
       "id": "github",
       "name": "GitHub（Actions / リポジトリ）",
       "used_for": "ソース管理・主系オートパイロット・CI",
-      "personal_data": "none",
+      "personal_data": "personal",
       "critical": false,
       "breaks_if_down": "主系が止まる。**副系（CCR）は別経路なので代走できる**",
       "fallback": "CCR Routines（実績として日々の出荷はこちらが担っている）",
@@ -221,7 +243,8 @@
         "gate_fails_closed_on_api",
         "egress_degrade"
       ],
-      "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた"
+      "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた",
+      "$personal_data": "**[2026-08-29 訂正] `none` は規約本文から裏づけられなかった。**\n\nGitHub General Privacy Statement（Standard ToS が Site Policies として Agreement の一部に参照している）が、アカウント開設時に **GitHub handle / name / email address / password / payment information / transaction information** を収集すると明記。有料 subscription では name / billing address / payment specifics も列挙。\n\n**registrar と同じ形の誤りが2社目。**どちらも「ユーザーの個人情報を渡していない」は正しく、**渡しているのは会社（オーナー本人）の個人情報**だった。**この欄が2種類の事実を1つの語で表している。**\n\n**役割が状況で変わる点も記録しておく:** 通常の直接関係では GitHub が Controller、organization-provided account では Organization が Controller で GitHub は Processor、DPA に定める特定の処理では **GitHub 自身が Controller**。**Controller と Processor の双方の役割を持つ構造。**"
     },
     {
       "id": "prtimes",
