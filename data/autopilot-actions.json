@@ -27,7 +27,7 @@
     "  acknowledged … 既知の制約。直す対象ではないので日報では件数だけ出す",
     "                 （消すと『無い』ことになり、毎日出すとノイズになる）"
   ],
-  "last_run_jst": "2026-08-28",
+  "last_run_jst": "2026-08-29",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -237,7 +237,7 @@
       },
       "state": "done",
       "created_jst": "2026-08-25",
-      "last_seen_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-29",
       "closed_jst": "2026-08-25",
       "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 2件を除外: ap-20260820-actions, ap-20260821-actions）",
       "last_run_jst": "2026-08-25",
@@ -392,7 +392,7 @@
       },
       "state": "done",
       "created_jst": "2026-08-26",
-      "last_seen_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-29",
       "closed_jst": "2026-08-26",
       "evidence": "Actions run 17件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
       "last_run_jst": "2026-08-26",
@@ -515,7 +515,7 @@
     {
       "id": "act-orphaned-pr-660",
       "title": "ブランチ claude/obsidian-auto-20260827 に 1 コミットが取り残されている（PR #660 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260827 が、最後のマージ（PR #660 / head c51306e）より1 件先にあり、**それらは main にも無い**: 813b335。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "detail": "ブランチ claude/obsidian-auto-20260827 が、最後のマージ（PR #660 / head c51306e）より1 件先にあり、**それらは main にも無い**: 813b335。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json / docs/obsidian/AUTOPILOT_LOG.md\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
       "source": "orphan",
       "domain": null,
       "touches": [],
@@ -530,7 +530,7 @@
       },
       "state": "open",
       "created_jst": "2026-08-27",
-      "last_seen_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-29",
       "closed_jst": null,
       "evidence": "#660 はまだ 1 件先にある"
     },
@@ -671,7 +671,7 @@
     {
       "id": "act-orphaned-branch-claude-obsidian-auto-20260826",
       "title": "ブランチ claude/obsidian-auto-20260826 に 1 コミットが取り残されている（PR #586 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260826 が、最後のマージ（PR #586 / head 673b2df）より1 件先にあり、**それらは main にも無い**: ee4e37c。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "detail": "ブランチ claude/obsidian-auto-20260826 が、最後のマージ（PR #586 / head 673b2df）より1 件先にあり、**それらは main にも無い**: ee4e37c。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json / docs/obsidian/AUTOPILOT_LOG.md / growth/content/coverage-queue.json\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
       "source": "orphan",
       "domain": null,
       "touches": [],
@@ -686,14 +686,14 @@
       },
       "state": "open",
       "created_jst": "2026-08-28",
-      "last_seen_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-29",
       "closed_jst": null,
       "evidence": "claude/obsidian-auto-20260826 はまだ 1 件先にある"
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-auto-20260825",
       "title": "ブランチ claude/obsidian-auto-20260825 に 1 コミットが取り残されている（PR #548 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260825 が、最後のマージ（PR #548 / head 6c21917）より1 件先にあり、**それらは main にも無い**: 675dfcb。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "detail": "ブランチ claude/obsidian-auto-20260825 が、最後のマージ（PR #548 / head 6c21917）より1 件先にあり、**それらは main にも無い**: 675dfcb。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
       "source": "orphan",
       "domain": null,
       "touches": [],
@@ -708,14 +708,14 @@
       },
       "state": "open",
       "created_jst": "2026-08-28",
-      "last_seen_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-29",
       "closed_jst": null,
       "evidence": "claude/obsidian-auto-20260825 はまだ 1 件先にある"
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-auto-20260823",
       "title": "ブランチ claude/obsidian-auto-20260823 に 1 コミットが取り残されている（PR #538 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260823 が、最後のマージ（PR #538 / head 79be128）より1 件先にあり、**それらは main にも無い**: 1e5399e。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。",
+      "detail": "ブランチ claude/obsidian-auto-20260823 が、最後のマージ（PR #538 / head 79be128）より1 件先にあり、**それらは main にも無い**: 1e5399e。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
       "source": "orphan",
       "domain": null,
       "touches": [],
@@ -730,7 +730,7 @@
       },
       "state": "open",
       "created_jst": "2026-08-28",
-      "last_seen_jst": "2026-08-28",
+      "last_seen_jst": "2026-08-29",
       "closed_jst": null,
       "evidence": "claude/obsidian-auto-20260823 はまだ 1 件先にある"
     },
@@ -750,11 +750,11 @@
           "branch": "claude/seo-aio-v4-growth-am8iqw"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-28",
       "last_seen_jst": "2026-08-28",
-      "closed_jst": null,
-      "evidence": "claude/seo-aio-v4-growth-am8iqw はまだ 1 件先にある"
+      "closed_jst": "2026-08-29",
+      "evidence": "claude/seo-aio-v4-growth-am8iqw の取り残しは解消（走査に出てこない）"
     }
   ]
 }
