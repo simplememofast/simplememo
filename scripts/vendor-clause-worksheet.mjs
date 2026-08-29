@@ -364,8 +364,9 @@ function report() {
   // data/vendor-register.json にあり、守るのは **DPAレビュー**（dpa_reviewed）で、
   // **この40/44マスとは別物。**実測: 1マスを unreviewed に戻しても
   // check-corporate --check は exit 0。**条項マスを守る検査は存在しない。**
-  console.log('  **埋め終えても、CIは条項マスを守らない。**'
-    + 'policy.enforce_unreviewed（vendor-register.json）が守るのは DPAレビューで、ここではない。\n');
+  console.log('  **[2026-08-29] 守る検査が入った。**check-corporate の clauseGuard が、'
+    + '一度も見ていないマス（上限0）と、改定で戻されたまま14日過ぎたマスで落とす。'
+    + 'policy.enforce_unreviewed（vendor-register.json）は別物で、守るのは DPAレビュー。\n');
   return problems.length;
 }
 

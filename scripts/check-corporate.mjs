@@ -94,6 +94,82 @@ export function nextCorporateTaxDue(fyEndMonth, today, extraMonths = 0) {
  * @param {Set|null} vendorIds  ベンダー台帳の id。**null は「照合しない」**で、
  *   空の Set は「ベンダー台帳が空」。この2つは違う。
  */
+/**
+ * **埋め終えた条項マスを、守る。**
+ *
+ * [2026-08-29] **ここは長らく何も無かった。**そして台帳3箇所と、この作業中の説明が
+ * 「埋めたあと `policy.enforce_unreviewed` を true にすると CI が守る」と言っていた。
+ * **嘘だった** —— あのフラグは `data/vendor-register.json` にあり、守るのは DPAレビュー。
+ * **実測: 1マスを unreviewed に戻しても `--check` は exit 0。**
+ *
+ * 守るべきものは2つあり、**性質が違うので別々に数える。**
+ *
+ * **① 一度も見ていないマス（`unreviewed_budget`）。**
+ * ベンダーを足したのに読んでいない、という形。**ラチェット** ——
+ * 上限を上げて通さない。44/44 を埋め切った日に 0 にした。
+ *
+ * **② 改定で戻されたマス（`reset_grace_days`）。**
+ * `vendor-terms.mjs` が指紋の変化で `reviewed` を `unreviewed` へ戻したもの。
+ * **これを即座に落とすと膠着する** —— seo-daily は改定を検知して
+ * `data/corporate-obligations.json` をコミットするPRを出すが、
+ * **そのPR自身が落ちて指紋の更新が入らず、翌週また同じ改定を検知する。**
+ * 機械が仕事をした瞬間に、機械の仕事が止まる形になる。
+ *
+ * だから戻された直後は通し、**放置されたら落とす。**猶予は週次取得の2回ぶん。
+ * **`fetched_at` では測れない** —— あちらは改定が無くても毎回今日になるので、
+ * `vendor-terms` に `reset_at` を書かせて、そちらを見る。
+ */
+export function clauseGuard(cr, today) {
+  const problems = [];
+  const clauses = cr.clauses || [];
+  const budget = cr.unreviewed_budget;
+  const grace = cr.reset_grace_days;
+  // **上限が無ければ無制限、が一番危ない。**（check-selftests と同じ扱い）
+  if (typeof budget !== 'number') {
+    problems.push('contract_review.unreviewed_budget が数でない'
+      + ' — **上限の無いラチェットはラチェットではない**');
+  }
+  if (typeof grace !== 'number') {
+    problems.push('contract_review.reset_grace_days が数でない'
+      + ' — **猶予が無いと、改定を検知したPR自身が落ちて膠着する**');
+  }
+  if (problems.length) return problems;
+
+  const never = [];
+  const stale = [];
+  for (const v of cr.vendors || []) {
+    const resetClauses = new Set(Array.isArray(v.reset_clauses) ? v.reset_clauses : []);
+    const resetAt = typeof v.reset_at === 'string' ? v.reset_at : null;
+    for (const c of clauses) {
+      if (v[c] !== 'unreviewed') continue;
+      if (resetAt && resetClauses.has(c)) {
+        const days = Math.round(
+          (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${resetAt}T00:00:00Z`)) / 86400000);
+        if (Number.isFinite(days) && days > grace) stale.push(`${v.id}.${c}（${days}日）`);
+        continue;   // 猶予の内側。**機械が戻した直後を落とさない**
+      }
+      never.push(`${v.id}.${c}`);
+    }
+  }
+  if (never.length > budget) {
+    problems.push(`一度も見ていない条項マスが ${never.length} 件で、上限 ${budget} を超えた`
+      + ` — ${never.join(' / ')}。**読むか、読まない理由を書いて not_applicable にする。**`
+      + '（上限を上げて通さない）');
+  } else if (never.length < budget) {
+    // **余った枠は、次の空欄を黙って飲む。**
+    // 直して減らしたら上限も同じPRで下げさせる（check-routine-runs の open_budget と同じ）。
+    problems.push(`unreviewed_budget が ${budget} だが、実際に見ていないマスは ${never.length} 件`
+      + ' — **枠が余っている。**次にベンダーを足したとき、その空欄を黙って飲む。'
+      + `${never.length} へ下げること`);
+  }
+  if (stale.length) {
+    problems.push(`改定で戻されたまま ${grace} 日を過ぎた条項マスが ${stale.length} 件`
+      + ` — ${stale.join(' / ')}。**前の判定は前の本文に対するもの。**`
+      + '読み直して reviewed_by を付け直すこと');
+  }
+  return problems;
+}
+
 export function validate(doc, { vendorIds = null, today = new Date().toISOString().slice(0, 10) } = {}) {
   const problems = [];
   const warnings = [];
@@ -151,6 +227,7 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
 
   const cr = doc.contract_review;
   if (cr) {
+    problems.push(...clauseGuard(cr, today));
     const seen = new Set();
     for (const v of cr.vendors || []) {
       const at = `contract_review「${v.id}」`;
@@ -267,6 +344,67 @@ SCENARIOS.push(
     delete r.existence_confirmed_at;
     assert(!validate(d).problems.some((x) => x.includes('existence_confirmed_at')),
       '在る記録にまで確認日を求めた');
+  }],
+  // [2026-08-29] **埋め終えたものを守る検査。**入れるまで、44マスを埋め切っても
+  // 1マスを unreviewed に戻して --check を走らせると exit 0 だった（実測）。
+  ['**一度も見ていないマスが上限を超えたら落ちる**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    d.contract_review.vendors[0][d.contract_review.clauses[0]] = 'unreviewed';
+    assert(validate(d).problems.some((x) => x.includes('一度も見ていない')),
+      '**戻したマスが素通りした** —— これが入るまでの状態');
+  }],
+  ['**上限を先に上げておくのも落とす**（余った枠は次の空欄を黙って飲む）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    d.contract_review.unreviewed_budget = 5;
+    const p = validate(d).problems;
+    assert(p.some((x) => x.includes('枠が余っている')),
+      `枠を先に広げても落ちなかった: ${p.join(' / ')}`);
+  }],
+  ['上限が数でなければ落ちる（**無ければ無制限、が一番危ない**）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    delete d.contract_review.unreviewed_budget;
+    assert(validate(d).problems.some((x) => x.includes('unreviewed_budget')),
+      '上限を消しても落ちない');
+  }],
+  ['猶予が数でなければ落ちる', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    delete d.contract_review.reset_grace_days;
+    assert(validate(d).problems.some((x) => x.includes('reset_grace_days')),
+      '猶予を消しても落ちない');
+  }],
+  // **膠着しないことを固定する。**改定を検知したPR自身が落ちると、
+  // 指紋の更新が入らず翌週また同じ改定を検知する。
+  ['**改定で戻された直後は落とさない**（落とすと seo-daily のPRが入らず膠着する）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const c = d.contract_review.clauses[0];
+    const v = d.contract_review.vendors[0];
+    v[c] = 'unreviewed';
+    v.reset_at = '2026-08-29';
+    v.reset_clauses = [c];
+    const p = validate(d, { today: '2026-08-31' }).problems;   // 2日後
+    assert(!p.some((x) => x.includes('条項マス')),
+      `**機械が戻した直後を落とした** —— 膠着する: ${p.join(' / ')}`);
+  }],
+  ['**猶予を過ぎたら落ちる**（戻されたまま放置させない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const c = d.contract_review.clauses[0];
+    const v = d.contract_review.vendors[0];
+    v[c] = 'unreviewed';
+    v.reset_at = '2026-08-01';
+    v.reset_clauses = [c];
+    const p = validate(d, { today: '2026-08-29' }).problems;   // 28日後
+    assert(p.some((x) => x.includes('戻されたまま')),
+      `28日放置しても落ちない: ${p.join(' / ')}`);
+  }],
+  ['**戻されていない観点は猶予に乗らない**（reset_clauses に無いものを守らない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const [c0, c1] = d.contract_review.clauses;
+    const v = d.contract_review.vendors[0];
+    v[c1] = 'unreviewed';          // 戻されていない観点を空に
+    v.reset_at = '2026-08-29';
+    v.reset_clauses = [c0];        // 猶予の対象は別の観点だけ
+    assert(validate(d, { today: '2026-08-29' }).problems.some((x) => x.includes('一度も見ていない')),
+      '**行に reset_at があるだけで、別の観点まで猶予に乗せた**');
   }],
   ['**登録されていない読み手は落ちる**（"claude" や "auto" を勝手に足させない）', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
