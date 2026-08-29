@@ -360,7 +360,12 @@ function report() {
   }
 
   console.log('\n  **この一覧は ok / risk を決めない。**決めるのは人で、ここが出すのは順序と材料だけ。');
-  console.log('  埋め終えたら data/vendor-register.json の policy.enforce_unreviewed を true にすると CI が守る。\n');
+  // [2026-08-29] **ここは嘘を言っていた。**`policy.enforce_unreviewed` は
+  // data/vendor-register.json にあり、守るのは **DPAレビュー**（dpa_reviewed）で、
+  // **この40/44マスとは別物。**実測: 1マスを unreviewed に戻しても
+  // check-corporate --check は exit 0。**条項マスを守る検査は存在しない。**
+  console.log('  **埋め終えても、CIは条項マスを守らない。**'
+    + 'policy.enforce_unreviewed（vendor-register.json）が守るのは DPAレビューで、ここではない。\n');
   return problems.length;
 }
 
