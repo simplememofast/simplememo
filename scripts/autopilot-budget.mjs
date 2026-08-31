@@ -155,7 +155,21 @@ export function summarize(ledger, month = jstMonth()) {
     month,
     cap,
     spent,
-    remaining: cap - spent,
+    // **副系が測れていない月、これは「使った額」ではなく「使った額の下限」。**
+    // 名前を epistemic status ごと持たせる —— 下流はどれを引用しても嘘にならない。
+    spent_is_lower_bound: ccr.length === 0,
+    // **残高は、支出が全部見えているときにしか出せない。**
+    // 一部しか測れていない月に `cap - spent` を「残り」と呼ぶと、
+    // **測っていないぶんが「まだ使える」に化ける。**そこは null にする
+    // （「判定していない」を「大丈夫」と混ぜない、というこの台帳の他の規律と同じ）。
+    remaining: ccr.length > 0 ? cap - spent : null,
+    // 測れているぶんだけを引いた値。**残高ではなく上限**（実際の残りはこれ以下）。
+    // 名前に上限だと書いてあれば、そのまま引用されても誤りにならない。
+    remaining_upper_bound: cap - spent,
+    // **`over: false` は「枠内」ではない。**spent が下限なので、この判定は
+    // 遅れる方向にしか外れない（早すぎる停止は起きない）。止める閾値を
+    // 下限で判定してよいかは monthly_usd_cap と同じく人間側の判断なので、
+    // ここでは挙動を変えずに性質だけ書いておく。
     over: spent >= cap,
     runs: rows.length,
     shipped,
@@ -298,7 +312,12 @@ function fmt(n) { return n === null ? 'n/a' : `$${n.toFixed(4)}`; }
 
 export function render(s, ledger) {
   const out = [];
-  out.push(`Autopilot budget ${s.month}: ${fmt(s.spent)} / ${fmt(s.cap)} (remaining ${fmt(s.remaining)})`);
+  // 残高が出せない月は「残り」と書かない。上限のほうを、上限だと書いて出す。
+  const tail = s.remaining === null
+    ? `(remaining 不明 — 測れているぶんを引いた上限は ${fmt(s.remaining_upper_bound)})`
+    : `(remaining ${fmt(s.remaining)})`;
+  const scope = s.spent_is_lower_bound ? '主系のみ・下限 ' : '';
+  out.push(`Autopilot budget ${s.month}: ${scope}${fmt(s.spent)} / ${fmt(s.cap)} ${tail}`);
   out.push(`  runs ${s.runs} · shipped ${s.shipped} · per shipped ${fmt(s.usd_per_shipped)}`);
   out.push(`  actions: ${s.by_route.actions.runs} runs ${fmt(s.by_route.actions.spent)}`);
   out.push(`  ccr:     ${s.by_route.ccr.runs} runs ${fmt(s.by_route.ccr.spent)}`);
@@ -406,6 +425,42 @@ SCENARIOS.push(
     assert(out.includes('判定していない'),
       '**判定できなかったことが報告に出ない** — 読む側は「超過なし」と区別できない');
   }],
+  // [2026-09-01] **残高が、測れていないぶんを「まだ使える」に化けさせていた。**
+  // 日報は `$20.04 / $40.00（残り $19.96）` と出していたが、この $20.04 は
+  // 21回中8回（主系のみ）の計上で、副系13回は観測手段が無い。
+  // 単価のほうは「主系1記事あたり」と範囲を単位に書いてあった（simplememo-api
+  // autopilot-report.ts の注記がその理由を書いている）のに、**同じ理屈が
+  // 見出しの金額には適用されていなかった。**
+  ['**副系が測れていない月は残高を出さない**（測っていないぶんが「使える」に化ける）', () => {
+    const d = budgetDoc();
+    const s2 = summarize(d, '2026-08');
+    assert(s2.ccr_measured === false, '前提: 2026-08 は副系が未観測');
+    assert(s2.remaining === null, `残高が出ている: ${s2.remaining}`);
+    assert(s2.spent_is_lower_bound === true, '支出が下限だと言えていない');
+  }],
+  ['**上限のほうは出す**（出せないと下流が自前で cap - spent を計算し直す）', () => {
+    const s2 = summarize(budgetDoc(), '2026-08');
+    assert(typeof s2.remaining_upper_bound === 'number' && s2.remaining_upper_bound > 0,
+      String(s2.remaining_upper_bound));
+    assert(s2.remaining_upper_bound === s2.cap - s2.spent, '上限は cap - spent そのもの');
+  }],
+  ['残高を出せない月は「残り」と書かない', () => {
+    const d = budgetDoc();
+    const out = render(summarize(d, '2026-08'), d);
+    assert(/remaining 不明/.test(out), out.split('\n')[0]);
+    assert(!/\(remaining \$/.test(out), `残高として出ている: ${out.split('\n')[0]}`);
+    assert(/主系のみ・下限/.test(out), '支出の範囲が見出しに出ていない');
+  }],
+  ['**副系が測れた月は従来どおり残高を出す**（測れているのに出さないのは別の嘘）', () => {
+    const d = budgetDoc();
+    d.runs = [...d.runs, { date_jst: '2026-08-15', route: 'ccr', run_id: 'x',
+      total_cost_usd: 1, num_turns: 1, outcome: 'shipped' }];
+    const s2 = summarize(d, '2026-08');
+    assert(s2.ccr_measured === true, '前提: ccr行を足した');
+    assert(s2.remaining === s2.cap - s2.spent, `残高が出ていない: ${s2.remaining}`);
+    assert(s2.spent_is_lower_bound === false, '測れているのに下限扱いになっている');
+    assert(/\(remaining \$/.test(render(s2, d)), '測れた月に「残り」が出ていない');
+  }],
   ['超過なしのときは「超過なし」と書く（両者を同じ語にしない）', () => {
     const d = budgetDoc();
     const out = render({ ...summarize(d),
@@ -503,7 +558,13 @@ if (isMain) {
   if (flag('json')) {
     console.log(JSON.stringify({
       month: s.month, cap_usd: s.cap, spent_usd: Number(s.spent.toFixed(4)),
-      remaining_usd: Number(s.remaining.toFixed(4)), over: s.over,
+      // **残高は測り切れている月だけ。**null は「残りゼロ」ではなく「出せない」。
+      // 受け手（simplememo-api の日報）は `typeof === 'number'` で見ているので、
+      // null なら「（残り …）」の節がそのまま消える。
+      remaining_usd: s.remaining === null ? null : Number(s.remaining.toFixed(4)),
+      remaining_usd_upper_bound: Number(s.remaining_upper_bound.toFixed(4)),
+      spent_usd_is_lower_bound: s.spent_is_lower_bound,
+      over: s.over,
       runs: s.runs, shipped: s.shipped,
       usd_per_shipped: s.usd_per_shipped === null ? null : Number(s.usd_per_shipped.toFixed(4)),
       by_route: s.by_route, ccr_measured: s.ccr_measured,
