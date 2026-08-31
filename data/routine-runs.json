@@ -66,15 +66,18 @@
     "",
     "写しに**プロンプトは入れない**（job_config / derived_state.prompt）。",
     "副系のプロンプトには運用の中身がそのまま入っていて、ここが要るのは",
-    "「走ったか」だけ。**要らないものを持つと、置き場所の判断が別の問題になる。**"
+    "「走ったか」だけ。**要らないものを持つと、置き場所の判断が別の問題になる。**",
+    "",
+    "【2026-08-31 訂正】上の 08-24 の記録は `resetsAt: 1788217200 = 2026-08-24T23:00Z（月曜）` と書いているが、**この2つは同じ時刻ではない。**1788217200 は 2026-08-31T23:00Z で、2026-08-24T23:00Z は 1787612400（ちょうど7日＝604800秒ちがう）。epoch を写し間違えたか、換算を1週ずらしたかのどちらかで、**どちらが起きたかはこの記録からは決まらない。**",
+    "**ただし結論（リセットは月曜 23:00 UTC）は独立に裏づけられた** —— 2026-08-31（月）00:03Z と 00:20Z に拒否された3本の `resetsAt` が**同日 23:00Z** を指していた。同じ週の中で「拒否 → その日の23:00にリセット」が2回別々の月曜で観測できたので、`45 23 * * 1` へ移した判断は動かさない。"
   ],
-  "observed_at": "2026-08-28T10:14:58Z",
+  "observed_at": "2026-08-31T23:03:50Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 2,
-  "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**",
+  "open_budget": 4,
+  "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**新しく落ちた2本（ccr-0920 / obsidian-community）を記録したぶん。**上げる方向に動かしたことを、ここに明記しておく。**この台帳は「上限を上げて通さない」と書いているが、禁じているのは**記録も診断もせずに枠だけ広げること**で、実際 2026-08-28 に週次2本を見つけたときも 2 へ上げている（いまの2件がそれ）。\n\n**下げる条件を先に書いておく** —— 4本それぞれの次の発火が SUCCEEDED になったら、その行を消して同じPRで budget を下げる。**枠が余ったまま放置しない**（余った枠は次に止まったものを黙って飲み込む）。",
   "open_findings": [
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
@@ -87,6 +90,18 @@
       "what": "failed",
       "found_at": "2026-08-28",
       "why": "**『SimpleMemo マーケデータ 週次スナップショット』が 2026-08-24 に FAILED。原因の一次証拠はこのセッション**（cse_01PEHaBP24CJJU57oMQxQnpd）にある —— 週次利用枠の拒否（$comment に文言と数値を引いてある）。**cron は `0 0 * * 1` → `45 23 * * 1` へ移した**（枠のリセット 23:00 UTC の45分後）。次の発火は 2026-08-31T23:45Z。**この行は、その回が SUCCEEDED になるまで残す** —— 移しただけでは直ったことにならない。SEO Weekly と別枠にするため15分ずらしてある"
+    },
+    {
+      "id": "trig_01ESF9AHax6buS9X1pdFv657",
+      "what": "failed",
+      "found_at": "2026-08-31",
+      "why": "**ccr-0920（Obsidianオートパイロット再試行・毎日 00:20Z）が 2026-08-31 に FAILED。**13秒（00:20:33 → 00:20:46）。**原因は確定している。**セッションの `post_turn_summary.status_detail` がそのまま返した —— `You've hit your weekly limit · resets 11pm (UTC)`、`rate_limit_info: { seven_day, status: \"rejected\", resetsAt: 1788217200 }`。`1788217200` は **2026-08-31T23:00Z**（月曜）で、**観測した時刻の2分前にリセットされている。**コードの不具合ではなく、週次の利用枠が枯れた状態で発火した。11〜13秒で終わっているのは拒否が即返るため（2026-08-24 の週次2本と同じ形）。\n\n**害はこの1回では終わっていない。**`claude/obsidian-auto-20260830` も `-20260831` も存在せず、`data/autopilot-runs.json` の最終行は 2026-08-28。**2日以上、記事が1本も出ていない。**主系（Actions）・副系A/B（意図的に停止中）のどれも埋めていない —— 08-28 に副系A/Bを止めたときの根拠は「停止後も空白日はゼロ（主系＋再試行の2段で足りている）」だったが、**その再試行がいま落ちている。**前提が崩れているので、**副系A/Bを止めたままにする判断は見直しの対象**（判断そのものはオーナー）。\n\n次の発火は 2026-09-01T00:20Z で、**リセット後なので通る見込み。****この行は、次の発火が SUCCEEDED になるまで残す。**枠が空くのではなく、実際に1回通ったことを見てから下げる。"
+    },
+    {
+      "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
+      "what": "failed",
+      "found_at": "2026-08-31",
+      "why": "**obsidian-community v3（Reddit実投稿・毎日 11:01Z）が 2026-08-31 に FAILED。**11秒（11:25:23 → 11:25:34）。**原因は確定している。**セッションの `post_turn_summary.status_detail` がそのまま返した —— `You've hit your weekly limit · resets 11pm (UTC)`、`rate_limit_info: { seven_day, status: \"rejected\", resetsAt: 1788217200 }`。`1788217200` は **2026-08-31T23:00Z**（月曜）で、**観測した時刻の2分前にリセットされている。**コードの不具合ではなく、週次の利用枠が枯れた状態で発火した。11〜13秒で終わっているのは拒否が即返るため（2026-08-24 の週次2本と同じ形）。\n\n上の ccr-0920 と同じ週・同じ枠の枯渇で、**同じ日に SEO Weekly（00:03Z・11秒）も落ちている。**3本が同一原因なので、個別の不具合として追わない。\n\n次の発火は 2026-09-01T11:01Z。**この行は、次の発火が SUCCEEDED になるまで残す。**枠が空くのではなく、実際に1回通ったことを見てから下げる。"
     }
   ],
   "intentional_stops": [
@@ -114,32 +129,6 @@
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",
   "routines": [
     {
-      "id": "trig_01155FSgJxnmFUjncRWnddZy",
-      "name": "審査結果と App Crashes の到着待ち",
-      "cron_expression": null,
-      "run_once_at": "2026-08-28T10:50:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-08-28T10:50:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
-    },
-    {
-      "id": "trig_012yF8RNZ3seSbKL1dRpxhGY",
-      "name": "カナリア48時間後 — 判定を見て…",
-      "cron_expression": null,
-      "run_once_at": "2026-08-29T23:35:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-08-29T23:35:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
-    },
-    {
       "id": "trig_018EyeYcJiVLFQeAHArMpGtM",
       "name": "【停止:クラウドでは動作不可→PCで再作成を】Reddit承認待ち監視（通知のみ・自動承認しない）",
       "cron_expression": "49 * * * *",
@@ -153,30 +142,17 @@
       "last_run_finished_at": "2026-07-31T23:53:00.199446Z"
     },
     {
-      "id": "trig_018h8v63BhVwqmqcmeuFoAZN",
-      "name": "item 1: Source Info の実測を読む",
-      "cron_expression": null,
-      "run_once_at": "2026-08-28T12:30:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-08-28T12:30:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
-    },
-    {
       "id": "trig_01ESF9AHax6buS9X1pdFv657",
       "name": "Obsidianオートパイロット再試行 v3（09:20 JST・ccr-0920・当日が空白のときだけ・配信の種）",
       "cron_expression": "20 0 * * *",
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-29T00:20:00Z",
-      "last_fired_at": "2026-08-28T00:20:23.551065Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-28T00:20:23.531357768Z",
-      "last_run_finished_at": "2026-08-28T00:45:40.115601Z"
+      "next_run_at": "2026-09-01T00:20:00Z",
+      "last_fired_at": "2026-08-31T00:20:33.654230Z",
+      "last_run_status": "FAILED",
+      "last_run_fired_at": "2026-08-31T00:20:33.634779871Z",
+      "last_run_finished_at": "2026-08-31T00:20:46.516193Z"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -185,11 +161,24 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-28T11:01:00Z",
-      "last_fired_at": "2026-08-27T11:26:38.803756Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-27T11:26:38.781208492Z",
-      "last_run_finished_at": "2026-08-27T11:28:09.694896Z"
+      "next_run_at": "2026-09-01T11:01:00Z",
+      "last_fired_at": "2026-08-31T11:25:23.608379Z",
+      "last_run_status": "FAILED",
+      "last_run_fired_at": "2026-08-31T11:25:23.583005176Z",
+      "last_run_finished_at": "2026-08-31T11:25:34.041500Z"
+    },
+    {
+      "id": "trig_01P18wgcMnXGMAeH9zHZVNpM",
+      "name": "ct= が Detailed に載り始めたか確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T22:00:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T22:00:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     },
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
@@ -198,11 +187,11 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-31T00:01:21.733119813Z",
-      "last_fired_at": "2026-08-24T00:03:20.723580Z",
+      "next_run_at": "2026-09-07T00:01:21.733119813Z",
+      "last_fired_at": "2026-08-31T00:03:13.801959Z",
       "last_run_status": "FAILED",
-      "last_run_fired_at": "2026-08-24T00:03:20.700182033Z",
-      "last_run_finished_at": "2026-08-24T00:03:32.476070Z"
+      "last_run_fired_at": "2026-08-31T00:03:13.774489430Z",
+      "last_run_finished_at": "2026-08-31T00:03:24.788760Z"
     },
     {
       "id": "trig_01QZb1NYgNfpSuot97dZZJpD",

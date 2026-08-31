@@ -210,21 +210,30 @@ function selftest() {
       const { problems } = V(real);
       assert(problems.length === 0, problems.join(' / '));
     }],
-    // [2026-08-28] 5件 → 6件。**写しを取り直したら1本増えた** ——
-    // Routines UI で作った「副系の写しの取り直し」が止まっていて、
-    // どちらの一覧にも入っていなかった（列挙の網羅がそのまま鳴った）。
+    // [2026-08-28] 5件 → 6件（写しを取り直したら、止まっていた1本がどちらの
+    // 一覧にも無かった）。[2026-08-31] 6件 → 8件。**本番の日次2本が落ちた** ——
+    // ccr-0920 と obsidian-community が週次利用枠の枯渇で FAILED。
     // **ここは実データに固定してある。**写しが動いたら同じ変更で直すこと。
-    ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
+    ['**実データで8件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
-      assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 2, '未対応は2件（週次2本）');
+      assert(unhealthy.length === 8, `健全でないのは8件のはずが ${unhealthy.length}`);
+      assert(real.open_findings.length === 4, '未対応は4件（週次2本＋日次2本）');
       assert(real.intentional_stops.length === 4,
         '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],
 
     // --- 黙って止まったものを通さない -----------------------------------
+    // [2026-08-31] **実データに結びついていた。**`find(r => r.enabled)` は
+    // 先頭の有効な routine を取るだけなので、そこが**既に open_findings に載っている**
+    // 日（＝いま）は、止めても「一覧に無い」にならず、この検査が黙って空回りする。
+    // **どちらの一覧にも居ない健全な1本**を選ぶ形にして、件数から切り離した。
     ['**新しく止まった routine を通さない**', () => {
-      const p = V(broken(real, (d) => { d.routines.find((r) => r.enabled).enabled = false; })).problems;
+      const p = V(broken(real, (d) => {
+        const listed = new Set([...d.open_findings, ...d.intentional_stops].map((f) => f.id));
+        const target = d.routines.find((r) => r.enabled && !listed.has(r.id));
+        assert(target, '健全な routine が1本も無く、この壊し方が成立しない');
+        target.enabled = false;
+      })).problems;
       assert(p.some((x) => x.includes('どちらの一覧にも無い')), p.join(' / '));
     }],
     ['**新しく失敗した routine を通さない**', () => {
@@ -294,8 +303,10 @@ function selftest() {
       const p = V(broken(real, (d) => { d.open_budget = 1; })).problems;
       assert(p.some((x) => x.includes('上限 1 を超えた')), p.join(' / '));
     }],
+    // [2026-08-31] 固定値 3 は未対応が2件のときだけ「余っている」側になった。
+    // **いまの件数から1つ上**にして、どの日でも同じ向きを試す。
     ['**上限を先に上げておくのも落とす**（余った枠は次の停止を黙って飲む）', () => {
-      const p = V(broken(real, (d) => { d.open_budget = 3; })).problems;
+      const p = V(broken(real, (d) => { d.open_budget = d.open_findings.length + 1; })).problems;
       assert(p.some((x) => x.includes('枠が余っている')), p.join(' / '));
     }],
     ['直して減らしたら、上限も同じPRで下げさせる', () => {
