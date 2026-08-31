@@ -254,6 +254,31 @@
       "expr": "r.dated",
       "disposition": "向きが逆",
       "note": "`!r.dated.length && !r.machine.length` の否定形。**両方空のときに発火する**側で、「台帳を読めていない疑い」を出すための判定。消える方向ではない"
+    },
+    {
+      "file": "scripts/check-rollout-promotion.mjs",
+      "expr": "p?.to",
+      "disposition": "別に検出",
+      "note": "**直前のループが `['at','flag','from','to','why']` の欠落を全部 problems に入れている。**ここの `p?.to` は「在るのに数でない」と「在って上限超え」を分けるためだけの分岐で、欠落側は消えない。上限そのものは `cap` で fail closed にしてある（`ap.max_auto_rollout && …` と書いていて、この検査に捕まって直した形）"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "r.exists",
+      "disposition": "別に検出",
+      "note": "**すぐ上の行が `typeof r.exists !== 'boolean'` を落としている。**したがってここへ来る時点で exists は真偽値で、欠落による truthiness の穴は無い。`!r.exists && !r.note` は「無いのに理由が無い」を出す側で、消える方向ではない"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "r.where",
+      "disposition": "別に検出",
+      "note": "[2026-08-28] **`where` が消えたら黙るのではなく、別の行で鳴る。**この規則は「所在を決めたのに実在の確認日を書く欄が無い」を出すもので、`where` が無い記録はそもそも別勘定（レポートの `noPlace` が「所在が未定」として毎回数える）。**どちらへ落ちても報告される**ので、条件が消えて素通りする形にはならない。\n\nなお本体側の `where` が null のまま放置される件は、autonomy-gap の corp_records が入口として持っている"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "r.where",
+      "line_hint": "レポート側 unverified",
+      "disposition": "表示のみ",
+      "note": "[2026-08-28] 検査ではなく件数表示の分類（`noPlace` / `unverified`）。**2つの述語で records を漏れなく分けている**ので、片方から落ちた行はもう片方に必ず出る。ここが消えても検査の力は変わらない（validate 側は別）"
     }
   ],
   "coverage_measured_at": "2026-08-26",

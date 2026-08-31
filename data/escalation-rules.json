@@ -177,6 +177,24 @@
       "within_hours": 24,
       "stop_automation": false,
       "note": "Claude Code ステップが作業に入る前（5秒未満）に落ちた、という**観測された形**。**原因ではない**ので、この種別のまま放置せず切り分けて上書きすること。同じ形になる原因は少なくとも3つある: 上流actionの版の破損 / `--model` 等の指定ミス / 資格情報の失効。autopilot-act.mjs の interpretRun がこれを書き、needs_triage を立てる。**安い順に切り分ける**（版の照合 → モデル解決 → 資格情報）。2026-08-25 以前は同じ形を auth_or_credential と決めつけており、誤診とオーナーへの不要な依頼を生んだ"
+    },
+    {
+      "trigger": "rate_limit_weekly",
+      "kind": "failure_class",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "**週次の利用枠が尽きた状態で発火し、1ターン・課金ゼロで弾かれる。**2026-08-29〜31 に主系（Actions）・副系（ccr-0920）・週次2本が同じ理由で落ちた。ログ本文で確認: `api_error_status: 429` / `\"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"` / `num_turns: 1` / `total_cost_usd: 0`（run 33279844326・33340960317）。\n\n**AIには直せないが、鍵の問題でもない。**枠はアカウント全体で共有され、リセットは月曜 23:00 UTC。**待てば直る**ので `stop_automation` は false。止めても枠は戻らず、リセット後に自分で復旧する経路を塞ぐだけになる。\n\n**`auth_or_credential` と取り違えないこと。**シグネチャ（`is_error: true` / `num_turns: 1` / `total_cost_usd: 0`）が両者で同じで、2026-08-31 まで obsidian-autopilot.yml の切り分けステップは**429 を「資格情報が通っていない。`claude setup-token` を再実行せよ」と報告していた。**同日 `api_error_status: 429` を分ける修正を入れたが、**それ以前に auth_or_credential と記録された回（ap-20260824-actions / ap-20260825-actions）は、同じ誤診である疑いが残る**（未確認）。\n\n**オーナー側の手は「待つ」以外にもう1つある** —— 同じ枠を使う経路（主系 21:00Z / 副系 00:20Z / 週次 00:0xZ・23:45Z）が週のどこに固まっているか。週次2本を月曜 00:0xZ に置いていたのが2026-08-24 の失敗の直接の原因だった（枠のリセット23時間前）。"
+    },
+    {
+      "trigger": "claim_without_completion",
+      "kind": "failure_class",
+      "who": "self_then_owner",
+      "channel": "gh_issue",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "**当日ロックを claim だけ取って死ぬと、その日は主系も走らないまま緑になる。**2026-08-29 に実際に起きた —— 副系 ccr-0920 が `claude/obsidian-auto-20260829` に claim コミット（36de90a6）だけ置いて終わり、記事もPRも無い。同日の主系 run 33230445898 は Gate の重複判定（「ブランチが既にある＝進行中/実行済み」）でスキップし、**3秒で success を返した。**\n\n**二重実行の防止そのものは正しい。**問題は「進行中」と「死んでいる」を同じ形で扱うところで、claim は取れたが完走していない日に、**代替経路を自分から降ろしてしまう。**\n\n**まずレーンFが直しにいく**（who: self_then_owner）。直し方は自明ではないので、設計をPRで出させる形にする —— 候補は (a) claim コミットに期限を持たせ、古い claim は主系が奪う、(b) 主系が「ブランチはあるが差分ゼロ」を進行中と数えない、(c) claim を取った側が終了時に必ず outcome を書く。**どれも「緑のまま何も出ない日」を無くす方向。**\n\n止めない（stop_automation: false）—— 止めると翌日も走らず、この故障が直る前に空白日が増える。"
     }
   ]
 }

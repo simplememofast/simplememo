@@ -67,6 +67,52 @@ export function parseExpiry(doc) {
   return null;
 }
 
+/**
+ * RDAP の応答から**上位レジストラ名**を取り出す。**純関数。**
+ *
+ * [2026-08-28] **これは規約からは分からなかった問い。**
+ * ムームードメイン利用規約 §2 は上位レジストラの規約を丸ごと取り込む構造で、
+ * 本文は候補としてお名前.com と eNom を掲げるが、
+ * **どれが simplememofast.com に乗っているかは書いていない。**
+ * どちらかで景色が変わる —— お名前.com なら §32 が事業者登録者について
+ * 「一切の責任を負わない」、eNom なら §18 が Washington 州法・JAMS 仲裁で、
+ * 責任上限は $400 以下。**規約を読んでも閉じない不明が、RDAP には出ている。**
+ *
+ * RDAP は `entities[].roles` に `registrar` を持つ要素を置き、
+ * 名前は jCard（`vcardArray`）の `fn` に入る。IANA ID は
+ * `publicIds[].type === 'IANA Registrar ID'`。
+ * **どちらも無いことがある**ので、取れなかったら null を返す ——
+ * **取れなかったことを「上位レジストラが無い」と混ぜない。**
+ */
+export function parseRegistrar(doc) {
+  if (!doc || !Array.isArray(doc.entities)) return null;
+  for (const ent of doc.entities) {
+    const roles = Array.isArray(ent?.roles) ? ent.roles : [];
+    if (!roles.some((r) => String(r).trim().toLowerCase() === 'registrar')) continue;
+    let name = null;
+    const card = ent?.vcardArray;
+    // jCard は ['vcard', [ ['fn', {}, 'text', '名前'], ... ]] という形。
+    if (Array.isArray(card) && Array.isArray(card[1])) {
+      for (const f of card[1]) {
+        if (Array.isArray(f) && String(f[0]).toLowerCase() === 'fn' && typeof f[3] === 'string') {
+          name = f[3];
+          break;
+        }
+      }
+    }
+    let ianaId = null;
+    for (const pid of (Array.isArray(ent?.publicIds) ? ent.publicIds : [])) {
+      if (String(pid?.type ?? '').toLowerCase().includes('iana')) {
+        ianaId = String(pid.identifier ?? '') || null;
+        break;
+      }
+    }
+    if (!name && !ianaId) return null;
+    return { name, ianaId };
+  }
+  return null;
+}
+
 /** 残り日数。**同日は 0**（「切れていない」と「今日切れる」を混ぜない）。 */
 export function daysUntil(dueYmd, todayYmd) {
   const due = Date.parse(`${dueYmd}T00:00:00Z`);
@@ -112,13 +158,17 @@ async function fetchExpiry(domain, { fetchImpl = fetch } = {}) {
         signal: AbortSignal.timeout(15000),
       });
       if (!res.ok) continue;
-      const parsed = parseExpiry(await res.json());
-      if (parsed) return { expiry: parsed, source: base };
+      const doc = await res.json();
+      const parsed = parseExpiry(doc);
+      // [2026-08-28] **同じ応答から上位レジストラも拾う。**
+      // 期限が取れた endpoint の応答だけを使う（別の endpoint の名前を混ぜない）。
+      // registrar が取れなくても期限は返す —— **片方が欠けても、取れたほうは捨てない。**
+      if (parsed) return { expiry: parsed, source: base, registrar: parseRegistrar(doc) };
     } catch {
       // 次の endpoint へ。**最後まで落ちたら unknown**（例外で止めない）
     }
   }
-  return { expiry: null, source: null };
+  return { expiry: null, source: null, registrar: null };
 }
 
 export function readLedger() {
@@ -147,6 +197,27 @@ export function selftest() {
      '壊れた日付を通している');
   eq(parseExpiry(null), null, 'null で落ちる');
   eq(parseExpiry({}), null, 'events が無いときに落ちる');
+
+  // 上位レジストラ — **規約からは閉じなかった不明を、ここで閉じる**
+  const REG = { entities: [
+    { roles: ['registrant'], vcardArray: ['vcard', [['fn', {}, 'text', '別の名前']]] },
+    { roles: ['registrar'],
+      vcardArray: ['vcard', [['version', {}, 'text', '4.0'], ['fn', {}, 'text', 'GMO Internet, Inc.']]],
+      publicIds: [{ type: 'IANA Registrar ID', identifier: '49' }] },
+  ] };
+  eq(JSON.stringify(parseRegistrar(REG)), JSON.stringify({ name: 'GMO Internet, Inc.', ianaId: '49' }),
+     'レジストラを取れない');
+  // **registrant を registrar と取り違えない。**期限側で登録日を取り違える誤りと同じ形。
+  eq(parseRegistrar({ entities: [{ roles: ['registrant'],
+       vcardArray: ['vcard', [['fn', {}, 'text', '登録者']]] }] }), null,
+     '**registrant をレジストラとして拾っている**');
+  eq(parseRegistrar({ entities: [{ roles: ['Registrar'],
+       vcardArray: ['vcard', [['fn', {}, 'text', 'eNom, LLC']]] }] })?.name, 'eNom, LLC',
+     '大文字の roles を取れない');
+  eq(parseRegistrar({ entities: [{ roles: ['registrar'] }] }), null,
+     '名前もIDも無いのに何かを返している');
+  eq(parseRegistrar({}), null, 'entities が無いときに落ちる');
+  eq(parseRegistrar(null), null, 'null で落ちる');
 
   // 残り日数
   eq(daysUntil('2026-09-01', '2026-08-26'), 6, '残り日数が違う');
@@ -201,7 +272,7 @@ if (isMain) {
   const domain = entry.domain ?? 'simplememofast.com';
   const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // JST
 
-  const { expiry, source } = await fetchExpiry(domain);
+  const { expiry, source, registrar } = await fetchExpiry(domain);
   const r = reconcile({ fetched: expiry, ledgerDue: entry.next_due ?? null, today });
 
   console.log(`ドメインの有効期限（${domain}）\n`);
@@ -221,6 +292,21 @@ if (isMain) {
       entry.source = 'rdap';
       entry.unconfirmed_reason = null;
       entry.$derived = 'RDAP から取得。**手で書かない** — scripts/check-domain-expiry.mjs --write が正';
+      // [2026-08-28] **上位レジストラも同じ応答から拾う。**
+      // 規約（ムームードメイン §2）は上位レジストラ規約を丸ごと取り込むが、
+      // **誰が乗っているかは書いていない。**契約条項の registrar 行はそこで止まっている。
+      // 取れなければ書かない —— **取れなかったことを「無い」と混ぜない。**
+      const reg = registrar;
+      if (reg) {
+        entry.upstream_registrar = reg.name;
+        entry.upstream_registrar_iana_id = reg.ianaId;
+        entry.$upstream_registrar = '**RDAP から取得。手で書かない。**'
+          + 'ムームードメイン利用規約 §2 が上位レジストラの規約を取り込む構造なので、'
+          + '**誰が乗っているかで適用される責任条項が変わる**'
+          + '（お名前.com なら事業者登録者に一切責任を負わない / eNom なら Washington 州法・'
+          + 'JAMS 仲裁・上限 $400 以下）。contract_review の registrar 行の '
+          + '$governing_law がこの値を待っている';
+      }
       fs.writeFileSync(LEDGER_PATH, `${JSON.stringify(doc, null, 2)}\n`);
       console.log(`\n  → 台帳を更新（${r.due}）`);
     }

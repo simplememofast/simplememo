@@ -1514,17 +1514,10 @@
         "../simplememo-api/scripts/check-contracts.mjs",
         "../simplememo-api/data/contract-register.json"
       ],
-      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。**契約書そのものの分類は未着手**（契約書がリポジトリに無い）\n\n**[2026-08-28] 置き場所が決まった。オーナー判断で `simplememo-api`（非公開）。**公開リポジトリは最初から候補外（`data/publication-policy.json` —— **消しても公開されなかったことにはならない**ので、実行可能な対策は「これ以上ここへ機微情報を足さない」だけ）。\n\n受け皿は同日に置いた —— `../simplememo-api/contracts/`（書面）、`../simplememo-api/data/contract-register.json`（台帳）、`../simplememo-api/scripts/check-contracts.mjs`（両方向の検査・CI配線済み）、`../simplememo-api/docs/contracts.md`（手順）。\n\n**それでもこの行は動かない。**止めているのは書面そのもので、台帳はいま空。**空の受け皿を「できるようになった」と数えない** —— このリポジトリが「門を作った」を「動いた」と数えないのと同じ基準。\n\n`blocked_on` を足したので、**1件目が入った日に検査が鳴る**（隣が見えるセッションでのみ。CIは1リポジトリしかチェックアウトしないので評価されない —— evidence の扱いと同じ非対称で、**鳴らない側は「無い」ではなく「見えない」**）。",
+      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。\n\n**[2026-08-28 訂正] 待っていた相手を間違えていた。**この行は `contract_docs`（契約書をリポジトリに置く）を待っていたが、この台帳自身が records で「**書面の契約書は無く、規約への同意で成立している**」と記録している。**存在しない書面を待っていた。**分類の対象は規約本文で、それは特定済み・指紋監視（**週1回・月曜**）・15/40マス読解済み。待っているのは残り34マスで、それは `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。",
       "blocker": "missing_source_document",
-      "unblocked_by": "**置き場所は決まった**（2026-08-28・`../simplememo-api/contracts/`）。残るのは書面そのもの。1件目が台帳に入れば、定型／非定型の分類と承認者の要求は`check-contracts.mjs` が持っている",
-      "unlock": "contract_docs",
-      "blocked_on": [
-        {
-          "file": "../simplememo-api/data/contract-register.json",
-          "path": "contracts.length",
-          "atLeast": 1
-        }
-      ]
+      "unblocked_by": "規約40マスのうち34マスが未読。**「契約書がリポジトリに無い」ではない** —— 書面契約は存在せず、対象は規約本文で、既に特定・指紋監視されている",
+      "unlock": "vendor_terms"
     },
     {
       "area": "⑦ 法人経営",
@@ -1537,7 +1530,7 @@
         "scripts/vendor-terms.mjs",
         "scripts/vendor-clause-worksheet.mjs"
       ],
-      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily が毎日取得）。一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ",
+      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ",
       "blocker": "missing_source_document",
       "unblocked_by": "**本文そのものは依然リポジトリに無い**（公開リポジトリなので他社の規約本文は運ばない）。人が10社の規約を読んで40マスを埋めるところは変わらない。2026-08-26 に移せたのは**改定の検知**で、埋めたあとが腐るのを止める側\n\n**[2026-08-28] 埋める順序を機械に出させた**（`scripts/vendor-clause-worksheet.mjs`）。判定は相変わらず人だが、**40マスが等価に見える状態はやめた** —— 未確認の30マスを台帳の事実（personal_data の水準・critical・代替の有無・金銭の有無）だけで並べると、露出2が11・1が14・0が5。**先頭は Apple と Resend の liability_cap / personal_data。**\n\n出したことで欠落が2つ表に出た: (1) **ip の10マスには順序をつけられない** —— 「著作物・生成物を誰が抱えているか」を表す欄が vendor-register.json に無く、`used_for` は自由文なので順位に使えない。(2) **registrar の3マスは読む先が null** —— `critical` かつ代替なしで露出2なのに、読む対象が台帳に無い。**人が読めば済む話ではなく、先に台帳を直す話。**",
       "unlock": "vendor_terms"
@@ -1569,27 +1562,11 @@
       "area": "⑦ 法人経営",
       "task": "契約・請求・納品・支払いの照合",
       "executor": "nobody",
-      "evidence": [
-        "../simplememo-api/scripts/check-contracts.mjs",
-        "../simplememo-api/data/contract-register.json",
-        "../simplememo-api/docs/contracts.md"
-      ],
-      "note": "3リポジトリに証跡ゼロ\n\n**[2026-08-28] 置き場所が決まった。オーナー判断で `simplememo-api`（非公開）。**公開リポジトリは最初から候補外（`data/publication-policy.json` —— **消しても公開されなかったことにはならない**ので、実行可能な対策は「これ以上ここへ機微情報を足さない」だけ）。\n\n受け皿は同日に置いた —— `../simplememo-api/contracts/`（書面）、`../simplememo-api/data/contract-register.json`（台帳）、`../simplememo-api/scripts/check-contracts.mjs`（両方向の検査・CI配線済み）、`../simplememo-api/docs/contracts.md`（手順）。\n\n**それでもこの行は動かない。**止めているのは書面そのもので、台帳はいま空。**空の受け皿を「できるようになった」と数えない** —— このリポジトリが「門を作った」を「動いた」と数えないのと同じ基準。\n\n`blocked_on` を足したので、**1件目が入った日に検査が鳴る**（隣が見えるセッションでのみ。CIは1リポジトリしかチェックアウトしないので評価されない —— evidence の扱いと同じ非対称で、**鳴らない側は「無い」ではなく「見えない」**）。\n\n**この行だけ、もう1つ足りない。**金額の照合には明細（銀行・カード）が要り、それは `bank_feed` の側。書面が入っても**骨格の照合まで**で、「金額が合っている」はここでは言えない。",
-      "blocker": "missing_source_document",
-      "unblocked_by": "**置き場所は決まった**（2026-08-28）。照合の骨格（契約を指しているか・納品したか・支払ったか）は `check-contracts.mjs` に在る。残るのは契約と請求の書面。**金額の突合はここに入っていない** —— 明細の連携（bank_feed）が別に要る",
-      "unlock": "contract_docs",
-      "blocked_on": [
-        {
-          "file": "../simplememo-api/data/contract-register.json",
-          "path": "contracts.length",
-          "atLeast": 1
-        },
-        {
-          "file": "../simplememo-api/data/contract-register.json",
-          "path": "invoices.length",
-          "atLeast": 1
-        }
-      ]
+      "evidence": [],
+      "note": "3リポジトリに証跡ゼロ。\n\n**[2026-08-28] ここだけは本当に材料が無い。**上の2行と違い、照合には請求・入金の実データが要る。ただし**要るのは書類ではなくデータ。****[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**したがって道は「PDFを置く」ではなく「freee から金額・日付・相手・入金状態を取り出す」。**取り出し口の有無は未確認で、**あると仮定して計画に載せない。**",
+      "blocker": "external_credential",
+      "unblocked_by": "freee の請求データを機械が読む経路。**書類ではなくデータが要る** —— 照合に要るのは金額・日付・相手・入金状態で、PDFではない。**freee にその取り出し口があるかは未確認**（このセッションのプロキシから叩けない）",
+      "unlock": "contract_docs"
     },
     {
       "area": "⑦ 法人経営",
@@ -1601,9 +1578,9 @@
         "scripts/vendor-terms.mjs",
         "scripts/vendor-clause-worksheet.mjs"
       ],
-      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily が毎日取得）。一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ",
+      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**",
       "blocker": "missing_source_document",
-      "unblocked_by": "同上。DPAの確認そのものは人の作業で、いま6社が未確認。確認したら policy.enforce_unreviewed を true にすると CI が守る\n\n**[2026-08-28] 未確認の6社は、個人データを渡している6社と一致する**（apple / resend が personal、cloudflare / google_cloud / firebase / appsflyer が pseudonymous。残る4社は none）。`scripts/vendor-clause-worksheet.mjs` が同じ事実で順序を出すので、**DPA を見る順序も personal_data の露出順**で足りる —— apple と resend が先頭\n\n**[2026-08-28 夕] 先頭の resend を読んで、探す先が違っていたことが分かった。**貼られた Privacy Policy は冒頭で範囲を『resend.com への訪問』と定め、§2 で自らを **Data Controller** と位置づけている。扱っているのは**こちらが顧客として渡すアカウント情報**であって、**こちらがResend経由で送る宛先アドレスとメモ本文ではない。**後者について Resend は Processor になるはずで、それを定めるのは DPA。**Privacy Policy をいくら読んでもこの欄は埋まらない。**\n\n**したがって『6社の DPA を確認する』は、6社ぶんの Privacy Policy を読むことではない。**読む先は各社の DPA / Subprocessors / セキュリティ文書で、resend の場合は https://resend.com/legal/subprocessors → /security/gdpr → /security/soc-2 → DPA（`data/vendor-register.json` の resend `$dpa_next` に順を置いた）。**この区別が付いていなかったことが、6社が未確認のまま残っていた理由の一部かもしれない。**",
+      "unblocked_by": "同上。DPAの確認そのものは人の作業で、いま6社が未確認。確認したら policy.enforce_unreviewed を true にすると CI が守る\n\n**[2026-08-28] 未確認の6社は、個人データを渡している6社と一致する**（apple / resend が personal、cloudflare / google_cloud / firebase / appsflyer が pseudonymous。残る4社は none）。`scripts/vendor-clause-worksheet.mjs` が同じ事実で順序を出すので、**DPA を見る順序も personal_data の露出順**で足りる —— apple と resend が先頭\n\n**[2026-08-28 夕] 先頭の resend を読んで、探す先が違っていたことが分かった。**貼られた Privacy Policy は冒頭で範囲を『resend.com への訪問』と定め、§2 で自らを **Data Controller** と位置づけている。扱っているのは**こちらが顧客として渡すアカウント情報**であって、**こちらがResend経由で送る宛先アドレスとメモ本文ではない。**後者について Resend は Processor になるはずで、それを定めるのは DPA。**Privacy Policy をいくら読んでもこの欄は埋まらない。**\n\n**したがって『6社の DPA を確認する』は、6社ぶんの Privacy Policy を読むことではない。**読む先は各社の DPA / Subprocessors / セキュリティ文書で、resend の場合は https://resend.com/legal/subprocessors → /security/gdpr → /security/soc-2 → DPA（`data/vendor-register.json` の resend `$dpa_next` に順を置いた）。**この区別が付いていなかったことが、6社が未確認のまま残っていた理由の一部かもしれない。**\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**",
       "unlock": "vendor_terms"
     },
     {
@@ -1612,11 +1589,13 @@
       "executor": "ai_proposes",
       "evidence": [
         "data/corporate-obligations.json",
-        "scripts/check-corporate.mjs"
+        "scripts/check-corporate.mjs",
+        "../simplememo-api/data/incidents.json",
+        "../simplememo-api/test/incidents.test.ts"
       ],
-      "note": "2026-08-22に台帳と検査を実装。5件中2件は所在があり（規約への同意・App Reviewのやり取り）、**3件は所在が決まっていない**（議事録・株主名簿・事故記録）。事故記録は「発生していない」のか「記録する場所が無い」のかを区別できていない",
-      "blocker": "missing_source_document",
-      "unblocked_by": "議事録・株主名簿・事故記録の所在が決まっていない",
+      "note": "2026-08-22に台帳と検査を実装。5件中2件は所在があり（規約への同意・App Reviewのやり取り）、**3件は所在が決まっていない**（議事録・株主名簿・事故記録）。事故記録は「発生していない」のか「記録する場所が無い」のかを区別できていない\n\n**[2026-08-28] 所在が決まった。3件のうち1件は機械の側に入った。**事故記録は ../simplememo-api/data/incidents.json を作成し、あちらの test/incidents.test.ts が形を守っている。**空の entries が「起きていない」を意味する** —— ファイルが無い状態は「起きていない」を何も意味しなかった。\n\n議事録・株主名簿は**法が保管場所を本店と指定している**ので、リポジトリには置かない（入れても義務は果たされず、正が2つになる）。株主名簿は氏名・住所が載るため非公開リポジトリでも置かない —— git の履歴は消せない。\n\n**したがってこの行がこれ以上機械側へ寄ることはない。**残るのは実在の確認1回で、それは `corp_records` が持っている。",
+      "blocker": "external_data",
+      "unblocked_by": "本店に議事録・株主名簿が実在するかの確認（1回）。**所在は 2026-08-28 に決まった** —— 議事録・株主名簿は本店（会社法318条2項/125条1項）、事故記録は ../simplememo-api/data/incidents.json（作成済み・検査付き）",
       "unlock": "corp_records"
     },
     {
@@ -2360,17 +2339,10 @@
         "../simplememo-api/scripts/check-contracts.mjs",
         "../simplememo-api/data/contract-register.json"
       ],
-      "note": "2026-08-22。⑦の条項検査と同じ機構。**定型／非定型の分類は、契約書がリポジトリに無いのでまだできない** — 現状あるのは「規約への同意」という形の定型のみ\n\n**[2026-08-28] 置き場所が決まった。オーナー判断で `simplememo-api`（非公開）。**公開リポジトリは最初から候補外（`data/publication-policy.json` —— **消しても公開されなかったことにはならない**ので、実行可能な対策は「これ以上ここへ機微情報を足さない」だけ）。\n\n受け皿は同日に置いた —— `../simplememo-api/contracts/`（書面）、`../simplememo-api/data/contract-register.json`（台帳）、`../simplememo-api/scripts/check-contracts.mjs`（両方向の検査・CI配線済み）、`../simplememo-api/docs/contracts.md`（手順）。\n\n**それでもこの行は動かない。**止めているのは書面そのもので、台帳はいま空。**空の受け皿を「できるようになった」と数えない** —— このリポジトリが「門を作った」を「動いた」と数えないのと同じ基準。\n\n`blocked_on` を足したので、**1件目が入った日に検査が鳴る**（隣が見えるセッションでのみ。CIは1リポジトリしかチェックアウトしないので評価されない —— evidence の扱いと同じ非対称で、**鳴らない側は「無い」ではなく「見えない」**）。",
+      "note": "2026-08-22。⑦の条項検査と同じ機構。\n\n**[2026-08-28 訂正] 「契約書がリポジトリに無いのでできない」は誤り。**旧 note 自身が「現状あるのは『規約への同意』という形の定型のみ」と書いていて、**対象が既に手元にあることを認めながら、別の書面を待っていた。**条項比較は contract_review で実際に動いており（apple 4/4・resend 2/4）、止まっているのは残り34マスの読解＝ `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。",
       "blocker": "missing_source_document",
-      "unblocked_by": "**置き場所は決まった**（2026-08-28）。条項の4観点は`corporate-obligations.json` の contract_review と同じ列で、**ok/risk を書けるのは人だけ**という規則も同じ。残るのは書面",
-      "unlock": "contract_docs",
-      "blocked_on": [
-        {
-          "file": "../simplememo-api/data/contract-register.json",
-          "path": "contracts.length",
-          "atLeast": 1
-        }
-      ]
+      "unblocked_by": "規約40マスのうち34マスが未読。**条項比較の対象は規約本文**で、書面契約は存在しない",
+      "unlock": "vendor_terms"
     },
     {
       "area": "⑬ アナログ領域",
@@ -2526,8 +2498,8 @@
     "min(証跡の初出月) を使うと、2月から検査していたことになってしまう。",
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
   ],
-  "blocked_on_missing_budget": 11,
+  "blocked_on_missing_budget": 14,
   "authority_absent_budget": 7,
   "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。",
-  "$blocked_on_missing_budget": "**[2026-08-28] 14 → 11。**⑦⑬の契約3行に述語が付いたので同じ差分で下げた。**上げて通さない**のと対に、**減ったら下げる** —— 余った枠は、次に述語の無い待ちを黙って飲み込む（routine-runs の open_budget と同じ形）。"
+  "$blocked_on_missing_budget": "**[2026-08-31] 11 → 14 へ戻した。**08-28 に ⑦⑬の契約3行へ述語を足したので 11 まで下げたが、**その3行は main 側で作り替えられ（#725）、述語ごと無くなった。**待っていた相手が違っていた、というのが向こうの結論で、そちらが正しい。**これは上限を上げたのではなく、下げた根拠が消えたので戻したもの。**述語を足したぶんだけ下げる、という規則自体は動かしていない。"
 }

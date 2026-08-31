@@ -163,6 +163,13 @@ export function applyVerdict(row, r, today) {
       delete next.risk_note;
       next.reset_reason = `本文が改定された（${r.before} → ${r.fingerprint}・${today}）`
         + ' — **前の判定は前の本文に対するもの。**読み直すまで unreviewed';
+      // [2026-08-29] **戻した日と、戻した観点を残す。**
+      // check-corporate が「改定で戻された直後」と「ずっと読んでいない」を
+      // 区別するのに要る。**`fetched_at` では代用できない** ——
+      // あちらは改定が無くても毎回の取得で今日になるので、
+      // 戻されたマスが何日放置されているかを測れない。
+      next.reset_at = today;
+      next.reset_clauses = reset.slice();
     }
   }
   return { row: next, reset };
@@ -252,6 +259,10 @@ export function selftest() {
   eq(changed.reset.length, 2, '戻した観点の数が違う');
   eq(changed.row.fingerprint, 'bbb', '指紋を更新していない');
   eq(typeof changed.row.reset_reason, 'string', '戻した理由が残っていない');
+  // [2026-08-29] **戻した日と観点。**check-corporate の猶予がこれを読む。
+  eq(changed.row.reset_at, '2026-08-26', '**戻した日が残っていない**（何日放置されたかを測れない）');
+  eq(JSON.stringify(changed.row.reset_clauses), JSON.stringify(changed.reset),
+     '戻した観点の一覧が残っていない');
 
   // 変わっていなければ判定に触らない
   const same = applyVerdict(row, { verdict: 'unchanged', fingerprint: 'aaa' }, '2026-08-26');

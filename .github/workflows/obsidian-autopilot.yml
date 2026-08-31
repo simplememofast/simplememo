@@ -382,7 +382,21 @@ jobs:
             echo "::notice title=Obsidian Autopilot::切り分け: **資格情報は通っている。**同じトークンで1ターン完走した。即死の原因は資格情報以外（--model指定・MCP・プロンプト等）を見ること。"
             exit 0
           fi
-          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+
+          # [2026-08-31] **落ちた＝資格情報、と決めつけていた。**
+          # 08-29 と 08-30 の即死で、このステップは実際に
+          # 「`claude setup-token` を再実行せよ」と報告した。ところが同じログの
+          # プローブ応答は `api_error_status: 429` /
+          # `"You've hit your weekly limit · resets 11pm (UTC)"` で、
+          # **トークンは通っており、週次の利用枠が尽きていただけだった。**
+          # 誤った対処（トークン回転）へオーナーを送るうえ、本当の原因
+          # （待てば直る／枠の使い方の問題）が記録に残らない。
+          # **「判定できなかった」を「資格情報が原因」と書かない。**
+          if printf '%s' "$out" | grep -q '"api_error_status":429'; then
+            echo "::error title=Obsidian Autopilot::切り分け: **資格情報は通っている。利用枠が尽きている。**プローブが 429 を返した（$(printf '%s' "$out" | sed -n 's/.*"result":"\([^"]*\)".*/\1/p' | head -c 120)）。**トークンの回転は不要。**枠のリセットを待つか、同じ枠を使う経路（Actions の主系・CCRの副系・週次）が同じ時間帯に固まっていないかを見ること。"
+            exit 1
+          fi
+          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた（429 ではない）。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
           exit 1
 
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。

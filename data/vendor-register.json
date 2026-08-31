@@ -127,12 +127,13 @@
       "degradation_probes": [
         "model_fallback"
       ],
-      "degradation_note": "使えるモデルが減れば縮退先へ移る。全滅したら**走らない**（静かに寝ない）"
+      "degradation_note": "使えるモデルが減れば縮退先へ移る。全滅したら**走らない**（静かに寝ない）",
+      "$used_for": "**認証経路が2つあり、適用される契約が違う**（2026-08-29 の調査で判明）:\n\n  `anthropic_api_key`        … オートパイロット主系 → **Commercial Terms**\n  `claude_code_oauth_token`  … GitHub Actions の Claude Code。`claude setup-token` で取るので\n                               Pro/Max 経路 → **Consumer Terms**。**critical: true**\n\nAnthropic 自身の Claude Code 文書がこの区別を明記している。\n\n**contract_review の anthropic 行は Commercial Terms 側しか読めていない。**非EEA向けの Consumer Terms 本文が公式サイトから取得できなかった（取れた版は本文自身が EEA/スイス限定と書いている）。**重いほうの経路の契約が未確定** —— 詳細はあちらの `$two_contracts`。\n\n**行を割るかどうかは未決**（割るとマスが 40 → 44 になり、追ってきた数字が動く）。"
     },
     {
       "id": "google_cloud",
-      "name": "Google Cloud（BigQuery / Search Console）",
-      "used_for": "検索データの取り込み・ファネル評価",
+      "name": "Google Cloud（BigQuery）",
+      "used_for": "ファネル評価のためのデータ蓄積・集計（BigQuery）",
       "personal_data": "pseudonymous",
       "critical": false,
       "breaks_if_down": "計測が止まる。出荷は続く",
@@ -149,7 +150,29 @@
       "approved_by": "human",
       "approved_at": "2026-08-22",
       "$fallback_was": "無し。データが欠測する（『取得できなかった』として記録される）",
-      "fallback_note": "**代替なし。**データが欠測する。欠測は「取得できなかった」として記録され、ゼロとは区別される"
+      "fallback_note": "**代替なし。**データが欠測する。欠測は「取得できなかった」として記録され、ゼロとは区別される",
+      "$name": "**[2026-08-29] Search Console をこの行から分離した。**1行で「BigQuery / Search Console」を束ねていたが、**適用される契約が違う。**Google 公式のサービス別一覧が Search Console の適用文書として**Google 一般利用規約1件だけを列挙**しており、GCP Terms は入っていない。→ `search_console` の行を参照。\n\n**「同じ Google だから同じ規約」という仮定を、確かめずに1行にしていた。**確かめたら違った。ムームードメインの `personal_data: none` と同じ形の誤り。"
+    },
+    {
+      "id": "search_console",
+      "name": "Google Search Console",
+      "used_for": "検索クエリ・表示回数・順位の取得（SEO評価）",
+      "$used_for": "**[2026-08-29] google_cloud から分離して作った行。**適用契約は **Google 一般利用規約**（GCP Terms ではない）。Search Console API を使う場合は Search Console API Terms と Google APIs Terms が**追加で乗る** —— **API を実際に使っているかは未確認。**",
+      "personal_data": "pseudonymous",
+      "$personal_data": "検索クエリ・表示回数・順位。個人を直接特定しないが、**Google 一般利用規約には Search Console 専用の DPA も Processor 条項も無い**（探した上で見つからなかった）。契約上の位置づけが GCP 側とは違う。",
+      "critical": false,
+      "breaks_if_down": "SEOの計測が止まる。サイトもアプリも動く",
+      "fallback": null,
+      "fallback_note": "**代替なし。**検索側の実データはここにしか無い。止まると欠測になり、ゼロとは区別して記録される（google_cloud と同じ扱い）",
+      "dpa_reviewed": null,
+      "terms_accepted_by": "human",
+      "evidence": [
+        "data/corporate-obligations.json"
+      ],
+      "money_flow": "none",
+      "$money_flow": "**無料。**だから責任上限の計算式（直前12か月料金の125%）が0になり、**500米ドルの下限だけが残る** —— contract_review の $liability_cap 参照。",
+      "approved_by": "human",
+      "approved_at": "2026-08-29"
     },
     {
       "id": "firebase",
@@ -200,7 +223,7 @@
       "id": "github",
       "name": "GitHub（Actions / リポジトリ）",
       "used_for": "ソース管理・主系オートパイロット・CI",
-      "personal_data": "none",
+      "personal_data": "personal",
       "critical": false,
       "breaks_if_down": "主系が止まる。**副系（CCR）は別経路なので代走できる**",
       "fallback": "CCR Routines（実績として日々の出荷はこちらが担っている）",
@@ -220,7 +243,8 @@
         "gate_fails_closed_on_api",
         "egress_degrade"
       ],
-      "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた"
+      "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた",
+      "$personal_data": "**[2026-08-29 訂正] `none` は規約本文から裏づけられなかった。**\n\nGitHub General Privacy Statement（Standard ToS が Site Policies として Agreement の一部に参照している）が、アカウント開設時に **GitHub handle / name / email address / password / payment information / transaction information** を収集すると明記。有料 subscription では name / billing address / payment specifics も列挙。\n\n**registrar と同じ形の誤りが2社目。**どちらも「ユーザーの個人情報を渡していない」は正しく、**渡しているのは会社（オーナー本人）の個人情報**だった。**この欄が2種類の事実を1つの語で表している。**\n\n**役割が状況で変わる点も記録しておく:** 通常の直接関係では GitHub が Controller、organization-provided account では Organization が Controller で GitHub は Processor、DPA に定める特定の処理では **GitHub 自身が Controller**。**Controller と Processor の双方の役割を持つ構造。**"
     },
     {
       "id": "prtimes",
@@ -249,7 +273,7 @@
       "name": "ムームードメイン（GMOペパボ）— simplememofast.com",
       "$name": "**[2026-08-28] 実名にした。**それまで唯一この行だけが汎用名で、他の9社は全部実名だった。汎用名のままだと `contract_review` の `source` を埋められず、**台帳でいちばん重いベンダー（止まると全部止まる・代替なし）の規約だけが読めない**という穴になっていた。\n\n**公開リポジトリに事業者名を足す判断。**`data/publication-policy.json` がこのファイルを `ok_in_public_repo: review`（足す前に必ず読む）にしているので、理由を残す —— **ドメインのレジストラは whois / RDAP が必ず返す公開情報**で、ICANN がレジストラの識別を要求している。つまりここに書いても新たに開示するものは無い。レジストラは乗っ取りの標的として最も価値が高い相手だが、**隠しても隠れていない**ので、隠すことを対策と数えない（移管ロックと自動更新のほうが実際に効く。`revocation` 欄を参照）",
       "used_for": "サイト・API・メールのFrom・ディープリンクの土台",
-      "personal_data": "none",
+      "personal_data": "personal",
       "critical": true,
       "breaks_if_down": "**全部止まる。**サイト・API・メール送信・アプリの通信",
       "fallback": null,
@@ -265,7 +289,8 @@
       "spend_cap_ref": "unset",
       "spend_cap_note": "**代替が無い critical。**失効するとドメインごと失う",
       "approved_by": "human",
-      "approved_at": "2026-08-22"
+      "approved_at": "2026-08-22",
+      "$personal_data": "**[2026-08-29 訂正] `none` は誤りだった。**規約本文と矛盾していた。\n\nムームードメイン利用規約 §5-3 が「**氏名、住所及び電子メールアドレス等**」を『登録情報』として明示している。外部ディープリサーチが条項番号つきで確認した。\n\n**なぜ間違えたか。**「ユーザーの個人情報を渡していない」は正しい ——**渡しているのは会社（オーナー本人）の個人情報。**台帳の他の行がユーザーデータの話をしていたので、**同じ欄に別の種類の事実が入る場所だと気づいていなかった。**\n\n**帰結: この行は DPA 未レビューの一覧に入る。**GMOペパボのプライバシーポリシーは §30-1 が参照する**別文書で、まだ読んでいない。**\n\n**Whois 情報代理公開が既定で有効かは、規約からは分からない**（§27 は「代理公開できる」）。リサーチャーが「既定 ON か申込が必要かを定める文言」を探して見つからなかったと報告した。**いま氏名・住所が Whois に出ているかどうかは、管理画面でしか確かめられない。**"
     }
   ],
   "$fallback_fields": [

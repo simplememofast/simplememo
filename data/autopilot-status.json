@@ -1,23 +1,21 @@
 {
-  "date_jst": "2026-08-28",
-  "generated_at": "2026-08-28T00:42:00Z",
-  "action": "new",
-  "article": {
-    "url": "https://simplememofast.com/obsidian/sync/official-sync/",
-    "title": "Obsidian SyncのStandardとPlus、必要なのはどちらか"
-  },
+  "date_jst": "2026-08-31",
+  "generated_at": "2026-08-31T23:20:00Z",
+  "action": null,
+  "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 0,
+    "consecutive_no_article_days": 3,
     "last_article_date_jst": "2026-08-28",
-    "last_production_change_date_jst": "2026-08-28",
-    "days_since_production_change": 0
+    "last_production_change_date_jst": "2026-08-29",
+    "days_since_production_change": 2
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-24",
     "bq_export_days_accumulated": 15,
     "bq_checked": true,
-    "manual_snapshot_label": "2026-08-24"
+    "manual_snapshot_label": "2026-08-24",
+    "$note": "**[2026-08-31] この日は再計測していない。**値は 08-28 の観測のまま。計測するのは当日のオートパイロットで、その実行が 429 で即死したため計測自体が起きていない。**「変わっていない」ではなく「測っていない」。**"
   },
   "cost": {
     "month": "2026-08",
@@ -94,7 +92,8 @@
         }
       ]
     },
-    "cap_set_by": "placeholder"
+    "cap_set_by": "placeholder",
+    "$note": "**[2026-08-31] 08-28 の集計のまま。意図的に取り直していない。**`autopilot-budget --json` はいま JST の月替わり（2026-09-01）を見て 2026-09 のゼロを返すので、それで上書きすると 8月の実績が消える。**そして 8月の数字は動いていない** —— 08-30 と 08-31 の失敗はどちらもログ上 `total_cost_usd: 0` / `num_turns: 1` で、課金ゼロで弾かれている。"
   },
   "runs": {
     "window": {
@@ -168,7 +167,7 @@
       "unresolved": []
     }
   },
-  "reason": "【連続無記事0日目・本番最終変更2026-08-28・BQ確認済み(15/28日蓄積・2026-09-06頃到達見込み)】再試行経路(09:20 JST・ccr-0920)による実行。主系・副系A・副系Bのいずれにも当日分の実行痕跡が無いことを§0の(a)〜(e)で確認済み（当日ブランチ無し・本番status JSON日付は前日・当日head PR無し・主系当日run無し）。占有コミットは非fast-forward拒否なく通った。**新規判明**: `check-routine-runs.mjs`（本日main合流・PR#693/#694）が副系A(ccr-0730)・副系B(ccr-0830)のroutine自体をstoppedと検知——今日これらが動かなかったのはタイミングではなく停止によるもの。自分のタスク範囲外のため触っていない（open_findingsの予算内・4/4）。レーンF: 未修理の故障なし（`autopilot-selfheal.mjs` --check）。前回レーンC実施が前日08-27で7日未満のためレーンCは優先せず、coverage-queueのpending先頭 C07 `/obsidian/sync/official-sync/` を実装（レーンE）。**訂正**: C07のevidenceは「Standard $4/Plus $8」としていたが、出典を遡っても確認できず（Sync $4とPublish $8という別製品の価格の混同の疑い）採用しなかった。公式ヘルプで確認できる唯一の差——バージョン履歴保持期間（Standard1か月/Plus12か月、`/obsidian/sync/`が2026-08-26に確認済み）——だけを根拠に判断フローを構成し、Plus単体の価格・保存容量差は本セッションの実行環境からはobsidian.md本体にもraw.githubusercontent.com経由のobsidianmd/obsidian-helpにも到達できず（前者403・後者は複数パス試行で404）未確認と明記した。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。",
+  "reason": "**記事なし。上流が3日止まっていた。**08-29 は副系が当日ロックを claim だけ取って死に、主系はブランチの存在を見て Gate で skip（3秒・緑）。08-30 と 08-31 は主系が 429（週次の利用枠）で1ターン即死し、08-31 は副系 ccr-0920 も同じ理由で落ちた。**この欄を書いているのは当日のオートパイロットではなく、後から追いかけたセッション**（実行が落ちた日は status JSON を書く主体も居ないという構造的な穴。data/autopilot-runs.json の ap-20260829/30/31 に一次資料つきで記録した）。",
   "verified": "実測（このセッションで実際に実行した）: (a) egressの実測——obsidian.mdへはcurlで403（CONNECT tunnel failed）、raw.githubusercontent.com/obsidianmd/obsidian-releasesは200だがobsidianmd/obsidian-helpは複数パス試行すべて404（前回セッションが到達した経路が本日は機能しなかった）、api.github.comは直接到達200だが本セッションのGitHub API利用は設定リポジトリ以外403。(b) GitHub MCP `get_job_logs`でseo-daily.yml最新run(08-27 09:30 JST)のExport preflightログを読み、BigQueryのdata_date 2026-08-10〜08-24・15/28日蓄積・28日窓到達2026-09-06を確認（bq-preflight.mjsは資格情報無しで失敗するためこの経路で代替）。(c) coverage-queue.jsonのC07 evidence「Standard $4/Plus $8」をAUTOPILOT_LOG.md全文・coverage-queue.json全体でgrepし、他に出典が無いことを確認——Sync $4とPublish $8（/obsidian/pricing/で別々に検証済みの2製品）の混同の疑いと結論した。一次情報として新規に確認したのはこの「出典が無いことの確認」自体で、既存の検証済み事実（バージョン履歴保持期間・Sync基本料金）は/obsidian/sync/・/obsidian/pricing/からの引用。§4の全チェックをローカルで全通過（seo-check 0 errors 0 warnings・268ファイル）。iPhoneビューポート（390×844 DPR3）実描画QA: Playwright+Chromiumで実描画し、水平スクロールなし（scrollWidth=clientWidth=390）・表はoverflow-x:auto内・回答ブロック(tip-box) top=807px（ファーストビュー内）・cta-qrはモバイル非表示。JSエラーは外部analytics(ahrefs/GTM)のトンネル失敗2件のみで、既存の/obsidian/sync/ページで同一条件で再現したため本ページ固有の問題ではないと確認。QRは44件（新規2件含む）を独立デコードして0 failed、既存42件はバイト同一。",
   "checks": {
     "seo_check": "0 errors 0 warnings（268ファイル）",
