@@ -367,19 +367,57 @@ export const UNLOCKS = {
                                 + '残る未検証は「既存の副系Routineが MCP を持つか」と「自己バインド」の2つ。'
                                 + '取り直しが自動になれば、記録は主系（Actions の run 列挙）と'
                                 + '同じ意味で完結する' },
-  impl_machine_gate: { kind: 'implement', label: '不可逆な領域の機械ゲートを作る',
-                       needs: '**承認を外すには権限表が machine_gate を要求する** —— '
-                            + '実在する checker / export された関数 / kill switch の経路 / '
-                            + '正の日次上限 / 材料が無いときは止まる（holds_when_unknown）。'
-                            + '**「ゲートがあります」と1行書いても外れない。**'
-                            + '対象は App Store公開・App Review提出・段階公開の拡大・'
-                            + 'PR TIMES配信・削除要求への対応・危機対応・ChatOps起動・'
-                            + '収集同意・本番での停止訓練' },
-  impl_granted:      { kind: 'implement', label: '境界が外れた可逆な領域を実装する',
-                       needs: '権限は渡ったので、あとは作るだけ —— SNS投稿の経路復旧 / '
-                            + 'タグ作成からTestFlight配信まで / Kill Switch を機械が叩く経路 / '
-                            + '要望から設計への落とし込み / 課金導線の改善 / '
-                            + '推論をどこで回すか（VISION §14 の決着が先）' },
+  // [2026-08-28] **`impl_machine_gate`（9件）と `impl_granted`（6件）を消した。**
+  // この2つが、上位3群で「実装すれば +18件（+9.0pt）」と出していた入口だが、
+  // **15件のうち12件は、行の unblocked_by が自分で「人に残した」と書いていた。**
+  // 権限表と1件ずつ突き合わせて `policy_boundary` / `human_consent` へ移した
+  // （PR TIMES配信・ChatOps起動・削除要求・危機対応・停止訓練・要望の採否・
+  //   SNS再開・タグ作成・緊急kill・課金導線・推論の置き場所・収集同意）。
+  //
+  // **消したのは入口であって、仕事ではない。**残った3件は本当に残っていて、
+  // ただし要るものが3件とも違ったので、下の2つへ割った
+  // （App Review提出 / App Store公開 → `ship_execute`、段階公開の昇格 → 待ち）。
+  //
+  // **同じ誤りをもう一度入れないために。**この2つの入口が長く残ったのは、
+  // 「境界が外れた」と「作れば動く」を1つの語で書いていたからで、
+  // 権限表を見れば1件ずつ違うと分かる状態だった。
+  // **入口の名前は、要るものを名指しできる粒度で切ること。**
+  ship_execute:      { kind: 'implement', label: '出荷の実行側を作る（門はもう在る）',
+                       needs: '**門は 2026-08-28 に入った**（#708・`scripts/check-release-gate.mjs` の '
+                            + '`evaluateSubmission` / `evaluateRelease`）。権限表も同日に '
+                            + '`requires_approval: false` ＋ machine_gate へ動いている。'
+                            + '**残っているのは実行側** —— ASCへの提出・公開を実際に呼ぶ経路と、'
+                            + 'タグ作成の権限。**そのあとに `policy.enabled` を立てる操作が要り、'
+                            + 'そこは権限表で human_only**（AIが自分で立てる経路は作らない）。'
+                            + '\n\n**門ができたことを「動いた」と数えない** —— '
+                            + 'coverage 台帳の executor は据え置いてある' },
+  rollout_first_pass:{ kind: 'wait', label: 'カナリアが判定できる母数に届くのを待つ',
+                       needs: '**作るものもオーナー操作も残っていない。**門は 2026-08-27 に入り'
+                            + '（`evaluatePromotion`）、カナリアは同日 25% へ上がり、'
+                            + '`auto_promote.enabled` は 2026-08-28 にオーナーが立てた。'
+                            + '**残るのは 48時間の寝かせ（2026-08-29 まで必ず hold）と、'
+                            + '3指標が各群30以上で判定できること。**どちらも実装では早められない'
+                            + '\n\n**述語（satisfied_when）は置いていない。**この入口が持つ行の blocker は '
+                            + '`verification_pending` で、`WAITING_BLOCKERS` に入っていない ——'
+                            + '**置いても一度も評価されない。**空回りする検査を足すより、'
+                            + '待っている対象をここに名指ししておくほうが効く' },
+  // [2026-08-31] **`vendor_terms` から1行だけ切り出した。**
+  // ⑦「定型／非定型契約の分類」は「人が規約を読む」を待っていたが、
+  // **分類に要るのは規約本文ではなく台帳**（書面契約ゼロ ＋ 11社の terms_accepted_by）で、
+  // それは既に手元にある。**待ち方そのものが間違っていた行。**
+  impl_contract_class: { kind: 'implement', label: '契約の定型／非定型を機械が導く経路を作る',
+                       needs: '**材料は揃っている** —— `../simplememo-api/data/contract-register.json` の '
+                            + 'contracts は空（書面契約ゼロ）、成立している11社は `data/vendor-register.json` の '
+                            + '規約同意。**無いのは導く側とCIの照合。**'
+                            + '\n\n非定型は人の承認が要る（権限表「契約・支払い・送金」が human_only）ので、'
+                            + '**機械が出せるのは分類と食い違いの検出まで。**'
+                            + '`check-contracts.mjs` は既に `kind: "non_standard"` に '
+                            + '`approved_by: "human"` を要求している。'
+                            + '\n\n**分母が薄いことは自覚しておく** —— いま分類の対象は11社で、'
+                            + 'しかも全部が同じ種別（規約同意＝定型）になる見込み。'
+                            + '**一度も発火しない検査を作らない**のがこの台帳の規則なので、'
+                            + '作るなら「非定型が現れたときに承認を要求する」側が本体で、'
+                            + '分類そのものは副産物として扱うこと' },
   impl_backlog:      { kind: 'implement', label: 'バックログの作り方を直す',
                        needs: '**追加の候補しか持っていない。**減らす提案を採点対象に入れ、中期のロードマップを組み立てる経路を作る' },
   impl_measurement:  { kind: 'implement', label: 'North Star Metric を実測する',

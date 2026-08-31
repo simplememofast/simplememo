@@ -705,6 +705,24 @@
       "detected_note": "Actions API のステップ一覧から起こした。Gate は success だが Checkout 以降が全て skipped ＝ Gate が run=false を出した回（秘密鍵未設定・当日重複のいずれか。ステップの conclusion からはどちらかまでは決まらない）。"
     },
     {
+      "run_id": "ap-20260829-ccr0920",
+      "date_jst": "2026-08-29",
+      "route": "ccr-0920",
+      "attempted": true,
+      "outcome": "no_artifact",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "副系が当日ロック（claude/obsidian-auto-20260829）を claim だけ取って、記事もPRも作らずに終わった。**同じ日の主系（ap-20260829-actions・skipped_gate）が何もしなかったのは、これが理由。**Gate はブランチの存在を『進行中/実行済み』と読んでスキップし、3秒で success を返す。**claim を取った側が死ぬと、その日は主系も走らないまま緑になる。**主系側の行だけを見ると『重複でスキップした正常な日』に見えるので、この行を別に立てている",
+      "external_ref": null,
+      "interventions": [],
+      "source": "git: claude/obsidian-auto-20260829 は claim コミット1件のみ（36de90a6・lane: ccr-0920）で main との差分ゼロ。PRは存在しない。主系 run 33230445898 は steps 3〜13 が全て skipped で3秒 success",
+      "failure_class": "claim_without_completion",
+      "failed_at": "2026-08-29T09:20+09:00",
+      "detected_at": "2026-09-01T08:10+09:00"
+    },
+    {
       "run_id": "ap-20260830-actions",
       "date_jst": "2026-08-30",
       "route": "actions",
