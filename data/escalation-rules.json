@@ -170,6 +170,15 @@
       "note": "上流の GitHub Action（claude-code-action@v1 のようなフローティングタグ）が壊れた版を配り、作業に入る前に落ちる。2026-08-24・08-25 に主系が2日連続で踏んだ（CLI 2.1.241）。**セッションが自分で直せる**——原因の切り分けはジョブログの `Download action repository … (SHA:…)` を直近の成功runと比べるだけで、費用ゼロ。修理は SHA の pin。ただし主系の GH_PAT には `workflow` scope が無く `.github/workflows/*` を push できないため、**主系だけは自力で完走できない**（副系CCRは push できる）。この非対称が解消するまで who は self_then_owner。止めない理由: 上流が直れば自然に復旧しうるうえ、副系が出荷を継続できるため"
     },
     {
+      "trigger": "usage_limit",
+      "kind": "infra",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "Claude の使用量上限（HTTP 429）に当たって、その日の出荷が丸ごと消えた。2026-08-30・08-31 の主系がこれで、応答は `You've hit your weekly limit · resets Aug 31, 11pm (UTC)`。**資格情報の失効と混ぜないこと** —— 当時の切り分けステップは2値しか持たず、429を「資格情報が通っていない。claude setup-token を再実行せよ」と書いていた。**無事な鍵を捨てさせる指示**で、しかも needs_triage が立たないので誰も見直さない。who が owner なのは、セッション側に打つ手が1つも無いから（待つか、枠を上げるか、1回あたりの入力量を減らすかで、後ろ2つは人の判断）。stop_automation を false にしてあるのは、**上限は時間で戻る**から —— 止めると解除は人間だけになり（emergency-stop の非対称）、自然に直る停止を人待ちの停止に変えてしまう。副系CCRも同じアカウントを使うので**代走は当てにできない**（08-31 に両系が同じ時間帯に落ちている）。連続するなら repair_limit ではなくこちらで拾う"
+    },
+    {
       "trigger": "immediate_failure",
       "kind": "infra",
       "who": "self_then_owner",
@@ -177,15 +186,6 @@
       "within_hours": 24,
       "stop_automation": false,
       "note": "Claude Code ステップが作業に入る前（5秒未満）に落ちた、という**観測された形**。**原因ではない**ので、この種別のまま放置せず切り分けて上書きすること。同じ形になる原因は少なくとも3つある: 上流actionの版の破損 / `--model` 等の指定ミス / 資格情報の失効。autopilot-act.mjs の interpretRun がこれを書き、needs_triage を立てる。**安い順に切り分ける**（版の照合 → モデル解決 → 資格情報）。2026-08-25 以前は同じ形を auth_or_credential と決めつけており、誤診とオーナーへの不要な依頼を生んだ"
-    },
-    {
-      "trigger": "rate_limit_weekly",
-      "kind": "failure_class",
-      "who": "owner",
-      "channel": "daily_report",
-      "within_hours": 24,
-      "stop_automation": false,
-      "note": "**週次の利用枠が尽きた状態で発火し、1ターン・課金ゼロで弾かれる。**2026-08-29〜31 に主系（Actions）・副系（ccr-0920）・週次2本が同じ理由で落ちた。ログ本文で確認: `api_error_status: 429` / `\"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"` / `num_turns: 1` / `total_cost_usd: 0`（run 33279844326・33340960317）。\n\n**AIには直せないが、鍵の問題でもない。**枠はアカウント全体で共有され、リセットは月曜 23:00 UTC。**待てば直る**ので `stop_automation` は false。止めても枠は戻らず、リセット後に自分で復旧する経路を塞ぐだけになる。\n\n**`auth_or_credential` と取り違えないこと。**シグネチャ（`is_error: true` / `num_turns: 1` / `total_cost_usd: 0`）が両者で同じで、2026-08-31 まで obsidian-autopilot.yml の切り分けステップは**429 を「資格情報が通っていない。`claude setup-token` を再実行せよ」と報告していた。**同日 `api_error_status: 429` を分ける修正を入れたが、**それ以前に auth_or_credential と記録された回（ap-20260824-actions / ap-20260825-actions）は、同じ誤診である疑いが残る**（未確認）。\n\n**オーナー側の手は「待つ」以外にもう1つある** —— 同じ枠を使う経路（主系 21:00Z / 副系 00:20Z / 週次 00:0xZ・23:45Z）が週のどこに固まっているか。週次2本を月曜 00:0xZ に置いていたのが2026-08-24 の失敗の直接の原因だった（枠のリセット23時間前）。"
     },
     {
       "trigger": "claim_without_completion",

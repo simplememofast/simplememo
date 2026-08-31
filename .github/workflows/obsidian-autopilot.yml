@@ -379,24 +379,52 @@ jobs:
           echo "$out" | head -c 2000
 
           if [ "$code" -eq 0 ] && printf '%s' "$out" | grep -q '"is_error":false'; then
+            echo "verdict=ok" >> "$GITHUB_OUTPUT"
             echo "::notice title=Obsidian Autopilot::切り分け: **資格情報は通っている。**同じトークンで1ターン完走した。即死の原因は資格情報以外（--model指定・MCP・プロンプト等）を見ること。"
             exit 0
           fi
 
-          # [2026-08-31] **落ちた＝資格情報、と決めつけていた。**
-          # 08-29 と 08-30 の即死で、このステップは実際に
-          # 「`claude setup-token` を再実行せよ」と報告した。ところが同じログの
-          # プローブ応答は `api_error_status: 429` /
-          # `"You've hit your weekly limit · resets 11pm (UTC)"` で、
-          # **トークンは通っており、週次の利用枠が尽きていただけだった。**
-          # 誤った対処（トークン回転）へオーナーを送るうえ、本当の原因
-          # （待てば直る／枠の使い方の問題）が記録に残らない。
-          # **「判定できなかった」を「資格情報が原因」と書かない。**
+          # 【2026-09-01】**落ちた＝鍵が悪い、ではない。**
+          #
+          # このステップは長らく2択（通った / 通らなかった）しか持たず、
+          # 通らなかった側をすべて「資格情報が通っていない。setup-token を
+          # 再実行せよ」と書いていた。08-30・08-31 の即死がまさにここに入り、
+          # **オーナーは無事な鍵を入れ替えるよう指示されていた。**
+          # 実際の中身は使用量上限で、入れ替えても直らないし、放っておけば直る。
+          #
+          #   {"api_error_status":429,"result":"You've hit your weekly limit · resets Aug 31, 11pm (UTC)"}
+          #
+          # 答えは最初から応答に入っていて、**読まずに捨てていた。**
+          # 08-24〜08-25 の教訓（所要時間から原因を断定するな）を受けて
+          # 「実験に聞く」形にしたのがこのステップだが、
+          # **その実験が2値しか返さないので、3つ目の原因は必ず2択のどちらかに化ける。**
           if printf '%s' "$out" | grep -q '"api_error_status":429'; then
-            echo "::error title=Obsidian Autopilot::切り分け: **資格情報は通っている。利用枠が尽きている。**プローブが 429 を返した（$(printf '%s' "$out" | sed -n 's/.*"result":"\([^"]*\)".*/\1/p' | head -c 120)）。**トークンの回転は不要。**枠のリセットを待つか、同じ枠を使う経路（Actions の主系・CCRの副系・週次）が同じ時間帯に固まっていないかを見ること。"
-            exit 1
+            limit_msg="$(printf '%s' "$out" | sed -n 's/.*"result":"\([^"]*\)".*/\1/p' | head -1)"
+            echo "verdict=usage_limit" >> "$GITHUB_OUTPUT"
+            echo "limit_message=${limit_msg}" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Obsidian Autopilot::切り分け: **資格情報は失効していない。使用量上限（HTTP 429）で止まっている。**「${limit_msg}」。**トークンを入れ替えても直らない**（入れ替えは無事な鍵を捨てるだけ）。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同時に止まる。"
+            exit 0
           fi
-          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた（429 ではない）。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+
+          echo "verdict=credential" >> "$GITHUB_OUTPUT"
+          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた（429ではない）。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+          exit 1
+
+      # 上のステップは「資格情報かどうか」しか答えない係なので、使用量上限のときは
+      # exit 0 で抜ける（鍵は無事なので、資格情報の判定としては正しい）。
+      # だが**ジョブは赤でなければならない** —— 1日ぶんの出荷が消えている。
+      # ここを別ステップに分けてあるのは、`scripts/autopilot-act.mjs` の
+      # interpretRun が読めるのが**ステップ名と conclusion だけ**だから。
+      # ログ本文は読めないので、判定結果はステップの形で残す必要がある。
+      #
+      # メッセージは env 経由で渡す。**${{ }} を run: に直接埋めない** ——
+      # 中身は API の応答文字列なので、シェルへ展開させる形にはしない。
+      - name: 使用量上限で止まっている
+        if: always() && steps.credprobe.outputs.verdict == 'usage_limit'
+        env:
+          LIMIT_MESSAGE: ${{ steps.credprobe.outputs.limit_message }}
+        run: |
+          echo "::error title=Obsidian Autopilot::**使用量上限で1日ぶんの出荷が消えた。**${LIMIT_MESSAGE}。資格情報は無事なので入れ替えないこと。"
           exit 1
 
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。

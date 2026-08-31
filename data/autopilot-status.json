@@ -1,14 +1,14 @@
 {
-  "date_jst": "2026-08-31",
+  "date_jst": "2026-08-29",
   "generated_at": "2026-08-31T23:20:00Z",
   "action": null,
   "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 3,
+    "consecutive_no_article_days": 1,
     "last_article_date_jst": "2026-08-28",
     "last_production_change_date_jst": "2026-08-29",
-    "days_since_production_change": 2
+    "days_since_production_change": 0
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-24",
@@ -167,7 +167,7 @@
       "unresolved": []
     }
   },
-  "reason": "**記事なし。上流が3日止まっていた。**08-29 は副系が当日ロックを claim だけ取って死に、主系はブランチの存在を見て Gate で skip（3秒・緑）。08-30 と 08-31 は主系が 429（週次の利用枠）で1ターン即死し、08-31 は副系 ccr-0920 も同じ理由で落ちた。**この欄を書いているのは当日のオートパイロットではなく、後から追いかけたセッション**（実行が落ちた日は status JSON を書く主体も居ないという構造的な穴。data/autopilot-runs.json の ap-20260829/30/31 に一次資料つきで記録した）。",
+  "reason": "**記事なし。当日ロックを取った副系が、記事もPRも作らずに終わった。**主系はそのブランチの存在を「進行中/実行済み」と読んで Gate でスキップし、3秒で success を返した（run 33230445898・steps 3〜13 が全て skipped）。**claim を取った側が死ぬと、その日は主系も走らないまま緑になる。**\n\n**この欄が 08-29 で止まっているのは、そのあとの2日を書いた行がアクチュエータ由来だから。**08-30 と 08-31 も記事は出ておらず（どちらも 429・週次の利用枠）、`data/autopilot-runs.json` の usage_limit 2行に一次資料つきで入っている。ただし `statusAgreement` は `act-` 由来の行を除外する設計なので、**この欄の日付はセッションが書いた最後の日を指す。**\n\n**書いたのは当日のオートパイロットではなく、2026-09-01 に追いかけたセッション。**実行が落ちた日は status を書く主体も居ない、という構造的な穴がここに出ている。",
   "verified": "実測（このセッションで実際に実行した）: (a) egressの実測——obsidian.mdへはcurlで403（CONNECT tunnel failed）、raw.githubusercontent.com/obsidianmd/obsidian-releasesは200だがobsidianmd/obsidian-helpは複数パス試行すべて404（前回セッションが到達した経路が本日は機能しなかった）、api.github.comは直接到達200だが本セッションのGitHub API利用は設定リポジトリ以外403。(b) GitHub MCP `get_job_logs`でseo-daily.yml最新run(08-27 09:30 JST)のExport preflightログを読み、BigQueryのdata_date 2026-08-10〜08-24・15/28日蓄積・28日窓到達2026-09-06を確認（bq-preflight.mjsは資格情報無しで失敗するためこの経路で代替）。(c) coverage-queue.jsonのC07 evidence「Standard $4/Plus $8」をAUTOPILOT_LOG.md全文・coverage-queue.json全体でgrepし、他に出典が無いことを確認——Sync $4とPublish $8（/obsidian/pricing/で別々に検証済みの2製品）の混同の疑いと結論した。一次情報として新規に確認したのはこの「出典が無いことの確認」自体で、既存の検証済み事実（バージョン履歴保持期間・Sync基本料金）は/obsidian/sync/・/obsidian/pricing/からの引用。§4の全チェックをローカルで全通過（seo-check 0 errors 0 warnings・268ファイル）。iPhoneビューポート（390×844 DPR3）実描画QA: Playwright+Chromiumで実描画し、水平スクロールなし（scrollWidth=clientWidth=390）・表はoverflow-x:auto内・回答ブロック(tip-box) top=807px（ファーストビュー内）・cta-qrはモバイル非表示。JSエラーは外部analytics(ahrefs/GTM)のトンネル失敗2件のみで、既存の/obsidian/sync/ページで同一条件で再現したため本ページ固有の問題ではないと確認。QRは44件（新規2件含む）を独立デコードして0 failed、既存42件はバイト同一。",
   "checks": {
     "seo_check": "0 errors 0 warnings（268ファイル）",

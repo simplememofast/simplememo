@@ -208,12 +208,6 @@
       "note": "**直前のループが `['at','flag','from','to','why']` の欠落を全部 problems に入れている。**ここの `p?.to` は「在るのに数でない」と「在って上限超え」を分けるためだけの分岐で、欠落側は消えない。上限そのものは `cap` で fail closed にしてある（`ap.max_auto_rollout && …` と書いていて、この検査に捕まって直した形）"
     },
     {
-      "file": "scripts/check-routine-runs.mjs",
-      "expr": "r.enabled",
-      "disposition": "前提",
-      "note": "**判定ではなく自己テストの検体選び。**「どちらの一覧にも居ない健全な1本を止めたら落ちるか」を試すために、有効な routine の中から未掲載のものを選ぶ。止まっている routine を選んでも `stopped` は既に一覧に載っているので、検体として成立しない。\n\n**この形が怖いのは「候補が0件のとき検査が黙って空回りする」ほうだが、直後に `assert(target)` を置いてある** —— 健全な routine が1本も無い日は、空回りではなく自己テストが落ちる。\n\n**実際に空回りしていたのを直した跡。**2026-08-31 まで検体選びは `find(r => r.enabled)` で、先頭の有効な routine を取るだけだった。その日、先頭が既に open_findings に載っていたため「どちらの一覧にも無い」が出ず、**この自己テストが何も試さないまま緑を出していた。**"
-    },
-    {
       "file": "scripts/daily-brief.mjs",
       "expr": "budget.run_caps",
       "disposition": "別に検出",
