@@ -137,7 +137,7 @@
         "`policy.enabled` を立てる操作そのもの",
         "kill_switch を倒す操作"
       ],
-      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold**",
+      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく（**版の状態と、アプリ単位の提出枠の両方**）、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold**",
       "evidence": [
         "scripts/check-release-gate.mjs",
         "data/release-gate.json",
@@ -151,8 +151,9 @@
         "kill_switch_path": "data/release-gate.json#policy.kill_switch",
         "daily_cap": 1,
         "holds_when_unknown": true,
-        "$holds_when_unknown": "**CI・リリースノート・TestFlightの状態と経過・ブロッカー件数・実機確認の記録・審査の進行状況のどれが欠けても hold。**とくに実機確認は『たぶん誰か見ただろう』で通さない"
-      }
+        "$holds_when_unknown": "**CI・リリースノート・TestFlightの状態と経過・ブロッカー件数・実機確認の記録・審査の進行状況（**版の状態と提出枠の両方**）のどれが欠けても hold。**とくに実機確認は『たぶん誰か見ただろう』で通さない"
+      },
+      "$gate_2026_08_31": "**提出枠（reviewSubmissions）を条件に足した。**それまで「審査が進行中か」は build.in_review、すなわち**版の状態しか見ていなかった。**Apple の提出は版ではなくアプリ単位の reviewSubmission で、App版・カスタムプロダクトページ・Appイベント・実験を1件に束ね、**同時に進行できるのは1件だけ。**5.7.8 で実際に踏んだ —— 版一覧は「審査中の版は無い」と言うのに deliver は `A review submission is already in progress` で落ちた（simplememo-ios run 31597781663）。**版だけ見ている門は、この形を通す。**材料は simplememo-ios/data/appstore/release-materials.json の review.submission_open。**読めなければ hold**（「空いている」に倒さない）"
     },
     {
       "domain": "App Store への公開（審査通過後）",
