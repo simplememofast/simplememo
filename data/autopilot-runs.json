@@ -654,6 +654,57 @@
       "external_ref": null,
       "interventions": [],
       "source": "session"
+    },
+    {
+      "run_id": "ap-20260829-actions",
+      "date_jst": "2026-08-29",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "33230445898",
+      "interventions": [],
+      "source": "act-reconcile-session",
+      "detected_at": "2026-08-31T23:27:34Z",
+      "detected_note": "Actions API のステップ一覧から起こした。Gate は success だが Checkout 以降が全て skipped ＝ Gate が run=false を出した回（秘密鍵未設定・当日重複のいずれか。ステップの conclusion からはどちらかまでは決まらない）。"
+    },
+    {
+      "run_id": "ap-20260830-actions",
+      "date_jst": "2026-08-30",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
+      "external_ref": "33279844326",
+      "interventions": [],
+      "source": "act-reconcile-session",
+      "failure_class": "usage_limit",
+      "detected_at": "2026-08-31T23:27:44Z"
+    },
+    {
+      "run_id": "ap-20260831-actions",
+      "date_jst": "2026-08-31",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
+      "external_ref": "33340960317",
+      "interventions": [],
+      "source": "act-reconcile-session",
+      "failure_class": "usage_limit",
+      "detected_at": "2026-08-31T23:27:44Z"
     }
   ]
 }
