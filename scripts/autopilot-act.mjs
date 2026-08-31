@@ -1260,6 +1260,51 @@ export function interpretRun(run) {
     // 数え直され、歯止めが効かなくなる。結論は failure_reason と
     // needs_triage で伝える。
     const probe = step('資格情報かを切り分ける');
+
+    // 【2026-09-01】**「単独実行も落ちた」と「鍵が悪い」は別。**
+    //
+    // 上のコメントは「推測をやめて実験に聞く」ことで08-24〜08-25の誤りを閉じた、
+    // と書いている。閉じ切れていなかった —— **その実験が2値しか返さないので、
+    // 3つ目の原因は必ず2択のどちらかに化ける。**
+    //
+    // 08-30・08-31 の即死がそれで、中身は使用量上限（HTTP 429）だった。
+    // 台帳には「資格情報が通っていない。setup-token を再実行せよ」と
+    // needs_triage: false で入るので、**無事な鍵を捨てる指示が、
+    // 誰も見直さない形で残る。**答えは応答の中にあった:
+    //
+    //   {"api_error_status":429,"result":"You've hit your weekly limit · resets Aug 31, 11pm (UTC)"}
+    //
+    // ワークフロー側でこれを別ステップに割った（読めるのはステップ名と
+    // conclusion だけで、ログ本文は読めないため）。このステップが無い
+    // 過去の run は undefined になり、従来どおりの判定に落ちる。
+    const usageLimit = step('使用量上限');
+    if (usageLimit?.conclusion === 'failure') {
+      return {
+        outcome: 'failed', attempted: true,
+        // **ここだけ「形」ではなく「原因」を種別に書く。**
+        // 上の切り分け（資格情報かどうか）は種別を immediate_failure のまま
+        // 据え置く —— あちらは原因を1つに絞れておらず、絞れないものを種別に
+        // 書くと再発の数え方が壊れるから。**429 は絞れている。**
+        // かつ形では書けない: Claude Code の導入だけで10秒使うので、429で
+        // 弾かれても5秒規則には引っかからず `null` になる。**failed なのに
+        // failure_class が無い行は autopilot-selfheal が落とす**（再発を
+        // 数えられないため）ので、形に寄せる選択肢がそもそも無い。
+        // 種別を足すと data/escalation-rules.json に移管規則が要る
+        // （check-escalation.mjs が実績のある種別を全部要求する）。
+        failure_class: 'usage_limit',
+        // 上限は時間で戻る。**セッションが調べ直すことは何も無く、
+        // オーナーが replace すべきものも無い。**
+        needs_triage: false,
+        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
+          + `同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した`
+          + `（ワークフローの切り分けステップ）。**資格情報は失効していない —— `
+          + `トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**`
+          + `上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので`
+          + `**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。`
+          + `恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）`,
+      };
+    }
+
     if (probe?.conclusion === 'failure') {
       return {
         outcome: 'failed', attempted: true,
@@ -2154,6 +2199,63 @@ async function selftest() {
   // close_check の再発判定が別種別として数え直される。
   t('切り分けの結果で failure_class は動かさない',
     credBad.failure_class === 'immediate_failure' && credOk.failure_class === 'immediate_failure');
+
+  // 【2026-09-01】使用量上限（429）を資格情報の失効と混ぜない。
+  // **実際の形は probe=success + 使用量上限=failure。**429 のとき切り分け
+  // ステップは exit 0 で抜ける（鍵は無事なので資格情報の判定としては正しい）ので、
+  // 上限のステップを先に読まないと「資格情報は通っている → model-routing を見ろ」
+  // に化ける。08-30・08-31 に実際に化けたのは2値しか無かった頃の逆側で、
+  // 「資格情報が通っていない → setup-token を再実行せよ」だった。
+  const withLimit = interpretRun({
+    status: 'completed', conclusion: 'failure',
+    steps: [
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+        started_at: '2026-08-30T23:07:49Z', completed_at: '2026-08-30T23:08:01.4Z' },
+      { name: '即死が資格情報かを切り分ける', conclusion: 'success' },
+      { name: '使用量上限で止まっている', conclusion: 'failure' },
+    ],
+  });
+  t('使用量上限は使用量上限と書く', withLimit.failure_reason.includes('HTTP 429'));
+  t('使用量上限で資格情報を疑わせない',
+    !withLimit.failure_reason.includes('資格情報が通っていない'));
+  t('使用量上限で鍵の入れ替えを指示しない',
+    !withLimit.failure_reason.includes('claude setup-token'));
+  t('使用量上限で「資格情報は通っている→model-routing」に化けない',
+    !withLimit.failure_reason.includes('model-routing.json'));
+  t('使用量上限は入れ替えが無駄だと明示する',
+    withLimit.failure_reason.includes('入れ替えても直らない'));
+  t('使用量上限は副系も同時に落ちると書く', withLimit.failure_reason.includes('副系CCR'));
+  t('使用量上限は時間で戻るのでトリアージへ回さない', withLimit.needs_triage === false);
+  // **上限だけは形ではなく原因で種別を付ける。**実測12.4秒は5秒規則に
+  // 引っかからず、形に寄せると `null` になる —— failed なのに種別が無い行は
+  // autopilot-selfheal が落とす。原因が1つに絞れているので、絞れたものを書く。
+  t('使用量上限は原因を種別に書く', withLimit.failure_class === 'usage_limit');
+  const withLimitFast = interpretRun({
+    status: 'completed', conclusion: 'failure',
+    steps: [
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+        started_at: '2026-08-30T23:07:49Z', completed_at: '2026-08-30T23:07:49.5Z' },
+      { name: '即死が資格情報かを切り分ける', conclusion: 'success' },
+      { name: '使用量上限で止まっている', conclusion: 'failure' },
+    ],
+  });
+  t('上限は速くても遅くても同じ種別（形で揺れない）', withLimitFast.failure_class === 'usage_limit');
+  // このステップを持たない過去の run は、従来どおりの判定に落ちる
+  t('上限ステップが無い回は従来どおり', credBad.failure_reason.includes('資格情報が通っていない'));
+  // step() は名前の部分一致なので、**別のステップに巻き込まれないこと**を見る。
+  // 「予算ゲート（当月の実費が上限を超えていたら走らない）」は「上限」を含む。
+  const notLimit = interpretRun({
+    status: 'completed', conclusion: 'failure',
+    steps: [
+      { name: '予算ゲート（当月の実費が上限を超えていたら走らない）', conclusion: 'failure' },
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+        started_at: '2026-08-30T23:07:49Z', completed_at: '2026-08-30T23:08:01.4Z' },
+      { name: '即死が資格情報かを切り分ける', conclusion: 'failure' },
+    ],
+  });
+  t('「上限」を含む別ステップを使用量上限と読まない',
+    notLimit.failure_class !== 'usage_limit'
+      && notLimit.failure_reason.includes('資格情報が通っていない'));
   const slow = interpretRun({ status: 'completed', conclusion: 'failure', steps: [
     { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
       started_at: '2026-08-25T06:24:00Z', completed_at: '2026-08-25T06:44:00Z' }] });

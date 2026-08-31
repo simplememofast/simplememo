@@ -170,6 +170,15 @@
       "note": "上流の GitHub Action（claude-code-action@v1 のようなフローティングタグ）が壊れた版を配り、作業に入る前に落ちる。2026-08-24・08-25 に主系が2日連続で踏んだ（CLI 2.1.241）。**セッションが自分で直せる**——原因の切り分けはジョブログの `Download action repository … (SHA:…)` を直近の成功runと比べるだけで、費用ゼロ。修理は SHA の pin。ただし主系の GH_PAT には `workflow` scope が無く `.github/workflows/*` を push できないため、**主系だけは自力で完走できない**（副系CCRは push できる）。この非対称が解消するまで who は self_then_owner。止めない理由: 上流が直れば自然に復旧しうるうえ、副系が出荷を継続できるため"
     },
     {
+      "trigger": "usage_limit",
+      "kind": "infra",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "Claude の使用量上限（HTTP 429）に当たって、その日の出荷が丸ごと消えた。2026-08-30・08-31 の主系がこれで、応答は `You've hit your weekly limit · resets Aug 31, 11pm (UTC)`。**資格情報の失効と混ぜないこと** —— 当時の切り分けステップは2値しか持たず、429を「資格情報が通っていない。claude setup-token を再実行せよ」と書いていた。**無事な鍵を捨てさせる指示**で、しかも needs_triage が立たないので誰も見直さない。who が owner なのは、セッション側に打つ手が1つも無いから（待つか、枠を上げるか、1回あたりの入力量を減らすかで、後ろ2つは人の判断）。stop_automation を false にしてあるのは、**上限は時間で戻る**から —— 止めると解除は人間だけになり（emergency-stop の非対称）、自然に直る停止を人待ちの停止に変えてしまう。副系CCRも同じアカウントを使うので**代走は当てにできない**（08-31 に両系が同じ時間帯に落ちている）。連続するなら repair_limit ではなくこちらで拾う"
+    },
+    {
       "trigger": "immediate_failure",
       "kind": "infra",
       "who": "self_then_owner",
