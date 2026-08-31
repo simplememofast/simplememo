@@ -764,6 +764,28 @@ export function merge(ledger, derived, today) {
     const cur = byId.get(d.id) ?? legacy;
     if (cur) {
       cur.last_seen_jst = today;
+      // **再発したら開け直す。**derive は「いまその条件が立っている」ときにしか
+      // 行を出さないので、導出に出てきた done は**同じ故障がまた起きている**という意味。
+      //
+      // これが無いと、**IDが固定の行は一度閉じたら二度と立たない。**
+      // 実害（2026-09-01 に測った）: act-ledger-sync は 2026-08-26 に閉じ、以後
+      // 08-29〜08-31 の主系 run が台帳に入らなくなっても再点火しなかった。結果
+      // `autopilot-runs --check` が赤になり、**その検査は autopilot-act.yml 自身の
+      // 「台帳の検査」段にも居るので、日次アクチュエータが自分で自分を止めた。**
+      // 台帳を埋める handler（reconcile-runs）を持っている当人が、埋めれば直る検査で
+      // 落ちていた。**PR #738 はその台帳を手で埋めたが、開け直せない構造は残っている** ——
+      // 手で埋めたぶん、次に同じことが起きるまで defect が見えなくなった。
+      //
+      // **acknowledged は開け直さない。**あれは「知っていて受け入れている」で、
+      // 条件が立ち続けるのが前提の状態（開け直すと既知の制約が毎日鳴る）。
+      if (cur.state === 'done') {
+        cur.state = 'open';
+        cur.closed_jst = null;
+        // 再発は新しい発生。**古い created_jst を引き継ぐと、経過日数が実態より古く出る。**
+        cur.reopened_jst = today;
+        cur.created_jst = today;
+        cur.evidence = null;
+      }
       // 件数など、事実として動くものだけ追従させる
       if (cur.state === 'open') { cur.title = d.title; cur.detail = d.detail; }
       continue;
@@ -1929,6 +1951,35 @@ async function selftest() {
     t('**PRの一覧を detail に残す**（どのマージから来たかを追える）',
       /#642 #643 #644 #647 #648/.test(o[0].detail));
     t('畳んだことを明示する', /PRの数だけあるわけではない/.test(o[0].detail));
+  }
+  {
+    // **再発したら開け直す。**IDが固定の行（act-ledger-sync 等）は、これが無いと
+    // 一度閉じたきり二度と立たない —— 2026-08-26 に閉じた act-ledger-sync が
+    // 08-29〜08-31 の取りこぼしで再点火せず、日次アクチュエータが自分を止めた。
+    const led = { actions: [{
+      id: 'act-ledger-sync', title: '旧', detail: '旧', source: 'ledger', state: 'done',
+      created_jst: '2026-08-20', last_seen_jst: '2026-08-26', closed_jst: '2026-08-26',
+      evidence: '解消した', close_check: { kind: 'ledger_covers_runs', params: {} },
+    }] };
+    const again = [{ id: 'act-ledger-sync', title: '新', detail: '新', source: 'ledger',
+      close_check: { kind: 'ledger_covers_runs', params: {} } }];
+    const added = merge(led, again, '2026-09-01');
+    const row = led.actions[0];
+    t('**閉じた行は、再発したら開け直す**', row.state === 'open' && row.closed_jst === null);
+    t('行を増やさずに開け直す', led.actions.length === 1 && added.length === 0);
+    t('**経過日数は再発から数える**（古い created_jst を引き継がない）',
+      row.created_jst === '2026-09-01' && row.reopened_jst === '2026-09-01');
+    t('開け直したら前回の根拠を残さない（次の突き合わせで書き直る）', row.evidence === null);
+    t('開け直した行は中身も追従する', row.title === '新');
+    // **acknowledged は開け直さない**（既知の制約は条件が立ち続けるのが前提）
+    const ack = { actions: [{
+      id: 'act-x', title: '旧', detail: '旧', source: 'ledger', state: 'acknowledged',
+      created_jst: '2026-08-20', last_seen_jst: '2026-08-26', closed_jst: null,
+      close_check: { kind: 'manual', params: {} },
+    }] };
+    merge(ack, [{ id: 'act-x', title: '新', detail: '新', source: 'ledger',
+      close_check: { kind: 'manual', params: {} } }], '2026-09-01');
+    t('**既知の制約（acknowledged）は開け直さない**', ack.actions[0].state === 'acknowledged');
   }
   {
     // **旧ID（PR単位）の行があれば、そこへ流して行を増やさない。**
