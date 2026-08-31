@@ -401,6 +401,23 @@ export const UNLOCKS = {
                             + '`verification_pending` で、`WAITING_BLOCKERS` に入っていない ——'
                             + '**置いても一度も評価されない。**空回りする検査を足すより、'
                             + '待っている対象をここに名指ししておくほうが効く' },
+  // [2026-08-31] **`vendor_terms` から1行だけ切り出した。**
+  // ⑦「定型／非定型契約の分類」は「人が規約を読む」を待っていたが、
+  // **分類に要るのは規約本文ではなく台帳**（書面契約ゼロ ＋ 11社の terms_accepted_by）で、
+  // それは既に手元にある。**待ち方そのものが間違っていた行。**
+  impl_contract_class: { kind: 'implement', label: '契約の定型／非定型を機械が導く経路を作る',
+                       needs: '**材料は揃っている** —— `../simplememo-api/data/contract-register.json` の '
+                            + 'contracts は空（書面契約ゼロ）、成立している11社は `data/vendor-register.json` の '
+                            + '規約同意。**無いのは導く側とCIの照合。**'
+                            + '\n\n非定型は人の承認が要る（権限表「契約・支払い・送金」が human_only）ので、'
+                            + '**機械が出せるのは分類と食い違いの検出まで。**'
+                            + '`check-contracts.mjs` は既に `kind: "non_standard"` に '
+                            + '`approved_by: "human"` を要求している。'
+                            + '\n\n**分母が薄いことは自覚しておく** —— いま分類の対象は11社で、'
+                            + 'しかも全部が同じ種別（規約同意＝定型）になる見込み。'
+                            + '**一度も発火しない検査を作らない**のがこの台帳の規則なので、'
+                            + '作るなら「非定型が現れたときに承認を要求する」側が本体で、'
+                            + '分類そのものは副産物として扱うこと' },
   impl_backlog:      { kind: 'implement', label: 'バックログの作り方を直す',
                        needs: '**追加の候補しか持っていない。**減らす提案を採点対象に入れ、中期のロードマップを組み立てる経路を作る' },
   impl_measurement:  { kind: 'implement', label: 'North Star Metric を実測する',
