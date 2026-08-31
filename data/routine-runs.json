@@ -68,7 +68,7 @@
     "副系のプロンプトには運用の中身がそのまま入っていて、ここが要るのは",
     "「走ったか」だけ。**要らないものを持つと、置き場所の判断が別の問題になる。**"
   ],
-  "observed_at": "2026-08-28T04:45:16Z",
+  "observed_at": "2026-08-31T23:08:46Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -104,23 +104,15 @@
       "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
       "found_at": "2026-08-28",
       "why": "**副系B（08:30 JST・ccr-0830）。副系Aと同じ判断・同じ根拠。**副系Bは「主系と副系Aの両方が不発の日」だけ動く3段目なので、Aを止めたままにする以上こちらを単独で戻す意味は無い。**戻すときはAから先に**（名前にもそう書いた）"
+    },
+    {
+      "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
+      "found_at": "2026-08-31",
+      "why": "**名前に「停止 2026-08-28・実測で不可 / Routineはリポジトリを持てない」と書いてある。**止めた判断も理由も名前に残っている —— 08-28 に『これが本来の形』と書いた形が、**2件目として実際に現れた。**最後の実行は 08-28 に SUCCEEDED で、そのあと止めてある。写しの取り直しは Routine からではなくセッションが行う（この台帳の $observed_by のとおり）"
     }
   ],
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",
   "routines": [
-    {
-      "id": "trig_012yF8RNZ3seSbKL1dRpxhGY",
-      "name": "カナリア48時間後 — 判定を見て…",
-      "cron_expression": null,
-      "run_once_at": "2026-08-29T23:35:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-08-29T23:35:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
-    },
     {
       "id": "trig_018EyeYcJiVLFQeAHArMpGtM",
       "name": "【停止:クラウドでは動作不可→PCで再作成を】Reddit承認待ち監視（通知のみ・自動承認しない）",
@@ -141,11 +133,11 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-29T00:20:00Z",
-      "last_fired_at": "2026-08-28T00:20:23.551065Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-28T00:20:23.531357768Z",
-      "last_run_finished_at": "2026-08-28T00:45:40.115601Z"
+      "next_run_at": "2026-09-01T00:20:00Z",
+      "last_fired_at": "2026-08-31T00:20:33.654230Z",
+      "last_run_status": "FAILED",
+      "last_run_fired_at": "2026-08-31T00:20:33.634779871Z",
+      "last_run_finished_at": "2026-08-31T00:20:46.516193Z"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -154,11 +146,24 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-28T11:01:00Z",
-      "last_fired_at": "2026-08-27T11:26:38.803756Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-08-27T11:26:38.781208492Z",
-      "last_run_finished_at": "2026-08-27T11:28:09.694896Z"
+      "next_run_at": "2026-09-01T11:01:00Z",
+      "last_fired_at": "2026-08-31T11:25:23.608379Z",
+      "last_run_status": "FAILED",
+      "last_run_fired_at": "2026-08-31T11:25:23.583005176Z",
+      "last_run_finished_at": "2026-08-31T11:25:34.041500Z"
+    },
+    {
+      "id": "trig_01P18wgcMnXGMAeH9zHZVNpM",
+      "name": "ct= が Detailed に載り始めたか確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T22:00:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T22:00:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     },
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
@@ -167,15 +172,15 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-31T00:01:21.733119813Z",
-      "last_fired_at": "2026-08-24T00:03:20.723580Z",
+      "next_run_at": "2026-09-07T00:01:21.733119813Z",
+      "last_fired_at": "2026-08-31T00:03:13.801959Z",
       "last_run_status": "FAILED",
-      "last_run_fired_at": "2026-08-24T00:03:20.700182033Z",
-      "last_run_finished_at": "2026-08-24T00:03:32.476070Z"
+      "last_run_fired_at": "2026-08-31T00:03:13.774489430Z",
+      "last_run_finished_at": "2026-08-31T00:03:24.788760Z"
     },
     {
       "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
-      "name": "SimpleMemo マーケデータ 週次スナップショット",
+      "name": "SimpleMemo 週次 BigQuery退避＋有効期限監視（クラウド／ブラウザ分はMacのローカルタスク）",
       "cron_expression": "45 23 * * 1",
       "run_once_at": null,
       "enabled": true,
@@ -200,6 +205,19 @@
       "last_run_finished_at": "2026-08-25T23:35:54.069791Z"
     },
     {
+      "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
+      "name": "【停止 2026-08-28・実測で不可】副系の写しの取り直し（Routineはリポジトリを持てない）",
+      "cron_expression": "0 3 * * *",
+      "run_once_at": null,
+      "enabled": false,
+      "bound_session": false,
+      "next_run_at": "2026-08-29T03:02:41.351439633Z",
+      "last_fired_at": "2026-08-28T05:42:56.590228Z",
+      "last_run_status": "SUCCEEDED",
+      "last_run_fired_at": "2026-08-28T05:42:56.566743626Z",
+      "last_run_finished_at": "2026-08-28T05:46:33.007462Z"
+    },
+    {
       "id": "trig_01TRBdBgSA9646FS4LDQgJdt",
       "name": "【停止 2026-08-28・意図的】Obsidianオートパイロット副系A v3（07:30 JST・ccr-0730）— 主系+再試行で空白日ゼロ／週次利用上限に実際に当たっているため有料の副系は戻さない",
       "cron_expression": "30 22 * * *",
@@ -211,19 +229,6 @@
       "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-08-25T22:33:17.840682217Z",
       "last_run_finished_at": "2026-08-25T22:34:24.794429Z"
-    },
-    {
-      "id": "trig_01Vj9QQ4nur8vHTfiHXrkuan",
-      "name": "#244 のマージ待ち確認",
-      "cron_expression": null,
-      "run_once_at": "2026-08-28T05:12:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-08-28T05:12:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
     }
   ]
 }
