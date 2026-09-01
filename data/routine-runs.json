@@ -105,7 +105,7 @@
     "【2026-08-31 訂正】上の 08-24 の記録は `resetsAt: 1788217200 = 2026-08-24T23:00Z（月曜）` と書いているが、**この2つは同じ時刻ではない。**1788217200 は 2026-08-31T23:00Z で、2026-08-24T23:00Z は 1787612400（ちょうど7日＝604800秒ちがう）。epoch を写し間違えたか、換算を1週ずらしたかのどちらかで、**どちらが起きたかはこの記録からは決まらない。**",
     "**ただし結論（リセットは月曜 23:00 UTC）は独立に裏づけられた** —— 2026-08-31（月）00:03Z と 00:20Z に拒否された3本の `resetsAt` が**同日 23:00Z** を指していた。同じ週の中で「拒否 → その日の23:00にリセット」が2回別々の月曜で観測できたので、`45 23 * * 1` へ移した判断は動かさない。"
   ],
-  "observed_at": "2026-09-01T00:24:47Z",
+  "observed_at": "2026-09-01T01:08:52Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -117,7 +117,7 @@
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
       "what": "failed",
       "found_at": "2026-08-28",
-      "why": "**SEO Weekly が 2026-08-24 に FAILED。原因は確定した** —— 同じ月曜0時台に落ちた『マーケデータ週次』のセッションに `rate_limit_info: {seven_day, rejected}` と \"You've hit your weekly limit\" がそのまま残っていた（$comment 参照）。**残っているのは対処のほう** —— このRoutineは `created_via: http_api` で、エージェントからは cron を変更できない（update_trigger が「Agents can only update routines they created」で拒否）。**オーナーが `0 0 * * 1` → `30 23 * * 1` に変える**（週次枠のリセット直後）。なお**この週の作業自体は落ちていない**: セッション cse_01DVcNLCyxfhTW3yfxPibBa6 は拒否のあと 08-25 に再開されて branch `claude/seo-serp-weekly-2026-08-25` を出しており、トリガの FAILED だけが残っている"
+      "why": "**SEO Weekly が 2026-08-24 に FAILED。原因は確定した** —— 同じ月曜0時台に落ちた『マーケデータ週次』のセッションに `rate_limit_info: {seven_day, rejected}` と \"You've hit your weekly limit\" がそのまま残っていた（$comment 参照）。**残っているのは対処のほう** —— このRoutineは `created_via: http_api` で、エージェントからは cron を変更できない（update_trigger が「Agents can only update routines they created」で拒否）。**オーナーが `0 0 * * 1` → `30 23 * * 1` に変える**（週次枠のリセット直後）。なお**この週の作業自体は落ちていない**: セッション cse_01DVcNLCyxfhTW3yfxPibBa6 は拒否のあと 08-25 に再開されて branch `claude/seo-serp-weekly-2026-08-25` を出しており、トリガの FAILED だけが残っている\n\n---\n\n**[2026-09-01] オーナーが cron を変えた。台帳が書いた案とは違う値だが、狙いは満たしている。**\n\n    旧  0 0 * * 1   月 00:00 UTC = 月 09:00 JST\n    案  30 23 * * 1 月 23:30 UTC （この行が書いた案）\n    新  0 0 * * 2   **火 00:00 UTC = 火 09:00 JST**（オーナーが入れた値）\n\n**観測した週次枠の境界は 月 23:00 UTC**（`resetsAt: 1788217200`）。それを基準に測ると:\n\n    旧 … 発火はリセットの **23時間前**。週の枠を使い切った側で回る\n    新 … 発火はリセットの **+1時間**。新しい枠の頭で回る\n\n**方向として正しい。**案より30分ぶん余裕が大きい。\n\n**境界の根拠は観測2件。**08-24 のセッション（週次BigQuery）と 08-31 のセッション（ccr-0920）が**1週間離れているのに同じ `resetsAt` を返した** —— 08-24 の時点で 08-31 23:00 UTC を指していたので、**固定の曜日境界**と読める。**ただし公式の文書で確かめたものではない。**次の境界が 09-07 23:00 UTC であることまでは、この2件からは言えない。\n\n**同じ境界を跨ぐ側で実証が1件ある** —— 週次BigQuery は `45 23 * * 1`（+45分）で**08-31T23:45 に SUCCEEDED**。境界の読み方が実際に効いた回。\n\n**この行は閉じない。**次の発火は **2026-09-08 00:01 UTC（09-08 09:01 JST）** で、**まだ1回も試していない。**「変えた」は「直った」ではない —— SUCCEEDED を見るまで残す、と上に書いたとおりにする。\n\n**余裕は1時間しかない。**リセットが1時間以上ずれたら、同じ形でまた落ちる。落ちたら `get_session` で `rate_limit_info.resetsAt` を読み、**境界そのものを測り直すこと**（曜日境界という読み方が外れている証拠になる）。"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -163,32 +163,6 @@
       "last_run_finished_at": "2026-07-31T23:53:00.199446Z"
     },
     {
-      "id": "trig_01Da2EyGDZQjjfE5kbNqSo9G",
-      "name": "主系オートパイロットが復帰したか確認",
-      "cron_expression": null,
-      "run_once_at": "2026-09-01T01:01:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-09-01T01:01:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
-    },
-    {
-      "id": "trig_01EmAUPjTcmyfJjHsGQ3EPVn",
-      "name": "PR #742 / api#200 が緑でマージされたか確認",
-      "cron_expression": null,
-      "run_once_at": "2026-09-01T00:48:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-09-01T00:48:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
-    },
-    {
       "id": "trig_01ESF9AHax6buS9X1pdFv657",
       "name": "Obsidianオートパイロット再試行 v3（09:20 JST・ccr-0920・当日が空白のときだけ・配信の種）",
       "cron_expression": "20 0 * * *",
@@ -202,6 +176,32 @@
       "last_run_finished_at": "2026-09-01T00:21:59.523150Z"
     },
     {
+      "id": "trig_01KZanQWfUAN19q1RwJJ7w6U",
+      "name": "PR #749 / api#200 の確認と、副系プローブの続き",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T01:55:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T01:55:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
+    },
+    {
+      "id": "trig_01LfaEUFNHKqJAVWuJfWDhuQ",
+      "name": "obsidian-community の次回発火を確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T11:10:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T11:10:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
+    },
+    {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
       "name": "obsidian-community v3（Reddit実投稿・毎日20:00 JST・ライブ1＋AIO1＋会話継続・月1ショーケース）",
       "cron_expression": "1 11 * * *",
@@ -213,6 +213,19 @@
       "last_run_status": "FAILED",
       "last_run_fired_at": "2026-08-31T11:25:23.583005176Z",
       "last_run_finished_at": "2026-08-31T11:25:34.041500Z"
+    },
+    {
+      "id": "trig_01NTaNmS8eTrHVjbZTm8ceQT",
+      "name": "PR #747 と残り2レーンの確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T01:14:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T01:14:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     },
     {
       "id": "trig_01P18wgcMnXGMAeH9zHZVNpM",
@@ -230,11 +243,11 @@
     {
       "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
       "name": "SEO Weekly: SERP & AI visibility check",
-      "cron_expression": "0 0 * * 1",
+      "cron_expression": "0 0 * * 2",
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-09-07T00:01:21.733119813Z",
+      "next_run_at": "2026-09-08T00:01:21.733119813Z",
       "last_fired_at": "2026-08-31T00:03:13.801959Z",
       "last_run_status": "FAILED",
       "last_run_fired_at": "2026-08-31T00:03:13.774489430Z",
@@ -265,19 +278,6 @@
       "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-08-25T23:35:00.444572157Z",
       "last_run_finished_at": "2026-08-25T23:35:54.069791Z"
-    },
-    {
-      "id": "trig_01S7by8GMpXkSyaPMCAYJxhd",
-      "name": "#739 — 枠リセット後の初回実行を確かめる",
-      "cron_expression": null,
-      "run_once_at": "2026-09-01T00:30:00Z",
-      "enabled": true,
-      "bound_session": true,
-      "next_run_at": "2026-09-01T00:30:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null
     },
     {
       "id": "trig_01SszfDK2JWaHPrdWdotRjGp",
@@ -317,6 +317,19 @@
       "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-08-25T22:33:17.840682217Z",
       "last_run_finished_at": "2026-08-25T22:34:24.794429Z"
+    },
+    {
+      "id": "trig_01Xp6d57zGoyB1haaTdHhTrD",
+      "name": "PR #750 / api#202 の到達確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T01:51:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T01:51:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     }
   ]
 }
