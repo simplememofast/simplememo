@@ -235,21 +235,19 @@ function selftest() {
     // 「副系の写しの取り直し」が意図的に止まっていたのが記録されていなかった。
     // **数を固定しているのは意図** —— 黙って増えたときに気づくため。
     // 動いたときは、増えた理由を open_findings / intentional_stops に書いてから直す。
+    // [2026-09-01] 8件 → 6件。**枠が戻り、2本が SUCCEEDED になった**
+    // （再試行v3・週次BigQuery）。未対応 4 → 2。
     //
-    // [2026-09-01] 8/4/4 → 6/2/4。**今度は減った。**使用量上限（週次）が
-    // 2026-08-31T23:00Z にリセットされ、枠切れで落ちていた2本が戻った:
-    //
-    //   BigQuery 週次      08-31T23:45:53Z 発火 → 23:55:21Z SUCCEEDED
-    //   Obsidian 再試行 v3 09-01T00:20:49Z 発火 → 00:21:59Z SUCCEEDED
-    //
-    // BigQuery の行は「**その回が SUCCEEDED になるまで残す**」と自分で書いて
-    // あった条件を満たしたので消し、`open_budget` を同じPRで 4 → 2 に下げた。
-    // **残る2本は枠とは別**（obsidian-community は次の発火が 09-01T11:01Z、
-    // SEO Weekly は週次なので 09-07）。まだ落ちたままなので消していない。
+    // **この数字を直すのは4日で3回目**（08-28: 5→6 / 08-31: 6→8 / 09-01: 8→6）。
+    // 写しが動くたびここも動く。**次に触る人へ**: この固定が実際に捕まえているものは
+    // validate() の「どちらの一覧にも無い」「健全になっている」と重なっている。
+    // 重なっていない部分（＝件数そのもの）が何を守っているかを一度確かめて、
+    // 守っていないなら関係式（unhealthy = open + intentional）へ移すこと。
+    // **合わせるためだけに数字を書き換える回数が増えたら、それは検査ではなく作業になる。**
     ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
       assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 2, '未対応は2件（obsidian-community・SEO Weekly）');
+      assert(real.open_findings.length === 2, '未対応は2件（SEO Weekly・obsidian-community）');
       assert(real.intentional_stops.length === 4,
         '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],
