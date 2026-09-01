@@ -232,6 +232,11 @@ export const UNLOCKS = {
   // git の履歴は消せず simplememo は公開。原本には既に居場所がある
   // （規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しは正を2つにするだけ。
   // これは item 3 で直した「述語が古い写しを読む」のと同じ形の事故を、先に断っている。
+  // [2026-09-01] **役目を終えた。行は0件。**この入口は「freee に取り出し口があるか」を
+  // オーナーに確かめてもらう前提で立っていたが、**その問いは 2026-08-27 に本番で
+  // 答えが出ていた**（cron `freee_balance` が `/api/1/walletables` を叩いて 200）。
+  // **入口が要求していたのは、既に手元に在るものだった。**
+  // 行は `impl_invoice_reconcile`（実装）へ移した。**消さない理由**は corp_records と同じ。
   contract_docs:     { kind: 'owner_input', label: 'freee の請求データを機械が読めるようにする',
                        needs: '**照合に要るのは書類ではなくデータ**（金額・日付・相手・入金状態）。'
                             + '原本は freee にあり、**リポジトリへ写しは置かない**（2026-08-28 決定）。'
@@ -414,6 +419,23 @@ export const UNLOCKS = {
   // 「境界が外れた」と「作れば動く」を1つの語で書いていたからで、
   // 権限表を見れば1件ずつ違うと分かる状態だった。
   // **入口の名前は、要るものを名指しできる粒度で切ること。**
+  impl_invoice_reconcile: { kind: 'implement', label: '請求と入金の照合を作る（鍵はもう在る）',
+                       needs: '**freee の OAuth は 2026-08-27 から本番で動いている。**'
+                            + '`FREEE_CLIENT_ID` / `FREEE_CLIENT_SECRET` は Workers の secret に在り、'
+                            + 'refresh token は KV の `freee:refresh_token`。'
+                            + '`/api/1/walletables`（口座）と `/api/1/wallet_txns`（明細）は既に叩いている。'
+                            + '**新しい鍵も新しいアプリも要らない。**\n\n'
+                            + '**足りないのは請求書側だけ** —— freee請求書 API の `GET /invoices` から '
+                            + '`issue_date` / `due_date` / `partner_*` / `payment_status` / `payment_date` / '
+                            + '`due_amount` を取り、入金済みかを読む。**この行が要求しているのは'
+                            + '「入金済みか」までなので `payment_status` で足りる。**\n\n'
+                            + '**既存アプリの権限に `invoices` の GET を足すと再認可が要りうる** —— '
+                            + '動いている `freee_balance` を壊す形になりかねないので、'
+                            + '**先に壊さない手順を決めてから触る。**\n\n'
+                            + '**期日つき: 2026-09-21 に `GET /invoices` の破壊的変更**'
+                            + '（`limit + offset` が 10,000 以上のリクエストが制限対象）。'
+                            + '**日付範囲で取る形にしておけば当たらない。**' },
+
   ship_execute:      { kind: 'implement', label: '出荷の実行側を作る（門はもう在る）',
                        needs: '**門は 2026-08-28 に入った**（#708・`scripts/check-release-gate.mjs` の '
                             + '`evaluateSubmission` / `evaluateRelease`）。権限表も同日に '
