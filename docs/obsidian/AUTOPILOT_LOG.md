@@ -2364,3 +2364,247 @@ iPhone 390×844 DPR3 実描画QA（Playwright + Chromium）: 水平スクロー�
 **ネットワーク到達性は同じ経路・同じ日でも一定しない。** obsidian-help（過去に到達実績あり）が本日は404、obsidian-releasesは200だった。一次情報を使う記事は、執筆前に対象ホスト・リポジトリへの到達性を都度実測すること。
 
 coverage-queueのpendingは残り26件。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。
+
+## 2026-09-02（主系GitHub Actions・schedule） — レーンF。死んだ占有を守っていた／打つ手が無い故障を毎日直そうとしていた
+
+### §0 冪等性・占有
+
+`claude/obsidian-auto-20260902` は存在せず、本番 status JSON は 2026-08-29（当日でない）。
+`claude/obsidian-auto-20260902` を空コミットで占有し、非fast-forward拒否なく通過。
+緊急停止は全体・`agents.actions` とも false。
+
+### レーンF — 未修理4件のうち、直せる1件を直し、直せない3件は行き先を変えた
+
+`autopilot-selfheal.mjs` が4件を「🔧 修理対象」として出していた。**うち3件は
+そもそも修理対象ではなかった。**
+
+#### (1) 死んだ占有を守っていた（`ap-20260829-ccr0920` / `claim_without_completion`）
+
+2026-08-29、ccr-0920 が当日ブランチを claim だけ取って、記事もPRも作らずに終わった。
+同日 12:03 JST に動いた主系は**ブランチの存在だけを見て**「進行中/実行済み」と読み、
+3秒で success を返した。**その日の出荷はゼロ**で、主系側の行だけを見ると
+「重複でスキップした正常な日」に見える。
+
+因果はタイムスタンプで確認した（台帳の記述を鵜呑みにせず、実測した）:
+
+| | 時刻(JST) | 実測 |
+|---|---|---|
+| claim コミット `36de90a6` | 08-29 09:21 | ブランチに1コミット・main との差分0・PRなし |
+| 主系 run 33230445898 | 08-29 12:03（created 03:03Z） | Gate success → Checkout 以降13ステップが skipped・3秒 |
+
+**主系が 06:00 JST に走っていれば起きなかった**という読み方は成り立たない。
+schedule の実際の起動は最近ずっと遅れており、直近の実測はこうだった:
+
+| 日 | created (UTC) | JST | 遅れ |
+|---|---|---|---|
+| 08-27 | 00:24:50Z | 09:24 | 3.4h |
+| 08-28 | 05:04:34Z | 14:04 | 8.1h |
+| 08-29 | 03:03:33Z | 12:03 | 6.1h |
+| 09-01 | 00:21:14Z | 09:21 | 3.4h |
+| 09-02（本run） | 22:58:25Z(前日) | 07:58 | 1.0h |
+
+**主系はもう「いちばん最初に走る経路」ではない。**副系の claim を後から見る側に
+回っている日が続いており、この故障は再発する形をしている。
+
+直し方は「占有は守る。守らないのは死んだ占有だけ」。3条件が全部そろったときに限り
+引き継ぐ:
+
+1. `main` との差分ファイルが **0**（＝claim コミットしか無い）
+2. そのブランチを head とする PR が **0件**（`state: all`）
+3. 最新コミットから **90分以上**
+
+**90分は主系のジョブ上限そのもの**（`timeout-minutes: 90`）。これを越えて生きている
+主系の run は存在しえない。出荷まで走り切った回の実測は 18〜28分
+（run 33454414490 / 32900786201 / 32816234185）なので、**観測された最長の3倍以上**。
+
+**1つでも読めなかったら引き継がない。**「差分が無い」と「差分を読めなかった」は
+別物で、混ぜると GitHub API が読めない日に全部の占有が死んで見え、2026-08-21 の
+二重着手（PR #521 / #522）を別の入口から再現する。
+
+引き継ぎは**既存ブランチの上に空コミットを積む**（fast-forward）。ブランチを消さない・
+`--force` を使わない・弾かれたら終了 —— 排他は今までどおり機能する。
+
+#### (2) 打つ手が無い故障を、毎日直そうとしていた（`usage_limit` 3件）
+
+`data/escalation-rules.json` は `who` で修理主体を宣言している。`self_then_owner` は
+「まず自分で直す」、**`owner` は「セッション側に打つ手が1つも無い」**。それでも
+レーンFは `who: owner` の故障を修理対象に数えていたため、**`autopilot-selfheal.mjs`
+自身が冒頭で「一番たちの悪い無限ループ」と呼んでいる状態**になっていた。
+
+しかも `usage_limit` の規則には「**連続するなら repair_limit ではなくこちらで拾う**」と
+書いてある。`repair_of` を書くと数が3に進み、次の再発で `--contain` が経路を止める ——
+解除は人だけなので、**時間で自然に戻る停止を人待ちの停止に変えてしまう。**
+つまり「毎日直そうとする」だけでなく、**規則が禁じている経路を通ろうとしていた。**
+
+消すのではなく行き先を変えた。`owner_routed` は未修理の件数にも一覧にも残り（🤝 表示）、
+その日の `owner_requests` に載る。外れるのはレーンFの対象からだけ。
+
+**逃げ道にならない歯止め:** `data/escalation-rules.json` は `self_repair.may_modify` に
+**入っていない**。レーンFは規則を書き換えられないので、`who` を `owner` にして修理から
+逃げる経路が無い（自己テストがこれを固定している）。規則が読めなかった回は全件が
+修理対象に戻る（安全側は「直そうとする」ほう）。
+
+### 出せなかったもの — production の Gate
+
+**`.github/workflows/obsidian-autopilot.yml` の変更は、この経路から push できない。**
+
+```
+! [remote rejected] refusing to allow a Personal Access Token to create or update
+  workflow `.github/workflows/obsidian-autopilot.yml` without `workflow` scope
+```
+
+**これは事故ではなく決定どおり。**`act-gh-pat-scope-and-rotation`（2026-08-25）が
+「`workflow` scope は足さない」と決めている —— 足すと**無人の主系が自分の
+`permissions:` を書き換えて push できるようになる**ためで、いまその禁止を実際に
+強制しているのは GitHub 側の remote rejected であって散文ではない。代わりの経路も
+同じ行に書いてある: **ワークフローの修理は副系CCRが引き取る。原因特定までは主系が行う。**
+
+本日はその形どおりに終える。**次に走る副系CCRセッションは、以下をそのまま
+`git apply` すること**（`scripts/autopilot-gate.mjs` の `isAbandonedClaim()` が
+判定の正で、これはその bash 版）:
+
+```diff
+diff --git a/.github/workflows/obsidian-autopilot.yml b/.github/workflows/obsidian-autopilot.yml
+index 5d3af113..03d1d89e 100644
+--- a/.github/workflows/obsidian-autopilot.yml
++++ b/.github/workflows/obsidian-autopilot.yml
+@@ -55,6 +55,9 @@ jobs:
+           HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+           HAS_ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+           FORCE: ${{ inputs.force == true }}
++          # 占有の**中身**を読むために要る。以降のステップが既に使っている
++          # トークンと同じもので、permissions: は1つも広げていない。
++          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+         run: |
+           today="$(TZ=Asia/Tokyo date +%Y%m%d)"
+           today_dash="$(TZ=Asia/Tokyo date +%Y-%m-%d)"
+@@ -68,10 +71,37 @@ jobs:
+           fi
+ 
+           if [ "$FORCE" != "true" ]; then
+-            if git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/claude/obsidian-auto-${today}" >/dev/null 2>&1; then
+-              echo "run=false" >> "$GITHUB_OUTPUT"
+-              echo "::notice title=Obsidian Autopilot::claude/obsidian-auto-${today} が既に存在（進行中/実行済み）のためスキップ。"
+-              exit 0
++            branch="claude/obsidian-auto-${today}"
++            if git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${branch}" >/dev/null 2>&1; then
++              # 【2026-09-02】**ブランチの存在だけを「進行中/実行済み」と読まない。**
++              # 08-29、ccr-0920 が当日ブランチを claim だけ取って記事もPRも作らずに
++              # 終わり、同日12:03 JSTの主系はこの行で3秒 success を返した
++              # （run 33230445898 / ap-20260829-ccr0920）。**claim を取った側が
++              # 死ぬと、その日は誰も走らないまま緑になる。**
++              #
++              # 占有そのものは守る。守らないのは**死んだ占有**だけで、条件は3つ:
++              #   ① main との差分ファイルが0（＝claim コミットしか無い）
++              #   ② そのブランチを head とする PR が1件も無い
++              #   ③ 最新コミットから90分以上（主系のジョブ上限そのもの。
++              #      出荷まで走り切った回の実測は18〜28分）
++              # **1つでも読めなかったら引き継がない**（skip 側へ倒す）。
++              # 判定の論理は scripts/autopilot-gate.mjs の isAbandonedClaim() が
++              # 正で、ドリルと性質テストがそちらを固定している。
++              files="$(gh api "repos/${GITHUB_REPOSITORY}/compare/main...${branch}" --jq '.files | length' 2>/dev/null || echo "")"
++              last="$(gh api "repos/${GITHUB_REPOSITORY}/compare/main...${branch}" --jq '.commits[-1].commit.committer.date' 2>/dev/null || echo "")"
++              npr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=all&head=${GITHUB_REPOSITORY%%/*}:${branch}" --jq 'length' 2>/dev/null || echo "")"
++              takeover=false
++              if [ "$files" = "0" ] && [ "$npr" = "0" ] && [ -n "$last" ] && [ "$last" != "null" ]; then
++                age_min=$(( ( $(date -u +%s) - $(date -u -d "$last" +%s) ) / 60 ))
++                if [ "$age_min" -ge 90 ]; then takeover=true; fi
++              fi
++              if [ "$takeover" != "true" ]; then
++                echo "run=false" >> "$GITHUB_OUTPUT"
++                echo "::notice title=Obsidian Autopilot::${branch} が既に存在（進行中/実行済み）のためスキップ。files=${files:-unknown} pr=${npr:-unknown} last=${last:-unknown}"
++                exit 0
++              fi
++              echo "takeover=true" >> "$GITHUB_OUTPUT"
++              echo "::warning title=Obsidian Autopilot::${branch} は claim だけ取られて ${age_min} 分動いていない（差分0・PR0）。**死んだ占有**として引き継ぐ。"
+             fi
+             status_date="$(curl -sS --max-time 20 "https://simplememofast.com/data/autopilot-status.json?d=${today}" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("date_jst",""))' 2>/dev/null || echo "")"
+             if [ "$status_date" = "$today_dash" ]; then
+@@ -325,6 +355,7 @@ jobs:
+             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
+ 
+             0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。
++            0-1. 【死んだ占有の引き継ぎ】GATE_TAKEOVER=${{ steps.gate.outputs.takeover == 'true' }} 。true のときだけ、上の「ブランチが存在する＝実行済み」を**この日は適用しない**。当日ブランチは claim だけ取られて90分以上動いていない（差分0・PR0）とGateが実測している。Runbook §0-2 の「死んだ占有の引き継ぎ」の手順に従い、**既存のブランチの上に**空コミットを積んで占有し直すこと（`git fetch origin <当日ブランチ> && git checkout -B <当日ブランチ> origin/<当日ブランチ>`）。**`--force` / `--force-with-lease` は使わない・ブランチを消さない。**push が非fast-forwardで弾かれたら他経路が復帰したということなので、何もせず終了する。
+             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
+             2. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録を確認する。**全文は読まないこと**（77,000文字あり毎日+5,000増える。入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因）。**保留事項は LOG からではなく `data/autopilot-actions-report.json` を見る**（型付きで、閉じ条件が通れば消える。散文の履歴から拾うと解消済みが混ざる）。**台帳そのもの `data/autopilot-actions.json` は読まないこと** — 閉じた行が消えずに貯まるので、LOG と同じく増え続ける（レポート側は open と当日クローズだけなので未処理の件数でしか増えない）。レポートの `as_of_jst` が当日でない場合だけ、09:00 JST のアクチュエータがまだ走っていないということなので台帳側を見てよい。Runbook §0の「読むもの」も、全文を読むものと一部だけ読むものを分けてある——そちらの指定に従うこと。
+             2-1. 【レーンF・A〜Eより先】`node scripts/autopilot-selfheal.mjs` を実行する。未修理の故障が出たら、**その日の最優先アクションは基盤の修理**で、記事は書かない。触ってよいファイルとやってはいけない変更はスクリプトが出力する（検証を弱めない・自分の権限を広げない。これはCIが実際に検出する）。直したら `data/autopilot-runs.json` の自分の行に `repair_of` を書くこと——書かない限り翌日も未修理として上がってくる。⛔ が出ている対象は直さず `owner_requests` に上げる。
+```
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260902-actions`（route: actions・outcome: shipped・
+  lane: F・action: maintenance・pr: 774・`repair_of: ["ap-20260829-ccr0920"]`）を追記。
+  **`repair_note` に「部分的な修理である」と書いた** —— 判定・Runbook・ドリル・性質テストは
+  main に入るので Runbook を読む経路（副系CCR・代走）には本日から効くが、
+  **主系の bash Gate はパッチが当たるまで旧判定のまま。**
+- `usage_limit` の3件（`ap-20260830-actions` / `ap-20260831-actions` / `ap-20260831-ccr0920`）に
+  **`repair_of` は書いていない。**上記(2)のとおり、規則がそれを禁じているため。
+- `data/autopilot-cost.json` に **09-01 の主系 run 33454414490 を追記**（$9.3726 / 99ターン /
+  repair）。ジョブログの result 行から読んだ。それまで未記録だった。
+  **結果として1回あたり上限 $3.00 の 3.1倍の超過が未レビューで立ち、次回の主系は
+  着手前に止まる。**解除は `--ack-overrun`（人間のみ）。**記録しない選択はしない** ——
+  自分の超過を自分で通せると、上限が「お願い」になる。
+- `data/autopilot-status.json` を当日分で上書き（cost/runs は `--json` の出力をそのまま埋め込み）。
+- `data/kpi-definitions.json`: `noise_floor` を v24 へ。Runbook を触ったので checksum だけ動いた
+  （閾値も適用範囲も変えていない）。
+- **オーナー依頼を2件外した**（Runbook §1-3・実測で充足を確認）:
+  GH_PAT の回転（**2026-08-26 にオーナー実施済み**・台帳は closed）と、
+  副系A/BのRoutine停止（`check-routine-runs.mjs` の本日の出力が
+  「【停止 2026-08-28・意図的】」＝故障ではない）。**「継続」で繰り越さない。**
+
+### 検証
+
+`scripts/preflight.mjs`（CIが回すコマンドを workflow から機械的に抽出）**111本すべて通過**。
+着手時点では2本落ちており、どちらもこのPRの中身で解消した（台帳の未記入と、
+Runbook を触ったことによる `noise_floor` の checksum）。
+
+- `autopilot-drill --check`: 新コード `run_takeover` を含め **gate の16コード全てに演習
+  シナリオがある**（15→19。引き継ぐ／作業があれば追い越さない／90分未満は待つ／
+  読めなければ追い越さない）
+- `property-tests`: 不変条件2件と**変異2件**を追加。「作業の有無を見ずに引き継ぐ」
+  「読めなかった占有を空と読む」を**両方とも捕まえること**を確認した（性質が空虚でない証明）。
+  生成器の被覆にも3件（作業のある占有／読めない占有／死んだ占有）を足したので、
+  引き継ぎが一度も試されないまま緑になる道を塞いだ
+- `autopilot-selfheal --selftest`: 5件追加。**who=owner でも件数・一覧から消えないこと**と、
+  **escalation-rules.json が may_modify に入っていないこと**を固定
+- **Gate の bash は実 API で突き合わせた**（本番に入れられないので、論理だけ確かめた）:
+
+  | ブランチ | files | PR | 経過 | 判定 |
+  |---|---|---|---|---|
+  | `claude/obsidian-auto-20260829`（事故の当日） | 0 | 0 | 5,685分 | **引き継ぐ** |
+  | `claude/obsidian-auto-20260902`（本日・作業中） | 0 | 0 | 7分 | 待つ |
+  | `claude/obsidian-auto-20260828`（出荷済み） | 16 | 1 | — | 待つ |
+  | 存在しないブランチ（API 404） | — | — | — | 待つ |
+
+- **ブラウザQAは実施していない。**HTML/CSS/画像の変更が1つも無い回のため
+  （変更は `scripts/` `docs/` `data/` のみ）。環境都合ではない。
+  `seo-check.js` は 267ファイル 0 errors 0 warnings。
+
+### データ鮮度
+
+`bq-preflight.mjs` はこの環境では資格情報が無く落ちるため、本日 08:05 JST の
+seo-daily run 33569372663 の Export preflight ログから読んだ（Runbook §0-4 ③）:
+**newest data 2026-08-30（3日遅れ・正常は2〜3日）／21日蓄積／28日窓は 2026-09-06 から／
+穴なし・停止テーブルなし・中断したエクスポートなし。**
+レーンA/BはBQ28日窓まで引き続き正当化できない（あと5日）。
+
+### 残る弱さ（隠さない）
+
+- **90分より長く生きる副系セッションがあれば、追い越しうる。**主系はジョブ上限で
+  死ぬのでありえないが、CCR側に上限があるかは観測できていない。実測の最長は28分
+- 本番の Gate はまだ旧判定のまま（上記のパッチ待ち）
+- 運転台帳に **2026-09-01 の主系 run（33454414490 / PR #749）の行が無い**（`act-ledger-sync`）。
+  09:00 JST の日次アクチュエータの `reconcile-runs` が埋める見込みなので、
+  二重に立てないよう手では足していない
+
+### 次回への申し送り
+
+**副系CCRへ: 上のパッチを `.github/workflows/obsidian-autopilot.yml` へ当てること。**
+当てるまで、本番の Gate は「ブランチが在れば必ずスキップ」の旧判定のまま。
+
+**主系は次回、1回上限の未レビュー超過で止まる見込み。**副系は別経路なので止まらない。
+
+**選択肢を1つ潰しておく:** `workflow` scope を GH_PAT に足す提案はしないこと。
+2026-08-25 に理由つきで決まっている（`act-gh-pat-scope-and-rotation`）。
+
+coverage-queue の pending は26件。故障が片付いた日はレーンEへ戻れる。
