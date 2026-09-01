@@ -235,10 +235,19 @@ function selftest() {
     // 「副系の写しの取り直し」が意図的に止まっていたのが記録されていなかった。
     // **数を固定しているのは意図** —— 黙って増えたときに気づくため。
     // 動いたときは、増えた理由を open_findings / intentional_stops に書いてから直す。
-    ['**実データで8件が健全でない**（緑＝異常が無い、ではない）', () => {
+    // [2026-09-01] 8件 → 6件。**枠が戻り、2本が SUCCEEDED になった**
+    // （再試行v3・週次BigQuery）。未対応 4 → 2。
+    //
+    // **この数字を直すのは4日で3回目**（08-28: 5→6 / 08-31: 6→8 / 09-01: 8→6）。
+    // 写しが動くたびここも動く。**次に触る人へ**: この固定が実際に捕まえているものは
+    // validate() の「どちらの一覧にも無い」「健全になっている」と重なっている。
+    // 重なっていない部分（＝件数そのもの）が何を守っているかを一度確かめて、
+    // 守っていないなら関係式（unhealthy = open + intentional）へ移すこと。
+    // **合わせるためだけに数字を書き換える回数が増えたら、それは検査ではなく作業になる。**
+    ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
-      assert(unhealthy.length === 8, `健全でないのは8件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 4, '未対応は4件（週次2本＋Obsidian系2本）');
+      assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
+      assert(real.open_findings.length === 2, '未対応は2件（SEO Weekly・obsidian-community）');
       assert(real.intentional_stops.length === 4,
         '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],
