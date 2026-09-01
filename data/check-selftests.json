@@ -460,6 +460,12 @@
       "broke": "breaks_if_down 欠落／知らない personal_data／代替が無いのに fallback_note 欠落 の3通りで落ちることを観測"
     },
     {
+      "script": "scripts/check-waiting-progress.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-01",
+      "broke": "承認を外す（未承認の停止）／承認の review_by を過去日にする（期限切れ）の2通りで exit 1 を観測。**実データで壊して戻した**（git diff が空に戻ることを確認）。あわせて注入型の観測で6通り固定 —— 上限内は moving／目標到達後は止まっても見ない／鮮度が読めないときに「進んでいる」と書かない／**期日超過だけでは落とさない**／stale_budget_days が無い待ちは落とす／review_by の無い承認は期限切れ扱い。**この検査は赤い状態で入った**（収入の待ちが実際に止まっている）ので、空回りの疑いは無い"
+    },
+    {
       "script": "scripts/code-authorship.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
