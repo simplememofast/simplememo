@@ -222,6 +222,23 @@ export function planAll(doc, obligations, { now = Date.now(), sentToday = 0 } = 
 
 // ============================================================
 
+/**
+ * 実台帳を複製し、**質問を1件足してから**壊す。
+ *
+ * [2026-09-01] **`asks[1]` を直接いじる検体だった。**質問が1件に減った日に
+ * `Cannot set properties of undefined` で落ちた —— 検査が壊れたのではなく、
+ * **検体が台帳の行数に寄りかかっていた。**見たいのは「向き先の居ない draft を
+ * 落とすか」なので、行数に関係なく成り立つ形にする。
+ */
+function withExtraAsk(real, mutate) {
+  return broken(real, (d) => {
+    const base = d.asks[0];
+    assert(base, '実台帳に質問が1件も無い — **この検体が作れない**');
+    d.asks.push({ ...JSON.parse(JSON.stringify(base)), id: `${base.id}-検体` });
+    mutate(d.asks[d.asks.length - 1]);
+  });
+}
+
 function selftest() {
   const real = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
   const obligations = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
@@ -291,10 +308,21 @@ function selftest() {
     }],
 
     // --- 聞く理由 --------------------------------------------------------
+    // [2026-09-01] **実台帳の asks[0] が確定済みである前提を捨てた。**
+    // legal-record-statutory の答えが出て行を消したら、asks[0] が別の質問になり
+    // このテストが送信側へ倒れた。**台帳の行数と並び順に寄りかかっていた。**
+    // 見たいのは「その質問の元になった期限が確定したら hold か」なので、
+    // **いま残っている質問そのものを使い、その期限だけを確定させる。**
     ['**答えが出ているのに聞かない**', () => {
+      const doc = on();
+      const ask = doc.asks[0];
+      assert(ask, '実台帳に質問が1件も無い — **この検査が空回りしている**');
       const ob = JSON.parse(JSON.stringify(obligations));
-      ob.deadlines.find((x) => x.id === 'legal-record-statutory').confirmed_by_owner = true;
-      held(evaluateAsk({ ask: on().asks[0], doc: on(), obligations: ob, now: NOW }), '既に確定している');
+      const target = ob.deadlines.find((x) => x.id === ask.id);
+      assert(target, `質問「${ask.id}」に対応する期限が台帳に無い`);
+      target.confirmed_by_owner = true;
+      target.next_due = '2099-01-31';
+      held(evaluateAsk({ ask, doc, obligations: ob, now: NOW }), '既に確定している');
     }],
     ['元の未把握が消えていたら送らない', () => {
       const ob = { deadlines: [] };
@@ -359,15 +387,20 @@ function selftest() {
       const p = validate(broken(real, (d) => { d.asks[0].field = '占い'; }), { obligations });
       assert(p.some((x) => x.includes('居ない相手を向き先にしない')), p.join(' / '));
     }],
+    // [2026-09-01] **`asks[1]` を前提にしていた。**質問が1件に減った日に
+    // `Cannot set properties of undefined` で落ちた ——
+    // **検査が壊れたのではなく、検体が台帳の行数に寄りかかっていた。**
+    // 見たいのは「向き先の居ない draft を落とすか」なので、**検体を自分で作る。**
     ['**依頼していない相手を向き先にした draft を落とす**（この検査を作った当の穴）', () => {
-      const p = validate(broken(real, (d) => { d.asks[1].field = '社会保険・労務'; }), { obligations });
+      const p = validate(withExtraAsk(real, (a) => { a.field = '社会保険・労務'; a.status = 'draft'; }),
+        { obligations });
       assert(p.some((x) => x.includes('届かない質問を送る側に置かない')), p.join(' / '));
     }],
     ['parked にすれば置いておける（向き先が決まるまで消さない）', () => {
-      const p = validate(broken(real, (d) => {
-        d.asks[1].field = '社会保険・労務'; d.asks[1].status = 'parked';
-      }), { obligations });
-      assert(p.length === 0, p.join(' / '));
+      const p = validate(withExtraAsk(real, (a) => { a.field = '社会保険・労務'; a.status = 'parked'; }),
+        { obligations });
+      assert(p.some((x) => x.includes('届かない質問を送る側に置かない')) === false,
+        `parked が落ちている: ${p.join(' / ')}`);
     }],
     ['知らない status は落ちる', () => {
       const p = validate(broken(real, (d) => { d.asks[0].status = 'sent'; }), { obligations });

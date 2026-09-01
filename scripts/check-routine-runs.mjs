@@ -5,6 +5,7 @@
  *   node scripts/check-routine-runs.mjs           # 表示
  *   node scripts/check-routine-runs.mjs --check   # CI
  *   node scripts/check-routine-runs.mjs --selftest
+ *   node scripts/check-routine-runs.mjs --snapshot-fresh   # 写しの鮮度だけ（閉じ条件用）
  *   node scripts/check-routine-runs.mjs --sync <list_triggers の生JSON>   # 写しを取り直す
  *
  * 【台帳の「構造的に不可」は半分だけ正しかった】
@@ -235,10 +236,19 @@ function selftest() {
     // 「副系の写しの取り直し」が意図的に止まっていたのが記録されていなかった。
     // **数を固定しているのは意図** —— 黙って増えたときに気づくため。
     // 動いたときは、増えた理由を open_findings / intentional_stops に書いてから直す。
-    ['**実データで8件が健全でない**（緑＝異常が無い、ではない）', () => {
+    // [2026-09-01] 8件 → 6件。**枠が戻り、2本が SUCCEEDED になった**
+    // （再試行v3・週次BigQuery）。未対応 4 → 2。
+    //
+    // **この数字を直すのは4日で3回目**（08-28: 5→6 / 08-31: 6→8 / 09-01: 8→6）。
+    // 写しが動くたびここも動く。**次に触る人へ**: この固定が実際に捕まえているものは
+    // validate() の「どちらの一覧にも無い」「健全になっている」と重なっている。
+    // 重なっていない部分（＝件数そのもの）が何を守っているかを一度確かめて、
+    // 守っていないなら関係式（unhealthy = open + intentional）へ移すこと。
+    // **合わせるためだけに数字を書き換える回数が増えたら、それは検査ではなく作業になる。**
+    ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
-      assert(unhealthy.length === 8, `健全でないのは8件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 4, '未対応は4件（週次2本＋Obsidian系2本）');
+      assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
+      assert(real.open_findings.length === 2, '未対応は2件（SEO Weekly・obsidian-community）');
       assert(real.intentional_stops.length === 4,
         '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],
@@ -444,6 +454,28 @@ function selftest() {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest() === 0 ? 0 : 1);
+
+  // 写しの鮮度だけを見るモード。**閉じ条件から呼ばれる。**
+  //
+  // `--check` を閉じ条件に使えない —— あれは「健全でない routine が一覧に無い」でも
+  // 落ちるので、**写しを取り直しても閉じない**（別の理由で赤いまま）。
+  // 鮮度の行は鮮度で閉じる。混ぜると、取り直した人に「まだ足りない」と言うことになる。
+  if (process.argv.includes('--snapshot-fresh')) {
+    const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    const max = doc.max_snapshot_age_days;
+    const observed = Date.parse(doc.observed_at ?? '');
+    if (!(typeof max === 'number' && max > 0) || !Number.isFinite(observed)) {
+      console.error('鮮度を判定できない（max_snapshot_age_days / observed_at）');
+      process.exit(1);
+    }
+    const days = (Date.now() - observed) / DAY;
+    if (days > max) {
+      console.error(`写しが ${days.toFixed(1)} 日前で古い（上限 ${max} 日）`);
+      process.exit(1);
+    }
+    console.log(`写しは ${days.toFixed(1)} 日前（上限 ${max} 日）`);
+    process.exit(0);
+  }
 
   const syncAt = process.argv.indexOf('--sync');
   if (syncAt >= 0) {

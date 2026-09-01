@@ -18,6 +18,25 @@
  * 日にここが古くなり、「手元で通ったのにCIで落ちる」が戻ってくる。
  * 導出なので、CI に1本足せばここも1本増える。
  *
+ * 【2026-09-01 訂正 — 上の1行は、書かれてから一度も本当ではなかった】
+ * 拾えていたのは `run: |` のブロック形式だけで、**1行形式の
+ * `run: node scripts/foo.mjs --check` を1本も拾っていなかった。**
+ * 実測 CI 108 本のうち **47 本（43%）** がその形。61 本を全部通して
+ * 「手元は緑」と出していた。
+ *
+ * **足りないことは症状に出ない。**落ちる検査が増えるなら気づくが、
+ * 検査そのものが減るのは、残りが通ればただの緑になる。
+ * このファイルが潰すために作られた「手元で緑・CIで赤」が、
+ * このファイル自身の中に残っていた。
+ *
+ * 見つかり方も同型だった。`check-escalation.mjs --check` が手元で赤いのに
+ * preflight は「2 本失敗」と言い、その2本にそれが入っていなかった。
+ *
+ * 対処は2つ。(1) 1行形式を拾う。(2) **取らなかった行を理由つきで必ず表に出す**
+ * （`auditExtraction`）。分類できない実行行が出たら緑にせず exit 2 にする ——
+ * 見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。
+ * 本数の増減そのものは止められないが、**黙って減ることは止まる。**
+ *
  * 【手元でだけ落ちるものがある — 2026-08-28 の実測】
  * `check-generators --run` は `data/financial-policy.json` と
  * `data/revenue-series.json` が再生成で変わると言う。**これは main でも同じ**
@@ -76,11 +95,34 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
  * 行頭の空白と `-` を落としてから見る（YAML のブロック内なので字下げがある）。
  * `&&` や `|` でつながった行は**取らない** —— 手元で意味が変わりうるものを
  * 黙って走らせない。
+ *
+ * 【2026-09-01 修正】**1行形式の `run: node ...` を落としていた。**
+ *
+ * 拾えていたのはブロック形式（`run: |` の下に字下げして書く）だけで、
+ * `run: node scripts/foo.mjs --check` と1行で書かれたステップは
+ * `line.startsWith('node ')` に一度も当たらない。**実測で CI 108 本のうち
+ * 47 本（43%）がこの形**で、preflight はそれを1本も回さずに
+ * 「61 本中 N 本失敗」と出していた。
+ *
+ * このファイルの冒頭には「**導出なので、CI に1本足せばここも1本増える**」と
+ * 書いてある。1行形式で足された日は増えなかったので、その主張は嘘だった。
+ * しかも**足りないことは表に出ない** —— 少ない本数を全部通せば緑になる。
+ * 手元で緑を見てから CI で落ちる、というこのファイルが潰すために作られた
+ * 事象そのものが、このファイルの中に残っていた。
+ *
+ * 見つかり方も同じ形だった。`check-escalation.mjs --check` が手元で赤いのに
+ * preflight は「2 本失敗」と言い、その2本にそれが入っていなかった。
  */
 export function extractCommands(yamlText) {
   const out = [];
   for (const raw of String(yamlText ?? '').split('\n')) {
-    const line = raw.trim();
+    let line = raw.trim();
+    // `- run: node ...` / `run: node ...` / `- node ...` のどれでも同じ扱いにする。
+    // **コマンド本体を取り出してから**既存の除外（合成・変数）に掛けること。
+    // 順序を逆にすると、`run:` の付いた合成行が素通りする。
+    if (line.startsWith('- ')) line = line.slice(2).trim();
+    const inline = line.match(/^run:\s+(.+)$/);
+    if (inline) line = inline[1].trim();
     if (!line.startsWith('node ')) continue;
     if (/[|&;><]/.test(line)) continue;          // 合成された行は取らない
     if (/\$\{\{|\$[A-Z_]/.test(line)) continue;  // 変数を含む行は手元で意味が変わる
@@ -97,6 +139,41 @@ export function extractCommands(yamlText) {
     seen.add(k);
     return true;
   });
+}
+
+/**
+ * **取らなかった行を、理由つきで数える。**
+ *
+ * 取りこぼしは本数が減るだけなので、**残りが全部通れば緑になる。**
+ * 実際 2026-09-01 まで、1行形式の `run: node ...` を47本（CI全体の43%）
+ * 落としたまま「61本中N本失敗」と出していた。**足りないことは症状に出ない。**
+ *
+ * そこで、コマンド行に見えるのに取らなかったものを必ず表に出す。
+ * 理由の付くもの（合成・変数・対象外の実行系）は出したうえで通し、
+ * **どれにも当てはまらない形が出たら落とす** —— 見たことのない書き方は
+ * 「たぶん要らない」ではなく「まだ分かっていない」なので、緑にしない。
+ */
+export function auditExtraction(yamlText) {
+  const dropped = { composed: [], variable: [], out_of_scope: [], unknown: [] };
+  let taken = 0;
+  for (const raw of String(yamlText ?? '').split('\n')) {
+    let line = raw.trim();
+    if (line.startsWith('- ')) line = line.slice(2).trim();
+    const inline = line.match(/^run:\s+(.+)$/);
+    if (inline) line = inline[1].trim();
+    // 実行系に見える行だけを対象にする（散文やYAMLの他のキーは無視）
+    if (!/^(node|python3|npx)\s/.test(line)) continue;
+    if (/^node\s+(?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.mjs/.test(line)
+        && !/[|&;><]/.test(line) && !/\$\{\{|\$[A-Z_]/.test(line)) { taken += 1; continue; }
+    if (/[|&;><]/.test(line)) { dropped.composed.push(line); continue; }
+    if (/\$\{\{|\$[A-Z_]/.test(line)) { dropped.variable.push(line); continue; }
+    // .mjs 以外の実行系（.js / .py / growth/lib のテスト）は、**現状は回していない。**
+    // 回さないこと自体は判断だが、黙って消えていてよい理由は無いので表に出す。
+    if (/^(python3\s|npx\s)/.test(line) || /^node\s+\S+\.(js|py)\b/.test(line)
+        || /^node\s+\S+\.test\.mjs\b/.test(line)) { dropped.out_of_scope.push(line); continue; }
+    dropped.unknown.push(line);
+  }
+  return { taken, dropped };
 }
 
 // **import されたときに走らせない。**export しているものを import した側が
@@ -122,6 +199,29 @@ if (cmds.length === 0) {
   // **0本を「全部通った」と出さない。**導出が壊れたときに緑になるのが一番まずい
   console.error('ワークフローから1本も拾えなかった — 導出が壊れている');
   process.exit(2);
+}
+// **取らなかった行を先に出す。**本数が減っただけの導出は、残りが全部通れば
+// 緑になる（2026-09-01 まで47本を落としたまま緑を出していた）。
+{
+  const audit = auditExtraction(fs.readFileSync(WORKFLOW, 'utf8'));
+  const d = audit.dropped;
+  const n = d.composed.length + d.variable.length + d.out_of_scope.length + d.unknown.length;
+  if (n > 0) {
+    console.log(`導出で取らなかった ${n} 行（理由つき。**黙って減らさない**）:`);
+    const show = (label, xs) => {
+      for (const x of xs) console.log(`  ${label}  ${x}`);
+    };
+    show('合成    ', d.composed);
+    show('変数    ', d.variable);
+    show('対象外  ', d.out_of_scope);
+    show('**不明**', d.unknown);
+    console.log('');
+  }
+  if (d.unknown.length) {
+    // 見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。
+    console.error('導出が分類できない実行行がある — 緑にしない');
+    process.exit(2);
+  }
 }
 if (only) cmds = cmds.filter((c) => `${c.script} ${c.args.join(' ')}`.includes(only));
 

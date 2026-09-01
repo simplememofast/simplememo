@@ -755,6 +755,25 @@
       "source": "act-reconcile-session",
       "failure_class": "usage_limit",
       "detected_at": "2026-08-31T23:27:44Z"
+    },
+    {
+      "run_id": "ap-20260831-ccr0920",
+      "date_jst": "2026-08-31",
+      "route": "ccr-0920",
+      "attempted": true,
+      "outcome": "failed",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": "実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657`（09:20 JST・ccr-0920）の起動が 13 秒で FAILED（fired 2026-08-31T00:20:33Z / finished 00:20:46Z / session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**主系の 429 と同じ事象の副系側**で、同じアカウントなので代走にならなかった。1ターンも回っていないため当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）",
+      "external_ref": "cse_01VZpZ4oseTMEgbBPzddUSxN",
+      "interventions": [],
+      "source": "act-reconcile-session",
+      "failure_class": "usage_limit",
+      "failed_at": "2026-08-31T00:20:46Z",
+      "detected_at": "2026-09-01T00:14:46Z",
+      "detected_note": "list_triggers の last_run を実見（PR #739 のセッション）。**last_run は最新1回しか保持しない**ので、08-30 の同経路は既に上書きされていて確かめられない"
     }
   ]
 }

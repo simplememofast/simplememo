@@ -65,7 +65,7 @@ export function hoursSince(iso, now) {
  *
  * 見るのは「出してよい中身か」。Apple の審査そのものは見ない（まだ始まっていない）。
  */
-export function evaluateSubmission({ policy, build, ci, releaseNotes, doneToday = 0, now } = {}) {
+export function evaluateSubmission({ policy, build, ci, releaseNotes, review, doneToday = 0, now } = {}) {
   const g = commonGate(policy, doneToday);
   if (g) return g;
 
@@ -78,6 +78,21 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, doneToday 
   // **同じ版を二度出さない。**審査中のものがあるなら、それが片づくまで待つ
   if (build.in_review === true) return hold('同じアプリの審査が進行中 — 二重に出さない');
   if (build.in_review !== false) return unknown('審査が進行中かどうか');
+
+  // **上の in_review は版しか見ていない。**Apple の提出は版ではなく
+  // **アプリ単位の reviewSubmission** で、App版・カスタムプロダクトページ・
+  // Appイベント・実験を1件に束ねる。**同時に進行できるのは1件だけ**なので、
+  // **CPP だけの提出が残っていても App 版の提出は弾かれる。**
+  //
+  // 5.7.8 で実際に踏んだ: 版一覧は「審査中の版は無い」と言うのに deliver は
+  // "Cannot submit for review - A review submission is already in progress" で
+  // 落ちた（simplememo-ios run 31597781663）。**版だけ見ていると説明がつかない。**
+  if (!review || typeof review !== 'object') return unknown('提出枠の情報');
+  if (review.submission_open === true) {
+    return hold('アプリ単位の提出枠が埋まっている'
+      + ' — **版が空いていても提出は弾かれる**（5.7.8 の実害）');
+  }
+  if (review.submission_open !== false) return unknown('提出枠が空いているか');
 
   // CI。**「読めなかった」を「緑」と読み替えない**
   if (policy.require_ci_green === true) {
@@ -247,6 +262,9 @@ function selftest() {
         device_verified_by: 'owner', device_verified_at: ago(3), device_verified_sha: 'abc123',
       },
       ci: { conclusion: 'success', sha: 'abc123' },
+      // アプリ単位の提出枠。**空いている**（出どころは
+      // simplememo-ios/data/appstore/release-materials.json の review.submission_open）
+      review: { submission_open: false },
       // **`ja` であって `ja-JP` ではない。**このアプリの実際の ASC ロケール。
       // ここを台帳から取らずに直書きしていたので、台帳の値を直したときに
       // 自己テストだけが古い値のまま通り続ける形だった（2026-08-28 に実際にそうなった）。
@@ -338,6 +356,23 @@ function selftest() {
       heldS({ build: b }, '材料が無い');
     }],
     ['審査中なら二重に出さない', () => heldS({ build: { ...subOk().build, in_review: true } }, '二重')],
+
+    // --- アプリ単位の提出枠（版の状態だけでは足りない）---
+    //
+    // 5.7.8 の実害: 版一覧は「審査中の版は無い」と言うのに deliver は
+    // "A review submission is already in progress" で落ちた。
+    // **in_review だけを見ている門は、この形を通してしまう。**
+    ['**版が空いていても提出枠が埋まっていれば止まる**（5.7.8 の形）',
+      () => heldS({ build: { ...subOk().build, in_review: false },
+                    review: { submission_open: true } }, '提出枠が埋まっている')],
+    ['**提出枠が読めなければ hold**（空いているに倒さない）',
+      () => heldS({ review: {} }, '提出枠が空いているか')],
+    ['review そのものが無ければ hold',
+      () => heldS({ review: undefined }, '提出枠の情報')],
+    ['枠が空いていれば通る（他の材料が揃っていれば）', () => {
+      const r = evaluateSubmission(subOk({ review: { submission_open: false } }));
+      assert(r.decision === 'submit', JSON.stringify(r));
+    }],
     ['審査中かどうかが読めなければ hold', () => {
       const b = { ...subOk().build }; delete b.in_review;
       heldS({ build: b }, '材料が無い');

@@ -114,6 +114,80 @@ export function stakes(clause, v) {
   return out;
 }
 
+/**
+ * DPA レビューの4観点。**⑦の行が名指ししているもの**をそのまま使う
+ * （「AI事業者のDPA・データ利用・SLA・撤退計画の審査」）。
+ * 勝手に増やさない —— 観点が増えると、台帳の行が言っていないことを聞き始める。
+ */
+export const DPA_ASPECTS = [
+  ['dpa',      'DPA（データ処理契約）',
+   '締結済みか。**規約に自動で含まれるのか、別途の署名が要るのか。**'
+   + '「GDPR 準拠」と書いてあることは、契約が在ることを意味しない'],
+  ['data_use', 'データの使われ方',
+   '再委託先（subprocessors）は誰か。保存される国・リージョンはどこか。'
+   + '**こちらのデータをそのベンダーの学習・改善に使う条項があるか**'],
+  ['sla',      'SLA と事故時の扱い',
+   '稼働率の約束があるか。**侵害の通知期限**は何時間／何日か'],
+  ['exit',     '撤退計画',
+   '解約したときデータはいつ消えるか。**取り出す手段があるか。**'
+   + '「削除する」と「取り出せる」は別'],
+];
+
+/**
+ * DPA レビュー1件の露出。**純関数。**返すのは数か `null`。
+ *
+ * 条項側の `exposure()` と同じ規律で作る:
+ *
+ *   personal_data … **DPA の主題そのもの**なので重みを2倍に取る（0/2/4）
+ *   critical      … 落ちると事業が止まるか（+1）
+ *   代替が無い    … 逃げ場が無いほど契約に賭かる（+1）
+ *
+ * **登録簿に無い語は `null`。**0 に丸めると「渡していない」と同じ順位になり、
+ * **欄が欠けているほど安全に見える** —— governing_law で 2026-08-28 に
+ * 踏んだのと同じ向きの誤り。
+ */
+export function dpaExposure(v) {
+  if (!v || typeof v !== 'object') return null;
+  const w = DATA_WEIGHT[v.personal_data];
+  if (w === undefined) return null;
+  return w * 2 + (v.critical ? 1 : 0) + (v.fallback ? 0 : 1);
+}
+
+/** そのベンダーで何が賭かっているか。**台帳の言葉のまま。要約しない。** */
+export function dpaStakes(v) {
+  const out = [`渡しているもの: ${v.personal_data}`];
+  if (v.$personal_data) out.push(v.$personal_data);
+  if (v.used_for) out.push(`用途: ${v.used_for}`);
+  if (v.breaks_if_down) out.push(`止まると: ${v.breaks_if_down}`);
+  out.push(v.fallback ? `代替: ${v.fallback}` : `代替: **無し**${v.fallback_note ? ` — ${v.fallback_note}` : ''}`);
+  return out;
+}
+
+/**
+ * まだ読んでいない DPA を、露出の大きい順に並べる。
+ *
+ * **`personal_data: none` は対象外**（check-vendors の未レビュー判定と同じ条件）。
+ * **`dpa_reviewed` に日付が入っている行も出さない** —— 終わったものが並び続けると、
+ * 一覧そのものが読まれなくなる。
+ */
+export function buildDpa(register) {
+  const problems = [];
+  const rows = [];
+  for (const v of register?.vendors ?? []) {
+    if (v.personal_data === 'none') continue;
+    if (v.dpa_reviewed) continue;
+    const ex = dpaExposure(v);
+    if (ex === null) {
+      problems.push(`${v.id}: personal_data「${v.personal_data}」が登録簿の語彙に無い`
+        + ' — **順位を作れない。**0 に丸めると渡していないベンダーと同じ順位になる');
+      continue;
+    }
+    rows.push({ id: v.id, name: v.name, exposure: ex, stakes: dpaStakes(v) });
+  }
+  rows.sort((a, b) => b.exposure - a.exposure || a.id.localeCompare(b.id));
+  return { problems, rows };
+}
+
 export function load() {
   return {
     register: JSON.parse(fs.readFileSync(REGISTER_PATH, 'utf8')),
@@ -231,6 +305,58 @@ function selftest() {
       const withFb = exposure('liability_cap', { critical: true, fallback: '別経路' });
       const without = exposure('liability_cap', { critical: true, fallback: null });
       assert(without > withFb, `代替の有無で差が出ない: ${without} vs ${withFb}`);
+    }],
+
+    // ── DPA ワークシート（2026-09-01 追加）──────────────────────
+    ['DPA: 露出の大きいベンダーが先に来る', () => {
+      const reg = { vendors: [
+        { id: 'lo', name: 'lo', personal_data: 'pseudonymous', critical: false, fallback: '別経路' },
+        { id: 'hi', name: 'hi', personal_data: 'personal', critical: true, fallback: null },
+      ] };
+      const { rows } = buildDpa(reg);
+      assert(rows[0].id === 'hi', `先頭が hi でない: ${rows[0]?.id}`);
+      assert(rows[0].exposure > rows[1].exposure, '露出に差が出ていない');
+    }],
+
+    ['**DPA: 知らない personal_data の語を 0 にしない**（欠けているほど安全に見える丸めを作らない）', () => {
+      assert(dpaExposure({ personal_data: 'なにか' }) === null, '語彙外が数になった');
+      assert(dpaExposure({ critical: true }) === null, '欄の欠落が数になった');
+      const { problems, rows } = buildDpa({ vendors: [
+        { id: 'x', name: 'x', personal_data: 'なにか' },
+      ] });
+      assert(rows.length === 0, '順位を作れない行が一覧に混ざった');
+      assert(problems.length === 1, '**黙って落としている** — 落とすなら problems に出すこと');
+    }],
+
+    ['DPA: personal_data が none の行は対象外（check-vendors の未レビュー判定と同じ条件）', () => {
+      const { rows } = buildDpa({ vendors: [{ id: 'n', name: 'n', personal_data: 'none' }] });
+      assert(rows.length === 0, 'none が一覧に出た');
+    }],
+
+    ['**DPA: 読み終わった行は出さない**（終わったものが並ぶと一覧が読まれなくなる）', () => {
+      const v = { id: 'd', name: 'd', personal_data: 'personal', critical: true };
+      assert(buildDpa({ vendors: [v] }).rows.length === 1, '未レビューが出ない');
+      assert(buildDpa({ vendors: [{ ...v, dpa_reviewed: '2026-09-01' }] }).rows.length === 0,
+        'レビュー済みが出続ける');
+    }],
+
+    ['DPA: 代替が在ると露出は下がる', () => {
+      const base = { personal_data: 'personal', critical: true };
+      assert(dpaExposure({ ...base, fallback: null }) > dpaExposure({ ...base, fallback: '別経路' }),
+        '代替の有無で差が出ない');
+    }],
+
+    ['DPA: 観点は⑦の行が名指しした4つのまま（勝手に増やさない）', () => {
+      assert(DPA_ASPECTS.length === 4, `観点が 4 でない: ${DPA_ASPECTS.length}`);
+      const ids = DPA_ASPECTS.map(([id]) => id).join(',');
+      assert(ids === 'dpa,data_use,sla,exit', `観点の並びが違う: ${ids}`);
+    }],
+
+    ['**DPA: 実データで順位が作れる**（9社すべて）', () => {
+      const { problems, rows } = buildDpa(load().register);
+      assert(problems.length === 0, problems.join(' / '));
+      assert(rows.length === 9, `未レビューが 9 でない: ${rows.length}`);
+      assert(rows.every((r) => Number.isInteger(r.exposure)), '露出が数でない行がある');
     }],
 
     ['**知らない personal_data の語を 0 にしない**', () => {
@@ -370,10 +496,59 @@ function report() {
   return problems.length;
 }
 
+/**
+ * DPA レビューの読む順序。**条項側と同じで、決めるのは人。**
+ *
+ * ここが出すのは順序と、各ベンダーで何が賭かっているかと、**何を探せばいいか**。
+ * `dpa_reviewed` に日付を入れるのは、読んだ人。
+ */
+function dpaReport() {
+  const { register } = load();
+  const { problems, rows } = buildDpa(register);
+
+  console.log('\nDPAレビューの読む順序 — まだ読んでいないベンダーを、台帳の事実で並べた\n');
+
+  if (!rows.length) {
+    console.log('  未レビューのベンダーは無い。\n');
+    return problems.length;
+  }
+
+  console.log('  **この一覧は締結の要否も可否も決めない。**決めるのは人で、'
+    + 'ここが出すのは順序と材料だけ（条項ワークシートと同じ規律）。');
+  console.log('  露出 = personal_data×2 ＋ critical ＋ 代替なし。**登録簿の4欄だけから導いている。**\n');
+
+  for (const [i, r] of rows.entries()) {
+    console.log(`  ${String(i + 1).padStart(2)}. [露出 ${r.exposure}] ${r.id} — ${r.name}`);
+    for (const s2 of r.stakes) console.log(`        ${String(s2).replace(/\n+/g, ' ')}`);
+    console.log('');
+  }
+
+  console.log('  各ベンダーで見る4観点（⑦の行が名指ししているもの）:\n');
+  for (const [, label, what] of DPA_ASPECTS) {
+    console.log(`    ${label}`);
+    console.log(`      ${what}\n`);
+  }
+
+  console.log('  **原文はこのセッションから読めない。**エージェント環境の egress プロキシが');
+  console.log('  ベンダーのドメインを塞いでいる（2026-09-01 実測: resend.com / www.cloudflare.com /');
+  console.log('  docs.github.com すべて EGRESS_BLOCKED）。**検索の要約を原文の代わりに使わない。**');
+  console.log('  外部リサーチか人が読み、`dpa_reviewed` に日付を入れる。\n');
+
+  for (const p of problems) console.error(`  **問題** ${p}`);
+  return problems.length;
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest() ? 1 : 0);
-  if (process.argv.includes('--json')) { console.log(JSON.stringify(build(load()), null, 2)); process.exit(0); }
+  if (process.argv.includes('--dpa')) process.exit(dpaReport() ? 1 : 0);
+  if (process.argv.includes('--json')) {
+    const doc = load();
+    const out = process.argv.includes('--dpa-json')
+      ? buildDpa(doc.register) : build(doc);
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(0);
+  }
   if (process.argv.includes('--check')) {
     const problems = check(load());
     for (const p of problems) console.error(`  **問題** ${p}`);
