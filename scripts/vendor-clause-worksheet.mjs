@@ -375,11 +375,33 @@ function selftest() {
       assert(ids === 'dpa,data_use,sla,exit', `観点の並びが違う: ${ids}`);
     }],
 
-    ['**DPA: 実データで順位が作れる**（9社すべて）', () => {
-      const { problems, rows } = buildDpa(load().register);
+    // [2026-09-01] **`rows.length === 9` と件数を焼き込んでいた。**
+    // オーナーが3社を `dpa_reviewed` にした日に落ちた —— **検査が壊れたのではなく、
+    // 検体が実データの件数に寄りかかっていた。**
+    //
+    // **同じ形を今日3回踏んでいる**（check-expert-escalation で asks[1] → asks[0] →
+    // 0件、そしてこれ）。件数は台帳が動けば変わる。**変わらないのは不変条件のほう**なので、
+    // 期待値も実データから導く。
+    ['**DPA: 実データで順位が作れる**（件数は焼き込まない）', () => {
+      const reg = load().register;
+      const { problems, rows } = buildDpa(reg);
       assert(problems.length === 0, problems.join(' / '));
-      assert(rows.length === 9, `未レビューが 9 でない: ${rows.length}`);
+
+      // 不変条件: 「個人データを渡していて、まだ読んでいない」ベンダーと1対1で対応する。
+      // これは check-vendors の未レビュー判定と同じ条件（scripts/check-vendors.mjs）。
+      const expected = (reg.vendors ?? [])
+        .filter((v) => v.personal_data !== 'none' && !v.dpa_reviewed)
+        .map((v) => v.id).sort();
+      const got = rows.map((r) => r.id).sort();
+      assert(JSON.stringify(got) === JSON.stringify(expected),
+        `一覧が未レビュー集合と一致しない: ${got.join(',')} vs ${expected.join(',')}`);
       assert(rows.every((r) => Number.isInteger(r.exposure)), '露出が数でない行がある');
+
+      // **空になったら空回りしている。**全部読み終えた日にこの検体は意味を失うので、
+      // そのときは「読み終えた」ことを別の検体で固定すること。
+      assert(expected.length > 0,
+        '未レビューが0件 —— **この検体は空回りしている。**'
+        + '全社読み終えたなら、policy.enforce_unreviewed を true にして守る側へ移すこと');
     }],
 
     ['**知らない personal_data の語を 0 にしない**', () => {
