@@ -812,6 +812,23 @@ jobs:
       - name: Vendor register
         run: node scripts/check-vendors.mjs --check
 
+      # 【契約の種別】定型（規約への同意＝附合契約）か非定型（交渉・署名した書面）かを
+      # **台帳から導く。**⑦「定型／非定型契約の分類」の実行側。
+      #
+      # 今日は11社すべてが定型で緑になる。**空回りではない**のは入口を見ているから:
+      # terms_accepted_by の無い相手が足されたら「成立の経緯が台帳に無い」で落ち、
+      # 書面が1件でも api 側へ入れば非定型として**人の承認を要求する。**
+      #
+      # **「規約に同意したはず」で埋めない** —— 記録が無い＝問題なし、は
+      # このリポジトリが繰り返し踏んでいる誤り。undetermined を standard に丸めない。
+      #
+      # 隣（../simplememo-api）は CI に無いので、書面との照合は
+      # **していないと明示する。**読めなかったことを「食い違い無し」に化けさせない。
+      - name: Contract kind (定型／非定型)
+        run: |
+          node scripts/check-contract-kind.mjs --selftest
+          node scripts/check-contract-kind.mjs --check
+
       # 【縮退運転】台帳が「代替がある」と書いていることを、**実際に動かして確かめる。**
       #
       # 文章は書いた時点では正しくても、経路が変われば黙って嘘になる。
