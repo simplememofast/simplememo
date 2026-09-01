@@ -182,7 +182,11 @@ export function buildDpa(register) {
         + ' — **順位を作れない。**0 に丸めると渡していないベンダーと同じ順位になる');
       continue;
     }
-    rows.push({ id: v.id, name: v.name, exposure: ex, stakes: dpaStakes(v) });
+    // **下書きがあっても一覧から外さない。**外すと人が読みに来なくなる
+    // （条項側で同じ規律を自己テストで固定している）。
+    rows.push({ id: v.id, name: v.name, exposure: ex, stakes: dpaStakes(v),
+      draft: v.dpa_draft ? { at: v.dpa_draft.at, by: v.dpa_draft.by,
+        open_questions: v.dpa_draft.open_questions ?? [] } : null });
   }
   rows.sort((a, b) => b.exposure - a.exposure || a.id.localeCompare(b.id));
   return { problems, rows };
@@ -326,6 +330,25 @@ function selftest() {
       ] });
       assert(rows.length === 0, '順位を作れない行が一覧に混ざった');
       assert(problems.length === 1, '**黙って落としている** — 落とすなら problems に出すこと');
+    }],
+
+    ['**DPA: 下書きがあっても一覧から消さない**（消すと人が読みに来ない）', () => {
+      const v = { id: 'd', name: 'd', personal_data: 'personal', critical: true,
+        dpa_draft: { at: '2026-09-01', by: 'external_research', open_questions: ['未解決の点'] } };
+      const { rows } = buildDpa({ vendors: [v] });
+      assert(rows.length === 1, '下書きがあると一覧から消えた');
+      assert(rows[0].draft, '下書きの印が載っていない');
+      assert(rows[0].draft.open_questions.length === 1, '未解決の点が落ちている');
+    }],
+
+    ['**DPA: 下書きは dpa_reviewed の代わりにならない**（読んだことにしない）', () => {
+      const base = { id: 'd', name: 'd', personal_data: 'personal', critical: true };
+      const drafted = { ...base, dpa_draft: { at: '2026-09-01', by: 'external_research' } };
+      const reviewed = { ...base, dpa_reviewed: '2026-09-01' };
+      assert(buildDpa({ vendors: [drafted] }).rows.length === 1,
+        '下書きだけで「読んだ」扱いになっている');
+      assert(buildDpa({ vendors: [reviewed] }).rows.length === 0,
+        '人が読んだ行が残り続けている');
     }],
 
     ['DPA: personal_data が none の行は対象外（check-vendors の未レビュー判定と同じ条件）', () => {
@@ -520,6 +543,13 @@ function dpaReport() {
   for (const [i, r] of rows.entries()) {
     console.log(`  ${String(i + 1).padStart(2)}. [露出 ${r.exposure}] ${r.id} — ${r.name}`);
     for (const s2 of r.stakes) console.log(`        ${String(s2).replace(/\n+/g, ' ')}`);
+    if (r.draft) {
+      console.log(`        **下書きあり**（${r.draft.at} / ${r.draft.by}）—— `
+        + '**人の確認はまだ。**`dpa_reviewed` は空のまま');
+      for (const q of r.draft.open_questions) {
+        console.log(`          未解決: ${String(q).replace(/\n+/g, ' ')}`);
+      }
+    }
     console.log('');
   }
 
