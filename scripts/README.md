@@ -22,8 +22,9 @@ CI「SEO Validation」が実行する本体。`check-*.mjs` 全部、`autopilot-
 
 ## 2. 別ワークフローで走る
 
-- seo-daily.yml … growth の ingest/analyze/weekly-report、`recover-ingest`、
-  `check-expiry`、`check-store-facts`、`vendor-terms-watch`
+- seo-daily.yml … growth の ingest/analyze/weekly-report と `bq-preflight`、
+  `recover-ingest`、`check-domain-expiry`、`check-store-facts`、`vendor-terms`、
+  `should-snapshot --decide`（`--selftest` は seo-check.yml 側でも走る）
 - obsidian-autopilot.yml … `autopilot-budget` / `autopilot-selfheal` / `check-model-routing`
 - autopilot-act.yml … `autopilot-act` / `autopilot-budget` / `autopilot-runs`
 
