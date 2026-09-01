@@ -134,6 +134,83 @@ function isBlockedDataPath(pathname) {
   return UNSERVED_DATA.has(pathname.slice("/data/".length));
 }
 
+// /docs/, /scripts/, /tools/, /growth/ and /CLAUDE.md hold internal working
+// files that live in the repo but must not be publicly served (Cloudflare
+// Pages deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
+// and /tools/.env.example were live 200 — ops-intel leak, no public pages
+// under any of these paths.
+//
+// /growth/ matters more than the others: it holds committed Search Console
+// snapshots and App Store Connect exports. Without this block, click,
+// impression and revenue figures would be readable at a guessable URL,
+// indexable by search engines and cacheable by intermediaries.
+//
+// 2026-08-26: this block does NOT make those files private. The repository
+// itself is public (api.github.com/repos/simplememofast/simplememo returns
+// private: false), so every path 404'd here is still readable on GitHub.
+// What the block buys is that the site does not serve, link or expose them
+// to crawlers — not confidentiality. See data/publication-policy.json
+// (`repository_is_public`); do not read these 404s as "not public".
+const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth"];
+
+// Referral/attribution params that carry no content meaning (step 1b).
+// Each one mints a distinct crawlable URL for the same page — GSC has
+// collected `/?ref=launches.uicomet.com`, `/?from=AppAgg.com&…` and
+// `/blog/?q={search_term_string}` (a literal from a since-removed
+// SearchAction schema) that way. A 301 folds the backlink into the
+// canonical URL instead of leaving a near-duplicate parked in the index.
+//
+// `utm_*`, `gclid` and `fbclid` are deliberately NOT stripped: GA4 and
+// the ad platforms read them off the landing URL, so a redirect would
+// silently break campaign attribution. Those URLs are handled by the
+// self-referencing canonical instead, which is also why robots.txt no
+// longer Disallows them — a robots block would stop Googlebot from
+// fetching the page and therefore from ever seeing the canonical
+// (same reasoning as `?lang=` in step 1).
+const STRIPPED_PARAMS = ["ref", "from", "source", "q"];
+
+// Retired paths → their final targets (step 3). Mirrors _redirects, which
+// stays in place as the fallback if a Function deploy ever fails — keep the
+// two in sync.
+const RETIRED = {
+  "/blog/captio-alternatives-comparison": "/captio-alternative/",
+  "/blog/line-keep-migration": "/blog/line-keep-alternative",
+  "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
+  "/blog/memo-shuukan-tips": "/blog/memo-habit",
+  "/devlog/captio-alternative": "/captio-alternative/",
+  "/en/blog/why-captio-died": "/en/captio-alternative/",
+  "/privacy-policy": "/privacy",
+  "/privacy-policy/": "/privacy",
+  "/vs/whatsapp/": "/vs/",
+  "/vs/telegram/": "/vs/",
+  "/vs/trello/": "/vs/",
+  "/vs/mem/": "/vs/",
+  "/vs/slack-self-dm/": "/vs/",
+  // A backlink (featureupvote.com, DR72) carries a stray closing paren.
+  // `_redirects` has caught the bare form since it was added, but only
+  // AFTER this middleware passed it through — so `/)?lang=ja` cost two
+  // hops (301 here to `/)`, then 301 from `_redirects` to `/`) and GSC
+  // counts every intermediate URL separately. Mirroring it here folds
+  // both variants into the single hop the rest of this map already gets.
+  "/)": "/",
+  "/%29": "/",
+};
+
+// Slugs that never existed on this site but are repeatedly crawled because
+// they are linked from off-site (see docs/seo/gsc-index-triage-2026-07-02.md
+// — fabricated HN-style slugs that mimic our own vocabulary). A 404 invites
+// Google to keep re-checking; 410 Gone is the explicit "this will never
+// exist" signal and drops the URL from the index far faster. Verified absent
+// from the full git history, all current sources and every sitemap (step 4).
+const GONE = new Set([
+  "/blog/offline-first-outbox-teardown",
+  "/blog/email-inbox-as-task-manager",
+  "/blog/energy-budget-field-notes",
+  "/blog/ios-cold-start-1-4s-to-287ms",
+  "/blog/i-was-wrong-about-todo-debt",
+  "/blog/no-third-party-deps-ios-18-months",
+]);
+
 export const onRequest = async (context) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
@@ -160,32 +237,12 @@ export const onRequest = async (context) => {
   //    walked around with an extra slash.
   let pathname = path.includes("//") ? path.replace(/\/{2,}/g, "/") : path;
 
-  // /docs/, /scripts/, /tools/, /growth/ and /CLAUDE.md hold internal working
-  // files that live in the repo but must not be publicly served (Cloudflare
-  // Pages deploys every tracked file). 2026-07-07 audit: /CLAUDE.md, /scripts/*
-  // and /tools/.env.example were live 200 — ops-intel leak, no public pages
-  // under any of these paths.
-  //
-  // /growth/ matters more than the others: it holds committed Search Console
-  // snapshots and App Store Connect exports. Without this block, click,
-  // impression and revenue figures would be readable at a guessable URL,
-  // indexable by search engines and cacheable by intermediaries.
-  //
-  // 2026-08-26: this block does NOT make those files private. The repository
-  // itself is public (api.github.com/repos/simplememofast/simplememo returns
-  // private: false), so every path 404'd here is still readable on GitHub.
-  // What the block buys is that the site does not serve, link or expose them
-  // to crawlers — not confidentiality. See data/publication-policy.json
-  // (`repository_is_public`); do not read these 404s as "not public".
+  // Internal working files must not be publicly served — see
+  // INTERNAL_PREFIXES (module scope) for what and why.
   if (
-    pathname === "/docs" ||
-    pathname.startsWith("/docs/") ||
-    pathname === "/scripts" ||
-    pathname.startsWith("/scripts/") ||
-    pathname === "/tools" ||
-    pathname.startsWith("/tools/") ||
-    pathname === "/growth" ||
-    pathname.startsWith("/growth/") ||
+    INTERNAL_PREFIXES.some(
+      (p) => pathname === p || pathname.startsWith(p + "/")
+    ) ||
     pathname === "/CLAUDE.md" ||
     // 【2026-08-26】**data/*.json の遮断はここでしか効かない。**
     //
@@ -215,22 +272,10 @@ export const onRequest = async (context) => {
     needsRedirect = true;
   }
 
-  // 1b. Drop referral/attribution params that carry no content meaning.
-  //     Each one mints a distinct crawlable URL for the same page — GSC has
-  //     collected `/?ref=launches.uicomet.com`, `/?from=AppAgg.com&…` and
-  //     `/blog/?q={search_term_string}` (a literal from a since-removed
-  //     SearchAction schema) that way. A 301 folds the backlink into the
-  //     canonical URL instead of leaving a near-duplicate parked in the
-  //     index.
-  //
-  //     `utm_*`, `gclid` and `fbclid` are deliberately NOT stripped: GA4 and
-  //     the ad platforms read them off the landing URL, so a redirect would
-  //     silently break campaign attribution. Those URLs are handled by the
-  //     self-referencing canonical instead, which is also why robots.txt no
-  //     longer Disallows them — a robots block would stop Googlebot from
-  //     fetching the page and therefore from ever seeing the canonical
-  //     (same reasoning as `?lang=` above).
-  for (const param of ["ref", "from", "source", "q"]) {
+  // 1b. Drop referral/attribution params that carry no content meaning —
+  //     see STRIPPED_PARAMS (module scope) for why these four and why
+  //     `utm_*`/`gclid`/`fbclid` stay.
+  for (const param of STRIPPED_PARAMS) {
     if (url.searchParams.has(param)) {
       url.searchParams.delete(param);
       needsRedirect = true;
@@ -251,50 +296,15 @@ export const onRequest = async (context) => {
   //    normalized pathname so every variant of a retired URL costs exactly
   //    one hop. Before this, `/blog/memo-shuukan-tips.html?lang=ja` went
   //    .html-strip → 301 → _redirects → 301 (two hops, and GSC reports every
-  //    intermediate). Mirrors _redirects, which stays in place as the
-  //    fallback if a Function deploy ever fails — keep the two in sync.
-  const RETIRED = {
-    "/blog/captio-alternatives-comparison": "/captio-alternative/",
-    "/blog/line-keep-migration": "/blog/line-keep-alternative",
-    "/blog/memo-app-free-guide": "/blog/free-memo-apps-ranking",
-    "/blog/memo-shuukan-tips": "/blog/memo-habit",
-    "/devlog/captio-alternative": "/captio-alternative/",
-    "/en/blog/why-captio-died": "/en/captio-alternative/",
-    "/privacy-policy": "/privacy",
-    "/privacy-policy/": "/privacy",
-    "/vs/whatsapp/": "/vs/",
-    "/vs/telegram/": "/vs/",
-    "/vs/trello/": "/vs/",
-    "/vs/mem/": "/vs/",
-    "/vs/slack-self-dm/": "/vs/",
-    // A backlink (featureupvote.com, DR72) carries a stray closing paren.
-    // `_redirects` has caught the bare form since it was added, but only
-    // AFTER this middleware passed it through — so `/)?lang=ja` cost two
-    // hops (301 here to `/)`, then 301 from `_redirects` to `/`) and GSC
-    // counts every intermediate URL separately. Mirroring it here folds
-    // both variants into the single hop the rest of this map already gets.
-    "/)": "/",
-    "/%29": "/",
-  };
+  //    intermediate). The RETIRED map (module scope) mirrors _redirects,
+  //    which stays in place as the fallback if a Function deploy ever fails
+  //    — keep the two in sync.
   if (RETIRED[pathname]) {
     pathname = RETIRED[pathname];
   }
 
-  // 4. Slugs that never existed on this site but are repeatedly crawled
-  //    because they are linked from off-site (see
-  //    docs/seo/gsc-index-triage-2026-07-02.md — fabricated HN-style slugs
-  //    that mimic our own vocabulary). A 404 invites Google to keep
-  //    re-checking; 410 Gone is the explicit "this will never exist" signal
-  //    and drops the URL from the index far faster. Verified absent from the
-  //    full git history, all current sources and every sitemap.
-  const GONE = new Set([
-    "/blog/offline-first-outbox-teardown",
-    "/blog/email-inbox-as-task-manager",
-    "/blog/energy-budget-field-notes",
-    "/blog/ios-cold-start-1-4s-to-287ms",
-    "/blog/i-was-wrong-about-todo-debt",
-    "/blog/no-third-party-deps-ios-18-months",
-  ]);
+  // 4. Slugs that never existed on this site answer 410 Gone — see the
+  //    GONE set (module scope) for the list and rationale.
   if (GONE.has(pathname)) {
     return new Response("Gone", {
       status: 410,
