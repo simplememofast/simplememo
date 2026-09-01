@@ -757,6 +757,25 @@
       "detected_at": "2026-08-31T23:27:44Z"
     },
     {
+      "run_id": "ap-20260901-actions",
+      "date_jst": "2026-09-01",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 748,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "33454414490",
+      "interventions": [],
+      "source": "本セッション（主系06:00・GitHub Actions）。ブランチ claude/obsidian-auto-20260901・PR #748",
+      "repair_of": [
+        "ap-20260829-ccr0920"
+      ],
+      "repair_note": "死んだ占有（claim だけ取って終わった経路）を引き継ぐ判定を入れた。**参照実装（autopilot-gate.mjs）・ドリル・Runbook §0-2 は出荷したが、主系Gateのbashは push が remote reject されたため未適用**（act-gate-takeover-bash として副系へ引き渡し）。副系・再試行はセッションとして Runbook を読むので今日から引き継げるが、主系だけには同じ穴が残る。"
+    },
+    {
       "run_id": "ap-20260901-owner-session",
       "date_jst": "2026-09-01",
       "route": "owner-session",
