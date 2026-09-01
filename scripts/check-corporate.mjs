@@ -91,6 +91,38 @@ export function nextCorporateTaxDue(fyEndMonth, today, extraMonths = 0) {
 }
 
 /**
+ * **暦で固定された年次期限**（法定調書合計表の1月31日など）を導く。
+ *
+ * `nextCorporateTaxDue` と同じ理由でここに置く —— **手で日付を書かない。**
+ * `2027-01-31` と直書きすると、2027年2月1日以降は「期限を過ぎている」に化けるか、
+ * 誰かが黙って年だけ書き換える。**月日だけを持って、次の到来日は毎回計算する。**
+ *
+ * 決算期からの導出（`fiscal_year_end`）と違い、こちらは**会社の事情に依存しない。**
+ * 法が日付そのものを決めているものだけに使う。
+ *
+ * **境界は「今日を含まない」。**期限当日はまだ過ぎていないが、
+ * `next_due` が今日を指したまま翌日を迎えると期限切れになるので、
+ * **当日は「次」に進める側へ倒す**（早く鳴るほうが安全）。
+ *
+ * @param month 1〜12
+ * @param day   1〜31（その月に存在しない日は null）
+ * @param today YYYY-MM-DD
+ */
+export function nextFixedAnnualDue(month, day, today) {
+  if (!Number.isInteger(month) || month < 1 || month > 12) return null;
+  if (!Number.isInteger(day) || day < 1 || day > 31) return null;
+  const t = new Date(`${today}T00:00:00Z`);
+  if (Number.isNaN(t.getTime())) return null;
+  for (let y = t.getUTCFullYear(); y <= t.getUTCFullYear() + 2; y += 1) {
+    const due = new Date(Date.UTC(y, month - 1, day));
+    // **月をまたいだ日付を黙って受け取らない**（2/31 は 3/3 になる）。
+    if (due.getUTCMonth() !== month - 1 || due.getUTCDate() !== day) return null;
+    if (due > t) return due.toISOString().slice(0, 10);
+  }
+  return null;
+}
+
+/**
  * @param {Set|null} vendorIds  ベンダー台帳の id。**null は「照合しない」**で、
  *   空の Set は「ベンダー台帳が空」。この2つは違う。
  */
@@ -188,6 +220,15 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
       }
       // **決算期から導ける期限は、導いた値と一致することを強制する。**
       // 手で書き換えて年をまたぎ忘れる経路をつぶす。
+      if (d.derive_from === 'fixed_annual') {
+        const derived = nextFixedAnnualDue(d.due_month, d.due_day, today);
+        if (!derived) {
+          problems.push(`${at}: derive_from: fixed_annual だが due_month / due_day が無い/不正`);
+        } else if (derived !== d.next_due) {
+          problems.push(`${at}: next_due ${d.next_due} が ${d.due_month}/${d.due_day} からの導出 ${derived} と違う`
+            + '（**手で日付を書き換えない。**月日だけ持って毎回計算する）');
+        }
+      }
       if (d.derive_from === 'fiscal_year_end') {
         const m = doc.entity?.fiscal_year_end_month;
         const ext = d.filing_extension_months ?? 0;
@@ -310,6 +351,41 @@ const SCENARIOS = ledgerScenarios(
 // 「ベンダー台帳に無い id」が1件も出なかった（実測済み）。
 // [2026-08-28] **誰が読んだかの欄。**人の読みとAIの下書きが同じ字面になるのを止める。
 SCENARIOS.push(
+  // ── 暦で固定された年次期限（2026-09-01 追加）──────────────────
+  ['固定年次: 次の到来日を返す', () => {
+    assert(nextFixedAnnualDue(1, 31, '2026-09-01') === '2027-01-31',
+      `導出が違う: ${nextFixedAnnualDue(1, 31, '2026-09-01')}`);
+    assert(nextFixedAnnualDue(1, 31, '2027-01-30') === '2027-01-31', '直前で次年に飛んでいる');
+  }],
+
+  ['**固定年次: 当日は「次」へ倒す**（当日のまま翌日を迎えると期限切れに化ける）', () => {
+    assert(nextFixedAnnualDue(1, 31, '2027-01-31') === '2028-01-31',
+      '当日を「まだ来ていない」として残している');
+  }],
+
+  ['**固定年次: 存在しない日付を黙って繰り上げない**（2/31 が 3/3 になる）', () => {
+    assert(nextFixedAnnualDue(2, 31, '2026-09-01') === null, '2/31 が日付として通った');
+    assert(nextFixedAnnualDue(undefined, 31, '2026-09-01') === null, '月の欠落が通った');
+    assert(nextFixedAnnualDue(1, undefined, '2026-09-01') === null, '日の欠落が通った');
+  }],
+
+  ['**固定年次: 手で書いた日付が導出と違えば落ちる**（年をまたいで誰も直さない経路をつぶす）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const t = d.deadlines.find((x) => x.derive_from === 'fixed_annual');
+    assert(t, 'fixed_annual の行が実データに無い — **この検査が空回りしている**');
+    t.next_due = '2099-01-31';
+    assert(validate(d).problems.some((x) => x.includes('からの導出')),
+      '手書きの日付が素通りした');
+  }],
+
+  ['**固定年次: 月日が欠けたら落ちる**（導出を名乗って導出できない状態を作らない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const t = d.deadlines.find((x) => x.derive_from === 'fixed_annual');
+    delete t.due_month;
+    assert(validate(d).problems.some((x) => x.includes('due_month')),
+      'due_month 欠落が素通りした');
+  }],
+
   ['**読んだのに reviewed_by が無ければ落ちる**（人の読みとAIの下書きが同じ字面になる）', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
     const v = d.contract_review.vendors[0];
