@@ -31,16 +31,16 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { WIDTH, HEIGHT, LEAD_MAX_GLYPHS, splitHeadline, buildHTML } from './pr-hero-layout.mjs';
 import { evaluate } from './check-pr-claims.mjs';
+import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
-  const claimsDoc = readJSON('data/pr-claims.json');
-  const coverage = readJSON('data/automation-coverage.json');
-  const constants = readJSON('data/site-constants.json');
+  const claimsDoc = readJSON(ROOT, 'data/pr-claims.json');
+  const coverage = readJSON(ROOT, 'data/automation-coverage.json');
+  const constants = readJSON(ROOT, 'data/site-constants.json');
 
   const { claims } = evaluate(claimsDoc, coverage);
   const unsupported = claims.filter((c) => !c.supported);

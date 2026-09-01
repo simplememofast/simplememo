@@ -17,9 +17,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 const AI_EXECUTES = new Set(['ai_autonomous', 'ai_executes_gated']);
 const HUMAN_HELD = new Set(['human_only', 'ai_executes_gated', 'ai_proposes']);
@@ -98,7 +98,7 @@ const evalOne = (mode, executor, requires) => evaluate(DOC(mode, requires), COV(
 
 const SCENARIOS = [
   ['実データの参照がすべて解決する', () => {
-    const r = evaluate(readJSON('data/pr-claims.json'), readJSON('data/automation-coverage.json'));
+    const r = evaluate(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'));
     if (r.unresolved.length) throw new Error(`未解決 ${r.unresolved.length} 件`);
     if (r.invalidModes.length) throw new Error(`知らない mode: ${JSON.stringify(r.invalidModes)}`);
   }],
@@ -175,8 +175,8 @@ const LABEL = {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
-  const claimsDoc = readJSON('data/pr-claims.json');
-  const coverage = readJSON('data/automation-coverage.json');
+  const claimsDoc = readJSON(ROOT, 'data/pr-claims.json');
+  const coverage = readJSON(ROOT, 'data/automation-coverage.json');
   const { claims, unresolved, invalidModes } = evaluate(claimsDoc, coverage);
 
   if (argv.includes('--json')) {
