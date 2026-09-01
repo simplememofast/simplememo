@@ -81,9 +81,9 @@
       "name": "1記事あたり単価",
       "formula": "当月の実費 ÷ 当月の出荷数",
       "source_file": "scripts/autopilot-budget.mjs",
-      "version": 5,
-      "checksum": "6fb2a556b15556ca",
-      "changed_at": "2026-08-26",
+      "version": 6,
+      "checksum": "c9d8b343d91e2a37",
+      "changed_at": "2026-08-31",
       "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）",
       "history": [
         {
@@ -105,6 +105,11 @@
           "version": 5,
           "at": "2026-08-26",
           "why": "定義は変えていない。autopilot-budget.mjs の render に else を足しただけ（run_caps が null のとき「判定していない」と書く）。1出荷あたりの費用の計算式は同じ"
+        },
+        {
+          "version": 6,
+          "at": "2026-08-31",
+          "why": "定義は変えていない。分子（当月の実費合計）も分母（shipped）も触っていない。動いたのは同じファイルの別の値で、**残額の扱い**を変えたため —— 副系が測れていない月の remaining を null にし、cap - spent は remaining_upper_bound（残高ではなく上限）として出すようにした。あわせて spent_is_lower_bound を足している。単価が「測れている範囲の単価」であることは以前からで、それを兄弟の欄で明示しただけ"
         }
       ]
     },

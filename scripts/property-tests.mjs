@@ -201,11 +201,18 @@ const BUDGET_PROPERTIES = [
     },
   },
   {
-    name: '残額 = 上限 − 消化',
+    name: '公表する残額は 上限 − 消化（出せない月は null で、上限側が引き受ける）',
     why: '表示だけ別計算になっていると、止まる境界と見える境界がずれる',
+    // [2026-09-01] **不変条件を緩めたのではなく、対象を分けた。**
+    // 副系が測れていない月の `spent` は下限なので、`cap - spent` は残高ではなく
+    // 上限。そこを「残り」と呼ぶと、測っていないぶんが「まだ使える」に化ける。
+    // なので remaining は null にし、`remaining_upper_bound` が同じ算術を持つ。
+    // **元の狙い（表示が別計算にならないこと）はどちらの枝でも守る。**
     check: (ledger, month) => {
       const s = summarizeBudget(ledger, month);
-      return Math.abs(s.remaining - (s.cap - s.spent)) < 1e-9;
+      const eq = (a) => Math.abs(a - (s.cap - s.spent)) < 1e-9;
+      if (!eq(s.remaining_upper_bound)) return false;
+      return s.ccr_measured ? eq(s.remaining) : s.remaining === null;
     },
   },
 ];
