@@ -230,11 +230,12 @@ export function planAll(doc, obligations, { now = Date.now(), sentToday = 0 } = 
  * **検体が台帳の行数に寄りかかっていた。**見たいのは「向き先の居ない draft を
  * 落とすか」なので、行数に関係なく成り立つ形にする。
  */
-function withExtraAsk(real, mutate) {
+function withExtraAsk(real, base, mutate) {
   return broken(real, (d) => {
-    const base = d.asks[0];
-    assert(base, '実台帳に質問が1件も無い — **この検体が作れない**');
-    d.asks.push({ ...JSON.parse(JSON.stringify(base)), id: `${base.id}-検体` });
+    if (!Array.isArray(d.asks)) d.asks = [];
+    const src = d.asks[0] ?? base;
+    assert(src, '検体の元になる質問が無い');
+    d.asks.push({ ...JSON.parse(JSON.stringify(src)), id: `${src.id}-検体` });
     mutate(d.asks[d.asks.length - 1]);
   });
 }
@@ -244,9 +245,51 @@ function selftest() {
   const obligations = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
   const NOW = Date.parse('2026-08-28T00:00:00Z');
 
+  // [2026-09-01] **質問が0件になりうる。**社会保険の答えが出て最後の ask を消した日に、
+  // `asks[0]` を使う検体が12件まとめて壊れた。**前日に同じ形を半分だけ直していた**
+  // （`asks[1]` を `asks[0]` に寄せただけで、0件は想定していなかった）。
+  //
+  // **質問が無い状態は異常ではなく、この台帳の正常な終点。**聞くことが全部片づけば0件になる。
+  // だから検体の側が0件でも成り立つようにする —— **実データに1件も無ければ、検体を1件でっち上げる。**
+  //
+  // **id は実在する期限に合わせる。**この検査の規則は ask.id と deadlines[].id の
+  // 突き合わせで動くので、`-合成` のような接尾辞を付けると**規則がそもそも噛まない**
+  // （「確定済みの質問が残っていたら落とす」が空振りする）。
+  // 合成であることは `why_now` に書く。**この検体は実ファイルへ書き戻さない**ので、
+  // 台帳の質問と混ざる経路は無い。
+  //
+  // **検体は実データの状態に依存させない。**id を実在の期限（social-insurance）に
+  // 合わせた版を一度作ったが、**その期限が確定した瞬間に送信経路の検体が
+  // 「既に確定している」で止まり、12件が落ちた。**
+  // 実在の id を借りるかぎり、**台帳が動くたびに検体が壊れる。**
+  // だから**検体は自分の期限も持つ** —— 下の SYNTHETIC_OBLIGATION を obligations へ混ぜる。
+  const SYNTHETIC_ASK = {
+    id: '検体-未確定',
+    field: '税務',
+    status: 'draft',
+    why_now: '**検体。**実台帳に質問が0件のときだけ使う',
+    question: '検体の質問です。実際には送りません。',
+  };
+  const SYNTHETIC_OBLIGATION = {
+    id: '検体-未確定',
+    title: '検体の期限',
+    recurrence: 'annual',
+    next_due: null,
+    confirmed_by_owner: false,
+    unconfirmed_reason: '**検体。**自己テストのためだけに存在する',
+    what_breaks: '**検体。**壊れても何も止まらない',
+  };
+  // 実データの期限に**足す**（置き換えない）。他の検体は実データを見続ける。
+  obligations.deadlines = [...(obligations.deadlines ?? []), SYNTHETIC_OBLIGATION];
+  const withAsks = (d) => {
+    if (!Array.isArray(d.asks)) d.asks = [];
+    if (!d.asks.length) d.asks.push({ ...SYNTHETIC_ASK });
+    return d;
+  };
+
   /** 実データを使い、enabled だけ立てる（既定 false のままだと他の規則を試せない）。 */
   const on = (over = {}) => {
-    const d = JSON.parse(JSON.stringify(real));
+    const d = withAsks(JSON.parse(JSON.stringify(real)));
     d.policy.auto_send.enabled = true;
     d.policy.auto_send.dry_run = false;
     Object.assign(d.policy.auto_send, over);
@@ -268,14 +311,28 @@ function selftest() {
     // この行が守っていたのは「出荷している台帳のまま評価しても、実際には送らない」
     // ことで、その錠前は enabled から dry_run へ移っただけ。**性質のほうをピンし直す**
     // （フラグの値をピンすると、値が変わった日に検査ごと消える）。
-    ['**実台帳のまま評価しても send にはならない**（最後の錠前は dry_run）', () => {
+    // [2026-09-01] **質問が0件になると、この2件は主語を失う。**
+    // 「実台帳のまま」で見せたかったのは「送る材料が揃っていて、止めているのは
+    // dry_run だけ」という状態だが、質問が無ければ止めているのは材料の不在のほう。
+    //
+    // **どちらの状態でも黙らない形にした** —— 質問があれば従来どおり dry_run で
+    // 止まることを見る。0件なら「材料が無いので止まる」ことを見る。
+    // **そのうえで、錠前が1枚であること自体は検体で必ず確かめる。**
+    // （0件のときに skip すると、**送信経路の唯一の錠前を誰も見なくなる**）
+    ['**実台帳のまま評価しても send にはならない**（材料が無いか、dry_run で止まる）', () => {
       const r = ev(real);
       assert(r.decision !== 'send', `実台帳で send が出た: ${JSON.stringify(r)}`);
-      assert(r.decision === 'would_send' && /dry_run/.test(r.why),
-        `dry_run で止まっていない: ${JSON.stringify(r)}`);
+      if (real.asks?.length) {
+        assert(r.decision === 'would_send' && /dry_run/.test(r.why),
+          `質問が在るのに dry_run で止まっていない: ${JSON.stringify(r)}`);
+      } else {
+        assert(r.decision === 'hold' && /材料が無い/.test(r.why),
+          `質問が0件なのに材料の不在で止まっていない: ${JSON.stringify(r)}`);
+      }
     }],
-    ['**dry_run を倒すと、実台帳がそのまま send になる**（錠前が1枚であることを隠さない）', () => {
-      const d = JSON.parse(JSON.stringify(real));
+    ['**dry_run を倒すと send になる**（錠前が1枚であることを隠さない）', () => {
+      const d = withAsks(JSON.parse(JSON.stringify(real)));
+      d.policy.auto_send.enabled = true;
       d.policy.auto_send.dry_run = false;
       const r = ev(d);
       assert(r.decision === 'send', `dry_run を倒しても send にならない: ${JSON.stringify(r)}`);
@@ -372,19 +429,19 @@ function selftest() {
 
     // --- 台帳の検査 -------------------------------------------------------
     ['**アドレスを直接書いたら落とす**（このリポジトリは公開）', () => {
-      const p = validate(broken(real, (d) => {
+      const p = validate(broken(real, (d) => { withAsks(d);
         d.experts.find((e) => e.field === '税務').address_source = 'someone@example.com';
       }), { obligations });
       assert(p.some((x) => x.includes('第三者の個人情報を置かない')), p.join(' / '));
     }],
     ['依頼していないのに理由が無ければ落とす', () => {
-      const p = validate(broken(real, (d) => {
+      const p = validate(broken(real, (d) => { withAsks(d);
         delete d.experts.find((e) => !e.engaged).why_not;
       }), { obligations });
       assert(p.some((x) => x.includes('why_not が無い')), p.join(' / '));
     }],
     ['**experts に無い向き先の ask は落とす**', () => {
-      const p = validate(broken(real, (d) => { d.asks[0].field = '占い'; }), { obligations });
+      const p = validate(broken(real, (d) => { withAsks(d); d.asks[0].field = '占い'; }), { obligations });
       assert(p.some((x) => x.includes('居ない相手を向き先にしない')), p.join(' / '));
     }],
     // [2026-09-01] **`asks[1]` を前提にしていた。**質問が1件に減った日に
@@ -392,32 +449,39 @@ function selftest() {
     // **検査が壊れたのではなく、検体が台帳の行数に寄りかかっていた。**
     // 見たいのは「向き先の居ない draft を落とすか」なので、**検体を自分で作る。**
     ['**依頼していない相手を向き先にした draft を落とす**（この検査を作った当の穴）', () => {
-      const p = validate(withExtraAsk(real, (a) => { a.field = '社会保険・労務'; a.status = 'draft'; }),
+      const p = validate(withExtraAsk(real, SYNTHETIC_ASK, (a) => { a.field = '社会保険・労務'; a.status = 'draft'; }),
         { obligations });
       assert(p.some((x) => x.includes('届かない質問を送る側に置かない')), p.join(' / '));
     }],
     ['parked にすれば置いておける（向き先が決まるまで消さない）', () => {
-      const p = validate(withExtraAsk(real, (a) => { a.field = '社会保険・労務'; a.status = 'parked'; }),
+      const p = validate(withExtraAsk(real, SYNTHETIC_ASK, (a) => { a.field = '社会保険・労務'; a.status = 'parked'; }),
         { obligations });
       assert(p.some((x) => x.includes('届かない質問を送る側に置かない')) === false,
         `parked が落ちている: ${p.join(' / ')}`);
     }],
     ['知らない status は落ちる', () => {
-      const p = validate(broken(real, (d) => { d.asks[0].status = 'sent'; }), { obligations });
+      const p = validate(broken(real, (d) => { withAsks(d); d.asks[0].status = 'sent'; }), { obligations });
       assert(p.some((x) => x.includes('のどれでもない')), p.join(' / '));
     }],
+    // [2026-09-01] **`real` をそのまま渡していた。**質問が0件になった日に空振りした ——
+    // **落とすべき行が存在しないので、検査が正しくても何も出ない。**
+    // 「実データが偶然この形を持っている」に寄りかからない。
     ['確定済みの質問が残っていたら落とす', () => {
       const ob = JSON.parse(JSON.stringify(obligations));
-      ob.deadlines.find((x) => x.id === 'social-insurance').confirmed_by_owner = true;
-      const p = validate(real, { obligations: ob });
+      const d = withAsks(JSON.parse(JSON.stringify(real)));
+      const target = ob.deadlines.find((x) => x.id === d.asks[0].id);
+      assert(target, `質問「${d.asks[0].id}」に対応する期限が台帳に無い`);
+      target.confirmed_by_owner = true;
+      target.next_due = '2099-01-31';
+      const p = validate(d, { obligations: ob });
       assert(p.some((x) => x.includes('答えが出た質問を残さない')), p.join(' / '));
     }],
     ['上限が正の数でなければ落とす', () => {
-      const p = validate(broken(real, (d) => { d.policy.auto_send.daily_cap = 0; }), { obligations });
+      const p = validate(broken(real, (d) => { withAsks(d); d.policy.auto_send.daily_cap = 0; }), { obligations });
       assert(p.some((x) => x.includes('daily_cap')), p.join(' / '));
     }],
     ['set_by が無ければ落とす', () => {
-      const p = validate(broken(real, (d) => { delete d.experts[0].set_by; }), { obligations });
+      const p = validate(broken(real, (d) => { withAsks(d); delete d.experts[0].set_by; }), { obligations });
       assert(p.some((x) => x.includes('set_by が無い')), p.join(' / '));
     }],
 
