@@ -8,8 +8,16 @@
 """
 import json, os, re, subprocess, difflib
 
-ROOT = '/home/user/simplememo'
-SCRATCH = '/tmp/claude-0/-home-user/5cd0a29f-4e76-59db-ad01-7ecaf869dbfb/scratchpad'
+# 走らせ方: BLINDSPOT_SCRATCH=<ci-steps.json と final.out を置いた作業ディレクトリ> \
+#           python3 scripts/lib/blindspot-silent.py
+# blindspot-trace.cjs が TRACE_OUT / TRACE_ROOT を env で受けるのと同じ流儀。
+# 以前はあるセッションの scratchpad 絶対パスが焼き込まれていて、その場所が
+# 消えた時点で import すら通らなくなっていた。
+ROOT = os.environ.get('BLINDSPOT_ROOT') \
+    or os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+SCRATCH = os.environ.get('BLINDSPOT_SCRATCH')
+if not SCRATCH:
+    raise SystemExit('BLINDSPOT_SCRATCH（ci-steps.json / final.out を置いた作業ディレクトリ）を env で指定する')
 STEPS = json.load(open(f'{SCRATCH}/ci-steps.json', encoding='utf-8'))
 
 PAIRS = []
