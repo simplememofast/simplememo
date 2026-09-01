@@ -69,6 +69,34 @@ const SCENARIOS = [
     'PR #521 と #522 の二重着手を受けて入れた占有。'
     + '**弾かれること自体がこの仕組みの出力**であって障害ではない'],
 
+  // --- 死んだ占有（2026-08-29 に実際に起きた・ap-20260829-ccr0920） -------
+  // **占有は守るが、死んだ占有は守らない。**この2つを分けないと、
+  // claim を取った側が死んだ日は誰も走らないまま緑になる。
+  ['死んだ占有: claimだけ・90分以上動いていない → 引き継ぐ',
+    { route: 'actions', branchClaimed: true, claimHasWork: false, claimAgeMinutes: 162 },
+    CODES.RUN_TAKEOVER,
+    '**実績。**08-29 に ccr-0920 が claim だけ取って死に、12:03 JST の主系は'
+    + 'ブランチの存在だけを見て3秒で success を返した（run 33230445898）。'
+    + 'その日の出荷はゼロ。162分は当時の実際の経過時間（09:21→12:03）'],
+
+  ['死んだ占有: 作業のある占有は追い越さない',
+    { route: 'ccr-0920', branchClaimed: true, claimHasWork: true, claimAgeMinutes: 600 },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '**差分やPRがあるなら、それは死んだ占有ではなく成果物。**古くても追い越さない '
+    + '— 追い越せる形にすると、出荷済みの日に二重で書くことになる'],
+
+  ['死んだ占有: 90分未満は待つ',
+    { route: 'ccr-0830', branchClaimed: true, claimHasWork: false, claimAgeMinutes: 20 },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '出荷まで走り切った回の実測は18〜28分。**その最中はブランチが claim だけの状態**'
+    + 'なので、短い閾値にすると作業中の経路を追い越す'],
+
+  ['死んだ占有: 読めなかったときは追い越さない',
+    { route: 'actions', branchClaimed: true, claimHasWork: null, claimAgeMinutes: null },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '**「差分が無い」と「差分を読めなかった」は別物。**混ぜると、APIが読めない日に'
+    + '全部の占有が死んで見える'],
+
   ['二重防止: 当日作成のPRがある',
     { route: 'ccr-0920', prTodayExists: true }, CODES.SKIP_PR_TODAY,
     'ブランチ占有の前に別経路がPRまで進んでいる場合'],

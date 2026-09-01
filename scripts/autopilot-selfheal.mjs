@@ -53,8 +53,31 @@ const FAILED = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
  * 「あとで同じ経路が成功したから直った」とは扱わない —— 主系は
  * 秘密鍵未設定で毎日 success を返していた前例があり、
  * 「成功した」を回復の証拠にすると壊れたまま緑に見える。
+ *
+ * 【2026-09-02追加: 修理主体が人しかいない故障を、修理対象に数えない】
+ * `data/escalation-rules.json` が `who` で修理主体を宣言している。
+ * `self_then_owner` は「まず自分で直す」、**`owner` は「セッション側に打つ手が
+ * 1つも無い」**（usage_limit の規則がそう明記している: 待つか、枠を上げるか、
+ * 1回あたりの入力量を減らすかで、後ろ2つは人の判断）。
+ *
+ * それでも `who: owner` の故障を修理対象として数えていたため、**直せないものを
+ * 毎日直そうとする**状態になっていた —— まさにこのファイル冒頭が
+ * 「一番たちの悪い無限ループ」と呼んでいるもの。しかも usage_limit の規則には
+ * 「連続するなら repair_limit ではなくこちらで拾う」と書いてあり、
+ * repair_of を書いて数を進めるのは**規則が禁じている経路**だった
+ * （3回で --contain が経路を止め、解除は人だけ ＝ 時間で自然に戻る停止を
+ * 人待ちの停止に変えてしまう）。
+ *
+ * **消すのではなく、行き先を変える。**owner_routed は毎回そのまま表示され、
+ * その日の owner_requests に載る。数えるのをやめるのはレーンFの対象としてだけ。
+ *
+ * **これが「直さない口実」に使われないための歯止め:**
+ * `data/escalation-rules.json` は self_repair.may_modify に**入っていない**。
+ * レーンFは規則そのものを書き換えられないので、`who` を owner に書き換えて
+ * 修理から逃げる経路が無い。規則が読めなかった回は全件が修理対象に戻る
+ * （安全側は「直そうとする」ほう）。
  */
-export function analyze(runsDoc, matrix) {
+export function analyze(runsDoc, matrix, escalationRules = []) {
   const runs = runsDoc.runs;
   const repaired = new Set(runs.flatMap((r) => r.repair_of || []));
   const failures = runs.filter((r) => FAILED.has(r.outcome));
@@ -77,6 +100,7 @@ export function analyze(runsDoc, matrix) {
   const targets = unrepaired.map((r) => {
     const cls = r.failure_class || 'unknown';
     const tried = repairAttempts[cls] || 0;
+    const rule = escalationRules.find((x) => x.trigger === cls);
     return {
       run_id: r.run_id, date_jst: r.date_jst, route: r.route,
       outcome: r.outcome, failure_class: cls,
@@ -84,15 +108,20 @@ export function analyze(runsDoc, matrix) {
       repair_attempts_for_class: tried,
       // 上限に達した種別は**直さない**。人に上げる。
       escalate: tried >= limit,
+      // **修理主体が人しかいない種別は、そもそも修理対象ではない。**
+      owner_routed: rule?.who === 'owner',
+      escalation: rule ? { who: rule.who, channel: rule.channel, within_hours: rule.within_hours } : null,
     };
   });
 
-  const actionable = targets.filter((t) => !t.escalate);
+  const actionable = targets.filter((t) => !t.escalate && !t.owner_routed);
   return {
     lane_f_required: actionable.length > 0,
     unrepaired_count: unrepaired.length,
     targets,
     escalate: targets.filter((t) => t.escalate),
+    // **セッション側に打つ手が無い故障。**修理待ちではなく引き渡し待ち。
+    owner_routed: targets.filter((t) => t.owner_routed && !t.escalate),
     limit,
     may_modify: sr.may_modify || [],
     must_not: sr.must_not || [],
@@ -150,13 +179,63 @@ const SCENARIOS = ledgerScenarios(
   SELFTEST_BREAKAGES,
 );
 
+// ── 修理主体の振り分け（2026-09-02追加） ──────────────────────
+// **「直せないものを毎日直そうとする」を止める仕組みが、
+//   「直せるものを直さない口実」に化けないこと**をここで固定する。
+{
+  const MATRIX = { self_repair: { may_modify: ['x'], must_not: ['y'], stop_after_failed_repairs: 3 } };
+  const RULES = [
+    { trigger: 'usage_limit', who: 'owner', channel: 'daily_report', within_hours: 24 },
+    { trigger: 'claim_without_completion', who: 'self_then_owner', channel: 'gh_issue', within_hours: 24 },
+  ];
+  const doc = (cls) => ({ runs: [{
+    run_id: 'ap-x', date_jst: '2026-09-01', route: 'actions', attempted: true,
+    outcome: 'failed', failure_class: cls, source: 'test',
+  }] });
+
+  SCENARIOS.push(
+    ['who=owner の故障はレーンFを起動しない（打つ手が無いものを毎日直そうとしない）', () => {
+      const a = analyze(doc('usage_limit'), MATRIX, RULES);
+      assert(a.lane_f_required === false, 'usage_limit でレーンFが起動した');
+      assert(a.owner_routed.length === 1, '人へ渡す欄に出ていない');
+    }],
+    ['who=owner でも**表示と件数からは消えない**（消えると誰も渡さない）', () => {
+      const a = analyze(doc('usage_limit'), MATRIX, RULES);
+      assert(a.unrepaired_count === 1, '未修理の件数から消えた');
+      assert(a.targets.length === 1, '一覧から消えた');
+    }],
+    ['who=self_then_owner の故障は今までどおり修理対象', () => {
+      const a = analyze(doc('claim_without_completion'), MATRIX, RULES);
+      assert(a.lane_f_required === true, '修理対象がレーンFを起動しなかった');
+      assert(a.owner_routed.length === 0, '修理できる故障が人へ渡された');
+    }],
+    ['規則が読めなかった回は全件が修理対象に戻る（安全側は「直そうとする」）', () => {
+      const a = analyze(doc('usage_limit'), MATRIX, []);
+      assert(a.lane_f_required === true, '規則が無いのにレーンFが起動しなかった');
+    }],
+    ['**規則そのものは自己修復で書き換えられない**（who を owner にして逃げられない）', () => {
+      const matrix = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
+      const may = matrix.self_repair?.may_modify || [];
+      assert(!may.includes('data/escalation-rules.json'),
+        'escalation-rules.json が may_modify に入っている — 修理から逃げる経路ができる');
+    }],
+  );
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const runsDoc = JSON.parse(fs.readFileSync(RUNS_PATH, 'utf8'));
   const matrix = JSON.parse(fs.readFileSync(MATRIX_PATH, 'utf8'));
   const problems = validate(runsDoc, matrix);
-  const a = analyze(runsDoc, matrix);
+  // **読めなかった回は規則が無いものとして扱う** = 全件が修理対象に戻る。
+  // 安全側は「直そうとする」ほうで、「読めなかったから直さない」ではない。
+  let escalationRules = [];
+  try {
+    escalationRules = JSON.parse(
+      fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules || [];
+  } catch { escalationRules = []; }
+  const a = analyze(runsDoc, matrix, escalationRules);
 
   if (process.argv.includes('--contain')) {
     // 上限に達した故障の経路を止める。**表示ではなく状態を変える唯一の経路。**
@@ -200,16 +279,21 @@ if (isMain) {
 
   if (a.lane_f_required) {
     console.log('レーンF（自己修復）: **今日の最優先アクションはこれ**');
-  } else if (a.escalate.length) {
+  } else if (a.escalate.length || a.owner_routed.length) {
     console.log('レーンF（自己修復）: 対象なし（ただし人に上げるべき故障がある）');
   } else {
     console.log('レーンF（自己修復）: 未修理の故障なし。通常のレーンA〜Eへ');
   }
   console.log('');
   for (const t of a.targets) {
-    const mark = t.escalate ? '⛔ 人に上げる' : '🔧 修理対象';
+    const mark = t.escalate ? '⛔ 人に上げる' : t.owner_routed ? '🤝 人へ渡す' : '🔧 修理対象';
     console.log(`  ${mark}  ${t.run_id}  [${t.failure_class}]  ${t.outcome}`);
     if (t.failure_reason) console.log(`      ${t.failure_reason}`);
+    if (t.owner_routed && !t.escalate) {
+      console.log(`      **セッション側に打つ手が無い種別**（escalation-rules: who=owner /`
+        + ` ${t.escalation?.channel} / ${t.escalation?.within_hours}時間以内）。`);
+      console.log('      修理対象ではないので repair_of を書かない。**その日の owner_requests に載せる。**');
+    }
     if (t.escalate) {
       console.log(`      同種の故障を ${t.repair_attempts_for_class} 回修理して再発している（上限 ${a.limit}）。`);
       console.log('      **これ以上直さない。** 直せないものを毎日直そうとするのが一番たちの悪いループ。');
