@@ -286,7 +286,8 @@
     "scripts/autopilot-gate.mjs",
     "scripts/check-asc-landed.mjs",
     "scripts/generate-qr-codes.mjs",
-    "scripts/property-tests.mjs"
+    "scripts/property-tests.mjs",
+    "scripts/should-snapshot.mjs"
   ],
   "$no_ledger_binding": [
     {
@@ -299,7 +300,8 @@
       "scripts/generate-qr-codes.mjs": "npm の qrcode/jsqr で画像を作る。台帳を読まない",
       "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
       "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
-      "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く"
+      "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
+      "scripts/should-snapshot.mjs": "**JSONの台帳を読まない。**読むのは `growth/data/gsc/` の**ディレクトリ名そのもの**（`YYYY-MM-DD` が前回のスナップショットの日付）。別に管理表を持つと、管理表だけ進んで実体が無い状態を作れてしまうので、成果物の名前を正にしてある。判定は純関数 `decide()` に寄せて自己テスト14件で固定した。**「無いと消える」側の形は持っていない** —— ラベルが読めない回は`snapshot: true`（取る）へ倒してあり、**空のときに規則が消えるのではなく発火する。**"
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
   ],
