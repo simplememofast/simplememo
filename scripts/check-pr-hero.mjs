@@ -15,9 +15,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { LEAD_MAX_GLYPHS, splitHeadline, buildHTML, WIDTH, HEIGHT } from './pr-hero-layout.mjs';
 import { evaluate } from './check-pr-claims.mjs';
+import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 // この検査が守っているのは「裏の取れていない主張で完成品を作らせない」仕組み。
@@ -52,7 +52,7 @@ const SCENARIOS = [
     if (rest.length > 0) throw new Error('「」が無いのに rest が埋まっている');
   }],
   ['実データが検査を通る', () => {
-    const doc = readJSON('data/pr-claims.json');
+    const doc = readJSON(ROOT, 'data/pr-claims.json');
     const { lead, rest } = splitHeadline(doc.headline);
     if (lead.length + 2 > LEAD_MAX_GLYPHS) throw new Error('実データの見出しが長い');
     if (!rest.length) throw new Error('実データの rest が空');
@@ -69,8 +69,8 @@ if (process.argv.includes('--selftest')) {
   process.exit(failed === 0 ? 0 : 1);
 }
 
-const claimsDoc = readJSON('data/pr-claims.json');
-const coverage = readJSON('data/automation-coverage.json');
+const claimsDoc = readJSON(ROOT, 'data/pr-claims.json');
+const coverage = readJSON(ROOT, 'data/automation-coverage.json');
 let failed = 0;
 const check = (ok, msg) => { console.log(`  ${ok ? 'OK  ' : 'NG  '} ${msg}`); if (!ok) failed++; };
 

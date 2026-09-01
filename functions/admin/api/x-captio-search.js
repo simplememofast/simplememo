@@ -19,7 +19,7 @@
 // フロント側で localStorage に結果をマージしつつ「次のページを取得」で
 // 1 コールずつ叩く想定。サーバ側ではページ自動連結しない（API 課金対策）。
 
-import { safeJson, json } from './_shared.js';
+import { safeJson, json, rateLimitOf, USER_AGENT } from './_shared.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -67,7 +67,7 @@ export async function onRequest(context) {
     const res = await fetch(apiUrl, {
       headers: {
         'Authorization': 'Bearer ' + env.X_EN_BEARER_TOKEN,
-        'User-Agent': 'SimpleMemoAdmin/1.0',
+        'User-Agent': USER_AGENT,
       },
     });
     const body = await safeJson(res);
@@ -109,11 +109,7 @@ export async function onRequest(context) {
       next_token: (body && body.meta && body.meta.next_token) || null,
       newest_id: (body && body.meta && body.meta.newest_id) || null,
       oldest_id: (body && body.meta && body.meta.oldest_id) || null,
-      rateLimit: {
-        limit: res.headers.get('x-rate-limit-limit'),
-        remaining: res.headers.get('x-rate-limit-remaining'),
-        reset: res.headers.get('x-rate-limit-reset'),
-      },
+      rateLimit: rateLimitOf(res),
       errors: (body && (body.errors || body.error)) || null,
       title: (body && body.title) || null,
       detail: (body && body.detail) || null,

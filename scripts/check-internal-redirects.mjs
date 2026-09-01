@@ -34,31 +34,23 @@ import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { loadEdgeMiddleware, edgeResult } from "./lib/edge-middleware.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://simplememofast.com";
 const require = createRequire(import.meta.url);
 const { collectHtmlFiles } = require("./lib/site-files");
 
-const src = readFileSync(path.join(ROOT, "functions/_middleware.js"), "utf8");
-const { onRequest } = await import(
-  "data:text/javascript," + encodeURIComponent(src)
-);
-
-const PASSTHROUGH = Symbol("passthrough");
+// data: URL 経由でロードする理由は lib/edge-middleware.mjs 参照
+// （package.json が無いので .js の bare import は CJS 扱いになる）。
+const onRequest = await loadEdgeMiddleware(ROOT);
 
 /** What the edge would do with this path, before static assets are consulted. */
 async function edge(urlPath) {
-  const res = await onRequest({
-    request: new Request(ORIGIN + urlPath),
-    next: async () => PASSTHROUGH,
-  });
-  if (res === PASSTHROUGH) return null;
-  if (res.status >= 300 && res.status < 400) {
-    const loc = res.headers.get("location");
-    return `${res.status} → ${loc.startsWith(ORIGIN) ? loc.slice(ORIGIN.length) : loc}`;
-  }
-  return `${res.status}`;
+  const r = await edgeResult(onRequest, ORIGIN + urlPath, ORIGIN);
+  if (r.kind === "pass") return null;
+  if (r.kind === "redirect") return `${r.status} → ${r.to}`;
+  return `${r.status}`;
 }
 
 const isFile = (p) => existsSync(p) && statSync(p).isFile();

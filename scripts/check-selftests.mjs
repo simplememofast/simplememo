@@ -215,7 +215,7 @@ function selftest() {
   return failed;
 }
 
-const isMain = process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]));
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const argv = process.argv.slice(2);
   if (argv.includes('--selftest')) process.exit(selftest() === 0 ? 0 : 1);

@@ -32,7 +32,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';
 import { readLedger, requireShape } from './lib/read-ledger.mjs';
-import { mask } from './check-guard-shapes.mjs';
+import { mask, sources } from './check-guard-shapes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/generators.json');
@@ -71,16 +71,6 @@ export function writersIn(rawSrc) {
     if (WRITE_FLAGS.includes(flag)) flags.add(flag);
   }
   return [...flags].sort();
-}
-
-function sources() {
-  const out = [];
-  for (const dir of ['scripts', 'growth/scripts']) {
-    const d = path.join(ROOT, dir);
-    if (!fs.existsSync(d)) continue;
-    for (const f of fs.readdirSync(d)) if (f.endsWith('.mjs')) out.push(`${dir}/${f}`);
-  }
-  return out.sort();
 }
 
 export function scanWriters() {

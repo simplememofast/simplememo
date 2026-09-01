@@ -458,12 +458,16 @@ function checkEdgeRules() {
 
   const mw = fs.readFileSync(mwPath, 'utf8');
   const retired = new Map();
-  const retiredBlock = mw.match(/const RETIRED = \{([\s\S]*?)\n {2}\};/);
+  // RETIRED/GONE はモジュールスコープの宣言（インデント無しで閉じる）。
+  // 閉じ括弧は行頭アンカー（^）で取る: lazy な [\s\S]*? だけだと、将来
+  // 閉じ括弧のインデントが変わったときに次の行頭 `};` まで黙って
+  // 読み過ぎ、無関係のリテラルを retired として拾ってしまう。
+  const retiredBlock = mw.match(/^const RETIRED = \{([\s\S]*?)^\};/m);
   if (retiredBlock) {
     for (const m of retiredBlock[1].matchAll(/"([^"]+)":\s*"([^"]+)"/g)) retired.set(m[1], m[2]);
   }
   const gone = new Set();
-  const goneBlock = mw.match(/const GONE = new Set\(\[([\s\S]*?)\n {2}\]\);/);
+  const goneBlock = mw.match(/^const GONE = new Set\(\[([\s\S]*?)^\]\);/m);
   if (goneBlock) {
     for (const m of goneBlock[1].matchAll(/"([^"]+)"/g)) gone.add(m[1]);
   }

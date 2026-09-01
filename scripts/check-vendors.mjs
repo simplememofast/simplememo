@@ -19,9 +19,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { readLedger, readLedgerScenarios } from './lib/read-ledger.mjs';
+import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 export const DATA_LEVELS = ['none', 'pseudonymous', 'personal'];
 /** 金銭の動き方。none も明示させる（書いていない＝考えていない、を許さない）。 */
@@ -98,7 +98,7 @@ const SELFTEST_BREAKAGES = [
   ['**代替が無いのに理由が書いていない**のは落ちる', (d) => { d.vendors[0].fallback = null; delete d.vendors[0].fallback_note; }],
 ];
 const SCENARIOS = ledgerScenarios(
-  () => readJSON('data/vendor-register.json'),
+  () => readJSON(ROOT, 'data/vendor-register.json'),
   (d) => audit(d).errors,
   SELFTEST_BREAKAGES,
 );
@@ -111,7 +111,7 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
-  const doc = readJSON('data/vendor-register.json');
+  const doc = readJSON(ROOT, 'data/vendor-register.json');
   const { errors, unreviewed, noFallback, money } = audit(doc);
 
   if (argv.includes('--json')) {
