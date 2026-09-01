@@ -2414,11 +2414,99 @@ force しない。積むこと自体が後発への通知になる（claim だ�
 - `scripts/autopilot-gate.mjs`: `takeover_stale_claim` と `STALE_CLAIM_MINUTES = 120`。
   引き継ぎ判定は冪等チェック（出荷済み・当日PR・主系稼働中）の**後ろ**に置いた。
   前に置くと、別経路が既に出した日にもう1本出る
-- `.github/workflows/obsidian-autopilot.yml`: Gate の bash に同じ3条件。
-  checkout 前なので `gh` は使えず、compare API を curl + `python3 -c` で読む
+- `.github/workflows/obsidian-autopilot.yml`: Gate の bash に同じ3条件 —— **書いたが、
+  この経路では出荷できなかった**（次節）
 - `scripts/autopilot-drill.mjs`: 5シナリオ追加（引き継ぐ／仕事が載っている／猶予内／
   測れない／出荷済み）。gate の16コード全被覆
 - `docs/obsidian/AUTOPILOT_RUNBOOK.md` §0-2: 副系が読む手順としても書いた
+
+### 出せなかった1つ — 主系は自分のワークフローを push できない
+
+**判定の実体は主系 Gate の bash のほうで、そこだけ出荷できていない。**
+書き上げて push した時点で GitHub に弾かれた:
+
+    ! [remote rejected] ... (refusing to allow a Personal Access Token to
+      create or update workflow `.github/workflows/obsidian-autopilot.yml`
+      without `workflow` scope)
+
+`data/authority-matrix.json` の `self_repair.unattended_cannot_push` が
+2026-08-25 に書いたとおりで、**今日この経路で実測して同じ結論になった。**
+scope を足せば消える食い違いだが、**足さないと決めてある** —— 足すと無人の主系が
+自分のワークフロー定義を（`permissions:` を含めて）書き換えて push できる。
+must_not の「自分の権限を広げる変更」を実際に強制しているのは、この remote reject そのもの。
+
+適用は push できる副系CCRセッションへ渡す（`act-gate-takeover-bash`・閉じ条件は
+このファイルに `takeover=true` が入ること）。**それまでは、主系だけに 08-29 と同じ穴が残る**
+——主系は claim だけで死んだブランチを見ると従来どおり3秒でスキップする。
+`autopilot-gate.mjs` 側（参照実装）と Runbook §0-2（副系が読む手順）は本日入っているので、
+**セッションとして動く経路は今日から引き継げる。**
+
+差分の全文（そのまま `git apply` できる）:
+
+```diff
+diff --git a/.github/workflows/obsidian-autopilot.yml b/.github/workflows/obsidian-autopilot.yml
+index 5d3af113..2c05ad3d 100644
+--- a/.github/workflows/obsidian-autopilot.yml
++++ b/.github/workflows/obsidian-autopilot.yml
+@@ -55,6 +55,8 @@ jobs:
+           HAS_CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+           HAS_ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+           FORCE: ${{ inputs.force == true }}
++          # 死んだ占有の判定に compare API を読む。checkout 前なので gh は使えない。
++          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+         run: |
+           today="$(TZ=Asia/Tokyo date +%Y%m%d)"
+           today_dash="$(TZ=Asia/Tokyo date +%Y-%m-%d)"
+@@ -69,9 +71,36 @@ jobs:
+ 
+           if [ "$FORCE" != "true" ]; then
+             if git ls-remote --exit-code "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/claude/obsidian-auto-${today}" >/dev/null 2>&1; then
+-              echo "run=false" >> "$GITHUB_OUTPUT"
+-              echo "::notice title=Obsidian Autopilot::claude/obsidian-auto-${today} が既に存在（進行中/実行済み）のためスキップ。"
+-              exit 0
++              # 【2026-09-01】**「ブランチが在る」と「取った経路が生きている」は別物。**
++              #
++              # 2026-08-29、副系(09:20)が当日ロックを claim だけ取って記事もPRも
++              # 作らずに終わった。ここが存在だけを見ていたため主系も3秒でスキップし、
++              # **その日は誰も走らないまま全経路が緑になった**（ap-20260829-ccr0920）。
++              # 主系の行は skipped_gate として残るので、見た目は「重複でスキップした
++              # 正常な日」と区別がつかない。
++              #
++              # 死んだ占有だけを引き継ぐ。判定は autopilot-gate.mjs の
++              # takeover_stale_claim と同じ3条件で、**どれか1つでも欠けたら従来どおり
++              # スキップする**（ここでの誤りは、生きている経路を横から奪うこと）:
++              #   ① claim 以外の仕事が載っていない（ahead_by <= 1）
++              #   ② 最新コミットから 120 分以上動いていない（主系の90分上限より長く取る）
++              #   ③ ①②が実際に測れた（**「測れなかった」は「古い」ではない**）
++              cmp_json="$(curl -sS --max-time 20 -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/main...claude/obsidian-auto-${today}" || echo '')"
++              ahead="$(printf '%s' "$cmp_json" | python3 -c 'import json,sys; print(json.load(sys.stdin)["ahead_by"])' 2>/dev/null || echo '')"
++              newest="$(printf '%s' "$cmp_json" | python3 -c 'import json,sys; print(max(c["commit"]["committer"]["date"] for c in json.load(sys.stdin)["commits"]))' 2>/dev/null || echo '')"
++              newest_epoch="$(date -u -d "$newest" +%s 2>/dev/null || echo '')"
++              age_min=''
++              if [ -n "$newest_epoch" ]; then age_min="$(( ( $(date -u +%s) - newest_epoch ) / 60 ))"; fi
++
++              # **測れなかったら引き継がない。**空欄は「古い」ではなく「分からない」。
++              if [ -n "$ahead" ] && [ -n "$age_min" ] && [ "$ahead" -le 1 ] && [ "$age_min" -ge 120 ]; then
++                echo "takeover=true" >> "$GITHUB_OUTPUT"
++                echo "::warning title=Obsidian Autopilot::claude/obsidian-auto-${today} は claim だけ（ahead=${ahead}）で ${age_min} 分動いていない。**占有した経路は死んだものとして引き継ぐ。**同じブランチに引き継ぎコミットを積んでから作業すること（切り直さない・force しない）。"
++              else
++                echo "run=false" >> "$GITHUB_OUTPUT"
++                echo "::notice title=Obsidian Autopilot::claude/obsidian-auto-${today} が既に存在（進行中/実行済み。ahead=${ahead:-不明} / 経過=${age_min:-不明}分）のためスキップ。"
++                exit 0
++              fi
+             fi
+             status_date="$(curl -sS --max-time 20 "https://simplememofast.com/data/autopilot-status.json?d=${today}" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("date_jst",""))' 2>/dev/null || echo "")"
+             if [ "$status_date" = "$today_dash" ]; then
+@@ -324,7 +353,7 @@ jobs:
+           prompt: |
+             simplememofast.com のObsidian情報ハブを育てる毎日の定期実行（GitHub Actions版）です。リポジトリはチェックアウト済み・カレントディレクトリがリポジトリルートです。次を厳守して1イテレーションだけ実行してください。
+ 
+-            0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。
++            0. 【冪等性・最初に必ず】FORCE_RUN=${{ inputs.force == true }} 。FORCE_RUN が true なら本チェックは省略して必ず実行する（手動の検証実行。当日分のstatus JSONは上書きしてよい）。false の場合: `git ls-remote origin refs/heads/claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)` が存在する、または https://simplememofast.com/data/autopilot-status.json の date_jst が当日（JST）なら、本日分は別経路で実行済み。何もせず終了すること。ただし TAKEOVER=${{ steps.gate.outputs.takeover == 'true' }} が true のときは、**当日ブランチは claim だけで120分以上動いていない死んだ占有**なので終了しない —— Runbook §0-2「死んだ占有の引き継ぎ」に従い、そのブランチに引き継ぎコミットを積んでから作業する（切り直さない・force しない）。
+             1. `docs/obsidian/AUTOPILOT_RUNBOOK.md` を読む。以降の判断・実装・出荷はすべてRunbookに従う（このプロンプトより詳しい指示はRunbookが優先）。
+             2. `tail -n 200 docs/obsidian/AUTOPILOT_LOG.md` で前回までの記録を確認する。**全文は読まないこと**（77,000文字あり毎日+5,000増える。入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因）。**保留事項は LOG からではなく `data/autopilot-actions-report.json` を見る**（型付きで、閉じ条件が通れば消える。散文の履歴から拾うと解消済みが混ざる）。**台帳そのもの `data/autopilot-actions.json` は読まないこと** — 閉じた行が消えずに貯まるので、LOG と同じく増え続ける（レポート側は open と当日クローズだけなので未処理の件数でしか増えない）。レポートの `as_of_jst` が当日でない場合だけ、09:00 JST のアクチュエータがまだ走っていないということなので台帳側を見てよい。Runbook §0の「読むもの」も、全文を読むものと一部だけ読むものを分けてある——そちらの指定に従うこと。
+             2-1. 【レーンF・A〜Eより先】`node scripts/autopilot-selfheal.mjs` を実行する。未修理の故障が出たら、**その日の最優先アクションは基盤の修理**で、記事は書かない。触ってよいファイルとやってはいけない変更はスクリプトが出力する（検証を弱めない・自分の権限を広げない。これはCIが実際に検出する）。直したら `data/autopilot-runs.json` の自分の行に `repair_of` を書くこと——書かない限り翌日も未修理として上がってくる。⛔ が出ている対象は直さず `owner_requests` に上げる。
+```
 
 ### すでに直っていた2件 — 記録する口が無かった
 
