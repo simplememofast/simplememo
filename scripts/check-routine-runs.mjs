@@ -235,10 +235,21 @@ function selftest() {
     // 「副系の写しの取り直し」が意図的に止まっていたのが記録されていなかった。
     // **数を固定しているのは意図** —— 黙って増えたときに気づくため。
     // 動いたときは、増えた理由を open_findings / intentional_stops に書いてから直す。
-    ['**実データで8件が健全でない**（緑＝異常が無い、ではない）', () => {
+    //
+    // [2026-09-01] 8/4/4 → 6/2/4。**今度は減った。**使用量上限（週次）が
+    // 2026-08-31T23:00Z にリセットされ、枠切れで落ちていた2本が戻った:
+    //
+    //   BigQuery 週次      08-31T23:45:53Z 発火 → 23:55:21Z SUCCEEDED
+    //   Obsidian 再試行 v3 09-01T00:20:49Z 発火 → 00:21:59Z SUCCEEDED
+    //
+    // BigQuery の行は「**その回が SUCCEEDED になるまで残す**」と自分で書いて
+    // あった条件を満たしたので消し、`open_budget` を同じPRで 4 → 2 に下げた。
+    // **残る2本は枠とは別**（obsidian-community は次の発火が 09-01T11:01Z、
+    // SEO Weekly は週次なので 09-07）。まだ落ちたままなので消していない。
+    ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
-      assert(unhealthy.length === 8, `健全でないのは8件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 4, '未対応は4件（週次2本＋Obsidian系2本）');
+      assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
+      assert(real.open_findings.length === 2, '未対応は2件（obsidian-community・SEO Weekly）');
       assert(real.intentional_stops.length === 4,
         '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],

@@ -87,12 +87,12 @@
     "【2026-08-31 訂正】上の 08-24 の記録は `resetsAt: 1788217200 = 2026-08-24T23:00Z（月曜）` と書いているが、**この2つは同じ時刻ではない。**1788217200 は 2026-08-31T23:00Z で、2026-08-24T23:00Z は 1787612400（ちょうど7日＝604800秒ちがう）。epoch を写し間違えたか、換算を1週ずらしたかのどちらかで、**どちらが起きたかはこの記録からは決まらない。**",
     "**ただし結論（リセットは月曜 23:00 UTC）は独立に裏づけられた** —— 2026-08-31（月）00:03Z と 00:20Z に拒否された3本の `resetsAt` が**同日 23:00Z** を指していた。同じ週の中で「拒否 → その日の23:00にリセット」が2回別々の月曜で観測できたので、`45 23 * * 1` へ移した判断は動かさない。"
   ],
-  "observed_at": "2026-08-31T23:03:28Z",
+  "observed_at": "2026-09-01T00:29:41Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 4,
+  "open_budget": 2,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
     {
@@ -100,18 +100,6 @@
       "what": "failed",
       "found_at": "2026-08-28",
       "why": "**SEO Weekly が 2026-08-24 に FAILED。原因は確定した** —— 同じ月曜0時台に落ちた『マーケデータ週次』のセッションに `rate_limit_info: {seven_day, rejected}` と \"You've hit your weekly limit\" がそのまま残っていた（$comment 参照）。**残っているのは対処のほう** —— このRoutineは `created_via: http_api` で、エージェントからは cron を変更できない（update_trigger が「Agents can only update routines they created」で拒否）。**オーナーが `0 0 * * 1` → `30 23 * * 1` に変える**（週次枠のリセット直後）。なお**この週の作業自体は落ちていない**: セッション cse_01DVcNLCyxfhTW3yfxPibBa6 は拒否のあと 08-25 に再開されて branch `claude/seo-serp-weekly-2026-08-25` を出しており、トリガの FAILED だけが残っている"
-    },
-    {
-      "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
-      "what": "failed",
-      "found_at": "2026-08-28",
-      "why": "**『SimpleMemo マーケデータ 週次スナップショット』が 2026-08-24 に FAILED。原因の一次証拠はこのセッション**（cse_01PEHaBP24CJJU57oMQxQnpd）にある —— 週次利用枠の拒否（$comment に文言と数値を引いてある）。**cron は `0 0 * * 1` → `45 23 * * 1` へ移した**（枠のリセット 23:00 UTC の45分後）。次の発火は 2026-08-31T23:45Z。**この行は、その回が SUCCEEDED になるまで残す** —— 移しただけでは直ったことにならない。SEO Weekly と別枠にするため15分ずらしてある"
-    },
-    {
-      "id": "trig_01ESF9AHax6buS9X1pdFv657",
-      "what": "failed",
-      "found_at": "2026-08-31",
-      "why": "**Obsidianオートパイロット再試行 v3（09:20 JST） が 2026-08-31 に FAILED。**発火 2026-08-31T00:20:33Z → 終了 2026-08-31T00:20:46Z（**13秒**）。**原因は特定できていない。**\n\n**2件は同じ形をしている。**どちらも 2026-08-31 に FAILED で、**発火から10数秒で終わっている**（13秒 / 11秒）。長い処理が途中で落ちたのではなく、**始まってすぐ落ちている。**どちらも Obsidian 系で、どちらも `enabled: true` のまま次回発火が予定されている。\n\n**共通原因を疑う形だが、確かめていない。**`ended_reason` も `suspension_reason` も空で、**失敗の理由は list_triggers の応答からは分からない。**セッションのログは `session_id` にあるが、このセッションからは読めない。\n\n**2026-08-28 の写しでは、この2件は健全だった。**つまり 08-28 と 08-31 のあいだに壊れた。\n\n---\n\n**[2026-09-01 原因確定] 週次利用上限。読めないと書いたのは、試さずに書いた誤りだった。**\n\n`get_session` にこの `session_id` をそのまま渡したら、一次証拠が入っていた:\n\n```\npost_turn_summary.status_detail = \"You've hit your weekly limit · resets 11pm (UTC)\"\nrate_limit_info = { rateLimitType: \"seven_day\",\n                    resetsAt: 1788217200,   # 2026-08-31 23:00 UTC = 09-01 08:00 JST\n                    status: \"rejected\" }\n```\n\n**同じ日に主系（GitHub Actions）が HTTP 429 で落ちていたのと、同じ枠・同じリセット時刻。**主系側は 2026-09-01 のコミットで切り分けを直した（`failure_class: usage_limit`）。\n\n**上の『このセッションからは読めない』『オーナーは claude.ai の画面から開ける』は両方とも誤り。**`get_session` は最初から使えた。**試さずに「できない」と書いた。**\nしかも**同じ台帳の上の2行（08-28）が、既に同じ方法で読んでいる** —— SEO Weekly の行に「同じ月曜0時台に落ちたセッションに `rate_limit_info: {seven_day, rejected}` が残っていた」とある。**答えは自分の台帳の中にあったのに、GitHubのジョブログから独立に引き直した。**\n\n**この行は、次の発火が SUCCEEDED になるまで残す** —— 枠は 08-31 23:00 UTC に戻っているので、次回は通るはず。**「通るはず」は通ったことではない。**"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -157,17 +145,43 @@
       "last_run_finished_at": "2026-07-31T23:53:00.199446Z"
     },
     {
+      "id": "trig_01Da2EyGDZQjjfE5kbNqSo9G",
+      "name": "主系オートパイロットが復帰したか確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T01:01:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T01:01:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
+    },
+    {
+      "id": "trig_01EmAUPjTcmyfJjHsGQ3EPVn",
+      "name": "PR #742 / api#200 が緑でマージされたか確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T00:48:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T00:48:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
+    },
+    {
       "id": "trig_01ESF9AHax6buS9X1pdFv657",
       "name": "Obsidianオートパイロット再試行 v3（09:20 JST・ccr-0920・当日が空白のときだけ・配信の種）",
       "cron_expression": "20 0 * * *",
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-09-01T00:20:00Z",
-      "last_fired_at": "2026-08-31T00:20:33.654230Z",
-      "last_run_status": "FAILED",
-      "last_run_fired_at": "2026-08-31T00:20:33.634779871Z",
-      "last_run_finished_at": "2026-08-31T00:20:46.516193Z"
+      "next_run_at": "2026-09-02T00:20:00Z",
+      "last_fired_at": "2026-09-01T00:20:49.880559Z",
+      "last_run_status": "SUCCEEDED",
+      "last_run_fired_at": "2026-09-01T00:20:49.854412189Z",
+      "last_run_finished_at": "2026-09-01T00:21:59.523150Z"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -181,6 +195,19 @@
       "last_run_status": "FAILED",
       "last_run_fired_at": "2026-08-31T11:25:23.583005176Z",
       "last_run_finished_at": "2026-08-31T11:25:34.041500Z"
+    },
+    {
+      "id": "trig_01NTaNmS8eTrHVjbZTm8ceQT",
+      "name": "PR #747 と残り2レーンの確認",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T01:14:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T01:14:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     },
     {
       "id": "trig_01P18wgcMnXGMAeH9zHZVNpM",
@@ -215,11 +242,11 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-08-31T23:45:00Z",
-      "last_fired_at": "2026-08-24T00:11:04.093475Z",
-      "last_run_status": "FAILED",
-      "last_run_fired_at": "2026-08-24T00:11:04.060200853Z",
-      "last_run_finished_at": "2026-08-24T00:11:13.408444Z"
+      "next_run_at": "2026-09-07T23:45:00Z",
+      "last_fired_at": "2026-08-31T23:45:53.263504Z",
+      "last_run_status": "SUCCEEDED",
+      "last_run_fired_at": "2026-08-31T23:45:53.238315717Z",
+      "last_run_finished_at": "2026-08-31T23:55:21.353732Z"
     },
     {
       "id": "trig_01RC44fYy1D5TGryJ36ixCU1",
@@ -233,6 +260,32 @@
       "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-08-25T23:35:00.444572157Z",
       "last_run_finished_at": "2026-08-25T23:35:54.069791Z"
+    },
+    {
+      "id": "trig_01S7by8GMpXkSyaPMCAYJxhd",
+      "name": "#739 — 枠リセット後の初回実行を確かめる",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T00:30:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T00:30:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
+    },
+    {
+      "id": "trig_01SszfDK2JWaHPrdWdotRjGp",
+      "name": "ASC取得の修正が効いたか（日次のあと）",
+      "cron_expression": null,
+      "run_once_at": "2026-09-01T12:00:00Z",
+      "enabled": true,
+      "bound_session": true,
+      "next_run_at": "2026-09-01T12:00:00Z",
+      "last_fired_at": null,
+      "last_run_status": null,
+      "last_run_fired_at": null,
+      "last_run_finished_at": null
     },
     {
       "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
