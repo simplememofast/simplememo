@@ -24,6 +24,7 @@
  */
 
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
@@ -75,7 +76,29 @@ export const isExecutionSurface = (p) => EXECUTION_SURFACE.some((re) => re.test(
 /** 誰かがやっているもの =「実施中タスク」。 */
 const DOING = new Set(['ai_autonomous', 'ai_executes_gated', 'ai_proposes', 'human_only']);
 
-export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)) } = {}) {
+/**
+ * 隣のリポジトリの作業ツリーが、取得済みの origin より何コミット遅れているか。
+ * **ネットワークは触らない**（既に fetch 済みの ref だけを見る）。
+ * 判定できなければ null —— 「遅れていない」と混ぜない。
+ */
+export function behindOrigin(repoRel, { root = ROOT } = {}) {
+  const dir = path.join(root, repoRel);
+  const git = (args) => execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8' }).trim();
+  try {
+    let upstream;
+    try { upstream = git(['rev-parse', '--abbrev-ref', 'origin/HEAD']); }
+    catch { upstream = 'origin/main'; }
+    git(['rev-parse', '--verify', `${upstream}^{commit}`]);
+    return Number(git(['rev-list', '--count', `HEAD..${upstream}`]));
+  } catch {
+    return null; // ref が無い・gitでない・取得できない
+  }
+}
+
+export function validate(doc, {
+  exists = (p) => fs.existsSync(path.join(ROOT, p)),
+  behind = behindOrigin,
+} = {}) {
   const problems = [];
   if (!doc || !Array.isArray(doc.tasks)) return ['tasks must be an array'];
   const seen = new Set();
@@ -117,7 +140,23 @@ export function validate(doc, { exists = (p) => fs.existsSync(path.join(ROOT, p)
           const sibling = f.split('/').slice(0, 2).join('/');   // ../simplememo-ios
           if (!exists(sibling)) continue;
           if (!exists(f)) {
-            problems.push(`${at}: evidence "${f}" が存在しない（隣のリポジトリは在るのに）`);
+            // **「隣に無い」と「隣が古い」を混ぜない。**
+            // 2026-09-01、隣が origin より2コミット遅れているだけの作業ツリーで
+            // この規則が2件鳴り、**それを「main でも落ちる欠陥」として報告した。**
+            // 隣を最新にしたら消えた。片方（このリポジトリ）だけ stash して
+            // 確かめたので、**隣が変数だと気づかないまま結論を出していた。**
+            //
+            // ここが効くのは誤報そのものより、**次の一手**。この文面を読んだ人の
+            // 素直な直し方は「証跡の行を消す」で、それは**まだマージされていない
+            // だけの正しい参照を、黙って台帳から落とす。**遅れを見せて止める。
+            const n = behind(sibling);
+            const hint = n === null
+              ? ' — 隣の遅れは判定できなかった（gitでない・ref未取得）。**消す前に隣を更新して確かめ直すこと。**'
+              : n > 0
+                ? ` — **隣の作業ツリーが origin より ${n} コミット遅れている。**`
+                  + '先に隣を更新して確かめ直すこと。**台帳の行を消す前に。**'
+                : '';
+            problems.push(`${at}: evidence "${f}" が存在しない（隣のリポジトリは在るのに）${hint}`);
           }
           continue;
         }
@@ -218,11 +257,49 @@ const SELFTEST_BREAKAGES = [
     t.executor = 'ai_executes_gated';
   }],
 ];
+// [2026-09-01] **「隣に無い」と「隣が古い」を混ぜない。**
+// 隣が origin より2コミット遅れているだけの作業ツリーでこの規則が2件鳴り、
+// それを「main でも落ちる欠陥」として報告した（誤り）。隣を最新にしたら消えた。
+// **この文面を読んだ人の素直な直し方は「証跡の行を消す」**で、それは
+// まだマージされていないだけの正しい参照を黙って落とす。だから遅れを見せる。
+const STALE_SIBLING_SCENARIOS = [
+  ['**隣が遅れているときは、そう書く**（消す前に更新させる）', () => {
+    const p = validate(
+      { tasks: [{ id: 'x', domain: 'd', title: 't', executor: 'ai_executes_gated',
+        evidence: ['../simplememo-api/src/ない.ts'] }] },
+      { exists: (f) => f === '../simplememo-api', behind: () => 2 });
+    assert(p.some((m) => /2 コミット遅れている/.test(m)), p.join(' / '));
+    assert(p.some((m) => /台帳の行を消す前に/.test(m)), p.join(' / '));
+  }],
+  ['隣が最新なら余計な注記を足さない（本当に無いのだから）', () => {
+    const p = validate(
+      { tasks: [{ id: 'x', domain: 'd', title: 't', executor: 'ai_executes_gated',
+        evidence: ['../simplememo-api/src/ない.ts'] }] },
+      { exists: (f) => f === '../simplememo-api', behind: () => 0 });
+    assert(p.some((m) => /が存在しない/.test(m)), p.join(' / '));
+    assert(!p.some((m) => /遅れている/.test(m)), p.join(' / '));
+  }],
+  ['**遅れを判定できなかったら、判定できなかったと書く**（最新扱いにしない）', () => {
+    const p = validate(
+      { tasks: [{ id: 'x', domain: 'd', title: 't', executor: 'ai_executes_gated',
+        evidence: ['../simplememo-api/src/ない.ts'] }] },
+      { exists: (f) => f === '../simplememo-api', behind: () => null });
+    assert(p.some((m) => /判定できなかった/.test(m)), p.join(' / '));
+  }],
+  ['隣が無ければ、そもそも鳴らない（CI はここ）', () => {
+    const p = validate(
+      { tasks: [{ id: 'x', domain: 'd', title: 't', executor: 'ai_executes_gated',
+        evidence: ['../simplememo-api/src/ない.ts'] }] },
+      { exists: () => false, behind: () => { throw new Error('隣が無いのに遅れを見に行った'); } });
+    assert(!p.some((m) => /が存在しない/.test(m)), p.join(' / '));
+  }],
+];
+
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8')),
   (d) => validate(d),
   SELFTEST_BREAKAGES,
-);
+).concat(STALE_SIBLING_SCENARIOS);
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
