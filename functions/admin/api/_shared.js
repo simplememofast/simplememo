@@ -60,6 +60,42 @@ async function hmacSha1(key, data) {
   return btoa(binary);
 }
 
+// ---- X 資格情報 (ja/en) ----
+//
+// account → env キー名の対応。x-post と x-verify (action=me) が同じ規則を
+// 共有する（ja: X_*, en: X_EN_*）。
+export function credKeysFor(account) {
+  const prefix = account === 'en' ? 'X_EN_' : 'X_';
+  return {
+    consumerKey: prefix + 'API_KEY',
+    consumerSecret: prefix + 'API_SECRET',
+    token: prefix + 'ACCESS_TOKEN',
+    tokenSecret: prefix + 'ACCESS_TOKEN_SECRET',
+  };
+}
+
+// 未設定の env キー名を最初の1つだけ返す（全部設定済みなら null）。
+// エラーレスポンスの形は呼び出し元ごとに異なるため、ここでは組み立てない。
+export function firstMissing(env, credKeys) {
+  for (const k of Object.values(credKeys)) {
+    if (!env[k]) return k;
+  }
+  return null;
+}
+
+// X API へ送る共通 User-Agent
+export const USER_AGENT = 'SimpleMemoAdmin/1.0';
+
+// X API の rate-limit ヘッダ3点セット。
+// キー順序は JSON.stringify のシリアライズ結果に効くので変えない。
+export function rateLimitOf(res) {
+  return {
+    limit: res.headers.get('x-rate-limit-limit'),
+    remaining: res.headers.get('x-rate-limit-remaining'),
+    reset: res.headers.get('x-rate-limit-reset'),
+  };
+}
+
 // ---- レスポンスヘルパ ----
 
 export async function safeJson(res) {

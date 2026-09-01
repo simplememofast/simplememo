@@ -13,7 +13,7 @@
 //     "in_reply_to_tweet_id": "返信する場合の対象ツイート ID (任意)"
 //   }
 
-import { buildOAuth1Header, safeJson, json } from './_shared.js';
+import { buildOAuth1Header, safeJson, json, credKeysFor, firstMissing, USER_AGENT } from './_shared.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -30,16 +30,9 @@ export async function onRequest(context) {
   }
 
   const account = (body && body.account) === 'en' ? 'en' : 'ja';
-  const prefix = account === 'en' ? 'X_EN_' : 'X_';
-  const credKeys = {
-    consumerKey: prefix + 'API_KEY',
-    consumerSecret: prefix + 'API_SECRET',
-    token: prefix + 'ACCESS_TOKEN',
-    tokenSecret: prefix + 'ACCESS_TOKEN_SECRET',
-  };
-  for (const k of Object.values(credKeys)) {
-    if (!env[k]) return json({ error: k + ' が Cloudflare 環境変数に未設定です' }, 400);
-  }
+  const credKeys = credKeysFor(account);
+  const missing = firstMissing(env, credKeys);
+  if (missing) return json({ error: missing + ' が Cloudflare 環境変数に未設定です' }, 400);
 
   const text = body && body.text;
   if (!text || typeof text !== 'string') {
@@ -78,7 +71,7 @@ export async function onRequest(context) {
       headers: {
         'Authorization': authHeader,
         'Content-Type': 'application/json',
-        'User-Agent': 'SimpleMemoAdmin/1.0',
+        'User-Agent': USER_AGENT,
       },
       body: JSON.stringify(payload),
     });
