@@ -180,16 +180,42 @@ export const UNLOCKS = {
   // **確かめたことは確かめたこと。**
   company_facts:     { kind: 'owner_input', label: '会社の基礎事実を台帳に入れる',
                        needs: '**決算期・役員報酬・インボイス登録は 2026-08-25 に入り、'
-                            + '法人税と消費税の申告期限は機械が出している。**残るのは '
-                            + 'Apple Developer の auto-renew が入っているかの確認（1回で閉じる）・'
-                            + 'ドメインの更新日（RDAP から機械が入れる。seo-daily の commit 段が'
-                            + '月曜ゲートなので最初の機会は 2026-08-31）・'
-                            + '社会保険の具体的な届出期限・法定調書の要否',
+                            + '法人税と消費税の申告期限は機械が出している。**\n\n'
+                            + '**[2026-09-01] Apple は閉じた。**自動更新は入っていない（`false`）——'
+                            + '4通りで確かめた（Web の2つの役割・購入時の請求書・iOSアプリ）。'
+                            + '**入っていないと分かったので、期限監視は外せない。**\n\n'
+                            + '残るのは3つ: ドメインの更新日（RDAP から機械が入れる。'
+                            + 'seo-daily の週次段が #754 で修正されたので次の回で入る）・'
+                            + '**社会保険の具体的な届出期限**（確認先は税理士か年金事務所。'
+                            + '社労士は雇っていない）・**法定調書の要否**'
+                            + '（freee の probe が外注費と支払報酬料の計上を確認済みなので'
+                            + '「不要」では閉じない。判定は税務の領域）',
                        satisfied_when: [
                          { file: 'data/corporate-obligations.json',
                            path: 'deadlines[id=apple-developer-program].auto_renew_confirmed' },
                          { file: 'data/corporate-obligations.json',
                            path: 'deadlines[id=domain-renewal].next_due' },
+                         // [2026-09-01] **この2つを足した。述語が行の条件より狭かった。**
+                         //
+                         // この入口が持つ行（⑦ 税務・給与・社会保険・法定期限の管理）の
+                         // `unblocked_by` は**4つ**を待つと書いてあるのに、述語は**2つ**しか
+                         // 見ていなかった。Apple が閉じ、ドメインが入った時点で
+                         // **述語だけが「開いた」と言い、社会保険と法定調書が未把握のまま
+                         // 行を動かせと迫る形**になっていた。
+                         //
+                         // **狭い述語は、緩い述語より危ない。**満たされない述語は
+                         // 「まだです」と言い続けるだけだが、狭い述語は
+                         // **条件の一部だけで開いたと宣言する** —— そして開いた入口は
+                         // 上の検査が「待ち扱いのままだ」と催促するので、
+                         // **数字を上げる方向へ押してくる。**
+                         //
+                         // どちらも到達可能。social-insurance は該当が確定していて
+                         // 残るのは期限（税理士か年金事務所）、legal-record-statutory は
+                         // freee の probe が計上ありを返しているので「不要」で閉じない。
+                         { file: 'data/corporate-obligations.json',
+                           path: 'deadlines[id=social-insurance].next_due' },
+                         { file: 'data/corporate-obligations.json',
+                           path: 'deadlines[id=legal-record-statutory].next_due' },
                        ] },
   // [2026-08-28] **書き換えた。旧版は、この台帳自身が否定している前提で立っていた。**
   // 旧ラベルは「契約書・請求書をリポジトリに置く」、旧 needs は
