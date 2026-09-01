@@ -149,9 +149,9 @@
       "id": "vendor-contracts",
       "title": "取引先との契約・規約",
       "retention_years": 10,
-      "where": "各ベンダーの管理画面（利用規約への同意という形）。**書面が発生したら ../simplememo-api/contracts/**（2026-08-28 オーナー判断）",
+      "where": "各ベンダーの管理画面（利用規約への同意という形）。**書面が発生したら原本は freee。リポジトリには置かない**（2026-09-01 オーナー決定）。行（メタデータ）だけ ../simplememo-api/data/contract-register.json に置く",
       "exists": true,
-      "note": "**書面の契約書は無く、規約への同意で成立している。**だから条項検査の対象は規約本文になる（下の contract_review）\n\n**[2026-08-28] 書面が出てきたときの置き場所が決まった。**オーナー判断で `simplememo-api`（非公開）。このリポジトリは GitHub 上で公開されているので最初から候補外だった（publication-policy.json）。受け皿は同日に置いてある（`contracts/` ＋ `data/contract-register.json` ＋ `scripts/check-contracts.mjs` ＋ `docs/contracts.md`）。\n\n**いまも書面はゼロ**で、成立の形（規約への同意）は変わっていない。決まったのは「出てきたらどこへ置くか」であって、**出てきたことではない。**"
+      "note": "**書面の契約書は無く、規約への同意で成立している。**だから条項検査の対象は規約本文になる（下の contract_review）\n\n**[2026-08-28] 書面が出てきたときの置き場所が決まった。**オーナー判断で `simplememo-api`（非公開）。このリポジトリは GitHub 上で公開されているので最初から候補外だった（publication-policy.json）。受け皿は同日に置いてある（`contracts/` ＋ `data/contract-register.json` ＋ `scripts/check-contracts.mjs` ＋ `docs/contracts.md`）。\n\n**いまも書面はゼロ**で、成立の形（規約への同意）は変わっていない。決まったのは「出てきたらどこへ置くか」であって、**出てきたことではない。**\n\n**[2026-09-01 訂正] 置き場所の決定が更新された。**08-28 には「書面が発生したら `../simplememo-api/contracts/`」と書いたが、**同じ日に別のセッションが「原本は freee にあり、リポジトリへ写しは置かない」と記録しており、2つの決定が並んでいた。**09-01 にオーナーが寄せた —— **「台帳だけ入れる」。**\n\n    契約の行（メタデータ） … ../simplememo-api/data/contract-register.json（非公開）\n    書面そのもの          … freee。どちらのリポジトリにも置かない\n\n**2つは完全な矛盾ではなかった。**行は `document: null` ＋ `where` を持てるので、「メタデータは api・書面は freee」が成立する。受け皿側の `contracts/` ディレクトリは削除され、`policy.documents_in_repo` で「置かない」が明示された（simplememo-api#200）。"
     },
     {
       "id": "app-review-correspondence",
