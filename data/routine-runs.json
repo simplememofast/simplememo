@@ -144,7 +144,7 @@
     },
     {
       "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
-      "why": "**副系の写しの取り直し（毎日03:00 UTC）。**名前に判断が書いてある ——【停止 2026-08-28・実測で不可】Routineはリポジトリを持てない。\n\n**このセッションが 2026-08-28 に実測して確かめた形。**`create_trigger` は `environment_id` を継承するが `mcp__*` は継承せず、claude.ai の Routines UI にはリポジトリ欄が無く、発火するのは `folders_state: NONE` の Cowork セッション。**写しを取る主体が居ない。**\n\n**したがって取り直しは、いまのところセッションの手でやる**（`node scripts/check-routine-runs.mjs --sync <list_triggers の生JSON>`）。この写しも 2026-08-31 にそうやって取り直した。\n\n最後の実行は 2026-08-28 に SUCCEEDED。**失敗して止まったのではなく、動くと分かった上で止めた。**"
+      "why": "**副系の写しの取り直し（毎日03:00 UTC）。**名前に判断が書いてある ——【停止 2026-08-28・実測で不可】Routineはリポジトリを持てない。\n\n**このセッションが 2026-08-28 に実測して確かめた形。**`create_trigger` は `environment_id` を継承するが `mcp__*` は継承せず、claude.ai の Routines UI にはリポジトリ欄が無く、発火するのは `folders_state: NONE` の Cowork セッション。**写しを取る主体が居ない。**\n\n**したがって取り直しは、いまのところセッションの手でやる**（`node scripts/check-routine-runs.mjs --sync <list_triggers の生JSON>`）。この写しも 2026-08-31 にそうやって取り直した。\n\n最後の実行は 2026-08-28 に SUCCEEDED。**失敗して止まったのではなく、動くと分かった上で止めた。**\n\n**[2026-09-01 訂正] 『Routineはリポジトリを持てない』は広すぎた。**list_triggers の `job_config.ccr.session_context.sources` を13本すべてで見たところ、**4本は repo を持っている**（副系A・副系B・ccr-0920・SEO Weekly）。`created_via` では決まらない（持っている4本に meta_mcp と http_api の両方が居る）—— **作成時に source を渡したかどうか**で決まる。この routine（trig_01TixKQ5Sovfjfn8rRVQCrYf）は `session_context: {}` / `sources: null` で、**渡していなかった。**つまり測ったのは『Routineの限界』ではなく『この1本の作られ方』。\n\n**帰結: 取り直しの経路は作れる。**repo 付きで作り直すか、既に repo を持つ ccr-0920 に手順を足すか。**残る未確認は1つだけ** —— スケジュール起動のセッションが `claude-code-remote` の MCP を持つか（GitHub MCP は PR #696 で実証済み。別サーバなので推定しない）。"
     }
   ],
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",

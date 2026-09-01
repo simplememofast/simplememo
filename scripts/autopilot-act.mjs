@@ -68,6 +68,7 @@ const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
 const COST_PATH = path.join(ROOT, 'data/autopilot-cost.json');
 const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
 const STATUS_PATH = path.join(ROOT, 'data/autopilot-status.json');
+const ROUTINE_PATH = path.join(ROOT, 'data/routine-runs.json');
 
 export const STATES = ['open', 'done', 'acknowledged'];
 export const OWNERS = ['ai', 'human'];
@@ -685,6 +686,50 @@ export function derive(ctx) {
         auto: null,
         close_check: { kind: 'script_ok', params: { script: 'scripts/autopilot-act.mjs', args: ['--status-fresh'] } },
       });
+    }
+  }
+
+  // --- D6b: 副系の写しの鮮度 ---
+  //
+  // **CIが赤くなる前に、task として出す。**
+  //
+  // 2026-09-01、この写しが期限切れ（3日）を越えて `check-routine-runs --check` が落ち、
+  // SEO Validation が **step 40 で止まって後続49検査が skipped** になった。
+  // auto-merge は検証成功でしか動かないので、**PRが1本もマージできない状態**が
+  // 最初の信号だった。それまで、写しが古くなりつつあることはどこにも出ていない。
+  //
+  // **写しを取り直せるのはセッションだけ**（list_triggers は MCP 側で、CIからは叩けない）。
+  // だから機械にできるのは「期限が来る前に、やることとして積む」ところまで。
+  // 積む先があるので、ここが D6（status JSON の鮮度）と同じ形になる。
+  //
+  // **閾値は上限より1日早い。**上限に達してから積むと、積んだ日には既にCIが赤い。
+  if (ctx.routineDoc?.observed_at) {
+    const max = ctx.routineDoc.max_snapshot_age_days;
+    const observed = Date.parse(ctx.routineDoc.observed_at);
+    if (typeof max === 'number' && max > 0 && Number.isFinite(observed)) {
+      const days = (Date.parse(`${ctx.today}T00:00:00+09:00`) - observed) / 86400000;
+      if (days >= max - 1) {
+        out.push({
+          id: 'act-routine-snapshot-stale',
+          title: `副系の写しが ${days.toFixed(1)}日前（上限 ${max}日）— 期限まであと ${(max - days).toFixed(1)}日`,
+          detail: `data/routine-runs.json の observed_at が ${ctx.routineDoc.observed_at}。`
+            + `**上限（${max}日）を越えると check-routine-runs --check が落ち、`
+            + 'SEO Validation が止まって auto-merge が動かなくなる**（2026-09-01 に実際に起きた）。\n\n'
+            + '取り直すのはセッションだけができる（CIからは list_triggers を叩けない）:\n'
+            + '  1. MCP の list_triggers を呼び、応答の生JSONをファイルへ落とす\n'
+            + '  2. node scripts/check-routine-runs.mjs --sync <そのファイル>\n'
+            + '  3. node scripts/check-routine-runs.mjs --check — '
+            + '**増えた異常はここで落ちる。**理由を書いて open_findings へ（open_budget も同じ差分で動かす）\n\n'
+            + '**上限を緩めて閉じない。**古い写しを緑にすると「読めているつもり」で止まる。',
+          source: 'routine',
+          touches: ['data/routine-runs.json'],
+          auto: null,
+          close_check: {
+            kind: 'script_ok',
+            params: { script: 'scripts/check-routine-runs.mjs', args: ['--snapshot-fresh'] },
+          },
+        });
+      }
     }
   }
 
@@ -1953,6 +1998,30 @@ async function selftest() {
     t('畳んだことを明示する', /PRの数だけあるわけではない/.test(o[0].detail));
   }
   {
+    // --- 副系の写しの鮮度（D6b）---
+    // **CIが赤くなる前に積む。**上限に達してから積むと、積んだ日には既に赤い。
+    const doc = (observed) => ({ routineDoc: { observed_at: observed, max_snapshot_age_days: 3 }, today: '2026-09-04' });
+    const rows = (observed) => derive(doc(observed)).filter((a) => a.id === 'act-routine-snapshot-stale');
+    t('上限の1日前で積む（2日経過・上限3日）', rows('2026-09-02T00:00:00+09:00').length === 1);
+    t('**まだ余裕があるうちは積まない**（1日経過）', rows('2026-09-03T00:00:00+09:00').length === 0);
+    t('上限を越えていればもちろん積む（4日経過）', rows('2026-08-31T00:00:00+09:00').length === 1);
+    // **t は真偽値を取る。**ここに () => {...} を渡すと関数は常に truthy で、
+    // **この検査は決して落ちない。**一度そう書いた（2026-09-01）。
+    const closeCheck = rows('2026-09-02T00:00:00+09:00')[0].close_check;
+    t('**鮮度で閉じる**（--check ではない。取り直しても別の理由で赤いことがある）',
+      closeCheck.kind === 'script_ok' && closeCheck.params.args.includes('--snapshot-fresh'));
+    t('取り直す手順が detail に入っている（CIからは叩けないので人手に渡す）',
+      /list_triggers/.test(rows('2026-09-02T00:00:00+09:00')[0].detail)
+      && /--sync/.test(rows('2026-09-02T00:00:00+09:00')[0].detail));
+    t('**上限を緩めて閉じるなと書いてある**',
+      /上限を緩めて閉じない/.test(rows('2026-09-02T00:00:00+09:00')[0].detail));
+    t('写しが読めなければ積まない（観測が無いことを故障にしない）',
+      derive({ routineDoc: null, today: '2026-09-04' }).filter((a) => a.id === 'act-routine-snapshot-stale').length === 0);
+    t('**上限が数でなければ積まない**（正が無いときこの規則を発火させない）',
+      derive({ routineDoc: { observed_at: '2026-08-01T00:00:00Z', max_snapshot_age_days: 'たくさん' }, today: '2026-09-04' })
+        .filter((a) => a.id === 'act-routine-snapshot-stale').length === 0);
+  }
+  {
     // **再発したら開け直す。**IDが固定の行（act-ledger-sync 等）は、これが無いと
     // 一度閉じたきり二度と立たない —— 2026-08-26 に閉じた act-ledger-sync が
     // 08-29〜08-31 の取りこぼしで再点火せず、日次アクチュエータが自分を止めた。
@@ -2391,6 +2460,7 @@ async function buildContext(today) {
     { what: 'data/authority-matrix.json', why: '所有者の判定が成り立たない' });
   const costDoc = readJson(COST_PATH, null);
   const statusDoc = readJson(STATUS_PATH, null);
+  const routineDoc = readJson(ROUTINE_PATH, null);
   const repo = process.env.GITHUB_REPOSITORY || 'simplememofast/simplememo';
   const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
 
@@ -2414,7 +2484,7 @@ async function buildContext(today) {
   }
   const workflowRuns = await fetchWorkflowRuns(repo, token);
   const orphans = await fetchOrphanedCommits(repo, token, today);
-  return { today, runsDoc, matrix, costDoc, statusDoc, selfheal, budget, workflowRuns, orphans, repo, token };
+  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, repo, token };
 }
 
 async function main() {

@@ -5,6 +5,7 @@
  *   node scripts/check-routine-runs.mjs           # 表示
  *   node scripts/check-routine-runs.mjs --check   # CI
  *   node scripts/check-routine-runs.mjs --selftest
+ *   node scripts/check-routine-runs.mjs --snapshot-fresh   # 写しの鮮度だけ（閉じ条件用）
  *   node scripts/check-routine-runs.mjs --sync <list_triggers の生JSON>   # 写しを取り直す
  *
  * 【台帳の「構造的に不可」は半分だけ正しかった】
@@ -453,6 +454,28 @@ function selftest() {
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(selftest() === 0 ? 0 : 1);
+
+  // 写しの鮮度だけを見るモード。**閉じ条件から呼ばれる。**
+  //
+  // `--check` を閉じ条件に使えない —— あれは「健全でない routine が一覧に無い」でも
+  // 落ちるので、**写しを取り直しても閉じない**（別の理由で赤いまま）。
+  // 鮮度の行は鮮度で閉じる。混ぜると、取り直した人に「まだ足りない」と言うことになる。
+  if (process.argv.includes('--snapshot-fresh')) {
+    const doc = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    const max = doc.max_snapshot_age_days;
+    const observed = Date.parse(doc.observed_at ?? '');
+    if (!(typeof max === 'number' && max > 0) || !Number.isFinite(observed)) {
+      console.error('鮮度を判定できない（max_snapshot_age_days / observed_at）');
+      process.exit(1);
+    }
+    const days = (Date.now() - observed) / DAY;
+    if (days > max) {
+      console.error(`写しが ${days.toFixed(1)} 日前で古い（上限 ${max} 日）`);
+      process.exit(1);
+    }
+    console.log(`写しは ${days.toFixed(1)} 日前（上限 ${max} 日）`);
+    process.exit(0);
+  }
 
   const syncAt = process.argv.indexOf('--sync');
   if (syncAt >= 0) {
