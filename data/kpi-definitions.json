@@ -39,9 +39,9 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 7,
-      "checksum": "5cbc9adeae5e765f",
-      "changed_at": "2026-08-26",
+      "version": 8,
+      "checksum": "c57487f3e5c4c4b8",
+      "changed_at": "2026-09-01",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
         {
@@ -73,6 +73,11 @@
           "version": 7,
           "at": "2026-08-26",
           "why": "定義は変えていない。autopilot-runs.mjs に (a) 費用の台帳を readLedger 経由にする（無い→null、読めない→止める）と (b) helper のシナリオ5件を自己テストへ連結、を足しただけ。完走率の分子・分母・outcome の集合はどれも同じで、実データの出力も変わらない"
+        },
+        {
+          "version": 8,
+          "at": "2026-09-01",
+          "why": "定義は変えていない。scripts/autopilot-runs.mjs の --append に --repair-of / --repair-note を足しただけで、完走率の分子（shipped）・分母（attempted）の数え方は同じ（2026-09-01・レーンF）"
         }
       ]
     },
@@ -135,9 +140,9 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 22,
-      "checksum": "a2b788d7dfc42599",
-      "changed_at": "2026-08-31",
+      "version": 23,
+      "checksum": "ca5ff51e84e98153",
+      "changed_at": "2026-09-01",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
         {
@@ -244,6 +249,11 @@
           "version": 22,
           "at": "2026-08-31",
           "why": "**定義は変えていない。**§0-3 の期限を 2026-08-29 から 09-05 へ延ばし、「main に入るまでこの節は存在しないのと同じ」という注記を足したことによる checksum の変化。ノイズフロア（期待クリック数3未満を根拠にしない／適用はレーンA/Bのみ）の本文には触れていない"
+        },
+        {
+          "version": 23,
+          "at": "2026-09-01",
+          "why": "定義は変えていない。AUTOPILOT_RUNBOOK.md §0-2 に死んだ占有の引き継ぎ手順を足しただけで、期待クリック3未満の足切りには触れていない（2026-09-01・レーンF）"
         }
       ]
     },

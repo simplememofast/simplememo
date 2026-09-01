@@ -67,6 +67,40 @@ const SCENARIOS = [
     'PR #521 と #522 の二重着手を受けて入れた占有。'
     + '**弾かれること自体がこの仕組みの出力**であって障害ではない'],
 
+  // --- 死んだ占有（2026-08-29に実際に起きた） ---------------------------
+  // claim だけ取って死んだ経路が、その日の全経路を止めた。占有は「ブランチが
+  // 在る」だけで成立するので、**claim を取った側が死ぬと誰も走らないまま緑になる。**
+  ['死んだ占有: claimだけで2時間動いていない → 引き継ぐ',
+    { route: 'ccr-0920', branchClaimed: true, claimHasWork: false, claimAgeMinutes: 200 },
+    CODES.TAKEOVER_STALE_CLAIM,
+    '2026-08-29の実際の状況（ap-20260829-ccr0920）。**占有されていることと、'
+    + '占有した経路が生きていることは別物。**引き継がないと1日ぶんの出荷が消える'],
+
+  ['死んだ占有: 仕事が載っていれば引き継がない',
+    { route: 'ccr-0920', branchClaimed: true, claimHasWork: true, claimAgeMinutes: 600 },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '**古い＝死んでいる、ではない。**記事を書いている最中は claim 以外のコミットが載る。'
+    + '時間だけで判定すると、長くかかった回を横から奪う'],
+
+  ['死んだ占有: 猶予内なら引き継がない',
+    { route: 'ccr-0730', branchClaimed: true, claimHasWork: false, claimAgeMinutes: 60 },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '主系は90分上限で走るので、60分の claim は**生きている経路**でありうる。'
+    + '猶予（120分）を上限より長く取ってあるのはこのため'],
+
+  ['死んだ占有: 測れなかったら引き継がない',
+    { route: 'ccr-0920', branchClaimed: true, claimHasWork: false, claimAgeMinutes: null },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '**「測れなかった」は「古い」ではない。**§1-2 の「取得できなかった」と'
+    + '「増えていない」を混ぜない原則を、占有の判定にも当てる'],
+
+  ['死んだ占有: 出荷済みの日は引き継がない',
+    { route: 'ccr-0920', branchClaimed: true, claimHasWork: false, claimAgeMinutes: 300,
+      prodStatusDate: '2026-08-23' },
+    CODES.SKIP_ALREADY_SHIPPED,
+    '別経路が先に出荷していれば、古い claim が残っているのは正常。'
+    + '引き継ぎ判定を冪等チェックより先に置くと、**出た日にもう1本出る**'],
+
   ['二重防止: 当日作成のPRがある',
     { route: 'ccr-0920', prTodayExists: true }, CODES.SKIP_PR_TODAY,
     'ブランチ占有の前に別経路がPRまで進んでいる場合'],

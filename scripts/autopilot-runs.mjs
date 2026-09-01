@@ -9,6 +9,7 @@
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
  *   node scripts/autopilot-runs.mjs --append --run-id ... --date ... --route ... --outcome ...
  *        [--failure-class ... --failed-at ... --detected-at ... --needs-triage true]
+ *        [--repair-of ap-...,ap-... --repair-note "修理が及ぶ範囲と及ばない範囲"]
  *
  * 【何を測るか】外部レビュー（2026-08-22）が求めた指標のうち、
  * 実行を一意に指す識別子があれば数えられるもの:
@@ -576,6 +577,18 @@ if (isMain) {
     // 種別を決められなかった失敗は、決められなかったことを台帳に残す。
     // 空欄は「未記入」と「該当なし」の区別がつかない。
     if (val('needs-triage') === 'true') run.needs_triage = true;
+    // 修理した故障の run_id（カンマ区切り）。**手で書かせない。**
+    //
+    // [2026-09-01] Runbook §2 レーンFは「直したら repair_of を書く。書かない限り
+    // 翌日も未修理として上がる」と定めているのに、**その書き口が --append に
+    // 無かった。**実際 08-30・08-31 の使用量上限は、応答経路の修理（PR #738）が
+    // 出荷された後も未修理として残り続けた。手作業でしか書けない欄は、
+    // 忙しい日から落ちる —— それは記録ではなく善意に頼った運用になる。
+    // 存在しない run_id を指していないかは autopilot-selfheal.mjs の validate() が見る。
+    if (val('repair-of')) {
+      run.repair_of = val('repair-of').split(',').map((x) => x.trim()).filter(Boolean);
+    }
+    if (val('repair-note')) run.repair_note = val('repair-note');
     if (doc.runs.some((r) => r.run_id === run.run_id)) {
       console.log(`skip: run_id ${run.run_id} already recorded`);
       process.exit(0);

@@ -755,6 +755,32 @@
       "source": "act-reconcile-session",
       "failure_class": "usage_limit",
       "detected_at": "2026-08-31T23:27:44Z"
+    },
+    {
+      "run_id": "ap-20260901-owner-session",
+      "date_jst": "2026-09-01",
+      "route": "owner-session",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 738,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": null,
+      "interventions": [
+        {
+          "kind": "substitute",
+          "note": "オーナーのセッションからの代走。主系は2日連続で使用量上限に当たっており、原因特定と修理はこの経路が行った"
+        }
+      ],
+      "source": "PR #738（マージ済み・2026-09-01 08:09 JST 作成）の差分と、2026-09-01 のレーンFセッションによる突き合わせ",
+      "detected_at": "2026-09-01T08:10+09:00",
+      "repair_of": [
+        "ap-20260830-actions",
+        "ap-20260831-actions"
+      ],
+      "repair_note": "修理したのは**応答経路**（obsidian-autopilot.yml の切り分けステップと autopilot-act.mjs の interpretRun が2値しか持たず、429 を『資格情報が通っていない・setup-token を再実行せよ』と断定していた。無事な鍵を捨てる指示になっていた）。**使用量上限そのものはリポジトリ側の変更では防げない**——アカウントの週次上限で、2026-08-31T23:00Z にリセットされた。その証拠は 2026-09-01 の主系runが同じトークンで通っていること。"
     }
   ]
 }

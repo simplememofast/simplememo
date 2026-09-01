@@ -23,6 +23,7 @@
 /** 判定コード。文字列を直接比較させない（typoが静かに通るため）。 */
 export const CODES = {
   RUN: 'run',
+  TAKEOVER_STALE_CLAIM: 'takeover_stale_claim',
   SKIP_SECRETS: 'skip_secrets',
   SKIP_BUDGET: 'skip_budget',
   SKIP_RUN_CAP: 'skip_run_cap',
@@ -49,6 +50,23 @@ export const CODES = {
  */
 export const LANES_NEEDING_EGRESS = ['A', 'B', 'C-primary-source'];
 
+/**
+ * 死んだ占有を引き継ぐまでの猶予（分）。**主系の timeout-minutes（90）より長い。**
+ *
+ * 2026-08-29、副系(09:20)が当日ロックを claim だけ取って記事もPRも作らずに終わった。
+ * 占有は「ブランチが在る」だけで成立するので、**claim を取った側が死ぬと、
+ * その日は誰も走らないまま全経路が緑になる。**主系の行は `skipped_gate` として
+ * 残り、見た目は「重複でスキップした正常な日」と区別がつかない（ap-20260829-actions）。
+ *
+ * 引き継ぎの条件を「時間」だけにしないのが要点:
+ *   - **claim コミット以外の仕事が1つでも載っていたら引き継がない**（生きている）
+ *   - **経過時間が測れなかったら引き継がない**（「測れない」は「古い」ではない）
+ * 90分より長くしてあるのは、**走っている経路から取り上げないほうが先**だから。
+ * 遅れて取り戻すのは二番目でよい —— 二重着手（2026-08-21 の PR #521/#522）は
+ * 出荷が二重になるだけだが、生きている経路を追い出すと両方が中途半端に終わる。
+ */
+export const STALE_CLAIM_MINUTES = 120;
+
 const isPrimary = (route) => route === 'actions';
 
 /**
@@ -58,6 +76,8 @@ const isPrimary = (route) => route === 'actions';
  * @param {boolean} s.secretsPresent  主系のみ意味を持つ（CLAUDE_CODE_OAUTH_TOKEN か ANTHROPIC_API_KEY）
  * @param {boolean} s.budgetOver      当月の実費が上限に達しているか
  * @param {boolean} s.branchClaimed   origin に当日ブランチが既にあるか
+ * @param {boolean|null} s.claimHasWork    当日ブランチに claim コミット以外の仕事が載っているか（null = 測れなかった）
+ * @param {number|null} s.claimAgeMinutes  当日ブランチの最新コミットからの経過分（null = 測れなかった）
  * @param {string|null} s.prodStatusDate  本番 data/autopilot-status.json の date_jst
  * @param {string|null} s.mainStatusDate  origin/main の同ファイルの date_jst
  * @param {boolean} s.prTodayExists   当日作成のPRがあるか
@@ -65,7 +85,9 @@ const isPrimary = (route) => route === 'actions';
  * @param {boolean} s.force           手動の検証実行（冪等チェックを飛ばす）
  */
 export function decide(s) {
-  const RUNNABLE = new Set([CODES.RUN, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS]);
+  const RUNNABLE = new Set([
+    CODES.RUN, CODES.TAKEOVER_STALE_CLAIM, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS,
+  ]);
   const R = (code, reason, extra = {}) => ({ run: RUNNABLE.has(code), code, reason, ...extra });
 
   // -1. **緊急停止。**他のどの判定よりも先に見る。
@@ -161,8 +183,21 @@ export function decide(s) {
   if (s.force) return R(CODES.RUN, 'force指定（手動の検証実行）。冪等チェックを省略');
 
   // 4. 当日ブランチの占有。**弾かれること自体がこの仕組みの出力**であって障害ではない。
+  //
+  //    ただし「占有されている」と「占有した経路が生きている」は別物で、
+  //    2026-08-29 はここを同一視していたために1日ぶんの出荷が消えた。
+  //    **死んだ占有だけは引き継ぐ**（条件は STALE_CLAIM_MINUTES のコメント）。
+  //    引き継ぎでも即 run にはせず、5〜8（出荷済み・当日PR・主系稼働中）を
+  //    通ってからにする —— 別経路が先に出していたなら、古い claim が
+  //    残っていること自体は正常だから。
+  let takeover = false;
   if (s.branchClaimed) {
-    return R(CODES.SKIP_BRANCH_CLAIMED, '当日ブランチを他経路が先に取っている。何もせず終了');
+    const bare = s.claimHasWork === false;
+    const age = typeof s.claimAgeMinutes === 'number' ? s.claimAgeMinutes : null;
+    if (!bare || age === null || age < STALE_CLAIM_MINUTES) {
+      return R(CODES.SKIP_BRANCH_CLAIMED, '当日ブランチを他経路が先に取っている。何もせず終了');
+    }
+    takeover = true;
   }
 
   // 5. 本番に当日分が出ている＝マージ＋デプロイまで終わっている。
@@ -188,6 +223,18 @@ export function decide(s) {
     return R(CODES.SKIP_PRIMARY_RUNNING, `主系が作業中（status=${s.primaryRunStatus}）。副系は終了`);
   }
 
+  // 8-2. 死んだ占有の引き継ぎ。**同じブランチに引き継ぎコミットを積んでから作業する。**
+  //      積むことが次の経路への通知になる（claim だけでなくなるので、後発は 4 で止まる）。
+  //      新しいブランチを切ったり `--force` で上書きしたりしない —— 占有を
+  //      壊す方向の操作は、ここで直したい事故を別の形で作り直す。
+  if (takeover) {
+    return R(CODES.TAKEOVER_STALE_CLAIM,
+      `当日ブランチは claim だけで ${s.claimAgeMinutes} 分動いていない（上限 ${STALE_CLAIM_MINUTES} 分）。`
+      + '占有した経路は死んだものとして引き継ぐ。'
+      + '**同じブランチに引き継ぎコミットを積んでから作業する**（新しく切り直さない）',
+      s.egressBlocked ? { forbiddenLanes: LANES_NEEDING_EGRESS, degraded: true } : {});
+  }
+
   // 9. **外部到達が塞がれていても走る。**ただし選べるレーンが減る。
   //    2026-08-22の実績: obsidian.md / notion.com / github.com 本体が 403 になり、
   //    一次情報の実測が要る C05〜C10 を見送って C12 に切り替えて出荷した。
@@ -206,6 +253,8 @@ export function baseState(overrides = {}) {
   return {
     route: 'actions', todayJst: '2026-08-23',
     secretsPresent: true, budgetOver: false, runCapOverrun: false, branchClaimed: false,
+    // **既定は「測っていない」。**測れなかった占有は引き継がない側に倒れる。
+    claimHasWork: null, claimAgeMinutes: null,
     prodStatusDate: '2026-08-22', mainStatusDate: '2026-08-22',
     prTodayExists: false, primaryRunStatus: 'completed', force: false,
     // --- 故障・縮退の軸。既定は「すべて健全」 ---

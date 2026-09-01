@@ -127,6 +127,50 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
   初めて実際のロックとして機能する。claim コミットはそのまま残してよい
   （その経路がいつ着手したかの記録になる）。
 
+- **死んだ占有の引き継ぎ（2026-09-01追加）**: 上の占有は
+  **占有した経路が死んだ場合を考えていなかった。**2026-08-29、副系(09:20)が
+  当日ロックを claim だけ取って記事もPRも作らずに終わり、
+  **その日は主系も含めて誰も走らないまま全経路が緑になった**
+  （`ap-20260829-ccr0920` / `ap-20260829-actions`）。占有は「ブランチが在る」
+  だけで成立するので、claim を取った側が死ぬと**ロックが翌日まで残る。**
+  主系側の行は `skipped_gate` として残り、見た目は「重複でスキップした
+  正常な日」と区別がつかない。
+
+  当日ブランチが在るときは、次の3つを**全部**確かめてから引き継ぐ:
+
+  ```bash
+  DAY="claude/obsidian-auto-$(TZ=Asia/Tokyo date +%Y%m%d)"
+  git fetch origin "$DAY"
+  # ① claim 以外の仕事が載っているか（1 = claim だけ）
+  git rev-list --count origin/main.."origin/$DAY"
+  # ② 最新コミットからの経過（分）
+  echo $(( ( $(date +%s) - $(git log -1 --format=%ct "origin/$DAY") ) / 60 ))
+  ```
+
+  - **① が 2 以上なら引き継がない。**書いている最中は claim 以外のコミットが載る。
+    「古い＝死んでいる」ではない
+  - **② が 120 分未満なら引き継がない。**主系は `timeout-minutes: 90` で走るので、
+    それより短い猶予だと**生きている経路を横から奪う**。
+    二重着手（PR #521/#522）は出荷が二重になるだけだが、生きている経路を
+    追い出すと両方が中途半端に終わる
+  - **どちらかが測れなかったら引き継がない。**「測れなかった」は「古い」ではない
+    （§1-2 の「取得できなかった」と「増えていない」を混ぜない原則と同じ）
+  - **本番/mainのstatus JSONが当日分、または当日PRがあるなら引き継がない。**
+    別経路が先に出荷していれば、古い claim が残っているのは正常
+
+  引き継ぐときは**同じブランチに引き継ぎコミットを積んでから作業する。**
+  新しく切り直さない・`--force` で上書きしない — 積むこと自体が後発への通知になる
+  （claim だけでなくなるので、後から来た経路は①で止まる）。
+
+  ```bash
+  git checkout -B "$DAY" "origin/$DAY"
+  git commit --allow-empty -m "chore(autopilot): take over stale claim on $DAY (lane: <経路>)"
+  git push origin "$DAY"   # 非fast-forwardで弾かれたら、生きていた。何もせず終了する
+  ```
+
+  判定の機械可読版は `scripts/autopilot-gate.mjs` の `STALE_CLAIM_MINUTES` と
+  `takeover_stale_claim`（ドリル5シナリオで固定してある）。
+
 - Actions側の有効化にはオーナー作業が1つ要る: ローカルで `claude setup-token` を
   実行して出るトークンを repo secret **`CLAUDE_CODE_OAUTH_TOKEN`** に登録
   （サブスク課金でActions内のClaudeが動く。API課金でよければ `ANTHROPIC_API_KEY` でも可）。

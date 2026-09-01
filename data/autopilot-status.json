@@ -1,35 +1,37 @@
 {
-  "date_jst": "2026-08-29",
-  "generated_at": "2026-08-31T23:20:00Z",
-  "action": null,
+  "date_jst": "2026-09-01",
+  "generated_at": "2026-09-01T00:33:50Z",
+  "action": "maintenance",
   "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 1,
+    "consecutive_no_article_days": 4,
     "last_article_date_jst": "2026-08-28",
-    "last_production_change_date_jst": "2026-08-29",
-    "days_since_production_change": 0
+    "last_production_change_date_jst": "2026-08-28",
+    "days_since_production_change": 4
   },
   "data_freshness": {
-    "bq_export_last_data_date": "2026-08-24",
-    "bq_export_days_accumulated": 15,
+    "bq_export_last_data_date": "2026-08-29",
+    "bq_export_days_accumulated": 20,
     "bq_checked": true,
     "manual_snapshot_label": "2026-08-24",
-    "$note": "**[2026-08-31] この日は再計測していない。**値は 08-28 の観測のまま。計測するのは当日のオートパイロットで、その実行が 429 で即死したため計測自体が起きていない。**「変わっていない」ではなく「測っていない」。**"
+    "$note": "このコンテナでは `bq-preflight.mjs` が資格情報を持たず落ちる（BigQuery MCP も主系Actions環境には無い）。値は**本日09:25 JSTに走った seo-daily.yml run 33454679748 の Export preflight ログの実測**: 2026-08-10..2026-08-29・20日蓄積・28日窓は 2026-09-06 から。レーンA/Bはそれまで正当化できない。"
   },
   "cost": {
-    "month": "2026-08",
+    "month": "2026-09",
     "cap_usd": 40,
-    "spent_usd": 20.0445,
-    "remaining_usd": 19.9555,
+    "spent_usd": 0,
+    "remaining_usd": null,
+    "remaining_usd_upper_bound": 40,
+    "spent_usd_is_lower_bound": true,
     "over": false,
-    "runs": 5,
-    "shipped": 2,
-    "usd_per_shipped": 10.0222,
+    "runs": 0,
+    "shipped": 0,
+    "usd_per_shipped": null,
     "by_route": {
       "actions": {
-        "runs": 5,
-        "spent": 20.044477850000007
+        "runs": 0,
+        "spent": 0
       },
       "ccr": {
         "runs": 0,
@@ -38,38 +40,14 @@
     },
     "ccr_measured": false,
     "run_caps": {
-      "overruns": [
-        {
-          "run_id": "32599191984",
-          "date_jst": "2026-08-23",
-          "task_kind": "article",
-          "cost": 7.296703800000001,
-          "cap": 6,
-          "times": 1.2,
-          "reviewed": true,
-          "why": "主系の初出荷回。前日の故障（ap-20260822-actions）の修理を含む150ターン・17分の実行で、内容そのものは妥当と判断した。上限$2.00は実績n=1（$0.8149）から置いた暫定値で、上限側が過小。実測5件で異常検知が自己較正されるので、そこから再導出する。オーナー承認 2026-08-25"
-        },
-        {
-          "run_id": "32816234185",
-          "date_jst": "2026-08-25",
-          "task_kind": "repair",
-          "cost": 11.932870250000008,
-          "cap": 3,
-          "times": 4,
-          "reviewed": true,
-          "why": "2026-08-25のセッションでオーナーが明示的に権限を委譲して解除（「権限を与えるのでやって」）。支出そのものは妥当と判断した: 104ターン・27分で ap-20260824/25 の2件を修理して出荷しており、内容に無駄な反復は無い。**ただし本質は支出ではなく上限の較正。** 実測5件のうち task_kind が付いた3件を見ると、実際に仕事をして出荷した run は2件（article $7.2967 / repair $11.9329）で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run（$0.8149）だけ。** 上限 $2.00/$3.00 は失敗runのn=1から外挿した placeholder で、成功runを一度も許容していない。さらに repair は monthly_usd_cap $8 に対し1回が $11.93 で、月枠が1回分に足りていない。上限の再設定は monthly_usd_cap の決定を含み権限表で human_only なので、ここでは解除だけを行い、較正は数値つきで台帳に残す（act-budget-recalibrate）"
-        }
-      ],
+      "overruns": [],
       "unreviewed": [],
-      "runs_without_kind": 2
+      "runs_without_kind": 0
     },
     "models": {
-      "counts": {
-        "claude-haiku-4-5-20251001": 2,
-        "claude-sonnet-5": 2
-      },
-      "runs_with_models": 2,
-      "runs_without_models": 3
+      "counts": {},
+      "runs_with_models": 0,
+      "runs_without_models": 0
     },
     "anomaly": {
       "enabled": true,
@@ -77,33 +55,20 @@
       "median": 0.8149038,
       "threshold": 3.2596152,
       "samples": 5,
-      "anomalies": [
-        {
-          "run_id": "32599191984",
-          "date_jst": "2026-08-23",
-          "cost": 7.296703800000001,
-          "times_median": 9
-        },
-        {
-          "run_id": "32816234185",
-          "date_jst": "2026-08-25",
-          "cost": 11.932870250000008,
-          "times_median": 14.6
-        }
-      ]
+      "anomalies": []
     },
     "cap_set_by": "placeholder",
-    "$note": "**[2026-08-31] 08-28 の集計のまま。意図的に取り直していない。**`autopilot-budget --json` はいま JST の月替わり（2026-09-01）を見て 2026-09 のゼロを返すので、それで上書きすると 8月の実績が消える。**そして 8月の数字は動いていない** —— 08-30 と 08-31 の失敗はどちらもログ上 `total_cost_usd: 0` / `num_turns: 1` で、課金ゼロで弾かれている。"
+    "$note": "**[2026-09-01] 月が替わったので 2026-09 の集計に切り替えた。runs 0 は「今月まだ計上が無い」であって「無料で動いた」ではない** —— 当日runの実費は翌日09:00 JSTのアクチュエータ（append-cost）が入れる。8月の確定値（$20.04 / 5 run）は data/autopilot-cost.json に残っている。remaining_usd が null なのは PR #746 の設計で、副系CCRが測れていない月は残額を出さない（測っていないぶんが「使える」に化けるため）。"
   },
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-08-28",
-      "days": 18
+      "to": "2026-09-01",
+      "days": 22
     },
-    "completion_rate": 0.7619,
-    "change_failure_rate": 0.2381,
-    "human_intervention_rate": 0.3333,
+    "completion_rate": 0.6923,
+    "change_failure_rate": 0.3077,
+    "human_intervention_rate": 0.3077,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -111,39 +76,39 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.19047619047619047
+        "rate": 0.15384615384615385
       },
       "substitute": {
-        "runs": 1,
-        "rate": 0.047619047619047616
+        "runs": 2,
+        "rate": 0.07692307692307693
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.047619047619047616
+        "rate": 0.038461538461538464
       },
       "request": {
         "runs": 1,
-        "rate": 0.047619047619047616
+        "rate": 0.038461538461538464
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.8333,
+    "shipping_day_rate": 0.7273,
     "totals": {
-      "runs": 31,
-      "attempted": 21,
-      "shipped": 16,
-      "failed": 5,
+      "runs": 39,
+      "attempted": 26,
+      "shipped": 18,
+      "failed": 8,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 15,
-        "attempted": 13,
-        "shipped": 13
+        "runs": 18,
+        "attempted": 16,
+        "shipped": 15
       },
       "primary": {
-        "runs": 16,
-        "attempted": 8,
+        "runs": 21,
+        "attempted": 10,
         "shipped": 3
       }
     },
@@ -152,34 +117,61 @@
       "2026-08-16",
       "2026-08-17"
     ],
-    "intervention_count": 7,
+    "intervention_count": 8,
     "timings": {
       "time_to_detect_hours": {
-        "median": 2.675,
-        "max": 50.71666666666667,
-        "n": 6
+        "median": 2.95,
+        "max": 70.83333333333333,
+        "n": 7
       },
       "time_to_repair_hours": {
         "median": 6.683333333333334,
         "max": 25.633333333333333,
         "n": 6
       },
-      "unresolved": []
+      "unresolved": [
+        {
+          "run_id": "ap-20260827-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260828-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260829-actions",
+          "failure_class": null
+        },
+        {
+          "run_id": "ap-20260829-ccr0920",
+          "failure_class": "claim_without_completion"
+        },
+        {
+          "run_id": "ap-20260830-actions",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260831-actions",
+          "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260901-owner-session",
+          "failure_class": null
+        }
+      ]
     }
   },
-  "reason": "**記事なし。当日ロックを取った副系が、記事もPRも作らずに終わった。**主系はそのブランチの存在を「進行中/実行済み」と読んで Gate でスキップし、3秒で success を返した（run 33230445898・steps 3〜13 が全て skipped）。**claim を取った側が死ぬと、その日は主系も走らないまま緑になる。**\n\n**この欄が 08-29 で止まっているのは、そのあとの2日を書いた行がアクチュエータ由来だから。**08-30 と 08-31 も記事は出ておらず（どちらも 429・週次の利用枠）、`data/autopilot-runs.json` の usage_limit 2行に一次資料つきで入っている。ただし `statusAgreement` は `act-` 由来の行を除外する設計なので、**この欄の日付はセッションが書いた最後の日を指す。**\n\n**書いたのは当日のオートパイロットではなく、2026-09-01 に追いかけたセッション。**実行が落ちた日は status を書く主体も居ない、という構造的な穴がここに出ている。",
-  "verified": "実測（このセッションで実際に実行した）: (a) egressの実測——obsidian.mdへはcurlで403（CONNECT tunnel failed）、raw.githubusercontent.com/obsidianmd/obsidian-releasesは200だがobsidianmd/obsidian-helpは複数パス試行すべて404（前回セッションが到達した経路が本日は機能しなかった）、api.github.comは直接到達200だが本セッションのGitHub API利用は設定リポジトリ以外403。(b) GitHub MCP `get_job_logs`でseo-daily.yml最新run(08-27 09:30 JST)のExport preflightログを読み、BigQueryのdata_date 2026-08-10〜08-24・15/28日蓄積・28日窓到達2026-09-06を確認（bq-preflight.mjsは資格情報無しで失敗するためこの経路で代替）。(c) coverage-queue.jsonのC07 evidence「Standard $4/Plus $8」をAUTOPILOT_LOG.md全文・coverage-queue.json全体でgrepし、他に出典が無いことを確認——Sync $4とPublish $8（/obsidian/pricing/で別々に検証済みの2製品）の混同の疑いと結論した。一次情報として新規に確認したのはこの「出典が無いことの確認」自体で、既存の検証済み事実（バージョン履歴保持期間・Sync基本料金）は/obsidian/sync/・/obsidian/pricing/からの引用。§4の全チェックをローカルで全通過（seo-check 0 errors 0 warnings・268ファイル）。iPhoneビューポート（390×844 DPR3）実描画QA: Playwright+Chromiumで実描画し、水平スクロールなし（scrollWidth=clientWidth=390）・表はoverflow-x:auto内・回答ブロック(tip-box) top=807px（ファーストビュー内）・cta-qrはモバイル非表示。JSエラーは外部analytics(ahrefs/GTM)のトンネル失敗2件のみで、既存の/obsidian/sync/ページで同一条件で再現したため本ページ固有の問題ではないと確認。QRは44件（新規2件含む）を独立デコードして0 failed、既存42件はバイト同一。",
+  "reason": "【連続無記事4日目・本番最終変更 2026-08-28・BQ 20/28日（28日窓は 09-06）】**レーンF（自己修復）。記事は書いていない。**未修理の故障が3件上がっており、Runbook §2 のとおり基盤の修理を最優先にした。\\n\\n**直したもの: 死んだ占有が1日ぶんの出荷を消す穴（ap-20260829-ccr0920 / claim_without_completion）。**2026-08-29、副系(09:20)が当日ロックを claim だけ取って記事もPRも作らずに終わった。占有は「ブランチが在る」だけで成立するので、主系の Gate はそれを『進行中/実行済み』と読んで3秒でスキップし、**その日は誰も走らないまま全経路が緑になった**（run 33230445898・steps 3〜13 が全て skipped）。主系側の行は skipped_gate として残るため、見た目は「重複でスキップした正常な日」と区別がつかない。**占有されていることと、占有した経路が生きていることは別物**なので、死んだ占有だけを引き継ぐ判定を入れた（claim以外の仕事が無い＋120分以上動いていない＋その両方が実際に測れた、の3条件。1つでも欠けたら従来どおりスキップする）。\\n\\n**残り2件（ap-20260830/31-actions・usage_limit）は、修理済みだったのに台帳へ書く口が無くて開いたままだった。**応答経路の修理は 2026-09-01 08:09 JST のオーナーセッションが PR #738 で出荷済み（429 を「資格情報が通っていない・setup-token を再実行せよ」と断定していた2値の切り分けを3値にした）。**使用量上限そのものはリポジトリ側の変更では防げない**——アカウントの週次上限で、2026-08-31T23:00Z にリセットされた。その証拠は本日の主系runが同じトークンで通っていること。この2件が残っていた直接の原因は `autopilot-runs.mjs --append` に `--repair-of` が無く、Runbook が要求する記録を手作業でしか書けなかったことなので、そこも同時に塞いだ。\\n\\nトレンドレーダー: 本日は実施していない（レーンFの修理に充てた）。\\nROUTINE_MCP_PROBE: unavailable 主系Actions環境にCCRのMCPが無い",
+  "verified": "実測（このセッションで実際に実行した）: (a) 引き継ぎ判定を**本番のAPIで実走**——compare API で当日ブランチ claude/obsidian-auto-20260901 を測り `ahead=1 / 経過8分` → 「生きている＝引き継がない」を確認、存在しないブランチでは ahead が空 → 「測れない＝引き継がない」を確認。(b) ワークフローYAMLを python3 の yaml.safe_load でパースし13ステップを確認（最初に書いた埋め込みPythonはブロックスカラーのインデントを壊しており、そこで落ちた——shell側だけで完結する形に書き直した）。(c) ドリル5シナリオを追加して gate の16コード全被覆を確認（新コードに演習が無いとCIが落ちる仕組み）。(d) 資格情報2件を最新runで実測: CLAUDE_CODE_OAUTH_TOKEN は本セッションが Checkout 以降を実行していること自体が充足の証拠、GCP_SERVICE_ACCOUNT_JSON は seo-daily.yml run 33454679748 の『Credentials are configured』が success。(e) 副系Routineの状態を check-routine-runs.mjs で実測（ccr-0730/ccr-0830 は『停止 2026-08-28・意図的』のラベル付き、ccr-0920 は failed で未対応4件のうちの1件）。**検証していないこと**: 引き継ぎが本番で実際に起きるところ（死んだ占有が発生する日を待つ以外に確かめる手が無い）。ドリルが証明するのは判定の論理だけで、本物の切替演習は引き続き未実施。記事は書いていないので記事系QA（iPhoneビューポート・OG・QR）は該当なし。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（268ファイル）",
-    "content_graph": "28 entries OK。/obsidian/sync/official-sync/ を新規登録（cluster: obsidian-sync・parent: /obsidian/sync/・siblings: icloud, pricing）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施。水平スクロールなし・表はoverflow-x:auto内・JSエラーは外部analytics由来2件のみ（既存ページと同一）・回答ブロックtop=807px（ファーストビュー内）・QRはモバイル非表示",
-    "experiments": "36件中21 open・due 0・overdue 0",
-    "other": "Runbook §4 の全チェックをローカルで通過: check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（245 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / check-public-facts.mjs（distribution-queue.json含め6面OK） / generate_sitemap.py --dry-run。check-routine-runs.mjs --check は exit 0（未対応4件は既知・open_budget内、いずれも本セッションのタスク範囲外）"
+    "seo_check": "該当なし（本番HTMLに触っていない）。CI では通す",
+    "mobile_qa": "該当なし（記事なしの回・本番HTML無変更）",
+    "other": "ローカルで通したもの: autopilot-drill --check（21シナリオ・gate 16コード全被覆） / property-tests --check（不変条件すべて成立） / check-escalation --check / check-emergency-stop --check / check-degradation --check / check-authority --check / autopilot-runs --check / autopilot-selfheal --check / autopilot-budget --check / check-routine-runs --check。ワークフローYAMLは yaml.safe_load でパース確認。"
   },
   "owner_requests": [
-    "【要オーナー判断・継続】GH_PATの回転（workflow scope は足さないと決定済み・2026-08-25。残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。本セッションはGitHub Secretsの値・回転日を検査する権限が無く**実測手段が無いため未確認**で、前日の記録をそのまま繰り越す。",
-    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。",
-    "【新規・要オーナー判断】副系A(ccr-0730・07:30 JST)・副系B(ccr-0830・08:30 JST)のRoutineがstopped状態であることが本日`check-routine-runs.mjs`で判明（PR #693/#694）。再開するかどうかはオーナー判断（Routine停止の経緯・要否をこのセッションでは把握していない）。現状は open_findings に記録済みで、上限内（4/4）。"
+    "【要オーナー判断・継続】GH_PATの回転（workflow scope は足さないと決定済み・2026-08-25。残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。本セッションはGitHub Secretsの値・回転日を検査する権限が無く**実測手段が無いため未確認**。",
+    "【新規・要オーナー判断】副系の3経路が現在どれも稼働していない。check-routine-runs.mjs の実測では ccr-0730 と ccr-0830 が『停止 2026-08-28・意図的』、再試行の ccr-0920 は failed（当日が空・2026-08-31 発見）で未対応4件の1つ。**つまり今日の出荷は主系1本に依存している。**今日直した引き継ぎは「死んだ占有を後続が拾う」仕組みなので、拾う側の経路が動いていないと効かない。再開の可否はオーナー判断。",
+    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。前日の『GCP_SERVICE_ACCOUNT_JSON 未登録』系の依頼は、本日の実測（run 33454679748 の Credentials are configured が success）で充足を確認したため積んでいない。"
   ],
-  "next": "coverage-queueのpendingは残り26件。次点候補を選ぶ際は、キューのevidenceに書かれた数字（特に価格・容量など）を鵜呑みにせず、本文執筆前にAUTOPILOT_LOG.md全文とキュー自体をgrepして出典の有無を確かめること——今回のC07がまさにその一例で、evidence記載の「Standard $4/Plus $8」は一度も検証されておらず、Sync $4とPublish $8という別製品の価格を混同していた疑いが強い。この訂正フローそのものをdistribution-queueの配信の種として公開した（「社内の思い込み数字を遡ったら出典が無かった」という角度）。**ネットワーク到達性は経路によって変わる**——本日はobsidianmd/obsidian-helpへの到達に失敗したが（前回セッションは同じ経路で成功していた）、obsidian-releasesへは到達できた。次回の一次情報取得はまず到達性を実測してから引用元を選ぶこと。副系A/B(ccr-0730/ccr-0830)のRoutine停止は本セッションの範囲外だが、次に主系(06:00)・再試行(09:20)以外の経路からの出荷が3日以上途絶えるようなら、この停止が原因である可能性が高い。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。"
+  "next": "**引き継ぎは本番で一度も発火していない。**判定の論理はドリルと本番APIでの実走まで確かめたが、実際に死んだ占有を拾うところは、そういう日が来るまで観測できない。次に `takeover=true` の warning が Actions のログに出た日は、**その run が本当に出荷まで行ったか**を必ず台帳で確かめること（拾ったのに出荷しなければ、穴が1段深いところにある）。/ 引き継ぎの猶予120分は主系の timeout-minutes 90 から置いた値で、**副系CCRの最長実行時間は測っていない**。副系が120分を超えて走る回があるなら、そのとき奪われる側になる。/ property-tests.mjs の乱択は claimHasWork / claimAgeMinutes をまだ振っていない（レーンFの may_modify 外なので今回は触っていない）。組み合わせの網を新しい判定にも掛けるのが次の一手。/ レーンA/B は BQ 28日窓（2026-09-06）まで引き続き正当化できない。coverage-queue の pending は残り26件で、故障が片付いた日はレーンEへ戻る。"
 }
