@@ -455,6 +455,21 @@ jobs:
           node scripts/check-routine-runs.mjs --selftest
           node scripts/check-routine-runs.mjs --check
 
+      # 【週次が黙って消える形を止めた】
+      # seo-daily.yml の週次段は `[ "$(date -u +%u)" = "1" ]`（UTC月曜）だけで
+      # 開いていた。cron は `0 21 * * *` で **日境界の3時間前**にあり、
+      # GitHub の schedule が3時間以上遅れると **月曜21:00Z の回が火曜に着地して、
+      # その週の門が一度も開かない。**
+      #
+      # 2026-08-31 の週が実際にそうなった —— 全ジョブ success のまま、
+      # `growth/data/gsc/` の最新ラベルは 08-24 のまま8日、規約の指紋は 0/11。
+      # **誰も落ちないので、誰も気づかない形だった。**
+      #
+      # 判定は純関数に寄せて自己テストで固定してある。**ここで回さないと、
+      # あの14件は私の手元でしか走っていないことになる。**
+      - name: Snapshot gate (週次が曜日ずれで消えないか)
+        run: node scripts/should-snapshot.mjs --selftest
+
       # 【士業への確認】判断は人のまま、運ぶところだけを機械が持つ。
       # ⑧の返信ゲートと同じ形で、**宛先が外部の専門家なので閾値は厳しい** ——
       # 送るのは台帳にある reviewed な文面だけ（送信時に作らない）／

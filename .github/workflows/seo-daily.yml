@@ -221,22 +221,42 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # ここから下は月曜だけ（または手動実行で snapshot=true のとき）。
+      # ここから下は週1回（月曜。逃した週は経過日数で拾う）か、手動実行で snapshot=true のとき。
+      #
+      # [2026-09-01] **曜日だけで決めるのをやめた。1週ぶん黙って消えていた。**
+      # cron は `0 21 * * *` で **UTCの日境界の3時間前**。GitHub の schedule は
+      # 混雑すると遅れ、08-26 以降は実測 2〜8 時間ずれている。その結果:
+      #
+      #     08-30 23:15Z (日)  →  09-01 00:25Z (火)     月曜UTCに1回も走らなかった
+      #
+      # **門は一度も開かず、全ジョブ success のまま週が終わった。**実害は2つ:
+      # `growth/data/gsc/` の最新ラベルが 08-24 のまま8日、規約本文の指紋が 0/11
+      # （初着弾は 08-31 の予定だった）。
+      #
+      # **時刻をずらすだけでは直らない** —— 遅延が cron と日境界の距離を超えれば
+      # 同じことが起きる。曜日は残したまま「前回から何日たったか」を足した。
+      # 判定と自己テスト（14件）は scripts/should-snapshot.mjs にある。
+      #
+      # **set -e を付けてある。**判定が落ちたときに GITHUB_OUTPUT が空になると
+      # `snapshot != 'true'` で**黙って飛ぶ** —— いま直しているのと同じ壊れ方になる。
       - name: Is this a snapshot day?
         id: when
         run: |
-          if [ "${{ github.event.inputs.snapshot }}" = "true" ] || [ "$(date -u +%u)" = "1" ]; then
-            echo "snapshot=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "snapshot=false" >> "$GITHUB_OUTPUT"
-            echo "月曜ではないので、記録用スナップショットのコミットは行わない。" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          set -euo pipefail
+          out="$(node scripts/should-snapshot.mjs --decide --manual "${{ github.event.inputs.snapshot }}")"
+          echo "$out" | head -1 >> "$GITHUB_OUTPUT"
+          {
+            echo ""
+            echo "## 週次スナップショット"
+            echo ""
+            echo "$out" | tail -n +2
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # ⑦法人経営。各社の規約本文を取りに行き、**改定されたら読み直しへ戻す。**
       #
       # [2026-08-27] **ここへ移した。**元は上の「取得」群に並べて毎日走らせていたが、
       # 書き先の data/corporate-obligations.json を拾う `Commit and open PR` は
-      # **月曜だけ**（すぐ上の when ステップ）。つまり火〜日は
+      # **週1回だけ**（すぐ上の when ステップ）。つまり取らない日は
       # **16秒かけて10社を取得し、書いて、捨てていた。**
       #
       # 配線した当人が、配線先の commit ゲートを読んでいなかった。
@@ -244,6 +264,10 @@ jobs:
       # 検知が週1でも遅すぎることはない。
       #
       # **取得できなかった回は台帳を触らない**（読めなかった＝変わっていない、にしない）。
+      #
+      # **[2026-09-01] 週1回の「1回」が今週は来なかった。**上の when が
+      # UTC月曜だけで開いていて、cron の遅延で月曜が飛んだため。指紋が
+      # 11社とも空のままなのはこれが理由で、取得側の失敗ではない。
       #
       # なお上の「Domain expiry (RDAP)」も同じ性質を持つ（毎日走って月曜しか残らない）。
       # あちらは前任が「期限は年1回しか動かないのでその頻度で足りる」と明記して
