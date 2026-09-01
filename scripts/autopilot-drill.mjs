@@ -26,6 +26,8 @@
  * 本物の切替演習（主系を意図的に落として副系の出荷を確かめる）はまだ無い。
  */
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { decide, baseState, CODES } from './autopilot-gate.mjs';
 
 /** シナリオ: [名前, 状態の差分, 期待コード, なぜそう振る舞うべきか] */
@@ -302,7 +304,7 @@ if (process.argv.includes('--selftest')) {
   process.exit(failed === 0 ? 0 : 1);
 }
 
-const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].split('/').pop());
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const { results, passed, total, uncovered } = run();
   console.log(`切替演習（ドリル）: ${passed} / ${total} シナリオ`

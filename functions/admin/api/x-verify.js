@@ -13,7 +13,7 @@
 //        account=en       : X_EN_API_KEY/SECRET + X_EN_ACCESS_TOKEN/SECRET
 //        Bearer (App-only) では /2/users/me が拒否されるため OAuth1 を使う。
 
-import { buildOAuth1Header, safeJson, json } from './_shared.js';
+import { buildOAuth1Header, safeJson, json, credKeysFor, firstMissing, rateLimitOf, USER_AGENT } from './_shared.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -54,18 +54,14 @@ export async function onRequest(context) {
       const res = await fetch(apiUrl, {
         headers: {
           'Authorization': 'Bearer ' + env.X_BEARER_TOKEN,
-          'User-Agent': 'SimpleMemoAdmin/1.0',
+          'User-Agent': USER_AGENT,
         },
       });
       const body = await safeJson(res);
       return json({
         status: res.status,
         body: body,
-        rateLimit: {
-          limit: res.headers.get('x-rate-limit-limit'),
-          remaining: res.headers.get('x-rate-limit-remaining'),
-          reset: res.headers.get('x-rate-limit-reset'),
-        },
+        rateLimit: rateLimitOf(res),
       });
     } catch (e) {
       return json({ status: 0, body: { error: e.message } }, 500);
@@ -74,20 +70,13 @@ export async function onRequest(context) {
 
   if (action === 'me') {
     const account = url.searchParams.get('account') === 'en' ? 'en' : 'ja';
-    const prefix = account === 'en' ? 'X_EN_' : 'X_';
-    const credKeys = {
-      consumerKey: prefix + 'API_KEY',
-      consumerSecret: prefix + 'API_SECRET',
-      token: prefix + 'ACCESS_TOKEN',
-      tokenSecret: prefix + 'ACCESS_TOKEN_SECRET',
-    };
-    for (const k of Object.values(credKeys)) {
-      if (!env[k]) {
-        return json({
-          status: 0,
-          body: { error: k + ' が Cloudflare 環境変数に未設定です' },
-        }, 400);
-      }
+    const credKeys = credKeysFor(account);
+    const missing = firstMissing(env, credKeys);
+    if (missing) {
+      return json({
+        status: 0,
+        body: { error: missing + ' が Cloudflare 環境変数に未設定です' },
+      }, 400);
     }
     const apiUrl = 'https://api.x.com/2/users/me';
     try {
@@ -102,7 +91,7 @@ export async function onRequest(context) {
       const res = await fetch(apiUrl, {
         headers: {
           'Authorization': authHeader,
-          'User-Agent': 'SimpleMemoAdmin/1.0',
+          'User-Agent': USER_AGENT,
         },
       });
       const body = await safeJson(res);

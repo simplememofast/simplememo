@@ -22,15 +22,15 @@ import { summarize as rateSummarize } from './automation-rate.mjs';
 import { load as runsLoad, summarize as runsSummarize } from './autopilot-runs.mjs';
 import { loadLedger, summarize as budgetSummarize, modelUsage, detectAnomalies } from './autopilot-budget.mjs';
 import { run as expiryRun, STATES as EXPIRY } from './check-expiry.mjs';
+import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 const pct = (n, digits = 1) => `${(n * 100).toFixed(digits)}`;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ── 台帳 ───────────────────────────────────────────────
-const coverage = readJSON('data/automation-coverage.json');
+const coverage = readJSON(ROOT, 'data/automation-coverage.json');
 const rate = rateSummarize(coverage);
 const runs = runsSummarize(runsLoad());
 const ledger = loadLedger();
@@ -39,7 +39,7 @@ const budget = budgetSummarize(ledger, MONTH);
 const models = modelUsage(ledger, MONTH);
 const anomaly = detectAnomalies(ledger, MONTH);
 const capProvisional = ledger.budget.cap_set_by === 'placeholder';
-const authority = readJSON('data/authority-matrix.json');
+const authority = readJSON(ROOT, 'data/authority-matrix.json');
 // ネットワークは使わない（中間者復号の環境では実測が信用できないため、
 // ダッシュボードは台帳の値だけで描く）。
 const expiry = await expiryRun({ net: false });

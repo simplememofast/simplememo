@@ -123,7 +123,9 @@ export function mask(src) {
   return out.join('');
 }
 
-const READ_FN = /\b(readLedger|readJson|readFileSync|JSON\.parse|loadLedger)\b/;
+// readJSON は lib/read-ledger.mjs の素通しヘルパ（旧: 各スクリプトの
+// ローカル定義。lib へ寄せた際に DECL 経由の汚染が消えたので名前で拾う）
+const READ_FN = /\b(readLedger|readJson|readJSON|readFileSync|JSON\.parse|loadLedger)\b/;
 const DECL = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;]*)/g;
 
 /**
@@ -315,7 +317,9 @@ export function validate(sites, known) {
   return problems;
 }
 
-function sources() {
+// 2つの台帳（guard-shapes / generators）の走査対象。check-generators.mjs も
+// この定義を import して使う —— 走査の外周が2定義に割れてズレるのを防ぐ。
+export function sources() {
   const out = [];
   for (const dir of ['scripts', 'growth/scripts']) {
     const d = path.join(ROOT, dir);

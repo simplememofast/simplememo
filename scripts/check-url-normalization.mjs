@@ -21,38 +21,20 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadEdgeMiddleware, edgeResult } from "./lib/edge-middleware.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const ORIGIN = "https://simplememofast.com";
 
-// The middleware is plain ESM but the repo has no package.json (`"type":
-// "module"`), so a bare import of a .js file would be parsed as CommonJS.
-// Load it through a data: URL instead, which is always module-scoped.
-const src = readFileSync(path.join(ROOT, "functions/_middleware.js"), "utf8");
-const { onRequest } = await import(
-  "data:text/javascript," + encodeURIComponent(src)
-);
-
-const PASSTHROUGH = Symbol("passthrough");
+// data: URL 経由でロードする理由は lib/edge-middleware.mjs 参照
+// （package.json が無いので .js の bare import は CJS 扱いになる）。
+const onRequest = await loadEdgeMiddleware(ROOT);
 
 async function run(urlPath) {
   // Accept either a path (checked against the canonical origin) or an
   // absolute URL (for host-normalization cases, e.g. the www host).
   const absolute = urlPath.startsWith("https://") ? urlPath : ORIGIN + urlPath;
-  const res = await onRequest({
-    request: new Request(absolute),
-    next: async () => PASSTHROUGH,
-  });
-  if (res === PASSTHROUGH) return { kind: "pass" };
-  if (res.status >= 300 && res.status < 400) {
-    const loc = res.headers.get("location");
-    return {
-      kind: "redirect",
-      status: res.status,
-      to: loc.startsWith(ORIGIN) ? loc.slice(ORIGIN.length) : loc,
-    };
-  }
-  return { kind: "status", status: res.status };
+  return edgeResult(onRequest, absolute, ORIGIN);
 }
 
 const failures = [];

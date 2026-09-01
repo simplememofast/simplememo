@@ -27,9 +27,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readJSON } from './lib/read-json.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const readJSON = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 
 /** 根拠の強さ → 確信度。**手で置かせない。** */
 export const EVIDENCE_STRENGTH = {
@@ -120,7 +120,7 @@ if (isMain) {
     process.exit(failed === 0 ? 0 : 1);
   }
   const argv = process.argv.slice(2);
-  const doc = readJSON('data/feature-backlog.json');
+  const doc = readJSON(ROOT, 'data/feature-backlog.json');
   const { ranked, errors } = rank(doc);
 
   if (argv.includes('--json')) {
