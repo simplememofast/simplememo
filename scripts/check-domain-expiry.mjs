@@ -47,6 +47,31 @@ export const RDAP_ENDPOINTS = [
 export const WARN_DAYS = 60;
 
 /**
+ * 自動更新の決済が試行される日（期限の何日前か）。
+ *
+ * 【2026-09-01 追加】**この日付が要るのは、失敗が機械から見えないから。**
+ * ムームードメインは期限の30日前に**1回だけ**課金し、**再試行しない。**
+ * 落ちると**自動更新設定がOFFになる**。カードを直しても再決済されない
+ * （data/corporate-obligations.json の deadlines[domain-renewal].payment_attempt）。
+ *
+ * **RDAP は成功しても失敗しても同じ日付を返す。**つまり下の WARN_DAYS は
+ * **どちらの場合も等しく鳴る** —— **鳴っていることは決済が通ったことを意味しない。**
+ * 唯一の観測点は管理画面の「状態」欄で、ログインが要るのでここからは見えない。
+ *
+ * **だから機械にできるのは日付を出すところまで。**「いつ人が見に行けばよいか」を
+ * 出しておかないと、60日警告を見た人が**何を確かめるべきか分からないまま消す。**
+ */
+export const PAYMENT_ATTEMPT_DAYS_BEFORE = 30;
+
+/** 決済が試行される日。期限が取れていなければ null（推定しない）。 */
+export function paymentAttemptDate(due, daysBefore = PAYMENT_ATTEMPT_DAYS_BEFORE) {
+  if (!due) return null;
+  const t = Date.parse(`${due}T00:00:00Z`);
+  if (Number.isNaN(t)) return null;
+  return new Date(t - daysBefore * 86400000).toISOString().slice(0, 10);
+}
+
+/**
  * RDAP の応答から有効期限を取り出す。**純関数。**
  *
  * RDAP は `events[].eventAction === 'expiration'` に期限を置く。
@@ -245,6 +270,16 @@ export function selftest() {
   eq(reconcile({ fetched: '2026-09-01', ledgerDue: '2026-09-01', today: '2026-08-26' }).verdict,
      'expiring', '台帳と一致していると期限切れ間近を黙っている');
 
+  // 決済試行日 —— **期限から引くだけ。取れていなければ出さない。**
+  eq(paymentAttemptDate('2027-01-30'), '2026-12-31', '決済試行日を期限の30日前に置いていない');
+  eq(paymentAttemptDate(null), null, '**期限が無いのに決済日を推定している**');
+  eq(paymentAttemptDate('not-a-date'), null, '壊れた日付から決済日を作っている');
+  // 月またぎ・年またぎで壊れないこと（手計算だと落ちる形）
+  eq(paymentAttemptDate('2027-03-01'), '2027-01-30', '月またぎで決済試行日がずれる');
+  // WARN_DAYS は決済試行より前に鳴る必要がある。**逆転したら警告が手遅れになる。**
+  eq(WARN_DAYS > PAYMENT_ATTEMPT_DAYS_BEFORE, true,
+     '**60日警告が決済試行より後になっている** —— 鳴った時にはもう1回きりの課金が済んでいる');
+
   return p;
 }
 
@@ -279,6 +314,14 @@ if (isMain) {
   console.log(`  台帳: ${entry.next_due ?? '**未把握**'}`);
   console.log(`  RDAP: ${expiry ?? '**取得できず**'}${source ? `  (${source})` : ''}`);
   console.log(`  判定: ${r.verdict} — ${r.why}`);
+  // **警告だけ出して「何を見るか」を言わないと、見た人が消して終わる。**
+  const attempt = paymentAttemptDate(r.due);
+  if (attempt) {
+    console.log(`\n  決済の試行: ${attempt} ごろ（期限の ${PAYMENT_ATTEMPT_DAYS_BEFORE} 日前・**1回だけ・再試行なし**）`);
+    console.log('  **失敗しても RDAP の日付は変わらない。**この検査では成功と区別がつかない。');
+    console.log('  → その数日後に管理画面の「状態」欄が「自動更新中」のままかを1回見ること');
+    console.log('     落ちていた場合、カードを直しても自動では再決済されない（手で支払う）');
+  }
   if (r.verdict === 'unknown') {
     console.log('\n  **取得できなかったことを「期限なし」と読まないこと。**');
     console.log('  エージェント環境はプロキシが RDAP への CONNECT を拒否する。CIでは届く。');

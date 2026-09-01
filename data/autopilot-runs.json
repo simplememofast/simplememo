@@ -611,6 +611,22 @@
       "source": "session"
     },
     {
+      "run_id": "ap-20260827-actions",
+      "date_jst": "2026-08-27",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "33026752472",
+      "interventions": [],
+      "source": "act-reconcile",
+      "detected_at": "2026-08-31T23:39:57.061Z"
+    },
+    {
       "run_id": "ap-20260827-ccr0920",
       "date_jst": "2026-08-27",
       "route": "ccr-0920",
@@ -641,6 +657,22 @@
       "source": "session"
     },
     {
+      "run_id": "ap-20260828-actions",
+      "date_jst": "2026-08-28",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_gate",
+      "lane": null,
+      "action": null,
+      "pr": null,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "33143661940",
+      "interventions": [],
+      "source": "act-reconcile",
+      "detected_at": "2026-08-31T23:39:56.990Z"
+    },
+    {
       "run_id": "ap-20260828-ccr0920",
       "date_jst": "2026-08-28",
       "route": "ccr-0920",
@@ -660,15 +692,17 @@
       "date_jst": "2026-08-29",
       "route": "actions",
       "attempted": false,
-      "outcome": "skipped_duplicate",
+      "outcome": "skipped_gate",
       "lane": null,
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "Gate が当日ブランチの存在を検出して終了（run 自身の notice: 「claude/obsidian-auto-20260829 が既に存在（進行中/実行済み）のためスキップ。」）。**設計どおりの二重着手防止**で、失敗ではない。Claude Code 以降の全ステップが skipped",
+      "failure_reason": null,
       "external_ref": "33230445898",
       "interventions": [],
-      "source": "actions-api"
+      "source": "act-reconcile-session",
+      "detected_at": "2026-08-31T23:27:34Z",
+      "detected_note": "Actions API のステップ一覧から起こした。Gate は success だが Checkout 以降が全て skipped ＝ Gate が run=false を出した回（秘密鍵未設定・当日重複のいずれか。ステップの conclusion からはどちらかまでは決まらない）。"
     },
     {
       "run_id": "ap-20260829-ccr0920",
@@ -680,15 +714,13 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "当日ブランチ claude/obsidian-auto-20260829 を 00:21:56Z に占有（空コミット 36de90a6・Runbook §0-2）したあと、**何も残さずに終わった** —— PRなし・AUTOPILOT_LOG.md に 08-29 の節なし・status JSON も 08-28 のまま。占有まで到達しているので冪等チェックとRunbook読解の手前ではない。**原因は取れていない** —— CCRのスケジュール起動セッションのログは外部から読めず、Routine の last_run は最新1回しか保持しない（08-31 のぶんに上書きされている）。週次上限は 08-30 07:58 JST には既に効いていたが、**08-29 09:21 JST 時点で効いていた証拠は無いので断定しない**",
-      "external_ref": "36de90a641230ffc2bb48c9d28a22f1270e39e29",
+      "failure_reason": "副系が当日ロック（claude/obsidian-auto-20260829）を claim だけ取って、記事もPRも作らずに終わった。**同じ日の主系（ap-20260829-actions・skipped_gate）が何もしなかったのは、これが理由。**Gate はブランチの存在を『進行中/実行済み』と読んでスキップし、3秒で success を返す。**claim を取った側が死ぬと、その日は主系も走らないまま緑になる。**主系側の行だけを見ると『重複でスキップした正常な日』に見えるので、この行を別に立てている",
+      "external_ref": null,
       "interventions": [],
-      "source": "git",
-      "failure_class": "claimed_then_silent",
-      "failed_at": "2026-08-29T00:21:56Z",
-      "detected_at": "2026-09-01T00:05:00Z",
-      "detected_note": "ap-20260829-actions の同日ブランチ占有と突き合わせて確認（PR #739 のセッション）",
-      "needs_triage": true
+      "source": "git: claude/obsidian-auto-20260829 は claim コミット1件のみ（36de90a6・lane: ccr-0920）で main との差分ゼロ。PRは存在しない。主系 run 33230445898 は steps 3〜13 が全て skipped で3秒 success",
+      "failure_class": "claim_without_completion",
+      "failed_at": "2026-08-29T09:20+09:00",
+      "detected_at": "2026-09-01T08:10+09:00"
     },
     {
       "run_id": "ap-20260830-actions",
@@ -700,14 +732,12 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "実行枠（週次）の上限。ワークフローの切り分けステップが `\"api_error_status\":429` / `\"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"` を印字している（ジョブログ実見）。**資格情報は無事**で、鍵を回しても直らない。当時のプローブは同じ画面を見ながら「資格情報が通っていない・setup-token を再実行せよ」と出していた（2026-09-01 に訂正）",
+      "failure_reason": "Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
       "external_ref": "33279844326",
       "interventions": [],
-      "source": "actions-api",
+      "source": "act-reconcile-session",
       "failure_class": "usage_limit",
-      "failed_at": "2026-08-29T22:58:48Z",
-      "detected_at": "2026-09-01T00:05:00Z",
-      "detected_note": "ジョブログを実見して確定（PR #739 のセッション）。**2日間だれも見ていない** — 主系が落ちても人にもセッションにも届く経路が無かった"
+      "detected_at": "2026-08-31T23:27:44Z"
     },
     {
       "run_id": "ap-20260831-actions",
@@ -719,14 +749,12 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "実行枠（週次）の上限。ワークフローの切り分けステップが `\"api_error_status\":429` / `\"You've hit your weekly limit · resets 11pm (UTC)\"` を印字している（ジョブログ実見）。**資格情報は無事。**08-30 と同一原因の2日目",
+      "failure_reason": "Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
       "external_ref": "33340960317",
       "interventions": [],
-      "source": "actions-api",
+      "source": "act-reconcile-session",
       "failure_class": "usage_limit",
-      "failed_at": "2026-08-30T23:08:02Z",
-      "detected_at": "2026-09-01T00:05:00Z",
-      "detected_note": "ジョブログを実見して確定（PR #739 のセッション）"
+      "detected_at": "2026-08-31T23:27:44Z"
     },
     {
       "run_id": "ap-20260831-ccr0920",
@@ -738,14 +766,14 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "failure_reason": "実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657` の起動が 13 秒で FAILED（session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**1ターンも回っていない**ので当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）",
+      "failure_reason": "実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657`（09:20 JST・ccr-0920）の起動が 13 秒で FAILED（fired 2026-08-31T00:20:33Z / finished 00:20:46Z / session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**主系の 429 と同じ事象の副系側**で、同じアカウントなので代走にならなかった。1ターンも回っていないため当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）",
       "external_ref": "cse_01VZpZ4oseTMEgbBPzddUSxN",
       "interventions": [],
-      "source": "ccr-triggers-api",
+      "source": "act-reconcile-session",
       "failure_class": "usage_limit",
       "failed_at": "2026-08-31T00:20:46Z",
-      "detected_at": "2026-09-01T00:05:00Z",
-      "detected_note": "list_triggers の last_run を実見（PR #739 のセッション）"
+      "detected_at": "2026-09-01T00:14:46Z",
+      "detected_note": "list_triggers の last_run を実見（PR #739 のセッション）。**last_run は最新1回しか保持しない**ので、08-30 の同経路は既に上書きされていて確かめられない"
     }
   ]
 }

@@ -89,9 +89,9 @@
     },
     {
       "file": "scripts/autopilot-act.mjs",
-      "expr": "x.run_id",
+      "expr": "a.auto",
       "disposition": "前提",
-      "note": "run_id で行を突き合わせる。id の無い行は照合対象ではない"
+      "note": "auto を宣言した行にだけ handler を要求する。手動の行に handler は要らない"
     },
     {
       "file": "scripts/autopilot-act.mjs",
@@ -107,27 +107,39 @@
     },
     {
       "file": "scripts/autopilot-act.mjs",
+      "expr": "ctx.statusDoc?.date_jst",
+      "disposition": "前提",
+      "note": "D6 の**行動提案**を出すかどうか。status が読めた回に鮮度を見る。status そのものが無い状態は上流の別の規則が見る"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "last?.updated_at",
+      "disposition": "前提",
+      "note": "closed PR 一覧のページ送りを止める条件。**消えても「もう1ページ読む」側に倒れる**（無ければ条件が偽 → 続行 → 上限で null）ので、規則が消える方向には効かない。実測 2026-08-28: `pulls?state=closed&sort=updated&per_page=100` の100件すべてに updated_at が在り、マージ済み100件すべてで `merged_at <= updated_at`（＝この鍵で止めても窓の中を取りこぼさない）"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
       "expr": "ms",
       "disposition": "前提",
       "note": "上と同じ値の続き"
     },
     {
       "file": "scripts/autopilot-act.mjs",
-      "expr": "a.auto",
+      "expr": "x.run_id",
       "disposition": "前提",
-      "note": "auto を宣言した行にだけ handler を要求する。手動の行に handler は要らない"
-    },
-    {
-      "file": "scripts/autopilot-budget.mjs",
-      "expr": "run.run_id",
-      "disposition": "前提",
-      "note": "重複判定。id の無い run は重複判定の対象外"
+      "note": "run_id で行を突き合わせる。id の無い行は照合対象ではない"
     },
     {
       "file": "scripts/autopilot-budget.mjs",
       "expr": "an.enabled",
       "disposition": "前提",
       "note": "有効な注記だけが判定対象"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "run.run_id",
+      "disposition": "前提",
+      "note": "重複判定。id の無い run は重複判定の対象外"
     },
     {
       "file": "scripts/autopilot-budget.mjs",
@@ -166,36 +178,6 @@
       "note": "**直前の行が `if (!r.set_version) problems.push(...)` で欠落を捕まえている。**冗長だが安全"
     },
     {
-      "file": "scripts/check-publication.mjs",
-      "expr": "v.served_by_site",
-      "disposition": "前提",
-      "note": "配信面に出す宣言をした台帳にだけ参照を要求する"
-    },
-    {
-      "file": "scripts/daily-brief.mjs",
-      "expr": "budget.run_caps",
-      "disposition": "別に検出",
-      "note": "**#631 で意図してこう書いた。**「判定できたか」を run_caps_judged として記録する側で、null を捨てていない"
-    },
-    {
-      "file": "scripts/autopilot-act.mjs",
-      "expr": "ctx.statusDoc?.date_jst",
-      "disposition": "前提",
-      "note": "D6 の**行動提案**を出すかどうか。status が読めた回に鮮度を見る。status そのものが無い状態は上流の別の規則が見る"
-    },
-    {
-      "file": "scripts/autopilot-act.mjs",
-      "expr": "last?.updated_at",
-      "disposition": "前提",
-      "note": "closed PR 一覧のページ送りを止める条件。**消えても「もう1ページ読む」側に倒れる**（無ければ条件が偽 → 続行 → 上限で null）ので、規則が消える方向には効かない。実測 2026-08-28: `pulls?state=closed&sort=updated&per_page=100` の100件すべてに updated_at が在り、マージ済み100件すべてで `merged_at <= updated_at`（＝この鍵で止めても窓の中を取りこぼさない）"
-    },
-    {
-      "file": "scripts/check-model-routing.mjs",
-      "expr": "rule.fallback",
-      "disposition": "別に検出",
-      "note": "**直前が `if (!r.fallback) problems.push(...)` で欠落を捕まえている**（else 節がこれ）。冗長だが安全"
-    },
-    {
       "file": "scripts/check-model-routing.mjs",
       "expr": "doc.policy?.forbid_cheapest_for_irreversible",
       "disposition": "別に検出",
@@ -208,16 +190,34 @@
       "note": "[2026-08-26] **本物だった。**鍵を消すと exit 0（「引かれない表は装飾」の検査が丸ごと消える。--check-run-cap の呼び出し確認も含む）。同上の boolean 必須で塞いだ"
     },
     {
-      "file": "scripts/review-intake.mjs",
-      "expr": "spec.note_required",
+      "file": "scripts/check-model-routing.mjs",
+      "expr": "rule.fallback",
+      "disposition": "別に検出",
+      "note": "**直前が `if (!r.fallback) problems.push(...)` で欠落を捕まえている**（else 節がこれ）。冗長だが安全"
+    },
+    {
+      "file": "scripts/check-publication.mjs",
+      "expr": "v.served_by_site",
       "disposition": "前提",
-      "note": "spec は KINDS（ソース中の定数）。**台帳ではなくコードが決める**ので、鍵が消えることは無い。汚染は d.kind 経由で付いただけ"
+      "note": "配信面に出す宣言をした台帳にだけ参照を要求する"
+    },
+    {
+      "file": "scripts/check-rollout-promotion.mjs",
+      "expr": "p?.to",
+      "disposition": "別に検出",
+      "note": "**直前のループが `['at','flag','from','to','why']` の欠落を全部 problems に入れている。**ここの `p?.to` は「在るのに数でない」と「在って上限超え」を分けるためだけの分岐で、欠落側は消えない。上限そのものは `cap` で fail closed にしてある（`ap.max_auto_rollout && …` と書いていて、この検査に捕まって直した形）"
+    },
+    {
+      "file": "scripts/daily-brief.mjs",
+      "expr": "budget.run_caps",
+      "disposition": "別に検出",
+      "note": "**#631 で意図してこう書いた。**「判定できたか」を run_caps_judged として記録する側で、null を捨てていない"
     },
     {
       "file": "scripts/review-intake.mjs",
-      "expr": "spec.needs_ref",
-      "disposition": "前提",
-      "note": "同上（KINDS 由来）"
+      "expr": "a.judged",
+      "disposition": "別に検出",
+      "note": "同上（--check 本体）"
     },
     {
       "file": "scripts/review-intake.mjs",
@@ -233,9 +233,15 @@
     },
     {
       "file": "scripts/review-intake.mjs",
-      "expr": "a.judged",
-      "disposition": "別に検出",
-      "note": "同上（--check 本体）"
+      "expr": "spec.needs_ref",
+      "disposition": "前提",
+      "note": "同上（KINDS 由来）"
+    },
+    {
+      "file": "scripts/review-intake.mjs",
+      "expr": "spec.note_required",
+      "disposition": "前提",
+      "note": "spec は KINDS（ソース中の定数）。**台帳ではなくコードが決める**ので、鍵が消えることは無い。汚染は d.kind 経由で付いただけ"
     },
     {
       "file": "scripts/roadmap.mjs",
@@ -280,8 +286,7 @@
     "scripts/autopilot-gate.mjs",
     "scripts/check-asc-landed.mjs",
     "scripts/generate-qr-codes.mjs",
-    "scripts/property-tests.mjs",
-    "scripts/preflight.mjs"
+    "scripts/property-tests.mjs"
   ],
   "$no_ledger_binding": [
     {

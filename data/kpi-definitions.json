@@ -81,9 +81,9 @@
       "name": "1記事あたり単価",
       "formula": "当月の実費 ÷ 当月の出荷数",
       "source_file": "scripts/autopilot-budget.mjs",
-      "version": 5,
-      "checksum": "6fb2a556b15556ca",
-      "changed_at": "2026-08-26",
+      "version": 6,
+      "checksum": "c9d8b343d91e2a37",
+      "changed_at": "2026-08-31",
       "why_it_matters": "shipped が 0 の月は null（0除算を『無料』と誤読させない）",
       "history": [
         {
@@ -105,6 +105,11 @@
           "version": 5,
           "at": "2026-08-26",
           "why": "定義は変えていない。autopilot-budget.mjs の render に else を足しただけ（run_caps が null のとき「判定していない」と書く）。1出荷あたりの費用の計算式は同じ"
+        },
+        {
+          "version": 6,
+          "at": "2026-08-31",
+          "why": "定義は変えていない。分子（当月の実費合計）も分母（shipped）も触っていない。動いたのは同じファイルの別の値で、**残額の扱い**を変えたため —— 副系が測れていない月の remaining を null にし、cap - spent は remaining_upper_bound（残高ではなく上限）として出すようにした。あわせて spent_is_lower_bound を足している。単価が「測れている範囲の単価」であることは以前からで、それを兄弟の欄で明示しただけ"
         }
       ]
     },
@@ -130,9 +135,9 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 19,
-      "checksum": "e41bef6b8783c483",
-      "changed_at": "2026-08-27",
+      "version": 22,
+      "checksum": "a2b788d7dfc42599",
+      "changed_at": "2026-08-31",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
         {
@@ -224,6 +229,21 @@
           "version": 19,
           "at": "2026-08-27",
           "why": "定義は変えていない。AUTOPILOT_RUNBOOK.md §5-5『配信の種』の新設・§0-2の経路表とdの冪等性判定修正・§0-0/§5-4のccr-0830追加を行っただけで、noise_floor（§0原則2）の定義文には触れていない"
+        },
+        {
+          "version": 20,
+          "at": "2026-08-28",
+          "why": "**定義は変えていない。**AUTOPILOT_RUNBOOK.md に §0-3（list_triggers が呼べるかを1回だけ確かめる一時的な節・2026-08-29まで）を足したことによる checksum の変化。ノイズフロア（期待クリック数3未満を根拠にしない／適用はレーンA/Bのみ）の本文には触れていない"
+        },
+        {
+          "version": 21,
+          "at": "2026-08-28",
+          "why": "**定義は変えていない。**§0-3（一時的な確認）に「結果を AUTOPILOT_LOG.md にも1行残す」を足したことによる checksum の変化。理由は、get_session が成功セッションの要約を返すとは限らず、観測がセッションの中に閉じ込められるため。ノイズフロアの本文には触れていない"
+        },
+        {
+          "version": 22,
+          "at": "2026-08-31",
+          "why": "**定義は変えていない。**§0-3 の期限を 2026-08-29 から 09-05 へ延ばし、「main に入るまでこの節は存在しないのと同じ」という注記を足したことによる checksum の変化。ノイズフロア（期待クリック数3未満を根拠にしない／適用はレーンA/Bのみ）の本文には触れていない"
         }
       ]
     },

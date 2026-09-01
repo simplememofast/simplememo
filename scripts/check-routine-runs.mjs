@@ -230,39 +230,34 @@ function selftest() {
       const { problems } = V(real);
       assert(problems.length === 0, problems.join(' / '));
     }],
-    // 【2026-09-01】**個数のピン（5 / 2 / 3）をやめて、勘定が合うことを見る。**
-    //
-    // 元の形は実データの件数をそのまま留めていた。狙いは正しい —— この検査が
-    // 緑でも異常はあり、「緑＝異常が無い」と読ませないための杭だった。
-    // だが**実データが正当に増えるたびに落ちる。**実際 08-28 に意図的な停止が
-    // 1件増え、08-31 に週次上限で2本落ちただけで、3つとも同時に外れた。
-    //
-    // 問題は落ちること自体ではなく、**その直し方が「数字を書き換える」に
-    // なる**こと。数字合わせが習慣になった杭は、次に本当に何かが消えた日も
-    // 同じ手つきで書き換えられて素通りする。**杭が意味を失う。**
-    //
-    // 見るものを個数から**勘定**へ移す。健全でないものが在ること（下限）と、
-    // その全部がどちらかの一覧で説明されていること（恒等式）は、
-    // 件数が動いても意味が変わらない。**一覧から黙って消す**という、
-    // ここで本当に止めたかった操作は、恒等式のほうが正確に捕まえる
-    // （個数のピンは「5件のまま中身が入れ替わる」を通してしまう）。
-    ['**実データに健全でないものが在る**（緑＝異常が無い、ではない）', () => {
-      const { unhealthy, problems } = V(real);
-      assert(problems.length === 0, problems.join(' / '));
-      assert(unhealthy.length > 0,
-        '健全でないものが0件になっている — 実データが本当に全部健全なら'
-        + 'このピンは役目を終えているので、消す判断を明示的に行うこと');
-      const accounted = real.open_findings.length + real.intentional_stops.length;
-      assert(unhealthy.length === accounted,
-        `健全でない ${unhealthy.length} 件に対し、説明は 未対応 ${real.open_findings.length}`
-        + ` + 意図的な停止 ${real.intentional_stops.length} = ${accounted} 件`);
-      assert(real.open_findings.length <= real.open_budget,
-        `未対応 ${real.open_findings.length} 件が上限 ${real.open_budget} を超えている`);
+    // [2026-08-31] 5/2/3 → 8/4/4。**写しを取り直したら3件増えた。**
+    // Obsidian 系2本が 08-28〜08-31 のあいだに FAILED になり、
+    // 「副系の写しの取り直し」が意図的に止まっていたのが記録されていなかった。
+    // **数を固定しているのは意図** —— 黙って増えたときに気づくため。
+    // 動いたときは、増えた理由を open_findings / intentional_stops に書いてから直す。
+    ['**実データで8件が健全でない**（緑＝異常が無い、ではない）', () => {
+      const { unhealthy } = V(real);
+      assert(unhealthy.length === 8, `健全でないのは8件のはずが ${unhealthy.length}`);
+      assert(real.open_findings.length === 4, '未対応は4件（週次2本＋Obsidian系2本）');
+      assert(real.intentional_stops.length === 4,
+        '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
     }],
 
     // --- 黙って止まったものを通さない -----------------------------------
+    // [2026-08-31] **実データに結びついていた。**`find(r => r.enabled)` は
+    // 先頭の有効な routine を取るだけなので、そこが**既に open_findings に載っている**
+    // 日（＝いま）は、止めても「一覧に無い」にならず、この検査が黙って空回りする。
+    // **どちらの一覧にも居ない健全な1本**を選ぶ形にして、件数から切り離した。
     ['**新しく止まった routine を通さない**', () => {
-      const p = V(broken(real, (d) => { d.routines.find((r) => r.enabled).enabled = false; })).problems;
+      // [2026-08-31] **`find((r) => r.enabled)` だと、先頭が記録済みの行に当たると鳴らない。**
+      // 記録が増えた日に実際に踏んだ。**どちらの一覧にも居ない行**を選ぶ。
+      const p = V(broken(real, (d) => {
+        const recorded = new Set([...d.open_findings, ...d.intentional_stops].map((f) => f.id));
+        const r = d.routines.find((x) => x.enabled && !recorded.has(x.id));
+        if (!r) throw new Error('記録されていない enabled な routine が実データに無い'
+          + ' — **この検査は空回りしている**');
+        r.enabled = false;
+      })).problems;
       assert(p.some((x) => x.includes('どちらの一覧にも無い')), p.join(' / '));
     }],
     ['**新しく失敗した routine を通さない**', () => {
@@ -334,18 +329,30 @@ function selftest() {
     }],
 
     // --- 記録が実体とずれるのを通さない ---------------------------------
+    // [2026-08-31] **日付を直書きしていて、写しが進んだら空回りしていた。**
+    // `diagnose` は overdue を **観測時刻**（写しの observed_at）で判定するので、
+    // 固定の `2026-08-29T00:00:00Z` は写しが 08-31 になった時点で「予定を過ぎている」
+    // 側へ落ち、健全にならない。**直したはずの検体が直っていないまま緑になる。**
+    // 写しの時刻から算出して、どの日でも成立させる。
     ['**直ったのに open_findings に残っていたら落とす**', () => {
       const p = V(broken(real, (d) => {
         const f = d.open_findings[0];
         const r = d.routines.find((x) => x.id === f.id);
-        r.enabled = true; r.last_run_status = 'SUCCEEDED'; r.next_run_at = '2026-08-29T00:00:00Z';
+        // [2026-08-31] **固定日付を置くと、写しの観測時刻を追い越されて overdue のまま残る。**
+        // overdue の基準を壁時計から observed_at へ移した（同日の別の直し）ので、
+        // **写しより後**に置かないと「健全になった」形にならない。実際にここで踏んだ。
+        const after = new Date(Date.parse(d.observed_at) + DAY).toISOString().replace(/\.\d+Z$/, 'Z');
+        r.enabled = true; r.last_run_status = 'SUCCEEDED'; r.next_run_at = after;
       })).problems;
       assert(p.some((x) => x.includes('健全になっている')), p.join(' / '));
     }],
     ['**止めたはずのものが動いていたら落とす**', () => {
       const p = V(broken(real, (d) => {
         const r = d.routines.find((x) => x.id === d.intentional_stops[0].id);
-        r.enabled = true; r.next_run_at = '2026-08-29T00:00:00Z'; r.last_run_status = 'SUCCEEDED';
+        // [2026-08-31] 固定日付だと写しの観測時刻を追い越されて overdue のまま残り、
+        // 「動いている」形にならない（上の『直ったのに〜』と同じ理由）。
+        const after = new Date(Date.parse(d.observed_at) + DAY).toISOString().replace(/\.\d+Z$/, 'Z');
+        r.enabled = true; r.next_run_at = after; r.last_run_status = 'SUCCEEDED';
       })).problems;
       assert(p.some((x) => x.includes('止めたはずのものが走っている')), p.join(' / '));
     }],
@@ -363,8 +370,13 @@ function selftest() {
       const p = V(broken(real, (d) => { d.open_budget = 1; })).problems;
       assert(p.some((x) => x.includes('上限 1 を超えた')), p.join(' / '));
     }],
+    // [2026-08-31] 固定値 3 は未対応が2件のときだけ「余っている」側になった。
+    // **いまの件数から1つ上**にして、どの日でも同じ向きを試す。
     ['**上限を先に上げておくのも落とす**（余った枠は次の停止を黙って飲む）', () => {
-      const p = V(broken(real, (d) => { d.open_budget = 3; })).problems;
+      // [2026-08-31] **`= 3` を直書きしていたので、未対応が3件を超えた日に意味が反転した。**
+      // 実際 4 件になって「枠が余っている」ではなく「上限を超えた」が出た。
+      // **枠が余る状態を、件数から作る。**
+      const p = V(broken(real, (d) => { d.open_budget = d.open_findings.length + 1; })).problems;
       assert(p.some((x) => x.includes('枠が余っている')), p.join(' / '));
     }],
     ['直して減らしたら、上限も同じPRで下げさせる', () => {

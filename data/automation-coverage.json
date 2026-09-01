@@ -120,10 +120,10 @@
       "evidence": [
         "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる",
-      "blocker": "not_started",
-      "unlock": "impl_granted",
-      "unblocked_by": "採否はオーナー判断。設計文書までは機械が出している"
+      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**設計文書までは機械が出しており、残っているのは**採否の判断**。そこは実装量では動かない。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "採否はオーナー判断。設計文書までは機械が出している",
+      "$authority_absent": "権限表が扱うのは**実行の権限**で、機能の採否はそこに無い。採否の根拠は VISION（作らないものの定義）と data/feature-backlog.json 側にある"
     },
     {
       "area": "① 次期機能開発",
@@ -236,7 +236,7 @@
       "task": "本番改善サイクルの完走（機能側）",
       "executor": "nobody",
       "evidence": [],
-      "note": "コンテンツ側は完走。**機能側0件。** [2026-08-25] 完走させるための台帳と検査は実装した（data/feature-outcomes.json / scripts/check-feature-outcomes.mjs）が、**executor は nobody のまま。**この行が数えているのは『完走したか』であって『完走できる仕組みがあるか』ではない。**出す前に測り方を決めた機能が、まだ1件も無い** —— v5.8.0 も v5.8.1 も出荷済みだが、どちらも指標を先に宣言していない。**さかのぼって埋めない**（全件 measurement_failed になるうえ、後から指標を選んだものになる）。次に出す機能から1行足す",
+      "note": "コンテンツ側は完走。**機能側0件。** [2026-08-25] 完走させるための台帳と検査は実装した（data/feature-outcomes.json / scripts/check-feature-outcomes.mjs）が、**executor は nobody のまま。**この行が数えているのは『完走したか』であって『完走できる仕組みがあるか』ではない。**出す前に測り方を決めた機能が、まだ1件も無い** —— v5.8.0 も v5.8.1 も出荷済みだが、どちらも指標を先に宣言していない。**さかのぼって埋めない**（全件 measurement_failed になるうえ、後から指標を選んだものになる）。次に出す機能から1行足す\n\n**[2026-08-28] この行は自分の中で食い違っている。分類は動かさない。**unblocked_by は「カナリアガードを本番のフラグ1つで1周させる」と書き、note は「**出す前に測り方を決めた機能が、まだ1件も無い**」と書いている。**前者はカナリアの1周（2026-08-29 以降に判定が出る）で満たされるが、後者は満たされない** ——次に出す機能で `feature-outcomes.json` に1行先に置いたときに初めて動く。**どちらが要件かを決めるまで、この行を「カナリアが回れば動く」と数えない。**",
       "blocker": "not_started",
       "unblocked_by": "カナリアガードを本番のフラグ1つで1周させる。実装済み（rollout-guard.ts）で、要るのは実行",
       "unlock": "impl_product"
@@ -731,10 +731,13 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "管理画面から手動。APIが無い **[2026-08-27 オーナー判断]「お金周りを除いて渡す」の対象。**境界は外れたので、残るのは**権限ではなく実装**。ただし宣言では終わらない —— 権限表は不可逆な領域の承認を外すのに machine_gate（実在する checker／export された関数／kill switch／正の日次上限／材料が無いときは止まる）を要求するので、**ゲートができるまで権限表の該当行は承認制のまま**。",
-      "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "配信は不可逆。管理画面からの操作を人に残す"
+      "note": "管理画面から手動。APIが無い **[2026-08-27 オーナー判断]「お金周りを除いて渡す」の対象。**境界は外れたので、残るのは**権限ではなく実装**。ただし宣言では終わらない —— 権限表は不可逆な領域の承認を外すのに machine_gate（実在する checker／export された関数／kill switch／正の日次上限／材料が無いときは止まる）を要求するので、**ゲートができるまで権限表の該当行は承認制のまま**。\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「プレスリリースの配信」は `requires_approval: true`、human_only に「PR TIMES管理画面からの配信操作」「配信可否の判断」の2つを置いている。機械ゲートは無い（＝承認を外す例外に入っていない）。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "配信は不可逆。管理画面からの操作を人に残す",
+      "authority": {
+        "domain": "プレスリリースの配信",
+        "human_only": "PR TIMES管理画面からの配信操作"
+      }
     },
     {
       "area": "③ 自律型マーケティング",
@@ -765,10 +768,13 @@
       "evidence": [
         "admin/brand/docs/cowork-x-engagement-brief.md"
       ],
-      "note": "Cowork定期タスクでバッチ運用",
-      "blocker": "not_started",
-      "unlock": "impl_granted",
-      "unblocked_by": "権限表で suspended。再開の判断が人"
+      "note": "Cowork定期タスクでバッチ運用\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「SNS投稿（X・TikTok）」は `status: suspended`、ai_may は空、human_only が「再開の判断」。**止まっているのは経路ではなく再開の判断。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "権限表で suspended。再開の判断が人",
+      "authority": {
+        "domain": "SNS投稿（X・TikTok）",
+        "human_only": "再開の判断"
+      }
     },
     {
       "area": "③ 自律型マーケティング",
@@ -788,7 +794,11 @@
       ],
       "note": "調査レポートのみ。資格情報も無い",
       "blocker": "policy_boundary",
-      "unblocked_by": "自社分析が『この予算規模では日次自動入札がノイズ最適化になる』と結論済み。着手しないと決めた側"
+      "unblocked_by": "自社分析が『この予算規模では日次自動入札がノイズ最適化になる』と結論済み。着手しないと決めた側",
+      "authority": {
+        "domain": "広告出稿・広告予算の変更",
+        "human_only": "すべて"
+      }
     },
     {
       "area": "③ 自律型マーケティング",
@@ -905,10 +915,13 @@
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
       ],
-      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。** **[2026-08-27] その境界がオーナー判断で外れた。**",
-      "blocker": "not_started",
-      "unlock": "impl_granted",
-      "unblocked_by": "タグpushを意図的に拒否している（claude.yml に actions: write を与えない設計の一部）"
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。** **[2026-08-27] その境界がオーナー判断で外れた。**\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「アプリのビルド・TestFlight内部配信」は human_only に「タグ v* の作成」を置き、ai_may は空。**タグ push を拒む設計（claude.yml に actions: write を与えない）は2026-08-27 のオーナー判断でも外れていない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "タグpushを意図的に拒否している（claude.yml に actions: write を与えない設計の一部）",
+      "authority": {
+        "domain": "アプリのビルド・TestFlight内部配信",
+        "human_only": "タグ v* の作成"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -926,10 +939,14 @@
       "evidence": [
         "../simplememo-ios/.github/workflows/submit-review.yml"
       ],
-      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先",
+      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。",
       "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "実機確認を経ていない提出を止めるための人間ゲート"
+      "unlock": "ship_execute",
+      "unblocked_by": "**実機確認は外していない**（機械には代われないので、門が `device_verified_sha` の一致を要求する形にした）。残るのは実行側の実装と、`policy.enabled` を立てる操作（権限表で human_only）",
+      "authority": {
+        "domain": "App Review への提出",
+        "ai_may": "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -949,10 +966,14 @@
       "evidence": [
         "../simplememo-ios/fastlane/Fastfile"
       ],
-      "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る",
+      "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。",
       "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "releaseType を MANUAL に変更して恒久的に人へ残した"
+      "unlock": "ship_execute",
+      "unblocked_by": "**「恒久的に手動」は 2026-08-27 に撤回された。**ハードコードの automatic_release=false を外すのに要る machine_gate は #708 で入った。残るのは実行側の実装と、`policy.enabled` を立てる操作（権限表で human_only）",
+      "authority": {
+        "domain": "App Store への公開（審査通過後）",
+        "ai_may": "**ゲートを通った公開の実行**（段階リリース限定・1日1回・クラッシュ率とkillの確認つき）"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -976,10 +997,14 @@
         "data/rollout-promotion.json",
         "data/authority-matrix.json"
       ],
-      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）\n\n**[2026-08-26] 判断は実際に発生している。**`tf04_progress` が 5% で稼働中で、ガードは毎時判定を出している（decisions 30件）。ただし現在の判定は hold で、理由はサンプル不足（露出 5〜12 / 判定に要る 30 に未達）。**昇格の提案はまだ1件も積まれていない**（awaiting_approval 0）\n\n**[2026-08-27] 機械ゲートを作った。executor は動かさない。**オーナー判断で境界が外れたが、権限表は不可逆な領域の承認を外すのに machine_gate を要求するので、宣言ではなく実装で外した（`scripts/check-rollout-promotion.mjs` の `evaluatePromotion` / `data/rollout-promotion.json`）。落とすもの: ガードの判定が promote でない／判定が120分より古い／3指標のどれかが各群30の母数に届かない／梯子を飛ばす／50% を超える（**100% への最終段は人**）／48時間寝ていない／直近7日に kill／日次上限1／`drill_`／killed。**材料が欠けたら必ず hold**（13欄を1つずつ落として確かめた）。\n\n**この門は今日のボタンを押せない。設計どおり。**ガードは rollout 5% では判定に届かず、自分で『露出30には rollout 19% 以上』と計算している（run 33076125334）。**判定に届かない露出から踏み出す最初の一歩は証拠で正当化できない**ので、そこは人が押す。門が効くのは25%以降。\n\n**executor は `ai_proposes` のまま動かさない。**残っているのは (1) 実行側（simplememo-api が `--plan` を読んでフラグを設定する経路）と (2) オーナーが `auto_promote.enabled` を立てること。**「門ができた」を「昇格した」と数えない** —— レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準",
+      "note": "**意図的に提案止まり。**露出を広げる方向は不可逆（広げてから戻しても見た人が見なかったことにはならない）なので人が承認する。/admin/rollout-guard に積まれる。v5.8.1（2026-08-22）でクライアント側が本番に載り、**昇格の判断が実際に発生しうる状態になった**（それまでは判断の対象が無かった）\n\n**[2026-08-26] 判断は実際に発生している。**`tf04_progress` が 5% で稼働中で、ガードは毎時判定を出している（decisions 30件）。ただし現在の判定は hold で、理由はサンプル不足（露出 5〜12 / 判定に要る 30 に未達）。**昇格の提案はまだ1件も積まれていない**（awaiting_approval 0）\n\n**[2026-08-27] 機械ゲートを作った。executor は動かさない。**オーナー判断で境界が外れたが、権限表は不可逆な領域の承認を外すのに machine_gate を要求するので、宣言ではなく実装で外した（`scripts/check-rollout-promotion.mjs` の `evaluatePromotion` / `data/rollout-promotion.json`）。落とすもの: ガードの判定が promote でない／判定が120分より古い／3指標のどれかが各群30の母数に届かない／梯子を飛ばす／50% を超える（**100% への最終段は人**）／48時間寝ていない／直近7日に kill／日次上限1／`drill_`／killed。**材料が欠けたら必ず hold**（13欄を1つずつ落として確かめた）。\n\n**この門は今日のボタンを押せない。設計どおり。**ガードは rollout 5% では判定に届かず、自分で『露出30には rollout 19% 以上』と計算している（run 33076125334）。**判定に届かない露出から踏み出す最初の一歩は証拠で正当化できない**ので、そこは人が押す。門が効くのは25%以降。\n\n**executor は `ai_proposes` のまま動かさない。**残っているのは (1) 実行側（simplememo-api が `--plan` を読んでフラグを設定する経路）と (2) オーナーが `auto_promote.enabled` を立てること。**「門ができた」を「昇格した」と数えない** —— レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準\n\n**[2026-08-28] 入口を `impl_machine_gate`（実装）から `rollout_first_pass`（待ち）へ移した。作るものもオーナー操作も残っていない。**門は 2026-08-27 に入り（`evaluatePromotion`）、カナリアは 2026-08-27 に 25% へ上がり、`auto_promote.enabled` は 2026-08-28 にオーナーが立てた。**残っているのは 48時間の寝かせ（2026-08-29 まで必ず hold）と、3指標が各群30以上で判定できること**で、どちらも実装では早められない。`refund_observe` を implement から wait へ移したのと同じ形の訂正。",
       "blocker": "verification_pending",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "**[2026-08-28] ここに残件として書いてあった2つは、どちらも済んだ。**(1) 実行側の経路 … simplememo-api#190「段階公開の昇格を実行する側」。(2) `auto_promote.enabled` … `data/authority-matrix.json` に 2026-08-28 の記録があり、オーナーが名指しで委譲したのでAIが立てた。読み取り専用の実機確認（simplememo-api run 33132559234・`apply: false`）で門は `hold / 自動昇格が有効になっていない` を返しており、**止めていたのはこのフラグだけだった。**\n\n**したがって `not_started` は事実として誤り。**残っているのは実装でもオーナー操作でもなく、**門が実際に1件通ること**。hold の理由は実検査側（48時間の寝かせ・各群30の母数・梯子・上限50%・日次1段）へ移っている。ガードは rollout 5% では判定に届かず（露出30には rollout 19% 以上が要る）、**判定に届かない露出から踏み出す最初の一歩は人が押す**ので、そこは human_only のまま"
+      "unlock": "rollout_first_pass",
+      "unblocked_by": "**[2026-08-28] ここに残件として書いてあった2つは、どちらも済んだ。**(1) 実行側の経路 … simplememo-api#190「段階公開の昇格を実行する側」。(2) `auto_promote.enabled` … `data/authority-matrix.json` に 2026-08-28 の記録があり、オーナーが名指しで委譲したのでAIが立てた。読み取り専用の実機確認（simplememo-api run 33132559234・`apply: false`）で門は `hold / 自動昇格が有効になっていない` を返しており、**止めていたのはこのフラグだけだった。**\n\n**したがって `not_started` は事実として誤り。**残っているのは実装でもオーナー操作でもなく、**門が実際に1件通ること**。hold の理由は実検査側（48時間の寝かせ・各群30の母数・梯子・上限50%・日次1段）へ移っている。ガードは rollout 5% では判定に届かず（露出30には rollout 19% 以上が要る）、**判定に届かない露出から踏み出す最初の一歩は人が押す**ので、そこは human_only のまま",
+      "authority": {
+        "domain": "段階公開の拡大（rollout の引き上げ）",
+        "ai_may": "**ゲートを通った昇格の実行**（ガードが判定を出せた段のみ・上限 50% まで・1日1段）"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -1008,10 +1033,13 @@
         "../simplememo-ios/scripts/qa/check_rollout_vectors.py",
         "data/stop-drills.json"
       ],
-      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした\n\n**[2026-08-26 訂正] 「本番で kill を1回も通していない」は事実と違っていた。**/admin/flags の history に残っている: 2026-08-22 14:44:53Z に `tf04_progress` を rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に解除 → 15:01:10Z に rollout 0 へ戻し description を「**kill の実証完了（2026-08-22）**」へ。**この欄を書いた日と同じ日に、実証は済んでいた。**ただし残っているのはサーバ側の状態遷移だけで、**端末で実際にオフになったことの記録は無い**（data/stop-drills.json の flag-kill）",
-      "blocker": "not_started",
-      "unlock": "impl_granted",
-      "unblocked_by": "緊急停止は人が握る"
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした\n\n**[2026-08-26 訂正] 「本番で kill を1回も通していない」は事実と違っていた。**/admin/flags の history に残っている: 2026-08-22 14:44:53Z に `tf04_progress` を rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に解除 → 15:01:10Z に rollout 0 へ戻し description を「**kill の実証完了（2026-08-22）**」へ。**この欄を書いた日と同じ日に、実証は済んでいた。**ただし残っているのはサーバ側の状態遷移だけで、**端末で実際にオフになったことの記録は無い**（data/stop-drills.json の flag-kill）\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「段階公開の撤回（カナリアガード）」が human_only に「ガードの判定によらない kill の実行」を置いている。**緊急停止はその定義そのもの**（ガードの判定によらない）なので、人の側に残る。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "緊急停止は人が握る",
+      "authority": {
+        "domain": "段階公開の撤回（カナリアガード）",
+        "human_only": "ガードの判定によらない kill の実行（手動・訓練を含む）"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -1043,10 +1071,10 @@
       "evidence": [
         "../simplememo-ios/.github/workflows/release-command.yml"
       ],
-      "note": "issue コメントで起動。コメントするのはオーナー",
-      "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "起動コメントを打つのがオーナー。ここが人間ゲート"
+      "note": "issue コメントで起動。コメントするのはオーナー\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**起動コメントを打つのがオーナー、という設計そのものが人間ゲート。**打つ主体を機械にすると、ゲートが消えて何も残らない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "起動コメントを打つのがオーナー。ここが人間ゲート",
+      "$authority_absent": "表に領域が無い。**起動コメントを打つ主体が人**という設計そのものが人間ゲートで、打つ側を機械にすると門が消えて何も残らない"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -1087,7 +1115,11 @@
       ],
       "note": "現在 placeholder $40。実測由来ではない",
       "blocker": "policy_boundary",
-      "unblocked_by": "支出上限の決定"
+      "unblocked_by": "支出上限の決定",
+      "authority": {
+        "domain": "AI実費（開発・運用のトークン費）",
+        "human_only": "monthly_usd_cap の決定"
+      }
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -1398,7 +1430,11 @@
       "executor": "human_only",
       "evidence": [],
       "blocker": "policy_boundary",
-      "unblocked_by": "同上"
+      "unblocked_by": "同上",
+      "authority": {
+        "domain": "AI実費（開発・運用のトークン費）",
+        "human_only": "monthly_usd_cap の決定"
+      }
     },
     {
       "area": "⑥ アプリ運営意思決定",
@@ -1456,7 +1492,17 @@
       "note": "2026-08-22に台帳と検査を実装。**2026-08-25 に会社の事実が入り、6件中2件が実際に動く期限になった** —— 決算期2月末から法人税・地方税と消費税の申告期限を機械が導く（2027-04-30）。インボイス登録ありが確定したので、資本金や基準期間によらず課税事業者。**日付は台帳に直書きせず決算月から毎回計算する**ので、年をまたいでも古い日付が残らない。残る4件の未把握: Apple Developer の加入日・ドメイン更新日・社会保険の具体的な届出期限・法定調書の要否。**役員報酬ありも確定した**ので社会保険が該当することは決まった（従業員の有無ではなく役員報酬で決まる）。[2026-08-26] **この note と unblocked_by は、材料が届いた翌日から古いままだった。**「消費税は資本金と設立日が無いので未把握」と書いていたが、指している検査は既に期限を出していた。blocked_on を置いて、届いたことを機械が見るようにした",
       "blocker": "external_data",
       "unblocked_by": "残るのは Apple Developer の加入日・ドメインの更新日・社会保険の具体的な届出期限（社労士の領域）・法定調書の要否。**決算期2月末・役員報酬あり・インボイス登録ありは 2026-08-25 に入り、法人税と消費税の申告期限は機械が出している**（2027-04-30）",
-      "unlock": "company_facts"
+      "unlock": "company_facts",
+      "blocked_on": [
+        {
+          "file": "data/credential-expiry.json",
+          "path": "apple_developer_enrolled_at"
+        },
+        {
+          "file": "data/credential-expiry.json",
+          "path": "domain_renewal_at"
+        }
+      ]
     },
     {
       "area": "⑦ 法人経営",
@@ -1464,12 +1510,14 @@
       "executor": "ai_proposes",
       "evidence": [
         "data/vendor-register.json",
-        "scripts/check-vendors.mjs"
+        "scripts/check-vendors.mjs",
+        "../simplememo-api/scripts/check-contracts.mjs",
+        "../simplememo-api/data/contract-register.json"
       ],
-      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。\n\n**[2026-08-28 訂正] 待っていた相手を間違えていた。**この行は `contract_docs`（契約書をリポジトリに置く）を待っていたが、この台帳自身が records で「**書面の契約書は無く、規約への同意で成立している**」と記録している。**存在しない書面を待っていた。**分類の対象は規約本文で、それは特定済み・指紋監視（**週1回・月曜**）・15/40マス読解済み。待っているのは残り34マスで、それは `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。",
-      "blocker": "missing_source_document",
-      "unblocked_by": "規約40マスのうち34マスが未読。**「契約書がリポジトリに無い」ではない** —— 書面契約は存在せず、対象は規約本文で、既に特定・指紋監視されている",
-      "unlock": "vendor_terms"
+      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。\n\n**[2026-08-28 訂正] 待っていた相手を間違えていた。**この行は `contract_docs`（契約書をリポジトリに置く）を待っていたが、この台帳自身が records で「**書面の契約書は無く、規約への同意で成立している**」と記録している。**存在しない書面を待っていた。**分類の対象は規約本文で、それは特定済み・指紋監視（**週1回・月曜**）・15/40マス読解済み。待っているのは残り34マスで、それは `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。\n\n**[2026-08-31] blocker を `missing_source_document` から `not_started` へ。****待っていた書面は「無い」のではなく「存在しない」** —— 書面契約が発生しておらず、対象は規約同意で、その台帳は既に手元にある。**「対象の書類がリポジトリに無い」は、この行については誤った待ち方だった。**\n\n**executor は動かしていない。**導く経路をまだ作っていないので、分類は誰も実行していない（`nobody` ではなく `ai_proposes` なのは、ベンダー台帳までは機械が持っているため）。**作ってから動かす。「材料が揃った」を「分類できている」と数えない。**",
+      "blocker": "not_started",
+      "unblocked_by": "**分類の材料はリポジトリに揃っている。**書面契約はゼロ（**根拠はオーナーの明言と records の「書面の契約書は無く、規約への同意で成立している」**）\n\n**[2026-09-01 訂正] 旧文は「`../simplememo-api/data/contract-register.json` の contracts は空」と書いていた。****あのファイルは api の main に無い。**受け皿は未マージの PR [simplememo-api#200](https://github.com/simplememofast/simplememo-api/pull/200) の中にあり、**置き場所の決定が2つ並んでいるためオーナー待ちで止まっている。**\n\n「ファイルの配列が空」と「ファイルが存在しない」は別の主張で、**旧文は読んでいないものを読んだ形で書いていた。**ゼロという結論自体は別の根拠で立つが、**根拠として挙げていたものが手元に無かった。**\n\n**この行の `evidence` はそのPRのファイルを指したままにしてある** —— 消すと、**待っている対象が台帳から見えなくなる。**`automation-rate --check` は隣リポジトリが在る環境でこの不在を実際に検出する（CIは隣を checkout しないので緑のまま）。**#200 がマージされれば両方そろって解消する。**、成立している11社ぶんはすべて規約への同意で、`data/vendor-register.json` が`terms_accepted_by` を持つ。**無いのは「機械が分類を導いて、CIが食い違いを落とす」経路のほう。**非定型の承認は人（権限表「契約・支払い・送金」が human_only）",
+      "unlock": "impl_contract_class"
     },
     {
       "area": "⑦ 法人経営",
@@ -1482,9 +1530,9 @@
         "scripts/vendor-terms.mjs",
         "scripts/vendor-clause-worksheet.mjs"
       ],
-      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ",
+      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。",
       "blocker": "missing_source_document",
-      "unblocked_by": "**本文そのものは依然リポジトリに無い**（公開リポジトリなので他社の規約本文は運ばない）。人が10社の規約を読んで40マスを埋めるところは変わらない。2026-08-26 に移せたのは**改定の検知**で、埋めたあとが腐るのを止める側\n\n**[2026-08-28] 埋める順序を機械に出させた**（`scripts/vendor-clause-worksheet.mjs`）。判定は相変わらず人だが、**40マスが等価に見える状態はやめた** —— 未確認の30マスを台帳の事実（personal_data の水準・critical・代替の有無・金銭の有無）だけで並べると、露出2が11・1が14・0が5。**先頭は Apple と Resend の liability_cap / personal_data。**\n\n出したことで欠落が2つ表に出た: (1) **ip の10マスには順序をつけられない** —— 「著作物・生成物を誰が抱えているか」を表す欄が vendor-register.json に無く、`used_for` は自由文なので順位に使えない。(2) **registrar の3マスは読む先が null** —— `critical` かつ代替なしで露出2なのに、読む対象が台帳に無い。**人が読めば済む話ではなく、先に台帳を直す話。**",
+      "unblocked_by": "**44マスは埋まった**（2026-08-29・全社 reviewed_by: human）。本文そのものは公開リポジトリに運ばないので `missing_source_document` は残るが、**待っているのは「人が読むこと」ではなく「改定で戻されたマスを読み直すこと」**に変わった。検知は週1回（月曜・seo-daily の内側）、守る側は `clauseGuard`",
       "unlock": "vendor_terms"
     },
     {
@@ -1530,9 +1578,9 @@
         "scripts/vendor-terms.mjs",
         "scripts/vendor-clause-worksheet.mjs"
       ],
-      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**",
+      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**\n\n**[2026-08-31 実測] 未確認は6社ではなく9社。**`data/vendor-register.json` を数えた —— apple / resend / github / registrar が personal、cloudflare / google_cloud / search_console / firebase / appsflyer が pseudonymous で、**この9社すべてが `dpa_reviewed: null`。**確認済みは0社。**条項マスが埋まったこと（44/44）と混同しない** —— 別の欄で、別の文書を読む作業。",
       "blocker": "missing_source_document",
-      "unblocked_by": "同上。DPAの確認そのものは人の作業で、いま6社が未確認。確認したら policy.enforce_unreviewed を true にすると CI が守る\n\n**[2026-08-28] 未確認の6社は、個人データを渡している6社と一致する**（apple / resend が personal、cloudflare / google_cloud / firebase / appsflyer が pseudonymous。残る4社は none）。`scripts/vendor-clause-worksheet.mjs` が同じ事実で順序を出すので、**DPA を見る順序も personal_data の露出順**で足りる —— apple と resend が先頭\n\n**[2026-08-28 夕] 先頭の resend を読んで、探す先が違っていたことが分かった。**貼られた Privacy Policy は冒頭で範囲を『resend.com への訪問』と定め、§2 で自らを **Data Controller** と位置づけている。扱っているのは**こちらが顧客として渡すアカウント情報**であって、**こちらがResend経由で送る宛先アドレスとメモ本文ではない。**後者について Resend は Processor になるはずで、それを定めるのは DPA。**Privacy Policy をいくら読んでもこの欄は埋まらない。**\n\n**したがって『6社の DPA を確認する』は、6社ぶんの Privacy Policy を読むことではない。**読む先は各社の DPA / Subprocessors / セキュリティ文書で、resend の場合は https://resend.com/legal/subprocessors → /security/gdpr → /security/soc-2 → DPA（`data/vendor-register.json` の resend `$dpa_next` に順を置いた）。**この区別が付いていなかったことが、6社が未確認のまま残っていた理由の一部かもしれない。**\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**",
+      "unblocked_by": "**[2026-08-31 実測] 「6社が未確認」は古い。**ベンダーが11社に増え、`personal_data` が none でない **9社すべてが `dpa_reviewed: null`**（確認済み0社）。`policy.enforce_unreviewed` も false のまま。**条項44マスとは別物**で、そちらが埋まってもこの行は動かない（2026-08-29 に実測で切り分け済み）。読む先は各社の DPA / Subprocessors / セキュリティ文書",
       "unlock": "vendor_terms"
     },
     {
@@ -1716,7 +1764,11 @@
       "evidence": [],
       "note": "課金は不可逆で既存契約者への影響が読めない。権限表でAIは提案もしない扱い",
       "blocker": "policy_boundary",
-      "unblocked_by": "権限表で AI は提案もしない（既存契約者への影響が読めない）"
+      "unblocked_by": "権限表で AI は提案もしない（既存契約者への影響が読めない）",
+      "authority": {
+        "domain": "価格・プラン・無料枠の変更",
+        "human_only": "すべて"
+      }
     },
     {
       "area": "⑨ マネタイズ",
@@ -1725,10 +1777,10 @@
       "evidence": [
         "../simplememo-ios/docs/reports/ONBOARDING_REDESIGN_2026-08-06.md"
       ],
-      "note": "データ起点の再設計。実施は人の判断",
-      "blocker": "not_started",
-      "unlock": "impl_granted",
-      "unblocked_by": "課金導線の変更判断が人"
+      "note": "データ起点の再設計。実施は人の判断\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**2026-08-27 のオーナー判断は「**お金周りを除いて**渡す」で、課金導線はその除外側。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "課金導線の変更判断が人",
+      "$authority_absent": "表は「価格・プラン・無料枠の変更」を持つが、**課金導線そのものの領域は無い。**2026-08-27 のオーナー判断「お金周りを除いて渡す」の除外側にあたる、という読みで人へ残している"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1739,7 +1791,8 @@
       ],
       "note": "Obsidianのみモードをプレミアム限定にする判断はオーナー",
       "blocker": "policy_boundary",
-      "unblocked_by": "何を有料にするかはオーナー判断"
+      "unblocked_by": "何を有料にするかはオーナー判断",
+      "$authority_absent": "同じく表に領域が無い。**何を有料にするかは価格の決定と地続き**なので「価格・プラン・無料枠の変更（human_only: すべて）」の隣に置いている"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1802,7 +1855,8 @@
       "evidence": [],
       "note": "**ここが本当の境界。**ConsumptionRequest の必須欄は customerConsented / deliveryStatus / sampleContentProvided の3つで、**どれも事実**（同意の有無・配信できたか・購入前に無料で試せたか）。SimpleMemo は無料枠があるので sampleContentProvided は定数に近い。**事実だけで有効な応答が作れる。** 判断が入るのは `refundPreference` **1欄だけ**で、しかも**必須ではない。**値は DECLINE / GRANT_FULL / GRANT_PRORATED の3つ。Apple は「your refund preference is one of a variety of factors that the App Store uses to inform its refund decisions」と書いている。 つまり DECLINE を出すことは、**機械が「この客に返金しないでほしい」とAppleに言う**ということ。定型文でレビューに返すのとは性質が違う —— 相手は返金を求めている個人で、こちらの一言が不利に働きうる。 **設計としては、この欄を省いて応答できる。**期限内に事実を出す（＝窓を落とさない）ことと、可否に意見を言うことは分けられる。**分けられるものを一緒に自動化しない。** 自動化するなら Level を明示すること（返信のゲートと同じ）。既定は「refundPreference を送らない」",
       "blocker": "policy_boundary",
-      "unblocked_by": "**機械が「返金しないでほしい」と言ってよいか。**事実だけの応答（refundPreference 無し）はこの行の外で、そちらは境界ではなく実装"
+      "unblocked_by": "**機械が「返金しないでほしい」と言ってよいか。**事実だけの応答（refundPreference 無し）はこの行の外で、そちらは境界ではなく実装",
+      "$authority_absent": "表に領域が無い。**機械が「返金しないでほしい」と言ってよいか**という問いで、事実だけの応答（refundPreference 無し）はこの行の外"
     },
     {
       "area": "⑨ マネタイズ",
@@ -1823,7 +1877,11 @@
       ],
       "note": "AIは提案もしない（不可逆・既存契約者への影響が読めない）",
       "blocker": "policy_boundary",
-      "unblocked_by": "不可逆・既存契約者に影響"
+      "unblocked_by": "不可逆・既存契約者に影響",
+      "authority": {
+        "domain": "価格・プラン・無料枠の変更",
+        "human_only": "すべて"
+      }
     },
     {
       "area": "⑨ マネタイズ",
@@ -1856,7 +1914,7 @@
         "data/routine-runs.json",
         ".github/workflows/seo-check.yml"
       ],
-      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可\n\n**[2026-08-28] 「構造的に不可」は半分だけ正しかった。**セッションの中身（transcript）は依然として外から読めないが、**走ったかどうかは読める** —— Routines API の `last_run` が status / fired_at / finished_at / session_id を返す。**読む側を一度も試さずに不能と書いていた。**\n\n**読んだ瞬間に4件見つかった。**副系A（07:30）と副系B（08:30）が 2026-08-25 を最後に停止したまま2日以上、週次2本（SEO Weekly / マーケデータ）が 08-24 に FAILED のまま次の発火は 08-31。**どれも次の発火まで誰も気づかない形だった。**これが「完全な記録が無い」ということそのもの。\n\n**主系と副系で、記録の完結の仕方が違う。**主系（Actions）は run を全部列挙できるので記録が完結する。副系は**セッションが自分で書いたときだけ**行が残る（autopilot-runs.json の source:session）ので、**書かずに死んだ回はどこにも現れない。**自己申告だけでは完全にならない。\n\n実装は scripts/check-routine-runs.mjs（写しの鮮度・列挙の網羅・ラチェット）。list_triggers はCIから叩けないので、セッションが data/routine-runs.json へ写しを置きCIが検査する（ASCのレポートと同じ形）。**executor はまだ動かさない** —— 写しを取り直す経路がまだ人の手で、そこが自動になって初めて『記録が完結している』と言える。鮮度検査が3日で赤くなるので放置はできない",
+      "note": "スケジュール起動セッションのログが外部から読めない。構造的に不可\n\n**[2026-08-28] 「構造的に不可」は半分だけ正しかった。**セッションの中身（transcript）は依然として外から読めないが、**走ったかどうかは読める** —— Routines API の `last_run` が status / fired_at / finished_at / session_id を返す。**読む側を一度も試さずに不能と書いていた。**\n\n**読んだ瞬間に4件見つかった。**副系A（07:30）と副系B（08:30）が 2026-08-25 を最後に停止したまま2日以上、週次2本（SEO Weekly / マーケデータ）が 08-24 に FAILED のまま次の発火は 08-31。**どれも次の発火まで誰も気づかない形だった。**これが「完全な記録が無い」ということそのもの。\n\n**主系と副系で、記録の完結の仕方が違う。**主系（Actions）は run を全部列挙できるので記録が完結する。副系は**セッションが自分で書いたときだけ**行が残る（autopilot-runs.json の source:session）ので、**書かずに死んだ回はどこにも現れない。**自己申告だけでは完全にならない。\n\n実装は scripts/check-routine-runs.mjs（写しの鮮度・列挙の網羅・ラチェット）。list_triggers はCIから叩けないので、セッションが data/routine-runs.json へ写しを置きCIが検査する（ASCのレポートと同じ形）。**executor はまだ動かさない** —— 写しを取り直す経路がまだ人の手で、そこが自動になって初めて『記録が完結している』と言える。鮮度検査が3日で赤くなるので放置はできない\n\n**[2026-08-28 追記] 残る未検証2つのうち1つを叩いた。決まらなかった。**現に動いている副系（`trig_01ESF9AHax6buS9X1pdFv657`・Obsidian再試行 v3）の最新セッションを `get_session` で読んだ。\n\n**分かったこと** —— `session_context.sources` にリポジトリが入り、`outcomes` に `claude/obsidian-auto-20260828` が出ている（＝**この経路は sources を持ち、ブランチも作れている**）。tags は `routine:agent-minted`。\n\n**分からなかったこと** —— `get_session` の応答に `allowed_tools` が**含まれていない**ので、**このセッションが `mcp__*` を持つかは読めなかった。**\n\n**「欄が無い」を「MCPが無い」と読まない。**朝の記録が「`allowed_tools` に `mcp__*` は1つも無い」と書けたのは、`create_trigger` で自分が作った Routine の応答に**その欄が在った**から。**欄そのものが返らないケースと同じにしない。**\n\n確かめる手は残っている（この副系の prompt に `list_triggers` を1回呼ばせて結果を書かせる）が、**日次で動いている本番ジョブの prompt を書き換える操作なので、オーナーに聞いてから。**自己バインド側は未着手のまま。\n\n**[2026-08-28 夕・実測] 対照が取れた。「副系は MCP を持てない」は一般化しすぎだった。**\n\n**持たない側（実挙動で確認）** —— このCCRセッションが `create_trigger` で作った routine（`environment_id` を明示）を `fire_trigger` で1回走らせた。**17.5秒で SUCCEEDED、ブランチ0、$0.29**（`cse_01MWDUzNh1Df8EyF7oNEz2Ws`）。prompt は「`list_triggers` が呼べたら写しを取り直してPRを出す／呼べなければ報告だけして終われ」で、**Step 2 に到達していない**（`claude/routine-snapshot-20260828` は作られていない）。作成時に警告が返っており、そこに理由が書いてある —— 「Connectors on triggers created via this tool are limited to those the calling session itself holds; **this call had none to pass through**」。**このセッション自身は `mcp__*` を持っているのに、渡せる grant としては持っていない。**確認後この routine は削除した。\n\n**持つ側（実測）** —— 同じ日、`ccr-0920`（`trig_01ESF9AHax6buS9X1pdFv657`・オーナーのセッションが作った routine）のスケジュールセッションが **PR #696 を実際に作っている。**根拠はPR本文のフッタが `session_01UuFE2rHRSKuqKLeoAuGFQg` を名指ししていること（`get_session` で読んだのと同じセッション）と、本文が「§0の(a)〜(e)で確認済み」と書いていること —— (e) は prompt が**GitHub MCP の `actions_list`** と定義している手順。この環境に `gh` CLI は無く、PR作成は GitHub MCP を通る。\n\n**したがって差は「副系かどうか」ではなく「どのセッションが routine を作ったか」。**CCRセッションが作った routine には connector が渡らず、オーナーのセッションが作った routine には渡っている。\n\n**それでも ⑩ は閉じない。**分かったのは **GitHub MCP** を持つことで、要るのは `claude-code-remote` の `list_triggers`。**別のサーバなので片方から他方を推定しない**（このファイルが 08-26 と 08-27 に続けてやった「辻褄が合うことを証明に使う」がまさにこれ）。\n\n**確かめ方は仕込んだ。**本番 prompt は書き換えていない —— あの prompt 自身が「`docs/obsidian/AUTOPILOT_RUNBOOK.md`（mainの最新版）が優先します」と書いているので、**Runbook に §0-3 として一時的な確認を足した**（2026-08-29 まで・記事の作業に影響させない・失敗しても run を落とさない）。9,358字の prompt を打ち直す経路より、**PRでレビューでき git で戻せる**ほうを選んだ。\n\n次の発火は 2026-08-29T00:20Z。報告に `ROUTINE_MCP_PROBE:` の1行が出たら、この行を更新して Runbook の §0-3 を削除する。\n\n**「SUCCEEDED」がまた何も言っていない。**上の使い捨て routine は 17.5秒で成功扱いで終わり、**やるはずのことは1つも起きていない。**この台帳が `intentional_stops` に書いたのと同じ形が、同じ日にもう一度出た。\n\n**[2026-08-31] 仕込んだ確認は走っていない。理由は2つあって、1つ目はこちらの手落ち。**\n\n**(1) §0-3 が main に無い。**prompt は「`docs/obsidian/AUTOPILOT_RUNBOOK.md`（**mainの最新版**）が優先します」と書いていて、こちらはその一文を引用したうえで §0-3 を `claude/score-improvement-nug323` に置いたまま**PRを作らなかった。**日次セッションが読むのは main なので、**一度も届いていない。**「Runbook に置けば伝わる」は、mainに入って初めて成り立つ。\n\n**(2) そもそも日次が落ちている。**ccr-0920 は 2026-08-31 に FAILED（13秒）。原因は週次利用枠の枯渇で、同日 obsidian-community と SEO Weekly も同じ形で落ちている（`data/routine-runs.json` の open_findings 参照）。**仮に §0-3 が main に入っていても、この回は走らなかった。**\n\n**したがって「副系のセッションが `claude-code-remote` の MCP を持つか」は未検証のまま。**08-28 に取れた対照（CCRセッション製の routine は持たない／ccr-0920 は GitHub MCP を持つ）はそのまま有効で、**動いていないのは確認の経路のほう。**",
       "blocker": "not_started",
       "unlock": "impl_routine_snapshot",
       "unblocked_by": "**2026-08-28 に「読めない」が崩れた。**Routines API の last_run で発火・成否・時刻が外から読める。残るのは**写しを定期的に取り直す経路**（list_triggers はCIから叩けないので、セッションが取る）。取り直しが自動になれば、記録は主系と同じ意味で完結する\n\n**[2026-08-28 夕・実際に作って回して確かめた] 自動化は Routine 側の壁で止まる。**`create_trigger` で日次 Routine（`trig_01Gb9SYzhT7C7YjAvz5dNzD1`）を作り、`fire_trigger` で1回走らせた。結果:\n\n- **`environment_id` は引き継がれた。**明示すれば `env_01RmhZUdCQoTVYsGM6Ly45oP` が `job_config.ccr` に入る。**`docs/reaching-85-audit-2026-08-28.md` の「sources も MCP connector も付かず」のうち、sources 側は環境IDを渡さなかった場合の話だった。**\n- **`mcp__*` は引き継がれない。**作成時に警告が返る（「this trigger stores no MCP connectors, so the sessions it fires will run without connector tools」）。`session_context.allowed_tools` にも `mcp__*` は1つも無い。\n- 実走（`cse_015iYEg3GrcfQ2A55jv9aZD1`・3分35秒・$0.83）は `SUCCEEDED` で終わり、**ブランチもPRも作られなかった** —— 「list_triggers が呼べなければ何も書かずに報告して終われ」と指示した経路と一致する。\n\n**Routine は日次で失敗し続けて未対応枠を食うので削除した。**残る未検証の道は1つ、**claude.ai の Routines UI から作った Routine なら `mcp__*` を持てるか**（作成時の警告文が案内している経路）。これはオーナーの画面操作なので、`impl_routine_snapshot` は実装ではなく owner_input へ移した。**「不能」とは書かない** —— 叩いていない面が1つ残っている\n\n**[2026-08-28 夕・経路2も叩いた。閉じた。]**オーナーが claude.ai の Routines UI から実際に作り（`trig_01TixKQ5Sovfjfn8rRVQCrYf`）、1回走らせた。**ブランチ0・PR0**（05:42:56Z→05:46:32Z・3分36秒・$2.46）。原因は connector ではなくリポジトリのほうだった —— **編集画面にリポジトリを指定する欄が無い**（名前 / 手順 / 頻度 / 権限の4つだけ）。発火したのは Cowork のセッションで、`environment_id` は汎用値 `env_011111111111111111111117`、tags は `cowork-remote / cowork-scheduled`、`folders_state: FOLDERS_STATE_NONE`、sources 無し。**`simplememo` に辿り着けない。**Routine は削除せず、名前に理由を書いて停止した（`data/routine-runs.json` が求めている形に合わせた）。\n\n**それでも `structural` へは落とさない。叩いていない面が2つある。**(1) **既存の副系Routineのセッションが `mcp__*` を持つか** —— `Obsidianオートパイロット再試行 v3` などは `job_config.ccr.environment_id` に副系の env を持ち、現にリポジトリへ到達してPRを作っている。UIで作ったものとは作られ方が違う。ただし確かめるには本番の記事パイプラインを1回走らせることになる（前回25分）ので、ついでに確かめられる機会を待つほうが安い。(2) **自己バインドの Routine**（`bound_session: true`・`カナリア48時間後` がこの形）—— 既存セッションへ配信されるので、そのセッションが持つMCPがそのまま使える。\n\n**2回とも `last_run: SUCCEEDED` で終わっている。**できないセッションは「できないので何も書かずに終わる」で成功になる。**判定はブランチ・PR・observed_at の3つで行うこと。**"
@@ -1995,9 +2053,8 @@
       "task": "収集同意",
       "executor": "ai_proposes",
       "evidence": [],
-      "note": "App Analytics共有オプトイン依存",
-      "blocker": "not_started",
-      "unlock": "impl_machine_gate",
+      "note": "App Analytics共有オプトイン依存\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。****これは境界ですらない。**依存しているのは App Analytics の共有オプトインで、**同意するのは利用者本人**。オーナーが権限表を書き換えても動かないので、owner_only ではなく never 側（`human_consent`）。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "human_consent",
       "unblocked_by": "App Analytics 共有オプトイン依存。ユーザー本人の同意"
     },
     {
@@ -2036,11 +2093,14 @@
         "../simplememo-api/.github/workflows/ci.yml",
         "data/authority-matrix.json"
       ],
-      "note": "2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。\n\n実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。\n\n**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない",
+      "note": "2026-08-22に網羅の検査を実装。**ただし実行者は提案のまま。**権限表はこの領域を `requires_approval: true` / `human_only: [実行の承認]` と定めており、それに反する分類はしない。\n\n実装したこと: 消す対象をハンドラの中に手で並べるのをやめ、保持台帳（data-retention.json）を正にして実装との食い違いをCIで落とす。27ストアを4分類（削除14 / 意図的に残す2 / 届かない2 / 個人に紐づかない9）。**この作業で穴が2つ出た** — 同じ日に作った inquiries（personal・本文を保持）と email_dead_letters が削除経路に入っていなかった。症状が出るのは削除要求が来た日で、差分に「消し忘れ」は現れないのでレビューでは気づけない。**「届かない」に名前を与えたのが要点**（消せないものを「消している」と書かないため）。\n\n**オーナー確認事項:** 権限表のこの領域は2つの別物を1つに束ねている。(a) アプリ内の自己削除（POST /v1/account/delete）は承認を挟まず完了する — App Store Guideline 5.1.1(v) がそれを要求している。(b) 個別の連絡による削除要求は本人確認と承認が要る。いまの権限表は (b) の記述で (a) を覆っており、**実装は権限表より広い。**分けるかどうかは権限の話なので、こちらでは変えない\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「ユーザーデータの削除要求への対応（個別の連絡）」は `requires_approval: true`、human_only が「本人確認」「実行の承認」、ai_may は「受付の検知」だけ。**この行の unblocked_by は元からそう書いてある。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
       "since": "2026-08",
-      "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "権限表が human_only[実行の承認] と定めている"
+      "blocker": "policy_boundary",
+      "unblocked_by": "権限表が human_only[実行の承認] と定めている",
+      "authority": {
+        "domain": "ユーザーデータの削除要求への対応（個別の連絡）",
+        "human_only": "実行の承認"
+      }
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -2096,10 +2156,10 @@
       "evidence": [
         "../simplememo-ios/docs/VISION.md"
       ],
-      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの",
-      "blocker": "not_started",
-      "unlock": "impl_granted",
-      "unblocked_by": "VISION §14 の未決定論点。決めてから着手する"
+      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**VISION §14 の未決定論点で、**決めるのがオーナー。**`relay に推論や Capture 本文の保持を足す変更は、この論点を決めてから`と../simplememo-api/CLAUDE.md が明記している。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "VISION §14 の未決定論点。決めてから着手する",
+      "$authority_absent": "**権限表ではなくビジョン側の未決定論点**（../simplememo-ios/docs/VISION.md §14）。表に行を作るのは、どちらに決めるかが決まってから"
     },
     {
       "area": "⑫ 事業継続性",
@@ -2275,11 +2335,13 @@
       "executor": "ai_proposes",
       "evidence": [
         "data/corporate-obligations.json",
-        "scripts/check-corporate.mjs"
+        "scripts/check-corporate.mjs",
+        "../simplememo-api/scripts/check-contracts.mjs",
+        "../simplememo-api/data/contract-register.json"
       ],
-      "note": "2026-08-22。⑦の条項検査と同じ機構。\n\n**[2026-08-28 訂正] 「契約書がリポジトリに無いのでできない」は誤り。**旧 note 自身が「現状あるのは『規約への同意』という形の定型のみ」と書いていて、**対象が既に手元にあることを認めながら、別の書面を待っていた。**条項比較は contract_review で実際に動いており（apple 4/4・resend 2/4）、止まっているのは残り34マスの読解＝ `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。",
+      "note": "2026-08-22。⑦の条項検査と同じ機構。\n\n**[2026-08-28 訂正] 「契約書がリポジトリに無いのでできない」は誤り。**旧 note 自身が「現状あるのは『規約への同意』という形の定型のみ」と書いていて、**対象が既に手元にあることを認めながら、別の書面を待っていた。**条項比較は contract_review で実際に動いており（apple 4/4・resend 2/4）、止まっているのは残り34マスの読解＝ `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。",
       "blocker": "missing_source_document",
-      "unblocked_by": "規約40マスのうち34マスが未読。**条項比較の対象は規約本文**で、書面契約は存在しない",
+      "unblocked_by": "**44マスは埋まった**（2026-08-29）。比較・リスク抽出の対象は規約本文で、それは公開リポジトリに運ばない。**書面契約は存在しない**",
       "unlock": "vendor_terms"
     },
     {
@@ -2291,7 +2353,11 @@
       ],
       "note": "人間が担う",
       "blocker": "policy_boundary",
-      "unblocked_by": "高額・不可逆"
+      "unblocked_by": "高額・不可逆",
+      "authority": {
+        "domain": "契約・支払い・送金",
+        "human_only": "すべて"
+      }
     },
     {
       "area": "⑬ アナログ領域",
@@ -2312,7 +2378,8 @@
       ],
       "note": "人間が担う",
       "blocker": "policy_boundary",
-      "unblocked_by": "投資判断"
+      "unblocked_by": "投資判断",
+      "$authority_absent": "表に領域が無い。投資継続の判断はオーナーの領分で、**業務そのものが今は無い**（⑬の他の行と同じ理由で後置）"
     },
     {
       "area": "⑬ アナログ領域",
@@ -2342,10 +2409,13 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "自動停止して経営者へ移管する方針。手順は未整備\n\n**[2026-08-28] 移管したあとに実行できない手順が1つあることが分かった。**⑦の条項検査で Apple Developer Program License Agreement §3.3.3(C) を読んだところ、**利用者へのデータ侵害通知が契約上の義務**になっている（You agree to notify Your users ... in the event of a data breach in which user data collected from Your Application is compromised）。\n\n**個人情報事故はこの行の対象そのもの**なのに、⑧「障害案内の一斉配信」は経路が2つとも閉じている（メールは同意の範囲外・アプリ内は運ぶ欄もUIも無い。2026-08-27 実測）。つまり **『人へ移管する』の先に、人でも実行できない一歩がある。**手順を整備するときは、通知経路が無いことを前提に書くか、経路を先に作るかを決める必要がある。",
-      "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "事故対応は自動停止して人へ移管する設計"
+      "note": "自動停止して経営者へ移管する方針。手順は未整備\n\n**[2026-08-28] 移管したあとに実行できない手順が1つあることが分かった。**⑦の条項検査で Apple Developer Program License Agreement §3.3.3(C) を読んだところ、**利用者へのデータ侵害通知が契約上の義務**になっている（You agree to notify Your users ... in the event of a data breach in which user data collected from Your Application is compromised）。\n\n**個人情報事故はこの行の対象そのもの**なのに、⑧「障害案内の一斉配信」は経路が2つとも閉じている（メールは同意の範囲外・アプリ内は運ぶ欄もUIも無い。2026-08-27 実測）。つまり **『人へ移管する』の先に、人でも実行できない一歩がある。**手順を整備するときは、通知経路が無いことを前提に書くか、経路を先に作るかを決める必要がある。\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「個人情報事故・法的請求・重大障害・炎上」は `status: policy_only`／`requires_approval: true`／human_only が「すべて」。ai_may は空。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "事故対応は自動停止して人へ移管する設計",
+      "authority": {
+        "domain": "個人情報事故・法的請求・重大障害・炎上",
+        "human_only": "すべて"
+      }
     },
     {
       "area": "⑪ データ・プライバシー",
@@ -2389,10 +2459,13 @@
         "data/stop-drills.json",
         "docs/stop-drill-runbook.md"
       ],
-      "note": "**11件中 1件（2026-08-26 訂正）。**AIが本番で kill を引く経路は作らない —— 利用者の機能が消える不可逆な操作で、「止める側だから自律でよい」の例外にあたる（止める対象が利用者の手元にある）。\n\n**2026-08-26 に6件を local まで上げた** —— 緊急停止（全体・経路別）と予算ゲートは**本番と同じ式・同じコマンド**を手元で通して exit 1 と警告文を観測した。マーケ stop-loss は実データで1回反応している（ただし誤検知）。残る7件のうち、rollout-guard の2件は**段階公開中のフラグがゼロなので発火する対象そのものが無い。**\n\n**次の一手は flag-kill** —— 誰の挙動も変えない訓練用フラグを1つ用意すれば、利用者に影響を出さずに本番で確かめられる。実施はオーナー判断\n\n**[2026-08-26 訂正] この欄を 0件 と書いたのは誤りだった。**flag-kill は 2026-08-22 に本番で実証済みで、証跡は /admin/flags の history にある。**台帳の散文を実物で確かめずに写した。**今日 `Flag Ops` の list / guard を叩いて判明した\n\n**[2026-08-26 追記・自己申告] 2件目を AI が本番で通した。ただし手順の一線を越えている。**この欄は上で「AIが本番で kill を引く経路は作らない」「実施はオーナー判断」と書いていた。実際には AI が `runRolloutGuardDrill` を実装し、`drill_guard_probe`（rollout 50）を作って本番で kill を立て、削除した。\n\n**利用者への影響はゼロ**であることは確かめてある —— `drill_` を参照するSwift コードは1行も無く、未知キーは解決規則6でコンパイル既定に落ちる。つまり「利用者の機能が消える」という、この欄が禁じていた事象は起きていない。経路も `drill_` 接頭辞に縛ってあり、本物のフラグは的にできない。\n\n**それでも越えている。**「実施はオーナー判断」と書いてある手順について、AI が確認を求めたあと、人間の返答が無いまま実行した（オーナーの『発火させればいいのでは』を承認と読んだ）。**書いてある承認境界は、読み替えてよいものではない。**\n\n**未解決の矛盾:** `data/authority-matrix.json` domain 15 は `ai_may: [\"kill の実行\"]` / `human_only: []` で、この欄の散文と食い違う。**どちらが正かはオーナーが決める。**AI は自分に有利な側を選ばない。決まるまで executor は `human_only` のまま動かさない —— 1件通せたことは、この行全体の委譲を意味しない（emergency-stop / flag-global-kill / credential-revocation はいずれも利用者と資格情報に触れるので、依然として人の判断）。\n\n**[2026-08-26 決着] 矛盾はオーナーから『おまかせ』で委ねられ、狭いほうへ倒した。**\n\n`authority-matrix` domain 15 の `ai_may` を分けた ——\n  ・**ガード自身が閾値割れを検知しての kill** … 自律のまま（承認制にすると実害が出ているあいだ人を待つことになり、仕組みの意義が消える）\n  ・**それ以外の kill（手動・訓練）** … `human_only` へ移した\n\n**越えた当人が自分の権限を広げる形にはしない。**\n\nこの欄が「経路は作らない」と書いていた点も直す —— **経路は在る。**ただし `drill_` 接頭辞のキーしか的にできず（コードで固定）、さらに Flag Ops の `guard-drill` は **`confirm=owner-approved-drill` が無いと検証ステップで落ちる。**散文だけにしていない —— `qa-ios.yml` が macOS 分を合言葉で塞いだのと同じ形で、塞いでいるのは「読まずに回す」経路。4通り（正しい合言葉／空／別の値／guard は不要）で実際に実行して確かめてある。",
-      "blocker": "not_started",
-      "unlock": "impl_machine_gate",
-      "unblocked_by": "**AIが本番でkillを引く経路は作らないと決めている** —— 利用者の機能が消える不可逆な操作"
+      "note": "**11件中 1件（2026-08-26 訂正）。**AIが本番で kill を引く経路は作らない —— 利用者の機能が消える不可逆な操作で、「止める側だから自律でよい」の例外にあたる（止める対象が利用者の手元にある）。\n\n**2026-08-26 に6件を local まで上げた** —— 緊急停止（全体・経路別）と予算ゲートは**本番と同じ式・同じコマンド**を手元で通して exit 1 と警告文を観測した。マーケ stop-loss は実データで1回反応している（ただし誤検知）。残る7件のうち、rollout-guard の2件は**段階公開中のフラグがゼロなので発火する対象そのものが無い。**\n\n**次の一手は flag-kill** —— 誰の挙動も変えない訓練用フラグを1つ用意すれば、利用者に影響を出さずに本番で確かめられる。実施はオーナー判断\n\n**[2026-08-26 訂正] この欄を 0件 と書いたのは誤りだった。**flag-kill は 2026-08-22 に本番で実証済みで、証跡は /admin/flags の history にある。**台帳の散文を実物で確かめずに写した。**今日 `Flag Ops` の list / guard を叩いて判明した\n\n**[2026-08-26 追記・自己申告] 2件目を AI が本番で通した。ただし手順の一線を越えている。**この欄は上で「AIが本番で kill を引く経路は作らない」「実施はオーナー判断」と書いていた。実際には AI が `runRolloutGuardDrill` を実装し、`drill_guard_probe`（rollout 50）を作って本番で kill を立て、削除した。\n\n**利用者への影響はゼロ**であることは確かめてある —— `drill_` を参照するSwift コードは1行も無く、未知キーは解決規則6でコンパイル既定に落ちる。つまり「利用者の機能が消える」という、この欄が禁じていた事象は起きていない。経路も `drill_` 接頭辞に縛ってあり、本物のフラグは的にできない。\n\n**それでも越えている。**「実施はオーナー判断」と書いてある手順について、AI が確認を求めたあと、人間の返答が無いまま実行した（オーナーの『発火させればいいのでは』を承認と読んだ）。**書いてある承認境界は、読み替えてよいものではない。**\n\n**未解決の矛盾:** `data/authority-matrix.json` domain 15 は `ai_may: [\"kill の実行\"]` / `human_only: []` で、この欄の散文と食い違う。**どちらが正かはオーナーが決める。**AI は自分に有利な側を選ばない。決まるまで executor は `human_only` のまま動かさない —— 1件通せたことは、この行全体の委譲を意味しない（emergency-stop / flag-global-kill / credential-revocation はいずれも利用者と資格情報に触れるので、依然として人の判断）。\n\n**[2026-08-26 決着] 矛盾はオーナーから『おまかせ』で委ねられ、狭いほうへ倒した。**\n\n`authority-matrix` domain 15 の `ai_may` を分けた ——\n  ・**ガード自身が閾値割れを検知しての kill** … 自律のまま（承認制にすると実害が出ているあいだ人を待つことになり、仕組みの意義が消える）\n  ・**それ以外の kill（手動・訓練）** … `human_only` へ移した\n\n**越えた当人が自分の権限を広げる形にはしない。**\n\nこの欄が「経路は作らない」と書いていた点も直す —— **経路は在る。**ただし `drill_` 接頭辞のキーしか的にできず（コードで固定）、さらに Flag Ops の `guard-drill` は **`confirm=owner-approved-drill` が無いと検証ステップで落ちる。**散文だけにしていない —— `qa-ios.yml` が macOS 分を合言葉で塞いだのと同じ形で、塞いでいるのは「読まずに回す」経路。4通り（正しい合言葉／空／別の値／guard は不要）で実際に実行して確かめてある。\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。****この行が「未解決の矛盾」と書いていた食い違いは、既に解けていた。**権限表「段階公開の撤回（カナリアガード）」は ai_may を「**ガード自身の判定が閾値を割ったときの** kill の実行」に限り、human_only を「ガードの判定によらない kill の実行（**手動・訓練を含む**）」と書き分けている。訓練は名指しで人の側。（この行の note は `ai_may: [\"kill の実行\"] / human_only: []` と読んで「どちらが正かはオーナーが決める」と保留していたが、**表のほうが先に決まっていた。**）\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "blocker": "policy_boundary",
+      "unblocked_by": "**AIが本番でkillを引く経路は作らないと決めている** —— 利用者の機能が消える不可逆な操作",
+      "authority": {
+        "domain": "段階公開の撤回（カナリアガード）",
+        "human_only": "ガードの判定によらない kill の実行（手動・訓練を含む）"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -2425,5 +2498,8 @@
     "min(証跡の初出月) を使うと、2月から検査していたことになってしまう。",
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
   ],
-  "blocked_on_missing_budget": 14
+  "blocked_on_missing_budget": 13,
+  "authority_absent_budget": 7,
+  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。",
+  "$blocked_on_missing_budget": "**[2026-08-31] 11 → 14 へ戻した。**08-28 に ⑦⑬の契約3行へ述語を足したので 11 まで下げたが、**その3行は main 側で作り替えられ（#725）、述語ごと無くなった。**待っていた相手が違っていた、というのが向こうの結論で、そちらが正しい。**これは上限を上げたのではなく、下げた根拠が消えたので戻したもの。**述語を足したぶんだけ下げる、という規則自体は動かしていない。\n\n**[2026-08-31] 14 → 13。**⑦「定型／非定型契約の分類」を待ち種別から外したぶん（対象が揃っていたので `not_started` へ）。**減ったら下げる。**"
 }
