@@ -86,6 +86,67 @@ export function evaluate(claimsDoc, coverage) {
   return { claims, unresolved, invalidModes };
 }
 
+/**
+ * **見出し・リード文に書いた数字を、台帳の計算に当てる。**
+ *
+ * 【なぜ要るか — 実際にずれていた】
+ * 2026-09-01 時点で `data/pr-claims.json` は「65.7%」「13領域202タスク」と書いていたが、
+ * 台帳の計算は **66.3% / 203タスク**だった。`evaluate()` は claims の参照しか見ておらず、
+ * **見出しとリード文の数字は誰も検算していなかった。**
+ *
+ * 配信物にとってここが一番高くつく —— 記者が最初に引くのは見出しの数字で、
+ * **台帳と1桁違うだけで、残り全部の信頼が落ちる。**
+ * `code-authorship.json` が「再現できない数字は、記者に聞かれた瞬間にいちばん高くつく」と
+ * 書いているのと同じ理由を、率のほうにも効かせる。
+ *
+ * 【小数点のある % だけを見る】
+ * 見出しには「本番15件は100%AI」のように**別の指標**も並ぶ。全部を総合自動化率と
+ * 突き合わせると誤検出になるので、**小数第1位まで書かれた率**（65.7% / 91.5% など）だけを
+ * 総合自動化率の名乗りとみなす。100% や 95% は素通しする。
+ *
+ * **この規則は「1つの率しか書くな」ではない。**併記は台帳の規約そのもの
+ * （4つの率を必ず並べて出す）なので、**小数付きで書いてよい率を増やしたくなったら
+ * ここへ足す** —— 黙って通す形にはしない。
+ */
+export function checkNumbers(claimsDoc, coverage) {
+  const problems = [];
+  const tasks = coverage.tasks ?? [];
+  const counted = tasks.filter((t) => t.executor !== 'intentional_no');
+  const executing = counted.filter((t) => AI_EXECUTES.has(t.executor));
+  const rate = counted.length ? (executing.length / counted.length) * 100 : 0;
+  const rateStr = rate.toFixed(1);
+  const areas = new Set(tasks.map((t) => t.area)).size;
+
+  const text = `${claimsDoc.headline ?? ''}\n${claimsDoc.subhead ?? ''}`;
+
+  // 小数付きの率は、すべて総合自動化率でなければならない。
+  for (const m of text.matchAll(/(\d+\.\d)%/g)) {
+    if (m[1] !== rateStr) {
+      problems.push(`原稿の「${m[1]}%」が台帳の総合自動化率（${rateStr}%）と違う`
+        + ` — ${executing.length}/${counted.length}。**台帳を動かしたら原稿も動かす**`);
+    }
+  }
+  if (!text.includes(`${rateStr}%`)) {
+    problems.push(`原稿に総合自動化率（${rateStr}%）が出てこない`
+      + ' — **一番厳しい数え方を落とすと、残った率だけが独り歩きする**');
+  }
+
+  // 分解の規模。「13領域202タスク」の形で書いてある。
+  const shape = text.match(/(\d+)\s*領域\s*(\d+)\s*タスク/);
+  if (!shape) {
+    problems.push('原稿に「N領域Nタスク」の分解が出てこない — 分母を書かない率は読めない');
+  } else {
+    if (Number(shape[1]) !== areas) {
+      problems.push(`原稿の領域数「${shape[1]}」が台帳（${areas}）と違う`);
+    }
+    if (Number(shape[2]) !== tasks.length) {
+      problems.push(`原稿のタスク数「${shape[2]}」が台帳（${tasks.length}）と違う`
+        + ' — **分母が古いと、率だけ直しても合わない**');
+    }
+  }
+  return { problems, rateStr, areas, total: tasks.length };
+}
+
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 // この検査が守っているのは「原稿が実装から離れていくこと」。
 // **その検出が効かなくなったときに落ちること**を、ここで固定する。
@@ -97,6 +158,35 @@ const DOC = (mode, requires = ['A::T'], pass_threshold = 0.7) => ({
 const evalOne = (mode, executor, requires) => evaluate(DOC(mode, requires), COV(executor));
 
 const SCENARIOS = [
+  ['**実データ: 見出しの数字が台帳と一致する**（原稿が独り歩きしない）', () => {
+    const r = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'));
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+  }],
+  ['**古い率が残っていたら落ちる**（台帳を動かして原稿を忘れた回）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rateStr } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const stale = { headline: `運営全体では ${(Number(rateStr) - 0.6).toFixed(1)}%`, subhead: '13領域203タスク' };
+    const r = checkNumbers(stale, cov);
+    if (!r.problems.some((x) => x.includes('総合自動化率'))) throw new Error('古い率が素通りした');
+  }],
+  ['**盛った率は落ちる**（91.5% のような、台帳に無い数字）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const r = checkNumbers({ headline: '運営全体の自動化率 91.5%', subhead: '13領域203タスク' }, cov);
+    if (!r.problems.some((x) => x.includes('91.5'))) throw new Error('盛った率が素通りした');
+  }],
+  ['**小数の無い率は素通しする**（「本番15件は100%AI」は別の指標）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const r = checkNumbers({ headline: `本番15件は100%AI・運営全体では ${rateStr}%`,
+      subhead: `${areas}領域${total}タスク` }, cov);
+    if (r.problems.length) throw new Error(`100% で誤検出: ${r.problems.join(' / ')}`);
+  }],
+  ['**分母が古ければ落ちる**（率だけ直して分母を忘れた回）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const r = checkNumbers({ headline: `${rateStr}%`, subhead: `${areas}領域${total - 1}タスク` }, cov);
+    if (!r.problems.some((x) => x.includes('タスク数'))) throw new Error('古い分母が素通りした');
+  }],
   ['実データの参照がすべて解決する', () => {
     const r = evaluate(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'));
     if (r.unresolved.length) throw new Error(`未解決 ${r.unresolved.length} 件`);
@@ -228,7 +318,18 @@ if (isMain) {
     console.log('');
   }
 
+  const numbers = checkNumbers(claimsDoc, coverage);
+  if (numbers.problems.length) {
+    console.log('  **原稿の数字が台帳と違う:**');
+    for (const p of numbers.problems) console.log(`    - ${p}`);
+    console.log('');
+  }
+
   if (argv.includes('--check')) {
+    if (numbers.problems.length) {
+      console.error(`主張の検証に失敗: 原稿の数字が台帳と違う（${numbers.problems.length} 件）`);
+      process.exit(1);
+    }
     if (unresolved.length || invalidModes.length) {
       if (unresolved.length) {
         console.error(`主張の検証に失敗: 解決できない参照が ${unresolved.length} 件`);
