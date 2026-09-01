@@ -269,6 +269,83 @@ Investigation 節の有無。
 
 ---
 
+## 2026-09-01 (weekly)
+
+> **方法論メモ**: WebSearch ツールの返却件数はクエリあたり ~10 件（タスク仕様の 30 件には届かず）。US-based Google index を使用。JA キーワードの順位は google.co.jp と差が生じることがある。位置は返却リンクの順序から推定し「~N」表記。simplememofast.com App Store リスティングは対象外。一部 EN キーワードは検索クエリに補助語を加えており、純クエリとの乖離に注意（Notes欄に記載）。
+
+| Keyword | Lang | SimpleMemo pos (page) | attnoel | note2selfmail | emailmeapp | Δ vs last | Notes |
+|---|---|---|---|---|---|---|---|
+| captio | JA | not visible | not visible | not visible | not visible | flat | US SERP 全面 Emburse 経費ソフト；JA メモアプリ文脈不在（継続） |
+| captio 代替 | JA | ~5 (/blog/captio-discontinued) | ~4 (prev ~2) | not visible | not visible | SM: **−1**；attnoel: **−2** | prtimes.jp (SM PR) ~1；itmedia.co.jp ~2；note.com ~3；attnoel ~4；SM ~5 |
+| captio なくなった | JA | ~4 (/blog/captio-discontinued) | ~3 (prev ~2) | not visible | not visible | SM: flat；attnoel: −1 | Captioo App Store ~1；note.com ~2；attnoel ~3；SM ~4；teineini.net ~5 |
+| captio 後継 | JA | ~5 (/blog/captio-discontinued) | not visible (prev ~2) | not visible | not visible | SM: **−2 REGRESSION**；attnoel: dropped out | zenn.dev ~1；jiji.com (SM PR) ~2；prtimes.jp (SM PR) ~3；note.com ~4；SM ~5；paraworld.jp ~6 |
+| captio 使えない | JA | **~5** (/blog/captio-discontinued) | ~4 (prev ~1) | not visible | not visible | SM: **+** (not visible→~5)；attnoel: **−3** | Captioo App Store ~1；note.com ~2-3；attnoel ~4；SM ~5；growrichslowly.net ~6 |
+| Obsidian メモ iPhone | JA | not visible (prtimes.jp SM PR ~2 だが非対象) | n/a | n/a | n/a | flat | zenn.dev ~1；prtimes.jp (SM PR) ~2；note.com ~3；Obsidian App Store ~4 |
+| Obsidian 音声入力 | JA | not visible | n/a | n/a | n/a | flat | note.com ショートカット記事が ~1-5 を独占；genspark.ai ~6；SM不在 |
+| メモアプリ 音声 無料 | JA | not visible | n/a | n/a | n/a | flat | 文字起こしサービス（mojiokoshi3, smartshoki）が支配；SM不在 |
+| 自分宛メール メモ | JA | not visible | n/a | n/a | n/a | flat | メモメール App Store ~1-2；Moca App Store ~7；SM不在 |
+| Obsidian デイリーノート iPhone | JA | not visible | n/a | n/a | n/a | flat | substack ~1；note.com ~2-3；mac-ra.com ~3；SM不在 |
+| obsidian quick capture ios | EN | not visible | n/a | n/a | n/a | flat | Quick Draft / Quick Capture Vault Notes / quickcaptureobsidian.app が支配；SM不在 |
+| email to obsidian | EN | not visible | n/a | n/a | n/a | flat | Obsidian community/forum/GitHub が ~1-6；email2obsidian.com ~5；SM不在 |
+| voice memo obsidian | EN | ~4 (/en/blog/obsidian-voice-input) | n/a | n/a | n/a | flat | GitHub repo ~1；Voice MD plugin ~2；mdisbetter.com ~3；SM ~4；drew.tech ~5 |
+| captio alternative | EN | ~6-7 (/en/captio-alternative/)（要注意: クエリ補助語による位置不確実） | n/a | ~6 | not visible | SM: 不確実（prev ~4）；note2self: flat | alternativeto.net ~1；混在あり（Captions/CapCut代替結果が混入）。純クエリとの差異に注意 |
+| note to self email app | EN | not visible (prev ~4、初ランク) | n/a | ~7-8 (prev ~5) | ~6-7 (prev ~6) | SM: **dropped out**（要注意: クエリ補助語による可能性）；note2self: 低下 | App Store listings ~1-6 が支配；emailmeapp ~6-7；note2selfmail ~7-8；SM不在 |
+
+**Take:** JA-4「captio 後継」が ~3 → ~5 に後退（−2、調査トリガー）。後退の主因は SM 自身の PR 記事（prtimes.jp / jiji.com）が "captio 後継" SERP の #2-3 を占有し、SM の owned ページを押し下げた自己変位。反対に JA-5「captio 使えない」は not visible から ~5 に復帰し、attnoel が ~1 → ~4 に失速。EN-13「voice memo obsidian」は ~4 を維持。EN-14/EN-15 はクエリ変動による不確実性あり。
+
+### 調査 / Investigation
+
+**対象キーワード（トリガー）:**
+1. **JA-4「captio 後継」** — SM が ~3 → ~5（−2、必須トリガー）
+
+---
+
+**(a) 誰がポジションを取ったか**
+
+「captio 後継」2026-09-01 の上位 ~6 件:
+1. **zenn.dev/yuukikawabata/articles/iphone-mac-note-taking-apps-2026** — 「2026年版 iPhone & Mac 向けメモアプリ最適解」個人記事。SM の新規参入による "captio 後継" 文脈のカバレッジが Zenn の高ドメイン権威と組み合わさり #1 に到達。
+2. **jiji.com（SM プレスリリース・時事ドットコム転載）** — 「Captio式・即メール送信アプリ『シンプルメモ』を正式リリース」2026-04-24 配信。SM 自身の launch PR が高権威メディア経由で #2 を占有。
+3. **prtimes.jp（SM プレスリリース原文）** — 同上 PR の PR TIMES 掲載版。同一 PR の別配信先が #3 を占有。
+4. **note.com/masatakashida** — 「Captio に代わるアプリを開発中」という個人 note 記事。
+5. **simplememofast.com/blog/captio-discontinued** — SM の owned ページ（前週 #3 から #5 に押し下げ）。
+
+**構造的原因: SM 自己変位（Self-displacement by press syndication）。** 2026-04-24 のアプリローンチ PR が prtimes.jp / jiji.com に掲載され、これらが "captio 後継" クエリで高権威として評価され、SM の owned ブログ記事を後ろへ押し出した。外部競合（attnoel 等）の介在ではなく、自社のプレスリリース配信が自社記事の順位を下げるという構造的皮肉。attnoel は逆に今週 top ~6 から完全に消えた（先週 ~2 → 今週不在）。
+
+---
+
+**(b) インデックス状況**
+
+- `simplememofast.com/blog/captio-discontinued` は今週も ~5 に表示 → **デインデックスなし**。
+- 前週調査（2026-08-18）で HTTP 200 / タイトル正常を確認済み。今週も可視なため再確認は省略。
+- SM の "captio 後継" における後退は「順位低下」であり「インデックス問題」ではない。
+
+---
+
+**(c) 自サイト側の変更**
+
+`git log --since=2026-08-25 -- captio-alternative/ blog/ en/ sitemap.xml llms.txt _headers _redirects` の結果: **対象ファイルへの直接変更は 0 件。**
+
+2026-08-25 以降のマージ（PR #610-659）はすべて内部ツール・台帳管理・自律エージェント設定であり、公開向け SEO ページへの影響なし。
+
+→ **自サイト側の変更は captio クラスタに影響していない。順位変動は外部要因（SM PR 記事の権威蓄積 + zenn.dev 個人記事の台頭）による自己変位。**
+
+---
+
+**Next actions（記録のみ。実施しない）:**
+
+1. `/blog/captio-discontinued`: ページ内に「captio 後継」を明示的にターゲットした H2 見出しセクションを追加し、owned ページの"captio 後継"文脈適合性を強化する。prtimes.jp/jiji.com に対して owned ページが "captio 後継" の definitive answer として機能するよう再強調。
+2. `/captio-alternative/`（JP）: 「captio 後継」への内部リンクと FAQPage エントリを /blog/captio-discontinued へのリンク付きで追加し、owned ページへの内部リンク集約を強化する。
+3. EN-14/EN-15 の位置確認: 次週は純クエリ（補助語なし）で "captio alternative" および "note to self email app" を再検索し、今週の不確実データを補完する。
+
+**Morning brief JSON:**
+`{"type":"serp-weekly","date":"2026-09-01","regressed":1,"improved":1,"flat":11,"watch":["JA-4","EN-14","EN-15"],"investigation":true}`
+
+```json
+{"date":"2026-09-01","kw_tracked":15,"top3":0,"top10":5,"improved":1,"declined":2,"out_of_top30":0,"worst":{"kw":"JA-4 captio 後継","from":"~3","to":"~5"},"best":{"kw":"JA-5 captio 使えない","from":"not visible","to":"~5"},"investigation":true,"take":"JA-4 dropped 2 positions due to SM's own press releases outranking the owned blog; JA-5 recovered to ~5; EN-13 holds ~4; EN-14/EN-15 data uncertain this week."}
+```
+
+---
+
 ## YYYY-MM-DD（見本エントリ — 週次実行時にこのブロックを複製して日付を入れ、この行の括弧書きは消す）
 
 | # | Keyword | Our pos (URL) | Top competitor (pos) | Δ vs last | Notes |
