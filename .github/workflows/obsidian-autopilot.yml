@@ -346,6 +346,26 @@ jobs:
       #   ここも落ちる → トークンが通っていない（＝資格情報）
       #   ここは通る   → 資格情報ではない（--model指定・MCP・プロンプト等の側）
       #
+      # 【2026-09-01 訂正】**この2択が誤りだった。**3つ目がある:
+      #
+      #   ここも落ちるが 429  → **実行枠の上限。トークンは通っている。**
+      #
+      # 08-30・08-31 の主系はどちらもこれで落ちたのに、上の2択しか無かったため
+      # 「資格情報が通っていない。オーナーが `claude setup-token` を再実行して
+      # repo secret を更新する必要がある」と出していた。**プローブ自身が同じ
+      # 画面に答えを印字している**のに読んでいない:
+      #
+      #   "api_error_status":429,"result":"You've hit your weekly limit · resets ..."
+      #
+      # 鍵を回しても直らない（枠のリセットまで待つ以外に無い）ので、
+      # **有効な鍵をオーナーに捨てさせたうえで、翌日また同じ誤診を出す。**
+      # しかも interpretRun 側は needs_triage: false を書くので、
+      # **翌日のセッションは調べ直さない。**誤りが台帳に固定される。
+      #
+      # 教訓は「落ちた」を原因の証明に使わないこと —— 単独実行が落ちることは
+      # トークンが無効な証拠ではなく、**この経路で1ターンも回らなかった**証拠
+      # でしかない。枠・障害・地域制限のどれでも同じ形になる。
+      #
       # 上のステップと違って --model も MCP も渡さないので、切り分けたい変数
       # （トークンが通るか）だけが残る。2026-08-26 に手で1回やったのがこれで、
       # 実費は $0.04・所要3秒だった。**失敗した回にしか走らない。**
@@ -379,10 +399,38 @@ jobs:
           echo "$out" | head -c 2000
 
           if [ "$code" -eq 0 ] && printf '%s' "$out" | grep -q '"is_error":false'; then
+            echo "verdict=credential_ok" >> "$GITHUB_OUTPUT"
             echo "::notice title=Obsidian Autopilot::切り分け: **資格情報は通っている。**同じトークンで1ターン完走した。即死の原因は資格情報以外（--model指定・MCP・プロンプト等）を見ること。"
             exit 0
           fi
-          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行も落ちた。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+
+          # 【2026-09-01】落ちた理由が枠なら、資格情報ではない。**先に割る。**
+          # 判定は機械可読な api_error_status を主とし、文言は補助にしか使わない
+          # （文言はいつ変わってもおかしくないが、変わったときに 429 を
+          # 資格情報の失効として誤診する側へ倒れてはいけない）。
+          if printf '%s' "$out" | grep -q '"api_error_status":429'; then
+            reason="$(printf '%s' "$out" | grep -o '"result":"[^"]*"' | head -1 | cut -d: -f2- | sed 's/^"//; s/"$//')"
+            [ -n "$reason" ] || reason="（応答から文言を取れなかった。api_error_status=429 のみ観測）"
+            echo "verdict=usage_limit" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Obsidian Autopilot::切り分け: **実行枠の上限（429）。資格情報は通っている。**API応答: ${reason}。**鍵を回しても直らない** — リセットまで待つ以外に手は無い。"
+            exit 0
+          fi
+
+          echo "verdict=credential_failed" >> "$GITHUB_OUTPUT"
+          echo "::error title=Obsidian Autopilot::切り分け: **資格情報が通っていない。**同じトークンの単独実行が 429 以外で落ちた。オーナーがローカルで \`claude setup-token\` を再実行し repo secret CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある。"
+          exit 1
+
+      # 枠で落ちたことを、**ステップの conclusion として**残す。
+      #
+      # interpretRun が読めるのは Actions API が返すステップの名前と conclusion
+      # だけで、ログ本文は読めない（`show_full_output` の有無に関わらず、
+      # API 越しには出てこない）。上の判定を success のまま返すと
+      # 「プローブが通った＝資格情報は無事、残る候補は --model / MCP」に化けるので、
+      # **枠のときだけ存在して失敗するステップ**を1つ置いて信号にする。
+      - name: 実行枠の上限で落ちた（資格情報ではない）
+        if: always() && steps.credprobe.outputs.verdict == 'usage_limit'
+        run: |
+          echo "::error title=Obsidian Autopilot::実行枠の上限で1日ぶんの出荷が落ちた。**資格情報は無事**なので鍵は回さない。リセット後に自動で戻る。"
           exit 1
 
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。

@@ -52,6 +52,15 @@
       "note": "**運転台帳に実際に現れた分類。**gate_code の fail_credential は「判定が資格情報の失効に気づいた」場合だが、こちらは**判定を通り抜けて起動したあと即死する**形。2026-08-24・25 に主系が2日連続で is_error=true / num_turns=1 / duration_ms=486 / total_cost_usd=$0 の**完全同一シグネチャ**で落ちた（run 32667079679 / 32779337325）。単発のflakeではない。\\n\\nAIには直せない（新しい鍵を作れない）ので相手はオーナー。ただし **stop_automation は false にしてある** —— claude-code-action の full output が『hidden for security』で伏せられており、**エラー文言を読む唯一の手段が次のrun**だから。止めると診断もできなくなる。obsidian-autopilot.yml に show_full_output: true を入れてあるので、次の 06:00 JST run で文言が出る。**それでも同じ即時失敗が続くなら、そのときは止める判断に切り替える**（費用は$0だが、毎朝『動いているように見えて何も出ない』状態が常態化するほうが高い）"
     },
     {
+      "trigger": "usage_limit",
+      "kind": "failure_class",
+      "who": "owner",
+      "channel": "daily_report",
+      "within_hours": 24,
+      "stop_automation": false,
+      "note": "**運転台帳に実際に現れた分類。**実行枠（週次）の上限で、モデル呼び出しが 429 で拒否される形。2026-08-30・08-31 の主系はどちらもこれで落ち、CCRの副系も 08-31 09:20 JST の起動が同じ理由で拒否された（resetsAt 2026-08-31T23:00:00Z）。\\n\\n**auth_or_credential と別種別にしてあるのが要点。**症状は同じ（is_error=true / num_turns=1 / total_cost_usd=$0 の即死）だが、**打つ手が正反対**である —— 資格情報なら鍵を回す、枠なら鍵を回しても直らない。同じ種別に入れると selfheal の「同じ種別を3回直したら人へ」が、直しようのない故障を毎日直そうとする側で数え始める。\\n\\n**stop_automation は false。**リセットで自然に戻るうえ、止めると戻ったことに気づく経路も止まる。**相手はオーナーだが gh_issue ではなく日報**にしてある —— 人がやることは無く（枠は待つしかない）、知っておけばよいだけなので、起票すると閉じる作業だけが残る。\\n\\n**within_hours 24 で足りる根拠。**枠のリセットは時刻が決まっていて API 応答がそのまま返す（`resets ...`）ので、早く知っても復旧は早くならない。"
+    },
+    {
       "trigger": "fail_api",
       "kind": "gate_code",
       "who": "owner",

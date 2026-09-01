@@ -1259,18 +1259,62 @@ export function interpretRun(run) {
     // 種別を変えると D5 の連続判定と close_check の再発判定が別種別として
     // 数え直され、歯止めが効かなくなる。結論は failure_reason と
     // needs_triage で伝える。
+    // 【2026-09-01】**枠の上限を先に割る。**
+    //
+    // プローブは「同じトークンで1ターン走らせて落ちたら資格情報」という2択
+    // だったが、**429（実行枠の上限）でも落ちる。**08-30・08-31 の主系は
+    // どちらもこれで、プローブ自身が `"api_error_status":429` と
+    // `"You've hit your weekly limit · resets ..."` を印字していたのに、
+    // ここは「資格情報が通っていない」を needs_triage: false で書こうとしていた。
+    // **有効な鍵を捨てさせる指示を、翌日のセッションが読み直さない形で
+    // 台帳へ固定する**ことになる（ワークフロー側の訂正と対）。
+    //
+    // ログ本文は Actions API から読めないので、ワークフローが枠のときだけ
+    // 失敗するステップを1つ置いている。**その conclusion だけを見る。**
+    const quota = step('実行枠の上限で落ちた');
+    if (quota?.conclusion === 'failure') {
+      return {
+        outcome: 'failed', attempted: true,
+        // 資格情報の即死と**同じ種別にしない。** selfheal の「同じ種別を
+        // 3回直したら人へ」も escalation の相手も違う（枠は誰にも直せず、
+        // リセットで自然に戻る）。
+        failure_class: 'usage_limit',
+        // 答えは出ている。鍵を回す作業も、原因の再調査も要らない。
+        needs_triage: false,
+        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
+          + `切り分けステップが **429（実行枠の上限）** を観測した。`
+          + `**資格情報は通っている** —— 落ちたのは枠であって鍵ではないので、`
+          + `\`claude setup-token\` の再実行も repo secret の更新も要らない`
+          + `（回しても直らない）。**リセットまで待つ以外に手は無い。**`
+          + `枠のリセット時刻はジョブの notice に API の応答文言がそのまま出ている`,
+      };
+    }
+
     const probe = step('資格情報かを切り分ける');
     if (probe?.conclusion === 'failure') {
+      // **枠の切り分けが存在しない回に、その結論を持ち込まない。**
+      // 上の分岐が使う「実行枠の上限で落ちた」ステップは 2026-09-01 に足したもので、
+      // それ以前の run には**ステップ自体が無い**（skipped ですらなく、
+      // Actions API の steps に現れない）。つまり 429 を除外できていないので、
+      // 同じ「プローブも落ちた」から資格情報だと**断定できるのは新しい回だけ。**
+      // 旧い回は形が同じでも、実際 08-30・08-31 は 429 だった。
+      const quotaRuledOut = quota !== undefined;
       return {
         outcome: 'failed', attempted: true,
         failure_class: immediate ? 'immediate_failure' : null,
         // **セッションが調べ直す必要が無い。**答えは出ていて、残りはオーナー作業。
-        needs_triage: false,
+        // ただし枠を除外できていない回は、断定せずセッションへ回す。
+        needs_triage: !quotaRuledOut,
         failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗し、`
           + `**同じトークンでの単独実行（1ターン）も落ちた**（ワークフローの切り分けステップ）。`
-          + `--model も MCP も渡さない実行で落ちているので、**資格情報が通っていない。**`
+          + `--model も MCP も渡さない実行が **429 以外で** 落ちているので、**資格情報が通っていない**`
+          + `（枠の上限なら手前の「実行枠の上限で落ちた」で返っている）。`
           + `オーナーがローカルで \`claude setup-token\` を再実行し repo secret `
-          + `CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある（自動判定・実験済み）`,
+          + `CLAUDE_CODE_OAUTH_TOKEN を更新する必要がある（自動判定・実験済み）`
+          + (quotaRuledOut ? '' : `\n\n**ただしこの回は 429（実行枠の上限）を除外できていない。**`
+            + `枠の切り分けは 2026-09-01 に足したもので、この run にはそのステップが無い。`
+            + `**鍵を回す前に、当時のジョブログで \`api_error_status\` を確かめること**`
+            + `（08-30・08-31 は同じ形で、実際には枠だった）`),
       };
     }
     if (probe?.conclusion === 'success') {
@@ -2137,9 +2181,52 @@ async function selftest() {
       { name: '即死が資格情報かを切り分ける', conclusion: probeConclusion },
     ],
   });
+  // 【2026-09-01】枠の切り分けを足した。**旧い回と新しい回で確信度が違う。**
+  const withQuota = (probeConclusion, quotaConclusion) => interpretRun({
+    status: 'completed', conclusion: 'failure',
+    steps: [
+      { name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure',
+        started_at: '2026-08-30T23:07:49Z', completed_at: '2026-08-30T23:08:01.4Z' },
+      { name: '即死が資格情報かを切り分ける', conclusion: probeConclusion },
+      { name: '実行枠の上限で落ちた（資格情報ではない）', conclusion: quotaConclusion },
+    ],
+  });
+  // 実測: run 33279844326 / 33340960317 は "api_error_status":429 /
+  // "You've hit your weekly limit" で落ちたのに、旧実装は
+  // 「資格情報が通っていない・setup-token を再実行せよ」を needs_triage:false で書いた。
+  const quotaHit = withQuota('success', 'failure');
+  t('枠で落ちた回を資格情報の失効と書かない',
+    !quotaHit.failure_reason.includes('資格情報が通っていない'));
+  t('枠で落ちた回は資格情報が無事だと書く',
+    quotaHit.failure_reason.includes('資格情報は通っている'));
+  // **「repo secret を含まないこと」では書けない** —— 正しい文面は
+  // 「repo secret の更新も要らない」と**明示的に否定する**ので、部分文字列の
+  // 不在で書くと、正しい文が落ちて誤った文が通る（最初にそう書いて落とした）。
+  // 見るのは指示そのもの（〜する必要がある）の不在と、無効化の明示。
+  t('枠で落ちた回に鍵の再発行を指示しない',
+    !quotaHit.failure_reason.includes('更新する必要がある'));
+  t('枠で落ちた回は鍵を回しても直らないと書く',
+    quotaHit.failure_reason.includes('回しても直らない'));
+  t('枠は資格情報の即死と別種別にする', quotaHit.failure_class === 'usage_limit');
+  t('枠と分かったらトリアージへ回さない', quotaHit.needs_triage === false);
+  t('枠は着手した失敗として数える',
+    quotaHit.outcome === 'failed' && quotaHit.attempted === true);
+  // プローブと枠の両方が failure でも、**枠が勝つ**（順序の固定）。
+  t('枠の判定はプローブの失敗より先に効く',
+    withQuota('failure', 'failure').failure_class === 'usage_limit');
+  // 枠を除外できた回だけが、資格情報だと断定してよい回。
+  const credBadNew = withQuota('failure', 'skipped');
+  t('枠を除外できた回は資格情報と断定してよい',
+    credBadNew.needs_triage === false
+    && credBadNew.failure_reason.includes('資格情報が通っていない'));
+
   const credBad = withProbe('failure');
   t('単独実行も落ちたら資格情報と書く', credBad.failure_reason.includes('資格情報が通っていない'));
-  t('資格情報と分かったらトリアージへ回さない', credBad.needs_triage === false);
+  // **枠の切り分けが無い回は断定しない。**ステップ自体が存在しないので 429 を
+  // 除外できていない。08-30・08-31 がまさにこの形で、実際には枠だった。
+  t('枠の切り分けが無い回は資格情報だと断定しない', credBad.needs_triage === true);
+  t('枠の切り分けが無い回はログの確認を先に求める',
+    credBad.failure_reason.includes('api_error_status'));
   t('資格情報と分かってもオーナー作業を名指しする',
     credBad.failure_reason.includes('claude setup-token'));
   const credOk = withProbe('success');

@@ -1,23 +1,21 @@
 {
-  "date_jst": "2026-08-28",
-  "generated_at": "2026-08-28T00:42:00Z",
-  "action": "new",
-  "article": {
-    "url": "https://simplememofast.com/obsidian/sync/official-sync/",
-    "title": "Obsidian SyncのStandardとPlus、必要なのはどちらか"
-  },
+  "date_jst": "2026-08-31",
+  "generated_at": "2026-09-01T00:10:00Z",
+  "action": "halted",
+  "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 0,
+    "consecutive_no_article_days": 3,
     "last_article_date_jst": "2026-08-28",
-    "last_production_change_date_jst": "2026-08-28",
-    "days_since_production_change": 0
+    "last_production_change_date_jst": "2026-08-29",
+    "days_since_production_change": 2
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-24",
     "bq_export_days_accumulated": 15,
-    "bq_checked": true,
-    "manual_snapshot_label": "2026-08-24"
+    "bq_checked": false,
+    "manual_snapshot_label": "2026-08-24",
+    "$note": "**この日の値は確かめていない。**08-31 は当日セッションが1つも起動できておらず、後追いで書いたこのセッションも BQ を叩いていない。08-28 の値をそのまま持ち越しているので、蓄積日数は実際にはこれより進んでいる（bq_checked: false）"
   },
   "cost": {
     "month": "2026-08",
@@ -99,12 +97,12 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-08-28",
-      "days": 18
+      "to": "2026-08-31",
+      "days": 21
     },
-    "completion_rate": 0.7619,
-    "change_failure_rate": 0.2381,
-    "human_intervention_rate": 0.3333,
+    "completion_rate": 0.6538,
+    "change_failure_rate": 0.3462,
+    "human_intervention_rate": 0.2692,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -112,39 +110,39 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.19047619047619047
+        "rate": 0.15384615384615385
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.047619047619047616
+        "rate": 0.038461538461538464
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.047619047619047616
+        "rate": 0.038461538461538464
       },
       "request": {
         "runs": 1,
-        "rate": 0.047619047619047616
+        "rate": 0.038461538461538464
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.8333,
+    "shipping_day_rate": 0.7143,
     "totals": {
-      "runs": 31,
-      "attempted": 21,
-      "shipped": 16,
-      "failed": 5,
+      "runs": 37,
+      "attempted": 26,
+      "shipped": 17,
+      "failed": 9,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 15,
-        "attempted": 13,
-        "shipped": 13
+        "runs": 18,
+        "attempted": 16,
+        "shipped": 14
       },
       "primary": {
-        "runs": 16,
-        "attempted": 8,
+        "runs": 19,
+        "attempted": 10,
         "shipped": 3
       }
     },
@@ -168,19 +166,21 @@
       "unresolved": []
     }
   },
-  "reason": "【連続無記事0日目・本番最終変更2026-08-28・BQ確認済み(15/28日蓄積・2026-09-06頃到達見込み)】再試行経路(09:20 JST・ccr-0920)による実行。主系・副系A・副系Bのいずれにも当日分の実行痕跡が無いことを§0の(a)〜(e)で確認済み（当日ブランチ無し・本番status JSON日付は前日・当日head PR無し・主系当日run無し）。占有コミットは非fast-forward拒否なく通った。**新規判明**: `check-routine-runs.mjs`（本日main合流・PR#693/#694）が副系A(ccr-0730)・副系B(ccr-0830)のroutine自体をstoppedと検知——今日これらが動かなかったのはタイミングではなく停止によるもの。自分のタスク範囲外のため触っていない（open_findingsの予算内・4/4）。レーンF: 未修理の故障なし（`autopilot-selfheal.mjs` --check）。前回レーンC実施が前日08-27で7日未満のためレーンCは優先せず、coverage-queueのpending先頭 C07 `/obsidian/sync/official-sync/` を実装（レーンE）。**訂正**: C07のevidenceは「Standard $4/Plus $8」としていたが、出典を遡っても確認できず（Sync $4とPublish $8という別製品の価格の混同の疑い）採用しなかった。公式ヘルプで確認できる唯一の差——バージョン履歴保持期間（Standard1か月/Plus12か月、`/obsidian/sync/`が2026-08-26に確認済み）——だけを根拠に判断フローを構成し、Plus単体の価格・保存容量差は本セッションの実行環境からはobsidian.md本体にもraw.githubusercontent.com経由のobsidianmd/obsidian-helpにも到達できず（前者403・後者は複数パス試行で404）未確認と明記した。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。",
-  "verified": "実測（このセッションで実際に実行した）: (a) egressの実測——obsidian.mdへはcurlで403（CONNECT tunnel failed）、raw.githubusercontent.com/obsidianmd/obsidian-releasesは200だがobsidianmd/obsidian-helpは複数パス試行すべて404（前回セッションが到達した経路が本日は機能しなかった）、api.github.comは直接到達200だが本セッションのGitHub API利用は設定リポジトリ以外403。(b) GitHub MCP `get_job_logs`でseo-daily.yml最新run(08-27 09:30 JST)のExport preflightログを読み、BigQueryのdata_date 2026-08-10〜08-24・15/28日蓄積・28日窓到達2026-09-06を確認（bq-preflight.mjsは資格情報無しで失敗するためこの経路で代替）。(c) coverage-queue.jsonのC07 evidence「Standard $4/Plus $8」をAUTOPILOT_LOG.md全文・coverage-queue.json全体でgrepし、他に出典が無いことを確認——Sync $4とPublish $8（/obsidian/pricing/で別々に検証済みの2製品）の混同の疑いと結論した。一次情報として新規に確認したのはこの「出典が無いことの確認」自体で、既存の検証済み事実（バージョン履歴保持期間・Sync基本料金）は/obsidian/sync/・/obsidian/pricing/からの引用。§4の全チェックをローカルで全通過（seo-check 0 errors 0 warnings・268ファイル）。iPhoneビューポート（390×844 DPR3）実描画QA: Playwright+Chromiumで実描画し、水平スクロールなし（scrollWidth=clientWidth=390）・表はoverflow-x:auto内・回答ブロック(tip-box) top=807px（ファーストビュー内）・cta-qrはモバイル非表示。JSエラーは外部analytics(ahrefs/GTM)のトンネル失敗2件のみで、既存の/obsidian/sync/ページで同一条件で再現したため本ページ固有の問題ではないと確認。QRは44件（新規2件含む）を独立デコードして0 failed、既存42件はバイト同一。",
+  "reason": "【連続無記事3日目・本番最終変更2026-08-29・BQ未確認】**この日はどの経路も1ターンも回っていない。**主系（GitHub Actions・run 33340960317）は 08-31 08:07 JST に起動して 46 秒で失敗、副系の再試行（ccr-0920）は 09:20 JST の起動が 13 秒で失敗した。原因は両方とも同じで、**実行枠（週次）の上限**である —— 主系の切り分けステップは `\"api_error_status\":429` と `\"You've hit your weekly limit · resets 11pm (UTC)\"` を、副系のセッションは `rate_limit_info` に `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。枠は 2026-08-31 23:00 UTC（09-01 08:00 JST）にリセット済み。\n\n**このファイルは 2026-09-01 に後から書いた。**08-31 当日に status JSON を書ける主体が1つも起動できなかったためで、当日のセッションが書いたものではない。根拠はすべて一次資料（Actions のジョブログ・Routine の last_run・当日ブランチの有無）で、日報が読むこの1ファイルだけが 08-28 のまま3日間動かず、**「実行記録なし」と報告し続けていた**状態を解消するために書いている。\n\n**訂正を1件含む。**主系のワークフローはこの3日間、切り分けステップの結論として「**資格情報が通っていない。オーナーが `claude setup-token` を再実行し repo secret を更新する必要がある**」を出していた。**誤りである。**同じ画面に 429 が出ており、落ちたのは枠であって鍵ではない。鍵を回しても直らず、しかも台帳側（interpretRun）は `needs_triage: false` を書くので**翌日のセッションが読み直さない**形だった。プローブと分類器の両方を直し、壊し3通りで落ちることを確認してある。\n\n**08-29 は別の理由で空白。**再試行（ccr-0920）が 09:21 JST に当日ブランチを占有（36de90a6）したあと何も残さずに終わっており、主系は占有を見て設計どおりスキップした（run 33230445898）。**占有したあと消えた理由は取れていない** —— CCRのスケジュール起動セッションのログは外部から読めず、Routine の last_run は最新1回しか保持しないため 08-31 のぶんに上書きされている。週次上限が 08-29 時点で効いていた証拠は無いので、同じ原因とは書いていない（台帳では `claimed_then_silent` / needs_triage: true）。",
+  "verified": "一次資料のみ。(1) Actions のジョブログを実見: run 33279844326（08-30）・33340960317（08-31）はどちらも切り分けステップの応答に `\"api_error_status\":429` と `\"You've hit your weekly limit · resets ...\"` を含む。run 33230445898（08-29）は Gate の notice `claude/obsidian-auto-20260829 が既に存在（進行中/実行済み）のためスキップ。` で終了し、以降の全ステップが skipped。(2) Routine `trig_01ESF9AHax6buS9X1pdFv657` の last_run は FAILED / fired 2026-08-31T00:20:33Z / finished 00:20:46Z。(3) 当日ブランチは claude/obsidian-auto-20260829 までしか存在せず、20260830・20260831 は無い（＝副系は占有にも到達していない）。(4) AUTOPILOT_LOG.md に 08-29〜08-31 の節は無い。\n\n**推測で埋めた欄は無い。**08-30 の副系（ccr-0920）は起動記録が残っておらず（last_run は1回しか保持しない）、当日ブランチも無いため**着手したかどうかが決まらない。**台帳にもこの1件だけ行を作っていない —— `no_run` と書けば「起動しなかった」という観測していない主張になる。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（268ファイル）",
-    "content_graph": "28 entries OK。/obsidian/sync/official-sync/ を新規登録（cluster: obsidian-sync・parent: /obsidian/sync/・siblings: icloud, pricing）",
-    "mobile_qa": "iPhone 390×844 DPR3 実描画QA実施。水平スクロールなし・表はoverflow-x:auto内・JSエラーは外部analytics由来2件のみ（既存ページと同一）・回答ブロックtop=807px（ファーストビュー内）・QRはモバイル非表示",
-    "experiments": "36件中21 open・due 0・overdue 0",
-    "other": "Runbook §4 の全チェックをローカルで通過: check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし） / check-url-normalization（245 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments / autopilot-budget --check / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（未修理の故障なし） / autopilot-drill --check（15シナリオ全通過） / automation-rate --check / check-pr-facts --check / d-score --check / check-public-facts.mjs（distribution-queue.json含め6面OK） / generate_sitemap.py --dry-run。check-routine-runs.mjs --check は exit 0（未対応4件は既知・open_budget内、いずれも本セッションのタスク範囲外）"
+    "$note": "**当日の検証は行われていない。**08-31 はセッションが起動していないので、記事の検証もサイトの検査も走っていない。以下は 2026-09-01 にこの訂正を出すために回したもので、08-31 の成果物を検証したものではない（成果物が無い）。",
+    "autopilot_act_selftest": "162 項目通過。429 を資格情報の失効と誤診する形へ戻すと落ちることを壊し3通りで確認（枠の分岐を消す＝4件／枠を除外できない回でも断定する＝1件／枠の判定をプローブより後ろに置く＝1件）",
+    "autopilot_runs_check": "exit 0。台帳の欠落4日を埋めて最終記入 2026-08-31（許容1日以内）",
+    "check_escalation": "exit 0。failure_class `usage_limit` の移管規則を追加（日報・停止しない）",
+    "check_selftests": "exit 0。壊しの実測を data/check-selftests.json に記録",
+    "workflow_yaml": "obsidian-autopilot.yml を YAML として再パースし、判定ロジックを実物のログ応答5通り（08-30実測・08-31実測・成功・401・非JSON）で通した"
   },
   "owner_requests": [
     "【要オーナー判断・継続】GH_PATの回転（workflow scope は足さないと決定済み・2026-08-25。残っているのは回転のみ。詳細は data/autopilot-actions.json の act-gh-pat-scope-and-rotation）。急ぎではない。本セッションはGitHub Secretsの値・回転日を検査する権限が無く**実測手段が無いため未確認**で、前日の記録をそのまま繰り越す。",
     "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。",
-    "【新規・要オーナー判断】副系A(ccr-0730・07:30 JST)・副系B(ccr-0830・08:30 JST)のRoutineがstopped状態であることが本日`check-routine-runs.mjs`で判明（PR #693/#694）。再開するかどうかはオーナー判断（Routine停止の経緯・要否をこのセッションでは把握していない）。現状は open_findings に記録済みで、上限内（4/4）。"
+    "【新規・要オーナー判断】副系A(ccr-0730・07:30 JST)・副系B(ccr-0830・08:30 JST)のRoutineがstopped状態であることが本日`check-routine-runs.mjs`で判明（PR #693/#694）。再開するかどうかはオーナー判断（Routine停止の経緯・要否をこのセッションでは把握していない）。現状は open_findings に記録済みで、上限内（4/4）。",
+    "【オーナー作業不要・情報共有】08-30〜08-31 の主系停止は**実行枠（週次）の上限**であり、資格情報の問題ではない。ワークフローが出していた「`claude setup-token` を再実行して repo secret を更新する必要がある」という指示は誤りなので、**鍵は回さないこと。**枠は 2026-08-31 23:00 UTC にリセット済みで、経路は自動で戻る。誤診そのものは修正済み。"
   ],
-  "next": "coverage-queueのpendingは残り26件。次点候補を選ぶ際は、キューのevidenceに書かれた数字（特に価格・容量など）を鵜呑みにせず、本文執筆前にAUTOPILOT_LOG.md全文とキュー自体をgrepして出典の有無を確かめること——今回のC07がまさにその一例で、evidence記載の「Standard $4/Plus $8」は一度も検証されておらず、Sync $4とPublish $8という別製品の価格を混同していた疑いが強い。この訂正フローそのものをdistribution-queueの配信の種として公開した（「社内の思い込み数字を遡ったら出典が無かった」という角度）。**ネットワーク到達性は経路によって変わる**——本日はobsidianmd/obsidian-helpへの到達に失敗したが（前回セッションは同じ経路で成功していた）、obsidian-releasesへは到達できた。次回の一次情報取得はまず到達性を実測してから引用元を選ぶこと。副系A/B(ccr-0730/ccr-0830)のRoutine停止は本セッションの範囲外だが、次に主系(06:00)・再試行(09:20)以外の経路からの出荷が3日以上途絶えるようなら、この停止が原因である可能性が高い。レーンA/BはBQ28日窓（2026-09-06頃）まで引き続き正当化できない。GH_PAT回転は急ぎではないが未了。"
+  "next": "枠のリセット（2026-08-31 23:00 UTC）後、最初に起動するのは再試行（ccr-0920・09-01 09:20 JST）。**そこが通ることを確認するまで、経路が戻ったとは言わない。**戻ったら当日の status JSON はそのセッションが通常どおり上書きする（このファイルは 08-31 の記録として上書きされてよい）。\n\n**3日間だれも気づかなかったことのほうが本題。**主系が落ちても、届く先が「翌日のセッションが台帳を書くとき」しか無い。日報は status JSON だけを読むので、書ける主体が落ちている日はその日報自体が『当日記録なし』になり、**止まっていることと、止まったと報せる仕組みが同時に落ちる。**台帳の検知時間にもそれが出ていて、この4件の検知までは 24〜72 時間だった（従来の中央値は2.7時間）。副系A(ccr-0730)・副系B(ccr-0830)のRoutine停止（08-28に判明）も未解決のまま。"
 }

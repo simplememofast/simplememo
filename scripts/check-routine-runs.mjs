@@ -230,11 +230,34 @@ function selftest() {
       const { problems } = V(real);
       assert(problems.length === 0, problems.join(' / '));
     }],
-    ['**実データで5件が健全でない**（緑＝異常が無い、ではない）', () => {
-      const { unhealthy } = V(real);
-      assert(unhealthy.length === 5, `健全でないのは5件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 2, '未対応は2件（週次2本）');
-      assert(real.intentional_stops.length === 3, '意図的な停止は3件（Reddit監視・副系A・副系B）');
+    // 【2026-09-01】**個数のピン（5 / 2 / 3）をやめて、勘定が合うことを見る。**
+    //
+    // 元の形は実データの件数をそのまま留めていた。狙いは正しい —— この検査が
+    // 緑でも異常はあり、「緑＝異常が無い」と読ませないための杭だった。
+    // だが**実データが正当に増えるたびに落ちる。**実際 08-28 に意図的な停止が
+    // 1件増え、08-31 に週次上限で2本落ちただけで、3つとも同時に外れた。
+    //
+    // 問題は落ちること自体ではなく、**その直し方が「数字を書き換える」に
+    // なる**こと。数字合わせが習慣になった杭は、次に本当に何かが消えた日も
+    // 同じ手つきで書き換えられて素通りする。**杭が意味を失う。**
+    //
+    // 見るものを個数から**勘定**へ移す。健全でないものが在ること（下限）と、
+    // その全部がどちらかの一覧で説明されていること（恒等式）は、
+    // 件数が動いても意味が変わらない。**一覧から黙って消す**という、
+    // ここで本当に止めたかった操作は、恒等式のほうが正確に捕まえる
+    // （個数のピンは「5件のまま中身が入れ替わる」を通してしまう）。
+    ['**実データに健全でないものが在る**（緑＝異常が無い、ではない）', () => {
+      const { unhealthy, problems } = V(real);
+      assert(problems.length === 0, problems.join(' / '));
+      assert(unhealthy.length > 0,
+        '健全でないものが0件になっている — 実データが本当に全部健全なら'
+        + 'このピンは役目を終えているので、消す判断を明示的に行うこと');
+      const accounted = real.open_findings.length + real.intentional_stops.length;
+      assert(unhealthy.length === accounted,
+        `健全でない ${unhealthy.length} 件に対し、説明は 未対応 ${real.open_findings.length}`
+        + ` + 意図的な停止 ${real.intentional_stops.length} = ${accounted} 件`);
+      assert(real.open_findings.length <= real.open_budget,
+        `未対応 ${real.open_findings.length} 件が上限 ${real.open_budget} を超えている`);
     }],
 
     // --- 黙って止まったものを通さない -----------------------------------
