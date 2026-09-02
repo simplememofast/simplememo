@@ -37,7 +37,7 @@ const pick = (r, xs) => xs[Math.floor(r() * xs.length)];
 
 const ROUTES = ['actions', 'ccr-0730', 'ccr-0920', 'owner-session'];
 const RUN_STATUS = ['queued', 'in_progress', 'completed', null];
-const RUNNABLE = new Set([CODES.RUN, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS]);
+const RUNNABLE = new Set([CODES.RUN, CODES.RUN_TAKEOVER, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS]);
 /** 故障。**force でも予算でも飛び越えられてはいけない側。** */
 const FAULTS = new Set([CODES.FAIL_CREDENTIAL, CODES.FAIL_API, CODES.FAIL_NO_MODEL]);
 
@@ -48,6 +48,10 @@ function randomState(r) {
     budgetOver: r() < 0.3,
     runCapOverrun: r() < 0.25,
     branchClaimed: r() < 0.3,
+    // 占有の中身。**null（読めなかった）を必ず混ぜる** — 追い越しの判定は
+    // 「分からない日は追い越さない」に倒してあり、そこが最も踏みやすい。
+    claimHasWork: pick(r, [null, true, false]),
+    claimAgeMinutes: pick(r, [null, 0, 20, 89, 90, 400]),
     prodStatusDate: pick(r, ['2026-08-22', '2026-08-23']),
     mainStatusDate: pick(r, ['2026-08-22', '2026-08-23']),
     prTodayExists: r() < 0.3,
@@ -172,6 +176,26 @@ const PROPERTIES = [
     },
   },
   {
+    name: '占有の追い越しは、作業のある占有では絶対に起きない',
+    why: '**差分やPRのある占有を追い越すと、出荷済みの日に二重で書く。**'
+      + '死んだ占有（claimだけ・90分以上停止）を守らないことと、生きた占有を守ることは両立する',
+    check: (s, decide) => {
+      if (s.claimHasWork !== true) return true;
+      const d = decide({ ...s, branchClaimed: true, force: false });
+      return d.code !== CODES.RUN_TAKEOVER;
+    },
+  },
+  {
+    name: '占有の中身が読めない日は追い越さない',
+    why: '**「差分が無い」と「差分を読めなかった」は別物。**'
+      + 'GitHub API が読めない日に全部の占有が死んで見えると、二重着手の再発になる',
+    check: (s, decide) => {
+      if (s.claimHasWork !== null && s.claimAgeMinutes !== null) return true;
+      const d = decide({ ...s, branchClaimed: true, force: false });
+      return d.code !== CODES.RUN_TAKEOVER;
+    },
+  },
+  {
     name: 'egress遮断だけでは着手を止めない',
     why: '**止めるのではなく、できることを絞るのが正しい振る舞い**（2026-08-22の実績）',
     check: (s, decide) => {
@@ -238,6 +262,12 @@ const REQUIRED_COVERAGE = [
   ['使えるモデルが空配列', (s) => Array.isArray(s.modelsAvailable) && s.modelsAvailable.length === 0,
     '「モデルが無い」と「書くことが無い」を混ぜていないかを試す入口'],
   ['egress 遮断', (s) => s.egressBlocked, '縮退して走る経路を試す入口'],
+  ['作業のある占有', (s) => s.claimHasWork === true,
+    '**追い越してはいけない占有**。ここが生成されないと、追い越しの性質は空虚に通る'],
+  ['中身の読めない占有', (s) => s.claimHasWork === null || s.claimAgeMinutes === null,
+    '「差分が無い」と「読めなかった」を分けているかを試す入口'],
+  ['死んだ占有（claimだけ・90分以上）', (s) => s.claimHasWork === false && s.claimAgeMinutes >= 90,
+    '**引き継ぎが起きる唯一の状態。**生成されなければ、引き継ぎは一度も試されていない'],
   ['force あり', (s) => s.force, 'force が越えられない壁を試す入口'],
 ];
 const MIN_HITS = 5;
@@ -356,6 +386,14 @@ const MUTANTS = [
     '1回上限で止まるのは主系だけ（二重化が承認待ちを吸収する）'],
   ['判定が呼ぶたびに揺れる', (d) => { let n = 0; return (s) => ({ ...d(s), code: (n++ % 2) ? '__ゆらぎ__' : d(s).code }); },
     '同じ状態からは同じ判定が出る（決定論）'],
+  // **引き継ぎの条件を1つ落とすと、生きた占有まで追い越す。**
+  // 死んだ占有を守らないことと、作業のある占有を追い越すことは1条件しか離れていない。
+  ['作業の有無を見ずに引き継ぐ', (d) => (s) => (s.branchClaimed ? d({ ...s, claimHasWork: false }) : d(s)),
+    '占有の追い越しは、作業のある占有では絶対に起きない'],
+  ['読めなかった占有を「空」と読む', (d) => (s) => (s.branchClaimed
+    ? d({ ...s, claimHasWork: s.claimHasWork ?? false, claimAgeMinutes: s.claimAgeMinutes ?? 999 })
+    : d(s)),
+    '占有の中身が読めない日は追い越さない'],
 ];
 
 export function selftest() {

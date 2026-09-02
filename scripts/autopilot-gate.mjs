@@ -27,6 +27,7 @@ export const CODES = {
   SKIP_BUDGET: 'skip_budget',
   SKIP_RUN_CAP: 'skip_run_cap',
   SKIP_BRANCH_CLAIMED: 'skip_branch_claimed',
+  RUN_TAKEOVER: 'run_takeover',
   SKIP_ALREADY_SHIPPED: 'skip_already_shipped',
   SKIP_PR_TODAY: 'skip_pr_today',
   SKIP_PRIMARY_RUNNING: 'skip_primary_running',
@@ -49,6 +50,38 @@ export const CODES = {
  */
 export const LANES_NEEDING_EGRESS = ['A', 'B', 'C-primary-source'];
 
+/**
+ * 占有を「死んでいる」と見なすまでの分数。
+ *
+ * 【なぜ要るか】2026-08-29、ccr-0920 が当日ブランチを claim だけ取って
+ * 記事もPRも作らずに終わった（ap-20260829-ccr0920）。同日12:03 JSTに動いた
+ * 主系は**ブランチの存在だけを見て**「進行中/実行済み」と読み、3秒で
+ * success を返した（run 33230445898・Checkout以降が全て skipped）。
+ * **claim を取った側が死ぬと、その日は誰も走らないまま緑になる。**
+ * 占有は二重着手を防ぐためのものだが、**死んだ占有まで守ってしまっていた。**
+ *
+ * 【90分の根拠】主系のジョブ上限そのもの（`timeout-minutes: 90`）。
+ * この時間を越えて生きている主系の run は存在しえない。実測でも、
+ * 出荷まで走り切った回は 18〜28分（run 33454414490 / 32900786201 /
+ * 32816234185）で、上限の3分の1に届かない。**観測された最長の3倍以上**を
+ * 取ってあるので、作業中の経路を追い越す余地は実質的に無い。
+ */
+export const STALE_CLAIM_MINUTES = 90;
+
+/**
+ * 占有が「claim だけ取って死んでいる」か。
+ *
+ * **3条件すべてが揃ったときだけ真。**どれか1つでも分からない（null）なら
+ * 偽 —— 判定できない日は「実行済みかもしれない」側へ倒す（§0-2 と同じ原則）。
+ * ここを緩めると、2026-08-21 の二重着手（PR #521 / #522）を別の入口から作る。
+ */
+export function isAbandonedClaim(s) {
+  return s.branchClaimed === true
+    && s.claimHasWork === false                        // 差分もPRも無い＝claimコミットだけ
+    && typeof s.claimAgeMinutes === 'number'
+    && s.claimAgeMinutes >= STALE_CLAIM_MINUTES;
+}
+
 const isPrimary = (route) => route === 'actions';
 
 /**
@@ -58,6 +91,8 @@ const isPrimary = (route) => route === 'actions';
  * @param {boolean} s.secretsPresent  主系のみ意味を持つ（CLAUDE_CODE_OAUTH_TOKEN か ANTHROPIC_API_KEY）
  * @param {boolean} s.budgetOver      当月の実費が上限に達しているか
  * @param {boolean} s.branchClaimed   origin に当日ブランチが既にあるか
+ * @param {boolean|null} s.claimHasWork  そのブランチに main との差分か head PR があるか（null=読めなかった）
+ * @param {number|null} s.claimAgeMinutes そのブランチの最新コミットからの経過分（null=読めなかった）
  * @param {string|null} s.prodStatusDate  本番 data/autopilot-status.json の date_jst
  * @param {string|null} s.mainStatusDate  origin/main の同ファイルの date_jst
  * @param {boolean} s.prTodayExists   当日作成のPRがあるか
@@ -65,7 +100,7 @@ const isPrimary = (route) => route === 'actions';
  * @param {boolean} s.force           手動の検証実行（冪等チェックを飛ばす）
  */
 export function decide(s) {
-  const RUNNABLE = new Set([CODES.RUN, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS]);
+  const RUNNABLE = new Set([CODES.RUN, CODES.RUN_TAKEOVER, CODES.DEGRADE_MODEL, CODES.DEGRADE_EGRESS]);
   const R = (code, reason, extra = {}) => ({ run: RUNNABLE.has(code), code, reason, ...extra });
 
   // -1. **緊急停止。**他のどの判定よりも先に見る。
@@ -161,8 +196,17 @@ export function decide(s) {
   if (s.force) return R(CODES.RUN, 'force指定（手動の検証実行）。冪等チェックを省略');
 
   // 4. 当日ブランチの占有。**弾かれること自体がこの仕組みの出力**であって障害ではない。
+  //    ただし**死んだ占有は守らない**（2026-08-29 の ap-20260829-ccr0920）。
+  //    claim コミットだけで差分もPRも無く、90分以上動いていないブランチは
+  //    「進行中」ではなく「取ったまま死んだ」なので、引き継いで走る。
+  //    引き継ぎでも**ブランチは消さない・force push しない** — 既存の claim の
+  //    上に積む（fast-forward）ので、排他としては今までどおり機能する（§0-2）。
+  let takeover = false;
   if (s.branchClaimed) {
-    return R(CODES.SKIP_BRANCH_CLAIMED, '当日ブランチを他経路が先に取っている。何もせず終了');
+    if (!isAbandonedClaim(s)) {
+      return R(CODES.SKIP_BRANCH_CLAIMED, '当日ブランチを他経路が先に取っている。何もせず終了');
+    }
+    takeover = true;
   }
 
   // 5. 本番に当日分が出ている＝マージ＋デプロイまで終わっている。
@@ -195,9 +239,16 @@ export function decide(s) {
   if (s.egressBlocked) {
     return R(CODES.DEGRADE_EGRESS,
       '外部到達が塞がれている。着手はするが、一次情報の実測が要るレーンは選べない',
-      { forbiddenLanes: LANES_NEEDING_EGRESS, degraded: true });
+      { forbiddenLanes: LANES_NEEDING_EGRESS, degraded: true, takeover });
   }
 
+  if (takeover) {
+    return R(CODES.RUN_TAKEOVER,
+      `当日ブランチは claim だけ取られて ${s.claimAgeMinutes} 分動いていない（差分もPRも無い）。`
+      + '**死んだ占有を守ると、その日は誰も走らないまま緑になる。**引き継いで着手する。'
+      + '既存の claim の上に空コミットを積んで push すること（force push もブランチ削除もしない）',
+      { takeover: true });
+  }
   return R(CODES.RUN, '着手してよい。まず当日ブランチを空コミットで占有すること');
 }
 
@@ -206,6 +257,8 @@ export function baseState(overrides = {}) {
   return {
     route: 'actions', todayJst: '2026-08-23',
     secretsPresent: true, budgetOver: false, runCapOverrun: false, branchClaimed: false,
+    // 占有の中身。**既定は「読めなかった」** — 分からない日は追い越さない側に倒す。
+    claimHasWork: null, claimAgeMinutes: null,
     prodStatusDate: '2026-08-22', mainStatusDate: '2026-08-22',
     prTodayExists: false, primaryRunStatus: 'completed', force: false,
     // --- 故障・縮退の軸。既定は「すべて健全」 ---
