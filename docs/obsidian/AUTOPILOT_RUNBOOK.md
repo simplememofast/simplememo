@@ -653,6 +653,7 @@ node scripts/autopilot-selfheal.mjs --check  # 自己修復の境界
 node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
 node scripts/automation-rate.mjs --check     # 全領域の自動化率台帳
 node scripts/check-pr-facts.mjs --check      # PR原稿の事実と禁止表現
+node scripts/check-landing-freshness.mjs --check  # 着地面（トップ日英）が現実より古くないか
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
@@ -886,6 +887,33 @@ node scripts/autopilot-runs.mjs --append \
     動かず、サイトのデプロイが3日止まった。**
 
   写しが60日を超えて古いと検査が落ちる（古い写しは無い検査と同じ）。
+
+- **着地面（トップ日英）のブラッシュアップ（毎回・所要1分・キー不要）**:
+  ```sh
+  node scripts/check-landing-freshness.mjs      # --check なしで期限が近いバッジも出る
+  ```
+  **機械が落とすのは版番号・NEWの期限・公表した着地面へのリンクだけ。**
+  そこはCIが止めるので、この保守枠でやるのは**機械が決められない側**:
+
+  - **NEWバッジの残り日数が21日を切っていたら、いま決める。**出力に
+    「NEWバッジ 残り N 日」と出る。**期限が来てから慌てて剥がすと、
+    その日は全PRが止まる**（この検査は落ちる設計）。剥がすか、
+    「なぜまだ新しいのか」を言えるなら `data-new-until` を延ばす
+  - **直近に出荷した機能・公開したページが、トップから辿れるか。**
+    `data/app-releases.json` と直近のPRを見て、トップが一言も触れていない
+    ものがあれば候補に積む。**リンクの有無は機械が見るが、
+    「触れるべきか」は見られない**
+  - **配信・公表した主張と、トップの言い方が食い違っていないか。**
+    `data/pr-claims.json` の `published` が正。率の**値**は
+    check-autopilot-page が見るので、ここで見るのは言い回しのほう
+
+  **なぜこの枠が要るか（2026-09-03）**: 配信当日にトップを見に行ったら、
+  「最新バージョン3.9」（公開中は5.8.4・**2か月と5版ぶん古い**）、
+  「NEW · v3.0」のバッジ2つ、配信本文が `/` へ送っているのに `/` から
+  `/autopilot/` へ行けない、配信で名乗った率がトップに1つも無い、が同時に出た。
+  **どれも壊れていないので誰も直さない種類のずれで、しかも一番読まれる面に在った。**
+  機械で決まる4種はCIへ移したが、**「もう新しくない」の判断だけは人と当日の
+  セッションに残る。**残したぶんをここに置く
 
 - 本番URLのライブ確認（新規ページ公開後の200/OG/構造化データ確認）
 - `analyze.mjs` 各検出器の実行と、キューJSON/ログへの反映
