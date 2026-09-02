@@ -14,10 +14,23 @@
  * 両方「当日分なし」と判定して二重着手した（PR #521 と #522）。
  * 判定を関数にして初めて、切替のシナリオを机上ではなく実行で確かめられる。
  *
- * 【このモジュールが本番の実行経路ではないこと】
- * 主系の Gate は checkout 前に走るのでこのスクリプトを呼べない（bashのまま）。
- * ここは**参照実装とテスト対象**であり、副系・再試行のセッションが従う規約の
- * 機械可読版。bash とここがずれたら、ずれ自体が Runbook の穴なので直す。
+ * 【2026-09-03: 主系もここを通るようになった】
+ * ここには長らく「主系の Gate は checkout 前に走るのでこのスクリプトを呼べない
+ * （bashのまま）」と書いてあった。**その二重実装が、実際に片方だけ直る形で表に出た。**
+ * 09-02 に `isAbandonedClaim()`（死んだ占有の引き継ぎ）を入れたとき、
+ * 主系の bash Gate へ同じ判定を移す push が GitHub に拒否された
+ * —— GH_PAT に `workflow` scope が無いため（`act-gh-pat-scope-and-rotation` で
+ * **意図的に足さないと決めている**。足すと無人の主系が自分の permissions を
+ * 書き換えられる）。結果、**Runbook を読む経路だけが新しい判定になり、
+ * 主系は旧判定のまま残った。**
+ *
+ * そこで bash 版を書き直すのではなく、**判定そのものを .yml の外へ出した。**
+ * 主系は checkout の後に `--preflight` を呼ぶ。以後この判定の修理は
+ * `scripts/` への普通のPRで届く（workflow scope が要らない）。
+ * **権限は1ミリも広げていない。**広げずに自己修復の届く範囲だけを広げる形にした。
+ *
+ * checkout を先にしたぶん、スキップする日も数十秒ぶんのランナー時間を使う。
+ * **それは払う。**払わない代わりに払っていたのは「片方だけ直る」ことだった。
  */
 
 /** 判定コード。文字列を直接比較させない（typoが静かに通るため）。 */
@@ -268,4 +281,188 @@ export function baseState(overrides = {}) {
     modelsAvailable: null, preferredModel: null, egressBlocked: false,
     ...overrides,
   };
+}
+
+// ============================================================
+// preflight — 主系（GitHub Actions）の Gate 本体
+// ============================================================
+// **判定は decide() が持つ。ここは材料を集めるだけ。**
+//
+// 集めるのは checkout 前の bash が見ていたものと同じ3つ（秘密鍵の有無・当日ブランチの
+// 占有・本番status JSONの日付）に、**占有の中身**（差分・PR・経過分）と
+// **origin/main の当日分**を足したもの。緊急停止・予算・1回上限・モデルは
+// ワークフローの別ステップが持っており、そちらは触らない
+// （同じ判定を2箇所に置くと、また片方だけ直る）。
+//
+// **例外を投げない。**ここで throw すると、いままで静かにスキップしていた日が
+// 赤い通知になる。読めなかったものは null のまま decide() へ渡し、
+// decide() 側の「分からない日は追い越さない」に倒す。
+
+/** ISO文字列からの経過分。読めなければ **null**（分からないを 0 にしない）。 */
+export function ageMinutes(iso, now = Date.now()) {
+  if (typeof iso !== 'string' || !iso) return null;
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return null;
+  return Math.floor((now - t) / 60000);
+}
+
+/** JSTの当日（YYYY-MM-DD）。 */
+export function todayJst(now = new Date()) {
+  return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
+/**
+ * 占有の中身を1つの compare 応答から読む。**1つでも欠けたら null を返す。**
+ *
+ * Runbook §0-2 の「1つでも読めなかったら引き継がない」を、呼び出し側の
+ * if の書き方ではなくここで保証する。`files` が 0 でも `commits` が空なら
+ * 経過分が出せないので、その回は「読めなかった」。
+ */
+export function readClaim(compare, now = Date.now()) {
+  if (!compare || !Array.isArray(compare.files) || !Array.isArray(compare.commits)) {
+    return { claimHasWork: null, claimAgeMinutes: null };
+  }
+  const last = compare.commits[compare.commits.length - 1];
+  const iso = last?.commit?.committer?.date ?? null;
+  return { claimHasWork: compare.files.length > 0, claimAgeMinutes: ageMinutes(iso, now) };
+}
+
+/** GitHub Actions の `$GITHUB_OUTPUT` 行。**改行を含む値は heredoc 形式で書く。** */
+export function outputLines(obj) {
+  const out = [];
+  for (const [k, v] of Object.entries(obj)) {
+    const s = String(v ?? '');
+    if (s.includes('\n')) out.push(`${k}<<__EOF_${k}__\n${s}\n__EOF_${k}__`);
+    else out.push(`${k}=${s}`);
+  }
+  return out.join('\n');
+}
+
+/**
+ * JSONを取りに行く。**404 と「取れなかった」を混ぜない。**
+ *
+ * ここを1つの null に潰すと、**APIが落ちている日が「ブランチが無い日」に見える。**
+ * それは 2026-08-21 の二重着手（PR #521 / #522）を別の原因で作る形そのもの。
+ * status 0 は到達できなかったことを表す（例外は投げない）。
+ */
+async function getResp(url, headers = {}, ms = 20_000) {
+  try {
+    const r = await fetch(url, { headers, signal: AbortSignal.timeout(ms) });
+    if (!r.ok) return { status: r.status, json: null };
+    return { status: r.status, json: await r.json() };
+  } catch { return { status: 0, json: null }; }
+}
+
+/**
+ * 材料を集めて decide() を1回だけ呼ぶ。
+ *
+ * @param {object} o
+ * @param {string} o.repo    'owner/name'
+ * @param {string|null} o.token  GH_PAT か GITHUB_TOKEN（占有の中身を読むのに要る）
+ * @param {boolean} o.secretsPresent
+ * @param {boolean} o.force
+ * @param {string} o.today   'YYYY-MM-DD'
+ * @param {string|null} o.mainStatusDate  チェックアウト済みの main の status JSON の date_jst
+ */
+export async function preflight(o) {
+  const branch = `claude/obsidian-auto-${o.today.replace(/-/g, '')}`;
+  const headers = o.token
+    ? { authorization: `Bearer ${o.token}`, accept: 'application/vnd.github+json',
+        'user-agent': 'simplememo-autopilot-gate' }
+    : { accept: 'application/vnd.github+json', 'user-agent': 'simplememo-autopilot-gate' };
+
+  // **先に「APIが読めているか」を確かめる。**compare の 404 は
+  // 「ブランチが無い」と「リポジトリに届いていない（鍵が失効した・権限が消えた）」の
+  // どちらでも返る。区別せずに着手すると、**権限を失った日に毎回「当日分は無い」と
+  // 判定して走る**ことになる —— 冪等チェックの根拠が消えた状態で走るのが、
+  // 2026-08-21 の二重着手と同じ形。リポジトリ自体が 200 で返ることを先に見る。
+  const repoOk = (await getResp(`https://api.github.com/repos/${o.repo}`, headers)).status === 200;
+
+  // 占有の有無。**compare の 404 だけが「ブランチが無い」の答え。**
+  // それ以外の失敗（0 / 5xx / 403）は「読めなかった」で、着手の根拠にしない。
+  const cmp = await getResp(
+    `https://api.github.com/repos/${o.repo}/compare/main...${encodeURIComponent(branch)}`, headers);
+  const apiReachable = repoOk && (cmp.status === 200 || cmp.status === 404);
+  const branchClaimed = cmp.status === 200;
+
+  let claim = { claimHasWork: null, claimAgeMinutes: null };
+  if (branchClaimed) {
+    claim = readClaim(cmp.json);
+    // PRが1件でもあれば「作業がある」側。**PR一覧が読めなければ null のまま**
+    // （読めなかったことを「PRは無い」と読むと、死んでいない占有を追い越す）。
+    const owner = o.repo.split('/')[0];
+    const prs = await getResp(
+      `https://api.github.com/repos/${o.repo}/pulls?state=all&head=`
+      + `${encodeURIComponent(`${owner}:${branch}`)}`, headers);
+    if (!Array.isArray(prs.json)) claim.claimHasWork = null;
+    else if (prs.json.length > 0) claim.claimHasWork = true;
+  }
+
+  // 本番の status JSON。**取れない日は null**（＝「当日分ではない」と読まない）。
+  const prod = (await getResp(
+    `https://simplememofast.com/data/autopilot-status.json?d=${o.today.replace(/-/g, '')}`, {})).json;
+
+  const state = baseState({
+    route: 'actions',
+    todayJst: o.today,
+    secretsPresent: o.secretsPresent,
+    force: o.force,
+    branchClaimed,
+    claimHasWork: claim.claimHasWork,
+    claimAgeMinutes: claim.claimAgeMinutes,
+    prodStatusDate: prod?.date_jst ?? null,
+    mainStatusDate: o.mainStatusDate ?? null,
+    // 緊急停止・予算・1回上限・モデルはワークフローの別ステップが見る。
+    // ここで既定値のまま渡すのは「この段では判定しない」の意味。
+    prTodayExists: false,
+    primaryRunStatus: null,
+    // **APIが読めない日は着手しない**（decide 2c）。ここを true に固定すると、
+    // 冪等チェックの根拠が無いまま走る日ができる。
+    githubApiReachable: apiReachable,
+  });
+  const d = decide(state);
+  return { decision: d, branch, state };
+}
+
+// --- CLI ---------------------------------------------------------------
+// `node scripts/autopilot-gate.mjs --preflight` で GITHUB_OUTPUT へ書く。
+if (process.argv[1] && process.argv.includes('--preflight')) {
+  const fs = await import('node:fs');
+  const env = process.env;
+  const today = todayJst();
+  let mainStatusDate = null;
+  try {
+    mainStatusDate = JSON.parse(fs.readFileSync('data/autopilot-status.json', 'utf8')).date_jst ?? null;
+  } catch { /* 読めなければ null。**「当日分ではない」と読まない** */ }
+
+  let result;
+  try {
+    result = await preflight({
+      repo: env.GITHUB_REPOSITORY ?? 'simplememofast/simplememo',
+      token: env.GH_TOKEN || null,
+      secretsPresent: env.HAS_CLAUDE_TOKEN === 'true' || env.HAS_ANTHROPIC_KEY === 'true',
+      force: env.FORCE === 'true',
+      today,
+      mainStatusDate,
+    });
+  } catch (e) {
+    // **ここで赤くしない。**判定器が壊れた日は「実行済みかもしれない」側へ倒し、
+    // 理由を notice に出す。赤い通知にすると、翌日から誰も読まなくなる。
+    result = { decision: { run: false, code: 'preflight_error', reason: `判定器が落ちた: ${e.message}` },
+      branch: null };
+  }
+
+  const { decision: d } = result;
+  const lines = outputLines({
+    run: String(d.run),
+    code: d.code,
+    takeover: String(d.takeover === true),
+    today: today.replace(/-/g, ''),
+    today_dash: today,
+    reason: d.reason,
+  });
+  if (env.GITHUB_OUTPUT) fs.appendFileSync(env.GITHUB_OUTPUT, `${lines}\n`);
+  const level = d.run ? 'notice' : (d.code.startsWith('fail') || d.code === 'preflight_error' ? 'error' : 'notice');
+  console.log(`::${level} title=Obsidian Autopilot::[${d.code}] ${d.reason}`);
+  if (!env.GITHUB_OUTPUT) console.log(lines);
 }

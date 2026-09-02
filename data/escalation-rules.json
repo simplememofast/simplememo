@@ -20,7 +20,7 @@
     "channels": {
       "daily_report": "10:00 JST の日報メール（simplememo-api の autopilot_report cron）",
       "gh_issue": "GitHub Issue（cron-health.yml / autopilot-health.yml が起票）",
-      "owner_direct": "オーナーへの直接連絡。**経路が未整備**（この台帳で初めて名前が付いた）"
+      "owner_direct": "オーナーへの直接連絡。**2026-09-02 に経路を作った** — simplememo-api の src/owner-direct.ts（cron `owner_direct`・毎時 0 分）が、公開されている data/emergency-stop.json と data/autopilot-actions-report.json を読み、条件が立ったときだけ日報とは別便の単発メールを送る。状態の指紋が変わったときだけ送るので、同じ状態が続く間は再送しない。**この経路が実際に検知できるのは、その2つのJSONに現れる事象だけ** —— 緊急停止・全経路の出荷停止・オーナー待ちの滞留。crisis（個人情報事故・法的請求・重大障害・炎上）に機械の信号は無く、**そちらは経路ができても検知できない**（人が気づいて止める側のまま）"
     }
   },
   "rules": [
@@ -28,10 +28,10 @@
       "trigger": "emergency_stop",
       "kind": "gate_code",
       "who": "owner",
-      "channel": "gh_issue",
+      "channel": "owner_direct",
       "within_hours": 1,
       "stop_automation": true,
-      "note": "緊急停止が立っている。**AIは解除できない**（policy.ai_may_resume: false）ので、人が見るまで止まったまま。止める側の誤りは1日の出荷が止まるだけだが、解除する側の誤りは止めたかった事象を素通りさせる"
+      "note": "緊急停止が立っている。**AIは解除できない**（policy.ai_may_resume: false）ので、人が見るまで止まったまま。止める側の誤りは1日の出荷が止まるだけだが、解除する側の誤りは止めたかった事象を素通りさせる。\n\n**[2026-09-02] 経路を gh_issue から owner_direct へ移した。**within_hours は前から1時間と書いてあったが、**Issue は誰かが見に行かないと届かない**ので、実際に人へ届いていたのは 10:00 JST の日報＝最大24時間だった。owner_direct（simplememo-api の毎時 cron）は emergency-stop.json を直接読むので、ここだけは規則どおり1時間で届く。**規則に書いてあることと、届くことは別**という穴が、この1行では塞がった"
     },
     {
       "trigger": "fail_credential",
