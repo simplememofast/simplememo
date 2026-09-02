@@ -53,7 +53,13 @@ export const PAGE_PATH = path.join(ROOT, 'autopilot/index.html');
  *   - `pr-autopilot-2026-09-numbers.md` … 「使わない数字」を**わざと**載せている
  *   - `automation-rate-2026-08.md` … 日付つきの断面。当時の値のまま残すのが正しい
  */
-export const EXTRA_PATHS = [path.join(ROOT, 'docs/pr-autopilot-2026-09-body.md')];
+// [2026-09-02] 配信稿を足した。`-body.md` は 08-22 に書いた叩き台で、**実際に
+// 配信するのはこちら**（見出しが対句から月次の推移へ変わっている）。網に入って
+// いない文書が記者へ渡る、という形を作らないために、出す本文は必ずここへ足す。
+export const EXTRA_PATHS = [
+  path.join(ROOT, 'docs/pr-autopilot-2026-09-body.md'),
+  path.join(ROOT, 'docs/pr-autopilot-2026-09-final.md'),
+];
 export const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
 /**
  * Lane B（アプリ本体）の台帳。[2026-09-02] ページ §2 と配信本文が

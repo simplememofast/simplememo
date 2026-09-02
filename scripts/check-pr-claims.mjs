@@ -108,7 +108,7 @@ export function evaluate(claimsDoc, coverage) {
  * （4つの率を必ず並べて出す）なので、**小数付きで書いてよい率を増やしたくなったら
  * ここへ足す** —— 黙って通す形にはしない。
  */
-export function checkNumbers(claimsDoc, coverage) {
+export function checkNumbers(claimsDoc, coverage, timeline = null) {
   const problems = [];
   const tasks = coverage.tasks ?? [];
   const counted = tasks.filter((t) => t.executor !== 'intentional_no');
@@ -127,6 +127,27 @@ export function checkNumbers(claimsDoc, coverage) {
   };
   const rateStr = RATES.総合自動化率;
   const allowed = new Set(Object.values(RATES));
+
+  // **月次の推移も台帳である。**[2026-09-02 追加]
+  //
+  // 上の4つは「いまの状態」の率で、見出しが**過去の点**を引くことを想定していない。
+  // 9/3 配信稿の見出しは「12.1%から66.8%に」——12.1% は 2026-06 の総合自動化率で、
+  // `data/autonomy-timeline.json` に在る実在の値だが、この検査は「台帳のどの率とも
+  // 一致しない」と落とした。**台帳を1つしか知らなかった。**
+  //
+  // **緩めているのではない。**足すのは timeline の各月の総合自動化率だけで、
+  // 出所がある値という条件は変わらない（invent した 91.5% は今も落ちる）。
+  // timeline 自身は `scripts/autonomy-timeline.mjs --check` が終点を現在値に留めており、
+  // 台帳が動けば見出しも動かさないと落ちる、という関係も同じ。
+  //
+  // **読めなければ足さない。**ファイルが無い環境では過去の点を許さない側へ倒す
+  //（「検証できないから通す」を作らない）。
+  const timelinePoints = (timeline?.points ?? [])
+    .map((p) => (typeof p.overall_automation_rate === 'number'
+      ? (p.overall_automation_rate * 100).toFixed(1) : null))
+    .filter(Boolean);
+  for (const v of timelinePoints) allowed.add(v);
+
   const areas = new Set(tasks.map((t) => t.area)).size;
 
   const text = `${claimsDoc.headline ?? ''}\n${claimsDoc.subhead ?? ''}`;
@@ -137,8 +158,11 @@ export function checkNumbers(claimsDoc, coverage) {
   for (const m of text.matchAll(/(\d+\.\d)%/g)) {
     if (!allowed.has(m[1])) {
       problems.push(`原稿の「${m[1]}%」が台帳のどの率とも一致しない`
-        + ` — ${Object.entries(RATES).map(([k, v]) => `${k} ${v}%`).join(' / ')}。`
-        + '**台帳を動かしたら原稿も動かす**');
+        + ` — ${Object.entries(RATES).map(([k, v]) => `${k} ${v}%`).join(' / ')}`
+        + (timelinePoints.length
+          ? ` / 月次の推移 ${timelinePoints.join(' / ')}`
+          : ' ／ **月次の推移は読めていない**（data/autonomy-timeline.json）')
+        + '。**台帳を動かしたら原稿も動かす**');
     }
   }
   // **数字は、名前と一緒でなければ書けない。**
@@ -204,7 +228,7 @@ const evalOne = (mode, executor, requires) => evaluate(DOC(mode, requires), COV(
 
 const SCENARIOS = [
   ['**実データ: 見出しの数字が台帳と一致する**（原稿が独り歩きしない）', () => {
-    const r = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'));
+    const r = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'), readJSON(ROOT, 'data/autonomy-timeline.json'));
     if (r.problems.length) throw new Error(r.problems.join(' / '));
   }],
   ['**古い率が残っていたら落ちる**（台帳を動かして原稿を忘れた回）', () => {
@@ -244,6 +268,34 @@ const SCENARIOS = [
     const cov = readJSON(ROOT, 'data/automation-coverage.json');
     const r = checkNumbers({ headline: '運営全体の自動化率 91.5%', subhead: '13領域203タスク' }, cov);
     if (!r.problems.some((x) => x.includes('91.5'))) throw new Error('盛った率が素通りした');
+  }],
+  // ── 月次の推移を第2の台帳として認める（2026-09-02 追加）──────────────
+  // **落ちる側を先に固定する。**緩めたのではないことを、ここで見せる。
+  ['**月次の推移に在る率は書ける**（見出しが過去の点を引く形）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const tl = readJSON(ROOT, 'data/autonomy-timeline.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov, tl);
+    const past = (tl.points.find((p) => p.month === '2026-06').overall_automation_rate * 100).toFixed(1);
+    const r = checkNumbers({ headline: `${past}%から${rateStr}%へ`,
+      subhead: `総合自動化率は${areas}領域${total}タスクで${rateStr}%` }, cov, tl);
+    if (r.problems.length) throw new Error(`過去の点で落ちた: ${r.problems.join(' / ')}`);
+  }],
+  ['**台帳に無い数字は、推移を渡しても落ちる**（緩めていないこと）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const tl = readJSON(ROOT, 'data/autonomy-timeline.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov, tl);
+    const r = checkNumbers({ headline: '91.5%から66.8%へ',
+      subhead: `総合自動化率は${areas}領域${total}タスクで${rateStr}%` }, cov, tl);
+    if (!r.problems.some((x) => x.includes('91.5'))) throw new Error('作った数字が素通りした');
+  }],
+  ['**推移が読めなければ、過去の点は許さない**（検証できないから通す、を作らない）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const tl = readJSON(ROOT, 'data/autonomy-timeline.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov, tl);
+    const past = (tl.points.find((p) => p.month === '2026-06').overall_automation_rate * 100).toFixed(1);
+    const r = checkNumbers({ headline: `${past}%から${rateStr}%へ`,
+      subhead: `総合自動化率は${areas}領域${total}タスクで${rateStr}%` }, cov, null);
+    if (!r.problems.some((x) => x.includes(past))) throw new Error('推移を読めないのに過去の点が素通りした');
   }],
   ['**小数の無い率は素通しする**（「本番15件は100%AI」は別の指標）', () => {
     const cov = readJSON(ROOT, 'data/automation-coverage.json');
@@ -389,7 +441,11 @@ if (isMain) {
     console.log('');
   }
 
-  const numbers = checkNumbers(claimsDoc, coverage);
+  // 月次の推移も渡す（見出しが過去の点を引くため）。**読めなければ null を渡す** ——
+  // checkNumbers 側は null のとき過去の点を許さない側へ倒す。
+  let timeline = null;
+  try { timeline = readJSON(ROOT, 'data/autonomy-timeline.json'); } catch { /* 読めなければ厳しい側 */ }
+  const numbers = checkNumbers(claimsDoc, coverage, timeline);
   if (numbers.problems.length) {
     console.log('  **原稿の数字が台帳と違う:**');
     for (const p of numbers.problems) console.log(`    - ${p}`);

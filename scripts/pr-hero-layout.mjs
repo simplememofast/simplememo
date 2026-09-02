@@ -33,8 +33,33 @@ export function splitHeadline(headline) {
   return { lead: m[1], rest: m[2].replace(/^[、,]\s*/, '') };
 }
 
-export function buildHTML({ headline, subhead, appName, draft }) {
-  const { lead, rest } = splitHeadline(headline);
+/**
+ * 画像に組む2行を決める。**`hero` が在ればそちらが正、無ければ見出しから切り出す。**
+ *
+ * 【なぜ切り離したか — 2026-09-02】
+ * `splitHeadline` は見出しが「」で**始まる**ことを前提にしている
+ * （`/^「(.+?)」…/`）。旧見出し「アプリが、自ら育ち続ける。」…はその形だったが、
+ * 9/3 配信稿の見出しは違う形になり、**全61字が lead と読まれて検査が落ちた。**
+ *
+ * **そこで見出しのほうを直す、はやらない。**見出しは編集judgmentで、
+ * 画像は派生物。16字という budget は 64px・内寸1064px という**画像の都合**であって、
+ * 記者が読む見出しがそれに縛られる理由が無い。逆向きに直すと、
+ * 画像生成器の制約が配信文言を決めることになる。
+ *
+ * `hero` を書かなければ従来どおり見出しから切り出すので、**既存の運用は変わらない。**
+ */
+export function heroLines(doc) {
+  const lead = doc?.hero?.lead;
+  if (lead) return { lead, rest: doc.hero.rest ?? '' };
+  return splitHeadline(doc?.headline ?? '');
+}
+
+export function buildHTML({ headline, lead: leadIn, rest: restIn, subhead, appName, draft }) {
+  // lead/rest を直接渡せる（heroLines の結果をそのまま流す経路）。
+  // 渡さなければ従来どおり見出しから切り出す。
+  const split = splitHeadline(headline ?? '');
+  const lead = leadIn ?? split.lead;
+  const rest = restIn ?? split.rest;
   const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8">
 <style>
