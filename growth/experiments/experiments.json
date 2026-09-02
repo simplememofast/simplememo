@@ -1845,6 +1845,202 @@
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "受け側4本のいずれかで title / description が変わった → **表示回数の変化をこの実験の効果と読まない**"
       ]
+    },
+    {
+      "id": "selector-hub-2026-09-02-001",
+      "page": "/blog/free-memo-apps-ranking",
+      "type": "selector_hub",
+      "hypothesis": "サイト最大表示ページ（3,048imp/週・CTR 0.62%・順位9.5）を『直接売るページ』から『適合ユーザーを選別するハブ』へ。ファーストビューに開発者の情報開示（iPhone専用・テキスト専用・無料1日3通）と3問の分岐（Android/PC→Keep・Simplenote、多機能→Apple純正、最速→1位／Obsidian→/blog/obsidian-voice-input／画面を見ない→/apple-watch/・/siri/）、1位カード直後に文脈CTA（App Store＋Obsidian音声導線）を置く。低適合インストールを減らし、Store遷移1件あたりの活性・継続を上げる。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-03",
+      "status": "running",
+      "before": {
+        "disclosure": false,
+        "selector": false,
+        "cta_placements": {
+          "nav": 2,
+          "mid": 1,
+          "bottom": 1
+        },
+        "note": "開発者である旨の開示が無く、弱点（Android非対応・画像非対応・無料枠）は本文に散在。最初のApp Store導線はFAQ後の mid（本文の約6割地点）で、1位カードの直後に導線が無かった。"
+      },
+      "after": {
+        "disclosure": true,
+        "selector": true,
+        "cta_placements": {
+          "nav": 2,
+          "hero": 1,
+          "mid": 2,
+          "bottom": 1
+        },
+        "note": "JA の1位直後CTAは tag-cta-placements が hero と判定（ct=jp__hero・このページで唯一）。EN 側は文書後半に置かれるため mid（既存FAQ後のENと同ラベル。GA4では page_path×placement で JA 側だけ分離できる）。title / description / next-step は触っていない。"
+      },
+      "baseline": {
+        "clicks": 19,
+        "impressions": 3048,
+        "ctr": 0.0062,
+        "position": 9.53,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery yurika-simplememo.searchconsole.searchdata_url_impression（2026-09-02 に直接照会。レポート§5の値と一致）",
+        "note": "日次 2.7クリック/日・435表示/日。比較は日次で行う。"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-09-02: **主指標は GSC の CTR ではない。**分岐リンクのクリックと App Store outbound（GA4: page_path=/blog/free-memo-apps-ranking × data-cta-placement=hero）、その先の CPP（free-memo-generic・ppid 未記入）のDL。GSC は順位が実験と無関係に動いていないかのガードレール。",
+        "2026-09-02: title / description は据え置き。snippet-2026-08-09-free-memo-ranking（09-13評価）の窓に被るため。dateModified と最終更新は内容が増えたので 2026-09-02 へ動かした。",
+        "2026-09-02: レポートは『無料メモアプリおすすめ10選【2026年9月】…用途別に比較』への改題を提案しているが、**本文が並べているのは TOP5 で、10選の実体が無い**（用途別5件も同じ5本）。改題は 09-13 の評価時に、10本に増やすか『5選』へ正すかと一緒に決める。",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-A。実装は同§16。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "ホールドアウトなし。情報開示・分岐・CTAを同時に入れたので、どれが効いたかは分離できない。分離できないことを承知で1回の変更として記録する。",
+        "confounders": "cta-2026-08-10-mid-placement / cta-2026-08-10-desktop-qr / snippet-2026-08-09-free-memo-ranking が同ページで走行中（いずれも 09-13 評価）。placement=hero は本実験のみが持つラベルなので、mid の実験は hero を除いて読む。"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 80,
+        "rationale": "基準 2.7クリック/日 × 評価窓31日 ≒ 84。**80 に届かなければ結論を出さない。**分岐リンクのクリックは GA4 側で同じ窓・同じ下限（80セッション相当）で読む。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず次サイクルへ持ち越す（『効果なし』と書かない）",
+        "順位が 9.5 → 12 より悪化し、同期間のサイト全体の順位が動いていない → 分岐セクションが本文を押し下げたと疑い、セクションを FAQ 後へ移して再開",
+        "1〜2星レビューまたは返金率が同期間の基準を超えた → 『低適合を減らす』の逆が起きているので中断して記録",
+        "title / description が 09-13 の評価で変わった → 変更後の期間だけを別に読む（混ぜない）"
+      ]
+    },
+    {
+      "id": "cta-placement-2026-09-02-002",
+      "page": "/blog/line-keep-alternative",
+      "type": "cta_placement",
+      "hypothesis": "確認型クエリの読者（『終了したか』『Keepメモは使えるか』『保存先』）に冒頭4行で即答して『残したいもの別』に分岐し、比較表の直後（検討のピーク）に文脈CTA（CPP line-keep-alternative 付き）を置くと、到着後の Store 転換が上がる。検索 CTR は狙わない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-03",
+      "status": "running",
+      "before": {
+        "answer_block": false,
+        "cta_placements": {
+          "nav": 2,
+          "bottom": 1
+        },
+        "note": "TL;DR は終了事実とシンプルメモ推しを述べるが『Keepメモは続いている』は本文中盤（なぜ終了したのか）まで出てこない。本文中の App Store 導線はナビと末尾のみで、比較表（本文の約半分）の直後に転換点が無かった。"
+      },
+      "after": {
+        "answer_block": true,
+        "cta_placements": {
+          "nav": 2,
+          "mid": 1,
+          "bottom": 1
+        },
+        "note": "冒頭に『まず答え』ブロック（終了/継続の即答＋写真・ファイル→Apple純正/Keep、テキスト即時→シンプルメモ、LINE内→Keepメモ）、比較表の脚注直後に CTA（ct=jp__mid / en__mid・ppid=0253a7f9…）。title / description / FAQ は触っていない。"
+      },
+      "baseline": {
+        "clicks": 13,
+        "impressions": 1706,
+        "ctr": 0.0076,
+        "position": 6.63,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery yurika-simplememo.searchconsole.searchdata_url_impression（2026-09-02 に直接照会。レポート§5の値と一致）",
+        "note": "日次 1.9クリック/日・244表示/日。"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-09-02: **タイトルは動かしていない。**title-2026-07-01-002 は abandoned、SEO_AIO_PLAN_2026-08 §6 と GROWTH_ROI_PLAN §6 は『4度目のCTR改善はやらない』と明記している。レポート（GROWTH_LTV_ENGAGEMENT §6 P0-B）の初期目標 CTR 0.76→1.10% は採らず、読むのは Store 転換（GA4 outbound placement=mid、ASC CPP line-keep-alternative の DL）。",
+        "2026-09-02: faq-2026-08-09-line-keep-doko（09-13評価）と同ページ。冒頭ブロックは『どこ』意図にも答えるため、FAQ実験の CTR 変化を単独の効果と読まない。",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-B。実装は同§16。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "ホールドアウトなし。冒頭ブロックと表直後CTAを同時に入れた。",
+        "confounders": "faq-2026-08-09-line-keep-doko が同ページで走行中（09-13評価）。"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 50,
+        "rationale": "基準 1.9クリック/日 × 31日 ≒ 58。50 に届かなければ Store 転換の差は読まない（分母が小さすぎる）。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず持ち越す",
+        "順位が 6.6 → 9 より悪化し、サイト全体は動いていない → 冒頭ブロックが本文の答えを先食いしたと疑い、ブロックを比較表直前へ移して再開",
+        "CPP line-keep-alternative の DL がゼロのまま評価日を迎える → CPP 側（ASC）の集計閾値（初回DL 5件）未達として『効果なし』とは書かない"
+      ]
+    },
+    {
+      "id": "internal-link-2026-09-02-003",
+      "page": "(6 pages: /blog/obsidian-voice-input, /obsidian/, /obsidian/pricing/, /obsidian/plugins/, /obsidian/sync/, /obsidian/what-is-vault/)",
+      "type": "internal_link",
+      "hypothesis": "Obsidianクラスタは新規記事の量産より役割整理が先。勝ちページに入口別の分岐、子ページに『声で残す最短方法』への導線、ハブに未リンクの /obsidian/plugins/ を足すと、ハブの順位（11.8）と子→勝ちページの内部遷移が上がる。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-12",
+      "status": "running",
+      "before": {
+        "voice_input_entry_links": {
+          "apple-watch-obsidian": 1,
+          "siri": 0,
+          "fastest-voice-memo": 0,
+          "hands-free": 0
+        },
+        "child_pages_linking_voice_input": 1,
+        "hub_links_plugins": false,
+        "note": "子ページ pricing/plugins/sync/what-is-vault のうち /blog/obsidian-voice-input へ本文リンクを持つのは getting-started だけ。ハブ /obsidian/ の関連ページに /obsidian/plugins/（64imp/7clk/CTR 10.9%）が無かった。"
+      },
+      "after": {
+        "voice_input_entry_links": {
+          "apple-watch-obsidian": 2,
+          "siri": 1,
+          "fastest-voice-memo": 1,
+          "hands-free": 1
+        },
+        "child_pages_linking_voice_input": 5,
+        "hub_links_plugins": true,
+        "note": "子ページの導線は回答ブロック（AIO）の直下に1本。title / description / next-step は触っていない。"
+      },
+      "baseline": {
+        "clicks": 9,
+        "impressions": 359,
+        "ctr": 0.0251,
+        "position": 11.81,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery searchdata_url_impression の /obsidian/ の値（2026-09-02 に直接照会）",
+        "note": "/obsidian/plugins/ 64imp/7clk、/obsidian/sync/ 49imp/4clk、/blog/obsidian-voice-input 170imp/15clk（同窓）。"
+      },
+      "target_metric": "position",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-09-02: link-2026-08-28-feed-strongest-page（10-12評価）と同じ窓に揃えた。あちらは『大表示ページ→勝ちページ』の被リンク、こちらは『クラスタ内部の役割』。勝ちページの表示回数の変化はどちらの効果とも分離できないので、**表示回数はあちらに帰属させ、こちらはハブの順位と子ページからの内部遷移だけを読む。**",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-C / P1。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "ホールドアウトなし。6ページ同時変更で、どのリンクが効いたかは分離できない。",
+        "confounders": "link-2026-08-28-feed-strongest-page / monitor-2026-08-09-obsidian-ctr が同クラスタで走行中。"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 1500,
+        "rationale": "/obsidian/ の基準 51表示/日 × 41日 ≒ 2,100。1,500 に届かなければ順位差を読まない。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 持ち越す",
+        "ハブまたは子ページの title が変わった → その後の期間を別に読む",
+        "子ページ→voice-input の内部遷移が GA4 で計測できていないと分かった（page_referrer が取れない等）→ 順位だけで判定し、遷移の欄は『測れなかった』と書く"
+      ]
     }
   ]
 }
