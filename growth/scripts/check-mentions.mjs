@@ -32,6 +32,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const DIR = path.join(ROOT, 'growth/data/mentions');
 const README = path.join(DIR, 'README.md');
+export const GAPS = path.join(DIR, 'gaps.json');
 
 /** 手順書が言う週1に、遅れの許容を足したもの。 */
 export const MAX_GAP_DAYS = 10;
@@ -50,7 +51,7 @@ export function queriesFromReadme(text) {
 /** クエリの照合は緩める（README は素の語、スナップショットは引用符つきのことがある）。 */
 const norm = (s) => String(s).replace(/["“”\s]/g, '').toLowerCase();
 
-export function validate(snapshots, wantQueries, today = new Date()) {
+export function validate(snapshots, wantQueries, today = new Date(), acknowledged = []) {
   const problems = [];
   if (!snapshots.length) return { problems: ['スナップショットが1件も無い'], rows: [] };
 
@@ -88,8 +89,45 @@ export function validate(snapshots, wantQueries, today = new Date()) {
       (new Date(`${snapshots[i].date}T00:00:00Z`) - new Date(`${snapshots[i - 1].date}T00:00:00Z`))
       / 86_400_000);
     if (gap > MAX_GAP_DAYS) {
-      problems.push(`${snapshots[i - 1].date} → ${snapshots[i].date} が ${gap}日空いている`
-        + '（上限 ' + MAX_GAP_DAYS + '日）— 過去の欠測も記録に残す');
+      // **記録は残す。認めたものだけ黙る。**
+      //
+      // [2026-09-02] ここは許容の仕組みを持たず、**一度10日を超えたらその履歴は
+      // 永久に落ち続ける**形だった。埋め合わせのスナップショットは後から作れない
+      // （過去の検索結果は取り直せないし、取り直せてもそれは当時の観測ではない）ので、
+      // **直しようのない赤**になる。永久に赤い検査は signal ではなく noise になり、
+      // いずれ規則ごと消される —— 同じ経路をこのリポジトリは overdue の誤判定で
+      // 一度通っている。
+      //
+      // **認めるには理由が要る**（下の gaps.json 側の検査）。枠だけ広げる道は無い。
+      const ack = acknowledged.find(
+        (a) => a && a.from === snapshots[i - 1].date && a.to === snapshots[i].date);
+      if (!ack) {
+        problems.push(`${snapshots[i - 1].date} → ${snapshots[i].date} が ${gap}日空いている`
+          + '（上限 ' + MAX_GAP_DAYS + '日）— 過去の欠測も記録に残す。'
+          + '**理由を書いて growth/data/mentions/gaps.json の acknowledged へ**');
+      } else if (!String(ack.why ?? '').trim()) {
+        problems.push(`${ack.from} → ${ack.to} を why 無しで認めている`
+          + ' — **理由の無い許容は、枠を広げただけ**');
+      } else if (Number.isFinite(ack.days) && ack.days !== gap) {
+        problems.push(`${ack.from} → ${ack.to} の days が ${ack.days} だが実際は ${gap}日`
+          + ' — 台帳の数が実態と違う');
+      }
+    }
+  }
+
+  // **逆向きも見る。**実在しない欠測を認めさせない —— 先回りして書いておくと、
+  // 次に空けたときに黙ってしまう。台帳に在って gap が無い行は落とす。
+  const realGaps = new Set();
+  for (let i = 1; i < snapshots.length; i++) {
+    const gap = Math.floor(
+      (new Date(`${snapshots[i].date}T00:00:00Z`) - new Date(`${snapshots[i - 1].date}T00:00:00Z`))
+      / 86_400_000);
+    if (gap > MAX_GAP_DAYS) realGaps.add(`${snapshots[i - 1].date}→${snapshots[i].date}`);
+  }
+  for (const a of acknowledged) {
+    if (!a || !realGaps.has(`${a.from}→${a.to}`)) {
+      problems.push(`gaps.json の ${a?.from ?? '?'} → ${a?.to ?? '?'} に対応する欠測が無い`
+        + ' — **先回りして認めておくと、次に空けたときに黙る**');
     }
   }
 
@@ -134,8 +172,49 @@ if (process.argv.includes('--selftest')) {
       const snaps = files.map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
       const want = queriesFromReadme(fs.readFileSync(README, 'utf8'));
       if (!want.length) throw new Error('README から固定クエリを読めていない');
-      const { problems } = validate(snaps, want);
+      // **CLI と同じ引数で回す。**片方だけ acknowledged を渡さないと、
+      // 「実データが通る」が検査の実態とずれる。
+      const ack = fs.existsSync(GAPS)
+        ? (JSON.parse(fs.readFileSync(GAPS, 'utf8')).acknowledged ?? []) : [];
+      const { problems } = validate(snaps, want, new Date(), ack);
       if (problems.length) throw new Error(problems[0]);
+    }],
+    // ── 欠測の許容（2026-09-02 追加）─────────────────────────
+    // **記録は残したまま緑に戻せる経路。**枠だけ広げる道は塞いである。
+    ['**11日空いたら落ちる**（認めていないうちは黙らない）', () => {
+      const a = SNAP({ date: '2026-08-22' }), b = SNAP({ date: '2026-09-02' });
+      const { problems } = validate([a, b], WANT, NOW, []);
+      if (!has(problems, '11日空いている')) throw new Error(JSON.stringify(problems));
+    }],
+    ['理由つきで認めれば黙る', () => {
+      const a = SNAP({ date: '2026-08-22' }), b = SNAP({ date: '2026-09-02' });
+      const { problems } = validate([a, b], WANT, NOW,
+        [{ from: '2026-08-22', to: '2026-09-02', days: 11, why: '理由' }]);
+      if (problems.length) throw new Error(JSON.stringify(problems));
+    }],
+    ['**why が空なら認めたことにならない**（枠だけ広げる道を塞ぐ）', () => {
+      const a = SNAP({ date: '2026-08-22' }), b = SNAP({ date: '2026-09-02' });
+      const { problems } = validate([a, b], WANT, NOW,
+        [{ from: '2026-08-22', to: '2026-09-02', days: 11, why: '   ' }]);
+      if (!has(problems, 'why 無しで認めている')) throw new Error(JSON.stringify(problems));
+    }],
+    ['**実在しない欠測は認められない**（先回りして書いておくと次に黙る）', () => {
+      const a = SNAP({ date: '2026-08-22' }), b = SNAP({ date: '2026-08-28' });
+      const { problems } = validate([a, b], WANT, NOW,
+        [{ from: '2026-09-10', to: '2026-09-30', days: 20, why: '先回り' }]);
+      if (!has(problems, '対応する欠測が無い')) throw new Error(JSON.stringify(problems));
+    }],
+    ['days が実際の日数と違えば落ちる（台帳の数が実態と違う）', () => {
+      const a = SNAP({ date: '2026-08-22' }), b = SNAP({ date: '2026-09-02' });
+      const { problems } = validate([a, b], WANT, NOW,
+        [{ from: '2026-08-22', to: '2026-09-02', days: 3, why: '理由' }]);
+      if (!has(problems, '実際は 11日')) throw new Error(JSON.stringify(problems));
+    }],
+    ['**認めても「いま遅れている」は免除しない**（過去の間隔だけが対象）', () => {
+      const a = SNAP({ date: '2026-08-01' }), b = SNAP({ date: '2026-08-12' });
+      const { problems } = validate([a, b], WANT, NOW,
+        [{ from: '2026-08-01', to: '2026-08-12', days: 11, why: '理由' }]);
+      if (!has(problems, '最新のスナップショットが')) throw new Error(JSON.stringify(problems));
     }],
     ['**固定クエリが0件なら落ちる**（照合する相手が無い状態は照合ではない）', () => {
       const { problems } = validate([SNAP()], [], NOW);
@@ -196,7 +275,9 @@ if (isMain) {
     : [];
   const snapshots = files.map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), 'utf8')));
   const want = fs.existsSync(README) ? queriesFromReadme(fs.readFileSync(README, 'utf8')) : [];
-  const { problems, rows } = validate(snapshots, want);
+  const acknowledged = fs.existsSync(GAPS)
+    ? (JSON.parse(fs.readFileSync(GAPS, 'utf8')).acknowledged ?? []) : [];
+  const { problems, rows } = validate(snapshots, want, new Date(), acknowledged);
 
   console.log('言及・競合ウォッチ — **やらなかった週に気づく**\n');
   console.log(`  スナップショット ${rows.length}件 / 固定クエリ ${want.length}件\n`);
