@@ -1,7 +1,7 @@
 {
-  "as_of_jst": "2026-09-01",
+  "as_of_jst": "2026-09-02",
   "open_total": 10,
-  "oldest_open_days": 7,
+  "oldest_open_days": 8,
   "acknowledged": 2,
   "closed_today": [
     {
@@ -10,24 +10,19 @@
       "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 6件を除外: ap-20260820-actions, ap-20260821-actions, ap-20260826-actions, ap-20260830-actions, ap-20260831-actions, ap-20260831-ccr0920）"
     },
     {
-      "id": "act-orphaned-branch-claude-obsidian-auto-20260825",
-      "title": "ブランチ claude/obsidian-auto-20260825 に 1 コミットが取り残されている（PR #548 のマージ後）",
-      "evidence": "claude/obsidian-auto-20260825 の取り残しは解消（走査に出てこない）"
+      "id": "act-orphaned-branch-claude-obsidian-auto-20260826",
+      "title": "ブランチ claude/obsidian-auto-20260826 に 1 コミットが取り残されている（PR #586 のマージ後）",
+      "evidence": "claude/obsidian-auto-20260826 の取り残しは解消（走査に出てこない）"
     },
     {
-      "id": "act-orphaned-branch-claude-obsidian-auto-20260823",
-      "title": "ブランチ claude/obsidian-auto-20260823 に 1 コミットが取り残されている（PR #538 のマージ後）",
-      "evidence": "claude/obsidian-auto-20260823 の取り残しは解消（走査に出てこない）"
+      "id": "act-status-stale",
+      "title": "data/autopilot-status.json が 3日前（2026-08-29）のまま",
+      "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 0"
     },
     {
-      "id": "act-orphaned-branch-claude-obsidian-memo-automation-tqsd8z",
-      "title": "ブランチ claude/obsidian-memo-automation-tqsd8z に 1 コミットが取り残されている（PR #724 ほか32件 のマージ後）",
-      "evidence": "claude/obsidian-memo-automation-tqsd8z の取り残しは解消（走査に出てこない）"
-    },
-    {
-      "id": "act-orphaned-branch-claude-simplememo-autopilot-eval-vq51ql",
-      "title": "ブランチ claude/simplememo-autopilot-eval-vq51ql に 1 コミットが取り残されている（PR #719 のマージ後）",
-      "evidence": "claude/simplememo-autopilot-eval-vq51ql の取り残しは解消（走査に出てこない）"
+      "id": "act-selfheal-ap-20260829-ccr0920",
+      "title": "未修理の故障: ap-20260829-ccr0920（claim_without_completion）",
+      "evidence": "ap-20260829-ccr0920 は selfheal の未修理リストから消えた"
     }
   ],
   "human": [
@@ -35,17 +30,33 @@
       "id": "act-orphaned-pr-660",
       "title": "ブランチ claude/obsidian-auto-20260827 に 1 コミットが取り残されている（PR #660 のマージ後）",
       "detail": "ブランチ claude/obsidian-auto-20260827 が、最後のマージ（PR #660 / head c51306e）より1 件先にあり、**それらは main にも無い**: 813b335。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json / docs/obsidian/AUTOPILOT_LOG.md\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
-      "age_days": 5,
+      "age_days": 6,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
       "evidence": "#660 はまだ 1 件先にある"
     },
     {
-      "id": "act-orphaned-branch-claude-obsidian-auto-20260826",
-      "title": "ブランチ claude/obsidian-auto-20260826 に 1 コミットが取り残されている（PR #586 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260826 が、最後のマージ（PR #586 / head 673b2df）より1 件先にあり、**それらは main にも無い**: ee4e37c。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json / docs/obsidian/AUTOPILOT_LOG.md / growth/content/coverage-queue.json\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
-      "age_days": 4,
+      "id": "act-budget-overrun-33454414490",
+      "title": "1回上限の超過が未レビュー: 2026-09-01 repair $9.3726（上限 $3.00 の3.1倍）— 主系が repair を選ぶと止まる",
+      "detail": "解除: `node scripts/autopilot-budget.mjs --ack-overrun 33454414490 --why \"…\"`\n**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。上限は data/model-routing.json の rules.repair.max_usd_per_run が正で、実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる）。\n**月次上限は通っている**ため `--check` は exit 0 で、\"予算は大丈夫\" に見える。止まるのは `--check-run-cap --task repair` の側だけ。\nなお data/authority-matrix.json の「AI実費」は human_only に `monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**（権限表の変更は self_repair.must_not なのでAIからは直せない）。",
+      "age_days": 0,
+      "why": "scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている（AIが自分の超過を自分で通せると、上限が「お願い」になる）",
+      "evidence": "run 33454414490（repair $9.3726 / 上限 $3.00）が未レビュー。主系はこの種別を選ぶと止まる"
+    },
+    {
+      "id": "act-orphaned-branch-claude-obsidian-auto-20260902",
+      "title": "ブランチ claude/obsidian-auto-20260902 に 1 コミットが取り残されている（PR #774 のマージ後）",
+      "detail": "ブランチ claude/obsidian-auto-20260902 が、最後のマージ（PR #774 / head fddc10d）より1 件先にあり、**それらは main にも無い**: ef8b3a7。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-status.json / data/kpi-definitions.json / docs/obsidian/AUTOPILOT_LOG.md / docs/obsidian/AUTOPILOT_RUNBOOK.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "age_days": 0,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "claude/obsidian-auto-20260826 はまだ 1 件先にある"
+      "evidence": "claude/obsidian-auto-20260902 はまだ 1 件先にある"
+    },
+    {
+      "id": "act-orphaned-branch-claude-simplememofast-indexing-93xm3y",
+      "title": "ブランチ claude/simplememofast-indexing-93xm3y に 1 コミットが取り残されている（PR #781 のマージ後）",
+      "detail": "ブランチ claude/simplememofast-indexing-93xm3y が、最後のマージ（PR #781 / head 485ebb9）より1 件先にあり、**それらは main にも無い**: aa8bc12。（別の2件は main 側のコミットなので除外した）\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: docs/seo/gsc-index-request-2026-09-02.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "claude/simplememofast-indexing-93xm3y はまだ 1 件先にある"
     }
   ],
   "ai": [
@@ -53,14 +64,14 @@
       "id": "act-budget-recalibrate",
       "title": "1回あたりの実費を下げる — 毎回読ませていた205,000文字を72,000文字に減らした。効果は次の article 実測で確かめる",
       "detail": "**オーナーの判断（2026-08-25）: 上限を上げるのではなく、1回のコストを下げる。**\n月次上限を実測に合わせる案（日次出荷なら $280/月）を出したが、「一回のコストがかかりすぎるから節約を先にしたい」との回答。上限は据え置き。\n\n**実測した無駄。** Runbook §0 の「読むもの」を素直に全文読むと 約205,000文字。そのうち実際に要るのは約72,000文字だった。**入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因。**\n\n| 読ませていたもの | 現在 | 必要な部分 | 削減 |\n|---|---|---|---|\n| AUTOPILOT_LOG.md | 77,004字 | 末尾200行 約7,900字 | -69,100 |\n| SEO_AIO_PLAN_2026-08.md | 45,841字 | §6 のみ **715字** | -45,126 |\n| coverage-queue.json | 19,474字 | pending 先頭1件 | -18,500 |\n\nさらに **AUTOPILOT_LOG.md は毎日 +5,000字ずつ増える**ので、放っておくと1回あたりのコストが日々上がる構造だった。\n\n**入れた変更**（どちらも指示の側で、モデルもターン上限も触っていない）:\n- Runbook §0「読むもの」に**全文を読むものと一部だけ読むものの区別**を書いた（tail / sed で節抽出 / node で先頭1件）\n- 主系プロンプト手順2を `tail -n 200` にし、**保留事項は LOG ではなく data/autopilot-actions.json から取る**ようにした（この台帳が型付きで持っており、散文の履歴から拾うと解消済みが混ざる）\n\n**触らなかったもの**: `--max-turns 250`（成功した run が150ターン使っており、下げると正当な長さの run を殺す）。モデルの割り当て（repair の opus は「安いほうが高くつく」の設計判断で、実測なしに下げない）。\n\n**目標 $4.50。** article の実測 $7.2967 に対し、入力が実費の約6割・その入力を約65%削減という前提からの見積り（$7.30 x (1 - 0.6 x 0.65) = 約$4.45）。**前提のほうが外れる可能性があるので、閉じ条件は見積りではなく実測に置いた** —次に article が走って $4.50 以下なら閉じ、超えていれば額とともに開いたまま残る。\n\n**残っている論点**（今回は触っていない）: `anomaly`（中央値x4・自己較正）と `max_usd_per_run`（絶対額）は役割が違う——前者は検知して報告、後者は次の1回を止める。同じ値を2箇所に置いているのではないので両方残す。ただし `max_usd_per_run` の値そのものは今も placeholder のままで、**成功した run を許容していない**（article $2.00 / repair $3.00 に対し実測 $7.30 / $11.93）。節約後の実測が出たら、そこから引き直すのが筋。",
-      "age_days": 7,
+      "age_days": 8,
       "auto": null,
       "evidence": "2026-08-25 以降の article は最安でも $7.8771 で、目標 $4.5000 に届いていない（1件の実測）"
     },
     {
       "id": "act-health-591",
       "title": "【監視】autopilot監視: 当日分の実行記録がありません",
-      "age_days": 6,
+      "age_days": 7,
       "auto": null,
       "evidence": "Issue の状態を取得できず判定不能（閉じたという意味ではない）"
     },
@@ -68,23 +79,15 @@
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
       "detail": "33454414490（2026-09-01 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
-      "age_days": 0,
+      "age_days": 1,
       "auto": "reconcile-runs",
       "evidence": "台帳に無い run が 1件: 33454414490（記録対象外 1件を除外: 32817335365）"
-    },
-    {
-      "id": "act-selfheal-ap-20260829-ccr0920",
-      "title": "未修理の故障: ap-20260829-ccr0920（claim_without_completion）",
-      "detail": "2026-08-29 / ccr-0920 / outcome=no_artifact。副系が当日ロック（claude/obsidian-auto-20260829）を claim だけ取って、記事もPRも作らずに終わった。**同じ日の主系（ap-20260829-actions・skipped_gate）が何もしなかったのは、これが理由。**Gate はブランチの存在を『進行中/実行済み』と読んでスキップし、3秒で success を返す。**claim を取った側が死ぬと、その日は主系も走らないまま緑になる。**主系側の行だけを見ると『重複でスキップした正常な日』に見えるので、この行を別に立てている",
-      "age_days": 0,
-      "auto": null,
-      "evidence": "ap-20260829-ccr0920 は未修理のまま（repair_of で名指しされていない）"
     },
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）",
       "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
-      "age_days": 0,
+      "age_days": 1,
       "auto": null,
       "evidence": "ap-20260830-actions は未修理のまま（repair_of で名指しされていない）"
     },
@@ -92,7 +95,7 @@
       "id": "act-selfheal-ap-20260831-actions",
       "title": "未修理の故障: ap-20260831-actions（usage_limit）",
       "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
-      "age_days": 0,
+      "age_days": 1,
       "auto": null,
       "evidence": "ap-20260831-actions は未修理のまま（repair_of で名指しされていない）"
     },
@@ -100,25 +103,17 @@
       "id": "act-selfheal-ap-20260831-ccr0920",
       "title": "未修理の故障: ap-20260831-ccr0920（usage_limit）",
       "detail": "2026-08-31 / ccr-0920 / outcome=failed。実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657`（09:20 JST・ccr-0920）の起動が 13 秒で FAILED（fired 2026-08-31T00:20:33Z / finished 00:20:46Z / session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**主系の 429 と同じ事象の副系側**で、同じアカウントなので代走にならなかった。1ターンも回っていないため当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）",
-      "age_days": 0,
+      "age_days": 1,
       "auto": null,
       "evidence": "ap-20260831-ccr0920 は未修理のまま（repair_of で名指しされていない）"
-    },
-    {
-      "id": "act-status-stale",
-      "title": "data/autopilot-status.json が 3日前（2026-08-29）のまま",
-      "detail": "日報の唯一のデータ源。当日分でないと「上流が止まった」と報告される（Runbook §5-2）。",
-      "age_days": 0,
-      "auto": null,
-      "evidence": "scripts/autopilot-act.mjs --status-fresh が exit 1"
     }
   ],
   "executed": [
     {
       "handler": "append-cost",
       "ok": true,
-      "changed": 3,
-      "log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260826-actions: appended 2026-08-26 actions $7.8771\nap-20260830-actions: appended 2026-08-30 actions $0.0000\nap-20260831-actions: appended 2026-08-31 actions $0.0000\nap-20260831-ccr0920: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む"
+      "changed": 1,
+      "log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260831-ccr0920: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260902-actions: appended 2026-09-02 actions $13.5739"
     },
     {
       "handler": "reconcile-runs",
