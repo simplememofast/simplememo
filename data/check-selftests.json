@@ -130,6 +130,12 @@
       "broke": "検査本体の problems.push を潰すと自己テストが4件落ちることを観測"
     },
     {
+      "script": "scripts/app-releases.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-02",
+      "broke": "台帳の summary.store_ready を +1 して --check が exit 1（行からの再計算と食い違う）、measured_at を 2026-07-01 にして exit 1（30日超の鮮度）を観測。戻して exit 0。自己テスト12件は summary/AI超過/版順/観測の逆順/実機sha判定/READY以外の store/method欠落/古い台帳 の8通りで「壊すと落ちる」を固定"
+    },
+    {
       "script": "scripts/automation-rate.mjs",
       "state": "demonstrated",
       "at": "2026-08-27",
@@ -368,6 +374,12 @@
       "state": "demonstrated",
       "at": "2026-08-26",
       "broke": "§6 の照合／§2 の答え検査／受入条件の形／多言語の両方／§1 の出典、の5方向を潰すとそれぞれ対応する自己テストが落ちた。加えて実装中に**正しい PRD を「答えが無い」と落とす**バグを踏んだ（multiline の `$` が行末で止まっていた）ので、実データが通ることも自己テストに入れてある"
+    },
+    {
+      "script": "scripts/check-prior-art.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-02",
+      "broke": "実データで落ちるのを先に見た: PostHog / AppDNA の checked_at が 2026-08-25（8日前）で、翌日 9/3 の配信が2営業日以内にあるため exit 1（確かめ直してから通す）。自己テストは verdict の値域外・一次URL欠落・partial の discrepancy 欠落・探索記録の「無い」断定・policy 欠落・確認日の古さ の6通りで「壊すと落ちる」を固定し、配信が遠ければ古くても落ちないことも固定"
     },
     {
       "script": "scripts/check-public-facts.mjs",

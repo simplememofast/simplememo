@@ -193,6 +193,18 @@ const RULES = [
       + '（data/stop-drills.json の rollout-guard-freeze に訂正の経緯がある）',
   },
   {
+    // [2026-09-02] 配信前日に踏んだ。原稿は「**同期間**のコミットの99.5%、変更行の94.2%」と
+    // 書いていたが、その率は 8/11〜8/21 の計測値で、原稿が言う23日間のものではなかった。
+    // 同じ数え方で 9/1 まで測ると 81.9% / 70.9%。**率は窓とセットでしか意味を持たない。**
+    // 「同期間」「同じ期間」と書いて率を出すなら、その行に日付の窓があること。
+    id: 'rate-without-window',
+    pattern: /(?:同期間|同じ期間|この期間|当該期間)[^。\n]{0,80}?([0-9]+(?:\.[0-9]+)?)%/g,
+    check: (m) => !/\d{1,2}月\d{1,2}日|\d{4}-\d{2}-\d{2}|\d{1,2}月\d{1,2}日?[〜～-]\d{1,2}日/.test(String(m.input ?? '')),
+    message: (m) => `「同期間」の率 ${m[1]}% に計測窓が無い。`
+      + '率は窓とセットでしか意味を持たない —— 2026-09-02 の原稿は「同期間の99.5%」と書きながら'
+      + ' 8/11〜8/21 の値を引いていた（23日間では 81.9%）。同じ行に「8月11日〜21日」の形で窓を書く',
+  },
+  {
     // [2026-09-02] **この規則が無い間、トップページは「約1秒」を出し続けていた。**
     //
     // 上の `stale-launch-time` は `起動 … N秒` の語順で、しかも1行に収まっている
@@ -305,9 +317,38 @@ export function checkText(text) {
   return { mode, violations, missingName };
 }
 
+/**
+ * 自己テスト。**落ちるのを見る側を必ず持つ**（規則を足したのに一度も発火しない状態を
+ * 2026-08-26 に踏んだ。規則は在っても、当たらなければ無い）。
+ */
+export function selftest() {
+  let total = 0; const failures = [];
+  const t = (name, cond) => { total += 1; if (!cond) failures.push(name); console.log(`  ${cond ? 'ok  ' : 'FAIL'} ${name}`); };
+  const draft = (body) => `<!-- fact-check: draft -->\n# x\n${body}\n`;
+  const ids = (text) => checkText(text).violations.map((v) => v.rule);
+  t('**窓の無い「同期間の率」を落とす**（2026-09-02 の原稿そのもの）',
+    ids(draft('いっぽうコードは高い。同期間のコミットの**99.5%**、変更行の**94.2%**がAI著者。')).includes('rate-without-window'));
+  t('同じ行に日付の窓があれば通る',
+    !ids(draft('2026年8月11日〜21日の計測で、同期間のコミットの**99.5%**がAI著者。')).includes('rate-without-window'));
+  t('ISO の日付でも通る',
+    !ids(draft('同期間（2026-08-11〜2026-08-21）のコミットの99.5%。')).includes('rate-without-window'));
+  t('率の無い「同期間」は対象外',
+    !ids(draft('同期間にアプリ本体は7版がApp Storeに並びました。')).includes('rate-without-window'));
+  t('打ち消し語のある行は素通し（規約どおり）',
+    !ids(draft('同期間の率99.5%とは**書かない**。')).includes('rate-without-window'));
+  t('internal 文書には適用しない',
+    checkText('<!-- fact-check: internal -->\n同期間のコミットの99.5%。').mode === 'internal');
+  t('既存の規則も生きている（旧名）',
+    ids(draft('Captio式シンプルメモは速い。')).includes('old-app-name'));
+  if (failures.length) { console.log(`\nselftest: ${total}件中 ${failures.length}件 失敗`); return 1; }
+  console.log(`\nselftest: 全${total}件 通過`);
+  return 0;
+}
+
 const isMain = process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]));
 if (isMain) {
   const argv = process.argv.slice(2);
+  if (argv.includes('--selftest')) process.exit(selftest());
   const fi = argv.indexOf('--file');
   const files = fi >= 0 && argv[fi + 1]
     ? [argv[fi + 1]]

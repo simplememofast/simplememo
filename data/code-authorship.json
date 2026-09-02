@@ -14,7 +14,7 @@
   "to": "2026-08-21",
   "all_branches": true,
   "method": {
-    "ai_author_definition": "author に Claude を含む、または本文に Co-Authored-By: Claude",
+    "ai_author_definition": "author に Claude を含む、または本文に Co-Authored-By: Claude、または本文に Claude Code の足跡（Generated with [Claude Code] / claude.ai/code/session / Claude-Session:）。定義 v2（2026-09-02。v1 は署名とトレーラーのみ。8/11〜9/1 の実測で v1=v2）",
     "lines": "git show --numstat の 追加 + 削除（バイナリは0）",
     "excludes_merges": true,
     "dedupe": "SHA で一意化（--all は同じコミットを複数参照から拾う）",
@@ -22,7 +22,8 @@
       "simplememo",
       "simplememo-api",
       "simplememo-ios"
-    ]
+    ],
+    "definition_version": 2
   },
   "known_limits": [
     "**計測日そのものは窓に入れない。**計測日はAIが集中的に書いている日になりやすく、率を上げる方向に効く。実測では 08-22 を含めると 94.2% → 96.6% に動いた（+2.4pt）。「いちばん都合のよい日で締めた」と言われない窓の切り方にしてある",
@@ -60,5 +61,46 @@
   "headline": {
     "commits_rate_pct": 99.5,
     "lines_rate_pct": 94.2
-  }
+  },
+  "windows": [
+    {
+      "measured_at": "2026-09-02",
+      "from": "2026-08-11",
+      "to": "2026-09-01",
+      "all_branches": true,
+      "per_repo": {
+        "simplememo": {
+          "commits_total": 479,
+          "commits_ai": 460,
+          "lines_total": 135177,
+          "lines_ai": 129756
+        },
+        "simplememo-api": {
+          "commits_total": 179,
+          "commits_ai": 132,
+          "lines_total": 107685,
+          "lines_ai": 58861
+        },
+        "simplememo-ios": {
+          "commits_total": 236,
+          "commits_ai": 140,
+          "lines_total": 57986,
+          "lines_ai": 24559
+        }
+      },
+      "total": {
+        "commits_total": 894,
+        "commits_ai": 732,
+        "lines_total": 300848,
+        "lines_ai": 213176
+      },
+      "rates": {
+        "commits_rate_pct": 81.9,
+        "lines_rate_pct": 70.9
+      },
+      "why": "配信原稿が「同期間」と書いた23日間の窓。見出し（8/11〜8/21）より低い。8/22以降、署名もトレーラーも足跡も持たないコミットが iOS で増えたため（定義上は人側に数える）"
+    }
+  ],
+  "$windows_note": "見出し（from/to/headline）とは別の窓。原稿に出る率はここか見出しの値でなければならない（check-autopilot-page.mjs が突き合わせる）。同じ窓を --write-window し直すと上書きされる",
+  "$method_note": "[2026-09-02] 定義を v1（署名とトレーラー）から v2（＋Claude Code の足跡）へ広げた。見出しの窓（8/11〜8/21）の数値は v1 計測のまま据え置き —— 8/11〜9/1 で両定義を実測して同値（3リポジトリとも v1=v2）だったので、部分窓でも同値。squash マージが PR 本文の足跡を写すようになった以降の窓から差が出うる"
 }
