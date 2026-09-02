@@ -324,6 +324,16 @@ jobs:
             // 積むのではなく main から取り直すのが正しい。
             sh(`git checkout -B ${branch}`);
             sh(`git commit -m "chore(growth): GSC スナップショット ${label}（BigQuery 自動取り込み）"`);
+            // [2026-09-02] --force-with-lease は「手元の remote-tracking ref と一致するとき
+            // だけ上書きする」。checkout は fetch-depth: 2 で main しか持たないので、
+            // リモートに同名ブランチが残っていると（前週の PR がマージ後も消えていない
+            // ときが毎回そう）照合先が無く **stale info で必ず落ちる**。09-01T23:05Z が
+            // それで、ジョブ本体は完走していたのに PR だけ作られなかった。
+            // 先に同名ブランチを取り寄せて照合先を作る。無ければ何もしない。
+            // --force にはしない —— 別セッションが未マージの作業をこのブランチへ
+            // 積んでいた実例がある（#780 の dafbbf7）。lease なら取り寄せ後に
+            // 誰かが push していれば落ちる（それが正しい）。
+            sh(`git fetch origin +refs/heads/${branch}:refs/remotes/origin/${branch} || true`);
             sh(`git push -u origin ${branch} --force-with-lease`);
 
             const { owner, repo } = context.repo;
