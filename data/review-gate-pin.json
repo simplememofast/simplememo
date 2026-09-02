@@ -26,10 +26,10 @@
     "変わったのが判断に効く変更なのかを読んでから書くこと。"
   ],
   "entry": "scripts/check-review-replies.mjs",
-  "reviewed_at": "2026-08-27",
-  "reviewed_note": "初回の実運転（run 33028844739）を受けて表示を直した回。**この鳴子が自分の変更で鳴った初回でもある** —— 足した次のコミットで check-review-replies.mjs を直し、PRの前に指紋のずれを知らせてきた。判断そのもの（evaluateAutoPost / planAutoPost）は #659 から変わっていない",
+  "reviewed_at": "2026-09-02",
+  "reviewed_note": "#789 で check-pr-facts.mjs に規則 rate-without-window（「同期間」＋率で同じ行に日付の窓が無い文を落とす）と selftest() を足した回。判断そのもの（evaluateAutoPost / planAutoPost）は変えていない。レビュー返信への効き方は**止める方向だけ** —— 返信の下書きに「同期間」と「%」が並び日付が無ければ hold になる（実務上ほぼ出ない文）。--selftest の分岐は isMain の内側なので import 経由では走らない。check-review-replies.mjs と read-ledger.mjs は不変",
   "files": {
-    "scripts/check-pr-facts.mjs": "bc877ea8782e",
+    "scripts/check-pr-facts.mjs": "c9236bd4f67e",
     "scripts/check-review-replies.mjs": "d9a2f393081d",
     "scripts/lib/read-ledger.mjs": "a6e0cdd4c945"
   }
