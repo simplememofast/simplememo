@@ -245,12 +245,22 @@ function selftest() {
     // 重なっていない部分（＝件数そのもの）が何を守っているかを一度確かめて、
     // 守っていないなら関係式（unhealthy = open + intentional）へ移すこと。
     // **合わせるためだけに数字を書き換える回数が増えたら、それは検査ではなく作業になる。**
-    ['**実データで6件が健全でない**（緑＝異常が無い、ではない）', () => {
+    // [2026-09-02] **固定値をやめ、関係式へ移した。**上のコメントが
+    // 「合わせるためだけに数字を書き換える回数が増えたら、それは検査ではなく作業になる」
+    // と予告していたとおりになった —— 08-31 に 5/2/3 → 8/4/4、09-02 に 6 → 5 と、
+    // **同じセッション内で2回**書き換えている。どちらも実態の変化であって欠陥ではない。
+    //
+    // **固定値が守っていたものは2つあり、どちらも数字を書かずに書ける:**
+    //   (1) 実データが「異常あり」の側を通る（＝緑が空回りでない）… > 0 で足りる
+    //   (2) 健全でない行が、必ずどちらかの一覧で説明されている … 関係式そのもの
+    ['**実データが「異常あり」の側を通る**（緑＝異常が無い、ではない）', () => {
       const { unhealthy } = V(real);
-      assert(unhealthy.length === 6, `健全でないのは6件のはずが ${unhealthy.length}`);
-      assert(real.open_findings.length === 2, '未対応は2件（SEO Weekly・obsidian-community）');
-      assert(real.intentional_stops.length === 4,
-        '意図的な停止は4件（Reddit監視・副系A・副系B・写しの取り直し）');
+      assert(unhealthy.length > 0,
+        '健全でない行が1件も無い —— この検査は空回りしている（実データで異常の側を一度も通らない）');
+      assert(unhealthy.length === real.open_findings.length + real.intentional_stops.length,
+        `健全でない ${unhealthy.length} 件に対し、`
+        + `未対応 ${real.open_findings.length} + 意図的な停止 ${real.intentional_stops.length} `
+        + `= ${real.open_findings.length + real.intentional_stops.length} 件しか説明が無い`);
     }],
 
     // --- 黙って止まったものを通さない -----------------------------------
@@ -376,9 +386,16 @@ function selftest() {
     }],
 
     // --- ラチェット -----------------------------------------------------
+    // [2026-09-02] **`= 1` を直書きしていたので、未対応が1件になった日に反転した。**
+    // 件数と上限が並んだだけで「超えている」が作れなくなる。下の「枠が余っている」側と
+    // 同じく、**件数から作る。**
     ['**上限を超えたら落とす**（上限を上げて通さない）', () => {
-      const p = V(broken(real, (d) => { d.open_budget = 1; })).problems;
-      assert(p.some((x) => x.includes('上限 1 を超えた')), p.join(' / '));
+      assert(real.open_findings.length >= 1,
+        '未対応が0件なので「上限を超えた」を実データから作れない'
+        + ' —— **この検査は固定のfixtureへ移すこと**（黙って通してはいけない）');
+      const over = real.open_findings.length - 1;
+      const p = V(broken(real, (d) => { d.open_budget = over; })).problems;
+      assert(p.some((x) => x.includes(`上限 ${over} を超えた`)), p.join(' / '));
     }],
     // [2026-08-31] 固定値 3 は未対応が2件のときだけ「余っている」側になった。
     // **いまの件数から1つ上**にして、どの日でも同じ向きを試す。
