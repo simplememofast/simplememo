@@ -720,7 +720,7 @@ SimpleMemoは「無料メモアプリ」という大市場で表示を増やせ�
 | P1 | `obsidian/{pricing,plugins,sync,what-is-vault}/` | 回答ブロック（AIO）の**直下**に「声で話してObsidianに残す最短の方法」→ `/blog/obsidian-voice-input` を1本。回答より上には置いていない |
 | P1 | `obsidian/index.html` | 関連ページに未リンクだった `/obsidian/plugins/` を追加 |
 | P0-A / P0-C | `data/cpp-map.json` | 保留行を2つ追加（`free-memo-generic` → `^/blog/free-memo-apps-ranking$`、`obsidian-voice` → `^/blog/obsidian-voice-input$`）。**ppid は null**＝オーナー入力待ち。CI（`apply-cpp-ppid.js --check`）は notice を出すだけで落ちない |
-| §7-2 | `data/site-constants.json` → 25ファイル＋`llms.txt` | `appVersion` 5.8.1→**5.8.2**、`ratingValue` 4.4→**4.2**（JSON-LD は1桁小数。元値 4.24）、`ratingCount` 22→**25**。`sync_constants.js --write` で JSON-LD の `#app` 12ノードと表示テキストへ伝播。`voices/index.html` の meta-title / og-title / 本文の「★4.4・21件」は同期の規則外だったので手で 4.2・25 に揃えた |
+| §7-2 | `data/site-constants.json` → 25ファイル＋`llms.txt` | `appVersion` 5.8.1→**5.8.4**（レポートは 5.8.2 と読んでいたが、オーナーの 09-02 実機確認で 5.8.4）、`ratingValue` 4.4→**4.2**（JSON-LD は1桁小数。元値 4.24）、`ratingCount` 22→**25**。`sync_constants.js --write` で JSON-LD の `#app` 12ノードと表示テキストへ伝播。`voices/index.html` の meta-title / og-title / 本文の「★4.4・21件」は同期の規則外だったので手で 4.2・25 に揃えた |
 | 計測 | `growth/experiments/experiments.json` | `selector-hub-2026-09-02-001`（評価 10-03）、`cta-placement-2026-09-02-002`（10-03）、`internal-link-2026-09-02-003`（10-12）。基準値は §16-1 の BigQuery 値。control / min_sample / stop_conditions つき |
 
 描画は headless Chromium（幅 390 / 1200）で確認した。ダークテーマでの情報開示ブロック・分岐・回答ブロック・導線行の表示に崩れなし。
@@ -757,8 +757,8 @@ SimpleMemoは「無料メモアプリ」という大市場で表示を増やせ�
 
 ### 16-5. 未確定・オーナー判断待ち
 
-1. **CPP の UUID 2件**（`free-memo-generic`・`obsidian-voice`）。ASC でページを作るか既存 34 本から選び、`data/cpp-map.json` に記入して `node scripts/apply-cpp-ppid.js --write`。記入までは既定商品ページ（対照）のまま。`obsidian-voice` は `obsidian-vault`（1408d7a4…）の流用でも配線できるが、表の規律どおり CPP 1枚目の画を先に確認すること。
-2. **店頭事実の機械照合。**5.8.2 / 4.2 / 25 はレポート値。`seo-daily.yml` の次回ジョブサマリ（App Store 由来の公開表示）で drift が出ないことを見る。
+1. **CPP。**（2026-09-02 追記）オーナーの委任で自律判断した。`obsidian-voice` は既存の `obsidian-vault`（1408d7a4…）を流用して配線済み（同じ CPP が音声ページ /obsidian/airpods/ を既に受けている）。`free-memo-generic` は意図の合う CPP が ASC に無く、CPP の作成はサンドボックスから行えないので**既定商品ページ（対照）のまま**。汎用無料用の CPP を ASC で作ったら ppid を記入して `node scripts/apply-cpp-ppid.js --write`。
+2. **店頭事実。**（2026-09-02 追記）オーナーが実機で確認した値は **v5.8.4** / 4.2 / 25 件で、レポートの 5.8.2 は古かった。台帳と 22 ファイルを 5.8.4 に揃えた。機械照合は引き続き `seo-daily.yml` のジョブサマリで見る。
 3. **`free-memo-apps-ranking` の「10選」。**title と TL;DR は 10 本、本文は TOP5。09-13 の snippet 評価時に決める（§16-3）。
 4. **`seo-daily.yml` の 2026-09-01 23:05Z 実行が push で失敗**（`claude/seo-weekly-snapshot` への `--force-with-lease` が stale info で拒否）。GSC スナップショットの週次 PR が作られていない。中身の検出ステップは完走しており、リモートの同名ブランチを整理すれば次回は通るはず。この変更では触っていない。
 5. **`tag-cta-placements.js` の既知 notice**（トークンの言語とページのロケールが食い違う CTA 212 件）は以前からのもので、本変更で増減していない。
