@@ -37,7 +37,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { summarize } from './automation-rate.mjs';
 import { readLedger } from './lib/read-ledger.mjs';
-import { activeStreaks, load as loadRuns } from './autopilot-runs.mjs';
+import { activeStreaks, shippingStreaks, handsOffStreaks, load as loadRuns } from './autopilot-runs.mjs';
 import { LEDGER as CODE_LEDGER, knownRates } from './code-authorship.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -135,6 +135,12 @@ export function compare(html, live) {
   const streakChecks = [
     { label: '連続稼働（現在）', re: /連続稼働は現在[^\d\n]{0,6}(\d+)[^\d\n]{0,4}日/g, key: 'current' },
     { label: '連続稼働（最長）', re: /最長も[^\d\n]{0,6}(\d+)[^\d\n]{0,4}日/g, key: 'longest' },
+    // [2026-09-03] **稼働だけを公開面に置かない。**稼働の定義（no_run の行がある日だけ停止）は
+    // 正しいが、その定義では失敗し続けても連続は伸びる。実際いまページに出ている16日は
+    // 08-29〜08-31 の出荷ゼロ3日をまたいでいる。切れるほうの数字も同じ強さで照合する
+    // —— 照合しないままページに書くと「正の無い数字を公開面に置かない」に反する。
+    { label: '連続出荷（現在）', re: /連続出荷は現在[^\d\n]{0,6}(\d+)[^\d\n]{0,4}日/g, key: 'ship_current' },
+    { label: '連続出荷（最長）', re: /連続出荷の最長は[^\d\n]{0,6}(\d+)[^\d\n]{0,4}日/g, key: 'ship_longest' },
   ];
   for (const c of streakChecks) {
     const hits = [...html.matchAll(c.re)];
@@ -298,6 +304,18 @@ function selftest() {
   t('**台帳から計算できないのにページに連続稼働があれば落ちる**',
     compare('連続稼働は現在<b>16</b>日', md).problems.length === 1);
 
+  // 連続出荷 — **稼働と同じ強さで照合する。**片方だけ照合すると、
+  // 照合されないほうが台帳から離れても誰も気づかない。
+  const sk2 = { ...md, streaks: { current: 16, longest: 16, ship_current: 2, ship_longest: 6 } };
+  t('連続出荷が定義の値と一致すれば通る',
+    compare('連続出荷は現在<b>2</b>日で、連続出荷の最長は<b>6</b>日', sk2).problems.length === 0);
+  t('**連続出荷がずれたら落ちる**', 
+    compare('連続出荷は現在<b>9</b>日', sk2).problems.length === 1);
+  t('**台帳から計算できないのにページに連続出荷があれば落ちる**',
+    compare('連続出荷は現在<b>2</b>日', md).problems.length === 1);
+  t('稼働だけ合っていても出荷がずれていれば落ちる',
+    compare('連続稼働は現在<b>16</b>日で、最長も<b>16</b>日。連続出荷は現在<b>5</b>日', sk2).problems.length === 1);
+
   // コード著者率 — 台帳のどの窓にも無い率は落ちる
   const cr = { ...md, code_rates: [{ commits: 99.5, lines: 94.2 }, { commits: 81.9, lines: 70.9 }],
     lane_b: { tags: 14, store_ready: 7, device_verified_same_sha: 2, release_time_bounded: 2, code_ai_commit_rate_pct: 56.3, code_ai_line_rate_pct: 38.3 } };
@@ -326,8 +344,15 @@ if (isMain) {
   const appReleases = readLedger(APP_RELEASES_PATH, { onMissing: null, why: 'Lane B の数字が突き合わせられない' });
   let streaks = null;
   try {
-    const st = activeStreaks(loadRuns().runs);
-    streaks = { current: st.current.days, longest: st.longest.days };
+    const runsRows = loadRuns().runs;
+    const st = activeStreaks(runsRows);
+    const sh = shippingStreaks(runsRows);
+    const ho = handsOffStreaks(runsRows);
+    streaks = {
+      current: st.current.days, longest: st.longest.days,
+      ship_current: sh.current.days, ship_longest: sh.longest.days,
+      hands_off_current: ho.current.days, hands_off_longest: ho.longest.days,
+    };
   } catch (e) {
     console.error(`運転台帳が読めない（${e.message}）— 連続稼働は照合できない`);
   }
