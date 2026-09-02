@@ -139,6 +139,36 @@ export const CLOSE_CHECKS = {
     return { closed: true, evidence: `${since} 以降 ${route} は ${attempted.length}回着手し ${failure_class} の再発なし` };
   },
 
+  /**
+   * 指定経路が `since` より後に出荷していれば閉じる。
+   *
+   * **「失敗していない」では閉じない。**この行が起票されるのは経路が
+   * *黙って*出荷していない場合で、失敗が無いことは最初から前提にある。
+   * 閉じる条件は「もう一度出せた」——それだけが冗長化の証拠になる。
+   */
+  route_shipped_since({ route, since }, ctx) {
+    const rows = ctx.runsDoc?.runs;
+    if (!Array.isArray(rows)) {
+      return { closed: false, evidence: '運転台帳を読めず判定不能（出荷したという意味ではない）' };
+    }
+    const shipped = rows.filter((r) => r.route === route && r.date_jst > since && r.outcome === 'shipped');
+    return shipped.length
+      ? { closed: true, evidence: `${since} より後に ${route} が出荷した（${shipped.map((r) => r.date_jst).join(', ')}）` }
+      : { closed: false, evidence: `${since} 以降 ${route} の出荷は台帳に無い` };
+  },
+
+  /** どれか1経路でも `since` より後に出荷していれば閉じる（全停止からの復帰）。 */
+  shipping_resumed({ since }, ctx) {
+    const rows = ctx.runsDoc?.runs;
+    if (!Array.isArray(rows)) {
+      return { closed: false, evidence: '運転台帳を読めず判定不能（復帰したという意味ではない）' };
+    }
+    const shipped = rows.filter((r) => r.date_jst > since && r.outcome === 'shipped');
+    return shipped.length
+      ? { closed: true, evidence: `${since} より後に出荷が戻った（${[...new Set(shipped.map((r) => r.date_jst))].join(', ')}）` }
+      : { closed: false, evidence: `${since} 以降どの経路も出荷していない` };
+  },
+
   /** 既知の Actions run がすべて運転台帳に載っていれば閉じる。 */
   ledger_covers_runs(_params, ctx) {
     if (!ctx.workflowRuns) {
@@ -505,9 +535,8 @@ export function derive(ctx) {
 
   // --- D3b: マージ後に取り残されたコミット ---
   //
-  // **自動修復はさせない。**取り残しの中身は台帳のこともあれば書きかけのこともあり、
-  // 機械が中身を見ずに cherry-pick すると「訂正が生き残っているかの確認」を飛ばす。
-  // 検知して起票するところまでで、適用はセッションが行う。
+  // **中身を見ずに cherry-pick はしない。**取り残しの中身は台帳のこともあれば
+  // 書きかけのこともあり、機械が丸ごと当てると「訂正が生き残っているかの確認」を飛ばす。
   //
   // **行はブランチ単位。**PR単位で立てると、使い回されたブランチが
   // PRの数だけ行になる（fetchOrphanedCommits の【なぜブランチ単位か】）。
@@ -518,14 +547,25 @@ export function derive(ctx) {
   // **権限と材料は揃ったが、auto はまだ付けない。**
   // 「作った」と「動いた」を分ける —— まず日次runが実際に内訳を出すのを見る。
   //
-  // 付けるときの形（この順で、飛ばさない）:
+  // 【2026-09-02 決定: 保留を解いた】**保留の条件は満たされた。**
+  // 08-28 以降に立った取り残し7行のうち **7行で paths が出ており**、うち3行が
+  // `ledger_only: true`（残り4行は台帳の外を触っているので、そちらは今までどおり人が読む）。
+  // 「まず内訳が出るのを見る」は5日ぶん見た。
+  //
+  // **auto を付けるのは ledger_only の行だけで、手順は書いた順に守る:**
   //   1. 対象は `ledger_only === true` の行だけ（false と null は人が読む）
-  //   2. **追記型と状態型を分ける。**runs.json は --append（run_id で冪等）、
-  //      AUTOPILOT_LOG.md は追記、**status.json は載せ直さず再生成**
-  //      —— 現在値を持つ台帳なので、古い写しを当てると巻き戻る
+  //   2. **追記型と状態型を分ける。**runs.json / cost.json は --append（run_id で冪等）、
+  //      **status.json は載せ直さず再生成**（現在値を持つ台帳なので古い写しを当てると巻き戻る）、
+  //      **actions.json はこのエンジン自身の出力なので触らない**（当てると閉じた行が開き直る）
   //   3. **まず「本当に欠けているか」を見る。**取り残しの判定はSHAで行うので、
-  //      内容が別コミットで着地済みでも行は立つ（08-28 の実測で4件中3件がそれ）
+  //      内容が別コミットで着地済みでも行は立つ（08-28 の実測で4件中3件がそれ）。
+  //      欠けていなければ1行も書かない —— **走査が消えないことを、書く理由にしない**
   //   4. PRを出して SEO Validation → auto-merge に乗せる。直接 main を触らない
+  //      （ハンドラは作業ツリーに書くだけで、PRは autopilot-act.yml が作る）
+  //
+  // **AUTOPILOT_LOG.md は追記型だが、auto の対象に入れていない。**散文の差分は
+  // run_id のような冪等な鍵を持たないので、「欠けているか」を機械が判定できない。
+  // OPERATING_LEDGERS には残る（＝読む前に見当はつく）が、書くのは人。
   const orphanIds = new Set();
   for (const o of ctx.orphans ?? []) {
     const id = `act-orphaned-branch-${orphanSlug(o.branch)}`;
@@ -565,8 +605,13 @@ export function derive(ctx) {
                 + '**内容が着地済みでも行は立つ。**'
               : '**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。')),
       source: 'orphan',
-      touches: [],
-      auto: null,
+      // **touches は auto を付ける行にだけ書く。**classify() は
+      // 「自動実行するのに対象が特定できない」を human に倒すので、
+      // ledger_only でない行は今までどおり touches:[] のまま人へ行く。
+      touches: o.ledger_only === true
+        ? ['data/autopilot-runs.json', 'data/autopilot-cost.json', 'data/autopilot-status.json']
+        : [],
+      auto: o.ledger_only === true ? 'apply-orphan-ledger' : null,
       // 台帳には載せない（旧IDの行を引き当てるためだけの手掛かり）
       prs: all,
       close_check: { kind: 'branch_caught_up', params: { branch: o.branch } },
@@ -665,6 +710,97 @@ export function derive(ctx) {
           kind: 'no_failure_since',
           params: { route, failure_class: 'immediate_failure', since: last.date_jst },
         },
+      });
+    }
+  }
+
+  // --- D5b: 経路が黙って出荷していない / どの経路も出荷していない ---
+  //
+  // **失敗は拾えていた。拾えていなかったのは「緑のまま何もしない」ほう。**
+  //
+  // 2026-08-27・28・29 の主系は3日続けて `skipped_gate` で、これは *success* で
+  // 終わる。cron-health は failure しか見ず、autopilot-health は
+  // status JSON の日付しか見ない —— **副系が出荷していれば当日分は更新される**ので、
+  // 主系が何日スキップし続けても、どちらの監視も鳴らない。実際この3日が台帳に
+  // 載ったのは 08-31 23:27 で、**セッションが手で起こすまで4日目まで誰も気づいていない。**
+  //
+  // 【なぜ「出荷」で数えるか】着手やスキップでは数えられない。当日ロックの設計上、
+  // 副系が先に取った日に主系が譲るのは正常系で、譲った回も行は立つ。数えるべきは
+  // **その経路が最後に何かを出せた日**で、そこから離れるほど「動くはずの予備」が
+  // 未検証になる。08-29 に効いたのはこれ —— 副系が claim だけ取って死んだとき、
+  // 10日間出荷していなかった主系はもう譲る相手を確かめられなかった。
+  //
+  // 【閾値3日の理由】2日だと「副系が2日続けて先に取った」だけで鳴り、それは
+  // この設計では正常系にある。3日目からは「譲り続けている」ではなく
+  // 「出せていない」と読む。**08-27〜29 は3日なので、この規則なら拾える。**
+  const shipDays = new Set(runs.filter((r) => r.outcome === 'shipped').map((r) => r.date_jst));
+  const ledgerDays = [...new Set(runs.map((r) => r.date_jst))].sort();
+  const lastDay = ledgerDays.at(-1) ?? null;
+
+  const byRouteAll = {};
+  for (const r of runs) (byRouteAll[r.route] ??= []).push(r);
+  for (const [route, rs] of Object.entries(byRouteAll)) {
+    // 単発の経路（代走・オーナー実行）は「予備」ではないので数えない。
+    // **定期に起動するものだけが、黙っていることを問題にできる。**
+    const routeDays = [...new Set(rs.map((r) => r.date_jst))].sort();
+    if (routeDays.length < 3) continue;
+    const lastShip = rs.filter((r) => r.outcome === 'shipped').map((r) => r.date_jst).sort().at(-1) ?? null;
+    // 起点は「最後に出荷した日」。一度も出していない経路は台帳の初日から数える。
+    const since = lastShip ?? routeDays[0];
+    // その経路の行がある日のうち、起点より後で出荷していない日を数える
+    // （行の無い日は数えない —— 起動しなかったことを黙殺と混ぜない）。
+    const silent = routeDays.filter((d) => d > since);
+    if (silent.length < 3) continue;
+    out.push({
+      id: `act-route-silent-${route}`,
+      title: `${route} が ${silent.length}日ぶん出荷していない（${silent[0]}〜${silent.at(-1)}・最後の出荷 ${lastShip ?? 'なし'}）`,
+      detail: `この経路の行は立っているが、${since} より後に出荷が1件も無い`
+        + `（${silent.join(' / ')}）。\n\n`
+        + `**失敗ではないので、失敗を見る監視には出ない。** cron-health は `
+        + `event=schedule かつ conclusion=failure だけを集計し、autopilot-health は `
+        + `status JSON の日付だけを見る。**別の経路が出荷していれば当日分は更新される**ため、`
+        + `ここが黙っていること自体はどちらにも現れない。\n\n`
+        + `**冗長化の主張がここで未検証になる。**「主系が落ちても副系が出す」は、`
+        + `両方が最近出せていることでしか裏が取れない。片方が出していない日数は、`
+        + `そのまま「切替が試されていない日数」になる（2026-08-29、副系が claim だけ取って`
+        + `死んだ日に主系が10日ぶり以上の沈黙のままだったのが実例）。\n\n`
+        + `**まず Gate のスキップ理由を読む。**当日ロック（claude/obsidian-auto-<日付>）を`
+        + `別経路が取ったのか、本番 status JSON が当日分だったのか、秘密鍵が無いのかで`
+        + `打ち手が変わる。「毎日スキップしている」だけでは原因は決まらない。`,
+      source: 'route',
+      touches: ['data/autopilot-runs.json'],
+      // 原因は Gate のスキップ理由を読まないと決まらない。**起票と可視化まで。**
+      auto: null,
+      close_check: { kind: 'route_shipped_since', params: { route, since } },
+    });
+  }
+
+  // どの経路も出荷しなかった日が続いているとき。**経路別より上位の信号。**
+  // 08-29〜08-31 がこれで、個別の run には selfheal 行が立ったが
+  // 「3日出ていない」という形では台帳のどこにも現れていなかった。
+  if (lastDay && !shipDays.has(lastDay)) {
+    const outage = [];
+    for (let i = ledgerDays.length - 1; i >= 0; i -= 1) {
+      if (shipDays.has(ledgerDays[i])) break;
+      outage.unshift(ledgerDays[i]);
+    }
+    if (outage.length >= 2) {
+      const before = ledgerDays[ledgerDays.length - outage.length - 1] ?? null;
+      out.push({
+        id: 'act-shipping-outage',
+        title: `どの経路も ${outage.length}日連続で出荷していない（${outage[0]}〜${outage.at(-1)}）`,
+        detail: `台帳に行はあるが、出荷が1件も無い日が続いている（${outage.join(' / ')}）。\n\n`
+          + `**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、`
+          + `失敗した日も「記録がある日」なので連続が切れない。`
+          + `\`node scripts/autopilot-runs.mjs\` の **連続出荷** と **無介入出荷** が`
+          + `切れているほうを見ること。\n\n`
+          + `**個別の故障行だけを見ていると、この形が見えない。**`
+          + `1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、`
+          + `「3日出ていない」にはならない。`,
+        source: 'route',
+        touches: ['data/autopilot-runs.json'],
+        auto: null,
+        close_check: { kind: 'shipping_resumed', params: { since: before ?? outage[0] } },
       });
     }
   }
@@ -831,8 +967,22 @@ export function merge(ledger, derived, today) {
         cur.created_jst = today;
         cur.evidence = null;
       }
-      // 件数など、事実として動くものだけ追従させる
-      if (cur.state === 'open') { cur.title = d.title; cur.detail = d.detail; }
+      // 件数など、事実として動くものだけ追従させる。
+      //
+      // **[2026-09-02] auto と touches も追従させる。**どちらも導出の結果であって
+      // 行に固有の値ではない。追従させないと、**先に立った行が古い判定のまま残る** ——
+      // 取り残しの内訳（paths）が最初の走査で取れず `ledger_only: null` で立った行は、
+      // 翌日に内訳が取れて `true` になっても `auto: null` のままになり、
+      // 「台帳だけの取り残しは自動で再投入する」が**その行にだけ効かない。**
+      //
+      // 人が固定したい場合の口は `force_owner` で、classify はそちらを先に見る。
+      // merge は force_owner に触らないので、上書きされるのは導出値だけ。
+      if (cur.state === 'open') {
+        cur.title = d.title;
+        cur.detail = d.detail;
+        cur.auto = d.auto ?? null;
+        cur.touches = d.touches ?? [];
+      }
       continue;
     }
     const a = {
@@ -1033,6 +1183,35 @@ export const OPERATING_LEDGERS = [
   'docs/obsidian/AUTOPILOT_LOG.md',
   'growth/content/coverage-queue.json',
 ];
+
+/**
+ * **追記型の台帳だけ、再投入してよい。**（D3b の手順 2）
+ *
+ * `data/autopilot-runs.json` と `data/autopilot-cost.json` は run_id で冪等な追記型で、
+ * 載せ直しても足されるだけ。`data/autopilot-status.json` は**現在値を持つ状態型**で、
+ * 古い写しを当てると巻き戻る —— 再生成はするが、写しは当てない。
+ * `data/autopilot-actions.json` はこのエンジン自身の出力なので、古い写しを当てると
+ * **閉じた行が開き直る。**触らない。
+ */
+export const ORPHAN_APPENDABLE = {
+  'data/autopilot-runs.json': 'runs',
+  'data/autopilot-cost.json': 'cost',
+};
+
+/**
+ * ブランチ側の台帳にあって main 側に無い行を返す。**SHAではなく run_id で見る。**
+ *
+ * 取り残しの検知は SHA で行うので、**内容が別コミットで着地済みでも行は立つ**
+ * （2026-08-28 の実測で4件中3件がそれ）。だから再投入の前に、ここで
+ * 「本当に欠けているか」を必ず通す。欠けていなければ空配列が返り、
+ * ハンドラは1行も書かない。
+ */
+export function missingLedgerRows(branchDoc, mainDoc) {
+  const rows = Array.isArray(branchDoc?.runs) ? branchDoc.runs : null;
+  if (!rows) return null; // 読めなかった。**「欠けていない」と混ぜない**
+  const known = new Set((mainDoc?.runs ?? []).map((r) => String(r.run_id ?? '')));
+  return rows.filter((r) => r?.run_id && !known.has(String(r.run_id)));
+}
 
 /** 内訳を読むために叩くコミット数の上限。**超えたら断定しない**（下記）。 */
 export const ORPHAN_MAX_COMMIT_READS = 20;
@@ -1539,6 +1718,120 @@ export const HANDLERS = {
    * 封じ込め。上限に達した故障の経路を止める。
    * **止めるのはAIがやってよい（policy.ai_may_stop）。解除はしない。**
    */
+  /**
+   * 取り残しのうち**台帳だけを触っている追記型**を再投入する。（D3b の手順どおり）
+   *
+   * 2026-08-28 に手順を4段で書いて「auto はまだ付けない」と決めた。保留の条件は
+   * 「まず日次runが実際に内訳を出すのを見る」で、**08-28〜09-02 の7行のうち7行で
+   * paths が出ている**（うち3行が ledger_only:true）。前提は満たされたので付ける。
+   *
+   * 手順は飛ばさない:
+   *   1. `ledger_only === true` の行だけ。false と null は人が読む
+   *   2. **追記型と状態型を分ける。** runs / cost は run_id で冪等な --append。
+   *      status は写しを当てず**台帳から再生成**。actions はこのエンジン自身の
+   *      出力なので触らない（古い写しを当てると閉じた行が開き直る）
+   *   3. **まず「本当に欠けているか」を見る。**内容が別コミットで着地済みでも
+   *      SHAベースの走査は行を立てる（08-28 の実測で4件中3件）
+   *   4. 直接 main を触らない。ワークフローが差分をPRにして SEO Validation →
+   *      auto-merge に乗せる（このハンドラは作業ツリーに書くだけ）
+   *
+   * **1行も欠けていなかったとき、このハンドラは何も書かない。**その場合に残って
+   * いるのはブランチのSHAだけで、走査（SHAで見る）はそれを取り残しと呼び続ける。
+   * 消す手段は `delete-branch.yml`（内容が main と同一のときだけ消す）だが、
+   * **この経路には actions:write が無い**ので回せない。log にそう書いて渡す。
+   */
+  async 'apply-orphan-ledger'(ctx, action) {
+    if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: '認証情報が無くブランチ側の台帳を読めない' };
+    const orphans = ctx.orphans;
+    if (!Array.isArray(orphans)) {
+      return { ok: false, changed: 0, log: '取り残しの走査が未取得（解消と読ませない）' };
+    }
+    const branch = action?.close_check?.params?.branch ?? null;
+    const o = orphans.find((x) => x.branch === branch);
+    if (!o) return { ok: true, changed: 0, log: `${branch ?? '(不明)'} は走査に出てこない（既に解消）` };
+    if (o.ledger_only !== true) {
+      return { ok: false, changed: 0, log: `${branch} は台帳だけを触っていない（ledger_only=${o.ledger_only}）— 中身を人が読む` };
+    }
+    const log = [];
+    let changed = 0;
+    const headers = { authorization: `Bearer ${ctx.token}`, accept: 'application/vnd.github.raw',
+      'user-agent': 'simplememo-autopilot-act' };
+    const readBranch = async (file) => {
+      const url = `https://api.github.com/repos/${ctx.repo}/contents/${file}`
+        + `?ref=${encodeURIComponent(branch)}`;
+      const r = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+      if (!r.ok) return null;
+      try { return JSON.parse(await r.text()); } catch { return null; }
+    };
+
+    for (const file of o.paths ?? []) {
+      const kind = ORPHAN_APPENDABLE[file];
+      if (!kind) {
+        // **写さない理由はパスごとに違う。**まとめて「対象外」と書くと、
+        // 次に読む人が「なぜ写さないか」を毎回調べ直すことになる。
+        const why = file === 'data/autopilot-status.json'
+          ? '状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する'
+          : file === 'data/autopilot-actions.json'
+            ? 'このエンジン自身の出力。古い写しを当てると閉じた行が開き直る'
+            : file === 'docs/obsidian/AUTOPILOT_LOG.md'
+              ? '追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く'
+              : '追記対象に入れていない台帳';
+        log.push(`${file}: 写しを当てない（${why}）`);
+        continue;
+      }
+      const branchDoc = await readBranch(file);
+      if (!branchDoc) { log.push(`${file}: ブランチ側を読めず判定不能（欠けていないという意味ではない）`); continue; }
+      const mainDoc = kind === 'runs' ? ctx.runsDoc : ctx.costDoc;
+      const missing = missingLedgerRows(branchDoc, mainDoc);
+      if (missing === null) { log.push(`${file}: ブランチ側に runs が無く判定不能`); continue; }
+      if (missing.length === 0) { log.push(`${file}: 欠けている行は無い（内容は着地済み）`); continue; }
+      for (const r of missing) {
+        const script = kind === 'runs' ? 'scripts/autopilot-runs.mjs' : 'scripts/autopilot-budget.mjs';
+        const args = kind === 'runs'
+          ? ['--append', '--run-id', String(r.run_id), '--date', String(r.date_jst), '--route', String(r.route),
+             '--outcome', String(r.outcome), '--attempted', String(r.attempted ?? true), '--source', 'act-orphan',
+             ...(r.external_ref ? ['--external-ref', String(r.external_ref)] : []),
+             ...(r.failure_reason ? ['--failure-reason', String(r.failure_reason)] : []),
+             ...(r.failure_class ? ['--failure-class', String(r.failure_class)] : []),
+             ...(r.pr ? ['--pr', String(r.pr)] : []),
+             ...(r.artifact ? ['--artifact', String(r.artifact)] : []),
+             ...(r.lane ? ['--lane', String(r.lane)] : []),
+             ...(r.action ? ['--action', String(r.action)] : [])]
+          : ['--append', '--date', String(r.date_jst), '--route', String(r.route),
+             '--run-id', String(r.run_id), '--cost', String(r.total_cost_usd),
+             ...(r.num_turns != null ? ['--turns', String(r.num_turns)] : []),
+             ...(r.task_kind ? ['--task-kind', String(r.task_kind)] : []),
+             ...(r.outcome ? ['--outcome', String(r.outcome)] : []),
+             '--note', '取り残しから再投入（autopilot-act の apply-orphan-ledger）'];
+        try {
+          const out = execFileSync(process.execPath, [path.join(ROOT, script), ...args],
+            { cwd: ROOT, encoding: 'utf8' });
+          log.push(`${file}: ${r.run_id} を再投入 — ${out.trim()}`);
+          changed += 1;
+        } catch (e) {
+          log.push(`${file}: ${r.run_id} の再投入に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
+        }
+      }
+    }
+
+    // 追記した回だけ status を**台帳から作り直す**（写しは当てない）。
+    if (changed > 0) {
+      try {
+        const out = execFileSync(process.execPath,
+          [path.join(ROOT, 'scripts/autopilot-runs.mjs'), '--write-status'], { cwd: ROOT, encoding: 'utf8' });
+        log.push(`status を台帳から再生成 — ${out.trim()}`);
+      } catch (e) {
+        log.push(`status の再生成に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
+      }
+    } else {
+      log.push(`**1行も欠けていない。**残っているのはブランチ ${branch} のSHAだけで、`
+        + '走査はSHAで見るので取り残しと呼び続ける。消せるのは delete-branch.yml '
+        + '（変更したファイルが main と同一のときだけ消す）だが、**この経路に actions:write は無い**。'
+        + 'セッション（MCP の actions_run_trigger を持つ）が回すか、オーナーが UI から回す。');
+    }
+    return { ok: true, changed, log: log.join('\n') };
+  },
+
   async contain(_ctx) {
     try {
       const out = execFileSync(process.execPath,
@@ -1665,7 +1958,11 @@ async function selftest() {
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
   const matrix = {
     self_repair: {
-      may_modify: ['data/autopilot-runs.json', '.github/workflows/obsidian-autopilot.yml'],
+      // 実ファイル（data/authority-matrix.json）の may_modify から、ここで要る分だけ写した検体。
+      // **実ファイルとの一致は --check（validateLedger）が実データで見る。**
+      // 自己テストは台帳を読まない決まりなので、ここは形の検体にとどめる。
+      may_modify: ['data/autopilot-runs.json', 'data/autopilot-cost.json',
+        'data/autopilot-status.json', '.github/workflows/obsidian-autopilot.yml'],
       unattended_cannot_push: {
         paths: ['.github/workflows/obsidian-autopilot.yml'],
         who_applies: '副系CCRセッション',
@@ -2150,6 +2447,127 @@ async function selftest() {
       ovCtx([])).closed === true);
   t('run_id 指定は run_id 無しの行に一致しない',
     CLOSE_CHECKS.budget_overrun_reviewed({ run_id: 'null' }, ovCtx([noIdRow])).closed === true);
+
+  // merge: 導出値（auto / touches）は open な行に追従する
+  {
+    const led = { actions: [{
+      id: 'act-x', title: '旧', detail: '旧', source: 'orphan', state: 'open',
+      created_jst: '2026-09-01', last_seen_jst: '2026-09-01', closed_jst: null, evidence: null,
+      auto: null, touches: [], force_owner: null, close_check: { kind: 'manual', params: {} },
+    }] };
+    merge(led, [{ id: 'act-x', title: '新', detail: '新', source: 'orphan',
+      auto: 'apply-orphan-ledger', touches: ['data/autopilot-runs.json'],
+      close_check: { kind: 'manual', params: {} } }], '2026-09-02');
+    t('**内訳が後から取れた行にも auto が付く**（先に立った行が古い判定で残らない）',
+      led.actions[0].auto === 'apply-orphan-ledger');
+    t('対象ファイルも追従する', led.actions[0].touches.length === 1);
+    const led2 = { actions: [{ ...led.actions[0], force_owner: 'human', force_owner_why: 'ここは人' }] };
+    merge(led2, [{ id: 'act-x', title: '新', detail: '新', source: 'orphan',
+      auto: 'apply-orphan-ledger', touches: ['data/autopilot-runs.json'],
+      close_check: { kind: 'manual', params: {} } }], '2026-09-02');
+    t('**人が固定した force_owner は上書きしない**', led2.actions[0].force_owner === 'human'
+      && classify(led2.actions[0], matrix).owner === 'human');
+  }
+
+  // --- D3b: ledger_only の取り残しに auto を付けた（2026-09-02） ---
+  const orphanRow = (ledgerOnly) => derive({ orphans: [{
+    pr: 774, prs: [774], branch: 'claude/obsidian-auto-20260902', merged_sha: 'abcdef1234',
+    ahead_by: 1, commits: ['ee4e37c'], paths: ['data/autopilot-runs.json'], ledger_only: ledgerOnly,
+  }] }).find((a) => a.source === 'orphan');
+  t('**台帳だけの取り残しは自動で再投入する**', orphanRow(true)?.auto === 'apply-orphan-ledger');
+  t('台帳の外を触る取り残しは今までどおり人が読む', orphanRow(false)?.auto === null);
+  t('**内訳が取れていない取り残しも人が読む**（取れなかったを「台帳だけ」と読まない）',
+    orphanRow(null)?.auto === null);
+  t('自動の行は対象ファイルを名乗る（classify が「対象不明」で human に倒すため）',
+    (orphanRow(true)?.touches ?? []).length === 3);
+  t('自動でない行は touches を持たない', (orphanRow(false)?.touches ?? []).length === 0);
+  t('自動の対象は self_repair.may_modify の内側',
+    classify(orphanRow(true), matrix).owner === 'ai');
+  t('自動でない取り残しは human のまま', classify(orphanRow(false), matrix).owner === 'human');
+  t('handler が実在する', typeof HANDLERS['apply-orphan-ledger'] === 'function');
+
+  // 「本当に欠けているか」— **SHAで立った行を、内容の欠落と混ぜない**
+  const mainRuns = { runs: [{ run_id: 'ap-20260902-actions' }] };
+  t('欠けていなければ空（内容が着地済みでも走査は行を立てる）',
+    missingLedgerRows({ runs: [{ run_id: 'ap-20260902-actions' }] }, mainRuns).length === 0);
+  t('欠けていれば返す',
+    missingLedgerRows({ runs: [{ run_id: 'ap-20260903-ccr' }] }, mainRuns)[0].run_id === 'ap-20260903-ccr');
+  t('**読めなかったは「欠けていない」ではない**', missingLedgerRows({}, mainRuns) === null);
+  t('run_id の無い行は再投入しない',
+    missingLedgerRows({ runs: [{ date_jst: '2026-09-03' }] }, mainRuns).length === 0);
+  t('main 側が読めなくても、ブランチ側が読めれば全件が欠けている扱い',
+    missingLedgerRows({ runs: [{ run_id: 'x' }] }, null).length === 1);
+  t('**状態型と自己出力は追記対象に入れない**',
+    ORPHAN_APPENDABLE['data/autopilot-status.json'] === undefined
+    && ORPHAN_APPENDABLE['data/autopilot-actions.json'] === undefined
+    && ORPHAN_APPENDABLE['docs/obsidian/AUTOPILOT_LOG.md'] === undefined);
+  t('追記型は runs と cost の2つだけ', Object.keys(ORPHAN_APPENDABLE).length === 2);
+
+  // --- D5b: 経路の沈黙と全停止 ---
+  //
+  // **実物の3日で当てる。**08-27〜29 の主系（skipped_gate ×3・その間 副系は出荷）と、
+  // 08-29〜31 の全停止。どちらも当時どの監視も鳴らなかった形。
+  const routeRuns = (rows) => ({ today: '2026-09-01', runsDoc: { runs: rows }, selfheal: { targets: [] } });
+  const day = (d, route, outcome) => ({ run_id: `${d}-${route}`, date_jst: d, route, outcome, attempted: true });
+  const silent3 = [
+    day('2026-08-26', 'actions', 'shipped'),
+    day('2026-08-27', 'actions', 'skipped_gate'), day('2026-08-27', 'ccr-0920', 'shipped'),
+    day('2026-08-28', 'actions', 'skipped_gate'), day('2026-08-28', 'ccr-0920', 'shipped'),
+    day('2026-08-29', 'actions', 'skipped_gate'), day('2026-08-29', 'ccr-0920', 'shipped'),
+  ];
+  const s3 = derive(routeRuns(silent3)).filter((a) => a.id === 'act-route-silent-actions');
+  t('**主系が3日スキップし続けたら起票する**（当時どの監視も鳴らなかった形）', s3.length === 1);
+  t('沈黙の日数を題に出す', (s3[0]?.title ?? '').includes('3日ぶん出荷していない'));
+  t('最後の出荷日を題に出す', (s3[0]?.title ?? '').includes('最後の出荷 2026-08-26'));
+  t('沈黙は原因を名乗らない（Gateの理由を読ませる）', (s3[0]?.detail ?? '').includes('スキップ理由を読む'));
+  t('沈黙は自動実行しない', s3[0]?.auto === null);
+  const silent2 = silent3.filter((r) => r.date_jst <= '2026-08-28');
+  t('**2日では鳴らさない**（副系が先に取る日は正常系にある）',
+    derive(routeRuns(silent2)).filter((a) => a.id === 'act-route-silent-actions').length === 0);
+  t('出荷している副系は起票しない',
+    derive(routeRuns(silent3)).filter((a) => a.id === 'act-route-silent-ccr-0920').length === 0);
+  const oneOff = [
+    day('2026-08-26', 'actions', 'shipped'),
+    day('2026-08-27', 'owner-session', 'shipped'),
+    day('2026-08-28', 'actions', 'skipped_gate'), day('2026-08-29', 'actions', 'skipped_gate'),
+    day('2026-08-30', 'actions', 'skipped_gate'),
+  ];
+  t('**行が3日ぶんに満たない経路は数えない**（代走・オーナー実行は「予備」ではない）',
+    derive(routeRuns(oneOff)).filter((a) => a.id === 'act-route-silent-owner-session').length === 0);
+  // 閉じ条件は「もう一度出せたか」だけ。失敗が無いことでは閉じない。
+  t('出荷が無ければ閉じない',
+    CLOSE_CHECKS.route_shipped_since({ route: 'actions', since: '2026-08-26' },
+      routeRuns(silent3)).closed === false);
+  t('出荷が戻れば閉じる',
+    CLOSE_CHECKS.route_shipped_since({ route: 'actions', since: '2026-08-26' },
+      routeRuns([...silent3, day('2026-08-30', 'actions', 'shipped')])).closed === true);
+  t('**台帳が読めなければ閉じない**（出荷したという意味ではない）',
+    CLOSE_CHECKS.route_shipped_since({ route: 'actions', since: '2026-08-26' }, {}).closed === false);
+
+  const outage = [
+    day('2026-08-28', 'actions', 'skipped_gate'), day('2026-08-28', 'ccr-0920', 'shipped'),
+    day('2026-08-29', 'actions', 'skipped_gate'), day('2026-08-29', 'ccr-0920', 'no_artifact'),
+    day('2026-08-30', 'actions', 'failed'),
+    day('2026-08-31', 'actions', 'failed'), day('2026-08-31', 'ccr-0920', 'failed'),
+  ];
+  const og = derive(routeRuns(outage)).filter((a) => a.id === 'act-shipping-outage');
+  t('**どの経路も出さない日が続いたら起票する**（08-29〜31 の実物）', og.length === 1);
+  t('全停止の日数を題に出す', (og[0]?.title ?? '').includes('3日連続で出荷していない'));
+  t('全停止の行は1本だけ（故障の数だけ生やさない）',
+    derive(routeRuns(outage)).filter((a) => a.source === 'route' && a.id === 'act-shipping-outage').length === 1);
+  t('最終日に出荷があれば全停止は起票しない',
+    derive(routeRuns([...outage, day('2026-09-01', 'actions', 'shipped')]))
+      .filter((a) => a.id === 'act-shipping-outage').length === 0);
+  t('1日だけでは全停止に数えない',
+    derive(routeRuns([day('2026-08-30', 'actions', 'shipped'), day('2026-08-31', 'actions', 'failed')]))
+      .filter((a) => a.id === 'act-shipping-outage').length === 0);
+  t('全停止は出荷が戻れば閉じる',
+    CLOSE_CHECKS.shipping_resumed({ since: '2026-08-28' },
+      routeRuns([...outage, day('2026-09-01', 'actions', 'shipped')])).closed === true);
+  t('全停止は出荷が戻るまで閉じない',
+    CLOSE_CHECKS.shipping_resumed({ since: '2026-08-28' }, routeRuns(outage)).closed === false);
+  t('**全停止も台帳が読めなければ閉じない**',
+    CLOSE_CHECKS.shipping_resumed({ since: '2026-08-28' }, {}).closed === false);
 
   // 導出D7: 主系を止めている未レビュー超過を起票する
   const ovDerive = derive({

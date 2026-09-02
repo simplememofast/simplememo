@@ -130,6 +130,24 @@
       "note": "run_id で行を突き合わせる。id の無い行は照合対象ではない"
     },
     {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "r.attempted",
+      "disposition": "前提",
+      "note": "運転台帳の行に attempted があることを前提にしている（実費の取りこぼし D4 と append-cost の対象選び）。**正が消えても規則は消えない** —— scripts/autopilot-runs.mjs の validate が `attempted must be boolean` で落とし、autopilot-act.yml の『台帳の検査』段が --check を回す。欠けた行が黙って対象から外れる形にはならない"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "r?.run_id",
+      "disposition": "前提",
+      "note": "**ここだけ相手が検証されていない台帳。**missingLedgerRows が読むのは取り残しブランチ側の写しで、ネットワーク越しに取ってきたものなので autopilot-runs の validate を通っていない。run_id の無い行は --append の冪等鍵を作れないため**再投入しない**（自己テスト『run_id の無い行は再投入しない』で固定）。落としたことは handler の log に残る"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "v",
+      "disposition": "前提",
+      "note": "`interpretRun(r)` の戻り値。`v !== null && !v.skip` の null 検査は**台帳の欠落ではなく関数の契約**で、null は『記録対象外の run』を意味する（interpretRun のヘッダ）。台帳が空でもこの規則は消えず、対象が0件になるだけ"
+    },
+    {
       "file": "scripts/autopilot-budget.mjs",
       "expr": "an.enabled",
       "disposition": "前提",
