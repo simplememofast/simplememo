@@ -260,3 +260,20 @@ cd ../simplememo-ios && git tag -l 'v*' --sort=version:refname | tail -22   # �
 **この文書の限界：** 外部事例は等級B（一次HTMLを自分で開いていない）。iOS の所有者名義コミット37件が
 AI著作かどうかは判定していない（判定できないから人側に数える、という台帳の規則に従っただけ）。
 App Store の公開日は台帳に無く、§3-2 の日付はタグ日である。
+
+---
+
+## 9. 【2026-09-02 夜・追記】§6-B のうち実装したもの
+
+「開発すすめたい」を受けて、同日夜に B1 / B2 / B4 / B6 を実装した。B3 / B5 は本番の母数とオーナー承認が要るので着手していない。
+
+| # | 実装 | 何が言えるようになったか | 出どころ |
+|---|---|---|---|
+| **B1** | `data/app-releases.json` ＋ `scripts/app-releases.mjs`（--write / --check / --selftest）。1版1行：タグ・ビルド・実機確認の記録・App Store の状態・**公開が観測された時刻の幅**・コード差分の AI 著者率。`/autopilot/` §2 に Lane B の実測ブロック、§9 に台帳リンク。配信本文に「同じ期間にアプリ本体は7版」の段落。`check-autopilot-page` が7つの数字を台帳と突き合わせる | 「23日間でタグ14版・App Store に並んだ版7・実機確認の記録2（台帳は 08-28 から）・公開時刻を幅で持てた版2」を台帳つきで言える。**Apple は公開時刻を返さない**ので、READY を初めて観測した時刻と直前の非 READY の対で持つ（5.8.2 は 08-28 10:50Z〜22:34Z、5.8.4 は 09-01 04:36Z〜23:16Z）。コード差分の AI 著者率は**コミット 56.3%・変更行 38.3%**（定義上判定できないコミットは人側）—— ページには出し、本文には出していない | `node scripts/app-releases.mjs` |
+| **B4** | `autopilot-runs.mjs` に `activeStreaks()`。停止日＝no_run の行がある日（同じ日に主系の skipped_gate が並んでいても停止）、行の無い日は連続を切る。ページ §3 と本文に「連続稼働は現在16日（8月18日〜9月2日）」。`kpi-definitions.json` に `active_day_streak` | **16日（08-18〜09-02）**。08-16・17 で一度切れている。**skipped_gate を稼働と読むと23日連続になる**ので、no_run を日単位の判定として優先する側に固定した（自己テストで固定） | `node scripts/autopilot-runs.mjs` |
+| **B2** | (a) AI 著者の印を v2 へ（署名・トレーラー＋Claude Code の足跡）。8/11〜9/1 で v1=v2 を実測したので公開値は動かない。(b) `simplememo-ios` / `simplememo-api` に `.githooks/commit-msg`（申告の無いコミットを止める）と PR 本文の申告検査（`scripts/check_author_declaration.sh`・qa-static.yml / ci.yml）。(c) `check-pr-facts` に「同期間＋率で窓が無い」規則と `--selftest`。(d) `code-authorship.mjs --write-window` で見出しと別の窓を台帳に持ち、`check-autopilot-page` が**ページ・本文のコミット率・変更行率がどれかの窓の値であること**を要求 | 「同期間の99.5%」の再発を機械が止める。squash マージが PR 本文を写す設定なら、以後の印がコミットに残る（**設定は未確認**。Settings → General → "Default commit message" が "pull request title and description" であることを見る） | `node scripts/code-authorship.mjs --check` |
+| **B6** | `data/prior-art.json`（§1 の14件＋既存4件を一次URL・確認日・等級つきで）＋ `scripts/check-prior-art.mjs`。配信（distribution-queue の autopilot クラスタ）が2営業日以内なら全件の確認日が7日以内でないと落ちる | 記者Q&Aで他社を聞かれても範囲だけを一次URLつきで答えられる。**初回の --check で PostHog と AppDNA（08-25 確認）が実際に落ち**、同日に確かめ直した | `node scripts/check-prior-art.mjs` |
+
+**やっていないこと（§6-B のまま）**: B3（本番で promote/kill を1周）と B5（効果測定の接続）。どちらも `tf04_progress` の母数と承認が要る。
+
+**この追記で新しく分かったこと**: Lane B のコード差分の AI 著者率（56.3%／38.3%）は、3リポジトリ合算の 81.9%／70.9% よりさらに低い。アプリ本体の直近の修正（5.8.3〜5.8.6）が手元の環境から所有者の署名で入っているため。**数え方の限界であって「人が書いた」証拠ではない**が、この台帳の規則ではそう数える。

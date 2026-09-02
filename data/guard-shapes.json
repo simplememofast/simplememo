@@ -303,6 +303,42 @@
       "expr": "y.source",
       "disposition": "検体の選択",
       "note": "自己テスト内で `d.deadlines.find((y) => y.source && !y.confirmed_by_owner)` として**機械導出の行を実データから選んでいる**だけ。判定ではない。\n\n**該当が無ければ明示的に落とす** —— `if (!x) throw new Error('機械導出の行が実データに無い — **この検体が空回りしている**')` を書いてある。`x.where` の既存検体（該当ゼロだと次行で暗黙に例外）より一段はっきりさせた形で、**実データから機械導出の行が消えたときに『検査が通った』ではなく『検体が無い』と言う。**"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "so?.first_ready_at",
+      "disposition": "明示的に無いと書く",
+      "note": "`buildRows()` の `if (so?.first_ready_at && so.last_not_ready_before_ready_at)`。履歴の観測が無い版は else 側へ落ち、`store.how` に「現在の一覧で READY だが、履歴に観測が無い」と**書いた行になる**。観測が無いことが『公開時刻あり』へ倒れる形ではなく、無いことを行に残す形。`validate()` は released_between も released_before も無い store に how が無ければ落とす"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "r.device_verification",
+      "disposition": "安全側へ倒れる",
+      "note": "`summarize()` の `rows.filter((r) => r.device_verification && r.device_verification.sha_matches_tag === true)`。記録の無い版は『実機確認あり』に**数えない**側。この項が消えると記録の無い版が確認済みに見えるが、そちらへは倒れない。記録が無い理由は `$device_note` に行ごとに書いてある"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "r.asc.state",
+      "disposition": "対象が無いときは判定しない",
+      "note": "`validate()` の `if (r.asc && r.asc.state !== null && !ASC_STATES.has(r.asc.state))`。asc が null の版は Apple の一覧に無い版で、`$asc_note` にそう書いてある。語彙の検査は状態がある行にしか当たらない。**null が『既知の状態』に化けることはない**（READY でなければ store も付かず、summary の store_ready にも入らない）"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "rb",
+      "disposition": "無い側は別の行が要求する",
+      "note": "`validate()` の `if (rb !== null && (...順序の検査...))`。released_between が null なのは正当な場合がある（観測前から READY の版は上限しか無い）。その場合は次の行 `if (rb === null && r.store.released_before === null && !r.store.how)` が**理由の無い空欄を落とす**。順序の検査と欠落の検査を分けてある"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "d",
+      "disposition": "別の規則が落とす",
+      "note": "`summarize()` の窓の絞り込み `d !== null && d >= from && d <= to`。tag_at が読めない行は窓から外れるが、**同じ行は `validate()` の「tag_at が読めない」で problems に出る**ので、黙って分母から消えることはない。集計は validate を通った台帳にしか使わない"
+    },
+    {
+      "file": "scripts/code-authorship.mjs",
+      "expr": "entry.from",
+      "disposition": "書き込み側の選別",
+      "note": "`--write-window` の `(stored.windows ?? []).filter((w) => !(w.from === entry.from && w.to === entry.to))`。同じ窓の古い行を除いて新しい行で置き換える選別で、判定ではない。entry.from / entry.to は --from / --to の既定値を持つので無いことはなく、仮に無ければ何も除かれずに追記されるだけ（重複は次の validateLedger の窓ループが算数で見る）。**空でも消える規則を持たない**"
     }
   ],
   "coverage_measured_at": "2026-08-26",
@@ -549,6 +585,18 @@
       "expr": "freshness",
       "disposition": "明示的に問題にする",
       "note": "`assess()` の `if (freshness == null) return { state: 'unreadable', ... }`。**握り潰す形の逆。**鮮度が読めない回は unreadable を返し、`validate()` が『進み具合が読めない』として problems に積む（＝CIが落ちる）。**読めなかったことを「進んでいる」と書かないための分岐そのもの**で、この規則が消えると止まった待ちが moving に見える。自己テスト「**鮮度が読めないときに『進んでいる』と書かない**」で固定"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "v",
+      "disposition": "表示のみ",
+      "note": "`pct()` の `v === null || v === undefined ? 'n/a' : ...`。表示の書式だけで判定ではない。率が出せない（分母0）ときに 'n/a' と出し、0% と書かない"
+    },
+    {
+      "file": "scripts/app-releases.mjs",
+      "expr": "d",
+      "disposition": "別の規則が落とす",
+      "note": "`summarize()` の窓の絞り込み `d !== null && d >= from && d <= to`。tag_at が読めない行は窓から外れるが、**同じ行は `validate()` の「tag_at が読めない」で problems に出る**ので、黙って分母から消えることはない。集計は validate を通った台帳にしか使わない（両方の走査に当たるので、known と param_guards の両方に同じ読みを置く）"
     }
   ]
 }
