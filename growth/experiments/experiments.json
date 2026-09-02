@@ -1772,7 +1772,10 @@
         "2026-08-22 改訂1b【アプリ名を現行へ】原稿が旧名『Captio式シンプルメモ』を製品名として使っていた。data/site-constants.json の正は『Obsidian連携シンプルメモ』/『Simple Memo - for Obsidian』で、旧名は alternateName に残る旧称。**この修正はS2を17→19に押し上げる** — アプリ名を書くだけで見出しにObsidianが入り、それは乗車した2本を牽引したエンティティそのもの。逆に旧名のままなら、見出しにApp Storeから削除された別アプリ『Captio』の名が乗っていた。あわせてボイラープレートの『起動 約1秒』を現行の実測値『起動0.4秒』（ウォーム起動・タップ→キーボード表示まで／iPhone 16e・iOS 26.5.2・v5.7.3・2026-08-11実測）へ更新した。",
         "2026-08-22 改訂2【外部レビュー反映・fix版】外部レビュー「自律型アプリ運営 現状整理と不足項目」を受領。結論に同意し、①〜⑦すべてが『部分実装または未実証』であることを原稿に反映した。主な変更: (a) **RSIの名乗りを取り下げ**。『ガードレール付き自律型アプリ運営基盤』『AIがアプリ改善サイクルを継続実行する仕組み』『再帰的プロダクト改善ループ』のいずれかを使う。表記も『再起的』ではなく『再帰的』だがそもそも対外文言に使わない。 (b) 革命性の置き所を『人がいない』→『人の位置が変わった』へ。担当分担表を本文冒頭に新設。 (c) 避けるべき表現9件を禁止表現へ追加（完全無人／全自動バグ修正／実機テスト完全自動化／法人経営の無人化／AIが売上を自動で伸ばした／RSI実現 ほか）。 (d) ⑧CS ⑨マネタイズ ⑩AgentOps ⑪データ・プライバシー ⑫事業継続性 と各領域の追加項目を docs/autopilot-maturity-backlog.md へ独立させた。 (e) **採点は 82→76 に下げた。**下がるのが正しく、誇張のぶんの点は1次確認で失う点でもある。 **レビューへの訂正2件**（evidence §12-2）: ①『8/21の記事公開は0/1件』は日報側の既知の誤報を読んだもので、実際は PR #521 `/obsidian/plugins/` を 08-21 09:44 JST に出荷済み（誤報の修正は PR #523・同日12:06 JST、日報配信10:00の2時間後）。②『主系失敗後のバックアップ実行の証跡が無い』は AUTOPILOT_LOG の 08-22 エントリに冪等性チェック(a)〜(e)・当日ブランチ占有・出荷まで全手順が残っている。ただし『自動フェイルオーバーではない／機械的に観測できない／切替演習が無い』というレビューの本質的指摘は正しく、plan §3 Tier 2 に積んだ。",
         "2026-08-22 改訂3【タイトル確定・実測KPI投入・権限表】オーナー確定のタイトルは 「アプリが、自ら育ち続ける。」Obsidian連携シンプルメモ、AIによる\"自律型アプリ運営\"を実現 / サブは「ユーザー行動の計測から機能開発、QA、SEO・ASO、PR制作、配信準備までをAIが一気通貫で循環。公開・予算・契約はリスクに応じて人が承認し、自律性と安全性を両立。」。**採点は76→80。主張は広げていない**（サブタイトルが承認制を明記・「できていないこと」表も据え置き）。**採用条件を3つ課した**（原稿 §1）: ①タイトル単独で流通させずサブとセットで出す ②本文の最初の見出しで仕組みを即座に具体化する ③本文でこの比喩を拡張しない（「アプリが自分で考えて」「AIが自己進化して」は禁止表現へ追加）。理由: このコピーは取り下げたRSIの主張とほぼ同じ形をしており、正確には「アプリ**を**、AIが育て続ける」だから。 あわせて実装2件: (a) **共通実行IDと運転台帳**（data/autopilot-runs.json / scripts/autopilot-runs.mjs）で AI完走率76.9%・変更失敗率23.1%・人間介入率53.8%・出荷日率83.3%・主系0/3副系10/10・無運転日2日を実測として出せるようにした。 (b) **機械可読な権限表**（data/authority-matrix.json / scripts/check-authority.mjs）で13領域の承認境界を定義し、不可逆↔承認制の整合をCIが見る。これで Tier 1 の #2/#4/#5/#6 が埋まった。",
-        "2026-08-22 改訂3b【介入の内訳とレーンF】オーナー指摘「人間介入率53.8%を90%以上（＝自律側）にしたい。コーディング時間を考えるとすでにそうなっているのでは」を受けて実測し直した。**指摘は正しかった。** git実測では同期間の変更行の98.8%（56コミット中55件）がAI著者。現行の人間介入率は「その実行に人が1回でも触ったか」の二値で、YAMLを1行直した日も丸ごと介入ありになる。そこで介入を5種別（artifact/infra/substitute/bootstrap/request）に分けた: **成果物への介入 0件（0%）・基盤の修理4件（30.8%）・代走1件・立ち上げ1件・起票のみ1件。** 出荷10件すべてAIが書いており人は中身に触っていない（成果物のAI自律率100%）。**総計53.8%も併記して出す** — 都合のよい分母に乗り換えるのはgoodhartingそのものなので。 実質的な介入は基盤の修理の一点に集約され、その修理を書いたのも全部AIだった。人がやっていたのは『壊れていることに気づいて直せと言うこと』だけ＝**足りないのは能力ではなく起動条件**。そこで **レーンF（自己修復）** を実装: `scripts/autopilot-selfheal.mjs` が未修理の故障を検知し、その日の最優先を修理に切り替える（レーンA〜Eより先）。**歯止めは文章ではなくCIが実検出する** — 必須CIチェック15本が1本でも消えると落ち、対象ワークフローに actions: write が現れると落ちる（両方とも差し替えデータで実際に検出することを確認済み）。同一 failure_class を3回直しても再発するなら修理をやめて人間に上げる。判定スクリプトは修理を行わない（同じ場所に置くと判定側を都合よく変えられるため）。原稿に節を2つ追加した。**採点は80のまま** — 主張が増えたのではなく、既にあった事実の測り方が正確になっただけなので。"
+        "2026-08-22 改訂3b【介入の内訳とレーンF】オーナー指摘「人間介入率53.8%を90%以上（＝自律側）にしたい。コーディング時間を考えるとすでにそうなっているのでは」を受けて実測し直した。**指摘は正しかった。** git実測では同期間の変更行の98.8%（56コミット中55件）がAI著者。現行の人間介入率は「その実行に人が1回でも触ったか」の二値で、YAMLを1行直した日も丸ごと介入ありになる。そこで介入を5種別（artifact/infra/substitute/bootstrap/request）に分けた: **成果物への介入 0件（0%）・基盤の修理4件（30.8%）・代走1件・立ち上げ1件・起票のみ1件。** 出荷10件すべてAIが書いており人は中身に触っていない（成果物のAI自律率100%）。**総計53.8%も併記して出す** — 都合のよい分母に乗り換えるのはgoodhartingそのものなので。 実質的な介入は基盤の修理の一点に集約され、その修理を書いたのも全部AIだった。人がやっていたのは『壊れていることに気づいて直せと言うこと』だけ＝**足りないのは能力ではなく起動条件**。そこで **レーンF（自己修復）** を実装: `scripts/autopilot-selfheal.mjs` が未修理の故障を検知し、その日の最優先を修理に切り替える（レーンA〜Eより先）。**歯止めは文章ではなくCIが実検出する** — 必須CIチェック15本が1本でも消えると落ち、対象ワークフローに actions: write が現れると落ちる（両方とも差し替えデータで実際に検出することを確認済み）。同一 failure_class を3回直しても再発するなら修理をやめて人間に上げる。判定スクリプトは修理を行わない（同じ場所に置くと判定側を都合よく変えられるため）。原稿に節を2つ追加した。**採点は80のまま** — 主張が増えたのではなく、既にあった事実の測り方が正確になっただけなので。",
+        "2026-09-02【配信日の前倒し・バナー監査・ゲート材料】オーナー指示で配信は **2026-09-03（木）朝**（plan §1 の 9/28 は失効）。Appleイベントは 9/9（水）10:00 PT で確定（招待状 8/26）なので、plan §1 の条件式では**前窓**（配信日 ≤ イベント−2日）に入る。運転日数は 8/11〜9/2 の23日で **28日の下限には届かない** —— 原稿は「約30日」を主張していないので配信は妨げないが、S5=3 は据え置き（採点は人）。ヒーローバナー（1536×1024・3:2・2.6MB PNG）を台帳に当てた結果は docs/pr-banner-audit-2026-09-02.md。率（76.4% / 66.8% / 174 / 203）は台帳と一致、**件数3つ（17日間・15件・67種）が古い**（台帳の現在値 23日・19件・81本）。3:2 は PR TIMES / OGP の 1.91:1 に中央トリミングされると**下段の実績4枚と上端の PRESS RELEASE が切れる**ことを描画で確かめた。ゲートは**人が 0/1 で埋める**（本レコードは planned のまま。値は入れていない）: G1 幅1536≥1200 は満たすが比率が要再生成、G2 は 08-22 の読み替えどおり見出しに Obsidian連携シンプルメモ（固有名詞）が在る、G3 PR TIMES、G4 木曜朝。**S6 の材料:** 09-02 差し替え後の見出し「…運営業務のAI実行率76.4%」には**ニュース動詞が無い**（旧案「実現」で 4/5 を付けた）。「…AI実行率76.4%を公開」なら動詞が戻る。**再採点は人。ここでは点を動かしていない。****実スコアは動かさない判断:** 到達可能32件のうち今日この環境で完遂できる行は0件（docs/reaching-85-audit-2026-08-28 と同じ結論。唯一の候補 ⑦契約・請求・納品・支払いの照合は api 側の実装＋本番で1周が要り verification_pending 止まり）。配信前に台帳を動かすとバナーの率が全部ずれるので、配信まで凍結する。",
+        "2026-09-02 夕【見出しに動詞】オーナー承認で見出し末尾に「を公開」を足した（「…運営業務のAI実行率76.4%を公開」・50字）。S6 の再採点は人が行う。あわせて data/distribution-queue.json に配信の種（/autopilot/・1行回答・X投稿文）を登録し、配信当日の同時投下を定期配信の経路が拾える形にした。",
+        "2026-09-02 夜【サブタイトル網羅版・オーナー承認】AIが実行している領域を claim で裏の取れる範囲で列挙（計測・監視／QA／SEO・ASO／PR制作・配信準備／問い合わせの定型回答／レビュー返信／AI実費の上限管理／残高・法定期限・契約の監視）し、末尾を「AGI時代に向けて、運営から経営までAIが日々回し、人は公開・価格・広告・予算・契約の境界だけを持つ会社へ」に。オーナー案の「90%超を目指す」「完全AI自動駆動」「日本初のAIカンパニー」は不採用: 前者2つは本文の「95%は永久に達成できない」（境界を渡さずに届く上限 82.9%）と権限表に矛盾、後者は根拠が出せず G2 の趣旨（AI語・煽り語）にも当たる。タイトルは据え置き（AI前面タイトルの 8/3 が n=5 最下位）。"
       ],
       "control": {
         "kind": "none",
@@ -1844,6 +1847,202 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "受け側4本のいずれかで title / description が変わった → **表示回数の変化をこの実験の効果と読まない**"
+      ]
+    },
+    {
+      "id": "selector-hub-2026-09-02-001",
+      "page": "/blog/free-memo-apps-ranking",
+      "type": "selector_hub",
+      "hypothesis": "サイト最大表示ページ（3,048imp/週・CTR 0.62%・順位9.5）を『直接売るページ』から『適合ユーザーを選別するハブ』へ。ファーストビューに開発者の情報開示（iPhone専用・テキスト専用・無料1日3通）と3問の分岐（Android/PC→Keep・Simplenote、多機能→Apple純正、最速→1位／Obsidian→/blog/obsidian-voice-input／画面を見ない→/apple-watch/・/siri/）、1位カード直後に文脈CTA（App Store＋Obsidian音声導線）を置く。低適合インストールを減らし、Store遷移1件あたりの活性・継続を上げる。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-03",
+      "status": "running",
+      "before": {
+        "disclosure": false,
+        "selector": false,
+        "cta_placements": {
+          "nav": 2,
+          "mid": 1,
+          "bottom": 1
+        },
+        "note": "開発者である旨の開示が無く、弱点（Android非対応・画像非対応・無料枠）は本文に散在。最初のApp Store導線はFAQ後の mid（本文の約6割地点）で、1位カードの直後に導線が無かった。"
+      },
+      "after": {
+        "disclosure": true,
+        "selector": true,
+        "cta_placements": {
+          "nav": 2,
+          "hero": 1,
+          "mid": 2,
+          "bottom": 1
+        },
+        "note": "JA の1位直後CTAは tag-cta-placements が hero と判定（ct=jp__hero・このページで唯一）。EN 側は文書後半に置かれるため mid（既存FAQ後のENと同ラベル。GA4では page_path×placement で JA 側だけ分離できる）。title / description / next-step は触っていない。"
+      },
+      "baseline": {
+        "clicks": 19,
+        "impressions": 3048,
+        "ctr": 0.0062,
+        "position": 9.53,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery yurika-simplememo.searchconsole.searchdata_url_impression（2026-09-02 に直接照会。レポート§5の値と一致）",
+        "note": "日次 2.7クリック/日・435表示/日。比較は日次で行う。"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-09-02: **主指標は GSC の CTR ではない。**分岐リンクのクリックと App Store outbound（GA4: page_path=/blog/free-memo-apps-ranking × data-cta-placement=hero）、その先の CPP（free-memo-generic・ppid 未記入）のDL。GSC は順位が実験と無関係に動いていないかのガードレール。",
+        "2026-09-02: title / description は据え置き。snippet-2026-08-09-free-memo-ranking（09-13評価）の窓に被るため。dateModified と最終更新は内容が増えたので 2026-09-02 へ動かした。",
+        "2026-09-02: レポートは『無料メモアプリおすすめ10選【2026年9月】…用途別に比較』への改題を提案しているが、**本文が並べているのは TOP5 で、10選の実体が無い**（用途別5件も同じ5本）。改題は 09-13 の評価時に、10本に増やすか『5選』へ正すかと一緒に決める。",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-A。実装は同§16。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "ホールドアウトなし。情報開示・分岐・CTAを同時に入れたので、どれが効いたかは分離できない。分離できないことを承知で1回の変更として記録する。",
+        "confounders": "cta-2026-08-10-mid-placement / cta-2026-08-10-desktop-qr / snippet-2026-08-09-free-memo-ranking が同ページで走行中（いずれも 09-13 評価）。placement=hero は本実験のみが持つラベルなので、mid の実験は hero を除いて読む。"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 80,
+        "rationale": "基準 2.7クリック/日 × 評価窓31日 ≒ 84。**80 に届かなければ結論を出さない。**分岐リンクのクリックは GA4 側で同じ窓・同じ下限（80セッション相当）で読む。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず次サイクルへ持ち越す（『効果なし』と書かない）",
+        "順位が 9.5 → 12 より悪化し、同期間のサイト全体の順位が動いていない → 分岐セクションが本文を押し下げたと疑い、セクションを FAQ 後へ移して再開",
+        "1〜2星レビューまたは返金率が同期間の基準を超えた → 『低適合を減らす』の逆が起きているので中断して記録",
+        "title / description が 09-13 の評価で変わった → 変更後の期間だけを別に読む（混ぜない）"
+      ]
+    },
+    {
+      "id": "cta-placement-2026-09-02-002",
+      "page": "/blog/line-keep-alternative",
+      "type": "cta_placement",
+      "hypothesis": "確認型クエリの読者（『終了したか』『Keepメモは使えるか』『保存先』）に冒頭4行で即答して『残したいもの別』に分岐し、比較表の直後（検討のピーク）に文脈CTA（CPP line-keep-alternative 付き）を置くと、到着後の Store 転換が上がる。検索 CTR は狙わない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-03",
+      "status": "running",
+      "before": {
+        "answer_block": false,
+        "cta_placements": {
+          "nav": 2,
+          "bottom": 1
+        },
+        "note": "TL;DR は終了事実とシンプルメモ推しを述べるが『Keepメモは続いている』は本文中盤（なぜ終了したのか）まで出てこない。本文中の App Store 導線はナビと末尾のみで、比較表（本文の約半分）の直後に転換点が無かった。"
+      },
+      "after": {
+        "answer_block": true,
+        "cta_placements": {
+          "nav": 2,
+          "mid": 1,
+          "bottom": 1
+        },
+        "note": "冒頭に『まず答え』ブロック（終了/継続の即答＋写真・ファイル→Apple純正/Keep、テキスト即時→シンプルメモ、LINE内→Keepメモ）、比較表の脚注直後に CTA（ct=jp__mid / en__mid・ppid=0253a7f9…）。title / description / FAQ は触っていない。"
+      },
+      "baseline": {
+        "clicks": 13,
+        "impressions": 1706,
+        "ctr": 0.0076,
+        "position": 6.63,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery yurika-simplememo.searchconsole.searchdata_url_impression（2026-09-02 に直接照会。レポート§5の値と一致）",
+        "note": "日次 1.9クリック/日・244表示/日。"
+      },
+      "target_metric": "ctr",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-09-02: **タイトルは動かしていない。**title-2026-07-01-002 は abandoned、SEO_AIO_PLAN_2026-08 §6 と GROWTH_ROI_PLAN §6 は『4度目のCTR改善はやらない』と明記している。レポート（GROWTH_LTV_ENGAGEMENT §6 P0-B）の初期目標 CTR 0.76→1.10% は採らず、読むのは Store 転換（GA4 outbound placement=mid、ASC CPP line-keep-alternative の DL）。",
+        "2026-09-02: faq-2026-08-09-line-keep-doko（09-13評価）と同ページ。冒頭ブロックは『どこ』意図にも答えるため、FAQ実験の CTR 変化を単独の効果と読まない。",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-B。実装は同§16。"
+      ],
+      "control": {
+        "kind": "pre_post",
+        "note": "ホールドアウトなし。冒頭ブロックと表直後CTAを同時に入れた。",
+        "confounders": "faq-2026-08-09-line-keep-doko が同ページで走行中（09-13評価）。"
+      },
+      "min_sample": {
+        "metric": "clicks",
+        "threshold": 50,
+        "rationale": "基準 1.9クリック/日 × 31日 ≒ 58。50 に届かなければ Store 転換の差は読まない（分母が小さすぎる）。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 結論を出さず持ち越す",
+        "順位が 6.6 → 9 より悪化し、サイト全体は動いていない → 冒頭ブロックが本文の答えを先食いしたと疑い、ブロックを比較表直前へ移して再開",
+        "CPP line-keep-alternative の DL がゼロのまま評価日を迎える → CPP 側（ASC）の集計閾値（初回DL 5件）未達として『効果なし』とは書かない"
+      ]
+    },
+    {
+      "id": "internal-link-2026-09-02-003",
+      "page": "(6 pages: /blog/obsidian-voice-input, /obsidian/, /obsidian/pricing/, /obsidian/plugins/, /obsidian/sync/, /obsidian/what-is-vault/)",
+      "type": "internal_link",
+      "hypothesis": "Obsidianクラスタは新規記事の量産より役割整理が先。勝ちページに入口別の分岐、子ページに『声で残す最短方法』への導線、ハブに未リンクの /obsidian/plugins/ を足すと、ハブの順位（11.8）と子→勝ちページの内部遷移が上がる。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": "2026-09-02",
+      "evaluation_at": "2026-10-12",
+      "status": "running",
+      "before": {
+        "voice_input_entry_links": {
+          "apple-watch-obsidian": 1,
+          "siri": 0,
+          "fastest-voice-memo": 0,
+          "hands-free": 0
+        },
+        "child_pages_linking_voice_input": 1,
+        "hub_links_plugins": false,
+        "note": "子ページ pricing/plugins/sync/what-is-vault のうち /blog/obsidian-voice-input へ本文リンクを持つのは getting-started だけ。ハブ /obsidian/ の関連ページに /obsidian/plugins/（64imp/7clk/CTR 10.9%）が無かった。"
+      },
+      "after": {
+        "voice_input_entry_links": {
+          "apple-watch-obsidian": 2,
+          "siri": 1,
+          "fastest-voice-memo": 1,
+          "hands-free": 1
+        },
+        "child_pages_linking_voice_input": 5,
+        "hub_links_plugins": true,
+        "note": "子ページの導線は回答ブロック（AIO）の直下に1本。title / description / next-step は触っていない。"
+      },
+      "baseline": {
+        "clicks": 9,
+        "impressions": 359,
+        "ctr": 0.0251,
+        "position": 11.81,
+        "window": "2026-08-23..2026-08-29 (7d)",
+        "source": "BigQuery searchdata_url_impression の /obsidian/ の値（2026-09-02 に直接照会）",
+        "note": "/obsidian/plugins/ 64imp/7clk、/obsidian/sync/ 49imp/4clk、/blog/obsidian-voice-input 170imp/15clk（同窓）。"
+      },
+      "target_metric": "position",
+      "decision": null,
+      "evaluated_at": null,
+      "notes": [
+        "2026-09-02: link-2026-08-28-feed-strongest-page（10-12評価）と同じ窓に揃えた。あちらは『大表示ページ→勝ちページ』の被リンク、こちらは『クラスタ内部の役割』。勝ちページの表示回数の変化はどちらの効果とも分離できないので、**表示回数はあちらに帰属させ、こちらはハブの順位と子ページからの内部遷移だけを読む。**",
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-C / P1。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "ホールドアウトなし。6ページ同時変更で、どのリンクが効いたかは分離できない。",
+        "confounders": "link-2026-08-28-feed-strongest-page / monitor-2026-08-09-obsidian-ctr が同クラスタで走行中。"
+      },
+      "min_sample": {
+        "metric": "impressions",
+        "threshold": 1500,
+        "rationale": "/obsidian/ の基準 51表示/日 × 41日 ≒ 2,100。1,500 に届かなければ順位差を読まない。"
+      },
+      "stop_conditions": [
+        "評価日までに min_sample に届かない → 持ち越す",
+        "ハブまたは子ページの title が変わった → その後の期間を別に読む",
+        "子ページ→voice-input の内部遷移が GA4 で計測できていないと分かった（page_referrer が取れない等）→ 順位だけで判定し、遷移の欄は『測れなかった』と書く"
       ]
     }
   ]
