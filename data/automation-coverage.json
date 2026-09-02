@@ -134,7 +134,7 @@
       ],
       "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人",
       "blocker": "external_data",
-      "unblocked_by": "継続率がリポジトリに無い（BigQuery/ASC側）。降りれば evidence_strength を機械が導出できる",
+      "unblocked_by": "**[2026-09-02 実測] 「BigQuery の28日蓄積待ち」は、この行に対しては成立しない。**\n\nBigQuery を直接叩いて中身を数えた（project `yurika-simplememo`）:\n\n    データセット   `searchconsole` **1つだけ**\n    テーブル       ExportLog / searchdata_site_impression / searchdata_url_impression\n    列             data_date / site_url / query / country / search_type / device /\n                   impressions / clicks / sum_top_position\n\n**継続率も install も user も無い。**Search Console は検索の露出とクリックであって、**アプリの継続率は原理的に出てこない。**28日たまっても、たまるのは検索データ。\n\nASC 側も見た —— Analytics Reports **156本に cohort / retention のレポートは無い**（retention を名前に含むのは `Retention Messaging` の1本だけで、これはメッセージング機能の指標）。**検索語のときと同じ形** —— カタログに無いものを『降りてくる待ち』に置いていた。\n\n**したがって 2026-09-06 が来ても、この行は動かない。**待ち先を書き直すまで、`--plan` はこの2件を『待つだけ +2』の先頭に置き続ける。\n\n**どこから取るかは未決。**候補は Firebase（③のデータ連携が `external_credential` で止まっている）と ASC の Web UI（Analytics の画面には継続率がある。ただし API 面には無い）。**決まっていないので「Firebase 待ち」とも書かない** —— 同じ誤りを別の相手で繰り返さない。",
       "unlock": "bq_28d",
       "blocked_on": [
         {
@@ -197,7 +197,7 @@
       ],
       "note": "D28はBQ蓄積28日到達待ち（9/6前後）",
       "blocker": "external_data",
-      "unblocked_by": "BigQuery の28日蓄積待ち（9/6前後）",
+      "unblocked_by": "**[2026-09-02 実測] 「BigQuery の28日蓄積待ち」は、この行に対しては成立しない。**\n\nBigQuery を直接叩いて中身を数えた（project `yurika-simplememo`）:\n\n    データセット   `searchconsole` **1つだけ**\n    テーブル       ExportLog / searchdata_site_impression / searchdata_url_impression\n    列             data_date / site_url / query / country / search_type / device /\n                   impressions / clicks / sum_top_position\n\n**継続率も install も user も無い。**Search Console は検索の露出とクリックであって、**アプリの継続率は原理的に出てこない。**28日たまっても、たまるのは検索データ。\n\nASC 側も見た —— Analytics Reports **156本に cohort / retention のレポートは無い**（retention を名前に含むのは `Retention Messaging` の1本だけで、これはメッセージング機能の指標）。**検索語のときと同じ形** —— カタログに無いものを『降りてくる待ち』に置いていた。\n\n**したがって 2026-09-06 が来ても、この行は動かない。**待ち先を書き直すまで、`--plan` はこの2件を『待つだけ +2』の先頭に置き続ける。\n\n**どこから取るかは未決。**候補は Firebase（③のデータ連携が `external_credential` で止まっている）と ASC の Web UI（Analytics の画面には継続率がある。ただし API 面には無い）。**決まっていないので「Firebase 待ち」とも書かない** —— 同じ誤りを別の相手で繰り返さない。",
       "unlock": "bq_28d",
       "blocked_on": [
         {
