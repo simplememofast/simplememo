@@ -2608,3 +2608,48 @@ seo-daily run 33569372663 の Export preflight ログから読んだ（Runbook �
 2026-08-25 に理由つきで決まっている（`act-gh-pat-scope-and-rotation`）。
 
 coverage-queue の pending は26件。故障が片付いた日はレーンEへ戻れる。
+
+---
+
+## 2026-09-03 — 配線（引き継いだパッチを、bash に当てずに .yml から judgment を出した）
+
+- **判断根拠:** 前日（09-02）の記録が、`isAbandonedClaim()` の bash 版パッチを
+  「次に走る副系CCRセッションは、以下をそのまま `git apply` すること」として残していた。
+  **当てなかった。**当てると、同じ判定が `scripts/autopilot-gate.mjs` と `.yml` の
+  bash に二重に在る状態が続く —— そして**その二重化こそが、09-02 に片方だけ直った原因**だった。
+  パッチは捨てていない。**中身（3条件・90分・読めなければ引き継がない）はそのまま
+  `--preflight` に入っており、実 API で同じ答えが出ることを確かめてある。**
+- **やったこと:**
+  - `scripts/autopilot-gate.mjs` に `--preflight` を足した。材料を集めて `decide()` を
+    1回呼ぶだけで、判定そのものは今までどおり `decide()` が持つ。
+  - `.github/workflows/obsidian-autopilot.yml` の Gate から bash を消し、
+    **checkout を先に**して `node scripts/autopilot-gate.mjs --preflight` を呼ぶ形にした。
+    `takeover` はプロンプトの 0-1 として渡る（引き継いだパッチと同じ）。
+  - **権限は広げていない。**`workflow` scope は足していない（`act-gh-pat-scope-and-rotation`
+    の決定どおり）。広げたのは「AIが直せる範囲」だけで、以後この判定の修理は
+    `scripts/` への普通のPRで主系にも届く。
+- **PR:** （このコミットの属するPR）
+- **検証:**
+  - **実 API で4通り**（`preflight()` を直接呼んだ）:
+
+    | 対象 | 判定 |
+    |---|---|
+    | `claude/obsidian-auto-20260829`（事故の当日・差分0/PR0/7127分） | **`run_takeover`** |
+    | `claude/obsidian-auto-20260902`（作業のある占有） | `skip_branch_claimed` |
+    | `claude/obsidian-auto-20260903`（本日・作業中） | `skip_branch_claimed` |
+    | 存在しない当日ブランチ | `run` |
+    | 壊れたトークン／届かないリポジトリ | **`fail_api`** |
+
+    最後の1行が bash 版に無かったもの。**compare の 404 は「ブランチが無い」と
+    「リポジトリに届いていない」の両方で返る。**先に `/repos/{repo}` が 200 かを見て
+    分けている —— 分けないと、鍵が失効した日に毎回「当日分は無い」と判定して走る。
+  - `property-tests` に材料の読み方の不変条件を4件と生成器の被覆2件。
+    **変異2件で空虚でないことを確かめた**（`ageMinutes` が null の代わりに 0 を返す／
+    欠けた配列を空配列に倒す）。後者は最初この性質を素通りしていた ——
+    **読み手が入力を書き換えると、自分の誤りを性質から隠せる。**
+    応答の形を `readClaim` を呼ぶ前に確定させる形に直して捕まえた。
+  - `scripts/preflight.mjs`: **120本中1本失敗。**落ちたのは `check-generators --run` で、
+    **親コミットでも同じ3件が落ちる**（`app-releases --write` と、日付で動く生成物2件）。
+    このPRの中身とは無関係。
+- **保留・オーナー依頼:** 無し。**この配線は本番でまだ1回も走っていない。**
+  最初の実走は明日 06:00 JST の主系。

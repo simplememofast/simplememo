@@ -163,8 +163,16 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
   **ブランチを消さない・force push しない。**弾かれたら他経路が復帰したという
   ことなので、何もせず終了する。判定の論理は `scripts/autopilot-gate.mjs` の
   `isAbandonedClaim()` が正で、ドリル（4シナリオ）と性質テスト（2不変条件＋
-  変異2件）が固定している。主系の Gate は同じ条件を bash で実装し、
-  `steps.gate.outputs.takeover` としてプロンプトへ渡す。
+  変異2件）が固定している。
+
+  **[2026-09-03] 主系も同じ関数を通るようになった。**それまでは同じ条件を
+  `.yml` の bash で二重に実装する形にしていたが、**その push は GitHub に
+  拒否される**（GH_PAT に `workflow` scope が無い。意図的に足していない）。
+  実際 09-02 の修正は Runbook を読む経路にしか届かず、**主系だけ旧判定のまま
+  残った。**そこで判定を `.yml` から出し、主系は checkout の後に
+  `node scripts/autopilot-gate.mjs --preflight` を呼ぶ。引き継ぎの可否は
+  今までどおり `steps.gate.outputs.takeover` としてプロンプトへ渡る。
+  **以後この判定の修理は `scripts/` への普通のPRで主系にも届く。**
 
 - Actions側の有効化にはオーナー作業が1つ要る: ローカルで `claude setup-token` を
   実行して出るトークンを repo secret **`CLAUDE_CODE_OAUTH_TOKEN`** に登録

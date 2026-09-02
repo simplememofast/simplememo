@@ -20,7 +20,7 @@
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decide, baseState, CODES } from './autopilot-gate.mjs';
+import { decide, baseState, CODES, readClaim, ageMinutes, isAbandonedClaim } from './autopilot-gate.mjs';
 import { summarize as summarizeBudget, validate as validateBudget } from './autopilot-budget.mjs';
 
 /** 決定論的な擬似乱数（xorshift32）。種を変えない限り毎回同じ列。 */
@@ -242,6 +242,90 @@ const BUDGET_PROPERTIES = [
 ];
 
 /**
+ * 材料の読み方の性質（2026-09-03）。
+ *
+ * **判定は decide() が守っている。守られていなかったのは、その手前の読み方。**
+ * 主系の Gate が bash だった間、`isAbandonedClaim()` に渡す材料は bash の
+ * `|| echo ""` と文字列比較で組み立てられていて、**読めなかったときに何が入るかを
+ * 誰も試していなかった。**判定を .yml の外へ出したので、材料の読み方も
+ * ここで固定する。
+ *
+ * いちばん効くのは1つ目 —— **読めなかった応答から引き継ぎが起きないこと。**
+ * ここが破れると、GitHub API が不調な日に全部の占有が「死んでいる」と読め、
+ * 2026-08-21 の二重着手を別の入口から作る。
+ */
+/**
+ * compare 応答が**丸ごと**読めているか。**readClaim を呼ぶ前に確定させる。**
+ * 呼んだ後に見ると、入力を書き換える読み手が自分の誤りを隠せる。
+ */
+function isWholeCompare(resp) {
+  if (!Array.isArray(resp?.files) || !Array.isArray(resp?.commits)) return false;
+  const iso = resp.commits[resp.commits.length - 1]?.commit?.committer?.date;
+  return typeof iso === 'string' && Number.isFinite(Date.parse(iso));
+}
+
+const MATERIAL_PROPERTIES = [
+  {
+    name: '**読めない compare 応答からは、絶対に引き継ぎが起きない**',
+    why: 'APIが不調な日に全占有が「死んでいる」と読めると、二重着手を別の入口から作る',
+    // **応答の形は readClaim を呼ぶ前に確定させる。**呼んだ後に見ると、
+    // 読み手が入力を書き換える実装（欠けた配列を空配列に倒す等）が
+    // **自分の誤りを性質から隠せてしまう。**実際その変異は最初この性質を素通りした。
+    check: (resp) => {
+      const readable = isWholeCompare(resp);
+      const c = readClaim(resp);
+      if (readable) return true; // 読めた回は対象外
+      return isAbandonedClaim({ branchClaimed: true, ...c }) === false;
+    },
+  },
+  {
+    name: '差分が1つでもあれば claimHasWork は真（作業のある占有を追い越さない）',
+    why: '「claim コミットしか無い」を判定するのは files の数だけで、そこは真偽が反転しやすい',
+    check: (resp) => {
+      const hadArrays = Array.isArray(resp?.files) && Array.isArray(resp?.commits);
+      const nFiles = Array.isArray(resp?.files) ? resp.files.length : null;
+      const c = readClaim(resp);
+      if (!hadArrays) return c.claimHasWork === null;
+      return c.claimHasWork === (nFiles > 0);
+    },
+  },
+  {
+    name: '経過分は「読めた日付」からしか出ない（分からないを 0 にしない）',
+    why: '0 分は「たったいま動いた」で、追い越さない側。null との取り違えは逆向きに効く',
+    // **readClaim は応答が丸ごと読めたときだけ数を返す。**files だけ・commits だけ、
+    // といった片肺の応答は「読めなかった」に倒す —— 片方から他方を推定しない。
+    check: (resp) => {
+      const readable = isWholeCompare(resp);
+      const c = readClaim(resp);
+      return readable ? typeof c.claimAgeMinutes === 'number' : c.claimAgeMinutes === null;
+    },
+  },
+  {
+    name: 'ageMinutes は壊れた入力で必ず null',
+    why: 'NaN を数値として通すと、90分の比較が静かに false になり引き継ぎが永久に起きない',
+    check: () => [null, undefined, '', 'きのう', '2026-13-45T99:99:99Z', 42, {}]
+      .every((x) => ageMinutes(x) === null),
+  },
+];
+
+/** compare 応答の生成器。**「読めなかった」形を意図的に多く作る。** */
+function genCompare(r) {
+  const shape = pick(r, ['ok', 'no-files', 'no-commits', 'empty-commits', 'bad-date', 'null', 'partial']);
+  const date = new Date(Date.now() - Math.floor(r() * 10000) * 60000).toISOString();
+  const commits = [{ commit: { committer: { date } } }];
+  const files = Array.from({ length: Math.floor(r() * 3) }, () => ({ filename: 'x' }));
+  switch (shape) {
+    case 'ok': return { files, commits };
+    case 'no-files': return { commits };
+    case 'no-commits': return { files };
+    case 'empty-commits': return { files, commits: [] };
+    case 'bad-date': return { files, commits: [{ commit: { committer: { date: 'きのう' } } }] };
+    case 'partial': return { files, commits: [{ commit: {} }] };
+    default: return null;
+  }
+}
+
+/**
  * 生成器の被覆。**性質テストが黙って無力になる一つ目の道**を塞ぐ。
  *
  * `if (!s.budgetOver) return true;` のような番人つきの性質は、生成器がその
@@ -308,6 +392,30 @@ export function run({ cases = 400, seed = 20260822, decider = decide, gen = rand
     }
   }
 
+  // 材料の読み方。**生成器は「読めなかった」形を7通りのうち5通りで作る。**
+  const rm = rng(seed + 2);
+  const materialSample = Array.from({ length: cases }, () => genCompare(rm));
+  for (const p of MATERIAL_PROPERTIES) {
+    for (const resp of materialSample) {
+      let ok = false, err = null;
+      try { ok = p.check(resp); } catch (e) { err = e.message; }
+      if (!ok) { failures.push({ property: p.name, why: p.why, input: resp, err }); break; }
+    }
+  }
+  // 生成器が「読めた形」と「読めない形」を両方作っていること。**片方だけなら空虚。**
+  for (const [label, pred] of [
+    ['読めた compare', (x) => Array.isArray(x?.files) && x?.commits?.at?.(-1)?.commit?.committer?.date],
+    ['読めない compare', (x) => !(Array.isArray(x?.files) && x?.commits?.at?.(-1)?.commit?.committer?.date)],
+  ]) {
+    if (materialSample.filter(pred).length < MIN_HITS) {
+      failures.push({
+        property: `生成器が「${label}」を作る`,
+        why: '片方しか作らないと、材料の読み方の性質は空虚に通る',
+        input: { cases, 意味: '**この前提を持つ性質は空虚に通っている**' },
+      });
+    }
+  }
+
   // 予算側は「作った台帳」で回す。実データ1件では性質が試されないため。
   const rb = rng(seed + 1);
   const KINDS = ['article', 'repair', 'analysis', 'pr', 'qa_triage', 'unknown-kind', undefined];
@@ -348,8 +456,8 @@ export function run({ cases = 400, seed = 20260822, decider = decide, gen = rand
   }
 
   return {
-    total: PROPERTIES.length + BUDGET_PROPERTIES.length
-      + REQUIRED_COVERAGE.length + BROKEN_LEDGERS.length,
+    total: PROPERTIES.length + BUDGET_PROPERTIES.length + MATERIAL_PROPERTIES.length
+      + REQUIRED_COVERAGE.length + BROKEN_LEDGERS.length + 2,
     failures, cases, seed,
   };
 }
@@ -457,7 +565,12 @@ if (isMain) {
   }));
   // **数えたものは全部並べる。**総数だけ増やして行を出さないと、
   // 落ちたときに「27 / 28」とだけ出てどれか分からない。
-  for (const p of [...PROPERTIES, ...BUDGET_PROPERTIES, ...COVERAGE_ROWS, ...BROKEN_ROWS]) {
+  const MATERIAL_COVERAGE_ROWS = [
+    ['読めた compare', '片方しか作らないと、材料の読み方の性質は空虚に通る'],
+    ['読めない compare', '片方しか作らないと、材料の読み方の性質は空虚に通る'],
+  ].map(([label, why]) => ({ name: `生成器が「${label}」を作る`, why }));
+  for (const p of [...PROPERTIES, ...BUDGET_PROPERTIES, ...MATERIAL_PROPERTIES,
+    ...COVERAGE_ROWS, ...MATERIAL_COVERAGE_ROWS, ...BROKEN_ROWS]) {
     const f = failures.find((x) => x.property === p.name);
     console.log(`  ${f ? 'FAIL' : 'OK  '}  ${p.name}`);
     console.log(`        ${p.why}`);
