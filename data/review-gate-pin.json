@@ -26,10 +26,10 @@
     "変わったのが判断に効く変更なのかを読んでから書くこと。"
   ],
   "entry": "scripts/check-review-replies.mjs",
-  "reviewed_at": "2026-08-27",
-  "reviewed_note": "初回の実運転（run 33028844739）を受けて表示を直した回。**この鳴子が自分の変更で鳴った初回でもある** —— 足した次のコミットで check-review-replies.mjs を直し、PRの前に指紋のずれを知らせてきた。判断そのもの（evaluateAutoPost / planAutoPost）は #659 から変わっていない",
+  "reviewed_at": "2026-09-02",
+  "reviewed_note": "**[2026-09-02] check-pr-facts.mjs に規則 stale-launch-time-split を足した回。**トップページの数値ブロック（`<div>約1<span>秒</span></div>` ＋ 別要素のラベル）が既存の stale-launch-time を素通りしていたため、改行を跨ぐ形を見る規則を追加した。\n\n**読んだ差分と、返信への影響:** 変更は RULES への1件追加のみで、evaluateAutoPost / planAutoPost / 承認境界には触れていない。checkText の違反は check-review-replies.mjs で problems になり、**投稿を止める方向にしか効かない** —— この規則が増えて起こりうるのは「返信が保留になる」であって、「通らなかったものが通る」ではない。レビュー返信は素の文なので分割の形は出にくいが、行が折り返された返信で誤った起動時間を書けば止まる。\n\n前回（2026-08-27）は初回の実運転を受けて表示を直した回。判断そのものは #659 から変わっていない",
   "files": {
-    "scripts/check-pr-facts.mjs": "bc877ea8782e",
+    "scripts/check-pr-facts.mjs": "e864770e9e3d",
     "scripts/check-review-replies.mjs": "d9a2f393081d",
     "scripts/lib/read-ledger.mjs": "a6e0cdd4c945"
   }

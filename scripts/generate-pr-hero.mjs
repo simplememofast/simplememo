@@ -29,7 +29,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { WIDTH, HEIGHT, LEAD_MAX_GLYPHS, splitHeadline, buildHTML } from './pr-hero-layout.mjs';
+import { WIDTH, HEIGHT, LEAD_MAX_GLYPHS, heroLines, buildHTML } from './pr-hero-layout.mjs';
 import { evaluate } from './check-pr-claims.mjs';
 import { readJSON } from './lib/read-json.mjs';
 
@@ -63,7 +63,7 @@ if (isMain) {
 
   // nowrap で組むので、長すぎる見出しは**黙って切れる**。切れた画像が
   // そのまま配信されるのが最悪なので、生成前に落とす。
-  const { lead } = splitHeadline(claimsDoc.headline);
+  const { lead, rest } = heroLines(claimsDoc);
   if (lead.length + 2 > LEAD_MAX_GLYPHS) {
     console.error(`見出しの「」内が長すぎます: ${lead.length + 2}字（上限 ${LEAD_MAX_GLYPHS}字）`);
     console.error(`  「${lead}」— このままだと画像で切れます`);
@@ -71,7 +71,8 @@ if (isMain) {
   }
 
   const html = buildHTML({
-    headline: claimsDoc.headline,
+    lead,
+    rest,
     subhead: claimsDoc.subhead,
     appName: constants.appNameJa,
     draft: unsupported.length > 0,

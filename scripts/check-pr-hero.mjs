@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LEAD_MAX_GLYPHS, splitHeadline, buildHTML, WIDTH, HEIGHT } from './pr-hero-layout.mjs';
+import { LEAD_MAX_GLYPHS, splitHeadline, heroLines, buildHTML, WIDTH, HEIGHT } from './pr-hero-layout.mjs';
 import { evaluate } from './check-pr-claims.mjs';
 import { readJSON } from './lib/read-json.mjs';
 
@@ -53,9 +53,26 @@ const SCENARIOS = [
   }],
   ['実データが検査を通る', () => {
     const doc = readJSON(ROOT, 'data/pr-claims.json');
-    const { lead, rest } = splitHeadline(doc.headline);
-    if (lead.length + 2 > LEAD_MAX_GLYPHS) throw new Error('実データの見出しが長い');
+    const { lead, rest } = heroLines(doc);
+    if (lead.length + 2 > LEAD_MAX_GLYPHS) throw new Error('実データの画像1行目が長い');
     if (!rest.length) throw new Error('実データの rest が空');
+  }],
+  // [2026-09-02] 見出しと画像の切り離しを固定する。**ここが効かなくなると、
+  // 見出しを変えた日に画像が黙って切れる**（9/3 配信稿でその形を踏んだ:
+  // 「」で始まらない見出しの全61字が lead と読まれ、CI が落ちて初めて分かった）。
+  ['**hero が在れば見出しではなくそちらを使う**', () => {
+    const doc = { headline: '「かぎかっこ付き」の見出し', hero: { lead: 'ヒーロー側', rest: '続き' } };
+    const { lead, rest } = heroLines(doc);
+    if (lead !== 'ヒーロー側' || rest !== '続き') throw new Error('hero が優先されていない');
+  }],
+  ['**hero が無ければ従来どおり見出しから切り出す**（既存の運用を変えない）', () => {
+    const { lead, rest } = heroLines({ headline: '「短い」あとの訴求' });
+    if (lead !== '短い' || rest !== 'あとの訴求') throw new Error('従来の切り出しが壊れている');
+  }],
+  ['**hero.lead が長すぎれば検出できる**（budget を素通りさせない）', () => {
+    const doc = { headline: 'x', hero: { lead: 'あ'.repeat(LEAD_MAX_GLYPHS + 5), rest: 'y' } };
+    const { lead } = heroLines(doc);
+    if (lead.length + 2 <= LEAD_MAX_GLYPHS) throw new Error('長すぎる1行目を長いと判定できていない');
   }],
 ];
 
@@ -76,10 +93,11 @@ const check = (ok, msg) => { console.log(`  ${ok ? 'OK  ' : 'NG  '} ${msg}`); if
 
 console.log('ヒーロー画像の前提条件\n');
 
-const { lead, rest } = splitHeadline(claimsDoc.headline);
+const { lead, rest } = heroLines(claimsDoc);
+const heroSrc = claimsDoc.hero?.lead ? 'hero' : '見出しから切り出し';
 check(lead.length + 2 <= LEAD_MAX_GLYPHS,
-      `見出しの「」内が1行に収まる（${lead.length + 2}/${LEAD_MAX_GLYPHS}字）`);
-check(rest.length > 0, '「」の後ろに社名・訴求が続いている');
+      `画像の1行目が1行に収まる（${lead.length + 2}/${LEAD_MAX_GLYPHS}字・出所: ${heroSrc}）`);
+check(rest.length > 0, '1行目の後ろに社名・訴求が続いている');
 check(claimsDoc.subhead.length > 0 && claimsDoc.subhead.length <= 200,
       `リード文が長すぎない（${claimsDoc.subhead.length}字）`);
 
@@ -91,8 +109,8 @@ console.log(`  --   この状態では ${unsupported.length ? 'DRAFT リボン�
 
 // 透かしの有無が主張の裏取りに連動していること。ここが切れると、
 // 裏取り未完の画像が完成品として流通する。
-const draftHTML = buildHTML({ headline: claimsDoc.headline, subhead: claimsDoc.subhead, appName: 'x', draft: true });
-const finalHTML = buildHTML({ headline: claimsDoc.headline, subhead: claimsDoc.subhead, appName: 'x', draft: false });
+const draftHTML = buildHTML({ lead, rest, subhead: claimsDoc.subhead, appName: 'x', draft: true });
+const finalHTML = buildHTML({ lead, rest, subhead: claimsDoc.subhead, appName: 'x', draft: false });
 // 文字列 'DRAFT' で探すと CSS のコメントに当たって常に真になる（実際に踏んだ）。
 // **要素があるかどうか**で見る。
 const RIBBON = '<div class="draft">';
