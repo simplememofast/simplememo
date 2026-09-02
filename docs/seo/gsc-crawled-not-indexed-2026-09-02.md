@@ -176,6 +176,8 @@ BigQuery の21日窓に `?` や `.html` を含むURLは **0件**（表示のあ�
 2. デプロイ後、URL検査ツールで次の4件を「インデックス登録をリクエスト」する
    （1日の上限は十数件なので1回で済む）:
    `/glossary/e2e-encryption/` `/glossary/timeboxing/` `/use-cases/meeting-notes/` `/vs/roam-research/`
+   → **2026-09-02 実施済み**（Cowork、被リンク元3件を含む計7件。検査時の前回クロール日は
+   `gsc-index-request-2026-09-02.md` §実施報告。`/glossary/timeboxing/` は 05/28 から未クロールだった）
 3. 2〜4週間後に `growth/data/gsc` の日次（BigQuery）で4件の表示を確認する。
    4件が戻り、上記の統合2件を決めた後であれば、検証を押す意味が出る
 4. 統合2件の判断（§オーナー判断事項）
