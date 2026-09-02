@@ -257,3 +257,19 @@ AppTweak（ASOの最大手）と AppsFlyer（計測の最大手）が既に出�
 - AppTweak（等級C） — https://www.prnewswire.com/news-releases/apptweak-launches-ai-agents-to-scale-aso-and-apple-ads-performance-302704511.html
 - AppsFlyer — https://www.appsflyer.com/products/agentic-ai/ai-agents-hub/
 - Mobvy — https://mobvy.app/
+
+---
+
+## 2026-09-02 追記 — 配信前日に14件を引き直した（結果は別文書）
+
+`pr-autopilot-2026-09-positioning-review.md` §1 に、2026年の先行例14件
+（OpenAI harness engineering / LogRocket / Warp / Fluent / Amplitude / Autensa / APDL /
+IBM Bob / Devin（日本） / Codens / Bakusoku.AI / Shopify Campaign Autopilot / GrowthLoop /
+サイバーエージェント）を一次ソースのURLつきで当て直した。**等級は本文書と同じB**
+（egress で一次ドメインの直接取得は不可。ドメイン限定検索のスニペットと GitHub の README）。
+
+持ち込まれた整理のうち**5件が一次ソースと食い違う**：Warp「週300PR超」（公表は「PRの20〜30%を自動化」）、
+GrowthLoop「15%」（出典なし。81%のみ確認）、Fluent／Autensa／APDL（企業ではなく個人・小規模OSS）。
+**ストア配布アプリを閉ループでAIが日常運営しリリース実績を公開している先行例は見つからなかった**が、
+InterWorks（2026-06-26）と Devin Auto-Triage が「検知→修正→PR→リリース」に近い。
+**「世界初」「唯一」は引き続き書かない。**
