@@ -438,6 +438,39 @@ export function handsOffStreaks(runs) {
     && !rows.some((r) => (r.interventions || []).length > 0));
 }
 
+/**
+ * **マージ済みの当日ブランチに台帳を積もうとしていないか。**
+ *
+ * 【なぜここで止めるか】取り残しコミットの41%（アクション台帳17/41行）は、
+ * 全部これ1つの形だった —— 記事のPRがマージされた**後**に、その日の run を
+ * 台帳へ書く。`outcome: shipped` も `pr: 774` もマージされるまで確定しないので、
+ * **順序としては正しい。**間違っているのは書く先で、閉じたPRのブランチに積むと
+ * 次の検証が拾う先が無く、そのまま取り残しになる（auto-merge は検証済みSHAだけを
+ * マージする設計の帰結であって、事故ではない）。
+ *
+ * 直し方は1行: **main から新しいブランチを切って、そこへ書く。**
+ * 散文で書いても順番に効かないので、書く側が拒否する形にした。
+ *
+ * 【**祖先判定だけでは1回も発火しない**】最初これを
+ * `git merge-base --is-ancestor HEAD origin/main` だけで書いた。**効かない。**
+ * auto-merge は `merge_method: 'squash'` なので、マージ済みのブランチは
+ * main の祖先にならない。実際 `claude/obsidian-auto-20260827` は
+ * 「main に無いコミットを1件持つ」状態で残っている。
+ * だから `delete-branch.yml` と同じ二段構えにする ——
+ * 祖先であるか、**そのブランチが変えたファイルが main と同じ内容か。**
+ *
+ * @param {string|null} branch  いまのブランチ名（取れなければ null）
+ * @param {object} facts
+ * @param {boolean|null} facts.ancestor     head が origin/main の祖先か（null=判定不能）
+ * @param {boolean|null} facts.sameContent  変えたファイルが main と同内容か（null=判定不能）
+ */
+export function refusesMergedDayBranch(branch, facts = {}) {
+  // **判定できないときは止めない。**git が無い環境・detached HEAD・fetch できない日に
+  // 台帳が書けなくなるほうが害が大きい（落ちた回ほど記録されない、を再現する）。
+  if (typeof branch !== 'string' || !/^claude\/obsidian-auto-\d{8}$/.test(branch)) return false;
+  return facts.ancestor === true || facts.sameContent === true;
+}
+
 export function summarize(doc, { since = null, costDoc = null, statusDoc = null, today = undefined } = {}) {
   let runs = doc.runs;
   if (since) runs = runs.filter((r) => r.date_jst >= since);
@@ -790,6 +823,24 @@ function selftest() {
   eq(activeStreaks(runsOf(['2026-08-11', 'shipped'], ['2026-08-12', 'no_run'])).current.days, 0,
      '最終記入日が無運転なら現在の連続は0');
 
+  // --- 書く先の拒否 — **取り残しの41%が1つの形だった** ---
+  const DAY = 'claude/obsidian-auto-20260827';
+  eq(refusesMergedDayBranch(DAY, { ancestor: true }), true,
+     'マージ済み（祖先）の当日ブランチには積ませない');
+  eq(refusesMergedDayBranch(DAY, { ancestor: false, sameContent: true }), true,
+     '**squash マージでも止める**（祖先判定だけだと1回も発火しない）');
+  eq(refusesMergedDayBranch(DAY, { ancestor: false, sameContent: false }), false,
+     'まだマージされていない当日ブランチには積んでよい（通常の出荷経路）');
+  eq(refusesMergedDayBranch(DAY, { ancestor: null, sameContent: null }), false,
+     '**判定できない日は止めない**（落ちた回ほど記録されない、を再現しない）');
+  eq(refusesMergedDayBranch(DAY, {}), false, '材料が無ければ止めない');
+  eq(refusesMergedDayBranch('claude/autopilot-act-20260903', { ancestor: true }), false,
+     '日次アクチュエータのブランチは対象外（別経路・別の作り方）');
+  eq(refusesMergedDayBranch('main', { ancestor: true }), false, 'main は当日ブランチではない');
+  eq(refusesMergedDayBranch(null, { ancestor: true }), false, 'ブランチ名が取れなければ止めない');
+  eq(refusesMergedDayBranch('claude/obsidian-auto-2026082', { ancestor: true }), false,
+     '日付の桁が違うものは当日ブランチと見なさない');
+
   // --- 連続出荷・無介入出荷 — **稼働より厳しいことを固定する** ---
   // 稼働と同じ値になったら、並べて出す意味が消える。境界を1つずつ当てる。
   const failing = runsOf(['2026-08-11', 'shipped'], ['2026-08-12', 'failed'], ['2026-08-13', 'failed']);
@@ -848,6 +899,44 @@ if (isMain) {
   }
 
   if (has('append')) {
+    // **書く先を間違えていたら、書く前に止める。**（refusesMergedDayBranch の理由）
+    if (!has('allow-merged-branch')) {
+      let branch = null;
+      const facts = { ancestor: null, sameContent: null };
+      try {
+        const { execFileSync } = await import('node:child_process');
+        const git = (...a) => execFileSync('git', a, { cwd: ROOT, encoding: 'utf8' }).trim();
+        branch = git('rev-parse', '--abbrev-ref', 'HEAD');
+        try {
+          execFileSync('git', ['merge-base', '--is-ancestor', 'HEAD', 'origin/main'],
+            { cwd: ROOT, stdio: 'ignore' });
+          facts.ancestor = true;
+        } catch (e) {
+          // 終了コード1は「祖先ではない」。それ以外（origin/main が無い等）は判定不能。
+          facts.ancestor = e.status === 1 ? false : null;
+        }
+        // squash マージは祖先にならないので、**変えたファイルの中身で見る**
+        // （delete-branch.yml と同じ判定）。差分ファイルが0の回は判定不能のまま
+        // ——claim コミットだけのブランチを「マージ済み」と読ませない。
+        if (facts.ancestor === false) {
+          const base = git('merge-base', 'origin/main', 'HEAD');
+          const files = git('diff', '--name-only', base, 'HEAD').split('\n').filter(Boolean);
+          if (files.length > 0) {
+            const drift = git('diff', '--name-only', 'HEAD', 'origin/main', '--', ...files);
+            facts.sameContent = drift === '';
+          }
+        }
+      } catch { /* git が無い・リポジトリでない → 判定不能のまま */ }
+      if (refusesMergedDayBranch(branch, facts)) {
+        console.error(`${branch} は既に main へ入っている。**ここに台帳を積むと取り残しになる。**`);
+        console.error('  閉じたPRのブランチへの push は次の検証が拾わない'
+          + '（auto-merge は検証済みSHAだけをマージする設計の帰結）。');
+        console.error('  main から切り直してから書くこと:');
+        console.error('    git fetch origin main && git checkout -B claude/autopilot-ledger-$(TZ=Asia/Tokyo date +%Y%m%d) origin/main');
+        console.error('  それでもここへ書く理由があるなら --allow-merged-branch（理由をPR本文に書くこと）。');
+        process.exit(1);
+      }
+    }
     const run = {
       run_id: val('run-id'), date_jst: val('date'), route: val('route'),
       attempted: val('attempted', 'true') === 'true',

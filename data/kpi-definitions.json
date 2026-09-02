@@ -44,8 +44,8 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 10,
-      "checksum": "7d79a4218dcb4839",
+      "version": 11,
+      "checksum": "2d89071a55a0758d",
       "changed_at": "2026-09-02",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
@@ -93,6 +93,11 @@
           "version": 10,
           "at": "2026-09-02",
           "why": "定義は変えていない。連続の歩き方を streakWalk() に切り出し、同じ台帳から連続出荷・無介入出荷の2本を導出できるようにした回。完走率の式（shipped / attempted）にも分母の扱いにも触れていない"
+        },
+        {
+          "version": 11,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。autopilot-runs.mjs に refusesMergedDayBranch()（書く先の拒否）を足した回で、完走率の式にも分母の扱いにも触れていない"
         }
       ]
     },
@@ -155,8 +160,8 @@
       "name": "ノイズフロア",
       "formula": "期待クリック3件未満は根拠にしない",
       "source_file": "docs/obsidian/AUTOPILOT_RUNBOOK.md",
-      "version": 25,
-      "checksum": "3ca572c086873cd3",
+      "version": 26,
+      "checksum": "a3aae28eaef3a55a",
       "changed_at": "2026-09-02",
       "why_it_matters": "この閾値が動くと、過去に『根拠が弱い』として見送った施策の判断が全部変わる",
       "history": [
@@ -279,6 +284,11 @@
           "version": 25,
           "at": "2026-09-02",
           "why": "定義は変えていない。Runbook §0-2 の「死んだ占有の引き継ぎ」に、主系も scripts/autopilot-gate.mjs の --preflight を通るようになった旨を追記した回。ノイズフロアの閾値も適用範囲も触っていない"
+        },
+        {
+          "version": 26,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。Runbook §5 に「マージ後に書く台帳は別ブランチへ」（§5-1b）を足した回。ノイズフロアの閾値も適用範囲も触っていない"
         }
       ]
     },
@@ -382,8 +392,8 @@
       "name": "連続稼働日数",
       "formula": "停止日 = no_run の行がある日（同じ日に主系の skipped_gate 行が並んでいても停止）。稼働日 = no_run の行が無く、行が1つでもある日。行の無い日は連続を切る。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 2,
-      "checksum": "7d79a4218dcb4839",
+      "version": 3,
+      "checksum": "2d89071a55a0758d",
       "changed_at": "2026-09-02",
       "why_it_matters": "08-27 に「16日間連続で稼働」を取り下げたが、次に「連続」と書くときの定義がどこにも無かった。定義を置いて数えると 2026-08-18 から16日（08-16・17 で一度切れている）。**skipped_gate を稼働と読むと23日連続が復活する**ので、no_run を日単位の判定として優先する側に固定した",
       "history": [
@@ -391,6 +401,11 @@
           "version": 2,
           "at": "2026-09-02",
           "why": "定義は変えていない。activeStreaks() の中身を共通の streakWalk() へ移しただけで、停止日・稼働日・行の無い日の扱いは同一（既存の自己テスト8ケースがそのまま通る）。稼働の定義が変わったのではなく、**隣に切れる2本が並んだ**"
+        },
+        {
+          "version": 3,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。同じファイルに書く先の拒否（refusesMergedDayBranch）を足したことによる checksum の移動"
         }
       ]
     },
@@ -399,22 +414,34 @@
       "name": "連続出荷日数",
       "formula": "出荷（outcome = shipped）の行がある日だけが続く。停止（no_run）・失敗・Gateスキップ・行の無い日はすべて連続を切る。同じ日にどれか1経路でも出荷していればその日は出荷日。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 1,
-      "checksum": "7d79a4218dcb4839",
+      "version": 2,
+      "checksum": "2d89071a55a0758d",
       "changed_at": "2026-09-02",
       "why_it_matters": "**連続稼働は、失敗し続けても伸びる。**主系が落ちて行が立った日は「記録がある日」なので稼働に数えるのが正しく、そこは変えていない。だが実際に 2026-09-02 時点の連続稼働 16 日は、**08-29〜08-31 の出荷ゼロ3日を丸ごとまたいでいる**（08-29 は副系が claim だけ取って死に、08-30・08-31 は主系・副系とも週次上限の 429）。稼働だけを公開面に出すと、その3日は読めない。切れる指標を隣に置く",
-      "history": []
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。同じファイルに書く先の拒否（refusesMergedDayBranch）を足したことによる checksum の移動"
+        }
+      ]
     },
     {
       "id": "hands_off_shipping_streak",
       "name": "無介入出荷の連続日数",
       "formula": "出荷の行があり、かつその日のどの行にも介入（interventions）が無い日だけが続く。出荷した経路が無介入でも、同じ日に別の行へ介入があれば切れる（日単位）。停止・失敗・行の無い日も切る",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 1,
-      "checksum": "7d79a4218dcb4839",
+      "version": 2,
+      "checksum": "2d89071a55a0758d",
       "changed_at": "2026-09-02",
       "why_it_matters": "率には天井がある —— 総合自動化率の到達可能上限は 82.9%（scripts/autonomy-gap.mjs）で、そこから先は物理・対人・観測不能で動かない。**時間には天井が無い。**「オーナーが何日触らずに済んだか」は伸ばし続けられる指標で、率が頭打ちになった後も自律性の前進を測れる。\n\n**出荷があることを条件に入れてある。**入れないと、壊れたまま誰も直しに行かない日が無介入として積み上がる（08-30・08-31 がその形）。触っていないのは自律していたからではないので、放置で伸びる自律指標にはしない",
-      "history": []
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。同じファイルに書く先の拒否（refusesMergedDayBranch）を足したことによる checksum の移動"
+        }
+      ]
     }
   ]
 }

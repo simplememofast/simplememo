@@ -670,6 +670,30 @@ python3 scripts/generate_sitemap.py --dry-run
 5. `send_later` で60分後の自己チェックを仕込む（マージ確認まで面倒を見る）
 6. `docs/obsidian/AUTOPILOT_LOG.md` に1エントリ追記（同じPRに含める）
 
+### 5-1b. マージ**後**に書く台帳は、別のブランチへ（2026-09-03）
+
+`outcome: shipped` も `pr: <番号>` も**マージされるまで確定しない。**だから
+運転台帳（`data/autopilot-runs.json`）を書くのはマージの後になる ——
+**順序としてはそれで正しい。**間違えやすいのは書く先で、
+**マージ済みの当日ブランチに積むと、そのまま取り残しになる。**
+PRは閉じているので次の検証が拾う先が無い（auto-merge が検証済みSHAだけを
+マージする設計の帰結であって、事故ではない）。
+
+**アクション台帳41件のうち17件（41%）が、この1つの形だった。**
+
+```bash
+git fetch origin main
+git checkout -B "claude/autopilot-ledger-$(TZ=Asia/Tokyo date +%Y%m%d)" origin/main
+# ここで台帳を書き、PRを出す
+```
+
+散文だけにしていない。`scripts/autopilot-runs.mjs --append` が、
+**マージ済みの当日ブランチ上では書く前に落ちる**（`refusesMergedDayBranch()`）。
+squash マージは main の祖先にならないので、祖先判定だけでなく
+「そのブランチが変えたファイルが main と同内容か」も見る（`delete-branch.yml` と同じ二段）。
+**判定できない日は止めない** —— git が読めない環境で台帳が書けなくなるほうが害が大きい。
+どうしてもそこへ書く理由があるときだけ `--allow-merged-branch`（理由をPR本文に書く）。
+
 ### 5-2. ステータスJSON（日報メールのデータ源・毎回必須）
 
 `data/autopilot-status.json` を**毎回**その日の内容で上書きし、同じPRに含める。
