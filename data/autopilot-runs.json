@@ -776,6 +776,22 @@
       "detected_note": "list_triggers の last_run を実見（PR #739 のセッション）。**last_run は最新1回しか保持しない**ので、08-30 の同経路は既に上書きされていて確かめられない"
     },
     {
+      "run_id": "ap-20260901-actions",
+      "date_jst": "2026-09-01",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 749,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "33454414490",
+      "interventions": [],
+      "source": "session",
+      "repair_note": "主系（Actions・run 33454414490・09:21→09:39 JST）がレーンFで PR #749「§0-3 の経路を限る」を出荷した回。**この行は 2026-09-02 の配信前日の引き直しで人が起こした。**AUTOPILOT_LOG 09-02 分が「09:00 の reconcile-runs が埋める見込み」と書いて手で足さなかったが、reconcile-runs は成功回を自動追記しない（PR 番号の特定が要るため。scripts/autopilot-act.mjs の handler に明記）ので、待っても埋まらなかった。**artifact は null** —— 公開ページを出していない回（レーンFの慣例）。同日の副系 ccr-0920 は 00:20:49Z に SUCCEEDED したが主系が当日ロックを先に取っていたためスキップ（70秒・$0.42、#749 の本文に記録）。"
+    },
+    {
       "run_id": "ap-20260902-actions",
       "date_jst": "2026-09-02",
       "route": "actions",
