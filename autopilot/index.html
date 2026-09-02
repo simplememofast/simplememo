@@ -58,7 +58,7 @@
 
   <!-- JSON-LD: WebPage + BreadcrumbList -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/autopilot/#webpage","inLanguage":"ja","name":"自律型アプリ運営の実測値 - Obsidian連携シンプルメモ","description":"AIがどこまで運営を実行し、どこから人間が判断しているか。運転台帳から出した実測値と、まだできていないことの一覧。","url":"https://simplememofast.com/autopilot/","datePublished":"2026-08-25","dateModified":"2026-08-25","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"自律型アプリ運営","item":"https://simplememofast.com/autopilot/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"},"about":{"@id":"https://simplememofast.com/#app"}}
+  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/autopilot/#webpage","inLanguage":"ja","name":"自律型アプリ運営の実測値 - Obsidian連携シンプルメモ","description":"AIがどこまで運営を実行し、どこから人間が判断しているか。運転台帳から出した実測値と、まだできていないことの一覧。","url":"https://simplememofast.com/autopilot/","datePublished":"2026-08-25","dateModified":"2026-09-02","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"自律型アプリ運営","item":"https://simplememofast.com/autopilot/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"},"about":{"@id":"https://simplememofast.com/#app"}}
   </script>
   <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
@@ -314,7 +314,7 @@
       <p class="ap-lead">
         載せている数字はすべて台帳から出しています。<b>推定値と、まだ測れていないものは、そうと書いてあります。</b>
       </p>
-      <p class="ap-stamp">最終更新 2026-08-25 ／ 計測期間 2026-08-11 〜 2026-08-25（15日・27実行）／ <b>この節の率は上記時点のスナップショットです。</b>台帳（§9）は生きているので、日々動きます</p>
+      <p class="ap-stamp">最終更新 2026-09-02 ／ 計測期間 2026-08-11 〜 2026-09-02（23日・41実行）／ <b>この節の率は上記時点のスナップショットです。</b>台帳（§9）は生きているので、日々動きます</p>
 
       <!-- 1. 1サイクル -->
       <section class="ap-sec">
@@ -324,7 +324,7 @@
           <li><b>観測</b><span>検索クエリの動き・サイトの実描画・実行台帳・費用・資格情報の期限を読む。前日までに解決していない不具合があれば、そこから拾う。</span></li>
           <li><b>起案</b><span>その日にやることを1件だけ選ぶ。手順書が「1セッション1アクション」と定めているため、まとめて複数は出さない。</span></li>
           <li><b>実装</b><span>ブランチを切って変更し、PRを出す。コード・記事・設定のどれであっても経路は同じ。</span></li>
-          <li><b>検証</b><span>CIが51種の検査を回す。<b>必須40本が通らない限りマージされない。</b>誇大表現の検査と、台帳の算数の検査もここに含まれる。</span></li>
+          <li><b>検証</b><span>CIが81種の検査を回す（全81本について「わざと壊すと落ちる」ことを実測済み）。<b>通らない限りマージされない。</b>誇大表現の検査と、台帳の算数の検査もここに含まれる。</span></li>
           <li><b>出荷</b><span>検証を通った時点のコミットだけがマージされる。マージ＝本番公開。<b>ただしこれはサイト側だけで、iOSアプリは別経路（§2）。</b></span></li>
           <li><b>計測</b><span>出荷したものを実行IDで台帳に1行書く。着手・結果・PR・介入・費用が同じ行に載る。</span></li>
           <li><b>次の判断へ戻す</b><span>失敗した回は失敗の種類ごと記録し、翌日以降の起案がそれを読む。<b>台帳が書かれなかった回を検知する検査も、あとから足している（§6）。</b></span></li>
@@ -347,7 +347,7 @@
         </table>
         </div>
         <p class="ap-note">
-          権限表は16領域あり、<b>そのうち12が稼働中・11が承認制</b>です。
+          権限表は19領域あり、<b>そのうち15が稼働中・10が承認制</b>です。
           可逆な操作はAIが単独で実行し、不可逆な操作は承認を挟みます。
           <b>CIが見ているのは「不可逆な領域が承認不要になっていないか」「稼働中の領域が根拠ファイルを指せているか」「金額が動く領域が上限を持っているか」の3点だけ</b>で、
           実際に人が承認したかどうかは機械では見られません。そこは表の側に書いてあります。
@@ -359,8 +359,8 @@
             <tr><td>サイトコンテンツの新設・更新</td><td>可逆</td><td>AIが単独で実行</td></tr>
             <tr><td>段階公開の<b>撤回</b>（不具合を検知して止める）</td><td>可逆</td><td>AIが単独で実行</td></tr>
             <tr><td>段階公開の<b>拡大</b>（配る割合を上げる）</td><td><b>不可逆</b></td><td>人間の承認</td></tr>
-            <tr><td>App Review への提出</td><td><b>不可逆</b></td><td>人間のみ（実機での事前確認も人間）</td></tr>
-            <tr><td>App Store への公開（審査通過後）</td><td><b>不可逆</b></td><td>人間のみ</td></tr>
+            <tr><td>App Review への提出</td><td><b>不可逆</b></td><td>機械ゲート（未稼働・実行側も未実装）。<b>実機での事前確認と、ゲートを有効にする操作は人間のみ</b></td></tr>
+            <tr><td>App Store への公開（審査通過後）</td><td><b>不可逆</b></td><td>機械ゲート（未稼働・実行側も未実装）。<b>一括公開の判断と、ゲートを有効にする操作は人間のみ</b></td></tr>
             <tr><td>価格・プラン・無料枠の変更</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（上限は未設定）</span></td></tr>
             <tr><td>広告出稿・広告予算の変更</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（未実装）</span></td></tr>
             <tr><td>契約・支払い・送金</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（未実装）</span></td></tr>
@@ -371,7 +371,7 @@
         </div>
         <p class="ap-note">
           同じ機能の「引っ込める」と「広げる」を別の領域に分けてあります。広げてから戻しても、見た人が見なかったことにはならないためです。
-          <b>ただしこの判定は本番でまだ一度も発火していません</b>（現在、段階公開中の機能がゼロのため）。
+          <b>ただし、この門を通って実行された昇格はまだ1件もありません。</b>段階公開中のフラグは1つ（tf04_progress）で、ガードは毎時判定を出していますが、判定に要る母数（各群30）に届かず hold のままです（2026-08-27 の実測 run 33076125334）。
         </p>
       </section>
 
@@ -379,13 +379,13 @@
       <section class="ap-sec">
         <h2>3. 実測 — 何回動き、何回人が入ったか</h2>
         <div class="ap-kpis">
-          <div class="ap-kpi"><div class="ap-kpi__v">70.6%</div><div class="ap-kpi__l">AI完走率<br>（着手17回のうち出荷12回）</div></div>
-          <div class="ap-kpi"><div class="ap-kpi__v">41.2%</div><div class="ap-kpi__l">人間介入率<br>（人が1回でも触った実行）</div></div>
-          <div class="ap-kpi"><div class="ap-kpi__v">0件</div><div class="ap-kpi__l">成果物への介入<br>（出荷12件の中身に人が触った回数）</div></div>
-          <div class="ap-kpi"><div class="ap-kpi__v">80.0%</div><div class="ap-kpi__l">出荷日率<br>（15日のうち何かが出た日）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">67.9%</div><div class="ap-kpi__l">AI完走率<br>（着手28回のうち出荷19回）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">25.0%</div><div class="ap-kpi__l">人間介入率<br>（人が1回でも触った実行）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">0件</div><div class="ap-kpi__l">成果物への介入<br>（出荷19件の中身に人が触った回数）</div></div>
+          <div class="ap-kpi"><div class="ap-kpi__v">73.9%</div><div class="ap-kpi__l">出荷日率<br>（23日のうち何かが出た日）</div></div>
         </div>
         <p>
-          <b>人間介入率41.2%をそのまま出します。</b>4割の実行に人が入っています。
+          <b>人間介入率25.0%をそのまま出します。</b>4回に1回の実行に人が入っています。
           ただしこの数字は「その実行に人が1回でも触ったか」を数えたもので、ワークフローの設定を1行直しただけの日も丸ごと介入ありになります。
           そこで介入を種類で分けています。
         </p>
@@ -394,20 +394,20 @@
           <thead><tr><th>介入の種類</th><th class="num">実行数</th><th class="num">割合</th></tr></thead>
           <tbody>
             <tr><td><b>成果物への介入</b>（人が記事を書いた・書き直した）</td><td class="num"><b>0</b></td><td class="num"><b>0.0%</b></td></tr>
-            <tr><td>実行基盤の修理（ワークフロー・手順書・スクリプト）</td><td class="num">4</td><td class="num">23.5%</td></tr>
-            <tr><td>代走（全経路が不発で人が代わりに実行）</td><td class="num">1</td><td class="num">5.9%</td></tr>
-            <tr><td>立ち上げ（初回に人が通しで実演・一度きり）</td><td class="num">1</td><td class="num">5.9%</td></tr>
-            <tr><td>起票のみ（人に依頼したが、結局やらずに済んだ）</td><td class="num">1</td><td class="num">5.9%</td></tr>
+            <tr><td>実行基盤の修理（ワークフロー・手順書・スクリプト）</td><td class="num">4</td><td class="num">14.3%</td></tr>
+            <tr><td>代走（全経路が不発で人が代わりに実行）</td><td class="num">1</td><td class="num">3.6%</td></tr>
+            <tr><td>立ち上げ（初回に人が通しで実演・一度きり）</td><td class="num">1</td><td class="num">3.6%</td></tr>
+            <tr><td>起票のみ（人に依頼したが、結局やらずに済んだ）</td><td class="num">1</td><td class="num">3.6%</td></tr>
           </tbody>
         </table>
         </div>
         <p class="ap-note">
-          出荷された12件は、すべてAIが書いています。実質的な介入は「基盤の修理」23.5%の一点で、その修理を書いたのもAIでした。
+          出荷された19件は、すべてAIが書いています。実質的な介入は「基盤の修理」14.3%の一点で、その修理を書いたのもAIでした。
           人間がやったのは、壊れていることに気づいて直せと言うことです。
         </p>
         <p class="ap-note">
-          <b>経路別では、主系2/7・副系（代走）10/10。</b>主系は定時起動のワークフローで、成果物ゼロで終わった回が続いています。
-          日々の出荷は副系が担っており、<b>二重化していなければ止まっていました。</b>
+          <b>経路別では、主系5/12・副系（代走）14/16。</b>主系は定時起動のワークフローで、8月23日に初めて出荷し、その後も成果物ゼロや週次の利用上限で落ちた回があります。副系も2回落ちています。
+          <b>二重化していなければ止まっていた日が複数あります。</b>
           無運転日は2日（8月16日・17日）です。
         </p>
         <p class="ap-note">
@@ -423,7 +423,7 @@
         <p class="ap-note">
           203タスク・13領域を1件ずつ棚卸しして、誰が実行するかで数えたものです。
           <b>総合自動化率66.8%、AI実行率76.4%、AI関与率87.9%。</b>「半分できていない」と自分から言える形で出しています。
-          2026-08-25に棚卸しへ13件足したので、率は61.9%から下がりました（その後の実装で61.9%）。<b>実装が減ったのではなく、やるべきことの一覧が正確になった分だけ分母が増えています</b>（足した13件のうち10件が未実装）。
+          2026-08-25に棚卸しへ13件足したので、率は61.3%から58.6%へ下がりました。その後の実装で66.8%まで戻っています（2026-09-02時点）。<b>実装が減ったのではなく、やるべきことの一覧が正確になった分だけ分母が増えています</b>（足した13件のうち10件が未実装）。
           タスクの粒度は領域間で揃っておらず、全タスクを等価に数えている点は限界として付記します。
         </p>
         <div class="ap-tablewrap">
@@ -496,8 +496,8 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
         <p class="ap-note">
           <b>この2行が並んでいること自体が、いまの現在地です。</b>
           初出荷は出たが、台帳を書く主体が落ちた回には存在しないという穴が残り、
-          8月24日・25日の失敗は<b>いずれも未解消のまま</b>台帳に載せてあります。
-          検知までの中央値は2.7時間、最大50.7時間。修理までの中央値は3.7時間です。
+          9月2日時点で未解消の失敗が7件（8月27日〜31日。うち3件は週次の利用上限）、<b>そのまま</b>台帳に載せてあります。
+          検知までの中央値は13.4時間、最大70.8時間。修理までの中央値は6.7時間です。<b>検知は8月末より遅くなっています</b>（主系が3日連続で「ブランチが在る」だけでスキップし、それを8月31日にまとめて見つけたため）。
         </p>
       </section>
 
@@ -514,10 +514,10 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
             <tr><td>実機テスト</td><td><b>iOSシミュレータ・実機iPhoneの操作、撮影、計測ができない</b>（macOS環境が必須）</td></tr>
             <tr><td>広告運用</td><td><b>未実装。</b>この予算規模では日次の自動入札がノイズ最適化になるという自社分析があり、着手していない</td></tr>
             <tr><td>予算配分</td><td>上限での自己停止まで。<b>配分の最適化はまだ。</b>上限値自体も暫定で、実測由来ではない</td></tr>
-            <tr><td>障害の検知</td><td><b>1系統（課金）に気づく経路が無い。</b>購入失敗イベントを受ける経路がiOS側に無く、ユーザーから言われて初めて分かる</td></tr>
-            <tr><td>売上データ</td><td>App Store側の売上・課金データと<b>未接続</b>。獲得単価も投資回収期間も、いま出せる形になっていない</td></tr>
-            <tr><td>カスタマーサポート</td><td>受け口と分類は実装したが、<b>返信の自動化が無い</b></td></tr>
-            <tr><td>法人領域</td><td>取引先・送金先の許可リストが動き始めたところ。経理・税務・労務・契約審査は<b>証跡ゼロ</b>。権限と承認境界の設計段階で、<b>無人化しない</b></td></tr>
+            <tr><td>障害の検知</td><td>課金失敗はApp Storeのレポート経由で<b>気づけるようになった</b>が、<b>回復させる導線（支払い方法の更新の案内）は未実装</b></td></tr>
+            <tr><td>売上データ</td><td>App Store側の売上・課金データは8月25日から取り込み始めたが、<b>LTV・回収期間は28日ぶんが貯まるまで出せない</b>（広告費ゼロのため獲得単価は定義上存在しない）</td></tr>
+            <tr><td>カスタマーサポート</td><td>受け口・分類・承認済みテンプレートでの自動回答まで実装。<b>テンプレートに当たらない用件と、障害案内の一斉配信は人</b>（後者は送る経路そのものが無い）</td></tr>
+            <tr><td>法人領域</td><td>法定期限6件は機械の監視下（9月2日）、銀行・カード残高の読み取りと契約の定型／非定型の分類も機械。<b>仕訳・請求・支払いの照合は手つかず</b>で、申告・支払い・非定型契約の承認は人。<b>無人化しない</b></td></tr>
             <tr><td>広報の配信操作</td><td>原稿・採点・検査・画像までは自動。<b>配信そのものは管理画面から人間が行う</b></td></tr>
           </tbody>
         </table>
@@ -561,12 +561,12 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
           <a href="/data/autopilot-status.json"><b>稼働状況</b><span>いま何が動いていて、何が止まっているか</span></a>
           <a href="/data/autopilot-cost.json"><b>AI実費</b><span>月次上限と、種別ごとの枠。<b>上限値は暫定です</b></span></a>
           <a href="/data/automation-coverage.json"><b>自動化の棚卸し</b><span>203タスク・13領域を1件ずつ、誰が実行するかで分類</span></a>
-          <a href="/data/authority-matrix.json"><b>権限表</b><span>16領域。可逆／不可逆と、人間のみの操作</span></a>
+          <a href="/data/authority-matrix.json"><b>権限表</b><span>19領域。可逆／不可逆と、人間のみの操作</span></a>
           <a href="/data/code-authorship.json"><b>コード著者の台帳</b><span>数え方そのものを凍結してある</span></a>
           <a href="/data/operating-memory.json"><b>運転記憶</b><span>何を仮説し、外し、何を変えたか。<b>失敗した回も消していません</b></span></a>
         </div>
         <p class="ap-note">
-          観測できている実費は<b>$8.1116（2実行分）</b>です。副系10実行分は、
+          観測できている実費は<b>$50.8681（10実行分・2026-09-02時点）</b>です。副系16実行分は、
           スケジュール起動セッションのログを外から読めないため<b>ゼロではなく未観測</b>です。
           月次上限$40は<b>暫定値</b>で、実測由来ではありません。
         </p>
