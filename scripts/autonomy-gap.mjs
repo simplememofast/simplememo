@@ -31,6 +31,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { COVERAGE_PATH, summarize } from './automation-rate.mjs';
 
@@ -700,9 +701,16 @@ export function selftest() {
       { file: 'data/corporate-obligations.json', path: 'deadlines[id=corporate-tax].next_due' }, true],
     ['引き当たらない id は満たさない',
       { file: 'data/corporate-obligations.json', path: 'deadlines[id=そんな行は無い].next_due' }, false],
+    // [2026-09-02] **検体を実データから外した。**この行は長らく
+    // `deadlines[id=domain-renewal].next_due` が null であることに寄りかかっていたが、
+    // **週次が RDAP から 2027-01-30 を入れた日に、検体のほうが崩れた。**
+    // 検査が壊れたのではなく、**検体が「まだ埋まっていない実データ」を借りていた。**
+    // 埋まるのが目的の欄を検体に使うと、目的を達成した日に落ちる。
+    // （このリポジトリは同じ形を何度か踏んでいる —— 件数を焼き込んだ検体、など。）
+    // **借りるのをやめて、その場で作る。**`root` を差し替えられるので実データは要らない。
     ['**引き当たっても値が null なら満たさない**（在ることと埋まっていることは違う）',
       { file: 'data/corporate-obligations.json',
-        path: 'deadlines[id=domain-renewal].next_due' }, false],
+        path: 'deadlines[id=fixture].next_due' }, false, { fixture: { deadlines: [{ id: 'fixture', next_due: null }] } }],
     // **false は「確かめた」なので満たす。**null（確かめていない）と混ぜない。
     // company_facts が Apple の auto_renew_confirmed をこの形で見る ——
     // 自動更新が入っていなかった（false）としても、**確かめたことは確かめたこと。**
@@ -710,9 +718,18 @@ export function selftest() {
       { file: 'data/corporate-obligations.json',
         path: 'deadlines[id=domain-renewal].confirmed_by_owner' }, true],
   ];
-  for (const [label, pred, want] of predCases) {
+  for (const [label, pred, want, opts] of predCases) {
     let got;
-    try { got = blockedOnSatisfied(pred); } catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
+    let root;
+    if (opts?.fixture) {
+      // **その場で作った台帳で確かめる。**実データの「まだ埋まっていない欄」を借りない。
+      root = fs.mkdtempSync(path.join(os.tmpdir(), 'autonomy-pred-'));
+      fs.mkdirSync(path.join(root, 'data'), { recursive: true });
+      fs.writeFileSync(path.join(root, pred.file), JSON.stringify(opts.fixture));
+    }
+    try { got = blockedOnSatisfied(pred, root ? { root } : {}); }
+    catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
+    finally { if (root) fs.rmSync(root, { recursive: true, force: true }); }
     if (got !== want) problems.push(`述語「${label}」が ${got}（${want} のはず）`);
   }
 

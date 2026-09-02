@@ -202,6 +202,38 @@ export function clauseGuard(cr, today) {
   return problems;
 }
 
+/**
+ * **その期限を把握しているか。**「オーナーが確認した」だけが把握ではない。
+ *
+ * 【なぜ要るか — 機械が入れた権威ある値が「未把握」と表示されていた】
+ * 2026-09-02、週次が RDAP から simplememofast.com の有効期限（2027-01-30）を入れた。
+ * `check-domain-expiry.mjs --write` は `next_due` と `source: "rdap"` を書き、
+ * `unconfirmed_reason` を null にするが、**`confirmed_by_owner` は触らない。**
+ * その結果この行は:
+ *
+ *   - 一覧に「**未把握**」と出続ける（値は在るのに）
+ *   - **日付の検査を1つも受けない** —— 期限切れ警告も、近接の警告も飛ばされる
+ *   - 「未確認なのに理由が無い」で `--check` が落ちる（理由は null にされたので）
+ *
+ * **3つ目が効いた。**検査が自分で「この状態は矛盾している」と言った。
+ *
+ * 【どちらへ直すか】
+ * `confirmed_by_owner` を機械が立てる形にはしない —— **フラグの名前が「owner」で、
+ * 機械が自己認証する経路を作ることになる。**直すのは「把握」の定義のほう。
+ *
+ * 出典を名乗り、日付が入っていて、未確認の理由が無い行は**把握している。**
+ * オーナーが確認した行と同じように**検査を受けさせる**（そちらが本体）。
+ *
+ * **既存の5行は変わらない**（どれも source を持たず confirmed_by_owner: true）。
+ * 効くのは RDAP 由来のこの1行だけで、**効いた結果は「監視が増える」方向。**
+ */
+export function isKnown(d) {
+  if (d?.confirmed_by_owner === true) return true;
+  return typeof d?.source === 'string' && d.source.length > 0
+    && DATE.test(d?.next_due || '')
+    && d?.unconfirmed_reason == null;
+}
+
 export function validate(doc, { vendorIds = null, today = new Date().toISOString().slice(0, 10) } = {}) {
   const problems = [];
   const warnings = [];
@@ -210,9 +242,9 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
     const at = `deadlines「${d.title || d.id}」`;
     if (!d.id || !d.title) problems.push(`${at}: id と title が要る`);
     if (!d.what_breaks) problems.push(`${at}: what_breaks が無い — 切れたら何が止まるか書いていない期限は優先順位が付かない`);
-    if (d.confirmed_by_owner) {
+    if (isKnown(d)) {
       if (!DATE.test(d.next_due || '')) {
-        problems.push(`${at}: confirmed なのに next_due が YYYY-MM-DD でない`);
+        problems.push(`${at}: 把握しているのに next_due が YYYY-MM-DD でない`);
       } else {
         const days = Math.round((new Date(d.next_due) - new Date(today)) / 86400000);
         if (days < 0) problems.push(`${at}: 期限を ${-days} 日過ぎている`);
@@ -339,6 +371,16 @@ const SELFTEST_BREAKAGES = [
   ['**切れたら何が止まるか**が無い期限は落ちる（優先順位が付かない）', (d) => { delete d.deadlines[0].what_breaks; }],
   ['id と title が無ければ落ちる', (d) => { delete d.deadlines[0].id; delete d.deadlines[0].title; }],
   ['confirmed なのに日付が不正なら落ちる', (d) => { d.deadlines[0].confirmed_by_owner = true; d.deadlines[0].next_due = 'そのうち'; }],
+  // [2026-09-02] **機械導出の行も検査を受ける。**受けないと、値が在るのに
+  // 期限切れ警告が飛ばされる（RDAP のドメイン期限がその状態だった）。
+  ['**機械導出なのに日付が不正なら落ちる**（オーナー確認と同じ検査を受ける）',
+    (d) => { const x = d.deadlines.find((y) => y.source && !y.confirmed_by_owner);
+             if (!x) throw new Error('機械導出の行が実データに無い — **この検体が空回りしている**');
+             x.next_due = 'そのうち'; }],
+  ['**機械導出でも理由が残っていれば未把握に戻る**（把握したことにしない）',
+    (d) => { const x = d.deadlines.find((y) => y.source && !y.confirmed_by_owner);
+             if (!x) throw new Error('機械導出の行が実データに無い');
+             x.unconfirmed_reason = null; x.next_due = null; }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8')),
@@ -554,7 +596,7 @@ if (isMain) {
   const vendorIds = new Set(vendors.vendors.map((v) => v.id));
   const { problems, warnings } = validate(doc, { vendorIds });
 
-  const unconfirmed = (doc.deadlines || []).filter((d) => !d.confirmed_by_owner);
+  const unconfirmed = (doc.deadlines || []).filter((d) => !isKnown(d));
   // [2026-08-28] **「所在が決まっていない」と「実在を確かめていない」を分けた。**
   // ここは長らく `!r.exists` を数えて「所在が決まっていない N件」と書いていたが、
   // **数えているものと言っていることが違った。**所在を決めても件数が減らないので、
@@ -574,8 +616,10 @@ if (isMain) {
   console.log('法人としての期限・記録・契約条項\n');
   console.log(`  期限 ${doc.deadlines.length}件 — うち**未把握 ${unconfirmed.length}件**`);
   for (const d of doc.deadlines) {
-    console.log(`    ${d.confirmed_by_owner ? d.next_due : '**未把握**'.padEnd(10)}  ${d.title}`);
-    if (!d.confirmed_by_owner) console.log(`                ${d.unconfirmed_reason}`);
+    // **オーナー確認と機械導出を混ぜない。**どちらも把握だが、出所が違う。
+    const how = d.confirmed_by_owner ? '' : `  ← ${d.source} から機械が入れた`;
+    console.log(`    ${isKnown(d) ? d.next_due : '**未把握**'.padEnd(10)}  ${d.title}${how}`);
+    if (!isKnown(d)) console.log(`                ${d.unconfirmed_reason}`);
   }
   console.log(`\n  記録 ${doc.records.length}件 — **所在が未定 ${noPlace.length}件`
     + ` / 所在は決まったが実在は未確認 ${unverified.length}件**`);
