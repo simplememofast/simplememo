@@ -721,6 +721,7 @@ SimpleMemoは「無料メモアプリ」という大市場で表示を増やせ�
 | P1 | `obsidian/index.html` | 関連ページに未リンクだった `/obsidian/plugins/` を追加 |
 | P0-A / P0-C | `data/cpp-map.json` | 保留行を2つ追加（`free-memo-generic` → `^/blog/free-memo-apps-ranking$`、`obsidian-voice` → `^/blog/obsidian-voice-input$`）。**ppid は null**＝オーナー入力待ち。CI（`apply-cpp-ppid.js --check`）は notice を出すだけで落ちない |
 | §7-2 | `data/site-constants.json` → 25ファイル＋`llms.txt` | `appVersion` 5.8.1→**5.8.4**（レポートは 5.8.2 と読んでいたが、オーナーの 09-02 実機確認で 5.8.4）、`ratingValue` 4.4→**4.2**（JSON-LD は1桁小数。元値 4.24）、`ratingCount` 22→**25**。`sync_constants.js --write` で JSON-LD の `#app` 12ノードと表示テキストへ伝播。`voices/index.html` の meta-title / og-title / 本文の「★4.4・21件」は同期の規則外だったので手で 4.2・25 に揃えた |
+| 取り下げ | `data/revenue-series.json` / `financial-policy.json` | 当初、隣リポジトリ（ios）の観測3日分（last_day 08-26→08-29）に同期して含めていたが、main に #776 で入った `check-waiting-progress.mjs` の自己テストが**実データで `revenue_28d` が stalled であること**を前提にしており、同期すると CI が落ちる。この同期は本PRの目的ではなく、ios 側で暦日カウントへ直す作業（台帳の review_by 09-08）に付随するものなので、main の値へ戻した。手元の `check-generators --run` は隣が見えるぶんだけ差分を出すが、CI（隣なし）では出ない |
 | 計測 | `growth/experiments/experiments.json` | `selector-hub-2026-09-02-001`（評価 10-03）、`cta-placement-2026-09-02-002`（10-03）、`internal-link-2026-09-02-003`（10-12）。基準値は §16-1 の BigQuery 値。control / min_sample / stop_conditions つき |
 
 描画は headless Chromium（幅 390 / 1200）で確認した。ダークテーマでの情報開示ブロック・分岐・回答ブロック・導線行の表示に崩れなし。
