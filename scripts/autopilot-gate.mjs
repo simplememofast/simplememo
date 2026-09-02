@@ -33,6 +33,9 @@
  * **それは払う。**払わない代わりに払っていたのは「片方だけ直る」ことだった。
  */
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 /** 判定コード。文字列を直接比較させない（typoが静かに通るため）。 */
 export const CODES = {
   RUN: 'run',
@@ -426,7 +429,15 @@ export async function preflight(o) {
 
 // --- CLI ---------------------------------------------------------------
 // `node scripts/autopilot-gate.mjs --preflight` で GITHUB_OUTPUT へ書く。
-if (process.argv[1] && process.argv.includes('--preflight')) {
+//
+// **入口はこのファイルが直接実行されたときだけ。**このモジュールは
+// property-tests / autopilot-drill / check-degradation / check-escalation /
+// check-emergency-stop が import している。argv だけで判定すると、
+// **たまたま --preflight を含む引数で走ったそれらが、ここを実行しうる**
+// （GitHub API を叩き、GITHUB_OUTPUT に書く）。他の実行スクリプトと同じ形にする。
+const isGateMain = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isGateMain && process.argv.includes('--preflight')) {
   const fs = await import('node:fs');
   const env = process.env;
   const today = todayJst();
