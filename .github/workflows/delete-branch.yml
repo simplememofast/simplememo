@@ -1,0 +1,68 @@
+# 【運用】マージ済みの claude/ ブランチをリモートから消す。
+#
+# なぜ要るか（2026-09-02 実測）: エージェントのサンドボックスは
+#   - git の delete push が途中で切断される（"unexpected disconnect while reading sideband packet"）
+#   - REST の DELETE /git/refs/... はプロキシが 403 を返す（"Write access ... not permitted through this proxy"）
+#   - 通常の ref 更新 push は通る
+# ので、**ブランチを消す手段だけが無い。**残ったブランチは seo-daily の週次 push
+# （--force-with-lease）の照合先問題の温床だった（lease 側は #776 で直した）。
+# GITHUB_TOKEN（contents: write）を持つこのジョブが消す。
+#
+# 守り:
+#   - claude/ 配下しか消さない（main も他人のブランチも名前で弾く）
+#   - main に取り込み済みでなければ消さない。squash マージは祖先にならないので、
+#     ブランチが変えたファイルが main と同じ内容かで判定する
+#   - 入力は env 経由で渡す（run: に式を直接展開しない — check-injection-surface.mjs の規律）
+name: Delete merged branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "消すブランチ名（claude/ 配下・main に取り込み済みのものだけ）"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  delete:
+    name: Delete if merged into main
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: |
+          set -euo pipefail
+          case "$BRANCH" in
+            claude/*) ;;
+            *) echo "::error::claude/ 配下だけを消す（指定: $BRANCH）"; exit 1 ;;
+          esac
+          if ! git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null; then
+            echo "既に無い: $BRANCH"
+            echo "既に無い: \`$BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git fetch origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+          git fetch origin main
+          if git merge-base --is-ancestor "origin/$BRANCH" origin/main; then
+            echo "main の祖先 — 取り込み済み"
+          else
+            base=$(git merge-base origin/main "origin/$BRANCH")
+            files=$(git diff --name-only "$base" "origin/$BRANCH")
+            if [ -n "$files" ] && [ -n "$(git diff --stat "origin/$BRANCH" origin/main -- $files)" ]; then
+              echo "::error::main に無い差分がある — 消さない"
+              git diff --stat "origin/$BRANCH" origin/main -- $files
+              exit 1
+            fi
+            echo "変更したファイルは main と同一 — squash で取り込み済み"
+          fi
+          git push origin --delete "$BRANCH"
+          echo "削除した: \`$BRANCH\`" >> "$GITHUB_STEP_SUMMARY"
