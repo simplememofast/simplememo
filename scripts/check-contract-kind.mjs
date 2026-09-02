@@ -233,4 +233,8 @@ function main() {
   if (process.argv.includes('--check')) console.log('\n分類に食い違いなし。');
 }
 
-main();
+// **export しているので、import した瞬間に main() が走らないよう囲う。**
+// 囲わないと `process.exit()` がガードの外に出て、**import した側が黙って exit 0 する**
+// （scripts/check-module-entry.mjs がこの形を落とす）。
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) main();
