@@ -285,6 +285,24 @@
       "expr": "r.value",
       "disposition": "報告のみ",
       "note": "一覧表示（`const n = ...`）で `2/28` を出すかどうかだけ。**判定していない。**dir 型の待ち（growth/data/gsc のラベルを見る側）は value/target を持たないので、**持たない待ちで数字の欄を空にする**ためのもの"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "x.where",
+      "disposition": "検体の選択",
+      "note": "自己テスト内で `(d.records || []).find((x) => x.where && !x.exists)` として**検体になる行を実データから選んでいる**だけ。判定ではない。該当が無ければ `r` が undefined になり、**次の行の代入で例外が出てテストが落ちる** —— 黙って素通りする形ではない。\n\n**[2026-09-02] 新しく検出された理由。**この行自体は前からある。同じコミットで `isKnown()` を足して `d`（台帳由来）を渡す経路が増えたため、**汚染の広がり方が変わって走査に載った。**行を足したのではなく、見えるようになったほう"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "y.source",
+      "disposition": "検体の選択",
+      "note": "自己テスト内で `d.deadlines.find((y) => y.source && !y.confirmed_by_owner)` として**機械導出の行を実データから選んでいる**だけ。判定ではない。\n\n**該当が無ければ明示的に落とす** —— `if (!x) throw new Error('機械導出の行が実データに無い — **この検体が空回りしている**')` を書いてある。`x.where` の既存検体（該当ゼロだと次行で暗黙に例外）より一段はっきりさせた形で、**実データから機械導出の行が消えたときに『検査が通った』ではなく『検体が無い』と言う。**"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "y.source",
+      "disposition": "検体の選択",
+      "note": "自己テスト内で `d.deadlines.find((y) => y.source && !y.confirmed_by_owner)` として**機械導出の行を実データから選んでいる**だけ。判定ではない。\n\n**該当が無ければ明示的に落とす** —— `if (!x) throw new Error('機械導出の行が実データに無い — **この検体が空回りしている**')` を書いてある。`x.where` の既存検体（該当ゼロだと次行で暗黙に例外）より一段はっきりさせた形で、**実データから機械導出の行が消えたときに『検査が通った』ではなく『検体が無い』と言う。**"
     }
   ],
   "coverage_measured_at": "2026-08-26",
