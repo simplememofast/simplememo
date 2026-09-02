@@ -758,8 +758,8 @@ SimpleMemoは「無料メモアプリ」という大市場で表示を増やせ�
 
 ### 16-5. 未確定・オーナー判断待ち
 
-1. **CPP。**（2026-09-02 追記）オーナーの委任で自律判断した。`obsidian-voice` は既存の `obsidian-vault`（1408d7a4…）を流用して配線済み（同じ CPP が音声ページ /obsidian/airpods/ を既に受けている）。`free-memo-generic` は意図の合う CPP が ASC に無く、CPP の作成はサンドボックスから行えないので**既定商品ページ（対照）のまま**。汎用無料用の CPP を ASC で作ったら ppid を記入して `node scripts/apply-cpp-ppid.js --write`。
+1. **CPP — 両方とも配線済み（2026-09-02 追記）。**オーナーの委任で自律判断した。`obsidian-voice` は `obsidian-vault`（1408d7a4…・APPROVED）を流用。`free-memo-generic` は、simplememo-ios に足した `asc-cpp.yml`（ASC API で CPP を一覧・作成。#296 / #298 / #299）で ASC の 69 本を読み、汎用無料流入に最も近い承認済み `plain-notes` を**暫定で配線**（計測がすぐ始まる）。専用 CPP `free-memo-generic`（ppid `3b8f2fd5-768b-48da-9d65-e7346432f569`・版1・PREPARE_FOR_SUBMISSION・雛形 plain-notes・プロモ ja/en『無料・広告なし・開いた瞬間に書ける・受信箱に届く・無料枠1日3通』）も同日に作成した。**残る人手は1つ:** 次の App 版の審査提出に同乗させ、APPROVED になったら `data/cpp-map.json` の ppid を差し替える（CPP 単独の提出は App 版の提出を塞ぐので出さない）。
 2. **店頭事実。**（2026-09-02 追記）オーナーが実機で確認した値は **v5.8.4** / 4.2 / 25 件で、レポートの 5.8.2 は古かった。台帳と 22 ファイルを 5.8.4 に揃えた。機械照合は引き続き `seo-daily.yml` のジョブサマリで見る。
 3. **`free-memo-apps-ranking` の「10選」。**title と TL;DR は 10 本、本文は TOP5。09-13 の snippet 評価時に決める（§16-3）。
-4. **`seo-daily.yml` の push 失敗。**（2026-09-02 追記）09-01 23:05Z の失敗は `--force-with-lease` の照合先が無いこと（fetch-depth 2 で main しか持たない）が原因で、リモートに `claude/seo-weekly-snapshot` が残っている限り毎回落ちる。09-02 00:39Z の回は通って #780 が作られ 00:57Z にマージ済みだが、ブランチはまた残っている。**この環境からはブランチを消せない**（git の delete push は途中で切断、REST の DELETE はプロキシが 403）。恒久策は main 側に先に入っていた（#776: `git ls-remote` で在るときだけ取り寄せて lease の照合先を作る）。このブランチでも同じ趣旨の修正を書いたが、main の取り込み時に衝突したので main 側の実装を採り、こちらの版は捨てた。オーナーへ: リポジトリ設定の「Automatically delete head branches」を有効にすると、この種の残骸自体が出なくなる。
+4. **`seo-daily.yml` の push 失敗 — 解消（2026-09-02 追記）。**09-01 23:05Z の失敗は `--force-with-lease` の照合先が無いこと（fetch-depth 2 で main しか持たない）が原因で、lease 側は #776 が直した。残骸の `claude/seo-weekly-snapshot` はサンドボックスから消せない（git の delete push は切断、REST の DELETE はプロキシが 403）ので、`delete-branch.yml`（#784・claude/ 配下かつ main 取り込み済みのブランチだけを GITHUB_TOKEN で消す）を足して dispatch し、削除を ls-remote で確認した。
 5. **`tag-cta-placements.js` の既知 notice**（トークンの言語とページのロケールが食い違う CTA 212 件）は以前からのもので、本変更で増減していない。
