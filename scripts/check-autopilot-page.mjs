@@ -56,9 +56,15 @@ export const PAGE_PATH = path.join(ROOT, 'autopilot/index.html');
 // [2026-09-02] 配信稿を足した。`-body.md` は 08-22 に書いた叩き台で、**実際に
 // 配信するのはこちら**（見出しが対句から月次の推移へ変わっている）。網に入って
 // いない文書が記者へ渡る、という形を作らないために、出す本文は必ずここへ足す。
+// [2026-09-03] **トップページを足した。**9/3 の配信本文はトップ（`/`）へリンクしており、
+// 記者もユーザーもまずここへ着地する。同日、配信に合わせてトップへ
+// 「AI実行率76.4% / 総合自動化率66.8% / 203タスク・13領域」を出したので、
+// **サイトで一番読まれるページが網の外**という形を作らないために入れる。
+// （/autopilot/ だけを見ていた時期に、配信本文が 58.6% のまま止まっていたのと同じ穴。）
 export const EXTRA_PATHS = [
   path.join(ROOT, 'docs/pr-autopilot-2026-09-body.md'),
   path.join(ROOT, 'docs/pr-autopilot-2026-09-final.md'),
+  path.join(ROOT, 'index.html'),
 ];
 export const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
 /**

@@ -617,6 +617,53 @@
     .aib__go { display: inline-flex; align-items: center; min-height: 48px; padding: .7rem 1.4rem; border-radius: 24px; background: linear-gradient(135deg,#7c4dff,#5856D6); color: #fff; text-decoration: none; font-weight: 700; font-size: .95rem; }
     .aib__go:hover { opacity: .88; }
 
+    /* ── 自律運営（2026-09-03 のプレスリリースに合わせて追加） ─────────────
+       ここに出る率と件数は data/automation-coverage.json と data/autopilot-runs.json が正。
+       scripts/check-autopilot-page.mjs が **このファイルも** 台帳と突き合わせるので、
+       台帳を動かさずに数字だけ書き換えるとCIが落ちる。 */
+    .pressband { display: flex; align-items: center; gap: .85rem; flex-wrap: wrap; padding: .72rem 1.1rem;
+      border: 1px solid rgba(34,211,238,.28); border-radius: var(--radius-sm); text-decoration: none; color: inherit;
+      background: linear-gradient(90deg, rgba(34,211,238,.10), rgba(59,130,246,.05) 62%, rgba(59,130,246,0)); }
+    .pressband:hover { border-color: rgba(34,211,238,.55); background: linear-gradient(90deg, rgba(34,211,238,.16), rgba(59,130,246,.07) 62%, rgba(59,130,246,0)); }
+    .pressband__tag { flex: none; font-size: .66rem; font-weight: 800; letter-spacing: .09em; color: #0a0c12;
+      background: linear-gradient(135deg,#22d3ee,#3b82f6); padding: .2rem .6rem; border-radius: 999px; }
+    .pressband__date { flex: none; font-size: .72rem; font-weight: 700; letter-spacing: .04em; color: var(--text-muted); }
+    .pressband__body { font-size: .88rem; line-height: 1.75; color: var(--text-secondary); }
+    .pressband__body b { color: var(--text); }
+    .pressband__go { color: var(--accent); font-weight: 700; }
+
+    .zp { border: 1px solid rgba(34,211,238,.22); border-radius: var(--radius-lg); padding: 2rem; margin-top: 1.5rem;
+      background: linear-gradient(180deg, rgba(34,211,238,.06), rgba(34,211,238,0) 42%), var(--surface); }
+    .zp__g { background: linear-gradient(135deg,#22d3ee,#4da3ff 90%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+    .zp__lead { font-size: 1rem; line-height: 1.9; color: var(--text-secondary); margin: 0 0 1.3rem; }
+    .zp__lead strong { color: var(--text); }
+    .zp__kpis { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: .75rem; margin: 0 0 1.35rem; }
+    /* ラベル → 値 の順に並べてある。見た目の都合ではなく、
+       check-autopilot-page.mjs が「率の名前のすぐ後ろの数字」を台帳と突き合わせるため
+       （名前と値のあいだにタグ以外を挟むと、検査が黙って素通りする）。 */
+    .zp__kpi { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem .9rem; }
+    .zp__kpi span { display: block; font-size: .74rem; font-weight: 700; letter-spacing: .02em; color: var(--text-secondary); }
+    .zp__kpi b { display: block; font-size: 1.6rem; font-weight: 800; line-height: 1.25; letter-spacing: -.01em; color: #7fe3f5; margin: .15rem 0 .3rem; }
+    .zp__kpi em { display: block; font-style: normal; font-size: .74rem; line-height: 1.7; color: var(--text-muted); }
+    .zp__loop { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0 0 1.35rem; padding: 0; list-style: none; }
+    .zp__loop li { font-size: .8rem; font-weight: 700; color: var(--text-secondary); background: rgba(148,178,255,.07);
+      border: 1px solid var(--border); border-radius: 999px; padding: .35rem .8rem; }
+    .zp__loop li b { color: #7fe3f5; font-size: .7rem; margin-right: .35rem; }
+    .zp__split { display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: .9rem; margin: 0 0 1.25rem; }
+    .zp__box { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem 1.1rem; background: rgba(148,178,255,.04); }
+    .zp__box p { margin: 0; font-size: .875rem; line-height: 1.8; color: var(--text-secondary); }
+    .zp__box strong { color: var(--text); }
+    .zp__h { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .08em; margin-bottom: .45rem; color: #7fe3f5; }
+    .zp__h--human { color: #ffd07a; }
+    .zp__note { font-size: .82rem; line-height: 1.85; color: var(--text-muted); margin: 0 0 1.3rem; }
+    .zp__note strong { color: var(--text-secondary); }
+    .zp__links { display: flex; flex-wrap: wrap; gap: .6rem; }
+    .zp__links a { display: inline-flex; align-items: center; min-height: 48px; padding: .7rem 1.15rem; border-radius: 10px; font-size: .875rem; font-weight: 700; text-decoration: none; }
+    .zp__primary { background: linear-gradient(135deg,#22d3ee,#3b82f6); color: #0a0c12; }
+    .zp__ghost { color: var(--accent); border: 1px solid rgba(100,180,255,.2); }
+    .zp__stamp { font-size: .75rem; line-height: 1.8; color: var(--text-muted); margin: 1.15rem 0 0; }
+    @media (max-width: 600px) { .zp { padding: 1.4rem 1.15rem; } }
+
   </style>
   <!-- Ahrefs analytics - deferred for LCP (same pattern as gtag above) -->
   <script>
@@ -714,6 +761,20 @@
     </div>
   </section>
 
+  <!-- Press band — 2026-09-03 の PR TIMES 配信の着地面がこのトップページなので、
+       配信本文から来た人が「同じ話の続き」だと分かる1行を最初に置く。
+       製品の約束（H1）は動かさない。運営の話は運営の話として、別の帯で名乗る。
+       数字は台帳が正（scripts/check-autopilot-page.mjs がこのファイルも見る）。 -->
+  <section class="press-band" aria-label="お知らせ" style="padding:1.25rem 0 0;">
+    <div class="container">
+      <a href="/autopilot/" class="pressband">
+        <span class="pressband__tag">PRESS</span>
+        <span class="pressband__date">2026.09.03</span>
+        <span class="pressband__body"><b>ソロプレナーから「ゼロプレナー」へ。</b><span class="nb">このアプリを回している仕事の</span><span class="nb"><b>AI実行率76.4%</b>（実施中174タスク）／</span><span class="nb"><b>総合自動化率66.8%</b>（203タスク・13領域）を、</span><span class="nb">台帳ごと公開しました。</span> <span class="pressband__go nb">運営のしかたを見る →</span></span>
+      </a>
+    </div>
+  </section>
+
   <!-- AirPods Banner (newest feature — first banner after hero / v5.0.3 Siri送信) -->
   <section class="siri-banner" style="padding:1.5rem 0 0.5rem;">
     <div class="container">
@@ -753,7 +814,7 @@
     </div>
   </section>
 
-  <!-- Apple Watch Banner (first-view follow / NEW v3.9) -->
+  <!-- Apple Watch Banner (first-view follow / v3.9 で対応) -->
   <section class="watch-banner" style="padding:1.5rem 0 0.5rem;">
     <div class="container">
       <a href="/apple-watch-obsidian/" aria-label="Apple Watch対応を詳しく見る" style="display:block;text-decoration:none;border-radius:var(--radius-lg);overflow:hidden;border:1px solid rgba(79,195,247,.28);box-shadow:0 10px 34px rgba(59,130,246,.16);">
@@ -764,7 +825,7 @@
       </a>
       <div style="text-align:center;margin-top:1.25rem;">
         <p style="color:var(--text-secondary);font-size:.95rem;line-height:1.8;max-width:680px;margin:0 auto 1rem;">
-          <strong style="color:var(--text);">NEW・v3.9 Apple Watch対応。</strong><span class="nb">消える前に、声で残す。</span><span class="nb">手首から最短2タップで</span><span class="nb">メールとObsidianへ。</span>
+          <strong style="color:var(--text);">Apple Watch対応。</strong><span class="nb">消える前に、声で残す。</span><span class="nb">手首から最短2タップで</span><span class="nb">メールとObsidianへ。</span>
         </p>
         <a href="/apple-watch-obsidian/" style="display:inline-flex;align-items:center;min-height:48px;padding:.7rem 1.4rem;background:linear-gradient(135deg,#4fc3f7,#3b82f6);color:#0a0c12;text-decoration:none;font-weight:700;font-size:.95rem;border-radius:24px;">
           ⌚ Apple Watch対応を詳しく見る →
@@ -816,7 +877,7 @@
         <strong>Obsidian連携シンプルメモ</strong>は、メモをワンタップで自分のメールに送信できるiOS向け軽量アプリです。
         サービス終了した<strong><a href="/captio-alternative/" style="color:var(--accent);">Captioの代替</a></strong>として2026年にリリース。<a href="/blog/line-keep-alternative" style="color:var(--accent);">LINE Keep終了後</a>のテキストメモ保存先としても最適です。
         起動 0.4秒・ワンタップ送信の高速体験、完全オンデバイスの<a href="/voice-input/" style="color:var(--accent);">音声自動入力</a>、送ったメモをノートに自動追記する<a href="/obsidian/" style="color:var(--accent);">Obsidian連携</a>、Outboxアーキテクチャによるオフライン対応、<strong><a href="/glossary/aes-gcm/" style="color:var(--accent);">端末内 AES-GCM 暗号化</a></strong>（オフラインキューと送信履歴）によるプライバシー保護を特長としています。
-        最新バージョン3.9（2026年7月）では<a href="/apple-watch-obsidian/" style="color:var(--accent);">Apple Watchに対応</a>し、手首に話すだけでメールとObsidianの両方にメモを残せます。
+        2026年7月のv3.9で<a href="/apple-watch-obsidian/" style="color:var(--accent);">Apple Watchに対応</a>し、手首に話すだけでメールとObsidianの両方にメモを残せます。
         さらに2026年7月の無料アップデートで<strong><a href="/ai-tags/" style="color:var(--accent);">AIタグ自動追加</a></strong>を提供開始。オンデバイスAI（Apple Foundation Models）がメモの内容を理解して、20文字以内のタイトル・1〜3個のタグ・種別（todo／idea／log）を自動付与し、タグ付きのままObsidianのノートへ追記します。AIによるタグ付けはお使いのiPhoneの中だけで行われ、メモが外部サーバーへ送られることはありません（Apple Intelligence非対応機種では端末内の軽量整形へ自動フォールバック）。
       </p>
     </div>
@@ -1066,11 +1127,11 @@
     </div>
   </section>
 
-  <!-- Voice Input Spotlight (NEW in v3.0 — flagship) -->
+  <!-- Voice Input Spotlight (v3.0 で追加 — flagship) -->
   <section class="voice-spotlight" style="padding:1rem 0 1rem;">
     <div class="container">
       <div class="reveal" style="background:linear-gradient(135deg,rgba(34,211,238,.12),rgba(59,130,246,.08));border:1px solid rgba(34,211,238,.28);border-radius:var(--radius-lg);padding:clamp(1.25rem,5vw,2.5rem);">
-        <div style="display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#0a0c12;background:linear-gradient(135deg,#22d3ee,#3b82f6);padding:.25rem .8rem;border-radius:20px;margin-bottom:1rem;">NEW · v3.0 · 目玉機能</div>
+        <div style="display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#0a0c12;background:linear-gradient(135deg,#22d3ee,#3b82f6);padding:.25rem .8rem;border-radius:20px;margin-bottom:1rem;">目玉機能</div>
         <h2 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:700;line-height:1.3;margin-bottom:.75rem;">話すだけで、メモ。音声自動入力。</h2>
         <p style="font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:680px;margin-bottom:1.5rem;">
           右下のマイクをタップ、または<strong style="color:var(--text);">起動時に自動オン</strong>。あとは話すだけで、声がその場で文字になりメモになります。Appleの最新<strong style="color:var(--text);">オンデバイス音声認識</strong>を使うので、音声もテキストも外部に送りません。手がふさがっていても、思いついたことをそのまま残せます。
@@ -1096,11 +1157,11 @@
     </div>
   </section>
 
-  <!-- Obsidian Integration Spotlight (NEW in v3.0) -->
+  <!-- Obsidian Integration Spotlight (v3.0 で追加) -->
   <section class="obsidian-spotlight" style="padding:1rem 0 3rem;">
     <div class="container">
       <div class="reveal" style="background:linear-gradient(135deg,rgba(124,77,255,.12),rgba(88,86,214,.07));border:1px solid rgba(124,77,255,.25);border-radius:var(--radius-lg);padding:clamp(1.25rem,5vw,2.5rem);">
-        <div style="display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#fff;background:linear-gradient(135deg,#7c4dff,#5856D6);padding:.25rem .8rem;border-radius:20px;margin-bottom:1rem;">NEW · v3.0</div>
+        <div style="display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.05em;color:#fff;background:linear-gradient(135deg,#7c4dff,#5856D6);padding:.25rem .8rem;border-radius:20px;margin-bottom:1rem;">Obsidian連携</div>
         <h2 style="font-size:clamp(1.5rem,4vw,2rem);font-weight:700;line-height:1.3;margin-bottom:.75rem;">iPhoneのメモを、<span class="nb">自動でObsidianへ。</span></h2>
         <p style="font-size:1rem;color:var(--text-secondary);line-height:1.8;max-width:680px;margin-bottom:1.5rem;">
           ワンタップで送ったメモが、Obsidian保管庫のノートに<strong style="color:var(--text);">自動で追記</strong>されます。<span class="nb">キャプチャはiPhone、</span><span class="nb">整理はObsidian。</span>
@@ -1176,6 +1237,64 @@
           <a href="/about/" style="color:var(--accent);font-size:.875rem;text-decoration:none;padding:.75rem 1rem;border:1px solid rgba(100,180,255,.15);border-radius:8px;min-height:48px;display:inline-flex;align-items:center;">
             開発チームについて →</a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Autonomous operations — 2026-09-03 配信のプレスリリースと同じ数字・同じ境界で書く。
+       「なぜ作ったのか」（上）の続きとして、「いま誰が直し続けているのか」をここに置く。
+       製品の売り文句は上のヒーローのまま（VISION §0: AIを前面に出さない）。
+       ここはAIの賢さの自慢ではなく、**運営の透明性**として名乗る面。
+       率・件数はすべて data/automation-coverage.json と data/autopilot-runs.json が正で、
+       scripts/check-autopilot-page.mjs がこのファイルも突き合わせる。 -->
+  <section class="autopilot-teaser" style="padding:1rem 0 3rem;">
+    <div class="container">
+      <h2 class="section-title reveal">
+        <span class="section-label">
+          運営のしかた
+</span>
+        アプリが、<span class="zp__g nb">自ら育ち続ける。</span>
+</h2>
+      <div class="zp reveal">
+        <p class="zp__lead">
+          毎朝、AIが検索データと前日までの運転記録を読んで<strong>その日に直す1件</strong>を自分で選び、実装し、<strong>83種の自動検査</strong>に通します。通らなければ公開されません。2026年8月11日から9月2日までの23日間で、公式サイトと運営基盤に19件が反映されました。<strong>アプリ本体はこれとは別の経路です</strong> — AIが実装しても、実機での確認とApp Storeへの提出・公開は人が行います。
+        </p>
+        <div class="zp__kpis">
+          <div class="zp__kpi"><span>AI実行率</span><b>76.4%</b><em>実施中174タスクのうち、人の個別承認を待たずにAIが実行している割合</em></div>
+          <div class="zp__kpi"><span>総合自動化率</span><b>66.8%</b><em>203タスク・13領域。まだ誰も手を付けていない25件も分母に入れた、いちばん厳しい数え方</em></div>
+          <div class="zp__kpi"><span>23日間で本番へ</span><b>19件</b><em>公式サイトと運営基盤への反映（2026年8月11日〜9月2日）</em></div>
+          <div class="zp__kpi"><span>人が中身を書き直した回数</span><b>0件</b><em>その19件について。人が入るのは基盤の修理や代走のほう</em></div>
+        </div>
+        <ul class="zp__loop">
+          <li><b>1</b>観測 — 検索・利用データと運転記録を読む</li>
+          <li><b>2</b>起案 — その日にやる1件を選ぶ</li>
+          <li><b>3</b>実装 — コード・記事・設定</li>
+          <li><b>4</b>検証 — 83種の自動検査</li>
+          <li><b>5</b>出荷 — 通ったものだけが本番へ</li>
+          <li><b>6</b>計測 — 結果も失敗も同じ形式で記録</li>
+        </ul>
+        <div class="zp__split">
+          <div class="zp__box">
+            <span class="zp__h">AIが決めて実行する</span>
+            <p>サイトと記事の新設・更新、サーバ設定、不具合を検知して段階公開を<strong>止める</strong>こと、上限内の費用。可逆な操作から順に渡しています。</p>
+          </div>
+          <div class="zp__box">
+            <span class="zp__h zp__h--human">人が決める</span>
+            <p>App Storeへの公開、実機での事前確認、価格、広告、契約。そして<strong>止まった運転を再開できるのは人だけ</strong>です — 止め損ないより、止めっぱなしのほうが安いからです。</p>
+          </div>
+        </div>
+        <p class="zp__note">
+          <strong>割合を上げるいちばん簡単な方法は、できていない仕事を一覧に書かないことです。</strong>だから、まだ誰も手を付けていない25件も分母に残していて、棚卸しに「できていない仕事」を足した日には、この割合はいったん下がりました。うまくいった回だけでなく、失敗した回・費用が想定を超えた回・どの経路も動かなかった2日も、同じ形式で公開しています。
+        </p>
+        <div class="zp__links">
+          <a href="/autopilot/" class="zp__primary">運営のしかたを全部見る →</a>
+          <a href="/data/autopilot-runs.json" class="zp__ghost">運転記録（JSON）</a>
+          <a href="/data/automation-coverage.json" class="zp__ghost">仕事の棚卸し（JSON）</a>
+          <a href="https://prtimes.jp/main/html/rd/p/000000009.000182412.html" target="_blank" rel="noopener" class="zp__ghost">プレスリリース（PR TIMES）</a>
+        </div>
+        <p class="zp__stamp">
+          数値は2026年9月2日時点（計測期間 2026年8月11日〜9月2日・23日／41実行）。台帳は日々動くので、最新はJSONを見てください。
+        </p>
       </div>
     </div>
   </section>
@@ -1642,6 +1761,7 @@
       <div class="footer__col">
         <p class="footer__col-title">読みもの</p>
         <a href="/about/" class="footer__link">運営について</a>
+        <a href="/autopilot/" class="footer__link">自律運営（AIと人の境界）</a>
         <a href="/devlog/" class="footer__link">開発日誌</a>
         <a href="/methods/" class="footer__link">メソッド</a>
         <a href="/blog/" class="footer__link">ブログ</a>
