@@ -85,3 +85,32 @@ https://simplememofast.com/methods/second-brain/
 
 ---
 実施背景の詳細: `docs/seo/gsc-crawled-not-indexed-2026-09-02.md`（実施PR: #781）
+
+---
+
+## 実施報告（2026-09-02・Cowork）
+
+全7件リクエスト済み。クォータ超過なし。
+
+| URL | 区分 | 検査時の「前回のクロール」 |
+|---|---|---|
+| `/glossary/e2e-encryption/` | Tier 1 | 2026/08/29 |
+| `/glossary/timeboxing/` | Tier 1 | **2026/05/28** |
+| `/use-cases/meeting-notes/` | Tier 1 | 2026/08/22 |
+| `/vs/roam-research/` | Tier 1 | 2026/08/22 |
+| `/blog/memo-app-security-comparison` | Tier 2 | 2026/09/01 |
+| `/blog/meeting-memo-template` | Tier 2 | 2026/08/28 |
+| `/methods/second-brain/` | Tier 2 | 2026/09/01 |
+
+読み取れること:
+
+- 4件の日付は GSC の未登録リストの「前回のクロール」と一致。**`/glossary/timeboxing/` だけは5月末から
+  一度もクロールされていない**（3か月）。今回の本文追加は、Google がまだ見ていない状態。
+  このURLはリクエストが無ければ再クロール自体が来なかった可能性が高い。
+- Tier 2 の3件は 08/28〜09/01 に自然クロールされている。本文にリンクを足したのは 09/02 なので、
+  リンク先の発見はこの3件の次回クロック（リクエスト済み）に乗る。
+
+次の確認（依頼書の受入基準どおり）:
+
+- 9/17: BigQuery で4件に 09/03 以降の表示があるか（再クロール＝再評価の早期シグナル）
+- 9/24: 同じ4件と正規URL11件の表示を判定し、統合案2件と「検証を再開」の可否を決める
