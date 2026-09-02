@@ -192,6 +192,37 @@ const RULES = [
       + '書くなら Flag Ops の list で読んだ日付と件数を同じ行に添えること'
       + '（data/stop-drills.json の rollout-guard-freeze に訂正の経緯がある）',
   },
+  {
+    // [2026-09-02] **この規則が無い間、トップページは「約1秒」を出し続けていた。**
+    //
+    // 上の `stale-launch-time` は `起動 … N秒` の語順で、しかも1行に収まっている
+    // ことを前提にしている。ところがトップの数値ブロックはこう書かれていた:
+    //
+    //     <div class="stat-item__value">約1<span …>秒</span></div>
+    //     <div class="stat-item__label">アプリ起動スピード（実測中央値）</div>
+    //
+    // **3つとも外れている。**(1) 数字とラベルの順序が逆、(2) 数字と単位が
+    // `<span>` で割れている、(3) toText がタグを改行にするので `[^。\n]` を
+    // 跨げない。**規則は在り、対象ファイル（index.html）も見ていて、それでも
+    // 一度も発火しなかった** —— このリポジトリが繰り返し書いている
+    // 「判定できなかったを異常なしと報告する」形そのもの。
+    //
+    // 実測は 0.4秒（data/benchmark.json）で、同じページの説明文は
+    // 正しく「起動 0.4秒」と書いていた。**1枚のページが2つの数字を出していた。**
+    id: 'stale-launch-time-split',
+    multiline: true,
+    // 数値と単位が割れてもよく、ラベルとの順序も問わない。
+    // **改行を含む一致だけを見る**ので、1行に収まる形は上の規則の担当のまま
+    // （二重報告にしない）。
+    pattern: /(?:約\s*)?([0-9]+(?:\.[0-9]+)?)[\s\n]*秒[^。]{0,20}?起動|起動[^。]{0,20}?(?:約\s*)?([0-9]+(?:\.[0-9]+)?)[\s\n]*秒/g,
+    check: (m) => m[0].includes('\n') && launchTimeSuspect(Number(m[1] ?? m[2]), READY),
+    message: (m) => `起動時間が「${m[1] ?? m[2]}秒」（数値とラベルが別要素に割れている形）。`
+      + (READY === undefined
+        ? '実測が読めないので**検証できない** — data/benchmark.json に ready が無い'
+        : `実測は ${READY}秒（${BENCHMARK.measuredOn?.device} / ${BENCHMARK.measuredOn?.os}`
+          + ` / v${BENCHMARK.measuredOn?.ourAppVersion} / ${BENCHMARK.measuredOn?.date}実測・`
+          + 'data/benchmark.json が正）'),
+  },
 ];
 
 const hasNegation = (s) => NEGATIONS.some((n) => s.includes(n))
