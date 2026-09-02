@@ -2608,3 +2608,88 @@ seo-daily run 33569372663 の Export preflight ログから読んだ（Runbook �
 2026-08-25 に理由つきで決まっている（`act-gh-pat-scope-and-rotation`）。
 
 coverage-queue の pending は26件。故障が片付いた日はレーンEへ戻れる。
+
+## 2026-09-03（主系GitHub Actions・schedule） — レーンA（Refresh）。`/obsidian/getting-started/` に「obsidian ダウンロード」の未回答意図へ答えるFAQを追加
+
+### 経緯
+
+レーンF（自己修復・health-intake・ingest-recovery）はすべて「対象なし／正常」。監視Issue 0件、
+`data/ingest-recovery.json` の記録も0件で、修理を最優先にする理由は無かった。
+
+`growth/scripts/analyze.mjs --only unanswered` が検出した唯一のノイズフロア超過案件:
+
+    − 3.4 clicks  [query] obsidian ダウンロード
+                 imp 128 · pos 8.5 · expected CTR 2.7% · got 0
+                 already ranking: /obsidian/getting-started/ (pos 8.5, 128 imp)
+
+`growth/content/refresh-queue.json` にも同じ観測が `A1`（`query:obsidian ダウンロード`・
+`status: queued`）として既に入っていた（09-02 に自動生成・未着手）。
+
+ページを開くと、Step 1セクション（対応OS・配布形式の表）とFAQで既にインストール手順を
+詳しく扱っており、コンテンツの欠落ではなかった。ただし可視FAQ・FAQPage JSON-LDのどちらにも、
+クエリの言い回し「ダウンロード」に厳密一致する見出し・Q&Aが無い（既存の質問は「無料で使えますか」
+「アカウント登録は必要ですか」等）。**答え方の不一致**という診断で、Lane Bの実証済み手法
+（質問文とほぼ同一の見出し＋断定的な回答）をLane Aの未回答意図にも適用した。
+
+### 変更
+
+- FAQに「Obsidianはどこからダウンロードできますか？」を追加（JA/EN）。回答は
+  **2026-08-12の既存検証済み事実の範囲内**（公式サイト・obsidianmd/obsidian-releases
+  GitHubリリースの直接確認、Linux版AppImageの実インストール）で、新規の検証は行っていない
+- 同じ内容をFAQPage JSON-LDにも追加
+- `dateModified` を `2026-08-12` → `2026-09-03`
+- `refresh-queue.json` の A1 を `status: done` にし、`resolution` に対応内容を記録
+  （`STICKY_STATES` により再生成で戻らない）
+- `data/distribution-queue.json` に配信の種を追加（Runbook §5-5・`x_post_ja` 108字）
+- sitemapを再生成
+
+`/obsidian/` ハブ本体・`/obsidian/compare/logseq/` は触っていない
+（`monitor-2026-08-09-obsidian-ctr` 監視中のため対象外を確認済み）。
+
+### 検証
+
+- `seo-check.js`: 268ファイル 0 errors 0 warnings
+- iPhoneビューポート QA（Playwright, 390×844 DPR3）: `npx playwright install --with-deps chromium`
+  が正常完了（ダウンロード完了まで通した。深追いにはならなかった）。新規FAQ項目を開閉した前後で
+  `scrollWidth === clientWidth === 390`・overflowなしを実測
+- `check-css-version` / `check-benchmark`（新規CONFLICT/AMBIGUOUSなし） /
+  `check-url-normalization` / `check-internal-redirects`（13,885 href/src全て直200） /
+  `sync_constants --check` / `tag-cta-placements --check` / `check-experiments`（overdue 0） /
+  `autopilot-budget --check` / `autopilot-runs --check` / `check-authority --check` /
+  `autopilot-selfheal --check`（対象なし） / `autopilot-drill --check`（39/39） /
+  `automation-rate --check` / `check-pr-facts --check` / `d-score --check` /
+  `generate_sitemap.py --dry-run`: すべて通過
+
+### データ鮮度
+
+`bq-preflight.mjs` はこの環境で資格情報が無く落ちるため、本日 2026-09-02T00:38 UTC の
+seo-daily run 33576189276 の Export preflight ログから読んだ:
+**newest data 2026-08-30（3日遅れ・正常範囲）／21日蓄積／28日窓は2026-09-06から／
+穴なし・停止テーブルなし・中断エクスポートなし。**
+
+`growth/data/gsc/2026-09-02`（21日分・28日未満の部分ウィンドウ）は同runの
+`ingest-bigquery.mjs`が自動生成したもの。今回のunanswered-intent検出は**この単発
+スナップショット内の1クエリの期待クリック計算**を根拠にしており、複数スナップショット間の
+比較を要するdecay検出（`--only decay`）は行っていない——Runbookが「28日未満のうちに
+部分期間でスナップショットを作らない」と戒めているのは期間長が揺れる**比較**の話で、
+単発の期待クリック判定（ノイズフロア）は期間長に依存しない。
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260903-actions`（route: actions・lane: A・
+  action: refresh・outcome: shipped・pr: 793）を追記
+- `refresh-queue.json` A1 を `done` に（上記）
+- `data/autopilot-status.json` を当日分で上書き（cost/runs は script の `--json` 出力を結合）
+- 実費: 前回run（2026-09-02・33568838189）は既に台帳へ入っていたため、本日の追記対象は無し。
+  本runの実費は次回セッションが追記する
+
+### 残る弱さ・申し送り
+
+- 1回上限の未レビュー超過が2件（09-01 repair $9.37／09-02 repair $13.57）残ったまま。
+  本日はrefreshだったため主系は止まらずに進行できたが、**次にレーンFがrepairを選ぶ回は
+  着手前に止まる見込み**。解除は人間のみ（`--ack-overrun`）
+- 孤立ブランチ3件（`claude/obsidian-auto-20260827` / `-20260902` /
+  `claude/simplememofast-indexing-93xm3y`）は中身確認待ちのまま。owner_requestsに再掲
+- coverage-queue（レーンE）のpendingは26件のまま変化なし——本日はレーンAで足りる案件が
+  あったため着手していない
+- 次のGSCスナップショットで「obsidian ダウンロード」のクリック数の変化を確認すること

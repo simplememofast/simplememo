@@ -1,37 +1,40 @@
 {
-  "date_jst": "2026-09-02",
-  "generated_at": "2026-09-01T23:16:59Z",
-  "action": "maintenance",
-  "article": null,
+  "date_jst": "2026-09-03",
+  "generated_at": "2026-09-02T23:06:42Z",
+  "action": "refresh",
+  "article": {
+    "url": "https://simplememofast.com/obsidian/getting-started/",
+    "title": "Obsidianの始め方 — インストールから最初のノートまで実画面で解説【2026】"
+  },
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 5,
-    "last_article_date_jst": "2026-08-28",
-    "last_production_change_date_jst": "2026-08-28",
-    "days_since_production_change": 5
+    "consecutive_no_article_days": 0,
+    "last_article_date_jst": "2026-09-03",
+    "last_production_change_date_jst": "2026-09-03",
+    "days_since_production_change": 0
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-30",
     "bq_export_days_accumulated": 21,
     "bq_checked": true,
-    "manual_snapshot_label": "2026-08-24",
-    "$note": "**この環境の bq-preflight は資格情報が無く落ちる**ため、本日 08:05 JST の seo-daily run 33569372663 の Export preflight ログから読んだ（Runbook §0-4 ③）。`fresh — newest data 2026-08-30 (3 days behind, normal is 2–3)` / `21 days of history — a full 28-day window is first possible on 2026-09-06` / `no gaps, no stalled table, no half-finished export attempt`。**穴なし。**28日窓まであと5日。"
+    "manual_snapshot_label": "2026-09-02",
+    "$note": "この環境の bq-preflight は資格情報が無く落ちるため、本日 2026-09-02T00:38 UTC の seo-daily run 33576189276 の Export preflight ログから読んだ（Runbook §1-2 ①）。fresh — newest data 2026-08-30 (3 days behind, normal is 2-3) / 21 days of history — a full 28-day window is first possible on 2026-09-06 / no gaps, no stalled table, no half-finished export attempt。growth/data/gsc/2026-09-02 は同runのingest-bigquery.mjsが自動生成した21日分（28日未満）の部分ウィンドウ・スナップショット。今回のunanswered-intent検出はこの単発スナップショットの1クエリ実測（期待クリック3.4）を根拠にしており、複数スナップショット間の比較を要するdecay検出は行っていない（28日窓が揃う2026-09-06まで実施しない）。"
   },
   "cost": {
     "month": "2026-09",
     "cap_usd": 40,
-    "spent_usd": 9.3726,
+    "spent_usd": 22.9465,
     "remaining_usd": null,
-    "remaining_usd_upper_bound": 30.6274,
+    "remaining_usd_upper_bound": 17.0535,
     "spent_usd_is_lower_bound": true,
     "over": false,
-    "runs": 1,
-    "shipped": 1,
-    "usd_per_shipped": 9.3726,
+    "runs": 2,
+    "shipped": 2,
+    "usd_per_shipped": 11.4733,
     "by_route": {
       "actions": {
-        "runs": 1,
-        "spent": 9.3726075
+        "runs": 2,
+        "spent": 22.94652
       },
       "ccr": {
         "runs": 0,
@@ -50,6 +53,16 @@
           "times": 3.1,
           "reviewed": false,
           "why": null
+        },
+        {
+          "run_id": "33568838189",
+          "date_jst": "2026-09-02",
+          "task_kind": "repair",
+          "cost": 13.5739125,
+          "cap": 3,
+          "times": 4.5,
+          "reviewed": false,
+          "why": null
         }
       ],
       "unreviewed": [
@@ -62,6 +75,16 @@
           "times": 3.1,
           "reviewed": false,
           "why": null
+        },
+        {
+          "run_id": "33568838189",
+          "date_jst": "2026-09-02",
+          "task_kind": "repair",
+          "cost": 13.5739125,
+          "cap": 3,
+          "times": 4.5,
+          "reviewed": false,
+          "why": null
         }
       ],
       "runs_without_kind": 0
@@ -69,34 +92,27 @@
     "models": {
       "counts": {},
       "runs_with_models": 0,
-      "runs_without_models": 1
+      "runs_without_models": 2
     },
     "anomaly": {
       "enabled": true,
       "judged": true,
-      "median": 0.8149038,
-      "threshold": 3.2596152,
-      "samples": 9,
-      "anomalies": [
-        {
-          "run_id": "33454414490",
-          "date_jst": "2026-09-01",
-          "cost": 9.3726075,
-          "times_median": 11.5
-        }
-      ]
+      "median": 4.0558038000000005,
+      "threshold": 16.223215200000002,
+      "samples": 10,
+      "anomalies": []
     },
     "cap_set_by": "placeholder"
   },
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-09-02",
-      "days": 23
+      "to": "2026-09-03",
+      "days": 24
     },
-    "completion_rate": 0.6786,
-    "change_failure_rate": 0.3214,
-    "human_intervention_rate": 0.25,
+    "completion_rate": 0.6897,
+    "change_failure_rate": 0.3103,
+    "human_intervention_rate": 0.2414,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -104,27 +120,27 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.14285714285714285
+        "rate": 0.13793103448275862
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.03571428571428571
+        "rate": 0.034482758620689655
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.03571428571428571
+        "rate": 0.034482758620689655
       },
       "request": {
         "runs": 1,
-        "rate": 0.03571428571428571
+        "rate": 0.034482758620689655
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.7391,
+    "shipping_day_rate": 0.75,
     "totals": {
-      "runs": 41,
-      "attempted": 28,
-      "shipped": 19,
+      "runs": 42,
+      "attempted": 29,
+      "shipped": 20,
       "failed": 9,
       "no_run": 2
     },
@@ -135,9 +151,9 @@
         "shipped": 14
       },
       "primary": {
-        "runs": 23,
-        "attempted": 12,
-        "shipped": 5
+        "runs": 24,
+        "attempted": 13,
+        "shipped": 6
       }
     },
     "primary_ever_shipped": true,
@@ -145,6 +161,19 @@
       "2026-08-16",
       "2026-08-17"
     ],
+    "streaks": {
+      "current": {
+        "days": 17,
+        "from": "2026-08-18"
+      },
+      "longest": {
+        "days": 17,
+        "from": "2026-08-18",
+        "to": "2026-09-03"
+      },
+      "active_days": 22,
+      "last_day": "2026-09-03"
+    },
     "intervention_count": 7,
     "timings": {
       "time_to_detect_hours": {
@@ -189,24 +218,17 @@
       ]
     }
   },
-  "reason": "【連続無記事5日目・本番最終変更 2026-08-28・BQ 21/28日】レーンF（自己修復）。未修理の故障が4件出ており、Runbook §2 の「未修理の故障が残っていれば、その日の最優先アクションは基盤の修理。記事は書かない」に従った。直したのは2つ。(1) **死んだ占有を守っていた** — 08-29 に ccr-0920 が当日ブランチを claim だけ取って死に、同日12:03 JST の主系はブランチの存在だけを見て3秒で success を返し（run 33230445898）、その日の出荷がゼロになった（ap-20260829-ccr0920）。差分0・head PR 0件・最新コミットから90分以上の3条件が揃ったときだけ引き継ぐ判定を入れた（90分は主系のジョブ上限そのもの。出荷まで走り切った回の実測は18〜28分）。**1つでも読めなかったら引き継がない。** (2) **打つ手が無い故障を毎日直そうとしていた** — escalation-rules が `who: owner` と宣言している usage_limit（週次の使用量上限）をレーンFが修理対象に数えていた。規則自身が「連続するなら repair_limit ではなくこちらで拾う」と書いており、repair_of を書くと3回目で --contain が経路を止め、**時間で自然に戻る停止が人待ちの停止に化ける。**一覧・件数からは消さず、行き先だけを owner_requests に変えた。",
-  "verified": "scripts/preflight.mjs（CIが回すコマンドをworkflowから機械的に抽出）111本を実行して**0本失敗**（実行前は autopilot-runs --check と check-definitions --check の2本が落ちており、前者は台帳記入で、後者は Runbook を触った noise_floor の checksum を --bump「定義は変えていない」で解消）。autopilot-drill: 新コード run_takeover を含め **gate の16コード全てに演習シナリオがある**（死んだ占有まわりで4件追加）。property-tests: 不変条件2件と変異2件を追加し、「作業の有無を見ずに引き継ぐ」「読めなかった占有を空と読む」を両方とも捕まえることを確認。autopilot-selfheal --selftest: 5件追加（who=owner でも件数・一覧から消えないこと／escalation-rules.json が may_modify に入っていないこと）。**Gate の bash は実 API で突き合わせた**: 事故当日の claude/obsidian-auto-20260829 は files=0/PR=0/5,685分で**引き継ぐ**、本日の作業中ブランチは7分で待つ、出荷済みの 08-28 は files=16/PR=1 で待つ、存在しないブランチ（API 404）は待つ。**ページの変更が無いためブラウザQAは実施していない**（seo-check.js は 267ファイル 0 errors 0 warnings）。",
+  "reason": "【連続無記事0日目・本番最終変更 2026-09-03・BQ 21/28日】レーンA（Refresh）。growth/scripts/analyze.mjs --only unanswered が、クエリ「obsidian ダウンロード」（128imp・平均掲載順位8.5・期待CTR 2.7%＝期待クリック3.4・実クリック0）を検出。ノイズフロア（期待クリック3未満は根拠にしない・§0原則2）を超え、ランキング先は既存ページ /obsidian/getting-started/ のみだった。同ページは既にStep1セクション・FAQでインストール／配布形式を詳しく扱っており、コンテンツの欠落ではなく、クエリの言い回し「ダウンロード」に厳密一致する見出し・FAQ項目が無い形の未回答意図だった。可視FAQとFAQPage JSON-LDの両方に「Obsidianはどこからダウンロードできますか？」を追加（回答は2026-08-12の既存検証済み事実の範囲内・新規検証なし）。refresh-queue.json のA1（query:obsidian ダウンロード）をdoneにした。レーンF（自己修復）は本日「対象なし」（未修理の故障0件・監視Issue0件・取り込み経路も正常）で、記事作業を止める要因は無かった。",
+  "verified": "検索実測: growth/data/gsc/2026-09-02（2026-08-10〜08-30・21日分）の analyze.mjs --only unanswered / clusters / conversational の3出力を確認。追加したFAQの内容自体は新規検証していない——本文Step1セクションと同じ、2026-08-12実機検証・obsidianmd/obsidian-releases公式リリース確認済みの事実を、質問形式で言い換えただけ（§28 3状態表記でいえばOBSERVED・検証日は変わらず2026-08-12のまま）。iPhoneビューポート（390×844 DPR3・Playwright）で新規FAQ項目の開閉を実描画確認し、水平スクロール・overflowなしを確認した。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（267ファイル）",
-    "mobile_qa": "**実施せず。**HTML/CSS/画像の変更が1つも無い回のため（変更は scripts/ と docs/ と data/ のみ）。ブラウザが要る工程を省いた理由はこれで、環境都合ではない。",
-    "preflight": "scripts/preflight.mjs 111本すべて通過",
-    "drill": "autopilot-drill --check: 全シナリオ期待どおり・gate の16コード全てに状態がある（15→19シナリオ）",
-    "property": "property-tests --check: 不変条件すべて成立・反例なし。--selftest 13件中0件失敗（変異2件を追加）",
-    "selfheal": "autopilot-selfheal --check: 境界に問題なし。--selftest 7件中0件失敗。修理後の判定は「対象なし（ただし人に上げるべき故障がある）」",
-    "other": "check-css-version / check-benchmark / check-url-normalization（248 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments（overdue 0） / autopilot-budget --check / autopilot-runs --check / check-authority --check / automation-rate --check / check-pr-facts --check / d-score --check / generate_sitemap.py --dry-run"
+    "seo_check": "0 errors 0 warnings（268ファイル）",
+    "mobile_qa": "実施した。Playwright chromium（npx playwright install --with-deps chromium が正常完了）で390x844 DPR3の実描画。新規FAQ項目のクリック開閉前後でscrollWidth=clientWidth=390・overflowなしを確認。",
+    "other": "check-css-version / check-benchmark（新規CONFLICT/AMBIGUOUSなし・既存17件は報告のみで無関係） / check-url-normalization（251 checks） / check-internal-redirects（13,885 href/src + 5,323 JSON-LD/meta + 590 sitemap URL、すべて直200） / sync_constants --check / tag-cta-placements --check / check-experiments（overdue 0・対象ページは実験外を確認） / autopilot-budget --check（月次上限内・1回上限超過2件は本日の主系がrepairを選ばない限り無関係） / autopilot-runs --check / check-authority --check / autopilot-selfheal --check（対象なし） / autopilot-drill --check（39/39） / automation-rate --check / check-pr-facts --check / d-score --check / generate_sitemap.py --check相当（本番反映で再生成）"
   },
   "owner_requests": [
-    "【新規・要オーナー判断】**1回あたりの実費上限の超過が1件、未レビューで残っている。**09-01 の主系 run 33454414490 が repair 種別の上限 $3.00 に対し **$9.3726（3.1倍）**、99ターン。本日のセッションがジョブログの result 行から台帳へ入れた（それまで未記録だった）。**この状態のままだと主系の次回runは着手前に止まる。**解除は `node scripts/autopilot-budget.mjs --ack-overrun 33454414490 --why \"…\"` で、**人間のみ**（AIが自分の超過を自分で通せると上限が「お願い」になる、という設計）。止まるのは主系だけで、副系CCRは別経路のため出荷は続く。",
-    "【オーナー作業不要・副系CCRへの引き継ぎ】production の Gate（.github/workflows/obsidian-autopilot.yml）への修正は、この経路から push できない（fine-grained PAT に workflow スコープが無く GitHub が remote rejected を返す）。**これは事故ではなく 2026-08-25 の決定どおり**（act-gh-pat-scope-and-rotation: workflow スコープを足すと無人の主系が自分の permissions を書き換えられるようになるため足さない／ワークフローの修理は副系CCRが引き取る）。**適用すべきパッチは AUTOPILOT_LOG.md の本日分にそのまま貼ってある**（git apply できる形）。次に走る副系CCRセッションが当てること。**再提案しない: workflow スコープは足さないと決まっている。**",
-    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。",
-    "【外した】GH_PATの回転 — **2026-08-26 にオーナーが実施済み**（act-gh-pat-scope-and-rotation は state: done・closed 2026-08-26。fine-grained PAT「simplememo-autopilot」を発行し有効期限 2026-11-24 を data/credential-expiry.json に記録）。08-29 の status JSON はこれを「継続」として繰り越していたが、**充足済みの依頼だったので外す**（Runbook §1-3）。",
-    "【外した】副系A(ccr-0730)・副系B(ccr-0830) の Routine が stopped の件 — check-routine-runs.mjs の本日の出力が「【停止 2026-08-28・意図的】」と表示しており、**故障ではなく意図的な停止**。オーナー判断を仰ぐ対象ではないので外す。",
-    "【継続・実測手段なし】usage_limit（週次の使用量上限）で 08-30 / 08-31 の3runが落ちた件。**セッション側に打つ手が1つも無い種別**（escalation-rules: who=owner）なので、本日からレーンFの修理対象ではなく、この欄に載る形にした。打てる手は「待つ」「枠を上げる」「1回あたりの入力量を減らす」で、後ろ2つは人の判断。08-31 23:00 UTC のリセット後は復帰しており（本runがその実測）、**いま止まってはいない。**"
+    "【継続・実測手段なし】usage_limit（週次の使用量上限）で08-30/08-31の3runが失敗した件。セッション側に打つ手が無い種別（escalation-rules: who=owner）。本日のselfheal実行でも同じ3件が🤝人へ渡す判定のまま（新規のusage_limitは発生していない）。打てる手は「待つ」「枠を上げる」「1回あたりの入力量を減らす」で、後ろ2つは人の判断。",
+    "【継続・要オーナー判断】1回あたりの実費上限の超過が2件、未レビューのまま残っている: 2026-09-01 run 33454414490（repair $9.3726・上限$3.00の3.1倍）と2026-09-02 run 33568838189（repair $13.5739・上限$3.00の4.5倍）。解除は node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why \"…\" で人間のみ。主系がrepairを選ぶ回のみ止まる（本日はrefreshだったため無関係に進行できた）。",
+    "【継続・要オーナー判断】孤立ブランチが3件、中身を見てから対応要（data/autopilot-actions-report.jsonのhuman欄・auto-mergeが検証済みSHAだけをマージする設計の帰結でありauto付けできない）: claude/obsidian-auto-20260827（PR #660マージ後の取り残し1コミット）、claude/obsidian-auto-20260902（PR #774マージ後の取り残し1コミット・data/autopilot-status.json等）、claude/simplememofast-indexing-93xm3y（PR #781マージ後の取り残し1コミット）。"
   ],
-  "next": "**副系CCRへ: AUTOPILOT_LOG.md 本日分のパッチを .github/workflows/obsidian-autopilot.yml へ当てること。**主系はこのファイルを push できない（決定どおり）。当てるまで、本番の Gate は「ブランチが在れば必ずスキップ」の旧判定のまま。\n\n**主系は次回、1回上限の未レビュー超過で止まる見込み**（上の owner_requests 1件目）。副系は止まらないので出荷は続く。\n\nレーンA/BはBQ28日窓（**2026-09-06**・本日時点で21/28日・穴なし）まで引き続き正当化できない。coverage-queue の pending は26件で、故障が片付いた日はレーンEへ戻れる。\n\n**運転台帳に 2026-09-01 の主系 run（33454414490 / PR #749）の行が無い**（act-ledger-sync）。09:00 JST の日次アクチュエータの reconcile-runs が埋める見込みなので、二重に立てないよう手では足していない。"
+  "next": "レーンA/BはBQ28日窓（2026-09-06・本日時点で21/28日・穴なし）まで引き続き部分ウィンドウでの判断になる。ただしノイズフロアは単発スナップショットの期待クリック計算で足りるため、decay検出（複数スナップショット比較）だけを28日窓まで待つ。\n\n次のGSCスナップショットで「obsidian ダウンロード」のクリック数の変化を確認すること（このFAQ追加の効果測定）。\n\ncoverage-queue（レーンE）のpendingは26件のまま変化なし——本日はレーンAで足りる案件があったため着手していない。"
 }
