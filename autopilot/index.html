@@ -366,7 +366,7 @@
           <tbody>
             <tr><td>サイトコンテンツの新設・更新</td><td>可逆</td><td>AIが単独で実行</td></tr>
             <tr><td>段階公開の<b>撤回</b>（不具合を検知して止める）</td><td>可逆</td><td>AIが単独で実行</td></tr>
-            <tr><td>段階公開の<b>拡大</b>（配る割合を上げる）</td><td><b>不可逆</b></td><td>人間の承認</td></tr>
+            <tr><td>段階公開の<b>拡大</b>（配る割合を上げる）</td><td><b>不可逆</b></td><td>機械ゲート（露出50%まで・1日1段）。<b>100%への最終段と、母数が足りないまま上げる操作は人間のみ</b></td></tr>
             <tr><td>App Review への提出</td><td><b>不可逆</b></td><td>機械ゲート（未稼働・実行側も未実装）。<b>実機での事前確認と、ゲートを有効にする操作は人間のみ</b></td></tr>
             <tr><td>App Store への公開（審査通過後）</td><td><b>不可逆</b></td><td>機械ゲート（未稼働・実行側も未実装）。<b>一括公開の判断と、ゲートを有効にする操作は人間のみ</b></td></tr>
             <tr><td>価格・プラン・無料枠の変更</td><td><b>不可逆</b></td><td>人間のみ<span class="ap-flag">（上限は未設定）</span></td></tr>
@@ -380,6 +380,7 @@
         <p class="ap-note">
           同じ機能の「引っ込める」と「広げる」を別の領域に分けてあります。広げてから戻しても、見た人が見なかったことにはならないためです。
           <b>ただし、この門を通って実行された昇格はまだ1件もありません。</b>段階公開中のフラグは1つ（tf04_progress）で、ガードは毎時判定を出していますが、判定に要る母数（各群30）に届かず hold のままです（2026-08-27 の実測 run 33076125334）。
+          <b>「拡大」の行は、2026-09-02 に「人間の承認」から書き直しました。</b>自動昇格は 2026-08-28 にオーナーが有効にしており（<code>rollout-promotion.json</code> の <code>auto_promote.enabled</code>）、<b>権限表では露出50%までが機械ゲート付きのAI実行です。</b>ページだけが古い書き方のまま、実態より人手が多いように読める状態でした。<b>過小申告も食い違いです</b> —— 隣に置いた権限表を開くと違うことが書いてある、という形は同じなので直しました。
         </p>
       </section>
 
@@ -429,7 +430,37 @@
 
       <!-- 4. 領域別 -->
       <section class="ap-sec">
-        <h2>4. 領域別の自動化率</h2>
+        <h2>4. 自動化率 — 月ごとの推移と、領域別の内訳</h2>
+        <p class="ap-note">
+          <b>自律度は12.1%→66.8%。</b>2026年6月から8月までの3か月ぶんです。同じ199タスクを分母に固定して数えています。
+          <b>伸びたのはコードを書く力ではありません。</b>コード変更のAI著者率は2026年2月以降、コミットで87〜100%、変更行で66〜100%（7月66.3%・8月82.6%）で推移しています（月次は<a href="/data/autonomy-timeline.json">自律度の推移</a>の code_ai_commit_rate / code_ai_line_rate）。
+          動いたのは、コードを書く以外の仕事（施策を選ぶ・検証する・記録する・止める）が実行側へ移った分です。
+        </p>
+        <figure style="margin:4px 0 14px;">
+          <img src="/assets/img/autopilot/autonomy-timeline.svg"
+               alt="運営タスクの自律度とコード変更のAI著者率の月次推移。自律度は2026年4月8.0%から8月66.8%へ上がり、コード著者率は2月以降ほぼ横ばい"
+               width="880" height="330" loading="lazy" style="max-width:100%;height:auto;">
+        </figure>
+        <div class="ap-tablewrap">
+        <table class="ap-table">
+          <thead><tr><th>月</th><th class="num">総合自動化率</th><th class="num">その月に実行側へ移った数</th><th>測り方</th></tr></thead>
+          <tbody>
+            <tr><td>2026-04（ローンチ）</td><td class="num">8.0%</td><td class="num">0</td><td>再構成</td></tr>
+            <tr><td>2026-05</td><td class="num">11.1%</td><td class="num">6</td><td>再構成</td></tr>
+            <tr><td>2026-06</td><td class="num">12.1%</td><td class="num">2</td><td>再構成</td></tr>
+            <tr><td>2026-07</td><td class="num">18.6%</td><td class="num">13</td><td>再構成</td></tr>
+            <tr><td>2026-08</td><td class="num"><b>66.8%</b></td><td class="num">96</td><td><b>実測</b></td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="ap-note">
+          <b>⚠ 実測は2026年8月の1点だけです。</b>それ以前は再構成で、当時この指標を計測してはいませんでした。
+          数え方は「AIが実行しているタスクの証跡ファイルが、最初にコミットされた月」をその工程の稼働開始月とみなして累積するというもので、
+          <b>証跡の追加日と実際の稼働日には数日〜数週のずれがあります。</b>
+          分母も現在の棚卸し（199タスク）を過去へ固定したもので、<b>当時は「やるべきことの一覧」自体が存在しませんでした。</b>
+          当時の「提案どまり」「人が実行」「未着手」の内訳は復元していないため、<b>この系列で出せるのは総合自動化率だけ</b>で、AI関与率とカバー率の推移は作れません。
+          元データは<a href="/data/autonomy-timeline.json">自律度の推移</a>にそのまま置いてあり、限界の一覧も同じファイルの <code>known_limits</code> に入っています。
+        </p>
         <p class="ap-note">
           203タスク・13領域を1件ずつ棚卸しして、誰が実行するかで数えたものです。
           <b>総合自動化率66.8%、AI実行率76.4%、AI関与率87.9%。</b>「半分できていない」と自分から言える形で出しています。
@@ -572,6 +603,7 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
           <a href="/data/autopilot-status.json"><b>稼働状況</b><span>いま何が動いていて、何が止まっているか</span></a>
           <a href="/data/autopilot-cost.json"><b>AI実費</b><span>月次上限と、種別ごとの枠。<b>上限値は暫定です</b></span></a>
           <a href="/data/automation-coverage.json"><b>自動化の棚卸し</b><span>203タスク・13領域を1件ずつ、誰が実行するかで分類</span></a>
+          <a href="/data/autonomy-timeline.json"><b>自律度の推移</b><span>月ごとの総合自動化率。<b>実測は2026-08の1点だけ</b>で、他は再構成。限界は同じファイルの known_limits</span></a>
           <a href="/data/authority-matrix.json"><b>権限表</b><span>19領域。可逆／不可逆と、人間のみの操作</span></a>
           <a href="/data/code-authorship.json"><b>コード著者の台帳</b><span>数え方そのものを凍結してある</span></a>
           <a href="/data/operating-memory.json"><b>運転記憶</b><span>何を仮説し、外し、何を変えたか。<b>失敗した回も消していません</b></span></a>

@@ -85,7 +85,6 @@
 const UNSERVED_DATA = new Set([
   "audit-charter.json",
   "audit-findings.json",
-  "autonomy-timeline.json",
   "autopilot-actions-report.json",
   "autopilot-actions.json",
   "benchmark.json",

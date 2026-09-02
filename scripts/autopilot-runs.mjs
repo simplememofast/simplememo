@@ -4,6 +4,7 @@
  *
  *   node scripts/autopilot-runs.mjs            # 指標サマリ
  *   node scripts/autopilot-runs.mjs --json     # 機械可読（status JSON / 日報用）
+ *   node scripts/autopilot-runs.mjs --write-status # 同じ内容を status JSON の runs へ書く
  *   node scripts/autopilot-runs.mjs --check    # CI: 台帳の形と整合を検証（壊れていたら exit 1）
  *   node scripts/autopilot-runs.mjs --selftest # 検査そのものの自己検査（台帳を読まない）
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
@@ -149,6 +150,27 @@ export function load(file = RUNS_PATH) {
  */
 const isSessionAuthored = (r) => !String(r.source ?? '').startsWith('act-');
 
+/**
+ * status JSON の `runs` ブロックが持つべき「数え直せる事実」。
+ *
+ * **`--json` が吐く形と同じ数え方を、検査側からも使う。**日報と公開ページと
+ * プレスリリースが読むのはこのブロックで、`summarize()` の出力ではない。
+ */
+export function runsFacts(doc) {
+  const runs = doc?.runs || [];
+  const days = [...new Set(runs.map((r) => r.date_jst).filter(Boolean))].sort();
+  return {
+    window: { from: days[0] ?? null, to: days.at(-1) ?? null, days: days.length },
+    totals: {
+      runs: runs.length,
+      attempted: runs.filter((r) => r.attempted).length,
+      shipped: runs.filter((r) => r.outcome === 'shipped').length,
+      failed: runs.filter((r) => FAILED.has(r.outcome)).length,
+      no_run: runs.filter((r) => r.outcome === 'no_run').length,
+    },
+  };
+}
+
 export function statusAgreement(doc, statusDoc) {
   const authored = (doc?.runs || []).filter(isSessionAuthored);
   const dates = authored.map((r) => r.date_jst).filter(Boolean).sort();
@@ -180,6 +202,54 @@ export function statusAgreement(doc, statusDoc) {
       problems.push(
         `${latest} は ${want.join(' / ')} を出荷した記録なのに、status JSON の article は `
         + `${got ?? 'なし'} — 日付だけ当日にして中身が前日のままだと、日報は前日の記事を今日の成果として出す`);
+    }
+  }
+
+  // --- 数値ブロックの突き合わせ（2026-09-02 追加）---
+  //
+  // 【なぜ足したか】日付と記事URLは見ていたが、**`runs` ブロックの数字は
+  // 誰も突き合わせていなかった。**2026-09-02、台帳が 41実行/着手28/出荷19 の
+  // ところ status JSON は **40/27/18・完走率66.67%・22日** のまま本番に出ていて、
+  // `--check` は緑だった。公開ページとプレスリリースは台帳側（67.9%）を引いており、
+  // **同じリリースがリンクする2つのJSONが違う数字を出していた。**
+  // 記者が最初にやるのは数字を1つ選んで出どころを開くことなので、ここが割れる。
+  //
+  // 【なぜ黙る条件が要るか】アクチュエータ（source が `act-`）が行を足すと totals は
+  // 動くが、**status JSON を書くのはセッションで、アクチュエータの実行時にはもう
+  // 書き終わっている。**上の日付検査が `isSessionAuthored` で黙るのと同じ理由で、
+  // ここも黙る必要がある——さもないと台帳を埋めるための経路が、埋めた結果で
+  // 自分のPRを止める（このファイル冒頭の 2026-08-25 と同じ形）。
+  //
+  // **「その日の act- 行だけ」を除外する形では足りない。**前日ぶんの追記でも
+  // totals は動くので、`status の日付以降に act- の行があるか`で見る。
+  // 最初にその形で書いて、前日追記のケースで自分を止めることに気づいた。
+  //
+  // 【残す弱さ】アクチュエータが status の日付以降に1行でも足すと、
+  // そこから先は**次にセッションが status を書き直すまで数字が検査されない。**
+  // 消したのではなく先送りで、アクチュエータを止めないほうを選んだ結果。
+  const actAtOrAfterStatus = (doc?.runs || []).some(
+    (r) => !isSessionAuthored(r) && r.date_jst && statusDate && r.date_jst >= statusDate);
+  if (statusDate === latest && !actAtOrAfterStatus) {
+    const want = runsFacts(doc);
+    const got = statusDoc.runs;
+    if (!got) {
+      problems.push('status JSON に runs ブロックが無い'
+        + ' — 日報も公開ページもここを読む。`--write-status` で書くこと');
+    } else {
+      for (const k of ['runs', 'attempted', 'shipped', 'failed', 'no_run']) {
+        if (got?.totals?.[k] !== want.totals[k]) {
+          problems.push(
+            `status JSON の runs.totals.${k} は ${got?.totals?.[k] ?? 'なし'} だが、`
+            + `台帳を数え直すと ${want.totals[k]}`
+            + ' — **数字を手で写さない。**`node scripts/autopilot-runs.mjs --write-status` で書き直すこと');
+        }
+      }
+      if (got?.window?.days !== want.window.days) {
+        problems.push(
+          `status JSON の runs.window.days は ${got?.window?.days ?? 'なし'} だが、`
+          + `台帳の実行日は ${want.window.days} 日ぶんある`
+          + ' — 同じ期間を違う長さで名乗ると、率の分母が食い違う');
+      }
     }
   }
 
@@ -537,14 +607,24 @@ function selftest() {
   const ledger = (date, extra = {}) => ({
     runs: [{ run_id: 'r0', date_jst: '2026-08-22', outcome: 'shipped', artifact: '/a/' },
            { run_id: 'r1', date_jst: date, ...extra }] });
-  const st = (date, url) => ({ date_jst: date, article: url ? { url } : null });
+  /**
+   * status JSON の合成。**`runs` は既定で台帳と一致させる。**
+   * 数値ブロックの検査（下）を足したので、ここを空にすると
+   * 日付の検査を見ているつもりのテストが全部その理由で落ちる
+   * ——実際に5件落として気づいた。fixture は検査対象以外を成立させておく。
+   */
+  const st = (date, url, ledgerDoc = null, over = {}) => ({
+    date_jst: date,
+    article: url ? { url } : null,
+    runs: { ...(ledgerDoc ? runsFacts(ledgerDoc) : { window: { days: 0 }, totals: {} }), ...over },
+  });
   const probs = (d, sd) => statusAgreement(d, sd).problems.length;
 
   // 2026-08-23 の実害そのもの: 出荷したのに status JSON が前日のまま
   const shippedToday = ledger('2026-08-23', { outcome: 'shipped', artifact: '/obsidian/pricing/' });
   eq(probs(shippedToday, st('2026-08-22', '/obsidian/plugins/dataview/')), 1,
      '**出荷したのに status JSON が前日のまま → 落とす**（08-23 に日報を誤らせた状態）');
-  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/')), 0,
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/', shippedToday)), 0,
      '当日ぶんを書けば通る');
 
   // 逆向き（PR #540 の実害）: status は当日なのに台帳に行が無い。
@@ -555,15 +635,15 @@ function selftest() {
      '**status のほうが新しい（台帳の行が無い）→ 落とす**');
 
   // 日付だけ合わせて中身が前日、を通さない
-  eq(probs(shippedToday, st('2026-08-23', '/obsidian/plugins/dataview/')), 1,
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/plugins/dataview/', shippedToday)), 1,
      '日付は当日でも article が別の記事なら落とす');
   // 絶対URLと相対パスは同じものとして扱う（どちらの書き方も実在する）
-  eq(probs(shippedToday, st('2026-08-23', 'https://simplememofast.com/obsidian/pricing/')), 0,
+  eq(probs(shippedToday, st('2026-08-23', 'https://simplememofast.com/obsidian/pricing/', shippedToday)), 0,
      '絶対URLでも一致とみなす');
 
   // 出荷が無い日は article を問わない（スキップ日も status JSON は更新する決まり）
   const skipToday = ledger('2026-08-23', { outcome: 'no_run' });
-  eq(probs(skipToday, st('2026-08-23', null)), 0, '無運転の日は article なしで通る');
+  eq(probs(skipToday, st('2026-08-23', null, skipToday)), 0, '無運転の日は article なしで通る');
   eq(probs(skipToday, st('2026-08-22', null)), 1, 'スキップでも status JSON を書かなければ落ちる');
 
   // --- 日次アクチュエータとの相互作用（2026-08-25 統合時に追加）---
@@ -584,6 +664,36 @@ function selftest() {
   // source 未記入は従来どおりセッション扱い（過去の行を素通りさせない）
   eq(probs(ledger('2026-08-26', { outcome: 'shipped', artifact: '/y/' }), st('2026-08-25', '/a/')), 1,
      'source 未記入の行はセッション扱い（既存の台帳を素通りさせない）');
+
+  // --- 数値ブロックの突き合わせ（2026-09-02 追加）---
+  // **本番で実際に起きた形を先に固定する。**台帳 41/28/19 に対し status JSON が
+  // 40/27/18 のまま公開され、`--check` は緑だった。日付と記事URLしか見ていなかった。
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/', shippedToday)), 0,
+     '前提: 数字が一致していれば通る');
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/', shippedToday,
+     { totals: { runs: 1, attempted: 9, shipped: 0, failed: 0, no_run: 0 } })), 3,
+     '**totals が台帳とずれたら落とす**（runs / attempted / shipped の3件）');
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/', shippedToday,
+     { window: { days: 1 } })), 1,
+     '**期間の日数がずれたら落とす**（同じ期間を違う長さで名乗ると率の分母が食い違う）');
+  eq(probs(shippedToday, { date_jst: '2026-08-23', article: { url: '/obsidian/pricing/' } }), 1,
+     '**runs ブロックごと無いのは「問題なし」ではない**（日報も公開ページもここを読む）');
+
+  // アクチュエータを止めないこと。**ここを取り違えると本番の日次が毎日落ちる。**
+  // act- の行は totals を動かすが、status JSON はその前に書き終わっている。
+  const actYesterday = { runs: [
+    { run_id: 'a1', date_jst: '2026-08-25', outcome: 'shipped', artifact: '/x/', attempted: true, source: 'session' },
+    { run_id: 'a2', date_jst: '2026-08-26', outcome: 'failed', attempted: true, source: 'act-reconcile' }] };
+  eq(probs(actYesterday, st('2026-08-25', '/x/', { runs: [actYesterday.runs[0]] })), 0,
+     '**翌日ぶんの act- 追記で status の数字を落とさない**（埋める経路が埋めた結果で止まらない）');
+  const actSameDay = { runs: [
+    { run_id: 'b1', date_jst: '2026-08-25', outcome: 'shipped', artifact: '/x/', attempted: true, source: 'session' },
+    { run_id: 'b2', date_jst: '2026-08-25', outcome: 'failed', attempted: true, source: 'act-reconcile' }] };
+  eq(probs(actSameDay, st('2026-08-25', '/x/', { runs: [actSameDay.runs[0]] })), 0,
+     '**同じ日の act- 追記でも落とさない**（前日ぶんだけ除外する形では足りなかった）');
+  // ただし act- が1行も無いなら、ずれは全部セッションの責任として落とす
+  eq(probs(shippedToday, st('2026-08-23', '/obsidian/pricing/', { runs: [shippedToday.runs[0]] })), 3,
+     'act- が無ければ、写し損ねはそのまま落ちる（runs / shipped / 日数）');
 
   // 異常系
   eq(probs(shippedToday, null), 1, '**status JSON が読めないのは「問題なし」ではない**');
@@ -694,22 +804,46 @@ if (isMain) {
   const s = summarize(doc, { since: val('since', null), costDoc, statusDoc });
   if (costUnreadable) { console.error(costUnreadable); process.exit(1); }
 
+  /**
+   * status JSON の `runs` に入る形。**`--json` と `--write-status` で同じものを使う。**
+   * 別々に組むと、片方だけ直したときに公開されるほうがずれる
+   * ——2026-09-02 に本番へ出た 40/27/18 は、まさに手で写した写しだった。
+   */
+  const runsBlock = {
+    window: s.window,
+    completion_rate: s.completion_rate === null ? null : Number(s.completion_rate.toFixed(4)),
+    change_failure_rate: s.change_failure_rate === null ? null : Number(s.change_failure_rate.toFixed(4)),
+    human_intervention_rate: s.human_intervention_rate === null ? null : Number(s.human_intervention_rate.toFixed(4)),
+    intervention_by_kind: s.intervention_by_kind,
+    artifact_autonomy_rate: s.artifact_autonomy_rate === null ? null : Number(s.artifact_autonomy_rate.toFixed(4)),
+    shipping_day_rate: s.shipping_day_rate === null ? null : Number(s.shipping_day_rate.toFixed(4)),
+    totals: s.totals, by_route: s.by_route,
+    primary_ever_shipped: s.primary_ever_shipped,
+    no_run_days: s.no_run_days,
+    streaks: s.streaks,
+    intervention_count: s.interventions.length,
+    timings: s.timings,
+  };
+
   if (has('json')) {
-    console.log(JSON.stringify({
-      window: s.window,
-      completion_rate: s.completion_rate === null ? null : Number(s.completion_rate.toFixed(4)),
-      change_failure_rate: s.change_failure_rate === null ? null : Number(s.change_failure_rate.toFixed(4)),
-      human_intervention_rate: s.human_intervention_rate === null ? null : Number(s.human_intervention_rate.toFixed(4)),
-      intervention_by_kind: s.intervention_by_kind,
-      artifact_autonomy_rate: s.artifact_autonomy_rate === null ? null : Number(s.artifact_autonomy_rate.toFixed(4)),
-      shipping_day_rate: s.shipping_day_rate === null ? null : Number(s.shipping_day_rate.toFixed(4)),
-      totals: s.totals, by_route: s.by_route,
-      primary_ever_shipped: s.primary_ever_shipped,
-      no_run_days: s.no_run_days,
-      streaks: s.streaks,
-      intervention_count: s.interventions.length,
-      timings: s.timings,
-    }, null, 2));
+    console.log(JSON.stringify(runsBlock, null, 2));
+    process.exit(0);
+  }
+
+  // **`runs` ブロックだけを差し替える。**status JSON の他の欄（reason / verified /
+  // owner_requests / next）はセッションが書く散文で、台帳から導けない。
+  // 丸ごと生成する実装にすると、その日の判断がここで消える。
+  if (has('write-status')) {
+    if (!statusDoc) {
+      console.error('data/autopilot-status.json が読めないので書き換えない'
+        + ' — 空から作ると reason / verified / owner_requests が消える');
+      process.exit(1);
+    }
+    statusDoc.runs = runsBlock;
+    fs.writeFileSync(STATUS_PATH, `${JSON.stringify(statusDoc, null, 2)}\n`);
+    console.log(`data/autopilot-status.json の runs を台帳の現在値で書き直した`
+      + `（${runsBlock.totals.runs} 実行 / 着手 ${runsBlock.totals.attempted} / 出荷 ${runsBlock.totals.shipped}`
+      + ` / ${runsBlock.window.days} 日）`);
     process.exit(0);
   }
 

@@ -44,8 +44,8 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 8,
-      "checksum": "a437da8880473be8",
+      "version": 9,
+      "checksum": "69d8324514ec14b7",
       "changed_at": "2026-09-02",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
@@ -82,7 +82,12 @@
         {
           "version": 8,
           "at": "2026-09-02",
-          "why": "定義は変えていない。autopilot-runs.mjs に activeStreaks()（連続稼働の定義: no_run の行がある日を停止日、行の無い日は連続を切る）と、その表示・JSON出力・自己テストを足しただけで、完走率の式（shipped / attempted）にも分母の扱いにも触れていない"
+          "why": "定義は変えていない。AI完走率は shipped/attempted のまま。触ったのは status JSON との突き合わせを厚くした部分で、分子・分母のどちらにも変更なし: (1) statusAgreement に runs ブロック（totals 5項目 と window.days）の照合を追加、(2) --write-status を足して数字を手で写す経路を廃止、(3) --json と --write-status が同じ runsBlock を共有、(4) 欠落時に TypeError で落ちないよう got?.totals へ。**きっかけは 2026-09-02 に本番の status JSON が 40/27/18 のまま出ていたこと**（台帳は 41/28/19）"
+        },
+        {
+          "version": 9,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。main の #790（status JSON の runs ブロック照合・--write-status）と、#789 の activeStreaks()（連続稼働の定義: no_run の行がある日を停止日、行の無い日は連続を切る）をマージした回。完走率の式（shipped / attempted）にも分母の扱いにも触れていない"
         }
       ]
     },
@@ -368,7 +373,7 @@
       "formula": "停止日 = no_run の行がある日（同じ日に主系の skipped_gate 行が並んでいても停止）。稼働日 = no_run の行が無く、行が1つでもある日。行の無い日は連続を切る。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
       "version": 1,
-      "checksum": "a437da8880473be8",
+      "checksum": "69d8324514ec14b7",
       "changed_at": "2026-09-02",
       "why_it_matters": "08-27 に「16日間連続で稼働」を取り下げたが、次に「連続」と書くときの定義がどこにも無かった。定義を置いて数えると 2026-08-18 から16日（08-16・17 で一度切れている）。**skipped_gate を稼働と読むと23日連続が復活する**ので、no_run を日単位の判定として優先する側に固定した",
       "history": []
