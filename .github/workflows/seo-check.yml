@@ -312,7 +312,9 @@ jobs:
       # docs/pr-*.md は draft / internal / archived のどれかを宣言する。
       # 未宣言は落とす — 暗黙のファイル名規則にすると新しい原稿が黙って外れる。
       - name: PR draft facts
-        run: node scripts/check-pr-facts.mjs --check
+        run: |
+          node scripts/check-pr-facts.mjs --selftest
+          node scripts/check-pr-facts.mjs --check
 
       # 【切替演習】バックアップ経路が本当に引き継ぐかを、実行で確かめる。
       #
@@ -509,6 +511,30 @@ jobs:
         run: |
           node scripts/autopilot-runs.mjs --selftest
           node scripts/autopilot-runs.mjs --check
+
+      # 【Lane B の運転台帳】アプリ本体の版を1版1行で持つ（data/app-releases.json）。
+      #
+      # 2026-09-02 の配信前日に気づいた: 運転台帳（上）が数えるのは Lane A（サイト・
+      # 運営基盤）だけで、「出荷19件」にアプリ本体は1件も無い。いっぽう同じ期間に
+      # 7版が App Store に並んでいるのに、それを1行ずつ言える台帳が無かった。
+      # 隣のリポジトリは CI に無いので、ここで見るのは**算数・形・鮮度**だけ
+      # （code-authorship と同じ）。数え直しは3リポジトリの揃った場所で --write。
+      # 30日書き直されなければ落ちる —— 古い台帳は、無い台帳と同じ。
+      - name: App release ledger (Lane B)
+        run: |
+          node scripts/app-releases.mjs --selftest
+          node scripts/app-releases.mjs --check
+
+      # 【先行例の台帳】他社の「自律運営・自律開発」の主張を一次URL・確認日つきで持つ
+      # （data/prior-art.json）。2026-09-02 の配信前日に、持ち込まれた14件のうち5件が
+      # 一次ソースと食い違った（Warp「週300PR超」は根拠なし ほか）。
+      # 配信（distribution-queue の autopilot クラスタ）が2営業日以内にあるとき、
+      # 全件の確認日が7日以内でなければ落ちる。**各社の主張が今も正しいかは見ない**
+      # （ネットを読まない）。落とすのは確認日の古さだけ。
+      - name: Prior-art ledger freshness
+        run: |
+          node scripts/check-prior-art.mjs --selftest
+          node scripts/check-prior-art.mjs --check
 
       # 【アクション台帳】日次アクチュエータが読み書きする台帳の形を見る。
       #

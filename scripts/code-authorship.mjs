@@ -4,7 +4,9 @@
  *
  *   node scripts/code-authorship.mjs                       # 既定の窓で数える
  *   node scripts/code-authorship.mjs --from 2026-08-11 --to 2026-08-22
- *   node scripts/code-authorship.mjs --write               # 台帳を更新
+ *   node scripts/code-authorship.mjs --write               # 台帳を更新（見出しの窓）
+ *   node scripts/code-authorship.mjs --write-window --from 2026-08-11 --to 2026-09-01
+ *                                                          # 見出しとは別の窓を windows[] に足す／更新する
  *   node scripts/code-authorship.mjs --check               # CI
  *
  * 【なぜ作るか】
@@ -21,7 +23,8 @@
  * 【定義（ここが全部）】
  * - 対象コミット … 指定窓の author date。**マージコミットは除く**
  *   （マージは差分の重複計上になり、率を上げる方向に効く）
- * - AI著者 … `author` に Claude を含む、または本文に `Co-Authored-By: Claude`
+ * - AI著者 … `author` に Claude を含む、または本文に `Co-Authored-By: Claude`、
+ *   または本文に Claude Code の足跡（`Generated with [Claude Code]` / セッション URL / `Claude-Session:`）— 定義 v2（2026-09-02）
  * - 変更行 … `git show --numstat` の **追加 + 削除**（バイナリの `-` は0扱い）
  * - 範囲 … 3リポジトリ。既定は現在のブランチのみ。`--all-branches` で全参照
  * - 窓 … **計測日そのものは入れない。**計測日はAIが集中的に書いている日に
@@ -46,6 +49,16 @@ const REPOS = ['simplememo', 'simplememo-api', 'simplememo-ios'];
 
 const AI_AUTHOR = /claude/i;
 const AI_TRAILER = /^Co-Authored-By:\s*Claude/im;
+/**
+ * [2026-09-02] 定義 v2。**PR 本文の末尾に付く機械の足跡**も AI 著者の印に数える。
+ * GitHub の squash マージはコミット本文に PR 本文を写すが、Claude Code が作る PR 本文の末尾は
+ * 「🤖 Generated with [Claude Code]」とセッション URL であって Co-Authored-By ではない。
+ * v1（署名とトレーラーだけ）ではそれが人側に落ちる。8/11〜9/1 の実測では v1 と v2 の値は
+ * 一致した（足跡を持つ squash コミットがまだ無かった）ので、公開値は動いていない。
+ * 手で書ける印なので「厳密に AI が書いた」証明ではないが、**申告の無いコミットを人側に数える**
+ * 方針は変えない —— 申告の書式を1つ増やしただけ。
+ */
+const AI_FOOTPRINT = /Generated with \[Claude Code\]|claude\.ai\/code\/session|^Claude-Session:/im;
 
 /** 1リポジトリを数える。git が無い・リポジトリが無い場合は null（0ではない）。 */
 export function measureRepo(repoPath, { from, to, allBranches = false }) {
@@ -73,7 +86,7 @@ export function measureRepo(repoPath, { from, to, allBranches = false }) {
   for (const c of commits) {
     if (seen.has(c.sha)) continue;
     seen.add(c.sha);
-    const isAI = AI_AUTHOR.test(c.author) || AI_TRAILER.test(c.body);
+    const isAI = AI_AUTHOR.test(c.author) || AI_TRAILER.test(c.body) || AI_FOOTPRINT.test(c.body);
     let lines = 0;
     try {
       const stat = execFileSync('git', ['show', '--numstat', '--format=', c.sha],
@@ -151,7 +164,36 @@ export function validateLedger(doc) {
       problems.push(`headline.lines_rate_pct ${doc.headline.lines_rate_pct}% が実測 ${want}% と違う`);
     }
   }
+  // [2026-09-02] 見出しの窓（8/11〜8/21）とは別の窓も台帳に持つ。原稿が「同期間」と書いて
+  // 別の窓の値を引いた事故の再発防止 —— **原稿に出る率は、どれかの窓の値でなければならない**
+  // （突き合わせは check-autopilot-page.mjs）。ここは各窓の算数だけを見る。
+  for (const [i, w] of (doc.windows ?? []).entries()) {
+    const at = `windows[${i}]`;
+    if (!w || typeof w !== 'object') { problems.push(`${at}: object でない`); continue; }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(w.from ?? '') || !/^\d{4}-\d{2}-\d{2}$/.test(w.to ?? '')) problems.push(`${at}: from / to が YYYY-MM-DD でない`);
+    if (!w.measured_at) problems.push(`${at}: measured_at が無い（同じ窓でも後から数えると絶対数が動く）`);
+    const ws = Object.values(w.per_repo || {}).reduce((a, b) => ({
+      commits_total: a.commits_total + b.commits_total, commits_ai: a.commits_ai + b.commits_ai,
+      lines_total: a.lines_total + b.lines_total, lines_ai: a.lines_ai + b.lines_ai,
+    }), { commits_total: 0, commits_ai: 0, lines_total: 0, lines_ai: 0 });
+    for (const k of Object.keys(ws)) {
+      if (w.total?.[k] !== ws[k]) problems.push(`${at}: total.${k} が内訳の合計と一致しない`);
+    }
+    if (ws.commits_ai > ws.commits_total || ws.lines_ai > ws.lines_total) problems.push(`${at}: AI分が合計を超えている`);
+    const wc = Number((rate(ws.commits_ai, ws.commits_total) * 100).toFixed(1));
+    const wl = Number((rate(ws.lines_ai, ws.lines_total) * 100).toFixed(1));
+    if (w.rates?.commits_rate_pct !== wc) problems.push(`${at}: rates.commits_rate_pct ${w.rates?.commits_rate_pct} が実測 ${wc} と違う`);
+    if (w.rates?.lines_rate_pct !== wl) problems.push(`${at}: rates.lines_rate_pct ${w.rates?.lines_rate_pct} が実測 ${wl} と違う`);
+  }
   return problems;
+}
+
+/** 台帳が持つすべての率（見出し＋窓）。公開面の突き合わせが使う。 */
+export function knownRates(doc) {
+  const out = [];
+  if (doc?.headline) out.push({ window: `${doc.from}〜${doc.to}`, commits: doc.headline.commits_rate_pct, lines: doc.headline.lines_rate_pct });
+  for (const w of doc?.windows ?? []) out.push({ window: `${w.from}〜${w.to}`, commits: w.rates?.commits_rate_pct, lines: w.rates?.lines_rate_pct });
+  return out;
 }
 
 
@@ -163,6 +205,14 @@ const SELFTEST_BREAKAGES = [
   ['**見出しの率の鍵を消すと落ちる**（正が無いのを「合っている」と読まない）',
     (d) => { delete d.headline; }],
   ['見出しの率が実測とずれれば落ちる', (d) => { d.headline.lines_rate_pct = 99.9; }],
+  ['**窓の率が実測とずれれば落ちる**（「同期間」に別の窓の値を引いた事故を台帳側で止める）', (d) => {
+    if (!d.windows?.length) throw new Error('検体に windows が無い — --write-window で1つ入れてから');
+    d.windows[0].rates.commits_rate_pct = 99.5;
+  }],
+  ['窓の合計が内訳と一致しなければ落ちる', (d) => {
+    if (!d.windows?.length) throw new Error('検体に windows が無い');
+    d.windows[0].total.commits_total += 7;
+  }],
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(LEDGER, 'utf8')),
@@ -230,6 +280,31 @@ if (isMain) {
   console.log('  レビューで人が指示した内容も author には現れない —');
   console.log('  「壊れていることに気づいて直せと言う」は行数に出ない。');
 
+  if (argv.includes('--write-window')) {
+    if (r.missing_repos.length) {
+      console.error(`\n書き込まない: ${r.missing_repos.join(', ')} が無い。**部分的な計測を台帳にしない。**`);
+      process.exit(1);
+    }
+    if (!stored) { console.error('data/code-authorship.json が無い — 先に --write'); process.exit(1); }
+    const entry = {
+      measured_at: arg('--at', new Date().toISOString().slice(0, 10)),
+      from: r.from, to: r.to, all_branches: r.all_branches,
+      per_repo: r.per_repo, total: r.total,
+      rates: {
+        commits_rate_pct: Number((rate(r.total.commits_ai, r.total.commits_total) * 100).toFixed(1)),
+        lines_rate_pct: Number((rate(r.total.lines_ai, r.total.lines_total) * 100).toFixed(1)),
+      },
+      why: arg('--why', ''),
+    };
+    stored.windows = (stored.windows ?? []).filter((w) => !(w.from === entry.from && w.to === entry.to));
+    stored.windows.push(entry);
+    stored.windows.sort((a, b) => (a.from + a.to < b.from + b.to ? -1 : 1));
+    stored.$windows_note ??= '見出し（from/to/headline）とは別の窓。原稿に出る率はここか見出しの値でなければならない（check-autopilot-page.mjs が突き合わせる）。同じ窓を --write-window し直すと上書きされる';
+    fs.writeFileSync(LEDGER, `${JSON.stringify(stored, null, 2)}\n`);
+    console.log(`\n窓を台帳に書いた: ${entry.from}〜${entry.to}（コミット ${entry.rates.commits_rate_pct}% / 変更行 ${entry.rates.lines_rate_pct}%）`);
+    process.exit(0);
+  }
+
   if (argv.includes('--write')) {
     if (r.missing_repos.length) {
       console.error(`\n書き込まない: ${r.missing_repos.join(', ')} が無い。**部分的な計測を台帳にしない。**`);
@@ -249,7 +324,7 @@ if (isMain) {
       measured_at: arg('--at', new Date().toISOString().slice(0, 10)),
       from: r.from, to: r.to, all_branches: r.all_branches,
       method: {
-        ai_author_definition: 'author に Claude を含む、または本文に Co-Authored-By: Claude',
+        ai_author_definition: 'author に Claude を含む、または本文に Co-Authored-By: Claude、または本文に Claude Code の足跡（Generated with [Claude Code] / claude.ai/code/session / Claude-Session:）。定義 v2（2026-09-02。v1 は署名とトレーラーのみ。8/11〜9/1 の実測で v1=v2）',
         lines: 'git show --numstat の 追加 + 削除（バイナリは0）',
         excludes_merges: true,
         dedupe: 'SHA で一意化（--all は同じコミットを複数参照から拾う）',

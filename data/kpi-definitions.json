@@ -44,8 +44,8 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 8,
-      "checksum": "0565213ba30cc204",
+      "version": 9,
+      "checksum": "69d8324514ec14b7",
       "changed_at": "2026-09-02",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
@@ -83,6 +83,11 @@
           "version": 8,
           "at": "2026-09-02",
           "why": "定義は変えていない。AI完走率は shipped/attempted のまま。触ったのは status JSON との突き合わせを厚くした部分で、分子・分母のどちらにも変更なし: (1) statusAgreement に runs ブロック（totals 5項目 と window.days）の照合を追加、(2) --write-status を足して数字を手で写す経路を廃止、(3) --json と --write-status が同じ runsBlock を共有、(4) 欠落時に TypeError で落ちないよう got?.totals へ。**きっかけは 2026-09-02 に本番の status JSON が 40/27/18 のまま出ていたこと**（台帳は 41/28/19）"
+        },
+        {
+          "version": 9,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。main の #790（status JSON の runs ブロック照合・--write-status）と、#789 の activeStreaks()（連続稼働の定義: no_run の行がある日を停止日、行の無い日は連続を切る）をマージした回。完走率の式（shipped / attempted）にも分母の扱いにも触れていない"
         }
       ]
     },
@@ -289,9 +294,9 @@
       "name": "コード変更のAI著者率",
       "formula": "AI著者コミットの変更行（追加+削除）÷ 全変更行。マージ除く・SHAで一意化・**計測日は窓に入れない**",
       "source_file": "scripts/code-authorship.mjs",
-      "version": 3,
-      "checksum": "571c6f8babdb5d23",
-      "changed_at": "2026-08-26",
+      "version": 4,
+      "checksum": "e58e3821062d023f",
+      "changed_at": "2026-09-02",
       "why_it_matters": "原稿の「98.8%」は**再現できなかった**（どの数え方でも 231,315行 にならない）。数字ではなく数え方を凍結する。窓の切り方1つで 94.2% ↔ 96.6% と 2.4pt 動くので、**いちばん都合のよい日で締めない**ことを定義に含めてある",
       "history": [
         {
@@ -303,6 +308,11 @@
           "version": 3,
           "at": "2026-08-26",
           "why": "定義は変えていない。code-authorship.mjs の headline 突き合わせを「鍵が無ければ落とす」へ直しただけ（正が無いのを合っていると読まない）。率の計算式は同じ"
+        },
+        {
+          "version": 4,
+          "at": "2026-09-02",
+          "why": "定義を v2 へ広げた: 署名とトレーラーに加えて Claude Code の足跡（Generated with [Claude Code] / セッションURL / Claude-Session:）を AI 著者の印に数える。squash マージが PR 本文を写す経路で印が残るようにするため。8/11〜9/1 で v1 と v2 を実測して同値なので、公開値（99.5% / 94.2% / 81.9% / 70.9%）は動いていない。--write-window（見出しと別の窓を台帳に持つ）と knownRates() も追加"
         }
       ]
     },
@@ -322,6 +332,51 @@
           "why": "段の一覧に4族を足した（自分宛メール・email-to-obsidian・暗号化/セキュリティ比較・オフライン/比較ランキング）。**段そのもの（1.0/0.5/0.2）と基準（Free 1日3通の天井に当たるか）は変えていない**が、規則が増えたことで既定 0.5 から動いたページがある — 未宣言クリックは 25.7% → 10.8%。値が動いた以上、過去の数字とそのまま比較できないので version を上げる"
         }
       ]
+    },
+    {
+      "id": "lane_b_store_ready",
+      "name": "Lane B の App Store 到達版数",
+      "formula": "窓内にタグを切った版のうち、Apple の版の一覧で READY_FOR_DISTRIBUTION になっている版の数",
+      "source_file": "scripts/app-releases.mjs",
+      "version": 2,
+      "checksum": "23521327a7fa352e",
+      "changed_at": "2026-09-02",
+      "why_it_matters": "運転台帳（Lane A）の「出荷」にアプリ本体は入らない。アプリ本体を1版1行で数える台帳がこれで、公開面が引く「同期間に7版」の正。**AIが出した数ではない**（実機確認・提出・公開は人）",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-02",
+          "why": "定義は変えていない。AI 著者の印に Claude Code の足跡を足した（code-authorship の v2 と同じ）。到達版数の式には触れていない"
+        }
+      ]
+    },
+    {
+      "id": "lane_b_code_ai_commit_rate",
+      "name": "Lane B のコード差分の AI 著者率（コミット）",
+      "formula": "窓内の各版について 直前のタグ..このタグ のコミット（マージ除く）を数え、author に Claude を含むか本文に Co-Authored-By: Claude を持つものの割合",
+      "source_file": "scripts/app-releases.mjs",
+      "version": 2,
+      "checksum": "23521327a7fa352e",
+      "changed_at": "2026-09-02",
+      "why_it_matters": "code-authorship.mjs と同じ定義をアプリ本体の版単位に当てたもの。署名もトレーラーも持たないコミットは人側に数えるので、手元の環境から所有者の署名で入れた変更は AI に出ない（過小に出る方向の限界）",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-02",
+          "why": "定義を v2 へ広げた（code-authorship と同じ: 署名・トレーラー・Claude Code の足跡）。9/2 の再計測で値は 56.3% のまま"
+        }
+      ]
+    },
+    {
+      "id": "active_day_streak",
+      "name": "連続稼働日数",
+      "formula": "停止日 = no_run の行がある日（同じ日に主系の skipped_gate 行が並んでいても停止）。稼働日 = no_run の行が無く、行が1つでもある日。行の無い日は連続を切る。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
+      "source_file": "scripts/autopilot-runs.mjs",
+      "version": 1,
+      "checksum": "69d8324514ec14b7",
+      "changed_at": "2026-09-02",
+      "why_it_matters": "08-27 に「16日間連続で稼働」を取り下げたが、次に「連続」と書くときの定義がどこにも無かった。定義を置いて数えると 2026-08-18 から16日（08-16・17 で一度切れている）。**skipped_gate を稼働と読むと23日連続が復活する**ので、no_run を日単位の判定として優先する側に固定した",
+      "history": []
     }
   ]
 }

@@ -1,0 +1,422 @@
+{
+  "$comment": [
+    "Lane B（iOSアプリ本体）の運転台帳。**scripts/app-releases.mjs --write の出力そのもの。**手で書き換えない。",
+    "1版1行。タグ・ビルド・実機確認の記録・App Store の状態・公開が観測された時刻の幅・コード差分の AI 著者率。",
+    "",
+    "**言えること**: 同期間にタグを切った版の数、うち App Store に並んだ数、実機確認の記録がある数、公開の観測幅、各版のコード差分。",
+    "**言えないこと**: 「AIがアプリを出した」。提出・実機確認・公開は人の操作（data/authority-matrix.json）。",
+    "",
+    "公開時刻そのものは Apple が返さない。released_between は「READY 以外を最後に見た時刻」と",
+    "「READY を初めて見た時刻」の対で、実体は simplememo-ios/data/appstore/release-materials.json の git 履歴。",
+    "実機確認は recorded_from が \"owner statement\" のとき人の申告であって、機械の検証ではない。"
+  ],
+  "measured_at": "2026-09-02",
+  "window": {
+    "from": "2026-08-11",
+    "to": "2026-09-02"
+  },
+  "method": {
+    "tags": "simplememo-ios の refs/tags のうち v<x.y.z>。tag_at は creatordate、JST の日付で窓に入れる",
+    "code_ai_author_definition": "author に Claude を含む、または本文に Co-Authored-By: Claude、または本文に Claude Code の足跡（Generated with [Claude Code] / claude.ai/code/session / Claude-Session:）— scripts/code-authorship.mjs と同じ定義 v2。差分は直前のタグ..このタグ、マージ除く",
+    "release_time_definition": "release-materials.json の履歴で READY_FOR_DISTRIBUTION を初めて観測した時刻と、その直前に別の状態を観測した時刻の対。観測前から READY の版は上限だけ",
+    "device_verification": "device-verification.json の履歴。版ごとに最新の記録。sha がタグと一致するかを sha_matches_tag に持つ",
+    "materials_snapshots": 37,
+    "materials_unreadable_snapshots": 0,
+    "device_snapshots": 2
+  },
+  "known_limits": [
+    "実機確認の台帳は 2026-08-28 に始まった。それ以前の版の「記録なし」は欠落であって、確認しなかったことの証拠ではない",
+    "Apple の版の一覧は直近10版。それより古い版の asc は null",
+    "審査提出（reviewSubmissions）は版を持たない応答なので版に紐づけない。件数は summary.review_submissions_in_window",
+    "code は直前のタグからの差分。**TestFlight 止まりの版の差分も、次に並んだ版に含まれない**（版ごとに独立）",
+    "AI 著者の定義は署名とトレーラーだけを見る。手元の環境から所有者の署名でコミットした変更は人側に数える（code-authorship と同じ限界）"
+  ],
+  "rows": [
+    {
+      "version": "5.7.5",
+      "tag": "v5.7.5",
+      "tag_at": "2026-08-11T11:09:58+09:00",
+      "tag_sha": "5a368fe14fb44c3766e2552a46783dd833096818",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.7.4",
+        "commits_total": 15,
+        "commits_ai": 15,
+        "lines_total": 3050,
+        "lines_ai": 3050
+      }
+    },
+    {
+      "version": "5.7.6",
+      "tag": "v5.7.6",
+      "tag_at": "2026-08-11T13:17:36+09:00",
+      "tag_sha": "00f74d476571292d07df0494a678b7900ec2596c",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-09T04:25:08-07:00",
+        "live": false
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": null,
+        "released_before": "2026-08-28T09:40:19+00:00",
+        "how": "初めて観測した時点で既に READY。**下限は無い**（観測が始まる前に公開されていた）"
+      },
+      "code": {
+        "since_tag": "v5.7.5",
+        "commits_total": 6,
+        "commits_ai": 6,
+        "lines_total": 204,
+        "lines_ai": 204
+      }
+    },
+    {
+      "version": "5.7.7",
+      "tag": "v5.7.7",
+      "tag_at": "2026-08-11T14:29:56+09:00",
+      "tag_sha": "9841729033e449680a492f00a519d991554227cf",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.7.6",
+        "commits_total": 12,
+        "commits_ai": 12,
+        "lines_total": 1335,
+        "lines_ai": 1335
+      }
+    },
+    {
+      "version": "5.7.8",
+      "tag": "v5.7.8",
+      "tag_at": "2026-08-12T00:00:57+09:00",
+      "tag_sha": "4cb2a273c40f31c55db6a5706babb271346efad7",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-12T05:23:20-07:00",
+        "live": false
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": null,
+        "released_before": "2026-08-28T09:40:19+00:00",
+        "how": "初めて観測した時点で既に READY。**下限は無い**（観測が始まる前に公開されていた）"
+      },
+      "code": {
+        "since_tag": "v5.7.7",
+        "commits_total": 16,
+        "commits_ai": 16,
+        "lines_total": 2036,
+        "lines_ai": 2036
+      }
+    },
+    {
+      "version": "5.7.9",
+      "tag": "v5.7.9",
+      "tag_at": "2026-08-14T23:59:06+09:00",
+      "tag_sha": "168e6b5080503c90e240b0d678a2d6e90bcd4cd5",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.7.8",
+        "commits_total": 9,
+        "commits_ai": 9,
+        "lines_total": 1489,
+        "lines_ai": 1489
+      }
+    },
+    {
+      "version": "5.7.10",
+      "tag": "v5.7.10",
+      "tag_at": "2026-08-15T14:01:00+09:00",
+      "tag_sha": "1ed97b543a437609df90c2b1d676525b85955226",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.7.9",
+        "commits_total": 1,
+        "commits_ai": 1,
+        "lines_total": 368,
+        "lines_ai": 368
+      }
+    },
+    {
+      "version": "5.7.11",
+      "tag": "v5.7.11",
+      "tag_at": "2026-08-15T16:47:51+09:00",
+      "tag_sha": "ec5098f7342f303a8bd38593dcf312e15e854976",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-18T03:54:12-07:00",
+        "live": false
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": null,
+        "released_before": "2026-08-28T09:40:19+00:00",
+        "how": "初めて観測した時点で既に READY。**下限は無い**（観測が始まる前に公開されていた）"
+      },
+      "code": {
+        "since_tag": "v5.7.10",
+        "commits_total": 2,
+        "commits_ai": 2,
+        "lines_total": 177,
+        "lines_ai": 177
+      }
+    },
+    {
+      "version": "5.8.0",
+      "tag": "v5.8.0",
+      "tag_at": "2026-08-19T21:51:10+09:00",
+      "tag_sha": "266b32526319a29d7e7624911e2c31f8f8de86ac",
+      "build": {
+        "number": "590",
+        "uploaded_at": "2026-08-19T07:44:34-07:00",
+        "processing_state": "VALID"
+      },
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-21T00:20:36-07:00",
+        "live": false
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": null,
+        "released_before": "2026-08-28T09:40:19+00:00",
+        "how": "初めて観測した時点で既に READY。**下限は無い**（観測が始まる前に公開されていた）"
+      },
+      "code": {
+        "since_tag": "v5.7.11",
+        "commits_total": 11,
+        "commits_ai": 11,
+        "lines_total": 2647,
+        "lines_ai": 2647
+      }
+    },
+    {
+      "version": "5.8.1",
+      "tag": "v5.8.1",
+      "tag_at": "2026-08-22T20:50:01+09:00",
+      "tag_sha": "4db804b82bfcdcddd0256c26da930f5cbba0736e",
+      "build": {
+        "number": "597",
+        "uploaded_at": "2026-08-22T04:56:00-07:00",
+        "processing_state": "VALID"
+      },
+      "device_verification": null,
+      "$device_note": "実機確認の台帳（data/appstore/device-verification.json）は 2026-08-28 に始まった。**この版の記録は無い**（無いのであって、確認しなかったとは言えない）",
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-22T05:02:19-07:00",
+        "live": false
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": null,
+        "released_before": "2026-08-28T09:40:19+00:00",
+        "how": "初めて観測した時点で既に READY。**下限は無い**（観測が始まる前に公開されていた）"
+      },
+      "code": {
+        "since_tag": "v5.8.0",
+        "commits_total": 9,
+        "commits_ai": 9,
+        "lines_total": 1986,
+        "lines_ai": 1986
+      }
+    },
+    {
+      "version": "5.8.2",
+      "tag": "v5.8.2",
+      "tag_at": "2026-08-28T14:01:00+09:00",
+      "tag_sha": "48f456c08925e9f39296f6aebfd70a655960e386",
+      "build": {
+        "number": "685",
+        "uploaded_at": "2026-08-27T22:09:34-07:00",
+        "processing_state": "VALID"
+      },
+      "device_verification": {
+        "sha": "48f456c08925e9f39296f6aebfd70a655960e386",
+        "at": "2026-08-28T05:16:08Z",
+        "recorded_from": "owner statement",
+        "sha_matches_tag": true
+      },
+      "$device_note": null,
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-27T22:50:55-07:00",
+        "live": false
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": [
+          "2026-08-28T10:50:59+00:00",
+          "2026-08-28T22:34:07+00:00"
+        ],
+        "released_before": null,
+        "how": "観測の挟み撃ち（READY 以外を最後に見た時刻 〜 READY を初めて見た時刻）"
+      },
+      "code": {
+        "since_tag": "v5.8.1",
+        "commits_total": 49,
+        "commits_ai": 15,
+        "lines_total": 14538,
+        "lines_ai": 2678
+      }
+    },
+    {
+      "version": "5.8.3",
+      "tag": "v5.8.3",
+      "tag_at": "2026-08-29T07:59:54+09:00",
+      "tag_sha": "f4b3976788f5864a14401f92329ecc72643f265e",
+      "build": {
+        "number": "758",
+        "uploaded_at": "2026-08-28T16:07:29-07:00",
+        "processing_state": "VALID"
+      },
+      "device_verification": null,
+      "$device_note": "記録が無い。TestFlight 止まりか、記録されていないかのどちらか",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.8.2",
+        "commits_total": 47,
+        "commits_ai": 20,
+        "lines_total": 6627,
+        "lines_ai": 2529
+      }
+    },
+    {
+      "version": "5.8.4",
+      "tag": "v5.8.4",
+      "tag_at": "2026-08-29T08:53:53+09:00",
+      "tag_sha": "84e1815d36bdaefc03bcc2abd94f4a2f8e5e3e45",
+      "build": {
+        "number": "766",
+        "uploaded_at": "2026-08-28T17:04:16-07:00",
+        "processing_state": "VALID"
+      },
+      "device_verification": {
+        "sha": "84e1815d36bdaefc03bcc2abd94f4a2f8e5e3e45",
+        "at": "2026-08-29T00:15:21Z",
+        "recorded_from": "owner statement",
+        "sha_matches_tag": true
+      },
+      "$device_note": null,
+      "asc": {
+        "state": "READY_FOR_DISTRIBUTION",
+        "version_created_at": "2026-08-31T16:02:59-07:00",
+        "live": true
+      },
+      "$asc_note": null,
+      "store": {
+        "released_between": [
+          "2026-09-01T04:36:28+00:00",
+          "2026-09-01T23:16:24+00:00"
+        ],
+        "released_before": null,
+        "how": "観測の挟み撃ち（READY 以外を最後に見た時刻 〜 READY を初めて見た時刻）"
+      },
+      "code": {
+        "since_tag": "v5.8.3",
+        "commits_total": 5,
+        "commits_ai": 0,
+        "lines_total": 275,
+        "lines_ai": 0
+      }
+    },
+    {
+      "version": "5.8.5",
+      "tag": "v5.8.5",
+      "tag_at": "2026-09-02T09:19:24+09:00",
+      "tag_sha": "a4fdf5da1db09aeedfde651051247be4d6207fc8",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "記録が無い。TestFlight 止まりか、記録されていないかのどちらか",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.8.4",
+        "commits_total": 32,
+        "commits_ai": 2,
+        "lines_total": 18342,
+        "lines_ai": 1148
+      }
+    },
+    {
+      "version": "5.8.6",
+      "tag": "v5.8.6",
+      "tag_at": "2026-09-02T11:45:57+09:00",
+      "tag_sha": "9645ad17dace1d33d31eb1c79345b5514251db98",
+      "build": null,
+      "device_verification": null,
+      "$device_note": "記録が無い。TestFlight 止まりか、記録されていないかのどちらか",
+      "asc": null,
+      "$asc_note": "Apple の版の一覧（直近10版）に無い。TestFlight 段階か、一覧の外",
+      "store": null,
+      "code": {
+        "since_tag": "v5.8.5",
+        "commits_total": 8,
+        "commits_ai": 7,
+        "lines_total": 1176,
+        "lines_ai": 1145
+      }
+    }
+  ],
+  "summary": {
+    "window": {
+      "from": "2026-08-11",
+      "to": "2026-09-02"
+    },
+    "tags": 14,
+    "store_ready": 7,
+    "store_ready_versions": [
+      "5.7.6",
+      "5.7.8",
+      "5.7.11",
+      "5.8.0",
+      "5.8.1",
+      "5.8.2",
+      "5.8.4"
+    ],
+    "device_verified_same_sha": 2,
+    "release_time_bounded": 2,
+    "code": {
+      "commits_total": 222,
+      "commits_ai": 125,
+      "lines_total": 54250,
+      "lines_ai": 20792
+    },
+    "code_ai_commit_rate_pct": 56.3,
+    "code_ai_line_rate_pct": 38.3,
+    "review_submissions_in_window": 10
+  }
+}

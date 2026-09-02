@@ -339,6 +339,61 @@ function timings(runs) {
 /** 主系（GitHub Actions）以外はすべて副系・代走とみなす。 */
 const isPrimary = (r) => r.route === 'actions';
 
+/**
+ * **「連続稼働」を数字で言うための定義。**
+ *
+ * [2026-09-02] 配信原稿は「16日間連続で稼働」を 08-27 に取り下げた（台帳に無運転日が
+ * 2日あった）。取り下げは正しいが、**次に「連続」と書くときの定義がどこにも無い**ので、
+ * 数えられるうちは書けず、数えずに書けば同じ誤りをする。ここに定義を置く。
+ *
+ *   停止日 … no_run の行がある日。**no_run は日単位の判定**（「その日どの経路も
+ *            動かなかった」）なので、同じ日に主系の skipped_gate 行が並んでいても停止。
+ *            実際 08-16 / 08-17 は actions の skipped_gate と none の no_run が並ぶ —
+ *            主系は起動して寝ただけで、出荷できる経路が1つも無かった日。
+ *            **ここを「skipped_gate があるから稼働」と読むと 23日連続になり、
+ *            08-27 に取り下げた「連続稼働」が定義の違いで復活する。**
+ *   稼働日 … no_run の行が無く、行が1つでもある日（出荷・失敗・スキップを問わない）。
+ *   行の無い日 … 台帳は「実行が無い日も no_run として1行書く」決まりなので、
+ *            行が無い＝記録していない。**稼働とも停止とも言えないので連続を切る**
+ *            （分からない日を稼働に数えない）。
+ *
+ * current は台帳の最終記入日で終わる連続。longest は窓の中の最長。
+ * **暦日で歩く**（行の並びではなく日付で数える）。
+ */
+export function activeStreaks(runs) {
+  const byDay = new Map();
+  for (const r of runs) {
+    if (!r?.date_jst) continue;
+    const s = byDay.get(r.date_jst) ?? new Set();
+    s.add(r.outcome);
+    byDay.set(r.date_jst, s);
+  }
+  const days = [...byDay.keys()].sort();
+  const empty = { current: { days: 0, from: null }, longest: { days: 0, from: null, to: null }, active_days: 0, last_day: null };
+  if (!days.length) return empty;
+  const isActive = (d) => {
+    const s = byDay.get(d);
+    if (!s) return false;            // 行の無い日は稼働に数えない
+    if (s.has('no_run')) return false; // no_run は日単位の判定。他の行があっても停止
+    return true;
+  };
+  const nextDay = (d) => new Date(Date.parse(`${d}T00:00:00Z`) + 86400000).toISOString().slice(0, 10);
+  let longest = { days: 0, from: null, to: null };
+  let cur = { days: 0, from: null };
+  let activeDays = 0;
+  for (let d = days[0]; d <= days[days.length - 1]; d = nextDay(d)) {
+    if (isActive(d)) {
+      activeDays += 1;
+      if (cur.days === 0) cur = { days: 0, from: d };
+      cur.days += 1;
+      if (cur.days > longest.days) longest = { days: cur.days, from: cur.from, to: d };
+    } else {
+      cur = { days: 0, from: null };
+    }
+  }
+  return { current: cur, longest, active_days: activeDays, last_day: days[days.length - 1] };
+}
+
 export function summarize(doc, { since = null, costDoc = null, statusDoc = null, today = undefined } = {}) {
   let runs = doc.runs;
   if (since) runs = runs.filter((r) => r.date_jst >= since);
@@ -404,6 +459,8 @@ export function summarize(doc, { since = null, costDoc = null, statusDoc = null,
     artifact_autonomy_rate: rate(shipped.length - shippedWithArtifactIntervention.length, shipped.length),
     shipping_day_rate: rate(shippedDays.size, days.length),
     no_run_days: noRun.map((r) => r.date_jst),
+    // 「連続稼働」の定義つきの値。**書くならここから引く。**
+    streaks: activeStreaks(runs),
     by_route: byRoute,
     // 「主系が一度も出荷していない」を機械が言えるようにする（＝切替の証拠）
     primary_ever_shipped: (byRoute.primary?.shipped ?? 0) > 0,
@@ -445,6 +502,13 @@ function render(s, doc) {
   if (s.no_run_days.length) {
     o.push(`  ⚠ 無運転日 ${s.no_run_days.length} 日: ${s.no_run_days.join(', ')}`);
     o.push('    （どの経路も動かなかった日。Gateスキップと違い、これは正常系ではない）');
+  }
+  const sk = s.streaks;
+  if (sk) {
+    const cur = sk.current.days ? `${sk.current.days} 日（${sk.current.from}〜${sk.last_day}）` : '0 日（最終記入日が無運転）';
+    const lg = sk.longest.days ? `${sk.longest.days} 日（${sk.longest.from}〜${sk.longest.to}）` : '0 日';
+    o.push(`  連続稼働      現在 ${cur} ／ 最長 ${lg}`);
+    o.push('    （停止日 = no_run の行がある日。それ以外で行のある日が稼働。行の無い日は連続を切る）');
   }
   const st = s.staleness;
   o.push('');
@@ -640,6 +704,26 @@ function selftest() {
   eq(todayJst(new Date('2026-08-22T14:59:59Z')), '2026-08-22', 'JST 23:59 はまだ当日');
   eq(todayJst(new Date('2026-08-22T15:00:00Z')), '2026-08-23', 'JST 00:00 で日付が変わる');
 
+  // --- 連続稼働（activeStreaks）— 台帳を読まない。定義の境界を固定する ---
+  const runsOf = (...pairs) => pairs.map(([d, o], i) => ({ run_id: `s${i}`, date_jst: d, outcome: o }));
+  const three = activeStreaks(runsOf(['2026-08-11', 'shipped'], ['2026-08-12', 'skipped_gate'], ['2026-08-13', 'failed']));
+  eq(three.current.days, 3, '3日続けて行があれば連続3（no_run が無ければ Gateスキップも失敗も稼働）');
+  eq(three.longest.days, 3, '最長も3');
+  eq(three.current.from, '2026-08-11', '現在の連続の始まり');
+  const broken = activeStreaks(runsOf(['2026-08-11', 'shipped'], ['2026-08-12', 'shipped'], ['2026-08-13', 'no_run'], ['2026-08-14', 'shipped']));
+  eq(broken.current.days, 1, '**no_run で連続が切れる**（16日間連続と書いた誤りを再現できる形）');
+  eq(broken.longest.days, 2, '最長は切れる前の2');
+  eq(broken.longest.to, '2026-08-12', '最長の終わり');
+  const gap = activeStreaks(runsOf(['2026-08-11', 'shipped'], ['2026-08-13', 'shipped']));
+  eq(gap.current.days, 1, '**行の無い日は連続を切る**（分からない日を稼働に数えない）');
+  eq(gap.longest.days, 1, '行の無い日を挟むと最長も1');
+  const mixed = activeStreaks(runsOf(['2026-08-16', 'skipped_gate'], ['2026-08-16', 'no_run']));
+  eq(mixed.current.days, 0, '**同じ日に skipped_gate と no_run が並ぶなら停止**（08-16 の実物の形。ここを稼働と読むと23日連続が復活する）');
+  eq(activeStreaks(runsOf(['2026-08-11', 'no_run'])).current.days, 0, '無運転だけの日は0');
+  eq(activeStreaks([]).longest.days, 0, '空の台帳は0（推測で埋めない）');
+  eq(activeStreaks(runsOf(['2026-08-11', 'shipped'], ['2026-08-12', 'no_run'])).current.days, 0,
+     '最終記入日が無運転なら現在の連続は0');
+
   console.log(bad ? `\n${bad}/${n} 失敗` : `selftest: ${n}/${n} 通過`);
   if (bad) process.exit(1);
 }
@@ -736,6 +820,7 @@ if (isMain) {
     totals: s.totals, by_route: s.by_route,
     primary_ever_shipped: s.primary_ever_shipped,
     no_run_days: s.no_run_days,
+    streaks: s.streaks,
     intervention_count: s.interventions.length,
     timings: s.timings,
   };
