@@ -86,6 +86,112 @@ export function evaluate(claimsDoc, coverage) {
   return { claims, unresolved, invalidModes };
 }
 
+/**
+ * **見出し・リード文に書いた数字を、台帳の計算に当てる。**
+ *
+ * 【なぜ要るか — 実際にずれていた】
+ * 2026-09-01 時点で `data/pr-claims.json` は「65.7%」「13領域202タスク」と書いていたが、
+ * 台帳の計算は **66.3% / 203タスク**だった。`evaluate()` は claims の参照しか見ておらず、
+ * **見出しとリード文の数字は誰も検算していなかった。**
+ *
+ * 配信物にとってここが一番高くつく —— 記者が最初に引くのは見出しの数字で、
+ * **台帳と1桁違うだけで、残り全部の信頼が落ちる。**
+ * `code-authorship.json` が「再現できない数字は、記者に聞かれた瞬間にいちばん高くつく」と
+ * 書いているのと同じ理由を、率のほうにも効かせる。
+ *
+ * 【小数点のある % だけを見る】
+ * 見出しには「本番15件は100%AI」のように**別の指標**も並ぶ。全部を総合自動化率と
+ * 突き合わせると誤検出になるので、**小数第1位まで書かれた率**（65.7% / 91.5% など）だけを
+ * 総合自動化率の名乗りとみなす。100% や 95% は素通しする。
+ *
+ * **この規則は「1つの率しか書くな」ではない。**併記は台帳の規約そのもの
+ * （4つの率を必ず並べて出す）なので、**小数付きで書いてよい率を増やしたくなったら
+ * ここへ足す** —— 黙って通す形にはしない。
+ */
+export function checkNumbers(claimsDoc, coverage) {
+  const problems = [];
+  const tasks = coverage.tasks ?? [];
+  const counted = tasks.filter((t) => t.executor !== 'intentional_no');
+  const active = counted.filter((t) => t.executor !== 'nobody');
+  const executing = counted.filter((t) => AI_EXECUTES.has(t.executor));
+  const involved = counted.filter((t) => AI_INVOLVED.has(t.executor));
+  const pct = (n, d) => (d ? (n / d) * 100 : 0).toFixed(1);
+
+  // **台帳が定める4つの率。**規約は「4つを必ず並べて出す」なので、
+  // **どれを書いてもよいが、台帳の計算と一致していること。**
+  const RATES = {
+    総合自動化率: pct(executing.length, counted.length),
+    AI実行率: pct(executing.length, active.length),
+    AI関与率: pct(involved.length, active.length),
+    カバー率: pct(active.length, counted.length),
+  };
+  const rateStr = RATES.総合自動化率;
+  const allowed = new Set(Object.values(RATES));
+  const areas = new Set(tasks.map((t) => t.area)).size;
+
+  const text = `${claimsDoc.headline ?? ''}\n${claimsDoc.subhead ?? ''}`;
+
+  // 小数付きの率は、**4つのどれかと一致していなければならない。**
+  // 併記は台帳の規約そのものなので、1つに縛らない。
+  // ただし**台帳に無い数字は通さない**（91.5% はここで落ちる）。
+  for (const m of text.matchAll(/(\d+\.\d)%/g)) {
+    if (!allowed.has(m[1])) {
+      problems.push(`原稿の「${m[1]}%」が台帳のどの率とも一致しない`
+        + ` — ${Object.entries(RATES).map(([k, v]) => `${k} ${v}%`).join(' / ')}。`
+        + '**台帳を動かしたら原稿も動かす**');
+    }
+  }
+  // **数字は、名前と一緒でなければ書けない。**
+  //
+  // 4つの率は分母が違い、**意味も違う。**AI関与率（87.9%）は `ai_proposes` —— 
+  // 「提案・下書き・検知まで。適用/実行は人間」——を含むので、
+  // **これに「人の承認を待たずに」と付けると嘘になる。**
+  // 一方 AI実行率（75.9%）が数えるのは `ai_executes_gated` までで、
+  // その定義が「人の個別承認は不要」なので、自律の語を当てられる。
+  //
+  // **この取り違えは、この原稿で一度起きている** —— 旧サブタイトルが
+  // 「機能開発…までをAIが一気通貫で循環」と書き、機能開発は60%が ai_proposes だった。
+  // 台帳に「本文は正しく、**サブタイトルだけが強かった**」と記録が残っている。
+  //
+  // 裸の数字を許すと、**率だけ差し替えて語はそのまま**という直し方ができてしまう。
+  // 名前を要求すれば、差し替えた瞬間に名前と分母が食い違って読者に見える。
+  const NAMES = {
+    総合自動化率: ['総合自動化率', '自動化率'],
+    AI実行率: ['AI実行率', '実行率'],
+    AI関与率: ['AI関与率', '関与率'],
+    カバー率: ['カバー率'],
+  };
+  for (const [name, value] of Object.entries(RATES)) {
+    if (!text.includes(`${value}%`)) continue;
+    if (!NAMES[name].some((n) => text.includes(n))) {
+      problems.push(`原稿の「${value}%」に名前が付いていない — これは**${name}**`
+        + '（分母も意味も率ごとに違う）。**裸の数字は、語だけ残して率を差し替えられる**');
+    }
+  }
+
+  // **総合自動化率だけは必ず出す。**一番厳しい数え方を落とすと、
+  // 残った率だけが独り歩きする（台帳が「一番やってはいけない」と書いている形）。
+  if (!text.includes(`${rateStr}%`)) {
+    problems.push(`原稿に総合自動化率（${rateStr}%）が出てこない`
+      + ' — **一番厳しい数え方を落とすと、残った率だけが独り歩きする**');
+  }
+
+  // 分解の規模。「13領域202タスク」の形で書いてある。
+  const shape = text.match(/(\d+)\s*領域\s*(\d+)\s*タスク/);
+  if (!shape) {
+    problems.push('原稿に「N領域Nタスク」の分解が出てこない — 分母を書かない率は読めない');
+  } else {
+    if (Number(shape[1]) !== areas) {
+      problems.push(`原稿の領域数「${shape[1]}」が台帳（${areas}）と違う`);
+    }
+    if (Number(shape[2]) !== tasks.length) {
+      problems.push(`原稿のタスク数「${shape[2]}」が台帳（${tasks.length}）と違う`
+        + ' — **分母が古いと、率だけ直しても合わない**');
+    }
+  }
+  return { problems, rateStr, rates: RATES, areas, total: tasks.length };
+}
+
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 // この検査が守っているのは「原稿が実装から離れていくこと」。
 // **その検出が効かなくなったときに落ちること**を、ここで固定する。
@@ -97,6 +203,61 @@ const DOC = (mode, requires = ['A::T'], pass_threshold = 0.7) => ({
 const evalOne = (mode, executor, requires) => evaluate(DOC(mode, requires), COV(executor));
 
 const SCENARIOS = [
+  ['**実データ: 見出しの数字が台帳と一致する**（原稿が独り歩きしない）', () => {
+    const r = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'));
+    if (r.problems.length) throw new Error(r.problems.join(' / '));
+  }],
+  ['**古い率が残っていたら落ちる**（台帳を動かして原稿を忘れた回）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rateStr } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const stale = { headline: `運営全体では ${(Number(rateStr) - 0.6).toFixed(1)}%`, subhead: '13領域203タスク' };
+    const r = checkNumbers(stale, cov);
+    if (!r.problems.some((x) => x.includes('総合自動化率'))) throw new Error('古い率が素通りした');
+  }],
+  ['**率を差し替えて語だけ残すと落ちる**（AI実行率→AI関与率のすり替え）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rates, total, areas, rateStr } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    // 「AI実行率」と書いたまま、値だけ AI関与率（提案止まりを含む）へ差し替える。
+    const r = checkNumbers({ headline: `AI実行率は${rates.AI関与率}%`,
+      subhead: `総合自動化率は${areas}領域${total}タスクで${rateStr}%` }, cov);
+    if (!r.problems.some((x) => x.includes('名前が付いていない'))) {
+      throw new Error('実行率と関与率のすり替えが素通りした');
+    }
+  }],
+  ['**裸の数字は落ちる**（名前の無い率）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rates, total, areas, rateStr } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const r = checkNumbers({ headline: `運営業務の${rates.AI実行率}%が自律`,
+      subhead: `総合自動化率は${areas}領域${total}タスクで${rateStr}%` }, cov);
+    if (!r.problems.some((x) => x.includes('名前が付いていない'))) throw new Error('裸の数字が素通りした');
+  }],
+  ['**4つとも、名前を付ければ書ける**（併記は台帳の規約）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rates, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const r = checkNumbers({
+      headline: `AI実行率 ${rates.AI実行率}% / AI関与率 ${rates.AI関与率}%`,
+      subhead: `総合自動化率 ${rates.総合自動化率}% / カバー率 ${rates.カバー率}%（${areas}領域${total}タスク）`,
+    }, cov);
+    if (r.problems.length) throw new Error(`併記で落ちた: ${r.problems.join(' / ')}`);
+  }],
+  ['**盛った率は落ちる**（91.5% のような、台帳に無い数字）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const r = checkNumbers({ headline: '運営全体の自動化率 91.5%', subhead: '13領域203タスク' }, cov);
+    if (!r.problems.some((x) => x.includes('91.5'))) throw new Error('盛った率が素通りした');
+  }],
+  ['**小数の無い率は素通しする**（「本番15件は100%AI」は別の指標）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const r = checkNumbers({ headline: `本番15件は100%AI・運営全体の総合自動化率は ${rateStr}%`,
+      subhead: `${areas}領域${total}タスク` }, cov);
+    if (r.problems.length) throw new Error(`100% で誤検出: ${r.problems.join(' / ')}`);
+  }],
+  ['**分母が古ければ落ちる**（率だけ直して分母を忘れた回）', () => {
+    const cov = readJSON(ROOT, 'data/automation-coverage.json');
+    const { rateStr, total, areas } = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), cov);
+    const r = checkNumbers({ headline: `${rateStr}%`, subhead: `${areas}領域${total - 1}タスク` }, cov);
+    if (!r.problems.some((x) => x.includes('タスク数'))) throw new Error('古い分母が素通りした');
+  }],
   ['実データの参照がすべて解決する', () => {
     const r = evaluate(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'));
     if (r.unresolved.length) throw new Error(`未解決 ${r.unresolved.length} 件`);
@@ -228,7 +389,18 @@ if (isMain) {
     console.log('');
   }
 
+  const numbers = checkNumbers(claimsDoc, coverage);
+  if (numbers.problems.length) {
+    console.log('  **原稿の数字が台帳と違う:**');
+    for (const p of numbers.problems) console.log(`    - ${p}`);
+    console.log('');
+  }
+
   if (argv.includes('--check')) {
+    if (numbers.problems.length) {
+      console.error(`主張の検証に失敗: 原稿の数字が台帳と違う（${numbers.problems.length} 件）`);
+      process.exit(1);
+    }
     if (unresolved.length || invalidModes.length) {
       if (unresolved.length) {
         console.error(`主張の検証に失敗: 解決できない参照が ${unresolved.length} 件`);

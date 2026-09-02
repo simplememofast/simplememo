@@ -324,16 +324,30 @@ jobs:
             // 積むのではなく main から取り直すのが正しい。
             sh(`git checkout -B ${branch}`);
             sh(`git commit -m "chore(growth): GSC スナップショット ${label}（BigQuery 自動取り込み）"`);
-            // [2026-09-02] --force-with-lease は「手元の remote-tracking ref と一致するとき
-            // だけ上書きする」。checkout は fetch-depth: 2 で main しか持たないので、
-            // リモートに同名ブランチが残っていると（前週の PR がマージ後も消えていない
-            // ときが毎回そう）照合先が無く **stale info で必ず落ちる**。09-01T23:05Z が
-            // それで、ジョブ本体は完走していたのに PR だけ作られなかった。
-            // 先に同名ブランチを取り寄せて照合先を作る。無ければ何もしない。
-            // --force にはしない —— 別セッションが未マージの作業をこのブランチへ
-            // 積んでいた実例がある（#780 の dafbbf7）。lease なら取り寄せ後に
-            // 誰かが push していれば落ちる（それが正しい）。
-            sh(`git fetch origin +refs/heads/${branch}:refs/remotes/origin/${branch} || true`);
+
+            // **[2026-09-02] ここが "stale info" で落ちていた。**
+            // 2026-09-01 23:05Z の run 33569372663 —— 取得も生成もコミットも済ませたあと、
+            // **push だけが落ちて、週ぶんの成果が丸ごと捨てられた。**
+            //
+            //     ! [rejected] claude/seo-weekly-snapshot (stale info)
+            //
+            // 原因は `--force-with-lease` の前提。lease は
+            // **`refs/remotes/origin/<branch>` と突き合わせて**「自分が見たものを
+            // 上書きするのか」を確かめるが、checkout@v4 が取ってくるのは main だけで、
+            // **この追跡refが存在しない。**確かめられないので git は拒否する。
+            //
+            // **初回だけ通り、2回目以降は必ず落ちる** —— ブランチがリモートに
+            // 無ければ「新規作成」として通るため。実際 08-24 の週次で作られ、
+            // **次に週次の門が開いた 09-01 に落ちた。**間の回が全部 success なのは
+            // 門が開いていなかっただけで、直っていたからではない。
+            //
+            // **`--force` へ落とさない。**lease を捨てると、誰かがこのブランチへ
+            // 積んだものを黙って消す経路になる。**確かめられるようにするほうを直す。**
+            const remoteHead = sh(`git ls-remote --heads origin ${branch}`);
+            if (remoteHead) {
+              // 在るときだけ取る。無ければ新規作成なので lease は元から要らない。
+              sh(`git fetch origin +refs/heads/${branch}:refs/remotes/origin/${branch}`);
+            }
             sh(`git push -u origin ${branch} --force-with-lease`);
 
             const { owner, repo } = context.repo;

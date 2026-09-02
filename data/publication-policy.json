@@ -259,6 +259,11 @@
       "why": "この方針そのもの。**どれを隠しているかの一覧**なので、内部に置く",
       "ok_in_public_repo": "ok"
     },
+    "release-gate.json": {
+      "served_by_site": false,
+      "why": "**出荷の門（App Review 提出 / App Store 公開）の設定値。**しきい値（TestFlight 24h・承認後6h・クラッシュ率の母数100と悪化1pt・kill後7日）と kill_switch の在り処が書いてある。rollout-promotion.json と同じ性質で、サイトから配信する理由が無い（/autopilot/ が見せるのは権限表のほう）。\n\n**読んで確かめたこと:** 中身は方針の数値と真偽値だけで、版数・ビルド番号・ASCの識別子・クラッシュ率の実測値は入らない（実測は実行時に渡され、台帳には残さない）。`releases` は通った出荷の記録用だが、**入れるのは版数と時刻までで、審査のやり取りや却下理由は入れない** ——そこはAppleとの非公開のやり取りで、公開リポジトリに置く理由が無い。",
+      "ok_in_public_repo": "ok"
+    },
     "relevance-undecided.json": {
       "served_by_site": false,
       "why": "流入があるのに relevance を宣言していないページの一覧と、その理由。**中身は自社サイトのURLと、こちらが書いた判断理由だけ。**第三者のデータも、収益額も、資格情報も入らない",
@@ -327,9 +332,9 @@
       "ok_in_public_repo": "review",
       "public_repo_why": "取引先と月額の枠。**金額は入るが、無料枠かどうかの粗い区分まで。**請求書・契約番号は入れない"
     },
-    "release-gate.json": {
+    "waiting-progress.json": {
       "served_by_site": false,
-      "why": "**出荷の門（App Review 提出 / App Store 公開）の設定値。**しきい値（TestFlight 24h・承認後6h・クラッシュ率の母数100と悪化1pt・kill後7日）と kill_switch の在り処が書いてある。rollout-promotion.json と同じ性質で、サイトから配信する理由が無い（/autopilot/ が見せるのは権限表のほう）。\n\n**読んで確かめたこと:** 中身は方針の数値と真偽値だけで、版数・ビルド番号・ASCの識別子・クラッシュ率の実測値は入らない（実測は実行時に渡され、台帳には残さない）。`releases` は通った出荷の記録用だが、**入れるのは版数と時刻までで、審査のやり取りや却下理由は入れない** ——そこはAppleとの非公開のやり取りで、公開リポジトリに置く理由が無い。",
+      "why": "「待つだけ」と分類した行が本当に進んでいるかの観測。持つのは**カウンタの値と最終更新日と停止の理由**だけで、金額も個人データも運ばない（収入の行が持つのは covered_days 2/28 という進み具合であって、売上額ではない）。サイトからは参照していない",
       "ok_in_public_repo": "ok"
     }
   }

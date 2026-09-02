@@ -273,6 +273,36 @@
       "line_hint": "レポート側 unverified",
       "disposition": "表示のみ",
       "note": "[2026-08-28] 検査ではなく件数表示の分類（`noPlace` / `unverified`）。**2つの述語で records を漏れなく分けている**ので、片方から落ちた行はもう片方に必ず出る。ここが消えても検査の力は変わらない（validate 側は別）"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "r.value",
+      "disposition": "報告のみ",
+      "note": "`validate()` の問題文に `。2/28 のまま` を足すだけ。**判定していない** —— problems.push は r.state === 'stalled' で既に決まっており、value/target が無ければ件数の断り書きが落ちるだけで、落とす・落とさないは変わらない"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "r.value",
+      "disposition": "報告のみ",
+      "note": "一覧表示（`const n = ...`）で `2/28` を出すかどうかだけ。**判定していない。**dir 型の待ち（growth/data/gsc のラベルを見る側）は value/target を持たないので、**持たない待ちで数字の欄を空にする**ためのもの"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "x.where",
+      "disposition": "検体の選択",
+      "note": "自己テスト内で `(d.records || []).find((x) => x.where && !x.exists)` として**検体になる行を実データから選んでいる**だけ。判定ではない。該当が無ければ `r` が undefined になり、**次の行の代入で例外が出てテストが落ちる** —— 黙って素通りする形ではない。\n\n**[2026-09-02] 新しく検出された理由。**この行自体は前からある。同じコミットで `isKnown()` を足して `d`（台帳由来）を渡す経路が増えたため、**汚染の広がり方が変わって走査に載った。**行を足したのではなく、見えるようになったほう"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "y.source",
+      "disposition": "検体の選択",
+      "note": "自己テスト内で `d.deadlines.find((y) => y.source && !y.confirmed_by_owner)` として**機械導出の行を実データから選んでいる**だけ。判定ではない。\n\n**該当が無ければ明示的に落とす** —— `if (!x) throw new Error('機械導出の行が実データに無い — **この検体が空回りしている**')` を書いてある。`x.where` の既存検体（該当ゼロだと次行で暗黙に例外）より一段はっきりさせた形で、**実データから機械導出の行が消えたときに『検査が通った』ではなく『検体が無い』と言う。**"
+    },
+    {
+      "file": "scripts/check-corporate.mjs",
+      "expr": "y.source",
+      "disposition": "検体の選択",
+      "note": "自己テスト内で `d.deadlines.find((y) => y.source && !y.confirmed_by_owner)` として**機械導出の行を実データから選んでいる**だけ。判定ではない。\n\n**該当が無ければ明示的に落とす** —— `if (!x) throw new Error('機械導出の行が実データに無い — **この検体が空回りしている**')` を書いてある。`x.where` の既存検体（該当ゼロだと次行で暗黙に例外）より一段はっきりさせた形で、**実データから機械導出の行が消えたときに『検査が通った』ではなく『検体が無い』と言う。**"
     }
   ],
   "coverage_measured_at": "2026-08-26",
@@ -507,6 +537,18 @@
       "expr": "materials",
       "disposition": "向きが正しい",
       "note": "`inventory(materials)` の `materials === null ? false : …`。**材料が無いときに規則が消えるのではなく、全項目を `present: false` に倒す側。**null を「揃っている」に読み替えないためにここで明示している。呼び出し側（`loadMaterials`）は無い・古い・未来・壊れているのすべてを null に集約するので、**ここへ来る null は「使ってはいけない材料」を意味する**"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "value",
+      "disposition": "安全側へ倒れる",
+      "note": "`assess()` の `const reached = value != null && target != null && value >= target`。**観測値が無いときに『到達した』へ倒れない側。**value が読めないと reached が false になり、そのまま鮮度の判定へ落ちる（＝待ちを見張り続ける）。この規則が消えると『カウンタが読めない待ち』が到達扱いで一覧から消えるが、**そちらへは倒れない。**読めなかった回は次の `freshness == null` が unreadable として問題に出す。自己テスト「目標に届いていたら、止まっていても見ない」と「鮮度が読めないときに『進んでいる』と書かない」で両側を固定"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "freshness",
+      "disposition": "明示的に問題にする",
+      "note": "`assess()` の `if (freshness == null) return { state: 'unreadable', ... }`。**握り潰す形の逆。**鮮度が読めない回は unreadable を返し、`validate()` が『進み具合が読めない』として problems に積む（＝CIが落ちる）。**読めなかったことを「進んでいる」と書かないための分岐そのもの**で、この規則が消えると止まった待ちが moving に見える。自己テスト「**鮮度が読めないときに『進んでいる』と書かない**」で固定"
     }
   ]
 }

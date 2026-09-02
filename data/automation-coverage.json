@@ -134,7 +134,7 @@
       ],
       "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人",
       "blocker": "external_data",
-      "unblocked_by": "継続率がリポジトリに無い（BigQuery/ASC側）。降りれば evidence_strength を機械が導出できる",
+      "unblocked_by": "**[2026-09-02 実測] 「BigQuery の28日蓄積待ち」は、この行に対しては成立しない。**\n\nBigQuery を直接叩いて中身を数えた（project `yurika-simplememo`）:\n\n    データセット   `searchconsole` **1つだけ**\n    テーブル       ExportLog / searchdata_site_impression / searchdata_url_impression\n    列             data_date / site_url / query / country / search_type / device /\n                   impressions / clicks / sum_top_position\n\n**継続率も install も user も無い。**Search Console は検索の露出とクリックであって、**アプリの継続率は原理的に出てこない。**28日たまっても、たまるのは検索データ。\n\nASC 側も見た —— Analytics Reports **156本に cohort / retention のレポートは無い**（retention を名前に含むのは `Retention Messaging` の1本だけで、これはメッセージング機能の指標）。**検索語のときと同じ形** —— カタログに無いものを『降りてくる待ち』に置いていた。\n\n**したがって 2026-09-06 が来ても、この行は動かない。**待ち先を書き直すまで、`--plan` はこの2件を『待つだけ +2』の先頭に置き続ける。\n\n**どこから取るかは未決。**候補は Firebase（③のデータ連携が `external_credential` で止まっている）と ASC の Web UI（Analytics の画面には継続率がある。ただし API 面には無い）。**決まっていないので「Firebase 待ち」とも書かない** —— 同じ誤りを別の相手で繰り返さない。",
       "unlock": "bq_28d",
       "blocked_on": [
         {
@@ -197,7 +197,7 @@
       ],
       "note": "D28はBQ蓄積28日到達待ち（9/6前後）",
       "blocker": "external_data",
-      "unblocked_by": "BigQuery の28日蓄積待ち（9/6前後）",
+      "unblocked_by": "**[2026-09-02 実測] 「BigQuery の28日蓄積待ち」は、この行に対しては成立しない。**\n\nBigQuery を直接叩いて中身を数えた（project `yurika-simplememo`）:\n\n    データセット   `searchconsole` **1つだけ**\n    テーブル       ExportLog / searchdata_site_impression / searchdata_url_impression\n    列             data_date / site_url / query / country / search_type / device /\n                   impressions / clicks / sum_top_position\n\n**継続率も install も user も無い。**Search Console は検索の露出とクリックであって、**アプリの継続率は原理的に出てこない。**28日たまっても、たまるのは検索データ。\n\nASC 側も見た —— Analytics Reports **156本に cohort / retention のレポートは無い**（retention を名前に含むのは `Retention Messaging` の1本だけで、これはメッセージング機能の指標）。**検索語のときと同じ形** —— カタログに無いものを『降りてくる待ち』に置いていた。\n\n**したがって 2026-09-06 が来ても、この行は動かない。**待ち先を書き直すまで、`--plan` はこの2件を『待つだけ +2』の先頭に置き続ける。\n\n**どこから取るかは未決。**候補は Firebase（③のデータ連携が `external_credential` で止まっている）と ASC の Web UI（Analytics の画面には継続率がある。ただし API 面には無い）。**決まっていないので「Firebase 待ち」とも書かない** —— 同じ誤りを別の相手で繰り返さない。",
       "unlock": "bq_28d",
       "blocked_on": [
         {
@@ -1484,40 +1484,30 @@
     {
       "area": "⑦ 法人経営",
       "task": "税務・給与・社会保険・法定期限の管理",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/corporate-obligations.json",
-        "scripts/check-corporate.mjs"
+        "scripts/check-corporate.mjs",
+        "scripts/check-domain-expiry.mjs",
+        ".github/workflows/seo-daily.yml",
+        ".github/workflows/seo-check.yml"
       ],
-      "note": "2026-08-22に台帳と検査を実装。**2026-08-25 に会社の事実が入り、6件中2件が実際に動く期限になった** —— 決算期2月末から法人税・地方税と消費税の申告期限を機械が導く（2027-04-30）。インボイス登録ありが確定したので、資本金や基準期間によらず課税事業者。**日付は台帳に直書きせず決算月から毎回計算する**ので、年をまたいでも古い日付が残らない。残る4件の未把握: Apple Developer の加入日・ドメイン更新日・社会保険の具体的な届出期限・法定調書の要否。**役員報酬ありも確定した**ので社会保険が該当することは決まった（従業員の有無ではなく役員報酬で決まる）。[2026-08-26] **この note と unblocked_by は、材料が届いた翌日から古いままだった。**「消費税は資本金と設立日が無いので未把握」と書いていたが、指している検査は既に期限を出していた。blocked_on を置いて、届いたことを機械が見るようにした",
-      "blocker": "external_data",
-      "unblocked_by": "残るのは Apple Developer の加入日・ドメインの更新日・社会保険の具体的な届出期限（社労士の領域）・法定調書の要否。**決算期2月末・役員報酬あり・インボイス登録ありは 2026-08-25 に入り、法人税と消費税の申告期限は機械が出している**（2027-04-30）",
-      "unlock": "company_facts",
-      "blocked_on": [
-        {
-          "file": "data/credential-expiry.json",
-          "path": "apple_developer_enrolled_at"
-        },
-        {
-          "file": "data/credential-expiry.json",
-          "path": "domain_renewal_at"
-        }
-      ]
+      "note": "2026-08-22に台帳と検査を実装。**2026-08-25 に会社の事実が入り、6件中2件が実際に動く期限になった** —— 決算期2月末から法人税・地方税と消費税の申告期限を機械が導く（2027-04-30）。インボイス登録ありが確定したので、資本金や基準期間によらず課税事業者。**日付は台帳に直書きせず決算月から毎回計算する**ので、年をまたいでも古い日付が残らない。残る4件の未把握: Apple Developer の加入日・ドメイン更新日・社会保険の具体的な届出期限・法定調書の要否。**役員報酬ありも確定した**ので社会保険が該当することは決まった（従業員の有無ではなく役員報酬で決まる）。[2026-08-26] **この note と unblocked_by は、材料が届いた翌日から古いままだった。**「消費税は資本金と設立日が無いので未把握」と書いていたが、指している検査は既に期限を出していた。blocked_on を置いて、届いたことを機械が見るようにした\n\n**[2026-09-02] 6件すべてが機械の監視下に入った。executor を `ai_proposes` → `ai_executes_gated` へ。**\n\n最後まで残っていたドメインの更新日が、**週次の実行で RDAP から入った**（2027-01-30）。手で入れたのではなく `scripts/check-domain-expiry.mjs --write` が取得した値で、**外部の3経路（画面・外部調査のRDAP・オーナーのWHOIS）と一致した** —— 台帳が仕込んでいた答え合わせが、食い違いを出さずに閉じた。\n\nいま機械が持っているもの:\n\n    法人税・消費税      決算期（2月末）から毎回導出。**日付を直書きしない**\n    社会保険・法定調書  月日から毎回導出（fixed_annual）\n    ドメイン            RDAP から週次で取得（source: rdap）\n    Apple Developer     オーナー確認済（自動更新なしを4通りで確認）\n\n**人の個別承認は要らない。**期限が近づけば warning、欄が欠ければ CI が落ちる。オーナーが与えるのは「その義務が当社に当たるか」という事実（決算期・役員報酬・インボイス登録）で、**機械の実行を1件ずつ承認する形ではない。**\n\n**申告そのものは人のまま。**この行が数えているのは期限の管理であって、提出ではない（提出は⑦の別の行と士業の領域）。\n\n**あわせて `check-corporate.mjs` の「把握」の定義を直した** —— `confirmed_by_owner` だけを見ていたので、**機械が入れた権威ある値が「未把握」と表示され、しかも日付の検査を1つも受けていなかった**（期限切れ警告が飛ばされる）。出典と日付があり未確認の理由が無い行は把握とみなし、オーナー確認の行と同じ検査を受けさせる。**`confirmed_by_owner` を機械が立てる形にはしていない**（フラグ名が owner なので、機械が自己認証する経路を作らない）。"
     },
     {
       "area": "⑦ 法人経営",
       "task": "定型／非定型契約の分類",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/vendor-register.json",
         "scripts/check-vendors.mjs",
         "../simplememo-api/scripts/check-contracts.mjs",
-        "../simplememo-api/data/contract-register.json"
+        "../simplememo-api/data/contract-register.json",
+        "scripts/check-contract-kind.mjs",
+        ".github/workflows/seo-check.yml",
+        "data/check-selftests.json"
       ],
-      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。\n\n**[2026-08-28 訂正] 待っていた相手を間違えていた。**この行は `contract_docs`（契約書をリポジトリに置く）を待っていたが、この台帳自身が records で「**書面の契約書は無く、規約への同意で成立している**」と記録している。**存在しない書面を待っていた。**分類の対象は規約本文で、それは特定済み・指紋監視（**週1回・月曜**）・15/40マス読解済み。待っているのは残り34マスで、それは `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。\n\n**[2026-08-31] blocker を `missing_source_document` から `not_started` へ。****待っていた書面は「無い」のではなく「存在しない」** —— 書面契約が発生しておらず、対象は規約同意で、その台帳は既に手元にある。**「対象の書類がリポジトリに無い」は、この行については誤った待ち方だった。**\n\n**executor は動かしていない。**導く経路をまだ作っていないので、分類は誰も実行していない（`nobody` ではなく `ai_proposes` なのは、ベンダー台帳までは機械が持っているため）。**作ってから動かす。「材料が揃った」を「分類できている」と数えない。**",
-      "blocker": "not_started",
-      "unblocked_by": "**分類の材料はリポジトリに揃っている。**書面契約はゼロ（**根拠はオーナーの明言と records の「書面の契約書は無く、規約への同意で成立している」**）、成立している11社ぶんはすべて規約への同意で、`data/vendor-register.json` が `terms_accepted_by` を持つ。**無いのは「機械が分類を導いて、CIが食い違いを落とす」経路のほう。**非定型の承認は人（権限表「契約・支払い・送金」が human_only）\n\n**[2026-09-01] 待ちは解けた。**[simplememo-api#200](https://github.com/simplememofast/simplememo-api/pull/200) が 01:00Z にマージされ、`../simplememo-api/data/contract-register.json` は api の main に在る（`contracts: []` / `invoices: []` / `policy.documents_in_repo: false`）。**この行の evidence 4本すべてが実在する。**\n\n前版はここに「置き場所の決定が2つ並んでいるためオーナー待ちで止まっている」と書いていた。**その待ちはもう無い。**\n\n**ただし executor は動かさない。**揃ったのは材料で、導く経路とCIの照合はまだ無い。**さらに、作る前に決めることが1つある** —— 分類の対象は11社で全部が同じ種別（規約同意＝定型）になる見込みなので、分類そのものは**一度も食い違いを出さない検査**になりうる。この台帳の規則（空回りする検査を作らない）に正面から当たるため、**本体は「非定型が現れたときに承認を要求する」側**に置くこと。その要求は `check-contracts.mjs` が既に持っている（`kind: \"non_standard\"` に `approved_by: \"human\"`）ので、**残りは「何を足せば新しく発火するのか」を先に言えるかどうか。**言えないなら作らない。\n\n**`evidence` は隣リポジトリのファイルを指したままにしてある。**`automation-rate --check` は隣が checkout されている環境でのみ不在を検出する（CIは隣を持たないので、欠けていても緑のままだった）。**いまは4本とも実在するので、その盲点は今日は効いていない** —— ただし**盲点そのものは残っている。**",
-      "unlock": "impl_contract_class"
+      "note": "ベンダー台帳で「どの事業者とどんな関係があるか」までは機械が持つようになった。\n\n**[2026-08-28 訂正] 待っていた相手を間違えていた。**この行は `contract_docs`（契約書をリポジトリに置く）を待っていたが、この台帳自身が records で「**書面の契約書は無く、規約への同意で成立している**」と記録している。**存在しない書面を待っていた。**分類の対象は規約本文で、それは特定済み・指紋監視（**週1回・月曜**）・15/40マス読解済み。待っているのは残り34マスで、それは `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。\n\n**[2026-08-31] blocker を `missing_source_document` から `not_started` へ。****待っていた書面は「無い」のではなく「存在しない」** —— 書面契約が発生しておらず、対象は規約同意で、その台帳は既に手元にある。**「対象の書類がリポジトリに無い」は、この行については誤った待ち方だった。**\n\n**executor は動かしていない。**導く経路をまだ作っていないので、分類は誰も実行していない（`nobody` ではなく `ai_proposes` なのは、ベンダー台帳までは機械が持っているため）。**作ってから動かす。「材料が揃った」を「分類できている」と数えない。**\n\n**[2026-09-01] 導く側を作った。executor を `ai_proposes` → `ai_executes_gated` へ。**`scripts/check-contract-kind.mjs` が `data/vendor-register.json` と api の `contract-register.json` から種別を**導出**し、seo-check が毎回回す。手で書いた分類欄は作っていない —— **台帳に書くのではなく、台帳から導く。**\n\n導出: `terms_accepted_by` が在り書面が無い → 定型（附合契約）／書面が在る → 非定型／どちらも無い → **undetermined。standard に丸めない**（記録が無い＝問題なし、をやらない）。\n\n**今日の出力は11社すべて定型・非定型0件。**この行が数える側へ入る根拠は、分類が機械の出力になり、CIが食い違いで落ちるようになったこと。**非定型が現れたときの承認は人のまま**（権限表「契約・支払い・送金」が human_only）で、そこは渡していない。\n\n**空回りの疑いには入口で答えた** —— 実データを3通り壊して exit 1 を観測した（terms_accepted_by を消す／書面を入れて approved_by を \"ai\" にする／台帳に無い相手の書面を入れる）。`data/check-selftests.json` に demonstrated として記録。\n\n**隣が読めない回は照合していないと明示する。**CI に ../simplememo-api は無いので、書面との突き合わせは読めた回だけ。読めなかったことを「食い違い無し」に化けさせない。"
     },
     {
       "area": "⑦ 法人経営",

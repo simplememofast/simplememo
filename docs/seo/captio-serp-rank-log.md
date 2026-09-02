@@ -346,6 +346,39 @@ Investigation 節の有無。
 
 ---
 
+## 2026-09-02 (weekly)
+
+> **方法論メモ**: WebSearch ツールの返却件数はクエリあたり ~10 件（タスク仕様の 30 件には届かず）。US-based Google index を使用。JA キーワードの順位は google.co.jp と差が生じることがある。位置は返却リンクの順序から推定し「~N」表記。simplememofast.com の App Store リスティング（id6758438948）は自社ページではないため位置記録の主体は simplememofast.com ドメインの URL に限る。
+
+| Keyword | Lang | SimpleMemo pos (page) | attnoel | note2selfmail | emailmeapp | Δ vs last | Notes |
+|---|---|---|---|---|---|---|---|
+| captio | JA | not visible | not visible | not visible | not visible | flat | US SERP Emburse 主体（継続）；JA メモアプリ文脈不在 |
+| captio 代替 | JA | ~4 (/blog/captio-discontinued) | ~3 | not visible | not visible | SM: **+1**；attnoel: +1 | SM App Store非対象 #1；note.com #2；attnoel #3；SM blog #4；SM /captio/ #5 |
+| captio なくなった | JA | ~5 (/blog/captio-discontinued) | ~4 | not visible | not visible | SM: **−1**；attnoel: −1 | Captioo App Store #1；rbbtoday.com(SM PRリリース) #2；note.com #3；attnoel #4；SM #5 |
+| captio 後継 | JA | ~5 (/blog/captio-discontinued) | ~4 | not visible | not visible | SM: flat；attnoel: 復帰（prev not visible） | Captioo App Store #1；prtimes.jp(SM PR) #2；webcli.jp #3；attnoel #4；SM #5 |
+| captio 使えない | JA | ~6 (/blog/captio-discontinued) | ~5 | not visible | not visible | SM: **−1**；attnoel: −1 | Captioo App Store #1；SM App Store非対象 #2；webcli.jp #3；note.com #4；attnoel #5；SM blog #6 |
+| Obsidian メモ iPhone | JA | not visible | n/a | n/a | n/a | flat | Obsidian App Store #1；note.com #2；oragiblog.com #3；applion.jp #4；SM不在 |
+| Obsidian 音声入力 | JA | not visible | n/a | n/a | n/a | flat | note.com ショートカット記事が #1-6 を占有；SM不在 |
+| メモアプリ 音声 無料 | JA | not visible | n/a | n/a | n/a | flat | jp.plaud.ai #1；notta.ai #3；mojiokoshi3.com #4；文字起こしサービス支配；SM不在 |
+| 自分宛メール メモ | JA | not visible | n/a | n/a | n/a | flat | メモメール App Store #1-2；SM不在 |
+| Obsidian デイリーノート iPhone | JA | not visible | n/a | n/a | n/a | flat | knowledgestuck.substack.com #1；note.com #2-4；mukubeni.com #5；SM不在 |
+| obsidian quick capture ios | EN | not visible | n/a | n/a | n/a | flat | Quick Draft/Quick Capture App Store群 #1-4；obsidian.rocks #5；SM不在 |
+| email to obsidian | EN | not visible | n/a | n/a | n/a | flat | Medium #1；n8n.io #2；email2obsidian.com #4；SM不在（3週連続） |
+| voice memo obsidian | EN | ~5 (/en/blog/obsidian-voice-input) | n/a | n/a | n/a | **−1** (prev ~4) | community.obsidian.md Voice MD #1；forum.obsidian.md #2-4；SM #5；Medium #6；drew.tech #7 |
+| captio alternative | EN | ~7 (/en/captio-alternative/) | n/a | not visible | not visible | flat (prev ~6-7 uncertain) | SERP汚染：g2 #1(Captello)；getapp #2(Emburse)；echowave #4(Captions app)；SM #7 |
+| note to self email app | EN | not visible | n/a | ~8 | ~7 | SM: flat；note2self: flat；emailme: flat | App Store listings #1-6；emailmeapp #7；note2selfmail #8；SM不在 |
+
+**Take:** captio 代替が ~5→~4 に 1 段改善し SM blog が attnoel (#3) の直後に定着。captio なくなった・captio 使えない はそれぞれ 1 段後退し attnoel も同方向に動いたため SERP 全体のシフトと見られる。voice memo obsidian が ~4→~5 に小幅後退（−1）。いずれも閾値（−2）未満につき Investigation なし。JA Obsidian 群・EN email-to-obsidian は 3-4 週連続不在で構造的不在が固定化しつつある。
+
+**Morning brief JSON:**
+`{"type":"serp-weekly","date":"2026-09-02","regressed":3,"improved":1,"flat":11,"watch":["EN-13","JA-3","JA-5"],"investigation":false}`
+
+```json
+{"date":"2026-09-02","kw_tracked":15,"top3":0,"top10":6,"improved":1,"declined":3,"out_of_top30":0,"worst":{"kw":"voice memo obsidian","from":"~4","to":"~5"},"best":{"kw":"captio 代替","from":"~5","to":"~4"},"investigation":false,"take":"captio 代替 up 1 to ~4; captio なくなった/使えない and voice memo obsidian each down 1; no −2 regression threshold triggered."}
+```
+
+---
+
 ## YYYY-MM-DD（見本エントリ — 週次実行時にこのブロックを複製して日付を入れ、この行の括弧書きは消す）
 
 | # | Keyword | Our pos (URL) | Top competitor (pos) | Δ vs last | Notes |

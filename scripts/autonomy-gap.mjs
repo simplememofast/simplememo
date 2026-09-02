@@ -31,6 +31,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { COVERAGE_PATH, summarize } from './automation-rate.mjs';
 
@@ -331,8 +332,24 @@ export const UNLOCKS = {
                             + '残るのは、それが日報の文面ではなく**リポジトリ側から読める形**で出ること。'
                             + 'あと移行0027の適用と、母数 — inquiries は現在0件で、'
                             + '**来ていない本文の書式を想像して抽出を書かない**' },
-  vendor_terms:      { kind: 'owner_input', label: '人が10社の規約を読んで40マスを埋める',
-                       needs: '**[2026-08-28] `implement` から `owner_input` へ移した。取り込む側は既に在る。**'
+  // [2026-09-01] **ラベルが、終わった作業を要求し続けていた。**条項44マスは
+  // 2026-08-29 に 0/44 unreviewed で埋め切っている（実測）。**残っているのは DPA のほうで、
+  // 人が確認済みなのは 3/11**（cloudflare / anthropic / google_cloud / search_console /
+  // firebase / appsflyer / github / prtimes が未）。**2つは別の書面で、束ねたままだと
+  // `--plan` が「規約を読め」と言い続ける** —— 済んだ作業を毎回オーナーの手数に数える形。
+  vendor_terms:      { kind: 'owner_input', label: '人がDPAを読む（3/11・条項44マスは 08-29 に完了）',
+                       needs: '**[2026-09-01 実測] 条項マスは終わっている** —— '
+                            + '`data/corporate-obligations.json` の contract_review は '
+                            + '**44マス中 unreviewed 0**、11社すべて `reviewed_by: "human"`。'
+                            + '2026-08-29 に埋め切られ、`check-corporate.mjs` の clauseGuard が守っている。'
+                            + '**旧ラベル「人が10社の規約を読んで40マスを埋める」は、済んだ作業を'
+                            + '要求し続けていた。**\n\n'
+                            + '**残っているのは DPA。人が確認済みは 3/11**（apple / resend / registrar）。'
+                            + '未読は cloudflare / anthropic / google_cloud / search_console / '
+                            + 'firebase / appsflyer / github / prtimes の8社。'
+                            + '**条項（規約本文の4観点）と DPA（データ処理の取り決め）は別の書面**なので、'
+                            + '片方が終わってももう片方は動かない。\n\n'
+                            + '**[2026-08-28] `implement` から `owner_input` へ移した。取り込む側は既に在る。**'
                             + 'ラベルは「規約本文を取り込んで条項検査に載せる」だったが、'
                             + '**取り込みと改定検知は 2026-08-26 に機械へ移っている**'
                             + '（scripts/vendor-terms.mjs・seo-daily が**週1回・月曜に**取得し、'
@@ -445,16 +462,31 @@ export const UNLOCKS = {
                             + 'そこは権限表で human_only**（AIが自分で立てる経路は作らない）。'
                             + '\n\n**門ができたことを「動いた」と数えない** —— '
                             + 'coverage 台帳の executor は据え置いてある' },
-  rollout_first_pass:{ kind: 'wait', label: 'カナリアが判定できる母数に届くのを待つ',
-                       needs: '**作るものもオーナー操作も残っていない。**門は 2026-08-27 に入り'
-                            + '（`evaluatePromotion`）、カナリアは同日 25% へ上がり、'
-                            + '`auto_promote.enabled` は 2026-08-28 にオーナーが立てた。'
-                            + '**残るのは 48時間の寝かせ（2026-08-29 まで必ず hold）と、'
-                            + '3指標が各群30以上で判定できること。**どちらも実装では早められない'
-                            + '\n\n**述語（satisfied_when）は置いていない。**この入口が持つ行の blocker は '
-                            + '`verification_pending` で、`WAITING_BLOCKERS` に入っていない ——'
-                            + '**置いても一度も評価されない。**空回りする検査を足すより、'
-                            + '待っている対象をここに名指ししておくほうが効く' },
+  // [2026-09-01] kind を `wait` → `owner_input` へ。**待っても母数は貯まらない**ことを
+  // ガード自身が計算して出した（run 33497186518）。needs に全文と算数を置いてある。
+  rollout_first_pass:{ kind: 'owner_input',
+                       label: 'カナリアの母数を判定に届かせる（窓を広げるか、上限を上げる）',
+                       needs: '**[2026-09-01 訂正] 「待つだけ」は誤りだった。待っても母数は貯まらない。**'
+                            + '旧版はここに「作るものもオーナー操作も残っていない／残るのは48時間の'
+                            + '寝かせと各群30の母数で、どちらも実装では早められない」と書いていた。'
+                            + '**寝かせは 08-29 に明けており、それでも通っていない。**'
+                            + '\n\n門は毎日走っている（rollout-promote.yml・schedule）。'
+                            + '**2026-09-01 10:23Z の run 33497186518 が、止めている理由を自分で計算して出した:**'
+                            + '\n\n```\n露出 9 / 対照 45（版が古い 4 は除外済み）＝ 窓の母数 54\n'
+                            + '各群 30 が要る → 2群で最低 60。**54 < 60 で足りない**\n'
+                            + '露出を 30 にするには rollout 56% 以上\n'
+                            + '機械の上限は 50%（max_auto_rollout）→ 露出 27 で、**30 に届かない**\n```'
+                            + '\n\n**ガード自身の言葉: 「窓は転がるので、待っても母数は貯まらない」。**'
+                            + '窓は3日で、必要なのは約10日ぶん。**時間の問題ではなく窓幅と母数の問題。**'
+                            + '\n\n**したがって「門が効き始めるのは25%以降」も誤りだった** —— '
+                            + '25%でも50%でも、この母数では判定に届かない。動く道は2つしかない:'
+                            + '\n\n  (a) オーナーが rollout を 56% 以上へ上げる。**機械の上限 50% を超える**ので'
+                            + '委譲の外（`max_auto_rollout` を上げること自体がオーナー判断）'
+                            + '\n  (b) ガードの窓を 3日 → 約10日 へ広げる。実装で届くが、'
+                            + '**kill を持つガードの検知遅延を伸ばす**変更なので、率のために黙って倒さない'
+                            + '\n\n**分類は据え置いた。**(b) が実在する以上 `never` ではなく、'
+                            + '`statistical_power` へ倒すと「install が増えれば解ける」ことまで消える。'
+                            + '**変えたのは「誰が動かせば進むか」だけ** —— ⑨返金と④出荷でやったのと同じ訂正。' },
   // [2026-08-31] **`vendor_terms` から1行だけ切り出した。**
   // ⑦「定型／非定型契約の分類」は「人が規約を読む」を待っていたが、
   // **分類に要るのは規約本文ではなく台帳**（書面契約ゼロ ＋ 11社の terms_accepted_by）で、
@@ -669,9 +701,16 @@ export function selftest() {
       { file: 'data/corporate-obligations.json', path: 'deadlines[id=corporate-tax].next_due' }, true],
     ['引き当たらない id は満たさない',
       { file: 'data/corporate-obligations.json', path: 'deadlines[id=そんな行は無い].next_due' }, false],
+    // [2026-09-02] **検体を実データから外した。**この行は長らく
+    // `deadlines[id=domain-renewal].next_due` が null であることに寄りかかっていたが、
+    // **週次が RDAP から 2027-01-30 を入れた日に、検体のほうが崩れた。**
+    // 検査が壊れたのではなく、**検体が「まだ埋まっていない実データ」を借りていた。**
+    // 埋まるのが目的の欄を検体に使うと、目的を達成した日に落ちる。
+    // （このリポジトリは同じ形を何度か踏んでいる —— 件数を焼き込んだ検体、など。）
+    // **借りるのをやめて、その場で作る。**`root` を差し替えられるので実データは要らない。
     ['**引き当たっても値が null なら満たさない**（在ることと埋まっていることは違う）',
       { file: 'data/corporate-obligations.json',
-        path: 'deadlines[id=domain-renewal].next_due' }, false],
+        path: 'deadlines[id=fixture].next_due' }, false, { fixture: { deadlines: [{ id: 'fixture', next_due: null }] } }],
     // **false は「確かめた」なので満たす。**null（確かめていない）と混ぜない。
     // company_facts が Apple の auto_renew_confirmed をこの形で見る ——
     // 自動更新が入っていなかった（false）としても、**確かめたことは確かめたこと。**
@@ -679,9 +718,18 @@ export function selftest() {
       { file: 'data/corporate-obligations.json',
         path: 'deadlines[id=domain-renewal].confirmed_by_owner' }, true],
   ];
-  for (const [label, pred, want] of predCases) {
+  for (const [label, pred, want, opts] of predCases) {
     let got;
-    try { got = blockedOnSatisfied(pred); } catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
+    let root;
+    if (opts?.fixture) {
+      // **その場で作った台帳で確かめる。**実データの「まだ埋まっていない欄」を借りない。
+      root = fs.mkdtempSync(path.join(os.tmpdir(), 'autonomy-pred-'));
+      fs.mkdirSync(path.join(root, 'data'), { recursive: true });
+      fs.writeFileSync(path.join(root, pred.file), JSON.stringify(opts.fixture));
+    }
+    try { got = blockedOnSatisfied(pred, root ? { root } : {}); }
+    catch (e) { problems.push(`述語: ${label} で例外: ${e.message}`); continue; }
+    finally { if (root) fs.rmSync(root, { recursive: true, force: true }); }
     if (got !== want) problems.push(`述語「${label}」が ${got}（${want} のはず）`);
   }
 
