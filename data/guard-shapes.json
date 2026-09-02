@@ -273,6 +273,18 @@
       "line_hint": "レポート側 unverified",
       "disposition": "表示のみ",
       "note": "[2026-08-28] 検査ではなく件数表示の分類（`noPlace` / `unverified`）。**2つの述語で records を漏れなく分けている**ので、片方から落ちた行はもう片方に必ず出る。ここが消えても検査の力は変わらない（validate 側は別）"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "r.value",
+      "disposition": "報告のみ",
+      "note": "`validate()` の問題文に `。2/28 のまま` を足すだけ。**判定していない** —— problems.push は r.state === 'stalled' で既に決まっており、value/target が無ければ件数の断り書きが落ちるだけで、落とす・落とさないは変わらない"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "r.value",
+      "disposition": "報告のみ",
+      "note": "一覧表示（`const n = ...`）で `2/28` を出すかどうかだけ。**判定していない。**dir 型の待ち（growth/data/gsc のラベルを見る側）は value/target を持たないので、**持たない待ちで数字の欄を空にする**ためのもの"
     }
   ],
   "coverage_measured_at": "2026-08-26",
@@ -507,6 +519,18 @@
       "expr": "materials",
       "disposition": "向きが正しい",
       "note": "`inventory(materials)` の `materials === null ? false : …`。**材料が無いときに規則が消えるのではなく、全項目を `present: false` に倒す側。**null を「揃っている」に読み替えないためにここで明示している。呼び出し側（`loadMaterials`）は無い・古い・未来・壊れているのすべてを null に集約するので、**ここへ来る null は「使ってはいけない材料」を意味する**"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "value",
+      "disposition": "安全側へ倒れる",
+      "note": "`assess()` の `const reached = value != null && target != null && value >= target`。**観測値が無いときに『到達した』へ倒れない側。**value が読めないと reached が false になり、そのまま鮮度の判定へ落ちる（＝待ちを見張り続ける）。この規則が消えると『カウンタが読めない待ち』が到達扱いで一覧から消えるが、**そちらへは倒れない。**読めなかった回は次の `freshness == null` が unreadable として問題に出す。自己テスト「目標に届いていたら、止まっていても見ない」と「鮮度が読めないときに『進んでいる』と書かない」で両側を固定"
+    },
+    {
+      "file": "scripts/check-waiting-progress.mjs",
+      "expr": "freshness",
+      "disposition": "明示的に問題にする",
+      "note": "`assess()` の `if (freshness == null) return { state: 'unreadable', ... }`。**握り潰す形の逆。**鮮度が読めない回は unreadable を返し、`validate()` が『進み具合が読めない』として problems に積む（＝CIが落ちる）。**読めなかったことを「進んでいる」と書かないための分岐そのもの**で、この規則が消えると止まった待ちが moving に見える。自己テスト「**鮮度が読めないときに『進んでいる』と書かない**」で固定"
     }
   ]
 }
