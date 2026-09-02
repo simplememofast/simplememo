@@ -126,6 +126,7 @@ const UNSERVED_DATA = new Set([
   "spend-approvals.json",
   "stop-drills.json",
   "vendor-register.json",
+  "waiting-progress.json",
 ]);
 // END data-publication
 
