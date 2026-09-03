@@ -3457,3 +3457,69 @@ Routine の行き先は `environment_id` で決まる:
 - **種を足すのは人の目視判断のまま。**§5-6 は「どの回に書くか」を散文で決めており、
   機械が「この回は種になる」と判定しているわけではない。**検査は書式にしか掛かっていない**
 - `docs/story-seeds.md` は **100件を超えたら古い順に削る**（§5-6）。まだ7件
+
+---
+
+## 2026-09-03（10・代走 owner-session） — 保守のみ（本番照合と、その場で見つけた自分の欠陥1件）
+
+### 判断根拠
+
+オーナーの「すべてデプロイまですすめて」。**マージで終わりにせず、本番の実物と照合した。**
+
+### 照合の結果 —— 未出荷は無い
+
+| 対象 | 結果 |
+|---|---|
+| `simplememo` ブランチ | main と**差分なし**（#820 が squash 済み。commit 数の差は squash の帰結） |
+| `simplememo-api` / `simplememo-ios` | main と同一・作業ツリーもクリーン。**触っていないので出すものが無い** |
+| `data/autopilot-status.json`（本番） | リポジトリと**一致** |
+| `data/autopilot-cost.json`（本番） | **一致** |
+| `data/distribution-queue.json`（本番） | **一致** |
+| `docs/prtimes-d14-capture.md`（raw） | **一致**（Routine が読む先） |
+| `docs/story-seeds.md`（raw） | **一致**（消費側が読む先） |
+
+**404 が3件出たが、どれも意図的だった。**`functions/_middleware.js` に非配信リストがあり、
+正は `data/publication-policy.json`。日報が読む `autopilot-actions-report.json` は
+**サイトではなく raw から**取る設計（`simplememo-api/src/autopilot-report.ts:63`）で、
+そちらは 200。**「404 だから壊れている」と読まずに、止めている側を先に読んだ。**
+
+### ⚠ そのついでに、今日自分が出した欠陥を1つ見つけた
+
+`docs/story-seeds.md` の §0 が、製品の事実の参照先としてこう書いていた:
+
+    https://simplememofast.com/data/site-constants.json
+
+**これは 404 を返す。**`publication-policy.json` が `served_by_site: false` と宣言していて
+（理由も書いてある——「公開面へは sync_constants が値を撒くので、原本を出す必要が無い」）、
+`functions/_middleware.js` の非配信リストに載っている。
+
+**`story-seeds` スキルの本文にある記述をそのまま写して作り込んだ。**
+スキル側にも同じ誤りがあるが、あちらはリポジトリの外なのでここからは直せない。
+
+**今日ずっと直していた「静かに死んでいる経路」を、自分で1本足していた。**
+消費側は §0 に従って製品の事実を取りに行き、404 を受け取る。
+`llms.txt` は 200 だが**無料枠の記述を持たない**ので、代わりにはならない。
+
+直し方は、**同じポリシーが `ok_in_public_repo: "ok"` と
+`repository_is_public: true` を宣言している raw へ向けること**:
+
+    https://raw.githubusercontent.com/simplememofast/simplememo/main/data/site-constants.json   200
+
+**サイトのURLへ書き戻さないよう、404 になる理由と出典を §0 に残した。**
+消さずに残したのは、次に読む人が「リンク切れだ」と思ってサイト側へ直すのを止めるため。
+
+### 検証
+
+- **今日出した2本の文書のURLを全部叩いた**（これが欠陥の見つかり方）。
+  `prtimes.jp` の `000` は egress 遮断で想定どおり（Chrome 側の実行系からは届く）。
+  残る 404 は**警告文の中にある「これは 404 を返す」の実例**で、指示ではない
+- `check-pr-facts --file docs/story-seeds.md` → OK
+- `preflight.mjs` / `seo-check.js`
+
+### 残る弱さ・申し送り
+
+- **`story-seeds` スキル本体に同じ 404 が残っている**（`~/.claude/skills/synced/…/story-seeds/SKILL.md`）。
+  リポジトリの外なのでセッションからは直せない。**オーナーが直すまで、
+  台帳を読まずにスキルだけ読んだ回は 404 を踏む**
+- **リンクの生死を機械で見る検査は無い。**今回は手で叩いて見つけた。
+  文書が増えるほど、この見つけ方は落ちる
