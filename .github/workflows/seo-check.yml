@@ -21,6 +21,14 @@ jobs:
         with:
           node-version: '20'
 
+      # 12ゲートが実際に発火することを先に見る。**落ちることを確かめていない
+      # 検査は、無いのと同じ**（data/check-selftests.json）。この検査は
+      # そのラチェットの外にいた —— check-selftests.mjs は `.mjs` しか列挙せず、
+      # `.js` のこれを構造的に見られない（act-ci-selftest-ratchet-js-blind）。
+      # 主検査が黙って効かなくなるのが最悪の形で、2026-08-13 に実際に踏んでいる
+      # （閉じていない <script> に head が飲まれて12ゲート全部が緑）。
+      - name: SEO gates fire (self-test)
+        run: node scripts/seo-check.js --selftest
       - name: Run SEO validation
         run: |
           EXIT_CODE=0
