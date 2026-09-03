@@ -19,6 +19,18 @@ PR リリースの乗車判定（`growth/experiments/experiments.json` の `type
 `prtimes.jp` に届かない —— 実測で `HTTP 000`、`google.com` も同じなので
 **外向きが全般に閉じている**（許可先は自社ドメインと API のみ）。
 
+[2026-09-03 追記] CCR 側で出るエラーの**署名**はこれ。見たら即座に「経路が無い」と判断してよい:
+
+| 経路 | 出るもの |
+|---|---|
+| `curl https://prtimes.jp/...` | `curl: (56) CONNECT tunnel failed, response 403`（＝`HTTP 000`） |
+| `WebFetch` | `{"error_type":"EGRESS_BLOCKED","domain":"prtimes.jp"}` |
+| `help.prtimes.jp` | `getaddrinfo ENOTFOUND`（名前解決すら通らない） |
+| 対照: `simplememofast.com` / `raw.githubusercontent.com` | どちらも `HTTP 200` |
+
+**`raw.githubusercontent.com` が 200 なのが重要** —— CCR でもこの手順書自体は読める。
+**読めるのに実行できない**ので、「手順書が取れた＝経路がある」と早合点しないこと。
+
 一方 `note-simplememo-3days` / `x-engagement-simplememofast` /
 `indie-hackers-karma-daily` は **Claude-in-Chrome MCP** でログイン済み Chrome を
 毎日動かしている。**同じ経路なら PR TIMES の分析画面も読める。**
@@ -225,6 +237,22 @@ push/email して終わる。**定期版を作るまでは残しておくこと*
 - **画面の % をそのまま入れる**（`mobile_ratio: 62` と `0.62`）—— 判定式は 0〜1 前提
 - **`annotations.json` の書式を守らず backtest が拾わない** —— §5(c) の検算で分かる
 - **二重転記** —— §0 のガードで止める
+- **`autopilot-actions.json` の取り合い**（[2026-09-03] 発見・**未解決**）——
+  §5(d) はこの手順に `data/autopilot-actions.json` を書かせるが、
+  **同じ日の 20 分後に別の Routine が同じファイルを書く。**
+
+  | Routine | 時刻 | 同ファイルへの操作 |
+  |---|---|---|
+  | `PR実験の D+14 取得（台帳駆動）` | 09:00 JST | §5(d) で `act-pr6-d14-evaluate` を `done` にする |
+  | `Obsidianオートパイロット再試行 v3` | **09:20 JST** | 手順8で新しい行を**追記**する |
+
+  どちらも別々に PR を出す。ファイルは整形済みの複数行（1,184行）なので、
+  **既存行の書き換え（D+14）と末尾への追記（再試行）は通常 git が併合できる。**
+  危ないのは両方が同じ位置へ追記したときと、**片方の PR が古い main から
+  枝を切ったまま後からマージされたとき**（auto-merge は検証済み SHA を入れるので、
+  静かに相手の編集を巻き戻しうる）。
+  **9/17 は両方が動く最初の日。**§5(d) を書くときは、直前に `git pull` して
+  **その行だけを触る**こと（ファイル全体を書き直さない）。
 
 ## 検証したこと / していないこと（2026-09-03 実測）
 
@@ -232,11 +260,34 @@ push/email して終わる。**定期版を作るまでは残しておくこと*
 
 | | 結果 |
 |---|---|
-| 日次 Routine が Cowork 側に在るか | ✅ `trig_01GphcHzTuH1A1JUGq8dYkWa`「PR実験の D+14 取得（台帳駆動）」<br>`cron: 0 0 * * *`（09:00 JST）・**`environment_id` なし**＝Chrome が付く側 |
+| 日次 Routine が Cowork 側に在るか | ✅ `trig_01GphcHzTuH1A1JUGq8dYkWa`「PR実験の D+14 取得（台帳駆動）」<br>`cron: 0 0 * * *`（09:00 JST）。**2026-09-03 に実際に発火させて確認**（下記「確かめ方」） |
 | 二重転記の恐れ | ✅ 無し。同じ台帳へ書く Routine は他に無い |
 | 門（`pr-evaluation-due.mjs`） | ✅ 9/16→0件 / **9/17→`pr-2026-rsi-autopilot` 1件** / 9/18→1件（超過1日）<br>今日は `[]` を返し「何もしないのが正しい」と言う |
-| 手順書が raw で取れるか | ✅ HTTP 200・12,623 bytes・ローカルと同一 |
+| 手順書が raw で取れるか | ✅ HTTP 200・ローカルの `main` と `diff` で一致<br>（**バイト数は書かない** —— 数を書くと、その数を書いた時点で古くなる。<br>2026-09-03 に一度 `12,623 bytes` と書いて、その追記自体で 14,202 になった） |
 | `annotations.json` の書式 | ✅ 仮の数値で書式どおりに書いたら **backtest が n=5 → n=6** になり、<br>戻すと n=5 に戻ることを確認。**§5(c) の書式は正しい** |
+
+### Routine が Cowork 側か CCR 側かの確かめ方（**`list_triggers` では分からない**）
+
+**`list_triggers` は `environment_id` を返さない。**2026-09-03 に18本すべてのキーを
+突き合わせて確認した —— 返るのは `id` / `name` / `cron_expression` / `enabled` /
+`created_via` / `creator` / `session_request` などで、**`environment_id` というキーは
+そもそも存在しない。**したがって「一覧に env が出ていないから Cowork 側だ」とは言えない
+（**出ていないのではなく、最初から返っていない**）。ここを混同すると、
+CCR 側の Routine を「Chrome が付く」と誤読する。
+
+**確実なのは、発火させて生まれたセッションを見ること:**
+
+```
+fire_trigger(trigger_id) → 返ってきた session_id を get_session
+```
+
+Cowork 側なら、こう出る（2026-09-03 の実測値）:
+
+| 見るところ | Cowork 側（Chrome が付く） | CCR 側（付かない） |
+|---|---|---|
+| `environment_id` | `env_011111111111111111111117` | `env_01RmhZUdCQoTVYsGM6Ly45oP` |
+| `tags` | `cowork-remote` / `cowork-scheduled` / `product:cowork-remote` | （無し） |
+| `origin` | `force_run_trigger`（手動発火時） | `desktop_app` など |
 
 **まだ実物に当たっていないのは1点だけ** —— **PR TIMES の分析画面そのもの。**
 画面の項目名・単位・導線は推定のままで、初回はそこで調整が要る見込み。
