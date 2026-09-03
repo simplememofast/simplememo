@@ -128,6 +128,32 @@ export function validateApprovals(approvals, { policy = null, monthlyCap = null 
     if (a.two_person_required === false && !a.two_person_reason) {
       problems.push(`${at}: 二者承認を不要とした理由が無い`);
     }
+
+    // **変更の間隔（min_days_between_changes）を実際に見る。**（2026-09-03）
+    //
+    // 【なぜ足したか】この規則は 2026-08-22 から台帳にあったが、**検査されていなかった。**
+    // validate() は「数値が入っているか」しか見ず、ここは承認日の間隔を見ていなかった。
+    // つまり **同じ日に何度でも上げられた。**規則の note が「実費の中央値が動いたと言える
+    // 最小の窓」と理由まで書いているのに、それを守らせるものが無かった ——
+    // この台帳が繰り返し戒めている「散文は手を挙げない」の形そのもの。
+    //
+    // 【遡って判定しない】`min_days_enforced_from` より後の承認だけを見る。
+    // **規則が無かった時点の記録を、後から作った規則で落とすのは、記録のほうを嘘にする。**
+    // seq=1（08-22）と seq=2（09-03・間隔12日）はそれ以前なので対象外で、
+    // その事実は policy 側の note に書いてある。**免除ではなく、適用の開始点。**
+    if (limit && typeof limit.min_days_between_changes === 'number' && limit.min_days_enforced_from
+        && a.approved_at && a.approved_at > limit.min_days_enforced_from) {
+      const prev = [...rows].filter((x) => x.domain === a.domain && x.seq < a.seq).pop();
+      if (prev?.approved_at) {
+        const days = Math.floor(
+          (Date.parse(`${a.approved_at}T00:00:00Z`) - Date.parse(`${prev.approved_at}T00:00:00Z`)) / 86400000);
+        if (Number.isFinite(days) && days < limit.min_days_between_changes) {
+          problems.push(`${at}: 前回の承認（seq=${prev.seq} / ${prev.approved_at}）から ${days}日`
+            + ` — 規則は ${limit.min_days_between_changes}日以上`
+            + '。**効いたかどうかが分かる前に次の判断をしない**');
+        }
+      }
+    }
   });
   if (approvals.next_seq !== rows.length + 1) {
     problems.push(`next_seq=${approvals.next_seq} が記録数 ${rows.length} と合わない`);
@@ -298,6 +324,57 @@ SCENARIOS.push(
     rows.approvals[1].approved_by = ['ai'];
     const p = validateApprovals(rows, { policy: EXEMPT_POLICY, monthlyCap: 280 });
     assert(p.some((x) => x.includes('ai が入っている')), JSON.stringify(p));
+  }],
+);
+
+// [2026-09-03] **変更の間隔が実際に効くこと。**
+// 規則そのものより「落ちるのを見た」ほうを固定する —— 08-22 から台帳にあったのに
+// 検査が無く、同じ日に何度でも上げられた期間があった。
+const INTERVAL_POLICY = (enforcedFrom = '2026-09-03') => ({
+  change_limits: [{
+    domain: 'AI実費', max_step_pct: 25, min_days_between_changes: 14,
+    min_days_enforced_from: enforcedFrom,
+  }],
+});
+const intervalRows = (secondDate, thirdDate) => ({
+  next_seq: 4,
+  approvals: [
+    { seq: 1, domain: 'AI実費', from_usd: null, to_usd: 40, approved_at: '2026-08-22',
+      approved_by: ['human'], note: '初期値', two_person_required: false, two_person_reason: '初期値' },
+    { seq: 2, domain: 'AI実費', from_usd: 40, to_usd: 45, approved_at: secondDate,
+      approved_by: ['human'], note: '+12.5%', two_person_required: false, two_person_reason: '幅の内' },
+    { seq: 3, domain: 'AI実費', from_usd: 45, to_usd: 50, approved_at: thirdDate,
+      approved_by: ['human'], note: '+11%', two_person_required: false, two_person_reason: '幅の内' },
+  ],
+});
+SCENARIOS.push(
+  ['**間隔が足りない承認は落ちる**（同じ日に何度でも上げられた穴）', () => {
+    const p = validateApprovals(intervalRows('2026-09-05', '2026-09-10'),
+      { policy: INTERVAL_POLICY(), monthlyCap: 50 });
+    assert(p.some((x) => x.includes('5日') && x.includes('14日以上')), JSON.stringify(p));
+  }],
+  ['間隔が足りていれば通る', () => {
+    const p = validateApprovals(intervalRows('2026-09-05', '2026-09-19'),
+      { policy: INTERVAL_POLICY(), monthlyCap: 50 });
+    assert(p.length === 0, JSON.stringify(p));
+  }],
+  ['**開始点より前は遡って判定しない**（規則が無かった時点の記録を落とさない）', () => {
+    // seq=2 と seq=3 の間隔は5日だが、どちらも開始点(2026-12-31)より前
+    const p = validateApprovals(intervalRows('2026-09-05', '2026-09-10'),
+      { policy: INTERVAL_POLICY('2026-12-31'), monthlyCap: 50 });
+    assert(!p.some((x) => x.includes('14日以上')), JSON.stringify(p));
+  }],
+  ['**開始点の宣言が無ければ判定しない**（黙って遡及適用しない）', () => {
+    const pol = INTERVAL_POLICY();
+    delete pol.change_limits[0].min_days_enforced_from;
+    const p = validateApprovals(intervalRows('2026-09-05', '2026-09-10'), { policy: pol, monthlyCap: 50 });
+    assert(!p.some((x) => x.includes('14日以上')), JSON.stringify(p));
+  }],
+  ['**実データの承認記録が、いまの規則で通ること**', () => {
+    const p = validateApprovals(JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8')), {
+      policy: JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')),
+      monthlyCap: JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget.monthly_usd_cap });
+    assert(p.length === 0, JSON.stringify(p));
   }],
 );
 
