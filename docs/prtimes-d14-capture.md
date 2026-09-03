@@ -28,21 +28,41 @@ PR リリースの乗車判定（`growth/experiments/experiments.json` の `type
 
 ## 対象
 
-`growth/experiments/experiments.json` の `type: "pr_release"` かつ
-`status: "running"` かつ `evaluation_at` が当日以前のレコード。
+**この判定はスクリプトが持っている。散文で数え直さないこと。**
 
-2026-09-17 時点の対象は `pr-2026-rsi-autopilot`（PR⑥・2026-09-03 配信）。
+```
+node scripts/pr-evaluation-due.mjs --json
+```
+
+`growth/experiments/experiments.json` の `type: "pr_release"` かつ
+`status: "running"` かつ `evaluation_at` が当日以前で、**まだ転記されていない**
+ものだけを返す。**空配列なら何もせずに終わる。**
+
+[2026-09-03] 最初この判定は散文だけで書かれていて、**リリースごとに人が
+Routine を1本置く形**になっていた。台帳に行を足したら勝手に拾われる形でなければ
+自律ではないので、導出をスクリプトへ移した（自己テスト20件・変異6種で検出を確認）。
+実データの「9/16 は0件・9/17 は1件」も自己テストが固定しているので、
+台帳側で日付か status が動けば `seo-check` で落ちる。
+
 リリース URL は `annotations.json` の同日の `note` にある
-（`https://prtimes.jp/main/html/rd/p/000000009.000182412.html`）。
+（PR⑥ なら `https://prtimes.jp/main/html/rd/p/000000009.000182412.html`）。
 
 ---
 
 ## 手順
 
-### 0. 先に台帳を読む。**埋まっていたら何もしない。**
+### 0. 先に台帳を読む。**空なら何もしない。**
 
-`discover_boarding_post` が既に `null` でない（＝誰かが転記済み）なら、
-**上書きしない**で終了する。二重転記は「あとから入った値がどちらか分からない」状態を作る。
+```
+node scripts/pr-evaluation-due.mjs --json
+```
+
+**空配列ならここで終わる。**Chrome も開かない。期限が来ていない日のほうが多いので、
+**何もしない日が既定**である。
+
+返ってきた各行の `id` が対象で、`missing` が未転記のキー。
+`discover_boarding_post` が既に埋まっているものはこの時点で除かれている
+（二重転記は「あとから入った値がどちらか分からない」状態を作る）。
 
 ### 1. Chrome ツールをロードする
 
@@ -170,18 +190,32 @@ create it from a session that holds them, or ask the user to create it from the 
 ### したがって、本当の自動化にするには
 
 **claude.ai の Routines UI か、Cowork セッションから作ること。**
-プロンプトはこの文書を指すだけでよい:
+
+**そして「1回きり」で作らないこと。**[2026-09-03] 最初は PR⑥ の評価日だけに発火する
+one-shot を置いた。動きはするが、**7本目の配信でまた人が置くことになる。**
+それは自動化ではなく代行で、置き忘れた回は静かに評価されない。
+
+| 項目 | 値 |
+|---|---|
+| 種別 | **定期（毎日）** —— 一度きりにしない |
+| 時刻 | 09:00 JST |
+| environment_id | **指定しない**（指定すると CCR 側へ行き Chrome が付かない） |
 
 ```
-PR⑥（実験 id pr-2026-rsi-autopilot）の D+14 乗車判定を行う。
-手順の正典はここ。まず読むこと:
 https://raw.githubusercontent.com/simplememofast/simplememo/main/docs/prtimes-d14-capture.md
+の手順に従って、評価期限の来た PR 実験の数値を PR TIMES から取得し、台帳へ記入する。
+
+まず `node scripts/pr-evaluation-due.mjs --json` を実行し、**空配列なら何もせずに終わる。**
 Chrome が繋がっていなければ数値を作らず、取れなかったと報告して終わること。
 ```
 
-CCR 側に作ってある `trig_01UyxxNpMNp7ecsBycR2xYqz`（9/17）は**取得できない見込みの控え**で、
-Chrome が無ければ手順と転記先をオーナーへ push/email して終わる。
-Cowork 側で作り直したら、そちらは削除してよい。
+**毎日走ってほとんどの日は何もしない**のが正しい形。判定はスクリプトが持っているので、
+プロンプトはリリース名を含まない —— **次の配信は台帳に行を足すだけで拾われる。**
+
+CCR 側に作ってある `trig_01UyxxNpMNp7ecsBycR2xYqz`（9/17 one-shot）は
+**取得できない見込みの控え**で、Chrome が無ければ手順と転記先をオーナーへ
+push/email して終わる。**定期版を作るまでは残しておくこと**（唯一の網なので）。
+作ったら削除してよい。
 
 ---
 
