@@ -627,6 +627,18 @@ jobs:
       # **落とす側は Runbook §4** —— 毎回のセッションが手元で `--check` を通してからコミットする。
       # ランナーに最初から入っている Chrome を使うので、ブラウザのダウンロードはしない。
       # ここが安定して測れることが確かめられたら、ブロックへ格上げしてよい。
+      # 【構造側・落とす】隣り合う nowrap のあいだに改行機会があるか。**ブラウザが要らない。**
+      # 折り返せるかどうかは**エンジンで違う** —— 2026-09-03、実機（iOS = WebKit）で
+      # 横スクロールが出ているのに Blink では 3面 × 14幅すべてで再現せず、
+      # しかもこの環境には WebKit を入れられない（ダウンロードが egress で塞がれる）。
+      # **測れないほうのエンジンで壊れる可能性を、構造の側で消す。**
+      # `<wbr>` は幅を持たないので、入れて悪くなることが無い。
+      - name: Adjacent nowrap runs have a break opportunity
+        run: node scripts/check-viewport-overflow.mjs --static
+
+      # 【描画側・報告のみ】判定にブラウザが要り、それを本番デプロイの門に乗せると
+      # ブラウザ側の不調でCIが赤くなる（check-benchmark を報告のみにしたのと同じ理由）。
+      # **落とす側は Runbook §4。**ランナーの Chrome を使うのでダウンロードはしない。
       - name: Landing pages do not scroll sideways (report-only)
         run: |
           npm i --no-save playwright-core

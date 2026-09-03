@@ -16,3 +16,7 @@ table th[scope=row]{background:transparent;color:var(--text);font-weight:600;tex
    詳細は assets/css/style.css の同名ブロック。**両方を同じ内容に保つこと。** */
 @media (max-width:1099px){.global-nav__links:not(.open){display:none!important}.global-nav__hamburger{display:block!important}.global-nav__links.open{display:flex!important;flex-direction:column!important;align-items:stretch!important;position:absolute!important;top:100%;left:0;right:0;padding:.5rem 1rem 1rem!important;gap:.25rem!important;z-index:999}}
 @media (max-width:359px){.global-nav__logo{font-size:0!important;gap:0!important}.global-nav__logo img{width:28px;height:28px}}
+
+/* 横スクロールの最終的な歯止め（2026-09-03）。修理ではなく網 —— この環境から WebKit を実測できないため。
+   hidden ではなく clip（hidden はスクロール容器を作り、sticky なナビが効かなくなる）。詳細は style.css の同名ブロック。 */
+body{overflow-x:clip}

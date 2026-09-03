@@ -2700,3 +2700,21 @@ img[src*="hero-ja"], img[src*="hero-en"] {
   .global-nav__logo { font-size: 0 !important; gap: 0 !important; }
   .global-nav__logo img { width: 28px; height: 28px; }
 }
+
+/* ============================================================
+   横スクロールの最終的な歯止め（2026-09-03）
+
+   **これは修理ではなく網。**原因側の修理は
+   (a) 隣接する nowrap のあいだへ `<wbr>` を入れること、
+   (b) `scripts/check-viewport-overflow.mjs` の静的規則がその欠落を落とすこと。
+
+   網を張る理由は、**この環境から WebKit を実測できない**こと。
+   Chromium は /opt/pw-browsers に在るが WebKit は無く、
+   `npx playwright install webkit` はダウンロードが egress で塞がれる。
+   実機（iOS = WebKit）で横スクロールが出ているのに、
+   Blink では 3面 × 14幅すべてで再現しなかった —— **engine の差を測れていない。**
+
+   `clip` であって `hidden` ではないのが要点。`hidden` はスクロール容器を作るので
+   `position: sticky` のグローバルナビが効かなくなる。`clip` は容器を作らない。
+   ============================================================ */
+body { overflow-x: clip; }

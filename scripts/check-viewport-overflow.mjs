@@ -72,6 +72,55 @@ export const KNOWN = [
   // 共有CSSで直したので消した —— **免除を残すと、次の再発を黙って通す。**
 ];
 
+/**
+ * **隣り合う nowrap のあいだに改行機会があるか**を、描画せずに見る規則。
+ *
+ * `.nb` は `white-space: nowrap`。隣り合うインライン要素のあいだに空白も `<wbr>` も
+ * 無いと、**連続した nowrap はまとめて1つの折り返せない塊**になりうる。
+ * 塊が画面より広ければ、そのページは横スクロールする。
+ *
+ * **描画では捕まらない。**折り返せるかどうかは**エンジンで違う** ——
+ * 2026-09-03、実機（iOS = WebKit）で横スクロールが出ているのに、
+ * Blink では 3面 × 14幅すべてで再現しなかった。しかもこの環境からは
+ * WebKit を入れられない（`npx playwright install webkit` がegressで塞がれる）。
+ * **測れないほうのエンジンで壊れる可能性を、構造の側で消す。**
+ *
+ * だから見るのは「実際に折り返したか」ではなく「**折り返せる場所が在るか**」。
+ * `<wbr>` は幅を持たないので、入れて悪くなることが無い。
+ * 文字数では並べ替えられない（31.5字の塊が無事で14字の塊が漏れた実測がある）が、
+ * **改行機会の有無は文字を見ずに決まる。**
+ */
+export const ADJACENT_NOWRAP =
+  /<\/(?:span|b|strong|a|em)>(?=<(?:span|b|strong|a|em)[^>]*class="[^"]*\bnb\b)/g;
+
+/** 改行機会の無い隣接を列挙する。**純関数**なので、入れて落ちることを確かめられる。 */
+export function unbreakableAdjacencies(html) {
+  const out = [];
+  for (const m of html.matchAll(ADJACENT_NOWRAP)) {
+    const ctx = html.slice(Math.max(0, m.index - 60), m.index + 80).replace(/\s+/g, ' ');
+    out.push({ index: m.index, line: html.slice(0, m.index).split('\n').length, context: ctx });
+  }
+  return out;
+}
+
+/** 静的規則を当てる面。描画側と同じ3面をファイルで指す。 */
+export const STATIC_FILES = ['index.html', 'en/index.html', 'autopilot/index.html'];
+
+export function checkStatic(files = STATIC_FILES) {
+  const problems = [];
+  let scanned = 0;
+  for (const f of files) {
+    const abs = path.join(ROOT, f);
+    if (!fs.existsSync(abs)) { problems.push(`${f}: 面が無い — 改名したなら STATIC_FILES も直すこと`); continue; }
+    scanned += 1;
+    for (const a of unbreakableAdjacencies(fs.readFileSync(abs, 'utf8'))) {
+      problems.push(`${f}:${a.line} 隣り合う nowrap に改行機会が無い — 閉じタグの直後へ \`<wbr>\` を入れること`
+        + `\n      …${a.context}…`);
+    }
+  }
+  return { problems, scanned };
+}
+
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript',
   '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.webp': 'image/webp', '.ico': 'image/x-icon', '.mp4': 'video/mp4', '.txt': 'text/plain; charset=utf-8' };
@@ -209,6 +258,31 @@ const SCENARIOS = [
     const r = withDom(doc, [{ right: 524, width: 160, cls: 'pricing-card', scroller: 'pricing-scroller' }]);
     if (r.culprits.length) throw new Error('カルーセルを漏れに数えた');
   }],
+  ['実データに改行機会の無い隣接が無い', () => {
+    const { problems, scanned } = checkStatic();
+    if (scanned !== STATIC_FILES.length) throw new Error(`見た面が ${scanned} / ${STATIC_FILES.length}`);
+    if (problems.length) throw new Error(problems[0].split('\n')[0]);
+  }],
+  ['**改行機会の無い隣接は落ちる**（2026-09-03 に14箇所あった形）', () => {
+    const bad = '<span class="nb">ワンタップでメールへ届き、</span><span class="nb">Obsidianにも自動追記。</span>';
+    if (!unbreakableAdjacencies(bad).length) throw new Error('検出しなかった');
+  }],
+  ['`<wbr>` があれば通る', () => {
+    const ok = '<span class="nb">ワンタップでメールへ届き、</span><wbr><span class="nb">Obsidianにも自動追記。</span>';
+    if (unbreakableAdjacencies(ok).length) throw new Error('改行機会が在るのに落とした');
+  }],
+  ['空白があれば通る（英語面はこちらが自然）', () => {
+    const ok = '<span class="nb">AirPods support</span> <span class="nb">— available now.</span>';
+    if (unbreakableAdjacencies(ok).length) throw new Error('空白を改行機会と読んでいない');
+  }],
+  ['nowrap でない隣接は対象外', () => {
+    const ok = '<span class="x">あ</span><span class="y">い</span>';
+    if (unbreakableAdjacencies(ok).length) throw new Error('関係ない隣接を拾った');
+  }],
+  ['**面が消えたら落ちる**（静的側も）', () => {
+    const { problems } = checkStatic(['そんなファイルは無い.html']);
+    if (!problems.length) throw new Error('無い面が通った');
+  }],
   ['**既知の免除は空**（直したら消す。残すと次の再発を黙って通す）', () => {
     if (KNOWN.length) throw new Error(`免除が ${KNOWN.length} 件ある — 直っていないなら理由と upTo を確かめること`);
   }],
@@ -255,7 +329,18 @@ if (isMain) {
     process.exit(failed ? 1 : 0);
   }
 
+  // **静的規則はブラウザが要らない。**だからCIでも落とせる側に置ける
+  //（描画のほうは報告のみ。判定にブラウザを要求するとCIが外部要因で赤くなる）。
+  if (argv.includes('--static')) {
+    const { problems, scanned } = checkStatic();
+    console.log(`隣り合う nowrap の改行機会 — ${scanned} 面`);
+    for (const p of problems) console.log(`  - ${p}`);
+    if (!problems.length) console.log('  改行機会の無い隣接なし。');
+    process.exit(problems.length ? 1 : 0);
+  }
+
   const report = argv.includes('--report');
+  const staticResult = checkStatic();
   const m = await measure();
   console.log(`着地面の横漏れ — ${PAGES.join(' / ')} × ${WIDTHS.join('/')}px`);
   if (!m.measurable) {
@@ -274,7 +359,8 @@ if (isMain) {
       console.log(`      right=${c.right} w=${c.width} <${c.tag}.${c.cls}> "${c.text}"`);
     }
   }
-  if (!m.problems.length) {
+  for (const p of staticResult.problems) console.log(`  ★ ${p}`);
+  if (!m.problems.length && !staticResult.problems.length) {
     console.log(`\n  ${m.results.length} 通りを実測。**新しい横漏れなし**`
       + `${m.known.length ? `（既知 ${m.known.length} 件は上のとおり。直したら KNOWN から消すこと）` : ''}。`);
     console.log('  （サンドボックスのフォントでの実測。**実機のフォントとは字幅が違う**ので、'
@@ -284,5 +370,5 @@ if (isMain) {
     console.log('  `.nb` を並べただけでは改行機会にならない —— 隣接する nowrap のあいだに');
     console.log('  `<wbr>` を入れるか、flex アイテムに `min-width: 0` を与えること。');
   }
-  if (!report && m.problems.length) process.exit(1);
+  if (!report && (m.problems.length || staticResult.problems.length)) process.exit(1);
 }
