@@ -220,6 +220,42 @@ export function checkMiddleware(policy, text) {
   return [];
 }
 
+/**
+ * **配信されるトップレベルのディレクトリを、台帳に縛る。**
+ *
+ * [2026-09-03] `fixtures/` を足した日に、`https://simplememofast.com/fixtures/engine-divergence.html`
+ * が **200 を返していた。**中身は「Blink では収まり WebKit でははみ出す」ように
+ * **わざと壊した見本**で、サイトの一部ではない。
+ *
+ * このファイルの頭に既に書いてある —— **Pages はリポジトリの中身をそのまま配信する。**
+ * 遮断は `functions/_middleware.js` の `INTERNAL_PREFIXES` だが、
+ * **その一覧を誰も検査していなかった。**だから新しいディレクトリを置くと、黙って公開される。
+ * `data/*.json` について 2026-08-25 に見つけた穴と、**同じ形が階層ひとつ上に残っていた。**
+ *
+ * 見るのは「配信して良いか」ではなく「**決めた記録があるか**」:
+ * 遮断一覧にあるか、台帳の `served_dirs` にあるか。どちらでもなければ落とす。
+ * **判断そのものは人が書く。**
+ */
+export function undeclaredDirs(topDirs, blockedPrefixes, servedDirs) {
+  const blocked = new Set(blockedPrefixes.map((p) => p.replace(/^\//, '')));
+  const served = new Set(servedDirs || []);
+  return topDirs.filter((d) => !blocked.has(d) && !served.has(d));
+}
+
+/** `functions/_middleware.js` の `INTERNAL_PREFIXES` を読む。**書いてある値を見る**（推測しない）。 */
+export function internalPrefixes(text) {
+  const m = text.match(/const INTERNAL_PREFIXES = \[([^\]]*)\]/);
+  if (!m) return null;
+  return [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+}
+
+/** 配信対象になりうるトップレベルのディレクトリ。ドット始まりと node_modules は除く。 */
+export function topLevelDirs(root = ROOT, readdir = fs.readdirSync) {
+  return readdir(root, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
+    .map((e) => e.name).sort();
+}
+
 export function validate(policy, { files, referenced }) {
   const problems = [];
   const listed = new Set(Object.keys(policy.files || {}));
@@ -282,6 +318,23 @@ function selftest() {
     'a.json': { served_by_site: true, why: 'サイトが読む', ok_in_public_repo: 'ok' },
     'b.json': { served_by_site: false, why: '内部だけ', ok_in_public_repo: 'ok' },
   } };
+  // ── ディレクトリの配信（2026-09-03 に足した） ─────────────────
+  t('**遮断にも台帳にも無いディレクトリは落ちる**（fixtures/ を置いた日に本番で 200 だった）',
+    undeclaredDirs(['blog', 'fixtures'], ['/docs'], ['blog']).join() === 'fixtures');
+  t('遮断一覧にあれば通る',
+    undeclaredDirs(['blog', 'fixtures'], ['/docs', '/fixtures'], ['blog']).length === 0);
+  t('台帳の served_dirs にあれば通る',
+    undeclaredDirs(['blog', 'newpage'], ['/docs'], ['blog', 'newpage']).length === 0);
+  t('**INTERNAL_PREFIXES を実ファイルから読む**（推測しない）', (() => {
+    const got = internalPrefixes('const INTERNAL_PREFIXES = ["/a", "/b"];');
+    return got && got.join() === '/a,/b' && internalPrefixes('なにも無い') === null;
+  })());
+  t('**実データ: すべてのディレクトリに扱いが決まっている**', (() => {
+    const mw = fs.readFileSync(path.join(ROOT, 'functions/_middleware.js'), 'utf8');
+    const pol = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/publication-policy.json'), 'utf8'));
+    return undeclaredDirs(topLevelDirs(), internalPrefixes(mw) || [], pol.served_dirs).length === 0;
+  })());
+
   t('未分類のファイルは落ちる',
     validate(pol, { files: ['a.json', 'b.json', 'c.json'], referenced: new Set(['a.json']) })
       .some((p) => p.includes('c.json')));
@@ -422,5 +475,28 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     process.exit(1);
   }
-  if (process.argv.includes('--check')) console.log('\n分類・遮断・参照に食い違いなし。');
+  if (process.argv.includes('--check')) {
+    // **トップレベルのディレクトリも台帳に縛る。**置いただけで公開されるので。
+    const mwText = fs.readFileSync(path.join(ROOT, 'functions/_middleware.js'), 'utf8');
+    const prefixes = internalPrefixes(mwText);
+    if (!prefixes) {
+      console.error('functions/_middleware.js から INTERNAL_PREFIXES を読めない'
+        + ' — **遮断の一覧が読めないなら、遮断できているとは言えない。**');
+      process.exit(1);
+    }
+    const undeclared = undeclaredDirs(topLevelDirs(), prefixes, policy.served_dirs);
+    if (undeclared.length) {
+      console.error(`配信の扱いが決まっていないディレクトリが ${undeclared.length} 件: ${undeclared.join(' ')}`);
+      console.error('  **Cloudflare Pages はリポジトリの中身をそのまま配信する。**置いただけで公開される。');
+      console.error('  配信するなら data/publication-policy.json の `served_dirs` へ、');
+      console.error('  配信しないなら functions/_middleware.js の `INTERNAL_PREFIXES` へ書くこと。');
+      process.exit(1);
+    }
+    const gone = (policy.served_dirs || []).filter((x) => !topLevelDirs().includes(x));
+    if (gone.length) {
+      console.error(`台帳にあるが実在しないディレクトリ: ${gone.join(' ')} — 記録だけ残らせない`);
+      process.exit(1);
+    }
+    console.log(`\n分類・遮断・参照に食い違いなし（ディレクトリ ${policy.served_dirs.length} 配信 / ${prefixes.length} 遮断）。`);
+  }
 }

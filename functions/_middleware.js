@@ -152,7 +152,13 @@ function isBlockedDataPath(pathname) {
 // What the block buys is that the site does not serve, link or expose them
 // to crawlers — not confidentiality. See data/publication-policy.json
 // (`repository_is_public`); do not read these 404s as "not public".
-const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth"];
+// 2026-09-03: `/fixtures` を追加。**検査のための見本で、サイトの一部ではない。**
+// `fixtures/engine-divergence.html` はエンジン差を出すためにわざと壊してあり
+// （Blink では収まり WebKit でははみ出す）、`allPages()` の走査からも外してある。
+// **Pages はリポジトリをそのまま配信するので、置いただけで公開される** ——
+// 追加した当日、`https://simplememofast.com/fixtures/engine-divergence.html` が 200 を返していた。
+// `noindex,nofollow` は索引だけを止める。配信を止めるのはここ。
+const INTERNAL_PREFIXES = ["/docs", "/scripts", "/tools", "/growth", "/fixtures"];
 
 // Referral/attribution params that carry no content meaning (step 1b).
 // Each one mints a distinct crawlable URL for the same page — GSC has
