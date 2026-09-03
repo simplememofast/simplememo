@@ -18,15 +18,19 @@
     "  対象化するときは match に ^/en/... を明示的に追加する）。",
     "- 配線前にCPP側の中身（スクショ1枚目）がページの検索意図と一致しているかを",
     "  ASCで1本ずつ確認すること（v4 R1）。",
-    "- ppid を記入したら node scripts/apply-cpp-ppid.js --write → CI が --check で守る。"
+    "- ppid を記入したら node scripts/apply-cpp-ppid.js --write → CI が --check で守る。",
+    "- asc_state は『その ppid の CPP が ASC でどの状態か』の**記録された観測**。APPROVED 以外は Apple が既定商品ページへ倒すので、apply-cpp-ppid.js --check が落とす。取得は simplememo-ios の asc-cpp.yml --action list（鍵はあちらにしかない）。**ここは写しなので古くなる** —— 30日を越えると --check が notice を出す（落とはしない。CIはASCを読めない）。"
   ],
   "provider_token": "128498560",
   "updated": "2026-09-03",
+  "asc_state_checked_jst": "2026-09-03",
+  "$asc_state_source": "simplememo-ios / .github/workflows/asc-cpp.yml --action list （run 33721309279・2026-09-03 06:01Z・CPP 70本を読んだ）。このとき配線中の8つの ppid はすべて APPROVED だった。",
   "cpps": [
     {
       "id": "vs-notion",
       "asc_name": "vs-notion",
       "ppid": "65666dba-3ce5-43bd-830e-da97de8eaf11",
+      "asc_state": "APPROVED",
       "match": [
         "^/vs/notion"
       ],
@@ -36,6 +40,7 @@
       "id": "line-keep-alternative",
       "asc_name": "LINE Keep Alternative",
       "ppid": "0253a7f9-3c1a-4294-95bc-e6d800af5733",
+      "asc_state": "APPROVED",
       "match": [
         "^/blog/line-keep-alternative$"
       ],
@@ -45,6 +50,7 @@
       "id": "free-memo-generic",
       "asc_name": "plain-notes（暫定・承認済み）→ free-memo-generic（専用・審査待ち）",
       "ppid": "43019675-348f-489a-914f-065c753a2b1e",
+      "asc_state": "APPROVED",
       "match": [
         "^/blog/free-memo-apps-ranking$"
       ],
@@ -54,6 +60,7 @@
       "id": "obsidian-vault",
       "asc_name": "obsidian-vault",
       "ppid": "1408d7a4-3249-4c87-a079-e13032312579",
+      "asc_state": "APPROVED",
       "match": [
         "^/obsidian/"
       ],
@@ -63,6 +70,7 @@
       "id": "feat-siri-shortcuts",
       "asc_name": "feat-siri-shortcuts",
       "ppid": "45b35116-b5b3-4b97-9256-0c97289681b6",
+      "asc_state": "APPROVED",
       "match": [
         "^/siri/",
         "^/hands-free/"
@@ -73,6 +81,7 @@
       "id": "obsidian-voice",
       "asc_name": "obsidian-vault",
       "ppid": "1408d7a4-3249-4c87-a079-e13032312579",
+      "asc_state": "APPROVED",
       "match": [
         "^/blog/obsidian-voice-input$"
       ],
@@ -82,6 +91,7 @@
       "id": "watch-capture",
       "asc_name": "watch-capture",
       "ppid": "4b75e642-3dd9-425c-8ff7-9db0cc859eb6",
+      "asc_state": "APPROVED",
       "match": [
         "^/apple-watch"
       ],
@@ -91,6 +101,7 @@
       "id": "mail-to-self",
       "asc_name": "mail-to-self",
       "ppid": "0dee88d1-7fcb-4ed8-b5cc-2b8ffa05f8ed",
+      "asc_state": "APPROVED",
       "match": [
         "^/note-to-email/"
       ],
@@ -109,6 +120,7 @@
       "id": "autopilot",
       "asc_name": "vs-drafts（流用）",
       "ppid": "3d126d78-2267-4a6c-a860-c69707ab90a5",
+      "asc_state": "APPROVED",
       "match": [
         "^/autopilot/?$"
       ],

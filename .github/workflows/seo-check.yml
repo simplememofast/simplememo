@@ -104,6 +104,16 @@ jobs:
       # App Store CTA hrefs must match the CPP wiring table (data/cpp-map.json):
       # a wired page carries exactly the mapped ppid, an unwired page carries
       # none. Null ppids in the map are pending owner input and only notice.
+      #
+      # The --selftest runs first and proves the map rules actually fire —
+      # notably "a wired ppid whose CPP is not APPROVED must fail", which is the
+      # trap free-memo-generic fell into (Apple serves the default product page
+      # for a page that has not passed review, while the ledger says "wired").
+      # It is wired here rather than through data/check-selftests.json because
+      # check-selftests.mjs only enumerates `.mjs` checks and cannot see a `.js`
+      # one — see data/autopilot-actions.json#act-ci-selftest-ratchet-js-blind.
+      - name: CPP ppid rules fire (self-test)
+        run: node scripts/apply-cpp-ppid.js --selftest
       - name: CPP ppid wiring matches data/cpp-map.json
         run: node scripts/apply-cpp-ppid.js --check
 
