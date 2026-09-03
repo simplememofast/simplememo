@@ -72,6 +72,22 @@ jobs:
       - name: Script tags are closed
         run: node scripts/check-script-tags.mjs
 
+      # 上の検査が見ているのは**症状**（コメントの入れ子・迷子の `-->`・閉じていない
+      # タグ）で、それを出した**原因**の側は 2026-09-03 まで無検査だった ——
+      # inject_faq_schema.py は CI に配線されておらず、`--check` も `--selftest` も
+      # 持っていなかった。「最初の `</head>` を拾ってコメントの中へ差し込む」直しは
+      # 入っていたが、**それが落ちるのを誰も見ていない。**
+      #
+      # 無検査のあいだに1面ずれていた: en/vs/index.html は可視 FAQ が5問あるのに
+      # `"mainEntity":[]`（空の FAQPage）を出荷していた。
+      #
+      # --check は**位置ではなく中身**を突き合わせる。`</head>` の直前へ入れ直す道具は
+      # 他にもあり（inject_locale_seed.py）、走った順で並びが入れ替わる。
+      - name: FAQ schema rules fire (self-test)
+        run: python3 scripts/inject_faq_schema.py --selftest
+      - name: FAQ schema matches the visible FAQs
+        run: python3 scripts/inject_faq_schema.py --check
+
       - name: URL normalization rules
         run: node scripts/check-url-normalization.mjs
 
