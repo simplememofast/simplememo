@@ -1,21 +1,24 @@
 {
-  "date_jst": "2026-09-02",
-  "generated_at": "2026-09-01T23:16:59Z",
-  "action": "maintenance",
-  "article": null,
+  "date_jst": "2026-09-03",
+  "generated_at": "2026-09-03T03:44:28Z",
+  "action": "refresh",
+  "article": {
+    "url": "https://simplememofast.com/obsidian/getting-started/",
+    "title": "Obsidianの始め方 — インストールから最初のノートまで実画面で解説【2026】"
+  },
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 5,
-    "last_article_date_jst": "2026-08-28",
-    "last_production_change_date_jst": "2026-08-28",
-    "days_since_production_change": 5
+    "consecutive_no_article_days": 0,
+    "last_article_date_jst": "2026-09-03",
+    "last_production_change_date_jst": "2026-09-03",
+    "days_since_production_change": 0
   },
   "data_freshness": {
-    "bq_export_last_data_date": "2026-08-30",
-    "bq_export_days_accumulated": 21,
+    "bq_export_last_data_date": "2026-08-31",
+    "bq_export_days_accumulated": 22,
     "bq_checked": true,
-    "manual_snapshot_label": "2026-08-24",
-    "$note": "**この環境の bq-preflight は資格情報が無く落ちる**ため、本日 08:05 JST の seo-daily run 33569372663 の Export preflight ログから読んだ（Runbook §0-4 ③）。`fresh — newest data 2026-08-30 (3 days behind, normal is 2–3)` / `21 days of history — a full 28-day window is first possible on 2026-09-06` / `no gaps, no stalled table, no half-finished export attempt`。**穴なし。**28日窓まであと5日。"
+    "manual_snapshot_label": "2026-09-02",
+    "$note": "この環境の bq-preflight.mjs は資格情報が無く落ちる（Cannot authenticate to BigQuery）ため、**BigQuery MCP で直接読んだ**（Runbook §1-2 ① の代替経路・プロジェクト yurika-simplememo）。実測: searchdata_site_impression は first 2026-08-10 / last 2026-08-31 / COUNT(DISTINCT data_date)=22 / span=22 —— **days と span が一致しているので穴なし**。ExportLog の最新は SEARCHDATA_SITE_IMPRESSION data_date 2026-08-31（publish 2026-09-03 04:11 JST）。temp_ で始まるテーブルは **0件**＝落ちたエクスポートの痕跡なし。**本日 08:08 JST の主系は 21日 / 最新 08-30 と記録していたが、04:11 JST 着弾ぶんが反映されて 22日 / 最新 08-31 になった**（主系の記録が誤りだったのではなく、同じ日のうちに1日進んだ）。28日窓は data_date 2026-09-06 ぶんが着弾してから。"
   },
   "cost": {
     "month": "2026-09",
@@ -63,12 +66,12 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-09-02",
-      "days": 23
+      "to": "2026-09-03",
+      "days": 24
     },
-    "completion_rate": 0.6786,
-    "change_failure_rate": 0.3214,
-    "human_intervention_rate": 0.25,
+    "completion_rate": 0.6897,
+    "change_failure_rate": 0.3103,
+    "human_intervention_rate": 0.2414,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -76,27 +79,27 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.14285714285714285
+        "rate": 0.13793103448275862
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.03571428571428571
+        "rate": 0.034482758620689655
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.03571428571428571
+        "rate": 0.034482758620689655
       },
       "request": {
         "runs": 1,
-        "rate": 0.03571428571428571
+        "rate": 0.034482758620689655
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.7391,
+    "shipping_day_rate": 0.75,
     "totals": {
-      "runs": 41,
-      "attempted": 28,
-      "shipped": 19,
+      "runs": 43,
+      "attempted": 29,
+      "shipped": 20,
       "failed": 9,
       "no_run": 2
     },
@@ -107,9 +110,9 @@
         "shipped": 14
       },
       "primary": {
-        "runs": 23,
-        "attempted": 12,
-        "shipped": 5
+        "runs": 25,
+        "attempted": 13,
+        "shipped": 6
       }
     },
     "primary_ever_shipped": true,
@@ -117,6 +120,45 @@
       "2026-08-16",
       "2026-08-17"
     ],
+    "streaks": {
+      "current": {
+        "days": 17,
+        "from": "2026-08-18"
+      },
+      "longest": {
+        "days": 17,
+        "from": "2026-08-18",
+        "to": "2026-09-03"
+      },
+      "active_days": 22,
+      "last_day": "2026-09-03"
+    },
+    "shipping_streaks": {
+      "current": {
+        "days": 3,
+        "from": "2026-09-01"
+      },
+      "longest": {
+        "days": 6,
+        "from": "2026-08-18",
+        "to": "2026-08-23"
+      },
+      "active_days": 18,
+      "last_day": "2026-09-03"
+    },
+    "hands_off_streaks": {
+      "current": {
+        "days": 3,
+        "from": "2026-09-01"
+      },
+      "longest": {
+        "days": 4,
+        "from": "2026-08-25",
+        "to": "2026-08-28"
+      },
+      "active_days": 12,
+      "last_day": "2026-09-03"
+    },
     "intervention_count": 7,
     "timings": {
       "time_to_detect_hours": {
@@ -157,28 +199,35 @@
         {
           "run_id": "ap-20260831-ccr0920",
           "failure_class": "usage_limit"
+        },
+        {
+          "run_id": "ap-20260903-actions-33706886868",
+          "failure_class": null
         }
       ]
     }
   },
-  "reason": "【連続無記事5日目・本番最終変更 2026-08-28・BQ 21/28日】レーンF（自己修復）。未修理の故障が4件出ており、Runbook §2 の「未修理の故障が残っていれば、その日の最優先アクションは基盤の修理。記事は書かない」に従った。直したのは2つ。(1) **死んだ占有を守っていた** — 08-29 に ccr-0920 が当日ブランチを claim だけ取って死に、同日12:03 JST の主系はブランチの存在だけを見て3秒で success を返し（run 33230445898）、その日の出荷がゼロになった（ap-20260829-ccr0920）。差分0・head PR 0件・最新コミットから90分以上の3条件が揃ったときだけ引き継ぐ判定を入れた（90分は主系のジョブ上限そのもの。出荷まで走り切った回の実測は18〜28分）。**1つでも読めなかったら引き継がない。** (2) **打つ手が無い故障を毎日直そうとしていた** — escalation-rules が `who: owner` と宣言している usage_limit（週次の使用量上限）をレーンFが修理対象に数えていた。規則自身が「連続するなら repair_limit ではなくこちらで拾う」と書いており、repair_of を書くと3回目で --contain が経路を止め、**時間で自然に戻る停止が人待ちの停止に化ける。**一覧・件数からは消さず、行き先だけを owner_requests に変えた。",
-  "verified": "scripts/preflight.mjs（CIが回すコマンドをworkflowから機械的に抽出）111本を実行して**0本失敗**（実行前は autopilot-runs --check と check-definitions --check の2本が落ちており、前者は台帳記入で、後者は Runbook を触った noise_floor の checksum を --bump「定義は変えていない」で解消）。autopilot-drill: 新コード run_takeover を含め **gate の16コード全てに演習シナリオがある**（死んだ占有まわりで4件追加）。property-tests: 不変条件2件と変異2件を追加し、「作業の有無を見ずに引き継ぐ」「読めなかった占有を空と読む」を両方とも捕まえることを確認。autopilot-selfheal --selftest: 5件追加（who=owner でも件数・一覧から消えないこと／escalation-rules.json が may_modify に入っていないこと）。**Gate の bash は実 API で突き合わせた**: 事故当日の claude/obsidian-auto-20260829 は files=0/PR=0/5,685分で**引き継ぐ**、本日の作業中ブランチは7分で待つ、出荷済みの 08-28 は files=16/PR=1 で待つ、存在しないブランチ（API 404）は待つ。**ページの変更が無いためブラウザQAは実施していない**（seo-check.js は 267ファイル 0 errors 0 warnings）。",
+  "reason": "【連続無記事0日目・本番最終変更 2026-09-03・BQ 22/28日】**この日は2つの回が走っている。**(1) 主系（Actions・run 33692832179・07:57→08:08 JST）がレーンA（Refresh）で PR #793 を出荷 —— `/obsidian/getting-started/` に「obsidian ダウンロード」（128imp・pos 8.5・期待クリック3.4・実クリック0）への直接回答FAQを追加した。(2) 代走（owner-session・この回）がレーンF（自己修復）。**着手の理由は、日報そのものが壊れていたこと。**10:00 JST の日報は「当日分の実行記録なし・公開記事 0」と報告したが、実際には2時間前に出荷が済んでいた —— 主系が書いた記録コミット `ac0e224` がauto-merge の検証済みSHAのあとに積まれ、main に届いていなかった（Runbook §5-1b が同日に書いた形）。**出荷はしたのに、出荷していないと報告される日**だったので、まずそこを直した（運転台帳へ ap-20260903-actions・LOG へ主系の記録・status JSON へ本日分）。そのうえで日次アクチュエータ自身の欠陥を4件直した（詳細は AUTOPILOT_LOG 2026-09-03（6））—— ① 規則が「人へ渡す」と決めた故障（usage_limit・who: owner）を derive が AI 行として起票し続けていた（3日ぶん・オーナーには一度も届いていない）② `issue_closed` の判定材料（`ctx.issues`）を誰も作っておらず、監視Issue の行が8日間「判定不能」で居座っていた（#591 は立った当日に閉じている）③ 照合して受容した取り残しの行が、ID の付け替えで引き当てられず翌日に新規で戻ってきていた④ **実費の取得に失敗した回を「実費は発生していない」として永久除外に積んでいた** —— 除外6件のうち3件は実費が台帳にあり、1件は副系CCR（Actions のログが原理的に無い）だった。\n\n【同日 追記（7回目・代走）】オーナーの指示「枠を適切にあげて」を受けて、`escalation-rules` が挙げる3つの手のどれが効くかを**先に実測した**。週次の使用量上限は**アカウント全体で共有される資源**で、autopilot の寄与はごく一部 —— したがって「1回あたりの入力量を減らす」はこの上限にほとんど効かず、**08-30/08-31 に出荷が消えたのは autopilot が使いすぎたからではなく巻き添えだった**。**オーナーの判断: ① プラン階層で対応する**（実際の消費は x20 プランに収まる。追加の課金経路 ANTHROPIC_API_KEY は引き続き使わない）。**枠そのものはセッションから上げられない**（claude.ai の課金設定に届くツールがこの環境に無い）ので、ここでやったのは判断が次のセッションへ伝わる形にすることだけ —— escalation-rules の note に実測と判断、autopilot-cost に「月次上限と週次上限は別物」、そして依頼の行を「既知の制約」へ。**金額はどこにも書いていない**（公開リポジトリ・本番配信のため）。\n\n【同日 追記（8回目・代走）】オーナーの「定期タスクで自動で画面取得するシステムあったはず、確認して」を受けて確認 —— **あった**（Claude-in-Chrome MCP の定期タスク3本が稼働中）。**ただし PR TIMES を見に行くものは1本も無い。**手順の正典を docs/prtimes-d14-capture.md に置き、9/17 の Routine を1本作った。⚠ **実測で分かった決定的な差: Routine の environment_id が無いものだけが Cowork 側で発火して Chrome が付く。**CCR からは Cowork 環境を指定できない（list_environments が返さない）ため、私が作れるのは「取れない見込みの控え」だけ。**そう名前に書いた。**本当の自動化は claude.ai の Routines UI か Cowork セッションから作り直す。\n\n【同日 追記（9回目・代走）】前の回で見つけた docs/story-seeds.md の 404 を直した。**根本原因はファイルの不在ではなく生産側の不在** —— story-seeds スキルが「追記は Runbook §5-6 が行う」と書いているのに **§5-6 が存在しなかった**（Runbook は §5-5 で終わっていた）。消費側だけが3つ作られ、種を書く側が一度も書かれていない。台帳（種7件）と Runbook §5-6 を両方入れた。**数字は全部この場で出典に当たり、X向けの字数・seed_id の書式・必須欄をスクリプトで数えた。**週次上限の種には金額も比率も書いていない（公開リポジトリ）。\n\n【同日 追記（10回目・代走）】オーナーの「すべてデプロイまで」を受けて本番と照合した。**未出荷は無い**（3リポジトリとも main と一致・本番の status/cost/distribution-queue とリポジトリが一致・Routine が読む raw 2本も一致）。404 が3件出たが**どれも publication-policy.json による意図的な非配信**で、日報が読むファイルはサイトではなく raw から取る設計だった。⚠ **その照合で、今日自分が出した欠陥を1件見つけた** —— docs/story-seeds.md の §0 が製品の事実の参照先に 404 を返す URL（サイトの site-constants.json）を書いていた。story-seeds スキルの記述をそのまま写したもので、**今日ずっと直していた「静かに死んでいる経路」を自分で1本足していた。**raw へ向け直し、404 になる理由と出典を残した（書き戻し防止）。",
+  "verified": "**主系（PR #793）の検証は主系の記録のまま**（AUTOPILOT_LOG 2026-09-03 の「主系GitHub Actions・schedule」の節）。この代走の回で実際に測ったのは以下。① `scripts/preflight.mjs` **124本すべて通過**。途中まで `check-generators.mjs --run` が落ちていたが、原因は**作業ツリーが汚れていると走らない**という当スクリプトの規律で、**09-03 の各セッションはこれをずっと「1本失敗」と記録したまま実際には走らせていなかった**。コミットしてから走らせたら生成物が2件古く（収入の写しが 08-28 のまま）、取り込んで通過した。**main（60e9ab01）の同じ木で先に 124本中0本失敗を測ってあり**、差分が自分のものだと確かめてから直した。② `autopilot-act.mjs --selftest` を **241 → 293 項目**（+52・失敗0）。③ **変異8件で自己テストが空虚でないことを確かめた** —— owner_routed の分岐を殺す／since を自分の日付に固定する／ページング防護を外す／読めなかった回を空一覧に倒す／受容を畳み先から外す／done まで畳み先に広げる／読めない回を absent に倒す／観測手段の無い経路も未記録に数える。**8件すべてが対応するテストを落とした。**④ `--apply` を**実データで走らせた**（実費の取得は HTTP 403 で「読めなかった」に分類され、除外に積まれないことを実測。旧コードなら本日の出荷回を永久除外に積んでいた）。⑤ 取り残し `ac0e224` の LOG は、ブランチが足した 3,471文字・非空66行のうち **main に無い行が0行**であることを数えて示した。⑥ BigQuery は **MCP で直接読んだ**（`bq-preflight.mjs` はこの環境で資格情報が無く落ちる）。⑦ `property-tests --check` 反例なし／`autopilot-drill --check` 39/39／`autopilot-selfheal --check` 境界問題なし／`check-guard-shapes --check` 新規3箇所を1件ずつ読んで台帳へ記録。**検証していないこと:** この修正が本番の日次アクチュエータ（`autopilot-act.yml`・09:00 JST）で走った実績はまだ無い。`ap-20260903-actions` の実費が次の run で埋まるかが最初の実証になる。\n\n【7回目】`check-escalation --check`（規則の無い故障種別なし・自己テスト5件0失敗）／`autopilot-selfheal --check` と `--selftest` 7件0失敗 —— **escalation-rules.json が may_modify に入っていない**という固定が生きたままであることを確認（触ったのは note の文面だけで、判定に使う who / stop_automation / channel / within_hours は1つも動かしていない）。`preflight.mjs` 124本すべて通過。`seo-check` 268ファイル 0/0。**本番で新Gateが初めて走ったのを観測**（run 33706886868・workflow_dispatch・11:14 JST・Gate success 17秒→以降skipped）。当日ぶんの作業が在る日なのでスキップが正しい判定で、台帳へは reconcile-runs が自動で入れた（手で足していない）。",
   "checks": {
-    "seo_check": "0 errors 0 warnings（267ファイル）",
-    "mobile_qa": "**実施せず。**HTML/CSS/画像の変更が1つも無い回のため（変更は scripts/ と docs/ と data/ のみ）。ブラウザが要る工程を省いた理由はこれで、環境都合ではない。",
-    "preflight": "scripts/preflight.mjs 111本すべて通過",
-    "drill": "autopilot-drill --check: 全シナリオ期待どおり・gate の16コード全てに状態がある（35→39シナリオ）",
-    "property": "property-tests --check: 不変条件すべて成立・反例なし。--selftest 13件中0件失敗（変異2件を追加）",
-    "selfheal": "autopilot-selfheal --check: 境界に問題なし。--selftest 7件中0件失敗。修理後の判定は「対象なし（ただし人に上げるべき故障がある）」",
-    "other": "check-css-version / check-benchmark / check-url-normalization（248 checks） / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments（overdue 0） / autopilot-budget --check / autopilot-runs --check / check-authority --check / automation-rate --check / check-pr-facts --check / d-score --check / generate_sitemap.py --dry-run"
+    "seo_check": "0 errors 0 warnings（268ファイル）",
+    "mobile_qa": "**実施せず。**9回目の変更は docs/ と data/ のみで HTML/CSS/画像を1つも触っていないため。",
+    "preflight": "scripts/preflight.mjs **124本すべて通過**。⚠ 途中まで `check-generators --run` が失敗していたが、原因は**作業ツリーが汚れていると走らない**という当スクリプトの規律（人の編集を潰さないため）。**09-03 の各セッションはこれをずっと「1本失敗」として記録していて、実際には走らせていなかった。**コミットしてから走らせたら生成物が2件古く（data/revenue-series.json の写しが 08-28 のまま）、それを取り込んで通過した。main（60e9ab01）の同じ木では 124本中0本失敗を先に測ってある",
+    "selftest": "autopilot-act --selftest: **241 → 293 項目**（+52・0件失敗）。**変異8件で空虚でないことを確認**",
+    "drill": "autopilot-drill --check: 39/39 シナリオ・gate の16コードを全被覆",
+    "property": "property-tests --check: 不変条件すべて成立・反例なし。--selftest 13件中0件失敗",
+    "selfheal": "autopilot-selfheal --check: 境界に問題なし。--selftest 7件中0件失敗。判定は「対象なし（ただし人に上げるべき故障がある）」",
+    "guard_shapes": "check-guard-shapes --check: 新しく増えた3箇所（t.route / t.failure_class / x?.pull_request）を1件ずつ読んで data/guard-shapes.json へ記録。--selftest 20件中0件失敗",
+    "other": "check-authority --check / check-selftests --check / check-definitions --check / check-autopilot-page --check（公開ページの数字は台帳の現在値と一致）/ autopilot-runs --check / autopilot-budget --check / check-model-routing --check / check-financial-policy --check / check-css-version / check-benchmark / check-url-normalization / check-internal-redirects / sync_constants --check / tag-cta-placements --check / check-experiments / automation-rate --check / check-pr-facts --check / d-score --check",
+    "waiting_progress": "check-waiting-progress --selftest 13件0失敗。**実データの `revenue_28d` が stalled であることを直接assertしていた1件を書き換えた** —— 写しを取り直したら止まらなくなり、前提が消えたため。assert は消さず、「全件を分類できる」＋「**鮮度だけを退かせれば stalled が出る**」の2件へ。変異（`staleDays > budget` の枝を殺す）で5件が落ちることを確認。⚠ **「進んでいる」は「直った」ではない** —— acknowledged_stall の診断（購入のあった日しか増えない・約3日に1回）どおりの速さ（6暦日で 2→4）で、承認は review_by 2026-09-08 まで残してある",
+    "escalation": "check-escalation --check: 規則の無い故障種別なし・自己テスト5件0失敗。usage_limit の note に実測（週次上限はアカウント全体で共有・autopilot の寄与はごく一部）とオーナーの判断（プラン階層）を追記した",
+    "story_seeds": "check-pr-facts --file docs/story-seeds.md OK（fact-check: draft を宣言）。X向け7件すべて全角120字以内（97〜109字）・seed_id は S-YYYYMMDD-slug に全件一致で重複なし・必須8欄が全種にそろっていることをスクリプトで確認",
+    "deploy_verification": "本番と照合: status/cost/distribution-queue（サイト）と prtimes-d14-capture/story-seeds（raw）がリポジトリと一致。3リポジトリとも main と差分なし。404 3件は functions/_middleware.js の非配信リスト（正: data/publication-policy.json）による意図的なもの",
+    "link_check": "今日出した2本の文書のURLを全部実測。1件（サイトの site-constants.json）が 404 で、これを直した。prtimes.jp の 000 は egress 遮断で想定どおり"
   },
   "owner_requests": [
-    "【新規・要オーナー判断】**1回あたりの実費上限の超過が1件、未レビューで残っている。**09-01 の主系 run 33454414490 が repair 種別の上限 $3.00 に対し **$9.3726（3.1倍）**、99ターン。本日のセッションがジョブログの result 行から台帳へ入れた（それまで未記録だった）。**この状態のままだと主系の次回runは着手前に止まる。**解除は `node scripts/autopilot-budget.mjs --ack-overrun 33454414490 --why \"…\"` で、**人間のみ**（AIが自分の超過を自分で通せると上限が「お願い」になる、という設計）。止まるのは主系だけで、副系CCRは別経路のため出荷は続く。",
-    "【オーナー作業不要・副系CCRへの引き継ぎ】production の Gate（.github/workflows/obsidian-autopilot.yml）への修正は、この経路から push できない（fine-grained PAT に workflow スコープが無く GitHub が remote rejected を返す）。**これは事故ではなく 2026-08-25 の決定どおり**（act-gh-pat-scope-and-rotation: workflow スコープを足すと無人の主系が自分の permissions を書き換えられるようになるため足さない／ワークフローの修理は副系CCRが引き取る）。**適用すべきパッチは AUTOPILOT_LOG.md の本日分にそのまま貼ってある**（git apply できる形）。次に走る副系CCRセッションが当てること。**再提案しない: workflow スコープは足さないと決まっている。**",
-    "【オーナー作業不要・情報共有】依頼は data/autopilot-actions.json（アクション台帳）が単一の正で、この owner_requests は日報の読み口として残しているだけ。件数と状態はそちらを見るのが正確。",
-    "【外した】GH_PATの回転 — **2026-08-26 にオーナーが実施済み**（act-gh-pat-scope-and-rotation は state: done・closed 2026-08-26。fine-grained PAT「simplememo-autopilot」を発行し有効期限 2026-11-24 を data/credential-expiry.json に記録）。08-29 の status JSON はこれを「継続」として繰り越していたが、**充足済みの依頼だったので外す**（Runbook §1-3）。",
-    "【外した】副系A(ccr-0730)・副系B(ccr-0830) の Routine が stopped の件 — check-routine-runs.mjs の本日の出力が「【停止 2026-08-28・意図的】」と表示しており、**故障ではなく意図的な停止**。オーナー判断を仰ぐ対象ではないので外す。",
-    "【継続・実測手段なし】usage_limit（週次の使用量上限）で 08-30 / 08-31 の3runが落ちた件。**セッション側に打つ手が1つも無い種別**（escalation-rules: who=owner）なので、本日からレーンFの修理対象ではなく、この欄に載る形にした。打てる手は「待つ」「枠を上げる」「1回あたりの入力量を減らす」で、後ろ2つは人の判断。08-31 23:00 UTC のリセット後は復帰しており（本runがその実測）、**いま止まってはいない。**"
+    "【継続・要オーナー操作】PR⑥ の D+14 乗車判定（2026-09-17）。**手順は機械化済み**（docs/prtimes-d14-capture.md ＋ Routine trig_01UyxxNpMNp7ecsBycR2xYqz）だが、**Chrome コネクタが付くのは Cowork 側の Routine だけ**で、CCR からは環境を指定できない。**本当の自動化にするには claude.ai の Routines UI か Cowork セッションから同じ Routine を作り直すこと**（文書に貼れるプロンプトあり）。作り直せばこの依頼は消える。作り直さない場合、9/17 に控えの Routine が手順と転記先を push/email で届ける。",
+    "【オーナー側の操作】週次の使用量上限は**プラン階層で対応すると決まった**（2026-09-03・x20 で収まる）。claude.ai の課金設定はセッションから触れないので実行はオーナー側。判断は台帳へ落としてある。"
   ],
-  "next": "**副系CCRへ: AUTOPILOT_LOG.md 本日分のパッチを .github/workflows/obsidian-autopilot.yml へ当てること。**主系はこのファイルを push できない（決定どおり）。当てるまで、本番の Gate は「ブランチが在れば必ずスキップ」の旧判定のまま。\n\n**主系は次回、1回上限の未レビュー超過で止まる見込み**（上の owner_requests 1件目）。副系は止まらないので出荷は続く。\n\nレーンA/BはBQ28日窓（**2026-09-06**・本日時点で21/28日・穴なし）まで引き続き正当化できない。coverage-queue の pending は26件で、故障が片付いた日はレーンEへ戻れる。\n\n**運転台帳に 2026-09-01 の主系 run（33454414490 / PR #749）の行が無い**（act-ledger-sync）。09:00 JST の日次アクチュエータの reconcile-runs が埋める見込みなので、二重に立てないよう手では足していない。"
+  "next": "**story-seeds の経路はまだ実走していない。**次に X の定期タスクが走る回（昼12:30 / 夜19:30 JST）に初めて raw が 200 を返す。**引けたか・種を使ったかは消費側の報告にしか出ない**ので、そこを見ないと成功は確認できない。\n\n**副系が生きているかを、主系が落ちる前に知る手段が無い。**台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できず、スキップ回は attempted: false で行すら残らない日がある（09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない）。直すには副系側に「走ったこと自体」を書かせる経路が要る。**今回は直していない。**\n\n**週次上限の残量（数値）は読めない。**読めるのは allowed / allowed_warning / rejected の状態だけで、「あと何回走れるか」は今も言えない。\n\n**主系へ**: `ap-20260903-actions` の実費が未記入のまま。代走の環境から Actions のジョブログを読めないため（HTTP 403）で、Actions 上で走る append-cost が埋める。**埋まらなかったら 6回目の (4) の修正が効いていない。**\n\nレーンA/B は BQ28日窓（data_date 2026-09-06 ぶんの着弾後）まで部分ウィンドウでの判断が続く。本日時点で 22/28日・穴なし。\n\ncoverage-queue（レーンE）の pending は 26件のまま。"
 }

@@ -356,9 +356,8 @@
       padding: 0.5rem;
       line-height: 1;
     }
-    @media (max-width: 768px) {
-      .global-nav__links { display: none; }
-      .global-nav__cta { display: none; }
+    @media (max-width: 1099px) {
+      .global-nav__links:not(.open) { display: none; }
       .global-nav__hamburger { display: block; }
       .global-nav__links.open {
         display: flex;
@@ -390,6 +389,14 @@
         padding: 0.8rem;
         font-weight: 700;
       }
+    }
+
+    /* CTAだけは 768px 以下（サイト共通の契約。769〜1099px では出したまま）。
+       [2026-09-03] この面は共有CSS（assets/css/style.min.css）を読み込んでいないので、
+       **共有側でナビの断点を 1099px にした修理がここへ届いていなかった。**
+       900px で `.global-nav__inner` が 1074px になり、+87px 横漏れしていた。 */
+    @media (max-width: 768px) {
+      .global-nav__cta { display: none; }
     }
 
   </style>

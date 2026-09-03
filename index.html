@@ -348,7 +348,7 @@
   <!-- JSON-LD: FAQPage (mirrors the visible FAQ section) -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Simple Memoはどんなアプリですか？","acceptedAnswer":{"@type":"Answer","text":"Simple Memoは「起動→書く→送信」の3ステップだけに特化したメモアプリです。入力したメモは、あらかじめ設定したメールアドレス宛にワンタップで送信されます。フォルダ管理や同期設定などの複雑な機能はありません。整理が必要なタグ付けも手作業では行わず、AIタグ自動追加が端末内で自動的に付けます。"}},{"@type":"Question","name":"AIタグ自動追加とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"話すか書くだけで、メモの内容をAIが理解して、20文字以内のタイトル・内容を表すタグ1〜3個・種別（todo／idea／log）を自動で付ける機能です。2026年7月の無料アップデートで提供を開始しました。タイトルはメールの件名にも使われ、Obsidian連携をオンにしていればタグ付きのままノートへ自動追記されます。本文（原文）は書き換えません。AIタグ自動追加の詳細もご覧ください。"}},{"@type":"Question","name":"AIタグ付けでメモの内容が外部サーバーに送られますか？","acceptedAnswer":{"@type":"Answer","text":"送られません。タグ付け・タイトル生成はAppleのオンデバイスAI（Apple Foundation Models）を使ってお使いのiPhoneの中だけで実行され、この処理でネットワーク通信は行いません。Apple Intelligence非対応の機種でも、端末内の軽量整形が同じ形式でタイトル・タグ・種別を付けます。"}},{"@type":"Question","name":"オフラインでもメモを送信できますか？","acceptedAnswer":{"@type":"Answer","text":"はい。オフライン時にメモを送信すると、メッセージは端末内のOutbox（未送信キュー）にAES-GCM暗号化された状態で保存されます。ネットワークに再接続すると、自動的に送信が再開されます。"}},{"@type":"Question","name":"無料で使えますか？","acceptedAnswer":{"@type":"Answer","text":"はい。Freeプランなら1日3通まで、ずっと無料でご利用いただけます。クレジットカード登録は不要で、初日からそのままお使いいただけます。もっと送りたい場合は、Premiumプラン（月額・年額）で送信無制限になります。"}},{"@type":"Question","name":"Premiumはいつでも解約できますか？","acceptedAnswer":{"@type":"Answer","text":"はい、いつでも解約できます。解約はiPhoneの「設定」→「サブスクリプション」から行えます。解約後も無料プラン（1日3通まで）でそのままお使いいただけ、Freeプランは登録不要・期限なしでご利用いただけます。"}},{"@type":"Question","name":"画像は送れますか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。Simple Memoはテキストメモの高速送信に特化しており、画像の添付には対応していません。写真を保存したい場合は、Apple純正の「写真」アプリや「メモ」アプリをご利用ください。Simple Memoは「思いついたことをすぐテキストで残す」ための専用ツールです。"}}]}</script>
 
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=fa92a786e6">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=a7629b3f2c">
   <style>
     /* Language Switcher — 2026 refined */
     .header {
@@ -1843,67 +1843,5 @@
   });
   </script>
   <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
-  <!-- ── 一時的な診断（2026-09-03）────────────────────────────────
-       **`?diag=1` が付いたときだけ動く。**通常の閲覧者には何も起きない。
-
-       置いた理由: 実機（iOS = WebKit）で横スクロールが出ているのに、
-       この環境の Chromium では 3面×14幅・フォント太らせ・isMobile・
-       iPhoneプリセット・fixed/absolute の全走査で**一度も再現しない。**
-       `npx playwright install webkit` は egress で塞がれていて入らない。
-       `body { overflow-x: clip }` の網でも止まらないので、
-       **body の外側（fixed / html 側 / ブラウザ固有）で起きている**ことまでは分かる。
-
-       推測を続けても当たらないので、**実機に原因を吐かせる。**
-       原因が特定できたら、この節ごと消すこと。 -->
-  <script>
-  (function () {
-    if (!/[?&]diag=1/.test(location.search)) return;
-    function run() {
-      var de = document.documentElement, vw = de.clientWidth, rows = [];
-      var all = document.querySelectorAll('*');
-      for (var i = 0; i < all.length; i++) {
-        var el = all[i], r = el.getBoundingClientRect();
-        if (!r.width) continue;
-        if (r.right <= vw + 0.5 && r.left >= -0.5) continue;
-        // **止めている親の名前を出す。**body には overflow-x:clip を入れてあるので、
-        // 「clip親あり」だけだと全要素に付いて情報が無くなる（2026-09-03 の実測でそうなった）。
-        var sc = '', a = el.parentElement;
-        while (a) {
-          var o = getComputedStyle(a).overflowX;
-          if ((o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip')
-              && a !== document.body && a !== document.documentElement) {
-            sc = String(a.className || a.tagName).slice(0, 18); break;
-          }
-          a = a.parentElement;
-        }
-        var cs = getComputedStyle(el);
-        rows.push({ r: Math.round(r.right), l: Math.round(r.left), w: Math.round(r.width), sc: sc,
-          p: cs.position, n: String(el.className || el.tagName).slice(0, 24),
-          t: (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 16) });
-      }
-      rows.sort(function (a, b) { return b.r - a.r; });
-      var vv = window.visualViewport, out = [];
-      out.push('layout=' + vw + ' inner=' + window.innerWidth
-        + (vv ? ' visual=' + Math.round(vv.width) + ' scale=' + vv.scale.toFixed(2) + ' offX=' + Math.round(vv.offsetLeft) : ''));
-      out.push('html.scrollW=' + de.scrollWidth + ' body.scrollW=' + document.body.scrollWidth
-        + ' over=' + (de.scrollWidth - vw) + ' dpr=' + (window.devicePixelRatio || '-'));
-      out.push('UA=' + navigator.userAgent.slice(0, 70));
-      if (!rows.length) out.push('画面外に出ている要素: なし');
-      for (var j = 0; j < 8 && j < rows.length; j++) {
-        var x = rows[j];
-        out.push((j + 1) + ') R' + x.r + ' L' + x.l + ' W' + x.w + ' ' + x.p
-          + (x.sc ? ' [止める親:' + x.sc + ']' : '') + ' .' + x.n + ' "' + x.t + '"');
-      }
-      var d = document.createElement('div');
-      d.setAttribute('style', 'position:fixed;left:0;top:0;right:0;z-index:2147483647;background:#000;'
-        + 'color:#0f0;font:11px/1.5 ui-monospace,monospace;padding:8px;white-space:pre-wrap;'
-        + 'word-break:break-all;max-height:72vh;overflow:auto;border-bottom:2px solid #0f0');
-      d.textContent = out.join('\n');
-      document.body.appendChild(d);
-    }
-    if (document.readyState === 'complete') setTimeout(run, 400);
-    else window.addEventListener('load', function () { setTimeout(run, 400); });
-  })();
-  </script>
 </body>
 </html>

@@ -142,10 +142,40 @@ def replace_or_insert(html_text: str, block: str) -> str:
     # Insert just before </head>. Don't consume any leading whitespace; the
     # block itself ends with '\n' so the resulting layout is stable across
     # repeated runs (idempotent).
-    head_close = re.search(r"</head>", html_text)
-    if not head_close:
+    #
+    # [2026-09-03] This used to be a bare re.search(r"</head>"), which found the
+    # FIRST </head> in the file -- including one inside an HTML comment.
+    # /captio-alternative/ carried the comment
+    #
+    #     <!-- JSON-LD: FAQPage is auto-generated near </head> by scripts/... -->
+    #
+    # so the block was spliced INTO that comment. HTML comments do not nest, so
+    # the comment terminated at the injected block's first "-->", and the
+    # remainder ("</head> by scripts/inject_faq_schema.py -->") became live
+    # markup: the real </head> moved up, and the trailing text was hoisted into
+    # <body>. The literal string "by scripts/inject_faq_schema.py -->" was the
+    # FIRST VISIBLE LINE of that production page, and stayed there unnoticed.
+    #
+    # So: find the first </head> that is not inside a comment.
+    head_close = _first_live_head_close(html_text)
+    if head_close is None:
         return html_text
-    return html_text[: head_close.start()] + block + html_text[head_close.start():]
+    return html_text[:head_close] + block + html_text[head_close:]
+
+
+COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+
+
+def _first_live_head_close(html_text: str):
+    """Offset of the first ``</head>`` that is not inside an HTML comment.
+
+    Returns ``None`` when the document has no live ``</head>``.  Commented-out
+    ones are skipped rather than treated as insertion points -- splicing into a
+    comment silently corrupts the document (see the note above).
+    """
+    masked = COMMENT_RE.sub(lambda m: " " * (m.end() - m.start()), html_text)
+    hit = re.search(r"</head>", masked)
+    return hit.start() if hit else None
 
 
 def process_file(file_path: Path, page_url: str, lang: str, dry_run: bool) -> bool:

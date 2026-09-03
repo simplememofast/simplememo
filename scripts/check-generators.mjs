@@ -51,6 +51,77 @@ const WRITE_FLAGS = ['--write', '--sync', '--svg', '--rebuild'];
 /** 隣リポジトリ。揃っていない場所では、書かずに拒否するのが正しい生成器がある。 */
 const SIBLINGS = ['simplememo-api', 'simplememo-ios'];
 
+/**
+ * 隣リポジトリの状態を3つに分ける。**「在る／無い」の2択では足りない。**
+ *
+ * [2026-09-03] `app-releases.mjs --write` が exit 1 で落ち、この検査は
+ * 「**書く動作が壊れている。**」と報告した。**壊れていない。**
+ * 隣が**浅いクローン**（`--depth` 付きで取られた状態）で、タグと履歴が欠けており、
+ * 生成器のほうは正しく拒否していた（`app-releases.mjs` の `assertSiblingReady`）。
+ * `git fetch --unshallow origin` を1回撃ったら、そのまま通った。
+ *
+ * **誤診の代償は、直し先を隠すこと。**「生成器が壊れた」と読んだ人は
+ * `app-releases.mjs` を読みに行く。そこには何も無い。直すのは環境のほうで、
+ * 打つべき1行は生成器の例外文にだけ書いてあった —— この検査は伝えていなかった。
+ *
+ * だから状態は3つ:
+ *   `ready`   … 揃っている。生成器は成功すること
+ *   `absent`  … 隣が無い。生成器は**拒否すること**（部分的な計測を台帳にしない）
+ *   `shallow` … 隣は在るが浅い。生成器は**拒否すること**。そして
+ *               **報告は環境の直し方を名指しする**（生成器を疑わせない）
+ */
+export function siblingState(
+  root = ROOT,
+  { exists = (f) => fs.existsSync(f), isShallow = gitIsShallow } = {},
+) {
+  const missing = SIBLINGS.filter((r) => !exists(path.join(root, '..', r)));
+  if (missing.length) return { kind: 'absent', repos: missing };
+  const shallow = SIBLINGS.filter((r) => isShallow(path.join(root, '..', r)));
+  if (shallow.length) return { kind: 'shallow', repos: shallow };
+  return { kind: 'ready', repos: [] };
+}
+
+/** 浅いクローンか。git が読めない場所では「浅くない」に倒す（過検出しない）。 */
+function gitIsShallow(dir) {
+  try {
+    return execFileSync('git', ['-C', dir, 'rev-parse', '--is-shallow-repository'],
+      { encoding: 'utf8', stdio: 'pipe' }).trim() === 'true';
+  } catch { return false; }
+}
+
+/**
+ * ある生成器に何を期待するかを決める。**純関数**なので、
+ * 誤診が戻ってきたことを自己テストで落とせる。
+ */
+export function expectationFor(entry, state) {
+  if (entry.needs !== 'siblings' || state.kind === 'ready') {
+    return {
+      want: 'ok',
+      note: '',
+      fail: (rc, tail) => `${entry.cmd} が exit ${rc} — **書く動作が壊れている。**${tail}`,
+    };
+  }
+  if (state.kind === 'shallow') {
+    return {
+      want: 'refuse',
+      note: `  （隣が浅いので拒否を確かめた: ${state.repos.join(' ')}）`,
+      fail: () => `${entry.cmd} が浅いクローンの隣で exit 0 — **欠けた履歴で書いている。**`
+        + `${state.repos.join(' / ')} にタグと履歴が無い`,
+      // **拒否した場合でも直し方を出す。**「拒否が正しい」で終わると、
+      // 走らせたかった人はここから先へ進めない。
+      hint: `隣が浅いので ${entry.cmd} は走っていない。`
+        + `走らせるなら ${state.repos.map((r) => `\`git -C ../${r} fetch --unshallow origin\``).join(' ')} を先に撃つこと`,
+    };
+  }
+  return {
+    want: 'refuse',
+    note: '  （隣が無いので拒否を確かめた）',
+    fail: () => `${entry.cmd} が隣リポジトリ無しで exit 0 — **揃っていない場所で書いている。**`
+      + '無いものを「無かった」として固めてしまう',
+    hint: `隣（${state.repos.join(' / ')}）が無いので ${entry.cmd} は走っていない`,
+  };
+}
+
 /** ソースを走査して「書き出す旗を持つ」スクリプトを挙げる。 */
 export function writersIn(rawSrc) {
   // [2026-08-26] 生のソースで当てると、**この検査自身の自己テストに書いた
@@ -182,6 +253,8 @@ function dirtyPaths() {
 function doRun(doc) {
   const problems = [];
   const dated = new Set(doc.run.filter((g) => g.dated).flatMap((g) => g.writes || []));
+  const state = siblingState();
+  const hints = [];
   for (const g of doc.run) {
     const [script, ...args] = g.cmd.split(' ');
     const started = Date.now();
@@ -194,22 +267,14 @@ function doRun(doc) {
     }
     // [2026-08-26] 隣リポジトリが要るものは、**隣が無いとき非0で拒否するのが正しい**
     // （「部分的な計測を台帳にしない」）。それを「壊れている」と読むと、
-    // 逆に**拒否を免除する例外**を作ることになる。なので向きを分けて確かめる:
-    //   隣が在る → exit 0 であること
-    //   隣が無い → **非0で拒否すること**（黙って何もしないのは通さない）
-    const needsSiblings = g.needs === 'siblings';
-    const haveSiblings = SIBLINGS.every((r) => fs.existsSync(path.join(ROOT, '..', r)));
-    const want = needsSiblings && !haveSiblings ? 'refuse' : 'ok';
-    const good = want === 'ok' ? rc === 0 : rc !== 0;
-    const label = want === 'refuse' ? (good ? '拒否' : 'FAIL') : (good ? 'ok  ' : 'FAIL');
-    console.log(`  ${label} ${g.cmd.padEnd(44)} ${Date.now() - started}ms`
-      + (want === 'refuse' ? '  （隣が無いので拒否を確かめた）' : ''));
-    if (!good) {
-      problems.push(want === 'refuse'
-        ? `${g.cmd} が隣リポジトリ無しで exit 0 — **揃っていない場所で書いている。**`
-          + '無いものを「無かった」として固めてしまう'
-        : `${g.cmd} が exit ${rc} — **書く動作が壊れている。**${tail}`);
-    }
+    // 逆に**拒否を免除する例外**を作ることになる。
+    // [2026-09-03] 「在る／無い」の2択では足りなかった —— `expectationFor` を見ること。
+    const exp = expectationFor(g, state);
+    const good = exp.want === 'ok' ? rc === 0 : rc !== 0;
+    const label = exp.want === 'refuse' ? (good ? '拒否' : 'FAIL') : (good ? 'ok  ' : 'FAIL');
+    console.log(`  ${label} ${g.cmd.padEnd(44)} ${Date.now() - started}ms${exp.note}`);
+    if (good && exp.hint) hints.push(exp.hint);
+    if (!good) problems.push(exp.fail(rc, tail));
   }
 
   // 追跡下のファイルが動いたら、コミット済みの生成物が台帳より古かったということ
@@ -219,6 +284,10 @@ function doRun(doc) {
     problems.push(`${file} が再生成で変わった — **コミット済みの生成物が元より古い。**`
       + '同じコミットに生成物を含めること');
   }
+  // **走らなかったものは、走らなかったと言う。**拒否は正しいが、
+  // 「なぜ走っていないか」と「どうすれば走るか」を出さないと、
+  // 次の人は生成器のほうを読みに行く（2026-09-03 に実際そうなった）。
+  for (const h of hints) console.log(`  ↳ ${h}`);
   return problems;
 }
 
@@ -241,6 +310,39 @@ function restore(before) {
 
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 const SCENARIOS = [
+  ['**浅い隣を「生成器が壊れた」と読まない**（2026-09-03 の誤診）', () => {
+    const st = siblingState('/x', { exists: () => true, isShallow: (d) => d.endsWith('simplememo-ios') });
+    assert(st.kind === 'shallow', JSON.stringify(st));
+    const exp = expectationFor({ cmd: 'scripts/app-releases.mjs --write', needs: 'siblings' }, st);
+    assert(exp.want === 'refuse', '浅い隣で成功を期待した — 欠けた履歴で台帳を書かせることになる');
+    assert(!exp.fail(1, '').includes('書く動作が壊れている'),
+      '**浅いクローンを「書く動作が壊れている」と報告した。**直し先は環境で、生成器ではない');
+  }],
+  ['**拒否したときは直し方を出す**（拒否で終わると先へ進めない）', () => {
+    const st = siblingState('/x', { exists: () => true, isShallow: () => true });
+    const exp = expectationFor({ cmd: 'scripts/app-releases.mjs --write', needs: 'siblings' }, st);
+    assert(/fetch --unshallow/.test(exp.hint || ''), `直し方を出していない: ${exp.hint}`);
+    const absent = expectationFor({ cmd: 'x --write', needs: 'siblings' },
+      siblingState('/x', { exists: () => false, isShallow: () => false }));
+    assert((absent.hint || '').includes('隣'), `隣が無い側の理由が出ていない: ${absent.hint}`);
+  }],
+  ['隣が揃っていれば成功を期待する（**拒否を免除しない**）', () => {
+    const st = siblingState('/x', { exists: () => true, isShallow: () => false });
+    assert(st.kind === 'ready', JSON.stringify(st));
+    const exp = expectationFor({ cmd: 'x --write', needs: 'siblings' }, st);
+    assert(exp.want === 'ok', '揃っているのに拒否を期待した — 黙って書かない生成器を通してしまう');
+    assert(exp.fail(1, '').includes('書く動作が壊れている'), '揃っている場所での失敗は生成器の欠陥');
+  }],
+  ['隣を要らないものは隣の状態に影響されない', () => {
+    for (const kind of [{ exists: () => false }, { exists: () => true, isShallow: () => true }]) {
+      const exp = expectationFor({ cmd: 'x --write' }, siblingState('/x', { isShallow: () => false, ...kind }));
+      assert(exp.want === 'ok', '隣を要らない生成器に拒否を期待した');
+    }
+  }],
+  ['**git が読めない場所では浅いと決めつけない**（過検出する検査は無視される）', () => {
+    const st = siblingState('/does-not-exist-xyz', { exists: () => true });
+    assert(st.kind === 'ready', `git の無い場所で ${st.kind} と読んだ`);
+  }],
   ['--write を持つスクリプトを見つける', () => {
     const f = writersIn("if (process.argv.includes('--write')) { x(); }");
     assert(f.includes('--write'), JSON.stringify(f));

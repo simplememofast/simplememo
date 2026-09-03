@@ -357,9 +357,39 @@
       "expr": "entry.from",
       "disposition": "書き込み側の選別",
       "note": "`--write-window` の `(stored.windows ?? []).filter((w) => !(w.from === entry.from && w.to === entry.to))`。同じ窓の古い行を除いて新しい行で置き換える選別で、判定ではない。entry.from / entry.to は --from / --to の既定値を持つので無いことはなく、仮に無ければ何も除かれずに追記されるだけ（重複は次の validateLedger の窓ループが算数で見る）。**空でも消える規則を持たない**"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "t.route",
+      "disposition": "前提",
+      "note": "who=owner の故障を人へ渡すとき、`no_failure_since` の since を**同じ経路・同じ種別の最後の失敗日**から取る（`r.route === t.route`）。selfheal の target は運転台帳の失敗行そのものなので route は必ず在る（`autopilot-runs --check` の validate が route を要求する）。**万一 undefined でも一致が0件になり、reduce の初期値 `t.date_jst` が残る** —— since が古いほど再発を見る窓は広く、**閉じやすくなる方向には動かない。**"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "t.failure_class",
+      "disposition": "前提",
+      "note": "同じ since の導出で種別を突き合わせる。台帳側の欠落は左辺の `?? 'unknown'` で 'unknown' に寄せてあるので**黙って全件一致にはならない**。t.failure_class 自体は selfheal が `r.failure_class || 'unknown'` で必ず埋めるため undefined にならない。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "x?.pull_request",
+      "disposition": "前提",
+      "note": "issues API は PR も返すので、監視Issueの一覧から PR を落とす（health-intake.mjs と同じ扱い）。**この鍵が無ければ PR ではない**というのが GitHub の契約で、台帳の正ではない。落とし損ねても `issue_closed` は「一覧に在る＝まだ open」側へ倒れるだけで、**故障を消す方向には効かない。**"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "a.not_before_jst",
+      "disposition": "前提",
+      "note": "**着手できる日は任意の欄。**書いた行にだけ形式（YYYY-MM-DD）を要求する。無い行に要求が無いのが正しい —— 期日を持たない依頼のほうが多数で、そちらは age_days で数える。**正（欄そのもの）が消えたときに規則が消えるのは意図どおり** ——欄が無ければ滞留の数え方は元の age_days に戻るだけで、鳴らなくなる側へは倒れない。逆に形式検査が要るのは、書き間違えた期日がその行を黙って永久に鳴らなくするから（simplememo-api の actionableAgeDays は読めない日付を age_days に落とすが、**落とすこと自体は静かに起きる**ので、書いた側で止める）"
+    },
+    {
+      "file": "scripts/check-viewport-overflow.mjs",
+      "expr": "staticResult.problems",
+      "disposition": "前提",
+      "note": "`checkStatic()` の戻り値。**同じファイルの純関数**で、`problems` は必ず配列を返す（`const problems = []` から始めて push するだけ・早期 return が無い）。台帳や外部入力は経由しない。\n\n**正が消える経路が無いことが要点。**`checkStatic` の走査対象 `STATIC_FILES` が空になっても `problems` は `[]` で、`.length` は 0 —— つまり**「見る面が消えた」を「異常なし」と読む**。そこは `scanned !== STATIC_FILES.length` を見る自己テスト（**面が消えたら落ちる**）が受けており、`STATIC_FILES.length !== allPages().length` を見る自己テスト（**静的規則は全面に当たる**）が全面から縮むことも落とす。**この式そのものではなく、上流の2本で守っている。**"
     }
   ],
-  "coverage_measured_at": "2026-08-26",
+  "coverage_measured_at": "2026-09-03",
   "no_ledger_binding": [
     "growth/scripts/acquisition-mix.mjs",
     "growth/scripts/analyze.mjs",

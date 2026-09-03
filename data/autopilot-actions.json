@@ -21,6 +21,12 @@
     "【履歴はここに持たない】解決した行は state:done になり、日報から消える。",
     "経緯は docs/obsidian/AUTOPILOT_LOG.md が持つ。同じ歴史を2箇所に置かない。",
     "",
+    "【not_before_jst（任意）】着手できる日。**期日待ちを滞留と数えないための欄。**",
+    "  age_days は行が立ってからの日数なので、評価日待ちと放置を区別できない。",
+    "  owner_direct（simplememo-api）はこれがあれば**その日から**滞留を数える。",
+    "  無ければこれまでどおり age_days。書き間違えるとその行が黙って永久に鳴らなく",
+    "  なるので、形式は --check が見る",
+    "",
     "【state】",
     "  open         … 未処理。日報に出る",
     "  done         … close_check が通った。evidence に根拠が入る",
@@ -220,8 +226,8 @@
     },
     {
       "id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 3件",
-      "detail": "ap-20260820-actions（run 32303452390）, ap-20260821-actions（run 32419185478）, ap-20260831-ccr0920（run cse_01VZpZ4oseTMEgbBPzddUSxN）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。",
+      "title": "実費台帳に載っていない run が 1件",
+      "detail": "ap-20260903-actions（run 33692832179）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 1件（ap-20260831-ccr0920）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
       "source": "cost",
       "domain": null,
       "touches": [
@@ -235,21 +241,17 @@
         "params": {
           "exclude": [
             "ap-20260820-actions",
-            "ap-20260821-actions",
-            "ap-20260826-actions",
-            "ap-20260830-actions",
-            "ap-20260831-actions",
-            "ap-20260831-ccr0920"
+            "ap-20260821-actions"
           ]
         }
       },
-      "state": "done",
+      "state": "open",
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
-      "closed_jst": "2026-09-03",
-      "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 6件を除外: ap-20260820-actions, ap-20260821-actions, ap-20260826-actions, ap-20260830-actions, ap-20260831-actions, ap-20260831-ccr0920）",
-      "last_run_jst": "2026-09-02",
-      "last_run_log": "ap-20260820-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260831-ccr0920: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260902-actions: appended 2026-09-02 actions $13.5739",
+      "closed_jst": null,
+      "evidence": "実費が未記録の run が 1件: ap-20260903-actions（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）",
+      "last_run_jst": "2026-09-03",
+      "last_run_log": "ap-20260820-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260821-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260903-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない",
       "reopened_jst": "2026-09-03"
     },
     {
@@ -386,7 +388,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33692832179（2026-09-03 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "33706886868（2026-09-03 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -399,14 +401,14 @@
         "kind": "ledger_covers_runs",
         "params": {}
       },
-      "state": "open",
-      "created_jst": "2026-09-01",
+      "state": "done",
+      "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "台帳に無い run が 1件: 33692832179（記録対象外 1件を除外: 32817335365）",
+      "closed_jst": "2026-09-03",
+      "evidence": "Actions run 26件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
       "last_run_jst": "2026-09-03",
-      "last_run_log": "33692832179: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
-      "reopened_jst": "2026-09-01"
+      "last_run_log": "33706886868 -> ap-20260903-actions-33706886868: appended ap-20260903-actions-33706886868 (skipped_gate)\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
+      "reopened_jst": "2026-09-03"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -450,11 +452,11 @@
           "issue": 591
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-26",
       "last_seen_jst": "2026-08-26",
-      "closed_jst": null,
-      "evidence": "Issue の状態を取得できず判定不能（閉じたという意味ではない）"
+      "closed_jst": "2026-09-03",
+      "evidence": "#591 は open な監視Issueの一覧に無い（回復とみなす）"
     },
     {
       "id": "act-orphaned-pr-670",
@@ -771,53 +773,53 @@
     },
     {
       "id": "act-selfheal-ap-20260830-actions",
-      "title": "未修理の故障: ap-20260830-actions（usage_limit）",
-      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
+      "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-08-31 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
-      "touches": [
-        "data/autopilot-runs.json",
-        ".github/workflows/obsidian-autopilot.yml"
-      ],
-      "force_owner": null,
-      "force_owner_why": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
       "auto": null,
       "close_check": {
-        "kind": "run_repaired",
+        "kind": "no_failure_since",
         "params": {
-          "run_id": "ap-20260830-actions"
+          "route": "actions",
+          "failure_class": "usage_limit",
+          "since": "2026-08-31"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-01",
+      "state": "done",
+      "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "ap-20260830-actions は未修理のまま（repair_of で名指しされていない）"
+      "closed_jst": "2026-09-03",
+      "evidence": "2026-08-31 以降 actions は 3回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-03"
     },
     {
       "id": "act-selfheal-ap-20260831-actions",
-      "title": "未修理の故障: ap-20260831-actions（usage_limit）",
-      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
+      "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-08-31 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
-      "touches": [
-        "data/autopilot-runs.json",
-        ".github/workflows/obsidian-autopilot.yml"
-      ],
-      "force_owner": null,
-      "force_owner_why": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
       "auto": null,
       "close_check": {
-        "kind": "run_repaired",
+        "kind": "no_failure_since",
         "params": {
-          "run_id": "ap-20260831-actions"
+          "route": "actions",
+          "failure_class": "usage_limit",
+          "since": "2026-08-31"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-01",
+      "state": "done",
+      "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "ap-20260831-actions は未修理のまま（repair_of で名指しされていない）"
+      "closed_jst": "2026-09-03",
+      "evidence": "2026-08-31 以降 actions は 3回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-03"
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-memo-automation-tqsd8z",
@@ -917,28 +919,27 @@
     },
     {
       "id": "act-selfheal-ap-20260831-ccr0920",
-      "title": "未修理の故障: ap-20260831-ccr0920（usage_limit）",
-      "detail": "2026-08-31 / ccr-0920 / outcome=failed。実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657`（09:20 JST・ccr-0920）の起動が 13 秒で FAILED（fired 2026-08-31T00:20:33Z / finished 00:20:46Z / session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**主系の 429 と同じ事象の副系側**で、同じアカウントなので代走にならなかった。1ターンも回っていないため当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）",
+      "title": "未修理の故障: ap-20260831-ccr0920（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-08-31 / ccr-0920 / outcome=failed。実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657`（09:20 JST・ccr-0920）の起動が 13 秒で FAILED（fired 2026-08-31T00:20:33Z / finished 00:20:46Z / session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**主系の 429 と同じ事象の副系側**で、同じアカウントなので代走にならなかった。1ターンも回っていないため当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-08-31 以降に ccr-0920 が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
-      "touches": [
-        "data/autopilot-runs.json",
-        ".github/workflows/obsidian-autopilot.yml"
-      ],
-      "force_owner": null,
-      "force_owner_why": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
       "auto": null,
       "close_check": {
-        "kind": "run_repaired",
+        "kind": "no_failure_since",
         "params": {
-          "run_id": "ap-20260831-ccr0920"
+          "route": "ccr-0920",
+          "failure_class": "usage_limit",
+          "since": "2026-08-31"
         }
       },
-      "state": "open",
+      "state": "acknowledged",
       "created_jst": "2026-09-01",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": "ap-20260831-ccr0920 は未修理のまま（repair_of で名指しされていない）"
+      "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**"
     },
     {
       "id": "act-orphaned-branch-claude-simplememofast-indexing-93xm3y",
@@ -978,11 +979,14 @@
           "branch": "claude/obsidian-auto-20260902"
         }
       },
-      "state": "open",
+      "state": "acknowledged",
       "created_jst": "2026-09-02",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": "claude/obsidian-auto-20260902 はまだ 1 件先にある"
+      "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ef8b3a7`「ドリルの本数を実測に直す（15→39）」は、**取り残しではなく main に届かなかった訂正**で、内容は PR #811 が同日に入れている。4ファイルの照合:\n① `docs/obsidian/AUTOPILOT_RUNBOOK.md` §4 … main は「切替演習（39シナリオ・gateの16コードを全被覆）」。実測 `autopilot-drill --check` は 39/39 で一致\n② `docs/obsidian/AUTOPILOT_LOG.md` … 09-02 エントリの「35→39」が main にある\n③ `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で新しい\n④ `data/kpi-definitions.json` … **ブランチ側の行は literal には入っていない。入れてはいけない。**ブランチは noise_floor を v24→v25 にしているが、main は同じ番号 v25 を**別の変更**（09-02・Runbook §0-2）に使っており、いまは v30。**版番号が衝突している**ので写しを当てると5版ぶん巻き戻る。ブランチが必要としていたもの（Runbook を触ったことによる checksum の更新）は main の v30 が果たしている —— why にも「§4 のドリル本数の表記を実測値（39シナリオ）へ直したため」と同じ理由が書いてある。**欠けているのは版番号ではなく無い**、と示せたので受容する。",
+      "reviewed_orphans": [
+        "ef8b3a7"
+      ]
     },
     {
       "id": "act-budget-overrun-33454414490",
@@ -1011,7 +1015,7 @@
     {
       "id": "act-pr6-d14-evaluate",
       "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
-      "detail": "**2026-09-17（D+14）に、9/3 配信の PR⑥ の乗車判定をする。**台帳は `growth/experiments/experiments.json` の `pr-2026-rsi-autopilot`（status: running・evaluation_at: 2026-09-17）。\n\n**機械では埋められない。**必要な数値は PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。**だから人の作業として積む。**\n\n【PR TIMES の分析画面から転記する5つ】`discover_boarding_post` へ:\n  pv … 総PV／ google_referral_ratio … 参照元のGoogle系比率（0〜1）／mobile_ratio … スマートフォン比率（0〜1）／ syndication_count … 転載本数／day1_senders_vs_prev3avg … 配信当日の送信者数 ÷ 前3日平均（分かれば）\n【判定】boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。外したらどのSを読み違えたかを notes に書いて重みを更新する（レコードの $comment のとおり）。\n【あわせて直す】`growth/data/annotations.json` の 2026-09-03 の label を「PR⑥ …（AI実行率76.4%） — n,nnnPV・転載nn・D-SCORE 85・乗車/非乗車」の書式へ。**`d-score --backtest` はこの書式でしか拾わない**ので、直すまで n=5 のままになる。\n\n**判定のとき、最初に疑う候補は2つ**（レコードの 2026-09-03 の注記のとおり）:\n  (1) **時刻** —— 08:03 JST 配信。n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で同じ帯\n  (2) **S2（見出しの固有名詞）** —— 配信見出しは iPhone を含むが、**アプリ名も Obsidian も App Store も無い。**乗車した2本（65/71）を牽引したのはそのエンティティだった\n\n**閉じ条件は `manual`。**評価日そのものを閉じ条件にはできない —— 同じ 2026-09-1x に**別の12件が評価日を迎える**（9/13）ので、「evaluated_at が 2026-09-1 で始まる」では他の実験の評価で誤って閉じる。**判定不能を完了と読まない**ための選択で、閉じるのは人。",
+      "detail": "**2026-09-17（D+14）に、9/3 配信の PR⑥ の乗車判定をする。**台帳は `growth/experiments/experiments.json` の `pr-2026-rsi-autopilot`（status: running・evaluation_at: 2026-09-17）。\n\n**機械では埋められない。**必要な数値は PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。**だから人の作業として積む。**\n\n【PR TIMES の分析画面から転記する5つ】`discover_boarding_post` へ:\n  pv … 総PV／ google_referral_ratio … 参照元のGoogle系比率（0〜1）／mobile_ratio … スマートフォン比率（0〜1）／ syndication_count … 転載本数／day1_senders_vs_prev3avg … 配信当日の送信者数 ÷ 前3日平均（分かれば）\n【判定】boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。外したらどのSを読み違えたかを notes に書いて重みを更新する（レコードの $comment のとおり）。\n【あわせて直す】`growth/data/annotations.json` の 2026-09-03 の label を「PR⑥ …（AI実行率76.4%） — n,nnnPV・転載nn・D-SCORE 85・乗車/非乗車」の書式へ。**`d-score --backtest` はこの書式でしか拾わない**ので、直すまで n=5 のままになる。\n\n**判定のとき、最初に疑う候補は2つ**（レコードの 2026-09-03 の注記のとおり）:\n  (1) **時刻** —— 08:03 JST 配信。n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で同じ帯\n  (2) **S2（見出しの固有名詞）** —— 配信見出しは iPhone を含むが、**アプリ名も Obsidian も App Store も無い。**乗車した2本（65/71）を牽引したのはそのエンティティだった\n\n**閉じ条件は `manual`。**評価日そのものを閉じ条件にはできない —— 同じ 2026-09-1x に**別の12件が評価日を迎える**（9/13）ので、「evaluated_at が 2026-09-1 で始まる」では他の実験の評価で誤って閉じる。**判定不能を完了と読まない**ための選択で、閉じるのは人。\n\n---\n\n**[2026-09-03 追記] 機械にやらせる経路を用意した。**\n手順の正典は `docs/prtimes-d14-capture.md`（Routine は `raw.githubusercontent.com/simplememofast/simplememo/main/docs/prtimes-d14-capture.md` から読む。`x-engagement-simplememofast` が SKILL.md を正典にしているのと同じ形）。\n2026-09-17 朝に発火する Routine を1本作った。**Chrome が繋がっていなければ数値を作らずに終える**設計で、取れた数値は push できない実行系でも報告に必ず出す。\n**初回は調整が要る見込み** —— 分析画面の実物をまだ誰も機械側から見ていない。",
       "source": "manual",
       "domain": null,
       "touches": [
@@ -1020,13 +1024,14 @@
       ],
       "outside_repo": true,
       "force_owner": "human",
-      "force_owner_why": "必要な数値が PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。機械は転記先と書式は用意できるが、値そのものを取りに行けない",
+      "force_owner_why": "必要な数値のうち3つが PR TIMES のログイン後の分析画面にしかなく、**この実行系（主系 Actions / 代走 CCR）は外向きが絞られていて prtimes.jp に届かない**（実測 HTTP 000。google.com も同じなので prtimes 個別の遮断ではない）。\n\n⚠ **[2026-09-03 訂正] 「機械には取りに行けない」は言い過ぎだった。**`note-simplememo-3days` / `x-engagement-simplememofast` / `indie-hackers-karma-daily` は **Claude-in-Chrome MCP** でログイン済み Chrome を毎日動かしており、同じ経路なら読める。塞いでいたのは「機械の能力」ではなく「この実行系に Chrome が無いこと」。手順を docs/prtimes-d14-capture.md に置き、9/17 の Routine を作った。\n\n**それでも human のままにしてある** —— その Routine は**一度も実走していない**。書いた代走セッションは Chrome ツールを持たず分析画面の実物を見ていないので、画面の項目名も導線も推定のまま。**実走して取れたことを確かめるまで、人の側にも残す。**取れたらこの行は Routine 側が閉じる。",
       "auto": null,
       "close_check": {
         "kind": "manual",
         "params": {}
       },
       "state": "open",
+      "not_before_jst": "2026-09-17",
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
@@ -1052,44 +1057,80 @@
           "branch": "claude/obsidian-auto-20260903"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "claude/obsidian-auto-20260903 はまだ 1 件先にある",
-      "last_run_jst": "2026-09-03",
-      "last_run_log": "data/autopilot-runs.json: ap-20260903-actions を再投入 — appended ap-20260903-actions (shipped)\ndata/autopilot-status.json: 写しを当てない（状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する）\ndocs/obsidian/AUTOPILOT_LOG.md: 写しを当てない（追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く）\nstatus を台帳から再生成 — data/autopilot-status.json の runs を台帳の現在値で書き直した（42 実行 / 着手 29 / 出荷 20 / 24 日）"
-    },
-    {
-      "id": "act-orphaned-branch-claude-obsidian-auto-20260827",
-      "title": "ブランチ claude/obsidian-auto-20260827 に 1 コミットが取り残されている（PR #660 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260827 が、最後のマージ（PR #660 / head c51306e）より1 件先にあり、**それらは main にも無い**: 813b335。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json / docs/obsidian/AUTOPILOT_LOG.md\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
-      "source": "orphan",
-      "domain": null,
-      "touches": [
-        "data/autopilot-runs.json",
-        "data/autopilot-cost.json",
-        "data/autopilot-status.json"
-      ],
-      "force_owner": null,
-      "force_owner_why": null,
-      "auto": "apply-orphan-ledger",
-      "close_check": {
-        "kind": "branch_caught_up",
-        "params": {
-          "branch": "claude/obsidian-auto-20260827"
-        }
-      },
       "state": "acknowledged",
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": "2026-09-03 に走査が中身を照合した。**再投入するものは無い。**取り残し 813b335 が触った 3 ファイルはすべて main に着地済み（data/autopilot-runs.json: 行キーの包含（ブランチ側 29行すべてが main にある） / data/autopilot-status.json: 状態型で main 側が新しい（ブランチ 2026-08-27 / main 2026-09-02）— 上書き済み / docs/obsidian/AUTOPILOT_LOG.md: 前方一致（ブランチ側 86272 文字が main 側 122413 文字の先頭と一致））。残るのはブランチ claude/obsidian-auto-20260827 のSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は人の領域（authority-matrix の「運転台帳の取り残しの始末」）。",
-      "reviewed_orphans": [
-        "813b335"
-      ],
+      "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ac0e224` は主系が PR #793 の**マージ後**に積んだ記録コミットで、3ファイルすべてについて main に欠けが無いことを示した:\n① `data/autopilot-runs.json` … 行キーの包含（ブランチ側 42行すべてが main にある。apply-orphan-ledger が機械で照合）。**ただし `ap-20260903-actions` の行を main へ入れたのはこのセッション**で、ブランチの写しではなく Actions API の run 33692832179 とマージ済み PR #793 から起こし直した（`external_ref` はブランチ側の行に無かった値）\n② `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で、ブランチ側と同じ日付＝上書き済み。**写しは当てていない**（当てると cost 枠が $40 時代へ巻き戻る）\n③ `docs/obsidian/AUTOPILOT_LOG.md` … 機械の前方一致は通らない（ブランチが分岐したあとに main へ別の 09-03 エントリが5本入っているので、ブランチ側は main の接頭辞になりえない）。**代わりに行の包含で示した** —— ブランチが `b7e6e3e` へ足した 3,471文字・非空66行のうち、**いま main に無い行は0行**（本文を回収して同じPRで入れた）。",
       "last_run_jst": "2026-09-03",
-      "last_run_log": "data/autopilot-runs.json: 欠けている行は無い（内容は着地済み）\ndata/autopilot-status.json: 写しを当てない（状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する）\ndocs/obsidian/AUTOPILOT_LOG.md: 写しを当てない（追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く）\n照合 data/autopilot-runs.json: 行キーの包含（ブランチ側 29行すべてが main にある）\n照合 data/autopilot-status.json: 状態型で main 側が新しい（ブランチ 2026-08-27 / main 2026-09-02）— 上書き済み\n照合 docs/obsidian/AUTOPILOT_LOG.md: 前方一致（ブランチ側 86272 文字が main 側 122413 文字の先頭と一致）\n**1行も欠けていない。**claude/obsidian-auto-20260827 を acknowledged にした（reviewed_orphans: 813b335）。"
+      "last_run_log": "data/autopilot-runs.json: 欠けている行は無い（内容は着地済み）\ndata/autopilot-status.json: 写しを当てない（状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する）\ndocs/obsidian/AUTOPILOT_LOG.md: 写しを当てない（追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く）\n照合 data/autopilot-runs.json: 行キーの包含（ブランチ側 42行すべてが main にある）\n照合 data/autopilot-status.json: 状態型で main 側が新しい（ブランチ 2026-09-03 / main 2026-09-03）— 上書き済み\n照合 docs/obsidian/AUTOPILOT_LOG.md: main 側の先頭と一致しない（追記以外が起きている）— 中身を人が読む\n**1行も欠けていないが、全パスの包含は示せていない。**人へ残す —— 残っているのはブランチ claude/obsidian-auto-20260903 のSHAだけかもしれないが、示せていないものを「着地済み」に倒さない。",
+      "reviewed_orphans": [
+        "ac0e224"
+      ]
+    },
+    {
+      "id": "act-autopilot-cpp-ppid",
+      "title": "/autopilot/ 用のカスタムプロダクトページ（CPP）を1本作り、ppid を data/cpp-map.json へ記入する",
+      "detail": "2026-09-03 のプレスリリースが読者を送る先は `/` と `/autopilot/` の2本。**`/autopilot/` にだけ CPP が無い。**\n\n帰結は D+14（9/17）の乗車判定に出る —— この面から来たインストールがデフォルト商品ページのぶんに混ざるので、**「PR経由で何件入ったか」を分離できない。**配信当日にモバイルのCTAを足した（`ct=jp__bottom`）が、`ct=` はサイト側のクリック計測で、**インストールの帰属は ASC 側の ppid でしか取れない。**\n\n手順: ASC → SimpleMemo → カスタムプロダクトページ → 新規作成 → URL末尾の `ppid=<UUID>` を `data/cpp-map.json` の `id: autopilot` 行へ記入 → `node scripts/apply-cpp-ppid.js --write` → `--check` が以後を守る。\n\n**AIからは実行できない。**App Store Connect の人の操作で、この環境には ASC の書き込み経路が無い（読み取りの `asc-metrics` だけ）。台帳側の受け皿（`ppid: null` の行）は 2026-09-03 に作ってあるので、記入するだけで配線される。\n\n**急がなくてよい理由も書いておく。**9/17 の判定は Wilson 区間で読むので、分離できないぶんは「PR経由を過小にも過大にも見ない」ではなく**「分けられない」**として扱う（分母に混ぜて率を作らない）。いま作れば 9/17 までの残り2週間ぶんは分離できる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/cpp-map.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "App Store Connect でのCPP作成は人の操作。この環境には ASC への書き込み経路が無く、ppid は作成後にしか存在しない。**機械は受け皿（ppid: null の行）と配線スクリプトまでを用意できるが、値は作れない。**",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
+    },
+    {
+      "id": "act-pages-outside-shared-css",
+      "title": "17面が共有スタイルシートを読み込んでいない — 共有CSSの修理が届かない",
+      "detail": "2026-09-03、全269面を初めて描画して分かった。次の17面は `assets/css/style.min.css` を読まず、ページ内の `<style>` だけで組んである:\n\n  tiktok/ ・ admin/{,brand,reddit}/ ・ verify.html ・ compose.html ・ data/voice-shift/\n  use-cases/{writers,researchers,designers}/ ・ vs/{tana,heptabase,anytype}/\n  blog/{obsidian-voice-fastest-route,email-management-tips,email-self-task-management,\n        information-organization-guide}.html\n\n**帰結が実際に出た。**共有CSSでナビの断点を 768px → 1099px にした修理がこの17面へ届かず、`/tiktok/` が 900px で **+87px 横漏れ**していた（当日、個別に直した）。`/blog/information-organization-guide.html` も同じ理由で `overflow-wrap` を個別に足している。\n\n**うち13面には `box-sizing: border-box` のリセットも無い**（共有CSSの `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}` が効いていない）。padding が幅に足し算される状態で組まれているので、**リセットを足すと見た目が変わる** —— 機械的な一括変換をしない理由がここにある。\n\n**急ぎではない。**全面の掃き（`check-viewport-overflow.mjs --check`）が269面すべてを 320/360/900/1100px で見るようになったので、**次に届かなかったときは検査が落ちる。**黙って壊れる経路は塞いである。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "assets/css/style.css",
+        "assets/css/style.min.css"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "共有CSSへ寄せると13面の見た目が変わる（content-box 前提で組まれている）。**どこまで揃えるかは設計の判断**で、機械が黙って決めてよい範囲ではない。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
+    },
+    {
+      "id": "act-two-lang-switchers",
+      "title": "言語切替が2実装ある（ドロップダウン10面 / JA・ENの2ボタン226面）— 狭い幅で英語ロゴが入らない原因",
+      "detail": "`/en/` などの10面は1つのドロップダウン（幅105px）、残り226面は JA / EN の2ボタン（幅140px）。**同じ役目の部品が2つある。**\n\n2026-09-03、英語面8つが 360px で 1〜3px 横漏れした。内訳は\nアイコン 28 ＋ ロゴ文字 171 ＋ 言語切替 81 ＋ ☰ 48 ＋ 余白/隙間 56 = **384px** で、360px には 24px 足りない。**35px の差はこの2実装の差そのもの。**\n\n当日はロゴ末尾を省略する形（`Simple Memo - for Obs…`）で収めた —— 余白を詰める案はタップ標的を 56px → 36px にしてしまい（推奨44px割れ）、詰めても 360px では足りなかった。**ブランドの本体は読めるので実害は小さいが、原因を直したわけではない。**\n\n揃えるなら、狭い幅で 35px 得られるドロップダウン側へ。226面の書き換えになるので、**やるかどうかは人が決める。**",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "assets/css/style.css"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "226面の共通部品の作り替えで、見た目と操作が変わる。**横漏れは既に塞いである**ので、急いで機械が動かす理由が無い。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
     }
   ]
 }
