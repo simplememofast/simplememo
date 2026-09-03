@@ -134,7 +134,7 @@ export function nextFixedAnnualDue(month, day, today) {
  * **嘘だった** —— あのフラグは `data/vendor-register.json` にあり、守るのは DPAレビュー。
  * **実測: 1マスを unreviewed に戻しても `--check` は exit 0。**
  *
- * 守るべきものは2つあり、**性質が違うので別々に数える。**
+ * 守るべきものは3つあり、**性質が違うので別々に数える。**
  *
  * **① 一度も見ていないマス（`unreviewed_budget`）。**
  * ベンダーを足したのに読んでいない、という形。**ラチェット** ——
@@ -150,12 +150,35 @@ export function nextFixedAnnualDue(month, day, today) {
  * だから戻された直後は通し、**放置されたら落とす。**猶予は週次取得の2回ぶん。
  * **`fetched_at` では測れない** —— あちらは改定が無くても毎回今日になるので、
  * `vendor-terms` に `reset_at` を書かせて、そちらを見る。
+ *
+ * **③ 指紋が一度も付いていないベンダー（`never_fingerprinted_budget`）。**
+ *
+ * ①と②は「人が読んだ判定」を守るが、**その判定を守っているのは指紋のほう**である。
+ * 本文が改定されたら `vendor-terms` が reviewed を戻す —— **指紋が在れば。**
+ *
+ * `vendor-terms` の `unknown` は、性質の違う2つを同じ値にしている:
+ *
+ *   指紋が在って今日の取得に失敗した … 見張りは立っている。今日更新できなかっただけ
+ *   **指紋が一度も付いていない**     … **見張りが一度も立っていない。**
+ *                                     人が付けた ok / risk は、本文が変わっても永久に戻らない
+ *
+ * 後者は「今日の失敗」ではなく**恒久的な穴**なのに、`unknown` に混ざって同じ行に出る。
+ * しかも seo-daily の該当段は `continue-on-error: true` ＋ `|| true` なので
+ * **落ちない＝気づけない。**
+ *
+ * **2026-09-02 の週次で実際に 9/11 にしか指紋が付かなかった**（appsflyer と prtimes が
+ * 取れず）。11社ぶんの見張りが立ったように見えて、**2社は最初から見ていない。**
+ *
+ * これは `records` の `exists: false` で踏んだのと同じ形 ——
+ * **「無い」と「確かめていない」を同じ値にする。**だから台帳から数える
+ * （ネットを見ない・その日の取得の成否に左右されない）。
  */
 export function clauseGuard(cr, today) {
   const problems = [];
   const clauses = cr.clauses || [];
   const budget = cr.unreviewed_budget;
   const grace = cr.reset_grace_days;
+  const fpBudget = cr.never_fingerprinted_budget;
   // **上限が無ければ無制限、が一番危ない。**（check-selftests と同じ扱い）
   if (typeof budget !== 'number') {
     problems.push('contract_review.unreviewed_budget が数でない'
@@ -164,6 +187,10 @@ export function clauseGuard(cr, today) {
   if (typeof grace !== 'number') {
     problems.push('contract_review.reset_grace_days が数でない'
       + ' — **猶予が無いと、改定を検知したPR自身が落ちて膠着する**');
+  }
+  if (typeof fpBudget !== 'number') {
+    problems.push('contract_review.never_fingerprinted_budget が数でない'
+      + ' — **上限の無いラチェットはラチェットではない**');
   }
   if (problems.length) return problems;
 
@@ -193,6 +220,34 @@ export function clauseGuard(cr, today) {
     problems.push(`unreviewed_budget が ${budget} だが、実際に見ていないマスは ${never.length} 件`
       + ' — **枠が余っている。**次にベンダーを足したとき、その空欄を黙って飲む。'
       + `${never.length} へ下げること`);
+  }
+  // ③ **指紋が一度も付いていないベンダー。**台帳だけで数える ——
+  // その日の取得が失敗しても値が動かないので、CIが天候で赤くならない。
+  //
+  // **`v.source && !v.fingerprint` とは書かない。**最初そう書いて
+  // check-guard-shapes に捕まった（「正が無いと消えうる規則の形」）。
+  // source を条件に混ぜると、**source を消した社がこの勘定から静かに落ちる。**
+  // 代わりに source そのものを必須にする —— 取りに行く先が無い社は
+  // `vendor-terms` が「source が無い — 飛ばす」で黙って飛ばすので、
+  // **見張りが立たない点では指紋が無いのと同じ。**欠落は数えずに名指しする。
+  const sourceless = (cr.vendors || []).filter((v) => !v.source).map((v) => v.id);
+  if (sourceless.length) {
+    problems.push(`規約の取得先（source）が無いベンダーが ${sourceless.length} 社`
+      + ` — ${sourceless.join(' / ')}。**vendor-terms はこの社を黙って飛ばす**ので、`
+      + '指紋が付かず、本文が改定されても reviewed が戻らない。URL を書くこと');
+  }
+  const unwatched = (cr.vendors || []).filter((v) => !v.fingerprint).map((v) => v.id);
+  if (unwatched.length > fpBudget) {
+    problems.push(`指紋が一度も付いていないベンダーが ${unwatched.length} 社で、`
+      + `上限 ${fpBudget} を超えた — ${unwatched.join(' / ')}。`
+      + '**この社は本文が改定されても reviewed が戻らない** ——'
+      + '人の判定を守っているのは指紋のほうなので、見張りが無い社の ok / risk は'
+      + '永久に据え置かれる。取得できるようにするか、取れない理由を'
+      + `\`$never_fingerprinted_budget\` に書いて上限を上げること（上げた事実は残る）`);
+  } else if (unwatched.length < fpBudget) {
+    problems.push(`never_fingerprinted_budget が ${fpBudget} だが、`
+      + `指紋の無いベンダーは ${unwatched.length} 社 — **枠が余っている。**`
+      + `次に取得が壊れた社を黙って飲む。${unwatched.length} へ下げること`);
   }
   if (stale.length) {
     problems.push(`改定で戻されたまま ${grace} 日を過ぎた条項マスが ${stale.length} 件`
@@ -483,6 +538,47 @@ SCENARIOS.push(
     delete d.contract_review.unreviewed_budget;
     assert(validate(d).problems.some((x) => x.includes('unreviewed_budget')),
       '上限を消しても落ちない');
+  }],
+  // [2026-09-03] **見張りそのものが立っていない社を数える検査。**
+  // 入れるまで、指紋を全社ぶん消しても --check は exit 0 だった（実測）。
+  // 2026-09-02 の週次が 9/11 にしか指紋を付けられなかったことに、
+  // **気づける場所がどこにも無かった。**
+  ['**指紋が一度も付いていない社が上限を超えたら落ちる**', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const v = d.contract_review.vendors.find((x) => x.fingerprint);
+    assert(v, '指紋の在るベンダーが実データに無い');
+    delete v.fingerprint;
+    assert(validate(d).problems.some((x) => x.includes('指紋が一度も付いていない')),
+      '**見張りの消えた社が素通りした** —— これが入るまでの状態');
+  }],
+  ['**上限を先に上げておくのも落とす**（余った枠は次に壊れた社を黙って飲む）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    d.contract_review.never_fingerprinted_budget += 3;
+    assert(validate(d).problems.some((x) => x.includes('枠が余っている')),
+      '枠を先に広げても落ちなかった');
+  }],
+  ['指紋の上限が数でなければ落ちる（**無ければ無制限、が一番危ない**）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    delete d.contract_review.never_fingerprinted_budget;
+    assert(validate(d).problems.some((x) => x.includes('never_fingerprinted_budget')),
+      '上限を消しても落ちない');
+  }],
+  // **source を条件に混ぜる代わりに、source そのものを要求する。**
+  // 混ぜると「source を消した社」がこの勘定から静かに落ちる形になる
+  // （check-guard-shapes が指す「正が無いと消えうる規則」）。
+  ['**取得先（source）が無ければ落ちる**（黙って飛ばされる社を作らない）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    delete d.contract_review.vendors[0].source;
+    assert(validate(d).problems.some((x) => x.includes('source）が無い')),
+      '**取得先の無い社が素通りした** —— vendor-terms はこの社を黙って飛ばす');
+  }],
+  ['source を消しても指紋の勘定からは落ちない（**消して逃げられない**）', () => {
+    const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));
+    const v = d.contract_review.vendors.find((x) => x.fingerprint);
+    delete v.fingerprint;
+    delete v.source;
+    assert(validate(d).problems.some((x) => x.includes('指紋が一度も付いていない')),
+      '**source を消したら見張りの勘定から消えた** —— 逃げ道になっている');
   }],
   ['猶予が数でなければ落ちる', () => {
     const d = JSON.parse(fs.readFileSync(OBLIGATIONS_PATH, 'utf8'));

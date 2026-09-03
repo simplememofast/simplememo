@@ -107,6 +107,31 @@ export function looksLikeTerms(text) {
 }
 
 /** 本文の指紋。**先頭12文字**（台帳が読める長さで、衝突は実用上問題にならない）。 */
+/**
+ * 指紋の上限（`never_fingerprinted_budget`）を、**締める方向にだけ**動かす。
+ *
+ * **これが無いと膠着する。**上限は現状の2社ぶんで置いてあるが、指紋が付いた日に
+ * 実数が減ると `check-corporate` の「枠が余っている」で落ちる ——
+ * **落ちるのは、その指紋を運んでいる週次のPR自身。**マージされないので指紋は
+ * 台帳に入らず、翌週また同じところで落ちる。`reset_grace_days` を入れた理由
+ * （2026-08-29）とまったく同じ形で、**機械が仕事をした瞬間に機械の仕事が止まる。**
+ *
+ * だから**直した機械が、同じコミットで上限も下げる。**
+ *
+ * **上げるほうは機械にやらせない。**上げるのは「取れなくなったことを受け入れる」
+ * 判断で、理由を `$never_fingerprinted_budget` に書く人の仕事。機械が上げられると
+ * **壊れるたびに上限が追いかけて、ラチェットが効かなくなる。**
+ * このリポジトリの非対称（自律実行は止める方向のみ）と同じ向きに倒してある。
+ */
+export function tightenFingerprintBudget(cr) {
+  const before = cr.never_fingerprinted_budget;
+  if (typeof before !== 'number') return { changed: false, before, after: before };
+  const actual = (cr.vendors || []).filter((v) => !v.fingerprint).length;
+  if (actual >= before) return { changed: false, before, after: before };
+  cr.never_fingerprinted_budget = actual;
+  return { changed: true, before, after: actual };
+}
+
 export function fingerprint(text) {
   return crypto.createHash('sha256').update(text, 'utf8').digest('hex').slice(0, 12);
 }
@@ -279,6 +304,31 @@ export function selftest() {
   eq(first.row.liability_cap, 'ok', '初回取得で判定を戻している');
   eq(first.row.fingerprint, 'ccc', '初回の指紋を残していない');
 
+  // --- 上限は締める方向にだけ ---
+  const cr2 = (budget, fps) => ({ never_fingerprinted_budget: budget,
+    vendors: fps.map((f, i) => ({ id: `v${i}`, source: 'x', fingerprint: f })) });
+
+  const down = cr2(2, ['aaa', 'bbb', null]);
+  eq(tightenFingerprintBudget(down).after, 1, '実数まで下げていない');
+  eq(down.never_fingerprinted_budget, 1, '台帳側を書き換えていない');
+
+  // **ここが本体。**上げられると、壊れるたびに上限が追いかけてラチェットが死ぬ
+  const up = cr2(0, [null, null, 'ccc']);
+  eq(tightenFingerprintBudget(up).changed, false, '**機械が上限を上げた**');
+  eq(up.never_fingerprinted_budget, 0, '**機械が上限を上げた**（台帳が緩んだ）');
+
+  const level = cr2(1, ['aaa', null]);
+  eq(tightenFingerprintBudget(level).changed, false, '同数なのに動かしている');
+
+  // 数でないときに 0 を書き込まない（**上限の不在を「上限0」に化けさせない**）
+  const broken = { never_fingerprinted_budget: null, vendors: [] };
+  eq(tightenFingerprintBudget(broken).changed, false, '数でない上限を触っている');
+  eq(broken.never_fingerprinted_budget, null, '**数でない上限に値を書き込んだ**');
+
+  // 全社に指紋が付いた日は 0 まで落ちる（膠着の出口）
+  const done = cr2(2, ['aaa', 'bbb']);
+  eq(tightenFingerprintBudget(done).after, 0, '全社そろっても 0 まで落ちない');
+
   return p;
 }
 
@@ -316,6 +366,12 @@ if (isMain) {
   console.log(`規約本文の指紋（${today} JST）\n`);
   const counts = { unknown: 0, unseen: 0, unchanged: 0, changed: 0 };
   const resets = [];
+  // **`unknown` は2つの状態を同じ値にしている。**分けて名前で出す ——
+  // 「指紋は在るが今日は取れなかった」は見張りが立っている（今日更新できなかっただけ）。
+  // 「指紋が一度も無い」は**見張りが一度も立っていない**ので、本文が改定されても
+  // reviewed が戻らない。**恒久的な穴なのに、同じ行に混ざって数だけ増える。**
+  // 数え直しではなく表示の分割なので counts は触らない（--check の判定は台帳側が持つ）。
+  const unwatched = [];
 
   for (const [i, row] of cr.vendors.entries()) {
     if (!row.source) { console.log(`  ${row.id.padEnd(14)} source が無い — 飛ばす`); continue; }
@@ -327,7 +383,10 @@ if (isMain) {
     const { row: next, reset } = applyVerdict(row, r, today);
     cr.vendors[i] = next;
     if (reset.length) resets.push({ id: row.id, reset });
-    console.log(`  ${row.id.padEnd(14)} ${r.verdict.padEnd(10)} ${r.why ?? ''}`);
+    const never = r.verdict === 'unknown' && r.fingerprint === null;
+    if (never) unwatched.push({ id: row.id, why: r.why ?? '' });
+    const mark = never ? ' ← **指紋がまだ一度も無い**' : '';
+    console.log(`  ${row.id.padEnd(14)} ${r.verdict.padEnd(10)} ${r.why ?? ''}${mark}`);
   }
 
   console.log(`\n  取得できず ${counts.unknown} / 初回 ${counts.unseen}`
@@ -341,8 +400,22 @@ if (isMain) {
     console.log('\n  **取得できなかったことを「変わっていない」と読まないこと。**');
     console.log('  エージェント環境はプロキシが各社の規約ページへの CONNECT を拒否する。CIでは届く。');
   }
+  if (unwatched.length) {
+    console.log(`\n  **指紋が一度も付いていない ${unwatched.length} 社:**`);
+    for (const x of unwatched) console.log(`    ${x.id.padEnd(14)} ${x.why}`);
+    console.log('  **今日取れなかったのとは別の話。**この社は本文が改定されても'
+      + ' reviewed が戻らない —— 人が付けた ok / risk を守っているのは指紋のほうで、');
+    console.log('  **見張りが一度も立っていない。**上限は台帳の'
+      + ' `contract_review.never_fingerprinted_budget`（check-corporate が数える）。');
+  }
 
   if (argv.includes('--write')) {
+    const t = tightenFingerprintBudget(cr);
+    if (t.changed) {
+      console.log(`\n  **指紋の上限を ${t.before} → ${t.after} へ下げた。**`
+        + '見張りが立った社のぶんは同じコミットで締める'
+        + '（下げないと、この指紋を運ぶPR自身が「枠が余っている」で落ちて膠着する）。');
+    }
     fs.writeFileSync(LEDGER_PATH, `${JSON.stringify(doc, null, 2)}\n`);
     console.log('\n  → 台帳を更新した。');
   }
