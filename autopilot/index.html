@@ -60,7 +60,7 @@
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/autopilot/#webpage","inLanguage":"ja","name":"自律型アプリ運営の実測値 - Obsidian連携シンプルメモ","description":"AIがどこまで運営を実行し、どこから人間が判断しているか。運転台帳から出した実測値と、まだできていないことの一覧。","url":"https://simplememofast.com/autopilot/","datePublished":"2026-08-25","dateModified":"2026-09-02","breadcrumb":{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"自律型アプリ運営","item":"https://simplememofast.com/autopilot/"}]},"isPartOf":{"@id":"https://simplememofast.com/#website"},"about":{"@id":"https://simplememofast.com/#app"}}
   </script>
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=f6fb8a2917">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=7f238d427c">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -131,6 +131,19 @@
     .ap-qr img { width: 148px; height: 148px; display: block; margin: 0 auto 12px; border-radius: 10px; background: #fff; padding: 8px; }
     .ap-qr p { font-size: 0.86rem; color: var(--text-secondary); margin: 0; }
     @media (max-width: 767px) { .ap-qr--desktop { display: none; } }
+
+    /* 実物への導線。**このページはプレスリリースの着地面**なのに、
+       スマートフォンからは App Store へ行く手段が1つも無かった ——
+       QR はデスクトップ限定（上の媒体クエリ）で、ナビのCTAは 768px 以下で消える。
+       透明性のページなので売り込まない。事実だけ置いて、§2 の境界へ戻す。 */
+    .ap-cta { margin-top: 40px; padding: 26px 22px; border: 1px solid rgba(34,211,238,.22);
+      border-radius: var(--radius-lg); background: linear-gradient(180deg, rgba(34,211,238,.05), rgba(34,211,238,0) 55%), var(--surface); }
+    .ap-cta h2 { margin-top: 0; }
+    .ap-cta__row { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 14px; }
+    .ap-cta__row a { display: inline-flex; align-items: center; min-height: 48px; padding: 12px 20px;
+      border-radius: 10px; font-size: 0.9rem; font-weight: 700; text-decoration: none; }
+    .ap-cta__store { background: linear-gradient(135deg,#22d3ee,#3b82f6); color: #0a0c12; }
+    .ap-cta__ghost { color: var(--accent); border: 1px solid rgba(100,180,255,.22); }
   
     /* Global Navigation */
     .global-nav {
@@ -652,6 +665,24 @@ note        : 台帳に記録が無かった。成果物ゼロで落ちた回は
           止まるのは主系だけなので、<b>レビューを待つ間も副系が出荷を続けます</b>（§3の1/6・10/10）。
           解除は人間のみです —— <b>AIが自分の超過を自分で通せるなら、上限は「お願い」になります。</b>
           <b>この停止は本番でまだ一度も発火していません。</b>
+        </p>
+      </section>
+
+      <!-- 10. 実物 -->
+      <section class="ap-sec ap-cta">
+        <h2>10. このページの数字は、動いているアプリのものです</h2>
+        <p class="ap-note">
+          「Obsidian連携シンプルメモ」は、思いついた瞬間に話すか書くだけで、自分のメールと
+          Obsidian へメモを残す iPhone／Apple Watch 向けアプリです。
+          <b>1日3通まで期限なく無料</b>で、クレジットカードの登録は要りません（メールアドレスの認証だけ）。
+        </p>
+        <div class="ap-cta__row">
+          <a data-cta-variant="v1" data-cta-cluster="other" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="ap-cta__store">App Store で無料ダウンロード</a>
+          <a href="/" class="ap-cta__ghost">トップページ →</a>
+        </div>
+        <p class="ap-note">
+          <b>ここから先は人の領分です。</b>App Store への公開・実機での事前確認・価格・広告・契約は、
+          このページの §2 のとおり人が決めています。上で説明してきたのは、その手前の運営のしかたです。
         </p>
       </section>
 
