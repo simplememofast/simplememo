@@ -3523,3 +3523,66 @@ Routine の行き先は `environment_id` で決まる:
   台帳を読まずにスキルだけ読んだ回は 404 を踏む**
 - **リンクの生死を機械で見る検査は無い。**今回は手で叩いて見つけた。
   文書が増えるほど、この見つけ方は落ちる
+
+---
+
+## 2026-09-04（主系GitHub Actions・schedule） — レーンC。`/obsidian/plugins/` にテーマのダーク/ライト内訳を追加
+
+### 判断根拠
+
+レーンF（自己修復）: `autopilot-selfheal.mjs` に未修理の故障なし（🤝 usage_limit 3件は既存・既に owner_requests でオーナー判断済み）。
+`health-intake.mjs` / `recover-ingest.mjs --check` も対象なし。**この日の最優先は無し、記事レーンへ進む。**
+
+レーンA/B: `refresh-queue.json` は全5件が dropped/blocked、`new-queue.json` はN1実装済み・N2〜N4は需要未検証/カニバリ懸念で
+据え置き（Runbook §2 記載どおり）。GSCの新しいデータは無し —— `bq-preflight.mjs` は資格情報なしで落ち、**この経路（主系Actions）に
+BigQuery MCPは接続されていない**ため `bq_checked: false`。`growth/data/gsc/` にも新しい手動スナップショットは無い（最新は2026-09-02のまま）。
+→ レーンA/Bに新しい根拠なし。
+
+レーンC: 前回実施が2026-08-27（`/obsidian/plugins/` キャプチャ系キーワード分析）で、本日まで8日経過（7日以上）。
+Runbook §2「前回レーンCから7日以上経っている → その日の優先レーンにする」に従い、Cを選択。08-27の申し送り
+「次回レーンCは今回とは別の資産へ（テーマ側の一次情報か別カテゴリの集計を検討）」のとおり、**テーマ側**を選んだ。
+
+### やったこと
+
+`community-css-themes.json`（Obsidian公式配布元・GitHub `obsidianmd/obsidian-releases`）を`raw.githubusercontent.com`経由で
+直接取得（729件・2026-09-04）。各テーマの`modes`フィールド（`dark`/`light`）と`legacy`フラグをスクリプトで集計した:
+
+| 区分 | 件数 | 比率 |
+|---|--:|--:|
+| ダーク＋ライト両対応 | 491 | 67.4% |
+| ダーク限定 | 206 | 28.3% |
+| ライト限定 | 32 | 4.4% |
+| （内数）legacy形式 | 17 | 2.3% |
+
+同時に取得した`community-plugins.json`は7,242件（8月21日の6,812件から14日間で430個増・1日あたり約31個）。
+`/obsidian/plugins/` の既存「実測 — 公式レジストリの推移」表に本日行を追加し、新セクション「実測 — テーマのダーク/ライト対応内訳」
+（表＋考察）とFAQ1件・JSON-LD FAQPage1件を追加した。dateModifiedを2026-09-04へ更新。
+
+**今回もプラグイン・テーマを実際にインストールして動かす検証はしていない**（既存の検証環境注記の方針を継続）。
+
+`data/distribution-queue.json` にレーンC出荷として1件追記（§5-5）。§5-6の記事ネタ台帳は、今回は「数字の引き直し」の枠に
+近く強い種にならないため見送った（無理に作らない、と明記されている）。
+
+### 検証
+
+- `seo-check.js` → 0 errors 0 warnings（269ファイル）
+- `check-css-version.mjs` / `check-benchmark.mjs`（既存の報告のみ・新規なし）/ `check-url-normalization.mjs` /
+  `check-internal-redirects.mjs` / `sync_constants.js --check` / `tag-cta-placements.js --check` /
+  `growth/scripts/check-experiments.mjs` / `autopilot-budget.mjs --check` / `autopilot-runs.mjs --check` /
+  `check-authority.mjs --check` / `autopilot-selfheal.mjs --check` / `autopilot-drill.mjs --check`（39/39） /
+  `automation-rate.mjs --check` / `check-pr-facts.mjs --check` / `check-landing-freshness.mjs --check` /
+  `d-score.mjs --check` / `check-script-tags.mjs`（270面・整合） / `check-public-facts.mjs` すべて通過
+- `check-viewport-overflow.mjs --static`（269面）・`--check`（深い3面×14幅＋全269面×4幅）とも横漏れ0件。
+  既存の `/usr/local/share/chromium/chrome-linux/chrome` を `CHROMIUM_PATH` で指定し、新規ダウンロードなしで実行
+  （WebKitGTKは今回未導入・報告に「測れなかった」と出るのみで、既存の必須チェックには含まれていない）
+- `git fetch --unshallow`（既にunshallow）→ `generate_sitemap.py` 実行・`--dry-run` も通過
+- 取得した2ファイルの件数（テーマ729・プラグイン7,242）とダーク/ライト集計は、この場でNode.jsスクリプトを書いて
+  直接数えた実測値（`modes`配列の内容から機械的に分類・edge caseなし＝全テーマが`dark`/`light`/`dark+light`のいずれか）
+
+### 残る弱さ・申し送り
+
+- レーンA/BはBQ 28日窓（2026-09-06頃見込み）まで引き続き根拠薄い。この経路（主系Actions）は
+  BigQuery MCPが無いため、`bq_checked` は今回も実測不能（false）——手動CSVスナップショットの更新もオーナー作業待ち
+- coverage-queue（レーンE）は pending 26件で潤沢。次回レーンA/Bが空振りならE（先頭 C08 `/obsidian/compare/notion/`）へ
+- 次回レーンCは今回もテーマ側を使ったので、別の資産（プラグインのダウンロード分布の中央値・作者の重複など）を検討
+- owner_requests 2件は本日も実測手段なく継続（PR⑥ D+14判定は2026-09-17まで未到来・週次上限のプラン階層対応はセッションから確認不可）
