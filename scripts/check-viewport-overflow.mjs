@@ -103,6 +103,32 @@ export function unbreakableAdjacencies(html) {
   return out;
 }
 
+/**
+ * **`word-break: keep-all` は上限とセットでなければ置けない。**
+ *
+ * [2026-09-03] 実機の診断が名指しした原因がこれ。トップの3本のピルに
+ * `word-break: keep-all` が付いており、**日本語がまったく折り返せない。**
+ * WebKit ではそれが厳密に効いて 380px の箱ができ、350px の親からはみ出した
+ * （実機: `layout=390 over=41` / `R431 W380 「⚡ アクションボタンで5秒メモ…」`）。
+ *
+ * **Blink は同じ指定でも折り返す。**だからこちらの実測では
+ * 3面 × 14幅・フォント太らせ・iPhoneプリセットのどれでも一度も出なかった。
+ * `<wbr>` の規則（隣接 nowrap）とは別の入口で、同じ「折り返せない塊」ができていた。
+ *
+ * **禁止はしない。**意図して使うなら、箱が親を超えられない上限を同じ宣言に置くこと。
+ */
+export const KEEP_ALL = /word-break:\s*keep-all/g;
+
+/** `keep-all` を持つ style 属性のうち、`max-width` を持たないものを列挙する。 */
+export function unboundedKeepAll(html) {
+  const out = [];
+  for (const m of html.matchAll(/style="([^"]*word-break:\s*keep-all[^"]*)"/g)) {
+    if (/max-width\s*:/.test(m[1])) continue;
+    out.push({ line: html.slice(0, m.index).split('\n').length, style: m[1].slice(0, 90) });
+  }
+  return out;
+}
+
 /** 静的規則を当てる面。描画側と同じ3面をファイルで指す。 */
 export const STATIC_FILES = ['index.html', 'en/index.html', 'autopilot/index.html'];
 
@@ -113,9 +139,16 @@ export function checkStatic(files = STATIC_FILES) {
     const abs = path.join(ROOT, f);
     if (!fs.existsSync(abs)) { problems.push(`${f}: 面が無い — 改名したなら STATIC_FILES も直すこと`); continue; }
     scanned += 1;
-    for (const a of unbreakableAdjacencies(fs.readFileSync(abs, 'utf8'))) {
+    const html = fs.readFileSync(abs, 'utf8');
+    for (const a of unbreakableAdjacencies(html)) {
       problems.push(`${f}:${a.line} 隣り合う nowrap に改行機会が無い — 閉じタグの直後へ \`<wbr>\` を入れること`
         + `\n      …${a.context}…`);
+    }
+    for (const k of unboundedKeepAll(html)) {
+      problems.push(`${f}:${k.line} \`word-break: keep-all\` に上限が無い — **日本語がまったく折り返せなくなる。**`
+        + ' WebKit では箱が親を超える（2026-09-03 の実機で over=41px）。'
+        + ' 同じ宣言へ `max-width` を置くか、`keep-all` を外すこと'
+        + `\n      style="${k.style}…"`);
     }
   }
   return { problems, scanned };
@@ -282,6 +315,17 @@ const SCENARIOS = [
   ['**面が消えたら落ちる**（静的側も）', () => {
     const { problems } = checkStatic(['そんなファイルは無い.html']);
     if (!problems.length) throw new Error('無い面が通った');
+  }],
+  ['**上限の無い keep-all は落ちる**（2026-09-03 の実機が名指しした原因）', () => {
+    const bad = '<a style="border-radius:24px;word-break:keep-all;">⚡ アクションボタンで5秒メモ</a>';
+    if (!unboundedKeepAll(bad).length) throw new Error('検出しなかった');
+  }],
+  ['`max-width` が同じ宣言に在れば通る（意図して使う道を塞がない）', () => {
+    const ok = '<a style="word-break:keep-all;max-width:calc(100% - .6rem);">x</a>';
+    if (unboundedKeepAll(ok).length) throw new Error('上限が在るのに落とした');
+  }],
+  ['keep-all が無い style は対象外', () => {
+    if (unboundedKeepAll('<a style="border-radius:24px;">x</a>').length) throw new Error('関係ない style を拾った');
   }],
   ['**既知の免除は空**（直したら消す。残すと次の再発を黙って通す）', () => {
     if (KNOWN.length) throw new Error(`免除が ${KNOWN.length} 件ある — 直っていないなら理由と upTo を確かめること`);

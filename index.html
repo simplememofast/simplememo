@@ -1142,13 +1142,13 @@
         <a href="/voice-input/" style="display:inline-flex;align-items:center;min-height:48px;padding:.7rem 1.4rem;background:linear-gradient(135deg,#22d3ee,#3b82f6);color:#0a0c12;text-decoration:none;font-weight:700;font-size:.95rem;border-radius:24px;">
           音声入力を詳しく見る →
         </a>
-        <a href="/hands-free/" style="display:inline-flex;align-items:center;min-height:48px;margin-left:.6rem;padding:.7rem 1.2rem;border:1px solid rgba(34,211,238,.4);color:#22d3ee;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:24px;word-break:keep-all;">
+        <a href="/hands-free/" style="display:inline-flex;align-items:center;min-height:48px;margin-left:.6rem;padding:.7rem 1.2rem;border:1px solid rgba(34,211,238,.4);color:#22d3ee;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:24px;max-width:calc(100% - .6rem);">
           🚲🚗 移動中もハンズフリー（圏外OK）→
         </a>
-        <a href="/siri/" style="display:inline-flex;align-items:center;min-height:48px;margin-left:.6rem;padding:.7rem 1.2rem;border:1px solid rgba(34,211,238,.4);color:#22d3ee;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:24px;word-break:keep-all;">
+        <a href="/siri/" style="display:inline-flex;align-items:center;min-height:48px;margin-left:.6rem;padding:.7rem 1.2rem;border:1px solid rgba(34,211,238,.4);color:#22d3ee;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:24px;max-width:calc(100% - .6rem);">
           🎧 AirPodsから、スマホを触らず送る →
         </a>
-        <a href="/fastest-voice-memo/" style="display:inline-flex;align-items:center;min-height:48px;margin-left:.6rem;padding:.7rem 1.2rem;border:1px solid rgba(34,211,238,.4);color:#22d3ee;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:24px;word-break:keep-all;">
+        <a href="/fastest-voice-memo/" style="display:inline-flex;align-items:center;min-height:48px;margin-left:.6rem;padding:.7rem 1.2rem;border:1px solid rgba(34,211,238,.4);color:#22d3ee;text-decoration:none;font-weight:700;font-size:.9rem;border-radius:24px;max-width:calc(100% - .6rem);">
           ⚡ アクションボタンで5秒メモ（おすすめの使い方）→
         </a>
       </div>
@@ -1865,10 +1865,15 @@
         var el = all[i], r = el.getBoundingClientRect();
         if (!r.width) continue;
         if (r.right <= vw + 0.5 && r.left >= -0.5) continue;
-        var sc = 0, a = el.parentElement;
+        // **止めている親の名前を出す。**body には overflow-x:clip を入れてあるので、
+        // 「clip親あり」だけだと全要素に付いて情報が無くなる（2026-09-03 の実測でそうなった）。
+        var sc = '', a = el.parentElement;
         while (a) {
           var o = getComputedStyle(a).overflowX;
-          if (o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip') { sc = 1; break; }
+          if ((o === 'auto' || o === 'scroll' || o === 'hidden' || o === 'clip')
+              && a !== document.body && a !== document.documentElement) {
+            sc = String(a.className || a.tagName).slice(0, 18); break;
+          }
           a = a.parentElement;
         }
         var cs = getComputedStyle(el);
@@ -1887,7 +1892,7 @@
       for (var j = 0; j < 8 && j < rows.length; j++) {
         var x = rows[j];
         out.push((j + 1) + ') R' + x.r + ' L' + x.l + ' W' + x.w + ' ' + x.p
-          + (x.sc ? ' [clip親あり]' : '') + ' .' + x.n + ' "' + x.t + '"');
+          + (x.sc ? ' [止める親:' + x.sc + ']' : '') + ' .' + x.n + ' "' + x.t + '"');
       }
       var d = document.createElement('div');
       d.setAttribute('style', 'position:fixed;left:0;top:0;right:0;z-index:2147483647;background:#000;'
