@@ -86,12 +86,83 @@ def iter_en_pages() -> list[Path]:
     return sorted(p for p in EN_DIR.rglob("*.html"))
 
 
+def run_selftest() -> int:
+    """**落ちることを確かめる。**data/check-selftests.json:
+    「落ちることを確かめていない検査は、無いのと同じ」。
+
+    この検査は長らく台帳の外にいた —— `check-selftests.mjs` の列挙が
+    `node` で始まる行しか見ておらず、`python3` のこれを構造的に見られなかった
+    （data/autopilot-actions.json#act-ci-selftest-ratchet-py-blind）。
+
+    固定するのは、**壊れても赤くならない**側の性質である。この道具が黙って
+    間違えると、英語の読者が dual-DOM の面で日本語を見続けるか（種が入らない）、
+    逆に日本語の読者の選択が毎回上書きされるか（`if(!getItem)` が消える）で、
+    どちらも CI では何も起きない。
+
+    disk には何も書かない。
+    """
+    failures: list[str] = []
+
+    def t(name: str, cond: bool) -> None:
+        if not cond:
+            failures.append(name)
+
+    page = "<html><head><title>x</title></head><body>y</body></html>"
+
+    # --- 入れる / 入れない ---
+    out, changed = transform(page)
+    t("種の無いページには入る", changed and MARKER in out)
+    t("入れる位置は </head> の直前（head の中）",
+      out.index(MARKER) < out.index("</head>"))
+    t("本文は壊さない", out.endswith("<body>y</body></html>"))
+
+    # **冪等。**再実行で2つ入ると、読者の localStorage を二重に触る。
+    again, changed2 = transform(out)
+    t("すでに種があれば入れない（冪等）", (not changed2) and again == out)
+    t("種は1つだけ", out.count(MARKER) == 1)
+
+    # `</head>` が無い面には入れられない。**黙って本文の先頭へ置かない。**
+    noanchor = "<html><body>y</body></html>"
+    out3, changed3 = transform(noanchor)
+    t("</head> が無ければ入れない", (not changed3) and out3 == noanchor)
+
+    # --- 種そのもの（ここが壊れると、CIではなく読者側で壊れる） ---
+    # **既存の値を上書きしない。**この条件が消えると、英語の面を開くたびに
+    # 読者が切替器で選んだ 'ja' を 'en' へ書き戻す。
+    t("既に保存されていれば書かない（読者の選択を上書きしない）",
+      "if(!localStorage.getItem(k))" in SNIPPET)
+    # localStorage は Safari のプライベートモードで例外を投げる。
+    t("localStorage は try/catch で包む", SNIPPET.startswith("<!--") and "try{" in SNIPPET and "catch(e){}" in SNIPPET)
+    t("キーは lang.js と同じ simple-memo-lang", "'simple-memo-lang'" in SNIPPET)
+    t("書く値は en", "setItem(k,'en')" in SNIPPET)
+    t("目印は種そのものに入っている（冪等判定の前提）", MARKER in SNIPPET)
+    # 非同期にすると、読者が先にリンクを踏んだときに種が入らない。
+    t("script は defer/async を付けない（読み込み中に走らせる）",
+      "defer" not in SNIPPET and "async" not in SNIPPET)
+
+    # --- 走査対象 ---
+    t("見るのは /en/ の下だけ", EN_DIR == REPO_ROOT / "en")
+    pages = iter_en_pages()
+    t("実データ: /en/ に面がある", len(pages) > 0)
+    t("実データ: 走査結果は並び順が決まっている", pages == sorted(pages))
+
+    for f in failures:
+        print(f"  x {f}")
+    print(f"自己テスト 15 件中 {len(failures)} 件失敗")
+    return 1 if failures else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--check", action="store_true",
                         help="exit 1 if any /en/ page is missing the seed")
+    parser.add_argument("--selftest", action="store_true",
+                        help="この検査自身が落ちることを確かめる（disk には触らない）")
     args = parser.parse_args()
+
+    if args.selftest:
+        return run_selftest()
 
     files = iter_en_pages()
     if not files:

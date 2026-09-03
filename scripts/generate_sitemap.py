@@ -296,7 +296,12 @@ def check_committed(rendered: dict[Path, str]) -> int:
     """
     problems = 0
     for path, xml in rendered.items():
-        name = path.relative_to(REPO_ROOT)
+        # 自己テストは REPO_ROOT の外（tmpdir）の検体を渡す。**壊れたsitemapを
+        # リポジトリに置かない**ため。relative_to はそこで ValueError を投げる。
+        try:
+            name = path.relative_to(REPO_ROOT)
+        except ValueError:
+            name = path
         if not path.exists():
             print(f"  MISSING FILE  {name}")
             problems += 1
@@ -321,9 +326,113 @@ def check_committed(rendered: dict[Path, str]) -> int:
     return 0
 
 
+def run_selftest() -> int:
+    """**落ちることを確かめる。**data/check-selftests.json:
+    「落ちることを確かめていない検査は、無いのと同じ」。
+
+    この検査は台帳の外にいた —— `check-selftests.mjs` の列挙が `node` で始まる行
+    しか見ておらず、`python3` のこれを構造的に見られなかった
+    （data/autopilot-actions.json#act-ci-selftest-ratchet-py-blind）。
+
+    **この道具は一度、まさにその形で効いていなかった。**2026-08-22 まで CI に
+    あったのは `--dry-run`（件数を表示するだけでコミット済みのファイルを一切
+    見ない）で、**generate_sitemap.py を回し忘れた PR を一度も止められなかった。**
+    `--check` に替えて URL の集合を突き合わせるようにしたが、
+    **その `--check` が落ちることは誰も確かめていなかった。**ここで確かめる。
+
+    検体は文字列と tmpdir。**壊れた sitemap をリポジトリに置かない。**
+    """
+    import contextlib
+    import io
+    import tempfile
+
+    failures: list[str] = []
+
+    def quiet(fn):
+        """check_committed は判定と同時に人向けの説明を刷る。**自己テストの中では
+        黙らせる** —— 通っている回の CI ログに「FAIL: 1 件のずれ」が並ぶと、
+        読む人が本物の失敗を探せなくなる。返り値だけを見る。"""
+        with contextlib.redirect_stdout(io.StringIO()):
+            return fn()
+
+    def t(name: str, cond: bool) -> None:
+        if not cond:
+            failures.append(name)
+
+    rel = lambda p: REPO_ROOT / p  # noqa: E731
+
+    # --- URL の作り方 ---
+    t("ルートの index.html は / になる", url_for_file(rel("index.html")) == SITE_URL + "/")
+    t("下位の index.html は末尾スラッシュ", url_for_file(rel("en/index.html")) == SITE_URL + "/en/")
+    t("index 以外の .html は拡張子を落とす", url_for_file(rel("faq.html")) == SITE_URL + "/faq")
+    t("404.html は載せない", url_for_file(rel("404.html")) is None)
+    t(".html 以外は載せない", url_for_file(rel("robots.txt")) is None)
+    # 除外ディレクトリ。build/ は生成物で、外し忘れると --check が常に落ちる。
+    for d in ("docs", "scripts", "admin", "build", "tools"):
+        t(f"{d}/ 配下は載せない", url_for_file(rel(f"{d}/x.html")) is None)
+    # 除外は先頭セグメントの完全一致。前方一致で別ディレクトリを巻き込まない。
+    t("除外名と前方一致するだけの面は載せる",
+      url_for_file(rel("docsite/x.html")) == SITE_URL + "/docsite/x")
+
+    # --- 行き先の振り分け ---
+    t("/en/ は sitemap-en", determine_target(SITE_URL + "/en/guides/") == "en")
+    t("少数ロケールのトップは sitemap-locales", determine_target(SITE_URL + "/ko/") == "locales")
+    t("それ以外は sitemap-ja", determine_target(SITE_URL + "/obsidian/") == "ja")
+
+    # --- noindex ---
+    t("noindex の面を拾う",
+      NOINDEX_RE.search('<meta name="robots" content="noindex, follow">') is not None)
+    t("index の面は拾わない",
+      NOINDEX_RE.search('<meta name="robots" content="index, follow">') is None)
+
+    # --- 突き合わせ（2026-08-22 の穴そのもの） ---
+    t("urls_in は loc を拾う",
+      urls_in("<loc>https://a/</loc><loc>https://b/</loc>") == {"https://a/", "https://b/"})
+
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp) / "sitemap-ja.xml"
+        want = "<urlset><url><loc>https://x/a/</loc><lastmod>2026-01-01</lastmod></url>"\
+               "<url><loc>https://x/b/</loc><lastmod>2026-01-01</lastmod></url></urlset>"
+
+        f.write_text(want, encoding="utf-8")
+        t("一致していれば 0", quiet(lambda: check_committed({f: want})) == 0)
+
+        # **回し忘れた PR を止める。**新しい面が sitemap に無い状態。
+        f.write_text(want.replace("<url><loc>https://x/b/</loc><lastmod>2026-01-01</lastmod></url>", ""), encoding="utf-8")
+        t("生成される URL が載っていなければ落ちる（回し忘れを止める）",
+          quiet(lambda: check_committed({f: want})) == 1)
+
+        # 消したページが残っている状態。
+        f.write_text(want.replace("</urlset>", "<url><loc>https://x/gone/</loc></url></urlset>"), encoding="utf-8")
+        t("消えた面が sitemap に残っていれば落ちる", quiet(lambda: check_committed({f: want})) == 1)
+
+        # **lastmod は比較しない。**スイープ判定される面の lastmod は再生成の
+        # たびに動くので、差分に数えると毎日落ちる検査になり、誰も見なくなる。
+        f.write_text(want.replace("2026-01-01", "2020-12-31"), encoding="utf-8")
+        t("lastmod の違いは落とさない（毎日落ちる検査にしない）",
+          quiet(lambda: check_committed({f: want})) == 0)
+
+        f.unlink()
+        t("ファイルが無ければ落ちる", quiet(lambda: check_committed({f: want})) == 1)
+
+    # --- 出力の形 ---
+    block = render_url_block("https://x/a&b/", "2026-01-01")
+    t("loc と lastmod を出す", "<loc>https://x/a&amp;b/</loc>" in block and "<lastmod>2026-01-01</lastmod>" in block)
+    t("XML の特殊文字をエスケープする", "&amp;" in block and "a&b" not in block)
+
+    for f2 in failures:
+        print(f"  x {f2}")
+    print(f"自己テスト 23 件中 {len(failures)} 件失敗")
+    return 1 if failures else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--selftest", action="store_true",
+        help="この検査自身が落ちることを確かめる（sitemap は書かない）",
+    )
     parser.add_argument(
         "--check",
         action="store_true",
@@ -331,6 +440,9 @@ def main() -> int:
              "一致するかだけを検査する。差があれば非ゼロで終わる。書き込みはしない。",
     )
     args = parser.parse_args()
+
+    if args.selftest:
+        return run_selftest()
 
     url_files = collect_urls()
     existing = read_existing_lastmods()
