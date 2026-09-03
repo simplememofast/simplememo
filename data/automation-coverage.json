@@ -915,13 +915,14 @@
       "evidence": [
         "../simplememo-ios/docs/release-automation.md"
       ],
-      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。** **[2026-08-27] その境界がオーナー判断で外れた。**\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「アプリのビルド・TestFlight内部配信」は human_only に「タグ v* の作成」を置き、ai_may は空。**タグ push を拒む設計（claude.yml に actions: write を与えない）は2026-08-27 のオーナー判断でも外れていない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
-      "blocker": "policy_boundary",
-      "unblocked_by": "タグpushを意図的に拒否している（claude.yml に actions: write を与えない設計の一部）",
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。** **[2026-08-27] その境界がオーナー判断で外れた。**\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「アプリのビルド・TestFlight内部配信」は human_only に「タグ v* の作成」を置き、ai_may は空。**タグ push を拒む設計（claude.yml に actions: write を与えない）は2026-08-27 のオーナー判断でも外れていない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n**[2026-09-03] 境界が外れた。**旧 note は「タグ push を拒む設計（claude.yml に actions: write を与えない）は 2026-08-27 のオーナー判断でも外れていない」と書いていたが、**塞げていたのは1経路だけだった** —— MCP の `actions_run_trigger` は actions:write を持ち（2026-08-28 実測）、issue コメントの橋はセッションをオーナーとして通す（run 30699556723 で実際に出荷済み）。**技術的な経路は開いていて、塞いでいたのは書いてある規則。**\n\nオーナーが渡したのは **submit_review=false の範囲だけ** —— TestFlight 内部配信まで。App Review 提出を伴う起動は権限表で human_only のまま、提出そのものは別領域の門が見る。\n\n**blocker を policy_boundary から verification_pending へ動かした。**作るものは無く、残っているのは1周動いたのを見ること。**executor は動かさない** —— この経路で AI はまだ1回も起動していない。",
+      "blocker": "verification_pending",
+      "unblocked_by": "**2026-09-03 にオーナーが submit_review=false に限って渡した。**経路（release.yml）も門（preflight）も既に在るので、残っているのは **AI がこの経路で1回起動したのを見ること**だけ",
       "authority": {
         "domain": "アプリのビルド・TestFlight内部配信",
-        "human_only": "タグ v* の作成"
-      }
+        "ai_may": "**submit_review=false に限った release.yml の起動**（v* タグ作成 → Xcode Cloud → TestFlight 内部配信まで）"
+      },
+      "unlock": "testflight_first_dispatch"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -939,7 +940,7 @@
       "evidence": [
         "../simplememo-ios/.github/workflows/submit-review.yml"
       ],
-      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。",
+      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] 「実行側（ASCへの提出・公開の呼び出し）がまだ無い」は不正確だった。**ASC を呼ぶ経路は在る —— review-submit.yml が prepare_app_store_version.rb と fastlane submit_review を回しており、この経路で実際に何度も出荷している。**無かったのは実行側ではなく、門とその経路の接続**（材料の受け渡しと、release.yml から門を呼ぶ配線）。\n\n**executor は据え置く。**同日、門を release.yml の submit_review=true 経路へ配線し、材料は実行側が集める形にした（release-gate-run.mjs --materials）。ただし **policy.enabled は false のままで、まだ1回も通していない。**「配線した」を「動いた」と数えない。",
       "blocker": "not_started",
       "unlock": "ship_execute",
       "unblocked_by": "**実機確認は外していない**（機械には代われないので、門が `device_verified_sha` の一致を要求する形にした）。残るのは実行側の実装と、`policy.enabled` を立てる操作（権限表で human_only）",
@@ -966,7 +967,7 @@
       "evidence": [
         "../simplememo-ios/fastlane/Fastfile"
       ],
-      "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。",
+      "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] この欄の先頭「automatic_release がハードコードで false」は失効した。**同日 #313 で true になり、prepare_app_store_version.rb は releaseType を AFTER_APPROVAL に強制する。**承認された瞬間に出る。**\n\n**executor は動かさない**（AI が実行しているのではなく、Apple が出している）。むしろこの行で起きたのは、**渡した権限に付けた条件が効かなくなったこと**のほう —— release-gate.json の require_phased_release は「一度に全員へ出さないための最後の砦」と書いてあるが、門は enabled: false・材料は隣のリポジトリ・release.yml から一度も呼ばれない。実測でも段階リリースは付いていなかった（review.phased_release: false・2026-09-02 取得）。\n\n**同日、門の外側で塞いだ** —— simplememo-ios の scripts/lib/phased_release.rb が提出前に段階リリースを作り、作れなければ提出を止める。あわせて evaluateSubmission 側にも段階リリースの条件を置いた（**evaluateRelease は AFTER_APPROVAL では構造的に到達しない**ため、あちらに置いたままでは効かない）。",
       "blocker": "not_started",
       "unlock": "ship_execute",
       "unblocked_by": "**「恒久的に手動」は 2026-08-27 に撤回された。**ハードコードの automatic_release=false を外すのに要る machine_gate は #708 で入った。残るのは実行側の実装と、`policy.enabled` を立てる操作（権限表で human_only）",
@@ -1074,7 +1075,7 @@
       "note": "issue コメントで起動。コメントするのはオーナー\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**起動コメントを打つのがオーナー、という設計そのものが人間ゲート。**打つ主体を機械にすると、ゲートが消えて何も残らない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
       "blocker": "policy_boundary",
       "unblocked_by": "起動コメントを打つのがオーナー。ここが人間ゲート",
-      "$authority_absent": "表に領域が無い。**起動コメントを打つ主体が人**という設計そのものが人間ゲートで、打つ側を機械にすると門が消えて何も残らない"
+      "$authority_absent": "表に領域が無い。**起動コメントを打つ主体が人**という設計そのものが人間ゲートで、打つ側を機械にすると門が消えて何も残らない\n\n**[2026-09-03 訂正] 「打つ主体が人という設計そのものが人間ゲート」は事実と違う。**release-command.yml の Security model 自身が 2026-08-01 にこう訂正している —— **セッションが持つ GitHub トークンは simplememofast として認証されるので、セッションが投稿したコマンドは両方のゲートを通り、実際に出荷する。**run 30699556723（v4.9.48）で skip ではなく実行された。同ファイルは「**『セッションが投稿した』を安全層として扱うな**」と名指しで書いている。\n\nしたがってこの行を止めているのは**投稿の主体ではない。**止めているのは (a) 版が 5.8.0 にピン留めされていること（main は 5.8.9。版を変えるには main への PR が要る＝**意図的な錠前**）と、(b) docs/release-automation.md の Hard Rule（実機確認が先）。**前者は錠前、後者は書いてある規則で、機械の門ではない。**"
     },
     {
       "area": "⑤ AI予算・トークン管理",

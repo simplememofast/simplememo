@@ -43,6 +43,28 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LEDGER_PATH = path.join(ROOT, 'data/release-gate.json');
 const MATERIALS_PATH = path.join(ROOT, 'data/release-materials.json');
 
+/**
+ * **材料の置き場は、呼ぶ側によって違う。**
+ *
+ * このリポジトリで走らせるときは上の既定（まだ存在しない）。
+ * **出荷を実行する側（simplememo-ios の release.yml）から呼ぶときは、
+ * あちらが自分で集めた `data/appstore/release-materials.json` を渡す。**
+ *
+ * 材料を「送る側が集める」のは元からの設計 —— `guard.last_kill_at` は
+ * 本番の管理鍵が要るので、この公開リポジトリでは**永久に埋まらない**と
+ * simplememo-ios 側の台帳に書いてある。門だけを公開側に置き、材料は
+ * 実行側が持つ、という分け方をパスの側でも通す。
+ */
+export function materialsPathFrom(args, { root = ROOT } = {}) {
+  const i = args.indexOf('--materials');
+  if (i === -1) return path.join(root, 'data/release-materials.json');
+  const given = args[i + 1];
+  if (!given || given.startsWith('--')) {
+    throw new Error('--materials にはパスが要る（**省略を既定へ落とさない** — 別の材料で判定したことになる）');
+  }
+  return path.isAbsolute(given) ? given : path.resolve(process.cwd(), given);
+}
+
 /** 材料がこれより古ければ全部捨てる。 */
 export const MAX_MATERIAL_AGE_HOURS = 6;
 
@@ -227,6 +249,24 @@ function selftest() {
   const fresh = (over = {}) => JSON.stringify({ collected_at: '2026-08-28T03:30:00Z', ...over });
 
   const scenarios = [
+    // --- 材料の置き場（実行側は自分のファイルを渡す） ---
+    ['--materials が無ければ、このリポジトリの既定を見る', () => {
+      const got = materialsPathFrom([], { root: '/r' });
+      assert(got === '/r/data/release-materials.json', got);
+    }],
+    ['--materials で差し替えられる（絶対パス）', () => {
+      assert(materialsPathFrom(['--materials', '/x/m.json'], { root: '/r' }) === '/x/m.json');
+    }],
+    ['相対パスは cwd から解決する', () => {
+      const got = materialsPathFrom(['--materials', 'data/appstore/release-materials.json'], { root: '/r' });
+      assert(got.endsWith('/data/appstore/release-materials.json') && got.startsWith('/'), got);
+    }],
+    ['**値の無い --materials は既定へ落とさない**（別の材料で判定したことになる）', () => {
+      // lib/selftest の `broken` は台帳を壊した複製を作る道具で、例外の検査ではない。
+      const throws = (fn) => { try { fn(); return false; } catch { return true; } };
+      assert(throws(() => materialsPathFrom(['--materials'], { root: '/r' })), '投げていない');
+      assert(throws(() => materialsPathFrom(['--materials', '--json'], { root: '/r' })), '次の旗を値に読んでいる');
+    }],
     ['材料ファイルが無ければ全部「無い」', () => {
       const { data, why } = loadMaterials({ text: null, now: NOW });
       assert(data === null, '無いのに読めた');
@@ -327,13 +367,15 @@ if (isMain) {
   } else {
     const now = new Date().toISOString();
     const ledger = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
-    const { data: materials, why } = loadMaterials({ text: readIfExists(MATERIALS_PATH), now });
+    const materialsPath = materialsPathFrom(args);
+    const { data: materials, why } = loadMaterials({ text: readIfExists(materialsPath), now });
     const inv = inventory(materials);
     const have = inv.filter((f) => f.present).length;
     const r = evaluateBoth(toGateInput({ ledger, materials, now }));
 
     console.log('出荷の門 — 実データに当てる（**ASC へは何も送らない**）\n');
     console.log(`  材料        ${have} / ${inv.length} 項目`);
+    console.log(`              ${path.relative(process.cwd(), materialsPath) || materialsPath}`);
     if (why) console.log(`              ${why}`);
     console.log(`  この門を通った出荷  ${(ledger.releases ?? []).length} 件\n`);
 
@@ -364,6 +406,19 @@ if (isMain) {
         for (const f of fields) console.log(`      ${f.key.padEnd(30)} ${f.why}`);
         console.log('');
       }
+    }
+    // **実行側が読むための形。**人向けの表示は上に出したまま、判定だけを機械可読で出す。
+    // 出荷を実行する側（simplememo-ios）は文面ではなくこれを読む ——
+    // **表示文言を直したら出荷が変わる、という結び方をしない。**
+    if (args.includes('--json')) {
+      console.log(JSON.stringify({
+        materials_path: materialsPath,
+        materials_present: have,
+        materials_total: inv.length,
+        materials_why: why ?? null,
+        submission: r.actual.submission,
+        release: r.actual.release,
+      }, null, 2));
     }
     if (args.includes('--check')) {
       // **判定が hold であることは失敗ではない。**材料が無いのだから hold が正しい。

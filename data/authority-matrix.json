@@ -71,17 +71,24 @@
     {
       "domain": "アプリのビルド・TestFlight内部配信",
       "reversible": true,
-      "ai_may": [],
+      "ai_may": [
+        "**submit_review=false に限った release.yml の起動**（v* タグ作成 → Xcode Cloud → TestFlight 内部配信まで）",
+        "起動の提案と、対象コミット・版数の提示"
+      ],
       "requires_approval": false,
       "human_only": [
-        "タグ v* の作成"
+        "**submit_review=true での起動**（App Review 提出を伴う起動）— 提出は領域「App Review への提出」の門が別に見る",
+        "**実機での事前確認そのもの**（機械には代われない。提出側の門がその記録を要求する）"
       ],
-      "gate": "Xcode Cloud が archive → attach-testflight-testers.yml が ASC API で内部グループへ自動アタッチ",
+      "gate": "release.yml の preflight ジョブが**対象コミットで static / parity が success**でなければタグを作らせない（scripts/release_preflight.rb）。タグは動かさない・main の子孫であること・MARKETING_VERSION の一致もタグジョブが強制する。**submit_review=true の経路は別に門を通る** —— release.yml の release_gate ジョブが simplememo の check-release-gate を実行側の材料に当て、submit でなければ出荷ジョブへ進ませない",
       "evidence": [
-        "simplememo-ios/docs/release-automation.md"
+        "../simplememo-ios/.github/workflows/release.yml",
+        "../simplememo-ios/scripts/release_preflight.rb",
+        "scripts/check-release-gate.mjs",
+        "scripts/release-gate-run.mjs"
       ],
       "status": "active",
-      "note": "AIワークフローに actions: write を与えていないため、AIはこの連鎖を起動できない（claude.yml 冒頭に理由あり）"
+      "note": "**[2026-09-03] オーナーが submit_review=false に限って渡した。**旧 note は「タグ push を拒む設計（claude.yml に actions: write を与えない）」だったが、**その記述は経路を1つしか見ていなかった** ——\n\n  - claude.yml … いまも actions: write を持たない（変えていない）\n  - MCP の actions_run_trigger … **actions:write あり**（2026-08-28 実測・CLAUDE.md）\n  - issue コメントの橋（release-command.yml）… **セッションはオーナーとして認証されるので通る**。run 30699556723（v4.9.48）で実際に出荷した\n\nつまり**技術的な経路は元から開いていて、塞いでいたのは書いてある規則だった。**渡すにあたって、渡す先を機械が読める形に切り分けてある —— TestFlight 内部配信までは AI、**App Review 提出を伴う起動は人**。提出そのものは別領域の門（machine_gate）が見る。\n\n**実機確認は外していない。**機械には代われないので、提出側の門が `device_verified_sha` と `build.sha` の一致を要求する形で残してある。\n\n**executor はまだ動かさない** —— この経路で AI が1回も起動していない（data/automation-coverage.json の ④ は据え置き）。"
     },
     {
       "domain": "macOSランナーの起動（GitHub Actions 分数の消費）",
@@ -137,14 +144,14 @@
         "`policy.enabled` を立てる操作そのもの",
         "kill_switch を倒す操作"
       ],
-      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく（**版の状態と、アプリ単位の提出枠の両方**）、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold**",
+      "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく（**版の状態と、アプリ単位の提出枠の両方**）、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold** **[2026-09-03] 段階リリースの確認を提出側にも足した** —— 承認後の公開が自動になったので、公開を決める時点が提出の時点へ移った。`review.phased_release` が true でなければ提出しない。",
       "evidence": [
         "scripts/check-release-gate.mjs",
         "data/release-gate.json",
         "simplememo-ios/.github/workflows/submit-review.yml"
       ],
       "status": "active",
-      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない\n\n**[2026-08-28] オーナーが名指しで渡した。**旧 note は「技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない」だった。\n\n**Hard Rule（実機で確認してから提出する）は外していない。**機械には代われないので、**門がその記録を要求する形に変えた** —— `device_verified_by` / `device_verified_at` / `device_verified_sha` が無ければ hold。sha を要求するのは、**見たものと出すものを一致させる**ため（別のビルドを見て出せてしまうと、記録があること自体が意味を失う）。\n\n**enabled は false で置いてある。**実行側（ASCへの提出の呼び出し・タグ作成の権限）もまだ無い。",
+      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない\n\n**[2026-08-28] オーナーが名指しで渡した。**旧 note は「技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない」だった。\n\n**Hard Rule（実機で確認してから提出する）は外していない。**機械には代われないので、**門がその記録を要求する形に変えた** —— `device_verified_by` / `device_verified_at` / `device_verified_sha` が無ければ hold。sha を要求するのは、**見たものと出すものを一致させる**ため（別のビルドを見て出せてしまうと、記録があること自体が意味を失う）。\n\n**enabled は false で置いてある。**実行側（ASCへの提出の呼び出し・タグ作成の権限）もまだ無い。\n\n**[2026-09-03] 門を実行の経路へ配線した。**それまで門は `check-release-gate.mjs` に判定規則としてだけ在り、`release.yml` からも `review-submit.yml` からも呼ばれていなかった。いまは release.yml の `release_gate` ジョブが、実行側が集めた材料に門を当て、`submit` でなければ提出ジョブへ進ませない（`release-gate-run.mjs --materials`）。**材料は送る側が集める** —— 公開リポジトリには本番の管理鍵を置かない、という元からの分け方をパスの側でも通した。\n\n**`enabled` は false のまま。**配線しただけで、まだ1回も通していない。",
       "machine_gate": {
         "checker": "scripts/check-release-gate.mjs",
         "function": "evaluateSubmission",
@@ -175,7 +182,7 @@
         "simplememo-ios/fastlane/Fastfile"
       ],
       "status": "active",
-      "note": "\n\n**[2026-08-28] オーナーが名指しで渡した。**それまでここは human_only で、gate に「fastlane の automatic_release がハードコードで false。**恒久的に手動**」と書いてあった。**渡っただけでは外れない** —— 権限表は不可逆な領域の承認を外すのに machine_gate を要求する（GATE_REQUIRED）ので、宣言ではなく実装で外した（`scripts/check-release-gate.mjs`）。\n\n非対称は消していない —— **止める側（取り下げ・段階リリースの停止）は軽く、出す側は重い。**段階リリースは門の側で**必須**にしてある（`require_phased_release`）。一度に全員へ出す設定は validate が落とす。\n\n**enabled は false で置いてある。**先例2つ（段階公開の門・レビュー返信の門）と同じで、実装した日には立てない。ここは影響がその2つより大きいので同じかそれ以上に慎重にする。**そして実行側（ASCへの提出・公開の呼び出し）がまだ無い** —— 門だけでは何も動かない。",
+      "note": "\n\n**[2026-08-28] オーナーが名指しで渡した。**それまでここは human_only で、gate に「fastlane の automatic_release がハードコードで false。**恒久的に手動**」と書いてあった。**渡っただけでは外れない** —— 権限表は不可逆な領域の承認を外すのに machine_gate を要求する（GATE_REQUIRED）ので、宣言ではなく実装で外した（`scripts/check-release-gate.mjs`）。\n\n非対称は消していない —— **止める側（取り下げ・段階リリースの停止）は軽く、出す側は重い。**段階リリースは門の側で**必須**にしてある（`require_phased_release`）。一度に全員へ出す設定は validate が落とす。\n\n**enabled は false で置いてある。**先例2つ（段階公開の門・レビュー返信の門）と同じで、実装した日には立てない。ここは影響がその2つより大きいので同じかそれ以上に慎重にする。**そして実行側（ASCへの提出・公開の呼び出し）がまだ無い** —— 門だけでは何も動かない。\n\n**[2026-09-03] この領域の門は、構造的に到達しなくなった。**同日 fastlane が `automatic_release: true` になり、`prepare_app_store_version.rb` が `releaseType: AFTER_APPROVAL` を強制する。版が `PENDING_DEVELOPER_RELEASE` で止まらないので、**`evaluateRelease` は開く機会を持たない。**\n\n**消していない** —— `asc-release-type.yml` で1版だけ MANUAL に戻せば経路は復活する。代わりに、あちらが持っていた条件のうち**段階リリースだけを提出側へも複製した**（到達しない門に条件を置いたままにすると、条件が在ることと効くことがずれる）。\n\n**そして、この領域でいちばん効いた手当ては門ではない** —— 提出スクリプト（simplememo-ios の `scripts/lib/phased_release.rb`）が提出前に段階リリースを作り、作れなければ提出を止める。**門が動くのを待たずに塞いだ。**実測では段階リリースは付いていなかった（`review.phased_release: false`・2026-09-02）。",
       "machine_gate": {
         "checker": "scripts/check-release-gate.mjs",
         "function": "evaluateRelease",
