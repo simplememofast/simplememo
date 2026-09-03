@@ -768,7 +768,7 @@
       "evidence": [
         "admin/brand/docs/cowork-x-engagement-brief.md"
       ],
-      "note": "Cowork定期タスクでバッチ運用\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「SNS投稿（X・TikTok）」は `status: suspended`、ai_may は空、human_only が「再開の判断」。**止まっているのは経路ではなく再開の判断。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "note": "Cowork定期タスクでバッチ運用\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「SNS投稿（X・TikTok）」は `status: suspended`、ai_may は空、human_only が「再開の判断」。**止まっているのは経路ではなく再開の判断。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n**[2026-09-03] 「再開の判断」を検討したら、2つの文書が食い違っていた。どちらにも寄せない。**\n\n権限表「SNS投稿（X・TikTok）」の `status: suspended` が指しているのは、**サイト管理画面 `/admin/api/x-post` 経由の scheduled 投稿**（`x-post-scheduled.yml`）で、止まった原因は 2026-08-07 以降の Cloudflare Access 認証（302 でログイン画面へ）と、**Cowork へ一本化したので二重運用になる**というオーナー判断。**X日本語をやめたわけではない。**\n\n実際に動いている経路について、手元の材料が2つに割れている:\n\n  - 証跡の `admin/brand/docs/cowork-x-engagement-brief.md` は、**X 公式アプリ / X Web から人が手動で投稿する**と書き、「**API からの自動投稿: このタスクでは絶対にやらない**」と名指ししている → AI は下書きまで＝ `ai_proposes` が正しい\n  - 一方 `data/routine-runs.json` には `x-engagement-simplememofast 昼スロット（12:30 JST）`（cron `30 3 * * *`）が実在し、スキルの説明は「引用リポスト0-1件・リプライ3件を**投稿して**」と書いている → 実行している側に読める\n\n**この材料からは決まらない。**片方が古いのか、routine が下書きまでなのかは、投稿の実物を見ないと分からない。**executor は動かさない**（低いほうへ据え置く）。決めるには『直近の投稿を誰が押したか』を1回確かめればよく、**それは実装ではなく観測。**\n\n**そして、この行の +0.5pt は『再開の判断』では取れない見込み。**止まっている経路を戻しても、投稿を押すのが人である限り分類は変わらない。動くとしたら『Cowork 経路が実際に投稿している』が確かめられたときで、それは境界の話ではなく**観測の話**。",
       "blocker": "policy_boundary",
       "unblocked_by": "権限表で suspended。再開の判断が人",
       "authority": {
@@ -1114,7 +1114,7 @@
       "evidence": [
         "data/authority-matrix.json"
       ],
-      "note": "現在 placeholder $40。実測由来ではない",
+      "note": "現在 placeholder $40。実測由来ではない\n\n**[2026-09-03 訂正] 「現在 placeholder $40。実測由来ではない」は失効した。**同日オーナーが $280 に決めている（承認記録は data/spend-approvals.json の seq=2・二者承認は placeholder_replacement のため不要）。seq=1 が「ここを実測に置き換えるのが最初の仕事」と書いていたもの。\n\n**executor は動かない。**上限を決めるのは依然としてオーナーで、権限表の human_only もそのまま。変わったのは値の由来だけ —— placeholder から**主系の実測 n=6 の外挿**へ。ただし**外挿であって月次の実測ではなく、副系CCRの実費は観測できない**ので、この $280 が縛るのは主系だけ。",
       "blocker": "policy_boundary",
       "unblocked_by": "支出上限の決定",
       "authority": {
@@ -1435,7 +1435,8 @@
       "authority": {
         "domain": "AI実費（開発・運用のトークン費）",
         "human_only": "monthly_usd_cap の決定"
-      }
+      },
+      "note": "**[2026-09-03] ⑤と同じ行を指している。**上限は同日 $280 に決まった（data/spend-approvals.json seq=2）。決めるのがオーナーである点は変わっていない。"
     },
     {
       "area": "⑥ アプリ運営意思決定",
