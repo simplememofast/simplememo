@@ -17,21 +17,23 @@
     {
       "domain": "AI実費（開発・運用のトークン費）",
       "authority_domain": "AI実費（開発・運用のトークン費）",
-      "current_monthly_usd": 40,
-      "cap_set_by": "placeholder",
+      "current_monthly_usd": 280,
+      "cap_set_by": "owner",
       "max_step_pct": 25,
       "max_step_note": "1回の変更幅は現在額の25%まで。**倍にしない。**倍にすると、効いたかどうかが分かる前に次の判断が来る",
       "min_days_between_changes": 14,
       "min_days_note": "実費の中央値が動いたと言える最小の窓。異常消費の検知が min_samples 5件を要求するのと同じ理由",
-      "loss_limit_usd": 60,
-      "loss_limit_note": "**1か月の実費がここを超えたら、増額の判断を止めて元に戻す。**上限40の1.5倍",
+      "loss_limit_usd": 420,
+      "loss_limit_note": "**1か月の実費がここを超えたら、増額の判断を止めて元に戻す。**上限280の1.5倍。（2026-09-03、上限を $40→$280 にしたのに合わせて $60→$420。**損失上限が上限以下だと check-financial-policy が落ちる** —— 上限より低い損失上限は、上限に達する前に必ず発動するので、上限のほうが意味を失う）",
       "withdraw_conditions": [
         "成果物ゼロの run が3回続いた（金を使って何も出ていない）",
         "1記事あたり単価が直近中央値の3倍を超えた",
         "異常消費の検知が2週連続で発火した"
       ],
       "who_decides": "human",
-      "status": "active"
+      "status": "active",
+      "placeholder_replacement_exempt": true,
+      "placeholder_replacement_note": "**placeholder を実測値へ置き換える1回だけ、max_step_pct を外す。**（2026-09-03・オーナー判断）\nseq=1 の note が「初期値。実測1点（$0.8149）からの粗い外挿で置いた placeholder で、実測由来ではない。**ここを実測に置き換えるのが最初の仕事**」と書いているのに、max_step_pct（25%）はその置き換えを想定していなかった。実測（主系 n=6・日次×30日で $254〜$344/月）へ寄せるには +25% を9回・14日おきで4か月半かかる —— **台帳が『最初の仕事』と呼ぶものが、規則で4か月半かかる。**\n**二度使えない。**check-financial-policy.mjs が3条件（規則の宣言・1領域1回・直前が初期値）を要求するので、placeholder→実測 の1回以外では構造的に成立しない。**二者承認そのものは外していない** —— 外したのは上げ幅による自動発動だけで、approved_by に ai を書けないことも、上限と承認記録の一致もそのまま効く。"
     },
     {
       "domain": "広告出稿・広告予算",

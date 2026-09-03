@@ -75,9 +75,47 @@ export function validateApprovals(approvals, { policy = null, monthlyCap = null 
 
     // 上げ幅が規則を超えるなら承認者が2人要る
     const limit = (policy?.change_limits || []).find((c) => c.domain === a.domain);
+
+    // **placeholder を実測値へ置き換える1回だけ、上げ幅の規則を外す。**（2026-09-03）
+    //
+    // 【なぜ例外が要るか】seq=1 の note が自分でこう書いている ——
+    // 「初期値。実測1点（$0.8149）からの粗い外挿で置いた placeholder で、実測由来ではない。
+    // **ここを実測に置き換えるのが最初の仕事**」。ところが max_step_pct（25%）は
+    // 「熟慮した額を大きく動かすな」の規則で、**placeholder からの置き換えを想定していない。**
+    // 実測（主系 n=6・日次×30日で $254〜$344/月）へ寄せるには +25% を9回・14日おき、
+    // 4か月半かかる。**台帳が「最初の仕事」と呼ぶものが、規則で4か月半かかる。**
+    //
+    // 【二度使えない形にしてある】次の3つが全部そろったときだけ通る:
+    //   ① 規則の側が placeholder_replacement_exempt: true を宣言している
+    //   ② その領域でこの例外を使った承認が他に無い（**1領域につき1回だけ**）
+    //   ③ **直前の承認が初期値**（from_usd === null）である
+    // ③ があるので、placeholder→実測 の1回以外では構造的に成立しない。
+    //
+    // **二者承認そのものは外していない。**外したのは「上げ幅による自動発動」だけで、
+    // approved_by に ai が書けないことも、上限と承認記録の一致も、そのまま効く。
+    let exempt = false;
+    if (a.placeholder_replacement === true) {
+      const reasons = [];
+      if (!limit?.placeholder_replacement_exempt) {
+        reasons.push('規則の側が placeholder_replacement_exempt を宣言していない');
+      }
+      const others = rows.filter((x) => x !== a && x.domain === a.domain
+        && x.placeholder_replacement === true);
+      if (others.length) reasons.push(`同じ領域で既に使われている（seq=${others.map((x) => x.seq).join(',')}）`);
+      const prev = [...rows].filter((x) => x.domain === a.domain && x.seq < a.seq).pop();
+      if (!prev || prev.from_usd !== null) {
+        reasons.push('直前の承認が初期値（from_usd: null）ではない — placeholder からの置き換えに当たらない');
+      }
+      if (reasons.length) {
+        problems.push(`${at}: placeholder_replacement を使えない — ${reasons.join(' / ')}`);
+      } else {
+        exempt = true;
+      }
+    }
+
     if (limit && typeof a.from_usd === 'number' && typeof limit.max_step_pct === 'number') {
       const stepPct = ((a.to_usd - a.from_usd) / a.from_usd) * 100;
-      const needsTwo = stepPct > limit.max_step_pct;
+      const needsTwo = stepPct > limit.max_step_pct && !exempt;
       if (needsTwo && (a.approved_by || []).length < 2) {
         problems.push(`${at}: 変更幅 ${stepPct.toFixed(1)}% が上限 ${limit.max_step_pct}% を超えるのに承認者が1人`);
       }
@@ -205,6 +243,64 @@ const SCENARIOS = ledgerScenarios(
 // 止めたい行為が「黙って上限を動かす」なので、削除で外せては止めたことにならない。
 // 読み出し側（COST_PATH）で number を要求する形にしたが、
 // **突き合わせそのものが効いていること**もここで固定する。
+// [2026-09-03] **placeholder からの置き換え例外が、二度使えないこと。**
+// 例外そのものより、**例外が閉じていること**のほうを固定する。
+// 開いたままだと「max_step_pct を外す口」が台帳に残り、次の増額で使われる。
+const EXEMPT_POLICY = {
+  change_limits: [{
+    domain: 'AI実費', max_step_pct: 25, placeholder_replacement_exempt: true,
+  }],
+};
+const exemptRows = (extra = []) => ({
+  next_seq: 3 + extra.length,
+  approvals: [
+    { seq: 1, domain: 'AI実費', from_usd: null, to_usd: 40, approved_at: '2026-08-22',
+      approved_by: ['human'], note: '初期値', two_person_required: false, two_person_reason: '初期値' },
+    { seq: 2, domain: 'AI実費', from_usd: 40, to_usd: 280, approved_at: '2026-09-03',
+      approved_by: ['human'], note: '置き換え', two_person_required: false,
+      two_person_reason: 'placeholder の置き換え', placeholder_replacement: true },
+    ...extra,
+  ],
+});
+SCENARIOS.push(
+  ['placeholder の置き換えは、承認者1人でも通る', () => {
+    const p = validateApprovals(exemptRows(), { policy: EXEMPT_POLICY, monthlyCap: 280 });
+    assert(p.length === 0, JSON.stringify(p));
+  }],
+  ['**同じ例外を2回は使えない**（例外が増額の常用口にならない）', () => {
+    const p = validateApprovals(exemptRows([
+      { seq: 3, domain: 'AI実費', from_usd: 280, to_usd: 900, approved_at: '2026-09-20',
+        approved_by: ['human'], note: 'もう一度', two_person_required: false,
+        two_person_reason: 'x', placeholder_replacement: true },
+    ]), { policy: EXEMPT_POLICY, monthlyCap: 900 });
+    assert(p.some((x) => x.includes('既に使われている')), JSON.stringify(p));
+  }],
+  ['**直前が初期値でなければ使えない**（後から遡って例外にできない）', () => {
+    const rows = exemptRows();
+    rows.approvals[0].from_usd = 10; // 初期値ではなくなる
+    const p = validateApprovals(rows, { policy: EXEMPT_POLICY, monthlyCap: 280 });
+    assert(p.some((x) => x.includes('初期値')), JSON.stringify(p));
+  }],
+  ['**規則の側が宣言していなければ使えない**（承認記録だけで例外を作れない）', () => {
+    const p = validateApprovals(exemptRows(), {
+      policy: { change_limits: [{ domain: 'AI実費', max_step_pct: 25 }] }, monthlyCap: 280 });
+    assert(p.some((x) => x.includes('宣言していない')), JSON.stringify(p));
+  }],
+  ['**例外を使わない大幅増額は、今までどおり2人要る**', () => {
+    const rows = exemptRows();
+    delete rows.approvals[1].placeholder_replacement;
+    rows.approvals[1].two_person_required = true;
+    const p = validateApprovals(rows, { policy: EXEMPT_POLICY, monthlyCap: 280 });
+    assert(p.some((x) => x.includes('承認者が1人')), JSON.stringify(p));
+  }],
+  ['**例外を使っても approved_by の ai は通らない**（外したのは上げ幅の判定だけ）', () => {
+    const rows = exemptRows();
+    rows.approvals[1].approved_by = ['ai'];
+    const p = validateApprovals(rows, { policy: EXEMPT_POLICY, monthlyCap: 280 });
+    assert(p.some((x) => x.includes('ai が入っている')), JSON.stringify(p));
+  }],
+);
+
 SCENARIOS.push(
   ['**承認された最新値と違う上限は落ちる**', () => {
     const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));

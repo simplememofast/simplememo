@@ -390,9 +390,16 @@ export function render(s, ledger) {
     out.push('    NOTE: 種別の枠を超えても主系全体は止まらない（止めるのは月次上限）。');
   }
 
+  // **条件を cap_set_by から cap_basis へ移した（2026-09-03）。**
+  // 旧条件だと、オーナーが額を決めた瞬間にこの注記ごと消える。だが消えてよいのは
+  // 「オーナー未確認」の部分だけで、**「まだ実測ではない」ほうは残る。**
+  // 額を誰が決めたか（cap_set_by）と、何に基づくか（cap_basis）は別の問い。
   if (ledger.budget.cap_set_by === 'placeholder') {
-    out.push('  NOTE: monthly_usd_cap は暫定値（オーナー未確認）。実測が貯まるまで');
-    out.push('        「予算に応じて配分している」と対外的に言わないこと。');
+    out.push('  NOTE: monthly_usd_cap は暫定値（オーナー未確認）。');
+  }
+  if ((ledger.budget.cap_basis ?? 'placeholder') !== 'measured') {
+    out.push(`  NOTE: monthly_usd_cap の根拠は ${ledger.budget.cap_basis ?? 'placeholder'}`
+      + '（月次の実測ではない）。**「予算に応じて配分している」と対外的に言わないこと。**');
   }
   return out.join('\n');
 }
@@ -576,6 +583,9 @@ if (isMain) {
       models: modelUsage(ledger, s.month),
       anomaly: detectAnomalies(ledger, s.month),
       cap_set_by: ledger.budget.cap_set_by ?? null,
+      // **公開面にも根拠を運ぶ。**誰が決めたか（cap_set_by）だけを出すと、
+      // 「オーナーが決めた額」＝「実測から決めた額」と読まれる。別の問いなので両方出す。
+      cap_basis: ledger.budget.cap_basis ?? 'placeholder',
     }, null, 2));
     process.exit(0);
   }

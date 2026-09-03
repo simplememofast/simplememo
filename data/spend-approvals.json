@@ -12,7 +12,7 @@
     "**AIは承認者になれない。**approved_by に ai を書くとCIが落ちる。",
     "止めることはAIに許しているが（emergency-stop）、金額を上げることは許さない。"
   ],
-  "next_seq": 2,
+  "next_seq": 3,
   "approvals": [
     {
       "seq": 1,
@@ -20,10 +20,26 @@
       "from_usd": null,
       "to_usd": 40,
       "approved_at": "2026-08-22",
-      "approved_by": ["human"],
+      "approved_by": [
+        "human"
+      ],
       "note": "**初期値。**実測1点（$0.8149）からの粗い外挿で置いた placeholder で、実測由来ではない。ここを実測に置き換えるのが最初の仕事",
       "two_person_required": false,
       "two_person_reason": "初期値の設定で、上げ幅の概念が無い（from が null）"
+    },
+    {
+      "seq": 2,
+      "domain": "AI実費（開発・運用のトークン費）",
+      "from_usd": 40,
+      "to_usd": 280,
+      "approved_at": "2026-09-03",
+      "approved_by": [
+        "human"
+      ],
+      "note": "**placeholder を実測へ置き換えた。**seq=1 が「ここを実測に置き換えるのが最初の仕事」と書いていたもの。\n【$280 の位置】主系の実測 n=6（$0.8149 / $7.2967 / $7.8771 / $9.3726 / $11.9329 / $13.5739）を日次出荷×30日に伸ばすと、中央値で $259/月・平均で $254/月・当月の per shipped（$11.4733）で $344/月。**$280 はこの幅の中にある。**\n【外挿であって実測ではない】2週間ぶんの月次実測から決めた値ではなく、run 単位の実測からの外挿。そして**副系CCRの実費は観測できない**ので、この $280 が縛るのは主系だけ。実際の総額はこれより多い。\n【オーナーの言葉】「日次出荷なら $280/月 ↑いったんこれで」——**いったん**であることを記録に残す。",
+      "two_person_required": false,
+      "two_person_reason": "placeholder からの置き換え（placeholder_replacement）なので max_step_pct の自動発動を外した。規則の側の宣言（financial-policy.json の placeholder_replacement_exempt）とセットで、**1領域1回・直前が初期値のときだけ**成立する。詳細は同ファイルの placeholder_replacement_note",
+      "placeholder_replacement": true
     }
   ]
 }
