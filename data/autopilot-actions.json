@@ -1212,6 +1212,33 @@
       "evidence": "**閉じた。台帳 91 → 93 本、demonstrated 93 / none 0 / selftest_only 0。**\n\n`RUN_RE` を `(?:node|python3)` × `(?:m?js|py)` へ広げた。`.js` のときと同じ順番でしか通らないことを観測している —— 広げただけの状態で `--check` は2本ぶん落ちる。\n\n【入れた自己テストと、壊して落ちるのを見た回数】\n  - `generate_sitemap.py` 23件 … 壊し7通り。**「載っていない URL」を問題に数えない**と1件落ちる —— これが 2026-08-22 の穴そのもので、`--dry-run` が件数を出すだけだった当時、**回し忘れた PR を一度も止められなかった。**ほかに「消えた面が残っている」「ファイルが無い」「404.html を載せる」「除外ディレクトリを外す（5件・`scripts/` の検体や `build/` の生成物まで載る）」「ルートの index.html を `/` に写さない」「noindex の判定を殺す」。\n  - `inject_locale_seed.py` 15件 … 壊し5通り。冪等／`</head>` の有無／**既存の値の確認を外す**（英語の面を開くたびに読者の選択を上書きする）／キーを lang.js と違うものにする／head の外へ置く。\n\n**どちらも壊れても赤くならない側**である。sitemap は「回し忘れ」が素通りし、locale seed は読者側でしか壊れない。\n\n【鏡も同時に広げた】`scripts/preflight.mjs` は python を「対象外」として表に出しつつ**一度も回していなかった。**インタプリタを取り出して回すようにし、133 → **137本**。実行の切り替えそのものは自己テストの外にあるが、`node` 決め打ちへ戻すと`--only .py` の4本が即座に落ちることを確認した（node が .py を解釈できない）。\n\n**このとき既知の除外を広げすぎて `unknown` を到達不能にしかけた** —— 「node/python で始まる行はすべて対象外」と書くと、見たことのない形まで「既知の除外」に流れ込む。**「分類できなかった」を「分類済み」と報告する形**で、この工程が潰しているものそのもの。除外を具体名（npx / `.test.mjs` / `growth/lib/`）へ戻し、`node tools/x.mjs` と `python3 tools/x.py` が `unknown` に落ちる検体を置いた。\n\n【残した観測】`inject_locale_seed.py` の挿入位置は `rpartition(\"</head>\")` で**最後の** `</head>` を選ぶ。/en/ の48面はすべて `</head>` が1つなので今日は差が出ないが、本文中のコメントに `</head>` が現れた面では種が head の外へ出る。`inject_faq_schema.py` が 2026-09 に同じ形を踏んでいる。**その検体は置いていない** —— 置くと現状の危うい挙動を固定するため、台帳に観測だけ残した。"
     },
     {
+      "id": "act-faq-injector-untested",
+      "title": "本番を壊した inject_faq_schema.py は、CI に配線も自己テストも無い（直した箇所が落ちるのを誰も見ていない）",
+      "detail": "**このリポジトリで唯一、本番ページに目に見える壊れ方を出した道具**が、台帳にも CI にも入っていない。実測（2026-09-03）:\n\n  `.github/workflows/*.yml` からの参照 … **0件**（grep で確認）\n  `--check` モード … **無い**。argparse は `--dry-run` の1つだけ\n  `--selftest` … **0件**\n\n2026-09-03、`scripts/inject_faq_schema.py` は素の `re.search(r\"</head>\")` で**最初の** `</head>` を拾い、/captio-alternative/ のコメント\n\n    <!-- JSON-LD: FAQPage is auto-generated near </head> by scripts/... -->\n\nの**中へ**ブロックを差し込んだ。HTML のコメントは入れ子にならないので、注入したブロックの最初の `-->` でコメントが終わり、残り（`</head> by scripts/inject_faq_schema.py -->`）が生きた markup になった。**本番ページの最初の可視行がその文字列になり、しばらく誰も気づかなかった。**\n\n直し（`_first_live_head_close` —— コメントを同じ長さの空白で覆ってから探す）は入っているが、**それが落ちることを誰も確かめていない。**台帳の言い方でいえば `none` に相当する ——ただし列挙の外なので、`none_budget: 0` のラチェットにも掛からない。\n\n【いま何が守っているか】**症状のほうは見えている。**`check-script-tags.mjs`（配線済み・demonstrated）が入れ子コメント・迷子の `-->`・閉じていないタグを見るので、同じ壊れ方が再発すれば CI で赤くなる。**原因のほうが無検査**という形。\n\n【姉妹の道具は閉じた】`inject_locale_seed.py` は同じ日に同じ穴（向きは逆 ——`rpartition` で**最後の** `</head>` を選ぶ）を直し、コメントを覆う実装を自己テスト21件・壊し4通りで固定した。**`</head>` を挿入位置に使うスクリプトはこの2本だけ**で、片方だけ観測が付いている状態になっている。\n\n【やること】`--check`（コミット済みの FAQ ブロックが再生成と一致するか）と`--selftest`（コメント内の `</head>` を選ばないこと・冪等・既存ブロックの置換）を足し、CI へ条件の付かないステップとして配線する。`gatingChecks()` が「`if:` や`continue-on-error: true` の中にしか無い配線」を落とすので、置き方はそこに従う。\n\n【閉じ条件】`data/check-selftests.json` に `scripts/inject_faq_schema.py` の行が現れたら閉じる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "scripts/inject_faq_schema.py",
+        ".github/workflows/seo-check.yml",
+        "data/check-selftests.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": "data/check-selftests.json",
+          "needle": "scripts/inject_faq_schema.py"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null,
+      "evidence": null
+    },
+    {
       "id": "act-selftest-rule-only-coverage",
       "title": ".js 2本の自己テストがループ側の門7つを見ていなかった — 門ごと通す検体を足した（実測）",
       "detail": "**列挙・証跡・配線を閉じたあとに残った、4段目。**`.js` の5本は台帳に載り（#836）、観測が CI に効いているかも見るようにした（`gatingChecks()`）。だが**その自己テストが本体のどこを見ているか**は、まだ誰も測っていなかった。測った。\n\n`sync_constants.js` と `indexnow-notify.js` の自己テストは、**規則の配列を1本ずつ単体で当てる**作り（`apply(ruleName, html)` / `notifiablePaths(lines)`）で、**ループ側で掛かるゲートを一度も通らない。**隔離した写しで壊して確かめた（2026-09-03、リポジトリの木は触っていない）:\n\n  壊したもの                                        自己テストの反応\n  ------------------------------------------------  ----------------\n  見える評価の「自社ページのみ」を外す                12件中 0件失敗\n  価格の「料金セクション内のみ」を外す                12件中 0件失敗\n  og:site_name の判定を殺す                          12件中 0件失敗\n  llms.txt「当たらない規則」を合格にする              12件中 0件失敗\n  noindex の除外を殺す                               13件中 0件失敗\n  <鍵>.txt が複数でも黙って先頭を選ぶ                13件中 0件失敗\n  keyLocation をサイトルートにする                   13件中 0件失敗\n\n**7通りすべて緑のまま。**どれも実害が外に出る形である:\n  - 自社ページ限定を外すと、比較ページに載っている**競合の評価を自社の値へ書き換える**\n  - 料金ゾーン限定を外すと、本文中の編集上の価格まで書き換える\n  - llms.txt の「当たらない規則は穴」を合格にすると、**文面が変わった日にこの値の管理が黙って消える**\n  - noindex の除外が消えると、**noindex の面を検索エンジンへ「新しい」と申告する**\n    （台帳の broke 自身が「この5本で唯一、外向きに作用する。誤った通知に CI の失敗は無く、    被害は Bing 側に出る」と書いている、まさにその経路）\n  - 鍵の重複は #411 の再発。keyLocation がずれると通知は 200 を返しながら1件も反映されない\n\n**`tag-cta-placements.js` は対照として効いている** —— `[?&]ct=` へ戻す壊し（892本を編集上の参照へ落とした形）で 16件中7件が落ちた。**「規則を単体で当てる作りだから駄目」ではなく、ゲートがループ側にあるかどうかで決まる。**\n\n【何をするか】上の7通りで落ちる検体を足す。そのためには判定をループから切り出す必要がある（`sync_constants` は1面ぶんの走査と llms.txt の走査、`indexnow-notify` は noindex の分離・鍵の探索先・送信本文の組み立て）。**切り出しは挙動を変えないこと**を、`--check` と `--write` の出力がバイト単位で同一であることで示す（この形の検証は 2026-09-03 に一度通してある:sync_constants は食い違いのある木で348行＋25ファイル574行、tag-cta は265面3,211行）。\n\n【この行を分けた理由】#836 がマージされた直後で、**同じファイルを別セッションが書いたばかり**である。載せ替えは設計判断を含むので、機械が黙って上書きしない。\n\n【閉じ条件】上の7通りのうち、少なくとも「自社ページ限定」「noindex の除外」「鍵の重複」の3つで落ちること。`data/check-selftests.json` の当該2行の `broke` にその観測が入る。",
