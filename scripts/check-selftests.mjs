@@ -44,6 +44,52 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
 export const STATES = ['none', 'selftest_only', 'demonstrated'];
 
 /**
+ * **配線されているだけでは足りない。落とせるステップを持っているか。**
+ *
+ * 2026-09-03 に実測: 台帳 91 本のうち `scripts/indexnow-notify.js` の 1 本は、
+ * `--selftest` が
+ *
+ *     - name: IndexNow notification (on main push only)
+ *       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+ *       run: |
+ *         node scripts/indexnow-notify.js --selftest
+ *         node scripts/indexnow-notify.js --since 1
+ *       continue-on-error: true
+ *
+ * の中にしか無かった。**PR では走らず、走っても job を落とせない。**
+ * それでも台帳は `demonstrated` と書き、`--check` は緑を出す ——
+ * この台帳が狩っている「『判定できなかった』を『異常なし』と報告する」形が、
+ * 配線のもう一段外側で起きていた。
+ *
+ * `if:` の条件の中身は評価しない。**手元で真偽を決められない条件は
+ * 「常に走る」と呼べない**ので、一律で「落とせない」に数える。
+ * 落とせる呼び出しが1つでもあれば、その検査は数に入る。
+ */
+export function gatingChecks(workflow = WORKFLOW) {
+  const lines = fs.readFileSync(workflow, 'utf8').split('\n');
+  const steps = [];
+  let cur = null;
+  for (const raw of lines) {
+    let st = raw.trim();
+    if (st.startsWith('- ')) {
+      if (cur) steps.push(cur);
+      cur = { body: [], gated: false };
+      st = st.slice(2).trim();
+    }
+    if (!cur) continue;
+    if (/^if:\s/.test(st) || /^continue-on-error:\s*true\b/.test(st)) cur.gated = true;
+    cur.body.push(raw);
+  }
+  if (cur) steps.push(cur);
+  const found = new Set();
+  for (const st of steps) {
+    if (st.gated) continue;
+    for (const m of st.body.join('\n').matchAll(/node\s+((?:growth\/)?scripts\/[\w.-]+\.m?js)/g)) found.add(m[1]);
+  }
+  return [...found].sort();
+}
+
+/**
  * CI（seo-check.yml）が実際に走らせている node 検査。**配線が正。**
  *
  * **[2026-09-03] `.mjs` しか拾っていなかった。**seo-check.yml が走らせる node 検査は
@@ -69,7 +115,11 @@ export function loadLedger(file = LEDGER_PATH) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-export function validate(doc, { wired = wiredChecks(), exists = (p) => fs.existsSync(path.join(ROOT, p)) } = {}) {
+export function validate(doc, {
+  wired = wiredChecks(),
+  gating = gatingChecks(),
+  exists = (p) => fs.existsSync(path.join(ROOT, p)),
+} = {}) {
   const problems = [];
   const rows = doc?.checks;
   if (!Array.isArray(rows)) return ['checks が配列でない'];
@@ -101,6 +151,17 @@ export function validate(doc, { wired = wiredChecks(), exists = (p) => fs.exists
   }
   for (const r of rows) {
     if (!wired.includes(r.script)) problems.push(`台帳にあるが CI が走らせていない: ${r.script}（--sync で外す）`);
+  }
+
+  // **走ることと、落とせることは別。**`if:` の中や `continue-on-error: true` の
+  // 下にしか無い呼び出しは、PR を止められない。台帳が `demonstrated` と書いても、
+  // その観測は CI に効いていない。
+  for (const w of wired) {
+    if (!gating.includes(w)) {
+      problems.push(`配線はされているが**落とせるステップが1つも無い**: ${w}`
+        + '（`if:` か `continue-on-error: true` の中にしかいない）。'
+        + '自己テストは条件の付かない独立したステップで走らせること');
+    }
   }
 
   // ラチェット。**増える方向だけを止める。**
@@ -165,23 +226,23 @@ export function render(doc) {
 // ── 自己テスト（この検査自身が落ちることを固定する） ──────────────
 const SCENARIOS = [
   ['CI が走らせているのに台帳に無ければ落ちる', () => {
-    const p = validate({ checks: [], none_budget: 0, selftest_only_budget: 0 }, { wired: ['scripts/x.mjs'], exists: () => true });
+    const p = validate({ checks: [], none_budget: 0, selftest_only_budget: 0 }, { wired: ['scripts/x.mjs'], gating: ['scripts/x.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('台帳に無い')), p.join(' / '));
   }],
   ['台帳にあるのに CI が走らせていなければ落ちる', () => {
     const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'none' }], none_budget: 9, selftest_only_budget: 0 },
-      { wired: [], exists: () => true });
+      { wired: [], gating: [], exists: () => true });
     assert(p.some((x) => x.includes('CI が走らせていない')), p.join(' / '));
   }],
   ['**demonstrated に証跡が無ければ落ちる**（誰でも「見た」と書けてしまう）', () => {
     const p = validate({ checks: [{ script: 'scripts/x.mjs', state: 'demonstrated' }], none_budget: 0, selftest_only_budget: 0 },
-      { wired: ['scripts/x.mjs'], exists: () => true });
+      { wired: ['scripts/x.mjs'], gating: ['scripts/x.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('at（観測日）')), p.join(' / '));
     assert(p.some((x) => x.includes('broke')), p.join(' / '));
   }],
   ['**ラチェット: none が上限を超えたら落ちる**', () => {
     const rows = [{ script: 'a.mjs', state: 'none' }, { script: 'b.mjs', state: 'none' }];
-    const opt = { wired: ['a.mjs', 'b.mjs'], exists: () => true };
+    const opt = { wired: ['a.mjs', 'b.mjs'], gating: ['a.mjs', 'b.mjs'], exists: () => true };
     const doc = (n) => ({ checks: rows, none_budget: n, selftest_only_budget: 0 });
     assert(validate(doc(2), opt).length === 0, '上限ちょうどは通る');
     assert(validate(doc(1), opt).some((x) => x.includes('上限')), '超えたら落ちる');
@@ -189,14 +250,14 @@ const SCENARIOS = [
   ['**ラチェット: selftest_only にも上限がある**（段を下ろしただけでは止める力は移らない）', () => {
     const rows = [{ script: 'a.mjs', state: 'selftest_only' },
       { script: 'b.mjs', state: 'selftest_only' }];
-    const opt = { wired: ['a.mjs', 'b.mjs'], exists: () => true };
+    const opt = { wired: ['a.mjs', 'b.mjs'], gating: ['a.mjs', 'b.mjs'], exists: () => true };
     const doc = (n) => ({ checks: rows, none_budget: 0, selftest_only_budget: n });
     assert(validate(doc(2), opt).length === 0, '上限ちょうどは通る');
     const over = validate(doc(1), opt);
     assert(over.some((x) => x.includes('落ちるのを見ていない検査')), over.join(' / '));
   }],
   ['**上限を書き忘れたら落ちる**（無ければ無制限、が一番危ない）', () => {
-    const opt = { wired: [], exists: () => true };
+    const opt = { wired: [], gating: [], exists: () => true };
     assert(validate({ checks: [], none_budget: 0 }, opt)
       .some((x) => x.includes('selftest_only_budget が数でない')), 'selftest_only_budget の欠落');
     assert(validate({ checks: [], selftest_only_budget: 0 }, opt)
@@ -204,12 +265,12 @@ const SCENARIOS = [
   }],
   ['知らない state は落ちる', () => {
     const p = validate({ checks: [{ script: 'a.mjs', state: 'たぶん大丈夫' }], none_budget: 0, selftest_only_budget: 0 },
-      { wired: ['a.mjs'], exists: () => true });
+      { wired: ['a.mjs'], gating: ['a.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('知らない state')), p.join(' / '));
   }],
   ['state が demonstrated でないのに観測記録があれば落ちる', () => {
     const p = validate({ checks: [{ script: 'a.mjs', state: 'none', at: '2026-08-26' }], none_budget: 1, selftest_only_budget: 0 },
-      { wired: ['a.mjs'], exists: () => true });
+      { wired: ['a.mjs'], gating: ['a.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('観測の記録がある')), p.join(' / '));
   }],
   // **拡張子で検査を見落とさない。**2026-09-03 まで `.mjs` しか拾っておらず、
@@ -234,6 +295,57 @@ const SCENARIOS = [
       fs.rmSync(f, { force: true });
     }
   }],
+  // ── 走ることと、落とせることは別 ─────────────────────────
+  ['**`if:` の中の呼び出しは「落とせる」に数えない**', () => {
+    const yml = tmpWorkflow([
+      '      - name: x',
+      "        if: github.ref == 'refs/heads/main'",
+      '        run: node scripts/a.mjs --selftest',
+    ]);
+    assert(gatingChecks(yml).join() === '', gatingChecks(yml).join());
+  }],
+  ['**`continue-on-error: true` の下も数えない**（落ちても job は緑）', () => {
+    const yml = tmpWorkflow([
+      '      - name: x',
+      '        run: node scripts/a.mjs --selftest',
+      '        continue-on-error: true',
+    ]);
+    assert(gatingChecks(yml).join() === '', gatingChecks(yml).join());
+  }],
+  ['条件の付かないステップの呼び出しは数える', () => {
+    const yml = tmpWorkflow(['      - name: x', '        run: node scripts/a.mjs --check']);
+    assert(gatingChecks(yml).join() === 'scripts/a.mjs', gatingChecks(yml).join());
+  }],
+  ['落とせる呼び出しが1つでもあれば数に入る（条件付きが別にあってもよい）', () => {
+    const yml = tmpWorkflow([
+      '      - name: x',
+      "        if: github.event_name == 'push'",
+      '        run: node scripts/a.mjs --since 1',
+      '      - name: y',
+      '        run: node scripts/a.mjs --selftest',
+    ]);
+    assert(gatingChecks(yml).join() === 'scripts/a.mjs', gatingChecks(yml).join());
+  }],
+  ['`if:` は次のステップへ漏れない', () => {
+    const yml = tmpWorkflow([
+      '      - name: x',
+      "        if: github.event_name == 'push'",
+      '        run: node scripts/a.mjs',
+      '      - name: y',
+      '        run: node scripts/b.mjs',
+    ]);
+    assert(gatingChecks(yml).join() === 'scripts/b.mjs', gatingChecks(yml).join());
+  }],
+  ['**落とせるステップを持たない配線は落ちる**（2026-09-03 に indexnow が実際にそうだった）', () => {
+    const p = validate({ checks: [{ script: 'a.mjs', state: 'demonstrated', at: '2026-09-03', broke: 'x' }],
+      none_budget: 0, selftest_only_budget: 0 },
+    { wired: ['a.mjs'], gating: [], exists: () => true });
+    assert(p.some((x) => x.includes('落とせるステップが1つも無い')), p.join(' / '));
+  }],
+  ['実データ: 配線 91 本がすべて落とせるステップを持つ', () => {
+    const missing = wiredChecks().filter((w) => !gatingChecks().includes(w));
+    assert(missing.length === 0, missing.join(' / '));
+  }],
   ['実データが検査を通る', () => {
     const p = validate(loadLedger());
     assert(p.length === 0, p.join(' / '));
@@ -241,6 +353,17 @@ const SCENARIOS = [
 ];
 
 function assert(cond, msg) { if (!cond) throw new Error(msg); }
+
+/**
+ * 検体のワークフローを一時ファイルへ書いて、そのパスを返す。
+ * **リポジトリには置かない** —— 壊れた定義をリポジトリに残せば、いつか読まれる。
+ */
+function tmpWorkflow(lines) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'check-selftests-'));
+  const file = path.join(dir, 'wf.yml');
+  fs.writeFileSync(file, ['jobs:', '  a:', '    steps:', ...lines, ''].join('\n'));
+  return file;
+}
 
 function selftest() {
   let failed = 0;

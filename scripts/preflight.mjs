@@ -37,6 +37,25 @@
  * 見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。
  * 本数の増減そのものは止められないが、**黙って減ることは止まる。**
  *
+ * 【2026-09-03 — 同じ穴が、もう一段あった】
+ * 1行形式を拾うようになった後も、導出は **`.mjs` で終わる行しか見ていなかった。**
+ * 落ちていたのは 8 本で、そこに **`seo-check.js`（このリポジトリの主検査・12ゲート）**
+ * が入っている。CI と手元の差は 125 対 133 だった。
+ *
+ * 見つけ方は自力ではない。`check-selftests.mjs` のラチェットが**まったく同じ形**で
+ * `.js` を1本も見ていないのが先に分かり（act-ci-selftest-ratchet-js-blind）、
+ * そちらを直したときに**この鏡も同じ正規表現を持っている**ことに気づいた。
+ * **1か所直して終わりにすると、鏡のほうが古い版を映し続ける。**
+ *
+ * 併せて **`if:` 付きのステップは取らないことにした。**`.mjs` には該当が1本も
+ * 無かったので今日までは同じ結果になるが、`.js` を拾うと
+ * `node scripts/indexnow-notify.js --since 1`（main への push 限定）が入ってくる ——
+ * 手元で回すと検査ではなく **IndexNow への実送信**になる。取らなかったことは
+ * 「条件付き」として表に出す（黙って減らさない、は同じ）。
+ *
+ * 導出そのものは `--selftest` で留めてある。2回続けて**症状に出ない形**で
+ * 壊れたので、境界を検体で持つ。
+ *
  * 【手元でだけ落ちるものがある — 2026-08-28 の実測】
  * `check-generators --run` は `data/financial-policy.json` と
  * `data/revenue-series.json` が再生成で変わると言う。**これは main でも同じ**
@@ -115,18 +134,21 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
  */
 export function extractCommands(yamlText) {
   const out = [];
+  let stepHasIf = false;
   for (const raw of String(yamlText ?? '').split('\n')) {
     let line = raw.trim();
     // `- run: node ...` / `run: node ...` / `- node ...` のどれでも同じ扱いにする。
     // **コマンド本体を取り出してから**既存の除外（合成・変数）に掛けること。
     // 順序を逆にすると、`run:` の付いた合成行が素通りする。
-    if (line.startsWith('- ')) line = line.slice(2).trim();
+    if (line.startsWith('- ')) { stepHasIf = false; line = line.slice(2).trim(); }
+    if (/^if:\s/.test(line)) { stepHasIf = true; continue; }
     const inline = line.match(/^run:\s+(.+)$/);
     if (inline) line = inline[1].trim();
     if (!line.startsWith('node ')) continue;
     if (/[|&;><]/.test(line)) continue;          // 合成された行は取らない
     if (/\$\{\{|\$[A-Z_]/.test(line)) continue;  // 変数を含む行は手元で意味が変わる
-    const m = line.match(/^node\s+((?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.mjs)(.*)$/);
+    if (stepHasIf) continue;                     // 条件付きのステップは手元で意味が違う
+    const m = line.match(/^node\s+((?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.m?js)(.*)$/);
     if (!m) continue;
     const args = m[2].trim();
     out.push({ script: m[1], args: args === '' ? [] : args.split(/\s+/) });
@@ -154,22 +176,28 @@ export function extractCommands(yamlText) {
  * 「たぶん要らない」ではなく「まだ分かっていない」なので、緑にしない。
  */
 export function auditExtraction(yamlText) {
-  const dropped = { composed: [], variable: [], out_of_scope: [], unknown: [] };
+  const dropped = { composed: [], variable: [], conditional: [], out_of_scope: [], unknown: [] };
   let taken = 0;
+  let stepHasIf = false;
   for (const raw of String(yamlText ?? '').split('\n')) {
     let line = raw.trim();
-    if (line.startsWith('- ')) line = line.slice(2).trim();
+    if (line.startsWith('- ')) { stepHasIf = false; line = line.slice(2).trim(); }
+    if (/^if:\s/.test(line)) { stepHasIf = true; continue; }
     const inline = line.match(/^run:\s+(.+)$/);
     if (inline) line = inline[1].trim();
     // 実行系に見える行だけを対象にする（散文やYAMLの他のキーは無視）
     if (!/^(node|python3|npx)\s/.test(line)) continue;
-    if (/^node\s+(?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.mjs/.test(line)
-        && !/[|&;><]/.test(line) && !/\$\{\{|\$[A-Z_]/.test(line)) { taken += 1; continue; }
+    if (/^node\s+(?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.m?js/.test(line)
+        && !/[|&;><]/.test(line) && !/\$\{\{|\$[A-Z_]/.test(line) && !stepHasIf) { taken += 1; continue; }
     if (/[|&;><]/.test(line)) { dropped.composed.push(line); continue; }
     if (/\$\{\{|\$[A-Z_]/.test(line)) { dropped.variable.push(line); continue; }
-    // .mjs 以外の実行系（.js / .py / growth/lib のテスト）は、**現状は回していない。**
+    // **条件付きのステップは、手元では意味が違う。**CI 側の `if:` が
+    // 「main への push のときだけ」と言っているものを手元で回すと、
+    // 検査ではなく副作用（IndexNow への実送信）が起きる。
+    if (stepHasIf) { dropped.conditional.push(line); continue; }
+    // .py / npx / growth/lib のテストは、**現状は回していない。**
     // 回さないこと自体は判断だが、黙って消えていてよい理由は無いので表に出す。
-    if (/^(python3\s|npx\s)/.test(line) || /^node\s+\S+\.(js|py)\b/.test(line)
+    if (/^(python3\s|npx\s)/.test(line) || /^node\s+\S+\.py\b/.test(line)
         || /^node\s+\S+\.test\.mjs\b/.test(line)) { dropped.out_of_scope.push(line); continue; }
     dropped.unknown.push(line);
   }
@@ -180,9 +208,97 @@ export function auditExtraction(yamlText) {
 // `--check` を持っていると、ここが `process.exit()` を呼んで
 // **呼び出し側のコードを1行も走らせずに exit 0 する**（2026-08-28 に実測）。
 // 検査は scripts/check-module-entry.mjs。
+/**
+ * **導出そのものを固定する。**
+ *
+ * この道具が壊れる形は毎回同じ —— **拾えなくなるだけなので、残りが全部通れば緑になる。**
+ * 実際に2回起きている:
+ *   - 2026-09-01: 1行形式の `run: node ...` を拾わず、CI 108 本のうち 47 本（43%）を
+ *     落としたまま「61 本中 N 本失敗」と出していた
+ *   - 2026-09-03: `.mjs` しか拾わず、`seo-check.js` など 8 本を落としていた
+ *     （data/autopilot-actions.json#act-ci-selftest-ratchet-js-blind と同じ形）
+ *
+ * どちらも症状に出ない。だから**境界を検体で留めておく。**
+ */
+function selftest() {
+  const cases = [];
+  const t = (name, fn) => cases.push([name, fn]);
+  const yaml = (...lines) => lines.join('\n');
+  const names = (text) => extractCommands(text).map((c) => `${c.script} ${c.args.join(' ')}`.trim());
+
+  t('1行形式の run: を拾う（2026-09-01 まで 47 本落としていた）', () => {
+    const got = names(yaml('      - name: x', '        run: node scripts/a.mjs --check'));
+    assertEq(got.join(), 'scripts/a.mjs --check');
+  });
+  t('ブロック形式も拾う', () => {
+    const got = names(yaml('      - name: x', '        run: |', '          node scripts/b.mjs'));
+    assertEq(got.join(), 'scripts/b.mjs');
+  });
+  t('**`.js` も拾う**（2026-09-03 まで主検査を落としていた）', () => {
+    const got = names(yaml('      - name: x', '        run: node scripts/seo-check.js --selftest'));
+    assertEq(got.join(), 'scripts/seo-check.js --selftest');
+  });
+  t('growth/scripts も拾う', () => {
+    const got = names(yaml('        run: node growth/scripts/c.mjs --check'));
+    assertEq(got.join(), 'growth/scripts/c.mjs --check');
+  });
+  // 手元で回すと検査ではなく**副作用**になる。IndexNow の実送信がこれ。
+  t('**`if:` 付きのステップは取らない**（手元では意味が違う）', () => {
+    const text = yaml('      - name: x', "        if: github.ref == 'refs/heads/main'",
+      '        run: node scripts/d.js --since 1');
+    assertEq(names(text).join(), '');
+    assertEq(auditExtraction(text).dropped.conditional.join(), 'node scripts/d.js --since 1');
+  });
+  t('`if:` は次のステップへ漏れない', () => {
+    const text = yaml('      - name: x', "        if: github.ref == 'refs/heads/main'",
+      '        run: node scripts/d.mjs', '      - name: y', '        run: node scripts/e.mjs');
+    assertEq(names(text).join(), 'scripts/e.mjs');
+  });
+  t('合成された行は取らない', () => {
+    assertEq(names(yaml('        run: |', '          node scripts/f.mjs || EXIT=$?')).join(), '');
+  });
+  t('変数を含む行は取らない', () => {
+    assertEq(names(yaml('        run: node scripts/g.mjs --x ${{ github.sha }}')).join(), '');
+  });
+  t('同じ script+args は1本にまとめる', () => {
+    const text = yaml('        run: node scripts/h.mjs --check', '        run: node scripts/h.mjs --check');
+    assertEq(names(text).length, 1);
+  });
+  t('python は対象外として表に出す（黙って消さない）', () => {
+    const d = auditExtraction(yaml('        run: python3 scripts/i.py --check')).dropped;
+    assertEq(d.out_of_scope.join(), 'python3 scripts/i.py --check');
+    assertEq(d.unknown.length, 0);
+  });
+  // **見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。**
+  t('分類できない実行行は unknown に落ちる（＝緑にしない）', () => {
+    assertEq(auditExtraction(yaml('        run: node tools/j.mjs')).dropped.unknown.length, 1);
+  });
+  t('実データ: 取りこぼしの分類に unknown が無い', () => {
+    const d = auditExtraction(fs.readFileSync(WORKFLOW, 'utf8')).dropped;
+    assertEq(d.unknown.join(' / '), '');
+  });
+  t('実データ: 1本も拾えない、が起きていない', () => {
+    const n = extractCommands(fs.readFileSync(WORKFLOW, 'utf8')).length;
+    if (!(n > 100)) throw new Error(`導出が ${n} 本しかない — 壊れている可能性`);
+  });
+
+  let failed = 0;
+  for (const [name, fn] of cases) {
+    try { fn(); console.log(`  ok   ${name}`); }
+    catch (e) { failed += 1; console.log(`  FAIL ${name}\n       ${e.message}`); }
+  }
+  console.log(`\n  自己テスト ${cases.length} 件中 ${failed} 件失敗`);
+  return failed === 0 ? 0 : 1;
+}
+
+function assertEq(got, want) {
+  if (got !== want) throw new Error(`got ${JSON.stringify(got)} / want ${JSON.stringify(want)}`);
+}
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
 const argv = process.argv.slice(2);
+if (argv.includes('--selftest')) process.exit(selftest());
 const only = (() => {
   const i = argv.indexOf('--only');
   return i >= 0 ? argv[i + 1] : null;
@@ -205,7 +321,8 @@ if (cmds.length === 0) {
 {
   const audit = auditExtraction(fs.readFileSync(WORKFLOW, 'utf8'));
   const d = audit.dropped;
-  const n = d.composed.length + d.variable.length + d.out_of_scope.length + d.unknown.length;
+  const n = d.composed.length + d.variable.length + d.conditional.length
+    + d.out_of_scope.length + d.unknown.length;
   if (n > 0) {
     console.log(`導出で取らなかった ${n} 行（理由つき。**黙って減らさない**）:`);
     const show = (label, xs) => {
@@ -213,6 +330,7 @@ if (cmds.length === 0) {
     };
     show('合成    ', d.composed);
     show('変数    ', d.variable);
+    show('条件付き', d.conditional);
     show('対象外  ', d.out_of_scope);
     show('**不明**', d.unknown);
     console.log('');
