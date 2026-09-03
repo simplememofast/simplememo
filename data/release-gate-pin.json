@@ -34,10 +34,10 @@
   "entry": "scripts/release-gate-run.mjs",
   "mirror": "simplememo-ios/data/release-gate-pin.json",
   "reviewed_at": "2026-09-03",
-  "reviewed_note": "初回。**この日に判定規則そのものを変えたので、その変更を読んだ上で留めている。**\n\n変えたのは2点: (1) evaluateSubmission に段階リリースの条件を足した —— 同日 fastlane が automatic_release: true になり、公開を決める時点が提出の時点へ移ったため（evaluateRelease は AFTER_APPROVAL では版が PENDING_DEVELOPER_RELEASE で止まらず、構造的に到達しない）。(2) release-gate-run.mjs に --materials / --json を足した —— 材料は実行側が持つので、門だけを公開側に置く分け方をパスの側でも通した。\n\n**どちらも止める方向にしか効かない** —— 起こりうるのは「提出が hold になる」であって「通らなかったものが通る」ではない。(2) は判定に触れていない（入出力の口だけ）。\n\nlib/selftest.mjs は不変（498def1338f8 は段階公開の写しと同じ値）。",
+  "reviewed_note": "初回。**この日に判定規則そのものを変えたので、その変更を読んだ上で留めている。**\n\n変えたのは2点: (1) evaluateSubmission に段階リリースの条件を足した —— 同日 fastlane が automatic_release: true になり、公開を決める時点が提出の時点へ移ったため（evaluateRelease は AFTER_APPROVAL では版が PENDING_DEVELOPER_RELEASE で止まらず、構造的に到達しない）。(2) release-gate-run.mjs に --materials / --json を足した —— 材料は実行側が持つので、門だけを公開側に置く分け方をパスの側でも通した。\n\n**どちらも止める方向にしか効かない** —— 起こりうるのは「提出が hold になる」であって「通らなかったものが通る」ではない。(2) は判定に触れていない（入出力の口だけ）。\n\nlib/selftest.mjs は不変（498def1338f8 は段階公開の写しと同じ値）。\n\n**[2026-09-03 二度目] 実行側の通しで、こちらの配線バグを捕まえた。**\n\n`release-gate-run.mjs` に `--json-out <path>` を足した。`--json` は**人向けの棚卸しを出したあとに JSON を足す**ので、実行側の `--json > gate-verdict.json` は必ずパースできない。初回に留めた版はその形で、`enforce` が false だったので「判定が読めなかった」に落ちて気づけた。\n\n**enforce を先に立てていたら、配線の不具合が門の判定に化けていた** —— 要約は「判定が submit でない」としか言わないので、門が止めたのかパイプが壊れているのかが読み手に区別できない。**報告だけの期間を置く意味が、そのまま出た形。**\n\n**読んだ差分と、判定への影響:** 変わったのは `release-gate-run.mjs` の出力の口だけ（`jsonOutPathFrom` の追加と、verdict を1つのオブジェクトにまとめて `--json` / `--json-out` の両方へ渡す形）。`evaluateSubmission` / `evaluateRelease` / `toGateInput` / `loadMaterials` は**1行も動いていない**（`check-release-gate.mjs` の指紋 ea8b6c485a64 は初回と同じ）。`--json-out` も `--materials` / `--pin` と同じ規律で、**値が無ければ「出さない」に落とさない**（読む側は空ファイルと区別できない）。",
   "files": {
     "scripts/check-release-gate.mjs": "ea8b6c485a64",
     "scripts/lib/selftest.mjs": "498def1338f8",
-    "scripts/release-gate-run.mjs": "739a830c26e9"
+    "scripts/release-gate-run.mjs": "4f76a0a58db1"
   }
 }

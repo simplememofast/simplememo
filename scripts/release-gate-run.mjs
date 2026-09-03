@@ -55,6 +55,29 @@ const MATERIALS_PATH = path.join(ROOT, 'data/release-materials.json');
  * simplememo-ios 側の台帳に書いてある。門だけを公開側に置き、材料は
  * 実行側が持つ、という分け方をパスの側でも通す。
  */
+/**
+ * `--json-out <path>` の解決。**`--json` と分けてある理由。**
+ *
+ * `--json` は人向けの棚卸しを出したあとに JSON を足すので、**`> file` で受けると
+ * 混ざってパースできない。**実際に踏んだ（2026-09-03・実行側の通し確認）。
+ * `enforce` が false なら「判定が読めなかった」に落ちるだけだが、
+ * **true にした日から、配線の不具合が門の判定に化けて毎回止める。**
+ * しかも要約は「判定が submit でない」としか言わないので、**門が止めたのか
+ * パイプが壊れているのかが読み手に区別できない。**
+ *
+ * だから機械が読む出力は**ファイルへ分ける。**人向けの表示は stdout に残す
+ * （実行ログから消さない）。
+ */
+export function jsonOutPathFrom(args) {
+  const i = args.indexOf('--json-out');
+  if (i === -1) return null;
+  const given = args[i + 1];
+  if (!given || given.startsWith('--')) {
+    throw new Error('--json-out にはパスが要る — **省略を「出さない」に落とさない**（読む側は空ファイルと区別できない）');
+  }
+  return path.isAbsolute(given) ? given : path.resolve(process.cwd(), given);
+}
+
 export function materialsPathFrom(args, { root = ROOT } = {}) {
   const i = args.indexOf('--materials');
   if (i === -1) return path.join(root, 'data/release-materials.json');
@@ -261,6 +284,17 @@ function selftest() {
       const got = materialsPathFrom(['--materials', 'data/appstore/release-materials.json'], { root: '/r' });
       assert(got.endsWith('/data/appstore/release-materials.json') && got.startsWith('/'), got);
     }],
+    ['--json-out が無ければ null（書かない）', () => {
+      assert(jsonOutPathFrom([]) === null, '書き出し先が勝手に決まっている');
+    }],
+    ['--json-out で書き出し先を決められる', () => {
+      assert(jsonOutPathFrom(['--json-out', '/x/v.json']) === '/x/v.json');
+    }],
+    ['**値の無い --json-out は「出さない」に落とさない**（読む側は空と区別できない）', () => {
+      const throws = (fn) => { try { fn(); return false; } catch { return true; } };
+      assert(throws(() => jsonOutPathFrom(['--json-out'])), '投げていない');
+      assert(throws(() => jsonOutPathFrom(['--json-out', '--check'])), '次の旗を値に読んでいる');
+    }],
     ['**値の無い --materials は既定へ落とさない**（別の材料で判定したことになる）', () => {
       // lib/selftest の `broken` は台帳を壊した複製を作る道具で、例外の検査ではない。
       const throws = (fn) => { try { fn(); return false; } catch { return true; } };
@@ -410,16 +444,19 @@ if (isMain) {
     // **実行側が読むための形。**人向けの表示は上に出したまま、判定だけを機械可読で出す。
     // 出荷を実行する側（simplememo-ios）は文面ではなくこれを読む ——
     // **表示文言を直したら出荷が変わる、という結び方をしない。**
-    if (args.includes('--json')) {
-      console.log(JSON.stringify({
-        materials_path: materialsPath,
-        materials_present: have,
-        materials_total: inv.length,
-        materials_why: why ?? null,
-        submission: r.actual.submission,
-        release: r.actual.release,
-      }, null, 2));
-    }
+    const verdict = {
+      materials_path: materialsPath,
+      materials_present: have,
+      materials_total: inv.length,
+      materials_why: why ?? null,
+      submission: r.actual.submission,
+      release: r.actual.release,
+    };
+    if (args.includes('--json')) console.log(JSON.stringify(verdict, null, 2));
+    const jsonOut = jsonOutPathFrom(args);
+    // **stdout には混ぜない。**上の人向けの表示と同じ流れに JSON を足すと、
+    // `> file` で受けた側がパースできない（2026-09-03 に実行側の通し確認で踏んだ）。
+    if (jsonOut) fs.writeFileSync(jsonOut, `${JSON.stringify(verdict, null, 2)}\n`);
     if (args.includes('--check')) {
       // **判定が hold であることは失敗ではない。**材料が無いのだから hold が正しい。
       // ここで落とすのは、門が材料無しで通ってしまったときだけ。
