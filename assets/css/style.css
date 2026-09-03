@@ -2644,3 +2644,59 @@ img[src*="hero-ja"], img[src*="hero-en"] {
   .cta-qr img { width: 132px; height: 132px; background: #fff; border-radius: 12px; padding: 6px; margin: 0 0 .4rem; }
   .cta-qr small { font-size: .72rem; color: var(--text-muted); }
 }
+
+/* ============================================================
+   グローバルナビの横溢れ（2026-09-03 実測）
+
+   `.global-nav__links` は `display:flex` で `flex-wrap` を持たず、
+   ハンバーガーへ切り替わるのは **768px** から。その結果、
+   **769〜1099px でほぼ全ページのナビが画面を超えていた。**実測:
+
+       /            769px +233   800px +202   900px +102   1000px +2
+       /autopilot/  769px +309   900px +178   1000px +78   1024px +54
+       /about/      同上
+       /en/         769px +132   800px +101   900px +1
+
+   サブページはさらに **320px でも +23〜24px** 溢れる。トップの言語切替は
+   `.lang-dropdown`（47px）だが、サブページは `.lang-switcher--nav`（80px）で、
+   ロゴ 188px と合わせて 320px の画面に収まらない。
+
+   **この帯はタブレットそのもの。**プレスリリースの着地面（/autopilot/）が
+   横スクロールする状態で配信していた。
+
+   ここへ置くのは、`.global-nav__links` のレイアウトが **各ページのインライン
+   `<style>` にある**ため（268ページ）。共有CSSは後勝ちにできないので
+   `!important` で上書きする —— このファイルが既にナビへ同じやり方を
+   使っているのと同じ理由。
+   ============================================================ */
+
+/* 1099px まではハンバーガーにする。**CTAは残す** ——
+   リンク列を畳めば 769px でも収まり（ロゴ188 + 言語80 + CTA110 + ☰48 + 余白48 = 474）、
+   ダウンロード導線をタブレットから消す理由が無い。 */
+@media (max-width: 1099px) {
+  .global-nav__links:not(.open) { display: none !important; }
+  .global-nav__hamburger { display: block !important; }
+  /* 開いたときに落ちてくる形。各ページのインラインCSSは **768px までしか**
+     この形を持っていないので、769〜1099px のぶんをここで補う
+     （背景・文字色は下の `.global-nav__links.open` が幅に関係なく当たる）。 */
+  .global-nav__links.open {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    position: absolute !important;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 0.5rem 1rem 1rem !important;
+    gap: 0.25rem !important;
+    z-index: 999;
+  }
+}
+
+/* 320px 帯。ロゴ 188px + 言語切替 80px + ☰ 48px + 余白 32px = 348px で 28px 足りない。
+   **削るのはロゴの文字。**言語切替のボタンを細くすると、高さ44pxの
+   タップ標的が横26pxまで痩せる。アイコンは残り、`/` へのリンクとしても生きる。 */
+@media (max-width: 359px) {
+  .global-nav__logo { font-size: 0 !important; gap: 0 !important; }
+  .global-nav__logo img { width: 28px; height: 28px; }
+}

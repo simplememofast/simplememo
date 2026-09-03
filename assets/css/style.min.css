@@ -8,3 +8,11 @@
    A row header should read as an emphasised first cell, not as a second
    header row. */
 table th[scope=row]{background:transparent;color:var(--text);font-weight:600;text-transform:none;letter-spacing:normal;text-align:left}
+
+/* グローバルナビの横溢れ（2026-09-03 実測）。769〜1099px でほぼ全ページのナビが
+   画面を超えていた（/ +233@769 / /autopilot/ +309@769・+54@1024 / /en/ +132@769）。
+   サブページは 320px でも +23〜24px。`.global-nav__links` のレイアウトは
+   268ページのインライン <style> にあるので、ここから !important で上書きする。
+   詳細は assets/css/style.css の同名ブロック。**両方を同じ内容に保つこと。** */
+@media (max-width:1099px){.global-nav__links:not(.open){display:none!important}.global-nav__hamburger{display:block!important}.global-nav__links.open{display:flex!important;flex-direction:column!important;align-items:stretch!important;position:absolute!important;top:100%;left:0;right:0;padding:.5rem 1rem 1rem!important;gap:.25rem!important;z-index:999}}
+@media (max-width:359px){.global-nav__logo{font-size:0!important;gap:0!important}.global-nav__logo img{width:28px;height:28px}}

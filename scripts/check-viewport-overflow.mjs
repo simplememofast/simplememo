@@ -52,7 +52,15 @@ export const PAGES = ['/', '/en/', '/autopilot/'];
  * 見る幅。**320 を必ず含める。**
  * 2026-09-03 の見落としは 390 から始めたことによる（390 では通っていた）。
  */
-export const WIDTHS = [320, 360, 375, 390, 393, 414, 430];
+export const WIDTHS = [320, 360, 375, 390, 393, 414, 430, 600, 768, 800, 900, 1024, 1100, 1280];
+
+/**
+ * **タブレット帯（769〜1099px）を足したのは 2026-09-03。**
+ * その日まで `.global-nav__links` は 768px までしかハンバーガーへ切り替わらず、
+ * **ほぼ全ページのナビがこの帯で画面を超えていた**（/ が +233px @769、
+ * /autopilot/ が +309px @769・+54px @1024）。
+ * 幅の一覧に無い帯は、壊れていても誰も気づかない —— 320px のときと同じ形。
+ */
 
 /**
  * **既知の漏れ。**新しく作り込んだ漏れと区別するためにここに置く。
@@ -60,11 +68,8 @@ export const WIDTHS = [320, 360, 375, 390, 393, 414, 430];
  * 一覧に無い漏れが出たら `--check` は落ちる。
  */
 export const KNOWN = [
-  { page: '/autopilot/', upTo: 359, since: '2026-09-03',
-    why: '**227ページ共通のナビ。**サブページの言語切替 `.lang-switcher--nav` が 80px'
-       + '（トップの `.lang-dropdown` は 47px）で、320px ではロゴ 188px と合わせて画面を 23px 超える。'
-       + '直すには共有CSS（assets/css/style.css）と 268ファイルのキャッシュバスターの'
-       + '一斉更新が要るので、**帯の修理とは別の変更にする。**トップと /en/ は影響を受けない' },
+  // **2026-09-03 に空にした。**`/autopilot/ @320px +23px`（227ページ共通のナビ）は
+  // 共有CSSで直したので消した —— **免除を残すと、次の再発を黙って通す。**
 ];
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript',
@@ -204,16 +209,13 @@ const SCENARIOS = [
     const r = withDom(doc, [{ right: 524, width: 160, cls: 'pricing-card', scroller: 'pricing-scroller' }]);
     if (r.culprits.length) throw new Error('カルーセルを漏れに数えた');
   }],
-  ['**既知の漏れは落とさないが、黙って消しもしない**', async () => {
-    const m = await measure({ pages: ['/autopilot/'], widths: [320] });
-    if (!m.measurable) throw new Error(m.why);
-    if (m.problems.length) throw new Error('既知の漏れで落ちた');
-    if (!m.known.length) throw new Error('既知の漏れが報告に出ていない — 直ったなら KNOWN から消すこと');
+  ['**既知の免除は空**（直したら消す。残すと次の再発を黙って通す）', () => {
+    if (KNOWN.length) throw new Error(`免除が ${KNOWN.length} 件ある — 直っていないなら理由と upTo を確かめること`);
   }],
-  ['**一覧に無い幅の漏れは落ちる**（既知は upTo までしか免除しない）', () => {
-    const k = KNOWN.find((x) => x.page === '/autopilot/');
-    if (!k) throw new Error('KNOWN の形が変わった');
-    if (k.upTo >= 375) throw new Error('既知の免除が実機の主要幅まで広がっている');
+  ['**タブレット帯を見る**（2026-09-03 に壊れていたのはここ）', () => {
+    for (const w of [768, 800, 900, 1024]) {
+      if (!WIDTHS.includes(w)) throw new Error(`${w}px が幅の一覧から外れている`);
+    }
   }],
   ['**測れなかったを「異常なし」と混ぜない**', async () => {
     const m = await measure({ pages: [], widths: [] });
