@@ -2273,6 +2273,10 @@ export function validateLedger(ledger, matrix) {
     else seen.add(a.id);
     if (!STATES.includes(a.state)) p.push(`${at}: state must be one of ${STATES.join('|')}`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(a.created_jst || '')) p.push(`${at}: created_jst must be YYYY-MM-DD`);
+    // **書き間違えた期日は、その行を黙って永久に鳴らなくする。**形だけは機械が見る。
+    if (a.not_before_jst != null && !/^\d{4}-\d{2}-\d{2}$/.test(a.not_before_jst)) {
+      p.push(`${at}: not_before_jst must be YYYY-MM-DD（着手できる日。期日待ちを滞留と数えないための欄）`);
+    }
     if (!a.title) p.push(`${at}: title is required`);
     if (!a.close_check?.kind) p.push(`${at}: close_check.kind is required — 閉じ条件の無い依頼は永久に残る`);
     else if (!CLOSE_CHECKS[a.close_check.kind]) p.push(`${at}: 未知の close_check: ${a.close_check.kind}`);
@@ -2397,6 +2401,17 @@ async function selftest() {
       touches: ['.github/workflows/obsidian-autopilot.yml'],
     }] }, matrix);
     t('台帳検査が auto+push不可を落とす', probs.some((m) => /無人では push できない対象/.test(m)));
+
+    // **期日待ちを滞留と数えないための欄。**書き間違えるとその行が黙って
+    // 永久に鳴らなくなるので、形だけは機械が見る。
+    const nb = (value) => validateLedger({ actions: [{
+      id: 'x', state: 'open', created_jst: '2026-09-03', title: 't',
+      close_check: { kind: 'manual' }, not_before_jst: value,
+    }] }, matrix).filter((m) => /not_before_jst/.test(m));
+    t('着手できる日は YYYY-MM-DD だけ受ける', nb('2026-09-17').length === 0);
+    t('**書き間違えた期日は落とす**（黙って永久に鳴らなくなるのを防ぐ）',
+      nb('9/17').length === 1 && nb('いつか').length === 1);
+    t('欄が無い行はこれまでどおり通る', nb(undefined).length === 0 && nb(null).length === 0);
   }
 
   // 閉じ条件: 失敗が無いだけでは閉じない（走っていない可能性を潰す）
@@ -3814,7 +3829,11 @@ async function main() {
       acknowledged: sum.acknowledged,
       closed_today: sum.closed_today.map((a) => ({ id: a.id, title: a.title, evidence: a.evidence })),
       human: sum.human.map((a) => ({ id: a.id, title: a.title, detail: a.detail,
-        age_days: a.age_days, why: a.owner_why, evidence: a.evidence })),
+        age_days: a.age_days, why: a.owner_why, evidence: a.evidence,
+        // **「まだ着手できない」を「放置している」と読ませないための1欄。**
+        // age_days は行が立ってからの日数で、期日待ちと放置を区別できない。
+        // owner_direct（simplememo-api）はこれがあれば**その日から**滞留を数える。
+        not_before_jst: a.not_before_jst ?? null })),
       // detail は AI 行にも入れる。**日報メールだけの出力ではなくなったため。**
       // 主系のプロンプトはこのレポートを「保留事項」の参照先にしており、
       // AI が自分の行を実行するには detail（手順・解除コマンド・判断の根拠）が要る。
