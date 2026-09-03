@@ -1067,6 +1067,27 @@
       "reviewed_orphans": [
         "ac0e224"
       ]
+    },
+    {
+      "id": "act-autopilot-cpp-ppid",
+      "title": "/autopilot/ 用のカスタムプロダクトページ（CPP）を1本作り、ppid を data/cpp-map.json へ記入する",
+      "detail": "2026-09-03 のプレスリリースが読者を送る先は `/` と `/autopilot/` の2本。**`/autopilot/` にだけ CPP が無い。**\n\n帰結は D+14（9/17）の乗車判定に出る —— この面から来たインストールがデフォルト商品ページのぶんに混ざるので、**「PR経由で何件入ったか」を分離できない。**配信当日にモバイルのCTAを足した（`ct=jp__bottom`）が、`ct=` はサイト側のクリック計測で、**インストールの帰属は ASC 側の ppid でしか取れない。**\n\n手順: ASC → SimpleMemo → カスタムプロダクトページ → 新規作成 → URL末尾の `ppid=<UUID>` を `data/cpp-map.json` の `id: autopilot` 行へ記入 → `node scripts/apply-cpp-ppid.js --write` → `--check` が以後を守る。\n\n**AIからは実行できない。**App Store Connect の人の操作で、この環境には ASC の書き込み経路が無い（読み取りの `asc-metrics` だけ）。台帳側の受け皿（`ppid: null` の行）は 2026-09-03 に作ってあるので、記入するだけで配線される。\n\n**急がなくてよい理由も書いておく。**9/17 の判定は Wilson 区間で読むので、分離できないぶんは「PR経由を過小にも過大にも見ない」ではなく**「分けられない」**として扱う（分母に混ぜて率を作らない）。いま作れば 9/17 までの残り2週間ぶんは分離できる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/cpp-map.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "App Store Connect でのCPP作成は人の操作。この環境には ASC への書き込み経路が無く、ppid は作成後にしか存在しない。**機械は受け皿（ppid: null の行）と配線スクリプトまでを用意できるが、値は作れない。**",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
     }
   ]
 }

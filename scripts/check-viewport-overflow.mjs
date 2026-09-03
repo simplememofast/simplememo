@@ -129,8 +129,59 @@ export function unboundedKeepAll(html) {
   return out;
 }
 
-/** 静的規則を当てる面。描画側と同じ3面をファイルで指す。 */
-export const STATIC_FILES = ['index.html', 'en/index.html', 'autopilot/index.html'];
+/**
+ * **サイトの全HTML面。**
+ *
+ * [2026-09-03] ここまで、描画していたのは配信本文が送る3面だけだった。
+ * **残り266面は一度も測っていない。**そのうち33面が実際に横漏れしていて、
+ * 最大 469px ——「画面の1.5倍」の幅を、誰も見ないまま出していた。
+ *
+ * 見つからなかった理由は 320px を見落とした回とまったく同じ形で、
+ * **一覧に無いものは、壊れていても誰も気づかない。**
+ * 面のほうも同じだった。
+ */
+export function allPages(root = ROOT) {
+  const out = [];
+  const walk = (d) => {
+    for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      if (e.name === 'node_modules' || e.name === '.git') continue;
+      const abs = path.join(d, e.name);
+      if (e.isDirectory()) walk(abs);
+      else if (e.name.endsWith('.html')) {
+        out.push('/' + path.relative(root, abs).split(path.sep).join('/').replace(/index\.html$/, ''));
+      }
+    }
+  };
+  walk(root);
+  return out.sort();
+}
+
+/**
+ * **全面を掃くときの幅。**深い3面の14幅とは別に、全269面をこの幅だけで見る。
+ *
+ * **2つに決めたのは実測から。**269面 × 11幅 を1回通しで回して漏れた33面に対し、
+ * どの幅の組み合わせで全部captureできるかを貪欲法で解いた:
+ *
+ *     320px … 28面   360px … 25面   375px … 13面   390px … 12面   414px … 10面
+ *     430px …  9面   768px …  3面   900px …  4面   1024px …  3面   1100px …  7面
+ *
+ *     320 → +28面 ／ 360 → +8面 ／ 1100 → +6面 ／ 900 → +3面 ＝ **4幅で45面すべて**
+ *
+ * **途中経過で決めない。**269面のうち150面まで見た時点では「320+360 の2幅で全部」
+ * に見えていた。最後まで回したら 1100px と 900px でしか出ない面が9つあり、
+ * **2幅では取りこぼしていた** —— タブレット帯のナビが 2026-09-03 に壊れていたのと同じ帯。
+ *
+ * **全部の幅（11幅）を回すと 22 分かかり、CIに載らない＝結局また3面しか見ない。**
+ * 4幅なら 1,076 通りで、深い3面ぶんと合わせて数分に収まる。
+ *
+ * **限界も書いておく。**これは「この4幅で漏れない」を保証するだけで、
+ * たとえば 414px だけで壊れる新しい書き方は掃きでは捕まらない
+ * （深い3面のほうは 14 幅を見ているので、共有部品ならそちらに出る）。
+ */
+export const SWEEP_WIDTHS = [320, 360, 900, 1100];
+
+/** 静的規則を当てる面。**サイトの全HTMLに当てる**（正規表現なので実質ただ）。 */
+export const STATIC_FILES = allPages().map((u) => (u.endsWith('/') ? `${u}index.html` : u).slice(1));
 
 export function checkStatic(files = STATIC_FILES) {
   const problems = [];
@@ -235,7 +286,14 @@ export const PROBE = () => {
   return { vw, doc, over: Math.max(0, doc - vw), culprits: culprits.slice(0, 4) };
 };
 
-export async function measure({ pages = PAGES, widths = WIDTHS } = {}) {
+/**
+ * **同時に開く枚数。**直列だと1枚 0.44 秒（描画待ち 250ms が支配的）で、
+ * 269面 × 11幅 = 2,959通りに 22 分かかる —— **CIでは回せない＝全面を見ない口実になる。**
+ * 待ち時間が支配的なので、並べれば実時間はほぼ枚数ぶん縮む。
+ */
+export const CONCURRENCY = 6;
+
+export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CONCURRENCY } = {}) {
   const chromium = await loadChromium();
   const exe = findChromium();
   if (!chromium || !exe) {
@@ -245,24 +303,34 @@ export async function measure({ pages = PAGES, widths = WIDTHS } = {}) {
   }
   const { srv, port } = await serve();
   const browser = await chromium.launch({ executablePath: exe, args: ['--no-sandbox'] });
+  const jobs = [];
+  for (const page of pages) for (const width of widths) jobs.push({ page, width });
   const results = [];
-  try {
-    for (const page of pages) {
-      for (const width of widths) {
-        const p = await browser.newPage({ viewport: { width, height: 800 } });
+  const failures = [];
+  let next = 0;
+  const worker = async () => {
+    for (let i = next++; i < jobs.length; i = next++) {
+      const { page, width } = jobs[i];
+      const p = await browser.newPage({ viewport: { width, height: 800 } });
+      try {
         await p.goto(`http://127.0.0.1:${port}${page}`, { waitUntil: 'domcontentloaded' });
         await p.waitForTimeout(250);
         results.push({ page, width, ...(await p.evaluate(PROBE)) });
-        await p.close();
-      }
+      } catch (e) {
+        // **測れなかったことを、漏れが無かったことにしない。**
+        failures.push({ page, width, why: String(e.message || e).split('\n')[0].slice(0, 120) });
+      } finally { await p.close().catch(() => {}); }
     }
+  };
+  try {
+    await Promise.all(Array.from({ length: Math.min(concurrency, jobs.length) }, worker));
   } finally {
     await browser.close();
     srv.close();
   }
   const isKnown = (r) => KNOWN.some((k) => k.page === r.page && r.width <= k.upTo);
   const over = results.filter((r) => r.over > 0);
-  return { measurable: true, results,
+  return { measurable: true, results, failures,
     problems: over.filter((r) => !isKnown(r)),   // 落とすのは**新しい漏れ**だけ
     known: over.filter(isKnown) };
 }
@@ -279,6 +347,36 @@ const SCENARIOS = [
   }],
   ['**320px を必ず見る**（2026-09-03 の見落としは 390 から始めたこと）', () => {
     if (!WIDTHS.includes(320)) throw new Error('320 が幅の一覧から外れている');
+    if (!SWEEP_WIDTHS.includes(320)) throw new Error('掃きの幅から 320 が外れている');
+  }],
+  ['**全面を数える**（3面しか見ていなかった回の再発防止）', () => {
+    const all = allPages();
+    if (all.length < 200) throw new Error(`面が ${all.length} しかない — 列挙が壊れている`);
+    for (const p of PAGES) {
+      if (!all.includes(p)) throw new Error(`深く見ている ${p} が全面の一覧に無い — 列挙が面を落としている`);
+    }
+    if (!all.includes('/blog/')) throw new Error('index.html を持つディレクトリが `/…/` になっていない');
+    if (all.some((u) => u.includes('node_modules') || u.includes('.git'))) throw new Error('作業用ディレクトリを拾っている');
+  }],
+  ['**静的規則は全面に当たる**（3面だけだと 266 面が素通りする）', () => {
+    if (STATIC_FILES.length !== allPages().length) {
+      throw new Error(`静的の対象が ${STATIC_FILES.length} / 全 ${allPages().length} 面`);
+    }
+    // 実際に 2026-09-03、3面から全面へ広げた瞬間に /ai-tags/ で2件見つかっている。
+    if (!STATIC_FILES.includes('ai-tags/index.html')) throw new Error('/ai-tags/ が対象外');
+  }],
+  ['**組み合わせを黙って落とさない**（並列化で一番こわいのがこれ）', async () => {
+    // 並列にすると、例外が出た組み合わせが**そのまま消える**書き方になりやすい。
+    // 消えると「測った通り数」が減るだけで、報告は「漏れなし」になる。
+    // だから **要求した通り数 = 結果 + 失敗** を実測で確かめる。
+    const pages = ['/', '/en/', '/__ここには面が無い__/'];
+    const widths = [320, 360];
+    const m = await measure({ pages, widths, concurrency: 3 });
+    if (!m.measurable) throw new Error(`測れなかった: ${m.why}`);
+    const asked = pages.length * widths.length;
+    const got = m.results.length + m.failures.length;
+    if (got !== asked) throw new Error(`要求 ${asked} 通りに対し ${got} 通りしか戻っていない`
+      + ` — **並列化が組み合わせを落としている**（results ${m.results.length} / failures ${m.failures.length}）`);
   }],
   ['**幅より広い要素を漏れと数える**', () => {
     const doc = { documentElement: { clientWidth: 320, scrollWidth: 344 } };
@@ -385,8 +483,17 @@ if (isMain) {
 
   const report = argv.includes('--report');
   const staticResult = checkStatic();
+  // **全面 × 2幅を、深い3面 × 14幅と一緒に測る。**
+  // 面を絞る側（3面）と幅を絞る側（全面）を両方持つ。片方だけだと、
+  // 2026-09-03 に実際そうなったように「見ていない面」か「見ていない幅」が残る。
+  const sweep = argv.includes('--no-sweep') ? null
+    : await measure({ pages: allPages(), widths: SWEEP_WIDTHS });
   const m = await measure();
   console.log(`着地面の横漏れ — ${PAGES.join(' / ')} × ${WIDTHS.join('/')}px`);
+  if (sweep) {
+    console.log(`全面の掃き — ${allPages().length}面 × ${SWEEP_WIDTHS.join('/')}px`
+      + `${sweep.measurable ? `（${sweep.results.length} 通り）` : ''}`);
+  }
   if (!m.measurable) {
     console.log(`\n  **測れなかった**: ${m.why}`);
     console.log('  「測れなかった」は「漏れなし」ではない。');
@@ -403,9 +510,29 @@ if (isMain) {
       console.log(`      right=${c.right} w=${c.width} <${c.tag}.${c.cls}> "${c.text}"`);
     }
   }
+  // 掃きの側。**同じ面が2幅で出るので、面ごとに1行へまとめる。**
+  const sweepPages = new Map();
+  if (sweep?.measurable) {
+    for (const r of sweep.problems) {
+      if (!sweepPages.has(r.page) || sweepPages.get(r.page).over < r.over) sweepPages.set(r.page, r);
+    }
+    for (const r of [...sweepPages.values()].sort((a, b) => b.over - a.over)) {
+      console.log(`\n  ★ ${r.page} @${r.width}px — +${r.over}px`);
+      for (const c of r.culprits.slice(0, 2)) {
+        console.log(`      right=${c.right} w=${c.width} <${c.tag}.${c.cls}> "${c.text}"`);
+      }
+    }
+  }
+  if (sweep && !sweep.measurable) console.log(`\n  **全面の掃きが測れなかった**: ${sweep.why}`);
+  for (const f of [...(m.failures ?? []), ...(sweep?.failures ?? [])]) {
+    console.log(`  ! 測れなかった ${f.page} @${f.width}px — ${f.why}`);
+  }
   for (const p of staticResult.problems) console.log(`  ★ ${p}`);
-  if (!m.problems.length && !staticResult.problems.length) {
-    console.log(`\n  ${m.results.length} 通りを実測。**新しい横漏れなし**`
+  const sweepFailed = sweep && (!sweep.measurable || sweepPages.size || sweep.failures.length);
+  if (!m.problems.length && !staticResult.problems.length && !sweepFailed && !(m.failures ?? []).length) {
+    console.log(`\n  ${m.results.length + (sweep?.results.length ?? 0)} 通りを実測`
+      + `（深い ${PAGES.length}面 × ${WIDTHS.length}幅 ＋ 全 ${allPages().length}面 × ${SWEEP_WIDTHS.length}幅）。`
+      + '**新しい横漏れなし**'
       + `${m.known.length ? `（既知 ${m.known.length} 件は上のとおり。直したら KNOWN から消すこと）` : ''}。`);
     console.log('  （サンドボックスのフォントでの実測。**実機のフォントとは字幅が違う**ので、'
       + '通ったことは実機の保証にはならない）');
@@ -414,5 +541,10 @@ if (isMain) {
     console.log('  `.nb` を並べただけでは改行機会にならない —— 隣接する nowrap のあいだに');
     console.log('  `<wbr>` を入れるか、flex アイテムに `min-width: 0` を与えること。');
   }
-  if (!report && (m.problems.length || staticResult.problems.length)) process.exit(1);
+  if (sweepPages.size) {
+    console.log(`\n  **全面の掃きで ${sweepPages.size} 面が漏れている。**`);
+    console.log('  表が原因なら `<div style="overflow-x:auto">` で包むこと（サイトの既存の書き方）。');
+  }
+  if (!report && (m.problems.length || staticResult.problems.length || sweepFailed
+    || (m.failures ?? []).length)) process.exit(1);
 }

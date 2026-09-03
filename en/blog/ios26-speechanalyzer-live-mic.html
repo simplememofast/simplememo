@@ -383,7 +383,8 @@ TextFieldLink(prompt: Text("Speak or type")) {
         <p><code>SpeechAnalyzer</code> / <code>SpeechTranscriber</code> are iOS 26+. If your app deploys lower, mark the speech types <code>@available(iOS 26.0, *)</code> and gate the entry point with <code>if #available(iOS 26.0, *)</code>. Separately: the mic tap closure runs on a real-time audio thread, so under Swift 6 complete strict concurrency, capture only locals (the continuation, the target format, a fresh converter) and never touch a <code>@MainActor</code> object inside the tap. Done that way it compiles without <code>@unchecked Sendable</code> escape hatches.</p>
 
         <h2>Migration checklist from SFSpeechRecognizer</h2>
-        <table>
+        <div style="overflow-x:auto">
+          <table>
           <thead><tr><th scope="col">SFSpeechRecognizer (old)</th><th scope="col">SpeechAnalyzer (iOS 26)</th></tr></thead>
           <tbody>
             <tr><th scope="row">One object does session + recognition</th><td><code>SpeechAnalyzer</code> + composable modules</td></tr>
@@ -396,6 +397,7 @@ TextFieldLink(prompt: Text("Speak or type")) {
             <tr><th scope="row">works on watchOS</th><td>not on watchOS (use system dictation)</td></tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Where this ships</h2>
         <p>This exact pipeline (minus the email/send parts) powers the voice input in <a href="/voice-input/">Simple Memo's on-device voice capture</a> — a fast iPhone memo app that emails notes to yourself and auto-appends them to Obsidian, with no per-use API cost. The repo strips it down to the speech essentials so you can drop it into your own project.</p>

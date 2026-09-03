@@ -226,7 +226,147 @@ const DOC = (mode, requires = ['A::T'], pass_threshold = 0.7) => ({
 });
 const evalOne = (mode, executor, requires) => evaluate(DOC(mode, requires), COV(executor));
 
+/**
+ * **計画書の配信日を、台帳の実配信日に当てる。**
+ *
+ * [2026-09-03] `docs/pr-autopilot-2026-09-plan.md` は §1・§5 の見出しで
+ * 「**D = 2026-09-28（月）に確定**」と書いたままだった。実際の配信は **9/3**。
+ * §0-1 に「9/28 は失効」という追記はあったが、**§5 へ直接飛んだ読者には見えない。**
+ * 失効した日程の行が ⬜（未了）のまま3行残っており、
+ * **「まだやっていない仕事」と「もう消えた仕事」が同じ見た目**になっていた。
+ *
+ * 散文の追記では止まらない。追記そのものが埋もれるからで、
+ * **現に §0-1 は 09-02 に書かれていて、翌日まで誰も §5 を直していない。**
+ *
+ * だから見るのは「日付が古いか」ではなく「**古い日付が現況として書かれているか**」:
+ *   - その行が**配信日 D を名乗っている**（`配信日` か `D=` / `＝D` を含む）
+ *   - 台帳の実配信日と**違う日付**を挙げている
+ *   - **失効の印が無い**（`失効` か打ち消し線）
+ *
+ * この3つが揃ったときだけ落とす。§1 の候補日の比較表（9/14・9/21・9/28 を並べて
+ * 却下理由を書いた行）は D を名乗っていないので**当たらない** ——
+ * 意思決定の記録は残せる。**過検出する検査は、やがて無視される。**
+ */
+export function staleDateClaims(md, publishedIso, { file = 'docs/pr-autopilot-2026-09-plan.md' } = {}) {
+  const okForms = publishedForms(publishedIso);
+  // **D を名乗る印。**この直後に日付が来ている形だけを「主張」と読む。
+  const D_TOKEN = /(?:配信日|D)\s*(?:は|＝|=|—|-|:|：|（|\()?\s*/g;
+  // 比較演算子が挟まったら、それは**条件式であって主張ではない**。
+  const COMPARE = /[≤≥＜＞<>以上以下]/;
+  const out = [];
+  md.split('\n').forEach((line, i) => {
+    if (SUPERSEDED.test(line)) return;
+    for (const m of line.matchAll(D_TOKEN)) {
+      const win = line.slice(m.index + m[0].length, m.index + m[0].length + WINDOW);
+      if (COMPARE.test(win)) continue;                       // 「配信日 ≥ 2026-09-08」
+      const d = firstDate(win);
+      if (!d || okForms.has(d)) continue;                     // 日付が続かない／実配信日そのもの
+      out.push({ file, line: i + 1, dates: [d], text: line.trim().slice(0, 120) });
+      break;
+    }
+  });
+  return out;
+}
+
+/** 実配信日の書き方（`9/3` と `2026-09-03`）。台帳の `+09:00` を JST の暦日で読む。 */
+function publishedForms(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) throw new Error(`実配信日が読めない: ${iso}`);
+  const j = new Date(d.getTime() + 9 * 3600 * 1000);
+  const [y, m, dd] = [j.getUTCFullYear(), j.getUTCMonth() + 1, j.getUTCDate()];
+  return new Set([`${m}/${dd}`, `${y}-${String(m).padStart(2, '0')}-${String(dd).padStart(2, '0')}`]);
+}
+
+const SUPERSEDED = /失効|~~|⛔/;
+/** `配信日` の直後から何文字まで見るか。`check-autopilot-page.mjs` と同じ考え方。 */
+const WINDOW = 12;
+const DATE_TOKEN = /\b(20\d{2}-\d{2}-\d{2})\b|(?<![\d/])(\d{1,2})\/(\d{1,2})(?![\d/])/;
+
+function firstDate(text) {
+  const m = text.match(DATE_TOKEN);
+  return m ? (m[1] ? m[1] : `${Number(m[2])}/${Number(m[3])}`) : null;
+}
+
+/**
+ * **失効した節に「未了」が残っていないか。**
+ *
+ * [2026-09-03] §5 の見出しを「失効」にしても、表の中には ⬜ の行が5つ残っていた
+ * （9/24×2・9/25×3）。**「まだやっていない仕事」と「もう消えた仕事」が同じ見た目**で、
+ * 読んだ人は前者だと思う。見出しの追記は行までは届かない。
+ *
+ * 日付の規則（`staleDateClaims`）では捕まらない —— 5行のうち日付を D と結びつけて
+ * 書いている行は1つも無い。**構造で見るしかない。**
+ */
+export function unmarkedTodoInSupersededSection(md, { file = 'docs/pr-autopilot-2026-09-plan.md' } = {}) {
+  const out = [];
+  let section = null;
+  md.split('\n').forEach((line, i) => {
+    const h = line.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { section = SUPERSEDED.test(h[2]) ? { title: h[2].trim(), line: i + 1 } : null; return; }
+    if (!section || !line.startsWith('|')) return;
+    if (!/⬜/.test(line) || SUPERSEDED.test(line)) return;
+    out.push({ file, line: i + 1, section: section.title.slice(0, 60), text: line.trim().slice(0, 110) });
+  });
+  return out;
+}
+
 const SCENARIOS = [
+  ['**失効した配信日が現況として残っていたら落ちる**（2026-09-03 の §5）', () => {
+    const md = '## 5. 逆算スケジュール（**D = 2026-09-28（月）**・§1で確定）';
+    const r = staleDateClaims(md, '2026-09-03T08:03+09:00');
+    if (r.length !== 1) throw new Error(`見逃した: ${JSON.stringify(r)}`);
+    if (!r[0].dates.includes('2026-09-28')) throw new Error(JSON.stringify(r[0]));
+  }],
+  ['失効の印があれば通る（**記録は残せる**）', () => {
+    for (const md of [
+      '## 5. 逆算スケジュール（~~**D = 2026-09-28**~~ ← 失効。D = 2026-09-03）',
+      '| ~~9/28（月）＝D~~ | ⛔ **失効** |',
+    ]) {
+      const r = staleDateClaims(md, '2026-09-03T08:03+09:00');
+      if (r.length) throw new Error(`失効済みを落とした: ${JSON.stringify(r)}`);
+    }
+  }],
+  ['**過検出しない**（条件式・時点参照・候補日の比較表）', () => {
+    // 実際に 2026-09-03 の初版が誤検出した4つの形。全部「主張」ではない。
+    for (const md of [
+      '| **9/28（月）** | **48日** | **採用。**最初の月曜 |',          // 候補日の比較表
+      '  配信日 ≤ Appleイベント日 − 2日   9/3 ≤ 9/7   ✅ 前窓',        // 条件式
+      '  配信日 ≥ 2026-09-08（運転28日）   9/3 = 23日   ❌',           // 条件式
+      '| 9/2（水） | AI | 原稿を配信日時点の実測へ更新 | ✅ 09-02 |',   // 時点参照
+      '| 9/3（木）＝D | AI | 評価日＝9/17 に追加 | ✅ |',               // 評価日は D ではない
+    ]) {
+      const r = staleDateClaims(md, '2026-09-03T08:03+09:00');
+      if (r.length) throw new Error(`過検出: ${md}\n       → ${JSON.stringify(r)}`);
+    }
+  }],
+  ['**失効した節に残った「未了」を見つける**（見出しの追記は行まで届かない）', () => {
+    const md = ['## 5. 逆算（~~D = 9/28~~ ← 失効）', '', '| 期日 | 誰 | やること | 状態 |',
+      '| **9/24（木）** | AI | D-SCORE再採点 | ⬜ |',
+      '| ~~9/25（金）~~ | ~~オーナー~~ | ~~予約投稿~~ | ⛔ **失効** |'].join('\n');
+    const r = unmarkedTodoInSupersededSection(md);
+    if (r.length !== 1) throw new Error(`⬜ の検出が ${r.length} 件: ${JSON.stringify(r)}`);
+    if (!r[0].text.includes('9/24')) throw new Error(JSON.stringify(r[0]));
+  }],
+  ['生きている節の「未了」は落とさない（**予定を消させない**）', () => {
+    const md = ['## 6. これから', '', '| **9/17（水）** | AI | D+14 の乗車判定 | ⬜ |'].join('\n');
+    if (unmarkedTodoInSupersededSection(md).length) throw new Error('生きている予定を失効と読んだ');
+  }],
+  ['実配信日そのものは落とさない（9/3 も 2026-09-03 も）', () => {
+    for (const md of ['## 配信日 — **2026-09-03（木）**', '| 9/3（木）＝D | AI | 実施 |']) {
+      if (staleDateClaims(md, '2026-09-03T08:03+09:00').length) throw new Error(`実配信日を落とした: ${md}`);
+    }
+  }],
+  ['**計画書の実データが通る**（この検査自身が赤いまま置かれない）', () => {
+    const md = fs.readFileSync(path.join(ROOT, 'docs/pr-autopilot-2026-09-plan.md'), 'utf8');
+    const at = readJSON(ROOT, 'data/pr-claims.json').published?.at;
+    if (!at) throw new Error('data/pr-claims.json に published.at が無い — 実配信日を当てる先が消えた');
+    const r = staleDateClaims(md, at);
+    if (r.length) throw new Error(`失効表示の無い旧配信日が ${r.length} 行:\n       `
+      + r.map((x) => `${x.file}:${x.line} ${x.dates.join(',')} ${x.text}`).join('\n       '));
+    const t = unmarkedTodoInSupersededSection(md);
+    if (t.length) throw new Error(`失効した節に「未了(⬜)」が ${t.length} 行:\n       `
+      + t.map((x) => `${x.file}:${x.line} 〔${x.section}〕${x.text}`).join('\n       '));
+  }],
   ['**実データ: 見出しの数字が台帳と一致する**（原稿が独り歩きしない）', () => {
     const r = checkNumbers(readJSON(ROOT, 'data/pr-claims.json'), readJSON(ROOT, 'data/automation-coverage.json'), readJSON(ROOT, 'data/autonomy-timeline.json'));
     if (r.problems.length) throw new Error(r.problems.join(' / '));
@@ -467,6 +607,27 @@ if (isMain) {
       }
       process.exit(1);
     }
+    // **計画書が実配信日から離れていないか。**原稿と同じ理由で、
+    // 段取りの文書も台帳に当てる（散文の「失効」追記では止まらなかった・2026-09-03）。
+    const planPath = 'docs/pr-autopilot-2026-09-plan.md';
+    const at = claimsDoc.published?.at;
+    if (at && fs.existsSync(path.join(ROOT, planPath))) {
+      const md = fs.readFileSync(path.join(ROOT, planPath), 'utf8');
+      const stale = staleDateClaims(md, at, { file: planPath });
+      const todos = unmarkedTodoInSupersededSection(md, { file: planPath });
+      if (stale.length || todos.length) {
+        for (const x of stale) {
+          console.error(`${x.file}:${x.line} 旧配信日 ${x.dates.join(',')} が現況として残っている`
+            + `（実配信は ${at}）— 打ち消すか「失効」と書くこと\n    ${x.text}`);
+        }
+        for (const x of todos) {
+          console.error(`${x.file}:${x.line} 失効した節に「未了(⬜)」が残っている`
+            + `— **未了と失効が同じ見た目になる。**⛔ を付けること\n    〔${x.section}〕${x.text}`);
+        }
+        process.exit(1);
+      }
+    }
     console.log('参照はすべて解決した（支持率は上の一覧を見ること）。');
+    console.log(`段取りの文書も実配信日 ${at} と矛盾しない。`);
   }
 }
