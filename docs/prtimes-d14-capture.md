@@ -207,6 +207,33 @@ backtest は **「1 件は書式が違い拾えなかった」** と報告して
 
 ### 6. 出荷と報告
 
+> ## ⛔ [2026-09-03 実測] **Cowork 側は `git push` できない**
+>
+> **Chrome が付く実行系（Cowork）と、リポジトリへ書ける実行系（CCR）は、別である。**
+> この手順は「Chrome さえあれば §5 まで通る」前提で書かれていたが、**出口が塞がっている。**
+>
+> Cowork セッションで `git push` した実測結果:
+>
+> ```
+> push rejected by git proxy; repo not in authorized sources
+> → needs_action: add simplememofast/simplememo to session sources to enable push
+> ```
+>
+> **つまり 9/17 に Chrome で数値が取れても、その足では台帳へ書けない。**
+> Routine のプロンプトは「`experiments.json` へ記入して PR を出す」で終わっているので、
+> **そこで詰まる。**
+>
+> **測れている範囲**: `create_session` で立てた Cowork セッション（`session_01MEq1hp9BtsEG8jE5oST4Hf`）で
+> 明示的にこのエラーを見た。`fire_trigger` で起きた Cowork セッションも push せずに終わっており
+> 挙動は整合するが、**そちらは push を必須にしていなかったので単独では確証にならない。**
+> **Routine 実物での確認は、まだ取れていない。**
+>
+> **回避の候補**（どれも 9/17 前に実測が要る）:
+> 1. **GitHub API で書く** —— git proxy は `git push` を止めるが、API は別経路。
+>    `create_or_update_file` でブランチへ置ければ足りる
+> 2. **Cowork セッションの sources にこのリポジトリを足す**（`needs_action` が言っている本筋）
+> 3. **2段構え** —— Cowork は数値を取って外へ出すだけにし、**書き込みは CCR 側にやらせる**
+
 - リポジトリへ push できる実行系なら、`claude/` ブランチで PR を出す
   （SEO Validation → auto-merge。CLAUDE.md の手順どおり）
 - **push できない実行系でも、5つの数値と判定は必ず報告に出す。**
@@ -229,11 +256,27 @@ backtest は **「1 件は書式が違い拾えなかった」** と報告して
 （Claude-in-Chrome を含む）がサーバ側で組み立てられる。**
 `env_01RmhZ…`（Simple Memo）は CCR で、**Chrome は付かない。**
 
-**そして CCR セッションからは Cowork 環境を指定できない。**
-`list_environments` が返すのは CCR 環境3つだけで、Cowork 環境は出てこない。
+`list_environments` が返すのは CCR 環境3つ（`Default` / `HumanAds` / `Simple Memo`）だけで、
+**Cowork 環境は出てこない。**
 `create_trigger` は呼び出し元の環境を既定にするので、**CCR から作った Routine は必ず CCR 側へ行く**
 （実際に警告が出る: `this trigger stores no MCP connectors ...
 create it from a session that holds them, or ask the user to create it from the claude.ai routines UI`）。
+
+> **[2026-09-03 訂正] 「CCR からは Cowork 環境を指定できない」は誤りだった。**
+> ここには以前そう書いてあったが、**前提は正しいのに結論が間違っていた。**
+> `list_environments` に**出てこない**ことと、**指定できない**ことは別である。
+>
+> **ID さえ分かっていれば `create_session` は受け取る。**実測:
+>
+> ```
+> create_session(environment_id="env_011111111111111111111117", prompt=…)
+>   → session_01MEq1hp9BtsEG8jE5oST4Hf
+>     environment_id: env_011111111111111111111117
+>     tags: product:cowork-remote, config:cowork-remote
+> ```
+>
+> **CCR から Cowork 側の作業を直接起こせる。**その ID は、Routine を1回
+> `fire_trigger` して `get_session` すれば読める（上の「確かめ方」）。
 
 ### したがって、本当の自動化にするには
 
@@ -323,6 +366,8 @@ push/email して終わる。**定期版を作るまでは残しておくこと*
 | 二重転記の恐れ | ✅ 無し（`experiments.json` / `annotations.json` について）。<br>18本の Routine のプロンプトを突合し、この2つを書くのは D+14 の1本だけと確認。<br>⚠ ただし `data/autopilot-actions.json` は**別の1本と競合する**（下記） |
 | **PR TIMES の分析画面** | ❌ **見ていない。**2026-09-03 に Cowork 側で空回しを2回起こしたが、<br>1回目は成果物を残さず、2回目は `WebFetch` の権限プロンプトで停止した（冒頭 ⛔）。<br>**項目名・単位・導線は依然として推定のまま。** |
 | Routine が人待ちで止まらないか | ❌ **止まりうる。**`WebFetch` が `bypassPermissions` でもプロンプトを出す。<br>非決定的（1回目は起きず、2回目に起きた）。冒頭 ⛔ の回避策が要る |
+| **Cowork から台帳へ書けるか** | ❌ **書けない。**`git push` が git proxy に拒否される（§6 の ⛔）。<br>**Chrome が付く実行系と、リポジトリへ書ける実行系が別**という構造の問題。<br>回避策3案は §6 に置いたが、**どれもまだ実測していない** |
+| CCR から Cowork を起こせるか | ✅ **起こせる。**`create_session` に `environment_id` を明示すればよい。<br>手順書が以前「できない」と書いていたのは誤り（上の訂正） |
 | 門（`pr-evaluation-due.mjs`） | ✅ 9/16→0件 / **9/17→`pr-2026-rsi-autopilot` 1件** / 9/18→1件（超過1日）<br>今日は `[]` を返し「何もしないのが正しい」と言う |
 | 手順書が raw で取れるか | ✅ HTTP 200・ローカルの `main` と `diff` で一致<br>（**バイト数は書かない** —— 数を書くと、その数を書いた時点で古くなる。<br>2026-09-03 に一度 `12,623 bytes` と書いて、その追記自体で 14,202 になった） |
 | `annotations.json` の書式 | ✅ 仮の数値で書式どおりに書いたら **backtest が n=5 → n=6** になり、<br>戻すと n=5 に戻ることを確認。**§5(c) の書式は正しい** |
@@ -353,15 +398,20 @@ Cowork 側なら、こう出る（2026-09-03 の実測値）:
 **まだ実物に当たっていないのは1点だけ** —— **PR TIMES の分析画面そのもの。**
 画面の項目名・単位・導線は推定のままで、初回はそこで調整が要る見込み。
 
-### 空回しを2回やった結果（2026-09-03）—— **画面には届かなかった**
+### 空回しを3回やった結果（2026-09-03）—— **画面の項目名はまだ取れていない**
 
-CCR から `fire_trigger` で日次 Routine を2回起こし、評価期限に関係なく
-分析画面だけを見に行かせた。**どちらも画面まで届かなかったが、届かなかった理由が違う。**
+Cowork 側で3回起こし、評価期限に関係なく分析画面だけを見に行かせた。
+**3回とも止まった場所が違う。**止まった場所のほうが、この手順の穴を示している。
 
 | | 結果 | 分かったこと |
 |---|---|---|
-| 1回目<br>`session_0121RzvF1Lj26FGf2PuwVYW6` | 7分・25,395トークンで**正常終了** | だが**発火元に成果物が残らなかった** —— ブランチも PR も無く、<br>報告はトランスクリプトの中だけ。**CCR からは読めない**（→「黙って壊れる形」） |
-| 2回目<br>`session_019a4CCzVD4bfBBsELeBiQgM` | **`REQUIRES_ACTION` で停止** | 手順書を `WebFetch` で読もうとして**権限プロンプト待ち**になった。<br>**Chrome より手前で止まった**（→ 冒頭 ⛔） |
+| 1回目<br>`session_0121RzvF1Lj26FGf2PuwVYW6`<br>（`fire_trigger`） | 7分・25,395トークンで**正常終了** | だが**発火元に成果物が残らなかった** —— ブランチも PR も無く、<br>報告はトランスクリプトの中だけ。**CCR からは読めない** |
+| 2回目<br>`session_019a4CCzVD4bfBBsELeBiQgM`<br>（`fire_trigger`） | **`REQUIRES_ACTION` で停止** | 手順書を `WebFetch` で読もうとして**権限プロンプト待ち**になった。<br>**Chrome より手前で止まった**（→ 冒頭 ⛔） |
+| 3回目<br>`session_01MEq1hp9BtsEG8jE5oST4Hf`<br>（`create_session`） | 完走したが **push 拒否** | `push rejected by git proxy; repo not in authorized sources`<br>**Cowork は台帳へ書けない**（→ §6 の ⛔）。<br>副産物: **CCR から Cowork を直接起こせる**と分かった（→ 上の訂正） |
+
+**1回目の「やらなかったのか、できなかったのか」は、3回目が答えを出した** —— **できなかった。**
+push は git proxy に拒否される。**「報告に書く」を代替手段にしていたのは、
+代替手段が無いことを知らなかったからである。**
 
 **副産物として、routing は実証できた。**どちらのセッションも
 `environment_id: env_011111111111111111111117` ＋ タグ `cowork-remote` で生まれた（n=2）。
