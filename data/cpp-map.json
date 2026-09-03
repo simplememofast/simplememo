@@ -112,7 +112,7 @@
       "match": [
         "^/autopilot/?$"
       ],
-      "note": "【ppid未記入・オーナー操作待ち】2026-09-03 のプレスリリース着地面。配信本文が読者を送る先で、`/` と並ぶ2本のうちの1本。**いまは ppid が無いので、この面から来たインストールがデフォルト商品ページに混ざって数えられない** —— D+14（9/17）の乗車判定で「PR経由のインストール」を分離できないのはこれが理由。ASC → アプリ → カスタムプロダクトページ で1本作り、URL末尾の ppid= を書いて `node scripts/apply-cpp-ppid.js --write`。**AIからは実行できない**（App Store Connect の人の操作）。"
+      "note": "【ppid未記入・オーナー操作待ち】2026-09-03 のプレスリリース着地面。配信本文が読者を送る先で、`/` と並ぶ2本のうちの1本。**いまは ppid が無いので、この面から来たインストールがデフォルト商品ページに混ざって数えられない** —— D+14（9/17）の乗車判定で「PR経由のインストール」を分離できないのはこれが理由。\n\n⚠ **[2026-09-03 追記] CPP を作るだけでは計測は始まらない。**新規作成した CPP は PREPARE_FOR_SUBMISSION で、Apple の一次資料が『Custom product pages must be approved before they are visible to users』『Users are automatically redirected to your default product page if they access a disabled or deleted custom product page URL』と書いている（developer.apple.com/help/app-store-connect/create-custom-product-pages/configure-multiple-product-page-versions/）。**つまり未承認の ppid を配線すると、リンクは既定商品ページへ倒れて今と同じく混ざったままなのに、台帳と `--check` は「配線済み」と言う。**同じ状態で free-memo-generic（3b8f2fd5…）が待っている。\n\n**9/17 までに分離したいなら経路は2つ。**\n(a) **既に APPROVED で未使用の CPP を暫定で配線する** —— 2026-09-02 に free-memo-apps-ranking → plain-notes でやった形。**配線した当日から計測が始まる。**代償は中身が /autopilot/ の文脈と合わないこと（このページの目的は帰属の分離なので、CVR より分離を優先するなら妥当）。\n(b) **新規作成して審査に出す** —— Apple は CPP 単独の提出を許している（『You may choose to add other items to the submission』）。直近22日の審査提出は10件（data/app-releases.json summary）なので、次の版に同乗させる待ちも短い。承認された日から計測が始まる。（リポジトリ側の運用則「CPP 単独では出さない」は ASC の審査提出が同時に1本しか持てないことへの配慮で、**Apple の制約ではない**。この同時1本の制約自体は今回一次資料で取り直していない）\n\n**この行を「配線済み」と読んでよいのは、入れた ppid が APPROVED の CPP のときだけ。**未承認の ppid で閉じると、測っていないものを測ったことにする。"
     }
   ]
 }
