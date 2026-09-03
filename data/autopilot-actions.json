@@ -1000,6 +1000,30 @@
       "last_seen_jst": "2026-09-02",
       "closed_jst": null,
       "evidence": "run 33454414490（repair $9.3726 / 上限 $3.00）が未レビュー。主系はこの種別を選ぶと止まる"
+    },
+    {
+      "id": "act-pr6-d14-evaluate",
+      "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
+      "detail": "**2026-09-17（D+14）に、9/3 配信の PR⑥ の乗車判定をする。**台帳は `growth/experiments/experiments.json` の `pr-2026-rsi-autopilot`（status: running・evaluation_at: 2026-09-17）。\n\n**機械では埋められない。**必要な数値は PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。**だから人の作業として積む。**\n\n【PR TIMES の分析画面から転記する5つ】`discover_boarding_post` へ:\n  pv … 総PV／ google_referral_ratio … 参照元のGoogle系比率（0〜1）／mobile_ratio … スマートフォン比率（0〜1）／ syndication_count … 転載本数／day1_senders_vs_prev3avg … 配信当日の送信者数 ÷ 前3日平均（分かれば）\n【判定】boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。外したらどのSを読み違えたかを notes に書いて重みを更新する（レコードの $comment のとおり）。\n【あわせて直す】`growth/data/annotations.json` の 2026-09-03 の label を「PR⑥ …（AI実行率76.4%） — n,nnnPV・転載nn・D-SCORE 85・乗車/非乗車」の書式へ。**`d-score --backtest` はこの書式でしか拾わない**ので、直すまで n=5 のままになる。\n\n**判定のとき、最初に疑う候補は2つ**（レコードの 2026-09-03 の注記のとおり）:\n  (1) **時刻** —— 08:03 JST 配信。n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で同じ帯\n  (2) **S2（見出しの固有名詞）** —— 配信見出しは iPhone を含むが、**アプリ名も Obsidian も App Store も無い。**乗車した2本（65/71）を牽引したのはそのエンティティだった\n\n**閉じ条件は `manual`。**評価日そのものを閉じ条件にはできない —— 同じ 2026-09-1x に**別の12件が評価日を迎える**（9/13）ので、「evaluated_at が 2026-09-1 で始まる」では他の実験の評価で誤って閉じる。**判定不能を完了と読まない**ための選択で、閉じるのは人。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "growth/experiments/experiments.json",
+        "growth/data/annotations.json"
+      ],
+      "outside_repo": true,
+      "force_owner": "human",
+      "force_owner_why": "必要な数値が PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。機械は転記先と書式は用意できるが、値そのものを取りに行けない",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null,
+      "evidence": "評価日 2026-09-17（D+14）。それまでは開いたまま毎朝上がる。**期日前に閉じない。**"
     }
   ]
 }
