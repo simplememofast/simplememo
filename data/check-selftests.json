@@ -460,6 +460,12 @@
       "broke": "新しい data/check-selftests.json を分類せずに置いて「分類するまで通さない」で落ちた"
     },
     {
+      "script": "scripts/check-release-gate-pin.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-03",
+      "broke": "自己テスト11件。**実物を壊して3通りで落ちるのを観測した**（写しではなく scripts/check-release-gate.mjs と release-gate-run.mjs そのものを触って、戻した）: **(1) 判定規則に1行足す** → exit 1「門が変わっている」。**(2) 入口（release-gate-run.mjs）を変える** → exit 1。**(3) 依存を1本増やす**（check-release-gate.mjs に lib/read-ledger.mjs を import）→ exit 1 「留めていない依存が公開の可否を決めている」—— **閉包で留めているので、増えたぶんも捕まる。**\n\n自己テスト側は pinPathFrom（`--pin` の解決）を5件と、実物の閉包を3件。**閉包が入口1本だけになっていないことを検査している** —— 依存の数え落としは 「留めた」と言いながら何も留めていない形になるので、`files.length >= 3` を固定してある。\n\n**この検査はいま何も止めていない。**data/release-gate.json の policy.enabled が false なので 門は必ず hold し、simplememo-ios の release.yml も報告だけで失敗させない。**それでも先に留める** —— 後から留めると『留めた時点で既に読んでいない版』を留めることになる。"
+    },
+    {
       "script": "scripts/check-release-gate.mjs",
       "state": "demonstrated",
       "at": "2026-08-31",

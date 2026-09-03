@@ -264,6 +264,11 @@
       "why": "この方針そのもの。**どれを隠しているかの一覧**なので、内部に置く",
       "ok_in_public_repo": "ok"
     },
+    "release-gate-pin.json": {
+      "served_by_site": false,
+      "why": "実行側（simplememo-ios・非公開）が留めている出荷ゲート指紋の写し。**中身は公開ファイルのハッシュだけ**で秘密は無いが、サイトが参照しないので配信しない（review-gate-pin.json / rollout-gate-pin.json と同じ扱い）",
+      "ok_in_public_repo": "ok"
+    },
     "release-gate.json": {
       "served_by_site": false,
       "why": "**出荷の門（App Review 提出 / App Store 公開）の設定値。**しきい値（TestFlight 24h・承認後6h・クラッシュ率の母数100と悪化1pt・kill後7日）と kill_switch の在り処が書いてある。rollout-promotion.json と同じ性質で、サイトから配信する理由が無い（/autopilot/ が見せるのは権限表のほう）。\n\n**読んで確かめたこと:** 中身は方針の数値と真偽値だけで、版数・ビルド番号・ASCの識別子・クラッシュ率の実測値は入らない（実測は実行時に渡され、台帳には残さない）。`releases` は通った出荷の記録用だが、**入れるのは版数と時刻までで、審査のやり取りや却下理由は入れない** ——そこはAppleとの非公開のやり取りで、公開リポジトリに置く理由が無い。",

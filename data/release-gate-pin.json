@@ -1,0 +1,43 @@
+{
+  "$comment": [
+    "**App Review への提出を許すかどうかを決めているコードの指紋（公開側の写し）。**",
+    "scripts/check-release-gate-pin.mjs が seo-check で照合する。",
+    "",
+    "【これは門ではない。鳴子である】",
+    "実際に提出を止めているのは simplememo-ios/data/release-gate-pin.json のほう。",
+    "あちらは ASC の鍵を持っていて、留めた指紋と実物が違えば提出せずに落ちる。",
+    "",
+    "**この写しが要るのは、留めた側と留められた側が別のリポジトリにいるから。**",
+    "レビュー返信（2026-08-27）と段階公開（2026-08-28）でまったく同じ形を作っている。",
+    "こちらで release-gate-run.mjs を1文字直すと、あちらの指紋は黙って古くなる。",
+    "",
+    "**先の2つとの違い: 実行側は自前の照合を持たない。**",
+    "レビュー返信も段階公開も、実行側は別言語で照合を書いていた。出荷の実行側は",
+    "**この門そのものを node で走らせる**（simplememo を checkout して",
+    "release-gate-run.mjs --materials を叩く）ので、照合器も同じものを使う ——",
+    "`check-release-gate-pin.mjs --pin <あちらの写し>`。**同じ判定を2つ書かない。**",
+    "",
+    "【更新するときは2か所】",
+    "  1. ここ（公開側の写し）",
+    "  2. simplememo-ios/data/release-gate-pin.json（**実際に止めている側**）",
+    "片方だけ直すと、こちらは緑であちらが止まる。",
+    "",
+    "**指紋だけ機械的に貼り替えるなら、この仕組みは何もしていない。**",
+    "変わったのが判断に効く変更なのかを読んでから書くこと。",
+    "",
+    "【いまは何も止めていない】",
+    "data/release-gate.json の policy.enabled は false なので、門は必ず hold する。",
+    "release.yml 側もその間は**報告だけ**で、失敗させない。指紋が効き始めるのは",
+    "オーナーが enabled を立てた日から。**留めるのはその前**でよい ——",
+    "後から留めると『留めた時点で既に読んでいない版』を留めることになる。"
+  ],
+  "entry": "scripts/release-gate-run.mjs",
+  "mirror": "simplememo-ios/data/release-gate-pin.json",
+  "reviewed_at": "2026-09-03",
+  "reviewed_note": "初回。**この日に判定規則そのものを変えたので、その変更を読んだ上で留めている。**\n\n変えたのは2点: (1) evaluateSubmission に段階リリースの条件を足した —— 同日 fastlane が automatic_release: true になり、公開を決める時点が提出の時点へ移ったため（evaluateRelease は AFTER_APPROVAL では版が PENDING_DEVELOPER_RELEASE で止まらず、構造的に到達しない）。(2) release-gate-run.mjs に --materials / --json を足した —— 材料は実行側が持つので、門だけを公開側に置く分け方をパスの側でも通した。\n\n**どちらも止める方向にしか効かない** —— 起こりうるのは「提出が hold になる」であって「通らなかったものが通る」ではない。(2) は判定に触れていない（入出力の口だけ）。\n\nlib/selftest.mjs は不変（498def1338f8 は段階公開の写しと同じ値）。",
+  "files": {
+    "scripts/check-release-gate.mjs": "ea8b6c485a64",
+    "scripts/lib/selftest.mjs": "498def1338f8",
+    "scripts/release-gate-run.mjs": "739a830c26e9"
+  }
+}
