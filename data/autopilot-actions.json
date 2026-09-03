@@ -1182,6 +1182,58 @@
       "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
       "evidence": "完了（2026-09-03）。**穴を塞いだ。**`check-selftests.mjs` の `wiredChecks()` を `\\.mjs` から `\\.m?js(?![\\w.-])` へ広げ、`data/check-selftests.json` は **86本 → 91本**になった。\n\n【機械で検証】`node scripts/check-selftests.mjs --check` exit 0。内訳は **落ちるのを見た 91 / 自己テストのみ 0（上限0）/ 自己テスト無し 0（上限0）。**\n  `wiredChecks()` の実測: `.mjs` 86本 + `.js` 5本 = 91本。\n\n【順番を守った】**先に5本すべてへ自己テストを入れ、壊して落ちるのを観測してから**正規表現を広げた。逆にすると5本が `none`/`selftest_only` で入って上限0を超え、CI が即赤になる —— そこで上限を上げるのは台帳が明示的に禁じている（「上げた瞬間にこの台帳は『現状を追認する表』になり、止める力を失う」）。\n  - `seo-check.js` … 12件。TITLE / VIEWPORT / getMetaContent を潰して 2 / 1 / 1 件落ちるのを観測\n  - `apply-cpp-ppid.js` … 8件。APPROVED 判定を潰して4件\n  - `tag-cta-placements.js` … 16件。参照リンクの切り分け / 位置判定 / 属性剥がし を潰して 2 / 3 / 1 件\n  - `sync_constants.js` … 12件。**他社データ保護のガード**を外して2件、`stampDate` を反転して2件\n  - `indexnow-notify.js` … 13件。SKIP_DIRS / 存在確認 / 前方一致 を潰して 3 / 1 / 1 件\n\n【この修正自体も固定した】`check-selftests.mjs` の自己テストに 「**`.js` の検査も列挙する**（拡張子で見落とさない）」を足して 9件 → 10件。**正規表現を `.mjs` だけに戻すと `--check` が exit 1 になる**ことを観測済み（元の穴の再現）。\n\n【途中で自己テストが自分の誤りを1件捕まえた】`sync_constants` の検体を1桁で書いており、規則が `\\d{3}` を要求するため**判定を殺しても通る**空振りの検査になっていた。検体を3桁に直し、**検体が台帳の値と別物であること**を固定する行を足した。\n\n【残る限界】91本すべてが `demonstrated` になったのは「壊れたら気づく」を見たということで、**「見るべきものを見ている」の証明ではない**（台帳の $comment が『0/0 が意味しないこと』として先に書いている通り）。"
+    },
+    {
+      "id": "act-ci-selftest-ratchet-py-blind",
+      "title": "自己テストのラチェットが python の検査2本を見ていない（.js は 2026-09-03 に閉じた）",
+      "detail": "**`.js` を閉じたら、同じ形が python に残った。**`check-selftests.mjs` の `wiredChecks()` は `.mjs` → `.m?js` へ広がったが、正規表現は依然として `node` で始まる行しか見ない:\n  `/node\\s+((?:growth\\/)?scripts\\/[\\w.-]+\\.m?js)/g`\n\n実測（2026-09-03、seo-check.yml）:\n  - `run: |` ブロック 40 個のうち **39 個は中で node を呼ぶ**ので、既に台帳に入っている\n  - `exit 1` で落とすのに node も python も呼ばない素のシェル判定は **0 件**\n  - 残る台帳の外は **python の2本だけ**:\n      `python3 scripts/inject_locale_seed.py --check`\n      `python3 scripts/generate_sitemap.py --check`\n  - どちらも `--selftest` を持たない（grep で 0 件）\n  - `preflight.mjs` も同じ2本を「対象外」として表に出している（黙って消してはいない）\n\n**`generate_sitemap.py --check` は、一度この形で実際に効いていなかった。**seo-check.yml のコメントが書いている: 以前は `--dry-run` で「件数を表示するだけでコミット済みのファイルを見ない」ため、**generate_sitemap.py の実行を忘れた PR を一度も止められなかった**（2026-08-22）。`--check` に替えて URL の集合を突き合わせるようにしたが、**その `--check` が落ちることは誰も確かめていない。**\n\n【順番】`.js` のときと同じ制約が掛かる。`none_budget` は 0 なので、**先に2本へ自己テストを書き、それから列挙を広げる。**逆にすると CI が即赤くなり、上限を上げて通すのは台帳が明示的に禁じている。\n\n【あわせて要る】`gatingChecks()`（`if:` / `continue-on-error: true` の中にしか無い配線を落とす）も `node` の行しか見ていない。python を列挙に入れるなら、こちらの正規表現も同時に広げること。\n\n【閉じ条件をこう置いた理由】`data/check-selftests.json` に `scripts/generate_sitemap.py` の行が現れたら閉じる。**`check-selftests.mjs --check` が通ることは条件にできない** —— いま既に通っているから。通っているのに見ていない、というのがこの行そのもの。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "scripts/check-selftests.mjs",
+        "data/check-selftests.json",
+        "scripts/generate_sitemap.py",
+        "scripts/inject_locale_seed.py"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": "data/check-selftests.json",
+          "needle": "scripts/generate_sitemap.py"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null,
+      "evidence": null
+    },
+    {
+      "id": "act-selftest-rule-only-coverage",
+      "title": ".js 2本の自己テストは規則を単体で当てるだけで、ループ側のゲート7つが見えていない（実測）",
+      "detail": "**列挙・証跡・配線を閉じたあとに残った、4段目。**`.js` の5本は台帳に載り（#836）、観測が CI に効いているかも見るようにした（`gatingChecks()`）。だが**その自己テストが本体のどこを見ているか**は、まだ誰も測っていなかった。測った。\n\n`sync_constants.js` と `indexnow-notify.js` の自己テストは、**規則の配列を1本ずつ単体で当てる**作り（`apply(ruleName, html)` / `notifiablePaths(lines)`）で、**ループ側で掛かるゲートを一度も通らない。**隔離した写しで壊して確かめた（2026-09-03、リポジトリの木は触っていない）:\n\n  壊したもの                                        自己テストの反応\n  ------------------------------------------------  ----------------\n  見える評価の「自社ページのみ」を外す                12件中 0件失敗\n  価格の「料金セクション内のみ」を外す                12件中 0件失敗\n  og:site_name の判定を殺す                          12件中 0件失敗\n  llms.txt「当たらない規則」を合格にする              12件中 0件失敗\n  noindex の除外を殺す                               13件中 0件失敗\n  <鍵>.txt が複数でも黙って先頭を選ぶ                13件中 0件失敗\n  keyLocation をサイトルートにする                   13件中 0件失敗\n\n**7通りすべて緑のまま。**どれも実害が外に出る形である:\n  - 自社ページ限定を外すと、比較ページに載っている**競合の評価を自社の値へ書き換える**\n  - 料金ゾーン限定を外すと、本文中の編集上の価格まで書き換える\n  - llms.txt の「当たらない規則は穴」を合格にすると、**文面が変わった日にこの値の管理が黙って消える**\n  - noindex の除外が消えると、**noindex の面を検索エンジンへ「新しい」と申告する**\n    （台帳の broke 自身が「この5本で唯一、外向きに作用する。誤った通知に CI の失敗は無く、    被害は Bing 側に出る」と書いている、まさにその経路）\n  - 鍵の重複は #411 の再発。keyLocation がずれると通知は 200 を返しながら1件も反映されない\n\n**`tag-cta-placements.js` は対照として効いている** —— `[?&]ct=` へ戻す壊し（892本を編集上の参照へ落とした形）で 16件中7件が落ちた。**「規則を単体で当てる作りだから駄目」ではなく、ゲートがループ側にあるかどうかで決まる。**\n\n【何をするか】上の7通りで落ちる検体を足す。そのためには判定をループから切り出す必要がある（`sync_constants` は1面ぶんの走査と llms.txt の走査、`indexnow-notify` は noindex の分離・鍵の探索先・送信本文の組み立て）。**切り出しは挙動を変えないこと**を、`--check` と `--write` の出力がバイト単位で同一であることで示す（この形の検証は 2026-09-03 に一度通してある:sync_constants は食い違いのある木で348行＋25ファイル574行、tag-cta は265面3,211行）。\n\n【この行を分けた理由】#836 がマージされた直後で、**同じファイルを別セッションが書いたばかり**である。載せ替えは設計判断を含むので、機械が黙って上書きしない。\n\n【閉じ条件】上の7通りのうち、少なくとも「自社ページ限定」「noindex の除外」「鍵の重複」の3つで落ちること。`data/check-selftests.json` の当該2行の `broke` にその観測が入る。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "scripts/sync_constants.js",
+        "scripts/indexnow-notify.js",
+        "data/check-selftests.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "#836 でマージされたばかりの自己テストを書き換える話であり、判定をループから切り出す設計変更を伴う。**穴は実測で示したが、いつ・どこまで載せ替えるかは判断。**見えていない状態にはしないので、ここに数字ごと置いてある。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null,
+      "evidence": null
     }
   ]
 }

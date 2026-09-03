@@ -1126,9 +1126,17 @@ jobs:
       # このステップが動くのは main への「直接 push」だけ。auto-merge の
       # マージ push は GITHUB_TOKEN 起因でワークフローを発火させないため、
       # そちらの通知は auto-merge.yml のマージ後ステップが行う。
+      # **自己テストは条件を付けずに独立させる。**もともとは下の送信ステップの
+      # 中に書いてあったが、そこは `if:`（main への push 限定）と
+      # `continue-on-error: true` の両方が掛かっている ——
+      # **PR では走らず、走っても job を落とせない。**台帳には demonstrated と
+      # 書いてあるのに、その観測は CI に一度も効いていなかった。
+      # 通信はしないので、毎回走らせて構わない。
+      # 再発は check-selftests.mjs の gatingChecks() が見る。
+      - name: IndexNow selection rules fire (self-test)
+        run: node scripts/indexnow-notify.js --selftest
+
       - name: IndexNow notification (on main push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: |
-          node scripts/indexnow-notify.js --selftest
-          node scripts/indexnow-notify.js --since 1
+        run: node scripts/indexnow-notify.js --since 1
         continue-on-error: true
