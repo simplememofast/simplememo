@@ -375,6 +375,12 @@
       "expr": "x?.pull_request",
       "disposition": "前提",
       "note": "issues API は PR も返すので、監視Issueの一覧から PR を落とす（health-intake.mjs と同じ扱い）。**この鍵が無ければ PR ではない**というのが GitHub の契約で、台帳の正ではない。落とし損ねても `issue_closed` は「一覧に在る＝まだ open」側へ倒れるだけで、**故障を消す方向には効かない。**"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "a.not_before_jst",
+      "disposition": "前提",
+      "note": "**着手できる日は任意の欄。**書いた行にだけ形式（YYYY-MM-DD）を要求する。無い行に要求が無いのが正しい —— 期日を持たない依頼のほうが多数で、そちらは age_days で数える。**正（欄そのもの）が消えたときに規則が消えるのは意図どおり** ——欄が無ければ滞留の数え方は元の age_days に戻るだけで、鳴らなくなる側へは倒れない。逆に形式検査が要るのは、書き間違えた期日がその行を黙って永久に鳴らなくするから（simplememo-api の actionableAgeDays は読めない日付を age_days に落とすが、**落とすこと自体は静かに起きる**ので、書いた側で止める）"
     }
   ],
   "coverage_measured_at": "2026-09-03",
