@@ -630,8 +630,10 @@ jobs:
       # 【構造側・落とす】隣り合う nowrap のあいだに改行機会があるか。**ブラウザが要らない。**
       # 折り返せるかどうかは**エンジンで違う** —— 2026-09-03、実機（iOS = WebKit）で
       # 横スクロールが出ているのに Blink では 3面 × 14幅すべてで再現せず、
-      # しかもこの環境には WebKit を入れられない（ダウンロードが egress で塞がれる）。
       # **測れないほうのエンジンで壊れる可能性を、構造の側で消す。**
+      # [2026-09-03 追記] 「WebKit を入れられない」は**経路を1つしか試していなかった** ——
+      # `apt-get install webkit2gtk-driver` は通る（下の手順で実際に測っている）。
+      # ただし静的規則は**測る前に**落とすので、こちらは残す。
       # `<wbr>` は幅を持たないので、入れて悪くなることが無い。
       - name: Adjacent nowrap runs have a break opportunity
         run: node scripts/check-viewport-overflow.mjs --static
@@ -639,6 +641,14 @@ jobs:
       # 【描画側・報告のみ】判定にブラウザが要り、それを本番デプロイの門に乗せると
       # ブラウザ側の不調でCIが赤くなる（check-benchmark を報告のみにしたのと同じ理由）。
       # **落とす側は Runbook §4。**ランナーの Chrome を使うのでダウンロードはしない。
+      # WebKit も測る。**Blink とは行分割の判断が違い、実機（iOS）はこちら側。**
+      # 2026-09-03、実機で over=41px が出た版を Blink は 5幅すべてで over=0 と報告した。
+      # `npx playwright install webkit` はサンドボックスの egress で塞がれていたが、
+      # **apt の webkit2gtk-driver は通る**（WebKitGTK = Safari と同じ WebKit コア）。
+      # ヘッドレスで動かないので Xvfb を併せて入れる。約30秒。
+      - name: Install WebKit (WebKitGTK + WebDriver)
+        run: sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb
+
       - name: Landing pages do not scroll sideways (report-only)
         run: |
           npm i --no-save playwright-core

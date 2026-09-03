@@ -7,6 +7,12 @@
   <title>TikTok Slide Builder</title>
   <link rel="preconnect" href="https://analytics.ahrefs.com">  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
+    /* 折り返せない語を箱からはみ出させない。**この面は共有CSS（assets/css/style.min.css）を
+       読み込んでいない**ので、共有側の同じ規則が届かない。
+       2026-09-03: WebKit で測ったら `from:noreply@simplememofast.com` のような
+       語が切れず 320px で漏れていた（**Blink は同じ語を切るので出なかった**）。 */
+    body{overflow-wrap:break-word}
+
     :root {
       --bg: #000; --surface: #0d1117; --accent: #6ab4ff; --accent2: #4fc3f7;
       --green: #3fb950; --red: #f85149; --yellow: #d29922;

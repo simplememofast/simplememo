@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>エンジン差の見本（検査用・公開面ではない）</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:sans-serif}
+  /* 幅350pxの親に、折り返せない中身を入れる。**Blinkは折り返し、WebKitは折り返さない。** */
+  .wrap{width:350px}
+  .keep-all{word-break:keep-all;font-size:.9rem;display:inline-flex;padding:.5rem 1rem}
+</style></head>
+<body>
+  <!--
+    **これは検査のための見本で、サイトの一部ではない。**
+    2026-09-03、`word-break: keep-all` を WebKit だけが厳密に守ることが分かった。
+    Blink だけで測っていたあいだ、実機で出ていた横スクロールが一度も再現しなかった。
+    この見本は「WebKit を測れているか」を確かめるためだけに在る ——
+    **これが Blink でも赤くなったら、Blink 側の挙動が変わったということ。**
+  -->
+  <div class="wrap">
+    <div class="keep-all">情報整理の完全ガイド（Projects/Areas/Resources/Archives）を読む</div>
+  </div>
+</body></html>
