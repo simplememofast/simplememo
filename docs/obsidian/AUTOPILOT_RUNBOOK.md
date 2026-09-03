@@ -654,9 +654,20 @@ node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
 node scripts/automation-rate.mjs --check     # 全領域の自動化率台帳
 node scripts/check-pr-facts.mjs --check      # PR原稿の事実と禁止表現
 node scripts/check-landing-freshness.mjs --check  # 着地面（トップ日英）が現実より古くないか
+node scripts/check-viewport-overflow.mjs --check  # 着地面に横スクロールが出ていないか（320px を含む）
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
 ```
+
+**⚠ `check-viewport-overflow` はブラウザが要る。**`npm i --no-save playwright-core` を先に。
+CI では**報告のみ**なので、**落とす側はここ。**通らないままコミットしない。
+**320px を必ず含めてある** —— 2026-09-03、配信当日に足した PRESS 帯が実機で横スクロールを
+起こしたが、その日の検証は 390 / 900 / 1280px を見て「異常なし」と報告していた。
+**幅を1つ足りなく選んだだけで、この種の不具合は本番へ出る。**
+原因は `.nb`（nowrap）を隙間なく並べたこと。**隣接するインライン要素のあいだに空白も
+`<wbr>` も無いと、連続した nowrap はまとめて1つの折り返せない塊になる。**
+`.nb` を細かく割っても塊の合計は変わらない（実際、割っても直らなかった）。
+効いたのは `<wbr>` と、flex アイテムの `min-width: 0`。
 
 + **iPhoneビューポートQA**（Playwright: 390×844 DPR3で対象ページを実描画し、
   水平スクロールなし・画像表示・表のカード化を確認。手本:

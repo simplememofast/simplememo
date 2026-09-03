@@ -617,6 +617,22 @@ jobs:
           node scripts/check-landing-freshness.mjs --selftest
           node scripts/check-landing-freshness.mjs --check
 
+      # 【横漏れ】2026-09-03、配信当日にトップへ足した PRESS 帯が**実機で横スクロールを
+      # 起こした。**描画して確かめてはいた —— 390 / 900 / 1280px で。**320px を見ていない。**
+      # 実測すると 320px で 24px はみ出しており、オーナーのスクリーンショットで発覚するまで
+      # 誰も気づいていない。
+      #
+      # **報告のみ。**判定にはブラウザが要り、それを本番デプロイの門に乗せると
+      # ブラウザ側の不調でCIが赤くなる（check-benchmark を報告のみにしたのと同じ理由）。
+      # **落とす側は Runbook §4** —— 毎回のセッションが手元で `--check` を通してからコミットする。
+      # ランナーに最初から入っている Chrome を使うので、ブラウザのダウンロードはしない。
+      # ここが安定して測れることが確かめられたら、ブロックへ格上げしてよい。
+      - name: Landing pages do not scroll sideways (report-only)
+        run: |
+          npm i --no-save playwright-core
+          node scripts/check-viewport-overflow.mjs --selftest || true
+          node scripts/check-viewport-overflow.mjs --report
+
       # 【性質テスト】ドリルは26の**具体例**を固定する。ここは**書かなかった
       # 組み合わせ**を総当たりで踏む。2026-08-21の二重着手は、まさに
       # 書かれていなかった組み合わせだった。種を固定して反例を再現可能にする。
