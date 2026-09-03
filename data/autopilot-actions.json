@@ -220,8 +220,8 @@
     },
     {
       "id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 4件",
-      "detail": "ap-20260820-actions（run 32303452390）, ap-20260821-actions（run 32419185478）, ap-20260831-ccr0920（run cse_01VZpZ4oseTMEgbBPzddUSxN）, ap-20260903-actions（run 33692832179）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。",
+      "title": "実費台帳に載っていない run が 1件",
+      "detail": "ap-20260903-actions（run 33692832179）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 1件（ap-20260831-ccr0920）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
       "source": "cost",
       "domain": null,
       "touches": [
@@ -245,7 +245,7 @@
       "closed_jst": null,
       "evidence": "実費が未記録の run が 1件: ap-20260903-actions（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）",
       "last_run_jst": "2026-09-03",
-      "last_run_log": "ap-20260820-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260821-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260903-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\n除外から外した（実費が台帳にある）: ap-20260826-actions, ap-20260830-actions, ap-20260831-actions\n除外から外した（Actions の run ではないので、そもそも数えない）: ap-20260831-ccr0920",
+      "last_run_log": "ap-20260820-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260821-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260903-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない",
       "reopened_jst": "2026-09-03"
     },
     {
@@ -382,7 +382,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33454414490（2026-09-01 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "33706886868（2026-09-03 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -396,13 +396,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-09-02",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
-      "evidence": "Actions run 25件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-02",
-      "last_run_log": "33454414490: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
-      "reopened_jst": "2026-09-01"
+      "evidence": "Actions run 26件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
+      "last_run_jst": "2026-09-03",
+      "last_run_log": "33706886868 -> ap-20260903-actions-33706886868: appended ap-20260903-actions-33706886868 (skipped_gate)\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
+      "reopened_jst": "2026-09-03"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -929,11 +929,11 @@
           "since": "2026-08-31"
         }
       },
-      "state": "open",
+      "state": "acknowledged",
       "created_jst": "2026-09-01",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": "2026-08-31 以降 ccr-0920 は一度も着手していない（失敗が無いことは回復の証拠にならない）"
+      "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**"
     },
     {
       "id": "act-orphaned-branch-claude-simplememofast-indexing-93xm3y",
