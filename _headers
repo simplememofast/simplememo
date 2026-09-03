@@ -10,7 +10,26 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
   Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob: https://tools.applemediaservices.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://*.ahrefs.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://analytics.ahrefs.com https://static.cloudflareinsights.com; connect-src 'self' https://api.simplememofast.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://analytics.google.com https://*.ahrefs.com https://cloudflareinsights.com; object-src 'none'; base-uri 'self'
-  Cache-Control: public, max-age=3600, must-revalidate
+  # 【2026-09-03】HTML は max-age=3600 から no-cache へ。
+  #
+  # **1時間、直したページが読者に届かない。**この日、横スクロールの修理を
+  # 3回出したが、オーナーの実機では「まだ出る」が続いた。時刻を並べると:
+  #
+  #     09:14 JST  #802 マージ（帯の nowrap）
+  #     09:40 JST  スクショ② — #802 は入っているはず
+  #     09:53 JST  #810 マージ（隣接14箇所＋clip の網）
+  #     10:25 JST  スクショ③ — **9:40 に取った HTML が 10:40 まで新鮮**なので、
+  #                #810 の入っていないページを見ている可能性が高い
+  #
+  # `must-revalidate` が効くのは **max-age を過ぎたあと**で、その1時間は
+  # 問い合わせずにキャッシュから出る。**修理の可否を実機で確かめる運用と噛み合わない。**
+  # mainへのpushが即デプロイ（CLAUDE.md）なのに、読者に届くまで最大1時間ずれる。
+  #
+  # `no-cache` は「キャッシュするな」ではなく「**使う前に必ず確かめろ**」。
+  # 変わっていなければ 304 が返るので、転送量はほぼ増えない。
+  # 静的アセットは別ルール（/assets/*・/*.css・/*.js）で 1週間 immutable のまま ——
+  # あちらは中身が変わるとクエリ（?v=ハッシュ）が変わるので、長く持たせて安全。
+  Cache-Control: public, no-cache
 
 /assets/*
   Cache-Control: public, max-age=604800, immutable
