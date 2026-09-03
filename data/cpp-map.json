@@ -21,7 +21,7 @@
     "- ppid を記入したら node scripts/apply-cpp-ppid.js --write → CI が --check で守る。"
   ],
   "provider_token": "128498560",
-  "updated": "2026-09-02",
+  "updated": "2026-09-03",
   "cpps": [
     {
       "id": "vs-notion",
@@ -104,6 +104,15 @@
         "^/tiktok/"
       ],
       "note": "【予約行・R2.5用】ショート動画30日検証の bio リンク用CPP。ASC側でCPP作成後に asc_name と ppid を記入する。/tiktok/ ページも同じCPPで受ける"
+    },
+    {
+      "id": "autopilot",
+      "asc_name": "vs-drafts（流用）",
+      "ppid": "3d126d78-2267-4a6c-a860-c69707ab90a5",
+      "match": [
+        "^/autopilot/?$"
+      ],
+      "note": "2026-09-03 のプレスリリース着地面。配信本文が読者を送る先で、`/` と並ぶ2本のうちの1本。\n\n**[2026-09-03] 専用CPPは作れなかった。`vs-drafts` を流用している**（`obsidian-voice` が `obsidian-vault` を流用しているのと同じ形）。\n\n**旧注記の「AIからは実行できない（App Store Connect の人の操作）」は誤りだった。**隣の `simplememo-ios` に 09-02 から `scripts/asc_cpp.rb` と `.github/workflows/asc-cpp.yml`（ubuntu・`environment: appstore`）が在り、`create` は撃てる。リポジトリ跨ぎの死角で、道具は前日に隣へ入っていた。\n\n**本当の詰まりは Apple の上限。**実際に撃って返ってきた値:\n  `STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n**ASC は既に70本で上限。**1本消さないと作れず、`asc_cpp.rb` に delete は無い（足すこと自体が権限の拡張になるので足していない）。\n\n**「未参照の62本」は余りではなかった。**この台帳が参照していないだけで、`uc-*` / `vs-*` は**すべて実在するページのために作り置きされている**（`vs/drafts/` も `use-cases/writers/` も在る）。だから流用は「余りを使う」ではなく**「その面から借りる」**であることを明記しておく。\n\n**なぜ vs-drafts か:** (1) `APPROVED` なので ppid が**いますぐ効く** —— 新規作成は審査を通るまで既定商品ページへ倒れ、D+14（9/17）までの2週間が計測に乗らない。(2) 文面が自律運用の記事から来た読者にそのまま通る（「届くところまで最初から通っています。仕組みを作る時間も、保守する手間もかかりません」）。(3) `/vs/drafts/` は細い比較面で混ざる量が最小。\n\n**代償: `/autopilot/` と `/vs/drafts/` のインストールは互いに分離できない。**PR経由を全体から分離する目的には足りるが、この2面の内訳は読めない。\n\n**専用CPPに戻すには:** ASC で未提出（`PREPARE_FOR_SUBMISSION`）の CPP を1本削除してから `asc-cpp.yml` を `action: create` / `name: autopilot` で回す。審査は App 版の提出に同乗する。"
     }
   ]
 }

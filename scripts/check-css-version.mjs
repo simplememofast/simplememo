@@ -33,6 +33,8 @@ const write = process.argv.includes('--write');
 /** Every asset served with an immutable cache header and referenced with ?v=. */
 const ASSETS = [
   'assets/css/style.min.css',
+  // 共有CSSを読まない17面のための「網」。immutable で配るので ?v= が要る。
+  'assets/css/safety-net.css',
   'js/app-store-tracking.js',
   'js/lang.js',
   'js/contact-form.js',

@@ -216,6 +216,51 @@ export const SWEEP_WIDTHS = [320, 360, 900, 1100];
  */
 export const WEBKIT_SWEEP_WIDTHS = [320];
 
+/**
+ * **どの面も「網」を持っていること。**
+ *
+ * [2026-09-03] 共有CSS（`assets/css/style.min.css`）を読まない面が17あり、
+ * そこへは共有側の修理が届かなかった。ナビの断点を 1099px にした修理が `/tiktok/` に届かず、
+ * 900px で **+87px** 漏れていた（当日、個別に直した）。
+ *
+ * 17面を共有CSSへ寄せるのは**見た目が変わる**ので採らず、
+ * 網だけを `assets/css/safety-net.css` へ切り出した。
+ * ここが見るのは「**どちらか一方は読んでいるか**」だけ ——
+ * 新しい面を共有CSS無しで置いたとき、網も無いまま出荷されるのを止める。
+ */
+export const SHARED_CSS = 'assets/css/style.min.css';
+export const SAFETY_NET_CSS = 'assets/css/safety-net.css';
+
+/**
+ * **`<link>` として読んでいるかを見る。文字列の出現ではない。**
+ *
+ * 初版は `html.includes('assets/css/style.min.css')` で見ていた。**素通りする。**
+ * `tiktok/index.html` には 2026-09-03 に足した注記
+ * 「この面は共有CSS（assets/css/style.min.css）を読み込んでいないので、…」があり、
+ * **その文が「読み込んでいる」と判定されていた。**壊しテスト（網の link を外す）が
+ * 落ちなかったので気づいた —— 落とせることを確かめていなければ、
+ * **この検査は何も見ないまま緑を出し続けていた。**
+ *
+ * 同じ形をこの日3回踏んでいる（`</head>` をコメント内で数えた、
+ * `by scripts/inject_faq_schema.py -->` をコメント内で数えた）。**素の文字列で構造を判定しない。**
+ */
+export function linksStylesheet(html, file) {
+  const re = /<link\b[^>]*>/gi;
+  for (const tag of html.match(re) || []) {
+    if (!/rel\s*=\s*["']?stylesheet/i.test(tag)) continue;
+    const href = tag.match(/href\s*=\s*["']([^"']+)["']/i);
+    if (href && href[1].split('?')[0].endsWith(file.replace(/^.*\//, ''))) return true;
+  }
+  return false;
+}
+
+export function pagesWithoutNet(files = STATIC_FILES, read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8')) {
+  return files.filter((f) => {
+    const html = read(f);
+    return !linksStylesheet(html, SHARED_CSS) && !linksStylesheet(html, SAFETY_NET_CSS);
+  });
+}
+
 /** 静的規則を当てる面。**サイトの全HTMLに当てる**（正規表現なので実質ただ）。 */
 export const STATIC_FILES = allPages().map((u) => (u.endsWith('/') ? `${u}index.html` : u).slice(1));
 
@@ -230,6 +275,12 @@ export function checkStatic(files = STATIC_FILES) {
     for (const a of unbreakableAdjacencies(html)) {
       problems.push(`${f}:${a.line} 隣り合う nowrap に改行機会が無い — 閉じタグの直後へ \`<wbr>\` を入れること`
         + `\n      …${a.context}…`);
+    }
+    if (!linksStylesheet(html, SHARED_CSS) && !linksStylesheet(html, SAFETY_NET_CSS)) {
+      problems.push(`${f}: **共有CSSも網も読んでいない。**`
+        + ` \`${SHARED_CSS}\` か \`${SAFETY_NET_CSS}\` のどちらかを読むこと ——`
+        + '\n      どちらも無いと、横漏れの修理がこの面へ**一切届かない**'
+        + '（2026-09-03、そうなっていた17面のうち `/tiktok/` が 900px で +87px 漏れていた）');
     }
     for (const k of unboundedKeepAll(html)) {
       problems.push(`${f}:${k.line} \`word-break: keep-all\` に上限が無い — **日本語がまったく折り返せなくなる。**`
@@ -444,6 +495,32 @@ const SCENARIOS = [
     }
     if (!all.includes('/blog/')) throw new Error('index.html を持つディレクトリが `/…/` になっていない');
     if (all.some((u) => u.includes('node_modules') || u.includes('.git'))) throw new Error('作業用ディレクトリを拾っている');
+  }],
+  ['**どの面も共有CSSか網を読んでいる**（届かない面を作らない）', () => {
+    const none = pagesWithoutNet();
+    if (none.length) {
+      throw new Error(`共有CSSも網も無い面が ${none.length}: ${none.slice(0, 5).join(' ')}`);
+    }
+  }],
+  ['**どちらも無い面は落ちる**（2026-09-03 に17面そうなっていた）', () => {
+    const fake = (f) => (f === 'x.html' ? '<html><head></head></html>'
+      : '<link rel="stylesheet" href="/assets/css/style.min.css?v=abc">');
+    const out = pagesWithoutNet(['x.html', 'y.html'], fake);
+    if (out.join() !== 'x.html') throw new Error(JSON.stringify(out));
+  }],
+  ['網だけでも通る（共有CSSを読まない面のための逃げ道）', () => {
+    const fake = () => '<link rel="stylesheet" href="/assets/css/safety-net.css?v=abc">';
+    if (pagesWithoutNet(['z.html'], fake).length) throw new Error('網を読んでいるのに落とした');
+  }],
+  ['**文中に名前が出るだけでは「読んでいる」と数えない**（初版はこれで素通りした）', () => {
+    // tiktok/index.html の注記が実際にこの形で、検査を無効にしていた。
+    const prose = '<!-- この面は共有CSS（assets/css/style.min.css）を読み込んでいない -->';
+    if (linksStylesheet(prose, SHARED_CSS)) throw new Error('コメント内の文字列を <link> と読んだ');
+    if (!pagesWithoutNet(['p.html'], () => prose).length) throw new Error('素通りした');
+    // rel が違うものも数えない
+    if (linksStylesheet('<link rel="preload" href="/assets/css/style.min.css">', SHARED_CSS)) {
+      throw new Error('preload を stylesheet と読んだ');
+    }
   }],
   ['**静的規則は全面に当たる**（3面だけだと 266 面が素通りする）', () => {
     if (STATIC_FILES.length !== allPages().length) {
