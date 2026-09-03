@@ -31,10 +31,20 @@
  * 過検出する検査は、やがて無視される。だから描画して測る。
  *
  * 【それでも残る限界】
- * ここが使うのはサンドボックスのフォント（IPAGothic）で、**実機のフォントではない。**
- * CJKは1文字1emなのでほぼ一致するが、英数字の字幅は違う。
+ * **[2026-09-03 訂正] ここに「サンドボックスのフォント（IPAGothic）で測っている」と書いていたのは誤り。**
+ * サイトは Noto Sans JP を**自前配信**しており（`/assets/fonts/NotoSansJP-*.woff2`）、
+ * 実機も同じ woff2 を読む。実測すると Blink と WebKit で
+ * CJK 192px / ラテン 178px / 数字 80px が**完全に一致**する（16px時）。
+ * **日本語の字幅は実機と同じ。**
+ *
+ * 残る差は**ラテン文字と絵文字のフォールバック**にある ——
+ * `Noto Sans JP` のあとは `-apple-system` → 実機では SF Pro、ここでは DejaVu 系。
+ * 実機の1点で校正すると、修理前の版で **実機 41px / WebKitGTK 31px**（過小に出る）。
  * だから**「通った」は「実機で必ず大丈夫」を意味しない。**
  * いちばん狭い 320px を含めているのはその余裕代でもある。
+ *
+ * そしてエンジンは2つ測る（`lib/webkit-driver.mjs`）。
+ * **Blink だけでは、実機で出ている横スクロールを一度も再現できなかった。**
  */
 
 import fs from 'node:fs';
@@ -42,6 +52,7 @@ import path from 'node:path';
 import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { run } from './lib/selftest.mjs';
+import { measureWebKit, findWebKitDriver } from './lib/webkit-driver.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -81,9 +92,13 @@ export const KNOWN = [
  *
  * **描画では捕まらない。**折り返せるかどうかは**エンジンで違う** ——
  * 2026-09-03、実機（iOS = WebKit）で横スクロールが出ているのに、
- * Blink では 3面 × 14幅すべてで再現しなかった。しかもこの環境からは
- * WebKit を入れられない（`npx playwright install webkit` がegressで塞がれる）。
+ * Blink では 3面 × 14幅すべてで再現しなかった。
  * **測れないほうのエンジンで壊れる可能性を、構造の側で消す。**
+ *
+ * **[同日 追記] WebKit は入った。**「入れられない」は経路を1つしか試していなかった ——
+ * `npx playwright install webkit` は egress で 403 だが、
+ * `apt-get install webkit2gtk-driver` は通る。いまは実際に両エンジンで測っている。
+ * ただしこの静的規則は**測る前に**落とせるので残す（描画は面と幅を絞らざるを得ない）。
  *
  * だから見るのは「実際に折り返したか」ではなく「**折り返せる場所が在るか**」。
  * `<wbr>` は幅を持たないので、入れて悪くなることが無い。
@@ -144,7 +159,9 @@ export function allPages(root = ROOT) {
   const out = [];
   const walk = (d) => {
     for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-      if (e.name === 'node_modules' || e.name === '.git') continue;
+      // `fixtures/` は**検査のための見本**で、公開する面ではない。
+      // 中身はわざと壊してあるので、走査に混ぜると検査が自分の見本で落ちる。
+      if (e.name === 'node_modules' || e.name === '.git' || e.name === 'fixtures') continue;
       const abs = path.join(d, e.name);
       if (e.isDirectory()) walk(abs);
       else if (e.name.endsWith('.html')) {
@@ -179,6 +196,25 @@ export function allPages(root = ROOT) {
  * （深い3面のほうは 14 幅を見ているので、共有部品ならそちらに出る）。
  */
 export const SWEEP_WIDTHS = [320, 360, 900, 1100];
+
+/**
+ * **WebKit でも測る。**Blink とは**行分割の判断が違う**ので、片方だけでは足りない。
+ *
+ * [2026-09-03] 実機（iOS = WebKit）で `over=41px` が出た版を、Blink は
+ * 320/360/390/393/430px の**すべてで over=0** と報告していた。
+ * 同じ版を WebKitGTK で測ると 390px で **over=31px** —— 向きも桁も実機と合う。
+ *
+ * **速さの都合で対象を絞ってある。**WebKit は 378ms/通り（ドライバ3本並列・4コア）で、
+ * 全面 × 4幅（1,076通り）だと 6.8 分かかる。内訳:
+ *
+ *   - **深い3面 × 14幅**（42通り・約16秒）… 新しい書き方が最初に載る面
+ *   - **全269面 × 320px**（269通り・約1.7分）… 漏れが最も出る幅（実測で45面中28面）
+ *
+ * **限界を承知で使う。**WebKitGTK は iOS Safari そのものではなく、
+ * ラテン文字のフォールバックが実機と違うので**過小に出る**（実機41px → ここ31px）。
+ * 「WebKit で 0」は「実機で 0」ではない。詳細は `lib/webkit-driver.mjs`。
+ */
+export const WEBKIT_SWEEP_WIDTHS = [320];
 
 /** 静的規則を当てる面。**サイトの全HTMLに当てる**（正規表現なので実質ただ）。 */
 export const STATIC_FILES = allPages().map((u) => (u.endsWith('/') ? `${u}index.html` : u).slice(1));
@@ -335,6 +371,32 @@ export async function measure({ pages = PAGES, widths = WIDTHS, concurrency = CO
     known: over.filter(isKnown) };
 }
 
+/**
+ * WebKit 側の実測。**サーバの立ち上げはこちらが持つ**ので、
+ * 呼ぶ側は Chromium 側と同じ形（`measure`）で扱える。
+ */
+export async function measureWk({ pages = PAGES, widths = WIDTHS, concurrency = 3, deep = null } = {}) {
+  const { srv, port } = await serve();
+  try {
+    // `deep` を渡すと**2段**で測る: 深い面は全幅、それ以外は WEBKIT_SWEEP_WIDTHS だけ。
+    // 速さの都合で、Chromium 側と同じ「面を絞る側」と「幅を絞る側」を持つ。
+    const jobs = deep
+      ? [{ pages: deep, widths },
+         { pages: pages.filter((p) => !deep.includes(p)), widths: WEBKIT_SWEEP_WIDTHS }]
+      : [{ pages, widths }];
+    const merged = { measurable: true, engine: 'webkit', results: [], failures: [], problems: [] };
+    for (const j of jobs) {
+      if (!j.pages.length) continue;
+      const r = await measureWebKit({ ...j, port, concurrency });
+      if (!r.measurable) return r;
+      merged.results.push(...r.results);
+      merged.failures.push(...r.failures);
+      merged.problems.push(...r.problems);
+    }
+    return merged;
+  } finally { srv.close(); }
+}
+
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 const SCENARIOS = [
   ['実データの着地面に横漏れが無い', async () => {
@@ -348,6 +410,31 @@ const SCENARIOS = [
   ['**320px を必ず見る**（2026-09-03 の見落としは 390 から始めたこと）', () => {
     if (!WIDTHS.includes(320)) throw new Error('320 が幅の一覧から外れている');
     if (!SWEEP_WIDTHS.includes(320)) throw new Error('掃きの幅から 320 が外れている');
+  }],
+  ['**WebKit で本当に測れているか**（Blink と差が出る見本で確かめる）', async () => {
+    // `fixtures/engine-divergence.html` は **Blink では収まり WebKit でははみ出す**ように作ってある。
+    // WebKit 側の経路が黙って壊れた（ドライバが消えた・iframe が読めない・常に 0 を返す）とき、
+    // **実データは通ってしまう**ので、差が出ると分かっている見本で確かめる。
+    const P = ['/fixtures/engine-divergence.html'], W = [360];
+    const wk = await measureWk({ pages: P, widths: W });
+    if (!wk.measurable) throw new Error(`WebKit で測れなかった: ${wk.why}`);
+    const over = wk.results[0]?.over ?? 0;
+    if (over <= 0) {
+      throw new Error('**WebKit が見本を素通りした。**`word-break: keep-all` を守らない'
+        + 'エンジンで測っているか、iframe の中身が読めていない'
+        + `（doc=${wk.results[0]?.doc} vw=${wk.results[0]?.vw}）`);
+    }
+    const bl = await measure({ pages: P, widths: W });
+    if ((bl.results[0]?.over ?? 0) > 0) {
+      throw new Error('**Blink でも見本が漏れた。**エンジン差の見本として成立していないので、'
+        + 'この検査は「WebKit を測れている」ことを示せていない。見本を作り直すこと');
+    }
+  }],
+  ['**WebKit が無い環境では「異常なし」にしない**', () => {
+    // 落とすかどうかは呼び出し側の判断だが、**measurable: false と理由が返ること**は要求する。
+    if (typeof findWebKitDriver !== 'function') throw new Error('ドライバ探索が export されていない');
+    const none = findWebKitDriver(['/does/not/exist']);
+    if (none !== null && !fs.existsSync(none)) throw new Error('存在しない実体を返した');
   }],
   ['**全面を数える**（3面しか見ていなかった回の再発防止）', () => {
     const all = allPages();
@@ -489,10 +576,27 @@ if (isMain) {
   const sweep = argv.includes('--no-sweep') ? null
     : await measure({ pages: allPages(), widths: SWEEP_WIDTHS });
   const m = await measure();
+  // **もう一方のエンジン。**Blink とは行分割の判断が違い、実機（iOS）はこちら側。
+  //   深い3面 × 14幅（約16秒）＋ 全269面 × 320px（約1.7分）。
+  //   全面 × 4幅まで広げると 6.8 分で、CIに載らない＝結局また測らなくなる。
+  const wk = argv.includes('--no-webkit') ? null
+    : await measureWk({
+        pages: [...new Set([...PAGES, ...allPages()])],
+        widths: WIDTHS,
+        concurrency: 3,
+        deep: PAGES,
+      }).catch((e) => ({ measurable: false, engine: 'webkit',
+        why: String(e.message || e).split('\n')[0].slice(0, 160) }));
   console.log(`着地面の横漏れ — ${PAGES.join(' / ')} × ${WIDTHS.join('/')}px`);
   if (sweep) {
     console.log(`全面の掃き — ${allPages().length}面 × ${SWEEP_WIDTHS.join('/')}px`
       + `${sweep.measurable ? `（${sweep.results.length} 通り）` : ''}`);
+  }
+  if (wk) {
+    console.log(wk.measurable
+      ? `WebKit — 深い ${PAGES.length}面 × ${WIDTHS.length}幅 ＋ 全 ${allPages().length}面 × ${WEBKIT_SWEEP_WIDTHS.join('/')}px`
+        + `（${wk.results.length} 通り）`
+      : `WebKit — **測れなかった**: ${wk.why}`);
   }
   if (!m.measurable) {
     console.log(`\n  **測れなかった**: ${m.why}`);
@@ -524,18 +628,42 @@ if (isMain) {
     }
   }
   if (sweep && !sweep.measurable) console.log(`\n  **全面の掃きが測れなかった**: ${sweep.why}`);
+  // WebKit 側。**面ごとに1行へまとめる**（Blink 側と同じ扱い）。
+  const wkPages = new Map();
+  if (wk?.measurable) {
+    for (const r of wk.problems) {
+      if (!wkPages.has(r.page) || wkPages.get(r.page).over < r.over) wkPages.set(r.page, r);
+    }
+    for (const r of [...wkPages.values()].sort((a, b) => b.over - a.over)) {
+      console.log(`\n  ◆ WebKit ${r.page} @${r.width}px — +${r.over}px`);
+      for (const c of (r.culprits ?? []).slice(0, 2)) {
+        console.log(`      right=${c.right} w=${c.width} <${c.tag}.${c.cls}> "${c.text}"`);
+      }
+    }
+    for (const f of wk.failures) console.log(`  ! WebKit で測れなかった ${f.page} @${f.width}px — ${f.why}`);
+  }
   for (const f of [...(m.failures ?? []), ...(sweep?.failures ?? [])]) {
     console.log(`  ! 測れなかった ${f.page} @${f.width}px — ${f.why}`);
   }
   for (const p of staticResult.problems) console.log(`  ★ ${p}`);
   const sweepFailed = sweep && (!sweep.measurable || sweepPages.size || sweep.failures.length);
-  if (!m.problems.length && !staticResult.problems.length && !sweepFailed && !(m.failures ?? []).length) {
-    console.log(`\n  ${m.results.length + (sweep?.results.length ?? 0)} 通りを実測`
-      + `（深い ${PAGES.length}面 × ${WIDTHS.length}幅 ＋ 全 ${allPages().length}面 × ${SWEEP_WIDTHS.length}幅）。`
+  const wkFailed = wk && (!wk.measurable || wkPages.size || wk.failures.length);
+  if (!m.problems.length && !staticResult.problems.length && !sweepFailed && !wkFailed
+    && !(m.failures ?? []).length) {
+    const wkN = wk?.measurable ? wk.results.length : 0;
+    console.log(`\n  ${m.results.length + (sweep?.results.length ?? 0) + wkN} 通りを実測`
+      + `（Blink: 深い ${PAGES.length}面 × ${WIDTHS.length}幅 ＋ 全 ${allPages().length}面 × ${SWEEP_WIDTHS.length}幅`
+      + `${wkN ? ` ／ WebKit: ${wkN} 通り` : ''}）。`
       + '**新しい横漏れなし**'
       + `${m.known.length ? `（既知 ${m.known.length} 件は上のとおり。直したら KNOWN から消すこと）` : ''}。`);
-    console.log('  （サンドボックスのフォントでの実測。**実機のフォントとは字幅が違う**ので、'
-      + '通ったことは実機の保証にはならない）');
+    // **留保は正確に書く。**「フォントが違う」ではない —— 日本語は自前配信の woff2 で実機と同じ。
+    console.log('  （日本語の字幅は実機と同じ（Noto Sans JP を自前配信しているため）。'
+      + '**ラテン文字と絵文字のフォールバックだけが違い、実機より小さめに出る** ——'
+      + '\n   2026-09-03 の校正で 実機41px に対しここは31px。**余裕は多めに見ること。**）');
+    if (!wkN) {
+      console.log('  （**WebKit を測っていない。**`apt-get install -y --no-install-recommends '
+        + 'webkit2gtk-driver xvfb` を入れると、Blink では出ない壊れ方も見る）');
+    }
   } else {
     console.log(`\n  **横スクロールが出る組み合わせが ${m.problems.length} 件。**`);
     console.log('  `.nb` を並べただけでは改行機会にならない —— 隣接する nowrap のあいだに');
@@ -545,6 +673,12 @@ if (isMain) {
     console.log(`\n  **全面の掃きで ${sweepPages.size} 面が漏れている。**`);
     console.log('  表が原因なら `<div style="overflow-x:auto">` で包むこと（サイトの既存の書き方）。');
   }
-  if (!report && (m.problems.length || staticResult.problems.length || sweepFailed
+  if (wkPages.size) {
+    console.log(`\n  **WebKit で ${wkPages.size} 面が漏れている。**Blink では出ない壊れ方がある ——`);
+    console.log('  `word-break: keep-all` のように、**行分割の判断がエンジンで違う**指定を疑うこと。');
+    console.log('  （WebKitGTK は iOS Safari そのものではなく、ラテン文字のフォールバックが違うので');
+    console.log('   **実機より小さめに出る。**2026-09-03 の実測で 実機41px → ここ31px）');
+  }
+  if (!report && (m.problems.length || staticResult.problems.length || sweepFailed || wkFailed
     || (m.failures ?? []).length)) process.exit(1);
 }

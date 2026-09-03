@@ -726,6 +726,43 @@ fixed/absolute の全走査のどれでも出なかった。`--static` はこの
 **SEOの12ゲートは全部緑だった。**正規表現はコメントの内と外を区別しない ——
 2026-08-13 に `<script>` の閉じ忘れで同じことが起きたときと、まったく同じ理屈である。
 
+### **WebKit は入る**（2026-09-03 に訂正）
+
+上の節が「この環境に WebKit は入らない」と書いていたのは、**経路を1つしか試していなかった。**
+
+    npx playwright install webkit          … 403（配布CDNがプロキシで塞がれている）
+    apt-get install webkit2gtk-driver      … **通る**（WebKitGTK 2.52 + W3C WebDriver）
+
+WebKitGTK は Safari と同じ WebKit コア（`AppleWebKit/605.1.15`）。**効き目は実測で確かめた** ——
+実機が `over=41px` を出した修理前の `index.html` を両エンジンにかけると:
+
+    Blink      … 320/360/390/393/430px すべて **over=0**（＝当時の誤報告を再現）
+    WebKitGTK  … 390px で **over=31px**（実機と同じ向き・同じ桁）
+
+導入直後、**Blink では出ない漏れが2面**見つかった（`/data/voice-shift/` +14px、
+`/blog/email-management-tips.html` +1px）。どちらも `from:noreply@simplememofast.com` のような
+語が切れずに漏れており、**Blink は同じ語を切る。**
+
+**扱いの癖が2つある。**どちらも `scripts/lib/webkit-driver.mjs` に書いてある:
+
+- **ドライバ1本にセッションは1つ。**並列化はドライバを複数プロセス立てる（4コアで3本が頭打ち）
+- **`window/rect` が効かない**（幅を指定しても 447px のまま）。
+  **幅ぴったりの iframe を土台ページに立てて測る** —— iframe の中は独立したビューポートになる
+
+### フォントの留保は、書き方が誤っていた（2026-09-03 に訂正）
+
+「サンドボックスのフォント（IPAGothic）で測っている」と書いていたが、**誤り。**
+サイトは Noto Sans JP を**自前配信**していて（`/assets/fonts/NotoSansJP-*.woff2`）、
+実機も同じ woff2 を読む。実測すると Blink と WebKit で
+**CJK 192px / ラテン 178px / 数字 80px が完全に一致**する（16px時）。
+
+残っているのは**ラテン文字と絵文字のフォールバック**だけ ——
+`Noto Sans JP` のあとは `-apple-system` で、実機は SF Pro、ここは DejaVu 系。
+実機の1点で校正すると **実機 41px に対し WebKitGTK 31px** と**過小に出る。**
+
+したがって留保は「フォントが違うから当てにならない」ではなく、
+**「ラテン文字ぶん、実機より小さめに出る。余裕は多めに見る」**が正しい。
+
 ### 実機でしか出ない不具合を追うとき（2026-09-03 に確立）
 
 **この環境に WebKit は入らない**（`npx playwright install webkit` は egress で塞がれる）。

@@ -75,6 +75,12 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/blog/obsidian-voice-fastest-route#article","inLanguage":"ja","headline":"Obsidianに音声で挿す最速の経路 — 5ルートを画面数とタップ数で数える","description":"声からObsidianのノートまでの5経路（キーボード音声入力・ショートカット内蔵アクション/URI・Whisperプラグイン・自動追記アプリ・AirPods＋Siri）を、省けない操作の数とObsidianを開くか否かで比較する。秒数は計測手順を公開している値のみ使用。","url":"https://simplememofast.com/blog/obsidian-voice-fastest-route","datePublished":"2026-08-20","dateModified":"2026-08-20","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/blog-obsidian-voice-fastest-route.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/obsidian-voice-fastest-route"},"keywords":"Obsidian, 音声入力, 音声メモ, ハンズフリー, AirPods, Siri, iPhone, デイリーノート"}</script>
 
   <style>
+    /* 折り返せない語を箱からはみ出させない。**この面は共有CSS（assets/css/style.min.css）を
+       読み込んでいない**ので、共有側の同じ規則が届かない。
+       2026-09-03: WebKit で測ったら `from:noreply@simplememofast.com` のような
+       語が切れず 320px で漏れていた（**Blink は同じ語を切るので出なかった**）。 */
+    body{overflow-wrap:break-word}
+
     /* Global Navigation */
     .global-nav {
       position: sticky;
