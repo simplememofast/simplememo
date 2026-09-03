@@ -3269,3 +3269,100 @@ assert は消していない。**実データが「止まっている」こと�
 - **週次上限の残量（数値）は読めない。**読めるのは `allowed` / `allowed_warning` / `rejected` の状態だけ。
   「あと何回走れるか」は今も言えない
 - `act-budget-recalibrate`（9日・最古）は開いたまま。article の実測が1件しかなく、次の article 回まで判定できない
+
+---
+
+## 2026-09-03（8・代走 owner-session） — 配線（PR TIMES の D+14 取得を、人の作業から機械の経路へ）
+
+### 判断根拠
+
+前の回（7）が「人に残るのは PR⑥ の D+14 判定だけ」と書いたのに対し、オーナーから
+「**定期タスクで自動で画面取得するシステムあったはず、確認して**」。**確認した。あった。**
+
+`Claude-in-Chrome MCP`（`mcp__claude-in-chrome__*` / `mcp__Claude_in_Chrome__*`）で
+ログイン済み Chrome を動かす定期タスクが3本、実際に稼働している ——
+`note-simplememo-3days` / `x-engagement-simplememofast`（昼12:30・夜19:30）/
+`indie-hackers-karma-daily`。
+
+**ただし PR TIMES を見に行くものは1本も無かった。**3リポジトリ全体と全スキルを grep して
+ヒットするのは `annotations.json` などの**記録**と D-SCORE の採点だけ。
+
+**そして前の回の私の書き方は言い過ぎだった。**「人にしかできないのは分析画面を開いて
+5つの数字を読むところだけ」と書いたが、正確には「**この実行系からはできない**」。
+塞いでいたのは機械の能力ではなく、CCR に Chrome が無いこと。台帳の `force_owner_why` も
+同じ強さで書いてあったので、そこも直した。
+
+### やったこと
+
+#### (1) 手順の正典を `docs/prtimes-d14-capture.md` に置いた
+
+Routine が `raw.githubusercontent.com` から読む形にした。
+`x-engagement-simplememofast` の Routine が SKILL.md を正典にして
+プロンプトを薄く保っているのと**同じ型**（発明していない）。
+
+**書式は実物と照合した。**`d-score.mjs` 113〜116 行の正規表現をそのまま文書に載せてある:
+
+    /D-SCORE\s*(\d+)/   /([\d,]+)PV/   /転載(\d+)/   /(?:^|[^非])乗車/
+
+現在の backtest は **n=5・「1 件は書式が違い拾えなかった」** で、その1件が PR⑥ の
+`PV未集計・転載未集計・D-SCORE 85・判定待ち`。**転記が効いたかは n が 6 になるかで分かる。**
+
+**壊れ方を先に書いた。**Chrome が無いのに「0件だった」と書く／画面の % をそのまま
+0〜1 のフィールドに入れる／書式が合わず backtest が拾わない／二重転記 —— の4つ。
+どれにもガードを対応させてある。
+
+#### (2) ⚠ 環境を間違えると Chrome が付かない、を実測で特定した
+
+Routine の行き先は `environment_id` で決まる:
+
+| Routine | environment_id | Chrome |
+|---|---|---|
+| `x-engagement` 昼/夜・Reddit実投稿 | **（なし）** | **付く**（毎日稼働中） |
+| `Obsidianオートパイロット再試行` / `SEO Weekly` | `env_01RmhZ…`（Simple Memo・CCR） | 付かない |
+
+**`environment_id` を持たない Routine が Cowork 側で発火し、アカウントのコネクタが
+サーバ側で組み立てられる。**そして **CCR からは Cowork 環境を指定できない** ——
+`list_environments` は CCR 環境3つしか返さず、`create_trigger` は呼び出し元の環境を既定にする。
+
+実際、作った瞬間にツールが警告を返した:
+
+    this trigger stores no MCP connectors ... create it from a session that holds
+    them, or ask the user to create it from the claude.ai routines UI
+
+**つまり私が作れるのは「取れない見込みの Routine」だけ。**
+
+#### (3) それでも黙って置かず、性格を名前に書いた
+
+`trig_01UyxxNpMNp7ecsBycR2xYqz`（2026-09-17 09:00 JST・push/email 通知つき）:
+
+    PR⑥ D+14 乗車判定（9/17）— ⚠CCR環境なのでChrome無しの見込み。取得はCowork側Routineで置き換えること
+
+**Chrome があれば取りに行き、無ければ数値を作らずに手順と転記先をオーナーへ push/email する。**
+「自動化した」ように見えて何もしない Routine を残さないため、**期待される結果のほうを既定として
+プロンプトに書いた。**本当の自動化にするには claude.ai の Routines UI か Cowork セッションから
+作り直す（文書に貼れるプロンプトを置いた）。作り直したらこちらは削除してよい。
+
+#### (4) 台帳の「機械には取りに行けない」を訂正した
+
+`act-pr6-d14-evaluate` の `force_owner_why` を、環境を限定した書き方へ。
+**それでも `force_owner: human` のままにしてある** —— その Routine は一度も実走しておらず、
+書いた代走セッションは分析画面の実物を見ていない。**取れたことを確かめるまで人の側にも残す。**
+
+### 検証
+
+- `d-score.mjs --backtest` を実際に回し、**パーサの正規表現4本を実物と照合**した（文書に転記）
+- `check-experiments --check`: `0 due, 0 overdue (as of 2026-09-03)` —— 9/17 に `due` へ変わる
+- `raw.githubusercontent.com` からこのリポジトリの `docs/` が **HTTP 200** で引けることを確認
+  （`docs/story-seeds.md` は **404**。x-engagement の Routine がそれを読みに行っているが、
+  ファイルが存在しない。**404 を許容する設計なので壊れてはいないが、その機能は一度も発火していない**）
+- `autopilot-act --check` / `preflight.mjs` / `seo-check.js`
+- **モバイル実描画QAは実施していない。**変更は `docs/` と `data/` のみで HTML/CSS/画像を触っていない
+
+### 残る弱さ・申し送り
+
+- **この手順は一度も実走していない。**分析画面の項目名・単位・導線は**推定**で、
+  代走セッションは `prtimes.jp` に届かない（実測 HTTP 000）ため実物を見ていない。
+  初回は調整が要る見込み。**だからこそ「読めなかったものを埋めない」を先に置いた**
+- **Cowork 側の Routine はオーナーにしか作れない。**CCR からは環境を指定できない
+- **`docs/story-seeds.md` が 404。**x-engagement の Routine が毎日読みに行っている先が存在しない。
+  今回の範囲外なので触っていないが、記事ネタ台帳の機能は現在死んでいる
