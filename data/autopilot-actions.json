@@ -1088,6 +1088,49 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null
+    },
+    {
+      "id": "act-pages-outside-shared-css",
+      "title": "17面が共有スタイルシートを読み込んでいない — 共有CSSの修理が届かない",
+      "detail": "2026-09-03、全269面を初めて描画して分かった。次の17面は `assets/css/style.min.css` を読まず、ページ内の `<style>` だけで組んである:\n\n  tiktok/ ・ admin/{,brand,reddit}/ ・ verify.html ・ compose.html ・ data/voice-shift/\n  use-cases/{writers,researchers,designers}/ ・ vs/{tana,heptabase,anytype}/\n  blog/{obsidian-voice-fastest-route,email-management-tips,email-self-task-management,\n        information-organization-guide}.html\n\n**帰結が実際に出た。**共有CSSでナビの断点を 768px → 1099px にした修理がこの17面へ届かず、`/tiktok/` が 900px で **+87px 横漏れ**していた（当日、個別に直した）。`/blog/information-organization-guide.html` も同じ理由で `overflow-wrap` を個別に足している。\n\n**うち13面には `box-sizing: border-box` のリセットも無い**（共有CSSの `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}` が効いていない）。padding が幅に足し算される状態で組まれているので、**リセットを足すと見た目が変わる** —— 機械的な一括変換をしない理由がここにある。\n\n**急ぎではない。**全面の掃き（`check-viewport-overflow.mjs --check`）が269面すべてを 320/360/900/1100px で見るようになったので、**次に届かなかったときは検査が落ちる。**黙って壊れる経路は塞いである。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "assets/css/style.css",
+        "assets/css/style.min.css"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "共有CSSへ寄せると13面の見た目が変わる（content-box 前提で組まれている）。**どこまで揃えるかは設計の判断**で、機械が黙って決めてよい範囲ではない。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
+    },
+    {
+      "id": "act-two-lang-switchers",
+      "title": "言語切替が2実装ある（ドロップダウン10面 / JA・ENの2ボタン226面）— 狭い幅で英語ロゴが入らない原因",
+      "detail": "`/en/` などの10面は1つのドロップダウン（幅105px）、残り226面は JA / EN の2ボタン（幅140px）。**同じ役目の部品が2つある。**\n\n2026-09-03、英語面8つが 360px で 1〜3px 横漏れした。内訳は\nアイコン 28 ＋ ロゴ文字 171 ＋ 言語切替 81 ＋ ☰ 48 ＋ 余白/隙間 56 = **384px** で、360px には 24px 足りない。**35px の差はこの2実装の差そのもの。**\n\n当日はロゴ末尾を省略する形（`Simple Memo - for Obs…`）で収めた —— 余白を詰める案はタップ標的を 56px → 36px にしてしまい（推奨44px割れ）、詰めても 360px では足りなかった。**ブランドの本体は読めるので実害は小さいが、原因を直したわけではない。**\n\n揃えるなら、狭い幅で 35px 得られるドロップダウン側へ。226面の書き換えになるので、**やるかどうかは人が決める。**",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "assets/css/style.css"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "226面の共通部品の作り替えで、見た目と操作が変わる。**横漏れは既に塞いである**ので、急いで機械が動かす理由が無い。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
     }
   ]
 }
