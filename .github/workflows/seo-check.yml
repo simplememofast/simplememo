@@ -88,7 +88,6 @@ jobs:
         run: node scripts/check-content-graph.mjs
 
       # Rating / price / © / og:site_name must match data/site-constants.json
-      - name: Site constants consistency
       # 検出規則が実際に効くことを先に見る。**他社の評価・価格を書き換えない**
       # ことも含む —— ガードが無かった頃、この規則は競合の 4.9/206 を自社の値へ
       # 書き換えかけている（本体のコメント）。
@@ -112,7 +111,6 @@ jobs:
       # Every App Store CTA must carry placement/cluster/variant metadata. A new
       # page copied from an old template would otherwise silently reintroduce
       # unmeasurable CTAs, which is the state this replaced.
-      - name: CTA placement metadata
       # 配置の判定が実際に効くことを先に見る。序数で測っていた頃は 207 件中
       # 168 件の末尾CTAを hero と呼んでいた（本体のコメント）。
       - name: CTA placement rules fire (self-test)
