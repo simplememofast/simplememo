@@ -1092,8 +1092,8 @@
       },
     {
       "id": "act-pages-outside-shared-css",
-      "title": "17面が共有スタイルシートを読まない — 網は配った（2026-09-03）。共有CSSへ寄せるかは未決",
-      "detail": "**「修理が届かない」ほうは塞いだ。**`assets/css/safety-net.css` を作り、17面すべてに配った（2026-09-03）。以後、共有側の網（横漏れの歯止め・ナビの断点・`min-width: 0` 群・折り返せない語の扱い）はこの面にも届く。`scripts/check-viewport-overflow.mjs --static` が**共有CSSか網のどちらかを読んでいることを全269面で要求する**ので、次に抜けたら落ちる。\n\n**残っているのは設計の判断だけ** —— 17面を共有CSSそのものへ寄せるかどうか。\nうち13面は `box-sizing: border-box` のリセットを持たず、**padding が幅に足し算される前提**で組まれている。寄せると見た目が変わる。\n\n対象:\n  tiktok/ ・ admin/{,brand,reddit}/ ・ verify.html ・ compose.html ・ data/voice-shift/\n  use-cases/{writers,researchers,designers}/ ・ vs/{tana,heptabase,anytype}/\n  blog/{obsidian-voice-fastest-route,email-management-tips,email-self-task-management,\n        information-organization-guide}.html\n\n**急ぎではない。**網が届いている以上、放置しても壊れる経路が無い。",
+      "title": "17面が共有スタイルシートを読まない — 網は配った。**寄せない**と決めた（実測・2026-09-03）",
+      "detail": "**「修理が届かない」ほうは塞いだ。**`assets/css/safety-net.css` を17面すべてに配り、`--static` が全269面で「共有CSSか網のどちらかを読んでいること」を要求する。\n\n**残りの問い（共有CSSへ寄せるか）に、実測で答えを出した。答えは「寄せない」。**\n\n内容系12面に共有CSSを（head の先頭へ）足して、要素の位置・大きさが 2px 超動く割合を測った:\n\n    面                                   390px          1280px       高さの変化\n    /tiktok/                             42%            81%          0 / 0 px\n    /data/voice-shift/                   85%            96%       +597 / +347\n    /use-cases/writers/                  56%            65%       +674 / +396\n    /use-cases/researchers/              56%            65%       +914 / +397\n    /use-cases/designers/                57%            66%       +625 / +405\n    /blog/obsidian-voice-fastest-route   83%            97%       +111 / +1047\n    /blog/email-management-tips         55%            60%      +1724 / +577\n    /blog/email-self-task-management    55%            60%      +1403 / +733\n    /blog/information-organization-guide 55%            62%      +1566 / +1238\n    /vs/tana/                            53%            58%      +1530 / +627\n    /vs/heptabase/                       53%            58%      +1306 / +625\n    /vs/anytype/                         53%            58%      +1397 / +755\n\n**安全に寄せられる面は1つも無い。**どの面も要素の半分以上が動き、高さは最大 1,724px 変わる。共有CSSの `*{box-sizing:border-box;margin:0;padding:0}` がcontent-box 前提の組みを作り替えるため。\n\n管理・道具の5面（admin ×3・verify・compose）はそもそも設計体系の外なので、**測る対象にも入れていない。**\n\n**得られるはずだったもの（共有の修理が届く）は、網で既に得ている。**残るのは「見た目を揃えたい」だけで、その代償が上の表。**寄せない。**\n\n── 残る差（承知のうえで残すもの） ────────────────\n自前面のロゴは `.95rem`（共有CSS面は ≤400px で `.78rem`）で、ナビの右側も 19px 広い。`/vs/tana/` は 390px でロゴが2行に折り返す。**横漏れは無い**（over=0）。\n網へロゴの省略規則を持ってきたら**常に切れた**ので外した（12面 × 5幅で悪化0を確認）。きちんと1行に収めるにはナビの右側を詰める必要があり、それは各面のCSSの作り直し ＝ 上の表と同じ代償になる。",
       "source": "manual",
       "domain": null,
       "touches": [
@@ -1107,11 +1107,11 @@
         "kind": "manual",
         "params": {}
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "網の効果を実測（17面 × 360/900/1280px）: **高さの変化は全面で 0px**。11面でナビが 900px のとき「リンク列 → ☰」へ変わるが、これは残り252面と揃える意図した変更。`/tiktok/` だけロゴの縮み規則で +80px 悪化したので、`.global-nav{max-width:100%}` を先に置いて解決（内側 519px → 232px）。適用後の全面走査は Blink 1,118 ＋ WebKit 308 = **1,426通りで漏れ0**。"
+      "closed_jst": "2026-09-03",
+      "evidence": "**寄せない、を実測で決めた。**内容系12面に共有CSSを head 先頭へ足して要素の位置・大きさの変化を数えたところ、2px 超動く要素が **42〜97%**、高さの変化は最大 **+1,724px**。安全に寄せられる面は1つも無かった。得られるはずだった「共有の修理が届く」は `assets/css/safety-net.css` で既に得ており、`scripts/check-viewport-overflow.mjs --static` が全269面で「共有CSSか網のどちらか」を要求する（外すと落ちることを確認済み）。網の適用後の全面走査は Blink 1,118 ＋ WebKit 308 = 1,426通りで漏れ0。"
     },
     {
       "id": "act-two-lang-switchers",
