@@ -29,6 +29,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -42,11 +43,25 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
  */
 export const STATES = ['none', 'selftest_only', 'demonstrated'];
 
-/** CI（seo-check.yml）が実際に走らせている node 検査。**配線が正。** */
+/**
+ * CI（seo-check.yml）が実際に走らせている node 検査。**配線が正。**
+ *
+ * **[2026-09-03] `.mjs` しか拾っていなかった。**seo-check.yml が走らせる node 検査は
+ * `.mjs` 86本 / `.js` 5本で、台帳の86行はすべて `.mjs` だった。つまりこの検査は
+ * 「列挙・証跡・ラチェットに問題なし」と緑を出しながら、**5本について何も見ていなかった** ——
+ * しかもその中にこのリポジトリの主検査 `seo-check.js` が入っていた。
+ * この台帳の $comment が「この工程で見つけた穴は、すべて同じ形をしていた ——
+ * **『判定できなかった』を『異常なし』と報告する**」と書いている、まさにその形。
+ *
+ * 拡張子を `m?js` に広げたのは、5本すべてに自己テストを入れて
+ * 落ちるのを観測したあと（先に広げると none/selftest_only が上限0を超えて即赤になる。
+ * **上限を上げて通すのは禁じ手**で、順番でしか閉じられない）。
+ * 末尾の否定先読みは `foo.js` を `foo.j` + `s` のような形で拾わないため。
+ */
 export function wiredChecks(workflow = WORKFLOW) {
   const text = fs.readFileSync(workflow, 'utf8');
   const found = new Set();
-  for (const m of text.matchAll(/node\s+((?:growth\/)?scripts\/[\w.-]+\.mjs)/g)) found.add(m[1]);
+  for (const m of text.matchAll(/node\s+((?:growth\/)?scripts\/[\w.-]+\.m?js)(?![\w.-])/g)) found.add(m[1]);
   return [...found].sort();
 }
 
@@ -196,6 +211,28 @@ const SCENARIOS = [
     const p = validate({ checks: [{ script: 'a.mjs', state: 'none', at: '2026-08-26' }], none_budget: 1, selftest_only_budget: 0 },
       { wired: ['a.mjs'], exists: () => true });
     assert(p.some((x) => x.includes('観測の記録がある')), p.join(' / '));
+  }],
+  // **拡張子で検査を見落とさない。**2026-09-03 まで `.mjs` しか拾っておらず、
+  // `.js` の5本（主検査 seo-check.js を含む）がこの台帳の外にいた。
+  // 緑を出しながら何も見ていない、という当台帳が狩っている形そのもの。
+  ['**`.js` の検査も列挙する**（拡張子で見落とさない）', () => {
+    const f = path.join(os.tmpdir(), `wired-${process.pid}.yml`);
+    fs.writeFileSync(f, [
+      '        run: node scripts/seo-check.js --selftest',
+      '        run: node scripts/a.mjs --check',
+      '        run: node growth/scripts/b.mjs --check',
+      '        run: node scripts/c.js',
+    ].join('\n'));
+    try {
+      const w = wiredChecks(f);
+      assert(w.includes('scripts/seo-check.js'), `.js を落としている: ${w.join(',')}`);
+      assert(w.includes('scripts/c.js'), `.js を落としている: ${w.join(',')}`);
+      assert(w.includes('scripts/a.mjs') && w.includes('growth/scripts/b.mjs'), `.mjs を落とした: ${w.join(',')}`);
+      // 同じ script を --selftest と本体で2回走らせても1本に畳む。
+      assert(w.length === 4, `重複を畳めていない: ${w.join(',')}`);
+    } finally {
+      fs.rmSync(f, { force: true });
+    }
   }],
   ['実データが検査を通る', () => {
     const p = validate(loadLedger());

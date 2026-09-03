@@ -94,6 +94,24 @@ function filePathToUrl(filePath) {
 }
 
 /**
+ * git diff の出力から通知してよい .html だけを残す。**純粋**（存在確認は注入する）。
+ *
+ * 何を通知するかの判断はここに全部ある。**間違えると、消えたページや検査用の
+ * 見本を検索エンジンへ「新しい」と申告する**ことになるので、切り出して
+ * --selftest から直接叩けるようにしてある。
+ */
+function notifiablePaths(lines, exists = (p) => fs.existsSync(path.join(ROOT_DIR, p))) {
+  return String(lines).split('\n')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .filter((p) => p.endsWith('.html'))
+    .filter((p) => p !== '404.html')
+    .filter((p) => !SKIP_DIRS.some((d) => p === d || p.startsWith(d + '/')))
+    // 削除・リネーム元のパスは disk に無い。消えたページは通知しない。
+    .filter(exists);
+}
+
+/**
  * 直近 commits 個の first-parent 差分から通知対象を組み立てる。
  * HEAD~N は first parent を辿るので、マージコミットでは首親差分になる。
  */
@@ -110,14 +128,7 @@ function getChangedSince(commits = 1) {
       + `seo-check.yml の checkout は fetch-depth: 2 以上が必要）: ${e.message}`
     );
   }
-  const changed = out.split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .filter((p) => p.endsWith('.html'))
-    .filter((p) => p !== '404.html')
-    .filter((p) => !SKIP_DIRS.some((d) => p === d || p.startsWith(d + '/')))
-    // 削除・リネーム元のパスは disk に無い。消えたページは通知しない。
-    .filter((p) => fs.existsSync(path.join(ROOT_DIR, p)));
+  const changed = notifiablePaths(out);
 
   const noindexExcluded = [];
   const urls = [];
@@ -196,8 +207,56 @@ function writeSummary(lines) {
   }
 }
 
+/**
+ * Prove the notify-or-not decision actually discriminates.
+ *
+ * data/check-selftests.json: "落ちることを確かめていない検査は、無いのと同じ".
+ * Wired into seo-check.yml directly because check-selftests.mjs enumerates
+ * `.mjs` only and cannot see this `.js` file — act-ci-selftest-ratchet-js-blind.
+ *
+ * This script is the one on the list that **acts on the outside world** rather
+ * than gating a build: a wrong path here tells search engines that a deleted
+ * page, a noindex page, or a fixture under scripts/ is fresh content. There is
+ * no CI failure for that — the request succeeds and the damage is at Bing.
+ */
+function runSelfTest() {
+  const failures = [];
+  const t = (name, cond) => { if (!cond) failures.push(name); };
+  const all = () => true;
+  const keep = (lines) => notifiablePaths(lines, all);
+
+  t('通常のページは通知対象', keep('obsidian/index.html').length === 1);
+  t('.html 以外は落とす', keep('data/cpp-map.json\nassets/css/main.css').length === 0);
+  t('404.html は通知しない', keep('404.html').length === 0);
+  // SKIP_DIRS。**検査用の見本や管理画面を「新しい記事」として申告しない。**
+  t('scripts/ 配下は通知しない', keep('scripts/fixture.html').length === 0);
+  t('admin/ 配下は通知しない', keep('admin/index.html').length === 0);
+  t('docs/ 配下は通知しない', keep('docs/x.html').length === 0);
+  t('前方一致で別ディレクトリを巻き込まない', keep('adminsomething/index.html').length === 1);
+  // **消えたページを通知しない。**削除・リネーム元は disk に無い。
+  t('disk に無いパスは落とす', notifiablePaths('gone/index.html', () => false).length === 0);
+  t('空行と空白を落とす', keep('\n  \nobsidian/index.html\n\n').length === 1);
+
+  t('URL はサイトのオリジンで組む',
+    filePathToUrl(path.join(ROOT_DIR, 'obsidian/index.html')) === `${SITE_URL}/obsidian/`);
+  t('ルートの index.html は / になる',
+    filePathToUrl(path.join(ROOT_DIR, 'index.html')) === `${SITE_URL}/`);
+
+  t('生成する鍵は 32 桁の16進', /^[a-f0-9]{32}$/.test(generateKey()));
+  t('生成する鍵は毎回違う', generateKey() !== generateKey());
+
+  failures.forEach((f) => console.error(`  ✗ ${f}`));
+  console.log(`自己テスト 13 件中 ${failures.length} 件失敗`);
+  return failures.length ? 1 : 0;
+}
+
 async function main() {
   const args = process.argv.slice(2);
+
+  // **鍵にも網にも触る前に返す。**自己テストが本番の通知を撃たないため。
+  if (args.includes('--selftest')) {
+    process.exit(runSelfTest());
+  }
 
   if (args.includes('--generate-key')) {
     createKey();

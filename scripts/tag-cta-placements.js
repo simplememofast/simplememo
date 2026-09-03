@@ -112,8 +112,9 @@ const langMismatch = [];
 const args = new Set(process.argv.slice(2));
 const WRITE = args.has('--write');
 const CHECK = args.has('--check');
-if (!WRITE && !CHECK) {
-  console.error('usage: tag-cta-placements.js --check | --write');
+const SELFTEST = args.has('--selftest');
+if (!WRITE && !CHECK && !SELFTEST) {
+  console.error('usage: tag-cta-placements.js --check | --write | --selftest');
   process.exit(2);
 }
 
@@ -249,6 +250,69 @@ function classify(html) {
     else if (a.zone === 'footer') a.placement = 'footer';
   }
   return anchors;
+}
+
+/**
+ * Prove the classifier actually discriminates.
+ *
+ * data/check-selftests.json: "落ちることを確かめていない検査は、無いのと同じ".
+ * Wired into seo-check.yml directly because check-selftests.mjs enumerates
+ * `.mjs` only and cannot see this `.js` file — act-ci-selftest-ratchet-js-blind.
+ *
+ * Every assertion below is a bug this script's own comments record as having
+ * shipped: reference links stealing `bottom`, ordinal-vs-position mislabelling
+ * 168 of 207 CTAs as `hero`, competitor links getting tagged, and --write /
+ * --check disagreeing forever because measuring the tagged document is not
+ * idempotent.
+ */
+if (SELFTEST) {
+  const failures = [];
+  const t = (name, cond) => { if (!cond) failures.push(name); };
+  const own = (extra = '') => `<a href="https://apps.apple.com/jp/app/id6758438948?pt=1&amp;ct=jp__x&amp;mt=8"${extra}>D</a>`;
+  const ref = '<a href="https://apps.apple.com/jp/app/id6758438948?mt=8">App Store</a>';
+  const rival = '<a href="https://apps.apple.com/jp/app/id999999999?ct=jp__x">Rival</a>';
+  const placements = (html) => classify(html).map((a) => a.placement);
+
+  // 位置で決まること。**序数ではない** —— 序数で測っていた版は 207 件中 168 件の
+  // 末尾CTAを hero と呼んでいた（本体のコメント）。
+  const long = 'p'.repeat(4000);
+  t('main の先頭側の CTA は hero',
+    placements(`<main>${own()}${long}${long}</main>`)[0] === 'hero');
+  t('main の末尾側の CTA は bottom',
+    placements(`<main>${long}${long}${own()}</main>`)[0] === 'bottom');
+  t('main の中ほどの CTA は mid',
+    placements(`<main>${long}${own()}${long}</main>`)[0] === 'mid');
+  // chrome は位置ではなくゾーンで決まる。
+  t('nav の中の CTA は nav', placements(`<nav>${own()}</nav><main>${long}</main>`)[0] === 'nav');
+  t('footer の中の CTA は footer', placements(`<main>${long}</main><footer>${own()}</footer>`)[0] === 'footer');
+  t('nav クラスを持つ CTA は本文にあっても nav',
+    placements(`<main>${long}${own(' class="global-nav__cta"')}</main>`)[0] === 'nav');
+  // **本文中の参照リンクが bottom を横取りしない。**ct= の有無で分ける。
+  t('ct= を持たない自社リンクは reference', placements(`<main>${long}${ref}</main>`)[0] === 'reference');
+  t('参照リンクは本物の CTA から bottom を奪わない', (() => {
+    const p = placements(`<main>${long}${own()}${ref}</main>`);
+    return p[0] === 'bottom' && p[1] === 'reference';
+  })());
+  // 他社のストアリンクは編集上の引用。**印を付けない。**
+  t('他社アプリのリンクは placement を持たない', placements(`<main>${long}${rival}</main>`)[0] === null);
+
+  // 冪等性。**属性を剥がしてから測らないと --write と --check が永久にすれ違う。**
+  const tagged1 = `<main>${long}<a data-cta-placement="hero" data-cta-cluster="other" data-cta-variant="v1" href="https://apps.apple.com/jp/app/id6758438948?pt=1&amp;ct=jp__x&amp;mt=8">D</a>${long}</main>`;
+  t('付与済みの属性を剥がすと素の文書に戻る', !/data-cta-/.test(stripCtaAttrs(tagged1)));
+  t('剥がしてから測れば同じ位置に落ち着く',
+    placements(stripCtaAttrs(tagged1))[0] === placements(`<main>${long}${own()}${long}</main>`)[0]);
+
+  // クラスタとロケール。
+  t('クラスタは URL から引く', clusterOf('/obsidian/airpods/') === 'obsidian' && clusterOf('/vs/notion/') === 'vs' && clusterOf('/') === 'home');
+  t('ロケール接頭辞はクラスタを変えない', clusterOf('/en/obsidian/') === 'obsidian');
+  // **言語はトークンから引く。**ページの位置からではない（実測で 182 件食い違っている）。
+  t('トークンの接尾辞が言語を決める', langOf('foo-en', 'index.html') === 'en' && langOf('foo-jp', 'en/index.html') === 'jp');
+  t('接尾辞が無いときだけページの位置で決める', langOf('foo', 'en/index.html') === 'en' && langOf('foo', 'index.html') === 'jp');
+  t('畳んだ形は冪等', langOf('jp__nav', 'en/index.html') === 'jp');
+
+  failures.forEach((f) => console.error(`  ✗ ${f}`));
+  console.log(`自己テスト 16 件中 ${failures.length} 件失敗`);
+  process.exit(failures.length ? 1 : 0);
 }
 
 const problems = [];   // real failures: a CTA carrying no placement metadata

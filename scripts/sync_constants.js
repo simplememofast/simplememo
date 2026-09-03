@@ -134,8 +134,8 @@ const RULES = [
  * **一番古い事実より新しい鮮度を主張できない。**（評価が10日前なら、
  * バージョンを今日更新しても、この行全体としては10日前が正しい）
  */
-function stampDate() {
-  const dates = [C.appVersionNote, C.ratingNote, C.priceNote]
+function stampDate(c = C) {
+  const dates = [c.appVersionNote, c.ratingNote, c.priceNote]
     .map((n) => {
       const all = [...String(n || '').matchAll(/(\d{4}-\d{2}-\d{2})/g)].map((m) => m[1]).sort();
       return all.length ? all[all.length - 1] : null;
@@ -156,8 +156,9 @@ const LLMS_RULES = [
 
 const args = new Set(process.argv.slice(2));
 const WRITE = args.has('--write');
-if (!WRITE && !args.has('--check')) {
-  console.error('usage: sync_constants.js --check | --write');
+const SELFTEST = args.has('--selftest');
+if (!WRITE && !args.has('--check') && !SELFTEST) {
+  console.error('usage: sync_constants.js --check | --write | --selftest');
   process.exit(2);
 }
 
@@ -168,6 +169,78 @@ function* htmlFiles(dir) {
     if (e.isDirectory()) yield* htmlFiles(p);
     else if (e.name.endsWith('.html')) yield p;
   }
+}
+
+/**
+ * Prove the detectors discriminate — and, more importantly, that they refuse
+ * to touch a competitor's numbers.
+ *
+ * data/check-selftests.json: "落ちることを確かめていない検査は、無いのと同じ".
+ * Wired into seo-check.yml directly because check-selftests.mjs enumerates
+ * `.mjs` only and cannot see this `.js` file — act-ci-selftest-ratchet-js-blind.
+ *
+ * The aggregateRating case is not hypothetical: without the
+ * `(?!"@type":"SoftwareApplication")` guard this rule offered to rewrite
+ * Boomerang's 4.9/206 to our own numbers on /en/send-email-to-yourself/,
+ * because our node there carries no aggregateRating and a forward scan ran
+ * straight into the next app in the ItemList. A detector that edits someone
+ * else's structured data is worse than no detector at all.
+ */
+if (SELFTEST) {
+  const failures = [];
+  const t = (name, cond) => { if (!cond) failures.push(name); };
+  const ruleBy = (name) => RULES.find((r) => r[0] === name);
+  /** Apply one rule the way the main body does, and report what changed. */
+  const apply = (name, html) => {
+    const [, re, build] = ruleBy(name);
+    return html.replace(new RegExp(re.source, re.flags), build);
+  };
+
+  // --- 他社のデータを書き換えないこと（この検査の一番重い仕事） ---
+  const ourNodeNoRating = '{"@id":"https://simplememofast.com/#app","@type":"SoftwareApplication","name":"x"}';
+  const rivalNode = '{"@type":"SoftwareApplication","name":"Boomerang","aggregateRating":{"ratingValue":"4.9","ratingCount":"206"}}';
+  const itemList = `[${ourNodeNoRating},${rivalNode}]`;
+  t('自社ノードに評価が無いとき、隣の他社の評価へ回り込まない',
+    apply('JSON-LD aggregateRating on #app', itemList) === itemList);
+  t('他社の 4.9/206 がそのまま残る', /"4\.9"[\s\S]*"206"/.test(apply('JSON-LD aggregateRating on #app', itemList)));
+
+  // --- 自社ノードの評価は書き換えること（守るだけで直さないと意味が無い） ---
+  const ourNodeStale = '{"@id":"https://simplememofast.com/#app","aggregateRating":{"ratingValue":"1.0","ratingCount":"1"}}';
+  const fixed = apply('JSON-LD aggregateRating on #app', ourNodeStale);
+  t('自社ノードの古い評価は台帳の値へ直す',
+    fixed.includes(`"${C.ratingValue}"`) && fixed.includes(`"${C.ratingCount}"`) && !fixed.includes('"1.0"'));
+
+  // --- 価格 ---
+  t('自社の月額 offer を直す',
+    apply('JSON-LD monthly offer price', '"name": "Premium Monthly","price": "1"').includes(String(C.priceMonthlyJpy)));
+  // 検体は3桁にする。規則は `\d{3}` を要求しており、1桁の検体では**規則を殺しても
+  // 通ってしまう**（この自己テストを書いたとき実際にそれで落ちた）。
+  t('見える月額（月額N円）を直す',
+    apply('JPY monthly (月額N円 / ¥N/月)', '月額999円') === `月額${C.priceMonthlyJpy}円`);
+  t('月額の検体は台帳の値と別物であること（検査が空振りしない）', String(C.priceMonthlyJpy) !== '999');
+
+  // --- 見える評価の対 ---
+  const pair = apply('rating pair JA 「4.4…10件の評価」', '<strong>1.0</strong> · 1件の評価');
+  t('見える評価の対（値と件数）を同時に直す',
+    pair.includes(String(C.ratingValue)) && pair.includes(`${C.ratingCount}件の評価`));
+
+  // --- 鮮度の日付。**一番古い事実より新しい鮮度を主張しない。** ---
+  // 実際に起きた形: 版だけ新しい日付にしたら「リリースの13日前に 5.8.1 が現行」と名乗った。
+  t('3つの注記のうち一番古い日付を採る',
+    stampDate({ appVersionNote: '2026-09-01', ratingNote: '2026-08-20', priceNote: '2026-08-25' }) === '2026-08-20');
+  t('1つの注記に複数の日付があれば、その中では新しい方を使う',
+    stampDate({ appVersionNote: '2026-08-01 と 2026-09-01', ratingNote: '2026-09-02', priceNote: '2026-09-03' }) === '2026-09-01');
+  t('日付がどこにも無ければ null（今日の日付を捏造しない）',
+    stampDate({ appVersionNote: 'なし', ratingNote: '', priceNote: null }) === null);
+
+  // --- 実データが通ること（合成検体だけだと本物が形を変えた日に気づかない） ---
+  t('台帳の値が揃っている',
+    [C.ratingValue, C.ratingCount, C.priceMonthlyJpy, C.appVersion].every((v) => v !== undefined && v !== null && String(v) !== ''));
+  t('実データの stampDate が日付を返す', /^\d{4}-\d{2}-\d{2}$/.test(String(stampDate())));
+
+  failures.forEach((f) => console.error(`  ✗ ${f}`));
+  console.log(`自己テスト 12 件中 ${failures.length} 件失敗`);
+  process.exit(failures.length ? 1 : 0);
 }
 
 let driftCount = 0;
