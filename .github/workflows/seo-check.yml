@@ -646,8 +646,20 @@ jobs:
       # `npx playwright install webkit` はサンドボックスの egress で塞がれていたが、
       # **apt の webkit2gtk-driver は通る**（WebKitGTK = Safari と同じ WebKit コア）。
       # ヘッドレスで動かないので Xvfb を併せて入れる。約30秒。
+      # `apt-get update` を先に撃つ。**ランナーの索引は mirror より古いことがある** ——
+      # 初回の実行が、索引の 2.52.3 を取りに行って mirror の 2.52.6 しか無く 404 で落ちた
+      # （ローカルで同じ壁に当たって update で解けていたのに、CI 側へ写し忘れていた）。
+      #
+      # `continue-on-error` にしてあるのは、**apt の不調で本番デプロイを止めないため。**
+      # このリポジトリは描画側の検査を報告のみにしており（ブラウザ側の不調でCIが赤くなる）、
+      # ここも同じ扱いにする。**ただし黙らせない** —— 失敗すると手順が赤い警告で残り、
+      # 検査本体も `WebKit — **測れなかった**` と理由つきで出す。
+      # `|| true` にしないのはそのため（それだと成功と見分けがつかない）。
       - name: Install WebKit (WebKitGTK + WebDriver)
-        run: sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb
+        continue-on-error: true
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb
 
       - name: Landing pages do not scroll sideways (report-only)
         run: |
