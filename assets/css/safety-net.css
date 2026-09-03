@@ -1,0 +1,94 @@
+/* ============================================================
+   横漏れの網 — **共有スタイルシートを読まない面のために切り出したもの。**
+
+   [2026-09-03] 全269面を初めて描画したとき、45面で横スクロールが出た。
+   直す先は共有CSS（assets/css/style.css）へ寄せたが、**17面はそれを読み込んでいない。**
+   実際に届かなかった: ナビの断点を 768px → 1099px にした修理が `/tiktok/` へ届かず、
+   900px で **+87px** 漏れていた（当日、個別に直した）。
+   `/blog/information-organization-guide.html` も同じ理由で `overflow-wrap` を個別に足している。
+
+   **17面を共有CSSへ寄せる案は採らなかった。**うち13面は `box-sizing: border-box` の
+   リセットも持たず、padding が幅に足し算される前提で組まれている ——
+   **寄せると見た目が変わる。**どこまで揃えるかは設計の判断で、機械が黙って決める範囲ではない
+   （`data/autopilot-actions.json` の `act-pages-outside-shared-css`）。
+
+   **代わりに「網」だけを切り出した。**ここに入れてよいのは
+   *壊れているものを収める規則*だけで、*見た目を決める規則*は入れない。
+   `box-sizing` を入れていないのはそのため。
+
+   ── 実測して確かめたこと（17面 × 360/900/1280px） ──────────
+
+   - **高さの変化は全面で 0px。**段組みも文字も動かない
+   - 11面でナビが 900px のとき「リンク列 → ☰」へ変わる。
+     **これは意図した揃え** —— 残り252面は既にそう振る舞っており、
+     `/use-cases/*` が 1100px で +88px 漏れていたのはこれが無かったから
+   - `/data/voice-shift/` は 360px で CTA が消える（≤768px の契約に揃う）
+   - **`/tiktok/` だけ +80px 悪化した。**ロゴを縮ませる規則を足すと、
+     幅の制約が無いこの面では内側が 519px に膨らむ。
+     `.global-nav` に `max-width: 100%` を与えて解決（下の最後の節）
+   ============================================================ */
+
+/* 横漏れの最終的な歯止め。**修理ではなく網** —— 原因側は
+   `scripts/check-viewport-overflow.mjs` が落とす。
+   `hidden` ではなく `clip` を使う（`hidden` は `position: sticky` を壊す）。 */
+body {
+  overflow-x: clip;
+  overflow-wrap: break-word;   /* 折り返せない語（URL・英語の専門語）を箱から出さない */
+}
+
+/* モバイル専用のCTAリンクは既定で出さない。**面ごとの <style> 任せにすると抜ける** ——
+   2026-09-03、9面で抜けていてデスクトップに出ていた。 */
+.nav-cta-mobile { display: none; }
+
+/* ナビのCTAは 768px 以下では出さない（☰ の中の `.nav-cta-mobile` が受ける）。 */
+@media (max-width: 768px) {
+  .global-nav__cta { display: none !important; }
+}
+
+/* 769〜1099px も ☰ にする。各面のインラインCSSは 768px までしか持っていない。 */
+@media (max-width: 1099px) {
+  .global-nav__links:not(.open) { display: none !important; }
+  .global-nav__hamburger { display: block !important; }
+  .global-nav__links.open .nav-cta-mobile { display: block !important; }
+  .global-nav__links.open {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    position: absolute !important;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 0.5rem 1rem 1rem !important;
+    gap: 0.25rem !important;
+    z-index: 999;
+  }
+}
+
+/* **flex / grid の子は既定で min-content より縮まない**（`min-width: auto`）。
+   2026-09-03 の45面のうち12面がこの形だった。`min-width: 0` は「縮んでよい」と言うだけ。 */
+.author-bio > *,
+.reason-card,
+.philosophy-box > * > *,
+.flow-desc {
+  min-width: 0;
+}
+
+/* ナビが画面より広くならないようにしてから、ロゴを縮ませる。
+
+   **順序が要る。**`.global-nav` に上限が無いまま
+   `.global-nav__logo > span { white-space: nowrap }` を入れると、
+   折り返しで収まっていた面が**膨らむ** —— `/tiktok/` が 360px で
+   内側 519px・**+80px 漏れ**になった（実測）。上限を先に置くと 232px へ縮んで収まる。 */
+.global-nav,
+.global-nav__inner {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.global-nav__logo { min-width: 0; flex-shrink: 1; }
+.global-nav__logo > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
