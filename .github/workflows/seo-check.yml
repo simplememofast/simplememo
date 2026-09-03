@@ -850,6 +850,12 @@ jobs:
           node scripts/check-autopilot-page.mjs --selftest
           node scripts/check-autopilot-page.mjs --check
 
+      # PR実験の評価期限の導出。**回さなければ手元でしか走っていない。**
+      # 実データの「9/16 は0件・9/17 は1件」も自己テストが固定しているので、
+      # 台帳側で日付や status が動けばここで落ちる。
+      - name: PR実験の評価期限
+        run: node scripts/pr-evaluation-due.mjs --selftest
+
       - name: Operating memory
         run: |
           node scripts/check-operating-memory.mjs --selftest
