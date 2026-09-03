@@ -633,4 +633,91 @@ function main() {
   process.exit(0);
 }
 
+/**
+ * Prove the gates actually fire.
+ *
+ * data/check-selftests.json: "落ちることを確かめていない検査は、無いのと同じ".
+ * This is the repo's primary SEO gate and it had no self-test, because
+ * check-selftests.mjs enumerates `.mjs` checks only and cannot see a `.js`
+ * one — see data/autopilot-actions.json#act-ci-selftest-ratchet-js-blind.
+ * That is exactly the shape this project keeps finding: a check reporting
+ * "no problems" about ground it never looked at.
+ *
+ * The precedent is concrete. On 2026-08-13 a new page's head landed inside an
+ * unclosed <script> and all twelve gates went green, because they read
+ * title/description/canonical with regexes that happily match inside script
+ * bodies. check-script-tags.mjs now guards that specific hole; this proves the
+ * gates themselves still bite.
+ *
+ * Synthetic pages are written under os.tmpdir(), never inside the repo — a
+ * fixture that lands in the working tree gets committed sooner or later, and
+ * a deliberately broken page is the last thing that should ship.
+ */
+function runSelfTest() {
+  const os = require('os');
+  const failures = [];
+  const t = (name, cond) => { if (!cond) failures.push(name); };
+
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'seo-check-selftest-'));
+  /** Run checkFile over one synthetic page and return what it reported. */
+  const report = (html) => {
+    const file = path.join(dir, 'page.html');
+    fs.writeFileSync(file, html);
+    errors.length = 0;
+    warnings.length = 0;
+    checkFile(file);
+    const got = { errors: [...errors], warnings: [...warnings] };
+    errors.length = 0;
+    warnings.length = 0;
+    return got;
+  };
+  const head = [
+    '<title>t</title>',
+    `<meta name="description" content="${'d'.repeat(120)}">`,
+    '<link rel="canonical" href="https://simplememofast.com/">',
+    '<meta name="viewport" content="width=device-width">',
+  ].join('');
+  const page = (over = {}) => {
+    const parts = { html: '<html lang="ja">', head, body: '<body></body>', ...over };
+    return `${parts.html}<head>${parts.head}</head>${parts.body}</html>`;
+  };
+  const has = (r, tag) => [...r.errors, ...r.warnings].some((m) => m.startsWith(tag));
+
+  // A page with nothing wrong must stay quiet — otherwise every assertion
+  // below could be passing on noise rather than on the gate under test.
+  t('揃ったページは何も言わない', report(page()).errors.length === 0);
+
+  t('[TITLE] title が無ければ落ちる', has(report(page({ head: head.replace('<title>t</title>', '') })), '[TITLE]'));
+  t('[TITLE] title が空でも落ちる', has(report(page({ head: head.replace('<title>t</title>', '<title>  </title>') })), '[TITLE]'));
+  t('[DESC] description が無ければ落ちる',
+    has(report(page({ head: head.replace(/<meta name="description"[^>]*>/, '') })), '[DESC]'));
+  t('[CANONICAL] canonical が無ければ落ちる',
+    has(report(page({ head: head.replace(/<link rel="canonical"[^>]*>/, '') })), '[CANONICAL]'));
+  t('[VIEWPORT] viewport が無ければ落ちる',
+    has(report(page({ head: head.replace(/<meta name="viewport"[^>]*>/, '') })), '[VIEWPORT]'));
+  t('[SCHEMA] 廃止された HowTo は落ちる',
+    has(report(page({ body: '<body><script type="application/ld+json">{"@type":"HowTo"}</script></body>' })), '[SCHEMA]'));
+  // 2026-08-11 に実際に出荷された形。英語ページに日本語専用の span が並ぶ。
+  t('[LANG] 英語ページの ja span を lang.js 無しで出したら落ちる',
+    has(report(page({ html: '<html lang="en">', body: '<body><span data-lang="ja">あ</span></body>' })), '[LANG]'));
+  t('[LANG] lang.js があれば言わない',
+    !has(report(page({ html: '<html lang="en">', body: '<body><span data-lang="ja">あ</span><script src="/js/lang.js"></script></body>' })), '[LANG]'));
+  // noindex は早期 return するので、**壊れていても何も出ないのが正**。
+  t('noindex のページは検査しない',
+    report(page({ head: '<meta name="robots" content="noindex">' })).errors.length === 0);
+
+  // getMetaContent の2件は、どちらも**実際に起きた誤計測**の再発検査（本体のコメント参照）。
+  const apos = getMetaContent(`<meta name="description" content="memos aren't. ${'x'.repeat(130)}">`, 'name', 'description');
+  t('description のアポストロフィで値が切れない', apos !== null && apos.length > 100);
+  const first = getMetaContent('<meta content="other" name="og:x"><meta content="wanted" name="description">', 'name', 'description');
+  t('content を先に書いた meta でも正しい tag から読む', first === 'wanted');
+
+  fs.rmSync(dir, { recursive: true, force: true });
+
+  failures.forEach((f) => console.error(`  ✗ ${f}`));
+  console.log(`自己テスト 12 件中 ${failures.length} 件失敗`);
+  process.exit(failures.length ? 1 : 0);
+}
+
+if (process.argv.includes('--selftest')) runSelfTest();
 main();
