@@ -2611,6 +2611,95 @@ coverage-queue の pending は26件。故障が片付いた日はレーンEへ�
 
 ---
 
+## 2026-09-03（主系GitHub Actions・schedule） — レーンA（Refresh）。`/obsidian/getting-started/` に「obsidian ダウンロード」の未回答意図へ答えるFAQを追加
+
+> **この記録は取り残しから回収した。**主系が書いたコミット `ac0e224` は、auto-merge が検証済みSHA（`b7e6e3e`）をマージした**あと**にブランチへ積まれたため main に入っていない —— Runbook §5-1b が同じ日に書いた形そのもの。本文は主系が書いたまま（`15→19` のような後日訂正も、当時の記録として触っていない）。**実費の追記だけは引き継げていない** —— 回収した代走セッションの環境から Actions のジョブログを読めないため（下の 2026-09-03（6））。
+
+### 経緯
+
+レーンF（自己修復・health-intake・ingest-recovery）はすべて「対象なし／正常」。監視Issue 0件、
+`data/ingest-recovery.json` の記録も0件で、修理を最優先にする理由は無かった。
+
+`growth/scripts/analyze.mjs --only unanswered` が検出した唯一のノイズフロア超過案件:
+
+    − 3.4 clicks  [query] obsidian ダウンロード
+                 imp 128 · pos 8.5 · expected CTR 2.7% · got 0
+                 already ranking: /obsidian/getting-started/ (pos 8.5, 128 imp)
+
+`growth/content/refresh-queue.json` にも同じ観測が `A1`（`query:obsidian ダウンロード`・
+`status: queued`）として既に入っていた（09-02 に自動生成・未着手）。
+
+ページを開くと、Step 1セクション（対応OS・配布形式の表）とFAQで既にインストール手順を
+詳しく扱っており、コンテンツの欠落ではなかった。ただし可視FAQ・FAQPage JSON-LDのどちらにも、
+クエリの言い回し「ダウンロード」に厳密一致する見出し・Q&Aが無い（既存の質問は「無料で使えますか」
+「アカウント登録は必要ですか」等）。**答え方の不一致**という診断で、Lane Bの実証済み手法
+（質問文とほぼ同一の見出し＋断定的な回答）をLane Aの未回答意図にも適用した。
+
+### 変更
+
+- FAQに「Obsidianはどこからダウンロードできますか？」を追加（JA/EN）。回答は
+  **2026-08-12の既存検証済み事実の範囲内**（公式サイト・obsidianmd/obsidian-releases
+  GitHubリリースの直接確認、Linux版AppImageの実インストール）で、新規の検証は行っていない
+- 同じ内容をFAQPage JSON-LDにも追加
+- `dateModified` を `2026-08-12` → `2026-09-03`
+- `refresh-queue.json` の A1 を `status: done` にし、`resolution` に対応内容を記録
+  （`STICKY_STATES` により再生成で戻らない）
+- `data/distribution-queue.json` に配信の種を追加（Runbook §5-5・`x_post_ja` 108字）
+- sitemapを再生成
+
+`/obsidian/` ハブ本体・`/obsidian/compare/logseq/` は触っていない
+（`monitor-2026-08-09-obsidian-ctr` 監視中のため対象外を確認済み）。
+
+### 検証
+
+- `seo-check.js`: 268ファイル 0 errors 0 warnings
+- iPhoneビューポート QA（Playwright, 390×844 DPR3）: `npx playwright install --with-deps chromium`
+  が正常完了（ダウンロード完了まで通した。深追いにはならなかった）。新規FAQ項目を開閉した前後で
+  `scrollWidth === clientWidth === 390`・overflowなしを実測
+- `check-css-version` / `check-benchmark`（新規CONFLICT/AMBIGUOUSなし） /
+  `check-url-normalization` / `check-internal-redirects`（13,885 href/src全て直200） /
+  `sync_constants --check` / `tag-cta-placements --check` / `check-experiments`（overdue 0） /
+  `autopilot-budget --check` / `autopilot-runs --check` / `check-authority --check` /
+  `autopilot-selfheal --check`（対象なし） / `autopilot-drill --check`（39/39） /
+  `automation-rate --check` / `check-pr-facts --check` / `d-score --check` /
+  `generate_sitemap.py --dry-run`: すべて通過
+
+### データ鮮度
+
+`bq-preflight.mjs` はこの環境で資格情報が無く落ちるため、本日 2026-09-02T00:38 UTC の
+seo-daily run 33576189276 の Export preflight ログから読んだ:
+**newest data 2026-08-30（3日遅れ・正常範囲）／21日蓄積／28日窓は2026-09-06から／
+穴なし・停止テーブルなし・中断エクスポートなし。**
+
+`growth/data/gsc/2026-09-02`（21日分・28日未満の部分ウィンドウ）は同runの
+`ingest-bigquery.mjs`が自動生成したもの。今回のunanswered-intent検出は**この単発
+スナップショット内の1クエリの期待クリック計算**を根拠にしており、複数スナップショット間の
+比較を要するdecay検出（`--only decay`）は行っていない——Runbookが「28日未満のうちに
+部分期間でスナップショットを作らない」と戒めているのは期間長が揺れる**比較**の話で、
+単発の期待クリック判定（ノイズフロア）は期間長に依存しない。
+
+### 台帳
+
+- `data/autopilot-runs.json` に `ap-20260903-actions`（route: actions・lane: A・
+  action: refresh・outcome: shipped・pr: 793）を追記
+- `refresh-queue.json` A1 を `done` に（上記）
+- `data/autopilot-status.json` を当日分で上書き（cost/runs は script の `--json` 出力を結合）
+- 実費: 前回run（2026-09-02・33568838189）は既に台帳へ入っていたため、本日の追記対象は無し。
+  本runの実費は次回セッションが追記する
+
+### 残る弱さ・申し送り
+
+- 1回上限の未レビュー超過が2件（09-01 repair $9.37／09-02 repair $13.57）残ったまま。
+  本日はrefreshだったため主系は止まらずに進行できたが、**次にレーンFがrepairを選ぶ回は
+  着手前に止まる見込み**。解除は人間のみ（`--ack-overrun`）
+- 孤立ブランチ3件（`claude/obsidian-auto-20260827` / `-20260902` /
+  `claude/simplememofast-indexing-93xm3y`）は中身確認待ちのまま。owner_requestsに再掲
+- coverage-queue（レーンE）のpendingは26件のまま変化なし——本日はレーンAで足りる案件が
+  あったため着手していない
+- 次のGSCスナップショットで「obsidian ダウンロード」のクリック数の変化を確認すること
+
+---
+
 ## 2026-09-03 — 配線（引き継いだパッチを、bash に当てずに .yml から judgment を出した）
 
 - **判断根拠:** 前日（09-02）の記録が、`isAbandonedClaim()` の bash 版パッチを
@@ -2823,3 +2912,230 @@ coverage-queue の pending は26件。故障が片付いた日はレーンEへ�
   AIからは提案しない**と workflow のコメントに書いた。
 - **検証:** YAML パース・`check-injection-surface --check`・`preflight.mjs` 123本中1本失敗
   （既存の `check-generators --run`。main でも同じ）。
+---
+
+## 2026-09-03（6・代走 owner-session） — レーンF。**出荷した日に「実行記録なし」と報告していた**／日次アクチュエータの欠陥4件
+
+### 着手の理由 — 日報そのものが壊れていた
+
+オーナーから当日の日報を渡されて「解決して」。日報の1行目はこうだった:
+
+    公開記事: 0（当日分の実行記録なし・最新は 2026-09-02）
+    連続無記事: 5日（最後の記事 2026-08-28）
+
+**どちらも事実と違う。**同じ日の 08:06 JST に PR #793（レーンA・Refresh・
+`/obsidian/getting-started/`）がマージされ、本番へ出ている。主系 run 33692832179 は
+07:57→08:08 JST で success。
+
+原因は主系の記録コミット `ac0e224`（status JSON・運転台帳・LOG の3点）が
+**auto-merge の検証済みSHA `b7e6e3e` のあとに積まれ、main に届いていなかった**こと。
+Runbook §5-1b が**同じ日の朝に**「マージ後に書く台帳は別のブランチへ」と書いた、
+まさにその形。§5-1b は `autopilot-runs.mjs --append` にガードまで入れているが、
+**主系はそれより前の版で走っていた**（本番の主系が読むのは main の Runbook で、
+§5-1b が main に入ったのは主系の run が終わったあと）。
+
+出荷はしたのに出荷していないと報告される日なので、まずそこを直した:
+
+- 運転台帳へ `ap-20260903-actions`（route: actions / lane: A / action: refresh /
+  pr: 793 / external_ref: **33692832179**）。**取り残しの写しではなく Actions API と
+  マージ済みPRから起こし直した** —— 主系の行には `external_ref` が無く、あの値が無いと
+  `append-cost` が実費を結合できない
+- LOG へ主系の記録を回収（下の「取り残し」）
+- status JSON を本日分で上書き（§5-2）
+
+### レーンF — 日次アクチュエータ自身の欠陥を4件
+
+`autopilot-selfheal --check` は「対象なし」。つまり**運転の失敗は残っていない。**
+残っていたのは、その失敗を**数え、行き先を決め、閉じる**側の欠陥だった。
+
+#### (1) 規則が「人へ渡す」と決めた故障を、AI行として起票し続けていた
+
+2026-09-02 の回が `autopilot-selfheal.mjs` に `owner_routed` を入れ、
+`usage_limit`（`escalation-rules.json` の `who: owner`）を 🤝 として表示するようにした。
+**表示は変わったが、台帳の行き先は変わっていない。**`autopilot-act.mjs` の `derive()` は
+`t.escalate` しか見ておらず、`owner_routed` は `else` に落ちて**AI行のまま起票されていた。**
+
+帰結は非対称に出た —— 日報は3日ぶん「AIがやること: 未修理の故障（usage_limit）」を出し、
+**規則が人へ渡すと決めた依頼はオーナーに一度も届いていない。**セッション側から見れば
+「打つ手が無いのに毎日上がってくる行」で、これは 09-02 の回が潰したかった当のもの。
+
+閉じ条件も直した。`run_repaired` は selfheal の未修理リストから消えたら閉じる条件で、
+消えるのは `repair_of` を書いたときだけ —— そして **Runbook はこの種別に `repair_of` を
+書くことを禁じている**（書くと `repair_limit` が進み、3回目で `--contain` が経路を止める。
+時間で自然に戻る停止が人待ちの停止に化ける）。つまり**規則が満たすことを禁じている閉じ条件**で、
+構造的に永久に開く。`no_failure_since`（経路 × 種別 × 最後の失敗日）へ替えた。D5 と同じ形。
+
+**替えた結果、2件はその場で閉じた。**`ap-20260830-actions` と `ap-20260831-actions` は
+「08-31 以降 actions は3回着手し usage_limit の再発なし」で閉じる。
+**人が見ないまま閉じたことは、そのまま書いておく** —— 規則が最初に挙げる手が「待つ」で、
+待った結果として条件が消えた。09-03（2）の「未レビューだった2件は、レビューされずに閉じた」と同じ形。
+
+**3件目は閉じない。**`ap-20260831-ccr0920` は「08-31 以降 ccr-0920 は**一度も着手していない**」。
+`no_failure_since` は「失敗が無い」だけでは閉じない（走ってすらいない可能性を潰す）ので、
+**沈黙している経路の行は人へ渡ったまま残る。**副系ccr-0920 が 09-01 に起動したこと自体は
+09-01 の行の注記に残っているが、当日ロックで**スキップ**なので `attempted` ではない。
+
+#### (2) `issue_closed` の判定材料を、誰も作っていなかった
+
+`health-intake.mjs`（08-26）は監視Issueを台帳へ運び、閉じるのは `issue_closed` に任せる設計。
+ところが **`buildContext` は `ctx.issues` を一度も作っていなかった。**
+`issue_closed` は毎日「Issue の状態を取得できず判定不能」を返すだけで、
+`act-health-591` は**8日間**未処理の上から2番目に居座っていた。
+
+**#591 は立った当日（2026-08-26T14:31:44Z）に監視ワークフロー自身が閉じている。**
+故障はとうに終わっていて、**終わったことを見に行く経路だけが無かった。**
+
+`fetchOpenHealthIssues()` を足して配線した。対象ラベルは `health-intake.mjs` の
+`HEALTH_LABELS` を**そのまま import** する（運ぶ側と閉じる側でずれると、
+運ばれたのに閉じない行か、運んでいないのに閉じる行が出る）。
+**読めなかった回は `null`** —— トークン無し・非200・例外・**1ページで覆えない件数**。
+最後のが要るのは、2ページ目の Issue が「一覧に無い＝閉じた」に化けるから。
+
+#### (3) 照合して受容した取り残しが、翌日に新規で戻ってきていた
+
+`merge()` は旧ID（PR単位）の行を新ID（ブランチ単位）の畳み先にするが、
+**`state === 'open'` のときしか引き当てていなかった。**同じ日の PR #807 が
+`813b335` を照合して `act-orphaned-pr-660` を `acknowledged` にした直後、
+新IDの行が引き当てに失敗して立ち上がり、**照合済みの取り残しがAIの未処理として戻ってきた。**
+受容は「もう見た」という記録なので、引き当てから漏れると何度でも見直させる。
+`acknowledged` も畳み先に含めた（`done` は今までどおり含めない）。
+畳んだあとの再点火は今までどおり `reviewed_orphans` が持つ —— 同じブランチに別のコミットが
+積まれれば受容は自動で開き直る（自己テストで固定）。
+
+#### (4) 実費の**取得に失敗した回**を「実費は発生していない」として永久除外に積んでいた
+
+いちばん効いていたのはこれ。`fetchRunCost()` は
+「ジョブログに実費行が無い」も「ジョブログを読めなかった」も同じ `null` を返し、
+`append-cost` はどちらも
+`実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む`
+と書いていた。**除外は台帳に残り、二度と取りに行かない。**
+
+台帳が自分で証拠を持っていた —— **除外6件のうち3件は、実費が台帳にある:**
+
+| run_id | Actions run | 台帳の実費 | 除外一覧 |
+|---|---|---|---|
+| `ap-20260826-actions` | 32900786201（**success で出荷**） | ある | 載っていた |
+| `ap-20260830-actions` | 33279844326 | ある | 載っていた |
+| `ap-20260831-actions` | 33340960317 | ある | 載っていた |
+
+**同じ run が「実費は存在しない」と書かれたあとで実際に測れている。**
+取得の失敗を、事実の不在として記録していた。
+
+4件目は種類が違う。`ap-20260831-ccr0920` の `external_ref` は
+`cse_01VZpZ4oseTMEgbBPzddUSxN` —— **CCRのセッションid**で、Actions API へ投げれば
+当然404（実測した）。台帳自身が「CCR経路の実費は観測手段が無い。cost は null で、0ではない」と
+書いているのに、**観測手段が無いだけの回が「発生していない」に化けていた。**
+
+直し方は、返り値で状態を分けること:
+
+    measured    実費行を読めた
+    absent      ログは読めたが実費行が無い（Claude Code 前に落ちた回）→ 除外してよい
+    gone        ログが 410／run が 404／Actions の run id ではない → **実費はあった。もう取れない**
+    unreadable  一時的（5xx・403・例外）→ **除外しない。**翌日また試す
+
+除外の文言も「実費が**存在しない**」から「実費が**残っていない**」へ。
+`absent` と `gone` は同じ除外でも意味が違い、後者は実費が存在した回だから。
+そのうえで **実費が載った run は除外から自動で外す**ようにした（載ったのに
+「存在しない」の一覧に残ると、根拠の文が嘘を言い続ける）。
+
+**この修正が無ければ、この回自身が同じ誤りを犯していた。**代走の環境は
+Actions のジョブログを読めない（ログ本体は blob ホストで、egress プロキシが CONNECT を 403 で拒否）。
+`--apply` を回した実測は `ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない`。
+旧コードなら **`ap-20260903-actions`（本日の出荷回・実費は確実に発生している）を永久除外に積んでいた。**
+
+#### ⚠ (5) 自分で入れた修正が、その場で別のものを壊した
+
+(1) のために `merge()` が**導出の閉じ条件に追従する**ようにした
+（追従しないと、先に立った行が古い閉じ条件のまま取り残される）。
+これが `cost_covers_runs` の `exclude` —— **handler が積んでいく状態** —— を毎回消した。
+`--apply` の1回目で除外6件が全部消え、閉じていた行が開き直ったのを見て気づいた。
+
+種別（kind）が変われば params は前の種別のものなので捨てる。
+同じ種別なら、導出が出さなかったキーは残す、に直した。
+**「閉じ条件は導出の結果」は、半分しか正しくなかった。**
+
+### 取り残し3件 — 全部照合して片付けた
+
+権限表の「運転台帳の取り残しの始末」（#809 でオーナーが委譲・同日 #811 で機械にも一部委譲）に従い、
+**main に欠けが無いことを積極的に示せた**ものだけ受容した。
+
+| ブランチ | SHA | 判定 |
+|---|---|---|
+| `claude/obsidian-auto-20260827` | 813b335 | #807 が受容済み。(3) の修正で畳まれ、開き直らなくなった |
+| `claude/obsidian-auto-20260903` | ac0e224 | **回収して受容** |
+| `claude/obsidian-auto-20260902` | ef8b3a7 | **照合して受容**（内容は #811 が入れている） |
+
+`ac0e224` の照合。機械（`apply-orphan-ledger`）は3パスのうち2つを自分で示した ——
+runs は行キーの包含（ブランチ側42行すべてが main にある）、status は
+「main 側が 2026-09-03 で上書き済み」。**LOG だけは前方一致が通らない** ——
+ブランチが分岐したあとに main へ別の 09-03 エントリが5本入っているので、
+ブランチ側は main の接頭辞になりえない（機械の判定は正しい。示せないものを倒していない）。
+**代わりに行の包含で示した**: ブランチが `b7e6e3e` へ足した 3,471文字・非空66行のうち、
+**いま main に無い行は0行**。本文（主系が書いた 09-03 のエントリ）はこのPRで回収して入れた。
+
+`ef8b3a7` は「ドリルの本数を実測に直す（15→39）」で、**取り残しではなく main に届かなかった訂正**。
+Runbook §4・LOG の該当行は #811 が入れており、実測 `autopilot-drill --check` は 39/39 で一致する。
+`kpi-definitions.json` だけは**写しを当ててはいけない** —— ブランチは noise_floor を v25 にしているが、
+main は同じ番号 v25 を**別の変更**に使っていて、いまは v30。版番号が衝突している。
+ブランチが必要としていた「Runbook を触ったことによる checksum の更新」は main の v30 が
+同じ理由（§4 のドリル本数を 39 へ）で果たしている。
+
+### 公開面 — 台帳に1行増えたので、公開済みの数字が1日ぶんずれた
+
+`ap-20260903-actions` を足したことで、連続稼働 16→**17**日・連続出荷 2→**3**日。
+`check-autopilot-page --check` が `autopilot/index.html` と
+`docs/pr-autopilot-2026-09-body.md` の両方で食い違いを出したので、両方を引き直した。
+
+配信稿のほうは「本文は配信時のまま残します」と書いてある一方で、
+ヘッダに「**台帳が正で、本文が従。**手で書き換えて検査を黙らせないこと」とも書いてある。
+**数字は台帳に従わせ、配信時の値は追記に記録として残した**（narrative は1文字も変えていない）。
+配信時の値がパターンに当たらない書き方にしてあるので、検査は現在値だけを見る。
+
+### 検証
+
+- `scripts/preflight.mjs`: **124本中1本失敗**。落ちたのは `check-generators.mjs --run` で、
+  **作業ツリーが汚れていると走らない**という当のスクリプトの規律による
+  （`作業ツリーがクリーンでないので走らせない — 人の編集を潰さない。`）。
+  コミット後に再実行して確認した（下の「コミット後」）。
+  **main（60e9ab01）の同じ木では 124本中0本失敗**を先に測ってある
+- `autopilot-act.mjs --selftest`: **241 → 293 項目**（+52・失敗0）
+- **変異で空虚でないことを確かめた（8件）**: `owner_routed` の分岐を殺す／`since` を自分の日付に固定する／
+  ページング防護を外す／読めなかった回を空一覧に倒す／受容を畳み先から外す（＝元の挙動）／
+  `done` まで畳み先に広げる／読めない回を `absent` に倒す（＝元の挙動）／
+  観測手段の無い経路も未記録に数える（＝元の挙動）。**8件すべてが対応するテストを落とした**
+- `--apply` を**実データで走らせた**（上の HTTP 403 と、除外3件の自動解除）
+- `check-guard-shapes --check`: 新しく増えた3箇所（`t.route` / `t.failure_class` / `x?.pull_request`）を
+  1件ずつ読んで `data/guard-shapes.json` に記録。**どれも「読めないときに規則が消える」向きではない**
+  ことを注記に書いた（`--selftest` 20件0失敗）
+- `property-tests --check` 反例なし・`--selftest` 13件0失敗 ／ `autopilot-drill --check` 39/39 ／
+  `autopilot-selfheal --check` 境界問題なし・`--selftest` 7件0失敗 ／ `check-authority --check` ／
+  `check-selftests --check` ／ `check-definitions --check`
+- `seo-check.js`: **268ファイル 0 errors 0 warnings**
+- BigQuery は **MCP で直接読んだ**（`bq-preflight.mjs` はこの環境で資格情報が無く落ちる）。
+  22日蓄積・最新 data_date 2026-08-31・`days == span` で穴なし・`temp_` テーブル0件
+- **モバイル実描画QAは実施していない。**HTML の変更は `autopilot/index.html` の数字3箇所だけで、
+  レイアウトに触っていない（`check-viewport-overflow --static` は「改行機会の無い隣接なし」）。
+  ブラウザが要る工程を省いた理由はこれで、環境都合ではない
+
+### 台帳
+
+- `data/autopilot-runs.json` … `ap-20260903-actions`（実費は未記入。**代走の環境から
+  ジョブログが読めないため**で、0ではない。Actions 上で走る `append-cost` が埋める）
+- `data/autopilot-actions.json` … 未処理 **10件 → 4件**（人2/AI2）。閉じたのは6件、受容が2件
+- `data/autopilot-status.json` … 本日分（action: refresh・article: `/obsidian/getting-started/`）
+- `data/guard-shapes.json` … `known` に3件
+- `ROUTINE_MCP_PROBE` は**出さない。**この回は CCR だが**スケジュール起動ではない**（オーナー起動の代走）ので、
+  §0-3 が聞いている問い（スケジュール起動の副系が `claude-code-remote` の MCP を持つか）の答えにならない。
+  2026-09-01 に主系が「答えの形をした無関係な行」を残した誤りを、経路違いで繰り返さない
+
+### 残る弱さ・申し送り
+
+- **オーナーへ1件**: `ap-20260831-ccr0920`（`usage_limit`）。打つ手は「待つ・枠を上げる・
+  1回あたりの入力量を減らす」で、後ろ2つは人の判断。**この行は ccr-0920 が実際に着手するまで閉じない** ——
+  副系が沈黙している状態と、上限で落ちる状態が、台帳の上で区別できていない
+- **`ap-20260903-actions` の実費が未記入。**次に Actions 上で `autopilot-act.yml` が走れば埋まる。
+  **埋まらなかったら (4) の修正が効いていない**ので、そこを見ること
+- `act-budget-recalibrate`（9日・最古）は開いたまま。09-03（2）が「削減は効かなかった」と結論して
+  1回上限を引き直したが、**目標 $4.50 そのものは取り下げられていない**。article の実測が
+  08-26 の1件しかないので、次の article 回まで判定できない。**閉じるなら目標を動かす判断が要り、
+  それは実費の判断＝人の領域**なので、こちらからは閉じていない
