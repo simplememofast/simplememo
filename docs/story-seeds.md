@@ -26,10 +26,22 @@ note・X・Reddit・Indie Hackers の定期投稿タスクが「次に何を書�
 - **全媒体で書かない表現**: 完全自動化／完全無人／無人経営／人間不要／世界初／
   AIが経営すると読める言い回し／再帰的自己改善／爆速／神アプリ／革命／圧倒的／最強／
   徹底解説／完全ガイド／◯◯選。加えて各種の `使わない表現` 欄を守る。
-- **製品の事実は台帳ではなく本番から取る**（種は運営の話であって仕様書ではない）:
-  `https://simplememofast.com/data/site-constants.json` と `https://simplememofast.com/llms.txt`。
+- **製品の事実は台帳ではなく一次ファイルから取る**（種は運営の話であって仕様書ではない）。
   現行の正式名称は **Obsidian連携シンプルメモ**（EN: Simple Memo - for Obsidian）だが、
-  **版・料金・無料枠は必ず上のファイルの当日値を引くこと。**ここに書き写すと二重管理になる。
+  **版・料金・無料枠は必ず当日値を引くこと。**ここに書き写すと二重管理になる。
+
+  ```
+  https://raw.githubusercontent.com/simplememofast/simplememo/main/data/site-constants.json
+  https://simplememofast.com/llms.txt
+  ```
+
+  **⚠ `https://simplememofast.com/data/site-constants.json` は 404 を返す。**サイトが
+  意図的に配信していない（`data/publication-policy.json`: `served_by_site: false` /
+  「公開面へは sync_constants が値を撒くので、原本を出す必要が無い」。実体は
+  `functions/_middleware.js` の非配信リスト）。**リポジトリは公開なので raw からは読める**
+  （同ポリシーの `repository_is_public: true` / `ok_in_public_repo: "ok"`）。
+  **サイトのURLへ書き戻さないこと** —— 2026-09-03 にこの台帳を作ったとき、実際にそのURLを
+  書いて 404 を出している（`llms.txt` は 200 だが、無料枠の記述を持たない）。
 
 ---
 
