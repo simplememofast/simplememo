@@ -39,24 +39,91 @@ const MAP_FILE = path.join(ROOT_DIR, 'data/cpp-map.json');
 const args = new Set(process.argv.slice(2));
 const WRITE = args.has('--write');
 const CHECK = args.has('--check');
-if (!WRITE && !CHECK) {
-  console.error('usage: apply-cpp-ppid.js --check | --write');
+const SELFTEST = args.has('--selftest');
+if (!WRITE && !CHECK && !SELFTEST) {
+  console.error('usage: apply-cpp-ppid.js --check | --write | --selftest');
   process.exit(2);
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Everything that makes the map itself unusable, as a pure function so
+ * --selftest can prove each rule actually fires. data/check-selftests.json:
+ * "落ちることを確かめていない検査は、無いのと同じ".
+ *
+ * Note this script is `.js`, and check-selftests.mjs only enumerates `.mjs`
+ * checks — so it cannot see this file and the ratchet does not cover it. The
+ * self-test below is wired into seo-check.yml directly for that reason.
+ */
+function mapProblems(m) {
+  const out = [];
+  for (const cpp of m.cpps) {
+    if (cpp.ppid == null) continue;
+    if (!UUID_RE.test(cpp.ppid)) {
+      out.push(`${cpp.id}: ppid "${cpp.ppid}" is not a UUID — copy it from the CPP URL in App Store Connect`);
+      continue;
+    }
+    // A well-formed UUID is not enough. Apple: "Custom product pages must be
+    // approved before they are visible to users", and a page that is not live
+    // redirects to the default product page. So a ppid whose CPP has not been
+    // approved fails in exactly the same way as a malformed one — every click
+    // lands on the default page while this ledger says the page is wired.
+    //
+    // That is not hypothetical. free-memo-generic was created on 2026-09-02 and
+    // sat in PREPARE_FOR_SUBMISSION; the row had to keep pointing at a
+    // different, already-approved CPP (plain-notes) because wiring the
+    // dedicated one would have measured nothing. Nothing here could tell the
+    // difference, so the ledger carries the state it was verified at.
+    //
+    // asc_state comes from `asc-cpp.yml --action list` in simplememo-ios (the
+    // repo that holds the ASC key). It is a recorded observation, not a live
+    // read — see the staleness notice below.
+    if (cpp.asc_state !== 'APPROVED') {
+      out.push(
+        `${cpp.id}: ppid ${cpp.ppid} is wired but asc_state is ${JSON.stringify(cpp.asc_state ?? null)} — `
+        + 'only APPROVED CPPs are served; anything else silently falls back to the default product page. '
+        + 'Verify with asc-cpp.yml --action list in simplememo-ios and record the state here.'
+      );
+    }
+  }
+  return out;
+}
+
+if (SELFTEST) {
+  const failures = [];
+  const t = (name, cond) => { if (!cond) failures.push(name); };
+  const row = (over = {}) => ({
+    id: 'x', ppid: '3d126d78-2267-4a6c-a860-c69707ab90a5', asc_state: 'APPROVED', match: ['^/x/$'], ...over,
+  });
+
+  t('承認済みの行は通る', mapProblems({ cpps: [row()] }).length === 0);
+  t('ppid が null の行は何も言わない（オーナー入力待ち）',
+    mapProblems({ cpps: [row({ ppid: null, asc_state: undefined })] }).length === 0);
+  t('UUID でない ppid は落ちる', mapProblems({ cpps: [row({ ppid: 'not-a-uuid' })] }).length === 1);
+  // 本命。**未承認を配線すると Apple は既定商品ページへ倒すのに、台帳は「配線済み」と言う。**
+  t('未提出の CPP を配線したら落ちる',
+    mapProblems({ cpps: [row({ asc_state: 'PREPARE_FOR_SUBMISSION' })] }).length === 1);
+  t('asc_state を書き忘れたら落ちる', mapProblems({ cpps: [row({ asc_state: undefined })] }).length === 1);
+  t('落ちる理由に状態が出る',
+    /PREPARE_FOR_SUBMISSION/.test(mapProblems({ cpps: [row({ asc_state: 'PREPARE_FOR_SUBMISSION' })] })[0] || ''));
+  t('複数行でも件数が合う',
+    mapProblems({ cpps: [row(), row({ id: 'y', asc_state: 'REJECTED' }), row({ id: 'z', ppid: 'zzz' })] }).length === 2);
+  // **実データが通ることも見る。**合成検体だけだと、本物が形を変えた日に気づかない。
+  t('実データ（data/cpp-map.json）が通る',
+    mapProblems(JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'))).length === 0);
+
+  failures.forEach((f) => console.error(`  ✗ ${f}`));
+  console.log(`自己テスト 8 件中 ${failures.length} 件失敗`);
+  process.exit(failures.length ? 1 : 0);
+}
 
 /** Same anchor conventions as tag-cta-placements.js — see the comments there. */
 const PARAM_CT = /(?:[?&]|&amp;)ct=/;
 const PARAM_PPID = /((?:[?&]|&amp;)ppid=)([^"&]*)/;
 
 const map = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));
-const malformed = [];
-for (const cpp of map.cpps) {
-  if (cpp.ppid != null && !UUID_RE.test(cpp.ppid)) {
-    malformed.push(`${cpp.id}: ppid "${cpp.ppid}" is not a UUID — copy it from the CPP URL in App Store Connect`);
-  }
-}
+const malformed = mapProblems(map);
 if (malformed.length) {
   // A malformed map must fail even in --check: shipping a token Apple ignores
   // would silently send every click back to the default product page while
@@ -64,6 +131,25 @@ if (malformed.length) {
   malformed.forEach((m) => console.error(`  ${m}`));
   console.error('FAIL: data/cpp-map.json is malformed.');
   process.exit(1);
+}
+
+// The states above are a snapshot, and ASC can move underneath it (a CPP can be
+// deleted, or an edit can put an approved page back into review). CI here cannot
+// re-read ASC — the key lives in simplememo-ios and this repo's checkout is its
+// own — so staleness is reported, never failed: failing the build on a question
+// this build cannot answer would block unrelated work, the same reasoning the
+// competitor-benchmark check already runs on.
+const STALE_AFTER_DAYS = 30;
+if (map.asc_state_checked_jst) {
+  const ageDays = Math.floor(
+    (Date.now() - Date.parse(`${map.asc_state_checked_jst}T00:00:00+09:00`)) / 86400000
+  );
+  if (ageDays > STALE_AFTER_DAYS) {
+    console.log(
+      `  note: asc_state was last verified ${map.asc_state_checked_jst} (${ageDays} days ago). `
+      + 'Re-run asc-cpp.yml --action list in simplememo-ios and update asc_state / asc_state_checked_jst.'
+    );
+  }
 }
 
 /** First matching map entry wins; the current patterns are disjoint anyway. */

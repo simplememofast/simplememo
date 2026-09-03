@@ -1069,27 +1069,27 @@
       ]
     },
     {
-        "id": "act-autopilot-cpp-ppid",
-        "title": "/autopilot/ 用のカスタムプロダクトページ（CPP）を1本作り、ppid を data/cpp-map.json へ記入する",
-        "detail": "2026-09-03 のプレスリリースが読者を送る先は `/` と `/autopilot/` の2本。**`/autopilot/` にだけ CPP が無い。**\n\n帰結は D+14（9/17）の乗車判定に出る —— この面から来たインストールがデフォルト商品ページのぶんに混ざるので、**「PR経由で何件入ったか」を分離できない。**配信当日にモバイルのCTAを足した（`ct=jp__bottom`）が、`ct=` はサイト側のクリック計測で、**インストールの帰属は ASC 側の ppid でしか取れない。**\n\n手順: ASC → SimpleMemo → カスタムプロダクトページ → 新規作成 → URL末尾の `ppid=<UUID>` を `data/cpp-map.json` の `id: autopilot` 行へ記入 → `node scripts/apply-cpp-ppid.js --write` → `--check` が以後を守る。\n\n**AIからは実行できない。**App Store Connect の人の操作で、この環境には ASC の書き込み経路が無い（読み取りの `asc-metrics` だけ）。台帳側の受け皿（`ppid: null` の行）は 2026-09-03 に作ってあるので、記入するだけで配線される。\n\n**急がなくてよい理由も書いておく。**9/17 の判定は Wilson 区間で読むので、分離できないぶんは「PR経由を過小にも過大にも見ない」ではなく**「分けられない」**として扱う（分母に混ぜて率を作らない）。いま作れば 9/17 までの残り2週間ぶんは分離できる。\n\n---\n\n⚠ **[2026-09-03 追記・検証] この手順のままだと 9/17 に間に合わない。**\n上の手順は「CPP を1本作って ppid を書く」で終わっているが、**作成しただけの CPP では計測が始まらない。**\nApple の一次資料（developer.apple.com/help/app-store-connect/create-custom-product-pages/configure-multiple-product-page-versions/）:\n  - 『Custom product pages must be approved before they are visible to users.』\n  - 『Users are automatically redirected to your default product page if they access a disabled or deleted custom product page URL.』\n新規作成した CPP は PREPARE_FOR_SUBMISSION なので、**その ppid を配線したリンクは既定商品ページへ倒れる** —— いま分離できていないのと同じ状態のまま、台帳と `apply-cpp-ppid.js --check` だけが「配線済み」と言う形になる。**これは apply-cpp-ppid.js 自身がコメントで警告している失敗**（\"shipping a token Apple ignores would silently send every click back to the default product page while the ledger says the page is wired\"）。実例として free-memo-generic（3b8f2fd5…）が同じ状態で審査待ちのまま止まっている。\n\n**9/17 までに実際に分離するなら、経路は2つ。**\n  (a) **既に APPROVED で未使用の CPP を暫定で配線する。**2026-09-02 に free-memo-apps-ranking → plain-notes でやった形と同じ。**配線した当日から計測が始まる。**代償は中身が /autopilot/ の文脈と合わないこと。**未使用**であることが要る（既に別ページを受けている CPP を流用すると、そちらの数字と混ざって結局分離できない —— obsidian-vault は既に /obsidian/ と /blog/obsidian-voice-input を受けている）。\n  (b) **新規作成して審査に出す。**Apple は CPP 単独の提出を許している（『You may choose to add other items to the submission』）。直近22日の審査提出は10件（data/app-releases.json summary.review_submissions_in_window）なので、次の版に同乗させる待ちも短い。承認日から計測が始まる。\n**(a)+(b) の併用が free-memo-generic と同じ形**で、いちばん取りこぼしが少ない。\n\n**閉じ条件の読み方（この行の要点）:** 入れた ppid が **APPROVED の CPP のとき**だけ「分離できている」。未承認の ppid を入れて closed にすると、**測っていないものを測ったことにする。**\n\n**なお、この行の「急がなくてよい理由」は D+14 の判定式には効かない。**乗車判定は `boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5`（data/autopilot-actions-report.json の act-pr6-d14-evaluate）で、**PR TIMES 側の数値だけで決まりインストール数は入らない。**ppid が要るのは判定式ではなく「PR経由で何件入ったか」を別に答えるため。\n\n---\n\n**[2026-09-03 実測] ASC を実際に叩いた。分かったことを3つ。**\n（`simplememo-ios` の `asc-cpp.yml` を list / create で回した結果。run 33721309279 ほか）\n\n**(1) 専用CPPは作れない —— Apple の上限に当たっている。**\n`POST /appCustomProductPages` が返した値をそのまま置く:\n  `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n**ASC の CPP は現在ちょうど70本で、これが上限。**1本消さないと新規作成はできず、`asc_cpp.rb` に delete は無い。**削除は不可逆で外向きなので、消すかどうかはオーナーの判断**（どれを消すかも含めて）。\n\n**(2) 流用なら今日から効く。**`vs-drafts`（`3d126d78-2267-4a6c-a860-c69707ab90a5`）は **APPROVED**（list の実測）。承認済みなので配線した瞬間から計測に乗る。配線は PR #830 が入れた。\n  ※ list の `visible` 列は `vs-drafts` も含めほぼ全部 `false` だが、**これは無効という意味ではない** —— 実測のある `mail-to-self` も `visible: false` / `APPROVED` で 15DL・CVR 5.42% を出している。`visible` の意味自体は未解明で、今回は判断材料にしていない。\n\n**(3) 「/vs/drafts/ と混ざる」はいまは起きていない。**`data/cpp-map.json` に `^/vs/drafts` の行は無く、`vs/drafts/index.html` の CTA は ppid を持たない（`apply-cpp-ppid.js` の規律どおり、表に無いページは未配線）。つまり **`vs-drafts` CPP にいま入るのは `/autopilot/` からの流入だけ**で、実質は専用CPPと同じに読める。**混ざり始めるのは、将来 `/vs/drafts/` を同じ ppid へ配線したときだけ** —— そのときは PR経由の分離が黙って死ぬので、`/vs/drafts/` を配線するときにこの行を思い出すこと。\n\n**この行の閉じ条件:** PR #830 が main に入り、本番の `/autopilot/` が `ppid=3d126d78…` を1件返すこと。**専用CPPの作成は別の話**（上限を1本空ける判断が要る）で、この行の条件には入れない —— 入れると「分離は始まっているのに行が閉じない」状態を作る。",
-        "source": "manual",
-        "domain": null,
-        "touches": [
-          "data/cpp-map.json"
-        ],
-        "force_owner": "human",
-        "force_owner_why": "App Store Connect でのCPP作成は人の操作。この環境には ASC への書き込み経路が無く、ppid は作成後にしか存在しない。**機械は受け皿（ppid: null の行）と配線スクリプトまでを用意できるが、値は作れない。**\n\n⚠ **[2026-09-03 訂正] 「この環境には ASC への書き込み経路が無い」はもう成り立たない。**simplememo-ios に `asc-cpp.yml`（ASC API で CPP を list / create。#296 / #298 / #299）があり、**2026-09-02 に実際にこれで free-memo-generic を作っている**（data/cpp-map.json の同行に ppid ごと記録がある）。塞いでいるのは「機械に経路が無いこと」ではなく、**この実行系が simplememo-ios を見られないこと**（セッションのリポジトリ範囲外・add_repo は分類器が拒否）。主系（Actions）や iOS リポジトリ側からなら機械で作れる。\n\n**それでも human を残す理由は別にある。**作成しただけでは計測が始まらず（detail 参照）、**承認まで進めるには審査提出という人の操作が要る** —— data/release-gate.json は enabled:false / dry_run:true で、提出の門はまだ立っていない。",
-        "auto": null,
-        "close_check": {
-          "kind": "manual",
-          "params": {}
-        },
-        "state": "done",
-        "created_jst": "2026-09-03",
-        "last_seen_jst": "2026-09-03",
-        "closed_jst": "2026-09-03",
-        "evidence": "完了（2026-09-03）。**依頼どおりの「専用CPPを1本作る」はできていない。**代わりに承認済みCPPの流用で**分離そのものは達成した**ので、その差を先に書く。\n\n【機械で検証】\n  - 配線は PR #830（`vs-drafts` 流用・ppid `3d126d78-2267-4a6c-a860-c69707ab90a5`）。main は 5fbcbb2。\n  - **本番で確認済み**: `curl -s https://simplememofast.com/autopilot/ | grep -o 'ppid=[a-f0-9-]*' | sort -u` → **1件**（`ppid=3d126d78-…`）。App Store CTA 3本すべてに入っている（`ct=jp__nav` ×2・`ct=jp__bottom` ×1）。\n  - `node scripts/apply-cpp-ppid.js --check` exit 0（27ページ配線）。\n  - `vs-drafts` が **APPROVED** であることは `simplememo-ios` の `asc-cpp.yml --action list` の実測（run 33721309279）。承認済みなので **配線した時点から計測に乗る**。\n\n【専用CPPを作らなかった理由 —— 作れなかった】\n  `POST /appCustomProductPages` の返り値そのもの: `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n  **ASC の CPP はちょうど70本で Apple の上限。**内訳は APPROVED 32 / PREPARE_FOR_SUBMISSION 38 —— **枠の54%が、一度も審査に出していない＝1インストールも受けられないページで埋まっている。**1本消さないと新規作成はできず、削除は不可逆で外向き。\n  **オーナー判断（2026-09-03）: いまは何もしない。**`vs-drafts` で 9/17 の分離は足りるため、専用CPPと70枠の整理は D+14 の判定後に扱う。\n\n【この流用がいま実質「専用」である理由】\n  `data/cpp-map.json` に `^/vs/drafts` の行は無く、`vs/drafts/index.html` の CTA は ppid を持たない（表に無いページは未配線、という `apply-cpp-ppid.js` の規律）。つまり **`vs-drafts` CPP にいま入るのは `/autopilot/` からの流入だけ。**\n  ⚠ **将来 `/vs/drafts/` を同じ ppid へ配線した時点で、PR経由の分離は黙って死ぬ。**そのときここを見ること。\n\n【残る限界】\n  ASC 側の実数（この ppid で何件入ったか）はリポジトリから読めない。**この行が保証するのは「分離できる状態にした」までで、「分離した数字を得た」ではない。**数字は D+14 の判定時に ASC で見る。"
+      "id": "act-autopilot-cpp-ppid",
+      "title": "/autopilot/ 用のカスタムプロダクトページ（CPP）を1本作り、ppid を data/cpp-map.json へ記入する",
+      "detail": "2026-09-03 のプレスリリースが読者を送る先は `/` と `/autopilot/` の2本。**`/autopilot/` にだけ CPP が無い。**\n\n帰結は D+14（9/17）の乗車判定に出る —— この面から来たインストールがデフォルト商品ページのぶんに混ざるので、**「PR経由で何件入ったか」を分離できない。**配信当日にモバイルのCTAを足した（`ct=jp__bottom`）が、`ct=` はサイト側のクリック計測で、**インストールの帰属は ASC 側の ppid でしか取れない。**\n\n手順: ASC → SimpleMemo → カスタムプロダクトページ → 新規作成 → URL末尾の `ppid=<UUID>` を `data/cpp-map.json` の `id: autopilot` 行へ記入 → `node scripts/apply-cpp-ppid.js --write` → `--check` が以後を守る。\n\n**AIからは実行できない。**App Store Connect の人の操作で、この環境には ASC の書き込み経路が無い（読み取りの `asc-metrics` だけ）。台帳側の受け皿（`ppid: null` の行）は 2026-09-03 に作ってあるので、記入するだけで配線される。\n\n**急がなくてよい理由も書いておく。**9/17 の判定は Wilson 区間で読むので、分離できないぶんは「PR経由を過小にも過大にも見ない」ではなく**「分けられない」**として扱う（分母に混ぜて率を作らない）。いま作れば 9/17 までの残り2週間ぶんは分離できる。\n\n---\n\n⚠ **[2026-09-03 追記・検証] この手順のままだと 9/17 に間に合わない。**\n上の手順は「CPP を1本作って ppid を書く」で終わっているが、**作成しただけの CPP では計測が始まらない。**\nApple の一次資料（developer.apple.com/help/app-store-connect/create-custom-product-pages/configure-multiple-product-page-versions/）:\n  - 『Custom product pages must be approved before they are visible to users.』\n  - 『Users are automatically redirected to your default product page if they access a disabled or deleted custom product page URL.』\n新規作成した CPP は PREPARE_FOR_SUBMISSION なので、**その ppid を配線したリンクは既定商品ページへ倒れる** —— いま分離できていないのと同じ状態のまま、台帳と `apply-cpp-ppid.js --check` だけが「配線済み」と言う形になる。**これは apply-cpp-ppid.js 自身がコメントで警告している失敗**（\"shipping a token Apple ignores would silently send every click back to the default product page while the ledger says the page is wired\"）。実例として free-memo-generic（3b8f2fd5…）が同じ状態で審査待ちのまま止まっている。\n\n**9/17 までに実際に分離するなら、経路は2つ。**\n  (a) **既に APPROVED で未使用の CPP を暫定で配線する。**2026-09-02 に free-memo-apps-ranking → plain-notes でやった形と同じ。**配線した当日から計測が始まる。**代償は中身が /autopilot/ の文脈と合わないこと。**未使用**であることが要る（既に別ページを受けている CPP を流用すると、そちらの数字と混ざって結局分離できない —— obsidian-vault は既に /obsidian/ と /blog/obsidian-voice-input を受けている）。\n  (b) **新規作成して審査に出す。**Apple は CPP 単独の提出を許している（『You may choose to add other items to the submission』）。直近22日の審査提出は10件（data/app-releases.json summary.review_submissions_in_window）なので、次の版に同乗させる待ちも短い。承認日から計測が始まる。\n**(a)+(b) の併用が free-memo-generic と同じ形**で、いちばん取りこぼしが少ない。\n\n**閉じ条件の読み方（この行の要点）:** 入れた ppid が **APPROVED の CPP のとき**だけ「分離できている」。未承認の ppid を入れて closed にすると、**測っていないものを測ったことにする。**\n\n**なお、この行の「急がなくてよい理由」は D+14 の判定式には効かない。**乗車判定は `boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5`（data/autopilot-actions-report.json の act-pr6-d14-evaluate）で、**PR TIMES 側の数値だけで決まりインストール数は入らない。**ppid が要るのは判定式ではなく「PR経由で何件入ったか」を別に答えるため。\n\n---\n\n**[2026-09-03 実測] ASC を実際に叩いた。分かったことを3つ。**\n（`simplememo-ios` の `asc-cpp.yml` を list / create で回した結果。run 33721309279 ほか）\n\n**(1) 専用CPPは作れない —— Apple の上限に当たっている。**\n`POST /appCustomProductPages` が返した値をそのまま置く:\n  `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n**ASC の CPP は現在ちょうど70本で、これが上限。**1本消さないと新規作成はできず、`asc_cpp.rb` に delete は無い。**削除は不可逆で外向きなので、消すかどうかはオーナーの判断**（どれを消すかも含めて）。\n\n**(2) 流用なら今日から効く。**`vs-drafts`（`3d126d78-2267-4a6c-a860-c69707ab90a5`）は **APPROVED**（list の実測）。承認済みなので配線した瞬間から計測に乗る。配線は PR #830 が入れた。\n  ※ list の `visible` 列は `vs-drafts` も含めほぼ全部 `false` だが、**これは無効という意味ではない** —— 実測のある `mail-to-self` も `visible: false` / `APPROVED` で 15DL・CVR 5.42% を出している。`visible` の意味自体は未解明で、今回は判断材料にしていない。\n\n**(3) 「/vs/drafts/ と混ざる」はいまは起きていない。**`data/cpp-map.json` に `^/vs/drafts` の行は無く、`vs/drafts/index.html` の CTA は ppid を持たない（`apply-cpp-ppid.js` の規律どおり、表に無いページは未配線）。つまり **`vs-drafts` CPP にいま入るのは `/autopilot/` からの流入だけ**で、実質は専用CPPと同じに読める。**混ざり始めるのは、将来 `/vs/drafts/` を同じ ppid へ配線したときだけ** —— そのときは PR経由の分離が黙って死ぬので、`/vs/drafts/` を配線するときにこの行を思い出すこと。\n\n**この行の閉じ条件:** PR #830 が main に入り、本番の `/autopilot/` が `ppid=3d126d78…` を1件返すこと。**専用CPPの作成は別の話**（上限を1本空ける判断が要る）で、この行の条件には入れない —— 入れると「分離は始まっているのに行が閉じない」状態を作る。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/cpp-map.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "App Store Connect でのCPP作成は人の操作。この環境には ASC への書き込み経路が無く、ppid は作成後にしか存在しない。**機械は受け皿（ppid: null の行）と配線スクリプトまでを用意できるが、値は作れない。**\n\n⚠ **[2026-09-03 訂正] 「この環境には ASC への書き込み経路が無い」はもう成り立たない。**simplememo-ios に `asc-cpp.yml`（ASC API で CPP を list / create。#296 / #298 / #299）があり、**2026-09-02 に実際にこれで free-memo-generic を作っている**（data/cpp-map.json の同行に ppid ごと記録がある）。塞いでいるのは「機械に経路が無いこと」ではなく、**この実行系が simplememo-ios を見られないこと**（セッションのリポジトリ範囲外・add_repo は分類器が拒否）。主系（Actions）や iOS リポジトリ側からなら機械で作れる。\n\n**それでも human を残す理由は別にある。**作成しただけでは計測が始まらず（detail 参照）、**承認まで進めるには審査提出という人の操作が要る** —— data/release-gate.json は enabled:false / dry_run:true で、提出の門はまだ立っていない。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
       },
+      "state": "done",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": "2026-09-03",
+      "evidence": "完了（2026-09-03）。**依頼どおりの「専用CPPを1本作る」はできていない。**代わりに承認済みCPPの流用で**分離そのものは達成した**ので、その差を先に書く。\n\n【機械で検証】\n  - 配線は PR #830（`vs-drafts` 流用・ppid `3d126d78-2267-4a6c-a860-c69707ab90a5`）。main は 5fbcbb2。\n  - **本番で確認済み**: `curl -s https://simplememofast.com/autopilot/ | grep -o 'ppid=[a-f0-9-]*' | sort -u` → **1件**（`ppid=3d126d78-…`）。App Store CTA 3本すべてに入っている（`ct=jp__nav` ×2・`ct=jp__bottom` ×1）。\n  - `node scripts/apply-cpp-ppid.js --check` exit 0（27ページ配線）。\n  - `vs-drafts` が **APPROVED** であることは `simplememo-ios` の `asc-cpp.yml --action list` の実測（run 33721309279）。承認済みなので **配線した時点から計測に乗る**。\n\n【専用CPPを作らなかった理由 —— 作れなかった】\n  `POST /appCustomProductPages` の返り値そのもの: `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n  **ASC の CPP はちょうど70本で Apple の上限。**内訳は APPROVED 32 / PREPARE_FOR_SUBMISSION 38 —— **枠の54%が、一度も審査に出していない＝1インストールも受けられないページで埋まっている。**1本消さないと新規作成はできず、削除は不可逆で外向き。\n  **オーナー判断（2026-09-03）: いまは何もしない。**`vs-drafts` で 9/17 の分離は足りるため、専用CPPと70枠の整理は D+14 の判定後に扱う。\n\n【この流用がいま実質「専用」である理由】\n  `data/cpp-map.json` に `^/vs/drafts` の行は無く、`vs/drafts/index.html` の CTA は ppid を持たない（表に無いページは未配線、という `apply-cpp-ppid.js` の規律）。つまり **`vs-drafts` CPP にいま入るのは `/autopilot/` からの流入だけ。**\n  ⚠ **将来 `/vs/drafts/` を同じ ppid へ配線した時点で、PR経由の分離は黙って死ぬ。**そのときここを見ること。\n\n【残る限界】\n  ASC 側の実数（この ppid で何件入ったか）はリポジトリから読めない。**この行が保証するのは「分離できる状態にした」までで、「分離した数字を得た」ではない。**数字は D+14 の判定時に ASC で見る。"
+    },
     {
       "id": "act-pages-outside-shared-css",
       "title": "17面が共有スタイルシートを読まない — 網は配った（2026-09-03）。共有CSSへ寄せるかは未決",
@@ -1134,6 +1134,51 @@
       "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
       "evidence": "実測（2026-09-03）: `lang-dropdown` を持つ面をすべて列挙したら**ちょうど10言語のホーム**だった。`lang-switcher--nav` を持つ 227面のうち、hreflang 対を持つ（＝リンク型）が 41面、残り 186面は `data-lang-btn` のボタン型で同一URL内の切り替え。`/en/ai-tags/` は `[('/ai-tags/','ja'), ('/en/ai-tags/','en')]` で同一ページ間、`/blog/memo-habit.html` は `<button data-lang-btn>` でページ内切り替え。**「同じ役目の部品が2つある」という前提が、この時点で崩れた。**"
+    },
+    {
+      "id": "act-asc-cpp-slot-cleanup",
+      "title": "ASC のカスタムプロダクトページ70枠の整理 — 未提出38本を消すか・出すか・置くかを決める",
+      "detail": "**ASC のカスタムプロダクトページ（CPP）は70本で Apple の上限に張り付いている。**2026-09-03 に `/autopilot/` 用の CPP を作ろうとして実際に返ってきた値:\n  `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n\n**内訳（`simplememo-ios` の `asc-cpp.yml --action list`・run 33721309279 の実測）:**\n  - `APPROVED` … 32本（配信できる）\n  - `PREPARE_FOR_SUBMISSION` … 38本（**一度も審査に出していない**）\n\n**未提出の38本は1インストールも受けられない。**Apple の一次資料が『Custom product pages must be approved before they are visible to users』『未承認・削除済みの CPP URL は既定商品ページへ自動リダイレクトされる』と書いている。つまり **70枠の54%が、機能しないまま枠だけを占めている。**\n\n**ただし『枠が足りない』という言い方が正しいかは疑わしい。**配線されている ppid は8つだけで、**APPROVED 32本のうち24本が遊んでいる。**新しい面に CPP が要るとき遊んでいる承認済みを流用すれば足りることは `/autopilot/` で実証済み（`vs-drafts` 流用・PR #830・当日から計測が始まった）。**枠を空ける前に、まず遊んでいる24本で足りないのかを問うべき。**\n\n【選べる手は3つ】\n  (A) **未提出38本を削除して枠を戻す。**枠は空くが不可逆。しかも下記の『消す前に要ること』が未了。\n  (B) **提出して使えるようにする。**38本が資産になる。App Review を通す必要があり、`data/release-gate.json` は `enabled:false` / `dry_run:true` なので提出は人の操作のまま。\n  (C) **何もしない。**遊んでいる24本を流用し続ける。新規CPPが要る場面が来るまで枠は問題にならない。\n\n【⚠ 消す前に必ず要ること — まだ誰もやっていない】\n  **70本のプロモーションテキスト（ja / en-US の140本）は ASC にしか存在しない。**`simplememo-ios/data/appstore/` にも `data/cpp-map.json` にも写しは無い（2026-09-03 に確認）。**いま38本を消すと、書かれた原稿がそのまま消える。**\n  **写しをどこへ置くかも自明ではない。**この公開リポジトリへ置くと**未出荷の商品ページ原稿38本を公開すること**になる —— `growth/scripts/ingest-asc.mjs` が『このリポジトリは公開されている／広げる方向の変更をしない』と定めている当のもの。置くなら非公開の `simplememo-ios` 側で、`asc_cpp.rb` に一覧をファイルへ書き出す口を足すのが筋。\n\n【なぜ機械で実行しないか】\n  1. **権限表に領域が無い。**20領域のどこにも『App Store の商品ページの作成・削除』は無く、不可逆で外向きな操作なのに承認の枠組みが存在しない。\n  2. **道具が無い。**`asc_cpp.rb` は `list` / `create` だけで `delete` を持たない。足すこと自体が `self_repair.must_not` の「自分の権限を広げる変更」に当たり、`simplememo-ios` への変更は同じく must_not の「他リポジトリへの変更」に当たる。\n  **これは『やっていない』のではなく『いまの権限では踏めない』。**枠組みごとオーナーが決める話。\n\n【この行がいま塞いでいるもの】無い。`/autopilot/` は流用で計測が始まっており D+14（9/17）の判定に影響しない。**次に新しい CPP が要ったときに初めて詰まる。**\n\n【あわせて入れた歯止め】`apply-cpp-ppid.js --check` が **『配線した ppid の CPP が APPROVED でなければ落ちる』**ようになった（`data/cpp-map.json` の `asc_state`）。未承認を配線して『配線済み』と表示される罠（`free-memo-generic` が踏んだもの）は、これで機械が捕まえる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "outside_repo": true,
+      "force_owner": "human",
+      "force_owner_why": "**権限表の20領域のどこにも『App Store の商品ページ（CPP）の作成・削除』が無い。**不可逆（消した ppid は戻らない）で外向き（ASC アカウントの状態）なのに承認の枠組みが存在しない領域なので踏まない。加えて道具も無く、`asc_cpp.rb` に `delete` を足すことは self_repair.must_not の「自分の権限を広げる変更」と「他リポジトリ（simplememo-ios）への変更」の両方に当たる。**枠組みを作るところからオーナーの判断。**",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
+    },
+    {
+      "id": "act-ci-selftest-ratchet-js-blind",
+      "title": "自己テストのラチェットが .js の検査5本を見ていない（seo-check.js を含む）",
+      "detail": "**自己テストのラチェットは `.js` の検査を1本も見ていない。**`scripts/check-selftests.mjs` の `wiredChecks()` が seo-check.yml を読む正規表現がこれ:\n  `/node\\s+((?:growth\\/)?scripts\\/[\\w.-]+\\.mjs)/g`\n**`.mjs` しか拾わない。**実測（2026-09-03）:\n  - seo-check.yml が走らせる node 検査 … `.mjs` 86本 / `.js` 5本\n  - `data/check-selftests.json` … 86本（**すべて .mjs**）\n  - 見えていない5本 … `seo-check.js` / `sync_constants.js` / `tag-cta-placements.js` / `indexnow-notify.js` / `apply-cpp-ppid.js`\n\n**これは台帳自身が狩っている形と同じもの。**`data/check-selftests.json` の $comment は「この工程で見つけた穴は、すべて同じ形をしていた —— **『判定できなかった』を『異常なし』と報告する**」と書いている。いま `check-selftests.mjs --check` は「列挙・証跡・ラチェットに問題なし」と緑を出すが、**5本については何も見ていない。**しかもその中に、このリポジトリの主検査である `seo-check.js` が入っている。\n\n**なぜ正規表現を直して終わりにしないか。**直すと5本が state `none` で台帳に入る。`none_budget` は 0 なので **CI が即座に赤くなる。**上限を上げて通すのは台帳が明示的に禁じている（「**上限を上げて通さないこと** —— 上げた瞬間にこの台帳は『現状を追認する表』になり、止める力を失う」）。つまり**先に4本へ自己テストを書き、それから正規表現を直す**順番でしか閉じられない（`apply-cpp-ppid.js` は 2026-09-03 に自己テストを入れて配線済みなので、残りは4本）。\n\n【残っている4本と、それぞれの重さ】\n  - `seo-check.js` … 主検査。12ゲート。**ここが黙って効かなくなるのが最悪の形**（2026-08-13 に「閉じていない script タグの中に head が飲まれても12ゲート全部が緑」を実際に踏んでいる）\n  - `tag-cta-placements.js` … 全CTAの配置メタデータ。`apply-cpp-ppid.js` と対の関係\n  - `sync_constants.js` … 定数の同期\n  - `indexnow-notify.js` … 通知。この環境では egress が塞がっていて落ちる既知の経路\n\n【見つかった経緯】`apply-cpp-ppid.js` に「配線先の CPP が APPROVED か」の門を足したとき、台帳の規則（「CI へ検査を足すなら自己テストを同じ変更で入れる」）に従って登録しようとして、**登録先に自分が載らない**ことに気づいた。**規則を守ろうとして初めて、規則が届いていない範囲が見えた。**\n\n【閉じ条件をこう置いた理由】`data/check-selftests.json` に `scripts/seo-check.js` の行が現れたら閉じる。**`check-selftests.mjs --check` が通ることを閉じ条件にはできない —— いま既に通っているから。**通っているのに何も見ていない、というのがこの行そのもので、その検査を条件にすると**問題が直っていないのに翌日の日次実行が閉じてしまう。**主検査 `seo-check.js` が台帳に載ることは、正規表現の修正と自己テストの両方が済まないと起きない。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "scripts/check-selftests.mjs",
+        "data/check-selftests.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "file_contains",
+        "params": {
+          "file": "data/check-selftests.json",
+          "needle": "scripts/seo-check.js"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
     }
   ]
 }
