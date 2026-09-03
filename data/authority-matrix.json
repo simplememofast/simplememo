@@ -474,6 +474,30 @@
       ],
       "status": "active",
       "note": "**[2026-09-03] オーナーが委譲した** ——『今後同じケースはあなたが自己判断で意思決定』。契機は同日の owner_direct（オーナー待ち1件・最古6日／act-orphaned-pr-660）で、そのとき出した2つの問い（本番へ出すか／ブランチを消すか）を、以後は聞かずに決める。\n\n**広いほうではなく狭いほうへ倒した。**同じ表の「段階公開の撤回」が 2026-08-26 に同型の判断をしている ——『オーナーから《おまかせ》と委ねられたが、越えた当人が自分の権限を広げる形にはしない』。ここも同じ倒し方で、**委譲されたのは「照合して受容する」ところまで**とし、不可逆なブランチ削除は human_only に残した。\n\n**PR を出して main へ入れることを ai_may に入れたのは、権限の拡大ではない。**サイトコンテンツの更新は既に requires_approval:false で、主系・副系が毎日同じ経路（PR → SEO Validation → auto-merge）で出荷している。09-03 にここを問い合わせたのは過剰で、実態に合わせただけ。\n\n**[同日・追記] 機械（日次アクチュエータ）にも、示せる範囲だけ渡した。**\nこの節は当初「機械にはまだ渡していない」と書いていた。**その日のうちに入れたので訂正する。**\n入れないと書いた理由（委譲の当日に同じ委譲を根拠へ使わない）はオーナーの明示的な\n指示で解けた。渡したのは apply-orphan-ledger が **gate の示し方で包含を積極的に\n示せた行だけ** を acknowledged にするところまでで、`reviewed_orphans` は機械が書く。\n示せなければ今までどおり人へ回る。**human_only は1つも動かしていない** ——\nブランチの削除は人のまま。\n\n**示せない側に何を置いたか。**`data/autopilot-actions.json` はこのエンジン自身の\n出力＝「何が欠けているか」を記録するファイルなので、それについて「欠けが無い」を\n自分で判定するのは循環になる。読めない・JSONが壊れている・日付が読めないも同じ側。\n\n**実物3件で当ててから入れた。**#660 は受容（人の照合と一致）、#774 と #781 は人へ。\nとくに #774 は機械が「示せない」と言った側が正しく、追ったら**取り残しではなく\nmain に届かなかった訂正**で、main の Runbook のほうが誤っていた。"
+    },
+    {
+      "domain": "App Store の商品ページ（カスタムプロダクトページ）の作成・削除",
+      "reversible": false,
+      "ai_may": [
+        "一覧の取得と写しの更新（asc-cpp.yml の list）",
+        "CPP の作成（create）。**審査提出はしない**",
+        "削除の候補を出す（delete を confirm 無しで撃つ）"
+      ],
+      "requires_approval": true,
+      "human_only": [
+        "**削除の実行**（delete に confirm を付ける操作）—— 消えた ppid は戻らず、同名で作り直しても別の ppid になる",
+        "審査への提出（CPP を APPROVED にする操作）"
+      ],
+      "gate": "機械側の守りは simplememo-ios の scripts/asc_cpp.rb の delete_problems（純関数・自己テスト16件）。**APPROVED は消せない** —— サイトが配線してよい ppid は APPROVED だけで （scripts/apply-cpp-ppid.js --check が data/cpp-map.json の asc_state で強制）、この1条件だけで配線中の面を1本も消せない。加えて **写しに文面が無ければ消さない**（プロモ文は ASC と data/appstore/cpp-inventory.json にしか無い）、1回5本まで、名前の明示が必須、**confirm を立てたときだけ実行**。ワークフローが消す前と後に写しを取り直す。machine_gate ではなく requires_approval にしてあるのは、**不可逆な側を人の手に残すため**。",
+      "evidence": [
+        "data/cpp-map.json",
+        "scripts/apply-cpp-ppid.js",
+        "../simplememo-ios/scripts/asc_cpp.rb",
+        "../simplememo-ios/.github/workflows/asc-cpp.yml",
+        "../simplememo-ios/data/appstore/cpp-inventory.json"
+      ],
+      "status": "active",
+      "note": "【2026-09-03 に足した — オーナーの明示の委譲】この日まで20領域のどこにも CPP の作成・削除が無く、**不可逆で外向きな操作なのに承認の枠組みだけが存在しない**状態だった。ASC の CPP は Apple の上限 70 本に張り付いており（実測: POST が 409 STATE_ERROR / Cannot have more that 70 custom product pages for this app.）、内訳は APPROVED 32 / PREPARE_FOR_SUBMISSION 38。**未提出の38本は1インストールも受けられないまま枠を占めている**（Apple は未承認 CPP へのリンクを既定商品ページへ倒す）。枠を空けるには消すしかない。\n\n**self_repair.must_not は『権限表を自分で書き換えない』と書いており、これはその例外。**黙って足さないために経緯を残す —— 「消すには (i) 権限表への領域追加 (ii) delete の実装 の2つにオーナーの明示の委譲が要る」と報告したのに対し、オーナーが『権限付与します』と明示で応答した（2026-09-03）。2026-08-28 に data/autopilot-status.json を may_modify へ足したときと同じ形。\n\n**⚠ 権限が付いても、消してよいわけではない。**どれを消すかは中身の判断で、この行が許しているのは『枠組みが在る』ところまで。削除の実行そのものは human_only に残してある。"
     }
   ],
   "self_repair": {
