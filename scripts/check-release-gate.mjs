@@ -94,6 +94,26 @@ export function evaluateSubmission({ policy, build, ci, releaseNotes, review, do
   }
   if (review.submission_open !== false) return unknown('提出枠が空いているか');
 
+  // **段階リリースは、いまや提出側の条件である。**
+  //
+  // [2026-09-03] この行を公開側（evaluateRelease）だけに置いていたのは、
+  // 「Apple が通したものを、いま全員に出すか」を人か門が後から決める前提だった。
+  // **その前提が同じ日に消えた** —— fastlane が `automatic_release: true` になり、
+  // `prepare_app_store_version.rb` が `releaseType: AFTER_APPROVAL` を強制するので、
+  // **審査を通った瞬間に出る。**公開を決める時点は提出の時点へ移った。
+  //
+  // 帰結として `evaluateRelease` は**構造的に到達しない** ——
+  // 版が PENDING_DEVELOPER_RELEASE で止まらないので、あの門は開く機会を持たない。
+  // **到達しない門に条件を置いたままにすると、条件が在ることと効くことがずれる。**
+  // だから同じ条件をこちら側にも置く（あちらからは消さない ——
+  // `asc-release-type.yml` で1版だけ MANUAL に戻せば、あちらの経路は復活する）。
+  if (policy.require_phased_release === true && review.phased_release !== true) {
+    return review.phased_release === undefined
+      ? unknown('段階リリースの設定 — **承認された瞬間に出るので、提出の時点で要る**')
+      : hold('段階リリースが有効でない — **一度に全員へ出さない**'
+        + '（承認後は自動で出るので、ここを通すと止める機会が無い）');
+  }
+
   // CI。**「読めなかった」を「緑」と読み替えない**
   if (policy.require_ci_green === true) {
     if (!ci || typeof ci !== 'object') return unknown('CI の結果');
@@ -264,7 +284,8 @@ function selftest() {
       ci: { conclusion: 'success', sha: 'abc123' },
       // アプリ単位の提出枠。**空いている**（出どころは
       // simplememo-ios/data/appstore/release-materials.json の review.submission_open）
-      review: { submission_open: false },
+      // **段階リリースは提出側の条件になった**（2026-09-03・自動公開の帰結）。
+      review: { submission_open: false, phased_release: true },
       // **`ja` であって `ja-JP` ではない。**このアプリの実際の ASC ロケール。
       // ここを台帳から取らずに直書きしていたので、台帳の値を直したときに
       // 自己テストだけが古い値のまま通り続ける形だった（2026-08-28 に実際にそうなった）。
@@ -370,7 +391,10 @@ function selftest() {
     ['review そのものが無ければ hold',
       () => heldS({ review: undefined }, '提出枠の情報')],
     ['枠が空いていれば通る（他の材料が揃っていれば）', () => {
-      const r = evaluateSubmission(subOk({ review: { submission_open: false } }));
+      // [2026-09-03] `phased_release` を足した。**この検体が落ちたのは正しい挙動** ——
+      // 段階リリースが提出側の条件になったので、review を丸ごと差し替える検体は
+      // 「他の材料が揃っている」を満たさなくなった。上書きではなく**足して**直す。
+      const r = evaluateSubmission(subOk({ review: { submission_open: false, phased_release: true } }));
       assert(r.decision === 'submit', JSON.stringify(r));
     }],
     ['審査中かどうかが読めなければ hold', () => {
@@ -381,6 +405,20 @@ function selftest() {
     ['版数が読めなければ hold', () => heldS({ build: { ...subOk().build, version: 'latest' } }, '版数')],
     ['日次上限に達していたら出さない', () => heldS({ doneToday: 1 }, '上限')],
     ['本日の回数が読めなければ hold（0 と読み替えない）', () => heldS({ doneToday: null }, '材料が無い')],
+
+    // **段階リリースを提出側でも要求する**（2026-09-03・自動公開の帰結）。
+    // ここが無いと、承認された瞬間に全員へ出る版を、門が素通りさせる。
+    ['**段階リリースでなければ提出しない**', () => heldS(
+      { review: { submission_open: false, phased_release: false } }, '一度に全員',
+    )],
+    ['段階リリースの設定が読めなければ提出しない', () => heldS(
+      { review: { submission_open: false } }, '材料が無い',
+    )],
+    ['提出側の段階リリースは policy で切れる（公開側と同じ条件式）', () => {
+      const c = subOk({ review: { submission_open: false, phased_release: false } });
+      c.policy.require_phased_release = false;
+      assert(evaluateSubmission(c).decision === 'submit', '**policy を折れば通る**べき');
+    }],
 
     // --- 公開 ---
     ['条件が揃えば release', () => {

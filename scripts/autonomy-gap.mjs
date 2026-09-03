@@ -453,6 +453,26 @@ export const UNLOCKS = {
                             + '（`limit + offset` が 10,000 以上のリクエストが制限対象）。'
                             + '**日付範囲で取る形にしておけば当たらない。**' },
 
+  // [2026-09-03] **境界が外れた行。**オーナーが submit_review=false に限って渡した
+  // （権限表「アプリのビルド・TestFlight内部配信」の ai_may）。**作るものは無い** ——
+  // 経路（release.yml）も門（preflight の CI緑判定）も元から在り、塞いでいたのは
+  // 書いてある規則のほうだった。したがって implement ではない。
+  //
+  // `wait` にしたのは reply_gate（「自動投稿が1周 dry_run で動いたのを見る」）と
+  // 同じ理由 —— **残っているのは1周見ることだけ**で、その機会は次の出荷が要るときに来る。
+  // 出荷の必要が無いのに1回起動してみせるのは、TestFlight のビルド番号を焼くだけで
+  // 何も確かめていない（番号は再利用できない）。
+  testflight_first_dispatch: { kind: 'wait',
+                       label: 'AI が TestFlight 配信を1回起動したのを見る（経路も門も在る）',
+                       needs: '**2026-09-03 にオーナーが submit_review=false に限って渡した。**'
+                            + '作るものは無く、残っているのは AI が `release.yml` を '
+                            + '`submit_review=false` で1回起動し、TestFlight に載るまでを見ること。'
+                            + '\n\n**技術的な経路は元から開いていた** —— MCP の `actions_run_trigger` は '
+                            + 'actions:write を持ち（2026-08-28 実測）、issue コメントの橋は'
+                            + 'セッションをオーナーとして通す（run 30699556723 で実際に出荷済み）。'
+                            + '**塞いでいたのは書いてある規則で、機械の門ではなかった。**'
+                            + '\n\n機会は次の出荷が要るときに来る。**確かめるためだけに起動しない** —— '
+                            + 'TestFlight のビルド番号は再利用できないので、焼くだけで何も確かめていない' },
   ship_execute:      { kind: 'implement', label: '出荷の実行側を作る（門はもう在る）',
                        needs: '**門は 2026-08-28 に入った**（#708・`scripts/check-release-gate.mjs` の '
                             + '`evaluateSubmission` / `evaluateRelease`）。権限表も同日に '
