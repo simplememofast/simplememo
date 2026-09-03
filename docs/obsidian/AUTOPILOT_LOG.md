@@ -2708,3 +2708,57 @@ coverage-queue の pending は26件。故障が片付いた日はレーンEへ�
   「日次出荷なら $280/月」と見積もっており、$18 の repair 枠は**1回ぶんちょうど**。
   2回目の repair は種別枠を超える（種別枠は止めないので出荷は続く）。
   **月次上限そのものはオーナーの領域**なので触っていない。
+
+---
+
+## 2026-09-03（3） — 保守のみ（月次上限を placeholder から実測へ・規則のほうを直した）
+
+- **判断根拠:** オーナーが「日次出荷なら $280/月 ↑いったんこれで」。ところが $40→$280 は
+  `financial-policy.json` の `max_step_pct`（25%）を大きく超え、**承認者2人が要る**。
+  そして **AIは承認者になれない**（`approved_by` に `ai` を書くとCIが落ちる）。
+  一人運営で「2人」を形だけ埋めるのは規則を骨抜きにするので、**規則のほうを直す道を選んだ**
+  （オーナーが選択・`who_decides: human`）。
+
+  **例外が要る理由は台帳が自分で書いていた。** `spend-approvals.json` の seq=1 の note ——
+  「初期値。実測1点（$0.8149）からの粗い外挿で置いた placeholder で、実測由来ではない。
+  **ここを実測に置き換えるのが最初の仕事**」。`max_step_pct` は「熟慮した額を大きく動かすな」の
+  規則で、**placeholder からの置き換えを想定していない。**実測へ寄せるには +25% を9回・14日おきで
+  4か月半 —— **台帳が「最初の仕事」と呼ぶものが、規則で4か月半かかる。**
+
+- **やったこと:**
+  - `financial-policy.json` に `placeholder_replacement_exempt: true` を宣言。
+    `current_monthly_usd` 40→280、`loss_limit_usd` 60→**420**
+    （損失上限が上限以下だとCIが落ちる ——上限に達する前に必ず発動するので上限が意味を失う）
+  - `spend-approvals.json` に seq=2 を追記（`from 40 → to 280` / `approved_by: ["human"]` /
+    `placeholder_replacement: true`）
+  - `autopilot-cost.json`: `monthly_usd_cap` 280、`cap_set_by` placeholder→**owner**、
+    種別枠を $280 の中で引き直し（article 180 / repair 60 / analysis 12 / pr 12 / qa_triage 8 / audit 8 = 280）
+
+- **例外は二度使えない形にした。**`check-financial-policy.mjs` が3条件を要求する ——
+  ① 規則の側が宣言している ② 1領域につき1回だけ ③ **直前の承認が初期値（`from_usd: null`）**。
+  ③ があるので placeholder→実測 の1回以外では構造的に成立しない。
+  **二者承認そのものは外していない** —— 外したのは上げ幅による自動発動だけで、
+  `approved_by` に `ai` を書けないことも、上限と承認記録の一致もそのまま効く。
+  **自己テスト6件**がそれを固定している（2回目は落ちる／直前が初期値でなければ落ちる／
+  規則の宣言が無ければ落ちる／例外を使わない大幅増額は今までどおり2人／`ai` は通らない）。
+
+- **⚠ 自制が散文だけになりかけたので、そこも塞いだ。**
+  「予算に応じて配分していると対外的に言わない」の注記は `cap_set_by === 'placeholder'` に
+  紐づいていて、**オーナーが額を決めた瞬間に注記ごと消える**形だった。
+  消えてよいのは「オーナー未確認」の部分だけで、**「まだ実測ではない」ほうは残る。**
+  `cap_basis`（placeholder / extrapolation / measured）を足し、注記の条件をそちらへ移した。
+  いまは `extrapolation` —— run 単位の実測（主系 n=6）を日次×30日に伸ばした外挿であって、
+  月次の実測ではない。`--json` にも載せたので、公開される status JSON にも根拠が出る。
+
+- **$280 の位置:** 主系の実測 n=6 を日次出荷×30日に伸ばすと 中央値 $259/月・平均 $254/月・
+  当月の per shipped で $344/月。**$280 はこの幅の中。**ただし**副系CCRの実費は観測できない**ので、
+  この上限が縛るのは主系だけ。実際の総額はこれより多い。
+
+- **検証:** `check-financial-policy --check` / `--selftest` 13件（+6）、`autopilot-budget --check`
+  （枠の合計 = 280）、`check-model-routing --check`、`autopilot-runs --check`、
+  `preflight.mjs` 122本中1本失敗（既存の `check-generators --run`。main でも同じ）。
+
+- **残している論点:** `min_days_between_changes: 14` は**いまも検査されていない**
+  （`validate` は「数値が入っているか」しか見ず、`validateApprovals` は承認日の間隔を見ない）。
+  前回承認 08-22 から今日で12日なので、**この規則を機械化すると今回の変更自体が落ちる。**
+  同じPRで入れると「入れた規則を同じPRで破る」形になるため、**別件として残す。**
