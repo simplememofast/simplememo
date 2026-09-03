@@ -238,19 +238,77 @@ if (SELFTEST) {
     [C.ratingValue, C.ratingCount, C.priceMonthlyJpy, C.appVersion].every((v) => v !== undefined && v !== null && String(v) !== ''));
   t('実データの stampDate が日付を返す', /^\d{4}-\d{2}-\d{2}$/.test(String(stampDate())));
 
+  // ── ここから下は「規則を単体で当てる」では届かない門 ──────────────
+  //
+  // 上の検体は RULES の1本を取り出して `apply()` で当てるので、**ループ本体に
+  // 掛かる門を1つも通らない。**2026-09-03 に隔離した写しで測ったところ、
+  // 自社ページ限定・料金ゾーン限定・og:site_name・llms.txt の門をそれぞれ潰しても
+  // **12件中0件失敗**（＝緑のまま）だった。どれも実害が外に出る門である。
+  // 判定を scanHtml / scanLlms へ切り出し、ここから面ごと通す。
+  const drift = (html, rel = 'fixture/x.html') => scanHtml(html, rel).findings;
+
+  // 何も食い違っていない面が黙ることを先に固定する。これが無いと、
+  // 以下の「落ちた」が雑音の上で成立している可能性を排除できない。
+  const okPage = `<html lang="ja"><head><meta property="og:site_name" content="${C.appNameJa}">`
+    + `</head><body><script type="application/ld+json">`
+    + `{"@id":"https://simplememofast.com/#app",`
+    + `"aggregateRating":{"ratingValue":"${C.ratingValue}","ratingCount":"${C.ratingCount}"},`
+    + `"softwareVersion":"${C.appVersion}"}</script></body></html>`;
+  t('正準値だけの面は何も言わない', drift(okPage).length === 0);
+
+  // **見える評価は自社の値だけの面に限る。**外すと、比較ページに載っている
+  // 競合の評価（4.9 / 206 など）を自社の値へ書き換えにいく。
+  const visibleRating = '<p><strong>1.0</strong> ・ 1件の評価</p>';
+  t('見える評価は比較ページでは見ない（競合の数字を書き換えない）',
+    drift(visibleRating, 'vs/captio/index.html').length === 0);
+  t('見える評価は自社値の面では見る', drift(visibleRating, 'index.html').length === 1);
+
+  // **価格は料金セクションの中だけ。**外すと本文中の編集上の価格まで書き換える。
+  t('価格は料金セクションの外では見ない', drift('<p>月額999円</p>').length === 0);
+  t('価格は料金セクションの中では見る',
+    drift('<section class="pricing"><p>月額999円</p></section>').length === 1);
+
+  // og:site_name は2つの正式名のどちらかでなければならない。
+  t('og:site_name が正式名でなければ落ちる',
+    drift('<meta property="og:site_name" content="シンプルメモ">').length === 1);
+  t('og:site_name が英語の正式名なら通る',
+    drift(`<meta property="og:site_name" content="${C.appNameEn}">`).length === 0);
+
+  // llms.txt は HTML の走査を通らないので、ここを見ないと丸ごと無検査になる。
+  const llms = `**Current facts (as of ${stampDate()}):** version ${C.appVersion}\n`
+    + `App Store rating ${C.ratingValue} (${C.ratingCount} ratings)\n`;
+  t('llms.txt が正準値なら何も言わない', scanLlms(llms).findings.length === 0);
+  t('llms.txt の version がずれていれば落ちる',
+    scanLlms(llms.replace(`version ${C.appVersion}`, 'version 3.9')).findings.length === 1);
+  // **当たらない規則は合格ではない。**文面が変われば、この値は誰にも管理されなくなる。
+  t('llms.txt の文面が変わって規則が当たらなくなったら、通さずに落ちる',
+    scanLlms('この文書には Current facts の行が無い\n').findings.length === LLMS_RULES.length);
+
+  // --write と --check の別。書き換える側だけが本文を変える。
+  const drifted = okPage.replace(`"ratingValue":"${C.ratingValue}"`, '"ratingValue":"9.9"');
+  t('--write は正準値へ書き換える',
+    scanHtml(drifted, 'fixture/x.html', { write: true }).out === okPage);
+  t('--check は書き換えない', scanHtml(drifted, 'fixture/x.html').out === drifted);
+
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 12 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 24 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
-let driftCount = 0;
-let filesChanged = 0;
-const report = [];
-
-for (const file of htmlFiles(ROOT)) {
-  let src = fs.readFileSync(file, 'utf8');
-  const orig = src;
-  const rel = path.relative(ROOT, file);
+/**
+ * 1面ぶんの検査。**disk を触らない。**
+ *
+ * ループ本体から切り出したのは、**自己テストがここを通れなかった**から。
+ * 規則を1本ずつ単体で当てる検体（下の `apply()`）は RULES の中身しか見ないので、
+ * ここに掛かる門 —— 自社ページ限定（`scope === 'own'`）・料金ゾーン限定
+ * （`scope === 'pricing'`）・og:site_name —— を**1つも通らない。**
+ * 2026-09-03 に隔離した写しで測ったところ、この3つと llms.txt の門を潰しても
+ * 自己テストは 12件中0件失敗で緑のままだった。
+ * 呼び出し側の挙動は切り出し前と同じ（`--check` / `--write` の出力が
+ * バイト単位で一致することを確認してある）。
+ */
+function scanHtml(src, rel, { write = false } = {}) {
+  const findings = [];
   // byte ranges of pricing sections / plan cards on this page
   const priceZones = [];
   for (const zm of src.matchAll(/<(?:section|div)[^>]*class="[^"]*(?:pricing|plan-summary)[^"]*"[^>]*>/g)) {
@@ -265,51 +323,73 @@ for (const file of htmlFiles(ROOT)) {
       if (scope === 'pricing' && !inPriceZone(index)) return m;
       const canonical = build(...args2);
       if (m === canonical) return m;
-      driftCount++;
-      report.push(`${WRITE ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
-      return WRITE ? canonical : m;
+      findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+      return write ? canonical : m;
     });
   }
   // og:site_name must be one of the two official names
   for (const mm of src.matchAll(/og:site_name" content="([^"]+)"/g)) {
     if (mm[1] !== C.appNameJa && mm[1] !== C.appNameEn) {
-      driftCount++;
-      report.push(`${WRITE ? 'fix' : 'DRIFT'}: ${path.relative(ROOT, file)}: og:site_name: ${JSON.stringify(mm[1])}`);
-      if (WRITE) {
+      findings.push(`${write ? 'fix' : 'DRIFT'}: ${rel}: og:site_name: ${JSON.stringify(mm[1])}`);
+      if (write) {
         const lang = /<html[^>]*lang="ja"/.test(src) ? C.appNameJa : C.appNameEn;
         src = src.replace(mm[0], `og:site_name" content="${lang}"`);
       }
     }
   }
-  if (WRITE && src !== orig) {
-    fs.writeFileSync(file, src);
+  return { out: src, findings };
+}
+
+/**
+ * llms.txt — same source of truth, different file type (see LLMS_RULES).
+ *
+ * **当たらない規則は「合格」ではなく「穴」。**文面が変わって規則がどこにも
+ * 当たらなくなったとき黙って通すと、この値は誰にも管理されない状態になる。
+ * ここも同じ理由で切り出した —— 自己テストが llms.txt を一度も通っていなかった。
+ */
+function scanLlms(src, { write = false } = {}) {
+  const findings = [];
+  for (const [desc, re, build] of LLMS_RULES) {
+    if (!re.test(src)) {
+      // A rule that matches nothing is a silent hole in the gate, not a pass.
+      findings.push(`${write ? 'fix' : 'DRIFT'}: llms.txt: ${desc}: pattern not found — the file's wording changed, so this value is no longer enforced`);
+      continue;
+    }
+    src = src.replace(re, (...a) => {
+      const m = a[0];
+      const canonical = build(...a);
+      if (m === canonical) return m;
+      findings.push(`${write ? 'fix' : 'DRIFT'}: llms.txt: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
+      return write ? canonical : m;
+    });
+  }
+  return { out: src, findings };
+}
+
+let driftCount = 0;
+let filesChanged = 0;
+const report = [];
+
+for (const file of htmlFiles(ROOT)) {
+  const orig = fs.readFileSync(file, 'utf8');
+  const rel = path.relative(ROOT, file);
+  const { out, findings } = scanHtml(orig, rel, { write: WRITE });
+  driftCount += findings.length;
+  report.push(...findings);
+  if (WRITE && out !== orig) {
+    fs.writeFileSync(file, out);
     filesChanged++;
   }
 }
 
-// llms.txt — same source of truth, different file type (see LLMS_RULES).
 {
   const llmsPath = path.join(ROOT, 'llms.txt');
   if (fs.existsSync(llmsPath)) {
-    let src = fs.readFileSync(llmsPath, 'utf8');
-    const orig = src;
-    for (const [desc, re, build] of LLMS_RULES) {
-      if (!re.test(src)) {
-        // A rule that matches nothing is a silent hole in the gate, not a pass.
-        driftCount++;
-        report.push(`${WRITE ? 'fix' : 'DRIFT'}: llms.txt: ${desc}: pattern not found — the file's wording changed, so this value is no longer enforced`);
-        continue;
-      }
-      src = src.replace(re, (...a) => {
-        const m = a[0];
-        const canonical = build(...a);
-        if (m === canonical) return m;
-        driftCount++;
-        report.push(`${WRITE ? 'fix' : 'DRIFT'}: llms.txt: ${desc}: ${JSON.stringify(m.slice(0, 60))} -> ${JSON.stringify(canonical.slice(0, 60))}`);
-        return WRITE ? canonical : m;
-      });
-    }
-    if (WRITE && src !== orig) { fs.writeFileSync(llmsPath, src); filesChanged++; }
+    const orig = fs.readFileSync(llmsPath, 'utf8');
+    const { out, findings } = scanLlms(orig, { write: WRITE });
+    driftCount += findings.length;
+    report.push(...findings);
+    if (WRITE && out !== orig) { fs.writeFileSync(llmsPath, out); filesChanged++; }
   }
 }
 
