@@ -1274,6 +1274,96 @@ export function classifyOrphanPaths(paths) {
   return paths.every((p) => OPERATING_LEDGERS.includes(p));
 }
 
+export const ORPHAN_STATUS_FILE = 'data/autopilot-status.json';
+export const ORPHAN_LOG_FILE = 'docs/obsidian/AUTOPILOT_LOG.md';
+
+/**
+ * **1ファイルぶんの「main に欠けが無い」を、示せるときだけ示す。**
+ *
+ * これが要る理由: 取り残しの判定はSHAで行うので、**内容が別コミットで着地済みでも
+ * 行は立つ。**apply-orphan-ledger は「1行も欠けていない」をそこまで計算しておきながら、
+ * **その結論を捨てて**行を open のままオーナーへ回していた。2026-09-03 の
+ * owner_direct が上げた「オーナー待ち 6日」は、まさにその形で開いていた
+ * （#660 / 813b335 —— 人が手で照合して、取るものは無かった）。
+ *
+ * **示せないものは示せないと返す。**返り値は3値ではなく2値だが、
+ * `why` に「判定不能」と「欠けている」を書き分ける。どちらも landed:false ——
+ * **判定不能を「着地済み」に倒さない**（この運用が繰り返し戒めている形）。
+ */
+export function proveLandedFile(file, branchText, mainText) {
+  if (typeof branchText !== 'string') {
+    return { landed: false, why: 'ブランチ側を読めず判定不能（欠けていないという意味ではない）' };
+  }
+  if (typeof mainText !== 'string') {
+    return { landed: false, why: 'main 側を読めず判定不能' };
+  }
+
+  // ① 追記型のJSON —— 行キーの包含。**SHAではなく run_id で見る。**
+  if (ORPHAN_APPENDABLE[file]) {
+    let b; let m;
+    try { b = JSON.parse(branchText); m = JSON.parse(mainText); }
+    catch { return { landed: false, why: 'JSON として読めず判定不能' }; }
+    const missing = missingLedgerRows(b, m);
+    if (missing === null) return { landed: false, why: 'ブランチ側に runs が無く判定不能' };
+    return missing.length === 0
+      ? { landed: true, why: `行キーの包含（ブランチ側 ${(b.runs ?? []).length}行すべてが main にある）` }
+      : { landed: false, why: `欠けている行 ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}` };
+  }
+
+  // ② 状態型 —— main 側が新しければ**上書き済み**。
+  //
+  // 「ブランチが古い」のであって「main に無い仕事がある」ではない。
+  // 当てると巻き戻るので再投入はしないが、**失われるものは無い。**
+  if (file === ORPHAN_STATUS_FILE) {
+    let b; let m;
+    try { b = JSON.parse(branchText); m = JSON.parse(mainText); }
+    catch { return { landed: false, why: 'JSON として読めず判定不能' }; }
+    const bd = b?.date_jst; const md = m?.date_jst;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(bd ?? '') || !/^\d{4}-\d{2}-\d{2}$/.test(md ?? '')) {
+      return { landed: false, why: 'date_jst を読めず判定不能' };
+    }
+    return md >= bd
+      ? { landed: true, why: `状態型で main 側が新しい（ブランチ ${bd} / main ${md}）— 上書き済み` }
+      : { landed: false, why: `main 側のほうが古い（ブランチ ${bd} / main ${md}）— 巻き戻っている疑い` };
+  }
+
+  // ③ 追記型の散文 —— **前方一致。**
+  //
+  // 散文には run_id のような冪等な鍵が無いので、行ごとの照合はできない。
+  // だが**追記しかしないファイル**なら、「ブランチ側の全文が main 側の先頭と
+  // 一致する」ことが包含の十分条件になる（main はその後ろに足しただけ）。
+  // 一致しなければ、追記以外が起きている＝人が読む。
+  if (file === ORPHAN_LOG_FILE) {
+    return mainText.startsWith(branchText)
+      ? { landed: true, why: `前方一致（ブランチ側 ${branchText.length} 文字が main 側 ${mainText.length} 文字の先頭と一致）` }
+      : { landed: false, why: 'main 側の先頭と一致しない（追記以外が起きている）— 中身を人が読む' };
+  }
+
+  // ④ それ以外。**data/autopilot-actions.json をここに落としているのは意図的。**
+  // あれはこのエンジン自身の出力で、「何が欠けているか」を記録するファイル。
+  // その file について「欠けが無い」を自分で判定するのは循環なので、示さない。
+  return { landed: false, why: '包含を機械で示す方法が無い — 人が読む' };
+}
+
+/**
+ * 取り残しが触った**全パス**について ③ を通す。**1つでも示せなければ proven:false。**
+ * `texts` は `{ [file]: { branch, main } }`。
+ */
+export function proveOrphanLanded(paths, texts) {
+  if (!Array.isArray(paths) || paths.length === 0) {
+    return { proven: false, why: ['触ったパスが取れていない（内訳が無いことを「台帳だけ」と読まない）'] };
+  }
+  const why = [];
+  let proven = true;
+  for (const file of paths) {
+    const t = texts?.[file] ?? {};
+    const r = proveLandedFile(file, t.branch, t.main);
+    if (!r.landed) proven = false;
+    why.push(`${file}: ${r.why}`);
+  }
+  return { proven, why };
+}
+
 /**
  * 取り残しコミットが触ったパスを集める。**1つでも取れなければ null。**
  * 部分的な一覧は「台帳だけ」と読まれうるので、途中経過を返さない。
@@ -1825,6 +1915,22 @@ export const HANDLERS = {
       if (!r.ok) return null;
       try { return JSON.parse(await r.text()); } catch { return null; }
     };
+    // 包含の証明には**生のテキスト**が要る（散文の前方一致は JSON.parse を通せない）。
+    const readBranchText = async (file) => {
+      const url = `https://api.github.com/repos/${ctx.repo}/contents/${file}`
+        + `?ref=${encodeURIComponent(branch)}`;
+      try {
+        const r = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+        if (!r.ok) return null;
+        return await r.text();
+      } catch { return null; }
+    };
+    const readMainText = (file) => {
+      // アクチュエータは main のチェックアウトで走る。**この作業ツリーが main 側。**
+      // 同じ run で先に足された行（reconcile-runs など）も入るが、それらは
+      // この行と同じPRで一緒に着地するので、判定が食い違うことはない。
+      try { return fs.readFileSync(path.join(ROOT, file), 'utf8'); } catch { return null; }
+    };
 
     for (const file of o.paths ?? []) {
       const kind = ORPHAN_APPENDABLE[file];
@@ -1886,10 +1992,39 @@ export const HANDLERS = {
         log.push(`status の再生成に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
       }
     } else {
-      log.push(`**1行も欠けていない。**残っているのはブランチ ${branch} のSHAだけで、`
-        + '走査はSHAで見るので取り残しと呼び続ける。消せるのは delete-branch.yml '
-        + '（変更したファイルが main と同一のときだけ消す）だが、**この経路に actions:write は無い**。'
-        + 'セッション（MCP の actions_run_trigger を持つ）が回すか、オーナーが UI から回す。');
+      // **計算した答えを使う。**
+      //
+      // ここまでで「追記型に欠けている行は無い」ことは分かっている。だが以前は
+      // そこで止めて行を open のまま残しており、**その結論を捨てて**オーナーの
+      // 待ち行列に積んでいた。2026-09-03 の owner_direct が上げた「6日」は
+      // これで開いていた（#660 / 813b335。人が手で照合して、取るものは無かった）。
+      //
+      // 触った**全パス**について包含を積極的に示せたときだけ受容する。
+      // 1つでも示せなければ、今までどおり人へ。**判定不能は示せていない側。**
+      const texts = {};
+      for (const file of o.paths ?? []) {
+        texts[file] = { branch: await readBranchText(file), main: readMainText(file) };
+      }
+      const proof = proveOrphanLanded(o.paths ?? [], texts);
+      for (const line of proof.why) log.push(`照合 ${line}`);
+      if (proof.proven) {
+        // **受容したSHAを必ず書く。**書かないと merge が開け直す（何を承知したのか
+        // 台帳から言えないため）。別のコミットが積まれた日は、ここが食い違って開く。
+        action.state = 'acknowledged';
+        action.reviewed_orphans = [...(o.commits ?? [])];
+        action.closed_jst = null;
+        action.evidence = `${ctx.today} に走査が中身を照合した。**再投入するものは無い。**`
+          + `取り残し ${(o.commits ?? []).join(', ')} が触った ${(o.paths ?? []).length} ファイルは`
+          + `すべて main に着地済み（${proof.why.join(' / ')}）。`
+          + `残るのはブランチ ${branch} のSHAだけで、走査はSHAで見るため取り残しと呼び続ける。`
+          + 'ブランチの削除は人の領域（authority-matrix の「運転台帳の取り残しの始末」）。';
+        log.push(`**1行も欠けていない。**${branch} を acknowledged にした`
+          + `（reviewed_orphans: ${(o.commits ?? []).join(', ')}）。`);
+      } else {
+        log.push(`**1行も欠けていないが、全パスの包含は示せていない。**人へ残す —— `
+          + `残っているのはブランチ ${branch} のSHAだけかもしれないが、`
+          + '示せていないものを「着地済み」に倒さない。');
+      }
     }
     return { ok: true, changed, log: log.join('\n') };
   },
@@ -2634,6 +2769,60 @@ async function selftest() {
     && ORPHAN_APPENDABLE['data/autopilot-actions.json'] === undefined
     && ORPHAN_APPENDABLE['docs/obsidian/AUTOPILOT_LOG.md'] === undefined);
   t('追記型は runs と cost の2つだけ', Object.keys(ORPHAN_APPENDABLE).length === 2);
+
+  // --- 「main に欠けが無い」を示せるときだけ示す（自動受容の根拠） ---
+  {
+    const runs = (ids) => JSON.stringify({ runs: ids.map((id) => ({ run_id: id })) });
+    const RUNS = 'data/autopilot-runs.json';
+
+    t('追記型: 行キーが全部あれば着地済み',
+      proveLandedFile(RUNS, runs(['a', 'b']), runs(['a', 'b', 'c'])).landed === true);
+    t('追記型: 1行でも欠けていれば示さない',
+      proveLandedFile(RUNS, runs(['a', 'z']), runs(['a', 'b'])).landed === false);
+    t('**読めなかったら示さない**（欠けていないという意味ではない）',
+      proveLandedFile(RUNS, null, runs(['a'])).landed === false
+      && proveLandedFile(RUNS, runs(['a']), null).landed === false);
+    t('JSON として壊れていたら示さない',
+      proveLandedFile(RUNS, '{{{', runs(['a'])).landed === false);
+
+    const statusDoc = (d) => JSON.stringify({ date_jst: d });
+    t('状態型: main 側が新しければ上書き済み',
+      proveLandedFile(ORPHAN_STATUS_FILE, statusDoc('2026-08-27'), statusDoc('2026-09-02')).landed === true);
+    t('状態型: 同じ日でも上書き済み',
+      proveLandedFile(ORPHAN_STATUS_FILE, statusDoc('2026-09-02'), statusDoc('2026-09-02')).landed === true);
+    t('**状態型: main 側が古いなら示さない**（巻き戻りの疑い）',
+      proveLandedFile(ORPHAN_STATUS_FILE, statusDoc('2026-09-02'), statusDoc('2026-08-27')).landed === false);
+    t('状態型: date_jst が読めなければ示さない',
+      proveLandedFile(ORPHAN_STATUS_FILE, statusDoc('いつか'), statusDoc('2026-09-02')).landed === false);
+
+    t('散文: 前方一致なら着地済み（main はその後ろに足しただけ）',
+      proveLandedFile(ORPHAN_LOG_FILE, '## 8/27\n本文\n', '## 8/27\n本文\n\n## 8/28\n続き\n').landed === true);
+    t('**散文: 先頭が違えば示さない**（追記以外が起きている）',
+      proveLandedFile(ORPHAN_LOG_FILE, '## 8/27\n直した本文\n', '## 8/27\n本文\n\n## 8/28\n').landed === false);
+    t('散文: main のほうが短ければ示さない',
+      proveLandedFile(ORPHAN_LOG_FILE, '## 8/27\n本文\n続き\n', '## 8/27\n本文\n').landed === false);
+
+    // **このエンジン自身の出力について「欠けが無い」を自分で判定するのは循環。**
+    t('**自分の出力（actions台帳）では示さない**',
+      proveLandedFile('data/autopilot-actions.json', '{}', '{}').landed === false);
+    t('知らない台帳では示さない',
+      proveLandedFile('growth/content/coverage-queue.json', '[]', '[]').landed === false);
+
+    const texts = {
+      [RUNS]: { branch: runs(['a']), main: runs(['a', 'b']) },
+      [ORPHAN_STATUS_FILE]: { branch: statusDoc('2026-08-27'), main: statusDoc('2026-09-02') },
+      [ORPHAN_LOG_FILE]: { branch: 'x\n', main: 'x\ny\n' },
+    };
+    t('**全パスで示せたときだけ proven**',
+      proveOrphanLanded([RUNS, ORPHAN_STATUS_FILE, ORPHAN_LOG_FILE], texts).proven === true);
+    t('1つでも示せなければ proven でない',
+      proveOrphanLanded([RUNS, 'data/autopilot-actions.json'], texts).proven === false);
+    t('**内訳が取れていなければ proven でない**（「台帳だけ」と読まない）',
+      proveOrphanLanded([], {}).proven === false
+      && proveOrphanLanded(null, {}).proven === false);
+    t('示せなかった理由がパスごとに残る',
+      proveOrphanLanded([RUNS, 'data/autopilot-actions.json'], texts).why.length === 2);
+  }
 
   // --- D5b: 経路の沈黙と全停止 ---
   //
