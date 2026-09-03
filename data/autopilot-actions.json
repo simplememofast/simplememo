@@ -25,7 +25,11 @@
     "  open         … 未処理。日報に出る",
     "  done         … close_check が通った。evidence に根拠が入る",
     "  acknowledged … 既知の制約。直す対象ではないので日報では件数だけ出す",
-    "                 （消すと『無い』ことになり、毎日出すとノイズになる）"
+    "                 （消すと『無い』ことになり、毎日出すとノイズになる）",
+    "                 **取り残し（source: orphan）を受容するときは reviewed_orphans に",
+    "                 照合したSHAを必ず書く。**書かないと merge が開け直す（何を承知したのか",
+    "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
+    "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
   "last_run_jst": "2026-09-02",
   "actions": [
@@ -534,11 +538,14 @@
           "pr": 660
         }
       },
-      "state": "open",
+      "state": "acknowledged",
       "created_jst": "2026-08-27",
-      "last_seen_jst": "2026-09-02",
+      "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": "#660 はまだ 1 件先にある"
+      "evidence": "2026-09-03 にセッションが 813b335 の中身を main と突き合わせた。**再投入するものは無い。** data/autopilot-runs.json: ブランチ側 29行の run_id がすべて main にあり、date_jst/route/outcome/lane/action/pr/artifact も一致（欠落0件）。 docs/obsidian/AUTOPILOT_LOG.md: ブランチ側 2,034行が main 側 2,710行の先頭と完全一致（差分は main 側の追記 676行のみ）。当日の owner-session が同日中に拾っている。 data/autopilot-status.json: ブランチは 2026-08-27 の写しで main は 2026-09-02。**状態型なので当てると巻き戻る**（追記型と分けて扱う、の指示どおり当てない）。 残るのはブランチのSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は delete-branch.yml だが現在の照合条件では通らない（docs/orphan-branch-cleanup-2026-09-03.md）。",
+      "reviewed_orphans": [
+        "813b335"
+      ]
     },
     {
       "id": "act-orphaned-pr-648",

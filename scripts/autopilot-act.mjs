@@ -614,6 +614,8 @@ export function derive(ctx) {
       auto: o.ledger_only === true ? 'apply-orphan-ledger' : null,
       // 台帳には載せない（旧IDの行を引き当てるためだけの手掛かり）
       prs: all,
+      // 同じく手掛かり。**受容した行が「いま何を抱えているか」を merge が見るのに要る。**
+      commits: o.commits ?? [],
       close_check: { kind: 'branch_caught_up', params: { branch: o.branch } },
     });
   }
@@ -959,6 +961,26 @@ export function merge(ledger, derived, today) {
       //
       // **acknowledged は開け直さない。**あれは「知っていて受け入れている」で、
       // 条件が立ち続けるのが前提の状態（開け直すと既知の制約が毎日鳴る）。
+      // **受容（acknowledged）は「このSHAなら承知」であって、ブランチへの白紙委任ではない。**
+      //
+      // 取り残しの受容は「中身を照合したら main に欠けているものが無かった」という
+      // 判断で、根拠は**照合したコミットそのもの。**同じブランチに別のコミットが
+      // 積まれたら、それは誰も見ていない。ここを見ないと、一度受容したブランチは
+      // 以後どんな取り残しを積まれても二度と鳴らない —— **受容が消音になる。**
+      //
+      // reviewed_orphans が無い受容も開け直す（何を承知したのか台帳に書いていない
+      // ので、承知した範囲を言えない）。**受容するときは照合したSHAを必ず書くこと。**
+      if (cur.state === 'acknowledged' && d.source === 'orphan') {
+        const reviewed = [...(cur.reviewed_orphans ?? [])].map(String).sort().join(',');
+        const present = [...(d.commits ?? [])].map(String).sort().join(',');
+        if (reviewed !== present) {
+          cur.state = 'open';
+          cur.closed_jst = null;
+          cur.reopened_jst = today;
+          cur.created_jst = today;
+          cur.evidence = null;
+        }
+      }
       if (cur.state === 'done') {
         cur.state = 'open';
         cur.closed_jst = null;
@@ -1162,6 +1184,30 @@ export const ORPHAN_LOOKBACK_DAYS = 7;
 export const ORPHAN_MAX_PAGES = 10;
 
 /**
+ * 走査の窓を **まだ片付いていない取り残しの行が全部入るところまで** 広げる。
+ * 返すのは `YYYY-MM-DD`、対象が無ければ null（既定の7日窓のまま）。
+ *
+ * **open だけでなく acknowledged も見る。**受容した行は「このSHAなら承知」であって
+ * 「このブランチは今後何を積まれても承知」ではない。別のコミットが積まれたことを
+ * 言うには、受容した後も走査にそのブランチが載り続けている必要がある。
+ *
+ * created_jst から1日ぶん余裕を取るのは、行が立つのは JST の日付で、
+ * PRのマージはその前日の UTC でありうるため。
+ */
+export function orphanWatchSince(ledger, slackDays = 1) {
+  const dates = (ledger?.actions ?? [])
+    .filter((a) => (a.state === 'open' || a.state === 'acknowledged')
+      && a.close_check?.kind === 'branch_caught_up'
+      && /^\d{4}-\d{2}-\d{2}$/.test(a.created_jst ?? ''))
+    .map((a) => a.created_jst)
+    .sort();
+  if (dates.length === 0) return null;
+  const t = Date.parse(`${dates[0]}T00:00:00Z`);
+  if (!Number.isFinite(t)) return null;
+  return new Date(t - slackDays * 86400000).toISOString().slice(0, 10);
+}
+
+/**
  * **運転そのものが毎日書き換える台帳。**ここだけを触る取り残しは「再投入の候補」で、
  * それ以外を含むものは書きかけかもしれないので中身を読むしかない。
  *
@@ -1258,7 +1304,7 @@ export function orphanSlug(branch) {
  * マージ後に push された取り残しを探す。**取れなかったら null**
  * （空配列だと「取り残しは無い」＝逆の結論になる）。
  */
-export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fetch } = {}) {
+export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fetch, watchSince = null } = {}) {
   if (!token) return null;
   const headers = {
     authorization: `Bearer ${token}`,
@@ -1271,7 +1317,23 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
     return res.json();
   };
   try {
-    const since = new Date(Date.parse(`${today}T00:00:00Z`) - ORPHAN_LOOKBACK_DAYS * 86400000);
+    // **窓は「拾う範囲」であって「閉じてよい範囲」ではない。**
+    //
+    // 既定は7日。だが窓から外れたブランチは走査に載らず、branch_caught_up は
+    // **載っていないことを「解消」と読んで閉じる。**取り残しが残ったままでも閉じる。
+    //
+    // 2026-09-03 に実測した実害: act-orphaned-pr-660（ブランチ
+    // claude/obsidian-auto-20260827）は merged_at 2026-08-27T00:32:47Z で、
+    // 09-03 の since（08-27T00:00Z）には入るが **09-04 の since（08-28T00:00Z）で
+    // 外れる。**ブランチには 813b335e が残ったままなのに、翌日の走査で消えて
+    // 「取り残しは解消（走査に出てこない）」という **嘘の evidence で閉じる。**
+    // 7日以内に片付かなかった取り残しは、例外なく全部この閉じ方をしていた。
+    //
+    // なので **開いている行がある間は窓を狭めない。**判定に要るのはその行の
+    // ブランチだけなので、覆えなければ null を返す既存の規律もそのまま効く。
+    const windowMs = Date.parse(`${today}T00:00:00Z`) - ORPHAN_LOOKBACK_DAYS * 86400000;
+    const watchMs = watchSince ? Date.parse(`${watchSince}T00:00:00Z`) : NaN;
+    const since = new Date(Number.isFinite(watchMs) ? Math.min(windowMs, watchMs) : windowMs);
     // **窓の中のマージ済みPRを全部拾う。**1ページ固定だと覆えない（下の
     // 【1ページでは覆えない】）。updated desc なので、ページ末尾が窓より古く
     // なった時点で以降も全部古い（merged_at <= updated_at なので取りこぼさない）。
@@ -2246,6 +2308,48 @@ async function selftest() {
       await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: boom }) === null);
     t('トークンが無ければ null', await fetchOrphanedCommits('o/r', null, '2026-08-26') === null);
   }
+  {
+    // **窓から落ちた取り残しを「解消」にしない。**
+    // 実測（2026-09-03）: PR #660 は merged_at 2026-08-27T00:32:47Z。既定の7日窓だと
+    // 09-04 の since は 08-28T00:00Z なので落ちる。落ちれば走査に載らず、
+    // branch_caught_up は「走査に出てこない＝解消」で **嘘の evidence を書いて閉じる。**
+    const pr660 = [{
+      number: 660, merged_at: '2026-08-27T00:32:47Z', updated_at: '2026-08-27T00:32:47Z',
+      head: { sha: 'c51306e', ref: 'claude/obsidian-auto-20260827' }, base: { ref: 'main' },
+    }];
+    const mk = (shas) => ({ commits: shas.map((sha) => ({ sha })) });
+    const fakeFetch = async (url) => {
+      if (url.includes('/pulls?')) {
+        return { ok: true, json: async () => (url.includes('page=1') ? pr660 : []) };
+      }
+      if (url.includes('/commits/')) return { ok: true, json: async () => ({ files: [] }) };
+      return { ok: true, json: async () => mk(['813b335']) };
+    };
+    const dropped = await fetchOrphanedCommits('o/r', 'tok', '2026-09-04', { fetchImpl: fakeFetch });
+    t('既定の窓では 09-04 に落ちる（これが嘘の閉じ方の原因だった）', dropped.length === 0);
+    const watched = await fetchOrphanedCommits('o/r', 'tok', '2026-09-04',
+      { fetchImpl: fakeFetch, watchSince: '2026-08-26' });
+    t('**開いている行がある間は窓を広げて拾い続ける**',
+      watched.length === 1 && watched[0].branch === 'claude/obsidian-auto-20260827');
+
+    // 窓を広げても「載っていない＝解消」の読み方自体は変えない
+    t('広げた窓で拾えた行は閉じない',
+      CLOSE_CHECKS.branch_caught_up({ pr: 660 }, { orphans: watched }).closed === false);
+
+    const led = { actions: [
+      { id: 'a', state: 'open', created_jst: '2026-08-27',
+        close_check: { kind: 'branch_caught_up', params: { branch: 'b1' } } },
+      { id: 'b', state: 'acknowledged', created_jst: '2026-08-20',
+        close_check: { kind: 'branch_caught_up', params: { branch: 'b2' } } },
+      { id: 'c', state: 'done', created_jst: '2026-01-01',
+        close_check: { kind: 'branch_caught_up', params: { branch: 'b3' } } },
+    ] };
+    t('窓は最古の未解決行まで広がる（1日の余裕つき）', orphanWatchSince(led) === '2026-08-19');
+    t('**受容した行も窓に入れる**（積み増しに気づくには載り続ける必要がある）',
+      orphanWatchSince({ actions: [led.actions[1]] }) === '2026-08-19');
+    t('閉じた行では窓を広げない', orphanWatchSince({ actions: [led.actions[2]] }) === null);
+    t('対象が無ければ null（既定の7日窓のまま）', orphanWatchSince({ actions: [] }) === null);
+  }
 
   // --- 取り残しコミットの検知 ---
   t('走査が取れなければ閉じない',
@@ -2346,6 +2450,34 @@ async function selftest() {
     merge(ack, [{ id: 'act-x', title: '新', detail: '新', source: 'ledger',
       close_check: { kind: 'manual', params: {} } }], '2026-09-01');
     t('**既知の制約（acknowledged）は開け直さない**', ack.actions[0].state === 'acknowledged');
+
+    // **取り残しの受容だけは、受容したSHAに紐づく。**
+    // ブランチへの白紙委任にすると、一度受容したブランチは以後どんな取り残しを
+    // 積まれても鳴らない（受容が消音になる）。
+    const mkAck = (reviewed) => ({ actions: [{
+      id: 'act-orphaned-branch-claude-x', title: '旧', detail: '旧', source: 'orphan',
+      state: 'acknowledged', created_jst: '2026-08-27', last_seen_jst: '2026-08-27',
+      closed_jst: null, reviewed_orphans: reviewed,
+      close_check: { kind: 'branch_caught_up', params: { branch: 'claude/x' } },
+    }] });
+    const derived = (commits) => derive({ orphans: [{
+      pr: 660, prs: [660], branch: 'claude/x', merged_sha: 'abcdef1234',
+      ahead_by: commits.length, commits, paths: ['data/autopilot-runs.json'], ledger_only: true,
+    }] }).filter((a) => a.source === 'orphan');
+
+    const same = mkAck(['813b335']);
+    merge(same, derived(['813b335']), '2026-09-10');
+    t('照合済みのSHAだけなら受容のまま', same.actions[0].state === 'acknowledged');
+
+    const grew = mkAck(['813b335']);
+    merge(grew, derived(['813b335', 'cafe123']), '2026-09-10');
+    t('**受容したブランチに別のコミットが積まれたら開け直す**',
+      grew.actions[0].state === 'open' && grew.actions[0].created_jst === '2026-09-10');
+
+    const blank = mkAck(undefined);
+    merge(blank, derived(['813b335']), '2026-09-10');
+    t('照合したSHAを書いていない受容は開け直す（承知した範囲を言えない）',
+      blank.actions[0].state === 'open');
   }
   {
     // **旧ID（PR単位）の行があれば、そこへ流して行を増やさない。**
@@ -2870,7 +3002,7 @@ function readJson(p, fallback = null) {
   }
 }
 
-async function buildContext(today) {
+async function buildContext(today, ledger = null) {
   const runsDoc = readJson(RUNS_PATH, { runs: [] });
   // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
   // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
@@ -2901,7 +3033,8 @@ async function buildContext(today) {
     console.error(`# 実費ゲートの判定を取得できなかった: ${e.message}`);
   }
   const workflowRuns = await fetchWorkflowRuns(repo, token);
-  const orphans = await fetchOrphanedCommits(repo, token, today);
+  const orphans = await fetchOrphanedCommits(repo, token, today,
+    { watchSince: orphanWatchSince(ledger) });
   return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, repo, token };
 }
 
@@ -2945,7 +3078,7 @@ async function main() {
     return;
   }
 
-  const ctx = await buildContext(today);
+  const ctx = await buildContext(today, ledger);
   merge(ledger, derive(ctx), today);
   reconcile(ledger, ctx);
 
