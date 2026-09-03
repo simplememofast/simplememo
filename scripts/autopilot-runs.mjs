@@ -439,6 +439,57 @@ export function handsOffStreaks(runs) {
 }
 
 /**
+ * **公開面を出したと数えてよいレーン。**Runbook §2 の分類そのもの。
+ *
+ *   A  SEO（Refresh / New / 配線）      B  AIO（回答ブロック）
+ *   C  Evidence Asset（一次情報）        D  Paid relevance 例外（四半期1本）
+ *   E  Coverage（まとめサイト化）
+ *
+ * **F（自己修復）は入らない。**Runbook が「レーンFで1日使い切ってよい。その日の
+ * 記事はゼロでよく」と明記しているとおり、あれは**自分を直す日**であって、
+ * 公開面に何かが出た日ではない。lane が無い日（§6 の保守のみ）も同じ。
+ */
+export const PUBLISHING_LANES = ['A', 'B', 'C', 'D', 'E'];
+
+/**
+ * **連続公開日数 — 「出荷した」ではなく「公開面に出た」の連続。**
+ *
+ * [2026-09-03] 連続出荷は現在 3 日と出るが、**その3日のうち2日はレーンF（自己修復）
+ * で、公開面には何も出ていない。**連続出荷の定義（shipped の行がある日）は
+ * それ自体は正しい —— 自己修復も出荷である。だが**自分を直し続けても連続出荷は
+ * 伸びる。**これは連続稼働に対して連続出荷を足したときと**同じ形の穴**で、
+ * 一段内側に残っていた。
+ *
+ * 実物（2026-09-03 時点）:
+ *
+ *     09-01  actions  lane F  PR #749   公開面の成果物なし
+ *     09-02  actions  lane F  PR #774   公開面の成果物なし
+ *     09-03  actions  lane A  PR #793   /obsidian/getting-started/
+ *
+ * 連続出荷は 3 日。**公開面が出たのは1日だけ。**新規カバレッジ（レーンE）は
+ * 08-28 が最後で、6日空いている。
+ *
+ * **どちらが正しい優先順位かは、この指標では決めない。**故障が続けばレーンFが
+ * 勝ち続けるのが正しい日もある。決められるようにするために、まず**分けて数える。**
+ */
+export function publishingStreaks(runs) {
+  return streakWalk(runs, (rows) =>
+    rows.some((r) => r.outcome === 'shipped' && PUBLISHING_LANES.includes(r.lane)));
+}
+
+/**
+ * 最後に公開面が出た日と、そのレーン。**空白が伸びていることを1行で言うため。**
+ * 連続が 0 のとき「いつから出ていないか」が無いと、読み手は台帳を遡ることになる。
+ */
+export function lastPublishing(runs) {
+  const rows = (runs ?? [])
+    .filter((r) => r.outcome === 'shipped' && PUBLISHING_LANES.includes(r.lane))
+    .sort((a, b) => String(a.date_jst).localeCompare(String(b.date_jst)));
+  const last = rows[rows.length - 1];
+  return last ? { date_jst: last.date_jst, lane: last.lane, artifact: last.artifact ?? null } : null;
+}
+
+/**
  * **マージ済みの当日ブランチに台帳を積もうとしていないか。**
  *
  * 【なぜここで止めるか】取り残しコミットの41%（アクション台帳17/41行）は、
@@ -541,6 +592,9 @@ export function summarize(doc, { since = null, costDoc = null, statusDoc = null,
     // 稼働より厳しい2本。**稼働だけを出すと、失敗し続けても伸びる数字になる。**
     shipping_streaks: shippingStreaks(runs),
     hands_off_streaks: handsOffStreaks(runs),
+    // **出荷の内側にもう1本。**自己修復も出荷なので、連続出荷は自分を直し続けても伸びる。
+    publishing_streaks: publishingStreaks(runs),
+    last_publishing: lastPublishing(runs),
     by_route: byRoute,
     // 「主系が一度も出荷していない」を機械が言えるようにする（＝切替の証拠）
     primary_ever_shipped: (byRoute.primary?.shipped ?? 0) > 0,
@@ -602,6 +656,21 @@ function render(s, doc) {
   if (sh) {
     o.push(`  連続出荷      ${sh}`);
     o.push('    （出荷のある日だけが続く。停止・失敗・スキップ・行の無い日はすべて切る）');
+  }
+  const pb = fmt(s.publishing_streaks, '0 日（最終記入日に公開面の出荷が無い）');
+  if (pb) {
+    o.push(`  連続公開      ${pb}`);
+    o.push('    （レーンA〜Eの出荷がある日だけが続く。**レーンF＝自己修復と保守のみの日は切る**）');
+    const lp = s.last_publishing;
+    if (lp) {
+      const to = s.staleness?.latest ?? lp.date_jst;
+      const gap = Math.round(
+        (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${lp.date_jst}T00:00:00Z`)) / 86400000);
+      o.push(`    最後の公開面: ${lp.date_jst}（レーン${lp.lane}`
+        + `${Number.isFinite(gap) && gap > 0 ? ` / ${gap}日前` : ''}）${lp.artifact ? ` ${lp.artifact}` : ''}`);
+    } else {
+      o.push('    最後の公開面: 窓の中に無い');
+    }
   }
   const ho = fmt(s.hands_off_streaks, '0 日（最終記入日に無介入の出荷が無い）');
   if (ho) {
@@ -857,6 +926,36 @@ function selftest() {
   ];
   eq(shippingStreaks(twoRoutes).current.days, 1, '同じ日に失敗と出荷が並べば出荷日（経路のどれかが出せばよい）');
 
+  // --- 連続公開 — **出荷の内側にもう1本。**自己修復も出荷なので、
+  //     連続出荷は自分を直し続けても伸びる。ここが切れることを固定する。
+  const laned = (...triples) => triples.map(([d, o, lane], i) =>
+    ({ run_id: `p${i}`, date_jst: d, outcome: o, lane }));
+  const repairRun = laned(
+    ['2026-09-01', 'shipped', 'F'], ['2026-09-02', 'shipped', 'F'], ['2026-09-03', 'shipped', 'A']);
+  eq(shippingStreaks(repairRun).current.days, 3, '自己修復も出荷なので連続出荷は伸びる');
+  eq(publishingStreaks(repairRun).current.days, 1,
+     '**レーンFでは連続公開は伸びない**（2026-09-03 の実物がこの形）');
+  eq(publishingStreaks(laned(['2026-09-01', 'shipped', 'F'])).current.days, 0,
+     'レーンFだけの日は公開ゼロ');
+  eq(publishingStreaks(laned(['2026-09-01', 'shipped', null])).current.days, 0,
+     '**lane が無い日（§6 の保守のみ）も公開ではない**');
+  eq(publishingStreaks(laned(['2026-09-01', 'failed', 'E'])).current.days, 0,
+     '公開レーンでも出荷していなければ数えない');
+  for (const lane of PUBLISHING_LANES) {
+    eq(publishingStreaks(laned(['2026-09-01', 'shipped', lane])).current.days, 1,
+       `レーン${lane} は公開面に数える`);
+  }
+  const mixedDay = [
+    { run_id: 'x', date_jst: '2026-09-01', outcome: 'shipped', lane: 'F' },
+    { run_id: 'y', date_jst: '2026-09-01', outcome: 'shipped', lane: 'E' },
+  ];
+  eq(publishingStreaks(mixedDay).current.days, 1,
+     '同じ日に自己修復と公開が並べば公開日（経路のどれかが出せばよい）');
+  eq(lastPublishing(repairRun).date_jst, '2026-09-03', '最後の公開面の日を返す');
+  eq(lastPublishing(repairRun).lane, 'A', 'そのレーンも返す');
+  eq(lastPublishing(laned(['2026-09-01', 'shipped', 'F'])), null,
+     '**公開が1度も無ければ null**（0日と「窓の中に無い」を混ぜない）');
+
   const iv = (kind) => [{ kind, who: 'owner', note: 'x' }];
   const touched = [
     { run_id: 'a', date_jst: '2026-08-11', outcome: 'shipped', interventions: [] },
@@ -1013,6 +1112,13 @@ if (isMain) {
     streaks: s.streaks,
     shipping_streaks: s.shipping_streaks,
     hands_off_streaks: s.hands_off_streaks,
+    // **status JSON の `streak.consecutive_no_article_days` は手書きの欄。**
+    // あれはセッションが自分で書く散文側（reason / verified / next と同じ列）で、
+    // 台帳から導かれていない —— 日報にも autopilot-health にも出ているのに、
+    // **書いた本人以外は確かめられない。**
+    // ここに導出値を並べて置く。突き合わせる側が現れたときの正はこちら。
+    publishing_streaks: s.publishing_streaks,
+    last_publishing: s.last_publishing,
     intervention_count: s.interventions.length,
     timings: s.timings,
   };
