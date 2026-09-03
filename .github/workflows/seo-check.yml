@@ -88,7 +88,12 @@ jobs:
         run: node scripts/check-content-graph.mjs
 
       # Rating / price / © / og:site_name must match data/site-constants.json
-      - name: Site constants consistency
+      # 検出規則が実際に効くことを先に見る。**他社の評価・価格を書き換えない**
+      # ことも含む —— ガードが無かった頃、この規則は競合の 4.9/206 を自社の値へ
+      # 書き換えかけている（本体のコメント）。
+      - name: Constants detectors fire (self-test)
+        run: node scripts/sync_constants.js --selftest
+      - name: Site constants match data/site-constants.json
         run: node scripts/sync_constants.js --check
 
       # 【公開表示の鮮度】評価と公開バージョンは、**JSON-LD の aggregateRating
@@ -106,7 +111,11 @@ jobs:
       # Every App Store CTA must carry placement/cluster/variant metadata. A new
       # page copied from an old template would otherwise silently reintroduce
       # unmeasurable CTAs, which is the state this replaced.
-      - name: CTA placement metadata
+      # 配置の判定が実際に効くことを先に見る。序数で測っていた頃は 207 件中
+      # 168 件の末尾CTAを hero と呼んでいた（本体のコメント）。
+      - name: CTA placement rules fire (self-test)
+        run: node scripts/tag-cta-placements.js --selftest
+      - name: CTA placement metadata check
         run: node scripts/tag-cta-placements.js --check
 
       # App Store CTA hrefs must match the CPP wiring table (data/cpp-map.json):
@@ -1119,5 +1128,7 @@ jobs:
       # そちらの通知は auto-merge.yml のマージ後ステップが行う。
       - name: IndexNow notification (on main push only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: node scripts/indexnow-notify.js --since 1
+        run: |
+          node scripts/indexnow-notify.js --selftest
+          node scripts/indexnow-notify.js --since 1
         continue-on-error: true
