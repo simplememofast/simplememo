@@ -387,6 +387,12 @@
       "expr": "staticResult.problems",
       "disposition": "前提",
       "note": "`checkStatic()` の戻り値。**同じファイルの純関数**で、`problems` は必ず配列を返す（`const problems = []` から始めて push するだけ・早期 return が無い）。台帳や外部入力は経由しない。\n\n**正が消える経路が無いことが要点。**`checkStatic` の走査対象 `STATIC_FILES` が空になっても `problems` は `[]` で、`.length` は 0 —— つまり**「見る面が消えた」を「異常なし」と読む**。そこは `scanned !== STATIC_FILES.length` を見る自己テスト（**面が消えたら落ちる**）が受けており、`STATIC_FILES.length !== allPages().length` を見る自己テスト（**静的規則は全面に当たる**）が全面から縮むことも落とす。**この式そのものではなく、上流の2本で守っている。**"
+    },
+    {
+      "file": "scripts/check-viewport-overflow.mjs",
+      "expr": "none",
+      "disposition": "前提",
+      "note": "自己テストの中の `findWebKitDriver(['/does/not/exist'])` の戻り値。**`null`（見つからない）を期待している側**で、`null` 以外が返ってきたら「実体が在る」ことまで確かめる、という二段の書き方になっている。\n\n**正が消えても緩まない。**`findWebKitDriver` が壊れて常に `null` を返すようになったら、この行は素通りするが、**同じ自己テスト群の『WebKit で本当に測れているか』が落ちる**（`fixtures/engine-divergence.html` で Blink と差が出ることを実測で要求している）。つまりドライバ探索の縮退はこの式ではなく上流のテストが受けており、ここは「存在しないパスを渡したのに実体を返した」という**逆方向の間違い**だけを見ている。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
