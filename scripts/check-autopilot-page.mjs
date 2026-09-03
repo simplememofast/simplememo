@@ -66,6 +66,66 @@ export const EXTRA_PATHS = [
   path.join(ROOT, 'docs/pr-autopilot-2026-09-final.md'),
   path.join(ROOT, 'index.html'),
 ];
+/**
+ * **配信済みの記録は、いまの台帳に追従しない。**
+ *
+ * [2026-09-03] `-body.md` を網に入れた 09-02 の時点で、この検査は時限式になっていた ——
+ * 配信本文は「本文は配信時のまま残します（配信時点の原稿を書き換えると『何を送ったか』の
+ * 記録が消えます）」と自分で宣言しているのに、この検査は台帳の**現在値**と突き合わせる。
+ * **台帳が1日進んだ瞬間に必ず落ちる。**実際 09-03、日次アクチュエータが台帳へ1行足した
+ * だけで、連続稼働 16→17 の食い違いで PR がマージできなくなり、
+ * **台帳が main に着地できない＝翌日の判断材料が古いまま**という自己閉塞になった。
+ *
+ * 【凍結してよい理由】この検査が生まれた事故は「**配信前の**原稿が 58.6% で止まっていた」
+ * （08-26）で、危険なのは配信前の陳腐化である。送ってしまった文書はもう動かないので、
+ * 現在値と違うことは欠陥ではなく**時点が違う**というだけ。
+ *
+ * 【それでも見えなくしない】凍結してもズレは毎回**印字する**（落とさないだけ）。
+ * 黙って照合対象から外すと、このリポジトリが何度も踏んでいる
+ * 「見ていないことを、一致していると読む」に戻る。
+ *
+ * 【凍結できない場所】**生きた公開面（.html）は凍結できない。**
+ * サイトは書き換えられるので「もう動かない」が成り立たない。
+ * 置いても凍結されず、置いたこと自体を落とす。
+ */
+export const FROZEN_RE = /<!--\s*numbers-frozen:\s*(\d{4}-\d{2}-\d{2})(?:\s+([^>]*?))?\s*-->/;
+
+/** 凍結宣言を読む。**判定できない書き方は凍結ではなく問題として返す。** */
+export function readFreeze(text, { allowed = false, today = null } = {}) {
+  const m = String(text).match(FROZEN_RE);
+  if (!m) return { frozen: false, problems: [] };
+  const problems = [];
+  if (!allowed) {
+    problems.push('numbers-frozen は配信済みの記録（docs/ の .md）にだけ置ける'
+      + ' — **生きた公開面は凍結できない。**サイトは書き換えられるので「もう動かない」が成り立たない');
+  }
+  if (today && m[1] > today) {
+    problems.push(`numbers-frozen の日付が未来（${m[1]}）`
+      + ' — **配信前の原稿は台帳に追従させる。**この検査が生まれたのは配信前の陳腐化である');
+  }
+  return { frozen: problems.length === 0, at: m[1], note: (m[2] ?? '').trim(), problems };
+}
+
+/**
+ * 1ファイルぶんの判定。**呼び出し側に分岐を持たせない。**
+ *
+ * [2026-09-03] 最初は main() の中で `if (fz.frozen)` を書いていた。変異試験で
+ * **「凍結なら compare を呼ばない」に書き換えてもテストが1件も落ちなかった** ——
+ * つまり「ズレは印字する」という設計上いちばん大事な約束が、テストに覆われて
+ * いなかった。`compare()` 単体しか見ていなかったのが原因。ここへ切り出して、
+ * **凍結してもズレが drift に出ることを固定する。**
+ */
+export function classifyFile(text, { allowed = false, today = null, live }) {
+  const fz = readFreeze(text, { allowed, today });
+  const r = compare(text, live);
+  return {
+    problems: [...fz.problems, ...(fz.frozen ? [] : r.problems)],
+    drift: fz.frozen ? r.problems : [],
+    found: r.found,
+    frozen: fz.frozen, at: fz.at ?? null, note: fz.note ?? '',
+  };
+}
+
 export const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
 /**
  * Lane B（アプリ本体）の台帳。[2026-09-02] ページ §2 と配信本文が
@@ -316,6 +376,37 @@ function selftest() {
   t('稼働だけ合っていても出荷がずれていれば落ちる',
     compare('連続稼働は現在<b>16</b>日で、最長も<b>16</b>日。連続出荷は現在<b>5</b>日', sk2).problems.length === 1);
 
+  // 配信済みの凍結 — **落とさないことと、見えなくすることは別。**
+  const FZ = '<!-- numbers-frozen: 2026-09-03 配信済み -->';
+  t('配信済みの記録は凍結を宣言できる',
+    readFreeze(FZ, { allowed: true, today: '2026-09-03' }).frozen === true);
+  t('宣言の日付と注記を読む',
+    readFreeze(FZ, { allowed: true, today: '2026-09-03' }).at === '2026-09-03'
+    && readFreeze(FZ, { allowed: true, today: '2026-09-03' }).note === '配信済み');
+  t('**生きた公開面（.html）は凍結できない**',
+    readFreeze(FZ, { allowed: false, today: '2026-09-03' }).frozen === false
+    && readFreeze(FZ, { allowed: false, today: '2026-09-03' }).problems.length === 1);
+  t('**未来の日付では凍結できない**（配信前の原稿を先に黙らせない）',
+    readFreeze('<!-- numbers-frozen: 2026-12-31 -->', { allowed: true, today: '2026-09-03' }).frozen === false);
+  t('宣言が無ければ凍結しない',
+    readFreeze('ふつうの本文', { allowed: true, today: '2026-09-03' }).frozen === false);
+  t('**凍結しても照合そのものは走る**（ズレを印字するために要る）',
+    compare(`${FZ}\n連続出荷は現在<b>9</b>日`, sk2).problems.length === 1);
+  t('凍結の宣言があっても、数字が1つも無ければ found は空のまま',
+    compare(FZ, sk2).found.length === 0);
+  const cf = (text, allowed) => classifyFile(text, { allowed, today: '2026-09-03', live: sk2 });
+  t('**凍結してもズレは drift に出る**（照合ごと飛ばすと、この行が 0 になる）',
+    cf(`${FZ}\n連続出荷は現在<b>9</b>日`, true).drift.length === 1);
+  t('凍結したズレは problems には入らない（落とさない）',
+    cf(`${FZ}\n連続出荷は現在<b>9</b>日`, true).problems.length === 0);
+  t('**凍結していなければズレは problems に入る**（落とす）',
+    cf('連続出荷は現在<b>9</b>日', true).problems.length === 1
+    && cf('連続出荷は現在<b>9</b>日', true).drift.length === 0);
+  t('**凍結できない場所では、宣言が問題になったうえでズレも落ちる**',
+    cf(`${FZ}\n連続出荷は現在<b>9</b>日`, false).problems.length === 2);
+  t('**凍結しても found は減らない**（何を見たかの記録を消さない）',
+    cf(`${FZ}\n連続出荷は現在<b>9</b>日`, true).found.length === 1);
+
   // コード著者率 — 台帳のどの窓にも無い率は落ちる
   const cr = { ...md, code_rates: [{ commits: 99.5, lines: 94.2 }, { commits: 81.9, lines: 70.9 }],
     lane_b: { tags: 14, store_ready: 7, device_verified_same_sha: 2, release_time_bounded: 2, code_ai_commit_rate_pct: 56.3, code_ai_line_rate_pct: 38.3 } };
@@ -362,11 +453,18 @@ if (isMain) {
   const targets = [PAGE_PATH, ...EXTRA_PATHS].filter((f) => fs.existsSync(f));
   const problems = [];
   const found = [];
+  const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  const drifted = [];
   for (const f of targets) {
     const label = path.relative(ROOT, f);
-    const r = compare(fs.readFileSync(f, 'utf8'), live);
+    const text = fs.readFileSync(f, 'utf8');
+    // **凍結してよいのは docs/ の .md（配信済みの記録）だけ。**
+    // .html は生きた公開面なので、宣言を置いたこと自体が問題になる。
+    const r = classifyFile(text, { allowed: f.endsWith('.md'), today, live });
     problems.push(...r.problems.map((x) => `${label}: ${x}`));
-    found.push(...r.found);
+    // **落とさないが、見えなくもしない。**ズレは毎回印字する。
+    if (r.frozen) drifted.push({ label, at: r.at, note: r.note, lines: r.drift });
+    found.push(...r.found.map((x) => ({ ...x, frozen: r.frozen, file: label })));
     // **一覧に入れたのに1つも照合していない、を落とす。**
     // 表記が変わって正規表現に当たらなくなると、検査は黙って通る ——
     // それは「一致した」ではなく「見ていない」。網に入れた文書には
@@ -381,7 +479,17 @@ if (isMain) {
   console.log(`公開ページ /autopilot/ と配信本文 × 台帳 — 突き合わせた数字 ${found.length} 件`);
   console.log(`  対象: ${targets.map((f) => path.relative(ROOT, f)).join(' / ')}\n`);
   for (const f of found) {
-    console.log(`  ${f.got === f.want ? '一致' : '不一致'}  ${f.label}: ページ ${f.got} / 台帳 ${f.want}`);
+    const mark = f.got === f.want ? '一致' : (f.frozen ? '時点差' : '不一致');
+    console.log(`  ${mark}  ${f.label}: ページ ${f.got} / 台帳 ${f.want}`);
+  }
+  for (const d of drifted) {
+    console.log(`\n  凍結: ${d.label}（numbers-frozen ${d.at}${d.note ? ' ' + d.note : ''}）`);
+    if (!d.lines.length) {
+      console.log('    台帳の現在値と一致している（凍結しているが、いまはズレていない）');
+    } else {
+      console.log(`    **配信時点の数字なので落とさない。**現在値とのズレ ${d.lines.length}件:`);
+      for (const l of d.lines) console.log(`      - ${l}`);
+    }
   }
   if (!found.length) {
     console.log('  ページに台帳由来の数字が1つも見つからなかった。');
