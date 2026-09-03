@@ -654,6 +654,7 @@ node scripts/autopilot-drill.mjs --check     # 切替演習（15シナリオ）
 node scripts/automation-rate.mjs --check     # 全領域の自動化率台帳
 node scripts/check-pr-facts.mjs --check      # PR原稿の事実と禁止表現
 node scripts/check-landing-freshness.mjs --check  # 着地面（トップ日英）が現実より古くないか
+node scripts/check-viewport-overflow.mjs --static # 隣り合う nowrap に改行機会があるか（ブラウザ不要・CIも落とす）
 node scripts/check-viewport-overflow.mjs --check  # 着地面に横スクロールが出ていないか（320px を含む）
 node growth/scripts/d-score.mjs --check      # pr_releaseの算数とゲートの矛盾
 python3 scripts/generate_sitemap.py --dry-run
