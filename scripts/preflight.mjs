@@ -109,6 +109,15 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
 
 /**
+ * 実行行の形。**インタプリタも取り出す** —— `node` だけを回していたころ、
+ * `python3 scripts/generate_sitemap.py --check` は「対象外」として表に出しつつ
+ * 一度も回していなかった。2026-09-03 に台帳（check-selftests.mjs）が python を
+ * 列挙するようになったので、鏡もここで合わせる。
+ * **1か所だけ直すと、鏡が古い版を映し続ける。**
+ */
+const RUN_RE = /^(node|python3)\s+((?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.(?:m?js|py))(.*)$/;
+
+/**
  * ワークフローから `node <script> <args>` の行を拾う。**純関数。**
  *
  * 行頭の空白と `-` を落としてから見る（YAML のブロック内なので字下げがある）。
@@ -144,14 +153,14 @@ export function extractCommands(yamlText) {
     if (/^if:\s/.test(line)) { stepHasIf = true; continue; }
     const inline = line.match(/^run:\s+(.+)$/);
     if (inline) line = inline[1].trim();
-    if (!line.startsWith('node ')) continue;
+    if (!/^(?:node|python3)\s/.test(line)) continue;
     if (/[|&;><]/.test(line)) continue;          // 合成された行は取らない
     if (/\$\{\{|\$[A-Z_]/.test(line)) continue;  // 変数を含む行は手元で意味が変わる
     if (stepHasIf) continue;                     // 条件付きのステップは手元で意味が違う
-    const m = line.match(/^node\s+((?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.m?js)(.*)$/);
+    const m = line.match(RUN_RE);
     if (!m) continue;
-    const args = m[2].trim();
-    out.push({ script: m[1], args: args === '' ? [] : args.split(/\s+/) });
+    const args = m[3].trim();
+    out.push({ runner: m[1], script: m[2], args: args === '' ? [] : args.split(/\s+/) });
   }
   // 同じ script+args は1回だけ
   const seen = new Set();
@@ -187,7 +196,7 @@ export function auditExtraction(yamlText) {
     if (inline) line = inline[1].trim();
     // 実行系に見える行だけを対象にする（散文やYAMLの他のキーは無視）
     if (!/^(node|python3|npx)\s/.test(line)) continue;
-    if (/^node\s+(?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.m?js/.test(line)
+    if (RUN_RE.test(line)
         && !/[|&;><]/.test(line) && !/\$\{\{|\$[A-Z_]/.test(line) && !stepHasIf) { taken += 1; continue; }
     if (/[|&;><]/.test(line)) { dropped.composed.push(line); continue; }
     if (/\$\{\{|\$[A-Z_]/.test(line)) { dropped.variable.push(line); continue; }
@@ -195,10 +204,15 @@ export function auditExtraction(yamlText) {
     // 「main への push のときだけ」と言っているものを手元で回すと、
     // 検査ではなく副作用（IndexNow への実送信）が起きる。
     if (stepHasIf) { dropped.conditional.push(line); continue; }
-    // .py / npx / growth/lib のテストは、**現状は回していない。**
+    // npx と growth/lib のテストは、**現状は回していない。**
     // 回さないこと自体は判断だが、黙って消えていてよい理由は無いので表に出す。
-    if (/^(python3\s|npx\s)/.test(line) || /^node\s+\S+\.py\b/.test(line)
-        || /^node\s+\S+\.test\.mjs\b/.test(line)) { dropped.out_of_scope.push(line); continue; }
+    //
+    // **ここを「node/python で始まる行はすべて対象外」にしない。**そう書くと
+    // 見たことのない形（例: `node tools/x.mjs`）まで「既知の除外」に流れ込み、
+    // 下の unknown が構造的に到達不能になる —— 「分類できなかった」を
+    // 「分類済み」と報告する形で、この工程が潰しているものそのもの。
+    if (/^npx\s/.test(line) || /\.test\.mjs\b/.test(line)
+        || /^(?:node|python3)\s+growth\/lib\//.test(line)) { dropped.out_of_scope.push(line); continue; }
     dropped.unknown.push(line);
   }
   return { taken, dropped };
@@ -264,14 +278,36 @@ function selftest() {
     const text = yaml('        run: node scripts/h.mjs --check', '        run: node scripts/h.mjs --check');
     assertEq(names(text).length, 1);
   });
-  t('python は対象外として表に出す（黙って消さない）', () => {
-    const d = auditExtraction(yaml('        run: python3 scripts/i.py --check')).dropped;
-    assertEq(d.out_of_scope.join(), 'python3 scripts/i.py --check');
+  // **台帳が python を列挙するようになったら、鏡もここで合わせる。**
+  // 2026-09-03 まで python は「対象外」として表に出しつつ一度も回していなかった。
+  t('**python の検査も回す**（2026-09-03 まで対象外にしていた）', () => {
+    const text = yaml('      - name: x', '        run: python3 scripts/generate_sitemap.py --check');
+    const got = extractCommands(text);
+    assertEq(got.length, 1);
+    assertEq(`${got[0].runner} ${got[0].script} ${got[0].args.join(' ')}`,
+      'python3 scripts/generate_sitemap.py --check');
+  });
+  t('インタプリタを取り違えない（node の行は node で回す）', () => {
+    const got = extractCommands(yaml('        run: node scripts/a.mjs'));
+    assertEq(got[0].runner, 'node');
+  });
+  t('scripts/ の外は対象外として表に出す（黙って消さない）', () => {
+    const d = auditExtraction(yaml('        run: node growth/lib/x.test.mjs')).dropped;
+    assertEq(d.out_of_scope.join(), 'node growth/lib/x.test.mjs');
     assertEq(d.unknown.length, 0);
   });
+  t('npx は対象外', () => {
+    const d = auditExtraction(yaml('        run: npx playwright test')).dropped;
+    assertEq(d.out_of_scope.join(), 'npx playwright test');
+  });
   // **見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。**
+  // **見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。**
+  // 既知の除外を広げすぎると、ここが構造的に到達不能になる（実際に一度そうした）。
   t('分類できない実行行は unknown に落ちる（＝緑にしない）', () => {
     assertEq(auditExtraction(yaml('        run: node tools/j.mjs')).dropped.unknown.length, 1);
+  });
+  t('python でも scripts/ の外なら unknown', () => {
+    assertEq(auditExtraction(yaml('        run: python3 tools/j.py')).dropped.unknown.length, 1);
   });
   t('実データ: 取りこぼしの分類に unknown が無い', () => {
     const d = auditExtraction(fs.readFileSync(WORKFLOW, 'utf8')).dropped;
@@ -344,7 +380,7 @@ if (cmds.length === 0) {
 if (only) cmds = cmds.filter((c) => `${c.script} ${c.args.join(' ')}`.includes(only));
 
 if (argv.includes('--list')) {
-  for (const c of cmds) console.log(`node ${c.script} ${c.args.join(' ')}`.trim());
+  for (const c of cmds) console.log(`${c.runner ?? 'node'} ${c.script} ${c.args.join(' ')}`.trim());
   console.log(`\n${cmds.length} 本（.github/workflows/seo-check.yml から導出）`);
   process.exit(0);
 }
@@ -420,7 +456,7 @@ for (const c of cmds) {
     if (mirror === null) mirror = makeMirror();   // 1回だけ作って使い回す
     if (mirror) cwd = mirror;
   }
-  const r = spawnSync('node', [c.script, ...c.args], { cwd, encoding: 'utf8' });
+  const r = spawnSync(c.runner ?? 'node', [c.script, ...c.args], { cwd, encoding: 'utf8' });
   if (r.status === 0) {
     console.log(`  ok    ${label}`);
   } else {

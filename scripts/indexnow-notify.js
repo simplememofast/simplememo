@@ -25,6 +25,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const https = require('https');
 const { execFileSync } = require('child_process');
 const { collectHtmlFiles, toUrlPath } = require('./lib/site-files');
@@ -57,13 +58,13 @@ function generateKey() {
  * 1 ファイルを唯一の正とする。複数あれば #411 型の鍵重複が再発している
  * ということなので、黙って選ばずエラーで知らせる。
  */
-function resolveKey() {
-  if (fs.existsSync(KEY_FILE)) {
-    return fs.readFileSync(KEY_FILE, 'utf8').trim();
+function resolveKey({ root = ROOT_DIR, keyFile = KEY_FILE } = {}) {
+  if (fs.existsSync(keyFile)) {
+    return fs.readFileSync(keyFile, 'utf8').trim();
   }
-  const candidates = fs.readdirSync(ROOT_DIR)
+  const candidates = fs.readdirSync(root)
     .filter((f) => /^[a-f0-9]{32}\.txt$/.test(f))
-    .filter((f) => fs.readFileSync(path.join(ROOT_DIR, f), 'utf8').trim() === f.slice(0, -4));
+    .filter((f) => fs.readFileSync(path.join(root, f), 'utf8').trim() === f.slice(0, -4));
   if (candidates.length === 1) return candidates[0].slice(0, -4);
   if (candidates.length === 0) {
     throw new Error('IndexNow key not found: .indexnow-key も <key>.txt も無い。--generate-key で作成し、<key>.txt をコミットして配備すること');
@@ -112,6 +113,27 @@ function notifiablePaths(lines, exists = (p) => fs.existsSync(path.join(ROOT_DIR
 }
 
 /**
+ * noindex の面を通知対象から外す。**外した面も返す** —— 黙って減らさない。
+ *
+ * ここは `notifiablePaths` の外にあったので、**自己テストが一度も通っていなかった。**
+ * 2026-09-03 に隔離した写しで確かめたところ、この判定を殺しても自己テストは
+ * 13件中0件失敗（緑のまま）だった。noindex の面を「新しい記事」として
+ * 検索エンジンへ申告しても、**CI は何も言わない。**
+ */
+function partitionNoindex(paths, read = (p) => fs.readFileSync(path.join(ROOT_DIR, p), 'utf8')) {
+  const noindexExcluded = [];
+  const urls = [];
+  for (const p of paths) {
+    if (/noindex/i.test(read(p))) {
+      noindexExcluded.push(p);
+      continue;
+    }
+    urls.push(filePathToUrl(path.join(ROOT_DIR, p)));
+  }
+  return { noindexExcluded, urls };
+}
+
+/**
  * 直近 commits 個の first-parent 差分から通知対象を組み立てる。
  * HEAD~N は first parent を辿るので、マージコミットでは首親差分になる。
  */
@@ -129,18 +151,26 @@ function getChangedSince(commits = 1) {
     );
   }
   const changed = notifiablePaths(out);
-
-  const noindexExcluded = [];
-  const urls = [];
-  for (const p of changed) {
-    const content = fs.readFileSync(path.join(ROOT_DIR, p), 'utf8');
-    if (/noindex/i.test(content)) {
-      noindexExcluded.push(p);
-      continue;
-    }
-    urls.push(filePathToUrl(path.join(ROOT_DIR, p)));
-  }
+  const { noindexExcluded, urls } = partitionNoindex(changed);
   return { changed, noindexExcluded, urls };
+}
+
+/**
+ * IndexNow の送信本文。**keyLocation は必ず `<鍵>.txt` を指す。**
+ *
+ * ここがずれると、通知は HTTP 200 を返しながら1件も反映されない ——
+ * `.indexnow-key` が gitignore されていたころ、CI は毎回ランダムな鍵を作り、
+ * **サイトに配備されていない検証ファイル**を指す通知を送り続けていた。
+ * 送信の直前で組み立てていたので自己テストからは見えず、
+ * 2026-09-03 に測ったらここを壊しても 13件中0件失敗（緑）だった。
+ */
+function buildPayload(key, urls) {
+  return {
+    host: 'simplememofast.com',
+    key: key,
+    keyLocation: `${SITE_URL}/${key}.txt`,
+    urlList: urls,
+  };
 }
 
 function sendNotification(key, urls) {
@@ -149,12 +179,7 @@ function sendNotification(key, urls) {
     return Promise.resolve(null);
   }
 
-  const payload = JSON.stringify({
-    host: 'simplememofast.com',
-    key: key,
-    keyLocation: `${SITE_URL}/${key}.txt`,
-    urlList: urls,
-  });
+  const payload = JSON.stringify(buildPayload(key, urls));
 
   return new Promise((resolve, reject) => {
     const url = new URL(INDEXNOW_ENDPOINT);
@@ -245,8 +270,66 @@ function runSelfTest() {
   t('生成する鍵は 32 桁の16進', /^[a-f0-9]{32}$/.test(generateKey()));
   t('生成する鍵は毎回違う', generateKey() !== generateKey());
 
+  // ── ここから下は「パスの選び方」の外にある門 ──────────────────
+  //
+  // 上の検体は notifiablePaths（パスの絞り込み）しか通らない。2026-09-03 に
+  // 隔離した写しで測ったところ、**noindex の除外・鍵の重複・keyLocation** を
+  // それぞれ潰しても 13件中0件失敗（緑のまま）だった。この道具はこの5本で
+  // 唯一**外向きに作用する**ので、どれも CI の失敗ではなく Bing 側の被害になる。
+  t('下位の index.html は末尾スラッシュ',
+    filePathToUrl(path.join(ROOT_DIR, 'en/index.html')) === `${SITE_URL}/en/`);
+  t('index 以外の .html は拡張子を落とす',
+    filePathToUrl(path.join(ROOT_DIR, 'faq.html')) === `${SITE_URL}/faq`);
+
+  // **noindex の面を「新しい記事」として申告しない。**
+  const pages = {
+    'a/index.html': '<html><head></head></html>',
+    'b/index.html': '<meta name="robots" content="noindex">',
+  };
+  const part = partitionNoindex(Object.keys(pages), (p) => pages[p]);
+  t('noindex の面は通知しない', part.noindexExcluded.join() === 'b/index.html');
+  t('noindex で外した面は黙らずに残す', part.urls.length === 1 && part.urls[0].endsWith('/a/'));
+
+  // ── 鍵の解決（#411 の重複と、CI が毎回新鍵を作っていた穴） ──────
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'indexnow-selftest-'));
+  const key = (n) => String(n).repeat(32).slice(0, 32);
+  const put = (name, body) => fs.writeFileSync(path.join(dir, name), body);
+  const resolveIn = (keyFile = path.join(dir, '.no-such-file')) => resolveKey({ root: dir, keyFile });
+  // 落ちるべきでない場所で落ちたら、それも「✗」として報告する。例外を素通しに
+  // すると crash で終わり、**どの判定が壊れたのかが出力から消える。**
+  const safe = (fn) => { try { return fn(); } catch (e) { return `throw: ${e.message}`; } };
+  const threw = (fn, needle) => {
+    try { fn(); return false; } catch (e) { return String(e.message).includes(needle); }
+  };
+
+  const k1 = key('a');
+  put(`${k1}.txt`, k1);
+  t('配備済みの <鍵>.txt が1つならそれを使う', safe(resolveIn) === k1);
+  put('.local-key', 'ffffffffffffffffffffffffffffffff');
+  t('.indexnow-key があればそれが優先',
+    safe(() => resolveIn(path.join(dir, '.local-key'))) === 'ffffffffffffffffffffffffffffffff');
+  // 中身がファイル名と一致しない検証ファイルは、プロトコル上そもそも無効。
+  put(`${key('b')}.txt`, 'ちがう中身');
+  t('中身がファイル名と一致しない <鍵>.txt は候補にしない', safe(resolveIn) === k1);
+  // 重複は #411 の再発。**黙ってどちらかを選ばない。**
+  const k3 = key('c');
+  put(`${k3}.txt`, k3);
+  t('<鍵>.txt が2つあれば黙って選ばずに落ちる', threw(resolveIn, 'ambiguous'));
+  fs.rmSync(path.join(dir, `${k1}.txt`));
+  fs.rmSync(path.join(dir, `${k3}.txt`));
+  // **無ければ生成する、をやめた理由。**.indexnow-key は gitignore なので CI では
+  // 毎回ランダムな鍵が生まれ、配備されていない検証ファイルを指す通知を送り続けた。
+  t('鍵がどこにも無ければ、生成せずに落ちる', threw(resolveIn, 'not found'));
+  fs.rmSync(dir, { recursive: true, force: true });
+
+  // ── 送信本文 ────────────────────────────────────────
+  const payload = buildPayload(k1, [`${SITE_URL}/`]);
+  t('keyLocation は鍵と同じ名前の .txt を指す', payload.keyLocation === `${SITE_URL}/${k1}.txt`);
+  t('host はサイトのホスト名', payload.host === 'simplememofast.com');
+  t('urlList はそのまま載る', payload.urlList.join() === `${SITE_URL}/`);
+
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 13 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 24 件中 ${failures.length} 件失敗`);
   return failures.length ? 1 : 0;
 }
 

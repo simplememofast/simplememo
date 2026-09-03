@@ -139,6 +139,13 @@ jobs:
       # without this seed an English reader following any link into one of
       # them lands in Japanese — which is how it behaved until 2026-08-13.
       # A new /en/ page copied from a template would silently reintroduce it.
+      #
+      # 自己テストが先に走る。この道具が黙って壊れると、**CI ではなく読者側で**
+      # 壊れる —— 種が入らなければ英語の読者が dual-DOM の面で日本語を見続け、
+      # `if(!getItem)` が消えれば日本語の読者が切替器で選んだ値を毎回上書きする。
+      # どちらも赤くならない。
+      - name: Locale seed rules fire (self-test)
+        run: python3 scripts/inject_locale_seed.py --selftest
       - name: /en/ pages seed the reader's locale
         run: python3 scripts/inject_locale_seed.py --check
 
@@ -1114,6 +1121,12 @@ jobs:
       # --dry-run は件数を表示するだけでコミット済みのファイルを見ないため、
       # generate_sitemap.py の実行を忘れたPRを一度も止められなかった（2026-08-22）。
       # --check はURLの集合を突き合わせ、新しいページが sitemap に載っていなければ落ちる。
+      #
+      # **その --check が落ちることは、誰も確かめていなかった。**上の 2026-08-22 の
+      # 一件は「検査が在るのに何も見ていない」形で、置き換えた --check 自身が
+      # 同じ状態でないことを先に見る。自己テストは sitemap を書かない。
+      - name: Sitemap check fires (self-test)
+        run: python3 scripts/generate_sitemap.py --selftest
       - name: Sitemap lists every page (stale sitemap fails)
         run: python3 scripts/generate_sitemap.py --check
 

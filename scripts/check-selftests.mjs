@@ -44,6 +44,24 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
 export const STATES = ['none', 'selftest_only', 'demonstrated'];
 
 /**
+ * ワークフローの本文から「配線された検査」を拾う正規表現。
+ *
+ * **2回、狭すぎた。**どちらも `--check` が緑を出したまま、その範囲について
+ * 何も見ていない状態だった:
+ *   - 2026-09-03 まで `\.mjs` で終わっていて、`seo-check.js`（主検査・12ゲート）
+ *     を含む `.js` 5本が台帳の外にいた
+ *   - 同じ日、`node` で始まる行しか見ておらず、`python3` の2本
+ *     （`generate_sitemap.py` / `inject_locale_seed.py`）が外に残っていた。
+ *     前者は 2026-08-22 に**まさにこの形で効いていなかった** ——
+ *     `--dry-run` が件数を出すだけで、回し忘れた PR を一度も止められなかった
+ *
+ * 末尾の否定先読みは `foo.js` を `foo.j` + `s` のような形で拾わないため。
+ * インタプリタを増やすときは `scripts/preflight.mjs` の導出も同時に見ること
+ * —— **1か所だけ直すと、鏡が古い版を映し続ける。**
+ */
+const RUN_RE = /(?:node|python3)\s+((?:growth\/)?scripts\/[\w.-]+\.(?:m?js|py))(?![\w.-])/;
+
+/**
  * **配線されているだけでは足りない。落とせるステップを持っているか。**
  *
  * 2026-09-03 に実測: 台帳 91 本のうち `scripts/indexnow-notify.js` の 1 本は、
@@ -84,7 +102,7 @@ export function gatingChecks(workflow = WORKFLOW) {
   const found = new Set();
   for (const st of steps) {
     if (st.gated) continue;
-    for (const m of st.body.join('\n').matchAll(/node\s+((?:growth\/)?scripts\/[\w.-]+\.m?js)/g)) found.add(m[1]);
+    for (const m of st.body.join('\n').matchAll(new RegExp(RUN_RE.source, 'g'))) found.add(m[1]);
   }
   return [...found].sort();
 }
@@ -107,7 +125,7 @@ export function gatingChecks(workflow = WORKFLOW) {
 export function wiredChecks(workflow = WORKFLOW) {
   const text = fs.readFileSync(workflow, 'utf8');
   const found = new Set();
-  for (const m of text.matchAll(/node\s+((?:growth\/)?scripts\/[\w.-]+\.m?js)(?![\w.-])/g)) found.add(m[1]);
+  for (const m of text.matchAll(new RegExp(RUN_RE.source, 'g'))) found.add(m[1]);
   return [...found].sort();
 }
 
