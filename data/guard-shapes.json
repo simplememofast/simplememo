@@ -381,6 +381,12 @@
       "expr": "a.not_before_jst",
       "disposition": "前提",
       "note": "**着手できる日は任意の欄。**書いた行にだけ形式（YYYY-MM-DD）を要求する。無い行に要求が無いのが正しい —— 期日を持たない依頼のほうが多数で、そちらは age_days で数える。**正（欄そのもの）が消えたときに規則が消えるのは意図どおり** ——欄が無ければ滞留の数え方は元の age_days に戻るだけで、鳴らなくなる側へは倒れない。逆に形式検査が要るのは、書き間違えた期日がその行を黙って永久に鳴らなくするから（simplememo-api の actionableAgeDays は読めない日付を age_days に落とすが、**落とすこと自体は静かに起きる**ので、書いた側で止める）"
+    },
+    {
+      "file": "scripts/check-viewport-overflow.mjs",
+      "expr": "staticResult.problems",
+      "disposition": "前提",
+      "note": "`checkStatic()` の戻り値。**同じファイルの純関数**で、`problems` は必ず配列を返す（`const problems = []` から始めて push するだけ・早期 return が無い）。台帳や外部入力は経由しない。\n\n**正が消える経路が無いことが要点。**`checkStatic` の走査対象 `STATIC_FILES` が空になっても `problems` は `[]` で、`.length` は 0 —— つまり**「見る面が消えた」を「異常なし」と読む**。そこは `scanned !== STATIC_FILES.length` を見る自己テスト（**面が消えたら落ちる**）が受けており、`STATIC_FILES.length !== allPages().length` を見る自己テスト（**静的規則は全面に当たる**）が全面から縮むことも落とす。**この式そのものではなく、上流の2本で守っている。**"
     }
   ],
   "coverage_measured_at": "2026-09-03",

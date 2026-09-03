@@ -75,7 +75,7 @@
 
   <!-- JSON-LD: FAQPage -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/ai-tags/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"AIタグ自動追加はいつから使えますか？","acceptedAnswer":{"@type":"Answer","text":"すでに提供中です。アプリの無料アップデートとして配信済みのため、App Storeで最新版にアップデート（未インストールの場合は無料ダウンロード）すれば、すぐに使えます。"}},{"@type":"Question","name":"どのiPhoneで使えますか？","acceptedAnswer":{"@type":"Answer","text":"オンデバイスAI（Apple Foundation Models）によるタグ付けは、iOS 26以降のApple Intelligence対応iPhoneで動作します。対応していない機種でも、端末内の軽量整形（ルール＋自然言語処理）が自動で同じ形式のタイトル・タグ・種別を付与するため、機能自体はどの対応機種（iOS 16以降）でも使えます。"}},{"@type":"Question","name":"メモの内容が外部サーバーへ送られませんか？","acceptedAnswer":{"@type":"Answer","text":"送られません。AIによるタグ付け・タイトル生成はApple Foundation Modelsを使ってお使いのiPhoneの中だけで実行され、この処理でネットワーク通信は行いません。なお、メモを自分宛メールとして送る機能自体は通常のメール送信（SMTP）を使います。"}},{"@type":"Question","name":"タグはどのように付きますか？","acceptedAnswer":{"@type":"Answer","text":"AIがメモの内容を理解して、内容を表す名詞タグを1〜3個、20文字以内のタイトル、そしてtodo（やること）／idea（アイデア）／log（記録）などの種別を自動で付けます。本文は書き換えません。Obsidian連携をオンにしていれば、タグ付きのままノートへ自動追記されます。"}},{"@type":"Question","name":"Obsidianを使っていなくても意味がありますか？","acceptedAnswer":{"@type":"Answer","text":"はい。生成されたタイトルはメール件名にも使われるため、受信箱でメモが見つけやすくなります。Obsidian連携をオンにすれば、タグ付きノートの自動整理まで広がります。"}},{"@type":"Question","name":"変なタグが付いたりしませんか？","acceptedAnswer":{"@type":"Answer","text":"AIの生成結果は端末内でチェックし、条件を満たさない場合は軽量整形へ自動的に切り替えます（フォールバック）。どちらの場合も本文（原文）は一切書き換えず、そのまま保持されます。"}},{"@type":"Question","name":"料金はかかりますか？","acceptedAnswer":{"@type":"Answer","text":"アプリはFreeプラン（1日3通までずっと無料）から使えます。送信無制限のPremiumは月額500円または年額5,000円です。"}}]}</script>
-  <link rel="stylesheet" href="/assets/css/style.min.css?v=fa92a786e6">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=a7629b3f2c">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
   <style>
@@ -89,7 +89,7 @@
     .ai-hero{position:relative;text-align:center;padding:4.5rem 0 3rem;overflow:hidden}
     .ai-hero::before{content:'';position:absolute;inset:-20% -10% auto;height:130%;background:radial-gradient(60% 55% at 50% 12%,rgba(139,124,255,.16),transparent 70%),radial-gradient(45% 40% at 18% 55%,rgba(34,211,238,.10),transparent 70%),radial-gradient(45% 40% at 84% 45%,rgba(124,77,255,.12),transparent 70%);pointer-events:none}
     .ai-hero>.container{position:relative}
-    .ai-hero__pill{display:inline-flex;align-items:center;gap:.5rem;padding:.32rem .9rem .32rem .4rem;font-size:.8rem;font-weight:700;color:#e9e2ff;background:rgba(124,77,255,.14);border:1px solid rgba(124,77,255,.45);border-radius:999px;margin-bottom:1.5rem}
+    .ai-hero__pill{display:inline-flex;align-items:center;gap:.5rem;max-width:100%;padding:.32rem .9rem .32rem .4rem;font-size:.8rem;font-weight:700;color:#e9e2ff;background:rgba(124,77,255,.14);border:1px solid rgba(124,77,255,.45);border-radius:999px;margin-bottom:1.5rem}
     .ai-hero__pill-badge{font-size:.68rem;letter-spacing:.06em;color:#fff;background:linear-gradient(135deg,#7c4dff,#5856D6);padding:.14rem .55rem;border-radius:999px}
     .ai-hero__title{font-size:clamp(2.3rem,7.5vw,3.6rem);font-weight:700;line-height:1.22;letter-spacing:.01em;margin-bottom:1.1rem}
     .ai-grad-voice{background:linear-gradient(135deg,#22d3ee 0%,#4da3ff 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
@@ -281,7 +281,7 @@
     <!-- Hero -->
     <section class="ai-hero">
       <div class="container">
-        <p style="margin:0;"><span class="ai-hero__pill"><span class="ai-hero__pill-badge">NEW</span><span class="nb">AIタグ自動追加 — 提供中</span></span></p>
+        <p style="margin:0;"><span class="ai-hero__pill"><span class="ai-hero__pill-badge">NEW</span><wbr><span class="nb">AIタグ自動追加 — 提供中</span></span></p>
         <h1 class="ai-hero__title"><span class="nb"><span class="ai-grad-voice">声</span>で残す。</span><br><span class="nb"><span class="ai-grad-ai">AI</span>が整える。</span></h1>
         <p class="ai-hero__sub">話すだけで、タグ付けまで<strong>自動</strong>。シンプルメモのAIがメモの内容を理解して、<strong>タイトル・タグ・種別</strong>を整えてから、メールと<strong>Obsidian</strong>へ届けます。すべて、お使いのiPhoneの中だけで。</p>
         <ul class="ai-hero__trust">

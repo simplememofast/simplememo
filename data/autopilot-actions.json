@@ -1067,6 +1067,70 @@
       "reviewed_orphans": [
         "ac0e224"
       ]
+    },
+    {
+      "id": "act-autopilot-cpp-ppid",
+      "title": "/autopilot/ 用のカスタムプロダクトページ（CPP）を1本作り、ppid を data/cpp-map.json へ記入する",
+      "detail": "2026-09-03 のプレスリリースが読者を送る先は `/` と `/autopilot/` の2本。**`/autopilot/` にだけ CPP が無い。**\n\n帰結は D+14（9/17）の乗車判定に出る —— この面から来たインストールがデフォルト商品ページのぶんに混ざるので、**「PR経由で何件入ったか」を分離できない。**配信当日にモバイルのCTAを足した（`ct=jp__bottom`）が、`ct=` はサイト側のクリック計測で、**インストールの帰属は ASC 側の ppid でしか取れない。**\n\n手順: ASC → SimpleMemo → カスタムプロダクトページ → 新規作成 → URL末尾の `ppid=<UUID>` を `data/cpp-map.json` の `id: autopilot` 行へ記入 → `node scripts/apply-cpp-ppid.js --write` → `--check` が以後を守る。\n\n**AIからは実行できない。**App Store Connect の人の操作で、この環境には ASC の書き込み経路が無い（読み取りの `asc-metrics` だけ）。台帳側の受け皿（`ppid: null` の行）は 2026-09-03 に作ってあるので、記入するだけで配線される。\n\n**急がなくてよい理由も書いておく。**9/17 の判定は Wilson 区間で読むので、分離できないぶんは「PR経由を過小にも過大にも見ない」ではなく**「分けられない」**として扱う（分母に混ぜて率を作らない）。いま作れば 9/17 までの残り2週間ぶんは分離できる。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "data/cpp-map.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "App Store Connect でのCPP作成は人の操作。この環境には ASC への書き込み経路が無く、ppid は作成後にしか存在しない。**機械は受け皿（ppid: null の行）と配線スクリプトまでを用意できるが、値は作れない。**",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
+    },
+    {
+      "id": "act-pages-outside-shared-css",
+      "title": "17面が共有スタイルシートを読み込んでいない — 共有CSSの修理が届かない",
+      "detail": "2026-09-03、全269面を初めて描画して分かった。次の17面は `assets/css/style.min.css` を読まず、ページ内の `<style>` だけで組んである:\n\n  tiktok/ ・ admin/{,brand,reddit}/ ・ verify.html ・ compose.html ・ data/voice-shift/\n  use-cases/{writers,researchers,designers}/ ・ vs/{tana,heptabase,anytype}/\n  blog/{obsidian-voice-fastest-route,email-management-tips,email-self-task-management,\n        information-organization-guide}.html\n\n**帰結が実際に出た。**共有CSSでナビの断点を 768px → 1099px にした修理がこの17面へ届かず、`/tiktok/` が 900px で **+87px 横漏れ**していた（当日、個別に直した）。`/blog/information-organization-guide.html` も同じ理由で `overflow-wrap` を個別に足している。\n\n**うち13面には `box-sizing: border-box` のリセットも無い**（共有CSSの `*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}` が効いていない）。padding が幅に足し算される状態で組まれているので、**リセットを足すと見た目が変わる** —— 機械的な一括変換をしない理由がここにある。\n\n**急ぎではない。**全面の掃き（`check-viewport-overflow.mjs --check`）が269面すべてを 320/360/900/1100px で見るようになったので、**次に届かなかったときは検査が落ちる。**黙って壊れる経路は塞いである。",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "assets/css/style.css",
+        "assets/css/style.min.css"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "共有CSSへ寄せると13面の見た目が変わる（content-box 前提で組まれている）。**どこまで揃えるかは設計の判断**で、機械が黙って決めてよい範囲ではない。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
+    },
+    {
+      "id": "act-two-lang-switchers",
+      "title": "言語切替が2実装ある（ドロップダウン10面 / JA・ENの2ボタン226面）— 狭い幅で英語ロゴが入らない原因",
+      "detail": "`/en/` などの10面は1つのドロップダウン（幅105px）、残り226面は JA / EN の2ボタン（幅140px）。**同じ役目の部品が2つある。**\n\n2026-09-03、英語面8つが 360px で 1〜3px 横漏れした。内訳は\nアイコン 28 ＋ ロゴ文字 171 ＋ 言語切替 81 ＋ ☰ 48 ＋ 余白/隙間 56 = **384px** で、360px には 24px 足りない。**35px の差はこの2実装の差そのもの。**\n\n当日はロゴ末尾を省略する形（`Simple Memo - for Obs…`）で収めた —— 余白を詰める案はタップ標的を 56px → 36px にしてしまい（推奨44px割れ）、詰めても 360px では足りなかった。**ブランドの本体は読めるので実害は小さいが、原因を直したわけではない。**\n\n揃えるなら、狭い幅で 35px 得られるドロップダウン側へ。226面の書き換えになるので、**やるかどうかは人が決める。**",
+      "source": "manual",
+      "domain": null,
+      "touches": [
+        "assets/css/style.css"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "226面の共通部品の作り替えで、見た目と操作が変わる。**横漏れは既に塞いである**ので、急いで機械が動かす理由が無い。",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {}
+      },
+      "state": "open",
+      "created_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-03",
+      "closed_jst": null
     }
   ]
 }
