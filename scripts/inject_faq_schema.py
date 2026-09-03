@@ -323,7 +323,85 @@ def discover() -> list[tuple[Path, str, str]]:
     return targets
 
 
-def check_committed(targets: list[tuple[Path, str, str]]) -> int:
+JSONLD_RE = re.compile(
+    r'<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>', re.DOTALL | re.IGNORECASE
+)
+
+
+def faqpage_nodes(payload) -> list[dict]:
+    """JSON-LD の中の FAQPage ノードを全部返す。
+
+    トップレベルが配列のことも、``@graph`` にぶら下がっていることもある。
+    **どれか1つの形しか見ないと、見ていない形が「異常なし」になる。**
+    """
+    found: list[dict] = []
+    stack = [payload]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, list):
+            stack.extend(node)
+            continue
+        if not isinstance(node, dict):
+            continue
+        if node.get("@type") == "FAQPage":
+            found.append(node)
+        graph = node.get("@graph")
+        if isinstance(graph, list):
+            stack.extend(graph)
+    return found
+
+
+def audit_structured_data(pages) -> list[str]:
+    """全面の JSON-LD を見て、**書き手を問わず**おかしいものを返す。
+
+    `check_committed` が見るのは `discover()` が返す面（この道具が持ち主の面）だけで、
+    **人が書いた FAQPage を持つ47面は対象外**だった。文言は人が選んだものなので
+    突き合わせない —— が、**次の2つは書き手を問わず間違い**であり、判定に文字列の
+    比較が要らないので誤検出が構造的に出ない。
+
+      - **空の FAQPage** … `mainEntity` が空のノードを publish している。
+        2026-09-03 に2面で実際に見つかった（`en/vs/index.html` は生成側の化石、
+        `en/siri/index.html` は手書き。どちらも可視 FAQ は5問・8問あった）。
+      - **読めない JSON-LD** … 検索エンジンが解釈できないブロック。
+        実測 1,011 ブロックすべてが解析できるので、増えたら異常である。
+
+    **質問文の突き合わせはここではやらない。**実測すると47面中27面が「食い違い」に
+    見えるが、その大半は誤検出だった（二言語ページで可視側が両言語ぶん出る／
+    1つの `<summary>` の中に ja と en の span が並んで連結される）。
+    誤検出だらけの報告は読まれなくなるので、**数えられるものだけを数える。**
+    詳細は data/autopilot-actions.json#act-faq-question-level-audit。
+    """
+    problems: list[str] = []
+    for label, text in pages:
+        for hit in JSONLD_RE.finditer(text):
+            raw = hit.group(1)
+            try:
+                payload = json.loads(raw)
+            except (ValueError, TypeError) as exc:
+                # **「読めなかった」を「異常なし」と報告しない。**
+                problems.append(f"  INVALID JSON-LD   {label}: {exc}")
+                continue
+            for node in faqpage_nodes(payload):
+                if not node.get("mainEntity"):
+                    problems.append(
+                        f"  EMPTY FAQPage     {label}: mainEntity が空の FAQPage を publish している"
+                    )
+    return problems
+
+
+def indexable_pages(root: Path = REPO_ROOT):
+    """検査対象の面を (表示名, 本文) で返す。discover() と同じ除外を使う。"""
+    for path in sorted(root.rglob("*.html")):
+        rel = path.relative_to(root)
+        if any(p in SKIP_DIRS for p in rel.parts) or rel.name in SKIP_FILES:
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if NOINDEX_RE.search(text):
+            continue
+        yield str(rel), text
+
+
+def check_committed(targets: list[tuple[Path, str, str]], pages=None) -> int:
     """コミット済みの FAQPage が、いまの可視 FAQ と一致しているかを検査する。
 
     【なぜ要るか】この道具は**このリポジトリで唯一、本番ページに目に見える壊れ方を
@@ -365,13 +443,23 @@ def check_committed(targets: list[tuple[Path, str, str]]) -> int:
             print(f"  STALE             {rel}: 出荷中の FAQPage が可視の FAQ と食い違う")
             problems += 1
 
+    # **書き手を問わない検査。**上は discover() が持ち主の面だけを見るので、
+    # 人が書いた FAQPage を持つ47面がまるごと外に出ていた。
+    sweep = audit_structured_data(indexable_pages() if pages is None else pages)
+    for line in sweep:
+        print(line)
+    problems += len(sweep)
+
     if problems:
         print(
             f"\nFAIL: {problems} 件。`python3 scripts/inject_faq_schema.py` を実行して、"
-            f"生成された FAQPage を同じコミットに含めてください。"
+            f"生成された FAQPage を同じコミットに含めてください"
+            f"（手書きの FAQPage は生成対象外なので、そちらは手で直すか、"
+            f"空のブロックを外してこの道具に持たせてください）。"
         )
         return 1
-    print(f"FAQ schema: {len(targets)} 面の FAQPage は可視の FAQ と一致（位置は比較対象外）")
+    print(f"FAQ schema: {len(targets)} 面の FAQPage は可視の FAQ と一致（位置は比較対象外）／"
+          f"空の FAQPage と読めない JSON-LD は全面で 0 件")
     return 0
 
 
@@ -517,9 +605,39 @@ def run_selftest() -> int:
         rc, out = quiet(lambda: check_committed([(f, "https://x/p/", "ja")]))
         t("抽出0を異常なしにしない", rc == 1 and "NO FAQ EXTRACTED" in out)
 
+    # --- 書き手を問わない検査（空の FAQPage / 読めない JSON-LD） ---
+    ld = lambda body: f'<script type="application/ld+json">{body}</script>'  # noqa: E731
+    # **--check がこの検査を実際に呼んでいること。**呼ばなくなっても、
+    # audit_structured_data 単体の検体は全部通ってしまう（配線が外れても緑）。
+    rc, out = quiet(lambda: check_committed([], pages=[("x", ld('{"@type":"FAQPage","mainEntity":[]}'))]))
+    t("--check は書き手を問わない検査を実行する", rc == 1 and "EMPTY FAQPage" in out)
+    full = ld('{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Q"}]}')
+    t("中身のある FAQPage は問題にしない", audit_structured_data([("x", full)]) == [])
+    # 2026-09-03 に2面で実際に見つかった形（生成側の化石と、手書きのもの）。
+    t("空の FAQPage を拾う",
+      any("EMPTY FAQPage" in x for x in audit_structured_data([("x", ld('{"@type":"FAQPage","mainEntity":[]}'))])))
+    t("mainEntity が無い FAQPage も拾う",
+      any("EMPTY FAQPage" in x for x in audit_structured_data([("x", ld('{"@type":"FAQPage"}'))])))
+    # **どれか1つの形しか見ないと、見ていない形が「異常なし」になる。**
+    t("@graph の中の FAQPage も見る",
+      any("EMPTY FAQPage" in x for x in audit_structured_data([("x", ld('{"@graph":[{"@type":"FAQPage","mainEntity":[]}]}'))])))
+    t("配列の中の FAQPage も見る",
+      any("EMPTY FAQPage" in x for x in audit_structured_data([("x", ld('[{"@type":"WebPage"},{"@type":"FAQPage","mainEntity":[]}]'))])))
+    t("FAQPage 以外は見ない",
+      audit_structured_data([("x", ld('{"@type":"WebPage","mainEntity":[]}'))]) == [])
+    # **「読めなかった」を「異常なし」と報告しない。**
+    t("読めない JSON-LD を拾う",
+      any("INVALID JSON-LD" in x for x in audit_structured_data([("x", ld('{"@type":"FAQPage",}'))])))
+    t("JSON-LD 以外の script は見ない",
+      audit_structured_data([("x", '<script>var x={"@type":"FAQPage"}</script>')]) == [])
+    # 実データ。増えたら異常だと言えるように、いまの値を固定しておく。
+    pages = list(indexable_pages())
+    t("実データ: 面が取れている", len(pages) > 100)
+    t("実データ: 空の FAQPage も読めない JSON-LD も無い", audit_structured_data(pages) == [])
+
     for f2 in failures:
         print(f"  x {f2}")
-    print(f"自己テスト 31 件中 {len(failures)} 件失敗")
+    print(f"自己テスト 42 件中 {len(failures)} 件失敗")
     return 1 if failures else 0
 
 
