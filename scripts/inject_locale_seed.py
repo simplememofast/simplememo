@@ -50,6 +50,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -69,17 +70,50 @@ SNIPPET = (
 
 ANCHOR = "</head>"
 
+COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+
+
+def first_live_head_close(text: str) -> int | None:
+    """コメントの中にいない最初の ``</head>`` の位置。無ければ None。
+
+    [2026-09-03] ここは `text.rpartition("</head>")` で **最後の** ``</head>`` を
+    選んでいた。/en/ の48面はすべて ``</head>`` を1つしか持たないので出力は
+    変わらないが、**本文中のコメントに ``</head>`` が現れた面では種が head の外へ出る。**
+
+    これは推測ではない。`scripts/inject_faq_schema.py` が 2026-09-03 に**同じ形**を
+    踏んでいる —— あちらは素の ``re.search`` で **最初の** ``</head>`` を拾い、
+    /captio-alternative/ の
+
+        <!-- JSON-LD: FAQPage is auto-generated near </head> by scripts/... -->
+
+    というコメントの**中へ**ブロックを差し込んだ。HTML のコメントは入れ子にならない
+    ので、注入したブロックの最初の ``-->`` でコメントが終わり、残り
+    （``</head> by scripts/inject_faq_schema.py -->``）が生きた markup になった。
+    **本番ページの最初の可視行が「by scripts/inject_faq_schema.py -->」になり、
+    しばらく誰も気づかなかった。**
+
+    向きが逆なだけで同じ穴なので、同じ直し方をする —— コメントを**同じ長さの空白**
+    で覆って（位置がずれないように）から最初の ``</head>`` を探す。
+
+    残る限界: ``<script>`` の文字列中に ``</head>`` があると、まだ本物と区別できない。
+    先例（inject_faq_schema.py）も同じ範囲で、閉じていない ``<script>`` は
+    `scripts/check-script-tags.mjs` が別に見ている。
+    """
+    masked = COMMENT_RE.sub(lambda m: " " * (m.end() - m.start()), text)
+    hit = masked.find(ANCHOR)
+    return hit if hit >= 0 else None
+
 
 def transform(text: str) -> tuple[str, bool]:
     """Return (new_text, changed)."""
     if MARKER in text:
         return text, False
-    if ANCHOR not in text:
+    at = first_live_head_close(text)
+    if at is None:
         return text, False
     # Insert as the last thing in <head> so it cannot delay the LCP image
     # or the stylesheet, while still running before any navigation.
-    head, sep, tail = text.rpartition(ANCHOR)
-    return f"{head}  {SNIPPET}\n{sep}{tail}", True
+    return f"{text[:at]}  {SNIPPET}\n{text[at:]}", True
 
 
 def iter_en_pages() -> list[Path]:
@@ -126,6 +160,32 @@ def run_selftest() -> int:
     out3, changed3 = transform(noanchor)
     t("</head> が無ければ入れない", (not changed3) and out3 == noanchor)
 
+    # --- コメントの中の </head> を本物と取り違えない ---
+    #
+    # `inject_faq_schema.py` が 2026-09-03 に**この形で本番を壊している** ——
+    # コメントの中へブロックを差し込み、HTML のコメントは入れ子にならないので
+    # 残りが生きた markup になって、本文の先頭に文字列が出た。
+    # こちらは `rpartition`（最後を選ぶ）だったので**向きが逆の同じ穴**だった。
+    after = "<html><head><title>x</title></head><body><!-- ここに </head> と書いてある --></body></html>"
+    out4, changed4 = transform(after)
+    t("本物より後ろのコメント内 </head> を選ばない",
+      changed4 and out4.index(MARKER) < out4.index("<body>"))
+    t("コメントは壊れていない", "<!-- ここに </head> と書いてある -->" in out4)
+
+    before = "<html><!-- 生成は </head> の直前 --><head><title>x</title></head><body>y</body></html>"
+    out5, changed5 = transform(before)
+    t("本物より前のコメント内 </head> も選ばない（先例が踏んだ向き）",
+      changed5 and out5.index(MARKER) > out5.index("<head>"))
+    t("コメントの中へ差し込まない", "<!-- 生成は </head> の直前 -->" in out5)
+
+    # コメントを覆うときは**同じ長さの空白**にする。長さが変われば位置がずれる。
+    t("コメントの中にしか </head> が無ければ入れない",
+      first_live_head_close("<html><!-- </head> --><body>y</body></html>") is None)
+    # 覆うのは同じ長さの空白なので、返る位置は**元の文字列での**位置と一致する。
+    # 長さの変わる覆い方をすると、ここがずれて差し込み先が動く。
+    t("覆っても位置がずれない（本物の </head> の位置を返す）",
+      first_live_head_close(before) == before.index("</head>", before.index("</title>")))
+
     # --- 種そのもの（ここが壊れると、CIではなく読者側で壊れる） ---
     # **既存の値を上書きしない。**この条件が消えると、英語の面を開くたびに
     # 読者が切替器で選んだ 'ja' を 'en' へ書き戻す。
@@ -148,7 +208,7 @@ def run_selftest() -> int:
 
     for f in failures:
         print(f"  x {f}")
-    print(f"自己テスト 15 件中 {len(failures)} 件失敗")
+    print(f"自己テスト 21 件中 {len(failures)} 件失敗")
     return 1 if failures else 0
 
 
