@@ -171,12 +171,38 @@ const SELFTESTS = [
     const r = validate({ waits: [w] }, { now: NOW, observer: STALLED });
     if (!r.problems.length) throw new Error('期限の無い承認が素通りした');
   }],
-  ['**実データ: 収入の待ちが止まっているのを検出する**', () => {
+  // 【2026-09-03 に書き換えた】旧版は「実データの `revenue_28d` が **stalled** であること」を
+  // 直接assertしていた。この検査が空回りしていないことを実データで示すのが目的で、
+  // 当時それが実際に止まっていたので、そのまま条件に使えた。
+  //
+  // **止まっていた原因は、待ちそのものではなく写しだった。**
+  // `data/revenue-series.json` は隣（simplememo-ios）からの写しで、2026-08-28 から
+  // 更新されていなかった。09-03 に `revenue-series.mjs --write` を走らせたら
+  // covered_days 2→4・last_day 08-26→09-01 に動いた。**待ちは進んでいる。**
+  //
+  // ここで assert を消すと、この検査が空回りしても誰も気づかなくなる。
+  // **assert は残し、実データが「止まっている」ことに依存するのをやめた** ——
+  // 実データを読んで全件が分類できることと、**その実データの鮮度だけを退かせると
+  // 実際に stalled が出ること**（＝判定が生きていること）を見る。
+  ['**実データ: 全件を分類できる**（読めない待ちを残さない）', () => {
     const led = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
     const r = validate(led, { now: NOW });
-    const row = r.rows.find((x) => x.id === 'revenue_28d');
-    if (!row || row.state !== 'stalled') {
-      throw new Error('止まっている待ちを検出しなかった — **この検査が空回りしている**');
+    if (!r.rows.length) throw new Error('待ちが1件も無い — **この検査が空回りしている**');
+    const bad = r.rows.filter((x) => x.state === 'unreadable');
+    if (bad.length) throw new Error(`鮮度を読めない待ち: ${bad.map((x) => x.id).join(', ')}`);
+  }],
+  ['**実データ: 鮮度を退かせれば stalled が出る**（判定が生きている）', () => {
+    const led = JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
+    // 実データの待ちを1件ずつ、**鮮度だけ**上限より古くして観測させる。
+    // value/target は実データのまま（目標に届いていれば見ない、の枝も生きたまま）。
+    const base = validate(led, { now: NOW });
+    const stale = new Date(NOW - 400 * DAY).toISOString().slice(0, 10);
+    const r = validate(led, { now: NOW, observer: (w) => {
+      const row = base.rows.find((x) => x.id === w.id) ?? {};
+      return { value: row.value ?? 0, target: row.target ?? 28, freshness: stale };
+    } });
+    if (!r.rows.some((x) => x.state === 'stalled')) {
+      throw new Error('鮮度を退かせても stalled が出ない — **この検査が空回りしている**');
     }
   }],
 ];

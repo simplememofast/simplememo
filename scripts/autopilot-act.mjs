@@ -61,6 +61,10 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { requireShape } from './lib/read-ledger.mjs';
+// **どのラベルを監視Issueと見なすかは health-intake.mjs が正。**
+// 台帳へ運ぶ側と、閉じたかを見る側で対象がずれると、
+// 「運ばれたが一生閉じない行」か「運んでいないのに閉じる行」のどちらかが出る。
+import { HEALTH_LABELS } from './health-intake.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
@@ -209,13 +213,23 @@ export const CLOSE_CHECKS = {
     // ——この台帳が潰したかった「堆積」そのものに戻る。
     // 除外は handler が実測（取得を試みて失敗）してから積む。最初から諦めない。
     const skip = new Set(exclude);
-    const missing = (ctx.runsDoc?.runs ?? [])
-      .filter((r) => r.attempted && r.external_ref
+    const attempted = (ctx.runsDoc?.runs ?? []).filter((r) => r.attempted && r.external_ref);
+    // **測る手段がある run だけを数える。**副系CCRの external_ref は
+    // セッションid（cse_…）で、Actions のジョブログは存在しない ——
+    // 台帳自身が「CCR経路の実費は観測手段が無い（cost は null で、0ではない）」と
+    // 書いているとおり。**ここを除外一覧に積むと「実費が存在しない」と書かれる**
+    // ので、構造的に測れないものは数の外に置き、件数だけを根拠に出す。
+    const unobservable = attempted.filter((r) => !isActionsRunRef(r.external_ref));
+    const missing = attempted
+      .filter((r) => isActionsRunRef(r.external_ref)
         && !costed.has(String(r.external_ref)) && !skip.has(r.run_id));
-    const note = skip.size > 0 ? `（実費が存在しない ${skip.size}件を除外: ${[...skip].join(', ')}）` : '';
+    const note = skip.size > 0 ? `（実費が残っていない ${skip.size}件を除外: ${[...skip].join(', ')}）` : '';
+    const un = unobservable.length > 0
+      ? `（うち ${unobservable.length}件は副系CCRで**観測手段が無い** —— ゼロではない: ${unobservable.map((r) => r.run_id).join(', ')}）`
+      : '';
     return missing.length === 0
-      ? { closed: true, evidence: `着手した run はすべて実費台帳にある${note}` }
-      : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}` };
+      ? { closed: true, evidence: `Actions の run はすべて実費台帳にある${note}${un}` }
+      : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}${un}` };
   },
 
   /**
@@ -491,6 +505,57 @@ export function derive(ctx) {
         auto: 'contain',
         close_check: { kind: 'run_repaired', params: { run_id: t.run_id } },
       });
+    } else if (t.owner_routed) {
+      // **セッション側に打つ手が1つも無い種別**（escalation-rules の who: owner）。
+      //
+      // 2026-09-02 に selfheal 側だけを直した。**表示は 🤝 に変わったが、
+      // 台帳の行き先は変わっていなかった** —— derive が見ていたのは escalate だけで、
+      // owner_routed はこの else に落ちて **AI 行として起票され続けた。**
+      // 日報は3日ぶん「AIがやること: 未修理の故障（usage_limit）」を出し、
+      // 規則が「人へ渡す」と決めた当の依頼は**一度もオーナーに届いていない。**
+      // 判定を2箇所に持ったまま片方だけ直した形で、このログが繰り返し戒めているもの。
+      //
+      // 閉じ条件も `run_repaired` ではない。あれは selfheal の未修理リストから
+      // 消えたら閉じる条件で、消えるのは `repair_of` を書いたときだけ ——
+      // そして **Runbook はこの種別に repair_of を書くことを禁じている**
+      // （書くと repair_limit が進み、3回目で --contain が経路を止める）。
+      // つまり **規則が満たすことを禁じている閉じ条件**で、構造的に永久に開く。
+      //
+      // 代わりに「その経路で、その種別が再発しなくなったか」で見る（D5 と同じ形）。
+      // `since` は**同じ経路・同じ種別の最後の失敗日**にする。行は run 単位だが、
+      // 上限は経路単位で解けるので、同じ上限に当たった回は同時に閉じる。
+      // `no_failure_since` は「失敗が無い」だけでは閉じない（走ってすらいない
+      // 可能性を潰す）ので、沈黙している経路の行は開いたまま残る。
+      const sameClass = runs.filter((r) => r.route === t.route
+        && (r.failure_class ?? 'unknown') === t.failure_class
+        && FAILED_OUTCOMES.has(r.outcome));
+      const latest = sameClass.reduce((a, r) => (a && a > r.date_jst ? a : r.date_jst), t.date_jst);
+      const esc = t.escalation ?? {};
+      out.push({
+        id: `act-selfheal-${t.run_id}`,
+        title: `未修理の故障: ${t.run_id}（${t.failure_class}）— セッション側に打つ手が無い種別`,
+        detail: `${t.date_jst} / ${t.route} / outcome=${t.outcome}。${t.failure_reason ?? '理由未記入'}\n\n`
+          + `**この種別は data/escalation-rules.json が who: owner と宣言している。**`
+          + `レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、`
+          + `3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n`
+          + `渡し先 ${esc.channel ?? '不明'} / ${esc.within_hours ?? '?'}時間以内。\n\n`
+          + `**閉じ条件は経路と種別で見る** — ${latest} 以降に ${t.route} が実際に着手し、`
+          + `${t.failure_class} が再発しなければ閉じる。着手が1回も無い間は閉じない`
+          + `（失敗が無いことは回復の証拠にならない）。`,
+        source: 'selfheal',
+        domain: null,
+        // **人の判断が要るのは「待つ」以外の2つ** —— 枠を上げる / 1回あたりの入力量を減らす。
+        force_owner: 'human',
+        force_owner_why: `data/escalation-rules.json が ${t.failure_class} を who: owner と宣言している`
+          + `（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。`
+          + `**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い`,
+        touches: [],
+        auto: null,
+        close_check: {
+          kind: 'no_failure_since',
+          params: { route: t.route, failure_class: t.failure_class, since: latest },
+        },
+      });
     } else {
       out.push({
         id: `act-selfheal-${t.run_id}`,
@@ -629,13 +694,26 @@ export function derive(ctx) {
     // 導出は運転台帳だけで完結させる（APIが読めない日でも「実費が未記録」は言える）。
     // 実際の金額はジョブログにしか無いので、取りに行くのは handler の仕事。
     const costed = new Set((ctx.costDoc.runs ?? []).map((e) => String(e.run_id ?? '')));
-    const missing = runs.filter((r) => r.attempted && r.external_ref && !costed.has(String(r.external_ref)));
+    // **題と根拠で違う数を出さない。**閉じ条件（cost_covers_runs）は
+    // ①Actions の run だけを数え ②実測して駄目だったものを除外する、の2つを掛けている。
+    // 題だけ素の件数にすると「4件」と「1件」が並んで出る（2026-09-03 に実際に出た）。
+    // **除外は handler が積んだ状態**なので、いまの台帳の行から読む。
+    const excluded = new Set(((ctx.ledgerDoc?.actions ?? [])
+      .find((a) => a.id === 'act-cost-sync')?.close_check?.params?.exclude) ?? []);
+    const unobservable = runs.filter((r) => r.attempted && r.external_ref && !isActionsRunRef(r.external_ref));
+    const missing = runs.filter((r) => r.attempted && isActionsRunRef(r.external_ref)
+      && !costed.has(String(r.external_ref)) && !excluded.has(r.run_id));
     if (missing.length > 0) {
       out.push({
         id: 'act-cost-sync',
         title: `実費台帳に載っていない run が ${missing.length}件`,
         detail: missing.map((r) => `${r.run_id}（run ${r.external_ref}）`).join(', ')
-          + '。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。',
+          + '。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。'
+          + (excluded.size > 0 ? `\n実測して取れなかったものを ${excluded.size}件 除外している: ${[...excluded].join(', ')}。` : '')
+          + (unobservable.length > 0
+            ? `\n副系CCRの ${unobservable.length}件（${unobservable.map((r) => r.run_id).join(', ')}）は`
+              + '**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**'
+            : ''),
         source: 'cost',
         touches: ['data/autopilot-cost.json'],
         auto: 'append-cost',
@@ -933,9 +1011,23 @@ export function merge(ledger, derived, today) {
   // 旧IDの行は閉じ条件 {pr} のまま生きている（互換は branch_caught_up 側にある）ので、
   // 同じ取り残しに新IDで行を立てると**2行並ぶ** —— 畳むための変更で1行増える。
   // 既存の行があればそこへ流し、閉じるのは今までどおり閉じ条件に任せる。
+  //
+  // **[2026-09-03] 受容した行も畳み先にする。**旧IDが `open` のときしか
+  // 引き当てていなかったので、**照合して受容した行だけが引き当てから漏れていた。**
+  //
+  // 実害: 09-03 の PR #807 が claude/obsidian-auto-20260827 の 813b335 を照合し、
+  // 「内容は別コミットで着地済み」と確かめて `act-orphaned-pr-660` を
+  // `acknowledged` + `reviewed_orphans: ["813b335"]` にした。その**同じ日のうちに**、
+  // 新IDの行が引き当てに失敗して立ち上がり、**照合済みの取り残しがAIの未処理として
+  // 戻ってきた。**受容は「もう見た」という記録なので、引き当てから漏れると
+  // **何度でも見直させる。**
+  //
+  // 畳んだあとの再点火は今までどおり `reviewed_orphans` が持つ ——
+  // 同じブランチに別のコミットが積まれれば、受容は自動で開き直る（下記）。
   const legacyByPr = new Map();
   for (const a of ledger.actions) {
-    if (a.state !== 'open' || a.close_check?.kind !== 'branch_caught_up') continue;
+    if (!['open', 'acknowledged'].includes(a.state)) continue;
+    if (a.close_check?.kind !== 'branch_caught_up') continue;
     const n = a.close_check?.params?.pr;
     if (Number.isInteger(n)) legacyByPr.set(n, a);
   }
@@ -1004,6 +1096,36 @@ export function merge(ledger, derived, today) {
         cur.detail = d.detail;
         cur.auto = d.auto ?? null;
         cur.touches = d.touches ?? [];
+        // **[2026-09-03] 閉じ条件も追従させる。**同じ理由で、これも導出の結果。
+        //
+        // 追従させないと、**先に立った行だけが古い閉じ条件のまま取り残される。**
+        // 実害: usage_limit の3行は `run_repaired`（= repair_of が書かれたら閉じる）で
+        // 立っていて、その後 derive が「この種別に repair_of を書いてはいけない」と
+        // 判定するようになっても、**行の側は満たしてはいけない条件を持ち続けた。**
+        // 導出を直しても、直した判定が既存の行に一生届かない。
+        //
+        // **ただし handler が積んだ params は消さない。**閉じ条件の params は
+        // 導出値だけではない —— `cost_covers_runs` の `exclude` は
+        // append-cost が「実測して駄目だった」ものを積んでいく**状態**で、
+        // 導出は空の params を出す。素直に上書きすると、**この修正自身が
+        // 除外の履歴を毎朝消して、閉じた依頼を開け直す**（実際に一度やった）。
+        //
+        // 種別（kind）が変われば params は前の種別のものなので捨てる。
+        // 同じ種別なら、導出が出さなかったキーは残す。
+        if (d.close_check) {
+          const keep = cur.close_check?.kind === d.close_check.kind ? (cur.close_check.params ?? {}) : {};
+          cur.close_check = { ...d.close_check, params: { ...keep, ...(d.close_check.params ?? {}) } };
+        }
+        // **force_owner は付ける方向にだけ追従させる。**
+        //
+        // 導出が「人へ」と言ったら人へ移すが、導出が null になっても**人の固定は外さない。**
+        // 非対称なのは、外す側の誤りだけが**人の依頼を黙ってAIの仕事に変える**から。
+        // （この台帳の他の非対称 —— 自律実行は止める方向のみ・AIは止められるが解除できない
+        // —— と同じ向き。）人が外したいときは行を直接書き換える。
+        if (d.force_owner) {
+          cur.force_owner = d.force_owner;
+          cur.force_owner_why = d.force_owner_why ?? null;
+        }
       }
       continue;
     }
@@ -1826,18 +1948,37 @@ export const HANDLERS = {
     if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: '認証情報が無く実費を取得できない' };
     const costed = new Set((ctx.costDoc?.runs ?? []).map((e) => String(e.run_id ?? '')));
     const targets = (ctx.runsDoc?.runs ?? [])
-      .filter((r) => r.attempted && r.external_ref && !costed.has(String(r.external_ref)))
+      // **Actions の run だけを狙う。**副系CCRの external_ref はセッションid（cse_…）で、
+      // Actions API は 404 を返す —— それを「実費が発生していない」と読んでいた。
+      .filter((r) => r.attempted && isActionsRunRef(r.external_ref) && !costed.has(String(r.external_ref)))
       .slice(-10); // 一度に遡る上限。歴史全部を毎日取りに行かない
     const log = [];
     let changed = 0;
     const unmeasurable = [];
     for (const r of targets) {
       const cost = await fetchRunCost(ctx.repo, ctx.token, r.external_ref);
-      if (cost == null) {
-        // ジョブログに実費行が無い ＝ Claude Code ステップに到達せず落ちた回。
-        // **0 を書かない**（「無料で動いた」になる）。代わりに、待っても埋まらない
-        // ものとして除外に積む。積まないと、この依頼が永久に開いたままになる。
-        log.push(`${r.run_id}: 実費行がジョブログに無い（0ではなく、そもそも発生していない）→ 除外に積む`);
+      // **[2026-09-03] 「読めなかった」を「発生していない」と書かない。**
+      //
+      // 旧版は fetchRunCost の null を1つの意味として扱い、取得に失敗した回まで
+      // 「そもそも発生していない」として**永久除外**に積んでいた。除外は台帳に残り、
+      // 二度と取りに行かない。実際、除外6件のうち3件はあとから実費が取れていて
+      // （ap-20260826-actions は **success で出荷した回**）、
+      // **台帳が「実費は存在しない」と言い続けている run に実費が載っている**状態だった。
+      if (cost.state === 'unreadable') {
+        // 一時的な失敗。**除外しない。**翌日また試す。
+        log.push(`${r.run_id}: ジョブログを読めなかった（${cost.why}）— 実費が無いという意味ではないので除外しない`);
+        continue;
+      }
+      if (cost.state === 'absent') {
+        // ログは読めた。実費行が無い ＝ Claude Code ステップに到達せず落ちた回。
+        // **0 を書かない**（「無料で動いた」になる）。待っても埋まらないので除外に積む。
+        log.push(`${r.run_id}: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む`);
+        unmeasurable.push(r.run_id);
+        continue;
+      }
+      if (cost.state === 'gone') {
+        // **実費はあった。もう取れないだけ。**同じ除外でも理由が違うので、混ぜて書かない。
+        log.push(`${r.run_id}: 実費は取得できない（${cost.why}）— **発生していないのではなく、記録が残っていない** → 除外に積む`);
         unmeasurable.push(r.run_id);
         continue;
       }
@@ -1858,9 +1999,23 @@ export const HANDLERS = {
         log.push(`${r.run_id}: 追記に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
       }
     }
-    if (unmeasurable.length > 0 && action?.close_check?.params) {
+    if (action?.close_check?.params) {
       const cur = new Set(action.close_check.params.exclude ?? []);
       for (const id of unmeasurable) cur.add(id);
+      // **除外は取り消せる形にしておく。**あとから実費が載った run が
+      // 「実費は存在しない」の一覧に残り続けると、根拠の文が嘘を言い続ける
+      // （2026-09-03 の実測で6件中3件がこれだった）。
+      const refById = new Map((ctx.runsDoc?.runs ?? []).map((r) => [r.run_id, String(r.external_ref ?? '')]));
+      const dropped = [...cur].filter((id) => costed.has(refById.get(id) ?? ''));
+      for (const id of dropped) cur.delete(id);
+      if (dropped.length > 0) log.push(`除外から外した（実費が台帳にある）: ${dropped.join(', ')}`);
+      // **観測手段が無い経路は、除外一覧ではなく件数で出す。**両方に出すと、
+      // 同じ run について「実費が残っていない」と「観測手段が無い」を二重に言う。
+      const notActions = [...cur].filter((id) => refById.has(id) && !isActionsRunRef(refById.get(id)));
+      for (const id of notActions) cur.delete(id);
+      if (notActions.length > 0) {
+        log.push(`除外から外した（Actions の run ではないので、そもそも数えない）: ${notActions.join(', ')}`);
+      }
       action.close_check.params.exclude = [...cur].sort();
     }
     return { ok: true, changed, log: log.join('\n') || '対象なし' };
@@ -2042,26 +2197,65 @@ export const HANDLERS = {
 
 };
 
-/** ジョブログから result 行の total_cost_usd / num_turns を拾う。 */
-async function fetchRunCost(repo, token, runId) {
+/** Actions の run id かどうか。**CCRのセッションid（cse_…）をここへ投げない。** */
+export function isActionsRunRef(ref) {
+  return /^\d+$/.test(String(ref ?? ''));
+}
+
+/**
+ * ジョブログから result 行の total_cost_usd / num_turns を拾う。
+ *
+ * **返り値で「読めなかった」と「読めたが実費が無い」を分ける。**
+ * 旧版はどちらも `null` を返していて、呼び出し側（append-cost）が
+ * **両方を「そもそも発生していない」と書いて永久除外に積んでいた。**
+ *
+ * 実害（2026-09-03 に台帳で確認）: 除外6件のうち **3件は実費が台帳にある** ——
+ * `ap-20260826-actions`（run 32900786201・**success で出荷した回**）・
+ * `ap-20260830-actions`・`ap-20260831-actions`。一度「実費は存在しない」と
+ * 書かれ、あとから同じ run の実費が実際に取れている。**取得の失敗を、
+ * 事実の不在として記録していた。**
+ * さらに `ap-20260831-ccr0920` の `external_ref` は `cse_…`（CCRのセッションid）で、
+ * Actions API は当然 404 を返す。**観測手段が無いだけの回**が「発生していない」に化けていた。
+ *
+ * - `{ state: 'measured', usd, turns }` … 実費行を読めた
+ * - `{ state: 'absent' }`   … ログは読めたが実費行が無い（Claude Code 前に落ちた回）
+ * - `{ state: 'gone', why }`     … ログが消えている（410 / run が無い 404）。実費はあったが、もう取れない
+ * - `{ state: 'unreadable', why }` … 一時的に読めない。**除外しない**（翌日また試す）
+ */
+export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {}) {
+  if (!isActionsRunRef(runId)) {
+    return { state: 'gone', why: `Actions の run id ではない（${runId}）— この経路のログは Actions API から読めない` };
+  }
   const headers = { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json',
     'user-agent': 'simplememo-autopilot-act' };
+  let jr;
   try {
-    const jr = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${runId}/jobs`,
+    jr = await fetchImpl(`https://api.github.com/repos/${repo}/actions/runs/${runId}/jobs`,
       { headers, signal: AbortSignal.timeout(20_000) });
-    if (!jr.ok) return null;
-    const jobId = ((await jr.json()).jobs ?? [])[0]?.id;
-    if (!jobId) return null;
-    const lr = await fetch(`https://api.github.com/repos/${repo}/actions/jobs/${jobId}/logs`,
+  } catch (e) { return { state: 'unreadable', why: `jobs の取得に失敗: ${String(e).slice(0, 80)}` }; }
+  // 404/410 は「もう無い」。それ以外の非200は**一時的**として扱い、除外に積まない。
+  if (jr.status === 404 || jr.status === 410) return { state: 'gone', why: `jobs が HTTP ${jr.status}（run ごと消えている）` };
+  if (!jr.ok) return { state: 'unreadable', why: `jobs が HTTP ${jr.status}` };
+  let jobId;
+  try { jobId = ((await jr.json()).jobs ?? [])[0]?.id; }
+  catch (e) { return { state: 'unreadable', why: `jobs の応答を読めない: ${String(e).slice(0, 80)}` }; }
+  if (!jobId) return { state: 'gone', why: 'run にジョブが無い' };
+  let lr;
+  try {
+    lr = await fetchImpl(`https://api.github.com/repos/${repo}/actions/jobs/${jobId}/logs`,
       { headers, redirect: 'follow', signal: AbortSignal.timeout(30_000) });
-    if (!lr.ok) return null;
-    const text = await lr.text();
-    const cost = text.match(/"total_cost_usd"\s*:\s*([0-9.]+)/)
-      ?? text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/);
-    if (!cost) return null;
-    const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
-    return { usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null };
-  } catch { return null; }
+  } catch (e) { return { state: 'unreadable', why: `ログの取得に失敗: ${String(e).slice(0, 80)}` }; }
+  // **410 Gone = 保持期間を過ぎて消えた。**実費が無かったのではなく、もう読めない。
+  if (lr.status === 410 || lr.status === 404) return { state: 'gone', why: `ログが HTTP ${lr.status}（保持期間切れ）` };
+  if (!lr.ok) return { state: 'unreadable', why: `ログが HTTP ${lr.status}` };
+  let text;
+  try { text = await lr.text(); }
+  catch (e) { return { state: 'unreadable', why: `ログ本文を読めない: ${String(e).slice(0, 80)}` }; }
+  const cost = text.match(/"total_cost_usd"\s*:\s*([0-9.]+)/)
+    ?? text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/);
+  if (!cost) return { state: 'absent' };
+  const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
+  return { state: 'measured', usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null };
 }
 
 // ============================================================
@@ -2734,6 +2928,60 @@ async function selftest() {
       close_check: { kind: 'manual', params: {} } }], '2026-09-02');
     t('**人が固定した force_owner は上書きしない**', led2.actions[0].force_owner === 'human'
       && classify(led2.actions[0], matrix).owner === 'human');
+
+    // **[2026-09-03] 閉じ条件も導出の結果。**追従しないと、先に立った行だけが
+    // 古い閉じ条件のまま取り残される（usage_limit の3行が `run_repaired` で
+    // 立ったまま、derive が「repair_of を書いてはいけない」と判定するように
+    // なっても、行の側は満たしてはいけない条件を持ち続けた）。
+    const cc = { actions: [{
+      id: 'act-y', title: '旧', detail: '旧', source: 'selfheal', state: 'open',
+      created_jst: '2026-09-01', last_seen_jst: '2026-09-01', closed_jst: null, evidence: null,
+      auto: null, touches: [], force_owner: null,
+      close_check: { kind: 'run_repaired', params: { run_id: 'r' } },
+    }] };
+    merge(cc, [{ id: 'act-y', title: '新', detail: '新', source: 'selfheal',
+      force_owner: 'human', force_owner_why: '規則が人へ渡すと決めている',
+      close_check: { kind: 'no_failure_since', params: { route: 'actions', failure_class: 'usage_limit', since: '2026-08-31' } } }],
+      '2026-09-03');
+    t('**open な行は導出の閉じ条件に追従する**', cc.actions[0].close_check?.kind === 'no_failure_since');
+    t('種別が変われば前の種別の params は捨てる',
+      cc.actions[0].close_check?.params?.run_id === undefined);
+
+    // **handler が積んだ状態を追従で消さない。**cost_covers_runs の exclude は
+    // append-cost が実測して積む状態で、導出は空の params を出す。
+    // 素直に上書きすると、**閉じ条件の追従が毎朝この履歴を消す。**
+    const acc = { actions: [{
+      id: 'act-cost-sync', title: '旧', detail: '旧', source: 'cost', state: 'open',
+      created_jst: '2026-09-01', last_seen_jst: '2026-09-01', closed_jst: null, evidence: null,
+      auto: 'append-cost', touches: [], force_owner: null,
+      close_check: { kind: 'cost_covers_runs', params: { exclude: ['ap-x'] } },
+    }] };
+    merge(acc, [{ id: 'act-cost-sync', title: '新', detail: '新', source: 'cost',
+      auto: 'append-cost', close_check: { kind: 'cost_covers_runs', params: {} } }], '2026-09-03');
+    t('**handler が積んだ params を追従で消さない**',
+      acc.actions[0].close_check?.params?.exclude?.[0] === 'ap-x');
+    // 導出が同じキーを出したときは導出が勝つ（そちらが新しい事実）
+    merge(acc, [{ id: 'act-cost-sync', title: '新', detail: '新', source: 'cost',
+      auto: 'append-cost', close_check: { kind: 'cost_covers_runs', params: { exclude: ['ap-y'] } } }], '2026-09-03');
+    t('導出が同じキーを出せば導出が勝つ', acc.actions[0].close_check?.params?.exclude?.[0] === 'ap-y');
+    t('導出が人へ回したら、行も人へ回る', cc.actions[0].force_owner === 'human'
+      && classify(cc.actions[0], matrix).owner === 'human');
+    t('回した理由も一緒に載る', (cc.actions[0].force_owner_why ?? '').includes('規則'));
+
+    // **付ける方向にだけ追従する。**導出が null になっても人の固定は外さない ——
+    // 外す側の誤りだけが、人の依頼を黙ってAIの仕事に変える。
+    const pin = { actions: [{ ...cc.actions[0], force_owner: 'human', force_owner_why: '人が固定' }] };
+    merge(pin, [{ id: 'act-y', title: '新', detail: '新', source: 'selfheal', force_owner: null,
+      close_check: { kind: 'run_repaired', params: { run_id: 'r' } } }], '2026-09-03');
+    t('**導出が null でも人の固定は外れない**（非対称）', pin.actions[0].force_owner === 'human');
+
+    // 閉じた行・受容した行には触らない（既存の規律）
+    const doneRow = { actions: [{ ...cc.actions[0], state: 'acknowledged',
+      close_check: { kind: 'manual', params: {} }, force_owner: null }] };
+    merge(doneRow, [{ id: 'act-y', title: '新', detail: '新', source: 'selfheal', force_owner: 'human',
+      close_check: { kind: 'no_failure_since', params: {} } }], '2026-09-03');
+    t('**既知の制約（acknowledged）の閉じ条件は書き換えない**',
+      doneRow.actions[0].close_check?.kind === 'manual' && doneRow.actions[0].force_owner === null);
   }
 
   // --- D3b: ledger_only の取り残しに auto を付けた（2026-09-02） ---
@@ -2890,6 +3138,111 @@ async function selftest() {
   t('**全停止も台帳が読めなければ閉じない**',
     CLOSE_CHECKS.shipping_resumed({ since: '2026-08-28' }, {}).closed === false);
 
+  // issue_closed の材料を実際に取りに行く（2026-09-03）
+  //
+  // **閉じ条件だけ在って、材料を作る側が無かった。**buildContext は ctx.issues を
+  // 一度も作っておらず、act-health-591 は8日間ずっと「判定不能」で居座っていた ——
+  // 対象の #591 は立った当日（08-26）に監視ワークフロー自身が閉じている。
+  {
+    const res = (body, ok = true, status = 200) => ({
+      ok, status, json: async () => body,
+    });
+    const call = (body, opts = {}) => fetchOpenHealthIssues('o/r', 'tok',
+      { fetchImpl: async () => res(body, opts.ok ?? true, opts.status ?? 200), perPage: opts.perPage ?? 100 });
+
+    t('トークンが無ければ null（空一覧にしない）',
+      (await fetchOpenHealthIssues('o/r', '', { fetchImpl: async () => res([]) })) === null);
+    t('**非200 は null**（読めなかったのに「Issueは無い」と読ませない）',
+      (await call([], { ok: false, status: 403 })) === null);
+    t('配列でない応答も null', (await call({ message: 'x' })) === null);
+    t('例外も null',
+      (await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: async () => { throw new Error('network'); } })) === null);
+    t('**1ページで覆えない件数は null**（2ページ目のIssueが「閉じた」に化ける）',
+      (await call([{ number: 1 }, { number: 2 }], { perPage: 2 })) === null);
+
+    const map = await call([{ number: 591 }, { number: 7, pull_request: {} }]);
+    t('番号をキーにした Map を返す', map instanceof Map && map.has(591));
+    t('**PR は混ぜない**（issues API はPRも返す）', map.size === 1 && !map.has(7));
+    t('読めた上での 0 件は空 Map（null と区別する）',
+      (await call([])) instanceof Map);
+
+    // 対象ラベルは health-intake と同じ定数から引く（運ぶ側と閉じる側でずれない）
+    let asked = '';
+    await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: async (u) => { asked = u; return res([]); } });
+    t('**取り込みと同じラベルで問い合わせる**',
+      Object.keys(HEALTH_LABELS).every((l) => asked.includes(encodeURIComponent(l))));
+    t('open だけを見る', asked.includes('state=open'));
+
+    // 閉じ条件と繋がっていること（材料 → 判定）
+    t('取れた一覧に無い監視Issueは閉じる',
+      CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: await call([]) }).closed === true);
+    t('取れなかった日は閉じない',
+      CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: await call([], { ok: false }) }).closed === false);
+  }
+
+  // 導出D1/D2: 修理主体が人しかいない故障は、AI行として起票しない
+  //
+  // **2026-09-02 に selfheal だけを直したときの穴を、ここで固定する。**
+  // 表示は 🤝 に変わったのに derive は escalate しか見ておらず、
+  // usage_limit の3件は3日ぶん「AIがやること」に出続け、規則が人へ渡すと
+  // 決めた依頼は一度もオーナーに届いていなかった。
+  const shRuns = [
+    { run_id: 'r-0830', date_jst: '2026-08-30', route: 'actions', outcome: 'failed',
+      failure_class: 'usage_limit', attempted: true },
+    { run_id: 'r-0831', date_jst: '2026-08-31', route: 'actions', outcome: 'failed',
+      failure_class: 'usage_limit', attempted: true },
+    { run_id: 'r-0901', date_jst: '2026-09-01', route: 'actions', outcome: 'shipped', attempted: true },
+  ];
+  const shTarget = (over) => ({
+    run_id: 'r-0830', date_jst: '2026-08-30', route: 'actions', outcome: 'failed',
+    failure_class: 'usage_limit', failure_reason: '週次の使用量上限',
+    repair_attempts_for_class: 0, escalate: false, owner_routed: true,
+    escalation: { who: 'owner', channel: 'daily_report', within_hours: 24 }, ...over,
+  });
+  const shDerive = (target, runs = shRuns) => derive({
+    today: '2026-09-03', runsDoc: { runs }, statusDoc: null, costDoc: null,
+    selfheal: { targets: [target] },
+  }).filter((d) => d.source === 'selfheal');
+
+  const ownerRow = shDerive(shTarget())[0];
+  t('who=owner の故障は人へ固定する', ownerRow?.force_owner === 'human');
+  t('人へ固定した理由に規則の名前を出す',
+    (ownerRow?.force_owner_why ?? '').includes('escalation-rules'));
+  t('**規則が満たすことを禁じている閉じ条件で立てない**（repair_of を書けないので run_repaired は永久に開く）',
+    ownerRow?.close_check?.kind === 'no_failure_since');
+  t('閉じ条件は経路と種別で見る',
+    ownerRow?.close_check?.params?.route === 'actions'
+    && ownerRow?.close_check?.params?.failure_class === 'usage_limit');
+  t('**since は同じ経路・同じ種別の最後の失敗日**（古い回の行が先に閉じない）',
+    ownerRow?.close_check?.params?.since === '2026-08-31');
+  t('自動実行は付けない（人の行に handler を付けない）', ownerRow?.auto == null);
+  t('行IDは今までどおり run 単位（既存の行へ流れて増えない）',
+    ownerRow?.id === 'act-selfheal-r-0830');
+  t('題に「打つ手が無い種別」と出す', (ownerRow?.title ?? '').includes('打つ手が無い'));
+
+  // **自分だけ見て since を決めない**（他の回が無ければ自分の日付）
+  t('同じ種別の失敗が自分しか無ければ since は自分の日付',
+    shDerive(shTarget(), [shRuns[0]])[0]?.close_check?.params?.since === '2026-08-30');
+  // **別経路の失敗を混ぜない**
+  t('別経路の同じ種別は since に混ざらない',
+    shDerive(shTarget(), [shRuns[0],
+      { run_id: 'x', date_jst: '2026-09-02', route: 'ccr-0920', outcome: 'failed',
+        failure_class: 'usage_limit', attempted: true }])[0]?.close_check?.params?.since === '2026-08-30');
+
+  // **who=self_then_owner は今までどおりAIの仕事**（逃げ道を作っていないこと）
+  const selfRow = shDerive(shTarget({
+    failure_class: 'claim_without_completion', owner_routed: false,
+    escalation: { who: 'self_then_owner', channel: 'gh_issue', within_hours: 24 },
+  }))[0];
+  t('who=self_then_owner の故障は人へ固定しない', selfRow?.force_owner == null);
+  t('直せる故障の閉じ条件は run_repaired のまま', selfRow?.close_check?.kind === 'run_repaired');
+
+  // **上限に達した故障（escalate）は今までどおり contain**
+  const escRow = shDerive(shTarget({ escalate: true, repair_attempts_for_class: 3 }))[0];
+  t('上限に達した故障は今までどおり封じ込める', escRow?.auto === 'contain');
+  t('上限に達した故障は owner_routed より優先される',
+    escRow?.id === 'act-selfheal-escalated-usage_limit');
+
   // 導出D7: 主系を止めている未レビュー超過を起票する
   const ovDerive = derive({
     today: '2026-08-25', runsDoc: { runs: [] }, selfheal: { targets: [] },
@@ -2925,7 +3278,88 @@ async function selftest() {
   t('除外前は閉じない', CLOSE_CHECKS.cost_covers_runs({}, costCtx).closed === false);
   const excluded = CLOSE_CHECKS.cost_covers_runs({ exclude: ['never'] }, costCtx);
   t('除外すれば閉じる', excluded.closed === true);
-  t('除外したことを隠さない', excluded.evidence.includes('実費が存在しない 1件'));
+  // **[2026-09-03] 文言を「存在しない」から「残っていない」へ。**
+  // 除外に積まれる理由は2つ（ログに実費行が無い／ログが消えた）で、
+  // **後者は実費が存在した回**。「存在しない」と書くと、片方について嘘になる。
+  t('除外したことを隠さない', excluded.evidence.includes('実費が残っていない 1件'));
+
+  // **観測手段が無い経路を「未記録」に数えない／除外一覧にも積まない。**
+  // 副系CCRの external_ref はセッションid（cse_…）で、Actions のジョブログは無い。
+  // 旧版はこれを Actions API に投げて 404 を受け、「そもそも発生していない」と
+  // 書いて永久除外へ積んでいた（実データ: ap-20260831-ccr0920）。
+  const ccrCtx = { costDoc: { runs: [] }, runsDoc: { runs: [
+    { run_id: 'ap-x-ccr0920', attempted: true, external_ref: 'cse_01VZpZ4' }] } };
+  const ccrRes = CLOSE_CHECKS.cost_covers_runs({}, ccrCtx);
+  t('**観測手段が無い run は未記録に数えない**（除外を積まなくても閉じる）', ccrRes.closed === true);
+  t('**数えないことを隠さない**（件数と「ゼロではない」を根拠に出す）',
+    ccrRes.evidence.includes('観測手段が無い') && ccrRes.evidence.includes('ゼロではない'));
+  // 題と根拠で違う件数を出さない（2026-09-03 に「4件」と「1件」が並んで出た）
+  {
+    const ctx0 = {
+      today: '2026-09-03', statusDoc: null, selfheal: { targets: [] },
+      runsDoc: { runs: [
+        { run_id: 'a', attempted: true, external_ref: '1', route: 'actions', date_jst: '2026-09-01' },
+        { run_id: 'b', attempted: true, external_ref: '2', route: 'actions', date_jst: '2026-09-02' },
+        { run_id: 'c', attempted: true, external_ref: 'cse_x', route: 'ccr-0920', date_jst: '2026-09-02' }] },
+      costDoc: { runs: [] },
+    };
+    const bare = derive(ctx0).find((d) => d.id === 'act-cost-sync');
+    t('**観測手段が無い run は題の件数に入れない**', /2件/.test(bare?.title ?? ''));
+    t('数えないことは detail に出す（ゼロではないと書く）',
+      (bare?.detail ?? '').includes('ゼロではない'));
+    const withExcl = derive({ ...ctx0, ledgerDoc: { actions: [{ id: 'act-cost-sync',
+      close_check: { kind: 'cost_covers_runs', params: { exclude: ['a'] } } }] } })
+      .find((d) => d.id === 'act-cost-sync');
+    t('**除外済みは題の件数に入れない**（閉じ条件と同じ数を出す）', /1件/.test(withExcl?.title ?? ''));
+    t('除外したことは detail に出す', (withExcl?.detail ?? '').includes('除外している'));
+    const allGone = derive({ ...ctx0, ledgerDoc: { actions: [{ id: 'act-cost-sync',
+      close_check: { kind: 'cost_covers_runs', params: { exclude: ['a', 'b'] } } }] } })
+      .find((d) => d.id === 'act-cost-sync');
+    t('全部片付いたら起票しない', allGone === undefined);
+  }
+
+  t('Actions の run は今までどおり数える',
+    CLOSE_CHECKS.cost_covers_runs({}, { costDoc: { runs: [] }, runsDoc: { runs: [
+      { run_id: 'a', attempted: true, external_ref: '99' },
+      { run_id: 'b', attempted: true, external_ref: 'cse_1' }] } }).closed === false);
+  t('run id の見分けは数字かどうか',
+    isActionsRunRef('33692832179') && !isActionsRunRef('cse_01VZ') && !isActionsRunRef(null));
+
+  // fetchRunCost: **読めなかった / 読めたが無い / もう無い** を分ける
+  {
+    // **/logs を先に見る。**ログのURLは /actions/jobs/<id>/logs で、'/jobs' も含む。
+    const mk = (jobsRes, logRes) => (url) => url.endsWith('/logs')
+      ? Promise.resolve(logRes) : Promise.resolve(jobsRes);
+    const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [{ id: 1 }] }) };
+    const withLog = (body) => ({ ok: true, status: 200, text: async () => body });
+
+    const measured = await fetchRunCost('o/r', 'tok', '1',
+      { fetchImpl: mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}')) });
+    t('実費行を読めたら measured', measured.state === 'measured' && measured.usd === 1.25 && measured.turns === 9);
+    t('実費行が無ければ absent（＝発生していない）',
+      (await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(okJobs, withLog('ログ本文')) })).state === 'absent');
+    t('**ログが 410 なら gone**（保持期間切れ。実費が無かったのではない）',
+      (await fetchRunCost('o/r', 'tok', '1',
+        { fetchImpl: mk(okJobs, { ok: false, status: 410 }) })).state === 'gone');
+    t('**一時的な失敗は unreadable**（除外に積ませない）',
+      (await fetchRunCost('o/r', 'tok', '1',
+        { fetchImpl: mk(okJobs, { ok: false, status: 500 }) })).state === 'unreadable');
+    t('403 も unreadable（権限は復旧しうる）',
+      (await fetchRunCost('o/r', 'tok', '1',
+        { fetchImpl: mk(okJobs, { ok: false, status: 403 }) })).state === 'unreadable');
+    t('例外も unreadable',
+      (await fetchRunCost('o/r', 'tok', '1',
+        { fetchImpl: () => { throw new Error('network'); } })).state === 'unreadable');
+    t('run ごと 404 なら gone',
+      (await fetchRunCost('o/r', 'tok', '1',
+        { fetchImpl: mk({ ok: false, status: 404 }, null) })).state === 'gone');
+    t('jobs が 5xx なら unreadable',
+      (await fetchRunCost('o/r', 'tok', '1',
+        { fetchImpl: mk({ ok: false, status: 502 }, null) })).state === 'unreadable');
+    t('**CCRのセッションidは Actions へ投げない**',
+      (await fetchRunCost('o/r', 'tok', 'cse_01VZ',
+        { fetchImpl: () => { throw new Error('投げてはいけない'); } })).state === 'gone');
+  }
 
   // 閉じ条件: 入力が取れないときは閉じない
   const noApi = CLOSE_CHECKS.ledger_covers_runs({}, { workflowRuns: null, runsDoc: { runs: [] } });
@@ -3191,6 +3625,57 @@ function readJson(p, fallback = null) {
   }
 }
 
+/**
+ * open な監視Issueを **番号 → Issue** の Map で返す。**取れなければ `null`。**
+ *
+ * 【なぜ足したか — 閉じ条件に材料が繋がっていなかった】
+ * `issue_closed`（CLOSE_CHECKS）は 2026-08-26 から在り、`health-intake.mjs` が
+ * 立てる `act-health-*` の唯一の閉じ条件になっている。ところが **buildContext は
+ * `ctx.issues` を一度も作っていなかった。**結果、この閉じ条件は毎日
+ * 「Issue の状態を取得できず判定不能」を返し続けていた。
+ *
+ * 実害（2026-09-03 に実測）: `act-health-591` は **8日間** 未処理の上から2番目に
+ * 居座っていたが、対象の #591 は **立った当日（2026-08-26T14:31:44Z）に監視
+ * ワークフロー自身が閉じている。**故障はとうに終わっていて、
+ * **終わったことを見に行く経路だけが無かった。**
+ *
+ * 取り込み（health-intake）と判定（ここ）で**対象ラベルを同じ定数から引く**。
+ * ずれると、運ばれたのに閉じない行か、運んでいないのに閉じる行が出る。
+ *
+ * 【`null` と空 Map を混ぜない】
+ * `issue_closed` は「取れた一覧に無い＝閉じた」と読む。だから
+ * **読めなかった回に空 Map を返すと、その日だけ全部の監視が回復したことになる。**
+ * トークンが無い・APIが非200・ページングが要る件数 —— どれも `null`。
+ */
+export async function fetchOpenHealthIssues(repo, token, { fetchImpl = fetch, perPage = 100 } = {}) {
+  if (!token) return null;
+  const labels = Object.keys(HEALTH_LABELS).join(',');
+  const url = `https://api.github.com/repos/${repo}/issues`
+    + `?state=open&labels=${encodeURIComponent(labels)}&per_page=${perPage}`;
+  try {
+    const res = await fetchImpl(url, {
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: 'application/vnd.github+json',
+        'user-agent': 'simplememo-autopilot-act',
+      },
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) return null;
+    const body = await res.json();
+    if (!Array.isArray(body)) return null;
+    // **1ページで覆えなかったら断定しない。**2ページ目に居る Issue は
+    // 「一覧に無い」＝閉じた、と読まれる。取り残しの走査と同じ規律。
+    if (body.length >= perPage) return null;
+    const out = new Map();
+    // PR は issues API にも出てくる。**Issue だけを見る**（health-intake と同じ）。
+    for (const x of body) if (!x?.pull_request && Number.isInteger(x?.number)) out.set(x.number, x);
+    return out;
+  } catch {
+    return null;
+  }
+}
+
 async function buildContext(today, ledger = null) {
   const runsDoc = readJson(RUNS_PATH, { runs: [] });
   // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
@@ -3224,7 +3709,11 @@ async function buildContext(today, ledger = null) {
   const workflowRuns = await fetchWorkflowRuns(repo, token);
   const orphans = await fetchOrphanedCommits(repo, token, today,
     { watchSince: orphanWatchSince(ledger) });
-  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, repo, token };
+  // **issue_closed の材料。**取れなければ null のまま渡す（判定不能を回復と読ませない）。
+  const issues = await fetchOpenHealthIssues(repo, token);
+  // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
+  // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
+  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues, ledgerDoc: ledger, repo, token };
 }
 
 async function main() {
