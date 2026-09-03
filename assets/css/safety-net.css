@@ -86,9 +86,21 @@ body {
 }
 
 .global-nav__logo { min-width: 0; flex-shrink: 1; }
-.global-nav__logo > span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
+/* **ロゴの末尾を省略する規則は、ここには置かない。**
+
+   [2026-09-03] 共有CSS側には在る（英語面が 360px で 1〜3px 漏れたのを、
+   `Simple Memo - for Obs…` と省略して収めた）。**そのまま網へ持ってきたら、
+   自前CSSの面ではロゴが常に切れた** —— これらの面はロゴが `.95rem` で、
+   共有CSS側の `.78rem`（≤400px）より大きく、しかもナビの右側が 19px 広い。
+   実測すると `/vs/tana/` は 360/390/430px のすべてで切れ、
+   フォントを `.78rem` まで縮めても 360/390 では足りなかった。
+
+   **外しても悪化しない。**12面 × 5幅（320〜1280）で
+   `over` は全部 0 のまま、ナビの高さも変わらない（実測）。
+   横漏れは上の `max-width: 100%` と `body { overflow-x: clip }` が受ける。
+
+   外した結果、これらの面のロゴは **#828 以前と同じ**（入らないぶんは折り返す）。
+   ブランド名が途中で切れるより、そのほうが情報が残る。
+   きちんと収めるにはナビの右側を詰める必要があり、それは各面のCSSの作り直し ——
+   `data/autopilot-actions.json` の `act-pages-outside-shared-css` に測った数字を残してある。 */
