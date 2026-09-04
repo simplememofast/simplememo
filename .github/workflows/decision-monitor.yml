@@ -1,0 +1,60 @@
+name: Decision Monitor
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_run:
+    workflows: ["Auto-merge Claude PRs"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Observe without creating a ledger or recovery PR'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: read
+
+concurrency:
+  group: decision-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Exercise contract, selection and recovery gates
+        run: |
+          node scripts/value-contracts.mjs --selftest
+          node scripts/decision-review.mjs --selftest
+          node scripts/decision-monitor.mjs --selftest
+      - name: Observe, settle, and recover within the declared boundary
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          WRITE_TOKEN_AVAILABLE: ${{ secrets.GH_PAT != '' }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          MODE=''
+          if [ "$DRY_RUN" != 'true' ]; then
+            if [ "$WRITE_TOKEN_AVAILABLE" != 'true' ]; then
+              echo '::error::GH_PAT is required to trigger SEO Validation on generated PRs.'
+              exit 1
+            fi
+            MODE='--apply'
+          fi
+          node scripts/decision-monitor.mjs $MODE >> "$GITHUB_STEP_SUMMARY"

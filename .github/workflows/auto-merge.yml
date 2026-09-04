@@ -47,8 +47,8 @@ jobs:
             const { owner, repo } = context.repo;
             let mergedCount = 0;
 
-            if (!branch.startsWith('claude/')) {
-              core.info(`${branch} は claude/ ブランチではないため対象外`);
+            if (!branch.startsWith('claude/') && !branch.startsWith('Codex/')) {
+              core.info(`${branch} は自動マージ対象のブランチではない`);
               return;
             }
 
@@ -64,6 +64,10 @@ jobs:
             }
 
             for (const pr of prs) {
+              if (pr.base.ref !== 'main' || pr.head.repo?.full_name !== `${owner}/${repo}`) {
+                core.info(`#${pr.number}: unexpected repository or base branch`);
+                continue;
+              }
               if (pr.draft) {
                 core.info(`#${pr.number} は draft のため見送り（Ready にすると次の検証で対象になる）`);
                 continue;

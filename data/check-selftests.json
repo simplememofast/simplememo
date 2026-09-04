@@ -580,6 +580,24 @@
       "broke": "10通りで落ちることを観測。**--check が構造的に落ちない条件だった** —— `!b.date_jst || b.automation.overall === undefined` は、date_jst が new Date() 由来で常に真、automation.overall は壊れた台帳でも Number(NaN.toFixed(1)) = NaN で undefined にならない。どちらも成立しえず、「生成できた」と出すだけの行だった。代わりに1枚が自分で掲げる不変条件——**新しい情報を作らない／数字はすべて台帳が正**——をverify() で検査するようにした。実費・自動化率・未実装件数・未修理の故障を手で書き換えると台帳と食い違って落ちる。NaN も「生成できた」と呼ばない"
     },
     {
+      "script": "scripts/decision-ci.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-04",
+      "broke": "自律ブランチの契約必須判定を常時falseにする変異で自己テストが失敗。"
+    },
+    {
+      "script": "scripts/decision-monitor.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-04",
+      "broke": "緊急停止を無視する変異で自己テストが失敗。隔離Gitで実際の逆パッチ・HEAD競合・他ファイル不変・二重観測を検証。"
+    },
+    {
+      "script": "scripts/decision-review.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-04",
+      "broke": "強制探索分岐を無効化すると自己テストが失敗。成熟前・不適格候補の除外・二重消費防止も検証。"
+    },
+    {
       "script": "scripts/feature-score.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
@@ -674,6 +692,12 @@
       "state": "demonstrated",
       "at": "2026-09-03",
       "broke": "壊し3通りで落ちることを観測。**(1) 参照リンクの切り分け（isCta = isOwn && ct=）を殺す**と2件 —— 本文末尾の参照リンクが本物のCTAから bottom を横取りする、この script のコメントが記録している事故。**(2) 位置ではなく序数で決める**（frac を 0 に固定）と3件 —— 序数で測っていた版は 207件中168件の末尾CTAを hero と呼んでいた。**(3) 属性剥がしを恒等にする**と1件 —— 冪等性が壊れ、--write と --check が永久にすれ違う。自己テストは16件で、他社アプリのリンクに印を付けないこと・言語をトークンから引くこと（ページの位置からではない）も見る。"
+    },
+    {
+      "script": "scripts/value-contracts.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-04",
+      "broke": "欠測日をゼロにする変異で自己テストが失敗。承認必須、実測baseline、決済期限、Brier、証拠ハッシュも検証。"
     },
     {
       "script": "scripts/vendor-clause-worksheet.mjs",

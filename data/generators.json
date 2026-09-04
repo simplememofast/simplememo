@@ -137,6 +137,13 @@
       "why": "Lane B（アプリ本体）の運転台帳。/autopilot/ §2 と配信本文が引く「App Store に並んだ版の数」の正",
       "$dated_note": "measured_at が計測日になる。窓の終端も計測日なので、日付が動けば summary も動きうる。**古い台帳は --check が30日で落とす**",
       "needs": "siblings"
+    },
+    {
+      "cmd": "scripts/decision-review.mjs --write",
+      "writes": [
+        "data/decision-review.json"
+      ],
+      "why": "決済済み契約から成熟判定と探索状態を導く。CIの隔離コピーで実際に書いて整合を確認する。"
     }
   ],
   "never_run": [

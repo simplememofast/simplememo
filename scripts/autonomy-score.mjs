@@ -32,6 +32,7 @@
  */
 
 import fs from 'node:fs';
+import { verifiedSettlement } from './value-contracts.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';
@@ -84,7 +85,7 @@ const weightOf = (cls, policy) => policy.reversibility?.[cls]?.weight ?? 1;
 export function vdc(runs, policy, { contracts = null } = {}) {
   const shipped = runs.filter((r) => r.outcome === 'shipped');
   const settled = contracts
-    ? shipped.filter((r) => contracts.some((c) => c.run_id === r.run_id && c.settled_at)).length
+    ? shipped.filter((r) => contracts.some((c) => c.run_id === r.run_id && verifiedSettlement(c))).length
     : 0;
   const rate = shipped.length ? settled / shipped.length : 0;
   return {
@@ -137,16 +138,24 @@ export function umr(runs, policy) {
  * 実際に動いている自動検知と自己修復（レーンF）が一切見えなくなる。
  * **Phase 6 のハードゲートは点ではなく auto_revert_count に紐づける**（点で代替しない）。
  */
-export function ra(runs, allRuns, policy) {
+export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {}) {
   const src = new Set(policy.ra?.machine_detection_sources ?? []);
   const breakages = runs.filter((r) => BREAKAGE_STAGES.has(r.failure_stage));
   const detected = breakages.filter((r) => src.has(r.source));
-  const repairedBy = (id) => allRuns.find((x) => (x.repair_of || []).includes(id));
+  const repairedBy = (id) => allRuns.find((x) => x.outcome === 'shipped' && (x.repair_of || []).includes(id));
   const recoveredHandsOff = breakages.filter((r) => {
     const rep = repairedBy(r.run_id);
     return Boolean(rep) && handsOff(rep) && handsOff(r);
   });
-  const n = breakages.length;
+  const incidents = recoveries.filter(r => r.mode === 'production' && r.before?.failed === true
+    && /^[a-f0-9]{40}$/.test(r.target_sha ?? '') && Number.isFinite(Date.parse(r.detected_at))
+    && (!window || (r.detected_at.slice(0, 10) >= window.from && r.detected_at.slice(0, 10) <= window.to)));
+  const machineIncidents = incidents.filter(r => r.human_interventions === 0 && ['schedule', 'workflow_run'].includes(r.trigger));
+  const recovered = r => r.state === 'recovered' && r.human_interventions === 0
+    && ['schedule', 'workflow_run'].includes(r.trigger) && /^[a-f0-9]{40}$/.test(r.revert_sha ?? '')
+    && r.validation === 'success' && r.after?.healthy === true && r.deployment_verified === true;
+  const recoveredIncidents = incidents.filter(recovered);
+  const n = breakages.length + incidents.length;
   const half = policy.weights.ra / 2;
   // **文脈。**機械の検知が 0/n でも「何も検知していない」ではない ——
   // act-reconcile は Gate スキップ（適格性）を実際に自分で拾っている。
@@ -155,20 +164,20 @@ export function ra(runs, allRuns, policy) {
   const detectedAtAll = breakages.filter((r) => r.detected_at).length;
   const eligibilityByMachine = runs.filter(
     (r) => r.failure_stage === 'eligibility' && src.has(r.source)).length;
-  const dRate = n ? detected.length / n : 0;
-  const rRate = n ? recoveredHandsOff.length / n : 0;
+  const dRate = n ? (detected.length + machineIncidents.length) / n : 0;
+  const rRate = n ? (recoveredHandsOff.length + recoveredIncidents.length) / n : 0;
   // 自動 revert は「出荷後の指標劣化を検知して人手なしで巻き戻した」回。台帳に語彙が無い＝0。
-  const autoRevert = allRuns.filter((r) => r.auto_revert_of).length;
+  const autoRevert = recoveries.filter((r) => r.mode === 'production' && r.before?.failed === true && recovered(r)).length;
   return {
     id: 'ra', n,
-    detect: { rate: dRate, hit: detected.length, points: half * dRate, max: half,
+    detect: { rate: dRate, hit: detected.length + machineIncidents.length, points: half * dRate, max: half,
               detected_at_all: detectedAtAll,
               eligibility_detected_by_machine: eligibilityByMachine,
-              why: n && !detected.length
+              why: n && !detected.length && !machineIncidents.length
                 ? `**${detectedAtAll}/${n} は検知されているが、機械が自分で気づいた故障は 0 件。**`
                   + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている —— 拾えていないのは故障のほう`
                 : null },
-    recover: { rate: rRate, hit: recoveredHandsOff.length, points: half * rRate, max: half },
+    recover: { rate: rRate, hit: recoveredHandsOff.length + recoveredIncidents.length, points: half * rRate, max: half },
     auto_revert_count: autoRevert,
     rate: n ? (dRate + rRate) / 2 : 0,
     max: policy.weights.ra, points: half * dRate + half * rRate, measurable: n > 0,
@@ -241,7 +250,7 @@ export function coverage(selftests) {
 // ── 合成 ──────────────────────────────────────────────────────
 export function score(ctx) {
   const { policy, runsDoc, selftests, rules, actions, history = [], today = todayJst(),
-          contracts = null, metrics = null } = ctx;
+          contracts = null, metrics = null, recoveries = [] } = ctx;
   const all = runsDoc.runs || [];
   const w = windowOf(all, policy.window_days, today);
   const inW = all.filter((r) => inWindow(r, w));
@@ -249,7 +258,7 @@ export function score(ctx) {
   const components = [
     vdc(inW, policy, { contracts }),
     umr(inW, policy),
-    ra(inW, all, policy),
+    ra(inW, all, policy, { recoveries, window: w }),
     ep(inW, policy, { rules, actions }),
     tuc(inW, policy, w),
   ];
@@ -258,10 +267,12 @@ export function score(ctx) {
 
   // **非退行制約。**被覆率が下がった窓はスコアを据え置く（上げない）。
   // チェックを緩めれば VDC も UMR も自動的に上がるため。
-  const prev = history.length ? history[history.length - 1] : null;
+  // Keep the coverage high-water mark. One low-coverage snapshot must not reset the guard.
+  const prev = history.length ? history.reduce((a, b) =>
+    b.coverage.demonstrated > a.coverage.demonstrated || (b.coverage.demonstrated === a.coverage.demonstrated && b.coverage.rate > a.coverage.rate) ? b : a) : null;
   const guard = policy.anti_gaming?.coverage_non_regression;
   let total = raw, held = false, heldWhy = null;
-  if (guard?.enabled && prev && cov.demonstrated < prev.coverage.demonstrated) {
+  if (guard?.enabled && prev && (cov.demonstrated < prev.coverage.demonstrated || cov.rate < (prev.coverage.rate ?? 0))) {
     if (raw > prev.total) {
       total = prev.total; held = true;
       heldWhy = `検査被覆率が ${prev.coverage.demonstrated} → ${cov.demonstrated} に下がった窓なので、`
@@ -303,6 +314,7 @@ export function loadContext({ today = todayJst() } = {}) {
     history: fs.existsSync(HISTORY_PATH) ? readJson(HISTORY_PATH).snapshots ?? [] : [],
     metrics: fs.existsSync(METRICS_PATH) ? readJson(METRICS_PATH) : null,
     contracts: fs.existsSync(contractsPath) ? readJson(contractsPath).contracts ?? [] : null,
+    recoveries: fs.existsSync(path.join(ROOT, 'data/decision-recovery.json')) ? readJson(path.join(ROOT, 'data/decision-recovery.json')).incidents ?? [] : [],
     today,
   };
 }
@@ -481,8 +493,8 @@ function selftest() {
   // --- VDC ---
   eq(vdc([ship('a')], P).points, 0, '**L2 が無ければ 0 点**（空欄にしない）');
   eq(vdc([ship('a')], P).measurable, false, '測れていないことを出す');
-  eq(vdc([ship('a'), ship('b')], P, { contracts: [{ run_id: 'a', settled_at: 'x' }] }).points, 15,
-     '契約が半分にあれば半分');
+  eq(vdc([ship('a'), ship('b')], P, { contracts: [{ run_id: 'a', settled_at: 'x' }] }).points, 0,
+     '決済時刻を書くだけでは加点しない');
   eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).points, 0,
      '**決済されていない契約は数えない**（書いただけでは検証ではない）');
 
@@ -522,7 +534,12 @@ function selftest() {
   eq(ra([brk('f1'), { run_id: 'e', date_jst: '2026-09-01', outcome: 'skipped_gate', failure_stage: 'eligibility', source: 'act-reconcile' }], [], P)
        .detect.eligibility_detected_by_machine, 1,
      '**適格性の沈黙は機械が拾えている**（0% だけ出して「何も検知していない」と読ませない）');
-  eq(ra([brk('f1')], [brk('f1'), { auto_revert_of: 'f1' }], P).auto_revert_count, 1, '起きたら数える');
+  eq(ra([brk('f1')], [brk('f1'), { auto_revert_of: 'f1' }], P).auto_revert_count, 0, '自己申告だけで権限を広げない');
+  eq(ra([brk('f1')], [brk('f1'), ship('r', { outcome: 'failed', repair_of: ['f1'] })], P).recover.hit, 0, '失敗した修理を復旧に数えない');
+  const recovered = { mode: 'production', before: { failed: true }, target_sha: 'a'.repeat(40), detected_at: '2026-09-01T00:00:00Z',
+    state: 'recovered', trigger: 'schedule', human_interventions: 0, revert_sha: 'b'.repeat(40), validation: 'success', after: { healthy: true }, deployment_verified: true };
+  eq(ra([], [], P, { recoveries: [recovered] }).points, 20, '本番で検知と復旧が両方検証されれば数える');
+  eq(ra([], [], P, { recoveries: [{ ...recovered, mode: 'drill' }] }).auto_revert_count, 0, '訓練でPhase6を開かない');
 
   // --- EP ---
   const rules = { policy: { default_within_hours: 24 }, rules: [{ trigger: 'usage_limit', within_hours: 24 }] };

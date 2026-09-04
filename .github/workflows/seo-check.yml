@@ -2,7 +2,7 @@ name: SEO Validation
 
 on:
   push:
-    branches: [main, 'claude/**']
+    branches: [main, 'claude/**', 'Codex/**']
   pull_request:
     branches: [main]
 
@@ -15,11 +15,21 @@ jobs:
       # git diff が失敗する）。
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Prospective decisions and recovery safety
+        run: |
+          node scripts/value-contracts.mjs --selftest
+          node scripts/value-contracts.mjs --check
+          node scripts/decision-ci.mjs --selftest
+          node scripts/decision-ci.mjs --check
+          node scripts/decision-review.mjs --selftest
+          node scripts/decision-monitor.mjs --selftest
+          node scripts/decision-monitor.mjs --check
 
       # 12ゲートが実際に発火することを先に見る。**落ちることを確かめていない
       # 検査は、無いのと同じ**（data/check-selftests.json）。この検査は

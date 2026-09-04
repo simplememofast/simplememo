@@ -80,8 +80,11 @@ export function resolveScope(spec, { authority }) {
  * 引き順は「宣言 → 領域 → レーン → 触るパス」。上のものほど具体的。
  */
 export function classOf(candidate, { scorePolicy }) {
+  // A declaration cannot downgrade an irreversible domain.
+  const domain = (scorePolicy.domain_class || []).find((d) => d.domain === candidate.domain);
+  if (domain?.class === 'R2') return { class: 'R2', source: `domain:${candidate.domain}` };
   if (candidate.reversibility_class) {
-    return { class: candidate.reversibility_class, source: 'declared' };
+    return { class: ['R0', 'R1', 'R2'].includes(candidate.reversibility_class) ? candidate.reversibility_class : null, source: 'declared' };
   }
   if (candidate.domain) {
     const row = (scorePolicy.domain_class || []).find((d) => d.domain === candidate.domain);
@@ -214,6 +217,9 @@ export function judge(candidate, ctx) {
     const touches = candidate.touches || [];
     const cap = c.boundedness.max_touch_paths ?? Infinity;
     if (!touches.length) put('boundedness', 'unknown', '触るパスが宣言されていない（範囲外かどうかを判定できない）');
+    else if (touches.some((p) => typeof p !== 'string' || p.startsWith('/') || p.includes('\\') || p.split('/').some((s) => s === '..' || s === '.'))) {
+      put('boundedness', 'fail', '正規化されたリポジトリ相対パスが必要');
+    }
     else if (touches.length > cap) put('boundedness', 'fail', `触るパスが ${touches.length} 件（上限 ${cap}）`);
     else {
       const fit = fitScope(touches, c.boundedness.scopes, { authority, declared: candidate.scope });
@@ -243,7 +249,8 @@ export function judge(candidate, ctx) {
         { age_days: daysBetween(ev.date, today), evidence_source: ev.source });
     } else {
       const age = daysBetween(ev.date, today);
-      if (age > max) put('evidence_age', 'fail', `最後に条件を見たのが ${age} 日前（上限 ${max} 日）`,
+      if (age === null || age < 0) put('evidence_age', 'fail', '証拠の日付が不正または未来');
+      else if (age > max) put('evidence_age', 'fail', `最後に条件を見たのが ${age} 日前（上限 ${max} 日）`,
         { age_days: age, evidence_source: ev.source });
       else put('evidence_age', 'pass', `${age} 日前の観測（${ev.source}）`,
         { age_days: age, evidence_source: ev.source });
@@ -297,7 +304,7 @@ export function judge(candidate, ctx) {
     title: candidate.title ?? null,
     judged_jst: today,
     verdict,
-    halted: verdict === 'escalate_l4',
+    halted: verdict === 'escalate_l4' || (policy.enforcement === 'block' && CRITERIA.some((k) => criteria[k]?.result !== 'pass')),
     reversibility_class: criteria.reversibility?.class ?? null,
     criteria,
     reasons,
