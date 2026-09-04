@@ -32,13 +32,19 @@
 > | `simplememo-ios` #319（09:47Z マージ） | `NotionManager.swift` 274行 / `NotionSettingsViewController.swift` / `NotionIntegrationTests.swift` 222行 / 9言語 / `data/third-party-egress.json` / `docs/notion-v1.md` |
 > | `simplememo-ios` #320（09:55Z マージ） | `MARKETING_VERSION` 5.8.11 → **5.8.12**、`release_notes/{ja-JP,en-US}/5.8.12.txt` |
 > | `simplememo-api` #239 | `migrations/0032_notion.sql` / `src/notion.ts` / `src/notion-client.ts` / `docs/notion-release.md` |
-> | **`GET https://api.simplememofast.com/v1/notion/config`** | **`{"available":false}`**（HTTP 200・2026-09-04 10:0xZ 実測） |
+> | **`GET https://api.simplememofast.com/v1/notion/config`** | 10:0xZ **`{"available":false}`** → **14:31Z `{"available":true}`**（3回連続で確認）。**サーバ側の有効化は済んだ** |
 >
-> **入っているが、動いていない。**`docs/notion-release.md` の公開順は
-> D1 migration 0032 → Workers の `NOTION_*` シークレット → `NOTION_ENABLED=true`
-> → **実OAuthと保存の確認** → iOS配布、で、最後の2つが未実施と明記されている
-> （「**実NotionアカウントとのOAuth・保存は未検証**」）。5.8.12 のリリースノート自身も
-> 「接続設定の準備が整い次第、設定画面から利用できます」と書いている。
+> `docs/notion-release.md` の公開順は D1 migration 0032 → Workers の `NOTION_*` シークレット
+> → `NOTION_ENABLED=true` → **実OAuthと保存の確認** → iOS配布。
+> **14:31Z の `available:true` で、この3つ目までは通ったと読める**
+> （同ファイルが「設定不足は available=false」と定義している）。
+>
+> **残りの2つは、このセッションからは確かめられない。**
+> ① 実Notion公開connectionでの認可・保存の実機確認 —— 観測手段が無い。
+> ② **App Store 公開** —— 台帳の公開版は **5.8.4**（オーナー確認・09-02）で、Notion が入ったのは
+> **5.8.12**（TestFlight。`release.yml` は tag → Xcode Cloud → TestFlight までで、
+> App Review 提出は別のオプトイン）。`itunes.apple.com` はこのセッションの egress で塞がれていて
+> **再確認できなかった**（403）。**「測れなかった」を「出ていない」と書かない。**
 >
 > ### これが §6 の判断1（次の弾のエンティティ）に効く
 >
@@ -57,7 +63,9 @@
 >
 > ### 書いてはいけないこと
 >
-> **`available:false` のあいだは「Notion連携を提供開始」と書けない。**
+> **「Notion連携を提供開始」と書けるのは、App Store の公開版がその機能を持ってからである。**
+`available:true`（14:31Z）はサーバ側が開いたことしか言わない —— **アプリ側の公開は別のゲート**で、
+台帳の公開版は 5.8.4、Notion は 5.8.12 に入っている。
 > `docs/pr-action-router-launch-plan.md` §0 の
 > 「**受け皿ページを、機能が出る前に公開しない**」と同じ線である。
 > **ここは日単位のゲート**（migration・シークレット・実OAuth確認）であって、

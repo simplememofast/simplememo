@@ -302,12 +302,24 @@ Discover は**興味関心のフィード**なので、効くのは
 | `simplememo-ios` #319（09:47Z） | `NotionManager.swift` 274行・`NotionSettingsViewController.swift`・`NotionIntegrationTests.swift` 222行・9言語・`docs/notion-v1.md` |
 | `simplememo-ios` #320（09:55Z） | `MARKETING_VERSION` 5.8.11 → **5.8.12** ＋ リリースノート ja/en |
 | `simplememo-api` #239 | `migrations/0032_notion.sql`・`src/notion.ts`・`src/notion-client.ts`・`docs/notion-release.md` |
-| **`GET /v1/notion/config`** | **`{"available":false}`**（HTTP 200・本番・10:0xZ） |
+| **`GET /v1/notion/config`** | 10:0xZ **`false`** → **14:31Z `true`**（本番・3回連続）。**サーバ側は有効化済み** |
 
 **マージされていることと、動いていることは別。**`docs/notion-release.md` が
 公開順を明示している —— D1 migration 0032 → Workers の `NOTION_*` → `NOTION_ENABLED=true`
-→ **実OAuthと保存の確認** → iOS配布。同ファイルは冒頭で
-「**実NotionアカウントとのOAuth・保存は未検証**」と自分で断っている。
+→ **実OAuthと保存の確認** → iOS配布。
+
+**同日 14:31Z、3つ目まで通った** —— `available` が `true` に変わった（3回連続で確認）。
+同ファイルが「設定不足は available=false」と定義しているので、**migration とシークレットと
+`NOTION_ENABLED` は揃った**と読める。
+
+**残りは2つ。どちらもこのセッションからは確かめられない。**
+
+| 残っているゲート | このセッションで測れるか |
+|---|---|
+| 実Notion公開connectionでの認可・保存の実機確認 | **観測手段が無い**（同ファイルが「未検証」と断っている状態から動いたかは不明） |
+| **App Store 公開** | **測れなかった。**台帳の公開版は **5.8.4**（オーナー確認・09-02）、Notion が入ったのは **5.8.12**（TestFlight）。`release.yml` は tag → Xcode Cloud → TestFlight までで App Review 提出は別オプトイン。`itunes.apple.com` が egress で 403 のため再確認できず |
+
+**「測れなかった」を「出ていない」と書かない。**
 
 ### 弾の選択に効くこと（**合計点で決めない**）
 
@@ -331,7 +343,9 @@ Discover は**興味関心のフィード**なので、効くのは
 
 ### 原稿に書けないこと
 
-**`available:false` のあいだは「Notion連携を提供開始」と書けない。**
+**「Notion連携を提供開始」と書けるのは、App Store の公開版がその機能を持ってからである。**
+`available:true`（14:31Z）はサーバ側が開いたことしか言わない —— **アプリ側の公開は別のゲート**で、
+台帳の公開版は 5.8.4、Notion は 5.8.12 に入っている。
 `docs/pr-action-router-launch-plan.md` §0 の「**受け皿ページを、機能が出る前に公開しない**」と同じ線で、
 5.8.12 のリリースノート自身も「接続設定の準備が整い次第、設定画面から利用できます」と書いている。
 **ここは日単位のゲート**（migration・シークレット・実OAuth確認）で、EventKit の実装とは桁が違う。
