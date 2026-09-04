@@ -286,8 +286,21 @@ if (isMain) {
     if (bt.boarded_min_score !== null && bt.not_boarded_max_score !== null) {
       console.log('');
       console.log(`  乗車した最低スコア: ${bt.boarded_min_score} / 非乗車の最高スコア: ${bt.not_boarded_max_score}`);
-      console.log(`  合格ライン ${PASS_MARK} はこの間に置かれている（${bt.not_boarded_max_score} < ${PASS_MARK} <= ${bt.boarded_min_score}）。`);
-      console.log('  n=5 の較正であり、外挿の根拠にはならない。');
+      // **合計点が分離しなくなったら、そう言う。**
+      // [2026-09-04] ここは分離を前提に `${max} < ${PASS_MARK} <= ${min}` を無条件で
+      // 出していた。PR⑥（85点・非乗車）が台帳へ入った瞬間、**「85 < 60」という
+      // 偽の不等式を印字した。**検査が壊れたのではなく、較正が破れたのに
+      // 出力が破れていないふりをしていた。**破れたことは、出力に出さなければ誰も気づけない。**
+      if (bt.not_boarded_max_score < PASS_MARK && PASS_MARK <= bt.boarded_min_score) {
+        console.log(`  合格ライン ${PASS_MARK} はこの間に置かれている（${bt.not_boarded_max_score} < ${PASS_MARK} <= ${bt.boarded_min_score}）。`);
+      } else {
+        console.log(`  ⚠ **合計点の合格ライン ${PASS_MARK} は、もう分離していない。**`);
+        console.log(`     非乗車に ${PASS_MARK} 以上が出ている（最高 ${bt.not_boarded_max_score}）ので、`);
+        console.log('     「60点以上なら撃つ」は単独では成り立たない。');
+        console.log('     分離しているのは必要条件のほう —— S1_novelty >= 20 かつ S2_entity_reach >= 10');
+        console.log('     （docs/pr-discover-strategy-2026-09-04.md §4）。');
+      }
+      console.log(`  n=${bt.rows.length} の較正であり、外挿の根拠にはならない。`);
     }
     process.exit(0);
   }
