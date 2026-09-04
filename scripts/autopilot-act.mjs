@@ -1678,6 +1678,31 @@ async function fetchWorkflowRuns(repo, token, limit = 30) {
  * 台帳の失敗行に嘘の failure_class が入ると、selfheal の
  * 「同じ種別を3回直したら人へ」という歯止めが別の種別で数えられて効かなくなる。
  */
+/**
+ * ワークフローがステップ名に出した判定コードを読む。**純関数。**
+ *
+ * `.github/workflows/obsidian-autopilot.yml` の「判定コード: <code>」という
+ * 何もしないステップが、`steps.gate.outputs.code` を名前に埋めて出している。
+ * **名前に "Gate" を入れない。**`step('Gate')` は includes で先頭一致を拾うので、
+ * 同じ語を持つステップを増やすと、いつか順序の入れ替えで別のステップを掴む。
+ *
+ * 【なぜステップ名なのか】判定コードは `$GITHUB_OUTPUT` にも `::notice` にも出ているが、
+ * **Actions API の run 一覧から読めるのはステップの name と conclusion だけ。**
+ * 注釈は checks:read が要り、ジョブログは追加の取得経路が要る。
+ * ステップ名なら、いま既に取っている情報の中に入っている。
+ *
+ * 【無くても壊れない】この写しが無い run（2026-09-04 より前の全部）では null を返し、
+ * 運転台帳側が declined_unrecorded として自己申告する。
+ * **後から足した観測手段が、過去を「記録があった」ことにしない。**
+ */
+export function declaredGateCode(run) {
+  const declared = (run.steps ?? []).find((x) => /^判定コード:/.test(x.name ?? ''));
+  if (!declared) return null;
+  const code = String(declared.name).replace(/^判定コード:\s*/, '').trim();
+  // 空（式が展開されなかった）を「コードが読めた」と読まない。
+  return code && code !== '-' ? code : null;
+}
+
 export function interpretRun(run) {
   const step = (name) => (run.steps ?? []).find((s) => s.name?.includes(name));
   const claude = step('Claude Code');
@@ -1723,24 +1748,45 @@ export function interpretRun(run) {
     const budget = step('予算ゲート');
     const route = step('振り分け');
     const ran = (st) => st != null && st.conclusion !== 'skipped';
-    let note;
+    // **[2026-09-04] 判定コードも一緒に返す。**
+    // 運転台帳の failure_stage が `eligibility` の行は「なぜ寝たか」を要求する
+    // （scripts/autopilot-runs.mjs の GATE_CODE_REQUIRED_FROM）。ここで決めないと、
+    // **すべての Gate スキップが declined_unrecorded になり、ラチェットが一度も噛まない。**
+    //
+    // 下の4分岐のうち3つはステップの実行結果から**一意に決まる**ので、
+    // 決まるものは名前を付けて返す。決まらない1つ（秘密鍵未設定 / 当日重複）は
+    // ワークフローが出す判定コードの写し（下の gateCode）から読む。
+    const gateCode = declaredGateCode(run);
+    let note, code = gateCode;
     if (estop?.conclusion === 'failure') {
       note = '緊急停止が立っていたため着手しなかった（data/emergency-stop.json）';
+      code ??= 'emergency_stop';
     } else if (ran(route)) {
       // **ここが 2026-08-25 まで名前を持っていなかった停止。**解除は人間のみ
       // なので、気づかれないと毎日この形で静かに止まり続ける。
       note = '1回あたりの実費上限が未レビューのため着手しなかった'
         + '（node scripts/autopilot-budget.mjs --check-run-cap）。解除は人間のみ';
+      code ??= 'skip_run_cap';
     } else if (ran(budget)) {
       note = '当月の実費が月次上限に達していたため着手しなかった（data/autopilot-cost.json）';
+      code ??= 'skip_budget';
     } else if (ran(estop) || gate != null) {
-      note = `Gate で止まった（秘密鍵未設定・当日重複のいずれか。Gate=${gate?.conclusion ?? '不明'}）`;
+      // **ここだけはステップの実行結果から決まらない。**秘密鍵未設定も当日重複も
+      // 「Gate が run=false を出して以降が skipped」という同じ形になる。
+      // ワークフローが判定コードをステップ名に出していれば gateCode が埋まる。
+      note = gateCode
+        ? `Gate で止まった（${gateCode}）`
+        : 'Gate で止まった（秘密鍵未設定・当日重複のいずれか。'
+          + `Gate=${gate?.conclusion ?? '不明'}）。**判定コードの写しが無い run**`;
     } else {
       // ステップ情報が無い run（API の取得漏れなど）。**決まらないなら決めない。**
       note = `Claude Code ステップ未実行。手前のどこで止まったかはステップ情報が無く判定できない（Gate=${gate?.conclusion ?? '不明'}）`;
     }
     return { outcome: 'skipped_gate', attempted: false, failure_class: null,
-      failure_reason: null, note };
+      failure_reason: null, note,
+      // **決まったときだけ書く。**決まらない回は運転台帳側が
+      // declined_unrecorded として自己申告する（沈黙を正常に見せない）。
+      gate_code: code ?? null };
   }
   if (claude.conclusion === 'failure') {
     // **所要時間が言えるのは「作業に入る前に落ちた」までで、原因ではない。**
@@ -1926,6 +1972,11 @@ export const HANDLERS = {
         '--external-ref', String(run.id), '--source', 'act-reconcile'];
       if (v.failure_reason) args.push('--failure-reason', v.failure_reason);
       if (v.failure_class) args.push('--failure-class', v.failure_class);
+      // **なぜ寝たかが決まった回だけ渡す。**渡さない回は autopilot-runs.mjs 側が
+      // declined_unrecorded として自己申告する —— 決まらなかったことを、
+      // 決まったことにしない（GATE_CODE_REQUIRED_FROM のラチェットはそれを許している）。
+      if (v.gate_code) args.push('--gate-code', v.gate_code, '--eligibility-verdict', 'declined_by_design');
+      if (v.note) args.push('--stage-note', v.note);
       if (v.needs_triage) args.push('--needs-triage', 'true');
       args.push('--detected-at', new Date().toISOString());
       try {
@@ -3607,6 +3658,40 @@ async function selftest() {
     close_check: { kind: 'run_repaired', params: {} } }] };
   reconcile(broken, {});
   t('検査が壊れても閉じない', broken.actions[0].state === 'open');
+
+  // --- 判定コードの写し（2026-09-04）-------------------------------------
+  {
+    const stepsOf = (...names) => names.map(([name, conclusion]) => ({ name, conclusion }));
+    const mk = (steps) => ({ id: 1, status: 'completed', conclusion: 'success', event: 'schedule',
+      jst_date: '2026-09-05', steps });
+    t('判定コードの写しが無ければ null（過去の run を「記録があった」ことにしない）',
+      declaredGateCode(mk(stepsOf(['Gate（秘密鍵）', 'success']))) === null);
+    t('**ステップ名から判定コードを読む**',
+      declaredGateCode(mk(stepsOf(['判定コード: skip_already_shipped', 'success']))) === 'skip_already_shipped');
+    t('**式が展開されず空になった名前を「読めた」と読まない**',
+      declaredGateCode(mk(stepsOf(['判定コード: ', 'success']))) === null);
+    t('前方一致で他のステップを拾わない',
+      declaredGateCode(mk(stepsOf(['まとめ 判定コード: x', 'success']))) === null);
+
+    // 一意に決まる3分岐。**写しが無くても名前が付く。**
+    const skipped = (extra) => mk([...extra, { name: 'Claude Code', conclusion: 'skipped' }]);
+    t('緊急停止は写し無しでも emergency_stop',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'failure']))).gate_code === 'emergency_stop');
+    t('1回あたりの上限は写し無しでも skip_run_cap',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'success'],
+        ['予算ゲート', 'success'], ['振り分け', 'success']))).gate_code === 'skip_run_cap');
+    t('月次上限は写し無しでも skip_budget',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'success'],
+        ['予算ゲート', 'success'], ['振り分け', 'skipped']))).gate_code === 'skip_budget');
+    t('**秘密鍵未設定と当日重複は、写しが無ければ決まらない**（推測しない）',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['緊急停止の確認', 'skipped'],
+        ['予算ゲート', 'skipped'], ['振り分け', 'skipped']))).gate_code === null);
+    t('**写しがあれば、その1つも決まる**',
+      interpretRun(skipped(stepsOf(['Gate', 'success'], ['判定コード: skip_secrets', 'success'],
+        ['緊急停止の確認', 'skipped'], ['予算ゲート', 'skipped'], ['振り分け', 'skipped']))).gate_code === 'skip_secrets');
+    t('出荷した回に判定コードは付かない',
+      interpretRun(mk([{ name: 'Claude Code', conclusion: 'success' }])).gate_code === undefined);
+  }
 
   if (fails.length) {
     console.error('自己検査に失敗:');

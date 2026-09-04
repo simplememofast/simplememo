@@ -286,6 +286,34 @@ export const ELIGIBILITY_VERDICTS = ['declined_by_design', 'declined_unrecorded'
 export const GATE_CODE_REQUIRED_FROM = '2026-09-04';
 
 /**
+ * 失敗の層を、outcome と failure_class から導く。**純関数。**
+ *
+ * 【なぜ導出するか】層を必須にした日、`--append` はこの欄を渡していなかった。
+ * 追記した瞬間に `validate()` が落ちるので、**翌朝の日次アクチュエータが
+ * 自分の検査で止まる。**（実際にそうなる直前まで行った。）
+ *
+ * 呼び出し側に書かせる形にもできるが、**書き手が3経路ある**
+ * （reconcile-runs / セッション / 人）ので、1つ忘れると同じ事故が再発する。
+ * 導出を1か所に置き、**明示の指定があればそちらを優先する**（推測を上書きさせる口を残す）。
+ *
+ * 【推測しない部分】適格性の判定理由（gate_code）は、Actions API のステップ情報からは
+ * 決まらない —— Gate が寝た理由（秘密鍵未設定 / 当日重複 / 予算 / 占有）は
+ * どれも「Claude Code ステップが skipped」という同じ形で現れる。
+ * **だから導出は `declined_unrecorded` を返す。**分からないことを分かったことにしない。
+ */
+export function deriveStage({ outcome, failure_class = null } = {}) {
+  if (outcome === 'shipped') return null;
+  if (NOT_ATTEMPTED.has(outcome)) {
+    if (outcome === 'no_run') return { failure_stage: 'absent' };
+    return { failure_stage: 'eligibility', eligibility_verdict: 'declined_unrecorded', gate_code: null };
+  }
+  // 枠・予算で止まった回。**実行の失敗と混ぜない** —— 直し方が違う。
+  if (failure_class === 'usage_limit' || failure_class === 'spend_over_cap') return { failure_stage: 'cost' };
+  if (failure_class === 'route-absent') return { failure_stage: 'absent' };
+  return { failure_stage: 'execution' };
+}
+
+/**
  * 出荷しなかった行が、どの層で止まったかを持っているか。
  *
  * 【なぜ要るか】2026-09-04 まで、Gateが寝た日・実行が落ちた日・枠が尽きた日が
@@ -1033,6 +1061,29 @@ function selftest() {
   eq(handsOffStreaks(abandoned).current.days, 0,
      '**壊れたまま誰も触らない日は無介入に数えない**（放置で伸びる自律指標を作らない）');
 
+  // --- 層の導出（deriveStage）。**書き手が渡し忘れても追記が落ちない形** ---
+  eq(deriveStage({ outcome: 'shipped' }), null, '出荷には層が無い');
+  const j_ = (x) => JSON.stringify(x);
+  eq(j_(deriveStage({ outcome: 'skipped_gate' })),
+     j_({ failure_stage: 'eligibility', eligibility_verdict: 'declined_unrecorded', gate_code: null }),
+     '**Gate スキップの理由はステップ情報から決まらない**ので、決まらないと書く');
+  eq(deriveStage({ outcome: 'skipped_duplicate' })?.failure_stage, 'eligibility', '冪等スキップも適格性の層');
+  eq(j_(deriveStage({ outcome: 'no_run' })), j_({ failure_stage: 'absent' }), '無運転は経路不在');
+  eq(j_(deriveStage({ outcome: 'failed', failure_class: 'usage_limit' })), j_({ failure_stage: 'cost' }),
+     '**枠で止まった回を実行の失敗に混ぜない**（直し方が違う）');
+  eq(j_(deriveStage({ outcome: 'failed', failure_class: 'spend_over_cap' })), j_({ failure_stage: 'cost' }), '予算超過も同じ');
+  eq(j_(deriveStage({ outcome: 'no_artifact', failure_class: 'permissions' })), j_({ failure_stage: 'execution' }),
+     '成果物ゼロは実行の層');
+  eq(j_(deriveStage({ outcome: 'cancelled', failure_class: 'route-absent' })), j_({ failure_stage: 'absent' }),
+     '経路が無いのは実行の失敗ではない');
+  eq(deriveStage({ outcome: 'failed' })?.failure_stage, 'execution', '種別が無くても層は決まる');
+  // **導出した層は、必ず検査を通る形であること。**ここが崩れると追記が落ちる。
+  for (const o of OUTCOMES.filter((x) => x !== 'shipped')) {
+    const d = deriveStage({ outcome: o, failure_class: null });
+    eq(stageProblems({ outcome: o, ...d, date_jst: '2026-12-31' }, 'at').length, 0,
+       `導出した層で --append が通る（${o}）`);
+  }
+
   // --- 失敗の層（failure_stage）— **落ちることを確かめる** ---------------
   // ここは「出荷しなかった行がどの層で止まったか」を強制する側。通ることだけ
   // 確かめると、フィールドを消しても緑のままになる。**両方向を当てる。**
@@ -1149,6 +1200,18 @@ if (isMain) {
     // 種別を決められなかった失敗は、決められなかったことを台帳に残す。
     // 空欄は「未記入」と「該当なし」の区別がつかない。
     if (val('needs-triage') === 'true') run.needs_triage = true;
+    // **失敗の層。導出を既定にし、明示があればそちらを採る。**
+    // 導出を既定にしないと、書き手（reconcile-runs / セッション / 人）の
+    // どれか1つが渡し忘れた日に、追記そのものが validate で落ちる。
+    if (run.outcome !== 'shipped') {
+      const d = deriveStage(run) ?? {};
+      run.failure_stage = val('failure-stage', d.failure_stage);
+      if (run.failure_stage === 'eligibility') {
+        run.eligibility_verdict = val('eligibility-verdict', d.eligibility_verdict ?? 'declined_unrecorded');
+        run.gate_code = val('gate-code', d.gate_code ?? null);
+      }
+      if (val('stage-note')) run.stage_note = val('stage-note');
+    }
     if (doc.runs.some((r) => r.run_id === run.run_id)) {
       console.log(`skip: run_id ${run.run_id} already recorded`);
       process.exit(0);
