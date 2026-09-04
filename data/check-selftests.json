@@ -613,7 +613,7 @@
       "script": "scripts/health-intake.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",
-      "broke": "取り込み側に「open な Issue の一覧から消えた行を done にする」を足したら、「**取り込みが行を閉じている（回復の判定は issue_closed の仕事）**」で落ちた。一見それらしい実装だが、**故障を消す方向の判断が2箇所に散る** —— 一覧を取れなかった日に全部の故障が回復したことになる。閉じるのは close_check だけ\n\n[2026-09-04 監視Issue] ラベルをカンマでAND指定する変異、一覧不在をclosedとする変異、Actからの取り込みを切断する変異の3通りを実行し、各自己検査が非0終了した。単一ラベル・ページング・重複除去・取得失敗・ラベル削除後open・個別APIのclosed・PR除外・doneから再開を検査。実際のGitHub Issueを作って故障実績に加算してはいない。"
+      "broke": "取り込み側に「open な Issue の一覧から消えた行を done にする」を足したら、「**取り込みが行を閉じている（回復の判定は issue_closed の仕事）**」で落ちた。一見それらしい実装だが、**故障を消す方向の判断が2箇所に散る** —— 一覧を取れなかった日に全部の故障が回復したことになる。閉じるのは close_check だけ\n\n[2026-09-04 監視Issue] ラベルをカンマでAND指定する変異、一覧不在をclosedとする変異、Actからの取り込みを切断する変異の3通りを実行し、各自己検査が非0終了した。単一ラベル・ページング・重複除去・取得失敗・ラベル削除後open・個別APIのclosed・PR除外・doneから再開を検査。実際のGitHub Issueを作って故障実績に加算してはいない。\n\n[2026-09-04 Cron Health復旧] scripts/lib/cron-recovery.mjsと実際のcron-health.ymlのscriptを接続して検査。24h外に消えた故障、コメントで増えた別workflow、最新の失敗・キャンセル・実行中、API 403/404、ページ未完、同一runの成功した再試行を検査。実workflowのconfirmedを無視する、ページ上限で部分一覧を返す、status=successだけを読む、コメントを読まない、の4変異でhealth-intake --checkが非0終了することを実測した。GitHubの読み書きは検体に置換し、実際のIssueは作成・閉鎖していない。"
     },
     {
       "script": "scripts/indexnow-notify.js",
