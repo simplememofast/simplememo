@@ -5,6 +5,8 @@ name: Cron Health
 # 「失敗があればIssue作成/追記、全回復したらクローズ」だけを行う小さな見張り。
 #
 # - 集計対象: 過去24hの event=schedule かつ conclusion=failure の run
+# - Decision Monitorは登録から3時間の猶予後、直近3時間に定期起動が無い場合も追跡する
+#   手動・マージ後の実行を定期起動の証拠にしない。監視自身の頻度は毎朝1回のまま
 # - 「回復」の判定: Issueに記録した全workflowの最新 scheduled run が成功したこと
 #   24hは新規検知の窓。古い故障はIssue本文・追記から追跡を継続する。
 # - Issueは label `ops/cron-failure` の open 1件に集約する（毎回コメントで追記）
@@ -39,6 +41,7 @@ jobs:
         with:
           script: |
             const { confirmCronRecovery } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/cron-recovery.mjs`);
+            const { observeScheduleSilence, silenceMarker } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/cron-silence.mjs`);
             const LABEL = 'ops/cron-failure';
             const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
             const { owner, repo } = context.repo;
@@ -58,6 +61,8 @@ jobs:
             };
             const failures = await listRuns('failure');
             const successes = await listRuns('success');
+            // APIの不明・不完全を空一覧に置き換えず、Issueへ書く前に失敗させる。
+            const silences = await observeScheduleSilence({ github, owner, repo, now: Date.now() });
 
             const startedMs = (r) => Date.parse(r.run_started_at ?? r.created_at);
             const jst = (ms) => new Date(ms).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo', hour12: false });
@@ -90,6 +95,12 @@ jobs:
               '',
               ...(lines.length ? lines : ['失敗した scheduled run はありません。']),
               '',
+              '### 定期起動の欠落',
+              ...(silences.length ? silences.flatMap(s => [
+                `- **${s.name}** (\`${s.workflow_path}\`) — 直近${s.max_silence_minutes}分に scheduled run がありません。手動・マージ後の起動とは区別しています。`,
+                silenceMarker(s, owner, repo, context.eventName ?? 'unknown'),
+              ]) : ['対象workflowの定期起動を確認、または新設直後の猶予内です。']),
+              '',
               `_[cron-health.yml](${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}) による自動投稿_`,
             ].join('\n');
 
@@ -99,19 +110,19 @@ jobs:
             });
             const existing = openIssues.find(issue => !issue.pull_request && issue.state === 'open');
 
-            if (stillFailing.length > 0) {
+            if (stillFailing.length > 0 || silences.length > 0) {
               try { await github.rest.issues.getLabel({ owner, repo, name: LABEL }); }
-              catch { await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'B60205', description: 'scheduled run の失敗を cron-health.yml が検知' }); }
+              catch { await github.rest.issues.createLabel({ owner, repo, name: LABEL, color: 'B60205', description: '定期実行の失敗・起動欠落を cron-health.yml が検知' }); }
               if (existing) {
                 await github.rest.issues.createComment({ owner, repo, issue_number: existing.number, body });
-                core.notice(`未回復 ${stillFailing.length} 件 — #${existing.number} に追記`);
+                core.notice(`未回復 ${stillFailing.length} 件・定期起動欠落 ${silences.length} 件 — #${existing.number} に追記`);
               } else {
                 const { data: created } = await github.rest.issues.create({
                   owner, repo, labels: [LABEL],
-                  title: 'cron監視: scheduled run が失敗しています',
+                  title: 'cron監視: 定期実行の失敗または起動欠落があります',
                   body,
                 });
-                core.notice(`未回復 ${stillFailing.length} 件 — #${created.number} を作成`);
+                core.notice(`未回復 ${stillFailing.length} 件・定期起動欠落 ${silences.length} 件 — #${created.number} を作成`);
               }
             } else if (existing) {
               const recovery = await confirmCronRecovery({ github, owner, repo, issue: existing, now: Date.now() });
