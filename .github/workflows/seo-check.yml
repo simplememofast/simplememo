@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+# New revisions supersede validation of older revisions on the same branch/PR.
+# Keep push and pull_request separate: autonomous content requires PR validation.
+# Every main run has a unique group so deployment observations and IndexNow's
+# first-parent notifications still run for every merged commit.
+concurrency:
+  group: seo-validation-${{ github.event_name }}-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.run_id || 'latest' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   seo-check:
     runs-on: ubuntu-latest
