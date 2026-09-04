@@ -52,6 +52,13 @@ jobs:
               return;
             }
 
+            // A picker pushes its declaration before it has an implementation
+            // or a PR number. Only the PR check verifies the final run binding.
+            if (branch.startsWith('claude/obsidian-auto-') && run.event !== 'pull_request') {
+              core.info('自律施策は契約・実行記録・PRを照合した pull_request 検証の成功を待つ');
+              return;
+            }
+
             // run.pull_requests は push 起因の run で空になることがあるため、
             // head ブランチから開いているPRを引き直す。
             const { data: prs } = await github.rest.pulls.list({
