@@ -21,6 +21,58 @@ const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
 
+export function recoveryAttribution(previous, trigger) {
+  const automated = value => ['schedule', 'workflow_run'].includes(value);
+  const priorHuman = previous?.detected_at && !(previous.human_interventions === 0 && automated(previous.trigger)) ? 1 : 0;
+  return { trigger: priorHuman ? previous.trigger ?? 'unknown' : trigger,
+    human_interventions: Math.max(priorHuman, automated(trigger) ? 0 : 1) };
+}
+
+export function pendingRecovery(previous, { head, probes, now, trigger }) {
+  return { ...previous, state: 'revert_pending', mode: 'production', execution_head: head,
+    confirmed_at: now, ...recoveryAttribution(previous, trigger), before: { failed: true, probes } };
+}
+
+export function recoveryCheckpoint(previous, pending) {
+  return `<!-- decision-recovery ${JSON.stringify({ version: 1, source_hash: hash(previous), incident: pending })} -->`;
+}
+
+export function resumeRecovery(previous, pr, { contractId, targetSha }) {
+  assert.notEqual(pr.state, 'CLOSED', 'recovery PR was closed by an operator; do not recreate');
+  assert(Number.isInteger(pr.number) && pr.number > 0, 'recovery PR number required');
+  const markers = [...(pr.body ?? '').matchAll(/<!-- decision-recovery ([^\n]+) -->/g)];
+  assert.equal(markers.length, 1, 'recovery PR checkpoint missing or ambiguous');
+  const checkpoint = JSON.parse(markers[0][1]);
+  assert.equal(checkpoint.version, 1, 'unsupported recovery checkpoint');
+  assert.equal(checkpoint.source_hash, hash(previous), 'recovery checkpoint does not match the recorded observation');
+  const record = checkpoint.incident;
+  assert.equal(record.contract_id, contractId, 'recovery checkpoint contract mismatch');
+  assert.equal(record.target_sha, targetSha, 'recovery checkpoint target mismatch');
+  assert.equal(record.state, 'revert_pending', 'recovery checkpoint is not pending');
+  assert.equal(record.mode, 'production', 'recovery checkpoint is not production');
+  assert(shaOK(record.execution_head), 'recovery execution head required');
+  assert.equal(record.detected_at, previous.detected_at, 'first detection changed');
+  assert.equal(hash(record.probes), hash(previous.probes), 'first probes changed');
+  assert(Date.parse(record.confirmed_at) - Date.parse(record.detected_at) >= 60000, 'independent confirmation required');
+  assert(record.before?.failed === true && Array.isArray(record.before.probes), 'confirmed failure required');
+  assert(record.before.probes.some(p => p.known && !p.healthy
+    && previous.probes?.some(q => q.path === p.path && q.known && !q.healthy)), 'same failure must be observed twice');
+  assert([0, 1].includes(record.human_interventions), 'known recovery attribution required');
+  assert.deepEqual({ trigger: record.trigger, human_interventions: record.human_interventions },
+    recoveryAttribution(previous, record.trigger), 'recovery cannot erase prior human involvement');
+  return { ...record, revert_pr: pr.number };
+}
+
+export function verifyRollback(incident, revertHead, paths, cwd = ROOT) {
+  const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
+  assert(shaOK(incident.execution_head) && shaOK(incident.target_sha) && shaOK(revertHead), 'rollback commits required');
+  assert.equal(command('rev-parse', `${revertHead}^`), incident.execution_head, 'rollback PR was changed after creation');
+  const expected = command('diff', '--binary', '--full-index', '--no-renames', incident.target_sha, `${incident.target_sha}^`, '--', ...paths);
+  assert(expected, 'empty declared rollback');
+  const actual = command('diff', '--binary', '--full-index', '--no-renames', incident.execution_head, revertHead);
+  assert.equal(actual, expected, 'rollback PR differs from the declared reverse patch');
+}
+
 export function renderReport(html, score, stages) {
   let out = html.replace(/(<span data-score-total>)[\d.]+(<\/span>)/g, `$1${score.total.toFixed(1)}$2`);
   const c = score.components;
@@ -130,7 +182,7 @@ export function applyRevert(plan, cwd = ROOT) {
   execFileSync('git', ['apply', '--reverse'], { cwd, input: diff });
 }
 
-function publish(files, branch, title, expectedHead) {
+function publish(files, branch, title, expectedHead, checkpoint = '') {
   // Never overwrite a newer main or a pre-existing PR branch.
   git('fetch', 'origin', 'main');
   if (git('rev-parse', 'origin/main') !== expectedHead) throw new Error('main advanced; leave state for the next monitor');
@@ -141,7 +193,7 @@ function publish(files, branch, title, expectedHead) {
   git('push', '-u', 'origin', branch);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-pr-'));
   try {
-    fs.writeFileSync(path.join(tmp, 'body.md'), `${title}\n\nGenerated by the deterministic decision monitor. All existing SEO Validation checks must pass before merge.\n`);
+    fs.writeFileSync(path.join(tmp, 'body.md'), `${title}\n\nGenerated by the deterministic decision monitor. All existing SEO Validation checks must pass before merge.\n${checkpoint ? `\n${checkpoint}\n` : ''}`);
     const url = execFileSync('gh', ['pr', 'create', '--repo', REPO, '--head', branch, '--base', 'main', '--title', title, '--body-file', path.join(tmp, 'body.md')], { cwd: ROOT, encoding: 'utf8' }).trim();
     const number = Number(url.match(/\/pull\/(\d+)$/)?.[1]);
     if (!Number.isInteger(number) || !number) throw new Error('could not read the created PR number');
@@ -176,13 +228,27 @@ async function main() {
     if (!verifiedSettlement(row)) row.settlement = settle(c, row.delivery, ctx);
     const merge = row.delivery.merge_sha;
     let incident = recovery.incidents.find(i => i.contract_id === c.id);
+    const recoveryBranch = `Codex/decision-revert-${merge.slice(0, 12)}`;
+    // The PR and its checkpoint are created together. If main advanced before
+    // the separate ledger PR could be saved, recover that checkpoint first,
+    // even when the rollback has already merged and probes are healthy again.
+    if (incident?.state === 'observing' && !incident.revert_pr) {
+      const existing = gh('pr', 'list', '--repo', REPO, '--head', recoveryBranch, '--state', 'all', '--json', 'number,state,body')[0];
+      if (existing) {
+        Object.assign(incident, resumeRecovery(incident, existing, { contractId: c.id, targetSha: merge }));
+        Object.assign(incident, recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'));
+      }
+    }
     if (incident?.revert_pr && incident.state !== 'recovered') {
       const pr = api(`pulls/${incident.revert_pr}`);
       if (pr.merged && (await deployment(pr.merge_commit_sha))?.conclusion === 'success') {
+        git('fetch', 'origin', pr.head.sha, incident.execution_head);
+        verifyRollback(incident, pr.head.sha, c.touches.filter(staticPath));
         const checks = api(`commits/${pr.head.sha}/check-runs`).check_runs;
         const seo = checks.find(x => x.name === 'seo-check' && x.conclusion === 'success');
         const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
-        if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident, {
+        if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident,
+          recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'), {
           state: 'recovered', revert_sha: pr.merge_commit_sha, validation: 'success', deployment_verified: true,
           after: { healthy: true, probes: after }, recovered_at: now.toISOString(),
         });
@@ -198,19 +264,18 @@ async function main() {
       probes, previous: incident, now: now.toISOString(), stopped: stop() });
     if (plan.action === 'observe') {
       if (!incident) { incident = { contract_id: c.id }; recovery.incidents.push(incident); }
-      Object.assign(incident, { state: 'observing', detected_at: now.toISOString(), head_sha: head, target_sha: merge, probes });
+      Object.assign(incident, recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'),
+        { state: 'observing', detected_at: now.toISOString(), head_sha: head, target_sha: merge, probes });
     }
     if (plan.action === 'revert' && apply) {
       if (stop()) throw new Error('stopped before recovery');
-      const branch = `Codex/decision-revert-${merge.slice(0, 12)}`;
-      const existing = gh('pr', 'list', '--repo', REPO, '--head', branch, '--state', 'all', '--json', 'number,state')[0];
-      if (existing?.state === 'CLOSED') throw new Error('recovery PR was closed by an operator; do not recreate');
-      // The incident stays in a separate ledger PR; rollback changes only the declared static files.
-      if (!existing) applyRevert(plan);
-      const pr = existing ?? publish(plan.paths, branch, `Revert static regression for ${c.id}`, head);
-      Object.assign(incident, { state: 'revert_pending', mode: 'production', trigger: process.env.GITHUB_EVENT_NAME ?? 'manual',
-        human_interventions: ['schedule', 'workflow_run'].includes(process.env.GITHUB_EVENT_NAME) ? 0 : 1,
-        before: { failed: true, probes }, revert_pr: pr.number });
+      const pending = pendingRecovery(incident, { head, probes, now: now.toISOString(), trigger: process.env.GITHUB_EVENT_NAME ?? 'manual' });
+      const checkpoint = recoveryCheckpoint(incident, pending);
+      // The reverse patch and its recovery evidence are published together.
+      // The rollback commit still changes only the declared static files.
+      applyRevert(plan);
+      const pr = publish(plan.paths, recoveryBranch, `Revert static regression for ${c.id}`, head, checkpoint);
+      Object.assign(incident, pending, { revert_pr: pr.number });
       git('checkout', '--detach', head);
     }
   }
@@ -241,6 +306,32 @@ function selftest() {
     { probes: [{ path: 'index.html', known: false }] }, { probes: [{ path: 'index.html', known: true, healthy: true }] }]) assert.equal(recoveryPlan({ ...p, ...change }).action, 'hold');
   assert.equal(recoveryPlan({ ...p, previous: null }).action, 'observe');
   assert.equal(recoveryPlan({ ...p, intent: { ...p.intent, eligibility: { reversibility_class: 'R1' } } }).action, 'hold');
+  const observed = { contract_id: 'x', state: 'observing', ...p.previous, trigger: 'schedule', human_interventions: 0 };
+  const pending = pendingRecovery(observed, { head: p.headSha, probes: p.probes, now: p.now, trigger: 'workflow_run' });
+  const checkpoint = recoveryCheckpoint(observed, pending);
+  const recoveryPR = { number: 123, state: 'MERGED', body: checkpoint };
+  const binding = { contractId: 'x', targetSha: p.mergeSha };
+  // Simulate a successful PR creation followed by a failed ledger publication:
+  // the next process has only the old observation and the already merged PR.
+  assert.deepEqual(resumeRecovery(structuredClone(observed), recoveryPR, binding), { ...pending, revert_pr: 123 });
+  for (const change of [{ state: 'CLOSED' }, { body: '' }, { body: checkpoint + '\n' + checkpoint }, { number: null }]) {
+    assert.throws(() => resumeRecovery(observed, { ...recoveryPR, ...change }, binding));
+  }
+  assert.throws(() => resumeRecovery({ ...observed, detected_at: p.now }, recoveryPR, binding), /recorded observation/);
+  assert.throws(() => resumeRecovery({ ...observed, head_sha: 'c'.repeat(40) }, recoveryPR, binding), /recorded observation/);
+  for (const change of [{ contract_id: 'other' }, { target_sha: 'c'.repeat(40) }, { execution_head: null },
+    { confirmed_at: observed.detected_at }, { before: { failed: true, probes: [{ path: 'other.html', known: true, healthy: false }] } }]) {
+    assert.throws(() => resumeRecovery(observed, { ...recoveryPR, body: recoveryCheckpoint(observed, { ...pending, ...change }) }, binding));
+  }
+  const humanObservation = { ...observed, trigger: 'workflow_dispatch', human_interventions: 1 };
+  const humanPending = pendingRecovery(humanObservation, { head: p.headSha, probes: p.probes, now: p.now, trigger: 'schedule' });
+  assert.equal(humanPending.human_interventions, 1);
+  assert.equal(resumeRecovery(humanObservation, { ...recoveryPR, body: recoveryCheckpoint(humanObservation, humanPending) }, binding).human_interventions, 1);
+  assert.throws(() => resumeRecovery(humanObservation, { ...recoveryPR,
+    body: recoveryCheckpoint(humanObservation, { ...humanPending, trigger: 'schedule', human_interventions: 0 }) }, binding), /prior human involvement/);
+  assert.equal(recoveryAttribution(observed, 'workflow_dispatch').human_interventions, 1);
+  assert.equal(recoveryAttribution({ detected_at: observed.detected_at }, 'schedule').human_interventions, 1);
+  assert.equal(recoveryAttribution(null, 'schedule').human_interventions, 0);
   assert.equal(pageHealth('<title>good</title><link rel="canonical" href="https://simplememofast.com/">', 200,
     { title: 'good', canonical: 'https://simplememofast.com/' }).healthy, true);
   assert.equal(pageHealth('<title>bad</title>', 200, { title: 'good' }).healthy, false);
@@ -270,6 +361,15 @@ function selftest() {
     assert.equal(fs.readFileSync(path.join(dir, 'index.html'), 'utf8'), 'healthy\n');
     assert.equal(fs.readFileSync(path.join(dir, 'other.txt'), 'utf8'), 'keep\n');
     assert.throws(() => applyRevert({ target, expected_head: '0'.repeat(40), paths: ['index.html'] }, dir));
+    g('add', '.'); g('commit', '-m', 'restore');
+    const restored = g('rev-parse', 'HEAD');
+    const incident = { target_sha: target, execution_head: target };
+    verifyRollback(incident, restored, ['index.html'], dir);
+    fs.writeFileSync(path.join(dir, 'other.txt'), 'unexpected change\n');
+    g('add', '.'); g('commit', '--amend', '--no-edit');
+    assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /declared reverse patch/);
+    fs.writeFileSync(path.join(dir, 'other.txt'), 'another commit\n'); g('add', '.'); g('commit', '-m', 'change after creation');
+    assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /changed after creation/);
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('decision-monitor: repeated probes, safe scope, stop, stale HEAD, and real Git recovery drill passed');
 }
