@@ -571,7 +571,7 @@
       "script": "scripts/code-authorship.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
-      "broke": "total が内訳の合計と一致しない 1通りで落ちることを観測"
+      "broke": "total が内訳の合計と一致しない 1通りで落ちることを観測\n\n[2026-09-04 日付境界] CI 33869604354とローカルUTCで、日付だけの--sinceが実行時刻を引き継いで5コミットを0件にする不具合を再現。JST暦日とauthor dateを明示した方法v4へ修正。実Gitの日付境界前後・author/committerの不一致を追加し、UTC・東京・ロサンゼルスで11件通過。committer dateへ戻す・全履歴を含める・開始日の前半を落とす、の3変異は全て自己検査が非0終了。保存済みの公開値は再計算していない。"
     },
     {
       "script": "scripts/daily-brief.mjs",
