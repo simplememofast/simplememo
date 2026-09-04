@@ -274,6 +274,112 @@ function normalizeArtifact(v) {
  * とくに attempted と outcome の食い違い（Gateスキップなのに attempted=true 等）は
  * 完走率を静かにずらすので、ここで必ず落とす。
  */
+/** 失敗の層（L1適格性 / L0実行 / コスト / 経路不在）。**data/autonomy-score.json と同じ語彙。** */
+export const FAILURE_STAGES = ['eligibility', 'execution', 'cost', 'absent'];
+export const ELIGIBILITY_VERDICTS = ['declined_by_design', 'declined_by_fault',
+  'declined_unrecorded', 'blocked'];
+/**
+ * **判定器そのもの、または前提が壊れていて着手できなかった**ことを表す判定コード。
+ *
+ * これらを `declined_by_design` に混ぜると、**鍵が失効した日が「設計どおり静かに寝た日」
+ * として台帳に残る。**どちらも outcome は skipped_gate で、層も eligibility（実行前に止まった）
+ * だが、**片方は正しく動いていて、もう片方は壊れている。**
+ * escalation-rules.json も fail_credential を 4時間・stop_automation: true と扱っていて、
+ * 設計どおりの棄却とは別物として既に区別している。
+ */
+export const FAULT_GATE_CODES = ['fail_credential', 'fail_api', 'fail_no_model', 'preflight_error'];
+
+/**
+ * gate_code の記録を要求し始めた日。**これより前の行は遡って復元できないので免除する。**
+ * ラチェットの入れ方は data/check-selftests.json と同じ —— 過去を直させるのではなく、
+ * 増える方向だけを止める。過去を直させると、**思い出せない行を埋めるために推測が入る。**
+ */
+export const GATE_CODE_REQUIRED_FROM = '2026-09-04';
+
+/**
+ * 失敗の層を、outcome と failure_class から導く。**純関数。**
+ *
+ * 【なぜ導出するか】層を必須にした日、`--append` はこの欄を渡していなかった。
+ * 追記した瞬間に `validate()` が落ちるので、**翌朝の日次アクチュエータが
+ * 自分の検査で止まる。**（実際にそうなる直前まで行った。）
+ *
+ * 呼び出し側に書かせる形にもできるが、**書き手が3経路ある**
+ * （reconcile-runs / セッション / 人）ので、1つ忘れると同じ事故が再発する。
+ * 導出を1か所に置き、**明示の指定があればそちらを優先する**（推測を上書きさせる口を残す）。
+ *
+ * 【推測しない部分】適格性の判定理由（gate_code）は、Actions API のステップ情報からは
+ * 決まらない —— Gate が寝た理由（秘密鍵未設定 / 当日重複 / 予算 / 占有）は
+ * どれも「Claude Code ステップが skipped」という同じ形で現れる。
+ * **だから導出は `declined_unrecorded` を返す。**分からないことを分かったことにしない。
+ */
+export function deriveStage({ outcome, failure_class = null } = {}) {
+  if (outcome === 'shipped') return null;
+  if (NOT_ATTEMPTED.has(outcome)) {
+    if (outcome === 'no_run') return { failure_stage: 'absent' };
+    return { failure_stage: 'eligibility', eligibility_verdict: 'declined_unrecorded', gate_code: null };
+  }
+  // 枠・予算で止まった回。**実行の失敗と混ぜない** —— 直し方が違う。
+  if (failure_class === 'usage_limit' || failure_class === 'spend_over_cap') return { failure_stage: 'cost' };
+  if (failure_class === 'route-absent') return { failure_stage: 'absent' };
+  return { failure_stage: 'execution' };
+}
+
+/**
+ * 出荷しなかった行が、どの層で止まったかを持っているか。
+ *
+ * 【なぜ要るか】2026-09-04 まで、Gateが寝た日・実行が落ちた日・枠が尽きた日が
+ * すべて同じ「失敗」として並んでいた。**『選択ミスか実行ミスか』は調べれば分かる
+ * 問いではなく、記録が無いので原理的に答えられない問いだった。**
+ * 層を1フィールド足すだけで、明日から機械的に答えられる問いに変わる。
+ */
+export function stageProblems(r, at) {
+  const problems = [];
+  if (r.outcome === 'shipped') {
+    if (r.failure_stage) problems.push(`${at}: shipped なのに failure_stage がある — 出荷は止まっていない`);
+    return problems;
+  }
+  if (!r.failure_stage) {
+    problems.push(`${at}: 出荷していないのに failure_stage が無い`
+      + ` — **どの層で止まったかを持たない行は「選択ミスか実行ミスか」に答えられない**`
+      + `（${FAILURE_STAGES.join('|')}）`);
+    return problems;
+  }
+  if (!FAILURE_STAGES.includes(r.failure_stage)) {
+    problems.push(`${at}: 未登録の failure_stage "${r.failure_stage}"（${FAILURE_STAGES.join('|')}）`);
+    return problems;
+  }
+  if (r.failure_stage !== 'eligibility') {
+    if (r.eligibility_verdict) {
+      problems.push(`${at}: failure_stage=${r.failure_stage} なのに eligibility_verdict がある`);
+    }
+    return problems;
+  }
+  if (!ELIGIBILITY_VERDICTS.includes(r.eligibility_verdict)) {
+    problems.push(`${at}: eligibility なのに eligibility_verdict が ${ELIGIBILITY_VERDICTS.join('|')} でない`
+      + `（got ${JSON.stringify(r.eligibility_verdict)}）`);
+  }
+  // **故障で止まった回を「設計どおり」と書かせない。**
+  if (FAULT_GATE_CODES.includes(r.gate_code) && r.eligibility_verdict !== 'declined_by_fault') {
+    problems.push(`${at}: gate_code=${r.gate_code} は故障で止まった回なのに`
+      + ` eligibility_verdict=${r.eligibility_verdict}`
+      + ' — **鍵が失効した日を「設計どおり静かに寝た日」として残さない。**declined_by_fault と書く');
+  }
+  if (r.eligibility_verdict === 'declined_by_fault' && !FAULT_GATE_CODES.includes(r.gate_code)) {
+    problems.push(`${at}: declined_by_fault なのに gate_code=${JSON.stringify(r.gate_code)}`
+      + `（故障の判定コードは ${FAULT_GATE_CODES.join('|')}）`);
+  }
+  // **ラチェット。**新しい行は「なぜ寝たか」を必ず持つ。持たない行は
+  // declined_unrecorded と自己申告することでだけ通る —— 沈黙を正常に見せない。
+  if ((r.date_jst || '') >= GATE_CODE_REQUIRED_FROM
+      && r.eligibility_verdict !== 'declined_unrecorded'
+      && !r.gate_code) {
+    problems.push(`${at}: ${GATE_CODE_REQUIRED_FROM} 以降の eligibility 行は gate_code が要る`
+      + ` — **理由の無い棄却は、沈黙と区別が付かない**`
+      + `（記録が取れなかったなら eligibility_verdict: "declined_unrecorded" と書く）`);
+  }
+  return problems;
+}
+
 export function validate(doc) {
   const problems = [];
   if (!doc || !Array.isArray(doc.runs)) return ['runs must be an array'];
@@ -302,6 +408,7 @@ export function validate(doc) {
     }
     if (!r.source) problems.push(`${at}: source is required — 後から検算できない行は指標として存在しないのと同じ`);
     if (r.interventions && !Array.isArray(r.interventions)) problems.push(`${at}: interventions must be an array`);
+    problems.push(...stageProblems(r, at));
   });
   return problems;
 }
@@ -975,6 +1082,73 @@ function selftest() {
   eq(handsOffStreaks(abandoned).current.days, 0,
      '**壊れたまま誰も触らない日は無介入に数えない**（放置で伸びる自律指標を作らない）');
 
+  // --- 層の導出（deriveStage）。**書き手が渡し忘れても追記が落ちない形** ---
+  eq(deriveStage({ outcome: 'shipped' }), null, '出荷には層が無い');
+  const j_ = (x) => JSON.stringify(x);
+  eq(j_(deriveStage({ outcome: 'skipped_gate' })),
+     j_({ failure_stage: 'eligibility', eligibility_verdict: 'declined_unrecorded', gate_code: null }),
+     '**Gate スキップの理由はステップ情報から決まらない**ので、決まらないと書く');
+  eq(deriveStage({ outcome: 'skipped_duplicate' })?.failure_stage, 'eligibility', '冪等スキップも適格性の層');
+  eq(j_(deriveStage({ outcome: 'no_run' })), j_({ failure_stage: 'absent' }), '無運転は経路不在');
+  eq(j_(deriveStage({ outcome: 'failed', failure_class: 'usage_limit' })), j_({ failure_stage: 'cost' }),
+     '**枠で止まった回を実行の失敗に混ぜない**（直し方が違う）');
+  eq(j_(deriveStage({ outcome: 'failed', failure_class: 'spend_over_cap' })), j_({ failure_stage: 'cost' }), '予算超過も同じ');
+  eq(j_(deriveStage({ outcome: 'no_artifact', failure_class: 'permissions' })), j_({ failure_stage: 'execution' }),
+     '成果物ゼロは実行の層');
+  eq(j_(deriveStage({ outcome: 'cancelled', failure_class: 'route-absent' })), j_({ failure_stage: 'absent' }),
+     '経路が無いのは実行の失敗ではない');
+  eq(deriveStage({ outcome: 'failed' })?.failure_stage, 'execution', '種別が無くても層は決まる');
+  // **導出した層は、必ず検査を通る形であること。**ここが崩れると追記が落ちる。
+  for (const o of OUTCOMES.filter((x) => x !== 'shipped')) {
+    const d = deriveStage({ outcome: o, failure_class: null });
+    eq(stageProblems({ outcome: o, ...d, date_jst: '2026-12-31' }, 'at').length, 0,
+       `導出した層で --append が通る（${o}）`);
+  }
+
+  // --- 失敗の層（failure_stage）— **落ちることを確かめる** ---------------
+  // ここは「出荷しなかった行がどの層で止まったか」を強制する側。通ることだけ
+  // 確かめると、フィールドを消しても緑のままになる。**両方向を当てる。**
+  const sp = (r) => stageProblems(r, 'at').length;
+  eq(sp({ outcome: 'shipped' }), 0, '出荷した行には層が要らない');
+  eq(sp({ outcome: 'shipped', failure_stage: 'execution' }), 1,
+     '**出荷したのに層があるのは落とす**（出荷は止まっていない）');
+  eq(sp({ outcome: 'failed' }), 1, '**層の無い失敗行は落とす** — これが無いと分類が空欄のまま増える');
+  eq(sp({ outcome: 'failed', failure_stage: 'そのへんの層' }), 1, '未登録の層は落とす');
+  eq(sp({ outcome: 'failed', failure_stage: 'execution' }), 0, '実行の層は verdict を要求しない');
+  eq(sp({ outcome: 'failed', failure_stage: 'cost' }), 0, 'コストの層も同じ');
+  eq(sp({ outcome: 'no_run', failure_stage: 'absent' }), 0,
+     '**経路不在は3分類のどれでもない**（設計ノートに無く、実データにだけ在った層）');
+  eq(sp({ outcome: 'execution', failure_stage: 'execution', eligibility_verdict: 'blocked' }), 1,
+     '実行の層に適格性の判定が付いているのは落とす（層を跨いだ記録）');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility' }), 1,
+     '適格性の層は verdict を要求する');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', eligibility_verdict: 'よく分からない' }), 1,
+     '未登録の verdict は落とす');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility',
+          eligibility_verdict: 'declined_by_design', date_jst: '2026-09-03' }), 0,
+     'ラチェット開始前の行は gate_code を要求しない（遡って復元できないため）');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility',
+          eligibility_verdict: 'declined_by_design', date_jst: '2026-09-04' }), 1,
+     `**${GATE_CODE_REQUIRED_FROM} 以降は gate_code を要求する** — 理由の無い棄却は沈黙と区別が付かない`);
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility',
+          eligibility_verdict: 'declined_by_design', date_jst: '2026-09-04', gate_code: 'skip_budget' }), 0,
+     '書けば通る');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility',
+          eligibility_verdict: 'declined_unrecorded', date_jst: '2026-09-04' }), 0,
+     '**「記録が取れなかった」と自己申告すれば通る** — 取れなかったことを取れたことにしない');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_design', gate_code: 'fail_credential' }), 1,
+     '**鍵が失効した日を「設計どおり静かに寝た日」として残さない**');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_fault', gate_code: 'fail_credential' }), 0,
+     '故障として書けば通る');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_fault', gate_code: 'skip_secrets' }), 1,
+     '**逆向きも落とす**（正常な棄却を故障として書かない）');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_design', gate_code: 'preflight_error' }), 1,
+     '判定器が落ちた回も故障側');
+
   console.log(bad ? `\n${bad}/${n} 失敗` : `selftest: ${n}/${n} 通過`);
   if (bad) process.exit(1);
 }
@@ -1059,6 +1233,18 @@ if (isMain) {
     // 種別を決められなかった失敗は、決められなかったことを台帳に残す。
     // 空欄は「未記入」と「該当なし」の区別がつかない。
     if (val('needs-triage') === 'true') run.needs_triage = true;
+    // **失敗の層。導出を既定にし、明示があればそちらを採る。**
+    // 導出を既定にしないと、書き手（reconcile-runs / セッション / 人）の
+    // どれか1つが渡し忘れた日に、追記そのものが validate で落ちる。
+    if (run.outcome !== 'shipped') {
+      const d = deriveStage(run) ?? {};
+      run.failure_stage = val('failure-stage', d.failure_stage);
+      if (run.failure_stage === 'eligibility') {
+        run.eligibility_verdict = val('eligibility-verdict', d.eligibility_verdict ?? 'declined_unrecorded');
+        run.gate_code = val('gate-code', d.gate_code ?? null);
+      }
+      if (val('stage-note')) run.stage_note = val('stage-note');
+    }
     if (doc.runs.some((r) => r.run_id === run.run_id)) {
       console.log(`skip: run_id ${run.run_id} already recorded`);
       process.exit(0);

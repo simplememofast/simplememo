@@ -41,6 +41,31 @@
     "集計（scripts/autopilot-runs.mjs）は総計と内訳の**両方**を出す。",
     "総計だけ出すと過少評価になり、内訳だけ出すと都合のよい分母選びになる。",
     "",
+    "",
+    "【failure_stage — 「選択ミスか実行ミスか」を分ける】",
+    "**failure_class は「どんな故障か」を言うが、「どの層で死んだか」は言わない。**",
+    "2026-09-04 まで、Gateが寝た日と実行が落ちた日と枠が尽きた日が、すべて同じ「失敗」として",
+    "台帳に並んでいた。だから『22件の死は選択ミスか実行ミスか』という問いに答えられなかった。",
+    "答えられなかったのは記録が足りなかったからで、調べれば分かることではなかった。",
+    "",
+    "  eligibility … **実行前の判定で止まった**（L1）。Gateが寝た日。棄却が正しいかは別問題",
+    "  execution   … **着手して実装の層で死んだ**（L0）",
+    "  cost        … **枠・予算で止まった**。実行枠の429・予算上限",
+    "  absent      … **経路そのものが存在せず、判定も実行も行われていない**",
+    "",
+    "**absent は設計ノートの3分類（適格性/実行/コスト）に無い。**足したのは、",
+    "2026-08-16〜17 の2行がどれにも入らなかったから。副系Routineが当時そもそも存在せず、",
+    "判定も実行もされていない。3つに押し込むと「実行の層で死んだ」と読めてしまい、",
+    "**機械が居なかった日と、機械が失敗した日が同じ色になる。**",
+    "",
+    "eligibility の行はさらに eligibility_verdict を持つ:",
+    "  declined_by_design  … 理由が記録された正しい棄却（秘密鍵未設定・当日重複など）",
+    "  declined_by_fault   … **判定器または前提が壊れていて着手できなかった**（鍵の失効・API到達不能・判定器の例外）。設計どおりの棄却と混ぜると、鍵が切れた日が「静かに寝た日」として残る",
+    "  declined_unrecorded … **寝た理由が台帳から読めない。**沈黙と正常の区別が付かない",
+    "  blocked             … L1適格性ゲートの基準で落ちた（scripts/autonomy-eligibility.mjs）",
+    "",
+    "**declined_unrecorded は 0 を目指す欄。**scripts/autopilot-runs.mjs --check が",
+    "2026-09-04 以降の新しい行について gate_code を要求する（過去分は遡って復元できないので免除）。",
     "【failure_class と repair_of — 自己修復のための2フィールド】",
     "  failure_class … 故障の**種別**（permissions / runner-timeout / actor-rejected /",
     "                  route-absent / runbook-gap）。同じ故障の再発を数えるために要る。",
@@ -129,7 +154,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260813-ccr",
@@ -159,7 +188,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260814-ccr",
@@ -189,7 +222,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260815-ccr",
@@ -219,7 +256,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260816-none",
@@ -244,7 +285,9 @@
       "failed_at": "2026-08-16T06:00+09:00",
       "detected_at": "2026-08-18T08:43+09:00",
       "resolved_at": "2026-08-19T10:21+09:00",
-      "detected_note": "2日連続の実行記録ゼロを08-18のセッションが検知。PR #510 マージが解消時刻"
+      "detected_note": "2日連続の実行記録ゼロを08-18のセッションが検知。PR #510 マージが解消時刻",
+      "failure_stage": "absent",
+      "stage_note": "**その日どの経路も存在しなかった。**判定も実行も行われていないので、選択ミスでも実行ミスでもない"
     },
     {
       "run_id": "ap-20260817-actions",
@@ -259,7 +302,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260817-none",
@@ -275,7 +322,9 @@
       "artifact": null,
       "interventions": [],
       "external_ref": null,
-      "failure_class": "route-absent"
+      "failure_class": "route-absent",
+      "failure_stage": "absent",
+      "stage_note": "**その日どの経路も存在しなかった。**判定も実行も行われていないので、選択ミスでも実行ミスでもない"
     },
     {
       "run_id": "ap-20260818-actions",
@@ -290,7 +339,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260818-ccr",
@@ -320,7 +373,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260819-actions-manual",
@@ -335,7 +392,11 @@
       "action": null,
       "pr": null,
       "artifact": null,
-      "interventions": []
+      "interventions": [],
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_by_design",
+      "gate_code": "skip_secrets",
+      "stage_note": "実行判定が「秘密鍵が無い」で寝た。判定は行われ理由も残っている（設計どおりの棄却）"
     },
     {
       "run_id": "ap-20260819-ccr",
@@ -384,7 +445,9 @@
       "failed_at": "2026-08-20T06:21+09:00",
       "detected_at": "2026-08-20T07:00+09:00",
       "resolved_at": "2026-08-20T07:55+09:00",
-      "detected_note": "同日のオーナー依頼セッションが検知。PR #513 マージが解消時刻"
+      "detected_note": "同日のオーナー依頼セッションが検知。PR #513 マージが解消時刻",
+      "failure_stage": "execution",
+      "stage_note": "着手して実装層で死んだ。apt がジョブ上限を消尽"
     },
     {
       "run_id": "ap-20260820-owner",
@@ -432,7 +495,9 @@
       "failed_at": "2026-08-21T06:23+09:00",
       "detected_at": "2026-08-21T09:20+09:00",
       "resolved_at": "2026-08-21T10:05+09:00",
-      "detected_note": "再試行Routine(09:20)が検知。PR #522 マージが解消時刻"
+      "detected_note": "再試行Routine(09:20)が検知。PR #522 マージが解消時刻",
+      "failure_stage": "execution",
+      "stage_note": "着手して実装層で死んだ。claude-code-action が非人間アクターを拒否"
     },
     {
       "run_id": "ap-20260821-ccr0920",
@@ -475,7 +540,9 @@
       "failed_at": "2026-08-22T06:20+09:00",
       "detected_at": "2026-08-22T07:30+09:00",
       "detected_note": "副系CCR(07:30)が get_job_logs で検知。PR #526（14:00 JST マージ）が claude_args に --allowedTools を足して解消。**翌朝 06:18 JST の主系 run 32599191984 が実際に出荷できたことが、その修理が効いた直接証拠**（ap-20260823-actions）",
-      "resolved_at": "2026-08-22T14:00+09:00"
+      "resolved_at": "2026-08-22T14:00+09:00",
+      "failure_stage": "execution",
+      "stage_note": "着手したが権限拒否14件で成果物ゼロ。実行の層"
     },
     {
       "run_id": "ap-20260822-ccr0730",
@@ -533,7 +600,9 @@
       "reclassified_at": "2026-08-25T15:40+09:00",
       "reclassified_note": "【2026-08-26 実測・決着】**原因は資格情報だった。版は容疑から外れる。**疑われていた版（claude-code-action c81e3bc6 が入れる Claude Code 2.1.241）を、**現在の有効なトークンで**直接走らせたところ正常に完走した: is_error=false / num_turns=1 / result=\"PROBE_OK\"（run 32919495397 の suspect-2.1.241・実費 $0.04）。同一プロンプト・同一トークンで回した対照 2.1.245 も同じく完走しており、装置側の誤りではない。つまり 2.1.241 × 旧トークン=失敗、2.1.241 × 新トークン=成功で、**動いている変数はトークンだけ。**さらに上流リポジトリの差分を実測すると c81e3bc6→16b3b310 の src/ の違いは `const claudeCodeVersion = \"2.1.241\" → \"2.1.245\"` の1文字列のみで、ラッパーのロジックは同一。版が失敗を説明できる余地がそもそも無かった。**当初の『auth_or_credential』が正しく、08-25 の『版が原因』という訂正のほうが誤りだった。**誤った理由は『失敗runと成功runでSHAが違う』を版の証拠として読んだこと——@v1 はフローティングタグなので、日をまたげばSHAはほぼ必ず違う。**あの対照は当たり前に差を見つける。** 残る留保: 旧トークンが無効だったことを直接観測したわけではない（旧トークンは既に無く、GitHub Secrets のメタデータは admin 権限が要り 403）。これは消去法による結論。また 08-24/08-25 と 08-26 では時刻も違うため、上流側の一時障害を完全には排除していない（ただし2日とも 486ms で完全同一という決定論的な形は、一時障害より資格情報の拒否と整合する）。 ---- 以下は 08-25 時点の記録（誤った結論を含む。経緯として残す） ---- 当初 auth_or_credential と記録したが誤り。版の実測: 失敗した2回はどちらも claude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 / Agent SDK 0.3.241\"・2026-08-23T00:53Z）を引いていた。直前に出荷できた run 32599191984（08-23）は SHA 24dcd50c / CLI 2.1.240。ジョブログの Download action repository 行で直接確認できる。 秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う run 32816234185（08-25 15:16 JST・SHA 16b3b310 / CLI 2.1.245）が通っている。「2日とも完全同一シグネチャだから flake ではない＝認証系」という推論が誤りで、決定的な startup 失敗も同一の数値を出す——**同一シグネチャは依存が固定されていることの証拠**だった。なお GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めないため、08-24〜08-25 の間に鍵が回っていなかったことまでは repo からは断定できない（Runbook §7-3 と同じ制約）。 【2026-08-25 訂正】この行は当初「秘密鍵は一度も変えていない」を前提にしていたが、**それは誤り。** 本run(32816234185)を起動したCCRセッションの記録によれば、**オーナーは本runの直前に `claude setup-token` を再実行し CLAUDE_CODE_OAUTH_TOKEN を更新している。** したがって最後の失敗(08-25 06:24)と本runの成功(08-25 15:16)の間で **版とトークンの2つが同時に動いており、どちらが効いたかはこの観測からは分離できない。** 版の相関（2.1.240成功 → 2.1.241で2日連続失敗 → 2.1.245成功）は事実で示唆は強いが、排除ではない。決着させるには、新トークンのまま uses: を c81e3bc6 に固定して1回走らせる（落ちれば版が原因で確定・費用$0）。",
       "resolved_at": "2026-08-25T15:40+09:00",
-      "reclassified_confidence": "inconclusive"
+      "reclassified_confidence": "inconclusive",
+      "failure_stage": "execution",
+      "stage_note": "判定を通り抜けて起動したあと即死。実行の層"
     },
     {
       "run_id": "ap-20260825-actions",
@@ -557,7 +626,9 @@
       "reclassified_at": "2026-08-25T15:40+09:00",
       "reclassified_note": "【2026-08-26 実測・決着】**原因は資格情報だった。版は容疑から外れる。**疑われていた版（claude-code-action c81e3bc6 が入れる Claude Code 2.1.241）を、**現在の有効なトークンで**直接走らせたところ正常に完走した: is_error=false / num_turns=1 / result=\"PROBE_OK\"（run 32919495397 の suspect-2.1.241・実費 $0.04）。同一プロンプト・同一トークンで回した対照 2.1.245 も同じく完走しており、装置側の誤りではない。つまり 2.1.241 × 旧トークン=失敗、2.1.241 × 新トークン=成功で、**動いている変数はトークンだけ。**さらに上流リポジトリの差分を実測すると c81e3bc6→16b3b310 の src/ の違いは `const claudeCodeVersion = \"2.1.241\" → \"2.1.245\"` の1文字列のみで、ラッパーのロジックは同一。版が失敗を説明できる余地がそもそも無かった。**当初の『auth_or_credential』が正しく、08-25 の『版が原因』という訂正のほうが誤りだった。**誤った理由は『失敗runと成功runでSHAが違う』を版の証拠として読んだこと——@v1 はフローティングタグなので、日をまたげばSHAはほぼ必ず違う。**あの対照は当たり前に差を見つける。** 残る留保: 旧トークンが無効だったことを直接観測したわけではない（旧トークンは既に無く、GitHub Secrets のメタデータは admin 権限が要り 403）。これは消去法による結論。また 08-24/08-25 と 08-26 では時刻も違うため、上流側の一時障害を完全には排除していない（ただし2日とも 486ms で完全同一という決定論的な形は、一時障害より資格情報の拒否と整合する）。 ---- 以下は 08-25 時点の記録（誤った結論を含む。経緯として残す） ---- 当初 auth_or_credential と記録したが誤り。版の実測: 失敗した2回はどちらも claude-code-action@v1 → SHA c81e3bc6（upstream の \"bump Claude Code to 2.1.241 / Agent SDK 0.3.241\"・2026-08-23T00:53Z）を引いていた。直前に出荷できた run 32599191984（08-23）は SHA 24dcd50c / CLI 2.1.240。ジョブログの Download action repository 行で直接確認できる。 秘密鍵は一度も変えていない状態で、同じ秘密鍵を使う run 32816234185（08-25 15:16 JST・SHA 16b3b310 / CLI 2.1.245）が通っている。「2日とも完全同一シグネチャだから flake ではない＝認証系」という推論が誤りで、決定的な startup 失敗も同一の数値を出す——**同一シグネチャは依存が固定されていることの証拠**だった。なお GitHub Secrets のメタデータ読み取りは admin 権限が要り HTTP 403 で読めないため、08-24〜08-25 の間に鍵が回っていなかったことまでは repo からは断定できない（Runbook §7-3 と同じ制約）。 【2026-08-25 訂正】この行は当初「秘密鍵は一度も変えていない」を前提にしていたが、**それは誤り。** 本run(32816234185)を起動したCCRセッションの記録によれば、**オーナーは本runの直前に `claude setup-token` を再実行し CLAUDE_CODE_OAUTH_TOKEN を更新している。** したがって最後の失敗(08-25 06:24)と本runの成功(08-25 15:16)の間で **版とトークンの2つが同時に動いており、どちらが効いたかはこの観測からは分離できない。** 版の相関（2.1.240成功 → 2.1.241で2日連続失敗 → 2.1.245成功）は事実で示唆は強いが、排除ではない。決着させるには、新トークンのまま uses: を c81e3bc6 に固定して1回走らせる（落ちれば版が原因で確定・費用$0）。",
       "resolved_at": "2026-08-25T15:40+09:00",
-      "reclassified_confidence": "inconclusive"
+      "reclassified_confidence": "inconclusive",
+      "failure_stage": "execution",
+      "stage_note": "判定を通り抜けて起動したあと即死。実行の層"
     },
     {
       "run_id": "ap-20260825-actions-force",
@@ -624,7 +695,11 @@
       "external_ref": "33026752472",
       "interventions": [],
       "source": "act-reconcile",
-      "detected_at": "2026-08-31T23:39:57.061Z"
+      "detected_at": "2026-08-31T23:39:57.061Z",
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_unrecorded",
+      "gate_code": null,
+      "stage_note": "**Gate は success で終わったが、寝た理由が台帳に無い。**2026-08-27〜29 はこの形で3日連続沈黙し、セッションが手で起こすまで4日目まで誰も気づいていない"
     },
     {
       "run_id": "ap-20260827-ccr0920",
@@ -670,7 +745,11 @@
       "external_ref": "33143661940",
       "interventions": [],
       "source": "act-reconcile",
-      "detected_at": "2026-08-31T23:39:56.990Z"
+      "detected_at": "2026-08-31T23:39:56.990Z",
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_unrecorded",
+      "gate_code": null,
+      "stage_note": "**Gate は success で終わったが、寝た理由が台帳に無い。**2026-08-27〜29 はこの形で3日連続沈黙し、セッションが手で起こすまで4日目まで誰も気づいていない"
     },
     {
       "run_id": "ap-20260828-ccr0920",
@@ -702,7 +781,11 @@
       "interventions": [],
       "source": "act-reconcile-session",
       "detected_at": "2026-08-31T23:27:34Z",
-      "detected_note": "Actions API のステップ一覧から起こした。Gate は success だが Checkout 以降が全て skipped ＝ Gate が run=false を出した回（秘密鍵未設定・当日重複のいずれか。ステップの conclusion からはどちらかまでは決まらない）。"
+      "detected_note": "Actions API のステップ一覧から起こした。Gate は success だが Checkout 以降が全て skipped ＝ Gate が run=false を出した回（秘密鍵未設定・当日重複のいずれか。ステップの conclusion からはどちらかまでは決まらない）。",
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_unrecorded",
+      "gate_code": null,
+      "stage_note": "**Gate は success で終わったが、寝た理由が台帳に無い。**2026-08-27〜29 はこの形で3日連続沈黙し、セッションが手で起こすまで4日目まで誰も気づいていない"
     },
     {
       "run_id": "ap-20260829-ccr0920",
@@ -720,7 +803,9 @@
       "source": "git: claude/obsidian-auto-20260829 は claim コミット1件のみ（36de90a6・lane: ccr-0920）で main との差分ゼロ。PRは存在しない。主系 run 33230445898 は steps 3〜13 が全て skipped で3秒 success",
       "failure_class": "claim_without_completion",
       "failed_at": "2026-08-29T09:20+09:00",
-      "detected_at": "2026-09-01T08:10+09:00"
+      "detected_at": "2026-09-01T08:10+09:00",
+      "failure_stage": "execution",
+      "stage_note": "当日ロックを取ったまま何も作らずに終了。実行の層"
     },
     {
       "run_id": "ap-20260830-actions",
@@ -737,7 +822,9 @@
       "interventions": [],
       "source": "act-reconcile-session",
       "failure_class": "usage_limit",
-      "detected_at": "2026-08-31T23:27:44Z"
+      "detected_at": "2026-08-31T23:27:44Z",
+      "failure_stage": "cost",
+      "stage_note": "週次の実行枠（usage limit）。主系・副系が同じアカウントの枠を食うため同日に落ちる"
     },
     {
       "run_id": "ap-20260831-actions",
@@ -754,7 +841,9 @@
       "interventions": [],
       "source": "act-reconcile-session",
       "failure_class": "usage_limit",
-      "detected_at": "2026-08-31T23:27:44Z"
+      "detected_at": "2026-08-31T23:27:44Z",
+      "failure_stage": "cost",
+      "stage_note": "週次の実行枠（usage limit）。主系・副系が同じアカウントの枠を食うため同日に落ちる"
     },
     {
       "run_id": "ap-20260831-ccr0920",
@@ -773,7 +862,9 @@
       "failure_class": "usage_limit",
       "failed_at": "2026-08-31T00:20:46Z",
       "detected_at": "2026-09-01T00:14:46Z",
-      "detected_note": "list_triggers の last_run を実見（PR #739 のセッション）。**last_run は最新1回しか保持しない**ので、08-30 の同経路は既に上書きされていて確かめられない"
+      "detected_note": "list_triggers の last_run を実見（PR #739 のセッション）。**last_run は最新1回しか保持しない**ので、08-30 の同経路は既に上書きされていて確かめられない",
+      "failure_stage": "cost",
+      "stage_note": "週次の実行枠（usage limit）。主系・副系が同じアカウントの枠を食うため同日に落ちる"
     },
     {
       "run_id": "ap-20260901-actions",
@@ -839,7 +930,11 @@
       "external_ref": "33706886868",
       "interventions": [],
       "source": "act-reconcile",
-      "detected_at": "2026-09-03T02:44:32.638Z"
+      "detected_at": "2026-09-03T02:44:32.638Z",
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_unrecorded",
+      "gate_code": null,
+      "stage_note": "**Gate は success で終わったが、寝た理由が台帳に無い。**2026-08-27〜29 はこの形で3日連続沈黙し、セッションが手で起こすまで4日目まで誰も気づいていない"
     },
     {
       "run_id": "ap-20260904-actions",

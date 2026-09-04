@@ -60,7 +60,7 @@
     "「見ていない」を「異常なし」と書かないため、**数だけ先に置く。**",
     "次の対象はこれ（scripts/lib/param-guard-scan.py を参照）。"
   ],
-  "measured_at": "2026-08-26",
+  "measured_at": "2026-09-04",
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
@@ -425,7 +425,7 @@
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
   ],
-  "param_guards_measured_at": "2026-08-26",
+  "param_guards_measured_at": "2026-09-04",
   "$param_guards_note": [
     "**第2の族: 仮引数に対する「無いかもしれない」判定。**",
     "汚染の伝播は `const NAME = ...` を追うので、仮引数には付かない。",
@@ -651,6 +651,12 @@
       "expr": "d",
       "disposition": "別の規則が落とす",
       "note": "`summarize()` の窓の絞り込み `d !== null && d >= from && d <= to`。tag_at が読めない行は窓から外れるが、**同じ行は `validate()` の「tag_at が読めない」で problems に出る**ので、黙って分母から消えることはない。集計は validate を通った台帳にしか使わない（両方の走査に当たるので、known と param_guards の両方に同じ読みを置く）"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "x",
+      "disposition": "表示整形",
+      "note": "`pct(x)` が `n/a` を出す。**測れなかった成分を 0% と書かないための分岐。**EP の見逃し率は、時刻を持つ故障が窓内に1件も無ければ null になり、そこで `0.0%` と出すと**「見逃しゼロ」＝満点に見える。**点のほうは別に守ってある —— rate が null なら points も 0 で、`measurable: false` が立ち、check() が「measurable=false なのに点が入っている」で落とす。つまりこの null は表示だけの話で、握り潰されていない（自己テスト「時刻を持つ故障が無ければ0（満点にしない）」で固定）"
     }
   ]
 }

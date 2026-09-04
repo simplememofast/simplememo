@@ -38,6 +38,7 @@ import { fileURLToPath } from 'node:url';
 import { summarize } from './automation-rate.mjs';
 import { readLedger } from './lib/read-ledger.mjs';
 import { activeStreaks, shippingStreaks, handsOffStreaks, load as loadRuns } from './autopilot-runs.mjs';
+import { score as autonomyScore, loadContext as loadScoreContext } from './autonomy-score.mjs';
 import { LEDGER as CODE_LEDGER, knownRates } from './code-authorship.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -242,6 +243,60 @@ export function compare(html, live) {
     }
   }
 
+  // 自律スコア。[2026-09-04] §5 として公開面に出したので、同じ網に入れる。
+  //
+  // **この節は「作った日」に公開している。**だから照合を先に置く ——
+  // 正の無い数字を公開面に置かない、というのはこのファイルが在る理由そのもので、
+  // 新しい節を例外にすると、いちばん新しい数字だけが網の外に出る。
+  //
+  // 行は `data-score` / `data-stage` 属性で結び付ける。見出しの文言で結ぶと、
+  // **言い回しを変えた日に照合が黙って消える**（2026-08-26 に5回踏んだ形）。
+  const asc = live.autonomy_score ?? null;
+  const scoreRows = [...html.matchAll(
+    /<tr data-score="(vdc|umr|ra|ep|tuc)">.*?<td class="num">(?:<b>)?([\d.]+)(?:<\/b>)?<\/td><td class="num">(\d+)<\/td>/g)];
+  const totalHits = [...html.matchAll(/<span data-score-total>([\d.]+)<\/span>/g)];
+  if ((scoreRows.length || totalHits.length) && !asc) {
+    problems.push('自律スコアがページに出ているが、台帳から計算できない'
+      + ' — **正の無い数字を公開面に置かない。**`node scripts/autonomy-score.mjs --check`');
+  } else if (asc) {
+    for (const h of totalHits) {
+      const got = h[1], want = asc.total.toFixed(1);
+      found.push({ label: '自律スコア（合計）', got, want });
+      if (got !== want) {
+        problems.push(`自律スコア（合計）: ページは ${got}、台帳の現在値は ${want}`
+          + ' — **点数だけ直して成分を置き去りにしない。**両方 scripts/autonomy-score.mjs が正');
+      }
+    }
+    for (const [, id, pts, max] of scoreRows) {
+      const c = asc.components[id];
+      for (const [label, got, want] of [
+        [`自律スコア ${id}（得点）`, pts, c.points.toFixed(1)],
+        [`自律スコア ${id}（配点）`, max, String(c.max)],
+      ]) {
+        found.push({ label, got, want });
+        if (got !== want) {
+          problems.push(`${label}: ページは ${got}、台帳の現在値は ${want}`
+            + ' — 配点は data/autonomy-score.json（人間の持ち分）が正');
+        }
+      }
+    }
+  }
+
+  // 失敗の層。**「選び方を間違えたのか、作り方を間違えたのか」の内訳そのもの。**
+  const stageRows = [...html.matchAll(/<tr data-stage="(eligibility|execution|cost|absent)">.*?<td class="num">(?:<b>)?(\d+)(?:<\/b>)?<\/td>/g)];
+  if (stageRows.length && !live.failure_stages) {
+    problems.push('失敗の層がページに出ているが、運転台帳から数えられない — 正の無い数字を公開面に置かない');
+  } else {
+    for (const [, stage, got] of stageRows) {
+      const want = String(live.failure_stages?.[stage] ?? 0);
+      found.push({ label: `失敗の層（${stage}）`, got, want });
+      if (got !== want) {
+        problems.push(`失敗の層（${stage}）: ページは ${got} 件、運転台帳では ${want} 件`
+          + ' — **層の内訳は data/autopilot-runs.json の failure_stage が正**');
+      }
+    }
+  }
+
   // 領域別の表。**行ごとに突き合わせる。**
   // 「表があること」は求めない（無ければ検査しない）が、**あるなら全行合っていること。**
   for (const m of html.matchAll(
@@ -297,6 +352,36 @@ function selftest() {
     compare('総合自動化率61.3%', live).problems.some((p) => p.includes('総合自動化率')));
   t('古いタスク数を落とす',
     compare('176タスク・13領域', live).problems.some((p) => p.includes('タスク数')));
+
+  // --- 自律スコア（§5）。**落ちることを両側で確かめる。** ---
+  const asc = {
+    autonomy_score: { total: 35.5, components: {
+      vdc: { points: 0, max: 30 }, umr: { points: 19.7, max: 25 },
+      ra: { points: 2.7, max: 20 }, ep: { points: 4.7, max: 15 }, tuc: { points: 8.4, max: 10 } } },
+    failure_stages: { eligibility: 12, execution: 6, cost: 3, absent: 2 },
+  };
+  const scoreRow = (id, pts, max) => `<tr data-score="${id}"><td>x</td><td class="num"><b>${pts}</b></td><td class="num">${max}</td><td>y</td></tr>`;
+  const stageRow = (id, n) => `<tr data-stage="${id}"><td>x</td><td class="num"><b>${n}</b></td><td>y</td></tr>`;
+  t('自律スコアが合っていれば通る',
+    compare(`<span data-score-total>35.5</span>${scoreRow('umr', '19.7', 25)}`, asc).problems.length === 0);
+  t('**古い合計点を落とす**',
+    compare('<span data-score-total>40.0</span>', asc).problems.some((p) => p.includes('自律スコア（合計）')));
+  t('**成分の得点がずれたら落とす**（合計だけ直して成分を置き去りにしない）',
+    compare(scoreRow('umr', '25.0', 25), asc).problems.some((p) => p.includes('umr（得点）')));
+  t('**配点を書き換えたら落とす**（配点は人間の持ち分）',
+    compare(scoreRow('vdc', '0.0', 10), asc).problems.some((p) => p.includes('vdc（配点）')));
+  t('**正が計算できないのにページに出ていたら落とす**',
+    compare('<span data-score-total>35.5</span>', { autonomy_score: null })
+      .problems.some((p) => p.includes('計算できない')));
+  t('ページに出ていなければ検査しない（出す義務までは課さない）',
+    compare('自律スコアの話はしていない', { autonomy_score: null }).problems.length === 0);
+  t('失敗の層が合っていれば通る',
+    compare(stageRow('eligibility', 12) + stageRow('cost', 3), asc).problems.length === 0);
+  t('**層の件数がずれたら落とす**',
+    compare(stageRow('eligibility', 9), asc).problems.some((p) => p.includes('eligibility')));
+  t('**台帳に無い層は 0 件として落とす**（黙って合わせない）',
+    compare(stageRow('absent', 2), { failure_stages: { eligibility: 12 } })
+      .problems.some((p) => p.includes('absent')));
   t('<b> をまたいでも読める',
     compare('<b>総合自動化率58.6%、AI関与率87.7%。</b>', live).problems.length === 0);
   t('出ていない指標は検査しない（出す義務までは課さない）',
@@ -448,8 +533,22 @@ if (isMain) {
     console.error(`運転台帳が読めない（${e.message}）— 連続稼働は照合できない`);
   }
   const codeDoc = readLedger(CODE_LEDGER, { onMissing: null, why: 'コード著者率が突き合わせられない' });
+  // 自律スコアと失敗の層。**読めなかったら null のまま渡す** ——
+  // compare 側が「ページに出ているのに正が無い」で落とす。ここで 0 を捏造すると、
+  // 計算できない日にページの数字が「合っている」ことになる。
+  let autonomy = null, failureStages = null;
+  try { autonomy = autonomyScore(loadScoreContext()); }
+  catch (e) { console.error(`自律スコアが計算できない（${e.message}）— §5 は照合できない`); }
+  try {
+    failureStages = {};
+    for (const r of loadRuns().runs || []) {
+      if (r.outcome === 'shipped' || !r.failure_stage) continue;
+      failureStages[r.failure_stage] = (failureStages[r.failure_stage] ?? 0) + 1;
+    }
+  } catch (e) { failureStages = null; console.error(`失敗の層が数えられない（${e.message}）`); }
   const live = { ...summary.overall, by_area: summary.by_area, counts_total: doc.tasks.length,
-    lane_b: appReleases?.summary ?? null, streaks, code_rates: codeDoc ? knownRates(codeDoc) : null };
+    lane_b: appReleases?.summary ?? null, streaks, code_rates: codeDoc ? knownRates(codeDoc) : null,
+    autonomy_score: autonomy, failure_stages: failureStages };
   const targets = [PAGE_PATH, ...EXTRA_PATHS].filter((f) => fs.existsSync(f));
   const problems = [];
   const found = [];
