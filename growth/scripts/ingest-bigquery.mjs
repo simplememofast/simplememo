@@ -274,6 +274,30 @@ const surfaces = await dimension('surfaces   ', `
   WHERE site_url = @site AND data_date BETWEEN @start AND @end
   GROUP BY search_type ORDER BY impressions DESC`);
 
+/* Search Console が bulk export に出しうる面の一覧（公式のテーブルリファレンス）。
+ * **出ていない面は行が返らない**ので、素直に書くと surfaces から消える —— そして
+ * 「消えている」は読み手からは見えない。DISCOVER が無いのか、DISCOVER が 0 なのかが
+ * 区別できない形になる。
+ *
+ * [2026-09-04] これを実際に踏んだ。台帳は「自社サイトの記事は現状 Discover にほぼ
+ * 乗らない」と根拠なしで書いていて、確かめようとしたら surfaces に DISCOVER の行が
+ * 無かった。**そこからは「0」とも「エクスポートに入っていない」とも決められない。**
+ * BigQuery を直接引いて（site / url 両テーブル・全期間）WEB と IMAGE しか無いことを
+ * 確認し、公式リファレンスに DISCOVER が値として載っていることを確かめて、初めて
+ * 「本当に 0」と言えた。**その2手を、毎回やらせない。**
+ * 出なかった面を 0 で埋めて、**「出ていない」を値として残す。** */
+const KNOWN_SURFACES = ['WEB', 'IMAGE', 'VIDEO', 'NEWS', 'DISCOVER', 'GOOGLE_NEWS'];
+const surfaceMap = Object.fromEntries(
+  surfaces.map((s) => [s.search_type, { clicks: s.clicks, impressions: s.impressions }]),
+);
+for (const t of KNOWN_SURFACES) {
+  if (!(t in surfaceMap)) surfaceMap[t] = { clicks: 0, impressions: 0, absent_from_export: true };
+}
+if (!surfaceMap.DISCOVER.impressions) {
+  console.log('  surfaces: **DISCOVER のインプレッションは 0。**この窓では自社サイトは Discover 面に出ていない');
+  console.log('            （PR TIMES 経由でしか Discover を取れない、の根拠。docs/pr-discover-strategy-2026-09-04.md §4-4）');
+}
+
 /* ── Normalise to the shape the CSV path produces ────────────────────────
  * Page URLs become site-relative paths via the repo's own page inventory, and
  * CTR is recomputed rather than stored, exactly as lib/csv.mjs does. A row with
@@ -312,7 +336,9 @@ const meta = buildMeta({
         ? anonymised.hidden_impressions / anonymised.impressions
         : null,
       // Unfiltered by search_type, unlike everything above it.
-      surfaces: Object.fromEntries(surfaces.map((s) => [s.search_type, { clicks: s.clicks, impressions: s.impressions }])),
+      // **出なかった面も 0 で入っている**（absent_from_export: true 付き）。
+      // 面が消えたことを「キーが無い」で表現すると、読み手に見えない。
+      surfaces: surfaceMap,
     },
   },
 });
