@@ -1,6 +1,6 @@
 {
   "as_of_jst": "2026-09-04",
-  "open_total": 1,
+  "open_total": 3,
   "oldest_open_days": 1,
   "acknowledged": 6,
   "closed_today": [
@@ -47,8 +47,25 @@
       "detail": "2026-09-17（D+14）に、9/3配信のPR⑥を評価する。対象は growth/experiments/experiments.json の pr-2026-rsi-autopilot（status: running、evaluation_at: 2026-09-17）。\n\n2026-09-04、対象リリースの非公開分析を読み取り専用で開くことへのオーナーの明示承認「ok」を受け、Codexのアプリ内ブラウザーで取得経路を確認した。「分析データ」→「レポート」→対象行の「詳細」。公開URL・公開日時・期間指定を照合し、ページビュー、デバイス別アクセス、参照元サイト一覧、掲載メディア一覧を実際に読めた。閲覧承認待ちは解消済み。今回の非公開取得値は公開台帳へ転記していない。\n\n手順の正典は docs/prtimes-d14-capture.md。参照元は割合表示ではなく訪問者数の表なので、全ページの行を読み、Google系の合計を全参照元合計で割る。スマートフォン比率は対象リリースの期間合計の%を100で割る。送信者比率はPR TIMESにはなく、アプリ側の実測が別途必要。\n\n残る実測は、Coworkの日次Routine（trig_01GphcHzTuH1A1JUGq8dYkWa）が取得から認可された保存先・PR作成まで完走することと、9/17の評価値。Codexでの対話中の読み取り成功をCoworkの完走とは扱わない。9/4の期限判定は0件で、discover_boarding_postは空のまま維持する。\n\n期限後、対象と期間と公開範囲を確認した値だけを確定転記し、配信見出しでD-SCOREを再採点して、annotations.jsonとbacktestを照合する。読めた値が一部だけの場合は非公開の作業記録に保持し、最終転記先へ部分的に入れない（1項目でも入ると現行の期限判定から除外される）。判定不能を完了とはせず、この対象実験の評価完了を確認して閉じる。",
       "age_days": 1,
       "why": "当初のActions/CCRでは非公開分析へ到達できず、取得を担う実行系の検証が必要だった。2026-09-04、明示承認後のCodexでは対象画面の読み取りに成功し、項目・単位・導線の推定は解消した。現在のhuman分類は過去の依頼と未完了のD14評価を残すもので、閲覧承認を再度求める意味ではない。Coworkの日次Routineで取得からPR作成まで完走した証拠はまだない。評価日の実測・対象実験の確定評価まで閉じない。",
-      "evidence": "2026-09-04、オーナーの明示承認後にrelease_id=9の分析を読み取り。公開日から当日までの日付指定、対象URL、ページビュー、参照元の訪問者数、デバイス比率、掲載メディア全件数を照合。導線・単位は docs/prtimes-d14-capture.md に反映。非公開数値はローカル記録に保存し、D14の転記・完了は未実施。",
+      "evidence": "リポジトリから検査できない（人が閉じる）",
       "not_before_jst": "2026-09-17"
+    },
+    {
+      "id": "act-health-869",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "#869 がまだ open",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
+      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 1 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
+      "detail": "ブランチ claude/google-discover-strategy-ydu1a6 が、最後のマージ（PR #858 / head d001100）より1 件先にあり、**それらは main にも無い**: cada448。（別の8件は main 側のコミットなので除外した）\n\nこのブランチは #853 #854 #856 #858 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: docs/pr-discover-handoff-2026-09-04.md / docs/pr-discover-strategy-2026-09-04.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "claude/google-discover-strategy-ydu1a6 はまだ 1 件先にある",
+      "not_before_jst": null
     }
   ],
   "ai": [],

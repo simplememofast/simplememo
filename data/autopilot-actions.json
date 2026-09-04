@@ -1189,7 +1189,7 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-04",
       "closed_jst": null,
-      "evidence": "2026-09-04、オーナーの明示承認後にrelease_id=9の分析を読み取り。公開日から当日までの日付指定、対象URL、ページビュー、参照元の訪問者数、デバイス比率、掲載メディア全件数を照合。導線・単位は docs/prtimes-d14-capture.md に反映。非公開数値はローカル記録に保存し、D14の転記・完了は未実施。",
+      "evidence": "リポジトリから検査できない（人が閉じる）",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1572,6 +1572,49 @@
           "close_check"
         ]
       }
+    },
+    {
+      "id": "act-health-869",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "source": "health",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "issue_closed",
+        "params": {
+          "issue": 869
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": null,
+      "evidence": "#869 がまだ open"
+    },
+    {
+      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
+      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 1 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
+      "detail": "ブランチ claude/google-discover-strategy-ydu1a6 が、最後のマージ（PR #858 / head d001100）より1 件先にあり、**それらは main にも無い**: cada448。（別の8件は main 側のコミットなので除外した）\n\nこのブランチは #853 #854 #856 #858 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: docs/pr-discover-handoff-2026-09-04.md / docs/pr-discover-strategy-2026-09-04.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "branch": "claude/google-discover-strategy-ydu1a6"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": null,
+      "evidence": "claude/google-discover-strategy-ydu1a6 はまだ 1 件先にある"
     }
   ],
   "escalation_review_authorization": {
