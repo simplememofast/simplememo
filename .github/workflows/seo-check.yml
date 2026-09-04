@@ -989,7 +989,9 @@ jobs:
       # 書いてあること、そして **headline が実測とずれていないこと** —
       # 「数字だけ良くする」経路をつぶすための検査。
       - name: Code authorship ledger
-        run: node scripts/code-authorship.mjs --check
+        run: |
+          node scripts/code-authorship.mjs --selftest
+          node scripts/code-authorship.mjs --check
 
       # 【季節性】上下を施策の成果と読む前に、曜日と外れ値を落とす。
       #
