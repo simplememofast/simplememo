@@ -1806,6 +1806,81 @@
       ]
     },
     {
+      "id": "pr-2026-action-router",
+      "page": "(PR TIMES配信 — 追記G 第1弾「言ったら、終わる。」。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "PR⑥（D-SCORE 85・非乗車）で分かった必要条件 —— S1>=20 かつ S2>=10 の AND —— を、合計点ではなく必要条件のほうで通す初の弾。訴求は「『明日、牛乳』はリマインダーへ。『金曜15時、歯医者』はカレンダーへ」で、見出しに **リマインダー / カレンダー（D-1 の最高帯「全国民級」）とアプリ名（Obsidian を含む）** を必ず入れる。乗車した2本（②Obsidian連携 提供開始 / ③Apple Watch初対応）と同じ「大きな固有名詞 × 初対応・提供開始」の形に戻す。**リマインダーとカレンダーは1本に束ねる**（追記B・追記F-3 の小出し厳禁。割ると2本目が⑤と同じ死に方をする）。**時流（S5）は買わない** —— 追記E-3 が「時間減衰リスクあり＝待たずに撃つ」と名指ししている弾であり、乗車した③は S5=3 だった。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": null,
+      "evaluation_at": null,
+      "status": "planned",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": null,
+        "source": "PR実績ベースライン（n=6）: 乗車2本=D-SCORE 65-71・PV 10,434-12,188 / 非乗車4本=21-46（PR⑥は台帳85だが配信物を採り直すと45・docs/pr-discover-strategy-2026-09-04.md §3-1）。転載の床は22-34本/回で乗車とは無関係（追記A-5）。**合計点ではなく必要条件 S1>=20 かつ S2>=10 が n=5 を 5/5 で分離する**"
+      },
+      "target_metric": "discover_boarding",
+      "decision": null,
+      "evaluated_at": null,
+      "d_score_pre": {
+        "$comment": "配信前採点（初回・2026-09-04）。**追記F の 93〜95 ではなく 76 で置いている。**下げたのは訴求を弱めたからではなく、(a) 追記G-1 が S1 の完全初出30を既に否定していること、(b) S7 は計画が実在してから付ける点であること、の2つによる。**見出し確定稿で必ず再採点すること**（PR⑥ はこれをやらずに、配信されていない見出しの85点で撃った）。",
+        "scored_at": "2026-09-04",
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度／追記G-1 の競合裏取り／docs/pr-discover-strategy-2026-09-04.md の必要条件。較正は growth/scripts/d-score.mjs --backtest で再現できる",
+        "S1_novelty": 20,
+        "S2_entity_reach": 20,
+        "S3_concrete_nouns": 15,
+        "S4_transformation": 13,
+        "S5_timing": 3,
+        "S6_news_verb": 5,
+        "S7_launch_design": 0,
+        "total": 76,
+        "total_note": "76。**必要条件（S1>=20 かつ S2>=10）は余裕で通る**——ここが PR⑥ の85点との決定的な差で、あちらは配信物では S2 が 3 だった。合計点だけ見れば 85 > 76 だが、n=5 を分離するのは合計ではなく積のほう。S7 を埋めれば 81、Apple/iOS の窓に当たれば 86〜89 まで伸びる余地がある。",
+        "score_rationale": {
+          "S1_novelty": "20。D-1 の「20=能力クラス・プラットフォーム・エンティティ結合の初出」。**30（カテゴリ完全初出）は取れない** —— 追記G-1 が競合を裏取り済みで、Voice Inbox for Obsidian（音声→Obsidian＋カレンダー）と Remindian（Obsidian Tasks↔Apple Reminders 双方向）が実在する。差別化の芯は「モバイル単体（Mac常駐なし・プラグインなし）で Capture→判定→Apple実行系→Obsidian へ完了が戻る」の一本化で、これは日本語ニュース面では未発見だが、**「世界初」は書けない**（check-pr-facts の overclaim 規則が落とす）。",
+          "S2_entity_reach": "20。D-1 の「20=全国民級（LINE・iPhone標準・**カレンダー・リマインダー**）」に、尺度が挙げている例そのものが入る。加えてアプリ名「Obsidian連携シンプルメモ」で見出しに Obsidian も乗る。**PR⑥ が落としたのはここで、配信見出しには固有名詞が1つも無かった。**",
+          "S3_concrete_nouns": "15。D-1 の「15=生活名詞が見出しに入る（**牛乳・歯医者**・スクショ）」に、尺度が挙げている例そのものが入る。**PR⑥ の15点は本文の固有数値（11チェック・261ファイル）に対して付いていて、この軸が測っている見出しの生活名詞ではなかった。**",
+          "S4_transformation": "13。「言ったら、鳴る」で Before→After が1文になり、ギミック（アプリを開かない・プラグイン不要・Mac常駐不要）もある。**15にしないのは、完了同期が結果整合だから** —— iOS は常駐できないのでアプリ起動時/BG更新時の突合になる（追記G-3）。原稿で「即時反映」を約束できない以上、変身の一文も一段割り引く。",
+          "S5_timing": "3。平時。**追記E-3 が「時間減衰リスクあり → 待たずに撃つ。S5は捨てる」とこの弾を名指ししている。**乗車した③（7/6 Apple Watch初対応）も S5=3 で乗っており、時流は増幅器であって主因ではない（追記E-1）。窓に間に合わせるために弾の質を落とさない（追記E-4）。",
+          "S6_news_verb": "5。「提供開始」。D-1 の 5点帯そのもの。",
+          "S7_launch_design": "0。**まだ計画が無いので 0。**D-1 は「コミュニティ同時投下＋記事化媒体への情報提供＋X連携の**計画あり**=5」で、計画の実在が条件。PR⑥ は受け皿ページ /autopilot/ を公開して 0→5 にした。**この5点はいちばん安く買える** —— 受け皿ページ＋Obsidianコミュニティ投下＋X で埋まる。"
+        },
+        "gates": {
+          "G1_thumbnail_1200px": null,
+          "G2_no_ai_or_clickbait_words": null,
+          "G3_prtimes_distribution": null,
+          "G4_weekday_morning": null,
+          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。**G2 を読み替えない**（PR⑥ は「AI語を許す代わりに S2 の固有名詞を必ず入れる」と交換したが、配信物では担保のほうだけが落ちた）。G1 は幅1200pxだけで判定しない —— docs/pr-thumbnail-spec.md の 1.91:1 セーフエリアまで見る。G4 の帯は同 §4。"
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。**参照元に google.com と googlequicksearchbox が立つかを必ず見る** —— news.google.com だけならそれは Google ニュース面であって Discover ではない（PR⑥ の実測）。",
+        "google_referral_ratio": null,
+        "mobile_ratio": null,
+        "syndication_count": null,
+        "pv": null,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": null
+      },
+      "notes": [
+        "2026-09-04【起案】PR⑥ の D+1 実測（非乗車が実質確定）を受けて起案した。**この弾は EventKit を必要とするが、simplememo-ios には import EventKit が1行も無い**（grep 実測・VISION §12 も「Destination は実質1つで、選択も分岐も無い」と書いている）。したがって **status は planned のままで、実装が揃うまで配信しない。**原稿の骨格は docs/pr-action-router-2026-10.md。",
+        "2026-09-04【小出し厳禁】リマインダーとカレンダーを別リリースに割らない（追記B・追記F-3）。割ると2本目が「同じ話の2回目」になり、S1=0 で ⑤（AirPods/Siri・非乗車）と同じ死に方をする。**カレンダーが間に合わないなら、リリースごと待つ。**",
+        "2026-09-04【市場語条項】見出し・ストア・サイトに社内語（Multi-Destination / Capture OS / Routing）を出さない（追記D-3 の二層言語ルール）。出せば S2 3・S3 0 に落ちる。市場語は「場面名詞＋話すだけ＋行き先アプリ名」。",
+        "2026-09-04【VISION 整合】Routing の Level を本文に明示する（VISION §4.2）。**Level 1（提案）→ Level 2（ワンタップ）を作る。Level 3（Silent）は作らない。**「全自動」と書かない（check-pr-facts の overclaim 規則が落とす）。ユーザーの修正は Correction Learning の受け皿へ記録する設計にする（VISION §5.1・§13 の問5）。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "PRリリース型はページ実験ではないため対照を持たない。判定は Discover 乗車の二値。"
+      }
+    },
+    {
       "id": "link-2026-08-28-feed-strongest-page",
       "page": "/blog/obsidian-voice-input",
       "type": "internal_link",
