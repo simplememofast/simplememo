@@ -54,7 +54,7 @@ export const HEALTH_LABELS = {
   },
   'ops/cron-failure': {
     domain: null,
-    what: '定期実行が失敗している',
+    what: '定期実行の失敗または起動欠落がある',
   },
 };
 
