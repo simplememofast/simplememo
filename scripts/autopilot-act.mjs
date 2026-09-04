@@ -57,6 +57,7 @@
  */
 
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
+import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -1666,7 +1667,7 @@ async function fetchWorkflowRuns(repo, token, limit = 30) {
     try {
       const jr = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${r.id}/jobs`,
         { headers, signal: AbortSignal.timeout(20_000) });
-      if (jr.ok) steps = ((await jr.json()).jobs ?? [])[0]?.steps ?? null;
+      if (jr.ok) steps = primarySteps((await jr.json()).jobs ?? []);
     } catch { /* step が読めなくても run 自体は記録する */ }
     out.push({
       id: r.id,
@@ -1964,7 +1965,7 @@ export function interpretRun(run) {
 // 見えなくなる（このファイル冒頭に書いた「壊れているときほど記録が消える」の再来）。
 
 /** GitHub の失敗ステップの完了時刻だけを使う。run の作成時刻は故障時刻ではない。 */
-export function detectionEvidence(run, eventName, now = new Date()) {
+export function detectionEvidence(run, eventName, now = new Date(), completion = null) {
   const detectedAt = now.toISOString();
   const completedFailure = run.status === 'completed' && ['failure', 'cancelled'].includes(run.conclusion);
   const failures = completedFailure ? (run.steps ?? []).filter(step =>
@@ -1976,10 +1977,12 @@ export function detectionEvidence(run, eventName, now = new Date()) {
   failures.sort((a, b) => Date.parse(a.completed_at) - Date.parse(b.completed_at));
   const failure = failures[0];
   return {
-    source: ['schedule', 'workflow_run'].includes(eventName) ? 'act-reconcile' : 'act-reconcile-session',
+    source: (['schedule', 'workflow_run'].includes(eventName)
+      || (eventName === 'repository_dispatch' && completion?.automatic === true)) ? 'act-reconcile' : 'act-reconcile-session',
     detected_at: detectedAt,
     failed_at: failure?.completed_at ?? null,
     detected_note: `Actions run ${run.id} を ${eventName || 'local-session'} で照合。`
+      + (completion ? `完了通知元run ${completion.upstream_run_id}、自動起動のAPI検証=${completion.automatic}。` : '')
       + (failure ? `失敗時刻は GitHub step #${failure.number}「${failure.name}」の completed_at。`
         : '失敗ステップの確定時刻は未取得。run の作成時刻で代用しない。'),
   };
@@ -2015,7 +2018,7 @@ export const HANDLERS = {
       // **成功した回は書かない**。書かないことで指標が甘くなることは無い
       //（shipped を落とすと完走率は下がる側に倒れる）。
       if (v.outcome === 'shipped') { log.push(`${run.id}: 成功回はPR特定が要るため自動追記しない`); continue; }
-      const observation = detectionEvidence(run, ctx.eventName);
+      const observation = detectionEvidence(run, ctx.eventName, new Date(), ctx.completion);
       const args = ['--append', '--run-id', runId, '--date', run.jst_date, '--route', 'actions',
         '--outcome', v.outcome, '--attempted', String(v.attempted),
         '--external-ref', String(run.id), '--source', observation.source];
@@ -2343,9 +2346,9 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   if (jr.status === 404 || jr.status === 410) return { state: 'gone', why: `jobs が HTTP ${jr.status}（run ごと消えている）` };
   if (!jr.ok) return { state: 'unreadable', why: `jobs が HTTP ${jr.status}` };
   let jobId;
-  try { jobId = ((await jr.json()).jobs ?? [])[0]?.id; }
+  try { jobId = primaryJob((await jr.json()).jobs ?? [])?.id; }
   catch (e) { return { state: 'unreadable', why: `jobs の応答を読めない: ${String(e).slice(0, 80)}` }; }
-  if (!jobId) return { state: 'gone', why: 'run にジョブが無い' };
+  if (!jobId) return { state: 'unreadable', why: '主系のジョブを特定できず実費を読めない' };
   let lr;
   try {
     lr = await fetchImpl(`https://api.github.com/repos/${repo}/actions/jobs/${jobId}/logs`,
@@ -2483,6 +2486,16 @@ async function selftest() {
     t(`同期ハンドラから故障時刻をappendへ渡す: ${eventName}`, value('--failed-at') === '2026-09-04T00:02:00Z');
     t(`同期ハンドラから検知の起動元をappendへ渡す: ${eventName}`, value('--source')
       === (eventName === 'schedule' ? 'act-reconcile' : 'act-reconcile-session'));
+  }
+  for (const automatic of [true, false]) {
+    let appended;
+    const completion = { upstream_run_id: '123', automatic };
+    await HANDLERS['reconcile-runs']({ workflowRuns: [observedRun], runsDoc: { runs: [] },
+      eventName: 'repository_dispatch', completion }, null,
+    { append: args => { appended = args; return 'recorded'; } });
+    t(`完了通知の検証結果を実際のappendへ渡す: ${automatic}`, appended[appended.indexOf('--source') + 1]
+      === (automatic ? 'act-reconcile' : 'act-reconcile-session'));
+    t('通知元の監査証跡を残す', appended[appended.indexOf('--detected-note') + 1].includes('完了通知元run 123'));
   }
   const matrix = {
     self_repair: {
@@ -3498,12 +3511,22 @@ async function selftest() {
     // **/logs を先に見る。**ログのURLは /actions/jobs/<id>/logs で、'/jobs' も含む。
     const mk = (jobsRes, logRes) => (url) => url.endsWith('/logs')
       ? Promise.resolve(logRes) : Promise.resolve(jobsRes);
-    const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [{ id: 1 }] }) };
+    const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [
+      { id: 99, name: 'Notify Autopilot Act' }, { id: 1, name: 'autopilot' }] }) };
     const withLog = (body) => ({ ok: true, status: 200, text: async () => body });
 
     const measured = await fetchRunCost('o/r', 'tok', '1',
       { fetchImpl: mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}')) });
     t('実費行を読めたら measured', measured.state === 'measured' && measured.usd === 1.25 && measured.turns === 9);
+    let requestedLog;
+    await fetchRunCost('o/r', 'tok', '1', { fetchImpl: async url => {
+      if (url.endsWith('/logs')) { requestedLog = url; return withLog('{"total_cost_usd":1.25}'); }
+      return okJobs;
+    } });
+    t('通知ジョブが先頭でも主系の実費ログを読む', requestedLog === 'https://api.github.com/repos/o/r/actions/jobs/1/logs');
+    t('主系ジョブ不明は実費ゼロや消失にしない', (await fetchRunCost('o/r', 'tok', '1', {
+      fetchImpl: async () => ({ ok: true, json: async () => ({ jobs: [{ name: 'Notify Autopilot Act', id: 99 }] }) }),
+    })).state === 'unreadable');
     t('実費行が無ければ absent（＝発生していない）',
       (await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(okJobs, withLog('ログ本文')) })).state === 'absent');
     t('**ログが 410 なら gone**（保持期間切れ。実費が無かったのではない）',
@@ -3859,6 +3882,7 @@ export async function fetchOpenHealthIssues(repo, token, { fetchImpl = fetch, pe
 }
 
 async function buildContext(today, ledger = null) {
+  const completion = await completionOrigin();
   const runsDoc = readJson(RUNS_PATH, { runs: [] });
   // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
   // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
@@ -3899,7 +3923,7 @@ async function buildContext(today, ledger = null) {
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
   return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues,
-    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME };
+    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion };
 }
 
 async function main() {
