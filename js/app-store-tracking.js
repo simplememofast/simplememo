@@ -29,6 +29,9 @@
 (function () {
   "use strict";
 
+  if (window.__simpleMemoStoreTracking) return;
+  window.__simpleMemoStoreTracking = true;
+
   var SELECTOR = 'a[href*="apps.apple.com"]';
 
   function push() {
@@ -38,22 +41,30 @@
     window.dataLayer.push(arguments);
   }
 
+  function ownStoreUrl(a) {
+    try {
+      var url = new URL(a.getAttribute("href") || "", location.href);
+      return url.protocol === "https:" && url.hostname === "apps.apple.com"
+        && /\/id6758438948(?:\/|$)/.test(url.pathname) ? url : null;
+    } catch (err) { return null; }
+  }
+
   function dims(a) {
-    var href = a.getAttribute("href") || "";
-    var m = href.match(/[?&]ct=([^&#]*)/);
+    var url = ownStoreUrl(a);
     return {
-      ct: m ? decodeURIComponent(m[1]) : "(none)",
+      ct: url ? url.searchParams.get("ct") || "(none)" : "(none)",
       placement: a.getAttribute("data-cta-placement") || "(untagged)",
       cluster: a.getAttribute("data-cta-cluster") || "(untagged)",
       variant: a.getAttribute("data-cta-variant") || "(none)",
-      page_path: location.pathname
+      page_path: location.pathname,
+      measurement_version: "2026-09-05"
     };
   }
 
   document.addEventListener("click", function (e) {
     var t = e.target;
     var a = (t && t.closest) ? t.closest(SELECTOR) : null;
-    if (!a) return;
+    if (!a || !ownStoreUrl(a)) return;
     try {
       var d = dims(a);
       d.link_url = a.getAttribute("href") || "";
@@ -85,7 +96,8 @@
     return {
       to: a.getAttribute("href") || "",
       stage: a.getAttribute("data-next-step") || "(unset)",
-      page_path: location.pathname
+      page_path: location.pathname,
+      measurement_version: "2026-09-05"
     };
   }
 
@@ -104,7 +116,7 @@
     var observer = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
         var entry = entries[i];
-        if (!entry.isIntersecting) continue;
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
         var a = entry.target;
         if (seen) {
           if (seen.has(a)) { observer.unobserve(a); continue; }
@@ -121,7 +133,9 @@
 
     var start = function () {
       var links = document.querySelectorAll(SELECTOR + "," + NEXT_SELECTOR);
-      for (var i = 0; i < links.length; i++) observer.observe(links[i]);
+      for (var i = 0; i < links.length; i++) {
+        if (links[i].hasAttribute("data-next-step") || ownStoreUrl(links[i])) observer.observe(links[i]);
+      }
     };
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", start, { once: true });

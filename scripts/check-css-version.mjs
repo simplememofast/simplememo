@@ -36,6 +36,7 @@ const ASSETS = [
   // 共有CSSを読まない17面のための「網」。immutable で配るので ?v= が要る。
   'assets/css/safety-net.css',
   'js/app-store-tracking.js',
+  'js/analytics.js',
   'js/lang.js',
   'js/contact-form.js',
   // /siri/ のアプリ内ガイド。2026-08-11 に3例目が出た。#462 が英語5枚を

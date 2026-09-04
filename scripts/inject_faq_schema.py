@@ -23,12 +23,11 @@ beside it would publish two FAQPage nodes for one page, and the hand-written
 one is the one a human chose the wording for.
 
 Note on what this buys, so nobody re-measures it expecting the wrong thing:
-Google restricted FAQ rich results to authoritative government and health
-sites in 2023, so this will NOT put FAQ accordions in Google's results for
-this domain. It is worth doing for machine-readability — Bing still renders
-them, and the AI surfaces this site is actually winning on (3,164 Copilot
-citations) read structured data. Judge it on AI citations and Bing, not on
-Google rich results.
+Google stopped displaying FAQ rich results on 2026-05-07:
+https://support.google.com/webmasters/answer/6211453?hl=en
+Keep existing structured data consistent with visible answers. This validator
+checks that consistency; it does not promise Google/Bing/AI citation gains.
+
 """
 
 from __future__ import annotations
