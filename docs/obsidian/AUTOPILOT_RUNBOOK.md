@@ -981,6 +981,7 @@ node scripts/autopilot-runs.mjs --append \
 
 - **`--pr` は shipped のとき必須**（出荷はPRのマージでしか成立しない）。
   PR番号は `gh pr create` の直後に分かるので、その時点で追記する
+- **実行IDも必ず残す。**主系Actionsの中で `--route actions` を指定すると、記帳コマンドが `GITHUB_RUN_ID` を `external_ref` に引き継ぐ。副系は `--external-ref <CCRのsession id>` を明示する。別ワークフローやローカル実行では推測せず、対象の実行IDを明示する。
 - **失敗の回にも必ず1行残す。** `--outcome` と `--failure-reason` を書く。
   「なぜ落ちたか」の無い失敗は再発防止に使えない
 - **`interventions` は手で追記する**（オーナーへの依頼・オーナーによる修正・代走）。
