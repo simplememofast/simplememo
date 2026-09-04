@@ -208,6 +208,7 @@ export function ep(runs, policy, { rules, actions }) {
   const escalated = (actions.actions || []).filter((a) => a.force_owner === 'human' || a.state === 'acknowledged');
   const judged = escalated.filter((a) => typeof a.owner_needed === 'boolean');
   const needed = judged.filter((a) => a.owner_needed);
+  const delegated = judged.filter((a) => a.owner_needed_review?.mode === 'owner_delegated').length;
   const precRate = judged.length ? needed.length / judged.length : null;
   const precPoints = precRate === null ? 0 : half * precRate;
 
@@ -217,9 +218,9 @@ export function ep(runs, policy, { rules, actions }) {
             measurable: timed.length > 0,
             why: timed.length ? '**下界のみ**（検知の時刻までしか台帳に無い。配達時刻は持っていない）'
                               : '窓内に時刻を持つ故障が無い' },
-    precision: { rate: precRate, n: escalated.length, judged: judged.length, points: precPoints, max: half,
+    precision: { rate: precRate, n: escalated.length, judged: judged.length, delegated, points: precPoints, max: half,
                  measurable: judged.length > 0,
-                 why: judged.length ? null
+                 why: delegated ? `${judged.length}/${escalated.length} 判定済み（うち${delegated}件はオーナー委任に基づくAI評価。独立した人間評価ではない）` : judged.length ? null
                    : `オーナーへ上げた ${escalated.length} 件に owner_needed が1件も入っていない — **上げたのが正しかったかを、この台帳は言えない**` },
     rate: (missPoints + precPoints) / policy.weights.ep,
     max: policy.weights.ep, points: missPoints + precPoints,
@@ -552,6 +553,12 @@ function selftest() {
      '**owner_needed が空なら精度は0点**（測れないことを満点にしない）');
   const acts = { actions: [{ force_owner: 'human', owner_needed: true }, { force_owner: 'human', owner_needed: false }] };
   eq(ep([quick], P, { rules, actions: acts }).precision.points, 3.75, '半分が本当に必要だったなら半分');
+  const delegatedActs = { actions: acts.actions.map(a => ({ ...a,
+    owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) };
+  const delegatedPrecision = ep([quick], P, { rules, actions: delegatedActs }).precision;
+  eq(delegatedPrecision.points, 3.75, '委任しても必要・不要の判定比率は変えない');
+  eq(delegatedPrecision.delegated, 2, '委任によるAI評価の件数を区別する');
+  eq(delegatedPrecision.why.includes('独立した人間評価ではない'), true, '委任を独立した人間評価と表示しない');
   eq(ep([quick], P, { rules, actions: acts }).points, 11.25, '2つの半分を足す');
 
   // --- TUC ---

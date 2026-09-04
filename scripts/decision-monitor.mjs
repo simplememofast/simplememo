@@ -28,7 +28,7 @@ export function renderReport(html, score, stages) {
     vdc: `期間内の出荷${c.vdc.n}件のうち、事前宣言と公開後の実測決済を確認できたのは${c.vdc.hit}件。`,
     umr: '人の介入なく本番へ届いた変更の割合を可逆性で重み付け。R0には寄与の上限があります。',
     ra: `故障${c.ra.n}件のうち機械が検知したのは${c.ra.detect.hit}件、無介入の修理は${c.ra.recover.hit}件。本番の自動revert成功は${c.ra.auto_revert_count}回。`,
-    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。未判定は満点として扱いません。`,
+    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。${c.ep.precision.delegated ? `うち${c.ep.precision.delegated}件はオーナー委任によるAI評価で、独立した人間評価ではありません。` : '未判定は満点として扱いません。'}`,
     tuc: `検査を維持して週${c.tuc.per_week.toFixed(1)}回出荷。週${c.tuc.target}回が配点上の基準です。`,
   };
   out = out.replace(/<tr data-score="(vdc|umr|ra|ep|tuc)">.*?<\/tr>/g, (row, id) => row.replace(/<td class="num"><b>[\d.]+<\/b><\/td>/, `<td class="num"><b>${c[id].points.toFixed(1)}</b></td>`));
@@ -252,6 +252,11 @@ function selftest() {
   assert(report.includes('data-score-total>42.5</span>'));
   assert(report.includes('<b>15.0</b>'));
   assert(report.includes('出荷2件'));
+  const delegatedSample = structuredClone(sample);
+  delegatedSample.components.ep.precision = { judged: 19, delegated: 19 };
+  const delegatedReport = renderReport('<tr data-score="ep"><td>EP</td><td class="num"><b>0.0</b></td><td class="num">15</td><td>old</td></tr>', delegatedSample, {});
+  assert(delegatedReport.includes('19件はオーナー委任によるAI評価'));
+  assert(delegatedReport.includes('独立した人間評価ではありません'));
   // Exercise an actual reverse patch in a disposable Git repo. This is a drill, never production evidence.
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-recovery-test-'));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
