@@ -593,6 +593,7 @@ node scripts/autopilot-selfheal.mjs
 
 1. `node scripts/value-contracts.mjs --feedback` で過去の生Brier scoreを読む。確率の較正に使い、別の正規化報酬へ変換しない。
 2. 候補2件以上を `/tmp/decision-candidates.json` にJSON配列で書く。各候補には `id`（英小文字・数字・ハイフン）、`run_id`、`rank`、`metric`、`predicted_delta`、`p`、`horizon_days`（1〜28）、`counterfactual: {id, reason}`、`rank_gap`、`touches`、`max_changed_lines`（最大1500）、`predicted_usd`、`lane`、`action`、`evidence_date` を含める。`touches` はワイルドカードを使わない実パス。予算上限は既存の設定を使う。
+   `predicted_delta` は凍結する比較基準（null model）からの変化量。率は0〜1、件数・時間・費用は0以上に収まる予測だけを使う。比較基準が既に上限の出荷日率や、0件の未解消故障には、改善を予測する余地がない。そうした候補は選定から除外され、候補IDごとの理由が返る。
 3. `node scripts/value-contracts.mjs --select /tmp/decision-candidates.json` を実行する。境界・可逆性・証拠・予算・反復の5基準と、承認済み指標・実測baseline・比較基準が通った候補だけが選択対象になる。探索が指示された回も同じ条件を通す。0件なら施策を実装せず、理由を記録する。
 4. 出力された `data/decision-intents/<id>.json` だけを**別コミットにして先にpush**する。この時点では記事やコードを編集しない。CIがコミットの順序を検査し、事前データから予測・適格性を再計算する。
 5. 選ばれた候補だけを実装する。契約は変更しない。範囲や予測を変えたければ、この候補を中止して新しいIDで最初から判定する。宣言した `run_id` を運転台帳に使い、PR番号を記録する。
