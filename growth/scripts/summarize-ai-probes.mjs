@@ -8,4 +8,5 @@ if (!input) {
   console.error('Usage: node growth/scripts/summarize-ai-probes.mjs /private/path/observations.json');
   process.exit(2);
 }
-console.log(JSON.stringify(summarizeAiProbes(JSON.parse(fs.readFileSync(input, 'utf8'))), null, 2));
+const observations = JSON.parse(fs.readFileSync(input, 'utf8'));
+console.log(JSON.stringify(summarizeAiProbes(observations), null, 2));
