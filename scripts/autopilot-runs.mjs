@@ -54,6 +54,14 @@ export const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
 export const COST_PATH = path.join(ROOT, 'data/autopilot-cost.json');
 export const STATUS_PATH = path.join(ROOT, 'data/autopilot-status.json');
 
+/** 主系が自分を記帳するときだけ、GitHub自身が渡した実行IDを使う。 */
+export function externalRefFor(route, explicit, env = process.env) {
+  if (explicit !== null && explicit !== undefined) return explicit;
+  return route === 'actions' && env.GITHUB_ACTIONS === 'true'
+    && env.GITHUB_WORKFLOW === 'Obsidian Autopilot' && /^[1-9][0-9]*$/.test(env.GITHUB_RUN_ID ?? '')
+    ? env.GITHUB_RUN_ID : null;
+}
+
 export const OUTCOMES = [
   'shipped', 'no_artifact', 'failed', 'cancelled',
   'skipped_gate', 'skipped_duplicate', 'no_run',
@@ -849,6 +857,16 @@ function selftest() {
     n++;
     if (got !== want) { bad++; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); }
   };
+  const actionsEnv = { GITHUB_ACTIONS: 'true', GITHUB_WORKFLOW: 'Obsidian Autopilot', GITHUB_RUN_ID: '33815445009' };
+  eq(externalRefFor('actions', null, actionsEnv), '33815445009', '主系自身の記帳はGitHubの実行IDを引き継ぐ');
+  eq(externalRefFor('actions', '12345', actionsEnv), '12345', '明示された実行IDを上書きしない');
+  for (const route of ['ccr-0730', 'owner-session', undefined]) {
+    eq(externalRefFor(route, null, actionsEnv), null, '別経路に主系の実行IDを混ぜない');
+  }
+  for (const env of [{}, { ...actionsEnv, GITHUB_ACTIONS: 'false' },
+    { ...actionsEnv, GITHUB_WORKFLOW: 'Autopilot Act' }, { ...actionsEnv, GITHUB_RUN_ID: 'bad-id' }]) {
+    eq(externalRefFor('actions', null, env), null, '別ワークフロー・ローカル・不正なIDから推測しない');
+  }
   // **台帳の読み方そのもの**もここから走らせる。費用の台帳が壊れると
   // 実費の行が消えるだけで、0とも未観測とも区別がつかなくなる。
   for (const [name, fn] of readLedgerScenarios(fs, os)) {
@@ -1218,7 +1236,7 @@ if (isMain) {
       pr: val('pr') ? Number(val('pr')) : null,
       artifact: val('artifact', null),
       failure_reason: val('failure-reason', null),
-      external_ref: val('external-ref', null),
+      external_ref: externalRefFor(val('route'), val('external-ref', null)),
       interventions: [],
       source: val('source', 'session'),
     };

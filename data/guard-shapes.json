@@ -539,6 +539,12 @@
   ],
   "param_guards": [
     {
+      "file": "scripts/autopilot-runs.mjs",
+      "expr": "explicit",
+      "disposition": "前提",
+      "note": "externalRefFor は明示された実行IDを優先する。省略時は Obsidian Autopilot 自身の Actions 環境だけから有効な GITHUB_RUN_ID を引く。他ワークフロー・副系・ローカルでは null を維持し、日付から推測しない。自己テストで両方の経路と不正な環境値を固定した。"
+    },
+    {
       "file": "growth/scripts/acquisition-mix.mjs",
       "expr": "b",
       "disposition": "向きが逆",
