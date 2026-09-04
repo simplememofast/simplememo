@@ -260,7 +260,7 @@
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">Privacy Policy</h1>
-      <p class="page-content__date">Last updated: <time datetime="2026-05-07">May 7, 2026</time></p>
+      <p class="page-content__date">Last updated: <time datetime="2026-09-04">September 4, 2026</time></p>
 
       <div class="page-content__body">
         <p>YURIKA, K.K. ("we," "us," or "our") describes how we handle user information in "Simple Memo - for Obsidian" (also known as "Simple Memo - for Obsidian," hereinafter the "Service").</p>
@@ -279,14 +279,18 @@
         <ul>
           <li>Basic device/OS information</li>
           <li>Operational logs (send timestamps, status)</li>
+          <li>Usage events (screen views, interactions, and send outcomes), a random device-level identifier, session IDs, send IDs, and diagnostics such as whether app launch completed</li>
           <li>Technical data for abuse prevention and rate limiting (IP address, request metadata)</li>
         </ul>
+
+        <p>Usage events do not contain email addresses or memo text, but a send ID can link them to the recipient email hash in our delivery records. We therefore treat these events, device identifiers, and diagnostics as data that can be linked to the user.</p>
 
         <h2>2. How We Use Information</h2>
         <p>We use collected information for the following purposes:</p>
         <ul>
           <li>Providing email sending features (send, outbox/pending management, resend, history)</li>
           <li>Operating, maintaining, and improving the Service</li>
+          <li>Excluding internal test devices from usage aggregates and avoiding repeated guidance for Obsidian features that are already configured</li>
           <li>Preventing abuse and ensuring security (cooldowns, server-side rate limits, etc.)</li>
           <li>Responding to support inquiries</li>
           <li>Complying with legal obligations</li>
@@ -349,7 +353,7 @@
         <p>We take reasonable measures to protect information against leaks, loss, and damage.</p>
 
         <h2>9. Retention</h2>
-        <p>We aim not to retain information longer than necessary for the stated purposes. Some logs may be retained for limited periods for security and operational purposes.</p>
+        <p>We aim not to retain information longer than necessary for the stated purposes. Scheduled cleanup deletes usage events older than 90 days and send ID-to-recipient-hash records older than 35 days. Other logs may be retained for limited periods for security and operational purposes.</p>
 
         <h2>10. Updates</h2>
         <p>We may update this Policy as needed. The updated version will be posted on the Service or our website.</p>
@@ -364,9 +368,9 @@
           <li><strong>Key management</strong>: A 256-bit symmetric key is stored in Apple Keychain Services (<code>kSecClassGenericPassword</code>). It is excluded from backups and cannot be exported.</li>
           <li><strong>Transport</strong>: All API calls use TLS (HTTPS) over <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
           <li><strong>Email body handling</strong>: Memo bodies transit through our Relay API (Cloudflare Workers) and the external delivery infrastructure (Resend) for the sole purpose of sending email. We do not persistently store them on our infrastructure, and they are not written to logs (except in DEBUG builds during local development).</li>
-          <li><strong>Email address storage on the server</strong>: Only if you opt into reminder emails, we store a SHA-256 hash of your email address in Cloudflare D1. The raw address lives only in Resend's Contact API.</li>
+          <li><strong>Email address storage on the server</strong>: Cloudflare D1 stores a mapping between send IDs and recipient email hashes derived from SHA-256. These delivery records are created regardless of reminder opt-in. Reminder contacts are managed through Resend's Contact API.</li>
           <li><strong>Dependencies on the data path</strong>: Memo body encryption (CryptoKit), key storage (Keychain Services), and network transport (URLSession / Network.framework) are all Apple-native — no third-party SDK sits in the data path.</li>
-            <li><strong>SDKs used for optional features</strong>: As of v2.4, an optional onboarding-shortcut feature can pull your email from your Google account; this uses the <code>GoogleSignIn-iOS SDK</code> and the Firebase Authentication SDK. The Firebase App Check SDK is initialized at launch to harden our backend API against abuse (uses Apple App Attest). Anonymous funnel analytics (no PII) are sent in-house to our <code>/v1/analytics/event</code> endpoint with no external analytics SDK.</li>
+            <li><strong>SDKs used for optional features</strong>: As of v2.4, an optional onboarding-shortcut feature can pull your email from your Google account; this uses the <code>GoogleSignIn-iOS SDK</code> and the Firebase Authentication SDK. The Firebase App Check SDK is initialized at launch to harden our backend API against abuse (uses Apple App Attest). Usage analytics are sent in-house to our <code>/v1/analytics/event</code> endpoint. They do not directly contain email addresses or memo text, but send IDs can link them to recipient email hashes.</li>
         </ul>
         <p><strong>Note</strong>: The Service is <strong>not End-to-End Encrypted (E2EE)</strong>. Memo bodies are delivered through standard SMTP so you (the recipient) can read them in your normal mail client. For workloads requiring true E2EE, consider purpose-built services such as Standard Notes, Signal, or ProtonMail.</p>
         <p>These notes are restated as a route map for Obsidian users on the <a href="/en/privacy-architecture/">Privacy Architecture</a> page.</p>
