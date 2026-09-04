@@ -323,11 +323,13 @@
       "task": "問い合わせから再現テストを自動生成",
       "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md"
+        "../simplememo-ios/docs/qa/REGRESSION_TEST_TEMPLATE.md",
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/.github/workflows/repro-facts.yml"
       ],
       "note": "手動運用。ただしWatch同期は実績あり",
-      "blocker": "not_started",
-      "unblocked_by": "本文は依然 D1 にあり読めない。**2026-08-26 に端末/OS/版/分類だけを本文抜きで数える経路を作った**（simplememo-api: summarizeReproFacts / migrations/0027）。残るのは (a) 移行0027の適用、(b) その集計が日報の文面ではなく**リポジトリ側から読める形**で出ること、(c) 母数 — inquiries は現在0件\n\n**[2026-09-03 訂正] (a) と (c) は、どちらも済んでいた。**\n\n**(a) 移行0027 は 2026-08-27 22:17 に適用されている。**欠けていたのは `d1_migrations` の台帳行のほうで、DDL は当たっていた。`simplememo-api/migrations/historical/2026-09-01_backfill_d1_migrations_0026_0028.sql` が**スキーマ側で確認**してそう書いている（`device` cid 12 / `os` cid 13 が在る）。2026-09-03 時点で `migrations list --remote` は「適用するものは無い」。\n\n**(c) inquiries は0件ではない。**`simplememo-api/docs/email_intake.md` が実データの `email_hash` を並べ、同一差出人・同一分類で `auto_replied` が 0 → 1 に遷移したのを**独立に2回**記録している。\n\n**したがって残るのは (b) だけで、それは実装。**`blocker` を `external_data` から `not_started` へ移した —— **外部データを待っているのではない。**待ちに数えたままだと `--plan` がこの行を「材料が来ていない」側に置き続け、**実装で届くものが待ちに見える。**\n\n**executor は動かさない。**まだ何も出ていない。そして着手の前に設計判断が1つ要る —— **取り出し口をどこに置き、誰が読むか。**relay の管理鍵は「本番の管理鍵を、日次の可視化のためだけに別リポジトリの CI へ広げない」と定められており、simplememo は公開リポジトリ。",
+      "blocker": "verification_pending",
+      "unblocked_by": "本文は依然 D1 にあり読めない。**2026-08-26 に端末/OS/版/分類だけを本文抜きで数える経路を作った**（simplememo-api: summarizeReproFacts / migrations/0027）。残るのは (a) 移行0027の適用、(b) その集計が日報の文面ではなく**リポジトリ側から読める形**で出ること、(c) 母数 — inquiries は現在0件\n\n**[2026-09-03 訂正] (a) と (c) は、どちらも済んでいた。**\n\n**(a) 移行0027 は 2026-08-27 22:17 に適用されている。**欠けていたのは `d1_migrations` の台帳行のほうで、DDL は当たっていた。`simplememo-api/migrations/historical/2026-09-01_backfill_d1_migrations_0026_0028.sql` が**スキーマ側で確認**してそう書いている（`device` cid 12 / `os` cid 13 が在る）。2026-09-03 時点で `migrations list --remote` は「適用するものは無い」。\n\n**(c) inquiries は0件ではない。**`simplememo-api/docs/email_intake.md` が実データの `email_hash` を並べ、同一差出人・同一分類で `auto_replied` が 0 → 1 に遷移したのを**独立に2回**記録している。\n\n**したがって残るのは (b) だけで、それは実装。**`blocker` を `external_data` から `not_started` へ移した —— **外部データを待っているのではない。**待ちに数えたままだと `--plan` がこの行を「材料が来ていない」側に置き続け、**実装で届くものが待ちに見える。**\n\n**executor は動かさない。**まだ何も出ていない。そして着手の前に設計判断が1つ要る —— **取り出し口をどこに置き、誰が読むか。**relay の管理鍵は「本番の管理鍵を、日次の可視化のためだけに別リポジトリの CI へ広げない」と定められており、simplememo は公開リポジトリ。\n\n**[2026-09-03 続き] (b) の出口を作った（simplememo-api#236）。**\n\n    GET /admin/repro-facts              機械が読む口（Bearer ADMIN_API_KEY・読むだけ）\n    .github/workflows/repro-facts.yml   日次で取り込み data/repro-facts.json へ\n\n**日報の文面を剥がす経路は作らなかった** —— 表示を直した日に集計が壊れる形になるため。\n\n**取り込むのは simplememo-api（非公開）自身。**`ADMIN_API_KEY` は元からあちらにしか無く、`data/release-materials.json` の「**本番の管理鍵を、日次の可視化のためだけに別リポジトリの CI へ広げない**」に触れない。このリポジトリ（公開）は置かれた JSON を読むだけでよい。\n\n**3つの状態を潰していない** —— `ok`（0件を含む）/ `migration_pending` / `unreadable` を欄にし、`facts` は ok のときだけ入る。取得に失敗した回は写しを置き換えない。\n\n**blocker を `not_started` から `verification_pending` へ。**作るものは無くなったが、**まだ1周も走っていない。**executor は据え置く。",
       "unlock": "inquiry_facts"
     },
     {
@@ -1733,11 +1735,13 @@
       "task": "問い合わせからIssueと回帰テストを作成",
       "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md"
+        "../simplememo-ios/docs/reports/watch_sync_診断改修案_2026-07-26.md",
+        "../simplememo-api/src/inquiry.ts",
+        "../simplememo-api/.github/workflows/repro-facts.yml"
       ],
       "note": "手動では実績あり（Watch同期4往復→v4.9.30→回帰テスト化）",
-      "blocker": "not_started",
-      "unblocked_by": "本文は依然 D1 にあり読めない。**2026-08-26 に端末/OS/版/分類だけを本文抜きで数える経路を作った**（simplememo-api: summarizeReproFacts / migrations/0027）。残るのは (a) 移行0027の適用、(b) その集計が日報の文面ではなく**リポジトリ側から読める形**で出ること、(c) 母数 — inquiries は現在0件\n\n**[2026-09-03 訂正] (a) と (c) は、どちらも済んでいた。**\n\n**(a) 移行0027 は 2026-08-27 22:17 に適用されている。**欠けていたのは `d1_migrations` の台帳行のほうで、DDL は当たっていた。`simplememo-api/migrations/historical/2026-09-01_backfill_d1_migrations_0026_0028.sql` が**スキーマ側で確認**してそう書いている（`device` cid 12 / `os` cid 13 が在る）。2026-09-03 時点で `migrations list --remote` は「適用するものは無い」。\n\n**(c) inquiries は0件ではない。**`simplememo-api/docs/email_intake.md` が実データの `email_hash` を並べ、同一差出人・同一分類で `auto_replied` が 0 → 1 に遷移したのを**独立に2回**記録している。\n\n**したがって残るのは (b) だけで、それは実装。**`blocker` を `external_data` から `not_started` へ移した —— **外部データを待っているのではない。**待ちに数えたままだと `--plan` がこの行を「材料が来ていない」側に置き続け、**実装で届くものが待ちに見える。**\n\n**executor は動かさない。**まだ何も出ていない。そして着手の前に設計判断が1つ要る —— **取り出し口をどこに置き、誰が読むか。**relay の管理鍵は「本番の管理鍵を、日次の可視化のためだけに別リポジトリの CI へ広げない」と定められており、simplememo は公開リポジトリ。",
+      "blocker": "verification_pending",
+      "unblocked_by": "本文は依然 D1 にあり読めない。**2026-08-26 に端末/OS/版/分類だけを本文抜きで数える経路を作った**（simplememo-api: summarizeReproFacts / migrations/0027）。残るのは (a) 移行0027の適用、(b) その集計が日報の文面ではなく**リポジトリ側から読める形**で出ること、(c) 母数 — inquiries は現在0件\n\n**[2026-09-03 訂正] (a) と (c) は、どちらも済んでいた。**\n\n**(a) 移行0027 は 2026-08-27 22:17 に適用されている。**欠けていたのは `d1_migrations` の台帳行のほうで、DDL は当たっていた。`simplememo-api/migrations/historical/2026-09-01_backfill_d1_migrations_0026_0028.sql` が**スキーマ側で確認**してそう書いている（`device` cid 12 / `os` cid 13 が在る）。2026-09-03 時点で `migrations list --remote` は「適用するものは無い」。\n\n**(c) inquiries は0件ではない。**`simplememo-api/docs/email_intake.md` が実データの `email_hash` を並べ、同一差出人・同一分類で `auto_replied` が 0 → 1 に遷移したのを**独立に2回**記録している。\n\n**したがって残るのは (b) だけで、それは実装。**`blocker` を `external_data` から `not_started` へ移した —— **外部データを待っているのではない。**待ちに数えたままだと `--plan` がこの行を「材料が来ていない」側に置き続け、**実装で届くものが待ちに見える。**\n\n**executor は動かさない。**まだ何も出ていない。そして着手の前に設計判断が1つ要る —— **取り出し口をどこに置き、誰が読むか。**relay の管理鍵は「本番の管理鍵を、日次の可視化のためだけに別リポジトリの CI へ広げない」と定められており、simplememo は公開リポジトリ。\n\n**[2026-09-03 続き] (b) の出口を作った（simplememo-api#236）。**\n\n    GET /admin/repro-facts              機械が読む口（Bearer ADMIN_API_KEY・読むだけ）\n    .github/workflows/repro-facts.yml   日次で取り込み data/repro-facts.json へ\n\n**日報の文面を剥がす経路は作らなかった** —— 表示を直した日に集計が壊れる形になるため。\n\n**取り込むのは simplememo-api（非公開）自身。**`ADMIN_API_KEY` は元からあちらにしか無く、`data/release-materials.json` の「**本番の管理鍵を、日次の可視化のためだけに別リポジトリの CI へ広げない**」に触れない。このリポジトリ（公開）は置かれた JSON を読むだけでよい。\n\n**3つの状態を潰していない** —— `ok`（0件を含む）/ `migration_pending` / `unreadable` を欄にし、`facts` は ok のときだけ入る。取得に失敗した回は写しを置き換えない。\n\n**blocker を `not_started` から `verification_pending` へ。**作るものは無くなったが、**まだ1周も走っていない。**executor は据え置く。",
       "unlock": "inquiry_facts"
     },
     {
