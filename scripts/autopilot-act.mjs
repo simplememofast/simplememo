@@ -65,7 +65,7 @@ import { requireShape } from './lib/read-ledger.mjs';
 // **どのラベルを監視Issueと見なすかは health-intake.mjs が正。**
 // 台帳へ運ぶ側と、閉じたかを見る側で対象がずれると、
 // 「運ばれたが一生閉じない行」か「運んでいないのに閉じる行」のどちらかが出る。
-import { HEALTH_LABELS } from './health-intake.mjs';
+import { HEALTH_LABELS, fetchOpenIssues, toAction as healthAction } from './health-intake.mjs';
 import { judge, loadContext as loadEligibility, mergeJudgements, LOG_PATH as ELIGIBILITY_LOG } from './autonomy-eligibility.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -348,11 +348,12 @@ export const CLOSE_CHECKS = {
     if (!ctx.issues || !(ctx.issues instanceof Map)) {
       return { closed: false, evidence: 'Issue の状態を取得できず判定不能（閉じたという意味ではない）' };
     }
-    if (!ctx.issues.has(issue)) {
-      // 取得できた一覧に**無い**＝ open ではない。健康ワークフローは回復時に閉じるので、
-      // 一覧が open だけを持つ前提ならこれは「閉じた」。**前提を明示しておく。**
-      return { closed: true, evidence: `#${issue} は open な監視Issueの一覧に無い（回復とみなす）` };
+    const observed = ctx.issues.get(issue);
+    if (observed?.number !== issue || observed.pull_request || !['open', 'closed'].includes(observed.state)) {
+      return { closed: false, evidence: `#${issue} の状態が判定不能（一覧から消えただけでは閉じない）` };
     }
+    if (observed.state === 'closed') return { closed: true,
+      evidence: `https://github.com/${ctx.repo || 'simplememofast/simplememo'}/issues/${issue} の state=closed をGitHub APIで確認` };
     return { closed: false, evidence: `#${issue} がまだ open` };
   },
 
@@ -490,6 +491,14 @@ export function classify(action, matrix) {
 export function derive(ctx) {
   const out = [];
   const runs = ctx.runsDoc?.runs ?? [];
+
+  // 主系モデルが動けない日も、独立したActが実際の監視Issueを台帳に運ぶ。
+  if (ctx.issues instanceof Map) {
+    for (const issue of ctx.issues.values()) {
+      const action = healthAction(issue, ctx.today);
+      if (action) out.push(action);
+    }
+  }
 
   // --- D1/D2: 未修理の故障（レーンF） ---
   for (const t of ctx.selfheal?.targets ?? []) {
@@ -2547,9 +2556,9 @@ async function selftest() {
   t('**判定不能を回復と読まない**',
     /判定不能/.test(CLOSE_CHECKS.issue_closed({ issue: 7 }, {}).evidence));
   t('open な Issue では閉じない',
-    CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[7, {}]]) }).closed === false);
-  t('open 一覧から消えたら閉じる',
-    CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[9, {}]]) }).closed === true);
+    CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[7, { number: 7, state: 'open' }]]) }).closed === false);
+  t('open 一覧から消えただけでは閉じない',
+    CLOSE_CHECKS.issue_closed({ issue: 7 }, { issues: new Map([[9, {}]]) }).closed === false);
   t('issue 番号が無ければ閉じない',
     CLOSE_CHECKS.issue_closed({}, { issues: new Map() }).closed === false);
   // --- 取り残しコミットの検知（走査そのもの） ---
@@ -3277,46 +3286,66 @@ async function selftest() {
   t('**全停止も台帳が読めなければ閉じない**',
     CLOSE_CHECKS.shipping_resumed({ since: '2026-08-28' }, {}).closed === false);
 
-  // issue_closed の材料を実際に取りに行く（2026-09-03）
-  //
-  // **閉じ条件だけ在って、材料を作る側が無かった。**buildContext は ctx.issues を
-  // 一度も作っておらず、act-health-591 は8日間ずっと「判定不能」で居座っていた ——
-  // 対象の #591 は立った当日（08-26）に監視ワークフロー自身が閉じている。
+  // API → 導出 → 台帳 → 閉じ条件。単一ラベルの故障と明示的な閉鎖を再現する。
   {
-    const res = (body, ok = true, status = 200) => ({
-      ok, status, json: async () => body,
-    });
-    const call = (body, opts = {}) => fetchOpenHealthIssues('o/r', 'tok',
-      { fetchImpl: async () => res(body, opts.ok ?? true, opts.status ?? 200), perPage: opts.perPage ?? 100 });
-
-    t('トークンが無ければ null（空一覧にしない）',
-      (await fetchOpenHealthIssues('o/r', '', { fetchImpl: async () => res([]) })) === null);
-    t('**非200 は null**（読めなかったのに「Issueは無い」と読ませない）',
-      (await call([], { ok: false, status: 403 })) === null);
-    t('配列でない応答も null', (await call({ message: 'x' })) === null);
-    t('例外も null',
-      (await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: async () => { throw new Error('network'); } })) === null);
-    t('**1ページで覆えない件数は null**（2ページ目のIssueが「閉じた」に化ける）',
-      (await call([{ number: 1 }, { number: 2 }], { perPage: 2 })) === null);
-
-    const map = await call([{ number: 591 }, { number: 7, pull_request: {} }]);
-    t('番号をキーにした Map を返す', map instanceof Map && map.has(591));
-    t('**PR は混ぜない**（issues API はPRも返す）', map.size === 1 && !map.has(7));
-    t('読めた上での 0 件は空 Map（null と区別する）',
-      (await call([])) instanceof Map);
-
-    // 対象ラベルは health-intake と同じ定数から引く（運ぶ側と閉じる側でずれない）
-    let asked = '';
-    await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: async (u) => { asked = u; return res([]); } });
-    t('**取り込みと同じラベルで問い合わせる**',
-      Object.keys(HEALTH_LABELS).every((l) => asked.includes(encodeURIComponent(l))));
-    t('open だけを見る', asked.includes('state=open'));
-
-    // 閉じ条件と繋がっていること（材料 → 判定）
-    t('取れた一覧に無い監視Issueは閉じる',
-      CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: await call([]) }).closed === true);
-    t('取れなかった日は閉じない',
-      CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: await call([], { ok: false }) }).closed === false);
+    const res = (body, ok = true) => ({ ok, status: ok ? 200 : 403, json: async () => body });
+    const issue = (number, label, extra = {}) => ({ number, state: 'open', title: `故障${number}`, labels: [label], ...extra });
+    const stale = issue(591, 'ops/autopilot-stale');
+    const cron = issue(592, 'ops/cron-failure');
+    const both = issue(593, 'ops/cron-failure', { labels: Object.keys(HEALTH_LABELS) });
+    const fixtures = [stale, cron, both, issue(594, 'ops/cron-failure', { pull_request: {} })];
+    const requested = [];
+    const github = async url => {
+      requested.push(url);
+      const q = new URL(url).searchParams;
+      const labels = q.get('labels').split(',');
+      const selected = fixtures.filter(i => labels.every(l => i.labels.includes(l)));
+      const size = Number(q.get('per_page')); const offset = (Number(q.get('page')) - 1) * size;
+      return res(selected.slice(offset, offset + size));
+    };
+    const map = await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: github, perPage: 2 });
+    t('片方の監視ラベルだけでも取得し、両方のラベルは重複させない',
+      map instanceof Map && JSON.stringify([...map.keys()]) === '[591,592,593]');
+    t('監視Issueの2ページ目まで実際に取得する', requested.some(u => u.includes('page=2')));
+    t('PRは障害に含めない', !map.has(594));
+    const ctx = { today: '2026-09-04', issues: map };
+    const ledger = { actions: [] };
+    merge(ledger, derive(ctx), ctx.today);
+    t('独立Actから実際の監視Issueが台帳へ届く', ledger.actions.filter(a => a.source === 'health').length === 3);
+    reconcile(ledger, ctx);
+    t('openの故障を閉じない', ledger.actions.every(a => a.state === 'open'));
+    ledger.actions[0].state = 'done'; ledger.actions[0].closed_jst = '2026-09-03';
+    merge(ledger, derive(ctx), ctx.today);
+    t('実際はopenの故障をdoneに埋めない', ledger.actions[0].state === 'open' && ledger.actions[0].closed_jst === null);
+    for (const fetchImpl of [async () => res([], false), async () => res({}),
+      async () => { throw new Error('network'); },
+      async url => new URL(url).searchParams.get('labels') === 'ops/cron-failure' ? res([], false) : res([stale])]) {
+      const unknown = await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl, watched: [591] });
+      t('取得失敗・片方だけ読めた回を空一覧にせず閉じない', unknown === null
+        && !CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: unknown }).closed);
+    }
+    t('トークン無しは判定不能', await fetchOpenHealthIssues('o/r', '', { fetchImpl: github }) === null);
+    t('ページ上限で未完の一覧は判定不能',
+      await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: github, perPage: 1, maxPages: 1 }) === null);
+    const empty = await fetchOpenHealthIssues('o/r', 'tok', { fetchImpl: async () => res([]) });
+    t('正常な空一覧と取得失敗を区別する', empty instanceof Map && empty.size === 0);
+    t('空一覧から閉鎖を推定しない', !CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: empty }).closed);
+    const watch = async (response) => fetchOpenHealthIssues('o/r', 'tok', { watched: [591, 591],
+      fetchImpl: async url => url.endsWith('/issues/591') ? response() : res([]) });
+    const removed = await watch(() => res({ ...stale, labels: [] }));
+    t('監視ラベルを外しただけのopen Issueは閉じない',
+      !CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: removed }).closed && removed.get(591)?.state === 'open');
+    const closed = await watch(() => res({ ...stale, state: 'closed' }));
+    const done = reconcile(ledger, { ...ctx, issues: closed });
+    t('個別APIでclosedを確認したIssueだけを閉じる', done.length === 1 && done[0].id === 'act-health-591'
+      && done[0].evidence.includes('state=closed'));
+    t('個別確認のclosed Issueを新たな障害として導出しない', derive({ ...ctx, issues: closed }).length === 0);
+    for (const response of [() => res(null, false), () => res({}), () => res({ ...stale, number: 999, state: 'closed' }),
+      () => res({ ...stale, state: 'closed', pull_request: {} }), () => { throw new Error('network'); }]) {
+      const unknown = await watch(response);
+      t('個別取得失敗・404・異なる番号・PR・不正形式では閉じない',
+        !CLOSE_CHECKS.issue_closed({ issue: 591 }, { issues: unknown }).closed);
+    }
   }
 
   // 導出D1/D2: 修理主体が人しかいない故障は、AI行として起票しない
@@ -3804,54 +3833,29 @@ function readJson(p, fallback = null) {
 }
 
 /**
- * open な監視Issueを **番号 → Issue** の Map で返す。**取れなければ `null`。**
- *
- * 【なぜ足したか — 閉じ条件に材料が繋がっていなかった】
- * `issue_closed`（CLOSE_CHECKS）は 2026-08-26 から在り、`health-intake.mjs` が
- * 立てる `act-health-*` の唯一の閉じ条件になっている。ところが **buildContext は
- * `ctx.issues` を一度も作っていなかった。**結果、この閉じ条件は毎日
- * 「Issue の状態を取得できず判定不能」を返し続けていた。
- *
- * 実害（2026-09-03 に実測）: `act-health-591` は **8日間** 未処理の上から2番目に
- * 居座っていたが、対象の #591 は **立った当日（2026-08-26T14:31:44Z）に監視
- * ワークフロー自身が閉じている。**故障はとうに終わっていて、
- * **終わったことを見に行く経路だけが無かった。**
- *
- * 取り込み（health-intake）と判定（ここ）で**対象ラベルを同じ定数から引く**。
- * ずれると、運ばれたのに閉じない行か、運んでいないのに閉じる行が出る。
- *
- * 【`null` と空 Map を混ぜない】
- * `issue_closed` は「取れた一覧に無い＝閉じた」と読む。だから
- * **読めなかった回に空 Map を返すと、その日だけ全部の監視が回復したことになる。**
- * トークンが無い・APIが非200・ページングが要る件数 —— どれも `null`。
+ * 監視ラベルごとのopen一覧を統合し、台帳で追跡中のIssueは個別にも照会する。
+ * 一覧に無い理由にはラベル削除や取得範囲外もある。閉鎖はGET /issues/{番号}で
+ * state=closedを確認した場合だけ。取得失敗はnullまたは個別状態不明として保つ。
  */
-export async function fetchOpenHealthIssues(repo, token, { fetchImpl = fetch, perPage = 100 } = {}) {
-  if (!token) return null;
-  const labels = Object.keys(HEALTH_LABELS).join(',');
-  const url = `https://api.github.com/repos/${repo}/issues`
-    + `?state=open&labels=${encodeURIComponent(labels)}&per_page=${perPage}`;
-  try {
-    const res = await fetchImpl(url, {
-      headers: {
-        authorization: `Bearer ${token}`,
-        accept: 'application/vnd.github+json',
-        'user-agent': 'simplememo-autopilot-act',
-      },
-      signal: AbortSignal.timeout(20_000),
-    });
-    if (!res.ok) return null;
-    const body = await res.json();
-    if (!Array.isArray(body)) return null;
-    // **1ページで覆えなかったら断定しない。**2ページ目に居る Issue は
-    // 「一覧に無い」＝閉じた、と読まれる。取り残しの走査と同じ規律。
-    if (body.length >= perPage) return null;
-    const out = new Map();
-    // PR は issues API にも出てくる。**Issue だけを見る**（health-intake と同じ）。
-    for (const x of body) if (!x?.pull_request && Number.isInteger(x?.number)) out.set(x.number, x);
-    return out;
-  } catch {
-    return null;
+export async function fetchOpenHealthIssues(repo, token, { fetchImpl = fetch, perPage = 100,
+  maxPages = 5, watched = [] } = {}) {
+  const result = await fetchOpenIssues({ repo, token, fetchImpl, perPage, maxPages });
+  if (result.issues === null) return null;
+  const out = new Map(result.issues.map(issue => [issue.number, issue]));
+  const missing = [...new Set(watched)].filter(n => Number.isInteger(n) && n > 0 && !out.has(n));
+  // 追跡数が異常に増えてもAPIを際限なく呼ばない。未取得は判定不能のまま残す。
+  for (const number of missing.slice(0, 100)) {
+    try {
+      const res = await fetchImpl(`https://api.github.com/repos/${repo}/issues/${number}`, {
+        headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json' },
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (!res.ok) continue;
+      const issue = await res.json();
+      if (issue?.number === number && !issue.pull_request && ['open', 'closed'].includes(issue.state)) out.set(number, issue);
+    } catch { /* 個別状態不明。閉じたとは推定しない。 */ }
   }
+  return out;
 }
 
 async function buildContext(today, ledger = null) {
@@ -3888,7 +3892,10 @@ async function buildContext(today, ledger = null) {
   const orphans = await fetchOrphanedCommits(repo, token, today,
     { watchSince: orphanWatchSince(ledger) });
   // **issue_closed の材料。**取れなければ null のまま渡す（判定不能を回復と読ませない）。
-  const issues = await fetchOpenHealthIssues(repo, token);
+  const watched = (ledger?.actions ?? []).filter(a => a.state !== 'done' && a.close_check?.kind === 'issue_closed')
+    .map(a => a.close_check.params?.issue);
+  const issues = await fetchOpenHealthIssues(repo, token, { watched });
+  if (issues === null) console.error('# 監視Issueの一覧を取得できず判定不能（台帳を解決扱いにしない）');
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
   return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues,

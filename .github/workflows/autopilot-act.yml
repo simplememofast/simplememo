@@ -33,7 +33,8 @@ name: Autopilot Act
 
 on:
   workflow_run:
-    workflows: ["Obsidian Autopilot"]
+    # 監視Issueの作成・閉鎖を次の朝まで台帳の外へ置かない。
+    workflows: ["Obsidian Autopilot", "Autopilot Health", "Cron Health"]
     types: [completed]
   schedule:
     - cron: '0 0 * * *'   # 09:00 JST
