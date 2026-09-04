@@ -1169,7 +1169,7 @@
     {
       "id": "act-pr6-d14-evaluate",
       "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
-      "detail": "**2026-09-17（D+14）に、9/3 配信の PR⑥ の乗車判定をする。**台帳は `growth/experiments/experiments.json` の `pr-2026-rsi-autopilot`（status: running・evaluation_at: 2026-09-17）。\n\n**機械では埋められない。**必要な数値は PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。**だから人の作業として積む。**\n\n【PR TIMES の分析画面から転記する5つ】`discover_boarding_post` へ:\n  pv … 総PV／ google_referral_ratio … 参照元のGoogle系比率（0〜1）／mobile_ratio … スマートフォン比率（0〜1）／ syndication_count … 転載本数／day1_senders_vs_prev3avg … 配信当日の送信者数 ÷ 前3日平均（分かれば）\n【判定】boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。外したらどのSを読み違えたかを notes に書いて重みを更新する（レコードの $comment のとおり）。\n【あわせて直す】`growth/data/annotations.json` の 2026-09-03 の label を「PR⑥ …（AI実行率76.4%） — n,nnnPV・転載nn・D-SCORE 85・乗車/非乗車」の書式へ。**`d-score --backtest` はこの書式でしか拾わない**ので、直すまで n=5 のままになる。\n\n**判定のとき、最初に疑う候補は2つ**（レコードの 2026-09-03 の注記のとおり）:\n  (1) **時刻** —— 08:03 JST 配信。n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で同じ帯\n  (2) **S2（見出しの固有名詞）** —— 配信見出しは iPhone を含むが、**アプリ名も Obsidian も App Store も無い。**乗車した2本（65/71）を牽引したのはそのエンティティだった\n\n**閉じ条件は `manual`。**評価日そのものを閉じ条件にはできない —— 同じ 2026-09-1x に**別の12件が評価日を迎える**（9/13）ので、「evaluated_at が 2026-09-1 で始まる」では他の実験の評価で誤って閉じる。**判定不能を完了と読まない**ための選択で、閉じるのは人。\n\n---\n\n**[2026-09-03 追記] 機械にやらせる経路を用意した。**\n手順の正典は `docs/prtimes-d14-capture.md`（Routine は `raw.githubusercontent.com/simplememofast/simplememo/main/docs/prtimes-d14-capture.md` から読む。`x-engagement-simplememofast` が SKILL.md を正典にしているのと同じ形）。\n2026-09-17 朝に発火する Routine を1本作った。**Chrome が繋がっていなければ数値を作らずに終える**設計で、取れた数値は push できない実行系でも報告に必ず出す。\n**初回は調整が要る見込み** —— 分析画面の実物をまだ誰も機械側から見ていない。\n\n**[2026-09-03 追記2] Chrome の要らない範囲を実際に動かして確かめた。**\n  - 日次 Routine は Cowork 側に在る（`trig_01GphcHzTuH1A1JUGq8dYkWa`・`cron: 0 0 * * *`・`environment_id` なし＝Chrome が付く）。**二重転記の恐れは無い**\n  - 門は 9/16→0件 / **9/17→この実験1件** / 9/18→1件（超過1日）\n  - `annotations.json` の書式は、仮の数値で書いたら **backtest が n=5 → n=6** になった\n  - 手順書は raw で取れる（HTTP 200・ローカルと同一）\n\n**残る未検証は PR TIMES の分析画面そのものだけ。**そして日次 Routine は 9/16 まで 毎日何もしないので、**Chrome の経路が初めて試されるのは 9/17 ——「取れなければ困る日」その日。**\n先に1回、Cowork で分析画面を開いて §3 の5項目の表示を見ておくのが安い（判定も転記もせず、項目名が推定どおりかだけ確かめる）。",
+      "detail": "2026-09-17（D+14）に、9/3配信のPR⑥を評価する。対象は growth/experiments/experiments.json の pr-2026-rsi-autopilot（status: running、evaluation_at: 2026-09-17）。\n\n2026-09-04、対象リリースの非公開分析を読み取り専用で開くことへのオーナーの明示承認「ok」を受け、Codexのアプリ内ブラウザーで取得経路を確認した。「分析データ」→「レポート」→対象行の「詳細」。公開URL・公開日時・期間指定を照合し、ページビュー、デバイス別アクセス、参照元サイト一覧、掲載メディア一覧を実際に読めた。閲覧承認待ちは解消済み。今回の非公開取得値は公開台帳へ転記していない。\n\n手順の正典は docs/prtimes-d14-capture.md。参照元は割合表示ではなく訪問者数の表なので、全ページの行を読み、Google系の合計を全参照元合計で割る。スマートフォン比率は対象リリースの期間合計の%を100で割る。送信者比率はPR TIMESにはなく、アプリ側の実測が別途必要。\n\n残る実測は、Coworkの日次Routine（trig_01GphcHzTuH1A1JUGq8dYkWa）が取得から認可された保存先・PR作成まで完走することと、9/17の評価値。Codexでの対話中の読み取り成功をCoworkの完走とは扱わない。9/4の期限判定は0件で、discover_boarding_postは空のまま維持する。\n\n期限後、対象と期間と公開範囲を確認した値だけを確定転記し、配信見出しでD-SCOREを再採点して、annotations.jsonとbacktestを照合する。読めた値が一部だけの場合は非公開の作業記録に保持し、最終転記先へ部分的に入れない（1項目でも入ると現行の期限判定から除外される）。判定不能を完了とはせず、この対象実験の評価完了を確認して閉じる。",
       "source": "manual",
       "domain": null,
       "touches": [
@@ -1178,7 +1178,7 @@
       ],
       "outside_repo": true,
       "force_owner": "human",
-      "force_owner_why": "必要な数値のうち3つが PR TIMES のログイン後の分析画面にしかなく、**この実行系（主系 Actions / 代走 CCR）は外向きが絞られていて prtimes.jp に届かない**（実測 HTTP 000。google.com も同じなので prtimes 個別の遮断ではない）。\n\n⚠ **[2026-09-03 訂正] 「機械には取りに行けない」は言い過ぎだった。**`note-simplememo-3days` / `x-engagement-simplememofast` / `indie-hackers-karma-daily` は **Claude-in-Chrome MCP** でログイン済み Chrome を毎日動かしており、同じ経路なら読める。塞いでいたのは「機械の能力」ではなく「この実行系に Chrome が無いこと」。手順を docs/prtimes-d14-capture.md に置き、9/17 の Routine を作った。\n\n**それでも human のままにしてある** —— その Routine は**一度も実走していない**。書いた代走セッションは Chrome ツールを持たず分析画面の実物を見ていないので、画面の項目名も導線も推定のまま。**実走して取れたことを確かめるまで、人の側にも残す。**取れたらこの行は Routine 側が閉じる。",
+      "force_owner_why": "当初のActions/CCRでは非公開分析へ到達できず、取得を担う実行系の検証が必要だった。2026-09-04、明示承認後のCodexでは対象画面の読み取りに成功し、項目・単位・導線の推定は解消した。現在のhuman分類は過去の依頼と未完了のD14評価を残すもので、閲覧承認を再度求める意味ではない。Coworkの日次Routineで取得からPR作成まで完走した証拠はまだない。評価日の実測・対象実験の確定評価まで閉じない。",
       "auto": null,
       "close_check": {
         "kind": "manual",
@@ -1187,9 +1187,9 @@
       "state": "open",
       "not_before_jst": "2026-09-17",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-04",
       "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）",
+      "evidence": "2026-09-04、オーナーの明示承認後にrelease_id=9の分析を読み取り。公開日から当日までの日付指定、対象URL、ページビュー、参照元の訪問者数、デバイス比率、掲載メディア全件数を照合。導線・単位は docs/prtimes-d14-capture.md に反映。非公開数値はローカル記録に保存し、D14の転記・完了は未実施。",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1202,14 +1202,22 @@
           "force_owner_why",
           "evidence",
           "close_check"
-        ]
+        ],
+        "resolution_note": "上記のreasonは評価時点の履歴。続く2026-09-04の明示承認「ok」後、対象画面を読み取り済み。過去の移管の必要性は変更せず、D14評価は9/17まで未完了。"
       },
       "execution_authorization": {
         "date_jst": "2026-09-04",
         "by": "owner",
         "delegation": "人への依頼：あなたのおまかせ",
-        "private_data_access": "awaiting_specific_approval_after_auto_review_rejection",
-        "evaluation_due": "2026-09-17"
+        "private_data_access": "explicitly_approved_and_read_verified",
+        "evaluation_due": "2026-09-17",
+        "approval_request": "対象リリースの分析画面を、読み取り専用で開いてよいですか？",
+        "approval_response": "ok",
+        "scope": "PR TIMES release_id=9 の非公開分析を読み取り専用で確認",
+        "verified_runtime": "Codex in-app browser",
+        "verified_jst": "2026-09-04",
+        "routine_end_to_end_verified": false,
+        "private_metrics_published": false
       }
     },
     {
