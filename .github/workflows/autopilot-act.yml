@@ -32,6 +32,8 @@
 name: Autopilot Act
 
 on:
+  repository_dispatch:
+    types: [autopilot-completed]
   workflow_run:
     # 監視Issueの作成・閉鎖を次の朝まで台帳の外へ置かない。
     workflows: ["Obsidian Autopilot", "Autopilot Health", "Cron Health"]

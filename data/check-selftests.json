@@ -238,6 +238,12 @@
       "broke": "on_exceed が知らない値／月次上限が数でない／run の費用が数でない の3通りで落ちることを観測"
     },
     {
+      "script": "scripts/autopilot-completion.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-05",
+      "broke": "実際のworkflowの完了通知呼出を切断し --check が非0終了。実際の同期ハンドラから起動元の検証結果を渡さない変異も --selftest が非0終了。API応答の検体で手動起動・手動再実行・別workflow/branch/fork・古い通知・取得失敗・未完了タイムアウトを検証し、無人検知に加算しない。主系と通知ジョブの順序が逆でも主系の失敗ステップを読む。模擬障害を本番実績には加算しない。"
+    },
+    {
       "script": "scripts/autopilot-data.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",

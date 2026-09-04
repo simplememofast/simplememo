@@ -602,3 +602,27 @@ jobs:
           print(f"  --run-id {run_id} --cost {cost} --turns {turns} --outcome <shipped|no_artifact|failed>")
           print("```")
           PY
+
+  # A completion event did not start Act after the scheduled 2026-09-05 failure.
+  # Keep the independent workflow_run + daily cron, and explicitly wake the observer.
+  # This token exists only in this job: no checkout, PAT, model, or Actions write access.
+  notify-completion:
+    name: Notify Autopilot Act
+    needs: autopilot
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    continue-on-error: true
+    permissions:
+      contents: write
+    steps:
+      - name: Dispatch the independent observer
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            await github.rest.repos.createDispatchEvent({
+              owner: context.repo.owner, repo: context.repo.repo,
+              event_type: 'autopilot-completed',
+              client_payload: { upstream_run_id: String(context.runId) }
+            });
