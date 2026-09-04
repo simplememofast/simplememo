@@ -61,6 +61,7 @@ export const REPO = 'simplememofast/simplememo';
 
 /** Issue 1件 → 台帳の行。**純関数。** */
 export function toAction(issue, todayJst) {
+  if (issue?.state !== 'open' || issue.pull_request) return null;
   const label = (issue.labels ?? [])
     .map((l) => (typeof l === 'string' ? l : l?.name))
     .find((n) => HEALTH_LABELS[n]);
@@ -90,8 +91,8 @@ export function toAction(issue, todayJst) {
 /**
  * 台帳へ差分を当てる。**純関数**（読み書きは呼び出し側）。
  *
- * - 既にある行は `last_seen_jst` だけ更新する。**title や evidence を上書きしない** ——
- *   セッションが書き足した経緯を、毎朝の取り込みで消さないため
+ * - 既にあるopen行は `last_seen_jst` だけ更新し、書き足された経緯を保つ
+ * - doneでもGitHubでopenなら再開する。旧閉鎖の根拠はprevious_closureに保つ
  * - 無い行は足す
  * - **閉じない。**回復は issue_closed が判定する
  */
@@ -104,36 +105,60 @@ export function mergeActions(doc, issues, todayJst) {
     const row = toAction(issue, todayJst);
     if (!row) continue;
     const at = byId.get(row.id);
-    if (at === undefined) { actions.push(row); added.push(row.id); }
-    else { actions[at] = { ...actions[at], last_seen_jst: todayJst }; seen.push(row.id); }
+    if (at === undefined) { byId.set(row.id, actions.length); actions.push(row); added.push(row.id); }
+    else {
+      const current = actions[at];
+      actions[at] = { ...current, last_seen_jst: todayJst };
+      if (current.state === 'done') {
+        Object.assign(actions[at], { state: 'open', closed_jst: null, reopened_jst: todayJst, created_jst: todayJst,
+          previous_closure: { closed_jst: current.closed_jst, evidence: current.evidence },
+          evidence: row.evidence });
+      }
+      seen.push(row.id);
+    }
   }
   return { doc: { ...doc, actions }, added, seen };
 }
 
-async function fetchOpenIssues({ token = process.env.GITHUB_TOKEN, fetchImpl = fetch } = {}) {
-  if (!token) return { issues: null, why: 'GITHUB_TOKEN が無い' };
-  const labels = Object.keys(HEALTH_LABELS).join(',');
-  const url = `https://api.github.com/repos/${REPO}/issues`
-    + `?state=open&labels=${encodeURIComponent(labels)}&per_page=50`;
+export async function fetchOpenIssues({ repo = REPO, token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN,
+  fetchImpl = fetch, perPage = 100, maxPages = 5 } = {}) {
+  if (!token) return { issues: null, why: 'GitHubの読み取りトークンが無い' };
+  if (!Number.isInteger(perPage) || perPage < 1 || perPage > 100
+    || !Number.isInteger(maxPages) || maxPages < 1 || maxPages > 10) return { issues: null, why: '不正な取得上限' };
   try {
-    const res = await fetchImpl(url, {
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
-      signal: AbortSignal.timeout(20000),
-    });
-    if (!res.ok) return { issues: null, why: `GitHub API が ${res.status}` };
-    const body = await res.json();
-    // PR は issues API にも出てくる。**Issue だけを運ぶ。**
-    return { issues: body.filter((x) => !x.pull_request), why: null };
+    // GitHubのlabels=a,bは両ラベルの一致。監視はどちらか一方でよいので別々に読む。
+    const groups = await Promise.all(Object.keys(HEALTH_LABELS).map(async label => {
+      const issues = [];
+      for (let page = 1; page <= maxPages; page++) {
+        const url = `https://api.github.com/repos/${repo}/issues?state=open`
+          + `&labels=${encodeURIComponent(label)}&per_page=${perPage}&page=${page}`;
+        const res = await fetchImpl(url, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+          signal: AbortSignal.timeout(20000),
+        });
+        if (!res.ok) throw new Error(`GitHub API が ${res.status}`);
+        const body = await res.json();
+        if (!Array.isArray(body) || body.some(x => !Number.isInteger(x?.number) || x.state !== 'open'
+          || !Array.isArray(x.labels))) throw new Error('Issue一覧の形式が不正');
+        for (const issue of body) {
+          if (!issue.pull_request && issue.labels.some(l => (typeof l === 'string' ? l : l?.name) === label)) issues.push(issue);
+        }
+        if (body.length < perPage) return issues;
+      }
+      throw new Error('ページ上限まで取得しても一覧を覆いきれない');
+    }));
+    const unique = new Map(groups.flat().map(issue => [issue.number, issue]));
+    return { issues: [...unique.values()].sort((a, b) => a.number - b.number), why: null };
   } catch (e) {
     return { issues: null, why: `取得に失敗: ${String(e).slice(0, 120)}` };
   }
 }
 
-export function selftest() {
+export async function selftest() {
   const p = [];
   const eq = (got, want, msg) => { if (got !== want) p.push(`${msg}（got ${JSON.stringify(got)}）`); };
 
-  const iss = { number: 42, title: '出荷が2日止まっている', labels: [{ name: 'ops/autopilot-stale' }] };
+  const iss = { number: 42, state: 'open', title: '出荷が2日止まっている', labels: [{ name: 'ops/autopilot-stale' }] };
   const row = toAction(iss, '2026-08-26');
   eq(row?.id, 'act-health-42', 'id が issue 番号で決まっていない');
   eq(row?.source, 'health', 'source が health でない');
@@ -142,11 +167,11 @@ export function selftest() {
   eq(row?.close_check?.params?.issue, 42, '閉じ条件に issue 番号が渡っていない');
 
   // **対象ラベル以外は運ばない**
-  eq(toAction({ number: 1, title: 'x', labels: [{ name: 'enhancement' }] }, '2026-08-26'), null,
+  eq(toAction({ number: 1, state: 'open', title: 'x', labels: [{ name: 'enhancement' }] }, '2026-08-26'), null,
      '対象外のラベルを運んでいる');
   eq(toAction({ number: 1, title: 'x', labels: [] }, '2026-08-26'), null, 'ラベル無しを運んでいる');
   // 文字列ラベル（APIの表現ゆれ）
-  eq(toAction({ number: 2, title: 'x', labels: ['ops/cron-failure'] }, '2026-08-26')?.id,
+  eq(toAction({ number: 2, state: 'open', title: 'x', labels: ['ops/cron-failure'] }, '2026-08-26')?.id,
      'act-health-2', '文字列ラベルを読めていない');
 
   // 差分の当て方
@@ -154,6 +179,7 @@ export function selftest() {
   const first = mergeActions(base, [iss], '2026-08-26');
   eq(first.added.length, 1, '新規を足していない');
   eq(first.doc.actions.length, 1, '台帳に入っていない');
+  eq(mergeActions(base, [iss, iss], '2026-08-26').doc.actions.length, 1, '同一入力内のIssueを重複させた');
 
   // **2回目は足さない**（毎朝走るので冪等でないと台帳が膨らむ）
   const second = mergeActions(first.doc, [iss], '2026-08-27');
@@ -171,6 +197,35 @@ export function selftest() {
   const closed = mergeActions(first.doc, [], '2026-08-29');
   eq(closed.doc.actions[0].state, 'open', '**取り込みが行を閉じている**（回復の判定は issue_closed の仕事）');
 
+  eq(toAction({ ...iss, state: 'closed' }, '2026-09-04'), null, 'closedを新規障害にしない');
+  eq(toAction({ ...iss, pull_request: {} }, '2026-09-04'), null, 'PRを障害にしない');
+  const reopened = mergeActions({ actions: [{ ...row, state: 'done', closed_jst: '2026-09-03', evidence: '旧判定' }] }, [iss], '2026-09-04');
+  eq(reopened.doc.actions[0].state, 'open', 'GitHubでopenのIssueが台帳のdoneに隠れたまま');
+  eq(reopened.doc.actions[0].previous_closure.evidence, '旧判定', '旧閉鎖の根拠を消した');
+
+  const all = [iss, { ...iss, number: 43, labels: ['ops/cron-failure'] },
+    { ...iss, number: 44, labels: Object.keys(HEALTH_LABELS) }, { ...iss, number: 45, pull_request: {} }];
+  const res = (body, ok = true) => ({ ok, status: ok ? 200 : 403, json: async () => body });
+  const requested = [];
+  const github = async url => {
+    const q = new URL(url).searchParams; requested.push(q);
+    const wanted = q.get('labels').split(',');
+    const filtered = all.filter(i => wanted.every(l => i.labels.map(x => typeof x === 'string' ? x : x.name).includes(l)));
+    const size = Number(q.get('per_page')); const start = (Number(q.get('page')) - 1) * size;
+    return res(filtered.slice(start, start + size));
+  };
+  const observed = await fetchOpenIssues({ token: 'test', fetchImpl: github, perPage: 2 });
+  eq(JSON.stringify(observed.issues?.map(i => i.number)), '[42,43,44]', '片方のラベル・2ページ目・重複排除が正しくない');
+  eq(requested.every(q => !q.get('labels').includes(',')), true, '監視ラベルをAND指定した');
+  eq(requested.some(q => q.get('page') === '2'), true, '2ページ目を読まない');
+  eq((await fetchOpenIssues({ token: 'test', fetchImpl: github, perPage: 1, maxPages: 1 })).issues, null, '不完全な一覧を正常扱いした');
+  for (const fetchImpl of [async () => res([], false), async () => res({}), async () => res([{}]),
+    async () => { throw new Error('network'); }, async url => new URL(url).searchParams.get('labels') === 'ops/cron-failure' ? res([], false) : res([])]) {
+    eq((await fetchOpenIssues({ token: 'test', fetchImpl })).issues, null, '取得失敗を空一覧にした');
+  }
+  eq((await fetchOpenIssues({ token: '', fetchImpl: github })).issues, null, 'トークン欠落を空一覧にした');
+  eq((await fetchOpenIssues({ token: 'test', fetchImpl: async () => res([]) })).issues.length, 0, '実際の空一覧を読めない');
+
   return p;
 }
 
@@ -179,7 +234,7 @@ if (isMain) {
   const argv = process.argv.slice(2);
 
   if (argv.includes('--selftest') || argv.includes('--check')) {
-    const problems = selftest();
+    const problems = await selftest();
     if (problems.length) {
       console.error('自己検査で問題:');
       for (const x of problems) console.error(`  - ${x}`);
