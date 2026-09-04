@@ -327,6 +327,19 @@ node scripts/autopilot-selfheal.mjs   # 未修理の故障があればレーンF
 
 **① BigQuery一括エクスポート（一次・自動）**
 
+主系（Actions）ではモデル起動前の `scripts/autopilot-data.mjs` が既存の資格情報で
+取得・鮮度・欠損を検査する。`AUTOPILOT_DATA_REPORT` が設定されていれば、まず
+そのJSONを読む。`bq_checked`・`newest_data_date`・`observed_days` を今回の実測として
+statusへ記録する。`partial` は取得成功だが28日未満なので、28日窓との比較に使わない。
+`ready` のときは `GROWTH_GSC_DIR` に検査済みの一時スナップショットが設定済みで、
+`growth/scripts/analyze.mjs` などはそのまま最新データを読む。再認証や再取得は不要。
+一時スナップショットを公開リポジトリへコピー・コミットしない。
+`unavailable` は取得失敗であり、データなし・0件ではない。失敗段階を記録し、
+既存の手動スナップショットか独立したレーンの根拠を使う。
+資格情報は取得ステップ内だけにあり、モデルへは渡さない。
+
+`AUTOPILOT_DATA_REPORT` が無い副系・ローカル経路では、従来どおり以下で取得する。
+
 ```
 node growth/scripts/bq-preflight.mjs   # 稼働状況と28日到達までの残り日数
 ```
