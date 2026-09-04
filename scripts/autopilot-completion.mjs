@@ -12,9 +12,13 @@ const REPO = 'simplememofast/simplememo';
 export const NOTIFY_JOB = 'Notify Autopilot Act';
 const BOT = 'github-actions[bot]';
 
-export function primarySteps(jobs) {
+export function primaryJob(jobs) {
   // Adding a post-job must not make its successful dispatch look like a successful model run.
-  return jobs.find(job => job.name === 'autopilot')?.steps ?? null;
+  return jobs.find(job => job.name === 'autopilot') ?? null;
+}
+
+export function primarySteps(jobs) {
+  return primaryJob(jobs)?.steps ?? null;
 }
 
 function isRun(run, id, workflow) {
@@ -92,6 +96,7 @@ export function checkWiring(primary, act, source) {
   assert.match(act, /cron: '0 0 \* \* \*'/);
   assert.match(source, /await completionOrigin\(\)/);
   assert.match(source, /primarySteps\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)/);
+  assert.match(source, /jobId = primaryJob\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)\?\.id/);
   return true;
 }
 
