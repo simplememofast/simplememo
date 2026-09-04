@@ -1954,12 +1954,35 @@ export function interpretRun(run) {
 // 1つの handler の失敗で日次の同期が丸ごと止まると、止まったこと自体が
 // 見えなくなる（このファイル冒頭に書いた「壊れているときほど記録が消える」の再来）。
 
+/** GitHub の失敗ステップの完了時刻だけを使う。run の作成時刻は故障時刻ではない。 */
+export function detectionEvidence(run, eventName, now = new Date()) {
+  const detectedAt = now.toISOString();
+  const completedFailure = run.status === 'completed' && ['failure', 'cancelled'].includes(run.conclusion);
+  const failures = completedFailure ? (run.steps ?? []).filter(step =>
+    ['failure', 'cancelled'].includes(step.conclusion)
+    && typeof step.completed_at === 'string' && Number.isFinite(Date.parse(step.completed_at))
+    && Date.parse(step.completed_at) <= now.getTime()
+    && Number.isFinite(Date.parse(run.created_at))
+    && Date.parse(step.completed_at) >= Date.parse(run.created_at)) : [];
+  failures.sort((a, b) => Date.parse(a.completed_at) - Date.parse(b.completed_at));
+  const failure = failures[0];
+  return {
+    source: ['schedule', 'workflow_run'].includes(eventName) ? 'act-reconcile' : 'act-reconcile-session',
+    detected_at: detectedAt,
+    failed_at: failure?.completed_at ?? null,
+    detected_note: `Actions run ${run.id} を ${eventName || 'local-session'} で照合。`
+      + (failure ? `失敗時刻は GitHub step #${failure.number}「${failure.name}」の completed_at。`
+        : '失敗ステップの確定時刻は未取得。run の作成時刻で代用しない。'),
+  };
+}
+
 export const HANDLERS = {
   /**
    * 運転台帳の同期。Actions API の run を台帳へ落とす。
    * autopilot-runs.mjs --append を呼ぶ（検証を通す唯一の書き込み経路）。
    */
-  async 'reconcile-runs'(ctx) {
+  async 'reconcile-runs'(ctx, _action, { append = (args) => execFileSync(process.execPath,
+    [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
     if (!ctx.workflowRuns) return { ok: false, changed: 0, log: 'Actions API を読めず同期できない' };
     const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
     const log = [];
@@ -1983,9 +2006,10 @@ export const HANDLERS = {
       // **成功した回は書かない**。書かないことで指標が甘くなることは無い
       //（shipped を落とすと完走率は下がる側に倒れる）。
       if (v.outcome === 'shipped') { log.push(`${run.id}: 成功回はPR特定が要るため自動追記しない`); continue; }
+      const observation = detectionEvidence(run, ctx.eventName);
       const args = ['--append', '--run-id', runId, '--date', run.jst_date, '--route', 'actions',
         '--outcome', v.outcome, '--attempted', String(v.attempted),
-        '--external-ref', String(run.id), '--source', 'act-reconcile'];
+        '--external-ref', String(run.id), '--source', observation.source];
       if (v.failure_reason) args.push('--failure-reason', v.failure_reason);
       if (v.failure_class) args.push('--failure-class', v.failure_class);
       // **なぜ寝たかが決まった回だけ渡す。**渡さない回は autopilot-runs.mjs 側が
@@ -2000,10 +2024,10 @@ export const HANDLERS = {
       }
       if (v.note) args.push('--stage-note', v.note);
       if (v.needs_triage) args.push('--needs-triage', 'true');
-      args.push('--detected-at', new Date().toISOString());
+      args.push('--detected-at', observation.detected_at, '--detected-note', observation.detected_note);
+      if (observation.failed_at) args.push('--failed-at', observation.failed_at);
       try {
-        const out = execFileSync(process.execPath,
-          [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' });
+        const out = append(args);
         log.push(`${run.id} -> ${runId}: ${out.trim()}`);
         changed += 1;
       } catch (e) {
@@ -2424,6 +2448,33 @@ async function selftest() {
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
+  const observedRun = { id: 123, status: 'completed', conclusion: 'failure', event: 'schedule',
+    created_at: '2026-09-04T00:00:00Z', jst_date: '2026-09-04',
+    steps: [{ number: 3, name: 'Claude Code', conclusion: 'failure', started_at: '2026-09-04T00:01:00Z', completed_at: '2026-09-04T00:02:00Z' },
+      { number: 9, name: 'Final check', conclusion: 'failure', completed_at: '2026-09-04T00:04:00Z' }] };
+  const detectedNow = new Date('2026-09-04T00:05:00Z');
+  const detection = detectionEvidence(observedRun, 'workflow_run', detectedNow);
+  t('最初の失敗ステップの確定時刻を保存する', detection.failed_at === '2026-09-04T00:02:00Z');
+  t('検知と故障の時刻は別に記録する', detection.detected_at === detectedNow.toISOString());
+  for (const event of ['schedule', 'workflow_run', 'workflow_dispatch', undefined]) {
+    t(`検知の起動元を区別する: ${event}`, detectionEvidence(observedRun, event, detectedNow).source
+      === (['schedule', 'workflow_run'].includes(event) ? 'act-reconcile' : 'act-reconcile-session'));
+  }
+  for (const change of [{ steps: null }, { status: 'in_progress' }, { conclusion: 'success' },
+    { created_at: 'invalid' }, { steps: [{ conclusion: 'failure', completed_at: 'invalid' }] },
+    { steps: [{ conclusion: 'failure', completed_at: '2026-09-04T00:06:00Z' }] },
+    { steps: [{ conclusion: 'failure', completed_at: '2026-09-03T00:06:00Z' }] }]) {
+    t('未知・未来・実行前の時刻を故障時刻にしない', detectionEvidence({ ...observedRun, ...change }, 'schedule', detectedNow).failed_at === null);
+  }
+  for (const eventName of ['schedule', 'workflow_dispatch']) {
+    let appended;
+    await HANDLERS['reconcile-runs']({ workflowRuns: [observedRun], runsDoc: { runs: [] }, eventName }, null,
+      { append: (args) => { appended = args; return 'recorded'; } });
+    const value = flag => appended?.[appended.indexOf(flag) + 1];
+    t(`同期ハンドラから故障時刻をappendへ渡す: ${eventName}`, value('--failed-at') === '2026-09-04T00:02:00Z');
+    t(`同期ハンドラから検知の起動元をappendへ渡す: ${eventName}`, value('--source')
+      === (eventName === 'schedule' ? 'act-reconcile' : 'act-reconcile-session'));
+  }
   const matrix = {
     self_repair: {
       // 実ファイル（data/authority-matrix.json）の may_modify から、ここで要る分だけ写した検体。
@@ -3840,7 +3891,8 @@ async function buildContext(today, ledger = null) {
   const issues = await fetchOpenHealthIssues(repo, token);
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
-  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues, ledgerDoc: ledger, repo, token };
+  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues,
+    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME };
 }
 
 async function main() {
