@@ -311,7 +311,7 @@
       
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最終更新日：<time datetime="2026-05-07">2026年5月7日</time></p>
+        <p class="page-content__date">最終更新日：<time datetime="2026-09-04">2026年9月4日</time></p>
         <div class="page-content__body">
           <p>株式会社ユリカ（以下「当社」）は、「Obsidian連携シンプルメモ」（以下「本サービス」）におけるユーザー情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。</p>
 
@@ -329,14 +329,18 @@
           <ul>
             <li>端末情報（OS/端末種別等の一般的な情報）</li>
             <li>送信処理に必要なログ（送信日時、結果ステータス等）</li>
+            <li>利用イベント（画面表示・操作・送信結果）、端末単位のランダムな識別子、セッションID、送信ID、起動の完了状況などの診断情報</li>
             <li>不正利用対策やレート制限のための技術情報（IPアドレス、リクエスト情報等）</li>
           </ul>
+
+          <p>利用イベントにはメールアドレスやメモ本文を含めませんが、送信IDを介して送信記録の宛先メールアドレスのハッシュと紐付けられます。このため、これらのイベントや端末識別子、診断情報はユーザーと結び付けられる情報として扱います。</p>
 
           <h2>2. 利用目的</h2>
           <p>取得した情報は、以下の目的で利用します。</p>
           <ul>
             <li>メール送信機能の提供（送信、未送信管理／再送、履歴表示）</li>
             <li>本サービスの運用・保守、障害対応、品質改善</li>
+            <li>内部テスト端末を利用集計から除外し、設定済みのObsidian機能の案内が重複しないようにすること</li>
             <li>不正利用防止・セキュリティ確保（短時間連続送信の制限、サーバ側レート制限等）</li>
             <li>お問い合わせ対応</li>
             <li>法令遵守</li>
@@ -399,7 +403,7 @@
           <p>当社は、情報の漏えい、滅失、毀損の防止等のため、合理的な安全対策を講じます。</p>
 
           <h2>9. 保管期間</h2>
-          <p>当社は、利用目的に必要な期間を超えて情報を保管しないよう努めます。ログ等は、不正対策や運用上必要な範囲で一定期間保管される場合があります。</p>
+          <p>当社は、利用目的に必要な期間を超えて情報を保管しないよう努めます。利用イベントは90日、送信IDと宛先ハッシュの対応記録は35日を超えたものを定期削除します。その他のログ等は、不正対策や運用上必要な範囲で一定期間保管される場合があります。</p>
 
           <h2>10. 改定</h2>
           <p>当社は、本ポリシーを必要に応じて改定します。改定後は本サービスまたは当社ウェブサイト等に掲示します。</p>
@@ -414,9 +418,9 @@
             <li><strong>鍵管理</strong>: 256-bit 対称鍵は Apple Keychain Services（<code>kSecClassGenericPassword</code>）に保管され、デバイス外に取り出せません。バックアップにも含まれません。</li>
             <li><strong>通信路</strong>: API 通信はすべて TLS（HTTPS）で保護されます。クライアント側は <code>URLSessionConfiguration.ephemeral</code> を使用し、Cookie・キャッシュを残しません。</li>
             <li><strong>メール本文</strong>: 送信処理のため当社の Relay API（Cloudflare Workers）と外部送信基盤（Resend）を通過しますが、恒常的な保存は行いません。ログにも記録しません（開発時の DEBUG ビルドを除く）。</li>
-            <li><strong>メールアドレスのサーバ保存</strong>: リマインダー機能をオプトインされた場合のみ、メールアドレスの SHA-256 ハッシュを Cloudflare D1 に保存します。原文は Resend の Contact API のみが保持します。</li>
+            <li><strong>メールアドレスのサーバ保存</strong>: 送信IDと宛先メールアドレスのハッシュ（SHA-256から生成）の対応を Cloudflare D1 に保存します。この対応記録はリマインダーのオプトインにかかわらず作成されます。リマインダー用の連絡先は Resend の Contact API で管理します。</li>
             <li><strong>暗号化・保管・通信路の依存関係</strong>: メモ本文の暗号化（CryptoKit）、鍵保管（Keychain Services）、通信（URLSession / Network.framework）はすべて Apple 純正フレームワークで完結し、サードパーティ SDK を介しません。</li>
-            <li><strong>その他のオプション機能の SDK</strong>: 任意のオンボーディング短縮機能として Google アカウントから email を取り込む際に、Google が提供する <code>GoogleSignIn-iOS SDK</code> および Firebase Authentication SDK を使用します（v2.4 以降）。バックエンド API への不正アクセス防止のため、Apple の App Attest を活用する Firebase App Check SDK を起動時に初期化します。利用解析（PII を含まないファネルイベント）は自社実装で当社の <code>/v1/analytics/event</code> エンドポイントへ送信します。</li>
+            <li><strong>その他のオプション機能の SDK</strong>: 任意のオンボーディング短縮機能として Google アカウントから email を取り込む際に、Google が提供する <code>GoogleSignIn-iOS SDK</code> および Firebase Authentication SDK を使用します（v2.4 以降）。バックエンド API への不正アクセス防止のため、Apple の App Attest を活用する Firebase App Check SDK を起動時に初期化します。利用解析は自社実装で当社の <code>/v1/analytics/event</code> エンドポイントへ送信します。メールアドレスや本文を直接含めませんが、送信IDを介して宛先のハッシュと紐付けられます。</li>
           </ul>
           <p><strong>注意</strong>: 本サービスは <strong>End-to-End 暗号化（E2EE）を提供していません</strong>。受信者であるユーザーご自身のメールクライアントで通常通り本文を読めるよう、メール本文は標準的な SMTP プロトコルで配信されます。E2EE が必要な用途には、Standard Notes・Signal・ProtonMail などの専用サービスをご検討ください。</p>
           <p>この節の内容は、Obsidianユーザー向けに「データの通り道」の図解として<a href="/privacy-architecture/">プライバシー設計</a>ページにまとめ直しています。</p>

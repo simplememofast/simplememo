@@ -23,8 +23,9 @@
  * 【定義（ここが全部）】
  * - 対象コミット … 指定窓の author date。**マージコミットは除く**
  *   （マージは差分の重複計上になり、率を上げる方向に効く）
- * - AI著者 … `author` に Claude を含む、または本文に `Co-Authored-By: Claude`、
- *   または本文に Claude Code の足跡（`Generated with [Claude Code]` / セッション URL / `Claude-Session:`）— 定義 v2（2026-09-02）
+ * - AI著者 … `author` に Claude / Codex を含む、または本文に `Co-Authored-By: Claude` / `Co-Authored-By: Codex`、
+ *   または本文に Claude Code の足跡（`Generated with [Claude Code]` / セッション URL / `Claude-Session:`）— 定義 v3（2026-09-04）
+ *   過去の台帳は当時の定義を保持し、新しい計測には使用した定義を記録する。
  * - 変更行 … `git show --numstat` の **追加 + 削除**（バイナリの `-` は0扱い）
  * - 範囲 … 3リポジトリ。既定は現在のブランチのみ。`--all-branches` で全参照
  * - 窓 … **計測日そのものは入れない。**計測日はAIが集中的に書いている日に
@@ -39,6 +40,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { execFileSync } from 'node:child_process';
@@ -47,8 +49,12 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER = path.join(ROOT, 'data/code-authorship.json');
 const REPOS = ['simplememo', 'simplememo-api', 'simplememo-ios'];
 
-const AI_AUTHOR = /claude/i;
-const AI_TRAILER = /^Co-Authored-By:\s*Claude/im;
+const AI_AUTHOR = /claude|\bcodex\b/i;
+const AI_TRAILER = /^Co-Authored-By:[ \t]*(?:Claude|Codex(?:[ \t<]|$))/im;
+export const AUTHOR_METHOD = {
+  definition_version: 3,
+  ai_author_definition: 'author に Claude / Codex を含む、または本文に Co-Authored-By: Claude / Co-Authored-By: Codex、または本文に Claude Code の足跡（Generated with [Claude Code] / claude.ai/code/session / Claude-Session:）。定義 v3（2026-09-04。v2 に Codex の署名とトレーラーを追加）',
+};
 /**
  * [2026-09-02] 定義 v2。**PR 本文の末尾に付く機械の足跡**も AI 著者の印に数える。
  * GitHub の squash マージはコミット本文に PR 本文を写すが、Claude Code が作る PR 本文の末尾は
@@ -59,6 +65,10 @@ const AI_TRAILER = /^Co-Authored-By:\s*Claude/im;
  * 方針は変えない —— 申告の書式を1つ増やしただけ。
  */
 const AI_FOOTPRINT = /Generated with \[Claude Code\]|claude\.ai\/code\/session|^Claude-Session:/im;
+
+export function isAiAuthoredCommit({ author = '', body = '' }) {
+  return AI_AUTHOR.test(author) || AI_TRAILER.test(body) || AI_FOOTPRINT.test(body);
+}
 
 /** 1リポジトリを数える。git が無い・リポジトリが無い場合は null（0ではない）。 */
 export function measureRepo(repoPath, { from, to, allBranches = false }) {
@@ -86,7 +96,7 @@ export function measureRepo(repoPath, { from, to, allBranches = false }) {
   for (const c of commits) {
     if (seen.has(c.sha)) continue;
     seen.add(c.sha);
-    const isAI = AI_AUTHOR.test(c.author) || AI_TRAILER.test(c.body) || AI_FOOTPRINT.test(c.body);
+    const isAI = isAiAuthoredCommit(c);
     let lines = 0;
     try {
       const stat = execFileSync('git', ['show', '--numstat', '--format=', c.sha],
@@ -214,11 +224,57 @@ const SELFTEST_BREAKAGES = [
     d.windows[0].total.commits_total += 7;
   }],
 ];
-const SCENARIOS = ledgerScenarios(
+const SCENARIOS = [...ledgerScenarios(
   () => JSON.parse(fs.readFileSync(LEDGER, 'utf8')),
   (d) => validateLedger(d),
   SELFTEST_BREAKAGES,
-);
+),
+  ['Codex の署名・トレーラーを AI と数える', () => {
+    assert(isAiAuthoredCommit({ author: 'Codex <noreply@openai.com>' }), 'Codex author');
+    assert(isAiAuthoredCommit({ body: 'Fix delivery\n\nCo-Authored-By: Codex <noreply@openai.com>' }), 'Codex trailer');
+    assert(isAiAuthoredCommit({ body: 'co-authored-by: codex <noreply@openai.com>' }), 'case insensitive');
+  }],
+  ['Claude の署名・トレーラー・足跡は従来どおり', () => {
+    assert(isAiAuthoredCommit({ author: 'Claude <noreply@anthropic.com>' }), 'Claude author');
+    for (const body of ['Co-Authored-By: Claude Code <noreply@anthropic.com>',
+      'Generated with [Claude Code]', 'https://claude.ai/code/session/example', 'Claude-Session: example']) {
+      assert(isAiAuthoredCommit({ body }), body);
+    }
+  }],
+  ['本文での言及・似た名前・人の申告を AI と誤認しない', () => {
+    for (const commit of [{ body: 'Fix the Codex integration' }, { body: 'Author-Role: human' },
+      { author: 'Codexity <alice@example.com>' }, { body: 'Co-Authored-By: Codexity <alice@example.com>' }, {}]) {
+      assert(!isAiAuthoredCommit(commit), JSON.stringify(commit));
+    }
+  }],
+  ['実際の git 履歴のコミット数と変更行へ Codex 判定が反映される', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'code-authorship-'));
+    try {
+      const env = { ...process.env, GIT_AUTHOR_NAME: 'Alice', GIT_AUTHOR_EMAIL: 'alice@example.com',
+        GIT_COMMITTER_NAME: 'Alice', GIT_COMMITTER_EMAIL: 'alice@example.com',
+        GIT_AUTHOR_DATE: '2026-09-01T12:00:00Z', GIT_COMMITTER_DATE: '2026-09-01T12:00:00Z' };
+      const git = (args, extra = {}) => execFileSync('git', args, { cwd: dir, env: { ...env, ...extra }, stdio: 'pipe' });
+      git(['init', '-q']);
+      const commits = [
+        ['Codex author', { GIT_AUTHOR_NAME: 'Codex' }],
+        ['Fix\n\nCo-Authored-By: Codex <noreply@openai.com>', {}],
+        ['Fix\n\nCo-Authored-By: Claude <noreply@anthropic.com>', {}],
+        ['Fix\n\nAuthor-Role: human', {}],
+        ['Document Codex usage', {}],
+      ];
+      for (const [i, [body, author]] of commits.entries()) {
+        fs.writeFileSync(path.join(dir, `${i}.txt`), 'one line\n');
+        git(['add', `${i}.txt`]);
+        git(['-c', 'commit.gpgsign=false', 'commit', '-qm', body], author);
+      }
+      const got = measureRepo(dir, { from: '2026-09-01', to: '2026-09-01' });
+      assert(got.commits_total === 5 && got.commits_ai === 3, JSON.stringify(got));
+      assert(got.lines_total === 5 && got.lines_ai === 3, JSON.stringify(got));
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  }],
+];
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
@@ -288,6 +344,7 @@ if (isMain) {
     if (!stored) { console.error('data/code-authorship.json が無い — 先に --write'); process.exit(1); }
     const entry = {
       measured_at: arg('--at', new Date().toISOString().slice(0, 10)),
+      method: { ...AUTHOR_METHOD },
       from: r.from, to: r.to, all_branches: r.all_branches,
       per_repo: r.per_repo, total: r.total,
       rates: {
@@ -324,7 +381,7 @@ if (isMain) {
       measured_at: arg('--at', new Date().toISOString().slice(0, 10)),
       from: r.from, to: r.to, all_branches: r.all_branches,
       method: {
-        ai_author_definition: 'author に Claude を含む、または本文に Co-Authored-By: Claude、または本文に Claude Code の足跡（Generated with [Claude Code] / claude.ai/code/session / Claude-Session:）。定義 v2（2026-09-02。v1 は署名とトレーラーのみ。8/11〜9/1 の実測で v1=v2）',
+        ...AUTHOR_METHOD,
         lines: 'git show --numstat の 追加 + 削除（バイナリは0）',
         excludes_merges: true,
         dedupe: 'SHA で一意化（--all は同じコミットを複数参照から拾う）',

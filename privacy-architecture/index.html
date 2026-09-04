@@ -59,7 +59,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/privacy-architecture/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","headline":"プライバシー設計 — メモ本文はどこを通り、どこに残らないか","description":"Obsidian連携シンプルメモのデータの通り道を全公開。Vault追記はローカル完結、AIタグ付けはオンデバイス、メール配送は標準SMTPでE2EEではない——できること・できないことを隠さず明文化。","url":"https://simplememofast.com/privacy-architecture/","datePublished":"2026-08-11","dateModified":"2026-08-11","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/privacy-architecture/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/privacy-architecture/#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","headline":"プライバシー設計 — メモ本文はどこを通り、どこに残らないか","description":"Obsidian連携シンプルメモのデータの通り道を全公開。Vault追記はローカル完結、AIタグ付けはオンデバイス、メール配送は標準SMTPでE2EEではない——できること・できないことを隠さず明文化。","url":"https://simplememofast.com/privacy-architecture/","datePublished":"2026-08-11","dateModified":"2026-09-04","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/privacy-architecture/"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"プライバシー設計","item":"https://simplememofast.com/privacy-architecture/"}]}</script>
@@ -217,7 +217,8 @@
               <tr><th scope="row">メモ本文</th><td>あなたのメール受信箱</td><td>残る（それが目的です）</td></tr>
               <tr><th scope="row">メモ本文</th><td>あなたのObsidian Vault（設定時）</td><td>残る（端末内ローカル）</td></tr>
               <tr><th scope="row">Outbox・送信履歴</th><td>端末内のみ</td><td>AES-GCM-256で暗号化保存</td></tr>
-              <tr><th scope="row">メールアドレス</th><td>Cloudflare D1</td><td class="yes">リマインダーをオプトインした場合のみSHA-256ハッシュを保存（原文はResendのContact APIのみ）</td></tr>
+              <tr><th scope="row">メールアドレス</th><td>Cloudflare D1</td><td class="yes">送信IDと宛先ハッシュの対応を保存。リマインダーのオプトインとは別に記録し、35日を超えたものを定期削除</td></tr>
+              <tr><th scope="row">利用イベント・端末識別子・診断情報</th><td>Cloudflare D1</td><td>90日を超えたものを定期削除。送信IDを介して宛先ハッシュと紐付け可能</td></tr>
               <tr><th scope="row">AIタグ付けの入力（本文）</th><td>外部サーバー</td><td class="yes">送られない（オンデバイス処理）</td></tr>
             </tbody>
           </table>
@@ -230,7 +231,7 @@
           <span>データ経路のサードパーティSDKはゼロ</span>
         </h2>
         <p class="lp-section__lead">
-          <span>メモ本文の暗号化（CryptoKit）・鍵保管（Keychain Services）・通信（URLSession / Network.framework）は、すべてApple純正フレームワークで完結しています。<strong>暗号化・保管・通信路のパイプラインにサードパーティSDKは入っていません。</strong>任意機能のためのSDKは範囲を限定して使っています: Googleサインイン（オンボーディングのメール自動入力・GoogleSignIn-iOS + Firebase Authentication）、バックエンドAPIの不正利用防止（Firebase App Check・Apple App Attest）、PIIを含まない自社実装のファネル解析。これらはメモ本文のデータ経路に関与しません。</span>
+          <span>メモ本文の暗号化（CryptoKit）・鍵保管（Keychain Services）・通信（URLSession / Network.framework）は、すべてApple純正フレームワークで完結しています。<strong>暗号化・保管・通信路のパイプラインにサードパーティSDKは入っていません。</strong>任意機能のためのSDKは範囲を限定して使っています: Googleサインイン（オンボーディングのメール自動入力・GoogleSignIn-iOS + Firebase Authentication）、バックエンドAPIの不正利用防止（Firebase App Check・Apple App Attest）、自社実装の利用解析（メールアドレス・本文は直接含めませんが、送信IDを介して宛先ハッシュと紐付け可能です）。これらはメモ本文のデータ経路に関与しません。</span>
         </p>
       </section>
 
