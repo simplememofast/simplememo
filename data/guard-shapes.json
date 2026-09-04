@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/autopilot-checkpoint.mjs",
+      "expr": "files",
+      "disposition": "前提",
+      "note": "2026-09-05: assertの検証式。patchが空、または1パスでも宣言済みの公開ページ・画像の外なら復元を拒否する。空集合で検査を省略する向きではない。改ざんした.env追加patchの実際のGit復元を自己テストで拒否。"
+    },
+    {
       "file": "growth/scripts/build-queues.mjs",
       "expr": "queue.generated_at",
       "disposition": "報告のみ",
