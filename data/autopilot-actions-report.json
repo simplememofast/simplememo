@@ -1,6 +1,6 @@
 {
   "as_of_jst": "2026-09-04",
-  "open_total": 2,
+  "open_total": 1,
   "oldest_open_days": 1,
   "acknowledged": 7,
   "closed_today": [
@@ -38,6 +38,11 @@
       "id": "act-faq-question-level-audit",
       "title": "手書き FAQPage 47面の「質問文が可視 FAQ と合っているか」は、まだ数えられない（素朴な突き合わせは27面が誤検出）",
       "evidence": "オーナーの「人への依頼：あなたのおまかせ」を受け、質問比較を生成器から分離した読み取り専用監査として実装。inject_faq_schema.py --audit-questions / --check から実行。実サイト68面は一致58・候補10・読取不能0。候補10面の意味照合、検体の誤検出0/6・見逃し0/5、4変異の失敗を data/check-selftests.json に記録。146面の生成payloadは旧実装と全件一致。根拠と内容SHAは docs/faq-question-audit-2026-09-04.md。差分を欠陥と自動判定せず、回答の真偽・CSS可視性は検査範囲外。"
+    },
+    {
+      "id": "act-health-869",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "evidence": "https://github.com/simplememofast/simplememo/issues/869 の state=closed をGitHub APIで確認"
     }
   ],
   "human": [
@@ -49,14 +54,6 @@
       "why": "当初のActions/CCRでは非公開分析へ到達できず、取得を担う実行系の検証が必要だった。2026-09-04、明示承認後のCodexでは対象画面の読み取りに成功し、項目・単位・導線の推定は解消した。現在のhuman分類は過去の依頼と未完了のD14評価を残すもので、閲覧承認を再度求める意味ではない。Coworkの日次Routineで取得からPR作成まで完走した証拠はまだない。評価日の実測・対象実験の確定評価まで閉じない。",
       "evidence": "リポジトリから検査できない（人が閉じる）",
       "not_before_jst": "2026-09-17"
-    },
-    {
-      "id": "act-health-869",
-      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
-      "age_days": 0,
-      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "#869 がまだ open",
-      "not_before_jst": null
     }
   ],
   "ai": [],
