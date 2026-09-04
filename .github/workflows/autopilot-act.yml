@@ -32,6 +32,9 @@
 name: Autopilot Act
 
 on:
+  workflow_run:
+    workflows: ["Obsidian Autopilot"]
+    types: [completed]
   schedule:
     - cron: '0 0 * * *'   # 09:00 JST
   workflow_dispatch:
@@ -58,6 +61,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           # GH_PAT が要る理由は seo-daily.yml / obsidian-autopilot.yml と同じ:
           # GITHUB_TOKEN の push はワークフローを起動しないため、PRを作っても
           # SEO Validation が走らず auto-merge が永久に来ない。
@@ -119,6 +123,9 @@ jobs:
       - name: 自律スコアの記録
         run: node scripts/autonomy-score.mjs --snapshot
 
+      - name: 公開運転表を最新の観測と同期
+        run: node scripts/decision-monitor.mjs --publish-report
+
       # 書き込んだ台帳がCIを通る形かをここで見る。**PRを出す前に見る** —
       # 壊れた台帳をPRにすると、SEO Validation が落ちて auto-merge が来ず、
       # 翌日も同じ壊れた状態から始まる。
@@ -172,7 +179,7 @@ jobs:
           fi
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json \
-                  data/eligibility-log.json data/autonomy-score-history.json 2>/dev/null || true
+                  data/eligibility-log.json data/autonomy-score-history.json autopilot/index.html 2>/dev/null || true
           git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
           # 同日に再実行した場合は追記されるだけ。強制pushはしない
           # （弾かれること自体が「先に誰かが書いた」という出力）。

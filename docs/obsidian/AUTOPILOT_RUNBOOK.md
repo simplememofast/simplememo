@@ -587,6 +587,21 @@ node scripts/autopilot-selfheal.mjs
 
 レーンの選択理由は必ずログとステータスJSONの `reason` に書く。
 
+### §2-1 着手前の価値契約
+
+`node scripts/value-contracts.mjs --readiness` で承認済み指標を確認する。承認が0件なら既存の選定を継続し、承認欄は代筆しない。1件以上なら、変更を始める前に以下を実行する。
+
+1. `node scripts/value-contracts.mjs --feedback` で過去の生Brier scoreを読む。確率の較正に使い、別の正規化報酬へ変換しない。
+2. 候補2件以上を `/tmp/decision-candidates.json` にJSON配列で書く。各候補には `id`（英小文字・数字・ハイフン）、`run_id`、`rank`、`metric`、`predicted_delta`、`p`、`horizon_days`（1〜28）、`counterfactual: {id, reason}`、`rank_gap`、`touches`、`max_changed_lines`（最大1500）、`predicted_usd`、`lane`、`action`、`evidence_date` を含める。`touches` はワイルドカードを使わない実パス。予算上限は既存の設定を使う。
+3. `node scripts/value-contracts.mjs --select /tmp/decision-candidates.json` を実行する。境界・可逆性・証拠・予算・反復の5基準と、承認済み指標・実測baseline・比較基準が通った候補だけが選択対象になる。探索が指示された回も同じ条件を通す。0件なら施策を実装せず、理由を記録する。
+4. 出力された `data/decision-intents/<id>.json` だけを**別コミットにして先にpush**する。この時点では記事やコードを編集しない。CIがコミットの順序を検査し、事前データから予測・適格性を再計算する。
+5. 選ばれた候補だけを実装する。契約は変更しない。範囲や予測を変えたければ、この候補を中止して新しいIDで最初から判定する。宣言した `run_id` を運転台帳に使い、PR番号を記録する。
+6. PRを作る前に `node scripts/decision-monitor.mjs --publish-report` で公開運転表を同期し、`autopilot/index.html` も同じPRに含める。このコマンドの出力は同期完了だけで、選定には使わない。候補の理由や証拠には、公開してよい運用情報だけを書く。個人データや秘密情報は含めない。
+7. 事後決済と限定的な静的ページの復旧は Decision Monitor が行う。未来の結果、観測できない費用、欠測日を補完しない。契約なしの過去の出荷を契約に紐づけない。
+
+成熟の基準は決済20件。方向の改善が20件の窓で乏しい場合、次の10回のうち2回を適格候補の下位から選ぶ。成熟前には選択の枠組みを変更しない。R1以上の権限や日次実行回数を自動で拡大する処理は持たない。
+
+
 キュー状態の参考（2026-08-11時点）:
 - N1 `/obsidian/compare/logseq/` ✅ 実装済み（PR #470）
 - N2 `/obsidian/quick-capture/` — 需要未検証（実測0imp）。P2扱い。慌てない

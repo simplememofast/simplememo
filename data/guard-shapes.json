@@ -393,6 +393,96 @@
       "expr": "none",
       "disposition": "前提",
       "note": "自己テストの中の `findWebKitDriver(['/does/not/exist'])` の戻り値。**`null`（見つからない）を期待している側**で、`null` 以外が返ってきたら「実体が在る」ことまで確かめる、という二段の書き方になっている。\n\n**正が消えても緩まない。**`findWebKitDriver` が壊れて常に `null` を返すようになったら、この行は素通りするが、**同じ自己テスト群の『WebKit で本当に測れているか』が落ちる**（`fixtures/engine-divergence.html` で Blink と差が出ることを実測で要求している）。つまりドライバ探索の縮退はこの式ではなく上流のテストが受けており、ここは「存在しないパスを渡したのに実体を返した」という**逆方向の間違い**だけを見ている。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "p.known",
+      "disposition": "前提",
+      "note": "通信や観測が不明なら悪化とは判定せずholdする。未知のprobeでrevertしないことを自己テストで確認。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "p.path",
+      "disposition": "前提",
+      "note": "2回目の観測は同じパスの既知の異常が必要。パス欠落で復旧権限が広がることはない。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "expected.title",
+      "disposition": "前提",
+      "note": "titleとcanonical両方の存在・一致がhealthyの条件。片方が欠けるページを自己テストで落とす。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "incident?.revert_pr",
+      "disposition": "前提",
+      "note": "revert PRが無い観測中の行では回復成功の照合を行わない。回復成功へ昇格させる分岐を抑制する向き。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "pr.merged",
+      "disposition": "前提",
+      "note": "マージとPages成功の両方が確認できなければrecoveredにしない。欠測を成功にする向きではない。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "after",
+      "disposition": "前提",
+      "note": "空のprobe集合を復旧成功にしない。SEO成功と既知の健康probeが全部揃った場合だけ復旧を記録する。"
+    },
+    {
+      "file": "scripts/decision-review.mjs",
+      "expr": "state.mandate",
+      "disposition": "前提",
+      "note": "mandateは未発行ならnull。未発行では強制探索をしない。発行・消費・2回上限を自己テストで検証。"
+    },
+    {
+      "file": "scripts/decision-review.mjs",
+      "expr": "LIMITS.explorationSlots",
+      "disposition": "前提",
+      "note": "同一モジュールのObject.freezeされた定数2。上限内かつ適格候補が複数ある時だけ探索。"
+    },
+    {
+      "file": "scripts/decision-review.mjs",
+      "expr": "LIMITS.mature",
+      "disposition": "前提",
+      "note": "同一モジュールの固定値20。成熟前は2位実走を行わないことを自己テストで確認。"
+    },
+    {
+      "file": "scripts/decision-review.mjs",
+      "expr": "next.mandate",
+      "disposition": "前提",
+      "note": "存在する探索義務だけに消費を追記する。存在しない義務を作ったことにせず、選択自体はselectionsに必ず残す。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "c?.counterfactual?.id",
+      "disposition": "前提",
+      "note": "requireへ渡す検証式。偽なら問題を追加するため、欠落で検査が消える向きではない。counterfactual欠落を自己テストで確認。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "c?.eligibility?.criteria",
+      "disposition": "前提",
+      "note": "requireへ渡す検証式。5基準のpassが全部揃わない契約は拒否。欠けているほど権限が小さくなる。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "c.horizon_days",
+      "disposition": "前提",
+      "note": "決済サンプルが宣言した日数と一致しなければ検証済みとして認めない。契約日数は別のschema検証が1〜28に制限。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "s.observation_hash",
+      "disposition": "前提",
+      "note": "観測値から再計算したhashとの一致が必要。hash不一致の加点拒否を自己テストで検証。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "detected",
+      "disposition": "表示整形",
+      "note": "機械による検知が既存運転台帳と本番復旧台帳の両方で0件の時だけ補足文を出す。得点は分子と分母から別に計算し、補足文の分岐では変えない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",

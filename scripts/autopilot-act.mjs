@@ -66,6 +66,7 @@ import { requireShape } from './lib/read-ledger.mjs';
 // 台帳へ運ぶ側と、閉じたかを見る側で対象がずれると、
 // 「運ばれたが一生閉じない行」か「運んでいないのに閉じる行」のどちらかが出る。
 import { HEALTH_LABELS } from './health-intake.mjs';
+import { judge, loadContext as loadEligibility, mergeJudgements, LOG_PATH as ELIGIBILITY_LOG } from './autonomy-eligibility.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
@@ -3889,6 +3890,8 @@ async function main() {
   // --apply のときだけ、実際に手を動かす。
   const applied = [];
   if (has('apply')) {
+    const eligibility = loadEligibility({ today });
+    const judgements = readJson(ELIGIBILITY_LOG, { judgements: [] });
     for (const a of ledger.actions) {
       if (a.state !== 'open' || !a.auto) continue;
       // 自動実行は ai と判定されたものだけ。人の領域のアクションに
@@ -3898,6 +3901,14 @@ async function main() {
       // **押せないものは押しに行かない。**handler がファイルを書けても、
       // その後の push が remote rejected になるだけで、書きかけが残る。
       if (c.unattended_blocked) continue;
+      // Record before invoking the handler; R2 must never reach its side effect.
+      const decision = judge({ ...a, close_check_kind: a.close_check?.kind }, eligibility);
+      judgements.judgements = mergeJudgements(judgements.judgements, [decision]);
+      fs.writeFileSync(ELIGIBILITY_LOG, JSON.stringify(judgements, null, 2) + '\n');
+      if (decision.halted) {
+        applied.push({ handler: a.auto, ok: false, changed: 0, log: decision.reasons.join('; ') });
+        continue;
+      }
       const h = HANDLERS[a.auto];
       if (!h) continue;
       let r;
