@@ -81,7 +81,21 @@
       "created_jst": "2026-08-22",
       "last_seen_jst": "2026-08-25",
       "closed_jst": "2026-08-25",
-      "evidence": "完了（2026-08-25・オーナーが権限を委譲したうえで実施。self_repair.must_not「権限表を自分で書き換えない」に対する明示の例外）。\n**分けただけでなく、分割前の記述が実態と逆だった点を直した。**\n【機械で検証】アプリ内の自己削除には二段階確認がある — SettingsViewController.swift の showDeleteAccountFinalConfirmation()（ActionSheet → Alert の2段）を通ってから performAccountDeletion() が走る。サーバ側 POST /v1/account/delete（simplememo-api/src/index.ts）は (deviceToken, toEmail) と KV の verified: だけで即時に実行し、運用側の承認は挟まない。\n【要点】分割前は requires_approval: true / human_only: [実行の承認] とだけ書いており、**誰の承認かを言っていなかったため運用側が承認する経路だと読めた。**実際の承認者はアカウント本人。\n【requires_approval を false にしなかった理由】check-authority.mjs の規則1「不可逆な領域は必ず承認制」に当たる。**承認は在る。主語が違うだけ**なので、規則を緩めず主語を書いた（規則を緩めるのは self_repair.must_not の「検証を弱める変更」）。\n【結果】17領域中13が稼働・12が承認制。check-authority.mjs --check 通過。"
+      "evidence": "完了（2026-08-25・オーナーが権限を委譲したうえで実施。self_repair.must_not「権限表を自分で書き換えない」に対する明示の例外）。\n**分けただけでなく、分割前の記述が実態と逆だった点を直した。**\n【機械で検証】アプリ内の自己削除には二段階確認がある — SettingsViewController.swift の showDeleteAccountFinalConfirmation()（ActionSheet → Alert の2段）を通ってから performAccountDeletion() が走る。サーバ側 POST /v1/account/delete（simplememo-api/src/index.ts）は (deviceToken, toEmail) と KV の verified: だけで即時に実行し、運用側の承認は挟まない。\n【要点】分割前は requires_approval: true / human_only: [実行の承認] とだけ書いており、**誰の承認かを言っていなかったため運用側が承認する経路だと読めた。**実際の承認者はアカウント本人。\n【requires_approval を false にしなかった理由】check-authority.mjs の規則1「不可逆な領域は必ず承認制」に当たる。**承認は在る。主語が違うだけ**なので、規則を緩めず主語を書いた（規則を緩めるのは self_repair.must_not の「検証を弱める変更」）。\n【結果】17領域中13が稼働・12が承認制。check-authority.mjs --check 通過。",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "承認者と削除権限の境界を変える判断で、当時の権限表は自己変更を禁止していた。実際に8月25日の明示委任を受けて修正されており、事前の移管は必要だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-egress-policy-confirm",
@@ -151,7 +165,21 @@
       "created_jst": "2026-08-22",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "既知の制約として受容。回避手順が Runbook にある"
+      "evidence": "既知の制約として受容。回避手順が Runbook にある",
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "取得不能を0件と区別し、既存の承認済み代替手順で運転する技術的制約。認証追加を必須とする依頼ではなく、毎回の人間判断は不要だった。接続を拡張する場合は別途その操作の権限を確認する。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-ccr-command-classifier",
@@ -172,7 +200,21 @@
       "created_jst": "2026-08-22",
       "last_seen_jst": "2026-08-25",
       "closed_jst": null,
-      "evidence": "実害なし。回避可能な既知の制約として受容"
+      "evidence": "実害なし。回避可能な既知の制約として受容",
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "既存記録では許可された通常のツールで処理でき、成果物への実害が確認されていない。制約の記録は必要だが、通常運転の人間への移管は不要。承認審査の拒否を迂回する許可ではない。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-selfheal-ap-20260824-actions",
@@ -330,7 +372,21 @@
       "last_seen_jst": "2026-08-26",
       "closed_jst": "2026-08-26",
       "evidence": "2026-08-26 に回転完了（オーナー実施）。fine-grained PAT 「simplememo-autopilot」を発行し repo secret GH_PAT を更新。権限は Contents(RW) / Metadata(RO) / Pull requests(RW) の3件で、**Workflows は付けていない**（決定どおり）。13:41 JST の autopilot-act run 32931151082 が checkout と PR作成（#594）を実際に通しており、必要な権限が揃っていることは実測済み。有効期限 2026-11-24 を data/credential-expiry.json に記録したので、check-expiry の warn 30日 / fail 7日 が初めて機能する。**repository_access は All repositories のまま維持する（2026-08-26 オーナー判断）** ——逸脱ではなく決定。再提案しないこと。",
-      "last_run_log": "オーナーが回転を実施。期限を台帳へ記録し閉じた。repository_access を絞らない判断も同日に確定"
+      "last_run_log": "オーナーが回転を実施。期限を台帳へ記録し閉じた。repository_access を絞らない判断も同日に確定",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "PATの発行とsecret更新には当時の実行系にないアカウント権限が必要で、実際にオーナーが更新した。権限追加の是非も含むため移管は妥当だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-budget-overrun-32816234185",
@@ -354,7 +410,21 @@
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
       "closed_jst": "2026-08-25",
-      "evidence": "run 32816234185 の超過はレビュー済: 2026-08-25のセッションでオーナーが明示的に権限を委譲して解除（「権限を与えるのでやって」）。支出そのものは妥当と判断した: 104ターン・27分で ap-20260824/25 の2件を修理して出荷しており、内容に無駄な反復は無い。**ただし本質は支出ではなく上限の較正。** 実測5件のうち task_kind が付いた3件を見ると、実際に仕事をして出荷した run は2件（article $7.2967 / repair $11.9329）で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run（$0.8149）だけ。** 上限 $2.00/$3.00 は失敗runのn=1から外挿した placeholder で、成功runを一度も許容していない。さらに repair は monthly_usd_cap $8 に対し1回が $11.93 で、月枠が1回分に足りていない。上限の再設定は monthly_usd_cap の決定を含み権限表で human_only なので、ここでは解除だけを行い、較正は数値つきで台帳に残す（act-budget-recalibrate）"
+      "evidence": "run 32816234185 の超過はレビュー済: 2026-08-25のセッションでオーナーが明示的に権限を委譲して解除（「権限を与えるのでやって」）。支出そのものは妥当と判断した: 104ターン・27分で ap-20260824/25 の2件を修理して出荷しており、内容に無駄な反復は無い。**ただし本質は支出ではなく上限の較正。** 実測5件のうち task_kind が付いた3件を見ると、実際に仕事をして出荷した run は2件（article $7.2967 / repair $11.9329）で、そのどちらも1回上限を超えている。**上限を満たしたのは失敗した run（$0.8149）だけ。** 上限 $2.00/$3.00 は失敗runのn=1から外挿した placeholder で、成功runを一度も許容していない。さらに repair は monthly_usd_cap $8 に対し1回が $11.93 で、月枠が1回分に足りていない。上限の再設定は monthly_usd_cap の決定を含み権限表で human_only なので、ここでは解除だけを行い、較正は数値つきで台帳に残す（act-budget-recalibrate）",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "当時の1回上限超過の承認をAIが自己承認することは禁止されていた。支出の妥当性と上限の変更は別判断であり、明示委任を得る前の移管は必要だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-budget-recalibrate",
@@ -547,7 +617,21 @@
       "evidence": "2026-09-03 にセッションが 813b335 の中身を main と突き合わせた。**再投入するものは無い。** data/autopilot-runs.json: ブランチ側 29行の run_id がすべて main にあり、date_jst/route/outcome/lane/action/pr/artifact も一致（欠落0件）。 docs/obsidian/AUTOPILOT_LOG.md: ブランチ側 2,034行が main 側 2,710行の先頭と完全一致（差分は main 側の追記 676行のみ）。当日の owner-session が同日中に拾っている。 data/autopilot-status.json: ブランチは 2026-08-27 の写しで main は 2026-09-02。**状態型なので当てると巻き戻る**（追記型と分けて扱う、の指示どおり当てない）。 残るのはブランチのSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は delete-branch.yml だが現在の照合条件では通らない（docs/orphan-branch-cleanup-2026-09-03.md）。",
       "reviewed_orphans": [
         "813b335"
-      ]
+      ],
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "不足行の有無と状態ファイルの新旧はGitと台帳から比較できる。照合の結果、再投入不要と判断できており、技術調査を人へ渡す必要はなかった。ブランチ削除とは分けて評価する。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-orphaned-pr-648",
@@ -794,7 +878,21 @@
       "last_seen_jst": "2026-09-04",
       "closed_jst": "2026-09-04",
       "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-04"
+      "reopened_jst": "2026-09-04",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "共有アカウントの利用枠を変更するか、待つかの判断であり、当時のusage_limit規則もowner宛てを明示していた。発生時点では9月3日の方針決定より前なので移管は必要だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-selfheal-ap-20260831-actions",
@@ -819,7 +917,21 @@
       "last_seen_jst": "2026-09-04",
       "closed_jst": "2026-09-04",
       "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-04"
+      "reopened_jst": "2026-09-04",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "当時は共有利用枠に対する方針が未確定で、自己修復コードからプランや課金経路を変更できなかった。後日の回復をもって過去の移管を不要とは扱わない。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-memo-automation-tqsd8z",
@@ -939,7 +1051,21 @@
       "created_jst": "2026-09-01",
       "last_seen_jst": "2026-09-04",
       "closed_jst": null,
-      "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**"
+      "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "主副系で共有する利用枠の方針決定が必要で、9月3日にオーナーがプラン階層の方針を決めた記録がある。副系の回復実走とは別に、当時の判断依頼は妥当だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-orphaned-branch-claude-simplememofast-indexing-93xm3y",
@@ -986,7 +1112,21 @@
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ef8b3a7`「ドリルの本数を実測に直す（15→39）」は、**取り残しではなく main に届かなかった訂正**で、内容は PR #811 が同日に入れている。4ファイルの照合:\n① `docs/obsidian/AUTOPILOT_RUNBOOK.md` §4 … main は「切替演習（39シナリオ・gateの16コードを全被覆）」。実測 `autopilot-drill --check` は 39/39 で一致\n② `docs/obsidian/AUTOPILOT_LOG.md` … 09-02 エントリの「35→39」が main にある\n③ `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で新しい\n④ `data/kpi-definitions.json` … **ブランチ側の行は literal には入っていない。入れてはいけない。**ブランチは noise_floor を v24→v25 にしているが、main は同じ番号 v25 を**別の変更**（09-02・Runbook §0-2）に使っており、いまは v30。**版番号が衝突している**ので写しを当てると5版ぶん巻き戻る。ブランチが必要としていたもの（Runbook を触ったことによる checksum の更新）は main の v30 が果たしている —— why にも「§4 のドリル本数の表記を実測値（39シナリオ）へ直したため」と同じ理由が書いてある。**欠けているのは版番号ではなく無い**、と示せたので受容する。",
       "reviewed_orphans": [
         "ef8b3a7"
-      ]
+      ],
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "取り残しの内容とmainの訂正・版番号は比較可能。内容の照合で解ける問題で、権限や事業方針の人間判断は必要なかった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-budget-overrun-33454414490",
@@ -1010,7 +1150,21 @@
       "created_jst": "2026-09-02",
       "last_seen_jst": "2026-09-02",
       "closed_jst": "2026-09-03",
-      "evidence": "run 33454414490 は1回上限の超過として検出されなくなった（上限の見直しか実費行の訂正）"
+      "evidence": "run 33454414490 は1回上限の超過として検出されなくなった（上限の見直しか実費行の訂正）",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "当時のrepair上限を超えた実費のレビュー依頼。後日の上限較正で検出されなくなっても、発生時点の承認境界に従った移管は必要だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-pr6-d14-evaluate",
@@ -1035,7 +1189,28 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "evidence": "リポジトリから検査できない（人が閉じる）",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "必要な非公開分析値を取得できる実行経路が検証されていなかった。取得できたふりをせず所有者へ依頼する必要があった。今回の委任後も非公開画面の読み取りは自動承認審査が拒否しており、実際の取得は未完了。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      },
+      "execution_authorization": {
+        "date_jst": "2026-09-04",
+        "by": "owner",
+        "delegation": "人への依頼：あなたのおまかせ",
+        "private_data_access": "awaiting_specific_approval_after_auto_review_rejection",
+        "evaluation_due": "2026-09-17"
+      }
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-auto-20260903",
@@ -1066,7 +1241,21 @@
       "last_run_log": "data/autopilot-runs.json: 欠けている行は無い（内容は着地済み）\ndata/autopilot-status.json: 写しを当てない（状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する）\ndocs/obsidian/AUTOPILOT_LOG.md: 写しを当てない（追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く）\n照合 data/autopilot-runs.json: 行キーの包含（ブランチ側 42行すべてが main にある）\n照合 data/autopilot-status.json: 状態型で main 側が新しい（ブランチ 2026-09-03 / main 2026-09-03）— 上書き済み\n照合 docs/obsidian/AUTOPILOT_LOG.md: main 側の先頭と一致しない（追記以外が起きている）— 中身を人が読む\n**1行も欠けていないが、全パスの包含は示せていない。**人へ残す —— 残っているのはブランチ claude/obsidian-auto-20260903 のSHAだけかもしれないが、示せていないものを「着地済み」に倒さない。",
       "reviewed_orphans": [
         "ac0e224"
-      ]
+      ],
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "Actions API、マージ済みPR、台帳の行包含で不足を確認して回収できる。古い状態ファイルの再投入を避ける技術的判断を、人間だけの仕事にする必要はなかった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-autopilot-cpp-ppid",
@@ -1088,7 +1277,21 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
-      "evidence": "完了（2026-09-03）。**依頼どおりの「専用CPPを1本作る」はできていない。**代わりに承認済みCPPの流用で**分離そのものは達成した**ので、その差を先に書く。\n\n【機械で検証】\n  - 配線は PR #830（`vs-drafts` 流用・ppid `3d126d78-2267-4a6c-a860-c69707ab90a5`）。main は 5fbcbb2。\n  - **本番で確認済み**: `curl -s https://simplememofast.com/autopilot/ | grep -o 'ppid=[a-f0-9-]*' | sort -u` → **1件**（`ppid=3d126d78-…`）。App Store CTA 3本すべてに入っている（`ct=jp__nav` ×2・`ct=jp__bottom` ×1）。\n  - `node scripts/apply-cpp-ppid.js --check` exit 0（27ページ配線）。\n  - `vs-drafts` が **APPROVED** であることは `simplememo-ios` の `asc-cpp.yml --action list` の実測（run 33721309279）。承認済みなので **配線した時点から計測に乗る**。\n\n【専用CPPを作らなかった理由 —— 作れなかった】\n  `POST /appCustomProductPages` の返り値そのもの: `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n  **ASC の CPP はちょうど70本で Apple の上限。**内訳は APPROVED 32 / PREPARE_FOR_SUBMISSION 38 —— **枠の54%が、一度も審査に出していない＝1インストールも受けられないページで埋まっている。**1本消さないと新規作成はできず、削除は不可逆で外向き。\n  **オーナー判断（2026-09-03）: いまは何もしない。**`vs-drafts` で 9/17 の分離は足りるため、専用CPPと70枠の整理は D+14 の判定後に扱う。\n\n【この流用がいま実質「専用」である理由】\n  `data/cpp-map.json` に `^/vs/drafts` の行は無く、`vs/drafts/index.html` の CTA は ppid を持たない（表に無いページは未配線、という `apply-cpp-ppid.js` の規律）。つまり **`vs-drafts` CPP にいま入るのは `/autopilot/` からの流入だけ。**\n  ⚠ **将来 `/vs/drafts/` を同じ ppid へ配線した時点で、PR経由の分離は黙って死ぬ。**そのときここを見ること。\n\n【残る限界】\n  ASC 側の実数（この ppid で何件入ったか）はリポジトリから読めない。**この行が保証するのは「分離できる状態にした」までで、「分離した数字を得た」ではない。**数字は D+14 の判定時に ASC で見る。"
+      "evidence": "完了（2026-09-03）。**依頼どおりの「専用CPPを1本作る」はできていない。**代わりに承認済みCPPの流用で**分離そのものは達成した**ので、その差を先に書く。\n\n【機械で検証】\n  - 配線は PR #830（`vs-drafts` 流用・ppid `3d126d78-2267-4a6c-a860-c69707ab90a5`）。main は 5fbcbb2。\n  - **本番で確認済み**: `curl -s https://simplememofast.com/autopilot/ | grep -o 'ppid=[a-f0-9-]*' | sort -u` → **1件**（`ppid=3d126d78-…`）。App Store CTA 3本すべてに入っている（`ct=jp__nav` ×2・`ct=jp__bottom` ×1）。\n  - `node scripts/apply-cpp-ppid.js --check` exit 0（27ページ配線）。\n  - `vs-drafts` が **APPROVED** であることは `simplememo-ios` の `asc-cpp.yml --action list` の実測（run 33721309279）。承認済みなので **配線した時点から計測に乗る**。\n\n【専用CPPを作らなかった理由 —— 作れなかった】\n  `POST /appCustomProductPages` の返り値そのもの: `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n  **ASC の CPP はちょうど70本で Apple の上限。**内訳は APPROVED 32 / PREPARE_FOR_SUBMISSION 38 —— **枠の54%が、一度も審査に出していない＝1インストールも受けられないページで埋まっている。**1本消さないと新規作成はできず、削除は不可逆で外向き。\n  **オーナー判断（2026-09-03）: いまは何もしない。**`vs-drafts` で 9/17 の分離は足りるため、専用CPPと70枠の整理は D+14 の判定後に扱う。\n\n【この流用がいま実質「専用」である理由】\n  `data/cpp-map.json` に `^/vs/drafts` の行は無く、`vs/drafts/index.html` の CTA は ppid を持たない（表に無いページは未配線、という `apply-cpp-ppid.js` の規律）。つまり **`vs-drafts` CPP にいま入るのは `/autopilot/` からの流入だけ。**\n  ⚠ **将来 `/vs/drafts/` を同じ ppid へ配線した時点で、PR経由の分離は黙って死ぬ。**そのときここを見ること。\n\n【残る限界】\n  ASC 側の実数（この ppid で何件入ったか）はリポジトリから読めない。**この行が保証するのは「分離できる状態にした」までで、「分離した数字を得た」ではない。**数字は D+14 の判定時に ASC で見る。",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "当初依頼は新規CPPと審査を含み、承認済みページの単なる配線とは異なる。既存承認CPPの流用で目的を達成したことは記録済みだが、当初のアカウント操作・審査の判断依頼は必要だった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-pages-outside-shared-css",
@@ -1111,7 +1314,21 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
-      "evidence": "**寄せない、を実測で決めた。**内容系12面に共有CSSを head 先頭へ足して要素の位置・大きさの変化を数えたところ、2px 超動く要素が **42〜97%**、高さの変化は最大 **+1,724px**。安全に寄せられる面は1つも無かった。得られるはずだった「共有の修理が届く」は `assets/css/safety-net.css` で既に得ており、`scripts/check-viewport-overflow.mjs --static` が全269面で「共有CSSか網のどちらか」を要求する（外すと落ちることを確認済み）。網の適用後の全面走査は Blink 1,118 ＋ WebKit 308 = 1,426通りで漏れ0。"
+      "evidence": "**寄せない、を実測で決めた。**内容系12面に共有CSSを head 先頭へ足して要素の位置・大きさの変化を数えたところ、2px 超動く要素が **42〜97%**、高さの変化は最大 **+1,724px**。安全に寄せられる面は1つも無かった。得られるはずだった「共有の修理が届く」は `assets/css/safety-net.css` で既に得ており、`scripts/check-viewport-overflow.mjs --static` が全269面で「共有CSSか網のどちらか」を要求する（外すと落ちることを確認済み）。網の適用後の全面走査は Blink 1,118 ＋ WebKit 308 = 1,426通りで漏れ0。",
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "検証済みの安全網で障害を解消済み。共有CSS統一で多数要素が動くことも実測されており、不要な変更を見送る技術判断で処理できた。新しい見た目の方針を決める依頼は別扱い。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-two-lang-switchers",
@@ -1133,7 +1350,21 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
-      "evidence": "実測（2026-09-03）: `lang-dropdown` を持つ面をすべて列挙したら**ちょうど10言語のホーム**だった。`lang-switcher--nav` を持つ 227面のうち、hreflang 対を持つ（＝リンク型）が 41面、残り 186面は `data-lang-btn` のボタン型で同一URL内の切り替え。`/en/ai-tags/` は `[('/ai-tags/','ja'), ('/en/ai-tags/','en')]` で同一ページ間、`/blog/memo-habit.html` は `<button data-lang-btn>` でページ内切り替え。**「同じ役目の部品が2つある」という前提が、この時点で崩れた。**"
+      "evidence": "実測（2026-09-03）: `lang-dropdown` を持つ面をすべて列挙したら**ちょうど10言語のホーム**だった。`lang-switcher--nav` を持つ 227面のうち、hreflang 対を持つ（＝リンク型）が 41面、残り 186面は `data-lang-btn` のボタン型で同一URL内の切り替え。`/en/ai-tags/` は `[('/ai-tags/','ja'), ('/en/ai-tags/','en')]` で同一ページ間、`/blog/memo-habit.html` は `<button data-lang-btn>` でページ内切り替え。**「同じ役目の部品が2つある」という前提が、この時点で崩れた。**",
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "実装を列挙すれば異なる役割と分かり、統一すべきという前提が誤りだった。前提の訂正と不要作業の取り下げには人間の判断を必要としない。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-asc-cpp-slot-cleanup",
@@ -1152,11 +1383,31 @@
         "kind": "manual",
         "params": {}
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": "2026-09-04",
+      "evidence": "2026-09-04、オーナーの「人への依頼：あなたのおまかせ」を受け、削除・提出をせず全件保管と決定。9月3日の在庫写しは70本（APPROVED 32、未提出38）。既存調査では未提出35本にページまたは計画があり、対応のない3本も空けた枠の具体的用途がない。/autopilot/は承認済みvs-draftsで稼働している。閉じたのは今回の整理方針の判断であり、枠は空いていない。新しいCPPの具体的需要が生じた時は在庫を再取得して別途見直す。ASCへの変更は0件。",
+      "owner_needed": true,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "削除するとppidが戻らないアカウント資産の処分で、当時の権限範囲には含まれなかった。保管・削除・提出の方針を依頼したのは必要。今回の委任では現在の用途と在庫に基づき全件保管を選択する。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      },
+      "resolution": {
+        "kind": "retain_inventory",
+        "decided_jst": "2026-09-04",
+        "by": "codex_on_owner_delegation",
+        "revisit_when": "新しいCPPの具体的な用途が決まり、既存の承認済みCPPでは満たせないと確認できた時"
+      }
     },
     {
       "id": "act-ci-selftest-ratchet-js-blind",
@@ -1256,11 +1507,25 @@
         "kind": "manual",
         "params": {}
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": "2026-09-04",
+      "evidence": "オーナーの「人への依頼：あなたのおまかせ」を受け、質問比較を生成器から分離した読み取り専用監査として実装。inject_faq_schema.py --audit-questions / --check から実行。実サイト68面は一致58・候補10・読取不能0。候補10面の意味照合、検体の誤検出0/6・見逃し0/5、4変異の失敗を data/check-selftests.json に記録。146面の生成payloadは旧実装と全件一致。根拠と内容SHAは docs/faq-question-audit-2026-09-04.md。差分を欠陥と自動判定せず、回答の真偽・CSS可視性は検査範囲外。",
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "質問比較は生成器から切り離した読み取り専用処理にできる。公開HTMLを一括変更するかの設計判断と混ぜたため人待ちになった。比較と誤検出評価は技術作業として実行可能。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     },
     {
       "id": "act-selftest-rule-only-coverage",
@@ -1284,7 +1549,30 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": "2026-09-03",
-      "evidence": "**閉じた。7通りすべてで落ちるようにした。**\n\n  壊したもの                                    前（緑のまま）  後（落ちる）\n  --------------------------------------------  --------------  ------------\n  見える評価の「自社ページのみ」を外す            12件中0件失敗   1件失敗\n  価格の「料金セクション内のみ」を外す            12件中0件失敗   1件失敗\n  og:site_name の判定を殺す                      12件中0件失敗   1件失敗\n  llms.txt「当たらない規則」を合格にする          12件中0件失敗   1件失敗\n  noindex の除外を殺す                           13件中0件失敗   2件失敗\n  <鍵>.txt が複数でも黙って先頭を選ぶ            13件中0件失敗   1件失敗\n  keyLocation をサイトルートにする               13件中0件失敗   1件失敗\n\n加えて、同じ工程で見つけた門も固定した —— 鍵が無いときに**生成せずに落ちる**こと（`.indexnow-key` は gitignore なので CI では毎回ランダムな鍵が生まれ、配備されていない検証ファイルを指す通知を送り続けていた）、検証ファイルの中身の照合、`--write` が実際に書き換えること。自己テストは **12件 → 24件 / 13件 → 24件。**\n\n【切り出しが挙動を変えていないこと】判定をループから出す必要があったので、**出力がバイト単位で一致すること**で示した:\n  - `sync_constants` … 食い違いのある木で `--check` と `--write` を両方走らせ、ログ 348 行・書き換え 3,884 行が切り出し前と完全一致\n  - `indexnow-notify` … `--dry-run --since 5 / --since 20 / --all` の3通りが一致（261 URL）\n\n【この工程が示したこと】**「作りが悪い」ではない。**同じく規則を単体で当てる `tag-cta-placements.js` は `[?&]ct=` へ戻す壊しで 16件中7件が落ちる。**門がループ側にあるかどうかで決まる。**台帳の $comment に4段目として書いた ——列挙（在るか）→ 証跡（落ちるのを見たか）→ 配線（CI に効いているか）→**検体が本体のどこを通っているか。**"
+      "evidence": "**閉じた。7通りすべてで落ちるようにした。**\n\n  壊したもの                                    前（緑のまま）  後（落ちる）\n  --------------------------------------------  --------------  ------------\n  見える評価の「自社ページのみ」を外す            12件中0件失敗   1件失敗\n  価格の「料金セクション内のみ」を外す            12件中0件失敗   1件失敗\n  og:site_name の判定を殺す                      12件中0件失敗   1件失敗\n  llms.txt「当たらない規則」を合格にする          12件中0件失敗   1件失敗\n  noindex の除外を殺す                           13件中0件失敗   2件失敗\n  <鍵>.txt が複数でも黙って先頭を選ぶ            13件中0件失敗   1件失敗\n  keyLocation をサイトルートにする               13件中0件失敗   1件失敗\n\n加えて、同じ工程で見つけた門も固定した —— 鍵が無いときに**生成せずに落ちる**こと（`.indexnow-key` は gitignore なので CI では毎回ランダムな鍵が生まれ、配備されていない検証ファイルを指す通知を送り続けていた）、検証ファイルの中身の照合、`--write` が実際に書き換えること。自己テストは **12件 → 24件 / 13件 → 24件。**\n\n【切り出しが挙動を変えていないこと】判定をループから出す必要があったので、**出力がバイト単位で一致すること**で示した:\n  - `sync_constants` … 食い違いのある木で `--check` と `--write` を両方走らせ、ログ 348 行・書き換え 3,884 行が切り出し前と完全一致\n  - `indexnow-notify` … `--dry-run --since 5 / --since 20 / --all` の3通りが一致（261 URL）\n\n【この工程が示したこと】**「作りが悪い」ではない。**同じく規則を単体で当てる `tag-cta-placements.js` は `[?&]ct=` へ戻す壊しで 16件中7件が落ちる。**門がループ側にあるかどうかで決まる。**台帳の $comment に4段目として書いた ——列挙（在るか）→ 証跡（落ちるのを見たか）→ 配線（CI に効いているか）→**検体が本体のどこを通っているか。**",
+      "owner_needed": false,
+      "owner_needed_review": {
+        "reviewed_jst": "2026-09-04",
+        "reviewer": "codex",
+        "mode": "owner_delegated",
+        "reason": "実在する検査漏れの修正で、入力を本体の経路へ通す検体と変更前後の出力比較で検証可能。権限を拡張せずに行える検査強化を人待ちにする必要はなかった。",
+        "evidence_sha": "64a06f3eed7e9307cd27c912e13c3062ed9da1f5",
+        "evidence_fields": [
+          "detail",
+          "force_owner_why",
+          "evidence",
+          "close_check"
+        ]
+      }
     }
-  ]
+  ],
+  "escalation_review_authorization": {
+    "date_jst": "2026-09-04",
+    "request": "人への依頼：あなたのおまかせ",
+    "scope": "既存19件のエスカレーション必要性評価と、今回の対話で依頼された対応の判断",
+    "reviewer": "codex",
+    "mode": "owner_delegated",
+    "independent_human_judgment": false,
+    "criteria": "移管当時に、権限・支出・アカウント操作・取得できない非公開データの判断が必要だったか。事後に直ったことを理由に当時の必要性を取り消さず、コード調査だけで解ける事項は不要と評価。"
+  }
 }
