@@ -46,6 +46,37 @@ export const AXES = [
   ['S7_launch_design', 5, 'ローンチ設計'],
 ];
 export const PASS_MARK = 60;
+
+/**
+ * **必要条件（AND）。合計点では買えない2軸の下限。**
+ *
+ * 合格ライン60は7軸の**足し算**なので、S3〜S7（計55点）でS2の欠落を埋められる。
+ * 実際に埋まった —— PR⑥（2026-09-03）は S2 を19と採点して85点で撃ち、非乗車だった
+ * （配信見出しに Obsidian もアプリ名も App Store も無い。docs/pr-discover-strategy-2026-09-04.md）。
+ *
+ * **同じことは追記D-2 が n=5 の時点で散文に書いていた** ——
+ * 「4/24はS1満点でも落ちた＝**S2×S3**の『誰の興味グラフに刺さるか』が初出性と同格に効く」。
+ * **散文は積（×）と書き、実装は和（+）だった。**ここはその積のほうを機械に持たせる。
+ *
+ * 下限は D-1 の尺度の言葉で置いてある:
+ *   S1 20 = 「能力クラス・プラットフォーム・エンティティ結合の初出」（続報5・3話目0 は落ちる）
+ *   S2 10 = 「ニッチ確立級（Obsidian）」（無形・汎用3 は落ちる）
+ *
+ * n=5（追記D-2の採点表）を 5/5 で分離する。自己テストが固定している。
+ */
+export const NECESSARY = [
+  ['S1_novelty', 20, 'Googleにとっての初出性'],
+  ['S2_entity_reach', 10, 'エンティティ関心圏の広さ'],
+];
+
+/** 必要条件の判定。値が未記入なら null（「満たさない」と混ぜない）。 */
+export function necessary(d = {}) {
+  return NECESSARY.map(([key, floor, label]) => {
+    const v = d[key];
+    return { key, floor, label, value: typeof v === 'number' ? v : null,
+             ok: typeof v === 'number' ? v >= floor : null };
+  });
+}
 export const GATES = [
   ['G1_thumbnail_1200px', 'サムネイル1200px'],
   ['G2_no_ai_or_clickbait_words', '見出しにAI・煽り語を入れない'],
@@ -80,8 +111,16 @@ export function score(record) {
   const gateFailed = gates.filter((g) => g.value === false || g.value === 0);
   const gateUnknown = gates.filter((g) => g.value === null || g.value === undefined);
 
+  const need = necessary(d);
+  const needFailed = need.filter((n) => n.ok === false);
+
   const shipping = SHIPPING.has(record.status);
   if (shipping) {
+    // **合計点が足りていても、ここが落ちていたら撃たない。**
+    // 60点は足し算なので S3〜S7 で S2 の欠落を埋められてしまう（PR⑥がそうなった）。
+    for (const n of needFailed) {
+      problems.push(`${n.key} = ${n.value} < 必要条件 ${n.floor}（${n.label}）— 合計点では代替できない。乗車2本は両方を満たし、非乗車3本はどちらかが下回る`);
+    }
     if (gateUnknown.length) {
       problems.push(`status=${record.status} なのに未判定のゲートが ${gateUnknown.length} 件（${gateUnknown.map((g) => g.key).join(', ')}）`);
     }
@@ -92,11 +131,12 @@ export function score(record) {
   }
 
   const verdict = gateFailed.length ? 'BLOCKED（ゲート不合格）'
+    : needFailed.length ? `NO-GO（必要条件 ${needFailed.map((n) => n.key).join(', ')} が下限未満・${sum}点でも撃たない）`
     : sum < PASS_MARK ? `NO-GO（${sum} < ${PASS_MARK}）`
     : gateUnknown.length ? `PENDING（${sum}点・ゲート${gateUnknown.length}件未判定）`
     : `GO（${sum}点・ゲート全通過）`;
 
-  return { id: record.id, status: record.status, sum, axes, gates, gateFailed, gateUnknown, verdict, problems };
+  return { id: record.id, status: record.status, sum, axes, gates, gateFailed, gateUnknown, need, needFailed, verdict, problems };
 }
 
 /**
@@ -164,7 +204,48 @@ const SCENARIOS = [
     const r = score({ d_score_pre: pre });
     if (!r.problems.some((p) => p.includes('手計算が古い'))) throw new Error('total のずれが通った');
   }],
+  // ── 必要条件（AND）──────────────────────────────
+  // **合計点が合格でも、S1/S2 が下限未満なら撃たない**ことを固定する。
+  // PR⑥（85点・非乗車）が通ってしまった穴がここ。
+  ['**合計点では S2 の欠落を買えない**（85点でも必要条件で止まる）', () => {
+    const r = score({
+      status: 'running',
+      d_score_pre: {
+        S1_novelty: 25, S2_entity_reach: 4, S3_concrete_nouns: 15, S4_transformation: 14,
+        S5_timing: 3, S6_news_verb: 4, S7_launch_design: 5,
+        gates: { G1_thumbnail_1200px: true, G2_no_ai_or_clickbait_words: true,
+                 G3_prtimes_distribution: true, G4_weekday_morning: true },
+      },
+    });
+    if (r.sum < PASS_MARK) throw new Error(`前提が崩れた: ${r.sum} は合格線を超えているはず`);
+    if (!r.problems.some((p) => p.includes('S2_entity_reach') && p.includes('必要条件'))) {
+      throw new Error(`必要条件が効いていない: ${r.problems.join(' / ') || '(problem 無し)'}`);
+    }
+  }],
+  ['未記入の軸を「必要条件を満たさない」と混ぜない', () => {
+    const n = necessary({});
+    if (n.some((x) => x.ok === false)) throw new Error('空欄が「不合格」に倒れている');
+    if (!n.every((x) => x.ok === null)) throw new Error('空欄は null であるべき');
+  }],
+  ['**n=5 を 5/5 で分離する**（追記D-2 の採点表・乗車2/非乗車3）', () => {
+    // 出典: docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-2。S1/S2 のみ引く。
+    const CALIBRATION = [
+      ['6/1 Obsidian連携 提供開始', 30, 10, true],
+      ['7/6 Watch初対応', 20, 15, true],
+      ['4/24 初回リリース', 30, 3, false],
+      ['8/18 AirPods/Siri', 0, 15, false],
+      ['8/3 AIタグ', 5, 3, false],
+    ];
+    for (const [name, s1, s2, boarded] of CALIBRATION) {
+      const passes = necessary({ S1_novelty: s1, S2_entity_reach: s2 }).every((n) => n.ok === true);
+      if (passes !== boarded) {
+        throw new Error(`${name}: 必要条件=${passes} だが実績は${boarded ? '乗車' : '非乗車'}`);
+      }
+    }
+  }],
   ['全軸が埋まって total が合っていれば problem 無し', () => {
+    // status を付けない＝配信しないレコード。必要条件もゲートも問われない
+    // （必要条件が問われるのは running / evaluated のときだけ）。
     const pre = {};
     let sum = 0;
     for (const [k] of AXES) { pre[k] = 1; sum += 1; }
@@ -225,10 +306,25 @@ if (isMain) {
       console.log(`   ${a.key.padEnd(20)} ${v} / ${String(a.max).padEnd(3)} ${a.label}`);
     }
     console.log(`   ${'合計'.padEnd(18)} ${String(s.sum).padStart(3)} / 100   （合格 ${PASS_MARK}）`);
+    for (const n of s.need) {
+      const mark = n.ok === true ? '○' : n.ok === false ? '×' : '?';
+      console.log(`   ${mark} 必要条件 ${n.key} >= ${String(n.floor).padEnd(3)} ${n.label}`);
+    }
     for (const g of s.gates) {
       const mark = g.value === true || g.value === 1 ? '○' : g.value === false || g.value === 0 ? '×' : '?';
       console.log(`   ${mark} ${g.key.padEnd(30)} ${g.label}`);
     }
+    // **採点が配信物に当たっているか。**PR⑥ は 08-25 の採点のまま 09-03 に
+    // 別の見出しで配信され、台帳の85点はどこにも存在しない見出しの点になった。
+    // 追記D-4 と レコードの $comment は「見出し確定稿でもう一度回す」と書いていたが、
+    // 散文なので誰も落とせなかった。**ここは報告だけする**（落とすと、いま
+    // 未再採点のまま running の PR⑥ で CI が赤になり、9/17 の評価まで開けられない）。
+    // 9/17 に PR⑥ を配信見出しで再採点したら、これを problems へ移すこと。
+    const scoredAt = r.d_score_pre?.scored_at;
+    if (SHIPPING.has(r.status) && scoredAt && r.started_at && scoredAt < r.started_at) {
+      console.log(`   ⚠ 採点日 ${scoredAt} が配信日 ${r.started_at} より前。**配信見出しで再採点していない可能性がある**（追記D-4）`);
+    }
+
     if (s.problems.length) {
       bad++;
       console.log('   問題:');
