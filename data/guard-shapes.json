@@ -539,6 +539,12 @@
   ],
   "param_guards": [
     {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "value",
+      "disposition": "別に検出",
+      "note": "2026-09-05: observe の欠測理由の表示。値は null のまま返し、forecast は有限な観測だけで必要日数を満たすか判定する。readiness は基準値または予測値が欠測なら awaiting_observations とし、prepare/contractProblems は有限値を必須にする。欠測を0や改善可能へ変換しないことを自己テストで確認。"
+    },
+    {
       "file": "scripts/autopilot-runs.mjs",
       "expr": "explicit",
       "disposition": "前提",
