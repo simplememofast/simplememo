@@ -43,6 +43,7 @@ export const HISTORY_PATH = path.join(ROOT, 'data/autonomy-score-history.json');
 export const SELFTESTS_PATH = path.join(ROOT, 'data/check-selftests.json');
 export const ESCALATION_PATH = path.join(ROOT, 'data/escalation-rules.json');
 export const ACTIONS_PATH = path.join(ROOT, 'data/autopilot-actions.json');
+export const METRICS_PATH = path.join(ROOT, 'data/value-metrics.json');
 
 const readJson = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 export function todayJst(now = new Date()) {
@@ -239,7 +240,8 @@ export function coverage(selftests) {
 
 // ── 合成 ──────────────────────────────────────────────────────
 export function score(ctx) {
-  const { policy, runsDoc, selftests, rules, actions, history = [], today = todayJst(), contracts = null } = ctx;
+  const { policy, runsDoc, selftests, rules, actions, history = [], today = todayJst(),
+          contracts = null, metrics = null } = ctx;
   const all = runsDoc.runs || [];
   const w = windowOf(all, policy.window_days, today);
   const inW = all.filter((r) => inWindow(r, w));
@@ -276,6 +278,7 @@ export function score(ctx) {
     total, raw, held, held_why: heldWhy,
     max: components.reduce((s, c) => s + c.max, 0),
     coverage: cov,
+    metrics: metrics ? metricsSummary(metrics) : null,
     components: Object.fromEntries(components.map((c) => [c.id, c])),
     excluded: {
       failure_rate: policy.anti_gaming?.failure_rate_excluded
@@ -298,6 +301,7 @@ export function loadContext({ today = todayJst() } = {}) {
     rules: readJson(ESCALATION_PATH),
     actions: readJson(ACTIONS_PATH),
     history: fs.existsSync(HISTORY_PATH) ? readJson(HISTORY_PATH).snapshots ?? [] : [],
+    metrics: fs.existsSync(METRICS_PATH) ? readJson(METRICS_PATH) : null,
     contracts: fs.existsSync(contractsPath) ? readJson(contractsPath).contracts ?? [] : null,
     today,
   };
@@ -334,7 +338,8 @@ export function rankerBlindness(policy, { read = (p) => fs.readFileSync(path.joi
  *
  * 散文で「書き換えない」と書くだけにしない。実際に一覧を読んで確かめる。
  */
-export const OWNER_ONLY_FILES = ['data/autonomy-score.json', 'data/eligibility-policy.json'];
+export const OWNER_ONLY_FILES = ['data/autonomy-score.json', 'data/eligibility-policy.json',
+  'data/value-metrics.json'];
 export function policyOwnership(authority, { files = OWNER_ONLY_FILES } = {}) {
   const may = authority?.self_repair?.may_modify;
   if (!Array.isArray(may)) {
@@ -343,6 +348,75 @@ export function policyOwnership(authority, { files = OWNER_ONLY_FILES } = {}) {
   return files.filter((f) => may.includes(f)).map((f) =>
     `${f} が self_repair.may_modify に入っている`
     + ' — **自分の点数の付け方を自分で決められる場所を作らない。**権限表から外すこと');
+}
+
+/**
+ * L2 の前提台帳（data/value-metrics.json）— **契約が名指ししてよい指標の許可リスト。**
+ *
+ * 【なぜここで検査するか】VDC はこの台帳が無ければ動かない。
+ * **「起案してあるから使ってよい」を作らない**のがこの台帳の目的なので、
+ * 承認欄が空のまま使える経路ができていないことを、VDC を数えるのと同じ場所で見る。
+ *
+ * 【いちばん効く行】除外した指標が裏口から戻っていないか。
+ * 変更失敗率は自律スコアが意図して除外しているが、**価値契約の指標に入れれば
+ * 除外の意味は消える** —— 死亡率を最適化対象にした瞬間、チェックを緩める圧力が生まれる。
+ * 自律スコア自身も同じで、契約の指標にすると ranker に見せることになる。
+ */
+export const NULL_MODEL_KINDS = ['same_weekday_median', 'trailing_median', 'zero'];
+export const METRIC_TIERS = ['A', 'B', 'C'];
+
+export function validateMetrics(doc, policy) {
+  const problems = [];
+  if (!doc || !Array.isArray(doc.metrics)) return ['value-metrics.json: metrics must be an array'];
+  const ids = new Set();
+  for (const m of doc.metrics) {
+    const at = `value-metrics「${m.id || '(id無し)'}」`;
+    if (!m.id) problems.push(`${at}: id が無い`);
+    else if (ids.has(m.id)) problems.push(`${at}: id が重複`);
+    else ids.add(m.id);
+    if (!m.name) problems.push(`${at}: name が無い`);
+    if (!METRIC_TIERS.includes(m.tier)) problems.push(`${at}: tier は ${METRIC_TIERS.join('|')}（got ${JSON.stringify(m.tier)}）`);
+    if (m.approved_by && !m.approved_at) problems.push(`${at}: 承認者はいるのに承認日が無い`);
+    if (m.tier === 'C') {
+      if (!m.why_excluded) problems.push(`${at}: tier C に why_excluded が無い — **使わない判断こそ理由が要る**`);
+      if (m.null_model) problems.push(`${at}: tier C なのに null_model がある — 使わない指標に基準を置かない`);
+      continue;
+    }
+    if (!m.source) problems.push(`${at}: source が無い`);
+    if (!['up', 'down'].includes(m.direction)) problems.push(`${at}: direction は up|down`);
+    if (!m.gaming_risk) problems.push(`${at}: gaming_risk が無い`
+      + ' — **どう歪められるかを書いていない指標は、歪められたときに気づけない**');
+    const k = m.null_model?.kind;
+    if (!NULL_MODEL_KINDS.includes(k)) {
+      problems.push(`${at}: null_model.kind は ${NULL_MODEL_KINDS.join('|')}（got ${JSON.stringify(k)}）`
+        + ' — **ゼロを基準にすると、勝手に動く指標を選んだぶんがそのまま得点になる**');
+    }
+    if (m.tier === 'B') {
+      if (!m.promotes_when) problems.push(`${at}: tier B に promotes_when が無い — **いつ使えるようになるかを書く**`);
+      if (!Array.isArray(m.blocked_by) || !m.blocked_by.length) {
+        problems.push(`${at}: tier B に blocked_by が無い — 何が塞いでいるかを書かないと、待ちが理由なく続く`);
+      }
+    }
+  }
+  // **除外した指標が、価値契約の裏口から戻っていないか。**
+  const tierOf = (id) => doc.metrics.find((m) => m.id === id)?.tier ?? null;
+  if (policy?.anti_gaming?.failure_rate_excluded && tierOf('change_failure_rate') !== 'C') {
+    problems.push('自律スコアは変更失敗率を除外しているのに、価値契約では tier C になっていない'
+      + ' — **除外の意味が裏口から消える。**死亡率を最適化対象にすると、チェックを緩める圧力が生まれる');
+  }
+  if (policy?.anti_gaming?.hidden_from_ranker?.enabled && tierOf('autonomy_score') !== 'C') {
+    problems.push('自律スコアを ranker に見せない設定なのに、価値契約の指標として tier C になっていない'
+      + ' — **契約の指標にした時点で ranker に見せている**');
+  }
+  return problems;
+}
+
+export function metricsSummary(doc) {
+  const by = { A: 0, B: 0, C: 0 };
+  for (const m of doc?.metrics ?? []) if (m.tier in by) by[m.tier] += 1;
+  const usable = (doc?.metrics ?? []).filter((m) => m.tier !== 'C' && m.approved_by);
+  return { total: (doc?.metrics ?? []).length, by_tier: by, approved: usable.length,
+           usable_ids: usable.map((m) => m.id) };
 }
 
 // ── 検査 ──────────────────────────────────────────────────────
@@ -369,6 +443,8 @@ export function check(s, policy, { blindness = [] } = {}) {
     }
   }
   if (s.total > s.max) problems.push(`合計 ${s.total} が満点 ${s.max} を超えている`);
+  // L2 の前提台帳。**VDC が動く条件そのもの**なので、同じ検査で見る。
+  if (fs.existsSync(METRICS_PATH)) problems.push(...validateMetrics(readJson(METRICS_PATH), policy));
   return problems;
 }
 
@@ -527,6 +603,46 @@ function selftest() {
   ok('**一覧が読めないのは「守られている」ではない**', () => {
     assert(policyOwnership({}).length === 1, '読めないのに通した');
   });
+  // --- L2 の前提台帳 ---
+  const M = (over) => ({ metrics: [{ id: 'x', name: 'X', tier: 'A', source: 's', direction: 'up',
+    gaming_risk: 'g', null_model: { kind: 'trailing_median', window_days: 14 }, ...over }] });
+  eq(validateMetrics(M({}), {}), [], '形が揃っていれば通る');
+  ok('**null_model が無ければ落ちる**（ゼロを基準にしない）', () => {
+    assert(validateMetrics(M({ null_model: null }), {}).length > 0, '落ちなかった');
+  });
+  ok('未登録の null_model.kind は落ちる', () => {
+    assert(validateMetrics(M({ null_model: { kind: 'なんとなく' } }), {}).length > 0, '落ちなかった');
+  });
+  ok('**gaming_risk が無ければ落ちる**（歪め方を書いていない指標は歪められても気づけない）', () => {
+    assert(validateMetrics(M({ gaming_risk: null }), {}).length > 0, '落ちなかった');
+  });
+  ok('tier B は promotes_when と blocked_by を要求する', () => {
+    assert(validateMetrics(M({ tier: 'B' }), {}).length > 0, '落ちなかった');
+    assert(validateMetrics(M({ tier: 'B', promotes_when: 'w', blocked_by: ['b'] }), {}).length === 0, '揃っているのに落ちた');
+  });
+  ok('tier C は理由を要求し、基準を持たない', () => {
+    assert(validateMetrics({ metrics: [{ id: 'x', name: 'X', tier: 'C' }] }, {}).length > 0, '理由なしが通った');
+    assert(validateMetrics({ metrics: [{ id: 'x', name: 'X', tier: 'C', why_excluded: 'w',
+      null_model: { kind: 'zero' } }] }, {}).length > 0, '使わない指標に基準を置けてしまった');
+  });
+  ok('承認者がいるのに承認日が無ければ落ちる', () => {
+    assert(validateMetrics(M({ approved_by: 'owner' }), {}).length > 0, '落ちなかった');
+  });
+  ok('**除外した指標が価値契約の裏口から戻っていたら落ちる**（変更失敗率）', () => {
+    const doc = { metrics: [{ id: 'change_failure_rate', name: 'x', tier: 'A', source: 's',
+      direction: 'down', gaming_risk: 'g', null_model: { kind: 'zero' } }] };
+    const p = validateMetrics(doc, { anti_gaming: { failure_rate_excluded: true } });
+    assert(p.some((x) => x.includes('裏口')), `落ちなかった: ${JSON.stringify(p)}`);
+  });
+  ok('**自律スコア自身が契約の指標になっていたら落ちる**', () => {
+    const doc = { metrics: [{ id: 'autonomy_score', name: 'x', tier: 'B', source: 's', direction: 'up',
+      gaming_risk: 'g', null_model: { kind: 'zero' }, promotes_when: 'w', blocked_by: ['b'] }] };
+    const p = validateMetrics(doc, { anti_gaming: { hidden_from_ranker: { enabled: true } } });
+    assert(p.some((x) => x.includes('ranker')), `落ちなかった: ${JSON.stringify(p)}`);
+  });
+  eq(metricsSummary({ metrics: [{ tier: 'A', approved_by: 'o' }, { tier: 'A' }, { tier: 'C' }] }).approved, 1,
+     '**起案は承認ではない**（approved_by が入った指標だけ数える）');
+
   ok('実データのポリシーが検査を通る', () => {
     const ctx = loadContext();
     const p = check(score(ctx), ctx.policy, { blindness: rankerBlindness(ctx.policy) });
@@ -549,6 +665,10 @@ function render(s) {
   if (s.held) L.push(`  ⚠ ${s.held_why}\n`);
   L.push(`  検証済み決定被覆率 VDC  ${pts(c.vdc.points, c.vdc.max)}   ${pct(c.vdc.rate)}  (${c.vdc.hit}/${c.vdc.n} 出荷)`);
   if (c.vdc.why) L.push(`      ${c.vdc.why}`);
+  if (s.metrics) {
+    L.push(`      指標の許可リスト: A ${s.metrics.by_tier.A} / B ${s.metrics.by_tier.B} / C ${s.metrics.by_tier.C}`
+      + `  —— **契約に使えるのは承認済みの ${s.metrics.approved} 件**（起案は承認ではない）`);
+  }
   L.push(`  無検査マージ率     UMR  ${pts(c.umr.points, c.umr.max)}   ${pct(c.umr.rate)}  (重み ${c.umr.weight_counted}/${c.umr.weight_total}・出荷 ${c.umr.n})`);
   for (const [k, v] of Object.entries(c.umr.by_class)) {
     L.push(`      ${k}  ${v.hands_off}/${v.n} 無介入  （重み ${v.hands_off_weight}/${v.weight}）`);
