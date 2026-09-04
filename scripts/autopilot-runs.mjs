@@ -276,7 +276,18 @@ function normalizeArtifact(v) {
  */
 /** 失敗の層（L1適格性 / L0実行 / コスト / 経路不在）。**data/autonomy-score.json と同じ語彙。** */
 export const FAILURE_STAGES = ['eligibility', 'execution', 'cost', 'absent'];
-export const ELIGIBILITY_VERDICTS = ['declined_by_design', 'declined_unrecorded', 'blocked'];
+export const ELIGIBILITY_VERDICTS = ['declined_by_design', 'declined_by_fault',
+  'declined_unrecorded', 'blocked'];
+/**
+ * **判定器そのもの、または前提が壊れていて着手できなかった**ことを表す判定コード。
+ *
+ * これらを `declined_by_design` に混ぜると、**鍵が失効した日が「設計どおり静かに寝た日」
+ * として台帳に残る。**どちらも outcome は skipped_gate で、層も eligibility（実行前に止まった）
+ * だが、**片方は正しく動いていて、もう片方は壊れている。**
+ * escalation-rules.json も fail_credential を 4時間・stop_automation: true と扱っていて、
+ * 設計どおりの棄却とは別物として既に区別している。
+ */
+export const FAULT_GATE_CODES = ['fail_credential', 'fail_api', 'fail_no_model', 'preflight_error'];
 
 /**
  * gate_code の記録を要求し始めた日。**これより前の行は遡って復元できないので免除する。**
@@ -346,6 +357,16 @@ export function stageProblems(r, at) {
   if (!ELIGIBILITY_VERDICTS.includes(r.eligibility_verdict)) {
     problems.push(`${at}: eligibility なのに eligibility_verdict が ${ELIGIBILITY_VERDICTS.join('|')} でない`
       + `（got ${JSON.stringify(r.eligibility_verdict)}）`);
+  }
+  // **故障で止まった回を「設計どおり」と書かせない。**
+  if (FAULT_GATE_CODES.includes(r.gate_code) && r.eligibility_verdict !== 'declined_by_fault') {
+    problems.push(`${at}: gate_code=${r.gate_code} は故障で止まった回なのに`
+      + ` eligibility_verdict=${r.eligibility_verdict}`
+      + ' — **鍵が失効した日を「設計どおり静かに寝た日」として残さない。**declined_by_fault と書く');
+  }
+  if (r.eligibility_verdict === 'declined_by_fault' && !FAULT_GATE_CODES.includes(r.gate_code)) {
+    problems.push(`${at}: declined_by_fault なのに gate_code=${JSON.stringify(r.gate_code)}`
+      + `（故障の判定コードは ${FAULT_GATE_CODES.join('|')}）`);
   }
   // **ラチェット。**新しい行は「なぜ寝たか」を必ず持つ。持たない行は
   // declined_unrecorded と自己申告することでだけ通る —— 沈黙を正常に見せない。
@@ -1115,6 +1136,18 @@ function selftest() {
   eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility',
           eligibility_verdict: 'declined_unrecorded', date_jst: '2026-09-04' }), 0,
      '**「記録が取れなかった」と自己申告すれば通る** — 取れなかったことを取れたことにしない');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_design', gate_code: 'fail_credential' }), 1,
+     '**鍵が失効した日を「設計どおり静かに寝た日」として残さない**');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_fault', gate_code: 'fail_credential' }), 0,
+     '故障として書けば通る');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_fault', gate_code: 'skip_secrets' }), 1,
+     '**逆向きも落とす**（正常な棄却を故障として書かない）');
+  eq(sp({ outcome: 'skipped_gate', failure_stage: 'eligibility', date_jst: '2026-09-04',
+          eligibility_verdict: 'declined_by_design', gate_code: 'preflight_error' }), 1,
+     '判定器が落ちた回も故障側');
 
   console.log(bad ? `\n${bad}/${n} 失敗` : `selftest: ${n}/${n} 通過`);
   if (bad) process.exit(1);

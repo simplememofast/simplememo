@@ -56,6 +56,7 @@
  * という、判断を要さないぶん**毎日確実に漏れる**種類の作業だけ。
  */
 
+import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -1695,6 +1696,20 @@ async function fetchWorkflowRuns(repo, token, limit = 30) {
  * 運転台帳側が declined_unrecorded として自己申告する。
  * **後から足した観測手段が、過去を「記録があった」ことにしない。**
  */
+/**
+ * 判定コードから、適格性の「判定の結果」を選ぶ。**純関数。**
+ *
+ * 故障（鍵の失効・API 到達不能・判定器の例外）は outcome が skipped_gate になるが、
+ * **静かに寝たのではなく壊れている。**混ぜると、鍵が切れた日が
+ * 「設計どおり静かに寝た日」として台帳に残る。
+ *
+ * 逆向き（正常な棄却を故障として書く）も autopilot-runs.mjs の stageProblems が落とす。
+ * **片方だけ閉めても閉めたことにならない。**
+ */
+export function verdictFor(gateCode) {
+  return FAULT_GATE_CODES.includes(gateCode) ? 'declined_by_fault' : 'declined_by_design';
+}
+
 export function declaredGateCode(run) {
   const declared = (run.steps ?? []).find((x) => /^判定コード:/.test(x.name ?? ''));
   if (!declared) return null;
@@ -1975,7 +1990,13 @@ export const HANDLERS = {
       // **なぜ寝たかが決まった回だけ渡す。**渡さない回は autopilot-runs.mjs 側が
       // declined_unrecorded として自己申告する —— 決まらなかったことを、
       // 決まったことにしない（GATE_CODE_REQUIRED_FROM のラチェットはそれを許している）。
-      if (v.gate_code) args.push('--gate-code', v.gate_code, '--eligibility-verdict', 'declined_by_design');
+      if (v.gate_code) {
+        // **故障で止まった回を「設計どおり」と書かない。**鍵の失効・API 到達不能・
+        // 判定器の例外は、どれも outcome が skipped_gate になるが、
+        // **静かに寝たのではなく壊れている。**（autopilot-runs.mjs の FAULT_GATE_CODES が
+        // 逆向きも含めて検査する。）
+        args.push('--gate-code', v.gate_code, '--eligibility-verdict', verdictFor(v.gate_code));
+      }
       if (v.note) args.push('--stage-note', v.note);
       if (v.needs_triage) args.push('--needs-triage', 'true');
       args.push('--detected-at', new Date().toISOString());
@@ -3689,6 +3710,11 @@ async function selftest() {
     t('**写しがあれば、その1つも決まる**',
       interpretRun(skipped(stepsOf(['Gate', 'success'], ['判定コード: skip_secrets', 'success'],
         ['緊急停止の確認', 'skipped'], ['予算ゲート', 'skipped'], ['振り分け', 'skipped']))).gate_code === 'skip_secrets');
+    t('**鍵の失効は「設計どおり」ではない**', verdictFor('fail_credential') === 'declined_by_fault');
+    t('API に届かないのも故障側', verdictFor('fail_api') === 'declined_by_fault');
+    t('判定器が落ちたのも故障側', verdictFor('preflight_error') === 'declined_by_fault');
+    t('秘密鍵未設定は設計どおりの棄却', verdictFor('skip_secrets') === 'declined_by_design');
+    t('当日重複も設計どおりの棄却', verdictFor('skip_already_shipped') === 'declined_by_design');
     t('出荷した回に判定コードは付かない',
       interpretRun(mk([{ name: 'Claude Code', conclusion: 'success' }])).gate_code === undefined);
   }
