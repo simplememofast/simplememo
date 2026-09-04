@@ -44,9 +44,9 @@
       "name": "AI完走率",
       "formula": "本番へ出荷できた実行 ÷ 着手した実行",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 13,
-      "checksum": "f4525cb5c7cc1796",
-      "changed_at": "2026-09-03",
+      "version": 14,
+      "checksum": "b332bbf2b0d863b8",
+      "changed_at": "2026-09-04",
       "why_it_matters": "分母は attempted。秘密鍵未設定のGateスキップは着手に数えない（正しく働く安全装置を失敗率にしない）",
       "history": [
         {
@@ -108,6 +108,11 @@
           "version": 13,
           "at": "2026-09-03",
           "why": "定義は変えていない。同じファイルの status 出力に導出値（publishing_streaks / last_publishing）を並べたため checksum だけ動いた。"
+        },
+        {
+          "version": 14,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに failure_stage の検査（stageProblems）を足したため checksum だけ動いた。完走率・連続日数の数え方も、切る条件も一切変えていない。"
         }
       ]
     },
@@ -447,9 +452,9 @@
       "name": "連続稼働日数",
       "formula": "停止日 = no_run の行がある日（同じ日に主系の skipped_gate 行が並んでいても停止）。稼働日 = no_run の行が無く、行が1つでもある日。行の無い日は連続を切る。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 5,
-      "checksum": "f4525cb5c7cc1796",
-      "changed_at": "2026-09-03",
+      "version": 6,
+      "checksum": "b332bbf2b0d863b8",
+      "changed_at": "2026-09-04",
       "why_it_matters": "08-27 に「16日間連続で稼働」を取り下げたが、次に「連続」と書くときの定義がどこにも無かった。定義を置いて数えると 2026-08-18 から16日（08-16・17 で一度切れている）。**skipped_gate を稼働と読むと23日連続が復活する**ので、no_run を日単位の判定として優先する側に固定した",
       "history": [
         {
@@ -471,6 +476,11 @@
           "version": 5,
           "at": "2026-09-03",
           "why": "定義は変えていない。同じファイルの status 出力に導出値（publishing_streaks / last_publishing）を並べたため checksum だけ動いた。"
+        },
+        {
+          "version": 6,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに failure_stage の検査（stageProblems）を足したため checksum だけ動いた。完走率・連続日数の数え方も、切る条件も一切変えていない。"
         }
       ]
     },
@@ -479,9 +489,9 @@
       "name": "連続出荷日数",
       "formula": "出荷（outcome = shipped）の行がある日だけが続く。停止（no_run）・失敗・Gateスキップ・行の無い日はすべて連続を切る。同じ日にどれか1経路でも出荷していればその日は出荷日。current は台帳の最終記入日で終わる連続、longest は窓内の最長",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 4,
-      "checksum": "f4525cb5c7cc1796",
-      "changed_at": "2026-09-03",
+      "version": 5,
+      "checksum": "b332bbf2b0d863b8",
+      "changed_at": "2026-09-04",
       "why_it_matters": "**連続稼働は、失敗し続けても伸びる。**主系が落ちて行が立った日は「記録がある日」なので稼働に数えるのが正しく、そこは変えていない。だが実際に 2026-09-02 時点の連続稼働 16 日は、**08-29〜08-31 の出荷ゼロ3日を丸ごとまたいでいる**（08-29 は副系が claim だけ取って死に、08-30・08-31 は主系・副系とも週次上限の 429）。稼働だけを公開面に出すと、その3日は読めない。切れる指標を隣に置く",
       "history": [
         {
@@ -498,6 +508,11 @@
           "version": 4,
           "at": "2026-09-03",
           "why": "定義は変えていない。同じファイルの status 出力に導出値（publishing_streaks / last_publishing）を並べたため checksum だけ動いた。"
+        },
+        {
+          "version": 5,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに failure_stage の検査（stageProblems）を足したため checksum だけ動いた。完走率・連続日数の数え方も、切る条件も一切変えていない。"
         }
       ]
     },
@@ -506,8 +521,8 @@
       "name": "連続公開日数",
       "formula": "公開レーン（A=SEO / B=AIO / C=Evidence Asset / D=Paid relevance例外 / E=Coverage）の outcome=shipped の行がある日だけが続く。**レーンF（自己修復）と lane の無い日（保守のみ）は切る。**停止・失敗・Gateスキップ・行の無い日も切る。同じ日にどれか1経路でも公開レーンで出荷していればその日は公開日",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 2,
-      "changed_at": "2026-09-03",
+      "version": 3,
+      "changed_at": "2026-09-04",
       "why_it_matters": "連続出荷は自己修復も出荷として数えるので、**自分を直し続けても伸びる。**2026-09-03 の実物: 連続出荷 3日のうち 2日がレーンF で、公開面に出たのは1日だけ。新規カバレッジ（レーンE）は 08-28 が最後で6日空いていた。連続稼働に対して連続出荷を足したときと同じ形の穴が、一段内側に残っていた。**どちらが正しい優先順位かはこの指標では決めない**（故障が続けばレーンFが勝つのが正しい日もある）。決められるように、まず分けて数える",
       "history": [
         {
@@ -519,18 +534,23 @@
           "version": 2,
           "at": "2026-09-03",
           "why": "定義は変えていない。同じファイルの status 出力に導出値（publishing_streaks / last_publishing）を並べたため checksum だけ動いた。"
+        },
+        {
+          "version": 3,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに failure_stage の検査（stageProblems）を足したため checksum だけ動いた。完走率・連続日数の数え方も、切る条件も一切変えていない。"
         }
       ],
-      "checksum": "f4525cb5c7cc1796"
+      "checksum": "b332bbf2b0d863b8"
     },
     {
       "id": "hands_off_shipping_streak",
       "name": "無介入出荷の連続日数",
       "formula": "出荷の行があり、かつその日のどの行にも介入（interventions）が無い日だけが続く。出荷した経路が無介入でも、同じ日に別の行へ介入があれば切れる（日単位）。停止・失敗・行の無い日も切る",
       "source_file": "scripts/autopilot-runs.mjs",
-      "version": 4,
-      "checksum": "f4525cb5c7cc1796",
-      "changed_at": "2026-09-03",
+      "version": 5,
+      "checksum": "b332bbf2b0d863b8",
+      "changed_at": "2026-09-04",
       "why_it_matters": "率には天井がある —— 総合自動化率の到達可能上限は 82.9%（scripts/autonomy-gap.mjs）で、そこから先は物理・対人・観測不能で動かない。**時間には天井が無い。**「オーナーが何日触らずに済んだか」は伸ばし続けられる指標で、率が頭打ちになった後も自律性の前進を測れる。\n\n**出荷があることを条件に入れてある。**入れないと、壊れたまま誰も直しに行かない日が無介入として積み上がる（08-30・08-31 がその形）。触っていないのは自律していたからではないので、放置で伸びる自律指標にはしない",
       "history": [
         {
@@ -547,6 +567,96 @@
           "version": 4,
           "at": "2026-09-03",
           "why": "定義は変えていない。同じファイルの status 出力に導出値（publishing_streaks / last_publishing）を並べたため checksum だけ動いた。"
+        },
+        {
+          "version": 5,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに failure_stage の検査（stageProblems）を足したため checksum だけ動いた。完走率・連続日数の数え方も、切る条件も一切変えていない。"
+        }
+      ]
+    },
+    {
+      "id": "autonomy_score",
+      "name": "自律スコア（100点）",
+      "formula": "5成分の加重和。VDC 30（出荷のうち決済済みの価値契約を伴う割合）＋ UMR 25（人が一切触れずに本番到達した変更の割合を可逆性クラス R0=1/R1=3/R2=10 で重み付け・R0 の寄与は窓の総重みの60%まで）＋ RA 20（故障のうち機械が自分で検知した割合 10 と人手なしで復旧した割合 10）＋ EP 15（規則の within_hours を超えた検知の率から出す見逃し 7.5 と owner_needed による精度 7.5）＋ TUC 10（週あたり出荷数 / 目標7・上限1）。窓は28日（台帳が足りなければ全期間）。**検査被覆率が前回スナップショットより下がった窓では、素点が上がっていてもスコアを据え置く。**変更失敗率は入れない",
+      "source_file": "scripts/autonomy-score.mjs",
+      "version": 2,
+      "checksum": "70c4505037394ec2",
+      "changed_at": "2026-09-04",
+      "why_it_matters": "**総合自動化率（タスク被覆率）は「何を自動化できたか」しか言わない。**検証されていない決定を100%自動化すれば被覆率は100%になる。こちらは反証器の有無で数える —— L0 実装だけに反証器があり L1〜L3 に無い現状が、VDC 0/30 として数字に出る。**乗り換えではなく併設**で、片方が伸びてもう片方が伸びないことに意味がある。配点は data/autonomy-score.json（L4＝人間所有）に置き、AIは書き換えない",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに（a）配点ファイルが self_repair.may_modify に入っていないことの検査、（b）RA の検知に文脈（検知された件数・機械が拾った適格性の沈黙）、（c）check-generators の走査に載るための --write の別名、を足したため checksum だけ動いた。成分の式・重み・窓・分母はどれも変えていない。"
+        }
+      ]
+    },
+    {
+      "id": "unreviewed_merge_rate",
+      "name": "無検査マージ率（UMR・可逆性で重み付け）",
+      "formula": "Σ(可逆性重み × 人の介入がゼロの出荷) / Σ(可逆性重み × 全出荷)。可逆性クラスは data/autonomy-score.json の lane_action_class（action=new は R1、refresh は R0、レーンF は常に R0）。重みは R0=1 / R1=3 / R2=10。R0 の分子寄与は窓の総重みの60%を超えない",
+      "source_file": "scripts/autonomy-score.mjs",
+      "version": 2,
+      "checksum": "70c4505037394ec2",
+      "changed_at": "2026-09-04",
+      "why_it_matters": "**可逆な変更ばかり通して自律したつもりになるのを防ぐ。**既存の人間介入率（23.3%）は run 単位の二値で、可逆性を見ていない —— YAML を1行直した日と、索引される新しい公開URLを無検査で出した日が同じ重さで数えられる。重み付けすると「無検査で通してよい重さ」が測れる",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに（a）配点ファイルが self_repair.may_modify に入っていないことの検査、（b）RA の検知に文脈（検知された件数・機械が拾った適格性の沈黙）、（c）check-generators の走査に載るための --write の別名、を足したため checksum だけ動いた。成分の式・重み・窓・分母はどれも変えていない。"
+        }
+      ]
+    },
+    {
+      "id": "recovery_autonomy",
+      "name": "復旧自律性（RA）",
+      "formula": "故障（failure_stage が execution / cost / absent の行）を分母に、(a) source が data/autonomy-score.json の machine_detection_sources に含まれる割合＝機械の自己検知、(b) repair_of で修理された行があり、かつ故障行と修理行のどちらにも介入が無い割合＝人手なしの復旧。それぞれ満点10。自動 revert 回数（auto_revert_of を持つ行）は別に数え、点数に入れない",
+      "source_file": "scripts/autonomy-score.mjs",
+      "version": 2,
+      "checksum": "70c4505037394ec2",
+      "changed_at": "2026-09-04",
+      "why_it_matters": "**出荷後の指標劣化を検知して自動で revert できない限り、マージ権限をより危険なクラスへ広げることは原理的にできない。**設計ノートの定義（検知して人手なしで巻き戻した割合）をそのまま使うと自動 revert 0 回の現状で恒久的に 0 になり、実際に動いている自己修復が見えなくなるので検知と復旧に割った。**Phase 6 のハードゲートは点ではなく auto_revert_count >= 1 に紐づける**（点で代替すると、検知だけで満点に近づいて「巻き戻せる」ことになる）",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに（a）配点ファイルが self_repair.may_modify に入っていないことの検査、（b）RA の検知に文脈（検知された件数・機械が拾った適格性の沈黙）、（c）check-generators の走査に載るための --write の別名、を足したため checksum だけ動いた。成分の式・重み・窓・分母はどれも変えていない。"
+        }
+      ]
+    },
+    {
+      "id": "failure_stage_attribution",
+      "name": "失敗の層別帰属率",
+      "formula": "出荷しなかった run のうち failure_stage（eligibility / execution / cost / absent）を持つ割合。scripts/autopilot-runs.mjs の validate() が 100% を強制する（欠けた行があれば --check が落ちる）",
+      "source_file": "scripts/autopilot-runs.mjs",
+      "version": 2,
+      "checksum": "b332bbf2b0d863b8",
+      "changed_at": "2026-09-04",
+      "why_it_matters": "**『死んだ run は選択ミスか実行ミスか』は、調べれば分かる問いではなく、記録が同じ列に入っているせいで原理的に答えられない問いだった。**2026-09-04 に層を足して数えたら、出荷しなかった 23 行は適格性 12 / 実行 6 / コスト 3 / 経路不在 2 に分かれた。**適格性が最大の層**で、そこには 2026-09-04 まで「秘密鍵が在るか」以外の判定が無かった",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに（a）配点ファイルが self_repair.may_modify に入っていないことの検査、（b）RA の検知に文脈（検知された件数・機械が拾った適格性の沈黙）、（c）check-generators の走査に載るための --write の別名、を足したため checksum だけ動いた。成分の式・重み・窓・分母はどれも変えていない。"
+        }
+      ]
+    },
+    {
+      "id": "l1_eligibility_verdicts",
+      "name": "L1適格性ゲートの判定",
+      "formula": "開いている候補（data/autopilot-actions.json の state != done）を5基準（可逆性・変更境界・証拠の鮮度・予算・重複）で判定した結果の内訳。eligible / ineligible_recorded / escalate_l4。enforcement=record_plus_r2_block では R2 だけが実行を止める",
+      "source_file": "scripts/autonomy-eligibility.mjs",
+      "version": 2,
+      "checksum": "50acf6f77c6e6dc4",
+      "changed_at": "2026-09-04",
+      "why_it_matters": "**L1 で落ちた候補は L0 の失敗ログとは別のテーブル（data/eligibility-log.json）に書く。**これだけで「22件の死は選択ミスか実行ミスか」が機械的に答えられる問いに変わる。判定が全候補で同値になった基準は --check が名指しで落とす —— 判定しているように見えて分岐が死んでいる形を、このリポジトリは 2026-08-26 に5回踏んでいる",
+      "history": [
+        {
+          "version": 2,
+          "at": "2026-09-04",
+          "why": "定義は変えていない。同じファイルに（a）配点ファイルが self_repair.may_modify に入っていないことの検査、（b）RA の検知に文脈（検知された件数・機械が拾った適格性の沈黙）、（c）check-generators の走査に載るための --write の別名、を足したため checksum だけ動いた。成分の式・重み・窓・分母はどれも変えていない。"
         }
       ]
     }

@@ -351,6 +351,26 @@
       "served_by_site": false,
       "why": "他社の主張の検証記録。公開URLと判定しか入っていないが、サイトが参照する面が無い。原稿に他社名を書かない方針なので配信面にも出さない",
       "ok_in_public_repo": "ok"
+    },
+    "autonomy-score.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が配点として参照。**点数の付け方を見せることが訴求そのもの** —— 「自律スコア35.5点」だけを出して配点を隠すと、都合よく数えていないことを確かめる手段が読み手に無い。このファイルは L4（人間の持ち分）で、AIが書き換えられない側に置いてある",
+      "ok_in_public_repo": "ok"
+    },
+    "autonomy-score-history.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が推移として参照。**アンチゲーミングの非退行制約の基準**（検査被覆率が下がった窓ではスコアを上げない）がこの履歴を読むので、履歴を隠すと据え置きが効いたかを外から確かめられない",
+      "ok_in_public_repo": "ok"
+    },
+    "eligibility-policy.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が実行前の判定基準として参照。**何を止め、何を止めないかを見せる側**。enforcement（いまは R2 だけ止める）が書いてあるので、「判定はしているが実行は止めていない」を隠さずに出せる",
+      "ok_in_public_repo": "ok"
+    },
+    "eligibility-log.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が判定台帳として参照。中身は候補のID・判定・理由で、**候補そのものは data/autopilot-actions.json（既に公開）から来ている**ので新しく出るものは無い。**運転台帳とは別の表にしてあることが要点**なので、片方だけ公開すると分けた意味が読み手に伝わらない",
+      "ok_in_public_repo": "ok"
     }
   },
   "served_dirs": [

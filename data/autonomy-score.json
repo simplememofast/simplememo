@@ -1,0 +1,205 @@
+{
+  "$comment": [
+    "**自律スコアのポリシー台帳（L4＝憲法側）。AIはこのファイルを書き換えない。**",
+    "計算するのは scripts/autonomy-score.mjs で、この台帳は「何を何点で数えるか」だけを持つ。",
+    "",
+    "【なぜ既存の自動化率と別に要るか】",
+    "data/automation-coverage.json が出す総合自動化率（66.8%）は**タスク被覆率**で、",
+    "『13領域199タスクのうち、AIが実行している割合』を数えている。これは",
+    "**「何を自動化できたか」**の指標であって、**「その決定が検証されたか」**は一言も言わない。",
+    "",
+    "実際、2026-09-04 時点で死んだ run はすべて**実装層**の話であり、",
+    "『何をやるか』という決定はまだ一度も反証されたことがない。被覆率はその区別を持たない ——",
+    "検証されていない決定を100%自動化すれば、被覆率は100%になる。",
+    "",
+    "**したがって乗り換えない。**両方出す。片方が伸びてもう片方が伸びないことに意味がある。",
+    "（分母の乗り換えは goodharting そのもの、というのはこのリポジトリが",
+    "  2026-08-22 に人間介入率の内訳を足したときに立てた規律）",
+    "",
+    "【5成分の出どころ】",
+    "r/AI_Agents スレッドの指摘（適格性と価値の分離・成熟ゲート・スタック検出・強制探索）と",
+    "2026-08-11〜09-02 の運用実績から起こした設計ノート。層は L0 実装 / L1 適格性 /",
+    "L2 価値 / L3 フレーム / L4 憲法 の5つで、**自律度＝反証器を持つ決定層の高さ×通過量**と定義する。",
+    "",
+    "【アンチゲーミングが本体】",
+    "どの成分も**チェックを緩めれば上がる。**だから被覆率の非退行制約が全成分に掛かる。",
+    "被覆率が下がった週はスコアを据え置く（上げない）。",
+    "",
+    "**このスコアを ranker に見せない。**人間向けの計器であって、システムの最適化対象ではない。",
+    "見せた時点で最適化対象になり、指標としての寿命が終わる。",
+    "scripts/autonomy-score.mjs --check が、日次runのプロンプト経路からこのファイルが",
+    "読まれていないことを検査する。"
+  ],
+  "version": 1,
+  "policy_owner": "human",
+  "$policy_owner_note": [
+    "この台帳を変えてよいのはオーナーだけ。data/authority-matrix.json の self_repair.must_not",
+    "『権限表を自分で書き換えない』と同じ側に置く —— 配点と可逆性クラスは、",
+    "**AIが自分の点数の付け方を決められる場所**なので、権限表と同じ扱いにする。",
+    "scripts/autonomy-score.mjs --check が、権限表の self_repair.may_modify にこのファイルが**入っていないこと**を実際に読んで確かめる（散文の約束にしない）。data/eligibility-policy.json も同じ扱い。"
+  ],
+  "created_at": "2026-09-04",
+  "window_days": 28,
+  "$window_note": [
+    "28日。理由は2つ ——（1）このリポジトリの他の窓（BigQuery / revenue-series）が28日で揃っている、",
+    "（2）7日窓では出荷が5〜7件しか入らず、1件の増減で成分が10ポイント以上動く。",
+    "**単日の率では何も決めない**（simplememo-api の日次運転規律）と同じ理由で、",
+    "週次の率でも決めない。台帳が28日に満たない間は全期間を使い、その旨を出力に書く。"
+  ],
+
+  "weights": {
+    "vdc": 30,
+    "umr": 25,
+    "ra": 20,
+    "ep": 15,
+    "tuc": 10
+  },
+
+  "reversibility": {
+    "$comment": [
+      "**可逆性クラス。権限表の reversible（真偽値）とは別物で、こちらのほうが細かい。**",
+      "権限表は『戻せるか』の二値だが、UMR は『無検査で通してよい重さ』を測るので3段階が要る。",
+      "重みは無検査マージの分子側に掛ける —— R2 を1件無検査で通すことは、",
+      "R0 を10件通すのと同じ重さで数える。",
+      "",
+      "**二値と3段階は、実際に食い違う。**その食い違いは domain_class の conflict 欄に名指しで書いてある。",
+      "黙って片方へ寄せない。"
+    ],
+    "R0": { "weight": 1, "label": "単一の revert で戻る" },
+    "R1": { "weight": 3, "label": "戻せるが手間がかかる（索引された公開URL・配信済みビルド）" },
+    "R2": { "weight": 10, "label": "不可逆（審査提出・価格・ユーザーデータ・外部への送信）" }
+  },
+
+  "r2_blocks_execution": true,
+  "$r2_note": [
+    "**R2 は例外なく L4 へエスカレーションし、ループは触らない。**",
+    "2026-09-04 のオーナー判断で、L1適格性ゲートは『記録のみ、ただし R2 だけは停止』で入った。",
+    "他の4基準（境界・証拠鮮度・予算・重複）は落ちても実行を止めず、判定だけを台帳に残す ——",
+    "閾値の初期値が外れていた場合に、翌朝から出荷が止まるのを避けるため。",
+    "**1周動いたのを見てから停止側へ倒す。**（『門を作った日ではなく、門を通って",
+    "何かが動いた日に動いたと書く』— docs/autonomy-95-gap.md の規律）"
+  ],
+
+  "domain_class": [
+    { "domain": "サイトコンテンツの新設・更新", "class": "R1", "matrix_reversible": true,
+      "why": "**新設は R1、更新は R0。**新しい公開URLは索引されるので、revert しても検索結果には残り 404 になる。既存ページの更新は revert で完全に戻る。lane_action_class で action の値によって分ける",
+      "conflict": null, "reviewed_by": null },
+    { "domain": "サイト構造の変更（URL・リダイレクト・実験中ページ）", "class": "R1", "matrix_reversible": false,
+      "why": "リダイレクトは戻せるが、索引が追随するまで時間がかかる。権限表は不可逆側に置いているが、**技術的には戻る**ので R2 ではない",
+      "conflict": "権限表は reversible: false。こちらは R1（戻せるが手間がかかる）。**権限表のほうが厳しく、そちらが実効**（requires_approval: true）", "reviewed_by": null },
+    { "domain": "アプリのビルド・TestFlight内部配信", "class": "R1", "matrix_reversible": true,
+      "why": "**ビルド番号は再利用できない。**配信そのものは撤回できるが、番号は焼ける",
+      "conflict": null, "reviewed_by": null },
+    { "domain": "macOSランナーの起動（GitHub Actions 分数の消費）", "class": "R2", "matrix_reversible": false,
+      "why": "**支出は取り消せない。**1回約 $10.40（2026-08 実測）",
+      "conflict": null, "reviewed_by": null },
+    { "domain": "App Review への提出", "class": "R2", "matrix_reversible": false, "why": "Apple 側の記録が残る", "conflict": null, "reviewed_by": null },
+    { "domain": "App Store への公開（審査通過後）", "class": "R2", "matrix_reversible": false, "why": "ユーザーの端末に届く", "conflict": null, "reviewed_by": null },
+    { "domain": "価格・プラン・無料枠の変更", "class": "R2", "matrix_reversible": false, "why": "既存契約者の条件に影響する", "conflict": null, "reviewed_by": null },
+    { "domain": "AI実費（開発・運用のトークン費）", "class": "R2", "matrix_reversible": true,
+      "why": "**使ったトークン代は返ってこない。**権限表が reversible: true と書いているのは『上限を下げれば止まる』の意味であって、支出そのものは戻らない",
+      "conflict": "権限表は reversible: true。**支出は不可逆**なので R2。ただし requires_approval: false（上限内での消費は渡してある）ままなので、L1 の R2 停止は月次上限の範囲内では発火しない —— domain_class は UMR の重み付けにだけ効く", "reviewed_by": null },
+    { "domain": "広告出稿・広告予算の変更", "class": "R2", "matrix_reversible": false, "why": "支出", "conflict": null, "reviewed_by": null },
+    { "domain": "契約・支払い・送金", "class": "R2", "matrix_reversible": false, "why": "相手方がいる", "conflict": null, "reviewed_by": null },
+    { "domain": "プレスリリースの配信", "class": "R2", "matrix_reversible": false, "why": "外部への送信", "conflict": null, "reviewed_by": null },
+    { "domain": "SNS投稿（X・TikTok）", "class": "R2", "matrix_reversible": true,
+      "why": "**外部への送信は R2。**削除できても、届いた先からは消えない",
+      "conflict": "権限表は reversible: true（消せる）で requires_approval: false。**設計ノートの定義では外部送信は不可逆。**この行は現に AI が無検査で実行している領域なので、UMR では R2 の重み（10）で数える —— つまりSNS投稿は UMR を最も大きく動かす。オーナーが権限表側を変えるか、この分類を変えるかは L4 の判断", "reviewed_by": null },
+    { "domain": "ユーザーデータの削除（アプリ内の自己削除）", "class": "R2", "matrix_reversible": false, "why": "ユーザーデータ", "conflict": null, "reviewed_by": null },
+    { "domain": "ユーザーデータの削除要求への対応（個別の連絡）", "class": "R2", "matrix_reversible": false, "why": "ユーザーデータ", "conflict": null, "reviewed_by": null },
+    { "domain": "個人情報事故・法的請求・重大障害・炎上", "class": "R2", "matrix_reversible": false, "why": "対外的な帰責", "conflict": null, "reviewed_by": null },
+    { "domain": "段階公開の撤回（カナリアガード）", "class": "R0", "matrix_reversible": true,
+      "why": "**撤回は元に戻す操作そのもの。**安全側なので R0",
+      "conflict": null, "reviewed_by": null },
+    { "domain": "段階公開の拡大（rollout の引き上げ）", "class": "R1", "matrix_reversible": false,
+      "why": "下げられるが、上げた間に配信された端末は戻らない",
+      "conflict": "権限表は reversible: false。**下げる操作は存在する**ので R1", "reviewed_by": null },
+    { "domain": "問い合わせへの自動回答（承認済みテンプレート）", "class": "R2", "matrix_reversible": false, "why": "外部への送信（メール）", "conflict": null, "reviewed_by": null },
+    { "domain": "App Store レビュー返信の投稿", "class": "R2", "matrix_reversible": false, "why": "外部への送信（公開される）", "conflict": null, "reviewed_by": null },
+    { "domain": "運転台帳の取り残し（マージ後に取り残されたコミット）の始末", "class": "R0", "matrix_reversible": true, "why": "台帳の追記。revert で戻る", "conflict": null, "reviewed_by": null },
+    { "domain": "App Store の商品ページ（カスタムプロダクトページ）の作成・削除", "class": "R1", "matrix_reversible": false, "why": "差し替えられるが審査が挟まる", "conflict": null, "reviewed_by": null }
+  ],
+
+  "lane_action_class": {
+    "$comment": [
+      "運転台帳の行から可逆性クラスを引く表。**lane と action の組で決まる。**",
+      "domain_class の『サイトコンテンツの新設・更新』を、台帳が実際に持っている粒度まで割ったもの。",
+      "レーンA〜E は公開面、F は自己修復（scripts / 台帳）。"
+    ],
+    "default": "R1",
+    "by_lane": {
+      "A": { "new": "R1", "refresh": "R0" },
+      "B": { "new": "R1", "refresh": "R0" },
+      "C": { "new": "R1", "refresh": "R0" },
+      "D": { "new": "R1", "refresh": "R0" },
+      "E": { "new": "R1", "refresh": "R0" },
+      "F": { "new": "R0", "refresh": "R0" }
+    },
+    "$f_note": "レーンF は scripts / ワークフロー / 台帳しか触らない（authority_matrix.self_repair.may_modify）。単一の revert で戻るので new でも R0"
+  },
+
+  "anti_gaming": {
+    "coverage_non_regression": {
+      "enabled": true,
+      "source_file": "data/check-selftests.json",
+      "$note": "自己テストが demonstrated な検査の本数。**下がった窓ではスコアを据え置く（上げない）。**チェックを緩めれば VDC も UMR も自動的に上がるため。据え置きであって0点ではない —— 0点にすると『下げた側が得をしない』を通り越して『下げた側が全部失う』になり、正当な統廃合まで止まる"
+    },
+    "r0_weekly_cap": {
+      "enabled": true,
+      "max_share_of_weight": 0.6,
+      "$note": "UMR の分子に入る R0 の重みは、その窓の総重みの60%まで。**些末で可逆なコンテンツ更新を量産すれば点が伸びる**抜け道を塞ぐ。60%にしたのは、実測（2026-09-04 時点）で refresh が出荷の約半分を占めており、0.5 にすると正常運転が即座に上限に当たるため"
+    },
+    "failure_rate_excluded": true,
+    "$failure_rate_note": "**変更失敗率（30.0%）はスコアに入れない。**死亡率を最適化対象にした瞬間、チェックを緩める圧力が生まれ、手動レビューに逆戻りする",
+    "hidden_from_ranker": {
+      "enabled": true,
+      "must_not_read": [
+        ".github/workflows/obsidian-autopilot.yml",
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+      ],
+      "$note": "日次runのプロンプト経路が data/autonomy-score.json / scripts/autonomy-score.mjs を読んでいたら --check が落ちる。**計器を最適化対象にしない。**"
+    }
+  },
+
+  "tuc": {
+    "target_ships_per_week": 7,
+    "$note": "1日1出荷が満点。ロードマップの cadence 目標（Phase 6 で1日2run以上）はまだ先なので、いまの設計上限をそのまま置く。**止まっているのに安全だから満点、という状態を作らないための成分**なので、上限を上げるのは cadence を上げてから"
+  },
+
+  "ep": {
+    "rule_source": "data/escalation-rules.json",
+    "precision_field": "owner_needed",
+    "$note": [
+      "エスカレーション精度は2つに割る。**片方しか測れないので、割らないと『測れない』が『満点』になる。**",
+      "  miss      … 上げるべきだったのに上げなかった率。escalation-rules の within_hours と",
+      "              運転台帳の failed_at → detected_at から**いま計算できる**",
+      "  precision … 上げたうち本当に必要だった割合。**いまは測れない** ——",
+      "              アクション台帳に『人が要ったか』の欄が無い。owner_needed を足したので、",
+      "              以後オーナー送りのアクションを閉じるときに埋まる。埋まるまでこの半分は0点"
+    ]
+  },
+
+  "ra": {
+    "$note": [
+      "復旧自律性も2つに割る。設計ノートの定義は『悪い結果をシステム自身が検知し、人手なしで巻き戻した割合』だが、",
+      "**巻き戻し（自動 revert）は1回も起きていない。**割らずに測ると RA は恒久的に 0 になり、",
+      "実際に動いている自動検知と自己修復（レーンF）が一切見えなくなる。",
+      "  detect  … 故障のうち、機械が検知した割合（source が act-* で、-session が付かないもの）",
+      "  recover … 故障のうち、人手の介入なしに復旧した割合",
+      "**Phase 6 のハードゲートは RA の点数ではなく auto_revert_count >= 1 に紐づける。**",
+      "点で代替すると、検知だけで20点満点に近づいて『巻き戻せる』ことになってしまう"
+    ],
+    "machine_detection_sources": ["act-reconcile", "act-selfheal"],
+    "$machine_detection_note": "**`act-reconcile-session` は入れない。**あれは人が起こしたセッションが reconcile を回した形で、機械が自分で気づいたのとは違う。2026-08-27〜29 の3日連続 skipped_gate は、まさに『セッションが手で起こすまで4日目まで誰も気づいていない』の実例"
+  },
+
+  "vdc": {
+    "$note": [
+      "**L2（価値契約）が入るまで、この成分は構造的に 0 点。**空欄にしない ——",
+      "0 と書いてあることが『決定はまだ一度も反証されていない』の表示になる。",
+      "分母は窓内の出荷数、分子は決済済みの価値契約を伴った出荷数。",
+      "契約台帳（data/value-contracts.json）はまだ無い。**無いものを在るように数えない。**"
+    ],
+    "contract_ledger": "data/value-contracts.json"
+  }
+}

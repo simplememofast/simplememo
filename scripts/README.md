@@ -27,6 +27,9 @@ CI「SEO Validation」が実行する本体。`check-*.mjs` 全部、`autopilot-
   `should-snapshot --decide`（`--selftest` は seo-check.yml 側でも走る）
 - obsidian-autopilot.yml … `autopilot-budget` / `autopilot-selfheal` / `check-model-routing`
 - autopilot-act.yml … `autopilot-act` / `autopilot-budget` / `autopilot-runs`
+- autopilot-act.yml（続き） … `autonomy-eligibility --write` / `autonomy-score --snapshot`
+  … L1適格性ゲートの判定と、自律スコアの1点。**アクチュエータが台帳を更新した後に走る**
+  （先に判定すると、その日に立った候補と閉じた候補を見ずに前日の姿を採点する）
 
 ## 3. import されるか、台帳経由で実行される
 

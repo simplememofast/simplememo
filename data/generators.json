@@ -150,6 +150,14 @@
       "why": "**Apple のAPIを叩く。**鍵と外部通信が要り、取り込み台帳も増える"
     },
     {
+      "file": "scripts/autonomy-eligibility.mjs",
+      "why": "**出力がその日の暦日で決まる。**判定行は (候補, judged_jst) が鍵なので、CI が走る時刻によっては当日分がまだ無く、`--run` が毎回 diff を出す（＝毎日赤い検査になり、誰も見なくなる）。**書く経路は本番で毎日通っている** —— autopilot-act.yml が 09:00 JST に `--write` を撃ち、その直後の同じジョブで `--check` を通してから PR にする。判定そのもの（judge / validate）は seo-check.yml の `--selftest` と `--check` が毎PR回している。ここで走らせないのはファイルへの書き込みだけ"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "why": "**同上。**`--write`（= `--snapshot`）は履歴に「今日」の1点を足すので、暦日が変われば必ず diff が出る。加えてスコア自体が運転台帳の現在値から出るため、台帳が動けば同じ日でも値が動く。**採点そのものは seo-check.yml が毎PR検査している**（配点の合計・権限表の領域の網羅・配点ファイルが self_repair.may_modify に入っていないこと・プロンプト経路がスコアを読んでいないこと）"
+    },
+    {
       "file": "scripts/autopilot-act.mjs",
       "why": "**行動する側。**--emit-report と位置引数で行動台帳を書き、handler が実際に動く。CIで回したら本当に実行される"
     },

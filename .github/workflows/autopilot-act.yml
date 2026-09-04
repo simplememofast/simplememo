@@ -103,6 +103,22 @@ jobs:
             --emit-report data/autopilot-actions-report.json | tee /tmp/act.txt
           cat /tmp/act.txt >> "$GITHUB_STEP_SUMMARY"
 
+      # 【L1適格性ゲート】アクチュエータが台帳を更新したあとに判定する。
+      # **順序が要点** —— 先に判定すると、その日に立った候補と閉じた候補を見ずに
+      # 前日の姿を採点することになる。
+      #
+      # `--write` は同じ候補・同じ日なら上書きなので、同日2回目でも行は増えない。
+      # **enforcement は record_plus_r2_block** なので、ここで何かが「落ちた」ことは
+      # 実行が止まったことを意味しない（止まったかどうかは halted が持つ）。
+      - name: L1適格性ゲート（判定して台帳に残す）
+        run: node scripts/autonomy-eligibility.mjs --write
+
+      # 【自律スコア】その日の1点を履歴に足す。**非退行制約の基準がこれ。**
+      # 履歴が無いと「検査被覆率が下がった窓ではスコアを上げない」が効かないので、
+      # ここが毎日走ることがアンチゲーミングの前提になっている。
+      - name: 自律スコアの記録
+        run: node scripts/autonomy-score.mjs --snapshot
+
       # 書き込んだ台帳がCIを通る形かをここで見る。**PRを出す前に見る** —
       # 壊れた台帳をPRにすると、SEO Validation が落ちて auto-merge が来ず、
       # 翌日も同じ壊れた状態から始まる。
@@ -111,6 +127,8 @@ jobs:
           node scripts/autopilot-act.mjs --check
           node scripts/autopilot-runs.mjs --check
           node scripts/autopilot-budget.mjs --check
+          node scripts/autonomy-eligibility.mjs --check
+          node scripts/autonomy-score.mjs --check
 
       - name: 変更があればPRにする
         if: inputs.dry_run != true
@@ -153,7 +171,8 @@ jobs:
             git checkout -B "$DAY"
           fi
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
-                  data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json 2>/dev/null || true
+                  data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json \
+                  data/eligibility-log.json data/autonomy-score-history.json 2>/dev/null || true
           git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
           # 同日に再実行した場合は追記されるだけ。強制pushはしない
           # （弾かれること自体が「先に誰かが書いた」という出力）。

@@ -1,0 +1,442 @@
+{
+  "$comment": [
+    "**L1適格性ゲートの判定台帳。運転台帳（data/autopilot-runs.json）とは別の表。**",
+    "",
+    "【なぜ別の表なのか — これがこの仕組みでいちばん重要な一点】",
+    "2026-09-04 まで、『適格性で落ちた』と『実行で落ちた』は同じ「失敗」として",
+    "運転台帳に並んでいた。だから **『死んだ run は選択ミスか実行ミスか』に答えられなかった。**",
+    "答えられなかったのは調べ方が足りなかったからではなく、**記録が同じ列に入っていたから。**",
+    "",
+    "分けた結果、運転台帳側には failure_stage（eligibility / execution / cost / absent）が入り、",
+    "こちらには『**実行される前に**どの基準で落ちたか』が入る。",
+    "この2つは分母が違う —— 運転台帳は run が分母、こちらは候補が分母。",
+    "**同じ表に混ぜると、その違いが消える。**scripts/autonomy-eligibility.mjs の validate() が",
+    "outcome / failure_class の混入を落とす。",
+    "",
+    "【書く主体】scripts/autonomy-eligibility.mjs --write（日次アクチュエータから）。",
+    "同じ候補・同じ日は上書きで、追記ではない（冪等）。",
+    "",
+    "【enforcement】2026-09-04 の設定は record_plus_r2_block ——",
+    "**判定は全候補に対して行うが、止めるのは R2（不可逆）だけ。**",
+    "ineligible_recorded の行は『落ちたが走った（あるいは走れた）』を意味する。",
+    "**ここを読むときに「止まった」と読まないこと。**halted フィールドが実際の停止を持つ。"
+  ],
+  "enforcement": "record_plus_r2_block",
+  "last_judged_jst": "2026-09-04",
+  "judgements": [
+    {
+      "candidate_id": "act-asc-cpp-slot-cleanup",
+      "title": "ASC のカスタムプロダクトページ70枠の整理 — 未提出38本を消すか・出すか・置くかを決める",
+      "judged_jst": "2026-09-04",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 1,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-ccr-bigquery-connector",
+      "title": "副系CCRは BigQuery MCP 接続子を持たずに起動する",
+      "judged_jst": "2026-09-04",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 10,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**13 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 13
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）",
+        "repeat_guard: **13 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-ccr-command-classifier",
+      "title": "副系CCRで一部コマンドが auto mode クラシファイアに断続的にブロックされる",
+      "judged_jst": "2026-09-04",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 10,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**13 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 13
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）",
+        "repeat_guard: **13 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-faq-question-level-audit",
+      "title": "手書き FAQPage 47面の「質問文が可視 FAQ と合っているか」は、まだ数えられない（素朴な突き合わせは27面が誤検出）",
+      "judged_jst": "2026-09-04",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "どの許可リストにも収まらない: scripts/inject_faq_schema.py",
+          "scope": null,
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 1,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "boundedness: どの許可リストにも収まらない: scripts/inject_faq_schema.py",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "judged_jst": "2026-09-04",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_auto_handler / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_auto_handler"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 0
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-obsidian-auto-20260902",
+      "title": "ブランチ claude/obsidian-auto-20260902 に 1 コミットが取り残されている（PR #774 のマージ後）",
+      "judged_jst": "2026-09-04",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "2 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 2
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-obsidian-auto-20260903",
+      "title": "ブランチ claude/obsidian-auto-20260903 に 1 コミットが取り残されている（PR #793 のマージ後）",
+      "judged_jst": "2026-09-04",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "3 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.0000（derived_auto_handler / 上限 $1.5）",
+          "predicted_usd": 0,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_auto_handler"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-orphaned-pr-660",
+      "title": "ブランチ claude/obsidian-auto-20260827 に 1 コミットが取り残されている（PR #660 のマージ後）",
+      "judged_jst": "2026-09-04",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "fail",
+          "why": "**8 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）",
+          "open_days": 8
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）",
+        "repeat_guard: **8 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
+      ]
+    },
+    {
+      "candidate_id": "act-pr6-d14-evaluate",
+      "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
+      "judged_jst": "2026-09-04",
+      "verdict": "ineligible_recorded",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "fail",
+          "why": "**リポジトリの外**を触る候補は、パス許可リストで境界を判定できない"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 1,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "1 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 1
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260831-ccr0920",
+      "title": "未修理の故障: ap-20260831-ccr0920（usage_limit）— セッション側に打つ手が無い種別",
+      "judged_jst": "2026-09-04",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "3 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 3
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    }
+  ]
+}

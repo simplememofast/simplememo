@@ -1,0 +1,119 @@
+{
+  "$comment": [
+    "**L1適格性ゲートの基準（L4＝憲法側）。AIはこのファイルを書き換えない。**",
+    "判定は scripts/autonomy-eligibility.mjs、結果は data/eligibility-log.json。",
+    "",
+    "【なぜ実行「前」に置くか】",
+    "この運用の反証器は 2026-09-04 時点で L0（実装）にしかない —— 81本のCI検査が",
+    "落ちれば run が死に、失敗ログが翌朝の入力になる。**しかしそれは「選ばれたものを",
+    "どう作るか」しか見ていない。**『そのタスクは着手してよいものか』は、",
+    "一度も機械に判定されたことがない。",
+    "",
+    "**新しい概念は要らない。**既存のチェックと同じ機構を実行の前に置くだけで成立する。",
+    "可逆性・変更境界・証拠の鮮度・予算・重複は、どれも決定論的に判定できる。",
+    "",
+    "【enforcement — 2026-09-04 オーナー判断】",
+    "  record_plus_r2_block … 判定は全候補に対して行い台帳に残すが、**止めるのは R2 だけ。**",
+    "",
+    "他の4基準で落ちても実行は止めない。理由は閾値の初期値にある ——",
+    "**外れていた場合、翌朝から出荷が止まる。**このリポジトリの規律は",
+    "「門を作った日ではなく、門を通って何かが動いた日に動いたと書く」なので、",
+    "1周まわして判定の分布を見てから停止側へ倒す。**倒す日を決めるのは L4。**",
+    "",
+    "【この台帳が「効いていない」と言える条件】",
+    "判定が全候補で同じ値になったら、その基準は何も見ていない。",
+    "--check が criteria ごとの分散を見て、**全件同値の基準を名指しで出す。**"
+  ],
+  "version": 1,
+  "policy_owner": "human",
+  "created_at": "2026-09-04",
+  "enforcement": "record_plus_r2_block",
+  "$enforcement_values": [
+    "record_only            … 一切止めない（R2 も）",
+    "record_plus_r2_block   … R2 だけ止めて L4 へ上げる（2026-09-04 の設定）",
+    "block                  … どの基準で落ちても止める"
+  ],
+
+  "criteria": {
+    "reversibility": {
+      "enabled": true,
+      "block_classes": ["R2"],
+      "escalate_to": "L4",
+      "class_source": "data/autonomy-score.json#reversibility / domain_class / lane_action_class",
+      "$unknown_note": [
+        "**クラスを決められない候補は止めない。**止めると、domain も touches も持たない",
+        "既存の候補が全部止まる（2026-09-04 時点で開いている10件のうち大半がその形）。",
+        "代わりに unknown として数え、**auto ハンドラを持つ候補が unknown だったときだけ",
+        "強い所見として出す** —— 機械が実行できる候補の可逆性が不明、というのは",
+        "『止めない理由』ではなく『分類が追いついていない』の意味なので"
+      ]
+    },
+    "boundedness": {
+      "enabled": true,
+      "max_touch_paths": 40,
+      "$max_touch_paths_note": "予測 diff 規模の上限の代わり。**触るファイル数**でしか事前に測れない（行数は書く前には分からない）",
+      "scopes": {
+        "selfheal": "@authority:self_repair.may_modify",
+        "$selfheal_note": "**権限表を正とする。**ここに写しを置くと、権限表を絞ったときにこちらが古いまま残り、絞ったはずの範囲が通る",
+        "content": [
+          "*.html", "**/*.html",
+          "growth/content/**", "growth/data/**", "growth/experiments/**",
+          "assets/**", "docs/**", "data/*.json", "blog/**", "use-cases/**",
+          "obsidian/**", "en/**", "sitemap.xml", "robots.txt"
+        ],
+        "actuator": [
+          "data/autopilot-runs.json", "data/autopilot-actions.json",
+          "data/autopilot-status.json", "data/autopilot-cost.json",
+          "data/eligibility-log.json"
+        ]
+      },
+      "$outside_repo_note": "outside_repo: true の候補は、このリポジトリのパス許可リストで判定できない。**境界の外にあることを判定できないのは、境界が無いのと同じ**なので unknown ではなく fail にする"
+    },
+    "evidence_age": {
+      "enabled": true,
+      "max_days": 14,
+      "$note": [
+        "候補は max_days 以内のデータ点を最低1つ引用しなければならない。",
+        "**これが『モデルが思いついただけの、もっともらしいタスク』を殺す唯一の安価な手段。**",
+        "アクション台帳では last_seen_jst が『その条件を機械が最後に見た日』なので、これを使う。",
+        "14日にした理由: このリポジトリの週次ゲート（vendor-terms は月曜のみ）が最大6日遅れるので、",
+        "7日だと週次由来の証拠が構造的に落ちる。2週で1回は必ず見ている状態を要求する"
+      ]
+    },
+    "budget": {
+      "enabled": true,
+      "cap_source": "data/model-routing.json#rules.<kind>.max_usd_per_run",
+      "require_prediction": true,
+      "prediction_from": ["declared", "derived_auto_handler", "derived_median"],
+      "$note": [
+        "予測コストが上限以下であること。**加えて予測コストを必ず記録する** ——",
+        "後でコスト予測そのものを較正できるようにするため。",
+        "",
+        "declared             … 候補が predicted_usd を持っている",
+        "derived_auto_handler … auto ハンドラは決定論的な node スクリプトで、モデル呼び出しが無い → $0",
+        "derived_median       … 種別ごとの実測中央値（data/autopilot-cost.json）",
+        "",
+        "**どれも取れない候補は fail ではなく unknown。**予測が無いことと予測が上限を超えることは",
+        "違う所見で、混ぜると『予測を書いていない』が『高すぎる』として出てくる"
+      ]
+    },
+    "repeat_guard": {
+      "enabled": true,
+      "window_days": 7,
+      "$note": [
+        "直近 window_days に、同一の候補が同一の結果で死んでいないか。",
+        "**同じ壁に毎朝ぶつかる挙動を止める。**",
+        "",
+        "アクション台帳での形は『created から window_days 以上開いたまま、auto ハンドラも",
+        "オーナー送りの指定も無い』候補。2026-09-03 の実測では、アクション台帳41件のうち",
+        "17件（41%）が orphan の1クラスで全部 auto: null だった —— **毎朝立って、毎朝誰も実行しない。**"
+      ]
+    }
+  },
+
+  "kind_of": {
+    "$comment": "候補から予算の種別を引く。data/model-routing.json の rules のキーと揃える",
+    "by_lane": { "A": "article", "B": "article", "C": "article", "D": "article", "E": "article", "F": "repair" },
+    "default": "analysis"
+  }
+}
