@@ -1,118 +1,81 @@
 {
-  "as_of_jst": "2026-09-03",
-  "open_total": 9,
-  "oldest_open_days": 9,
-  "acknowledged": 4,
+  "as_of_jst": "2026-09-04",
+  "open_total": 4,
+  "oldest_open_days": 1,
+  "acknowledged": 6,
   "closed_today": [
     {
       "id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 3件",
-      "evidence": "着手した run はすべて実費台帳にある（実費が存在しない 6件を除外: ap-20260820-actions, ap-20260821-actions, ap-20260826-actions, ap-20260830-actions, ap-20260831-actions, ap-20260831-ccr0920）"
+      "title": "実費台帳に載っていない run が 1件",
+      "evidence": "Actions の run はすべて実費台帳にある（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）"
     },
     {
-      "id": "act-orphaned-branch-claude-simplememofast-indexing-93xm3y",
-      "title": "ブランチ claude/simplememofast-indexing-93xm3y に 1 コミットが取り残されている（PR #781 のマージ後）",
-      "evidence": "claude/simplememofast-indexing-93xm3y の取り残しは解消（走査に出てこない）"
+      "id": "act-budget-recalibrate",
+      "title": "1回あたりの実費を下げる — 毎回読ませていた205,000文字を72,000文字に減らした。効果は次の article 実測で確かめる",
+      "evidence": "2026-08-25 以降の article は最安 $3.7802（目標 $4.5000 以下）・2件の実測"
     },
     {
-      "id": "act-budget-overrun-33454414490",
-      "title": "1回上限の超過が未レビュー: 2026-09-01 repair $9.3726（上限 $3.00 の3.1倍）— 主系が repair を選ぶと止まる",
-      "evidence": "run 33454414490 は1回上限の超過として検出されなくなった（上限の見直しか実費行の訂正）"
+      "id": "act-selfheal-ap-20260830-actions",
+      "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし"
+    },
+    {
+      "id": "act-selfheal-ap-20260831-actions",
+      "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし"
     }
   ],
   "human": [
     {
-      "id": "act-orphaned-branch-claude-obsidian-auto-20260902",
-      "title": "ブランチ claude/obsidian-auto-20260902 に 1 コミットが取り残されている（PR #774 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260902 が、最後のマージ（PR #774 / head fddc10d）より1 件先にあり、**それらは main にも無い**: ef8b3a7。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-status.json / data/kpi-definitions.json / docs/obsidian/AUTOPILOT_LOG.md / docs/obsidian/AUTOPILOT_RUNBOOK.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "id": "act-asc-cpp-slot-cleanup",
+      "title": "ASC のカスタムプロダクトページ70枠の整理 — 未提出38本を消すか・出すか・置くかを決める",
+      "detail": "**ASC のカスタムプロダクトページ（CPP）は70本で Apple の上限に張り付いている。**2026-09-03 に `/autopilot/` 用の CPP を作ろうとして実際に返ってきた値:\n  `409 STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n\n**内訳（`simplememo-ios` の `asc-cpp.yml --action list`・run 33721309279 の実測）:**\n  - `APPROVED` … 32本（配信できる）\n  - `PREPARE_FOR_SUBMISSION` … 38本（**一度も審査に出していない**）\n\n**未提出の38本は1インストールも受けられない。**Apple の一次資料が『Custom product pages must be approved before they are visible to users』『未承認・削除済みの CPP URL は既定商品ページへ自動リダイレクトされる』と書いている。つまり **70枠の54%が、機能しないまま枠だけを占めている。**\n\n**ただし『枠が足りない』という言い方が正しいかは疑わしい。**配線されている ppid は8つだけで、**APPROVED 32本のうち24本が遊んでいる。**新しい面に CPP が要るとき遊んでいる承認済みを流用すれば足りることは `/autopilot/` で実証済み（`vs-drafts` 流用・PR #830・当日から計測が始まった）。**枠を空ける前に、まず遊んでいる24本で足りないのかを問うべき。**\n\n【選べる手は3つ】\n  (A) **未提出38本を削除して枠を戻す。**枠は空くが不可逆。しかも下記の『消す前に要ること』が未了。\n  (B) **提出して使えるようにする。**38本が資産になる。App Review を通す必要があり、`data/release-gate.json` は `enabled:false` / `dry_run:true` なので提出は人の操作のまま。\n  (C) **何もしない。**遊んでいる24本を流用し続ける。新規CPPが要る場面が来るまで枠は問題にならない。\n\n【⚠ 消す前に必ず要ること — まだ誰もやっていない】\n  **70本のプロモーションテキスト（ja / en-US の140本）は ASC にしか存在しない。**`simplememo-ios/data/appstore/` にも `data/cpp-map.json` にも写しは無い（2026-09-03 に確認）。**いま38本を消すと、書かれた原稿がそのまま消える。**\n  **写しをどこへ置くかも自明ではない。**この公開リポジトリへ置くと**未出荷の商品ページ原稿38本を公開すること**になる —— `growth/scripts/ingest-asc.mjs` が『このリポジトリは公開されている／広げる方向の変更をしない』と定めている当のもの。置くなら非公開の `simplememo-ios` 側で、`asc_cpp.rb` に一覧をファイルへ書き出す口を足すのが筋。\n\n【なぜ機械で実行しないか】\n  1. **権限表に領域が無い。**20領域のどこにも『App Store の商品ページの作成・削除』は無く、不可逆で外向きな操作なのに承認の枠組みが存在しない。\n  2. **道具が無い。**`asc_cpp.rb` は `list` / `create` だけで `delete` を持たない。足すこと自体が `self_repair.must_not` の「自分の権限を広げる変更」に当たり、`simplememo-ios` への変更は同じく must_not の「他リポジトリへの変更」に当たる。\n  **これは『やっていない』のではなく『いまの権限では踏めない』。**枠組みごとオーナーが決める話。\n\n【この行がいま塞いでいるもの】無い。`/autopilot/` は流用で計測が始まっており D+14（9/17）の判定に影響しない。**次に新しい CPP が要ったときに初めて詰まる。**\n\n【あわせて入れた歯止め】`apply-cpp-ppid.js --check` が **『配線した ppid の CPP が APPROVED でなければ落ちる』**ようになった（`data/cpp-map.json` の `asc_state`）。未承認を配線して『配線済み』と表示される罠（`free-memo-generic` が踏んだもの）は、これで機械が捕まえる。\n\n---\n\n**[2026-09-03 追記] 塞いでいた2つを外した（オーナーの明示の委譲）。**\n「消すには (i) 権限表への領域追加 (ii) delete の実装 が要る」と報告したのに対し、オーナーが『権限付与します』と応答した。両方を入れた。\n\n**(i) 権限表**: `data/authority-matrix.json` に **「App Store の商品ページ（カスタムプロダクトページ）の作成・削除」**を足した（20 → 21領域）。`reversible: false` / `requires_approval: true` / `human_only: [削除の実行（confirm を付ける操作）, 審査への提出]`。**machine_gate ではなく承認制にしたのは、不可逆な側を人の手に残すため。**self_repair.must_not の「権限表を自分で書き換えない」に対する例外なので、委譲の経緯を note に書いた。\n\n**(ii) 道具**: `simplememo-ios` の `asc_cpp.rb` に `delete` を実装。守りは純関数 `delete_problems` に集約し、自己テスト16件で1つずつ効いていることを固定した:\n  - **APPROVED は消せない** …… サイトが配線してよい ppid は APPROVED だけで、`apply-cpp-ppid.js --check` が `asc_state` で強制している。**この1条件だけで、向こうの台帳を読まずに配線中の面を1本も消せない**\n  - **写しに文面が無ければ消さない** …… プロモ文は ASC と `cpp-inventory.json` にしか無い\n  - 1回5本まで／名前の明示が必須（一括削除の口は作らない）／**confirm を立てたときだけ実行**\n  - ワークフローが**消す前と消した後に写しを取り直す**\n  あわせて `lib/asc_api.rb` の `else Net::HTTP::Get` を直した —— **未知のメソッドが黙って GET に落ちていた。**破壊的な呼び出しでは「消したつもりで何も起きていないのに成功と報告する」形になる。\n\n【反証】APPROVED のガードを外す→2件、写しの検査を外す→2件、confirm を既定で真にする→1件が落ちる。\n\n**この行はまだ閉じない。**枠組みが在ることと、消してよいことは別 —— **どれを消すかは中身の判断で、実行は human_only。**\n\n【実行の手順】`asc-cpp.yml` を `action: delete` / `names: <カンマ区切り>` で撃つ。**confirm 無しなら候補を出して終わる**ので、まずそれで一覧を確かめる。納得したら同じ入力に `confirm` を付けて再実行する。\n\n---\n\n**[2026-09-03 訂正・実測] 「未提出38本は死んでいる」は言い過ぎだった。**\n「つかわれないのだから適当に消してよい」を受けて消す前に数えたら、前提が逆だった:\n  - **実在ページがある / この台帳が言及している … 35本**\n  - どこにも対応が無い … **3本**（`feat-email-forward` / `feat-home-widget` / `feat-lock-screen`）\n`uc-students` → `/use-cases/students/`、`method-gtd` → `/methods/gtd/` のように、**ページは実在していて CPP だけが未提出**という状態。未提出なのは不要だからではなく審査に出していないからで、**提出すれば使えるようになる（可逆）。消すのは不可逆。**\n\n**⚠ さらに、機械の守りに穴が空いていた。**`free-memo-generic` は「承認されたら plain-notes と差し替える」と `data/cpp-map.json` の note に書いてあるのに、状態が PREPARE_FOR_SUBMISSION なので **「APPROVED は消せない」を素通りする。**あの不変条件が守るのは『いま配線されている CPP』であって『台帳が予定として書いている CPP』ではなかった。適当に消していれば、前日に作られた専用CPPと差し替え計画が消えていた。\n  → simplememo-ios #308 で塞いだ: **cpp-map.json の本文に名前か ppid が出てくるものは消さない**（予定は散文にしかないので ppid 欄だけでは届かない）。**読めなければ消さない**（判定不能を「言及なし」と読まない）。\n\n**【いまの推奨】1本も消さない。**枠が効くのは新しい CPP を作りたいときだけで、いまその需要が無い（/autopilot/ は vs-drafts で足りており、APPROVED 32本のうち24本が遊んでいる）。消して実害が最小の3本を消しても、**空いた3枠の使い道が無い。**残り35本は「提出すれば資産になる」側で、消すとその選択肢だけが失われる。\n**枠が実際に足りなくなったときに、その3本から。**",
       "age_days": 1,
-      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "claude/obsidian-auto-20260902 はまだ 1 件先にある"
+      "why": "**権限表の20領域のどこにも『App Store の商品ページ（CPP）の作成・削除』が無い。**不可逆（消した ppid は戻らない）で外向き（ASC アカウントの状態）なのに承認の枠組みが存在しない領域なので踏まない。加えて道具も無く、`asc_cpp.rb` に `delete` を足すことは self_repair.must_not の「自分の権限を広げる変更」と「他リポジトリ（simplememo-ios）への変更」の両方に当たる。**枠組みを作るところからオーナーの判断。**",
+      "evidence": "リポジトリから検査できない（人が閉じる）",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-faq-question-level-audit",
+      "title": "手書き FAQPage 47面の「質問文が可視 FAQ と合っているか」は、まだ数えられない（素朴な突き合わせは27面が誤検出）",
+      "detail": "**数えられるものは数えた。数えられないものを、数えたことにしない。**\n\n2026-09-03、`inject_faq_schema.py --check` に**書き手を問わない**検査を足した（空の FAQPage / 読めない JSON-LD）。どちらも文字列の比較が要らないので誤検出が構造的に出ない。実測: 全面で FAQPage ノード 214・JSON-LD ブロック 1,011 のうち、空が1件（`en/siri/index.html`・可視 FAQ 8問、この変更で直した）、読めないものは0件。\n\n**残っているのは「質問文が可視の FAQ と一致しているか」。**人が書いた FAQPage を持つ47面はこの道具の生成対象外で（横に足すと1面に FAQPage が2つ出る／文言を選んだのは人）、そちらが可視 FAQ と食い違っても誰も見ていない。\n\n**素朴に突き合わせたら 47面中27面が「食い違い」に見えた。**中身を見たら**大半が誤検出**で、原因は2つとも抽出側にある:\n\n  (a) **二言語ページで可視側だけ両言語ぶん出る。**`blog/captioo-alternative.html` はschema が ja の6問、可視の `faq-details` は 12（ja 6 + en 6）。差の6問は「欠けている」のではなく、別言語の同じ問いである。\n  (b) **1つの `<summary>` の中で ja と en の span が連結される。**`obsidian/compare/index.html` の可視テキストは\n        「Obsidianと比較されることが多いのはどのアプリですか？Which apps get compared…」\n     となり、schema の ja だけの文字列とは決して一致しない。20面ある obsidian/* がこの形で、素朴な比較では全問が「食い違い」に出る。\n\n**誤検出だらけの報告は読まれなくなる**ので、報告のみの形でも出さなかった。（`check-benchmark` の「報告のみ」は、報告そのものが正しいときの話である。）\n\n【やるなら要るもの】要素の**中で**言語を分けるテキスト抽出。いまの `strip_tags_and_normalize` はタグを落として連結するだけで、`extract_faqs` の言語判定も「FAQ の直前にある最後の `data-lang`」なので、`<summary>` の内側の span までは見ていない。実際 `extract_faqs(obsidian/compare/index.html, \"ja\")` は **0件**を返す。\n**先に測ること**: 言語別に切り出したうえで 47面の食い違いが何面残るか。20面を切っているなら、報告のみで出す価値がある。\n\n【閉じ条件】`scripts/inject_faq_schema.py` に質問文の突き合わせが入り、**その誤検出率を実測した記録**が `data/check-selftests.json` の `broke` に入ること。「検査を足した」だけでは閉じない —— この行は、足せることではなく**正しく数えられること**が条件である。",
+      "age_days": 1,
+      "why": "抽出の言語判定を要素の内側まで見るように変えると、**生成対象の146面の出力も変わりうる**（いまは要素の外側だけを見ている）。どこまで見るかは設計の判断で、機械が黙って決めてよい範囲ではない。**穴と誤検出率は実測で示したので、見えていない状態にはしていない。**",
+      "evidence": "リポジトリから検査できない（人が閉じる）",
+      "not_before_jst": null
     },
     {
       "id": "act-pr6-d14-evaluate",
       "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
-      "detail": "**2026-09-17（D+14）に、9/3 配信の PR⑥ の乗車判定をする。**台帳は `growth/experiments/experiments.json` の `pr-2026-rsi-autopilot`（status: running・evaluation_at: 2026-09-17）。\n\n**機械では埋められない。**必要な数値は PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。**だから人の作業として積む。**\n\n【PR TIMES の分析画面から転記する5つ】`discover_boarding_post` へ:\n  pv … 総PV／ google_referral_ratio … 参照元のGoogle系比率（0〜1）／mobile_ratio … スマートフォン比率（0〜1）／ syndication_count … 転載本数／day1_senders_vs_prev3avg … 配信当日の送信者数 ÷ 前3日平均（分かれば）\n【判定】boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。外したらどのSを読み違えたかを notes に書いて重みを更新する（レコードの $comment のとおり）。\n【あわせて直す】`growth/data/annotations.json` の 2026-09-03 の label を「PR⑥ …（AI実行率76.4%） — n,nnnPV・転載nn・D-SCORE 85・乗車/非乗車」の書式へ。**`d-score --backtest` はこの書式でしか拾わない**ので、直すまで n=5 のままになる。\n\n**判定のとき、最初に疑う候補は2つ**（レコードの 2026-09-03 の注記のとおり）:\n  (1) **時刻** —— 08:03 JST 配信。n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で同じ帯\n  (2) **S2（見出しの固有名詞）** —— 配信見出しは iPhone を含むが、**アプリ名も Obsidian も App Store も無い。**乗車した2本（65/71）を牽引したのはそのエンティティだった\n\n**閉じ条件は `manual`。**評価日そのものを閉じ条件にはできない —— 同じ 2026-09-1x に**別の12件が評価日を迎える**（9/13）ので、「evaluated_at が 2026-09-1 で始まる」では他の実験の評価で誤って閉じる。**判定不能を完了と読まない**ための選択で、閉じるのは人。",
-      "age_days": 0,
-      "why": "必要な数値が PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。機械は転記先と書式は用意できるが、値そのものを取りに行けない",
-      "evidence": "リポジトリから検査できない（人が閉じる）"
+      "detail": "**2026-09-17（D+14）に、9/3 配信の PR⑥ の乗車判定をする。**台帳は `growth/experiments/experiments.json` の `pr-2026-rsi-autopilot`（status: running・evaluation_at: 2026-09-17）。\n\n**機械では埋められない。**必要な数値は PR TIMES の分析画面にしかなく、prtimes.jp はこの環境の egress で塞がれている。**だから人の作業として積む。**\n\n【PR TIMES の分析画面から転記する5つ】`discover_boarding_post` へ:\n  pv … 総PV／ google_referral_ratio … 参照元のGoogle系比率（0〜1）／mobile_ratio … スマートフォン比率（0〜1）／ syndication_count … 転載本数／day1_senders_vs_prev3avg … 配信当日の送信者数 ÷ 前3日平均（分かれば）\n【判定】boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。外したらどのSを読み違えたかを notes に書いて重みを更新する（レコードの $comment のとおり）。\n【あわせて直す】`growth/data/annotations.json` の 2026-09-03 の label を「PR⑥ …（AI実行率76.4%） — n,nnnPV・転載nn・D-SCORE 85・乗車/非乗車」の書式へ。**`d-score --backtest` はこの書式でしか拾わない**ので、直すまで n=5 のままになる。\n\n**判定のとき、最初に疑う候補は2つ**（レコードの 2026-09-03 の注記のとおり）:\n  (1) **時刻** —— 08:03 JST 配信。n=5 で 08:32 に出した 8/18（PR⑤）は非乗車で同じ帯\n  (2) **S2（見出しの固有名詞）** —— 配信見出しは iPhone を含むが、**アプリ名も Obsidian も App Store も無い。**乗車した2本（65/71）を牽引したのはそのエンティティだった\n\n**閉じ条件は `manual`。**評価日そのものを閉じ条件にはできない —— 同じ 2026-09-1x に**別の12件が評価日を迎える**（9/13）ので、「evaluated_at が 2026-09-1 で始まる」では他の実験の評価で誤って閉じる。**判定不能を完了と読まない**ための選択で、閉じるのは人。\n\n---\n\n**[2026-09-03 追記] 機械にやらせる経路を用意した。**\n手順の正典は `docs/prtimes-d14-capture.md`（Routine は `raw.githubusercontent.com/simplememofast/simplememo/main/docs/prtimes-d14-capture.md` から読む。`x-engagement-simplememofast` が SKILL.md を正典にしているのと同じ形）。\n2026-09-17 朝に発火する Routine を1本作った。**Chrome が繋がっていなければ数値を作らずに終える**設計で、取れた数値は push できない実行系でも報告に必ず出す。\n**初回は調整が要る見込み** —— 分析画面の実物をまだ誰も機械側から見ていない。\n\n**[2026-09-03 追記2] Chrome の要らない範囲を実際に動かして確かめた。**\n  - 日次 Routine は Cowork 側に在る（`trig_01GphcHzTuH1A1JUGq8dYkWa`・`cron: 0 0 * * *`・`environment_id` なし＝Chrome が付く）。**二重転記の恐れは無い**\n  - 門は 9/16→0件 / **9/17→この実験1件** / 9/18→1件（超過1日）\n  - `annotations.json` の書式は、仮の数値で書いたら **backtest が n=5 → n=6** になった\n  - 手順書は raw で取れる（HTTP 200・ローカルと同一）\n\n**残る未検証は PR TIMES の分析画面そのものだけ。**そして日次 Routine は 9/16 まで 毎日何もしないので、**Chrome の経路が初めて試されるのは 9/17 ——「取れなければ困る日」その日。**\n先に1回、Cowork で分析画面を開いて §3 の5項目の表示を見ておくのが安い（判定も転記もせず、項目名が推定どおりかだけ確かめる）。",
+      "age_days": 1,
+      "why": "必要な数値のうち3つが PR TIMES のログイン後の分析画面にしかなく、**この実行系（主系 Actions / 代走 CCR）は外向きが絞られていて prtimes.jp に届かない**（実測 HTTP 000。google.com も同じなので prtimes 個別の遮断ではない）。\n\n⚠ **[2026-09-03 訂正] 「機械には取りに行けない」は言い過ぎだった。**`note-simplememo-3days` / `x-engagement-simplememofast` / `indie-hackers-karma-daily` は **Claude-in-Chrome MCP** でログイン済み Chrome を毎日動かしており、同じ経路なら読める。塞いでいたのは「機械の能力」ではなく「この実行系に Chrome が無いこと」。手順を docs/prtimes-d14-capture.md に置き、9/17 の Routine を作った。\n\n**それでも human のままにしてある** —— その Routine は**一度も実走していない**。書いた代走セッションは Chrome ツールを持たず分析画面の実物を見ていないので、画面の項目名も導線も推定のまま。**実走して取れたことを確かめるまで、人の側にも残す。**取れたらこの行は Routine 側が閉じる。",
+      "evidence": "リポジトリから検査できない（人が閉じる）",
+      "not_before_jst": "2026-09-17"
     }
   ],
   "ai": [
     {
-      "id": "act-budget-recalibrate",
-      "title": "1回あたりの実費を下げる — 毎回読ませていた205,000文字を72,000文字に減らした。効果は次の article 実測で確かめる",
-      "detail": "**オーナーの判断（2026-08-25）: 上限を上げるのではなく、1回のコストを下げる。**\n月次上限を実測に合わせる案（日次出荷なら $280/月）を出したが、「一回のコストがかかりすぎるから節約を先にしたい」との回答。上限は据え置き。\n\n**実測した無駄。** Runbook §0 の「読むもの」を素直に全文読むと 約205,000文字。そのうち実際に要るのは約72,000文字だった。**入力はターンごとに付いて回るので、ここが1回あたり実費の最大要因。**\n\n| 読ませていたもの | 現在 | 必要な部分 | 削減 |\n|---|---|---|---|\n| AUTOPILOT_LOG.md | 77,004字 | 末尾200行 約7,900字 | -69,100 |\n| SEO_AIO_PLAN_2026-08.md | 45,841字 | §6 のみ **715字** | -45,126 |\n| coverage-queue.json | 19,474字 | pending 先頭1件 | -18,500 |\n\nさらに **AUTOPILOT_LOG.md は毎日 +5,000字ずつ増える**ので、放っておくと1回あたりのコストが日々上がる構造だった。\n\n**入れた変更**（どちらも指示の側で、モデルもターン上限も触っていない）:\n- Runbook §0「読むもの」に**全文を読むものと一部だけ読むものの区別**を書いた（tail / sed で節抽出 / node で先頭1件）\n- 主系プロンプト手順2を `tail -n 200` にし、**保留事項は LOG ではなく data/autopilot-actions.json から取る**ようにした（この台帳が型付きで持っており、散文の履歴から拾うと解消済みが混ざる）\n\n**触らなかったもの**: `--max-turns 250`（成功した run が150ターン使っており、下げると正当な長さの run を殺す）。モデルの割り当て（repair の opus は「安いほうが高くつく」の設計判断で、実測なしに下げない）。\n\n**目標 $4.50。** article の実測 $7.2967 に対し、入力が実費の約6割・その入力を約65%削減という前提からの見積り（$7.30 x (1 - 0.6 x 0.65) = 約$4.45）。**前提のほうが外れる可能性があるので、閉じ条件は見積りではなく実測に置いた** —次に article が走って $4.50 以下なら閉じ、超えていれば額とともに開いたまま残る。\n\n**残っている論点**（今回は触っていない）: `anomaly`（中央値x4・自己較正）と `max_usd_per_run`（絶対額）は役割が違う——前者は検知して報告、後者は次の1回を止める。同じ値を2箇所に置いているのではないので両方残す。ただし `max_usd_per_run` の値そのものは今も placeholder のままで、**成功した run を許容していない**（article $2.00 / repair $3.00 に対し実測 $7.30 / $11.93）。節約後の実測が出たら、そこから引き直すのが筋。",
-      "age_days": 9,
-      "auto": null,
-      "evidence": "2026-08-25 以降の article は最安でも $7.8771 で、目標 $4.5000 に届いていない（1件の実測）"
-    },
-    {
-      "id": "act-health-591",
-      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
-      "age_days": 8,
-      "auto": null,
-      "evidence": "Issue の状態を取得できず判定不能（閉じたという意味ではない）"
-    },
-    {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33692832179（2026-09-03 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
-      "age_days": 2,
-      "auto": "reconcile-runs",
-      "evidence": "台帳に無い run が 1件: 33692832179（記録対象外 1件を除外: 32817335365）"
-    },
-    {
-      "id": "act-selfheal-ap-20260830-actions",
-      "title": "未修理の故障: ap-20260830-actions（usage_limit）",
-      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
-      "age_days": 2,
-      "auto": null,
-      "evidence": "ap-20260830-actions は未修理のまま（repair_of で名指しされていない）"
-    },
-    {
-      "id": "act-selfheal-ap-20260831-actions",
-      "title": "未修理の故障: ap-20260831-actions（usage_limit）",
-      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。",
-      "age_days": 2,
-      "auto": null,
-      "evidence": "ap-20260831-actions は未修理のまま（repair_of で名指しされていない）"
-    },
-    {
-      "id": "act-selfheal-ap-20260831-ccr0920",
-      "title": "未修理の故障: ap-20260831-ccr0920（usage_limit）",
-      "detail": "2026-08-31 / ccr-0920 / outcome=failed。実行枠（週次）の上限。Routine `trig_01ESF9AHax6buS9X1pdFv657`（09:20 JST・ccr-0920）の起動が 13 秒で FAILED（fired 2026-08-31T00:20:33Z / finished 00:20:46Z / session cse_01VZpZ4oseTMEgbBPzddUSxN）。同セッションの rate_limit_info が `seven_day` / `rejected` / resetsAt 2026-08-31T23:00:00Z を返している。**主系の 429 と同じ事象の副系側**で、同じアカウントなので代走にならなかった。1ターンも回っていないため当日ブランチの占有も無い（claude/obsidian-auto-20260831 は存在しない）",
-      "age_days": 2,
-      "auto": null,
-      "evidence": "ap-20260831-ccr0920 は未修理のまま（repair_of で名指しされていない）"
-    },
-    {
-      "id": "act-orphaned-branch-claude-obsidian-auto-20260903",
-      "title": "ブランチ claude/obsidian-auto-20260903 に 1 コミットが取り残されている（PR #793 のマージ後）",
-      "detail": "ブランチ claude/obsidian-auto-20260903 が、最後のマージ（PR #793 / head b7e6e3e）より1 件先にあり、**それらは main にも無い**: ac0e224。\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autopilot-runs.json / data/autopilot-status.json / docs/obsidian/AUTOPILOT_LOG.md\n\n**運転台帳だけを触っている。**「台帳の更新なら再投入」に当たる見込みだが、**再投入してよいかは別問題** —— 状態を持つ台帳（data/autopilot-status.json）は古い写しを載せ直すと現在値を巻き戻す。追記型（data/autopilot-runs.json / AUTOPILOT_LOG.md）と分けて扱うこと。\n\n**そして、まず「本当に欠けているか」を見る。**同じ内容が別コミットで着地していることがある —— 取り残しの判定はSHAで行うので、**内容が着地済みでも行は立つ。**",
+      "detail": "33815445009（2026-09-04 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "age_days": 0,
-      "auto": "apply-orphan-ledger",
-      "evidence": "claude/obsidian-auto-20260903 はまだ 1 件先にある"
+      "auto": "reconcile-runs",
+      "evidence": "台帳に無い run が 1件: 33815445009（記録対象外 1件を除外: 32817335365）"
     }
   ],
   "executed": [
     {
+      "handler": "append-cost",
+      "ok": true,
+      "changed": 1,
+      "log": "ap-20260820-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260903-actions: appended 2026-09-03 actions $3.7802"
+    },
+    {
       "handler": "reconcile-runs",
       "ok": true,
       "changed": 0,
-      "log": "33692832179: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）"
-    },
-    {
-      "handler": "apply-orphan-ledger",
-      "ok": true,
-      "changed": 1,
-      "log": "data/autopilot-runs.json: ap-20260903-actions を再投入 — appended ap-20260903-actions (shipped)\ndata/autopilot-status.json: 写しを当てない（状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する）\ndocs/obsidian/AUTOPILOT_LOG.md: 写しを当てない（追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く）\nstatus を台帳から再生成 — data/autopilot-status.json の runs を台帳の現在値で書き直した（42 実行 / 着手 29 / 出荷 20 / 24 日）"
-    },
-    {
-      "handler": "apply-orphan-ledger",
-      "ok": true,
-      "changed": 0,
-      "log": "data/autopilot-runs.json: 欠けている行は無い（内容は着地済み）\ndata/autopilot-status.json: 写しを当てない（状態型（現在値を持つ台帳）。古い写しを当てると巻き戻るので、台帳から再生成する）\ndocs/obsidian/AUTOPILOT_LOG.md: 写しを当てない（追記型だが散文で、run_id のような冪等な鍵が無い。「欠けているか」を機械が判定できないので人が書く）\n照合 data/autopilot-runs.json: 行キーの包含（ブランチ側 29行すべてが main にある）\n照合 data/autopilot-status.json: 状態型で main 側が新しい（ブランチ 2026-08-27 / main 2026-09-02）— 上書き済み\n照合 docs/obsidian/AUTOPILOT_LOG.md: 前方一致（ブランチ側 86272 文字が main 側 122413 文字の先頭と一致）\n**1行も欠けていない。**claude/obsidian-auto-20260827 を acknowledged にした（reviewed_orphans: 813b335）。"
+      "log": "33815445009: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）"
     }
   ]
 }
