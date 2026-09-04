@@ -37,7 +37,7 @@
     "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
     "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
-  "last_run_jst": "2026-09-03",
+  "last_run_jst": "2026-09-04",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -245,13 +245,13 @@
           ]
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": null,
-      "evidence": "実費が未記録の run が 1件: ap-20260903-actions（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）",
-      "last_run_jst": "2026-09-03",
-      "last_run_log": "ap-20260820-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260821-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない\nap-20260903-actions: ジョブログを読めなかった（ログが HTTP 403）— 実費が無いという意味ではないので除外しない",
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": "2026-09-04",
+      "evidence": "Actions の run はすべて実費台帳にある（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）",
+      "last_run_jst": "2026-09-04",
+      "last_run_log": "ap-20260820-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260903-actions: appended 2026-09-03 actions $3.7802",
       "reopened_jst": "2026-09-03"
     },
     {
@@ -379,16 +379,16 @@
           "target": 4.5
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-08-25",
       "last_seen_jst": "2026-08-25",
-      "closed_jst": null,
-      "evidence": "2026-08-25 以降の article は最安でも $7.8771 で、目標 $4.5000 に届いていない（1件の実測）"
+      "closed_jst": "2026-09-04",
+      "evidence": "2026-08-25 以降の article は最安 $3.7802（目標 $4.5000 以下）・2件の実測"
     },
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33706886868（2026-09-03 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "33815445009（2026-09-04 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -401,14 +401,14 @@
         "kind": "ledger_covers_runs",
         "params": {}
       },
-      "state": "done",
-      "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": "2026-09-03",
-      "evidence": "Actions run 26件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-03",
-      "last_run_log": "33706886868 -> ap-20260903-actions-33706886868: appended ap-20260903-actions-33706886868 (skipped_gate)\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
-      "reopened_jst": "2026-09-03"
+      "state": "open",
+      "created_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": null,
+      "evidence": "台帳に無い run が 1件: 33815445009（記録対象外 1件を除外: 32817335365）",
+      "last_run_jst": "2026-09-04",
+      "last_run_log": "33815445009: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
+      "reopened_jst": "2026-09-04"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -542,7 +542,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-08-27",
-      "last_seen_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-04",
       "closed_jst": null,
       "evidence": "2026-09-03 にセッションが 813b335 の中身を main と突き合わせた。**再投入するものは無い。** data/autopilot-runs.json: ブランチ側 29行の run_id がすべて main にあり、date_jst/route/outcome/lane/action/pr/artifact も一致（欠落0件）。 docs/obsidian/AUTOPILOT_LOG.md: ブランチ側 2,034行が main 側 2,710行の先頭と完全一致（差分は main 側の追記 676行のみ）。当日の owner-session が同日中に拾っている。 data/autopilot-status.json: ブランチは 2026-08-27 の写しで main は 2026-09-02。**状態型なので当てると巻き戻る**（追記型と分けて扱う、の指示どおり当てない）。 残るのはブランチのSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は delete-branch.yml だが現在の照合条件では通らない（docs/orphan-branch-cleanup-2026-09-03.md）。",
       "reviewed_orphans": [
@@ -790,11 +790,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": "2026-09-03",
-      "evidence": "2026-08-31 以降 actions は 3回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-03"
+      "created_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": "2026-09-04",
+      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-04"
     },
     {
       "id": "act-selfheal-ap-20260831-actions",
@@ -815,11 +815,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
-      "closed_jst": "2026-09-03",
-      "evidence": "2026-08-31 以降 actions は 3回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-03"
+      "created_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-04",
+      "closed_jst": "2026-09-04",
+      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-04"
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-memo-automation-tqsd8z",
@@ -937,7 +937,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-04",
       "closed_jst": null,
       "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**"
     },
@@ -981,7 +981,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-02",
-      "last_seen_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-04",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ef8b3a7`「ドリルの本数を実測に直す（15→39）」は、**取り残しではなく main に届かなかった訂正**で、内容は PR #811 が同日に入れている。4ファイルの照合:\n① `docs/obsidian/AUTOPILOT_RUNBOOK.md` §4 … main は「切替演習（39シナリオ・gateの16コードを全被覆）」。実測 `autopilot-drill --check` は 39/39 で一致\n② `docs/obsidian/AUTOPILOT_LOG.md` … 09-02 エントリの「35→39」が main にある\n③ `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で新しい\n④ `data/kpi-definitions.json` … **ブランチ側の行は literal には入っていない。入れてはいけない。**ブランチは noise_floor を v24→v25 にしているが、main は同じ番号 v25 を**別の変更**（09-02・Runbook §0-2）に使っており、いまは v30。**版番号が衝突している**ので写しを当てると5版ぶん巻き戻る。ブランチが必要としていたもの（Runbook を触ったことによる checksum の更新）は main の v30 が果たしている —— why にも「§4 のドリル本数の表記を実測値（39シナリオ）へ直したため」と同じ理由が書いてある。**欠けているのは版番号ではなく無い**、と示せたので受容する。",
       "reviewed_orphans": [
@@ -1059,7 +1059,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-03",
+      "last_seen_jst": "2026-09-04",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ac0e224` は主系が PR #793 の**マージ後**に積んだ記録コミットで、3ファイルすべてについて main に欠けが無いことを示した:\n① `data/autopilot-runs.json` … 行キーの包含（ブランチ側 42行すべてが main にある。apply-orphan-ledger が機械で照合）。**ただし `ap-20260903-actions` の行を main へ入れたのはこのセッション**で、ブランチの写しではなく Actions API の run 33692832179 とマージ済み PR #793 から起こし直した（`external_ref` はブランチ側の行に無かった値）\n② `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で、ブランチ側と同じ日付＝上書き済み。**写しは当てていない**（当てると cost 枠が $40 時代へ巻き戻る）\n③ `docs/obsidian/AUTOPILOT_LOG.md` … 機械の前方一致は通らない（ブランチが分岐したあとに main へ別の 09-03 エントリが5本入っているので、ブランチ側は main の接頭辞になりえない）。**代わりに行の包含で示した** —— ブランチが `b7e6e3e` へ足した 3,471文字・非空66行のうち、**いま main に無い行は0行**（本文を回収して同じPRで入れた）。",
       "last_run_jst": "2026-09-03",
@@ -1155,7 +1155,8 @@
       "state": "open",
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
-      "closed_jst": null
+      "closed_jst": null,
+      "evidence": "リポジトリから検査できない（人が閉じる）"
     },
     {
       "id": "act-ci-selftest-ratchet-js-blind",
@@ -1259,7 +1260,7 @@
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-03",
       "closed_jst": null,
-      "evidence": null
+      "evidence": "リポジトリから検査できない（人が閉じる）"
     },
     {
       "id": "act-selftest-rule-only-coverage",
