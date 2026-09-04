@@ -603,6 +603,23 @@ jobs:
           print("```")
           PY
 
+      - name: Preserve declared page work after model failure
+        id: checkpoint
+        if: failure() && steps.claude.outcome == 'failure'
+        continue-on-error: true
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/checkpoint-tools" "$GITHUB_SHA"
+          node "$RUNNER_TEMP/checkpoint-tools/scripts/autopilot-checkpoint.mjs" --save "$RUNNER_TEMP/autopilot-checkpoint" --workspace "$GITHUB_WORKSPACE"
+
+      - name: Upload bounded work checkpoint
+        if: always() && steps.checkpoint.outputs.saved == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: autopilot-work-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/autopilot-checkpoint
+          retention-days: 7
+          if-no-files-found: error
+
   # A completion event did not start Act after the scheduled 2026-09-05 failure.
   # Keep the independent workflow_run + daily cron, and explicitly wake the observer.
   # This token exists only in this job: no checkout, PAT, model, or Actions write access.
