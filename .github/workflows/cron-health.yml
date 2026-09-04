@@ -5,7 +5,8 @@ name: Cron Health
 # 「失敗があればIssue作成/追記、全回復したらクローズ」だけを行う小さな見張り。
 #
 # - 集計対象: 過去24hの event=schedule かつ conclusion=failure の run
-# - 「回復」の判定: そのワークフローの窓内の最新 scheduled run が成功していること
+# - 「回復」の判定: Issueに記録した全workflowの最新 scheduled run が成功したこと
+#   24hは新規検知の窓。古い故障はIssue本文・追記から追跡を継続する。
 # - Issueは label `ops/cron-failure` の open 1件に集約する（毎回コメントで追記）
 # - schedule トリガーはデフォルトブランチの定義でのみ動くため、
 #   このファイルの変更はmainへマージされて初めて有効になる（auto-merge.ymlと同じ性質）
@@ -16,16 +17,28 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: write
   actions: read
+
+concurrency:
+  group: cron-health
+  cancel-in-progress: false
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: 監視の取得・復旧判定を検査
+        run: node scripts/health-intake.mjs --check
       - uses: actions/github-script@v7
         with:
           script: |
+            const { confirmCronRecovery } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/cron-recovery.mjs`);
             const LABEL = 'ops/cron-failure';
             const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
             const { owner, repo } = context.repo;
@@ -39,9 +52,9 @@ jobs:
                   created: `>=${since}`, per_page: 100, page,
                 });
                 runs.push(...data.workflow_runs);
-                if (data.workflow_runs.length < 100) break;
+                if (data.workflow_runs.length < 100) return runs;
               }
-              return runs;
+              throw new Error('過去24hの実行一覧がページ上限内に収まらず、監視を完了できない');
             };
             const failures = await listRuns('failure');
             const successes = await listRuns('success');
@@ -84,7 +97,7 @@ jobs:
             const { data: openIssues } = await github.rest.issues.listForRepo({
               owner, repo, state: 'open', labels: LABEL, per_page: 10,
             });
-            const existing = openIssues[0];
+            const existing = openIssues.find(issue => !issue.pull_request && issue.state === 'open');
 
             if (stillFailing.length > 0) {
               try { await github.rest.issues.getLabel({ owner, repo, name: LABEL }); }
@@ -101,12 +114,18 @@ jobs:
                 core.notice(`未回復 ${stillFailing.length} 件 — #${created.number} を作成`);
               }
             } else if (existing) {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number: existing.number,
-                body: body + '\n\n全ワークフローが回復したためクローズします。',
-              });
-              await github.rest.issues.update({ owner, repo, issue_number: existing.number, state: 'closed' });
-              core.notice(`全回復 — #${existing.number} をクローズ`);
+              const recovery = await confirmCronRecovery({ github, owner, repo, issue: existing, now: Date.now() });
+              const proof = recovery.evidence.map(e => `- workflow ${e.workflow_id}: ${e.url} (completed/success)`).join('\n');
+              await github.rest.issues.createComment({ owner, repo, issue_number: existing.number,
+                body: body + `\n\n復旧の個別確認: ${recovery.why}\n${proof}`
+                  + (recovery.confirmed ? '\n全対象の最新定期実行が成功したためクローズします。'
+                    : '\n復旧を確認できないため、未解決のまま追跡を続けます。') });
+              if (recovery.confirmed) {
+                await github.rest.issues.update({ owner, repo, issue_number: existing.number, state: 'closed' });
+                core.notice(`全回復を確認 — #${existing.number} をクローズ`);
+              } else {
+                core.warning(`復旧未確認 — #${existing.number} はopenのまま: ${recovery.why}`);
+              }
             } else {
               core.notice('失敗なし・open Issue なし');
             }
