@@ -68,8 +68,9 @@ const FAILED = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
  * （3回で --contain が経路を止め、解除は人だけ ＝ 時間で自然に戻る停止を
  * 人待ちの停止に変えてしまう）。
  *
- * **消すのではなく、行き先を変える。**owner_routed は毎回そのまま表示され、
- * その日の owner_requests に載る。数えるのをやめるのはレーンFの対象としてだけ。
+ * **消すのではなく、行き先を変える。**owner_routed は毎回そのまま表示する。
+ * 依頼を出すかはアクション台帳の状態と照合する。既に完了・受付済みの依頼を
+ * 過去の失敗から作り直さない。未修理の件数と修理の判定は変えない。
  *
  * **これが「直さない口実」に使われないための歯止め:**
  * `data/escalation-rules.json` は self_repair.may_modify に**入っていない**。
@@ -126,6 +127,18 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
     may_modify: sr.may_modify || [],
     must_not: sr.must_not || [],
   };
+}
+
+/** 依頼の状態と故障の修理状態は別。受付済みを修理済みに変換しない。 */
+export function ownerRequest(target, actionsDoc) {
+  if (!target.owner_routed || target.escalate) return null;
+  const id = `act-selfheal-${target.run_id}`;
+  if (!Array.isArray(actionsDoc?.actions)) return { id, state: 'unknown', needs_attention: true };
+  const matches = actionsDoc.actions.filter(a => a.id === id);
+  if (matches.length !== 1) return { id, state: matches.length ? 'unknown' : 'untracked', needs_attention: true };
+  const action = matches[0];
+  const state = ['open', 'done', 'acknowledged'].includes(action.state) ? action.state : 'unknown';
+  return { id, state, needs_attention: !['done', 'acknowledged'].includes(state), evidence: action.evidence ?? null };
 }
 
 /** 権限表と台帳の整合。self_repair の境界が壊れていないかを見る。 */
@@ -219,6 +232,26 @@ const SCENARIOS = ledgerScenarios(
       assert(!may.includes('data/escalation-rules.json'),
         'escalation-rules.json が may_modify に入っている — 修理から逃げる経路ができる');
     }],
+    ['完了・受付済みの依頼は繰り返さず、故障と未修理件数は保持する', () => {
+      const a = analyze(doc('usage_limit'), MATRIX, RULES);
+      for (const state of ['done', 'acknowledged']) {
+        const request = ownerRequest(a.targets[0], { actions: [{ id: 'act-selfheal-ap-x', state, evidence: '確認済み' }] });
+        assert(request.state === state && !request.needs_attention, '同じ依頼を再作成する');
+        assert(a.unrepaired_count === 1 && a.targets.length === 1 && !a.lane_f_required,
+          '依頼の状態が修理の判定を書き換えた');
+      }
+    }],
+    ['別の故障・未登録・重複・読取不能の依頼を完了扱いしない', () => {
+      const target = analyze(doc('usage_limit'), MATRIX, RULES).targets[0];
+      for (const actions of [null, {}, { actions: [] }, { actions: [{ id: 'act-selfheal-other', state: 'done' }] },
+        { actions: [{ id: 'act-selfheal-ap-x', state: 'done' }, { id: 'act-selfheal-ap-x', state: 'open' }] },
+        { actions: [{ id: 'act-selfheal-ap-x', state: 'open' }] },
+        { actions: [{ id: 'act-selfheal-ap-x', state: 'unexpected' }] }]) {
+        assert(ownerRequest(target, actions).needs_attention, '未解決・判定不能なのに依頼を抑制した');
+      }
+      assert(ownerRequest({ ...target, escalate: true }, { actions: [{ id: 'act-selfheal-ap-x', state: 'done' }] }) === null,
+        '修理上限による新しいエスカレーションを過去の依頼で抑制した');
+    }],
   );
 }
 
@@ -236,6 +269,10 @@ if (isMain) {
       fs.readFileSync(path.join(ROOT, 'data/escalation-rules.json'), 'utf8')).rules || [];
   } catch { escalationRules = []; }
   const a = analyze(runsDoc, matrix, escalationRules);
+  let actionsDoc = null;
+  try { actionsDoc = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/autopilot-actions.json'), 'utf8')); }
+  catch { /* 読み取れないときは依頼済みとは判定しない。 */ }
+  for (const target of a.targets) target.owner_request = ownerRequest(target, actionsDoc);
 
   if (process.argv.includes('--contain')) {
     // 上限に達した故障の経路を止める。**表示ではなく状態を変える唯一の経路。**
@@ -280,19 +317,27 @@ if (isMain) {
   if (a.lane_f_required) {
     console.log('レーンF（自己修復）: **今日の最優先アクションはこれ**');
   } else if (a.escalate.length || a.owner_routed.length) {
-    console.log('レーンF（自己修復）: 対象なし（ただし人に上げるべき故障がある）');
+    console.log('レーンF（自己修復）: 対象なし。過去の故障と人への依頼状況は以下を確認。');
   } else {
     console.log('レーンF（自己修復）: 未修理の故障なし。通常のレーンA〜Eへ');
   }
   console.log('');
   for (const t of a.targets) {
-    const mark = t.escalate ? '⛔ 人に上げる' : t.owner_routed ? '🤝 人へ渡す' : '🔧 修理対象';
+    const request = t.owner_request;
+    const mark = t.escalate ? '⛔ 人に上げる' : request?.state === 'done' ? '✓ 依頼は完了'
+      : request?.state === 'acknowledged' ? '✓ 依頼は受付済み' : t.owner_routed ? '🤝 人へ渡す' : '🔧 修理対象';
     console.log(`  ${mark}  ${t.run_id}  [${t.failure_class}]  ${t.outcome}`);
     if (t.failure_reason) console.log(`      ${t.failure_reason}`);
     if (t.owner_routed && !t.escalate) {
       console.log(`      **セッション側に打つ手が無い種別**（escalation-rules: who=owner /`
         + ` ${t.escalation?.channel} / ${t.escalation?.within_hours}時間以内）。`);
-      console.log('      修理対象ではないので repair_of を書かない。**その日の owner_requests に載せる。**');
+      console.log('      修理対象ではないので repair_of を書かない。');
+      if (request && !request.needs_attention) {
+        console.log(`      ${request.id} は ${request.state}。同じ依頼を owner_requests に再作成しない。`);
+        if (request.evidence) console.log(`      依頼台帳の根拠: ${request.evidence}`);
+      } else {
+        console.log(`      依頼 ${request?.id} の状態: ${request?.state}。アクション台帳と照合し、未対応の依頼をその日の owner_requests に載せる。`);
+      }
     }
     if (t.escalate) {
       console.log(`      同種の故障を ${t.repair_attempts_for_class} 回修理して再発している（上限 ${a.limit}）。`);
