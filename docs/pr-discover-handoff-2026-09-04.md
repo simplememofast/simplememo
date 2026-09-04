@@ -22,6 +22,49 @@
 
 ---
 
+> ## ⚠ 2026-09-04 10:00Z 追記 —— **この文書を書いた数時間後に、前提が1つ動いた**
+>
+> **Notion 連携が両リポジトリの main に入った。**§3-1 が「Notion API（未実装）」と
+> 書いていた行は、**もう正しくない。**
+>
+> | | 実測（コミットと HTTP で確認） |
+> |---|---|
+> | `simplememo-ios` #319（09:47Z マージ） | `NotionManager.swift` 274行 / `NotionSettingsViewController.swift` / `NotionIntegrationTests.swift` 222行 / 9言語 / `data/third-party-egress.json` / `docs/notion-v1.md` |
+> | `simplememo-ios` #320（09:55Z マージ） | `MARKETING_VERSION` 5.8.11 → **5.8.12**、`release_notes/{ja-JP,en-US}/5.8.12.txt` |
+> | `simplememo-api` #239 | `migrations/0032_notion.sql` / `src/notion.ts` / `src/notion-client.ts` / `docs/notion-release.md` |
+> | **`GET https://api.simplememofast.com/v1/notion/config`** | **`{"available":false}`**（HTTP 200・2026-09-04 10:0xZ 実測） |
+>
+> **入っているが、動いていない。**`docs/notion-release.md` の公開順は
+> D1 migration 0032 → Workers の `NOTION_*` シークレット → `NOTION_ENABLED=true`
+> → **実OAuthと保存の確認** → iOS配布、で、最後の2つが未実施と明記されている
+> （「**実NotionアカウントとのOAuth・保存は未検証**」）。5.8.12 のリリースノート自身も
+> 「接続設定の準備が整い次第、設定画面から利用できます」と書いている。
+>
+> ### これが §6 の判断1（次の弾のエンティティ）に効く
+>
+> Action Router を推していたのは、**Notion が未実装だったから**である。その制約は消えた。
+> ただし**合計点は Action Router のほうが高い**ので、そこは正直に書く：
+>
+> | | S1 | S2（D-1の尺度） | 合計（概算） | 自社GSC | 実装 |
+> |---|--:|--:|--:|--:|---|
+> | Action Router | 20 | **20** | **76** | **60 / 3 imp** | **EventKit 0行** |
+> | Notion | 20 | 15 | ~64 | **735 imp** | **両repoマージ済み・未有効化** |
+>
+> **合計点を決め手にしない。**その合計点こそ §4-3 で n=6 に破れた側であり
+> （⑥は85点で非乗車）、S2 の尺度は §4-5 と §1-7 で**実測と逆を向いている**ことが
+> 分かっている軸である（D-1 はリマインダー/カレンダーに最高帯の 20 を置くが、実測は 60 と 3）。
+> **必要条件（S1≥20 ∧ S2≥10）は、どちらも通る。**
+>
+> ### 書いてはいけないこと
+>
+> **`available:false` のあいだは「Notion連携を提供開始」と書けない。**
+> `docs/pr-action-router-launch-plan.md` §0 の
+> 「**受け皿ページを、機能が出る前に公開しない**」と同じ線である。
+> **ここは日単位のゲート**（migration・シークレット・実OAuth確認）であって、
+> EventKit の実装（月単位）とは桁が違う、というのが今回動いた点の意味。
+
+---
+
 ## 0. 一段落で
 
 自社アプリ（Obsidian連携シンプルメモ / iOS）は PR TIMES に6本配信し、**2本だけ Google Discover に乗って
@@ -276,7 +319,7 @@ boarded = (google_referral_ratio > 0.9) && (mobile_ratio > 0.5)
 | 候補 | S1 | S2 | AND | エンティティの勢い | 実装 | 撃てる時期 |
 |---|--:|--:|:-:|---|---|---|
 | **Action Router**（話した用事をリマインダー/カレンダーへ） | 20 | 20 | ○ | **✕ 自社GSC 60/3imp** | **EventKit が1行も無い** | 実装後 |
-| **Notion 連携** | 20 | 15 | ○ | **△ 下降中だが水準は Obsidian 史上最高超** | Notion API（未実装） | 実装後 |
+| **Notion 連携** | 20 | 15 | ○ | **△ 下降中だが水準は Obsidian 史上最高超** | **両repoマージ済み（09-04）・`available:false` で未有効化**（冒頭の追記） | **有効化＋実OAuth確認の後**（日単位） |
 | **Ray-Ban Meta 対応** | 20〜30 | 15〜20 | ○ | **○ 日本で立ち上がり中** | Meta DAT SDK（未実装） | **配布制限あり。2026年後半GA予定** |
 | 調査リリース＋Apple/Obsidian 接木 | 30 | 15 | ○ | — | **不要** | 鍵が通れば数日 |
 | 共有シート対応 | 20 | 15 | ○ | — | **Xcode ターゲット無し** | 実装後 |
@@ -453,7 +496,9 @@ D-1 の S2 は「**その名前を持っている人の数**」で並んでい�
 
 ## 6. いま人の判断待ちになっていること
 
-1. **次の弾のエンティティ** — Action Router（リマインダー/カレンダー）か Notion か Ray-Ban Meta か
+1. **次の弾のエンティティ** — Action Router（リマインダー/カレンダー）か Notion か Ray-Ban Meta か。
+   **2026-09-04 10:00Z に前提が動いた** —— Notion 連携が両repoの main に入り、
+   残るゲートは有効化と実OAuth確認だけになった（`available:false`）。冒頭の追記を先に読むこと
 2. **見出しの確定** — §3-3 のどれか、または別案
 3. **PR の回数そのもの** — §4-6 の期待値を踏まえて続けるか、R2 に回すか
 4. **VISION §14** — Correction ログを端末内に閉じるか relay へ送るか（Routing 実装の前提。
