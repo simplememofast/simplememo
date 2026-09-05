@@ -6,7 +6,7 @@ import os from 'node:os';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract } from './value-contracts.mjs';
+import { contractProblems, approvedMetric, METRICS, verifyHistory, selectContract, predictionFeedback } from './value-contracts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -60,13 +60,17 @@ export async function verifyDecision({ branch, head, baseRef, pr = null, cwd = R
   if (problems.length) throw new Error(problems.join('; '));
   const history = verifyHistory(c, base, head, cwd);
   const atDeclaration = f => JSON.parse(git('show', `${history.declaration_sha}^:${f}`));
+  // A policy-code upgrade must not rewrite an older immutable declaration.
+  // This source is from its parent commit, not from the candidate's supplied JSON.
+  const selectorSource = git('show', `${history.declaration_sha}^:scripts/value-contracts.mjs`);
+  const feedbackRequired = /^export const SELECTION_FEEDBACK_VERSION = 1;$/m.test(selectorSource);
   const recomputed = await selectContract(c.candidates, { metrics: atDeclaration('data/value-metrics.json'),
     runs: atDeclaration('data/autopilot-runs.json').runs, costs: atDeclaration('data/autopilot-cost.json').runs,
     now: new Date(c.created_at), eligibility: {
       policy: atDeclaration('data/eligibility-policy.json'), scorePolicy: atDeclaration('data/autonomy-score.json'),
       authority: atDeclaration('data/authority-matrix.json'), routing: atDeclaration('data/model-routing.json'),
       costDoc: atDeclaration('data/autopilot-cost.json'),
-    } }, atDeclaration('data/decision-review.json'), atDeclaration('data/value-contracts.json').contracts);
+    } }, atDeclaration('data/decision-review.json'), atDeclaration('data/value-contracts.json').contracts, { feedbackRequired });
   assert.deepEqual(c, recomputed, 'selection, baseline, forecast, budget and eligibility must reproduce from pre-change data');
   const added = git('diff', '--name-only', '--diff-filter=A', base, head).split('\n');
   if (c.eligibility.reversibility_class === 'R0' && added.some(p => p.endsWith('.html'))) throw new Error('a new public URL is R1, never R0');
@@ -129,10 +133,14 @@ async function selftest() {
     }
     save('data/value-metrics.json', m); save('data/autopilot-runs.json', { runs: before });
     save('data/decision-review.json', { selections: [] }); save('data/value-contracts.json', { contracts: [] });
+    fs.mkdirSync(path.join(dir, 'scripts'));
+    fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), 'export const SELECTION_FEEDBACK_VERSION = 1;\n');
     fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'fixture base');
     const baseRef = g('rev-parse', 'HEAD');
     const candidate = { id: 'binding-test', run_id: 'test-run', metric: 'shipping_day_rate', touches: ['index.html'],
       lane: 'A', action: 'refresh', evidence_date: '2026-09-03', predicted_usd: 0, predicted_delta: .1, p: .8,
+      calibration: { snapshot_sha256: predictionFeedback([], { before: new Date('2026-09-04T00:00:00Z') }).snapshot_sha256,
+        reason: 'No prior settlements; current evidence supports a tentative forecast rather than demonstrated calibration.' },
       horizon_days: 1, max_changed_lines: 100, rank: 1, counterfactual: { id: 'alternative', reason: 'Compare two bounded improvements' } };
     const choices = [candidate, { ...candidate, id: 'alternative', rank: .9,
       counterfactual: { id: candidate.id, reason: 'Compare two bounded improvements' } }];
@@ -169,6 +177,28 @@ async function selftest() {
     fs.writeFileSync(path.join(dir, 'index.html'), 'before\n'); g('add', '.'); g('commit', '-m', 'remove fixture implementation');
     const emptyHead = g('rev-parse', 'HEAD');
     await assert.rejects(verifyDecision({ ...options, head: emptyHead, pr: { ...pr, head: { ...pr.head, sha: emptyHead } } }), /no implemented change/);
+    // The verifier must reject hand-authored declarations that bypass the CLI,
+    // and cannot use a field in that declaration to opt out of the new rule.
+    for (const kind of ['missing-reference', 'stale-reference', 'missing-selection-receipt']) {
+      g('checkout', '--detach', baseRef);
+      const bad = structuredClone(c);
+      if (kind === 'missing-reference') for (const x of bad.candidates) delete x.calibration;
+      if (kind === 'stale-reference') for (const x of bad.candidates) x.calibration.snapshot_sha256 = '0'.repeat(64);
+      if (kind === 'missing-selection-receipt') delete bad.selection.calibration;
+      save(`data/decision-intents/${c.id}.json`, bad); g('add', '.'); g('commit', '-m', kind);
+      await assert.rejects(verifyDecision({ ...options, head: g('rev-parse', 'HEAD') }), /calibration|must reproduce/, kind);
+    }
+    // The deployed pre-upgrade contract format remains verifiable against its
+    // own parent. This is version compatibility, not a candidate-controlled flag.
+    g('checkout', '--detach', baseRef);
+    fs.writeFileSync(path.join(dir, 'scripts/value-contracts.mjs'), '// legacy selector\n');
+    g('add', '.'); g('commit', '-m', 'legacy fixture base');
+    const legacyBase = g('rev-parse', 'HEAD');
+    const legacy = structuredClone(c);
+    delete legacy.selection.calibration;
+    for (const x of legacy.candidates) delete x.calibration;
+    save(`data/decision-intents/${c.id}.json`, legacy); g('add', '.'); g('commit', '-m', 'legacy declaration');
+    assert.equal((await verifyDecision({ ...options, baseRef: legacyBase, head: g('rev-parse', 'HEAD') })).state, 'declared');
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('decision-ci: real Git declaration-to-run binding and PR-only autonomous merge checks passed');
 }

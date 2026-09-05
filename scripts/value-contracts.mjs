@@ -20,6 +20,9 @@ const read = f => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
 const write = (f, x) => { fs.mkdirSync(path.dirname(path.join(ROOT, f)), { recursive: true }); fs.writeFileSync(path.join(ROOT, f), JSON.stringify(x, null, 2) + '\n'); };
 const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
 export const METRICS = ['shipping_day_rate', 'publishing_day_rate', 'time_to_detect_hours', 'unresolved_failures', 'usd_per_shipped', 'eligibility_unrecorded_rate'];
+// CI reads this marker from the declaration's parent, so old immutable contracts
+// retain their original format while new declarations cannot omit feedback.
+export const SELECTION_FEEDBACK_VERSION = 1;
 // Mathematical domains of the readers above, not configurable scoring targets.
 const RATE_METRICS = new Set(['shipping_day_rate', 'publishing_day_rate', 'eligibility_unrecorded_rate']);
 export const intentPath = id => `data/decision-intents/${id}.json`;
@@ -192,18 +195,34 @@ export function settle(c, delivery, ctx) {
 
 export function verifiedSettlement(c) {
   const s = c?.settlement;
-  return s?.state === 'settled' && finite(s.actual) && finite(s.brier) && s.brier >= 0 && s.brier <= 1
+  if (!(s?.state === 'settled' && finite(s.actual) && finite(s.brier) && s.brier >= 0 && s.brier <= 1
     && [0, 1].includes(s.event) && finite(Date.parse(s.settled_at)) && s.delivery?.verified === true
     && /^[a-f0-9]{40}$/.test(s.delivery?.merge_sha ?? '') && /^[a-f0-9]{64}$/.test(s.observation_hash ?? '')
-    && Array.isArray(s.samples) && s.samples.length === c.horizon_days && s.samples.every(x => finite(x.value))
+    && METRICS.includes(c.intent?.metric) && finite(c.intent.p) && c.intent.p >= 0 && c.intent.p <= 1
+    && finite(c.intent.null_model?.value) && finite(c.intent.predicted_delta) && c.intent.predicted_delta !== 0
+    && typeof c.id === 'string' && c.id === c.intent.id && typeof c.run_id === 'string' && c.run_id === c.intent.run_id
+    && Number.isInteger(c.horizon_days) && c.horizon_days >= 1 && c.horizon_days <= 28 && c.horizon_days === c.intent.horizon_days
+    && Array.isArray(s.samples) && s.samples.length === c.horizon_days && s.samples.every(x => finite(x?.value))
     && digest(s.samples) === s.observation_hash && s.delivery.intent_hash === digest(c.intent)
     && Date.parse(c.intent?.created_at) < Date.parse(s.delivery.deployed_at)
-    && s.brier === (c.intent.p - s.event) ** 2;
+    && s.brier === (c.intent.p - s.event) ** 2)) return false;
+  const start = shift(todayJst(new Date(s.delivery.deployed_at)), 1);
+  const end = shift(start, c.horizon_days - 1);
+  if (s.due_after_jst !== end || todayJst(new Date(s.settled_at)) <= end) return false;
+  if (!s.samples.every((x, i) => x.date === shift(start, i) && x.value >= 0 && x.value <= domainMaximum(c.intent.metric))) return false;
+  const actual = s.samples.reduce((sum, x) => sum + x.value, 0) / s.samples.length;
+  const delta = actual - c.intent.null_model.value;
+  return s.actual === actual && s.delta === delta && s.event === Number(delta * Math.sign(c.intent.predicted_delta) > 0);
 }
 
-export async function selectContract(candidates, ctx, state, contracts) {
+export async function selectContract(candidates, ctx, state, contracts, { feedbackRequired = true } = {}) {
   const { choose, review } = await import('./decision-review.mjs');
   if (!Array.isArray(candidates) || candidates.length < 2 || candidates.length > 10 || candidates.some(c => !finite(c.rank)) || new Set(candidates.map(c => c.id)).size !== candidates.length) throw new Error('2..10 distinct ranked candidates required');
+  const calibration = predictionFeedback(contracts, { before: ctx.now });
+  if (feedbackRequired) for (const c of candidates) {
+    if (c.calibration?.snapshot_sha256 !== calibration.snapshot_sha256) throw new Error(`${c.id}: read --feedback from the declaration checkout; calibration snapshot is missing or stale`);
+    if (typeof c.calibration.reason !== 'string' || c.calibration.reason.trim().length < 20 || c.calibration.reason.length > 2000) throw new Error(`${c.id}: calibration.reason must explain the probability and ranking in 20..2000 characters`);
+  }
   const ranked = [...candidates].sort((a, b) => b.rank - a.rank || a.id.localeCompare(b.id));
   const normalized = candidates.map(c => {
     const other = ranked.find(x => x.id !== c.id);
@@ -214,8 +233,10 @@ export async function selectContract(candidates, ctx, state, contracts) {
     try { prepare(c, ctx); return { ...c, eligible: true }; }
     catch (error) { return { ...c, eligible: false, rejection: error.message }; }
   });
-  const selection = choose(eligible, state, review(contracts, state));
+  const selection = choose(eligible, state, review(feedbackRequired ? calibrationHistory(contracts, ctx.now) : contracts, state));
   if (!selection.selected) throw new Error(`no eligible candidate with approved metrics and fresh observations: ${eligible.map(c => `${c.id}: ${c.rejection}`).join('; ')}`);
+  if (feedbackRequired) selection.calibration = { version: SELECTION_FEEDBACK_VERSION,
+    snapshot_sha256: calibration.snapshot_sha256, settled: calibration.settled };
   return { ...prepare(normalized.find(c => c.id === selection.selected), ctx), selection, candidates: normalized };
 }
 
@@ -226,6 +247,39 @@ export function feedback(contracts) {
       const rows = settled.filter(c => c.intent.metric === id);
       return [id, { n: rows.length, mean_brier: rows.length ? rows.reduce((s, c) => s + c.settlement.brier, 0) / rows.length : null }];
     })), scoring_rule: 'raw_brier_only' };
+}
+
+// An average loss cannot say which probability was over/under-confident. Give
+// the picker the frozen forecasts and outcomes, never autonomy points, weights,
+// normalized rewards or an automatic rank adjustment. Bound the prompt size per
+// metric; the digest and aggregates cover every admitted historical observation.
+function calibrationHistory(contracts, before) {
+  if (!finite(before.getTime())) throw new Error('feedback observation time required');
+  const verified = contracts.filter(verifiedSettlement).filter(c => Date.parse(c.settlement.settled_at) < before.getTime());
+  const ids = new Map(), runs = new Map();
+  for (const c of verified) { ids.set(c.id, (ids.get(c.id) ?? 0) + 1); runs.set(c.run_id, (runs.get(c.run_id) ?? 0) + 1); }
+  // Ambiguous duplicates do not acquire extra influence by being repeated.
+  return verified.filter(c => ids.get(c.id) === 1 && runs.get(c.run_id) === 1 && METRICS.includes(c.intent.metric))
+    .sort((a, b) => Date.parse(a.settlement.settled_at) - Date.parse(b.settlement.settled_at) || a.id.localeCompare(b.id));
+}
+
+export function predictionFeedback(contracts, { before = new Date() } = {}) {
+  const admitted = calibrationHistory(contracts, before);
+  const records = admitted.map(c => ({ contract_id: c.id, run_id: c.run_id, metric: c.intent.metric,
+    p: c.intent.p, predicted_delta: c.intent.predicted_delta, null_forecast: c.intent.null_model.value,
+    horizon_days: c.horizon_days, actual: c.settlement.actual, event: c.settlement.event, brier: c.settlement.brier,
+    settled_at: c.settlement.settled_at, intent_hash: c.settlement.delivery.intent_hash,
+    observation_hash: c.settlement.observation_hash }));
+  const summary = feedback(admitted);
+  return { version: SELECTION_FEEDBACK_VERSION, ...summary,
+    snapshot_sha256: digest({ version: SELECTION_FEEDBACK_VERSION, records }),
+    excluded_settled: contracts.filter(c => c.settlement?.state === 'settled').length - admitted.length,
+    by_metric: Object.fromEntries(METRICS.map(id => {
+      const rows = records.filter(c => c.metric === id);
+      return [id, { ...summary.by_metric[id], recent: rows.slice(-10), omitted_older: Math.max(0, rows.length - 10) }];
+    })),
+    use: 'Explain how these forecasts and outcomes inform each candidate probability and rank. With no relevant settlements, state the evidence and uncertainty; do not claim calibration improved.',
+    caveat: 'Raw Brier only. Operational outcomes can overlap and are not causal estimates. A recorded reference is not proof of learning or improved decisions.' };
 }
 
 // A declaration whose declaring run died is retired, never implemented: its run_id is already a
@@ -336,10 +390,76 @@ export async function selftest() {
   assert.equal(verifiedSettlement({ ...row, settlement: { ...settlement, observation_hash: '0'.repeat(64) } }), false);
   assert.equal(verifiedSettlement({ run_id: 'fake', settled_at: 'today' }), false);
   assert.equal(feedback([row]).mean_brier, settlement.brier);
-  const choices = [{ ...candidate, rank: 1, counterfactual: { id: 'runner-up', reason: 'First candidate has direct evidence' } },
-    { ...candidate, id: 'runner-up', rank: .95, counterfactual: { id: candidate.id, reason: 'Alternative changes another operation' } }];
+  // A self-consistent Brier/hash is not sufficient: the recorded event, dates
+  // and actual must reproduce from the closed observation window.
+  for (const change of [{ event: 0, brier: .8 ** 2 }, { actual: .4 }, { delta: .4 },
+    { settled_at: '2026-09-05T14:59:59Z' }, { due_after_jst: '2026-09-04' }]) {
+    assert.equal(verifiedSettlement({ ...row, settlement: { ...settlement, ...change } }), false, `reject inconsistent settlement ${JSON.stringify(change)}`);
+  }
+  for (const sample of [null, { ...settlement.samples[0], date: '2026-09-04' }, { ...settlement.samples[0], value: 2 }]) {
+    const samples = [sample];
+    assert.equal(verifiedSettlement({ ...row, settlement: { ...settlement, samples, observation_hash: digest(samples) } }), false);
+  }
+  for (const change of [{ id: 'wrong-id' }, { run_id: 'wrong-run' }, { horizon_days: 2 }]) {
+    assert.equal(verifiedSettlement({ ...row, ...change }), false, 'settlement identity and horizon must match the frozen declaration');
+  }
+  // Both forecasts have exactly the same loss, but need opposite adjustments.
+  const fixture = (id, p, outcome = 'shipped') => {
+    const intent = { ...c, id, run_id: `run-${id}`, p };
+    const d = { ...delivery, intent_hash: digest(intent) };
+    return { id, run_id: intent.run_id, intent, horizon_days: 1,
+      settlement: settle(intent, d, { ...later, runs: [...runs, { run_id: 'observed', date_jst: '2026-09-05', outcome }] }) };
+  };
+  const win = fixture('forecast-win', .75), miss = fixture('forecast-miss', .25, 'no_run');
+  const before = new Date('2026-09-07T00:00:00Z');
+  const winFeedback = predictionFeedback([win], { before }), missFeedback = predictionFeedback([miss], { before });
+  assert.equal(winFeedback.mean_brier, missFeedback.mean_brier);
+  assert.equal(winFeedback.by_metric.shipping_day_rate.recent[0].p, .75);
+  assert.equal(missFeedback.by_metric.shipping_day_rate.recent[0].p, .25);
+  assert.equal(winFeedback.by_metric.shipping_day_rate.recent[0].event, 1);
+  assert.equal(missFeedback.by_metric.shipping_day_rate.recent[0].event, 0);
+  assert.notEqual(winFeedback.snapshot_sha256, missFeedback.snapshot_sha256);
+  assert.equal(predictionFeedback([win], { before: new Date(win.settlement.settled_at) }).settled, 0, 'future and simultaneous settlements are unavailable to a prediction');
+  assert.equal(predictionFeedback([win, win], { before }).settled, 0, 'duplicate records must not multiply evidence');
+  assert.equal(predictionFeedback([{ ...win, settlement: { ...win.settlement, actual: .5 } }], { before }).excluded_settled, 1);
+  assert.deepEqual(predictionFeedback([win, miss], { before }), predictionFeedback([miss, win], { before }), 'input ledger order cannot change the snapshot');
+  const longHistory = Array.from({ length: 11 }, (_, i) => fixture(`forecast-${String(i).padStart(2, '0')}`, .75));
+  const bounded = predictionFeedback(longHistory, { before });
+  assert.equal(bounded.settled, 11);
+  assert.equal(bounded.by_metric.shipping_day_rate.recent.length, 10);
+  assert.equal(bounded.by_metric.shipping_day_rate.omitted_older, 1);
+  const changedOlder = [fixture('forecast-00', .25, 'no_run'), ...longHistory.slice(1)];
+  assert.notEqual(bounded.snapshot_sha256, predictionFeedback(changedOlder, { before }).snapshot_sha256, 'omitted older rows still bind the digest');
+  const privateExtra = { ...win, score: { points: 99 }, secret_note: 'DO_NOT_PROPAGATE', intent: { ...win.intent, secret_note: 'DO_NOT_PROPAGATE' } };
+  privateExtra.settlement = { ...win.settlement, delivery: { ...win.settlement.delivery, intent_hash: digest(privateExtra.intent) } };
+  assert.equal(JSON.stringify(predictionFeedback([privateExtra], { before })).includes('DO_NOT_PROPAGATE'), false, 'feedback projects only explicit public fields');
+  const calibration = { snapshot_sha256: predictionFeedback([], { before: ctx.now }).snapshot_sha256,
+    reason: 'No settlements exist yet; probability is based on current observations and remains uncertain.' };
+  const choices = [{ ...candidate, rank: 1, calibration, counterfactual: { id: 'runner-up', reason: 'First candidate has direct evidence' } },
+    { ...candidate, id: 'runner-up', rank: .95, calibration, counterfactual: { id: candidate.id, reason: 'Alternative changes another operation' } }];
   const chosen = await selectContract(choices, ctx, { selections: [] }, []);
   assert.equal(chosen.selection.selected, candidate.id);
+  assert(chosen.selection.calibration, 'selection must freeze the feedback reference');
+  assert.equal(chosen.selection.calibration.snapshot_sha256, calibration.snapshot_sha256);
+  assert.equal(chosen.selection.calibration.settled, 0);
+  for (const bad of [{ ...calibration, snapshot_sha256: '0'.repeat(64) }, undefined, { ...calibration, reason: 'read' }]) {
+    await assert.rejects(selectContract([{ ...choices[0], calibration: bad }, choices[1]], ctx, { selections: [] }, []), /calibration/);
+  }
+  const historyContext = { ...ctx, now: before, runs: [4, 5, 6].map(i => ({ run_id: `history-${i}`, date_jst: `2026-09-0${i}`, outcome: 'no_run' })) };
+  await assert.rejects(selectContract(choices, historyContext, { selections: [] }, [win]), /snapshot is missing or stale/);
+  const historicalChoices = choices.map(x => ({ ...x, calibration: { snapshot_sha256: winFeedback.snapshot_sha256,
+    reason: 'The previous 0.75 forecast improved against its frozen null; one outcome is insufficient to establish calibration.' } }));
+  assert.equal((await selectContract(historicalChoices, historyContext, { selections: [] }, [win])).selection.calibration.settled, 1, 'a real settlement packet reaches the declaration');
+  const nineteen = Array.from({ length: 19 }, (_, i) => fixture(`maturity-${i}`, .75));
+  const future = fixture('future-outcome', .75);
+  future.settlement.settled_at = '2026-09-08T00:00:00Z';
+  const mixedHistory = [...nineteen, future];
+  const safeChoices = choices.map(x => ({ ...x, calibration: { ...calibration,
+    snapshot_sha256: predictionFeedback(mixedHistory, { before }).snapshot_sha256 } }));
+  assert.equal((await selectContract(safeChoices, historyContext, { selections: [1, 2, 3, 4] }, mixedHistory)).selection.selected,
+    candidate.id, 'future outcomes cannot mature the selection gate');
+  const legacyChoices = choices.map(({ calibration, ...x }) => x);
+  assert.equal((await selectContract(legacyChoices, ctx, { selections: [] }, [], { feedbackRequired: false })).selection.calibration, undefined, 'legacy declarations retain their original format');
   const forced = await selectContract(choices, ctx, { selections: [], mandate: { selections: [] } }, []);
   assert.equal(forced.selection.selected, 'runner-up');
   const publishing = { ...metrics.metrics[0], id: 'publishing_day_rate' };
@@ -347,7 +467,7 @@ export async function selftest() {
   const mixed = [choices[0], { ...choices[1], metric: publishing.id }];
   assert.equal((await selectContract(mixed, feasible, { selections: [] }, [])).selection.selected, 'runner-up');
   await assert.rejects(selectContract(choices, saturated, { selections: [] }, []), /test-contract:.*directional improvement is impossible.*runner-up:/);
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-history-test-'));
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-history-test-')));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
     g('init'); g('config', 'user.name', 'Test'); g('config', 'user.email', 'test@example.invalid');
@@ -387,6 +507,32 @@ export async function selftest() {
     assert.throws(() => retireIntent(c, { reason: 'long enough reason', contracts: [{ id: c.id }] }), /already registered/);
     assert.throws(() => retireIntent(c, { reason: 'long enough reason', runs: [{ run_id: c.run_id, outcome: 'shipped' }] }), /shipped/);
     assert.throws(() => retireIntent({ ...c, run_id: '' }, { reason: 'long enough reason' }), /run_id/);
+    // Execute the actual CLI pair used by the primary model, in a disposable
+    // repository. A helper-only test would miss a stale --feedback CLI route.
+    g('checkout', '-q', '-b', 'feedback-cli', base);
+    const save = (f, x) => { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), JSON.stringify(x, null, 2) + '\n'); };
+    for (const f of ['value-contracts.mjs', 'decision-review.mjs', 'autonomy-eligibility.mjs', 'autonomy-score.mjs', 'lib/selftest.mjs']) {
+      fs.mkdirSync(path.dirname(path.join(dir, 'scripts', f)), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, 'scripts', f), path.join(dir, 'scripts', f));
+    }
+    for (const f of ['eligibility-policy.json', 'autonomy-score.json', 'authority-matrix.json', 'model-routing.json', 'autopilot-cost.json']) save(`data/${f}`, read(`data/${f}`));
+    const today = todayJst();
+    save('data/value-metrics.json', metrics);
+    save('data/autopilot-runs.json', { runs: [1, 2, 3].map(i => ({ run_id: `cli-${i}`, date_jst: shift(today, -i), outcome: 'no_run' })) });
+    save('data/value-contracts.json', { contracts: [] }); save('data/decision-review.json', { selections: [] });
+    g('add', '.'); g('commit', '-q', '-m', 'CLI fixture inputs');
+    const cli = (...args) => execFileSync(process.execPath, [path.join(dir, 'scripts/value-contracts.mjs'), ...args], { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    const packet = JSON.parse(cli('--feedback'));
+    assert.equal(packet.snapshot_sha256, calibration.snapshot_sha256, 'actual CLI returns the packet the selector expects');
+    const cliChoices = choices.map(x => ({ ...x, evidence_date: today, calibration: { ...calibration, snapshot_sha256: packet.snapshot_sha256 } }));
+    save('candidates.json', cliChoices.map(({ calibration, ...x }) => x));
+    assert.throws(() => cli('--select', 'candidates.json'), /calibration snapshot is missing or stale/);
+    assert.equal(fs.existsSync(path.join(dir, intentPath(candidate.id))), false, 'missing feedback cannot create a declaration');
+    save('candidates.json', cliChoices);
+    const selected = JSON.parse(cli('--select', 'candidates.json'));
+    const declared = JSON.parse(fs.readFileSync(path.join(dir, selected.intent), 'utf8'));
+    assert.equal(declared.selection.calibration.snapshot_sha256, packet.snapshot_sha256);
+    assert.equal(declared.candidates[0].calibration.reason, cliChoices[0].calibration.reason);
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('value-contracts: prospective contracts, approval, missing data, maturity, raw Brier and retirement checks passed');
 }
@@ -445,7 +591,7 @@ async function main() {
     fs.rmSync(path.join(ROOT, file));
     console.log(JSON.stringify({ retired: file, rejection: target, reason: rejection.reason }, null, 2)); return;
   }
-  if (args.includes('--feedback')) { console.log(JSON.stringify(feedback(read('data/value-contracts.json').contracts), null, 2)); return; }
+  if (args.includes('--feedback')) { console.log(JSON.stringify(predictionFeedback(read('data/value-contracts.json').contracts), null, 2)); return; }
   const problems = loadIntents().flatMap(c => contractProblems(c, metrics).map(p => `${c.id}: ${p}`));
   for (const row of read('data/value-contracts.json').contracts) if (row.settlement?.state === 'settled' && !verifiedSettlement(row)) problems.push(`${row.id}: unverified settlement`);
   if (problems.length) throw new Error(problems.join('\n'));
