@@ -269,7 +269,10 @@ if (isMain) {
 const mode = process.argv.includes('--check') ? 'check' : 'generate';
 try {
   const targets = siteTargets();
-  if (mode === 'generate') { await generate(targets); console.log(`\n${targets.length} code(s) written. Now run with --check.`); }
+  if (mode === 'generate') {
+    await generate(targets);
+    console.log(`\n${targets.length} code(s) written. Run node scripts/check-css-version.mjs --write, then this script with --check.`);
+  }
   else process.exit(await check(targets) ? 1 : 0);
 } catch (e) {
   if (e.code === 'MODULE_NOT_FOUND') {
