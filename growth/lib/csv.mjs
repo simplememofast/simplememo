@@ -97,8 +97,8 @@ function toNumber(raw) {
  *   than dropping it silently: an unrecognised header usually means the export
  *   carried a dimension we should be storing, not that the file is malformed.
  */
-export function parseGscExport(text, { delimiter } = {}) {
-  const delim = delimiter || (text.includes('\t') && !text.includes(',') ? '\t' : ',');
+export function parseGscExport(text, { delimiter, keepUnavailable = false } = {}) {
+  const delim = delimiter || (text.split(/\r?\n/, 1)[0].includes('\t') ? '\t' : ',');
   const raw = parseDelimited(text, delim);
   if (!raw.length) return { rows: [], columns: [], unmapped: [] };
 
@@ -119,10 +119,28 @@ export function parseGscExport(text, { delimiter } = {}) {
     }
     // A row with no impressions carries no signal and would distort every
     // aggregate (notably the derived CTR curve), so drop it here.
-    if (rec.impressions == null || rec.impressions === 0) continue;
+    if (rec.impressions == null && !keepUnavailable) continue;
+    if (rec.impressions === 0 && !columns.includes('date')) continue;
     // GSC rounds CTR for display; recompute so downstream gap math is exact.
     if (rec.clicks != null && rec.impressions) rec.ctr = rec.clicks / rec.impressions;
     rows.push(rec);
   }
   return { rows, columns, unmapped };
+}
+
+/** Impressions-only AI exports exist for dates, countries and devices too. */
+export function classifyGscColumns(columns) {
+  const has = (name) => columns.includes(name);
+  if (!has('impressions')) return null;
+  if (!has('clicks')) {
+    for (const [field, kind] of [['page', 'pages'], ['date', 'dates'], ['device', 'devices'], ['country', 'countries']]) {
+      if (has(field) && !has('query')) return kind + '-aio';
+    }
+    return null;
+  }
+  if (has('query') && has('page')) return 'query-pages';
+  for (const [field, kind] of [['query', 'queries'], ['page', 'pages'], ['date', 'dates'], ['device', 'devices'], ['country', 'countries']]) {
+    if (has(field)) return kind;
+  }
+  return null;
 }

@@ -674,7 +674,7 @@
       "id": "snippet-2026-08-09-gkeep-vs-anotes",
       "page": "/en/vs/google-keep-vs-apple-notes/",
       "type": "snippet_rewrite",
-      "hypothesis": "Leading with a verdict in the snippet and adding FAQ rich-result eligibility lifts CTR at unchanged position.",
+      "hypothesis": "Leading with a verdict in the snippet may lift observed CTR at unchanged position. FAQ markup is maintained for visible-content consistency; Google FAQ rich-result eligibility is not an outcome.",
       "source": {
         "pr": null,
         "commit": null
@@ -718,6 +718,13 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ],
+      "amendments": [
+        {
+          "date": "2026-09-05",
+          "original_hypothesis": "Leading with a verdict in the snippet and adding FAQ rich-result eligibility lifts CTR at unchanged position.",
+          "reason": "FAQ rich results are no longer a valid Google target; preserve the historical hypothesis and evaluate observed CTR only."
+        }
       ]
     },
     {
@@ -872,9 +879,10 @@
         "COMPETING HYPOTHESIS, not yet ruled out: 56 users clicked App Store while only 139 reached 90% depth. 40% of deep scrollers converting is implausible, so a large share of the 60 clicks probably comes from the always-visible nav link or from the 14 pages that already had hero/mid CTAs. If nav is doing the work, this change adds little. The data-cta-placement dimension resolves this at the next snapshot — that is what it was built for.",
         "Power: at a 3.8% baseline and 1,600 sessions/28d, only a near-doubling is detectable in one cycle. A 50% lift would need roughly 2.5 months. Read the placement breakdown, not just the aggregate rate.",
         "No A/B split. data-cta-variant stays v1 everywhere; placement-level attribution replaces the need to split, and splitting at this traffic would halve an already underpowered sample.",
-        "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). Not a violation of the one-variable rule: those measure GSC CTR (search to page), this measures App Store clicks per session (page to store). A body paragraph cannot move the first.",
+        "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). The primary metrics differ (GSC CTR versus page-to-store clicks), but body changes may also affect search snippets. Treat this overlap as a confounder; it does not establish independence.",
         "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed).",
-        "2026-08-11: 本実験の途中で、全ページ末尾に「次に読む」カード(P1-1)を挿入した。tag-cta-placements.js は placement を本文中の相対位置(frac)で決めるため、末尾にコンテンツが増えた結果 81件のCTAが bottom → mid に再分類された。**評価日 2026-09-13 に GA4 を placement 次元で見ると、実験と無関係に mid のクリックが増えて見える。**本実験の target_metric は app_store_click / session_start の集計比であり、ラベルの付け替えでは動かないため主判定は成立する。placement 別の内訳を見る場合のみ、08-11 以前と以後を分けて読むこと。"
+        "2026-08-11: 本実験の途中で、全ページ末尾に「次に読む」カード(P1-1)を挿入した。tag-cta-placements.js は placement を本文中の相対位置(frac)で決めるため、末尾にコンテンツが増えた結果 81件のCTAが bottom → mid に再分類された。**評価日 2026-09-13 に GA4 を placement 次元で見ると、実験と無関係に mid のクリックが増えて見える。**本実験の target_metric は app_store_click / session_start の集計比であり、ラベルの付け替えでは動かないため主判定は成立する。placement 別の内訳を見る場合のみ、08-11 以前と以後を分けて読むこと。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
       ],
       "control": {
         "kind": "none",
@@ -934,7 +942,8 @@
         "This page was excluded from the 2026-08-10 mid-CTA batch on the grounds of not using the strongest page as a test bed. That exclusion is revised here, and the reason it was wrong is worth recording: it was written to protect the page from title and snippet experiments, which move search performance. A body paragraph cannot move SERP CTR — it is not in the title, the description, or above the fold. Applying the rule to a body CTA left the highest-intent traffic on the site (relevance 1.0, CTR 10.9%, position 5.3) with no way to install without scrolling back to the header.",
         "Placed after 方法4, the section that already describes this app, so the link follows content the reader has just read rather than interrupting the comparison.",
         "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question.",
-        "2026-08-28: **ct= を読み替える。**キャンペーントークンを `{ページ}-{言語}__{配置}` の670種類から `{言語}__{配置}` の8種類へ畳んだので、このページの mid CTA は `jp__mid` になった。**ページ単位では区別できなくなる。**\n\n**測定は失われていない。**GA4 の app_store_click は `page_path` と `data-cta-placement` を ct= とは別のディメンションで記録している（js/app-store-tracking.js の dims()）。したがって `page_path=/blog/obsidian-voice-input AND placement=mid` で同じ系列が読める。**フィルタする列が変わっただけで、母数も定義も変わらない。**\n\n9/13 に読むときは ct= ではなくこの2列で絞ること。**08-28 より前は ct= 側にしか値が無く、以後は両方に有る**ので、窓をまたぐなら page_path+placement で通して読むのが安全。"
+        "2026-08-28: **ct= を読み替える。**キャンペーントークンを `{ページ}-{言語}__{配置}` の670種類から `{言語}__{配置}` の8種類へ畳んだので、このページの mid CTA は `jp__mid` になった。**ページ単位では区別できなくなる。**\n\n**測定は失われていない。**GA4 の app_store_click は `page_path` と `data-cta-placement` を ct= とは別のディメンションで記録している（js/app-store-tracking.js の dims()）。したがって `page_path=/blog/obsidian-voice-input AND placement=mid` で同じ系列が読める。**フィルタする列が変わっただけで、母数も定義も変わらない。**\n\n9/13 に読むときは ct= ではなくこの2列で絞ること。**08-28 より前は ct= 側にしか値が無く、以後は両方に有る**ので、窓をまたぐなら page_path+placement で通して読むのが安全。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
       ],
       "control": {
         "kind": "none",
@@ -959,7 +968,7 @@
       "id": "aio-2026-08-11-answer-blocks",
       "page": "/blog/memo-app-security-comparison",
       "type": "answer_block",
-      "hypothesis": "会話型(AI Mode fan-out)クエリに、質問文そのままのh2と2文以内の断定的な答えを置くと、AIの回答内で名指しされる頻度が上がり、2-3ヶ月遅れでブランド検索とAIO表示が増える。クリックはこの面では発生しないため指標にしない。",
+      "hypothesis": "質問に直接答える可視本文により、取得条件を固定したAI回答でのブランド言及・リンク付き引用が増えるか検証する。自然文クエリは通常検索として実クリックを保持する。Google専用AIレポートの表示、ブランド検索、外部AI参照流入は別々に評価する。",
       "source": {
         "pr": null,
         "commit": null
@@ -981,7 +990,8 @@
       "decision": null,
       "evaluated_at": null,
       "notes": [
-        "2026-08-11: 7ページに data-answer-block を挿入。対象は会話型クエリ 「セキュリティとコラボレーションの両立(54imp/pos4.7)」「apple watchで音声入力するには(49imp/pos9.0)」「2026年に社会人に最も評価されている(31imp/pos6.5)」「お金を払う価値がある(31imp/pos7.2)」「デジタルと手書きどちらが優れているか(18imp/pos5.9)」「標準的な議事録テンプレート(7imp/pos4.1)」「AIでタグを自動提案(7imp/pos6.4)」。セキュリティ比較の回答は他社(CryptPad/Notion/Standard Notes)を推し、自社は該当しないと明記している。短期CVを下げうるが現状クリック0のため下げる余地がない。判定はクリックではなく、ブランド検索表示数・AIO表示数・会話型クエリ件数と平均順位で行う。"
+        "2026-08-11: 7ページに data-answer-block を挿入。対象は会話型クエリ 「セキュリティとコラボレーションの両立(54imp/pos4.7)」「apple watchで音声入力するには(49imp/pos9.0)」「2026年に社会人に最も評価されている(31imp/pos6.5)」「お金を払う価値がある(31imp/pos7.2)」「デジタルと手書きどちらが優れているか(18imp/pos5.9)」「標準的な議事録テンプレート(7imp/pos4.1)」「AIでタグを自動提案(7imp/pos6.4)」。セキュリティ比較の回答は他社(CryptPad/Notion/Standard Notes)を推し、自社は該当しないと明記している。短期CVを下げうるが現状クリック0のため下げる余地がない。判定はクリックではなく、ブランド検索表示数・AIO表示数・会話型クエリ件数と平均順位で行う。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
       ],
       "pages": [
         "/blog/memo-app-security-comparison",
@@ -1009,6 +1019,13 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
+      ],
+      "amendments": [
+        {
+          "date": "2026-09-05",
+          "original_hypothesis": "会話型(AI Mode fan-out)クエリに、質問文そのままのh2と2文以内の断定的な答えを置くと、AIの回答内で名指しされる頻度が上がり、2-3ヶ月遅れでブランド検索とAIO表示が増える。クリックはこの面では発生しないため指標にしない。",
+          "reason": "自然文だけでAI由来と判定できず、専用AIレポートにクリックが無いことはクリック自体が発生しない証拠ではない。"
+        }
       ]
     },
     {
@@ -1038,7 +1055,8 @@
       "evaluated_at": null,
       "notes": [
         "2026-08-11: オーナーがサイト外（App Store・note・Zenn・X）の表示名統一を完了。サイト側はOrganizationを持つ223ページ全数が正準@id https://simplememofast.com/#organization を指しており元から連結済みだったため、施策案の「sameAsを全240ページに展開」は不要と判明していた（§4 P0-4追記）。これでエンティティ分割は内外とも解消し、施策は投入完了。あとは評価日にブランド検索表示数を読むだけ。",
-        "2026-08-12: 「エンティティ分割は内外とも解消」は Organization については正しいが、SoftwareApplication では成り立っていなかった。自社の SoftwareApplication ノート6件（ai-tags 日英・apple-watch 日英・voices・en/send-email-to-yourself）が @id を持たず、#app と結合していない状態で残っていた。223ページの Organization を数えた確認はこの面を見ていない。2026-08-12 に6件へ #app を付与し、自社28ノート全数が#app に揃ったことを確認済み。評価日に読むときの注意: エンティティ統一が完全に効いていた期間は 08-12 以降であって08-11 以降ではない。施策投入日は面によって1日ずれている。"
+        "2026-08-12: 「エンティティ分割は内外とも解消」は Organization については正しいが、SoftwareApplication では成り立っていなかった。自社の SoftwareApplication ノート6件（ai-tags 日英・apple-watch 日英・voices・en/send-email-to-yourself）が @id を持たず、#app と結合していない状態で残っていた。223ページの Organization を数えた確認はこの面を見ていない。2026-08-12 に6件へ #app を付与し、自社28ノート全数が#app に揃ったことを確認済み。評価日に読むときの注意: エンティティ統一が完全に効いていた期間は 08-12 以降であって08-11 以降ではない。施策投入日は面によって1日ずれている。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1366,7 +1384,8 @@
       "notes": [
         "2026-08-12: 計測できないことを先に書いておく。QRはスキャンされてもGA4の app_store_click は発火しない（指で押していないため）。効果が出る先は App Store Connect のキャンペーン別インストール（ct=download-jp__hero / download-jp__qr / download-jp__nav）だけで、growth/data/appstore/ は現在も空。2026-08-10 のPC限定QRと同じ制約であり、承知のうえで入れている。",
         "2026-08-12: 進行中の cta-2026-08-10-desktop-qr（評価日同じ 2026-09-13）と 干渉する。あちらは9ページの締めCTA直下のQRを測るもので、こちらは全ページのフッターから新しいPC向け導線を足す。同日評価なので、どちらの寄与かは切り分けられない。切り分けが要るなら評価日をずらすこと。",
-        "2026-08-12: グローバルナビのCTAは触っていない。現状は全ページで App Store へ直リンクし ct=…__nav で測られている。PCだけ /download/ へ向ける案（.cta-qr と同じCSSの出し分けで可能）はオーナー判断待ち。実行するとPC分の __nav 計測が途切れ、上記2実験の期間中にPC側の挙動を変えることになる。"
+        "2026-08-12: グローバルナビのCTAは触っていない。現状は全ページで App Store へ直リンクし ct=…__nav で測られている。PCだけ /download/ へ向ける案（.cta-qr と同じCSSの出し分けで可能）はオーナー判断待ち。実行するとPC分の __nav 計測が途切れ、上記2実験の期間中にPC側の挙動を変えることになる。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1575,7 +1594,8 @@
         "2026-08-20: 主指標はブランド検索表示数とAIO表示数（v3ノーススター系）。CTRは主判定に使わない——ベースラインCTR 10.9%は指名検索が主imp源で、タイトル文言では動かない見込み（v4 §5-2で事前宣言）。期待する効果は AI引用文言の是正とブランド一貫性で、2〜3ヶ月遅れの指標。",
         "2026-08-20: title・meta description・og:title/description・twitter:title/description を同型化した。H1「話すだけで、メールとObsidianへ。」は元から勝ち文法で不変更。og:image（assets/img/og/index.png）も主見出しが同文法・AIはバッジ格で降格済みのため再生成せず。AI言及はdescriptionの後半へ降格（削除はしない）。",
         "2026-08-20: lang.jsのmeta-template経路を確認——トップ（/）はsingle-DOMで .meta-template ブロックを持たず、lang.js本体にもタイトル文字列は無いため、実行時にtitleが旧値へ戻る経路は存在しない。lang.jsは今回不変更なのでキャッシュバスタ ?v= も現行ハッシュのまま（check-css-version.mjs がCIで内容とバスタの一致を強制しており、v3 §9-5の再発はCIが検出する）。",
-        "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。"
+        "2026-08-20: /en/ トップのtitleも AI-first（AI Auto-Tagging Notes to Email & Obsidian | Simple Memo）だが、本実験の対象外（EN投資はR10二重ゲート凍結中・台帳を汚さないため別途起票が要る）。",
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
       ],
       "control": {
         "kind": "pre_post",
@@ -2132,6 +2152,13 @@
         "ハブまたは子ページの title が変わった → その後の期間を別に読む",
         "子ページ→voice-input の内部遷移が GA4 で計測できていないと分かった（page_referrer が取れない等）→ 順位だけで判定し、遷移の欄は『測れなかった』と書く"
       ]
+    }
+  ],
+  "measurement_changes": [
+    {
+      "date": "2026-09-05",
+      "version": "2026-09-05",
+      "note": "App Storeクリック・表示を自社アプリID 6758438948だけに限定。以前は比較記事の他社ストアリンクも対象だったため、修正前後のGA4イベント総数は直接比較しない。日英AI機能・FAQの計測も補完。クエリ分類v2は自社・旧名・競合・曖昧名を分離し、ブランド評価は両期間を同じ分類で再集計する。WEBとAIの集計を分離、完全な同日数・非重複期間だけを比較する。 全GA4ローダー・CTA計測を本番ホストに限定し、ローカル検証・Pagesプレビューからの送信を防ぐ。"
     }
   ]
 }

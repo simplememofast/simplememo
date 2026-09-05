@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Acquisition measurement and GSC aggregation regressions
+        run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
+
       - name: Prospective decisions and recovery safety
         run: |
           node scripts/autopilot-data.mjs --selftest
