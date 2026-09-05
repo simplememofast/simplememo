@@ -2527,6 +2527,53 @@ async function selftest() {
     domains: [{ domain: '承認が要る領域', requires_approval: true }],
   };
 
+  // A real failure needed two manual Act invocations on 2026-09-05: the first
+  // recorded the run, but append-cost was only derived after execution ended.
+  for (const scenario of ['new', 'existing-cost-action', 'unreadable', 'halted']) {
+    const store = { runs: [], costs: [] };
+    if (scenario === 'existing-cost-action') store.runs.push({ run_id: 'old', external_ref: '99',
+      attempted: true, route: 'actions', date_jst: '2026-09-03', outcome: 'failed' });
+    const ledger = { actions: [] };
+    const ctx = { today: '2026-09-04', workflowRuns: [observedRun], eventName: 'workflow_dispatch',
+      completion: { automatic: false }, selfheal: { targets: [] }, budget: null,
+      runsDoc: { runs: structuredClone(store.runs) }, costDoc: { runs: [] }, ledgerDoc: ledger };
+    merge(ledger, derive(ctx), ctx.today);
+    const order = [], recorded = [], judgements = { judgements: [] };
+    const result = await applyLedgerCycle(ledger, ctx, { today: ctx.today, matrix, eligibility: {}, judgements,
+      judgeCandidate: a => ({ candidate_id: a.id, judged_jst: ctx.today,
+        halted: scenario === 'halted' && a.auto === 'append-cost', reasons: ['fixture'] }),
+      recordJudgements: d => recorded.push(...d.judgements.map(j => j.candidate_id)),
+      refresh: current => {
+        current.runsDoc = { runs: structuredClone(store.runs) };
+        current.costDoc = { runs: structuredClone(store.costs) };
+      },
+      handlers: {
+        'reconcile-runs': (current, action) => HANDLERS['reconcile-runs'](current, action, { append: args => {
+          t(`runの記録前に適格性を残す: ${scenario}`, recorded.includes(action.id));
+          const val = flag => args[args.indexOf(flag) + 1];
+          store.runs.push({ run_id: val('--run-id'), external_ref: val('--external-ref'),
+            date_jst: val('--date'), route: val('--route'), attempted: val('--attempted') === 'true', outcome: val('--outcome') });
+          order.push('run'); return 'written';
+        } }),
+        'append-cost': async (current, action) => {
+          t(`実費の記録前に適格性を残す: ${scenario}`, recorded.includes(action.id));
+          t(`同じ監視で新規runを実費処理へ渡す: ${scenario}`, current.runsDoc.runs.some(r => r.external_ref === '123'));
+          order.push('cost');
+          if (scenario === 'unreadable') return { ok: false, changed: 0, log: 'unreadable' };
+          store.costs = current.runsDoc.runs.map(r => ({ run_id: r.external_ref, usd: 4.8768404 }));
+          return { ok: true, changed: store.costs.length, log: 'measured fixture' };
+        },
+      },
+    });
+    const blocked = ['unreadable', 'halted'].includes(scenario);
+    t(`run処理を再実行しない: ${scenario}`, order.filter(x => x === 'run').length === 1);
+    t(`実費処理は最後に1回だけ: ${scenario}`, order.join(',') === (scenario === 'halted' ? 'run' : 'run,cost'));
+    t(`不明・停止を0円や完了にしない: ${scenario}`,
+      ledger.actions.find(a => a.id === 'act-cost-sync')?.state === (blocked ? 'open' : 'done')
+      && (blocked ? store.costs.length === 0 : store.costs.some(r => r.run_id === '123' && r.usd > 0)));
+    t(`実行結果を一度だけ報告する: ${scenario}`, result.length === 2);
+  }
+
   // 権限の導出
   t('自動実行は may_modify 内なら ai',
     classify({ auto: 'reconcile-runs', touches: ['data/autopilot-runs.json'] }, matrix).owner === 'ai');
@@ -3940,6 +3987,47 @@ async function buildContext(today, ledger = null) {
     ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion };
 }
 
+/** Sync runs first, then collect their costs in the same observation.
+ * The second phase can only run append-cost; repair/containment handlers are not retried.
+ */
+export async function applyLedgerCycle(ledger, ctx, { today, matrix, eligibility, judgements,
+  refresh, recordJudgements, handlers = HANDLERS, judgeCandidate = judge }) {
+  const applied = [];
+  for (const costPhase of [false, true]) {
+    for (const a of ledger.actions) {
+      if ((a.auto === 'append-cost') !== costPhase) continue;
+      if (a.state !== 'open' || !a.auto) continue;
+      // 自動実行は ai と判定されたものだけ。人の領域のアクションに
+      // handler を付けたくなったら、まず classify を通ることを確かめる。
+      const c = classify(a, matrix);
+      if (c.owner !== 'ai') continue;
+      // **押せないものは押しに行かない。**handler がファイルを書けても、
+      // その後の push が remote rejected になるだけで、書きかけが残る。
+      if (c.unattended_blocked) continue;
+      // Record before invoking the handler; R2 must never reach its side effect.
+      const decision = judgeCandidate({ ...a, close_check_kind: a.close_check?.kind }, eligibility);
+      judgements.judgements = mergeJudgements(judgements.judgements, [decision]);
+      recordJudgements(judgements);
+      if (decision.halted) {
+        applied.push({ handler: a.auto, ok: false, changed: 0, log: decision.reasons.join('; ') });
+        continue;
+      }
+      const h = handlers[a.auto];
+      if (!h) continue;
+      let r;
+      try { r = await h(ctx, a); }
+      catch (e) { r = { ok: false, changed: 0, log: `handler が例外: ${e.message}` }; }
+      applied.push({ handler: a.auto, ...r });
+      a.last_run_jst = today;
+      a.last_run_log = String(r.log ?? '').slice(0, 2000);
+    }
+    await refresh(ctx);
+    merge(ledger, derive(ctx), today);
+    reconcile(ledger, ctx);
+  }
+  return applied;
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const has = (f) => argv.includes(`--${f}`);
@@ -3989,42 +4077,21 @@ async function main() {
   if (has('apply')) {
     const eligibility = loadEligibility({ today });
     const judgements = readJson(ELIGIBILITY_LOG, { judgements: [] });
-    for (const a of ledger.actions) {
-      if (a.state !== 'open' || !a.auto) continue;
-      // 自動実行は ai と判定されたものだけ。人の領域のアクションに
-      // handler を付けたくなったら、まず classify を通ることを確かめる。
-      const c = classify(a, matrix);
-      if (c.owner !== 'ai') continue;
-      // **押せないものは押しに行かない。**handler がファイルを書けても、
-      // その後の push が remote rejected になるだけで、書きかけが残る。
-      if (c.unattended_blocked) continue;
-      // Record before invoking the handler; R2 must never reach its side effect.
-      const decision = judge({ ...a, close_check_kind: a.close_check?.kind }, eligibility);
-      judgements.judgements = mergeJudgements(judgements.judgements, [decision]);
-      fs.writeFileSync(ELIGIBILITY_LOG, JSON.stringify(judgements, null, 2) + '\n');
-      if (decision.halted) {
-        applied.push({ handler: a.auto, ok: false, changed: 0, log: decision.reasons.join('; ') });
-        continue;
-      }
-      const h = HANDLERS[a.auto];
-      if (!h) continue;
-      let r;
-      try { r = await h(ctx, a); }
-      catch (e) { r = { ok: false, changed: 0, log: `handler が例外: ${e.message}` }; }
-      applied.push({ handler: a.auto, ...r });
-      a.last_run_jst = today;
-      a.last_run_log = String(r.log ?? '').slice(0, 2000);
-    }
-    // 実行で状態が変わっているので、台帳を読み直してもう一度突き合わせる。
-    // （reconcile-runs が台帳を書き換えた直後に ledger_covers_runs を通したい）
-    ctx.runsDoc = readJson(RUNS_PATH, { runs: [] });
-    ctx.costDoc = readJson(COST_PATH, null);
-    try {
-      ctx.selfheal = JSON.parse(execFileSync(process.execPath,
-        [path.join(ROOT, 'scripts/autopilot-selfheal.mjs'), '--json'], { cwd: ROOT, encoding: 'utf8' }));
-    } catch { /* 直前の値のまま */ }
-    merge(ledger, derive(ctx), today);
-    reconcile(ledger, ctx);
+    applied.push(...await applyLedgerCycle(ledger, ctx, {
+      today, matrix, eligibility, judgements,
+      recordJudgements: doc => fs.writeFileSync(ELIGIBILITY_LOG, JSON.stringify(doc, null, 2) + '\n'),
+      refresh: current => {
+        current.runsDoc = readJson(RUNS_PATH, { runs: [] });
+        current.costDoc = readJson(COST_PATH, null);
+        current.statusDoc = readJson(STATUS_PATH, null);
+        for (const [key, script] of [['selfheal', 'autopilot-selfheal'], ['budget', 'autopilot-budget']]) {
+          try {
+            current[key] = JSON.parse(execFileSync(process.execPath,
+              [path.join(ROOT, `scripts/${script}.mjs`), '--json'], { cwd: ROOT, encoding: 'utf8' }));
+          } catch { current[key] = null; /* 読めない判定を古い値で閉じない */ }
+        }
+      },
+    }));
 
     const problems = validateLedger(ledger, matrix);
     if (problems.length) {
