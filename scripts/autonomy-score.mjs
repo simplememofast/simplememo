@@ -178,6 +178,16 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
   const detectedAtAll = breakages.filter((r) => r.detected_at).length;
   const eligibilityByMachine = runs.filter(
     (r) => r.failure_stage === 'eligibility' && src.has(r.source)).length;
+  // **同じ検出器が回したが、起動したのが人だった回。**
+  //
+  // [2026-09-05] 検知 0/12 を「検出器が動いていない」と読ませないために足した。
+  // 実測すると、無人枠（schedule）より先に**手動 dispatch やセッションが同じ照合を回して**
+  // 記録している —— 09-05 の例では無人枠 01:49Z の85分前、00:24Z の手動起動が先だった。
+  // **開発が活発な期間ほど、この指標は「機械の性能」ではなく「人の静かさ」を測る。**
+  //
+  // 数えるだけで**点には入れない。**「回るはずだった」は回ったことではない。
+  const beatenByDispatch = breakages.filter((r) => String(r.source ?? '').startsWith('act-')
+    && !src.has(r.source)).length;
   const dRate = n ? (detected.length + machineIncidents.length) / n : 0;
   const rRate = n ? (recoveredHandsOff.length + recoveredIncidents.length) / n : 0;
   // 自動 revert は「出荷後の指標劣化を検知して人手なしで巻き戻した」回。台帳に語彙が無い＝0。
@@ -187,9 +197,14 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
     detect: { rate: dRate, hit: detected.length + machineIncidents.length, points: half * dRate, max: half,
               detected_at_all: detectedAtAll,
               eligibility_detected_by_machine: eligibilityByMachine,
+              beaten_by_dispatch: beatenByDispatch,
               why: n && !detected.length && !machineIncidents.length
                 ? `**${detectedAtAll}/${n} は検知されているが、機械が自分で気づいた故障は 0 件。**`
-                  + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている —— 拾えていないのは故障のほう`
+                  + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている`
+                  + (beatenByDispatch
+                    ? ` ／ **うち ${beatenByDispatch} 件は同じ照合が回して記録しているが、起動したのが人**`
+                      + `（手動 dispatch・セッション）。**検出器が動いていないのではなく、先を越されている**`
+                    : ' —— 拾えていないのは故障のほう')
                 : null },
     recover: { rate: rRate, hit: recoveredHandsOff.length + recoveredIncidents.length, points: half * rRate, max: half },
     auto_revert_count: autoRevert,
@@ -637,6 +652,17 @@ function selftest() {
   eq(ra([brk('f1'), { run_id: 'e', date_jst: '2026-09-01', outcome: 'skipped_gate', failure_stage: 'eligibility', source: 'act-reconcile' }], [], P)
        .detect.eligibility_detected_by_machine, 1,
      '**適格性の沈黙は機械が拾えている**（0% だけ出して「何も検知していない」と読ませない）');
+  // **「先を越された」を数えるが、点には入れない。**
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.beaten_by_dispatch, 1,
+     '同じ照合が回したが起動が人だった回を数える');
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.points, 0,
+     '**数えても点には入れない**（「回るはずだった」は回ったことではない）');
+  eq(ra([brk('f1', { source: 'session' })], [], P).detect.beaten_by_dispatch, 0,
+     'そもそも照合を回していない回は数えない（source が act- で始まらない）');
+  eq(ra([brk('f1', { source: 'act-reconcile' })], [], P).detect.beaten_by_dispatch, 0,
+     '**無人で回った回は「先を越された」ではない**（そちらは検知に数える）');
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.why.includes('先を越されている'), true,
+     '**検出器が動いていない、と読ませない**');
   eq(ra([brk('f1')], [brk('f1'), { auto_revert_of: 'f1' }], P).auto_revert_count, 0, '自己申告だけで権限を広げない');
   eq(ra([brk('f1')], [brk('f1'), ship('r', { outcome: 'failed', repair_of: ['f1'] })], P).recover.hit, 0, '失敗した修理を復旧に数えない');
   const recovered = { mode: 'production', before: { failed: true }, target_sha: 'a'.repeat(40), detected_at: '2026-09-01T00:00:00Z',
@@ -839,7 +865,7 @@ function render(s) {
   }
   if (c.umr.r0_capped) L.push(`      ⚠ **R0 の寄与が上限に当たっている** — 可逆で些末な変更の量産では伸びない`);
   L.push(`  復旧自律性         RA   ${pts(c.ra.points, c.ra.max)}   (故障 ${c.ra.n} 件)`);
-  L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知)`);
+  L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知${c.ra.detect.beaten_by_dispatch ? `・先を越された ${c.ra.detect.beaten_by_dispatch}` : ''})`);
   if (c.ra.detect.why) L.push(`            ${c.ra.detect.why}`);
   L.push(`      復旧  ${pts(c.ra.recover.points, c.ra.recover.max)}  ${pct(c.ra.recover.rate)}  (${c.ra.recover.hit}/${c.ra.n} を人手なしで復旧)`);
   L.push(`      自動 revert ${c.ra.auto_revert_count} 回  ← **Phase 6 のハードゲート。点数では代替しない**`);
