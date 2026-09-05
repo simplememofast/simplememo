@@ -19,12 +19,13 @@
     "- 配線前にCPP側の中身（スクショ1枚目）がページの検索意図と一致しているかを",
     "  ASCで1本ずつ確認すること（v4 R1）。",
     "- ppid を記入したら node scripts/apply-cpp-ppid.js --write → CI が --check で守る。",
-    "- asc_state は『その ppid の CPP が ASC でどの状態か』の**記録された観測**。APPROVED 以外は Apple が既定商品ページへ倒すので、apply-cpp-ppid.js --check が落とす。取得は simplememo-ios の asc-cpp.yml --action list（鍵はあちらにしかない）。**ここは写しなので古くなる** —— 30日を越えると --check が notice を出す（落とはしない。CIはASCを読めない）。"
+    "- asc_state は『その ppid の CPP が ASC でどの状態か』の**記録された観測**。APPROVED 以外は Apple が既定商品ページへ倒すので、apply-cpp-ppid.js --check が落とす。取得は simplememo-ios の asc-cpp.yml --action list（鍵はあちらにしかない）。**ここは写しなので古くなる** —— 30日を越えると --check が notice を出す（落とはしない。CIはASCを読めない）。",
+    "Approval and visibility are independent. asc_visible must be the observed boolean true for every wired CPP. Hidden approved pages also fall back to the default page."
   ],
   "provider_token": "128498560",
-  "updated": "2026-09-03",
-  "asc_state_checked_jst": "2026-09-03",
-  "$asc_state_source": "simplememo-ios / .github/workflows/asc-cpp.yml --action list （run 33721309279・2026-09-03 06:01Z・CPP 70本を読んだ）。このとき配線中の8つの ppid はすべて APPROVED だった。",
+  "updated": "2026-09-05",
+  "asc_state_checked_jst": "2026-09-05",
+  "$asc_state_source": "ASC inventory run 33967344673, 2026-09-05T12:55:12Z. All 8 unique wired CPP IDs are APPROVED and visible=true. The observation is a snapshot, not a live API check.",
   "cpps": [
     {
       "id": "vs-notion",
@@ -34,7 +35,8 @@
       "match": [
         "^/vs/notion"
       ],
-      "note": "Notion比較クラスタ（/vs/notion/・/vs/notion-vs-evernote/・/vs/notion-vs-obsidian/）"
+      "note": "Notion比較クラスタ（/vs/notion/・/vs/notion-vs-evernote/・/vs/notion-vs-obsidian/）",
+      "asc_visible": true
     },
     {
       "id": "line-keep-alternative",
@@ -44,7 +46,8 @@
       "match": [
         "^/blog/line-keep-alternative$"
       ],
-      "note": "サイト最大表示ページ（10,301imp/3M）。CTR改善対象外・ブランド露出資産（v3 §6）だが、来た読者のストア転換はCPPで受ける"
+      "note": "サイト最大表示ページ（10,301imp/3M）。CTR改善対象外・ブランド露出資産（v3 §6）だが、来た読者のストア転換はCPPで受ける",
+      "asc_visible": true
     },
     {
       "id": "free-memo-generic",
@@ -54,7 +57,8 @@
       "match": [
         "^/blog/free-memo-apps-ranking$"
       ],
-      "note": "【2026-09-02 配線】サイト最大表示ページ（3,048imp/週・CTR 0.62%）。asc-cpp.yml（simplememo-ios）の list で ASC の CPP 69 本を読み、汎用無料流入に最も近い承認済み CPP は plain-notes（『機能を足さないことで速さを守っています』）だったので、**計測がすぐ始まるこちらを暫定で配線**した。専用の free-memo-generic は同日 create で作成済み（ppid 3b8f2fd5-768b-48da-9d65-e7346432f569・版1・PREPARE_FOR_SUBMISSION・雛形は plain-notes・プロモ ja/en『無料・広告なし・開いた瞬間に書ける・受信箱に届く・無料枠1日3通』）。**審査を通るまで ppid 付きリンクは既定商品ページへ倒れる**ので、次の App 版の提出に同乗させて APPROVED になったら、この ppid を 3b8f2fd5-… に差し替える（CPP だけの提出は App 版の提出を塞ぐので単独では出さない）"
+      "note": "【2026-09-02 配線】サイト最大表示ページ（3,048imp/週・CTR 0.62%）。asc-cpp.yml（simplememo-ios）の list で ASC の CPP 69 本を読み、汎用無料流入に最も近い承認済み CPP は plain-notes（『機能を足さないことで速さを守っています』）だったので、**計測がすぐ始まるこちらを暫定で配線**した。専用の free-memo-generic は同日 create で作成済み（ppid 3b8f2fd5-768b-48da-9d65-e7346432f569・版1・PREPARE_FOR_SUBMISSION・雛形は plain-notes・プロモ ja/en『無料・広告なし・開いた瞬間に書ける・受信箱に届く・無料枠1日3通』）。**審査を通るまで ppid 付きリンクは既定商品ページへ倒れる**ので、次の App 版の提出に同乗させて APPROVED になったら、この ppid を 3b8f2fd5-… に差し替える（CPP だけの提出は App 版の提出を塞ぐので単独では出さない）",
+      "asc_visible": true
     },
     {
       "id": "obsidian-vault",
@@ -64,7 +68,8 @@
       "match": [
         "^/obsidian/"
       ],
-      "note": "Obsidianハブ配下全ページ。最良コホート（設定済み新規の活性97.6%）の入口"
+      "note": "Obsidianハブ配下全ページ。最良コホート（設定済み新規の活性97.6%）の入口",
+      "asc_visible": true
     },
     {
       "id": "feat-siri-shortcuts",
@@ -75,7 +80,8 @@
         "^/siri/",
         "^/hands-free/"
       ],
-      "note": "Siri・ハンズフリー系（8/18リリース受け皿を含む）"
+      "note": "Siri・ハンズフリー系（8/18リリース受け皿を含む）",
+      "asc_visible": true
     },
     {
       "id": "obsidian-voice",
@@ -85,7 +91,8 @@
       "match": [
         "^/blog/obsidian-voice-input$"
       ],
-      "note": "【2026-09-02 配線・オーナー委任の自律判断】サイト最高CTRページ（170imp/15clk/8.82%・順位5.4）だが match が ^/obsidian/ なので CPP 未配線だった。専用CPPは ASC に無い（作成はオーナーのみ可能）ため、同じ CPP が既に /obsidian/airpods/（音声ページ）を受けている obsidian-vault を流用する。『音声→自動追記』専用の CPP を ASC で作ったら、この行の asc_name / ppid だけ差し替える（match は変えない）。docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-C"
+      "note": "【2026-09-02 配線・オーナー委任の自律判断】サイト最高CTRページ（170imp/15clk/8.82%・順位5.4）だが match が ^/obsidian/ なので CPP 未配線だった。専用CPPは ASC に無い（作成はオーナーのみ可能）ため、同じ CPP が既に /obsidian/airpods/（音声ページ）を受けている obsidian-vault を流用する。『音声→自動追記』専用の CPP を ASC で作ったら、この行の asc_name / ppid だけ差し替える（match は変えない）。docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-C",
+      "asc_visible": true
     },
     {
       "id": "watch-capture",
@@ -95,7 +102,8 @@
       "match": [
         "^/apple-watch"
       ],
-      "note": "/apple-watch/ と /apple-watch-obsidian/ の両方に一致（依頼P1の指定どおり）"
+      "note": "/apple-watch/ と /apple-watch-obsidian/ の両方に一致（依頼P1の指定どおり）",
+      "asc_visible": true
     },
     {
       "id": "mail-to-self",
@@ -105,7 +113,8 @@
       "match": [
         "^/note-to-email/"
       ],
-      "note": "実測のある唯一のCPP: 15DL・CVR 5.42%＝デフォルト2.45%の2.2倍（n=15・90日）"
+      "note": "実測のある唯一のCPP: 15DL・CVR 5.42%＝デフォルト2.45%の2.2倍（n=15・90日）",
+      "asc_visible": true
     },
     {
       "id": "tiktok",
@@ -124,7 +133,8 @@
       "match": [
         "^/autopilot/?$"
       ],
-      "note": "2026-09-03 のプレスリリース着地面。配信本文が読者を送る先で、`/` と並ぶ2本のうちの1本。\n\n**[2026-09-03] 専用CPPは作れなかった。`vs-drafts` を流用している**（`obsidian-voice` が `obsidian-vault` を流用しているのと同じ形）。\n\n**旧注記の「AIからは実行できない（App Store Connect の人の操作）」は誤りだった。**隣の `simplememo-ios` に 09-02 から `scripts/asc_cpp.rb` と `.github/workflows/asc-cpp.yml`（ubuntu・`environment: appstore`）が在り、`create` は撃てる。リポジトリ跨ぎの死角で、道具は前日に隣へ入っていた。\n\n**本当の詰まりは Apple の上限。**実際に撃って返ってきた値:\n  `STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n**ASC は既に70本で上限。**1本消さないと作れず、`asc_cpp.rb` に delete は無い（足すこと自体が権限の拡張になるので足していない）。\n\n**「未参照の62本」は余りではなかった。**この台帳が参照していないだけで、`uc-*` / `vs-*` は**すべて実在するページのために作り置きされている**（`vs/drafts/` も `use-cases/writers/` も在る）。だから流用は「余りを使う」ではなく**「その面から借りる」**であることを明記しておく。\n\n**なぜ vs-drafts か:** (1) `APPROVED` なので ppid が**いますぐ効く** —— 新規作成は審査を通るまで既定商品ページへ倒れ、D+14（9/17）までの2週間が計測に乗らない。(2) 文面が自律運用の記事から来た読者にそのまま通る（「届くところまで最初から通っています。仕組みを作る時間も、保守する手間もかかりません」）。(3) `/vs/drafts/` は細い比較面で混ざる量が最小。\n\n**代償: `/autopilot/` と `/vs/drafts/` のインストールは互いに分離できない。**PR経由を全体から分離する目的には足りるが、この2面の内訳は読めない。\n\n**専用CPPに戻すには:** ASC で未提出（`PREPARE_FOR_SUBMISSION`）の CPP を1本削除してから `asc-cpp.yml` を `action: create` / `name: autopilot` で回す。審査は App 版の提出に同乗する。"
+      "note": "2026-09-03 のプレスリリース着地面。配信本文が読者を送る先で、`/` と並ぶ2本のうちの1本。\n\n**[2026-09-03] 専用CPPは作れなかった。`vs-drafts` を流用している**（`obsidian-voice` が `obsidian-vault` を流用しているのと同じ形）。\n\n**旧注記の「AIからは実行できない（App Store Connect の人の操作）」は誤りだった。**隣の `simplememo-ios` に 09-02 から `scripts/asc_cpp.rb` と `.github/workflows/asc-cpp.yml`（ubuntu・`environment: appstore`）が在り、`create` は撃てる。リポジトリ跨ぎの死角で、道具は前日に隣へ入っていた。\n\n**本当の詰まりは Apple の上限。**実際に撃って返ってきた値:\n  `STATE_ERROR` / `Cannot have more that 70 custom product pages for this app.`\n**ASC は既に70本で上限。**1本消さないと作れず、`asc_cpp.rb` に delete は無い（足すこと自体が権限の拡張になるので足していない）。\n\n**「未参照の62本」は余りではなかった。**この台帳が参照していないだけで、`uc-*` / `vs-*` は**すべて実在するページのために作り置きされている**（`vs/drafts/` も `use-cases/writers/` も在る）。だから流用は「余りを使う」ではなく**「その面から借りる」**であることを明記しておく。\n\n**なぜ vs-drafts か:** (1) `APPROVED` なので ppid が**いますぐ効く** —— 新規作成は審査を通るまで既定商品ページへ倒れ、D+14（9/17）までの2週間が計測に乗らない。(2) 文面が自律運用の記事から来た読者にそのまま通る（「届くところまで最初から通っています。仕組みを作る時間も、保守する手間もかかりません」）。(3) `/vs/drafts/` は細い比較面で混ざる量が最小。\n\n**代償: `/autopilot/` と `/vs/drafts/` のインストールは互いに分離できない。**PR経由を全体から分離する目的には足りるが、この2面の内訳は読めない。\n\n**専用CPPに戻すには:** ASC で未提出（`PREPARE_FOR_SUBMISSION`）の CPP を1本削除してから `asc-cpp.yml` を `action: create` / `name: autopilot` で回す。審査は App 版の提出に同乗する。",
+      "asc_visible": true
     }
   ]
 }

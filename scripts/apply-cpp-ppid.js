@@ -86,6 +86,11 @@ function mapProblems(m) {
         + 'Verify with asc-cpp.yml --action list in simplememo-ios and record the state here.'
       );
     }
+    // Approval alone is insufficient: an approved but hidden CPP also falls
+    // back to the default page. Keep the observed boolean with the state.
+    if (cpp.asc_visible !== true) {
+      out.push(`${cpp.id}: wired CPP visibility is ${JSON.stringify(cpp.asc_visible ?? null)}; verify visible=true in the ASC inventory before wiring it.`);
+    }
   }
   return out;
 }
@@ -94,7 +99,7 @@ if (SELFTEST) {
   const failures = [];
   const t = (name, cond) => { if (!cond) failures.push(name); };
   const row = (over = {}) => ({
-    id: 'x', ppid: '3d126d78-2267-4a6c-a860-c69707ab90a5', asc_state: 'APPROVED', match: ['^/x/$'], ...over,
+    id: 'x', ppid: '3d126d78-2267-4a6c-a860-c69707ab90a5', asc_state: 'APPROVED', asc_visible: true, match: ['^/x/$'], ...over,
   });
 
   t('承認済みの行は通る', mapProblems({ cpps: [row()] }).length === 0);
@@ -113,8 +118,11 @@ if (SELFTEST) {
   t('実データ（data/cpp-map.json）が通る',
     mapProblems(JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'))).length === 0);
 
+  t('承認済みでも非表示なら落ちる', mapProblems({ cpps: [row({ asc_visible: false })] }).length === 1);
+  t('表示状態を観測していなければ落ちる', mapProblems({ cpps: [row({ asc_visible: undefined })] }).length === 1);
+
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 8 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 10 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
