@@ -131,12 +131,12 @@
     "**壊しテストで触ったファイルを HEAD から戻すときは、",
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**"
   ],
-  "observed_at": "2026-09-05T04:19:12.455Z",
+  "observed_at": "2026-09-05T05:19:26.499Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 3,
+  "open_budget": 2,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
     {
@@ -145,7 +145,7 @@
       "found_at": "2026-09-05",
       "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
       "observation": {
-        "observed_at": "2026-09-05T04:19:12.455Z",
+        "observed_at": "2026-09-05T05:19:26.499Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
@@ -155,27 +155,12 @@
       }
     },
     {
-      "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
-      "what": "failed",
-      "found_at": "2026-09-05",
-      "why": "PR実験D+14取得は00:05:44.401809454Zに発火し00:05:51.102823ZにFAILED。実行ログはfive_hourのrate_limit拒否、session limit、03:00 UTCリセットを記録。取得できた実測値や復旧成功には数えず、既存の次回予定を維持。",
-      "observation": {
-        "observed_at": "2026-09-05T04:19:12.455Z",
-        "enabled": true,
-        "last_run_status": "FAILED",
-        "last_run_fired_at": "2026-09-05T00:05:44.401809454Z",
-        "last_run_finished_at": "2026-09-05T00:05:51.102823Z",
-        "last_run_session_id": "cse_01SpYtYZct2UJqJDwCs6K3Xg",
-        "next_run_at": "2026-09-06T00:04:57.619574729Z"
-      }
-    },
-    {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
       "what": "failed",
       "found_at": "2026-09-05",
       "why": "実APIの観測で failed。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T04:19:12.455Z",
+        "observed_at": "2026-09-05T05:19:26.499Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T02:31:55.483723663Z",
@@ -286,15 +271,15 @@
       "enabled": true,
       "bound_session": false,
       "next_run_at": "2026-09-06T00:04:57.619574729Z",
-      "last_fired_at": "2026-09-05T00:05:44.414657Z",
-      "last_run_status": "FAILED",
-      "last_run_fired_at": "2026-09-05T00:05:44.401809454Z",
-      "last_run_finished_at": "2026-09-05T00:05:51.102823Z",
-      "last_run_session_id": "cse_01SpYtYZct2UJqJDwCs6K3Xg"
+      "last_fired_at": "2026-09-05T04:56:12.659004Z",
+      "last_run_status": "SUCCEEDED",
+      "last_run_fired_at": "2026-09-05T04:56:12.630784507Z",
+      "last_run_finished_at": "2026-09-05T04:57:38.131528Z",
+      "last_run_session_id": "cse_01MrLUrYPsFERpkcTtJAyfoi"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
-      "name": "obsidian-community v4（Reddit実投稿・毎日 11:31 / 20:01 JST・ライブ1＋AIO1＋余力1・会話継続≤3・月1ショーケース）",
+      "name": "obsidian-community v4.1（Reddit・11:31/20:01 JST） ｜ last: （v4.1 適用 09-05 14:00 JST・11:31 回は利用枠超過で6秒で失敗）",
       "cron_expression": "31 2,11 * * *",
       "run_once_at": null,
       "enabled": true,
@@ -406,7 +391,7 @@
     },
     {
       "id": "trig_01VuJravpvATQPBuAigHCZJi",
-      "name": "x-engagement-simplememofast 夜スロット（19:30 JST・v3 クラウド自立版）",
+      "name": "x-engagement 夜19:30 v3.1 ｜ last: （未実行・v3.1 適用 09-05 14:00 JST）",
       "cron_expression": "30 10 * * *",
       "run_once_at": null,
       "enabled": true,
@@ -420,7 +405,7 @@
     },
     {
       "id": "trig_01XUeM9mCTkoqdWhUMac6jD1",
-      "name": "x-engagement-simplememofast 昼スロット（12:30 JST・v3 クラウド自立版）",
+      "name": "x-engagement 昼12:30 v3.1 ｜ last: （未実行・v3.1 適用 09-05 14:00 JST）",
       "cron_expression": "30 3 * * *",
       "run_once_at": null,
       "enabled": true,
@@ -442,8 +427,8 @@
     "pages": 3,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 222,
-    "unregistered_current_count": 0,
+    "total_records": 228,
+    "unregistered_current_count": 6,
     "ended_records": 206,
     "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
@@ -477,6 +462,28 @@
         "last_run_fired_at": "2026-09-05T03:07:34.688042683Z",
         "last_run_finished_at": "2026-09-05T03:08:36.876554Z",
         "last_run_session_id": "cse_013drTFUw1VvYnu1AuBSPqVh"
+      }
+    },
+    {
+      "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
+      "what": "failed",
+      "found_at": "2026-09-05",
+      "why": "PR実験D+14取得は00:05:44.401809454Zに発火し00:05:51.102823ZにFAILED。実行ログはfive_hourのrate_limit拒否、session limit、03:00 UTCリセットを記録。取得できた実測値や復旧成功には数えず、既存の次回予定を維持。",
+      "observation": {
+        "observed_at": "2026-09-05T04:19:12.455Z",
+        "enabled": true,
+        "last_run_status": "FAILED",
+        "last_run_fired_at": "2026-09-05T00:05:44.401809454Z",
+        "last_run_finished_at": "2026-09-05T00:05:51.102823Z",
+        "last_run_session_id": "cse_01SpYtYZct2UJqJDwCs6K3Xg",
+        "next_run_at": "2026-09-06T00:04:57.619574729Z"
+      },
+      "closed_at": "2026-09-05T05:19:26.499Z",
+      "resolution": "APIの実行状態がSUCCEEDEDに変わった。セッションの終了状態であり、出荷・投稿・依頼内容の達成を証明しない。",
+      "evidence": {
+        "last_run_fired_at": "2026-09-05T04:56:12.630784507Z",
+        "last_run_finished_at": "2026-09-05T04:57:38.131528Z",
+        "last_run_session_id": "cse_01MrLUrYPsFERpkcTtJAyfoi"
       }
     }
   ]
