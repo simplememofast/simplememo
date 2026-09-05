@@ -132,12 +132,12 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-05T11:21:01.154Z",
+  "observed_at": "2026-09-05T12:21:18.352Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 4,
+  "open_budget": 5,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
     {
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T11:21:01.154Z",
+        "observed_at": "2026-09-05T12:21:18.352Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
@@ -174,19 +174,35 @@
     },
     {
       "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
-      "what": "never_ran",
+      "what": "stopped",
       "found_at": "2026-09-05",
-      "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T11:31:00Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
+      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T11:21:01.154Z",
-        "enabled": true,
+        "observed_at": "2026-09-05T12:21:18.352Z",
+        "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
         "last_run_finished_at": null,
         "last_run_session_id": null,
         "next_run_at": "2026-09-05T11:31:00Z"
       },
-      "tracked_due_at": "2026-09-05T11:31:00Z"
+      "tracked_due_at": "2026-09-05T11:31:00Z",
+      "state_history": [
+        {
+          "what": "never_ran",
+          "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T11:31:00Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
+          "observation": {
+            "observed_at": "2026-09-05T11:21:01.154Z",
+            "enabled": true,
+            "last_run_status": null,
+            "last_run_fired_at": null,
+            "last_run_finished_at": null,
+            "last_run_session_id": null,
+            "next_run_at": "2026-09-05T11:31:00Z"
+          },
+          "changed_at": "2026-09-05T12:21:18.352Z"
+        }
+      ]
     },
     {
       "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
@@ -194,7 +210,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T11:21:01.154Z",
+        "observed_at": "2026-09-05T12:21:18.352Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
@@ -209,13 +225,28 @@
       "found_at": "2026-09-05",
       "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
       "observation": {
-        "observed_at": "2026-09-05T11:21:01.154Z",
+        "observed_at": "2026-09-05T12:21:18.352Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
         "last_run_finished_at": "2026-09-05T00:20:28.779580Z",
         "last_run_session_id": "cse_01XHxkzJV3mCgR9eMn84f2cz",
         "next_run_at": "2026-09-06T00:20:00Z"
+      }
+    },
+    {
+      "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
+      "what": "stopped",
+      "found_at": "2026-09-05",
+      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+      "observation": {
+        "observed_at": "2026-09-05T12:21:18.352Z",
+        "enabled": false,
+        "last_run_status": "SUCCEEDED",
+        "last_run_fired_at": "2026-09-05T10:24:32.667374953Z",
+        "last_run_finished_at": "2026-09-05T10:28:11.535061Z",
+        "last_run_session_id": "cse_012373J6kREn3SgUsxbt6W5C",
+        "next_run_at": "2026-09-06T00:04:57.619574729Z"
       }
     }
   ],
@@ -356,7 +387,7 @@
     },
     {
       "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
-      "name": "x-engagement 夜19:30 v4.1-device ｜ last 09-05 19:30 JST: Q0 R0 L0 F0 ブロッカー: Macに未接続 dev:no bb:skip chrome:skip",
+      "name": "【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0）",
       "cron_expression": "30 10 * * *",
       "run_once_at": null,
       "enabled": false,
@@ -370,10 +401,10 @@
     },
     {
       "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
-      "name": "obsidian-community v5.1-device（Reddit・11:31/20:31 JST） ｜ last: （未実行・v5.1 適用 09-05 15:25 JST）",
+      "name": "【停止・ローカル版へ移行 09-05】obsidian-community v5.1-device（Reddit・承認署名が付かずクラウド実行のまま・投稿0）",
       "cron_expression": "31 2,11 * * *",
       "run_once_at": null,
-      "enabled": true,
+      "enabled": false,
       "bound_session": false,
       "next_run_at": "2026-09-05T11:31:00Z",
       "last_fired_at": null,
@@ -398,7 +429,7 @@
     },
     {
       "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
-      "name": "x-engagement 昼12:30 v4-device ｜ last 09-05 18:50 JST: Q0 R0 L0 F0 ブロッカー: デバイスブリッジ未接続 dev:no chrome:none bb:skip",
+      "name": "【停止・ローカル版へ移行 09-05】x-engagement 昼12:30 v4.1-device（承認署名が付かずクラウド実行のまま dev:no・投稿0）",
       "cron_expression": "30 3 * * *",
       "run_once_at": null,
       "enabled": false,
@@ -440,10 +471,10 @@
     },
     {
       "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
-      "name": "PR実験の D+14 取得（台帳駆動）v2 ｜ 2026-09-05 総点検版（CI赤の手当て入り・要: リポジトリ選択＋通知ON）",
+      "name": "【停止・ローカル版へ移行 09-05】PR実験の D+14 取得（台帳駆動）v2（ローカルタスクとして Working folder にリポジトリを指定して再登録）",
       "cron_expression": "0 0 * * *",
       "run_once_at": null,
-      "enabled": true,
+      "enabled": false,
       "bound_session": false,
       "next_run_at": "2026-09-06T00:04:57.619574729Z",
       "last_fired_at": "2026-09-05T10:24:32.695103Z",
@@ -602,9 +633,9 @@
     "pages": 3,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 241,
-    "unregistered_current_count": 8,
-    "ended_records": 214,
+    "total_records": 245,
+    "unregistered_current_count": 9,
+    "ended_records": 217,
     "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
   },
