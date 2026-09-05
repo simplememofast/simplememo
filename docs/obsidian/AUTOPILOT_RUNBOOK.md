@@ -702,11 +702,12 @@ node scripts/autopilot-selfheal.mjs
 `node scripts/value-contracts.mjs --readiness` で承認済み指標を確認する。承認が0件なら既存の選定を継続し、承認欄は代筆しない。1件以上なら、変更を始める前に以下を実行する。
 
 0. 引き継ぎの回（`GATE_TAKEOVER=true`）で当日ブランチに `data/decision-intents/*.json` が残っていたら、**それは死んだ run の宣言**。実装せず §0-2 の手順で取り下げ（`--retire`）てコミット・pushしてから、以下を**新しい候補**で行う。契約と記帳の `run_id` は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`。
-1. `node scripts/value-contracts.mjs --feedback` で過去の生Brier scoreを読む。確率の較正に使い、別の正規化報酬へ変換しない。
+1. `node scripts/value-contracts.mjs --feedback` で過去の予測・実測結果・生Brier scoreを読む。指標ごとの直近10件と全件の平均・件数が返る。平均だけでなく `p` と `event` を見て、確率を高く／低く見積もった事例を確認する。確率の較正に使い、別の正規化報酬へ変換しない。
 2. 候補2件以上を `/tmp/decision-candidates.json` にJSON配列で書く。各候補には `id`（英小文字・数字・ハイフン）、`run_id`、`rank`、`metric`、`predicted_delta`、`p`、`horizon_days`（1〜28）、`counterfactual: {id, reason}`、`rank_gap`、`touches`、`max_changed_lines`（最大1500）、`predicted_usd`、`lane`、`action`、`evidence_date` を含める。`touches` はワイルドカードを使わない実パス。予算上限は既存の設定を使う。
    `predicted_delta` は凍結する比較基準（null model）からの変化量。率は0〜1、件数・時間・費用は0以上に収まる予測だけを使う。比較基準が既に上限の出荷日率や、0件の未解消故障には、改善を予測する余地がない。そうした候補は選定から除外され、候補IDごとの理由が返る。
+   各候補に `calibration: {snapshot_sha256, reason}` を付ける。`snapshot_sha256` は直前の `--feedback` の値をそのまま使い、`reason`（20〜2000文字）には、関連する過去の予測と実測が今回の `p`・順位の判断にどう関わるかを書く。関連する決済が0件なら、その事実と今回の根拠・不確実性を書く。結果を参照した記録だけで学習・改善の実績とは扱わない。checkoutを変えた場合は読み直す。
 3. `node scripts/value-contracts.mjs --select /tmp/decision-candidates.json` を実行する。境界・可逆性・証拠・予算・反復の5基準と、承認済み指標・実測baseline・比較基準が通った候補だけが選択対象になる。探索が指示された回も同じ条件を通す。0件なら施策を実装せず、理由を記録する。
-4. 出力された `data/decision-intents/<id>.json` だけを**別コミットにして先にpush**する。この時点では記事やコードを編集しない。CIがコミットの順序を検査し、事前データから予測・適格性を再計算する。
+4. 出力された `data/decision-intents/<id>.json` だけを**別コミットにして先にpush**する。この時点では記事やコードを編集しない。CIがコミットの順序を検査し、事前データから予測・適格性・較正の参照記録を再計算する。参照が無い・古い・後から変更された新規契約は通らない。この配線より前に宣言済みの契約は当時の形式で検証し、過去に参照記録を付け足さない。
 5. 選ばれた候補だけを実装する。契約は変更しない。範囲や予測を変えたければ、この候補を中止して新しいIDで最初から判定する。実装をpushし、`gh pr create` でPR番号を確定する。**マージを待たずに**、§5-4の記帳コマンドで宣言した `run_id`・`lane`・`action` とそのPR番号を持つ行を同じブランチへ追加する。1つの契約に複数の新しい出荷を混ぜない。
 6. 記帳後に `node scripts/decision-monitor.mjs --publish-report` で公開運転表を同期し、運転台帳・status JSON・`autopilot/index.html` を同じPRへcommit・pushする。**この最終HEADに対するpull_request起因のSEO Validationが成功してから自動マージされる。**宣言だけのpushや、PR番号と出荷記録が未確定の途中HEADの検査はマージの根拠にならない。`outcome: shipped` の行はこのPRがマージされてmainへ入った時点で出荷実績になる。未マージのプレビューを実績として報告しない。このコマンドの出力は同期完了だけで、選定には使わない。候補の理由や証拠には、公開してよい運用情報だけを書く。個人データや秘密情報は含めない。
 7. 事後決済と限定的な静的ページの復旧は Decision Monitor が行う。未来の結果、観測できない費用、欠測日を補完しない。契約なしの過去の出荷を契約に紐づけない。
