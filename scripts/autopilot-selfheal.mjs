@@ -46,6 +46,20 @@ const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
 
 const FAILED = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
 
+/** A failed execution can be observed before its cause is known. */
+export function observedPendingTriage(row) {
+  const failed = Date.parse(row.failed_at);
+  const detected = Date.parse(row.detected_at);
+  return row.outcome === 'failed' && row.attempted === true && row.needs_triage === true
+    && ['act-reconcile', 'act-reconcile-session'].includes(row.source)
+    && row.route === 'actions' && /^[1-9]\d*$/.test(String(row.external_ref ?? ''))
+    && typeof row.failure_reason === 'string' && row.failure_reason.trim().length > 0
+    && typeof row.detected_note === 'string' && row.detected_note.trim().length > 0
+    && [row.failed_at, row.detected_at].every(value => typeof value === 'string'
+      && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value))
+    && Number.isFinite(failed) && Number.isFinite(detected) && failed <= detected;
+}
+
 /**
  * 未修理の故障を求める。
  *
@@ -106,6 +120,7 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
       run_id: r.run_id, date_jst: r.date_jst, route: r.route,
       outcome: r.outcome, failure_class: cls,
       failure_reason: r.failure_reason,
+      needs_triage: r.needs_triage === true,
       repair_attempts_for_class: tried,
       // 上限に達した種別は**直さない**。人に上げる。
       escalate: tried >= limit,
@@ -171,10 +186,11 @@ export function validate(runsDoc, matrix) {
       if (t === r.run_id) problems.push(`${r.run_id}: 自分自身を repair_of にしている`);
     }
   }
-  // 失敗しているのに failure_class が無い行は、再発を数えられない
+  // 未記入は拒否する。GitHubの失敗観測と調査待ちを明記した行は、原因を
+  // 捏造して埋めずに保持する。未修理件数・既存のunknown修理上限にも残す。
   for (const r of runsDoc.runs) {
-    if (FAILED.has(r.outcome) && !r.failure_class) {
-      problems.push(`${r.run_id}: outcome=${r.outcome} なのに failure_class が無い — 「前と同じ故障か」を判定できない`);
+    if (FAILED.has(r.outcome) && !r.failure_class && !observedPendingTriage(r)) {
+      problems.push(`${r.run_id}: outcome=${r.outcome} なのに failure_class が無い — 原因未確定なら失敗の観測証拠と needs_triage が必要`);
     }
   }
   return problems;
@@ -207,6 +223,35 @@ const SCENARIOS = ledgerScenarios(
   }] });
 
   SCENARIOS.push(
+    ['原因未確定の実行失敗を証拠付きの調査待ちとして保持する', () => {
+      const row = { ...doc(null).runs[0], source: 'act-reconcile-session', external_ref: '90001',
+        needs_triage: true, failure_reason: '単独診断は判定不能', detected_note: 'GitHub step completed_at',
+        failed_at: '2026-09-05T00:00:20Z', detected_at: '2026-09-05T00:01:00Z' };
+      assert(validate({ runs: [row] }, MATRIX).length === 0, '観測済みの故障が同期を止めた');
+      const pending = analyze({ runs: [row] }, MATRIX, RULES);
+      assert(pending.unrepaired_count === 1 && pending.lane_f_required
+        && pending.targets[0].needs_triage && !pending.targets[0].owner_routed,
+      '原因未確定の故障を隠した、または認証交換の人待ちにした');
+      for (const field of ['needs_triage', 'external_ref', 'source', 'failure_reason',
+        'failed_at', 'detected_at', 'detected_note']) {
+        const bad = { ...row }; delete bad[field];
+        assert(validate({ runs: [bad] }, MATRIX).length > 0, `${field}が無い空欄を通した`);
+      }
+      for (const change of [{ outcome: 'no_run' }, { attempted: false }, { route: 'ccr' },
+        { needs_triage: 'true' }, { detected_at: '2026-09-04T00:00:00Z' },
+        { failed_at: 'invalid' }, { failed_at: 1 }, { failed_at: '2026-09-05' },
+        { external_ref: 'not-a-run' }, { failure_reason: '  ' }]) {
+        assert(validate({ runs: [{ ...row, ...change }] }, MATRIX).length > 0,
+          '失敗観測の条件を満たさない行を通した');
+      }
+      const prior = [1, 2, 3].flatMap(i => [
+        { ...row, run_id: `unknown-${i}` },
+        { run_id: `repair-${i}`, outcome: 'shipped', repair_of: [`unknown-${i}`] },
+      ]);
+      const limited = analyze({ runs: [...prior, row] }, MATRIX, RULES);
+      assert(limited.targets[0].escalate && limited.targets[0].repair_attempts_for_class === 3
+        && !limited.lane_f_required, '既存のunknown修理上限を無効にした');
+    }],
     ['who=owner の故障はレーンFを起動しない（打つ手が無いものを毎日直そうとしない）', () => {
       const a = analyze(doc('usage_limit'), MATRIX, RULES);
       assert(a.lane_f_required === false, 'usage_limit でレーンFが起動した');
