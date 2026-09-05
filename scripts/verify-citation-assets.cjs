@@ -27,6 +27,15 @@ const paths = ['/en/autopilot/', '/press/', '/en/press/', '/resources/obsidian-i
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, pathname + ' fits mobile');
       assert.equal(await page.locator('img').evaluateAll(imgs => imgs.every(img => !img.complete || img.naturalWidth > 0)), true, pathname + ' images load');
       if (evidence) await page.screenshot({ path: path.join(evidence, pathname.slice(1).replaceAll('/', '-') + 'mobile.png'), fullPage: true });
+      for (const width of [320, 360, 640, 641, 900, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        const overflow = await page.locator('main *').evaluateAll(nodes => nodes.filter(node => {
+          const rect = node.getBoundingClientRect();
+          return rect.width > 0 && rect.right > innerWidth + 1 && !node.closest('.table-scroll, pre');
+        }).map(node => node.tagName + '.' + node.className));
+        assert.deepEqual(overflow, [], pathname + ' fits ' + width + 'px without relying on clipping');
+      }
+      await page.setViewportSize({ width: 390, height: 844 });
     }
     const report = await context.request.get(origin + '/assets/downloads/autopilot-runs-2026-09-02.csv');
     assert.equal(report.status(), 200);
@@ -41,7 +50,7 @@ const paths = ['/en/autopilot/', '/press/', '/en/press/', '/resources/obsidian-i
     for (const pathname of ['/resources/obsidian-inbox/', '/en/resources/obsidian-inbox/']) {
       await page.goto(origin + pathname);
       const sent = [];
-      const observe = request => sent.push(request.url() + ' ' + (request.postData() || ''));
+      const observe = request => sent.push({ url: request.url(), method: request.method(), body: request.postData() || '' });
       page.on('request', observe);
       await page.locator('#destination').selectOption('daily');
       await page.locator('#note-date').fill('2026-09-05');
@@ -67,8 +76,15 @@ const paths = ['/en/autopilot/', '/press/', '/en/press/', '/resources/obsidian-i
       await page.locator('#copy-markdown').click();
       assert((await page.locator('#tool-status').textContent()).length > 10, 'clipboard denial provides a visible fallback');
       assert.equal((await page.evaluate(() => getSelection().toString())).trimEnd(), (await page.locator('#markdown-preview').textContent()).trimEnd());
-      assert(!sent.some(value => value.includes('PRIVATE-NOTE-7827')), 'typed content is not transmitted');
-      assert(!sent.some(value => /^https?:/.test(value)), 'editing and downloading need no network requests');
+      assert(!sent.some(value => (value.url + value.body).includes('PRIVATE-NOTE-7827')), 'typed content is not transmitted, including in an infrastructure beacon');
+      const unexpected = sent.filter(value => {
+        const url = new URL(value.url);
+        if (!['http:', 'https:'].includes(url.protocol)) return false;
+        // Cloudflare injects this page-performance beacon on production. It is
+        // not the generator's upload path; the canary check above still applies.
+        return !(url.origin === new URL(origin).origin && url.pathname === '/cdn-cgi/rum' && value.method === 'POST');
+      });
+      assert.deepEqual(unexpected, [], 'the tool must not make application data requests');
       page.off('request', observe);
     }
     await page.setViewportSize({ width: 1440, height: 1000 });
@@ -81,7 +97,7 @@ const paths = ['/en/autopilot/', '/press/', '/en/press/', '/resources/obsidian-i
     assert.equal((await noScript.request.get(origin + '/assets/downloads/obsidian-inbox-en.md')).status(), 200);
     await noScript.close();
     assert.deepEqual(errors, [], 'no browser exceptions');
-    console.log('PASS: five mobile pages; canonical/languages; source counts; blank worksheet; bilingual generation, literal text, download bytes, privacy, clipboard fallback, and no-JS downloads.');
+    console.log('PASS: five pages at seven widths; canonical/languages; source counts; blank worksheet; bilingual generation, literal text, download bytes, no input transmission (including infrastructure beacons), clipboard fallback, and no-JS downloads.');
   } finally {
     await browser.close();
   }
