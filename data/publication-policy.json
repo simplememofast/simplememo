@@ -65,6 +65,11 @@
   "repository_is_public": true,
   "$repository_is_public": "2026-08-26 に api.github.com/repos/simplememofast/simplememo を叩いて確かめた（private: false）。**この欄が true である限り、served_by_site: false は『非公開』を意味しない。**CI は seo-check.yml が REPO_PRIVATE として github.event.repository.private の生の値を渡し、ここと食い違ったら落ちる（リポジトリを非公開にしたときも、公開に戻したときも気づける）。**観測値が渡ってこない実行では照合しない** —— 照合できなかったことを『一致』と書かない。",
   "files": {
+    "app-releases.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §2 が Lane B（アプリ本体）の台帳として参照。版・タグ・実機確認の有無・App Store の状態・公開の観測幅・コード差分。鍵も個人名も入れていない（実機確認は recorded_from だけ）",
+      "ok_in_public_repo": "ok"
+    },
     "audit-charter.json": {
       "served_by_site": false,
       "why": "監査の設計。攻撃面に準ずる",
@@ -83,6 +88,16 @@
     "automation-coverage.json": {
       "served_by_site": true,
       "why": "/autopilot/ が棚卸しとして参照。数え方を外から再現できることが売り",
+      "ok_in_public_repo": "ok"
+    },
+    "autonomy-score-history.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が推移として参照。**アンチゲーミングの非退行制約の基準**（検査被覆率が下がった窓ではスコアを上げない）がこの履歴を読むので、履歴を隠すと据え置きが効いたかを外から確かめられない",
+      "ok_in_public_repo": "ok"
+    },
+    "autonomy-score.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が配点として参照。**点数の付け方を見せることが訴求そのもの** —— 「自律スコア35.5点」だけを出して配点を隠すと、都合よく数えていないことを確かめる手段が読み手に無い。このファイルは L4（人間の持ち分）で、AIが書き換えられない側に置いてある",
       "ok_in_public_repo": "ok"
     },
     "autonomy-timeline.json": {
@@ -108,11 +123,6 @@
     "autopilot-runs.json": {
       "served_by_site": true,
       "why": "/autopilot/ が運転台帳として参照。失敗も含めて出している",
-      "ok_in_public_repo": "ok"
-    },
-    "app-releases.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §2 が Lane B（アプリ本体）の台帳として参照。版・タグ・実機確認の有無・App Store の状態・公開の観測幅・コード差分。鍵も個人名も入れていない（実機確認は recorded_from だけ）",
       "ok_in_public_repo": "ok"
     },
     "autopilot-status.json": {
@@ -146,6 +156,11 @@
       "why": "内部リンク構造。運用データ",
       "ok_in_public_repo": "ok"
     },
+    "contract-coverage.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "**公開レーンの出荷に、事前登録した予測が付いているかを数える門の方針。**eligibility-policy.json と同じ側 —— 何を止め、何を止めないかを見せる。enforcement は当面 record_only で、**「数えてはいるが止めていない」を隠さずに出せる。**そして中身のいちばん重要な事実は、**契約の仕組みを 2026-09-04 に配線しておきながら、公開レーンの出荷 14 件に起案が1本も付いていなかった**こと。配点（autonomy-score.json）と指標（value-metrics.json）を公開しておいて、**「その仕組みが実際には使われていなかった」だけを隠すのは、いちばん都合の悪い部分を隠すことになる。**値は方針・日付・レーン名・目標本数だけで、個人データも資格情報も持たない。"
+    },
     "corporate-obligations.json": {
       "served_by_site": false,
       "why": "**法人の期限・記録・事業形態。**登記事項でないもの（役員報酬の有無・決算期・顧問の有無）を含む。公開する理由が無い",
@@ -168,10 +183,30 @@
       "why": "リポジトリ横断の検査。内部構造",
       "ok_in_public_repo": "ok"
     },
+    "decision-recovery.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
+    },
+    "decision-review.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
+    },
     "distribution-queue.json": {
       "served_by_site": true,
       "why": "Runbook §5-5。X/note/Reddit/Indie Hackersの定期配信タスクが https://simplememofast.com/data/distribution-queue.json を読んで消費する。サイトのHTMLからはリンクしない機械消費用のフィードなので allow_unreferenced",
       "allow_unreferenced": true,
+      "ok_in_public_repo": "ok"
+    },
+    "eligibility-log.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が判定台帳として参照。中身は候補のID・判定・理由で、**候補そのものは data/autopilot-actions.json（既に公開）から来ている**ので新しく出るものは無い。**運転台帳とは別の表にしてあることが要点**なので、片方だけ公開すると分けた意味が読み手に伝わらない",
+      "ok_in_public_repo": "ok"
+    },
+    "eligibility-policy.json": {
+      "served_by_site": true,
+      "why": "/autopilot/ §5 が実行前の判定基準として参照。**何を止め、何を止めないかを見せる側**。enforcement（いまは R2 だけ止める）が書いてあるので、「判定はしているが実行は止めていない」を隠さずに出せる",
       "ok_in_public_repo": "ok"
     },
     "emergency-stop.json": {
@@ -259,6 +294,11 @@
       "why": "配信前の原稿の主張。**出す前の文面**なので公開しない",
       "ok_in_public_repo": "ok"
     },
+    "prior-art.json": {
+      "served_by_site": false,
+      "why": "他社の主張の検証記録。公開URLと判定しか入っていないが、サイトが参照する面が無い。原稿に他社名を書かない方針なので配信面にも出さない",
+      "ok_in_public_repo": "ok"
+    },
     "publication-policy.json": {
       "served_by_site": false,
       "why": "この方針そのもの。**どれを隠しているかの一覧**なので、内部に置く",
@@ -336,6 +376,16 @@
       "why": "停止機構の一覧と、どこまで確かめたか。**配信はしない** —— どの経路をどう止められるかの地図なので、サイトから引ける形にはしない（リポジトリが公開なので非公開にはならないが、既定を配信にはしない）",
       "ok_in_public_repo": "ok"
     },
+    "value-contracts.json": {
+      "served_by_site": true,
+      "ok_in_public_repo": "ok",
+      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
+    },
+    "value-metrics.json": {
+      "served_by_site": true,
+      "why": "**L2（価値契約）が名指ししてよい指標の許可リストと null model。**/autopilot/ §5 が参照。中身は指標名・出典・**どう歪められるか**で、値そのものは持たない。配点（autonomy-score.json）と基準（eligibility-policy.json）を出しておいて**「どの指標で価値を測るか」だけ隠すのは、いちばん歪めやすい部分を隠すことになる。**起案（drafted_by: ai）と承認（approved_by）を別の欄にしてあるので、**まだ1件も承認されていないことも公開面から読める**",
+      "ok_in_public_repo": "ok"
+    },
     "vendor-register.json": {
       "served_by_site": false,
       "why": "取引先と、何を渡しているか。**依存の地図**なので出さない",
@@ -346,51 +396,6 @@
       "served_by_site": false,
       "why": "「待つだけ」と分類した行が本当に進んでいるかの観測。持つのは**カウンタの値と最終更新日と停止の理由**だけで、金額も個人データも運ばない（収入の行が持つのは covered_days 2/28 という進み具合であって、売上額ではない）。サイトからは参照していない",
       "ok_in_public_repo": "ok"
-    },
-    "prior-art.json": {
-      "served_by_site": false,
-      "why": "他社の主張の検証記録。公開URLと判定しか入っていないが、サイトが参照する面が無い。原稿に他社名を書かない方針なので配信面にも出さない",
-      "ok_in_public_repo": "ok"
-    },
-    "autonomy-score.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が配点として参照。**点数の付け方を見せることが訴求そのもの** —— 「自律スコア35.5点」だけを出して配点を隠すと、都合よく数えていないことを確かめる手段が読み手に無い。このファイルは L4（人間の持ち分）で、AIが書き換えられない側に置いてある",
-      "ok_in_public_repo": "ok"
-    },
-    "autonomy-score-history.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が推移として参照。**アンチゲーミングの非退行制約の基準**（検査被覆率が下がった窓ではスコアを上げない）がこの履歴を読むので、履歴を隠すと据え置きが効いたかを外から確かめられない",
-      "ok_in_public_repo": "ok"
-    },
-    "eligibility-policy.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が実行前の判定基準として参照。**何を止め、何を止めないかを見せる側**。enforcement（いまは R2 だけ止める）が書いてあるので、「判定はしているが実行は止めていない」を隠さずに出せる",
-      "ok_in_public_repo": "ok"
-    },
-    "eligibility-log.json": {
-      "served_by_site": true,
-      "why": "/autopilot/ §5 が判定台帳として参照。中身は候補のID・判定・理由で、**候補そのものは data/autopilot-actions.json（既に公開）から来ている**ので新しく出るものは無い。**運転台帳とは別の表にしてあることが要点**なので、片方だけ公開すると分けた意味が読み手に伝わらない",
-      "ok_in_public_repo": "ok"
-    },
-    "value-metrics.json": {
-      "served_by_site": true,
-      "why": "**L2（価値契約）が名指ししてよい指標の許可リストと null model。**/autopilot/ §5 が参照。中身は指標名・出典・**どう歪められるか**で、値そのものは持たない。配点（autonomy-score.json）と基準（eligibility-policy.json）を出しておいて**「どの指標で価値を測るか」だけ隠すのは、いちばん歪めやすい部分を隠すことになる。**起案（drafted_by: ai）と承認（approved_by）を別の欄にしてあるので、**まだ1件も承認されていないことも公開面から読める**",
-      "ok_in_public_repo": "ok"
-    },
-    "value-contracts.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
-    },
-    "decision-review.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
-    },
-    "decision-recovery.json": {
-      "served_by_site": true,
-      "ok_in_public_repo": "ok",
-      "why": "公開運転台帳だけを基にした意思決定・決済・復旧の証跡。個人データや資格情報を含めない。過去の出荷や訓練で本番の実績を捏造しない。"
     }
   },
   "served_dirs": [
