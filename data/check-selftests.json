@@ -322,6 +322,12 @@
       "broke": "壊し11通りを実測。**両方向を要求している**のが要点で、片方だけだと「境界を実装待ちに書く」か「渡されたものを境界に書く」のどちらかが素通りする。実際に落としたもの: (1) 権限表の human_only から条項を消す（＝渡された）／(2) coverage の blocker を policy_boundary → not_started + unlock（＝2026-08-28 に12件やっていた形）／(3) 渡された行（App Review 提出）の blocker を policy_boundary にする（逆向き）／(4) ai_may から条項を消す（取り上げられた）／(5) 領域名を1文字変える（**照合が黙って空回りするのを止める**。「プレスリリース」の長音を全角ハイフンに替えて確認）／(6) human_only を名指ししたまま executor を ai_executes_gated にする／(7) $authority_absent を削る（表も指さず理由も書かない境界）／(8) 理由を空白だけにする（欄を作っただけで通さない）／(9) authority_absent_budget を 0 に下げる（ラチェット）／(10) budget のキーごと消す（無ければ無制限、を通さない）／(11) human_only と ai_may を両方書く（どちら側の主張か決まらない）。\n\n**実データが通ることも同じ harness で確かめている**（ledgerScenarios の第1件）。"
     },
     {
+      "script": "scripts/check-credential-probe.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-05",
+      "broke": "実際のworkflowの診断shellを、認証情報・モデルを使わないCLI検体12種で実行。既定値をcredentialへ戻す変異と判定不能markerの配線を切る変異で自己検査が失敗することを確認。503・403・通信断・不正JSON・一般429は認証失効と断定しない。"
+    },
+    {
       "script": "scripts/check-credentials.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
