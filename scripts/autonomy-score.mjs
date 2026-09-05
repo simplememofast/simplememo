@@ -357,16 +357,104 @@ export function coverage(selftests) {
  * 「機会が無かった」と「機会はあったが検証できていない」を混ぜると、
  * **何もしていないことが免除される。**
  */
+/**
+ * **窓内に分母が無い成分へ、最後に測れた率を据え置く。**
+ *
+ * [2026-09-05・オーナー判断] 「壊れて直したほうが 27.5 点高い」を消すために入れた。
+ * 3択のうち **② 最後に測れた率を据え置く** が選ばれている
+ * （根拠と、③ を採らなかった理由は data/autonomy-score.json の carry_forward）。
+ *
+ * **据え置きは「測ったことがある」ときだけ。**窓の外を新しい順に見て
+ * `min_denominator` 件以上の分母が取れなければ、0 点のまま ——
+ * **一度も試されていない能力に点は入れない。**
+ *
+ * **古い率は持ち回らない。**いちばん新しい標本が `max_age_days` より古ければ据え置きをやめる。
+ * これが無いと「一度だけ良い率を出して、以後ずっと故障を起こさない」で点が固定できる。
+ *
+ * VDC・UMR・TUC には当てない（窓内に分母が在るので、0 は機会が無かったからではない）。
+ */
+export function carryForward(components, allRuns, w, policy, { rules, actions } = {}) {
+  const cfg = policy.carry_forward;
+  if (!cfg?.enabled) return { enabled: false, items: [], skipped: [] };
+  const minN = cfg.min_denominator ?? 3;
+  const maxAge = cfg.max_age_days ?? policy.window_days * 2;
+  const outside = allRuns.filter((r) => (r.date_jst || '') < w.from);
+  const newestFirst = (rows) => [...rows].sort((a, b) => (a.date_jst < b.date_jst ? 1 : -1));
+  const ageOf = (d) => Math.round((Date.parse(`${w.to}T00:00:00Z`) - Date.parse(`${d}T00:00:00Z`)) / 864e5);
+  const items = [], skipped = [];
+
+  // **率をそのまま点にしない。**EP の見逃しは「率が低いほど良い」成分で、
+  // ra.detect と同じ式で当てると**符号が逆になる**（2026-09-05、EP が 0 点に落ちて気づいた）。
+  // 据え置くのは「満点に対する取り分」（share）で、率は表示のために別に持つ。
+  const take = (id, rows, measure) => {
+    if (!(cfg.applies_to || []).includes(id)) return;
+    const sample = newestFirst(rows).slice(0, minN);
+    if (sample.length < minN) {
+      skipped.push({ id, why: `窓の外に分母が ${sample.length} 件しかない（${minN} 件必要）— **測ったことが無い**` });
+      return;
+    }
+    const age = ageOf(sample[0]?.date_jst);
+    if (!Number.isFinite(age) || age > maxAge) {
+      skipped.push({ id, why: `最後に測れたのが ${age} 日前で、期限 ${maxAge} 日を過ぎている — **昔うまくいったことは、いまの能力の証拠ではない**` });
+      return;
+    }
+    const { rate, share } = measure(sample);
+    if (!Number.isFinite(share) || share < 0 || share > 1) { skipped.push({ id, why: `取り分を計算できない（${share}）` }); return; }
+    items.push({ id, rate, share, n: sample.length, measured_at: sample[0]?.date_jst, age_days: age });
+  };
+
+  if (components.ra.n === 0) {
+    const breaks = outside.filter((r) => BREAKAGE_STAGES.has(r.failure_stage));
+    const raOf = (sample) => ra(sample, allRuns, policy, { recoveries: [], window: null });
+    take('ra.detect', breaks, (sample) => { const h = raOf(sample).detect; return { rate: h.rate, share: h.points / h.max }; });
+    take('ra.recover', breaks, (sample) => { const h = raOf(sample).recover; return { rate: h.rate, share: h.points / h.max }; });
+  }
+  if (components.ep.miss.n === 0) {
+    take('ep.miss', outside.filter((r) => BREAKAGE_STAGES.has(r.failure_stage) && r.failed_at && r.detected_at),
+      (sample) => { const h = ep(sample, policy, { rules, actions }).miss; return { rate: h.rate, share: h.points / h.max }; });
+  }
+  return { enabled: true, items, skipped, min_denominator: minN, max_age_days: maxAge };
+}
+
+/** 据え置きを成分へ反映する。**点を書き換えるので、書き換えた印を必ず残す。** */
+export function applyCarry(components, carried, policy) {
+  const byId = Object.fromEntries(components.map((x) => [x.id, x]));
+  const half = (component) => policy.weights[component] / 2;
+  for (const item of carried.items || []) {
+    const [id, part] = item.id.split('.');
+    const target = byId[id]?.[part];
+    if (!target) continue;
+    target.rate = item.rate;
+    target.points = half(id) * item.share;
+    target.carried = item;
+    target.why = `**窓内に分母が無いので、${item.measured_at}（${item.age_days} 日前）までの ${item.n} 件で測れた率を据え置いた。**`
+      + 'この窓で測り直したものではない';
+    byId[id].carried = (byId[id].carried || []).concat(item);
+  }
+  const raC = byId.ra, epC = byId.ep;
+  if (raC?.carried) {
+    raC.points = raC.detect.points + raC.recover.points;
+    raC.rate = (raC.detect.rate + raC.recover.rate) / 2;
+    raC.why = '窓内に故障が無い。**最後に測れた率を据え置いている**（満点ではない）';
+  }
+  if (epC?.carried) {
+    epC.points = epC.miss.points + epC.precision.points;
+    epC.rate = epC.points / policy.weights.ep;
+  }
+  return components;
+}
+
 export function noOpportunity(components, policy) {
   const byId = Object.fromEntries(components.map((x) => [x.id, x]));
   const half = (component) => policy.weights[component] / 2;
   const slots = [
-    { id: 'ra.detect', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い' },
-    { id: 'ra.recover', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い' },
-    { id: 'ep.miss', n: byId.ep.miss.n, max: half('ep'), why: '時刻を持つ故障が無い' },
-    { id: 'ep.precision', n: byId.ep.precision.n, max: half('ep'), why: 'オーナーへ上げたアクションが無い' },
+    { id: 'ra.detect', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い', carried: Boolean(byId.ra.detect.carried) },
+    { id: 'ra.recover', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い', carried: Boolean(byId.ra.recover.carried) },
+    { id: 'ep.miss', n: byId.ep.miss.n, max: half('ep'), why: '時刻を持つ故障が無い', carried: Boolean(byId.ep.miss.carried) },
+    { id: 'ep.precision', n: byId.ep.precision.n, max: half('ep'), why: 'オーナーへ上げたアクションが無い', carried: false },
   ];
-  const openSlots = slots.filter((x) => x.n === 0);
+  // **据え置いた成分は穴ではない。**点が入っているので、無機会減点から外す。
+  const openSlots = slots.filter((x) => x.n === 0 && !x.carried);
   const forgonePoints = openSlots.reduce((s, x) => s + x.max, 0);
   const rawTotal = components.reduce((s, x) => s + x.points, 0);
   const totalMax = components.reduce((s, x) => s + x.max, 0);
@@ -399,6 +487,9 @@ export function score(ctx) {
     ep(inW, policy, { rules, actions }),
     tuc(inW, policy, w),
   ];
+  // **据え置きは合計より前に当てる。**当てたあとの点を素点にする。
+  const carried = carryForward(Object.fromEntries(components.map((c) => [c.id, c])), all, w, policy, { rules, actions });
+  applyCarry(components, carried, policy);
   const raw = components.reduce((s, c) => s + c.points, 0);
   const cov = coverage(selftests);
 
@@ -426,6 +517,7 @@ export function score(ctx) {
     total, raw, held, held_why: heldWhy,
     max: components.reduce((s, c) => s + c.max, 0),
     coverage: cov,
+    carried,
     no_opportunity: noOpportunity(components, policy),
     metrics: metrics ? metricsSummary(metrics) : null,
     components: Object.fromEntries(components.map((c) => [c.id, c])),
@@ -588,8 +680,11 @@ export function check(s, policy, { blindness = [] } = {}) {
   }
   // **測れていない成分を、測れているように出さない。**
   for (const c of Object.values(s.components)) {
-    if (c.points > 0 && c.measurable === false) {
-      problems.push(`成分 ${c.id} は measurable=false なのに ${c.points} 点入っている`);
+    const labelled = Array.isArray(c.carried) && c.carried.length
+      && c.carried.every((x) => x.measured_at && Number.isFinite(x.rate) && Number.isFinite(x.n));
+    if (c.points > 0 && c.measurable === false && !labelled) {
+      problems.push(`成分 ${c.id} は measurable=false なのに ${c.points} 点入っている`
+        + '（据え置きなら carried に measured_at / rate / n を残すこと）');
     }
   }
   if (s.total > s.max) problems.push(`合計 ${s.total} が満点 ${s.max} を超えている`);
@@ -646,6 +741,8 @@ function selftest() {
     tuc: { target_ships_per_week: 7 },
     ra: { machine_detection_sources: ['act-reconcile'] },
     ep: { precision_review: { accepted_modes: ['human'], delegations: [] } },
+    carry_forward: { enabled: true, applies_to: ['ra.detect', 'ra.recover', 'ep.miss'],
+                     min_denominator: 3, max_age_days: 56 },
   };
   const ship = (id, over = {}) => ({ run_id: id, date_jst: '2026-09-01', outcome: 'shipped', lane: 'E', action: 'new', interventions: [], ...over });
 
@@ -968,6 +1065,129 @@ function selftest() {
     assert(p2.some((x) => x.includes('無機会')), `落ちなかった: ${JSON.stringify(p2)}`);
   });
 
+  // --- 据え置き（窓内に分母が無い成分に、最後に測れた率を当てる）---
+  //
+  // **実データでは不発**（いまの窓には故障が12件ある）。合成でしか固定できないので、
+  // 「効いている」「効いていない」の両側を検体で押さえる。
+  const priorFails = [];
+  for (let i = 0; i < 4; i += 1) {
+    const d = `2026-08-${String(20 + i).padStart(2, '0')}`;
+    priorFails.push({ run_id: `o${i}`, date_jst: d, outcome: 'failed', failure_stage: 'execution',
+      interventions: [], source: i === 0 ? 'session' : 'act-reconcile',
+      failed_at: `${d}T00:00:00Z`, detected_at: `${d}T01:00:00Z` });
+    if (i >= 2) priorFails.push(ship(`o${i}-fix`,
+      { date_jst: d, lane: 'F', action: 'refresh', repair_of: [`o${i}`], pr: 700 + i }));
+  }
+  const carryBase = { ...quietBase, runsDoc: { runs: [...priorFails, ...quietBase.runsDoc.runs] } };
+  const carried = score(carryBase);
+
+  eq(carried.carried?.items?.map((x) => x.id), ['ra.detect', 'ra.recover', 'ep.miss'],
+     '**窓の外の直近3件から据え置く**');
+  eq(Number(carried.total.toFixed(4)), 59.1667, '据え置きが効いた合計（据え置き前は 35.0）');
+  eq(score(quietBase).total, 35, '窓の外にも故障が無ければ据え置かない（**測ったことが無いなら 0 のまま**）');
+
+  ok('**据え置きは印を残す**（measured_at / rate / share / n）', () => {
+    for (const x of carried.carried.items) {
+      assert(x.measured_at && Number.isFinite(x.rate) && Number.isFinite(x.share) && Number.isFinite(x.n),
+        `印が欠けている: ${JSON.stringify(x)}`);
+    }
+    assert(carried.components.ra.detect.carried, 'ra.detect に印が無い');
+    assert(String(carried.components.ra.detect.why).includes('据え置いた'),
+      '据え置いたことが本文に出ていない');
+  });
+
+  ok('**符号を逆にしない** — EP の見逃しは率が低いほど点が高い', () => {
+    // [2026-09-05] 初版は `points = max × rate` を全成分に当てていて、
+    // **見逃し率0（＝一度も遅れていない）が 0 点**になっていた。成分ごとに取り分で当てる。
+    const miss = carried.components.ep.miss;
+    assert(miss.rate === 0, `検体の見逃し率が 0 でない: ${miss.rate}`);
+    assert(miss.points === 7.5, `見逃し率0なのに ${miss.points} 点 —— 符号が逆`);
+  });
+
+  ok('**期限を過ぎた率は持ち回らない**', () => {
+    const late = { ...carryBase, today: '2026-11-30', runsDoc: { runs: [...priorFails,
+      ...Array.from({ length: 28 }, (_, i) => ship(`r${i}`, { date_jst: `2026-11-${String(i + 3).padStart(2, '0')}`, lane: 'C', pr: 200 + i }))] } };
+    const s2 = score(late);
+    assert(s2.carried.items.length === 0, `期限切れなのに据え置いた: ${JSON.stringify(s2.carried.items)}`);
+    assert(s2.carried.skipped.length === 3, `理由が残っていない: ${JSON.stringify(s2.carried.skipped)}`);
+    assert(s2.total === 35, `0 に戻っていない: ${s2.total}`);
+  });
+
+  ok('**分母が足りなければ据え置かない**（min_denominator）', () => {
+    const thin = { ...carryBase, runsDoc: { runs: [priorFails[0], priorFails[2], ...quietBase.runsDoc.runs] } };
+    const s2 = score(thin);
+    assert(s2.carried.items.length === 0, `2件で据え置いた: ${JSON.stringify(s2.carried.items)}`);
+    assert(s2.carried.skipped.some((x) => x.why.includes('測ったことが無い')), '理由が違う');
+  });
+
+  ok('据え置きを切れば 0 に戻る', () => {
+    const off = structuredClone(P); off.carry_forward.enabled = false;
+    const s2 = score({ ...carryBase, policy: off });
+    assert(s2.carried.enabled === false, '無効化が効いていない');
+    assert(s2.total === 35, `据え置きが残っている: ${s2.total}`);
+  });
+
+  ok('**据え置いた成分は無機会減点から外れる**', () => {
+    eq(carried.no_opportunity.items.map((x) => x.id), ['ep.precision'], '');
+    assert(carried.no_opportunity.forgone === 7.5, `二重に数えている: ${carried.no_opportunity.forgone}`);
+  });
+
+  ok('**VDC / UMR / TUC には当てない**', () => {
+    for (const id of ['vdc', 'umr', 'tuc']) {
+      assert(!carried.components[id].carried, `${id} に据え置きが当たっている`);
+    }
+    assert(carried.components.vdc.points === 0, 'VDC が据え置きで動いた');
+  });
+
+  ok('**applies_to に無い成分は据え置かない**（対象は台帳が決める）', () => {
+    const only = structuredClone(P); only.carry_forward.applies_to = ['ra.detect'];
+    const s2 = score({ ...carryBase, policy: only });
+    eq(s2.carried.items.map((x) => x.id), ['ra.detect'], '');
+    assert(!s2.components.ra.recover.carried, 'applies_to に無い ra.recover が据え置かれた');
+    assert(!s2.components.ep.miss.carried, 'applies_to に無い ep.miss が据え置かれた');
+  });
+
+  ok('**据え置きは窓の外からだけ拾う**（窓内の行を混ぜない）', () => {
+    // ep.miss は「時刻を持つ故障」が分母なので、**時刻の無い故障だけがある窓**では
+    // ra.n > 0 のまま ep.miss.n === 0 になる。ここで窓内も拾うと、
+    // 「窓の中で測れなかったもの」を据え置きの標本に混ぜてしまう。
+    const timeless = Array.from({ length: 3 }, (_, i) => ({ run_id: `t${i}`,
+      date_jst: `2026-09-${String(10 + i).padStart(2, '0')}`, outcome: 'failed',
+      failure_stage: 'execution', interventions: [], source: 'session' }));
+    const s2 = score({ ...carryBase,
+      runsDoc: { runs: [...priorFails, ...timeless, ...quietBase.runsDoc.runs] } });
+    assert(s2.components.ra.n === 3, `前提が崩れた（窓内の故障 ${s2.components.ra.n} 件）`);
+    assert(s2.components.ep.miss.n === 0, '前提が崩れた（窓内に時刻つき故障がある）');
+    const item = s2.carried.items.find((x) => x.id === 'ep.miss');
+    assert(item, 'ep.miss が据え置かれていない');
+    assert(item.measured_at === '2026-08-23',
+      `窓内の行を混ぜている（measured_at=${item.measured_at}・窓の外の最新は 2026-08-23）`);
+    assert(!s2.carried.items.some((x) => x.id.startsWith('ra.')),
+      '窓内に故障があるのに RA を据え置いた');
+  });
+
+  ok('**未来日付の行を「最後に測れた率」にしない**', () => {
+    // 窓は [w.from, today] なので、today より後の行はどちらにも入らない。
+    // ここを「窓の外＝window より前」ではなく「全期間」で拾うと、
+    // **まだ起きていない日付の行が、いまの能力の証拠になってしまう。**
+    const future = Array.from({ length: 3 }, (_, i) => ({ run_id: `f${i}`,
+      date_jst: `2026-10-${String(5 + i).padStart(2, '0')}`, outcome: 'failed',
+      failure_stage: 'execution', interventions: [], source: 'act-reconcile',
+      failed_at: `2026-10-0${5 + i}T00:00:00Z`, detected_at: `2026-10-0${5 + i}T01:00:00Z` }));
+    const s2 = score({ ...quietBase, runsDoc: { runs: [...future, ...quietBase.runsDoc.runs] } });
+    assert(s2.components.ra.n === 0, `前提が崩れた（窓内の故障 ${s2.components.ra.n} 件）`);
+    assert(s2.carried.items.length === 0,
+      `未来の行から据え置いた: ${JSON.stringify(s2.carried.items)}`);
+    assert(s2.total === 35, `点が入っている: ${s2.total}`);
+  });
+
+  ok('**印の無い据え置きは検査が落とす**', () => {
+    const faked = structuredClone(carried);
+    faked.components.ra.carried = [{ rate: 1 }];   // measured_at も n も無い
+    const p2 = check(faked, P, { blindness: [] });
+    assert(p2.some((x) => x.includes('measurable=false')), `落ちなかった: ${JSON.stringify(p2.slice(0, 3))}`);
+  });
+
   ok('実データのポリシーが検査を通る', () => {
     const ctx = loadContext();
     const p = check(score(ctx), ctx.policy, { blindness: rankerBlindness(ctx.policy) });
@@ -1017,10 +1237,18 @@ function render(s) {
     L.push(`\n  ⚠ 無機会減点 ${nop.forgone} 点  （${nop.items.map((x) => `${x.id}: ${x.why}`).join(' / ')}）`);
     L.push(`     ${nop.note}`);
     L.push(`     参考: 分母の無い成分を分母から外すと ${nop.normalized.toFixed(1)} —— **これはスコアではない**`);
-  } else {
-    L.push(`  **採点の形にひとつ穴がある** — 窓内に故障が無いと RA/EP は「満点」ではなく 0 点になる。`);
-    L.push(`  実測: 故障ゼロの28日は 35.0、3日に1故障を機械が検知して直した28日は 62.5（**壊れたほうが 27.5 点高い**）。`);
-    L.push(`  いまの窓は故障もエスカレーションも在るので穴は開いていない。**分母の付け替えはオーナーの判断。**`);
+  }
+  const cf = s.carried;
+  if (cf?.items?.length) {
+    L.push(`\n  据え置き ${cf.items.length} 件  （窓内に分母が無いので、最後に測れた率を当てている）`);
+    for (const x of cf.items) {
+      L.push(`     ${x.id.padEnd(11)} ${(x.share * 100).toFixed(1).padStart(5)}%  ${x.measured_at} までの ${x.n} 件（${x.age_days} 日前）`);
+    }
+    L.push(`     **この窓で測り直したものではない。**期限（${cf.max_age_days} 日）を過ぎれば 0 に戻る`);
+  }
+  for (const x of cf?.skipped ?? []) L.push(`  据え置かなかった: ${x.id} — ${x.why}`);
+  if (cf?.enabled && !cf.items.length && !cf.skipped.length) {
+    L.push(`  据え置き方針は有効（窓内に分母が在るので出番なし）— **故障が無い月に点が下がる形を、${cf.max_age_days} 日を上限に打ち消す**`);
   }
   L.push(`\n  **この数字は人間向けの計器で、ranker には見せていない。**`);
   L.push(`  併記: 総合自動化率（タスク被覆率）は scripts/automation-rate.mjs。`);
