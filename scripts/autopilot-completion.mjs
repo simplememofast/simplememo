@@ -122,7 +122,7 @@ export function checkWiring(primary, act, source) {
   assert.doesNotMatch(act, /git stash/);
   assert.match(source, /await completionOrigin\(\)/);
   assert.match(source, /primarySteps\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)/);
-  assert.match(source, /jobId = primaryJob\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)\?\.id/);
+  assert.match(source, /job = primaryJob\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\); jobId = job\?\.id/);
   return true;
 }
 

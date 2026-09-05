@@ -50,6 +50,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { load as loadRouting } from './check-model-routing.mjs';
+import { OUTCOMES } from './autopilot-runs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/autopilot-cost.json');
@@ -293,14 +294,33 @@ export function modelUsage(ledger, month = jstMonth()) {
   return { counts, runs_with_models: rows.length - unknown, runs_without_models: unknown };
 }
 
-export function appendRun(ledger, run) {
+export function appendRun(ledger, run, { enrichMissing = false } = {}) {
   const required = ['date_jst', 'route', 'total_cost_usd'];
   for (const k of required) {
     if (run[k] === undefined || run[k] === null) throw new Error(`appendRun: ${k} is required`);
   }
   // 同一 run_id の二重追記を防ぐ。ワークフローの再実行で二重計上すると、
   // 上限判定が実態より厳しくなり「使っていないのに止まる」が起きる。
-  if (run.run_id && ledger.runs.some((r) => r.run_id === run.run_id)) {
+  const existing = run.run_id && ledger.runs.find((r) => r.run_id === run.run_id);
+  if (existing && enrichMissing) {
+    // A cost can be measured before its result is recorded. Only fill missing
+    // result metadata; never replace the amount, review, or an existing result.
+    for (const key of required) {
+      if (existing[key] !== run[key]) throw Error(`enrich: ${key} differs from recorded cost`);
+    }
+    if (run.outcome !== undefined && !OUTCOMES.includes(run.outcome)) throw Error('enrich: invalid outcome');
+    if (run.task_kind !== undefined && !['article', 'repair', 'analysis'].includes(run.task_kind)) throw Error('enrich: invalid task_kind');
+    const patch = {};
+    for (const key of ['outcome', 'task_kind']) {
+      if (run[key] === undefined) continue;
+      if (existing[key] == null) patch[key] = run[key];
+      else if (existing[key] !== run[key]) throw Error(`enrich: ${key} is already recorded`);
+    }
+    Object.assign(existing, patch);
+    return { ledger, appended: false, enriched: Object.keys(patch).length > 0,
+      reason: `run_id ${run.run_id} already recorded` };
+  }
+  if (existing) {
     return { ledger, appended: false, reason: `run_id ${run.run_id} already recorded` };
   }
   ledger.runs.push(run);
@@ -426,6 +446,35 @@ const SCENARIOS = ledgerScenarios(
 // 足りずに別の理由で落ちる（一度やった）。summarize の結果の run_caps だけ差し替える。
 const budgetDoc = () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
 SCENARIOS.push(
+  ['結果未確定の実費を一度だけ計上し、後から欠けた結果のみ補完する', () => {
+    const d = budgetDoc(); d.runs = [];
+    const cost = { date_jst: '2026-09-05', route: 'actions', run_id: '33959414641',
+      total_cost_usd: 0.8407852, num_turns: 20, note: 'measured result' };
+    assert(appendRun(d, { ...cost }).appended, '実費が入らない');
+    const before = summarize(d, '2026-09');
+    assert(before.spent === 0.8407852 && before.shipped === 0, '結果を推測している');
+    const metadata = { ...cost, outcome: 'shipped', task_kind: 'article',
+      num_turns: 999, note: 'replacement', cap_review: { by: 'owner', at: '2026-09-05', why: 'not a real review' } };
+    assert(!appendRun(d, metadata).appended && d.runs[0].outcome === undefined, '既定の追記冪等性が変わった');
+    const result = appendRun(d, metadata, { enrichMissing: true });
+    assert(result.enriched && !result.appended && d.runs.length === 1, '補完で二重計上');
+    const after = summarize(d, '2026-09');
+    assert(after.spent === before.spent && after.shipped === 1, '費用か結果の集計が違う');
+    assert(d.runs[0].num_turns === 20 && d.runs[0].note === 'measured result'
+      && d.runs[0].cap_review === undefined, '補完で費用・レビューを書き換えた');
+    assert(!appendRun(d, metadata, { enrichMissing: true }).enriched, '補完が冪等でない');
+  }],
+  ['既知の費用・日付・経路・結果を補完で変更できない', () => {
+    const row = { date_jst: '2026-09-05', route: 'actions', run_id: '33959414641',
+      total_cost_usd: 0.8407852, outcome: 'failed' };
+    for (const change of [{ total_cost_usd: 0 }, { date_jst: '2026-09-04' }, { route: 'ccr' },
+      { outcome: 'shipped' }, { outcome: 'made-up' }, { task_kind: 'made-up' }]) {
+      const d = budgetDoc(); d.runs = [{ ...row }];
+      let rejected = false;
+      try { appendRun(d, { ...row, ...change }, { enrichMissing: true }); } catch { rejected = true; }
+      assert(rejected && JSON.stringify(d.runs) === JSON.stringify([row]), '既知の事実を上書きした');
+    }
+  }],
   ['**判定できなかったら、そう書く**（節ごと消さない）', () => {
     const d = budgetDoc();
     const out = render({ ...summarize(d), run_caps: null }, d);
@@ -513,13 +562,15 @@ if (isMain) {
       console.error('--cost に数値が要る（取得できなかった回は追記しない。0を書くと「無料で動いた」になる）');
       process.exit(1);
     }
-    const res = appendRun(ledger, run);
-    if (!res.appended) {
+    const res = appendRun(ledger, run, { enrichMissing: flag('enrich-missing-metadata') });
+    if (!res.appended && !res.enriched) {
       console.log(`skip: ${res.reason}`);
       process.exit(0);
     }
+    const after = validate(ledger);
+    if (after.length) throw Error(`cost append rejected: ${after.join('; ')}`);
     fs.writeFileSync(LEDGER_PATH, JSON.stringify(ledger, null, 2) + '\n');
-    console.log(`appended ${run.date_jst} ${run.route} ${fmt(run.total_cost_usd)}`);
+    console.log(`${res.enriched ? 'enriched' : 'appended'} ${run.date_jst} ${run.route} ${fmt(run.total_cost_usd)}`);
     process.exit(0);
   }
 
