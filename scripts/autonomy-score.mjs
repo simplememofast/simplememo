@@ -335,6 +335,55 @@ export function coverage(selftests) {
   return { total: checks.length, demonstrated, rate: checks.length ? demonstrated / checks.length : 0 };
 }
 
+/**
+ * **分母が無い成分を 0 点にしていることの帰結を、数字で出す。**
+ *
+ * [2026-09-05 実測] 28日・1日1出荷で「故障ゼロ」と
+ * 「3日に1故障・機械が検知・人手なしで修理」を並べると、
+ * **壊れて直したほうが 27.5 点高い**（66.4 対 38.9）。
+ *
+ * 穴は、アンチゲーミング規則の**相互作用**で開いている。
+ * 片方だけを見ていると見えない。
+ *
+ *   anti_gaming.failure_rate_excluded  … 故障の**減点を外した**
+ *   分母が無い成分 = 0 点        … 故障の**加点だけを残した**
+ *   → 故障が**減点の無い純増**になっている。
+ *
+ * **点は動かさない。**分母の付け替えは採点の意味を変えるので
+ * data/autonomy-score.json の所有者（L4）の判断であって、AI が自分の
+ * 採点入力を決めてよい範囲ではない。**見えるようにするまでがこちら側の仕事。**
+ *
+ * **VDC はここに入れない。**契約が0本でも出荷は21件あり、分母は在る。
+ * 「機会が無かった」と「機会はあったが検証できていない」を混ぜると、
+ * **何もしていないことが免除される。**
+ */
+export function noOpportunity(components, policy) {
+  const byId = Object.fromEntries(components.map((x) => [x.id, x]));
+  const half = (component) => policy.weights[component] / 2;
+  const slots = [
+    { id: 'ra.detect', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い' },
+    { id: 'ra.recover', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い' },
+    { id: 'ep.miss', n: byId.ep.miss.n, max: half('ep'), why: '時刻を持つ故障が無い' },
+    { id: 'ep.precision', n: byId.ep.precision.n, max: half('ep'), why: 'オーナーへ上げたアクションが無い' },
+  ];
+  const openSlots = slots.filter((x) => x.n === 0);
+  const forgonePoints = openSlots.reduce((s, x) => s + x.max, 0);
+  const rawTotal = components.reduce((s, x) => s + x.points, 0);
+  const totalMax = components.reduce((s, x) => s + x.max, 0);
+  const denominator = totalMax - forgonePoints;
+  return {
+    forgone: forgonePoints, items: openSlots,
+    // **反実仮想。**分母の無い成分を分母から外したら何点か。
+    // これは**スコアではない**。並べて出すのは、差が欠陥の大きさだから。
+    normalized: forgonePoints && denominator > 0 ? (rawTotal / denominator) * totalMax : rawTotal,
+    note: forgonePoints
+      ? '**分母が無い成分を 0 点にしている。**故障が1件も起きなかった窓は、'
+        + '故障が起きて機械が検知・修理した窓より低く出る（2026-09-05 実測で 27.5 点差）。'
+        + '変更失敗率をスコアから外している（anti_gaming）ため、**故障は減点の無い純増**になっている'
+      : null,
+  };
+}
+
 // ── 合成 ──────────────────────────────────────────────────────
 export function score(ctx) {
   const { policy, runsDoc, selftests, rules, actions, history = [], today = todayJst(),
@@ -377,6 +426,7 @@ export function score(ctx) {
     total, raw, held, held_why: heldWhy,
     max: components.reduce((s, c) => s + c.max, 0),
     coverage: cov,
+    no_opportunity: noOpportunity(components, policy),
     metrics: metrics ? metricsSummary(metrics) : null,
     components: Object.fromEntries(components.map((c) => [c.id, c])),
     excluded: {
@@ -543,6 +593,14 @@ export function check(s, policy, { blindness = [] } = {}) {
     }
   }
   if (s.total > s.max) problems.push(`合計 ${s.total} が満点 ${s.max} を超えている`);
+  // **穴が開いているのに、黙って開いていることを許さない。**
+  // no_opportunity は点を動かさない診断なので、消しても合計は変わらない ——
+  // だからこそ、消えたことに気づく側をここに置く。
+  const nop = s.no_opportunity;
+  if (nop && nop.forgone > 0 && !nop.note) {
+    problems.push(`無機会減点が ${nop.forgone} 点あるのに、理由が出ていない`
+      + ' — **分母が無いから0点なのか、やっていないから0点なのかが読めなくなる**');
+  }
   // **ep() が緩められたときに鳴る側。**生の台帳から数え直して照合する。
   //
   // **「2枚目の扉」と書きかけて、変異試験で外れた。**この照合は acceptedReview() を
@@ -833,6 +891,83 @@ function selftest() {
   eq(metricsSummary({ metrics: [{ tier: 'A', approved_by: 'o' }, { tier: 'A' }, { tier: 'C' }] }).approved, 1,
      '**起案は承認ではない**（approved_by が入った指標だけ数える）');
 
+  // --- 無機会減点（**故障が起きたほうが高く出る**）---
+  //
+  // ここは「点が正しいか」ではなく「**採点の形が歪んでいることを、計器が言うか**」を見る。
+  // 数字はこの場で score() から取り直すので、上の docstring に書いた 27.5 が
+  // 実装からずれたらここが落ちる（散文だけにしない）。
+  const quietBase = {
+    policy: P, selftests: { checks: [{ state: 'demonstrated' }] },
+    rules, actions: { actions: [] }, today: '2026-09-28',
+    runsDoc: { runs: Array.from({ length: 28 }, (_, i) => ship(`q${i}`,
+      { date_jst: `2026-09-${String(i + 1).padStart(2, '0')}`, lane: 'C', pr: 100 + i })) },
+  };
+  const brokenBase = {
+    ...quietBase,
+    runsDoc: { runs: quietBase.runsDoc.runs.flatMap((r, i) => i % 3 !== 2 ? [r] : [
+      { run_id: `f${i}`, date_jst: r.date_jst, outcome: 'failed', failure_stage: 'execution',
+        source: 'act-reconcile', interventions: [],
+        failed_at: `${r.date_jst}T00:00:00Z`, detected_at: `${r.date_jst}T01:00:00Z` },
+      ship(`fix${i}`, { date_jst: r.date_jst, lane: 'F', action: 'refresh', repair_of: [`f${i}`], pr: 500 + i }),
+    ]) },
+  };
+  const quiet = score(quietBase);
+  const broken = score(brokenBase);
+
+  eq(quiet.no_opportunity?.forgone, 35, '**故障もエスカレーションも無い窓は 35 点ぶん分母が無い**（RA 20 ＋ EP 15）');
+  eq(quiet.no_opportunity?.items?.map((x) => x.id),
+     ['ra.detect', 'ra.recover', 'ep.miss', 'ep.precision'], '分母の無い成分を名指しで出す');
+  eq(broken.no_opportunity?.items?.map((x) => x.id), ['ep.precision'],
+     '故障が入れば RA と EP見逃し の分母は戻る（残るのは上げていないことだけ）');
+
+  ok('**穴が開いた窓には理由が本文で付く**（注記だけ消す変異が素通りしていた）', () => {
+    // [2026-09-05] 変異試験で見つけた自分の穴。check() の見張りは**手で組んだ**
+    // no_opportunity を渡していたので、noOpportunity() が注記を返さなくなっても
+    // 誰も落ちなかった。**見張りを検査したつもりで、見張りの入力を検査していた。**
+    const n = quiet.no_opportunity ?? {};
+    assert(n.forgone > 0, '前提が崩れている（無機会減点が0）');
+    assert(typeof n.note === 'string' && n.note.includes('純増'),
+      `実物の noOpportunity() が理由を返していない: ${JSON.stringify(n.note)}`);
+  });
+
+  ok('**壊れて直したほうが、壊れないより高く出る**（設計上の欠陥。点は動かさず記録する）', () => {
+    const gap = broken.total - quiet.total;
+    assert(gap > 0, `壊れたほうが高くない（gap=${gap.toFixed(1)}）—— 欠陥が直ったならこの検査を書き換える`);
+    // **散文に書いた数字を、ここで固定する。**render() と docstring の 35.0 / 62.5 / 27.5 は
+    // この2シナリオから出た実測値なので、実装が動いたらここが落ちて散文の嘘が残らない。
+    assert(quiet.total === 35, `故障ゼロの実測が 35.0 でない: ${quiet.total}`);
+    assert(broken.total === 62.5, `故障ありの実測が 62.5 でない: ${broken.total}`);
+    assert(gap === 27.5, `差が 27.5 でない: ${gap.toFixed(2)} —— 散文の数字を書き直すこと`);
+    assert(gap <= quiet.no_opportunity?.forgone,
+      `差 ${gap.toFixed(1)} が無機会減点 ${quiet.no_opportunity?.forgone} を超えた —— 別の原因が混ざっている`);
+  });
+
+  ok('**VDC は無機会に入れない**（契約0本は「機会が無かった」ではない）', () => {
+    assert(quiet.components.vdc.n > 0, '出荷が0だと前提が崩れる');
+    assert(quiet.components.vdc.points === 0, 'VDC が0点でない');
+    assert(!(quiet.no_opportunity?.items ?? []).some((x) => x.id.startsWith('vdc')),
+      '**契約を書いていないことが免除されている**');
+  });
+
+  ok('反実仮想は素点を分母から割り戻した値', () => {
+    const n = quiet.no_opportunity ?? {};
+    assert(Math.abs(n.normalized - (quiet.raw / (100 - n.forgone)) * 100) < 1e-9,
+      `割り戻しが合わない: ${n.normalized}`);
+    assert(broken.no_opportunity?.normalized > broken.raw, '分母が減れば反実仮想は素点より上');
+  });
+
+  ok('分母が全部あれば反実仮想は素点と同じ', () => {
+    const s2 = score({ ...brokenBase, actions: { actions: [{ force_owner: 'human' }] } });
+    assert(s2.no_opportunity?.forgone === 0, `まだ分母が欠けている: ${JSON.stringify(s2.no_opportunity?.items)}`);
+    assert(s2.no_opportunity?.normalized === s2.raw, '素点と一致していない');
+    assert(s2.no_opportunity?.note === null, '穴が無いのに注記が出ている');
+  });
+
+  ok('**無機会減点があるのに注記が無ければ検査が落ちる**', () => {
+    const p2 = check({ ...quiet, no_opportunity: { forgone: 9, items: [], note: null } }, P, { blindness: [] });
+    assert(p2.some((x) => x.includes('無機会')), `落ちなかった: ${JSON.stringify(p2)}`);
+  });
+
   ok('実データのポリシーが検査を通る', () => {
     const ctx = loadContext();
     const p = check(score(ctx), ctx.policy, { blindness: rankerBlindness(ctx.policy) });
@@ -876,6 +1011,17 @@ function render(s) {
   L.push(`  制約下スループット TUC  ${pts(c.tuc.points, c.tuc.max)}   週 ${c.tuc.per_week.toFixed(1)} 出荷 / 目標 ${c.tuc.target}`);
   L.push(`\n  検査被覆率  ${s.coverage.demonstrated}/${s.coverage.total} 本が「壊すと落ちる」ことを実測済み`);
   L.push(`  ${s.excluded.failure_rate}`);
+  // **穴を、開いている窓でだけ言う。**閉じている窓で毎回出すと、注記が背景になる。
+  const nop = s.no_opportunity;
+  if (nop?.forgone > 0) {
+    L.push(`\n  ⚠ 無機会減点 ${nop.forgone} 点  （${nop.items.map((x) => `${x.id}: ${x.why}`).join(' / ')}）`);
+    L.push(`     ${nop.note}`);
+    L.push(`     参考: 分母の無い成分を分母から外すと ${nop.normalized.toFixed(1)} —— **これはスコアではない**`);
+  } else {
+    L.push(`  **採点の形にひとつ穴がある** — 窓内に故障が無いと RA/EP は「満点」ではなく 0 点になる。`);
+    L.push(`  実測: 故障ゼロの28日は 35.0、3日に1故障を機械が検知して直した28日は 62.5（**壊れたほうが 27.5 点高い**）。`);
+    L.push(`  いまの窓は故障もエスカレーションも在るので穴は開いていない。**分母の付け替えはオーナーの判断。**`);
+  }
   L.push(`\n  **この数字は人間向けの計器で、ranker には見せていない。**`);
   L.push(`  併記: 総合自動化率（タスク被覆率）は scripts/automation-rate.mjs。`);
   L.push(`  片方が伸びてもう片方が伸びないことに意味があるので、乗り換えない。\n`);
