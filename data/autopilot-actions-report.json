@@ -1,6 +1,6 @@
 {
   "as_of_jst": "2026-09-05",
-  "open_total": 12,
+  "open_total": 14,
   "oldest_open_days": 2,
   "acknowledged": 6,
   "closed_today": [
@@ -13,11 +13,6 @@
       "id": "act-routine-snapshot-stale",
       "title": "副系の写しが 2.6日前（上限 3日）— 期限まであと 0.4日",
       "evidence": "scripts/check-routine-runs.mjs --snapshot-fresh が exit 0"
-    },
-    {
-      "id": "act-orphaned-branch-claude-autopilot-act-20260905",
-      "title": "ブランチ claude/autopilot-act-20260905 に 1 コミットが取り残されている（PR #892 ほか1件 のマージ後）",
-      "evidence": "claude/autopilot-act-20260905 の取り残しは解消（走査に出てこない）"
     }
   ],
   "human": [
@@ -39,12 +34,30 @@
       "not_before_jst": null
     },
     {
+      "id": "act-orphaned-branch-claude-apple-submission-automation-8nc4cs",
+      "title": "ブランチ claude/apple-submission-automation-8nc4cs に 1 コミットが取り残されている（PR #855 ほか3件 のマージ後）",
+      "detail": "ブランチ claude/apple-submission-automation-8nc4cs が、最後のマージ（PR #855 / head af2c309）より1 件先にあり、**それらは main にも無い**: 16cdecd。（別の63件は main 側のコミットなので除外した）\n\nこのブランチは #847 #848 #849 #855 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/automation-coverage.json\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "claude/apple-submission-automation-8nc4cs はまだ 1 件先にある",
+      "not_before_jst": null
+    },
+    {
       "id": "act-orphaned-branch-claude-autonomy-score-refinement-w7owrh",
       "title": "ブランチ claude/autonomy-score-refinement-w7owrh に 3 コミットが取り残されている（PR #914 ほか5件 のマージ後）",
       "detail": "ブランチ claude/autonomy-score-refinement-w7owrh が、最後のマージ（PR #914 / head 70724e2）より3 件先にあり、**それらは main にも無い**: deca9ee, a156501, 8398e94。（別の10件は main 側のコミットなので除外した）\n\nこのブランチは #851 #852 #901 #906 #910 #914 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: autopilot/index.html / data/autopilot-runs.json / data/autopilot-status.json / data/decision-intents/coverage-queue-collision-fix-20260905.json / growth/content/coverage-queue.json\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
       "age_days": 0,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
       "evidence": "claude/autonomy-score-refinement-w7owrh はまだ 3 件先にある",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260905",
+      "title": "ブランチ claude/autopilot-act-20260905 に 1 コミットが取り残されている（PR #895 ほか2件 のマージ後）",
+      "detail": "ブランチ claude/autopilot-act-20260905 が、最後のマージ（PR #895 / head 2486244）より1 件先にあり、**それらは main にも無い**: 046b92c。（別の27件は main 側のコミットなので除外した）\n\nこのブランチは #887 #892 #895 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autonomy-score-history.json / data/autopilot-actions-report.json / data/autopilot-actions.json / data/eligibility-log.json\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "claude/autopilot-act-20260905 はまだ 1 件先にある",
       "not_before_jst": null
     },
     {
