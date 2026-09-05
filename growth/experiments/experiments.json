@@ -1913,6 +1913,83 @@
       }
     },
     {
+      "id": "pr-2026-notion",
+      "page": "(PR TIMES配信 — Notion Inbox 提供開始。ページ実験ではなくPRリリース型レコード)",
+      "type": "pr_release",
+      "hypothesis": "乗車した②（Obsidian連携 提供開始・12,332PV）と**同型**の弾 —— 「大きな固有名詞 × 提供開始」。PR⑥ で分かった必要条件（S1>=20 かつ S2>=10）を通す。**Action Router ではなくこちらを先に撃つ理由は2つ**: (a) **実装が公開版に載っている** —— Notion Inbox は 5.8.12 で入り、公開版 5.8.17 が持っている（relay の /v1/notion/config も 2026-09-04 14:31Z から available:true）。Action Router は EventKit が1行も無い。(b) **自社GSCの実測で Notion 735imp に対しリマインダー60・カレンダー3** —— D-1 の S2 尺度はリマインダー/カレンダーを最高帯に置くが、実測は逆を向いている（docs/pr-discover-strategy-2026-09-04.md §4-3）。**ただし尺度そのものは書き換えていない**ので、この弾の S2 は尺度どおり 15 で置く。**訴求で言えないことがある** —— 出荷は「メールに足すコピー」で、「Notionのみ」は Premium（同 §4-3-3）。「メール登録不要」「Notionが保存先になる」は書けない。",
+      "source": {
+        "pr": null,
+        "commit": null
+      },
+      "started_at": null,
+      "evaluation_at": null,
+      "status": "planned",
+      "before": null,
+      "after": null,
+      "baseline": {
+        "clicks": null,
+        "impressions": null,
+        "ctr": null,
+        "position": null,
+        "window": null,
+        "source": "PR実績ベースライン（n=6）: 乗車2本=D-SCORE 65-71・PV 10,434-12,332 / 非乗車4本=21-46（PR⑥は台帳85だが配信物を採り直すと45）。**⑥の非乗車は D+1 の初期観測で、9/17 の D+14 評価まで確定しない。**転載の床は22-34本/回で乗車とは無関係（追記A-5）。必要条件 S1>=20 かつ S2>=10 が n=5 を 5/5 で分離する"
+      },
+      "target_metric": "discover_boarding",
+      "decision": null,
+      "evaluated_at": null,
+      "d_score_pre": {
+        "$comment": "配信前採点（初回・2026-09-05）。**61 は合格ライン60のすぐ上**で、乗車2本（65-71）より低い。低いのは訴求を弱めたからではなく、**出荷形が「置き換え」ではなく「追加コピー」だったから**（S4）。**見出し確定稿で必ず再採点すること** —— PR⑥ はこれをやらずに、配信されていない見出しの85点で撃った。",
+        "scored_at": "2026-09-05",
+        "basis": "docs/GROWTH_ROI_PLAN_2026-08-20.md 追記D-1 の尺度／docs/pr-discover-strategy-2026-09-04.md §4-3・§4-3-3（出荷実態をコードで確認）。較正は growth/scripts/d-score.mjs --backtest で再現できる",
+        "S1_novelty": 20,
+        "S2_entity_reach": 15,
+        "S3_concrete_nouns": 8,
+        "S4_transformation": 10,
+        "S5_timing": 3,
+        "S6_news_verb": 5,
+        "S7_launch_design": 0,
+        "total": 61,
+        "total_note": "61。**必要条件（S1>=20 かつ S2>=10）は通る。**合計では Action Router の 76 に負けるが、**合計点は n=6 で分離しなくなった側**であり（⑥85点が非乗車。ただし D+1 の初期観測）、S2 の尺度は実測と逆を向いていることが分かっている軸である。**合計で弾を選ばない。****61 は薄い** —— 乗車2本は 65-71 だった。伸ばせるのは S7（+5・受け皿ページとコミュニティ投下が実在したら）と S3（+7・見出しに生活名詞を入れられたら）。**S4 は出荷形が変わらない限り上がらない。**",
+        "score_rationale": {
+          "S1_novelty": "20。D-1 の「20=能力クラス・プラットフォーム・エンティティ結合の初出」。SimpleMemo にとって Notion 結合は初出。**30（カテゴリ完全初出）は取れない** —— Notion へ保存するアプリは多数実在する。「世界初」「唯一」は書かない。",
+          "S2_entity_reach": "15。D-1 の「15=大衆化ツール級」。**20（全国民級）ではない。****尺度を実測で上書きしていない** —— 自社GSC では Notion 735imp でリマインダー60・カレンダー3 を大きく上回るが、それは自社サイトが Obsidian 文脈で作られている偏りを含む数字で、尺度を書き換える根拠には足りない（§4-3 の限界）。**必要条件の 10 は余裕で超える。**見出しにはアプリ名経由で Obsidian も乗る。",
+          "S3_concrete_nouns": "8。見出しに固有名詞（Notion・Obsidian）は入るが、**D-1 が S3 で測っているのは生活名詞**（牛乳・歯医者・スクショ）で、それが入らない。**この軸は乗車を分離しない**（乗車 8,10 / 非乗車 0,10,0）ので、**ここを埋めるために見出しを長くしない。**",
+          "S4_transformation": "10。**この弾のいちばん弱い軸で、しかも乗車を分離する軸**（乗車 15,12 / 非乗車 8,10,5）。10 は非乗車側の帯に入る。**出荷が「置き換え」ではなく「追加コピー」だから**である —— 無料の既定ではメールを送ったうえで Notion にコピーが入り、「Notionのみに保存」は Premium（§4-3-3）。「思いついたことが Notion に残っている」は言えるが、「保存先が Notion になる」は言えない。**採点で埋めずに、事実として低く置いてある。**",
+          "S5_timing": "3。平時。Apple の9月窓には当てない（追記E-3・§6-3）。乗車した③も S5=3 だった。",
+          "S6_news_verb": "5。「提供開始」。②が使った動詞そのもの。",
+          "S7_launch_design": "0。**受け皿ページもコミュニティ投下もまだ無い。**docs/pr-action-router-launch-plan.md §5 と同じ厳しい読み（3つ揃った日に初めて5）を適用する。**計画があることにしない。**"
+        },
+        "gates": {
+          "G1_thumbnail_1200px": null,
+          "G2_no_ai_or_clickbait_words": null,
+          "G3_prtimes_distribution": null,
+          "G4_weekday_morning": null,
+          "$note": "G1-G4は配信物（サムネ・見出し確定稿・配信予約）が存在してから0/1で埋める。1つでも落ちたら配信不可。**G2 を読み替えない。**G1 は幅1200pxだけで判定しない —— docs/pr-thumbnail-spec.md の 1.91:1 セーフエリアまで見る。G4 の帯は同 §4。"
+        }
+      },
+      "discover_boarding_post": {
+        "$comment": "配信後にPR TIMES分析画面から転記。boarded = google_referral_ratio > 0.9 かつ mobile_ratio > 0.5。**参照元に google.com と googlequicksearchbox が立つかを必ず見る** —— news.google.com だけならそれは Google ニュース面であって Discover ではない（PR⑥ の実測）。**D+1 では埋めない。D+14 で埋める。**",
+        "google_referral_ratio": null,
+        "mobile_ratio": null,
+        "syndication_count": null,
+        "pv": null,
+        "day1_senders_vs_prev3avg": null,
+        "boarded": null
+      },
+      "notes": [
+        "2026-09-05 起票。**Action Router（pr-2026-action-router・76点）を追い越して先に置いた。**理由は合計点ではなく、(a) 実装が公開版 5.8.17 に載っていること、(b) 自社GSCの実測（Notion 735 vs リマインダー60/カレンダー3）。**Action Router は planned のまま残す** —— EventKit が入れば撃てる弾で、消す理由が無い。",
+        "**②（Obsidian連携 提供開始・12,332PV・乗車）と同型。**「大きな固有名詞 × 提供開始」。見出し候補は docs/pr-discover-strategy-2026-09-04.md §6-1''、配信原稿の骨格は docs/pr-notion-2026-09.md。",
+        "**書けないことが3つある**（§4-3-3・コードで確認）: 「メール登録不要」／「Notionが保存先になる」／「Notionのみ」を無料機能として書くこと。無料の既定は**メール送信＋Notionコピー＋Obsidian追記**で、3つ同時に出る。「Notionのみに保存」は Premium で、ONにすると **Obsidian も止まる**。",
+        "**5.8.17 で初回の宛先設定画面から「Notionに接続」を外している。**新規ユーザーは初回導線で Notion に出会わない（設定画面から接続する）。**「はじめから使える」と書かない。**",
+        "S7 を 0 のままにしてある。**この記録が存在するだけでは 5 にしない** —— docs/pr-action-router-launch-plan.md §5 の3条件（受け皿ページが本番で200・コミュニティ投下の原稿確定・プリテストで言い回し決定）を流用する。**S7 は当落を変えない5点で、初速を変える5点。取りに行って配信を遅らせない。**",
+        "**61 は薄い。**乗車2本は 65-71 だった。撃つかどうかは人が決める —— この記録は「必要条件を通る弾が実在する」ことを台帳に置いただけで、**配信の決定ではない。**status は planned のまま。"
+      ],
+      "control": {
+        "kind": "none",
+        "note": "PRリリース型はページ実験ではないため対照を持たない。判定は Discover 乗車の二値。"
+      }
+    },
+    {
       "id": "link-2026-08-28-feed-strongest-page",
       "page": "/blog/obsidian-voice-input",
       "type": "internal_link",
