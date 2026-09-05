@@ -646,7 +646,7 @@
     },
     {
       "candidate_id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 1件",
+      "title": "実費記録の同期が必要な run が 1件",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
@@ -685,6 +685,47 @@
         }
       },
       "reasons": []
+    },
+    {
+      "candidate_id": "act-credentials-check-blind-in-ci",
+      "title": "資格情報の検査が CI では隣のリポジトリを1つも見ていない（iOS の secret 2件が構造的に見えなかった）",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "unknown",
+          "why": "引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+          "age_days": 0,
+          "evidence_source": "ledger_bookkeeping"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
     },
     {
       "candidate_id": "act-ep-ratification-2026-09",
@@ -1295,7 +1336,48 @@
     },
     {
       "candidate_id": "act-routine-run-trig_013uV3Pk3SZH8QJS6PxSg9Bw",
-      "title": "定期タスクの異常を調査: x-engagement 夜19:30 v4.1-device ｜ last 09-05 19:30 JST: Q0 R0 L0 F0 ブロッカー: Macに未接続 dev:no bb:skip chrome:skip (stopped)",
+      "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0） (stopped)",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・content の範囲内",
+          "scope": "content",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-routine-run-trig_0146oEExJXb2GRXt6ES2nw7o",
+      "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】obsidian-community v5.1-device（Reddit・承認署名が付かずクラウド実行のまま・投稿0） (stopped)",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
@@ -1336,7 +1418,7 @@
     },
     {
       "candidate_id": "act-routine-run-trig_01DmNiVHB7jo42bNVJL1wnBo",
-      "title": "定期タスクの異常を調査: x-engagement 昼12:30 v4-device ｜ last 09-05 18:50 JST: Q0 R0 L0 F0 ブロッカー: デバイスブリッジ未接続 dev:no chrome:none bb:skip (stopped)",
+      "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】x-engagement 昼12:30 v4.1-device（承認署名が付かずクラウド実行のまま dev:no・投稿0） (stopped)",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
@@ -1378,6 +1460,47 @@
     {
       "candidate_id": "act-routine-run-trig_01ESF9AHax6buS9X1pdFv657",
       "title": "定期タスクの異常を調査: Obsidianオートパイロット再試行 v3（09:20 JST・ccr-0920・当日が空白のときだけ・配信の種） (failed)",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・content の範囲内",
+          "scope": "content",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-routine-run-trig_01GphcHzTuH1A1JUGq8dYkWa",
+      "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】PR実験の D+14 取得（台帳駆動）v2（ローカルタスクとして Working folder にリポジトリを指定して再登録） (stopped)",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
