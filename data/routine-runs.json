@@ -131,12 +131,12 @@
     "**壊しテストで触ったファイルを HEAD から戻すときは、",
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**"
   ],
-  "observed_at": "2026-09-05T06:19:42.944Z",
+  "observed_at": "2026-09-05T07:19:58.322Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 2,
+  "open_budget": 4,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
     {
@@ -145,7 +145,7 @@
       "found_at": "2026-09-05",
       "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
       "observation": {
-        "observed_at": "2026-09-05T06:19:42.944Z",
+        "observed_at": "2026-09-05T07:19:58.322Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
@@ -156,17 +156,47 @@
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
-      "what": "failed",
+      "what": "stopped",
       "found_at": "2026-09-05",
       "why": "実APIの観測で failed。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T06:19:42.944Z",
-        "enabled": true,
+        "observed_at": "2026-09-05T07:19:58.322Z",
+        "enabled": false,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T02:31:55.483723663Z",
         "last_run_finished_at": "2026-09-05T02:32:01.721717Z",
         "last_run_session_id": "cse_01Le2RXrWQJP6asVodZZ5nzY",
         "next_run_at": "2026-09-05T11:31:00Z"
+      }
+    },
+    {
+      "id": "trig_01VuJravpvATQPBuAigHCZJi",
+      "what": "stopped",
+      "found_at": "2026-09-05",
+      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+      "observation": {
+        "observed_at": "2026-09-05T07:19:58.322Z",
+        "enabled": false,
+        "last_run_status": "SUCCEEDED",
+        "last_run_fired_at": "2026-09-04T10:31:24.031150958Z",
+        "last_run_finished_at": "2026-09-04T10:33:00.562297Z",
+        "last_run_session_id": "cse_01MBFomsX3zMrzh8KAiK9rUd",
+        "next_run_at": "2026-09-05T10:30:38.163491503Z"
+      }
+    },
+    {
+      "id": "trig_01XUeM9mCTkoqdWhUMac6jD1",
+      "what": "stopped",
+      "found_at": "2026-09-05",
+      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+      "observation": {
+        "observed_at": "2026-09-05T07:19:58.322Z",
+        "enabled": false,
+        "last_run_status": "SUCCEEDED",
+        "last_run_fired_at": "2026-09-05T03:30:44.823441013Z",
+        "last_run_finished_at": "2026-09-05T03:38:10.813141Z",
+        "last_run_session_id": "cse_01BqvNSLNETKRDMRqy8iiFBF",
+        "next_run_at": "2026-09-06T03:30:15.406786494Z"
       }
     }
   ],
@@ -279,10 +309,10 @@
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
-      "name": "obsidian-community v4.1（Reddit・11:31/20:01 JST） ｜ last: （v4.1 適用 09-05 14:00 JST・11:31 回は利用枠超過で6秒で失敗）",
+      "name": "【停止 09-05 15:30 JST・v5.1-device に同時刻で置換】obsidian-community v4.1（Reddit・クラウド単独は reddit.com に届かず 08-04 以降投稿0）",
       "cron_expression": "31 2,11 * * *",
       "run_once_at": null,
-      "enabled": true,
+      "enabled": false,
       "bound_session": false,
       "next_run_at": "2026-09-05T11:31:00Z",
       "last_fired_at": "2026-09-05T02:31:55.495459Z",
@@ -391,10 +421,10 @@
     },
     {
       "id": "trig_01VuJravpvATQPBuAigHCZJi",
-      "name": "x-engagement 夜19:30 v3.1 ｜ last: （未実行・v3.1 適用 09-05 14:00 JST）",
+      "name": "【停止 09-05 15:30 JST・v4.1-device に同時刻で置換】x-engagement 夜19:30 v3.1（クラウド単独はブラウザに届かず投稿0）",
       "cron_expression": "30 10 * * *",
       "run_once_at": null,
-      "enabled": true,
+      "enabled": false,
       "bound_session": false,
       "next_run_at": "2026-09-05T10:30:38.163491503Z",
       "last_fired_at": "2026-09-04T10:31:24.043650Z",
@@ -405,10 +435,10 @@
     },
     {
       "id": "trig_01XUeM9mCTkoqdWhUMac6jD1",
-      "name": "x-engagement 昼12:30 v3.1 ｜ last: （未実行・v3.1 適用 09-05 14:00 JST）",
+      "name": "【停止 09-05 15:30 JST・v4.1-device に同時刻で置換】x-engagement 昼12:30 v3.1（クラウド単独はブラウザに届かず投稿0・14:32 のテストは40分超ハング）",
       "cron_expression": "30 3 * * *",
       "run_once_at": null,
-      "enabled": true,
+      "enabled": false,
       "bound_session": false,
       "next_run_at": "2026-09-06T03:30:15.406786494Z",
       "last_fired_at": "2026-09-05T03:30:44.840256Z",
