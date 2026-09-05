@@ -1897,6 +1897,17 @@ export function interpretRun(run) {
       };
     }
 
+    if (step('資格情報の診断は判定不能')?.conclusion === 'failure') {
+      return {
+        outcome: 'failed', attempted: true,
+        failure_class: immediate ? 'immediate_failure' : null,
+        needs_triage: true,
+        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗。`
+          + '単独実行から資格情報の可否を判定できなかった。通信・サービス・CLIを含めて原因を確認する。'
+          + '資格情報の交換が必要とは断定できない（診断は判定不能）。',
+      };
+    }
+
     if (probe?.conclusion === 'failure') {
       return {
         outcome: 'failed', attempted: true,
@@ -3738,6 +3749,17 @@ async function selftest() {
   t('資格情報が無事なら次の候補を名指しする', credOk.failure_reason.includes('model-routing.json'));
   // **判定不能を「無事」と混ぜない。**CLIが入る前に落ちた回はここに来る。
   t('切り分けが skipped なら従来どおり要トリアージ', withProbe('skipped').needs_triage === true);
+  for (const probeConclusion of ['success', 'failure']) {
+    const result = interpretRun({ ...observedRun, steps: [
+      ...observedRun.steps,
+      { name: '即死が資格情報かを切り分ける', conclusion: probeConclusion },
+      { name: '資格情報の診断は判定不能', conclusion: 'failure' },
+    ] });
+    t(`診断が判定不能なら成功・失敗の印から認証を断定しない: ${probeConclusion}`,
+      result.needs_triage === true && result.failure_reason.includes('診断は判定不能')
+      && !result.failure_reason.includes('資格情報は通っている')
+      && !result.failure_reason.includes('更新する必要がある'));
+  }
   t('切り分けが skipped なら資格情報を無事と書かない',
     !withProbe('skipped').failure_reason.includes('資格情報は通っている'));
   // 形（failure_class）は据え置き。種別を動かすと D5 の連続判定と
