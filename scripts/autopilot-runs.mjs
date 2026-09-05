@@ -388,6 +388,46 @@ export function stageProblems(r, at) {
   return problems;
 }
 
+const missingStepsSkip = r => r?.route === 'actions' && r.attempted === false && r.outcome === 'skipped_gate'
+  && ['act-reconcile', 'act-reconcile-session'].includes(r.source) && r.gate_code == null
+  && r.eligibility_verdict === 'declined_unrecorded'
+  && r.stage_note === 'Claude Code ステップ未実行。手前のどこで止まったかはステップ情報が無く判定できない（Gate=不明）';
+
+function modelStartProof(proof, previous, at) {
+  const step = proof?.model_step;
+  const created = Date.parse(proof?.run_created_at), started = Date.parse(step?.started_at);
+  const completed = Date.parse(step?.completed_at), observed = Date.parse(proof?.observed_at), retracted = Date.parse(at);
+  return /^[1-9]\d*$/.test(String(proof?.external_ref ?? ''))
+    && String(previous?.external_ref) === String(proof.external_ref)
+    && proof.source_url === `https://api.github.com/repos/simplememofast/simplememo/actions/runs/${proof.external_ref}/jobs`
+    && proof.workflow_path === '.github/workflows/obsidian-autopilot.yml' && proof.primary_job === 'autopilot'
+    && step?.status === 'completed' && ['success', 'failure', 'cancelled', 'timed_out'].includes(step.conclusion)
+    && typeof step.name === 'string' && step.name.startsWith('Claude Code')
+    && [created, started, completed, observed, retracted].every(Number.isFinite)
+    && created <= started && started < completed && completed <= observed && observed <= retracted
+    && previous.date_jst === new Date(created + 9 * 3600000).toISOString().slice(0, 10);
+}
+
+/** Retract one proven false skip while retaining the original row and evidence.
+ * This is an explicit correction, not a claim of shipment, failure, or recovery. */
+export function retractUnverifiedSkip(doc, proof, { at = new Date().toISOString() } = {}) {
+  const index = doc.runs.findIndex(r => String(r.external_ref) === String(proof?.external_ref));
+  if (index < 0) {
+    if (doc.retracted_observations?.some(r => String(r.previous.external_ref) === String(proof?.external_ref))) return false;
+    throw Error('No matching run to correct');
+  }
+  const previous = doc.runs[index];
+  if (!missingStepsSkip(previous) || !modelStartProof(proof, previous, at)) throw Error('False skip correction lacks matching model evidence');
+  const audit = { retracted_at: at, by: 'codex-session', reason_code: 'missing_steps_misread_as_skip',
+    replacement_status: 'result_unverified', previous: structuredClone(previous), evidence: structuredClone(proof) };
+  const next = { ...doc, runs: doc.runs.filter((_, i) => i !== index),
+    retracted_observations: [...(doc.retracted_observations ?? []), audit] };
+  const problems = validate(next);
+  if (problems.length) throw Error(problems.join('; '));
+  doc.runs = next.runs; doc.retracted_observations = next.retracted_observations;
+  return true;
+}
+
 export function validate(doc) {
   const problems = [];
   if (!doc || !Array.isArray(doc.runs)) return ['runs must be an array'];
@@ -418,6 +458,25 @@ export function validate(doc) {
     if (r.interventions && !Array.isArray(r.interventions)) problems.push(`${at}: interventions must be an array`);
     problems.push(...stageProblems(r, at));
   });
+  if (doc.retracted_observations !== undefined) {
+    if (!Array.isArray(doc.retracted_observations)) problems.push('retracted_observations must be an array');
+    else {
+      const corrected = new Set();
+      for (const correction of doc.retracted_observations) {
+        const ref = String(correction?.previous?.external_ref);
+        if (corrected.has(ref) || correction?.by !== 'codex-session'
+          || correction.reason_code !== 'missing_steps_misread_as_skip' || correction.replacement_status !== 'result_unverified'
+          || !missingStepsSkip(correction.previous) || validate({ runs: [correction.previous] }).length > 0
+          || !modelStartProof(correction.evidence, correction.previous, correction.retracted_at)) {
+          problems.push('retracted observation lacks unique original row and matching model evidence');
+        }
+        corrected.add(ref);
+        if (doc.runs.some(r => String(r.external_ref) === ref && r.attempted === false)) {
+          problems.push(`run ${ref}: a verified model start cannot be restored as unattempted`);
+        }
+      }
+    }
+  }
   return problems;
 }
 
@@ -858,6 +917,44 @@ function selftest() {
     if (got !== want) { bad++; console.error(`  ✗ ${msg}\n      got=${JSON.stringify(got)} want=${JSON.stringify(want)}`); }
   };
   const actionsEnv = { GITHUB_ACTIONS: 'true', GITHUB_WORKFLOW: 'Obsidian Autopilot', GITHUB_RUN_ID: '33815445009' };
+  {
+    const previous = { run_id: 'ap-20260905-actions-33959414641', external_ref: '33959414641',
+      route: 'actions', date_jst: '2026-09-05', attempted: false, outcome: 'skipped_gate',
+      source: 'act-reconcile-session', gate_code: null, failure_stage: 'eligibility', eligibility_verdict: 'declined_unrecorded',
+      stage_note: 'Claude Code ステップ未実行。手前のどこで止まったかはステップ情報が無く判定できない（Gate=不明）' };
+    const proof = { external_ref: '33959414641', run_created_at: '2026-09-05T09:58:55Z',
+      source_url: 'https://api.github.com/repos/simplememofast/simplememo/actions/runs/33959414641/jobs',
+      workflow_path: '.github/workflows/obsidian-autopilot.yml', primary_job: 'autopilot', observed_at: '2026-09-05T11:57:26Z',
+      model_step: { name: 'Claude Code', status: 'completed', conclusion: 'success',
+        started_at: '2026-09-05T09:59:36Z', completed_at: '2026-09-05T10:04:39Z' } };
+    const at = '2026-09-05T12:20:00Z';
+    const doc = { runs: [structuredClone(previous)] };
+    eq(retractUnverifiedSkip(doc, proof, { at }), true, '実モデル着手に矛盾する未着手の行を撤回する');
+    if (!doc.retracted_observations?.[0]) throw Error('Correction lost its original row and model evidence');
+    eq(doc.runs.length, 0, '出荷・失敗の行に置き換えない');
+    eq(JSON.stringify(doc.retracted_observations[0].previous), JSON.stringify(previous), '元の行を全項目保存する');
+    eq(doc.retracted_observations[0].replacement_status, 'result_unverified', '訂正後の結果は未確定のまま');
+    eq(validate(doc).length, 0, '照合できる訂正は台帳検査を通る');
+    const swappedAudit = structuredClone(doc);
+    swappedAudit.retracted_observations[0].evidence.external_ref = '123';
+    swappedAudit.retracted_observations[0].evidence.source_url = 'https://api.github.com/repos/simplememofast/simplememo/actions/runs/123/jobs';
+    eq(validate(swappedAudit).length > 0, true, '履歴の証拠だけ別の実行へ差し替えても拒否する');
+    eq(retractUnverifiedSkip(doc, proof, { at }), false, '同じ訂正を重複保存しない');
+    eq(validate({ ...doc, runs: [previous] }).some(p => p.includes('cannot be restored')), true, '古い未着手行の再投入を拒否する');
+    for (const change of [{ external_ref: '123' }, { source_url: 'https://example.com/jobs' }, { primary_job: 'Notify Autopilot Act' },
+      { workflow_path: '.github/workflows/seo-check.yml' }, { observed_at: '2026-09-05T13:00:00Z' }, { model_step: {} },
+      { model_step: { ...proof.model_step, conclusion: 'skipped' } },
+      { model_step: { ...proof.model_step, completed_at: '2026-09-05T09:59:00Z' } }]) {
+      const badDoc = { runs: [structuredClone(previous)] }; let rejected = false;
+      try { retractUnverifiedSkip(badDoc, { ...proof, ...change }, { at }); } catch { rejected = true; }
+      eq(rejected && JSON.stringify(badDoc.runs) === JSON.stringify([previous]) && badDoc.retracted_observations === undefined,
+        true, '不正・別実行・別workflow・未来・逆転の証拠で元の行を消せない');
+    }
+    const unrelated = { ...previous, source: 'owner-session' };
+    let protectedRow = { runs: [unrelated] }, rejected = false;
+    try { retractUnverifiedSkip(protectedRow, proof, { at }); } catch { rejected = true; }
+    eq(rejected && protectedRow.runs[0] === unrelated, true, '他の出所の記録は同じ手順で訂正しない');
+  }
   eq(externalRefFor('actions', null, actionsEnv), '33815445009', '主系自身の記帳はGitHubの実行IDを引き継ぐ');
   eq(externalRefFor('actions', '12345', actionsEnv), '12345', '明示された実行IDを上書きしない');
   for (const route of ['ccr-0730', 'owner-session', undefined]) {

@@ -1,6 +1,7 @@
 {
   "$comment": [
     "運転台帳 — 1回のオートパイロット実行を1行で表す。**共通実行ID（run_id）が背骨。**",
+    "retracted_observations は証拠で否定された誤記の訂正履歴。元の行・確認時刻・実行証拠を保存し、集計用のrunsへは混ぜない。result_unverified は出荷・失敗・復旧のどれも断定しない。",
     "",
     "【なぜ必要か】2026-08-22の外部レビューが指摘したとおり、この運用は",
     "『1つの改善サイクルが完走したか』を機械的に言えなかった。AI完走率・人間介入率・",
@@ -994,27 +995,6 @@
       "stage_note": "Gate で止まった（skip_branch_claimed）"
     },
     {
-      "run_id": "ap-20260905-actions-33959414641",
-      "date_jst": "2026-09-05",
-      "route": "actions",
-      "attempted": false,
-      "outcome": "skipped_gate",
-      "lane": null,
-      "action": null,
-      "pr": null,
-      "artifact": null,
-      "failure_reason": null,
-      "external_ref": "33959414641",
-      "interventions": [],
-      "source": "act-reconcile-session",
-      "detected_at": "2026-09-05T11:36:27.825Z",
-      "detected_note": "Actions run 33959414641 を workflow_run で照合。監視起動元run 33963750152、自動起動のAPI検証=false。失敗ステップの確定時刻は未取得。run の作成時刻で代用しない。",
-      "failure_stage": "eligibility",
-      "eligibility_verdict": "declined_unrecorded",
-      "gate_code": null,
-      "stage_note": "Claude Code ステップ未実行。手前のどこで止まったかはステップ情報が無く判定できない（Gate=不明）"
-    },
-    {
       "run_id": "sm-20260905-queue-collision",
       "date_jst": "2026-09-05",
       "route": "owner-session",
@@ -1028,6 +1008,51 @@
       "external_ref": "session_015sPuk4aoPzjA99e7wpSiB9",
       "interventions": [],
       "source": "session"
+    }
+  ],
+  "retracted_observations": [
+    {
+      "retracted_at": "2026-09-05T12:15:11.788Z",
+      "by": "codex-session",
+      "reason_code": "missing_steps_misread_as_skip",
+      "replacement_status": "result_unverified",
+      "previous": {
+        "run_id": "ap-20260905-actions-33959414641",
+        "date_jst": "2026-09-05",
+        "route": "actions",
+        "attempted": false,
+        "outcome": "skipped_gate",
+        "lane": null,
+        "action": null,
+        "pr": null,
+        "artifact": null,
+        "failure_reason": null,
+        "external_ref": "33959414641",
+        "interventions": [],
+        "source": "act-reconcile-session",
+        "detected_at": "2026-09-05T11:36:27.825Z",
+        "detected_note": "Actions run 33959414641 を workflow_run で照合。監視起動元run 33963750152、自動起動のAPI検証=false。失敗ステップの確定時刻は未取得。run の作成時刻で代用しない。",
+        "failure_stage": "eligibility",
+        "eligibility_verdict": "declined_unrecorded",
+        "gate_code": null,
+        "stage_note": "Claude Code ステップ未実行。手前のどこで止まったかはステップ情報が無く判定できない（Gate=不明）"
+      },
+      "evidence": {
+        "external_ref": "33959414641",
+        "run_created_at": "2026-09-05T09:58:55Z",
+        "source_url": "https://api.github.com/repos/simplememofast/simplememo/actions/runs/33959414641/jobs",
+        "workflow_path": ".github/workflows/obsidian-autopilot.yml",
+        "primary_job": "autopilot",
+        "observed_at": "2026-09-05T12:15:11.764Z",
+        "model_step": {
+          "name": "Claude Code（Runbook 1イテレーション実行）",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-09-05T09:59:36Z",
+          "completed_at": "2026-09-05T10:04:39Z"
+        }
+      }
     }
   ]
 }
