@@ -55,10 +55,11 @@ export async function collect({ token, fetchImpl = fetch, now = timestamp, maxPa
         // unknown run (diagnose reports never_ran for recurring schedules).
         assert(row.last_run === null || (row.last_run === undefined && row.last_fired_at == null) || (row.last_run && ['PENDING', 'SUCCEEDED', 'FAILED']
           .includes(row.last_run.status?.replace('ROUTINE_RUN_STATUS_', ''))), 'Unknown routine run status');
-        if (row.last_run) {
-          assert(time(row.last_run.fired_at), 'Routine run timestamp missing');
-          if (row.last_run.status.replace('ROUTINE_RUN_STATUS_', '') !== 'PENDING') assert(time(row.last_run.finished_at), 'Routine completion timestamp missing');
-        }
+      }
+      if (row.last_run) {
+        assert(['PENDING', 'SUCCEEDED', 'FAILED'].includes(row.last_run.status?.replace('ROUTINE_RUN_STATUS_', '')), 'Unknown routine run status');
+        assert(time(row.last_run.fired_at), 'Routine run timestamp missing');
+        if (row.last_run.status.replace('ROUTINE_RUN_STATUS_', '') !== 'PENDING') assert(time(row.last_run.finished_at), 'Routine completion timestamp missing');
       }
       // The API also returns prompts, connector settings, and session context.
       // Keep only operating metadata; never persist the raw response.
@@ -95,8 +96,10 @@ export function reconcileObservation(previous, observation) {
   for (const id of registered) {
     const row = current.get(id);
     assert(row, 'Registered routine missing from the complete inventory');
-    if (row.ended_reason) ended.push(row);
-    else {
+    if (row.ended_reason) {
+      ended.push(row);
+      routines.push(row);
+    } else {
       const { ended_reason, ...routine } = row;
       routines.push(routine);
     }
@@ -117,17 +120,22 @@ export function reconcileObservation(previous, observation) {
         last_run_finished_at: row.last_run_finished_at, last_run_session_id: row.last_run_session_id,
         next_run_at: row.next_run_at };
       open.push({ ...prior, id: row.id, what, found_at: prior?.found_at ?? observation.observed_at.slice(0, 10),
-        why: prior?.what === what ? prior.why : what === 'pending'
+        why: prior?.what === what ? prior.why : what === 'completion_unverified'
+          ? '単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。'
+          : what === 'pending'
           ? '実APIはPENDING。実行は終了しておらず結果未確定。故障・復旧成功・依頼内容の達成には数えず、同じ実行の終了を次の観測で確認する。'
           : `実APIの観測で ${what}。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。`,
         ...(prior && prior.what !== what ? { state_history: [...(prior.state_history ?? []), {
-          what: prior.what, why: prior.why, observation: prior.observation ?? null,
+          what: prior.what, why: prior.why, observation: prior.observation ?? previous.routines.find(r => r.id === row.id) ?? null,
           changed_at: observation.observed_at,
         }] } : {}),
         observation: evidence });
     } else if (prior) {
       assert(row.last_run_status === 'SUCCEEDED', 'A finding needs a successful run before closure');
-      const priorRun = previous.routines.find(r => r.id === row.id);
+      // 終了した単発予約のAPIはlast_runを省略することがある。省略前の実行IDを
+      // 履歴から引き継ぎ、別の古い成功で未確認の実行を閉じない。
+      const priorRun = [previous.routines.find(r => r.id === row.id),
+        ...(prior.state_history ?? []).map(f => f.observation).reverse()].find(r => r?.last_run_fired_at);
       if (priorRun?.last_run_fired_at) {
         // A pending run can finish without changing its fire time. Failed or
         // replaced runs still require a newer run; a status edit is not recovery.
@@ -145,10 +153,10 @@ export function reconcileObservation(previous, observation) {
           last_run_session_id: row.last_run_session_id } });
     }
   }
-  for (const row of ended) {
-    assert(!stopIds.has(row.id) && !oldFindings.has(row.id), 'Ended routine has an unresolved operator decision');
-  }
-  const next = { ...previous, observed_at: observation.observed_at, routines,
+  // 予約の終了だけでは台帳から除かない。成功を照合できた単発だけを退役する。
+  const completedIds = new Set(ended.filter(r => r.last_run_status === 'SUCCEEDED').map(r => r.id));
+  const next = { ...previous, observed_at: observation.observed_at,
+    routines: routines.filter(r => !completedIds.has(r.id)),
     open_findings: open, closed_findings: closed,
     // This is the count of explicitly recorded findings, not a spending or failure allowance.
     open_budget: open.length,
@@ -157,7 +165,9 @@ export function reconcileObservation(previous, observation) {
       scope: 'registered_simplememo_routines', total_records: observation.records.length,
       unregistered_current_count: observation.records.filter(r => !r.ended_reason && !registered.has(r.id)).length,
       ended_records: observation.records.filter(r => r.ended_reason).length,
-      ended_since_previous: ended.map(({ id, name, ended_reason, last_fired_at }) => ({ id, name, ended_reason, last_fired_at })),
+      ended_since_previous: ended.filter(r => completedIds.has(r.id) || !previous.routines.find(p => p.id === r.id)?.ended_reason)
+        .map(({ id, name, ended_reason, last_fired_at, last_run_status, last_run_fired_at, last_run_finished_at, last_run_session_id }) =>
+          ({ id, name, ended_reason, last_fired_at, last_run_status, last_run_fired_at, last_run_finished_at, last_run_session_id })),
       note: '全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。' } };
   const checked = validate(next, { now });
   assert.equal(checked.problems.length, 0, 'Observed routine ledger is inconsistent');
@@ -247,6 +257,41 @@ async function selftest() {
   assert.equal(failedAgain.open_findings[0].what, 'failed');
   assert.equal(failedAgain.closed_findings.length, 0);
   assert.equal(failedAgain.open_findings[0].state_history.length, 2);
+  const oneShotRow = { ...row, id: 'trig_once', enabled: false, cron_expression: '',
+    run_once_at: row.last_fired_at, ended_reason: 'run_once_fired', last_run: undefined };
+  const endedUnknown = await collect({ token: 'x', now: () => '2026-09-06T03:05:00Z',
+    fetchImpl: async () => fake([oneShotRow]) });
+  const oneShotPrior = { ...prior, routines: [{ ...endedUnknown.records[0], enabled: true,
+    ended_reason: '', last_run_status: 'PENDING', last_run_fired_at: row.last_run.fired_at,
+    last_run_session_id: row.last_run.session_id }],
+    open_findings: [{ id: oneShotRow.id, what: 'pending', found_at: '2026-09-05', why: 'Waiting for completion' }],
+    open_budget: 1 };
+  const unverified = reconcileObservation(oneShotPrior, endedUnknown);
+  assert.equal(unverified.routines.length, 1);
+  assert.equal(unverified.open_findings[0].what, 'completion_unverified');
+  assert.equal(unverified.closed_findings.length, 0);
+  const repeatedUnknown = reconcileObservation(unverified, { ...endedUnknown, observed_at: '2026-09-06T03:06:00Z' });
+  assert.equal(repeatedUnknown.open_findings.length, 1);
+  assert.equal(repeatedUnknown.observation.ended_since_previous.length, 0);
+  const endedFailedObservation = structuredClone(endedUnknown);
+  Object.assign(endedFailedObservation.records[0], { last_run_status: 'FAILED', last_run_fired_at: row.last_run.fired_at,
+    last_run_finished_at: row.last_run.finished_at, last_run_session_id: row.last_run.session_id });
+  const endedFailedFinding = reconcileObservation({ ...oneShotPrior, open_findings: [], open_budget: 0 }, endedFailedObservation);
+  assert.equal(endedFailedFinding.open_findings[0].what, 'failed');
+  assert.equal(endedFailedFinding.routines.length, 1);
+  const endedSuccess = structuredClone(endedFailedObservation);
+  endedSuccess.observed_at = '2026-09-06T03:07:00Z';
+  endedSuccess.records[0].last_run_status = 'SUCCEEDED';
+  const verifiedEnd = reconcileObservation(repeatedUnknown, endedSuccess);
+  assert.equal(verifiedEnd.routines.length, 0);
+  assert.equal(verifiedEnd.open_findings.length, 0);
+  assert.equal(verifiedEnd.closed_findings.length, 1);
+  assert.equal(verifiedEnd.observation.ended_since_previous[0].last_run_session_id, row.last_run.session_id);
+  assert.throws(() => reconcileObservation(endedFailedFinding, endedSuccess), /newer successful/);
+  endedSuccess.records[0].last_run_session_id = 'cse_swapped';
+  assert.throws(() => reconcileObservation(repeatedUnknown, endedSuccess), /verified pending completion/);
+  const invalidEnded = { ...oneShotRow, last_run: { ...row.last_run, status: 'ROUTINE_RUN_STATUS_UNKNOWN' } };
+  await assert.rejects(() => collect({ token: 'x', fetchImpl: async () => fake([invalidEnded]) }), /run status/);
   assert.throws(() => reconcileObservation(second, { ...observed, records: [] }), /missing/);
   assert.throws(() => reconcileObservation(prior, { ...observed, complete: false }), /Complete/);
   assert.throws(() => reconcileObservation(prior, { ...observed, observed_at: '2026-09-03T00:00:00Z' }), /Older/);

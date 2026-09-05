@@ -53,11 +53,14 @@ export const OVERDUE_GRACE_HOURS = 6;
  */
 export function diagnose(r, { now, observedAt = now }) {
   if (!r || typeof r !== 'object') return 'malformed';
-  if (r.enabled !== true) return 'stopped';
+  const endedOneShot = r.ended_reason === 'run_once_fired';
+  if (r.enabled !== true && !endedOneShot) return 'stopped';
   if (r.last_run_status === 'FAILED') return 'failed';
   // PENDING のまま長時間残る実例がある。失敗と断定せず、未確定として残す。
   // 次の発火予定が未来でも、現在の実行が終わった証拠にはならない。
   if (r.last_run_status === 'PENDING') return 'pending';
+  // 単発の予約終了は実行完了ではない。APIが結果を返さない間は追跡を残す。
+  if (endedOneShot) return r.last_run_status === 'SUCCEEDED' ? null : 'completion_unverified';
   // 予定を過ぎているのに発火していない。
   //
   // [2026-08-28] **基準を壁時計から写しの観測時刻へ移した。**
@@ -201,6 +204,7 @@ export function normalizeRoutines(payload) {
       cron_expression: t.cron_expression ?? null,
       run_once_at: t.run_once_at ?? null,
       enabled: Boolean(t.enabled),
+      ended_reason: t.ended_reason ?? '',
       bound_session: Boolean(t.persistent_session_id),
       next_run_at: t.next_run_at ?? null,
       last_fired_at: t.last_fired_at ?? null,
