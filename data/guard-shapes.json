@@ -837,6 +837,30 @@
       "expr": "name",
       "disposition": "検体の生成",
       "note": "2026-09-05: `genCompare` が『名前の読めないファイル』（filename 無し）を検体として作るための分岐。readClaim は名前の読めないファイルを作業側に倒す（宣言と読まない）ので、その状態が生成されないと性質『宣言ファイル以外の差分が1つでもあれば claimHasWork は真』は片側しか試されない。判定ではない。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "verdict",
+      "disposition": "検体の生成",
+      "note": "2026-09-05: 成果物判定ステップがAPIの写しに存在しないケースを生成する。判定本体はmissing以外の欠落を原因未確定の失敗として残す。"
+    },
+    {
+      "file": "scripts/autopilot-output.mjs",
+      "expr": "before",
+      "disposition": "前提",
+      "note": "2026-09-05: 固定SHAにある開始前の運転台帳を読めなければassertでunknownへ倒す。空配列に置き換えて過去の記録を今回の成果と読まない。"
+    },
+    {
+      "file": "scripts/autopilot-output.mjs",
+      "expr": "after",
+      "disposition": "前提",
+      "note": "2026-09-05: GitHubが対象PRの固定SHAに運転台帳が存在しないと404を返した場合だけ次候補へ進む。403・503・JSON欠落はreaderまたはrunsAtがthrowしunknownを返す。"
+    },
+    {
+      "file": "scripts/autopilot-output.mjs",
+      "expr": "current",
+      "disposition": "検体の生成",
+      "note": "2026-09-05: リモートブランチrefが404で消えている検体を生成する。マージ済みPRの照合はhead SHAで続行し、open PRのref欠落はunknownにする。"
     }
   ]
 }
