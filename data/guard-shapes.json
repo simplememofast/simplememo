@@ -537,6 +537,18 @@
       "expr": "intent?.run_id",
       "disposition": "別の規則が落とす",
       "note": "2026-09-05: retireIntent の「宣言した run が出荷済みなら取り下げない」。intent に run_id が無ければこの照合は偽になるが、**同じ関数の直前で『intent has no run_id』が problems に積まれて throw する**ので、規則が黙って消えることはない（自己テスト「run_id 無しで throw」で固定）。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "row.head_sha",
+      "disposition": "前提",
+      "note": "2026-09-05: 開いているPRが現在のブランチheadを覆うという正の証拠の照合。直前で40桁SHAを要求し、欠落・相違ならPR待ちとして分類しない。主系への着地証明ではなく、同じ変更を二重に再投入しないための条件。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "a.pending_pr",
+      "disposition": "前提",
+      "note": "2026-09-05: 任意のPR待ち証跡が存在するときの型・用途検査。source=orphan・state=open・branchと40桁headの照合を要求する。欠落時は通常の未処理として表示・判定され、待機として抑止されない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
