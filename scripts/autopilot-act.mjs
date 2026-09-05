@@ -632,7 +632,7 @@ export function derive(ctx) {
       out.push({
         id: 'act-ledger-sync',
         title: `運転台帳に載っていない Actions run が ${missing.length}件`,
-        detail: missing.map((r) => `${r.id}（${r.jst_date} / ${r.conclusion}）`).join(', ')
+        detail: missing.map((r) => `${r.id}（${r.jst_date} / ${r.conclusion}${interpretRun(r)?.unverified ? ' / ステップ情報が未確認' : ''}）`).join(', ')
           + '。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。',
         source: 'ledger',
         touches: ['data/autopilot-runs.json'],
@@ -1886,7 +1886,8 @@ export function declaredGateCode(run) {
 }
 
 export function interpretRun(run) {
-  const step = (name) => (run.steps ?? []).find((s) => s.name?.includes(name));
+  const step = (name) => (Array.isArray(run.steps) ? run.steps : [])
+    .find((s) => typeof s?.name === 'string' && s.name.includes(name));
   const claude = step('Claude Code');
   const gate = step('Gate');
 
@@ -1909,7 +1910,10 @@ export function interpretRun(run) {
     return { outcome: 'cancelled', attempted: true, failure_class: 'cancelled',
       failure_reason: 'schedule 起動の run が cancelled で終了（1日ぶんの出荷が消えている）' };
   }
-  // Claude Code に到達していない ＝ 手前のどれかで止まった。
+  if (!claude || !['success', 'failure', 'skipped', 'cancelled', 'timed_out'].includes(claude.conclusion)) {
+    return { unverified: true, note: '主系モデルのステップ情報を確認できず、着手・結果を判定できない。再取得まで運転台帳への追記を保留する' };
+  }
+  // Claude Code の skipped を確認できた ＝ 手前のどれかで止まった。
   //
   // **「いずれか」で書かない。**ここは長らく「秘密鍵未設定・当日重複・予算・
   // 緊急停止のいずれか」という4択を毎回そのまま台帳へ書いていた。止まった日の
@@ -1925,7 +1929,7 @@ export function interpretRun(run) {
   //   1回あたりの上限        … 振り分けまで成功し、Claude だけ skipped
   // 振り分けと Claude の間には run_cap_ok しか条件が無いので、最後の行は
   // 消去法ではなく**一意**に決まる。
-  if (!claude || claude.conclusion === 'skipped') {
+  if (claude.conclusion === 'skipped') {
     const estop = step('緊急停止');
     const budget = step('予算ゲート');
     const route = step('振り分け');
@@ -2186,6 +2190,7 @@ export const HANDLERS = {
       if (known.has(String(run.id))) continue;
       const v = interpretRun(run);
       if (!v) { log.push(`${run.id}: まだ完了していない`); continue; }
+      if (v.unverified) { log.push(`${run.id}: ${v.note}`); continue; }
       if (v.skip) { log.push(`${run.id}: ${v.skip_reason}`); continue; }
       // 同日に複数の run が走ると `ap-YYYYMMDD-actions` は一意にならない
       // （2026-08-25 は schedule / force / 手動中止の3本が走った）。
@@ -3016,6 +3021,22 @@ async function selftest() {
     steps: [{ number: 3, name: 'Claude Code', conclusion: 'failure', started_at: '2026-09-04T00:01:00Z', completed_at: '2026-09-04T00:02:00Z' },
       { number: 9, name: 'Final check', conclusion: 'failure', completed_at: '2026-09-04T00:04:00Z' }] };
   const detectedNow = new Date('2026-09-04T00:05:00Z');
+  for (const steps of [null, undefined, [], {}, [{ name: 'Notify Autopilot Act', conclusion: 'success' }],
+    [{ name: 'Gate', conclusion: 'success' }], [{ name: 'Claude Code', conclusion: null }]]) {
+    for (const conclusion of ['success', 'failure']) {
+      const observed = { ...observedRun, conclusion, steps };
+      const v = interpretRun(observed);
+      t('欠けたステップを未着手や成功へ変換しない', v.unverified === true && v.outcome === undefined && v.attempted === undefined && !v.skip);
+      if (v.unverified !== true || v.outcome !== undefined || v.attempted !== undefined || v.skip) throw Error('Missing model steps were classified as a known execution result');
+      const ctx = { today: '2026-09-04', workflowRuns: [observed], runsDoc: { runs: [] }, selfheal: { targets: [] } };
+      let writes = 0;
+      const result = await HANDLERS['reconcile-runs'](ctx, null, { append: () => { writes++; return 'written'; } });
+      t('未確認の観測を実appendへ渡さない', writes === 0 && result.changed === 0 && result.log.includes('再取得'));
+      if (writes !== 0 || result.changed !== 0) throw Error('Unverified model steps reached the run append command');
+      t('未確認runの同期依頼を閉じない', CLOSE_CHECKS.ledger_covers_runs({}, ctx).closed === false);
+      t('未確認runを再確認の依頼へ導出する', derive(ctx).some(a => a.id === 'act-ledger-sync' && a.detail.includes('ステップ情報が未確認')));
+    }
+  }
   const detection = detectionEvidence(observedRun, 'workflow_run', detectedNow);
   t('最初の失敗ステップの確定時刻を保存する', detection.failed_at === '2026-09-04T00:02:00Z');
   t('検知と故障の時刻は別に記録する', detection.detected_at === detectedNow.toISOString());
