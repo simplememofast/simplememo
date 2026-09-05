@@ -581,7 +581,7 @@ export function rankerBlindness(policy, { read = (p) => fs.readFileSync(path.joi
  * 散文で「書き換えない」と書くだけにしない。実際に一覧を読んで確かめる。
  */
 export const OWNER_ONLY_FILES = ['data/autonomy-score.json', 'data/eligibility-policy.json',
-  'data/value-metrics.json'];
+  'data/value-metrics.json', 'data/contract-coverage.json'];
 export function policyOwnership(authority, { files = OWNER_ONLY_FILES } = {}) {
   const may = authority?.self_repair?.may_modify;
   if (!Array.isArray(may)) {

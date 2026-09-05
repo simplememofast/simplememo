@@ -288,6 +288,24 @@ jobs:
       - name: Checks have been seen to fail
         run: node scripts/check-selftests.mjs --check
 
+      # 【公開レーンの出荷に、事前登録した予測が付いているか】
+      #
+      # 価値契約の仕組みは 2026-09-04 に配線され、承認済み指標も3件入った。
+      # それから 09-05 まで**起案は1本も書かれず**、公開レーンの出荷 14 件のうち
+      # 契約は 0 件だった。**配線が済んでいることと、使われることは別。**
+      # 使われなかったことに気づく仕掛けが無かったので、ここで数える。
+      #
+      # 覆いは「契約が在る」または「その日の不適格理由が記録されている」。
+      # **書けない日があること自体は正常。**異常なのは、書きも記録もせずに出荷が通ること。
+      #
+      # **既定は record_only で、CIは落ちない。**日次runは §3-1 に一度も到達して
+      # いないので、いま block にすると翌朝から出荷が止まる。止める日を決めるのは
+      # data/contract-coverage.json の持ち主。
+      - name: Value contracts cover publishing-lane ships
+        run: |
+          node scripts/check-contract-coverage.mjs --selftest
+          node scripts/check-contract-coverage.mjs --check
+
       # 【正が無いと消える規則】4つのPRで7件出た形を、機械で洗い出す。
       #
       #   intakeIds.size && !intakeIds.has(id)   空の台帳 → 規則が丸ごと消える
