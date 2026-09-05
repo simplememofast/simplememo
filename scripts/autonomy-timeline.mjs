@@ -37,6 +37,38 @@ export const CLAIM_SURFACES = ['docs/pr-autopilot-2026-09-body.md'];
 const COVERAGE_PATH = path.join(ROOT, 'data/automation-coverage.json');
 const AI_EXECUTES = new Set(['ai_autonomous', 'ai_executes_gated']);
 
+/** 系列が読むリポジトリ。**この3つが揃っていないと数えない。** */
+export const SERIES_REPOS = ['simplememo', 'simplememo-ios', 'simplememo-api'];
+
+export const repoPath = (name) => (name === 'simplememo' ? ROOT : path.resolve(ROOT, '..', name));
+
+/**
+ * そのリポジトリの**本線の ref**。
+ *
+ * 【なぜ ref を固定するのか — 2026-09-05 に踏んだ】
+ * `codeRatios` は `git log --all` で読んでいた。`--all` は**クローンに在る ref を
+ * 全部**歩くので、**出る数字がクローンの状態しだいになる。**
+ *
+ * しかも `--rebuild` は浅いクローンを拒むので `git fetch --unshallow` が要り、
+ * **それを実行するとリモートブランチが全部降りてくる**（実測 468本）。
+ * つまり「指示どおりに直すと汚染される」形をしていた。実測:
+ *
+ *     2026-08 のコード行AI比率   HEAD 0.8264 / --all 0.4681 / main のみ 0.3600
+ *
+ * **3つとも違い、HEAD の値はどの引き方でも再現できなかった。**
+ * 本線に固定すれば、誰がどこで回しても同じ数になる。
+ */
+function mainRefOf(cwd) {
+  for (const ref of ['origin/main', 'main', 'origin/master', 'master']) {
+    try {
+      execFileSync('git', ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`],
+        { cwd, stdio: 'ignore' });
+      return ref;
+    } catch { /* 次を試す */ }
+  }
+  return null;
+}
+
 /** 証跡パス → その月。隣リポジトリは `../name/` と素の `name/` の両表記を受ける。 */
 function repoFor(p) {
   for (const name of ['simplememo-ios', 'simplememo-api']) {
@@ -50,9 +82,13 @@ function repoFor(p) {
 function firstMonth(p) {
   const { cwd, rel } = repoFor(p);
   if (!fs.existsSync(cwd)) return null;
+  // **HEAD ではなく本線から取る。**HEAD は「いまどのブランチに居るか」で変わるので、
+  // 作業中のブランチによって証跡の初出月が動いてしまう。
+  const ref = mainRefOf(cwd);
+  if (!ref) return null;
   for (const args of [
-    ['log', '--reverse', '--format=%ad', '--date=format:%Y-%m', '--diff-filter=A', '--', rel],
-    ['log', '--reverse', '--format=%ad', '--date=format:%Y-%m', '--', rel],
+    ['log', ref, '--reverse', '--format=%ad', '--date=format:%Y-%m', '--diff-filter=A', '--', rel],
+    ['log', ref, '--reverse', '--format=%ad', '--date=format:%Y-%m', '--', rel],
   ]) {
     try {
       const out = execFileSync('git', args, { cwd, encoding: 'utf8' }).split('\n')[0].trim();
@@ -69,13 +105,16 @@ function firstMonth(p) {
  */
 export function codeRatios() {
   const byMonth = new Map();
-  for (const name of ['simplememo', 'simplememo-ios', 'simplememo-api']) {
-    const cwd = name === 'simplememo' ? ROOT : path.resolve(ROOT, '..', name);
+  for (const name of SERIES_REPOS) {
+    const cwd = repoPath(name);
     if (!fs.existsSync(cwd)) continue;
+    // **`--all` をやめて本線に固定した（2026-09-05）。**理由は mainRefOf の頭に書いた。
+    const ref = mainRefOf(cwd);
+    if (!ref) continue;
     let raw;
     try {
       raw = execFileSync('git', [
-        'log', '--all', '--no-merges', '--date=format:%Y-%m', '--numstat',
+        'log', ref, '--no-merges', '--date=format:%Y-%m', '--numstat',
         '--format=\u0001%ad\u0002%an\u0002%(trailers:key=Co-authored-by,valueonly,separator=;)',
       ], { cwd, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
     } catch { continue; }
@@ -275,19 +314,30 @@ export function toSvg(doc) {
  * `git fetch --unshallow` してから再実行すれば7点に戻る。
  */
 function assertFullHistory() {
-  let shallow = '';
-  try {
-    shallow = execFileSync('git', ['rev-parse', '--is-shallow-repository'],
-      { cwd: ROOT, encoding: 'utf8' }).trim();
-  } catch {
-    shallow = ''; // git が無い環境では判定しない（黙って通す方が害が小さい）
+  const problems = [];
+  for (const name of SERIES_REPOS) {
+    const cwd = repoPath(name);
+    // **無いものを黙って 0 として数えない（2026-09-05）。**旧版は
+    // `if (!fs.existsSync(cwd)) continue;` で隣を素通りしていたので、
+    // **隣が手元に無い環境で回すと、その分だけ少ない数が「実測」として出た。**
+    if (!fs.existsSync(cwd)) { problems.push(`${name} が手元に無い`); continue; }
+    let shallow = '';
+    try {
+      shallow = execFileSync('git', ['rev-parse', '--is-shallow-repository'],
+        { cwd, encoding: 'utf8' }).trim();
+    } catch {
+      problems.push(`${name} で git が使えない`); continue;
+    }
+    if (shallow === 'true') problems.push(`${name} が浅いクローン`);
+    if (!mainRefOf(cwd)) problems.push(`${name} に本線の ref（origin/main 等）が無い`);
   }
-  if (shallow === 'true') {
-    throw new Error(
-      '**浅いクローンでは再計算しない。**証跡の初出月を git log から取るので、\n'
-      + '  クローンに無い月が系列から丸ごと消える（実際に7点→2点になった事故がある）。\n'
-      + '  先に `git fetch --unshallow` を実行すること。');
-  }
+  if (problems.length === 0) return;
+  throw new Error(
+    '**揃っていない環境では再計算しない。**証跡の初出月とコード行を git log から取るので、\n'
+    + '  欠けているぶんが**黙って少ない数**として系列に載る\n'
+    + '  （浅いクローンで7点→2点になった事故、隣を素通りして少なく数えた事故がある）。\n\n'
+    + problems.map((x) => `    - ${x}`).join('\n')
+    + '\n\n  3リポジトリすべてを `git fetch --unshallow` してから実行すること。');
 }
 
 export function rebuild() {

@@ -348,17 +348,17 @@
 </div>
 <div class="reason-card__desc">
 
-<span>Memo text is never stored on the server. The moment a send completes, the text is gone from server memory too. The on-device Outbox queue is AES-GCM encrypted. Your ideas belong only to you.</span>
+<span>The on-device Outbox queue is AES-GCM encrypted. During email delivery, memo text passes through our Relay API on Cloudflare Workers and the external delivery service Resend. We do not persist memo text on our servers. Email delivery is not end-to-end encrypted.</span>
 </div>
 </div>
 <div class="reason-card">
 <div class="reason-card__title">
 
-<span>Zero External Dependencies</span>
+<span>Delivery Infrastructure and Dependencies</span>
 </div>
 <div class="reason-card__desc">
 
-<span>Learning from the risk of depending on a third-party email API, the send infrastructure was built in-house. By combining Cloudflare Workers with Resend API, the service remains stable and independent from third-party specification changes.</span>
+<span>We develop the Relay API that runs on Cloudflare Workers and use Resend API for email delivery. This setup depends on the availability and specifications of those external services. The on-device Outbox keeps offline memos ready for retry when connectivity returns.</span>
 </div>
 </div>
 <div class="reason-card">

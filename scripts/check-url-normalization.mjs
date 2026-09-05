@@ -45,7 +45,7 @@ function fail(msg) {
 }
 
 /** Assert a single 301 to `to`, and that `to` is itself terminal. */
-async function redirects(from, to) {
+async function redirects(from, to, { checkStaticDestination = true } = {}) {
   checked++;
   const r = await run(from);
   if (r.kind !== "redirect") {
@@ -62,6 +62,17 @@ async function redirects(from, to) {
     fail(
       `${from} → ${r.to} is NOT one hop: destination redirects again to ${second.to}`,
     );
+  } else if (second.kind !== "pass") {
+    fail(`${from} → ${r.to} is NOT a live destination: ${JSON.stringify(second)}`);
+  } else if (checkStaticDestination) {
+    // Middleware pass-through is not a 200: Pages may still redirect a
+    // directory without a trailing slash, or return 404 for a missing file.
+    const pathname = new URL(r.to, ORIGIN).pathname;
+    const file = path.join(ROOT, decodeURIComponent(pathname));
+    const target = pathname.endsWith("/") ? path.join(file, "index.html") : file + ".html";
+    if (!existsSync(target) || !statSync(target).isFile()) {
+      fail(`${from} → ${r.to} has no directly served HTML destination`);
+    }
   }
 }
 
@@ -139,8 +150,10 @@ if (process.argv.includes("--selftest")) {
   await expect("正しい行き先の 301 は通る（/faq.html → /faq）", () => redirects("/faq.html", "/faq"), false);
   await expect("**行き先が違う 301 は落ちる**（301 が出たことだけで通さない）", () => redirects("/faq.html", "/そんなページは無い"), true);
   await expect("**410 でないものを gone 扱いすると落ちる**", () => gone(served), true);
+  await expect("**存在しない転送先は落ちる**", () => redirects("/__normalization-test-missing.html", "/__normalization-test-missing"), true);
+  await expect("**Pages で再転送されるディレクトリは落ちる**", () => redirects("/en?lang=ja", "/en"), true);
 
-  console.log(`\n  自己テスト 7 件中 ${bad} 件失敗`);
+  console.log(`\n  自己テスト 9 件中 ${bad} 件失敗`);
   process.exit(bad === 0 ? 0 : 1);
 }
 
@@ -239,6 +252,12 @@ await redirects("/blog/line-keep-migration", "/blog/line-keep-alternative");
 await redirects("/blog/line-keep-migration.html", "/blog/line-keep-alternative");
 await redirects("/blog/line-keep-migration.html?lang=ja", "/blog/line-keep-alternative");
 await redirects("/vs/mem/", "/vs/");
+// _redirects already has /vs/mem. Without the same middleware entry,
+// stripping a query or .html first minted /vs/mem as an intermediate URL.
+await redirects("/vs/mem", "/vs/");
+await redirects("/vs/mem?lang=en", "/vs/");
+await redirects("/vs/mem.html?lang=en", "/vs/");
+await redirects("https://www.simplememofast.com/vs/mem?lang=en&utm_source=newsletter", "/vs/?utm_source=newsletter");
 await redirects("/vs/mem/index.html", "/vs/");
 await redirects("/vs/mem/?lang=en", "/vs/");
 await redirects("/privacy-policy", "/privacy");
@@ -258,8 +277,10 @@ await redirects("/%29", "/");
 await redirects("/)?lang=ja", "/");
 await redirects("/%29?lang=ja", "/");
 
-// ── 6. 410 Gone — fabricated slugs from injected backlinks ───────────────
+// ── 6. 410 Gone — known nonexistent slugs reported by GSC ────────────────
 for (const slug of [
+  "/blog/ios-share-extension-five-boundaries",
+  "/blog/field-notes-from-a-year-of-pairing-with-an-ai-working-alone",
   "/blog/offline-first-outbox-teardown",
   "/blog/email-inbox-as-task-manager",
   "/blog/energy-budget-field-notes",
@@ -270,6 +291,10 @@ for (const slug of [
   await gone(slug);
   await gone(slug + ".html");
   await gone(slug + "?lang=ja");
+  await gone(slug + "/");
+  await gone(slug + "/index.html?ref=external");
+  await gone(slug.replace("/blog/", "//blog//") + ".html?lang=en");
+  await gone("https://www.simplememofast.com" + slug + "?utm_source=external");
 }
 
 // ── 7. Internal-only paths stay unreachable, extra slashes and all ───────
@@ -322,7 +347,39 @@ await notFound("/growth/");
 await servesDirectly("/admin/");
 await servesDirectly("/admin/api/upload");
 // …but a slash-padded variant is normalized first, then re-enters as /admin/.
-await redirects("//admin/api/upload", "/admin/api/upload");
+// This is an authenticated Function endpoint, not a static HTML page.
+await redirects("//admin/api/upload", "/admin/api/upload", { checkStaticDestination: false });
+
+// The complete 65-URL GSC "Crawled — currently not indexed" sample.
+// Expected destinations were independently verified with live HTTP requests.
+// Redirects are intentional; their final documents must remain indexable.
+{
+  const { cases } = JSON.parse(readFileSync(
+    path.join(ROOT, "docs/seo/gsc-crawled-cases-2026-09-05.json"), "utf8",
+  ));
+  if (cases.length !== 65 || new Set(cases.map(c => c.from)).size !== 65) {
+    fail("GSC crawled sample must contain exactly 65 distinct URLs");
+  }
+  const sitemap = readFileSync(path.join(ROOT, "sitemap-ja.xml"), "utf8");
+  for (const c of cases) {
+    if (c.status === 301) await redirects(c.from, c.to);
+    else if (c.status === 200 && c.from === c.to) await servesDirectly(c.from);
+    else fail(`Invalid GSC expectation: ${JSON.stringify(c)}`);
+    const filename = c.to.endsWith("/") ? `${c.to}index.html` : `${c.to}.html`;
+    const full = path.join(ROOT, filename.slice(1));
+    checked++;
+    if (!existsSync(full)) { fail(`${c.to}: final document is missing`); continue; }
+    const html = readFileSync(full, "utf8");
+    const canonical = html.match(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"/i)?.[1];
+    if (canonical !== ORIGIN + c.to) fail(`${c.to}: final canonical differs (${canonical})`);
+    if (/<meta\b[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(html)) {
+      fail(`${c.to}: final document is noindex`);
+    }
+    if (!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`)) {
+      fail(`${c.to}: final document is absent from the Japanese sitemap`);
+    }
+  }
+}
 
 // ── 9. Canonical URLs must never redirect ────────────────────────────────
 for (const p of [

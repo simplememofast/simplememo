@@ -97,6 +97,22 @@ const SCENARIOS = [
     '**「差分が無い」と「差分を読めなかった」は別物。**混ぜると、APIが読めない日に'
     + '全部の占有が死んで見える'],
 
+  // --- 宣言だけ積んで死んだ占有（2026-09-05 に実際に起きた） -------------------
+  ['死んだ占有: 契約を宣言した直後に落ちた → 引き継ぐ（宣言は実装しない）',
+    { route: 'actions', branchClaimed: true, claimHasWork: false, claimAgeMinutes: 428,
+      claimDeclarations: ['data/decision-intents/ship-coverage-notion-20260905.json'] },
+    CODES.RUN_TAKEOVER,
+    '**実績。**2026-09-05 07:53 JST に主系が価値契約を宣言し、08:05 にセッション上限で落ちた。'
+    + '09:01 の再試行と 19:00 の手動起動は宣言コミットを「差分あり」と読んで skip し、'
+    + 'その日は誰も走らないまま緑になった。428分は 07:53→15:01 の実経過に相当。'
+    + '引き継ぎ側は旧契約を rejections へ移して新IDで再宣言する（死んだ run_id には結ばない）'],
+
+  ['死んだ占有: 宣言に加えて実装の差分があるなら追い越さない',
+    { route: 'actions', branchClaimed: true, claimHasWork: true, claimAgeMinutes: 428,
+      claimDeclarations: ['data/decision-intents/x.json'] },
+    CODES.SKIP_BRANCH_CLAIMED,
+    '宣言の隣に成果物があるなら、それは死んだ占有ではなく作業中か出荷待ち。追い越すと二重出荷'],
+
   ['二重防止: 当日作成のPRがある',
     { route: 'ccr-0920', prTodayExists: true }, CODES.SKIP_PR_TODAY,
     'ブランチ占有の前に別経路がPRまで進んでいる場合'],
@@ -192,6 +208,20 @@ const SCENARIOS = [
     { route: 'actions', preferredModel: 'claude-sonnet-5', modelsAvailable: ['claude-sonnet-5'] },
     CODES.RUN,
     '縮退コードが常時立つと、縮退の意味が消える'],
+
+  ...[
+    ['API不能', { githubApiReachable: false }, CODES.FAIL_API],
+    ['forceでもAPI不能', { githubApiReachable: false, force: true }, CODES.FAIL_API],
+    ['作業中の占有', { branchClaimed: true, claimHasWork: true }, CODES.SKIP_BRANCH_CLAIMED],
+    ['本番出荷済み', { prodStatusDate: '2026-08-23' }, CODES.SKIP_ALREADY_SHIPPED],
+    ['mainへマージ済み', { mainStatusDate: '2026-08-23' }, CODES.SKIP_ALREADY_SHIPPED],
+    ['当日PRあり', { prTodayExists: true }, CODES.SKIP_PR_TODAY],
+    ['主系実行中', { route: 'ccr-0920', primaryRunStatus: 'in_progress' }, CODES.SKIP_PRIMARY_RUNNING],
+  ].map(([name, patch, code]) => [
+    `代替モデルでも止める: ${name}`,
+    { preferredModel: 'primary', modelsAvailable: ['fallback'], ...patch }, code,
+    '使える代替モデルがあることは、着手の根拠や重複実行を避ける条件の代わりにならない',
+  ]),
 
   // --- API障害（2026-08-22追加） ----------------------------------------
   ['API障害: GitHub APIが読めない日は着手しない',

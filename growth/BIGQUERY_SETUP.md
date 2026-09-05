@@ -27,7 +27,19 @@ Obsidian autopilot は08-13〜08-15の3回とも「新規GSCスナップショ�
 報告していた — Runbookが `growth/data/gsc/` しか見ておらず、ここを
 見に行く手順が無かったため（`docs/obsidian/AUTOPILOT_RUNBOOK.md` §1-2で修正済み）。
 
-### まだできないこと：スクリプトからの認証
+### 現在のAPI認証（2026-09-05更新）
+
+GitHub Actionsの `GCP_SERVICE_ACCOUNT_JSON` は登録済み。9/5の
+[SEO Daily実行33927109084](https://github.com/simplememofast/simplememo/actions/runs/33927109084)
+では `credential type: service_account` とGSC取得成功を確認した。
+ローカルにADCやgcloudがないことから、アカウント全体の認証が未設定とは判断しない。
+
+追加の集計は [Analytics APIの実行手順](ANALYTICS_API.md) を使う。
+既存鍵をActions内で再利用し、結果は暗号化してローカルへ回収する。
+GA4の新しいデータセットを読める権限はGSCの取得成功だけでは証明できないため、
+最初に `preflight` で確認する。
+
+### 過去の状態：8/15時点のコンテナからの認証
 
 `node growth/scripts/bq-preflight.mjs` は autopilot のコンテナでは
 `Cannot authenticate to BigQuery` で落ちる（サービスアカウント鍵も

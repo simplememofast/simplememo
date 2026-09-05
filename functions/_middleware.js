@@ -14,8 +14,9 @@
 // issues.
 //
 // This middleware fixes that by returning a 301 from the variants to the
-// canonical URL. Once Google sees the 301 it drops the variant from the
-// index entirely — GSC backfills clear in a few weeks. Bonus: human users
+// canonical URL. Google can retain the source in GSC's "Page with redirect"
+// report; a 301 does not guarantee that the target is indexed or that the
+// report clears on a particular schedule. Bonus: human users
 // who land on an old `?lang=en` bookmark get redirected to the canonical
 // page, which is a better UX than serving identical content from two URLs.
 //
@@ -28,10 +29,9 @@
 //      hops (`https://www…/x.html` → 301 middleware, host kept → `https://www…/x`
 //      → 301 `_redirects` → apex) and the intermediate www URL became one more
 //      GSC "Page with redirect" row. The `_redirects` rule stays as the
-//      fallback if a Functions deploy ever fails. The `http://` leg of
-//      `http://www…` is out of our hands: the edge's Always Use HTTPS 301
-//      runs before anything in this repo, so that spelling always costs
-//      one extra hop.
+//      fallback if a Functions deploy ever fails. HTTP handling can happen
+//      outside Pages (HTTPS settings / the www Worker); verify the deployed
+//      response separately instead of inferring its hop count here.
 //
 //   0b. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
 //      Pages resolves the extra slashes and serves 200, so these are true
@@ -192,6 +192,7 @@ const RETIRED = {
   "/vs/whatsapp/": "/vs/",
   "/vs/telegram/": "/vs/",
   "/vs/trello/": "/vs/",
+  "/vs/mem": "/vs/",
   "/vs/mem/": "/vs/",
   "/vs/slack-self-dm/": "/vs/",
   // A backlink (featureupvote.com, DR72) carries a stray closing paren.
@@ -204,13 +205,16 @@ const RETIRED = {
   "/%29": "/",
 };
 
-// Slugs that never existed on this site but are repeatedly crawled because
-// they are linked from off-site (see docs/seo/gsc-index-triage-2026-07-02.md
-// — fabricated HN-style slugs that mimic our own vocabulary). A 404 invites
-// Google to keep re-checking; 410 Gone is the explicit "this will never
-// exist" signal and drops the URL from the index far faster. Verified absent
-// from the full git history, all current sources and every sitemap (step 4).
+// Known nonexistent slugs reported by GSC. Keep the existing 410 policy for
+// URLs we will not publish; do not redirect them to unrelated live articles.
+// Google treats 404 and 410 alike for indexing, so this does not promise a
+// faster removal or a cleared GSC report. The two additions from the August
+// report are absent from the available Git history, current content and
+// sitemaps; their discovery source is unverified. See
+// docs/seo/gsc-404-audit-2026-09-05.md (step 4).
 const GONE = new Set([
+  "/blog/ios-share-extension-five-boundaries",
+  "/blog/field-notes-from-a-year-of-pairing-with-an-ai-working-alone",
   "/blog/offline-first-outbox-teardown",
   "/blog/email-inbox-as-task-manager",
   "/blog/energy-budget-field-notes",
@@ -312,8 +316,9 @@ export const onRequest = async (context) => {
   }
 
   // 4. Slugs that never existed on this site answer 410 Gone — see the
-  //    GONE set (module scope) for the list and rationale.
-  if (GONE.has(pathname)) {
+  //    GONE set (module scope) for the list and rationale. Match a trailing
+  //    slash too, including the directory form produced by /index.html.
+  if (GONE.has(pathname.replace(/\/$/, ""))) {
     return new Response("Gone", {
       status: 410,
       headers: {

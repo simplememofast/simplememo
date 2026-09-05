@@ -20,10 +20,11 @@
   "launch_note": "App Store 初回リリースは 2026-04-24（PR① 配信日）。2026-04 の値がローンチ時点の水準",
   "known_limits": [
     "証跡ファイルの追加日 ≒ 稼働開始日。実際には数日〜数週のずれがある",
-    "証跡の初出月では正しく出ないタスクには since を明示している（2026-08時点で26件）。それ以外は min(証跡の初出月) の近似のまま",
+    "証跡の初出月では正しく出ないタスクには台帳側で since を明示している（その一覧は automation-coverage.json の since 欄）。それ以外は min(証跡の初出月) の近似のまま",
     "分母は現在の棚卸しを過去へ固定している。当時は『やるべきことの一覧』自体が存在しなかった",
+    "**末尾の月は途中まで。**その月が終わるまで、コード行の数字は他の月と同じ土俵で比べられない",
     "ai_proposes / human_only / nobody の当時の状態は復元していない。したがって出せるのは総合自動化率だけで、AI関与率とカバー率の系列は作れない",
-    "コード変更のAI比率は別の物差し。こちらは2026-02以降ほぼ一貫して85〜100%で、伸びていない（伸びたのはコード以外）"
+    "コード変更のAI比率は別の物差し。**月ごとに大きく振れる**ので、系列として読まない（伸びたのはコード以外）。**ここに実数を書き写さない** —— 2026-08時点で26件・85〜100% と書かれた記述が、実データと合わなくなったまま残っていた"
   ],
   "denominator_tasks": 199,
   "points": [
@@ -41,9 +42,9 @@
       "newly_ai_executed": 2,
       "cumulative": 3,
       "overall_automation_rate": 0.01507537688442211,
-      "code_ai_line_rate": 0.9919280046714526,
-      "code_ai_commit_rate": 0.9027777777777778,
-      "code_lines": 29113
+      "code_ai_line_rate": 0.9883703667046073,
+      "code_ai_commit_rate": 0.8571428571428571,
+      "code_lines": 20207
     },
     {
       "month": "2026-03",
@@ -52,7 +53,7 @@
       "overall_automation_rate": 0.08040201005025126,
       "code_ai_line_rate": 1,
       "code_ai_commit_rate": 1,
-      "code_lines": 381511
+      "code_lines": 332224
     },
     {
       "month": "2026-04",
@@ -61,16 +62,16 @@
       "overall_automation_rate": 0.08040201005025126,
       "code_ai_line_rate": 1,
       "code_ai_commit_rate": 1,
-      "code_lines": 13936
+      "code_lines": 8665
     },
     {
       "month": "2026-05",
       "newly_ai_executed": 6,
       "cumulative": 22,
       "overall_automation_rate": 0.11055276381909548,
-      "code_ai_line_rate": 0.9000666978869541,
-      "code_ai_commit_rate": 0.8810975609756098,
-      "code_lines": 211401
+      "code_ai_line_rate": 0.8752759894179193,
+      "code_ai_commit_rate": 0.8465346534653465,
+      "code_lines": 150821
     },
     {
       "month": "2026-06",
@@ -79,25 +80,34 @@
       "overall_automation_rate": 0.12060301507537688,
       "code_ai_line_rate": 1,
       "code_ai_commit_rate": 1,
-      "code_lines": 88291
+      "code_lines": 52122
     },
     {
       "month": "2026-07",
       "newly_ai_executed": 13,
       "cumulative": 37,
       "overall_automation_rate": 0.18592964824120603,
-      "code_ai_line_rate": 0.6634393699971505,
-      "code_ai_commit_rate": 0.9417721518987342,
-      "code_lines": 154412
+      "code_ai_line_rate": 0.6245177232200916,
+      "code_ai_commit_rate": 0.9290123456790124,
+      "code_lines": 138406
     },
     {
       "month": "2026-08",
       "newly_ai_executed": 96,
       "cumulative": 133,
       "overall_automation_rate": 0.6683417085427136,
-      "code_ai_line_rate": 0.826371881932337,
-      "code_ai_commit_rate": 0.872444011684518,
-      "code_lines": 294814
+      "code_ai_line_rate": 0.7810784854792521,
+      "code_ai_commit_rate": 0.826025459688826,
+      "code_lines": 230119
+    },
+    {
+      "month": "2026-09",
+      "newly_ai_executed": 1,
+      "cumulative": 134,
+      "overall_automation_rate": 0.6733668341708543,
+      "code_ai_line_rate": 0.22435104796018498,
+      "code_ai_commit_rate": 0.5483870967741935,
+      "code_lines": 227251
     }
   ],
   "undated_tasks": [],

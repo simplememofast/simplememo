@@ -85,6 +85,22 @@ export const LANES_NEEDING_EGRESS = ['A', 'B', 'C-primary-source'];
 export const STALE_CLAIM_MINUTES = 90;
 
 /**
+ * 占有の中に在っても「作業」と数えないファイル。**価値契約の宣言と、その取り下げ。**
+ *
+ * 【2026-09-05 に実際に起きた】主系が 07:53 JST に契約を宣言（`data/decision-intents/` に1ファイル）
+ * した直後にセッション上限で落ちた。09:01 の再試行と 19:00 の手動起動は、その1ファイルを
+ * 「差分あり＝作業中」と読んで skip_branch_claimed を返し、**その日は誰も走らないまま緑になった**
+ * —— 死んだ占有を守らないために作った引き継ぎが、宣言コミットのせいで一日中効かなかった。
+ * 宣言は「これからやる」の記録であって成果物ではない。claim コミットと同じ側に置く。
+ * **名前の読めないファイルは作業側に倒す**（分からないものを宣言と読まない）。
+ */
+export const DECLARATION_PREFIXES = ['data/decision-intents/', 'data/decision-rejections/'];
+export function isDeclarationFile(p) {
+  if (typeof p !== 'string') return false;
+  return DECLARATION_PREFIXES.some((prefix) => p.startsWith(prefix));
+}
+
+/**
  * 占有が「claim だけ取って死んでいる」か。
  *
  * **3条件すべてが揃ったときだけ真。**どれか1つでも分からない（null）なら
@@ -93,7 +109,7 @@ export const STALE_CLAIM_MINUTES = 90;
  */
 export function isAbandonedClaim(s) {
   return s.branchClaimed === true
-    && s.claimHasWork === false                        // 差分もPRも無い＝claimコミットだけ
+    && s.claimHasWork === false                        // 宣言ファイル以外の差分もPRも無い＝claim（と宣言）だけ
     && typeof s.claimAgeMinutes === 'number'
     && s.claimAgeMinutes >= STALE_CLAIM_MINUTES;
 }
@@ -109,6 +125,7 @@ const isPrimary = (route) => route === 'actions';
  * @param {boolean} s.branchClaimed   origin に当日ブランチが既にあるか
  * @param {boolean|null} s.claimHasWork  そのブランチに main との差分か head PR があるか（null=読めなかった）
  * @param {number|null} s.claimAgeMinutes そのブランチの最新コミットからの経過分（null=読めなかった）
+ * @param {string[]|null} s.claimDeclarations そのブランチに残っている宣言ファイル（data/decision-intents|rejections/）。null=読めなかった
  * @param {string|null} s.prodStatusDate  本番 data/autopilot-status.json の date_jst
  * @param {string|null} s.mainStatusDate  origin/main の同ファイルの date_jst
  * @param {boolean} s.prTodayExists   当日作成のPRがあるか
@@ -186,17 +203,26 @@ export function decide(s) {
   // 2b. **モデルが1つも使えない日は走らない。** 代替があるなら縮退して走る。
   //     「使えるモデルが無い」を「今日は書くことが無い」と区別する
   //     （前者は故障、後者は正常系。日報で同じ行に出ると原因が消える）。
+  let modelDegradation = null;
   if (Array.isArray(s.modelsAvailable)) {
     if (s.modelsAvailable.length === 0) {
       return R(CODES.FAIL_NO_MODEL, '使えるモデルが1つも無い。故障として報告し、その日は走らない');
     }
     if (s.preferredModel && !s.modelsAvailable.includes(s.preferredModel)) {
-      return R(CODES.DEGRADE_MODEL,
-        `主モデル ${s.preferredModel} が使えない。${s.modelsAvailable[0]} へ落として走る`
-        + '（**縮退したことを日報に出す。**黙って別のモデルで書くと品質の変化が原因不明になる）',
-        { modelUsed: s.modelsAvailable[0], degraded: true });
+      modelDegradation = { modelUsed: s.modelsAvailable[0],
+        reason: `主モデル ${s.preferredModel} が使えない。${s.modelsAvailable[0]} へ落として走る`
+          + '（**縮退したことを日報に出す。**黙って別のモデルで書くと品質の変化が原因不明になる）' };
     }
   }
+
+  // 代替モデルは着手許可ではない。API・占有・出荷・PR・主系の確認後にだけ
+  // 実行可能な結果へ添える。外部到達制限と占有の引き継ぎも同時に保持する。
+  const ready = (code, reason, extra = {}) => {
+    if (!modelDegradation) return R(code, reason, extra);
+    return R(code === CODES.DEGRADE_EGRESS ? code : CODES.DEGRADE_MODEL,
+      `${reason} ${modelDegradation.reason}`,
+      { ...extra, modelUsed: modelDegradation.modelUsed, degraded: true });
+  };
 
   // 2c. **GitHub API が読めない日は着手しない。**
   //     冪等チェック（当日ブランチ・当日PR・主系の実行状態）は全部この API に乗っている。
@@ -209,7 +235,7 @@ export function decide(s) {
   }
 
   // 3. 手動の検証実行は以降の冪等チェックを飛ばす。
-  if (s.force) return R(CODES.RUN, 'force指定（手動の検証実行）。冪等チェックを省略');
+  if (s.force) return ready(CODES.RUN, 'force指定（手動の検証実行）。冪等チェックを省略');
 
   // 4. 当日ブランチの占有。**弾かれること自体がこの仕組みの出力**であって障害ではない。
   //    ただし**死んだ占有は守らない**（2026-08-29 の ap-20260829-ccr0920）。
@@ -224,6 +250,14 @@ export function decide(s) {
     }
     takeover = true;
   }
+  // 引き継ぐ占有に残っている価値契約の宣言。**引き継ぎ側はこれを実装しない**（2026-09-05）。
+  // 宣言した run_id は既に死んだ run で、decision-ci の boundRun は同じ run_id を新しい出荷に結ばせない。
+  // 一覧を渡さないと、引き継ぎ側が旧契約を実装するか、見落として二重に宣言するかのどちらかになる。
+  let staleDeclarations = [];
+  if (takeover) {
+    if (Array.isArray(s.claimDeclarations)) staleDeclarations = [...s.claimDeclarations];
+  }
+  const takeoverInfo = takeover ? { takeover: true, staleDeclarations } : { takeover: false };
 
   // 5. 本番に当日分が出ている＝マージ＋デプロイまで終わっている。
   if (s.prodStatusDate === s.todayJst) {
@@ -253,19 +287,26 @@ export function decide(s) {
   //    一次情報の実測が要る C05〜C10 を見送って C12 に切り替えて出荷した。
   //    **止めるのではなく、できることに絞るのが正しい振る舞い**なので run のまま返す。
   if (s.egressBlocked) {
-    return R(CODES.DEGRADE_EGRESS,
+    return ready(CODES.DEGRADE_EGRESS,
       '外部到達が塞がれている。着手はするが、一次情報の実測が要るレーンは選べない',
-      { forbiddenLanes: LANES_NEEDING_EGRESS, degraded: true, takeover });
+      { forbiddenLanes: LANES_NEEDING_EGRESS, degraded: true, ...takeoverInfo });
   }
 
   if (takeover) {
-    return R(CODES.RUN_TAKEOVER,
-      `当日ブランチは claim だけ取られて ${s.claimAgeMinutes} 分動いていない（差分もPRも無い）。`
+    let declared = '';
+    if (staleDeclarations.length > 0) {
+      declared = `**この占有には価値契約の宣言が ${staleDeclarations.length} 件残っている**（${staleDeclarations.join(' / ')}）。`
+        + '宣言した run は死んでいるので**その契約は実装しない** —— '
+        + '`node scripts/value-contracts.mjs --retire <宣言ファイル> --reason "..."` で data/decision-rejections/ へ移してコミットし、'
+        + '新しい候補で Runbook §2-1 を最初からやり直す（契約と記帳の run_id は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`）。';
+    }
+    return ready(CODES.RUN_TAKEOVER,
+      `当日ブランチは claim だけ取られて ${s.claimAgeMinutes} 分動いていない（宣言ファイル以外の差分もPRも無い）。`
       + '**死んだ占有を守ると、その日は誰も走らないまま緑になる。**引き継いで着手する。'
-      + '既存の claim の上に空コミットを積んで push すること（force push もブランチ削除もしない）',
-      { takeover: true });
+      + '既存の claim の上に空コミットを積んで push すること（force push もブランチ削除もしない）。' + declared,
+      takeoverInfo);
   }
-  return R(CODES.RUN, '着手してよい。まず当日ブランチを空コミットで占有すること');
+  return ready(CODES.RUN, '着手してよい。まず当日ブランチを空コミットで占有すること');
 }
 
 /** 既定の状態。シナリオは差分だけを書けるようにする。 */
@@ -274,7 +315,7 @@ export function baseState(overrides = {}) {
     route: 'actions', todayJst: '2026-08-23',
     secretsPresent: true, budgetOver: false, runCapOverrun: false, branchClaimed: false,
     // 占有の中身。**既定は「読めなかった」** — 分からない日は追い越さない側に倒す。
-    claimHasWork: null, claimAgeMinutes: null,
+    claimHasWork: null, claimAgeMinutes: null, claimDeclarations: null,
     prodStatusDate: '2026-08-22', mainStatusDate: '2026-08-22',
     prTodayExists: false, primaryRunStatus: 'completed', force: false,
     // --- 故障・縮退の軸。既定は「すべて健全」 ---
@@ -323,11 +364,19 @@ export function todayJst(now = new Date()) {
  */
 export function readClaim(compare, now = Date.now()) {
   if (!compare || !Array.isArray(compare.files) || !Array.isArray(compare.commits)) {
-    return { claimHasWork: null, claimAgeMinutes: null };
+    return { claimHasWork: null, claimAgeMinutes: null, claimDeclarations: null };
   }
   const last = compare.commits[compare.commits.length - 1];
   const iso = last?.commit?.committer?.date ?? null;
-  return { claimHasWork: compare.files.length > 0, claimAgeMinutes: ageMinutes(iso, now) };
+  // **宣言ファイルは作業に数えない**（2026-09-05）。名前の読めないファイルは作業側に倒す。
+  const work = [];
+  const declarations = [];
+  for (const f of compare.files) {
+    const name = typeof f?.filename === 'string' ? f.filename : null;
+    if (isDeclarationFile(name)) declarations.push(name);
+    else work.push(name);
+  }
+  return { claimHasWork: work.length > 0, claimAgeMinutes: ageMinutes(iso, now), claimDeclarations: declarations };
 }
 
 /** GitHub Actions の `$GITHUB_OUTPUT` 行。**改行を含む値は heredoc 形式で書く。** */
@@ -391,6 +440,7 @@ export async function preflight(o) {
   let claim = { claimHasWork: null, claimAgeMinutes: null };
   if (branchClaimed) {
     claim = readClaim(cmp.json);
+    // 宣言ファイル（data/decision-intents|rejections/）だけの差分は claim と同じ扱い（readClaim）。
     // PRが1件でもあれば「作業がある」側。**PR一覧が読めなければ null のまま**
     // （読めなかったことを「PRは無い」と読むと、死んでいない占有を追い越す）。
     const owner = o.repo.split('/')[0];
@@ -413,6 +463,7 @@ export async function preflight(o) {
     branchClaimed,
     claimHasWork: claim.claimHasWork,
     claimAgeMinutes: claim.claimAgeMinutes,
+    claimDeclarations: claim.claimDeclarations ?? null,
     prodStatusDate: prod?.date_jst ?? null,
     mainStatusDate: o.mainStatusDate ?? null,
     // 緊急停止・予算・1回上限・モデルはワークフローの別ステップが見る。
@@ -468,6 +519,7 @@ if (isGateMain && process.argv.includes('--preflight')) {
     run: String(d.run),
     code: d.code,
     takeover: String(d.takeover === true),
+    stale_declarations: (Array.isArray(d.staleDeclarations) ? d.staleDeclarations : []).join(','),
     today: today.replace(/-/g, ''),
     today_dash: today,
     reason: d.reason,

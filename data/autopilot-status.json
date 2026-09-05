@@ -1,17 +1,14 @@
 {
-  "date_jst": "2026-09-04",
-  "generated_at": "2026-09-03T23:15:41Z",
-  "action": "refresh",
-  "article": {
-    "url": "https://simplememofast.com/obsidian/plugins/",
-    "title": "Obsidianプラグイン入門 — 6,812個から実測トップ10【2026】"
-  },
+  "date_jst": "2026-09-05",
+  "generated_at": "2026-09-05T07:55:00Z",
+  "action": "maintenance",
+  "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 0,
+    "consecutive_no_article_days": 1,
     "last_article_date_jst": "2026-09-04",
     "last_production_change_date_jst": "2026-09-04",
-    "days_since_production_change": 0
+    "days_since_production_change": 1
   },
   "data_freshness": {
     "bq_export_last_data_date": "2026-08-31",
@@ -225,8 +222,8 @@
       ]
     }
   },
-  "reason": "【連続無記事0日目・本番最終変更2026-09-04・BQ 22/28日（未実測）】レーンF: autopilot-selfheal.mjsに未修理の故障なし（🤝usage_limit 3件は既存・2026-09-03にオーナーがプラン階層で対応すると判断済み）。health-intake.mjs / recover-ingest.mjs --check も対象なし。レーンA/B: refresh-queue.jsonは全5件dropped/blocked、new-queue.jsonはN1実装済みでN2〜N4は需要未検証/カニバリ懸念のまま据え置き（Runbook §2記載どおり）。この経路にBigQuery MCPは接続されておらずbq-preflight.mjsも落ちるためbq_checked:false、手動スナップショットも新規なし→レーンA/Bに新しい根拠なし。レーンC: 前回実施2026-08-27から8日経過（7日以上）で優先レーンに該当。08-27の申し送り「次回は別の資産へ（テーマ側の一次情報）」に従い、Obsidian公式テーマレジストリ（community-css-themes.json・729件）のmodesフィールドをこの場で集計し、/obsidian/plugins/にダーク/ライト対応内訳（両対応67.4%・ダーク限定28.3%・ライト限定4.4%）を追加した。community-plugins.jsonも再取得（7,242件）し推移表を更新。プラグイン・テーマのインストール動作検証は今回も未実施。",
-  "verified": "OBSERVED: community-css-themes.json（729件）・community-plugins.json（7,242件）をraw.githubusercontent.com経由で2026-09-04に直接取得し、modes/legacyフィールドの集計をNode.jsスクリプトで実行（edge caseなし＝全テーマがdark/light/dark+lightのいずれかに分類）。UNVERIFIED: プラグイン・テーマを実際にインストールして動作させる検証は今回も行っていない（既存ページの検証範囲の方針を継続）。この配信によるクリック数等の変化は未計測。",
+  "reason": "オーナーセッション。レーンEのキュー先頭 C08（/obsidian/compare/notion/）を着手前に collides_with 確認したところ、既存の /vs/notion-vs-obsidian/ が <html lang=\"ja\">・h1「Notion vs Obsidian どちらを選ぶべきか」で同一主題だった（キューの「(EN)・JA Obsidian軸は不在」は誤り）。Runbook のレーンE規則に従い実装せず blocked にして Refresh 切替対象とした。あわせて、このリポジトリで最初の価値契約 coverage-queue-collision-fix-20260905 を起案→実装の順で通した。",
+  "verified": "実測したのは (1) /vs/notion-vs-obsidian/ の lang 属性・h1・hreflang 対（リポジトリ内のHTMLを直接読んだ）、(2) publishing_day_rate の基準率（直近14日 0.429 / 直近7日 0.286 / 日曜 1/3・observe() で再計算）、(3) 実行環境から capacities.io・www.notion.com へ接続できないこと（ゲートウェイが CONNECT に 403）。**競合アプリの実機検証は未実施**（この環境ではできない）。記事本文の主張は一切書いていない。",
   "checks": {
     "seo_check": "0 errors 0 warnings（269ファイル）",
     "mobile_qa": "check-viewport-overflow.mjs --check（深い3面×14幅＋全269面×4幅）で横漏れ0件。既存の /usr/local/share/chromium/chrome-linux/chrome をCHROMIUM_PATHに指定し新規ダウンロードなしで実行。WebKitGTKは今回未導入（必須チェックには含まれない）",
@@ -237,5 +234,5 @@
     "【継続・実測手段なし】PR⑥のD+14乗車判定（2026-09-17）。手順は機械化済み（docs/prtimes-d14-capture.md ＋ Routine trig_01UyxxNpMNp7ecsBycR2xYqz）だが、Chromeコネクタが付くのはCowork側のRoutineだけで、CCRからは環境を指定できない。本当の自動化にするにはclaude.aiのRoutines UIかCoworkセッションから同じRoutineを作り直すこと（文書に貼れるプロンプトあり）。評価日（2026-09-17）が未到来のため、今回もこの回からは確認できない。",
     "【継続・実測手段なし】週次の使用量上限はプラン階層で対応すると決まった（2026-09-03・x20で収まる）。claude.aiの課金設定はセッションから触れないため、実施済みかどうかをこの環境から確認する手段がない。"
   ],
-  "next": "レーンA/BはBQ 28日窓（2026-09-06頃見込み）まで引き続き根拠薄い。coverage-queue（レーンE）はpending 26件で潤沢——次回A/Bが空振りならE（先頭C08 /obsidian/compare/notion/）へ。次回レーンCは今回もテーマ側を使ったため、別の資産（プラグインのダウンロード分布・作者の重複など）を検討。"
+  "next": "C08 は Refresh 側で扱う（レーンAの足切り判定が要る）。キューの次の pending 先頭は C09 /obsidian/compare/capacities/。価値契約は horizon 1日なので、2026-09-06 の観測後に Decision Monitor が決済する。"
 }

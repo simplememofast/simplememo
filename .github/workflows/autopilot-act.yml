@@ -32,11 +32,14 @@
 name: Autopilot Act
 
 on:
+  push:
+    branches: [main]
+    paths: ['data/routine-runs.json']
   repository_dispatch:
     types: [autopilot-completed]
   workflow_run:
     # 監視Issueの作成・閉鎖を次の朝まで台帳の外へ置かない。
-    workflows: ["Obsidian Autopilot", "Autopilot Health", "Cron Health"]
+    workflows: ["Obsidian Autopilot", "Autopilot Health", "Cron Health", "Auto-merge Claude PRs"]
     types: [completed]
   schedule:
     - cron: '0 0 * * *'   # 09:00 JST
@@ -58,7 +61,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  routine-intake:
+    # GITHUB_TOKEN merges suppress push events. Inspect current main after the
+    # auto-merge workflow completes; the report records the snapshot Act consumed.
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'Auto-merge Claude PRs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    outputs:
+      needed: ${{ steps.observe.outputs.needed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check whether routine observation reached intake
+        id: observe
+        env:
+          UPSTREAM_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+        run: |
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import { routineIntakeNeeded } from './scripts/lib/routine-actions.mjs';
+          const doc = JSON.parse(fs.readFileSync('data/routine-runs.json', 'utf8'));
+          const report = JSON.parse(fs.readFileSync('data/autopilot-actions-report.json', 'utf8'));
+          const needed = process.env.UPSTREAM_CONCLUSION === 'success' && routineIntakeNeeded(doc, report);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `needed=${needed}\n`);
+          JS
+
   act:
+    needs: routine-intake
+    # A routine observation should wake intake. If this job's optional API
+    # observer writes a snapshot, its own merge must not create a publish loop.
+    if: >-
+      always() && !cancelled() &&
+      (needs.routine-intake.result == 'skipped' || needs.routine-intake.outputs.needed == 'true') &&
+      (github.event_name != 'push' ||
+      (!startsWith(github.event.head_commit.message, '日次アクチュエータの同期（') &&
+       !startsWith(github.event.head_commit.message, 'chore(autopilot): 日次アクチュエータの同期（')))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

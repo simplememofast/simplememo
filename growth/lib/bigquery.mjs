@@ -310,7 +310,10 @@ async function request(url, { token, quotaProject = null, method = 'GET', body }
     if (res.ok) return payload;
 
     const message = payload?.error?.message || `HTTP ${res.status}`;
-    lastError = new Error(`BigQuery: ${message}`);
+    lastError = Object.assign(new Error(`BigQuery: ${message}`), {
+      status: res.status,
+      reasons: (payload?.error?.errors || []).map((e) => e.reason),
+    });
     if (!RETRY_STATUS.has(res.status) || attempt === MAX_ATTEMPTS) throw lastError;
     await sleep(2 ** attempt * 500);
   }
@@ -338,7 +341,14 @@ async function request(url, { token, quotaProject = null, method = 'GET', body }
  * @param {object} [opts.types]    BigQuery type for each param; defaults to STRING
  * @param {string} [opts.location] dataset location — must match, or the job is not found
  */
-export async function query(client, { sql, params = {}, types = {}, location } = {}) {
+export async function query(client, {
+  sql, params = {}, types = {}, location, dryRun = false,
+  maximumBytesBilled, includeJobMetadata = false,
+} = {}) {
+  if (maximumBytesBilled !== undefined &&
+      (!/^\d+$/.test(String(maximumBytesBilled)) || BigInt(maximumBytesBilled) <= 0n)) {
+    throw new Error('maximumBytesBilled must be a positive integer');
+  }
   const { projectId } = client;
   const loc = location ?? client.location ?? null;
 
@@ -358,16 +368,26 @@ export async function query(client, { sql, params = {}, types = {}, location } =
       queryParameters: queryParameters.length ? queryParameters : undefined,
       timeoutMs: 60_000,
       maxResults: 20_000,
+      ...(dryRun ? { dryRun: true } : {}),
+      ...(maximumBytesBilled !== undefined ? { maximumBytesBilled: String(maximumBytesBilled) } : {}),
       ...(loc ? { location: loc } : {}),
     },
   });
 
-  const schema = payload.schema;
+  // A dry run intentionally has no running job to poll.
+  if (dryRun) return {
+    rows: [], dryRun: true, jobId: null, location: loc,
+    totalBytesProcessed: payload.totalBytesProcessed == null ? null : Number(payload.totalBytesProcessed),
+    totalBytesBilled: 0, cacheHit: false,
+  };
+
+  let schema = payload.schema;
   const jobId = payload.jobReference?.jobId;
   const jobLocation = payload.jobReference?.location ?? loc;
   const rows = [];
 
   const collect = (p) => {
+    schema = p.schema ?? schema;
     for (const row of p.rows || []) rows.push(decodeRow(row, (p.schema || schema)?.fields || []));
   };
 
@@ -395,10 +415,48 @@ export async function query(client, { sql, params = {}, types = {}, location } =
     pageToken = payload.pageToken;
   }
 
+  const job = includeJobMetadata && jobId ? await request(
+    `${BQ_BASE}/projects/${encodeURIComponent(projectId)}/jobs/${encodeURIComponent(jobId)}` +
+    (jobLocation ? `?location=${encodeURIComponent(jobLocation)}` : ''), auth(client)
+  ) : null;
+  if (job?.status?.errorResult) {
+    throw Object.assign(new Error(`BigQuery job failed: ${job.status.errorResult.message}`), {
+      reasons: [job.status.errorResult.reason], jobId,
+    });
+  }
+  const stats = job?.statistics?.query;
   return {
     rows,
-    totalBytesProcessed: Number(payload.totalBytesProcessed || 0),
-    cacheHit: Boolean(payload.cacheHit),
+    totalBytesProcessed: Number(stats?.totalBytesProcessed ?? payload.totalBytesProcessed ?? 0),
+    totalBytesBilled: stats?.totalBytesBilled == null ? null : Number(stats.totalBytesBilled),
+    cacheHit: Boolean(stats?.cacheHit ?? payload.cacheHit),
+    jobId: jobId ?? null, location: jobLocation,
+    statementType: stats?.statementType ?? null,
+  };
+}
+
+/** Metadata only; omit the dataset ACL and raw user data. */
+export async function getDataset(client, { dataset }) {
+  const d = await request(`${BQ_BASE}/projects/${encodeURIComponent(client.projectId)}` +
+    `/datasets/${encodeURIComponent(dataset)}`, auth(client));
+  return {
+    id: d.datasetReference?.datasetId, location: d.location,
+    creationTime: d.creationTime ?? null,
+    defaultTableExpirationMs: d.defaultTableExpirationMs ?? null,
+    defaultPartitionExpirationMs: d.defaultPartitionExpirationMs ?? null,
+    maxTimeTravelHours: d.maxTimeTravelHours ?? null,
+  };
+}
+
+export async function getTable(client, { dataset, table }) {
+  const t = await request(`${BQ_BASE}/projects/${encodeURIComponent(client.projectId)}` +
+    `/datasets/${encodeURIComponent(dataset)}/tables/${encodeURIComponent(table)}`, auth(client));
+  return {
+    id: t.tableReference?.tableId, type: t.type, schema: t.schema ?? null,
+    creationTime: t.creationTime ?? null, lastModifiedTime: t.lastModifiedTime ?? null,
+    expirationTime: t.expirationTime ?? null,
+    numRows: t.numRows ?? null, numBytes: t.numBytes ?? null,
+    timePartitioning: t.timePartitioning ?? null,
   };
 }
 

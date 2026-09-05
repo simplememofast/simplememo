@@ -86,6 +86,11 @@ const RULES = [
   ['rating pair EN "4.4 … 10 ratings"',
     /(\d\.\d)((?:[^{}\d]|<[^>]+>|\d(?! ratings)){0,90}?)(\d+)( ratings\b)/g,
     (m, v, mid, n, tail) => C.ratingValue + mid + C.ratingCount + tail, 'own'],
+  // Localized hero ratings use the same source as JSON-LD. Keep the star
+  // and translated count label intact, and retain the own-page boundary.
+  ['rating pair localized hero',
+    /(★\s*)(\d(?:\.\d+)?)([^<\d]{0,60})(\d+)(\s*(?:تقييمات|valoraciones|ulasan|개|avaliações|değerlendirme|則評分|个评分))/g,
+    (m, star, value, middle, count, label) => star + C.ratingValue + middle + C.ratingCount + label, 'own'],
   // Visible prices: enforced ONLY inside pricing sections / plan cards —
   // anywhere else on a page ($X vs competitor) prices may be editorial.
   ['JPY monthly (月額N円 / ¥N/月)',
@@ -263,6 +268,28 @@ if (SELFTEST) {
     drift(visibleRating, 'vs/captio/index.html').length === 0);
   t('見える評価は自社値の面では見る', drift(visibleRating, 'index.html').length === 1);
 
+  const localizedRatings = [
+    ["ar", "★ 1.0 (1 تقييمات في App Store)"],
+    ["es", "★ 1.0 · 1 valoraciones en App Store"],
+    ["id", "★ 1.0 · 1 ulasan di App Store"],
+    ["ko", "★ 1.0 · App Store 평가 1개"],
+    ["pt-BR", "★ 1.0 · 1 avaliações na App Store"],
+    ["tr", "★ 1.0 · App Store'da 1 değerlendirme"],
+    ["zh-Hant", "★ 1.0 · App Store 1 則評分"],
+    ["zh", "★ 1.0 · App Store 1 个评分"],
+  ];
+  for (const [locale, label] of localizedRatings) {
+    const html = `<p>${label}</p>`;
+    const rel = `${locale}/index.html`;
+    t(`${locale}: stale visible rating fails`, drift(html, rel).length === 1);
+    const fixed = scanHtml(html, rel, { write: true }).out;
+    const expected = html.replace('1.0', C.ratingValue).replace(/(?<![\d.])1(?![\d.])/, C.ratingCount);
+    t(`${locale}: write preserves translation and updates both values`, fixed === expected);
+    t(`${locale}: synchronized rating passes`, drift(fixed, rel).length === 0);
+    t(`${locale}: competitor rating is untouched`,
+      scanHtml(html, `${locale}/vs/competitor/index.html`, { write: true }).out === html);
+  }
+
   // **価格は料金セクションの中だけ。**外すと本文中の編集上の価格まで書き換える。
   t('価格は料金セクションの外では見ない', drift('<p>月額999円</p>').length === 0);
   t('価格は料金セクションの中では見る',
@@ -291,7 +318,7 @@ if (SELFTEST) {
   t('--check は書き換えない', scanHtml(drifted, 'fixture/x.html').out === drifted);
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 24 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 56 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
