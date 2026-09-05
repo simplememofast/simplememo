@@ -195,6 +195,14 @@ jobs:
           node scripts/check-domain-expiry.mjs --write 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
+      # **答えを job ログにも出す（`tee`）。**隣の domain-expiry は最初から tee があり、
+      # こちらだけ無かった。2026-09-05、その非対称が実害になった —— 公開版が 5.8.4 から
+      # 5.8.17 へ動いていたのに台帳が3日古いままで、**本番サイトが21面で 5.8.4 を名乗っていた。**
+      # このステップは Apple に届くランナーで毎日 --net を回して**正しい答えを出していた**が、
+      # 出力が step summary にしか行かないので、**台帳にも job ログにも残らず、
+      # あとから機械が読めなかった。**（サンドボックスからは itunes.apple.com への
+      # CONNECT が拒否されることがあるので、ここが唯一の観測点になる場合がある。）
+      # **--write は付けない。**この欄は人が実物を読んで動かす（appVersionNote に理由がある）。
       - name: Store facts vs App Store (report only)
         continue-on-error: true
         run: |
@@ -203,7 +211,7 @@ jobs:
             echo "## App Store 由来の公開表示"
             echo ""
             echo '```'
-            node scripts/check-store-facts.mjs --net 2>&1 || true
+            node scripts/check-store-facts.mjs --net 2>&1 | tee /dev/stderr || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

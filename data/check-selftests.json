@@ -262,6 +262,12 @@
       "broke": "8通りで落ちることを観測。**被覆の穴を1つ見つけて塞いだ** —— gate は15コードを出しうるのに、ドリルが期待に使っていたのは14で、`skip_run_cap`（1回あたりの上限）は一度も演習されていなかった。例ベースのドリルはシナリオを消しても `passed === total` が成り立つので、**2件のドリルも26件のドリルも同じ「全シナリオが期待どおり」を出す。**数ではなく被覆で判定するようにし、1回上限の3シナリオ（主系は止まる／force でも越えない／副系は動く）を足した。演習を消すと exit 1 になることを確かめた。自己テストは本番の run() にシナリオを渡す形にしてある（並行実装を持たない） [2026-09-05] 代替モデルがある場合にもAPI不能（forceを含む）、占有、本番/mainの出荷済み、当日PR、主系実行中で止まる7シナリオを追加。旧decideはこの組み合わせでdegrade_model/run=trueとなることを再現した。"
     },
     {
+      "script": "scripts/autopilot-output.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-05",
+      "broke": "実行ID照合削除・開始前と同じ記録の再利用・確認不能をmissingへ変更・snapshotのrun/attempt照合削除・PR待ちを本番証明へ変更・検査をモデルの作業treeから実行する配線へ変更、の6変異を実際の自己検査で検出。観測側のunknown分類を外す変異もAct自己検査で検出。41項目には実CLIのcapture→verifyと終了コード/step output、missing/unknown、開始前snapshotの上書き拒否を含む。手動の実API読取は旧実行33959414641に対応するPR不在を確認したが、過去のGitHub結果や無人実績は書き換えない。"
+    },
+    {
       "script": "scripts/autopilot-runs.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",
