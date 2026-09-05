@@ -425,17 +425,17 @@
               
             </div>
             <div class="reason-card__desc">
-              <span>サーバーにメモ本文を保存しません。送信が完了した瞬間、テキストはサーバーのメモリからも消えます。端末内のOutboxキューはAES-GCMで暗号化。あなたのアイデアはあなただけのものです。</span>
+              <span>端末内のOutboxキューはAES-GCMで暗号化します。メール送信時には本文が当社のRelay API（Cloudflare Workers）と外部配信サービス（Resend）を通過します。当社はメモ本文を恒常的に保存しません。メール配信はエンドツーエンド暗号化ではありません。</span>
               
             </div>
           </div>
           <div class="reason-card">
             <div class="reason-card__title">
-              <span>外部依存ゼロの設計</span>
+              <span>配信基盤と依存範囲</span>
               
             </div>
             <div class="reason-card__desc">
-              <span>特定の外部メールAPIに依存するリスクを教訓に、送信基盤を自前で構築しました。Cloudflare WorkersとResend APIの組み合わせにより、外部サービスの仕様変更に左右されない安定した送信を実現しています。</span>
+              <span>当社が開発するRelay APIはCloudflare Workers上で動作し、メール配信にはResend APIを利用します。これらの外部サービスの稼働状況や仕様変更の影響を受ける構成です。端末内のOutboxは、オフライン時のメモを保持してオンライン復帰時の再送に備えます。</span>
               
             </div>
           </div>
