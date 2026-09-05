@@ -45,7 +45,7 @@ function fail(msg) {
 }
 
 /** Assert a single 301 to `to`, and that `to` is itself terminal. */
-async function redirects(from, to) {
+async function redirects(from, to, { checkStaticDestination = true } = {}) {
   checked++;
   const r = await run(from);
   if (r.kind !== "redirect") {
@@ -62,6 +62,17 @@ async function redirects(from, to) {
     fail(
       `${from} → ${r.to} is NOT one hop: destination redirects again to ${second.to}`,
     );
+  } else if (second.kind !== "pass") {
+    fail(`${from} → ${r.to} is NOT a live destination: ${JSON.stringify(second)}`);
+  } else if (checkStaticDestination) {
+    // Middleware pass-through is not a 200: Pages may still redirect a
+    // directory without a trailing slash, or return 404 for a missing file.
+    const pathname = new URL(r.to, ORIGIN).pathname;
+    const file = path.join(ROOT, decodeURIComponent(pathname));
+    const target = pathname.endsWith("/") ? path.join(file, "index.html") : file + ".html";
+    if (!existsSync(target) || !statSync(target).isFile()) {
+      fail(`${from} → ${r.to} has no directly served HTML destination`);
+    }
   }
 }
 
@@ -139,8 +150,10 @@ if (process.argv.includes("--selftest")) {
   await expect("正しい行き先の 301 は通る（/faq.html → /faq）", () => redirects("/faq.html", "/faq"), false);
   await expect("**行き先が違う 301 は落ちる**（301 が出たことだけで通さない）", () => redirects("/faq.html", "/そんなページは無い"), true);
   await expect("**410 でないものを gone 扱いすると落ちる**", () => gone(served), true);
+  await expect("**存在しない転送先は落ちる**", () => redirects("/__normalization-test-missing.html", "/__normalization-test-missing"), true);
+  await expect("**Pages で再転送されるディレクトリは落ちる**", () => redirects("/en?lang=ja", "/en"), true);
 
-  console.log(`\n  自己テスト 7 件中 ${bad} 件失敗`);
+  console.log(`\n  自己テスト 9 件中 ${bad} 件失敗`);
   process.exit(bad === 0 ? 0 : 1);
 }
 
@@ -239,6 +252,12 @@ await redirects("/blog/line-keep-migration", "/blog/line-keep-alternative");
 await redirects("/blog/line-keep-migration.html", "/blog/line-keep-alternative");
 await redirects("/blog/line-keep-migration.html?lang=ja", "/blog/line-keep-alternative");
 await redirects("/vs/mem/", "/vs/");
+// _redirects already has /vs/mem. Without the same middleware entry,
+// stripping a query or .html first minted /vs/mem as an intermediate URL.
+await redirects("/vs/mem", "/vs/");
+await redirects("/vs/mem?lang=en", "/vs/");
+await redirects("/vs/mem.html?lang=en", "/vs/");
+await redirects("https://www.simplememofast.com/vs/mem?lang=en&utm_source=newsletter", "/vs/?utm_source=newsletter");
 await redirects("/vs/mem/index.html", "/vs/");
 await redirects("/vs/mem/?lang=en", "/vs/");
 await redirects("/privacy-policy", "/privacy");
@@ -322,7 +341,8 @@ await notFound("/growth/");
 await servesDirectly("/admin/");
 await servesDirectly("/admin/api/upload");
 // …but a slash-padded variant is normalized first, then re-enters as /admin/.
-await redirects("//admin/api/upload", "/admin/api/upload");
+// This is an authenticated Function endpoint, not a static HTML page.
+await redirects("//admin/api/upload", "/admin/api/upload", { checkStaticDestination: false });
 
 // ── 9. Canonical URLs must never redirect ────────────────────────────────
 for (const p of [
