@@ -125,6 +125,12 @@
     },
     {
       "file": "scripts/autopilot-act.mjs",
+      "expr": "pr.merged_at",
+      "disposition": "前提",
+      "note": "2026-09-05: closed PR一覧から観測窓内にマージされたPRを選ぶ条件。closedは未マージのクローズも含むため、merged_at=nullの行をマージ履歴へ入れないことが正しい。未処理の違反を消す検査ではない。新しいpending receipt自己テストのpr束縛で既存箇所が走査対象になった。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
       "expr": "ms",
       "disposition": "前提",
       "note": "上と同じ値の続き"

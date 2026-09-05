@@ -11,6 +11,56 @@ export function routineIntakeNeeded(doc, report) {
   return report?.routine_snapshot_sha256 !== routineSnapshotDigest(doc);
 }
 
+// Main may not yet contain Act's receipt while its PR is still being validated.
+// Starting Act for every unrelated merge then refreshes that PR and restarts CI.
+// A verified pending receipt suppresses duplicate intake only, never marks delivery.
+export async function routineIntakeDecision(doc, report, { repo, day, token, get } = {}) {
+  if (!routineIntakeNeeded(doc, report)) return { needed: false, reason: 'consumed_on_main' };
+  const needed = { needed: true, reason: 'new_observation' };
+  const unverified = { needed: true, reason: 'pending_receipt_unverified' };
+  if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo ?? '') || !/^\d{4}-\d{2}-\d{2}$/.test(day ?? '')) return unverified;
+  if (!get && !token) return unverified;
+  const read = get ?? (async endpoint => {
+    const res = await fetch(`https://api.github.com/repos/${repo}${endpoint}`, {
+      headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json', 'user-agent': 'simplememo-routine-intake' },
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) throw Error(`GitHub read failed (${res.status})`);
+    return res.json();
+  });
+  const branch = `claude/autopilot-act-${day.replaceAll('-', '')}`;
+  const validPr = pr => Number.isInteger(pr?.number) && pr.number > 0 && pr.state === 'open'
+    && pr.head?.ref === branch && pr.head.repo?.full_name === repo
+    && pr.base?.ref === 'main' && pr.base.repo?.full_name === repo
+    && /^[a-f0-9]{40}$/.test(pr.head.sha ?? '');
+  const jsonAt = async (file, head) => {
+    const data = await read(`/contents/${file}?ref=${head}`);
+    if (data?.type !== 'file' || data.encoding !== 'base64' || typeof data.content !== 'string') throw Error('Unverified receipt content');
+    return JSON.parse(Buffer.from(data.content, 'base64').toString('utf8'));
+  };
+  try {
+    const prs = await read('/pulls?state=open&base=main&head='
+      + encodeURIComponent(`${repo.split('/')[0]}:${branch}`) + '&per_page=100');
+    if (!Array.isArray(prs) || prs.length >= 100) return unverified;
+    const candidates = prs.filter(validPr);
+    if (candidates.length === 0) return needed;
+    if (candidates.length !== 1) return unverified;
+    const pr = await read(`/pulls/${candidates[0].number}`);
+    if (!validPr(pr) || pr.number !== candidates[0].number) return needed;
+    const [input, receipt] = await Promise.all([
+      jsonAt('data/routine-runs.json', pr.head.sha), jsonAt('data/autopilot-actions-report.json', pr.head.sha),
+    ]);
+    if (routineSnapshotDigest(input) !== routineSnapshotDigest(doc) || routineIntakeNeeded(doc, receipt)) return needed;
+    const [fresh, ref] = await Promise.all([
+      read(`/pulls/${pr.number}`), read(`/git/ref/heads/${encodeURIComponent(branch)}`),
+    ]);
+    if (!validPr(fresh) || fresh.number !== pr.number) return needed;
+    if (fresh.head.sha !== pr.head.sha || ref?.ref !== `refs/heads/${branch}`
+      || ref.object?.type !== 'commit' || ref.object.sha !== pr.head.sha) return unverified;
+    return { needed: false, reason: 'waiting_for_pr', pr: pr.number, head_sha: pr.head.sha, production_verified: false };
+  } catch { return unverified; }
+}
+
 const millis = value => typeof value === 'string' ? Date.parse(value) : NaN;
 const validId = value => typeof value === 'string' && /^trig_[A-Za-z0-9]+$/.test(value);
 const label = value => String(value ?? '').replace(/[\x00-\x1f\x7f<>`]/g, ' ').slice(0, 120);
