@@ -1977,12 +1977,12 @@ export function detectionEvidence(run, eventName, now = new Date(), completion =
   failures.sort((a, b) => Date.parse(a.completed_at) - Date.parse(b.completed_at));
   const failure = failures[0];
   return {
-    source: (['schedule', 'workflow_run'].includes(eventName)
-      || (eventName === 'repository_dispatch' && completion?.automatic === true)) ? 'act-reconcile' : 'act-reconcile-session',
+    source: (completion ? completion.automatic === true
+      : ['schedule', 'workflow_run'].includes(eventName)) ? 'act-reconcile' : 'act-reconcile-session',
     detected_at: detectedAt,
     failed_at: failure?.completed_at ?? null,
     detected_note: `Actions run ${run.id} を ${eventName || 'local-session'} で照合。`
-      + (completion ? `完了通知元run ${completion.upstream_run_id}、自動起動のAPI検証=${completion.automatic}。` : '')
+      + (completion ? `監視起動元run ${completion.upstream_run_id}、自動起動のAPI検証=${completion.automatic}。` : '')
       + (failure ? `失敗時刻は GitHub step #${failure.number}「${failure.name}」の completed_at。`
         : '失敗ステップの確定時刻は未取得。run の作成時刻で代用しない。'),
   };
@@ -1997,9 +1997,13 @@ export const HANDLERS = {
     [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
     if (!ctx.workflowRuns) return { ok: false, changed: 0, log: 'Actions API を読めず同期できない' };
     const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
+    const taken = new Set((ctx.runsDoc?.runs ?? []).map((r) => r.run_id));
     const log = [];
     let changed = 0;
-    for (const run of ctx.workflowRuns) {
+    // The API lists newest first. A later manual skip must not take the day's id
+    // before the failed scheduled run (or collide with another append in this batch).
+    const chronological = [...ctx.workflowRuns].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+    for (const run of chronological) {
       if (known.has(String(run.id))) continue;
       const v = interpretRun(run);
       if (!v) { log.push(`${run.id}: まだ完了していない`); continue; }
@@ -2011,7 +2015,6 @@ export const HANDLERS = {
       // ——external_ref と重複するが、**run_id は人が読む識別子**なので
       // 日付と経路が先頭に残る形を保つ。
       let runId = `ap-${run.jst_date.replace(/-/g, '')}-actions`;
-      const taken = new Set((ctx.runsDoc?.runs ?? []).map((r) => r.run_id));
       if (taken.has(runId)) runId = `${runId}-${run.id}`;
       if (taken.has(runId)) { log.push(`${run.id}: ${runId} が既にある`); continue; }
       // shipped は PR 番号が要る（validate が落とす）。PRの特定は機械には荷が重いので
@@ -2040,6 +2043,8 @@ export const HANDLERS = {
       if (observation.failed_at) args.push('--failed-at', observation.failed_at);
       try {
         const out = append(args);
+        taken.add(runId);
+        known.add(String(run.id));
         log.push(`${run.id} -> ${runId}: ${out.trim()}`);
         changed += 1;
       } catch (e) {
@@ -2487,15 +2492,24 @@ async function selftest() {
     t(`同期ハンドラから検知の起動元をappendへ渡す: ${eventName}`, value('--source')
       === (eventName === 'schedule' ? 'act-reconcile' : 'act-reconcile-session'));
   }
-  for (const automatic of [true, false]) {
+  for (const eventName of ['repository_dispatch', 'workflow_run', 'schedule']) for (const automatic of [true, false]) {
     let appended;
     const completion = { upstream_run_id: '123', automatic };
     await HANDLERS['reconcile-runs']({ workflowRuns: [observedRun], runsDoc: { runs: [] },
-      eventName: 'repository_dispatch', completion }, null,
+      eventName, completion }, null,
     { append: args => { appended = args; return 'recorded'; } });
     t(`完了通知の検証結果を実際のappendへ渡す: ${automatic}`, appended[appended.indexOf('--source') + 1]
       === (automatic ? 'act-reconcile' : 'act-reconcile-session'));
-    t('通知元の監査証跡を残す', appended[appended.indexOf('--detected-note') + 1].includes('完了通知元run 123'));
+    t('通知元の監査証跡を残す', appended[appended.indexOf('--detected-note') + 1].includes('監視起動元run 123'));
+  }
+  {
+    const appended = [];
+    const later = { ...observedRun, id: 124, created_at: '2026-09-04T00:10:00Z' };
+    await HANDLERS['reconcile-runs']({ workflowRuns: [later, observedRun, later], runsDoc: { runs: [] },
+      eventName: 'workflow_dispatch' }, null, { append: args => { appended.push(args); return 'recorded'; } });
+    const values = flag => appended.map(args => args[args.indexOf(flag) + 1]);
+    t('同日の最初の実行へ基本run_idを割り当てる', JSON.stringify(values('--external-ref')) === JSON.stringify(['123', '124']));
+    t('1バッチ内の追記でも同日IDを衝突させない', JSON.stringify(values('--run-id')) === JSON.stringify(['ap-20260904-actions', 'ap-20260904-actions-124']));
   }
   const matrix = {
     self_repair: {

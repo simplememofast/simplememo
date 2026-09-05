@@ -5,6 +5,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,14 +43,10 @@ export function automaticCompletion(current, upstream, jobs) {
 }
 
 export async function completionOrigin({ env = process.env, event, get, sleep = ms => new Promise(r => setTimeout(r, ms)) } = {}) {
-  if (env.GITHUB_EVENT_NAME !== 'repository_dispatch') return null;
+  if (!['schedule', 'workflow_run', 'repository_dispatch'].includes(env.GITHUB_EVENT_NAME)) return null;
   event ??= env.GITHUB_EVENT_PATH ? JSON.parse(fs.readFileSync(env.GITHUB_EVENT_PATH, 'utf8')) : {};
-  assert.equal(event.action, 'autopilot-completed', 'Wrong completion event type');
-  const upstreamId = event.client_payload?.upstream_run_id;
-  assert.match(String(upstreamId), /^[1-9]\d*$/, 'Invalid upstream run id');
   assert.equal(env.GITHUB_REPOSITORY, REPO, 'Completion is restricted to the production repository');
   assert.match(String(env.GITHUB_RUN_ID), /^[1-9]\d*$/, 'Missing current run id');
-  assert.notEqual(String(upstreamId), String(env.GITHUB_RUN_ID), 'Cannot notify itself');
   const token = env.GH_TOKEN || env.GITHUB_TOKEN;
   get ??= async endpoint => {
     assert.ok(token, 'GitHub read token is required');
@@ -61,6 +59,24 @@ export async function completionOrigin({ env = process.env, event, get, sleep = 
   };
   const current = await get(`/actions/runs/${env.GITHUB_RUN_ID}`);
   assert.ok(isRun(current, env.GITHUB_RUN_ID, 'autopilot-act.yml'), 'Wrong recipient workflow or branch');
+  assert.equal(current.event, env.GITHUB_EVENT_NAME, 'Monitor event does not match GitHub evidence');
+  const firstAttempt = current.run_attempt === 1 && String(env.GITHUB_RUN_ATTEMPT) === '1';
+  if (env.GITHUB_EVENT_NAME === 'schedule') {
+    return { upstream_run_id: String(current.id), automatic: firstAttempt };
+  }
+  if (env.GITHUB_EVENT_NAME === 'workflow_run') {
+    const parentId = event.workflow_run?.id;
+    assert.match(String(parentId), /^[1-9]\d*$/, 'Missing workflow_run parent');
+    const parent = await get(`/actions/runs/${parentId}`);
+    assert.ok(['obsidian-autopilot.yml', 'autopilot-health.yml', 'cron-health.yml']
+      .some(workflow => isRun(parent, parentId, workflow)), 'Wrong workflow_run parent');
+    return { upstream_run_id: String(parentId), automatic: firstAttempt
+      && parent.status === 'completed' && parent.event === 'schedule' && parent.run_attempt === 1 };
+  }
+  assert.equal(event.action, 'autopilot-completed', 'Wrong completion event type');
+  const upstreamId = event.client_payload?.upstream_run_id;
+  assert.match(String(upstreamId), /^[1-9]\d*$/, 'Invalid upstream run id');
+  assert.notEqual(String(upstreamId), String(env.GITHUB_RUN_ID), 'Cannot notify itself');
   let upstream;
   // The dispatching job still belongs to the parent run. Wait for its final result,
   // otherwise reconcile-runs would skip precisely the run that woke this observer.
@@ -94,10 +110,57 @@ export function checkWiring(primary, act, source) {
   assert.match(act, /repository_dispatch:\n    types: \[autopilot-completed\]/);
   assert.match(act, /workflow_run:[\s\S]*?types: \[completed\]/);
   assert.match(act, /cron: '0 0 \* \* \*'/);
+  assert.ok(act.indexOf('Prepare ledger branch before observation') < act.indexOf('id: act\n'), 'Load pending ledger before deriving observations');
+  assert.match(act, /git merge --no-edit origin\/main/);
+  assert.doesNotMatch(act, /git stash/);
   assert.match(source, /await completionOrigin\(\)/);
   assert.match(source, /primarySteps\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)/);
   assert.match(source, /jobId = primaryJob\(\(await jr\.json\(\)\)\.jobs \?\? \[\]\)\?\.id/);
   return true;
+}
+
+function testPendingBranch(act) {
+  const block = act.split('      - name: Prepare ledger branch before observation\n')[1]?.split('\n      #')[0];
+  assert.ok(block, 'Pending branch preparation is missing');
+  const shell = block.split('        run: |\n')[1].split('\n').map(line => line.replace(/^          /, '')).join('\n');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'act-branch-'));
+  const cwd = path.join(root, 'work');
+  const env = { ...process.env, RUNNER_TEMP: root, PATH: `${root}:${process.env.PATH}`,
+    GIT_AUTHOR_NAME: 'test', GIT_COMMITTER_NAME: 'test', GIT_AUTHOR_EMAIL: 'test@example.test', GIT_COMMITTER_EMAIL: 'test@example.test' };
+  const git = (...args) => execFileSync('git', args, { cwd, env, stdio: 'pipe' });
+  try {
+    fs.mkdirSync(cwd);
+    execFileSync('git', ['init', '--bare', path.join(root, 'origin')], { stdio: 'pipe' });
+    git('init', '-b', 'main'); git('remote', 'add', 'origin', path.join(root, 'origin'));
+    fs.mkdirSync(path.join(cwd, 'data')); fs.mkdirSync(path.join(cwd, 'scripts'));
+    fs.writeFileSync(path.join(cwd, 'data/autopilot-runs.json'), '[]\n');
+    fs.writeFileSync(path.join(cwd, 'scripts/trusted'), 'v1\n');
+    git('add', '.'); git('commit', '-m', 'base'); git('push', '-u', 'origin', 'main');
+    const day = execFileSync('date', ['+%Y%m%d'], { env: { ...env, TZ: 'Asia/Tokyo' }, encoding: 'utf8' }).trim();
+    const branch = `claude/autopilot-act-${day}`;
+    git('checkout', '-b', branch);
+    fs.writeFileSync(path.join(cwd, 'data/autopilot-runs.json'), '[1]\n');
+    git('commit', '-am', 'first observation'); git('push', '-u', 'origin', branch);
+    git('checkout', 'main');
+    fs.writeFileSync(path.join(cwd, 'scripts/trusted'), 'v2\n');
+    git('commit', '-am', 'new trusted code'); git('push', 'origin', 'main');
+    fs.writeFileSync(path.join(root, 'gh'), '#!/bin/sh\nprintf "123\\n"\n', { mode: 0o700 });
+    execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
+    assert.equal(fs.readFileSync(path.join(cwd, 'data/autopilot-runs.json'), 'utf8'), '[1]\n');
+    assert.equal(fs.readFileSync(path.join(cwd, 'scripts/trusted'), 'utf8'), 'v2\n');
+    fs.writeFileSync(path.join(cwd, 'data/autopilot-runs.json'), '[1,2]\n');
+    git('commit', '-am', 'second observation'); git('push', 'origin', branch);
+    git('checkout', 'main');
+    execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' });
+    assert.equal(fs.readFileSync(path.join(cwd, 'data/autopilot-runs.json'), 'utf8'), '[1,2]\n');
+    fs.writeFileSync(path.join(cwd, 'scripts/untrusted'), 'must not execute\n');
+    git('add', '.'); git('commit', '-m', 'unexpected code'); git('push', 'origin', branch);
+    git('checkout', 'main');
+    let rejected;
+    try { execFileSync('bash', ['-e', '-c', shell], { cwd, env, stdio: 'pipe' }); } catch (error) { rejected = error; }
+    assert.equal(rejected?.status, 1);
+    assert.match(rejected.stdout.toString(), /Unexpected pending PR path: scripts\/untrusted/);
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
 }
 
 async function selftest() {
@@ -134,6 +197,20 @@ async function selftest() {
   await assert.rejects(run({ event: { ...event, client_payload: {} } }), /Invalid upstream/);
   await assert.rejects(run({ event: { ...event, action: 'unknown' } }), /Wrong completion event/);
   assert.equal(await run({ env: { ...env, GITHUB_EVENT_NAME: 'workflow_dispatch' }, get: () => { throw Error('No API expected'); } }), null);
+  for (const monitorEvent of ['schedule', 'workflow_run']) {
+    const triggered = { ...current, event: monitorEvent };
+    const options = { env: { ...env, GITHUB_EVENT_NAME: monitorEvent },
+      event: { workflow_run: { id: 1 } }, get: mock(triggered) };
+    assert.equal((await run(options)).automatic, true);
+    assert.equal((await run({ ...options, get: mock({ ...triggered, run_attempt: 2 }) })).automatic, false);
+    assert.equal((await run({ ...options, env: { ...options.env, GITHUB_RUN_ATTEMPT: '2' } })).automatic, false);
+    if (monitorEvent === 'workflow_run') {
+      for (const changed of [{ event: 'workflow_dispatch' }, { run_attempt: 2 }]) {
+        assert.equal((await run({ ...options, get: mock(triggered, { ...upstream, ...changed }) })).automatic, false);
+      }
+      await assert.rejects(run({ ...options, get: mock(triggered, { ...upstream, path: '.github/workflows/other.yml' }) }), /Wrong workflow_run parent/);
+    }
+  }
   let waits = 0, reads = 0;
   const poll = async endpoint => endpoint.endsWith('/1') && ++reads < 3
     ? { ...upstream, status: 'in_progress' } : mock()(endpoint);
@@ -150,6 +227,7 @@ async function selftest() {
   const act = fs.readFileSync(path.join(ROOT, '.github/workflows/autopilot-act.yml'), 'utf8');
   const source = fs.readFileSync(path.join(ROOT, 'scripts/autopilot-act.mjs'), 'utf8');
   checkWiring(primary, act, source);
+  testPendingBranch(act);
   for (const mutated of [primary.replace('needs: autopilot', 'needs: absent'),
     primary.replace('createDispatchEvent', 'getWorkflow'),
     primary.replace('github-token: ${{ github.token }}', 'github-token: ${{ secrets.GH_PAT }}'),

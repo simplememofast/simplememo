@@ -93,6 +93,31 @@ jobs:
             exit 1
           fi
 
+      # Derive from the pending ledger itself. Computing against main and applying
+      # a stash onto a pending PR conflicts when two observers record the same run.
+      - name: Prepare ledger branch before observation
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
+          OPEN="$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$OPEN" ]; then
+            git fetch origin "$DAY"
+            git diff --name-only origin/main...FETCH_HEAD > "$RUNNER_TEMP/act-pending-paths"
+            while IFS= read -r FILE; do
+              case "$FILE" in
+                data/autopilot-actions.json|data/autopilot-actions-report.json|data/autopilot-runs.json|data/autopilot-cost.json|data/emergency-stop.json|data/eligibility-log.json|data/autonomy-score-history.json|autopilot/index.html) ;;
+                *) echo "Unexpected pending PR path: $FILE"; exit 1 ;;
+              esac
+            done < "$RUNNER_TEMP/act-pending-paths"
+            git checkout -B "$DAY" FETCH_HEAD
+            git merge --no-edit origin/main
+          else
+            git checkout -B "$DAY"
+          fi
+
       # 判定ロジックそのものの自己検査。台帳を読まないので、台帳が壊れていても
       # ここは通る（＝壊れているのが判定側か台帳側かを切り分けられる）。
       - name: 自己検査
@@ -150,36 +175,6 @@ jobs:
             exit 0
           fi
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # 【当日ブランチの扱い】**open なPRがあるかどうかだけで決める。**
-          #
-          #   open なPRがある  → まだ出荷されていない当日分がある。その続きから書く
-          #   open なPRが無い  → 前回のPRはマージ済み（か、そもそも無い）。
-          #                      **main から取り直す**
-          #
-          # 以前は「ブランチがあれば必ずその続き」にしていたが、main が進んだあとに
-          # 古いブランチをチェックアウトして stash pop すると、**衝突しても
-          # `|| true` が握り潰してコンフリクトマーカーごと commit しうる。**
-          # 実際 2回目の実走では main が2コミット進んでおり、たまたま衝突しなかった
-          # だけだった。台帳を壊す経路を運頼みにしない。
-          #
-          # 取り直しで捨てた差分は失われない —— この台帳は毎回 main の状態から
-          # 導出し直されるので、次の実行が同じ結論に到達する（実費の除外も
-          # append-cost が再度実測して積み直す）。**状態ではなく導出が正。**
-          if [ -n "$(gh pr list --head "$DAY" --state open --json number --jq '.[].number')" ]; then
-            echo "open なPRがある → 当日ブランチの続きから書く"
-            git stash -q
-            git fetch origin "$DAY"
-            git checkout -B "$DAY" FETCH_HEAD
-            # ここでの衝突は握り潰さない。**握り潰すとコンフリクトマーカーが
-            # 台帳に入って本番へ出る。**落として人が見るほうが安い。
-            git stash pop
-          else
-            echo "open なPRが無い → main から取り直す"
-            git checkout -B "$DAY"
-          fi
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json \
                   data/eligibility-log.json data/autonomy-score-history.json autopilot/index.html 2>/dev/null || true
