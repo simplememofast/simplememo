@@ -29,6 +29,7 @@
 (function () {
   "use strict";
 
+  if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
   if (window.__simpleMemoStoreTracking) return;
   window.__simpleMemoStoreTracking = true;
 

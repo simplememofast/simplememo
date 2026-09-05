@@ -14,11 +14,11 @@ function element(href, attrs = {}) {
     },
   };
 }
-function browser(links) {
+function browser(links, hostname = 'simplememofast.com') {
   const handlers = [], observed = [];
   let notify;
   const context = {
-    URL, WeakSet, location: { href: 'https://simplememofast.com/vs/logseq/', pathname: '/vs/logseq/' },
+    URL, WeakSet, location: { hostname, href: `https://${hostname}/vs/logseq/`, pathname: '/vs/logseq/' },
     document: { readyState: 'complete', querySelectorAll: () => links,
       addEventListener: (type, callback) => { if (type === 'click') handlers.push(callback); } },
     IntersectionObserver: class {
@@ -51,6 +51,16 @@ test('only this app contributes to acquisition events and impressions', () => {
   assert.deepEqual(b.events().map(e => e[1]), ['app_store_click', 'seo_cta_click']);
   assert.equal(b.events()[0][2].ct, 'jp obsidian');
   assert.equal(b.events()[0][2].measurement_version, '2026-09-05');
+});
+
+test('preview and local QA never enqueue production acquisition events', () => {
+  const own = element('https://apps.apple.com/app/id6758438948');
+  for (const host of ['127.0.0.1', 'localhost', 'preview.simplememo.pages.dev']) {
+    const b = browser([own], host);
+    b.click(own);
+    assert.equal(b.events().length, 0);
+    assert.equal(b.observed.length, 0);
+  }
 });
 
 test('half-visible threshold and one impression per element are enforced', () => {

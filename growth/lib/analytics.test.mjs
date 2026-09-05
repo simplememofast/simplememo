@@ -58,3 +58,34 @@ test('every indexable HTML page with an own-app CTA includes tracking and GA4', 
   }
   assert.deepEqual(missing, []);
 });
+
+test('every inline GA4 loader blocks previews/local QA and still configures production', () => {
+  const files = execFileSync('git', ['ls-files', '*.html'], { cwd: root, encoding: 'utf8' }).trim().split('\n');
+  let checked = 0;
+  for (const file of files) {
+    const html = fs.readFileSync(path.join(root.pathname, file), 'utf8');
+    for (const match of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi)) {
+      if (!match[0].includes('G-EPZVZKCVQG')) continue;
+      assert.ok(match[1].trim(), `${file}: unguarded external GA4 script`);
+      checked++;
+      for (const hostname of ['simplememofast.com', 'www.simplememofast.com', '127.0.0.1', 'preview.simplememo.pages.dev']) {
+        const appended = [], listeners = [];
+        const context = { location: { hostname, pathname: '/' + file },
+          document: { createElement: () => ({}), head: { appendChild: s => appended.push(s) } },
+          requestIdleCallback: callback => callback(), addEventListener: (_, callback) => listeners.push(callback) };
+        context.window = context;
+        vm.runInNewContext(match[1], context);
+        listeners.forEach(callback => callback());
+        const production = ['simplememofast.com', 'www.simplememofast.com'].includes(hostname);
+        assert.equal(appended.length, production ? 1 : 0, `${file} on ${hostname}`);
+        if (production) {
+          appended[0].onload();
+          const configs = Array.from(context.dataLayer).filter(args => args[0] === 'config');
+          assert.equal(configs.length, 1, file);
+          assert.equal(configs[0][1], 'G-EPZVZKCVQG', file);
+        } else assert.equal(context.dataLayer, undefined, file);
+      }
+    }
+  }
+  assert.ok(checked > 0, 'No inline loaders were checked');
+});
