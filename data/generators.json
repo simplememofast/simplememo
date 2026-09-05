@@ -207,6 +207,10 @@
       "why": "**--record が復旧の実績を書く。**やっていない復旧を実績にしない"
     },
     {
+      "file": "scripts/routine-observer-local.py",
+      "why": "MacのKeychain・実API・GitHub PR・launchdに接続する運用処理。CIでは資格情報不要の--selftestだけ実行し、--once/--installは静的生成物の再生成に使わない。"
+    },
+    {
       "file": "scripts/routine-observer.mjs",
       "why": "実APIの全ページ・現時刻を読む運転監視。--apply は観測状態と未解消一覧を更新するため、CIの静的再生成比較には使わない。資格情報を渡さない自己検査でHTTP失敗・不完全なページ・古い成功による誤閉鎖・配線切断を拒否し、本番の読み取りはAutopilot Actの専用ステップで行う。"
     },

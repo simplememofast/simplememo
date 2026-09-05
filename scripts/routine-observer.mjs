@@ -16,6 +16,7 @@ export function checkWiring(workflow) {
   assert(start > workflow.indexOf('- name: Prepare ledger branch before observation'), 'Read pending ledger before observing');
   const end = workflow.indexOf('\n      - name:', start + 1);
   const step = workflow.slice(start, end);
+  assert.match(step, /if: vars.CLAUDE_ROUTINE_API_READ_ENABLED == 'true'/);
   assert.match(step, /CLAUDE_CODE_OAUTH_TOKEN: \$\{\{ secrets.CLAUDE_CODE_OAUTH_TOKEN \}\}/);
   assert.match(step, /run: node scripts\/routine-observer.mjs --apply/);
   assert.equal((workflow.match(/CLAUDE_CODE_OAUTH_TOKEN/g) ?? []).length, 2, 'Keep credential scoped to the observer step');
@@ -151,6 +152,7 @@ async function selftest() {
   const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/autopilot-act.yml'), 'utf8');
   checkWiring(workflow);
   assert.throws(() => checkWiring(workflow.replace('run: node scripts/routine-observer.mjs --apply', 'run: echo disconnected')));
+  assert.throws(() => checkWiring(workflow.replace("if: vars.CLAUDE_ROUTINE_API_READ_ENABLED == 'true'", 'if: always()')));
   assert.throws(() => checkWiring(workflow.replace('data/autonomy-score-history.json data/routine-runs.json', 'data/autonomy-score-history.json')));
   const row = { id: 'trig_example1', name: 'Example', enabled: true, ended_reason: '', cron_expression: '0 0 * * *',
     last_fired_at: '2026-09-05T00:00:00Z',
