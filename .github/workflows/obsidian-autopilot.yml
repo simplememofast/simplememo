@@ -285,6 +285,19 @@ jobs:
           sudo apt-get -o DPkg::Lock::Timeout=120 update -qq
           sudo apt-get -o DPkg::Lock::Timeout=120 install -y -qq --no-install-recommends fonts-noto-cjk
 
+      - name: Capture output baseline before the model
+        id: output_baseline
+        if: >-
+          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
+          && steps.route.outputs.run_cap_ok == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/output-tools" "$GITHUB_SHA"
+          node "$RUNNER_TEMP/output-tools/scripts/autopilot-output.mjs" --capture "$RUNNER_TEMP/autopilot-output-before.json"
+
       # 【2026-08-21】run 32419185478（06:23 JST）はこのステップが**3秒**で
       # failure になり、その日の主系出荷がゼロになった。08-20 のapt詰まりとは
       # 別物で（フォント導入は同runで9秒・success）、ジョブログの実際の1行は:
@@ -479,60 +492,24 @@ jobs:
 
       # [2026-08-22 マージ] 下の2ステップは別々のブランチで同時に足された。
       # 競合ではなく補完関係なので両方残す。**順序に意味がある** —
-      # 「成果物ゼロなら落とす」が job を失敗させても、実費の抽出は
+      # 「成果物の実行IDを照合」が job を失敗させても、実費の抽出は
       # `if: always()` で必ず走る。失敗した回にも実費は発生しており、
       # 成功した回だけ記録すると上限判定が実態より甘くなる。
 
-      # 【2026-08-22】主系は 08-18 以降、毎日違う理由で不発になりながら job は
-      # 緑で終わってきた（実行空白 → aptで90分枯渇 → actor拒否で3秒failure →
-      # ツール不許可で成果物ゼロ）。壊れ方は毎回違うが、**「緑なのに何も出て
-      # いない」を検知できないという一点が共通していて、それが毎回、気づくのを
-      # 翌朝以降に遅らせている。**
-      #
-      # PR #525 で sitemap に入れた `--check` と同じ考え方をここに置く。出荷した
-      # なら当日ブランチが必ず存在する（記事なしの日でも status JSON と LOG だけの
-      # PRを出す規約なので、ブランチが無い＝本当に何もしていない）。別経路の
-      # 副系CCRが先に出していた場合だけは正当なので、本番status JSONが当日分なら
-      # それも成功として扱う。
-      # 【2026-08-25】条件を Claude Code ステップと揃えた。以前は
-      # `steps.gate.outputs.run == 'true'` だけを見ており、**月次上限で
-      # 意図的にスキップした日も「成果物ゼロ」で赤くなる**状態だった
-      # （正常に止まったことが故障として報告される）。1回上限のスキップを
-      # 足すにあたって同じ穴を広げないよう、ここで揃えている。
-      - name: 成果物ゼロなら落とす
-        if: >-
-          steps.gate.outputs.run == 'true' && steps.budget.outputs.within == 'true'
-          && steps.route.outputs.run_cap_ok == 'true'
+      # A pre-existing declaration branch passed the former existence check on
+      # 2026-09-05 even though this model run created no PR. Verify a fresh remote
+      # record bound to this run; an open PR remains pending, never production proof.
+      - name: 成果物の実行IDを照合
+        id: output
+        if: steps.claude.outcome == 'success'
         env:
-          TODAY: ${{ steps.gate.outputs.today }}
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           TODAY_DASH: ${{ steps.gate.outputs.today_dash }}
-        run: |
-          # checkout済みなので origin を使う（認証ヘッダが入っており、privateでも読める）。
-          # --exit-code は「該当refなし」を2で返す。それ以外の非ゼロは通信/認証の失敗で、
-          # 「出荷していない」証拠にはならないため、赤くせず警告に留める。
-          # ここを取り違えると、ネットワークの瞬断で毎朝falseな赤が出て誰も見なくなる。
-          rc=0
-          git ls-remote --exit-code origin "refs/heads/claude/obsidian-auto-${TODAY}" >/dev/null 2>&1 || rc=$?
+        run: node "$RUNNER_TEMP/output-tools/scripts/autopilot-output.mjs" --verify "$RUNNER_TEMP/autopilot-output-before.json"
 
-          if [ "$rc" -eq 0 ]; then
-            echo "当日ブランチ claude/obsidian-auto-${TODAY} を確認。"
-            exit 0
-          fi
-
-          if [ "$rc" -ne 2 ]; then
-            echo "::warning title=Obsidian Autopilot::git ls-remote が exit ${rc} で終了し、当日ブランチの有無を判定できなかった。成果物チェックはスキップする。"
-            exit 0
-          fi
-
-          # 別経路（副系CCR）が先に出していた場合は正当。
-          status_date="$(curl -sS --max-time 20 "https://simplememofast.com/data/autopilot-status.json?d=${TODAY}" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("date_jst",""))' 2>/dev/null || echo "")"
-          if [ "$status_date" = "$TODAY_DASH" ]; then
-            echo "当日ブランチは無いが本番status JSONが当日分（${status_date}）。別経路で出荷済みとみなす。"
-            exit 0
-          fi
-
-          echo "::error title=Obsidian Autopilot::Claude Code は成功したが成果物がゼロ（claude/obsidian-auto-${TODAY} も本番status JSONの当日分も無い）。ジョブログの result 行にある permission_denials_count と num_turns を最初に見ること。"
-          exit 1
+      - name: "成果物判定: ${{ steps.output.outputs.verdict || 'unknown' }}"
+        if: always() && steps.claude.outcome == 'success'
+        run: 'true'
 
       # 【実費の記録】claude-code-action の実行ログから total_cost_usd を取り出し、
       # runのサマリと通知に出す。
