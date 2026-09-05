@@ -55,7 +55,9 @@ jobs:
       - name: SEO gates fire (self-test)
         run: node scripts/seo-check.js --selftest
       - name: Editorial resources match their dated source data
-        run: python3 scripts/build-citation-assets.py --check
+        run: |
+          python3 scripts/build-citation-assets.py --selftest
+          python3 scripts/build-citation-assets.py --check
 
       - name: Run SEO validation
         run: |

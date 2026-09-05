@@ -9,6 +9,7 @@ import csv
 import hashlib
 import io
 import json
+import tempfile
 from collections import Counter
 from datetime import date
 from html import escape as e
@@ -271,17 +272,43 @@ put("assets/downloads/capture-measurement-worksheet.csv", csv_text(
     ["method", "trial", "device", "os_version", "app_version", "warm_or_cold", "start_definition", "end_definition", "ready_seconds", "actions_count", "destination", "destination_delay_seconds", "success", "notes"],
     [[method,i]+[""]*12 for method in ["Obsidian direct entry","Apple Shortcuts","Simple Memo","Email to self","Share sheet"] for i in range(1,11)]))
 
+def output_differences(root, expected):
+    differences = []
+    for rel, text in expected.items():
+        path = root / rel
+        if not path.exists() or path.read_text() != text:
+            differences.append(rel)
+    return differences
+
+
+def selftest():
+    with tempfile.TemporaryDirectory(prefix="citation-assets-test-") as folder:
+        root = Path(folder)
+        expected = {"report.html": "<p>19 of 28</p>\n", "runs.csv": "attempted,shipped\n28,19\n"}
+        assert output_differences(root, expected) == ["report.html", "runs.csv"], "missing outputs must fail"
+        for rel, text in expected.items():
+            (root / rel).write_text(text)
+        assert output_differences(root, expected) == [], "matching outputs must pass"
+        (root / "report.html").write_text("<p>19 of 41</p>\n")
+        assert output_differences(root, expected) == ["report.html"], "a changed denominator must fail"
+        (root / "report.html").write_text(expected["report.html"])
+        (root / "runs.csv").write_text("attempted,shipped\n28,20\n")
+        assert output_differences(root, expected) == ["runs.csv"], "changed downloaded data must fail"
+    print("Citation selftest: missing outputs, matching outputs, changed page, and changed CSV verified.")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
-    differences = []
-    for rel, text in outputs.items():
-        path = ROOT / rel
-        if args.check:
-            if not path.exists() or path.read_text() != text:
-                differences.append(rel)
-        else:
+    if args.selftest:
+        selftest()
+        raise SystemExit(0)
+    differences = output_differences(ROOT, outputs) if args.check else []
+    if not args.check:
+        for rel, text in outputs.items():
+            path = ROOT / rel
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text)
     if differences:
