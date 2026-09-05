@@ -117,12 +117,28 @@ export function reconcileObservation(previous, observation) {
         last_run_finished_at: row.last_run_finished_at, last_run_session_id: row.last_run_session_id,
         next_run_at: row.next_run_at };
       open.push({ ...prior, id: row.id, what, found_at: prior?.found_at ?? observation.observed_at.slice(0, 10),
-        why: prior?.why ?? `実APIの観測で ${what}。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。`,
+        why: prior?.what === what ? prior.why : what === 'pending'
+          ? '実APIはPENDING。実行は終了しておらず結果未確定。故障・復旧成功・依頼内容の達成には数えず、同じ実行の終了を次の観測で確認する。'
+          : `実APIの観測で ${what}。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。`,
+        ...(prior && prior.what !== what ? { state_history: [...(prior.state_history ?? []), {
+          what: prior.what, why: prior.why, observation: prior.observation ?? null,
+          changed_at: observation.observed_at,
+        }] } : {}),
         observation: evidence });
     } else if (prior) {
       assert(row.last_run_status === 'SUCCEEDED', 'A finding needs a successful run before closure');
       const priorRun = previous.routines.find(r => r.id === row.id);
-      if (priorRun?.last_run_fired_at) assert(Date.parse(row.last_run_fired_at) > Date.parse(priorRun.last_run_fired_at), 'A newer successful run is required');
+      if (priorRun?.last_run_fired_at) {
+        // A pending run can finish without changing its fire time. Failed or
+        // replaced runs still require a newer run; a status edit is not recovery.
+        const samePendingRun = priorRun.last_run_status === 'PENDING'
+          && row.last_run_fired_at === priorRun.last_run_fired_at
+          && typeof row.last_run_session_id === 'string' && row.last_run_session_id.length > 0
+          && row.last_run_session_id === priorRun.last_run_session_id
+          && Date.parse(row.last_run_finished_at) >= Date.parse(row.last_run_fired_at)
+          && Date.parse(row.last_run_finished_at) <= now;
+        assert(samePendingRun || Date.parse(row.last_run_fired_at) > Date.parse(priorRun.last_run_fired_at), 'A newer successful run or verified pending completion is required');
+      }
       closed.push({ ...prior, closed_at: observation.observed_at,
         resolution: 'APIの実行状態がSUCCEEDEDに変わった。セッションの終了状態であり、出荷・投稿・依頼内容の達成を証明しない。',
         evidence: { last_run_fired_at: row.last_run_fired_at, last_run_finished_at: row.last_run_finished_at,
@@ -195,11 +211,47 @@ async function selftest() {
   const recovered = reconcileObservation(repeat, later);
   assert.equal(recovered.open_budget, 0); assert.equal(recovered.closed_findings.length, 1);
   assert(recovered.closed_findings[0].resolution.includes('達成を証明しない'));
+  const pending = structuredClone(later);
+  pending.records[0].last_run_status = 'PENDING';
+  pending.records[0].last_run_finished_at = null;
+  const running = reconcileObservation(repeat, pending);
+  assert.equal(running.open_findings[0].what, 'pending');
+  assert.equal(running.open_budget, 1); assert.equal(running.closed_findings.length, 0);
+  assert(running.open_findings[0].why.includes('結果未確定'));
+  assert.equal(running.open_findings[0].state_history[0].what, 'failed');
+  assert.equal(running.open_findings[0].state_history[0].why, repeat.open_findings[0].why);
+  const stillRunning = reconcileObservation(running, { ...pending, observed_at: '2026-09-06T03:02:00Z' });
+  assert.equal(stillRunning.open_findings[0].state_history.length, 1);
+  assert.equal(stillRunning.closed_findings.length, 0);
+  const completed = structuredClone(later);
+  completed.observed_at = '2026-09-06T03:05:00Z';
+  completed.records[0].last_run_finished_at = '2026-09-06T03:04:00Z';
+  const finished = reconcileObservation(stillRunning, completed);
+  assert.equal(finished.open_budget, 0); assert.equal(finished.closed_findings.length, 1);
+  assert.equal(finished.closed_findings[0].evidence.last_run_fired_at, pending.records[0].last_run_fired_at);
+  const changedSession = structuredClone(completed);
+  changedSession.records[0].last_run_session_id = 'cse_other';
+  assert.throws(() => reconcileObservation(stillRunning, changedSession), /verified pending completion/);
+  const delayedStatus = structuredClone(completed);
+  delayedStatus.records[0].last_run_finished_at = '2026-09-06T00:01:00Z';
+  assert.equal(reconcileObservation(stillRunning, delayedStatus).open_budget, 0,
+    'A delayed API status can report a real completion before the preceding snapshot');
+  for (const invalidEnd of [null, '2026-09-05T23:59:00Z', '2026-09-06T03:06:00Z']) {
+    const invalidCompletion = structuredClone(completed);
+    invalidCompletion.records[0].last_run_finished_at = invalidEnd;
+    assert.throws(() => reconcileObservation(stillRunning, invalidCompletion), /verified pending completion/);
+  }
+  const endedFailed = structuredClone(completed);
+  endedFailed.records[0].last_run_status = 'FAILED';
+  const failedAgain = reconcileObservation(stillRunning, endedFailed);
+  assert.equal(failedAgain.open_findings[0].what, 'failed');
+  assert.equal(failedAgain.closed_findings.length, 0);
+  assert.equal(failedAgain.open_findings[0].state_history.length, 2);
   assert.throws(() => reconcileObservation(second, { ...observed, records: [] }), /missing/);
   assert.throws(() => reconcileObservation(prior, { ...observed, complete: false }), /Complete/);
   assert.throws(() => reconcileObservation(prior, { ...observed, observed_at: '2026-09-03T00:00:00Z' }), /Older/);
   assert.throws(() => reconcileObservation({ ...prior, intentional_stops: [{ id: row.id, why: 'owner stopped' }] }, observed), /Intentional/);
-  console.log('routine-observer: complete pagination, private-field exclusion, failure recording, verified closure and stop preservation passed');
+  console.log('routine-observer: complete pagination, private-field exclusion, failure/pending transitions, verified completion and stop preservation passed');
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
