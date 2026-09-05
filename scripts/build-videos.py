@@ -22,8 +22,8 @@ Honesty rules, which are not negotiable:
     about what the app looks like, and this file cannot verify that claim.
   * Every number shown traces to data/site-constants.json or to the measured
     table in blog/fastest-memo-app-benchmark.html.
-  * Each video states the relevant limitation out loud (dictation cannot
-    auto-start on watchOS; delivery is plain SMTP and therefore not E2EE).
+  * Each video states the relevant limitation (Watch email needs connectivity,
+    vault appends go through the iPhone; email delivery is not E2EE).
 
 Requires Pillow and an ffmpeg binary (npm ffmpeg-static, or FFMPEG env var).
 """
@@ -43,8 +43,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W, H = 1280, 720
 FPS = 24
 
-FONT_B = '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc'
-FONT_R = '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc'
+FONT_B = os.environ.get('VIDEO_FONT_B', '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc')
+FONT_R = os.environ.get('VIDEO_FONT_R', '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc')
 
 INK = (255, 255, 255)
 DIM = (150, 163, 196)
@@ -328,14 +328,14 @@ def build_launch(bg, icon, c):
 def build_apple_watch(bg, icon, c):
     frames = [(title_scene(bg, icon, 'APPLE WATCH', ['手首に話すだけで、', 'メールとObsidianへ。'],
                            'iPhoneを取り出さずに、Apple Watchから音声でメモを残せます。'), 3.2)]
-    steps = [('話す', 'マイクを1回タップ'), ('iPhone経由', '自動で中継'), ('届く', 'メールとObsidian')]
+    steps = [('開く', '音声入力が自動で開く'), ('話す', '「完了」で送信'), ('届く', 'メールとObsidian')]
     for k in range(1, 4):
         frames.append((steps_scene(bg, 'Apple Watchからの経路', steps, k), 1.1))
     frames.append((steps_scene(bg, 'Apple Watchからの経路', steps, 3), 1.6))
-    frames.append((caveat_scene(bg, 'watchOSの制約（全アプリ共通）',
-                                ['アプリの起動と同時に、音声入力を',
-                                 '自動で開始することはできません。',
-                                 'マイクを1回タップする操作が必要です。']), 3.6))
+    frames.append((caveat_scene(bg, '音声入力と保存先の条件',
+                                ['自動で開かないときは、マイクをタップ。',
+                                 'メール送信には通信が必要です。',
+                                 'Obsidianへの追記はiPhoneを経由します。']), 3.6))
     frames.append((outro_scene(bg, icon, 'Apple Watch対応。'), 2.4))
     return frames
 
@@ -430,7 +430,7 @@ VIDEOS = {
     'launch-1s': (build_launch, '起動して書いて送るまで約1秒 — 実測ベンチマーク',
                   'アプリの起動から送信までの3ステップと、入力を開始できるまでの実測時間を主要メモアプリと比較した図解動画です。数値は当サイトの計測表に基づきます。'),
     'apple-watch-voice': (build_apple_watch, 'Apple Watchから声だけでメモを残す',
-                          'Apple Watchで音声メモを取り、iPhone経由でメールとObsidianへ届けるまでの経路を示した図解動画です。watchOSでは起動時に音声入力を自動開始できない制約も説明します。'),
+                          'Apple Watchでアプリを開くと音声入力が開き、話して「完了」で送信する現行手順の図解動画です。自動で開かない場合のマイク操作、メール送信に必要な通信、Obsidianへの追記はiPhoneを経由することも説明します。'),
     'siri-airpods': (build_siri_airpods, 'Siriとその場のAirPodsでハンズフリーにメモを残す',
                      'アプリ内ガイドの実機スクリーンショットを使って、合言葉ひとつでAirPodsから音声メモを残す流れを紹介するスライドショー動画です。'),
     'obsidian-append': (build_obsidian, 'メモがObsidianのノートに追記されるまで',

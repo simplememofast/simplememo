@@ -819,7 +819,8 @@
         "Desktop converts worse than its traffic share (51% of search clicks, 35% of App Store clicks), which is expected: desktop visitors sensibly decline to click a badge they cannot install from. The waste is these 21 clicks, not half the audience.",
         "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
         "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input).",
-        "2026-08-28: **この実験は現状のままでは評価できない。**2つ別々の理由がある。\n\n1. **`__qr` のトークンがサイトに1つも存在しない。**実測（`grep -roh 'ct=[^&\"]*' --include=*.html`）で0件。target_metric が名指ししている集計単位が、そもそも出荷されていない。\n2. **仮に存在しても ASC には現れない。**Apple の閾値は「1キャンペーンにつき初回DL 5人以上」で、初回DLの実測は 4.5〜5.0/日。詳細は growth/reports/2026-08-28-campaign-token-cardinality.md。\n\nこの実験のノート自身が「**NOT MEASURABLE IN GA4** … The only readout is App Store Connect campaign data」と書いている。**その唯一の読み口が塞がっている。**\n\n**ここでは決定を書かない**（評価日は 2026-09-13、判断は持ち主のもの）。ただし 9/13 に「データが足りない」と読むのは誤りで、**待っても出ない**ことは今分かっている。`measurement_failed`（測れたが判断できない、ではなく測っていない）に近い形。"
+        "2026-08-28: **この実験は現状のままでは評価できない。**2つ別々の理由がある。\n\n1. **`__qr` のトークンがサイトに1つも存在しない。**実測（`grep -roh 'ct=[^&\"]*' --include=*.html`）で0件。target_metric が名指ししている集計単位が、そもそも出荷されていない。\n2. **仮に存在しても ASC には現れない。**Apple の閾値は「1キャンペーンにつき初回DL 5人以上」で、初回DLの実測は 4.5〜5.0/日。詳細は growth/reports/2026-08-28-campaign-token-cardinality.md。\n\nこの実験のノート自身が「**NOT MEASURABLE IN GA4** … The only readout is App Store Connect campaign data」と書いている。**その唯一の読み口が塞がっている。**\n\n**ここでは決定を書かない**（評価日は 2026-09-13、判断は持ち主のもの）。ただし 9/13 に「データが足りない」と読むのは誤りで、**待っても出ない**ことは今分かっている。`measurement_failed`（測れたが判断できない、ではなく測っていない）に近い形。",
+        "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。"
       ],
       "control": {
         "kind": "none",
@@ -991,7 +992,8 @@
       "evaluated_at": null,
       "notes": [
         "2026-08-11: 7ページに data-answer-block を挿入。対象は会話型クエリ 「セキュリティとコラボレーションの両立(54imp/pos4.7)」「apple watchで音声入力するには(49imp/pos9.0)」「2026年に社会人に最も評価されている(31imp/pos6.5)」「お金を払う価値がある(31imp/pos7.2)」「デジタルと手書きどちらが優れているか(18imp/pos5.9)」「標準的な議事録テンプレート(7imp/pos4.1)」「AIでタグを自動提案(7imp/pos6.4)」。セキュリティ比較の回答は他社(CryptPad/Notion/Standard Notes)を推し、自社は該当しないと明記している。短期CVを下げうるが現状クリック0のため下げる余地がない。判定はクリックではなく、ブランド検索表示数・AIO表示数・会話型クエリ件数と平均順位で行う。",
-        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
+        "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。"
       ],
       "pages": [
         "/blog/memo-app-security-comparison",
@@ -1237,7 +1239,9 @@
       "target_metric": "rich_result_impressions",
       "decision": null,
       "evaluated_at": null,
-      "notes": [],
+      "notes": [
+        "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。"
+      ],
       "control": {
         "kind": "pre_post",
         "note": "同上",
