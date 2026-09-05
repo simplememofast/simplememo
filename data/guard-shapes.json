@@ -615,6 +615,24 @@
       "expr": "a.pending_pr",
       "disposition": "前提",
       "note": "2026-09-05: 任意のPR待ち証跡が存在するときの型・用途検査。source=orphan・state=open・branchと40桁headの照合を要求する。欠落時は通常の未処理として表示・判定され、待機として抑止されない。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "pr.changed_files",
+      "disposition": "前提",
+      "note": "2026-09-05: 公開待ちPRのファイル一覧を変更総数と照合する。欠測・0件・ページ上限・不許可パスならassertで止まり、部分応答を待機の根拠にしない。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "pr.number",
+      "disposition": "前提",
+      "note": "2026-09-05: 一覧・詳細・再取得のPR番号が一致する場合だけ既存更新として待機する。欠落または変更はassertで停止し、別PRの証跡を流用しない。"
+    },
+    {
+      "file": "scripts/decision-monitor.mjs",
+      "expr": "pr.head.ref",
+      "disposition": "前提",
+      "note": "2026-09-05: 一覧・詳細・再取得・実ブランチrefを同一headとして照合する。欠落や不一致ならassertで止め、PRが覆わない変更を公開済み扱いしない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",

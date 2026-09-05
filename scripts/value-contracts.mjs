@@ -511,7 +511,7 @@ export async function selftest() {
     // repository. A helper-only test would miss a stale --feedback CLI route.
     g('checkout', '-q', '-b', 'feedback-cli', base);
     const save = (f, x) => { fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true }); fs.writeFileSync(path.join(dir, f), JSON.stringify(x, null, 2) + '\n'); };
-    for (const f of ['value-contracts.mjs', 'decision-review.mjs', 'autonomy-eligibility.mjs', 'autonomy-score.mjs', 'lib/selftest.mjs']) {
+    for (const f of ['value-contracts.mjs', 'decision-review.mjs', 'autonomy-eligibility.mjs', 'autonomy-score.mjs', 'lib/selftest.mjs', 'lib/decision-origin.mjs']) {
       fs.mkdirSync(path.dirname(path.join(dir, 'scripts', f)), { recursive: true });
       fs.copyFileSync(path.join(ROOT, 'scripts', f), path.join(dir, 'scripts', f));
     }
