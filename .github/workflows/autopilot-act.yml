@@ -32,6 +32,9 @@
 name: Autopilot Act
 
 on:
+  push:
+    branches: [main]
+    paths: ['data/routine-runs.json']
   repository_dispatch:
     types: [autopilot-completed]
   workflow_run:
@@ -59,6 +62,12 @@ concurrency:
 
 jobs:
   act:
+    # A routine observation should wake intake. If this job's optional API
+    # observer writes a snapshot, its own merge must not create a publish loop.
+    if: >-
+      github.event_name != 'push' ||
+      (!startsWith(github.event.head_commit.message, '日次アクチュエータの同期（') &&
+       !startsWith(github.event.head_commit.message, 'chore(autopilot): 日次アクチュエータの同期（'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
