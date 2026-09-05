@@ -108,7 +108,7 @@ jobs:
             git diff --name-only origin/main...FETCH_HEAD > "$RUNNER_TEMP/act-pending-paths"
             while IFS= read -r FILE; do
               case "$FILE" in
-                data/autopilot-actions.json|data/autopilot-actions-report.json|data/autopilot-runs.json|data/autopilot-cost.json|data/emergency-stop.json|data/eligibility-log.json|data/autonomy-score-history.json|autopilot/index.html) ;;
+                data/autopilot-actions.json|data/autopilot-actions-report.json|data/autopilot-runs.json|data/autopilot-cost.json|data/emergency-stop.json|data/eligibility-log.json|data/autonomy-score-history.json|data/routine-runs.json|autopilot/index.html) ;;
                 *) echo "Unexpected pending PR path: $FILE"; exit 1 ;;
               esac
             done < "$RUNNER_TEMP/act-pending-paths"
@@ -122,6 +122,14 @@ jobs:
       # ここは通る（＝壊れているのが判定側か台帳側かを切り分けられる）。
       - name: 自己検査
         run: node scripts/autopilot-act.mjs --selftest
+
+      # Read metadata independently of model quota. Existing credentials stay in
+      # this step only; denial does not trigger login, fallback billing, or retries.
+      - name: Observe registered routine runs
+        continue-on-error: true
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: node scripts/routine-observer.mjs --apply
 
       - name: 実行（導出 → 突き合わせ → 自動実行）
         id: act
@@ -165,6 +173,7 @@ jobs:
           node scripts/autonomy-eligibility.mjs --check
           node scripts/autonomy-score.mjs --check
           node scripts/check-autopilot-page.mjs --check
+          node scripts/check-routine-runs.mjs --check
 
       - name: 変更があればPRにする
         if: inputs.dry_run != true
@@ -178,7 +187,7 @@ jobs:
           DAY="claude/autopilot-act-$(TZ=Asia/Tokyo date +%Y%m%d)"
           git add data/autopilot-actions.json data/autopilot-actions-report.json \
                   data/autopilot-runs.json data/autopilot-cost.json data/emergency-stop.json \
-                  data/eligibility-log.json data/autonomy-score-history.json autopilot/index.html 2>/dev/null || true
+                  data/eligibility-log.json data/autonomy-score-history.json data/routine-runs.json autopilot/index.html 2>/dev/null || true
           git commit -m "chore(autopilot): 日次アクチュエータの同期（$(TZ=Asia/Tokyo date +%Y-%m-%d)）"
           # 同日に再実行した場合は追記されるだけ。強制pushはしない
           # （弾かれること自体が「先に誰かが書いた」という出力）。
