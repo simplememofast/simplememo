@@ -69,6 +69,28 @@ function randomState(r) {
 
 const PROPERTIES = [
   {
+    name: '代替モデルでも死んだ占有への引き継ぎ情報を保持する',
+    why: '着手可能な引き継ぎを必ず作る。無作為な他の停止条件に隠れて検査が素通りするのを防ぐ',
+    check: (s, decide) => {
+      const result = decide(baseState({ branchClaimed: true, claimHasWork: false, claimAgeMinutes: 90,
+        preferredModel: 'preferred', modelsAvailable: ['fallback'], egressBlocked: s.egressBlocked }));
+      return result.run && result.takeover === true && result.modelUsed === 'fallback';
+    },
+  },
+  {
+    name: '代替モデルは着手可否・停止理由・実行制約を変えない',
+    why: '代替が使えても、API不能・占有・出荷済み・進行中は解除されない。外部到達制限と引き継ぎも残る',
+    check: (s, decide) => {
+      const normal = decide({ ...s, preferredModel: 'preferred', modelsAvailable: ['preferred'] });
+      const fallback = decide({ ...s, preferredModel: 'preferred', modelsAvailable: ['fallback'] });
+      if (normal.run !== fallback.run) return false;
+      if (!normal.run) return normal.code === fallback.code;
+      return fallback.modelUsed === 'fallback' && fallback.degraded === true
+        && Boolean(normal.takeover) === Boolean(fallback.takeover)
+        && JSON.stringify(normal.forbiddenLanes) === JSON.stringify(fallback.forbiddenLanes);
+    },
+  },
+  {
     name: 'run フラグは判定コードと必ず一致する',
     why: '片方だけ見て分岐しているコードがあると、縮退時に「走らない」と誤読される',
     check: (s, decide) => { const d = decide(s); return d.run === RUNNABLE.has(d.code); },
@@ -478,6 +500,20 @@ export function run({ cases = 400, seed = 20260822, decider = decide, gen = rand
 
 /** わざと壊した判定器と、**それを捕まえるはずの性質**。 */
 const MUTANTS = [
+  ['代替モデルで着手条件を飛び越える', (d) => (s) =>
+    s.preferredModel === 'preferred' && s.modelsAvailable?.[0] === 'fallback'
+      ? { run: true, code: CODES.DEGRADE_MODEL, modelUsed: 'fallback', degraded: true } : d(s),
+    '代替モデルは着手可否・停止理由・実行制約を変えない'],
+  ['代替モデルで外部到達制限を落とす', (d) => (s) => {
+    const result = { ...d(s) };
+    if (result.modelUsed) delete result.forbiddenLanes;
+    return result;
+  }, '代替モデルは着手可否・停止理由・実行制約を変えない'],
+  ['代替モデルで占有引き継ぎを落とす', (d) => (s) => {
+    const result = { ...d(s) };
+    if (result.modelUsed) delete result.takeover;
+    return result;
+  }, '代替モデルでも死んだ占有への引き継ぎ情報を保持する'],
   ['run を常に立てる', (d) => (s) => ({ ...d(s), run: true }),
     'run フラグは判定コードと必ず一致する'],
   ['判定コードを常に RUN にする', (d) => (s) => ({ ...d(s), code: CODES.RUN }),
