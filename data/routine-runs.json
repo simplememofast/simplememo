@@ -131,7 +131,7 @@
     "**壊しテストで触ったファイルを HEAD から戻すときは、",
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**"
   ],
-  "observed_at": "2026-09-05T01:33:19.516Z",
+  "observed_at": "2026-09-05T03:19:00.836Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -145,7 +145,7 @@
       "found_at": "2026-09-05",
       "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
       "observation": {
-        "observed_at": "2026-09-05T01:33:19.516Z",
+        "observed_at": "2026-09-05T03:19:00.836Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
@@ -160,7 +160,7 @@
       "found_at": "2026-09-05",
       "why": "PR実験D+14取得は00:05:44.401809454Zに発火し00:05:51.102823ZにFAILED。実行ログはfive_hourのrate_limit拒否、session limit、03:00 UTCリセットを記録。取得できた実測値や復旧成功には数えず、既存の次回予定を維持。",
       "observation": {
-        "observed_at": "2026-09-05T01:33:19.516Z",
+        "observed_at": "2026-09-05T03:19:00.836Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T00:05:44.401809454Z",
@@ -170,18 +170,18 @@
       }
     },
     {
-      "id": "trig_01RcUDUaFDf86KffssLRsQdw",
-      "what": "never_ran",
+      "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
+      "what": "failed",
       "found_at": "2026-09-05",
-      "why": "PR実験D+14の取りこぼし監視は有効だが、APIのlast_runとlast_fired_atはnull。次回は2026-09-05T03:07:00Z。未実行を記録し、次の発火後の実レコードで確認する。将来の予定があることだけでは成功にしない。",
+      "why": "実APIの観測で failed。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T01:33:19.516Z",
+        "observed_at": "2026-09-05T03:19:00.836Z",
         "enabled": true,
-        "last_run_status": null,
-        "last_run_fired_at": null,
-        "last_run_finished_at": null,
-        "last_run_session_id": null,
-        "next_run_at": "2026-09-05T03:07:00Z"
+        "last_run_status": "FAILED",
+        "last_run_fired_at": "2026-09-05T02:31:55.483723663Z",
+        "last_run_finished_at": "2026-09-05T02:32:01.721717Z",
+        "last_run_session_id": "cse_01Le2RXrWQJP6asVodZZ5nzY",
+        "next_run_at": "2026-09-05T11:31:00Z"
       }
     }
   ],
@@ -299,12 +299,12 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-09-05T02:31:00Z",
-      "last_fired_at": "2026-09-04T11:02:32.639749Z",
-      "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-09-04T11:02:32.626503409Z",
-      "last_run_finished_at": "2026-09-04T11:04:13.128273Z",
-      "last_run_session_id": "cse_01Ei2MTMHFTggEC1DqVDMSbs"
+      "next_run_at": "2026-09-05T11:31:00Z",
+      "last_fired_at": "2026-09-05T02:31:55.495459Z",
+      "last_run_status": "FAILED",
+      "last_run_fired_at": "2026-09-05T02:31:55.483723663Z",
+      "last_run_finished_at": "2026-09-05T02:32:01.721717Z",
+      "last_run_session_id": "cse_01Le2RXrWQJP6asVodZZ5nzY"
     },
     {
       "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
@@ -369,12 +369,12 @@
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
-      "next_run_at": "2026-09-05T03:07:00Z",
-      "last_fired_at": null,
-      "last_run_status": null,
-      "last_run_fired_at": null,
-      "last_run_finished_at": null,
-      "last_run_session_id": null
+      "next_run_at": "2026-09-06T03:07:00Z",
+      "last_fired_at": "2026-09-05T03:07:34.700434Z",
+      "last_run_status": "SUCCEEDED",
+      "last_run_fired_at": "2026-09-05T03:07:34.688042683Z",
+      "last_run_finished_at": "2026-09-05T03:08:36.876554Z",
+      "last_run_session_id": "cse_013drTFUw1VvYnu1AuBSPqVh"
     },
     {
       "id": "trig_01TixKQ5Sovfjfn8rRVQCrYf",
@@ -445,20 +445,7 @@
     "total_records": 222,
     "unregistered_current_count": 0,
     "ended_records": 206,
-    "ended_since_previous": [
-      {
-        "id": "trig_01RaeF1da7KhM4HbsC3gxVuG",
-        "name": "日次アクチュエータが新しい配線で動いたか…",
-        "ended_reason": "run_once_fired",
-        "last_fired_at": "2026-09-05T01:30:55.667247Z"
-      },
-      {
-        "id": "trig_01YNC2N7JqL87AWE47NuuXnj",
-        "name": "副系プローブの期限判定（09-05）",
-        "ended_reason": "run_once_fired",
-        "last_fired_at": "2026-09-05T01:30:55.910732Z"
-      }
-    ],
+    "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
   },
   "closed_findings": [
@@ -469,6 +456,28 @@
       "why": "**`x-engagement-simplememofast 昼スロット（12:30 JST）` が never_ran。ただし故障ではない —— まだ番が来ていない。**\n\n    cron        30 3 * * *      （03:30 UTC = 12:30 JST）\n    created_at  2026-09-01T07:30:09Z\n    next_run_at 2026-09-02T03:33:05Z\n    last_run    null\n\n**作られたのが 07:30Z で、その日のスロット 03:30Z は既に過ぎていた。**初回の機会は 09-02 03:33Z で、**まだ来ていない。**対になる `夜スロット（19:30 JST・30 10 * * *）` は同じ 07:30Z に作られ、**同日 10:33Z に SUCCEEDED している** —— 作成後にスロットが来たほうは走った。\n\n**したがって「黙って止まっている」ではない。**それでも一覧に入れるのは、**検査が『どちらの一覧にも無い』を落とすから**で、これは正しい設計。**枠を上げて通すのではなく、理由を書いて入れる**（この検査は件数と枠の一致を要求するので、枠だけ動かすことはできない）。\n\n**閉じ条件: 09-02 03:33Z 以降に last_run が入ること。**そこで入らなければ、**そのときは本物の never_ran** —— 初回の機会を逃したことになる。\n\n**検査側の残り課題（今回は直していない）。**`diagnose` の never_ran は`created_at` と次回発火の関係を見ないので、**「一度も走っていない」と「まだ番が来ていない」を区別できない。**\n同じ関数の overdue は 08-28 に同型の誤りを直している —— 壁時計ではなく**写しの観測時刻**を基準にする、という修正で、コメントに『**発火しなかった**と**発火したか写しからは分からない**は違う』と書いてある。\n**ここで足りないのは3つ目の区別: 『まだ発火する番が来ていない』。**\n**直すなら慎重に** —— never_ran は 2026-08-12 の実害（発火記録あり・実行痕跡ゼロ）を捕まえるための規則で、**next_run_at が未来であることだけを根拠に黙らせると、next_run_at が進み続ける形の故障を永久に見逃す。**created_at との差で bound を掛ける必要があり、cron の周期が要る。**周期を推定して黙らせるのは、この規則を弱める側に倒れる。**",
       "closed_at": "2026-09-05T00:47:25Z",
       "resolution": "実APIのlast_runはSUCCEEDED。2026-09-04T22:59:34.658227467Z発火、23:04:17.994813Z終了で、never_ranではなくなった。これはセッションの終了状態であり、SNS投稿の実行成功を証明しない。"
+    },
+    {
+      "id": "trig_01RcUDUaFDf86KffssLRsQdw",
+      "what": "never_ran",
+      "found_at": "2026-09-05",
+      "why": "PR実験D+14の取りこぼし監視は有効だが、APIのlast_runとlast_fired_atはnull。次回は2026-09-05T03:07:00Z。未実行を記録し、次の発火後の実レコードで確認する。将来の予定があることだけでは成功にしない。",
+      "observation": {
+        "observed_at": "2026-09-05T01:33:19.516Z",
+        "enabled": true,
+        "last_run_status": null,
+        "last_run_fired_at": null,
+        "last_run_finished_at": null,
+        "last_run_session_id": null,
+        "next_run_at": "2026-09-05T03:07:00Z"
+      },
+      "closed_at": "2026-09-05T03:19:00.836Z",
+      "resolution": "APIの実行状態がSUCCEEDEDに変わった。セッションの終了状態であり、出荷・投稿・依頼内容の達成を証明しない。",
+      "evidence": {
+        "last_run_fired_at": "2026-09-05T03:07:34.688042683Z",
+        "last_run_finished_at": "2026-09-05T03:08:36.876554Z",
+        "last_run_session_id": "cse_013drTFUw1VvYnu1AuBSPqVh"
+      }
     }
   ]
 }
