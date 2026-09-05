@@ -126,6 +126,9 @@ jobs:
       # Read metadata independently of model quota. Existing credentials stay in
       # this step only; denial does not trigger login, fallback billing, or retries.
       - name: Observe registered routine runs
+        # The existing setup-token returned HTTP 401 for this API (run 33935822325).
+        # Enable only after this credential's read access has been verified.
+        if: vars.CLAUDE_ROUTINE_API_READ_ENABLED == 'true'
         continue-on-error: true
         env:
           CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
