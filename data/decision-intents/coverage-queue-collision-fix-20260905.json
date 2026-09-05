@@ -1,0 +1,242 @@
+{
+  "id": "coverage-queue-collision-fix-20260905",
+  "run_id": "sm-20260905-queue-collision",
+  "created_at": "2026-09-05T10:00:18.342Z",
+  "metric": "publishing_day_rate",
+  "metric_policy_hash": "2cab4a44b192de519158921c6ea4eca81015ea18dc784514693a35604ffd30c3",
+  "baseline": 1,
+  "baseline_date": "2026-09-04",
+  "null_model": {
+    "kind": "trailing_median",
+    "value": 0.5,
+    "n": 14,
+    "samples": [
+      {
+        "date": "2026-09-04",
+        "value": 1,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-09-03",
+        "value": 1,
+        "n": 2,
+        "reason": null
+      },
+      {
+        "date": "2026-09-02",
+        "value": 0,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-09-01",
+        "value": 0,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-08-31",
+        "value": 0,
+        "n": 2,
+        "reason": null
+      },
+      {
+        "date": "2026-08-30",
+        "value": 0,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-08-29",
+        "value": 0,
+        "n": 2,
+        "reason": null
+      },
+      {
+        "date": "2026-08-28",
+        "value": 1,
+        "n": 2,
+        "reason": null
+      },
+      {
+        "date": "2026-08-27",
+        "value": 1,
+        "n": 3,
+        "reason": null
+      },
+      {
+        "date": "2026-08-26",
+        "value": 1,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-08-25",
+        "value": 0,
+        "n": 3,
+        "reason": null
+      },
+      {
+        "date": "2026-08-24",
+        "value": 0,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-08-23",
+        "value": 1,
+        "n": 1,
+        "reason": null
+      },
+      {
+        "date": "2026-08-22",
+        "value": 1,
+        "n": 2,
+        "reason": null
+      }
+    ]
+  },
+  "predicted_delta": 0.5,
+  "p": 0.3,
+  "horizon_days": 1,
+  "counterfactual": {
+    "id": "implement-c08-notion-page-20260905",
+    "reason": "C08をそのまま新規ページとして実装すると、lang=ja の /vs/notion-vs-obsidian/ と同一主題で自社競合になる。キューの注記が (EN) と誤っていることを実測で確認したので、実装せず注記を直す"
+  },
+  "rank_gap": 0.6499999999999999,
+  "touches": [
+    "growth/content/coverage-queue.json"
+  ],
+  "max_changed_lines": 60,
+  "max_binary_bytes": 0,
+  "predicted_usd": 0.6,
+  "eligibility": {
+    "candidate_id": "coverage-queue-collision-fix-20260905",
+    "title": null,
+    "judged_jst": "2026-09-05",
+    "verdict": "eligible",
+    "halted": false,
+    "reversibility_class": "R0",
+    "criteria": {
+      "reversibility": {
+        "result": "pass",
+        "why": "R0",
+        "class": "R0",
+        "class_source": "declared"
+      },
+      "boundedness": {
+        "result": "pass",
+        "why": "1 パス・content の範囲内",
+        "scope": "content",
+        "scope_source": "inferred"
+      },
+      "evidence_age": {
+        "result": "pass",
+        "why": "0 日前の観測（declared）",
+        "age_days": 0,
+        "evidence_source": "declared"
+      },
+      "budget": {
+        "result": "pass",
+        "why": "予測 $0.6000（declared / 上限 $1.5）",
+        "predicted_usd": 0.6,
+        "cap_usd": 1.5,
+        "kind": "analysis",
+        "prediction_source": "declared"
+      },
+      "repeat_guard": {
+        "result": "pass",
+        "why": "0 日（上限 7 日 / 実行主体 不要）",
+        "open_days": 0
+      }
+    },
+    "reasons": []
+  },
+  "evidence": {
+    "source_hash": "8dc733719e163e6f3e49fb18c9a3ab5c3cf0c92628947b2d11b76e16d0db09a9",
+    "date": "2026-09-05"
+  },
+  "rollback": {
+    "mode": "revert_static_only",
+    "paths": []
+  },
+  "input": {
+    "id": "coverage-queue-collision-fix-20260905",
+    "run_id": "sm-20260905-queue-collision",
+    "metric": "publishing_day_rate",
+    "touches": [
+      "growth/content/coverage-queue.json"
+    ],
+    "lane": "F",
+    "action": "refresh",
+    "reversibility_class": "R0",
+    "evidence_date": "2026-09-05",
+    "predicted_usd": 0.6,
+    "predicted_delta": 0.5,
+    "p": 0.3,
+    "horizon_days": 1,
+    "max_changed_lines": 60,
+    "counterfactual": {
+      "id": "implement-c08-notion-page-20260905",
+      "reason": "C08をそのまま新規ページとして実装すると、lang=ja の /vs/notion-vs-obsidian/ と同一主題で自社競合になる。キューの注記が (EN) と誤っていることを実測で確認したので、実装せず注記を直す"
+    },
+    "rank_gap": 0.6499999999999999,
+    "max_binary_bytes": 0
+  },
+  "selection": {
+    "selected": "coverage-queue-collision-fix-20260905",
+    "reason": "ranked_first",
+    "exploration": false
+  },
+  "candidates": [
+    {
+      "id": "coverage-queue-collision-fix-20260905",
+      "run_id": "sm-20260905-queue-collision",
+      "rank": 0.85,
+      "metric": "publishing_day_rate",
+      "predicted_delta": 0.5,
+      "p": 0.3,
+      "horizon_days": 1,
+      "counterfactual": {
+        "id": "implement-c08-notion-page-20260905",
+        "reason": "C08をそのまま新規ページとして実装すると、lang=ja の /vs/notion-vs-obsidian/ と同一主題で自社競合になる。キューの注記が (EN) と誤っていることを実測で確認したので、実装せず注記を直す"
+      },
+      "rank_gap": 0.6499999999999999,
+      "touches": [
+        "growth/content/coverage-queue.json"
+      ],
+      "max_changed_lines": 60,
+      "max_binary_bytes": 0,
+      "predicted_usd": 0.6,
+      "lane": "F",
+      "action": "refresh",
+      "reversibility_class": "R0",
+      "evidence_date": "2026-09-05"
+    },
+    {
+      "id": "implement-c08-notion-page-20260905",
+      "run_id": "sm-20260905-queue-collision",
+      "rank": 0.2,
+      "metric": "publishing_day_rate",
+      "predicted_delta": 0.5,
+      "p": 0.3,
+      "horizon_days": 1,
+      "counterfactual": {
+        "id": "coverage-queue-collision-fix-20260905",
+        "reason": "衝突を直さずに実装すると重複ページになる"
+      },
+      "rank_gap": 0.6499999999999999,
+      "touches": [
+        "obsidian/compare/notion/index.html"
+      ],
+      "max_changed_lines": 1400,
+      "max_binary_bytes": 0,
+      "predicted_usd": 3,
+      "lane": "E",
+      "action": "new",
+      "reversibility_class": "R1",
+      "evidence_date": "2026-09-05"
+    }
+  ]
+}
