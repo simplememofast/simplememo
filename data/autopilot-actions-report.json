@@ -1,8 +1,15 @@
 {
   "as_of_jst": "2026-09-05",
   "routine_snapshot_sha256": "846c15cc947c0944ec2c2af83008c8c05cc3476387436addf6a97a86236e4ac9",
-  "open_total": 10,
+  "open_total": 9,
   "pending_pr": [
+    {
+      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
+      "title": "PR #949 の反映待ち: claude/google-discover-strategy-ydu1a6",
+      "pr": 949,
+      "first_verified_head": "cb625af9dd17dd08769b6c41c243ee36669dfda5",
+      "evidence": "PR #949 へ引き継いだhead cb625af9dd17dd08769b6c41c243ee36669dfda5 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
+    },
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260905",
       "title": "PR #924 の反映待ち: claude/autopilot-act-20260905",
@@ -18,11 +25,18 @@
       "evidence": "PR #946 へ引き継いだhead 5f00c7236459e148b19147ba4437026fbf457575 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
     },
     {
-      "id": "act-orphaned-branch-claude-zero-preneur-autonomy-roadmap-yzxaev",
-      "title": "PR #945 の反映待ち: claude/zero-preneur-autonomy-roadmap-yzxaev",
-      "pr": 945,
-      "first_verified_head": "dfd63061e572f5137dbd10945c49a70f6f354894",
-      "evidence": "PR #945 へ引き継いだhead dfd63061e572f5137dbd10945c49a70f6f354894 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
+      "id": "act-orphaned-branch-claude-score-improvement-nug323",
+      "title": "PR #947 の反映待ち: claude/score-improvement-nug323",
+      "pr": 947,
+      "first_verified_head": "564fc1e2a7f7c5369077e43ee821b0840ea82431",
+      "evidence": "PR #947 へ引き継いだhead 564fc1e2a7f7c5369077e43ee821b0840ea82431 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
+    },
+    {
+      "id": "act-orphaned-branch-Codex-routine-observations",
+      "title": "PR #948 の反映待ち: Codex/routine-observations",
+      "pr": 948,
+      "first_verified_head": "23ebbc80f73fda4ec77cc8d0bc1eb70a620af990",
+      "evidence": "PR #948 へ引き継いだhead 23ebbc80f73fda4ec77cc8d0bc1eb70a620af990 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
     }
   ],
   "oldest_open_days": 2,
@@ -32,11 +46,6 @@
       "id": "act-cost-sync",
       "title": "実費台帳に載っていない run が 1件",
       "evidence": "Actions の run はすべて実費台帳にある（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）"
-    },
-    {
-      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
-      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 4 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
-      "evidence": "claude/google-discover-strategy-ydu1a6 の取り残しは解消（走査に出てこない）"
     },
     {
       "id": "act-routine-snapshot-stale",
@@ -54,9 +63,9 @@
       "evidence": "claude/apple-submission-automation-8nc4cs の取り残しは解消（走査に出てこない）"
     },
     {
-      "id": "act-orphaned-branch-Codex-routine-observations",
-      "title": "ブランチ Codex/routine-observations に 1 コミットが取り残されている（PR #912 ほか5件 のマージ後）",
-      "evidence": "Codex/routine-observations の取り残しは解消（走査に出てこない）"
+      "id": "act-orphaned-branch-claude-zero-preneur-autonomy-roadmap-yzxaev",
+      "title": "PR #945 の反映待ち: claude/zero-preneur-autonomy-roadmap-yzxaev",
+      "evidence": "claude/zero-preneur-autonomy-roadmap-yzxaev の取り残しは解消（走査に出てこない）"
     }
   ],
   "human": [
@@ -84,15 +93,6 @@
       "age_days": 0,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
       "evidence": "#883 がまだ open",
-      "not_before_jst": null
-    },
-    {
-      "id": "act-orphaned-branch-claude-score-improvement-nug323",
-      "title": "ブランチ claude/score-improvement-nug323 に 2 コミットが取り残されている（PR #823 ほか17件 のマージ後）",
-      "detail": "ブランチ claude/score-improvement-nug323 が、最後のマージ（PR #823 / head f1db462）より2 件先にあり、**それらは main にも無い**: 4668b65, 564fc1e。（別の118件は main 側のコミットなので除外した）\n\nこのブランチは #742 #749 #751 #754 #756 #758 #760 #761 #762 #763 #764 #765 #766 #769 #770 #771 #772 #823 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: .github/workflows/analytics-read.yml / .github/workflows/autopilot-act.yml / .github/workflows/obsidian-autopilot.yml / .github/workflows/seo-check.yml / CLAUDE.md / about/index.html / ai-tags/index.html / apple-watch/index.html / ar/index.html / assets/img/autopilot/autonomy-timeline.svg / assets/video/apple-watch-voice-poster.jpg / assets/video/apple-watch-voice.mp4 / assets/video/manifest.json / autopilot/index.html / blog/freelance-memo-management.html / blog/instant-capture-workflow.html / captio-alternative/index.html / data/automation-coverage.json / data/autonomy-score.json / data/autonomy-timeline.json / data/autopilot-runs.json / data/autopilot-status.json / data/check-selftests.json / data/decision-intents/coverage-queue-collision-fix-20260905.json / data/decision-review.json / data/guard-shapes.json / data/kpi-definitions.json / data/pr-claims.json / data/routine-runs.json / data/site-constants.json / data/value-contracts.json / data/value-metrics.json / data/voice-shift/index.html / docs/autonomy-score-2026-09-04.md / docs/obsidian/AUTOPILOT_RUNBOOK.md / docs/pr-autopilot-2026-09-final.md / docs/pr-discover-handoff-2026-09-04.md / docs/pr-discover-strategy-2026-09-04.md / docs/seo/ACTION-PLAN-2026-09-05.md / docs/seo/FULL-AUDIT-REPORT-2026-09-05.md / docs/seo/audit-2026-09-05/README.md / docs/seo/audit-2026-09-05/bq_paths.txt / docs/seo/audit-2026-09-05/crawl-summary.json / docs/seo/audit-2026-09-05/gsc-bigquery.md / docs/seo/audit-2026-09-05/screenshots/apple-watch-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/autopilot-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/blog_best-memo-apps-2026-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/blog_line-keep-alternative-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/captio-alternative-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/download-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/en-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/glossary_e2e-encryption-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/ko-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/obsidian-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/obsidian_getting-started-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/obsidian_plugins-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/roadmap-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/root-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/vs-mobile-fold.png / docs/seo/audit-2026-09-05/screenshots/vs_notion-mobile-fold.png / docs/seo/audit-2026-09-05/seo-content.md / docs/seo/audit-2026-09-05/seo-performance.md / docs/seo/audit-2026-09-05/seo-schema.md / docs/seo/audit-2026-09-05/seo-sitemap.md / docs/seo/audit-2026-09-05/seo-technical.md / docs/seo/audit-2026-09-05/seo-visual.md / docs/seo/audit-2026-09-05/work-seo-content/autopilot_numbers.py / docs/seo/audit-2026-09-05/work-seo-content/autopilot_numeric.py / docs/seo/audit-2026-09-05/work-seo-content/benchmark-report.txt / docs/seo/audit-2026-09-05/work-seo-content/claims_hits.json / docs/seo/audit-2026-09-05/work-seo-content/html_files.txt / docs/seo/audit-2026-09-05/work-seo-content/one_second_class.py / docs/seo/audit-2026-09-05/work-seo-content/one_second_hits.json / docs/seo/audit-2026-09-05/work-seo-content/onpage.json / docs/seo/audit-2026-09-05/work-seo-content/onpage.py / docs/seo/audit-2026-09-05/work-seo-content/sweep_claims.py / docs/seo/audit-2026-09-05/work-seo-content/unserved_data.txt / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_apple-watch_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_autopilot_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_blog_best-memo-apps-2026.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_en_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_es_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_glossary_e2e-encryption_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_obsidian_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_obsidian_plugins_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run1-_vs_notion_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run2-_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run2-_autopilot_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run2-_obsidian_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run3-_apple-watch-obsidian_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-run3-_siri_.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-summary-run1.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-summary-run2.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv-summary-run3.json / docs/seo/audit-2026-09-05/work-seo-performance/cwv.js / docs/seo/audit-2026-09-05/work-seo-performance/cwv2.js / docs/seo/audit-2026-09-05/work-seo-performance/fontgap.json / docs/seo/audit-2026-09-05/work-seo-performance/fontgap.py / docs/seo/audit-2026-09-05/work-seo-performance/imginv.js / docs/seo/audit-2026-09-05/work-seo-performance/imginv.json / docs/seo/audit-2026-09-05/work-seo-performance/psi-mobile-home.json / docs/seo/audit-2026-09-05/work-seo-performance/ttfb-refetch.txt / docs/seo/audit-2026-09-05/work-seo-schema/analyze.py / docs/seo/audit-2026-09-05/work-seo-schema/census.json / docs/seo/audit-2026-09-05/work-seo-schema/census.py / docs/seo/audit-2026-09-05/work-seo-schema/new_pages.txt / docs/seo/audit-2026-09-05/work-seo-schema/probe.py / docs/seo/audit-2026-09-05/work-seo-schema/probe2.py / docs/seo/audit-2026-09-05/work-seo-schema/sitemap_lastmod.tsv / docs/seo/audit-2026-09-05/work-seo-schema/validate2.py / docs/seo/audit-2026-09-05/work-seo-schema/wt_html_list.txt / docs/seo/audit-2026-09-05/work-seo-sitemap/analyze.py / docs/seo/audit-2026-09-05/work-seo-sitemap/doorway_sim.py / docs/seo/audit-2026-09-05/work-seo-sitemap/lastmod_fix_proposal_138.json / docs/seo/audit-2026-09-05/work-seo-sitemap/lastmod_honesty.py / docs/seo/audit-2026-09-05/work-seo-sitemap/lastmod_rows.json / docs/seo/audit-2026-09-05/work-seo-sitemap/llms_check.py / docs/seo/audit-2026-09-05/work-seo-sitemap/sitemap_urls.json / docs/seo/audit-2026-09-05/work-seo-technical/analyze_crawl.py / docs/seo/audit-2026-09-05/work-seo-technical/faq_visibility.out / docs/seo/audit-2026-09-05/work-seo-technical/faq_visibility.py / docs/seo/audit-2026-09-05/work-seo-technical/hidden_faq.out / docs/seo/audit-2026-09-05/work-seo-technical/link_check.out / docs/seo/audit-2026-09-05/work-seo-technical/link_check.py / docs/seo/audit-2026-09-05/work-seo-technical/robots_live.txt / docs/seo/audit-2026-09-05/work-seo-visual/analysis.txt / docs/seo/audit-2026-09-05/work-seo-visual/analyze.py / docs/seo/audit-2026-09-05/work-seo-visual/blankcheck.js / docs/seo/audit-2026-09-05/work-seo-visual/grey-pill-pages.txt / docs/seo/audit-2026-09-05/work-seo-visual/measure.js / docs/seo/audit-2026-09-05/work-seo-visual/recheck.js / docs/seo/audit-2026-09-05/work-seo-visual/results.json / docs/seo/audit-2026-09-05/work-seo-visual/scrollshot.js / docs/seo/gsc-404-audit-2026-09-05.md / docs/seo/gsc-crawled-audit-2026-09-05.md / docs/seo/gsc-crawled-cases-2026-09-05.json / docs/seo/gsc-redirect-audit-2026-08-20.md / docs/seo/gsc-redirect-audit-2026-09-05.md / docs/zero-preneur-autonomy-roadmap-2026-09-05.md / download/index.html / en/about/index.html / en/captio-alternative/index.html / en/index.html / en/obsidian/index.html / en/roadmap/index.html / en/siri/index.html / es/index.html / fastest-voice-memo/index.html / functions/_middleware.js / glossary/e2e-encryption/index.html / growth/ANALYTICS_API.md / growth/BIGQUERY_SETUP.md / growth/MEASUREMENT_REPAIR_2026-09-05.md / growth/content/coverage-queue.json / growth/experiments/experiments.json / growth/lib/analytics-envelope.mjs / growth/lib/analytics-export.test.mjs / growth/lib/bigquery.mjs / growth/scripts/analytics-artifact.mjs / growth/scripts/export-analytics.mjs / growth/sql/analytics/ga4-funnel.sql / growth/sql/analytics/ga4-quality.sql / growth/sql/analytics/gsc-pages.sql / growth/sql/analytics/gsc-site.sql / hands-free/index.html / id/index.html / index.html / ko/index.html / llms.txt / note-to-email/index.html / obsidian/index.html / pt-BR/index.html / scripts/autonomy-eligibility.mjs / scripts/autonomy-score.mjs / scripts/autonomy-timeline.mjs / scripts/autopilot-act.mjs / scripts/autopilot-completion.mjs / scripts/autopilot-drill.mjs / scripts/autopilot-gate.mjs / scripts/build-videos.py / scripts/check-routine-runs.mjs / scripts/check-url-normalization.mjs / scripts/check-viewport-overflow.mjs / scripts/decision-monitor.mjs / scripts/ep-ratify.mjs / scripts/lib/routine-actions.mjs / scripts/normalize_i18n_head.py / scripts/pr-evaluation-due.mjs / scripts/property-tests.mjs / scripts/routine-observer.mjs / scripts/seo-check.js / scripts/sync_constants.js / scripts/value-contracts.mjs / siri/index.html / sitemap-en.xml / sitemap-ja.xml / sitemap-locales.xml / sitemap.xml / tr/index.html / voice-input/index.html / vs/roam-research/index.html / vs/todoist/index.html / zh-Hant/index.html / zh/index.html\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
-      "age_days": 0,
-      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "claude/score-improvement-nug323 はまだ 2 件先にある",
       "not_before_jst": null
     },
     {
