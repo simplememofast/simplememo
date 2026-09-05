@@ -2,7 +2,8 @@
 """Observe registered routines on macOS using existing Keychain authentication.
 
 Only the Node observer receives the token. GitHub receives one public metadata
-file through a normal PR. No model, login, credential refresh, or routine writes.
+file through a normal PR. The installed Claude Code client handles normal OAuth
+renewal within its existing grant. No model, login, or routine writes.
 """
 import argparse
 import datetime as dt
@@ -13,9 +14,11 @@ import os
 from pathlib import Path
 import plistlib
 import re
+import selectors
 import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 
 REPO = 'simplememofast/simplememo'
@@ -68,10 +71,95 @@ def should_publish(before, after):
     return semantic_state(before) != semantic_state(after) or new - old >= dt.timedelta(days=1)
 
 
-def observe(work, invoke=command, account=None):
-    secret = json.loads(invoke(['/usr/bin/security', 'find-generic-password', '-a', account or getpass.getuser(),
-                              '-w', '-s', 'Claude Code-credentials']))
-    token = secret.get('claudeAiOauth', {}).get('accessToken')
+def check_auth_reply(reply):
+    result = reply.get('result', {})
+    if reply.get('error') or result.get('isError'):
+        raise RuntimeError('Claude Code authentication unavailable')
+    blocks = result.get('content', [])
+    if not blocks or blocks[0].get('type') != 'text':
+        raise RuntimeError('Claude Code authentication reply unavailable')
+    try:
+        status = json.loads(blocks[0]['text']).get('status')
+    except (ValueError, TypeError, AttributeError):
+        raise RuntimeError('Claude Code authentication reply unavailable')
+    if status != 200:
+        raise RuntimeError('Claude Code routine read was not successful')
+
+
+def refresh_with_claude():
+    """Use the installed client's normal OAuth maintenance, never a new login.
+
+    RemoteTrigger(list) is GET-only and does not invoke a model. Its first page
+    is discarded; collect() still reads the complete inventory for publication.
+    """
+    cli = Path.home() / '.local/bin/claude'
+    with tempfile.TemporaryDirectory(prefix='simplememo-routine-auth-') as cwd:
+        proc = subprocess.Popen([str(cli), '--safe-mode', '--strict-mcp-config', 'mcp', 'serve'],
+                                cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.DEVNULL)
+        selector = selectors.DefaultSelector()
+        selector.register(proc.stdout, selectors.EVENT_READ)
+        buffer = b''
+
+        def request(ident, method, params=None):
+            nonlocal buffer
+            msg = {'jsonrpc': '2.0', 'method': method}
+            if ident is not None:
+                msg['id'] = ident
+            if params is not None:
+                msg['params'] = params
+            proc.stdin.write((json.dumps(msg) + '\n').encode()); proc.stdin.flush()
+            if ident is None:
+                return
+            deadline = time.monotonic() + 30
+            while time.monotonic() < deadline:
+                if b'\n' not in buffer:
+                    if not selector.select(max(0, deadline - time.monotonic())):
+                        break
+                    data = os.read(proc.stdout.fileno(), 65536)
+                    if not data:
+                        break
+                    buffer += data
+                    if len(buffer) > 2 * 1024 * 1024:
+                        raise RuntimeError('Claude Code authentication response too large')
+                    continue
+                line, buffer = buffer.split(b'\n', 1)
+                reply = json.loads(line)
+                if reply.get('id') == ident:
+                    return reply
+            raise RuntimeError('Claude Code authentication check timed out')
+
+        try:
+            request(1, 'initialize', {'protocolVersion': '2024-11-05', 'capabilities': {},
+                                     'clientInfo': {'name': 'simplememo-routine-observer', 'version': '1'}})
+            request(None, 'notifications/initialized')
+            check_auth_reply(request(2, 'tools/call', {'name': 'RemoteTrigger', 'arguments': {'action': 'list'}}))
+        finally:
+            selector.close()
+            proc.terminate()
+            try:
+                proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                proc.kill(); proc.wait(timeout=3)
+
+
+def observe(work, invoke=command, account=None, refresh=refresh_with_claude, now=time.time):
+    def credentials():
+        return json.loads(invoke(['/usr/bin/security', 'find-generic-password', '-a', account or getpass.getuser(),
+                                  '-w', '-s', 'Claude Code-credentials'])).get('claudeAiOauth', {})
+    oauth = credentials()
+    expires = oauth.get('expiresAt')
+    if isinstance(expires, (int, float)) and expires <= (now() + 300) * 1000:
+        if not oauth.get('refreshToken'):
+            raise RuntimeError('Existing Claude Code authentication cannot renew')
+        scopes = set(oauth.get('scopes', []))
+        refresh()
+        oauth = credentials()
+        if set(oauth.get('scopes', [])) - scopes:
+            raise RuntimeError('Claude Code authentication scope changed')
+        if not isinstance(oauth.get('expiresAt'), (int, float)) or oauth['expiresAt'] <= now() * 1000:
+            raise RuntimeError('Claude Code authentication remains expired')
+    token = oauth.get('accessToken')
     if not isinstance(token, str) or not token:
         raise RuntimeError('Existing Claude Code credential unavailable')
     # Token is never a command argument, file, plist value, or Git environment.
@@ -165,6 +253,39 @@ def install():
 
 
 class Tests(unittest.TestCase):
+    def test_standard_auth_reply_is_not_task_success(self):
+        check_auth_reply({'result': {'content': [{'type': 'text', 'text': '{"status":200,"json":"private instructions"}'}]}})
+        for bad in [{'error': {}}, {'result': {'isError': True}}, {'result': {'content': []}},
+                    {'result': {'content': [{'type': 'text', 'text': '{"status":401}'}]}}]:
+            with self.assertRaises(RuntimeError):
+                check_auth_reply(bad)
+
+    def test_expired_auth_uses_client_and_preserves_scopes(self):
+        for outcome in ['renewed', 'expired', 'expanded', 'denied']:
+            reads = []; calls = []
+            old = {'accessToken': 'old-fixture', 'refreshToken': 'refresh-fixture', 'expiresAt': 1000, 'scopes': ['read-fixture']}
+            new = {**old, 'accessToken': 'new-fixture', 'expiresAt': 900000}
+            if outcome == 'expired': new['expiresAt'] = 1000
+            if outcome == 'expanded': new['scopes'] = ['read-fixture', 'extra-fixture']
+            def fake(args, **kwargs):
+                if args[0] == '/usr/bin/security':
+                    reads.append(True)
+                    return json.dumps({'claudeAiOauth': old if len(reads) == 1 else new})
+                calls.append('observe')
+                self.assertTrue(kwargs['env']['CLAUDE_CODE_OAUTH_TOKEN'] == 'new-fixture')
+                self.assertTrue('refresh-fixture' not in kwargs['env'].values())
+                return '{}'
+            def renew():
+                calls.append('client')
+                if outcome == 'denied': raise RuntimeError('Existing authentication unavailable')
+            if outcome == 'renewed':
+                observe(Path('/tmp/unused'), invoke=fake, refresh=renew, now=lambda: 100)
+                self.assertEqual(calls, ['client', 'observe'])
+            else:
+                with self.assertRaises(RuntimeError):
+                    observe(Path('/tmp/unused'), invoke=fake, refresh=renew, now=lambda: 100)
+                self.assertEqual(calls, ['client'])
+
     def test_only_owned_metadata_can_be_pushed(self):
         check_paths([LEDGER])
         for paths in [[OBSERVER], [LEDGER, '.github/workflows/autopilot-act.yml'], ['../secret']]:
@@ -192,7 +313,7 @@ class Tests(unittest.TestCase):
                 return json.dumps({'claudeAiOauth': {'accessToken': 'fixture-private-token'}})
             self.assertEqual(args, [NODE, OBSERVER, '--apply'])
             self.assertNotIn('fixture-private-token', ' '.join(args))
-            self.assertEqual(kwargs['env']['CLAUDE_CODE_OAUTH_TOKEN'], 'fixture-private-token')
+            self.assertTrue(kwargs['env']['CLAUDE_CODE_OAUTH_TOKEN'] == 'fixture-private-token')
             return '{}'
         self.assertEqual(observe(Path('/tmp/unused'), invoke=fake, account='fixture'), '{}')
         self.assertEqual(len(calls), 2)
