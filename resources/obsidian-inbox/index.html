@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<title>Obsidian Inbox用Markdown生成ツール｜シンプルメモ</title>
+<meta name="description" content="ObsidianのInboxやデイリーノート向けに、時刻・チェックボックス付きのMarkdownをブラウザで作成。プレビュー、コピー、ファイル保存ができる無料ツールです。アカウントやアプリは不要。入力内容を送信せず、保管庫を変更することもありません。">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/resources/obsidian-inbox/">
+  <link rel="alternate" hreflang="ja" href="https://simplememofast.com/resources/obsidian-inbox/">
+  <link rel="alternate" hreflang="en" href="https://simplememofast.com/en/resources/obsidian-inbox/">
+  <link rel="alternate" hreflang="x-default" href="https://simplememofast.com/resources/obsidian-inbox/">
+<meta property="og:title" content="Obsidian Inbox用Markdown生成ツール｜シンプルメモ">
+<meta property="og:description" content="ObsidianのInboxやデイリーノート向けに、時刻・チェックボックス付きのMarkdownをブラウザで作成。プレビュー、コピー、ファイル保存ができる無料ツールです。アカウントやアプリは不要。入力内容を送信せず、保管庫を変更することもありません。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://simplememofast.com/resources/obsidian-inbox/">
+<meta property="og:site_name" content="Obsidian連携シンプルメモ">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@simplememofast">
+<meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/assets/css/editorial-resources.css?v=72b185e854">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://simplememofast.com/resources/obsidian-inbox/#webpage", "name": "Obsidian Inbox用Markdown生成ツール｜シンプルメモ", "url": "https://simplememofast.com/resources/obsidian-inbox/", "inLanguage": "ja", "description": "ObsidianのInboxやデイリーノート向けに、時刻・チェックボックス付きのMarkdownをブラウザで作成。プレビュー、コピー、ファイル保存ができる無料ツールです。アカウントやアプリは不要。入力内容を送信せず、保管庫を変更することもありません。", "isPartOf": {"@id": "https://simplememofast.com/#website"}, "about": {"@id": "https://simplememofast.com/#app"}}</script>
+
+<script src="/js/obsidian-inbox-tool.js?v=a26747df54" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+<header class="resource-nav"><div>
+<a class="resource-brand" href="/">Obsidian連携シンプルメモ</a>
+<a href="/obsidian/">Obsidian</a><a href="/press/">紹介用資料</a><a href="/resources/obsidian-inbox/">Markdownツール</a>
+<nav class="languages" aria-label="言語"><a href="/resources/obsidian-inbox/" lang="ja" aria-current="page">JA</a><a href="/en/resources/obsidian-inbox/" lang="en" >EN</a></nav>
+</div></header>
+<main id="main" class="resource-main"><p class="eyebrow">無料・アカウント不要</p><h1>思いつきを、使いやすいInboxの形に。</h1><p class="lead">時刻付きの箇条書きやチェックボックスを試して、Markdownをコピー・保存できます。シンプルメモのアプリを使っていなくても利用できます。</p><div class="tool-grid"><form id="inbox-tool" class="tool-panel">
+<label for="destination">出力先の例</label><select id="destination" name="destination"><option value="inbox">Inbox.md</option><option value="daily">デイリーノート（YYYY-MM-DD.md）</option></select>
+<label for="heading">Inboxの見出し</label><input id="heading" name="heading" value="Inbox" maxlength="100" autocomplete="off">
+<label for="note-date">日付</label><input type="date" id="note-date" name="date" required>
+<label for="note-time">時刻</label><input type="time" id="note-time" name="time">
+<label class="check-label" for="timestamp"><input type="checkbox" id="timestamp" name="timestamp" checked>時刻を付ける</label>
+<label for="style">行の形式</label><select id="style" name="style"><option value="bullet">箇条書き</option><option value="task">チェックボックス</option></select>
+<label for="memo">メモの例</label><textarea id="memo" name="memo" maxlength="10000" autocomplete="off" spellcheck="false">散歩のあとで、今日のメモを見返す。</textarea>
+<p class="small">生成処理はブラウザ内で完結します。アカウント、アップロード、保管庫へのアクセスはありません。</p>
+</form><section class="tool-panel" aria-label="Markdownプレビュー"><h2 style="margin-top:0;border:0;padding:0">プレビュー</h2><p><code id="markdown-filename">Inbox.md</code></p><pre><code id="markdown-preview"># Inbox
+
+- 09:00 散歩のあとで、今日のメモを見返す。</code></pre>
+<div class="actions"><button id="copy-markdown" type="button">Markdownをコピー</button><button id="download-markdown" type="button"> .mdを保存</button></div><p id="tool-status" role="status" aria-live="polite"></p></section></div>
+<noscript><p class="note">生成ツールにはJavaScriptが必要です。下の配布用MarkdownはJavaScriptなしで取得できます。</p></noscript>
+<h2>保管庫で使う手順</h2><ol><li>Inboxかデイリーノートを選び、日付と行の形式を決めます。</li><li>例文を編集し、Markdownをコピーするかファイルを保存します。</li><li>Obsidianで既存のノートを開き、必要な部分を貼り付けます。ファイルを取り込む場合、同名のノートがあれば別名にしてください。</li><li>見返す時間に、必要な行をタスクや保存用ノートへ移します。Inboxを空にしやすい、小さな形式から始めます。</li></ol>
+<p class="note">これはMarkdownの例を作るツールです。シンプルメモの設定変更、プラグイン導入、保管庫への自動追記は行いません。既存のメモも上書きしません。最初の日付と時刻にはブラウザのローカル時刻を使い、自由に変更できます。</p>
+<h2>そのまま保存できるひな形</h2><p>記録欄と見返しの問いだけを置いたMarkdownです。テンプレート用プラグインは不要で、日付の例は自分の運用に合わせて置き換えます。</p><div class="actions"><a class="button secondary" href="/assets/downloads/obsidian-inbox-ja.md">Inboxのひな形（.md）</a><a class="button secondary" href="/assets/downloads/obsidian-daily-ja.md">日次レビューのひな形（.md）</a><a class="button secondary" href="/assets/downloads/capture-measurement-worksheet.csv">キャプチャ実測シート（CSV）</a></div>
+<h2>キャプチャ方法を同じ条件で比べる</h2><p>CSVは記入用の実測シートで、測定結果ではありません。Obsidianへの直接入力、Appleショートカット、シンプルメモ、自分宛メール、共有シートの5方式を例に、各10試行の空欄を用意しました。同じ保存先まで到達するには、方式ごとの追加設定が必要になる場合があります。自分の設定を記録してください。</p><p>端末とOSを揃え、「どの操作から、何ができるまで」を測るか先に決めます。ウォーム起動とコールド起動は分け、失敗も残します。操作数、入力開始までの時間、保存先に現れるまでの時間は別に計測します。50試行で利用者全体を代表できるとは扱いません。既存の<a href="/blog/benchmark-methodology">測定方法の説明</a>も参照できます。</p>
+<h2>例文作成から、自動で残す運用へ</h2><p>iPhoneから保管庫へ自動で追記する場合は、<a href="/obsidian/">シンプルメモのObsidian設定ガイド</a>をご覧ください。フォルダ選択、Inbox・デイリーノートの使い分け、オフライン時、Obsidianが開く代替経路を説明しています。音声入力は<a href="/siri/">Siriの設定</a>へ。フォルダやノート名は自分の運用に合わせて選べます。</p><p>使い方を記事で紹介するときは、読者が例を変更できるこのページを案内できます。製品説明や設定画面は<a href="/press/">紹介用資料</a>にまとめています。</p></main>
+<footer class="resource-footer"><div><nav aria-label="フッターナビゲーション">
+<a href="/about/">開発者について</a>
+<a href="/privacy">プライバシー</a>
+<a href="/contact">お問い合わせ</a>
+<a href="/autopilot/">運営の実測値</a>
+</nav><p>© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p></div></footer>
+</body></html>

@@ -30,6 +30,9 @@ TOP_CLUSTER_XDEFAULT = "/"  # x-default points to ja root
 # (ja_url_path, en_url_path)
 # Each entry MUST have both files present on disk for hreflang to be emitted.
 JA_EN_PAIRS = [
+    ("/autopilot/", "/en/autopilot/"),
+    ("/press/", "/en/press/"),
+    ("/resources/obsidian-inbox/", "/en/resources/obsidian-inbox/"),
     ("/about/",                             "/en/about/"),
     ("/roadmap/",                           "/en/roadmap/"),
     ("/faq",                                "/en/faq"),
