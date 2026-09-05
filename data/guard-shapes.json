@@ -501,6 +501,18 @@
       "expr": "pending.lane_f_required",
       "disposition": "前提",
       "note": "自己検査のassertが確認する正の期待値。値が欠落/falseならassertは失敗するので、欠落によって検査が消える条件ではない。未分類を未修理一覧から除く変異で実際に失敗した。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.carried",
+      "disposition": "前提",
+      "note": "2026-09-05: 据え置き（carry_forward）で点が入った成分だけ、measurable=false でも check() を通す判定。**正が無いときは falsy になり、labelled=false → 検査が落ちる**側に倒れる。据え置きの印（carried）が消えたら「measurable=false なのに点が入っている」で名指しで止まる。緩む向きではない。変異試験⑨（labelled を true 固定）で落ちることを実測済み。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "cf.items",
+      "disposition": "表示整形",
+      "note": "2026-09-05: 据え置きが1件も無い窓に「方針は有効（出番なし）」の1行を出すかどうかの分岐。**点は分岐の外で決まっている。**正が無い（cf.items が消える）と TypeError になるが、その手前の `cf?.enabled` と、carryForward() が必ず items/skipped を返すことで担保している。据え置きが在る窓は上の分岐が拾うので、ここは「何も無かった」だけを言う。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
