@@ -1,9 +1,14 @@
 {
   "as_of_jst": "2026-09-05",
-  "open_total": 7,
+  "open_total": 6,
   "oldest_open_days": 2,
   "acknowledged": 6,
   "closed_today": [
+    {
+      "id": "act-cost-sync",
+      "title": "実費台帳に載っていない run が 1件",
+      "evidence": "Actions の run はすべて実費台帳にある（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）"
+    },
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 2件",
@@ -70,22 +75,13 @@
       "not_before_jst": null
     }
   ],
-  "ai": [
-    {
-      "id": "act-cost-sync",
-      "title": "実費台帳に載っていない run が 1件",
-      "detail": "ap-20260905-actions（run 33926832821）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 1件（ap-20260831-ccr0920）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
-      "age_days": 0,
-      "auto": "append-cost",
-      "evidence": "実費が未記録の run が 1件: ap-20260905-actions（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）"
-    }
-  ],
+  "ai": [],
   "executed": [
     {
-      "handler": "reconcile-runs",
+      "handler": "append-cost",
       "ok": true,
-      "changed": 2,
-      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33926832821 -> ap-20260905-actions: appended ap-20260905-actions (failed)\n33931560258 -> ap-20260905-actions-33931560258: appended ap-20260905-actions-33931560258 (skipped_gate)"
+      "changed": 1,
+      "log": "ap-20260820-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260905-actions: appended 2026-09-05 actions $4.8768"
     }
   ]
 }
