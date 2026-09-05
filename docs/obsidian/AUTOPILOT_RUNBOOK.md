@@ -1025,6 +1025,13 @@ squash マージは main の祖先にならないので、祖先判定だけで�
 
 台帳は `data/autopilot-cost.json`、集計と上限判定は `scripts/autopilot-budget.mjs`。
 
+2026-09-05: 日次Actは運転台帳に加え、主系Actionsの完了したClaude Codeステップから
+実費の回収対象を選ぶ。PR・出荷結果の特定が保留でも、ジョブログで測れた実費は
+外部run IDで記録する。結果と種別は推測せず省略し、後から運転台帳で確定した場合だけ
+`--append --enrich-missing-metadata`で同じ費用行の欠落欄へ補完する。
+補完は金額・日付・経路の一致を要求し、既知の結果・金額・超過レビューは変更しない。
+モデル着手後に実費行が欠けたログは取得不能として再確認し、消費なし・0円にはしない。
+
 ```
 node scripts/autopilot-budget.mjs            # 当月の集計を見る
 node scripts/autopilot-budget.mjs --json     # status JSON の cost に入れる形

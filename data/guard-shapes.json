@@ -64,6 +64,54 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "r.cost_observation",
+      "disposition": "前提",
+      "note": "2026-09-05: APIで確認したモデル着手のうち費用未回収の証跡を保持する。運転台帳由来の候補は元のrun行が残るため、追加の観測保存は要らない。APIの直近一覧から消えても導出・実CLI回収・閉鎖判定が残る検査を追加。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "a.close_check.params?.pending_runs",
+      "disposition": "前提",
+      "note": "2026-09-05: 新設した任意のAPI観測保存欄が在る場合だけ形を検査する。既存の運転台帳だけの依頼では省略を許し、新規観測の導出では必ずpending_runsを生成して未回収runの追跡を残す。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "r.outcome",
+      "disposition": "前提",
+      "note": "2026-09-05: 費用行へ既知の結果を補完する条件。運転台帳にまだ結果が無いAPI観測では補完しない。実費未記録は独立した!recordedで対象になるため、結果欠測で費用回収は消えない。未記帳successの導出・閉鎖・実CLI追記で確認。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "run.outcome",
+      "disposition": "前提",
+      "note": "2026-09-05: 任意の結果メタデータを補完するとき、渡された場合だけ列挙値を要求する。未確定の費用行は結果を持たなくてよい。費用・日付・経路の照合は別に必須で、結果欠測でも省略しない。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "run.task_kind",
+      "disposition": "前提",
+      "note": "2026-09-05: 任意の種別メタデータの値検査。種別を推測しないため未指定を許す。種別未記録の1回上限は既存のunclassified表示を維持する。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "result.enriched",
+      "disposition": "前提",
+      "note": "2026-09-05: 自己テストのassert内で補完成功・追記なし・1行保持を同時に要求する。偽ならテストが落ちる向き。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "before.spent",
+      "disposition": "前提",
+      "note": "2026-09-05: 自己テストのassertで補完前後の実費一致と出荷数の更新を要求する。存在確認ではなく数値等価の検査で、実費が変わると落ちる。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "res.appended",
+      "disposition": "前提",
+      "note": "2026-09-05: 追記も補完も無い場合だけ書込を省略する冪等性。欠けたメタデータを補完した場合はenriched=trueで保存する。実CLIを通した補完・再実行検査で確認。"
+    },
+    {
       "file": "scripts/autopilot-checkpoint.mjs",
       "expr": "files",
       "disposition": "前提",

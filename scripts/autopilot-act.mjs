@@ -238,9 +238,9 @@ export const CLOSE_CHECKS = {
    * **autopilot-budget.mjs --check で代用しない。**あれは「上限を超えたか」を
    * 見る検査で、台帳が空でも通る。閉じ条件は、閉じたい当のものを検査する。
    */
-  cost_covers_runs({ exclude = [] }, ctx) {
+  cost_covers_runs({ exclude = [], pending_runs }, ctx) {
     if (!ctx.costDoc) return { closed: false, evidence: '実費台帳を読めず判定不能' };
-    const costed = new Set((ctx.costDoc.runs ?? []).map((e) => String(e.run_id ?? '')));
+    const costed = new Map((ctx.costDoc.runs ?? []).map((e) => [String(e.run_id ?? ''), e]));
     // **実費が原理的に存在しない run がある。** Claude Code ステップに到達せず
     // 落ちた回（apt詰まり・actor拒否など）は実行ログ自体が無いので、待っても
     // 永久に埋まらない。ここを除外しないと、この依頼は**閉じない依頼**になる
@@ -254,16 +254,15 @@ export const CLOSE_CHECKS = {
     // 書いているとおり。**ここを除外一覧に積むと「実費が存在しない」と書かれる**
     // ので、構造的に測れないものは数の外に置き、件数だけを根拠に出す。
     const unobservable = attempted.filter((r) => !isActionsRunRef(r.external_ref));
-    const missing = attempted
-      .filter((r) => isActionsRunRef(r.external_ref)
-        && !costed.has(String(r.external_ref)) && !skip.has(r.run_id));
+    const missing = costCandidates(ctx, pending_runs).filter((r) => costSyncNeeded(r, costed.get(String(r.external_ref)))
+      && (costed.has(String(r.external_ref)) || !costExcluded(r, skip)));
     const note = skip.size > 0 ? `（実費が残っていない ${skip.size}件を除外: ${[...skip].join(', ')}）` : '';
     const un = unobservable.length > 0
       ? `（うち ${unobservable.length}件は副系CCRで**観測手段が無い** —— ゼロではない: ${unobservable.map((r) => r.run_id).join(', ')}）`
       : '';
     return missing.length === 0
-      ? { closed: true, evidence: `Actions の run はすべて実費台帳にある${note}${un}` }
-      : { closed: false, evidence: `実費が未記録の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}${un}` };
+      ? { closed: true, evidence: `運転台帳と取得済みの着手証跡にあるActions runの実費・既知の結果を同期済み${note}${un}` }
+      : { closed: false, evidence: `実費または既知の結果が未同期の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}${un}` };
   },
 
   /**
@@ -743,9 +742,9 @@ export function derive(ctx) {
   // 人手（セッション手動）の手順は、忙しい日から順に落ちる。--append は
   // run_id で冪等なので、機械が毎日やって害が無い。
   if (ctx.costDoc) {
-    // 導出は運転台帳だけで完結させる（APIが読めない日でも「実費が未記録」は言える）。
-    // 実際の金額はジョブログにしか無いので、取りに行くのは handler の仕事。
-    const costed = new Set((ctx.costDoc.runs ?? []).map((e) => String(e.run_id ?? '')));
+    // Result attribution can be pending while the model has already spent money.
+    // Use observed model steps as well as the run ledger; cost still comes from logs.
+    const costed = new Map((ctx.costDoc.runs ?? []).map((e) => [String(e.run_id ?? ''), e]));
     // **題と根拠で違う数を出さない。**閉じ条件（cost_covers_runs）は
     // ①Actions の run だけを数え ②実測して駄目だったものを除外する、の2つを掛けている。
     // 題だけ素の件数にすると「4件」と「1件」が並んで出る（2026-09-03 に実際に出た）。
@@ -753,12 +752,13 @@ export function derive(ctx) {
     const excluded = new Set(((ctx.ledgerDoc?.actions ?? [])
       .find((a) => a.id === 'act-cost-sync')?.close_check?.params?.exclude) ?? []);
     const unobservable = runs.filter((r) => r.attempted && r.external_ref && !isActionsRunRef(r.external_ref));
-    const missing = runs.filter((r) => r.attempted && isActionsRunRef(r.external_ref)
-      && !costed.has(String(r.external_ref)) && !excluded.has(r.run_id));
+    const candidates = costCandidates(ctx);
+    const missing = candidates.filter((r) => costSyncNeeded(r, costed.get(String(r.external_ref)))
+      && (costed.has(String(r.external_ref)) || !costExcluded(r, excluded)));
     if (missing.length > 0) {
       out.push({
         id: 'act-cost-sync',
-        title: `実費台帳に載っていない run が ${missing.length}件`,
+        title: `実費記録の同期が必要な run が ${missing.length}件`,
         detail: missing.map((r) => `${r.run_id}（run ${r.external_ref}）`).join(', ')
           + '。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。'
           + (excluded.size > 0 ? `\n実測して取れなかったものを ${excluded.size}件 除外している: ${[...excluded].join(', ')}。` : '')
@@ -769,7 +769,8 @@ export function derive(ctx) {
         source: 'cost',
         touches: ['data/autopilot-cost.json'],
         auto: 'append-cost',
-        close_check: { kind: 'cost_covers_runs', params: {} },
+        close_check: { kind: 'cost_covers_runs', params: { pending_runs: candidates
+          .filter(r => r.cost_observation && !costed.has(String(r.external_ref))).map(r => r.cost_observation) } },
       });
     }
   }
@@ -2236,19 +2237,23 @@ export const HANDLERS = {
    * 実費台帳の同期。ジョブログから total_cost_usd を読んで --append する。
    * **取得できなかった回は書かない**（0を書くと「無料で動いた」になる）。
    */
-  async 'append-cost'(ctx, action) {
+  async 'append-cost'(ctx, action, { readCost = fetchRunCost, append = (args) => execFileSync(process.execPath,
+    [path.join(ROOT, 'scripts/autopilot-budget.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
     if (!ctx.token || !ctx.repo) return { ok: false, changed: 0, log: '認証情報が無く実費を取得できない' };
     const costed = new Set((ctx.costDoc?.runs ?? []).map((e) => String(e.run_id ?? '')));
-    const targets = (ctx.runsDoc?.runs ?? [])
-      // **Actions の run だけを狙う。**副系CCRの external_ref はセッションid（cse_…）で、
-      // Actions API は 404 を返す —— それを「実費が発生していない」と読んでいた。
-      .filter((r) => r.attempted && isActionsRunRef(r.external_ref) && !costed.has(String(r.external_ref)))
+    const existing = new Map((ctx.costDoc?.runs ?? []).map((e) => [String(e.run_id ?? ''), e]));
+    const candidates = costCandidates(ctx, action?.close_check?.params?.pending_runs);
+    const excluded = new Set(action?.close_check?.params?.exclude ?? []);
+    const targets = candidates.filter((r) => costSyncNeeded(r, existing.get(String(r.external_ref)))
+      && (existing.has(String(r.external_ref)) || !costExcluded(r, excluded)))
       .slice(-10); // 一度に遡る上限。歴史全部を毎日取りに行かない
     const log = [];
     let changed = 0;
     const unmeasurable = [];
     for (const r of targets) {
-      const cost = await fetchRunCost(ctx.repo, ctx.token, r.external_ref);
+      const recorded = existing.get(String(r.external_ref));
+      const cost = recorded ? { state: 'measured', usd: recorded.total_cost_usd, turns: recorded.num_turns }
+        : await readCost(ctx.repo, ctx.token, r.external_ref);
       // **[2026-09-03] 「読めなかった」を「発生していない」と書かない。**
       //
       // 旧版は fetchRunCost の null を1つの意味として扱い、取得に失敗した回まで
@@ -2276,17 +2281,17 @@ export const HANDLERS = {
       }
       const args = ['--append', '--date', r.date_jst, '--route', r.route,
         '--run-id', String(r.external_ref), '--cost', String(cost.usd),
-        '--outcome', r.outcome, '--note', '日次アクチュエータが自動追記（ジョブログの result 行）'];
+        '--note', '日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）'];
+      if (r.outcome) args.push('--outcome', r.outcome);
+      if (recorded) args.push('--enrich-missing-metadata');
       if (cost.turns != null) args.push('--turns', String(cost.turns));
       // 種別は**分かるときだけ**書く。推測を入れると種別ごとの枠が静かに嘘になる。
-      const kind = r.lane === 'F' ? 'repair'
-        : ['new', 'refresh', 'wiring'].includes(r.action) ? 'article' : null;
+      const kind = costTaskKind(r);
       if (kind) args.push('--task-kind', kind);
       try {
-        const out = execFileSync(process.execPath,
-          [path.join(ROOT, 'scripts/autopilot-budget.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' });
+        const out = append(args);
         log.push(`${r.run_id}: ${out.trim()}`);
-        if (!out.startsWith('skip')) changed += 1;
+        if (!out.startsWith('skip')) { changed += 1; costed.add(String(r.external_ref)); }
       } catch (e) {
         log.push(`${r.run_id}: 追記に失敗 ${e.stderr?.toString().trim() ?? e.message}`);
       }
@@ -2298,6 +2303,10 @@ export const HANDLERS = {
       // 「実費は存在しない」の一覧に残り続けると、根拠の文が嘘を言い続ける
       // （2026-09-03 の実測で6件中3件がこれだった）。
       const refById = new Map((ctx.runsDoc?.runs ?? []).map((r) => [r.run_id, String(r.external_ref ?? '')]));
+      for (const r of candidates) {
+        refById.set(r.run_id, String(r.external_ref));
+        refById.set(`actions-run-${r.external_ref}`, String(r.external_ref));
+      }
       const dropped = [...cur].filter((id) => costed.has(refById.get(id) ?? ''));
       for (const id of dropped) cur.delete(id);
       if (dropped.length > 0) log.push(`除外から外した（実費が台帳にある）: ${dropped.join(', ')}`);
@@ -2494,6 +2503,41 @@ export function isActionsRunRef(ref) {
   return /^\d+$/.test(String(ref ?? ''));
 }
 
+const costTaskKind = r => r.lane === 'F' ? 'repair'
+  : ['new', 'refresh', 'wiring'].includes(r.action) ? 'article' : null;
+const costExcluded = (r, excluded) => excluded.has(r.run_id) || excluded.has(`actions-run-${r.external_ref}`);
+const costSyncNeeded = (r, recorded) => !recorded
+  || (r.outcome != null && recorded.outcome == null)
+  || (costTaskKind(r) != null && recorded.task_kind == null);
+
+/** The workflow reader is scoped to obsidian-autopilot.yml. A completed model
+ * step proves a cost candidate, not a shipment or any other result. */
+const validCostObservation = observed => /^[1-9]\d*$/.test(String(observed?.id ?? ''))
+  && Number.isFinite(Date.parse(observed.created_at))
+  && observed.jst_date === jstToday(new Date(observed.created_at))
+  && ['success', 'failure', 'cancelled', 'timed_out'].includes(observed.model_conclusion);
+
+export function costCandidates(ctx, pendingRuns = ctx.ledgerDoc?.actions?.find(a => a.id === 'act-cost-sync')
+  ?.close_check?.params?.pending_runs ?? []) {
+  const byRef = new Map();
+  for (const r of ctx.runsDoc?.runs ?? []) {
+    if (r.attempted && isActionsRunRef(r.external_ref)) byRef.set(String(r.external_ref), { ...r });
+  }
+  const observations = [...(Array.isArray(pendingRuns) ? pendingRuns : []), ...(ctx.workflowRuns ?? [])
+    .filter(r => r.status === 'completed').map(r => ({ id: r.id, created_at: r.created_at, jst_date: r.jst_date,
+      model_conclusion: (r.steps ?? []).find(s => s.name?.includes('Claude Code'))?.conclusion }))];
+  for (const observed of observations) {
+    if (!validCostObservation(observed)) continue;
+    const ref = String(observed.id);
+    if (!byRef.has(ref)) byRef.set(ref, {
+      run_id: `actions-run-${ref}`, external_ref: ref, date_jst: observed.jst_date,
+      route: 'actions', attempted: true, cost_observation: observed,
+    });
+  }
+  return [...byRef.values()].sort((a, b) => String(a.date_jst).localeCompare(String(b.date_jst))
+    || String(a.external_ref).localeCompare(String(b.external_ref), 'en', { numeric: true }));
+}
+
 /**
  * ジョブログから result 行の total_cost_usd / num_turns を拾う。
  *
@@ -2528,8 +2572,8 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   // 404/410 は「もう無い」。それ以外の非200は**一時的**として扱い、除外に積まない。
   if (jr.status === 404 || jr.status === 410) return { state: 'gone', why: `jobs が HTTP ${jr.status}（run ごと消えている）` };
   if (!jr.ok) return { state: 'unreadable', why: `jobs が HTTP ${jr.status}` };
-  let jobId;
-  try { jobId = primaryJob((await jr.json()).jobs ?? [])?.id; }
+  let job, jobId;
+  try { job = primaryJob((await jr.json()).jobs ?? []); jobId = job?.id; }
   catch (e) { return { state: 'unreadable', why: `jobs の応答を読めない: ${String(e).slice(0, 80)}` }; }
   if (!jobId) return { state: 'unreadable', why: '主系のジョブを特定できず実費を読めない' };
   let lr;
@@ -2545,7 +2589,14 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   catch (e) { return { state: 'unreadable', why: `ログ本文を読めない: ${String(e).slice(0, 80)}` }; }
   const cost = text.match(/"total_cost_usd"\s*:\s*([0-9.]+)/)
     ?? text.match(/AI実費:\s*\*\*\$([0-9.]+)\*\*/);
-  if (!cost) return { state: 'absent' };
+  if (!cost) {
+    const model = (job.steps ?? []).find(s => s.name?.includes('Claude Code'));
+    // Cancellation or a lost result line can follow real model consumption.
+    // Only a confirmed skipped model step proves that this run did not reach it.
+    return model?.conclusion === 'skipped' ? { state: 'absent' }
+      : { state: 'unreadable', why: '実費行が無いがモデル未着手は確認できない。0円・不存在として除外しない' };
+  }
+  if (!Number.isFinite(Number(cost[1]))) return { state: 'unreadable', why: '実費行の金額が不正' };
   const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
   return { state: 'measured', usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null };
 }
@@ -2576,6 +2627,10 @@ export function validateLedger(ledger, matrix) {
     if (!a.title) p.push(`${at}: title is required`);
     if (!a.close_check?.kind) p.push(`${at}: close_check.kind is required — 閉じ条件の無い依頼は永久に残る`);
     else if (!CLOSE_CHECKS[a.close_check.kind]) p.push(`${at}: 未知の close_check: ${a.close_check.kind}`);
+    if (a.close_check?.kind === 'cost_covers_runs' && a.close_check.params?.pending_runs !== undefined
+      && (!Array.isArray(a.close_check.params.pending_runs) || !a.close_check.params.pending_runs.every(validCostObservation))) {
+      p.push(`${at}: pending cost runs must contain valid observed model execution`);
+    }
     if (a.state === 'done' && !a.closed_jst) p.push(`${at}: done なのに closed_jst が無い`);
     if (a.state === 'done' && !a.evidence) p.push(`${at}: done なのに evidence が無い — 「閉じた」は根拠とセットでしか書けない`);
     if (a.auto && !HANDLERS[a.auto]) p.push(`${at}: 未知の handler: ${a.auto}`);
@@ -3051,7 +3106,7 @@ async function selftest() {
           t(`同じ監視で新規runを実費処理へ渡す: ${scenario}`, current.runsDoc.runs.some(r => r.external_ref === '123'));
           order.push('cost');
           if (scenario === 'unreadable') return { ok: false, changed: 0, log: 'unreadable' };
-          store.costs = current.runsDoc.runs.map(r => ({ run_id: r.external_ref, usd: 4.8768404 }));
+          store.costs = current.runsDoc.runs.map(r => ({ run_id: r.external_ref, usd: 4.8768404, outcome: r.outcome }));
           return { ok: true, changed: store.costs.length, log: 'measured fixture' };
         },
       },
@@ -4046,6 +4101,87 @@ async function selftest() {
     noIdDerive[0]?.close_check?.params?.date_jst === '2026-08-25'
     && noIdDerive[0]?.close_check?.params?.task_kind === 'repair');
 
+  // Actual handler + budget CLI: successful model execution can still have no
+  // result ledger row. Charge only the measured cost, then enrich once resolved.
+  {
+    const observed = { id: 33959414641, status: 'completed', conclusion: 'success', event: 'workflow_dispatch',
+      created_at: '2026-09-05T09:58:55Z', jst_date: '2026-09-05',
+      steps: [{ name: 'Claude Code', conclusion: 'success' }] };
+    const ctx = { today: '2026-09-05', token: 'fixture', repo: 'o/r', workflowRuns: [observed],
+      runsDoc: { runs: [] }, costDoc: { budget: { monthly_usd_cap: 40, on_exceed: 'skip_run' }, runs: [] },
+      selfheal: { targets: [] } };
+    const candidate = costCandidates(ctx)[0];
+    t('結果のない成功runも実費の候補にする', candidate?.external_ref === '33959414641');
+    if (!candidate) throw Error('confirmed model execution is missing from cost candidates');
+    t('モデル成功を出荷結果へ変換しない', candidate?.outcome === undefined && candidate?.lane === undefined);
+    const contradicted = costCandidates({ ...ctx, runsDoc: { runs: [{ run_id: 'wrong-skip', external_ref: '33959414641',
+      attempted: false, outcome: 'skipped_gate' }] } });
+    t('未着手と誤記された行でも実モデル着手の実費を消さない', contradicted.length === 1
+      && contradicted[0].outcome === undefined && contradicted[0].external_ref === '33959414641');
+    t('未記帳runの実費を導出する', derive(ctx).some(a => a.id === 'act-cost-sync'));
+    t('未記帳runの実費を未回収のまま閉じない', !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+    for (const change of [{ status: 'in_progress' }, { id: 'cse_1' }, { id: 0 }, { created_at: 'bad' },
+      { jst_date: '2026-09-04' }, { steps: null }, { steps: [{ name: 'Claude Code', conclusion: 'skipped' }] }]) {
+      t('未着手・未完了・不正な観測は費用を推定しない', costCandidates({ ...ctx, workflowRuns: [{ ...observed, ...change }] }).length === 0);
+    }
+    t('手動中止でもモデル着手済みなら実費を回収する', costCandidates({ ...ctx,
+      workflowRuns: [{ ...observed, conclusion: 'cancelled', steps: [{ name: 'Claude Code', conclusion: 'cancelled' }] }] }).length === 1);
+    const { tmpdir } = await import('node:os');
+    const scratch = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'simplememo-cost-cycle-')));
+    try {
+      fs.cpSync(path.join(ROOT, 'scripts'), path.join(scratch, 'scripts'), { recursive: true });
+      fs.mkdirSync(path.join(scratch, 'data'));
+      const file = path.join(scratch, 'data/autopilot-cost.json');
+      fs.writeFileSync(file, JSON.stringify(ctx.costDoc));
+      const append = args => execFileSync(process.execPath, [path.join(scratch, 'scripts/autopilot-budget.mjs'), ...args],
+        { cwd: scratch, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      const reload = () => { ctx.costDoc = JSON.parse(fs.readFileSync(file, 'utf8')); };
+      let reads = 0;
+      const readCost = async (_repo, _token, id) => {
+        t('外部run IDで費用ログを読む', id === '33959414641'); reads++;
+        return { state: 'measured', usd: 0.8407852, turns: 20 };
+      };
+      const action = derive(ctx).find(a => a.id === 'act-cost-sync');
+      ctx.ledgerDoc = { actions: [action] };
+      ctx.workflowRuns = [];
+      t('APIの直近一覧から外れても未回収の実行を保持する', costCandidates(ctx).length === 1
+        && derive(ctx).some(a => a.id === 'act-cost-sync') && !CLOSE_CHECKS.cost_covers_runs(action.close_check.params, ctx).closed);
+      t('不正な費用観測の保存を台帳検査で拒否', validateLedger({ actions: [{ ...action,
+        close_check: { kind: 'cost_covers_runs', params: { pending_runs: [{ id: 'cse_1' }] } } }] }, matrix)
+        .some(p => p.includes('pending cost runs')));
+      const first = await HANDLERS['append-cost'](ctx, action, { readCost, append }); reload();
+      if (first.changed !== 1 || ctx.costDoc.runs.length !== 1) throw Error(`実費CLI検査: ${first.log}; ${JSON.stringify(ctx.costDoc)}`);
+      t('実CLIで未記帳runの実費を正確に一度だけ保存', first.changed === 1 && ctx.costDoc.runs.length === 1
+        && ctx.costDoc.runs[0].total_cost_usd === 0.8407852 && ctx.costDoc.runs[0].num_turns === 20);
+      t('実CLIでも結果・種別・レビューは推測しない', ctx.costDoc.runs[0].outcome === undefined
+        && ctx.costDoc.runs[0].task_kind === undefined && ctx.costDoc.runs[0].cap_review === undefined && ctx.runsDoc.runs.length === 0);
+      t('回収後は費用の依頼を閉じられる', CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+      const second = await HANDLERS['append-cost'](ctx, action, { readCost, append });
+      t('再観測はログ再取得も二重請求も起こさない', second.changed === 0 && reads === 1);
+      ctx.runsDoc.runs.push({ ...candidate, run_id: 'ap-20260905-actions-33959414641', outcome: 'no_artifact', action: 'new' });
+      t('運転台帳が後から入っても外部IDで候補を重複させない', costCandidates(ctx).length === 1);
+      t('後から確定した結果を費用台帳へ同期する依頼を導出', derive(ctx).some(a => a.id === 'act-cost-sync')
+        && !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+      const third = await HANDLERS['append-cost'](ctx, action, { readCost, append }); reload();
+      t('実CLIで同じ費用行へ結果だけ補完する', third.changed === 1 && reads === 1 && ctx.costDoc.runs.length === 1
+        && ctx.costDoc.runs[0].outcome === 'no_artifact' && ctx.costDoc.runs[0].task_kind === 'article'
+        && ctx.costDoc.runs[0].total_cost_usd === 0.8407852 && CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+      t('補完済みの観測は再起票しない', !derive(ctx).some(a => a.id === 'act-cost-sync'));
+      ctx.costDoc.runs = [];
+      for (const state of ['unreadable', 'absent', 'gone']) {
+        const a = { close_check: { params: {} } }; let writes = 0;
+        await HANDLERS['append-cost'](ctx, a, { readCost: async () => ({ state, why: 'fixture' }), append: () => { writes++; } });
+        t('測れていない金額を0円で追記しない', writes === 0);
+        t('一時的な欠測は除外へ積まず再確認する', (a.close_check.params.exclude.length === 0) === (state === 'unreadable'));
+      }
+      const alias = { close_check: { params: { exclude: ['actions-run-33959414641'] } } };
+      let excludedReads = 0;
+      await HANDLERS['append-cost'](ctx, alias, { readCost: async () => { excludedReads++; throw Error('excluded'); }, append });
+      t('後から運転IDが付いても外部ID由来の除外を保持', excludedReads === 0
+        && CLOSE_CHECKS.cost_covers_runs(alias.close_check.params, ctx).closed);
+    } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
+  }
+
   // 閉じ条件: 実費が原理的に存在しない run は除外できる（除外しないと永久に閉じない）
   const costCtx = { costDoc: { runs: [] }, runsDoc: { runs: [
     { run_id: 'never', attempted: true, external_ref: '1' }] } };
@@ -4105,12 +4241,22 @@ async function selftest() {
     const mk = (jobsRes, logRes) => (url) => url.endsWith('/logs')
       ? Promise.resolve(logRes) : Promise.resolve(jobsRes);
     const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [
-      { id: 99, name: 'Notify Autopilot Act' }, { id: 1, name: 'autopilot' }] }) };
+      { id: 99, name: 'Notify Autopilot Act' }, { id: 1, name: 'autopilot', steps: [{ name: 'Claude Code', conclusion: 'skipped' }] }] }) };
     const withLog = (body) => ({ ok: true, status: 200, text: async () => body });
 
     const measured = await fetchRunCost('o/r', 'tok', '1',
       { fetchImpl: mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}')) });
     t('実費行を読めたら measured', measured.state === 'measured' && measured.usd === 1.25 && measured.turns === 9);
+    const originalFetch = globalThis.fetch;
+    try {
+      globalThis.fetch = mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}'));
+      let args;
+      const result = await HANDLERS['append-cost']({ repo: 'o/r', token: 'fixture', costDoc: { runs: [] },
+        runsDoc: { runs: [] }, workflowRuns: [{ id: 1, created_at: '2026-09-05T00:00:00Z', jst_date: '2026-09-05',
+          status: 'completed', conclusion: 'success', steps: [{ name: 'Claude Code', conclusion: 'success' }] }] },
+      { close_check: { params: {} } }, { append: values => { args = values; return 'appended'; } });
+      t('handlerの既定経路が実費readerへ接続されている', result.changed === 1 && args?.[args.indexOf('--cost') + 1] === '1.25');
+    } finally { globalThis.fetch = originalFetch; }
     let requestedLog;
     await fetchRunCost('o/r', 'tok', '1', { fetchImpl: async url => {
       if (url.endsWith('/logs')) { requestedLog = url; return withLog('{"total_cost_usd":1.25}'); }
@@ -4120,8 +4266,14 @@ async function selftest() {
     t('主系ジョブ不明は実費ゼロや消失にしない', (await fetchRunCost('o/r', 'tok', '1', {
       fetchImpl: async () => ({ ok: true, json: async () => ({ jobs: [{ name: 'Notify Autopilot Act', id: 99 }] }) }),
     })).state === 'unreadable');
-    t('実費行が無ければ absent（＝発生していない）',
+    t('モデル未着手を確認できて実費行が無ければ absent',
       (await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(okJobs, withLog('ログ本文')) })).state === 'absent');
+    for (const conclusion of ['success', 'failure', 'cancelled', undefined]) {
+      const jobs = { ok: true, json: async () => ({ jobs: [{ id: 1, name: 'autopilot',
+        steps: [{ name: 'Claude Code', conclusion }] }] }) };
+      t('実費行の欠測をモデル消費ゼロにしない',
+        (await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(jobs, withLog('no result')) })).state === 'unreadable');
+    }
     t('**ログが 410 なら gone**（保持期間切れ。実費が無かったのではない）',
       (await fetchRunCost('o/r', 'tok', '1',
         { fetchImpl: mk(okJobs, { ok: false, status: 410 }) })).state === 'gone');
