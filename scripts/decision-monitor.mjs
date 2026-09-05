@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
 import { review, advance, recordSelection } from './decision-review.mjs';
 import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
+import { ep as scoreEp } from './autonomy-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -81,7 +82,7 @@ export function renderReport(html, score, stages) {
     vdc: `期間内の出荷${c.vdc.n}件のうち、事前宣言と公開後の実測決済を確認できたのは${c.vdc.hit}件。`,
     umr: '人の介入なく本番へ届いた変更の割合を可逆性で重み付け。R0には寄与の上限があります。',
     ra: `故障${c.ra.n}件のうち機械が検知したのは${c.ra.detect.hit}件、無介入の修理は${c.ra.recover.hit}件。本番の自動revert成功は${c.ra.auto_revert_count}回。`,
-    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。${c.ep.precision.delegated ? `うち${c.ep.precision.delegated}件はオーナー委任によるAI評価で、独立した人間評価ではありません。` : '未判定は満点として扱いません。'}`,
+    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。${c.ep.precision.delegated_ai ? `うち${c.ep.precision.delegated_ai}件はオーナー委任によるAI評価で、独立した人間評価ではありません。` : '未判定は満点として扱いません。'}`,
     tuc: `検査を維持して週${c.tuc.per_week.toFixed(1)}回出荷。週${c.tuc.target}回が配点上の基準です。`,
   };
   out = out.replace(/<tr data-score="(vdc|umr|ra|ep|tuc)">.*?<\/tr>/g, (row, id) => row.replace(/<td class="num"><b>[\d.]+<\/b><\/td>/, `<td class="num"><b>${c[id].points.toFixed(1)}</b></td>`));
@@ -362,8 +363,22 @@ function selftest() {
   assert(report.includes('data-score-total>42.5</span>'));
   assert(report.includes('<b>15.0</b>'));
   assert(report.includes('出荷2件'));
+  // **手で組んだ形を渡さない。**初版は `{ judged: 19, delegated: 19 }` を渡していたが、
+  // 実物の ep() が返すのは `delegated_ai` で、**公開ページの分岐は一度も配線されていなかった** ——
+  // 19件すべてAIの自己評価なのに「未判定は満点として扱いません」と出続けていた
+  // （2026-09-05、main の autopilot/index.html で実際に出ていた）。
+  // **描画側を検査したつもりで、描画側の入力を検査していた。**実物を通す。
+  const realPrecision = scoreEp([], {
+    weights: { ep: 15 },
+    ep: { precision_review: { accepted_modes: [], delegations: [{ mode: 'owner_delegated', reviewer: 'codex' }] } },
+  }, {
+    rules: { rules: [] },
+    actions: { actions: Array.from({ length: 19 }, (_, i) => ({ id: `a${i}`, force_owner: 'human',
+      owner_needed: i < 10, owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) },
+  }).precision;
+  assert.equal(realPrecision.judged, 19, 'ep() の返り値が想定と違う');
   const delegatedSample = structuredClone(sample);
-  delegatedSample.components.ep.precision = { judged: 19, delegated: 19 };
+  delegatedSample.components.ep.precision = realPrecision;
   const delegatedReport = renderReport('<tr data-score="ep"><td>EP</td><td class="num"><b>0.0</b></td><td class="num">15</td><td>old</td></tr>', delegatedSample, {});
   assert(delegatedReport.includes('19件はオーナー委任によるAI評価'));
   assert(delegatedReport.includes('独立した人間評価ではありません'));
