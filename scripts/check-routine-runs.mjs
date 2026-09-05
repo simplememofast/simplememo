@@ -451,7 +451,9 @@ function selftest() {
 
     // --- 写しの鮮度 -----------------------------------------------------
     ['**写しが古いと落とす**（読めているつもりを緑にしない）', () => {
-      const p = validate(real, { now: NOW + 10 * DAY }).problems;
+      // Advance from the observation itself, not a fixed calendar date that
+      // stops being stale when a real snapshot is refreshed.
+      const p = validate(real, { now: Date.parse(real.observed_at) + (real.max_snapshot_age_days + 1) * DAY }).problems;
       assert(p.some((x) => x.includes('古い')), p.join(' / '));
     }],
     ['observed_at が読めなければ落とす', () => {

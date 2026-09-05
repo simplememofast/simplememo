@@ -9,6 +9,8 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
 import { review, advance, recordSelection } from './decision-review.mjs';
+import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
+import { ep as scoreEp } from './autonomy-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -80,7 +82,7 @@ export function renderReport(html, score, stages) {
     vdc: `期間内の出荷${c.vdc.n}件のうち、事前宣言と公開後の実測決済を確認できたのは${c.vdc.hit}件。`,
     umr: '人の介入なく本番へ届いた変更の割合を可逆性で重み付け。R0には寄与の上限があります。',
     ra: `故障${c.ra.n}件のうち機械が検知したのは${c.ra.detect.hit}件、無介入の修理は${c.ra.recover.hit}件。本番の自動revert成功は${c.ra.auto_revert_count}回。`,
-    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。${c.ep.precision.delegated ? `うち${c.ep.precision.delegated}件はオーナー委任によるAI評価で、独立した人間評価ではありません。` : '未判定は満点として扱いません。'}`,
+    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。${c.ep.precision.delegated_ai ? `うち${c.ep.precision.delegated_ai}件はオーナー委任によるAI評価で、独立した人間評価ではありません。` : '未判定は満点として扱いません。'}`,
     tuc: `検査を維持して週${c.tuc.per_week.toFixed(1)}回出荷。週${c.tuc.target}回が配点上の基準です。`,
   };
   out = out.replace(/<tr data-score="(vdc|umr|ra|ep|tuc)">.*?<\/tr>/g, (row, id) => row.replace(/<td class="num"><b>[\d.]+<\/b><\/td>/, `<td class="num"><b>${c[id].points.toFixed(1)}</b></td>`));
@@ -91,17 +93,35 @@ export function renderReport(html, score, stages) {
   return out;
 }
 
+export function renderRunStreaks(html, runs) {
+  // Keep the definition shared with the public-page checker. A failed day can
+  // extend activity while breaking shipping; neither count is hand-maintained.
+  const region = /<!-- run-streaks:start -->[\s\S]*?<!-- run-streaks:end -->/g;
+  assert.equal([...html.matchAll(region)].length, 1, 'public run-streaks region missing or ambiguous');
+  const active = activeStreaks(runs), shipping = shippingStreaks(runs);
+  const date = day => day.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
+  const range = (from, to) => from ? `（${date(from)}〜${date(to)}）` : '';
+  const content = `<!-- run-streaks:start -->
+          この定義での連続稼働は現在<b>${active.current.days}</b>日${range(active.current.from, active.last_day)}で、最長も<b>${active.longest.days}</b>日${range(active.longest.from, active.longest.to)}です。
+          ${active.last_day ? `「現在」は台帳の最終記入日（${date(active.last_day)}）時点です。` : '台帳の記録はまだありません。'}
+          稼働の定義では、失敗して行が立った日も「記録がある日」なので連続が切れません。
+          <b>連続出荷は現在${shipping.current.days}日</b>${range(shipping.current.from, shipping.last_day)}で、<b>連続出荷の最長は${shipping.longest.days}日</b>${range(shipping.longest.from, shipping.longest.to)}です。
+          <!-- run-streaks:end -->`;
+  return html.replace(region, () => content);
+}
+
 export async function publishReport() {
   const { score, loadContext } = await import('./autonomy-score.mjs');
   const file = 'autopilot/index.html';
   const original = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const stages = {};
-  for (const r of read('data/autopilot-runs.json').runs) {
+  const runs = read('data/autopilot-runs.json').runs;
+  for (const r of runs) {
     if (r.outcome === 'shipped') continue;
     if (!['eligibility', 'execution', 'cost', 'absent'].includes(r.failure_stage)) throw new Error(`unclassified run: ${r.run_id}`);
     stages[r.failure_stage] = (stages[r.failure_stage] ?? 0) + 1;
   }
-  const rendered = renderReport(original, score(loadContext()), stages);
+  const rendered = renderRunStreaks(renderReport(original, score(loadContext()), stages), runs);
   if (rendered !== original) fs.writeFileSync(path.join(ROOT, file), rendered);
   return rendered !== original;
 }
@@ -343,11 +363,46 @@ function selftest() {
   assert(report.includes('data-score-total>42.5</span>'));
   assert(report.includes('<b>15.0</b>'));
   assert(report.includes('出荷2件'));
+  // **手で組んだ形を渡さない。**初版は `{ judged: 19, delegated: 19 }` を渡していたが、
+  // 実物の ep() が返すのは `delegated_ai` で、**公開ページの分岐は一度も配線されていなかった** ——
+  // 19件すべてAIの自己評価なのに「未判定は満点として扱いません」と出続けていた
+  // （2026-09-05、main の autopilot/index.html で実際に出ていた）。
+  // **描画側を検査したつもりで、描画側の入力を検査していた。**実物を通す。
+  const realPrecision = scoreEp([], {
+    weights: { ep: 15 },
+    ep: { precision_review: { accepted_modes: [], delegations: [{ mode: 'owner_delegated', reviewer: 'codex' }] } },
+  }, {
+    rules: { rules: [] },
+    actions: { actions: Array.from({ length: 19 }, (_, i) => ({ id: `a${i}`, force_owner: 'human',
+      owner_needed: i < 10, owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) },
+  }).precision;
+  assert.equal(realPrecision.judged, 19, 'ep() の返り値が想定と違う');
   const delegatedSample = structuredClone(sample);
-  delegatedSample.components.ep.precision = { judged: 19, delegated: 19 };
+  delegatedSample.components.ep.precision = realPrecision;
   const delegatedReport = renderReport('<tr data-score="ep"><td>EP</td><td class="num"><b>0.0</b></td><td class="num">15</td><td>old</td></tr>', delegatedSample, {});
   assert(delegatedReport.includes('19件はオーナー委任によるAI評価'));
   assert(delegatedReport.includes('独立した人間評価ではありません'));
+  const streakTemplate = 'before<!-- run-streaks:start -->stale<!-- run-streaks:end -->after';
+  const shippingDays = [1, 2].map(day => ({ date_jst: `2026-09-0${day}`, outcome: 'shipped' }));
+  const shippingReport = renderRunStreaks(streakTemplate, shippingDays);
+  assert(shippingReport.includes('連続出荷は現在2日'));
+  assert(shippingReport.includes('2026年9月1日〜2026年9月2日'));
+  const failedDays = [...shippingDays, { date_jst: '2026-09-03', outcome: 'failed' }];
+  const failureReport = renderRunStreaks(shippingReport, failedDays);
+  assert(failureReport.includes('連続稼働は現在<b>3</b>日（2026年9月1日〜2026年9月3日）'));
+  assert(failureReport.includes('最長も<b>3</b>日'));
+  assert(failureReport.includes('連続出荷は現在0日</b>で、'));
+  assert(failureReport.includes('連続出荷の最長は2日</b>（2026年9月1日〜2026年9月2日）'));
+  assert(failureReport.startsWith('before') && failureReport.endsWith('after'));
+  assert.equal(renderRunStreaks(failureReport, failedDays), failureReport);
+  const gapReport = renderRunStreaks(streakTemplate, [...shippingDays, { date_jst: '2026-09-04', outcome: 'shipped' }]);
+  assert(gapReport.includes('連続稼働は現在<b>1</b>日（2026年9月4日〜2026年9月4日）'));
+  assert(gapReport.includes('最長も<b>2</b>日'));
+  const emptyReport = renderRunStreaks(streakTemplate, []);
+  assert(emptyReport.includes('台帳の記録はまだありません。'));
+  assert(!emptyReport.includes('null') && !emptyReport.includes('2026'));
+  assert.throws(() => renderRunStreaks('missing', failedDays), /missing or ambiguous/);
+  assert.throws(() => renderRunStreaks(streakTemplate.repeat(2), failedDays), /missing or ambiguous/);
   // Exercise an actual reverse patch in a disposable Git repo. This is a drill, never production evidence.
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-recovery-test-'));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();

@@ -489,6 +489,30 @@
       "expr": "detected",
       "disposition": "表示整形",
       "note": "機械による検知が既存運転台帳と本番復旧台帳の両方で0件の時だけ補足文を出す。得点は分子と分母から別に計算し、補足文の分岐では変えない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "r.failure_class",
+      "disposition": "別に検出",
+      "note": "失敗原因の未記入を拒否する条件。原因未確定の記録だけはobservedPendingTriageで実行失敗・調査待ち・GitHub参照・失敗/検知時刻・観測説明を全て要求する。証拠を1つずつ消すと拒否され、既存のunknown修理上限3回も残ることを自己検査。空欄を正常や修理済みに変換しない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "pending.lane_f_required",
+      "disposition": "前提",
+      "note": "自己検査のassertが確認する正の期待値。値が欠落/falseならassertは失敗するので、欠落によって検査が消える条件ではない。未分類を未修理一覧から除く変異で実際に失敗した。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.carried",
+      "disposition": "前提",
+      "note": "2026-09-05: 据え置き（carry_forward）で点が入った成分だけ、measurable=false でも check() を通す判定。**正が無いときは falsy になり、labelled=false → 検査が落ちる**側に倒れる。据え置きの印（carried）が消えたら「measurable=false なのに点が入っている」で名指しで止まる。緩む向きではない。変異試験⑨（labelled を true 固定）で落ちることを実測済み。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "cf.items",
+      "disposition": "表示整形",
+      "note": "2026-09-05: 据え置きが1件も無い窓に「方針は有効（出番なし）」の1行を出すかどうかの分岐。**点は分岐の外で決まっている。**正が無い（cf.items が消える）と TypeError になるが、その手前の `cf?.enabled` と、carryForward() が必ず items/skipped を返すことで担保している。据え置きが在る窓は上の分岐が拾うので、ここは「何も無かった」だけを言う。"
     }
   ],
   "coverage_measured_at": "2026-09-03",

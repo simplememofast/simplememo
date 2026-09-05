@@ -33,6 +33,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run as runScenarios } from './lib/selftest.mjs';
+import { OWNER_ONLY_FILES } from './autonomy-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const POLICY_PATH = path.join(ROOT, 'data/eligibility-policy.json');
@@ -184,7 +185,8 @@ export function evidenceOf(candidate) {
  * ctx: { policy, scorePolicy, authority, routing, costDoc, today, priorJudgements }
  */
 export function judge(candidate, ctx) {
-  const { policy, scorePolicy, authority, routing, costDoc, today } = ctx;
+  const { policy, scorePolicy, authority, routing, costDoc, today,
+          ownerOnly = OWNER_ONLY_FILES } = ctx;
   const c = policy.criteria;
   const criteria = {};
   const reasons = [];
@@ -222,6 +224,23 @@ export function judge(candidate, ctx) {
     }
     else if (touches.length > cap) put('boundedness', 'fail', `触るパスが ${touches.length} 件（上限 ${cap}）`);
     else {
+      // **オーナー所有のファイルは、どのスコープにも属さない。**
+      //
+      // [2026-09-05 実測] `content` の許可リストに `data/*.json` があるので、
+      // **採点の重み（data/autonomy-score.json）・この門自身の基準
+      // （data/eligibility-policy.json）・指標の承認（data/value-metrics.json）が
+      // すべて「収まる」と判定されていた。**`policyOwnership()` は
+      // `self_repair.may_modify` の側だけを見張っていて、**こちらの扉は開いていた。**
+      //
+      // 見張りが1枚あることは、入口が1つであることを意味しない。
+      // 正は autonomy-score.mjs の OWNER_ONLY_FILES（コード側）に置く ——
+      // 台帳側に写しを置くと、その台帳自身が書き換え対象になったときに一緒に緩む。
+      const ownerOwned = touches.filter((t) => ownerOnly.includes(t));
+      if (ownerOwned.length) {
+        put('boundedness', 'fail', `**オーナー所有のファイルは候補の範囲に入れられない**: ${ownerOwned.join(', ')}`
+          + ' — 自分の採点や、自分を判定する門を、自分で書き換える候補を作らない',
+          { scope: null, scope_source: 'owner_only' });
+      } else {
       const fit = fitScope(touches, c.boundedness.scopes, { authority, declared: candidate.scope });
       if (!fit.scope) {
         put('boundedness', 'fail', `どの許可リストにも収まらない: ${fit.outside.join(', ')}`,
@@ -229,6 +248,7 @@ export function judge(candidate, ctx) {
       } else {
         put('boundedness', 'pass', `${touches.length} パス・${fit.scope} の範囲内`,
           { scope: fit.scope, scope_source: fit.source });
+      }
       }
     }
   }
@@ -517,6 +537,55 @@ function selftest() {
   eq(J({ touches: ['data/a.json', 'data/b.json', 'data/c.json', 'data/d.json'] }).criteria.boundedness.result, 'fail',
      'パス数の上限を超えたら落とす');
   eq(J({ touches: ['src/secret.ts'] }).criteria.boundedness.result, 'fail', '許可リストの外は落とす');
+
+  // --- オーナー所有のファイル（**門を、門で守られている側が書き換えられないようにする**）---
+  //
+  // [2026-09-05 実測] 実データの `content` は許可リストに `data/*.json` を持つので、
+  // **採点の重み・この門自身の基準・指標の承認が、3つとも「収まる」と判定されていた。**
+  // `policyOwnership()` は self_repair.may_modify の側だけを見張っていて、こちらは開いていた。
+  const OWNED = ['data/autonomy-score.json', 'data/eligibility-policy.json', 'data/value-metrics.json'];
+  const JO = (over) => judge({ id: 'x', touches: ['a.html'], reversibility_class: 'R0',
+    evidence_date: '2026-09-04', predicted_usd: 1, created_jst: '2026-09-04', ...over },
+    { policy, scorePolicy, authority: auth, routing, costDoc, today: '2026-09-04', ownerOnly: OWNED });
+  for (const f of OWNED) {
+    eq(JO({ touches: [f] }).criteria.boundedness.result, 'fail', `**${f} を候補の範囲に入れられない**`);
+  }
+  ok('**1つでも混ざれば落とす**（通るパスに紛れ込ませられない）', () => {
+    // **許可リストが両方を覆う検体でないと、別の理由で落ちて通ってしまう。**
+    // 初版は content:['*.html'] のままで混在を試したので、`data/autonomy-score.json` が
+    // 「どのスコープにも収まらない」で落ちていた —— **検査が正しい理由で通っていなかった**
+    // （変異試験③で発覚。08-26 の vendor-terms と同じ形）。
+    const both = { ...policy, criteria: { ...policy.criteria,
+      boundedness: { ...policy.criteria.boundedness, scopes: { content: ['*.html', 'data/*.json'] } } } };
+    const mixed = { id: 'x', touches: ['a.html', 'data/autonomy-score.json'], reversibility_class: 'R0',
+      evidence_date: '2026-09-04', predicted_usd: 1, created_jst: '2026-09-04' };
+    const base = { policy: both, scorePolicy, authority: auth, routing, costDoc, today: '2026-09-04' };
+    assert(judge(mixed, { ...base, ownerOnly: [] }).criteria.boundedness.result === 'pass',
+      '前提が崩れている（所有権を外すと通るはずの検体）');
+    const r = judge(mixed, { ...base, ownerOnly: OWNED });
+    assert(r.criteria.boundedness.result === 'fail', `混ざっているのに通った: ${r.criteria.boundedness.why}`);
+    assert(r.criteria.boundedness.scope_source === 'owner_only', '落ちた理由が所有権でない');
+  });
+  eq(JO({ touches: ['a.html'] }).criteria.boundedness.result, 'pass',
+     '所有ファイルを触らない候補は通る（**塞いだせいで全部止まる、にしない**）');
+  ok('**許可リストが所有ファイルを覆っていても落ちる**（スコープ判定より前に立つ）', () => {
+    const wide = { ...policy, criteria: { ...policy.criteria,
+      boundedness: { ...policy.criteria.boundedness, scopes: { content: ['data/*.json'] } } } };
+    const r = judge({ id: 'x', touches: ['data/autonomy-score.json'], reversibility_class: 'R0',
+      evidence_date: '2026-09-04', predicted_usd: 1, created_jst: '2026-09-04' },
+      { policy: wide, scorePolicy, authority: auth, routing, costDoc, today: '2026-09-04', ownerOnly: OWNED });
+    assert(r.criteria.boundedness.result === 'fail',
+      `許可リストに覆われていると通ってしまう: ${r.criteria.boundedness.why}`);
+    assert(r.criteria.boundedness.scope_source === 'owner_only',
+      `落ちた理由が所有権でない: ${r.criteria.boundedness.scope_source}`);
+  });
+  ok('**正はコードに置く**（OWNER_ONLY_FILES を既定にしている）', () => {
+    const r = judge({ id: 'x', touches: ['data/autonomy-score.json'], reversibility_class: 'R0',
+      evidence_date: '2026-09-04', predicted_usd: 1, created_jst: '2026-09-04' },
+      { policy, scorePolicy, authority: auth, routing, costDoc, today: '2026-09-04' });  // ownerOnly を渡さない
+    assert(r.criteria.boundedness.result === 'fail',
+      '既定が空になっている —— **台帳に写しを置くと、その台帳ごと緩む**');
+  });
   // --- スコープの当て方（**推測でスコープを決めない**）---
   const SC = { actuator: ['data/*.json'], content: ['*.html', 'docs/**'], selfheal: '@authority:self_repair.may_modify' };
   eq(fitScope(['data/a.json'], SC, { authority: auth }).scope, 'actuator', '収まる最も狭いスコープを採る');

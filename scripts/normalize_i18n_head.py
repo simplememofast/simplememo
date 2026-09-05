@@ -125,6 +125,10 @@ EXCLUDED_DIR_PARTS = {
     "node_modules", "admin", "drafts", "docs", "scripts", "screenshots",
     "tools", "tiktok", "templates", ".git", ".github", ".claude", "js",
     "assets", "functions",
+    # 検査用フィクスチャ（noindex + robots.txt Disallow）。公開面ではないので
+    # canonical を持たせない。engine-divergence.html は </style></head> が同一行の
+    # ため、挿入すると <style> 内に block が落ちて CSS ごと壊れる。
+    "fixtures",
 }
 
 EXCLUDED_TOP_FILES = {"404.html"}
@@ -190,10 +194,13 @@ def build_auto_plan(
 
 # Patterns that match a SINGLE LINE of an owned tag (whitespace + tag).
 # Used with re.fullmatch on the line stripped of its trailing newline.
+# Attribute order must not matter: heads reserialized by other tools can emit
+# href-first / alphabetized attributes (e.g. en/roadmap), and an unmatched tag
+# survives removal, so the next run would insert a duplicate next to it.
 OWNED_LINE_PATTERNS = [
-    re.compile(r'\s*<link\s+rel="canonical"[^>]*>\s*'),
-    re.compile(r'\s*<link\s+rel="alternate"\s+hreflang="[^"]+"[^>]*>\s*'),
-    re.compile(r'\s*<meta\s+http-equiv="content-language"[^>]*>\s*'),
+    re.compile(r'\s*<link\b(?=[^>]*\brel="canonical")[^>]*>\s*'),
+    re.compile(r'\s*<link\b(?=[^>]*\brel="alternate")(?=[^>]*\bhreflang="[^"]+")[^>]*>\s*'),
+    re.compile(r'\s*<meta\b(?=[^>]*\bhttp-equiv="content-language")[^>]*>\s*'),
 ]
 
 # Comments that this script OWNS (so re-runs don't accumulate them) and
