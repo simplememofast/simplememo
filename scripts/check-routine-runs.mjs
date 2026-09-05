@@ -48,13 +48,17 @@ export const OVERDUE_GRACE_HOURS = 6;
 
 /**
  * 1つの routine の健全性。**純関数。**
- * 返すのは `null`（健全）か、`what`（何が起きているか）。
+ * 返すのは `null`（要追跡の状態なし）か、`what`（何が起きているか）。
+ * pending は結果未確定。故障・復旧成功とは数えず、終了まで追跡する。
  */
 export function diagnose(r, { now, observedAt = now }) {
   if (!r || typeof r !== 'object') return 'malformed';
   if (r.enabled !== true) return 'stopped';
   if (r.last_run_status === 'FAILED') return 'failed';
-  // 予定を過ぎているのに発火していない。**PENDING は走っている最中なので健全。**
+  // PENDING のまま長時間残る実例がある。失敗と断定せず、未確定として残す。
+  // 次の発火予定が未来でも、現在の実行が終わった証拠にはならない。
+  if (r.last_run_status === 'PENDING') return 'pending';
+  // 予定を過ぎているのに発火していない。
   //
   // [2026-08-28] **基準を壁時計から写しの観測時刻へ移した。**
   // ここは `now - due` を見ていたが、`last_fired_at` を持っているのは**写し**であって
@@ -328,12 +332,14 @@ function selftest() {
       assert(!p.some((x) => x.includes('#244')),
         `**壁時計で判定している。**写しより後の予定を「止まっている」と呼んだ: ${p.join(' / ')}`);
     }],
-    ['走っている最中（PENDING）は健全に数える', () => {
+    ['実行中（PENDING）は成功・故障にせず、結果未確定として追跡する', () => {
       const r = {
         id: 'x', name: 'x', enabled: true, cron_expression: '0 0 * * *',
         next_run_at: '2026-08-29T00:00:00Z', last_run_status: 'PENDING',
       };
-      assert(diagnose(r, { now: NOW }) === null, 'PENDING を異常にしている');
+      assert(diagnose(r, { now: NOW }) === 'pending', '未確定の実行を見失った');
+      r.last_run_fired_at = '2026-08-20T00:00:00Z';
+      assert(diagnose(r, { now: NOW }) === 'pending', '経過時間だけで成功や故障と断定した');
     }],
     ['cron があるのに一度も走っていなければ立つ', () => {
       const r = { id: 'x', name: 'x', enabled: true, cron_expression: '0 0 * * *', next_run_at: '2026-08-29T00:00:00Z' };
@@ -529,11 +535,11 @@ if (isMain) {
     const mark = what ? `**${what}**` : 'ok';
     console.log(`  ${mark.padEnd(14)} ${(r.name ?? '').slice(0, 40)}`);
   }
-  console.log(`\n  健全でない ${unhealthy?.length ?? 0} 件`
+  console.log(`\n  要追跡 ${unhealthy?.length ?? 0} 件`
     + ` = 未対応 ${doc.open_findings.length}（上限 ${doc.open_budget}）`
     + ` + 意図的に停止 ${doc.intentional_stops.length}`);
   if (doc.open_findings.length) {
-    console.log('\n  **未対応** — 次の発火まで誰も気づかない形で止まっている:');
+    console.log('\n  **要確認** — 故障・停止・未実行・結果未確定（pending）を区別して追跡:');
     for (const f of doc.open_findings) {
       const r = doc.routines.find((x) => x.id === f.id);
       console.log(`    [${f.what}] ${(r?.name ?? f.id).slice(0, 46)}（${f.found_at} 発見）`);
