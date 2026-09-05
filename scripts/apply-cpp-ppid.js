@@ -91,6 +91,15 @@ function mapProblems(m) {
     if (cpp.asc_visible !== true) {
       out.push(`${cpp.id}: wired CPP visibility is ${JSON.stringify(cpp.asc_visible ?? null)}; verify visible=true in the ASC inventory before wiring it.`);
     }
+    // English destinations must have observed English artwork in the approved
+    // version. A translated web page alone does not establish a localized CPP.
+    if (cpp.match.some((pattern) => pattern.startsWith('^/en/'))) {
+      const evidence = cpp.locale_evidence?.['en-US'];
+      if (!evidence || !UUID_RE.test(evidence.approved_version_id ?? '')
+          || evidence.first_image_reviewed !== true || !Number.isFinite(Date.parse(evidence.checked_at ?? ''))) {
+        out.push(`${cpp.id}: English wiring requires dated, reviewed en-US artwork from an identified approved CPP version.`);
+      }
+    }
   }
   return out;
 }
@@ -120,9 +129,16 @@ if (SELFTEST) {
 
   t('承認済みでも非表示なら落ちる', mapProblems({ cpps: [row({ asc_visible: false })] }).length === 1);
   t('表示状態を観測していなければ落ちる', mapProblems({ cpps: [row({ asc_visible: undefined })] }).length === 1);
+  const english = row({match: ['^/en/x/$']});
+  t('英語素材未確認の配線は落ちる', mapProblems({cpps:[english]}).length === 1);
+  const observedEnglish = {...english, locale_evidence: {'en-US': {
+    approved_version_id:'b71eff39-3eec-4095-89f6-47942728473d', first_image_reviewed:true, checked_at:'2026-09-05T14:00:00Z',
+  }}};
+  t('承認版の英語画像確認済みなら通る', mapProblems({cpps:[observedEnglish]}).length === 0);
+  t('英語素材未確認を日付だけで通さない', mapProblems({cpps:[{...observedEnglish, locale_evidence:{'en-US':{...observedEnglish.locale_evidence['en-US'],first_image_reviewed:false}}}]}).length === 1);
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 10 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 13 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
