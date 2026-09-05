@@ -3586,3 +3586,97 @@ Runbook §2「前回レーンCから7日以上経っている → その日の�
 - coverage-queue（レーンE）は pending 26件で潤沢。次回レーンA/Bが空振りならE（先頭 C08 `/obsidian/compare/notion/`）へ
 - 次回レーンCは今回もテーマ側を使ったので、別の資産（プラグインのダウンロード分布の中央値・作者の重複など）を検討
 - owner_requests 2件は本日も実測手段なく継続（PR⑥ D+14判定は2026-09-17まで未到来・週次上限のプラン階層対応はセッションから確認不可）
+
+---
+
+## 2026-09-06（主系GitHub Actions・schedule） — レーンE着手→価値契約のboundedness不適格でスキップ（保守のみ）
+
+### 判断根拠
+
+レーンF（自己修復）: `autopilot-selfheal.mjs` に未修理の故障なし（🤝 usage_limit 3件は既存・オーナー判断済み）。
+`health-intake.mjs` は open な監視Issue 1件（#883、原因不明のため継続オープン）を台帳へ反映。`recover-ingest.mjs`
+は退避経路の発火記録が引き続き0件（`degraded`なし）。**この日の最優先は無し、記事レーンへ進む。**
+
+レーンA/B: `AUTOPILOT_DATA_REPORT` は `partial`（25/28日・lag 3日）。`refresh-queue.json` 全5件がdropped、
+`new-queue.json` はN1実装済み・N2〜N4は既存の理由で据え置き。新しい根拠なし。
+
+レーンC: 前回実施が2026-09-04（`/obsidian/plugins/` テーマ内訳）で本日まで2日、7日未満のため優先しない。
+
+レーンE: `coverage-queue.json` の pending 先頭 **C09 `/obsidian/compare/capacities/`**（Capacitiesのデスクトップ版を
+実機起動して検証）に着手。
+
+### 価値契約（§2-1）— 6回の再宣言の末、boundedness不適格と判明
+
+承認済み指標6件（うち `publishing_day_rate` が forecast_available）があるため、§2-1に従い実装前に
+`/tmp/decision-candidates.json` へ2候補（C09実装 vs 保守のみ）を書き、`--select` で判定した。
+
+**実装そのものは完了させた**（後述）。しかし touches を実際の差分に合わせて確定させる過程で、
+`python3 scripts/generate_sitemap.py` が `sitemap.xml` だけでなく `sitemap-ja.xml`・`sitemap-en.xml`・
+`sitemap-locales.xml` も書き換えることが分かり、この3ファイルを touches に加えると
+`data/eligibility-policy.json` の `criteria.boundedness.scopes.content` にこれらを通す glob が無く
+（`"sitemap.xml"` のリテラル一致のみ）、**boundedness基準が必ず fail する**ことが判明した。
+
+`scripts/value-contracts.mjs` の `prepare()` は5基準のうち1つでも `pass` でなければ無条件で候補を reject する
+（`data/eligibility-policy.json` の enforcement は `record_plus_r2_block` で「R2以外は記録のみ・止めない」と
+書かれているが、`prepare()` 自体はこの enforcement 設定を見ていない）。`scripts/decision-ci.mjs` の `required()` は
+承認済み指標が1件でもあれば `claude/obsidian-auto-*` ブランチの非bookkeeping差分にこの契約を必須化するため、
+**回避手段が無い。** `data/eligibility-policy.json` は `self_repair.may_modify` の外（AIは書き換えない）なので、
+自分で穴を塞ぐこともできない。
+
+`--select` に2案（C09実装・保守のみ）を渡すと、C09実装は自動的に ineligible と判定されて除外され、
+**保守のみが自動選択された**（`skip-lane-e-maintenance-20260906`・`data/decision-intents/`）。
+この過程で touches の過不足に気づくたびに退避（`git stash`）→ `--retire` → 候補修正 → `--select` を
+6回繰り返した（`data/decision-rejections/obsidian-compare-capacities-20260906{,b,c,d}.json` に経緯が残る）。
+**最後に判明したsitemap分割ファイルの一件だけは、touchesに加えても通らない**——ここで初めて
+「範囲の記述漏れ」ではなく「制度側の欠落」だと判断し、実装を中止した。
+
+### やったこと（実装は完了・出荷はしていない）
+
+Capacities公式サイトのダウンロードページはJS描画でURLが取れなかったため、AURの `capacities-appimage`
+パッケージ定義（PKGBUILD）から実際の配布URLとSHA256を確認し、Linux版AppImage（**v1.70.2**）を取得。
+ダウンロードしたファイルのSHA256が公開値（`ea71456d...`）と一致することを確認した。
+
+`xvfb-run` + Chromeのリモートデバッグポートを立て、`playwright-core`で`connectOverCDP`し、実際に起動して
+オンボーディングを最後まで操作・スクリーンショットを取得した。確認できた事実:
+
+- 起動直後は「Welcome to Capacities」からログイン/Get startedの二択で、フォルダを選ぶ導線は無い
+- オンボーディングの途中でノートが自動的に**Bookタイプのオブジェクト**になり、「Every note you make is
+  an object.」という説明とともにAuthor（人物参照）・Rating（星）等の構造化プロパティが最初から付いた
+- オンボーディングの最後（「Ready to think clearly?」画面）で**メールアドレス入力が必須**になり、
+  ここで検証を停止（実際のアカウント作成はしていない）
+- 公式ドキュメント（`docs.capacities.io/misc/offline-support`）は「ノートは独自データベース形式で保存され、
+  ファイルシステムには無い」と明記。エクスポート（Markdown ZIP）は用意されているが既定の保存方式ではない
+- 料金は公式ページで確認: 無料（メディア5GB上限）／Pro $9.99/月／Believer $12.49/月〜
+
+これらを基に `obsidian/compare/capacities/index.html`（新規・比較表・実機スクリーンショット3枚・FAQ6問・
+検証環境ブロック付き）を書き、`data/content-graph.json`・`growth/content/coverage-queue.json`（C09→done）・
+`vs/capacities/index.html`（意図分岐バナー＋関連リンク）・`obsidian/index.html`・`obsidian/compare/logseq/`・
+`obsidian/compare/index.html`（「Capacities未検証」という既存の記述を「検証済み」へ訂正——放置すると
+自サイト内で矛盾する記述になるところだった）・OG画像・スクリーンショット3枚（webp/png）まで作り切った。
+`seo-check.js`・`check-viewport-overflow.mjs`・`check-script-tags.mjs`等はローカルで通過を確認済み。
+
+**この一式は現在のブランチにコミットしておらず、本PRには含まれていない。** 上記のboundedness不適格が
+判明したのが実装完了後だったため、公開はできないがドラフトとしても持ち出せない（次回セッションはこの
+ブランチを見ないため）。**もう一度Capacitiesを起動して確かめ直す再検証コストが、次にC09へ着手する
+セッションに乗る。**これ自体がこの一件の実害である。
+
+### 検証
+
+- `node scripts/autopilot-selfheal.mjs` / `health-intake.mjs` / `recover-ingest.mjs --check` — 対象なし
+- `node scripts/value-contracts.mjs --readiness` / `--feedback`（決済0件・較正実績なし） / `--select`
+  （6回・最終的に保守のみが選ばれる）
+- 上記の新ページ一式について: `seo-check.js`（0 errors）・`check-viewport-overflow.mjs --static/--check`・
+  `check-script-tags.mjs`・`check-content-graph.mjs` をローカルで実行し通過を確認（コミットはしていない）
+
+### 残る弱さ・申し送り
+
+- **`data/eligibility-policy.json` の `criteria.boundedness.scopes.content` に `sitemap-ja.xml`・
+  `sitemap-en.xml`・`sitemap-locales.xml` を通す glob（例: `"sitemap-*.xml"`）が無い。**このままでは
+  承認済み指標がある限り、新規URLを伴うレーンA〜Eの出荷が今後も同じ理由で全件不適格になる。
+  オーナーによる修正が必要（別途 owner_requests へ記録）
+- C09 `/obsidian/compare/capacities/` は次回セッションが再度ゼロから実装する必要がある。**検証した事実
+  （バージョン1.70.2・SHA256・オンボーディングの4画面・料金）はこのログに残したので、再検証そのもの
+  （AppImageの再取得・起動・スクリーンショット）は必要でも、何を確かめるべきかは繰り返さなくてよい**
+- `growth/content/coverage-queue.json` のC09は本PRでは触っていない（**`pending`のまま**）。ドラフト側で
+  `status: "done"`に書き換えていたが、そのコミット自体をこの branch に含めていないため、コミット済みの
+  台帳には反映されていない。次回セッションが実装し直したときに`done`へ更新すること
