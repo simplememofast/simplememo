@@ -91,8 +91,22 @@ export function vdc(runs, policy, { contracts = null } = {}) {
   return {
     id: 'vdc', rate, n: shipped.length, hit: settled,
     max: policy.weights.vdc, points: policy.weights.vdc * rate,
-    measurable: Boolean(contracts),
-    why: contracts ? null : 'L2（価値契約）が未実装。決済済みの契約を持つ出荷は構造的に 0 件',
+    // **「契約が0本」を「台帳が無い」と同じ扱いにしない。**
+    // Boolean([]) は真なので、空の台帳は measurable=true・why=null になり、
+    // **0点の理由が1行も出ない状態**になっていた（2026-09-05 に実測）。
+    // 3つの状態は原因も次の一手も違うので、分けて言う。
+    measurable: Array.isArray(contracts) && contracts.length > 0,
+    contracts_written: Array.isArray(contracts) ? contracts.length : null,
+    why: !contracts
+      ? '**契約台帳が無い。**L2 の仕組みそのものが置かれていない'
+      : contracts.length === 0
+        ? '**仕組みは在るが、契約がまだ1本も書かれていない。**'
+          + '日次runは着手前に契約を書くよう配線済み（obsidian-autopilot.yml §3-1）で、'
+          + '承認済み指標が0件の間は書かない設計。**次に主系が完走した回が最初の1本になる**'
+        : settled === 0
+          ? `**契約は ${contracts.length} 本あるが、決済済みが 0。**`
+            + '決済は horizon 経過後に Decision Monitor が行う —— 書いた日には点が入らない'
+          : null,
   };
 }
 
@@ -248,6 +262,16 @@ export function ep(runs, policy, { rules, actions }) {
   const precRate = counted.length ? needed.length / counted.length : null;
   const precPoints = precRate === null ? 0 : half * precRate;
   const judged = counted;   // 表示の互換のため（数えた件数＝判定として採用した件数）
+  // **誰が下した判定を数えたかを、点と一緒に出す。**
+  // 委任を認めた後でも「人が判定した割合」と読めてしまうと、
+  // **点が上がったこと自体が、何が起きたかを隠す。**
+  const byMode = {};
+  for (const a of counted) {
+    const m = a.owner_needed_review?.mode ?? '(不明)';
+    byMode[m] = (byMode[m] ?? 0) + 1;
+  }
+  const humanCount = byMode.human ?? 0;
+  const aiCount = counted.length - humanCount;
 
   return {
     id: 'ep',
@@ -256,14 +280,19 @@ export function ep(runs, policy, { rules, actions }) {
             why: timed.length ? '**下界のみ**（検知の時刻までしか台帳に無い。配達時刻は持っていない）'
                               : '窓内に時刻を持つ故障が無い' },
     precision: { rate: precRate, n: escalated.length, filled: filled.length, judged: counted.length,
-                 uncounted: uncounted.length, points: precPoints, max: half,
+                 uncounted: uncounted.length, by_mode: byMode, human: humanCount, delegated_ai: aiCount,
+                 needed: needed.length, points: precPoints, max: half,
                  measurable: counted.length > 0,
                  why: uncounted.length
                    ? `${filled.length}/${escalated.length} に判定が入っているが、**${uncounted.length}件は採点しない**`
                      + `（${uncountedReasons(uncounted, policy).join(' / ')}）。`
                      + `**記録の無い委任は、自己付与と見分けがつかない。**`
                      + `data/autonomy-score.json の ep.precision_review.delegations にオーナーが1行足せば数え直される`
-                   : counted.length ? null
+                   : aiCount
+                     ? `${counted.length}/${escalated.length} 判定済み。**うち ${aiCount} 件はAIが自分で下した判定**`
+                       + `（オーナーの委任に基づく・2026-09-05）。必要だった ${needed.length} / 不要だった ${counted.length - needed.length}`
+                       + `${humanCount ? ` ／ 人の判定は ${humanCount} 件` : ' ／ **人の判定は 0 件**'}`
+                   : counted.length ? `${counted.length}/${escalated.length} 判定済み（人の判定）`
                    : `オーナーへ上げた ${escalated.length} 件に owner_needed が1件も入っていない — **上げたのが正しかったかを、この台帳は言えない**` },
     rate: (missPoints + precPoints) / policy.weights.ep,
     max: policy.weights.ep, points: missPoints + precPoints,
@@ -561,6 +590,16 @@ function selftest() {
      '決済時刻を書くだけでは加点しない');
   eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).points, 0,
      '**決済されていない契約は数えない**（書いただけでは検証ではない）');
+  // **3つの 0 を分けて言う。**原因も次の一手も違う。
+  eq(vdc([ship('a')], P).why?.includes('契約台帳が無い'), true, '台帳が無い状態');
+  eq(vdc([ship('a')], P).measurable, false, '台帳が無ければ測れていない');
+  eq(vdc([ship('a')], P, { contracts: [] }).why?.includes('契約がまだ1本も書かれていない'), true,
+     '**空の台帳を「仕組みが無い」と同じ扱いにしない**');
+  eq(vdc([ship('a')], P, { contracts: [] }).measurable, false,
+     '**Boolean([]) は真だが、契約0本は測れていない**（この取り違えが実際に起きていた）');
+  eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).why?.includes('決済済みが 0'), true,
+     '書かれたが決済されていない状態');
+  eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).contracts_written, 1, '書かれた本数を出す');
 
   // --- UMR ---
   eq(umr([ship('a')], P).points, 25, '無介入なら満点');
@@ -629,7 +668,7 @@ function selftest() {
   eq(dp.points, 0, '**委任の記録が無ければ0点**（AIが自分のエスカレーションを自分で採点しない）');
   eq(dp.uncounted, 2, '数えなかった件数を出す');
   eq(dp.filled, 2, '**欄が埋まっている件数は別に出す**（消さない・見えなくしない）');
-  eq(dp.why.includes('委任の記録が無い'), true, '理由を名指しする');
+  eq(dp.why?.includes('委任の記録が無い'), true, '理由を名指しする');
 
   // 判定者の記録が無い欄も数えない —— 機械が埋めたのと見分けがつかない
   const bare = { actions: [{ force_owner: 'human', owner_needed: true }] };
@@ -644,6 +683,15 @@ function selftest() {
     delegations: [{ mode: 'owner_delegated', reviewer: 'codex', delegated_at: '2026-09-05' }] } } };
   eq(ep([quick], withDelegation, { rules, actions: delegatedActs }).precision.points, 3.75,
      '委任が台帳に入れば数える');
+  {
+    const dpp = ep([quick], withDelegation, { rules, actions: delegatedActs }).precision;
+    eq(dpp.delegated_ai, 2, '**委任で数えた件数は、AIが下した判定として別に持つ**');
+    eq(dpp.human, 0, '人の判定は0件');
+    eq(dpp.why?.includes('AIが自分で下した判定'), true,
+       '**委任した後も「人の判定」とは表示しない**（点が上がったことが、何が起きたかを隠さない）');
+    eq(dpp.why?.includes('人の判定は 0 件'), true, '人の判定が0件であることを名指しする');
+    eq(dpp.needed, 1, '必要・不要の内訳も出す（全部 true に倒れ始めたら見えるように）');
+  }
   eq(ep([quick], withDelegation, { rules, actions: { actions: delegatedActs.actions.map((a) => ({ ...a,
        owner_needed_review: { mode: 'owner_delegated', reviewer: '別のだれか' } })) } }).precision.points, 0,
      '**委任した相手だけ**（reviewer が違えば数えない）');
