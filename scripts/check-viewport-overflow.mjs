@@ -314,21 +314,25 @@ export function serve(root = ROOT) {
 export const CHROMIUM_BASES = () => [process.env.PLAYWRIGHT_BROWSERS_PATH, '/opt/pw-browsers',
   path.join(process.env.HOME || '', '.cache/ms-playwright')].filter(Boolean);
 
-/** 探す場所を引数に出してあるのは、**「無ければ null」を試せるようにするため。** */
-export function findChromium(bases = CHROMIUM_BASES()) {
-  const fromEnv = process.env.CHROMIUM_PATH;
-  if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
+/** キャッシュ・環境変数・システムの候補を分け、探索の全経路をテストできるようにする。 */
+export function findChromium(bases = CHROMIUM_BASES(), {
+  fromEnv = process.env.CHROMIUM_PATH,
+  systemPaths = ['/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/usr/bin/chromium'],
+  exists = fs.existsSync,
+  readDir = fs.readdirSync,
+} = {}) {
+  if (fromEnv && exists(fromEnv)) return fromEnv;
   // GitHub の ubuntu ランナーには Chrome が最初から入っている。
   // **ここを見れば CI でブラウザを落とさずに済む**（150MB のダウンロードを毎PR撃たない）。
-  for (const f of ['/usr/bin/google-chrome', '/usr/bin/chromium-browser', '/usr/bin/chromium']) {
-    if (fs.existsSync(f)) return f;
+  for (const f of systemPaths) {
+    if (exists(f)) return f;
   }
   for (const base of bases) {
-    if (!fs.existsSync(base)) continue;
-    for (const d of fs.readdirSync(base).filter((x) => x.startsWith('chromium')).sort().reverse()) {
+    if (!exists(base)) continue;
+    for (const d of readDir(base).filter((x) => x.startsWith('chromium')).sort().reverse()) {
       for (const rel of ['chrome-linux/chrome', 'chrome-linux/headless_shell', 'chrome-mac/Chromium.app/Contents/MacOS/Chromium']) {
         const f = path.join(base, d, rel);
-        if (fs.existsSync(f)) return f;
+        if (exists(f)) return f;
       }
     }
   }
@@ -604,11 +608,25 @@ const SCENARIOS = [
     if (!m.measurable && !m.why) throw new Error('測れない理由を言っていない');
   }],
   ['**Chromium が無ければ null**（無いのに在ることにしない）', () => {
-    const saved = process.env.CHROMIUM_PATH;
-    process.env.CHROMIUM_PATH = '/nonexistent';
-    const got = findChromium(['/nonexistent']);
-    if (saved === undefined) delete process.env.CHROMIUM_PATH; else process.env.CHROMIUM_PATH = saved;
+    const got = findChromium(['/cache'], {
+      fromEnv: '/env/chrome', systemPaths: ['/system/chrome'], exists: () => false,
+      readDir: () => { throw new Error('存在しないディレクトリを読んだ'); },
+    });
     if (got !== null) throw new Error(`無い場所から見つけたことにした: ${got}`);
+  }],
+  ['Chromium は環境変数、システム、キャッシュの順に探す', () => {
+    const cache = '/cache/chromium-1/chrome-linux/chrome';
+    const present = new Set(['/env/chrome', '/system/chrome', '/cache', cache]);
+    const options = {
+      fromEnv: '/env/chrome', systemPaths: ['/system/chrome'],
+      exists: (f) => present.has(f), readDir: () => ['firefox-1', 'chromium-1'],
+    };
+    for (const expected of ['/env/chrome', '/system/chrome', cache]) {
+      const got = findChromium(['/cache'], options);
+      if (got !== expected) throw new Error(`expected ${expected}, got ${got}`);
+      present.delete(expected);
+    }
+    if (findChromium(['/cache'], options) !== null) throw new Error('キャッシュ本体が無いのに見つけた');
   }],
   ['実環境では見つかる（常に null を返す実装で通らせない）', () => {
     if (findChromium() === null) throw new Error('この環境の Chromium を見つけられていない');
