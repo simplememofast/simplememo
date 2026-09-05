@@ -129,9 +129,18 @@ function selftest() {
   t('実データが読める', Array.isArray(readRows()) && readRows().length > 0);
   // **実データで「いま何も期限が来ていない」ことも固定する。**
   // 9/17 より前にこれが非空になったら、台帳側で日付か status が動いている。
+  const PR6 = 'pr-2026-rsi-autopilot';
+  const pr6 = readRows().find((e) => e.id === PR6);
+  t('実データ: PR⑥ の行がある', Boolean(pr6));
+  t('実データ: PR⑥ の評価日は 2026-09-17', pr6?.evaluation_at === '2026-09-17');
+  t('実データ: PR⑥ の status は running か evaluated',
+    ['running', 'evaluated'].includes(pr6?.status));
   t('実データ: 2026-09-16 時点では0件', due(readRows(), '2026-09-16').length === 0);
-  t('実データ: 2026-09-17 時点では1件（PR⑥）',
-    due(readRows(), '2026-09-17').map((x) => x.id).join(',') === 'pr-2026-rsi-autopilot');
+  const settled = pr6?.status !== 'running' || isCaptured(pr6?.discover_boarding_post);
+  t(`実データ: 9/17 の門は ${settled ? '0件（転記済み）' : 'PR⑥ 1件（未転記）'}`,
+    settled
+      ? due(readRows(), '2026-09-17').length === 0
+      : due(readRows(), '2026-09-17').map((x) => x.id).join(',') === PR6);
 
   console.log(`\nselftest: ${ng ? `${ok + ng}件中 ${ng}件 失敗` : `全${ok}件 通過`}`);
   return ng ? 1 : 0;
