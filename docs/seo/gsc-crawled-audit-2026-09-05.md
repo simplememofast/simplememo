@@ -6,7 +6,7 @@
 
 65件をGETで取得し、各転送を個別に追跡した。結果は**直接200が11件、1回の301で正規ページへ到達するものが54件**。最終65レスポンスは200で、到達URLとHTMLのcanonicalが一致し、meta robots / X-Robots-Tagによるnoindexはなかった。URL別の入力・転送先・初回HTTPステータスは [全65件のケース](gsc-crawled-cases-2026-09-05.json) に保存している。
 
-これはHTTPの現況であり、Googleの登録状態ではない。Search ConsoleのURL検査APIやGoogleが選択したcanonicalは取得していない。したがって、11件の除外理由を「品質が原因」と断定したり、54件の転送先がGoogleに登録済みだと断定したりはしない。
+これはHTTPの現況であり、Googleの登録状態ではない。HTTP確認の後にSearch ConsoleのUIで11件の正規URLを個別検査した結果を、下の追記に記録した。54件の転送先すべてのGoogle登録状態は個別検査していない。
 
 | 直接200の正規URL | 日本語本文の文字数（概数） | ホームからのリンク距離 | サイト内リンク元ページ数 |
 |---|---:|---:|---:|
@@ -35,23 +35,29 @@ URL正規化は本番で既に機能していた。重複URLを改めて200に�
 - **E2E暗号化**: 前方秘匿性と侵害後の回復を区別。「受信者だけが共通鍵を持つ」「過去と未来の両方が無条件に安全」という説明を訂正。4段階の説明を概念の整理として位置付け、HTTPS API接続からメール配送全体の暗号化を推定しない説明に変更。
 - **即キャプチャ**: 出典のない「平均23秒で忘れる」、3秒を超えると使わなくなるという断定、起動時間と入力・配送時間の混同を修正。1行メモの型と処理済みメールの扱いを追加。
 
-変更は日本語・英語の表示に反映。可視FAQからFAQPageを再生成し、実際に本文を変更した4ページのみdateModified・可視更新日・サイトマップlastmodを更新した。
+追加のURL検査で、フリーランス記事だけが現在も未登録であることを確認したため、同記事も改訂。根拠のない80%・40%・作業時間の削減値、公開記録のない利用体験、家賃按分の断定を撤去した。請求番号を使う照合用テンプレートを追加し、入金額と会計上の売上・粗利、メモと帳簿・元書類を区別する説明を国税庁の資料とともに記載した。
+
+変更は日本語・英語の表示に反映。可視FAQからFAQPageを再生成し、実際に本文を変更した5ページのみdateModified・可視更新日・サイトマップlastmodを更新した。
 
 ## 検証
 
 - `node scripts/seo-check.js`: 269 HTML、0 errors / 0 warnings。
-- `node scripts/check-url-normalization.mjs`: 429件成功（最新mainへのrebase後）。65件の実例を追加し、転送先HTMLの存在・自己canonical・noindexなし・JAサイトマップ掲載も検査する。
+- `node scripts/check-url-normalization.mjs`: 433件成功（追加改訂時の最新main）。65件の実例を追加し、転送先HTMLの存在・自己canonical・noindexなし・JAサイトマップ掲載も検査する。
 - `node scripts/check-internal-redirects.mjs`: 内部リンク・メタデータ・サイトマップの参照先は直接到達。
 - `node scripts/check-script-tags.mjs`: HTML要素とscriptの開閉は整合。
 - `python3 scripts/inject_faq_schema.py --check`: 生成対象146面のFAQPageと可視FAQが一致。
 - 価格・定数、アセットのバージョン、content-graph、git diffの空白検査を実施。
-- 変更4ページを375px / 1440px、JA / ENの計16条件でブラウザ確認。横方向のはみ出し、H1重複、言語切替の不一致がないことを確認。
+- 変更5ページを375px / 1440px、JA / ENの計20条件でブラウザ確認。横方向のはみ出し、H1重複、言語切替の不一致がないことを確認。
 
 ## GSCで確認する対象
 
-今回の変更後、まず4つの正規URLをURL検査で確認する。Googleが選択したcanonicalが別URLならその相手との内容の違いを評価し、まだ未登録なら変更内容を踏まえて再クロールをリクエストする。旧`.html` / `?lang=` / 統合済みURLの54件は転送元として扱う。すべてを個別にインデックス登録することは目標にしない。
+2026-09-05、Search ConsoleのUIで正規URL11件を個別検査した。**10件は「URL は Google に登録されています」、フリーランス記事1件だけが「クロール済み - インデックス未登録」だった。**これは今回の公開前に確認した状態であり、今回の修正で10件が登録されたという意味ではない。
 
-この修正は掲載内容の正確性と再発防止を改善するもので、インデックス登録の完了を保証するものではない。次の評価ではHTTP検査結果とSearch Consoleの登録判定を区別する。
+未登録の `/blog/freelance-memo-management` は最終クロール2026/07/28 16:08:27、クロール許可・取得成功・インデックス許可はすべて正常。ユーザー指定・Google選択の正規URLも検査対象URLだった。E2E暗号化ページは2026/09/02 11:10:49、Roam比較は同日11:14:50にクロールされ、Googleの正規URLも検査対象URLだった。
+
+フリーランス記事の改訂を公開した後、その正規URLの再クロールをリクエストする。旧`.html` / `?lang=` / 統合済みURLの54件は転送元として扱う。すべてを個別にインデックス登録することは目標にしない。
+
+この修正は掲載内容の正確性と再発防止を改善するもので、残る1件のインデックス登録の完了を保証するものではない。次の評価ではHTTP検査結果とSearch Consoleの登録判定を区別する。
 
 ## 参照した一次情報
 
@@ -60,3 +66,5 @@ URL正規化は本番で既に機能していた。重複URLを改めて200に�
 - [Todoist: インボックスとプロジェクト](https://www.todoist.com/help/todoist/features/whats-the-difference-between-the-inbox-and-a-project-d6dSLqAM)
 - [Todoist: Pro料金改定](https://www.todoist.com/help/todoist/billing/todoist-pro-pricing-update-in-2025-bxBvHZuJZ)
 - [Signal: Double Ratchet仕様](https://signal.org/docs/specifications/doubleratchet/)
+
+追記の参照: [国税庁・必要経費](https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2210.htm)、[記帳・帳簿等の保存](https://www.nta.go.jp/taxes/shiraberu/shinkoku/kojin_jigyo/index.htm)。
