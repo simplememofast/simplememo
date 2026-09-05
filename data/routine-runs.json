@@ -132,52 +132,21 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-05T07:58:52.300Z",
+  "observed_at": "2026-09-05T10:20:45.084Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 4,
+  "open_budget": 3,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
-    {
-      "id": "trig_01ESF9AHax6buS9X1pdFv657",
-      "what": "failed",
-      "found_at": "2026-09-05",
-      "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
-      "observation": {
-        "observed_at": "2026-09-05T07:58:52.300Z",
-        "enabled": true,
-        "last_run_status": "FAILED",
-        "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
-        "last_run_finished_at": "2026-09-05T00:20:28.779580Z",
-        "last_run_session_id": "cse_01XHxkzJV3mCgR9eMn84f2cz",
-        "next_run_at": "2026-09-06T00:20:00Z"
-      }
-    },
-    {
-      "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
-      "what": "never_ran",
-      "found_at": "2026-09-05",
-      "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T11:31:00Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-05T07:58:52.300Z",
-        "enabled": true,
-        "last_run_status": null,
-        "last_run_fired_at": null,
-        "last_run_finished_at": null,
-        "last_run_session_id": null,
-        "next_run_at": "2026-09-05T11:31:00Z"
-      },
-      "tracked_due_at": "2026-09-05T11:31:00Z"
-    },
     {
       "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
       "what": "never_ran",
       "found_at": "2026-09-05",
       "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T10:34:49.332619211Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T07:58:52.300Z",
+        "observed_at": "2026-09-05T10:20:45.084Z",
         "enabled": true,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -188,18 +157,34 @@
       "tracked_due_at": "2026-09-05T10:34:49.332619211Z"
     },
     {
-      "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
-      "what": "pending",
+      "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
+      "what": "never_ran",
       "found_at": "2026-09-05",
-      "why": "実APIはPENDING。実行は終了しておらず結果未確定。故障・復旧成功・依頼内容の達成には数えず、同じ実行の終了を次の観測で確認する。",
+      "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T11:31:00Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T07:58:52.300Z",
+        "observed_at": "2026-09-05T10:20:45.084Z",
         "enabled": true,
-        "last_run_status": "PENDING",
-        "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
+        "last_run_status": null,
+        "last_run_fired_at": null,
         "last_run_finished_at": null,
-        "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5",
-        "next_run_at": "2026-09-06T03:30:36.964912742Z"
+        "last_run_session_id": null,
+        "next_run_at": "2026-09-05T11:31:00Z"
+      },
+      "tracked_due_at": "2026-09-05T11:31:00Z"
+    },
+    {
+      "id": "trig_01ESF9AHax6buS9X1pdFv657",
+      "what": "failed",
+      "found_at": "2026-09-05",
+      "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
+      "observation": {
+        "observed_at": "2026-09-05T10:20:45.084Z",
+        "enabled": true,
+        "last_run_status": "FAILED",
+        "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
+        "last_run_finished_at": "2026-09-05T00:20:28.779580Z",
+        "last_run_session_id": "cse_01XHxkzJV3mCgR9eMn84f2cz",
+        "next_run_at": "2026-09-06T00:20:00Z"
       }
     }
   ],
@@ -382,16 +367,16 @@
     },
     {
       "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
-      "name": "x-engagement 昼12:30 v4.1-device ｜ last: （未実行・v4.1 適用 09-05 15:20 JST。14:32 のテスト発火はクラウド単独のままハング）",
+      "name": "x-engagement 昼12:30 v4-device ｜ last 09-05 18:50 JST: Q0 R0 L0 F0 ブロッカー: デバイスブリッジ未接続 dev:no chrome:none bb:skip",
       "cron_expression": "30 3 * * *",
       "run_once_at": null,
       "enabled": true,
       "bound_session": false,
       "next_run_at": "2026-09-06T03:30:36.964912742Z",
       "last_fired_at": "2026-09-05T05:32:36.648842Z",
-      "last_run_status": "PENDING",
+      "last_run_status": "SUCCEEDED",
       "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
-      "last_run_finished_at": null,
+      "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
       "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5"
     },
     {
@@ -430,11 +415,11 @@
       "enabled": true,
       "bound_session": false,
       "next_run_at": "2026-09-06T00:04:57.619574729Z",
-      "last_fired_at": "2026-09-05T04:56:12.659004Z",
+      "last_fired_at": "2026-09-05T09:53:59.464181Z",
       "last_run_status": "SUCCEEDED",
-      "last_run_fired_at": "2026-09-05T04:56:12.630784507Z",
-      "last_run_finished_at": "2026-09-05T04:57:38.131528Z",
-      "last_run_session_id": "cse_01MrLUrYPsFERpkcTtJAyfoi"
+      "last_run_fired_at": "2026-09-05T09:53:59.430042313Z",
+      "last_run_finished_at": "2026-09-05T09:57:19.603628Z",
+      "last_run_session_id": "cse_01NWbhHWLHPW4zzuQ4EmDEAS"
     },
     {
       "id": "trig_01Mnp2Bi5UCXVHaZ2XJmELmt",
@@ -586,9 +571,9 @@
     "pages": 3,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 231,
-    "unregistered_current_count": 4,
-    "ended_records": 208,
+    "total_records": 236,
+    "unregistered_current_count": 6,
+    "ended_records": 211,
     "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
   },
@@ -643,6 +628,30 @@
         "last_run_fired_at": "2026-09-05T04:56:12.630784507Z",
         "last_run_finished_at": "2026-09-05T04:57:38.131528Z",
         "last_run_session_id": "cse_01MrLUrYPsFERpkcTtJAyfoi"
+      }
+    },
+    {
+      "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
+      "what": "pending",
+      "found_at": "2026-09-05",
+      "why": "実APIはPENDING。実行は終了しておらず結果未確定。故障・復旧成功・依頼内容の達成には数えず、同じ実行の終了を次の観測で確認する。",
+      "observation": {
+        "observed_at": "2026-09-05T07:58:52.300Z",
+        "enabled": true,
+        "last_run_status": "PENDING",
+        "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
+        "last_run_finished_at": null,
+        "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5",
+        "next_run_at": "2026-09-06T03:30:36.964912742Z"
+      },
+      "closed_at": "2026-09-05T10:20:45.084Z",
+      "resolution": "APIの実行状態がSUCCEEDEDに変わった。セッションの終了状態であり、出荷・投稿・依頼内容の達成を証明しない。",
+      "evidence": {
+        "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
+        "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
+        "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5",
+        "last_run_status": "SUCCEEDED",
+        "ended_reason": ""
       }
     }
   ]
