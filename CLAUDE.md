@@ -54,22 +54,39 @@ mainへのマージ＝本番デプロイなので、検証を通ったコミッ�
   コミットIDの祖先判定（`git merge-base --is-ancestor`）では確かめられない。
 - **draft PR は対象外** — 出荷を保留したいときは draft にしておけばよい。
   Ready にすると、次の検証成功時にマージされる。
-- **ワークフローファイルを触る PR は、ブランチを切った後に main で同じファイルが動くと
-  マージできない（読み。裏は取れていない）** —— 2026-09-05、PR #938（`seo-check.yml` に
-  1行追加）で auto-merge が2回 `403 refusing to allow a GitHub App to create or update
-  workflow .github/workflows/seo-check.yml without workflows permission` を返した。
-  同じ日に同じトークンで押した #933（`obsidian-autopilot.yml` を変更）や、
-  #851 / #859 / #877 / #935（いずれも `seo-check.yml` を変更）は github-actions[bot] が
-  そのまま squash できている。**6件で違うのは1つ**で、#938 だけは PR を開いた（10:39Z）
-  後に #935（10:41Z）が main 側で同じ `seo-check.yml` を変えていた。GITHUB_TOKEN には
-  `workflows` 権限が無いので、squash が作る3-way マージ後の内容（どのコミットにも無い
-  新しい内容）を書こうとして拒まれる、と読んでいる。**6件と矛盾しないだけで、
-  GitHub の仕様として確かめたわけではない**（辻褄が合うことは原因の証明ではない）。
-  直し方は main を取り込んで押し直すこと —— head のワークフローの内容がマージ結果と
-  一致すれば、次の検証成功で auto-merge が拾う。**反証条件:** 取り込んで一致させても
-  なお 403 なら、この読みは外れている。auto-merge の失敗 run は PR 側には何も出ない
-  （PR は `mergeable_state: clean` のまま open で残る）ので、**開いたままの PR を見たら
-  auto-merge.yml の run 一覧で `failure` を探す。**
+- **ワークフローファイルを触る PR は、head の blob がマージ結果の blob と一致しないと
+  マージできない（読み。GitHubの仕様としては未確認）** —— 2026-09-05、PR #938
+  （`seo-check.yml` に2行追加）で auto-merge が2回 `403 refusing to allow a GitHub App
+  to create or update workflow .github/workflows/seo-check.yml without workflows
+  permission` を返した。main へ rebase して押し直したら**同じ内容がそのまま通った**。
+  `seo-check.yml` の blob を測ると、効いている変数が1つに絞れる:
+
+        403時   head 80c1eb8 = 563edd3   main 067ddcd = 19350bc   squashの結果 = 9e14cea
+        成功時  head dab0e07 = 9e14cea   main 562e52d = 19350bc   squashの結果 = 9e14cea
+
+  **書かれる内容は両方とも 9e14cea で、1バイトも違わない。**違うのは
+  **head のコミットがその blob を既に持っているかどうか**だけ。403 の側では head が
+  563edd3 で、GITHUB_TOKEN（`workflows` 権限なし）が3-wayマージで**新しく作った内容を
+  書く**形になる。rebase 後は head の blob がそのまま採用されるので、App は何も
+  authoring していない。**これが discriminator だと読んでいる。**
+
+  **最初はここに「squash が作る 3-way マージ後の内容（どのコミットにも無い新しい内容）を
+  書こうとして拒まれる」と書いた。測ったら誤り。**内容は新しくない —— 20分後に
+  同じ 9e14cea が問題なく書かれている。**「新しい内容だから」で説明していたら、
+  次に同じ形が来たとき『内容は同じだから通るはず』と読み違える。**
+  このファイルは 08-26 と 08-27 にも同じ種類の誤り（辻褄が合うことを原因の証明に使う）を
+  している。**推測を書く前に blob を測る。**
+
+  交絡は潰してある: 403 とマージの間に #939 / #940 が main に入ったが、どちらも
+  ワークフローを触っていない（`seo-check.yml` の blob は 067ddcd → 562e52d で 19350bc の
+  まま）。それでも**各条件1データ点ずつ**で、GitHub の仕様を読んで確かめたわけではない。
+
+  **直し方:** main を取り込んで押し直す（rebase でも merge でもよい）。head の
+  ワークフローファイルがマージ結果と同一になれば、次の検証成功で auto-merge が拾う。
+  **反証条件:** 同一にしてもなお 403 なら、この読みは外れている。
+  **失敗は PR 側に何も出ない**（PR は `mergeable_state: clean` のまま open で残り、
+  チェックは全部緑に見える）ので、**開いたままの PR を見たら auto-merge.yml の
+  run 一覧で `failure` を探す。**
 
 `workflow_run` で起動するワークフローは常にデフォルトブランチの定義が
 使われるため、auto-merge.yml 自体を変更した場合、その変更はmainに
