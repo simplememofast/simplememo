@@ -91,8 +91,22 @@ export function vdc(runs, policy, { contracts = null } = {}) {
   return {
     id: 'vdc', rate, n: shipped.length, hit: settled,
     max: policy.weights.vdc, points: policy.weights.vdc * rate,
-    measurable: Boolean(contracts),
-    why: contracts ? null : 'L2（価値契約）が未実装。決済済みの契約を持つ出荷は構造的に 0 件',
+    // **「契約が0本」を「台帳が無い」と同じ扱いにしない。**
+    // Boolean([]) は真なので、空の台帳は measurable=true・why=null になり、
+    // **0点の理由が1行も出ない状態**になっていた（2026-09-05 に実測）。
+    // 3つの状態は原因も次の一手も違うので、分けて言う。
+    measurable: Array.isArray(contracts) && contracts.length > 0,
+    contracts_written: Array.isArray(contracts) ? contracts.length : null,
+    why: !contracts
+      ? '**契約台帳が無い。**L2 の仕組みそのものが置かれていない'
+      : contracts.length === 0
+        ? '**仕組みは在るが、契約がまだ1本も書かれていない。**'
+          + '日次runは着手前に契約を書くよう配線済み（obsidian-autopilot.yml §3-1）で、'
+          + '承認済み指標が0件の間は書かない設計。**次に主系が完走した回が最初の1本になる**'
+        : settled === 0
+          ? `**契約は ${contracts.length} 本あるが、決済済みが 0。**`
+            + '決済は horizon 経過後に Decision Monitor が行う —— 書いた日には点が入らない'
+          : null,
   };
 }
 
@@ -164,6 +178,16 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
   const detectedAtAll = breakages.filter((r) => r.detected_at).length;
   const eligibilityByMachine = runs.filter(
     (r) => r.failure_stage === 'eligibility' && src.has(r.source)).length;
+  // **同じ検出器が回したが、起動したのが人だった回。**
+  //
+  // [2026-09-05] 検知 0/12 を「検出器が動いていない」と読ませないために足した。
+  // 実測すると、無人枠（schedule）より先に**手動 dispatch やセッションが同じ照合を回して**
+  // 記録している —— 09-05 の例では無人枠 01:49Z の85分前、00:24Z の手動起動が先だった。
+  // **開発が活発な期間ほど、この指標は「機械の性能」ではなく「人の静かさ」を測る。**
+  //
+  // 数えるだけで**点には入れない。**「回るはずだった」は回ったことではない。
+  const beatenByDispatch = breakages.filter((r) => String(r.source ?? '').startsWith('act-')
+    && !src.has(r.source)).length;
   const dRate = n ? (detected.length + machineIncidents.length) / n : 0;
   const rRate = n ? (recoveredHandsOff.length + recoveredIncidents.length) / n : 0;
   // 自動 revert は「出荷後の指標劣化を検知して人手なしで巻き戻した」回。台帳に語彙が無い＝0。
@@ -173,9 +197,14 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
     detect: { rate: dRate, hit: detected.length + machineIncidents.length, points: half * dRate, max: half,
               detected_at_all: detectedAtAll,
               eligibility_detected_by_machine: eligibilityByMachine,
+              beaten_by_dispatch: beatenByDispatch,
               why: n && !detected.length && !machineIncidents.length
                 ? `**${detectedAtAll}/${n} は検知されているが、機械が自分で気づいた故障は 0 件。**`
-                  + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている —— 拾えていないのは故障のほう`
+                  + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている`
+                  + (beatenByDispatch
+                    ? ` ／ **うち ${beatenByDispatch} 件は同じ照合が回して記録しているが、起動したのが人**`
+                      + `（手動 dispatch・セッション）。**検出器が動いていないのではなく、先を越されている**`
+                    : ' —— 拾えていないのは故障のほう')
                 : null },
     recover: { rate: rRate, hit: recoveredHandsOff.length + recoveredIncidents.length, points: half * rRate, max: half },
     auto_revert_count: autoRevert,
@@ -248,6 +277,16 @@ export function ep(runs, policy, { rules, actions }) {
   const precRate = counted.length ? needed.length / counted.length : null;
   const precPoints = precRate === null ? 0 : half * precRate;
   const judged = counted;   // 表示の互換のため（数えた件数＝判定として採用した件数）
+  // **誰が下した判定を数えたかを、点と一緒に出す。**
+  // 委任を認めた後でも「人が判定した割合」と読めてしまうと、
+  // **点が上がったこと自体が、何が起きたかを隠す。**
+  const byMode = {};
+  for (const a of counted) {
+    const m = a.owner_needed_review?.mode ?? '(不明)';
+    byMode[m] = (byMode[m] ?? 0) + 1;
+  }
+  const humanCount = byMode.human ?? 0;
+  const aiCount = counted.length - humanCount;
 
   return {
     id: 'ep',
@@ -256,14 +295,19 @@ export function ep(runs, policy, { rules, actions }) {
             why: timed.length ? '**下界のみ**（検知の時刻までしか台帳に無い。配達時刻は持っていない）'
                               : '窓内に時刻を持つ故障が無い' },
     precision: { rate: precRate, n: escalated.length, filled: filled.length, judged: counted.length,
-                 uncounted: uncounted.length, points: precPoints, max: half,
+                 uncounted: uncounted.length, by_mode: byMode, human: humanCount, delegated_ai: aiCount,
+                 needed: needed.length, points: precPoints, max: half,
                  measurable: counted.length > 0,
                  why: uncounted.length
                    ? `${filled.length}/${escalated.length} に判定が入っているが、**${uncounted.length}件は採点しない**`
                      + `（${uncountedReasons(uncounted, policy).join(' / ')}）。`
                      + `**記録の無い委任は、自己付与と見分けがつかない。**`
                      + `data/autonomy-score.json の ep.precision_review.delegations にオーナーが1行足せば数え直される`
-                   : counted.length ? null
+                   : aiCount
+                     ? `${counted.length}/${escalated.length} 判定済み。**うち ${aiCount} 件はAIが自分で下した判定**`
+                       + `（オーナーの委任に基づく・2026-09-05）。必要だった ${needed.length} / 不要だった ${counted.length - needed.length}`
+                       + `${humanCount ? ` ／ 人の判定は ${humanCount} 件` : ' ／ **人の判定は 0 件**'}`
+                   : counted.length ? `${counted.length}/${escalated.length} 判定済み（人の判定）`
                    : `オーナーへ上げた ${escalated.length} 件に owner_needed が1件も入っていない — **上げたのが正しかったかを、この台帳は言えない**` },
     rate: (missPoints + precPoints) / policy.weights.ep,
     max: policy.weights.ep, points: missPoints + precPoints,
@@ -561,6 +605,16 @@ function selftest() {
      '決済時刻を書くだけでは加点しない');
   eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).points, 0,
      '**決済されていない契約は数えない**（書いただけでは検証ではない）');
+  // **3つの 0 を分けて言う。**原因も次の一手も違う。
+  eq(vdc([ship('a')], P).why?.includes('契約台帳が無い'), true, '台帳が無い状態');
+  eq(vdc([ship('a')], P).measurable, false, '台帳が無ければ測れていない');
+  eq(vdc([ship('a')], P, { contracts: [] }).why?.includes('契約がまだ1本も書かれていない'), true,
+     '**空の台帳を「仕組みが無い」と同じ扱いにしない**');
+  eq(vdc([ship('a')], P, { contracts: [] }).measurable, false,
+     '**Boolean([]) は真だが、契約0本は測れていない**（この取り違えが実際に起きていた）');
+  eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).why?.includes('決済済みが 0'), true,
+     '書かれたが決済されていない状態');
+  eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).contracts_written, 1, '書かれた本数を出す');
 
   // --- UMR ---
   eq(umr([ship('a')], P).points, 25, '無介入なら満点');
@@ -598,6 +652,17 @@ function selftest() {
   eq(ra([brk('f1'), { run_id: 'e', date_jst: '2026-09-01', outcome: 'skipped_gate', failure_stage: 'eligibility', source: 'act-reconcile' }], [], P)
        .detect.eligibility_detected_by_machine, 1,
      '**適格性の沈黙は機械が拾えている**（0% だけ出して「何も検知していない」と読ませない）');
+  // **「先を越された」を数えるが、点には入れない。**
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.beaten_by_dispatch, 1,
+     '同じ照合が回したが起動が人だった回を数える');
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.points, 0,
+     '**数えても点には入れない**（「回るはずだった」は回ったことではない）');
+  eq(ra([brk('f1', { source: 'session' })], [], P).detect.beaten_by_dispatch, 0,
+     'そもそも照合を回していない回は数えない（source が act- で始まらない）');
+  eq(ra([brk('f1', { source: 'act-reconcile' })], [], P).detect.beaten_by_dispatch, 0,
+     '**無人で回った回は「先を越された」ではない**（そちらは検知に数える）');
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.why.includes('先を越されている'), true,
+     '**検出器が動いていない、と読ませない**');
   eq(ra([brk('f1')], [brk('f1'), { auto_revert_of: 'f1' }], P).auto_revert_count, 0, '自己申告だけで権限を広げない');
   eq(ra([brk('f1')], [brk('f1'), ship('r', { outcome: 'failed', repair_of: ['f1'] })], P).recover.hit, 0, '失敗した修理を復旧に数えない');
   const recovered = { mode: 'production', before: { failed: true }, target_sha: 'a'.repeat(40), detected_at: '2026-09-01T00:00:00Z',
@@ -629,7 +694,7 @@ function selftest() {
   eq(dp.points, 0, '**委任の記録が無ければ0点**（AIが自分のエスカレーションを自分で採点しない）');
   eq(dp.uncounted, 2, '数えなかった件数を出す');
   eq(dp.filled, 2, '**欄が埋まっている件数は別に出す**（消さない・見えなくしない）');
-  eq(dp.why.includes('委任の記録が無い'), true, '理由を名指しする');
+  eq(dp.why?.includes('委任の記録が無い'), true, '理由を名指しする');
 
   // 判定者の記録が無い欄も数えない —— 機械が埋めたのと見分けがつかない
   const bare = { actions: [{ force_owner: 'human', owner_needed: true }] };
@@ -644,6 +709,15 @@ function selftest() {
     delegations: [{ mode: 'owner_delegated', reviewer: 'codex', delegated_at: '2026-09-05' }] } } };
   eq(ep([quick], withDelegation, { rules, actions: delegatedActs }).precision.points, 3.75,
      '委任が台帳に入れば数える');
+  {
+    const dpp = ep([quick], withDelegation, { rules, actions: delegatedActs }).precision;
+    eq(dpp.delegated_ai, 2, '**委任で数えた件数は、AIが下した判定として別に持つ**');
+    eq(dpp.human, 0, '人の判定は0件');
+    eq(dpp.why?.includes('AIが自分で下した判定'), true,
+       '**委任した後も「人の判定」とは表示しない**（点が上がったことが、何が起きたかを隠さない）');
+    eq(dpp.why?.includes('人の判定は 0 件'), true, '人の判定が0件であることを名指しする');
+    eq(dpp.needed, 1, '必要・不要の内訳も出す（全部 true に倒れ始めたら見えるように）');
+  }
   eq(ep([quick], withDelegation, { rules, actions: { actions: delegatedActs.actions.map((a) => ({ ...a,
        owner_needed_review: { mode: 'owner_delegated', reviewer: '別のだれか' } })) } }).precision.points, 0,
      '**委任した相手だけ**（reviewer が違えば数えない）');
@@ -791,7 +865,7 @@ function render(s) {
   }
   if (c.umr.r0_capped) L.push(`      ⚠ **R0 の寄与が上限に当たっている** — 可逆で些末な変更の量産では伸びない`);
   L.push(`  復旧自律性         RA   ${pts(c.ra.points, c.ra.max)}   (故障 ${c.ra.n} 件)`);
-  L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知)`);
+  L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知${c.ra.detect.beaten_by_dispatch ? `・先を越された ${c.ra.detect.beaten_by_dispatch}` : ''})`);
   if (c.ra.detect.why) L.push(`            ${c.ra.detect.why}`);
   L.push(`      復旧  ${pts(c.ra.recover.points, c.ra.recover.max)}  ${pct(c.ra.recover.rate)}  (${c.ra.recover.hit}/${c.ra.n} を人手なしで復旧)`);
   L.push(`      自動 revert ${c.ra.auto_revert_count} 回  ← **Phase 6 のハードゲート。点数では代替しない**`);
