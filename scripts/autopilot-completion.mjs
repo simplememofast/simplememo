@@ -68,8 +68,15 @@ export async function completionOrigin({ env = process.env, event, get, sleep = 
     const parentId = event.workflow_run?.id;
     assert.match(String(parentId), /^[1-9]\d*$/, 'Missing workflow_run parent');
     const parent = await get(`/actions/runs/${parentId}`);
-    assert.ok(['obsidian-autopilot.yml', 'autopilot-health.yml', 'cron-health.yml']
+    assert.ok(['obsidian-autopilot.yml', 'autopilot-health.yml', 'cron-health.yml', 'auto-merge.yml']
       .some(workflow => isRun(parent, parentId, workflow)), 'Wrong workflow_run parent');
+    if (parent.path === '.github/workflows/auto-merge.yml') {
+      assert.ok(parent.status === 'completed' && parent.conclusion === 'success'
+        && parent.event === 'workflow_run', 'Unverified routine publication');
+      // Publication can originate in a human-directed change. It is a wakeup,
+      // never retroactive evidence of unattended fault detection.
+      return { upstream_run_id: String(parentId), automatic: false };
+    }
     return { upstream_run_id: String(parentId), automatic: firstAttempt
       && parent.status === 'completed' && parent.event === 'schedule' && parent.run_attempt === 1 };
   }
@@ -209,6 +216,11 @@ async function selftest() {
         assert.equal((await run({ ...options, get: mock(triggered, { ...upstream, ...changed }) })).automatic, false);
       }
       await assert.rejects(run({ ...options, get: mock(triggered, { ...upstream, path: '.github/workflows/other.yml' }) }), /Wrong workflow_run parent/);
+      const publication = { ...upstream, path: '.github/workflows/auto-merge.yml', event: 'workflow_run', conclusion: 'success' };
+      assert.equal((await run({ ...options, get: mock(triggered, publication) })).automatic, false);
+      for (const changed of [{ conclusion: 'failure' }, { status: 'in_progress' },
+        { event: 'workflow_dispatch' }, { head_repository: { full_name: 'someone/fork' } }, { head_branch: 'feature' }])
+        await assert.rejects(run({ ...options, get: mock(triggered, { ...publication, ...changed }) }));
     }
   }
   let waits = 0, reads = 0;

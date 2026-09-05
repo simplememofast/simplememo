@@ -58,7 +58,7 @@
 
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
-import { deriveRoutineActions, routineResolved } from './lib/routine-actions.mjs';
+import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded } from './lib/routine-actions.mjs';
 import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -2497,6 +2497,11 @@ async function selftest() {
       observation: { method: 'GET', endpoint: '/v1/code/triggers', include_last_run: true, has_more: false, pages: 1 } };
     const get = d => derive({ routineDoc: d, now, today: '2026-09-05' }).filter(a => a.source === 'routine-run');
     const action = get(doc)[0];
+    const consumed = { routine_snapshot_sha256: routineSnapshotDigest(doc) };
+    t('first observation needs intake when no receipt exists', routineIntakeNeeded(doc, {}));
+    t('same observation does not restart intake after its publication', !routineIntakeNeeded(structuredClone(doc), consumed));
+    t('a new observation wakes intake', routineIntakeNeeded({ ...doc, observed_at: '2026-09-05T08:01:00Z' }, consumed));
+    t('changed facts at the same timestamp also wake intake', routineIntakeNeeded({ ...doc, open_budget: 2 }, consumed));
     t('routine finding is actually wired into derive', get(doc).length === 1);
     t('routine intake has no control handler or owner notification', action.auto === null
       && classify(action, { self_repair: { may_modify: [] } }).owner === 'ai');
@@ -2584,6 +2589,30 @@ async function selftest() {
     t('routine snapshot push wakes Act on main', /push:\s*\n\s*branches: \[main\]\s*\n\s*paths: \['data\/routine-runs.json'\]/.test(workflow));
     for (const prefix of ['日次アクチュエータの同期（', 'chore(autopilot): 日次アクチュエータの同期（'])
       t('Act excludes its own snapshot publication from push wakeups', workflow.includes(`!startsWith(github.event.head_commit.message, '${prefix}')`));
+    t('auto-merge completion is wired despite suppressed push events', workflow.includes('"Cron Health", "Auto-merge Claude PRs"'));
+    t('Act requires the successful intake gate and handles skipped regular events',
+      workflow.includes('needs: routine-intake') && workflow.includes('always() && !cancelled() &&')
+      && workflow.includes("(needs.routine-intake.result == 'skipped' || needs.routine-intake.outputs.needed == 'true')"));
+    t('emitted report records the snapshot actually consumed', fs.readFileSync(fileURLToPath(import.meta.url), 'utf8')
+      .includes('routine_snapshot_sha256: routineSnapshotDigest(ctx.routineDoc)'));
+    const { tmpdir } = await import('node:os');
+    const scratch = fs.mkdtempSync(path.join(tmpdir(), 'routine-intake-'));
+    try {
+      fs.mkdirSync(path.join(scratch, 'data'));
+      fs.symlinkSync(path.join(ROOT, 'scripts'), path.join(scratch, 'scripts'), 'dir');
+      const step = workflow.split('      - name: Check whether routine observation reached intake\n')[1]?.split('\n  act:\n')[0];
+      const shell = step?.split('        run: |\n')[1]?.split('\n').map(line => line.replace(/^          /, '')).join('\n');
+      t('actual read-only workflow intake step exists', typeof shell === 'string');
+      const output = path.join(scratch, 'output');
+      fs.writeFileSync(path.join(scratch, 'data/routine-runs.json'), JSON.stringify(doc));
+      for (const [conclusion, report, expected] of [['success', {}, true], ['success', consumed, false], ['failure', {}, false]]) {
+        fs.writeFileSync(output, '');
+        fs.writeFileSync(path.join(scratch, 'data/autopilot-actions-report.json'), JSON.stringify(report));
+        execFileSync('bash', ['-e', '-c', shell], { cwd: scratch,
+          env: { ...process.env, GITHUB_OUTPUT: output, UPSTREAM_CONCLUSION: conclusion }, stdio: 'pipe' });
+        t('actual workflow emits the correct intake decision', fs.readFileSync(output, 'utf8') === `needed=${expected}\n`);
+      }
+    } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
   }
   const observedRun = { id: 123, status: 'completed', conclusion: 'failure', event: 'schedule',
     created_at: '2026-09-04T00:00:00Z', jst_date: '2026-09-04',
@@ -4259,6 +4288,7 @@ async function main() {
   // 衝突を起こす。別ファイルなら、片方が読めなくてももう片方は届く。
   const payload = {
       as_of_jst: today,
+      routine_snapshot_sha256: routineSnapshotDigest(ctx.routineDoc),
       open_total: sum.open_total,
       oldest_open_days: sum.oldest_open_days,
       acknowledged: sum.acknowledged,

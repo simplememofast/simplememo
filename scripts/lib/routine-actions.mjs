@@ -1,5 +1,15 @@
 // Model-free intake. Execution status is not proof of a post, shipment, or repair.
 import { diagnose, validate, OVERDUE_GRACE_HOURS } from '../check-routine-runs.mjs';
+import { createHash } from 'node:crypto';
+
+// Publication-loop suppression, not authorization or evidence of recovery.
+export function routineSnapshotDigest(doc) {
+  return createHash('sha256').update(JSON.stringify(doc)).digest('hex');
+}
+
+export function routineIntakeNeeded(doc, report) {
+  return report?.routine_snapshot_sha256 !== routineSnapshotDigest(doc);
+}
 
 const millis = value => typeof value === 'string' ? Date.parse(value) : NaN;
 const validId = value => typeof value === 'string' && /^trig_[A-Za-z0-9]+$/.test(value);
