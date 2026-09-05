@@ -691,7 +691,7 @@
       "script": "scripts/routine-observer-local.py",
       "state": "demonstrated",
       "at": "2026-09-05",
-      "broke": "PRへ書けるパスの許可リスト、状態不変時の更新抑制、取得処理だけへのトークン引渡しを個別に壊した変異版で自己検査が非0終了。Macの既存認証による実APIの全3ページ取得もprobeで確認。"
+      "broke": "PRへ書けるパスの許可リスト、状態不変時の更新抑制、取得処理だけへのトークン引渡しを個別に壊した変異版で自己検査が非0終了。Macの既存認証による実APIの全3ページ取得もprobeで確認。 標準クライアントの呼出・更新後のscope増加拒否・期限切れ拒否をそれぞれ外した3変異も自己検査で失敗。既存の有効な認証でRemoteTrigger(list)がHTTP 200を返すことを実測し、生応答を保存しないことを確認。実際の期限切れ更新は未観測。"
     },
     {
       "script": "scripts/routine-observer.mjs",

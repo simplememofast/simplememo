@@ -18,7 +18,9 @@
 
 ## Macで継続観測する
 
-`python3 scripts/routine-observer-local.py --once`は、専用キャッシュのmainから一時worktreeを作り、Keychainにある既存Claude Code認証を読み取りステップの環境にだけ渡す。秘密のコピー・ログイン・認証更新は行わない。毎時確認し、状態変化か24時間経過があったときだけ`Codex/routine-observations`へ台帳1ファイルのPRを作成・更新する。下書きPR・未知の変更・同時実行・先に更新されたブランチは上書きしない。SEO Validationと既存のauto-mergeを通す。
+`python3 scripts/routine-observer-local.py --once`は、専用キャッシュのmainから一時worktreeを作り、Keychainにある既存Claude Code認証を読み取りステップの環境にだけ渡す。秘密をコピーしたり、新しいログインを始めたりしない。毎時確認し、状態変化か24時間経過があったときだけ`Codex/routine-observations`へ台帳1ファイルのPRを作成・更新する。下書きPR・未知の変更・同時実行・先に更新されたブランチは上書きしない。SEO Validationと既存のauto-mergeを通す。
+
+2026-09-05に、現在のアクセストークンが同日15:28 JSTに期限切れとなることを確認した。期限が近いときは、インストール済みClaude CodeのMCPサーバーへ読み取り専用の`RemoteTrigger(action=list)`を1回要求し、標準クライアントの通常のOAuth更新を使う。クライアント2.1.261の`teleport-org`認証処理が、読み取り前に既存認証の更新と失効確認を行うことをコードで確認した。そこで得る最初の1ページは保存・公開せず、更新後のKeychain認証で全ページを改めて読む。権限の増加・期限切れのまま・標準処理の拒否は更新を止める。refresh tokenを独自のHTTP処理・子プロセスの環境・ファイルへ渡さない。
 
 `--probe`は同じ実取得・台帳検査まで行い、push/PRを行わない。`--install`はユーザーの`~/.local/libexec/`と`~/Library/LaunchAgents/com.simplememo.routine-observer.plist`に実行ファイルと設定を配置する。起動は`launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.simplememo.routine-observer.plist`。止めるときは同じplistを`launchctl bootout`する。認証値をplistへ保存しない。
 
