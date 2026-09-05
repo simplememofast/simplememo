@@ -9,6 +9,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
 import { review, advance, recordSelection } from './decision-review.mjs';
+import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -91,17 +92,35 @@ export function renderReport(html, score, stages) {
   return out;
 }
 
+export function renderRunStreaks(html, runs) {
+  // Keep the definition shared with the public-page checker. A failed day can
+  // extend activity while breaking shipping; neither count is hand-maintained.
+  const region = /<!-- run-streaks:start -->[\s\S]*?<!-- run-streaks:end -->/g;
+  assert.equal([...html.matchAll(region)].length, 1, 'public run-streaks region missing or ambiguous');
+  const active = activeStreaks(runs), shipping = shippingStreaks(runs);
+  const date = day => day.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
+  const range = (from, to) => from ? `（${date(from)}〜${date(to)}）` : '';
+  const content = `<!-- run-streaks:start -->
+          この定義での連続稼働は現在<b>${active.current.days}</b>日${range(active.current.from, active.last_day)}で、最長も<b>${active.longest.days}</b>日${range(active.longest.from, active.longest.to)}です。
+          ${active.last_day ? `「現在」は台帳の最終記入日（${date(active.last_day)}）時点です。` : '台帳の記録はまだありません。'}
+          稼働の定義では、失敗して行が立った日も「記録がある日」なので連続が切れません。
+          <b>連続出荷は現在${shipping.current.days}日</b>${range(shipping.current.from, shipping.last_day)}で、<b>連続出荷の最長は${shipping.longest.days}日</b>${range(shipping.longest.from, shipping.longest.to)}です。
+          <!-- run-streaks:end -->`;
+  return html.replace(region, () => content);
+}
+
 export async function publishReport() {
   const { score, loadContext } = await import('./autonomy-score.mjs');
   const file = 'autopilot/index.html';
   const original = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const stages = {};
-  for (const r of read('data/autopilot-runs.json').runs) {
+  const runs = read('data/autopilot-runs.json').runs;
+  for (const r of runs) {
     if (r.outcome === 'shipped') continue;
     if (!['eligibility', 'execution', 'cost', 'absent'].includes(r.failure_stage)) throw new Error(`unclassified run: ${r.run_id}`);
     stages[r.failure_stage] = (stages[r.failure_stage] ?? 0) + 1;
   }
-  const rendered = renderReport(original, score(loadContext()), stages);
+  const rendered = renderRunStreaks(renderReport(original, score(loadContext()), stages), runs);
   if (rendered !== original) fs.writeFileSync(path.join(ROOT, file), rendered);
   return rendered !== original;
 }
@@ -348,6 +367,27 @@ function selftest() {
   const delegatedReport = renderReport('<tr data-score="ep"><td>EP</td><td class="num"><b>0.0</b></td><td class="num">15</td><td>old</td></tr>', delegatedSample, {});
   assert(delegatedReport.includes('19件はオーナー委任によるAI評価'));
   assert(delegatedReport.includes('独立した人間評価ではありません'));
+  const streakTemplate = 'before<!-- run-streaks:start -->stale<!-- run-streaks:end -->after';
+  const shippingDays = [1, 2].map(day => ({ date_jst: `2026-09-0${day}`, outcome: 'shipped' }));
+  const shippingReport = renderRunStreaks(streakTemplate, shippingDays);
+  assert(shippingReport.includes('連続出荷は現在2日'));
+  assert(shippingReport.includes('2026年9月1日〜2026年9月2日'));
+  const failedDays = [...shippingDays, { date_jst: '2026-09-03', outcome: 'failed' }];
+  const failureReport = renderRunStreaks(shippingReport, failedDays);
+  assert(failureReport.includes('連続稼働は現在<b>3</b>日（2026年9月1日〜2026年9月3日）'));
+  assert(failureReport.includes('最長も<b>3</b>日'));
+  assert(failureReport.includes('連続出荷は現在0日</b>で、'));
+  assert(failureReport.includes('連続出荷の最長は2日</b>（2026年9月1日〜2026年9月2日）'));
+  assert(failureReport.startsWith('before') && failureReport.endsWith('after'));
+  assert.equal(renderRunStreaks(failureReport, failedDays), failureReport);
+  const gapReport = renderRunStreaks(streakTemplate, [...shippingDays, { date_jst: '2026-09-04', outcome: 'shipped' }]);
+  assert(gapReport.includes('連続稼働は現在<b>1</b>日（2026年9月4日〜2026年9月4日）'));
+  assert(gapReport.includes('最長も<b>2</b>日'));
+  const emptyReport = renderRunStreaks(streakTemplate, []);
+  assert(emptyReport.includes('台帳の記録はまだありません。'));
+  assert(!emptyReport.includes('null') && !emptyReport.includes('2026'));
+  assert.throws(() => renderRunStreaks('missing', failedDays), /missing or ambiguous/);
+  assert.throws(() => renderRunStreaks(streakTemplate.repeat(2), failedDays), /missing or ambiguous/);
   // Exercise an actual reverse patch in a disposable Git repo. This is a drill, never production evidence.
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-recovery-test-'));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
