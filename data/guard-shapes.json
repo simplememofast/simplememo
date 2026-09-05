@@ -534,6 +534,18 @@
     },
     {
       "file": "scripts/value-contracts.mjs",
+      "expr": "c.intent.id",
+      "disposition": "前提",
+      "note": "宣言と決済行のID・run_idの一致が検証済みの必要条件。欠落時はfalseを返し、誤った行を学習・得点の対象にしない。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "c.intent.horizon_days",
+      "disposition": "前提",
+      "note": "決済行の日数が1〜28の整数で、宣言日数と同一であることを要求。宣言の欠落や異なる日数を短い観測窓へ丸めない。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
       "expr": "s.observation_hash",
       "disposition": "前提",
       "note": "観測値から再計算したhashとの一致が必要。hash不一致の加点拒否を自己テストで検証。"

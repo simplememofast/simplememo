@@ -132,12 +132,12 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-05T12:21:18.352Z",
+  "observed_at": "2026-09-05T13:21:37.509Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 5,
+  "open_budget": 6,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
     {
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T12:21:18.352Z",
+        "observed_at": "2026-09-05T13:21:37.509Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
@@ -178,7 +178,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T12:21:18.352Z",
+        "observed_at": "2026-09-05T13:21:37.509Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -210,7 +210,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T12:21:18.352Z",
+        "observed_at": "2026-09-05T13:21:37.509Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
@@ -225,7 +225,7 @@
       "found_at": "2026-09-05",
       "why": "09:20 JSTの通常再試行は00:20:16.114358098Zに発火し00:20:28.779580ZにFAILED。Claudeの当該ルーティン画面でsession limit / resets 3am (UTC)を確認。主系と利用枠を共有しているため独立した容量の代替になっていない。成功・復旧には数えず、既存の次回予定を維持。",
       "observation": {
-        "observed_at": "2026-09-05T12:21:18.352Z",
+        "observed_at": "2026-09-05T13:21:37.509Z",
         "enabled": true,
         "last_run_status": "FAILED",
         "last_run_fired_at": "2026-09-05T00:20:16.114358098Z",
@@ -240,13 +240,28 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-05T12:21:18.352Z",
+        "observed_at": "2026-09-05T13:21:37.509Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T10:24:32.667374953Z",
         "last_run_finished_at": "2026-09-05T10:28:11.535061Z",
         "last_run_session_id": "cse_012373J6kREn3SgUsxbt6W5C",
         "next_run_at": "2026-09-06T00:04:57.619574729Z"
+      }
+    },
+    {
+      "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
+      "what": "completion_unverified",
+      "found_at": "2026-09-05",
+      "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
+      "observation": {
+        "observed_at": "2026-09-05T13:21:37.509Z",
+        "enabled": false,
+        "last_run_status": null,
+        "last_run_fired_at": null,
+        "last_run_finished_at": null,
+        "last_run_session_id": null,
+        "next_run_at": "2026-09-06T12:40:53.239185213Z"
       }
     }
   ],
@@ -502,10 +517,11 @@
       "name": "伏字が実際の日次取り込みで効いたか確認",
       "cron_expression": "",
       "run_once_at": "2026-09-05T12:40:00Z",
-      "enabled": true,
+      "enabled": false,
+      "ended_reason": "run_once_fired",
       "bound_session": true,
-      "next_run_at": "2026-09-05T12:40:00Z",
-      "last_fired_at": null,
+      "next_run_at": "2026-09-06T12:40:53.239185213Z",
+      "last_fired_at": "2026-09-05T12:40:53.619116Z",
       "last_run_status": null,
       "last_run_fired_at": null,
       "last_run_finished_at": null,
@@ -633,10 +649,21 @@
     "pages": 3,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 245,
+    "total_records": 247,
     "unregistered_current_count": 9,
-    "ended_records": 217,
-    "ended_since_previous": [],
+    "ended_records": 220,
+    "ended_since_previous": [
+      {
+        "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
+        "name": "伏字が実際の日次取り込みで効いたか確認",
+        "ended_reason": "run_once_fired",
+        "last_fired_at": "2026-09-05T12:40:53.619116Z",
+        "last_run_status": null,
+        "last_run_fired_at": null,
+        "last_run_finished_at": null,
+        "last_run_session_id": null
+      }
+    ],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
   },
   "closed_findings": [
