@@ -58,7 +58,7 @@
 
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
-import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded } from './lib/routine-actions.mjs';
+import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded, routineIntakeDecision } from './lib/routine-actions.mjs';
 import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -2781,6 +2781,44 @@ async function selftest() {
     t('same observation does not restart intake after its publication', !routineIntakeNeeded(structuredClone(doc), consumed));
     t('a new observation wakes intake', routineIntakeNeeded({ ...doc, observed_at: '2026-09-05T08:01:00Z' }, consumed));
     t('changed facts at the same timestamp also wake intake', routineIntakeNeeded({ ...doc, open_budget: 2 }, consumed));
+    {
+      const branch = 'claude/autopilot-act-20260905', head = 'c'.repeat(40);
+      const pr = { number: 924, state: 'open', head: { ref: branch, sha: head, repo: { full_name: 'o/r' } },
+        base: { ref: 'main', repo: { full_name: 'o/r' } } };
+      const fixture = ({ prs = [pr], first = pr, fresh = pr, input = doc, receipt = consumed,
+        refSha = head, broken = '', partial = false } = {}) => {
+        let reads = 0;
+        return async endpoint => {
+          if (broken && endpoint.includes(broken)) throw Error('read failure');
+          if (endpoint.startsWith('/pulls?')) return partial ? Array(100).fill(pr) : prs;
+          if (endpoint === '/pulls/924') return ++reads === 1 ? first : fresh;
+          if (endpoint.startsWith('/git/ref/')) return { ref: `refs/heads/${branch}`, object: { type: 'commit', sha: refSha } };
+          if (endpoint.startsWith('/contents/')) return { type: 'file', encoding: 'base64',
+            content: Buffer.from(JSON.stringify(endpoint.includes('/data/routine-runs.json') ? input : receipt)).toString('base64') };
+          throw Error('unexpected fixture endpoint');
+        };
+      };
+      const decide = options => routineIntakeDecision(doc, {}, { repo: 'o/r', day: '2026-09-05', get: fixture(options) });
+      const waiting = await decide();
+      t('matching pending input and receipt let CI finish without another Act run', waiting.needed === false
+        && waiting.reason === 'waiting_for_pr' && waiting.pr === 924 && waiting.production_verified === false);
+      t('main receipt requires no PR read', (await routineIntakeDecision(doc, consumed, { get: () => { throw Error('must not read'); } })).reason === 'consumed_on_main');
+      t('an updated PR list head is refreshed before reading its receipt', (await decide({ prs: [{ ...pr, head: { ...pr.head, sha: 'a'.repeat(40) } }] })).needed === false);
+      for (const options of [{ prs: [] }, { receipt: {} }, { input: { ...doc, open_budget: 2 } },
+        { receipt: { routine_snapshot_sha256: routineSnapshotDigest({ ...doc, open_budget: 2 }) } },
+        { first: { ...pr, number: 925 } }, { fresh: { ...pr, number: 925 } },
+        { first: { ...pr, state: 'closed' } }, { fresh: { ...pr, state: 'closed' } },
+        { first: { ...pr, base: { ...pr.base, ref: 'other' } } },
+        { first: { ...pr, head: { ...pr.head, repo: { full_name: 'fork/r' } } } }])
+        t('missing, different or closed pending work does not suppress new intake', (await decide(options)).needed === true);
+      for (const options of [{ broken: '/pulls?' }, { broken: '/contents/' }, { broken: '/git/ref/' },
+        { partial: true }, { prs: [pr, pr] }, { refSha: 'a'.repeat(40) },
+        { fresh: { ...pr, head: { ...pr.head, sha: 'a'.repeat(40) } } }]) {
+        const result = await decide(options);
+        t('unknown pending receipt cannot declare an observation consumed', result.needed === true && result.reason === 'pending_receipt_unverified');
+      }
+    }
+
     t('routine finding is actually wired into derive', get(doc).length === 1);
     t('routine intake has no control handler or owner notification', action.auto === null
       && classify(action, { self_repair: { may_modify: [] } }).owner === 'ai');
@@ -2888,8 +2926,33 @@ async function selftest() {
         fs.writeFileSync(output, '');
         fs.writeFileSync(path.join(scratch, 'data/autopilot-actions-report.json'), JSON.stringify(report));
         execFileSync('bash', ['-e', '-c', shell], { cwd: scratch,
-          env: { ...process.env, GITHUB_OUTPUT: output, UPSTREAM_CONCLUSION: conclusion }, stdio: 'pipe' });
+          env: { ...process.env, GH_TOKEN: '', GITHUB_TOKEN: '', GITHUB_REPOSITORY: '', GITHUB_OUTPUT: output, UPSTREAM_CONCLUSION: conclusion }, stdio: 'pipe' });
         t('actual workflow emits the correct intake decision', fs.readFileSync(output, 'utf8') === `needed=${expected}\n`);
+      }
+      const preload = path.join(scratch, 'pending-fixture.mjs');
+      fs.writeFileSync(preload, `
+        const doc = ${JSON.stringify(doc)}, receipt = ${JSON.stringify(consumed)};
+        const day = new Date(Date.now() + 9 * 3600000).toISOString().slice(0,10).replaceAll('-','');
+        const branch = 'claude/autopilot-act-' + day, head = 'c'.repeat(40);
+        const pr = {number:924,state:'open',head:{ref:branch,sha:head,repo:{full_name:'o/r'}},base:{ref:'main',repo:{full_name:'o/r'}}};
+        globalThis.fetch = async url => {
+          if (process.env.SIMPLEMEMO_TEST_INTAKE === 'broken') return {ok:false,status:503};
+          let data;
+          if (url.includes('/pulls?')) data = [pr];
+          else if (url.endsWith('/pulls/924')) data = pr;
+          else if (url.includes('/git/ref/')) data = {ref:'refs/heads/'+branch,object:{type:'commit',sha:head}};
+          else if (url.includes('/contents/')) data = {type:'file',encoding:'base64',content:Buffer.from(JSON.stringify(
+            url.includes('/data/routine-runs.json') ? doc : process.env.SIMPLEMEMO_TEST_INTAKE === 'stale' ? {} : receipt)).toString('base64')};
+          else throw Error('Unexpected fixture URL');
+          return {ok:true,json:async()=>data};
+        };`);
+      for (const [mode, expected] of [['pending', false], ['stale', true], ['broken', true]]) {
+        fs.writeFileSync(output, '');
+        fs.writeFileSync(path.join(scratch, 'data/autopilot-actions-report.json'), '{}');
+        execFileSync('bash', ['-e', '-c', shell], { cwd: scratch, stdio: 'pipe', env: { ...process.env,
+          NODE_OPTIONS: '--import=' + preload, GH_TOKEN: 'fixture', GITHUB_REPOSITORY: 'o/r',
+          GITHUB_OUTPUT: output, UPSTREAM_CONCLUSION: 'success', SIMPLEMEMO_TEST_INTAKE: mode } });
+        t('actual workflow consults the pending receipt and preserves unknown work', fs.readFileSync(output, 'utf8') === `needed=${expected}\n`);
       }
     } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
   }

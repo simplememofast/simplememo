@@ -69,6 +69,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       needed: ${{ steps.observe.outputs.needed }}
     steps:
@@ -82,14 +83,19 @@ jobs:
         id: observe
         env:
           UPSTREAM_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           node --input-type=module - <<'JS'
           import fs from 'node:fs';
-          import { routineIntakeNeeded } from './scripts/lib/routine-actions.mjs';
+          import { routineIntakeDecision } from './scripts/lib/routine-actions.mjs';
           const doc = JSON.parse(fs.readFileSync('data/routine-runs.json', 'utf8'));
           const report = JSON.parse(fs.readFileSync('data/autopilot-actions-report.json', 'utf8'));
-          const needed = process.env.UPSTREAM_CONCLUSION === 'success' && routineIntakeNeeded(doc, report);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `needed=${needed}\n`);
+          const day = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+          const decision = process.env.UPSTREAM_CONCLUSION === 'success'
+            ? await routineIntakeDecision(doc, report, { repo: process.env.GITHUB_REPOSITORY, day, token: process.env.GH_TOKEN })
+            : { needed: false, reason: 'upstream_not_successful' };
+          console.log(JSON.stringify(decision));
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `needed=${decision.needed}\n`);
           JS
 
   act:
