@@ -138,7 +138,7 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
   **占有は守る。守らないのは死んだ占有だけ。**次の3つが全部そろったときに限り、
   引き継いで着手してよい:
 
-  ① `main` との差分ファイルが **0**（＝claim コミットしか無い）
+  ① `main` との差分ファイルが **0**、または `data/decision-intents/` と `data/decision-rejections/` の下だけ（＝claim コミットと価値契約の宣言しか無い。2026-09-05 追加）
   ② そのブランチを head とする PR が **1件も無い**（`state: all` で見る）
   ③ 最新コミットから **90分以上**経っている
 
@@ -162,8 +162,31 @@ CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡
 
   **ブランチを消さない・force push しない。**弾かれたら他経路が復帰したという
   ことなので、何もせず終了する。判定の論理は `scripts/autopilot-gate.mjs` の
-  `isAbandonedClaim()` が正で、ドリル（4シナリオ）と性質テスト（2不変条件＋
-  変異2件）が固定している。
+  `isAbandonedClaim()` が正で、ドリル（6シナリオ）と性質テスト（不変条件＋
+  変異）が固定している。
+
+  **[2026-09-05] 宣言だけ積んで死んだ占有。**主系が 07:53 JST に価値契約を宣言
+  （§2-1 の契約コミット）した直後にセッション上限で落ち、09:01 の再試行と 19:00 の
+  手動起動はその1ファイルを「差分あり＝作業中」と読んで skip した。**引き継ぎが
+  宣言コミットのせいで一日中効かなかった。**以後、宣言ファイル（`data/decision-intents/`
+  と `data/decision-rejections/`）は差分に数えない（`readClaim`）。引き継いだ回は Gate が
+  `steps.gate.outputs.stale_declarations` にその一覧を出す。**残っている宣言は実装しない**
+  —— 宣言した run_id は既に死んだ run で、`decision-ci` の `boundRun` は同じ run_id を
+  新しい出荷に結ばせない。手順:
+
+  ```bash
+  node scripts/value-contracts.mjs --retire data/decision-intents/<id>.json \
+    --reason "declaring run <run_id> failed (<failure_class>); takeover re-declares under a new id"
+  git add data/decision-intents data/decision-rejections
+  git commit -m "chore(decision): retire <id> (declaring run failed)"
+  git push origin "$DAY"
+  ```
+
+  取り下げは `data/decision-rejections/<id>.json`（`stage: "execution"`）に残り、CI は
+  それを記帳として扱う。そのあと §2-1 を**新しい候補で最初から**やり直す。契約と記帳の
+  `run_id` は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`（引き継いだ run 自身の ID。
+  死んだ run の `ap-<YYYYMMDD>-actions` とは衝突させない。日次の照合も、同じ日に
+  2回目の Actions run を `-<run id>` 付きで記帳する）。
 
   **[2026-09-03] 主系も同じ関数を通るようになった。**それまでは同じ条件を
   `.yml` の bash で二重に実装する形にしていたが、**その push は GitHub に
@@ -627,6 +650,7 @@ node scripts/autopilot-selfheal.mjs
 
 `node scripts/value-contracts.mjs --readiness` で承認済み指標を確認する。承認が0件なら既存の選定を継続し、承認欄は代筆しない。1件以上なら、変更を始める前に以下を実行する。
 
+0. 引き継ぎの回（`GATE_TAKEOVER=true`）で当日ブランチに `data/decision-intents/*.json` が残っていたら、**それは死んだ run の宣言**。実装せず §0-2 の手順で取り下げ（`--retire`）てコミット・pushしてから、以下を**新しい候補**で行う。契約と記帳の `run_id` は `ap-<YYYYMMDD>-actions-$GITHUB_RUN_ID`。
 1. `node scripts/value-contracts.mjs --feedback` で過去の生Brier scoreを読む。確率の較正に使い、別の正規化報酬へ変換しない。
 2. 候補2件以上を `/tmp/decision-candidates.json` にJSON配列で書く。各候補には `id`（英小文字・数字・ハイフン）、`run_id`、`rank`、`metric`、`predicted_delta`、`p`、`horizon_days`（1〜28）、`counterfactual: {id, reason}`、`rank_gap`、`touches`、`max_changed_lines`（最大1500）、`predicted_usd`、`lane`、`action`、`evidence_date` を含める。`touches` はワイルドカードを使わない実パス。予算上限は既存の設定を使う。
    `predicted_delta` は凍結する比較基準（null model）からの変化量。率は0〜1、件数・時間・費用は0以上に収まる予測だけを使う。比較基準が既に上限の出荷日率や、0件の未解消故障には、改善を予測する余地がない。そうした候補は選定から除外され、候補IDごとの理由が返る。
