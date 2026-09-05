@@ -87,6 +87,7 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 <meta name="twitter:image" content="{BASE}{og}">
 <link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="{asset('assets/css/editorial-resources.css')}">
+<link rel="stylesheet" href="{asset('assets/css/safety-net.css')}">
 <script type="application/ld+json">{json.dumps(schema, ensure_ascii=False)}</script>
 {seed}
 {scripts}
