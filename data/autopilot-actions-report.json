@@ -4,39 +4,18 @@
   "open_total": 10,
   "pending_pr": [
     {
-      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
-      "title": "PR #949 の反映待ち: claude/google-discover-strategy-ydu1a6",
-      "pr": 949,
-      "first_verified_head": "cb625af9dd17dd08769b6c41c243ee36669dfda5",
-      "evidence": "取り残しの走査結果を取得できず判定不能（解消したという意味ではない）"
-    },
-    {
       "id": "act-orphaned-branch-claude-autopilot-act-20260905",
       "title": "PR #924 の反映待ち: claude/autopilot-act-20260905",
       "pr": 924,
       "first_verified_head": "cdab7f68cb24ad5ff42247df355861cddb55dc69",
-      "evidence": "取り残しの走査結果を取得できず判定不能（解消したという意味ではない）"
+      "evidence": "PR #924 へ引き継いだhead cdab7f68cb24ad5ff42247df355861cddb55dc69 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
     },
     {
       "id": "act-orphaned-branch-claude-autonomy-score-refinement-w7owrh",
       "title": "PR #946 の反映待ち: claude/autonomy-score-refinement-w7owrh",
       "pr": 946,
       "first_verified_head": "5f00c7236459e148b19147ba4437026fbf457575",
-      "evidence": "取り残しの走査結果を取得できず判定不能（解消したという意味ではない）"
-    },
-    {
-      "id": "act-orphaned-branch-claude-score-improvement-nug323",
-      "title": "PR #947 の反映待ち: claude/score-improvement-nug323",
-      "pr": 947,
-      "first_verified_head": "564fc1e2a7f7c5369077e43ee821b0840ea82431",
-      "evidence": "取り残しの走査結果を取得できず判定不能（解消したという意味ではない）"
-    },
-    {
-      "id": "act-orphaned-branch-Codex-routine-observations",
-      "title": "PR #948 の反映待ち: Codex/routine-observations",
-      "pr": 948,
-      "first_verified_head": "23ebbc80f73fda4ec77cc8d0bc1eb70a620af990",
-      "evidence": "取り残しの走査結果を取得できず判定不能（解消したという意味ではない）"
+      "evidence": "PR #946 へ引き継いだhead 5f00c7236459e148b19147ba4437026fbf457575 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
     }
   ],
   "oldest_open_days": 2,
@@ -53,9 +32,19 @@
       "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）"
     },
     {
+      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
+      "title": "PR #949 の反映待ち: claude/google-discover-strategy-ydu1a6",
+      "evidence": "claude/google-discover-strategy-ydu1a6 の取り残しは解消（走査に出てこない）"
+    },
+    {
       "id": "act-routine-snapshot-stale",
       "title": "副系の写しが 2.6日前（上限 3日）— 期限まであと 0.4日",
       "evidence": "scripts/check-routine-runs.mjs --snapshot-fresh が exit 0"
+    },
+    {
+      "id": "act-orphaned-branch-claude-score-improvement-nug323",
+      "title": "PR #947 の反映待ち: claude/score-improvement-nug323",
+      "evidence": "claude/score-improvement-nug323 の取り残しは解消（走査に出てこない）"
     },
     {
       "id": "act-orphaned-branch-claude-apple-submission-automation-8nc4cs",
@@ -66,6 +55,11 @@
       "id": "act-orphaned-branch-claude-zero-preneur-autonomy-roadmap-yzxaev",
       "title": "PR #945 の反映待ち: claude/zero-preneur-autonomy-roadmap-yzxaev",
       "evidence": "claude/zero-preneur-autonomy-roadmap-yzxaev の取り残しは解消（走査に出てこない）"
+    },
+    {
+      "id": "act-orphaned-branch-Codex-routine-observations",
+      "title": "PR #948 の反映待ち: Codex/routine-observations",
+      "evidence": "Codex/routine-observations の取り残しは解消（走査に出てこない）"
     }
   ],
   "human": [
@@ -92,7 +86,7 @@
       "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
       "age_days": 0,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
-      "evidence": "Issue の状態を取得できず判定不能（閉じたという意味ではない）",
+      "evidence": "#883 がまだ open",
       "not_before_jst": null
     },
     {
@@ -129,7 +123,7 @@
       "title": "【監視】autopilot監視: 当日分の実行記録がありません",
       "age_days": 0,
       "auto": null,
-      "evidence": "Issue の状態を取得できず判定不能（閉じたという意味ではない）"
+      "evidence": "#913 がまだ open"
     },
     {
       "id": "act-routine-run-trig_013uV3Pk3SZH8QJS6PxSg9Bw",
@@ -156,12 +150,5 @@
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     }
   ],
-  "executed": [
-    {
-      "handler": "reconcile-runs",
-      "ok": true,
-      "changed": 1,
-      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641 -> ap-20260905-actions-33959414641: appended ap-20260905-actions-33959414641 (skipped_gate)"
-    }
-  ]
+  "executed": []
 }
