@@ -1,8 +1,8 @@
 {
-  "as_of_jst": "2026-09-04",
-  "open_total": 1,
-  "oldest_open_days": 1,
-  "acknowledged": 7,
+  "as_of_jst": "2026-09-05",
+  "open_total": 6,
+  "oldest_open_days": 2,
+  "acknowledged": 6,
   "closed_today": [
     {
       "id": "act-cost-sync",
@@ -10,39 +10,14 @@
       "evidence": "Actions の run はすべて実費台帳にある（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）"
     },
     {
-      "id": "act-budget-recalibrate",
-      "title": "1回あたりの実費を下げる — 毎回読ませていた205,000文字を72,000文字に減らした。効果は次の article 実測で確かめる",
-      "evidence": "2026-08-25 以降の article は最安 $3.7802（目標 $4.5000 以下）・2件の実測"
-    },
-    {
       "id": "act-ledger-sync",
-      "title": "運転台帳に載っていない Actions run が 1件",
-      "evidence": "Actions run 27件すべてが台帳にある（記録対象外 1件を除外: 32817335365）"
+      "title": "運転台帳に載っていない Actions run が 2件",
+      "evidence": "Actions run 29件すべてが台帳にある（記録対象外 1件を除外: 32817335365）"
     },
     {
-      "id": "act-selfheal-ap-20260830-actions",
-      "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし"
-    },
-    {
-      "id": "act-selfheal-ap-20260831-actions",
-      "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし"
-    },
-    {
-      "id": "act-asc-cpp-slot-cleanup",
-      "title": "ASC のカスタムプロダクトページ70枠の整理 — 未提出38本を消すか・出すか・置くかを決める",
-      "evidence": "2026-09-04、オーナーの「人への依頼：あなたのおまかせ」を受け、削除・提出をせず全件保管と決定。9月3日の在庫写しは70本（APPROVED 32、未提出38）。既存調査では未提出35本にページまたは計画があり、対応のない3本も空けた枠の具体的用途がない。/autopilot/は承認済みvs-draftsで稼働している。閉じたのは今回の整理方針の判断であり、枠は空いていない。新しいCPPの具体的需要が生じた時は在庫を再取得して別途見直す。ASCへの変更は0件。"
-    },
-    {
-      "id": "act-faq-question-level-audit",
-      "title": "手書き FAQPage 47面の「質問文が可視 FAQ と合っているか」は、まだ数えられない（素朴な突き合わせは27面が誤検出）",
-      "evidence": "オーナーの「人への依頼：あなたのおまかせ」を受け、質問比較を生成器から分離した読み取り専用監査として実装。inject_faq_schema.py --audit-questions / --check から実行。実サイト68面は一致58・候補10・読取不能0。候補10面の意味照合、検体の誤検出0/6・見逃し0/5、4変異の失敗を data/check-selftests.json に記録。146面の生成payloadは旧実装と全件一致。根拠と内容SHAは docs/faq-question-audit-2026-09-04.md。差分を欠陥と自動判定せず、回答の真偽・CSS可視性は検査範囲外。"
-    },
-    {
-      "id": "act-health-869",
-      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
-      "evidence": "https://github.com/simplememofast/simplememo/issues/869 の state=closed をGitHub APIで確認"
+      "id": "act-routine-snapshot-stale",
+      "title": "副系の写しが 2.6日前（上限 3日）— 期限まであと 0.4日",
+      "evidence": "scripts/check-routine-runs.mjs --snapshot-fresh が exit 0"
     }
   ],
   "human": [
@@ -50,10 +25,54 @@
       "id": "act-pr6-d14-evaluate",
       "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
       "detail": "2026-09-17（D+14）に、9/3配信のPR⑥を評価する。対象は growth/experiments/experiments.json の pr-2026-rsi-autopilot（status: running、evaluation_at: 2026-09-17）。\n\n2026-09-04、対象リリースの非公開分析を読み取り専用で開くことへのオーナーの明示承認「ok」を受け、Codexのアプリ内ブラウザーで取得経路を確認した。「分析データ」→「レポート」→対象行の「詳細」。公開URL・公開日時・期間指定を照合し、ページビュー、デバイス別アクセス、参照元サイト一覧、掲載メディア一覧を実際に読めた。閲覧承認待ちは解消済み。今回の非公開取得値は公開台帳へ転記していない。\n\n手順の正典は docs/prtimes-d14-capture.md。参照元は割合表示ではなく訪問者数の表なので、全ページの行を読み、Google系の合計を全参照元合計で割る。スマートフォン比率は対象リリースの期間合計の%を100で割る。送信者比率はPR TIMESにはなく、アプリ側の実測が別途必要。\n\n残る実測は、Coworkの日次Routine（trig_01GphcHzTuH1A1JUGq8dYkWa）が取得から認可された保存先・PR作成まで完走することと、9/17の評価値。Codexでの対話中の読み取り成功をCoworkの完走とは扱わない。9/4の期限判定は0件で、discover_boarding_postは空のまま維持する。\n\n期限後、対象と期間と公開範囲を確認した値だけを確定転記し、配信見出しでD-SCOREを再採点して、annotations.jsonとbacktestを照合する。読めた値が一部だけの場合は非公開の作業記録に保持し、最終転記先へ部分的に入れない（1項目でも入ると現行の期限判定から除外される）。判定不能を完了とはせず、この対象実験の評価完了を確認して閉じる。",
-      "age_days": 1,
+      "age_days": 2,
       "why": "当初のActions/CCRでは非公開分析へ到達できず、取得を担う実行系の検証が必要だった。2026-09-04、明示承認後のCodexでは対象画面の読み取りに成功し、項目・単位・導線の推定は解消した。現在のhuman分類は過去の依頼と未完了のD14評価を残すもので、閲覧承認を再度求める意味ではない。Coworkの日次Routineで取得からPR作成まで完走した証拠はまだない。評価日の実測・対象実験の確定評価まで閉じない。",
       "evidence": "リポジトリから検査できない（人が閉じる）",
       "not_before_jst": "2026-09-17"
+    },
+    {
+      "id": "act-health-883",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "#883 がまだ open",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
+      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 2 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
+      "detail": "ブランチ claude/google-discover-strategy-ydu1a6 が、最後のマージ（PR #858 / head d001100）より2 件先にあり、**それらは main にも無い**: cada448, b42a6ac。（別の8件は main 側のコミットなので除外した）\n\nこのブランチは #853 #854 #856 #858 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: docs/pr-discover-handoff-2026-09-04.md / docs/pr-discover-strategy-2026-09-04.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "age_days": 0,
+      "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
+      "evidence": "claude/google-discover-strategy-ydu1a6 はまだ 2 件先にある",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-selfheal-ap-20260830-actions",
+      "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "age_days": 0,
+      "why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
+      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-selfheal-ap-20260831-actions",
+      "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "age_days": 0,
+      "why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
+      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "not_before_jst": null
+    },
+    {
+      "id": "act-selfheal-ap-20260905-actions",
+      "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-09-05 / actions / outcome=failed。Claude Code ステップが 1169000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "age_days": 0,
+      "why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
+      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "not_before_jst": null
     }
   ],
   "ai": [],

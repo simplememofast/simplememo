@@ -37,7 +37,7 @@
     "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
     "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
-  "last_run_jst": "2026-09-04",
+  "last_run_jst": "2026-09-05",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -269,7 +269,7 @@
     {
       "id": "act-cost-sync",
       "title": "実費台帳に載っていない run が 1件",
-      "detail": "ap-20260904-actions（run 33815445009）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 1件（ap-20260831-ccr0920）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
+      "detail": "ap-20260905-actions（run 33926832821）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 1件（ap-20260831-ccr0920）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
       "source": "cost",
       "domain": null,
       "touches": [
@@ -288,13 +288,13 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-04",
-      "last_seen_jst": "2026-09-04",
-      "closed_jst": "2026-09-04",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": "2026-09-05",
       "evidence": "Actions の run はすべて実費台帳にある（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 1件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920）",
-      "last_run_jst": "2026-09-04",
-      "last_run_log": "ap-20260820-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260904-actions: appended 2026-09-04 actions $5.0614",
-      "reopened_jst": "2026-09-04"
+      "last_run_jst": "2026-09-05",
+      "last_run_log": "ap-20260820-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260821-actions: ログは読めたが実費行が無い（0ではなく、そもそも発生していない）→ 除外に積む\nap-20260905-actions: appended 2026-09-05 actions $4.8768",
+      "reopened_jst": "2026-09-05"
     },
     {
       "id": "act-credential-actions",
@@ -457,8 +457,8 @@
     },
     {
       "id": "act-ledger-sync",
-      "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33815445009（2026-09-04 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "title": "運転台帳に載っていない Actions run が 2件",
+      "detail": "33931560258（2026-09-05 / success）, 33926832821（2026-09-05 / failure）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -472,13 +472,13 @@
         "params": {}
       },
       "state": "done",
-      "created_jst": "2026-09-04",
-      "last_seen_jst": "2026-09-04",
-      "closed_jst": "2026-09-04",
-      "evidence": "Actions run 27件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-04",
-      "last_run_log": "33815445009: 成功回はPR特定が要るため自動追記しない\n32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）",
-      "reopened_jst": "2026-09-04"
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": "2026-09-05",
+      "evidence": "Actions run 29件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
+      "last_run_jst": "2026-09-05",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33926832821 -> ap-20260905-actions: appended ap-20260905-actions (failed)\n33931560258 -> ap-20260905-actions-33931560258: appended ap-20260905-actions-33931560258 (skipped_gate)",
+      "reopened_jst": "2026-09-05"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -612,7 +612,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-08-27",
-      "last_seen_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-05",
       "closed_jst": null,
       "evidence": "2026-09-03 にセッションが 813b335 の中身を main と突き合わせた。**再投入するものは無い。** data/autopilot-runs.json: ブランチ側 29行の run_id がすべて main にあり、date_jst/route/outcome/lane/action/pr/artifact も一致（欠落0件）。 docs/obsidian/AUTOPILOT_LOG.md: ブランチ側 2,034行が main 側 2,710行の先頭と完全一致（差分は main 側の追記 676行のみ）。当日の owner-session が同日中に拾っている。 data/autopilot-status.json: ブランチは 2026-08-27 の写しで main は 2026-09-02。**状態型なので当てると巻き戻る**（追記型と分けて扱う、の指示どおり当てない）。 残るのはブランチのSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は delete-branch.yml だが現在の照合条件では通らない（docs/orphan-branch-cleanup-2026-09-03.md）。",
       "reviewed_orphans": [
@@ -858,7 +858,7 @@
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-08-31 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-08-30 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets Aug 31, 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -870,15 +870,15 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-08-31"
+          "since": "2026-09-05"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-04",
-      "last_seen_jst": "2026-09-04",
-      "closed_jst": "2026-09-04",
-      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-04",
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": null,
+      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-05",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -897,7 +897,7 @@
     {
       "id": "act-selfheal-ap-20260831-actions",
       "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-08-31 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "detail": "2026-08-31 / actions / outcome=failed。Claude Code ステップが失敗し、同じトークンでの単独実行も HTTP 429（使用量上限）を返した: \"You've hit your weekly limit · resets 11pm (UTC)\"。**資格情報は失効していない** —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。上限がリセットされれば自動で戻る。副系CCRも同じアカウントなので同じ時間帯に同じ形で落ちる。【この行の但し書き】2026-09-01 のセッションが Actions API とジョブログから起こした。当時のワークフローの切り分けステップと interpretRun は2値しか持たず、429 を「資格情報が通っていない。claude setup-token を再実行せよ」と needs_triage なしで書く形だったため、**その誤った断定は台帳に入れていない**（同じPRで両方を直した）。\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
       "source": "selfheal",
       "domain": null,
       "touches": [],
@@ -909,15 +909,15 @@
         "params": {
           "route": "actions",
           "failure_class": "usage_limit",
-          "since": "2026-08-31"
+          "since": "2026-09-05"
         }
       },
-      "state": "done",
-      "created_jst": "2026-09-04",
-      "last_seen_jst": "2026-09-04",
-      "closed_jst": "2026-09-04",
-      "evidence": "2026-08-31 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-04",
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": null,
+      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
+      "reopened_jst": "2026-09-05",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1049,7 +1049,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-05",
       "closed_jst": null,
       "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**",
       "owner_needed": true,
@@ -1107,7 +1107,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-02",
-      "last_seen_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-05",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ef8b3a7`「ドリルの本数を実測に直す（15→39）」は、**取り残しではなく main に届かなかった訂正**で、内容は PR #811 が同日に入れている。4ファイルの照合:\n① `docs/obsidian/AUTOPILOT_RUNBOOK.md` §4 … main は「切替演習（39シナリオ・gateの16コードを全被覆）」。実測 `autopilot-drill --check` は 39/39 で一致\n② `docs/obsidian/AUTOPILOT_LOG.md` … 09-02 エントリの「35→39」が main にある\n③ `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で新しい\n④ `data/kpi-definitions.json` … **ブランチ側の行は literal には入っていない。入れてはいけない。**ブランチは noise_floor を v24→v25 にしているが、main は同じ番号 v25 を**別の変更**（09-02・Runbook §0-2）に使っており、いまは v30。**版番号が衝突している**ので写しを当てると5版ぶん巻き戻る。ブランチが必要としていたもの（Runbook を触ったことによる checksum の更新）は main の v30 が果たしている —— why にも「§4 のドリル本数の表記を実測値（39シナリオ）へ直したため」と同じ理由が書いてある。**欠けているのは版番号ではなく無い**、と示せたので受容する。",
       "reviewed_orphans": [
@@ -1242,7 +1242,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-04",
+      "last_seen_jst": "2026-09-05",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ac0e224` は主系が PR #793 の**マージ後**に積んだ記録コミットで、3ファイルすべてについて main に欠けが無いことを示した:\n① `data/autopilot-runs.json` … 行キーの包含（ブランチ側 42行すべてが main にある。apply-orphan-ledger が機械で照合）。**ただし `ap-20260903-actions` の行を main へ入れたのはこのセッション**で、ブランチの写しではなく Actions API の run 33692832179 とマージ済み PR #793 から起こし直した（`external_ref` はブランチ側の行に無かった値）\n② `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で、ブランチ側と同じ日付＝上書き済み。**写しは当てていない**（当てると cost 枠が $40 時代へ巻き戻る）\n③ `docs/obsidian/AUTOPILOT_LOG.md` … 機械の前方一致は通らない（ブランチが分岐したあとに main へ別の 09-03 エントリが5本入っているので、ブランチ側は main の接頭辞になりえない）。**代わりに行の包含で示した** —— ブランチが `b7e6e3e` へ足した 3,471文字・非空66行のうち、**いま main に無い行は0行**（本文を回収して同じPRで入れた）。",
       "last_run_jst": "2026-09-03",
@@ -1596,8 +1596,8 @@
     },
     {
       "id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
-      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 1 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
-      "detail": "ブランチ claude/google-discover-strategy-ydu1a6 が、最後のマージ（PR #858 / head d001100）より1 件先にあり、**それらは main にも無い**: cada448。（別の8件は main 側のコミットなので除外した）\n\nこのブランチは #853 #854 #856 #858 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: docs/pr-discover-handoff-2026-09-04.md / docs/pr-discover-strategy-2026-09-04.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 2 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
+      "detail": "ブランチ claude/google-discover-strategy-ydu1a6 が、最後のマージ（PR #858 / head d001100）より2 件先にあり、**それらは main にも無い**: cada448, b42a6ac。（別の8件は main 側のコミットなので除外した）\n\nこのブランチは #853 #854 #856 #858 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: docs/pr-discover-handoff-2026-09-04.md / docs/pr-discover-strategy-2026-09-04.md\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
       "source": "orphan",
       "domain": null,
       "touches": [],
@@ -1610,11 +1610,11 @@
           "branch": "claude/google-discover-strategy-ydu1a6"
         }
       },
-      "state": "acknowledged",
-      "created_jst": "2026-09-04",
-      "last_seen_jst": "2026-09-04",
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
       "closed_jst": null,
-      "evidence": "2026-09-04、Codexがオーナーの委任に基づいて cada44861439bb3014f180ab53b126936e6ec2df の文書2件をレビュー。Notion連携の訂正はmainに欠けていたため、この台帳更新と同じPRで取り込む。iOS #319・#320とAPI #239のマージ、本番GET /v1/notion/configのHTTP 200・available:false、mainの公開手順とmigrationを照合した。有効化・実OAuth確認・配布は未完了として残し、所要日数を断定しない。PR⑥もD+1の初期観測を9/17の確定評価と区別した。詳細は docs/pr-discover-handoff-2026-09-04.md 冒頭。元ブランチは保持し、受容はこの1コミットのみ。以後の別SHAには既存の再点火規則を適用する。セッションによるレビュー・取り込みであり、無人修復の実績には加算しない。",
+      "evidence": "claude/google-discover-strategy-ydu1a6 はまだ 2 件先にある",
       "reviewed_orphans": [
         "cada448"
       ],
@@ -1631,7 +1631,81 @@
           "close_check"
         ],
         "reviewed_commit": "cada44861439bb3014f180ab53b126936e6ec2df"
-      }
+      },
+      "reopened_jst": "2026-09-05"
+    },
+    {
+      "id": "act-health-883",
+      "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
+      "source": "health",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "issue_closed",
+        "params": {
+          "issue": 883
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": null,
+      "evidence": "#883 がまだ open"
+    },
+    {
+      "id": "act-routine-snapshot-stale",
+      "title": "副系の写しが 2.6日前（上限 3日）— 期限まであと 0.4日",
+      "detail": "data/routine-runs.json の observed_at が 2026-09-02T00:31:53Z。**上限（3日）を越えると check-routine-runs --check が落ち、SEO Validation が止まって auto-merge が動かなくなる**（2026-09-01 に実際に起きた）。\n\n取り直すのはセッションだけができる（CIからは list_triggers を叩けない）:\n  1. MCP の list_triggers を呼び、応答の生JSONをファイルへ落とす\n  2. node scripts/check-routine-runs.mjs --sync <そのファイル>\n  3. node scripts/check-routine-runs.mjs --check — **増えた異常はここで落ちる。**理由を書いて open_findings へ（open_budget も同じ差分で動かす）\n\n**上限を緩めて閉じない。**古い写しを緑にすると「読めているつもり」で止まる。",
+      "source": "routine",
+      "domain": null,
+      "touches": [
+        "data/routine-runs.json"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "script_ok",
+        "params": {
+          "script": "scripts/check-routine-runs.mjs",
+          "args": [
+            "--snapshot-fresh"
+          ]
+        }
+      },
+      "state": "done",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": "2026-09-05",
+      "evidence": "scripts/check-routine-runs.mjs --snapshot-fresh が exit 0",
+      "reopened_jst": "2026-09-05"
+    },
+    {
+      "id": "act-selfheal-ap-20260905-actions",
+      "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
+      "detail": "2026-09-05 / actions / outcome=failed。Claude Code ステップが 1169000ms で失敗し、同じトークンでの単独実行が **HTTP 429（使用量上限）** を返した（ワークフローの切り分けステップ）。**資格情報は失効していない —— トークンを入れ替えても直らないし、入れ替えれば無事な鍵を捨てることになる。**上限がリセットされれば自動で戻る。副系CCRも同じアカウントを使うので**同じ時間帯に同じ形で落ちる**（代走は当てにできない）。恒久的に減らすなら上限を上げるか、1回あたりの入力量を下げること（自動判定）\n\n**この種別は data/escalation-rules.json が who: owner と宣言している。**レーンFは修理対象にせず、repair_of も書かない（書くと repair_limit が進み、3回目で経路が止まる — 時間で自然に戻る停止が人待ちの停止に化ける）。\n渡し先 daily_report / 24時間以内。\n\n**閉じ条件は経路と種別で見る** — 2026-09-05 以降に actions が実際に着手し、usage_limit が再発しなければ閉じる。着手が1回も無い間は閉じない（失敗が無いことは回復の証拠にならない）。",
+      "source": "selfheal",
+      "domain": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "data/escalation-rules.json が usage_limit を who: owner と宣言している（打つ手は「待つ・枠を上げる・入力量を減らす」で、後ろ2つは人の判断）。**規則そのものは self_repair.may_modify の外**なので、レーンFがこの行き先を書き換えて逃げる経路は無い",
+      "auto": null,
+      "close_check": {
+        "kind": "no_failure_since",
+        "params": {
+          "route": "actions",
+          "failure_class": "usage_limit",
+          "since": "2026-09-05"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": null,
+      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
     }
   ],
   "escalation_review_authorization": {
