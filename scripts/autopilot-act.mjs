@@ -3760,6 +3760,24 @@ async function selftest() {
       && !result.failure_reason.includes('資格情報は通っている')
       && !result.failure_reason.includes('更新する必要がある'));
   }
+  {
+    const { validate: validateRepair, analyze: analyzeRepair } = await import('./autopilot-selfheal.mjs');
+    const matrix = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/authority-matrix.json'), 'utf8'));
+    const observation = { id: 90001, created_at: '2026-09-05T00:00:00Z', status: 'completed',
+      conclusion: 'failure', event: 'schedule', steps: [
+        { name: 'Claude Code', conclusion: 'failure', started_at: '2026-09-05T00:00:00Z',
+          completed_at: '2026-09-05T00:00:20Z' },
+        { name: '資格情報の診断は判定不能', conclusion: 'failure' },
+      ] };
+    const row = { run_id: 'fixture-unknown', route: 'actions', external_ref: String(observation.id),
+      ...interpretRun(observation),
+      ...detectionEvidence(observation, 'workflow_dispatch', new Date('2026-09-05T00:01:00Z')) };
+    t('実際の診断導出と検知証拠が自己修復検査を通る（原因は未確定）',
+      row.failure_class === null && validateRepair({ runs: [row] }, matrix).length === 0);
+    const pending = analyzeRepair({ runs: [row] }, matrix, []);
+    t('診断未確定を未修理件数と調査対象に残す',
+      pending.unrepaired_count === 1 && pending.targets[0].needs_triage && pending.lane_f_required);
+  }
   t('切り分けが skipped なら資格情報を無事と書かない',
     !withProbe('skipped').failure_reason.includes('資格情報は通っている'));
   // 形（failure_class）は据え置き。種別を動かすと D5 の連続判定と
