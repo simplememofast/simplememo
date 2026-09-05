@@ -37,7 +37,7 @@
     "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
     "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
-  "last_run_jst": "2026-09-05",
+  "last_run_jst": "2026-09-06",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -269,7 +269,7 @@
     {
       "id": "act-cost-sync",
       "title": "実費記録の同期が必要な run が 1件",
-      "detail": "actions-run-33959414641（run 33959414641）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 2件（ap-20260831-ccr0920, sm-20260905-queue-collision）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
+      "detail": "ap-20260906-actions（run 33996430959）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 2件（ap-20260831-ccr0920, sm-20260905-queue-collision）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
       "source": "cost",
       "domain": null,
       "touches": [
@@ -285,24 +285,17 @@
             "ap-20260820-actions",
             "ap-20260821-actions"
           ],
-          "pending_runs": [
-            {
-              "id": 33959414641,
-              "created_at": "2026-09-05T09:58:55Z",
-              "jst_date": "2026-09-05",
-              "model_conclusion": "success"
-            }
-          ]
+          "pending_runs": []
         }
       },
       "state": "done",
-      "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
-      "closed_jst": "2026-09-05",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": "2026-09-06",
       "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・既知の結果を同期済み（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）",
-      "last_run_jst": "2026-09-05",
-      "last_run_log": "actions-run-33959414641: appended 2026-09-05 actions $0.8408",
-      "reopened_jst": "2026-09-05"
+      "last_run_jst": "2026-09-06",
+      "last_run_log": "ap-20260906-actions: appended 2026-09-06 actions $19.6009",
+      "reopened_jst": "2026-09-06"
     },
     {
       "id": "act-credential-actions",
@@ -481,11 +474,11 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "台帳に無い run が 1件: 33959414641（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-05",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない",
+      "last_run_jst": "2026-09-06",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない\n33996430959 -> ap-20260906-actions: appended ap-20260906-actions (failed)",
       "reopened_jst": "2026-09-05"
     },
     {
@@ -620,7 +613,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-08-27",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "2026-09-03 にセッションが 813b335 の中身を main と突き合わせた。**再投入するものは無い。** data/autopilot-runs.json: ブランチ側 29行の run_id がすべて main にあり、date_jst/route/outcome/lane/action/pr/artifact も一致（欠落0件）。 docs/obsidian/AUTOPILOT_LOG.md: ブランチ側 2,034行が main 側 2,710行の先頭と完全一致（差分は main 側の追記 676行のみ）。当日の owner-session が同日中に拾っている。 data/autopilot-status.json: ブランチは 2026-08-27 の写しで main は 2026-09-02。**状態型なので当てると巻き戻る**（追記型と分けて扱う、の指示どおり当てない）。 残るのはブランチのSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は delete-branch.yml だが現在の照合条件では通らない（docs/orphan-branch-cleanup-2026-09-03.md）。",
       "reviewed_orphans": [
@@ -881,12 +874,12 @@
           "since": "2026-09-05"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
-      "closed_jst": null,
-      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-05",
+      "state": "done",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": "2026-09-06",
+      "evidence": "2026-09-05 以降 actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-06",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -920,12 +913,12 @@
           "since": "2026-09-05"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
-      "closed_jst": null,
-      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）",
-      "reopened_jst": "2026-09-05",
+      "state": "done",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": "2026-09-06",
+      "evidence": "2026-09-05 以降 actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-06",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1057,7 +1050,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**",
       "owner_needed": true,
@@ -1115,7 +1108,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-02",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ef8b3a7`「ドリルの本数を実測に直す（15→39）」は、**取り残しではなく main に届かなかった訂正**で、内容は PR #811 が同日に入れている。4ファイルの照合:\n① `docs/obsidian/AUTOPILOT_RUNBOOK.md` §4 … main は「切替演習（39シナリオ・gateの16コードを全被覆）」。実測 `autopilot-drill --check` は 39/39 で一致\n② `docs/obsidian/AUTOPILOT_LOG.md` … 09-02 エントリの「35→39」が main にある\n③ `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で新しい\n④ `data/kpi-definitions.json` … **ブランチ側の行は literal には入っていない。入れてはいけない。**ブランチは noise_floor を v24→v25 にしているが、main は同じ番号 v25 を**別の変更**（09-02・Runbook §0-2）に使っており、いまは v30。**版番号が衝突している**ので写しを当てると5版ぶん巻き戻る。ブランチが必要としていたもの（Runbook を触ったことによる checksum の更新）は main の v30 が果たしている —— why にも「§4 のドリル本数の表記を実測値（39シナリオ）へ直したため」と同じ理由が書いてある。**欠けているのは版番号ではなく無い**、と示せたので受容する。",
       "reviewed_orphans": [
@@ -1250,7 +1243,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ac0e224` は主系が PR #793 の**マージ後**に積んだ記録コミットで、3ファイルすべてについて main に欠けが無いことを示した:\n① `data/autopilot-runs.json` … 行キーの包含（ブランチ側 42行すべてが main にある。apply-orphan-ledger が機械で照合）。**ただし `ap-20260903-actions` の行を main へ入れたのはこのセッション**で、ブランチの写しではなく Actions API の run 33692832179 とマージ済み PR #793 から起こし直した（`external_ref` はブランチ側の行に無かった値）\n② `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で、ブランチ側と同じ日付＝上書き済み。**写しは当てていない**（当てると cost 枠が $40 時代へ巻き戻る）\n③ `docs/obsidian/AUTOPILOT_LOG.md` … 機械の前方一致は通らない（ブランチが分岐したあとに main へ別の 09-03 エントリが5本入っているので、ブランチ側は main の接頭辞になりえない）。**代わりに行の包含で示した** —— ブランチが `b7e6e3e` へ足した 3,471文字・非空66行のうち、**いま main に無い行は0行**（本文を回収して同じPRで入れた）。",
       "last_run_jst": "2026-09-03",
@@ -1659,7 +1652,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "#883 がまだ open"
     },
@@ -1709,11 +1702,12 @@
           "since": "2026-09-05"
         }
       },
-      "state": "open",
-      "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
-      "closed_jst": null,
-      "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
+      "state": "done",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": "2026-09-06",
+      "evidence": "2026-09-05 以降 actions は 1回着手し usage_limit の再発なし",
+      "reopened_jst": "2026-09-06"
     },
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260905",
@@ -1830,7 +1824,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -1860,7 +1854,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない",
       "reopened_jst": "2026-09-05"
@@ -2008,7 +2002,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -2059,7 +2053,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -2089,7 +2083,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -2119,9 +2113,34 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
+    },
+    {
+      "id": "act-selfheal-ap-20260906-actions",
+      "title": "未修理の故障: ap-20260906-actions（unknown）",
+      "detail": "2026-09-06 / actions / outcome=failed。Claude Code ステップが 2712000ms で失敗した一方、**同じトークンでの単独実行（1ターン）は完走している**（ワークフローの切り分けステップ）。**資格情報は通っているので、そこを疑わない。**残る候補は --model の指定（data/model-routing.json の解決結果が実在するモデルか）・MCP・プロンプト・上流の版（自動判定）",
+      "source": "selfheal",
+      "domain": null,
+      "touches": [
+        "data/autopilot-runs.json",
+        ".github/workflows/obsidian-autopilot.yml"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "run_repaired",
+        "params": {
+          "run_id": "ap-20260906-actions"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": null,
+      "evidence": "ap-20260906-actions は未修理のまま（repair_of で名指しされていない）"
     }
   ],
   "escalation_review_authorization": {
