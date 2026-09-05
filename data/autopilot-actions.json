@@ -1706,6 +1706,28 @@
       "last_seen_jst": "2026-09-05",
       "closed_jst": null,
       "evidence": "2026-09-05 以降 actions は一度も着手していない（失敗が無いことは回復の証拠にならない）"
+    },
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260905",
+      "title": "ブランチ claude/autopilot-act-20260905 に 1 コミットが取り残されている（PR #892 ほか1件 のマージ後）",
+      "detail": "ブランチ claude/autopilot-act-20260905 が、最後のマージ（PR #892 / head 0b57777）より1 件先にあり、**それらは main にも無い**: add3aa4。（別の4件は main 側のコミットなので除外した）\n\nこのブランチは #887 #892 で使い回されている。**取り残しはブランチ1本ぶんで、PRの数だけあるわけではない。**\n\n**auto-merge は検証済みSHAだけをマージする設計なので、これは事故ではなく帰結。**PRが既に閉じているため、次の検証が拾う先が無い。\n\n**中身を見てから適用すること。**台帳の更新なら再投入、書きかけなら捨てる。機械が中身を見ずに cherry-pick しない（この行に auto を付けない理由）。\n\n触ったパス: data/autonomy-score-history.json\n\n**運転台帳の外を触っている。**書きかけかもしれないので、中身を読んでから決めること。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "branch": "claude/autopilot-act-20260905"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": null,
+      "evidence": "claude/autopilot-act-20260905 はまだ 1 件先にある"
     }
   ],
   "escalation_review_authorization": {
