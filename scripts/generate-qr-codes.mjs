@@ -16,14 +16,18 @@
  * shipped and decodes it with an independent decoder, so an encoder fault or a
  * bad write shows up rather than being taken on trust.
  *
- * This repo has no package.json, so the two dependencies are not installed by
- * default and this script is not wired into CI. Run it by hand after changing
- * a campaign token or adding a page.
+ * CI decodes the shipped SVGs against their actual referring pages and the CPP
+ * map. Install qrcode@1.5.4 and jsqr@1.4.0 before generating or checking.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+import siteFiles from './lib/site-files.js';
+
+const require = createRequire(import.meta.url);
+const { collectHtmlFiles, toUrlPath } = siteFiles;
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = path.join(ROOT, 'assets/img');
@@ -88,12 +92,15 @@ export const QR_PAGES = [
   // English body copy, so a second code would send `en` readers to a page they
   // cannot read.
   { slug: 'autopilot', en: false },
+  // Preserve the older campaign labels when bringing these two codes under verification.
+  { slug: 'ai-tags', en: true, campaigns: { jp: 'ai-tags-qr-ja', en: 'ai-tags-qr-en' } },
 ];
 
 /** Campaign token follows the site convention: <slug>-<lang>__<placement>. */
-export const storeUrl = (slug, lang, placement = 'qr') =>
+export const storeUrl = (slug, lang, placement = 'qr', ppid = null, campaign = `${slug}-${lang}__${placement}`) =>
   `https://apps.apple.com/${lang === 'jp' ? 'jp' : 'us'}/app/${APP_ID}`
-  + `?pt=${PROVIDER_TOKEN}&ct=${slug}-${lang}__${placement}&mt=8`;
+  + `?pt=${PROVIDER_TOKEN}&ct=${encodeURIComponent(campaign)}&mt=8`
+  + (ppid ? `&ppid=${ppid}` : '');
 
 /**
  * `qr-<slug>-<lang>.svg`, with the placement in the middle when it is not the
@@ -106,17 +113,67 @@ const fileFor = (slug, lang, placement = 'qr') => {
   return `qr-${slug}${where ? `-${where}` : ''}-${lang === 'jp' ? 'ja' : 'en'}.svg`;
 };
 
-const targets = QR_PAGES.flatMap(({ slug, en, placement }) =>
-  (en ? ['jp', 'en'] : ['jp']).map((lang) => ({
-    file: fileFor(slug, lang, placement),
-    url: storeUrl(slug, lang, placement),
-  }))
-);
+/** Match the real page path, not a filename slug: some EN codes moved to /en/. */
+export function cppForQr(pagePath, map) {
+  const cpp = map.cpps.find((row) => row.match.some((re) => new RegExp(re).test(pagePath)));
+  if (!cpp?.ppid || cpp.asc_visible === false) return null;
+  if (cpp.asc_state !== 'APPROVED' || cpp.asc_visible !== true
+      || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(cpp.ppid)) {
+    throw new Error(`${pagePath}: QR requires a valid, approved, visibly enabled CPP observation`);
+  }
+  return cpp.ppid;
+}
+
+export function qrReferences(html, pagePath) {
+  const clean = html.replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+  return [...clean.matchAll(/<img\b[^>]*>/gi)].flatMap(([tag]) => {
+    const src = tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+    if (!src) return [];
+    const url = new URL(src, `https://simplememofast.com${pagePath}`);
+    return url.origin === 'https://simplememofast.com'
+      && /^\/assets\/img\/qr-[^/]+\.svg$/.test(url.pathname)
+      ? [path.posix.basename(url.pathname)] : [];
+  });
+}
+
+export function buildTargets(pages, map, definitions = QR_PAGES) {
+  const owners = new Map();
+  for (const { pagePath, html } of pages) {
+    for (const file of qrReferences(html, pagePath)) {
+      if (!owners.has(file)) owners.set(file, []);
+      owners.get(file).push(pagePath);
+    }
+  }
+  const targets = definitions.flatMap(({ slug, en, placement, campaigns }) =>
+    (en ? ['jp', 'en'] : ['jp']).map((lang) => {
+      const file = fileFor(slug, lang, placement);
+      const sources = owners.get(file);
+      if (!sources?.length) throw new Error(`${file}: no referring HTML page`);
+      const ppids = [...new Set(sources.map((p) => cppForQr(p, map)))];
+      if (ppids.length !== 1) throw new Error(`${file}: shared by pages with conflicting CPP routes`);
+      return { file, sources, ppid: ppids[0], url: storeUrl(slug, lang, placement, ppids[0], campaigns?.[lang]) };
+    })
+  );
+  for (const file of owners.keys()) {
+    if (!targets.some((t) => t.file === file)) throw new Error(`${file}: referenced QR missing from generator`);
+  }
+  return targets;
+}
+
+export function siteTargets() {
+  const map = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/cpp-map.json'), 'utf8'));
+  const pages = collectHtmlFiles(ROOT, {
+    skipDirs: ['node_modules', 'scripts', 'docs', 'screenshots', 'admin', 'tools', 'growth'],
+    tolerateReadErrors: false,
+  }).map((f) => ({ pagePath: toUrlPath(ROOT, f), html: fs.readFileSync(f, 'utf8') }));
+  return buildTargets(pages, map);
+}
 
 /* ── generate ──────────────────────────────────────────────────────────── */
 
-async function generate() {
-  const { default: QRCode } = await import('qrcode');
+async function generate(targets) {
+  const QRCode = require('qrcode');
   for (const { file, url } of targets) {
     const svg = await QRCode.toString(url, {
       type: 'svg',
@@ -136,7 +193,7 @@ async function generate() {
 /* ── check ─────────────────────────────────────────────────────────────── */
 
 /** SVG path of horizontal runs → boolean module matrix. */
-function matrixFromSvg(svg) {
+export function matrixFromSvg(svg) {
   const size = Number(svg.match(/viewBox="0 0 (\d+)/)[1]);
   const d = svg.match(/<path stroke="[^"]*" d="([^"]*)"/)[1];
   const m = Array.from({ length: size }, () => new Uint8Array(size));
@@ -154,7 +211,7 @@ function matrixFromSvg(svg) {
 
 /** Modules → RGBA. Extra white padding keeps a thin quiet zone from being
  *  mistaken for a content fault; the quiet zone is measured separately. */
-function toRgba(m, size, scale = 8, pad = 4) {
+export function toRgba(m, size, scale = 8, pad = 4) {
   const w = (size + pad * 2) * scale;
   const data = new Uint8ClampedArray(w * w * 4).fill(255);
   for (let r = 0; r < size; r++) {
@@ -173,8 +230,8 @@ function toRgba(m, size, scale = 8, pad = 4) {
 
 const MIN_QUIET_ZONE = 4;
 
-async function check() {
-  const { default: jsQR } = await import('jsqr');
+async function check(targets) {
+  const jsQR = require('jsqr');
   let bad = 0;
   for (const { file, url } of targets) {
     const p = path.join(OUT, file);
@@ -211,11 +268,12 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
 const mode = process.argv.includes('--check') ? 'check' : 'generate';
 try {
-  if (mode === 'generate') { await generate(); console.log(`\n${targets.length} code(s) written. Now run with --check.`); }
-  else process.exit(await check() ? 1 : 0);
+  const targets = siteTargets();
+  if (mode === 'generate') { await generate(targets); console.log(`\n${targets.length} code(s) written. Now run with --check.`); }
+  else process.exit(await check(targets) ? 1 : 0);
 } catch (e) {
-  if (e.code === 'ERR_MODULE_NOT_FOUND') {
-    console.error(`Missing dependency. This repo has no package.json, so install them ad hoc:\n\n  npm i --no-save qrcode jsqr\n`);
+  if (e.code === 'MODULE_NOT_FOUND') {
+    console.error(`Missing dependency. Install them ad hoc:\n\n  npm i --no-save qrcode@1.5.4 jsqr@1.4.0\n`);
     process.exit(2);
   }
   throw e;

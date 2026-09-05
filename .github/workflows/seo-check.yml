@@ -32,6 +32,12 @@ jobs:
       - name: Acquisition measurement and GSC aggregation regressions
         run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
 
+      - name: Published QR codes preserve their intended App Store route
+        run: |
+          npm i --no-save --ignore-scripts qrcode@1.5.4 jsqr@1.4.0
+          node --test scripts/qr-routing.test.mjs
+          node scripts/generate-qr-codes.mjs --check
+
       - name: Prospective decisions and recovery safety
         run: |
           node scripts/autopilot-data.mjs --selftest
