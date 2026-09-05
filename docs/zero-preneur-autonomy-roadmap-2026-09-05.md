@@ -428,7 +428,7 @@ VISION の究極 KPI（Zero-decision Capture Rate）を tier A に入れられ�
 | # | 決着 | 記録先 |
 |---|---|---|
 | 7-1 | **A. 3件とも承認**（検知までの時間・1出荷あたり実費・判定理由未記録率） | `data/value-metrics.json` の `approved_by` / `approval_evidence` |
-| 7-3 | 同日午前に別セッションで **全面委任**（#906・EP 5.0→8.9・公開面は「人の判定 0 件」と表示）。その上で **A. 委任のまま＋月1で人が追認** | `data/autonomy-score.json` の `ep.precision_review.delegations` / `ratification` |
+| 7-3 | 同日午前に別セッションで **全面委任**（#906・EP 5.0→8.9・公開面は「人の判定 0 件」と表示）。その上で **A. 委任のまま＋月1で人が追認**。起票は日次アクチュエータ D8（`act-ep-ratification-<YYYY-MM>`・14日の窓・未追認は翌月へ持ち越し）、上書きは人が `scripts/ep-ratify.mjs --ratify / --overturn` で行い、`autonomy-score.mjs --check` が根拠の無い `mode: human` を落とす | `data/autonomy-score.json` の `ep.precision_review.delegations` / `ratification` |
 | 7-5 | **#877 で主系に検索データの取得ステップが入った**（モデル起動前・資格情報はステップ内に限定）。28日そろった日だけ分析器へ渡す。動いたかは `autopilot-status.json` の `bq_checked` で読む | `.github/workflows/obsidian-autopilot.yml` |
 | 据え置き | #910 の実測「窓内に故障が無いと壊れて直したほうが 27.5 点高い」に対し、オーナーが **② 最後に測れた率を据え置く** を選択（RA 検知・復旧・EP 見逃しのみ。最小分母3・56日で失効） | `data/autonomy-score.json` の `carry_forward` |
 | 7-2 / 7-4 / 7-6 / 7-7 / 7-8 / 7-9 | **未決**。次に判断を仰ぐ | — |

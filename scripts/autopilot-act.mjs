@@ -109,8 +109,36 @@ export function daysBetween(a, b) {
 // 「確認できなかった」を「閉じた」に倒すと、この台帳は嘘をつき始める
 // （bq_checked:false を 0件 と書かないのと同じ規律）。
 
+/**
+ * EP 委任判定の月次追認（D8）の閉じ条件。**追認が全部済んだか、窓を過ぎたか**のどちらかで閉じる。
+ * 窓を過ぎて閉じた行は evidence に「未追認 N 件は翌月へ持ち越す」と書く —— 閉じたことを追認と読ませない。
+ */
+function epRatifiedOrWindow(params, ctx) {
+  const acts = ctx.ledgerDoc?.actions;
+  if (!Array.isArray(acts)) return { closed: false, evidence: 'アクション台帳を読めず判定不能' };
+  const accepted = new Set(ctx.scorePolicy?.ep?.precision_review?.accepted_modes ?? ['human']);
+  const ids = Array.isArray(params.ids) ? params.ids : [];
+  const still = [];
+  for (const id of ids) {
+    const a = acts.find((x) => x.id === id);
+    if (!a) continue;                                   // 行が消えたら追認の対象も消える
+    const mode = a.owner_needed_review?.mode;
+    if (typeof mode !== 'string') continue;             // 判定者の記録が無い行は数えられていない
+    if (!accepted.has(mode)) still.push(id);
+  }
+  if (still.length === 0) return { closed: true, evidence: `${ids.length} 件すべて人の判定に置き換わった（${params.month}）` };
+  const window = Number.isFinite(params.window_days) ? params.window_days : 14;
+  const days = daysBetween(params.opened_jst, ctx.today);
+  if (Number.isFinite(days) && days >= window) {
+    return { closed: true,
+      evidence: `追認されずに ${days} 日の窓を過ぎた。**未追認 ${still.length} 件（${still.join(' / ')}）は翌月の起票に持ち越す**` };
+  }
+  return { closed: false, evidence: `未追認 ${still.length} 件（${still.join(' / ')}）。窓は ${params.opened_jst} から ${window} 日` };
+}
+
 export const CLOSE_CHECKS = {
   routine_resolved: routineResolved,
+  ep_ratified_or_window: epRatifiedOrWindow,
   /** 対象の run が selfheal の未修理リストから消えたら閉じる。 */
   run_repaired({ run_id }, ctx) {
     // **判定できないときは閉じない。** selfheal の出力が取れていないのに
@@ -1021,6 +1049,54 @@ export function derive(ctx) {
         params: noId ? { date_jst: o.date_jst, task_kind: o.task_kind } : { run_id: o.run_id },
       },
     });
+  }
+
+
+  // --- D8: EP 委任判定の月次追認（2026-09-05・オーナー判断） ---
+  //
+  // EP 精度の判定（owner_needed）はオーナーが AI へ全面委任した（#906）。点は入るが、
+  // 「必要だった」と判定するほど点が上がる向きの利害が判定者（AI）の側に残る。
+  // オーナーはその上に **月1で人が追認する** を選んだ（data/autonomy-score.json の
+  // ep.precision_review.ratification）。**点は動かない**（委任で既に数えている）。
+  // 動くのは公開面の「人の判定 0 件」で、反転した件数が AI の自己採点の甘さの実測になる。
+  //
+  // 【起票の形】月に1行。id を月で固定し、台帳にその月の行が（どの状態でも）在れば立てない。
+  // 立てた行は 14 日の窓で閉じ、未追認は翌月の起票に持ち越す（閉じ条件 ep_ratified_or_window）。
+  // **derive は台帳を読むだけで書かない。**追認そのものは人が scripts/ep-ratify.mjs で行う。
+  const ratification = ctx.scorePolicy?.ep?.precision_review?.ratification;
+  if (ratification?.cadence === 'monthly' && Array.isArray(ctx.ledgerDoc?.actions) && typeof ctx.today === 'string') {
+    const month = ctx.today.slice(0, 7);
+    const accepted = new Set(ctx.scorePolicy.ep.precision_review.accepted_modes ?? ['human']);
+    const pending = [];
+    for (const a of ctx.ledgerDoc.actions) {
+      if (typeof a.owner_needed !== 'boolean') continue;
+      const mode = a.owner_needed_review?.mode;
+      if (typeof mode !== 'string') continue;
+      if (!accepted.has(mode)) pending.push(a);
+    }
+    const id = `act-ep-ratification-${month}`;
+    const exists = ctx.ledgerDoc.actions.some((a) => a.id === id);
+    if (pending.length > 0 && !exists) {
+      out.push({
+        id,
+        title: `EP 委任判定の月次追認（${month}）: 未追認 ${pending.length} 件を人が読む`,
+        detail: `オーナー判断（2026-09-05・data/autonomy-score.json ep.precision_review.ratification）: `
+          + `委任で数えている判定を月1回、人が読んで納得した行を人の判定に上書きする。\n\n`
+          + `対象:\n${pending.map((p) => `- ${p.id} … owner_needed=${p.owner_needed}`
+            + `（${p.owner_needed_review.mode}${p.owner_needed_review.reviewer ? '/' + p.owner_needed_review.reviewer : ''}）`).join('\n')}\n\n`
+          + '手順: `node scripts/ep-ratify.mjs --list` で読み、納得した行は `--ratify <id> --evidence "オーナーの言葉"`、'
+          + '納得しない行は `--overturn <id> --evidence "…"`。台帳をコミットして push する。\n\n'
+          + '**点は変わらない**（委任で既に数えている）。変わるのは公開面の「人の判定 0 件」で、'
+          + '反転した件数が AI の自己採点の甘さの実測になる。追認せずに 14 日の窓を過ぎたら閉じ、未追認は翌月の起票に持ち越す。',
+        source: 'ep-ratification',
+        touches: ['data/autopilot-actions.json'],
+        force_owner: 'human',
+        force_owner_why: '判定者を人に置き換える操作そのもの。AI が代筆すると #901 の穴（自己採点）に戻る',
+        auto: null,
+        close_check: { kind: 'ep_ratified_or_window',
+          params: { month, ids: pending.map((p) => p.id), opened_jst: ctx.today, window_days: 14 } },
+      });
+    }
   }
 
   return out;
@@ -3834,6 +3910,47 @@ async function selftest() {
   }).filter((d) => d.source === 'budget');
   t('run_id 無しでもidが衝突しない', new Set(noIdDerive.map((d) => d.id)).size === 2);
   t('run_id 無しのidに null を出さない', noIdDerive.every((d) => !d.id.includes('null')));
+
+  // --- D8: EP 委任判定の月次追認（2026-09-05） ---
+  {
+    const policy = { ep: { precision_review: { accepted_modes: ['human'],
+      delegations: [{ mode: 'owner_delegated', reviewer: 'codex' }], ratification: { cadence: 'monthly' } } } };
+    const delegated = (id) => ({ id, title: id, state: 'done', force_owner: 'human', owner_needed: true,
+      owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } });
+    const human = (id) => ({ id, title: id, state: 'done', force_owner: 'human', owner_needed: true,
+      owner_needed_review: { mode: 'human', reviewer: 'owner', reviewed_jst: '2026-10-01', evidence: 'オーナーが「私の判断が要る件だった」と述べた' } });
+    const ctxOf = (actions, today = '2026-10-01', scorePolicy = policy) => ({
+      today, runsDoc: { runs: [] }, selfheal: { targets: [] }, statusDoc: null, costDoc: null,
+      ledgerDoc: { actions }, scorePolicy });
+    const d8 = derive(ctxOf([delegated('act-a'), delegated('act-b'), human('act-c')])).filter((d) => d.source === 'ep-ratification');
+    t('未追認の委任判定があれば月次の行を1つ立てる', d8.length === 1 && d8[0].id === 'act-ep-ratification-2026-10');
+    t('追認は人に固定する', d8[0]?.force_owner === 'human' && d8[0]?.auto === null);
+    t('対象は委任判定だけ（人の判定は数えない）', JSON.stringify(d8[0]?.close_check?.params?.ids) === '["act-a","act-b"]');
+    t('件数を題に出す', (d8[0]?.title ?? '').includes('未追認 2 件'));
+    t('道具の使い方を本文に出す', (d8[0]?.detail ?? '').includes('ep-ratify.mjs --list'));
+    t('**点が動かないことを本文に書く**', (d8[0]?.detail ?? '').includes('点は変わらない'));
+    t('未追認が無ければ立てない',
+      derive(ctxOf([human('act-c')])).filter((d) => d.source === 'ep-ratification').length === 0);
+    t('**その月の行が既に在れば立てない**（done でも再点火しない）',
+      derive(ctxOf([delegated('act-a'), { id: 'act-ep-ratification-2026-10', state: 'done', title: 'x' }]))
+        .filter((d) => d.source === 'ep-ratification').length === 0);
+    t('cadence が monthly でなければ立てない（L4 が決めるまで動かない）',
+      derive(ctxOf([delegated('act-a')], '2026-10-01', { ep: { precision_review: { accepted_modes: ['human'] } } }))
+        .filter((d) => d.source === 'ep-ratification').length === 0);
+    t('採点の方針が読めなければ立てない',
+      derive(ctxOf([delegated('act-a')], '2026-10-01', null)).filter((d) => d.source === 'ep-ratification').length === 0);
+    const params = { month: '2026-10', ids: ['act-a', 'act-b'], opened_jst: '2026-10-01', window_days: 14 };
+    t('未追認が残っていれば閉じない',
+      CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf([delegated('act-a'), delegated('act-b')], '2026-10-05')).closed === false);
+    t('全部人の判定に置き換わったら閉じる',
+      CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf([human('act-a'), human('act-b')], '2026-10-05')).closed === true);
+    const passed = CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf([delegated('act-a'), human('act-b')], '2026-10-15'));
+    t('**窓を過ぎたら閉じるが、未追認を持ち越すと書く**', passed.closed === true && passed.evidence.includes('act-a') && passed.evidence.includes('持ち越す'));
+    t('窓の内側では未追認の id を根拠に出す',
+      CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf([delegated('act-a'), human('act-b')], '2026-10-05')).evidence.includes('act-a'));
+    t('台帳が読めなければ閉じない',
+      CLOSE_CHECKS.ep_ratified_or_window(params, { today: '2026-10-20', ledgerDoc: null, scorePolicy: policy }).closed === false);
+  }
   t('run_id 無しは先に run_id を入れろと書く', (noIdDerive[0]?.detail ?? '').includes('run_id を入れる'));
   t('run_id 無しの閉じ条件は日付と種別で照合する',
     noIdDerive[0]?.close_check?.params?.date_jst === '2026-08-25'
@@ -4338,7 +4455,9 @@ async function buildContext(today, ledger = null) {
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
   return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues,
-    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion };
+    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion,
+    // 採点の方針（L4・読むだけ）。D8 の月次追認と、その閉じ条件が accepted_modes を見る
+    scorePolicy: readJson(path.join(ROOT, 'data/autonomy-score.json')) };
 }
 
 /** Sync runs first, then collect their costs in the same observation.

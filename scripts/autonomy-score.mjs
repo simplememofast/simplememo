@@ -715,8 +715,28 @@ export function check(s, policy, { blindness = [] } = {}) {
         + '委任を認めるなら data/autonomy-score.json の ep.precision_review.delegations に書く');
     }
   }
+  // **人の判定として数える行には、判定者・日付・根拠が要る**（2026-09-05・月次追認の道具と対）。
+  // acceptedReview は mode: human をそのまま数えるが、その欄は機械が書ける台帳にある。
+  // 根拠（オーナーの言葉）の無い human は、機械が書いたのと見分けがつかない。
+  if (fs.existsSync(ACTIONS_PATH)) problems.push(...humanReviewProblems(readJson(ACTIONS_PATH).actions ?? []));
   // L2 の前提台帳。**VDC が動く条件そのもの**なので、同じ検査で見る。
   if (fs.existsSync(METRICS_PATH)) problems.push(...validateMetrics(readJson(METRICS_PATH), policy));
+  return problems;
+}
+
+/** 人の判定（mode: human）に判定者・日付・根拠が揃っているか。scripts/ep-ratify.mjs と同じ規則。 */
+export function humanReviewProblems(actions) {
+  const problems = [];
+  for (const a of actions ?? []) {
+    const r = a?.owner_needed_review;
+    if (r?.mode !== 'human') continue;
+    const at = `data/autopilot-actions.json#${a.id ?? '?'}`;
+    if (r.reviewer !== 'owner') problems.push(`${at}: 人の判定なのに reviewer が owner でない（${r.reviewer ?? '空'}）`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(r.reviewed_jst ?? '')) problems.push(`${at}: 人の判定なのに reviewed_jst が無い`);
+    if (typeof r.evidence !== 'string' || r.evidence.trim().length < 12) {
+      problems.push(`${at}: 人の判定なのに根拠（evidence）が無い — 機械が mode: human と書いたのと見分けがつかない`);
+    }
+  }
   return problems;
 }
 
@@ -879,6 +899,12 @@ function selftest() {
   eq(acceptedReview({ mode: 'human' }, P), true, '既定で人の判定は数える');
   eq(acceptedReview({ mode: 'owner_delegated', reviewer: 'codex' }, P), false, '既定で委任は数えない');
   eq(acceptedReview(undefined, P), false, '判定者の記録が無ければ数えない');
+  eq(humanReviewProblems([{ id: 'm', owner_needed_review: { mode: 'human' } }]).length, 3,
+     '**機械が mode: human とだけ書いた行は3点で落ちる**（判定者・日付・根拠）');
+  eq(humanReviewProblems([{ id: 'h', owner_needed_review: { mode: 'human', reviewer: 'owner', reviewed_jst: '2026-10-01',
+     evidence: '2026-10-01、オーナーが「私が判断すべき件だった」と述べた' } }]), [], '道具が書く形は通る');
+  eq(humanReviewProblems([{ id: 'd', owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } }]), [],
+     '委任判定はこの検査の対象外（数えるかどうかは acceptedReview が決める）');
   eq(acceptedReview({ mode: 'human' }, { weights: P.weights }), false,
      '**方針が無いなら数えない**（既定で緩めない）');
 
