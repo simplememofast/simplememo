@@ -58,6 +58,8 @@
 
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
+import { deriveRoutineActions, routineResolved } from './lib/routine-actions.mjs';
+import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -108,6 +110,7 @@ export function daysBetween(a, b) {
 // （bq_checked:false を 0件 と書かないのと同じ規律）。
 
 export const CLOSE_CHECKS = {
+  routine_resolved: routineResolved,
   /** 対象の run が selfheal の未修理リストから消えたら閉じる。 */
   run_repaired({ run_id }, ctx) {
     // **判定できないときは閉じない。** selfheal の出力が取れていないのに
@@ -917,6 +920,9 @@ export function derive(ctx) {
     }
   }
 
+  // 実行の異常・未確定をセッションの調査キューへ運ぶ。制御操作はしない。
+  out.push(...deriveRoutineActions(ctx.routineDoc, { now: ctx.now }));
+
   // --- D6b: 副系の写しの鮮度 ---
   //
   // **CIが赤くなる前に、task として出す。**
@@ -1084,6 +1090,10 @@ export function merge(ledger, derived, today) {
           cur.created_jst = today;
           cur.evidence = null;
         }
+      }
+      if (cur.state === 'acknowledged' && d.source === 'routine-run'
+        && cur.close_check?.params?.episode !== d.close_check?.params?.episode) {
+        cur.state = 'done'; // below: reopen only a different observed execution/state
       }
       if (cur.state === 'done') {
         cur.state = 'open';
@@ -2476,6 +2486,105 @@ async function selftest() {
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
+  {
+    const observed_at = '2026-09-05T08:00:00Z', now = Date.parse(observed_at);
+    const row = { id: 'trig_test', name: 'Example', enabled: true, cron_expression: '0 7 * * *',
+      last_fired_at: '2026-09-05T07:00:00Z', last_run_fired_at: '2026-09-05T07:00:00Z',
+      last_run_finished_at: '2026-09-05T07:01:00Z', last_run_session_id: 'cse_failed',
+      last_run_status: 'FAILED', next_run_at: '2026-09-06T07:00:00Z' };
+    const doc = { observed_at, max_snapshot_age_days: 3, routines: [row], intentional_stops: [],
+      open_budget: 1, open_findings: [{ id: row.id, what: 'failed', found_at: '2026-09-05', why: 'Observed failure' }],
+      observation: { method: 'GET', endpoint: '/v1/code/triggers', include_last_run: true, has_more: false, pages: 1 } };
+    const get = d => derive({ routineDoc: d, now, today: '2026-09-05' }).filter(a => a.source === 'routine-run');
+    const action = get(doc)[0];
+    t('routine finding is actually wired into derive', get(doc).length === 1);
+    t('routine intake has no control handler or owner notification', action.auto === null
+      && classify(action, { self_repair: { may_modify: [] } }).owner === 'ai');
+    const ledger = { actions: [] };
+    merge(ledger, get(doc), '2026-09-05');
+    merge(ledger, get(doc), '2026-09-05');
+    t('repeated observations do not duplicate routine tasks', ledger.actions.length === 1);
+    reconcile(ledger, { routineDoc: doc, now, today: '2026-09-05' });
+    t('an open finding cannot close from fresh observation alone', ledger.actions[0].state === 'open');
+    ledger.actions[0].state = 'acknowledged';
+    merge(ledger, get(doc), '2026-09-05');
+    t('acknowledged execution stays acknowledged', ledger.actions[0].state === 'acknowledged');
+    const nextFault = structuredClone(doc);
+    nextFault.routines[0].last_run_fired_at = '2026-09-05T07:30:00Z';
+    nextFault.routines[0].last_run_session_id = 'cse_different';
+    merge(ledger, get(nextFault), '2026-09-05');
+    t('another execution reopens the existing investigation', ledger.actions[0].state === 'open' && ledger.actions.length === 1);
+    const unfired = structuredClone(doc);
+    Object.assign(unfired.routines[0], { last_fired_at: null, last_run_status: null,
+      last_run_fired_at: null, last_run_finished_at: null, last_run_session_id: null });
+    Object.assign(unfired.open_findings[0], { what: 'never_ran', tracked_due_at: '2026-09-05T10:00:00Z' });
+    t('first opportunity in the future is not an incident', get(unfired).length === 0);
+    unfired.open_findings[0].tracked_due_at = '2026-09-05T02:00:00Z';
+    t('existing six hour grace includes its boundary', get(unfired).length === 0);
+    unfired.open_findings[0].tracked_due_at = '2026-09-05T01:59:59Z';
+    t('advanced next_run cannot hide a missed tracked deadline', get(unfired).length === 1);
+    delete unfired.open_findings[0].tracked_due_at;
+    t('unknown first deadline requests investigation instead of assuming healthy', get(unfired).length === 1);
+    const pending = structuredClone(doc);
+    Object.assign(pending.routines[0], { last_run_status: 'PENDING', last_run_finished_at: null });
+    pending.open_findings[0].what = 'pending';
+    const pendingAction = get(pending)[0];
+    t('pending is routed as unknown, not failure', pendingAction.title.includes('実行結果を確認') && pendingAction.close_check.params.what === 'pending');
+    const badSnapshots = [null, { ...doc, observed_at: '2026-09-06T00:00:00Z' },
+      { ...doc, observed_at: '2026-09-01T00:00:00Z' }, { ...doc, routines: [] },
+      { ...doc, observation: { ...doc.observation, has_more: true } },
+      { ...doc, observation: { ...doc.observation, pages: 0 } },
+      { ...doc, observation: { ...doc.observation, endpoint: '/other' } }];
+    for (const bad of badSnapshots) {
+      t('invalid/stale/incomplete snapshots cannot close a routine task',
+        !routineResolved(action.close_check.params, { routineDoc: bad, now }).closed);
+    }
+    const complete = reconcileObservation(pending, { observed_at, pages: 1, complete: true,
+      records: [{ ...row, last_run_status: 'SUCCEEDED', last_run_finished_at: '2026-09-05T07:59:00Z' }] });
+    const resolved = d => CLOSE_CHECKS.routine_resolved(pendingAction.close_check.params, { routineDoc: d, now }).closed;
+    t('same pending session can close using real observer completion', resolved(complete));
+    t('completion of a different session cannot close the pending target',
+      !routineResolved({ ...pendingAction.close_check.params, session_id: 'cse_other_pending' }, { routineDoc: complete, now }).closed);
+    t('failed execution cannot be rewritten successful with the same fire',
+      !routineResolved(action.close_check.params, { routineDoc: complete, now }).closed);
+    for (const edit of [d => { d.closed_findings = []; }, d => { d.routines = []; },
+      d => { d.closed_findings[0].closed_at = '2026-09-05T07:59:00Z'; },
+      d => { d.closed_findings[0].evidence.last_run_session_id = 'cse_wrong'; },
+      d => { d.closed_findings[0].evidence.last_run_finished_at = null; },
+      d => { d.closed_findings[0].evidence.last_run_finished_at = '2026-09-05T08:01:00Z'; },
+      d => { d.closed_findings[0].evidence.last_run_finished_at = '2026-09-05T06:59:00Z'; }]) {
+      const bad = structuredClone(complete); edit(bad);
+      t('missing, stale, mismatched or invalid closure evidence stays open', !resolved(bad));
+    }
+    const recovery = reconcileObservation(doc, { observed_at, pages: 1, complete: true,
+      records: [{ ...row, last_run_status: 'SUCCEEDED', last_run_fired_at: '2026-09-05T07:30:00Z',
+        last_run_finished_at: '2026-09-05T07:59:00Z', last_run_session_id: 'cse_new' }] });
+    t('a later successful execution closes the prior failure investigation',
+      routineResolved(action.close_check.params, { routineDoc: recovery, now }).closed);
+    const stopped = structuredClone(doc);
+    stopped.routines[0].enabled = false; stopped.open_findings = []; stopped.open_budget = 0;
+    stopped.intentional_stops = [{ id: row.id, why: 'Replaced by another approved routine' }];
+    const retired = routineResolved(action.close_check.params, { routineDoc: stopped, now });
+    t('verified intentional stop closes without claiming recovery', retired.closed && retired.evidence.includes('復旧成功ではない'));
+    t('intentional stops are not routed for reactivation', get(stopped).length === 0);
+    const oneShot = structuredClone(pending);
+    Object.assign(oneShot.routines[0], { enabled: false, ended_reason: 'run_once_fired', run_once_at: row.last_fired_at, cron_expression: '' });
+    const onceAction = get(oneShot)[0];
+    const onceDone = reconcileObservation(oneShot, { observed_at, pages: 1, complete: true,
+      records: [{ ...oneShot.routines[0], last_run_status: 'SUCCEEDED', last_run_finished_at: '2026-09-05T07:59:00Z' }] });
+    onceDone.observation.ended_since_previous = [];
+    t('archived single-shot completion remains verifiable after the next snapshot',
+      routineResolved(onceAction.close_check.params, { routineDoc: onceDone, now }).closed);
+    const tracked = reconcileObservation(unfired, { observed_at, pages: 1, complete: true, records: unfired.routines });
+    const anchor = tracked.open_findings[0].tracked_due_at;
+    const shifted = reconcileObservation(tracked, { observed_at, pages: 1, complete: true,
+      records: [{ ...unfired.routines[0], next_run_at: '2026-09-07T07:00:00Z' }] });
+    t('observer preserves the original tracked deadline across next_run shifts', shifted.open_findings[0].tracked_due_at === anchor);
+    const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/autopilot-act.yml'), 'utf8');
+    t('routine snapshot push wakes Act on main', /push:\s*\n\s*branches: \[main\]\s*\n\s*paths: \['data\/routine-runs.json'\]/.test(workflow));
+    for (const prefix of ['日次アクチュエータの同期（', 'chore(autopilot): 日次アクチュエータの同期（'])
+      t('Act excludes its own snapshot publication from push wakeups', workflow.includes(`!startsWith(github.event.head_commit.message, '${prefix}')`));
+  }
   const observedRun = { id: 123, status: 'completed', conclusion: 'failure', event: 'schedule',
     created_at: '2026-09-04T00:00:00Z', jst_date: '2026-09-04',
     steps: [{ number: 3, name: 'Claude Code', conclusion: 'failure', started_at: '2026-09-04T00:01:00Z', completed_at: '2026-09-04T00:02:00Z' },

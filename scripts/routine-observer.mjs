@@ -120,6 +120,9 @@ export function reconcileObservation(previous, observation) {
         last_run_finished_at: row.last_run_finished_at, last_run_session_id: row.last_run_session_id,
         next_run_at: row.next_run_at };
       open.push({ ...prior, id: row.id, what, found_at: prior?.found_at ?? observation.observed_at.slice(0, 10),
+        ...(what === 'never_ran' ? { tracked_due_at: prior?.tracked_due_at
+          ?? prior?.observation?.next_run_at ?? previous.routines.find(r => r.id === row.id)?.next_run_at
+          ?? row.next_run_at ?? null } : {}),
         why: prior?.what === what ? prior.why : what === 'completion_unverified'
           ? '単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。'
           : what === 'pending'
@@ -150,7 +153,8 @@ export function reconcileObservation(previous, observation) {
       closed.push({ ...prior, closed_at: observation.observed_at,
         resolution: 'APIの実行状態がSUCCEEDEDに変わった。セッションの終了状態であり、出荷・投稿・依頼内容の達成を証明しない。',
         evidence: { last_run_fired_at: row.last_run_fired_at, last_run_finished_at: row.last_run_finished_at,
-          last_run_session_id: row.last_run_session_id } });
+          last_run_session_id: row.last_run_session_id, last_run_status: row.last_run_status,
+          ended_reason: row.ended_reason ?? '' } });
     }
   }
   // 予約の終了だけでは台帳から除かない。成功を照合できた単発だけを退役する。

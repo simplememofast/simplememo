@@ -525,6 +525,12 @@
       "expr": "priorRun.last_run_session_id",
       "disposition": "前提",
       "note": "2026-09-05: 同じPENDING実行の完了として閉じるための同一性条件。時刻またはsession IDが無い・違うとsamePendingRunは成立せず、別の新しい成功runが無ければ拒否する。単発APIがlast_runを省略しても状態履歴から直前の既知の実行を引き継ぐ。履歴引継ぎを外す変異では、別sessionの成功で閉じる誤りを自己検査が検出した。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "retired.closed",
+      "disposition": "報告のみ",
+      "note": "2026-09-05: 自己検査の真偽値。意図的停止が閉じたことと、復旧と呼ばない説明の両方を要求する。closed が欠ければ t が失敗するため、欠落で検査が消える条件ではない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
