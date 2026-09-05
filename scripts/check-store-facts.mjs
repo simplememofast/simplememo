@@ -126,6 +126,14 @@ export function validateOffline(doc, today = new Date()) {
   return { problems, rows };
 }
 
+/** Site display and sync_constants use one decimal; keep API precision out of the ledger. */
+export function displayRating(raw) {
+  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw < 0 || raw > 5) {
+    throw new Error('App Store averageUserRating is not a number between 0 and 5');
+  }
+  return Number(raw.toFixed(1));
+}
+
 async function fetchStore(country = 'jp') {
   const url = `https://itunes.apple.com/lookup?id=${APP_ID}&country=${country}`;
   const res = await fetch(url, { signal: AbortSignal.timeout(20_000) });
@@ -134,7 +142,8 @@ async function fetchStore(country = 'jp') {
   const r = json?.results?.[0];
   if (!r) throw new Error('results が空 — アプリが見つからない');
   return {
-    ratingValue: r.averageUserRating,
+    ratingValue: displayRating(r.averageUserRating),
+    rawRatingValue: r.averageUserRating,
     ratingCount: r.userRatingCount,
     appVersion: r.version,
   };
@@ -151,6 +160,15 @@ const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(CONSTANTS, 'utf8')),
   (d) => validateOffline(d).problems,
   SELFTEST_BREAKAGES,
+);
+SCENARIOS.push(
+  ['APIの4.24はサイトの4.2と一致する', () => assert(displayRating(4.24) === 4.2, 'raw precision leaked')],
+  ['平均の変化を一桁へ丸める', () => assert(displayRating(4.26) === 4.3, 'rounding failed')],
+  ['欠落した平均をゼロ扱いしない', () => {
+    let rejected = false;
+    try { displayRating(null); } catch { rejected = true; }
+    assert(rejected, 'missing rating accepted');
+  }],
 );
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
@@ -202,9 +220,11 @@ if (isMain) {
         doc.ratingCount = String(live.ratingCount);
         doc.appVersion = String(live.appVersion);
         doc.ratingNote = `Machine-verified from iTunes Lookup (jp) on ${today}. `
-          + `${doc.ratingNote || ''}`.slice(0, 900);
-        doc.appVersionNote = `Machine-verified from iTunes Lookup (jp) on ${today}. `
-          + `${doc.appVersionNote || ''}`.slice(0, 900);
+          + `Raw average ${live.rawRatingValue}, ${live.ratingCount} ratings; visible ratings and JSON-LD use the same one-decimal value ${live.ratingValue}. `
+          + 'Run node scripts/sync_constants.js --write after changing the ledger.';
+        doc.appVersionNote = `Machine-verified from iTunes Lookup (jp) on ${today}: public version ${live.appVersion}. `
+          + 'This is the publicly available storefront version, not a TestFlight build, a version waiting for review, or MARKETING_VERSION. '
+          + 'Re-check with node scripts/check-store-facts.mjs --net --write, then sync_constants.js --write.';
         fs.writeFileSync(CONSTANTS, `${JSON.stringify(doc, null, 2)}\n`);
         console.log('  台帳を更新した。**`node scripts/sync_constants.js --write` で'
           + 'ページのJSON-LDへ反映すること。**');

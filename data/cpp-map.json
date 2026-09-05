@@ -20,12 +20,13 @@
     "  ASCで1本ずつ確認すること（v4 R1）。",
     "- ppid を記入したら node scripts/apply-cpp-ppid.js --write → CI が --check で守る。",
     "- asc_state は『その ppid の CPP が ASC でどの状態か』の**記録された観測**。APPROVED 以外は Apple が既定商品ページへ倒すので、apply-cpp-ppid.js --check が落とす。取得は simplememo-ios の asc-cpp.yml --action list（鍵はあちらにしかない）。**ここは写しなので古くなる** —— 30日を越えると --check が notice を出す（落とはしない。CIはASCを読めない）。",
-    "Approval and visibility are independent. asc_visible must be the observed boolean true for every wired CPP. Hidden approved pages also fall back to the default page."
+    "Approval and visibility are independent. asc_visible must be the observed boolean true for every wired CPP. Hidden approved pages also fall back to the default page.",
+    "2026-09-05: Four explicit English paths are wired after reviewing the three approved en-US CPP destinations. Other English paths remain unchanged."
   ],
   "provider_token": "128498560",
   "updated": "2026-09-05",
   "asc_state_checked_jst": "2026-09-05",
-  "$asc_state_source": "ASC inventory run 33967344673, 2026-09-05T12:55:12Z. All 8 unique wired CPP IDs are APPROVED and visible=true. The observation is a snapshot, not a live API check. QR generation uses the same recorded APPROVED + visible=true condition.",
+  "$asc_state_source": "ASC detailed inventory run 33973026065, 2026-09-05T14:52:52Z. All 8 unique wired CPP IDs APPROVED and visible=true. Primary en-US destinations also reviewed on the public US web storefront.",
   "cpps": [
     {
       "id": "vs-notion",
@@ -66,10 +67,21 @@
       "ppid": "1408d7a4-3249-4c87-a079-e13032312579",
       "asc_state": "APPROVED",
       "match": [
-        "^/obsidian/"
+        "^/obsidian/",
+        "^/en/obsidian/"
       ],
       "note": "Obsidianハブ配下全ページ。最良コホート（設定済み新規の活性97.6%）の入口",
-      "asc_visible": true
+      "asc_visible": true,
+      "locale_evidence": {
+        "en-US": {
+          "approved_version_id": "2ed56774-5645-4aae-8b8f-8a2a2f55c215",
+          "first_image": "01-hero.png",
+          "first_image_reviewed": true,
+          "checked_at": "2026-09-05T14:53:32.665054+00:00",
+          "source": "App Store Connect approved version; English screenshot and promotional text inspected",
+          "public_storefront_checked": "US web storefront: ppid retained after canonical redirect; matching English first image visible on 2026-09-05"
+        }
+      }
     },
     {
       "id": "feat-siri-shortcuts",
@@ -78,10 +90,21 @@
       "asc_state": "APPROVED",
       "match": [
         "^/siri/",
-        "^/hands-free/"
+        "^/hands-free/",
+        "^/en/siri/"
       ],
       "note": "Siri・ハンズフリー系（8/18リリース受け皿を含む）",
-      "asc_visible": true
+      "asc_visible": true,
+      "locale_evidence": {
+        "en-US": {
+          "approved_version_id": "b71eff39-3eec-4095-89f6-47942728473d",
+          "first_image": "01-airpods-to-obsidian.png",
+          "first_image_reviewed": true,
+          "checked_at": "2026-09-05T14:53:32.665840+00:00",
+          "source": "App Store Connect approved version; English screenshot and promotional text inspected",
+          "public_storefront_checked": "US web storefront: ppid retained after canonical redirect; matching English first image visible on 2026-09-05"
+        }
+      }
     },
     {
       "id": "obsidian-voice",
@@ -89,10 +112,21 @@
       "ppid": "1408d7a4-3249-4c87-a079-e13032312579",
       "asc_state": "APPROVED",
       "match": [
-        "^/blog/obsidian-voice-input$"
+        "^/blog/obsidian-voice-input$",
+        "^/en/blog/obsidian-voice-input$"
       ],
       "note": "【2026-09-02 配線・オーナー委任の自律判断】サイト最高CTRページ（170imp/15clk/8.82%・順位5.4）だが match が ^/obsidian/ なので CPP 未配線だった。専用CPPは ASC に無い（作成はオーナーのみ可能）ため、同じ CPP が既に /obsidian/airpods/（音声ページ）を受けている obsidian-vault を流用する。『音声→自動追記』専用の CPP を ASC で作ったら、この行の asc_name / ppid だけ差し替える（match は変えない）。docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-C",
-      "asc_visible": true
+      "asc_visible": true,
+      "locale_evidence": {
+        "en-US": {
+          "approved_version_id": "2ed56774-5645-4aae-8b8f-8a2a2f55c215",
+          "first_image": "01-hero.png",
+          "first_image_reviewed": true,
+          "checked_at": "2026-09-05T14:53:32.665864+00:00",
+          "source": "App Store Connect approved version; English screenshot and promotional text inspected",
+          "public_storefront_checked": "US web storefront: ppid retained after canonical redirect; matching English first image visible on 2026-09-05"
+        }
+      }
     },
     {
       "id": "watch-capture",
@@ -111,10 +145,21 @@
       "ppid": "0dee88d1-7fcb-4ed8-b5cc-2b8ffa05f8ed",
       "asc_state": "APPROVED",
       "match": [
-        "^/note-to-email/"
+        "^/note-to-email/",
+        "^/en/note-to-email/"
       ],
       "note": "実測のある唯一のCPP: 15DL・CVR 5.42%＝デフォルト2.45%の2.2倍（n=15・90日）",
-      "asc_visible": true
+      "asc_visible": true,
+      "locale_evidence": {
+        "en-US": {
+          "approved_version_id": "fbbf1e38-c43f-4a83-a82e-f9cd3ca847ee",
+          "first_image": "01-send-to-yourself.png",
+          "first_image_reviewed": true,
+          "checked_at": "2026-09-05T14:53:32.665872+00:00",
+          "source": "App Store Connect approved version; English screenshot and promotional text inspected",
+          "public_storefront_checked": "US web storefront: ppid retained after canonical redirect; matching English first image visible on 2026-09-05"
+        }
+      }
     },
     {
       "id": "tiktok",
