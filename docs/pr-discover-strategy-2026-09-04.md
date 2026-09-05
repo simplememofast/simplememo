@@ -307,12 +307,24 @@ Discover は**興味関心のフィード**なので、効くのは
 | `simplememo-ios` #319（09:47Z） | `NotionManager.swift` 274行・`NotionSettingsViewController.swift`・`NotionIntegrationTests.swift` 222行・9言語・`docs/notion-v1.md` |
 | `simplememo-ios` #320（09:55Z） | `MARKETING_VERSION` 5.8.11 → **5.8.12** ＋ リリースノート ja/en |
 | `simplememo-api` #239 | `migrations/0032_notion.sql`・`src/notion.ts`・`src/notion-client.ts`・`docs/notion-release.md` |
-| **`GET /v1/notion/config`** | **`{"available":false}`**（HTTP 200・本番・10:0xZ） |
+| **`GET /v1/notion/config`** | 10:0xZ **`false`** → **14:31Z `true`**（本番・3回連続）。**サーバ側は有効化済み** |
 
 **マージされていることと、動いていることは別。**`docs/notion-release.md` が
 公開順を明示している —— D1 migration 0032 → Workers の `NOTION_*` → `NOTION_ENABLED=true`
-→ **実OAuthと保存の確認** → iOS配布。同ファイルは冒頭で
-「**実NotionアカウントとのOAuth・保存は未検証**」と自分で断っている。
+→ **実OAuthと保存の確認** → iOS配布。
+
+**同日 14:31Z、3つ目まで通った** —— `available` が `true` に変わった（3回連続で確認）。
+同ファイルが「設定不足は available=false」と定義しているので、**migration とシークレットと
+`NOTION_ENABLED` は揃った**と読める。
+
+**残りは2つ。どちらもこのセッションからは確かめられない。**
+
+| 残っているゲート | このセッションで測れるか |
+|---|---|
+| 実Notion公開connectionでの認可・保存の実機確認 | **観測手段が無い**（同ファイルが「未検証」と断っている状態から動いたかは不明） |
+| **App Store 公開** | **測れなかった。**台帳の公開版は **5.8.4**（オーナー確認・09-02）、Notion が入ったのは **5.8.12**（TestFlight）。`release.yml` は tag → Xcode Cloud → TestFlight までで App Review 提出は別オプトイン。`itunes.apple.com` が egress で 403 のため再確認できず |
+
+**「測れなかった」を「出ていない」と書かない。**
 
 ### 弾の選択に効くこと（**合計点で決めない**）
 
@@ -337,12 +349,65 @@ Discover は**興味関心のフィード**なので、効くのは
 
 ### 原稿に書けないこと
 
-**`available:false` のあいだは「Notion連携を提供開始」と書けない。**
+**「Notion連携を提供開始」と書けるのは、App Store の公開版がその機能を持ってからである。**
+`available:true`（14:31Z）はサーバ側が開いたことしか言わない —— **アプリ側の公開は別のゲート**で、
+台帳の公開版は 5.8.4、Notion は 5.8.12 に入っている。
 `docs/pr-action-router-launch-plan.md` §0 の「**受け皿ページを、機能が出る前に公開しない**」と同じ線で、
 5.8.12 のリリースノート自身も「接続設定の準備が整い次第、設定画面から利用できます」と書いている。
-残るのは設定・実OAuth確認・配布で、EventKitを新規に実装する候補とは工程が異なる。
-**完了までの日数は未確認**。訂正の取り込みと本番APIの再確認は
-`docs/pr-discover-handoff-2026-09-04.md` 冒頭の「取り残された訂正の再確認」に記録した。
+**ここは日単位のゲート**（migration・シークレット・実OAuth確認）で、EventKit の実装とは桁が違う。
+
+---
+
+### 4-3-3. [2026-09-05 実測] **公開版に載った。ただし「既定の保存先」ではなく「メールに足すコピー」だった**
+
+オーナーが App Store を読んだ —— **公開版は 5.8.17。**Notion が入ったのは 5.8.12 なので、
+**公開版はもう Notion を持っている。**サーバ側も `available:true`（09-04 14:31Z 以降）。
+**「新機能『Notion連携』を提供開始」と書ける最後のゲートは開いた。**
+
+**が、原稿の土台にする文書のほうが古い。**`simplememo-ios/docs/notion-v1.md` は #319 時点の設計で
+「**Notionは新しいメモの既定保存先になる**」「**メールの登録・認証は不要**」と書いているが、
+**出荷されたのは別の形**である（5.8.14 で変わった）。
+
+#### 出荷実態（`origin/main` のコードと文言で確認）
+
+`SendManager.send()` は**必ずメールの Outbox レコードを作ってから** `queueNotionCopy(...)` を呼ぶ。
+Notion は主系ではなく**コピー**である。宛先の決定は `ObsidianManager.swift:1244`:
+
+    NotionOnlyMode.isActive ? .notion : (ObsidianOnlyMode.isActive ? .obsidian : .email)
+
+| モード | 条件 | メール | Notion | Obsidian |
+|---|---|:-:|:-:|:-:|
+| **既定（無料）** | 両 Only が OFF | **送る** | 接続済みなら**コピー** | 有効なら**追記** |
+| **Notion のみ** | **Premium** ＋ 接続済み | 送らない | **主系** | **止まる**（`guard !NotionOnlyMode.isActive`） |
+| Obsidian のみ | 既存 | 送らない | — | 主系 |
+
+文言も一致する（`ja.lproj/Localizable.strings`）:
+
+    notion.email_copy   = "メール送信に加えてNotionにも保存します。"
+    notion.only.premium = "プレミアムにすると、メールを送らず Notion にだけ保存できます"
+
+さらに **5.8.17 で初回の宛先設定画面から「Notionに接続」を外した** ——
+Notion は設定画面から接続する。**新規ユーザーは初回導線で Notion に出会わない。**
+
+#### 原稿で書けること / 書けないこと
+
+| | |
+|---|---|
+| ✅ | 「新機能『Notion連携』を提供開始」／「話したメモが Notion の『SimpleMemo Inbox』にそのまま残る」／「Notionを開かずに追記できる」／「iPhone文字・音声・Siri・Watch が同じ経路」 |
+| ❌ | **「メール登録不要」**（前提。外せるのは Premium）／**「Notionが保存先になる」**（無料では両方に出る）／「Notionのみ」を無料機能として書くこと |
+
+**§6-1'' の見出し候補への影響:**
+
+- **A・C はそのまま使える**（どちらも「保存先が変わる」とは言っていない）
+- **B（「NotionとObsidianの両方へ同時に送信」）は、無料の既定では正しい** ——
+  両方設定済みなら**メール・Notion・Obsidian の3つに出る**。**ただし「Notionのみ」ON では
+  Obsidian が止まる**ので、Premium の説明と並べて書かない
+- **S4（変化）は当初の見立てより低く出る。**「置き換え」ではなく「追加コピー」だから。
+  **S1・S2（必要条件）は変わらない**
+
+> **⚠ `simplememo-ios/docs/notion-v1.md` はまだ直していない。**あれを読んで原稿を起こすと
+> 「メール登録不要でNotionへ」と書いてしまう。**直すのは ios 側の別作業**（あのブランチには
+> 別件の PR #315 が開いているので、混ぜていない）。
 
 ---
 

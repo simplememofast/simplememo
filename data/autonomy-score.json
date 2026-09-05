@@ -385,7 +385,25 @@
         "    \"evidence\": \"オーナーの承認の引用\", \"scope\": \"どの範囲まで\" }",
         "**ここに書けるのはオーナーだけ。**このファイルは self_repair.may_modify の外にあり、",
         "scripts/autonomy-score.mjs --check がそれを毎回確かめている。"
-      ]
+      ],
+      "ratification": {
+        "cadence": "monthly",
+        "decided_at": "2026-09-05",
+        "decided_by": "owner",
+        "evidence": "2026-09-05、EP 精度の判定を同日に『全面委任』した（上の delegations）うえで、人の関与を足すかを問う3択（委任のまま＋月1で人が追認／委任のまま／委任を取り消す）に対し、オーナーが『委任のまま＋月1で人が追認（推奨）』を選択。対話での明示判断（Claude Code セッション session_013C7zrtf3P369vK7dyRiZdF）。",
+        "procedure": [
+          "月1回、`owner_needed_review.mode` が `owner_delegated` で `ratified_from` を持たない行をオーナーが読む。",
+          "納得した行は `owner_needed_review` を `mode: \"human\"` / `reviewer: \"owner\"` / `reviewed_jst` に上書きし、元の AI 判定（mode / reviewer / reason / evidence_sha）を `ratified_from` に残す。",
+          "納得しない行は `owner_needed` を反転して同じ形で書く（判定を消さない。AI が『必要だった』と書いた行を人が『不要』に倒した記録が、判定者側の利害を測る材料になる）。",
+          "**点は変わらない**（委任で既に数えている）。変わるのは公開面の『人の判定は 0 件』の件数だけ。",
+          "起票と上書きの道具は PR-C（scripts/ep-ratify.mjs と日次アクチュエータの月次起票）。道具が入るまでは、人が同じ形を手で書く。"
+        ],
+        "$why_it_matters": [
+          "**全面委任は『スコアを上げるため』に行われた**（delegations の $why_it_matters）。委任のままだと、『必要だった』と判定するほど点が上がる向きの利害が判定者（AI）の側に残り、それを見張る人が居ない。",
+          "月1の追認は点を動かさない。**動かすのは『人の判定 0 件』という表示**で、追認が進めば公開面の注記が減り、追認で反転した件数が『AI の自己採点がどれだけ甘かったか』の実測になる。",
+          "取り消し（accepted_modes と delegations を戻す）は L4 の判断で、この欄は取り消しを縛らない。"
+        ]
+      }
     }
   },
   "ra": {
