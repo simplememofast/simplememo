@@ -315,40 +315,64 @@ function checkFile(filePath) {
   }
 }
 
-function checkSitemap() {
-  const sitemapPath = path.join(ROOT_DIR, 'sitemap.xml');
-  if (!fs.existsSync(sitemapPath)) {
-    errors.push('[SITEMAP] sitemap.xml not found');
-    return;
-  }
-
-  const content = fs.readFileSync(sitemapPath, 'utf8');
-  const urlMatches = content.match(/<loc>[^<]+<\/loc>/g) || [];
-  const urls = urlMatches.map(m => m.replace(/<\/?loc>/g, ''));
-
-  // Check for noindex pages in sitemap
-  for (const url of urls) {
-    const relativePath = url.replace(SITE_URL, '');
-    let filePath;
-
-    if (relativePath.endsWith('/')) {
-      filePath = path.join(ROOT_DIR, relativePath, 'index.html');
-    } else {
-      filePath = path.join(ROOT_DIR, relativePath + '.html');
-      if (!fs.existsSync(filePath)) {
-        filePath = path.join(ROOT_DIR, relativePath, 'index.html');
-      }
+function checkSitemap(rootDir = ROOT_DIR, { quiet = false } = {}) {
+  const seenMaps = new Set();
+  const urls = new Set();
+  const fail = (message) => errors.push(`[SITEMAP] ${message}`);
+  const decode = (value) => value.replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+  const localPath = (url) => {
+    try {
+      const parsed = new URL(url);
+      if (parsed.origin !== SITE_URL || parsed.search || parsed.hash) throw new Error('non-canonical origin/query/fragment');
+      const file = path.resolve(rootDir, '.' + decodeURIComponent(parsed.pathname));
+      if (file !== path.resolve(rootDir) && !file.startsWith(path.resolve(rootDir) + path.sep)) throw new Error('outside site root');
+      return file;
+    } catch (e) {
+      fail(`Invalid URL: ${url} (${e.message})`);
+      return null;
     }
-
-    if (fs.existsSync(filePath)) {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      if (/content\s*=\s*["'][^"']*noindex/i.test(fileContent)) {
-        errors.push(`[SITEMAP] Noindex page in sitemap: ${url}`);
+  };
+  const visit = (url) => {
+    if (seenMaps.has(url)) { fail(`Repeated or cyclic sitemap: ${url}`); return; }
+    seenMaps.add(url);
+    const file = localPath(url);
+    if (!file) return;
+    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) { fail(`Missing sitemap: ${url}`); return; }
+    const xml = fs.readFileSync(file, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+    const index = /<sitemapindex\b[^>]*>[\s\S]*<\/sitemapindex>/.test(xml);
+    if (!index && !/<urlset\b[^>]*>[\s\S]*<\/urlset>/.test(xml)) { fail(`Invalid sitemap root: ${url}`); return; }
+    const entries = [...xml.matchAll(index ? /<sitemap\b[^>]*>([\s\S]*?)<\/sitemap>/g : /<url\b[^>]*>([\s\S]*?)<\/url>/g)];
+    if (!entries.length) fail(`Empty sitemap: ${url}`);
+    for (const entry of entries) {
+      const locs = [...entry[1].matchAll(/<loc\b[^>]*>([^<]*)<\/loc>/g)];
+      if (locs.length !== 1 || !locs[0][1].trim()) { fail(`Entry needs one loc: ${url}`); continue; }
+      const loc = decode(locs[0][1].trim());
+      if (index) { visit(loc); continue; }
+      if (urls.has(loc)) { fail(`Duplicate page URL: ${loc}`); continue; }
+      urls.add(loc);
+      const base = localPath(loc);
+      if (!base) continue;
+      const candidates = loc.endsWith('/') ? [path.join(base, 'index.html')] : [base + '.html', path.join(base, 'index.html')];
+      const page = candidates.find((f) => fs.existsSync(f) && fs.statSync(f).isFile());
+      if (!page) { fail(`Missing page: ${loc}`); continue; }
+      const html = fs.readFileSync(page, 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+      for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+        if (['robots', 'googlebot'].some((name) => /\b(?:noindex|none)\b/i.test(getMetaContent(tag, 'name', name) || ''))) {
+          fail(`Noindex page in sitemap: ${loc}`);
+        }
       }
+      const canonicals = [];
+      for (const tag of html.match(/<link\b[^>]*>/gi) || []) {
+        const attrs = {};
+        for (const m of tag.matchAll(/([a-zA-Z:-]+)\s*=\s*("([^"]*)"|'([^']*)')/g)) attrs[m[1].toLowerCase()] = m[3] ?? m[4];
+        if ((attrs.rel || '').toLowerCase().split(/\s+/).includes('canonical')) canonicals.push(decode(attrs.href || ''));
+      }
+      if (canonicals.length !== 1 || canonicals[0] !== loc) fail(`Canonical differs from sitemap URL: ${loc}`);
     }
-  }
-
-  console.log(`  Sitemap: ${urls.length} URLs`);
+  };
+  visit(`${SITE_URL}/sitemap.xml`);
+  if (!quiet) console.log(`  Sitemap: ${urls.size} page URLs (${seenMaps.size} XML files)`);
 }
 
 function checkRobots() {
@@ -712,10 +736,46 @@ function runSelfTest() {
   const first = getMetaContent('<meta content="other" name="og:x"><meta content="wanted" name="description">', 'name', 'description');
   t('content を先に書いた meta でも正しい tag から読む', first === 'wanted');
 
+  // Exercise the actual recursive checker using an isolated site, including
+  // the noindex-in-child case that the old index-only scan silently skipped.
+  const mapDir = path.join(dir, 'site');
+  fs.mkdirSync(mapDir);
+  const indexXml = (loc) => `<sitemapindex><sitemap><loc>${SITE_URL}/${loc}</loc></sitemap></sitemapindex>`;
+  const urlXml = (entries) => `<urlset>${entries.map((u) => `<url><loc>${u}</loc></url>`).join('')}</urlset>`;
+  const target = `${SITE_URL}/sample`;
+  const validPage = `<link href="${target}" rel="canonical">`;
+  const sitemapReport = ({ body = validPage, entries = [target], index = indexXml('child.xml'), child = null } = {}) => {
+    fs.writeFileSync(path.join(mapDir, 'sitemap.xml'), index);
+    fs.writeFileSync(path.join(mapDir, 'child.xml'), child ?? urlXml(entries));
+    fs.writeFileSync(path.join(mapDir, 'sample.html'), body);
+    errors.length = 0;
+    checkSitemap(mapDir, { quiet: true });
+    const result = [...errors];
+    errors.length = 0;
+    return result;
+  };
+  const sitemapTests = [
+    ['valid child sitemap passes', () => sitemapReport().length === 0],
+    ['child noindex fails regardless of meta attribute order', () => sitemapReport({ body: validPage + '<meta content="noindex,follow" name="robots">' }).some((e) => e.includes('Noindex'))],
+    ['googlebot none fails', () => sitemapReport({ body: validPage + '<meta name="googlebot" content="none">' }).some((e) => e.includes('Noindex'))],
+    ['unrelated description mentioning noindex passes', () => sitemapReport({ body: validPage + '<meta name="description" content="noindex explained">' }).length === 0],
+    ['missing page fails', () => sitemapReport({ entries: [`${SITE_URL}/missing`] }).some((e) => e.includes('Missing page'))],
+    ['duplicate page fails', () => sitemapReport({ entries: [target, target] }).some((e) => e.includes('Duplicate'))],
+    ['canonical mismatch fails', () => sitemapReport({ body: validPage.replace('/sample', '/other') }).some((e) => e.includes('Canonical'))],
+    ['missing canonical fails', () => sitemapReport({ body: '<h1>Example</h1>' }).some((e) => e.includes('Canonical'))],
+    ['missing child fails', () => sitemapReport({ index: indexXml('missing.xml') }).some((e) => e.includes('Missing sitemap'))],
+    ['cycle fails without recursion loop', () => sitemapReport({ child: indexXml('sitemap.xml') }).some((e) => e.includes('cyclic'))],
+    ['foreign sitemap fails', () => sitemapReport({ index: indexXml('child.xml').replace(SITE_URL, 'https://example.org') }).some((e) => e.includes('Invalid URL'))],
+    ['nested index passes', () => { fs.writeFileSync(path.join(mapDir, 'leaf.xml'), urlXml([target])); return sitemapReport({ child: indexXml('leaf.xml') }).length === 0; }],
+    ['homepage resolves to root index.html', () => { fs.writeFileSync(path.join(mapDir, 'index.html'), `<link rel="canonical" href="${SITE_URL}/">`); return sitemapReport({ entries: [`${SITE_URL}/`] }).length === 0; }],
+    ['urlset root also passes', () => sitemapReport({ index: urlXml([target]) }).length === 0],
+  ];
+  for (const [name, check] of sitemapTests) t(`[SITEMAP] ${name}`, check());
+
   fs.rmSync(dir, { recursive: true, force: true });
 
   failures.forEach((f) => console.error(`  ✗ ${f}`));
-  console.log(`自己テスト 12 件中 ${failures.length} 件失敗`);
+  console.log(`自己テスト 26 件中 ${failures.length} 件失敗`);
   process.exit(failures.length ? 1 : 0);
 }
 
