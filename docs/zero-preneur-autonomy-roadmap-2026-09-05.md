@@ -513,6 +513,38 @@ main から2コミット先（claim + 宣言）のままで、`--retire` も引�
   契約が必須になった時点から効き始めた**構造的な穴**であって、今日たまたま出た事故ではない
 - **反証条件:** `"sitemap-*.xml"` を content に足しても新規URLの候補が不適格なら、原因は別にある
 
+#### **オーナー判断（新規・7-11）: 宣言より前の「記帳」が decision-ci を落とす**
+
+**PR #969 は CI も赤で、原因は boundedness とは別。**`decision-ci` が `implementation preceded
+declaration` で exit 1 になっている。詰まりが2つ重なっているので、片方だけ直しても main には入らない。
+
+`verifyHistory`（`value-contracts.mjs`）は「宣言ファイルを足したコミットまでに、**宣言ファイル以外の
+差分が1つでもあれば落とす**」。実測した差分:
+
+```
+    data/autopilot-actions.json                              ← **これ1件だけが原因**
+    data/decision-intents/skip-lane-e-maintenance-20260906.json
+    data/decision-rejections/obsidian-compare-capacities-20260906{,b,c,d}.json
+```
+
+犯人は `chore(autopilot): health-intake last_seen 更新（act-health-883）` の**1行**（`last_seen` の
+書き換え）。候補を選ぶ前の定型の記帳で、**候補の実装ではない。**
+
+- **claim コミットは無罪。**空コミットなので差分を持たず、この規則には当たらない（実測）
+- `data/autopilot-actions.json` は宣言**後**に許される `metadata` の一覧にも入っていない。
+  つまりこのファイルは前後どちらでも `touches` に書かない限り通らない
+
+**直し方の候補（どれを取るかは人の判断）:**
+
+| # | 直し方 | 効き方 |
+|---|---|---|
+| A | **Runbook の順序を変える** —— 記帳を宣言の**後**へ回す | **門を1ミリも緩めない。**「宣言してから他に触る」という規則そのものに合わせる。候補選定が記帳を読む必要があるなら取れない |
+| B | 宣言前の許可リストに `data/autopilot-actions.json` を足す | 1ファイルだけ緩める。記帳は候補の実装ではないので筋は通る |
+| C | 宣言後の `metadata` 一式を宣言前にも許す | **取らないほうがよい。**`autopilot/index.html`（公開ページ）が入っており、宣言前に公開面を触れることになる |
+
+**A が本命。**門は「宣言してから触る」と言っていて、run の手順のほうがそれに従っていない。
+**規則を run に合わせるのではなく、run を規則に合わせる。**
+
 #### 併せて 09-05 に確定したこと
 
 - **D8（#938）が本番で初起票した。**`act-ep-ratification-2026-09`（open・未追認20件・`force_owner: human`・
