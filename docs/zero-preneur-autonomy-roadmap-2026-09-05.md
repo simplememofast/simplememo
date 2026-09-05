@@ -450,6 +450,79 @@ VISION の究極 KPI（Zero-decision Capture Rate）を tier A に入れられ�
 - **穴が1つ確定した。**`readClaim` は差分ファイル数 > 0 を「作業あり」とみなすので、**契約だけ積んで死んだ占有は90分ルールで引き継がれない。**同じ run_id の契約は再利用できない（`boundRun` が main の失敗行と衝突する）ため、引き継ぎ側は旧契約を `data/decision-rejections/` へ移して新IDで再宣言する必要がある。**契約の中止コマンドは無い。**→ PR-B で門と手順を直す（オーナー判断 A）。
 - **仮説（未検証）:** 落ちたのは週次枠ではなくセッション枠（5時間窓）で、07:20〜08:10 JST に同じアカウントで走っていた対話セッション（このロードマップの調査）と重なっている。セッション単位の消費は観測できないので因果は言えない。**主系の起動帯（07:45〜08:15 JST）に重い対話セッションを置かない**のが安い緩和策。
 
+### 段2の実走2回目（2026-09-06）— 契約フローは6周した。**出荷は境界の穴で止まった**
+
+```
+    07:37 JST頃  主系（schedule）が当日ブランチ claude/obsidian-auto-20260906 を claim
+                 レーンE先頭の C09（/obsidian/compare/capacities/）に着手し、ページ本体まで実装
+    ——           価値契約を4回宣言して4回とも取り下げた（touches の確定が回るたびに広がった）
+                   obsidian-compare-capacities-20260906   → retire
+                   obsidian-compare-capacities-20260906b  → retire（compareハブの表記更新を追加）
+                   obsidian-compare-capacities-20260906c  → retire（同上・再宣言）
+                   obsidian-compare-capacities-20260906d  → retire（sitemap分割ファイルを追加）
+                 最終的に skip-lane-e-maintenance-20260906 を宣言（保守のみ）
+    08:19:45 JST PR #969 を作成（docs/data のみ・公開HTMLの変更なし）
+    08:22:58 JST Claude Code ステップが 45.2分 走ったところで failed（run 33996430959）
+                 ジョブの timeout は90分なので**これはタイムアウトではない。**資格情報は
+                 切り分けステップが通しており、残る候補は --model 解決 / MCP / プロンプト / 上流の版
+```
+
+**`--retire`（PR-B・#933）が本番で初めて動いた。**ただし**作った理由とは違う用途**で —— 設計したのは
+「死んだ占有を引き継ぐとき、旧契約を取り下げて新IDで再宣言する」経路だったが、実際に効いたのは
+**同一セッション内で touches の見積もりが足りないと分かるたびに宣言し直す**使い方だった。
+4回とも `data/decision-rejections/`（stage: execution）に残っている。**門は通ったが、通り方が違う。**
+
+**09-05 の死んだ契約は、引き継がれないまま残った。**`claude/obsidian-auto-20260905` は
+main から2コミット先（claim + 宣言）のままで、`--retire` も引き継ぎも起きていない。
+理由は単純で、**翌日の run は当日ブランチが変わるので前日のブランチを見に行かない。**
+#933 が直したのは「同じ日のうちに再試行が塞がれる」ほうだけだった。
+
+#### 記録が2つあって食い違っている（どちらも同じ run 33996430959）
+
+| どこ | source | outcome | stage | PR |
+|---|---|---|---|---|
+| 当日ブランチ（未マージ） | `session` | **shipped** | — | 969 |
+| main | `act-reconcile-session` | **failed** | execution | null |
+
+セッションは自分の仕事を終えて `shipped` と書き、その後にステップが落ちた。
+アクチュエータはステップの結末から `failed` を導いた。**どちらも嘘ではなく、測っているものが違う** ——
+前者は「成果物を出したか」、後者は「run が完走したか」。**台帳は後者を採る**（機械の導出が正）。
+成果物は PR #969 に残っているので失われてはいない。**ここを手で `shipped` に直さない** ——
+自己申告で失敗を消す操作そのものになる。
+
+#### **オーナー判断（新規・7-10）: boundedness の content スコープに分割 sitemap が無い**
+
+**これが今日の出荷を止めた原因で、放置すると新規URLを伴う出荷が全件止まる。**
+
+`data/eligibility-policy.json` の `criteria.boundedness.scopes.content` は `sitemap.xml` を通すが、
+`generate_sitemap.py` が同時に書き換える **`sitemap-ja.xml` / `sitemap-en.xml` / `sitemap-locales.xml`
+の3本が入っていない。**新規URLを1本足すと必ずこの3本に触るので、boundedness が落ちる。
+
+実測（`fitScope` に実際の touches を通した）:
+
+```
+    新規URL1本の候補   → scope: null    outside: [sitemap-ja.xml, sitemap-en.xml, sitemap-locales.xml]
+    分割sitemapを除く   → scope: content outside: []          ← 対照
+```
+
+**AI はこのファイルを書き換えない**（L4・`self_repair.may_modify` の外）。だから主系は今日、
+**実装を終えたページを出荷せずに捨てた。**門は設計どおり fail-closed に働いており、壊れてはいない。
+足りないのは**許可リストの1行**で、それを足せるのは人だけ。
+
+- **穴の性質:** 8月までの出荷は L2 契約を通っていなかったので露出しなかった。09-04 に指標が承認されて
+  契約が必須になった時点から効き始めた**構造的な穴**であって、今日たまたま出た事故ではない
+- **反証条件:** `"sitemap-*.xml"` を content に足しても新規URLの候補が不適格なら、原因は別にある
+
+#### 併せて 09-05 に確定したこと
+
+- **D8（#938）が本番で初起票した。**`act-ep-ratification-2026-09`（open・未追認20件・`force_owner: human`・
+  閉じ条件 `ep_ratified_or_window`・14日窓）。PR 本文の「初回の行は次の日次 run で立つ」という予測どおり。
+  **門を作った日ではなく、通った日の記録。**追認の道具は `node scripts/ep-ratify.mjs --list`
+- auto-merge が 403 でワークフロー変更を拒む条件を blob で測り直して訂正した（#945・詳細は `CLAUDE.md`）。
+  最初に書いた「新しい内容だから」は誤りで、書かれる blob は両方とも同じ
+- 資格情報台帳の穴（ASC Individual Key 2件）を塞ぎ、その穴が CI から構造的に見えない件を
+  `act-credentials-check-blind-in-ci` として運転台帳に残した（#952）
+
 ## 8. この戦略が失敗する条件（空欄にして「考えていない」と読ませないために）
 
 設計ノート §5 に、この文書で足した3つを加える。
