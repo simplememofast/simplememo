@@ -194,6 +194,38 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
  *               **検知だけで既に超えていれば配達も超えている。**片側検定として成立する
  *   precision … 上げたうち本当に必要だった割合。**いまは測れない**（owner_needed が空）
  */
+/**
+ * その判定を採点に数えてよいか。**純関数。**
+ *
+ * 欄が埋まっていることは、人が判定したことを意味しない。
+ * `data/autopilot-actions.json` は `self_repair.may_modify` の中にあり、機械が書ける ——
+ * 実際 2026-09-05 に、AI が自分のエスカレーション19件を `owner_delegated` として自己評価し、
+ * 精度が 0 → 3.9 点に動いていた。**その委任の記録は、オーナー所有の台帳に1件も無かった。**
+ *
+ * **判定そのものは消さない。採点から外すだけ。**オーナーが委任を認めた時点で
+ * `ep.precision_review.delegations` に1行足せば、遡って数え直される。
+ */
+export function acceptedReview(review, policy) {
+  const p = policy?.ep?.precision_review;
+  if (!p) return false;            // 方針が無いなら数えない（既定で緩めない）
+  const mode = review?.mode;
+  if (!mode) return false;         // **誰が判定したか分からない欄は数えない**
+  if ((p.accepted_modes ?? []).includes(mode)) return true;
+  return (p.delegations ?? []).some((d) => d.mode === mode && d.reviewer === review.reviewer);
+}
+
+/** 数えなかった理由を、件数つきでまとめる。**「数えなかった」を黙って消さない。** */
+export function uncountedReasons(uncounted, policy) {
+  const out = new Map();
+  for (const a of uncounted) {
+    const r = a.owner_needed_review;
+    const key = !r?.mode ? '判定者の記録が無い'
+      : `${r.mode}${r.reviewer ? `/${r.reviewer}` : ''} は委任の記録が無い`;
+    out.set(key, (out.get(key) ?? 0) + 1);
+  }
+  return [...out].map(([k, n]) => `${k}: ${n}件`);
+}
+
 export function ep(runs, policy, { rules, actions }) {
   const half = policy.weights.ep / 2;
   const within = (r) => {
@@ -206,11 +238,16 @@ export function ep(runs, policy, { rules, actions }) {
   const missPoints = missRate === null ? 0 : half * (1 - missRate);
 
   const escalated = (actions.actions || []).filter((a) => a.force_owner === 'human' || a.state === 'acknowledged');
-  const judged = escalated.filter((a) => typeof a.owner_needed === 'boolean');
-  const needed = judged.filter((a) => a.owner_needed);
-  const delegated = judged.filter((a) => a.owner_needed_review?.mode === 'owner_delegated').length;
-  const precRate = judged.length ? needed.length / judged.length : null;
+  const filled = escalated.filter((a) => typeof a.owner_needed === 'boolean');
+  // **誰が判定したかで数えるかどうかを決める。**欄が埋まっていることは、
+  // 人が判定したことを意味しない —— 2026-09-05 に実測で出た穴で、
+  // アクション台帳（機械が書ける）に AI の自己評価が19件入り、精度が 0 → 3.9 点に動いた。
+  const counted = filled.filter((a) => acceptedReview(a.owner_needed_review, policy));
+  const uncounted = filled.filter((a) => !acceptedReview(a.owner_needed_review, policy));
+  const needed = counted.filter((a) => a.owner_needed);
+  const precRate = counted.length ? needed.length / counted.length : null;
   const precPoints = precRate === null ? 0 : half * precRate;
+  const judged = counted;   // 表示の互換のため（数えた件数＝判定として採用した件数）
 
   return {
     id: 'ep',
@@ -218,9 +255,15 @@ export function ep(runs, policy, { rules, actions }) {
             measurable: timed.length > 0,
             why: timed.length ? '**下界のみ**（検知の時刻までしか台帳に無い。配達時刻は持っていない）'
                               : '窓内に時刻を持つ故障が無い' },
-    precision: { rate: precRate, n: escalated.length, judged: judged.length, delegated, points: precPoints, max: half,
-                 measurable: judged.length > 0,
-                 why: delegated ? `${judged.length}/${escalated.length} 判定済み（うち${delegated}件はオーナー委任に基づくAI評価。独立した人間評価ではない）` : judged.length ? null
+    precision: { rate: precRate, n: escalated.length, filled: filled.length, judged: counted.length,
+                 uncounted: uncounted.length, points: precPoints, max: half,
+                 measurable: counted.length > 0,
+                 why: uncounted.length
+                   ? `${filled.length}/${escalated.length} に判定が入っているが、**${uncounted.length}件は採点しない**`
+                     + `（${uncountedReasons(uncounted, policy).join(' / ')}）。`
+                     + `**記録の無い委任は、自己付与と見分けがつかない。**`
+                     + `data/autonomy-score.json の ep.precision_review.delegations にオーナーが1行足せば数え直される`
+                   : counted.length ? null
                    : `オーナーへ上げた ${escalated.length} 件に owner_needed が1件も入っていない — **上げたのが正しかったかを、この台帳は言えない**` },
     rate: (missPoints + precPoints) / policy.weights.ep,
     max: policy.weights.ep, points: missPoints + precPoints,
@@ -456,6 +499,25 @@ export function check(s, policy, { blindness = [] } = {}) {
     }
   }
   if (s.total > s.max) problems.push(`合計 ${s.total} が満点 ${s.max} を超えている`);
+  // **ep() が緩められたときに鳴る側。**生の台帳から数え直して照合する。
+  //
+  // **「2枚目の扉」と書きかけて、変異試験で外れた。**この照合は acceptedReview() を
+  // ep() と共有しているので、**判定そのものを潰すと両方いっしょに黙る**（実測）。
+  // 独立に効くのは「ep() の絞り込みだけを外した」場合で、そのときはここが名指しで落ちる（実測）。
+  // acceptedReview() 自体を潰した場合に鳴るのは自己テストのほう（2件が名指しで落ちる）。
+  // **どちらが何を守っているかを混ぜない。**
+  if (fs.existsSync(ACTIONS_PATH)) {
+    const acts = readJson(ACTIONS_PATH).actions ?? [];
+    const esc = acts.filter((a) => a.force_owner === 'human' || a.state === 'acknowledged');
+    const ok = esc.filter((a) => typeof a.owner_needed === 'boolean'
+      && acceptedReview(a.owner_needed_review, policy)).length;
+    if (s.components.ep?.precision?.judged !== ok) {
+      problems.push(`EP の精度が数えた件数（${s.components.ep?.precision?.judged}）が、`
+        + `台帳から数え直した採用件数（${ok}）と一致しない`
+        + ' — **AIが自分のエスカレーションを自分で採点していないか。**'
+        + '委任を認めるなら data/autonomy-score.json の ep.precision_review.delegations に書く');
+    }
+  }
   // L2 の前提台帳。**VDC が動く条件そのもの**なので、同じ検査で見る。
   if (fs.existsSync(METRICS_PATH)) problems.push(...validateMetrics(readJson(METRICS_PATH), policy));
   return problems;
@@ -481,6 +543,7 @@ function selftest() {
                    coverage_non_regression: { enabled: true }, failure_rate_excluded: true },
     tuc: { target_ships_per_week: 7 },
     ra: { machine_detection_sources: ['act-reconcile'] },
+    ep: { precision_review: { accepted_modes: ['human'], delegations: [] } },
   };
   const ship = (id, over = {}) => ({ run_id: id, date_jst: '2026-09-01', outcome: 'shipped', lane: 'E', action: 'new', interventions: [], ...over });
 
@@ -551,15 +614,44 @@ function selftest() {
   eq(ep([], P, { rules, actions: { actions: [] } }).miss.points, 0, '時刻を持つ故障が無ければ0（満点にしない）');
   eq(ep([quick], P, { rules, actions: { actions: [] } }).precision.points, 0,
      '**owner_needed が空なら精度は0点**（測れないことを満点にしない）');
-  const acts = { actions: [{ force_owner: 'human', owner_needed: true }, { force_owner: 'human', owner_needed: false }] };
-  eq(ep([quick], P, { rules, actions: acts }).precision.points, 3.75, '半分が本当に必要だったなら半分');
-  const delegatedActs = { actions: acts.actions.map(a => ({ ...a,
-    owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) };
-  const delegatedPrecision = ep([quick], P, { rules, actions: delegatedActs }).precision;
-  eq(delegatedPrecision.points, 3.75, '委任しても必要・不要の判定比率は変えない');
-  eq(delegatedPrecision.delegated, 2, '委任によるAI評価の件数を区別する');
-  eq(delegatedPrecision.why.includes('独立した人間評価ではない'), true, '委任を独立した人間評価と表示しない');
+  // **誰が判定したかで数えるかどうかが決まる。**欄が埋まっていることは、人が判定したことではない。
+  const hum = (m) => ({ mode: 'human', reviewed_jst: '2026-09-05', ...m });
+  const acts = { actions: [
+    { force_owner: 'human', owner_needed: true, owner_needed_review: hum() },
+    { force_owner: 'human', owner_needed: false, owner_needed_review: hum() }] };
+  eq(ep([quick], P, { rules, actions: acts }).precision.points, 3.75, '人が判定していれば、半分が必要なら半分');
   eq(ep([quick], P, { rules, actions: acts }).points, 11.25, '2つの半分を足す');
+
+  // **記録の無い委任は数えない。**2026-09-05 に実データで開いていた穴。
+  const delegatedActs = { actions: acts.actions.map((a) => ({ ...a,
+    owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) };
+  const dp = ep([quick], P, { rules, actions: delegatedActs }).precision;
+  eq(dp.points, 0, '**委任の記録が無ければ0点**（AIが自分のエスカレーションを自分で採点しない）');
+  eq(dp.uncounted, 2, '数えなかった件数を出す');
+  eq(dp.filled, 2, '**欄が埋まっている件数は別に出す**（消さない・見えなくしない）');
+  eq(dp.why.includes('委任の記録が無い'), true, '理由を名指しする');
+
+  // 判定者の記録が無い欄も数えない —— 機械が埋めたのと見分けがつかない
+  const bare = { actions: [{ force_owner: 'human', owner_needed: true }] };
+  eq(ep([quick], P, { rules, actions: bare }).precision.points, 0,
+     '**`owner_needed` だけ埋まっていて判定者の記録が無い行は数えない**');
+  eq(ep([quick], P, { rules, actions: bare }).precision.why.includes('判定者の記録が無い'), true,
+     '理由を分けて出す（委任の記録が無いのとは別の穴）');
+
+  // **オーナーが委任を認めれば、遡って数え直される。**判定を消していないので戻せる。
+  const withDelegation = { ...P, ep: { ...P.ep, precision_review: {
+    accepted_modes: ['human'],
+    delegations: [{ mode: 'owner_delegated', reviewer: 'codex', delegated_at: '2026-09-05' }] } } };
+  eq(ep([quick], withDelegation, { rules, actions: delegatedActs }).precision.points, 3.75,
+     '委任が台帳に入れば数える');
+  eq(ep([quick], withDelegation, { rules, actions: { actions: delegatedActs.actions.map((a) => ({ ...a,
+       owner_needed_review: { mode: 'owner_delegated', reviewer: '別のだれか' } })) } }).precision.points, 0,
+     '**委任した相手だけ**（reviewer が違えば数えない）');
+  eq(acceptedReview({ mode: 'human' }, P), true, '既定で人の判定は数える');
+  eq(acceptedReview({ mode: 'owner_delegated', reviewer: 'codex' }, P), false, '既定で委任は数えない');
+  eq(acceptedReview(undefined, P), false, '判定者の記録が無ければ数えない');
+  eq(acceptedReview({ mode: 'human' }, { weights: P.weights }), false,
+     '**方針が無いなら数えない**（既定で緩めない）');
 
   // --- TUC ---
   const w7 = { days: 7 };
@@ -706,7 +798,7 @@ function render(s) {
   L.push(`  エスカレーション精度 EP ${pts(c.ep.points, c.ep.max)}`);
   L.push(`      見逃し ${pts(c.ep.miss.points, c.ep.miss.max)}  ${c.ep.miss.rate === null ? 'n/a' : `遅延 ${c.ep.miss.late}/${c.ep.miss.n}`}`);
   L.push(`             ${c.ep.miss.why}`);
-  L.push(`      精度   ${pts(c.ep.precision.points, c.ep.precision.max)}  ${c.ep.precision.why ?? `${c.ep.precision.judged}/${c.ep.precision.n} 判定済み`}`);
+  L.push(`      精度   ${pts(c.ep.precision.points, c.ep.precision.max)}  ${c.ep.precision.why ?? `${c.ep.precision.judged}/${c.ep.precision.n} 判定済み（人の判定）`}`);
   L.push(`  制約下スループット TUC  ${pts(c.tuc.points, c.tuc.max)}   週 ${c.tuc.per_week.toFixed(1)} 出荷 / 目標 ${c.tuc.target}`);
   L.push(`\n  検査被覆率  ${s.coverage.demonstrated}/${s.coverage.total} 本が「壊すと落ちる」ことを実測済み`);
   L.push(`  ${s.excluded.failure_rate}`);

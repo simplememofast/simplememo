@@ -46,7 +46,6 @@
     "**単日の率では何も決めない**（simplememo-api の日次運転規律）と同じ理由で、",
     "週次の率でも決めない。台帳が28日に満たない間は全期間を使い、その旨を出力に書く。"
   ],
-
   "weights": {
     "vdc": 30,
     "umr": 25,
@@ -54,7 +53,6 @@
     "ep": 15,
     "tuc": 10
   },
-
   "reversibility": {
     "$comment": [
       "**可逆性クラス。権限表の reversible（真偽値）とは別物で、こちらのほうが細かい。**",
@@ -65,11 +63,19 @@
       "**二値と3段階は、実際に食い違う。**その食い違いは domain_class の conflict 欄に名指しで書いてある。",
       "黙って片方へ寄せない。"
     ],
-    "R0": { "weight": 1, "label": "単一の revert で戻る" },
-    "R1": { "weight": 3, "label": "戻せるが手間がかかる（索引された公開URL・配信済みビルド）" },
-    "R2": { "weight": 10, "label": "不可逆（審査提出・価格・ユーザーデータ・外部への送信）" }
+    "R0": {
+      "weight": 1,
+      "label": "単一の revert で戻る"
+    },
+    "R1": {
+      "weight": 3,
+      "label": "戻せるが手間がかかる（索引された公開URL・配信済みビルド）"
+    },
+    "R2": {
+      "weight": 10,
+      "label": "不可逆（審査提出・価格・ユーザーデータ・外部への送信）"
+    }
   },
-
   "r2_blocks_execution": true,
   "$r2_note": [
     "**R2 は例外なく L4 へエスカレーションし、ループは触らない。**",
@@ -79,47 +85,176 @@
     "**1周動いたのを見てから停止側へ倒す。**（『門を作った日ではなく、門を通って",
     "何かが動いた日に動いたと書く』— docs/autonomy-95-gap.md の規律）"
   ],
-
   "domain_class": [
-    { "domain": "サイトコンテンツの新設・更新", "class": "R1", "matrix_reversible": true,
+    {
+      "domain": "サイトコンテンツの新設・更新",
+      "class": "R1",
+      "matrix_reversible": true,
       "why": "**新設は R1、更新は R0。**新しい公開URLは索引されるので、revert しても検索結果には残り 404 になる。既存ページの更新は revert で完全に戻る。lane_action_class で action の値によって分ける",
-      "conflict": null, "reviewed_by": null },
-    { "domain": "サイト構造の変更（URL・リダイレクト・実験中ページ）", "class": "R1", "matrix_reversible": false,
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "サイト構造の変更（URL・リダイレクト・実験中ページ）",
+      "class": "R1",
+      "matrix_reversible": false,
       "why": "リダイレクトは戻せるが、索引が追随するまで時間がかかる。権限表は不可逆側に置いているが、**技術的には戻る**ので R2 ではない",
-      "conflict": "権限表は reversible: false。こちらは R1（戻せるが手間がかかる）。**権限表のほうが厳しく、そちらが実効**（requires_approval: true）", "reviewed_by": null },
-    { "domain": "アプリのビルド・TestFlight内部配信", "class": "R1", "matrix_reversible": true,
+      "conflict": "権限表は reversible: false。こちらは R1（戻せるが手間がかかる）。**権限表のほうが厳しく、そちらが実効**（requires_approval: true）",
+      "reviewed_by": null
+    },
+    {
+      "domain": "アプリのビルド・TestFlight内部配信",
+      "class": "R1",
+      "matrix_reversible": true,
       "why": "**ビルド番号は再利用できない。**配信そのものは撤回できるが、番号は焼ける",
-      "conflict": null, "reviewed_by": null },
-    { "domain": "macOSランナーの起動（GitHub Actions 分数の消費）", "class": "R2", "matrix_reversible": false,
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "macOSランナーの起動（GitHub Actions 分数の消費）",
+      "class": "R2",
+      "matrix_reversible": false,
       "why": "**支出は取り消せない。**1回約 $10.40（2026-08 実測）",
-      "conflict": null, "reviewed_by": null },
-    { "domain": "App Review への提出", "class": "R2", "matrix_reversible": false, "why": "Apple 側の記録が残る", "conflict": null, "reviewed_by": null },
-    { "domain": "App Store への公開（審査通過後）", "class": "R2", "matrix_reversible": false, "why": "ユーザーの端末に届く", "conflict": null, "reviewed_by": null },
-    { "domain": "価格・プラン・無料枠の変更", "class": "R2", "matrix_reversible": false, "why": "既存契約者の条件に影響する", "conflict": null, "reviewed_by": null },
-    { "domain": "AI実費（開発・運用のトークン費）", "class": "R2", "matrix_reversible": true,
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "App Review への提出",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "Apple 側の記録が残る",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "App Store への公開（審査通過後）",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "ユーザーの端末に届く",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "価格・プラン・無料枠の変更",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "既存契約者の条件に影響する",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "AI実費（開発・運用のトークン費）",
+      "class": "R2",
+      "matrix_reversible": true,
       "why": "**使ったトークン代は返ってこない。**権限表が reversible: true と書いているのは『上限を下げれば止まる』の意味であって、支出そのものは戻らない",
-      "conflict": "権限表は reversible: true。**支出は不可逆**なので R2。ただし requires_approval: false（上限内での消費は渡してある）ままなので、L1 の R2 停止は月次上限の範囲内では発火しない —— domain_class は UMR の重み付けにだけ効く", "reviewed_by": null },
-    { "domain": "広告出稿・広告予算の変更", "class": "R2", "matrix_reversible": false, "why": "支出", "conflict": null, "reviewed_by": null },
-    { "domain": "契約・支払い・送金", "class": "R2", "matrix_reversible": false, "why": "相手方がいる", "conflict": null, "reviewed_by": null },
-    { "domain": "プレスリリースの配信", "class": "R2", "matrix_reversible": false, "why": "外部への送信", "conflict": null, "reviewed_by": null },
-    { "domain": "SNS投稿（X・TikTok）", "class": "R2", "matrix_reversible": true,
+      "conflict": "権限表は reversible: true。**支出は不可逆**なので R2。ただし requires_approval: false（上限内での消費は渡してある）ままなので、L1 の R2 停止は月次上限の範囲内では発火しない —— domain_class は UMR の重み付けにだけ効く",
+      "reviewed_by": null
+    },
+    {
+      "domain": "広告出稿・広告予算の変更",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "支出",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "契約・支払い・送金",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "相手方がいる",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "プレスリリースの配信",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "外部への送信",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "SNS投稿（X・TikTok）",
+      "class": "R2",
+      "matrix_reversible": true,
       "why": "**外部への送信は R2。**削除できても、届いた先からは消えない",
-      "conflict": "権限表は reversible: true（消せる）で requires_approval: false。**設計ノートの定義では外部送信は不可逆。**この行は現に AI が無検査で実行している領域なので、UMR では R2 の重み（10）で数える —— つまりSNS投稿は UMR を最も大きく動かす。オーナーが権限表側を変えるか、この分類を変えるかは L4 の判断", "reviewed_by": null },
-    { "domain": "ユーザーデータの削除（アプリ内の自己削除）", "class": "R2", "matrix_reversible": false, "why": "ユーザーデータ", "conflict": null, "reviewed_by": null },
-    { "domain": "ユーザーデータの削除要求への対応（個別の連絡）", "class": "R2", "matrix_reversible": false, "why": "ユーザーデータ", "conflict": null, "reviewed_by": null },
-    { "domain": "個人情報事故・法的請求・重大障害・炎上", "class": "R2", "matrix_reversible": false, "why": "対外的な帰責", "conflict": null, "reviewed_by": null },
-    { "domain": "段階公開の撤回（カナリアガード）", "class": "R0", "matrix_reversible": true,
+      "conflict": "権限表は reversible: true（消せる）で requires_approval: false。**設計ノートの定義では外部送信は不可逆。**この行は現に AI が無検査で実行している領域なので、UMR では R2 の重み（10）で数える —— つまりSNS投稿は UMR を最も大きく動かす。オーナーが権限表側を変えるか、この分類を変えるかは L4 の判断",
+      "reviewed_by": null
+    },
+    {
+      "domain": "ユーザーデータの削除（アプリ内の自己削除）",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "ユーザーデータ",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "ユーザーデータの削除要求への対応（個別の連絡）",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "ユーザーデータ",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "個人情報事故・法的請求・重大障害・炎上",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "対外的な帰責",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "段階公開の撤回（カナリアガード）",
+      "class": "R0",
+      "matrix_reversible": true,
       "why": "**撤回は元に戻す操作そのもの。**安全側なので R0",
-      "conflict": null, "reviewed_by": null },
-    { "domain": "段階公開の拡大（rollout の引き上げ）", "class": "R1", "matrix_reversible": false,
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "段階公開の拡大（rollout の引き上げ）",
+      "class": "R1",
+      "matrix_reversible": false,
       "why": "下げられるが、上げた間に配信された端末は戻らない",
-      "conflict": "権限表は reversible: false。**下げる操作は存在する**ので R1", "reviewed_by": null },
-    { "domain": "問い合わせへの自動回答（承認済みテンプレート）", "class": "R2", "matrix_reversible": false, "why": "外部への送信（メール）", "conflict": null, "reviewed_by": null },
-    { "domain": "App Store レビュー返信の投稿", "class": "R2", "matrix_reversible": false, "why": "外部への送信（公開される）", "conflict": null, "reviewed_by": null },
-    { "domain": "運転台帳の取り残し（マージ後に取り残されたコミット）の始末", "class": "R0", "matrix_reversible": true, "why": "台帳の追記。revert で戻る", "conflict": null, "reviewed_by": null },
-    { "domain": "App Store の商品ページ（カスタムプロダクトページ）の作成・削除", "class": "R1", "matrix_reversible": false, "why": "差し替えられるが審査が挟まる", "conflict": null, "reviewed_by": null }
+      "conflict": "権限表は reversible: false。**下げる操作は存在する**ので R1",
+      "reviewed_by": null
+    },
+    {
+      "domain": "問い合わせへの自動回答（承認済みテンプレート）",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "外部への送信（メール）",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "App Store レビュー返信の投稿",
+      "class": "R2",
+      "matrix_reversible": false,
+      "why": "外部への送信（公開される）",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "運転台帳の取り残し（マージ後に取り残されたコミット）の始末",
+      "class": "R0",
+      "matrix_reversible": true,
+      "why": "台帳の追記。revert で戻る",
+      "conflict": null,
+      "reviewed_by": null
+    },
+    {
+      "domain": "App Store の商品ページ（カスタムプロダクトページ）の作成・削除",
+      "class": "R1",
+      "matrix_reversible": false,
+      "why": "差し替えられるが審査が挟まる",
+      "conflict": null,
+      "reviewed_by": null
+    }
   ],
-
   "lane_action_class": {
     "$comment": [
       "運転台帳の行から可逆性クラスを引く表。**lane と action の組で決まる。**",
@@ -128,16 +263,33 @@
     ],
     "default": "R1",
     "by_lane": {
-      "A": { "new": "R1", "refresh": "R0" },
-      "B": { "new": "R1", "refresh": "R0" },
-      "C": { "new": "R1", "refresh": "R0" },
-      "D": { "new": "R1", "refresh": "R0" },
-      "E": { "new": "R1", "refresh": "R0" },
-      "F": { "new": "R0", "refresh": "R0" }
+      "A": {
+        "new": "R1",
+        "refresh": "R0"
+      },
+      "B": {
+        "new": "R1",
+        "refresh": "R0"
+      },
+      "C": {
+        "new": "R1",
+        "refresh": "R0"
+      },
+      "D": {
+        "new": "R1",
+        "refresh": "R0"
+      },
+      "E": {
+        "new": "R1",
+        "refresh": "R0"
+      },
+      "F": {
+        "new": "R0",
+        "refresh": "R0"
+      }
     },
     "$f_note": "レーンF は scripts / ワークフロー / 台帳しか触らない（authority_matrix.self_repair.may_modify）。単一の revert で戻るので new でも R0"
   },
-
   "anti_gaming": {
     "coverage_non_regression": {
       "enabled": true,
@@ -160,12 +312,10 @@
       "$note": "日次runのプロンプト経路が data/autonomy-score.json / scripts/autonomy-score.mjs を読んでいたら --check が落ちる。**計器を最適化対象にしない。**"
     }
   },
-
   "tuc": {
     "target_ships_per_week": 7,
     "$note": "1日1出荷が満点。ロードマップの cadence 目標（Phase 6 で1日2run以上）はまだ先なので、いまの設計上限をそのまま置く。**止まっているのに安全だから満点、という状態を作らないための成分**なので、上限を上げるのは cadence を上げてから"
   },
-
   "ep": {
     "rule_source": "data/escalation-rules.json",
     "precision_field": "owner_needed",
@@ -176,9 +326,47 @@
       "  precision … 上げたうち本当に必要だった割合。**いまは測れない** ——",
       "              アクション台帳に『人が要ったか』の欄が無い。owner_needed を足したので、",
       "              以後オーナー送りのアクションを閉じるときに埋まる。埋まるまでこの半分は0点"
-    ]
+    ],
+    "precision_review": {
+      "$comment": [
+        "**「上げたのが正しかったか」を誰が判定してよいか。L4＝人間の持ち分。**",
+        "",
+        "【なぜ要るか】2026-09-05 に実測で出た穴。EP の精度側は `owner_needed` が入った件数で",
+        "採点していたが、**その欄を機械が埋められる。**実際、アクション台帳の 19 件が",
+        "`owner_needed_review.mode: \"owner_delegated\"` / `reviewer: \"codex\"` で埋まり、",
+        "精度が 0 → 3.9 点に動いた。**AI が自分のエスカレーションを自分で採点した点数。**",
+        "",
+        "**委任そのものの記録がどこにも無い。**`owner_delegated` という語は",
+        "`data/autopilot-actions.json`（`self_repair.may_modify` の中＝機械が書ける）と",
+        "読む側のスクリプトにしか存在せず、権限表にも承認台帳にも1件も無い。",
+        "**記録の無い委任は、自己付与と見分けがつかない。**",
+        "",
+        "対比として、`data/value-metrics.json` の指標承認は同じ日に",
+        "`approved_by: \"owner\"` ＋ オーナー発話の引用（approval_evidence）を持っている。",
+        "**あちらは人の承認を主張しており、こちらは主張していない。**その差がここの線。",
+        "",
+        "【直し方】判定を消さない。**採点から外すだけ。**",
+        "レビューの中身（reason / evidence_sha）は残るので、オーナーが委任を認めた時点で",
+        "delegations に1行足せば、遡って数え直される。",
+        "",
+        "【accepted_modes】`owner_needed_review.mode` がこの一覧にあるものだけ数える。",
+        "**review 欄そのものが無い行も数えない** —— 誰が判定したか分からない欄は、",
+        "機械が埋めたのと見分けがつかない（この穴が開いていた期間がまさにそれ）。"
+      ],
+      "accepted_modes": [
+        "human"
+      ],
+      "delegations": [],
+      "$delegations_note": [
+        "オーナーが判定を委任した相手。空＝誰にも委任していない。",
+        "1件ずつ、いつ・誰に・どこまでを書く。形は:",
+        "  { \"mode\": \"owner_delegated\", \"reviewer\": \"<名前>\", \"delegated_at\": \"YYYY-MM-DD\",",
+        "    \"evidence\": \"オーナーの承認の引用\", \"scope\": \"どの範囲まで\" }",
+        "**ここに書けるのはオーナーだけ。**このファイルは self_repair.may_modify の外にあり、",
+        "scripts/autonomy-score.mjs --check がそれを毎回確かめている。"
+      ]
+    }
   },
-
   "ra": {
     "$note": [
       "復旧自律性も2つに割る。設計ノートの定義は『悪い結果をシステム自身が検知し、人手なしで巻き戻した割合』だが、",
@@ -189,10 +377,12 @@
       "**Phase 6 のハードゲートは RA の点数ではなく auto_revert_count >= 1 に紐づける。**",
       "点で代替すると、検知だけで20点満点に近づいて『巻き戻せる』ことになってしまう"
     ],
-    "machine_detection_sources": ["act-reconcile", "act-selfheal"],
+    "machine_detection_sources": [
+      "act-reconcile",
+      "act-selfheal"
+    ],
     "$machine_detection_note": "**`act-reconcile-session` は入れない。**あれは人が起こしたセッションが reconcile を回した形で、機械が自分で気づいたのとは違う。2026-08-27〜29 の3日連続 skipped_gate は、まさに『セッションが手で起こすまで4日目まで誰も気づいていない』の実例"
   },
-
   "vdc": {
     "$note": [
       "**L2（価値契約）が入るまで、この成分は構造的に 0 点。**空欄にしない ——",
