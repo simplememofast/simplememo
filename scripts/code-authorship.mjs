@@ -21,7 +21,7 @@
  * 台帳（data/code-authorship.json）は**この script の出力そのもの**。
  *
  * 【定義（ここが全部）】
- * - 対象コミット … 指定窓の author date。**マージコミットは除く**
+ * - 対象コミット … 指定窓の author date（JSTの開始日00:00〜終了日翌日00:00未満）。**マージコミットは除く**
  *   （マージは差分の重複計上になり、率を上げる方向に効く）
  * - AI著者 … `author` に Claude / Codex を含む、または本文に `Co-Authored-By: Claude` / `Co-Authored-By: Codex`、
  *   または本文に Claude Code の足跡（`Generated with [Claude Code]` / セッション URL / `Claude-Session:`）— 定義 v3（2026-09-04）
@@ -52,7 +52,9 @@ const REPOS = ['simplememo', 'simplememo-api', 'simplememo-ios'];
 const AI_AUTHOR = /claude|\bcodex\b/i;
 const AI_TRAILER = /^Co-Authored-By:[ \t]*(?:Claude|Codex(?:[ \t<]|$))/im;
 export const AUTHOR_METHOD = {
-  definition_version: 3,
+  definition_version: 4,
+  date_basis: 'author date (%aI)',
+  date_window: 'Asia/Tokyo: from 00:00:00 inclusive through the day after to 00:00:00 exclusive',
   ai_author_definition: 'author に Claude / Codex を含む、または本文に Co-Authored-By: Claude / Co-Authored-By: Codex、または本文に Claude Code の足跡（Generated with [Claude Code] / claude.ai/code/session / Claude-Session:）。定義 v3（2026-09-04。v2 に Codex の署名とトレーラーを追加）',
 };
 /**
@@ -73,11 +75,18 @@ export function isAiAuthoredCommit({ author = '', body = '' }) {
 /** 1リポジトリを数える。git が無い・リポジトリが無い場合は null（0ではない）。 */
 export function measureRepo(repoPath, { from, to, allBranches = false }) {
   if (!fs.existsSync(path.join(repoPath, '.git'))) return null;
+  const validDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value ?? '')
+    && Number.isFinite(Date.parse(`${value}T00:00:00Z`))
+    && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+  if (!validDate(from) || !validDate(to) || from > to) throw new Error('from/to must be ordered calendar dates');
+  const start = Date.parse(`${from}T00:00:00+09:00`);
+  const end = Date.parse(`${to}T00:00:00+09:00`) + 86400000;
   const range = allBranches ? ['--all'] : ['HEAD'];
+  // Git's date-only --since inherits the execution time of day and filters committer
+  // dates. Read author timestamps explicitly, without pruning non-monotonic history.
   const args = [
     'log', ...range, '--no-merges',
-    `--since=${from}`, `--until=${to} 23:59:59`,
-    '--pretty=format:%H%x01%an <%ae>%x01%B%x02',
+    '--pretty=format:%H%x01%an <%ae>%x01%aI%x01%B%x02',
   ];
   let out;
   try {
@@ -86,9 +95,9 @@ export function measureRepo(repoPath, { from, to, allBranches = false }) {
     return null;
   }
   const commits = out.split('\x02').map((c) => c.trim()).filter(Boolean).map((c) => {
-    const [sha, author, body] = c.split('\x01');
-    return { sha, author: author || '', body: body || '' };
-  });
+    const [sha, author, authoredAt, ...body] = c.split('\x01');
+    return { sha, author: author || '', authoredAt: Date.parse(authoredAt), body: body.join('\x01') };
+  }).filter(c => c.authoredAt >= start && c.authoredAt < end);
   // --all は同じコミットを複数の参照から拾いうる。**SHAで一意にする**
   // （ここを忘れると率が上がる方向に狂う）。
   const seen = new Set();
@@ -273,6 +282,36 @@ const SCENARIOS = [...ledgerScenarios(
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  }],
+  ['JSTの暦日全体をauthor dateで数え、committer dateと実行時刻に依存しない', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'authorship-dates-'));
+    try {
+      const env = { ...process.env, GIT_AUTHOR_NAME: 'Alice', GIT_AUTHOR_EMAIL: 'alice@example.com',
+        GIT_COMMITTER_NAME: 'Alice', GIT_COMMITTER_EMAIL: 'alice@example.com' };
+      const git = (args, dates = {}) => execFileSync('git', args, { cwd: dir, env: { ...env, ...dates }, stdio: 'pipe' });
+      git(['init', '-q']);
+      const dates = [
+        ['2026-08-31T14:59:59Z', '2026-09-01T06:00:00Z'], // before the JST day
+        ['2026-08-31T15:00:00Z', '2026-09-01T06:00:00Z'], // inclusive start
+        ['2026-09-01T14:59:59Z', '2026-09-01T06:00:00Z'], // last second
+        ['2026-09-01T15:00:00Z', '2026-09-01T06:00:00Z'], // next day, excluded
+        ['2026-09-01T06:00:00Z', '2030-01-01T00:00:00Z'], // author is inside, committer outside
+        ['2026-08-30T06:00:00Z', '2026-09-01T06:00:00Z'], // author outside, committer inside
+      ];
+      for (const [i, [author, committer]] of dates.entries()) {
+        fs.writeFileSync(path.join(dir, `${i}.txt`), 'one line\n');
+        git(['add', `${i}.txt`]);
+        git(['-c', 'commit.gpgsign=false', 'commit', '-qm', `fixture ${i}`],
+          { GIT_AUTHOR_DATE: author, GIT_COMMITTER_DATE: committer });
+      }
+      const got = measureRepo(dir, { from: '2026-09-01', to: '2026-09-01' });
+      assert(got.commits_total === 3 && got.lines_total === 3 && got.commits_ai === 0, JSON.stringify(got));
+      for (const [from, to] of [['2026-02-30', '2026-09-01'], ['2026-09-02', '2026-09-01']]) {
+        let rejected = false;
+        try { measureRepo(dir, { from, to }); } catch { rejected = true; }
+        assert(rejected, 'invalid date window must not be counted');
+      }
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
   }],
 ];
 

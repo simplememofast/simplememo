@@ -41,6 +41,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { selftest as cronRecoverySelftest } from './lib/cron-recovery.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const LEDGER_PATH = path.join(ROOT, 'data/autopilot-actions.json');
@@ -53,7 +54,7 @@ export const HEALTH_LABELS = {
   },
   'ops/cron-failure': {
     domain: null,
-    what: '定期実行が失敗している',
+    what: '定期実行の失敗または起動欠落がある',
   },
 };
 
@@ -155,7 +156,7 @@ export async function fetchOpenIssues({ repo = REPO, token = process.env.GH_TOKE
 }
 
 export async function selftest() {
-  const p = [];
+  const p = await cronRecoverySelftest();
   const eq = (got, want, msg) => { if (got !== want) p.push(`${msg}（got ${JSON.stringify(got)}）`); };
 
   const iss = { number: 42, state: 'open', title: '出荷が2日止まっている', labels: [{ name: 'ops/autopilot-stale' }] };

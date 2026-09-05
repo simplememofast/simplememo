@@ -57,6 +57,9 @@
  */
 
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
+import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
+import { deriveRoutineActions, routineResolved } from './lib/routine-actions.mjs';
+import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -107,6 +110,7 @@ export function daysBetween(a, b) {
 // （bq_checked:false を 0件 と書かないのと同じ規律）。
 
 export const CLOSE_CHECKS = {
+  routine_resolved: routineResolved,
   /** 対象の run が selfheal の未修理リストから消えたら閉じる。 */
   run_repaired({ run_id }, ctx) {
     // **判定できないときは閉じない。** selfheal の出力が取れていないのに
@@ -916,6 +920,9 @@ export function derive(ctx) {
     }
   }
 
+  // 実行の異常・未確定をセッションの調査キューへ運ぶ。制御操作はしない。
+  out.push(...deriveRoutineActions(ctx.routineDoc, { now: ctx.now }));
+
   // --- D6b: 副系の写しの鮮度 ---
   //
   // **CIが赤くなる前に、task として出す。**
@@ -1083,6 +1090,10 @@ export function merge(ledger, derived, today) {
           cur.created_jst = today;
           cur.evidence = null;
         }
+      }
+      if (cur.state === 'acknowledged' && d.source === 'routine-run'
+        && cur.close_check?.params?.episode !== d.close_check?.params?.episode) {
+        cur.state = 'done'; // below: reopen only a different observed execution/state
       }
       if (cur.state === 'done') {
         cur.state = 'open';
@@ -1666,7 +1677,7 @@ async function fetchWorkflowRuns(repo, token, limit = 30) {
     try {
       const jr = await fetch(`https://api.github.com/repos/${repo}/actions/runs/${r.id}/jobs`,
         { headers, signal: AbortSignal.timeout(20_000) });
-      if (jr.ok) steps = ((await jr.json()).jobs ?? [])[0]?.steps ?? null;
+      if (jr.ok) steps = primarySteps((await jr.json()).jobs ?? []);
     } catch { /* step が読めなくても run 自体は記録する */ }
     out.push({
       id: r.id,
@@ -1896,6 +1907,17 @@ export function interpretRun(run) {
       };
     }
 
+    if (step('資格情報の診断は判定不能')?.conclusion === 'failure') {
+      return {
+        outcome: 'failed', attempted: true,
+        failure_class: immediate ? 'immediate_failure' : null,
+        needs_triage: true,
+        failure_reason: `Claude Code ステップが ${ms ?? '不明'}ms で失敗。`
+          + '単独実行から資格情報の可否を判定できなかった。通信・サービス・CLIを含めて原因を確認する。'
+          + '資格情報の交換が必要とは断定できない（診断は判定不能）。',
+      };
+    }
+
     if (probe?.conclusion === 'failure') {
       return {
         outcome: 'failed', attempted: true,
@@ -1964,7 +1986,7 @@ export function interpretRun(run) {
 // 見えなくなる（このファイル冒頭に書いた「壊れているときほど記録が消える」の再来）。
 
 /** GitHub の失敗ステップの完了時刻だけを使う。run の作成時刻は故障時刻ではない。 */
-export function detectionEvidence(run, eventName, now = new Date()) {
+export function detectionEvidence(run, eventName, now = new Date(), completion = null) {
   const detectedAt = now.toISOString();
   const completedFailure = run.status === 'completed' && ['failure', 'cancelled'].includes(run.conclusion);
   const failures = completedFailure ? (run.steps ?? []).filter(step =>
@@ -1976,10 +1998,12 @@ export function detectionEvidence(run, eventName, now = new Date()) {
   failures.sort((a, b) => Date.parse(a.completed_at) - Date.parse(b.completed_at));
   const failure = failures[0];
   return {
-    source: ['schedule', 'workflow_run'].includes(eventName) ? 'act-reconcile' : 'act-reconcile-session',
+    source: (completion ? completion.automatic === true
+      : ['schedule', 'workflow_run'].includes(eventName)) ? 'act-reconcile' : 'act-reconcile-session',
     detected_at: detectedAt,
     failed_at: failure?.completed_at ?? null,
     detected_note: `Actions run ${run.id} を ${eventName || 'local-session'} で照合。`
+      + (completion ? `監視起動元run ${completion.upstream_run_id}、自動起動のAPI検証=${completion.automatic}。` : '')
       + (failure ? `失敗時刻は GitHub step #${failure.number}「${failure.name}」の completed_at。`
         : '失敗ステップの確定時刻は未取得。run の作成時刻で代用しない。'),
   };
@@ -1994,9 +2018,13 @@ export const HANDLERS = {
     [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
     if (!ctx.workflowRuns) return { ok: false, changed: 0, log: 'Actions API を読めず同期できない' };
     const known = new Set((ctx.runsDoc?.runs ?? []).map((r) => String(r.external_ref ?? '')));
+    const taken = new Set((ctx.runsDoc?.runs ?? []).map((r) => r.run_id));
     const log = [];
     let changed = 0;
-    for (const run of ctx.workflowRuns) {
+    // The API lists newest first. A later manual skip must not take the day's id
+    // before the failed scheduled run (or collide with another append in this batch).
+    const chronological = [...ctx.workflowRuns].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
+    for (const run of chronological) {
       if (known.has(String(run.id))) continue;
       const v = interpretRun(run);
       if (!v) { log.push(`${run.id}: まだ完了していない`); continue; }
@@ -2008,14 +2036,13 @@ export const HANDLERS = {
       // ——external_ref と重複するが、**run_id は人が読む識別子**なので
       // 日付と経路が先頭に残る形を保つ。
       let runId = `ap-${run.jst_date.replace(/-/g, '')}-actions`;
-      const taken = new Set((ctx.runsDoc?.runs ?? []).map((r) => r.run_id));
       if (taken.has(runId)) runId = `${runId}-${run.id}`;
       if (taken.has(runId)) { log.push(`${run.id}: ${runId} が既にある`); continue; }
       // shipped は PR 番号が要る（validate が落とす）。PRの特定は機械には荷が重いので
       // **成功した回は書かない**。書かないことで指標が甘くなることは無い
       //（shipped を落とすと完走率は下がる側に倒れる）。
       if (v.outcome === 'shipped') { log.push(`${run.id}: 成功回はPR特定が要るため自動追記しない`); continue; }
-      const observation = detectionEvidence(run, ctx.eventName);
+      const observation = detectionEvidence(run, ctx.eventName, new Date(), ctx.completion);
       const args = ['--append', '--run-id', runId, '--date', run.jst_date, '--route', 'actions',
         '--outcome', v.outcome, '--attempted', String(v.attempted),
         '--external-ref', String(run.id), '--source', observation.source];
@@ -2037,6 +2064,8 @@ export const HANDLERS = {
       if (observation.failed_at) args.push('--failed-at', observation.failed_at);
       try {
         const out = append(args);
+        taken.add(runId);
+        known.add(String(run.id));
         log.push(`${run.id} -> ${runId}: ${out.trim()}`);
         changed += 1;
       } catch (e) {
@@ -2343,9 +2372,9 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   if (jr.status === 404 || jr.status === 410) return { state: 'gone', why: `jobs が HTTP ${jr.status}（run ごと消えている）` };
   if (!jr.ok) return { state: 'unreadable', why: `jobs が HTTP ${jr.status}` };
   let jobId;
-  try { jobId = ((await jr.json()).jobs ?? [])[0]?.id; }
+  try { jobId = primaryJob((await jr.json()).jobs ?? [])?.id; }
   catch (e) { return { state: 'unreadable', why: `jobs の応答を読めない: ${String(e).slice(0, 80)}` }; }
-  if (!jobId) return { state: 'gone', why: 'run にジョブが無い' };
+  if (!jobId) return { state: 'unreadable', why: '主系のジョブを特定できず実費を読めない' };
   let lr;
   try {
     lr = await fetchImpl(`https://api.github.com/repos/${repo}/actions/jobs/${jobId}/logs`,
@@ -2457,6 +2486,105 @@ async function selftest() {
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
+  {
+    const observed_at = '2026-09-05T08:00:00Z', now = Date.parse(observed_at);
+    const row = { id: 'trig_test', name: 'Example', enabled: true, cron_expression: '0 7 * * *',
+      last_fired_at: '2026-09-05T07:00:00Z', last_run_fired_at: '2026-09-05T07:00:00Z',
+      last_run_finished_at: '2026-09-05T07:01:00Z', last_run_session_id: 'cse_failed',
+      last_run_status: 'FAILED', next_run_at: '2026-09-06T07:00:00Z' };
+    const doc = { observed_at, max_snapshot_age_days: 3, routines: [row], intentional_stops: [],
+      open_budget: 1, open_findings: [{ id: row.id, what: 'failed', found_at: '2026-09-05', why: 'Observed failure' }],
+      observation: { method: 'GET', endpoint: '/v1/code/triggers', include_last_run: true, has_more: false, pages: 1 } };
+    const get = d => derive({ routineDoc: d, now, today: '2026-09-05' }).filter(a => a.source === 'routine-run');
+    const action = get(doc)[0];
+    t('routine finding is actually wired into derive', get(doc).length === 1);
+    t('routine intake has no control handler or owner notification', action.auto === null
+      && classify(action, { self_repair: { may_modify: [] } }).owner === 'ai');
+    const ledger = { actions: [] };
+    merge(ledger, get(doc), '2026-09-05');
+    merge(ledger, get(doc), '2026-09-05');
+    t('repeated observations do not duplicate routine tasks', ledger.actions.length === 1);
+    reconcile(ledger, { routineDoc: doc, now, today: '2026-09-05' });
+    t('an open finding cannot close from fresh observation alone', ledger.actions[0].state === 'open');
+    ledger.actions[0].state = 'acknowledged';
+    merge(ledger, get(doc), '2026-09-05');
+    t('acknowledged execution stays acknowledged', ledger.actions[0].state === 'acknowledged');
+    const nextFault = structuredClone(doc);
+    nextFault.routines[0].last_run_fired_at = '2026-09-05T07:30:00Z';
+    nextFault.routines[0].last_run_session_id = 'cse_different';
+    merge(ledger, get(nextFault), '2026-09-05');
+    t('another execution reopens the existing investigation', ledger.actions[0].state === 'open' && ledger.actions.length === 1);
+    const unfired = structuredClone(doc);
+    Object.assign(unfired.routines[0], { last_fired_at: null, last_run_status: null,
+      last_run_fired_at: null, last_run_finished_at: null, last_run_session_id: null });
+    Object.assign(unfired.open_findings[0], { what: 'never_ran', tracked_due_at: '2026-09-05T10:00:00Z' });
+    t('first opportunity in the future is not an incident', get(unfired).length === 0);
+    unfired.open_findings[0].tracked_due_at = '2026-09-05T02:00:00Z';
+    t('existing six hour grace includes its boundary', get(unfired).length === 0);
+    unfired.open_findings[0].tracked_due_at = '2026-09-05T01:59:59Z';
+    t('advanced next_run cannot hide a missed tracked deadline', get(unfired).length === 1);
+    delete unfired.open_findings[0].tracked_due_at;
+    t('unknown first deadline requests investigation instead of assuming healthy', get(unfired).length === 1);
+    const pending = structuredClone(doc);
+    Object.assign(pending.routines[0], { last_run_status: 'PENDING', last_run_finished_at: null });
+    pending.open_findings[0].what = 'pending';
+    const pendingAction = get(pending)[0];
+    t('pending is routed as unknown, not failure', pendingAction.title.includes('実行結果を確認') && pendingAction.close_check.params.what === 'pending');
+    const badSnapshots = [null, { ...doc, observed_at: '2026-09-06T00:00:00Z' },
+      { ...doc, observed_at: '2026-09-01T00:00:00Z' }, { ...doc, routines: [] },
+      { ...doc, observation: { ...doc.observation, has_more: true } },
+      { ...doc, observation: { ...doc.observation, pages: 0 } },
+      { ...doc, observation: { ...doc.observation, endpoint: '/other' } }];
+    for (const bad of badSnapshots) {
+      t('invalid/stale/incomplete snapshots cannot close a routine task',
+        !routineResolved(action.close_check.params, { routineDoc: bad, now }).closed);
+    }
+    const complete = reconcileObservation(pending, { observed_at, pages: 1, complete: true,
+      records: [{ ...row, last_run_status: 'SUCCEEDED', last_run_finished_at: '2026-09-05T07:59:00Z' }] });
+    const resolved = d => CLOSE_CHECKS.routine_resolved(pendingAction.close_check.params, { routineDoc: d, now }).closed;
+    t('same pending session can close using real observer completion', resolved(complete));
+    t('completion of a different session cannot close the pending target',
+      !routineResolved({ ...pendingAction.close_check.params, session_id: 'cse_other_pending' }, { routineDoc: complete, now }).closed);
+    t('failed execution cannot be rewritten successful with the same fire',
+      !routineResolved(action.close_check.params, { routineDoc: complete, now }).closed);
+    for (const edit of [d => { d.closed_findings = []; }, d => { d.routines = []; },
+      d => { d.closed_findings[0].closed_at = '2026-09-05T07:59:00Z'; },
+      d => { d.closed_findings[0].evidence.last_run_session_id = 'cse_wrong'; },
+      d => { d.closed_findings[0].evidence.last_run_finished_at = null; },
+      d => { d.closed_findings[0].evidence.last_run_finished_at = '2026-09-05T08:01:00Z'; },
+      d => { d.closed_findings[0].evidence.last_run_finished_at = '2026-09-05T06:59:00Z'; }]) {
+      const bad = structuredClone(complete); edit(bad);
+      t('missing, stale, mismatched or invalid closure evidence stays open', !resolved(bad));
+    }
+    const recovery = reconcileObservation(doc, { observed_at, pages: 1, complete: true,
+      records: [{ ...row, last_run_status: 'SUCCEEDED', last_run_fired_at: '2026-09-05T07:30:00Z',
+        last_run_finished_at: '2026-09-05T07:59:00Z', last_run_session_id: 'cse_new' }] });
+    t('a later successful execution closes the prior failure investigation',
+      routineResolved(action.close_check.params, { routineDoc: recovery, now }).closed);
+    const stopped = structuredClone(doc);
+    stopped.routines[0].enabled = false; stopped.open_findings = []; stopped.open_budget = 0;
+    stopped.intentional_stops = [{ id: row.id, why: 'Replaced by another approved routine' }];
+    const retired = routineResolved(action.close_check.params, { routineDoc: stopped, now });
+    t('verified intentional stop closes without claiming recovery', retired.closed && retired.evidence.includes('復旧成功ではない'));
+    t('intentional stops are not routed for reactivation', get(stopped).length === 0);
+    const oneShot = structuredClone(pending);
+    Object.assign(oneShot.routines[0], { enabled: false, ended_reason: 'run_once_fired', run_once_at: row.last_fired_at, cron_expression: '' });
+    const onceAction = get(oneShot)[0];
+    const onceDone = reconcileObservation(oneShot, { observed_at, pages: 1, complete: true,
+      records: [{ ...oneShot.routines[0], last_run_status: 'SUCCEEDED', last_run_finished_at: '2026-09-05T07:59:00Z' }] });
+    onceDone.observation.ended_since_previous = [];
+    t('archived single-shot completion remains verifiable after the next snapshot',
+      routineResolved(onceAction.close_check.params, { routineDoc: onceDone, now }).closed);
+    const tracked = reconcileObservation(unfired, { observed_at, pages: 1, complete: true, records: unfired.routines });
+    const anchor = tracked.open_findings[0].tracked_due_at;
+    const shifted = reconcileObservation(tracked, { observed_at, pages: 1, complete: true,
+      records: [{ ...unfired.routines[0], next_run_at: '2026-09-07T07:00:00Z' }] });
+    t('observer preserves the original tracked deadline across next_run shifts', shifted.open_findings[0].tracked_due_at === anchor);
+    const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/autopilot-act.yml'), 'utf8');
+    t('routine snapshot push wakes Act on main', /push:\s*\n\s*branches: \[main\]\s*\n\s*paths: \['data\/routine-runs.json'\]/.test(workflow));
+    for (const prefix of ['日次アクチュエータの同期（', 'chore(autopilot): 日次アクチュエータの同期（'])
+      t('Act excludes its own snapshot publication from push wakeups', workflow.includes(`!startsWith(github.event.head_commit.message, '${prefix}')`));
+  }
   const observedRun = { id: 123, status: 'completed', conclusion: 'failure', event: 'schedule',
     created_at: '2026-09-04T00:00:00Z', jst_date: '2026-09-04',
     steps: [{ number: 3, name: 'Claude Code', conclusion: 'failure', started_at: '2026-09-04T00:01:00Z', completed_at: '2026-09-04T00:02:00Z' },
@@ -2484,6 +2612,25 @@ async function selftest() {
     t(`同期ハンドラから検知の起動元をappendへ渡す: ${eventName}`, value('--source')
       === (eventName === 'schedule' ? 'act-reconcile' : 'act-reconcile-session'));
   }
+  for (const eventName of ['repository_dispatch', 'workflow_run', 'schedule']) for (const automatic of [true, false]) {
+    let appended;
+    const completion = { upstream_run_id: '123', automatic };
+    await HANDLERS['reconcile-runs']({ workflowRuns: [observedRun], runsDoc: { runs: [] },
+      eventName, completion }, null,
+    { append: args => { appended = args; return 'recorded'; } });
+    t(`完了通知の検証結果を実際のappendへ渡す: ${automatic}`, appended[appended.indexOf('--source') + 1]
+      === (automatic ? 'act-reconcile' : 'act-reconcile-session'));
+    t('通知元の監査証跡を残す', appended[appended.indexOf('--detected-note') + 1].includes('監視起動元run 123'));
+  }
+  {
+    const appended = [];
+    const later = { ...observedRun, id: 124, created_at: '2026-09-04T00:10:00Z' };
+    await HANDLERS['reconcile-runs']({ workflowRuns: [later, observedRun, later], runsDoc: { runs: [] },
+      eventName: 'workflow_dispatch' }, null, { append: args => { appended.push(args); return 'recorded'; } });
+    const values = flag => appended.map(args => args[args.indexOf(flag) + 1]);
+    t('同日の最初の実行へ基本run_idを割り当てる', JSON.stringify(values('--external-ref')) === JSON.stringify(['123', '124']));
+    t('1バッチ内の追記でも同日IDを衝突させない', JSON.stringify(values('--run-id')) === JSON.stringify(['ap-20260904-actions', 'ap-20260904-actions-124']));
+  }
   const matrix = {
     self_repair: {
       // 実ファイル（data/authority-matrix.json）の may_modify から、ここで要る分だけ写した検体。
@@ -2499,6 +2646,53 @@ async function selftest() {
     },
     domains: [{ domain: '承認が要る領域', requires_approval: true }],
   };
+
+  // A real failure needed two manual Act invocations on 2026-09-05: the first
+  // recorded the run, but append-cost was only derived after execution ended.
+  for (const scenario of ['new', 'existing-cost-action', 'unreadable', 'halted']) {
+    const store = { runs: [], costs: [] };
+    if (scenario === 'existing-cost-action') store.runs.push({ run_id: 'old', external_ref: '99',
+      attempted: true, route: 'actions', date_jst: '2026-09-03', outcome: 'failed' });
+    const ledger = { actions: [] };
+    const ctx = { today: '2026-09-04', workflowRuns: [observedRun], eventName: 'workflow_dispatch',
+      completion: { automatic: false }, selfheal: { targets: [] }, budget: null,
+      runsDoc: { runs: structuredClone(store.runs) }, costDoc: { runs: [] }, ledgerDoc: ledger };
+    merge(ledger, derive(ctx), ctx.today);
+    const order = [], recorded = [], judgements = { judgements: [] };
+    const result = await applyLedgerCycle(ledger, ctx, { today: ctx.today, matrix, eligibility: {}, judgements,
+      judgeCandidate: a => ({ candidate_id: a.id, judged_jst: ctx.today,
+        halted: scenario === 'halted' && a.auto === 'append-cost', reasons: ['fixture'] }),
+      recordJudgements: d => recorded.push(...d.judgements.map(j => j.candidate_id)),
+      refresh: current => {
+        current.runsDoc = { runs: structuredClone(store.runs) };
+        current.costDoc = { runs: structuredClone(store.costs) };
+      },
+      handlers: {
+        'reconcile-runs': (current, action) => HANDLERS['reconcile-runs'](current, action, { append: args => {
+          t(`runの記録前に適格性を残す: ${scenario}`, recorded.includes(action.id));
+          const val = flag => args[args.indexOf(flag) + 1];
+          store.runs.push({ run_id: val('--run-id'), external_ref: val('--external-ref'),
+            date_jst: val('--date'), route: val('--route'), attempted: val('--attempted') === 'true', outcome: val('--outcome') });
+          order.push('run'); return 'written';
+        } }),
+        'append-cost': async (current, action) => {
+          t(`実費の記録前に適格性を残す: ${scenario}`, recorded.includes(action.id));
+          t(`同じ監視で新規runを実費処理へ渡す: ${scenario}`, current.runsDoc.runs.some(r => r.external_ref === '123'));
+          order.push('cost');
+          if (scenario === 'unreadable') return { ok: false, changed: 0, log: 'unreadable' };
+          store.costs = current.runsDoc.runs.map(r => ({ run_id: r.external_ref, usd: 4.8768404 }));
+          return { ok: true, changed: store.costs.length, log: 'measured fixture' };
+        },
+      },
+    });
+    const blocked = ['unreadable', 'halted'].includes(scenario);
+    t(`run処理を再実行しない: ${scenario}`, order.filter(x => x === 'run').length === 1);
+    t(`実費処理は最後に1回だけ: ${scenario}`, order.join(',') === (scenario === 'halted' ? 'run' : 'run,cost'));
+    t(`不明・停止を0円や完了にしない: ${scenario}`,
+      ledger.actions.find(a => a.id === 'act-cost-sync')?.state === (blocked ? 'open' : 'done')
+      && (blocked ? store.costs.length === 0 : store.costs.some(r => r.run_id === '123' && r.usd > 0)));
+    t(`実行結果を一度だけ報告する: ${scenario}`, result.length === 2);
+  }
 
   // 権限の導出
   t('自動実行は may_modify 内なら ai',
@@ -3498,12 +3692,22 @@ async function selftest() {
     // **/logs を先に見る。**ログのURLは /actions/jobs/<id>/logs で、'/jobs' も含む。
     const mk = (jobsRes, logRes) => (url) => url.endsWith('/logs')
       ? Promise.resolve(logRes) : Promise.resolve(jobsRes);
-    const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [{ id: 1 }] }) };
+    const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [
+      { id: 99, name: 'Notify Autopilot Act' }, { id: 1, name: 'autopilot' }] }) };
     const withLog = (body) => ({ ok: true, status: 200, text: async () => body });
 
     const measured = await fetchRunCost('o/r', 'tok', '1',
       { fetchImpl: mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}')) });
     t('実費行を読めたら measured', measured.state === 'measured' && measured.usd === 1.25 && measured.turns === 9);
+    let requestedLog;
+    await fetchRunCost('o/r', 'tok', '1', { fetchImpl: async url => {
+      if (url.endsWith('/logs')) { requestedLog = url; return withLog('{"total_cost_usd":1.25}'); }
+      return okJobs;
+    } });
+    t('通知ジョブが先頭でも主系の実費ログを読む', requestedLog === 'https://api.github.com/repos/o/r/actions/jobs/1/logs');
+    t('主系ジョブ不明は実費ゼロや消失にしない', (await fetchRunCost('o/r', 'tok', '1', {
+      fetchImpl: async () => ({ ok: true, json: async () => ({ jobs: [{ name: 'Notify Autopilot Act', id: 99 }] }) }),
+    })).state === 'unreadable');
     t('実費行が無ければ absent（＝発生していない）',
       (await fetchRunCost('o/r', 'tok', '1', { fetchImpl: mk(okJobs, withLog('ログ本文')) })).state === 'absent');
     t('**ログが 410 なら gone**（保持期間切れ。実費が無かったのではない）',
@@ -3654,6 +3858,35 @@ async function selftest() {
   t('資格情報が無事なら次の候補を名指しする', credOk.failure_reason.includes('model-routing.json'));
   // **判定不能を「無事」と混ぜない。**CLIが入る前に落ちた回はここに来る。
   t('切り分けが skipped なら従来どおり要トリアージ', withProbe('skipped').needs_triage === true);
+  for (const probeConclusion of ['success', 'failure']) {
+    const result = interpretRun({ ...observedRun, steps: [
+      ...observedRun.steps,
+      { name: '即死が資格情報かを切り分ける', conclusion: probeConclusion },
+      { name: '資格情報の診断は判定不能', conclusion: 'failure' },
+    ] });
+    t(`診断が判定不能なら成功・失敗の印から認証を断定しない: ${probeConclusion}`,
+      result.needs_triage === true && result.failure_reason.includes('診断は判定不能')
+      && !result.failure_reason.includes('資格情報は通っている')
+      && !result.failure_reason.includes('更新する必要がある'));
+  }
+  {
+    const { validate: validateRepair, analyze: analyzeRepair } = await import('./autopilot-selfheal.mjs');
+    const matrix = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/authority-matrix.json'), 'utf8'));
+    const observation = { id: 90001, created_at: '2026-09-05T00:00:00Z', status: 'completed',
+      conclusion: 'failure', event: 'schedule', steps: [
+        { name: 'Claude Code', conclusion: 'failure', started_at: '2026-09-05T00:00:00Z',
+          completed_at: '2026-09-05T00:00:20Z' },
+        { name: '資格情報の診断は判定不能', conclusion: 'failure' },
+      ] };
+    const row = { run_id: 'fixture-unknown', route: 'actions', external_ref: String(observation.id),
+      ...interpretRun(observation),
+      ...detectionEvidence(observation, 'workflow_dispatch', new Date('2026-09-05T00:01:00Z')) };
+    t('実際の診断導出と検知証拠が自己修復検査を通る（原因は未確定）',
+      row.failure_class === null && validateRepair({ runs: [row] }, matrix).length === 0);
+    const pending = analyzeRepair({ runs: [row] }, matrix, []);
+    t('診断未確定を未修理件数と調査対象に残す',
+      pending.unrepaired_count === 1 && pending.targets[0].needs_triage && pending.lane_f_required);
+  }
   t('切り分けが skipped なら資格情報を無事と書かない',
     !withProbe('skipped').failure_reason.includes('資格情報は通っている'));
   // 形（failure_class）は据え置き。種別を動かすと D5 の連続判定と
@@ -3859,6 +4092,7 @@ export async function fetchOpenHealthIssues(repo, token, { fetchImpl = fetch, pe
 }
 
 async function buildContext(today, ledger = null) {
+  const completion = await completionOrigin();
   const runsDoc = readJson(RUNS_PATH, { runs: [] });
   // **空の権限表で分類しない。**{} だと classify は全部 human を返すので
   // 安全側ではあるが、**権限表が無いまま「分類した」ことになる。**
@@ -3899,7 +4133,48 @@ async function buildContext(today, ledger = null) {
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
   return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues,
-    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME };
+    ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion };
+}
+
+/** Sync runs first, then collect their costs in the same observation.
+ * The second phase can only run append-cost; repair/containment handlers are not retried.
+ */
+export async function applyLedgerCycle(ledger, ctx, { today, matrix, eligibility, judgements,
+  refresh, recordJudgements, handlers = HANDLERS, judgeCandidate = judge }) {
+  const applied = [];
+  for (const costPhase of [false, true]) {
+    for (const a of ledger.actions) {
+      if ((a.auto === 'append-cost') !== costPhase) continue;
+      if (a.state !== 'open' || !a.auto) continue;
+      // 自動実行は ai と判定されたものだけ。人の領域のアクションに
+      // handler を付けたくなったら、まず classify を通ることを確かめる。
+      const c = classify(a, matrix);
+      if (c.owner !== 'ai') continue;
+      // **押せないものは押しに行かない。**handler がファイルを書けても、
+      // その後の push が remote rejected になるだけで、書きかけが残る。
+      if (c.unattended_blocked) continue;
+      // Record before invoking the handler; R2 must never reach its side effect.
+      const decision = judgeCandidate({ ...a, close_check_kind: a.close_check?.kind }, eligibility);
+      judgements.judgements = mergeJudgements(judgements.judgements, [decision]);
+      recordJudgements(judgements);
+      if (decision.halted) {
+        applied.push({ handler: a.auto, ok: false, changed: 0, log: decision.reasons.join('; ') });
+        continue;
+      }
+      const h = handlers[a.auto];
+      if (!h) continue;
+      let r;
+      try { r = await h(ctx, a); }
+      catch (e) { r = { ok: false, changed: 0, log: `handler が例外: ${e.message}` }; }
+      applied.push({ handler: a.auto, ...r });
+      a.last_run_jst = today;
+      a.last_run_log = String(r.log ?? '').slice(0, 2000);
+    }
+    await refresh(ctx);
+    merge(ledger, derive(ctx), today);
+    reconcile(ledger, ctx);
+  }
+  return applied;
 }
 
 async function main() {
@@ -3951,42 +4226,21 @@ async function main() {
   if (has('apply')) {
     const eligibility = loadEligibility({ today });
     const judgements = readJson(ELIGIBILITY_LOG, { judgements: [] });
-    for (const a of ledger.actions) {
-      if (a.state !== 'open' || !a.auto) continue;
-      // 自動実行は ai と判定されたものだけ。人の領域のアクションに
-      // handler を付けたくなったら、まず classify を通ることを確かめる。
-      const c = classify(a, matrix);
-      if (c.owner !== 'ai') continue;
-      // **押せないものは押しに行かない。**handler がファイルを書けても、
-      // その後の push が remote rejected になるだけで、書きかけが残る。
-      if (c.unattended_blocked) continue;
-      // Record before invoking the handler; R2 must never reach its side effect.
-      const decision = judge({ ...a, close_check_kind: a.close_check?.kind }, eligibility);
-      judgements.judgements = mergeJudgements(judgements.judgements, [decision]);
-      fs.writeFileSync(ELIGIBILITY_LOG, JSON.stringify(judgements, null, 2) + '\n');
-      if (decision.halted) {
-        applied.push({ handler: a.auto, ok: false, changed: 0, log: decision.reasons.join('; ') });
-        continue;
-      }
-      const h = HANDLERS[a.auto];
-      if (!h) continue;
-      let r;
-      try { r = await h(ctx, a); }
-      catch (e) { r = { ok: false, changed: 0, log: `handler が例外: ${e.message}` }; }
-      applied.push({ handler: a.auto, ...r });
-      a.last_run_jst = today;
-      a.last_run_log = String(r.log ?? '').slice(0, 2000);
-    }
-    // 実行で状態が変わっているので、台帳を読み直してもう一度突き合わせる。
-    // （reconcile-runs が台帳を書き換えた直後に ledger_covers_runs を通したい）
-    ctx.runsDoc = readJson(RUNS_PATH, { runs: [] });
-    ctx.costDoc = readJson(COST_PATH, null);
-    try {
-      ctx.selfheal = JSON.parse(execFileSync(process.execPath,
-        [path.join(ROOT, 'scripts/autopilot-selfheal.mjs'), '--json'], { cwd: ROOT, encoding: 'utf8' }));
-    } catch { /* 直前の値のまま */ }
-    merge(ledger, derive(ctx), today);
-    reconcile(ledger, ctx);
+    applied.push(...await applyLedgerCycle(ledger, ctx, {
+      today, matrix, eligibility, judgements,
+      recordJudgements: doc => fs.writeFileSync(ELIGIBILITY_LOG, JSON.stringify(doc, null, 2) + '\n'),
+      refresh: current => {
+        current.runsDoc = readJson(RUNS_PATH, { runs: [] });
+        current.costDoc = readJson(COST_PATH, null);
+        current.statusDoc = readJson(STATUS_PATH, null);
+        for (const [key, script] of [['selfheal', 'autopilot-selfheal'], ['budget', 'autopilot-budget']]) {
+          try {
+            current[key] = JSON.parse(execFileSync(process.execPath,
+              [path.join(ROOT, `scripts/${script}.mjs`), '--json'], { cwd: ROOT, encoding: 'utf8' }));
+          } catch { current[key] = null; /* 読めない判定を古い値で閉じない */ }
+        }
+      },
+    }));
 
     const problems = validateLedger(ledger, matrix);
     if (problems.length) {

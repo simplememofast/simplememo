@@ -7,6 +7,7 @@
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/en/ai-tags/">
   <script>
     window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
       var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
       ric(function() {
         var s = document.createElement('script');
@@ -613,5 +614,6 @@ Grab milk and eggs on the way home, oh and detergent</pre>
       window.addEventListener('scroll', onScroll, {passive:true});
     })();
   </script>
+  <script src="/js/app-store-tracking.js?v=50afcb3e2a" defer></script>
 </body>
 </html>

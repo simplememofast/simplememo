@@ -9,6 +9,7 @@
   <!-- Google tag (gtag.js) - deferred for LCP -->
   <script>
     window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
       var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
       ric(function() {
         var s = document.createElement('script');
@@ -19,20 +20,8 @@
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          var ua = navigator.userAgent || '';
-          var aiSource = 'direct';
-          if (/ChatGPT-User/i.test(ua)) aiSource = 'chatgpt';
-          else if (/OAI-SearchBot/i.test(ua)) aiSource = 'openai-search';
-          else if (/PerplexityBot/i.test(ua)) aiSource = 'perplexity';
-          else if (/ClaudeBot/i.test(ua)) aiSource = 'claude';
-          else if (/Google-Extended/i.test(ua)) aiSource = 'google-ai';
-          else if (/Bingbot/i.test(ua) && /AI/i.test(ua)) aiSource = 'bing-copilot';
-          if (aiSource !== 'direct') {
-            gtag('set', {'ai_traffic_source': aiSource});
-          }
           gtag('config', 'G-EPZVZKCVQG', {
-            'page_language': (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname),
-            'custom_map': {'dimension1': 'ai_traffic_source'}
+            'page_language': (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)
           });
         };
       });
@@ -1842,6 +1831,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+  <script src="/js/app-store-tracking.js?v=50afcb3e2a" defer></script>
 </body>
 </html>

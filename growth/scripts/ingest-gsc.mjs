@@ -19,7 +19,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseGscExport } from '../lib/csv.mjs';
+import { parseGscExport, classifyGscColumns, parseDelimited } from '../lib/csv.mjs';
 import { ROOT, toPath } from '../lib/gsc.mjs';
 import { buildMeta, emptyBuckets, summarise, writeSnapshot } from '../lib/snapshot.mjs';
 
@@ -56,13 +56,25 @@ function pageFilterOf(dir, csvs) {
   const name = csvs.find((f) => /^(フィルタ|filters?)\.csv$/i.test(f));
   if (!name) return null;
   const text = fs.readFileSync(path.join(dir, name), 'utf8');
-  const m = text.match(/^\s*(?:ページ|Page)\s*,\s*\+?(.+?)\s*$/mi);
-  return m ? toPath(m[1]) : null;
+  let page = null;
+  for (const [rawKey, rawValue] of parseDelimited(text).slice(1)) {
+    const key = rawKey?.trim(), value = rawValue?.trim();
+    if (!value) continue;
+    if (/^(日付|Date)$/i.test(key)) continue;
+    if (/^(検索タイプ|Search type)$/i.test(key) && /^(ウェブ|Web)$/i.test(value)) continue;
+    if (/^(ページ|Page)$/i.test(key) && /^\+?https:\/\/(?:www\.)?simplememofast\.com\//i.test(value)) {
+      page = toPath(value.replace(/^\+/, ''));
+      continue;
+    }
+    throw new Error(`Unsupported GSC filter ${key} in ${dir}: import an unfiltered WEB/AI report or an exact single-page query export.`);
+  }
+  return page;
 }
 
 const buckets = emptyBuckets();
 const skipped = [];
 const files = [];
+const dimensionSources = new Map();
 
 function ingestDir(dir, label) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -80,27 +92,10 @@ function ingestDir(dir, label) {
 }
 
 function ingestFile(f, text, scopedPage) {
-  const { rows, columns, unmapped } = parseGscExport(text);
+  const { rows, columns, unmapped } = parseGscExport(text, { keepUnavailable: true });
   if (!rows.length) { skipped.push(`${f}: no data rows`); return; }
 
-  const has = (c) => columns.includes(c);
-  let kind = null;
-  if (has('query') && has('page')) kind = 'query-pages';
-  else if (has('query')) kind = 'queries';
-  // The "Performance on Search Generative AI Features" export is a page table
-  // with impressions and NOTHING else — Google reports no clicks, CTR or
-  // position for AI surfaces. Its filename and headers are identical to the
-  // ordinary page export's, so before this branch existed it matched
-  // `has('page')` and its 179 rows were appended straight into `pages`. That
-  // is silent corruption of the worst kind: page rows would double, totals
-  // would inflate, and every AI-surface row would enter the CTR curve as a
-  // page earning zero clicks at position 0 — dragging expected CTR down across
-  // the whole site while every number still looked plausible.
-  else if (has('page') && has('impressions') && !has('clicks')) kind = 'pages-aio';
-  else if (has('page')) kind = 'pages';
-  else if (has('date')) kind = 'dates';
-  else if (has('device')) kind = 'devices';
-  else if (has('country')) kind = 'countries';
+  const kind = classifyGscColumns(columns);
 
   if (!kind) { skipped.push(`${f}: no recognised dimension (columns: ${columns.join(', ') || 'none'})`); return; }
 
@@ -112,6 +107,19 @@ function ingestFile(f, text, scopedPage) {
     buckets['query-pages'].push(...rows);
     console.log(`  ${f} → query-pages (${scopedPage}): ${rows.length} rows`);
     return;
+  }
+
+  // A second unfiltered export of the same dimension is another population,
+  // not extra rows. Summing it silently doubles totals or mixes time windows.
+  if (dimensionSources.has(kind)) {
+    throw new Error(`Duplicate ${kind} exports: ${dimensionSources.get(kind)} and ${f}. Import one window per dimension.`);
+  }
+  dimensionSources.set(kind, f);
+  if (kind === 'dates' || kind === 'dates-aio') {
+    if (new Set(rows.map(r => r.date)).size !== rows.length) throw new Error(`Duplicate dates in ${f}`);
+  }
+  if (!kind.endsWith('-aio') && rows.some(r => !Number.isFinite(r.impressions) || !Number.isFinite(r.clicks))) {
+    throw new Error(`Unavailable WEB metrics in ${f}; keep missing data separate rather than converting it to zero.`);
   }
 
   // Normalise page URLs to site-relative paths so they join against the
@@ -176,7 +184,10 @@ for (const [kind, key] of [['pages', 'page'], ['queries', 'query'], ['dates', 'd
 
 // Totals rule, CTR curve and meta shape are shared with the BigQuery ingest —
 // see lib/snapshot.mjs for why they cannot live in either script.
-const meta = buildMeta({ label, buckets, period, source: 'csv-export', sourceFiles: files });
+const webDates = buckets.dates.map(r => r.date).sort();
+const inferredPeriod = webDates.length ? `${webDates[0]}..${webDates.at(-1)}` : null;
+if (period && inferredPeriod && period !== inferredPeriod) throw new Error(`--period ${period} does not match WEB date rows ${inferredPeriod}`);
+const meta = buildMeta({ label, buckets, period: period || inferredPeriod, source: 'csv-export', sourceFiles: files });
 
 if (dryRun) {
   console.log('\n--dry-run: nothing written.');

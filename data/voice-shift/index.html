@@ -7,6 +7,7 @@
   <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/data/voice-shift/">
   <script>
     window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
       var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
       ric(function() {
         var s = document.createElement('script');
@@ -66,12 +67,9 @@
   }
   </script>
 
-  <!-- JSON-LD: Dataset -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Dataset","@id":"https://simplememofast.com/data/voice-shift/#dataset","inLanguage":"ja","name":"「音声シフト」定点調査 — メモ入力方法の匿名メタデータ集計","description":"iOSメモアプリ「Obsidian連携シンプルメモ」の匿名利用メタデータから、初回送信の入力方法比率・初日のメモ文字数バケット分布・送信時間帯分布・Obsidian併用率を90日窓で集計する定点調査。メモ本文・メールアドレス等のPIIは設計上保存されておらず、集計にも含まれない。","url":"https://simplememofast.com/data/voice-shift/","creator":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ"},"license":"https://simplememofast.com/data/voice-shift/#citation","isAccessibleForFree":true,"measurementTechnique":"クライアントが送信する匿名・許可リスト制のイベントメタデータ（本文非閲覧設計）をD1上でSQL集計。内部アカウント除外あり","temporalCoverage":"2026-05/.."}</script>
-
   <!-- JSON-LD: WebPage -->
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/data/voice-shift/#webpage","inLanguage":"ja","name":"「音声シフト」定点調査 — メモは書くものから話すものへ（一次データ） | Obsidian連携シンプルメモ","url":"https://simplememofast.com/data/voice-shift/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
+  {"@context":"https://schema.org","@type":"WebPage","dateModified":"2026-09-05","@id":"https://simplememofast.com/data/voice-shift/#webpage","inLanguage":"ja","name":"「音声シフト」定点調査 — メモは書くものから話すものへ（一次データ） | Obsidian連携シンプルメモ","url":"https://simplememofast.com/data/voice-shift/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".lp-section__lead"]},"isPartOf":{"@id":"https://simplememofast.com/#website"}}
   </script>
   <link rel="stylesheet" href="/assets/css/safety-net.css?v=b380c7e070">
   <style>
@@ -196,7 +194,7 @@
           メモは「書くもの」から「話すもの」へ移りつつあるのか——それを、アプリの利用実態という一次データで定点観測するページです。運営する私たちは<strong>メモの本文を読めない設計</strong>（本文はサーバーに保存されない）のまま、匿名の許可リスト制メタデータだけで集計します。<strong>集計を始める前に、測り方の定義をこのページで先に公開します</strong>——あとから都合のよい定義に差し替えていないことを、公開順序そのもので示すためです。
         </p>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
-          定義公開: <time datetime="2026-08-20">2026年8月20日</time> ・ 初回確定集計: 2026年8月27日以降に掲載予定 ・ 最終集計: <strong>未実施</strong>
+          定義公開: <time datetime="2026-08-20">2026年8月20日</time> ・ 掲載状況確認: <time datetime="2026-09-05">2026年9月5日</time> ・ 確定集計: <strong>未掲載</strong>
         </p>
       </div>
 
@@ -224,8 +222,11 @@
         <h2 class="lp-section__title">結果</h2>
         <div class="tip-box">
           <div class="tip-box__title">初回集計は未掲載</div>
-          初回の確定集計は、内部アカウント除外を確定させた正史データ（2026年8月27日以降に確定）で行い、このセクションに<strong>窓・分母n・実行日つき</strong>で掲載します。<strong>それまでこのページに数値はありません——存在しない数値をこのページの出典で引用しないでください。</strong>
+          2026年9月5日現在、公開できる確定集計は掲載していません。以前の「8月27日以降」という予定は、結果の確定日を示すものではありません。内部・開発用アカウントの除外と各表の分母が30以上であることを確認してから、<strong>集計期間・分母n・実行日</strong>を付けて掲載します。このページは現在、測定方法の資料です。結果の出典として引用できる数値はありません。
         </div>
+        <p class="lp-section__lead">
+          9月5日に匿名メタデータの集計可能性を確認しました。現在は、初回利用の記録が複数ある場合の扱い、送信時刻と記録の到着順の違い、文字数が不明なメモを検証しています。また、期間の途中から記録を始めた項目があります。記録が無いことを「利用していない」と数えず、90日間を同じ条件で比較できるか確認してから結果を掲載します。
+        </p>
         <div style="overflow-x:auto">
           <table class="rt-table" aria-label="結果表（初回集計待ち）">
           <thead><tr><th>指標</th><th>窓</th><th>n</th><th>結果</th></tr></thead>
@@ -269,6 +270,7 @@
       <section class="lp-section">
         <h2 class="lp-section__title">更新履歴</h2>
         <ul style="font-size:.9rem;color:var(--text-secondary);line-height:1.9;margin:0 0 1rem 1.25rem;">
+          <li><time datetime="2026-09-05">2026-09-05</time> — 確定集計が未掲載であることを確認し、過去の掲載予定と現在の状態を区別し、測定方法の資料であることを明記。指標の定義・対象・公開基準は維持。</li>
           <li><time datetime="2026-08-20">2026-08-20</time> — ページ公開。4指標の定義を事前公開（集計はまだ行っていない）。</li>
         </ul>
       </section>
@@ -328,6 +330,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=a2d300c476" defer></script>
+  <script src="/js/app-store-tracking.js?v=50afcb3e2a" defer></script>
 </body>
 </html>

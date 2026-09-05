@@ -13,6 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { GSC_DIR, buildCtrCurve, buildSegmentCurves } from './gsc.mjs';
+import { QUERY_CLASSIFIER_VERSION } from './clusters.mjs';
 
 /**
  * `pages-aio` holds the "Performance on Search Generative AI Features" export:
@@ -21,7 +22,7 @@ import { GSC_DIR, buildCtrCurve, buildSegmentCurves } from './gsc.mjs';
  * `pages` because everything downstream of `pages` divides clicks by
  * impressions somewhere, and these rows have no clicks to divide.
  */
-export const BUCKET_KINDS = ['queries', 'pages', 'pages-aio', 'query-pages', 'dates', 'devices', 'countries'];
+export const BUCKET_KINDS = ['queries', 'pages', 'pages-aio', 'query-pages', 'dates', 'devices', 'countries', 'dates-aio', 'devices-aio', 'countries-aio'];
 
 export const emptyBuckets = () => Object.fromEntries(BUCKET_KINDS.map((k) => [k, []]));
 
@@ -76,6 +77,25 @@ export function buildMeta({ label, buckets, period = null, source = 'csv-export'
     ? sum(curveSource).impressions / totals.impressions
     : null;
 
+  const aiPages = buckets['pages-aio'] || [];
+  const aiDates = buckets['dates-aio'] || [];
+  const aiTotal = rows => rows.length && rows.every(r => Number.isFinite(r.impressions))
+    ? rows.reduce((n, r) => n + r.impressions, 0) : null;
+  const pageImpressions = aiTotal(aiPages);
+  const propertyImpressions = aiTotal(aiDates);
+  const dateSet = rows => [...new Set(rows.map(r => r.date))].sort();
+  const sameDates = aiDates.length > 0 && buckets.dates.length > 0
+    && JSON.stringify(dateSet(aiDates)) === JSON.stringify(dateSet(buckets.dates));
+  const periodDays = period ? (Date.parse(period.split('..')[1]) - Date.parse(period.split('..')[0])) / 86400000 + 1 : null;
+  const completeWindow = Number.isFinite(periodDays) && periodDays > 0
+    && dateSet(buckets.dates).length === periodDays
+    && dateSet(buckets.dates)[0] === period.split('..')[0]
+    && dateSet(buckets.dates).at(-1) === period.split('..')[1]
+    && buckets.dates.every(r => /^\d{4}-\d{2}-\d{2}$/.test(r.date)
+      && Number.isFinite(Date.parse(r.date)) && new Date(r.date).toISOString().slice(0, 10) === r.date)
+    && (!extra.bigquery || extra.bigquery.window_days_available >= extra.bigquery.window_days_requested);
+  const hasAi = ['pages-aio', 'dates-aio', 'countries-aio', 'devices-aio'].some(k => buckets[k]?.length);
+
   return {
     label,
     captured_at: new Date().toISOString().slice(0, 10),
@@ -85,6 +105,8 @@ export function buildMeta({ label, buckets, period = null, source = 'csv-export'
     // all CSV drops, so a missing value reads as 'csv-export'.
     source,
     source_files: sourceFiles,
+    query_classifier_version: QUERY_CLASSIFIER_VERSION,
+    complete_window: completeWindow,
     row_counts: Object.fromEntries(Object.entries(buckets).map(([k, v]) => [k, v.length])),
     totals: {
       clicks: totals.clicks,
@@ -92,18 +114,19 @@ export function buildMeta({ label, buckets, period = null, source = 'csv-export'
       ctr: totals.impressions ? totals.clicks / totals.impressions : null,
       source: totalsSource.from,
     },
-    // AI-surface exposure, kept apart from `totals` on purpose. These rows
-    // carry impressions only, so they can never be divided into a CTR — the
-    // share of total impressions is the whole measurement, and the number to
-    // watch is whether it grows. Null when the source carries no AI rows at
-    // all, which is every BigQuery snapshot: the bulk export has no AI-surface
-    // table, so that dimension still arrives only by CSV drop.
-    aio: buckets['pages-aio']?.length ? {
-      impressions: sum(buckets['pages-aio']).impressions,
-      pages: buckets['pages-aio'].length,
-      impression_share: totals.impressions
-        ? sum(buckets['pages-aio']).impressions / totals.impressions
-        : null,
+    // Property and URL aggregation differ. Never divide an AI page sum by
+    // the WEB property total, or infer an AI CTR from impressions-only rows.
+    aio: hasAi ? {
+      impressions: aiDates.length ? propertyImpressions : pageImpressions,
+      aggregation: aiDates.length ? 'property' : 'page',
+      property_impressions: propertyImpressions,
+      page_impressions: pageImpressions,
+      pages: aiPages.length,
+      period_start: dateSet(aiDates)[0] ?? null,
+      period_end: dateSet(aiDates).at(-1) ?? null,
+      same_web_dates: sameDates,
+      impression_share: sameDates && totalsSource.from === 'dates' && totals.impressions > 0 && propertyImpressions != null
+        ? propertyImpressions / totals.impressions : null,
     } : null,
     ctr_curve: curve,
     ctr_curve_source: curveFrom,
@@ -129,7 +152,10 @@ export function writeSnapshot({ label, buckets, meta, dir = GSC_DIR }) {
   const outDir = path.join(dir, label);
   fs.mkdirSync(outDir, { recursive: true });
   for (const [kind, rows] of Object.entries(buckets)) {
-    if (!rows.length) continue;
+    if (!rows.length) {
+      if (BUCKET_KINDS.includes(kind)) fs.rmSync(path.join(outDir, `${kind}.json`), { force: true });
+      continue;
+    }
     fs.writeFileSync(path.join(outDir, `${kind}.json`), JSON.stringify(rows, null, 0) + '\n');
   }
   fs.writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(meta, null, 2) + '\n');

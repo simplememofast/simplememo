@@ -186,17 +186,26 @@ export function decide(s) {
   // 2b. **モデルが1つも使えない日は走らない。** 代替があるなら縮退して走る。
   //     「使えるモデルが無い」を「今日は書くことが無い」と区別する
   //     （前者は故障、後者は正常系。日報で同じ行に出ると原因が消える）。
+  let modelDegradation = null;
   if (Array.isArray(s.modelsAvailable)) {
     if (s.modelsAvailable.length === 0) {
       return R(CODES.FAIL_NO_MODEL, '使えるモデルが1つも無い。故障として報告し、その日は走らない');
     }
     if (s.preferredModel && !s.modelsAvailable.includes(s.preferredModel)) {
-      return R(CODES.DEGRADE_MODEL,
-        `主モデル ${s.preferredModel} が使えない。${s.modelsAvailable[0]} へ落として走る`
-        + '（**縮退したことを日報に出す。**黙って別のモデルで書くと品質の変化が原因不明になる）',
-        { modelUsed: s.modelsAvailable[0], degraded: true });
+      modelDegradation = { modelUsed: s.modelsAvailable[0],
+        reason: `主モデル ${s.preferredModel} が使えない。${s.modelsAvailable[0]} へ落として走る`
+          + '（**縮退したことを日報に出す。**黙って別のモデルで書くと品質の変化が原因不明になる）' };
     }
   }
+
+  // 代替モデルは着手許可ではない。API・占有・出荷・PR・主系の確認後にだけ
+  // 実行可能な結果へ添える。外部到達制限と占有の引き継ぎも同時に保持する。
+  const ready = (code, reason, extra = {}) => {
+    if (!modelDegradation) return R(code, reason, extra);
+    return R(code === CODES.DEGRADE_EGRESS ? code : CODES.DEGRADE_MODEL,
+      `${reason} ${modelDegradation.reason}`,
+      { ...extra, modelUsed: modelDegradation.modelUsed, degraded: true });
+  };
 
   // 2c. **GitHub API が読めない日は着手しない。**
   //     冪等チェック（当日ブランチ・当日PR・主系の実行状態）は全部この API に乗っている。
@@ -209,7 +218,7 @@ export function decide(s) {
   }
 
   // 3. 手動の検証実行は以降の冪等チェックを飛ばす。
-  if (s.force) return R(CODES.RUN, 'force指定（手動の検証実行）。冪等チェックを省略');
+  if (s.force) return ready(CODES.RUN, 'force指定（手動の検証実行）。冪等チェックを省略');
 
   // 4. 当日ブランチの占有。**弾かれること自体がこの仕組みの出力**であって障害ではない。
   //    ただし**死んだ占有は守らない**（2026-08-29 の ap-20260829-ccr0920）。
@@ -253,19 +262,19 @@ export function decide(s) {
   //    一次情報の実測が要る C05〜C10 を見送って C12 に切り替えて出荷した。
   //    **止めるのではなく、できることに絞るのが正しい振る舞い**なので run のまま返す。
   if (s.egressBlocked) {
-    return R(CODES.DEGRADE_EGRESS,
+    return ready(CODES.DEGRADE_EGRESS,
       '外部到達が塞がれている。着手はするが、一次情報の実測が要るレーンは選べない',
       { forbiddenLanes: LANES_NEEDING_EGRESS, degraded: true, takeover });
   }
 
   if (takeover) {
-    return R(CODES.RUN_TAKEOVER,
+    return ready(CODES.RUN_TAKEOVER,
       `当日ブランチは claim だけ取られて ${s.claimAgeMinutes} 分動いていない（差分もPRも無い）。`
       + '**死んだ占有を守ると、その日は誰も走らないまま緑になる。**引き継いで着手する。'
       + '既存の claim の上に空コミットを積んで push すること（force push もブランチ削除もしない）',
       { takeover: true });
   }
-  return R(CODES.RUN, '着手してよい。まず当日ブランチを空コミットで占有すること');
+  return ready(CODES.RUN, '着手してよい。まず当日ブランチを空コミットで占有すること');
 }
 
 /** 既定の状態。シナリオは差分だけを書けるようにする。 */

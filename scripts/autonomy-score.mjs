@@ -91,8 +91,22 @@ export function vdc(runs, policy, { contracts = null } = {}) {
   return {
     id: 'vdc', rate, n: shipped.length, hit: settled,
     max: policy.weights.vdc, points: policy.weights.vdc * rate,
-    measurable: Boolean(contracts),
-    why: contracts ? null : 'L2（価値契約）が未実装。決済済みの契約を持つ出荷は構造的に 0 件',
+    // **「契約が0本」を「台帳が無い」と同じ扱いにしない。**
+    // Boolean([]) は真なので、空の台帳は measurable=true・why=null になり、
+    // **0点の理由が1行も出ない状態**になっていた（2026-09-05 に実測）。
+    // 3つの状態は原因も次の一手も違うので、分けて言う。
+    measurable: Array.isArray(contracts) && contracts.length > 0,
+    contracts_written: Array.isArray(contracts) ? contracts.length : null,
+    why: !contracts
+      ? '**契約台帳が無い。**L2 の仕組みそのものが置かれていない'
+      : contracts.length === 0
+        ? '**仕組みは在るが、契約がまだ1本も書かれていない。**'
+          + '日次runは着手前に契約を書くよう配線済み（obsidian-autopilot.yml §3-1）で、'
+          + '承認済み指標が0件の間は書かない設計。**次に主系が完走した回が最初の1本になる**'
+        : settled === 0
+          ? `**契約は ${contracts.length} 本あるが、決済済みが 0。**`
+            + '決済は horizon 経過後に Decision Monitor が行う —— 書いた日には点が入らない'
+          : null,
   };
 }
 
@@ -164,6 +178,16 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
   const detectedAtAll = breakages.filter((r) => r.detected_at).length;
   const eligibilityByMachine = runs.filter(
     (r) => r.failure_stage === 'eligibility' && src.has(r.source)).length;
+  // **同じ検出器が回したが、起動したのが人だった回。**
+  //
+  // [2026-09-05] 検知 0/12 を「検出器が動いていない」と読ませないために足した。
+  // 実測すると、無人枠（schedule）より先に**手動 dispatch やセッションが同じ照合を回して**
+  // 記録している —— 09-05 の例では無人枠 01:49Z の85分前、00:24Z の手動起動が先だった。
+  // **開発が活発な期間ほど、この指標は「機械の性能」ではなく「人の静かさ」を測る。**
+  //
+  // 数えるだけで**点には入れない。**「回るはずだった」は回ったことではない。
+  const beatenByDispatch = breakages.filter((r) => String(r.source ?? '').startsWith('act-')
+    && !src.has(r.source)).length;
   const dRate = n ? (detected.length + machineIncidents.length) / n : 0;
   const rRate = n ? (recoveredHandsOff.length + recoveredIncidents.length) / n : 0;
   // 自動 revert は「出荷後の指標劣化を検知して人手なしで巻き戻した」回。台帳に語彙が無い＝0。
@@ -173,9 +197,14 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
     detect: { rate: dRate, hit: detected.length + machineIncidents.length, points: half * dRate, max: half,
               detected_at_all: detectedAtAll,
               eligibility_detected_by_machine: eligibilityByMachine,
+              beaten_by_dispatch: beatenByDispatch,
               why: n && !detected.length && !machineIncidents.length
                 ? `**${detectedAtAll}/${n} は検知されているが、機械が自分で気づいた故障は 0 件。**`
-                  + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている —— 拾えていないのは故障のほう`
+                  + `同じ機械が適格性の沈黙は ${eligibilityByMachine} 件自分で拾っている`
+                  + (beatenByDispatch
+                    ? ` ／ **うち ${beatenByDispatch} 件は同じ照合が回して記録しているが、起動したのが人**`
+                      + `（手動 dispatch・セッション）。**検出器が動いていないのではなく、先を越されている**`
+                    : ' —— 拾えていないのは故障のほう')
                 : null },
     recover: { rate: rRate, hit: recoveredHandsOff.length + recoveredIncidents.length, points: half * rRate, max: half },
     auto_revert_count: autoRevert,
@@ -194,6 +223,38 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
  *               **検知だけで既に超えていれば配達も超えている。**片側検定として成立する
  *   precision … 上げたうち本当に必要だった割合。**いまは測れない**（owner_needed が空）
  */
+/**
+ * その判定を採点に数えてよいか。**純関数。**
+ *
+ * 欄が埋まっていることは、人が判定したことを意味しない。
+ * `data/autopilot-actions.json` は `self_repair.may_modify` の中にあり、機械が書ける ——
+ * 実際 2026-09-05 に、AI が自分のエスカレーション19件を `owner_delegated` として自己評価し、
+ * 精度が 0 → 3.9 点に動いていた。**その委任の記録は、オーナー所有の台帳に1件も無かった。**
+ *
+ * **判定そのものは消さない。採点から外すだけ。**オーナーが委任を認めた時点で
+ * `ep.precision_review.delegations` に1行足せば、遡って数え直される。
+ */
+export function acceptedReview(review, policy) {
+  const p = policy?.ep?.precision_review;
+  if (!p) return false;            // 方針が無いなら数えない（既定で緩めない）
+  const mode = review?.mode;
+  if (!mode) return false;         // **誰が判定したか分からない欄は数えない**
+  if ((p.accepted_modes ?? []).includes(mode)) return true;
+  return (p.delegations ?? []).some((d) => d.mode === mode && d.reviewer === review.reviewer);
+}
+
+/** 数えなかった理由を、件数つきでまとめる。**「数えなかった」を黙って消さない。** */
+export function uncountedReasons(uncounted, policy) {
+  const out = new Map();
+  for (const a of uncounted) {
+    const r = a.owner_needed_review;
+    const key = !r?.mode ? '判定者の記録が無い'
+      : `${r.mode}${r.reviewer ? `/${r.reviewer}` : ''} は委任の記録が無い`;
+    out.set(key, (out.get(key) ?? 0) + 1);
+  }
+  return [...out].map(([k, n]) => `${k}: ${n}件`);
+}
+
 export function ep(runs, policy, { rules, actions }) {
   const half = policy.weights.ep / 2;
   const within = (r) => {
@@ -206,10 +267,26 @@ export function ep(runs, policy, { rules, actions }) {
   const missPoints = missRate === null ? 0 : half * (1 - missRate);
 
   const escalated = (actions.actions || []).filter((a) => a.force_owner === 'human' || a.state === 'acknowledged');
-  const judged = escalated.filter((a) => typeof a.owner_needed === 'boolean');
-  const needed = judged.filter((a) => a.owner_needed);
-  const precRate = judged.length ? needed.length / judged.length : null;
+  const filled = escalated.filter((a) => typeof a.owner_needed === 'boolean');
+  // **誰が判定したかで数えるかどうかを決める。**欄が埋まっていることは、
+  // 人が判定したことを意味しない —— 2026-09-05 に実測で出た穴で、
+  // アクション台帳（機械が書ける）に AI の自己評価が19件入り、精度が 0 → 3.9 点に動いた。
+  const counted = filled.filter((a) => acceptedReview(a.owner_needed_review, policy));
+  const uncounted = filled.filter((a) => !acceptedReview(a.owner_needed_review, policy));
+  const needed = counted.filter((a) => a.owner_needed);
+  const precRate = counted.length ? needed.length / counted.length : null;
   const precPoints = precRate === null ? 0 : half * precRate;
+  const judged = counted;   // 表示の互換のため（数えた件数＝判定として採用した件数）
+  // **誰が下した判定を数えたかを、点と一緒に出す。**
+  // 委任を認めた後でも「人が判定した割合」と読めてしまうと、
+  // **点が上がったこと自体が、何が起きたかを隠す。**
+  const byMode = {};
+  for (const a of counted) {
+    const m = a.owner_needed_review?.mode ?? '(不明)';
+    byMode[m] = (byMode[m] ?? 0) + 1;
+  }
+  const humanCount = byMode.human ?? 0;
+  const aiCount = counted.length - humanCount;
 
   return {
     id: 'ep',
@@ -217,9 +294,20 @@ export function ep(runs, policy, { rules, actions }) {
             measurable: timed.length > 0,
             why: timed.length ? '**下界のみ**（検知の時刻までしか台帳に無い。配達時刻は持っていない）'
                               : '窓内に時刻を持つ故障が無い' },
-    precision: { rate: precRate, n: escalated.length, judged: judged.length, points: precPoints, max: half,
-                 measurable: judged.length > 0,
-                 why: judged.length ? null
+    precision: { rate: precRate, n: escalated.length, filled: filled.length, judged: counted.length,
+                 uncounted: uncounted.length, by_mode: byMode, human: humanCount, delegated_ai: aiCount,
+                 needed: needed.length, points: precPoints, max: half,
+                 measurable: counted.length > 0,
+                 why: uncounted.length
+                   ? `${filled.length}/${escalated.length} に判定が入っているが、**${uncounted.length}件は採点しない**`
+                     + `（${uncountedReasons(uncounted, policy).join(' / ')}）。`
+                     + `**記録の無い委任は、自己付与と見分けがつかない。**`
+                     + `data/autonomy-score.json の ep.precision_review.delegations にオーナーが1行足せば数え直される`
+                   : aiCount
+                     ? `${counted.length}/${escalated.length} 判定済み。**うち ${aiCount} 件はAIが自分で下した判定**`
+                       + `（オーナーの委任に基づく・2026-09-05）。必要だった ${needed.length} / 不要だった ${counted.length - needed.length}`
+                       + `${humanCount ? ` ／ 人の判定は ${humanCount} 件` : ' ／ **人の判定は 0 件**'}`
+                   : counted.length ? `${counted.length}/${escalated.length} 判定済み（人の判定）`
                    : `オーナーへ上げた ${escalated.length} 件に owner_needed が1件も入っていない — **上げたのが正しかったかを、この台帳は言えない**` },
     rate: (missPoints + precPoints) / policy.weights.ep,
     max: policy.weights.ep, points: missPoints + precPoints,
@@ -247,6 +335,143 @@ export function coverage(selftests) {
   return { total: checks.length, demonstrated, rate: checks.length ? demonstrated / checks.length : 0 };
 }
 
+/**
+ * **分母が無い成分を 0 点にしていることの帰結を、数字で出す。**
+ *
+ * [2026-09-05 実測] 28日・1日1出荷で「故障ゼロ」と
+ * 「3日に1故障・機械が検知・人手なしで修理」を並べると、
+ * **壊れて直したほうが 27.5 点高い**（66.4 対 38.9）。
+ *
+ * 穴は、アンチゲーミング規則の**相互作用**で開いている。
+ * 片方だけを見ていると見えない。
+ *
+ *   anti_gaming.failure_rate_excluded  … 故障の**減点を外した**
+ *   分母が無い成分 = 0 点        … 故障の**加点だけを残した**
+ *   → 故障が**減点の無い純増**になっている。
+ *
+ * **点は動かさない。**分母の付け替えは採点の意味を変えるので
+ * data/autonomy-score.json の所有者（L4）の判断であって、AI が自分の
+ * 採点入力を決めてよい範囲ではない。**見えるようにするまでがこちら側の仕事。**
+ *
+ * **VDC はここに入れない。**契約が0本でも出荷は21件あり、分母は在る。
+ * 「機会が無かった」と「機会はあったが検証できていない」を混ぜると、
+ * **何もしていないことが免除される。**
+ */
+/**
+ * **窓内に分母が無い成分へ、最後に測れた率を据え置く。**
+ *
+ * [2026-09-05・オーナー判断] 「壊れて直したほうが 27.5 点高い」を消すために入れた。
+ * 3択のうち **② 最後に測れた率を据え置く** が選ばれている
+ * （根拠と、③ を採らなかった理由は data/autonomy-score.json の carry_forward）。
+ *
+ * **据え置きは「測ったことがある」ときだけ。**窓の外を新しい順に見て
+ * `min_denominator` 件以上の分母が取れなければ、0 点のまま ——
+ * **一度も試されていない能力に点は入れない。**
+ *
+ * **古い率は持ち回らない。**いちばん新しい標本が `max_age_days` より古ければ据え置きをやめる。
+ * これが無いと「一度だけ良い率を出して、以後ずっと故障を起こさない」で点が固定できる。
+ *
+ * VDC・UMR・TUC には当てない（窓内に分母が在るので、0 は機会が無かったからではない）。
+ */
+export function carryForward(components, allRuns, w, policy, { rules, actions } = {}) {
+  const cfg = policy.carry_forward;
+  if (!cfg?.enabled) return { enabled: false, items: [], skipped: [] };
+  const minN = cfg.min_denominator ?? 3;
+  const maxAge = cfg.max_age_days ?? policy.window_days * 2;
+  const outside = allRuns.filter((r) => (r.date_jst || '') < w.from);
+  const newestFirst = (rows) => [...rows].sort((a, b) => (a.date_jst < b.date_jst ? 1 : -1));
+  const ageOf = (d) => Math.round((Date.parse(`${w.to}T00:00:00Z`) - Date.parse(`${d}T00:00:00Z`)) / 864e5);
+  const items = [], skipped = [];
+
+  // **率をそのまま点にしない。**EP の見逃しは「率が低いほど良い」成分で、
+  // ra.detect と同じ式で当てると**符号が逆になる**（2026-09-05、EP が 0 点に落ちて気づいた）。
+  // 据え置くのは「満点に対する取り分」（share）で、率は表示のために別に持つ。
+  const take = (id, rows, measure) => {
+    if (!(cfg.applies_to || []).includes(id)) return;
+    const sample = newestFirst(rows).slice(0, minN);
+    if (sample.length < minN) {
+      skipped.push({ id, why: `窓の外に分母が ${sample.length} 件しかない（${minN} 件必要）— **測ったことが無い**` });
+      return;
+    }
+    const age = ageOf(sample[0]?.date_jst);
+    if (!Number.isFinite(age) || age > maxAge) {
+      skipped.push({ id, why: `最後に測れたのが ${age} 日前で、期限 ${maxAge} 日を過ぎている — **昔うまくいったことは、いまの能力の証拠ではない**` });
+      return;
+    }
+    const { rate, share } = measure(sample);
+    if (!Number.isFinite(share) || share < 0 || share > 1) { skipped.push({ id, why: `取り分を計算できない（${share}）` }); return; }
+    items.push({ id, rate, share, n: sample.length, measured_at: sample[0]?.date_jst, age_days: age });
+  };
+
+  if (components.ra.n === 0) {
+    const breaks = outside.filter((r) => BREAKAGE_STAGES.has(r.failure_stage));
+    const raOf = (sample) => ra(sample, allRuns, policy, { recoveries: [], window: null });
+    take('ra.detect', breaks, (sample) => { const h = raOf(sample).detect; return { rate: h.rate, share: h.points / h.max }; });
+    take('ra.recover', breaks, (sample) => { const h = raOf(sample).recover; return { rate: h.rate, share: h.points / h.max }; });
+  }
+  if (components.ep.miss.n === 0) {
+    take('ep.miss', outside.filter((r) => BREAKAGE_STAGES.has(r.failure_stage) && r.failed_at && r.detected_at),
+      (sample) => { const h = ep(sample, policy, { rules, actions }).miss; return { rate: h.rate, share: h.points / h.max }; });
+  }
+  return { enabled: true, items, skipped, min_denominator: minN, max_age_days: maxAge };
+}
+
+/** 据え置きを成分へ反映する。**点を書き換えるので、書き換えた印を必ず残す。** */
+export function applyCarry(components, carried, policy) {
+  const byId = Object.fromEntries(components.map((x) => [x.id, x]));
+  const half = (component) => policy.weights[component] / 2;
+  for (const item of carried.items || []) {
+    const [id, part] = item.id.split('.');
+    const target = byId[id]?.[part];
+    if (!target) continue;
+    target.rate = item.rate;
+    target.points = half(id) * item.share;
+    target.carried = item;
+    target.why = `**窓内に分母が無いので、${item.measured_at}（${item.age_days} 日前）までの ${item.n} 件で測れた率を据え置いた。**`
+      + 'この窓で測り直したものではない';
+    byId[id].carried = (byId[id].carried || []).concat(item);
+  }
+  const raC = byId.ra, epC = byId.ep;
+  if (raC?.carried) {
+    raC.points = raC.detect.points + raC.recover.points;
+    raC.rate = (raC.detect.rate + raC.recover.rate) / 2;
+    raC.why = '窓内に故障が無い。**最後に測れた率を据え置いている**（満点ではない）';
+  }
+  if (epC?.carried) {
+    epC.points = epC.miss.points + epC.precision.points;
+    epC.rate = epC.points / policy.weights.ep;
+  }
+  return components;
+}
+
+export function noOpportunity(components, policy) {
+  const byId = Object.fromEntries(components.map((x) => [x.id, x]));
+  const half = (component) => policy.weights[component] / 2;
+  const slots = [
+    { id: 'ra.detect', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い', carried: Boolean(byId.ra.detect.carried) },
+    { id: 'ra.recover', n: byId.ra.n, max: half('ra'), why: '窓内に故障が無い', carried: Boolean(byId.ra.recover.carried) },
+    { id: 'ep.miss', n: byId.ep.miss.n, max: half('ep'), why: '時刻を持つ故障が無い', carried: Boolean(byId.ep.miss.carried) },
+    { id: 'ep.precision', n: byId.ep.precision.n, max: half('ep'), why: 'オーナーへ上げたアクションが無い', carried: false },
+  ];
+  // **据え置いた成分は穴ではない。**点が入っているので、無機会減点から外す。
+  const openSlots = slots.filter((x) => x.n === 0 && !x.carried);
+  const forgonePoints = openSlots.reduce((s, x) => s + x.max, 0);
+  const rawTotal = components.reduce((s, x) => s + x.points, 0);
+  const totalMax = components.reduce((s, x) => s + x.max, 0);
+  const denominator = totalMax - forgonePoints;
+  return {
+    forgone: forgonePoints, items: openSlots,
+    // **反実仮想。**分母の無い成分を分母から外したら何点か。
+    // これは**スコアではない**。並べて出すのは、差が欠陥の大きさだから。
+    normalized: forgonePoints && denominator > 0 ? (rawTotal / denominator) * totalMax : rawTotal,
+    note: forgonePoints
+      ? '**分母が無い成分を 0 点にしている。**故障が1件も起きなかった窓は、'
+        + '故障が起きて機械が検知・修理した窓より低く出る（2026-09-05 実測で 27.5 点差）。'
+        + '変更失敗率をスコアから外している（anti_gaming）ため、**故障は減点の無い純増**になっている'
+      : null,
+  };
+}
+
 // ── 合成 ──────────────────────────────────────────────────────
 export function score(ctx) {
   const { policy, runsDoc, selftests, rules, actions, history = [], today = todayJst(),
@@ -262,6 +487,9 @@ export function score(ctx) {
     ep(inW, policy, { rules, actions }),
     tuc(inW, policy, w),
   ];
+  // **据え置きは合計より前に当てる。**当てたあとの点を素点にする。
+  const carried = carryForward(Object.fromEntries(components.map((c) => [c.id, c])), all, w, policy, { rules, actions });
+  applyCarry(components, carried, policy);
   const raw = components.reduce((s, c) => s + c.points, 0);
   const cov = coverage(selftests);
 
@@ -289,6 +517,8 @@ export function score(ctx) {
     total, raw, held, held_why: heldWhy,
     max: components.reduce((s, c) => s + c.max, 0),
     coverage: cov,
+    carried,
+    no_opportunity: noOpportunity(components, policy),
     metrics: metrics ? metricsSummary(metrics) : null,
     components: Object.fromEntries(components.map((c) => [c.id, c])),
     excluded: {
@@ -450,11 +680,41 @@ export function check(s, policy, { blindness = [] } = {}) {
   }
   // **測れていない成分を、測れているように出さない。**
   for (const c of Object.values(s.components)) {
-    if (c.points > 0 && c.measurable === false) {
-      problems.push(`成分 ${c.id} は measurable=false なのに ${c.points} 点入っている`);
+    const labelled = Array.isArray(c.carried) && c.carried.length
+      && c.carried.every((x) => x.measured_at && Number.isFinite(x.rate) && Number.isFinite(x.n));
+    if (c.points > 0 && c.measurable === false && !labelled) {
+      problems.push(`成分 ${c.id} は measurable=false なのに ${c.points} 点入っている`
+        + '（据え置きなら carried に measured_at / rate / n を残すこと）');
     }
   }
   if (s.total > s.max) problems.push(`合計 ${s.total} が満点 ${s.max} を超えている`);
+  // **穴が開いているのに、黙って開いていることを許さない。**
+  // no_opportunity は点を動かさない診断なので、消しても合計は変わらない ——
+  // だからこそ、消えたことに気づく側をここに置く。
+  const nop = s.no_opportunity;
+  if (nop && nop.forgone > 0 && !nop.note) {
+    problems.push(`無機会減点が ${nop.forgone} 点あるのに、理由が出ていない`
+      + ' — **分母が無いから0点なのか、やっていないから0点なのかが読めなくなる**');
+  }
+  // **ep() が緩められたときに鳴る側。**生の台帳から数え直して照合する。
+  //
+  // **「2枚目の扉」と書きかけて、変異試験で外れた。**この照合は acceptedReview() を
+  // ep() と共有しているので、**判定そのものを潰すと両方いっしょに黙る**（実測）。
+  // 独立に効くのは「ep() の絞り込みだけを外した」場合で、そのときはここが名指しで落ちる（実測）。
+  // acceptedReview() 自体を潰した場合に鳴るのは自己テストのほう（2件が名指しで落ちる）。
+  // **どちらが何を守っているかを混ぜない。**
+  if (fs.existsSync(ACTIONS_PATH)) {
+    const acts = readJson(ACTIONS_PATH).actions ?? [];
+    const esc = acts.filter((a) => a.force_owner === 'human' || a.state === 'acknowledged');
+    const ok = esc.filter((a) => typeof a.owner_needed === 'boolean'
+      && acceptedReview(a.owner_needed_review, policy)).length;
+    if (s.components.ep?.precision?.judged !== ok) {
+      problems.push(`EP の精度が数えた件数（${s.components.ep?.precision?.judged}）が、`
+        + `台帳から数え直した採用件数（${ok}）と一致しない`
+        + ' — **AIが自分のエスカレーションを自分で採点していないか。**'
+        + '委任を認めるなら data/autonomy-score.json の ep.precision_review.delegations に書く');
+    }
+  }
   // L2 の前提台帳。**VDC が動く条件そのもの**なので、同じ検査で見る。
   if (fs.existsSync(METRICS_PATH)) problems.push(...validateMetrics(readJson(METRICS_PATH), policy));
   return problems;
@@ -480,6 +740,9 @@ function selftest() {
                    coverage_non_regression: { enabled: true }, failure_rate_excluded: true },
     tuc: { target_ships_per_week: 7 },
     ra: { machine_detection_sources: ['act-reconcile'] },
+    ep: { precision_review: { accepted_modes: ['human'], delegations: [] } },
+    carry_forward: { enabled: true, applies_to: ['ra.detect', 'ra.recover', 'ep.miss'],
+                     min_denominator: 3, max_age_days: 56 },
   };
   const ship = (id, over = {}) => ({ run_id: id, date_jst: '2026-09-01', outcome: 'shipped', lane: 'E', action: 'new', interventions: [], ...over });
 
@@ -497,6 +760,16 @@ function selftest() {
      '決済時刻を書くだけでは加点しない');
   eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).points, 0,
      '**決済されていない契約は数えない**（書いただけでは検証ではない）');
+  // **3つの 0 を分けて言う。**原因も次の一手も違う。
+  eq(vdc([ship('a')], P).why?.includes('契約台帳が無い'), true, '台帳が無い状態');
+  eq(vdc([ship('a')], P).measurable, false, '台帳が無ければ測れていない');
+  eq(vdc([ship('a')], P, { contracts: [] }).why?.includes('契約がまだ1本も書かれていない'), true,
+     '**空の台帳を「仕組みが無い」と同じ扱いにしない**');
+  eq(vdc([ship('a')], P, { contracts: [] }).measurable, false,
+     '**Boolean([]) は真だが、契約0本は測れていない**（この取り違えが実際に起きていた）');
+  eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).why?.includes('決済済みが 0'), true,
+     '書かれたが決済されていない状態');
+  eq(vdc([ship('a')], P, { contracts: [{ run_id: 'a' }] }).contracts_written, 1, '書かれた本数を出す');
 
   // --- UMR ---
   eq(umr([ship('a')], P).points, 25, '無介入なら満点');
@@ -534,6 +807,17 @@ function selftest() {
   eq(ra([brk('f1'), { run_id: 'e', date_jst: '2026-09-01', outcome: 'skipped_gate', failure_stage: 'eligibility', source: 'act-reconcile' }], [], P)
        .detect.eligibility_detected_by_machine, 1,
      '**適格性の沈黙は機械が拾えている**（0% だけ出して「何も検知していない」と読ませない）');
+  // **「先を越された」を数えるが、点には入れない。**
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.beaten_by_dispatch, 1,
+     '同じ照合が回したが起動が人だった回を数える');
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.points, 0,
+     '**数えても点には入れない**（「回るはずだった」は回ったことではない）');
+  eq(ra([brk('f1', { source: 'session' })], [], P).detect.beaten_by_dispatch, 0,
+     'そもそも照合を回していない回は数えない（source が act- で始まらない）');
+  eq(ra([brk('f1', { source: 'act-reconcile' })], [], P).detect.beaten_by_dispatch, 0,
+     '**無人で回った回は「先を越された」ではない**（そちらは検知に数える）');
+  eq(ra([brk('f1', { source: 'act-reconcile-session' })], [], P).detect.why.includes('先を越されている'), true,
+     '**検出器が動いていない、と読ませない**');
   eq(ra([brk('f1')], [brk('f1'), { auto_revert_of: 'f1' }], P).auto_revert_count, 0, '自己申告だけで権限を広げない');
   eq(ra([brk('f1')], [brk('f1'), ship('r', { outcome: 'failed', repair_of: ['f1'] })], P).recover.hit, 0, '失敗した修理を復旧に数えない');
   const recovered = { mode: 'production', before: { failed: true }, target_sha: 'a'.repeat(40), detected_at: '2026-09-01T00:00:00Z',
@@ -550,9 +834,53 @@ function selftest() {
   eq(ep([], P, { rules, actions: { actions: [] } }).miss.points, 0, '時刻を持つ故障が無ければ0（満点にしない）');
   eq(ep([quick], P, { rules, actions: { actions: [] } }).precision.points, 0,
      '**owner_needed が空なら精度は0点**（測れないことを満点にしない）');
-  const acts = { actions: [{ force_owner: 'human', owner_needed: true }, { force_owner: 'human', owner_needed: false }] };
-  eq(ep([quick], P, { rules, actions: acts }).precision.points, 3.75, '半分が本当に必要だったなら半分');
+  // **誰が判定したかで数えるかどうかが決まる。**欄が埋まっていることは、人が判定したことではない。
+  const hum = (m) => ({ mode: 'human', reviewed_jst: '2026-09-05', ...m });
+  const acts = { actions: [
+    { force_owner: 'human', owner_needed: true, owner_needed_review: hum() },
+    { force_owner: 'human', owner_needed: false, owner_needed_review: hum() }] };
+  eq(ep([quick], P, { rules, actions: acts }).precision.points, 3.75, '人が判定していれば、半分が必要なら半分');
   eq(ep([quick], P, { rules, actions: acts }).points, 11.25, '2つの半分を足す');
+
+  // **記録の無い委任は数えない。**2026-09-05 に実データで開いていた穴。
+  const delegatedActs = { actions: acts.actions.map((a) => ({ ...a,
+    owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) };
+  const dp = ep([quick], P, { rules, actions: delegatedActs }).precision;
+  eq(dp.points, 0, '**委任の記録が無ければ0点**（AIが自分のエスカレーションを自分で採点しない）');
+  eq(dp.uncounted, 2, '数えなかった件数を出す');
+  eq(dp.filled, 2, '**欄が埋まっている件数は別に出す**（消さない・見えなくしない）');
+  eq(dp.why?.includes('委任の記録が無い'), true, '理由を名指しする');
+
+  // 判定者の記録が無い欄も数えない —— 機械が埋めたのと見分けがつかない
+  const bare = { actions: [{ force_owner: 'human', owner_needed: true }] };
+  eq(ep([quick], P, { rules, actions: bare }).precision.points, 0,
+     '**`owner_needed` だけ埋まっていて判定者の記録が無い行は数えない**');
+  eq(ep([quick], P, { rules, actions: bare }).precision.why.includes('判定者の記録が無い'), true,
+     '理由を分けて出す（委任の記録が無いのとは別の穴）');
+
+  // **オーナーが委任を認めれば、遡って数え直される。**判定を消していないので戻せる。
+  const withDelegation = { ...P, ep: { ...P.ep, precision_review: {
+    accepted_modes: ['human'],
+    delegations: [{ mode: 'owner_delegated', reviewer: 'codex', delegated_at: '2026-09-05' }] } } };
+  eq(ep([quick], withDelegation, { rules, actions: delegatedActs }).precision.points, 3.75,
+     '委任が台帳に入れば数える');
+  {
+    const dpp = ep([quick], withDelegation, { rules, actions: delegatedActs }).precision;
+    eq(dpp.delegated_ai, 2, '**委任で数えた件数は、AIが下した判定として別に持つ**');
+    eq(dpp.human, 0, '人の判定は0件');
+    eq(dpp.why?.includes('AIが自分で下した判定'), true,
+       '**委任した後も「人の判定」とは表示しない**（点が上がったことが、何が起きたかを隠さない）');
+    eq(dpp.why?.includes('人の判定は 0 件'), true, '人の判定が0件であることを名指しする');
+    eq(dpp.needed, 1, '必要・不要の内訳も出す（全部 true に倒れ始めたら見えるように）');
+  }
+  eq(ep([quick], withDelegation, { rules, actions: { actions: delegatedActs.actions.map((a) => ({ ...a,
+       owner_needed_review: { mode: 'owner_delegated', reviewer: '別のだれか' } })) } }).precision.points, 0,
+     '**委任した相手だけ**（reviewer が違えば数えない）');
+  eq(acceptedReview({ mode: 'human' }, P), true, '既定で人の判定は数える');
+  eq(acceptedReview({ mode: 'owner_delegated', reviewer: 'codex' }, P), false, '既定で委任は数えない');
+  eq(acceptedReview(undefined, P), false, '判定者の記録が無ければ数えない');
+  eq(acceptedReview({ mode: 'human' }, { weights: P.weights }), false,
+     '**方針が無いなら数えない**（既定で緩めない）');
 
   // --- TUC ---
   const w7 = { days: 7 };
@@ -660,6 +988,206 @@ function selftest() {
   eq(metricsSummary({ metrics: [{ tier: 'A', approved_by: 'o' }, { tier: 'A' }, { tier: 'C' }] }).approved, 1,
      '**起案は承認ではない**（approved_by が入った指標だけ数える）');
 
+  // --- 無機会減点（**故障が起きたほうが高く出る**）---
+  //
+  // ここは「点が正しいか」ではなく「**採点の形が歪んでいることを、計器が言うか**」を見る。
+  // 数字はこの場で score() から取り直すので、上の docstring に書いた 27.5 が
+  // 実装からずれたらここが落ちる（散文だけにしない）。
+  const quietBase = {
+    policy: P, selftests: { checks: [{ state: 'demonstrated' }] },
+    rules, actions: { actions: [] }, today: '2026-09-28',
+    runsDoc: { runs: Array.from({ length: 28 }, (_, i) => ship(`q${i}`,
+      { date_jst: `2026-09-${String(i + 1).padStart(2, '0')}`, lane: 'C', pr: 100 + i })) },
+  };
+  const brokenBase = {
+    ...quietBase,
+    runsDoc: { runs: quietBase.runsDoc.runs.flatMap((r, i) => i % 3 !== 2 ? [r] : [
+      { run_id: `f${i}`, date_jst: r.date_jst, outcome: 'failed', failure_stage: 'execution',
+        source: 'act-reconcile', interventions: [],
+        failed_at: `${r.date_jst}T00:00:00Z`, detected_at: `${r.date_jst}T01:00:00Z` },
+      ship(`fix${i}`, { date_jst: r.date_jst, lane: 'F', action: 'refresh', repair_of: [`f${i}`], pr: 500 + i }),
+    ]) },
+  };
+  const quiet = score(quietBase);
+  const broken = score(brokenBase);
+
+  eq(quiet.no_opportunity?.forgone, 35, '**故障もエスカレーションも無い窓は 35 点ぶん分母が無い**（RA 20 ＋ EP 15）');
+  eq(quiet.no_opportunity?.items?.map((x) => x.id),
+     ['ra.detect', 'ra.recover', 'ep.miss', 'ep.precision'], '分母の無い成分を名指しで出す');
+  eq(broken.no_opportunity?.items?.map((x) => x.id), ['ep.precision'],
+     '故障が入れば RA と EP見逃し の分母は戻る（残るのは上げていないことだけ）');
+
+  ok('**穴が開いた窓には理由が本文で付く**（注記だけ消す変異が素通りしていた）', () => {
+    // [2026-09-05] 変異試験で見つけた自分の穴。check() の見張りは**手で組んだ**
+    // no_opportunity を渡していたので、noOpportunity() が注記を返さなくなっても
+    // 誰も落ちなかった。**見張りを検査したつもりで、見張りの入力を検査していた。**
+    const n = quiet.no_opportunity ?? {};
+    assert(n.forgone > 0, '前提が崩れている（無機会減点が0）');
+    assert(typeof n.note === 'string' && n.note.includes('純増'),
+      `実物の noOpportunity() が理由を返していない: ${JSON.stringify(n.note)}`);
+  });
+
+  ok('**壊れて直したほうが、壊れないより高く出る**（設計上の欠陥。点は動かさず記録する）', () => {
+    const gap = broken.total - quiet.total;
+    assert(gap > 0, `壊れたほうが高くない（gap=${gap.toFixed(1)}）—— 欠陥が直ったならこの検査を書き換える`);
+    // **散文に書いた数字を、ここで固定する。**render() と docstring の 35.0 / 62.5 / 27.5 は
+    // この2シナリオから出た実測値なので、実装が動いたらここが落ちて散文の嘘が残らない。
+    assert(quiet.total === 35, `故障ゼロの実測が 35.0 でない: ${quiet.total}`);
+    assert(broken.total === 62.5, `故障ありの実測が 62.5 でない: ${broken.total}`);
+    assert(gap === 27.5, `差が 27.5 でない: ${gap.toFixed(2)} —— 散文の数字を書き直すこと`);
+    assert(gap <= quiet.no_opportunity?.forgone,
+      `差 ${gap.toFixed(1)} が無機会減点 ${quiet.no_opportunity?.forgone} を超えた —— 別の原因が混ざっている`);
+  });
+
+  ok('**VDC は無機会に入れない**（契約0本は「機会が無かった」ではない）', () => {
+    assert(quiet.components.vdc.n > 0, '出荷が0だと前提が崩れる');
+    assert(quiet.components.vdc.points === 0, 'VDC が0点でない');
+    assert(!(quiet.no_opportunity?.items ?? []).some((x) => x.id.startsWith('vdc')),
+      '**契約を書いていないことが免除されている**');
+  });
+
+  ok('反実仮想は素点を分母から割り戻した値', () => {
+    const n = quiet.no_opportunity ?? {};
+    assert(Math.abs(n.normalized - (quiet.raw / (100 - n.forgone)) * 100) < 1e-9,
+      `割り戻しが合わない: ${n.normalized}`);
+    assert(broken.no_opportunity?.normalized > broken.raw, '分母が減れば反実仮想は素点より上');
+  });
+
+  ok('分母が全部あれば反実仮想は素点と同じ', () => {
+    const s2 = score({ ...brokenBase, actions: { actions: [{ force_owner: 'human' }] } });
+    assert(s2.no_opportunity?.forgone === 0, `まだ分母が欠けている: ${JSON.stringify(s2.no_opportunity?.items)}`);
+    assert(s2.no_opportunity?.normalized === s2.raw, '素点と一致していない');
+    assert(s2.no_opportunity?.note === null, '穴が無いのに注記が出ている');
+  });
+
+  ok('**無機会減点があるのに注記が無ければ検査が落ちる**', () => {
+    const p2 = check({ ...quiet, no_opportunity: { forgone: 9, items: [], note: null } }, P, { blindness: [] });
+    assert(p2.some((x) => x.includes('無機会')), `落ちなかった: ${JSON.stringify(p2)}`);
+  });
+
+  // --- 据え置き（窓内に分母が無い成分に、最後に測れた率を当てる）---
+  //
+  // **実データでは不発**（いまの窓には故障が12件ある）。合成でしか固定できないので、
+  // 「効いている」「効いていない」の両側を検体で押さえる。
+  const priorFails = [];
+  for (let i = 0; i < 4; i += 1) {
+    const d = `2026-08-${String(20 + i).padStart(2, '0')}`;
+    priorFails.push({ run_id: `o${i}`, date_jst: d, outcome: 'failed', failure_stage: 'execution',
+      interventions: [], source: i === 0 ? 'session' : 'act-reconcile',
+      failed_at: `${d}T00:00:00Z`, detected_at: `${d}T01:00:00Z` });
+    if (i >= 2) priorFails.push(ship(`o${i}-fix`,
+      { date_jst: d, lane: 'F', action: 'refresh', repair_of: [`o${i}`], pr: 700 + i }));
+  }
+  const carryBase = { ...quietBase, runsDoc: { runs: [...priorFails, ...quietBase.runsDoc.runs] } };
+  const carried = score(carryBase);
+
+  eq(carried.carried?.items?.map((x) => x.id), ['ra.detect', 'ra.recover', 'ep.miss'],
+     '**窓の外の直近3件から据え置く**');
+  eq(Number(carried.total.toFixed(4)), 59.1667, '据え置きが効いた合計（据え置き前は 35.0）');
+  eq(score(quietBase).total, 35, '窓の外にも故障が無ければ据え置かない（**測ったことが無いなら 0 のまま**）');
+
+  ok('**据え置きは印を残す**（measured_at / rate / share / n）', () => {
+    for (const x of carried.carried.items) {
+      assert(x.measured_at && Number.isFinite(x.rate) && Number.isFinite(x.share) && Number.isFinite(x.n),
+        `印が欠けている: ${JSON.stringify(x)}`);
+    }
+    assert(carried.components.ra.detect.carried, 'ra.detect に印が無い');
+    assert(String(carried.components.ra.detect.why).includes('据え置いた'),
+      '据え置いたことが本文に出ていない');
+  });
+
+  ok('**符号を逆にしない** — EP の見逃しは率が低いほど点が高い', () => {
+    // [2026-09-05] 初版は `points = max × rate` を全成分に当てていて、
+    // **見逃し率0（＝一度も遅れていない）が 0 点**になっていた。成分ごとに取り分で当てる。
+    const miss = carried.components.ep.miss;
+    assert(miss.rate === 0, `検体の見逃し率が 0 でない: ${miss.rate}`);
+    assert(miss.points === 7.5, `見逃し率0なのに ${miss.points} 点 —— 符号が逆`);
+  });
+
+  ok('**期限を過ぎた率は持ち回らない**', () => {
+    const late = { ...carryBase, today: '2026-11-30', runsDoc: { runs: [...priorFails,
+      ...Array.from({ length: 28 }, (_, i) => ship(`r${i}`, { date_jst: `2026-11-${String(i + 3).padStart(2, '0')}`, lane: 'C', pr: 200 + i }))] } };
+    const s2 = score(late);
+    assert(s2.carried.items.length === 0, `期限切れなのに据え置いた: ${JSON.stringify(s2.carried.items)}`);
+    assert(s2.carried.skipped.length === 3, `理由が残っていない: ${JSON.stringify(s2.carried.skipped)}`);
+    assert(s2.total === 35, `0 に戻っていない: ${s2.total}`);
+  });
+
+  ok('**分母が足りなければ据え置かない**（min_denominator）', () => {
+    const thin = { ...carryBase, runsDoc: { runs: [priorFails[0], priorFails[2], ...quietBase.runsDoc.runs] } };
+    const s2 = score(thin);
+    assert(s2.carried.items.length === 0, `2件で据え置いた: ${JSON.stringify(s2.carried.items)}`);
+    assert(s2.carried.skipped.some((x) => x.why.includes('測ったことが無い')), '理由が違う');
+  });
+
+  ok('据え置きを切れば 0 に戻る', () => {
+    const off = structuredClone(P); off.carry_forward.enabled = false;
+    const s2 = score({ ...carryBase, policy: off });
+    assert(s2.carried.enabled === false, '無効化が効いていない');
+    assert(s2.total === 35, `据え置きが残っている: ${s2.total}`);
+  });
+
+  ok('**据え置いた成分は無機会減点から外れる**', () => {
+    eq(carried.no_opportunity.items.map((x) => x.id), ['ep.precision'], '');
+    assert(carried.no_opportunity.forgone === 7.5, `二重に数えている: ${carried.no_opportunity.forgone}`);
+  });
+
+  ok('**VDC / UMR / TUC には当てない**', () => {
+    for (const id of ['vdc', 'umr', 'tuc']) {
+      assert(!carried.components[id].carried, `${id} に据え置きが当たっている`);
+    }
+    assert(carried.components.vdc.points === 0, 'VDC が据え置きで動いた');
+  });
+
+  ok('**applies_to に無い成分は据え置かない**（対象は台帳が決める）', () => {
+    const only = structuredClone(P); only.carry_forward.applies_to = ['ra.detect'];
+    const s2 = score({ ...carryBase, policy: only });
+    eq(s2.carried.items.map((x) => x.id), ['ra.detect'], '');
+    assert(!s2.components.ra.recover.carried, 'applies_to に無い ra.recover が据え置かれた');
+    assert(!s2.components.ep.miss.carried, 'applies_to に無い ep.miss が据え置かれた');
+  });
+
+  ok('**据え置きは窓の外からだけ拾う**（窓内の行を混ぜない）', () => {
+    // ep.miss は「時刻を持つ故障」が分母なので、**時刻の無い故障だけがある窓**では
+    // ra.n > 0 のまま ep.miss.n === 0 になる。ここで窓内も拾うと、
+    // 「窓の中で測れなかったもの」を据え置きの標本に混ぜてしまう。
+    const timeless = Array.from({ length: 3 }, (_, i) => ({ run_id: `t${i}`,
+      date_jst: `2026-09-${String(10 + i).padStart(2, '0')}`, outcome: 'failed',
+      failure_stage: 'execution', interventions: [], source: 'session' }));
+    const s2 = score({ ...carryBase,
+      runsDoc: { runs: [...priorFails, ...timeless, ...quietBase.runsDoc.runs] } });
+    assert(s2.components.ra.n === 3, `前提が崩れた（窓内の故障 ${s2.components.ra.n} 件）`);
+    assert(s2.components.ep.miss.n === 0, '前提が崩れた（窓内に時刻つき故障がある）');
+    const item = s2.carried.items.find((x) => x.id === 'ep.miss');
+    assert(item, 'ep.miss が据え置かれていない');
+    assert(item.measured_at === '2026-08-23',
+      `窓内の行を混ぜている（measured_at=${item.measured_at}・窓の外の最新は 2026-08-23）`);
+    assert(!s2.carried.items.some((x) => x.id.startsWith('ra.')),
+      '窓内に故障があるのに RA を据え置いた');
+  });
+
+  ok('**未来日付の行を「最後に測れた率」にしない**', () => {
+    // 窓は [w.from, today] なので、today より後の行はどちらにも入らない。
+    // ここを「窓の外＝window より前」ではなく「全期間」で拾うと、
+    // **まだ起きていない日付の行が、いまの能力の証拠になってしまう。**
+    const future = Array.from({ length: 3 }, (_, i) => ({ run_id: `f${i}`,
+      date_jst: `2026-10-${String(5 + i).padStart(2, '0')}`, outcome: 'failed',
+      failure_stage: 'execution', interventions: [], source: 'act-reconcile',
+      failed_at: `2026-10-0${5 + i}T00:00:00Z`, detected_at: `2026-10-0${5 + i}T01:00:00Z` }));
+    const s2 = score({ ...quietBase, runsDoc: { runs: [...future, ...quietBase.runsDoc.runs] } });
+    assert(s2.components.ra.n === 0, `前提が崩れた（窓内の故障 ${s2.components.ra.n} 件）`);
+    assert(s2.carried.items.length === 0,
+      `未来の行から据え置いた: ${JSON.stringify(s2.carried.items)}`);
+    assert(s2.total === 35, `点が入っている: ${s2.total}`);
+  });
+
+  ok('**印の無い据え置きは検査が落とす**', () => {
+    const faked = structuredClone(carried);
+    faked.components.ra.carried = [{ rate: 1 }];   // measured_at も n も無い
+    const p2 = check(faked, P, { blindness: [] });
+    assert(p2.some((x) => x.includes('measurable=false')), `落ちなかった: ${JSON.stringify(p2.slice(0, 3))}`);
+  });
+
   ok('実データのポリシーが検査を通る', () => {
     const ctx = loadContext();
     const p = check(score(ctx), ctx.policy, { blindness: rankerBlindness(ctx.policy) });
@@ -692,17 +1220,36 @@ function render(s) {
   }
   if (c.umr.r0_capped) L.push(`      ⚠ **R0 の寄与が上限に当たっている** — 可逆で些末な変更の量産では伸びない`);
   L.push(`  復旧自律性         RA   ${pts(c.ra.points, c.ra.max)}   (故障 ${c.ra.n} 件)`);
-  L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知)`);
+  L.push(`      検知  ${pts(c.ra.detect.points, c.ra.detect.max)}  ${pct(c.ra.detect.rate)}  (${c.ra.detect.hit}/${c.ra.n} を機械が検知${c.ra.detect.beaten_by_dispatch ? `・先を越された ${c.ra.detect.beaten_by_dispatch}` : ''})`);
   if (c.ra.detect.why) L.push(`            ${c.ra.detect.why}`);
   L.push(`      復旧  ${pts(c.ra.recover.points, c.ra.recover.max)}  ${pct(c.ra.recover.rate)}  (${c.ra.recover.hit}/${c.ra.n} を人手なしで復旧)`);
   L.push(`      自動 revert ${c.ra.auto_revert_count} 回  ← **Phase 6 のハードゲート。点数では代替しない**`);
   L.push(`  エスカレーション精度 EP ${pts(c.ep.points, c.ep.max)}`);
   L.push(`      見逃し ${pts(c.ep.miss.points, c.ep.miss.max)}  ${c.ep.miss.rate === null ? 'n/a' : `遅延 ${c.ep.miss.late}/${c.ep.miss.n}`}`);
   L.push(`             ${c.ep.miss.why}`);
-  L.push(`      精度   ${pts(c.ep.precision.points, c.ep.precision.max)}  ${c.ep.precision.why ?? `${c.ep.precision.judged}/${c.ep.precision.n} 判定済み`}`);
+  L.push(`      精度   ${pts(c.ep.precision.points, c.ep.precision.max)}  ${c.ep.precision.why ?? `${c.ep.precision.judged}/${c.ep.precision.n} 判定済み（人の判定）`}`);
   L.push(`  制約下スループット TUC  ${pts(c.tuc.points, c.tuc.max)}   週 ${c.tuc.per_week.toFixed(1)} 出荷 / 目標 ${c.tuc.target}`);
   L.push(`\n  検査被覆率  ${s.coverage.demonstrated}/${s.coverage.total} 本が「壊すと落ちる」ことを実測済み`);
   L.push(`  ${s.excluded.failure_rate}`);
+  // **穴を、開いている窓でだけ言う。**閉じている窓で毎回出すと、注記が背景になる。
+  const nop = s.no_opportunity;
+  if (nop?.forgone > 0) {
+    L.push(`\n  ⚠ 無機会減点 ${nop.forgone} 点  （${nop.items.map((x) => `${x.id}: ${x.why}`).join(' / ')}）`);
+    L.push(`     ${nop.note}`);
+    L.push(`     参考: 分母の無い成分を分母から外すと ${nop.normalized.toFixed(1)} —— **これはスコアではない**`);
+  }
+  const cf = s.carried;
+  if (cf?.items?.length) {
+    L.push(`\n  据え置き ${cf.items.length} 件  （窓内に分母が無いので、最後に測れた率を当てている）`);
+    for (const x of cf.items) {
+      L.push(`     ${x.id.padEnd(11)} ${(x.share * 100).toFixed(1).padStart(5)}%  ${x.measured_at} までの ${x.n} 件（${x.age_days} 日前）`);
+    }
+    L.push(`     **この窓で測り直したものではない。**期限（${cf.max_age_days} 日）を過ぎれば 0 に戻る`);
+  }
+  for (const x of cf?.skipped ?? []) L.push(`  据え置かなかった: ${x.id} — ${x.why}`);
+  if (cf?.enabled && !cf.items.length && !cf.skipped.length) {
+    L.push(`  据え置き方針は有効（窓内に分母が在るので出番なし）— **故障が無い月に点が下がる形を、${cf.max_age_days} 日を上限に打ち消す**`);
+  }
   L.push(`\n  **この数字は人間向けの計器で、ranker には見せていない。**`);
   L.push(`  併記: 総合自動化率（タスク被覆率）は scripts/automation-rate.mjs。`);
   L.push(`  片方が伸びてもう片方が伸びないことに意味があるので、乗り換えない。\n`);

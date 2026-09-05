@@ -18,6 +18,7 @@ import {
   curveFor, segmentOfPath, segmentOfQuery,
 } from '../lib/gsc.mjs';
 import { summarizeClusters, conversationalQueries } from '../lib/clusters.mjs';
+import { assessComparison, selectComparison } from '../lib/comparison.mjs';
 
 const argv = process.argv.slice(2);
 const flag = (n, d = null) => {
@@ -34,7 +35,8 @@ if (!snap) {
   console.error('No GSC snapshot ingested yet.\n\n  1. Follow growth/GSC_OWNER_ACTION.md (about 5 minutes)\n  2. node growth/scripts/ingest-gsc.mjs --label <YYYY-MM-DD>\n');
   process.exit(2);
 }
-const prev = previousSnapshot(snap.label);
+const prev = selectComparison(snap, listSnapshots().filter(label => label !== snap.label).map(loadSnapshot))
+  || previousSnapshot(snap.label);
 
 /* Every expectation is drawn from the row's own language segment. Judging an
  * English page against the site curve — which Japanese traffic dominates — is
@@ -94,43 +96,11 @@ function ctrGap() {
  * actionable; "clicks fell while impressions held and position held" (a CTR
  * loss, usually a SERP-feature change) points somewhere quite different from
  * "impressions fell too" (demand or indexing). */
-/** Days two snapshots share, as a fraction of the newer window. */
-function windowOverlap(a, b) {
-  if (!a?.meta.period_start || !b?.meta.period_start) return null;
-  const d = (x) => new Date(`${x}T00:00:00Z`).getTime();
-  const start = Math.max(d(a.meta.period_start), d(b.meta.period_start));
-  const end = Math.min(d(a.meta.period_end), d(b.meta.period_end));
-  const day = 86400000;
-  const shared = Math.max(0, (end - start) / day + 1);
-  const span = (d(b.meta.period_end) - d(b.meta.period_start)) / day + 1;
-  return span > 0 ? shared / span : null;
-}
-
-/* Equal-length windows can still be uncomparable when they cover mostly the
- * same days: nearly every click is in both totals, so the difference is the few
- * days at the edges plus noise. The length check below catches 28d vs 90d; this
- * catches 28d vs 28d taken two days apart, which is what happened on
- * 2026-08-11 (26 of 28 days shared). Withheld rather than printed with a
- * caveat — caveats go unread, numbers do not. */
-const MAX_DECAY_OVERLAP = 0.5;
-const overlap = windowOverlap(prev, snap);
+const comparison = assessComparison(snap, prev);
 
 function decay() {
   if (!prev) return null;
-  if (overlap != null && overlap > MAX_DECAY_OVERLAP) return { overlapping: { share: overlap } };
-  // Clicks are counted over a window, so two snapshots are only comparable
-  // when their windows are the same length. Every snapshot so far has been 28
-  // days, which made the check look unnecessary — until the 3-month export
-  // arrived with the generative-AI data attached. Ingesting that next to a
-  // 28-day snapshot would show every page tripling, and the snapshot after it
-  // would show the whole site collapsing, with no field anywhere saying why.
-  const span = (s) => (s.meta.period_start && s.meta.period_end
-    ? Math.round((Date.parse(s.meta.period_end) - Date.parse(s.meta.period_start)) / 86400000)
-    : null);
-  const [now, then] = [span(snap), span(prev)];
-  if (now != null && then != null && Math.abs(now - then) > 3) {
-    return { incomparable: { now_days: now, prev_days: then } };
-  }
+  if (!comparison.comparable) return { incomparable: comparison };
   const before = new Map(prev.pages.map((r) => [r.page, r]));
   const rows = [];
   for (const r of snap.pages) {
@@ -241,7 +211,9 @@ function unanswered() {
 const result = {
   snapshot: snap.label,
   period: snap.meta.period_start ? `${snap.meta.period_start}..${snap.meta.period_end}` : null,
-  compared_to: prev?.label ?? null,
+  compared_to: comparison.comparable ? prev?.label ?? null : null,
+  comparison,
+  aio: snap.meta.aio ?? null,
   clusters: summarizeClusters(snap.queries),
   conversational: conversationalQueries(snap.queries).slice(0, top),
   opportunities: opportunities(),
@@ -260,44 +232,50 @@ const show = (name) => !only || only === name;
 
 console.log(`GSC snapshot ${snap.label}${result.period ? ` (${result.period})` : ''}`);
 console.log(`  ${snap.meta.totals.clicks} clicks · ${snap.meta.totals.impressions} impressions · CTR ${pct(snap.meta.totals.ctr)}`);
-console.log(`  compared to: ${prev ? prev.label : '(no earlier snapshot — decay needs two)'}\n`);
+console.log(`  compared to: ${comparison.comparable ? prev.label : `(withheld: ${comparison.reason})`}\n`);
 
-/* Printed first, and deliberately above the click-ranked detectors: those all
- * measure distance from an expected CTR, which presumes the query is one this
- * site could convert. For 61.5% of impressions it is not, and the clusters
- * table is what says so before anything below it gets read as a to-do. */
+/* Topic shares describe visible query rows, not all site demand or installs. */
 if (show('clusters')) {
   const { clusters, sides, site, conversational } = result.clusters;
-  console.log('── Clusters (mutually exclusive; see growth/lib/clusters.mjs for the priority order)');
+  console.log(`── Query clusters (${result.clusters.classificationVersion}; mutually exclusive, available queries only)`);
   console.log(`  ${'cluster'.padEnd(20)}${'side'.padEnd(11)}${'queries'.padStart(8)}${'clicks'.padStart(8)}${'imp'.padStart(9)}${'CTR'.padStart(8)}${'pos'.padStart(7)}${'imp%'.padStart(8)}${'clk%'.padStart(8)}`);
   for (const c of clusters) {
     const mark = c.side === 'win' ? '★' : c.side === 'commodity' ? '☆' : ' ';
     console.log(`  ${(mark + c.label).padEnd(20)}${c.side.padEnd(11)}${String(c.queries).padStart(8)}${String(c.clicks).padStart(8)}${String(c.impressions).padStart(9)}${pct(c.ctr).padStart(8)}${n1(c.position).padStart(7)}${pct(c.impressionShare).padStart(8)}${pct(c.clickShare).padStart(8)}`);
   }
   console.log(`  ${''.padEnd(20)}${''.padEnd(11)}${''.padStart(8)}${'──────'.padStart(8)}${'───────'.padStart(9)}`);
-  for (const [key, mark, name] of [['win', '★', '勝ち筋'], ['commodity', '☆', 'コモディティ'], ['other', ' ', 'その他']]) {
+  for (const [key, mark, name] of [['win', '★', '用途適合の仮説'], ['commodity', '☆', '一般・他社検索'], ['other', ' ', 'その他']]) {
     const s = sides[key];
     if (!s || !s.impressions) continue;
     console.log(`  ${(mark + name).padEnd(20)}${''.padEnd(11)}${String(s.queries).padStart(8)}${String(s.clicks).padStart(8)}${String(s.impressions).padStart(9)}${pct(s.ctr).padStart(8)}${n1(s.position).padStart(7)}${pct(s.impressionShare).padStart(8)}${pct(s.clickShare).padStart(8)}`);
   }
   const ratio = sides.commodity?.ctr ? (sides.win?.ctr ?? 0) / sides.commodity.ctr : null;
-  console.log(`\n  Site CTR ${pct(site.ctr)} is the average of these${ratio ? `; ★ converts ${ratio.toFixed(1)}× ☆` : ''}.`);
-  console.log('  Report the two sides, not the average — which side moved is the whole finding.\n');
+  console.log(`\n  Visible-query CTR ${pct(site.ctr)}${ratio ? `; ★/☆ search CTR ratio ${ratio.toFixed(1)}×` : ''}.`);
+  console.log('  Shares exclude anonymized queries; topic fit is a hypothesis, not measured conversion.\n');
 }
 
-/* Zero clicks here is the expected outcome, not a miss: these queries are
- * issued by a model composing an answer, and a model does not click. Ranking
- * and count are the only signals available, so they are what gets printed. */
+if (show('aio')) {
+  console.log('── Google generative AI search visibility (WEB subset, impressions only)');
+  if (!result.aio) console.log('  unavailable in this snapshot — import the separate AI UI export.\n');
+  else {
+    const ai = result.aio;
+    console.log(`  ${ai.impressions ?? 'unknown'} impressions (${ai.aggregation || 'page'} aggregation); ${ai.pages} pages`);
+    console.log(`  property AI / WEB: ${pct(ai.aggregation === 'property' ? ai.impression_share : null)}`);
+    console.log('  No AI clicks/CTR available; page sums and property totals are separate.\n');
+  }
+}
+
+/* Query phrasing alone does not establish an AI origin or click expectation. */
 if (show('conversational')) {
   const c = result.clusters.conversational;
-  console.log('── Conversational queries (AI Mode fan-out fingerprint)');
+  console.log('── Natural-language queries (source unknown)');
   if (!result.conversational.length) console.log('   none detected\n');
   else {
     console.log(`  ${c.queries} queries · ${c.impressions} imp · ${c.clicks} clicks · avg pos ${n1(c.position)}`);
     for (const r of result.conversational) {
       console.log(`    pos ${n1(r.position).padStart(5)} · ${String(r.impressions).padStart(4)} imp · ${r.clicks} clk  ${r.query}`);
     }
-    console.log('\n  Judge these on position and count, never on clicks.\n');
+    console.log('\n  Use the dedicated AI report for AI visibility; phrasing does not identify the source.\n');
   }
 }
 
@@ -338,15 +316,10 @@ if (show('unanswered')) {
 if (show('decay')) {
   console.log('── Decay (vs previous snapshot)');
   if (result.decay === null) console.log('   needs a second snapshot\n');
-  else if (result.decay.overlapping) {
-    console.log(`   withheld: ${prev.label} (${prev.meta.period_start}..${prev.meta.period_end}) and ${snap.label} (${snap.meta.period_start}..${snap.meta.period_end})`);
-    console.log(`   share ${(result.decay.overlapping.share * 100).toFixed(0)}% of their days. Almost every click is in both`);
-    console.log('   totals, so a difference here would be the window shift, not decay. Compare');
-    console.log('   snapshots taken at least one full period apart.\n');
-  } else if (result.decay.incomparable) {
-    const { now_days, prev_days } = result.decay.incomparable;
-    console.log(`   not comparable: this snapshot covers ${now_days} days, the previous one ${prev_days}.`);
-    console.log('   Click counts scale with the window, so the difference would be the window, not decay.\n');
+  else if (result.decay.incomparable) {
+    const c = result.decay.incomparable;
+    console.log(`   withheld: ${c.reason} (current ${c.current_days ?? '?'} days; previous ${c.previous_days ?? '?'} days).`);
+    console.log('   Use complete, equal-length, disjoint windows with the same aggregation.\n');
   } else if (!result.decay.length) console.log('   no page lost meaningful clicks\n');
   else for (const r of result.decay) {
     console.log(`  ${String(r.delta_clicks).padStart(5)} clicks  ${r.page}`);

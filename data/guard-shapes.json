@@ -64,6 +64,12 @@
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
+      "file": "scripts/autopilot-checkpoint.mjs",
+      "expr": "files",
+      "disposition": "前提",
+      "note": "2026-09-05: assertの検証式。patchが空、または1パスでも宣言済みの公開ページ・画像の外なら復元を拒否する。空集合で検査を省略する向きではない。改ざんした.env追加patchの実際のGit復元を自己テストで拒否。"
+    },
+    {
       "file": "growth/scripts/build-queues.mjs",
       "expr": "queue.generated_at",
       "disposition": "報告のみ",
@@ -483,6 +489,48 @@
       "expr": "detected",
       "disposition": "表示整形",
       "note": "機械による検知が既存運転台帳と本番復旧台帳の両方で0件の時だけ補足文を出す。得点は分子と分母から別に計算し、補足文の分岐では変えない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "r.failure_class",
+      "disposition": "別に検出",
+      "note": "失敗原因の未記入を拒否する条件。原因未確定の記録だけはobservedPendingTriageで実行失敗・調査待ち・GitHub参照・失敗/検知時刻・観測説明を全て要求する。証拠を1つずつ消すと拒否され、既存のunknown修理上限3回も残ることを自己検査。空欄を正常や修理済みに変換しない。"
+    },
+    {
+      "file": "scripts/autopilot-selfheal.mjs",
+      "expr": "pending.lane_f_required",
+      "disposition": "前提",
+      "note": "自己検査のassertが確認する正の期待値。値が欠落/falseならassertは失敗するので、欠落によって検査が消える条件ではない。未分類を未修理一覧から除く変異で実際に失敗した。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "c.carried",
+      "disposition": "前提",
+      "note": "2026-09-05: 据え置き（carry_forward）で点が入った成分だけ、measurable=false でも check() を通す判定。**正が無いときは falsy になり、labelled=false → 検査が落ちる**側に倒れる。据え置きの印（carried）が消えたら「measurable=false なのに点が入っている」で名指しで止まる。緩む向きではない。変異試験⑨（labelled を true 固定）で落ちることを実測済み。"
+    },
+    {
+      "file": "scripts/autonomy-score.mjs",
+      "expr": "cf.items",
+      "disposition": "表示整形",
+      "note": "2026-09-05: 据え置きが1件も無い窓に「方針は有効（出番なし）」の1行を出すかどうかの分岐。**点は分岐の外で決まっている。**正が無い（cf.items が消える）と TypeError になるが、その手前の `cf?.enabled` と、carryForward() が必ず items/skipped を返すことで担保している。据え置きが在る窓は上の分岐が拾うので、ここは「何も無かった」だけを言う。"
+    },
+    {
+      "file": "scripts/routine-observer.mjs",
+      "expr": "priorRun.last_run_fired_at",
+      "disposition": "前提",
+      "note": "2026-09-05: 同じPENDING実行の完了として閉じるための同一性条件。時刻またはsession IDが無い・違うとsamePendingRunは成立せず、別の新しい成功runが無ければ拒否する。単発APIがlast_runを省略しても状態履歴から直前の既知の実行を引き継ぐ。履歴引継ぎを外す変異では、別sessionの成功で閉じる誤りを自己検査が検出した。"
+    },
+    {
+      "file": "scripts/routine-observer.mjs",
+      "expr": "priorRun.last_run_session_id",
+      "disposition": "前提",
+      "note": "2026-09-05: 同じPENDING実行の完了として閉じるための同一性条件。時刻またはsession IDが無い・違うとsamePendingRunは成立せず、別の新しい成功runが無ければ拒否する。単発APIがlast_runを省略しても状態履歴から直前の既知の実行を引き継ぐ。履歴引継ぎを外す変異では、別sessionの成功で閉じる誤りを自己検査が検出した。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "retired.closed",
+      "disposition": "報告のみ",
+      "note": "2026-09-05: 自己検査の真偽値。意図的停止が閉じたことと、復旧と呼ばない説明の両方を要求する。closed が欠ければ t が失敗するため、欠落で検査が消える条件ではない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -538,6 +586,12 @@
     "（読めない値を null にする）で、判定ではなかった。**対象外だと書いておく。**"
   ],
   "param_guards": [
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "value",
+      "disposition": "別に検出",
+      "note": "2026-09-05: observe の欠測理由の表示。値は null のまま返し、forecast は有限な観測だけで必要日数を満たすか判定する。readiness は基準値または予測値が欠測なら awaiting_observations とし、prepare/contractProblems は有限値を必須にする。欠測を0や改善可能へ変換しないことを自己テストで確認。"
+    },
     {
       "file": "scripts/autopilot-runs.mjs",
       "expr": "explicit",

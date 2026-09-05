@@ -20,6 +20,8 @@ const read = f => JSON.parse(fs.readFileSync(path.join(ROOT, f), 'utf8'));
 const write = (f, x) => { fs.mkdirSync(path.dirname(path.join(ROOT, f)), { recursive: true }); fs.writeFileSync(path.join(ROOT, f), JSON.stringify(x, null, 2) + '\n'); };
 const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
 export const METRICS = ['shipping_day_rate', 'publishing_day_rate', 'time_to_detect_hours', 'unresolved_failures', 'usd_per_shipped', 'eligibility_unrecorded_rate'];
+// Mathematical domains of the readers above, not configurable scoring targets.
+const RATE_METRICS = new Set(['shipping_day_rate', 'publishing_day_rate', 'eligibility_unrecorded_rate']);
 export const intentPath = id => `data/decision-intents/${id}.json`;
 export function approvedMetric(metrics, id) {
   const m = metrics.metrics.find(x => x.id === id);
@@ -71,6 +73,34 @@ export function forecast(metric, date, runs, costs) {
   return { value: values.length >= minimum ? median(values) : null, n: values.length, samples };
 }
 
+const domainMaximum = id => RATE_METRICS.has(id) ? 1 : Infinity;
+const improvementPossible = (metric, value) => finite(value)
+  && (metric.direction === 'up' ? value < domainMaximum(metric.id) : value > 0);
+
+// Approval alone does not mean a directional contract can be declared today.
+// Expose the same observed baseline and mathematical bounds that prepare uses,
+// before the picker spends a run inventing candidates for a saturated metric.
+export function readiness({ metrics, runs, costs = [], now }) {
+  const today = todayJst(now);
+  const approved = METRICS.filter(id => approvedMetric(metrics, id));
+  const observations = approved.map(id => {
+    const metric = approvedMetric(metrics, id);
+    const baseline = observe(id, shift(today, -1), runs, costs);
+    const model = forecast(metric, today, runs, costs);
+    const missing = !finite(baseline.value) || !finite(model.value);
+    return { metric: id, direction: metric.direction, baseline_date: shift(today, -1),
+      baseline: baseline.value, null_forecast: model.value, forecast_observed_days: model.n,
+      state: missing ? 'awaiting_observations' : improvementPossible(metric, model.value)
+        ? 'forecast_available' : 'no_directional_room',
+      reason: missing ? 'A measured prior-day baseline and the approved comparison window are required.'
+        : improvementPossible(metric, model.value) ? 'Candidate eligibility, scope, cost and actual prediction still require validation.'
+        : 'The approved comparison is already at the best possible outcome. Do not weaken the gate or manufacture a decline.',
+    };
+  });
+  return { approved, pending_owner: METRICS.filter(id => !approvedMetric(metrics, id)), date_jst: today,
+    forecast_available: observations.filter(r => r.state === 'forecast_available').map(r => r.metric), observations };
+}
+
 export function contractProblems(c, metrics) {
   const p = [];
   const require = (ok, why) => { if (!ok) p.push(why); };
@@ -97,6 +127,13 @@ export function contractProblems(c, metrics) {
     require(c.metric_policy_hash === digest(m), 'metric policy changed since declaration');
     require(c.null_model?.kind === m.null_model.kind, 'null model kind differs from approved policy');
     require(c.predicted_delta * (m.direction === 'up' ? 1 : -1) > 0, 'prediction must match approved direction');
+    const maximum = domainMaximum(m.id);
+    const inDomain = value => finite(value) && value >= 0 && value <= maximum;
+    require(inDomain(c.baseline), 'baseline outside metric domain');
+    require(inDomain(c.null_model?.value), 'null forecast outside metric domain');
+    require(inDomain(c.null_model?.value + c.predicted_delta), 'predicted outcome outside metric domain');
+    require(improvementPossible(m, c.null_model?.value),
+      'null forecast already at the best possible outcome; directional improvement is impossible');
   }
   return p;
 }
@@ -173,9 +210,12 @@ export async function selectContract(candidates, ctx, state, contracts) {
     if (c.counterfactual?.id !== other.id) throw new Error('counterfactual must identify the highest-ranked alternative');
     return { ...c, rank_gap: ranked[0].rank - ranked[1].rank };
   });
-  const eligible = normalized.map(c => { try { prepare(c, ctx); return { ...c, eligible: true }; } catch { return { ...c, eligible: false }; } });
+  const eligible = normalized.map(c => {
+    try { prepare(c, ctx); return { ...c, eligible: true }; }
+    catch (error) { return { ...c, eligible: false, rejection: error.message }; }
+  });
   const selection = choose(eligible, state, review(contracts, state));
-  if (!selection.selected) throw new Error('no eligible candidate with approved metrics and fresh observations');
+  if (!selection.selected) throw new Error(`no eligible candidate with approved metrics and fresh observations: ${eligible.map(c => `${c.id}: ${c.rejection}`).join('; ')}`);
   return { ...prepare(normalized.find(c => c.id === selection.selected), ctx), selection, candidates: normalized };
 }
 
@@ -237,6 +277,29 @@ export async function selftest() {
   assert.equal(observe('usd_per_shipped', '2026-09-01', [{ date_jst: '2026-09-01', attempted: true, outcome: 'shipped' }]).value, null);
   for (const change of [{ p: 2 }, { horizon_days: 0 }, { predicted_delta: 0 }, { counterfactual: null }, { max_changed_lines: 0 }, { touches: ['../index.html'] }, { evidence_date: '2099-01-01' }]) assert.throws(() => prepare({ ...candidate, ...change }, ctx));
   assert.throws(() => prepare(candidate, { ...ctx, metrics: { metrics: [{ ...metrics.metrics[0], approved_by: null }] } }));
+  // A daily rate cannot improve past 100%, even if its supplied probability is low.
+  // These are local fixtures, never production contracts or recovery evidence.
+  assert.equal(prepare({ ...candidate, predicted_delta: 1 }, ctx).predicted_delta, 1);
+  assert.throws(() => prepare({ ...candidate, predicted_delta: 1.1 }, ctx), /predicted outcome outside metric domain/);
+  const saturated = { ...ctx, runs: runs.map(r => ({ ...r, outcome: 'shipped', lane: 'F' })) };
+  assert.deepEqual(readiness(ctx).forecast_available, ['shipping_day_rate']);
+  assert.equal(readiness(saturated).observations[0].state, 'no_directional_room');
+  assert.deepEqual(readiness(saturated).forecast_available, []);
+  assert.equal(readiness({ ...ctx, runs: runs.slice(0, -1) }).observations[0].state, 'awaiting_observations');
+  assert.equal(readiness({ ...ctx, metrics: { metrics: [{ ...metrics.metrics[0], approved_by: null }] } }).observations.length, 0);
+  assert.equal(readiness({ ...ctx, now: new Date('2026-09-03T15:00:00Z') }).date_jst, '2026-09-04');
+  assert.throws(() => prepare(candidate, saturated), /directional improvement is impossible/);
+  assert.throws(() => prepare({ ...candidate, predicted_delta: Number.MIN_VALUE }, saturated), /directional improvement is impossible/);
+  for (const id of ['unresolved_failures', 'eligibility_unrecorded_rate']) {
+    const metric = { ...metrics.metrics[0], id, direction: 'down' };
+    const policy = { metrics: [metric] };
+    if (id === 'unresolved_failures') assert.equal(readiness({ ...ctx, metrics: policy }).observations[0].state, 'no_directional_room');
+    const base = { ...c, metric: id, metric_policy_hash: digest(metric), predicted_delta: -1 };
+    assert(contractProblems(base, policy).some(p => p.includes('directional improvement is impossible')));
+    assert.equal(contractProblems({ ...base, baseline: 1, null_model: { ...base.null_model, value: 1 } }, policy).length, 0);
+    assert(contractProblems({ ...base, predicted_delta: -2, baseline: 1, null_model: { ...base.null_model, value: 1 } }, policy)
+      .includes('predicted outcome outside metric domain'));
+  }
   const delivery = { verified: true, intent_hash: digest(c), merge_sha: 'a'.repeat(40), deployed_at: '2026-09-04T01:00:00Z' };
   assert.equal(settle(c, delivery, ctx).state, 'pending');
   const later = { ...ctx, now: new Date('2026-09-06T00:00:00Z') };
@@ -256,6 +319,11 @@ export async function selftest() {
   assert.equal(chosen.selection.selected, candidate.id);
   const forced = await selectContract(choices, ctx, { selections: [], mandate: { selections: [] } }, []);
   assert.equal(forced.selection.selected, 'runner-up');
+  const publishing = { ...metrics.metrics[0], id: 'publishing_day_rate' };
+  const feasible = { ...saturated, metrics: { metrics: [...metrics.metrics, publishing] } };
+  const mixed = [choices[0], { ...choices[1], metric: publishing.id }];
+  assert.equal((await selectContract(mixed, feasible, { selections: [] }, [])).selection.selected, 'runner-up');
+  await assert.rejects(selectContract(choices, saturated, { selections: [] }, []), /test-contract:.*directional improvement is impossible.*runner-up:/);
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-history-test-'));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
@@ -280,7 +348,8 @@ async function main() {
   if (args.includes('--selftest')) return selftest();
   const metrics = read('data/value-metrics.json');
   if (args.includes('--readiness')) {
-    console.log(JSON.stringify({ approved: METRICS.filter(id => approvedMetric(metrics, id)), pending_owner: METRICS.filter(id => !approvedMetric(metrics, id)) }, null, 2)); return;
+    console.log(JSON.stringify(readiness({ metrics, runs: read('data/autopilot-runs.json').runs,
+      costs: read('data/autopilot-cost.json').runs, now: new Date() }), null, 2)); return;
   }
   if (args.includes('--prepare')) {
     const file = args[args.indexOf('--prepare') + 1];

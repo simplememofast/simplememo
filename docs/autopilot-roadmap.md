@@ -4,6 +4,7 @@
 > 現在地の数字 → `automation-rate-2026-08.md`（176タスク・13領域の実測）
 > 積み残しの全量 → `autopilot-maturity-backlog.md`（外部レビュー由来）
 > プレスリリース → `pr-autopilot-2026-09.md` / `-plan.md` / `-evidence.md`
+> 自律スコア 90 への成分別の律速と順序 → `zero-preneur-autonomy-roadmap-2026-09-05.md`（2026-09-05）
 >
 > **更新: 2026-08-22**
 

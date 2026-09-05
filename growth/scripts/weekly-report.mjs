@@ -19,10 +19,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  ROOT, latestSnapshot, previousSnapshot, listSnapshots,
+  ROOT, latestSnapshot, previousSnapshot, listSnapshots, loadSnapshot,
   expectedCtr, positionOpportunity, businessRelevance, curveFor, segmentOfPath,
 } from '../lib/gsc.mjs';
 import { loadLedger, summarize, daysOverdue, today } from '../lib/ledger.mjs';
+import { assessComparison, selectComparison } from '../lib/comparison.mjs';
+import { auditOverlaps } from '../lib/experiment-overlap.mjs';
 
 const write = process.argv.includes('--write');
 const asOf = today();
@@ -33,14 +35,19 @@ const pct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`);
 const n1 = (v) => (v == null ? '—' : Number(v).toFixed(1));
 
 const snap = latestSnapshot();
-const prev = snap ? previousSnapshot(snap.label) : null;
+const previousCandidate = snap ? selectComparison(snap, listSnapshots().filter(label => label !== snap.label).map(loadSnapshot))
+  || previousSnapshot(snap.label) : null;
+const comparison = assessComparison(snap, previousCandidate);
+const prev = comparison.comparable ? previousCandidate : null;
 const ledger = loadLedger();
 const { due, overdue, byStatus, total } = summarize(ledger, asOf);
 
 p(`# Weekly Growth Report — ${asOf}`);
 p();
 p(`Snapshot: ${snap ? `\`${snap.label}\`` : '**none ingested**'}` +
-  (prev ? ` · compared to \`${prev.label}\`` : ' · no comparison snapshot yet'));
+  (prev ? ` · compared to \`${prev.label}\`` : ` · comparison withheld: ${comparison.reason}`));
+if (snap) p(`Current period: ${snap.meta.period_start ?? '?'}..${snap.meta.period_end ?? '?'}`
+  + (prev ? `; previous: ${prev.meta.period_start}..${prev.meta.period_end}` : ''));
 p();
 
 /* ── Decisions owed ─────────────────────────────────────────────────────
@@ -70,6 +77,16 @@ if (!due.length) {
 p();
 
 /* ── SEO performance ──────────────────────────────────────────────────── */
+const overlap = auditOverlaps(ledger);
+p('## 実験の重複と計測変更');
+p();
+p('同じページの複数変更は交絡要因。指標が違っても独立した因果効果とは断定しない。');
+p(`全体に影響する実験: ${overlap.global.join(', ') || 'なし'}。`);
+p(`URLで列挙できない範囲: ${overlap.unenumerated.join(', ') || 'なし'}。`);
+for (const item of overlap.overlaps) p(`- \`${item.page}\`: ${item.experiments.join(', ')}`);
+for (const change of ledger.measurement_changes || []) p(`- ${change.date}: ${change.note}`);
+p();
+
 p('## SEO');
 p();
 if (!snap) {
@@ -89,6 +106,18 @@ if (!snap) {
   row('Clicks', t.clicks, prev?.meta.totals.clicks, (v) => Math.round(v).toLocaleString());
   row('Impressions', t.impressions, prev?.meta.totals.impressions, (v) => Math.round(v).toLocaleString());
   row('CTR', t.ctr, prev?.meta.totals.ctr, pct);
+}
+p();
+
+p('## Google生成AI検索（WEBの内数）');
+p();
+if (!snap?.meta.aio) {
+  p('このスナップショットに専用AIレポートは未取得。ゼロではない。BigQuery出力だけでは埋まらない。');
+} else {
+  const ai = snap.meta.aio;
+  p(`表示: ${ai.impressions ?? '不明'}（${ai.aggregation || 'page'}集計）、掲載ページ: ${ai.pages}。`);
+  p(`同じ日付・プロパティ集計でのAI表示／WEB表示: ${pct(ai.aggregation === 'property' ? ai.impression_share : null)}。`);
+  p('AI固有クリック・CTRは未取得。ページ集計をプロパティ合計に加算しない。');
 }
 p();
 

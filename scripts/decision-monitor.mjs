@@ -9,6 +9,8 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
 import { review, advance, recordSelection } from './decision-review.mjs';
+import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
+import { ep as scoreEp } from './autonomy-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -21,6 +23,58 @@ const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
 
+export function recoveryAttribution(previous, trigger) {
+  const automated = value => ['schedule', 'workflow_run'].includes(value);
+  const priorHuman = previous?.detected_at && !(previous.human_interventions === 0 && automated(previous.trigger)) ? 1 : 0;
+  return { trigger: priorHuman ? previous.trigger ?? 'unknown' : trigger,
+    human_interventions: Math.max(priorHuman, automated(trigger) ? 0 : 1) };
+}
+
+export function pendingRecovery(previous, { head, probes, now, trigger }) {
+  return { ...previous, state: 'revert_pending', mode: 'production', execution_head: head,
+    confirmed_at: now, ...recoveryAttribution(previous, trigger), before: { failed: true, probes } };
+}
+
+export function recoveryCheckpoint(previous, pending) {
+  return `<!-- decision-recovery ${JSON.stringify({ version: 1, source_hash: hash(previous), incident: pending })} -->`;
+}
+
+export function resumeRecovery(previous, pr, { contractId, targetSha }) {
+  assert.notEqual(pr.state, 'CLOSED', 'recovery PR was closed by an operator; do not recreate');
+  assert(Number.isInteger(pr.number) && pr.number > 0, 'recovery PR number required');
+  const markers = [...(pr.body ?? '').matchAll(/<!-- decision-recovery ([^\n]+) -->/g)];
+  assert.equal(markers.length, 1, 'recovery PR checkpoint missing or ambiguous');
+  const checkpoint = JSON.parse(markers[0][1]);
+  assert.equal(checkpoint.version, 1, 'unsupported recovery checkpoint');
+  assert.equal(checkpoint.source_hash, hash(previous), 'recovery checkpoint does not match the recorded observation');
+  const record = checkpoint.incident;
+  assert.equal(record.contract_id, contractId, 'recovery checkpoint contract mismatch');
+  assert.equal(record.target_sha, targetSha, 'recovery checkpoint target mismatch');
+  assert.equal(record.state, 'revert_pending', 'recovery checkpoint is not pending');
+  assert.equal(record.mode, 'production', 'recovery checkpoint is not production');
+  assert(shaOK(record.execution_head), 'recovery execution head required');
+  assert.equal(record.detected_at, previous.detected_at, 'first detection changed');
+  assert.equal(hash(record.probes), hash(previous.probes), 'first probes changed');
+  assert(Date.parse(record.confirmed_at) - Date.parse(record.detected_at) >= 60000, 'independent confirmation required');
+  assert(record.before?.failed === true && Array.isArray(record.before.probes), 'confirmed failure required');
+  assert(record.before.probes.some(p => p.known && !p.healthy
+    && previous.probes?.some(q => q.path === p.path && q.known && !q.healthy)), 'same failure must be observed twice');
+  assert([0, 1].includes(record.human_interventions), 'known recovery attribution required');
+  assert.deepEqual({ trigger: record.trigger, human_interventions: record.human_interventions },
+    recoveryAttribution(previous, record.trigger), 'recovery cannot erase prior human involvement');
+  return { ...record, revert_pr: pr.number };
+}
+
+export function verifyRollback(incident, revertHead, paths, cwd = ROOT) {
+  const command = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
+  assert(shaOK(incident.execution_head) && shaOK(incident.target_sha) && shaOK(revertHead), 'rollback commits required');
+  assert.equal(command('rev-parse', `${revertHead}^`), incident.execution_head, 'rollback PR was changed after creation');
+  const expected = command('diff', '--binary', '--full-index', '--no-renames', incident.target_sha, `${incident.target_sha}^`, '--', ...paths);
+  assert(expected, 'empty declared rollback');
+  const actual = command('diff', '--binary', '--full-index', '--no-renames', incident.execution_head, revertHead);
+  assert.equal(actual, expected, 'rollback PR differs from the declared reverse patch');
+}
+
 export function renderReport(html, score, stages) {
   let out = html.replace(/(<span data-score-total>)[\d.]+(<\/span>)/g, `$1${score.total.toFixed(1)}$2`);
   const c = score.components;
@@ -28,7 +82,7 @@ export function renderReport(html, score, stages) {
     vdc: `期間内の出荷${c.vdc.n}件のうち、事前宣言と公開後の実測決済を確認できたのは${c.vdc.hit}件。`,
     umr: '人の介入なく本番へ届いた変更の割合を可逆性で重み付け。R0には寄与の上限があります。',
     ra: `故障${c.ra.n}件のうち機械が検知したのは${c.ra.detect.hit}件、無介入の修理は${c.ra.recover.hit}件。本番の自動revert成功は${c.ra.auto_revert_count}回。`,
-    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。未判定は満点として扱いません。`,
+    ep: `エスカレーションの必要性を判定済みなのは${c.ep.precision.judged}件。${c.ep.precision.delegated_ai ? `うち${c.ep.precision.delegated_ai}件はオーナー委任によるAI評価で、独立した人間評価ではありません。` : '未判定は満点として扱いません。'}`,
     tuc: `検査を維持して週${c.tuc.per_week.toFixed(1)}回出荷。週${c.tuc.target}回が配点上の基準です。`,
   };
   out = out.replace(/<tr data-score="(vdc|umr|ra|ep|tuc)">.*?<\/tr>/g, (row, id) => row.replace(/<td class="num"><b>[\d.]+<\/b><\/td>/, `<td class="num"><b>${c[id].points.toFixed(1)}</b></td>`));
@@ -39,17 +93,35 @@ export function renderReport(html, score, stages) {
   return out;
 }
 
+export function renderRunStreaks(html, runs) {
+  // Keep the definition shared with the public-page checker. A failed day can
+  // extend activity while breaking shipping; neither count is hand-maintained.
+  const region = /<!-- run-streaks:start -->[\s\S]*?<!-- run-streaks:end -->/g;
+  assert.equal([...html.matchAll(region)].length, 1, 'public run-streaks region missing or ambiguous');
+  const active = activeStreaks(runs), shipping = shippingStreaks(runs);
+  const date = day => day.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1年$2月$3日');
+  const range = (from, to) => from ? `（${date(from)}〜${date(to)}）` : '';
+  const content = `<!-- run-streaks:start -->
+          この定義での連続稼働は現在<b>${active.current.days}</b>日${range(active.current.from, active.last_day)}で、最長も<b>${active.longest.days}</b>日${range(active.longest.from, active.longest.to)}です。
+          ${active.last_day ? `「現在」は台帳の最終記入日（${date(active.last_day)}）時点です。` : '台帳の記録はまだありません。'}
+          稼働の定義では、失敗して行が立った日も「記録がある日」なので連続が切れません。
+          <b>連続出荷は現在${shipping.current.days}日</b>${range(shipping.current.from, shipping.last_day)}で、<b>連続出荷の最長は${shipping.longest.days}日</b>${range(shipping.longest.from, shipping.longest.to)}です。
+          <!-- run-streaks:end -->`;
+  return html.replace(region, () => content);
+}
+
 export async function publishReport() {
   const { score, loadContext } = await import('./autonomy-score.mjs');
   const file = 'autopilot/index.html';
   const original = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const stages = {};
-  for (const r of read('data/autopilot-runs.json').runs) {
+  const runs = read('data/autopilot-runs.json').runs;
+  for (const r of runs) {
     if (r.outcome === 'shipped') continue;
     if (!['eligibility', 'execution', 'cost', 'absent'].includes(r.failure_stage)) throw new Error(`unclassified run: ${r.run_id}`);
     stages[r.failure_stage] = (stages[r.failure_stage] ?? 0) + 1;
   }
-  const rendered = renderReport(original, score(loadContext()), stages);
+  const rendered = renderRunStreaks(renderReport(original, score(loadContext()), stages), runs);
   if (rendered !== original) fs.writeFileSync(path.join(ROOT, file), rendered);
   return rendered !== original;
 }
@@ -130,7 +202,7 @@ export function applyRevert(plan, cwd = ROOT) {
   execFileSync('git', ['apply', '--reverse'], { cwd, input: diff });
 }
 
-function publish(files, branch, title, expectedHead) {
+function publish(files, branch, title, expectedHead, checkpoint = '') {
   // Never overwrite a newer main or a pre-existing PR branch.
   git('fetch', 'origin', 'main');
   if (git('rev-parse', 'origin/main') !== expectedHead) throw new Error('main advanced; leave state for the next monitor');
@@ -141,7 +213,7 @@ function publish(files, branch, title, expectedHead) {
   git('push', '-u', 'origin', branch);
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-pr-'));
   try {
-    fs.writeFileSync(path.join(tmp, 'body.md'), `${title}\n\nGenerated by the deterministic decision monitor. All existing SEO Validation checks must pass before merge.\n`);
+    fs.writeFileSync(path.join(tmp, 'body.md'), `${title}\n\nGenerated by the deterministic decision monitor. All existing SEO Validation checks must pass before merge.\n${checkpoint ? `\n${checkpoint}\n` : ''}`);
     const url = execFileSync('gh', ['pr', 'create', '--repo', REPO, '--head', branch, '--base', 'main', '--title', title, '--body-file', path.join(tmp, 'body.md')], { cwd: ROOT, encoding: 'utf8' }).trim();
     const number = Number(url.match(/\/pull\/(\d+)$/)?.[1]);
     if (!Number.isInteger(number) || !number) throw new Error('could not read the created PR number');
@@ -176,13 +248,27 @@ async function main() {
     if (!verifiedSettlement(row)) row.settlement = settle(c, row.delivery, ctx);
     const merge = row.delivery.merge_sha;
     let incident = recovery.incidents.find(i => i.contract_id === c.id);
+    const recoveryBranch = `Codex/decision-revert-${merge.slice(0, 12)}`;
+    // The PR and its checkpoint are created together. If main advanced before
+    // the separate ledger PR could be saved, recover that checkpoint first,
+    // even when the rollback has already merged and probes are healthy again.
+    if (incident?.state === 'observing' && !incident.revert_pr) {
+      const existing = gh('pr', 'list', '--repo', REPO, '--head', recoveryBranch, '--state', 'all', '--json', 'number,state,body')[0];
+      if (existing) {
+        Object.assign(incident, resumeRecovery(incident, existing, { contractId: c.id, targetSha: merge }));
+        Object.assign(incident, recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'));
+      }
+    }
     if (incident?.revert_pr && incident.state !== 'recovered') {
       const pr = api(`pulls/${incident.revert_pr}`);
       if (pr.merged && (await deployment(pr.merge_commit_sha))?.conclusion === 'success') {
+        git('fetch', 'origin', pr.head.sha, incident.execution_head);
+        verifyRollback(incident, pr.head.sha, c.touches.filter(staticPath));
         const checks = api(`commits/${pr.head.sha}/check-runs`).check_runs;
         const seo = checks.find(x => x.name === 'seo-check' && x.conclusion === 'success');
         const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
-        if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident, {
+        if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident,
+          recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'), {
           state: 'recovered', revert_sha: pr.merge_commit_sha, validation: 'success', deployment_verified: true,
           after: { healthy: true, probes: after }, recovered_at: now.toISOString(),
         });
@@ -198,19 +284,18 @@ async function main() {
       probes, previous: incident, now: now.toISOString(), stopped: stop() });
     if (plan.action === 'observe') {
       if (!incident) { incident = { contract_id: c.id }; recovery.incidents.push(incident); }
-      Object.assign(incident, { state: 'observing', detected_at: now.toISOString(), head_sha: head, target_sha: merge, probes });
+      Object.assign(incident, recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'),
+        { state: 'observing', detected_at: now.toISOString(), head_sha: head, target_sha: merge, probes });
     }
     if (plan.action === 'revert' && apply) {
       if (stop()) throw new Error('stopped before recovery');
-      const branch = `Codex/decision-revert-${merge.slice(0, 12)}`;
-      const existing = gh('pr', 'list', '--repo', REPO, '--head', branch, '--state', 'all', '--json', 'number,state')[0];
-      if (existing?.state === 'CLOSED') throw new Error('recovery PR was closed by an operator; do not recreate');
-      // The incident stays in a separate ledger PR; rollback changes only the declared static files.
-      if (!existing) applyRevert(plan);
-      const pr = existing ?? publish(plan.paths, branch, `Revert static regression for ${c.id}`, head);
-      Object.assign(incident, { state: 'revert_pending', mode: 'production', trigger: process.env.GITHUB_EVENT_NAME ?? 'manual',
-        human_interventions: ['schedule', 'workflow_run'].includes(process.env.GITHUB_EVENT_NAME) ? 0 : 1,
-        before: { failed: true, probes }, revert_pr: pr.number });
+      const pending = pendingRecovery(incident, { head, probes, now: now.toISOString(), trigger: process.env.GITHUB_EVENT_NAME ?? 'manual' });
+      const checkpoint = recoveryCheckpoint(incident, pending);
+      // The reverse patch and its recovery evidence are published together.
+      // The rollback commit still changes only the declared static files.
+      applyRevert(plan);
+      const pr = publish(plan.paths, recoveryBranch, `Revert static regression for ${c.id}`, head, checkpoint);
+      Object.assign(incident, pending, { revert_pr: pr.number });
       git('checkout', '--detach', head);
     }
   }
@@ -241,6 +326,32 @@ function selftest() {
     { probes: [{ path: 'index.html', known: false }] }, { probes: [{ path: 'index.html', known: true, healthy: true }] }]) assert.equal(recoveryPlan({ ...p, ...change }).action, 'hold');
   assert.equal(recoveryPlan({ ...p, previous: null }).action, 'observe');
   assert.equal(recoveryPlan({ ...p, intent: { ...p.intent, eligibility: { reversibility_class: 'R1' } } }).action, 'hold');
+  const observed = { contract_id: 'x', state: 'observing', ...p.previous, trigger: 'schedule', human_interventions: 0 };
+  const pending = pendingRecovery(observed, { head: p.headSha, probes: p.probes, now: p.now, trigger: 'workflow_run' });
+  const checkpoint = recoveryCheckpoint(observed, pending);
+  const recoveryPR = { number: 123, state: 'MERGED', body: checkpoint };
+  const binding = { contractId: 'x', targetSha: p.mergeSha };
+  // Simulate a successful PR creation followed by a failed ledger publication:
+  // the next process has only the old observation and the already merged PR.
+  assert.deepEqual(resumeRecovery(structuredClone(observed), recoveryPR, binding), { ...pending, revert_pr: 123 });
+  for (const change of [{ state: 'CLOSED' }, { body: '' }, { body: checkpoint + '\n' + checkpoint }, { number: null }]) {
+    assert.throws(() => resumeRecovery(observed, { ...recoveryPR, ...change }, binding));
+  }
+  assert.throws(() => resumeRecovery({ ...observed, detected_at: p.now }, recoveryPR, binding), /recorded observation/);
+  assert.throws(() => resumeRecovery({ ...observed, head_sha: 'c'.repeat(40) }, recoveryPR, binding), /recorded observation/);
+  for (const change of [{ contract_id: 'other' }, { target_sha: 'c'.repeat(40) }, { execution_head: null },
+    { confirmed_at: observed.detected_at }, { before: { failed: true, probes: [{ path: 'other.html', known: true, healthy: false }] } }]) {
+    assert.throws(() => resumeRecovery(observed, { ...recoveryPR, body: recoveryCheckpoint(observed, { ...pending, ...change }) }, binding));
+  }
+  const humanObservation = { ...observed, trigger: 'workflow_dispatch', human_interventions: 1 };
+  const humanPending = pendingRecovery(humanObservation, { head: p.headSha, probes: p.probes, now: p.now, trigger: 'schedule' });
+  assert.equal(humanPending.human_interventions, 1);
+  assert.equal(resumeRecovery(humanObservation, { ...recoveryPR, body: recoveryCheckpoint(humanObservation, humanPending) }, binding).human_interventions, 1);
+  assert.throws(() => resumeRecovery(humanObservation, { ...recoveryPR,
+    body: recoveryCheckpoint(humanObservation, { ...humanPending, trigger: 'schedule', human_interventions: 0 }) }, binding), /prior human involvement/);
+  assert.equal(recoveryAttribution(observed, 'workflow_dispatch').human_interventions, 1);
+  assert.equal(recoveryAttribution({ detected_at: observed.detected_at }, 'schedule').human_interventions, 1);
+  assert.equal(recoveryAttribution(null, 'schedule').human_interventions, 0);
   assert.equal(pageHealth('<title>good</title><link rel="canonical" href="https://simplememofast.com/">', 200,
     { title: 'good', canonical: 'https://simplememofast.com/' }).healthy, true);
   assert.equal(pageHealth('<title>bad</title>', 200, { title: 'good' }).healthy, false);
@@ -252,6 +363,46 @@ function selftest() {
   assert(report.includes('data-score-total>42.5</span>'));
   assert(report.includes('<b>15.0</b>'));
   assert(report.includes('出荷2件'));
+  // **手で組んだ形を渡さない。**初版は `{ judged: 19, delegated: 19 }` を渡していたが、
+  // 実物の ep() が返すのは `delegated_ai` で、**公開ページの分岐は一度も配線されていなかった** ——
+  // 19件すべてAIの自己評価なのに「未判定は満点として扱いません」と出続けていた
+  // （2026-09-05、main の autopilot/index.html で実際に出ていた）。
+  // **描画側を検査したつもりで、描画側の入力を検査していた。**実物を通す。
+  const realPrecision = scoreEp([], {
+    weights: { ep: 15 },
+    ep: { precision_review: { accepted_modes: [], delegations: [{ mode: 'owner_delegated', reviewer: 'codex' }] } },
+  }, {
+    rules: { rules: [] },
+    actions: { actions: Array.from({ length: 19 }, (_, i) => ({ id: `a${i}`, force_owner: 'human',
+      owner_needed: i < 10, owner_needed_review: { mode: 'owner_delegated', reviewer: 'codex' } })) },
+  }).precision;
+  assert.equal(realPrecision.judged, 19, 'ep() の返り値が想定と違う');
+  const delegatedSample = structuredClone(sample);
+  delegatedSample.components.ep.precision = realPrecision;
+  const delegatedReport = renderReport('<tr data-score="ep"><td>EP</td><td class="num"><b>0.0</b></td><td class="num">15</td><td>old</td></tr>', delegatedSample, {});
+  assert(delegatedReport.includes('19件はオーナー委任によるAI評価'));
+  assert(delegatedReport.includes('独立した人間評価ではありません'));
+  const streakTemplate = 'before<!-- run-streaks:start -->stale<!-- run-streaks:end -->after';
+  const shippingDays = [1, 2].map(day => ({ date_jst: `2026-09-0${day}`, outcome: 'shipped' }));
+  const shippingReport = renderRunStreaks(streakTemplate, shippingDays);
+  assert(shippingReport.includes('連続出荷は現在2日'));
+  assert(shippingReport.includes('2026年9月1日〜2026年9月2日'));
+  const failedDays = [...shippingDays, { date_jst: '2026-09-03', outcome: 'failed' }];
+  const failureReport = renderRunStreaks(shippingReport, failedDays);
+  assert(failureReport.includes('連続稼働は現在<b>3</b>日（2026年9月1日〜2026年9月3日）'));
+  assert(failureReport.includes('最長も<b>3</b>日'));
+  assert(failureReport.includes('連続出荷は現在0日</b>で、'));
+  assert(failureReport.includes('連続出荷の最長は2日</b>（2026年9月1日〜2026年9月2日）'));
+  assert(failureReport.startsWith('before') && failureReport.endsWith('after'));
+  assert.equal(renderRunStreaks(failureReport, failedDays), failureReport);
+  const gapReport = renderRunStreaks(streakTemplate, [...shippingDays, { date_jst: '2026-09-04', outcome: 'shipped' }]);
+  assert(gapReport.includes('連続稼働は現在<b>1</b>日（2026年9月4日〜2026年9月4日）'));
+  assert(gapReport.includes('最長も<b>2</b>日'));
+  const emptyReport = renderRunStreaks(streakTemplate, []);
+  assert(emptyReport.includes('台帳の記録はまだありません。'));
+  assert(!emptyReport.includes('null') && !emptyReport.includes('2026'));
+  assert.throws(() => renderRunStreaks('missing', failedDays), /missing or ambiguous/);
+  assert.throws(() => renderRunStreaks(streakTemplate.repeat(2), failedDays), /missing or ambiguous/);
   // Exercise an actual reverse patch in a disposable Git repo. This is a drill, never production evidence.
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-recovery-test-'));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
@@ -265,6 +416,15 @@ function selftest() {
     assert.equal(fs.readFileSync(path.join(dir, 'index.html'), 'utf8'), 'healthy\n');
     assert.equal(fs.readFileSync(path.join(dir, 'other.txt'), 'utf8'), 'keep\n');
     assert.throws(() => applyRevert({ target, expected_head: '0'.repeat(40), paths: ['index.html'] }, dir));
+    g('add', '.'); g('commit', '-m', 'restore');
+    const restored = g('rev-parse', 'HEAD');
+    const incident = { target_sha: target, execution_head: target };
+    verifyRollback(incident, restored, ['index.html'], dir);
+    fs.writeFileSync(path.join(dir, 'other.txt'), 'unexpected change\n');
+    g('add', '.'); g('commit', '--amend', '--no-edit');
+    assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /declared reverse patch/);
+    fs.writeFileSync(path.join(dir, 'other.txt'), 'another commit\n'); g('add', '.'); g('commit', '-m', 'change after creation');
+    assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /changed after creation/);
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('decision-monitor: repeated probes, safe scope, stop, stale HEAD, and real Git recovery drill passed');
 }

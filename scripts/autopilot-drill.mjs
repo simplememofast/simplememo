@@ -193,6 +193,20 @@ const SCENARIOS = [
     CODES.RUN,
     '縮退コードが常時立つと、縮退の意味が消える'],
 
+  ...[
+    ['API不能', { githubApiReachable: false }, CODES.FAIL_API],
+    ['forceでもAPI不能', { githubApiReachable: false, force: true }, CODES.FAIL_API],
+    ['作業中の占有', { branchClaimed: true, claimHasWork: true }, CODES.SKIP_BRANCH_CLAIMED],
+    ['本番出荷済み', { prodStatusDate: '2026-08-23' }, CODES.SKIP_ALREADY_SHIPPED],
+    ['mainへマージ済み', { mainStatusDate: '2026-08-23' }, CODES.SKIP_ALREADY_SHIPPED],
+    ['当日PRあり', { prTodayExists: true }, CODES.SKIP_PR_TODAY],
+    ['主系実行中', { route: 'ccr-0920', primaryRunStatus: 'in_progress' }, CODES.SKIP_PRIMARY_RUNNING],
+  ].map(([name, patch, code]) => [
+    `代替モデルでも止める: ${name}`,
+    { preferredModel: 'primary', modelsAvailable: ['fallback'], ...patch }, code,
+    '使える代替モデルがあることは、着手の根拠や重複実行を避ける条件の代わりにならない',
+  ]),
+
   // --- API障害（2026-08-22追加） ----------------------------------------
   ['API障害: GitHub APIが読めない日は着手しない',
     { route: 'ccr-0730', githubApiReachable: false }, CODES.FAIL_API,

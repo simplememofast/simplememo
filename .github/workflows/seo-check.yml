@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+# New revisions supersede validation of older revisions on the same branch/PR.
+# Keep push and pull_request separate: autonomous content requires PR validation.
+# Every main run has a unique group so deployment observations and IndexNow's
+# first-parent notifications still run for every merged commit.
+concurrency:
+  group: seo-validation-${{ github.event_name }}-${{ github.ref }}-${{ github.ref == 'refs/heads/main' && github.run_id || 'latest' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   seo-check:
     runs-on: ubuntu-latest
@@ -21,8 +29,15 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Acquisition measurement and GSC aggregation regressions
+        run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
+
       - name: Prospective decisions and recovery safety
         run: |
+          node scripts/autopilot-data.mjs --selftest
+          node scripts/autopilot-data.mjs --check
+          node scripts/autopilot-checkpoint.mjs --selftest
+          node scripts/autopilot-checkpoint.mjs --check
           node scripts/value-contracts.mjs --selftest
           node scripts/value-contracts.mjs --check
           node scripts/decision-ci.mjs --selftest
@@ -574,6 +589,8 @@ jobs:
         run: |
           node scripts/check-routine-runs.mjs --selftest
           node scripts/check-routine-runs.mjs --check
+          node scripts/routine-observer.mjs --selftest
+          python3 scripts/routine-observer-local.py --selftest
 
       # 【週次が黙って消える形を止めた】
       # seo-daily.yml の週次段は `[ "$(date -u +%u)" = "1" ]`（UTC月曜）だけで
@@ -675,7 +692,10 @@ jobs:
       - name: Autopilot action ledger
         run: |
           node scripts/autopilot-act.mjs --selftest
+          node scripts/check-credential-probe.mjs --selftest
           node scripts/autopilot-act.mjs --check
+          node scripts/autopilot-completion.mjs --selftest
+          node scripts/autopilot-completion.mjs --check
 
       # 【ヒーロー画像】生成器の形だけを見る（Chromium を CI に持ち込まない）。
       #

@@ -23,12 +23,11 @@ beside it would publish two FAQPage nodes for one page, and the hand-written
 one is the one a human chose the wording for.
 
 Note on what this buys, so nobody re-measures it expecting the wrong thing:
-Google restricted FAQ rich results to authoritative government and health
-sites in 2023, so this will NOT put FAQ accordions in Google's results for
-this domain. It is worth doing for machine-readability — Bing still renders
-them, and the AI surfaces this site is actually winning on (3,164 Copilot
-citations) read structured data. Judge it on AI citations and Bing, not on
-Google rich results.
+Google stopped displaying FAQ rich results on 2026-05-07:
+https://support.google.com/webmasters/answer/6211453?hl=en
+Keep existing structured data consistent with visible answers. This validator
+checks that consistency; it does not promise Google/Bing/AI citation gains.
+
 """
 
 from __future__ import annotations
@@ -445,10 +444,17 @@ def check_committed(targets: list[tuple[Path, str, str]], pages=None) -> int:
 
     # **書き手を問わない検査。**上は discover() が持ち主の面だけを見るので、
     # 人が書いた FAQPage を持つ47面がまるごと外に出ていた。
-    sweep = audit_structured_data(indexable_pages() if pages is None else pages)
+    pages = list(indexable_pages() if pages is None else pages)
+    sweep = audit_structured_data(pages)
     for line in sweep:
         print(line)
     problems += len(sweep)
+
+    # Language-aware comparison is independent of generation. A different
+    # wording is a review candidate, not a reason to overwrite hand-written JSON-LD.
+    from faq_question_audit import audit_questions
+    questions = audit_questions(pages)
+    print(f"FAQ question review: {questions['pages']} pages; {questions['states']} (report only)")
 
     if problems:
         print(
@@ -483,6 +489,8 @@ def run_selftest() -> int:
     import contextlib
     import io
     import tempfile
+    from faq_question_audit import selftest as question_selftest
+    question_selftest()
 
     failures: list[str] = []
 
@@ -611,6 +619,7 @@ def run_selftest() -> int:
     # audit_structured_data 単体の検体は全部通ってしまう（配線が外れても緑）。
     rc, out = quiet(lambda: check_committed([], pages=[("x", ld('{"@type":"FAQPage","mainEntity":[]}'))]))
     t("--check は書き手を問わない検査を実行する", rc == 1 and "EMPTY FAQPage" in out)
+    t("--check は質問の比較も実行する", "FAQ question review:" in out and "'unread': 1" in out)
     full = ld('{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Q"}]}')
     t("中身のある FAQPage は問題にしない", audit_structured_data([("x", full)]) == [])
     # 2026-09-03 に2面で実際に見つかった形（生成側の化石と、手書きのもの）。
@@ -637,7 +646,7 @@ def run_selftest() -> int:
 
     for f2 in failures:
         print(f"  x {f2}")
-    print(f"自己テスト 42 件中 {len(failures)} 件失敗")
+    print(f"自己テスト 43 件中 {len(failures)} 件失敗")
     return 1 if failures else 0
 
 
@@ -648,10 +657,16 @@ def main() -> int:
                         help="コミット済みの FAQPage が可視の FAQ と一致しなければ exit 1")
     parser.add_argument("--selftest", action="store_true",
                         help="この検査自身が落ちることを確かめる（ページは書かない）")
+    parser.add_argument("--audit-questions", action="store_true",
+                        help="手書きFAQの質問文の差分候補をJSONで報告（読み取り専用）")
     args = parser.parse_args()
 
     if args.selftest:
         return run_selftest()
+    if args.audit_questions:
+        from faq_question_audit import audit_questions
+        print(json.dumps(audit_questions(indexable_pages()), ensure_ascii=False, indent=2))
+        return 0
 
     targets = discover()
     if args.check:
