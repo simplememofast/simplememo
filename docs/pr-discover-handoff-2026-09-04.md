@@ -33,6 +33,7 @@
 > | `simplememo-ios` #320（09:55Z マージ） | `MARKETING_VERSION` 5.8.11 → **5.8.12**、`release_notes/{ja-JP,en-US}/5.8.12.txt` |
 > | `simplememo-api` #239 | `migrations/0032_notion.sql` / `src/notion.ts` / `src/notion-client.ts` / `docs/notion-release.md` |
 > | **`GET https://api.simplememofast.com/v1/notion/config`** | 10:0xZ **`{"available":false}`** → **14:31Z `{"available":true}`**（3回連続で確認）。**サーバ側の有効化は済んだ** |
+> | **App Store 公開版**（09-05・オーナーが実機で確認） | **5.8.17**。Notion は 5.8.12 で入ったので、**公開版はもう持っている** |
 >
 > `docs/notion-release.md` の公開順は D1 migration 0032 → Workers の `NOTION_*` シークレット
 > → `NOTION_ENABLED=true` → **実OAuthと保存の確認** → iOS配布。
@@ -60,6 +61,20 @@
 > （⑥は85点で非乗車）、S2 の尺度は §4-5 と §1-7 で**実測と逆を向いている**ことが
 > 分かっている軸である（D-1 はリマインダー/カレンダーに最高帯の 20 を置くが、実測は 60 と 3）。
 > **必要条件（S1≥20 ∧ S2≥10）は、どちらも通る。**
+>
+> ### ⚠ 09-05 追記 —— **出荷されたのは「既定の保存先」ではなく「メールに足すコピー」**
+>
+> `simplememo-ios/docs/notion-v1.md` は「Notionが既定の保存先になる」「メール登録不要」と
+> 書いているが、**5.8.14 で設計が変わっていて、出荷はそうなっていない。**
+> `SendManager.send()` は必ずメールの Outbox を作ってから `queueNotionCopy(...)` を呼ぶ。
+>
+> | モード | メール | Notion | Obsidian |
+> |---|:-:|:-:|:-:|
+> | 既定（無料） | **送る** | コピー | 追記 |
+> | **Notion のみ（Premium）** | 送らない | 主系 | **止まる** |
+>
+> **「メール登録不要」「Notionが保存先になる」は書けない。**詳細と見出しへの影響は
+> 戦略文書 §4-3-3。
 >
 > ### 書いてはいけないこと
 >
