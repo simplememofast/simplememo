@@ -330,6 +330,37 @@ await servesDirectly("/admin/api/upload");
 // …but a slash-padded variant is normalized first, then re-enters as /admin/.
 await redirects("//admin/api/upload", "/admin/api/upload");
 
+// The complete 65-URL GSC "Crawled — currently not indexed" sample.
+// Expected destinations were independently verified with live HTTP requests.
+// Redirects are intentional; their final documents must remain indexable.
+{
+  const { cases } = JSON.parse(readFileSync(
+    path.join(ROOT, "docs/seo/gsc-crawled-cases-2026-09-05.json"), "utf8",
+  ));
+  if (cases.length !== 65 || new Set(cases.map(c => c.from)).size !== 65) {
+    fail("GSC crawled sample must contain exactly 65 distinct URLs");
+  }
+  const sitemap = readFileSync(path.join(ROOT, "sitemap-ja.xml"), "utf8");
+  for (const c of cases) {
+    if (c.status === 301) await redirects(c.from, c.to);
+    else if (c.status === 200 && c.from === c.to) await servesDirectly(c.from);
+    else fail(`Invalid GSC expectation: ${JSON.stringify(c)}`);
+    const filename = c.to.endsWith("/") ? `${c.to}index.html` : `${c.to}.html`;
+    const full = path.join(ROOT, filename.slice(1));
+    checked++;
+    if (!existsSync(full)) { fail(`${c.to}: final document is missing`); continue; }
+    const html = readFileSync(full, "utf8");
+    const canonical = html.match(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"/i)?.[1];
+    if (canonical !== ORIGIN + c.to) fail(`${c.to}: final canonical differs (${canonical})`);
+    if (/<meta\b[^>]*name="robots"[^>]*content="[^"]*noindex/i.test(html)) {
+      fail(`${c.to}: final document is noindex`);
+    }
+    if (!sitemap.includes(`<loc>${ORIGIN}${c.to}</loc>`)) {
+      fail(`${c.to}: final document is absent from the Japanese sitemap`);
+    }
+  }
+}
+
 // ── 9. Canonical URLs must never redirect ────────────────────────────────
 for (const p of [
   "/",
