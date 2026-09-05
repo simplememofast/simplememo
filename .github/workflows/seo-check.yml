@@ -443,6 +443,8 @@ jobs:
         run: |
           node scripts/autonomy-score.mjs --selftest
           node scripts/autonomy-score.mjs --check
+          # EP の委任判定を人が追認・反転する道具。人の判定に判定者・日付・根拠が揃うことを固定する
+          node scripts/ep-ratify.mjs --selftest
 
       # 【L1適格性ゲート】「そのタスクは着手して**よい**ものか」を実行前に判定する。
       #
