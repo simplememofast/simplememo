@@ -513,6 +513,18 @@
       "expr": "cf.items",
       "disposition": "表示整形",
       "note": "2026-09-05: 据え置きが1件も無い窓に「方針は有効（出番なし）」の1行を出すかどうかの分岐。**点は分岐の外で決まっている。**正が無い（cf.items が消える）と TypeError になるが、その手前の `cf?.enabled` と、carryForward() が必ず items/skipped を返すことで担保している。据え置きが在る窓は上の分岐が拾うので、ここは「何も無かった」だけを言う。"
+    },
+    {
+      "file": "scripts/routine-observer.mjs",
+      "expr": "priorRun.last_run_fired_at",
+      "disposition": "前提",
+      "note": "2026-09-05: 同じPENDING実行の完了として閉じるための同一性条件。時刻またはsession IDが無い・違うとsamePendingRunは成立せず、別の新しい成功runが無ければ拒否する。単発APIがlast_runを省略しても状態履歴から直前の既知の実行を引き継ぐ。履歴引継ぎを外す変異では、別sessionの成功で閉じる誤りを自己検査が検出した。"
+    },
+    {
+      "file": "scripts/routine-observer.mjs",
+      "expr": "priorRun.last_run_session_id",
+      "disposition": "前提",
+      "note": "2026-09-05: 同じPENDING実行の完了として閉じるための同一性条件。時刻またはsession IDが無い・違うとsamePendingRunは成立せず、別の新しい成功runが無ければ拒否する。単発APIがlast_runを省略しても状態履歴から直前の既知の実行を引き継ぐ。履歴引継ぎを外す変異では、別sessionの成功で閉じる誤りを自己検査が検出した。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
