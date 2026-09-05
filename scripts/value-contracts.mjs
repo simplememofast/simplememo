@@ -228,6 +228,29 @@ export function feedback(contracts) {
     })), scoring_rule: 'raw_brier_only' };
 }
 
+// A declaration whose declaring run died is retired, never implemented: its run_id is already a
+// historical run, so boundRun would refuse to bind it to a later ship. Retirement keeps the record
+// under data/decision-rejections/ (bookkeeping for decision-ci) and frees the day for a fresh declaration.
+export function retireIntent(intent, { reason, now = new Date(), contracts = [], runs = [] } = {}) {
+  const problems = [];
+  const id = intent?.id;
+  if (!(typeof id === 'string' && /^[a-z0-9][a-z0-9-]{2,99}$/.test(id))) problems.push('invalid intent id');
+  if (!(typeof intent?.run_id === 'string' && intent.run_id.length > 0)) problems.push('intent has no run_id');
+  if (!(typeof reason === 'string' && reason.trim().length >= 8)) problems.push('a reason of at least 8 characters is required');
+  if (contracts.some(c => c.id === id)) problems.push('contract already registered; retirement is only for declarations that never shipped');
+  if (runs.some(r => r.run_id === intent?.run_id && r.outcome === 'shipped')) problems.push('declaring run shipped; a shipped declaration is settled, not retired');
+  if (problems.length) throw new Error(problems.join('; '));
+  const declaring = runs.find(r => r.run_id === intent.run_id);
+  let declaringRun = null;
+  if (declaring) declaringRun = { outcome: declaring.outcome ?? null, failure_class: declaring.failure_class ?? null };
+  return {
+    id, run_id: intent.run_id, at: now.toISOString(), stage: 'execution', reason: reason.trim(),
+    retired_from: intentPath(id), metric: intent.metric ?? null, declared_at: intent.created_at ?? null,
+    declared_lane: intent.input?.lane ?? null, declared_action: intent.input?.action ?? null,
+    declaring_run: declaringRun,
+  };
+}
+
 export function loadIntents() {
   const dir = path.join(ROOT, 'data/decision-intents');
   return fs.existsSync(dir) ? fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort().map(f => read(`data/decision-intents/${f}`)) : [];
@@ -339,8 +362,33 @@ export async function selftest() {
     assert.throws(() => verifyHistory(c, base, g('rev-parse', 'HEAD'), dir), /undeclared path/);
     assert.throws(() => verifyHistory({ ...c, p: .9 }, base, head, dir), /changed after/);
     assert.throws(() => verifyHistory({ ...c, id: 'missing-id' }, base, head, dir), /not added/);
+    // Takeover after a declaring run died (2026-09-05): the dead declaration is retired into
+    // rejections, a fresh declaration follows, and the fresh one still verifies as declaration-first.
+    g('checkout', '-q', '-b', 'takeover', base);
+    fs.mkdirSync(path.join(dir, 'data/decision-intents'), { recursive: true });
+    fs.writeFileSync(path.join(dir, intentPath(c.id)), JSON.stringify(c, null, 2) + '\n'); g('add', '.'); g('commit', '-q', '-m', 'declare (dies)');
+    const retired = retireIntent(c, { reason: 'declaring run test-run failed (usage_limit); takeover re-declares', now: new Date('2026-09-05T00:00:00Z'),
+      runs: [{ run_id: c.run_id, outcome: 'failed', failure_class: 'usage_limit' }] });
+    assert.equal(retired.stage, 'execution');
+    assert.equal(retired.retired_from, intentPath(c.id));
+    assert.equal(retired.declaring_run.failure_class, 'usage_limit');
+    fs.mkdirSync(path.join(dir, 'data/decision-rejections'), { recursive: true });
+    fs.writeFileSync(path.join(dir, `data/decision-rejections/${c.id}.json`), JSON.stringify(retired, null, 2) + '\n');
+    fs.rmSync(path.join(dir, intentPath(c.id))); g('add', '-A'); g('commit', '-q', '-m', 'retire');
+    const fresh = { ...c, id: 'test-contract-2', run_id: 'test-run-2' };
+    fs.writeFileSync(path.join(dir, intentPath(fresh.id)), JSON.stringify(fresh, null, 2) + '\n'); g('add', '.'); g('commit', '-q', '-m', 'declare again');
+    fs.writeFileSync(path.join(dir, 'index.html'), 'after takeover\n'); g('add', '.'); g('commit', '-q', '-m', 'implement');
+    const takeoverHead = g('rev-parse', 'HEAD');
+    assert.equal(verifyHistory(fresh, base, takeoverHead, dir).changed_lines, 2);
+    // Exactly one live declaration remains in the branch diff (what decision-ci counts).
+    const live = g('diff', '--name-only', base, takeoverHead).split('\n').filter(f => /^data\/decision-intents\//.test(f));
+    assert.deepEqual(live, [intentPath(fresh.id)]);
+    assert.throws(() => retireIntent(c, { reason: '' }), /reason/);
+    assert.throws(() => retireIntent(c, { reason: 'long enough reason', contracts: [{ id: c.id }] }), /already registered/);
+    assert.throws(() => retireIntent(c, { reason: 'long enough reason', runs: [{ run_id: c.run_id, outcome: 'shipped' }] }), /shipped/);
+    assert.throws(() => retireIntent({ ...c, run_id: '' }, { reason: 'long enough reason' }), /run_id/);
   } finally { fs.rmSync(dir, { recursive: true }); }
-  console.log('value-contracts: prospective contracts, approval, missing data, maturity and raw Brier checks passed');
+  console.log('value-contracts: prospective contracts, approval, missing data, maturity, raw Brier and retirement checks passed');
 }
 
 async function main() {
@@ -381,6 +429,21 @@ async function main() {
     if (fs.existsSync(path.join(ROOT, intentPath(contract.id)))) throw new Error('intent exists; cannot change prediction');
     write(intentPath(contract.id), contract);
     console.log(JSON.stringify({ intent: intentPath(contract.id), ...contract.selection }, null, 2)); return;
+  }
+  if (args.includes('--retire')) {
+    const file = args[args.indexOf('--retire') + 1];
+    const ri = args.indexOf('--reason');
+    const reason = ri >= 0 ? args[ri + 1] : '';
+    if (!/^data\/decision-intents\/[a-z0-9][a-z0-9-]{2,99}\.json$/.test(file ?? '')) throw new Error('--retire takes a path under data/decision-intents/');
+    if (git('status', '--porcelain', '--untracked-files=no')) throw new Error('retire from a clean tracked tree');
+    const intent = read(file);
+    const rejection = retireIntent(intent, { reason, now: new Date(),
+      contracts: read('data/value-contracts.json').contracts, runs: read('data/autopilot-runs.json').runs });
+    const target = `data/decision-rejections/${intent.id}.json`;
+    if (fs.existsSync(path.join(ROOT, target))) throw new Error('rejection already recorded for this id');
+    write(target, rejection);
+    fs.rmSync(path.join(ROOT, file));
+    console.log(JSON.stringify({ retired: file, rejection: target, reason: rejection.reason }, null, 2)); return;
   }
   if (args.includes('--feedback')) { console.log(JSON.stringify(feedback(read('data/value-contracts.json').contracts), null, 2)); return; }
   const problems = loadIntents().flatMap(c => contractProblems(c, metrics).map(p => `${c.id}: ${p}`));

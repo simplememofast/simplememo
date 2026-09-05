@@ -60,7 +60,7 @@
     "「見ていない」を「異常なし」と書かないため、**数だけ先に置く。**",
     "次の対象はこれ（scripts/lib/param-guard-scan.py を参照）。"
   ],
-  "measured_at": "2026-09-04",
+  "measured_at": "2026-09-05",
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
@@ -531,6 +531,12 @@
       "expr": "retired.closed",
       "disposition": "報告のみ",
       "note": "2026-09-05: 自己検査の真偽値。意図的停止が閉じたことと、復旧と呼ばない説明の両方を要求する。closed が欠ければ t が失敗するため、欠落で検査が消える条件ではない。"
+    },
+    {
+      "file": "scripts/value-contracts.mjs",
+      "expr": "intent?.run_id",
+      "disposition": "別の規則が落とす",
+      "note": "2026-09-05: retireIntent の「宣言した run が出荷済みなら取り下げない」。intent に run_id が無ければこの照合は偽になるが、**同じ関数の直前で『intent has no run_id』が problems に積まれて throw する**ので、規則が黙って消えることはない（自己テスト「run_id 無しで throw」で固定）。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
@@ -563,7 +569,7 @@
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
   ],
-  "param_guards_measured_at": "2026-09-04",
+  "param_guards_measured_at": "2026-09-05",
   "$param_guards_note": [
     "**第2の族: 仮引数に対する「無いかもしれない」判定。**",
     "汚染の伝播は `const NAME = ...` を追うので、仮引数には付かない。",
@@ -807,6 +813,18 @@
       "expr": "x",
       "disposition": "表示整形",
       "note": "`pct(x)` が `n/a` を出す。**測れなかった成分を 0% と書かないための分岐。**EP の見逃し率は、時刻を持つ故障が窓内に1件も無ければ null になり、そこで `0.0%` と出すと**「見逃しゼロ」＝満点に見える。**点のほうは別に守ってある —— rate が null なら points も 0 で、`measurable: false` が立ち、check() が「measurable=false なのに点が入っている」で落とす。つまりこの null は表示だけの話で、握り潰されていない（自己テスト「時刻を持つ故障が無ければ0（満点にしない）」で固定）"
+    },
+    {
+      "file": "scripts/property-tests.mjs",
+      "expr": "age",
+      "disposition": "前提",
+      "note": "2026-09-05: 生成器の `DECLARATIONS_BY_AGE(age)`。経過分が読めない（null）占有は宣言の一覧も null＝「読めなかった」にする分岐。0 や空配列に倒すと「宣言は無い」と読まれ、材料の性質『宣言ファイルの一覧は読めた応答からしか出ない』が試す状態を生成器が作れなくなる。判定ではなく検体の生成。"
+    },
+    {
+      "file": "scripts/property-tests.mjs",
+      "expr": "name",
+      "disposition": "検体の生成",
+      "note": "2026-09-05: `genCompare` が『名前の読めないファイル』（filename 無し）を検体として作るための分岐。readClaim は名前の読めないファイルを作業側に倒す（宣言と読まない）ので、その状態が生成されないと性質『宣言ファイル以外の差分が1つでもあれば claimHasWork は真』は片側しか試されない。判定ではない。"
     }
   ]
 }

@@ -20,7 +20,7 @@
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { decide, baseState, CODES, readClaim, ageMinutes, isAbandonedClaim } from './autopilot-gate.mjs';
+import { decide, baseState, CODES, readClaim, ageMinutes, isAbandonedClaim, isDeclarationFile } from './autopilot-gate.mjs';
 import { summarize as summarizeBudget, validate as validateBudget } from './autopilot-budget.mjs';
 
 /** 決定論的な擬似乱数（xorshift32）。種を変えない限り毎回同じ列。 */
@@ -42,7 +42,7 @@ const RUNNABLE = new Set([CODES.RUN, CODES.RUN_TAKEOVER, CODES.DEGRADE_MODEL, CO
 const FAULTS = new Set([CODES.FAIL_CREDENTIAL, CODES.FAIL_API, CODES.FAIL_NO_MODEL]);
 
 function randomState(r) {
-  return baseState({
+  const st = baseState({
     route: pick(r, ROUTES),
     secretsPresent: r() < 0.8,
     budgetOver: r() < 0.3,
@@ -65,6 +65,18 @@ function randomState(r) {
     emergencyStop: r() < 0.15,
     emergencyStopReason: 'drill',
   });
+  // 占有に残った価値契約の宣言。**宣言だけ積んで死んだ占有**（2026-09-05）を必ず混ぜる。
+  // **乱数を1回も余分に引かない** —— 引くと後続の性質が見る状態列が全部ずれ、
+  // 「壊すと落ちる」検体が空振りする（実測: 追い越しの性質が1本、検体を見ずに通った）。
+  st.claimDeclarations = DECLARATIONS_BY_AGE(st.claimAgeMinutes);
+  return st;
+}
+
+/** 経過分から宣言の有無を決める（読めない占有は null・若い占有は空・死んだ占有には宣言が残っている）。 */
+function DECLARATIONS_BY_AGE(age) {
+  if (age === null) return null;
+  if (age >= 90) return ['data/decision-intents/a.json'];
+  return [];
 }
 
 const PROPERTIES = [
@@ -225,6 +237,27 @@ const PROPERTIES = [
       return d.run && d.code === CODES.DEGRADE_EGRESS;
     },
   },
+  // **新しい性質は末尾に足す。**性質は同じ乱数列を順に消費するので、途中に足すと後続の性質が見る状態が変わり、
+  // 「壊すと落ちる」検体が空振りする（2026-09-05 に実測。追い越しの性質が1本、検体を見ずに通った）。
+  {
+    name: '引き継ぎのときだけ、占有に残った宣言ファイルの一覧が判定に乗る',
+    why: '一覧が引き継ぎ側に届かないと、死んだ run の契約を実装する（boundRun が拒む）か、見落として二重に宣言するかのどちらかになる',
+    check: (s, decide) => {
+      // 固定した引き継ぎ状態で必ず1回試す（乱数が引き継ぎ状態を作らない回でも空振りしない）
+      for (const [decl, want] of [[['data/decision-intents/a.json'], ['data/decision-intents/a.json']], [[], []], [null, []]]) {
+        const fixed = decide(baseState({ branchClaimed: true, claimHasWork: false, claimAgeMinutes: 90,
+          claimDeclarations: decl, egressBlocked: s.egressBlocked }));
+        if (fixed.takeover !== true) return false;
+        if (JSON.stringify(fixed.staleDeclarations) !== JSON.stringify(want)) return false;
+      }
+      const d = decide(s);
+      if (d.takeover === true) {
+        const want = Array.isArray(s.claimDeclarations) ? s.claimDeclarations : [];
+        return JSON.stringify(d.staleDeclarations) === JSON.stringify(want);
+      }
+      return d.staleDeclarations === undefined;
+    },
+  },
 ];
 
 /** 予算台帳の不変条件。**合計が合わない集計は、合っていないことに気づけない。** */
@@ -293,22 +326,34 @@ const MATERIAL_PROPERTIES = [
     // **応答の形は readClaim を呼ぶ前に確定させる。**呼んだ後に見ると、
     // 読み手が入力を書き換える実装（欠けた配列を空配列に倒す等）が
     // **自分の誤りを性質から隠せてしまう。**実際その変異は最初この性質を素通りした。
-    check: (resp) => {
+    check: (resp, rc = readClaim) => {
       const readable = isWholeCompare(resp);
-      const c = readClaim(resp);
+      const c = rc(resp);
       if (readable) return true; // 読めた回は対象外
       return isAbandonedClaim({ branchClaimed: true, ...c }) === false;
     },
   },
   {
-    name: '差分が1つでもあれば claimHasWork は真（作業のある占有を追い越さない）',
-    why: '「claim コミットしか無い」を判定するのは files の数だけで、そこは真偽が反転しやすい',
-    check: (resp) => {
+    name: '宣言ファイル以外の差分が1つでもあれば claimHasWork は真、宣言ファイルだけなら偽',
+    why: '「claim コミットしか無い」の判定に価値契約の宣言（data/decision-intents/）を混ぜない。'
+      + '2026-09-05、宣言直後に落ちた占有を「差分あり」と読んで一日中守った',
+    check: (resp, rc = readClaim) => {
       const hadArrays = Array.isArray(resp?.files) && Array.isArray(resp?.commits);
-      const nFiles = Array.isArray(resp?.files) ? resp.files.length : null;
-      const c = readClaim(resp);
+      const c = rc(resp);
       if (!hadArrays) return c.claimHasWork === null;
-      return c.claimHasWork === (nFiles > 0);
+      const work = resp.files.filter((f) => !isDeclarationFile(f?.filename)).length;
+      return c.claimHasWork === (work > 0);
+    },
+  },
+  {
+    name: '宣言ファイルの一覧は、読めた応答からしか出ない',
+    why: '読めない日に空配列を返すと「宣言は無い」と読まれ、引き継ぎ側が旧契約を見落とす',
+    check: (resp, rc = readClaim) => {
+      const hadArrays = Array.isArray(resp?.files) && Array.isArray(resp?.commits);
+      const c = rc(resp);
+      if (!hadArrays) return c.claimDeclarations === null;
+      const want = resp.files.map((f) => f?.filename).filter((n) => isDeclarationFile(n));
+      return JSON.stringify(c.claimDeclarations) === JSON.stringify(want);
     },
   },
   {
@@ -316,9 +361,9 @@ const MATERIAL_PROPERTIES = [
     why: '0 分は「たったいま動いた」で、追い越さない側。null との取り違えは逆向きに効く',
     // **readClaim は応答が丸ごと読めたときだけ数を返す。**files だけ・commits だけ、
     // といった片肺の応答は「読めなかった」に倒す —— 片方から他方を推定しない。
-    check: (resp) => {
+    check: (resp, rc = readClaim) => {
       const readable = isWholeCompare(resp);
-      const c = readClaim(resp);
+      const c = rc(resp);
       return readable ? typeof c.claimAgeMinutes === 'number' : c.claimAgeMinutes === null;
     },
   },
@@ -335,7 +380,12 @@ function genCompare(r) {
   const shape = pick(r, ['ok', 'no-files', 'no-commits', 'empty-commits', 'bad-date', 'null', 'partial']);
   const date = new Date(Date.now() - Math.floor(r() * 10000) * 60000).toISOString();
   const commits = [{ commit: { committer: { date } } }];
-  const files = Array.from({ length: Math.floor(r() * 3) }, () => ({ filename: 'x' }));
+  // 宣言ファイル（作業に数えない）・普通のファイル・名前の読めないファイルを混ぜる
+  const NAMES = ['x', 'data/decision-intents/a.json', 'data/decision-rejections/b.json', undefined];
+  const files = Array.from({ length: Math.floor(r() * 3) }, () => {
+    const name = pick(r, NAMES);
+    return name === undefined ? {} : { filename: name };
+  });
   switch (shape) {
     case 'ok': return { files, commits };
     case 'no-files': return { commits };
@@ -375,8 +425,22 @@ const REQUIRED_COVERAGE = [
   ['死んだ占有（claimだけ・90分以上）', (s) => s.claimHasWork === false && s.claimAgeMinutes >= 90,
     '**引き継ぎが起きる唯一の状態。**生成されなければ、引き継ぎは一度も試されていない'],
   ['force あり', (s) => s.force, 'force が越えられない壁を試す入口'],
+  ['宣言だけの死んだ占有', (s) => s.branchClaimed && s.claimHasWork === false && s.claimAgeMinutes >= 90
+    && Array.isArray(s.claimDeclarations) && s.claimDeclarations.length > 0,
+    '契約を宣言した直後に落ちた占有（2026-09-05）。生成されなければ、宣言つきの引き継ぎは一度も試されていない'],
 ];
 const MIN_HITS = 5;
+
+/** 材料（compare 応答）の生成器の被覆。**片方しか作らないと、材料の読み方の性質は空虚に通る。** */
+const readableCompare = (x) => Array.isArray(x?.files) && Boolean(x?.commits?.at?.(-1)?.commit?.committer?.date);
+const MATERIAL_COVERAGE = [
+  ['読めた compare', readableCompare, '片方しか作らないと、材料の読み方の性質は空虚に通る'],
+  ['読めない compare', (x) => !readableCompare(x), '片方しか作らないと、材料の読み方の性質は空虚に通る'],
+  ['宣言ファイルだけの compare', (x) => readableCompare(x) && x.files.length > 0 && x.files.every((f) => isDeclarationFile(f?.filename)),
+    '宣言だけ積んで死んだ占有（2026-09-05）が生成されなければ、その読み方は一度も試されていない'],
+  ['宣言以外の差分がある compare', (x) => readableCompare(x) && x.files.some((f) => !isDeclarationFile(f?.filename)),
+    '作業のある占有が生成されなければ、追い越さない側の性質は空虚に通る'],
+];
 
 /** **検証器そのもの**を試す壊れた台帳。落ちなければ「上限に永久に当たらない」。 */
 const BROKEN_LEDGERS = [
@@ -386,7 +450,7 @@ const BROKEN_LEDGERS = [
     task_budgets: { article: { monthly_usd_cap: 20, note: 'x' } } }],
 ];
 
-export function run({ cases = 400, seed = 20260822, decider = decide, gen = randomState } = {}) {
+export function run({ cases = 400, seed = 20260822, decider = decide, gen = randomState, reader = readClaim } = {}) {
   const r = rng(seed);
   const failures = [];
   for (const p of PROPERTIES) {
@@ -420,19 +484,16 @@ export function run({ cases = 400, seed = 20260822, decider = decide, gen = rand
   for (const p of MATERIAL_PROPERTIES) {
     for (const resp of materialSample) {
       let ok = false, err = null;
-      try { ok = p.check(resp); } catch (e) { err = e.message; }
+      try { ok = p.check(resp, reader); } catch (e) { err = e.message; }
       if (!ok) { failures.push({ property: p.name, why: p.why, input: resp, err }); break; }
     }
   }
-  // 生成器が「読めた形」と「読めない形」を両方作っていること。**片方だけなら空虚。**
-  for (const [label, pred] of [
-    ['読めた compare', (x) => Array.isArray(x?.files) && x?.commits?.at?.(-1)?.commit?.committer?.date],
-    ['読めない compare', (x) => !(Array.isArray(x?.files) && x?.commits?.at?.(-1)?.commit?.committer?.date)],
-  ]) {
+  // 生成器が「読めた形」「読めない形」「宣言だけ」「宣言以外あり」を全部作っていること。**片方だけなら空虚。**
+  for (const [label, pred, why] of MATERIAL_COVERAGE) {
     if (materialSample.filter(pred).length < MIN_HITS) {
       failures.push({
         property: `生成器が「${label}」を作る`,
-        why: '片方しか作らないと、材料の読み方の性質は空虚に通る',
+        why,
         input: { cases, 意味: '**この前提を持つ性質は空虚に通っている**' },
       });
     }
@@ -479,7 +540,7 @@ export function run({ cases = 400, seed = 20260822, decider = decide, gen = rand
 
   return {
     total: PROPERTIES.length + BUDGET_PROPERTIES.length + MATERIAL_PROPERTIES.length
-      + REQUIRED_COVERAGE.length + BROKEN_LEDGERS.length + 2,
+      + REQUIRED_COVERAGE.length + BROKEN_LEDGERS.length + MATERIAL_COVERAGE.length,
     failures, cases, seed,
   };
 }
@@ -514,6 +575,11 @@ const MUTANTS = [
     if (result.modelUsed) delete result.takeover;
     return result;
   }, '代替モデルでも死んだ占有への引き継ぎ情報を保持する'],
+  ['引き継ぎ情報から宣言の一覧を落とす', (d) => (s) => {
+    const result = { ...d(s) };
+    if (result.takeover === true) delete result.staleDeclarations;
+    return result;
+  }, '引き継ぎのときだけ、占有に残った宣言ファイルの一覧が判定に乗る'],
   ['run を常に立てる', (d) => (s) => ({ ...d(s), run: true }),
     'run フラグは判定コードと必ず一致する'],
   ['判定コードを常に RUN にする', (d) => (s) => ({ ...d(s), code: CODES.RUN }),
@@ -576,12 +642,36 @@ export function selftest() {
         : `**どの性質も落ちなかった —— この壊し方は誰も見ていない**`);
   }
 
+  // (2b) 材料の読み方を壊す。**readClaim を差し替えて、名指しした材料の性質が落ちるか。**
+  //      2026-09-05 までの挙動（宣言ファイルを作業と数える）が、そのまま1つ目の変異。
+  const MATERIAL_MUTANTS = [
+    ['宣言ファイルを作業と数える（2026-09-05 までの挙動）', (rc) => (resp) => {
+      const c = rc(resp);
+      if (c.claimHasWork === false && Array.isArray(c.claimDeclarations) && c.claimDeclarations.length > 0) {
+        return { ...c, claimHasWork: true };
+      }
+      return c;
+    }, '宣言ファイル以外の差分が1つでもあれば claimHasWork は真、宣言ファイルだけなら偽'],
+    ['読めない応答で宣言の一覧を空配列にする', (rc) => (resp) => {
+      const c = rc(resp);
+      return c.claimDeclarations === null ? { ...c, claimDeclarations: [] } : c;
+    }, '宣言ファイルの一覧は、読めた応答からしか出ない'],
+  ];
+  for (const [label, wrap, expected] of MATERIAL_MUTANTS) {
+    const { failures } = run({ reader: wrap(readClaim) });
+    const names = failures.map((f) => f.property);
+    say(names.includes(expected), `**壊すと落ちる（材料）: ${label}**`,
+      names.length
+        ? `落ちたが別の性質だった。「${expected}」は通ってしまった（落ちたのは ${names.join(' / ')}）`
+        : `**どの性質も落ちなかった —— この壊し方は誰も見ていない**`);
+  }
+
   // (3) 素の判定器では1つも落ちない（常に落ちる検査も、何も見ていないのと同じ）
   const clean = run().failures;
   say(clean.length === 0, '素の判定器では反例が出ない',
     `${clean.length} 件落ちた: ${clean.map((f) => f.property).join(' / ')}`);
 
-  const total = 2 + MUTANTS.length + 1;
+  const total = 2 + MUTANTS.length + MATERIAL_MUTANTS.length + 1;
   console.log(`\n  自己テスト ${total} 件中 ${bad} 件失敗`);
   return bad;
 }
@@ -601,10 +691,7 @@ if (isMain) {
   }));
   // **数えたものは全部並べる。**総数だけ増やして行を出さないと、
   // 落ちたときに「27 / 28」とだけ出てどれか分からない。
-  const MATERIAL_COVERAGE_ROWS = [
-    ['読めた compare', '片方しか作らないと、材料の読み方の性質は空虚に通る'],
-    ['読めない compare', '片方しか作らないと、材料の読み方の性質は空虚に通る'],
-  ].map(([label, why]) => ({ name: `生成器が「${label}」を作る`, why }));
+  const MATERIAL_COVERAGE_ROWS = MATERIAL_COVERAGE.map(([label, , why]) => ({ name: `生成器が「${label}」を作る`, why }));
   for (const p of [...PROPERTIES, ...BUDGET_PROPERTIES, ...MATERIAL_PROPERTIES,
     ...COVERAGE_ROWS, ...MATERIAL_COVERAGE_ROWS, ...BROKEN_ROWS]) {
     const f = failures.find((x) => x.property === p.name);
