@@ -1211,6 +1211,9 @@ jobs:
       - name: BigQuery credential handling
         run: node growth/lib/bigquery.test.mjs
 
+      - name: Private analytics API retrieval
+        run: node --test growth/lib/analytics-export.test.mjs
+
       # 一括エクスポートの「届いているように見えて欠けている」判定。
       # これもネットワークに触らない（テーブル名と日付の配列だけを渡す）。
       # 2026-08-21、Search Console から5件の失敗メールが来たとき、
