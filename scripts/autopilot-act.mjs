@@ -381,9 +381,11 @@ export const CLOSE_CHECKS = {
       ? ctx.orphans.find((o) => o.branch === branch)
       : ctx.orphans.find((o) => o.pr === pr || (o.prs ?? []).includes(pr));
     const label = byBranch ? branch : `#${pr}`;
+    if (pendingPrCoversOrphan(still)) return { closed: false, pending_pr: still.pending_pr,
+      evidence: `${label} は PR #${still.pending_pr.number} でhead ${still.head_sha} を追跡中（main反映・出荷は未確認）` };
     return still
-      ? { closed: false, evidence: `${label} はまだ ${still.ahead_by} 件先にある` }
-      : { closed: true, evidence: `${label} の取り残しは解消（走査に出てこない）` };
+      ? { closed: false, pending_pr: null, evidence: `${label} はまだ ${still.ahead_by} 件先にある` }
+      : { closed: true, pending_pr: null, evidence: `${label} の取り残しは解消（走査に出てこない）` };
   },
 
   manual({ observed } = {}, _ctx) {
@@ -654,6 +656,13 @@ export function derive(ctx) {
     const uniq = orphanIds.has(id) ? `${id}-${o.pr}` : id;
     orphanIds.add(uniq);
     const all = (o.prs ?? [o.pr]).filter((n) => Number.isInteger(n));
+    if (pendingPrCoversOrphan(o)) {
+      out.push({ id: uniq, source: 'orphan', auto: null, touches: [], prs: all,
+        title: `PR #${o.pending_pr.number} の反映待ち: ${o.branch}`,
+        detail: '開いているPRがブランチの現在のheadを扱っている。検証・マージの結果を追跡し、同じ変更を再投入しない。',
+        close_check: { kind: 'branch_caught_up', params: { branch: o.branch } } });
+      continue;
+    }
     out.push({
       id: uniq,
       title: `ブランチ ${o.branch} に ${o.ahead_by} コミットが取り残されている`
@@ -1186,6 +1195,14 @@ export function reconcile(ledger, ctx) {
       a.evidence = `閉じ条件の実行に失敗: ${e.message}`;
       continue;
     }
+    if (res.pending_pr) {
+      // Keep the first verified head while this PR is pending. Recording every
+      // subsequent head would make the ledger's own commits change this receipt.
+      if (a.pending_pr?.number !== res.pending_pr.number || a.pending_pr.branch !== res.pending_pr.branch) a.pending_pr = res.pending_pr;
+      a.evidence = `PR #${a.pending_pr.number} へ引き継いだhead ${a.pending_pr.head_sha} を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）`;
+      continue;
+    }
+    if (res.pending_pr === null || res.closed) delete a.pending_pr;
     a.evidence = res.evidence;
     if (res.closed) {
       a.state = 'done';
@@ -1198,7 +1215,8 @@ export function reconcile(ledger, ctx) {
 
 /** 表示・メール用の集計。age は「開いてから何日」。 */
 export function summarize(ledger, matrix, today) {
-  const open = ledger.actions.filter((a) => a.state === 'open');
+  const pending_pr = ledger.actions.filter((a) => a.state === 'open' && a.pending_pr);
+  const open = ledger.actions.filter((a) => a.state === 'open' && !a.pending_pr);
   const rows = open.map((a) => {
     const c = classify(a, matrix);
     return { ...a, owner: c.owner, owner_why: c.why, age_days: daysBetween(a.created_jst, today) ?? 0 };
@@ -1206,6 +1224,7 @@ export function summarize(ledger, matrix, today) {
   rows.sort((a, b) => (b.age_days - a.age_days) || a.id.localeCompare(b.id));
   return {
     open_total: rows.length,
+    pending_pr,
     human: rows.filter((r) => r.owner === 'human'),
     ai: rows.filter((r) => r.owner === 'ai'),
     acknowledged: ledger.actions.filter((a) => a.state === 'acknowledged').length,
@@ -1534,6 +1553,14 @@ export function orphanSlug(branch) {
   return String(branch).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+export function pendingPrCoversOrphan(row) {
+  const proof = row?.pending_pr;
+  return Number.isInteger(proof?.number) && proof.number > 0
+    && typeof row.branch === 'string' && row.branch.length > 0
+    && /^[a-f0-9]{40}$/.test(row.head_sha ?? '')
+    && proof.head_sha === row.head_sha && proof.branch === row.branch;
+}
+
 /**
  * マージ後に push された取り残しを探す。**取れなかったら null**
  * （空配列だと「取り残しは無い」＝逆の結論になる）。
@@ -1547,7 +1574,7 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
   };
   const get = async (url) => {
     const res = await fetchImpl(url, { headers, signal: AbortSignal.timeout(20_000) });
-    if (!res.ok) throw new Error(`${res.status}`);
+    if (!res.ok) { const error = new Error(`${res.status}`); error.status = res.status; throw error; }
     return res.json();
   };
   try {
@@ -1592,6 +1619,19 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
         { pages: ORPHAN_MAX_PAGES, note: '7日窓を覆えなかった（解消と読ませない）' });
       return null;
     }
+    // A reused branch can have a new open PR. Calling its live work "orphaned"
+    // makes Act report its own growing commits on every observation and restart
+    // the pending PR's CI. Read all open PRs; failure is unknown, not an empty set.
+    const openPrs = [];
+    let openCovered = false;
+    for (let page = 1; page <= ORPHAN_MAX_PAGES; page++) {
+      const batch = await get(`https://api.github.com/repos/${repo}/pulls`
+        + `?state=open&sort=created&direction=desc&per_page=100&page=${page}`);
+      if (!Array.isArray(batch)) throw new Error('Incomplete open PR inventory');
+      openPrs.push(...batch);
+      if (batch.length < 100) { openCovered = true; break; }
+    }
+    if (!openCovered) throw new Error('Open PR inventory page limit reached');
     // **ブランチごとに、最後のマージだけ見る。**答えは最新マージPRの積なので、
     // compare はブランチ1本につき1回でよい。PRごとに回すと、1日25本の日に
     // 50回叩いたうえで同じ答えを24回捨てることになる。
@@ -1617,15 +1657,43 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
           get(`https://api.github.com/repos/${repo}/compare/`
             + `${encodeURIComponent(pr.base.ref)}...${encodeURIComponent(branch)}`),
         ]);
-      } catch {
-        continue; // ブランチが消えている（＝取り残しは起こりえない）
+      } catch (error) {
+        // A comparison failure is not evidence that the branch disappeared.
+        // Only an independent 404 for the branch ref permits removing its watch.
+        if (error.status !== 404) throw error;
+        try {
+          await get(`https://api.github.com/repos/${repo}/git/ref/heads/${encodeURIComponent(branch)}`);
+        } catch (refError) {
+          if (refError.status === 404) continue;
+          throw refError;
+        }
+        throw new Error('Comparison unavailable for an existing branch');
       }
+      if (!Array.isArray(after?.commits) || !Array.isArray(notOnBase?.commits)) throw new Error('Incomplete branch comparison');
       const missing = new Set((notOnBase.commits ?? []).map((c) => c.sha));
       const orphaned = (after.commits ?? []).filter((c) => missing.has(c.sha));
       if (orphaned.length === 0) continue;
+      const candidates = openPrs.filter(p => p.state === 'open' && p.head?.ref === branch
+        && p.head.repo?.full_name === repo && p.base?.repo?.full_name === repo && p.base.ref === 'main'
+        && Number.isInteger(p.number) && p.number > 0 && /^[a-f0-9]{40}$/.test(p.head.sha ?? ''));
+      let pending_pr = null, head_sha = null;
+      if (candidates.length) {
+        const [ref, fresh] = await Promise.all([
+          get(`https://api.github.com/repos/${repo}/git/ref/heads/${encodeURIComponent(branch)}`),
+          get(`https://api.github.com/repos/${repo}/pulls/${candidates[0].number}`),
+        ]);
+        if (ref?.ref !== `refs/heads/${branch}` || ref.object?.type !== 'commit'
+          || !/^[a-f0-9]{40}$/.test(ref.object.sha ?? '')) throw new Error('Unverified current branch head');
+        head_sha = ref.object.sha;
+        const pending = fresh?.number === candidates[0].number && fresh.state === 'open'
+          && fresh.head?.ref === branch && fresh.head.repo?.full_name === repo
+          && fresh.base?.ref === 'main' && fresh.base.repo?.full_name === repo
+          && fresh.head.sha === head_sha ? fresh : null;
+        if (pending) pending_pr = { number: pending.number, branch, head_sha };
+      }
       // ③ **中身の内訳。**「台帳の更新なら再投入、書きかけなら捨てる」を決めるのに
       // 要るのはこの一覧で、無いと拾う側がブランチを取り直して git show を叩く。
-      const paths = await fetchOrphanPaths(get, repo, orphaned);
+      const paths = pending_pr ? null : await fetchOrphanPaths(get, repo, orphaned);
       // **1ブランチ = 1件。**PRごとに返すと、使い回されたブランチが
       // PRの数だけ行になる（derive 側の【なぜブランチ単位か】を見ること）。
       out.push({
@@ -1638,6 +1706,7 @@ export async function fetchOrphanedCommits(repo, token, today, { fetchImpl = fet
         commits: orphaned.map((c) => c.sha.slice(0, 7)),
         paths,
         ledger_only: classifyOrphanPaths(paths),
+        ...(pending_pr ? { pending_pr, head_sha } : {}),
       });
     }
     return out;
@@ -2407,6 +2476,10 @@ export function validateLedger(ledger, matrix) {
     else if (seen.has(a.id)) p.push(`${at}: duplicate id`);
     else seen.add(a.id);
     if (!STATES.includes(a.state)) p.push(`${at}: state must be one of ${STATES.join('|')}`);
+    if (a.pending_pr && (a.state !== 'open' || a.source !== 'orphan'
+      || a.close_check?.kind !== 'branch_caught_up'
+      || !pendingPrCoversOrphan({ pending_pr: a.pending_pr, head_sha: a.pending_pr.head_sha,
+        branch: a.close_check?.params?.branch }))) p.push(`${at}: invalid pending PR receipt`);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(a.created_jst || '')) p.push(`${at}: created_jst must be YYYY-MM-DD`);
     // **書き間違えた期日は、その行を黙って永久に鳴らなくする。**形だけは機械が見る。
     if (a.not_before_jst != null && !/^\d{4}-\d{2}-\d{2}$/.test(a.not_before_jst)) {
@@ -2462,6 +2535,10 @@ function render(sum, applied, today) {
       if (a.evidence) L.push(`        現状: ${a.evidence}`);
     }
   }
+  if (sum.pending_pr?.length) {
+    L.push('', '■ PR待ち（再投入せず検証・マージを追跡）');
+    for (const a of sum.pending_pr) L.push(`  ${a.title}\n        ${a.evidence}`);
+  }
   if (applied?.length) {
     L.push('', '■ 今回このスクリプトが実行したこと');
     for (const r of applied) {
@@ -2473,7 +2550,7 @@ function render(sum, applied, today) {
     L.push('', '■ 本日クローズ（閉じ条件が通ったもの）');
     for (const a of sum.closed_today) L.push(`  ${a.title}\n        根拠: ${a.evidence}`);
   }
-  if (sum.open_total === 0) L.push('', '未処理なし。');
+  if (sum.open_total === 0 && !sum.pending_pr?.length) L.push('', '未処理なし。');
   return L.join('\n');
 }
 
@@ -2486,6 +2563,105 @@ async function selftest() {
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
+  // Existing fixtures model closed PR history. Add an explicit empty open-PR
+  // response; dedicated cases below exercise pending PRs through the real reader.
+  const fetchOrphansWithoutOpen = (repo, token, today, options = {}) => fetchOrphanedCommits(repo, token, today, {
+    ...options, fetchImpl: async (url, init) => url.includes('/pulls?state=open&')
+      ? { ok: true, json: async () => [] } : (options.fetchImpl ?? fetch)(url, init),
+  });
+  {
+    const sha = 'c'.repeat(40), old = 'a'.repeat(40), branch = 'claude/reused';
+    const pending = { number: 924, state: 'open', draft: false,
+      head: { ref: branch, sha, repo: { full_name: 'o/r' } }, base: { ref: 'main', repo: { full_name: 'o/r' } } };
+    const fixture = ({ prs = [pending], freshPr, refSha = sha, openError = false, refError = false,
+      compareStatus = null, refStatus = null,
+      pageTwo = false, endless = false } = {}) => async url => {
+      const data = value => ({ ok: true, json: async () => value });
+      if (url.includes('/pulls?state=closed')) return data([{ number: 895, merged_at: '2026-09-05T02:00:00Z',
+        head: { ref: branch, sha: old }, base: { ref: 'main' } }]);
+      if (url.includes('/pulls?state=open')) {
+        if (openError) throw new Error('HTTP 503');
+        if (endless || (pageTwo && url.endsWith('page=1'))) return data(Array.from({ length: 100 }, () => ({ state: 'open', head: { ref: 'other' } })));
+        return data(prs);
+      }
+      if (url.includes('/git/ref/heads/')) {
+        if (refError) throw new Error('HTTP 403');
+        if (refStatus) return { ok: false, status: refStatus };
+        return data({ ref: `refs/heads/${branch}`, object: { type: 'commit', sha: refSha } });
+      }
+      if (url.endsWith('/pulls/924')) return data(freshPr ?? prs[0]);
+      if (url.includes('/compare/')) return compareStatus ? { ok: false, status: compareStatus } : data({ commits: [{ sha }] });
+      if (url.includes('/commits/')) return data({ files: [{ filename: 'data/autopilot-runs.json' }] });
+      throw new Error('Unexpected fixture request');
+    };
+    const scan = options => fetchOrphanedCommits('o/r', 'tok', '2026-09-05', { fetchImpl: fixture(options) });
+    const covered = await scan();
+    t('open PR must cover the actual current branch head', pendingPrCoversOrphan(covered[0]));
+    t('live PR work is derived as stable waiting work without a handler', derive({ orphans: covered })[0].title.includes('反映待ち')
+      && derive({ orphans: covered })[0].auto === null);
+    const closure = CLOSE_CHECKS.branch_caught_up({ branch }, { orphans: covered });
+    t('pending PR is not closed as delivered', closure.closed === false && closure.pending_pr.number === 924 && closure.evidence.includes('main反映・出荷は未確認'));
+    t('legacy orphan PR identity also finds the pending successor', CLOSE_CHECKS.branch_caught_up({ pr: 895 }, { orphans: covered }).pending_pr.number === 924);
+    t('an open PR on a subsequent page is still found', pendingPrCoversOrphan((await scan({ pageTwo: true }))[0]));
+    t('draft PR work remains intentionally pending rather than orphaned', pendingPrCoversOrphan((await scan({ prs: [{ ...pending, draft: true }] }))[0]));
+    t('refreshing an old list entry observes the updated PR head', pendingPrCoversOrphan((await scan({ prs: [{ ...pending, head: { ...pending.head, sha: old } }], freshPr: pending }))[0]));
+    for (const options of [{ prs: [] }, { refSha: 'd'.repeat(40) },
+      { prs: [{ ...pending, state: 'closed' }] }, { prs: [{ ...pending, head: { ...pending.head, ref: 'other' } }] },
+      { prs: [{ ...pending, head: { ...pending.head, repo: { full_name: 'someone/fork' } } }] },
+      { prs: [{ ...pending, base: { ...pending.base, ref: 'development' } }] },
+      { prs: [{ ...pending, base: { ...pending.base, repo: { full_name: 'someone/fork' } } }] }]) {
+      const result = await scan(options);
+      t('an unrelated, closed or outdated PR does not suppress the orphan', !derive({ orphans: result })[0].title.includes('反映待ち'));
+      t('absence of exact pending coverage cannot close an orphan', !CLOSE_CHECKS.branch_caught_up({ branch }, { orphans: result }).closed);
+    }
+    t('a PR closed after listing does not suppress the orphan', !pendingPrCoversOrphan((await scan({ freshPr: { ...pending, state: 'closed' } }))[0]));
+    for (const options of [{ openError: true }, { refError: true }, { endless: true }]) {
+      const result = await scan(options);
+      t('incomplete open PR evidence remains unknown, not resolved', result === null
+        && !CLOSE_CHECKS.branch_caught_up({ branch }, { orphans: result }).closed);
+    }
+    for (const options of [{ compareStatus: 503 }, { compareStatus: 404 }, { compareStatus: 404, refStatus: 503 }]) {
+      const result = await scan(options);
+      t('a failed comparison is not proof of a deleted branch', result === null && !CLOSE_CHECKS.branch_caught_up({ branch }, { orphans: result }).closed);
+    }
+    t('independently confirmed branch deletion releases the orphan', (await scan({ compareStatus: 404, refStatus: 404 })).length === 0);
+    const ledger = { actions: [] };
+    merge(ledger, derive({ orphans: covered }), '2026-09-05');
+    reconcile(ledger, { orphans: covered, today: '2026-09-05' });
+    const before = JSON.stringify(ledger);
+    const advanced = structuredClone(covered);
+    advanced[0].head_sha = 'd'.repeat(40); advanced[0].pending_pr.head_sha = 'd'.repeat(40);
+    merge(ledger, derive({ orphans: advanced }), '2026-09-05');
+    reconcile(ledger, { orphans: advanced, today: '2026-09-05' });
+    t('repeated pending observations do not rewrite a self-referential orphan', JSON.stringify(ledger) === before);
+    const sum = summarize(ledger, {}, '2026-09-05');
+    t('pending PR is visible separately and does not ask for duplicate work', sum.pending_pr.length === 1 && sum.open_total === 0 && sum.human.length === 0 && sum.ai.length === 0);
+    t('pending work keeps its observation window open beyond seven days', orphanWatchSince(ledger) === '2026-09-04');
+    t('a typed pending receipt passes ledger validation', validateLedger(ledger, { self_repair: { may_modify: [] } }).length === 0);
+    const invalid = structuredClone(ledger); invalid.actions[0].pending_pr.head_sha = 'unknown';
+    t('an invalid waiting receipt cannot silently suppress work', validateLedger(invalid, { self_repair: { may_modify: [] } }).some(p => p.includes('invalid pending PR receipt')));
+    let replayed = 0;
+    const staleHandler = structuredClone(ledger); staleHandler.actions[0].auto = 'apply-orphan-ledger';
+    staleHandler.actions[0].touches = ['data/autopilot-runs.json'];
+    await applyLedgerCycle(staleHandler, { today: '2026-09-05', orphans: covered }, {
+      today: '2026-09-05', matrix: { self_repair: { may_modify: ['data/autopilot-runs.json'] } }, eligibility: {}, judgements: { judgements: [] },
+      refresh: () => {}, recordJudgements: () => {},
+      judgeCandidate: a => ({ candidate_id: a.id, judged_jst: '2026-09-05', halted: false, reasons: [] }),
+      handlers: { 'apply-orphan-ledger': () => { replayed++; return { ok: true, changed: 0 }; } },
+    });
+    t('a pending PR never executes a stale replay handler', replayed === 0);
+    const unknown = structuredClone(ledger);
+    reconcile(unknown, { orphans: null, today: '2026-09-05' });
+    t('unknown evidence preserves the pending watch without claiming delivery', unknown.actions[0].state === 'open'
+      && unknown.actions[0].pending_pr.head_sha === sha && orphanWatchSince(unknown) === '2026-09-04');
+    const delivered = structuredClone(ledger);
+    reconcile(delivered, { orphans: [], today: '2026-09-06' });
+    t('actual landing closes the pending work and releases its watch window', delivered.actions[0].state === 'done' && !delivered.actions[0].pending_pr && orphanWatchSince(delivered) === null);
+    const reopened = derive({ orphans: await scan({ prs: [] }) });
+    merge(ledger, reopened, '2026-09-05');
+    reconcile(ledger, { orphans: await scan({ prs: [] }), today: '2026-09-05' });
+    t('closing a PR without merging restores the remaining orphan', ledger.actions[0].state === 'open' && !ledger.actions[0].pending_pr);
+  }
   {
     const observed_at = '2026-09-05T08:00:00Z', now = Date.parse(observed_at);
     const row = { id: 'trig_test', name: 'Example', enabled: true, cron_expression: '0 7 * * *',
@@ -2805,7 +2981,7 @@ async function selftest() {
       }
       return { ok: true, json: async () => routes[key] };
     };
-    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    const found = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
     t('**後続PRで着地済みのコミットを取り残しに数えない**',
       found.length === 1 && found[0].ahead_by === 1 && found[0].commits[0] === 'orphan1');
     t('着地済みの件数を別に持つ（なぜ除いたかが読める）', found[0].landed_elsewhere === 5);
@@ -2832,7 +3008,7 @@ async function selftest() {
       }
       return { ok: true, json: async () => ({ commits: [{ sha: 'o1' }, { sha: 'o2' }] }) };
     };
-    const ledger = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+    const ledger = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-28', {
       fetchImpl: mkOrphanFetch({
         o1: ['data/autopilot-runs.json', 'docs/obsidian/AUTOPILOT_LOG.md'],
         o2: ['data/autopilot-status.json'],
@@ -2843,7 +3019,7 @@ async function selftest() {
         === 'data/autopilot-runs.json,data/autopilot-status.json,docs/obsidian/AUTOPILOT_LOG.md');
     t('**運転台帳だけなら ledger_only: true**', ledger[0].ledger_only === true);
 
-    const mixed = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+    const mixed = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-28', {
       fetchImpl: mkOrphanFetch({
         o1: ['data/autopilot-runs.json'],
         o2: ['blog/new-article.html'],
@@ -2852,7 +3028,7 @@ async function selftest() {
     t('**台帳の外を1つでも触っていれば false**（書きかけを台帳扱いしない）',
       mixed[0].ledger_only === false);
 
-    const partial = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', {
+    const partial = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-28', {
       fetchImpl: mkOrphanFetch({ o1: ['data/autopilot-runs.json'] }), // o2 は 404
     });
     t('**1コミットでも読めなければ全体を null**（部分的な一覧を「台帳だけ」と読ませない）',
@@ -2876,7 +3052,7 @@ async function selftest() {
       const after = url.includes('AAA...');
       return { ok: true, json: async () => ({ commits: after ? [] : [{ sha: 'pre1' }] }) };
     };
-    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    const found = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
     t('マージ後に push が無ければ取り残しゼロ', found.length === 0);
   }
   {
@@ -2899,7 +3075,7 @@ async function selftest() {
       }
       return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
     };
-    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    const found = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
     t('**同じブランチの複数PRを1件に畳む**（08-28 は9行＝3判断で出た）', found.length === 1);
     t('畳んでも取り残しの中身は変わらない',
       found[0].ahead_by === 1 && found[0].commits.join() === 'fb12596');
@@ -2930,7 +3106,7 @@ async function selftest() {
       }
       return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
     };
-    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
+    const found = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch });
     t('**squash 済みを取り残しに数えない**（和なら4件と誤報していた）',
       found.length === 1 && found[0].ahead_by === 1 && found[0].commits.join() === 'orphanB');
     t('答えは**最新マージPRの積**（古いPRの結果は使わない）',
@@ -2955,7 +3131,7 @@ async function selftest() {
       return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
     };
     t('**後のマージが拾っていれば行を立てない**（古いPRの結果を残さない）',
-      (await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch })).length === 0);
+      (await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-26', { fetchImpl: fakeFetch })).length === 0);
   }
   {
     // **一覧は7日窓を覆うまで辿る。**2026-08-28、1本のブランチから25本が
@@ -2983,7 +3159,7 @@ async function selftest() {
       }
       return { ok: true, json: async () => routes[Object.keys(routes).find((k) => url.includes(k))] };
     };
-    const found = await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', { fetchImpl: fakeFetch });
+    const found = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-28', { fetchImpl: fakeFetch });
     t('**1ページ目に収まらないブランチを取りこぼさない**',
       found.length === 1 && found[0].branch === 'quiet' && found[0].commits.join() === '813b335');
   }
@@ -2999,14 +3175,14 @@ async function selftest() {
       return { ok: true, json: async () => ({ commits: [] }) };
     };
     t('**窓を覆えなかったら null（途中までを返さない）**',
-      await fetchOrphanedCommits('o/r', 'tok', '2026-08-28', { fetchImpl: fakeFetch }) === null);
+      await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-28', { fetchImpl: fakeFetch }) === null);
   }
   {
     // **取得に失敗したら null。**空配列だと「取り残しは無い」になる
     const boom = async () => { throw new Error('network'); };
     t('**走査に失敗したら null（空配列にしない）**',
-      await fetchOrphanedCommits('o/r', 'tok', '2026-08-26', { fetchImpl: boom }) === null);
-    t('トークンが無ければ null', await fetchOrphanedCommits('o/r', null, '2026-08-26') === null);
+      await fetchOrphansWithoutOpen('o/r', 'tok', '2026-08-26', { fetchImpl: boom }) === null);
+    t('トークンが無ければ null', await fetchOrphansWithoutOpen('o/r', null, '2026-08-26') === null);
   }
   {
     // **窓から落ちた取り残しを「解消」にしない。**
@@ -3025,9 +3201,9 @@ async function selftest() {
       if (url.includes('/commits/')) return { ok: true, json: async () => ({ files: [] }) };
       return { ok: true, json: async () => mk(['813b335']) };
     };
-    const dropped = await fetchOrphanedCommits('o/r', 'tok', '2026-09-04', { fetchImpl: fakeFetch });
+    const dropped = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-09-04', { fetchImpl: fakeFetch });
     t('既定の窓では 09-04 に落ちる（これが嘘の閉じ方の原因だった）', dropped.length === 0);
-    const watched = await fetchOrphanedCommits('o/r', 'tok', '2026-09-04',
+    const watched = await fetchOrphansWithoutOpen('o/r', 'tok', '2026-09-04',
       { fetchImpl: fakeFetch, watchSince: '2026-08-26' });
     t('**開いている行がある間は窓を広げて拾い続ける**',
       watched.length === 1 && watched[0].branch === 'claude/obsidian-auto-20260827');
@@ -4174,7 +4350,7 @@ export async function applyLedgerCycle(ledger, ctx, { today, matrix, eligibility
   for (const costPhase of [false, true]) {
     for (const a of ledger.actions) {
       if ((a.auto === 'append-cost') !== costPhase) continue;
-      if (a.state !== 'open' || !a.auto) continue;
+      if (a.state !== 'open' || !a.auto || a.pending_pr) continue;
       // 自動実行は ai と判定されたものだけ。人の領域のアクションに
       // handler を付けたくなったら、まず classify を通ることを確かめる。
       const c = classify(a, matrix);
@@ -4290,6 +4466,8 @@ async function main() {
       as_of_jst: today,
       routine_snapshot_sha256: routineSnapshotDigest(ctx.routineDoc),
       open_total: sum.open_total,
+      pending_pr: sum.pending_pr.map(a => ({ id: a.id, title: a.title, pr: a.pending_pr.number,
+        first_verified_head: a.pending_pr.head_sha, evidence: a.evidence })),
       oldest_open_days: sum.oldest_open_days,
       acknowledged: sum.acknowledged,
       closed_today: sum.closed_today.map((a) => ({ id: a.id, title: a.title, evidence: a.evidence })),
