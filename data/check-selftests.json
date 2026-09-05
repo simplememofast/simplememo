@@ -628,10 +628,16 @@
       "broke": "自律ブランチの契約必須判定を常時falseにする変異で自己テストが失敗。"
     },
     {
+      "script": "scripts/decision-monitor-local.py",
+      "state": "demonstrated",
+      "at": "2026-09-05",
+      "broke": "隔離コピーでlive handle無視、実行入口のadmission切断、緊急停止無視、native起動フラグ欠落、job全件照合削除、receipt checksum照合削除の6変異が自己検査を非0終了させた。入口切断は停止中に先の処理へ到達したことを検出。既知の実行中runは古くても待ち、実monitor stepの完了時刻を使い、観測不能時は実行しない。検体の実行・手動probeを無人実績として加点しない。"
+    },
+    {
       "script": "scripts/decision-monitor.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",
-      "broke": "緊急停止を無視する変異で自己テストが失敗。隔離Gitで実際の逆パッチ・HEAD競合・他ファイル不変・二重観測を検証。"
+      "broke": "緊急停止を無視する変異で自己テストが失敗。隔離Gitで実際の逆パッチ・HEAD競合・他ファイル不変・二重観測を検証。 [2026-09-05 独立タイマー] 手動起動をinterval扱い、親PID照合削除、origin receipt不要化、公開待ちPRの入口切断、remote ref照合削除の5変異で自己検査が非0終了。入口切断は実CLIが待機せず契約読込へ進むことを検出。隔離launchdで初回・自然interval・手動kickstartの識別も実測したが、本番復旧実績には加算しない。実Gitの2つのcheckoutから同じmainを公開し、後発の処理が先発ブランチを上書きせず待機することも検査。"
     },
     {
       "script": "scripts/decision-review.mjs",

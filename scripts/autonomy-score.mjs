@@ -33,6 +33,7 @@
 
 import fs from 'node:fs';
 import { verifiedSettlement } from './value-contracts.mjs';
+import { automatedDecisionOrigin } from './lib/decision-origin.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';
@@ -164,9 +165,9 @@ export function ra(runs, allRuns, policy, { recoveries = [], window = null } = {
   const incidents = recoveries.filter(r => r.mode === 'production' && r.before?.failed === true
     && /^[a-f0-9]{40}$/.test(r.target_sha ?? '') && Number.isFinite(Date.parse(r.detected_at))
     && (!window || (r.detected_at.slice(0, 10) >= window.from && r.detected_at.slice(0, 10) <= window.to)));
-  const machineIncidents = incidents.filter(r => r.human_interventions === 0 && ['schedule', 'workflow_run'].includes(r.trigger));
+  const machineIncidents = incidents.filter(r => r.human_interventions === 0 && automatedDecisionOrigin(r));
   const recovered = r => r.state === 'recovered' && r.human_interventions === 0
-    && ['schedule', 'workflow_run'].includes(r.trigger) && /^[a-f0-9]{40}$/.test(r.revert_sha ?? '')
+    && automatedDecisionOrigin(r) && /^[a-f0-9]{40}$/.test(r.revert_sha ?? '')
     && r.validation === 'success' && r.after?.healthy === true && r.deployment_verified === true;
   const recoveredIncidents = incidents.filter(recovered);
   const n = breakages.length + incidents.length;

@@ -10,7 +10,8 @@ import { fileURLToPath } from 'node:url';
 import { loadIntents, contractProblems, verifyHistory, settle, staticPath, verifiedSettlement, METRICS, approvedMetric } from './value-contracts.mjs';
 import { review, advance, recordSelection } from './decision-review.mjs';
 import { activeStreaks, shippingStreaks } from './autopilot-runs.mjs';
-import { ep as scoreEp } from './autonomy-score.mjs';
+import { ep as scoreEp, ra as scoreRa } from './autonomy-score.mjs';
+import { automatedDecisionOrigin, runtimeDecisionOrigin, verifyLaunchd, NATIVE_LABEL, NATIVE_SCRIPT } from './lib/decision-origin.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = 'simplememofast/simplememo';
@@ -22,17 +23,45 @@ const gh = (...args) => JSON.parse(execFileSync('gh', args, { cwd: ROOT, encodin
 const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
+const ledgerFiles = ['data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json', 'autopilot/index.html'];
 
-export function recoveryAttribution(previous, trigger) {
-  const automated = value => ['schedule', 'workflow_run'].includes(value);
-  const priorHuman = previous?.detected_at && !(previous.human_interventions === 0 && automated(previous.trigger)) ? 1 : 0;
-  return { trigger: priorHuman ? previous.trigger ?? 'unknown' : trigger,
-    human_interventions: Math.max(priorHuman, automated(trigger) ? 0 : 1) };
+export function pendingPublication(request = api) {
+  const listed = request('pulls?state=open&base=main&per_page=100');
+  assert(Array.isArray(listed) && listed.length < 100, 'pending decision PR inventory is incomplete');
+  assert(listed.every(p => Number.isSafeInteger(p?.number) && typeof p?.head?.ref === 'string'), 'pending PR inventory has an unknown entry');
+  const candidates = listed.filter(p => typeof p?.head?.ref === 'string' && p.head.ref.startsWith('Codex/decision-observe-'));
+  const verified = [];
+  for (const item of candidates) {
+    assert(Number.isSafeInteger(item.number) && item.number > 0, 'pending decision PR identity missing');
+    const route = `pulls/${item.number}`, pr = request(route);
+    assert(pr?.number === item.number && pr.state === 'open' && pr.base?.ref === 'main'
+      && pr.base.repo?.full_name === REPO && pr.head?.repo?.full_name === REPO
+      && pr.head.ref === item.head.ref && shaOK(pr.head.sha), 'pending decision PR changed or targets another repository');
+    const files = request(`${route}/files?per_page=100`);
+    assert(Array.isArray(files) && files.length > 0 && files.length < 100 && files.length === pr.changed_files
+      && files.every(f => ledgerFiles.includes(f.filename)), 'pending decision PR has unverified scope');
+    const fresh = request(route);
+    assert(fresh.state === 'open' && fresh.number === pr.number && fresh.head?.sha === pr.head.sha
+      && fresh.head.ref === pr.head.ref && fresh.head.repo?.full_name === REPO
+      && fresh.base?.ref === 'main' && fresh.base.repo?.full_name === REPO, 'pending decision PR changed during verification');
+    const ref = request(`git/ref/heads/${pr.head.ref}`);
+    assert(ref?.object?.sha === pr.head.sha, 'pending decision branch differs from its PR');
+    verified.push({ pr: pr.number, head: pr.head.sha, draft: pr.draft === true });
+  }
+  return verified;
 }
 
-export function pendingRecovery(previous, { head, probes, now, trigger }) {
+export function recoveryAttribution(previous, origin) {
+  const current = typeof origin === 'string' ? { trigger: origin } : origin;
+  const priorHuman = previous?.detected_at && !(previous.human_interventions === 0 && automatedDecisionOrigin(previous)) ? 1 : 0;
+  const source = priorHuman ? { trigger: previous.trigger ?? 'unknown', execution_origin: previous.execution_origin } : current;
+  return { trigger: source.trigger, execution_origin: source.execution_origin ?? null,
+    human_interventions: Math.max(priorHuman, automatedDecisionOrigin(current) ? 0 : 1) };
+}
+
+export function pendingRecovery(previous, { head, probes, now, trigger, execution_origin }) {
   return { ...previous, state: 'revert_pending', mode: 'production', execution_head: head,
-    confirmed_at: now, ...recoveryAttribution(previous, trigger), before: { failed: true, probes } };
+    confirmed_at: now, ...recoveryAttribution(previous, { trigger, execution_origin }), before: { failed: true, probes } };
 }
 
 export function recoveryCheckpoint(previous, pending) {
@@ -60,8 +89,8 @@ export function resumeRecovery(previous, pr, { contractId, targetSha }) {
   assert(record.before.probes.some(p => p.known && !p.healthy
     && previous.probes?.some(q => q.path === p.path && q.known && !q.healthy)), 'same failure must be observed twice');
   assert([0, 1].includes(record.human_interventions), 'known recovery attribution required');
-  assert.deepEqual({ trigger: record.trigger, human_interventions: record.human_interventions },
-    recoveryAttribution(previous, record.trigger), 'recovery cannot erase prior human involvement');
+  assert.deepEqual({ trigger: record.trigger, human_interventions: record.human_interventions, execution_origin: record.execution_origin ?? null },
+    recoveryAttribution(previous, { trigger: record.trigger, execution_origin: record.execution_origin }), 'recovery cannot erase prior human involvement');
   return { ...record, revert_pr: pr.number };
 }
 
@@ -202,7 +231,13 @@ export function applyRevert(plan, cwd = ROOT) {
   execFileSync('git', ['apply', '--reverse'], { cwd, input: diff });
 }
 
-function publish(files, branch, title, expectedHead, checkpoint = '') {
+export const observationBranch = head => {
+  assert(shaOK(head), 'observation branch requires a verified starting commit');
+  return `Codex/decision-observe-${head.slice(0, 16)}`;
+};
+
+function publish(files, branch, title, expectedHead, checkpoint = '', cwd = ROOT) {
+  const git = (...args) => execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   // Never overwrite a newer main or a pre-existing PR branch.
   git('fetch', 'origin', 'main');
   if (git('rev-parse', 'origin/main') !== expectedHead) throw new Error('main advanced; leave state for the next monitor');
@@ -214,7 +249,7 @@ function publish(files, branch, title, expectedHead, checkpoint = '') {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-pr-'));
   try {
     fs.writeFileSync(path.join(tmp, 'body.md'), `${title}\n\nGenerated by the deterministic decision monitor. All existing SEO Validation checks must pass before merge.\n${checkpoint ? `\n${checkpoint}\n` : ''}`);
-    const url = execFileSync('gh', ['pr', 'create', '--repo', REPO, '--head', branch, '--base', 'main', '--title', title, '--body-file', path.join(tmp, 'body.md')], { cwd: ROOT, encoding: 'utf8' }).trim();
+    const url = execFileSync('gh', ['pr', 'create', '--repo', REPO, '--head', branch, '--base', 'main', '--title', title, '--body-file', path.join(tmp, 'body.md')], { cwd, encoding: 'utf8' }).trim();
     const number = Number(url.match(/\/pull\/(\d+)$/)?.[1]);
     if (!Number.isInteger(number) || !number) throw new Error('could not read the created PR number');
     return { number };
@@ -225,6 +260,14 @@ async function main() {
   const apply = process.argv.includes('--apply');
   const head = git('rev-parse', 'HEAD');
   if (stop()) throw new Error('emergency_stop: monitoring execution halted');
+  const origin = runtimeDecisionOrigin({ head });
+  if (apply) {
+    const pending = pendingPublication();
+    if (pending.length) {
+      console.log(JSON.stringify({ state: 'waiting_for_publication', ...origin, pending }));
+      return;
+    }
+  }
   const metrics = read('data/value-metrics.json');
   const runs = read('data/autopilot-runs.json').runs;
   const ledger = read('data/value-contracts.json');
@@ -256,7 +299,7 @@ async function main() {
       const existing = gh('pr', 'list', '--repo', REPO, '--head', recoveryBranch, '--state', 'all', '--json', 'number,state,body')[0];
       if (existing) {
         Object.assign(incident, resumeRecovery(incident, existing, { contractId: c.id, targetSha: merge }));
-        Object.assign(incident, recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'));
+        Object.assign(incident, recoveryAttribution(incident, origin));
       }
     }
     if (incident?.revert_pr && incident.state !== 'recovered') {
@@ -268,7 +311,7 @@ async function main() {
         const seo = checks.find(x => x.name === 'seo-check' && x.conclusion === 'success');
         const after = await Promise.all(c.touches.filter(p => staticPath(p) && p.endsWith('.html')).map(probe));
         if (seo && after.length && after.every(p => p.known && p.healthy)) Object.assign(incident,
-          recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'), {
+          recoveryAttribution(incident, origin), {
           state: 'recovered', revert_sha: pr.merge_commit_sha, validation: 'success', deployment_verified: true,
           after: { healthy: true, probes: after }, recovered_at: now.toISOString(),
         });
@@ -284,12 +327,12 @@ async function main() {
       probes, previous: incident, now: now.toISOString(), stopped: stop() });
     if (plan.action === 'observe') {
       if (!incident) { incident = { contract_id: c.id }; recovery.incidents.push(incident); }
-      Object.assign(incident, recoveryAttribution(incident, process.env.GITHUB_EVENT_NAME ?? 'manual'),
+      Object.assign(incident, recoveryAttribution(incident, origin),
         { state: 'observing', detected_at: now.toISOString(), head_sha: head, target_sha: merge, probes });
     }
     if (plan.action === 'revert' && apply) {
       if (stop()) throw new Error('stopped before recovery');
-      const pending = pendingRecovery(incident, { head, probes, now: now.toISOString(), trigger: process.env.GITHUB_EVENT_NAME ?? 'manual' });
+      const pending = pendingRecovery(incident, { head, probes, now: now.toISOString(), ...origin });
       const checkpoint = recoveryCheckpoint(incident, pending);
       // The reverse patch and its recovery evidence are published together.
       // The rollback commit still changes only the declared static files.
@@ -301,7 +344,7 @@ async function main() {
   }
   const result = review(ledger.contracts, strategy);
   strategy = { ...advance(strategy, result), last_review: result };
-  console.log(JSON.stringify({ approved_metrics: METRICS.filter(id => approvedMetric(metrics, id)), intents: intents.length,
+  console.log(JSON.stringify({ state: 'observed', ...origin, approved_metrics: METRICS.filter(id => approvedMetric(metrics, id)), intents: intents.length,
     settled: ledger.contracts.filter(verifiedSettlement).length, review: result.verdict, warnings }, null, 2));
   if (warnings.length) throw new Error('invalid declarations require attention; monitor did not mutate policy');
   if (apply) {
@@ -309,13 +352,55 @@ async function main() {
     save('data/value-contracts.json', ledger); save('data/decision-recovery.json', recovery); save('data/decision-review.json', strategy);
     const reportChanged = await publishReport();
     if (hash({ ledger, recovery, strategy }) === original && !reportChanged) return;
-    publish(['data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json', 'autopilot/index.html'],
-      `Codex/decision-observe-${process.env.GITHUB_RUN_ID ?? Date.now()}-${process.env.GITHUB_RUN_ATTEMPT ?? 1}`,
+    publish(ledgerFiles,
+      observationBranch(head),
       'Record verified decision outcomes and recovery evidence', head);
   }
 }
 
 function selftest() {
+  const launcher = `/fixture/.local/libexec/${NATIVE_SCRIPT}`;
+  const launchState = `gui/501/${NATIVE_LABEL} = {\n\tstate = running\n\tprogram = /usr/bin/python3\n\targuments = {\n\t\t/usr/bin/python3\n\t\t${launcher}\n\t\t--once\n\t}\n\tpid = 123\n}`;
+  const originOptions = { env: { DECISION_MONITOR_NATIVE_TIMER: '1' }, platform: 'darwin', uid: 501,
+    parentPid: 123, home: '/fixture', head: 'a'.repeat(40), now: new Date('2026-09-05T12:00:00Z'),
+    run: (file, args) => { assert.equal(file, '/bin/launchctl'); assert.equal(args[1], `gui/501/${NATIVE_LABEL}`); return args[0] === 'print' ? launchState : 'interval\n'; },
+    read: file => { assert.equal(file, launcher); return 'fixture launcher'; } };
+  const native = runtimeDecisionOrigin(originOptions);
+  assert.equal(native.trigger, 'launchd');
+  assert(automatedDecisionOrigin(native), 'verified interval is an autonomous origin');
+  assert.equal(runtimeDecisionOrigin({ env: {} }).trigger, 'manual');
+  assert.equal(automatedDecisionOrigin(runtimeDecisionOrigin({ env: { GITHUB_EVENT_NAME: 'launchd' } })), false, 'an environment name is not launchd proof');
+  for (const reason of ['speculative', 'non-ipc demand', 'unknown', '']) {
+    assert.throws(() => runtimeDecisionOrigin({ ...originOptions, run: (_, args) => args[0] === 'print' ? launchState : reason }), /interval timer/);
+  }
+  for (const change of [{ platform: 'linux' }, { parentPid: 124 }, { head: 'not-a-sha' }]) assert.throws(() => runtimeDecisionOrigin({ ...originOptions, ...change }));
+  for (const state of [launchState.replace('pid = 123', 'pid = 124'), launchState.replace('state = running', 'state = not running'),
+    launchState.replace('--once', '--probe'), launchState.replace(launcher, '/different/launcher.py')]) {
+    assert.throws(() => verifyLaunchd(state, { parentPid: 123, launcher }));
+  }
+  assert.equal(automatedDecisionOrigin({ ...native, execution_origin: { ...native.execution_origin, receipt_sha256: '0'.repeat(64) } }), false);
+  assert.equal(automatedDecisionOrigin({ ...native, execution_origin: null }), false);
+  const publication = { number: 321, state: 'open', draft: false, changed_files: 1,
+    head: { ref: 'Codex/decision-observe-abc', sha: 'a'.repeat(40), repo: { full_name: REPO } },
+    base: { ref: 'main', repo: { full_name: REPO } } };
+  const publicationApi = ({ list = [publication], detail = publication, files = [{ filename: 'data/value-contracts.json' }],
+    refreshed = detail, branch = detail.head?.sha } = {}) => {
+    let reads = 0;
+    return route => {
+      if (route.startsWith('pulls?')) return list;
+      if (route.includes('/files?')) return files;
+      if (route.startsWith('git/ref/')) return { object: { sha: branch } };
+      return ++reads === 1 ? detail : refreshed;
+    };
+  };
+  assert.deepEqual(pendingPublication(publicationApi()), [{ pr: 321, head: publication.head.sha, draft: false }]);
+  assert.deepEqual(pendingPublication(publicationApi({ list: [] })), []);
+  for (const options of [{ list: Array(100).fill(publication) }, { list: [{}] },
+    { files: [{ filename: '.github/workflows/decision-monitor.yml' }] }, { files: [] },
+    { detail: { ...publication, changed_files: 2 } }, { detail: { ...publication, state: 'closed' } },
+    { refreshed: { ...publication, head: { ...publication.head, sha: 'b'.repeat(40) } } }, { branch: 'b'.repeat(40) }]) {
+    assert.throws(() => pendingPublication(publicationApi(options)), /pending/);
+  }
   const p = { intent: { id: 'x', touches: ['index.html'], eligibility: { reversibility_class: 'R0' } },
     mergeSha: 'a'.repeat(40), headSha: 'b'.repeat(40), checks: { conclusion: 'success' },
     changedAtMerge: ['index.html'], changedSince: [], now: '2026-09-04T01:05:00Z', stopped: false,
@@ -352,6 +437,15 @@ function selftest() {
   assert.equal(recoveryAttribution(observed, 'workflow_dispatch').human_interventions, 1);
   assert.equal(recoveryAttribution({ detected_at: observed.detected_at }, 'schedule').human_interventions, 1);
   assert.equal(recoveryAttribution(null, 'schedule').human_interventions, 0);
+  assert.equal(recoveryAttribution(null, native).human_interventions, 0);
+  assert.equal(recoveryAttribution(humanObservation, native).human_interventions, 1, 'native execution cannot erase earlier human involvement');
+  const nativeIncident = { mode: 'production', before: { failed: true }, target_sha: p.mergeSha, detected_at: p.now,
+    ...native, human_interventions: 0, state: 'recovered', revert_sha: p.headSha, validation: 'success', after: { healthy: true }, deployment_verified: true };
+  assert.equal(scoreRa([], [], read('data/autonomy-score.json'), { recoveries: [nativeIncident] }).auto_revert_count, 1);
+  for (const change of [{ execution_origin: null }, { human_interventions: 1 },
+    { execution_origin: { ...native.execution_origin, launch_reason: 'non-ipc demand' } }]) {
+    assert.equal(scoreRa([], [], read('data/autonomy-score.json'), { recoveries: [{ ...nativeIncident, ...change }] }).auto_revert_count, 0, 'unverified or manual native execution cannot score');
+  }
   assert.equal(pageHealth('<title>good</title><link rel="canonical" href="https://simplememofast.com/">', 200,
     { title: 'good', canonical: 'https://simplememofast.com/' }).healthy, true);
   assert.equal(pageHealth('<title>bad</title>', 200, { title: 'good' }).healthy, false);
@@ -404,7 +498,7 @@ function selftest() {
   assert.throws(() => renderRunStreaks('missing', failedDays), /missing or ambiguous/);
   assert.throws(() => renderRunStreaks(streakTemplate.repeat(2), failedDays), /missing or ambiguous/);
   // Exercise an actual reverse patch in a disposable Git repo. This is a drill, never production evidence.
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'decision-recovery-test-'));
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-recovery-test-')));
   const g = (...a) => execFileSync('git', a, { cwd: dir, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
   try {
     g('init'); g('config', 'user.name', 'Test'); g('config', 'user.email', 'test@example.invalid');
@@ -425,6 +519,50 @@ function selftest() {
     assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /declared reverse patch/);
     fs.writeFileSync(path.join(dir, 'other.txt'), 'another commit\n'); g('add', '.'); g('commit', '-m', 'change after creation');
     assert.throws(() => verifyRollback(incident, g('rev-parse', 'HEAD'), ['index.html'], dir), /changed after creation/);
+    // Run the production entry point, with only GitHub replaced. It must wait
+    // before reading/settling any contract when a verified publication is live.
+    fs.cpSync(path.join(ROOT, 'scripts'), path.join(dir, 'scripts'), { recursive: true });
+    fs.mkdirSync(path.join(dir, 'data'));
+    fs.writeFileSync(path.join(dir, 'data/emergency-stop.json'), JSON.stringify({ stopped: false, agents: { act: { stopped: false } } }));
+    const bin = path.join(dir, 'bin'); fs.mkdirSync(bin);
+    const adapter = `#!${process.execPath}\nconst p = ${JSON.stringify(publication)};\nconst route = process.argv.at(-1);\nlet value;\nif (route.includes('/pulls?')) value = [p];\nelse if (route.includes('/files?')) value = [{filename:'data/value-contracts.json'}];\nelse if (route.includes('/git/ref/')) value = {object:{sha:p.head.sha}};\nelse value = p;\nconsole.log(JSON.stringify(value));\n`;
+    fs.writeFileSync(path.join(bin, 'gh'), adapter, { mode: 0o700 });
+    g('add', '.'); g('commit', '-m', 'pending publication CLI fixture');
+    const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, GITHUB_EVENT_NAME: 'workflow_dispatch' };
+    delete env.DECISION_MONITOR_NATIVE_TIMER;
+    const output = execFileSync(process.execPath, [path.join(dir, 'scripts/decision-monitor.mjs'), '--apply'],
+      { cwd: dir, env, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    const waiting = JSON.parse(output);
+    assert.equal(waiting.state, 'waiting_for_publication', 'actual monitor must use the pending publication gate');
+    assert.equal(waiting.pending[0].pr, 321);
+    assert.equal(g('status', '--porcelain'), '', 'waiting cannot write or fabricate an observation');
+    const publicationTest = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'decision-publication-test-')));
+    const previousPath = process.env.PATH;
+    try {
+      const remote = path.join(publicationTest, 'remote.git');
+      execFileSync('git', ['init', '--bare', remote], { stdio: 'pipe' });
+      g('remote', 'add', 'origin', remote);
+      const starting = g('rev-parse', 'HEAD');
+      g('push', 'origin', `${starting}:refs/heads/main`);
+      const second = path.join(publicationTest, 'second');
+      execFileSync('git', ['clone', '-b', 'main', remote, second], { stdio: 'pipe' });
+      const g2 = (...args) => execFileSync('git', args, { cwd: second, encoding: 'utf8', stdio: 'pipe' }).trim();
+      g2('config', 'user.name', 'Second fixture'); g2('config', 'user.email', 'test@example.invalid');
+      fs.writeFileSync(path.join(bin, 'gh'), `#!${process.execPath}\nconsole.log('https://github.com/${REPO}/pull/322');\n`);
+      process.env.PATH = `${bin}:${previousPath}`;
+      const branch = observationBranch(starting);
+      assert.equal(branch, `Codex/decision-observe-${starting.slice(0, 16)}`, 'both clocks use the same starting-commit branch');
+      fs.writeFileSync(path.join(dir, 'other.txt'), 'first clock observation\n');
+      assert.equal(publish(['other.txt'], branch, 'first clock fixture', starting, '', dir).number, 322);
+      const published = g('rev-parse', 'HEAD');
+      fs.writeFileSync(path.join(second, 'other.txt'), 'second clock observation\n');
+      assert.throws(() => publish(['other.txt'], observationBranch(starting), 'second clock fixture', starting, '', second), /branch already exists/);
+      assert.equal(g2('ls-remote', '--heads', 'origin', branch).split(/\s+/)[0], published, 'a second clock cannot replace the first clock publication');
+      assert.equal(g2('rev-parse', 'HEAD'), starting, 'waiting does not create a second commit');
+    } finally {
+      process.env.PATH = previousPath;
+      fs.rmSync(publicationTest, { recursive: true });
+    }
   } finally { fs.rmSync(dir, { recursive: true }); }
   console.log('decision-monitor: repeated probes, safe scope, stop, stale HEAD, and real Git recovery drill passed');
 }
