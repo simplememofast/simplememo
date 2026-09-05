@@ -687,6 +687,47 @@
       "reasons": []
     },
     {
+      "candidate_id": "act-ep-ratification-2026-09",
+      "title": "EP 委任判定の月次追認（2026-09）: 未追認 20 件を人が読む",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
       "candidate_id": "act-health-883",
       "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
       "judged_jst": "2026-09-05",
@@ -727,8 +768,48 @@
       ]
     },
     {
+      "candidate_id": "act-health-913",
+      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R1",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R1",
+          "class": "R1",
+          "class_source": "domain:サイトコンテンツの新設・更新"
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
       "candidate_id": "act-ledger-sync",
-      "title": "運転台帳に載っていない Actions run が 2件",
+      "title": "運転台帳に載っていない Actions run が 1件",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
@@ -769,8 +850,88 @@
       "reasons": []
     },
     {
+      "candidate_id": "act-orphaned-branch-claude-apple-submission-automation-8nc4cs",
+      "title": "ブランチ claude/apple-submission-automation-8nc4cs に 2 コミットが取り残されている（PR #925 ほか4件 のマージ後）",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-autonomy-score-refinement-w7owrh",
+      "title": "PR #946 の反映待ち: claude/autonomy-score-refinement-w7owrh",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
       "candidate_id": "act-orphaned-branch-claude-autopilot-act-20260905",
-      "title": "ブランチ claude/autopilot-act-20260905 に 1 コミットが取り残されている（PR #892 ほか1件 のマージ後）",
+      "title": "PR #924 の反映待ち: claude/autopilot-act-20260905",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
@@ -810,7 +971,7 @@
     },
     {
       "candidate_id": "act-orphaned-branch-claude-google-discover-strategy-ydu1a6",
-      "title": "ブランチ claude/google-discover-strategy-ydu1a6 に 2 コミットが取り残されている（PR #858 ほか3件 のマージ後）",
+      "title": "PR #949 の反映待ち: claude/google-discover-strategy-ydu1a6",
       "judged_jst": "2026-09-05",
       "verdict": "eligible",
       "halted": false,
@@ -931,6 +1092,126 @@
       "reasons": []
     },
     {
+      "candidate_id": "act-orphaned-branch-claude-score-improvement-nug323",
+      "title": "PR #947 の反映待ち: claude/score-improvement-nug323",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-claude-zero-preneur-autonomy-roadmap-yzxaev",
+      "title": "PR #945 の反映待ち: claude/zero-preneur-autonomy-roadmap-yzxaev",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-orphaned-branch-Codex-routine-observations",
+      "title": "PR #948 の反映待ち: Codex/routine-observations",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
       "candidate_id": "act-orphaned-pr-660",
       "title": "ブランチ claude/obsidian-auto-20260827 に 1 コミットが取り残されている（PR #660 のマージ後）",
       "judged_jst": "2026-09-05",
@@ -1009,6 +1290,129 @@
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
         "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-routine-run-trig_013uV3Pk3SZH8QJS6PxSg9Bw",
+      "title": "定期タスクの異常を調査: x-engagement 夜19:30 v4.1-device ｜ last 09-05 19:30 JST: Q0 R0 L0 F0 ブロッカー: Macに未接続 dev:no bb:skip chrome:skip (stopped)",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・content の範囲内",
+          "scope": "content",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-routine-run-trig_01DmNiVHB7jo42bNVJL1wnBo",
+      "title": "定期タスクの異常を調査: x-engagement 昼12:30 v4-device ｜ last 09-05 18:50 JST: Q0 R0 L0 F0 ブロッカー: デバイスブリッジ未接続 dev:no chrome:none bb:skip (stopped)",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・content の範囲内",
+          "scope": "content",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
+      "candidate_id": "act-routine-run-trig_01ESF9AHax6buS9X1pdFv657",
+      "title": "定期タスクの異常を調査: Obsidianオートパイロット再試行 v3（09:20 JST・ccr-0920・当日が空白のときだけ・配信の種） (failed)",
+      "judged_jst": "2026-09-05",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・content の範囲内",
+          "scope": "content",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
         "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
       ]
     },
