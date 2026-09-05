@@ -204,13 +204,16 @@ const RETIRED = {
   "/%29": "/",
 };
 
-// Slugs that never existed on this site but are repeatedly crawled because
-// they are linked from off-site (see docs/seo/gsc-index-triage-2026-07-02.md
-// — fabricated HN-style slugs that mimic our own vocabulary). A 404 invites
-// Google to keep re-checking; 410 Gone is the explicit "this will never
-// exist" signal and drops the URL from the index far faster. Verified absent
-// from the full git history, all current sources and every sitemap (step 4).
+// Known nonexistent slugs reported by GSC. Keep the existing 410 policy for
+// URLs we will not publish; do not redirect them to unrelated live articles.
+// Google treats 404 and 410 alike for indexing, so this does not promise a
+// faster removal or a cleared GSC report. The two additions from the August
+// report are absent from the available Git history, current content and
+// sitemaps; their discovery source is unverified. See
+// docs/seo/gsc-404-audit-2026-09-05.md (step 4).
 const GONE = new Set([
+  "/blog/ios-share-extension-five-boundaries",
+  "/blog/field-notes-from-a-year-of-pairing-with-an-ai-working-alone",
   "/blog/offline-first-outbox-teardown",
   "/blog/email-inbox-as-task-manager",
   "/blog/energy-budget-field-notes",
@@ -312,8 +315,9 @@ export const onRequest = async (context) => {
   }
 
   // 4. Slugs that never existed on this site answer 410 Gone — see the
-  //    GONE set (module scope) for the list and rationale.
-  if (GONE.has(pathname)) {
+  //    GONE set (module scope) for the list and rationale. Match a trailing
+  //    slash too, including the directory form produced by /index.html.
+  if (GONE.has(pathname.replace(/\/$/, ""))) {
     return new Response("Gone", {
       status: 410,
       headers: {

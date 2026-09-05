@@ -258,8 +258,10 @@ await redirects("/%29", "/");
 await redirects("/)?lang=ja", "/");
 await redirects("/%29?lang=ja", "/");
 
-// ── 6. 410 Gone — fabricated slugs from injected backlinks ───────────────
+// ── 6. 410 Gone — known nonexistent slugs reported by GSC ────────────────
 for (const slug of [
+  "/blog/ios-share-extension-five-boundaries",
+  "/blog/field-notes-from-a-year-of-pairing-with-an-ai-working-alone",
   "/blog/offline-first-outbox-teardown",
   "/blog/email-inbox-as-task-manager",
   "/blog/energy-budget-field-notes",
@@ -270,6 +272,10 @@ for (const slug of [
   await gone(slug);
   await gone(slug + ".html");
   await gone(slug + "?lang=ja");
+  await gone(slug + "/");
+  await gone(slug + "/index.html?ref=external");
+  await gone(slug.replace("/blog/", "//blog//") + ".html?lang=en");
+  await gone("https://www.simplememofast.com" + slug + "?utm_source=external");
 }
 
 // ── 7. Internal-only paths stay unreachable, extra slashes and all ───────
