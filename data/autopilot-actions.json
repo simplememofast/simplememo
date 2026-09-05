@@ -2013,6 +2013,26 @@
       "last_seen_jst": "2026-09-05",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
+    },
+    {
+      "id": "act-credentials-check-blind-in-ci",
+      "title": "資格情報の検査が CI では隣のリポジトリを1つも見ていない（iOS の secret 2件が構造的に見えなかった）",
+      "detail": "**`scripts/check-credentials.mjs` は隣のリポジトリのワークフローを走査するが、CI にはその隣が無い。**\n\n走査先は3つ（`SCAN_DIRS`）:\n\n    .github/workflows                      … simplememo（CIに在る）\n    ../simplememo-ios/.github/workflows    … **CIには存在しない**\n    ../simplememo-api/.github/workflows    … **CIには存在しない**\n\n`seo-check.yml` は simplememo しか checkout しないので、CI 上の `secretsInUse()` は**公開リポジトリの secret しか集めない。**つまりこの検査の主目的である「新しい secret を使う経路が増えたら落ちる」が、**3リポジトリのうち2つで最初から働いていない。**\n\n**実測（2026-09-05）:** 手元で隣を origin へ追随させてから preflight を回したところ、`ASC_INDIVIDUAL_KEY_ID` と `ASC_INDIVIDUAL_KEY_P8` が台帳に無いと名指しで落ちた（simplememo-ios の7ワークフローが読んでいる）。**同じコミットで CI は exit 0。**\nこの2件は #935 が本文に「このPRでは直さない」と書いて残していたもので、**CI から見えないので誰も落とされないまま残っていた。**\n\n**`act-ci-selftest-ratchet-js-blind` と同じ形。**あちらは正規表現が `.js` を1本も拾えず、こちらは checkout がディレクトリを持たない。どちらも**検査は緑なのに、見るべき範囲の一部が構造的に視野の外にある。**\n\n**塞ぐ手は2つあり、どちらも費用が要る:**\n\n1. `seo-check.yml` で非公開の2リポジトリを checkout する（公開リポジトリの run が非公開の内容を持つことになる）\n2. 検査を iOS / api 側の CI に配線する（**非公開リポジトリの Actions 分数を使う**）\n\n非公開リポジトリの分数は 2026-08 に無料枠を使い切っており、いまは1 run ごとに実費。**どちらを取るかは費用の判断なのでオーナーに置く。**\n\n**穴そのもの（secret 2件）は 2026-09-05 に `data/credential-expiry.json` へ追記して塞いだ。**この行が残しているのは**塞いだ穴ではなく、穴が見えなかった理由**のほう。",
+      "source": "manual",
+      "domain": null,
+      "touches": [],
+      "force_owner": "human",
+      "force_owner_why": "塞ぐには公開リポジトリのCIで非公開リポジトリを checkout するか、非公開側のCIに配線するかで、どちらも費用と情報の置き場所の判断が要る",
+      "auto": null,
+      "close_check": {
+        "kind": "manual",
+        "params": {
+          "observed": "2026-09-05 時点で未着手。CI は simplememo のみ checkout し、隣2リポジトリの secret は依然として検査の視野の外"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05"
     }
   ],
   "escalation_review_authorization": {
