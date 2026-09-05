@@ -2108,6 +2108,18 @@ export function interpretRun(run) {
         : `Claude Code ステップが失敗（所要 ${ms ?? '不明'}ms）。原因未特定・要トリアージ（自動判定）`,
     };
   }
+  const outputCheck = step('成果物の実行IDを照合');
+  if (outputCheck && outputCheck.conclusion !== 'skipped') {
+    const verdict = (run.steps ?? []).find(s => /^成果物判定:/.test(s.name ?? ''));
+    if (verdict?.conclusion === 'success' && verdict.name === '成果物判定: missing') {
+      return { outcome: 'no_artifact', attempted: true, failure_class: 'no_artifact',
+        failure_reason: '今回の実行IDに結びつく新しい結果記録を持つPRがないことをリモート照合で確認した' };
+    }
+    if (outputCheck.conclusion !== 'success' || verdict?.conclusion !== 'success' || verdict.name !== '成果物判定: verified') {
+      return { outcome: 'failed', attempted: true, failure_class: null, needs_triage: true,
+        failure_reason: 'Claude Code は完了したが、今回の成果物をリモート照合できなかった。取得・記録・並行更新を確認する。成果物ゼロとは断定しない。' };
+    }
+  }
   if (run.conclusion === 'failure') {
     // Claude Code は通ったが後段（成果物ゼロ検査など）で落ちた
     return { outcome: 'no_artifact', attempted: true, failure_class: 'no_artifact',
@@ -2738,6 +2750,21 @@ async function selftest() {
     reconcile(ledger, { orphans: await scan({ prs: [] }), today: '2026-09-05' });
     t('closing a PR without merging restores the remaining orphan', ledger.actions[0].state === 'open' && !ledger.actions[0].pending_pr);
   }
+  {
+    const make = (verdict, output = 'failure') => ({ status: 'completed', conclusion: output === 'success' ? 'success' : 'failure',
+      steps: [{ name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'success' },
+        { name: '成果物の実行IDを照合', conclusion: output },
+        ...(verdict === null ? [] : [{ name: `成果物判定: ${verdict}`, conclusion: 'success' }])] });
+    for (const verdict of ['unknown', null, '']) {
+      const result = interpretRun(make(verdict));
+      t('unverified output remains a triageable failure, not zero output', result.outcome === 'failed'
+        && result.failure_class === null && result.needs_triage === true && result.failure_reason.includes('ゼロとは断定しない'));
+    }
+    t('confirmed missing current-run output is no_artifact', interpretRun(make('missing')).outcome === 'no_artifact');
+    t('PR receipt alone cannot bypass the existing shipping ledger', interpretRun(make('verified', 'success')).needs_pr === true);
+    t('a failed verifier cannot claim a verified output', interpretRun(make('verified')).needs_triage === true);
+  }
+
   {
     const observed_at = '2026-09-05T08:00:00Z', now = Date.parse(observed_at);
     const row = { id: 'trig_test', name: 'Example', enabled: true, cron_expression: '0 7 * * *',
