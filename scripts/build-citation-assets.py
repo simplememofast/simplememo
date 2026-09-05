@@ -18,7 +18,7 @@ from normalize_i18n_head import build_block, replace_i18n_lines
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "https://simplememofast.com"
-DATA_PATH = "data/research/autopilot-2026-09-02.json"
+DATA_PATH = "data/autopilot-research-2026-09-02.json"
 data = json.loads((ROOT / DATA_PATH).read_text())
 constants = json.loads((ROOT / "data/site-constants.json").read_text())
 rows = data["runs"]
