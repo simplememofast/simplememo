@@ -1899,17 +1899,12 @@
           "branch": "claude/zero-preneur-autonomy-roadmap-yzxaev"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-05",
       "last_seen_jst": "2026-09-05",
-      "closed_jst": null,
-      "evidence": "PR #938 へ引き継いだhead dab0e07041ee9a0a5d24a880c03a72803b0795c8 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
-      "reopened_jst": "2026-09-05",
-      "pending_pr": {
-        "number": 938,
-        "branch": "claude/zero-preneur-autonomy-roadmap-yzxaev",
-        "head_sha": "dab0e07041ee9a0a5d24a880c03a72803b0795c8"
-      }
+      "closed_jst": "2026-09-05",
+      "evidence": "claude/zero-preneur-autonomy-roadmap-yzxaev の取り残しは解消（走査に出てこない）",
+      "reopened_jst": "2026-09-05"
     },
     {
       "id": "act-orphaned-branch-Codex-routine-observations",
@@ -1932,6 +1927,54 @@
       "last_seen_jst": "2026-09-05",
       "closed_jst": "2026-09-05",
       "evidence": "Codex/routine-observations の取り残しは解消（走査に出てこない）"
+    },
+    {
+      "id": "act-ep-ratification-2026-09",
+      "title": "EP 委任判定の月次追認（2026-09）: 未追認 20 件を人が読む",
+      "detail": "オーナー判断（2026-09-05・data/autonomy-score.json ep.precision_review.ratification）: 委任で数えている判定を月1回、人が読んで納得した行を人の判定に上書きする。\n\n対象:\n- act-authority-split-deletion … owner_needed=true（owner_delegated/codex）\n- act-ccr-bigquery-connector … owner_needed=false（owner_delegated/codex）\n- act-ccr-command-classifier … owner_needed=false（owner_delegated/codex）\n- act-gh-pat-scope-and-rotation … owner_needed=true（owner_delegated/codex）\n- act-budget-overrun-32816234185 … owner_needed=true（owner_delegated/codex）\n- act-orphaned-pr-660 … owner_needed=false（owner_delegated/codex）\n- act-selfheal-ap-20260830-actions … owner_needed=true（owner_delegated/codex）\n- act-selfheal-ap-20260831-actions … owner_needed=true（owner_delegated/codex）\n- act-selfheal-ap-20260831-ccr0920 … owner_needed=true（owner_delegated/codex）\n- act-orphaned-branch-claude-obsidian-auto-20260902 … owner_needed=false（owner_delegated/codex）\n- act-budget-overrun-33454414490 … owner_needed=true（owner_delegated/codex）\n- act-pr6-d14-evaluate … owner_needed=true（owner_delegated/codex）\n- act-orphaned-branch-claude-obsidian-auto-20260903 … owner_needed=false（owner_delegated/codex）\n- act-autopilot-cpp-ppid … owner_needed=true（owner_delegated/codex）\n- act-pages-outside-shared-css … owner_needed=false（owner_delegated/codex）\n- act-two-lang-switchers … owner_needed=false（owner_delegated/codex）\n- act-asc-cpp-slot-cleanup … owner_needed=true（owner_delegated/codex）\n- act-faq-question-level-audit … owner_needed=false（owner_delegated/codex）\n- act-selftest-rule-only-coverage … owner_needed=false（owner_delegated/codex）\n- act-orphaned-branch-claude-google-discover-strategy-ydu1a6 … owner_needed=false（owner_delegated/codex）\n\n手順: `node scripts/ep-ratify.mjs --list` で読み、納得した行は `--ratify <id> --evidence \"オーナーの言葉\"`、納得しない行は `--overturn <id> --evidence \"…\"`。台帳をコミットして push する。\n\n**点は変わらない**（委任で既に数えている）。変わるのは公開面の「人の判定 0 件」で、反転した件数が AI の自己採点の甘さの実測になる。追認せずに 14 日の窓を過ぎたら閉じ、未追認は翌月の起票に持ち越す。",
+      "source": "ep-ratification",
+      "domain": null,
+      "touches": [
+        "data/autopilot-actions.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "判定者を人に置き換える操作そのもの。AI が代筆すると #901 の穴（自己採点）に戻る",
+      "auto": null,
+      "close_check": {
+        "kind": "ep_ratified_or_window",
+        "params": {
+          "month": "2026-09",
+          "ids": [
+            "act-authority-split-deletion",
+            "act-ccr-bigquery-connector",
+            "act-ccr-command-classifier",
+            "act-gh-pat-scope-and-rotation",
+            "act-budget-overrun-32816234185",
+            "act-orphaned-pr-660",
+            "act-selfheal-ap-20260830-actions",
+            "act-selfheal-ap-20260831-actions",
+            "act-selfheal-ap-20260831-ccr0920",
+            "act-orphaned-branch-claude-obsidian-auto-20260902",
+            "act-budget-overrun-33454414490",
+            "act-pr6-d14-evaluate",
+            "act-orphaned-branch-claude-obsidian-auto-20260903",
+            "act-autopilot-cpp-ppid",
+            "act-pages-outside-shared-css",
+            "act-two-lang-switchers",
+            "act-asc-cpp-slot-cleanup",
+            "act-faq-question-level-audit",
+            "act-selftest-rule-only-coverage",
+            "act-orphaned-branch-claude-google-discover-strategy-ydu1a6"
+          ],
+          "opened_jst": "2026-09-05",
+          "window_days": 14
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-05",
+      "last_seen_jst": "2026-09-05",
+      "closed_jst": null,
+      "evidence": "未追認 20 件（act-authority-split-deletion / act-ccr-bigquery-connector / act-ccr-command-classifier / act-gh-pat-scope-and-rotation / act-budget-overrun-32816234185 / act-orphaned-pr-660 / act-selfheal-ap-20260830-actions / act-selfheal-ap-20260831-actions / act-selfheal-ap-20260831-ccr0920 / act-orphaned-branch-claude-obsidian-auto-20260902 / act-budget-overrun-33454414490 / act-pr6-d14-evaluate / act-orphaned-branch-claude-obsidian-auto-20260903 / act-autopilot-cpp-ppid / act-pages-outside-shared-css / act-two-lang-switchers / act-asc-cpp-slot-cleanup / act-faq-question-level-audit / act-selftest-rule-only-coverage / act-orphaned-branch-claude-google-discover-strategy-ydu1a6）。窓は 2026-09-05 から 14 日"
     }
   ],
   "escalation_review_authorization": {
