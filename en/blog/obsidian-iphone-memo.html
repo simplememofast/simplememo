@@ -236,10 +236,17 @@
     .capture-table-wrap { overflow-x: auto; overscroll-behavior-x: contain; }
     .capture-table-wrap table { min-width: 44rem; }
     .capture-table-wrap th, .capture-table-wrap td { vertical-align: top; }
-    .capture-table-wrap th:first-child { position: sticky; left: 0; z-index: 1; background: #0b1421; }
+    .capture-table-wrap th:first-child { background: #0b1421; }
     .capture-table-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
     .capture-table-hint { display: none; }
-    @media (max-width: 767px) { .capture-table-hint { display: block; } }
+    @media (max-width: 767px) {
+      .capture-table-hint { display: block; }
+      .capture-table-wrap table { table-layout: fixed; width: 44rem; }
+      .capture-table-wrap th:first-child { width: 8rem; }
+    }
+    @media (min-width: 375px) and (max-width: 767px) {
+      .capture-table-wrap th:first-child { position: sticky; left: 0; z-index: 1; }
+    }
 </style>
   <!-- locale-seed: declare EN once so dual-DOM pages resolve to English (scripts/inject_locale_seed.py) -->
   <script>try{var k='simple-memo-lang';if(!localStorage.getItem(k))localStorage.setItem(k,'en')}catch(e){}</script>
