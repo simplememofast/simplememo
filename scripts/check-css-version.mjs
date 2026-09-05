@@ -52,6 +52,11 @@ const ASSETS = [
     `assets/img/siri/onboarding-${n}.png`,
     `assets/img/siri/onboarding-en-${n}.png`,
   ]),
+  // QR destinations change while the asset path stays the same. A week-long
+  // immutable cache must not keep returning the previous App Store route.
+  ...fs.readdirSync(path.join(ROOT, 'assets/img'))
+    .filter((name) => /^qr-.*\.svg$/.test(name)).sort()
+    .map((name) => `assets/img/${name}`),
 ];
 
 /**

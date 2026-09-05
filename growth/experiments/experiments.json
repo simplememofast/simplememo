@@ -820,7 +820,9 @@
         "The QR content was verified only by comparing the encoded string against each page existing bottom CTA href (identical but for __bottom to __qr). The rendered code itself has not been scanned. Scan one before marking this PR ready.",
         "Excluded: relevance 0.3 pages, and pages with no bottom CTA (/ and /blog/obsidian-voice-input).",
         "2026-08-28: **この実験は現状のままでは評価できない。**2つ別々の理由がある。\n\n1. **`__qr` のトークンがサイトに1つも存在しない。**実測（`grep -roh 'ct=[^&\"]*' --include=*.html`）で0件。target_metric が名指ししている集計単位が、そもそも出荷されていない。\n2. **仮に存在しても ASC には現れない。**Apple の閾値は「1キャンペーンにつき初回DL 5人以上」で、初回DLの実測は 4.5〜5.0/日。詳細は growth/reports/2026-08-28-campaign-token-cardinality.md。\n\nこの実験のノート自身が「**NOT MEASURABLE IN GA4** … The only readout is App Store Connect campaign data」と書いている。**その唯一の読み口が塞がっている。**\n\n**ここでは決定を書かない**（評価日は 2026-09-13、判断は持ち主のもの）。ただし 9/13 に「データが足りない」と読むのは誤りで、**待っても出ない**ことは今分かっている。`measurement_failed`（測れたが判断できない、ではなく測っていない）に近い形。",
-        "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。"
+        "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。",
+        "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。",
+        "2026-09-05訂正: 8/28の「__qrトークンがサイトに存在しない」はHTMLだけを検索した誤判定だった。実際のSVG46個を復号すると44個に__qr、AIタグ2個に旧形式ctが存在した。トークン不在という根拠を撤回する。キャンペーンの最小件数・実レポート取得は別条件であり、QRスキャンや初回DLが測れたとは扱わない。"
       ],
       "control": {
         "kind": "none",
@@ -1245,7 +1247,8 @@
       "evaluated_at": null,
       "notes": [
         "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。",
-        "2026-09-05: / と /ai-tags/ の説明を事実訂正。端末内のタイトル・タグ生成と、外部サーバーを経由するメール配送を本文・検索用description・FAQ/JSON-LDで区別した。/download/ には日本のApp Store現行名・旧名・自動タグ機能・無料上限を明記。新しい実験や成功判定ではなく、既存の前後比較に併発する変更として扱う。タイトル、CTAリンク、QRコード、動画ファイルは変更していない。"
+        "2026-09-05: / と /ai-tags/ の説明を事実訂正。端末内のタイトル・タグ生成と、外部サーバーを経由するメール配送を本文・検索用description・FAQ/JSON-LDで区別した。/download/ には日本のApp Store現行名・旧名・自動タグ機能・無料上限を明記。新しい実験や成功判定ではなく、既存の前後比較に併発する変更として扱う。タイトル、CTAリンク、QRコード、動画ファイルは変更していない。",
+        "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1341,7 +1344,8 @@
       "decision": null,
       "evaluated_at": null,
       "notes": [
-        "2026-08-12: 既存の先頭tip-box「ひとことで言うと」を data-answer-block=\"logseq-or-obsidian\" のセクションへ置換（内容は同一主張の言い直し・新規主張なし、全て2026-08-11の実機検証済み事実）。タイトル・description・FAQ JSON-LDは不変更。判定は「logseqとobsidian どちらが 良い」の順位・対応ページ・AIO表示で行う。"
+        "2026-08-12: 既存の先頭tip-box「ひとことで言うと」を data-answer-block=\"logseq-or-obsidian\" のセクションへ置換（内容は同一主張の言い直し・新規主張なし、全て2026-08-11の実機検証済み事実）。タイトル・description・FAQ JSON-LDは不変更。判定は「logseqとobsidian どちらが 良い」の順位・対応ページ・AIO表示で行う。",
+        "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。"
       ],
       "pages": [
         "/obsidian/compare/logseq/"
@@ -2094,7 +2098,8 @@
         "2026-09-02: **主指標は GSC の CTR ではない。**分岐リンクのクリックと App Store outbound（GA4: page_path=/blog/free-memo-apps-ranking × data-cta-placement=hero）、その先の CPP（free-memo-generic・ppid 未記入）のDL。GSC は順位が実験と無関係に動いていないかのガードレール。",
         "2026-09-02: title / description は据え置き。snippet-2026-08-09-free-memo-ranking（09-13評価）の窓に被るため。dateModified と最終更新は内容が増えたので 2026-09-02 へ動かした。",
         "2026-09-02: レポートは『無料メモアプリおすすめ10選【2026年9月】…用途別に比較』への改題を提案しているが、**本文が並べているのは TOP5 で、10選の実体が無い**（用途別5件も同じ5本）。改題は 09-13 の評価時に、10本に増やすか『5選』へ正すかと一緒に決める。",
-        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-A。実装は同§16。"
+        "2026-09-02: 出典 docs/GROWTH_LTV_ENGAGEMENT_2026-09-01.md §6 P0-A。実装は同§16。",
+        "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。"
       ],
       "control": {
         "kind": "pre_post",
@@ -2247,6 +2252,15 @@
       "date": "2026-09-05",
       "version": "2026-09-05",
       "note": "App Storeクリック・表示を自社アプリID 6758438948だけに限定。以前は比較記事の他社ストアリンクも対象だったため、修正前後のGA4イベント総数は直接比較しない。日英AI機能・FAQの計測も補完。クエリ分類v2は自社・旧名・競合・曖昧名を分離し、ブランド評価は両期間を同じ分類で再集計する。WEBとAIの集計を分離、完全な同日数・非重複期間だけを比較する。 全GA4ローダー・CTA計測を本番ホストに限定し、ローカル検証・Pagesプレビューからの送信を防ぐ。"
+    },
+    {
+      "date": "2026-09-05",
+      "version": "qr-cpp-2026-09-05",
+      "note": "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。",
+      "cpp_inventory_run": "33967344673",
+      "cpp_inventory_fetched_at": "2026-09-05T12:55:12Z",
+      "routed_to_cpp": 27,
+      "default_product_page": 19
     }
   ]
 }
