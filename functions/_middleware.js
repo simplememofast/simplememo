@@ -14,8 +14,9 @@
 // issues.
 //
 // This middleware fixes that by returning a 301 from the variants to the
-// canonical URL. Once Google sees the 301 it drops the variant from the
-// index entirely — GSC backfills clear in a few weeks. Bonus: human users
+// canonical URL. Google can retain the source in GSC's "Page with redirect"
+// report; a 301 does not guarantee that the target is indexed or that the
+// report clears on a particular schedule. Bonus: human users
 // who land on an old `?lang=en` bookmark get redirected to the canonical
 // page, which is a better UX than serving identical content from two URLs.
 //
@@ -28,10 +29,9 @@
 //      hops (`https://www…/x.html` → 301 middleware, host kept → `https://www…/x`
 //      → 301 `_redirects` → apex) and the intermediate www URL became one more
 //      GSC "Page with redirect" row. The `_redirects` rule stays as the
-//      fallback if a Functions deploy ever fails. The `http://` leg of
-//      `http://www…` is out of our hands: the edge's Always Use HTTPS 301
-//      runs before anything in this repo, so that spelling always costs
-//      one extra hop.
+//      fallback if a Functions deploy ever fails. HTTP handling can happen
+//      outside Pages (HTTPS settings / the www Worker); verify the deployed
+//      response separately instead of inferring its hop count here.
 //
 //   0b. Collapse runs of duplicate slashes (`/en/vs/notion//` → `/en/vs/notion/`).
 //      Pages resolves the extra slashes and serves 200, so these are true
@@ -192,6 +192,7 @@ const RETIRED = {
   "/vs/whatsapp/": "/vs/",
   "/vs/telegram/": "/vs/",
   "/vs/trello/": "/vs/",
+  "/vs/mem": "/vs/",
   "/vs/mem/": "/vs/",
   "/vs/slack-self-dm/": "/vs/",
   // A backlink (featureupvote.com, DR72) carries a stray closing paren.
