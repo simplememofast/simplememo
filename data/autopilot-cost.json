@@ -175,7 +175,17 @@
       "total_cost_usd": 0,
       "num_turns": 1,
       "outcome": "failed",
-      "note": "日次アクチュエータが自動追記（ジョブログの result 行）"
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行）",
+      "task_kind": "article",
+      "task_kind_source": {
+        "provider": "github_job_log",
+        "run_id": "33279844326",
+        "job_id": "99173041910",
+        "run_attempt": 1,
+        "step_number": 7,
+        "observed_at": "2026-08-29T22:58:23.2955913Z",
+        "task_kind": "article"
+      }
     },
     {
       "date_jst": "2026-08-31",
@@ -184,7 +194,17 @@
       "total_cost_usd": 0,
       "num_turns": 1,
       "outcome": "failed",
-      "note": "日次アクチュエータが自動追記（ジョブログの result 行）"
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行）",
+      "task_kind": "article",
+      "task_kind_source": {
+        "provider": "github_job_log",
+        "run_id": "33340960317",
+        "job_id": "99336390574",
+        "run_attempt": 1,
+        "step_number": 7,
+        "observed_at": "2026-08-30T23:07:35.0288424Z",
+        "task_kind": "article"
+      }
     },
     {
       "date_jst": "2026-09-01",
@@ -233,7 +253,17 @@
       "total_cost_usd": 4.8768404,
       "num_turns": 94,
       "outcome": "failed",
-      "note": "日次アクチュエータが自動追記（ジョブログの result 行）"
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行）",
+      "task_kind": "article",
+      "task_kind_source": {
+        "provider": "github_job_log",
+        "run_id": "33926832821",
+        "job_id": "101197075645",
+        "run_attempt": 1,
+        "step_number": 8,
+        "observed_at": "2026-09-04T22:45:53.1410848Z",
+        "task_kind": "article"
+      }
     },
     {
       "date_jst": "2026-09-05",
@@ -241,7 +271,17 @@
       "run_id": "33959414641",
       "total_cost_usd": 0.8407852,
       "num_turns": 20,
-      "note": "日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）"
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）",
+      "task_kind": "article",
+      "task_kind_source": {
+        "provider": "github_job_log",
+        "run_id": "33959414641",
+        "job_id": "101288543517",
+        "run_attempt": 1,
+        "step_number": 8,
+        "observed_at": "2026-09-05T09:59:17.1464223Z",
+        "task_kind": "article"
+      }
     },
     {
       "date_jst": "2026-09-06",
@@ -250,7 +290,17 @@
       "total_cost_usd": 19.600872199999998,
       "num_turns": 251,
       "outcome": "failed",
-      "note": "日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）"
+      "note": "日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）",
+      "task_kind": "article",
+      "task_kind_source": {
+        "provider": "github_job_log",
+        "run_id": "33996430959",
+        "job_id": "101387673341",
+        "run_attempt": 1,
+        "step_number": 8,
+        "observed_at": "2026-09-05T22:37:27.1089806Z",
+        "task_kind": "article"
+      }
     }
   ],
   "$backfill_note": "**2026-08-25 更新。**旧記述は『runs は 2026-08-22 の1件のみ／この台帳に欠落は無い』だったが、**それは run 1〜11 までの話で、その後の3回を数えていなかった。**run 12（08-23・$7.2967・出荷）が抜けており、当月の実費を $0.8149 と表示していた。実際は $8.1116。\n\n抜けた原因は構造にあった。ワークフローの実費ステップは**金額を出力して『翌日のセッションが台帳へ入れること』と書くだけ**で、追記する主体が翌日の実行そのもの。その翌日（08-24）の主系が即時失敗したため、追記する者がいなかった。**記録が最も要る回＝失敗した回に、記録が落ちる。**\n\n**この穴は日次アクチュエータ（scripts/autopilot-act.mjs の append-cost）で塞がれた。**ジョブログから読んで自動追記するので、翌日の実行が落ちても記録は残る。ただし**種別（task_kind）は lane/action から導けるときだけ書く**規則なので、導出できない回は空のまま残る。空の行は1回あたりの上限を判定しないため、**種別の欠落は上限の素通りに直結する。**08-23 の行はこれに当たり、手で補った。\n\n現在の内訳: run 1〜8 Gateスキップ（Claude Code未実行＝実費ゼロ）／9 apt詰まりで cancelled／10 allowed_bots で failure／11 成果物ゼロ $0.8149／**12 出荷 $7.2967**／13・14（08-24・08-25）は初回モデル呼び出しの時点で失敗し modelUsage が空・$0。",
