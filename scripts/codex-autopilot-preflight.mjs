@@ -69,6 +69,7 @@ if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta
   else {
     const index=process.argv.indexOf('--input');
     assert.ok(index>=0 && process.argv[index+1], 'Use --input <fresh-snapshot.json> or --selftest');
-    console.log(JSON.stringify(codexPreflight(JSON.parse(fs.readFileSync(process.argv[index+1],'utf8'))),null,2));
+    const snapshot=JSON.parse(fs.readFileSync(process.argv[index+1],'utf8'));
+    console.log(JSON.stringify(codexPreflight(snapshot),null,2));
   }
 }
