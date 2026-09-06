@@ -116,22 +116,21 @@
     {
       "area": "① 次期機能開発",
       "task": "受領した要望の設計への落とし込み",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md",
         "docs/designs/obsidian-nested-destinations.md",
         "data/feature-backlog.json",
         "scripts/feature-score.mjs",
-        "scripts/roadmap.mjs"
+        "scripts/roadmap.mjs",
+        "docs/verified-design-execution-2026-09-06.md"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**設計文書までは機械が出しており、残っているのは**採否の判断**。そこは実装量では動かない。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-06] オーナーの最大権限委譲を受け、Codexが実際の要望と現行コードを照合しfolder_pick_uxの設計を採用した。feature-scoreの実CLIで受入条件と文書をバックログへ保存し、ロードマップにも反映する。権限表に設計採否の条項を追加したため、恒久的なオーナー待ちという従来の前提を解除する。公開と出力の検証が済むまでexecutorはai_proposesのまま。これは機能の実装・App Store公開の完了ではない。",
-      "blocker": "verification_pending",
-      "unblocked_by": "採用設計・CLI適用・開発計画への反映を本番のコミットと照合する",
+      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**設計文書までは機械が出しており、残っているのは**採否の判断**。そこは実装量では動かない。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-06] オーナーの最大権限委譲を受け、Codexが実際の要望と現行コードを照合しfolder_pick_uxの設計を採用した。feature-scoreの実CLIで受入条件と文書をバックログへ保存し、ロードマップにも反映する。権限表に設計採否の条項を追加したため、恒久的なオーナー待ちという従来の前提を解除する。公開と出力の検証が済むまでexecutorはai_proposesのまま。これは機能の実装・App Store公開の完了ではない。\n\n[2026-09-06 実行検証] PR1029のhead 18d63f2f6894d805e1e1bedc2bf5dfb24af68bdbはSEO Validation run 34028777897を通り、main c4a3b856aa262e9630ccba8c92a828802a095592へマージ。本番Pages 226ddeac-8c3d-4f4f-ba2c-620e5f179c18もsuccess。mainから実行したfeature-scoreとroadmapの両出力で、folder_pick_uxのAIによる設計採用と受入条件・文書への参照を確認した。実際に受領した要望の設計採否をAIが実行し開発計画へ適用したため、この業務をai_executes_gatedへ移す。機能そのものの実装・App Store公開・効果検証は別工程で、完了扱いにしない。",
       "authority": {
         "domain": "機能要望の設計採否",
         "ai_may": "リスクタグのない既存候補の設計採用"
       },
-      "unlock": "impl_product"
+      "since": "2026-09"
     },
     {
       "area": "① 次期機能開発",
