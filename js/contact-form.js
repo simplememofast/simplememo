@@ -47,6 +47,29 @@
   // 再現ファクト。**UAから作らない**（下の MAX_FACT のコメント参照）
   var deviceEl = document.getElementById('inquiry-device');
   var osEl = document.getElementById('inquiry-os');
+  var versionEl = document.getElementById('inquiry-version');
+  var reproduction = ['steps', 'expected', 'actual'].map(function (key) {
+    return { key: key, el: document.getElementById('inquiry-' + key) };
+  });
+  var headings = {
+    ja: { steps: '再現手順', expected: '期待した結果', actual: '実際の結果' },
+    en: { steps: 'Steps to reproduce', expected: 'Expected result', actual: 'Actual result' }
+  };
+
+  // Keep the existing body retention/deletion contract. Never infer actions or
+  // device versions from the browser, and never silently truncate a report.
+  function messageBody() {
+    var body = (bodyEl.value || '').trim();
+    reproduction.forEach(function (field) {
+      var value = field.el ? (field.el.value || '').trim() : '';
+      if (value) body += '\n\n' + headings[currentLocale()][field.key] + ':\n' + value;
+    });
+    return body.trim();
+  }
+
+  function updateCounter() {
+    if (counterEl) counterEl.textContent = messageBody().length + ' / ' + MAX_BODY;
+  }
 
   /** 表示言語。lang.js が <html lang> を切り替えるので、送信時点の値を読む。 */
   function currentLocale() {
@@ -90,16 +113,18 @@
   }
 
   if (counterEl && bodyEl) {
-    bodyEl.addEventListener('input', function () {
-      counterEl.textContent = bodyEl.value.length + ' / ' + MAX_BODY;
+    bodyEl.addEventListener('input', updateCounter);
+    reproduction.forEach(function (field) {
+      if (field.el) field.el.addEventListener('input', updateCounter);
     });
+    document.addEventListener('click', updateCounter);
   }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    var body = (bodyEl.value || '').trim();
-    if (!body) { say('error', 'empty'); bodyEl.focus(); return; }
+    if (!(bodyEl.value || '').trim()) { say('error', 'empty'); bodyEl.focus(); return; }
+    var body = messageBody();
     if (body.length > MAX_BODY) { say('error', 'tooLong'); return; }
 
     submitEl.disabled = true;
@@ -113,7 +138,8 @@
         email: (emailEl.value || '').trim(),
         locale: currentLocale(),
         device: factOf(deviceEl),
-        os: factOf(osEl)
+        os: factOf(osEl),
+        app_version: factOf(versionEl) || null
       })
     }).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (data) {

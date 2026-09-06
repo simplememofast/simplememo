@@ -31,6 +31,9 @@ jobs:
       - name: Acquisition measurement and GSC aggregation regressions
         run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
 
+      - name: Contact form reproduction details and failed delivery
+        run: node --test scripts/contact-form.test.mjs
+
       - name: Trend observations preserve failures and ranking baselines
         run: |
           python3 scripts/trend-radar.test.py
