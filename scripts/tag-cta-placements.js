@@ -240,6 +240,13 @@ function classify(html) {
 
   for (const a of anchors) {
     if (!a.isCta || a.zone) continue;
+    // An explicitly identified closing CTA must keep its measurement identity
+    // when nearby editorial text changes the byte-position fallback.
+    const position = a.tag.match(/\bdata-cta-position="(hero|mid|bottom)"/);
+    if (position) {
+      a.placement = position[1];
+      continue;
+    }
     const frac = (a.index - contentStart) / span;
     a.placement = frac < 0.25 ? 'hero' : frac > 0.75 ? 'bottom' : 'mid';
   }
@@ -282,6 +289,14 @@ if (SELFTEST) {
     placements(`<main>${long}${long}${own()}</main>`)[0] === 'bottom');
   t('main の中ほどの CTA は mid',
     placements(`<main>${long}${own()}${long}</main>`)[0] === 'mid');
+  t('明示された末尾 CTA は本文の長さで区分が変わらない',
+    [long, long.repeat(8)].every((copy) =>
+      placements(`<main>${long}${own(' data-cta-position="bottom"')}${copy}</main>`)[0] === 'bottom'));
+  t('不明な明示位置は位置からの分類を維持する',
+    placements(`<main>${long}${own(' data-cta-position="sidebar"')}${long}</main>`)[0] === 'mid');
+  t('明示位置はナビゲーションや参照リンクを上書きしない',
+    placements(`<nav>${own(' data-cta-position="bottom"')}</nav><main>${long}</main>`)[0] === 'nav'
+    && placements(`<main>${ref.replace('<a ', '<a data-cta-position="bottom" ')}${long}</main>`)[0] === 'reference');
   // chrome は位置ではなくゾーンで決まる。
   t('nav の中の CTA は nav', placements(`<nav>${own()}</nav><main>${long}</main>`)[0] === 'nav');
   t('footer の中の CTA は footer', placements(`<main>${long}</main><footer>${own()}</footer>`)[0] === 'footer');
