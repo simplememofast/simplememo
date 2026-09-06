@@ -2312,12 +2312,16 @@
     {
       "area": "⑬ アナログ領域",
       "task": "公的資金: 制度探索・期限管理・申請書下書き",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "未着手",
-      "blocker": "not_started",
-      "unblocked_by": "制度の探索に外部検索が要るが、期限管理と下書きは作れる",
-      "unlock": "impl_analog"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/scripts/grant-radar.py",
+        "../simplememo-api/scripts/test_grant_radar.py",
+        "../simplememo-api/.github/workflows/grant-radar.yml",
+        "../simplememo-api/data/grant-radar.json",
+        "../simplememo-api/docs/grants/current-draft.md"
+      ],
+      "note": "未着手\n\n[2026-09-06] simplememo-api#261を検査成功後に本番化し、Grant Research run 34019325140 (https://github.com/simplememofast/simplememo-api/actions/runs/34019325140) が完走。Jグランツを4語・東京都で検索し24制度を重複排除、JST締切を管理し、公式Word様式を確認した特許調査費用助成の記述欄に対応する申請下書き1件を生成。結果と下書きは非公開側のmain 04c0e5aへ保存。毎週月曜07:23 JSTに実行。本文・様式の変更、取得失敗、終了した募集回を検査し、失敗時は前回成功を最新扱いしない。全制度の網羅や申請資格の確定ではない。相談実績、見積、金額、売上計画、法的表明は未確認として残す。下書き作成までがこの行の対象で、交付申請・郵送・相談予約は実行していない。",
+      "since": "2026-09"
     },
     {
       "area": "⑬ アナログ領域",
