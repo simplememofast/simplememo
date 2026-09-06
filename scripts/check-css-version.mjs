@@ -32,6 +32,7 @@ const write = process.argv.includes('--write');
 
 /** Every asset served with an immutable cache header and referenced with ?v=. */
 const ASSETS = [
+  'assets/css/home-hero.css',
   'assets/css/editorial-resources.css',
   'js/obsidian-inbox-tool.js',
   'assets/css/style.min.css',
