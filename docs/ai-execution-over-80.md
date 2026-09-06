@@ -28,3 +28,13 @@ GH_PATを使うのは、生成したPRで検証を起動するため（GITHUB_TO
 - 請求照合：未着手からの移行なので分母増加を含める。契約・納品の根拠も必要。
 
 公開台帳はまだ変更しない。80％超えは未達。
+
+## 実施記録（2026-09-06）
+
+- PR #990: トレンドレーダー。初回の実データ取得は3ソース成功。CIで自己テスト台帳の登録・並び順と公開方針の不足を修正済み。最新版 c0a02b5c のCIを待つ。マージ後に trend-radar.yml を main で起動し、観測PRのマージと本番JSONを検証する。
+- PR #991: R&Dの定期実験（draft、#990依存）。最新 51ccf58f。仮説は3ソース並列化で20%以上短縮。ローカル3組の実験は中央値約13%短縮だが、ライブフィードが変化したため判定保留。実験失敗の隠蔽を検知する変異テストも確認済み。#990マージ後にreadyへし、必要なら新コミットでCIを起動する（draftのまま成功しても後から自動マージは発火しない）。
+- TestFlight: run https://github.com/simplememofast/simplememo-ios/actions/runs/34014697843 はこのタスクから submit_review=false で起動しsuccess。既存v5.8.20、build956の再利用。新規archiveをした証跡ではないので、その範囲の限界を維持する。
+- AI露出プローブの接続試験: claude 2.1.261。リポジトリ外の一時ディレクトリ、safe-mode、strict-mcp-config、WebSearchのみ、permission-mode=dontAsk、no-session-persistence、max-budget-usd=0.50。既定モデルは利用枠で拒否（0ドル）、sonnet指定は回答成功（0.0946466ドル）。modelUsageはclaude-sonnet-5/claude-haiku-4-5-20251001。固定質問Q2にSimpleMemoへの言及あり、第三者評価不足の指摘あり。現在は接続試験だけで、定期実行・全質問・結果記録は未実装。JSONのweb_search_requestsは0だったため、回答中のリンクだけで実際の検索呼び出しを証明しない。次はstream-jsonのtool_use/tool_resultで確認する。
+- 最新iOS origin/mainの収益日次台帳はcovered_days=7。28日揃ったと見なさない。
+
+台帳のAI実行件数はまだ134件のまま。分母・executorは変更していない。
