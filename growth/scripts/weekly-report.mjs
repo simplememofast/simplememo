@@ -71,8 +71,9 @@ if (!due.length) {
   p();
   p('```sh');
   p('node growth/scripts/experiments.mjs due');
-  p('node growth/scripts/experiments.mjs evaluate <id> --decision keep|revert|iterate|inconclusive');
+  p('node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "comparison and limitations"');
   p('```');
+  p('Other metrics and measurement diagnostics use `--review`; see [evidence requirements](../EXPERIMENT_EVIDENCE.md).');
 }
 p();
 

@@ -10,23 +10,24 @@
  *        [--metric ctr] [--baseline-clicks N --baseline-impressions N \
  *         --baseline-ctr 0.0x --baseline-position N \
  *         --baseline-window YYYY-MM-DD..YYYY-MM-DD --baseline-source "..."]
- *   node growth/scripts/experiments.mjs evaluate <id> --decision keep [--note "..."]
+ *   node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "..."
+ *   node growth/scripts/experiments.mjs evaluate <id> --decision <d> --review /private/review.json
  *   node growth/scripts/experiments.mjs reschedule <id> --evaluate 2026-09-06 --note "why"
  *
- * `evaluate` refuses to record a decision unless the ledger can point at GSC
- * data covering the period after the change. Recording "keep" from memory is
- * how the previous cycle produced six weeks of reports that all deferred to a
- * date nobody was holding — a decision with no evidence behind it is the thing
- * this ledger exists to make impossible, not merely to discourage.
- * `--force` exists for the genuine exception, and it stamps the entry as
- * evidence-free so the next reader knows.
+ * Evidence must match the target metric. GSC admission checks rows and periods;
+ * other metrics use an explicit review contract. Neither route proves causality.
+ * --force cannot bypass evidence; diagnostic and administrative closures are
+ * recorded separately from measured outcomes. Historical decisions are retained.
  */
 
 import {
   loadLedger, saveLedger, validate, summarize, isDue, daysOverdue, today,
   STATUSES, DECISIONS,
 } from '../lib/ledger.mjs';
-import { listSnapshots, loadSnapshot, toPath } from '../lib/gsc.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { listSnapshots, loadSnapshot, GSC_DIR } from '../lib/gsc.mjs';
+import { gscEvidence, reviewEvidence, fingerprint } from '../lib/experiment-evidence.mjs';
 
 const argv = process.argv.slice(2);
 const cmd = argv[0];
@@ -58,24 +59,12 @@ function line(e, asOf) {
   return `${e.id.padEnd(24)} ${state.padEnd(16)} ${e.page}`;
 }
 
-/**
- * Snapshots that are usable as post-change evidence for an experiment.
- *
- * The bar is "the measurement window begins on or after the change shipped"
- * (`started_at`) — NOT after `evaluation_at`. Those are different dates and
- * conflating them was a real bug: a snapshot covering 07-11..08-07 is entirely
- * post-change for a 07-01 retitle and is exactly the data the decision should
- * be read from, yet comparing against the 07-29 evaluation date rejected it.
- * The evaluation date says when we promised to look, not which data is valid.
- */
-function snapshotsCovering(exp) {
-  const changedOn = exp.started_at || exp.evaluation_at;
-  if (!changedOn) return [];
+/** Candidates pass the same admission rules as evaluate; no outcome is implied. */
+function snapshotsCovering(exp, asOf) {
   return listSnapshots().filter((label) => {
     try {
-      const s = loadSnapshot(label);
-      const start = s.meta.period_start || s.meta.captured_at || label;
-      return start >= changedOn;
+      gscEvidence(exp, loadSnapshot(label), { asOf, decision: 'inconclusive' });
+      return true;
     } catch { return false; }
   });
 }
@@ -104,11 +93,10 @@ switch (cmd) {
       }
       if (e.before?.title) console.log(`  before    ${e.before.title}`);
       if (e.after?.title)  console.log(`  after     ${e.after.title}`);
+      const candidates = snapshotsCovering(e, asOf);
+      console.log(candidates.length ? `  GSC candidates for this metric/scope: ${candidates.join(', ')}`
+        : '  No matching GSC comparison; collect the correct source or prepare an explicit review.');
     }
-    const snaps = [...new Set(due.flatMap(snapshotsCovering))].sort();
-    console.log(snaps.length
-      ? `\nPost-change GSC snapshots available: ${snaps.join(', ')}`
-      : '\nNo post-change GSC snapshot ingested yet — see growth/GSC_OWNER_ACTION.md.');
     break;
   }
 
@@ -170,31 +158,52 @@ switch (cmd) {
     if (!e) die(`no experiment with id ${argv[1]}`);
     const decision = flag('decision') || die(`--decision is required, one of: ${DECISIONS.join(', ')}`);
     if (!DECISIONS.includes(decision)) die(`invalid decision ${decision}; expected ${DECISIONS.join(', ')}`);
-
-    const snaps = snapshotsCovering(e);
-    if (!snaps.length && !has('force')) {
-      die(
-        `No GSC snapshot covers the period after ${e.evaluation_at}, so there is nothing to read this decision off.\n` +
-        `  Ingest one:  node growth/scripts/ingest-gsc.mjs --label <YYYY-MM-DD> --dir growth/input\n` +
-        `  Owner steps: growth/GSC_OWNER_ACTION.md\n` +
-        `  Override:    re-run with --force (the entry will be stamped evidence:none)`
-      );
-    }
+    if (!['running', 'frozen'].includes(e.status)) die('Only a running or frozen experiment can be evaluated; preserve previous decisions');
+    if (has('force')) die('--force no longer bypasses evidence. Use --review for a documented measurement_failed diagnosis');
+    if (has('snapshot') && has('review')) die('Choose either --snapshot or --review');
+    const asOf = today();
+    const note = flag('note');
+    let evidence;
+    try {
+      if (decision === 'abandoned') {
+        if (has('snapshot') || has('review')) throw new Error('Administrative abandonment does not take comparison evidence');
+        if (!note?.trim()) throw new Error('--note is required for administrative abandonment');
+        evidence = { schema_version: 1, kind: 'administrative', gsc_snapshots: [],
+          rationale: note, validation: 'administrative closure; no claim of measured efficacy or an unreachable metric' };
+      } else if (has('review')) {
+        const file = path.resolve(flag('review') || die('--review needs a file'));
+        const bytes = fs.readFileSync(file);
+        evidence = reviewEvidence(e, JSON.parse(bytes), { baseDir: path.dirname(file), asOf, decision,
+          manifestSha256: fingerprint(bytes) });
+      } else {
+        if (decision === 'measurement_failed') throw new Error('measurement_failed requires a diagnostic --review; unrelated GSC data is not evidence');
+        if (!note?.trim()) throw new Error('--note is required to explain the comparison, export filters and limitations');
+        const label = flag('snapshot');
+        if (!label || !listSnapshots().includes(label)) throw new Error('--snapshot must select one existing snapshot; selection must be explicit');
+        const snapshot = loadSnapshot(label);
+        const dimensions = ['meta', 'dates', e.measurement_scope?.kind === 'query_page' ? 'query-pages' : 'pages'];
+        const files = dimensions.map(name => {
+          const bytes = fs.readFileSync(path.join(GSC_DIR, label, `${name}.json`));
+          return { name: `${label}/${name}.json`, sha256: fingerprint(bytes) };
+        });
+        evidence = gscEvidence(e, snapshot, { asOf, decision, files });
+        evidence.rationale = note;
+      }
+    } catch (error) { die(`refusing to evaluate: ${error.message}`); }
 
     e.status = 'evaluated';
     e.decision = decision;
-    e.evaluated_at = today();
-    e.evidence = snaps.length ? { gsc_snapshots: snaps } : { gsc_snapshots: [], note: 'recorded with --force; no GSC data backed this decision' };
-    const note = flag('note');
-    if (note) (e.notes ||= []).push(`${today()}: ${note}`);
+    e.evaluated_at = asOf;
+    e.evidence = evidence;
+    if (note) (e.notes ||= []).push(`${asOf}: ${note}`);
 
     const problems = validate(ledger);
     if (problems.length) die(`refusing to write:\n  ${problems.join('\n  ')}`);
     saveLedger(ledger);
-    console.log(`${e.id} → evaluated / ${decision}${snaps.length ? ` (evidence: ${snaps.join(', ')})` : ' (NO EVIDENCE)'}`);
+    console.log(`${e.id} → evaluated / ${decision} (evidence: ${evidence.kind})`);
     if (decision === 'revert') console.log(`Next: restore the previous title on ${e.page}:\n  ${e.before?.title ?? '(no recorded before-title)'}`);
     if (decision === 'iterate') console.log(`Next: add the follow-up with \`experiments.mjs add --page ${e.page} --type title_test --evaluate <date>\``);
-    if (decision === 'abandoned') console.log(`Next: drop ${e.page} from the CTR working lists. The point of this decision is that there is no next round.`);
+    if (decision === 'abandoned') console.log('Closed administratively; this is not evidence of efficacy or an unreachable target.');
     break;
   }
 
@@ -222,7 +231,9 @@ switch (cmd) {
   due                             everything past its evaluation date, with baselines
   show <id>                       full JSON for one experiment
   add --page --type --evaluate    register a new experiment (evaluation date mandatory)
-  evaluate <id> --decision <d>    record an outcome (requires post-change GSC data)
+  evaluate <id> --decision <d>    record a reviewed outcome; see growth/EXPERIMENT_EVIDENCE.md
+    --snapshot <label> --note     GSC exact scope and comparable periods
+    --review <private.json>       source-specific comparison or measurement diagnostic
   reschedule <id> --evaluate --note   move a deadline, on the record`);
     process.exit(cmd ? 2 : 0);
 }

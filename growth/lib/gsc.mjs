@@ -79,6 +79,7 @@ export function loadSnapshot(label) {
     // clicks to divide.
     pagesAio: read('pages-aio'),
     queryPages: read('query-pages'),
+    dates: read('dates'),
   };
 }
 

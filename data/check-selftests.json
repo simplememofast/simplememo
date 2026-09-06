@@ -124,6 +124,12 @@
       "broke": "14通りで落ちることを観測。加えて **この検査自身が、冒頭に引いた規律を破っていた** —— dates / queries / pages がすべて空の写しは重複も不整合も起こしようがないので fatal 0 / warn 0 で「重複・内部不整合なし」を出していた。「取得できなかった」と「増えていない」を取り違えない、が守れていない。さらに meta.period_* が無ければ日付の欠けの判定が、meta.row_counts が無ければ内部整合の判定が、どちらも黙って丸ごと消えていた。3つとも fatal にした（実データ3件はすべて持っているので誤検出にならない）。欠け・鮮度・queries/pages が0行は報告のみのまま"
     },
     {
+      "script": "growth/scripts/check-experiment-evidence.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-06",
+      "broke": "隔離した仮データ環境で旧evaluate CLIへ戻すと、CTA＋期間情報だけの採用、force迂回、既存判定の上書き等を検査が検出してexit 1。対象ページ・検索語フィルタを除去した別変異もexit 1。実台帳の効果判定は変更せず、正常経路・比較契約・元資料ハッシュ・計測不能診断を回帰検査する。"
+    },
+    {
       "script": "growth/scripts/check-experiments.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
