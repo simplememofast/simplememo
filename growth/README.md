@@ -76,10 +76,13 @@ node growth/scripts/analyze.mjs --json          # for piping
 # experiments
 node growth/scripts/experiments.mjs due
 node growth/scripts/experiments.mjs add --page /obsidian/ --type title_test --evaluate 2026-09-06
-node growth/scripts/experiments.mjs evaluate <id> --decision keep --note "why"
+node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "comparison and limitations"
+# Other metrics / measurement diagnosis: growth/EXPERIMENT_EVIDENCE.md
+node growth/scripts/experiments.mjs evaluate <id> --decision measurement_failed --review /private/review.json
 
 # what CI runs
 node growth/scripts/check-experiments.mjs
+node growth/scripts/check-experiment-evidence.mjs
 ```
 
 ## Design decisions worth knowing before you change something
@@ -103,9 +106,12 @@ scheduled or local use.
 **A malformed ledger DOES fail CI.** An entry that cannot be parsed can never
 come due, so a broken file would silently switch the gate off.
 
-**`evaluate` refuses without post-change GSC data.** Recording an outcome from
-memory reproduces exactly the situation this replaced. `--force` exists and
-stamps the entry `evidence: none`, so the next reader can see it.
+**`evaluate` requires evidence for the target metric.** GSC comparisons require
+an explicitly selected snapshot, the exact page/query scope, numeric rows and
+complete comparable periods. Other metrics need a registered measurement
+contract and an explicit review. Diagnostic and administrative closures do not
+claim efficacy. `--force` no longer bypasses the requirement. See
+[EXPERIMENT_EVIDENCE.md](EXPERIMENT_EVIDENCE.md) for commands and validation limits.
 
 **Business relevance is hand-maintained, on purpose.** `BUSINESS_RELEVANCE` in
 `lib/gsc.mjs` maps URL patterns to how close a page's readers are to

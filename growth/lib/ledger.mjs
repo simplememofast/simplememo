@@ -95,6 +95,8 @@ export const DECISIONS = ['keep', 'revert', 'iterate', 'inconclusive', 'measurem
  */
 export function measuresPageCtr(exp) {
   if (!exp || exp.target_metric !== 'ctr') return false;
+  if (exp.measurement_scope && exp.measurement_scope.kind !== 'page') return false;
+  if (exp.type === 'faq_add' && !exp.measurement_scope) return false;
   // ページ集合（"(9 pages: …)"）は GSC の1行に対応しない。
   if (typeof exp.page !== 'string' || !exp.page.startsWith('/')) return false;
   const b = exp.baseline;
