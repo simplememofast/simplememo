@@ -78,6 +78,7 @@ class VoiceShiftTests(unittest.TestCase):
         self.db.execute('INSERT INTO send_correlation VALUES(?,?)', ('resolved-message', 'staff-hash'))
         s, _ = self.run_query()
         self.assertEqual((s['excluded_internal_installs'], s['cohort_installs'], s['capture_events']), (2, 1, 1))
+        self.assertEqual((s['configured_internal_id_count'], s['resolved_internal_id_count'], s['internal_union_count']), (1, 1, 2))
 
     def test_dedupe_is_per_install_with_separate_event_id_namespace(self):
         for iid in ['a', 'b']:

@@ -5,15 +5,19 @@
 -- limits all reported activity to the cohort window. No lifetime-new claim.
 WITH
 params AS (SELECT CAST(? AS INTEGER) AS from_ms, CAST(? AS INTEGER) AS to_ms),
-internal AS MATERIALIZED (
+configured_internal AS MATERIALIZED (
   SELECT value AS iid FROM json_each(?)
-  UNION
-  SELECT DISTINCT e.anonymous_install_id
+),
+resolved_internal AS MATERIALIZED (
+  SELECT DISTINCT e.anonymous_install_id AS iid
   FROM app_analytics_events e
   WHERE CAST(json_extract(e.properties_json, '$.client_send_id') AS TEXT) IN (
     SELECT message_id FROM send_correlation
     WHERE email_hash IN (SELECT value FROM json_each(?))
   )
+),
+internal AS MATERIALIZED (
+  SELECT iid FROM configured_internal UNION SELECT iid FROM resolved_internal
 ),
 opens AS MATERIALIZED (
   SELECT anonymous_install_id AS iid, MIN(server_timestamp) AS t0,
@@ -93,6 +97,9 @@ summary AS (
     'protocol', 'voice-shift-v2-exploratory',
     'from_inclusive_ms', (SELECT from_ms FROM params),
     'to_exclusive_ms', (SELECT to_ms FROM params),
+    'configured_internal_id_count', (SELECT COUNT(DISTINCT iid) FROM configured_internal),
+    'resolved_internal_id_count', (SELECT COUNT(*) FROM resolved_internal),
+    'internal_union_count', (SELECT COUNT(*) FROM internal),
     'candidate_installs', (SELECT COUNT(*) FROM cohort_diagnostic),
     'excluded_internal_installs', (SELECT COUNT(*) FROM cohort_diagnostic WHERE is_internal),
     'repeated_open_noninternal', (SELECT COUNT(*) FROM cohort_diagnostic WHERE NOT is_internal AND open_count > 1),
