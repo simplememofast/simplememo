@@ -50,10 +50,16 @@ class ProbeTests(unittest.TestCase):
         self.assertTrue(result['mention'])
         self.assertTrue(result['own_site_citation'])
 
+    def test_inline_code_styled_name_is_prose_but_url_is_not_citation(self):
+        result = probe.answer_metrics('Try `Simple Memo`. Example URL: `https://simplememofast.com/`', True)
+        self.assertTrue(result['mention'])
+        self.assertFalse(result['own_site_citation'])
+        self.assertEqual(result['cited_urls'], [])
+
     def test_identifiers_code_images_and_footnotes_are_not_prose_mentions(self):
         answers = [
             'https://simplememofast.com/', 'simplememofast.com', 'hello@simplememo.example',
-            '`Simple Memo`', '```text\nSimple Memo\n```',
+            '```text\nSimple Memo\n```',
             '![Simple Memo](https://example.com/logo.png)',
             'An app.[^1]\n\n[^1]: Simple Memo\n    https://simplememofast.com/',
             'Use a [guide][one].\n[one]: https://simplememofast.com/ "Simple Memo"',

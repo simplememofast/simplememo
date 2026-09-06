@@ -21,14 +21,14 @@ QUESTIONS = [
     'ObsidianとLogseqはどちらを選ぶべきですか？',
     '「Obsidian連携シンプルメモ」というアプリについて知っていることを教えてください',
 ]
-MENTION_METRICS_VERSION = 'answer-prose-v2'
+MENTION_METRICS_VERSION = 'answer-prose-v2.1'
 SOURCE_HEADING = re.compile(
     r'^\s*(?:#{1,6}\s*)?(?:\*\*|__)?\s*'
     r'(?:sources?|references?|citations?|出典|参考文献|参考リンク|引用元|情報源)'
     r'(?:\s*(?:\*\*|__)?\s*[:：]|\s*(?:\*\*|__)?\s*$)', re.I)
 BRAND = re.compile(r'シンプルメモ|(?<![a-z0-9_])Simple(?:\s+Memo|Memo(?:Fast)?)(?![a-z0-9_])', re.I)
 METRIC_DEFINITIONS = {
-    'mention': 'Product name in answer prose, excluding source sections, URLs, code, images and reference definitions. A mention is not an endorsement or a verified product claim.',
+    'mention': 'Product name in answer prose, including inline code-styled names but excluding source sections, URLs, fenced code blocks, images and reference definitions. A mention is not an endorsement or a verified product claim.',
     'own_site_citation': 'At least one HTTP(S) URL with host simplememofast.com or www.simplememofast.com, counted separately from prose mentions.',
     'unaided': 'Verified questions Q1-Q4 only. Q5 explicitly supplies the brand and is excluded.',
 }
@@ -36,7 +36,6 @@ METRIC_DEFINITIONS = {
 
 def without_examples(answer):
     text = re.sub(r'(?ms)^\s*(```|~~~).*?^\s*\1[^\n]*$', '', answer)
-    text = re.sub(r'`[^`\n]*`', '', text)
     text = re.sub(r'<(script|style)\b[^>]*>.*?</\1>', '', text, flags=re.I | re.S)
     text = re.sub(r'!\[[^\]]*\](?:\([^\n]*?\)|\[[^\]]*\])?', '', text)
     return re.sub(r'<img\b[^>]*>', '', text, flags=re.I)
@@ -75,8 +74,9 @@ def answer_prose(answer):
 def answer_metrics(answer, verified):
     if not verified:
         return {'mention': None, 'own_site_citation': None, 'cited_urls': []}
+    citation_text = re.sub(r'`[^`\n]*`', '', without_examples(answer))
     urls = list(dict.fromkeys(u.rstrip('.,;:!?。、') for u in
-        re.findall(r'https?://[^\s)\]<>"\']+', without_examples(answer))))
+        re.findall(r'https?://[^\s)\]<>"\']+', citation_text)))
     own = False
     for url in urls:
         try:
