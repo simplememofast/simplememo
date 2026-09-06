@@ -62,7 +62,7 @@ import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIn
 import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { requireShape } from './lib/read-ledger.mjs';
 // **どのラベルを監視Issueと見なすかは health-intake.mjs が正。**
@@ -261,8 +261,8 @@ export const CLOSE_CHECKS = {
       ? `（うち ${unobservable.length}件は副系CCRで**観測手段が無い** —— ゼロではない: ${unobservable.map((r) => r.run_id).join(', ')}）`
       : '';
     return missing.length === 0
-      ? { closed: true, evidence: `運転台帳と取得済みの着手証跡にあるActions runの実費・既知の結果を同期済み${note}${un}` }
-      : { closed: false, evidence: `実費または既知の結果が未同期の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}${un}` };
+      ? { closed: true, evidence: `運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み${note}${un}` }
+      : { closed: false, evidence: `実費・実行種別または既知の結果が未同期の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}${un}` };
   },
 
   /**
@@ -770,7 +770,7 @@ export function derive(ctx) {
         touches: ['data/autopilot-cost.json'],
         auto: 'append-cost',
         close_check: { kind: 'cost_covers_runs', params: { pending_runs: candidates
-          .filter(r => r.cost_observation && !costed.has(String(r.external_ref))).map(r => r.cost_observation) } },
+          .filter(r => r.cost_observation && costSyncNeeded(r, costed.get(String(r.external_ref)))).map(r => r.cost_observation) } },
       });
     }
   }
@@ -2266,8 +2266,15 @@ export const HANDLERS = {
     const unmeasurable = [];
     for (const r of targets) {
       const recorded = existing.get(String(r.external_ref));
+      // A failed run can have no lane/action even though routing already chose
+      // its spending class. Re-read the primary job until that class is known.
+      const observed = !recorded || recorded.task_kind == null
+        ? await readCost(ctx.repo, ctx.token, r.external_ref) : null;
       const cost = recorded ? { state: 'measured', usd: recorded.total_cost_usd, turns: recorded.num_turns }
-        : await readCost(ctx.repo, ctx.token, r.external_ref);
+        : observed;
+      if (recorded && recorded.task_kind == null && !observed?.task_kind) {
+        log.push(`${r.run_id}: 実行種別は未確認（${observed?.why ?? '振り分けの証跡なし'}）。既存の実費を保持し、同期を閉じず再確認する`);
+      }
       // **[2026-09-03] 「読めなかった」を「発生していない」と書かない。**
       //
       // 旧版は fetchRunCost の null を1つの意味として扱い、取得に失敗した回まで
@@ -2293,15 +2300,17 @@ export const HANDLERS = {
         unmeasurable.push(r.run_id);
         continue;
       }
-      const args = ['--append', '--date', r.date_jst, '--route', r.route,
+      const args = ['--append', '--date', recorded?.date_jst ?? r.date_jst, '--route', recorded?.route ?? r.route,
         '--run-id', String(r.external_ref), '--cost', String(cost.usd),
         '--note', '日次アクチュエータが自動追記（ジョブログの result 行。結果は運転台帳で判明した場合のみ）'];
       if (r.outcome) args.push('--outcome', r.outcome);
       if (recorded) args.push('--enrich-missing-metadata');
       if (cost.turns != null) args.push('--turns', String(cost.turns));
-      // 種別は**分かるときだけ**書く。推測を入れると種別ごとの枠が静かに嘘になる。
-      const kind = costTaskKind(r);
-      if (kind) args.push('--task-kind', kind);
+      // The result's lane/action is not the model's starting route. Only the
+      // pre-model routing step can supply missing spending metadata.
+      if (recorded?.task_kind == null && observed?.task_kind && observed.task_kind_source) {
+        args.push('--task-kind', observed.task_kind, '--task-kind-source', JSON.stringify(observed.task_kind_source));
+      }
       try {
         const out = append(args);
         log.push(`${r.run_id}: ${out.trim()}`);
@@ -2517,12 +2526,40 @@ export function isActionsRunRef(ref) {
   return /^\d+$/.test(String(ref ?? ''));
 }
 
-const costTaskKind = r => r.lane === 'F' ? 'repair'
-  : ['new', 'refresh', 'wiring'].includes(r.action) ? 'article' : null;
 const costExcluded = (r, excluded) => excluded.has(r.run_id) || excluded.has(`actions-run-${r.external_ref}`);
 const costSyncNeeded = (r, recorded) => !recorded
   || (r.outcome != null && recorded.outcome == null)
-  || (costTaskKind(r) != null && recorded.task_kind == null);
+  || recorded.task_kind == null;
+
+/** Read the executed routing notice, never the shell template or model output.
+ * GitHub's step times have second precision; log timestamps have fractions.
+ * Require one notice within the unique successful route step and before the
+ * model starts. A run-id-only cost row cannot distinguish re-run attempts, so
+ * only a confirmed first attempt is attributable. Missing/ambiguous evidence
+ * stays unknown, including old logs. */
+export function readCostTaskKind(text, job, runId) {
+  const routes = (job.steps ?? []).filter(s => s.name === 'タスク種別とモデルの振り分け');
+  const models = (job.steps ?? []).filter(s => s.name?.startsWith('Claude Code'));
+  if (routes.length !== 1 || models.length !== 1 || !isActionsRunRef(runId)
+    || String(job.run_id) !== String(runId) || job.run_attempt !== 1
+    || !isActionsRunRef(job.id)) return null;
+  const route = routes[0], model = models[0];
+  const start = Date.parse(route.started_at), end = Date.parse(route.completed_at), modelStart = Date.parse(model.started_at);
+  if (route.status !== 'completed' || route.conclusion !== 'success'
+    || !Number.isInteger(route.number) || route.number < 1 || !(route.number < model.number)
+    || ![start, end, modelStart].every(Number.isFinite) || end < start || modelStart < end) return null;
+  const notices = [];
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z) ##\[notice\](article|repair|analysis) -> [A-Za-z0-9][A-Za-z0-9._:-]*\s*$/);
+    if (!m) continue;
+    const at = Date.parse(m[1]);
+    if (at >= start && at < end + 1000 && at < modelStart) notices.push(m);
+  }
+  if (notices.length !== 1) return null;
+  const [, observed_at, task_kind] = notices[0];
+  return { task_kind, task_kind_source: { provider: 'github_job_log', run_id: String(runId),
+    job_id: String(job.id), run_attempt: 1, step_number: route.number, observed_at, task_kind } };
+}
 
 /** The workflow reader is scoped to obsidian-autopilot.yml. A completed model
  * step proves a cost candidate, not a shipment or any other result. */
@@ -2547,6 +2584,13 @@ export function costCandidates(ctx, pendingRuns = ctx.ledgerDoc?.actions?.find(a
       run_id: `actions-run-${ref}`, external_ref: ref, date_jst: observed.jst_date,
       route: 'actions', attempted: true, cost_observation: observed,
     });
+  }
+  // A measured cost row remains evidence after recent API observations have
+  // aged out, even if no result row was ever written. It proves no shipment.
+  for (const r of ctx.costDoc?.runs ?? []) {
+    if (r.route !== 'actions' || !isActionsRunRef(r.run_id) || byRef.has(String(r.run_id))) continue;
+    byRef.set(String(r.run_id), { run_id: `actions-run-${r.run_id}`, external_ref: String(r.run_id),
+      date_jst: r.date_jst, route: 'actions', attempted: true });
   }
   return [...byRef.values()].sort((a, b) => String(a.date_jst).localeCompare(String(b.date_jst))
     || String(a.external_ref).localeCompare(String(b.external_ref), 'en', { numeric: true }));
@@ -2612,7 +2656,8 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   }
   if (!Number.isFinite(Number(cost[1]))) return { state: 'unreadable', why: '実費行の金額が不正' };
   const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
-  return { state: 'measured', usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null };
+  return { state: 'measured', usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null,
+    ...readCostTaskKind(text, job, runId) };
 }
 
 // ============================================================
@@ -3105,7 +3150,7 @@ async function selftest() {
 
   // A real failure needed two manual Act invocations on 2026-09-05: the first
   // recorded the run, but append-cost was only derived after execution ended.
-  for (const scenario of ['new', 'existing-cost-action', 'unreadable', 'halted']) {
+  for (const scenario of ['new', 'existing-cost-action', 'unreadable', 'kind-unreadable', 'halted']) {
     const store = { runs: [], costs: [] };
     if (scenario === 'existing-cost-action') store.runs.push({ run_id: 'old', external_ref: '99',
       attempted: true, route: 'actions', date_jst: '2026-09-03', outcome: 'failed' });
@@ -3136,7 +3181,8 @@ async function selftest() {
           t(`同じ監視で新規runを実費処理へ渡す: ${scenario}`, current.runsDoc.runs.some(r => r.external_ref === '123'));
           order.push('cost');
           if (scenario === 'unreadable') return { ok: false, changed: 0, log: 'unreadable' };
-          store.costs = current.runsDoc.runs.map(r => ({ run_id: r.external_ref, usd: 4.8768404, outcome: r.outcome }));
+          store.costs = current.runsDoc.runs.map(r => ({ run_id: r.external_ref, usd: 4.8768404, outcome: r.outcome,
+            ...(scenario === 'kind-unreadable' ? {} : { task_kind: 'article' }) }));
           return { ok: true, changed: store.costs.length, log: 'measured fixture' };
         },
       },
@@ -3145,7 +3191,7 @@ async function selftest() {
     t(`run処理を再実行しない: ${scenario}`, order.filter(x => x === 'run').length === 1);
     t(`実費処理は最後に1回だけ: ${scenario}`, order.join(',') === (scenario === 'halted' ? 'run' : 'run,cost'));
     t(`不明・停止を0円や完了にしない: ${scenario}`,
-      ledger.actions.find(a => a.id === 'act-cost-sync')?.state === (blocked ? 'open' : 'done')
+      ledger.actions.find(a => a.id === 'act-cost-sync')?.state === (blocked || scenario === 'kind-unreadable' ? 'open' : 'done')
       && (blocked ? store.costs.length === 0 : store.costs.some(r => r.run_id === '123' && r.usd > 0)));
     t(`実行結果を一度だけ報告する: ${scenario}`, result.length === 2);
   }
@@ -3656,7 +3702,7 @@ async function selftest() {
     costDoc: { runs: [] },
     runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === false);
   t('実費が揃えば閉じる', CLOSE_CHECKS.cost_covers_runs({}, {
-    costDoc: { runs: [{ run_id: '1' }] },
+    costDoc: { runs: [{ run_id: '1', task_kind: 'article' }] },
     runsDoc: { runs: [{ run_id: 'a', attempted: true, external_ref: '1' }] } }).closed === true);
   t('実費台帳が無ければ判定不能', CLOSE_CHECKS.cost_covers_runs({}, { runsDoc: { runs: [] } }).closed === false);
 
@@ -4167,9 +4213,12 @@ async function selftest() {
         { cwd: scratch, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
       const reload = () => { ctx.costDoc = JSON.parse(fs.readFileSync(file, 'utf8')); };
       let reads = 0;
+      let knownKind = false;
       const readCost = async (_repo, _token, id) => {
         t('外部run IDで費用ログを読む', id === '33959414641'); reads++;
-        return { state: 'measured', usd: 0.8407852, turns: 20 };
+        return { state: 'measured', usd: knownKind ? 0.8408 : 0.8407852, turns: 20,
+          ...(knownKind ? { task_kind: 'repair', task_kind_source: { provider: 'github_job_log', run_id: id,
+            job_id: '99', run_attempt: 1, step_number: 8, observed_at: '2026-09-05T09:59:00.123Z', task_kind: 'repair' } } : {}) };
       };
       const action = derive(ctx).find(a => a.id === 'act-cost-sync');
       ctx.ledgerDoc = { actions: [action] };
@@ -4185,18 +4234,35 @@ async function selftest() {
         && ctx.costDoc.runs[0].total_cost_usd === 0.8407852 && ctx.costDoc.runs[0].num_turns === 20);
       t('実CLIでも結果・種別・レビューは推測しない', ctx.costDoc.runs[0].outcome === undefined
         && ctx.costDoc.runs[0].task_kind === undefined && ctx.costDoc.runs[0].cap_review === undefined && ctx.runsDoc.runs.length === 0);
-      t('回収後は費用の依頼を閉じられる', CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+      t('実費回収後も種別の欠測は閉じない', !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+      t('実費を計上しても種別未回収の観測を捨てない',
+        derive(ctx).find(a => a.id === 'act-cost-sync')?.close_check.params.pending_runs.length === 1);
       const second = await HANDLERS['append-cost'](ctx, action, { readCost, append });
-      t('再観測はログ再取得も二重請求も起こさない', second.changed === 0 && reads === 1);
+      t('欠測の再観測はログを再取得し二重請求は起こさない', second.changed === 0 && reads === 2);
       ctx.runsDoc.runs.push({ ...candidate, run_id: 'ap-20260905-actions-33959414641', outcome: 'no_artifact', action: 'new' });
+      knownKind = true;
       t('運転台帳が後から入っても外部IDで候補を重複させない', costCandidates(ctx).length === 1);
       t('後から確定した結果を費用台帳へ同期する依頼を導出', derive(ctx).some(a => a.id === 'act-cost-sync')
         && !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
       const third = await HANDLERS['append-cost'](ctx, action, { readCost, append }); reload();
-      t('実CLIで同じ費用行へ結果だけ補完する', third.changed === 1 && reads === 1 && ctx.costDoc.runs.length === 1
-        && ctx.costDoc.runs[0].outcome === 'no_artifact' && ctx.costDoc.runs[0].task_kind === 'article'
+      t('実CLIで実費を変えず実行種別と結果を補完する', third.changed === 1 && reads === 3 && ctx.costDoc.runs.length === 1
+        && ctx.costDoc.runs[0].outcome === 'no_artifact' && ctx.costDoc.runs[0].task_kind === 'repair'
+        && ctx.costDoc.runs[0].task_kind_source?.job_id === '99'
         && ctx.costDoc.runs[0].total_cost_usd === 0.8407852 && CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
       t('補完済みの観測は再起票しない', !derive(ctx).some(a => a.id === 'act-cost-sync'));
+      const fourth = await HANDLERS['append-cost'](ctx, action, { readCost, append });
+      t('種別も同期した後は再取得・再記帳しない', fourth.changed === 0 && reads === 3);
+      delete ctx.costDoc.runs[0].task_kind;
+      delete ctx.costDoc.runs[0].task_kind_source;
+      for (const state of ['unreadable', 'absent', 'gone', 'measured']) {
+        const a = { close_check: { params: { exclude: ['actions-run-33959414641'] } } };
+        let args;
+        await HANDLERS['append-cost'](ctx, a, { readCost: async () => ({ state, usd: 0, why: 'fixture' }),
+          append: values => { args = values; return 'skip'; } });
+        t('既存実費の種別欠測は消失・ゼロ・レーン推定に変換しない', a.close_check.params.exclude.length === 0
+          && args?.[args.indexOf('--cost') + 1] === '0.8407852' && !args.includes('--task-kind')
+          && !CLOSE_CHECKS.cost_covers_runs(a.close_check.params, ctx).closed);
+      }
       ctx.costDoc.runs = [];
       for (const state of ['unreadable', 'absent', 'gone']) {
         const a = { close_check: { params: {} } }; let writes = 0;
@@ -4273,19 +4339,100 @@ async function selftest() {
     const okJobs = { ok: true, status: 200, json: async () => ({ jobs: [
       { id: 99, name: 'Notify Autopilot Act' }, { id: 1, name: 'autopilot', steps: [{ name: 'Claude Code', conclusion: 'skipped' }] }] }) };
     const withLog = (body) => ({ ok: true, status: 200, text: async () => body });
+    const routeJob = { id: 1, run_id: 1, run_attempt: 1, name: 'autopilot', steps: [
+      { name: 'タスク種別とモデルの振り分け', number: 8, status: 'completed', conclusion: 'success',
+        started_at: '2026-09-05T22:37:27Z', completed_at: '2026-09-05T22:37:27Z' },
+      { name: 'Claude Code（Runbook 1イテレーション実行）', number: 12, status: 'completed', conclusion: 'failure',
+        started_at: '2026-09-05T22:37:46Z', completed_at: '2026-09-05T23:22:58Z' },
+      { name: 'Post Claude Code（Runbook 1イテレーション実行）', number: 41, conclusion: 'success' },
+    ] };
+    const routeLine = '2026-09-05T22:37:27.1089806Z ##[notice]article -> claude-sonnet-5';
+    const routeJobs = { ok: true, status: 200, json: async () => ({ jobs: [{ name: 'Notify Autopilot Act', id: 99 }, routeJob] }) };
+    const template = '2026-09-05T22:37:27.0000000Z echo "::notice title=Model routing::$KIND -> $MODEL"';
+    const parsed = readCostTaskKind(`${template}\n${routeLine}`, routeJob, '1');
+    t('振り分け完了秒内の実noticeから種別と出典を読む', parsed?.task_kind === 'article'
+      && parsed.task_kind_source.observed_at === '2026-09-05T22:37:27.1089806Z'
+      && parsed.task_kind_source.step_number === 8 && parsed.task_kind_source.run_id === '1');
+    for (const log of [template, routeLine.replace('22:37:27.', '22:37:26.'),
+      routeLine.replace('22:37:27.', '22:37:28.'), routeLine.replace('22:37:27.', '22:38:27.'),
+      routeLine.replace('article', '$KIND'), routeLine.replace('article', 'unknown'),
+      routeLine + '\n' + routeLine, routeLine + '\n' + routeLine.replace('article', 'repair')]) {
+      t('テンプレート・期間外・重複・未知種別を振り分け証跡にしない', readCostTaskKind(log, routeJob, '1') === null);
+    }
+    for (const change of [{ status: 'in_progress' }, { conclusion: 'failure' }, { number: 13 },
+      { started_at: 'bad' }, { completed_at: '2026-09-05T22:37:26Z' }, { name: 'unknown' }]) {
+      t('振り分けstepが未確認なら種別を推測しない', readCostTaskKind(routeLine,
+        { ...routeJob, steps: [{ ...routeJob.steps[0], ...change }, ...routeJob.steps.slice(1)] }, '1') === null);
+    }
+    t('同秒のモデル出力を振り分けに混ぜない', readCostTaskKind(routeLine, { ...routeJob,
+      steps: [routeJob.steps[0], { ...routeJob.steps[1], started_at: '2026-09-05T22:37:27Z' }] }, '1') === null);
+    t('振り分けstep重複を受理しない', readCostTaskKind(routeLine,
+      { ...routeJob, steps: [...routeJob.steps, routeJob.steps[0]] }, '1') === null);
+    for (const change of [{ run_attempt: 2 }, { run_attempt: undefined }, { run_id: 2 }]) {
+      t('再実行・実行回不明・別runの種別を既存実費に結び付けない',
+        readCostTaskKind(routeLine, { ...routeJob, ...change }, '1') === null);
+    }
+    const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
+    const routeStep = workflow.split(/^ {6}- name: /m).find(b => /^ {8}id: route$/m.test(b));
+    t('本番workflowの振り分けnoticeの出力元とreaderが一致する', routeStep?.startsWith('タスク種別とモデルの振り分け\n')
+      && routeStep.includes('echo "::notice title=Model routing::$KIND -> $MODEL"'));
 
     const measured = await fetchRunCost('o/r', 'tok', '1',
       { fetchImpl: mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}')) });
     t('実費行を読めたら measured', measured.state === 'measured' && measured.usd === 1.25 && measured.turns === 9);
     const originalFetch = globalThis.fetch;
     try {
-      globalThis.fetch = mk(okJobs, withLog('{"total_cost_usd":1.25,"num_turns":9}'));
+      globalThis.fetch = mk(routeJobs, withLog(`${routeLine}\n{"total_cost_usd":1.25,"num_turns":9}`));
       let args;
       const result = await HANDLERS['append-cost']({ repo: 'o/r', token: 'fixture', costDoc: { runs: [] },
         runsDoc: { runs: [] }, workflowRuns: [{ id: 1, created_at: '2026-09-05T00:00:00Z', jst_date: '2026-09-05',
           status: 'completed', conclusion: 'success', steps: [{ name: 'Claude Code', conclusion: 'success' }] }] },
       { close_check: { params: {} } }, { append: values => { args = values; return 'appended'; } });
       t('handlerの既定経路が実費readerへ接続されている', result.changed === 1 && args?.[args.indexOf('--cost') + 1] === '1.25');
+      t('handlerの既定経路が振り分け証跡を実費CLIへ渡す', args?.[args.indexOf('--task-kind') + 1] === 'article'
+        && JSON.parse(args[args.indexOf('--task-kind-source') + 1]).job_id === '1');
+
+      // Reproduce a paid failure with no result lane using the default reader,
+      // real append CLI, and real per-run/runtime budget gates in isolation.
+      const { tmpdir } = await import('node:os');
+      const scratch = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'simplememo-kind-cap-')));
+      try {
+        fs.cpSync(path.join(ROOT, 'scripts'), path.join(scratch, 'scripts'), { recursive: true });
+        fs.mkdirSync(path.join(scratch, 'data'));
+        const routing = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/model-routing.json'), 'utf8'));
+        routing.rules.article.max_usd_per_run = 10;
+        fs.writeFileSync(path.join(scratch, 'data/model-routing.json'), JSON.stringify(routing));
+        const original = { run_id: '1', date_jst: '2026-09-06', route: 'actions',
+          total_cost_usd: 19.600872199999998, num_turns: 251, outcome: 'failed' };
+        const file = path.join(scratch, 'data/autopilot-cost.json');
+        const doc = { budget: { monthly_usd_cap: 280, on_exceed: 'skip_run' }, runs: [original] };
+        fs.writeFileSync(file, JSON.stringify(doc));
+        const ctx = { repo: 'o/r', token: 'fixture', today: '2026-09-06', costDoc: structuredClone(doc),
+          runsDoc: { runs: [{ run_id: 'paid-failure', external_ref: '1', date_jst: '2026-09-06',
+            route: 'actions', attempted: true, outcome: 'failed' }] }, selfheal: { targets: [] } };
+        const action = derive(ctx).find(a => a.id === 'act-cost-sync');
+        t('失敗runの種別欠測を同期済みとして消さない', action && !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+        ctx.runsDoc.runs = [];
+        t('結果行や直近API観測が消えても実費行から欠測を追える', costCandidates(ctx).length === 1
+          && derive(ctx).some(a => a.id === 'act-cost-sync') && !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+        globalThis.fetch = mk(routeJobs, withLog(`${template}\n${routeLine}\n{"total_cost_usd":19.6009,"num_turns":251}`));
+        const append = values => execFileSync(process.execPath, [path.join(scratch, 'scripts/autopilot-budget.mjs'), ...values],
+          { cwd: scratch, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+        const enriched = await HANDLERS['append-cost'](ctx, action, { append });
+        ctx.costDoc = JSON.parse(fs.readFileSync(file, 'utf8'));
+        const row = ctx.costDoc.runs[0];
+        t('既存の失敗・精密実費・ターンを維持して種別だけ回収する', enriched.changed === 1
+          && ctx.costDoc.runs.length === 1 && row.task_kind === 'article' && row.task_kind_source?.job_id === '1'
+          && row.total_cost_usd === original.total_cost_usd && row.num_turns === 251 && row.outcome === 'failed'
+          && row.cap_review === undefined && CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+        for (const gate of ['--check-run-cap', '--runtime-budget']) {
+          const blocked = spawnSync(process.execPath, [path.join(scratch, 'scripts/autopilot-budget.mjs'), gate,
+            '--task', 'article', '--month', '2026-09'], { cwd: scratch, encoding: 'utf8' });
+          t('回収した種別で未レビュー超過が実CLIの次回支出を止める', blocked.status === 1
+            && (gate === '--runtime-budget' ? blocked.stderr.includes('unreviewed overrun')
+              : blocked.stdout.includes('1回上限')));
+        }
+      } finally { fs.rmSync(scratch, { recursive: true, force: true }); }
     } finally { globalThis.fetch = originalFetch; }
     let requestedLog;
     await fetchRunCost('o/r', 'tok', '1', { fetchImpl: async url => {

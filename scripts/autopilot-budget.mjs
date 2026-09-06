@@ -161,6 +161,9 @@ export function validate(ledger) {
       if (r?.route !== 'actions' && r?.route !== 'ccr') {
         problems.push(`runs[${i}].route must be "actions" or "ccr" (got ${JSON.stringify(r?.route)})`);
       }
+      if (r?.task_kind_source !== undefined && !validTaskKindSource(r)) {
+        problems.push(`runs[${i}].task_kind_source must identify this run and task kind in a GitHub job log`);
+      }
       // レビュー済みの印は、**理由が無ければ印ではない。**空の cap_review を
       // 置けるなら、1回上限は書き換え1文字で無効化できることになる。
       if (r?.cap_review !== undefined) {
@@ -333,11 +336,24 @@ export function modelUsage(ledger, month = jstMonth()) {
   return { counts, runs_with_models: rows.length - unknown, runs_without_models: unknown };
 }
 
+export function validTaskKindSource(run) {
+  const s = run.task_kind_source;
+  return s?.provider === 'github_job_log' && run.route === 'actions'
+    && s.run_attempt === 1
+    && /^[1-9]\d*$/.test(s.run_id) && s.run_id === run.run_id
+    && typeof s.job_id === 'string' && /^[1-9]\d*$/.test(s.job_id)
+    && Number.isInteger(s.step_number) && s.step_number > 0
+    && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(s.observed_at)
+    && Number.isFinite(Date.parse(s.observed_at))
+    && ['article', 'repair', 'analysis'].includes(s.task_kind) && s.task_kind === run.task_kind;
+}
+
 export function appendRun(ledger, run, { enrichMissing = false } = {}) {
   const required = ['date_jst', 'route', 'total_cost_usd'];
   for (const k of required) {
     if (run[k] === undefined || run[k] === null) throw new Error(`appendRun: ${k} is required`);
   }
+  if (run.task_kind_source !== undefined && !validTaskKindSource(run)) throw Error('append: invalid task_kind_source');
   // 同一 run_id の二重追記を防ぐ。ワークフローの再実行で二重計上すると、
   // 上限判定が実態より厳しくなり「使っていないのに止まる」が起きる。
   const existing = run.run_id && ledger.runs.find((r) => r.run_id === run.run_id);
@@ -355,6 +371,9 @@ export function appendRun(ledger, run, { enrichMissing = false } = {}) {
       if (existing[key] == null) patch[key] = run[key];
       else if (existing[key] !== run[key]) throw Error(`enrich: ${key} is already recorded`);
     }
+    // Evidence accompanies newly recovered metadata only; do not relabel an
+    // existing classification or replace its provenance on a repeated read.
+    if (patch.task_kind && run.task_kind_source) patch.task_kind_source = run.task_kind_source;
     Object.assign(existing, patch);
     return { ledger, appended: false, enriched: Object.keys(patch).length > 0,
       reason: `run_id ${run.run_id} already recorded` };
@@ -563,6 +582,29 @@ SCENARIOS.push(
       assert(rejected && JSON.stringify(d.runs) === JSON.stringify([row]), '既知の事実を上書きした');
     }
   }],
+  ['回収した実行種別の出典を同じrunへ保存し、不正な出典や後日の書換えを拒む', () => {
+    const row = { date_jst: '2026-09-06', route: 'actions', run_id: '33996430959',
+      total_cost_usd: 19.600872199999998, outcome: 'failed', num_turns: 251 };
+    const source = { provider: 'github_job_log', run_id: row.run_id, job_id: '101387673341', run_attempt: 1, step_number: 8,
+      observed_at: '2026-09-05T22:37:27.1089806Z', task_kind: 'article' };
+    const recovered = { ...row, task_kind: 'article', task_kind_source: source };
+    const d = budgetDoc(); d.runs = [{ ...row }];
+    assert(appendRun(d, recovered, { enrichMissing: true }).enriched && validTaskKindSource(d.runs[0]), '出典が保存されない');
+    const before = JSON.stringify(d.runs);
+    assert(!appendRun(d, { ...recovered, task_kind_source: { ...source, job_id: '2' } }, { enrichMissing: true }).enriched
+      && JSON.stringify(d.runs) === before, '既知の出典を書き換えた');
+    for (const change of [{ provider: 'model' }, { run_id: '2' }, { job_id: 'cse_1' }, { step_number: 0 },
+      { run_attempt: 2 }, { run_attempt: undefined },
+      { observed_at: 'unknown' }, { task_kind: 'repair' }]) {
+      const bad = { ...recovered, task_kind_source: { ...source, ...change } };
+      const next = budgetDoc(); next.runs = [{ ...row }];
+      let rejected = false;
+      try { appendRun(next, bad, { enrichMissing: true }); } catch { rejected = true; }
+      assert(rejected && JSON.stringify(next.runs) === JSON.stringify([row]), '不正な出典で種別を補完した');
+      next.runs = [bad];
+      assert(validate(next).some(p => p.includes('task_kind_source')), '不正な出典を台帳検査が見逃した');
+    }
+  }],
   ['**判定できなかったら、そう書く**（節ごと消さない）', () => {
     const d = budgetDoc();
     const out = render({ ...summarize(d), run_caps: null }, d);
@@ -653,6 +695,7 @@ if (isMain) {
       total_cost_usd: Number(val('cost')),
       num_turns: val('turns') !== undefined ? Number(val('turns')) : undefined,
       task_kind: val('task-kind') || undefined,
+      task_kind_source: val('task-kind-source') ? JSON.parse(val('task-kind-source')) : undefined,
       outcome: val('outcome') || undefined,
       note: val('note') || undefined,
     };
