@@ -24,6 +24,31 @@ const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
 const ledgerFiles = ['data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json', 'autopilot/index.html'];
+const reportSitemaps = { 'sitemap-ja.xml': 'https://simplememofast.com/autopilot/',
+  'sitemap.xml': 'https://simplememofast.com/sitemap-ja.xml' };
+
+// The report's content date can cross midnight. Accept only its generated
+// lastmod companion lines, never arbitrary sitemap edits or omitted patches.
+export function reportSitemapChange(file) {
+  const url = Object.hasOwn(reportSitemaps, file.filename) ? reportSitemaps[file.filename] : null;
+  if (!url || file.status !== 'modified' || file.additions !== 1 || file.deletions !== 1
+    || file.changes !== 2 || typeof file.patch !== 'string') return false;
+  const lines = file.patch.split('\n');
+  const changed = lines.filter(line => /^[+-]/.test(line));
+  if (changed.length !== 2 || lines.filter(line => line.startsWith('@@ ')).length !== 1) return false;
+  const dates = changed.map(line => line.match(/^[+-]\s*<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>$/)?.[1]);
+  if (dates.some(d => !d || !Number.isFinite(Date.parse(d)) || new Date(d).toISOString().slice(0, 10) !== d)) return false;
+  const at = lines.indexOf(changed[0]);
+  return changed[0].startsWith('-') && changed[1].startsWith('+')
+    && lines[at + 1] === changed[1] && lines[at - 1]?.trim() === `<loc>${url}</loc>`;
+}
+
+export function synchronizeReportSitemaps(cwd = ROOT) {
+  execFileSync('python3', ['scripts/generate_sitemap.py'], { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+  const changed = execFileSync('git', ['diff', '--name-only', 'HEAD'], { cwd, encoding: 'utf8' }).trim().split('\n').filter(Boolean);
+  assert(changed.every(file => ledgerFiles.includes(file) || Object.hasOwn(reportSitemaps, file)),
+    'generated report publication changed an unrelated file');
+}
 
 export function pendingPublication(request = api) {
   const listed = request('pulls?state=open&base=main&per_page=100');
@@ -39,7 +64,9 @@ export function pendingPublication(request = api) {
       && pr.head.ref === item.head.ref && shaOK(pr.head.sha), 'pending decision PR changed or targets another repository');
     const files = request(`${route}/files?per_page=100`);
     assert(Array.isArray(files) && files.length > 0 && files.length < 100 && files.length === pr.changed_files
-      && files.every(f => ledgerFiles.includes(f.filename)), 'pending decision PR has unverified scope');
+      && files.every(f => ledgerFiles.includes(f.filename)
+        || (files.some(p => p.filename === 'autopilot/index.html') && reportSitemapChange(f))),
+    'pending decision PR has unverified scope');
     const fresh = request(route);
     assert(fresh.state === 'open' && fresh.number === pr.number && fresh.head?.sha === pr.head.sha
       && fresh.head.ref === pr.head.ref && fresh.head.repo?.full_name === REPO
@@ -352,7 +379,8 @@ async function main() {
     save('data/value-contracts.json', ledger); save('data/decision-recovery.json', recovery); save('data/decision-review.json', strategy);
     const reportChanged = await publishReport();
     if (hash({ ledger, recovery, strategy }) === original && !reportChanged) return;
-    publish(ledgerFiles,
+    if (reportChanged) synchronizeReportSitemaps();
+    publish([...ledgerFiles, ...Object.keys(reportSitemaps)],
       observationBranch(head),
       'Record verified decision outcomes and recovery evidence', head);
   }
@@ -395,6 +423,22 @@ function selftest() {
   };
   assert.deepEqual(pendingPublication(publicationApi()), [{ pr: 321, head: publication.head.sha, draft: false }]);
   assert.deepEqual(pendingPublication(publicationApi({ list: [] })), []);
+  const sitemapChange = { filename: 'sitemap-ja.xml', status: 'modified', additions: 1, deletions: 1, changes: 2,
+    patch: '@@ -46,7 +46,7 @@\n   <url>\n     <loc>https://simplememofast.com/autopilot/</loc>\n-    <lastmod>2026-09-06</lastmod>\n+    <lastmod>2026-09-07</lastmod>\n   </url>' };
+  const indexChange = { ...sitemapChange, filename: 'sitemap.xml',
+    patch: sitemapChange.patch.replace('https://simplememofast.com/autopilot/', 'https://simplememofast.com/sitemap-ja.xml') };
+  const generatedFiles = [{ filename: 'autopilot/index.html' }, sitemapChange, indexChange];
+  assert.deepEqual(pendingPublication(publicationApi({ detail: { ...publication, changed_files: 3 }, files: generatedFiles })),
+    [{ pr: 321, head: publication.head.sha, draft: false }]);
+  for (const bad of [{ ...sitemapChange, patch: undefined }, { ...sitemapChange, status: 'added' },
+    { ...sitemapChange, filename: 'sitemap-en.xml' }, { ...sitemapChange, changes: 4 },
+    { ...sitemapChange, patch: sitemapChange.patch.replace('/autopilot/', '/other/') },
+    { ...sitemapChange, patch: sitemapChange.patch.replace('2026-09-07', '2026-02-30') },
+    { ...sitemapChange, patch: sitemapChange.patch + '\n+    <loc>https://unrelated.invalid/</loc>' }]) {
+    assert.throws(() => pendingPublication(publicationApi({ detail: { ...publication, changed_files: 2 },
+      files: [{ filename: 'autopilot/index.html' }, bad] })), /unverified scope/);
+  }
+  assert.throws(() => pendingPublication(publicationApi({ files: [sitemapChange] })), /unverified scope/);
   for (const options of [{ list: Array(100).fill(publication) }, { list: [{}] },
     { files: [{ filename: '.github/workflows/decision-monitor.yml' }] }, { files: [] },
     { detail: { ...publication, changed_files: 2 } }, { detail: { ...publication, state: 'closed' } },
