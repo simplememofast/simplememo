@@ -455,8 +455,8 @@
       </h1>
 
       <div class="article-meta">
-        <span lang="ja" data-lang="ja">2026年2月13日 ・ 技術トピック深掘り</span>
-        <span lang="en" data-lang="en">February 13, 2026 ・ Technical Deep Dive</span>
+        <span lang="ja" data-lang="ja">2026年2月13日公開 ・ 利用解析の説明更新：2026年9月6日</span>
+        <span lang="en" data-lang="en">Published February 13, 2026 ・ Analytics explanation updated September 6, 2026</span>
       </div>
 
       <!-- Japanese Content -->
@@ -486,7 +486,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           <p>二重の保護を行っている点に注目してほしい。<code>sceneWillResignActive</code>と<code>sceneDidEnterBackground</code>の両方でオーバーレイを表示する。<code>resignActive</code>はコントロールセンターや通知センターの表示時にも呼ばれるため、あらゆるシナリオでメモ内容を保護できる。</p>
           <p>オーバーレイは、アプリがアクティブに戻った時点（<code>sceneDidBecomeActive</code>）で即座に解除される。ユーザーにとっては完全に透過的な保護だ。</p>
 
-          <h2>3. ephemeral URLSession：通信の痕跡を残さない</h2>
+          <h2>3. ephemeral URLSession：通信キャッシュのディスク保存を抑える</h2>
           <p>標準の<code>URLSession</code>は、キャッシュ、Cookie、認証情報をディスクに保存する。一般的なアプリではこれは便利な機能だが、メモアプリでは不要であり、リスクになりうる。</p>
           <p>通信キャッシュが端末に残るということは、どのURLにいつアクセスしたかの痕跡がディスク上に存在するということだ。Cookieが保存されるということは、セッション情報が端末に残るということだ。</p>
           <p>このアプリでは、<code>URLSessionConfiguration.ephemeral</code>を使用する。</p>
@@ -498,12 +498,12 @@ func sceneDidEnterBackground(_ scene: UIScene) {
     return URLSession(configuration: config)
 }()</code></pre>
           <ul>
-            <li><strong>ディスクキャッシュなし：</strong>通信内容が端末に残らない</li>
-            <li><strong>Cookieの受信・送信なし：</strong>セッション追跡の余地を排除</li>
+            <li><strong>ディスクキャッシュなし：</strong>このURLSessionのキャッシュをディスクに保存しない</li>
+            <li><strong>Cookieの利用を無効化：</strong>このURLSessionではCookieを受け入れず、要求にも設定しない</li>
             <li><strong>URLキャッシュ無効化：</strong>キャッシュストレージ自体を<code>nil</code>に設定</li>
-            <li><strong>セッションの完全な分離：</strong>各セッションが独立し、前回の通信情報を一切引き継がない</li>
+            <li><strong>永続ストレージを使わない構成：</strong>URLSessionのセッション情報をディスクへ保存しない</li>
           </ul>
-          <p>仮に端末が物理的に侵害されたとしても、通信履歴はディスク上に存在しない。ephemeral URLSessionは、通信レイヤーでの「痕跡ゼロ」を実現する。</p>
+          <p>これはURLSessionのキャッシュなどに関する保護であり、アプリが別途保存・送信する利用イベントや、サーバー側の送信記録をなくす機能ではない。利用解析の識別子による関連付けも、この設定とは別に行われる。</p>
 
           <h2>4. ログに機密情報を一切出さない</h2>
           <p>ログは開発者にとって最も基本的なデバッグツールだが、プライバシーの観点からは最も危険な情報漏洩経路のひとつでもある。</p>
@@ -536,26 +536,14 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           <p>仮に端末に物理的にアクセスされたとしても、Keychainのセキュリティが破られない限り、Outbox内のメモは暗号化されたまま読み取ることができない。</p>
           <p>Outboxアーキテクチャの全体設計については、<a href="/devlog/outbox-architecture">Outboxアーキテクチャ：取りこぼしゼロ設計</a>で詳述している。</p>
 
-          <h2>6. データパスを Apple 純正のみで構成する意味（セキュリティ面）</h2>
-          <p>外部ライブラリの追加は、機能的には便利だが、セキュリティの観点からはすべてが攻撃対象面（Attack Surface）になる。</p>
-          <p>サプライチェーン攻撃は現実の脅威だ。信頼されたライブラリがアップデートで悪意あるコードを含む事例は、npm、PyPI、CocoaPodsなどのエコシステムで実際に発生している。</p>
-          <p>このアプリでは、メモ本文の暗号化・保管・送信といったデータの主要パスを <strong>Apple 純正フレームワークのみ</strong> で構成している。v2.4 から、任意のオンボーディング短縮（Google Sign-In）とバックエンド保護（App Check）のために Firebase / GoogleSignIn SDK を併用しているが、これらはメモ本文に一切触れない。</p>
-          <ul>
-            <li><strong>CryptoKit：</strong>暗号化処理</li>
-            <li><strong>Network.framework：</strong>ネットワーク接続状態の監視</li>
-            <li><strong>BackgroundTasks：</strong>バックグラウンド送信のスケジューリング</li>
-            <li><strong>os.log：</strong>ログ出力</li>
-          </ul>
-          <p>メモ本文を扱うデータパスにサードパーティのコードが一切入らないという事実は、セキュリティ監査を大幅に簡素化する。監査対象は Apple 純正フレームワークと自分たちのコードだけだ（v2.4 で追加された Firebase / GoogleSignIn SDK はメモ本文を扱わないため、データパスの監査対象には含まれない）。この境界線が明示的に引かれていること自体がセキュリティ上の強みになる。</p>
+          <h2>6. メモ本文の保護と外部SDKの役割</h2>
+          <p>iOSアプリ内では、メモ本文の暗号化にCryptoKit、鍵保管にKeychain、本文の送信にURLSessionを使う。Network.frameworkは接続状態の監視、BackgroundTasksはバックグラウンド送信のスケジューリングを担う。</p>
+          <p>一方、アプリは外部SDKも使う。GoogleSignInとFirebase AuthenticationはGoogleアカウントによる任意のメール自動入力に使い、Firebase App Checkは起動時に初期化してバックエンドAPIを保護する。AppsFlyerは獲得・利用解析に使い、自社解析と共通のインストール識別子を設定する。</p>
+          <p>メモ本文をイベント項目に含めない設計でも、識別子や送信記録の関連付けは残る。SDKを含む利用解析の範囲は、本文の暗号化とは別に確認する必要がある。項目と用途は<a href="/privacy#technical">プライバシーポリシー</a>で説明している。</p>
 
-          <h2>7. 設計哲学：「気配を消す」</h2>
-          <p>最良のプライバシー保護は、ユーザーが意識しないものだ。</p>
-          <p>プライバシー設定画面はない。トグルスイッチもない。「プライバシーモードを有効にしますか？」というダイアログも表示されない。すべてのプライバシー保護機能は、最初から有効であり、無効にする手段は存在しない。</p>
-          <p>ユーザーはプライバシーについて考える必要がない。アプリスイッチャーにメモが表示されないこと、通信の痕跡が残らないこと、Outboxが暗号化されていること——これらすべてが、サイレントに、バックグラウンドで動作する。</p>
-          <p>これがCaptio式の体験の延長線上にある設計思想だ。Captioがもたらしたのは「考えずに信頼できる」という感覚だった。プライバシーについても同じアプローチを取る。ユーザーが信頼を意識的に判断する必要がないほど、徹底的に設計する。</p>
-          <div class="philosophy-highlight">
-            <strong>原則：</strong>気配を消す——プライバシー保護は見えないほうがいい。ユーザーが「安全だろうか？」と一瞬でも考えた時点で、設計の失敗だ。
-          </div>
+          <h2>7. 保護の範囲を明示する</h2>
+          <p>端末内の暗号化、通信キャッシュの扱い、利用解析は、それぞれ異なる役割を持つ。Outboxの暗号化やephemeral URLSessionがあっても、利用イベントの収集がなくなるわけではない。</p>
+          <p>メモを素早く残せることと、取得する情報を理解できることの両方を大切にする。利用解析の送信先、識別子、関連付けの範囲を説明し、アプリの変更に合わせて見直す。</p>
 
           <!-- FAQ Section -->
           <div class="faq-section">
@@ -568,7 +556,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. アプリは通信を暗号化していますか？</div>
-              <div class="faq-item__answer">はい。HTTPS通信に加え、ephemeral URLSessionでキャッシュ・Cookie・認証情報を一切保存しません。通信の痕跡がディスク上に残ることはありません。</div>
+              <div class="faq-item__answer">はい。API通信にはHTTPSを使います。ephemeral URLSessionは、そのセッションのキャッシュ・Cookie・認証情報をディスクに永続保存しない構成です。別途行う利用解析やサーバー側の記録までなくすものではありません。</div>
             </div>
 
             <div class="faq-item">
@@ -578,12 +566,12 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. アナリティクスやトラッキングはありますか？</div>
-              <div class="faq-item__answer">アプリ内にサードパーティのアナリティクスSDKは含まれていません。ユーザーの行動を追跡するコードは一切組み込まれていません。</div>
+              <div class="faq-item__answer">はい。自社の利用解析とAppsFlyer SDKを使用しています。自社解析にはランダムなインストール識別子、セッション識別子、イベントの種類・時刻、アプリの版、送信結果などを送ります。AppsFlyerには初回メモ送信成功、認証成功、課金画面表示、プラン選択、購入成功のイベントを送り、購入時には金額・通貨・期間などを付ける場合があります。同じインストール識別子をAppsFlyerのCustomer User IDにも設定するため、獲得情報と利用イベントを関連付けられます。アプリから設定するイベント項目にはメールアドレス・メモ本文・認証コードを直接含めませんが、自社解析の送信IDは宛先メールアドレスのハッシュと紐付くため、完全に匿名の情報ではありません。詳しくは<a href="/privacy#technical">プライバシーポリシーの技術的な対策</a>をご覧ください。</div>
             </div>
 
             <div class="faq-item">
-              <div class="faq-item__question">Q. なぜ外部ライブラリを使わないのですか？</div>
-              <div class="faq-item__answer">セキュリティとプライバシーのためです。外部ライブラリは攻撃対象面になるため、ユーザーデータ（メモ本文・暗号鍵・通信）に触れるコードは Apple 純正フレームワークのみとしています。v2.4 で追加された Firebase / GoogleSignIn SDK は任意機能（Google Sign-In・App Check）専用で、メモ本文には一切触れません。</div>
+              <div class="faq-item__question">Q. Apple純正フレームワークと外部SDKをどう使い分けていますか？</div>
+              <div class="faq-item__answer">iOSアプリ内のメモ本文の暗号化と鍵保管にはCryptoKitとKeychainを使い、本文の送信はURLSessionで行います。一方、Googleサインイン、Firebaseによるバックエンド保護、AppsFlyerによる獲得・利用解析には外部SDKを使います。本文の保護と、識別子を伴う利用解析は区別して説明しています。</div>
             </div>
           </div>
 
@@ -639,7 +627,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           <p>Notice the double protection. The overlay is applied in both <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code>. Since <code>resignActive</code> is also called when Control Center or Notification Center appears, this ensures memo content is protected in every scenario.</p>
           <p>The overlay is immediately removed when the app becomes active again (<code>sceneDidBecomeActive</code>). For users, it's completely transparent protection.</p>
 
-          <h2>3. Ephemeral URLSession: Leave No Communication Trace</h2>
+          <h2>3. Ephemeral URLSession: Avoid Persistent Session Storage</h2>
           <p>The standard <code>URLSession</code> stores cache, cookies, and credentials to disk. For typical apps this is convenient functionality, but for a memo app it's unnecessary and potentially risky.</p>
           <p>Communication cache persisting on the device means traces of which URLs were accessed and when exist on disk. Cookies being stored means session information remains on the device.</p>
           <p>This app uses <code>URLSessionConfiguration.ephemeral</code>.</p>
@@ -651,12 +639,12 @@ func sceneDidEnterBackground(_ scene: UIScene) {
     return URLSession(configuration: config)
 }()</code></pre>
           <ul>
-            <li><strong>No disk cache:</strong> Communication content doesn't persist on the device</li>
-            <li><strong>No cookies sent or received:</strong> Eliminates any possibility of session tracking</li>
+            <li><strong>No disk cache:</strong> This URLSession does not persist its cache to disk</li>
+            <li><strong>Cookie use disabled:</strong> This URLSession does not accept cookies or set them on requests</li>
             <li><strong>URL cache disabled:</strong> The cache storage itself is set to <code>nil</code></li>
-            <li><strong>Complete session isolation:</strong> Each session is independent, carrying over zero information from previous communications</li>
+            <li><strong>No persistent session storage:</strong> URLSession session data is not stored on disk</li>
           </ul>
-          <p>Even if the device is physically compromised, no communication history exists on disk. Ephemeral URLSession achieves "zero trace" at the communication layer.</p>
+          <p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers.</p>
 
           <h2>4. Never Log Sensitive Information</h2>
           <p>Logs are a developer's most fundamental debugging tool, but from a privacy perspective, they're also one of the most dangerous information leakage vectors.</p>
@@ -689,26 +677,14 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           <p>Even with physical access to the device, Outbox memos remain encrypted and unreadable as long as Keychain security is maintained.</p>
           <p>For the complete Outbox architecture design, see <a href="/devlog/outbox-architecture">Outbox Architecture: Zero Message Loss Design</a>.</p>
 
-          <h2>6. Zero External Library Dependencies (Security Perspective)</h2>
-          <p>Adding external libraries is functionally convenient, but from a security perspective, every single one becomes an attack surface.</p>
-          <p>Supply chain attacks are a real threat. Cases where trusted libraries include malicious code in updates have actually occurred across ecosystems including npm, PyPI, and CocoaPods.</p>
-          <p>This app uses only Apple's native frameworks:</p>
-          <ul>
-            <li><strong>CryptoKit:</strong> Encryption operations</li>
-            <li><strong>Network.framework:</strong> Network connectivity monitoring</li>
-            <li><strong>BackgroundTasks:</strong> Background send scheduling</li>
-            <li><strong>os.log:</strong> Logging output</li>
-          </ul>
-          <p>The fact that no third-party code touches user data dramatically simplifies security auditing. The audit scope is limited to Apple's native frameworks and our own code. Having zero dependency graph complexity is itself a security strength.</p>
+          <h2>6. Memo Protection and External SDKs</h2>
+          <p>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. Network.framework monitors connectivity, and BackgroundTasks schedules background sending.</p>
+          <p>The app also uses external SDKs. GoogleSignIn and Firebase Authentication support optional email auto-fill from a Google account. Firebase App Check initializes at launch to protect backend access. AppsFlyer supports acquisition and usage analytics, with the same installation identifier used for first-party analytics.</p>
+          <p>Keeping memo text out of event fields does not remove links through identifiers and delivery records. Analytics, including SDK behavior, needs to be considered separately from memo encryption. Our <a href="/en/privacy#technical">Privacy Policy</a> describes the fields and purposes.</p>
 
-          <h2>7. Design Philosophy: "Disappear Without a Trace"</h2>
-          <p>The best privacy protection is the kind users never think about.</p>
-          <p>There is no privacy settings screen. No toggle switches. No "Would you like to enable privacy mode?" dialog. All privacy features are enabled by default, and there is no way to disable them.</p>
-          <p>Users don't need to think about privacy. The fact that memos don't appear in the app switcher, that no communication traces remain, that the Outbox is encrypted — all of this operates silently, in the background.</p>
-          <p>This is a design philosophy that extends from the Captio-style experience. What Captio delivered was the feeling of "trust without thinking." We take the same approach with privacy. The design is so thorough that users never need to consciously evaluate whether they can trust the app.</p>
-          <div class="philosophy-highlight">
-            <strong>Principle:</strong> Disappear without a trace — privacy protection is better when invisible. The moment a user thinks "Is this safe?" even for a second, the design has failed.
-          </div>
+          <h2>7. Explain the Scope of Each Protection</h2>
+          <p>On-device encryption, session storage, and usage analytics serve different purposes. An encrypted Outbox and an ephemeral URLSession do not mean the app collects no usage events.</p>
+          <p>Fast capture should come with an understandable explanation of collected data. We describe analytics destinations, identifiers, and how records can be linked, and review these explanations as the app changes.</p>
 
           <!-- FAQ Section -->
           <div class="faq-section">
@@ -721,7 +697,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Is communication encrypted?</div>
-              <div class="faq-item__answer">Yes. In addition to HTTPS, the app uses ephemeral URLSession which stores no cache, cookies, or credentials. No communication traces persist on disk.</div>
+              <div class="faq-item__answer">Yes. API communication uses HTTPS. An ephemeral URLSession avoids persisting that session’s caches, cookies, and credentials to disk. It does not remove separate analytics or server-side records.</div>
             </div>
 
             <div class="faq-item">
@@ -731,12 +707,12 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Is there analytics or tracking?</div>
-              <div class="faq-item__answer">The app contains no third-party analytics SDK. There is absolutely no code that tracks user behavior.</div>
+              <div class="faq-item__answer">Yes. We use first-party usage analytics and the AppsFlyer SDK. First-party events include a random installation identifier, session identifier, event type and time, app version, and outcomes such as send results. The app sends AppsFlyer events for first successful memo send, successful verification, paywall views, plan selection, and successful purchases; purchase events may include price, currency, and subscription period. The same installation identifier is set as AppsFlyer’s Customer User ID, allowing acquisition and usage records to be linked. Event fields set by our app do not directly include email addresses, memo text, or verification codes, but first-party send IDs can link to recipient email hashes. These records are not fully anonymous. See the <a href="/en/privacy#technical">technical measures in our Privacy Policy</a>.</div>
             </div>
 
             <div class="faq-item">
-              <div class="faq-item__question">Q. Why keep the data path free of external libraries?</div>
-              <div class="faq-item__answer">For security and privacy. Every external library is an attack surface. By building exclusively with Apple's native frameworks, zero third-party code touches user data.</div>
+              <div class="faq-item__question">Q. How do you use Apple frameworks and external SDKs?</div>
+              <div class="faq-item__answer">Within the iOS app, memo encryption and key storage use CryptoKit and Keychain, and memo transmission uses URLSession. External SDKs support Google sign-in, Firebase backend protection, and AppsFlyer acquisition and usage analytics. Memo-body protection and analytics involving identifiers are separate parts of the design.</div>
             </div>
           </div>
 

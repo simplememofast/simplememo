@@ -412,16 +412,18 @@
           <h2>11. お問い合わせ</h2>
           <p><!--email_off--><a href="mailto:support&#64;simplememofast.com">support&#64;simplememofast.com</a><!--/email_off--></p>
 
-          <h2>12. 暗号化に関する技術的な情報（参考）</h2>
+          <h2 id="technical">12. 暗号化に関する技術的な情報（参考）</h2>
           <p>本サービスは、ユーザーのプライバシーを保護するため、以下の技術的な対策を講じています。これらは「セキュリティ」というよりも「データ最小化」と「端末内保護」のための実装です。</p>
           <ul>
             <li><strong>端末内ストレージ</strong>: オフライン送信待ちメッセージ（Outbox）と送信履歴を、Apple 純正 CryptoKit による <strong>AES-GCM-256</strong> 暗号化で端末内に保存します（ファイル保護クラス: <code>completeFileProtectionUntilFirstUserAuthentication</code>）。</li>
             <li><strong>鍵管理</strong>: 256-bit 対称鍵は Apple Keychain Services（<code>kSecClassGenericPassword</code>）に保管し、<a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">再起動後の初回ロック解除から利用でき、他端末へ移行しない保護クラス</a>を使用します。アプリは暗号化・復号時に鍵を読み出します。バックアップに含まれる鍵のコピーは端末固有の鍵で保護され、別の端末では使用できません（<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">Appleの説明</a>）。機種変更前に、必要なメモがメールやObsidianなどの保存先に届いていることを確認してください。</li>
-            <li><strong>通信路</strong>: API 通信はすべて TLS（HTTPS）で保護されます。クライアント側は <code>URLSessionConfiguration.ephemeral</code> を使用し、Cookie・キャッシュを残しません。</li>
+            <li><strong>通信路</strong>: API通信はTLS（HTTPS）で保護されます。メモ送信用の<code>URLSessionConfiguration.ephemeral</code>は、そのセッションのキャッシュ・Cookie・認証情報をディスクに永続保存しない構成です。利用解析の保存・送信や、外部SDKの通信の説明とは区別します。</li>
             <li><strong>メール本文</strong>: 送信処理のため当社の Relay API（Cloudflare Workers）と外部送信基盤（Resend）を通過しますが、恒常的な保存は行いません。ログにも記録しません（開発時の DEBUG ビルドを除く）。</li>
             <li><strong>メールアドレスのサーバ保存</strong>: 送信IDと宛先メールアドレスのハッシュ（SHA-256から生成）の対応を Cloudflare D1 に保存します。この対応記録はリマインダーのオプトインにかかわらず作成されます。リマインダー用の連絡先は Resend の Contact API で管理します。</li>
             <li><strong>暗号化・保管・通信路の依存関係</strong>: メモ本文の暗号化（CryptoKit）、鍵保管（Keychain Services）、通信（URLSession / Network.framework）はすべて Apple 純正フレームワークで完結し、サードパーティ SDK を介しません。</li>
-            <li><strong>その他のオプション機能の SDK</strong>: 任意のオンボーディング短縮機能として Google アカウントから email を取り込む際に、Google が提供する <code>GoogleSignIn-iOS SDK</code> および Firebase Authentication SDK を使用します（v2.4 以降）。バックエンド API への不正アクセス防止のため、Apple の App Attest を活用する Firebase App Check SDK を起動時に初期化します。利用解析は自社実装で当社の <code>/v1/analytics/event</code> エンドポイントへ送信します。メールアドレスや本文を直接含めませんが、送信IDを介して宛先のハッシュと紐付けられます。</li>
+            <li><strong>サインインと不正利用防止のSDK</strong>: 任意のオンボーディング短縮機能としてGoogleアカウントからメールアドレスを取り込む際に、GoogleSignIn-iOS SDKとFirebase Authentication SDKを使います。Firebase App Check SDKは起動時に初期化し、Apple App Attestを用いてバックエンドAPIへの不正アクセスを防ぎます。</li>
+            <li><strong>自社の利用解析</strong>: 品質改善や利用状況の把握のため、当社の<code>/v1/analytics/event</code>へイベントを送信します。項目にはランダムなインストール識別子、セッション識別子、イベントの種類・識別子・時刻、アプリの版・ビルド、言語、送信結果などの許可された属性が含まれます。メールアドレス・メモ本文・認証コードを直接含めない設計ですが、送信IDを介して宛先メールアドレスのハッシュと紐付けられます。</li>
+            <li><strong>AppsFlyerによる獲得・利用解析</strong>: AppsFlyer SDKを起動し、初回メモ送信成功、認証成功、課金画面表示、プラン選択、購入成功をイベントとして送信します。アプリから設定する属性には、該当する場合、購入金額・通貨・購読期間・画面の区分が含まれます。自社解析と同じインストール識別子をAppsFlyerのCustomer User IDに設定するため、獲得情報と利用記録を関連付けられます。アプリから設定するイベント項目にはメールアドレス・メモ本文・認証コードを直接含めません。ここに挙げた項目はアプリが明示的に設定するもので、SDKが取得する技術情報の全項目を列挙したものではありません。識別子や関連付け可能な記録は、完全に匿名の情報として扱いません。</li>
           </ul>
           <p><strong>注意</strong>: 本サービスは <strong>End-to-End 暗号化（E2EE）を提供していません</strong>。受信者であるユーザーご自身のメールクライアントで通常通り本文を読めるよう、メール本文は標準的な SMTP プロトコルで配信されます。E2EE が必要な用途には、Standard Notes・Signal・ProtonMail などの専用サービスをご検討ください。</p>
           <p>この節の内容は、Obsidianユーザー向けに「データの通り道」の図解として<a href="/privacy-architecture/">プライバシー設計</a>ページにまとめ直しています。</p>
