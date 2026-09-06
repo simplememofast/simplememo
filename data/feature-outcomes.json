@@ -28,15 +28,64 @@
     "2026-07-01/02 のタイトル実験7件は**全件が「変更前の値を記録しないまま変えた」**で",
     "潰れた。あちらで学んだ規律が、機能側には効いていなかった。",
     "",
-    "【いまの状態】",
-    "**1件も無い。**これは「機能を出していない」という意味ではない ——",
-    "v5.8.0（Obsidian追記の雛形）も v5.8.1（段階公開の機構）も出荷済み。",
-    "**出す前に測り方を決めた機能が、まだ1件も無い**という意味。",
     "",
     "したがって過去分をさかのぼって埋めることはしない。埋めるなら全件が",
     "measurement_failed になるだけで、しかも『後から指標を選んだ』ものになる。",
     "**次に出す機能から、出す前に1行足す。**"
   ],
   "verdict_vocabulary": "data/operating-memory.json と同じ5値（success / failure / no_change / undecidable / measurement_failed）",
-  "features": []
+  "features": [
+    {
+      "id": "obsidian_nested_destinations_20260906",
+      "backlog_id": "folder_pick_ux",
+      "title": "Obsidianの階層保存先とフォルダ選択の改善",
+      "declared_at": "2026-09-06",
+      "evaluation_at": "2026-10-18",
+      "design": "docs/designs/obsidian-nested-destinations.md",
+      "measurement_plan": "docs/designs/obsidian-nested-destinations-measurement.md",
+      "metric": {
+        "key": "obsidian_configured_file_append_rate",
+        "numerator": "obsidian_append_success",
+        "denominator": "obsidian_append_success|obsidian_append_failed",
+        "higher_is_better": true,
+        "filters": {
+          "method": "file",
+          "write_stage": "vault",
+          "obsidian_layout": "nested"
+        },
+        "unit": "file-write attempt outcome event; retries are separate attempts",
+        "baseline": {
+          "rate": 0.9707317073170731,
+          "n": 1640,
+          "success_events": 1592,
+          "failure_events": 48,
+          "window_start_utc": "2026-08-09T00:00:00Z",
+          "window_end_utc": "2026-09-06T00:00:00Z",
+          "comparability": "Historical all-layout reference only; not a randomized control or a unique-capture rate."
+        }
+      },
+      "status": "declared_not_shipped",
+      "implementation_dependencies": [
+        "iOS and API allowlisted category-only telemetry",
+        "release version/build recorded before measurement",
+        "physical-device acceptance verification"
+      ],
+      "evaluation_policy": {
+        "observation_days": 28,
+        "minimum_nested_attempts": 200,
+        "minimum_nested_installs": 20,
+        "minimum_flat_attempts": 200,
+        "minimum_flat_installs": 20,
+        "fixed_review_date": "2026-10-18",
+        "insufficient_exposure": "undecidable; do not extend the window after seeing results",
+        "missing_telemetry": "measurement_failed"
+      },
+      "rollback_policy": "Confirmed data loss, duplicate writes, or writes outside the selected vault stop rollout immediately. A nested failure-event rate above 5% after at least 50 attempts and 10 installs pauses further rollout for investigation.",
+      "notes": [
+        "No shipped_at, result, or verdict is recorded before deployment and observation.",
+        "The flat cohort is an observational reference; results cannot establish causal improvement.",
+        "No AI execution-rate increment is claimed for this declaration."
+      ]
+    }
+  ]
 }
