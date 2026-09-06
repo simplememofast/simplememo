@@ -1116,13 +1116,16 @@
         "ctr": 0.0067,
         "position": 7.8,
         "window": "2026-05-09..2026-08-08",
-        "source": "GSC 3ヶ月ページ次元の3ページ合計。内訳: shortcuts 46clk/4849imp/0.95%/7.5・keep-vs-notes 9/2727/0.33%/8.2・quick-capture 2/906/0.22%/7.9"
+        "source": "GSC 3ヶ月ページ次元の3ページ合計。内訳: shortcuts 46clk/4849imp/0.95%/7.5・keep-vs-notes 9/2727/0.33%/8.2・quick-capture 2/906/0.22%/7.9",
+        "metric": "ctr",
+        "value": 0.006720113180853572
       },
       "target_metric": "ctr",
       "decision": null,
       "evaluated_at": null,
       "notes": [
-        "2026-09-06: 日英 ios-quick-capture-comparison の事実訂正。保存済み8/11の入力準備時間を保存・配達から分離し、Draftsの最速値と他アプリの中央値を区別。競合の無料枠・暗号化・オフライン条件と初回設定を公式資料で訂正。title/H1・canonical・既存CTAの宛先と計測属性は維持し、本文・説明文・FAQ・著者説明を更新。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。以後のクリック・回遊変化を8/11の英語書き換えやCTAだけの効果に帰属させない。"
+        "2026-09-06: 日英 ios-quick-capture-comparison の事実訂正。保存済み8/11の入力準備時間を保存・配達から分離し、Draftsの最速値と他アプリの中央値を区別。競合の無料枠・暗号化・オフライン条件と初回設定を公式資料で訂正。title/H1・canonical・既存CTAの宛先と計測属性は維持し、本文・説明文・FAQ・著者説明を更新。新規実験ではなく既存実験の交絡として記録し、開始日・評価日・判定基準は変更しない。以後のクリック・回遊変化を8/11の英語書き換えやCTAだけの効果に帰属させない。",
+        "2026-09-06: 元のWEB・3URL・2026-05-09〜08-08の基準をCSVで回収し、ページ3行と日別92行の57クリック・8,482表示を照合。元の丸め値・日付・判定条件は維持し、CTRの分子分母からbaseline.metric/valueと手動レビュー用measurement_contractを追記。国・端末・クエリの不一致は未解決。11/11は元の確認日として保持し、変更翌日以降の同じ92日間（最短8/12〜11/11）と3日遅延を満たす比較は最短11/14。対象の単一ページ化や未成熟データによる判定は行わない。詳細: growth/reports/2026-09-06-english-review-readiness.md。"
       ],
       "control": {
         "kind": "pre_post",
@@ -1141,7 +1144,76 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "measurement_contract": {
+        "source": "gsc",
+        "definition": "GSC WEB page CTR for the exact three registered URLs: sum page clicks / sum page impressions, all countries, devices and queries. Do not average page CTRs or use site-level impressions. This measures search clicks, not installations or LTV.",
+        "unit": "ratio",
+        "time_zone": "America/Los_Angeles",
+        "lag_days": 3,
+        "scope": {
+          "property": "sc-domain:simplememofast.com",
+          "pages": [
+            "/en/iphone-shortcuts-email-guide/",
+            "/en/vs/google-keep-vs-apple-notes/",
+            "/en/blog/ios-quick-capture-comparison"
+          ],
+          "search_type": "WEB",
+          "countries": "all",
+          "devices": "all",
+          "queries": "all",
+          "aggregation": "sum_page_clicks_over_sum_page_impressions"
+        }
+      },
+      "measurement_contract_evidence": {
+        "registered_at": "2026-09-06T14:11:38.840Z",
+        "baseline_checked_at": "2026-09-06T13:57:35.471079+00:00",
+        "source_kind": "authenticated_ui_csv_export",
+        "baseline_window": "2026-05-09..2026-08-08",
+        "verified_dimensions": [
+          "pages",
+          "dates"
+        ],
+        "date_rows_complete": true,
+        "page_and_date_totals_match": true,
+        "all_dimensions_reconciled": false,
+        "limitations": [
+          "Country, device and query tables do not reconcile with the verified page/date totals; the cause is unresolved. Do not use them for baseline composition or reallocate their difference.",
+          "Contract registration records recovered baseline evidence, not a post-change evaluation or new preregistration."
+        ],
+        "artifacts": [
+          {
+            "name": "gsc-baseline-20260509-20260808.zip",
+            "sha256": "28feeb8e310f4e8eb9d5a3f0f2a14f9704fc5bfb39fd6e0e53b29fd074792193",
+            "bytes": 4443
+          },
+          {
+            "name": "baseline-recovered.json",
+            "sha256": "3640f3a07b768db8a8a3f51b2bc8a7cf4854c5c3057b64716767a44f8c1ff3d2",
+            "bytes": 15726
+          },
+          {
+            "name": "baseline-download-manifest.json",
+            "sha256": "284519e17cce2fce05b56f923dd4b90b9e90203695ac3b9d48e19f992f2fcebf",
+            "bytes": 1224
+          },
+          {
+            "name": "ページ.csv",
+            "sha256": "2808fe736a9145fa338ac2fc93129c7fdf57f4b0b6053f1489566523d984aa67",
+            "bytes": 303
+          },
+          {
+            "name": "平均読み込み時間のチャート.csv",
+            "sha256": "857acbd9a055c50c16f19567a7ca9f8342cd9626d8151918a5bd658647746c9f",
+            "bytes": 2167
+          },
+          {
+            "name": "フィルタ.csv",
+            "sha256": "5323d1e0d1349725d93bcabb755853bc47013f3fedfd9f6a562b854b3375c70a",
+            "bytes": 212
+          }
+        ]
+      }
     },
     {
       "id": "engage-2026-08-11-next-step",
