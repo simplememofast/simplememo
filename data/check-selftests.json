@@ -247,7 +247,7 @@
       "script": "scripts/autopilot-budget.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
-      "broke": "on_exceed が知らない値／月次上限が数でない／run の費用が数でない の3通りで落ちることを観測 [2026-09-06 実行中の支出閾値] 実workflowのroute shell→実CLI→出力をarticle/repairの異なる値で検証。月次残枠無視・未レビュー超過無視・不正値許容・producer切断・consumer切断・金額直書き・CLI切断の7変異を全て検出。固定SDK 0.3.245/CLI 2.1.245も資格情報なしのloopback HTTP検体で動かし、閾値なし2呼出が閾値あり1呼出でerror_max_budget_usdになることを実測した。応答分の超過は残る。検体を実費や成果に加点しない。 [2026-09-06 実行種別の出典] 16自己検査。実行種別の補完元を同じrun/job/step/時刻とともに保存し、不正な出典・既存出典の書換えを拒否する。source検証削除・既存出典上書きの2変異で該当assertionが失敗。CLI出典受渡しの切断もActの実CLI検査で失敗を確認。費用・結果・レビューと集計式は維持。"
+      "broke": "on_exceed が知らない値／月次上限が数でない／run の費用が数でない の3通りで落ちることを観測 [2026-09-06 実行中の支出閾値] 実workflowのroute shell→実CLI→出力をarticle/repairの異なる値で検証。月次残枠無視・未レビュー超過無視・不正値許容・producer切断・consumer切断・金額直書き・CLI切断の7変異を全て検出。固定SDK 0.3.245/CLI 2.1.245も資格情報なしのloopback HTTP検体で動かし、閾値なし2呼出が閾値あり1呼出でerror_max_budget_usdになることを実測した。応答分の超過は残る。検体を実費や成果に加点しない。 [2026-09-06 実行種別の出典] 16自己検査。実行種別の補完元を同じrun/job/step/時刻とともに保存し、不正な出典・既存出典の書換えを拒否する。source検証削除・既存出典上書きの2変異で該当assertionが失敗。CLI出典受渡しの切断もActの実CLI検査で失敗を確認。費用・結果・レビューと集計式は維持。 [2026-09-06 種別残枠] 18自己検査。記事残枠0.125ドルをSDK閾値へ適用し、前月・他種別の費用を混同しない。全体warn_onlyでも種別枠切れは拒否。不明/非有限の種別上限も拒否。taskUpperBoundをInfinityへ置換した変異は「種別の残枠をSDK閾値が超えた」でexit 1。合成検体を実費・実行率へ加点しない。"
     },
     {
       "script": "scripts/autopilot-checkpoint.mjs",

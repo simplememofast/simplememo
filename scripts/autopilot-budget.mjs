@@ -88,9 +88,17 @@ export function runtimeBudget(ledger, routing, kind, month = jstMonth()) {
   assert(!state.unreviewed.some(r => r.task_kind === kind), 'runtime budget blocked by unreviewed overrun');
   const spent = ledger.runs.filter(r => r.date_jst.startsWith(month)).reduce((sum, r) => sum + r.total_cost_usd, 0);
   const upperBound = ledger.budget.monthly_usd_cap - spent;
-  const usd = ledger.budget.on_exceed === 'skip_run' ? Math.min(perRun, upperBound) : perRun;
+  const taskCap = ledger.budget.task_budgets?.[kind]?.monthly_usd_cap;
+  assert(Number.isFinite(taskCap) && taskCap > 0, 'runtime task budget must be finite and positive');
+  const taskSpent = ledger.runs.filter(r => r.date_jst.startsWith(month) && r.task_kind === kind)
+    .reduce((sum, r) => sum + r.total_cost_usd, 0);
+  const taskUpperBound = taskCap - taskSpent;
+  // The task gate stops this kind even when the global cap is warn_only.
+  // Unclassified and unobserved costs mean these remain upper bounds, not available balances.
+  const usd = Math.min(perRun, taskUpperBound,
+    ledger.budget.on_exceed === 'skip_run' ? upperBound : Infinity);
   assert(Number.isFinite(usd) && usd > 0, 'runtime budget has no positive spending allowance');
-  return { usd, per_run_usd: perRun, remaining_upper_bound_usd: upperBound };
+  return { usd, per_run_usd: perRun, remaining_upper_bound_usd: upperBound, task_remaining_upper_bound_usd: taskUpperBound };
 }
 
 export function runtimeBudgetWiring(source) {
@@ -530,6 +538,26 @@ const SCENARIOS = ledgerScenarios(
 // 足りずに別の理由で落ちる（一度やった）。summarize の結果の run_caps だけ差し替える。
 const budgetDoc = () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
 SCENARIOS.push(
+  ['SDK閾値は種別の残枠も守り、他種別・前月・warn_onlyを混同しない', () => {
+    const ledger = budgetDoc(), routing = loadRouting();
+    routing.rules.article.max_usd_per_run = 20;
+    ledger.budget.task_budgets.article.monthly_usd_cap = 20;
+    ledger.runs = [
+      { date_jst: '2026-09-01', route: 'actions', task_kind: 'article', total_cost_usd: 19.875 },
+      { date_jst: '2026-08-01', route: 'actions', task_kind: 'article', total_cost_usd: 20 },
+      { date_jst: '2026-09-01', route: 'actions', task_kind: 'repair', total_cost_usd: 10 },
+    ];
+    for (const mode of ['skip_run', 'warn_only']) {
+      ledger.budget.on_exceed = mode;
+      assert(runtimeBudget(ledger, routing, 'article', '2026-09').usd === 0.125, '種別の残枠をSDK閾値が超えた');
+    }
+    const reject = () => { let failed = false; try { runtimeBudget(ledger, routing, 'article', '2026-09'); } catch { failed = true; } assert(failed, '種別の枠切れ・不明値を起動許可にした'); };
+    ledger.runs[0].total_cost_usd = 20; reject();
+    ledger.runs = [];
+    for (const cap of [undefined, null, 0, -1, NaN, Infinity]) {
+      ledger.budget.task_budgets.article.monthly_usd_cap = cap; reject();
+    }
+  }],
   ['SDKの支出閾値は既存の1回上限と月次残枠の上界に従う', () => {
     const ledger = budgetDoc(); ledger.runs = [];
     const routing = loadRouting(); routing.rules.article.max_usd_per_run = 8.75;
