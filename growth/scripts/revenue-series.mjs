@@ -52,7 +52,8 @@ const POLICY_PATH = path.join(ROOT, 'data/financial-policy.json');
  * ここは**写し**を持つ。写しの流儀は data/crossrepo-probes.json と同じで、
  * **隣が無いCIでは判定に使い、隣が在る場所で更新する。**
  */
-export const IOS_SERIES = path.join(ROOT, '..', 'simplememo-ios', 'data/revenue/series.json');
+export const IOS_SERIES = process.env.ASC_REVENUE_SERIES_PATH
+  || path.join(ROOT, '..', 'simplememo-ios', 'data/revenue/series.json');
 
 /** 月次を名乗るのに要る日数。GSC の28日窓と揃える。 */
 export const DAYS_FOR_MONTHLY = 28;
@@ -158,7 +159,69 @@ export function readAll(dir = SRC_DIR) {
  *
  * 隣が読めなければ **null**（0 ではない）。「読めなかった」を「0日」と書かない。
  */
+// Validate coverage from the daily provenance, without copying monetary values.
+// A rolling window or later correction can legitimately reduce observed days.
+export function purchaseCoverage(doc) {
+  if (doc?.schema !== 'asc_revenue_v2' || doc.app_id !== '6758438948'
+      || doc.report !== 'App Store Purchases Standard' || doc.timezone !== 'UTC'
+      || !Number.isInteger(doc.instance_count) || doc.instance_count < 1) return null;
+  const epoch = (value) => {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return NaN;
+    const number = Date.parse(`${value}T00:00:00Z`);
+    return Number.isFinite(number) && new Date(number).toISOString().slice(0, 10) === value ? number : NaN;
+  };
+  if (typeof doc.generated_at !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(doc.generated_at)
+      || !Number.isFinite(Date.parse(doc.generated_at)) || Date.parse(doc.generated_at) > Date.now()
+      || new Date(doc.generated_at).toISOString().replace('.000Z', 'Z') !== doc.generated_at) return null;
+  const current = doc.current;
+  const from = epoch(current?.from), to = epoch(current?.to), dayMs = 86400000;
+  if (!Number.isFinite(from) || !Number.isFinite(to) || to - from !== 27 * dayMs
+      || to > epoch(doc.generated_at.slice(0, 10)) - 2 * dayMs
+      || !current.daily || Array.isArray(current.daily)) return null;
+  const dates = Array.from({ length: 28 }, (_, i) => new Date(from + i * dayMs).toISOString().slice(0, 10));
+  if (JSON.stringify(Object.keys(current.daily).sort()) !== JSON.stringify(dates)) return null;
+  const missing = [], provisional = [], conflicts = [];
+  let complete = 0, observed = 0;
+  for (const date of dates) {
+    const entry = current.daily[date];
+    if (entry === null) { missing.push(date); continue; }
+    if (!entry || !['observed', 'conflicting_instances'].includes(entry.state)) return null;
+    const processing = epoch(entry.processing_date);
+    if (!Number.isFinite(processing) || processing < epoch(date)
+        || processing > epoch(doc.generated_at.slice(0, 10))) return null;
+    if (entry.state === 'conflicting_instances') { conflicts.push(date); continue; }
+    observed += 1;
+    if (processing < epoch(date) + 2 * dayMs) provisional.push(date);
+    else complete += 1;
+  }
+  const ready = complete === 28;
+  if (doc.covered_days !== complete || current.complete_observed_days !== complete
+      || current.observed_days !== observed || doc.days_for_monthly !== 28
+      || doc.monthly_ready !== ready || current.state !== (ready ? 'complete' : 'incomplete')) return null;
+  for (const [field, values] of [['missing_dates', missing], ['provisional_dates', provisional], ['conflicting_dates', conflicts]]) {
+    if (JSON.stringify(current[field]) !== JSON.stringify(values)) return null;
+  }
+  return { from: current.from, to: current.to, timezone: 'UTC', state: current.state,
+    complete_days: complete, observed_days: observed,
+    missing_days: missing.length, provisional_days: provisional.length, conflicting_days: conflicts.length };
+}
+
 export function mirrorFrom(iosDoc, syncedAt) {
+  if (iosDoc?.schema === 'asc_revenue_v2') {
+    const coverage = purchaseCoverage(iosDoc);
+    if (!coverage) return null;
+    return {
+      $comment: ['購入レポートの日別観測範囲の写し。金額・個票・流入元は公開側へ運ばない。',
+        'covered_daysは現在の28日窓に確定版がある日数。累計暦日数ではなく、窓の移動や訂正で減る場合がある。',
+        'monthly_readyは28日窓の観測完了のみ。確定入金・月額外挿・LTV評価の完了ではない。'],
+      schema: 'revenue_observation_mirror_v2', source_schema: iosDoc.schema,
+      source: 'simplememo-ios/data/revenue/series.json', source_generated_at: iosDoc.generated_at,
+      synced_at: syncedAt, covered_days: coverage.complete_days, days_for_monthly: 28,
+      monthly_ready: iosDoc.monthly_ready, first_day: coverage.from, last_day: coverage.to,
+      coverage,
+    };
+  }
+  if (iosDoc?.schema) return null; // Do not reinterpret an unknown future schema as legacy.
   if (!iosDoc || typeof iosDoc.covered_days !== 'number') return null;
   return {
     $comment: [
@@ -190,6 +253,23 @@ export function mirrorFrom(iosDoc, syncedAt) {
  * 作り直したいときはファイルを消してから走らせる（意図的な操作を要求する）。
  */
 export function refusesToShrink(existing, next) {
+  if (next?.schema === 'revenue_observation_mirror_v2' && next.source_schema === 'asc_revenue_v2'
+      && next.covered_days === next.coverage?.complete_days) {
+    if (existing?.schema === 'revenue_observation_mirror_v2') {
+      if (typeof existing.source_generated_at !== 'string' || !Number.isFinite(Date.parse(existing.source_generated_at))
+          || typeof existing.last_day !== 'string' || !Number.isFinite(Date.parse(existing.last_day))) {
+        return '既存v2の生成時刻・対象窓が欠けているため、新旧を比較できない';
+      }
+      if (next.source_generated_at < existing.source_generated_at || next.last_day < existing.last_day) {
+        return '既存より古い日別集計への巻き戻しを拒む';
+      }
+      if (next.source_generated_at === existing.source_generated_at && !sameMirror(existing, next)) {
+        return '同じ生成時刻で異なる日別集計が届いたため、置換しない';
+      }
+    }
+    return null; // Validated new snapshot, including one-time legacy -> v2 migration.
+  }
+  if (existing?.schema === 'revenue_observation_mirror_v2') return '日別v2から旧スパンへの巻き戻しを拒む';
   const before = existing?.covered_days;
   const after = next?.covered_days;
   if (typeof before !== 'number' || typeof after !== 'number') return null;
@@ -303,6 +383,40 @@ function selftest() {
   t('同じ日数は通す', refusesToShrink({ covered_days: 5 }, { covered_days: 5 }) === null);
   t('写しがまだ無ければ拒まない', refusesToShrink(null, { covered_days: 1 }) === null);
 
+  const dailyV2 = (count, generated = '2026-09-06T00:00:00Z') => {
+    const dates = Array.from({ length: 28 }, (_, i) => new Date(Date.UTC(2026, 7, 8 + i)).toISOString().slice(0, 10));
+    const ready = count === 28;
+    return { schema: 'asc_revenue_v2', app_id: '6758438948', report: 'App Store Purchases Standard',
+      timezone: 'UTC', generated_at: generated, instance_count: 3,
+      covered_days: count, days_for_monthly: 28, monthly_ready: ready,
+      current: { from: dates[0], to: dates[27], state: ready ? 'complete' : 'incomplete',
+        complete_observed_days: count, observed_days: count, missing_dates: dates.slice(count),
+        conflicting_dates: [], provisional_dates: [],
+        daily: Object.fromEntries(dates.map((day, i) => [day, i < count
+          ? { state: 'observed', processing_date: '2026-09-06', values: { proceeds_usd: '987.654', secret: 'private-source' } }
+          : null])) } };
+  };
+  const v2 = dailyV2(3);
+  const v2mirror = mirrorFrom(v2, '2026-09-06');
+  t('v2は日別の確定版から写しの日数を照合する', v2mirror?.covered_days === 3 && v2mirror.coverage.missing_days === 25);
+  t('v2の写しにも金額・個票を含めない', !JSON.stringify(v2mirror).includes('987.654')
+    && !JSON.stringify(v2mirror).includes('private-source') && !JSON.stringify(v2mirror).includes('daily'));
+  t('v2の28日窓が揃った時だけready', mirrorFrom(dailyV2(28), '2026-09-06')?.monthly_ready === true);
+  t('v2で日数だけ28へ書き換えても受け入れない', mirrorFrom({ ...v2, covered_days: 28 }, 'x') === null);
+  t('v2の不完全窓をreadyにできない', mirrorFrom({ ...v2, monthly_ready: true }, 'x') === null);
+  t('v2の不正な期間・欠測一覧を拒む', mirrorFrom({ ...v2, current: { ...v2.current, missing_dates: [] } }, 'x') === null
+    && mirrorFrom({ ...v2, current: { ...v2.current, from: '2026-02-30' } }, 'x') === null);
+  t('未来の生成時刻と未知schemaを拒む', mirrorFrom({ ...v2, generated_at: '2099-01-01T00:00:00Z' }, 'x') === null
+    && mirrorFrom({ ...v2, schema: 'asc_revenue_v999' }, 'x') === null);
+  const corrected = mirrorFrom(dailyV2(1, '2026-09-06T01:00:00Z'), '2026-09-06');
+  t('検証済みの日別v2へ移る際は旧暦日数より減ってよい', refusesToShrink({ covered_days: 6 }, v2mirror) === null);
+  t('後日訂正で観測日数が減っても新しいv2を保存する', refusesToShrink(v2mirror, corrected) === null);
+  t('v2の古いスナップショットへの巻き戻しは拒む', typeof refusesToShrink(corrected, v2mirror) === 'string');
+  t('同じ生成時刻の矛盾を拒む', typeof refusesToShrink(v2mirror, mirrorFrom(dailyV2(1), '2026-09-06')) === 'string');
+  t('v2から旧スパンに戻さない', typeof refusesToShrink(v2mirror, mir) === 'string');
+  t('既存v2の生成時刻が欠けても規則を消さない',
+    typeof refusesToShrink({ ...v2mirror, source_generated_at: undefined }, corrected) === 'string');
+
   // 写しと方針の突き合わせは、写しの covered_days で行う
   // **時刻だけの差分で書かない。**（今日の教訓がこの生成器自身に当たっていた）
   const m1 = { covered_days: 1, synced_at: '2026-08-26', first_day: 'a' };
@@ -360,32 +474,18 @@ if (isMain) {
   const series = buildSeries(docs.map(observationOf));
   const problems = [];
 
-  console.log(`収入の履歴 — 取り込み ${docs.length} 件 / 観測 ${series.spans.length} 区間\n`);
-  for (const s of series.spans) {
-    console.log(`  ${s.from}〜${s.to}（${s.days ?? '?'}日）  課金 ${s.purchases} / 入金 $${s.proceeds_usd}`
-      + `  ← ${s.fetched} の取り込み`);
+  const policy = JSON.parse(fs.readFileSync(POLICY_PATH, "utf8"));
+  const existing = fs.existsSync(OUT_PATH) ? JSON.parse(fs.readFileSync(OUT_PATH, "utf8")) : null;
+  if (existing?.schema === "revenue_observation_mirror_v2") {
+    console.log(`収益の観測範囲: ${existing.first_day}〜${existing.last_day} UTC`);
+    console.log(`  確定版を確認した日 ${existing.covered_days} / 28。状態: ${existing.coverage.state}`);
+    console.log(`  未観測 ${existing.coverage.missing_days}日、暫定 ${existing.coverage.provisional_days}日、矛盾 ${existing.coverage.conflicting_days}日`);
+    console.log("  金額・課金人数・LTVはこの公開側の写しに含まれません。");
+  } else if (existing) {
+    console.log(`旧スパンの観測範囲: ${existing.covered_days}暦日。日別の確定観測日数とは異なります。`);
+  } else {
+    console.log("収益の写しは未取得です。欠測を売上0として扱いません。");
   }
-  if (series.skipped.length) {
-    console.log(`\n  足さずに飛ばした ${series.skipped.length} 件:`);
-    for (const s of series.skipped) console.log(`    ${s.fetched}: ${s.reason}`);
-    console.log('  **古い取り込みには date_range が無い。**推定で埋めず、飛ばして数える。');
-  }
-
-  console.log(`\n  覆っている日数 ${series.covered_days} / ${DAYS_FOR_MONTHLY}`
-    + `  （${series.monthly_ready ? '**月次を出せる**' : '月次にはまだ足りない'}）`);
-  console.log(`  累計  課金 ${series.purchases}件 / 入金 $${series.proceeds_usd} / 売上 $${series.sales_usd}`);
-  console.log('\n  **これは累計であって月額ではない。**'
-    + `${series.monthly_ready ? '' : `${DAYS_FOR_MONTHLY}日に届くまで月額へ換算しない。`}`);
-  console.log('  **ランウェイは出さない。**手元資金が機械に入っていないため（別の欄が持つ）。');
-
-  // 方針と系列の整合
-  // [2026-08-26] ここで読んだ方針を束縛していなかったため、下の --write が
-  // `ReferenceError: policy is not defined` で落ちていた。**一度も成功していない。**
-  const policy = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
-  // **突き合わせる相手は写し**であって、この場では作れない再構築ではない。
-  // [2026-08-26] 入力（growth/data/appstore/）は人が手で走らせたときしか増えない
-  // ので、再構築と突き合わせると CI が常に「実測0日」と言う。
-  const existing = fs.existsSync(OUT_PATH) ? JSON.parse(fs.readFileSync(OUT_PATH, 'utf8')) : null;
   problems.push(...policyDrift(policy, existing ?? series));
 
   if (process.argv.includes('--write')) {
