@@ -103,9 +103,18 @@
         "open_questions": [
           "自社が同意した契約版とDPAの適用記録。公開原文の取得は同意履歴の確認ではない。",
           "利用するWorkers・Pages・KV・D1ごとの再委託先と保存場所。",
-          "主契約の責任上限・準拠法（DPA §9.2・9.4が参照）、適用プランのSLA。",
+          "公開Self-Serve規約の責任上限・準拠法は確認済み。自社への適用契約、利用プランとSLAは未確認（subscriptions APIはobserve権限で403）。",
           "契約終了前にD1とKVの必要データを輸出し、別基盤で復元する手順と検証。"
-        ]
+        ],
+        "main_agreement": "Self-Serve Subscription Agreement（2025-09-12更新）: §12の一般責任上限は請求前12か月の支払額、§2.6は無料サービスの免責、§13はカリフォルニア州法。実際の契約適用・強行法上の例外は別途確認。 https://www.cloudflare.com/terms/",
+        "plan_observation": {
+          "at": "2026-09-06",
+          "source": "GET /accounts/{account_id}/subscriptions",
+          "profile": "observe",
+          "http_status": 403,
+          "result": "unavailable",
+          "note": "利用プランを取得できなかった。無料・有料・Enterpriseのいずれとも判定せず、資格情報の権限は変更していない。"
+        }
       }
     },
     {
