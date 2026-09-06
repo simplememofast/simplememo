@@ -33,7 +33,7 @@
   if (window.__simpleMemoStoreTracking) return;
   window.__simpleMemoStoreTracking = true;
 
-  var SELECTOR = 'a[href*="apps.apple.com"]';
+  var SELECTOR = 'a[href*="apps.apple.com"],a[data-app-route="onelink"]';
 
   function push() {
     // Push the arguments object exactly like gtag() does, so gtag.js
@@ -62,11 +62,36 @@
     };
   }
 
+  // Explicit opt-in only. Keep OneLink intent separate from a direct Store tap.
+  // No URL generation, redirect, identifier forwarding or navigation changes.
+  function bridgeDims(a) {
+    if (a.getAttribute("data-app-route") !== "onelink") return null;
+    var scope = a.getAttribute("data-app-traffic");
+    if (scope !== "qa" && scope !== "pilot") return null;
+    try {
+      var url = new URL(a.getAttribute("href") || "", location.href);
+      if (url.origin !== "https://simplememofast.onelink.me" || url.username || url.password
+          || !/^\/it5q\/[A-Za-z0-9]{8}$/.test(url.pathname)) return null;
+      var d = dims(a);
+      delete d.ct;
+      d.measurement_version = "2026-09-07";
+      d.link_route = "onelink";
+      // This known QA link can never be promoted by an accidental pilot label.
+      d.bridge_scope = url.pathname === "/it5q/4x0jfkpw" ? "qa" : scope;
+      // Keep the clicked host/path; omit arbitrary query/fragment values.
+      d.link_url = url.origin + url.pathname;
+      return d;
+    } catch (err) { return null; }
+  }
+
   document.addEventListener("click", function (e) {
     var t = e.target;
     var a = (t && t.closest) ? t.closest(SELECTOR) : null;
-    if (!a || !ownStoreUrl(a)) return;
+    if (!a) return;
     try {
+      var bridge = bridgeDims(a);
+      if (bridge) { push("event", "web_to_app_click", bridge); return; }
+      if (!ownStoreUrl(a)) return;
       var d = dims(a);
       d.link_url = a.getAttribute("href") || "";
       push("event", "app_store_click", d);
@@ -119,14 +144,17 @@
         var entry = entries[i];
         if (!entry.isIntersecting || entry.intersectionRatio < 0.5) continue;
         var a = entry.target;
+        // Recheck at visibility time: href may have changed since observe().
+        var isNext = a.hasAttribute("data-next-step");
+        var bridge = isNext ? null : bridgeDims(a);
+        if (!isNext && !bridge && !ownStoreUrl(a)) { observer.unobserve(a); continue; }
         if (seen) {
           if (seen.has(a)) { observer.unobserve(a); continue; }
           seen.add(a);
         }
         try {
-          var isNext = a.hasAttribute("data-next-step");
-          push("event", isNext ? "next_step_impression" : "seo_cta_impression",
-               isNext ? nextDims(a) : dims(a));
+          push("event", isNext ? "next_step_impression" : bridge ? "web_to_app_impression" : "seo_cta_impression",
+               isNext ? nextDims(a) : bridge || dims(a));
         } catch (err) { /* ignore */ }
         observer.unobserve(a);
       }
@@ -135,7 +163,7 @@
     var start = function () {
       var links = document.querySelectorAll(SELECTOR + "," + NEXT_SELECTOR);
       for (var i = 0; i < links.length; i++) {
-        if (links[i].hasAttribute("data-next-step") || ownStoreUrl(links[i])) observer.observe(links[i]);
+        if (links[i].hasAttribute("data-next-step") || ownStoreUrl(links[i]) || bridgeDims(links[i])) observer.observe(links[i]);
       }
     };
     if (document.readyState === "loading") {
