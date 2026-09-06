@@ -1,130 +1,79 @@
-# 音声シフト調査 — 90日窓メタデータ集計ランブック（v4 R7② / 弾薬庫案4の土台）
+# 音声シフト調査 — 観測記録の集計手順 v2
 
-**目的:** /data/voice-shift/ に掲載する4つの集計を、誰が回しても同じ定義で再実行できるようにする。
-**データ源:** simplememo-api の D1 `app_analytics_events`（本文非閲覧設計 — メモ本文・生メール・PIIは
-一切保存されていない。長さは `memo_length_bucket` のバケットのみ）。
-**実行者:** ADMIN_API_KEY または wrangler d1 アクセスを持つオーナー。この環境からは実行できない。
-**初回の正史窓:** 2026-08-27以降に、`--to` を実行日の3日前（イベント到着遅延の保守分）として実行する。
+更新：2026-09-06。状態：**探索的な診断手順。公開用の確定結果は未掲載。**
 
----
+旧定義は2026-08-20に公開したが、9/5の診断と9/6の実装照合で数え方に問題が見つかった。
+v2はその後の訂正であり、事前登録済みの分析や旧90日調査の結果とは呼ばない。
+[旧定義v1全文（実行不可）](voice-shift-v1-archived.md)を保持する。
 
-## 0. 共通の定義（ページに載せる定義と一字一句揃える）
+## 1. 変更の理由
 
-| 用語 | 定義 |
+| 旧手順 | v2の扱い |
 |---|---|
-| 窓 | `--from`〜`--to`（両端含む・UTC日付）。標準は直近90日 |
-| 新規install | 窓内に `app_first_open` を発火した `anonymous_install_id` |
-| first send | そのinstallの最初の `first_memo_send_success` イベント |
-| 初日 | そのinstallの `app_first_open` と同じ**JST日付**（UTC+9で日付を切る） |
-| 内部除外 | `resolveAnalyticsInternalAccounts` と同一の集合（静的ID ∪ send_correlation×内部メールハッシュの解決分）を除外。**既定で除外ON** |
-| n | 各表の分母となるinstall数またはイベント数。**nが30未満の表は公開しない** |
+| 窓内の最古app_first_openを新規インストールとする | 保持されている全期間の窓終端より前の最古を使う。窓内で初回起動が記録された端末と呼ぶ。生涯初回・DL数とは呼ばない |
+| first_memo_send_successとmemo_send_successを合計 | first_*は初回のミラーなので合計しない。memo_send_successとobsidian_only_memo_savedを対象にする |
+| 窓の終端より後も送信・設定を数え得る | すべての報告対象活動を開始後・終端未満に制限する |
+| obsidian_configuredの存在を設定完了とする | JSONのvalueがboolean trueの記録を区別。false・未記録・不正型を分ける |
+| 初回受信前の保存や重複初回起動の扱いなし | 件数を診断し、該当端末の和集合を探索集計から除外。除外は新規性の証明ではない |
+| 90日保持が90暦日の完全な記録を保証する前提 | 最初の完全日・項目導入日・遅延・保持の確認を必要とし、確認できない窓は公開しない |
 
-内部除外CTE（全クエリ共通・`src/analytics.ts` のresolverと同じ結合）:
+## 2. 集計単位と定義
 
-```sql
--- :internal_hashes = ANALYTICS_INTERNAL_EMAIL_HASHES（env・オーナー保持）
--- :internal_ids    = ANALYTICS_INTERNAL_INSTALL_IDS（env・静的リスト）
-WITH internal_installs AS (
-  SELECT DISTINCT e.anonymous_install_id AS iid
-  FROM app_analytics_events e
-  WHERE CAST(json_extract(e.properties_json,'$.client_send_id') AS TEXT) IN (
-    SELECT message_id FROM send_correlation WHERE email_hash IN (:internal_hashes)
-  )
-  UNION SELECT value FROM json_each(:internal_ids)
-),
-new_installs AS (
-  SELECT anonymous_install_id AS iid, MIN(server_timestamp) AS first_open_ts
-  FROM app_analytics_events
-  WHERE event_name = 'app_first_open'
-    AND server_timestamp BETWEEN :from_ms AND :to_ms
-    AND anonymous_install_id NOT IN (SELECT iid FROM internal_installs)
-  GROUP BY 1
-)
-```
+[実行するSQL](voice-shift-v2.sql)はSQLite/D1の読み取り専用集約。個票・メモ本文・メール・端末IDを出力しない。
 
-実行方法（例・本番D1に読み取りのみ）:
+- 窓：UTCの`from`以上、`to`未満。終端は取得日の3日前以前の完了したUTC日とし、パラメータは実行前に固定する。90暦日の完全性を証明できなければ90日調査として公表しない。短い窓を使う場合は別の探索分析として窓と理由を明示する。
+- 対象：保持範囲の最古app_first_openが窓内にある端末。内部除外後、重複初回起動・それより前の保存がある端末を除く。診断件数は重なり得るため、和集合の除外数も出す。
+- 保存：memo_send_success（メールAPI受付成功）またはobsidian_only_memo_saved（ローカル保存成功として届いた記録）。メールの受信箱到着・Obsidian同期完了を保証するイベントではない。テスト・キュー・first_*は加算しない。
+- 重複：端末と非空client_send_idを組にし、時刻・行IDの順で最古を採用。送信IDがなければevent_idを使う。IDの種類を別名空間にして衝突を防ぐ。IDがない経路間の同一メモ判定はできず、その行数を残す。
+- 時刻：サーバーがイベントを受け取った時刻。実際に話した時刻・メモを作った時刻とは断定しない。初日は最古初回受信と同じJST暦日で、初回24時間とは異なる。
+- 入力方法：最初の観測保存に付いたinput_methodタグ。混在した入力の文字数比や「音声だけで作成した率」ではない。未知の値・欠測はunknownとして分母に残す。watch・siri・sample_chip等を無条件にvoiceへ加算しない。
+- 文字数：0、1-10、11-50、51-200、201+の端末側バケット。不正値・未記録はunknown。平均文字数を推定しない。
+- Obsidian：対象端末の期間内にboolean trueを一度以上観測した割合を扱う。trueとfalseの両方を観測した端末も1件。既知状態端末数と未観測端末数を必ず併記し、未観測を未設定としない。フォルダの有効性・同期・継続利用の率ではない。
+- 日本語ロケール比率：保存イベント単位。ja、ja-、ja_で始まるロケールを日本語とし、未記録も別件数にする。日本在住を意味しない。
+
+## 3. 既存の読み取り権限で取得する
+
+旧手順の「この環境から実行できない」は解消済み。SimpleMemoのローカル運用手順に従い、
+`simplememo-cf observe`からCloudflare D1 Query APIへSELECTを送れる。
+管理コホートAPIの401と、D1の読み取り可否は別である。新しい鍵・権限拡張は必要ない。
+
+SQLの位置パラメータは順に次の4つ。値は公開リポジトリやコマンド引数に置かず、
+メモリ上でAPIのJSON bodyへ渡す。トークンはランチャーが環境へ供給する。
+
+1. `from` UTC epoch milliseconds
+2. `to` UTC epoch milliseconds（排他的終端）
+3. 内部端末IDのJSON配列：現行APIの静的既定値とWorkerの追加設定
+4. 内部メールハッシュのJSON配列：同上
+
+内部集合は既存resolveAnalyticsInternalAccountsの静的IDとsend_correlationによる解決を使用。
+静的値をパーサーが読み損ねた0件を採用しない。send_correlationの保持は35日で、
+未解決テスターが残り得る。除外設定数・解決数・取得時刻・元実装SHAを記録する。
+
+SQLに対して先にEXPLAIN QUERY PLANを行い、日付パラメータと利用インデックスを確認する。
+実行後はHTTP状態・success・rows_read・rows_written・changed_db、SQLハッシュ、
+期間・取得日時・元実装の版を非公開の結果と一緒に保存する。
+拒否・タイムアウト・欠測を0件へ変換しない。既存DBやイベントへ書き込まない。
+
+## 4. 公開前の照合
+
+結果を得ただけでは公開用の確定値にならない。
+
+1. ①入力タグ合計＝first_capture_installs、②長さ合計＝day0_events、③時間帯合計＝capture_events、保存経路合計＝capture_eventsを照合。
+2. 候補−内部除外−曖昧端末の和集合＝cohort_installs、enabled≦known≦cohortを確認する。
+3. 初期日の保持・項目の導入時期・ロケール欠測・初回前保存・重複・送信ID欠測・版ごとの未計測経路を点検する。期間内にイベントがあるだけでは完全性を証明しない。
+4. 率の分母が30未満なら表は公開しない。日0・時間帯はイベント数に加え寄与端末数も確認する。同じ端末の多数保存が多数の利用者を意味しない。
+5. 内部除外の限界や欠測を残し、アプリ利用者全体・市場・SEO経由へ一般化しない。単一窓の分布で「音声へ移行した」と主張しない。
+6. 上記を通った集計だけをgrowth/data/researchへ転記する。診断結果や未検証のSQL出力はリポジトリ外に保持する。公開ページに窓・定義版・分母・実行日・制約を記載する。数値がない間はDatasetを追加せず、llms.txtの数値未掲載注記を維持する。
+
+次回の公開可否判断候補：2026-09-13。日付到来だけでは公開せず、解消した条件を証拠で確認する。
+自動再集計や定期ジョブはこの変更に含まない。
+
+## 5. 回帰検証
 
 ```sh
-wrangler d1 execute simplememo_reminders --remote --env production --command "<SQL>"
+python3 growth/queries/voice-shift-v2.test.py
 ```
 
----
-
-## 1. first send 入力方法比率（install単位）
-
-```sql
-SELECT method, COUNT(*) AS installs
-FROM (
-  SELECT e.anonymous_install_id,
-         COALESCE(CAST(json_extract(e.properties_json,'$.input_method') AS TEXT), 'unknown') AS method,
-         ROW_NUMBER() OVER (PARTITION BY e.anonymous_install_id ORDER BY e.server_timestamp) AS rn
-  FROM app_analytics_events e
-  JOIN new_installs n ON n.iid = e.anonymous_install_id
-  WHERE e.event_name = 'first_memo_send_success'
-)
-WHERE rn = 1
-GROUP BY method ORDER BY installs DESC;
-```
-
-- 分母n = first send到達install数（rn=1の総数）。
-- `input_method` は iOS v3.7.0 以降のみ付与。v3.7未満のinstallは `unknown` に落ちる——
-  **unknownを除外して比率を出さない**。unknown込みの表とunknownの内訳注記をそのまま公開する。
-
-## 2. 初日メモ文字数分布（イベント単位・バケットのみ）
-
-```sql
-SELECT COALESCE(CAST(json_extract(e.properties_json,'$.memo_length_bucket') AS TEXT),'(なし)') AS bucket,
-       COUNT(*) AS events
-FROM app_analytics_events e
-JOIN new_installs n ON n.iid = e.anonymous_install_id
-WHERE e.event_name IN ('first_memo_send_success','memo_send_success')
-  AND date(e.server_timestamp/1000,'unixepoch','+9 hours')
-      = date(n.first_open_ts/1000,'unixepoch','+9 hours')
-GROUP BY bucket ORDER BY events DESC;
-```
-
-- 文字数は**クライアント側でバケット化された値しか存在しない**（本文非閲覧設計の帰結）。
-  バケット境界はiOS実装の定義をページの脚注に転記すること。
-
-## 3. 時間帯分布（JST・送信イベント単位）
-
-```sql
-SELECT CAST(strftime('%H', datetime(e.server_timestamp/1000,'unixepoch','+9 hours')) AS INTEGER) AS jst_hour,
-       COUNT(*) AS events
-FROM app_analytics_events e
-JOIN new_installs n ON n.iid = e.anonymous_install_id
-WHERE e.event_name IN ('first_memo_send_success','memo_send_success')
-GROUP BY jst_hour ORDER BY jst_hour;
-```
-
-- server_timestamp基準（クライアント時計の狂いを避ける）。海外installが混ざるとJST変換が
-  ずれるため、`locale` 別の感度確認を1回付ける（ja比率をページ脚注に併記）。
-
-## 4. Obsidian併用率（install単位）
-
-```sql
-SELECT
-  (SELECT COUNT(*) FROM new_installs) AS new_installs,
-  COUNT(DISTINCT e.anonymous_install_id) AS obsidian_configured
-FROM app_analytics_events e
-JOIN new_installs n ON n.iid = e.anonymous_install_id
-WHERE e.event_name = 'obsidian_configured';
-```
-
----
-
-## 5. 結果の置き場と公開手順
-
-1. 結果を `growth/data/research/voice-shift-90d.json` に転記（書式は同ディレクトリREADME）。
-   窓・n・実行日・内部除外の resolved/configured 数も必ず記録する。
-2. `/data/voice-shift/index.html` の各表を値で埋め、ページ内の「最終集計」スタンプを更新する。
-3. llms.txt の該当行の注記（「数値未掲載」）を外す。
-4. 集計定義を変えた場合は**旧定義の表を消さず**、更新履歴に定義変更として残す（このページは
-   定義を事前公開しているのが信頼の根拠なので、黙って差し替えた瞬間に価値が消える）。
-
-**やらないこと:** 生値（--include-internal相当）での公開／n<30の表の公開／
-バケットより細かい粒度の推定（「平均◯文字」は算出できない設計であり、しない）。
-
-**将来の置き換え:** この4クエリを `/admin/analytics/voice-shift` エンドポイントに固めるのが
-きれいな最終形（resolverを自動で通せる）。実装する場合は simplememo-api 側で別PR
-（VISION §14の論点に触れない読み取り専用集計なので衝突はない）。
+実SQLを合成データで実行し、ミラー・テストの除外、true/false/欠測、最古起動と重複、
+初回前保存、内部相関、送信ID重複、JST境界、未知タグ、空の観測を確認する。
+合成テストは実データの完全性・実機計測・公開可能性を証明しない。
