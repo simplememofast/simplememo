@@ -169,8 +169,11 @@ export function decide(s) {
 
   // 1. 秘密鍵。主系だけが持つ条件で、**意図的に静かに寝る**（毎日赤い通知を出さない）。
   //    副系は別の資格情報で動くのでこの条件を持たない。
-  if (isPrimary(s.route) && !s.secretsPresent) {
-    return R(CODES.SKIP_SECRETS, '秘密鍵が未設定。設計どおり静かにスキップ（副系だけが動く）');
+  const primaryCredentials = s.engine === 'codex' ? s.credentialsAvailable === true : s.secretsPresent;
+  if (isPrimary(s.route) && !primaryCredentials) {
+    return R(CODES.SKIP_SECRETS, s.engine === 'codex'
+      ? 'Codex実行の認証を確認できない。着手しない'
+      : '秘密鍵が未設定。設計どおり静かにスキップ（副系だけが動く）');
   }
 
   // 2. 予算。**主系だけを止める。** 副系CCRは別経路で、このゲートからは
@@ -274,12 +277,12 @@ export function decide(s) {
     return R(CODES.SKIP_PR_TODAY, '当日作成のPRがある。別経路が進行中');
   }
 
-  // 8. 主系がまだ走っている可能性。**副系・再試行だけが見る。**
-  //    主系は timeout-minutes: 90 で06:00に始まるので、最悪07:30ちょうどまで走る。
+  // 8. 別の主系がまだ走っている可能性。Codex主系も自身以外の実行を見る。
+  //    旧Actionsは90分上限。MacのCodexは実際のtask statusを確認し、経過時間だけで終了としない。
   //    「ブランチが無い」は「主系が失敗した」ではなく「主系がまだ書いていない」かもしれない。
-  if (!isPrimary(s.route)
+  if ((!isPrimary(s.route) || s.engine === 'codex')
       && (s.primaryRunStatus === 'queued' || s.primaryRunStatus === 'in_progress')) {
-    return R(CODES.SKIP_PRIMARY_RUNNING, `主系が作業中（status=${s.primaryRunStatus}）。副系は終了`);
+    return R(CODES.SKIP_PRIMARY_RUNNING, `別の主系が作業中（status=${s.primaryRunStatus}）。この実行は終了`);
   }
 
   // 9. **外部到達が塞がれていても走る。**ただし選べるレーンが減る。
