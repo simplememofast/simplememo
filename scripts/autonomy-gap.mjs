@@ -6,6 +6,7 @@
  *   node scripts/autonomy-gap.mjs --json     # 機械可読
  *   node scripts/autonomy-gap.mjs --target 95
  *   node scripts/autonomy-gap.mjs --plan --target 70   # 目標までの最短路
+ *   node scripts/autonomy-gap.mjs --execution-plan --target 90 # AI実行率を厳密に超える条件
  *   node scripts/autonomy-gap.mjs --check    # CI: 分類の網羅・登録語・算数の一致
  *   node scripts/autonomy-gap.mjs --selftest # 検査そのものの自己検査（台帳を読まない）
  *
@@ -609,10 +610,90 @@ export function planTo(doc, target) {
   return { ...a, steps };
 }
 
+/** AI execution uses active tasks; starting a nobody task grows both counts.
+ * Scenarios are arithmetic requirements, not authorization or execution evidence.
+ * Never invent tasks or relabel a blocker to make a target attainable.
+ */
+export function executionPlan(doc, target = 0.9) {
+  if (!Number.isFinite(target) || target <= 0 || target >= 1) {
+    throw new Error('AI実行率の目標は0超100未満で指定する');
+  }
+  if (!Array.isArray(doc?.tasks) || doc.tasks.some((t) =>
+    !t || (!AI.has(t.executor) && !NON_AI.has(t.executor) && t.executor !== 'intentional_no'))) {
+    throw new Error('tasks又はexecutorが不正');
+  }
+  const s = summarize(doc).overall;
+  if (!s.doing) throw new Error('実施中タスクが無くAI実行率を計算できない');
+  const outstanding = doc.tasks.filter((t) => NON_AI.has(t.executor));
+  if (outstanding.some((t) => !BLOCKERS[t.blocker])) throw new Error('未登録のblocker');
+  const active = outstanding.filter((t) => t.executor !== 'nobody');
+  const fresh = outstanding.filter((t) => t.executor === 'nobody');
+  const reachableActive = active.filter((t) => BLOCKERS[t.blocker].klass === 'reachable').length;
+  const reachableNew = fresh.filter((t) => BLOCKERS[t.blocker].klass === 'reachable').length;
+  const scenarios = fresh.map((_, i) => i + 1);
+  scenarios.unshift(0);
+  const rows = scenarios.map((started) => {
+    const denominator = s.doing + started;
+    let required = Math.floor(target * denominator) + 1;
+    // Correct floating-point products at integral thresholds, e.g. 58% of 50.
+    while (required / denominator <= target) required += 1;
+    const transfer = Math.max(0, required - s.ai_executes - started);
+    return {
+      newly_started: started, active_transfers_required: transfer,
+      total_changes: started + transfer, numerator: s.ai_executes + started + transfer,
+      denominator, rate: (s.ai_executes + started + transfer) / denominator,
+      arithmetically_possible: transfer <= active.length,
+      within_classified_reachable: transfer <= reachableActive && started <= reachableNew,
+    };
+  });
+  const ceilingNumerator = s.ai_executes + reachableActive + reachableNew;
+  const ceilingDenominator = s.doing + reachableNew;
+  return {
+    metric: 'ai_execution_rate', comparison: 'strictly_greater_than', target,
+    current: s, reachable_active: reachableActive, reachable_nobody: reachableNew,
+    classified_ceiling: { numerator: ceilingNumerator, denominator: ceilingDenominator,
+      rate: ceilingNumerator / ceilingDenominator },
+    scenarios: rows,
+    tasks: outstanding.map(({ area, task, executor, blocker, unlock }) =>
+      ({ area, task, executor, blocker, unlock, classification: BLOCKERS[blocker].klass })),
+    limitations: [
+      '既存台帳のタスクだけを使う。細分化・架空タスク追加による達成を計画しない。',
+      '到達可能分類は実装・資料・観測待ちも含む楽観上限。完了や権限委譲の証拠ではない。',
+      '既存分類を自動変更しない。境界変更は対象業務の条件と実行証跡を確認して別途行う。',
+    ],
+  };
+}
+
 /** 台帳を読まずに検査そのものを検査する（automation-rate.mjs / autopilot-runs.mjs と同じ作法）。 */
 export function selftest() {
   const problems = [];
   const mk = (executor, blocker) => ({ area: '① 検査用', task: 't', executor, blocker, unblocked_by: 'u', evidence: [] });
+
+  const execDoc = { tasks: [
+    ...Array.from({ length: 141 }, () => mk('ai_executes_gated')),
+    ...Array.from({ length: 34 }, () => mk('ai_proposes', 'policy_boundary')),
+    ...Array.from({ length: 24 }, () => mk('nobody', 'not_started')),
+    mk('intentional_no'),
+  ] };
+  const ep = executionPlan(execDoc);
+  if (ep.scenarios[0].active_transfers_required !== 17) problems.push('90%超に必要な既存移管数');
+  if (ep.scenarios[24].active_transfers_required !== 15 || ep.scenarios[24].denominator !== 199)
+    problems.push('未着手開始時の分母増加');
+  if (ep.classified_ceiling.numerator !== 165 || ep.classified_ceiling.denominator !== 199
+      || ep.scenarios.some((r) => r.within_classified_reachable)) problems.push('境界を到達可能に混ぜた');
+  const exact = executionPlan({ tasks: [...Array.from({ length: 9 }, () => mk('ai_autonomous')),
+    mk('human_only', 'policy_boundary')] });
+  if (exact.scenarios[0].active_transfers_required !== 1) problems.push('90%ちょうどを90%超としている');
+  const float = executionPlan({ tasks: [...Array.from({ length: 29 }, () => mk('ai_autonomous')),
+    ...Array.from({ length: 21 }, () => mk('human_only', 'policy_boundary'))] }, 0.58);
+  if (float.scenarios[0].active_transfers_required !== 1) problems.push('小数積の丸めで境界を誤る');
+  for (const [badDoc, badTarget] of [[execDoc, 1], [execDoc, NaN], [execDoc, 0],
+    [{ tasks: [] }, 0.9], [{ tasks: [mk('unknown')] }, 0.9],
+    [{ tasks: [mk('ai_autonomous'), mk('human_only', 'unknown')] }, 0.9]]) {
+    let failed = false;
+    try { executionPlan(badDoc, badTarget); } catch { failed = true; }
+    if (!failed) problems.push('実行率計画が不正入力を受け入れた');
+  }
 
   // 1. owner_only / never は到達可能側に数えない
   const a = analyse({ tasks: [mk('ai_autonomous'), mk('human_only', 'policy_boundary')] });
@@ -1132,6 +1213,22 @@ if (isMain) {
   const doc = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
   const ti = argv.indexOf('--target');
   const target = ti >= 0 && argv[ti + 1] ? Number(argv[ti + 1]) / 100 : 0.95;
+  if (argv.includes('--execution-plan')) {
+    try {
+      const p = executionPlan(doc, ti < 0 ? 0.9 : Number(argv[ti + 1]) / 100);
+      if (argv.includes('--json')) console.log(JSON.stringify(p, null, 2));
+      else {
+        console.log(`AI実行率 ${pct(p.target)} 超（厳密な > 判定）`);
+        console.log(`現在 ${p.current.ai_executes}/${p.current.doing} = ${pct(p.current.ai_execution_rate)}`);
+        console.log(`総合 ${pct(p.current.overall_automation_rate)} / 関与 ${pct(p.current.ai_involvement_rate)} / カバー ${pct(p.current.coverage_rate)}`);
+        console.log(`現在の到達可能分類の楽観上限 ${p.classified_ceiling.numerator}/${p.classified_ceiling.denominator} = ${pct(p.classified_ceiling.rate)}`);
+        console.log('未着手から開始 / 既存業務のAI移管 / 合計変更 / 達成時の分数 / 現分類内');
+        for (const r of p.scenarios) console.log(`${r.newly_started} / ${r.active_transfers_required} / ${r.total_changes} / ${r.numerator}/${r.denominator} / ${r.within_classified_reachable ? '候補あり' : '分類上は不足'}${r.arithmetically_possible ? '' : '（既存件数では不可）'}`);
+        for (const note of p.limitations) console.log(note);
+      }
+    } catch (e) { console.error(e.message); process.exit(1); }
+    process.exit(0);
+  }
   const a = analyse(doc, { target });
 
   if (argv.includes('--check')) {
