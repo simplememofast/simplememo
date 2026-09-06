@@ -1741,6 +1741,47 @@
       ]
     },
     {
+      "candidate_id": "act-budget-overrun-33996430959",
+      "title": "1回上限の超過が未レビュー: 2026-09-06 article $19.6009（上限 $10.00 の2倍）— 主系が article を選ぶと止まる",
+      "judged_jst": "2026-09-06",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "1 パス・actuator の範囲内",
+          "scope": "actuator",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "unknown",
+          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
+          "kind": "analysis"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 あり）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+      ]
+    },
+    {
       "candidate_id": "act-ccr-bigquery-connector",
       "title": "副系CCRは BigQuery MCP 接続子を持たずに起動する",
       "judged_jst": "2026-09-06",
@@ -1826,7 +1867,7 @@
     },
     {
       "candidate_id": "act-cost-sync",
-      "title": "実費記録の同期が必要な run が 1件",
+      "title": "実費記録の同期が必要な run が 2件",
       "judged_jst": "2026-09-06",
       "verdict": "eligible",
       "halted": false,

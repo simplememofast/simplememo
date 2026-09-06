@@ -268,8 +268,8 @@
     },
     {
       "id": "act-cost-sync",
-      "title": "実費記録の同期が必要な run が 1件",
-      "detail": "ap-20260906-actions（run 33996430959）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 2件（ap-20260831-ccr0920, sm-20260905-queue-collision）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
+      "title": "実費記録の同期が必要な run が 2件",
+      "detail": "ap-20260824-actions（run 32667079679）, ap-20260825-actions（run 32779337325）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 2件（ap-20260831-ccr0920, sm-20260905-queue-collision）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
       "source": "cost",
       "domain": null,
       "touches": [
@@ -288,13 +288,13 @@
           "pending_runs": []
         }
       },
-      "state": "done",
+      "state": "open",
       "created_jst": "2026-09-06",
       "last_seen_jst": "2026-09-06",
-      "closed_jst": "2026-09-06",
-      "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・既知の結果を同期済み（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）",
+      "closed_jst": null,
+      "evidence": "実費・実行種別または既知の結果が未同期の run が 2件: ap-20260824-actions, ap-20260825-actions（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）",
       "last_run_jst": "2026-09-06",
-      "last_run_log": "ap-20260906-actions: appended 2026-09-06 actions $19.6009",
+      "last_run_log": "ap-20260824-actions: 実行種別は未確認（振り分けの証跡なし）。既存の実費を保持し、同期を閉じず再確認する\nap-20260824-actions: skip: run_id 32667079679 already recorded\nap-20260825-actions: 実行種別は未確認（振り分けの証跡なし）。既存の実費を保持し、同期を閉じず再確認する\nap-20260825-actions: skip: run_id 32779337325 already recorded\nap-20260830-actions: enriched 2026-08-30 actions $0.0000\nap-20260831-actions: enriched 2026-08-31 actions $0.0000\nap-20260905-actions: enriched 2026-09-05 actions $4.8768\nactions-run-33959414641: enriched 2026-09-05 actions $0.8408\nap-20260906-actions: enriched 2026-09-06 actions $19.6009",
       "reopened_jst": "2026-09-06"
     },
     {
@@ -2141,6 +2141,30 @@
       "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "ap-20260906-actions は未修理のまま（repair_of で名指しされていない）"
+    },
+    {
+      "id": "act-budget-overrun-33996430959",
+      "title": "1回上限の超過が未レビュー: 2026-09-06 article $19.6009（上限 $10.00 の2倍）— 主系が article を選ぶと止まる",
+      "detail": "解除: `node scripts/autopilot-budget.mjs --ack-overrun 33996430959 --why \"…\"`\n**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。上限は data/model-routing.json の rules.article.max_usd_per_run が正で、実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる）。\n**月次上限は通っている**ため `--check` は exit 0 で、\"予算は大丈夫\" に見える。止まるのは `--check-run-cap --task article` の側だけ。\nなお data/authority-matrix.json の「AI実費」は human_only に `monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**（権限表の変更は self_repair.must_not なのでAIからは直せない）。",
+      "source": "budget",
+      "domain": null,
+      "touches": [
+        "data/autopilot-cost.json"
+      ],
+      "force_owner": "human",
+      "force_owner_why": "scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている（AIが自分の超過を自分で通せると、上限が「お願い」になる）",
+      "auto": null,
+      "close_check": {
+        "kind": "budget_overrun_reviewed",
+        "params": {
+          "run_id": "33996430959"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": null,
+      "evidence": "run 33996430959（article $19.6009 / 上限 $10.00）が未レビュー。主系はこの種別を選ぶと止まる"
     }
   ],
   "escalation_review_authorization": {
