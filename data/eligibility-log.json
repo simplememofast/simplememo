@@ -1767,9 +1767,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -1777,9 +1780,7 @@
           "open_days": 0
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     },
     {
       "candidate_id": "act-ccr-bigquery-connector",
@@ -1805,9 +1806,12 @@
           "evidence_source": "ledger_bookkeeping"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "fail",
@@ -1819,7 +1823,6 @@
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
         "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）",
         "repeat_guard: **15 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
       ]
     },
@@ -1847,9 +1850,12 @@
           "evidence_source": "ledger_bookkeeping"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "fail",
@@ -1861,7 +1867,6 @@
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
         "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）",
         "repeat_guard: **15 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
       ]
     },
@@ -1931,9 +1936,12 @@
           "evidence_source": "ledger_bookkeeping"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -1944,8 +1952,7 @@
       "reasons": [
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
-        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）"
       ]
     },
     {
@@ -1975,9 +1982,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -1985,8 +1995,48 @@
           "open_days": 1
         }
       },
+      "reasons": []
+    },
+    {
+      "candidate_id": "act-health-1006",
+      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
+      "judged_jst": "2026-09-06",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R1",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R1",
+          "class": "R1",
+          "class_source": "domain:サイトコンテンツの新設・更新"
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
       "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
       ]
     },
     {
@@ -2013,9 +2063,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2025,8 +2078,7 @@
       },
       "reasons": [
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
-        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
       ]
     },
     {
@@ -2072,6 +2124,48 @@
       "reasons": []
     },
     {
+      "candidate_id": "act-orphaned-branch-claude-autopilot-act-20260906",
+      "title": "PR #1014 の反映待ち: claude/autopilot-act-20260906",
+      "judged_jst": "2026-09-06",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": null,
+      "criteria": {
+        "reversibility": {
+          "result": "unknown",
+          "why": "可逆性クラスが引けない（domain も lane も touches も無い）",
+          "class": null
+        },
+        "boundedness": {
+          "result": "unknown",
+          "why": "触るパスが宣言されていない（範囲外かどうかを判定できない）"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": [
+        "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
+      ]
+    },
+    {
       "candidate_id": "act-orphaned-branch-claude-obsidian-auto-20260902",
       "title": "ブランチ claude/obsidian-auto-20260902 に 1 コミットが取り残されている（PR #774 のマージ後）",
       "judged_jst": "2026-09-06",
@@ -2095,9 +2189,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2107,8 +2204,7 @@
       },
       "reasons": [
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
-        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
       ]
     },
     {
@@ -2177,9 +2273,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "fail",
@@ -2190,7 +2289,6 @@
       "reasons": [
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）",
         "repeat_guard: **10 日開いたまま、実行する主体も上げる先も決まっていない**（同じ壁に毎朝ぶつかっている）"
       ]
     },
@@ -2218,9 +2316,12 @@
           "evidence_source": "ledger_bookkeeping"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2231,8 +2332,7 @@
       "reasons": [
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: **リポジトリの外**を触る候補は、パス許可リストで境界を判定できない",
-        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+        "evidence_age: 引用されたデータ点が無い（last_seen_jst は台帳の記帳で、機械が条件を見直した記録ではない）"
       ]
     },
     {
@@ -2262,9 +2362,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2272,9 +2375,7 @@
           "open_days": 1
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     },
     {
       "candidate_id": "act-routine-run-trig_0146oEExJXb2GRXt6ES2nw7o",
@@ -2303,9 +2404,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2313,9 +2417,7 @@
           "open_days": 1
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     },
     {
       "candidate_id": "act-routine-run-trig_01DmNiVHB7jo42bNVJL1wnBo",
@@ -2344,9 +2446,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2354,9 +2459,7 @@
           "open_days": 1
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     },
     {
       "candidate_id": "act-routine-run-trig_01ESF9AHax6buS9X1pdFv657",
@@ -2426,9 +2529,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2436,9 +2542,7 @@
           "open_days": 1
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     },
     {
       "candidate_id": "act-routine-run-trig_01N1SWZdPwKTot2SbT71UV2U",
@@ -2467,9 +2571,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2477,9 +2584,7 @@
           "open_days": 1
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     },
     {
       "candidate_id": "act-selfheal-ap-20260831-ccr0920",
@@ -2505,9 +2610,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2517,8 +2625,7 @@
       },
       "reasons": [
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
-        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）",
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
+        "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
       ]
     },
     {
@@ -2548,9 +2655,12 @@
           "evidence_source": "machine_observed"
         },
         "budget": {
-          "result": "unknown",
-          "why": "**予測コストが記録されていない**（後で予測そのものを較正できない）",
-          "kind": "analysis"
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
         },
         "repeat_guard": {
           "result": "pass",
@@ -2558,9 +2668,7 @@
           "open_days": 0
         }
       },
-      "reasons": [
-        "budget: **予測コストが記録されていない**（後で予測そのものを較正できない）"
-      ]
+      "reasons": []
     }
   ]
 }
