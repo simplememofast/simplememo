@@ -30,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 import { assert, run as runScenarios } from './lib/selftest.mjs';
 import { readLedger, requireShape } from './lib/read-ledger.mjs';
 import { planTo, UNLOCKS } from './autonomy-gap.mjs';
-import { EVIDENCE_STRENGTH } from './feature-score.mjs';
+import { EVIDENCE_STRENGTH, designDecisionProblems } from './feature-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const WEEKS = 13;
@@ -80,6 +80,8 @@ export function ranked(candidates) {
   return [...candidates]
     .map((c) => ({
       id: c.id,
+      design_decision: c.design_decision ?? null,
+      design_problems: designDecisionProblems(c),
       title: c.title,
       effect: c.expected_effect ?? null,
       days: c.effort_days ?? null,
@@ -141,6 +143,7 @@ export function validate(r) {
     if (!MACHINE_KINDS.has(s.kind)) problems.push(`${s.id} (${s.kind}) が機械側に入っている`);
   }
   for (const b of r.backlog) {
+    problems.push(...(b.design_problems ?? []).map(p => `${b.id}: ${p}`));
     if (b.ratio === null && b.effect !== null && b.days !== null) {
       problems.push(`${b.id}: 効果と日数があるのに順位が付いていない`);
     }
@@ -214,6 +217,7 @@ export function render(r) {
     }
     o.push(`      ${b.ratio === null ? '  — ' : b.ratio.toFixed(1).padStart(4)}`
       + `  ${b.title.slice(0, 44)}${b.days != null ? `  （${b.days}日）` : ''}`);
+    if (b.design_decision && !b.design_problems.length) o.push(`          設計採用済み（AI）: ${b.design_decision.document}`);
   }
   o.push('    **証拠の強い側が先。**効果比だけで並べると、推測を実測と同じ列に置くことになる');
 
@@ -225,6 +229,16 @@ export function render(r) {
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 const EXP = (id, at, status = 'running') => ({ id, evaluation_at: at, status });
 const SCENARIOS = [
+  ['採用設計を開発計画へ運び、不正な採用は計画の検査で拒否する', () => {
+    const docs = load();
+    const candidate = { id: 'fixture', title: '検体', expected_effect: 5, effort_days: 2, evidence_strength: 'observed', risks: [], evidence: ['data/review-intake.json'], design_decision: { by: 'ai', verdict: 'accepted', at: '2026-09-06', document: 'docs/designs/fixture.md', rationale: '受領した利用者要望と現在の実装制約を照合し、既存の挙動を保つ条件で採用する。', source_refs: ['data/review-intake.json'], acceptance: ['既存設定の保存先は変更しないこと', '範囲外へのファイル追記を拒否すること', '設定変更の取消は元の状態を保つこと'] } };
+    docs.backlog = { candidates: [candidate] };
+    const good = build(docs, '2026-09-06');
+    assert(!validate(good).some(p => p.startsWith('fixture:')), '正常な設計を拒否した');
+    assert(render(good).includes('設計採用済み（AI）: docs/designs/fixture.md'), '採用した設計が開発計画から消えた');
+    candidate.risks = ['privacy'];
+    assert(validate(build(docs, '2026-09-06')).some(p => p.includes('リスク付き')), '計画が承認境界を見逃した');
+  }],
   ['窓の中の評価日は置く', () => {
     const { rows } = dated([EXP('a', '2026-09-01')], '2026-08-26');
     assert(rows.length === 1, JSON.stringify(rows));

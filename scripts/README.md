@@ -78,3 +78,7 @@ CI「SEO Validation」が実行する本体。`check-*.mjs` 全部、`autopilot-
 挿入・再生成・冪等性・アンカー無し・日英ラベルを検査する。
 一時コピーで Cookie の SameSite 属性を変えると exit 1 になることを確認した。
 これは検証漏れの修正であり、不要テスト削除の実績や自動化率の加点にはしない。
+
+### AIによる設計採用の記録
+
+`node scripts/feature-score.mjs --record-design <既存候補ID> --decision-file <JSON>` は、設計文書・受入条件・既存根拠に結び付くAIの採用判断をバックログへ保存する。採用は点数から自動決定しない。リスク付き候補の承認を代替せず、既存判断を上書きしない。通常の採点とロードマップの両方が採用した文書を表示する。具体例は `docs/designs/obsidian-nested-destinations.md` と `folder_pick_ux.design_decision`。

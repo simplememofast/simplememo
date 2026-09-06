@@ -130,7 +130,24 @@
         "data/review-intake.json",
         "../simplememo-ios/data/appstore/asc-metrics.json"
       ],
-      "note": "レビュー2件（2026-06-01 / 07-10）が同じ所を指している。片方は「Dailynoteを年・月の階層フォルダに入れているので格納形式を変えるか迷う」と、**自分のvault構成をアプリに合わせるか悩んでいる**。Capture OS としては逆で、合わせるのはこちら側"
+      "note": "レビュー2件（2026-06-01 / 07-10）が同じ所を指している。片方は「Dailynoteを年・月の階層フォルダに入れているので格納形式を変えるか迷う」と、**自分のvault構成をアプリに合わせるか悩んでいる**。Capture OS としては逆で、合わせるのはこちら側",
+      "design_decision": {
+        "by": "ai",
+        "verdict": "accepted",
+        "at": "2026-09-06",
+        "document": "docs/designs/obsidian-nested-destinations.md",
+        "rationale": "階層フォルダと送り先の自由化について実際に受領した要望があり、現行コードはスラッシュを拒否している。既存保存先を保ち、フォルダ境界を検証する条件で設計を採用する。",
+        "acceptance": [
+          "既存設定の利用者は同じフォルダとノートに追記される。",
+          "選択フォルダ外へ逃げる相対パスとシンボリックリンクを拒否する。",
+          "保存先プレビューと実書き込みは同じパス解決関数を使う。",
+          "選び直しの取消と検証失敗では元の設定を保持する。",
+          "iPhoneとWatch、保留キュー、既存ファイルの追記を対象版で確認する。"
+        ],
+        "source_refs": [
+          "data/review-intake.json"
+        ]
+      }
     },
     {
       "id": "undo_last_capture",

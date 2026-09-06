@@ -118,12 +118,20 @@
       "task": "受領した要望の設計への落とし込み",
       "executor": "ai_proposes",
       "evidence": [
-        "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md"
+        "../simplememo-ios/docs/reports/feature_requests_2026-07-31_obsidian_user.md",
+        "docs/designs/obsidian-nested-destinations.md",
+        "data/feature-backlog.json",
+        "scripts/feature-score.mjs",
+        "scripts/roadmap.mjs"
       ],
-      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**設計文書までは機械が出しており、残っているのは**採否の判断**。そこは実装量では動かない。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
-      "blocker": "policy_boundary",
-      "unblocked_by": "採否はオーナー判断。設計文書までは機械が出している",
-      "$authority_absent": "権限表が扱うのは**実行の権限**で、機能の採否はそこに無い。採否の根拠は VISION（作らないものの定義）と data/feature-backlog.json 側にある"
+      "note": "AIが設計文書まで。採否はオーナー判断。**受領（機械）と分けたのは、片方だけ自動化されている状態を1行に潰さないため。**混ぜると『要望を受け取れているか』と『設計まで自動か』が同じ1行になる\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**設計文書までは機械が出しており、残っているのは**採否の判断**。そこは実装量では動かない。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-06] オーナーの最大権限委譲を受け、Codexが実際の要望と現行コードを照合しfolder_pick_uxの設計を採用した。feature-scoreの実CLIで受入条件と文書をバックログへ保存し、ロードマップにも反映する。権限表に設計採否の条項を追加したため、恒久的なオーナー待ちという従来の前提を解除する。公開と出力の検証が済むまでexecutorはai_proposesのまま。これは機能の実装・App Store公開の完了ではない。",
+      "blocker": "verification_pending",
+      "unblocked_by": "採用設計・CLI適用・開発計画への反映を本番のコミットと照合する",
+      "authority": {
+        "domain": "機能要望の設計採否",
+        "ai_may": "リスクタグのない既存候補の設計採用"
+      },
+      "unlock": "impl_product"
     },
     {
       "area": "① 次期機能開発",

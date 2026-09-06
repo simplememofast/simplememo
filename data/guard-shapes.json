@@ -663,6 +663,12 @@
       "expr": "existing.source_generated_at",
       "disposition": "別に検出",
       "note": "2026-09-06: 日別v2の生成時刻が同じ場合だけ内容の矛盾を拒否する条件。既存v2の生成時刻・対象窓の欠落は直前で別に拒否し、古い版も拒否する。生成時刻欠落、同時刻の矛盾、古い版、新しい訂正による日数減少を自己検証で確認。"
+    },
+    {
+      "file": "scripts/feature-score.mjs",
+      "expr": "item.design_decision",
+      "disposition": "任意項目",
+      "note": "2026-09-06: 設計採用記録のない既存候補は未採用のまま採点する。記録がある場合の形式不正はrank→score→designDecisionProblemsで別に拒否し、正しい形の場合だけ文書の実在を追加確認する。記録の欠落は設計採用済み表示や採用の根拠にならない。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
