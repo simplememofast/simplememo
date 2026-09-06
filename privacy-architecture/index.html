@@ -197,7 +197,7 @@
           <span>メモ1通のデータの通り道</span>
         </h2>
         <ol class="flow-steps">
-          <li><span class="flow-step__title">端末内で作成 — AES-GCM-256で保護</span>書いたメモはまず端末内のOutbox（未送信キュー）に入ります。Outboxと送信履歴はApple純正CryptoKitによる<strong>AES-GCM-256</strong>で暗号化され、256-bit対称鍵はApple Keychainに保管されます（デバイス外に出ず、バックアップにも含まれません）。オフラインならここで待機し、回線復帰後に自動再送されます。</li>
+          <li><span class="flow-step__title">端末内で作成 — AES-GCM-256で保護</span>書いたメモはまず端末内のOutbox（未送信キュー）に入ります。Outboxと送信履歴はApple純正CryptoKitによる<strong>AES-GCM-256</strong>で暗号化され、256-bit対称鍵はApple Keychainに保管されます。鍵は他端末へ移行しない設定で、アプリが暗号化・復号時に読み出します。バックアップに含まれる鍵のコピーも別の端末では使えません。機種変更前には、必要なメモが保存先に届いていることを確認してください。<a href="/privacy">鍵管理の詳細とAppleの説明</a>。オフラインならここで待機し、回線復帰後に自動再送されます。</li>
           <li><span class="flow-step__title">Obsidian Vaultへの追記 — ここは完全ローカル</span>Obsidian連携を有効にしている場合、Vaultへの追記は<strong>端末内のVaultフォルダへのファイル直接書き込み</strong>（開けない場合はURIフォールバック）で行われ、プラグインも外部サーバーも使いません。Vault追記の経路にネットワークは登場しません。</li>
           <li><span class="flow-step__title">AIタグ付け — オンデバイスで完結</span>タイトル（20文字以内）・タグ（1〜3個）・種別（todo/idea/log）の自動付与は、<strong>Apple Foundation ModelsによるオンデバイスAI</strong>がiPhoneの中だけで行います。<strong>タグ付けのためにメモ本文が外部サーバーへ送られることはありません。</strong>Apple Intelligence非対応機種は端末内の軽量整形に自動フォールバックします。</li>
           <li><span class="flow-step__title">メール送信 — TLSで通過、恒常保存なし</span>送信時のみ、本文はTLS（HTTPS）で当社のRelay API（Cloudflare Workers）と外部送信基盤（Resend）を<strong>通過</strong>します。恒常的な保存は行わず、ログにも記録しません。クライアントは <code>URLSessionConfiguration.ephemeral</code> を使い、Cookie・キャッシュを残しません。</li>

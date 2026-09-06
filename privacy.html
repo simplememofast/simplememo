@@ -312,7 +312,7 @@
       
       <!-- Japanese Content -->
       <div class="lang-body">
-        <p class="page-content__date">最終更新日：<time datetime="2026-09-04">2026年9月4日</time></p>
+        <p class="page-content__date">最終更新日：<time datetime="2026-09-06">2026年9月6日</time></p>
         <div class="page-content__body">
           <p>株式会社ユリカ（以下「当社」）は、「Obsidian連携シンプルメモ」（以下「本サービス」）におけるユーザー情報の取り扱いについて、以下のとおりプライバシーポリシーを定めます。</p>
 
@@ -416,7 +416,7 @@
           <p>本サービスは、ユーザーのプライバシーを保護するため、以下の技術的な対策を講じています。これらは「セキュリティ」というよりも「データ最小化」と「端末内保護」のための実装です。</p>
           <ul>
             <li><strong>端末内ストレージ</strong>: オフライン送信待ちメッセージ（Outbox）と送信履歴を、Apple 純正 CryptoKit による <strong>AES-GCM-256</strong> 暗号化で端末内に保存します（ファイル保護クラス: <code>completeFileProtectionUntilFirstUserAuthentication</code>）。</li>
-            <li><strong>鍵管理</strong>: 256-bit 対称鍵は Apple Keychain Services（<code>kSecClassGenericPassword</code>）に保管され、デバイス外に取り出せません。バックアップにも含まれません。</li>
+            <li><strong>鍵管理</strong>: 256-bit 対称鍵は Apple Keychain Services（<code>kSecClassGenericPassword</code>）に保管し、<a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">再起動後の初回ロック解除から利用でき、他端末へ移行しない保護クラス</a>を使用します。アプリは暗号化・復号時に鍵を読み出します。バックアップに含まれる鍵のコピーは端末固有の鍵で保護され、別の端末では使用できません（<a href="https://support.apple.com/ja-jp/guide/security/secb0694df1a/1/web/1">Appleの説明</a>）。機種変更前に、必要なメモがメールやObsidianなどの保存先に届いていることを確認してください。</li>
             <li><strong>通信路</strong>: API 通信はすべて TLS（HTTPS）で保護されます。クライアント側は <code>URLSessionConfiguration.ephemeral</code> を使用し、Cookie・キャッシュを残しません。</li>
             <li><strong>メール本文</strong>: 送信処理のため当社の Relay API（Cloudflare Workers）と外部送信基盤（Resend）を通過しますが、恒常的な保存は行いません。ログにも記録しません（開発時の DEBUG ビルドを除く）。</li>
             <li><strong>メールアドレスのサーバ保存</strong>: 送信IDと宛先メールアドレスのハッシュ（SHA-256から生成）の対応を Cloudflare D1 に保存します。この対応記録はリマインダーのオプトインにかかわらず作成されます。リマインダー用の連絡先は Resend の Contact API で管理します。</li>
