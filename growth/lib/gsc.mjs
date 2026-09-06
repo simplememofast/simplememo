@@ -380,6 +380,9 @@ export const BUSINESS_RELEVANCE = [
   // インストールに近い面である。既定に落ちていたので誰も決めていなかった。
   [/^\/$/, 1.0],
   [/^\/(obsidian|apple-watch-obsidian|siri|voice-input|hands-free|fastest-voice-memo|ai-tags)\//, 1.0],
+  // **Notion 連携の受け皿。**`/obsidian/` と同じ「連携そのものを説明する面」で、
+  // 検索意図も購入距離も同じ。規則が無ければ既定 0.5 に落ちる（下の注記の 101 ページと同じ穴）。
+  [/^\/notion\//, 1.0],
   [/^\/blog\/obsidian-/, 1.0],
   [/^\/(captio|captio-alternative)\//, 1.0],
   [/^\/blog\/captio/, 1.0],
