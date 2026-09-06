@@ -29,6 +29,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { decide, baseState, CODES } from './autopilot-gate.mjs';
+import { runCodexPreflightTests } from './codex-autopilot-preflight.mjs';
 
 /** シナリオ: [名前, 状態の差分, 期待コード, なぜそう振る舞うべきか] */
 const SCENARIOS = [
@@ -364,6 +365,7 @@ if (process.argv.includes('--selftest')) {
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
+  runCodexPreflightTests();
   const { results, passed, total, uncovered } = run();
   console.log(`切替演習（ドリル）: ${passed} / ${total} シナリオ`
     + `（gate の ${Object.keys(CODES).length} コードを被覆）`);

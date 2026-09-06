@@ -1,6 +1,15 @@
 # Obsidian Autopilot Runbook — 定期自動生成セッションの手順書
 
-**対象:** スケジュール起動される新規Claude Codeセッション（**毎日 06:00 JST**・Simple Memo環境）
+## 現行の実行元（2026-09-07移管）
+
+主系06:00 JSTと補完09:20/12:20 JSTは、このMacのCodex automation
+`obsidian-autopilot-retry-standby`へ移管する。現在の実行契約は
+[`docs/codex-autopilot-execution.md`](../codex-autopilot-execution.md)を読む。
+下のActions/CCRの記述は旧実行環境の説明で、停止・予算・当日占有・価値契約・
+記事品質・台帳・本番確認の要件は引き続き適用する。ActionsのClaude workflowは
+手動起動用に残し、定期予約を外す。定期設定の変更と、GPTでの初回公開成功は別判定。
+
+**対象:** MacのCodex automationで起動される主系06:00 JST・補完09:20/12:20 JSTのセッション。旧Claude workflowは手動の診断・復旧用。
 **目的:** Obsidian情報ハブをSEO/AIOの勝ち筋（CTR 6.5〜7.4%クラスタ）に沿って、
 **データが正当化する分だけ**自律的に育てる。量産はしない。
 
@@ -48,7 +57,7 @@
 だけのときに全部を止めることになり、**止めること自体をためらうようになる。**
 ためらわれる停止は、無い停止と同じ。
 
-この判定は主系（GitHub Actions のワークフロー）と副系（このセッション）の**両方に効く**。
+この判定はCodex主系・補完と、手動のGitHub Actionsワークフローの**すべてに効く**。
 リポジトリのファイルなので、どちらの経路も作業前に必ず読む位置にある。
 
 - **`force` で飛び越えない。**force は冪等チェックを飛ばすためのもので、停止の解除ではない
@@ -65,7 +74,19 @@
 この判定が壊れている場合でも止まる。
 
 
-## 0-2. 実行基盤（2026-08-20改訂: GitHub Actions主・CCR Routine 副＋再試行）
+## 0-2. 実行基盤（2026-09-07改訂: Mac Codex主＋補完）
+
+| 経路 | 時刻 | 実体 | 状態の見える場所 |
+|---|---|---|---|
+| 主系・route `actions` | 06:00 JST | Codex automation `obsidian-autopilot-retry-standby` | Codexの実タスクID・ローカルrun-result/logs・共有runs台帳・PR・本番 |
+| 補完・route `ccr-0920` | 09:20 / 12:20 JST | 同じCodex automation（当日未完の場合のみ） | 同上 |
+| 旧Claude Actions | 定期なし・手動のみ | `.github/workflows/obsidian-autopilot.yml` | Actions runログ・共有台帳 |
+| 旧CCR A / B / retry | 停止 | 下の旧trigger IDを保持 | 元設定はロールバック参照用 |
+
+時刻は予定であり、Macの起動状態による遅延があり得る。実際のtask statusで稼働を判定する。
+設定移管だけでは無人初回実行・記事公開成功を証明しない。詳細は現行の実行契約を参照。
+
+### 旧基盤の記録（2026-08-20時点・現在の予約ではない）
 
 CCR Routineの初回（08-12 06:00 JST）が「発火記録あり・実行痕跡ゼロ」で落ち、
 スケジュール起動セッションのログは外部から読めないことが分かった。以降:

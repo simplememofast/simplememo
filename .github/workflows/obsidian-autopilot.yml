@@ -33,10 +33,11 @@
 
 name: Obsidian Autopilot
 
+# 2026-09-07: the scheduled primary moved to the Mac Codex automation
+# obsidian-autopilot-retry-standby (06:00 JST; retries 09:20/12:20).
+# Keep this workflow for explicitly requested manual rollback/diagnosis only.
+# The shared route remains actions; see docs/codex-autopilot-execution.md.
 on:
-  schedule:
-    # 06:00 JST = 前日21:00 UTC。seo-daily と同時刻だが別ジョブ・別関心。
-    - cron: '0 21 * * *'
   workflow_dispatch:
     inputs:
       force:
