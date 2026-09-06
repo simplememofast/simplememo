@@ -245,3 +245,55 @@ test('registered FAQ scope is exact and all four September 13 CTA metrics requir
   assert.equal(ctas.length, 4);
   for (const e of ctas) { assert.ok(['ga4', 'asc'].includes(metricSource(e))); assert.throws(() => gscScope(e)); }
 });
+
+test('registered English three-page contract admits a mature manual fixture but rejects single-page, early and incomplete evidence', () => {
+  const ledgerPath = path.join(ROOT, 'growth/experiments/experiments.json');
+  const ledgerBefore = fs.readFileSync(ledgerPath);
+  const e = structuredClone(JSON.parse(ledgerBefore).experiments.find(row => row.id === 'en-2026-08-11-native-rewrite'));
+  const c = e.measurement_contract;
+  assert.equal(e.baseline.metric, 'ctr');
+  assert.equal(e.baseline.value, e.baseline.clicks / e.baseline.impressions);
+  assert.equal(c.source, 'gsc');
+  assert.equal(c.scope.pages.length, 3);
+  assert.throws(() => gscScope(e), /single exact page/);
+  e.id = 'synthetic-english-contract';
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'simplememo-en-review-'));
+  try {
+    const makePeriod = (name, start, end, value) => {
+      // Fixture values test admission only, never actual post-change results.
+      const bytes = JSON.stringify({ rows: [{ value, synthetic: true }] });
+      const file = path.join(dir, `${name}.json`);
+      fs.writeFileSync(file, bytes);
+      return { start, end, value, complete: true, definition: c.definition, unit: c.unit,
+        time_zone: c.time_zone, scope: c.scope, extraction: 'Synthetic fixture, not an actual export',
+        artifact: { path: file, sha256: fingerprint(bytes) } };
+    };
+    const review = { schema_version: 1, kind: 'comparison', experiment_id: e.id,
+      target_metric: e.target_metric, decision: 'inconclusive', source: c.source,
+      definition: c.definition, unit: c.unit, time_zone: c.time_zone, scope: c.scope,
+      reviewed_by: 'Synthetic test', rationale: 'Synthetic admission test only',
+      limitations: ['No actual future measurements or investment-gate evaluation'],
+      baseline: makePeriod('before', '2026-05-09', '2026-08-08', e.baseline.value),
+      post: makePeriod('after', '2026-08-12', '2026-11-11', 0.01) };
+    const options = { baseDir: dir, asOf: '2026-11-14', decision: 'inconclusive', manifestSha256: 'synthetic' };
+    const result = reviewEvidence(e, review, options);
+    assert.equal(result.kind, 'manual_comparison');
+    assert.equal(result.baseline.days, 92);
+    assert.equal(result.post.days, 92);
+    assert.deepEqual(result.scope, c.scope);
+    assert.match(result.validation, /not independently recomputed/);
+    assert.ok(!JSON.stringify(result).includes(dir));
+    assert.throws(() => reviewEvidence(e, review, { ...options, asOf: '2026-11-11' }), /3 complete calendar days/);
+    const single = structuredClone(review); single.scope.pages = [c.scope.pages[0]];
+    assert.throws(() => reviewEvidence(e, single, options), /scope differs/);
+    const short = structuredClone(review); short.post.end = '2026-09-08';
+    assert.throws(() => reviewEvidence(e, short, options), /same number of days/);
+    const missing = structuredClone(review); missing.post.value = null;
+    assert.throws(() => reviewEvidence(e, missing, options), /numeric result/);
+    const incomplete = structuredClone(review); incomplete.post.complete = false;
+    assert.throws(() => reviewEvidence(e, incomplete, options), /Both periods/);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+    assert.deepEqual(fs.readFileSync(ledgerPath), ledgerBefore);
+  }
+});
