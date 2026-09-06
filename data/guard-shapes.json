@@ -65,6 +65,18 @@
   "known": [
     {
       "file": "scripts/autopilot-act.mjs",
+      "expr": "observed?.task_kind_unavailable",
+      "disposition": "前提",
+      "note": "2026-09-06: 導入前の完了済み初回ジョブと照合できた場合だけ、種別記録が存在しない証跡をCLIへ渡す。証跡がなければcostSyncNeededは未同期を維持する。欠落・再実行・導入以後の日時では閉じず、実際の2件でreaderからCLIを通る補完を確認した。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "run.task_kind_unavailable",
+      "disposition": "前提",
+      "note": "2026-09-06: 任意の欠測理由を受け取った場合だけ内容を検証・補完する2箇所。run/job/初回/導入前時刻/種別未記録を要求し、不正な証拠はappendと台帳検査で拒否する。証跡を消すと未同期に戻る。既知の種別や実費・結果・レビューは上書きしない。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
       "expr": "observed?.task_kind",
       "disposition": "前提",
       "note": "2026-09-06: 実行種別と出典を確認できたときだけ欠測を補完する。確認できない場合は種別を推測せず、costSyncNeededが欠測を検出してopenと再取得を維持する。欠測・消失・0円への誤変換、reader切断、実CLI出典受渡し切断の検査で確認。"
