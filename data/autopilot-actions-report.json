@@ -1,8 +1,16 @@
 {
   "as_of_jst": "2026-09-06",
   "routine_snapshot_sha256": "de98511737d845bcb37c02027f45c97e7eee5c4713f9580a6ce6d32a9802d67b",
-  "open_total": 14,
-  "pending_pr": [],
+  "open_total": 13,
+  "pending_pr": [
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260906",
+      "title": "PR #1014 の反映待ち: claude/autopilot-act-20260906",
+      "pr": 1014,
+      "first_verified_head": "6b9e201bcc8f2ffeea18d1ac986cf27b0d636ba8",
+      "evidence": "PR #1014 へ引き継いだhead 6b9e201bcc8f2ffeea18d1ac986cf27b0d636ba8 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）"
+    }
+  ],
   "oldest_open_days": 3,
   "acknowledged": 6,
   "closed_today": [
@@ -25,6 +33,11 @@
       "id": "act-routine-run-trig_01ESF9AHax6buS9X1pdFv657",
       "title": "定期タスクの異常を調査: Obsidianオートパイロット再試行 v4（09:20＋12:20 JST・ccr-0920・当日が空白のときだけ・12:20 は利用枠リセット後の救済） (failed)",
       "evidence": "trig_01ESF9AHax6buS9X1pdFv657: cse_015TChkDBSBhQXJ6J59iqup3 の終了を 2026-09-06T00:23:47.440Z の観測と照合。投稿・出荷・自動修復の実績には数えない"
+    },
+    {
+      "id": "act-budget-overrun-33996430959",
+      "title": "1回上限の超過が未レビュー: 2026-09-06 article $19.6009（上限 $10.00 の2倍）— 主系が article を選ぶと止まる",
+      "evidence": "run 33996430959 は1回上限の超過として検出されなくなった（上限の見直しか実費行の訂正）"
     }
   ],
   "human": [
@@ -61,15 +74,6 @@
       "age_days": 1,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
       "evidence": "#883 がまだ open",
-      "not_before_jst": null
-    },
-    {
-      "id": "act-budget-overrun-33996430959",
-      "title": "1回上限の超過が未レビュー: 2026-09-06 article $19.6009（上限 $10.00 の2倍）— 主系が article を選ぶと止まる",
-      "detail": "解除: `node scripts/autopilot-budget.mjs --ack-overrun 33996430959 --why \"…\"`\n**承認そのものが目的ではなく、上限を見直すか支出を認めるかの判断**を求めている。上限は data/model-routing.json の rules.article.max_usd_per_run が正で、実測が貯まったなら上限側を直すのが筋（超過の判定は保存されず毎回導出し直されるので、上限を直せば過去の判定も一緒に変わる）。\n**月次上限は通っている**ため `--check` は exit 0 で、\"予算は大丈夫\" に見える。止まるのは `--check-run-cap --task article` の側だけ。\nなお data/authority-matrix.json の「AI実費」は human_only に `monthly_usd_cap の決定` しか挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**（権限表の変更は self_repair.must_not なのでAIからは直せない）。",
-      "age_days": 0,
-      "why": "scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている（AIが自分の超過を自分で通せると、上限が「お願い」になる）",
-      "evidence": "run 33996430959（article $19.6009 / 上限 $10.00）が未レビュー。主系はこの種別を選ぶと止まる",
       "not_before_jst": null
     }
   ],
@@ -150,8 +154,8 @@
     {
       "handler": "reconcile-runs",
       "ok": true,
-      "changed": 0,
-      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない"
+      "changed": 1,
+      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない\n34022754964 -> ap-20260906-actions-34022754964: appended ap-20260906-actions-34022754964 (skipped_gate)"
     },
     {
       "handler": "append-cost",

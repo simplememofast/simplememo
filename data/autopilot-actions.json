@@ -478,7 +478,7 @@
       "closed_jst": null,
       "evidence": "台帳に無い run が 1件: 33959414641（記録対象外 1件を除外: 32817335365）",
       "last_run_jst": "2026-09-06",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない\n34022754964 -> ap-20260906-actions-34022754964: appended ap-20260906-actions-34022754964 (skipped_gate)",
       "reopened_jst": "2026-09-05"
     },
     {
@@ -2160,11 +2160,11 @@
           "run_id": "33996430959"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-06",
       "last_seen_jst": "2026-09-06",
-      "closed_jst": null,
-      "evidence": "run 33996430959（article $19.6009 / 上限 $10.00）が未レビュー。主系はこの種別を選ぶと止まる"
+      "closed_jst": "2026-09-06",
+      "evidence": "run 33996430959 は1回上限の超過として検出されなくなった（上限の見直しか実費行の訂正）"
     },
     {
       "id": "act-health-1006",
@@ -2186,6 +2186,33 @@
       "last_seen_jst": "2026-09-06",
       "closed_jst": null,
       "evidence": "#1006 がまだ open"
+    },
+    {
+      "id": "act-orphaned-branch-claude-autopilot-act-20260906",
+      "title": "PR #1014 の反映待ち: claude/autopilot-act-20260906",
+      "detail": "開いているPRがブランチの現在のheadを扱っている。検証・マージの結果を追跡し、同じ変更を再投入しない。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "branch": "claude/autopilot-act-20260906"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-06",
+      "last_seen_jst": "2026-09-06",
+      "closed_jst": null,
+      "evidence": "PR #1014 へ引き継いだhead 6b9e201bcc8f2ffeea18d1ac986cf27b0d636ba8 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
+      "pending_pr": {
+        "number": 1014,
+        "branch": "claude/autopilot-act-20260906",
+        "head_sha": "6b9e201bcc8f2ffeea18d1ac986cf27b0d636ba8"
+      }
     }
   ],
   "escalation_review_authorization": {
