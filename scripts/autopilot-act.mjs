@@ -1098,6 +1098,14 @@ export function derive(ctx) {
         force_owner_why: '判定者を人に置き換える操作そのもの。AI が代筆すると #901 の穴（自己採点）に戻る',
         auto: null,
         close_check: { kind: 'ep_ratified_or_window',
+          // **window_days: 14 は eligibility-policy の evidence_age.max_days と同じ数字。**
+          // D8 は「その月の行が在れば立てない」ので、行の `last_seen_jst` は作られた日で
+          // 止まる（他の導出規則のように毎日再発行しないため）。適格性の evidence_age は
+          // last_seen_jst を証拠日として読むので、この行の証拠は毎日1日ぶん古くなる。
+          // **いまは効かない** —— 14日で証拠が切れる日と、この窓が閉じる日が同じ日になる
+          // （2026-09-05 に立った行なら、どちらも 09-19）。2026-09-07 に実測して確認した。
+          // **どちらかの数字を変えると噛み合わなくなる** —— 窓を伸ばすか max_days を縮めると、
+          // 行が自分の窓の内側で「証拠が古い」として不適格に並ぶ。変えるなら両方を見ること。
           params: { month, ids: pending.map((p) => p.id), opened_jst: ctx.today, window_days: 14 } },
       });
     }
