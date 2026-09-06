@@ -1107,6 +1107,26 @@
         }
       ],
       "source": "session"
+    },
+    {
+      "run_id": "ap-20260907-actions",
+      "date_jst": "2026-09-07",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 1051,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "34064655036",
+      "interventions": [],
+      "source": "session",
+      "repair_of": [
+        "ap-20260905-actions-33959414641",
+        "ap-20260906-actions"
+      ],
+      "repair_note": "**原因を今日直したのではない。直っていることを今日の完走で確かめた。**修理そのものは既に main にある —— a91a23b8（PR #943・成果物検査を「当日ブランチが在るか」から「この run に紐づく新しいPRが在るか」へ）/ a0425806（PR #973・分割sitemap `sitemap-*.xml` の許可と記帳のコミット順序）/ e320d394（PR #976・宣言した支出閾値を run の中で効かせる）。09-06 の主系 run 33996430959 は 2026-09-05T23:22:58Z に error_max_turns（251 turns）で落ちており、後ろ2本が main に入る約1時間前。後続 run 34022754964 は skip_branch_claimed でモデル未実行。**修正後にモデルが実際に走った定期主系の run は本日の 34064655036 が最初**で、この行がその確認材料。\\n\\nこの run が実際に通した経路: 宣言→実装のコミット順序（health-intake の記帳を stash して宣言だけ先に push・1831da64。09-06 の implementation preceded declaration は再現せず）/ 分割sitemapの許可（decision-monitor --publish-report が触る autopilot/index.html・sitemap-ja.xml・sitemap.xml を touches に入れた契約が boundedness を pass。09-06 に候補を6回作り直しても通らなかった判定）/ 成果物の実行ID照合（PR #1051 がこの run に紐づく新しい記録）/ 支出閾値。\\n\\n**通していない経路:** 新しい公開URLを1本足す形（今日はレーンFで .html を新規追加していない。09-06 のオーナー起動 PR #1024 が /obsidian/compare/capacities/ を分割sitemapごと出荷しているが、それは本 run の証跡ではない）と、副系CCRが同じ修正の上で走ること（09-06 以降、副系の行は台帳に無い）。artifact は null —— 公開ページを出していない回（レーンFの慣例）。"
     }
   ],
   "retracted_observations": [
