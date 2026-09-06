@@ -69,3 +69,12 @@ CI「SEO Validation」が実行する本体。`check-*.mjs` 全部、`autopilot-
   write-flag やピン済みガード式を lib/ へ動かすと台帳との照合が壊れる
 
 迷ったら `node scripts/preflight.mjs` を回してから触ること。
+
+## 2026-09-06: 言語切替ツールの回帰検査
+
+`inject_lang_switcher.py` は手動保守ツールとして残す。その既存テスト
+`inject_lang_switcher_test.py` は実行経路が無かったため、SEO Validation の
+無条件ステップへ接続した。`preflight.mjs` も同じ行から取り込む。
+挿入・再生成・冪等性・アンカー無し・日英ラベルを検査する。
+一時コピーで Cookie の SameSite 属性を変えると exit 1 になることを確認した。
+これは検証漏れの修正であり、不要テスト削除の実績や自動化率の加点にはしない。

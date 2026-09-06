@@ -34,6 +34,9 @@ jobs:
       - name: Contact form reproduction details and failed delivery
         run: node --test scripts/contact-form.test.mjs
 
+      - name: Language switcher insertion and regeneration regressions
+        run: python3 scripts/inject_lang_switcher_test.py
+
       - name: Trend observations preserve failures and ranking baselines
         run: |
           python3 scripts/trend-radar.test.py
