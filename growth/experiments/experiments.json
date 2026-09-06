@@ -543,7 +543,7 @@
         "2026-08-09: The page also carries frozen title test title-2026-07-01-002. Its measurement window (2026-07-01..07-29) has already elapsed and is banked in GSC, so this change cannot corrupt it retroactively — but that window is the ONLY period from which the title decision may be read. Do not evaluate the title test on post-08-09 data.",
         "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed.",
         "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly.",
-        "CORRECTION 2026-08-11 (query x page export): the target query lands on this page with 99 impressions, not the 139 recorded here — the site-wide query export does not say which page a query lands on. More important, it is a small corner of a cluster that looks structurally unwinnable: the page top 12 queries take 1,869 impressions for 7 clicks (0.37%), and the largest single query 「line keepメモ 終了」 is 710 imp / 1 click at position 9.4. These searchers are checking whether LINE Keep shut down and want LINE own announcement, not a third-party migration article. Keep the experiment running, but expect a small effect even if the FAQ works."
+        "CORRECTION 2026-09-06: The earlier 139-to-99 correction mixed different 28-day periods. The original 139 impressions belong to 2026-07-11..08-07; the 99 belong to 2026-07-13..08-09, including the FAQ launch date. Both the site-query and query-by-page rows in the latter export are 99, so those exports do not establish a page-allocation difference. Search Console was re-exported on 2026-09-06 with exact query line keepメモ どこ and exact page https://simplememofast.com/blog/line-keep-alternative for 07-11..08-07: 0 clicks, 139 impressions, CTR 0%, position 9.87. Keep the original pre-change baseline; use the same query AND page filters at review. See growth/reports/2026-09-06-experiment-review-readiness.md."
       ],
       "control": {
         "kind": "pre_post",
@@ -822,7 +822,8 @@
         "2026-08-28: **この実験は現状のままでは評価できない。**2つ別々の理由がある。\n\n1. **`__qr` のトークンがサイトに1つも存在しない。**実測（`grep -roh 'ct=[^&\"]*' --include=*.html`）で0件。target_metric が名指ししている集計単位が、そもそも出荷されていない。\n2. **仮に存在しても ASC には現れない。**Apple の閾値は「1キャンペーンにつき初回DL 5人以上」で、初回DLの実測は 4.5〜5.0/日。詳細は growth/reports/2026-08-28-campaign-token-cardinality.md。\n\nこの実験のノート自身が「**NOT MEASURABLE IN GA4** … The only readout is App Store Connect campaign data」と書いている。**その唯一の読み口が塞がっている。**\n\n**ここでは決定を書かない**（評価日は 2026-09-13、判断は持ち主のもの）。ただし 9/13 に「データが足りない」と読むのは誤りで、**待っても出ない**ことは今分かっている。`measurement_failed`（測れたが判断できない、ではなく測っていない）に近い形。",
         "2026-09-05: /apple-watch/ の事実訂正。現行の自動音声入力と矛盾した回答ブロック・説明・図解動画を修正。タイトル・description・CTA・QR配置は変更していない。既存実験の窓内の併発変更として扱い、この日以降の効果を回答ブロック・動画・QRの単独効果と断定しない。",
         "2026-09-05: QRのストア導線を修正。46画像を復号し、Obsidian・Siri・Watch・無料メモ・autopilotの27個を既存の承認済み・表示中CPPへ揃えた。残る19個は既定ページ。ページ内CTAのhref・QR配置・既存ctは維持し、AIタグ2個には欠けていたptを追加。出荷前後のCPP獲得を同条件とみなさず、QRとページ内ボタンのCPP合算からQR単独効果を推定しない。Apple側のCPP有効化は別のASO作業による同日介入。 mainのPR #958と統合し、ASC一覧33967344673（12:55:12Z）の配線済み8種すべてAPPROVED・visible=trueに更新。autopilotは既存HTMLと同じvs-draftsを共用する。",
-        "2026-09-05訂正: 8/28の「__qrトークンがサイトに存在しない」はHTMLだけを検索した誤判定だった。実際のSVG46個を復号すると44個に__qr、AIタグ2個に旧形式ctが存在した。トークン不在という根拠を撤回する。キャンペーンの最小件数・実レポート取得は別条件であり、QRスキャンや初回DLが測れたとは扱わない。"
+        "2026-09-05訂正: 8/28の「__qrトークンがサイトに存在しない」はHTMLだけを検索した誤判定だった。実際のSVG46個を復号すると44個に__qr、AIタグ2個に旧形式ctが存在した。トークン不在という根拠を撤回する。キャンペーンの最小件数・実レポート取得は別条件であり、QRスキャンや初回DLが測れたとは扱わない。",
+        "2026-09-06 review readiness: PCの旧クリック21件はQRスキャンやインストールの基準値ではない。ASCの同期間・同配信条件のキャンペーン/CPP資料を確認する。 評価日は9/13のまま。GSCファイルの存在だけで本指標の成功を認定せず、比較不能と標本不足を区別する。growth/reports/2026-09-06-experiment-review-readiness.md を参照。"
       ],
       "control": {
         "kind": "none",
@@ -885,7 +886,8 @@
         "Overlaps two running snippet experiments (/blog/free-memo-apps-ranking, /blog/offline-memo-apps). The primary metrics differ (GSC CTR versus page-to-store clicks), but body changes may also affect search snippets. Treat this overlap as a confounder; it does not establish independence.",
         "Excluded deliberately: /blog/line-keep-alternative and /glossary/aes-gcm/ (relevance 0.3 — the model says a strong CTA there spends trust without converting), and /blog/obsidian-voice-input (site strongest page at CTR 10.9%, not used as a test bed).",
         "2026-08-11: 本実験の途中で、全ページ末尾に「次に読む」カード(P1-1)を挿入した。tag-cta-placements.js は placement を本文中の相対位置(frac)で決めるため、末尾にコンテンツが増えた結果 81件のCTAが bottom → mid に再分類された。**評価日 2026-09-13 に GA4 を placement 次元で見ると、実験と無関係に mid のクリックが増えて見える。**本実験の target_metric は app_store_click / session_start の集計比であり、ラベルの付け替えでは動かないため主判定は成立する。placement 別の内訳を見る場合のみ、08-11 以前と以後を分けて読むこと。",
-        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。"
+        "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
+        "2026-09-06 review readiness: 旧60クリックイベント/1,600セッションは、クリックしたセッションの割合ではない。旧期間を本番・自社ストア・対象LP・同一セッションの定義へ復元できなければ、新しいGA4率との改善率を出さない。 評価日は9/13のまま。GSCファイルの存在だけで本指標の成功を認定せず、比較不能と標本不足を区別する。growth/reports/2026-09-06-experiment-review-readiness.md を参照。"
       ],
       "control": {
         "kind": "none",
@@ -947,7 +949,8 @@
         "The page still has no closing CTA. Adding one is a design decision for the owner, not a measurement question.",
         "2026-08-28: **ct= を読み替える。**キャンペーントークンを `{ページ}-{言語}__{配置}` の670種類から `{言語}__{配置}` の8種類へ畳んだので、このページの mid CTA は `jp__mid` になった。**ページ単位では区別できなくなる。**\n\n**測定は失われていない。**GA4 の app_store_click は `page_path` と `data-cta-placement` を ct= とは別のディメンションで記録している（js/app-store-tracking.js の dims()）。したがって `page_path=/blog/obsidian-voice-input AND placement=mid` で同じ系列が読める。**フィルタする列が変わっただけで、母数も定義も変わらない。**\n\n9/13 に読むときは ct= ではなくこの2列で絞ること。**08-28 より前は ct= 側にしか値が無く、以後は両方に有る**ので、窓をまたぐなら page_path+placement で通して読むのが安全。",
         "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
-        "2026-09-05: /blog/obsidian-voice-input の事実訂正。公式CaptureとURIを分離し、SimpleMemoの設定・iOS 26以降の音声入力・通信・Free 1日3通を明記。0.4秒はウォーム起動から入力可能までで、音声認識開始や保存完了の時間という旧説明を撤回。description・本文・FAQ/JSON-LD・更新日・次の一歩の説明を同期し、比較表を横送りで読めるよう調整。title/H1/canonical・ストアhref・既存CTAラベル・次の一歩の行き先は維持。既存施策の評価窓内に重なる内容変更として扱い、この日以降の変化を元のCTAや内部リンク単独の効果と断定しない。"
+        "2026-09-05: /blog/obsidian-voice-input の事実訂正。公式CaptureとURIを分離し、SimpleMemoの設定・iOS 26以降の音声入力・通信・Free 1日3通を明記。0.4秒はウォーム起動から入力可能までで、音声認識開始や保存完了の時間という旧説明を撤回。description・本文・FAQ/JSON-LD・更新日・次の一歩の説明を同期し、比較表を横送りで読めるよう調整。title/H1/canonical・ストアhref・既存CTAラベル・次の一歩の行き先は維持。既存施策の評価窓内に重なる内容変更として扱い、この日以降の変化を元のCTAや内部リンク単独の効果と断定しない。",
+        "2026-09-06 review readiness: baselineの64クリック/588表示はGSC検索実績で、記事内CTAの変更前利用率ではない。page_pathとplacement=midのGA4資料が必要。 評価日は9/13のまま。GSCファイルの存在だけで本指標の成功を認定せず、比較不能と標本不足を区別する。growth/reports/2026-09-06-experiment-review-readiness.md を参照。"
       ],
       "control": {
         "kind": "none",
@@ -1410,7 +1413,8 @@
         "2026-08-12: 進行中の cta-2026-08-10-desktop-qr（評価日同じ 2026-09-13）と 干渉する。あちらは9ページの締めCTA直下のQRを測るもので、こちらは全ページのフッターから新しいPC向け導線を足す。同日評価なので、どちらの寄与かは切り分けられない。切り分けが要るなら評価日をずらすこと。",
         "2026-08-12: グローバルナビのCTAは触っていない。現状は全ページで App Store へ直リンクし ct=…__nav で測られている。PCだけ /download/ へ向ける案（.cta-qr と同じCSSの出し分けで可能）はオーナー判断待ち。実行するとPC分の __nav 計測が途切れ、上記2実験の期間中にPC側の挙動を変えることになる。",
         "2026-09-05: measurement_changesを参照。GA4の自社App Store計測とブランド分類の定義変更をまたいだ単純な前後差で効果を判定しない。旧期間を同一定義で復元できなければ比較不能とする。",
-        "2026-09-05: / と /ai-tags/ の説明を事実訂正。端末内のタイトル・タグ生成と、外部サーバーを経由するメール配送を本文・検索用description・FAQ/JSON-LDで区別した。/download/ には日本のApp Store現行名・旧名・自動タグ機能・無料上限を明記。新しい実験や成功判定ではなく、既存の前後比較に併発する変更として扱う。タイトル、CTAリンク、QRコード、動画ファイルは変更していない。"
+        "2026-09-05: / と /ai-tags/ の説明を事実訂正。端末内のタイトル・タグ生成と、外部サーバーを経由するメール配送を本文・検索用description・FAQ/JSON-LDで区別した。/download/ には日本のApp Store現行名・旧名・自動タグ機能・無料上限を明記。新しい実験や成功判定ではなく、既存の前後比較に併発する変更として扱う。タイトル、CTAリンク、QRコード、動画ファイルは変更していない。",
+        "2026-09-06 review readiness: 旧全サイト60クリックを/download/固有の基準値やQRのインストール値にしない。GA4のページ内クリックとASCのQR/CPP観測を分ける。 評価日は9/13のまま。GSCファイルの存在だけで本指標の成功を認定せず、比較不能と標本不足を区別する。growth/reports/2026-09-06-experiment-review-readiness.md を参照。"
       ],
       "control": {
         "kind": "pre_post",
