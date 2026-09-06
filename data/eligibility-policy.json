@@ -59,8 +59,9 @@
           "*.html", "**/*.html",
           "growth/content/**", "growth/data/**", "growth/experiments/**",
           "assets/**", "docs/**", "data/*.json", "blog/**", "use-cases/**",
-          "obsidian/**", "en/**", "sitemap.xml", "robots.txt"
+          "obsidian/**", "en/**", "sitemap.xml", "sitemap-*.xml", "robots.txt"
         ],
+        "$content_sitemap_note": "**`sitemap-*.xml` は 2026-09-06 に足した。**`generate_sitemap.py` は sitemap.xml だけでなく sitemap-ja.xml / sitemap-en.xml / sitemap-locales.xml も書き換えるので、**新規URLを1本足すと必ずこの3本に触る。**許可リストが sitemap.xml しか持っていなかったため、2026-09-06 の主系は実装を終えた /obsidian/compare/capacities/ を boundedness 不適格として出荷せずに捨てた（PR #969・run 33996430959）。**門は設計どおり fail-closed に働いており、足りなかったのは許可リストの1行。**8月まで露出しなかったのは L2 契約が必須になったのが 09-04 以降だからで、構造的な穴。オーナーが4択で選択（2026-09-06・Claude Code セッション session_013C7zrtf3P369vK7dyRiZdF）。**ワイルドカードにしたのは分割が増えた日に同じ詰まりを再発させないため** —— このパターンが拾うのは generate_sitemap.py が所有するファイル群で、人が書く内容ではない。",
         "actuator": [
           "data/autopilot-runs.json", "data/autopilot-actions.json",
           "data/autopilot-status.json", "data/autopilot-cost.json",
