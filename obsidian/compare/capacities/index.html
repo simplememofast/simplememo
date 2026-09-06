@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/compare/capacities/">
+  <script>
+    window.addEventListener('load', function() {
+      if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+      var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+      ric(function() {
+        var s = document.createElement('script');
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+        s.async = true;
+        document.head.appendChild(s);
+        s.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-EPZVZKCVQG', {page_language: (function(p){return p==='/en'||p.indexOf('/en/')===0?'en':p.indexOf('/zh-Hant/')===0?'zh-Hant':p.indexOf('/zh/')===0?'zh-Hans':p.indexOf('/ko/')===0?'ko':p.indexOf('/es/')===0?'es':p.indexOf('/pt-BR/')===0?'pt-BR':p.indexOf('/id/')===0?'id':p.indexOf('/ar/')===0?'ar':p.indexOf('/tr/')===0?'tr':'ja';})(location.pathname)});
+        };
+      });
+    });
+  </script>
+  <title>ObsidianとCapacitiesの比較 — オブジェクト型PKMとの分岐点【2026】 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="ObsidianとCapacitiesの違いを、Markdownファイルとオブジェクト型ノートの設計から比較。Mac版1.70.2の初回デモで日次メモ・本の属性・リンク図を確認し、保存方式、オフラインの条件、書き出し、無料プランの範囲を公式資料と分けて整理します。">
+  <meta name="theme-color" content="#070b14">
+
+  <!-- OGP -->
+  <meta property="og:title" content="ObsidianとCapacitiesの比較 — オブジェクト型PKMとの分岐点">
+  <meta property="og:description" content="ObsidianとCapacitiesの違いを、Markdownファイルとオブジェクト型ノートの設計から比較。Mac版1.70.2の初回デモで日次メモ・本の属性・リンク図を確認し、保存方式、オフラインの条件、書き出し、無料プランの範囲を公式資料と分けて整理します。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-06T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/compare/capacities/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-capacities.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="ObsidianとCapacitiesの比較 — オブジェクト型PKMとの分岐点">
+  <meta name="twitter:description" content="ObsidianとCapacitiesの違いを、Markdownファイルとオブジェクト型ノートの設計から比較。Mac版1.70.2の初回デモで日次メモ・本の属性・リンク図を確認し、保存方式、オフラインの条件、書き出し、無料プランの範囲を公式資料と分けて整理します。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-capacities.png">
+  <link rel="preconnect" href="https://analytics.ahrefs.com">
+  <!-- i18n: managed by scripts/normalize_i18n_head.py -->
+  <link rel="canonical" href="https://simplememofast.com/obsidian/compare/capacities/">
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+
+  <!-- JSON-LD: BreadcrumbList -->
+  
+
+  <!-- JSON-LD: Article -->
+  
+
+  <!-- JSON-LD: FAQPage -->
+  
+
+  <!-- JSON-LD: WebPage with Speakable -->
+  
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=4806480582">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .lang-switcher-container{display:flex;justify-content:flex-end;padding:1.25rem 0}
+    .lang-switcher{display:inline-flex;background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-radius:22px;padding:3px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+    .lang-switcher__btn{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.75rem 1.1rem;min-height:48px;border-radius:19px;cursor:pointer;font-size:.875rem;font-weight:400;transition:all .25s cubic-bezier(.4,0,.2,1);letter-spacing:.02em}
+    .lang-switcher__btn:hover{color:rgba(255,255,255,.85)}
+    .lang-switcher__btn:focus-visible{outline:2px solid #6ab4ff;outline-offset:2px}
+    .lang-switcher__btn.active{background:rgba(100,180,255,.12);border:1px solid rgba(100,180,255,.2);color:#fff;box-shadow:0 0 12px rgba(100,180,255,.1)}
+    [data-lang="en"]{display:none} [data-lang].active{display:revert} span[data-lang].active{display:revert}
+    a.app-store-badge[data-lang].active{display:inline-flex}
+
+    .lp-hero{text-align:center;padding:4rem 0 3rem}
+    .lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem;letter-spacing:.03em}
+    .lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);font-weight:700;line-height:1.35;margin-bottom:1rem}
+    /* 中央揃えの和文は行頭が毎行ずれて読みにくい。狭い画面では左揃えにし、
+       行が2〜3行に収まる広い画面だけ中央のままにする。 */
+    .lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:38rem;margin:0 auto 2rem;text-align:left}
+    @media(min-width:721px){.lp-hero__sub{text-align:center}}
+
+    .lp-section{padding:3rem 0}
+    .lp-section__title{font-size:1.4rem;font-weight:700;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .lp-section__lead{font-size:1rem;color:var(--text-secondary);line-height:1.9;margin-bottom:2rem;max-width:44rem}
+
+    .steps-list{list-style:none;counter-reset:step;margin:1.5rem 0 2rem;padding-left:0}
+    .steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin-bottom:.75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.95rem;line-height:1.85}
+    .steps-list li strong{display:inline-block;margin-bottom:.15rem}
+    .steps-list li::before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#4fdcf0;font-size:.875rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+    .reason-cards{display:grid;grid-template-columns:1fr;gap:1rem;margin:1.5rem 0 2rem}
+    @media(min-width:720px){.reason-cards{grid-template-columns:repeat(2,1fr);gap:1.25rem}}
+    .reason-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.5rem}
+    .reason-card__title{font-size:1.05rem;font-weight:700;margin-bottom:.5rem;line-height:1.5}
+    .reason-card__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.85}
+
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-details{padding:0}
+    .faq-summary{padding:1rem 0;font-size:.98rem;font-weight:700;line-height:1.6;cursor:pointer;list-style:none;display:flex;gap:1rem;justify-content:space-between;align-items:flex-start}
+    .faq-summary::after{content:'+';flex:none;font-size:1.2rem;line-height:1.4;color:var(--accent-bright);transition:transform .2s}
+    .faq-details[open] .faq-summary::after{transform:rotate(45deg)}
+    .faq-answer{padding:0 0 1rem;font-size:.95rem;color:var(--text-secondary);line-height:1.9}
+
+    .cta-box{text-align:center;padding:2.5rem 1.5rem;margin:2rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+    .cta-box__title{font-size:1.25rem;font-weight:700;margin-bottom:.75rem;line-height:1.5}
+    .cta-box__desc{font-size:.95rem;color:var(--text-secondary);line-height:1.8;margin:0 auto 1.5rem;max-width:32rem}
+
+    .tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;font-size:.95rem;line-height:1.9}
+    .tip-box__title{font-weight:700;color:#4fdcf0;margin-bottom:.4rem;font-size:.8rem;letter-spacing:.06em}
+
+    .internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}
+    .internal-links a{font-size:.9rem;color:var(--accent-bright);text-decoration:none;padding:.4rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;transition:border-color .2s,background .2s;min-height:48px;display:inline-flex;align-items:center}
+    .internal-links a:hover{border-color:var(--accent);background:rgba(100,180,255,.07)}
+
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:rgba(100,180,255,.09);border:1px solid rgba(100,180,255,.16);border-radius:5px;padding:.1rem .35rem;word-break:break-all}
+    pre.note-sample{background:rgba(10,14,22,.7);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1.1rem 1.2rem;margin:1.25rem 0;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.95;color:var(--text-secondary)}
+    pre.note-sample code{background:none;border:0;padding:0;font-size:1em}
+
+    /* ── 比較表 ────────────────────────────────────────
+       狭い画面で列を縦に割ると見出し列が語中で折り返して読めなくなる
+       ので、行ごとのカードに組み替えて全幅を使わせる（/obsidian/daily-note/ と同じ流儀）。 */
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}
+    .rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}
+    .rt-table th{background:rgba(100,180,255,.06);font-weight:700}
+    .rt-table thead th{white-space:nowrap}
+    .rt-table tbody th{width:26%;font-weight:700}
+    .mk-yes{color:#54cf68;font-weight:700}
+    .mk-no{color:#ff7089;font-weight:700}
+    .mk-part{color:#ffb734;font-weight:700}
+    @media(max-width:700px){
+      .rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}
+      .rt-table{border-collapse:separate;border-spacing:0}
+      .rt-table thead{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin-bottom:.75rem;padding:.25rem 0}
+      .rt-table tbody th{border:0;padding:.55rem 1rem .15rem;font-size:1rem;background:none}
+      .rt-table td{border:0;padding:.5rem 1rem;color:var(--text-secondary)}
+      .rt-table td::before{content:attr(data-label);display:block;font-size:.68rem;font-weight:700;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.15rem}
+    }
+
+    /* ── 検証スクリーンショット ─────────────────────────
+       実UIの横長キャプチャ。掲載幅800pxで文字がつぶれないことを確認済み。
+       枠線は「これは図解ではなく画面の写し」であることを示す控えめな合図。 */
+    .shot{margin:1.5rem 0 2rem}
+    .shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}
+    .shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}
+    .shot-pair{display:grid;grid-template-columns:1fr;gap:1.25rem;margin:1.5rem 0 2rem}
+    @media(min-width:760px){.shot-pair{grid-template-columns:1fr 1fr}}
+    .shot-pair .shot{margin:0}
+    @media(prefers-reduced-motion:reduce){.lang-switcher__btn{transition:none}}
+
+    /* Global Navigation */
+    .global-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 12, 18, 0.85);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+    }
+    .global-nav__inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .global-nav__logo {
+      display: flex;
+      align-items: center;
+      min-height: 48px;
+      gap: 0.5rem;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+    .global-nav__logo img {
+      border-radius: 8px;
+    }
+    .global-nav__links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .global-nav__links a {
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      transition: color 0.2s, background 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__links a:hover {
+      color: #fff;
+      background: rgba(100,180,255,0.08);
+    }
+    .global-nav__actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .global-nav__cta {
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff !important;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      transition: opacity 0.2s;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .global-nav__cta:hover { opacity: 0.85; }
+    .nav-cta-mobile { display: none; }
+    .global-nav__hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-width: 48px;
+      min-height: 48px;
+      padding: 0.5rem;
+      line-height: 1;
+    }
+    @media (max-width: 768px) {
+      .global-nav__links { display: none; }
+      .global-nav__cta { display: none; }
+      .global-nav__hamburger { display: block; }
+      .global-nav__links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 56px;
+        left: 0;
+        right: 0;
+        background: rgba(10,12,18,0.95);
+        backdrop-filter: blur(20px);
+        padding: 0.5rem 1rem 1rem;
+        border-bottom: 1px solid rgba(100,160,220,0.1);
+        gap: 0.5rem;
+      }
+      .global-nav__links.open a { color: rgba(255,255,255,0.9);
+        padding: 0.7rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+      }
+      .global-nav__links.open .nav-cta-mobile {
+        display: block;
+        text-align: center;
+        margin-top: 0.5rem;
+        background: linear-gradient(135deg, #007AFF, #5856D6);
+        color: #fff;
+        border-radius: 12px;
+        padding: 0.8rem;
+        font-weight: 700;
+      }
+    }
+
+  </style>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/compare/capacities/#article","inLanguage":"ja","headline":"ObsidianとCapacitiesの比較 — オブジェクト型PKMとの分岐点","description":"ObsidianとCapacitiesの違いを、Markdownファイルとオブジェクト型ノートの設計から比較。Mac版1.70.2の初回デモで日次メモ・本の属性・リンク図を確認し、保存方式、オフラインの条件、書き出し、無料プランの範囲を公式資料と分けて整理します。","url":"https://simplememofast.com/obsidian/compare/capacities/","datePublished":"2026-09-06","dateModified":"2026-09-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-capacities.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/compare/capacities/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Obsidian比較","item":"https://simplememofast.com/obsidian/compare/"},{"@type":"ListItem","position":3,"name":"ObsidianとCapacities","item":"https://simplememofast.com/obsidian/compare/capacities/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/compare/capacities/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"ObsidianとCapacitiesはどちらを選ぶべきですか？","acceptedAnswer":{"@type":"Answer","text":"Markdownファイルを自分で管理したいならObsidian、本・人物などの種類ごとに属性をそろえたいならCapacitiesが候補です。今回確認したのはCapacitiesのMac版初回デモです。保存方式の説明は両社の公式資料に基づきます。"}},{"@type":"Question","name":"CapacitiesはMarkdownファイルをそのまま編集できますか？","acceptedAnswer":{"@type":"Answer","text":"公式資料では、通常のノート保存先はCapacities独自のデータベースです。Markdownへのエクスポートはありますが、Obsidianの保管庫フォルダをそのまま共有する運用とは異なります。本記事では実際の書き出しは検証していません。"}},{"@type":"Question","name":"Capacitiesはオフラインで使えますか？","acceptedAnswer":{"@type":"Answer","text":"公式資料では、ノートのダウンロード完了後にオフラインで編集できます。ただし全文検索やAIなどに制限があります。本記事では回線を切っての編集・再同期は検証していません。"}},{"@type":"Question","name":"無料で本や人物の種類を作れますか？","acceptedAnswer":{"@type":"Answer","text":"2026年9月6日に確認した公式料金表では、無料のBasicにカスタムオブジェクト型、同期、インポート・エクスポートが含まれます。メディアのアップロード量には別の上限があります。"}}]}</script>
+</head>
+<body>
+  <!-- Global Navigation -->
+  <nav class="global-nav" aria-label="メインナビゲーション">
+    <div class="global-nav__inner">
+      <a href="/" class="global-nav__logo">
+        <img src="/assets/img/app-icon-56.png" alt="Simple Memo - for Obsidian" width="28" height="28" loading="eager"><span>Obsidian連携シンプルメモ</span></a>
+      <ul class="global-nav__links" id="navLinks">
+        <li><a href="/guides/"><span>使い方</span></a></li>
+        <li><a href="/use-cases/"><span>活用事例</span></a></li>
+        <li><a href="/vs/"><span>比較</span></a></li>
+        <li><a href="/methods/"><span>メソッド</span></a></li>
+        <li><a href="/blog/"><span>ブログ</span></a></li>
+        <li><a href="/glossary/"><span>用語集</span></a></li>
+        <li><a href="/faq"><span>FAQ</span></a></li>
+        <li><a href="/about/"><span>開発者</span></a></li>
+        <li><a href="/devlog/"><span>開発記録</span></a></li>
+        <li class="nav-cta-mobile"><a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8"><span>ダウンロード</span></a></li>
+      </ul>
+      <div class="global-nav__actions">
+        <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8" class="global-nav__cta">
+          <span>ダウンロード</span>
+        </a>
+        <button class="global-nav__hamburger" aria-label="メニュー" aria-controls="navLinks" aria-expanded="false" onclick="var n=document.getElementById('navLinks');n.classList.toggle('open');this.setAttribute('aria-expanded',n.classList.contains('open'))">☰</button>
+      </div>
+    </div>
+  </nav>
+
+<main class="page-content">
+<div class="container" style="max-width:880px;">
+  <div class="lp-hero">
+    <div class="lp-hero__label">Obsidian × Capacities</div>
+    <h1 class="lp-hero__title">ObsidianとCapacitiesの比較<br>オブジェクト型PKMとの分岐点</h1>
+    <p class="lp-hero__sub">読みかけの本、会った人、そこから生まれたアイデア。これを「自分のファイル」として育てるか、「種類と属性を持つノート」として育てるかで、合う道具が変わります。Mac版の初回デモを操作し、保存方式は公式資料と照合しました。</p>
+    <p class="article-meta">著者: <a href="/about/">AI Ataka</a> ・ 公開・確認日: <time datetime="2026-09-06">2026年9月6日</time></p>
+  </div>
+  <aside class="tip-box" aria-label="この比較の対象">このページは<strong>ObsidianとCapacitiesの保管・整理の比較</strong>です。短いメモの入力方法を比べたい場合は、<a href="/vs/capacities/">SimpleMemoとCapacitiesの役割の違い</a>をご覧ください。</aside>
+  <section class="lp-section" data-answer-block="obsidian-or-capacities" style="padding-top:1rem;">
+    <h2 class="lp-section__title">ObsidianとCapacitiesはどちらを選ぶ？</h2>
+    <p class="lp-section__lead"><strong>ファイルの置き場所と形式を自分で管理したいならObsidian、本や人物ごとに同じ属性をそろえたいならCapacitiesが候補です。</strong>Obsidianにもプロパティがあるので、「属性があるか」だけでは選べません。属性の設計を自分のノート群で運用するか、アプリのオブジェクト型にまとめるかが判断の軸です。<a href="https://obsidian.md/help/properties" rel="noopener" target="_blank">Obsidianのプロパティ仕様</a>、<a href="https://docs.capacities.io/reference/content-types" rel="noopener" target="_blank">Capacitiesのオブジェクト型仕様</a>に基づく整理です。</p>
+    <p>以下の実画面はCapacitiesの<strong>ログイン前の初回デモ</strong>です。日次メモへの入力とサンプルの本の表示を確認しました。アカウント作成後の常用、同期、移行を完了したレビューではありません。</p>
+  </section>
+  <section class="lp-section" id="comparison">
+    <h2 class="lp-section__title">比較表：ノートをどう持つか</h2>
+    <table class="rt-table">
+      <thead><tr><th scope="col">判断軸</th><th scope="col">Obsidian</th><th scope="col">Capacities</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">通常の保存形式</th><td data-label="Obsidian">ローカルの保管庫にMarkdownファイル</td><td data-label="Capacities">アプリ独自のデータベース。Markdownは書き出し形式</td></tr>
+        <tr><th scope="row">情報をそろえる単位</th><td data-label="Obsidian">ノートのプロパティとテンプレート</td><td data-label="Capacities">本・人物などのオブジェクト型と、その型のプロパティ</td></tr>
+        <tr><th scope="row">アプリ外での編集</th><td data-label="Obsidian">ノートファイルを別のエディタでも扱える</td><td data-label="Capacities">まずエクスポートを経由する</td></tr>
+        <tr><th scope="row">別の端末との同期</th><td data-label="Obsidian">公式Syncやファイル同期サービスを選ぶ</td><td data-label="Capacities">クラウド同期を含む。オフライン利用にも事前ダウンロードの条件がある</td></tr>
+        <tr><th scope="row">今回の確認手段</th><td data-label="Obsidian">公式ヘルプの保存方式・プロパティ仕様</td><td data-label="Capacities">Mac版1.70.2の初回デモ操作＋公式資料</td></tr>
+      </tbody>
+    </table>
+    <p>保存と同期の仕様出典: <a href="https://obsidian.md/help/data-storage" target="_blank" rel="noopener">Obsidian — How Obsidian stores data</a>、<a href="https://docs.capacities.io/misc/offline-support" target="_blank" rel="noopener">Capacities — Offline Support</a>。表の仕様は2026年9月6日に確認しました。</p>
+  </section>
+  <section class="lp-section" id="hands-on">
+    <h2 class="lp-section__title">Mac版デモで確認した、日次メモから本への流れ</h2>
+    <p class="lp-section__lead">公式サイトからApple Silicon用の1.70.2を取得し、macOS 26.4.1で起動しました。初回画面の「Get started」を進めると、アカウント登録前に操作できるデモに入ります。</p>
+    <ol class="steps-list">
+      <li><strong>日付のメモへ1行入力する。</strong><br>Daily Noteの入力欄に「比較用メモ：読んだ本の要点を残す」と入力し、表示を確認しました。この段階では保存先フォルダを選びませんでした。デモ上の入力確認であり、再起動後の保持は未検証です。</li>
+      <li><strong>デモの本リンクを開く。</strong><br>次の画面で用意された「Deep Work」を開くと、Bookという種類のノートが表示されます。日次メモからのBacklinksも1件表示されました。本を自動抽出する機能を検証した結果ではなく、用意されたサンプルの画面遷移です。</li>
+      <li><strong>種類に付く属性を見る。</strong><br>BookにはAuthor、Rating、Recommended by、Mediumの欄が並びました。デモが著者や評価を埋めた画面では、「本について毎回確認したい項目」が本文から独立して見えます。</li>
+      <li><strong>リンクのつながりを図で見る。</strong><br>次のデモ画面には、本を中心に著者・日付・タグへつながる図が表示されました。その後はメールとパスワードの登録画面に進むため、そこで操作を終了しました。</li>
+    </ol>
+    <figure class="shot"><a href="/assets/img/obsidian/capacities-onboarding.png"><img src="/assets/img/obsidian/capacities-onboarding.png" alt="CapacitiesのMac版初回デモで、日次メモに比較用の日本語を入力した画面" width="1152" height="768" loading="lazy"></a><figcaption>実機撮影: 初回デモのDaily Note。画像を開くと原寸で確認できます。個人のノートではなく比較用の入力です。</figcaption></figure>
+    <figure class="shot"><a href="/assets/img/obsidian/capacities-objects.png"><img src="/assets/img/obsidian/capacities-objects.png" alt="CapacitiesのBook型サンプルに著者、評価、推薦者、媒体の属性が並んだ画面" width="1152" height="768" loading="lazy"></a><figcaption>実機撮影: デモが用意したBook型のサンプル。属性は初回案内が用意したものです。本文の一部は比較用の文面に置き換えています。独自の読書データを作成した結果ではありません。</figcaption></figure>
+    <p><strong>ここから読み取れるのは、入力の速さの優劣ではなく、情報の見せ方です。</strong>読書メモのたびに著者や評価をそろえたい人には、この型が見通しを与えます。一方、まず自由に書いて後から項目を決めたい人は、型を整える作業自体が負担になるかもしれません。これは画面からの編集上の判断で、利用者調査の結果ではありません。</p>
+  </section>
+  <section class="lp-section" id="properties">
+    <h2 class="lp-section__title">Obsidianにも属性はある：分岐点は設計の置き場所</h2>
+    <p>Obsidianのプロパティは、ノート先頭のYAMLとして保持されます。テンプレートに属性を含めることもできます。たとえば次のような読書メモを自分で設計できます。これは説明用の記述例で、今回アプリで実行した結果ではありません。<a href="https://obsidian.md/help/properties" target="_blank" rel="noopener">公式プロパティ仕様</a>を参照しています。</p>
+    <pre class="note-sample"><code>---
+type: book
+author: "著者名"
+rating: 4
+---
+# 読書メモ
+次の仕事で試すことを一つ書く。</code></pre>
+    <p>Capacitiesでは、オブジェクト型が持てる項目をプロパティとして定めます。公式資料には、特定の種類のノートを選ぶObject Selectも説明されています。人物を文字列として書くか、人物ノートとしてつなぐかまで設計できるため、読書記録から著者の別の仕事をたどる用途に合うと考えられます。<a href="https://docs.capacities.io/reference/properties" target="_blank" rel="noopener">Capacitiesのプロパティ仕様</a>に基づく説明で、カスタム型の作成は今回未検証です。</p>
+  </section>
+  <section class="lp-section" id="offline">
+    <h2 class="lp-section__title">オフライン対応と、普通のファイルで持つことは別</h2>
+    <p>Capacitiesの公式説明では、ノートを端末へダウンロードした後にオフラインで編集でき、オンライン復帰時に同期します。ただし全文検索やAIは利用できず、画像などは端末への取得状態にも左右されます。通常の保存先は独自のデータベースで、Obsidianの保管庫と同じフォルダを直接開いて共同編集する形式ではありません。<a href="https://docs.capacities.io/misc/offline-support" target="_blank" rel="noopener">Offline Support</a>に基づきます。</p>
+    <p>移動中に使うことが多い場合は、導入時に「必要なノートが端末へ取得済みか」「検索や添付ファイルも必要か」を確かめると判断しやすくなります。今回、回線遮断・再接続・競合解消の実験は行っていません。</p>
+  </section>
+  <section class="lp-section" id="export">
+    <h2 class="lp-section__title">移行を考えるなら、少量の書き出しから確認する</h2>
+    <p>公式のエクスポート説明では、属性はfront matter、コレクションはCSV、ノート間のリンクはローカルリンクとして書き出されます。自動エクスポートには保存先の指定と有効なスケジュールが必要で、実行時刻にアプリが開いていることも条件です。<a href="https://docs.capacities.io/reference/export" target="_blank" rel="noopener">Exports and Backups</a>で確認しました。</p>
+    <p>実際の移行では、本・人物・日次メモを少数ずつ用意し、書き出したファイルで本文・リンク・属性・画像が読めるかを確認してから対象を増やすのがよいでしょう。<strong>本記事ではエクスポートやObsidianへの取り込みを実行していません。</strong>書き出せるという仕様だけで、すべての表示や操作が移行先でも同じになるとは判断できません。</p>
+  </section>
+  <section class="lp-section" id="free-plan">
+    <h2 class="lp-section__title">料金は、必要な機能を無料範囲で試してから</h2>
+    <p>2026年9月6日に確認したCapacitiesの公式料金表では、Basicは無料で、カスタムオブジェクト型・端末間同期・インポートとエクスポートを含みます。メディアは合計5GBまで、その後のアップロードは月100MBという別枠です。有料機能や請求周期を含む最新条件は<a href="https://capacities.io/pricing" target="_blank" rel="noopener">公式料金表</a>で確認できます。</p>
+    <p>最初に選ぶのはプランより運用です。同じ読書メモを続けたとき、属性をそろえる方が書きやすいか、自分のファイル構成を育てる方が見返しやすいかで比べてみてください。価格だけの比較は<a href="/obsidian/pricing/">Obsidianの料金ガイド</a>、ファイル中心の別候補は<a href="/obsidian/compare/logseq/">ObsidianとLogseqの比較</a>も参考になります。</p>
+  </section>
+  <section class="lp-section" id="faq"><h2 class="lp-section__title">よくある質問</h2>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">ObsidianとCapacitiesはどちらを選ぶべきですか？</summary><div class="faq-answer">Markdownファイルを自分で管理したいならObsidian、本・人物などの種類ごとに属性をそろえたいならCapacitiesが候補です。今回確認したのはCapacitiesのMac版初回デモです。保存方式の説明は両社の公式資料に基づきます。</div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">CapacitiesはMarkdownファイルをそのまま編集できますか？</summary><div class="faq-answer">公式資料では、通常のノート保存先はCapacities独自のデータベースです。Markdownへのエクスポートはありますが、Obsidianの保管庫フォルダをそのまま共有する運用とは異なります。本記事では実際の書き出しは検証していません。</div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">Capacitiesはオフラインで使えますか？</summary><div class="faq-answer">公式資料では、ノートのダウンロード完了後にオフラインで編集できます。ただし全文検索やAIなどに制限があります。本記事では回線を切っての編集・再同期は検証していません。</div></details></div>
+<div class="faq-item"><details class="faq-details"><summary class="faq-summary">無料で本や人物の種類を作れますか？</summary><div class="faq-answer">2026年9月6日に確認した公式料金表では、無料のBasicにカスタムオブジェクト型、同期、インポート・エクスポートが含まれます。メディアのアップロード量には別の上限があります。</div></details></div>
+  </section>
+  <section class="lp-section" id="verification">
+    <h2 class="lp-section__title">検証環境と範囲</h2>
+    <div class="tip-box"><p><strong>実機確認:</strong> 2026年9月6日、Apple SiliconのMac／macOS 26.4.1／Capacities 1.70.2。公式配布ファイルから起動したログイン前の初回デモで、日次メモへの日本語入力、Bookサンプル、属性、Backlinks、リンク図を確認しました。掲載画像はその実画面です。</p><p><strong>公式資料による確認:</strong> 両アプリの保存方式、プロパティ、Capacitiesのオフライン条件・エクスポート・無料プラン。<strong>未検証:</strong> アカウント作成後の保存継続、カスタム型の作成、実際の同期・書き出し・移行、iOS版の操作感や性能、SimpleMemoからCapacitiesへの直接連携。今回の結果からこれらの動作を保証しません。</p></div>
+    <p>比較対象との提携による記事ではありません。本サイトは株式会社ユリカが運営し、独立アプリ「Obsidian連携シンプルメモ」の情報も掲載しています。</p>
+  </section>
+  <aside class="next-step" style="margin:2rem 0 3rem;">
+    <a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit;"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem;">次に読む</span><strong>Obsidianをメモの送り先にする方法</strong><span style="display:block;margin-top:.5rem;">保管・整理の道具を決めたら、思いついたことをそこへ残す入口を考えます。</span></a>
+  </aside>
+  <nav class="internal-links" aria-label="関連する比較と入門"><a href="/obsidian/compare/">Obsidian比較ハブ</a><a href="/obsidian/compare/logseq/">Logseqとの比較</a><a href="/vs/capacities/">SimpleMemoとの役割の違い</a><a href="/obsidian/getting-started/">Obsidianの始め方</a></nav>
+</div>
+</main>
+  <footer class="footer">
+    <div class="container">
+      <nav class="footer__nav" aria-label="Footer navigation">
+      <div class="footer__col">
+        <p class="footer__col-title">プロダクト</p>
+        <a href="/download/" class="footer__link"><span>ダウンロード</span></a>
+        <a href="/" class="footer__link"><span>ホーム</span></a>
+        <a href="/apple-watch/" class="footer__link"><span>Apple Watch対応</span></a>
+        <a href="/obsidian/" class="footer__link"><span>Obsidian連携</span></a>
+        <a href="/use-cases/" class="footer__link"><span>使い方</span></a>
+        <a href="/guides/" class="footer__link"><span>設定ガイド</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">比較・乗り換え</p>
+        <a href="/note-to-email/" class="footer__link"><span>メモ→メール</span></a>
+        <a href="/vs/" class="footer__link"><span>比較</span></a>
+      </div>
+      <div class="footer__col">
+        <p class="footer__col-title">サポート</p>
+        <a href="/roadmap/" class="footer__link"><span>公開ロードマップ</span></a>
+        <a href="/devlog/" class="footer__link"><span>開発記録</span></a>
+        <a href="/about/" class="footer__link"><span>開発者について</span></a>
+        <a href="/faq" class="footer__link"><span>FAQ</span></a>
+        <a href="/privacy" class="footer__link"><span>プライバシー</span></a>
+        <a href="/contact" class="footer__link"><span>お問い合わせ</span></a>
+      </div>
+      </nav>
+      <p class="footer__copyright">
+        © 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ
+      </p>
+    </div>
+  </footer>
+
+  <script>
+  // Close mobile nav when clicking a link
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
+  });
+  </script>
+  <script src="/js/app-store-tracking.js?v=50afcb3e2a" defer></script>
+</body>
+</html>
