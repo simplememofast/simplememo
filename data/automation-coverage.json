@@ -361,13 +361,16 @@
     {
       "area": "② バグ修正",
       "task": "実機/シミュレータでの操作・撮影・計測",
-      "executor": "human_only",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "../simplememo-ios/SimpleMemoUITests/ArticleScreenshotUITests.swift",
+        "../simplememo-ios/scripts/qa/capture-article-screenshots.sh",
+        "../simplememo-ios/scripts/qa/summarize_xcresult.py",
+        "../simplememo-ios/data/qa-capture-2026-09-06.json"
       ],
-      "note": "macOS必須。Runbook §7「できないこと」の筆頭\n\n**[2026-08-28] 前提が広すぎた。ただし覆ってはいない。**「macOSが要る＝人間だけ」と書いてあるが、**macOSの経路は2つある** —— GitHub Actions の macOSランナー（予算保護でAIは起動しない）と、**Xcode Cloud（Apple側の課金で、GitHubの予算とは別勘定）**。後者は自動で走っている: simplememo-ios#239（2026-08-27）に `SimpleMemo | PR Check | Build - iOS` が success で出ており、**人は何も触っていない。**起動と診断のAPI経路も在る（scripts/xcode_cloud_start_build.rb / xcode_cloud_diagnose.rb）。\n\n**それでも覆せない。**同じPRに出たのは Build だけで、**UIテスト（SimpleMemoQA / SimpleMemo-iOS-PR）は出ていない。**docs/qa/XCODE_CLOUD_ONE_TIME_SETUP.md はそれを『PR Check の合格に必要』と書いているので、**書いてあることと実際が食い違っている**（変更ファイルで起動条件が絞られているのか、アクションが外れているのかは、ASCの鍵が無いのでここでは確かめられない）。撮影のほうは docs/qa/ARTICLE_SCREENSHOTS.md が『ローカルMac』での通し実行しか記録していない。\n\n**したがって分類は動かさない。**言えるのは「人間だけ」の理由が予算保護だけではないことと、**この食い違い自体が確かめるべき対象**だということ",
-      "blocker": "physical_human",
-      "unblocked_by": "macOSランナーが要り、予算保護で人間の名指し起動のみ。**[2026-08-28] Xcode Cloud（Apple課金）は自動で走っており、そちらには予算保護が効かない。**覆すのに要るのは (1) UIテストのアクションが実際にPRで起動しているかの確認（ASCの鍵が要る。設定書は『合格に必要』と書いているが simplememo-ios#239 では Build しか出ていない）と (2) 撮影を Xcode Cloud 側で完結させ、成果物を取り出す経路"
+      "note": "macOS必須。Runbook §7「できないこと」の筆頭\n\n**[2026-08-28] 前提が広すぎた。ただし覆ってはいない。**「macOSが要る＝人間だけ」と書いてあるが、**macOSの経路は2つある** —— GitHub Actions の macOSランナー（予算保護でAIは起動しない）と、**Xcode Cloud（Apple側の課金で、GitHubの予算とは別勘定）**。後者は自動で走っている: simplememo-ios#239（2026-08-27）に `SimpleMemo | PR Check | Build - iOS` が success で出ており、**人は何も触っていない。**起動と診断のAPI経路も在る（scripts/xcode_cloud_start_build.rb / xcode_cloud_diagnose.rb）。\n\n**それでも覆せない。**同じPRに出たのは Build だけで、**UIテスト（SimpleMemoQA / SimpleMemo-iOS-PR）は出ていない。**docs/qa/XCODE_CLOUD_ONE_TIME_SETUP.md はそれを『PR Check の合格に必要』と書いているので、**書いてあることと実際が食い違っている**（変更ファイルで起動条件が絞られているのか、アクションが外れているのかは、ASCの鍵が無いのでここでは確かめられない）。撮影のほうは docs/qa/ARTICLE_SCREENSHOTS.md が『ローカルMac』での通し実行しか記録していない。\n\n**したがって分類は動かさない。**言えるのは「人間だけ」の理由が予算保護だけではないことと、**この食い違い自体が確かめるべき対象**だということ\n\n2026-09-06: CodexがローカルMacの専用iPhoneシミュレータで撮影UIテストを実行。操作・可視性assert・3枚の撮影・出力・寸法計測・画像確認を完了。1テスト成功/失敗0、70.480秒、1206x2622。新規ビルドは空き容量不足で停止したため5.8.14/build1の既存テスト成果物を利用し指紋を記録。最新版5.8.20の検証、実機、音声認識精度、AirPods/Watch確認には広げない。状態バーが黒くサイズも記事基準超過のため記事掲載は未承認。専用シミュレータは終了後に削除。GitHub macOS QAは起動せず、実機での事前確認は別行のまま。",
+      "since": "2026-09"
     },
     {
       "area": "② バグ修正",
@@ -644,14 +647,15 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "AIプローブ（生成AI検索での露出確認）",
-      "executor": "human_only",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "growth/input/AI_PROBE_PROTOCOL.md"
+        "growth/input/AI_PROBE_PROTOCOL.md",
+        "scripts/ai-visibility-probe.py",
+        ".github/workflows/ai-visibility-probe.yml",
+        "data/ai-visibility-probe.json"
       ],
-      "note": "月1・オーナーが手動",
-      "blocker": "external_credential",
-      "unblocked_by": "生成AI検索を叩く経路が無い",
-      "unlock": "analytics_vendors"
+      "note": "月1・オーナーが手動\n\n2026-09-06: 5固定質問をリポジトリ文脈無しの独立CLIセッションで実検索し、tool_use/tool_resultの成功対応を照合する週次経路を本番化。https://github.com/simplememofast/simplememo/actions/runs/34016914073 が成功。全5問有効・検索呼び出し6件、非指名4問中2問で言及、実費0.238017ドルを費用台帳へ記録。Claude Sonnetのみの新系列であり、旧手動3社比較の継続ではない。Q5は言及率から除外。予算不足・検索未実行・不完全回答は成功に数えない。観測結果と実費はPR #997で公開。",
+      "since": "2026-09"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -2359,12 +2363,14 @@
     {
       "area": "⑬ アナログ領域",
       "task": "R&D: 調査・仮説・プロトタイプ・実験",
-      "executor": "ai_proposes",
-      "evidence": [],
-      "note": "本セッション自体がその実例（調査→実装→検証）",
-      "blocker": "not_started",
-      "unblocked_by": "実例はあるが定型の実行経路が無い",
-      "unlock": "impl_analog"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "scripts/radar-research.py",
+        ".github/workflows/radar-research.yml",
+        "data/radar-research.json"
+      ],
+      "note": "本セッション自体がその実例（調査→実装→検証）\n\n2026-09-06: 公開ソース調査→仮説→並列取得の試作→3組の順序交替実験→結果判定を週次実行する経路を本番化。https://github.com/simplememofast/simplememo/actions/runs/34016328602 が成功し観測PR #996を経て公開JSONのrun_urlを確認。観測同等性を満たし中央値68.28%短縮、仮説supported。ただし小標本で一般化せず、本番方式の昇格・投資判断は自動実行しない。ローカル初回のinconclusiveも保持。",
+      "since": "2026-09"
     },
     {
       "area": "⑬ アナログ領域",
