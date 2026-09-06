@@ -531,8 +531,8 @@
       "name": "課金相当性（宣言）",
       "formula": "URL → 0.2 / 0.5 / 1.0 の3段。基準は「その面の読者が Free の1日3通の天井に当たる使い方をするか」",
       "source_file": "growth/lib/gsc.mjs",
-      "version": 3,
-      "checksum": "c55a94b8b5aa7e6b",
+      "version": 4,
+      "checksum": "0b72134a82cc763e",
       "changed_at": "2026-09-06",
       "why_it_matters": "**businessRelevance がDLと課金を同じ数字で表していた。**Premium が売っているのは機能ではなく送信回数の上限（Free 1日3通 → 無制限・月500円）なので、課金するのは「毎日何度もキャプチャする人」だけ。「メモアプリ 無料」はDLの母数として優秀でも課金には効きにくい、という割れ方をここで表す。**これは実測ではなく宣言。**ct=別のインストール／課金はこのリポジトリに無い（公開リポジトリなので分類列ごとの内訳を置かず、ASCの列も Source Type / Page Type までで Campaign が無い）。反証は growth/scripts/intent-axes.mjs の freeSeekingShare が担い、高く宣言した面が無料狙いクエリで出ていればCIが落ちる。段を3つに絞ってあるのは、最初5段で書いたら218ページ中129ページが businessRelevance との差0.1〜0.2に収まり、**2軸目のほとんどが1軸目の写しになっていた**ため",
       "history": [
@@ -545,6 +545,11 @@
           "version": 3,
           "at": "2026-09-06",
           "why": "BUSINESS_RELEVANCE に /notion/ = 1.0 の1行を足しただけで、**定義（関連度をどう点に写すか）は変えていない。**受け皿ページ /notion/ を新設したため、規則が無いと既定 0.5 に落ちる（同ファイルが注記している「規則に当たらず既定へ落ちた101ページ」と同じ穴）。/obsidian/ と同じ 1.0 に揃えた。"
+        },
+        {
+          "version": 4,
+          "at": "2026-09-06",
+          "why": "定義は変えていない。実験の比較期間を検査するため loadSnapshot に dates.json の読み込みを追加しただけで、BUSINESS_RELEVANCE の値・条件・課金相当性の式は変更していない。"
         }
       ]
     },
