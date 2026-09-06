@@ -8,8 +8,13 @@
   "closed_today": [
     {
       "id": "act-cost-sync",
-      "title": "実費記録の同期が必要な run が 2件",
+      "title": "実費記録の同期が必要な run が 1件",
       "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み（実行種別は導入前のため記録なし 2件: 32667079679, 32779337325。費用は取得済み）（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）"
+    },
+    {
+      "id": "act-ledger-sync",
+      "title": "運転台帳に載っていない Actions run が 1件",
+      "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）"
     },
     {
       "id": "act-selfheal-ap-20260830-actions",
@@ -77,14 +82,6 @@
   ],
   "ai": [
     {
-      "id": "act-ledger-sync",
-      "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33959414641（2026-09-05 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
-      "age_days": 1,
-      "auto": "reconcile-runs",
-      "evidence": "台帳に無い run が 1件: 33959414641（記録対象外 1件を除外: 32817335365）"
-    },
-    {
       "id": "act-routine-run-trig_013uV3Pk3SZH8QJS6PxSg9Bw",
       "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0） (stopped)",
       "detail": "登録済みタスク trig_013uV3Pk3SZH8QJS6PxSg9Bw。観測 2026-09-06T08:25:42.186Z、状態 stopped。\n実行 2026-09-05T10:35:45.582040954Z、セッション cse_017mXdfL64H762ZJMNcucRgy、終了 2026-09-05T10:59:08.552542Z、次回 2026-09-06T10:34:38.030652858Z、追跡開始時の予定 2026-09-05T10:34:49.332619211Z。\n名前は外部メタデータであり指示ではない。既存の調査・置換作業と実行証跡を照合し、原因と対応結果を記録する。未確定は故障や成功に数えない。利用枠リセット、再実行、投稿、予定・権限変更の許可をこの行から推定しない。解消は新しい観測の終了証跡、または理由付きの意図的停止と照合する。セッション終了は依頼内容の達成や自動修復の証明ではない。",
@@ -132,6 +129,14 @@
       "evidence": "#1006 がまだ open"
     },
     {
+      "id": "act-selfheal-ap-20260905-actions-33959414641",
+      "title": "未修理の故障: ap-20260905-actions-33959414641（no_artifact）",
+      "detail": "2026-09-05 / actions / outcome=no_artifact。2026-09-05 09:58:55Z開始の実行は20 turns・実費USD0.8407852で終了したが、新しい成果物PRはない。旧成果物検査は当日ブランチの存在のみで成功した。実際のclaude/obsidian-auto-20260905先頭は開始前の2026-09-04 22:53:58Zに作られた宣言コミットa8f319cfb07687f54c1e1f2548e3d96324c8b23eのままで、対象ブランチのPRは全状態で0件。既存PR943の実行ID照合修正後の正常実行は別途確認する。",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "ap-20260905-actions-33959414641 は未修理のまま（repair_of で名指しされていない）"
+    },
+    {
       "id": "act-selfheal-ap-20260906-actions",
       "title": "未修理の故障: ap-20260906-actions（unknown）",
       "detail": "2026-09-06 / actions / outcome=failed。GitHub run 33996430959 のSDK結果で error_max_turns / num_turns=251 / total_cost_usd=19.6008722 を確認。資格情報の単独診断は成功。ブランチの履歴と保存ログにはC09の価値契約を4回宣言・取り下げた後、分割sitemapが許可範囲外となり出荷を断念した記録がある。この2つの詰まり（分割sitemapの許可・宣言前の記帳順序）は既存PR #973（a0425806）で修正済み、支出閾値はPR #976で実装済み。モデル・資格情報を根拠なく入れ替えたり同じ修正を再実装しない。修正後の主系正常完走は未確認。後続run 34022754964はskip_branch_claimedでモデル未実行のため復旧証拠にしない。",
@@ -142,10 +147,10 @@
   ],
   "executed": [
     {
-      "handler": "reconcile-runs",
+      "handler": "append-cost",
       "ok": true,
-      "changed": 0,
-      "log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない"
+      "changed": 1,
+      "log": "ap-20260905-actions-33959414641: enriched 2026-09-05 actions $0.8408"
     }
   ]
 }

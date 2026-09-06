@@ -1872,7 +1872,7 @@
     },
     {
       "candidate_id": "act-cost-sync",
-      "title": "実費記録の同期が必要な run が 2件",
+      "title": "実費記録の同期が必要な run が 1件",
       "judged_jst": "2026-09-06",
       "verdict": "eligible",
       "halted": false,
@@ -2627,6 +2627,48 @@
         "reversibility: 可逆性クラスが引けない（domain も lane も touches も無い）",
         "boundedness: 触るパスが宣言されていない（範囲外かどうかを判定できない）"
       ]
+    },
+    {
+      "candidate_id": "act-selfheal-ap-20260905-actions-33959414641",
+      "title": "未修理の故障: ap-20260905-actions-33959414641（no_artifact）",
+      "judged_jst": "2026-09-06",
+      "verdict": "eligible",
+      "halted": false,
+      "reversibility_class": "R0",
+      "criteria": {
+        "reversibility": {
+          "result": "pass",
+          "why": "R0",
+          "class": "R0",
+          "class_source": "touches:repo-internal"
+        },
+        "boundedness": {
+          "result": "pass",
+          "why": "2 パス・selfheal の範囲内",
+          "scope": "selfheal",
+          "scope_source": "inferred"
+        },
+        "evidence_age": {
+          "result": "pass",
+          "why": "0 日前の観測（machine_observed）",
+          "age_days": 0,
+          "evidence_source": "machine_observed"
+        },
+        "budget": {
+          "result": "pass",
+          "why": "予測 $0.2380（derived_median / 上限 $1.5）",
+          "predicted_usd": 0.23801699999999998,
+          "cap_usd": 1.5,
+          "kind": "analysis",
+          "prediction_source": "derived_median"
+        },
+        "repeat_guard": {
+          "result": "pass",
+          "why": "0 日（上限 7 日 / 実行主体 不要）",
+          "open_days": 0
+        }
+      },
+      "reasons": []
     },
     {
       "candidate_id": "act-selfheal-ap-20260906-actions",
