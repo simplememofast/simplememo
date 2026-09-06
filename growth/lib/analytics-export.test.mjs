@@ -181,6 +181,8 @@ test('funnel always includes quality output and keeps the standard event denomin
   assert.ok(sql.includes("event_name = 'app_store_click'"));
   assert.ok(!sql.includes("event_name = 'seo_cta_click'"));
   assert.equal(api.calls.at(-1).params.measurement_version, '2026-09-05');
+  assert.ok(api.calls.every(q => q.params.bridge_measurement_version === '2026-09-07'));
+  assert.match(result.interpretation, /QA is excluded/);
 });
 test('journey uses the same date, following-day, encryption and two-query cost contract', async () => {
   const options = { ...ga4, report: 'ga4-journey' };

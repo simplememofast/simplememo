@@ -1,5 +1,6 @@
 -- BigQuery Standard SQL. NOT EXECUTED; validate actual export schema first.
 -- DATE parameters @start_date, @end_date; STRING @measurement_version.
+-- STRING @bridge_measurement_version for the separate OneLink event contract.
 -- No user identifiers or full page URLs are emitted in the result.
 WITH extracted AS (
   SELECT
@@ -11,6 +12,8 @@ WITH extracted AS (
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location') AS page_location,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'measurement_version') AS measurement_version,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'link_url') AS link_url,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'link_route') AS link_route,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'bridge_scope') AS bridge_scope,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'placement') AS placement,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'cluster') AS cluster,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'variant') AS variant,
@@ -48,7 +51,19 @@ SELECT
   COUNTIF(event_name IN ('app_store_click', 'seo_cta_click', 'seo_cta_impression') AND
     (NULLIF(placement, '') IS NULL OR placement = '(untagged)'
      OR NULLIF(cluster, '') IS NULL OR cluster = '(untagged)'
-     OR NULLIF(variant, '') IS NULL OR NULLIF(ct, '') IS NULL)) AS cta_dimensions_incomplete
+     OR NULLIF(variant, '') IS NULL OR NULLIF(ct, '') IS NULL)) AS cta_dimensions_incomplete,
+  COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND
+    (measurement_version IS NULL OR measurement_version != @bridge_measurement_version)) AS onelink_version_missing_or_other,
+  COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND NOT IFNULL(
+    link_route = 'onelink' AND REGEXP_CONTAINS(link_url,
+      r'^https://simplememofast\.onelink\.me/it5q/[A-Za-z0-9]{8}$'), FALSE)) AS onelink_target_invalid_or_missing,
+  COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND
+    (NULLIF(placement, '') IS NULL OR placement = '(untagged)'
+     OR NULLIF(cluster, '') IS NULL OR cluster = '(untagged)'
+     OR NULLIF(variant, '') IS NULL OR NOT IFNULL(bridge_scope IN ('qa', 'pilot'), FALSE))) AS onelink_dimensions_incomplete,
+  COUNTIF(event_name IN ('web_to_app_click', 'web_to_app_impression') AND
+    link_url = 'https://simplememofast.onelink.me/it5q/4x0jfkpw'
+    AND NOT IFNULL(bridge_scope = 'qa', FALSE)) AS onelink_qa_scope_mismatch
 FROM scoped
 GROUP BY event_date, hostname_scope, event_name
 ORDER BY event_date, hostname_scope, event_name;

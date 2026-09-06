@@ -26,6 +26,9 @@ COLUMNS = {
     "device_category": "VARCHAR", "device_language": "VARCHAR",
     "page_location": "VARCHAR", "page_referrer": "VARCHAR",
     "measurement_version": "VARCHAR", "link_url": "VARCHAR",
+    "link_route": "VARCHAR", "bridge_scope": "VARCHAR",
+    "event_date": "VARCHAR", "analytics_storage": "VARCHAR", "placement": "VARCHAR",
+    "cluster": "VARCHAR", "variant": "VARCHAR", "ct": "VARCHAR",
     "default_channel_group": "VARCHAR", "attributed_source": "VARCHAR", "attributed_medium": "VARCHAR",
 }
 
@@ -81,8 +84,8 @@ def click(user, offset=2, **overrides):
                  link_url="https://apps.apple.com/jp/app/id6758438948?ct=fixture", **overrides)
 
 
-def run(events):
-    tree = sqlglot.parse_one(SQL.read_text(), read="bigquery")
+def run(events, sql_file=SQL):
+    tree = sqlglot.parse_one(sql_file.read_text(), read="bigquery")
     first = tree.args["with_"].expressions[0]
     assert first.alias_or_name == "extracted"
     first.set("this", sqlglot.parse_one("SELECT * FROM fixture_events"))
@@ -95,9 +98,9 @@ def run(events):
         con.execute("CREATE TABLE fixture_events (" + ", ".join(f"{k} {v}" for k, v in COLUMNS.items()) + ")")
         con.executemany("INSERT INTO fixture_events VALUES (" + ",".join("?" for _ in COLUMNS) + ")",
                         [[row.get(k) for k in COLUMNS] for row in events])
-        result = con.execute(query, {"start_date": datetime.date(2026, 9, 6),
-                                     "end_date": datetime.date(2026, 9, 6),
-                                     "measurement_version": "2026-09-05"})
+        params = {"start_date": datetime.date(2026, 9, 6), "end_date": datetime.date(2026, 9, 6),
+                  "measurement_version": "2026-09-05", "bridge_measurement_version": "2026-09-07"}
+        result = con.execute(query, {k: v for k, v in params.items() if "$" + k in query})
         names = [c[0] for c in result.description]
         return [dict(zip(names, row)) for row in result.fetchall()]
     finally:
@@ -105,6 +108,71 @@ def run(events):
 
 
 class FunnelTests(unittest.TestCase):
+    def bridge(self, user, kind="web_to_app_click", offset=2, **overrides):
+        data = dict(measurement_version="2026-09-07", link_route="onelink", bridge_scope="pilot",
+                    link_url="https://simplememofast.onelink.me/it5q/test1234")
+        data.update(overrides)
+        return event(user, kind, offset, **data)
+
+    def test_onelink_and_direct_routes_are_separate_with_a_distinct_session_union(self):
+        rows = run(visit("both") + [click("both"), self.bridge("both"), self.bridge("both", offset=3),
+                   self.bridge("both", "web_to_app_impression", offset=1)] +
+                   visit("bridge") + [self.bridge("bridge")] + visit("none"))
+        row = rows[0]
+        self.assertEqual(row["observed_started_sessions"], 3)
+        self.assertEqual(row["sessions_with_own_app_click_24h"], 1)
+        self.assertEqual(row["sessions_with_onelink_click_24h"], 2)
+        self.assertEqual(row["sessions_with_onelink_impression"], 1)
+        self.assertEqual(row["onelink_clicked_without_recorded_impression"], 1)
+        self.assertEqual(row["sessions_with_both_app_routes_24h"], 1)
+        self.assertEqual(row["sessions_with_any_app_route_click_24h"], 2)
+        self.assertEqual(row["sessions_with_cta_impression"], 0)
+
+    def test_onelink_qa_is_visible_but_excluded_even_with_a_wrong_pilot_label(self):
+        rows = run(visit("qa") + [self.bridge("qa", bridge_scope="qa")] + visit("wrong") +
+                   [self.bridge("wrong", link_url="https://simplememofast.onelink.me/it5q/4x0jfkpw")])
+        self.assertEqual(rows[0]["sessions_with_onelink_qa_click_24h"], 2)
+        self.assertEqual(rows[0]["sessions_with_onelink_click_24h"], 0)
+        self.assertEqual(rows[0]["sessions_with_any_app_route_click_24h"], 0)
+
+    def test_invalid_bridge_targets_versions_routes_and_scopes_cannot_count(self):
+        invalid = [{"link_route": None}, {"link_route": "direct"}, {"bridge_scope": None},
+                   {"bridge_scope": "organic"}, {"measurement_version": "2026-09-05"}]
+        invalid += [{"link_url": url} for url in [None,
+            "https://apps.apple.com/app/id6758438948", "https://simplememofast.onelink.me.evil.test/it5q/test1234",
+            "http://simplememofast.onelink.me/it5q/test1234", "https://user@simplememofast.onelink.me/it5q/test1234",
+            "https://simplememofast.onelink.me/other/test1234", "https://simplememofast.onelink.me/it5q/test1234?token=private"]]
+        for change in invalid:
+            with self.subTest(change=change):
+                row = run(visit("a") + [self.bridge("a", **change)])[0]
+                self.assertEqual(row["sessions_with_onelink_click_24h"], 0)
+                self.assertEqual(row["sessions_with_own_app_click_24h"], 0)
+
+    def test_onelink_requires_production_identifiers_start_and_24_hour_window(self):
+        events = (visit("a") + [self.bridge("a", offset=-1), self.bridge("a", offset=86_400_000_000),
+                 self.bridge("a", page_location="https://preview.simplememo.pages.dev/")] +
+                 visit(None) + [self.bridge(None)] + [self.bridge("nostart")])
+        row = run(events)[0]
+        self.assertEqual(row["observed_started_sessions"], 1)
+        self.assertEqual(row["sessions_with_onelink_click_24h"], 0)
+        row = run(visit("a") + [self.bridge("a", offset=86_399_999_999)])[0]
+        self.assertEqual(row["sessions_with_onelink_click_24h"], 1)
+
+    def test_quality_exposes_bridge_failures_and_does_not_require_apple_ct(self):
+        sql = SQL.with_name("ga4-quality.sql")
+        good = self.bridge("a", placement="hero", cluster="obsidian", variant="pilot")
+        invalid = [dict(good, link_url=None), dict(good, measurement_version=None),
+                   dict(good, bridge_scope=None), dict(good, placement=None),
+                   dict(good, link_url="https://simplememofast.onelink.me/it5q/4x0jfkpw")]
+        row = run([good] + invalid, sql)[0]
+        self.assertEqual(row["recorded_events"], 6)
+        self.assertEqual(row["onelink_target_invalid_or_missing"], 1)
+        self.assertEqual(row["onelink_version_missing_or_other"], 1)
+        self.assertEqual(row["onelink_dimensions_incomplete"], 2)
+        self.assertEqual(row["onelink_qa_scope_mismatch"], 1)
+        self.assertEqual(row["cta_dimensions_incomplete"], 0)
+        self.assertEqual(row["click_target_invalid_or_missing"], 0)
+
     def test_projection_trims_session_fields_without_other_attribution_fallbacks(self):
         tree = sqlglot.parse_one(SQL.read_text(), read="bigquery")
         fields = [item for item in tree.args["with_"].expressions[0].this.expressions

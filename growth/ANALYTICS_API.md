@@ -35,6 +35,59 @@ It counts `app_store_click` for app ID `6758438948`, without adding the mirrored
 `seo_cta_click`. Unknown channels and nonproduction remain QA rows.
 Do not interpret this click rate as installation rate, revenue or LTV.
 
+### OneLink pilot intent
+
+The collector supports opt-in OneLink short links using `web_to_app_click` and
+`web_to_app_impression`, with `link_route=onelink`, `bridge_scope=qa|pilot` and
+`measurement_version=2026-09-07`. Existing direct Apple events retain version
+`2026-09-05`; their names, dimensions, mirrored click and rate definitions stay
+unchanged. Neither event proves a Store arrival or app installation.
+
+An opted-in anchor needs `data-app-route="onelink"`,
+`data-app-traffic="qa"` or `"pilot"`, and the existing CTA placement/cluster/variant
+attributes. Only HTTPS short URLs on `simplememofast.onelink.me`, template `it5q`,
+with an eight-character alphanumeric link ID are accepted. Long parameter URLs,
+other templates, credentials and custom ports are rejected. The recorded
+`link_url` keeps the clicked origin/path and omits query/fragment; it is never
+replaced with a supposed Apple destination. The known routing QA link stays QA
+even if its markup mistakenly says pilot. Other QA links must be labeled QA.
+
+`ga4-quality` checks the new version, target, scope and CTA dimensions separately;
+OneLink events do not require Apple's `ct`. `ga4-funnel` adds:
+
+- `sessions_with_onelink_impression`, `sessions_with_onelink_click_24h`, and
+  `onelink_clicked_without_recorded_impression`: opt-in pilot route observations.
+- `sessions_with_onelink_qa_click_24h`: QA observations, excluded from pilot and
+  combined-route counts, including a mislabeled known QA URL.
+- `sessions_with_both_app_routes_24h`: intersection of direct and pilot clicks.
+- `sessions_with_any_app_route_click_24h`: their distinct session union. Do not
+  add the two route counts; a person may use both in the same session.
+
+These use the existing observed session-start cohort, exact production host,
+session identifier and strictly less than 24-hour guards. OneLink adds no new
+rate and does not change session attribution to SEO. Impressions and clicks
+are same-session observations, not a match to one specific rendered CTA or proof
+of chronological causation. Read the quality output first. Version parameters
+for direct events and OneLink are recorded separately in each query artifact.
+
+The collector does not generate links, load AppsFlyer scripts, forward IDs or
+change navigation. No site anchor is switched by this implementation. Existing
+Apple hrefs continue working even with opt-in attributes, including a fallback.
+Impression monitoring covers anchors present when the tracker starts; later
+inserted anchors get delegated clicks only. URL replacement before first
+visibility is revalidated; changes after an element's first impression do not
+start a new exposure. Do not apply an asynchronous link rewriter without a new
+exposure lifecycle design and tests.
+
+Start the pilot only after its non-QA link, actual device redirect/first-launch
+receipt, privacy configuration and Apple campaign-series change are verified.
+Annotate the activation date/placement. Before activation, absent OneLink events
+or zero SQL columns are not measured zero demand. Synthetic tests cover these
+new fields; live BigQuery validation and the same mature-day conditions remain
+required. GA4's [custom event setup](https://developers.google.com/analytics/devguides/collection/ga4/events)
+and [BigQuery aggregate definitions](https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#countif)
+are the underlying collection and counting references.
+
 ### Comparing referral channels
 
 `session_source` and `session_medium` come only from

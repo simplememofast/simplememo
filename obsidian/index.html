@@ -24,7 +24,7 @@
     });
   </script>
   <title>Obsidianに最速でメモを送る方法 — iPhoneから自動追記（プラグイン不要）</title>
-  <meta name="description" content="Obsidian連携シンプルメモのObsidian連携。送信したメモをiCloud Drive内のObsidian保管庫へ自動追記。プラグイン不要・アプリを開かずバックグラウンドで、デイリーノートやInboxノートにタイムスタンプ付きで記録します。設定は約1分。">
+  <meta name="description" content="Obsidian連携シンプルメモで、iPhoneのメモをデイリーノートやInboxへ自動追記。プラグイン不要のフォルダ連携を、保存先の選択・書き込みテスト・最初のメモ確認まで案内します。保存先が違う場合や書き込みに失敗した場合の対処も解説。">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
@@ -72,10 +72,10 @@
   </script>
 
   <!-- JSON-LD: Article -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/#article","inLanguage":"ja","headline":"Obsidianに最速でメモを送る方法 — iPhoneから自動追記（プラグイン不要）","description":"Obsidian連携シンプルメモのObsidian連携。送信したメモをiCloud Drive内のObsidian保管庫へ自動追記。プラグイン不要・アプリを開かずバックグラウンドで、デイリーノートやInboxノートにタイムスタンプ付きで記録します。","url":"https://simplememofast.com/obsidian/","datePublished":"2026-05-30","dateModified":"2026-07-02","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-banner.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/#article","inLanguage":"ja","headline":"Obsidianに最速でメモを送る方法 — iPhoneから自動追記（プラグイン不要）","description":"Obsidian連携シンプルメモのObsidian連携。送信したメモをiCloud Drive内のObsidian保管庫へ自動追記。プラグイン不要・アプリを開かずバックグラウンドで、デイリーノートやInboxノートにタイムスタンプ付きで記録します。","url":"https://simplememofast.com/obsidian/","datePublished":"2026-05-30","dateModified":"2026-09-07","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/obsidian-banner.jpg","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/obsidian/"}}</script>
 
   <!-- JSON-LD: FAQPage -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidianのプラグインは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。コミュニティプラグインは不要です。Obsidianの標準機能だけで動作します。iCloud Drive上の保管庫フォルダへ、アプリが直接ノートを書き込みます。"}},{"@type":"Question","name":"メモを送るたびにObsidianが開きますか？","acceptedAnswer":{"@type":"Answer","text":"フォルダを選んでいれば開きません。メモはバックグラウンドでノートに追記されます。フォルダを選んでいない場合のみ、フォールバックとしてURLスキームでObsidianが一瞬開いて追記します。"}},{"@type":"Question","name":"どのノートに、どんな形で追記されますか？","acceptedAnswer":{"@type":"Answer","text":"設定した送り先によります。デイリーノートを選ぶとその日の yyyy-MM-dd.md に、Inboxノートを選ぶと固定のInboxノートに追記されます。既定では - HH:mm メモ のタイムスタンプ付きリスト行で追記します。設定でタイムスタンプをオフにでき、追記テンプレートで文頭・文末にチェックボックスやタグなどを付けられます。iPhoneとApple Watchで別々に設定でき、既存のノート内容は消しません。"}},{"@type":"Question","name":"Obsidian Syncだけで同期している場合も使えますか？","acceptedAnswer":{"@type":"Answer","text":"対象フォルダがiCloud Driveまたは「このiPhone内」にあり、ファイルAppからアクセスできる必要があります。Obsidian Sync専用の保管庫はフォルダ選択に出ないことがあり、その場合はURLスキーム方式にフォールバックします。"}},{"@type":"Question","name":"Androidやパソコンでも使えますか？","acceptedAnswer":{"@type":"Answer","text":"連携を行うObsidian連携シンプルメモは現在iPhone（iOS 16以降）向けアプリです。追記先のObsidian保管庫をiCloud DriveやObsidian Syncで同期しておけば、Mac・iPad・他端末のObsidianからも同じノートを開けます。"}},{"@type":"Question","name":"メモはサーバに保存されますか？","acceptedAnswer":{"@type":"Answer","text":"Obsidianへの追記は端末内で完結するローカル処理です。既存の送信・暗号化経路には一切変更を加えていません。メール本文は送信時の通過のみで、当社サーバに恒常的に保存しません。"}},{"@type":"Question","name":"今までのメール送信はどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"通常モードではメールとObsidianの両方に残ります。圏外ではメールをOutboxに保存し、選択済みフォルダへの追記は端末内で行います。Premiumでは、設定で保管庫フォルダを選んで書き込みテストを済ませると「Obsidianのみに保存（メールを送らない）」をオンにできます。有効な間はメモをメールで送らず、保管庫だけに保存します。Premiumの期限が切れても、このモードは無料枠の1日3件で継続します。"}},{"@type":"Question","name":"オフライン（圏外）でもObsidianに追記されますか？","acceptedAnswer":{"@type":"Answer","text":"はい。フォルダ直書き方式では、選んだフォルダのローカルファイルにその場で追記されるため、インターネット接続は不要です。圏外でメールがOutboxに入っても、Obsidianのノートにはローカルで保存されます。他端末への反映（iCloud同期）は通信が戻ったときに行われます。"}},{"@type":"Question","name":"ObsidianのInboxノートにまとめて貯められますか？","acceptedAnswer":{"@type":"Answer","text":"はい。送り先に固定の「Inboxノート」を選べば、送ったメモはすべてその1枚に時系列で追記されます（既定は - HH:mm メモ の形式）。あとでObsidian側で仕分け・リンクするだけ。デイリーノートとInboxノートはいつでも切り替えられます。"}},{"@type":"Question","name":"Gmail・Outlook・iCloudのメールでもObsidianに残せますか？","acceptedAnswer":{"@type":"Answer","text":"メールの宛先（Gmail / Outlook / iCloud など）に関係なくObsidian追記は動きます。Obsidianへの追記は端末内のローカル処理で、メール送信とは独立しているためです。通常モードではメールは普段の受信箱に届き、同じメモがObsidianにも残ります。「Obsidianのみに保存」が有効な間は、メモのメール送信を行いません。"}},{"@type":"Question","name":"Apple WatchからObsidianに送れますか？","acceptedAnswer":{"@type":"Answer","text":"Apple Watchから自分宛にメモを送ると、iPhone側の連携処理を通じて同じメモがObsidianにも追記されます（追記はiPhoneが担当し、Watchが保管庫へ直接書き込むわけではありません）。詳しくはApple Watch対応ページをご覧ください。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/obsidian/#faq","inLanguage":"ja","mainEntity":[{"@type":"Question","name":"Obsidianのプラグインは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"フォルダへの直接書き込みにコミュニティプラグインは不要です。iCloud Driveまたは「このiPhone内」の選んだフォルダへ書き込みます。この方式ではDaily Notes機能の有効化も不要です。先に設定の「Obsidian書き込みテスト」で保存先を確認してください。"}},{"@type":"Question","name":"メモを送るたびにObsidianが開きますか？","acceptedAnswer":{"@type":"Answer","text":"選んだフォルダへの直接書き込みが成功すれば、Obsidianを開かずに追記できます。通常モードではフォルダが未選択の場合や直接書き込みに失敗した場合に、URLスキームでObsidianを開いて追記を試みることがあります。設定の書き込みテストはフォルダへの直接書き込みだけを確認します。"}},{"@type":"Question","name":"どのノートに、どんな形で追記されますか？","acceptedAnswer":{"@type":"Answer","text":"「デイリーノート」は選んだフォルダのその日の yyyy-MM-dd.md に、「指定したノート」は設定した名前のファイル（既定は Inbox.md）に追記します。既定の書式は - HH:mm メモ です。「追記の書式」でタイムスタンプや文頭・文末のテンプレートを変更でき、iPhoneとApple Watchで別々に設定できます。追記時に既存のノート内容は消しません。"}},{"@type":"Question","name":"Obsidian Syncだけで同期している場合も使えますか？","acceptedAnswer":{"@type":"Answer","text":"対象フォルダがiCloud Driveまたは「このiPhone内」にあり、ファイルAppからアクセスできる必要があります。Obsidian Sync専用の保管庫はフォルダ選択に出ないことがあり、その場合はURLスキーム方式にフォールバックします。"}},{"@type":"Question","name":"Androidやパソコンでも使えますか？","acceptedAnswer":{"@type":"Answer","text":"連携を行うObsidian連携シンプルメモは現在iPhone（iOS 16以降）向けアプリです。追記先のObsidian保管庫をiCloud DriveやObsidian Syncで同期しておけば、Mac・iPad・他端末のObsidianからも同じノートを開けます。"}},{"@type":"Question","name":"メモはサーバに保存されますか？","acceptedAnswer":{"@type":"Answer","text":"Obsidianへの追記は端末内で完結するローカル処理です。既存の送信・暗号化経路には一切変更を加えていません。メール本文は送信時の通過のみで、当社サーバに恒常的に保存しません。"}},{"@type":"Question","name":"今までのメール送信はどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"通常モードではメールとObsidianの両方に残ります。圏外ではメールをOutboxに保存し、選択済みフォルダへの追記は端末内で行います。Premiumでは、設定で保管庫フォルダを選んで書き込みテストを済ませると「Obsidianのみに保存（メールを送らない）」をオンにできます。有効な間はメモをメールで送らず、保管庫だけに保存します。Premiumの期限が切れても、このモードは無料枠の1日3件で継続します。"}},{"@type":"Question","name":"オフライン（圏外）でもObsidianに追記されますか？","acceptedAnswer":{"@type":"Answer","text":"対象フォルダがiPhoneにダウンロード済みで、アプリから書き込める状態なら、インターネット接続なしでローカルファイルに追記できます。先に書き込みテストで確認してください。通常モードのメールはOutboxで待機し、他端末へのiCloud同期には通信の復帰が必要です。"}},{"@type":"Question","name":"ObsidianのInboxノートにまとめて貯められますか？","acceptedAnswer":{"@type":"Answer","text":"はい。「送り先」で「指定したノート」を選び、「ノート名」を設定します。空欄なら Inbox.md を使います。選んだフォルダの同じファイルへ追記するので、まず書き込みテストでファイル名と本文を確認してください。デイリーノートとの切り替えは設定で行えます。"}},{"@type":"Question","name":"Gmail・Outlook・iCloudのメールでもObsidianに残せますか？","acceptedAnswer":{"@type":"Answer","text":"メールの宛先（Gmail / Outlook / iCloud など）に関係なくObsidian追記は動きます。Obsidianへの追記は端末内のローカル処理で、メール送信とは独立しているためです。通常モードではメールは普段の受信箱に届き、同じメモがObsidianにも残ります。「Obsidianのみに保存」が有効な間は、メモのメール送信を行いません。"}},{"@type":"Question","name":"Apple WatchからObsidianに送れますか？","acceptedAnswer":{"@type":"Answer","text":"Apple Watchから自分宛にメモを送ると、iPhone側の連携処理を通じて同じメモがObsidianにも追記されます（追記はiPhoneが担当し、Watchが保管庫へ直接書き込むわけではありません）。詳しくはApple Watch対応ページをご覧ください。"}}]}</script>
 
   <!-- JSON-LD: WebPage with Speakable -->
   <script type="application/ld+json">
@@ -334,7 +334,7 @@
           </a>
         </div>
         <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:1rem;">
-          <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a></span>
+          <span>著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 更新: <time datetime="2026-09-07">2026年9月7日</time></span>
           
         </p>
       </div>
@@ -463,25 +463,27 @@
       <!-- Setup -->
       <section class="lp-section" id="setup">
         <h2 class="lp-section__title">
-          <span>設定手順（約1分）</span>
+          <span>設定手順：最初のメモが届くまで</span>
           
         </h2>
         <ul class="prereq-list">
           <li>iPhone（iOS 16.0以降）にObsidian連携シンプルメモをインストール済み</li>
           <li>iPhoneにObsidianをインストール済み</li>
-          <li>Obsidianの保管庫（Vault）が <strong>iCloud Drive</strong> または「このiPhone内」にあり、ファイルAppから開ける</li>
+          <li>Obsidianの保管庫（Vault）が <strong>iCloud Drive</strong> または「このiPhone内」にあり、ファイルAppから開ける。iCloudのフォルダはiPhoneにもダウンロードしておく</li>
         </ul>
         
         <ol class="steps-list">
-          <li><strong>Obsidian連携をオンにする</strong><br>設定画面の「詳細設定」にある「Obsidian 連携」をオンにします。</li>
-          <li><strong>Obsidianフォルダを選ぶ</strong><br>「Obsidian フォルダを選ぶ」をタップし、iCloud Drive内にあるObsidian保管庫のフォルダを選択します。アプリはそのフォルダへの安全なアクセス権だけを保存します。</li>
-          <li><strong>送り先を選ぶ</strong><br>追記先を「デイリーノート」か「Inboxノート」から選びます。デイリーノートを使う場合は、Obsidianの Daily Notes（デイリーノート）機能が有効で、ファイル名が <code>yyyy-MM-dd.md</code> であることを確認してください。</li>
-          <li><strong>メモを送る</strong><br>以降は、送信したメモが選んだノートに <code>- HH:mm メモ</code> の形で自動追記されます。Obsidianは開きません。iCloud同期のため、Obsidianに反映されるまで数秒かかることがあります。</li>
+          <li><strong>設定の「Obsidian」を開く</strong><br>シンプルメモの設定画面で「Obsidian」セクションに進み、「Obsidian 連携」をオンにします。</li>
+          <li><strong>「フォルダ」から保存先を選ぶ</strong><br>「フォルダ」の「選ぶ」をタップし、保管庫の中でメモを置きたいフォルダを選びます。普段のデイリーノートがサブフォルダにある場合は、そのフォルダを選んでください。</li>
+          <li><strong>「送り先」とノート名を合わせる</strong><br>日付ごとに残すなら「デイリーノート」、1枚に集めるなら「指定したノート」を選びます。後者は「ノート名」で名前を指定でき、空欄なら <code>Inbox.md</code> になります。デイリーノートは選んだフォルダの <code>yyyy-MM-dd.md</code> に追記します。この直接書き込みにDaily Notes機能の有効化は不要ですが、Obsidian側の保存先・日付形式は自動で読み取りません。</li>
+          <li><strong>「Obsidian書き込みテスト」で保存先を確認する</strong><br>テストはメールを送らず、選んだノートに「Obsidian連携テスト」と書き込みます。「書き込みました」に表示されたファイル名を確認し、iPhoneのObsidianでそのノートを開いてください。見つかればフォルダ連携を確認できています。</li>
+          <li><strong>短いメモを1件送り、同じノートで確認する</strong><br>例えば「明日の会議で確認すること」と送信し、選んだノートへの追記を確かめます。通常モードではメールも送るため、受信箱への到着は別に確認してください。次に思いついたことも、同じ保存先へ送れば設定をやり直さずに続けられます。</li>
         </ol>
         
         <div class="tip-box">
-          <div class="tip-box__title"><span>あとからでも設定できます</span></div>
-          <p>オンボーディングで「あとで」を選んでも大丈夫。<strong>設定 →「詳細設定」</strong>からいつでもオン・オフできます。</p>
+          <div class="tip-box__title"><span>書き込みテストに失敗したら</span></div>
+          <p>「書き込みできませんでした」が出たら、ファイルAppで対象フォルダを開けるか、iPhoneにダウンロード済みかを確認します。<strong>設定 → Obsidian → フォルダ</strong>で選び直し、先に書き込みテストをやり直してください。テストが成功しても別端末に見えない場合は、同じ保管庫かどうかと同期状況を確認します。iCloud経由の反映時間は通信状態によって変わります。</p>
+          <p>初回設定を後回しにした場合も、設定画面の「Obsidian」から始められます。</p>
           
         </div>
       </section>
@@ -525,11 +527,11 @@
           </div>
           <div class="trouble-item">
             <div class="trouble-item__q">デイリーノートは <code>yyyy-MM-dd.md</code> を前提にしています</div>
-            <div class="trouble-item__a"><p>デイリーノートの保存先フォルダや命名をカスタムしている場合は、ファイルがズレる可能性があります。その場合は「Inboxノート」を選ぶと確実に1ファイルに届きます。</p></div>
+            <div class="trouble-item__a"><p>直接書き込みでは、選んだフォルダの <code>yyyy-MM-dd.md</code> を使い、ファイルがなければ作成します。普段のデイリーノートと保存先や命名が違う場合は、フォルダを合わせるか、「指定したノート」で固定のInboxへ集めます。書き込みテストに表示されるファイル名で確認してください。</p></div>
           </div>
           <div class="trouble-item">
-            <div class="trouble-item__q">iCloud同期に数秒かかることがあります</div>
-            <div class="trouble-item__a"><p>書き込みはすぐ行われますが、iCloud経由でObsidianの画面に反映されるまで数秒のラグが出る場合があります。</p></div>
+            <div class="trouble-item__q">端末への書き込みとiCloud同期は別です</div>
+            <div class="trouble-item__a"><p>書き込みテストの成功は、選んだフォルダのファイルへ書けたことを示します。Macなど別端末への反映には同期が必要です。まずiPhoneで対象ノートを確認し、その後に他端末の同期状況を確認してください。</p></div>
           </div>
         </div>
 
@@ -570,17 +572,17 @@
           
         </h2>
         <div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidianのプラグインは必要ですか？</summary><div class="faq-answer"><p>いいえ。コミュニティプラグインは不要です。Obsidianの標準機能だけで動作します。iCloud Drive上の保管庫フォルダへ、アプリが直接ノートを書き込みます。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ObsidianのInboxノートにまとめて貯められますか？</summary><div class="faq-answer"><p>はい。送り先に固定の「Inboxノート」を選べば、送ったメモはすべてその1枚に時系列で追記されます（既定は - HH:mm メモ の形式）。あとでObsidian側で仕分け・リンクするだけ。デイリーノートとInboxノートはいつでも切り替えられます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidianのプラグインは必要ですか？</summary><div class="faq-answer"><p>フォルダへの直接書き込みにコミュニティプラグインは不要です。iCloud Driveまたは「このiPhone内」の選んだフォルダへ書き込みます。この方式ではDaily Notes機能の有効化も不要です。先に設定の「Obsidian書き込みテスト」で保存先を確認してください。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ObsidianのInboxノートにまとめて貯められますか？</summary><div class="faq-answer"><p>はい。「送り先」で「指定したノート」を選び、「ノート名」を設定します。空欄なら <code>Inbox.md</code> を使います。選んだフォルダの同じファイルへ追記するので、まず書き込みテストでファイル名と本文を確認してください。デイリーノートとの切り替えは設定で行えます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Gmail・Outlook・iCloudのメールでもObsidianに残せますか？</summary><div class="faq-answer"><p>メールの宛先（Gmail / Outlook / iCloud など）に関係なくObsidian追記は動きます。Obsidianへの追記は端末内のローカル処理で、メール送信とは独立しているためです。通常モードではメールは普段の受信箱に届き、同じメモがObsidianにも残ります。「Obsidianのみに保存」が有効な間は、メモのメール送信を行いません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Apple WatchからObsidianに送れますか？</summary><div class="faq-answer"><p>Apple Watchから自分宛にメモを送ると、iPhone側の連携処理を通じて同じメモがObsidianにも追記されます（追記はiPhoneが担当し、Watchが保管庫へ直接書き込むわけではありません）。詳しくは<a href="/apple-watch/">Apple Watch対応ページ</a>をご覧ください。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモを送るたびにObsidianが開きますか？</summary><div class="faq-answer"><p>フォルダを選んでいれば開きません。メモはバックグラウンドでノートに追記されます。フォルダを選んでいない場合のみ、フォールバックとしてURLスキームでObsidianが一瞬開いて追記します。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">どのノートに、どんな形で追記されますか？</summary><div class="faq-answer"><p>設定した送り先によります。デイリーノートを選ぶとその日の <code>yyyy-MM-dd.md</code> に、Inboxノートを選ぶと固定のInboxノートに追記されます。既定では <code>- HH:mm メモ</code> のタイムスタンプ付きリスト行で追記します。設定でタイムスタンプをオフにでき、追記テンプレートで文頭・文末にチェックボックスやタグなどを付けられます。iPhoneとApple Watchで別々に設定でき、既存のノート内容は消しません。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモを送るたびにObsidianが開きますか？</summary><div class="faq-answer"><p>選んだフォルダへの直接書き込みが成功すれば、Obsidianを開かずに追記できます。通常モードではフォルダが未選択の場合や直接書き込みに失敗した場合に、URLスキームでObsidianを開いて追記を試みることがあります。設定の書き込みテストはフォルダへの直接書き込みだけを確認します。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">どのノートに、どんな形で追記されますか？</summary><div class="faq-answer"><p>「デイリーノート」は選んだフォルダのその日の <code>yyyy-MM-dd.md</code> に、「指定したノート」は設定した名前のファイル（既定は <code>Inbox.md</code>）に追記します。既定の書式は <code>- HH:mm メモ</code> です。「追記の書式」でタイムスタンプや文頭・文末のテンプレートを変更でき、iPhoneとApple Watchで別々に設定できます。追記時に既存のノート内容は消しません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Obsidian Syncだけで同期している場合も使えますか？</summary><div class="faq-answer"><p>対象フォルダがiCloud Driveまたは「このiPhone内」にあり、ファイルAppからアクセスできる必要があります。Obsidian Sync専用の保管庫はフォルダ選択に出ないことがあり、その場合はURLスキーム方式にフォールバックします。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Androidやパソコンでも使えますか？</summary><div class="faq-answer"><p>連携を行うObsidian連携シンプルメモは現在iPhone（iOS 16以降）向けアプリです。追記先のObsidian保管庫をiCloud DriveやObsidian Syncで同期しておけば、Mac・iPad・他端末のObsidianからも同じノートを開けます。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモはサーバに保存されますか？</summary><div class="faq-answer"><p>Obsidianへの追記は端末内で完結するローカル処理です。既存の送信・暗号化経路には一切変更を加えていません。メール本文は送信時の通過のみで、当社サーバに恒常的に保存しません。</p></div></details></div>
           <div class="faq-item"><details class="faq-details"><summary class="faq-summary">今までのメール送信はどうなりますか？</summary><div class="faq-answer"><p>通常モードではメールとObsidianの両方に残ります。圏外ではメールをOutboxに保存し、選択済みフォルダへの追記は端末内で行います。Premiumでは、設定で保管庫フォルダを選んで書き込みテストを済ませると「Obsidianのみに保存（メールを送らない）」をオンにできます。有効な間はメモをメールで送らず、保管庫だけに保存します。Premiumの期限が切れても、このモードは無料枠の1日3件で継続します。</p></div></details></div>
-          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">オフライン（圏外）でもObsidianに追記されますか？</summary><div class="faq-answer"><p>はい。フォルダ直書き方式では、選んだフォルダのローカルファイルにその場で追記されるため、インターネット接続は不要です。圏外でメールがOutboxに入っても、Obsidianのノートにはローカルで保存されます。他端末への反映（iCloud同期）は通信が戻ったときに行われます。</p></div></details></div>
+          <div class="faq-item"><details class="faq-details"><summary class="faq-summary">オフライン（圏外）でもObsidianに追記されますか？</summary><div class="faq-answer"><p>対象フォルダがiPhoneにダウンロード済みで、アプリから書き込める状態なら、インターネット接続なしでローカルファイルに追記できます。先に書き込みテストで確認してください。通常モードのメールはOutboxで待機し、他端末へのiCloud同期には通信の復帰が必要です。</p></div></details></div>
         </div>
         
       </section>
@@ -592,7 +594,7 @@
           
         </div>
         <div class="cta-box__desc">
-          <span>ダウンロードは無料。Obsidian連携の設定は約1分です。</span>
+          <span>ダウンロードは無料。書き込みテストで保存先を確かめて、最初のメモを残しましょう。</span>
           
         </div>
         <a data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="bottom" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード">
@@ -707,6 +709,6 @@
     a.addEventListener('click', function(){ document.getElementById('navLinks').classList.remove('open'); });
   });
   </script>
-  <script src="/js/app-store-tracking.js?v=50afcb3e2a" defer></script>
+  <script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
 </body>
 </html>
