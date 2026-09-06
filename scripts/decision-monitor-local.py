@@ -185,7 +185,7 @@ def run_once(probe=False):
                     raise RuntimeError('Installed monitor launcher needs the verified main update')
                 git(['config', 'user.name', 'SimpleMemo Decision Monitor'], work)
                 git(['config', 'user.email', 'automation@simplememofast.com'], work)
-                git(['config', 'credential.https://github.com.helper', ''], work)
+                git(['config', '--replace-all', 'credential.https://github.com.helper', ''], work)
                 git(['config', '--add', 'credential.https://github.com.helper', '!' + GH + ' auth git-credential'], work)
                 env = {k: v for k, v in os.environ.items() if k not in ['GITHUB_EVENT_NAME', 'GITHUB_RUN_ID', 'GITHUB_RUN_ATTEMPT', 'GITHUB_ACTIONS', 'DECISION_MONITOR_NATIVE_TIMER']}
                 env['PATH'] = '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
@@ -369,6 +369,41 @@ class Tests(unittest.TestCase):
                 else:
                     self.assertEqual(len([a for kind, a in calls if kind == 'node' and '--selftest' in a]), 3)
                 self.assertTrue(any(a[:2] == ['worktree', 'remove'] for kind, a in calls if kind == 'git'), 'owned temporary checkout must be cleaned up')
+
+    def test_repeated_runs_share_real_git_configuration_without_accumulating_helpers(self):
+        # The config is shared by linked worktrees. A mock git cannot expose exit 5
+        # on the second run when two helper values already exist in that config.
+        with tempfile.TemporaryDirectory(prefix='decision-real-git-') as tmp:
+            root = Path(tmp); seed = root / 'seed'; cache = root / 'cache'
+            git(['init', '--initial-branch=main', str(seed)], root)
+            (seed / 'data').mkdir(); (seed / 'scripts').mkdir()
+            (seed / 'data/emergency-stop.json').write_text(json.dumps({'stopped': False, 'agents': {'act': {'stopped': False}}}))
+            (seed / 'scripts/decision-monitor-local.py').write_bytes(Path(__file__).read_bytes())
+            git(['add', '.'], seed)
+            git(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid',
+                 '-c', 'commit.gpgsign=false', 'commit', '-m', 'fixture'], seed)
+            real_command = command
+            node_calls = []
+            def invoke(args, **kwargs):
+                if args[0] != NODE:
+                    return real_command(args, **kwargs)
+                node_calls.append(args)
+                if '--selftest' in args:
+                    return 'fixture node selftest'
+                return json.dumps({'state': 'observed', 'trigger': 'manual', 'execution_origin': None})
+            with mock.patch.dict(run_once.__globals__, {'CACHE': cache, 'REMOTE': str(seed)}), \
+                    mock.patch(__name__ + '.monitor_admission', return_value={'state': 'due'}), \
+                    mock.patch(__name__ + '.command', side_effect=invoke):
+                for _ in range(3):
+                    self.assertEqual(run_once(probe=True)['state'], 'probe')
+                    # Preserve the empty first value: command() strips stdout.
+                    helpers = subprocess.run(['/usr/bin/git', 'config', '--local', '--get-all',
+                                              'credential.https://github.com.helper'],
+                                             cwd=cache / 'repository', capture_output=True,
+                                             text=True, check=True).stdout
+                    self.assertEqual(helpers.splitlines(), ['', '!' + GH + ' auth git-credential'])
+                self.assertEqual(len(node_calls), 12)
+                self.assertFalse((cache / 'last-success.json').exists(), 'probes must not record unattended success')
 
 
 if __name__ == '__main__':
