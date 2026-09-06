@@ -1,0 +1,37 @@
+name: Radar Research
+on:
+  schedule:
+    - cron: '37 21 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: radar-research
+  cancel-in-progress: false
+jobs:
+  experiment:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate experimental failure semantics
+        run: python3 scripts/radar-research.test.py
+      - name: Run bounded paired experiment
+        env:
+          RESEARCH_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/radar-research.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-research
+          path: data/radar-research.json
+          retention-days: 90
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GH_PAT }}
+          branch: Codex/radar-research-observations
+          add-paths: data/radar-research.json
+          commit-message: 'chore: record radar acquisition experiment'
+          title: 'chore: record radar acquisition experiment'
+          body: 'Paired sequential/parallel acquisition experiment. Only observations are published; the prototype is not promoted automatically.'

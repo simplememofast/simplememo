@@ -1,0 +1,162 @@
+{
+  "observed_at": "2026-09-06T05:49:30.093744+00:00",
+  "run_url": null,
+  "question": "Can three-source parallel acquisition reduce radar latency without changing observations?",
+  "research": {
+    "baseline": "scripts/trend-radar.py",
+    "source_urls": {
+      "google": "https://trends.google.com/trending/rss?geo=JP",
+      "hatena": "https://b.hatena.ne.jp/hotentry/it.rss",
+      "appstore": "https://itunes.apple.com/jp/rss/topfreeapplications/limit=100/genre=6007/json"
+    },
+    "comparison": "same parser, previous snapshot and source set; only acquisition concurrency changes"
+  },
+  "hypothesis": "The parallel prototype reduces median wall time by at least 20% with equivalent complete observations.",
+  "prototype": "scripts/radar-research.py:parallel",
+  "protocol": {
+    "paired_trials": 3,
+    "alternating_order": true,
+    "minimum_reduction": 0.2,
+    "limitations": [
+      "Small sample; network latency varies.",
+      "Live feeds can change between paired requests.",
+      "A passing experiment does not authorize production promotion."
+    ]
+  },
+  "trials": [
+    {
+      "order": [
+        "sequential",
+        "parallel"
+      ],
+      "equivalent_observations": false,
+      "complete": true,
+      "seconds": {
+        "sequential": 2.3138,
+        "parallel": 0.9821
+      },
+      "sources": {
+        "sequential": {
+          "google": {
+            "status": "ok",
+            "rows": 10
+          },
+          "hatena": {
+            "status": "ok",
+            "rows": 30
+          },
+          "appstore": {
+            "status": "ok",
+            "rows": 99
+          }
+        },
+        "parallel": {
+          "google": {
+            "status": "ok",
+            "rows": 10
+          },
+          "hatena": {
+            "status": "ok",
+            "rows": 30
+          },
+          "appstore": {
+            "status": "ok",
+            "rows": 99
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "parallel",
+        "sequential"
+      ],
+      "equivalent_observations": false,
+      "complete": true,
+      "seconds": {
+        "parallel": 1.049,
+        "sequential": 1.1335
+      },
+      "sources": {
+        "parallel": {
+          "google": {
+            "status": "ok",
+            "rows": 10
+          },
+          "hatena": {
+            "status": "ok",
+            "rows": 30
+          },
+          "appstore": {
+            "status": "ok",
+            "rows": 99
+          }
+        },
+        "sequential": {
+          "google": {
+            "status": "ok",
+            "rows": 10
+          },
+          "hatena": {
+            "status": "ok",
+            "rows": 30
+          },
+          "appstore": {
+            "status": "ok",
+            "rows": 99
+          }
+        }
+      }
+    },
+    {
+      "order": [
+        "sequential",
+        "parallel"
+      ],
+      "equivalent_observations": true,
+      "complete": true,
+      "seconds": {
+        "sequential": 0.9805,
+        "parallel": 0.8301
+      },
+      "sources": {
+        "sequential": {
+          "google": {
+            "status": "ok",
+            "rows": 10
+          },
+          "hatena": {
+            "status": "ok",
+            "rows": 30
+          },
+          "appstore": {
+            "status": "ok",
+            "rows": 99
+          }
+        },
+        "parallel": {
+          "google": {
+            "status": "ok",
+            "rows": 10
+          },
+          "hatena": {
+            "status": "ok",
+            "rows": 30
+          },
+          "appstore": {
+            "status": "ok",
+            "rows": 99
+          }
+        }
+      }
+    }
+  ],
+  "result": {
+    "comparable": false,
+    "median_sequential_seconds": 1.1335,
+    "median_parallel_seconds": 0.9821,
+    "fraction_reduction": 0.13356859285399206,
+    "verdict": "inconclusive"
+  },
+  "next_action": "Review the evidence before deciding whether to promote the prototype."
+}
