@@ -33,7 +33,9 @@ jobs:
         run: node --test growth/lib/measurement.test.mjs growth/lib/ingest-gsc.test.mjs growth/lib/cta-tracking.test.mjs growth/lib/analytics.test.mjs
 
       - name: Trend observations preserve failures and ranking baselines
-        run: python3 scripts/trend-radar.test.py
+        run: |
+          python3 scripts/trend-radar.test.py
+          python3 scripts/ai-visibility-probe.test.py
 
       - name: Research aggregation excludes duplicate and unknown-state errors
         run: python3 growth/queries/voice-shift-v2.test.py
