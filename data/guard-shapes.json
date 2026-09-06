@@ -651,6 +651,12 @@
       "expr": "pr.head.ref",
       "disposition": "前提",
       "note": "2026-09-05: 一覧・詳細・再取得・実ブランチrefを同一headとして照合する。欠落や不一致ならassertで止め、PRが覆わない変更を公開済み扱いしない。"
+    },
+    {
+      "file": "growth/scripts/revenue-series.mjs",
+      "expr": "existing.source_generated_at",
+      "disposition": "別に検出",
+      "note": "2026-09-06: 日別v2の生成時刻が同じ場合だけ内容の矛盾を拒否する条件。既存v2の生成時刻・対象窓の欠落は直前で別に拒否し、古い版も拒否する。生成時刻欠落、同時刻の矛盾、古い版、新しい訂正による日数減少を自己検証で確認。"
     }
   ],
   "coverage_measured_at": "2026-09-03",

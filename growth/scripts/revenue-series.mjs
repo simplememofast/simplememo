@@ -256,6 +256,10 @@ export function refusesToShrink(existing, next) {
   if (next?.schema === 'revenue_observation_mirror_v2' && next.source_schema === 'asc_revenue_v2'
       && next.covered_days === next.coverage?.complete_days) {
     if (existing?.schema === 'revenue_observation_mirror_v2') {
+      if (typeof existing.source_generated_at !== 'string' || !Number.isFinite(Date.parse(existing.source_generated_at))
+          || typeof existing.last_day !== 'string' || !Number.isFinite(Date.parse(existing.last_day))) {
+        return '既存v2の生成時刻・対象窓が欠けているため、新旧を比較できない';
+      }
       if (next.source_generated_at < existing.source_generated_at || next.last_day < existing.last_day) {
         return '既存より古い日別集計への巻き戻しを拒む';
       }
@@ -410,6 +414,8 @@ function selftest() {
   t('v2の古いスナップショットへの巻き戻しは拒む', typeof refusesToShrink(corrected, v2mirror) === 'string');
   t('同じ生成時刻の矛盾を拒む', typeof refusesToShrink(v2mirror, mirrorFrom(dailyV2(1), '2026-09-06')) === 'string');
   t('v2から旧スパンに戻さない', typeof refusesToShrink(v2mirror, mir) === 'string');
+  t('既存v2の生成時刻が欠けても規則を消さない',
+    typeof refusesToShrink({ ...v2mirror, source_generated_at: undefined }, corrected) === 'string');
 
   // 写しと方針の突き合わせは、写しの covered_days で行う
   // **時刻だけの差分で書かない。**（今日の教訓がこの生成器自身に当たっていた）
@@ -468,32 +474,18 @@ if (isMain) {
   const series = buildSeries(docs.map(observationOf));
   const problems = [];
 
-  console.log(`収入の履歴 — 取り込み ${docs.length} 件 / 観測 ${series.spans.length} 区間\n`);
-  for (const s of series.spans) {
-    console.log(`  ${s.from}〜${s.to}（${s.days ?? '?'}日）  課金 ${s.purchases} / 入金 $${s.proceeds_usd}`
-      + `  ← ${s.fetched} の取り込み`);
+  const policy = JSON.parse(fs.readFileSync(POLICY_PATH, "utf8"));
+  const existing = fs.existsSync(OUT_PATH) ? JSON.parse(fs.readFileSync(OUT_PATH, "utf8")) : null;
+  if (existing?.schema === "revenue_observation_mirror_v2") {
+    console.log(`収益の観測範囲: ${existing.first_day}〜${existing.last_day} UTC`);
+    console.log(`  確定版を確認した日 ${existing.covered_days} / 28。状態: ${existing.coverage.state}`);
+    console.log(`  未観測 ${existing.coverage.missing_days}日、暫定 ${existing.coverage.provisional_days}日、矛盾 ${existing.coverage.conflicting_days}日`);
+    console.log("  金額・課金人数・LTVはこの公開側の写しに含まれません。");
+  } else if (existing) {
+    console.log(`旧スパンの観測範囲: ${existing.covered_days}暦日。日別の確定観測日数とは異なります。`);
+  } else {
+    console.log("収益の写しは未取得です。欠測を売上0として扱いません。");
   }
-  if (series.skipped.length) {
-    console.log(`\n  足さずに飛ばした ${series.skipped.length} 件:`);
-    for (const s of series.skipped) console.log(`    ${s.fetched}: ${s.reason}`);
-    console.log('  **古い取り込みには date_range が無い。**推定で埋めず、飛ばして数える。');
-  }
-
-  console.log(`\n  覆っている日数 ${series.covered_days} / ${DAYS_FOR_MONTHLY}`
-    + `  （${series.monthly_ready ? '**月次を出せる**' : '月次にはまだ足りない'}）`);
-  console.log(`  累計  課金 ${series.purchases}件 / 入金 $${series.proceeds_usd} / 売上 $${series.sales_usd}`);
-  console.log('\n  **これは累計であって月額ではない。**'
-    + `${series.monthly_ready ? '' : `${DAYS_FOR_MONTHLY}日に届くまで月額へ換算しない。`}`);
-  console.log('  **ランウェイは出さない。**手元資金が機械に入っていないため（別の欄が持つ）。');
-
-  // 方針と系列の整合
-  // [2026-08-26] ここで読んだ方針を束縛していなかったため、下の --write が
-  // `ReferenceError: policy is not defined` で落ちていた。**一度も成功していない。**
-  const policy = JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8'));
-  // **突き合わせる相手は写し**であって、この場では作れない再構築ではない。
-  // [2026-08-26] 入力（growth/data/appstore/）は人が手で走らせたときしか増えない
-  // ので、再構築と突き合わせると CI が常に「実測0日」と言う。
-  const existing = fs.existsSync(OUT_PATH) ? JSON.parse(fs.readFileSync(OUT_PATH, 'utf8')) : null;
   problems.push(...policyDrift(policy, existing ?? series));
 
   if (process.argv.includes('--write')) {

@@ -1,17 +1,28 @@
 {
   "$comment": [
-    "収入の観測日数の**写し**。growth/scripts/revenue-series.mjs --write が書く。**手で編集しない。**",
-    "**実測は ../simplememo-ios/data/revenue/series.json**（取得が毎日走る側で積んでいる）。",
-    "**金額は運ばない。**このリポジトリは公開されており、blocked_on が読むのは covered_days だけ。",
-    "写しなので、隣が見える場所で更新する（data/crossrepo-probes.json と同じ流儀）。"
+    "購入レポートの日別観測範囲の写し。金額・個票・流入元は公開側へ運ばない。",
+    "covered_daysは現在の28日窓に確定版がある日数。累計暦日数ではなく、窓の移動や訂正で減る場合がある。",
+    "monthly_readyは28日窓の観測完了のみ。確定入金・月額外挿・LTV評価の完了ではない。"
   ],
+  "schema": "revenue_observation_mirror_v2",
+  "source_schema": "asc_revenue_v2",
   "source": "simplememo-ios/data/revenue/series.json",
+  "source_generated_at": "2026-09-06T02:14:10Z",
   "synced_at": "2026-09-06",
-  "covered_days": 6,
+  "covered_days": 7,
   "days_for_monthly": 28,
   "monthly_ready": false,
-  "first_day": "2026-08-23",
+  "first_day": "2026-08-08",
   "last_day": "2026-09-04",
-  "spans": 5,
-  "$spans": "区間の**本数**だけ。範囲と金額は隣が持つ"
+  "coverage": {
+    "from": "2026-08-08",
+    "to": "2026-09-04",
+    "timezone": "UTC",
+    "state": "incomplete",
+    "complete_days": 7,
+    "observed_days": 8,
+    "missing_days": 20,
+    "provisional_days": 1,
+    "conflicting_days": 0
+  }
 }
