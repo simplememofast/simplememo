@@ -356,7 +356,7 @@
       <!-- Atomic Answer Block (AI / LLM citation-friendly) -->
       <aside class="answer-block" aria-label="Page summary" style="background:rgba(15,20,30,.6);border:1px solid rgba(100,160,220,.12);border-left:3px solid var(--accent,#6ab4ff);border-radius:8px;padding:1.25rem 1.5rem;margin:0 auto 2rem;max-width:760px;font-size:.95rem;line-height:1.85;color:rgba(255,255,255,.75);">
         <span style="font-weight:700;color:var(--accent,#6ab4ff);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;display:block;">TL;DR</span>
-        <p style="margin:0;"><strong style="color:#fff;">Simple Memo</strong> is an iOS memo-to-email app built as a successor to Captio (which shut down in October 2024). It launches in 0.4 seconds, sends with one tap, uses AES-GCM on-device encryption, stores zero memo content on servers, and includes offline Outbox auto-resend. Developed by YURIKA, K.K. (Japan) as an independent app — not Captio's official successor.</p>
+        <p style="margin:0;"><strong style="color:#fff;">Simple Memo</strong> is an iOS memo-to-email app built as a successor to Captio (which shut down in October 2024). It launches in 0.4 seconds, sends with one tap, uses AES-GCM on-device encryption, does not persistently store memo bodies in its own backend, and includes offline Outbox auto-resend. Developed by YURIKA, K.K. (Japan) as an independent app — not Captio's official successor.</p>
       </aside>
 
       <!-- Quick Summary / Bottom Line -->
@@ -465,7 +465,7 @@
           </div>
           <div class="reason-card">
             <div class="reason-card__title">3. Offline Support + On-device Encryption</div>
-            <div class="reason-card__desc">Something Captio never had: full offline support. Outbox architecture stores offline memos with on-device AES-GCM-256 encryption (the same standard used in TLS 1.3 and Apple's own CryptoKit). Messages are automatically sent when connectivity returns. You can capture ideas on the subway, on a plane, or in a dead zone. Send history is encrypted with the same scheme, and the symmetric key lives in Apple Keychain — never leaves your device.</div>
+            <div class="reason-card__desc">Simple Memo stores queued memos and send history on your device with AES-GCM encryption. Its Outbox retries pending messages when connectivity returns. Captio also supported temporary offline storage, as documented on Tupil's product page; offline capture was not unique to Simple Memo.</div>
           </div>
         </div>
       </section>
@@ -496,10 +496,10 @@
         <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">For comparison, using Apple's built-in Mail app to email yourself a quick note takes approximately 15-25 seconds: you have to open Mail, tap compose, type the recipient address, add a subject, write the body, and tap send. That is 6 discrete steps and multiple keyboard switches. With Simple Memo, it is one step: open, type, send. The keyboard is already visible when the app finishes launching.</p>
 
         <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 1rem;">On-Device AES-GCM Encryption</h3>
-        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Simple Memo encrypts every memo with AES-GCM on your device before transmission. This means even if someone intercepted the data in transit, they would see only encrypted gibberish. Your thoughts are private by default, not by policy.</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">AES-GCM protects the Outbox and send history stored on your device. Email delivery is a separate process using Cloudflare Workers and Resend, which process message content for delivery. On-device storage encryption does not make ordinary email end-to-end encrypted.</p>
 
         <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 1rem;">Offline-First Architecture</h3>
-        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Captio required an active internet connection to send. If you were in the subway, on a flight, or in a basement with no signal, your memo simply failed. Simple Memo uses an Outbox architecture: when you tap send without connectivity, the memo is encrypted and stored locally. As soon as your device regains connectivity, the memo is automatically sent in the background. You never have to remember to retry, and you never lose a thought.</p>
+        <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Captio could temporarily store notes on the device while offline, according to <a href="https://tupil.com/" target="_blank" rel="noopener">its developer's product page</a>. Simple Memo also queues offline memos locally, with on-device encryption and automatic retries when connectivity returns. Check delivery status for important notes: a queued memo is not yet a delivered email.</p>
 
         <h3 style="font-size:1.1rem;font-weight:700;margin:1.5rem 0 1rem;">Email-Based Storage: Your Inbox as Your Archive</h3>
         <p style="font-size:.875rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem;">Like Captio, Simple Memo uses your email inbox as the storage layer. This is a deliberate design choice. Your memos are searchable through your email client, backed up by your email provider, and accessible from any device with email access. There is no proprietary database to export, no sync to configure, and no vendor lock-in. If you ever stop using Simple Memo, every memo you sent is still sitting in your email inbox, fully accessible.</p>
@@ -530,7 +530,7 @@
               <tr><th scope="row">Taps to Send</th><td class="yes">1 tap</td><td class="yes">1 tap</td><td>1 tap</td><td>1 tap</td><td>1 tap</td><td class="no">4-6 taps</td></tr>
               <tr><th scope="row">Send Infrastructure</th><td class="yes">Cloudflare + Resend</td><td class="no">Not specified in farewell</td><td class="mid">Gmail OAuth</td><td>Direct SMTP</td><td>Unknown</td><td>Apple Share Sheet</td></tr>
               <tr><th scope="row">Setup</th><td class="yes">Email only</td><td>Email only</td><td class="mid">Gmail OAuth required</td><td class="yes">Email only</td><td>Email only</td><td>—</td></tr>
-              <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">iCloud sync</td></tr>
+              <tr><th scope="row">Offline Support</th><td class="yes">Outbox auto-resend</td><td class="yes">Temporary on-device storage</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">iCloud sync</td></tr>
               <tr><th scope="row">Encryption</th><td class="yes">AES-GCM</td><td class="no">None</td><td class="no">None</td><td class="no">None</td><td class="no">None</td><td class="mid">iCloud</td></tr>
               <tr><th scope="row">Send History</th><td class="yes">In-app tracking</td><td class="no">No</td><td class="mid">Partial</td><td class="no">No</td><td class="no">No</td><td class="no">—</td></tr>
               <tr><th scope="row">Multiple Recipients</th><td class="yes">Yes</td><td>1</td><td class="mid">Paid: 2</td><td>2</td><td>1</td><td>Unlimited</td></tr>
