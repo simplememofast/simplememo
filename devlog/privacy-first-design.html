@@ -25,12 +25,12 @@
     });
   </script>
   <title>プライバシーファースト設計：メモアプリにおける偏執的なこだわり | Obsidian連携シンプルメモ 開発日誌</title>
-  <meta name="description" content="メモアプリに書かれるものは、その人の頭の中身。アプリスイッチャーのプライバシーオーバーレイ、ephemeral URLSession、ログ無害化、AES-GCM暗号化、Apple純正のみでデータパスを構成する判断まで、プライバシー保護設計の全容を公開します。">
+  <meta name="description" content="iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。">
   <meta name="theme-color" content="#070b14">
   <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- OGP -->
   <meta property="og:title" content="プライバシーファースト設計：メモアプリにおける偏執的なこだわり">
-  <meta property="og:description" content="メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。">
+  <meta property="og:description" content="iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-02-13T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/devlog/privacy-first-design">
@@ -45,7 +45,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="プライバシーファースト設計：メモアプリにおける偏執的なこだわり">
-  <meta name="twitter:description" content="メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。">
+  <meta name="twitter:description" content="iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png">
 
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
@@ -58,7 +58,7 @@
   <link rel="manifest" href="/assets/favicon/site.webmanifest">
 
   <!-- JSON-LD: BlogPosting -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。","url":"https://simplememofast.com/devlog/privacy-first-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/devlog/privacy-first-design#article","headline":"プライバシーファースト設計：メモアプリにおける偏執的なこだわり","description":"iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。","url":"https://simplememofast.com/devlog/privacy-first-design","inLanguage":"ja","datePublished":"2026-02-13","dateModified":"2026-09-06","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","@id":"https://simplememofast.com/#organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"image":"https://simplememofast.com/assets/img/og/devlog-privacy-first-design.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/devlog/privacy-first-design#webpage"}}</script>
 
   <!-- JSON-LD: BreadcrumbList -->
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"開発日誌","item":"https://simplememofast.com/devlog/"},{"@type":"ListItem","position":3,"name":"プライバシーファースト設計","item":"https://simplememofast.com/devlog/privacy-first-design"}]}</script>
@@ -439,12 +439,12 @@
     <div lang="ja" class="meta-template" data-lang="ja">
       <span class="meta-title">プライバシーファースト設計：メモアプリにおける偏執的なこだわり | Obsidian連携シンプルメモ 開発日誌</span>
       <span class="meta-og-title">プライバシーファースト設計：メモアプリにおける偏執的なこだわり</span>
-      <span class="meta-description">メモアプリに書かれるものは、その人の頭の中身。ephemeral URLSession・アプリスイッチャーオーバーレイ・ログ無害化・AES-GCM暗号化など、プライバシー保護設計の全容。</span>
+      <span class="meta-description">iPhone版シンプルメモのプライバシー設計を解説。AES-GCMの端末内暗号化、通信キャッシュ、診断ログ、利用解析の範囲と、アプリスイッチャーでメモを隠さない現行仕様・メール配送の制限を説明します。Keychainの鍵管理、保存先に残る情報、AppsFlyerと自社解析の識別子による関連付けも明記します。</span>
     </div>
     <div lang="en" class="meta-template" data-lang="en">
       <span class="meta-title">Privacy-First Design: Obsessive Attention to Detail in a Memo App | Simple Memo Dev Log</span>
       <span class="meta-og-title">Privacy-First Design: Obsessive Attention to Detail in a Memo App</span>
-      <span class="meta-description">What people write in a memo app is the raw contents of their mind. The full privacy architecture: ephemeral URLSession, app switcher overlay, sanitized logging, AES-GCM encryption.</span>
+      <span class="meta-description">Simple Memo’s on-device encryption, session storage, logs and analytics explained, including app-switcher visibility and email delivery limits.</span>
     </div>
   </div>
 <main class="page-content">
@@ -455,8 +455,8 @@
       </h1>
 
       <div class="article-meta">
-        <span lang="ja" data-lang="ja">2026年2月13日公開 ・ 利用解析の説明更新：2026年9月6日</span>
-        <span lang="en" data-lang="en">Published February 13, 2026 ・ Analytics explanation updated September 6, 2026</span>
+        <span lang="ja" data-lang="ja">2026年2月13日公開 ・ 保護・利用解析の説明更新：2026年9月6日</span>
+        <span lang="en" data-lang="en">Published February 13, 2026 ・ Protection and analytics explanation updated September 6, 2026</span>
       </div>
 
       <!-- Japanese Content -->
@@ -464,27 +464,16 @@
         <div class="article-body">
 
           <h2>1. なぜメモアプリにプライバシーが重要なのか</h2>
-          <p>メモアプリに書かれるものは、その人の頭の中身そのものだ。</p>
-          <p>パスワードの仮メモ。誰にも言えない相談事の下書き。日記のような独白。仕事のアイデア。買い物リスト。診察前に整理した症状メモ。メモアプリは、ユーザーの最もプライベートな思考が通過する場所である。</p>
-          <p>だからこそ、ユーザーは「このアプリは自分を見ていない」という絶対的な信頼を必要とする。機能的に優れていても、プライバシーに対する不信感があれば、人は本音を書かなくなる。メモアプリとしての存在意義が根底から揺らぐ。</p>
-          <p>Captioにはその信頼があった。シンプルすぎるがゆえに、余計なことをしていないと直感的に感じられた。私たちはその信頼を、技術的な設計で裏付ける必要がある。</p>
+          <p>仕事のアイデア、個人的な下書き、日々の記録。メモアプリには、人に見せる前の情報が集まる。素早く書けることと同じくらい、どこに保存され、どこへ送られるかを理解できることが大切だ。</p>
+          <p>この記事では、端末内の暗号化、通信キャッシュ、画面表示、診断ログと利用解析を分けて説明する。ひとつの保護が、ほかの経路の保護も保証するわけではない。</p>
           <div class="philosophy-highlight">
-            <strong>設計哲学：</strong>「過剰なくらいがちょうどいい」——メモアプリにおけるプライバシー保護は、やりすぎて困ることがない。ユーザーが気づかないレベルで、あらゆる漏洩経路を塞ぐ。
+            <strong>2026年9月6日更新：</strong>公開版と同じバージョン（5.8.17）のソースを照合し、画面保護・ログ・利用解析の説明を訂正した。できることと制限の両方を記す。
           </div>
 
-          <h2>2. アプリスイッチャーでのプライバシーオーバーレイ</h2>
-          <p>iOSのマルチタスク画面（アプリスイッチャー）は、各アプリのスナップショットを表示する。つまり、ユーザーがメモを書いている最中にホームに戻ると、その内容がアプリスイッチャー上に丸見えになる。</p>
-          <p>他人がiPhoneを手に取ってアプリスイッチャーを開けば、メモの内容が見えてしまう。パスワードを書いていたら？ 秘密の相談を下書きしていたら？</p>
-          <p>解決策として、アプリがバックグラウンドに移行する際にプライバシーオーバーレイを表示する。アプリアイコンとアプリ名だけが見える画面で、メモ内容を完全に隠す。</p>
-          <pre><code>func sceneWillResignActive(_ scene: UIScene) {
-    showPrivacyOverlay()
-}
-
-func sceneDidEnterBackground(_ scene: UIScene) {
-    showPrivacyOverlay()  // Ensure overlay in background too
-}</code></pre>
-          <p>二重の保護を行っている点に注目してほしい。<code>sceneWillResignActive</code>と<code>sceneDidEnterBackground</code>の両方でオーバーレイを表示する。<code>resignActive</code>はコントロールセンターや通知センターの表示時にも呼ばれるため、あらゆるシナリオでメモ内容を保護できる。</p>
-          <p>オーバーレイは、アプリがアクティブに戻った時点（<code>sceneDidBecomeActive</code>）で即座に解除される。ユーザーにとっては完全に透過的な保護だ。</p>
+          <h2>2. アプリスイッチャーでメモを自動的に隠す機能は有効ではない</h2>
+          <p>iOSは、アプリがバックグラウンドへ移った後の画面をスナップショットとして使う。Appleは、画面に機密情報がある場合は背景へ移る際に取り除くよう案内している。</p>
+          <p>確認した5.8.17のソースでは、<code>sceneWillResignActive</code>と<code>sceneDidEnterBackground</code>はドラフト保存を行い、プライバシーオーバーレイの表示処理を呼ばない。以前の表示用関数は残っているが、有効な保護として動作する経路ではない。</p>
+          <p><strong>表示中のメモがアプリスイッチャーの画像に残る可能性がある。</strong>Outboxを暗号化していても、画面画像が隠れるわけではない。この記事の旧版にあった「常にメモ内容を隠す」という説明を訂正する。</p>
 
           <h2>3. ephemeral URLSession：通信キャッシュのディスク保存を抑える</h2>
           <p>標準の<code>URLSession</code>は、キャッシュ、Cookie、認証情報をディスクに保存する。一般的なアプリではこれは便利な機能だが、メモアプリでは不要であり、リスクになりうる。</p>
@@ -505,36 +494,18 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           </ul>
           <p>これはURLSessionのキャッシュなどに関する保護であり、アプリが別途保存・送信する利用イベントや、サーバー側の送信記録をなくす機能ではない。利用解析の識別子による関連付けも、この設定とは別に行われる。</p>
 
-          <h2>4. ログに機密情報を一切出さない</h2>
-          <p>ログは開発者にとって最も基本的なデバッグツールだが、プライバシーの観点からは最も危険な情報漏洩経路のひとつでもある。</p>
-          <p>このアプリでは、DEBUGビルドであっても以下の情報をログに出力しない。</p>
-          <ul>
-            <li>メールアドレス</li>
-            <li>メモの内容</li>
-            <li>認証コード</li>
-            <li>完全なURL</li>
-          </ul>
-          <p>特に重要なのは、エラーログの設計だ。多くの開発者は<code>error.localizedDescription</code>をそのままログに出力するが、<code>localizedDescription</code>にはファイルパス、ユーザーデータ、内部的なURLなど、機密情報が含まれることがある。</p>
-          <pre><code>func logError(name: String, error: Error) {
-    #if DEBUG
-    // Only error type. Never localizedDescription.
-    os_log("[%.2f ms] ERROR %@: %@", log: log, type: .debug,
-            elapsed, name, String(describing: type(of: error)))
-    #endif
-}</code></pre>
-          <p>エラーの<strong>型</strong>だけを記録する。<code>URLError</code>なのか、<code>EncodingError</code>なのか、<code>CryptoKitError</code>なのか——型情報だけでデバッグには十分であり、ユーザーデータは一切漏洩しない。</p>
-          <p>Releaseビルドではログ出力がゼロになる。<code>#if DEBUG</code>ガードにより、本番環境で動作するコードにはログ出力のコードパス自体が存在しない。万が一ログがキャプチャされたとしても、機密データは含まれていない。多層防御の思想だ。</p>
+          <h2>4. 性能計測ログの出力範囲</h2>
+          <p><code>PerformanceLogger</code>のログ出力は、<code>#if DEBUG</code>で囲まれている。DEBUGが定義されないビルドでは、このロガーのログ出力処理は含まれない。</p>
+          <p>このロガーの<code>logError</code>は、エラーの詳細文ではなく型を記録する。たとえば<code>URLError</code>という種類を使い、ファイルパスやユーザー入力を含む可能性のある<code>localizedDescription</code>をそのまま出さない。</p>
+          <p>一方、<code>logEvent</code>に渡すイベント名や追加文字列を自動ですべて無害化する仕組みではない。呼び出し元でメールアドレス・メモ本文・認証情報を渡さないことが必要になる。</p>
+          <p><strong>この説明を、アプリ・外部SDK・OS全体の「ログゼロ」という保証には広げない。</strong>自社の利用イベント送信とAppsFlyerは別の仕組みとして有効になっている。取得範囲は本記事の利用解析FAQと<a href="/privacy#technical">プライバシーポリシー</a>で説明する。</p>
 
-          <h2>5. AES-GCM暗号化Outbox</h2>
-          <p>このアプリでは、送信ボタンを押した瞬間にUIがクリアされるが、メモ自体はOutboxに保存され、バックグラウンドで送信される。では、Outboxに保存されている未送信メモはどう保護されるか？</p>
-          <ul>
-            <li><strong>AES-GCM暗号化：</strong>すべての未送信メッセージはAES-GCM（Galois/Counter Mode）で暗号化される</li>
-            <li><strong>256ビット鍵：</strong>暗号化鍵は256ビットで生成され、Keychainに保存される</li>
-            <li><strong>端末バインド：</strong>鍵はKeychainに保存されるため、その端末でしか復号できない</li>
-            <li><strong>Apple CryptoKit：</strong>暗号化処理はApple純正のCryptoKitを使用。外部暗号ライブラリへの依存はゼロ</li>
-          </ul>
-          <p>仮に端末に物理的にアクセスされたとしても、Keychainのセキュリティが破られない限り、Outbox内のメモは暗号化されたまま読み取ることができない。</p>
-          <p>Outboxアーキテクチャの全体設計については、<a href="/devlog/outbox-architecture">Outboxアーキテクチャ：取りこぼしゼロ設計</a>で詳述している。</p>
+          <h2>5. AES-GCM暗号化Outboxの保護範囲</h2>
+          <p>送信待ちのメモは、端末内のOutboxというキューで管理する。保存時にはAppleのCryptoKitを使ってAES-GCMで暗号化する。新しい暗号鍵は256ビットで生成する。</p>
+          <p>鍵はKeychainに保管し、<code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>を使う。この設定では、再起動後の初回ロック解除から次の再起動までアクセスでき、別の端末へのバックアップ復元では鍵が移行しない。アプリは暗号化・復号のために鍵を読み出す。</p>
+          <p>これは保存データの保護であり、表示中の画面を隠したり、あらゆる端末侵害からの安全を保証したりするものではない。機種変更前には、必要なメモが保存先に届いていることを確認してほしい。</p>
+          <p>メール送信を使う場合、本文は当社のRelay APIと配送基盤で処理され、受信箱にはメールとして残る。<strong>端末内の暗号化は、メール配送のエンドツーエンド暗号化（E2EE）を意味しない。</strong>詳細は<a href="/privacy#technical">プライバシーポリシー</a>と<a href="/privacy-architecture/">データの通り道</a>で説明している。</p>
+          <p>送信待ちキューについては、<a href="/devlog/outbox-architecture">Outboxアーキテクチャの解説</a>を参照。</p>
 
           <h2>6. メモ本文の保護と外部SDKの役割</h2>
           <p>iOSアプリ内では、メモ本文の暗号化にCryptoKit、鍵保管にKeychain、本文の送信にURLSessionを使う。Network.frameworkは接続状態の監視、BackgroundTasksはバックグラウンド送信のスケジューリングを担う。</p>
@@ -551,7 +522,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. メモの内容はサーバーに保存されますか？</div>
-              <div class="faq-item__answer">Relay APIは通過型設計です。メモ内容の恒常的な保存は行いません。法令対応や障害対応等の正当な必要性がある場合を除きます。</div>
+              <div class="faq-item__answer">メール送信時、本文は当社のRelay APIと配送基盤を通過します。当社のRelay APIでは、法令対応や障害対応等の正当な必要性がある場合を除き、本文の恒常的な保存を行いません。配送先のメールボックスでの保存とは別です。保存先ごとの説明は<a href="/privacy-architecture/">プライバシー設計</a>をご覧ください。</div>
             </div>
 
             <div class="faq-item">
@@ -561,7 +532,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. 端末を紛失した場合、メモは安全ですか？</div>
-              <div class="faq-item__answer">Outboxの未送信メモはAES-GCM（256ビット鍵）で暗号化されています。鍵はKeychainに保存され、端末に紐づいているため、Keychainのセキュリティが維持される限り、メモは保護されます。</div>
+              <div class="faq-item__answer">OutboxはAES-GCMで暗号化して保存し、新しい鍵は256ビットで生成します。鍵は別の端末へ移行しないKeychainの保護クラスを使います。ただし、表示中の画面や配送先のメールまで保護する仕組みではありません。端末内の暗号化だけで、紛失時のすべての情報の安全を保証するものではありません。</div>
             </div>
 
             <div class="faq-item">
@@ -581,7 +552,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">【Day1】Captioが好きすぎて、もう一度"あの体験"を作りたくなった</div>
-                <div class="related-card__desc">起動 約1秒・ワンタップ送信、取りこぼしゼロ。すべての技術判断を記録した初回開発日誌。</div>
+                <div class="related-card__desc">Captioの体験を再現するために行った、初回開発時の技術判断の記録。</div>
               </a>
               <a href="/devlog/" class="related-card">
                 <div class="related-card__title">開発日誌 一覧</div>
@@ -589,11 +560,11 @@ func sceneDidEnterBackground(_ scene: UIScene) {
               </a>
               <a href="/devlog/outbox-architecture" class="related-card">
                 <div class="related-card__title">Outboxアーキテクチャ：取りこぼしゼロ設計</div>
-                <div class="related-card__desc">送信即UIクリア、でもメッセージは絶対に失われない。AES-GCM暗号化Outboxパターンの全容。</div>
+                <div class="related-card__desc">送信待ちメモを管理するキューと、AES-GCMで暗号化するOutbox設計の解説。</div>
               </a>
               <a href="/devlog/relay-api-design" class="related-card">
                 <div class="related-card__title">Relay API：Cloudflare Workersでメール送信基盤を構築</div>
-                <div class="related-card__desc">エッジコンピューティングで世界中から数十msでメール送信。通過型設計の全容。</div>
+                <div class="related-card__desc">Cloudflare Workersを使ったメール送信基盤と、本文を中継する設計の解説。</div>
               </a>
             </div>
           </div>
@@ -605,27 +576,16 @@ func sceneDidEnterBackground(_ scene: UIScene) {
         <div class="article-body">
 
           <h2>1. Why Privacy Matters for a Memo App</h2>
-          <p>What people write in a memo app is the raw contents of their mind.</p>
-          <p>A temporary password note. A draft of a consultation they can't share with anyone. A diary-like monologue. Work ideas. Shopping lists. Symptoms organized before a doctor's visit. A memo app is the place where a user's most private thoughts pass through.</p>
-          <p>Because of this, users need absolute trust that the app isn't watching them. No matter how functionally excellent an app is, if there's any distrust around privacy, people stop writing honestly. The very purpose of the memo app crumbles at its foundation.</p>
-          <p>Captio had that trust. It was so simple that you intuitively felt it wasn't doing anything extra. We need to earn that same trust — but backed by concrete technical design.</p>
+          <p>Work ideas, personal drafts, and daily notes often contain information that is not ready to share. Fast capture should come with a clear explanation of where that information is stored and sent.</p>
+          <p>This article separates on-device encryption, session storage, screen visibility, diagnostic logs, and usage analytics. Protection in one area does not guarantee protection in another.</p>
           <div class="philosophy-highlight">
-            <strong>Design Philosophy:</strong> "Being overly cautious is just right" — when it comes to privacy protection in a memo app, you can never overdo it. We seal every possible leakage path at a level users never even notice.
+            <strong>Updated September 6, 2026:</strong> We checked the source for version 5.8.17, matching the public app’s version, and corrected the explanations of screen protection, logs, and analytics. The descriptions include their limits.
           </div>
 
-          <h2>2. Privacy Overlay in the App Switcher</h2>
-          <p>The iOS multitask screen (app switcher) displays a snapshot of each app. This means if a user goes to the home screen while writing a memo, that content is fully visible in the app switcher.</p>
-          <p>If someone else picks up the iPhone and opens the app switcher, they can see the memo content. What if it contained a password? What if it was a draft of a secret consultation?</p>
-          <p>The solution: display a privacy overlay when the app transitions to the background. A screen showing only the app icon and title, completely hiding the memo content.</p>
-          <pre><code>func sceneWillResignActive(_ scene: UIScene) {
-    showPrivacyOverlay()
-}
-
-func sceneDidEnterBackground(_ scene: UIScene) {
-    showPrivacyOverlay()  // Ensure overlay in background too
-}</code></pre>
-          <p>Notice the double protection. The overlay is applied in both <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code>. Since <code>resignActive</code> is also called when Control Center or Notification Center appears, this ensures memo content is protected in every scenario.</p>
-          <p>The overlay is immediately removed when the app becomes active again (<code>sceneDidBecomeActive</code>). For users, it's completely transparent protection.</p>
+          <h2>2. Automatic Hiding in the App Switcher Is Not Enabled</h2>
+          <p>iOS takes a snapshot after an app moves to the background. Apple advises removing sensitive information from the interface during that transition.</p>
+          <p>In the checked source for version 5.8.17, <code>sceneWillResignActive</code> and <code>sceneDidEnterBackground</code> save the draft without calling the privacy overlay. The old overlay functions remain in the source, but are not an active protection path.</p>
+          <p><strong>Visible memo text may remain in the app-switcher snapshot.</strong> Encrypting the Outbox does not hide a screen image. This corrects the earlier article’s claim that the overlay always hides memo content.</p>
 
           <h2>3. Ephemeral URLSession: Avoid Persistent Session Storage</h2>
           <p>The standard <code>URLSession</code> stores cache, cookies, and credentials to disk. For typical apps this is convenient functionality, but for a memo app it's unnecessary and potentially risky.</p>
@@ -646,36 +606,18 @@ func sceneDidEnterBackground(_ scene: UIScene) {
           </ul>
           <p>This protects URLSession storage. It does not remove usage events separately stored or sent by the app, delivery records on the server, or links made through analytics identifiers.</p>
 
-          <h2>4. Never Log Sensitive Information</h2>
-          <p>Logs are a developer's most fundamental debugging tool, but from a privacy perspective, they're also one of the most dangerous information leakage vectors.</p>
-          <p>In this app, even in DEBUG builds, the following information is never logged:</p>
-          <ul>
-            <li>Email addresses</li>
-            <li>Memo content</li>
-            <li>Authentication codes</li>
-            <li>Full URLs</li>
-          </ul>
-          <p>Particularly critical is the design of error logging. Many developers output <code>error.localizedDescription</code> directly to logs, but <code>localizedDescription</code> can contain sensitive information such as file paths, user data, and internal URLs.</p>
-          <pre><code>func logError(name: String, error: Error) {
-    #if DEBUG
-    // Only error type. Never localizedDescription.
-    os_log("[%.2f ms] ERROR %@: %@", log: log, type: .debug,
-            elapsed, name, String(describing: type(of: error)))
-    #endif
-}</code></pre>
-          <p>Only the error <strong>type</strong> is recorded. Whether it's a <code>URLError</code>, <code>EncodingError</code>, or <code>CryptoKitError</code> — type information alone is sufficient for debugging, and zero user data is leaked.</p>
-          <p>Release builds have zero log output. The <code>#if DEBUG</code> guard means the code path for logging doesn't even exist in production binaries. Even if logs were somehow captured, they would contain no sensitive data. This is the defense-in-depth philosophy.</p>
+          <h2>4. The Scope of Performance Logging</h2>
+          <p>Logging in <code>PerformanceLogger</code> is guarded by <code>#if DEBUG</code>. Builds without DEBUG defined do not include this logger’s logging operations.</p>
+          <p>Its <code>logError</code> records the error type, such as <code>URLError</code>, instead of the detailed <code>localizedDescription</code>, which may contain a file path or user input.</p>
+          <p>This does not automatically sanitize every event name or additional string passed to <code>logEvent</code>. Callers must avoid passing email addresses, memo text, and authentication information.</p>
+          <p><strong>This is not a guarantee of zero logs across the entire app, external SDKs, and operating system.</strong> First-party usage events and AppsFlyer remain separate, enabled systems. The analytics FAQ below and our <a href="/en/privacy#technical">Privacy Policy</a> explain that collection.</p>
 
-          <h2>5. AES-GCM Encrypted Outbox</h2>
-          <p>In this app, the UI clears the moment the send button is pressed, but the memo itself is saved to the Outbox and sent in the background. So how are unsent memos in the Outbox protected?</p>
-          <ul>
-            <li><strong>AES-GCM encryption:</strong> All unsent messages are encrypted with AES-GCM (Galois/Counter Mode)</li>
-            <li><strong>256-bit key:</strong> The encryption key is generated at 256 bits and stored in the Keychain</li>
-            <li><strong>Device-bound:</strong> Since the key is stored in the Keychain, decryption is only possible on that specific device</li>
-            <li><strong>Apple CryptoKit:</strong> Encryption is handled by Apple's native CryptoKit. Zero dependency on external crypto libraries</li>
-          </ul>
-          <p>Even with physical access to the device, Outbox memos remain encrypted and unreadable as long as Keychain security is maintained.</p>
-          <p>For the complete Outbox architecture design, see <a href="/devlog/outbox-architecture">Outbox Architecture: Zero Message Loss Design</a>.</p>
+          <h2>5. What the AES-GCM Encrypted Outbox Protects</h2>
+          <p>Pending memos are managed in an on-device queue called the Outbox. The app uses Apple’s CryptoKit to encrypt saved data with AES-GCM. Newly generated encryption keys are 256 bits.</p>
+          <p>Keys are stored in Keychain with <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code>. This allows access after the first unlock following a restart, until the next restart, and prevents migration through a backup restored to another device. The app reads the key for encryption and decryption.</p>
+          <p>This protects stored data. It does not hide the visible screen or guarantee safety against every form of device compromise. Before changing devices, confirm that important memos have reached their destination.</p>
+          <p>When email sending is used, memo bodies are processed by our Relay API and delivery infrastructure, and remain as email in the recipient’s mailbox. <strong>On-device encryption does not mean email delivery is end-to-end encrypted (E2EE).</strong> See our <a href="/en/privacy#technical">Privacy Policy</a> and <a href="/en/privacy-architecture/">data route explanation</a>.</p>
+          <p>For the pending-send queue, see the <a href="/devlog/outbox-architecture">Outbox architecture article</a>.</p>
 
           <h2>6. Memo Protection and External SDKs</h2>
           <p>Within the iOS app, CryptoKit encrypts memo bodies, Keychain stores the key, and URLSession transmits memos. Network.framework monitors connectivity, and BackgroundTasks schedules background sending.</p>
@@ -692,7 +634,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Is memo content stored on servers?</div>
-              <div class="faq-item__answer">The Relay API uses a pass-through design. Memo content is not permanently stored, except where required by law or for legitimate operational needs such as incident response.</div>
+              <div class="faq-item__answer">When you send email, the body passes through our Relay API and delivery infrastructure. Our Relay API does not permanently store memo bodies except where required by law or for legitimate operational needs such as incident response. This is separate from storage in the recipient’s mailbox. See the <a href="/en/privacy-architecture/">privacy architecture</a> for the destination-specific explanation.</div>
             </div>
 
             <div class="faq-item">
@@ -702,7 +644,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
 
             <div class="faq-item">
               <div class="faq-item__question">Q. Are memos safe if I lose my device?</div>
-              <div class="faq-item__answer">Unsent memos in the Outbox are encrypted with AES-GCM (256-bit key). The key is stored in the Keychain and bound to the device, so memos remain protected as long as Keychain security is maintained.</div>
+              <div class="faq-item__answer">The Outbox is encrypted at rest with AES-GCM, and newly generated keys are 256 bits. Keys use a Keychain protection class that prevents migration to another device. This does not protect the visible screen or email already delivered to a mailbox, and on-device encryption does not guarantee that all information is safe after a device is lost.</div>
             </div>
 
             <div class="faq-item">
@@ -722,7 +664,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
             <div class="related-grid">
               <a href="/devlog/day1" class="related-card">
                 <div class="related-card__title">[Day 1] Loved Captio So Much, I Had to Recreate That Experience</div>
-                <div class="related-card__desc">Launch in ~1s, send with one tap, zero message loss. Every technical decision documented.</div>
+                <div class="related-card__desc">The initial development decisions behind recreating the Captio experience.</div>
               </a>
               <a href="/devlog/" class="related-card">
                 <div class="related-card__title">Dev Log Index</div>
@@ -730,11 +672,11 @@ func sceneDidEnterBackground(_ scene: UIScene) {
               </a>
               <a href="/devlog/outbox-architecture" class="related-card">
                 <div class="related-card__title">Outbox Architecture: Zero Message Loss</div>
-                <div class="related-card__desc">Instant UI clear on send, but messages never lost. The full AES-GCM encrypted Outbox pattern.</div>
+                <div class="related-card__desc">How the Outbox queues pending memos and encrypts stored data with AES-GCM.</div>
               </a>
               <a href="/devlog/relay-api-design" class="related-card">
                 <div class="related-card__title">Relay API: Email Infrastructure on Cloudflare Workers</div>
-                <div class="related-card__desc">Edge computing for global email delivery in milliseconds. The full pass-through design.</div>
+                <div class="related-card__desc">The email infrastructure built on Cloudflare Workers and its relay design.</div>
               </a>
             </div>
           </div>
@@ -751,7 +693,9 @@ func sceneDidEnterBackground(_ scene: UIScene) {
     <li><a href="https://developer.apple.com/documentation/cryptokit" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — CryptoKit Documentation</a> — <span lang="ja" data-lang="ja">AES-GCM暗号化によるOutboxデータ保護の実装に使用</span><span lang="en" data-lang="en">Used for implementing AES-GCM encryption to protect Outbox data at rest</span></li>
     <li><a href="https://developer.apple.com/documentation/foundation/urlsession" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — URLSession Documentation</a> — <span lang="ja" data-lang="ja">エフェメラル（一時的）セッションによるネットワーク通信でプライバシーを確保</span><span lang="en" data-lang="en">Ephemeral session configuration for privacy-preserving network communication</span></li>
     <li><a href="https://developer.apple.com/documentation/security/preventing-insecure-network-connections" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preventing Insecure Network Connections (App Transport Security)</a> — <span lang="ja" data-lang="ja">TLS通信の強制によるデータ転送時のセキュリティ確保</span><span lang="en" data-lang="en">Enforcing TLS for secure data transmission</span></li>
-    <li><a href="https://developer.apple.com/documentation/os/logging" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Unified Logging (os.log)</a> — <span lang="ja" data-lang="ja">ログサニタイズによる個人情報漏洩防止の実装に参照</span><span lang="en" data-lang="en">Referenced for implementing log sanitization to prevent personal data leakage</span></li>
+    <li><a href="https://developer.apple.com/documentation/os/generating-log-messages-from-your-code" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Generating Log Messages from Your Code</a> — <span lang="ja" data-lang="ja">ログの保存範囲と機密情報の扱い</span><span lang="en" data-lang="en">Log storage and handling sensitive information</span></li>
+    <li><a href="https://developer.apple.com/documentation/uikit/preparing-your-ui-to-run-in-the-background" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Preparing Your UI to Run in the Background</a> — <span lang="ja" data-lang="ja">アプリスイッチャー用スナップショットと画面上の情報</span><span lang="en" data-lang="en">App-switcher snapshots and visible information</span></li>
+    <li><a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly" target="_blank" rel="noopener" style="color:var(--accent);">Apple Developer — Keychain Access After First Unlock, This Device Only</a> — <span lang="ja" data-lang="ja">鍵のアクセス条件と他端末への移行制限</span><span lang="en" data-lang="en">Key access conditions and migration restrictions</span></li>
   </ul>
 </section>
 
@@ -768,7 +712,7 @@ func sceneDidEnterBackground(_ scene: UIScene) {
         <span lang="ja" data-lang="ja">Obsidian連携で、メモを貯める場所を作る</span><span lang="en" data-lang="en">Give your notes somewhere to accumulate</span>
       </span>
       <span style="display:block;font-size:.875rem;color:var(--text-secondary);line-height:1.7;">
-        <span lang="ja" data-lang="ja">メールで自分に送るだけで、Obsidianのノートに追記されます。</span><span lang="en" data-lang="en">Email a note to yourself and it is appended to your Obsidian vault.</span>
+        <span lang="ja" data-lang="ja">Obsidian連携を有効にし、保存先を設定する手順を確認できます。</span><span lang="en" data-lang="en">Learn how to enable the Obsidian integration and configure its destination.</span>
       </span>
     </a>
   </aside>
