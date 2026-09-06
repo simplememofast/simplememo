@@ -18,6 +18,7 @@ const FILES = {
   'ga4-quality': ['ga4-quality.sql'],
   // Always attach quality results to the funnel; never silently discard QA.
   'ga4-funnel': ['ga4-quality.sql', 'ga4-funnel.sql'],
+  'ga4-journey': ['ga4-quality.sql', 'ga4-journey.sql'],
 };
 const DAY = 86_400_000;
 function dateValue(value) {
@@ -135,6 +136,9 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
     } else out.status = opts.execution === 'dry-run' ? 'dry_run_complete' : 'complete';
     if (opts.report.startsWith('ga4-')) {
       out.interpretation = 'GA4 exported observed events/sessions; inspect quality rows before scoring. Store clicks are not installations, revenue, or LTV.';
+      if (opts.report === 'ga4-journey') {
+        out.interpretation = 'Existing card events and referrer-bearing arrivals, not proven click paths or causal effects. Event-day counts and 24-hour session-start cohorts are separate. Route session counts are not additive across routes or quality groups. Inspect both quality and context rows before evaluation; no inferred CTR or drop-off rate.';
+      }
     }
   } catch (e) { out.status = 'error'; out.error = errorDetails(e); }
   return out;
