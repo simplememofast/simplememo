@@ -26,6 +26,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 
@@ -39,16 +40,22 @@ const WF_DIRS = [
 ];
 
 /** ワークフローが実際に読んでいる secret 名を集める。台帳ではなく**現物**から。 */
-export function secretsInUse(dirs = WF_DIRS) {
+export function secretsInUse(dirs = WF_DIRS, { required = false } = {}) {
   const found = new Map(); // name -> [file]
   for (const dir of dirs) {
-    if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir).filter((x) => /\.ya?ml$/.test(x))) {
+    if (!fs.existsSync(dir)) {
+      if (required) throw new Error(`検査対象が存在しない: ${dir}`);
+      continue;
+    }
+    const files = fs.readdirSync(dir).filter((x) => /\.ya?ml$/.test(x));
+    if (required && files.length === 0) throw new Error(`検査対象にワークフローが無い: ${dir}`);
+    for (const f of files) {
       const src = fs.readFileSync(path.join(dir, f), 'utf8');
-      for (const m of src.matchAll(/secrets\.([A-Z0-9_]+)/g)) {
-        const list = found.get(m[1]) || [];
+      for (const m of src.matchAll(/secrets(?:\.([A-Z0-9_]+)|\[\s*['"]([A-Z0-9_]+)['"]\s*\])/g)) {
+        const name = m[1] || m[2];
+        const list = found.get(name) || [];
         if (!list.includes(f)) list.push(f);
-        found.set(m[1], list);
+        found.set(name, list);
       }
     }
   }
@@ -127,12 +134,36 @@ const SCENARIOS = ledgerScenarios(
   SELFTEST_BREAKAGES,
 );
 
+SCENARIOS.push(['明示した検査対象の欠落・空ディレクトリは成功にしない', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'credential-scan-'));
+  try {
+    for (const target of [path.join(dir, 'missing'), dir]) {
+      let rejected = false;
+      try { secretsInUse([target], { required: true }); } catch { rejected = true; }
+      assert(rejected, '検査対象なしを成功にした');
+    }
+    fs.writeFileSync(path.join(dir, 'test.yml'), "token: ${{ secrets.NEW_UNREGISTERED_KEY }}\nother: ${{ secrets['BRACKET_KEY'] }}\n");
+    const found = secretsInUse([dir], { required: true });
+    assert(found.has('NEW_UNREGISTERED_KEY') && found.has('BRACKET_KEY'), '実物のsecretを収集できない');
+    const doc = JSON.parse(fs.readFileSync(CRED_PATH, 'utf8'));
+    const stop = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
+    assert(validate(doc, stop, found).some(p => p.includes('NEW_UNREGISTERED_KEY')), '未登録secretで落ちない');
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}]);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const doc = JSON.parse(fs.readFileSync(CRED_PATH, 'utf8'));
   const stopDoc = JSON.parse(fs.readFileSync(STOP_PATH, 'utf8'));
-  const inUse = secretsInUse();
+  const dirAt = process.argv.indexOf('--workflow-dir');
+  if (dirAt !== -1 && (!process.argv[dirAt + 1] || process.argv[dirAt + 1].startsWith('--'))) {
+    console.error('--workflow-dir requires a directory'); process.exit(1);
+  }
+  const dirs = dirAt === -1 ? WF_DIRS : [path.resolve(process.argv[dirAt + 1])];
+  const inUse = secretsInUse(dirs, { required: dirAt !== -1 });
+  console.log(`検査対象: ${dirs.filter(d => fs.existsSync(d)).join(', ')}`);
+  for (const dir of dirs.filter(d => !fs.existsSync(d))) console.log(`未検査（別リポジトリのCIで検査）: ${dir}`);
 
   const stopAt = process.argv.indexOf('--stop');
   if (stopAt !== -1) {

@@ -898,7 +898,7 @@ jobs:
       # 「止めたい経路ごとに、失効させる鍵を名指しできるか」。
       # 新しい secret を使う経路が増えると落ちる。
       - name: Credential scope and revocation
-        run: node scripts/check-credentials.mjs --check
+        run: node scripts/check-credentials.mjs --check --workflow-dir .github/workflows
 
       # 【金額の規則】変更幅・損失上限・撤回条件と、資金繰りのシナリオ。
       # **損失上限が現在の上限以下だと落ちる**（初日から発火する上限は上限ではない）。
