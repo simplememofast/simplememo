@@ -21,6 +21,7 @@
  *          （埋められるのはオーナーだけなので、赤いCIは何も動かさない）
  */
 
+import { assessmentProblems, assessmentScenarios } from './lib/contract-assessment.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -356,6 +357,7 @@ export function validate(doc, { vendorIds = null, today = new Date().toISOString
   const cr = doc.contract_review;
   if (cr) {
     problems.push(...clauseGuard(cr, today));
+    problems.push(...assessmentProblems(cr.ai_assessments ?? [], cr.vendors ?? []));
     const seen = new Set();
     for (const v of cr.vendors || []) {
       const at = `contract_review「${v.id}」`;
@@ -448,6 +450,7 @@ const SCENARIOS = ledgerScenarios(
 // 「ベンダー台帳に無い id」が1件も出なかった（実測済み）。
 // [2026-08-28] **誰が読んだかの欄。**人の読みとAIの下書きが同じ字面になるのを止める。
 SCENARIOS.push(
+  ...assessmentScenarios,
   // ── 暦で固定された年次期限（2026-09-01 追加）──────────────────
   ['固定年次: 次の到来日を返す', () => {
     assert(nextFixedAnnualDue(1, 31, '2026-09-01') === '2027-01-31',
@@ -734,6 +737,7 @@ if (isMain) {
       console.log(`      ${v.id}（${which}）: ${v.draft_note}`);
     }
   }
+  console.log(`    AIによる公開規約の分析記録 ${(cr.ai_assessments ?? []).length}件（契約承認・適用確認とは別）`);
   console.log('    書面の契約書は無く、各社の規約への同意で成立している。');
   console.log('    **unreviewed は「問題なし」ではなく「見ていない」。**');
 
@@ -741,8 +745,8 @@ if (isMain) {
     console.log('\n  期限が近い:');
     for (const w of warnings) console.log(`    ${w}`);
   }
-  console.log('\n  **この台帳は器で、中身の大半はまだ空。**埋められるのはオーナーだけ。');
-  console.log('  ここでできるのは、空いている場所を空いていると言い続けることだけ。');
+  console.log('\n  期限・所在・過去の承認と、AIによる公開規約の分析を分けて保持する。');
+  console.log('  分析記録は契約承認・自社への適用確認を意味しない。');
 
   if (problems.length) {
     console.error('\n法人の台帳: 形の問題');
