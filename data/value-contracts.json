@@ -261,6 +261,377 @@
         "state": "pending",
         "due_after_jst": "2026-09-06"
       }
+    },
+    {
+      "id": "capacities-owner-recovery-20260906",
+      "run_id": "ap-20260906-owner-session-capacities-recovery",
+      "horizon_days": 1,
+      "intent": {
+        "id": "capacities-owner-recovery-20260906",
+        "run_id": "ap-20260906-owner-session-capacities-recovery",
+        "created_at": "2026-09-06T09:31:07.888Z",
+        "metric": "publishing_day_rate",
+        "metric_policy_hash": "2cab4a44b192de519158921c6ea4eca81015ea18dc784514693a35604ffd30c3",
+        "baseline": 0,
+        "baseline_date": "2026-09-05",
+        "null_model": {
+          "kind": "trailing_median",
+          "value": 0,
+          "n": 14,
+          "samples": [
+            {
+              "date": "2026-09-05",
+              "value": 0,
+              "n": 3,
+              "reason": null
+            },
+            {
+              "date": "2026-09-04",
+              "value": 1,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-09-03",
+              "value": 1,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-09-02",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-09-01",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-08-31",
+              "value": 0,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-08-30",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-08-29",
+              "value": 0,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-08-28",
+              "value": 1,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-08-27",
+              "value": 1,
+              "n": 3,
+              "reason": null
+            },
+            {
+              "date": "2026-08-26",
+              "value": 1,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-08-25",
+              "value": 0,
+              "n": 3,
+              "reason": null
+            },
+            {
+              "date": "2026-08-24",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-08-23",
+              "value": 1,
+              "n": 1,
+              "reason": null
+            }
+          ]
+        },
+        "predicted_delta": 1,
+        "p": 0.7,
+        "horizon_days": 1,
+        "counterfactual": {
+          "id": "memos-owner-comparison-20260906",
+          "reason": "C09は既存キューの先頭で、9/6の未出荷検証記録があり、sitemap許可範囲もPR #973で修正済み。公式資料とMac版を再確認して復旧する方が、次のC10を新たに検証するより今回の失敗を直接解消する。"
+        },
+        "rank_gap": 0.19999999999999996,
+        "touches": [
+          "obsidian/compare/capacities/index.html",
+          "obsidian/compare/index.html",
+          "vs/capacities/index.html",
+          "obsidian/index.html",
+          "growth/content/coverage-queue.json",
+          "data/content-graph.json",
+          "data/distribution-queue.json",
+          "assets/img/og/obsidian-capacities.png",
+          "assets/img/qr-obsidian-capacities-ja.svg",
+          "assets/img/qr-obsidian-capacities-en.svg",
+          "assets/img/obsidian/capacities-onboarding.png",
+          "assets/img/obsidian/capacities-objects.png",
+          "docs/obsidian/evidence/capacities-20260906.md",
+          "sitemap.xml",
+          "sitemap-ja.xml",
+          "sitemap-en.xml",
+          "sitemap-locales.xml",
+          "data/autopilot-runs.json",
+          "data/autopilot-status.json",
+          "docs/obsidian/AUTOPILOT_LOG.md",
+          "autopilot/index.html"
+        ],
+        "max_changed_lines": 1500,
+        "max_binary_bytes": 5242880,
+        "predicted_usd": 20,
+        "eligibility": {
+          "candidate_id": "capacities-owner-recovery-20260906",
+          "title": null,
+          "judged_jst": "2026-09-06",
+          "verdict": "eligible",
+          "halted": false,
+          "reversibility_class": "R1",
+          "criteria": {
+            "reversibility": {
+              "result": "pass",
+              "why": "R1",
+              "class": "R1",
+              "class_source": "declared"
+            },
+            "boundedness": {
+              "result": "pass",
+              "why": "21 パス・content の範囲内",
+              "scope": "content",
+              "scope_source": "declared"
+            },
+            "evidence_age": {
+              "result": "pass",
+              "why": "0 日前の観測（declared）",
+              "age_days": 0,
+              "evidence_source": "declared"
+            },
+            "budget": {
+              "result": "pass",
+              "why": "予測 $20.0000（declared / 上限 $20）",
+              "predicted_usd": 20,
+              "cap_usd": 20,
+              "kind": "article",
+              "prediction_source": "declared"
+            },
+            "repeat_guard": {
+              "result": "pass",
+              "why": "0 日（上限 7 日 / 実行主体 不要）",
+              "open_days": 0
+            }
+          },
+          "reasons": []
+        },
+        "evidence": {
+          "source_hash": "87d03423d725faadc80b4ba0d75b5952fb223577a91084d29359cd1eb8d9d726",
+          "date": "2026-09-06"
+        },
+        "rollback": {
+          "mode": "revert_static_only",
+          "paths": [
+            "obsidian/compare/capacities/index.html",
+            "obsidian/compare/index.html",
+            "vs/capacities/index.html",
+            "obsidian/index.html",
+            "assets/img/og/obsidian-capacities.png",
+            "assets/img/qr-obsidian-capacities-ja.svg",
+            "assets/img/qr-obsidian-capacities-en.svg",
+            "assets/img/obsidian/capacities-onboarding.png",
+            "assets/img/obsidian/capacities-objects.png"
+          ]
+        },
+        "input": {
+          "id": "capacities-owner-recovery-20260906",
+          "run_id": "ap-20260906-owner-session-capacities-recovery",
+          "metric": "publishing_day_rate",
+          "touches": [
+            "obsidian/compare/capacities/index.html",
+            "obsidian/compare/index.html",
+            "vs/capacities/index.html",
+            "obsidian/index.html",
+            "growth/content/coverage-queue.json",
+            "data/content-graph.json",
+            "data/distribution-queue.json",
+            "assets/img/og/obsidian-capacities.png",
+            "assets/img/qr-obsidian-capacities-ja.svg",
+            "assets/img/qr-obsidian-capacities-en.svg",
+            "assets/img/obsidian/capacities-onboarding.png",
+            "assets/img/obsidian/capacities-objects.png",
+            "docs/obsidian/evidence/capacities-20260906.md",
+            "sitemap.xml",
+            "sitemap-ja.xml",
+            "sitemap-en.xml",
+            "sitemap-locales.xml",
+            "data/autopilot-runs.json",
+            "data/autopilot-status.json",
+            "docs/obsidian/AUTOPILOT_LOG.md",
+            "autopilot/index.html"
+          ],
+          "lane": "E",
+          "action": "new",
+          "domain": "サイトコンテンツの新設・更新",
+          "reversibility_class": "R1",
+          "evidence_date": "2026-09-06",
+          "predicted_usd": 20,
+          "predicted_delta": 1,
+          "p": 0.7,
+          "horizon_days": 1,
+          "max_changed_lines": 1500,
+          "counterfactual": {
+            "id": "memos-owner-comparison-20260906",
+            "reason": "C09は既存キューの先頭で、9/6の未出荷検証記録があり、sitemap許可範囲もPR #973で修正済み。公式資料とMac版を再確認して復旧する方が、次のC10を新たに検証するより今回の失敗を直接解消する。"
+          },
+          "rank_gap": 0.19999999999999996,
+          "scope": "content",
+          "max_binary_bytes": 5242880
+        },
+        "selection": {
+          "selected": "capacities-owner-recovery-20260906",
+          "reason": "ranked_first",
+          "exploration": false,
+          "calibration": {
+            "version": 1,
+            "snapshot_sha256": "5072e8bcd1314288ae0485b68fec5cc029e29408bbdf3bf5fc34d589c5c32130",
+            "settled": 0
+          }
+        },
+        "candidates": [
+          {
+            "run_id": "ap-20260906-owner-session-capacities-recovery",
+            "metric": "publishing_day_rate",
+            "predicted_delta": 1,
+            "horizon_days": 1,
+            "rank_gap": 0.19999999999999996,
+            "max_changed_lines": 1500,
+            "max_binary_bytes": 5242880,
+            "predicted_usd": 20,
+            "lane": "E",
+            "action": "new",
+            "domain": "サイトコンテンツの新設・更新",
+            "reversibility_class": "R1",
+            "scope": "content",
+            "evidence_date": "2026-09-06",
+            "id": "capacities-owner-recovery-20260906",
+            "rank": 0.7,
+            "p": 0.7,
+            "touches": [
+              "obsidian/compare/capacities/index.html",
+              "obsidian/compare/index.html",
+              "vs/capacities/index.html",
+              "obsidian/index.html",
+              "growth/content/coverage-queue.json",
+              "data/content-graph.json",
+              "data/distribution-queue.json",
+              "assets/img/og/obsidian-capacities.png",
+              "assets/img/qr-obsidian-capacities-ja.svg",
+              "assets/img/qr-obsidian-capacities-en.svg",
+              "assets/img/obsidian/capacities-onboarding.png",
+              "assets/img/obsidian/capacities-objects.png",
+              "docs/obsidian/evidence/capacities-20260906.md",
+              "sitemap.xml",
+              "sitemap-ja.xml",
+              "sitemap-en.xml",
+              "sitemap-locales.xml",
+              "data/autopilot-runs.json",
+              "data/autopilot-status.json",
+              "docs/obsidian/AUTOPILOT_LOG.md",
+              "autopilot/index.html"
+            ],
+            "counterfactual": {
+              "id": "memos-owner-comparison-20260906",
+              "reason": "C09は既存キューの先頭で、9/6の未出荷検証記録があり、sitemap許可範囲もPR #973で修正済み。公式資料とMac版を再確認して復旧する方が、次のC10を新たに検証するより今回の失敗を直接解消する。"
+            },
+            "calibration": {
+              "snapshot_sha256": "5072e8bcd1314288ae0485b68fec5cc029e29408bbdf3bf5fc34d589c5c32130",
+              "reason": "関連する決済は0件で較正の実績は無い。9/6の主系はCapacities本文を出荷できず、通常再実行も終了済み。元の失敗と費用を保持したうえで、新しい宣言を先に保存して1記事を復旧する。公式資料には現在アクセスでき、対象と競合するopen PRは無い。一方、実機確認・公開CI・main競合・反映確認が未完のため成功確率は0.7とし、成功を既成事実にしない。"
+            },
+            "kind": "article"
+          },
+          {
+            "run_id": "ap-20260906-owner-session-capacities-recovery",
+            "metric": "publishing_day_rate",
+            "predicted_delta": 1,
+            "horizon_days": 1,
+            "rank_gap": 0.19999999999999996,
+            "max_changed_lines": 1500,
+            "max_binary_bytes": 5242880,
+            "predicted_usd": 20,
+            "lane": "E",
+            "action": "new",
+            "domain": "サイトコンテンツの新設・更新",
+            "reversibility_class": "R1",
+            "scope": "content",
+            "evidence_date": "2026-09-06",
+            "id": "memos-owner-comparison-20260906",
+            "rank": 0.5,
+            "p": 0.5,
+            "touches": [
+              "obsidian/compare/memos/index.html",
+              "obsidian/compare/index.html",
+              "vs/memos/index.html",
+              "obsidian/index.html",
+              "growth/content/coverage-queue.json",
+              "data/content-graph.json",
+              "data/distribution-queue.json",
+              "assets/img/og/obsidian-memos.png",
+              "assets/img/qr-obsidian-memos-ja.svg",
+              "assets/img/qr-obsidian-memos-en.svg",
+              "assets/img/obsidian/memos-onboarding.png",
+              "assets/img/obsidian/memos-objects.png",
+              "docs/obsidian/evidence/memos-20260906.md",
+              "sitemap.xml",
+              "sitemap-ja.xml",
+              "sitemap-en.xml",
+              "sitemap-locales.xml",
+              "data/autopilot-runs.json",
+              "data/autopilot-status.json",
+              "docs/obsidian/AUTOPILOT_LOG.md",
+              "autopilot/index.html"
+            ],
+            "counterfactual": {
+              "id": "capacities-owner-recovery-20260906",
+              "reason": "memosは次のpending項目でセルフホスト検証が可能だが、現在失敗しているC09を残し、別のアプリと検証環境を新たに準備する必要があるため優先度を下げる。"
+            },
+            "calibration": {
+              "snapshot_sha256": "5072e8bcd1314288ae0485b68fec5cc029e29408bbdf3bf5fc34d589c5c32130",
+              "reason": "関連する決済は0件で較正の実績は無い。C10はキュー上の次候補だが、今回の環境ではまだセルフホスト実機確認を行っていない。既存の失敗記事を復旧するC09より新しい不確実性が多く、期限内に品質検査まで完了する確率を0.5と置く。"
+            },
+            "kind": "article"
+          }
+        ]
+      },
+      "delivery": {
+        "verified": true,
+        "intent_hash": "dbecde41920ec5101419ef964f205ab9afdc2eecb958a4afcdb3c7b96ee7c024",
+        "merge_sha": "27b9b3753f851b047cb16b565ecbbd9562f86579",
+        "declaration_sha": "31c74dbce3167920679b4b98283fe95a35bffcf8",
+        "deployed_at": "2026-09-06T10:23:33Z",
+        "deployment_url": "https://dash.cloudflare.com/?to=/6f37d8ca103aa4af6a3722fc3c3e1ef6/pages/view/simplememo/1f0f2a97-127a-4d3b-9c6a-527b695a6912",
+        "pr": 1024
+      },
+      "settlement": {
+        "state": "pending",
+        "due_after_jst": "2026-09-07"
+      }
     }
   ]
 }
