@@ -47,7 +47,7 @@
     "unlock は解除条件のまとまり。**1タスク＝1作業ではない** —— ASCのレポートが降りれば",
     "複数件が同時に動く。個別に積むと順番を間違えるので、解除する行為のほうを単位にする。"
   ],
-  "measured_at": "2026-08-26",
+  "measured_at": "2026-09-06",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -128,21 +128,16 @@
     {
       "area": "① 次期機能開発",
       "task": "継続率データによる優先度判断",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md"
+        "../simplememo-api/docs/reports/RETENTION_MONETIZATION_COHORT_2026-07-29.md",
+        "../simplememo-api/src/analytics/aso-cohort.ts",
+        "../simplememo-api/scripts/retention-evaluation.py",
+        "../simplememo-api/.github/workflows/retention-evaluation.yml",
+        "../simplememo-api/data/retention-evaluation.json"
       ],
-      "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人",
-      "blocker": "external_data",
-      "unblocked_by": "**[2026-09-02 実測] 「BigQuery の28日蓄積待ち」は、この行に対しては成立しない。**\n\nBigQuery を直接叩いて中身を数えた（project `yurika-simplememo`）:\n\n    データセット   `searchconsole` **1つだけ**\n    テーブル       ExportLog / searchdata_site_impression / searchdata_url_impression\n    列             data_date / site_url / query / country / search_type / device /\n                   impressions / clicks / sum_top_position\n\n**継続率も install も user も無い。**Search Console は検索の露出とクリックであって、**アプリの継続率は原理的に出てこない。**28日たまっても、たまるのは検索データ。\n\nASC 側も見た —— Analytics Reports **156本に cohort / retention のレポートは無い**（retention を名前に含むのは `Retention Messaging` の1本だけで、これはメッセージング機能の指標）。**検索語のときと同じ形** —— カタログに無いものを『降りてくる待ち』に置いていた。\n\n**したがって 2026-09-06 が来ても、この行は動かない。**待ち先を書き直すまで、`--plan` はこの2件を『待つだけ +2』の先頭に置き続ける。\n\n**どこから取るかは未決。**候補は Firebase（③のデータ連携が `external_credential` で止まっている）と ASC の Web UI（Analytics の画面には継続率がある。ただし API 面には無い）。**決まっていないので「Firebase 待ち」とも書かない** —— 同じ誤りを別の相手で繰り返さない。",
-      "unlock": "bq_28d",
-      "blocked_on": [
-        {
-          "file": "data/autopilot-status.json",
-          "path": "data_freshness.bq_export_days_accumulated",
-          "atLeast": 28
-        }
-      ]
+      "note": "D7継続2.5〜3.7倍を根拠に優先度決定。決定は人\n\n2026-09-06: D1の成熟した獲得コホートを既存管理APIから読み、D28→D7→初日保存の順に95%区間の分離で調査優先度を決定する日次経路を本番化。https://github.com/simplememofast/simplememo-api/actions/runs/34016315646 が成功。今回は悪化を支持する差が無いためcontinue_measurement。機能採否・因果効果・解約率の判定ではない。初回HTTP403はクライアント識別ヘッダーを修正して解消し、失敗時は写しを更新しない。集計は非公開リポジトリ内に保持。",
+      "since": "2026-09"
     },
     {
       "area": "① 次期機能開発",
@@ -675,15 +670,16 @@
     {
       "area": "③ 自律型マーケティング",
       "task": "トレンドレーダー（Googleトレンド/はてブ/ランキング）",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "docs/trend-radar-prompt.md",
-        "docs/obsidian/AUTOPILOT_RUNBOOK.md"
+        "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+        "scripts/trend-radar.py",
+        ".github/workflows/trend-radar.yml",
+        "data/trend-radar.json"
       ],
-      "note": "2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人",
-      "blocker": "external_data",
-      "unblocked_by": "外部の順位・トレンドを取る経路が無い",
-      "unlock": "trend_source"
+      "note": "2026-08-22にRunbook §6の保守メニューへ組み込み。PR起案の判断は人\n\n2026-09-06: Google JPトレンド・はてブIT・App Store生産性ランキングの取得、前回差分、失敗保持、観測PRまで自動化。main実行 https://github.com/simplememofast/simplememo/actions/runs/34015632069 が成功し、観測PR #995を経て公開JSONのrun_url/status=okを確認。記事採否や外部投稿まで自動化したとは数えない。",
+      "since": "2026-09"
     },
     {
       "area": "③ 自律型マーケティング",
@@ -913,18 +909,19 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "ビルドとTestFlight内部配信",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/release-automation.md"
+        "../simplememo-ios/docs/release-automation.md",
+        "../simplememo-ios/.github/workflows/release.yml",
+        "../simplememo-ios/scripts/attach_testflight_testers.rb",
+        "data/authority-matrix.json"
       ],
-      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。** **[2026-08-27] その境界がオーナー判断で外れた。**\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「アプリのビルド・TestFlight内部配信」は human_only に「タグ v* の作成」を置き、ai_may は空。**タグ push を拒む設計（claude.yml に actions: write を与えない）は2026-08-27 のオーナー判断でも外れていない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n**[2026-09-03] 境界が外れた。**旧 note は「タグ push を拒む設計（claude.yml に actions: write を与えない）は 2026-08-27 のオーナー判断でも外れていない」と書いていたが、**塞げていたのは1経路だけだった** —— MCP の `actions_run_trigger` は actions:write を持ち（2026-08-28 実測）、issue コメントの橋はセッションをオーナーとして通す（run 30699556723 で実際に出荷済み）。**技術的な経路は開いていて、塞いでいたのは書いてある規則。**\n\nオーナーが渡したのは **submit_review=false の範囲だけ** —— TestFlight 内部配信まで。App Review 提出を伴う起動は権限表で human_only のまま、提出そのものは別領域の門が見る。\n\n**blocker を policy_boundary から verification_pending へ動かした。**作るものは無く、残っているのは1周動いたのを見ること。**executor は動かさない** —— この経路で AI はまだ1回も起動していない。",
-      "blocker": "verification_pending",
-      "unblocked_by": "**2026-09-03 にオーナーが submit_review=false に限って渡した。**経路（release.yml）も門（preflight）も既に在るので、残っているのは **AI がこの経路で1回起動したのを見ること**だけ",
+      "note": "タグ作成は人。以降はXcode Cloud＋自動アタッチ **[2026-08-25] ここを gated へ上げようとして、上げてはいけないと分かった。**権限表が『タグ v* の作成』を human_only と定めており、上げるにはそれを渡すしかない —— numbers.md が『人間専任19件のうち11件をAIに渡すと境界が消える』と警告しているのと同じ行為。**代わりに、境界を動かさずに塞げる穴（出荷前のCI緑判定）を実装した。** **[2026-08-27] その境界がオーナー判断で外れた。**\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「アプリのビルド・TestFlight内部配信」は human_only に「タグ v* の作成」を置き、ai_may は空。**タグ push を拒む設計（claude.yml に actions: write を与えない）は2026-08-27 のオーナー判断でも外れていない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n**[2026-09-03] 境界が外れた。**旧 note は「タグ push を拒む設計（claude.yml に actions: write を与えない）は 2026-08-27 のオーナー判断でも外れていない」と書いていたが、**塞げていたのは1経路だけだった** —— MCP の `actions_run_trigger` は actions:write を持ち（2026-08-28 実測）、issue コメントの橋はセッションをオーナーとして通す（run 30699556723 で実際に出荷済み）。**技術的な経路は開いていて、塞いでいたのは書いてある規則。**\n\nオーナーが渡したのは **submit_review=false の範囲だけ** —— TestFlight 内部配信まで。App Review 提出を伴う起動は権限表で human_only のまま、提出そのものは別領域の門が見る。\n\n**blocker を policy_boundary から verification_pending へ動かした。**作るものは無く、残っているのは1周動いたのを見ること。**executor は動かさない** —— この経路で AI はまだ1回も起動していない。\n\n2026-09-06: オーナーが委譲済みのsubmit_review=falseでAIがrelease.ymlを起動。https://github.com/simplememofast/simplememo-ios/actions/runs/34014697843 がpreflight/タグ検証/内部配信の確認まで成功。v5.8.20の既存VALIDビルド956が内部配信済みだったため冪等に再利用した。今回新規アーカイブを作った実績ではない。App Review提出ジョブはスキップ。変更したのは実行者の確認で、公開の人間承認境界は維持。",
       "authority": {
         "domain": "アプリのビルド・TestFlight内部配信",
         "ai_may": "**submit_review=false に限った release.yml の起動**（v* タグ作成 → Xcode Cloud → TestFlight 内部配信まで）"
       },
-      "unlock": "testflight_first_dispatch"
+      "since": "2026-09"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -1730,7 +1727,7 @@
       "note": "2026-08-22実装。実行判定が返す故障・縮退コード5件と、運転台帳に**実際に現れた** failure_class 4件の全部に規則が要る（規則の無い種別があると落ちる）。危機領域は stop_automation: true を強制。**owner_direct の経路は未整備**で、名前が付いただけであることも台帳に書いてある",
       "since": "2026-08"
     },
-     {
+    {
       "area": "⑧ カスタマーサポート",
       "task": "問い合わせからIssueと回帰テストを作成",
       "executor": "ai_executes_gated",
@@ -1746,7 +1743,7 @@
       "since": "2026-09",
       "unblocked_by": "**[2026-09-05] 実走を観測したので executor を動かした。**\n\n`simplememo-api/.github/workflows/classifier-gaps.yml` が実データで1周し、**Issue と回帰テストの両方が実物の問い合わせから自動でできた**（run 33948277349・写しは 78bc2a5）。\n\n    問い合わせ 27件 / unclassified 15件 / 順位が上の規則を外していた 6件\n    出た語形    同期 + できていません（実物2件）\n    作られた物  Issue #248 と it.fails の回帰テスト\n\n**そして直った。**「同期できません」は当たるのに「同期できていません」が unclassified に落ちていて、この形で書いた実物2件には自動返信が1通も出ていなかった。規則を直すと生成側の `it.fails` が落ちて気づける形にしてあり、実際に落ちた（simplememo-api 1.5.27）。\n\n**本文は出していない。**出るのは RULES の literal（話題語）と、ひらがなのみ・12文字以下・否定/可能の標識が先頭6文字以内・**2件以上の問い合わせに出現**を全部満たした語形だけ（許可制。オーナー判断 2026-09-05）。残っている risk は `simplememo-api/src/classifier-gaps.ts` の冒頭に書いてある。\n\n**②「問い合わせから再現テストを自動生成」は動かしていない。**同じ仕組みが両方の題名に当たるように見えるが、②は「② バグ修正」の下にあり、証跡が iOS の `REGRESSION_TEST_TEMPLATE.md`・note が「Watch同期」と、**製品バグの再現を指している。**分類器の欠陥で満たしたとは言い切れないので据え置く。",
       "unlock": "inquiry_facts"
-     },
+    },
     {
       "area": "⑧ カスタマーサポート",
       "task": "ライフサイクルメール（歓迎・確認・リマインド）",
