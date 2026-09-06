@@ -460,6 +460,211 @@
         "fingerprint": "4f1684de6d7b",
         "fetched_at": "2026-09-02"
       }
+    ],
+    "ai_assessments": [
+      {
+        "id": "cloudflare-public-terms-20260906",
+        "vendor_id": "cloudflare",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-06T09:54:32.272Z",
+        "source": {
+          "url": "https://www.cloudflare.com/terms/",
+          "version": "2025-09-12",
+          "sha256": "ddf973a64cb3a19c3c50a648022ca1ff4d7ccbe622e3dcfd66e57a6c5b373a43",
+          "characters": 46597
+        },
+        "open_questions": [
+          "Actual account agreement and subscribed SLA remain unverified.",
+          "Service-specific terms, DPA applicability and restoration elsewhere require separate verification."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Supplier cap depends on fees; free services excluded.",
+            "action": "Verify recovery exposure.",
+            "evidence": [
+              {
+                "section": "12",
+                "start": 34570,
+                "length": 1128,
+                "sha256": "cdf80c9aabb0232e94b6510f52b2cd916a516051bfe12c75cc462c9d28c187bf"
+              },
+              {
+                "section": "2.6",
+                "start": 16297,
+                "length": 632,
+                "sha256": "6e35bb3df89b19fc3ddfe92fcea11c0cc1c946d1f2a5e7089a4b6bf279dd0da1"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "risk",
+            "summary": "Customer indemnities exceed supplier paid-service IP protection.",
+            "action": "Assess asymmetric exposure.",
+            "evidence": [
+              {
+                "section": "10",
+                "start": 30528,
+                "length": 3032,
+                "sha256": "1e9a9735cdbdbba78c9fe280327e313dd6488f4112cbf1d5d8d9028e2db562f9"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Content ownership retained; feedback license perpetual.",
+            "action": "Avoid confidential feedback.",
+            "evidence": [
+              {
+                "section": "2.5",
+                "start": 12676,
+                "length": 3621,
+                "sha256": "e05cd42b7ae17adbfcad7ee73e5c14f7e3d8c586a41ac0a20ce2533c9acff479"
+              },
+              {
+                "section": "9",
+                "start": 29560,
+                "length": 968,
+                "sha256": "f78e18447b91600febe089dd0ea646e4a50a6763c0ed9459122d0aed34b9011e"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "DPA incorporation covers specified personal data.",
+            "action": "Verify applicable scope.",
+            "evidence": [
+              {
+                "section": "6",
+                "start": 23924,
+                "length": 1820,
+                "sha256": "0aa958175e76cd62cd0265cd8435a062f70fde57fa333f43317acc0baef5b668"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "not_identified",
+            "summary": "General mutual confidentiality not identified; beta information protected.",
+            "action": "Check separate agreements.",
+            "evidence": [
+              {
+                "section": "1–20",
+                "start": 5322,
+                "length": 39800,
+                "sha256": "3062fe9345faf62a820ac2c8de84ee17927bfb593f24e7458145b55f4d396f0d"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Broad service warranties disclaimed.",
+            "action": "Verify subscribed SLA.",
+            "evidence": [
+              {
+                "section": "11",
+                "start": 33560,
+                "length": 1010,
+                "sha256": "518877fc71a2c27254bc24c29e11717d24d99ad0fce2a34e2cfc6f8622cf24f5"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Supplier termination and suspension rights are broad.",
+            "action": "Prepare export path.",
+            "evidence": [
+              {
+                "section": "8",
+                "start": 28195,
+                "length": 1365,
+                "sha256": "871b339808d45697af4b87018731cdba9be77be755979d96517b50ea029c8398"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "risk",
+            "summary": "California law; arbitration, exceptions and class-action waiver.",
+            "action": "Seek counsel for disputes.",
+            "evidence": [
+              {
+                "section": "13",
+                "start": 35698,
+                "length": 417,
+                "sha256": "1c38422f0bd2578f0057ff0a9dc008bb4dd10ba7524de22459fba929d2b8d4e6"
+              },
+              {
+                "section": "17",
+                "start": 38407,
+                "length": 5390,
+                "sha256": "e6217b87c266fae321c9c42aa2db2f910a75a2a39fc3615e4a7d1d65b3c04544"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "Customer insurance requirement not identified.",
+            "action": "Check service-specific terms.",
+            "evidence": [
+              {
+                "section": "1–20",
+                "start": 5322,
+                "length": 39800,
+                "sha256": "3062fe9345faf62a820ac2c8de84ee17927bfb593f24e7458145b55f4d396f0d"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "risk",
+            "summary": "Assignment rights are asymmetric.",
+            "action": "Review before restructuring.",
+            "evidence": [
+              {
+                "section": "16",
+                "start": 37108,
+                "length": 1299,
+                "sha256": "0aa373fa3cb824dff1f465396c311eca3c3136642db56f511586a3430c411800"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "not_identified",
+            "summary": "Standalone force-majeure clause not identified.",
+            "action": "Assess outage remedies.",
+            "evidence": [
+              {
+                "section": "1–20",
+                "start": 5322,
+                "length": 39800,
+                "sha256": "3062fe9345faf62a820ac2c8de84ee17927bfb593f24e7458145b55f4d396f0d"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Automatic renewal; notice-based price changes; limited refunds.",
+            "action": "Track billing notices.",
+            "evidence": [
+              {
+                "section": "2.4",
+                "start": 12053,
+                "length": 585,
+                "sha256": "705e2ce1e0b6a34eb8a2862a6a0ba9158b1e61137a943d7ea39e6e37bd6afb97"
+              },
+              {
+                "section": "4",
+                "start": 19379,
+                "length": 2862,
+                "sha256": "7e7a53cd9fa9939760afdea21f814277effc09ea18172d78799679e035487dc5"
+              }
+            ]
+          }
+        }
+      }
     ]
   },
   "entity": {
