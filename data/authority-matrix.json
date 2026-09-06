@@ -506,6 +506,28 @@
       ],
       "status": "active",
       "note": "【2026-09-03 に足した — オーナーの明示の委譲】この日まで20領域のどこにも CPP の作成・削除が無く、**不可逆で外向きな操作なのに承認の枠組みだけが存在しない**状態だった。ASC の CPP は Apple の上限 70 本に張り付いており（実測: POST が 409 STATE_ERROR / Cannot have more that 70 custom product pages for this app.）、内訳は APPROVED 32 / PREPARE_FOR_SUBMISSION 38。**未提出の38本は1インストールも受けられないまま枠を占めている**（Apple は未承認 CPP へのリンクを既定商品ページへ倒す）。枠を空けるには消すしかない。\n\n**self_repair.must_not は『権限表を自分で書き換えない』と書いており、これはその例外。**黙って足さないために経緯を残す —— 「消すには (i) 権限表への領域追加 (ii) delete の実装 の2つにオーナーの明示の委譲が要る」と報告したのに対し、オーナーが『権限付与します』と明示で応答した（2026-09-03）。2026-08-28 に data/autopilot-status.json を may_modify へ足したときと同じ形。\n\n**⚠ 権限が付いても、消してよいわけではない。**どれを消すかは中身の判断で、この行が許しているのは『枠組みが在る』ところまで。削除の実行そのものは human_only に残してある。"
+    },
+    {
+      "domain": "機能要望の設計採否",
+      "reversible": true,
+      "ai_may": [
+        "受領要望と現行実装の照合",
+        "リスクタグのない既存候補の設計採用",
+        "採用根拠・受入条件・設計文書のバックログへの反映"
+      ],
+      "requires_approval": false,
+      "human_only": [
+        "リスクタグのある候補について既存の承認境界を変更する判断"
+      ],
+      "gate": "recordDesignとdesignDecisionProblemsが既存候補・出典・受入条件・文書を要求し、リスク付き候補と既存判断の上書きを拒否する。SEO Validationを通ったSHAだけがマージされる。設計採用によって実機・出荷の関門は通過しない。",
+      "evidence": [
+        "scripts/feature-score.mjs",
+        "scripts/roadmap.mjs",
+        "data/feature-backlog.json",
+        "docs/designs/obsidian-nested-destinations.md"
+      ],
+      "status": "active",
+      "note": "2026-09-06、オーナーの最大権限委譲と90%超えへの実行依頼を受け、Codexがfolder_pick_uxの設計を採用し実CLIでバックログへ反映した。設計採用の記録であり機能の実装・公開完了ではない。"
     }
   ],
   "self_repair": {
