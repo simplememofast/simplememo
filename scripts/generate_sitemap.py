@@ -3,9 +3,9 @@ Generate sitemap-ja.xml, sitemap-en.xml, and sitemap.xml (index) for
 simplememofast.com.
 
 Strategy:
-  - Derive <lastmod> per URL from git history (last commit touching the
-    file, skipping known mechanical sweep commits by subject prefix), so
-    lastmod reflects real content changes instead of the deploy date.
+  - Trace content, structured data and link changes through full Git history.
+    Ignore CSS/JS/attribution-only changes, regardless of commit size.
+    Existing sitemap dates never override the verified source history.
   - Skip pages whose HTML declares robots noindex.
   - Group entries by sitemap target:
       sitemap-ja.xml      -> ja root URLs
@@ -23,16 +23,17 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import os
 import re
-import subprocess
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from xml.sax.saxutils import escape
+from xml.etree import ElementTree as ET
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+from sitemap_lastmod import content_lastmods, git  # noqa: E402
 
 from i18n_config import (  # noqa: E402
     SITE_URL,
@@ -50,93 +51,15 @@ SITEMAP_EN_PATH = REPO_ROOT / "sitemap-en.xml"
 SITEMAP_LOCALES_PATH = REPO_ROOT / "sitemap-locales.xml"
 
 MINOR_LOCALES = {"ar", "es", "id", "ko", "pt-BR", "tr", "zh", "zh-Hant"}
-# 【2026-08-22】JSTで取る。この日付は「gitに履歴がまだ無いファイル」の lastmod に
-# 使われるため、新規ページの公開日そのものになる。ランナーのローカル日付（＝UTC）で
-# 取っていた旧実装では、日本時間の朝に走る定期実行（主系06:00・副系08:30・再試行09:20
-# はいずれも UTC では前日）が、**その日公開した記事に前日の lastmod を付けていた**。
-# Runbook が「日付は必ず JST で取ること」と定めているのと同じ理由。
+# Unpublished content and changed child XML use a JST candidate date.
+# Committed pages use the dated content change in Git, never today's date.
 JST = timezone(timedelta(hours=9))
 TODAY = datetime.now(JST).date().isoformat()
-
-# A commit that touches more than this many HTML pages at once is treated
-# as a mechanical sweep (cache-version bumps, meta cleanups, sitewide
-# find-and-replace) and ignored when deriving lastmod. Real content edits
-# land in small commits on this repo.
-MECHANICAL_SWEEP_THRESHOLD = 40
 
 NOINDEX_RE = re.compile(
     r'<meta\s+name="robots"\s+content="[^"]*noindex', re.IGNORECASE
 )
 
-
-def build_lastmod_index() -> dict[str, str]:
-    """Map repo-relative file path -> date of the last commit that touched
-    it as part of a non-sweep change (see MECHANICAL_SWEEP_THRESHOLD)."""
-    # 【2026-08-22】%cs はコミットに記録されたタイムゾーンで日付を出す。GitHubの
-    # マージコミットはUTCなので、日本時間の朝に出荷した記事は前日の日付になっていた。
-    # TODAY をJSTにしたのと同じ理由で、git由来の日付もJSTへ揃える
-    # （--date=format-local は TZ を見るので、環境変数で明示する）。
-    env = {**os.environ, "TZ": "Asia/Tokyo"}
-    out = subprocess.run(
-        ["git", "log", "--format=%x01%cd", "--date=format-local:%Y-%m-%d", "--name-only"],
-        cwd=REPO_ROOT, capture_output=True, text=True, check=True, env=env,
-    ).stdout
-    lastmod: dict[str, str] = {}
-    for chunk in out.split("\x01"):
-        if not chunk.strip():
-            continue
-        lines = chunk.strip().splitlines()
-        cs, files = lines[0].strip(), [l.strip() for l in lines[1:] if l.strip()]
-        html_files = [f for f in files if f.endswith(".html")]
-        if len(html_files) > MECHANICAL_SWEEP_THRESHOLD:
-            continue
-        # git log is newest-first: keep the first (= most recent) date seen
-        for f in files:
-            lastmod.setdefault(f, cs)
-    return lastmod
-
-
-LASTMOD_INDEX: dict[str, str] = {}
-
-
-def read_existing_lastmods() -> dict[str, str]:
-    """URL -> lastmod as currently published across all child sitemaps.
-
-    Used as a monotonic floor on regeneration: the 2026-07-07 audit found
-    a fresh regen would have rewritten 44 lastmods, 38 of them BACKWARD.
-    Root cause: cowork branches commit small (<threshold) content edits
-    and regenerate on-branch, but the squash-merge collapses them into a
-    single >threshold commit that build_lastmod_index() then skips as a
-    mechanical sweep — so git history can no longer reproduce the dates
-    that were honestly published. A regen must never roll a published
-    lastmod back; final_lastmod = max(published, git-derived).
-    """
-    lastmods: dict[str, str] = {}
-    pat = re.compile(
-        r"<loc>(.*?)</loc>\s*<lastmod>(\d{4}-\d{2}-\d{2})</lastmod>", re.S
-    )
-    for path in (SITEMAP_JA_PATH, SITEMAP_EN_PATH, SITEMAP_LOCALES_PATH):
-        if path.exists():
-            for loc, lm in pat.findall(path.read_text(encoding="utf-8")):
-                lastmods[loc.strip()] = lm
-    return lastmods
-
-
-def git_lastmod(file_path: Path) -> str:
-    """Date (YYYY-MM-DD) of the last non-sweep commit touching the file,
-    or "" when git gives no signal (untracked, or every commit touching it
-    was classified as a mechanical sweep).
-
-    【2026-08-22】ここは TODAY を返していた。すると「スイープ判定される変更しか
-    履歴に無いファイル」（実例: /download/）は、**再生成のたびに lastmod が
-    その日へ動く**。実際には何も変わっていないので、クローラに嘘の更新日を
-    毎日配ることになり、2026-08-19 と 08-20 の2回、手でlastmodを戻している。
-    空文字を返し、TODAY を当てるかどうかは呼び出し側（main）が決める。"""
-    global LASTMOD_INDEX
-    if not LASTMOD_INDEX:
-        LASTMOD_INDEX = build_lastmod_index()
-    rel = file_path.relative_to(REPO_ROOT).as_posix()
-    return LASTMOD_INDEX.get(rel, "")
 
 # URL -> (locale_for_html_lang, url_path)
 TOP_CLUSTER_PATHS = {absolute_url(p): (loc, p) for loc, p in TOP_CLUSTER}
@@ -279,6 +202,39 @@ def urls_in(xml: str) -> set[str]:
     return set(re.findall(r"<loc>([^<]+)</loc>", xml))
 
 
+def xml_dates(xml: str) -> dict[str, str | None]:
+    root = ET.fromstring(xml)
+    if root.tag.rsplit("}", 1)[-1] not in {"urlset", "sitemapindex"}:
+        raise ValueError("Unknown sitemap root")
+    dates = {}
+    for entry in root:
+        if len(entry.findall("{*}loc")) != 1 or len(entry.findall("{*}lastmod")) > 1:
+            raise ValueError("Duplicate loc or lastmod elements")
+        loc = entry.findtext("{*}loc")
+        if not loc or loc in dates:
+            raise ValueError("Missing or duplicate loc")
+        value = entry.findtext("{*}lastmod")
+        if value:
+            if date.fromisoformat(value).isoformat() != value or value > TODAY:
+                raise ValueError("Invalid or future lastmod")
+        dates[loc] = value
+    return dates
+
+
+def child_lastmod(path: Path, rendered: str) -> str:
+    """Sitemap-index dates describe the child XML file, not its newest article."""
+    rel = path.relative_to(REPO_ROOT).as_posix()
+    import subprocess
+    try:
+        committed = git(REPO_ROOT, "show", f"HEAD:{rel}")
+    except subprocess.CalledProcessError:
+        committed = None
+    if committed != rendered:
+        return TODAY
+    epoch = git(REPO_ROOT, "log", "-1", "--first-parent", "--format=%ct", "--", rel).strip()
+    return datetime.fromtimestamp(int(epoch), JST).date().isoformat() if epoch else TODAY
+
+
 def check_committed(rendered: dict[Path, str]) -> int:
     """コミット済みのsitemapが、いまのページ構成と一致しているかを検査する。
 
@@ -289,10 +245,8 @@ def check_committed(rendered: dict[Path, str]) -> int:
     sitemapに載っていなくても検知できなかった**。載っていない記事は、robots.txt が
     指す先に存在しないまま公開されることになる。
 
-    【lastmodは比較しない】git履歴がスイープ判定される（＝LASTMOD_INDEX に載らない）
-    ファイルの lastmod は TODAY にフォールバックするので、再生成のたびに勝手に動く。
-    それを差分として扱うと毎日落ちる検査になり、誰も見なくなる。ここで守りたいのは
-    「URLが載っているか」なので、**比較対象はURLの集合だけ**にしてある。
+    URL集合に加え、内容履歴から導出したlastmodと突き合わせる。
+    日付の水増し・古い日付・再生成忘れを同じ検査で止める。
     """
     problems = 0
     for path, xml in rendered.items():
@@ -307,7 +261,19 @@ def check_committed(rendered: dict[Path, str]) -> int:
             problems += 1
             continue
         want = urls_in(xml)
-        have = urls_in(path.read_text(encoding="utf-8"))
+        actual = path.read_text(encoding="utf-8")
+        have = urls_in(actual)
+        try:
+            expected_dates = xml_dates(xml)
+            actual_dates = xml_dates(actual)
+        except (ET.ParseError, ValueError) as error:
+            print(f"  INVALID XML   {name}: {error}")
+            problems += 1
+            continue
+        for url in sorted(want & have):
+            if actual_dates.get(url) != expected_dates.get(url):
+                print(f"  WRONG LASTMOD {name}: {url}: {actual_dates.get(url)} -> {expected_dates.get(url)}")
+                problems += 1
         for url in sorted(want - have):
             print(f"  NOT LISTED    {name}: {url}")
             problems += 1
@@ -322,7 +288,7 @@ def check_committed(rendered: dict[Path, str]) -> int:
         )
         return 1
 
-    print("sitemap: コミット済みのURL集合は現在のページ構成と一致（lastmodは比較対象外）")
+    print("sitemap: URL集合と内容履歴に基づくlastmodが一致")
     return 0
 
 
@@ -347,6 +313,7 @@ def run_selftest() -> int:
     import tempfile
 
     failures: list[str] = []
+    tested = 0
 
     def quiet(fn):
         """check_committed は判定と同時に人向けの説明を刷る。**自己テストの中では
@@ -356,6 +323,8 @@ def run_selftest() -> int:
             return fn()
 
     def t(name: str, cond: bool) -> None:
+        nonlocal tested
+        tested += 1
         if not cond:
             failures.append(name)
 
@@ -406,11 +375,16 @@ def run_selftest() -> int:
         f.write_text(want.replace("</urlset>", "<url><loc>https://x/gone/</loc></url></urlset>"), encoding="utf-8")
         t("消えた面が sitemap に残っていれば落ちる", quiet(lambda: check_committed({f: want})) == 1)
 
-        # **lastmod は比較しない。**スイープ判定される面の lastmod は再生成の
-        # たびに動くので、差分に数えると毎日落ちる検査になり、誰も見なくなる。
         f.write_text(want.replace("2026-01-01", "2020-12-31"), encoding="utf-8")
-        t("lastmod の違いは落とさない（毎日落ちる検査にしない）",
-          quiet(lambda: check_committed({f: want})) == 0)
+        t("古いlastmodを検知する", quiet(lambda: check_committed({f: want})) == 1)
+        f.write_text(want.replace("2026-01-01", "2099-01-01"), encoding="utf-8")
+        t("未来のlastmodを拒否する", quiet(lambda: check_committed({f: want})) == 1)
+        f.write_text(want.replace("2026-01-01", "2026-02-30"), encoding="utf-8")
+        t("存在しない暦日を拒否する", quiet(lambda: check_committed({f: want})) == 1)
+        f.write_text(want.replace("</urlset>", "<url><loc>https://x/a/</loc></url></urlset>"), encoding="utf-8")
+        t("重複URLを拒否する", quiet(lambda: check_committed({f: want})) == 1)
+        f.write_text(want[:-3], encoding="utf-8")
+        t("壊れたXMLを拒否する", quiet(lambda: check_committed({f: want})) == 1)
 
         f.unlink()
         t("ファイルが無ければ落ちる", quiet(lambda: check_committed({f: want})) == 1)
@@ -422,8 +396,10 @@ def run_selftest() -> int:
 
     for f2 in failures:
         print(f"  x {f2}")
-    print(f"自己テスト 23 件中 {len(failures)} 件失敗")
-    return 1 if failures else 0
+    print(f"自己テスト {tested} 件中 {len(failures)} 件失敗")
+    from test_sitemap_lastmod import run_tests
+    history_ok = run_tests()
+    return 1 if failures or not history_ok else 0
 
 
 def main() -> int:
@@ -436,8 +412,7 @@ def main() -> int:
     parser.add_argument(
         "--check",
         action="store_true",
-        help="コミット済みのsitemapに載っているURLの集合が、いま生成される集合と "
-             "一致するかだけを検査する。差があれば非ゼロで終わる。書き込みはしない。",
+        help="URL集合と内容履歴に基づくlastmodを検査。差があれば非ゼロ。書き込みはしない。",
     )
     args = parser.parse_args()
 
@@ -445,45 +420,26 @@ def main() -> int:
         return run_selftest()
 
     url_files = collect_urls()
-    existing = read_existing_lastmods()
-
+    history = content_lastmods(REPO_ROOT, list(url_files.values()))
     entries: dict[str, list[tuple[str, str]]] = {"ja": [], "en": [], "locales": []}
-    floored = 0
     for url in sorted(url_files):
-        computed = git_lastmod(url_files[url])
-        published = existing.get(url, "")
-        # Monotonic floor — ISO date strings compare lexicographically.
-        # 両方とも空になるのは「git履歴が無く、まだ公開もされていない」＝
-        # 本当に新規のページだけで、そのときだけ TODAY（JST）を当てる。
-        # git信号が無いだけの既存ページは、公開済みの日付をそのまま保つ。
-        lastmod = max(published, computed) or TODAY
-        if computed and published > computed:
-            floored += 1
-        entries[determine_target(url)].append((url, lastmod))
+        rel = url_files[url].relative_to(REPO_ROOT).as_posix()
+        entries[determine_target(url)].append((url, history[rel]["date"]))
 
     ja_xml = render_sitemap(entries["ja"])
     en_xml = render_sitemap(entries["en"])
     locales_xml = render_sitemap(entries["locales"])
-    def newest(part: list[tuple[str, str]]) -> str:
-        """Index entries advertise the child's real latest change, not the
-        run date — an unchanged child with a fresh lastmod wastes crawler
-        trust (2026-07-02 audit LOW #31)."""
-        return max((lm for _, lm in part), default=TODAY)
-
     index_xml = render_sitemap_index([
-        (f"{SITE_URL}/sitemap-ja.xml", newest(entries["ja"])),
-        (f"{SITE_URL}/sitemap-en.xml", newest(entries["en"])),
-        (f"{SITE_URL}/sitemap-locales.xml", newest(entries["locales"])),
+        (f"{SITE_URL}/sitemap-ja.xml", child_lastmod(SITEMAP_JA_PATH, ja_xml)),
+        (f"{SITE_URL}/sitemap-en.xml", child_lastmod(SITEMAP_EN_PATH, en_xml)),
+        (f"{SITE_URL}/sitemap-locales.xml", child_lastmod(SITEMAP_LOCALES_PATH, locales_xml)),
     ])
 
     print(f"sitemap-ja.xml:      {len(entries['ja'])} URLs")
     print(f"sitemap-en.xml:      {len(entries['en'])} URLs")
     print(f"sitemap-locales.xml: {len(entries['locales'])} URLs")
     print(f"sitemap.xml:         index of 3 sitemaps")
-    print(
-        f"lastmod floor:       kept {floored} published dates that git "
-        f"history would have moved backward"
-    )
+    print(f"lastmod: {len(history)} pages traced through content history (no date floor)")
 
     if args.check:
         return check_committed({
