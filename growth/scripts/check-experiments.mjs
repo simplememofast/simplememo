@@ -158,7 +158,8 @@ for (const { e, d } of rows) {
   // Annotation text is single-line by contract; GitHub renders \n as a literal.
   console.log(
     `::warning file=growth/experiments/experiments.json::${e.id} (${e.page}) is ${label}. ` +
-    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <${DECISIONS.join('|')}>`
+    `Evaluate with: node growth/scripts/experiments.mjs evaluate ${e.id} --decision <${DECISIONS.join('|')}>. ` +
+    'Select --snapshot and --note for GSC, or --review for other metrics/diagnosis; see growth/EXPERIMENT_EVIDENCE.md.'
   );
 }
 
@@ -174,8 +175,10 @@ if (process.env.GITHUB_STEP_SUMMARY) {
     '',
     '```sh',
     'node growth/scripts/experiments.mjs due',
-    'node growth/scripts/experiments.mjs evaluate <id> --decision keep --note "..."',
+    'node growth/scripts/experiments.mjs evaluate <id> --decision keep --snapshot <label> --note "comparison and limitations"',
     '```',
+    '',
+    'Other metrics and measurement diagnostics use an explicit `--review` file. See [evidence requirements](growth/EXPERIMENT_EVIDENCE.md).',
   ].join('\n');
   fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
 }
