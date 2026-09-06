@@ -766,6 +766,12 @@
       "broke": "壊し3通りで落ちることを観測。**(1) 参照リンクの切り分け（isCta = isOwn && ct=）を殺す**と2件 —— 本文末尾の参照リンクが本物のCTAから bottom を横取りする、この script のコメントが記録している事故。**(2) 位置ではなく序数で決める**（frac を 0 に固定）と3件 —— 序数で測っていた版は 207件中168件の末尾CTAを hero と呼んでいた。**(3) 属性剥がしを恒等にする**と1件 —— 冪等性が壊れ、--write と --check が永久にすれ違う。自己テストは16件で、他社アプリのリンクに印を付けないこと・言語をトークンから引くこと（ページの位置からではない）も見る。"
     },
     {
+      "script": "scripts/test-lang-metadata.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-06",
+      "broke": "修正前の js/lang.js を独立した一時フォルダへ配置して同じ回帰検査を実行し、ENからJAへ戻したタイトルが英語のままのため AssertionError / exit 1 になることを確認。修正版では日英両方向、保存済み言語、検索・OG・Twitterの個別値、metaの無いページを含む検査が exit 0。"
+    },
+    {
       "script": "scripts/value-contracts.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",
