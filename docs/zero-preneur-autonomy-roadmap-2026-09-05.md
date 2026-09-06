@@ -555,6 +555,55 @@ declaration` で exit 1 になっている。詰まりが2つ重なっている�
 - 資格情報台帳の穴（ASC Individual Key 2件）を塞ぎ、その穴が CI から構造的に見えない件を
   `act-credentials-check-blind-in-ci` として運転台帳に残した（#952）
 
+### 段2の実走3回目（2026-09-07）— **2つの詰まりは通った。**捨てたページは翌日に出た
+
+09-06 に止めた2つ（#973）が、本番でどちらも通った。**門を作った日ではなく、通った日の記録。**
+
+**詰まり1（分割sitemap）が通った。**契約 `capacities-owner-recovery-20260906` が
+`touches` に `sitemap.xml` / `sitemap-ja.xml` / `sitemap-en.xml` / `sitemap-locales.xml` の
+4本を含めて宣言され、`outcome: shipped`（PR #1024・run `ap-20260906-owner-session-capacities-recovery`）。
+**09-06 に boundedness で捨てられた `/obsidian/compare/capacities/` が、翌日 main に出た。**
+
+**詰まり2（記帳の順序）が通った。**09-07 の schedule run のコミット列:
+
+```
+    4d8f8812  claim（空コミット・差分なし）
+    1831da64  chore(decision): declare lane-f-close-postfix-failures-20260907
+    ca33cc35  レーンF: 修正後の主系完走を確認し、未修理2件の確認材料を残す   ← 実装
+    1714b0ab  記帳: 運転台帳・status JSON・公開運転表                        ← 記帳は最後
+```
+
+`git diff <base> 1831da64 --name-only` を実測すると**宣言ファイル2件だけ**で、宣言ファイル以外は
+**0件**。`implementation preceded declaration` は出ず、`outcome: shipped`（PR #1051）。
+
+**PR #969 はマージされずに閉じられた**（09-06 00:30:09Z・#973 のマージから11分後）。
+保守日の記録は main に残らず、作業は翌日の再実装で回収された。
+
+#### CI盲点は塞がった。**私が挙げた2案のどちらでもない方法で**
+
+`act-credentials-check-blind-in-ci` は 09-06 に `done`。実装は
+**3リポジトリそれぞれが自分のCIで自分のワークフローを検査する**形で、非公開側は
+公開checkerと台帳を**固定SHA**で取得し、自repoだけを走査する
+（simplememo #1012 / simplememo-api #266 / simplememo-ios #363）。
+
+私がロードマップに並べたのは「公開CIで非公開を checkout する」「非公開側のCIに配線する」の
+2案で、**採られたのは3つ目。公開リポジトリに非公開の内容を持ち込まず、各repoが自分の分を払う。**
+2案とも劣っていた。**選択肢を2つに絞って書いたことが、そのまま視野の狭さだった。**
+
+#### まだ残っているもの
+
+- **09-05 の死んだ契約ブランチは、そのまま。**`claude/obsidian-auto-20260905` は main から
+  2コミット先（claim + 宣言）で、取り下げも引き継ぎも起きていない。翌日の run は
+  当日ブランチが変わるので前日を見に行かない（09-06 に書いたとおり）
+- **`act-ep-ratification-2026-09` は open のまま**（未追認20件・窓は 09-19 まで）。
+  `last_seen_jst` は 09-05 から進んでいない —— D8 は「その月の行が在れば立てない」ので
+  毎日再発行せず、行の証拠日が止まる。適格性の `evidence_age` はこれを証拠日として読むため、
+  **証拠は毎日1日ぶん古くなる**（実測: 09-05 に 0日前 → 09-07 に 2日前。判定は今も `eligible`）。
+
+  **いまは効かない。**`evidence_age.max_days` が 14 で、この窓も 14 日なので、
+  **証拠が切れる日と窓が閉じる日が同じ 09-19 になる。**
+  **どちらかの数字を変えると噛み合わなくなる**ので、`autopilot-act.mjs` の D8 に註を置いた。
+
 ## 8. この戦略が失敗する条件（空欄にして「考えていない」と読ませないために）
 
 設計ノート §5 に、この文書で足した3つを加える。
