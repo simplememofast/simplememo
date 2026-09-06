@@ -112,6 +112,7 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       if (limit <= 0) throw new Error('Run reading budget exhausted');
       const params = { start_date: opts.start, end_date: opts.end,
         ...(opts.report.startsWith('ga4-') ? { measurement_version: '2026-09-05' } : {}),
+        ...(['ga4-quality.sql', 'ga4-funnel.sql'].includes(file) ? { bridge_measurement_version: '2026-09-07' } : {}),
       };
       const input = { sql, params, types: { start_date: 'DATE', end_date: 'DATE' }, maximumBytesBilled: limit };
       const item = { file, sql_sha256: crypto.createHash('sha256').update(sql).digest('hex'), params, maximum_bytes_billed: limit };
@@ -136,6 +137,9 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
     } else out.status = opts.execution === 'dry-run' ? 'dry_run_complete' : 'complete';
     if (opts.report.startsWith('ga4-')) {
       out.interpretation = 'GA4 exported observed events/sessions; inspect quality rows before scoring. Store clicks are not installations, revenue, or LTV.';
+      if (opts.report === 'ga4-funnel') {
+        out.interpretation += ' OneLink pilot intent is separate from direct Apple clicks; QA is excluded from pilot and combined-route counts. The combined-route column is a session union, not the sum of route counts. Zero OneLink observations before pilot activation are not measured zero demand.';
+      }
       if (opts.report === 'ga4-journey') {
         out.interpretation = 'Existing card events and referrer-bearing arrivals, not proven click paths or causal effects. Event-day counts and 24-hour session-start cohorts are separate. Route session counts are not additive across routes or quality groups. Inspect both quality and context rows before evaluation; no inferred CTR or drop-off rate.';
       }
