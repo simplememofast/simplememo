@@ -70,7 +70,7 @@ All outputs must be outside Git checkouts. The example uses a private directory;
 the recipient private key is solely for decrypting reports, not for Google auth.
 
 ```sh
-node growth/scripts/analytics-artifact.mjs init-key /Users/hajimeataka/SEO-AIO-2026-09-05/api-keys
+node growth/scripts/analytics-artifact.mjs init-key "$HOME/.local/share/simplememo-analytics/keys"
 ```
 
 This creates `recipient-private.pem` and `recipient-public.pem` with mode 0600
