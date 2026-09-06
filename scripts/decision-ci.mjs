@@ -13,7 +13,8 @@ const REPO = 'simplememofast/simplememo';
 export const protectedPaths = ['data/value-metrics.json', 'data/autonomy-score.json', 'data/eligibility-policy.json', 'data/authority-matrix.json',
   'data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json',
   'scripts/value-contracts.mjs', 'scripts/decision-ci.mjs', 'scripts/decision-monitor.mjs', 'scripts/decision-review.mjs', 'scripts/autonomy-score.mjs', 'scripts/autonomy-eligibility.mjs',
-  'scripts/lib/decision-origin.mjs', 'scripts/decision-monitor-local.py'];
+  'scripts/lib/decision-origin.mjs', 'scripts/decision-monitor-local.py',
+  'scripts/autopilot-budget.mjs', 'scripts/check-credential-probe.mjs'];
 export function required(branch, paths, metrics) {
   if (!/^claude\/obsidian-auto-/.test(branch)) return false;
   const bookkeeping = p => ['data/autopilot-runs.json', 'data/autopilot-status.json', 'docs/obsidian/AUTOPILOT_LOG.md'].includes(p) || p.startsWith('data/decision-rejections/');

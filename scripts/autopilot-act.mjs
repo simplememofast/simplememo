@@ -2012,6 +2012,15 @@ export function interpretRun(run) {
     // 数え直され、歯止めが効かなくなる。結論は failure_reason と
     // needs_triage で伝える。
     const probe = step('資格情報かを切り分ける');
+    const budgetLimit = step('実行中の支出閾値で停止');
+    const turnsLimit = step('ターン上限で停止');
+    if (budgetLimit?.conclusion === 'failure' || turnsLimit?.conclusion === 'failure') {
+      const budget = budgetLimit?.conclusion === 'failure';
+      return { outcome: 'failed', attempted: true, failure_class: null, needs_triage: true,
+        failure_reason: budget
+          ? 'SDKが実行中の支出閾値への到達を確認し、次のモデル呼出を停止した。進行中の応答分は閾値を超え得る。実費・未完の作業・超過レビューを確認し、予算の引上げや停止解除は自動で行わない。'
+          : 'SDKのターン上限への到達を確認した。未完の作業と繰り返しの原因を確認する。上限の増加や同じ処理の再実行を自動的な解決策にしない。' };
+    }
 
     // 【2026-09-01】**「単独実行も落ちた」と「鍵が悪い」は別。**
     //
@@ -4433,6 +4442,15 @@ async function selftest() {
     ],
   });
   const credBad = withProbe('failure');
+  for (const name of ['実行中の支出閾値で停止', 'ターン上限で停止']) {
+    const steps = [{ name: 'Claude Code（Runbook 1イテレーション実行）', conclusion: 'failure' }, { name, conclusion: 'failure' },
+      { name: '即死が資格情報かを切り分ける', conclusion: 'skipped' }];
+    const limit = interpretRun({ status: 'completed', conclusion: 'failure', steps });
+    t(`${name}は未完の失敗として保持`, limit.outcome === 'failed' && limit.attempted && limit.needs_triage);
+    t(`${name}を資格情報へ変換しない`, !limit.failure_reason.includes('資格情報') && limit.failure_reason.includes('SDK'));
+    steps[1].conclusion = 'skipped';
+    t(`${name}の未実行を停止証拠にしない`, !interpretRun({ status: 'completed', conclusion: 'failure', steps }).failure_reason.includes('SDK'));
+  }
   t('単独実行も落ちたら資格情報と書く', credBad.failure_reason.includes('資格情報が通っていない'));
   t('資格情報と分かったらトリアージへ回さない', credBad.needs_triage === false);
   t('資格情報と分かってもオーナー作業を名指しする',
