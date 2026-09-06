@@ -92,6 +92,9 @@ jobs:
       - name: Cache-busters match asset contents (CSS + JS)
         run: node scripts/check-css-version.mjs
 
+      - name: Check language metadata round trips
+        run: node scripts/test-lang-metadata.mjs
+
       # Report-only, and it stays that way until a measurement run resolves the
       # backlog. The site publishes four competitor speed tables that disagree,
       # and no CI job can decide which is right — only an iPhone can. Failing

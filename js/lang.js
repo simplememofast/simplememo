@@ -18,6 +18,17 @@
   // (often staler) template copy at runtime. Captured once at parse time,
   // before applyLang() mutates document.documentElement.lang.
   const SERVED_LANG = (document.documentElement.getAttribute('lang') || DEFAULT_LANG);
+  const SERVED_TITLE = document.title;
+  const SERVED_META = [
+    'meta[name="description"]',
+    'meta[property="og:title"]',
+    'meta[property="og:description"]',
+    'meta[name="twitter:title"]',
+    'meta[name="twitter:description"]'
+  ].map(selector => {
+    const element = document.querySelector(selector);
+    return element ? { element, content: element.getAttribute('content') } : null;
+  }).filter(Boolean);
 
   /**
    * Get language from URL query parameter
@@ -115,8 +126,16 @@
     });
 
     // Update document title and meta info from hidden templates.
-    // Only when switching AWAY from the served language — otherwise we keep the
-    // server-rendered (SEO-canonical) <title>/<meta> instead of clobbering them.
+    // Restore the original head when returning to the served language. Simply
+    // skipping the template leaves the previous language's metadata in place.
+    // The original head is authoritative, not the potentially stale template.
+    if (lang === SERVED_LANG) {
+      document.title = SERVED_TITLE;
+      SERVED_META.forEach(({ element, content }) => {
+        if (content === null) element.removeAttribute('content');
+        else element.setAttribute('content', content);
+      });
+    }
     const metaSource = (lang === SERVED_LANG)
       ? null
       : document.querySelector(`.meta-template[data-lang="${lang}"]`);
