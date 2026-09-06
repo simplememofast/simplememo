@@ -269,7 +269,7 @@
     {
       "id": "act-cost-sync",
       "title": "実費記録の同期が必要な run が 1件",
-      "detail": "ap-20260905-actions-33959414641（run 33959414641）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 2件（ap-20260831-ccr0920, sm-20260905-queue-collision）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
+      "detail": "actions-run-34064655036（run 34064655036）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 3件（ap-20260831-ccr0920, sm-20260905-queue-collision, ap-20260906-owner-session-capacities-recovery）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
       "source": "cost",
       "domain": null,
       "touches": [
@@ -285,17 +285,24 @@
             "ap-20260820-actions",
             "ap-20260821-actions"
           ],
-          "pending_runs": []
+          "pending_runs": [
+            {
+              "id": 34064655036,
+              "created_at": "2026-09-06T22:39:26Z",
+              "jst_date": "2026-09-07",
+              "model_conclusion": "success"
+            }
+          ]
         }
       },
       "state": "done",
-      "created_jst": "2026-09-06",
-      "last_seen_jst": "2026-09-06",
-      "closed_jst": "2026-09-06",
-      "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み（実行種別は導入前のため記録なし 2件: 32667079679, 32779337325。費用は取得済み）（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）",
-      "last_run_jst": "2026-09-06",
-      "last_run_log": "ap-20260905-actions-33959414641: enriched 2026-09-05 actions $0.8408",
-      "reopened_jst": "2026-09-06"
+      "created_jst": "2026-09-07",
+      "last_seen_jst": "2026-09-07",
+      "closed_jst": "2026-09-07",
+      "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み（実行種別は導入前のため記録なし 2件: 32667079679, 32779337325。費用は取得済み）（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 3件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision, ap-20260906-owner-session-capacities-recovery）",
+      "last_run_jst": "2026-09-07",
+      "last_run_log": "actions-run-34064655036: appended 2026-09-07 actions $9.6956",
+      "reopened_jst": "2026-09-07"
     },
     {
       "id": "act-credential-actions",
@@ -459,7 +466,7 @@
     {
       "id": "act-ledger-sync",
       "title": "運転台帳に載っていない Actions run が 1件",
-      "detail": "33959414641（2026-09-05 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
+      "detail": "34064655036（2026-09-07 / success）。成果物ゼロで落ちた回は台帳を書く主体がいないため、Actions API から補う。",
       "source": "ledger",
       "domain": null,
       "touches": [
@@ -472,14 +479,14 @@
         "kind": "ledger_covers_runs",
         "params": {}
       },
-      "state": "done",
-      "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-06",
-      "closed_jst": "2026-09-06",
-      "evidence": "Actions run 30件すべてが台帳にある（記録対象外 1件を除外: 32817335365）",
-      "last_run_jst": "2026-09-06",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない",
-      "reopened_jst": "2026-09-05"
+      "state": "open",
+      "created_jst": "2026-09-07",
+      "last_seen_jst": "2026-09-07",
+      "closed_jst": null,
+      "evidence": "台帳に無い run が 1件: 34064655036（記録対象外 1件を除外: 32817335365）",
+      "last_run_jst": "2026-09-07",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n34064655036: 成功回はPR特定が要るため自動追記しない",
+      "reopened_jst": "2026-09-07"
     },
     {
       "id": "act-detect-orphaned-post-merge-commits",
@@ -2325,6 +2332,33 @@
       "last_seen_jst": "2026-09-07",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
+    },
+    {
+      "id": "act-orphaned-branch-Codex-trend-radar-observations",
+      "title": "PR #1050 の反映待ち: Codex/trend-radar-observations",
+      "detail": "開いているPRがブランチの現在のheadを扱っている。検証・マージの結果を追跡し、同じ変更を再投入しない。",
+      "source": "orphan",
+      "domain": null,
+      "touches": [],
+      "force_owner": null,
+      "force_owner_why": null,
+      "auto": null,
+      "close_check": {
+        "kind": "branch_caught_up",
+        "params": {
+          "branch": "Codex/trend-radar-observations"
+        }
+      },
+      "state": "open",
+      "created_jst": "2026-09-07",
+      "last_seen_jst": "2026-09-07",
+      "closed_jst": null,
+      "evidence": "PR #1050 へ引き継いだhead 9645fe0b157ddf8b0f5a262803c898a765014343 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
+      "pending_pr": {
+        "number": 1050,
+        "branch": "Codex/trend-radar-observations",
+        "head_sha": "9645fe0b157ddf8b0f5a262803c898a765014343"
+      }
     }
   ],
   "escalation_review_authorization": {
