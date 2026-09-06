@@ -1,0 +1,43 @@
+name: Trend Radar
+on:
+  schedule:
+    - cron: '17 21 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: trend-radar
+  cancel-in-progress: false
+jobs:
+  observe:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test source handling
+        run: python3 scripts/trend-radar.test.py
+      - name: Collect public observations
+        id: collect
+        continue-on-error: true
+        env:
+          TREND_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python3 scripts/trend-radar.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trend-radar
+          path: data/trend-radar.json
+          retention-days: 30
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GH_PAT }}
+          branch: Codex/trend-radar-observations
+          add-paths: data/trend-radar.json
+          commit-message: 'chore: record public trend observations'
+          title: 'chore: record public trend observations'
+          body: 'Automated Google Trends, Hatena and App Store observations. Unreadable sources retain their last successful baseline and are marked explicitly.'
+      - name: Report acquisition failure
+        if: steps.collect.outcome == 'failure'
+        run: exit 1
