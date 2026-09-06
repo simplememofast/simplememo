@@ -409,6 +409,46 @@ export function flatCriteria(judgements) {
   return flat;
 }
 
+/**
+ * A homogeneous live sample is not proof that the budget comparison is dead.
+ * The first measured analysis run made every current candidate pass. Verify the
+ * same production judge at each configured cap, above it, and without a cost
+ * prediction. Controls are diagnostics only: never candidates or ledger rows.
+ * Policy, caps, real judgements, and enforcement are unchanged.
+ */
+export function validateFlatCriteria(criteria, ctx, evaluate = judge) {
+  const problems = [], notes = [];
+  for (const criterion of criteria) {
+    if (criterion !== 'budget') {
+      problems.push(`基準 ${criterion} が全候補で同じ結果 — 分岐を検証する必要がある`);
+      continue;
+    }
+    const caps = Object.entries(ctx.routing?.rules || {}).filter(([, rule]) =>
+      Number.isFinite(rule.max_usd_per_run) && rule.max_usd_per_run >= 0);
+    if (!ctx.policy.criteria?.budget?.enabled || !caps.length) {
+      problems.push('予算基準が無効または上限が無く、同値判定の分岐を検証できない');
+      continue;
+    }
+    const failures = [];
+    for (const [kind, rule] of caps) {
+      const cap = rule.max_usd_per_run;
+      const candidate = { id: '__budget_control__', kind, auto: null };
+      const controls = [
+        ['at_cap', { ...candidate, predicted_usd: cap }, ctx, 'pass'],
+        ['over_cap', { ...candidate, predicted_usd: cap + Math.max(1, cap) }, ctx, 'fail'],
+        ['missing_prediction', candidate, { ...ctx, costDoc: { runs: [] } }, 'unknown'],
+      ];
+      for (const [name, input, context, expected] of controls) {
+        const result = evaluate(input, context).criteria?.budget?.result;
+        if (result !== expected) failures.push(`${kind}/${name}: ${result} != ${expected}`);
+      }
+    }
+    if (failures.length) problems.push('予算の対照検査が失敗: ' + failures.join(' / '));
+    else notes.push(`予算は全候補で同値。実際の判定関数で ${caps.length} 種別の上限内・上限超過・予測不明を区別できた。候補の同質性を記録し、予算上限は変更しない。`);
+  }
+  return { problems, notes };
+}
+
 export function summarize(judgements) {
   const byVerdict = {};
   for (const v of VERDICTS) byVerdict[v] = judgements.filter((j) => j.verdict === v).length;
@@ -614,6 +654,20 @@ function selftest() {
   eq(judge({ id: 'x', reversibility_class: 'R2', touches: ['data/a.json'], created_jst: '2026-09-03', last_seen_jst: '2026-09-04', auto: 'h' }, soft).verdict,
      'ineligible_recorded', '**record_only では R2 でも止めない**（設定が実際に効いている）');
 
+  eq(validateFlatCriteria(['budget'], ctx).problems, [],
+     '全件予算内でも、実判定の対照が通れば候補の同質性として記録する');
+  eq(validateFlatCriteria(['budget'], ctx).notes.length, 1,
+     '同値である事実を黙って隠さない');
+  for (const constant of ['pass', 'fail', 'unknown']) {
+    assert(validateFlatCriteria(['budget'], ctx,
+      () => ({ criteria: { budget: { result: constant } } })).problems.length > 0,
+      `予算が常に ${constant} を返す壊れ方を対照で落とす`);
+  }
+  assert(validateFlatCriteria(['budget'], { ...ctx, routing: { rules: {} } }).problems.length > 0,
+     '上限が無い場合は検証済みにしない');
+  assert(validateFlatCriteria(['boundedness'], ctx).problems.length > 0,
+     '他の基準を便乗して免除しない');
+
   // --- 平坦な基準の検出 ---
   eq(flatCriteria([J({}), J({})]).filter((x) => x.flat).map((x) => x.criterion), CRITERIA,
      '**全候補で同値なら「何も見ていない」と名指しする**');
@@ -663,11 +717,10 @@ if (isMain) {
     const problems = [];
     if (!fs.existsSync(LOG_PATH)) problems.push('data/eligibility-log.json が無い — 判定は行われたが残っていない');
     else problems.push(...validate(readJson(LOG_PATH)));
-    // **判定が全候補で同値の基準は、何も見ていない。**
-    for (const k of s.flat_criteria) {
-      problems.push(`基準 ${k} が全 ${s.total} 候補で同じ結果 — **分岐が死んでいる可能性がある。**`
-        + '候補の側が均質なだけなら、そう書いて残すこと（黙って通さない）');
-    }
+    // 同値を記録し、予算については実判定の対照で分岐が生きているか確かめる。
+    const flat = validateFlatCriteria(s.flat_criteria, ctx);
+    problems.push(...flat.problems);
+    for (const note of flat.notes) console.log(`  観測: ${note}`);
     // 台帳の判定が今日のものか（**古い判定を現在値として読ませない**）
     if (fs.existsSync(LOG_PATH)) {
       const doc = readJson(LOG_PATH);
