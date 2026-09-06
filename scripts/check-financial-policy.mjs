@@ -48,6 +48,28 @@ export function capProblem(cap) {
   return null;
 }
 
+// The authority snapshot still said "$40, unconfirmed placeholder" after the
+// owner approved $280 and both the cost and financial ledgers reflected it.
+// Match the named domain and the existing approval; this never creates one.
+export function validateAuthorityBudget(authority, approvals, monthlyCap) {
+  const domain = 'AI実費（開発・運用のトークン費）';
+  const matches = (authority?.domains ?? []).filter(d => d.domain === domain);
+  if (matches.length !== 1) return ['authority AI budget domain must exist exactly once'];
+  const latest = (approvals?.approvals ?? []).filter(a => a.domain === domain).at(-1);
+  if (!latest) return ['authority AI budget requires an existing spending approval'];
+  const threshold = matches[0].threshold;
+  const problems = [];
+  if (!Number.isFinite(monthlyCap) || threshold?.monthly_usd_cap !== monthlyCap
+      || threshold?.monthly_usd_cap !== latest.to_usd) {
+    problems.push('authority AI budget must match the actual cap and latest approved amount');
+  }
+  if (threshold?.set_by !== 'owner'
+      || threshold?.approval_ref !== `data/spend-approvals.json#seq=${latest.seq}`) {
+    problems.push('authority AI budget must reference the existing owner approval');
+  }
+  return problems;
+}
+
 /**
  * 二者承認 — **上限を動かした記録が無いと、上限を動かせない。**
  *
@@ -404,6 +426,34 @@ SCENARIOS.push(
   }],
 );
 
+SCENARIOS.push(
+  ['authority snapshot agrees with the existing approved budget', () => {
+    const authority = JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8'));
+    const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));
+    const cap = JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget.monthly_usd_cap;
+    assert(validateAuthorityBudget(authority, approvals, cap).length === 0, 'current authority snapshot is stale');
+    const domain = 'AI実費（開発・運用のトークン費）';
+    for (const mutate of [
+      row => { row.threshold.monthly_usd_cap = cap + 1; },
+      row => { delete row.threshold.monthly_usd_cap; },
+      row => { row.threshold.set_by = 'placeholder'; },
+      row => { row.threshold.approval_ref = 'data/spend-approvals.json#seq=1'; },
+    ]) {
+      const changed = structuredClone(authority);
+      mutate(changed.domains.find(d => d.domain === domain));
+      assert(validateAuthorityBudget(changed, approvals, cap).length > 0, 'inconsistent authority passed');
+    }
+    const authorityWithoutBudgetDomain = structuredClone(authority);
+    authorityWithoutBudgetDomain.domains = authorityWithoutBudgetDomain.domains.filter(d => d.domain !== domain);
+    assert(validateAuthorityBudget(authorityWithoutBudgetDomain, approvals, cap).length > 0, 'missing domain passed');
+    const duplicate = structuredClone(authority);
+    duplicate.domains.push(structuredClone(authority.domains.find(d => d.domain === domain)));
+    assert(validateAuthorityBudget(duplicate, approvals, cap).length > 0, 'duplicate domain passed');
+    assert(validateAuthorityBudget(authority, { approvals: [] }, cap).length > 0, 'missing approval passed');
+    assert(validateAuthorityBudget(authority, approvals, cap + 1).length > 0, 'changed live cap passed');
+  }],
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
@@ -429,6 +479,7 @@ if (isMain) {
   const problems = [
     ...validate(doc, { authorityDomains: domains, monthlyCap: cap }),
     ...validateApprovals(approvals, { policy: doc, monthlyCap: cap }),
+    ...validateAuthorityBudget(authority, approvals, cap),
   ];
 
   console.log('金額を動かす規則\n');
