@@ -261,7 +261,7 @@
   <main class="page-content">
     <div class="container">
       <h1 class="page-content__title">Privacy Policy</h1>
-      <p class="page-content__date">Last updated: <time datetime="2026-09-04">September 4, 2026</time></p>
+      <p class="page-content__date">Last updated: <time datetime="2026-09-06">September 6, 2026</time></p>
 
       <div class="page-content__body">
         <p>YURIKA, K.K. ("we," "us," or "our") describes how we handle user information in "Simple Memo - for Obsidian" (also known as "Simple Memo - for Obsidian," hereinafter the "Service").</p>
@@ -366,7 +366,7 @@
         <p>To protect user privacy, the Service implements the following technical measures. These are oriented toward "data minimization" and "on-device protection" rather than promising blanket security.</p>
         <ul>
           <li><strong>On-device storage</strong>: The offline pending-send queue (Outbox) and send history are encrypted on-device with <strong>AES-GCM-256</strong> via Apple's native CryptoKit, and stored with file protection class <code>completeFileProtectionUntilFirstUserAuthentication</code>.</li>
-          <li><strong>Key management</strong>: A 256-bit symmetric key is stored in Apple Keychain Services (<code>kSecClassGenericPassword</code>). It is excluded from backups and cannot be exported.</li>
+          <li><strong>Key management</strong>: A 256-bit symmetric key is stored in Apple Keychain Services (<code>kSecClassGenericPassword</code>) with <a href="https://developer.apple.com/documentation/security/ksecattraccessibleafterfirstunlockthisdeviceonly">protection that allows access after the first unlock following a restart and prevents migration to another device</a>. The app reads the key for encryption and decryption. Key copies included in backups are protected by a device-specific key and cannot be used on another device (<a href="https://support.apple.com/en-ca/guide/security/secb0694df1a/web">Apple's explanation</a>). Before changing devices, confirm that important memos have reached their destination, such as your mailbox or Obsidian vault.</li>
           <li><strong>Transport</strong>: All API calls use TLS (HTTPS) over <code>URLSessionConfiguration.ephemeral</code> — no cookies, no caches.</li>
           <li><strong>Email body handling</strong>: Memo bodies transit through our Relay API (Cloudflare Workers) and the external delivery infrastructure (Resend) for the sole purpose of sending email. We do not persistently store them on our infrastructure, and they are not written to logs (except in DEBUG builds during local development).</li>
           <li><strong>Email address storage on the server</strong>: Cloudflare D1 stores a mapping between send IDs and recipient email hashes derived from SHA-256. These delivery records are created regardless of reminder opt-in. Reminder contacts are managed through Resend's Contact API.</li>
