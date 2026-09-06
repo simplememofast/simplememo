@@ -115,7 +115,7 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
  * 列挙するようになったので、鏡もここで合わせる。
  * **1か所だけ直すと、鏡が古い版を映し続ける。**
  */
-const RUN_RE = /^(node|python3)\s+((?:scripts|growth\/scripts)\/[A-Za-z0-9_.-]+\.(?:m?js|py))(.*)$/;
+const RUN_RE = /^(node|python3)\s+((?:scripts|growth\/(?:scripts|queries))\/[A-Za-z0-9_.-]+\.(?:m?js|py))(.*)$/;
 
 /**
  * ワークフローから `node <script> <args>` の行を拾う。**純関数。**
@@ -255,6 +255,14 @@ function selftest() {
   t('growth/scripts も拾う', () => {
     const got = names(yaml('        run: node growth/scripts/c.mjs --check'));
     assertEq(got.join(), 'growth/scripts/c.mjs --check');
+  });
+  t('growth/queries の実SQL検体も実行対象へ入れる', () => {
+    const text = yaml('        run: python3 growth/queries/voice-shift-v2.test.py');
+    const got = extractCommands(text);
+    assertEq(got.length, 1);
+    assertEq(`${got[0].runner} ${got[0].script}`, 'python3 growth/queries/voice-shift-v2.test.py');
+    assertEq(auditExtraction(text).taken, 1);
+    assertEq(auditExtraction(text).dropped.unknown.length, 0);
   });
   // 手元で回すと検査ではなく**副作用**になる。IndexNow の実送信がこれ。
   t('**`if:` 付きのステップは取らない**（手元では意味が違う）', () => {
