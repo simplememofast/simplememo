@@ -478,7 +478,7 @@
       "closed_jst": null,
       "evidence": "台帳に無い run が 1件: 33959414641（記録対象外 1件を除外: 32817335365）",
       "last_run_jst": "2026-09-06",
-      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない\n34022754964 -> ap-20260906-actions-34022754964: appended ap-20260906-actions-34022754964 (skipped_gate)",
+      "last_run_log": "32817335365: 手動起動(workflow_dispatch)を人が中止した。運用の失敗ではないので台帳に失敗として書かない（run 32817335365）\n33959414641: 成功回はPR特定が要るため自動追記しない",
       "reopened_jst": "2026-09-05"
     },
     {
@@ -2121,7 +2121,7 @@
     {
       "id": "act-selfheal-ap-20260906-actions",
       "title": "未修理の故障: ap-20260906-actions（unknown）",
-      "detail": "GitHub run 33996430959 のSDK結果で error_max_turns / num_turns=251 / total_cost_usd=19.6008722 を確認。資格情報の単独診断は成功。ブランチの履歴と保存ログにはC09の価値契約を4回宣言・取り下げた後、分割sitemapが許可範囲外となり出荷を断念した記録がある。この2つの詰まり（分割sitemapの許可・宣言前の記帳順序）は既存PR #973（a0425806）で修正済み、支出閾値はPR #976で実装済み。モデル・資格情報を根拠なく入れ替えたり同じ修正を再実装しない。修正後の主系正常完走は未確認。後続run 34022754964はskip_branch_claimedでモデル未実行のため復旧証拠にしない。",
+      "detail": "2026-09-06 / actions / outcome=failed。GitHub run 33996430959 のSDK結果で error_max_turns / num_turns=251 / total_cost_usd=19.6008722 を確認。資格情報の単独診断は成功。ブランチの履歴と保存ログにはC09の価値契約を4回宣言・取り下げた後、分割sitemapが許可範囲外となり出荷を断念した記録がある。この2つの詰まり（分割sitemapの許可・宣言前の記帳順序）は既存PR #973（a0425806）で修正済み、支出閾値はPR #976で実装済み。モデル・資格情報を根拠なく入れ替えたり同じ修正を再実装しない。修正後の主系正常完走は未確認。後続run 34022754964はskip_branch_claimedでモデル未実行のため復旧証拠にしない。",
       "source": "selfheal",
       "domain": null,
       "touches": [
@@ -2141,7 +2141,7 @@
       "created_jst": "2026-09-06",
       "last_seen_jst": "2026-09-06",
       "closed_jst": null,
-      "evidence": "停止理由と既存修正を照合済み。正常主系runの完走を未確認のためopenを維持する。"
+      "evidence": "ap-20260906-actions は未修理のまま（repair_of で名指しされていない）"
     },
     {
       "id": "act-budget-overrun-33996430959",
@@ -2204,16 +2204,11 @@
           "branch": "claude/autopilot-act-20260906"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-06",
       "last_seen_jst": "2026-09-06",
-      "closed_jst": null,
-      "evidence": "PR #1014 へ引き継いだhead 6b9e201bcc8f2ffeea18d1ac986cf27b0d636ba8 を照合済み。PR待ちとして追跡中（main反映・出荷は未確認）",
-      "pending_pr": {
-        "number": 1014,
-        "branch": "claude/autopilot-act-20260906",
-        "head_sha": "6b9e201bcc8f2ffeea18d1ac986cf27b0d636ba8"
-      }
+      "closed_jst": "2026-09-06",
+      "evidence": "claude/autopilot-act-20260906 の取り残しは解消（走査に出てこない）"
     }
   ],
   "escalation_review_authorization": {
