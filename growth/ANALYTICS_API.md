@@ -12,7 +12,7 @@ It has no schedule and does not replace the existing SEO Daily workflow.
 | `preflight` | GSC/GA4 dataset region, retention, tables, first/latest daily schemas | No dates, no SQL scan |
 | `gsc` | WEB dates, countries, devices, queries, anonymous impressions; separate URL dates/pages | Up to 31 days, PT, end at least 3 days ago; history starts 2026-08-10 |
 | `ga4-quality` | Host, missing identifiers/channel, consent, CTA version/target/dimensions | Up to 31 days, JST; see GA4 conditions below |
-| `ga4-funnel` | Quality report plus observed LP/session→own App Store click within 24 hours | Same GA4 conditions |
+| `ga4-funnel` | Quality report plus observed LP/session→own App Store click within 24 hours, grouped by session source/medium and landing referrer host | Same GA4 conditions |
 
 `execution=dry-run` validates against real tables and returns estimates.
 `execution=export` first dry-runs each SELECT, then executes it with a 1 GB
@@ -34,13 +34,43 @@ It counts `app_store_click` for app ID `6758438948`, without adding the mirrored
 `seo_cta_click`. Unknown channels and nonproduction remain QA rows.
 Do not interpret this click rate as installation rate, revenue or LTV.
 
+### Comparing referral channels
+
+`session_source` and `session_medium` come only from
+`session_traffic_source_last_click.cross_channel_campaign`. They describe the
+export's session attribution, not the user's first acquisition. A source/medium
+pair is kept together across events: `session_attribution_status` is `available`,
+`partial`, `missing`, or `conflicting`. Conflicting pairs output null source and
+medium instead of choosing an arbitrary winner. Missing values are not relabeled
+as direct traffic, and no manual-UTM or first-user fallback is substituted.
+[Google's export schema](https://support.google.com/analytics/answer/7029846?hl=en)
+documents these session fields.
+
+`landing_referrer_host` is a separate observation from the first page view in the
+session, using the same timestamp/batch ordering as the landing path. Later
+internal navigation cannot replace it. Only the lower-case host of an HTTP(S)
+referrer is returned; its path, query and fragment are not exported. The status
+distinguishes `external`, `internal`, `missing`, `invalid`, and
+`missing_landing_page`. Missing referrers do not prove a direct visit: browsers,
+apps, redirects and privacy settings can omit them. A referrer host is not an
+attribution override or proof that a particular post generated a visit.
+
+Use production rows with the quality review to compare observed visits and
+own-app clicks by source. Keep incomplete/conflicting attribution visible rather
+than allocating it to a published-profile list. A listed medium with no observed
+row has no measured contribution in this report, not a proven zero audience.
+When combining the finer groups, sum session/click counts and recompute rates;
+do not average row-level rates or compare a few new export days with an older
+28-day GA4 UI baseline. The existing export start, following-day coverage,
+five-day waiting period and encrypted storage requirements still apply.
+
 ## Run from the local task
 
 All outputs must be outside Git checkouts. The example uses a private directory;
 the recipient private key is solely for decrypting reports, not for Google auth.
 
 ```sh
-node growth/scripts/analytics-artifact.mjs init-key /Users/hajimeataka/SEO-AIO-2026-09-05/api-keys
+node growth/scripts/analytics-artifact.mjs init-key "$HOME/.local/share/simplememo-analytics/keys"
 ```
 
 This creates `recipient-private.pem` and `recipient-public.pem` with mode 0600
@@ -101,3 +131,20 @@ Validation: `node growth/lib/bigquery.test.mjs` and
 `node --test growth/lib/analytics-export.test.mjs`. Network mocks verify cost
 guards, paging, missing dates, permission failures and encryption. A live run
 is still required to establish current BigQuery permissions and actual schema.
+
+The funnel's SQL behavior is also checked with synthetic extracted events:
+
+```sh
+python3 -m venv /tmp/simplememo-sql-tests
+/tmp/simplememo-sql-tests/bin/python -m pip install -r growth/tests/requirements-sql.txt
+/tmp/simplememo-sql-tests/bin/python growth/tests/ga4-funnel-sql.test.py
+```
+
+This runs the checked-in aggregation after SQLGlot translation to DuckDB, with
+the warehouse scan replaced by fixtures and an equivalent first non-null array
+aggregate adapter. It covers source/medium conflicts, partial/missing values,
+referrer privacy and ordering, denominator conservation, duplicate/mirrored
+clicks, nonproduction and the 24-hour boundary. The source-field projection is
+tested separately against nested synthetic attribution data. These tests do not
+validate BigQuery's actual export schema, collection completeness or permissions;
+the first eligible live dry run remains required. Dependencies are test-only.

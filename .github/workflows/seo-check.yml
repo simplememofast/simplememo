@@ -34,6 +34,9 @@ jobs:
       - name: Contact form reproduction details and failed delivery
         run: node --test scripts/contact-form.test.mjs
 
+      - name: Language switcher insertion and regeneration regressions
+        run: python3 scripts/inject_lang_switcher_test.py
+
       - name: Trend observations preserve failures and ranking baselines
         run: |
           python3 scripts/trend-radar.test.py
@@ -1264,6 +1267,11 @@ jobs:
 
       - name: Private analytics API retrieval
         run: node --test growth/lib/analytics-export.test.mjs
+      - name: Test GA4 funnel SQL with synthetic events
+        run: |
+          python3 -m venv "$RUNNER_TEMP/ga4-sql-tests"
+          "$RUNNER_TEMP/ga4-sql-tests/bin/python" -m pip install --disable-pip-version-check -r growth/tests/requirements-sql.txt
+          "$RUNNER_TEMP/ga4-sql-tests/bin/python" growth/tests/ga4-funnel-sql.test.py
 
       # 一括エクスポートの「届いているように見えて欠けている」判定。
       # これもネットワークに触らない（テーブル名と日付の配列だけを渡す）。

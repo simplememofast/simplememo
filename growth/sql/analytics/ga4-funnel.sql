@@ -7,6 +7,8 @@
 -- All daily tables through end + 1 must be present and pass query 01/02.
 -- Do NOT filter page_view/session_start on measurement_version: those standard
 -- events do not carry the CTA parameter, and non-clickers are the denominator.
+-- Session attribution uses cross_channel_campaign only, never first-user or
+-- event-scoped UTM fallbacks. Referrer is a separate landing-page observation.
 WITH extracted AS (
   SELECT
     stream_id, user_pseudo_id, event_timestamp, event_name,
@@ -15,10 +17,15 @@ WITH extracted AS (
     device.language AS device_language,
     (SELECT value.int_value FROM UNNEST(event_params) WHERE key = 'ga_session_id') AS session_id,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_location') AS page_location,
+    (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'page_referrer') AS page_referrer,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'measurement_version') AS measurement_version,
     (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'link_url') AS link_url,
     JSON_VALUE(TO_JSON_STRING(session_traffic_source_last_click),
-      '$.cross_channel_campaign.default_channel_group') AS default_channel_group
+      '$.cross_channel_campaign.default_channel_group') AS default_channel_group,
+    NULLIF(TRIM(JSON_VALUE(TO_JSON_STRING(session_traffic_source_last_click),
+      '$.cross_channel_campaign.source')), '') AS attributed_source,
+    NULLIF(TRIM(JSON_VALUE(TO_JSON_STRING(session_traffic_source_last_click),
+      '$.cross_channel_campaign.medium')), '') AS attributed_medium
   FROM `yurika-simplememo.analytics_524656334.events_*`
   WHERE _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', @start_date)
     AND FORMAT_DATE('%Y%m%d', DATE_ADD(@end_date, INTERVAL 1 DAY))
@@ -26,7 +33,14 @@ WITH extracted AS (
     AND stream_id = '13605182969' AND platform = 'WEB'
 ), identified AS (
   SELECT *,
-    REGEXP_CONTAINS(LOWER(NET.HOST(page_location)), r'^(www\.)?simplememofast\.com$') AS production_event
+    REGEXP_CONTAINS(LOWER(NET.HOST(page_location)), r'^(www\.)?simplememofast\.com$') AS production_event,
+    -- Keep source/medium together: independent MAX/COALESCE values can invent
+    -- a pair that never occurred. Missing events do not conflict with a pair.
+    IF(attributed_source IS NULL AND attributed_medium IS NULL, NULL,
+      TO_JSON_STRING(STRUCT(attributed_source AS source, attributed_medium AS medium))) AS attribution_pair,
+    NULLIF(TRIM(page_referrer), '') IS NOT NULL AS has_referrer,
+    IF(REGEXP_CONTAINS(TRIM(page_referrer), r'(?i)^https?://'),
+      LOWER(NET.HOST(TRIM(page_referrer))), NULL) AS referrer_host
   FROM extracted
   WHERE NULLIF(user_pseudo_id, '') IS NOT NULL AND session_id IS NOT NULL
 ), starts AS (
@@ -48,12 +62,16 @@ WITH extracted AS (
       production_event AS is_production,
       COALESCE(NULLIF(REGEXP_EXTRACT(page_location, r'^https?://[^/]+([^?#]*)'), ''), '/') AS path,
       device_category AS device_category,
-      device_language AS device_language
+      device_language AS device_language,
+      has_referrer AS has_referrer,
+      referrer_host AS referrer_host
     ), NULL) IGNORE NULLS
       ORDER BY event_timestamp, batch_page_id, batch_ordering_id, batch_event_index LIMIT 1
     )[SAFE_OFFSET(0)] AS landing,
     COUNT(DISTINCT NULLIF(default_channel_group, '')) AS channel_values,
     MAX(NULLIF(default_channel_group, '')) AS channel_value,
+    COUNT(DISTINCT attribution_pair) AS attribution_values,
+    MAX(attribution_pair) AS attribution_value,
     COUNTIF(event_name = 'seo_cta_impression' AND production_event
       AND measurement_version = @measurement_version) > 0 AS saw_cta,
     -- Only app_store_click is counted. seo_cta_click is its mirrored payload.
@@ -68,6 +86,18 @@ WITH extracted AS (
     CASE WHEN channel_values = 0 THEN '(missing session channel)'
          WHEN channel_values > 1 THEN '(conflicting session channels)'
          ELSE channel_value END AS session_channel,
+    CASE WHEN attribution_values = 0 THEN 'missing'
+         WHEN attribution_values > 1 THEN 'conflicting'
+         WHEN JSON_VALUE(attribution_value, '$.source') IS NULL
+           OR JSON_VALUE(attribution_value, '$.medium') IS NULL THEN 'partial'
+         ELSE 'available' END AS session_attribution_status,
+    IF(attribution_values = 1, JSON_VALUE(attribution_value, '$.source'), NULL) AS session_source,
+    IF(attribution_values = 1, JSON_VALUE(attribution_value, '$.medium'), NULL) AS session_medium,
+    CASE WHEN landing IS NULL THEN 'missing_landing_page'
+         WHEN NOT landing.has_referrer THEN 'missing'
+         WHEN landing.referrer_host IS NULL THEN 'invalid'
+         WHEN REGEXP_CONTAINS(landing.referrer_host, r'(^|\.)simplememofast\.com$') THEN 'internal'
+         ELSE 'external' END AS landing_referrer_status,
     CASE WHEN landing IS NULL THEN 'missing_landing_page'
          WHEN landing.is_production IS NULL THEN 'missing_hostname'
          WHEN landing.is_production THEN 'production'
@@ -76,6 +106,11 @@ WITH extracted AS (
 )
 SELECT
   session_channel,
+  session_source,
+  session_medium,
+  session_attribution_status,
+  landing.referrer_host AS landing_referrer_host,
+  landing_referrer_status,
   landing_scope,
   landing.path AS landing_path,
   landing.device_category AS device_category,
@@ -90,5 +125,7 @@ FROM classified
 -- Keep missing/conflicting channels and nonproduction as visible QA rows.
 -- The SEO scorecard uses only session_channel='Organic Search' AND
 -- landing_scope='production', after the missing-data review.
-GROUP BY session_channel, landing_scope, landing_path, device_category, device_language
+GROUP BY session_channel, session_source, session_medium, session_attribution_status,
+  landing_referrer_host, landing_referrer_status, landing_scope, landing_path,
+  device_category, device_language
 ORDER BY observed_started_sessions DESC;
