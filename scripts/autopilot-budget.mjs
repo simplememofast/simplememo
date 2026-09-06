@@ -9,6 +9,7 @@
  *   node scripts/autopilot-budget.mjs --append --date 2026-08-23 --route actions \
  *        --run-id 123 --job-id 456 --cost 0.81 --turns 30 --outcome shipped
  *   node scripts/autopilot-budget.mjs --check-run-cap --task article   # 1回上限
+ *   node scripts/autopilot-budget.mjs --runtime-budget --task article # SDKへ渡す支出閾値
  *   node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why "…" # 人間のみ
  *
  * 【1回あたりの上限（--check-run-cap）】
@@ -17,8 +18,9 @@
  * 効く経路が無かったので、2026-08-23 の1回は article の上限 $2.00 に対して
  * $7.2967（3.6倍）を使い切って正常終了している。**上限は在るのに当たらなかった。**
  *
- * 事後にしか分からないのが本質的な制約で（費用はrunが終わるまで確定しない）、
- * 走っている最中に止めることはできない。できるのは「**次を止める**」こと。
+ * 2026-09-06: SDKは応答ごとに費用を加算し、--max-budget-usdで次の呼出を止められる。
+ * --runtime-budget は既存の1回上限と、skip_run時の月次残枠の上界から閾値を出す。
+ * 進行中の応答分は超え得るので、これは請求額の厳密な上限ではない。
  * --check-run-cap は、その種別の直近runが上限を超えたまま**未レビュー**なら
  * 非ゼロを返し、ワークフローが主系の次回をスキップする。
  *
@@ -47,6 +49,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { load as loadRouting } from './check-model-routing.mjs';
@@ -69,6 +73,41 @@ export function jstMonth(d = new Date()) {
 
 export function loadLedger(file = LEDGER_PATH) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+export function runtimeBudget(ledger, routing, kind, month = jstMonth()) {
+  assert(typeof kind === 'string' && Object.hasOwn(routing?.rules ?? {}, kind), 'runtime budget requires a known task kind');
+  const perRun = routing.rules[kind].max_usd_per_run;
+  assert(Number.isFinite(perRun) && perRun > 0, 'runtime per-run budget must be finite and positive');
+  const problems = validate(ledger);
+  assert(problems.length === 0, `runtime budget ledger invalid: ${problems.join('; ')}`);
+  assert(Number.isFinite(ledger.budget.monthly_usd_cap)
+    && ledger.runs.every(r => Number.isFinite(r.total_cost_usd)), 'runtime budget requires finite recorded costs and monthly cap');
+  assert(/^\d{4}-\d{2}$/.test(month), 'runtime budget month required');
+  const state = overruns(ledger, routing, { month });
+  assert(!state.unreviewed.some(r => r.task_kind === kind), 'runtime budget blocked by unreviewed overrun');
+  const spent = ledger.runs.filter(r => r.date_jst.startsWith(month)).reduce((sum, r) => sum + r.total_cost_usd, 0);
+  const upperBound = ledger.budget.monthly_usd_cap - spent;
+  const usd = ledger.budget.on_exceed === 'skip_run' ? Math.min(perRun, upperBound) : perRun;
+  assert(Number.isFinite(usd) && usd > 0, 'runtime budget has no positive spending allowance');
+  return { usd, per_run_usd: perRun, remaining_upper_bound_usd: upperBound };
+}
+
+export function runtimeBudgetWiring(source) {
+  const blocks = source.split(/^ {6}- name: /m).slice(1);
+  const step = id => {
+    const matches = blocks.filter(b => new RegExp(`^ {8}id: ${id}$`, 'm').test(b));
+    assert(matches.length === 1, `runtime budget requires one ${id} step`);
+    return matches[0];
+  };
+  const route = step('route'), claude = step('claude');
+  const shell = route.match(/^ {8}run: \|\n((?:(?: {10}[^\n]*|)\n)*)/m)?.[1]?.replace(/^ {10}/gm, '');
+  const args = claude.match(/^ {10}claude_args: \|\n((?: {12}[^\n]*\n)*)/m)?.[1]?.replace(/^ {12}/gm, '');
+  assert(shell && args, 'runtime budget execution blocks are missing');
+  const activeArgs = args.split('\n').filter(line => line.trim() && !line.trimStart().startsWith('#'));
+  assert(activeArgs.filter(line => /^--max-budget-usd\b/.test(line)).length === 1
+    && activeArgs.includes('--max-budget-usd ${{ steps.route.outputs.runtime_budget_usd }}'), 'Claude must consume the route runtime budget exactly once');
+  return { shell, args };
 }
 
 /**
@@ -446,6 +485,55 @@ const SCENARIOS = ledgerScenarios(
 // 足りずに別の理由で落ちる（一度やった）。summarize の結果の run_caps だけ差し替える。
 const budgetDoc = () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
 SCENARIOS.push(
+  ['SDKの支出閾値は既存の1回上限と月次残枠の上界に従う', () => {
+    const ledger = budgetDoc(); ledger.runs = [];
+    const routing = loadRouting(); routing.rules.article.max_usd_per_run = 8.75;
+    assert(runtimeBudget(ledger, routing, 'article', '2026-09').usd === 8.75, '1回上限を渡していない');
+    ledger.runs = [{ date_jst: '2026-09-01', route: 'actions', total_cost_usd: ledger.budget.monthly_usd_cap - 0.125 }];
+    assert(runtimeBudget(ledger, routing, 'article', '2026-09').usd === 0.125, '月次残枠の上界を超えた');
+    ledger.budget.on_exceed = 'warn_only';
+    assert(runtimeBudget(ledger, routing, 'article', '2026-09').usd === 8.75, 'warn_onlyの宣言を変更した');
+  }],
+  ['SDK閾値の欠測・不正値・枠切れ・未レビュー超過は起動許可にしない', () => {
+    const ledger = budgetDoc(); ledger.runs = []; const routing = loadRouting();
+    const reject = fn => { let failed = false; try { fn(); } catch { failed = true; } assert(failed, '不明/停止を閾値へ変換した'); };
+    for (const value of [undefined, null, 0, -1, '10', Infinity, NaN]) {
+      reject(() => runtimeBudget(ledger, { ...routing, rules: { ...routing.rules, article: { max_usd_per_run: value } } }, 'article', '2026-09'));
+    }
+    reject(() => runtimeBudget(ledger, routing, 'unknown', '2026-09'));
+    reject(() => runtimeBudget({ ...ledger, runs: null }, routing, 'article', '2026-09'));
+    const used = { date_jst: '2026-09-01', route: 'actions', total_cost_usd: ledger.budget.monthly_usd_cap };
+    reject(() => runtimeBudget({ ...ledger, runs: [used] }, routing, 'article', '2026-09'));
+    reject(() => runtimeBudget({ ...ledger, runs: [{ ...used, total_cost_usd: Infinity }] }, routing, 'article', '2026-09'));
+    reject(() => runtimeBudget({ ...ledger, runs: [{ ...used, task_kind: 'article', total_cost_usd: routing.rules.article.max_usd_per_run + 1 }] }, routing, 'article', '2026-09'));
+  }],
+  ['実workflowのrouteがポリシーを読み、SDK引数へ支出閾値を渡す', () => {
+    const source = fs.readFileSync(path.join(ROOT, '.github/workflows/obsidian-autopilot.yml'), 'utf8');
+    const { shell } = runtimeBudgetWiring(source);
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'runtime-budget-wiring-')));
+    try {
+      fs.cpSync(path.join(ROOT, 'scripts'), path.join(dir, 'scripts'), { recursive: true });
+      fs.mkdirSync(path.join(dir, 'data')); fs.mkdirSync(path.join(dir, 'bin'));
+      const ledger = budgetDoc(); ledger.runs = [];
+      const routing = loadRouting(); routing.rules.article.max_usd_per_run = 8.75; routing.rules.repair.max_usd_per_run = 18.25;
+      fs.writeFileSync(path.join(dir, 'data/autopilot-cost.json'), JSON.stringify(ledger));
+      fs.writeFileSync(path.join(dir, 'data/model-routing.json'), JSON.stringify(routing));
+      const adapter = `#!${process.execPath}\nconst {spawnSync}=require('node:child_process');\nif (process.argv[2] === 'scripts/autopilot-selfheal.mjs') console.log(JSON.stringify({lane_f_required:process.env.FIXTURE_KIND === 'repair'},null,2));\nelse {const r=spawnSync(${JSON.stringify(process.execPath)},process.argv.slice(2),{stdio:'inherit'});process.exit(r.status??1);}\n`;
+      fs.writeFileSync(path.join(dir, 'bin/node'), adapter, { mode: 0o700 });
+      for (const kind of ['article', 'repair']) {
+        const output = path.join(dir, `${kind}.output`);
+        const env = { ...process.env, PATH: `${path.join(dir, 'bin')}:${process.env.PATH}`, GITHUB_OUTPUT: output, FIXTURE_KIND: kind };
+        const result = spawnSync('bash', ['-e', '-c', shell], { cwd: dir, env, encoding: 'utf8' });
+        assert(result.status === 0, `actual route failed: ${result.stderr}`);
+        const text = fs.readFileSync(output, 'utf8');
+        assert(text.split('\n').filter(line => line === `runtime_budget_usd=${routing.rules[kind].max_usd_per_run}`).length === 1, `${kind} route output did not contain the actual policy threshold: ${text}`);
+      }
+      routing.rules.article.max_usd_per_run = 'invalid';
+      fs.writeFileSync(path.join(dir, 'data/model-routing.json'), JSON.stringify(routing));
+      const result = spawnSync(process.execPath, ['scripts/autopilot-budget.mjs', '--runtime-budget', '--task', 'article'], { cwd: dir, encoding: 'utf8' });
+      assert(result.status !== 0 && result.stdout.trim() === '', 'actual CLI emitted an allowance for an invalid policy');
+    } finally { fs.rmSync(dir, { recursive: true }); }
+  }],
   ['結果未確定の実費を一度だけ計上し、後から欠けた結果のみ補完する', () => {
     const d = budgetDoc(); d.runs = [];
     const cost = { date_jst: '2026-09-05', route: 'actions', run_id: '33959414641',
@@ -543,6 +631,17 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     console.error('\n壊れた台帳は「上限に永久に当たらない」を意味する。集計不能ではなく安全装置の停止。');
     process.exit(1);
+  }
+
+  if (flag('runtime-budget')) {
+    try {
+      const threshold = runtimeBudget(ledger, loadRouting(), val('task'), val('month', jstMonth()));
+      console.log(threshold.usd);
+      process.exit(0);
+    } catch (error) {
+      console.error(error.message);
+      process.exit(1);
+    }
   }
 
   if (flag('append')) {

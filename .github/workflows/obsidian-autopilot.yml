@@ -232,13 +232,16 @@ jobs:
           # 1回は article の上限 $2.00 に対し $7.2967（3.6倍）を使い切って正常終了
           # している。**上限は在ったが当たらなかった。**
           #
-          # 費用は run が終わるまで確定しないので、走っている最中には止められない。
-          # 止められるのは次の1回で、ここがその経路。**種別ごとに見る**ので、
+          # SDKは応答ごとに費用を加算する。既存上限を実行中の閾値にも渡し、
+          # 超過後の呼出を止める。進行中の応答分は超え得るため事後検査も残す。
+          # 未レビュー超過は次の1回を止める。**種別ごとに見る**ので、
           # 記事の超過が修理（レーンF）を止めることはない。
           #
           # 止まるのは主系だけ。副系CCRは別経路なので、人間のレビューを待つ間も
           # 出荷は続く。**二重化が承認待ちを吸収する。**
           if node scripts/autopilot-budget.mjs --check-run-cap --task "$KIND"; then
+            RUNTIME_BUDGET="$(node scripts/autopilot-budget.mjs --runtime-budget --task "$KIND")"
+            echo "runtime_budget_usd=$RUNTIME_BUDGET" >> "$GITHUB_OUTPUT"
             echo "run_cap_ok=true" >> "$GITHUB_OUTPUT"
           else
             echo "run_cap_ok=false" >> "$GITHUB_OUTPUT"
@@ -375,6 +378,7 @@ jobs:
           # issue_comment 等の外部から起動される経路が無い。
           claude_args: |
             --max-turns 250
+            --max-budget-usd ${{ steps.route.outputs.runtime_budget_usd }}
             --model ${{ steps.route.outputs.model }}
             --allowedTools "Bash,Read,Write,Edit,MultiEdit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
           prompt: |
@@ -419,9 +423,33 @@ jobs:
       # `command -v claude` が失敗し、判定ステップは skipped になる。
       # **判定不能は「資格情報は無事」ではない**ので、そこは従来どおり
       # needs_triage としてセッションへ回る。
+      - name: SDKの停止理由を確認
+        id: model_limit
+        if: always() && steps.claude.outcome == 'failure'
+        env:
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          MAX_BUDGET_USD: ${{ steps.route.outputs.runtime_budget_usd }}
+        run: |
+          f="${EXEC_FILE:-}"
+          [ -n "$f" ] && [ -f "$f" ] || f="${RUNNER_TEMP}/claude-execution-output.json"
+          verdict="$(node "$RUNNER_TEMP/output-tools/scripts/check-credential-probe.mjs" --classify-limit "$f" --max-budget-usd "$MAX_BUDGET_USD" --max-turns 250)"
+          echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+
+      - name: 実行中の支出閾値で停止
+        if: always() && steps.model_limit.outputs.verdict == 'budget'
+        run: |
+          echo '::error title=Obsidian Autopilot::SDKの支出閾値に到達したため次の呼出を停止した。実費と未完の作業を確認する。'
+          exit 1
+
+      - name: ターン上限で停止
+        if: always() && steps.model_limit.outputs.verdict == 'turns'
+        run: |
+          echo '::error title=Obsidian Autopilot::SDKのターン上限に到達した。未完の作業と繰り返しの原因を確認する。'
+          exit 1
+
       - name: 切り分け用のCLIを確認
         id: credprobe_ready
-        if: always() && steps.claude.outcome == 'failure'
+        if: always() && steps.claude.outcome == 'failure' && steps.model_limit.outputs.verdict != 'budget' && steps.model_limit.outputs.verdict != 'turns'
         run: command -v claude
 
       - name: 即死が資格情報かを切り分ける
