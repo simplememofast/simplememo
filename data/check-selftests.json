@@ -772,6 +772,12 @@
       "broke": "修正前の js/lang.js を独立した一時フォルダへ配置して同じ回帰検査を実行し、ENからJAへ戻したタイトルが英語のままのため AssertionError / exit 1 になることを確認。修正版では日英両方向、保存済み言語、検索・OG・Twitterの個別値、metaの無いページを含む検査が exit 0。"
     },
     {
+      "script": "scripts/trend-radar.test.py",
+      "state": "demonstrated",
+      "at": "2026-09-06",
+      "broke": "取得失敗時に以前のrowsを消しhitsを空配列にする変異でtest_failure_preserves_baseline_and_is_not_zero_hitsが失敗（exit 1）。復元後4件成功。"
+    },
+    {
       "script": "scripts/value-contracts.mjs",
       "state": "demonstrated",
       "at": "2026-09-04",
