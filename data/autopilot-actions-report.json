@@ -1,7 +1,7 @@
 {
   "as_of_jst": "2026-09-06",
   "routine_snapshot_sha256": "de98511737d845bcb37c02027f45c97e7eee5c4713f9580a6ce6d32a9802d67b",
-  "open_total": 12,
+  "open_total": 11,
   "pending_pr": [
     {
       "id": "act-orphaned-branch-claude-autopilot-act-20260906",
@@ -14,6 +14,11 @@
   "oldest_open_days": 3,
   "acknowledged": 6,
   "closed_today": [
+    {
+      "id": "act-cost-sync",
+      "title": "実費記録の同期が必要な run が 2件",
+      "evidence": "運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み（実行種別は導入前のため記録なし 2件: 32667079679, 32779337325。費用は取得済み）（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）"
+    },
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
@@ -121,14 +126,6 @@
       "age_days": 1,
       "auto": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
-    },
-    {
-      "id": "act-cost-sync",
-      "title": "実費記録の同期が必要な run が 2件",
-      "detail": "ap-20260824-actions（run 32667079679）, ap-20260825-actions（run 32779337325）。Runbook §5-3 は「翌日のセッションが入れる」としているが、手順は忙しい日から落ちる。\n実測して取れなかったものを 2件 除外している: ap-20260820-actions, ap-20260821-actions。\n副系CCRの 2件（ap-20260831-ccr0920, sm-20260905-queue-collision）は**そもそも数えない** —— external_ref がセッションid で、Actions のジョブログが存在しない。**ゼロではない。**",
-      "age_days": 0,
-      "auto": "append-cost",
-      "evidence": "実費・実行種別または既知の結果が未同期の run が 2件: ap-20260824-actions, ap-20260825-actions（実費が残っていない 2件を除外: ap-20260820-actions, ap-20260821-actions）（うち 2件は副系CCRで**観測手段が無い** —— ゼロではない: ap-20260831-ccr0920, sm-20260905-queue-collision）"
     },
     {
       "id": "act-health-1006",

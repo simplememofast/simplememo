@@ -164,6 +164,9 @@ export function validate(ledger) {
       if (r?.task_kind_source !== undefined && !validTaskKindSource(r)) {
         problems.push(`runs[${i}].task_kind_source must identify this run and task kind in a GitHub job log`);
       }
+      if (r?.task_kind_unavailable !== undefined && !validTaskKindAbsence(r)) {
+        problems.push(`runs[${i}].task_kind_unavailable must identify a completed job before routing existed`);
+      }
       // レビュー済みの印は、**理由が無ければ印ではない。**空の cap_review を
       // 置けるなら、1回上限は書き換え1文字で無効化できることになる。
       if (r?.cap_review !== undefined) {
@@ -336,6 +339,23 @@ export function modelUsage(ledger, month = jstMonth()) {
   return { counts, runs_with_models: rows.length - unknown, runs_without_models: unknown };
 }
 
+// The routing step first shipped in 16e9a78 (#550). Only completed, first-attempt
+// jobs before that deployment can prove that no routing receipt ever existed.
+export const ROUTING_INTRODUCED_AT = '2026-08-25T00:16:28Z';
+export function validTaskKindAbsence(run) {
+  const s = run.task_kind_unavailable;
+  const start = Date.parse(s?.started_at), end = Date.parse(s?.completed_at);
+  return s?.provider === 'github_job' && s.reason === 'predates_routing_step'
+    && run.route === 'actions' && run.task_kind == null && run.task_kind_source == null
+    && typeof s.run_id === 'string' && /^[1-9]\d*$/.test(s.run_id) && s.run_id === run.run_id
+    && typeof s.job_id === 'string' && /^[1-9]\d*$/.test(s.job_id)
+    && s.run_attempt === 1 && s.routing_step_count === 0
+    && Number.isInteger(s.model_step_number) && s.model_step_number > 0
+    && Number.isFinite(start) && Number.isFinite(end) && end >= start
+    && end < Date.parse(ROUTING_INTRODUCED_AT)
+    && new Date(start + 9 * 3600 * 1000).toISOString().slice(0, 10) === run.date_jst;
+}
+
 export function validTaskKindSource(run) {
   const s = run.task_kind_source;
   return s?.provider === 'github_job_log' && run.route === 'actions'
@@ -354,6 +374,7 @@ export function appendRun(ledger, run, { enrichMissing = false } = {}) {
     if (run[k] === undefined || run[k] === null) throw new Error(`appendRun: ${k} is required`);
   }
   if (run.task_kind_source !== undefined && !validTaskKindSource(run)) throw Error('append: invalid task_kind_source');
+  if (run.task_kind_unavailable !== undefined && !validTaskKindAbsence(run)) throw Error('append: invalid task_kind_unavailable');
   // 同一 run_id の二重追記を防ぐ。ワークフローの再実行で二重計上すると、
   // 上限判定が実態より厳しくなり「使っていないのに止まる」が起きる。
   const existing = run.run_id && ledger.runs.find((r) => r.run_id === run.run_id);
@@ -374,6 +395,11 @@ export function appendRun(ledger, run, { enrichMissing = false } = {}) {
     // Evidence accompanies newly recovered metadata only; do not relabel an
     // existing classification or replace its provenance on a repeated read.
     if (patch.task_kind && run.task_kind_source) patch.task_kind_source = run.task_kind_source;
+    if (run.task_kind_unavailable && existing.task_kind_unavailable == null) {
+      if (existing.task_kind != null || existing.task_kind_source != null) throw Error('enrich: routing is already recorded');
+      patch.task_kind_unavailable = run.task_kind_unavailable;
+    }
+    if (patch.task_kind) delete existing.task_kind_unavailable;
     Object.assign(existing, patch);
     return { ledger, appended: false, enriched: Object.keys(patch).length > 0,
       reason: `run_id ${run.run_id} already recorded` };
@@ -582,6 +608,29 @@ SCENARIOS.push(
       assert(rejected && JSON.stringify(d.runs) === JSON.stringify([row]), '既知の事実を上書きした');
     }
   }],
+  ['legacy routing absence is validated, idempotent, and never changes the measured amount', () => {
+    const row = { run_id: '32667079679', date_jst: '2026-08-24', route: 'actions', total_cost_usd: 0, outcome: 'failed' };
+    const receipt = { provider: 'github_job', reason: 'predates_routing_step', run_id: row.run_id,
+      job_id: '97262077233', run_attempt: 1, routing_step_count: 0, model_step_number: 6,
+      started_at: '2026-08-23T21:16:00Z', completed_at: '2026-08-23T21:17:00Z' };
+    const d = budgetDoc(); d.runs = [{ ...row }];
+    const incoming = { ...row, task_kind_unavailable: receipt };
+    assert(appendRun(d, incoming, { enrichMissing: true }).enriched, 'absence not saved');
+    assert(!appendRun(d, incoming, { enrichMissing: true }).enriched, 'absence not idempotent');
+    assert(d.runs[0].total_cost_usd === 0 && d.runs[0].task_kind === undefined, 'cost or kind fabricated');
+    for (const change of [{ provider: 'model' }, { run_id: '1' }, { job_id: 'unknown' },
+      { reason: 'unknown' }, { run_attempt: 2 }, { routing_step_count: 1 }, { model_step_number: 0 },
+      { started_at: 'invalid' }, { completed_at: '2026-08-25T00:16:28Z' }]) {
+      const bad = { ...row, task_kind_unavailable: { ...receipt, ...change } };
+      let rejected = false;
+      try { appendRun({ runs: [] }, bad); } catch { rejected = true; }
+      assert(rejected, 'bad absence receipt accepted');
+      const ledger = budgetDoc(); ledger.runs = [bad];
+      assert(validate(ledger).some(p => p.includes('task_kind_unavailable')), 'bad stored receipt accepted');
+    }
+    assert(!validTaskKindAbsence({ ...incoming, task_kind: 'article' }), 'known kind hidden');
+    assert(!validTaskKindAbsence({ ...incoming, date_jst: '2026-08-25' }), 'wrong date accepted');
+  }],
   ['回収した実行種別の出典を同じrunへ保存し、不正な出典や後日の書換えを拒む', () => {
     const row = { date_jst: '2026-09-06', route: 'actions', run_id: '33996430959',
       total_cost_usd: 19.600872199999998, outcome: 'failed', num_turns: 251 };
@@ -696,6 +745,7 @@ if (isMain) {
       num_turns: val('turns') !== undefined ? Number(val('turns')) : undefined,
       task_kind: val('task-kind') || undefined,
       task_kind_source: val('task-kind-source') ? JSON.parse(val('task-kind-source')) : undefined,
+      task_kind_unavailable: val('task-kind-unavailable') ? JSON.parse(val('task-kind-unavailable')) : undefined,
       outcome: val('outcome') || undefined,
       note: val('note') || undefined,
     };

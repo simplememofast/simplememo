@@ -56,6 +56,7 @@
  * という、判断を要さないぶん**毎日確実に漏れる**種類の作業だけ。
  */
 
+import { validTaskKindAbsence } from './autopilot-budget.mjs';
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
 import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded, routineIntakeDecision } from './lib/routine-actions.mjs';
@@ -260,8 +261,10 @@ export const CLOSE_CHECKS = {
     const un = unobservable.length > 0
       ? `（うち ${unobservable.length}件は副系CCRで**観測手段が無い** —— ゼロではない: ${unobservable.map((r) => r.run_id).join(', ')}）`
       : '';
+    const unrouted = [...costed.values()].filter(validTaskKindAbsence);
+    const kindNote = unrouted.length ? `（実行種別は導入前のため記録なし ${unrouted.length}件: ${unrouted.map(r => r.run_id).join(', ')}。費用は取得済み）` : '';
     return missing.length === 0
-      ? { closed: true, evidence: `運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み${note}${un}` }
+      ? { closed: true, evidence: `運転台帳と取得済みの着手証跡にあるActions runの実費・実行種別・既知の結果を同期済み${kindNote}${note}${un}` }
       : { closed: false, evidence: `実費・実行種別または既知の結果が未同期の run が ${missing.length}件: ${missing.map((r) => r.run_id).join(', ')}${note}${un}` };
   },
 
@@ -2268,11 +2271,11 @@ export const HANDLERS = {
       const recorded = existing.get(String(r.external_ref));
       // A failed run can have no lane/action even though routing already chose
       // its spending class. Re-read the primary job until that class is known.
-      const observed = !recorded || recorded.task_kind == null
+      const observed = !recorded || (recorded.task_kind == null && !validTaskKindAbsence(recorded))
         ? await readCost(ctx.repo, ctx.token, r.external_ref) : null;
       const cost = recorded ? { state: 'measured', usd: recorded.total_cost_usd, turns: recorded.num_turns }
         : observed;
-      if (recorded && recorded.task_kind == null && !observed?.task_kind) {
+      if (recorded && recorded.task_kind == null && !validTaskKindAbsence(recorded) && !observed?.task_kind && !observed?.task_kind_unavailable) {
         log.push(`${r.run_id}: 実行種別は未確認（${observed?.why ?? '振り分けの証跡なし'}）。既存の実費を保持し、同期を閉じず再確認する`);
       }
       // **[2026-09-03] 「読めなかった」を「発生していない」と書かない。**
@@ -2310,6 +2313,9 @@ export const HANDLERS = {
       // pre-model routing step can supply missing spending metadata.
       if (recorded?.task_kind == null && observed?.task_kind && observed.task_kind_source) {
         args.push('--task-kind', observed.task_kind, '--task-kind-source', JSON.stringify(observed.task_kind_source));
+      }
+      if (observed?.task_kind_unavailable && recorded?.task_kind == null) {
+        args.push('--task-kind-unavailable', JSON.stringify(observed.task_kind_unavailable));
       }
       try {
         const out = append(args);
@@ -2529,7 +2535,23 @@ export function isActionsRunRef(ref) {
 const costExcluded = (r, excluded) => excluded.has(r.run_id) || excluded.has(`actions-run-${r.external_ref}`);
 const costSyncNeeded = (r, recorded) => !recorded
   || (r.outcome != null && recorded.outcome == null)
-  || recorded.task_kind == null;
+  || (recorded.task_kind == null && !validTaskKindAbsence(recorded));
+
+/** Establish why routing metadata cannot exist for a completed legacy job. */
+export function readLegacyTaskKindAbsence(job, runId) {
+  const models = (job?.steps ?? []).filter(s => s.name?.startsWith('Claude Code'));
+  if (!Array.isArray(job?.steps) || job.status !== 'completed' || models.length !== 1
+    || models[0].status !== 'completed' || !['success', 'failure', 'cancelled', 'timed_out'].includes(models[0].conclusion)
+    || job.steps.some(s => s.name === 'タスク種別とモデルの振り分け')) return null;
+  const receipt = { provider: 'github_job', reason: 'predates_routing_step',
+    run_id: String(job.run_id), job_id: String(job.id), run_attempt: job.run_attempt,
+    started_at: job.started_at, completed_at: job.completed_at,
+    routing_step_count: 0, model_step_number: models[0].number };
+  if (!Number.isFinite(Date.parse(job.started_at))) return null;
+  const row = { run_id: String(runId), route: 'actions', date_jst: jstToday(new Date(job.started_at)),
+    task_kind_unavailable: receipt };
+  return validTaskKindAbsence(row) ? receipt : null;
+}
 
 /** Read the executed routing notice, never the shell template or model output.
  * GitHub's step times have second precision; log timestamps have fractions.
@@ -2656,8 +2678,10 @@ export async function fetchRunCost(repo, token, runId, { fetchImpl = fetch } = {
   }
   if (!Number.isFinite(Number(cost[1]))) return { state: 'unreadable', why: '実費行の金額が不正' };
   const turns = text.match(/"num_turns"\s*:\s*(\d+)/);
+  const routed = readCostTaskKind(text, job, runId);
+  const unavailable = routed ? null : readLegacyTaskKindAbsence(job, runId);
   return { state: 'measured', usd: Number(cost[1]), turns: turns ? Number(turns[1]) : null,
-    ...readCostTaskKind(text, job, runId) };
+    ...routed, ...(unavailable ? { task_kind_unavailable: unavailable } : {}) };
 }
 
 // ============================================================
@@ -2765,6 +2789,49 @@ async function selftest() {
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
   let count = 0;
   const t = (name, cond) => { count += 1; if (!cond) fails.push(name); };
+  {
+    const { appendRun } = await import('./autopilot-budget.mjs');
+    const job = { id: 97262077233, run_id: 32667079679, run_attempt: 1, status: 'completed',
+      started_at: '2026-08-23T21:16:00Z', completed_at: '2026-08-23T21:17:00Z',
+      steps: [{ name: 'Claude Code', number: 6, status: 'completed', conclusion: 'failure' }] };
+    const receipt = readLegacyTaskKindAbsence(job, '32667079679');
+    t('legacy completed job proves routing receipt was never recorded', receipt?.reason === 'predates_routing_step');
+    for (const change of [{ status: 'in_progress' }, { run_attempt: 2 }, { started_at: 'invalid' },
+      { completed_at: '2026-08-25T00:16:28Z' }, { run_id: 1 }, { steps: [] },
+      { steps: [...job.steps, { name: 'タスク種別とモデルの振り分け' }] },
+      { steps: [{ ...job.steps[0], conclusion: 'skipped' }] },
+      { steps: [{ ...job.steps[0], conclusion: undefined }] }]) {
+      t('missing or modern routing evidence stays unresolved', readLegacyTaskKindAbsence({ ...job, ...change }, '32667079679') === null);
+    }
+    const fetchImpl = async url => ({ ok: true, status: 200,
+      json: async () => ({ jobs: [{ ...job, name: 'autopilot' }] }),
+      text: async () => '{"total_cost_usd":0,"num_turns":1}' });
+    const observation = await fetchRunCost('o/r', 'fixture', '32667079679', { fetchImpl });
+    t('real cost reader preserves measured zero and absence receipt', observation.state === 'measured'
+      && observation.usd === 0 && observation.task_kind === undefined && observation.task_kind_unavailable?.job_id === '97262077233');
+    const row = { run_id: '32667079679', date_jst: '2026-08-24', route: 'actions', total_cost_usd: 0, outcome: 'failed' };
+    const ctx = { token: 'fixture', repo: 'o/r', today: '2026-09-06',
+      runsDoc: { runs: [{ ...row, run_id: 'legacy', external_ref: row.run_id, attempted: true }] },
+      costDoc: { runs: [{ ...row }] } };
+    t('old unrecorded routing begins as missing metadata', !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+    let calls = 0;
+    const deps = { readCost: async () => { calls++; return observation; }, append: args => {
+      const v = key => args[args.indexOf(key) + 1];
+      const patched = { ...row, task_kind_unavailable: JSON.parse(v('--task-kind-unavailable')) };
+      const result = appendRun(ctx.costDoc, patched, { enrichMissing: true });
+      return result.enriched ? 'enriched' : 'skip';
+    } };
+    const first = await HANDLERS['append-cost'](ctx, null, deps);
+    t('handler saves evidence without inventing a kind or changing cost', first.changed === 1
+      && ctx.costDoc.runs[0].total_cost_usd === 0 && ctx.costDoc.runs[0].task_kind === undefined);
+    t('verified legacy absence completes synchronization but stays visibly unknown', CLOSE_CHECKS.cost_covers_runs({}, ctx).closed
+      && CLOSE_CHECKS.cost_covers_runs({}, ctx).evidence.includes('実行種別は導入前のため記録なし'));
+    const second = await HANDLERS['append-cost'](ctx, null, deps);
+    t('subsequent cycle does not fetch the same immutable missing receipt', second.changed === 0 && calls === 1);
+    ctx.costDoc.runs[0].task_kind_unavailable.run_attempt = 2;
+    t('invalid receipt reopens synchronization', !CLOSE_CHECKS.cost_covers_runs({}, ctx).closed);
+  }
+
   // Existing fixtures model closed PR history. Add an explicit empty open-PR
   // response; dedicated cases below exercise pending PRs through the real reader.
   const fetchOrphansWithoutOpen = (repo, token, today, options = {}) => fetchOrphanedCommits(repo, token, today, {
