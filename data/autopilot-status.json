@@ -1,12 +1,15 @@
 {
   "date_jst": "2026-09-06",
-  "generated_at": "2026-09-06T08:55:24.964774Z",
-  "action": "maintenance",
-  "article": null,
-  "pr": 1012,
+  "generated_at": "2026-09-06T10:07:00.204701+00:00",
+  "action": "new",
+  "article": {
+    "url": "https://simplememofast.com/obsidian/compare/capacities/",
+    "title": "ObsidianとCapacitiesの比較 — オブジェクト型PKMとの分岐点"
+  },
+  "pr": 1024,
   "streak": {
-    "consecutive_no_article_days": 2,
-    "last_article_date_jst": "2026-09-04",
+    "consecutive_no_article_days": 0,
+    "last_article_date_jst": "2026-09-06",
     "last_production_change_date_jst": "2026-09-06",
     "days_since_production_change": 0
   },
@@ -15,7 +18,7 @@
     "bq_export_days_accumulated": 22,
     "bq_checked": false,
     "manual_snapshot_label": "2026-09-02",
-    "$note": "この経路（主系Actions）にBigQuery MCPは接続されておらず、bq-preflight.mjsも資格情報なしで落ちる（Cannot authenticate to BigQuery）。前回実測（2026-09-03・BigQuery MCP経由）の値をそのまま繰り越した——「見に行けなかった」であって「増えていない」ではない。手動CSVスナップショット（growth/data/gsc/）にも新規なし（最新2026-09-02のまま）。レーンCはGSCデータを使わないため、これはブロッカーではない。"
+    "$note": "このローカル復旧ではBigQueryを再取得していない。前回の実測値を保持しており、新規データがないという意味ではない。"
   },
   "cost": {
     "month": "2026-09",
@@ -65,7 +68,8 @@
       ]
     },
     "cap_set_by": "owner",
-    "cap_basis": "extrapolation"
+    "cap_basis": "extrapolation",
+    "$owner_session_note": "今回のローカルCodex実費は未観測で、0ドルとして追加していない。記載の実費は観測済みの下限。"
   },
   "runs": {
     "window": {
@@ -73,9 +77,9 @@
       "to": "2026-09-06",
       "days": 27
     },
-    "completion_rate": 0.6765,
-    "change_failure_rate": 0.3235,
-    "human_intervention_rate": 0.2353,
+    "completion_rate": 0.6857,
+    "change_failure_rate": 0.3143,
+    "human_intervention_rate": 0.2571,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -83,35 +87,35 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.11764705882352941
+        "rate": 0.11428571428571428
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.029411764705882353
+        "rate": 0.02857142857142857
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.029411764705882353
+        "rate": 0.02857142857142857
       },
       "request": {
-        "runs": 2,
-        "rate": 0.058823529411764705
+        "runs": 3,
+        "rate": 0.08571428571428572
       }
     },
     "artifact_autonomy_rate": 1,
     "shipping_day_rate": 0.7778,
     "totals": {
-      "runs": 50,
-      "attempted": 34,
-      "shipped": 23,
+      "runs": 51,
+      "attempted": 35,
+      "shipped": 24,
       "failed": 11,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 20,
-        "attempted": 18,
-        "shipped": 16
+        "runs": 21,
+        "attempted": 19,
+        "shipped": 17
       },
       "primary": {
         "runs": 30,
@@ -165,23 +169,23 @@
     },
     "publishing_streaks": {
       "current": {
-        "days": 0,
-        "from": null
+        "days": 1,
+        "from": "2026-09-06"
       },
       "longest": {
         "days": 5,
         "from": "2026-08-19",
         "to": "2026-08-23"
       },
-      "active_days": 13,
+      "active_days": 14,
       "last_day": "2026-09-06"
     },
     "last_publishing": {
-      "date_jst": "2026-09-04",
-      "lane": "C",
-      "artifact": "/obsidian/plugins/"
+      "date_jst": "2026-09-06",
+      "lane": "E",
+      "artifact": "/obsidian/compare/capacities/"
     },
-    "intervention_count": 8,
+    "intervention_count": 9,
     "timings": {
       "time_to_detect_hours": {
         "median": 2.675,
@@ -245,14 +249,15 @@
       ]
     }
   },
-  "reason": "オーナー依頼による運用修復。資格情報検査がCI上で非公開2repoを走査していなかった問題を、各repoのCI配線と明示走査先の検証で修正した。公開サイト PR #1012、API PR #266、iOS PR #363 をマージ済み。記事制作ではない。",
-  "verified": "3repoの対象PRで資格情報検査の成功を確認し、マージ済みSHAを照合した。主系の9月6日失敗は既存ログで error_max_turns（251 turns）と実費 $19.6008722 を確認した。支出閾値の修正 PR #976 は既にmainへ反映されているが、自然起動した主系の正常完走は未確認。資格情報検査の修正を主系全体の復旧と扱わない。",
+  "reason": "【記事作成・本番最終変更2026-09-06・BQ未確認】C09をオーナー起動の別PRで復旧。Mac版初回デモの観察と公式仕様を区別し、既存比較から相互接続した。PR #1024のマージ時に出荷成立。旧PR #969と失敗runは保持。",
+  "verified": "Capacities 1.70.2 / Apple Silicon Mac / macOS 26.4.1の初回デモで日本語入力・Bookの属性・Backlinks・リンク図を実機確認。画像2枚。アカウント作成後の保存・同期・書き出し・移行・iOS性能は未検証。公式資料の確認と分けて記載。",
   "checks": {
-    "other": "check-credentials 自己検査5件・実repo3件の走査成功。PR #1012 SEO Validation、PR #266 CI/Credential coverage、PR #363 static/parity/Credential coverage/Xcode PR Check成功。",
-    "data_freshness_note": "このセッションではBigQuery/GSCの新しい実測なし。data_freshnessの取得日を更新していない。"
+    "seo_check": "277 HTML、0 errors / 0 warnings（記事実装時のローカル検査）",
+    "mobile_qa": "変更4ページ×320/360/900/1100px、16表示で横はみ出し・画像失敗・JSエラー0。FAQとモバイルメニューも確認。",
+    "decision": "宣言31c74dbcを実装前にpush。最終HEADでPR #1024とrun_idを照合する公開CIがマージ条件。"
   },
   "owner_requests": [
     "EP20件の月次追認は本人の回答待ち。AIで本人追認を代行しない。"
   ],
-  "next": "正常主系runと翌日日報を確認し、台帳・実費の未同期を解消する。停止Routineのローカル移行、問い合わせ、Obsidian/Watchは未解消。PR⑥D14は9月17日以降に実測する。日次の運用修復をローカルCodexで設定済み（9:45 JST）；設定だけで自律完走したとは扱わない。"
+  "next": "主系は記事上限20ドル・月次280ドル。9/6の通常再実行はskip_branch_claimedでモデル未実行。次の通常主系完走は引き続き確認対象。今回の手動復旧を定期主系の正常完走とは扱わない。C09の同期・移行は未検証。次のcoverage候補はC10、C08は既存JAとの衝突でblockedを維持。"
 }
