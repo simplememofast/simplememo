@@ -60,14 +60,32 @@
     "「見ていない」を「異常なし」と書かないため、**数だけ先に置く。**",
     "次の対象はこれ（scripts/lib/param-guard-scan.py を参照）。"
   ],
-  "measured_at": "2026-09-05",
+  "measured_at": "2026-09-06",
   "method": "scripts/check-guard-shapes.mjs（コメント・文字列・正規表現を潰し、台帳由来の束縛を伝播させて存在確認の && を拾う）",
   "known": [
     {
       "file": "scripts/autopilot-act.mjs",
+      "expr": "observed?.task_kind",
+      "disposition": "前提",
+      "note": "2026-09-06: 実行種別と出典を確認できたときだけ欠測を補完する。確認できない場合は種別を推測せず、costSyncNeededが欠測を検出してopenと再取得を維持する。欠測・消失・0円への誤変換、reader切断、実CLI出典受渡し切断の検査で確認。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "original.total_cost_usd",
+      "disposition": "前提",
+      "note": "2026-09-06: 自己検査の等価比較で、補完後も元の精密な実費が不変と要求する。金額が違えばassertionを失敗させる向きで、正の欠測で違反を消す条件ではない。"
+    },
+    {
+      "file": "scripts/autopilot-budget.mjs",
+      "expr": "run.task_kind_source",
+      "disposition": "前提",
+      "note": "2026-09-06: 新設する任意の出典を受け取ったときはrun/種別/job/時刻の一致を検査する。旧行や従来の直書き経路には遡及して出典を要求しない。新しい機械補完経路は必ず種別と出典を実CLIへ同時に渡し、受渡し切断・不正出典・既存出典上書きの変異検査で失敗を確認した。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
       "expr": "r.cost_observation",
       "disposition": "前提",
-      "note": "2026-09-05: APIで確認したモデル着手のうち費用未回収の証跡を保持する。運転台帳由来の候補は元のrun行が残るため、追加の観測保存は要らない。APIの直近一覧から消えても導出・実CLI回収・閉鎖判定が残る検査を追加。"
+      "note": "2026-09-06: APIで確認したモデル着手のうち費用または実行種別未回収の証跡を保持する。運転台帳由来の候補は元のrun行が残るため、追加の観測保存は要らない。APIの直近一覧から消えても導出・実CLI回収・閉鎖判定が残る検査を追加。実費行だけが残る場合も候補化する。"
     },
     {
       "file": "scripts/autopilot-act.mjs",
