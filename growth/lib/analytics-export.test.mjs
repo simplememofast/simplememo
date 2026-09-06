@@ -182,6 +182,28 @@ test('funnel always includes quality output and keeps the standard event denomin
   assert.ok(!sql.includes("event_name = 'seo_cta_click'"));
   assert.equal(api.calls.at(-1).params.measurement_version, '2026-09-05');
 });
+test('journey uses the same date, following-day, encryption and two-query cost contract', async () => {
+  const options = { ...ga4, report: 'ga4-journey' };
+  for (const override of [{ start: '2026-09-05' }, { end: '2026-09-16' }]) {
+    assert.throws(() => validateOptions({ ...options, ...override }, now));
+  }
+  const incomplete = fakeApi({ listTables: async () => [{ id: 'events_20260906' }, { id: 'events_20260907' }] });
+  assert.equal((await collect(options, { api: incomplete, now })).status, 'incomplete_daily_tables');
+  assert.equal(incomplete.calls.length, 0);
+  const api = fakeApi();
+  const result = await collect(options, { api, now });
+  assert.equal(result.status, 'complete');
+  assert.deepEqual(result.queries.map((q) => q.file), ['ga4-quality.sql', 'ga4-journey.sql']);
+  assert.equal(result.total_bytes_billed, 20_000_000);
+  assert.equal(api.calls.length, 4);
+  assert.ok(api.calls.every((q) => q.maximumBytesBilled === QUERY_CAP));
+  assert.match(result.interpretation, /not additive/);
+  assert.deepEqual(unseal(seal(result, pair.publicKey), pair.privateKey), result);
+  const dryApi = fakeApi();
+  assert.equal((await collect({ ...options, execution: 'dry-run' }, { api: dryApi, now })).status, 'dry_run_complete');
+  assert.equal(dryApi.calls.length, 2);
+  assert.ok(dryApi.calls.every((q) => q.dryRun));
+});
 test('workflow handles secrets only in the reader, uploads ciphertext only, and cannot publish', () => {
   const text = fs.readFileSync(new URL('../../.github/workflows/analytics-read.yml', import.meta.url), 'utf8');
   assert.ok(text.includes("github.ref == 'refs/heads/main'"));
@@ -189,4 +211,5 @@ test('workflow handles secrets only in the reader, uploads ciphertext only, and 
   assert.ok(text.includes('path: ${{ runner.temp }}/analytics-export/analytics.enc.json'));
   assert.ok(!text.includes('contents: write')); assert.ok(!text.includes('schedule:'));
   assert.equal((text.match(/secrets\.GCP_SERVICE_ACCOUNT_JSON/g) || []).length, 1);
+  assert.ok(text.includes('ga4-journey'));
 });

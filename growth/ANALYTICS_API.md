@@ -13,6 +13,7 @@ It has no schedule and does not replace the existing SEO Daily workflow.
 | `gsc` | WEB dates, countries, devices, queries, anonymous impressions; separate URL dates/pages | Up to 31 days, PT, end at least 3 days ago; history starts 2026-08-10 |
 | `ga4-quality` | Host, missing identifiers/channel, consent, CTA version/target/dimensions | Up to 31 days, JST; see GA4 conditions below |
 | `ga4-funnel` | Quality report plus observed LP/session→own App Store click within 24 hours, grouped by session source/medium and landing referrer host | Same GA4 conditions |
+| `ga4-journey` | Quality report plus existing Next step card use and referrer-bearing page arrivals, by internal route | Same GA4 conditions |
 
 `execution=dry-run` validates against real tables and returns estimates.
 `execution=export` first dry-runs each SELECT, then executes it with a 1 GB
@@ -63,6 +64,61 @@ When combining the finer groups, sum session/click counts and recompute rates;
 do not average row-level rates or compare a few new export days with an older
 28-day GA4 UI baseline. The existing export start, following-day coverage,
 five-day waiting period and encrypted storage requirements still apply.
+
+### Reading internal journeys
+
+`ga4-journey` attaches `ga4-quality.sql` before `ga4-journey.sql` and uses the
+same reader, encryption, date coverage and two-query cost guards. It reads only
+existing `next_step_click`, `next_step_impression`, `page_view` and
+`session_start` events. It does not change browser collection or join customers
+across systems. The SQL is prepared and tested with fixtures; actual GA4
+permissions, schema and data still require the first eligible live run.
+
+The two `route_kind` values answer different questions:
+
+- `card`: `from_path` is the observed page location and `to_path` is the card's
+  `to` parameter. `stage`, `version_status` (relative to the requested measurement
+  version), and `card_page_path_status` retain missing/other/conflicting signals.
+- `referrer_arrival`: `from_path` is the internal `page_referrer` path and
+  `to_path` is the arriving page. This is a referrer-bearing arrival, not proof
+  of a particular link click. Reloads, back navigation and tabs may repeat or
+  preserve referrers. No click-to-arrival matching or channel reassignment occurs.
+
+`date_basis=event_day` counts raw events whose timestamps fall in the inclusive
+JST window. Repeated clicks remain repeated events. `events_without_session_key`
+and `events_outside_started_cohort_24h` expose data that cannot enter the bounded
+session cohort; these columns overlap and must not be added as distinct failures.
+
+`date_basis=session_start_day_24h` counts identifiable route sessions with a
+recorded `session_start` in the requested JST window and route events at or after
+that start, strictly before 24 hours later. It includes the next day's events
+when necessary. A session is counted once per route/dimension group, so these
+counts **cannot be summed across routes or quality groups** into total sessions.
+There is no all-site session or exposed-page denominator in this report.
+The raw-event and cohort columns use null for the other basis, not invented zeros.
+
+Card cohorts show sessions with clicks, impressions, clicks without recorded
+impressions, first clicks before the first recorded impression, and first clicks
+tied in timestamp with that impression. Ties have unresolved order. These are
+session/route observations, not per-card-view CTRs or proof that one tab's
+impression caused another tab's click. No CTR or drop-off rate is calculated.
+Standard page views do not require the custom card parameters.
+
+Use `row_scope=production_internal` for internal-route analysis, retaining
+`quality_or_context` rows for missing/external/invalid referrers, preview hosts,
+unusual paths, unsupported card targets and missing/other card dimensions.
+External/missing referrers are context, not automatic tracking failures. Missing
+session keys also remain visible on production rows. Only exact production
+hosts (`simplememofast.com`, `www.simplememofast.com`) and site-shaped paths up
+to 250 characters are exposed. Paths preserve case and trailing slashes; query
+strings and fragments are removed, unusual/encoded paths become null, and no
+raw external URLs, user IDs or session IDs leave the query. Do not canonicalize
+away route differences or treat absent rows as demonstrated zero demand.
+
+For the existing Next step and Obsidian experiments, retain their original
+evaluation dates and baselines. An untracked pre-implementation zero cannot be
+used as a growth-rate denominator. A few initial export days cannot establish
+the largest drop-off or isolate effects of concurrent internal-link changes.
 
 ## Run from the local task
 
@@ -138,6 +194,7 @@ The funnel's SQL behavior is also checked with synthetic extracted events:
 python3 -m venv /tmp/simplememo-sql-tests
 /tmp/simplememo-sql-tests/bin/python -m pip install -r growth/tests/requirements-sql.txt
 /tmp/simplememo-sql-tests/bin/python growth/tests/ga4-funnel-sql.test.py
+/tmp/simplememo-sql-tests/bin/python growth/tests/ga4-journey-sql.test.py
 ```
 
 This runs the checked-in aggregation after SQLGlot translation to DuckDB, with
@@ -148,3 +205,7 @@ clicks, nonproduction and the 24-hour boundary. The source-field projection is
 tested separately against nested synthetic attribution data. These tests do not
 validate BigQuery's actual export schema, collection completeness or permissions;
 the first eligible live dry run remains required. Dependencies are test-only.
+The journey fixtures additionally cover repeated clicks, missing session starts
+and keys, different sessions/users, JST/24-hour boundaries, impression order,
+query/fragment removal, host spoofing, invalid targets, referrer context and
+non-additive route-session counts. Both suites execute the checked-in SQL.
