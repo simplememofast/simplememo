@@ -3692,3 +3692,101 @@ Capacities公式サイトのダウンロードページはJS描画でURLが取�
 - 品質自己評価89/100（検証10/15）。SEOは277 HTML / 0 errors / 0 warnings。変更4ページ×320/360/900/1100pxの16表示で横はみ出し・画像失敗・JSエラー0、FAQ・モバイルメニューを確認。証跡: `docs/obsidian/evidence/capacities-20260906.md`。
 - 運転台帳の出荷行は同じPR #1024に結び付け、マージ時に出荷成立とする。途中HEADの失敗や宣言だけの成功はマージ根拠にしない。最終PRイベントのSEO Validation成功と公開反映はGitHub側で確認する。
 - 記事上限20ドル・月次280ドルを維持。今回のローカル実費は未観測、0ではない。旧19.6008722ドルの失敗とレビュー記録は変えていない。
+
+---
+
+## 2026-09-07（主系GitHub Actions・schedule） — レーンF。「直してあるが、確かめた実行が無い」故障2件を閉じた
+
+### 判断根拠
+
+`node scripts/autopilot-selfheal.mjs` が **🔧 修理対象を2件**返した。この日の最優先はレーンFで、記事は書いていない。
+
+| run_id | failure_class | 台帳が求めていたもの |
+|---|---|---|
+| `ap-20260905-actions-33959414641` | `no_artifact` | 「既存PR943の実行ID照合修正後の正常実行は別途確認する」 |
+| `ap-20260906-actions` | `unknown`（`error_max_turns` / 251 turns） | 「修正後の主系正常完走は未確認」 |
+
+**2件とも、原因の修理そのものは既に main に入っていた。**残っていたのは*確かめる実行*のほうだけで、
+それが無い限り `repair_of` は書けず、毎朝「未修理」として上がり続ける。
+
+- `a91a23b8`（PR #943・2026-09-05 11:25 UTC）— 成果物検査を「当日ブランチが在るか」から
+  **この run に紐づく新しいPRが在るか**へ変えた。09-05 の `no_artifact` は、旧検査が
+  前日夜に作られた宣言コミットだけのブランチを見て success を返したもの
+- `a0425806`（PR #973・2026-09-06 00:19 UTC）— 分割sitemapの許可（`sitemap-*.xml`）と記帳のコミット順序
+- `e320d394`（PR #976・2026-09-06 00:28 UTC）— 宣言した支出閾値を run の中で効かせる
+
+09-06 の主系（run 33996430959）が落ちたのは **2026-09-05T23:22:58Z** で、上の2本が main に入る
+**約1時間前**。つまりあの run は、自分を直す変更が出来上がる前に turn を使い切っている。
+その後の run 34022754964 は当日ブランチを見て `skip_branch_claimed`（モデル未実行）だったので、
+**修正後にモデルが実際に走った定期主系の run は、本日の 34064655036 が最初。**
+
+### やったこと
+
+**この run 自身を確認材料にした。**gate → 価値契約の宣言（別コミット・先押し）→ 実装 → PR →
+成果物の実行ID照合、までを1回で通し、`data/autopilot-runs.json` の本日の行に
+`repair_of: ["ap-20260905-actions-33959414641", "ap-20260906-actions"]` を書いた。
+
+**この run が実際に通した経路**（＝確認できたと言えるもの）:
+
+- **宣言→実装のコミット順序**（#973）… `data/autopilot-actions.json` の `health-intake` 記帳を
+  `git stash` で退避してから `--select` を実行し、宣言だけを先に push した（`1831da64`）。
+  09-06 に `implementation preceded declaration` で全作業を落とした形は再現しなかった
+- **分割sitemapの許可**（#973）… `decision-monitor.mjs --publish-report` が `autopilot/index.html` と
+  **`sitemap-ja.xml` / `sitemap.xml`** を書き換える。この3ファイルを `touches` に入れた契約が
+  `boundedness` を pass した（09-06 に候補を6回作り直しても通らなかったのがこの判定）
+- **成果物の実行ID照合**（#943）… 本日のPRがこの run に紐づく新しい記録として立つ
+- **支出閾値**（#976）… 宣言した `predicted_usd` が run の中で効いている状態で完走した
+
+**この run が通していない経路**（＝今日の完走では確かめていないもの）:
+
+- **新しい公開URLを1本足す経路**。今日はレーンFなので `.html` を新規追加していない。
+  ただし 09-06 のオーナー起動 PR #1024 が `/obsidian/compare/capacities/` を
+  分割sitemapごと出荷しているので、**その経路は別の回で通っている**（本日の run の証跡ではない）
+- **副系CCRが同じ修正の上で走ること**。09-06 以降、副系の行は台帳に無い
+
+### 価値契約（§2-1）
+
+`--readiness` は承認済み6件・`forecast_available` 3件。候補2件を `/tmp/decision-candidates.json` に
+書いて `--select` した（`data/decision-rejections/batch-bec1e523231479f8.json` に落選側が残る）。
+
+- 選択: `lane-f-close-postfix-failures-20260907`（rank 1・レーンF/maintenance・`unresolved_failures`）
+- 落選: `lane-e-compare-memos-20260907`（rank 0.6・レーンE/new・C10 `/obsidian/compare/memos/`）
+
+**`p` は 0.05 で宣言した。負ける側に賭けている。**`unresolved_failures` の凍結比較基準は
+14日の移動中央値 **2.5** だが、本日の実測 baseline は **6** で、そのうち **4件が `usage_limit`**
+——`escalation-rules` が `who: owner` としている種別で、`repair_of` を書くこと自体が規則違反。
+つまりこの指標は **4を下回れない**ので、2.5 との比較で勝つ余地が算術的に無い。
+`predicted_delta: -2` は今日の行動の実際の効き幅（6→4）で、順位はRunbookの
+「未修理があればレーンFが最優先」に従った。**指標が有利だから選んだのではない。**
+
+較正の材料は決済1件のみ（`publishing_day_rate` / p=0.30 / event=1 / Brier 0.49）で、
+`unresolved_failures` の決済は0件。**「較正が効いている」とは書けない。**
+
+### 検証
+
+- `seo-check.js`（277 HTML・0 errors / 0 warnings）/ `check-css-version.mjs` / `check-benchmark.mjs`（既存報告のみ）/
+  `check-url-normalization.mjs`（438件）/ `check-internal-redirects.mjs` / `sync_constants.js --check` /
+  `tag-cta-placements.js --check` / `check-experiments.mjs` / `autopilot-budget.mjs --check` /
+  `autopilot-runs.mjs --check` / `check-authority.mjs --check` / `autopilot-selfheal.mjs --check` /
+  `autopilot-drill.mjs --check`（全シナリオ）/ `automation-rate.mjs --check` / `check-pr-facts.mjs --check` /
+  `check-landing-freshness.mjs --check` / `d-score.mjs --check` / `autopilot-act.mjs --check` /
+  `check-script-tags.mjs`（278面）すべて通過
+- `check-viewport-overflow.mjs --static`（277面）・`--check`（深い3面×14幅＋全277面×4幅＝1108通り）とも
+  横漏れ0件。既存の `/usr/local/share/chromium/chrome-linux/chrome` を `CHROMIUM_PATH` で指定。
+  **WebKitGTK は今回入れていない**ので、そのエンジンでは測っていない
+- `AUTOPILOT_DATA_REPORT` は `state: partial`（`bq_checked: true` / 最新 data_date 2026-09-04 /
+  26日 / lag 3日）。**28日窓に未達なので28日比較には使わない。**「取得できなかった」ではない
+- `health-intake.mjs`（open な監視Issue 1件・既存行の `last_seen` 更新のみ）/
+  `recover-ingest.mjs --check`（記録0件・`degraded` なし）
+
+### 残る弱さ・申し送り
+
+- **今日の `repair_of` は「原因を今日直した」ではなく「直っていることを今日の完走で確かめた」。**
+  修理を書いたのは #943 / #973 / #976 で、本日の run はその確認材料。台帳の `repair_note` に
+  同じ区別を書いた。**ここを混ぜると、次に同じ形が来たとき「修理した実績がある」と読み違える**
+- **`unresolved_failures` は 4 を下回れない。**`usage_limit` 4件が構造的に残るため、
+  この指標を14日移動中央値と比べる限り、レーンFの改善は今後も event=0 として決済される。
+  指標側の扱い（`usage_limit` を分母から外すか、比較基準を変えるか）はオーナー判断
+- レーンA/Bは BQ 26/28日でまだ根拠薄い。次にレーンEへ行くときの先頭は **C10 `/obsidian/compare/memos/`**
+  （31imp / pos4.1・memos はOSSでこの環境でもセルフホスト検証できる）
+- レーンCは前回 2026-09-04（`/obsidian/plugins/` テーマ内訳）で本日まで3日。7日未満
