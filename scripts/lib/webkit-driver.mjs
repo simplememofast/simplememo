@@ -101,15 +101,51 @@ export const IFRAME_PROBE = `
   }, 320);
   document.body.appendChild(f);`;
 
-const wd = (port) => async (method, url, body) => {
-  const res = await fetch(`http://127.0.0.1:${port}${url}`, {
-    method, headers: { 'content-type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`${method} ${url} → ${res.status} ${JSON.stringify(json).slice(0, 200)}`);
-  return json.value;
-};
+// The async script's own deadline is 60 seconds. Allow its error response to
+// arrive, but do not inherit fetch's much longer default transport deadline.
+export const REQUEST_TIMEOUT_MS = 75_000;
+const oneLine = value => String(value ?? '').replace(/[\x00-\x1f\x7f]+/g, ' ').slice(0, 600);
+export function errorDetail(error) {
+  const causes = [error?.cause, ...(error?.cause?.errors ?? [])].filter(Boolean);
+  return oneLine([error?.name, error?.message ?? error,
+    ...causes.map(e => [e.code, e.message].filter(Boolean).join(': '))].filter(Boolean).join(' | '));
+}
+
+export const webDriverCall = (port, { fetchImpl = fetch, timeoutMs = REQUEST_TIMEOUT_MS } = {}) =>
+  async (method, url, body, { deadlineMs = timeoutMs } = {}) => {
+    const started = Date.now();
+    try {
+      const res = await fetchImpl(`http://127.0.0.1:${port}${url}`, {
+        method, headers: { 'content-type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+        signal: AbortSignal.timeout(deadlineMs),
+      });
+      // Invalid/truncated JSON is a failed command, never an empty success.
+      const json = await res.json();
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${JSON.stringify(json).slice(0, 200)}`);
+      return json.value;
+    } catch (error) {
+      throw new Error(`WebDriver ${port} ${method} ${url}: ${errorDetail(error)} `
+        + `(elapsed=${Date.now() - started}ms, deadline=${deadlineMs}ms)`, { cause: error });
+    }
+  };
+
+export function driverDiagnostic(d) {
+  return oneLine(`port=${d.port} pid=${d.proc.pid ?? 'unavailable'} `
+    + `exit=${d.proc.exitCode ?? 'none'} signal=${d.proc.signalCode ?? 'none'} `
+    + `spawn_error=${d.spawnError ?? 'none'} stderr=${d.stderr?.slice(-400) || '(empty)'}`);
+}
+
+export async function stopDrivers(drivers, disp, { deadlineMs = 2_000 } = {}) {
+  try {
+    await Promise.all(drivers.map(async d => {
+      try {
+        if (d.session) await d.call('DELETE', `/session/${d.session}`, undefined, { deadlineMs });
+      } catch { /* A broken driver must still be terminated below. */ }
+      finally { d.proc.kill(); }
+    }));
+  } finally { if (disp.proc) disp.proc.kill(); }
+}
 
 /**
  * `pages × widths` を WebKit で測る。戻りの形は Chromium 側の `measure()` に揃えてある。
@@ -137,8 +173,11 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
     for (let i = 0; i < n; i++) {
       const p = basePort + i;
       const proc = spawn(driver, [`--port=${p}`, '--host=127.0.0.1'],
-        { env: { ...process.env, DISPLAY: disp.display }, stdio: ['ignore', 'ignore', 'ignore'] });
-      drivers.push({ port: p, proc, call: wd(p), session: null });
+        { env: { ...process.env, DISPLAY: disp.display }, stdio: ['ignore', 'ignore', 'pipe'] });
+      const d = { port: p, proc, call: webDriverCall(p), session: null, stderr: '', spawnError: null };
+      proc.stderr.on('data', chunk => { d.stderr = (d.stderr + chunk.toString()).slice(-2_048); });
+      proc.on('error', error => { d.spawnError = errorDetail(error); });
+      drivers.push(d);
     }
     await new Promise((r) => setTimeout(r, 2000));
     for (const d of drivers) {
@@ -163,13 +202,13 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
         }
       }
     }));
-  } finally {
-    for (const d of drivers) {
-      if (d.session) await d.call('DELETE', `/session/${d.session}`).catch(() => {});
-      d.proc.kill();
-    }
-    if (disp.proc) disp.proc.kill();
-  }
+  } catch (error) {
+    // Capture state before cleanup sends its own termination signals.
+    error.diagnostics = drivers.map(driverDiagnostic);
+    if (disp.proc) error.diagnostics.push(oneLine(`Xvfb pid=${disp.proc.pid} `
+      + `exit=${disp.proc.exitCode ?? 'none'} signal=${disp.proc.signalCode ?? 'none'}`));
+    throw error;
+  } finally { await stopDrivers(drivers, disp); }
   return { measurable: true, engine: 'webkit', results, failures,
     problems: results.filter((r) => r.over > 0) };
 }
