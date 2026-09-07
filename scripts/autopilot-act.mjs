@@ -1018,7 +1018,7 @@ export function derive(ctx) {
   //
   // **止まっているのが repair である点が要。**主系は失敗すると次の日に
   // レーンF（自己修復）を選ぶので、**いちばん走ってほしい種別が止まっている。**
-  // 解除は人間だけができる（下記）ので、気づかなければ黙って止まり続ける。
+  // 解除は費用委任の境界を確認する（下記）ので、気づかなければ黙って止まり続ける。
   for (const o of ctx.budget?.run_caps?.unreviewed ?? []) {
     // 実費台帳は run_id を必須にしていない。無い行は `--ack-overrun <run_id>` の
     // 対象にできない＝**解除手段の無いゲート**なので、idを日付＋種別で作って
@@ -1039,14 +1039,13 @@ export function derive(ctx) {
         + `上限を直せば過去の判定も一緒に変わる）。\n`
         + `**月次上限は通っている**ため \`--check\` は exit 0 で、"予算は大丈夫" に見える。`
         + `止まるのは \`--check-run-cap --task ${o.task_kind}\` の側だけ。\n`
-        + `なお data/authority-matrix.json の「AI実費」は human_only に \`monthly_usd_cap の決定\` しか`
-        + `挙げておらず、**この1回上限の承認が人間のみであることは表に書かれていない**`
-        + `（権限表の変更は self_repair.must_not なのでAIからは直せない）。`,
+        + `2026-09-07の所有者委任により、開始前に保存した費用想定の5倍以内はAIが判断できる。`
+        + `AIは --by ai --projected-usd <総費用見込み> を指定し、5倍超の見込みは追加支出前に上げる。`
+        + `開始前想定の無い過去runは後付けの数字で通さない。月次枠は維持する。`,
       source: 'budget',
       touches: ['data/autopilot-cost.json'],
-      force_owner: 'human',
-      force_owner_why: 'scripts/autopilot-budget.mjs が --ack-overrun を人間のみと定めている'
-        + '（AIが自分の超過を自分で通せると、上限が「お願い」になる）',
+      force_owner: o.ai_review_eligible === true ? null : 'human',
+      force_owner_why: o.ai_review_eligible === true ? null : '開始前想定の証拠が無いか、実費が想定の5倍を超えており、AIへの費用委任の範囲内と確認できない',
       auto: null,
       close_check: {
         kind: 'budget_overrun_reviewed',
@@ -1959,10 +1958,10 @@ export function interpretRun(run) {
       note = '緊急停止が立っていたため着手しなかった（data/emergency-stop.json）';
       code ??= 'emergency_stop';
     } else if (ran(route)) {
-      // **ここが 2026-08-25 まで名前を持っていなかった停止。**解除は人間のみ
+      // **ここが 2026-08-25 まで名前を持っていなかった停止。**解除は費用委任の境界を確認する
       // なので、気づかれないと毎日この形で静かに止まり続ける。
       note = '1回あたりの実費上限が未レビューのため着手しなかった'
-        + '（node scripts/autopilot-budget.mjs --check-run-cap）。解除は人間のみ';
+        + '（node scripts/autopilot-budget.mjs --check-run-cap）。解除は費用委任の境界を確認する';
       code ??= 'skip_run_cap';
     } else if (ran(budget)) {
       note = '当月の実費が月次上限に達していたため着手しなかった（data/autopilot-cost.json）';
@@ -4190,7 +4189,14 @@ async function selftest() {
       { run_id: '32816234185', date_jst: '2026-08-25', task_kind: 'repair', cost: 11.9329, cap: 3, times: 4, reviewed: false }] } },
   }).filter((d) => d.source === 'budget');
   t('未レビュー超過を起票する', ovDerive.length === 1);
-  t('超過の承認は人に固定する', ovDerive[0]?.force_owner === 'human');
+  const delegatedOverrun = derive({ today: '2026-09-07', runsDoc: { runs: [] }, selfheal: { targets: [] },
+    statusDoc: null, costDoc: null, budget: { run_caps: { unreviewed: [
+      { run_id:'delegated',date_jst:'2026-09-07',task_kind:'repair',cost:20,cap:18,times:1.1,ai_review_eligible:true }
+    ] } } }).find(d => d.source === 'budget');
+  t('費用委任の証拠がある超過はAIへ分類する', delegatedOverrun?.force_owner === null);
+  t('AIへの分類を自動解除と混同しない', delegatedOverrun?.auto === null && delegatedOverrun?.detail.includes('--by ai'));
+
+  t('開始前想定が無い超過は人へ残す', ovDerive[0]?.force_owner === 'human');
   t('起票のidに日付を含めない', !/\d{8}-/.test(ovDerive[0]?.id ?? '') && ovDerive[0]?.id === 'act-budget-overrun-32816234185');
   t('止まる種別を題に出す', (ovDerive[0]?.title ?? '').includes('repair を選ぶと止まる'));
   t('解除コマンドを本文に出す', (ovDerive[0]?.detail ?? '').includes('--ack-overrun 32816234185'));
@@ -4798,8 +4804,8 @@ async function selftest() {
     skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('skipped')]).note.includes('月次上限'));
   t('1回上限の日は1回上限と書く',
     skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).note.includes('1回あたりの実費上限'));
-  t('1回上限の日に解除が人間のみと書く',
-    skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).note.includes('人間のみ'));
+  t('1回上限の日は費用委任の境界確認を案内する',
+    skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).note.includes('費用委任の境界'));
   t('1回上限の日も着手にしない',
     skipped([GATE, ESTOP('success'), BUDGET('success'), ROUTE('success')]).attempted === false);
   t('ステップ情報が無ければ理由を断定しない',
