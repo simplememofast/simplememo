@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Save short notes in your browser, search and tag them, recover deleted notes, and export to Markdown. Free, open-source, and no account required.">
+  <title>Memo Inbox — Keep a thought. Find it later.</title>
+  <link rel="stylesheet" href="style.155fa324d2bc.css">
+  <script type="module" src="app.2233c4a06867.js"></script>
+<link rel="canonical" href="https://simplememofast.com/memo-inbox/"><meta property="og:title" content="Memo Inbox — Browser-local notes and Markdown export"><meta property="og:description" content="Save short notes in your browser, search and tag them, recover deleted notes, and export to Markdown. Free, open-source, and no account required."><meta property="og:url" content="https://simplememofast.com/memo-inbox/"><meta property="og:type" content="website"><script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "@id": "https://simplememofast.com/memo-inbox/", "name": "Memo Inbox — Browser-local notes and Markdown export", "url": "https://simplememofast.com/memo-inbox/", "description": "Save short notes in your browser, search and tag them, recover deleted notes, and export to Markdown. Free, open-source, and no account required.", "inLanguage": "en", "applicationCategory": "ProductivityApplication", "operatingSystem": "Any modern browser", "isAccessibleForFree": true, "license": "https://opensource.org/license/mit"}</script><link rel="stylesheet" href="/assets/css/safety-net.css?v=b380c7e070"></head>
+<body>
+  <header><a class="brand" href="/memo-inbox/"><span class="mark">m</span> Memo Inbox</a><span class="local">Stored in this browser</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">A LITTLE SPACE FOR YOUR THOUGHTS</p><h1>Keep a thought.<br>Find it later.</h1><p>Collect your notes, add a tag, and carry them anywhere as Markdown.</p></section>
+    <div id="storage-error" class="error" hidden></div>
+    <div class="workspace">
+      <aside aria-label="Your notes">
+        <button id="new-note" class="primary">+ New note</button>
+        <label for="search">Search notes</label><input id="search" type="search" placeholder="A word, an idea, a tag…">
+        <div class="filters"><button id="inbox-tab" aria-pressed="true">Inbox <span id="inbox-count">0</span></button><button id="trash-tab" aria-pressed="false">Trash <span id="trash-count">0</span></button></div>
+        <label for="tag-filter">Filter by tag</label><select id="tag-filter"><option value="">All tags</option></select>
+        <div id="note-list" aria-label="Saved notes"></div>
+        <p id="list-empty" class="muted">Your next idea goes here.</p>
+      </aside>
+      <section class="editor" aria-label="Note editor">
+        <div class="editor-heading"><span id="editor-state">NEW NOTE</span><span id="note-date"></span></div>
+        <form id="note-form">
+          <label for="title">Title <span class="muted">optional</span></label><input id="title" maxlength="200" placeholder="Give your thought a name">
+          <label for="body">Note</label><textarea id="body" maxlength="200000" placeholder="Start with one line…" required></textarea>
+          <label for="tags">Tags <span class="muted">separate with commas</span></label><input id="tags" placeholder="reading, ideas, work">
+          <div class="editor-actions"><button id="save-note" class="primary" type="submit">Save note</button><button id="trash-note" type="button" hidden>Move to trash</button><button id="restore-note" type="button" hidden>Restore note</button><span id="save-state" role="status" aria-live="polite">Not saved yet</span></div>
+        </form>
+      </section>
+    </div>
+    <section class="portability" aria-labelledby="portability-title"><div><p class="eyebrow">YOUR NOTES, YOUR FILES</p><h2 id="portability-title">Take everything with you.</h2><p>Download a backup regularly. Notes stay in this browser on this device. Clearing site data removes them; there is no account or cloud sync.</p></div><div class="file-actions"><button id="export-markdown">Export Markdown ZIP</button><button id="export-backup">Download backup</button><button id="import-text">Import text files</button><button id="import-backup">Restore from backup</button><button id="demo">Try example notes</button></div></section>
+    <p id="status" role="status" aria-live="polite"></p>
+    <input id="text-files" type="file" accept=".txt,.md,text/plain,text/markdown" multiple hidden>
+    <input id="backup-file" type="file" accept=".json,application/json" hidden>
+  </main>
+  <footer><p>Made by <a href="https://simplememofast.com/">Simple Memo Developer</a>. A standalone, open-source note inbox.</p><a href="/memo-inbox/guide">How it works</a><a href="https://github.com/simplememofast/memo-inbox">Source</a><a href="LICENSE">MIT license</a></footer>
+</body></html>
