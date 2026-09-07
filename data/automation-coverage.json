@@ -256,19 +256,15 @@
     {
       "area": "① 次期機能開発",
       "task": "機能の削除・単純化・高速化の候補化",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "バックログ（data/feature-backlog.json）は**追加の候補しか持たない。**ビジョンは「作らない」を繰り返し定めている（Todo管理画面・Calendar UI・Knowledge Base を作らない）のに、**既にあるものを減らす提案が構造的に出てこない。**足すほうだけを採点する仕組みは、時間とともに必ず膨らむ方向に倒れる\n\n[2026-08-26] blocker を not_started → external_data へ。**「着手していないだけ」ではない。**器（採点の仕組み）は足せるが、減らす候補を出す根拠が無い。実測して確かめたうえで、数字のために推測で候補を作ることはしない。",
-      "blocker": "external_data",
-      "unblocked_by": "**採点の器ではなく、減らす根拠のほうが無い。**2026-08-26 に測った: 利用状況データ（D7/D28）は BigQuery 28日蓄積待ち（9/6前後）で、data/benchmark.json は起動0.4秒で競合の最速（Drafts 0.9秒）より速く、「速くする候補」が実測から出てこない。**根拠の無い削除提案は推測**なので、BigQuery が28日たまってから",
-      "unlock": "impl_backlog",
-      "blocked_on": [
-        {
-          "file": "data/autopilot-status.json",
-          "path": "data_freshness.bq_export_days_accumulated",
-          "atLeast": 28
-        }
-      ]
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/feature-backlog.json",
+        "scripts/feature-score.mjs",
+        "scripts/roadmap.mjs",
+        "docs/designs/email-setup-simplification.md"
+      ],
+      "note": "2026-09-07: 本番の認証コホート（英語14 install中Apple provider_error 6、エラー後48h内メール送信0）を根拠に、初期設定の手入力導線を単純化する候補email_setup_primary_manualをAIが登録・採点した。Apple/Googleの削除は根拠不足として不採用。改善効果は未測定なのでhypothesis、5×0.15÷2=0.375、登録時12位・「まず測る」。既存のfeature-scoreと13週roadmapの出力へ接続し、SEO Validationを通して記録する。完了範囲は候補化と優先付けのみ。製品への採用、実装、出荷、改善効果、本番改善サイクルの完走には流用しない。過去の『追加の候補しかない』『28日蓄積まで候補化不能』という停止理由は、初期設定の実測を起点とする今回の候補には当てはまらない。定着率の悪化や認証エラーの根本原因は断定していない。",
+      "since": "2026-09"
     },
     {
       "area": "① 次期機能開発",
