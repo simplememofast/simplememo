@@ -5,6 +5,9 @@ import { assert } from './selftest.mjs';
 export const REVIEW_AREAS = ['liability_cap', 'indemnification', 'ip', 'personal_data',
   'confidentiality', 'warranties', 'termination', 'governing_law', 'insurance',
   'assignment', 'force_majeure', 'payment'];
+// Apple's combined program agreement, paid schedules and exhibits is >630k
+// characters. Preserve the full source while retaining a finite input limit.
+export const MAX_SOURCE_CHARACTERS = 1000000;
 const hash = (text) => crypto.createHash('sha256').update(text).digest('hex');
 const digest = (s) => typeof s === 'string' && /^[a-f0-9]{64}$/.test(s);
 const nonempty = (s) => typeof s === 'string' && s.trim().length > 0;
@@ -27,7 +30,8 @@ export function assessmentProblems(rows, vendors) {
     if (r.basis !== 'generic_customer_review') fail('未承認の自社プレイブックを名乗っている');
     if (!nonempty(r.observed_at) || !Number.isFinite(Date.parse(r.observed_at))) fail('観測日時が不正');
     if (!digest(r.source?.sha256) || !Number.isInteger(r.source?.characters)
-      || r.source.characters < 2000 || !nonempty(r.source?.version)) fail('原文の指紋・長さ・版が不正');
+      || r.source.characters < 2000 || r.source.characters > MAX_SOURCE_CHARACTERS
+      || !nonempty(r.source?.version)) fail('原文の指紋・長さ・版が不正');
     if (!Array.isArray(r.open_questions) || !r.open_questions.length
       || r.open_questions.some((q) => !nonempty(q))) fail('未確認事項が無い');
     if (!r.findings || typeof r.findings !== 'object') { fail('検査結果が無い'); continue; }
@@ -50,7 +54,7 @@ export function assessmentProblems(rows, vendors) {
 // The agent supplies the judgment; the full fetched text is required to bind it
 // to exact sections. Source text and private extraction markers are not published.
 export function bindAssessment(input, text, vendors) {
-  if (typeof text !== 'string' || text.length > 200000 || !looksLikeTerms(text).ok)
+  if (typeof text !== 'string' || text.length > MAX_SOURCE_CHARACTERS || !looksLikeTerms(text).ok)
     throw new Error('原文を取得できていない');
   const findings = {};
   for (const key of REVIEW_AREAS) {
@@ -85,6 +89,16 @@ export const assessmentScenarios = [
         action: 'Verify', references: [{ section: 'fixture', from: 'BEGIN', to: 'END' }] }])) };
     const row = bindAssessment(input, text, vendors);
     assert(assessmentProblems([row], vendors).length === 0, '正しい検体');
+    const combined = 'BEGIN agreement ' + 'section '.repeat(90000) + ' END';
+    const combinedRow = bindAssessment(input, combined, vendors);
+    assert(combinedRow.source.characters === combined.length, '長い結合契約を省略せず記録');
+    let oversizedRejected = false;
+    try { bindAssessment(input, 'BEGIN agreement ' + 'x'.repeat(MAX_SOURCE_CHARACTERS) + ' END', vendors); }
+    catch { oversizedRejected = true; }
+    assert(oversizedRejected, '上限を超えた本文は引き続き拒否');
+    const oversizedRow = structuredClone(row);
+    oversizedRow.source.characters = MAX_SOURCE_CHARACTERS + 1;
+    assert(assessmentProblems([oversizedRow], vendors).length > 0, '保存済み記録にも同じ上限を適用');
     const additional = 'https://example.com/consumer-terms';
     const second = { ...input, source: { ...input.source, url: additional } };
     let rejected = false;

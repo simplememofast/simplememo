@@ -272,7 +272,10 @@
         "$governing_law": "§14.10: 管轄は **Northern District of California の州・連邦裁判所に専属**、準拠法は合衆国法およびカリフォルニア州法（抵触法を除く）。**European Relationship の例外はアイルランドだが、日本法人には適用されない。**Exhibit C §13 も §14.10 を参照するので、出口は1つ。\n\n実務上の意味: **争うにはカリフォルニアへ行くしかない。**費用・代理人・時間のどれを取っても一人法人には現実的でない。この欄の趣旨（$clause_note「海外事業者が大半なので、争えるかどうかがここで決まる」）に照らすと、答えは**「争えない」。**\n\n**$50 の上限と合わせて読むこと。**請求できる額が $50 で、請求する場所がカリフォルニア。2つ合わせて初めて『契約による救済は無いに等しい』という1つの事実になる。",
         "$personal_data": "**§3.3.3(C) が、利用者へのデータ侵害通知を契約上の義務にしている。**原文: You agree to notify Your users, in accordance with applicable law, in the event of a data breach in which user data collected from Your Application is compromised (e.g., You will send an email notifying Your users if there has been an unintentional disclosure or misuse of their user data).\n\n**その経路が無い。**⑧「障害案内の一斉配信」は `nobody` で、2026-08-27 の実測が経路を2つとも閉じている —— (a) **メール**: 宛先になりうる名簿は reminder_optin_invites だけで、同意文言が『メモが途切れた日に、そっと1通』とリマインダーに限定されており、**障害案内を送ると同意を超える。**(b) **アプリ内**: /v1/config の RemoteFlagPayload は flags / rollouts / killed / maxStaleSeconds / refreshSeconds しか運ばず、**文言を運ぶ欄も表示するUIも無い。**\n\nつまり**契約で約束した動作を、事故が起きた日に実行できない。**⑦（この行）と⑧（配信経路）と⑬（危機対応）が同じ穴を指している。**条項検査がこれを出したのは、この台帳を作った目的そのもの。**\n\nなお §3.3.3 のその他の義務（プライバシーポリシーの掲示・収集前の同意・目的外利用の禁止・Face Data / HealthKit の制限）は、現在の作りでは抵触しそうな箇所が見当たらない —— 収集しているものが少ないため。**ただしこれは本文と現況を突き合わせた結果であって、監査ではない。**",
         "fingerprint": "6b75d45e3e30",
-        "fetched_at": "2026-09-02"
+        "fetched_at": "2026-09-02",
+        "analysis_sources": [
+          "https://developer.apple.com/support/terms/apple-developer-program-license-agreement/"
+        ]
       },
       {
         "id": "cloudflare",
@@ -2220,6 +2223,205 @@
                 "start": 91850,
                 "length": 357,
                 "sha256": "230d0180daa16847ce1700406fdb168c64fc9f519038b522080eced1cf30c50e"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "registrar-public-terms-20260907",
+        "vendor_id": "registrar",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T09:06:19.231Z",
+        "source": {
+          "url": "https://muumuu-domain.com/?mode=kiyaku",
+          "version": "2026-07-31",
+          "representation": "EUC-JP HTML decoded per meta declaration; full articles 1–35 including 32-2 through 32-8 and revision history.",
+          "sha256": "1695db7fd95007659fe7bc55d1ed49235cf04ce20d6e7c6d5bce82797079109f",
+          "characters": 24124
+        },
+        "open_questions": [
+          "Upstream registrar/registry policies, actual contract and domain settings remain unverified.",
+          "Article 32 refers to Article 40(1), absent from this fetched text; do not infer the intended reference.",
+          "Privacy policy, renewal payment, transfer and recovery evidence require separate checks."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Domain-fee cap over prior two years; broad exclusions and unclear cross-reference.",
+            "action": "Clarify before reliance.",
+            "evidence": [
+              {
+                "section": "cap",
+                "start": 12924,
+                "length": 1461,
+                "sha256": "3a92baf4223449b95a9d321f4a18e9489fd3381a452b9ced263030a3ef5fc3c9"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "risk",
+            "summary": "Customer bears disputes; MCP has additional indemnity.",
+            "action": "Check operational exposure.",
+            "evidence": [
+              {
+                "section": "cap",
+                "start": 12924,
+                "length": 1461,
+                "sha256": "3a92baf4223449b95a9d321f4a18e9489fd3381a452b9ced263030a3ef5fc3c9"
+              },
+              {
+                "section": "mcp",
+                "start": 16710,
+                "length": 2732,
+                "sha256": "92179c015094971e5d802e632a857ceaabf6bd7f196c9fede889f4c7239bdd26"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Ownership stated within proxy-Whois clause; transfer restricted during proxy use.",
+            "action": "Verify actual settings.",
+            "evidence": [
+              {
+                "section": "ip",
+                "start": 11477,
+                "length": 677,
+                "sha256": "02fb1491ee87056283675e6de70b83c1a27fd6f84d28b5a04d75bd0a283c48e7"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "Privacy policy governs registration data; AI features have separate disclosures.",
+            "action": "Review data flow.",
+            "evidence": [
+              {
+                "section": "privacy",
+                "start": 12385,
+                "length": 529,
+                "sha256": "581a1bb6b4bf61323c53f6ac0501d9a41913124850edbf498b5d738aabdaa9d4"
+              },
+              {
+                "section": "ai",
+                "start": 14392,
+                "length": 1136,
+                "sha256": "4ac7daeafd385b683160f939959fe05853c21c6b53fb7be4c05e01b8dbfe62d5"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "conditional",
+            "summary": "Personal-data protection has exceptions; no broad mutual confidentiality identified.",
+            "action": "Check supplemental terms.",
+            "evidence": [
+              {
+                "section": "privacy",
+                "start": 12385,
+                "length": 529,
+                "sha256": "581a1bb6b4bf61323c53f6ac0501d9a41913124850edbf498b5d738aabdaa9d4"
+              },
+              {
+                "section": "all",
+                "start": 2028,
+                "length": 20937,
+                "sha256": "7dabacf4de713461383197bc758d82bd4942bb74026f7b274fdc12cc2862ec95"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Service and information warranties disclaimed.",
+            "action": "Verify continuity.",
+            "evidence": [
+              {
+                "section": "cap",
+                "start": 12924,
+                "length": 1461,
+                "sha256": "3a92baf4223449b95a9d321f4a18e9489fd3381a452b9ced263030a3ef5fc3c9"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Broad cancellation rights; renewal deadlines and refund restrictions.",
+            "action": "Verify renewal readiness.",
+            "evidence": [
+              {
+                "section": "termination",
+                "start": 5172,
+                "length": 3156,
+                "sha256": "0b15c712395f9a2676c41e4336334a97218c9824da31fb3e194788ea573aae9f"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "conditional",
+            "summary": "Japanese law and Tokyo District Court.",
+            "action": "Assess recourse.",
+            "evidence": [
+              {
+                "section": "law",
+                "start": 22800,
+                "length": 165,
+                "sha256": "5df33a95a617196aa975f767b5b530024948277397ad84d20adad3740b2674b4"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "No insurance requirement identified.",
+            "action": "Check supplements.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 2028,
+                "length": 20937,
+                "sha256": "7dabacf4de713461383197bc758d82bd4942bb74026f7b274fdc12cc2862ec95"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "conditional",
+            "summary": "Proxy-Whois restricts registrar transfer.",
+            "action": "Confirm transfer process.",
+            "evidence": [
+              {
+                "section": "ip",
+                "start": 11477,
+                "length": 677,
+                "sha256": "02fb1491ee87056283675e6de70b83c1a27fd6f84d28b5a04d75bd0a283c48e7"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "risk",
+            "summary": "Interruptions allowed for listed uncontrollable events.",
+            "action": "Maintain fallback.",
+            "evidence": [
+              {
+                "section": "force",
+                "start": 9367,
+                "length": 394,
+                "sha256": "9a1c310b010dbaa79ffd9ba69616f57ccaa32fdca6bf044de3df32c569b4a775"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Fees generally nonrefundable; revisions apply at renewal.",
+            "action": "Verify actual fees.",
+            "evidence": [
+              {
+                "section": "payment",
+                "start": 8706,
+                "length": 519,
+                "sha256": "30a06c0d04c1f07dbd536c5548a82d7f6c16703716543beb3294eae5e9eaf1f2"
               }
             ]
           }

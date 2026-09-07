@@ -200,14 +200,26 @@ export function applyVerdict(row, r, today) {
   return { row: next, reset };
 }
 
-async function fetchTerms(url, { fetchImpl = fetch } = {}) {
+export function decodeTermsHtml(bytes, contentType = '') {
+  // HTTP charset takes precedence over an HTML declaration. Do not fingerprint
+  // replacement characters when a legacy Japanese page is decoded as UTF-8.
+  const charset = /charset\s*=\s*["']?([^\s;"'>]+)/i;
+  const headerEncoding = contentType.match(charset)?.[1];
+  const prefix = new TextDecoder('latin1').decode(bytes.slice(0, 4096));
+  const metaEncoding = [...prefix.matchAll(/<meta\b[^>]*>/gi)]
+    .map(([tag]) => tag.match(charset)?.[1]).find(Boolean);
+  return new TextDecoder(headerEncoding || metaEncoding || 'utf-8', { fatal: true }).decode(bytes);
+}
+
+export async function fetchTerms(url, { fetchImpl = fetch } = {}) {
   try {
     const res = await fetchImpl(url, {
       headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'simplememo-vendor-terms/1.0' },
       signal: AbortSignal.timeout(20000),
     });
     if (!res.ok) return { text: null, fetchError: `HTTP ${res.status}` };
-    return { text: toText(await res.text()), fetchError: null };
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    return { text: toText(decodeTermsHtml(bytes, res.headers.get('content-type') || '')), fetchError: null };
   } catch (e) {
     return { text: null, fetchError: `取得に失敗: ${String(e).slice(0, 100)}` };
   }
@@ -228,6 +240,19 @@ export function selftest() {
      '**script の中身を本文に数えている**（殻を弾く判定が無意味になる）');
   eq(toText('<style>.a{}</style><p>y</p>'), 'y', 'style の中身を本文に数えている');
   eq(toText(null), '', 'null で落ちる');
+
+  const japanese = Uint8Array.from([205, 248, 205, 209, 181, 172, 204, 243]);
+  eq(decodeTermsHtml(japanese, 'text/html; charset=EUC-JP'), '利用規約', 'HTTPのEUC-JPを読めない');
+  const legacyPage = Buffer.concat([Buffer.from('<meta http-equiv="content-type" content="text/html; charset=euc-jp"><p>'), japanese, Buffer.from('</p>')]);
+  eq(toText(decodeTermsHtml(legacyPage)), '利用規約', 'HTMLの文字コード宣言を読めない');
+  eq(decodeTermsHtml(new TextEncoder().encode('利用規約')), '利用規約', 'UTF-8の既存ページが壊れた');
+  const headerWins = new TextEncoder().encode('<meta charset="euc-jp"><p>利用規約</p>');
+  eq(toText(decodeTermsHtml(headerWins, 'text/html; charset=utf-8')), '利用規約', 'HTTP宣言が優先されない');
+  for (const contentType of ['', 'text/html; charset=unknown-encoding']) {
+    let rejected = false;
+    try { decodeTermsHtml(japanese, contentType); } catch { rejected = true; }
+    eq(rejected, true, '文字化け・未知の文字コードを指紋に通している');
+  }
 
   // --- 殻を通さない ---
   const real = `terms of service ${'liability and governing law. '.repeat(200)}`;
