@@ -283,9 +283,11 @@ export function judge(candidate, ctx) {
     const pred = predictCost(candidate, { policy, costDoc });
     const kind = pred.kind ?? candidate.kind ?? policy.kind_of?.default;
     const cap = routing?.rules?.[kind]?.max_usd_per_run ?? null;
-    if (pred.usd === null) {
+    if (!Number.isFinite(pred.usd) || pred.usd < 0) {
       put('budget', 'unknown', '**予測コストが記録されていない**（後で予測そのものを較正できない）', { kind });
-    } else if (cap !== null && pred.usd > cap) {
+    } else if (!Number.isFinite(cap) || cap < 0) {
+      put('budget', 'unknown', '**種別の有効な予算上限が確認できない**', { kind, predicted_usd: pred.usd });
+    } else if (pred.usd > cap) {
       put('budget', 'fail', `予測 $${pred.usd.toFixed(4)} > 上限 $${cap}（${kind}）`,
         { predicted_usd: pred.usd, cap_usd: cap, kind, prediction_source: pred.source });
     } else {
@@ -551,6 +553,19 @@ function selftest() {
   const ctx = { policy, scorePolicy, authority: auth, routing, costDoc, today: '2026-09-04' };
   const J = (over) => judge({ id: 'x', touches: ['data/a.json'], created_jst: '2026-09-03',
     last_seen_jst: '2026-09-04', close_check_kind: 'ledger_covers_runs', auto: 'h', ...over }, ctx);
+
+  for (const cap of [undefined, null, -1, NaN, Infinity, '10']) {
+    const invalidCapContext = { ...ctx, routing: { rules: { analysis: { max_usd_per_run: cap } } } };
+    eq(judge({ id: 'invalid-cap-control', predicted_usd: 0 }, invalidCapContext).criteria.budget.result,
+      'unknown', '欠落・不正な上限でゼロ予測を許可しない');
+  }
+  eq(J({ kind: 'missing-kind', predicted_usd: 1 }).criteria.budget.result, 'unknown', '未知種別を上限なしで許可しない');
+  for (const predicted_usd of [-1, NaN, Infinity]) {
+    eq(J({ predicted_usd }).criteria.budget.result, 'unknown', '不正な費用予測を予算内とみなさない');
+  }
+  eq(judge({ id: 'zero-cap-control', predicted_usd: 0 },
+    { ...ctx, routing: { rules: { analysis: { max_usd_per_run: 0 } } } }).criteria.budget.result,
+    'pass', '有効なゼロ上限とゼロ予測は通す');
 
   eq(J({}).verdict, 'eligible', '全部通れば適格');
   eq(J({ reversibility_class: 'R2' }).verdict, 'escalate_l4', '**R2 は止めて L4 へ上げる**');
