@@ -154,6 +154,9 @@ export function compare(html, live) {
     { label: 'AI実行率', re: /AI実行率[^\d%]{0,12}([\d.]+)%/g, want: pct(live.ai_execution_rate) },
     { label: 'カバー率', re: /カバー率[^\d%]{0,12}([\d.]+)%/g, want: pct(live.coverage_rate) },
     { label: 'タスク数', re: /(\d+)\s*タスク・13領域/g, want: String(live.counts_total) },
+    { label: '実施中タスク数', re: /実施中\s*(\d+)\s*タスク/g, want: String(live.doing) },
+    { label: '未着手タスク数', re: /未着手\s*(\d+)\s*件/g, want: String(live.counts?.nobody) },
+    { label: '集計対象タスク数', re: /集計対象\s*(\d+)\s*タスク/g, want: String(live.defined) },
     // 配信本文の見出し。**記者がいちばん引用する2か所。**
     { label: '自律度の到達点', re: /自律度は[\d.]+%→([\d.]+)%/g, want: pct(live.overall_automation_rate) },
     { label: '見出しの率', re: /「([\d.]+)%」は、いちばん厳しい/g, want: pct(live.overall_automation_rate) },
@@ -325,7 +328,7 @@ export function compare(html, live) {
     const hits = [...html.matchAll(c.re)];
     if (!hits.length) continue;
     for (const h of hits) {
-      const got = c.label === 'タスク数' ? h[1] : `${h[1]}%`;
+      const got = c.label.endsWith('タスク数') ? h[1] : `${h[1]}%`;
       found.push({ label: c.label, got, want: c.want });
       if (got !== c.want) {
         problems.push(`${c.label}: ページは ${got}、台帳の現在値は ${c.want}`
@@ -345,6 +348,7 @@ function selftest() {
     ai_involvement_rate: 0.8774193548387097,
     ai_execution_rate: 0.7032258064516129,
     counts_total: 189,
+    doing: 155, defined: 186, counts: { nobody: 31 },
   };
   t('一致すれば通る',
     compare('総合自動化率58.6%、AI関与率87.7%。189タスク・13領域', live).problems.length === 0);
@@ -352,6 +356,10 @@ function selftest() {
     compare('総合自動化率61.3%', live).problems.some((p) => p.includes('総合自動化率')));
   t('古いタスク数を落とす',
     compare('176タスク・13領域', live).problems.some((p) => p.includes('タスク数')));
+  t('分母と未着手数が一致すれば通る', compare('実施中155タスク・集計対象186タスク・未着手31件', live).problems.length === 0);
+  t('率が正しくても古い実施中数を落とす', compare('AI実行率70.3%・実施中154タスク', live).problems.some(p => p.includes('実施中タスク数')));
+  t('古い未着手数を落とす', compare('未着手32件', live).problems.some(p => p.includes('未着手タスク数')));
+  t('全棚卸し数を分母と誤記すると落とす', compare('集計対象189タスク', live).problems.some(p => p.includes('集計対象タスク数')));
 
   // --- 自律スコア（§5）。**落ちることを両側で確かめる。** ---
   const asc = {

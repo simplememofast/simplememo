@@ -237,8 +237,16 @@ export function validate(doc, { authorityDomains = new Set(), monthlyCap = null,
 
   const s = doc.cash_scenarios;
   if (s) {
+    const unestimated = s.outflow_status === 'unestimated';
+    if (unestimated && (!Array.isArray(s.outflow_missing) || !s.outflow_missing.length
+      || s.outflow_missing.some(x => typeof x !== 'string' || !x.trim()))) {
+      problems.push('cash_scenarios: 未推計の不足資料が無い');
+    }
     for (const k of ['pessimistic', 'standard', 'optimistic']) {
-      if (typeof s.monthly_outflow_usd?.[k] !== 'number') problems.push(`cash_scenarios.monthly_outflow_usd.${k} が無い`);
+      const amount = s.monthly_outflow_usd?.[k];
+      if (unestimated ? amount !== null : !Number.isFinite(amount) || amount < 0) {
+        problems.push(`cash_scenarios.monthly_outflow_usd.${k}: 未推計はnull、推計は有限の非負額が必要`);
+      }
       if (!s.assumptions?.[k]) problems.push(`cash_scenarios.assumptions.${k} が無い — 前提の無いシナリオは比較できない`);
     }
     const o = s.monthly_outflow_usd || {};
@@ -258,6 +266,7 @@ export function validate(doc, { authorityDomains = new Set(), monthlyCap = null,
     // 収入接続を true にする作業そのものが、この穴を開ける作業でもあった。
     // **必要な材料を1つずつ数え、欠けているものを名指しする形にする。**
     const missing = [];
+    if (unestimated) missing.push('支出の推計');
     if (!s.revenue_connected) missing.push('収入');
     if (!s.cash_on_hand_connected) missing.push('手元資金');
     // 履歴が1日しかない収入から月次は引けない。**日数も材料のうち。**
@@ -280,6 +289,15 @@ export function validate(doc, { authorityDomains = new Set(), monthlyCap = null,
 // ── 自己テスト（**落ちることを確かめる**） ──────────────────────
 // 通ることだけ確かめる自己テストは、検査が何も見ていなくても緑になる。
 const SELFTEST_BREAKAGES = [
+  ['未推計に旧標準額を戻すと落ちる', (d) => { d.cash_scenarios.monthly_outflow_usd.standard = 40; }],
+  ['未推計の不足資料を消すと落ちる', (d) => { delete d.cash_scenarios.outflow_missing; }],
+  ['未推計の不足資料を空欄にすると落ちる', (d) => { d.cash_scenarios.outflow_missing = [' ']; }],
+  ['収入が揃っても支出未推計のランウェイは落ちる', (d) => {
+    d.cash_scenarios.revenue_history_days = 28;
+    d.cash_scenarios.revenue_connected = true;
+    d.cash_scenarios.cash_on_hand_connected = true;
+    d.cash_scenarios.runway_months = 12;
+  }],
   ['知らない status は落ちる', (d) => { d.change_limits[0].status = 'たぶん平気'; }],
   ['**変更幅の上限が無い**のは落ちる（無制限に上げられる）', (d) => { delete d.change_limits[0].max_step_pct; }],
   ['**変更の間隔が無い**のは落ちる（同日に何度でも上げられる）', (d) => { delete d.change_limits[0].min_days_between_changes; }],
@@ -502,9 +520,15 @@ if (isMain) {
     }
   }
   const s = doc.cash_scenarios;
-  console.log('\n  月いくら出ていくか（**出ていく側だけ**）');
-  console.log(`    悲観 $${s.monthly_outflow_usd.pessimistic} / 標準 $${s.monthly_outflow_usd.standard}`
-    + ` / 楽観 $${s.monthly_outflow_usd.optimistic}`);
+  console.log('\n  月次支出シナリオ（支出実績や予算上限とは別）');
+  const aiLimit = doc.change_limits.find(c => c.domain === AI_BUDGET_DOMAIN && c.status === 'active');
+  if (aiLimit) console.log(`    AI実行予算 $${aiLimit.current_monthly_usd}/月 / 損失上限 $${aiLimit.loss_limit_usd}（支出予測ではない）`);
+  if (s.outflow_status === 'unestimated') {
+    console.log(`    総支出は未推計: ${s.outflow_missing.join(' / ')}`);
+  } else {
+    console.log(`    悲観 $${s.monthly_outflow_usd.pessimistic} / 標準 $${s.monthly_outflow_usd.standard}`
+      + ` / 楽観 $${s.monthly_outflow_usd.optimistic}`);
+  }
   const ro = s.revenue_observed;
   console.log(`    収入の接続: ${s.revenue_connected ? 'あり（App Store Connect / Analytics）' : '**無し**（App Store Connect 未接続）'}`);
   if (ro) {
@@ -514,6 +538,7 @@ if (isMain) {
   }
   console.log(`    手元資金の接続: ${s.cash_on_hand_connected ? 'あり' : '**無し**（銀行・カードを読む経路が無い）'}`);
   const need = [];
+  if (s.outflow_status === 'unestimated') need.push('支出の推計');
   if (!s.revenue_connected) need.push('収入');
   if (!s.cash_on_hand_connected) need.push('手元資金');
   const d = s.revenue_history_days ?? (s.revenue_observed ? 1 : 0);
