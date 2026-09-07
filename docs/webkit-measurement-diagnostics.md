@@ -1,5 +1,40 @@
 # WebKit測定の失敗を診断する
 
+## 成功したCI内の未測定を自動運転へ届ける
+
+描画検査は `SIMPLEMEMO_VIEWPORT_V1` のJSON行を出力する。Blinkの深い面、全面、
+WebKitそれぞれについて予定数・実測数・測定失敗数・新しい横はみ出し数を記録する。
+全予定のpage/widthが重複なく実測されて初めてcompleteになる。エンジンの未導入、
+`--no-webkit`、`--no-sweep`、部分測定を「漏れなし」に変換しない。
+途中でプロセスが落ちて行が出なかった場合も、観測側では未確認になる。
+
+既存の毎日のAutopilot Actが、最新mainに対応するSEO Validationを読み、
+`act-viewport-measurement` という固定IDで通常の修理候補台帳へ取り込む。
+独立Codex運転が読む同じ候補台帳であり、修理コマンドをログから実行する処理はない。
+描画検査のreport-only方針、検査対象、権限表、修理予算は変えない。
+
+mainの直接pushはそのSHA、squashマージはmainのSHAに実際にマージされた自リポジトリPRの
+正確なhead SHAを使う。対象ワークフロー・run・attempt・job・測定step・時間範囲を照合する。
+未マージPRやfork、古いmainの緑には戻らない。取得後にmainとrun attemptを再読し、
+観測中に変化した場合は未確認にする。実行中は新規修理を作らず、既存の修理も閉じない。
+7日を超える結果、読めないログ、途中失敗、報告行の欠落・重複は健全とは判定しない。
+
+全3区分の実測が揃い、新しい横はみ出しも静的問題も0なら閉じられる。
+実際に観測した測定障害を閉じるには、それ以降の別runまたは新しいattemptが必要。
+一時的なAPI取得不能だけなら、同じrunの検証結果を読み直して解消できる。
+取得不能で、以前の実測障害のrun情報を上書きしない。再発は同じ候補を開き直す。
+結果の再読は既存Actの実行時に限り、新しいworkflow_runトリガーや通知先は追加しない。
+
+APIはreadのみ。ジョブログの署名付きURLへリポジトリのトークンは転送しない。
+API本文は2MiB、ログは8MiB、通信は各20秒（ログ本体30秒）で打ち切り、
+不足を成功扱いにしない。日次レポートには件数とrun/SHAの根拠だけを残す。
+今回の接続テストを、実障害の無人修復実績やスコア上昇としては計上しない。
+
+API仕様: [ジョブログの取得](https://docs.github.com/en/rest/actions/workflow-jobs#download-job-logs-for-a-workflow-run)、
+[コミットに対応するPRの取得](https://docs.github.com/en/rest/commits/commits#list-pull-requests-associated-with-a-commit)。
+
+## 過去の実測とドライバ修正
+
 2026-09-07のSEO Validation `34110440552` と `34112088081` は、Blinkの279面×4幅を
 測定した一方、WebKitは `fetch failed` で未測定だった。画面幅ステップは約13分かかった。
 report-onlyのためジョブは成功したが、WebKitやiPhone実機の確認済み実績にはならない。

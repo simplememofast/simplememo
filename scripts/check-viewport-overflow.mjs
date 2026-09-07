@@ -53,6 +53,7 @@ import http from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { run } from './lib/selftest.mjs';
 import { measureWebKit, findWebKitDriver } from './lib/webkit-driver.mjs';
+import { MARKER, measurementGroup } from './lib/viewport-health.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -683,6 +684,14 @@ if (isMain) {
       }).catch((e) => ({ measurable: false, engine: 'webkit',
         why: String(e.message || e).split('\n')[0].slice(0, 600),
         diagnostics: Array.isArray(e.diagnostics) ? e.diagnostics : [] }));
+  const requests = (pages, widths) => pages.flatMap(page => widths.map(width => ({ page, width })));
+  console.log(MARKER + JSON.stringify({ version: 1, static_problems: staticResult.problems.length,
+    groups: {
+      blink_deep: measurementGroup(m, requests(PAGES, WIDTHS)),
+      blink_sweep: measurementGroup(sweep, requests(allPages(), SWEEP_WIDTHS)),
+      webkit: measurementGroup(wk, [...requests(PAGES, WIDTHS),
+        ...requests(allPages().filter(p => !PAGES.includes(p)), WEBKIT_SWEEP_WIDTHS)]),
+    } }));
   console.log(`着地面の横漏れ — ${PAGES.join(' / ')} × ${WIDTHS.join('/')}px`);
   if (sweep) {
     console.log(`全面の掃き — ${allPages().length}面 × ${SWEEP_WIDTHS.join('/')}px`
