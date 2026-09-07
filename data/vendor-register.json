@@ -76,7 +76,7 @@
       "personal_data": "personal",
       "critical": true,
       "breaks_if_down": "**メモが送れなくなる。**端末側 Outbox が貯めて復旧後に再送する",
-      "fallback": "端末側 Outbox（暗号化キュー）が受け皿になる",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -93,7 +93,6 @@
       "spend_cap_note": "2026-09-07、既存管理画面で Workers Paid の有効契約を確認。従来の「有料化する時点」という説明を訂正。現行課金額・従量超過・上限を照合した予算決定は未完了で、spend_cap_ref は unset のまま。既存契約の読み取りであり、新規購入や増額は行っていない。",
       "approved_by": "human",
       "approved_at": "2026-08-22",
-      "fallback_probe": "device_outbox",
       "dpa_draft": {
         "at": "2026-09-06",
         "by": "ai_draft",
@@ -142,7 +141,11 @@
           }
         ]
       },
-      "$personal_data": "2026-09-07、API SHA 65ac3f2 の src/send.ts / src/resend.ts / migrations/0020_inquiries.sql を確認。Workerは生の宛先メールアドレス・件名・メモ本文を処理してResendへ送る。D1には問い合わせ本文も保存する。集計用IDやメールハッシュが仮名化されていても、ベンダー全体の処理を pseudonymous と分類できない。メモ本文の恒久保存や全通信の実測を確認したという意味ではない。"
+      "$personal_data": "2026-09-07、API SHA 65ac3f2 の src/send.ts / src/resend.ts / migrations/0020_inquiries.sql を確認。Workerは生の宛先メールアドレス・件名・メモ本文を処理してResendへ送る。D1には問い合わせ本文も保存する。集計用IDやメールハッシュが仮名化されていても、ベンダー全体の処理を pseudonymous と分類できない。メモ本文の恒久保存や全通信の実測を確認したという意味ではない。",
+      "fallback_note": "同等の代替は未検証。端末側Outboxは未送信メモを保管する縮退手段であり、Relay API・サイト配信・サーバー側保存の代替ではない",
+      "degradation_probes": [
+        "device_outbox"
+      ]
     },
     {
       "id": "resend",
@@ -325,11 +328,11 @@
     {
       "id": "github",
       "name": "GitHub（Actions / リポジトリ）",
-      "used_for": "ソース管理・主系オートパイロット・CI",
+      "used_for": "ソース管理・CI・PR検証・Git連携による出荷",
       "personal_data": "personal",
       "critical": false,
-      "breaks_if_down": "主系が止まる。**副系（CCR）は別経路なので代走できる**",
-      "fallback": "CCR Routines（実績として日々の出荷はこちらが担っている）",
+      "breaks_if_down": "ソース取得、PR検証、マージとGit連携による出荷が止まる。Codexの定期起動が別基盤でも、この依存は残る",
+      "fallback": null,
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
@@ -341,13 +344,13 @@
       "spend_cap_note": "無料枠。Actions分数の超過時のみ課金",
       "approved_by": "human",
       "approved_at": "2026-08-22",
-      "fallback_probe": "dual_lane",
       "degradation_probes": [
         "gate_fails_closed_on_api",
         "egress_degrade"
       ],
       "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた",
-      "$personal_data": "**[2026-08-29 訂正] `none` は規約本文から裏づけられなかった。**\n\nGitHub General Privacy Statement（Standard ToS が Site Policies として Agreement の一部に参照している）が、アカウント開設時に **GitHub handle / name / email address / password / payment information / transaction information** を収集すると明記。有料 subscription では name / billing address / payment specifics も列挙。\n\n**registrar と同じ形の誤りが2社目。**どちらも「ユーザーの個人情報を渡していない」は正しく、**渡しているのは会社（オーナー本人）の個人情報**だった。**この欄が2種類の事実を1つの語で表している。**\n\n**役割が状況で変わる点も記録しておく:** 通常の直接関係では GitHub が Controller、organization-provided account では Organization が Controller で GitHub は Processor、DPA に定める特定の処理では **GitHub 自身が Controller**。**Controller と Processor の双方の役割を持つ構造。**"
+      "$personal_data": "**[2026-08-29 訂正] `none` は規約本文から裏づけられなかった。**\n\nGitHub General Privacy Statement（Standard ToS が Site Policies として Agreement の一部に参照している）が、アカウント開設時に **GitHub handle / name / email address / password / payment information / transaction information** を収集すると明記。有料 subscription では name / billing address / payment specifics も列挙。\n\n**registrar と同じ形の誤りが2社目。**どちらも「ユーザーの個人情報を渡していない」は正しく、**渡しているのは会社（オーナー本人）の個人情報**だった。**この欄が2種類の事実を1つの語で表している。**\n\n**役割が状況で変わる点も記録しておく:** 通常の直接関係では GitHub が Controller、organization-provided account では Organization が Controller で GitHub は Processor、DPA に定める特定の処理では **GitHub 自身が Controller**。**Controller と Processor の双方の役割を持つ構造。**",
+      "fallback_note": "同等の代替は未検証。旧CCRの定期運転は停止済み。Codexの主系・補完は独立した予約だが、どちらもGitHubで当日占有・検証・出荷を行うため、GitHub障害時の代替には数えない"
     },
     {
       "id": "prtimes",

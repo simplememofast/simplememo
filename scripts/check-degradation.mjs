@@ -216,17 +216,6 @@ export const PROBES = {
       detail: `githubApiReachable:false → ${r.code}（run=${r.run}）`,
     };
   },
-  /** 副系（CCR）が主系とは別経路として実在する。 */
-  dual_lane: () => {
-    const runbook = path.join(ROOT, 'docs/obsidian/AUTOPILOT_RUNBOOK.md');
-    const wf = path.join(ROOT, '.github/workflows/obsidian-autopilot.yml');
-    const stop = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/emergency-stop.json'), 'utf8'));
-    const routes = Object.keys(stop.agents || {}).filter((k) => k.startsWith('ccr-'));
-    return {
-      ok: fs.existsSync(runbook) && fs.existsSync(wf) && routes.length >= 1,
-      detail: `主系ワークフロー + 手順書 + 副系 ${routes.length}経路（${routes.join(',')}）`,
-    };
-  },
   /** モデルが落ちたら縮退先へ、全滅なら走らない。 */
   model_fallback: () => {
     const degraded = decide(baseState({ modelsAvailable: ['haiku'], preferredModel: 'opus' }));
@@ -286,7 +275,7 @@ export function validate(doc, probes = PROBES, opts = {}) {
     }
 
     // 代替と縮退は**両立する。**片方を見たら終わりにしない
-    // （GitHub は副系という代替を持ちつつ、API到達不能時の縮退も持っている）。
+    // 別基盤の起動経路があっても、停止した事業者への依存が残るなら代替には数えない。
     let fallbackResult = null;
     if (v.fallback) {
       if (!v.fallback_probe) {
@@ -445,6 +434,17 @@ const SCENARIOS = [
   ['**probe が未実装なら落ちる**（名前だけの代替を通さない）', () => {
     const p = val(vdoc({ fallback_probe: 'そんな probe は無い' }));
     if (!hit(p, '実装されていない')) throw new Error(JSON.stringify(p));
+  }],
+  ['旧CCRの経路名だけではGitHub代替を証明しない', () => {
+    const doc = JSON.parse(fs.readFileSync(VENDORS, 'utf8'));
+    const github = doc.vendors.find((v) => v.id === 'github');
+    if (!github) throw new Error('GitHub vendor missing');
+    github.fallback = 'CCR Routines';
+    github.fallback_probe = 'dual_lane';
+    const { problems } = validate(doc);
+    if (!hit(problems, 'probe "dual_lane" が実装されていない')) {
+      throw new Error('Stopped CCR route names were accepted as GitHub fallback evidence');
+    }
   }],
   ['**誰も参照しない probe は落ちる**（覆っているように見えるだけの死んだコード）', () => {
     const p = val(vdoc(), { ...STUB, 誰も使わない: () => ({ ok: true, detail: '' }) });
