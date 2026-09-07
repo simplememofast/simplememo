@@ -1,26 +1,15 @@
 #!/usr/bin/env node
 /**
- * 条項検査の40マスを、**読む順序**に変える。
+ * 条項検査を読む順序に並べ、保存済みの公開規約分析を示す。
  *
  *   node scripts/vendor-clause-worksheet.mjs           # 順序と、各マスの材料を出す
  *   node scripts/vendor-clause-worksheet.mjs --json    # 機械可読
  *   node scripts/vendor-clause-worksheet.mjs --check   # CI: 2つの台帳の整合
  *   node scripts/vendor-clause-worksheet.mjs --selftest # 導出そのものの自己検査
  *
- * 【なぜ要るか】
- * `check-corporate.mjs` は「全観点が未確認のベンダー 10社」と出す。正しいが、
- * **40マスが等価に見える。**実際には等価ではない —— resend には宛先アドレスと
- * メモ本文が渡っていて代替が無く、prtimes には個人データが渡っていない。
- * それでも台帳の上では同じ `unreviewed` が40個並ぶ。
- *
- * **等価に見える一覧は、着手されない。**この行が 2026-08-22 から動いていないのは
- * 判断が重いからではなく、**どこから読めばいいかが出ていない**からでもある。
- *
- * 【この script が決めないこと】
- * **ok / risk は決めない。**それは法的判断で、`data/corporate-obligations.json` の
- * $note が「確認は人が規約を読むことでしか進まない」と書いたとおり人の領域。
- * ここが出すのは**順序と材料**だけ —— どのマスから読むと露出が大きいか、
- * そのマスで何が賭かっているか（何を渡しているか・止まると何が起きるか・代替はあるか）。
+ * 未確認のマスは従来の露出順に残す。保存済みのAI公開規約分析は別途、
+ * 出典・版・根拠節・未確認事項とともに表示する。人が確認済みのマスも
+ * 分析を参照できる。分析の表示で台帳の確認状態や契約承認は変更しない。
  *
  * 【順序の作り方 — 台帳に記録された事実だけから導く】
  * 推測を混ぜない。使うのは vendor-register.json の4欄だけ:
@@ -53,6 +42,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, broken, run } from './lib/selftest.mjs';
+import { assessmentProblems } from './lib/contract-assessment.mjs';
 import { MONEY_FLOWS } from './check-vendors.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -199,6 +189,24 @@ export function load() {
   };
 }
 
+// Preserve each source/version independently: consumer and commercial terms are
+// not interchangeable, and no public assessment establishes account applicability.
+export function publicAnalyses(cr) {
+  const records = cr?.ai_assessments ?? [];
+  const problems = assessmentProblems(records, cr?.vendors ?? []);
+  if (problems.length) return { problems, vendors: [] };
+  return { problems, vendors: (cr?.vendors ?? []).map((vendor) => ({
+    vendor: vendor.id,
+    assessments: records.filter((r) => r.vendor_id === vendor.id).map((r) => ({
+      id: r.id, actor: r.actor, agent: r.agent, observed_at: r.observed_at,
+      scope: r.scope, contract_approved: r.contract_approved,
+      agreement_applicability: r.agreement_applicability,
+      source: r.source, open_questions: r.open_questions,
+      findings: Object.fromEntries((cr.clauses ?? []).map((clause) => [clause, r.findings[clause]])),
+    })),
+  })) };
+}
+
 /**
  * 2つの台帳を突き合わせて、順序つきのマス一覧を作る。
  * **片方にしか居ないベンダーは problems に出す**（黙って落とさない）。
@@ -207,7 +215,7 @@ export function build({ register, obligations }) {
   const problems = [];
   const cr = obligations?.contract_review;
   if (!cr || !Array.isArray(cr.vendors) || !Array.isArray(cr.clauses)) {
-    return { problems: ['contract_review が読めない'], cells: [], unranked: [] };
+    return { problems: ['contract_review が読めない'], cells: [], unranked: [], public_analyses: [] };
   }
 
   const byId = new Map((register?.vendors ?? []).map((v) => [v.id, v]));
@@ -248,13 +256,15 @@ export function build({ register, obligations }) {
 
   // 露出の大きい順。同点は台帳の並び（＝人が決めた重要度順）を保つので安定ソート。
   cells.sort((a, b) => b.exposure - a.exposure);
-  return { problems, cells, unranked };
+  const analysis = publicAnalyses(cr);
+  problems.push(...analysis.problems);
+  return { problems, cells, unranked, public_analyses: analysis.vendors };
 }
 
 /**
  * CI が見るもの。**新しい赤を足さない** —— 未確認であること自体は
  * check-corporate.mjs が既に報告していて、二重に落とす意味が無い。
- * ここが落とすのは**2つの台帳がずれたとき**だけ。
+ * 台帳の不整合と、表示するAI分析の出典・範囲の不備を検出する。
  */
 export function check(doc) {
   const { problems } = build(doc);
@@ -292,6 +302,33 @@ function fixture() {
 function selftest() {
   const scenarios = [
     ['実データで問題が出ない', () => assert(check(load()).length === 0, check(load()).join(' / '))],
+
+    ['公開分析は出典別に残し、人の確認済みマスも参照できる', () => {
+      const doc = load();
+      const before = JSON.stringify(doc);
+      const out = build(doc);
+      const records = doc.obligations.contract_review.ai_assessments;
+      assert(out.public_analyses.flatMap((v) => v.assessments).length === records.length, '分析が消えた');
+      const anthropic = out.public_analyses.find((v) => v.vendor === 'anthropic');
+      assert(anthropic.assessments.length === 2, 'consumer/commercial をまとめてしまった');
+      assert(out.public_analyses.find((v) => v.vendor === 'firebase').assessments.length === 0, 'GCPの記録を無断流用した');
+      const a = out.public_analyses.flatMap((v) => v.assessments)[0];
+      assert(a.contract_approved === false && a.agreement_applicability === 'unverified', '適用・承認の留保が消えた');
+      assert(Object.keys(a.findings).length === 4 && a.findings.ip.evidence.length > 0, '4条項と根拠が欠けた');
+      assert(JSON.stringify(doc) === before, '元台帳を変更した');
+    }],
+    ['壊し: 出典・承認状態が不正な分析を表示しない', () => {
+      for (const mutate of [
+        (a) => { a.contract_approved = true; },
+        (a) => { a.source.url = 'https://unregistered.example'; },
+        (a) => { a.findings.ip.evidence = []; },
+      ]) {
+        const doc = load();
+        mutate(doc.obligations.contract_review.ai_assessments[0]);
+        const out = build(doc);
+        assert(out.problems.length > 0 && out.public_analyses.length === 0, '不正な分析を表示した');
+      }
+    }],
 
     ['露出の大きいマスが先に来る', () => {
       const { cells } = build(fixture());
@@ -488,7 +525,7 @@ function selftest() {
 
 function report() {
   const doc = load();
-  const { problems, cells, unranked } = build(doc);
+  const { problems, cells, unranked, public_analyses } = build(doc);
 
   console.log('\n条項検査の読む順序 — 未確認のマスだけを、台帳の事実で並べた\n');
   if (problems.length) {
@@ -530,7 +567,22 @@ function report() {
     console.log('    **これは欠落の報告であって、重要でないという意味ではない。**');
   }
 
-  console.log('\n  **この一覧は ok / risk を決めない。**決めるのは人で、ここが出すのは順序と材料だけ。');
+  console.log('\n  保存済みのAI公開規約分析（契約承認なし・アカウントへの適用未確認）');
+  for (const vendor of public_analyses) {
+    console.log(`\n    ${vendor.vendor}: ${vendor.assessments.length} 件`);
+    if (!vendor.assessments.length) console.log('      このベンダーに直接紐づく分析記録なし。別サービスの記録を自動流用しない。');
+    for (const a of vendor.assessments) {
+      console.log(`      ${a.id} / ${a.agent} / ${a.observed_at}`);
+      console.log(`      原文: ${a.source.url} / 版: ${a.source.version} / SHA-256: ${a.source.sha256}`);
+      for (const [clause, finding] of Object.entries(a.findings)) {
+        console.log(`        ${clause}: ${finding.result} — ${finding.summary}`);
+        console.log(`          対応: ${finding.action}`);
+        console.log(`          根拠節: ${finding.evidence.map((e) => e.section).join(', ')}`);
+      }
+      for (const q of a.open_questions) console.log(`        未確認: ${q}`);
+    }
+  }
+  console.log('\n  分析結果は保存時点の公開規約に対するAI判断。契約の承認・適用確認と既存の人の確認記録は更新しない。');
   // [2026-08-29] **ここは嘘を言っていた。**`policy.enforce_unreviewed` は
   // data/vendor-register.json にあり、守るのは **DPAレビュー**（dpa_reviewed）で、
   // **この40/44マスとは別物。**実測: 1マスを unreviewed に戻しても
