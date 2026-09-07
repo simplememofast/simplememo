@@ -122,13 +122,15 @@ export function medianCost(costDoc, kind) {
 }
 
 export function predictCost(candidate, { policy, costDoc }) {
-  if (typeof candidate.predicted_usd === 'number') {
-    return { usd: candidate.predicted_usd, source: 'declared' };
-  }
-  // auto ハンドラは決定論的な node スクリプトで、モデル呼び出しが無い。
-  if (candidate.auto) return { usd: 0, source: 'derived_auto_handler' };
+  // Resolve the same policy kind for declared and historical forecasts. A
+  // supplied amount must not silently switch an article to the analysis cap.
   const kind = candidate.lane ? (policy.kind_of?.by_lane?.[candidate.lane] ?? policy.kind_of?.default)
                               : (candidate.kind ?? policy.kind_of?.default);
+  if (typeof candidate.predicted_usd === 'number') {
+    return { usd: candidate.predicted_usd, source: 'declared', kind };
+  }
+  // auto ハンドラは決定論的な node スクリプトで、モデル呼び出しが無い。
+  if (candidate.auto) return { usd: 0, source: 'derived_auto_handler', kind };
   const { median, n } = medianCost(costDoc, kind);
   if (median === null) return { usd: null, source: null, kind };
   return { usd: median, source: 'derived_median', kind, n };
@@ -283,9 +285,11 @@ export function judge(candidate, ctx) {
     const pred = predictCost(candidate, { policy, costDoc });
     const kind = pred.kind ?? candidate.kind ?? policy.kind_of?.default;
     const cap = routing?.rules?.[kind]?.max_usd_per_run ?? null;
-    if (pred.usd === null) {
+    if (!Number.isFinite(pred.usd) || pred.usd < 0) {
       put('budget', 'unknown', '**予測コストが記録されていない**（後で予測そのものを較正できない）', { kind });
-    } else if (cap !== null && pred.usd > cap) {
+    } else if (!Number.isFinite(cap) || cap < 0) {
+      put('budget', 'unknown', '**種別の有効な予算上限が確認できない**', { kind, predicted_usd: pred.usd });
+    } else if (pred.usd > cap) {
       put('budget', 'fail', `予測 $${pred.usd.toFixed(4)} > 上限 $${cap}（${kind}）`,
         { predicted_usd: pred.usd, cap_usd: cap, kind, prediction_source: pred.source });
     } else {
@@ -644,6 +648,20 @@ function selftest() {
   eq(J({}).criteria.budget.result, 'pass', 'auto ハンドラは $0 と予測できる');
   eq(J({ auto: null, force_owner: 'human', lane: 'E' }).criteria.budget.result, 'pass',
      '実測中央値 $8 は article 上限 $10 の内');
+  for (const [lane, kind, cap] of [['E', 'article', 10], ['F', 'repair', 18]]) {
+    const budget = over => J({ auto: null, lane, ...over }).criteria.budget;
+    eq(budget({ predicted_usd: 4.3285265 }).kind, kind, '明示費用でもレーンの種別を保持する');
+    eq(budget({ predicted_usd: 4.3285265 }).result, 'pass', 'analysis上限へ誤分類しない');
+    eq(budget({ predicted_usd: cap }).result, 'pass', '既存の種別上限と同額は通る');
+    eq(budget({ predicted_usd: cap + .01 }).result, 'fail', '既存の種別上限超過は止める');
+    eq(budget({ predicted_usd: 4, kind: 'analysis' }).kind, kind, '費用の有無でレーン優先の規則を変えない');
+  }
+  eq(J({ auto: null, predicted_usd: 2 }).criteria.budget.result, 'fail', 'レーンなしの既定analysis上限は維持する');
+  eq(predictCost({ kind: 'repair', predicted_usd: 4 }, ctx).kind, 'repair', 'レーンなしの明示種別を保持する');
+  eq(J({ kind: 'missing-kind', predicted_usd: 1 }).criteria.budget.result, 'unknown', '未知種別を上限なしで許可しない');
+  for (const predicted_usd of [-1, NaN, Infinity]) {
+    eq(J({ predicted_usd }).criteria.budget.result, 'unknown', '不正な予測を予算内とみなさない');
+  }
   eq(J({ auto: null, force_owner: 'human', lane: 'E', predicted_usd: 12 }).criteria.budget.result, 'fail',
      '**上限を超える予測は落とす**');
   eq(J({ auto: null, force_owner: 'human', kind: 'pr' }).criteria.budget.result, 'unknown',

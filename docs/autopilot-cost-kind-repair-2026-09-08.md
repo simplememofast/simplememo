@@ -1,0 +1,9 @@
+# Explicit forecasts preserve the budget kind
+
+The native `obsidian` task `01a07dad-83f0-72b2-82db-92ff1a4a89bc` started at 06:01:58 JST for the September 8, 2026 06:00 slot. It passed preflight but rejected both article candidates. Its supplied forecast of $4.3285265 lost the lane-derived kind, so the judge applied the default analysis cap of $1.50 instead of the existing article cap of $20. No implementation, claim, PR or publication occurred in that task.
+
+`predictCost` now resolves the policy kind before choosing declared, deterministic-handler or historical-median cost sources. Lane mappings retain their existing precedence. `prepare` also persists an explicit `kind` so a candidate without a lane can be reconstructed with the same budget. Missing/invalid caps or non-finite/negative forecasts return unknown rather than an unchecked pass. No policy, cap, permission or execution scope was expanded.
+
+An offline replay of both saved candidates against their original main `884a2c4033be0af981147192be401ed7d8139943` now prepares successfully with kind `article`, the original forecast and the original $20 cap. This is diagnostic replay, not a rerun of the scheduled task. Tests cover article/repair classification, conflicting kind declarations, exact-cap and over-cap decisions, default analysis, unknown kinds, invalid forecasts and persisted-input reconstruction. Existing decision-CI integration tests also run.
+
+The forecast was a historical Claude article median used as a planning proxy, not a measured Codex charge. Codex actual cost remains unavailable. This repair supplies no automatic recovery or value-outcome credit. Another task ID appears in the separate PR1116 publication record; this stopped task is not rewritten as that publication. The next natural scheduled run remains the proof of repaired execution.

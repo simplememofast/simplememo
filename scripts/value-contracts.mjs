@@ -165,7 +165,7 @@ export function prepare(candidate, ctx) {
     evidence: { source_hash: digest({ runs: ctx.runs, costs: ctx.costs }), date: candidate.evidence_date },
     rollback: { mode: 'revert_static_only', paths: candidate.touches.filter(staticPath) },
   };
-  c.input = Object.fromEntries(['id', 'run_id', 'metric', 'touches', 'lane', 'action', 'domain', 'reversibility_class',
+  c.input = Object.fromEntries(['id', 'run_id', 'metric', 'touches', 'lane', 'kind', 'action', 'domain', 'reversibility_class',
     'evidence_date', 'predicted_usd', 'predicted_delta', 'p', 'horizon_days', 'max_changed_lines', 'counterfactual', 'rank_gap',
     'scope', 'created_jst', 'max_binary_bytes'].filter(k => candidate[k] !== undefined).map(k => [k, candidate[k]]));
   const problems = contractProblems(c, ctx.metrics);
@@ -348,6 +348,10 @@ export async function selftest() {
     evidence_date: '2026-09-03', predicted_usd: 0, predicted_delta: .1, p: .8, horizon_days: 1,
     max_changed_lines: 100, counterfactual: { id: 'runner-up', reason: 'Independent candidate comparison' }, rank_gap: .1 };
   const c = prepare(candidate, ctx);
+  const explicitKind = prepare({ ...candidate, lane: undefined, kind: 'article', predicted_usd: 4.3285265 }, ctx);
+  assert.equal(explicitKind.input.kind, 'article');
+  assert.deepEqual(prepare(explicitKind.input, ctx), explicitKind, 'persisted input must reproduce its original kind and budget');
+  assert.equal(prepare({ ...candidate, lane: 'E', predicted_usd: 4.3285265 }, ctx).eligibility.criteria.budget.kind, 'article');
   assert.equal(c.baseline, 0);
   assert.equal(c.null_model.value, 0);
   assert.equal(observe('shipping_day_rate', '2026-09-10', runs).value, null);
