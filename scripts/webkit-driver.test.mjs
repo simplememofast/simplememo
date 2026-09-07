@@ -1,8 +1,32 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { once } from 'node:events';
-import { webDriverCall, stopDrivers, driverDiagnostic, REQUEST_TIMEOUT_MS } from './lib/webkit-driver.mjs';
+import { once, EventEmitter } from 'node:events';
+import { spawn, execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import { webDriverCall, stopDrivers, driverDiagnostic, REQUEST_TIMEOUT_MS,
+  ensureDisplay, terminateOwnedProcess } from './lib/webkit-driver.mjs';
+
+function ownedFixture(onKill) {
+  const proc = Object.assign(new EventEmitter(), { pid: 123, exitCode: null, signalCode: null });
+  proc.kill = signal => {
+    onKill();
+    queueMicrotask(() => { proc.signalCode = signal; proc.emit('exit', null, signal); });
+    return true;
+  };
+  return proc;
+}
+
+function displayFixture(code) {
+  let child;
+  return { options: { env: {}, xvfbPath: process.execPath,
+    spawnFn: (_file, args, options) => {
+      assert.deepEqual(args.slice(0, 2), ['-displayfd', '3']);
+      assert(!args.includes(':99'));
+      child = spawn(process.execPath, ['-e', code], options);
+      return child;
+    } }, get child() { return child; } };
+}
 
 async function server(t, handle) {
   const srv = http.createServer(handle);
@@ -72,8 +96,8 @@ test('stalled session deletion cannot prevent owned driver and display cleanup',
   let deletions = 0;
   const port = await server(t, req => { if (req.method === 'DELETE') deletions++; });
   const killed = [];
-  const d = { session: 'fixture', call: webDriverCall(port), proc: { kill: () => killed.push('driver') } };
-  await stopDrivers([d], { proc: { kill: () => killed.push('display') } }, { deadlineMs: 80 });
+  const d = { session: 'fixture', call: webDriverCall(port), proc: ownedFixture(() => killed.push('driver')) };
+  await stopDrivers([d], { proc: ownedFixture(() => killed.push('display')) }, { deadlineMs: 80 });
   assert.equal(deletions, 1);
   assert.deepEqual(killed, ['driver', 'display']);
 });
@@ -81,9 +105,82 @@ test('stalled session deletion cannot prevent owned driver and display cleanup',
 test('startup failure without a session still cleans up only owned processes', async () => {
   const killed = [];
   await stopDrivers([{ session: null, call: () => { throw Error('no DELETE before session'); },
-    proc: { kill: () => killed.push('driver') } }], { proc: null });
+    proc: ownedFixture(() => killed.push('driver')) }], { proc: null });
   assert.deepEqual(killed, ['driver']);
 });
+
+test('Xvfb readiness waits for a complete display number on the private pipe', { timeout: 3_000 }, async t => {
+  const fixture = displayFixture(`const fs = require('fs'); fs.writeSync(3, '4');
+    setTimeout(() => fs.writeSync(3, '2\\n'), 40); setInterval(() => {}, 1000);`);
+  t.after(() => terminateOwnedProcess(fixture.child));
+  const disp = await ensureDisplay(fixture.options);
+  assert.equal(disp.display, ':42');
+  await stopDrivers([], disp);
+  assert(fixture.child.exitCode !== null || fixture.child.signalCode !== null);
+});
+
+test('a configured external display is preserved and never spawned or terminated', async () => {
+  const disp = await ensureDisplay({ env: { DISPLAY: ':external' }, spawnFn: () => { throw Error('must not spawn'); } });
+  assert.deepEqual(disp, { display: ':external', proc: null });
+  await stopDrivers([], disp);
+});
+
+test('Xvfb exits before readiness with its actual stderr retained', { timeout: 3_000 }, async t => {
+  const fixture = displayFixture(`require('fs').writeSync(2, 'fatal-display-startup\\n'); process.exit(1);`);
+  t.after(() => terminateOwnedProcess(fixture.child));
+  await assert.rejects(ensureDisplay(fixture.options), error => {
+    assert.match(error.message, /before ready|without a display/);
+    assert.match(error.diagnostics.join(' '), /fatal-display-startup/);
+    return true;
+  });
+});
+
+test('invalid Xvfb readiness and a hung startup are rejected and reaped', { timeout: 5_000 }, async t => {
+  for (const [response, expected] of [['bad\n', /invalid display/], ['65536\n', /invalid display/],
+    ['x'.repeat(40), /too long/], ['', /timed out/]]) {
+    const fixture = displayFixture(`require('fs').writeSync(3, ${JSON.stringify(response)}); setInterval(() => {}, 1000);`);
+    t.after(() => terminateOwnedProcess(fixture.child));
+    await assert.rejects(ensureDisplay({ ...fixture.options, startupMs: 250 }), expected);
+    assert(fixture.child.exitCode !== null || fixture.child.signalCode !== null);
+  }
+});
+
+test('Xvfb spawn errors remain diagnostic and bounded', { timeout: 3_000 }, async () => {
+  await assert.rejects(ensureDisplay({ env: {}, xvfbPath: process.execPath,
+    spawnFn: (_file, args, options) => spawn('/missing-simplememo-xvfb-fixture', args, options) }), error => {
+    assert.match(error.message, /ENOENT/);
+    assert.match(error.diagnostics.join(' '), /ENOENT/);
+    return true;
+  });
+});
+
+test('owned children that ignore SIGTERM are killed and awaited', { timeout: 3_000 }, async t => {
+  const proc = spawn(process.execPath, ['-e', `process.on('SIGTERM', () => {}); console.log('ready'); setInterval(() => {}, 1000);`],
+    { stdio: ['ignore', 'pipe', 'ignore'] });
+  t.after(() => { if (proc.exitCode === null && proc.signalCode === null) proc.kill('SIGKILL'); });
+  await once(proc.stdout, 'data');
+  await terminateOwnedProcess(proc, { graceMs: 60, killMs: 1000 });
+  assert.equal(proc.signalCode, 'SIGKILL');
+});
+
+test('Linux CI: independent real Xvfb displays remain connectable across cleanup',
+  { skip: process.platform !== 'linux' ? 'requires Linux Xvfb' :
+    !fs.existsSync('/usr/bin/Xvfb') || !fs.existsSync('/usr/bin/xdpyinfo')
+      ? 'Xvfb/xdpyinfo unavailable; real display readiness is unverified' : false, timeout: 20_000 }, async t => {
+    const first = await ensureDisplay({ env: {} });
+    t.after(() => terminateOwnedProcess(first.proc));
+    const second = await ensureDisplay({ env: {} });
+    t.after(() => terminateOwnedProcess(second.proc));
+    assert.notEqual(first.display, second.display);
+    const check = display => execFileSync('/usr/bin/xdpyinfo', ['-display', display], { stdio: 'pipe', timeout: 2_000 });
+    check(first.display); check(second.display);
+    await stopDrivers([], second);
+    check(first.display);
+    const third = await ensureDisplay({ env: {} });
+    t.after(() => terminateOwnedProcess(third.proc));
+    check(third.display);
+    check(first.display);
+  });
 
 test('driver diagnostics distinguish process exit and stderr, with bounded single-line output', () => {
   const result = driverDiagnostic({ port: 4700, proc: { pid: 123, exitCode: 1, signalCode: null },

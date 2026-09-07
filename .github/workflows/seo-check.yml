@@ -863,7 +863,7 @@ jobs:
         continue-on-error: true
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb
+          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
 
       - name: WebKit transport failures retain evidence and bound cleanup
         run: node --test scripts/webkit-driver.test.mjs
