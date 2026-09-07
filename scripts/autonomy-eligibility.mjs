@@ -122,13 +122,13 @@ export function medianCost(costDoc, kind) {
 }
 
 export function predictCost(candidate, { policy, costDoc }) {
-  if (typeof candidate.predicted_usd === 'number') {
-    return { usd: candidate.predicted_usd, source: 'declared' };
-  }
-  // auto ハンドラは決定論的な node スクリプトで、モデル呼び出しが無い。
-  if (candidate.auto) return { usd: 0, source: 'derived_auto_handler' };
   const kind = candidate.lane ? (policy.kind_of?.by_lane?.[candidate.lane] ?? policy.kind_of?.default)
                               : (candidate.kind ?? policy.kind_of?.default);
+  if (typeof candidate.predicted_usd === 'number') {
+    return { usd: candidate.predicted_usd, source: 'declared', kind };
+  }
+  // auto ハンドラは決定論的な node スクリプトで、モデル呼び出しが無い。
+  if (candidate.auto) return { usd: 0, source: 'derived_auto_handler', kind };
   const { median, n } = medianCost(costDoc, kind);
   if (median === null) return { usd: null, source: null, kind };
   return { usd: median, source: 'derived_median', kind, n };
@@ -592,6 +592,12 @@ function selftest() {
   eq(J({ touches: ['data/a.json', 'data/b.json', 'data/c.json', 'data/d.json'] }).criteria.boundedness.result, 'fail',
      'パス数の上限を超えたら落とす');
   eq(J({ touches: ['src/secret.ts'] }).criteria.boundedness.result, 'fail', '許可リストの外は落とす');
+
+  eq(J({ lane: 'E', predicted_usd: 4.3285265 }).criteria.budget.result, 'pass', '明示した記事予測に記事上限を適用する');
+  eq(J({ lane: 'E', predicted_usd: 10.01 }).criteria.budget.result, 'fail', '明示した記事予測でも記事上限超過を止める');
+  eq(J({ lane: 'F', predicted_usd: 12 }).criteria.budget.result, 'pass', '明示した修理予測に修理上限を適用する');
+  eq(J({ lane: undefined, kind: 'analysis', predicted_usd: 4.3285265 }).criteria.budget.result, 'fail', '分析上限は拡大しない');
+  eq(J({ lane: 'E', kind: 'repair', predicted_usd: 12 }).criteria.budget.result, 'fail', '明示種別で記事レーンの上限を回避しない');
 
   // --- オーナー所有のファイル（**門を、門で守られている側が書き換えられないようにする**）---
   //
