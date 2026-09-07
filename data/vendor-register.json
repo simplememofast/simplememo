@@ -272,7 +272,7 @@
       "id": "firebase",
       "name": "Firebase（App Check / Authentication）",
       "used_for": "APIの不正利用防止・OAuth のトークン検証",
-      "personal_data": "pseudonymous",
+      "personal_data": "personal",
       "critical": true,
       "breaks_if_down": "App Check が落ちると送信が弾かれうる",
       "fallback": null,
@@ -289,7 +289,8 @@
       "approved_by": "human",
       "approved_at": "2026-08-22",
       "$fallback_was": "App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）",
-      "fallback_note": "**代替ではなく回避策。**App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）が、外している間は検証が効かない。落ちたときの選択肢であって、機能の代替ではない"
+      "fallback_note": "**代替ではなく回避策。**App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）が、外している間は検証が効かない。落ちたときの選択肢であって、機能の代替ではない",
+      "account_evidence_note": "2026-09-07 source inspection at iOS ddcb604685153d661f92040f55ad8d23e64d37c7: GoogleSignInService uses Firebase Auth credentials and returns authResult.user.email; AppleSignInService passes appleIDCredential.fullName into the Firebase credential and reads Firebase user.email. This establishes personal-data handling in code, not observed user payloads or account contract applicability. See docs/firebase-service-scope-2026-09-07.md."
     },
     {
       "id": "appsflyer",
