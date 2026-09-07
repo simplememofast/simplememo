@@ -681,7 +681,8 @@ if (isMain) {
         concurrency: 3,
         deep: PAGES,
       }).catch((e) => ({ measurable: false, engine: 'webkit',
-        why: String(e.message || e).split('\n')[0].slice(0, 160) }));
+        why: String(e.message || e).split('\n')[0].slice(0, 600),
+        diagnostics: Array.isArray(e.diagnostics) ? e.diagnostics : [] }));
   console.log(`着地面の横漏れ — ${PAGES.join(' / ')} × ${WIDTHS.join('/')}px`);
   if (sweep) {
     console.log(`全面の掃き — ${allPages().length}面 × ${SWEEP_WIDTHS.join('/')}px`
@@ -692,6 +693,7 @@ if (isMain) {
       ? `WebKit — 深い ${PAGES.length}面 × ${WIDTHS.length}幅 ＋ 全 ${allPages().length}面 × ${WEBKIT_SWEEP_WIDTHS.join('/')}px`
         + `（${wk.results.length} 通り）`
       : `WebKit — **測れなかった**: ${wk.why}`);
+    for (const detail of wk.diagnostics ?? []) console.log(`  WebKit diagnostic: ${detail}`);
   }
   if (!m.measurable) {
     console.log(`\n  **測れなかった**: ${m.why}`);

@@ -865,6 +865,9 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb
 
+      - name: WebKit transport failures retain evidence and bound cleanup
+        run: node --test scripts/webkit-driver.test.mjs
+
       - name: Landing pages do not scroll sideways (report-only)
         run: |
           npm i --no-save playwright-core
