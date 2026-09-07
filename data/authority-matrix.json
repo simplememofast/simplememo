@@ -550,6 +550,23 @@
       ],
       "status": "active",
       "note": "2026-09-06、オーナーの最大権限委譲と90%超えへの実行依頼を受け、Codexがfolder_pick_uxの設計を採用し実CLIでバックログへ反映した。設計採用の記録であり機能の実装・公開完了ではない。"
+    },
+    {
+      "domain": "メモ本文の推論場所の設計判断",
+      "reversible": true,
+      "ai_may": [
+        "端末内推論の採用・適用と、クラウド推論を追加しない設計の保守"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "2026-09-07のオーナー包括委任に基づきAIが決定。ADR-001とtext-inference-policy.jsonを正とし、iOSのCIで未審査モデル・直接通信・クラウド経路復活を検査する。これは設計変更の権限であり、利用者の本文を外部学習へ出す同意の代用ではない。",
+      "evidence": [
+        "simplememo-ios/data/text-inference-policy.json",
+        "simplememo-ios/scripts/qa/check_text_inference.py",
+        "simplememo-ios/docs/adr/ADR-001-text-inference-placement.md"
+      ],
+      "status": "active",
+      "$note": "新規ユーザーデータ送信や契約締結を伴わない設計判断なのでreversible:true。将来クラウド推論を採用する際は、この欄で自動許可せずADRを置き換えてデータ経路・利用者の選択・保持・削除・費用を先に具体化する。"
     }
   ],
   "self_repair": {
