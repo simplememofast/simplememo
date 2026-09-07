@@ -1116,17 +1116,20 @@
     {
       "area": "⑤ AI予算・トークン管理",
       "task": "月次上限の決定",
-      "executor": "human_only",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/spend-approvals.json",
+        "scripts/monthly-budget.mjs",
+        "scripts/lib/monthly-budget-decision.mjs",
+        "data/autopilot-cost.json",
+        "docs/monthly-budget-decision-2026-09-07.md"
       ],
-      "note": "現在 placeholder $40。実測由来ではない\n\n**[2026-09-03 訂正] 「現在 placeholder $40。実測由来ではない」は失効した。**同日オーナーが $280 に決めている（承認記録は data/spend-approvals.json の seq=2・二者承認は placeholder_replacement のため不要）。seq=1 が「ここを実測に置き換えるのが最初の仕事」と書いていたもの。\n\n**executor は動かない。**上限を決めるのは依然としてオーナーで、権限表の human_only もそのまま。変わったのは値の由来だけ —— placeholder から**主系の実測 n=6 の外挿**へ。ただし**外挿であって月次の実測ではなく、副系CCRの実費は観測できない**ので、この $280 が縛るのは主系だけ。",
-      "blocker": "policy_boundary",
-      "unblocked_by": "支出上限の決定",
+      "note": "2026-09-07: オーナーの包括承認を受け、AIが主系9回$67.0402の実績から月次総額$280の維持と種別配分を決定し、monthly-budget --applyで実行予算へ反映した（spend-approvals seq=3）。記事$180→$125、修理$60→$115、その他予備枠$40を維持。過去のhuman承認は保持し今回のapproved_byはai。実際のruntime budget CLIで記事$20/回・修理$18/回と新しい種別残枠を確認。観測欠落、配分逸脱、変更幅・変更間隔違反をCIで拒否する。部分月・主系のみの判断で、CCR実費、全社予算、最適配分の実証には流用しない。",
       "authority": {
         "domain": "AI実費（開発・運用のトークン費）",
-        "human_only": "monthly_usd_cap の決定"
-      }
+        "ai_may": "オーナーの包括委任に基づく、実績を根拠とした月次上限・種別配分の決定と実行予算への適用"
+      },
+      "since": "2026-09"
     },
     {
       "area": "⑤ AI予算・トークン管理",
@@ -1436,13 +1439,10 @@
       "task": "月次予算の決定",
       "executor": "human_only",
       "evidence": [],
-      "blocker": "policy_boundary",
-      "unblocked_by": "同上",
-      "authority": {
-        "domain": "AI実費（開発・運用のトークン費）",
-        "human_only": "monthly_usd_cap の決定"
-      },
-      "note": "**[2026-09-03] ⑤と同じ行を指している。**上限は同日 $280 に決まった（data/spend-approvals.json seq=2）。決めるのがオーナーである点は変わっていない。"
+      "blocker": "external_data",
+      "unblocked_by": "全体の運営予算として収入・銀行残高・ベンダー実支出・観測範囲を照合し、資金制約と配分を決めて適用する。AI費用だけの決定を二重計上しない。",
+      "note": "2026-09-07: オーナーの包括承認で実行は委任されたが、全体の運営予算はまだAIが決定していない。旧記述は⑤と同じAI費用の承認seq=2だけを指していた。今回のseq=3による主系AI費用の決定は⑤に1回だけ計上し、この行へ二重加点しない。収入観測は現在28日窓の8日分に限られ、主系以外の費用も未確定。executorは既存のhuman_onlyのまま（直近の実行者であり、新たな承認要求ではない）。",
+      "unlock": "revenue_28d"
     },
     {
       "area": "⑥ アプリ運営意思決定",

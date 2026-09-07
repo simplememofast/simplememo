@@ -23,6 +23,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readLedger, requireShape } from './lib/read-ledger.mjs';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
+import { AI_BUDGET_DOMAIN, hasMonthlyMandate, monthlyDecisionProblems, appliedDecisionProblems } from './lib/monthly-budget-decision.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const POLICY_PATH = path.join(ROOT, 'data/financial-policy.json');
@@ -63,9 +64,9 @@ export function validateAuthorityBudget(authority, approvals, monthlyCap) {
       || threshold?.monthly_usd_cap !== latest.to_usd) {
     problems.push('authority AI budget must match the actual cap and latest approved amount');
   }
-  if (threshold?.set_by !== 'owner'
+  if (threshold?.set_by !== (latest.approved_by?.includes('ai') ? 'ai' : 'owner')
       || threshold?.approval_ref !== `data/spend-approvals.json#seq=${latest.seq}`) {
-    problems.push('authority AI budget must reference the existing owner approval');
+    problems.push('authority AI budget must reference the actual latest decision and actor');
   }
   return problems;
 }
@@ -77,9 +78,10 @@ export function validateAuthorityBudget(authority, approvals, monthlyCap) {
  * autopilot-cost.json の monthly_usd_cap を黙って書き換えることができない。
  *
  * 変更幅が max_step_pct を超える場合は承認者が2人要る。
- * **AIは承認者になれない** — 止めることは許しているが、金額を上げることは許さない。
+ * 2026-09-07以降、AI実費の月次決定はオーナー委任と実績の記録を要求する。
+ * 他領域や過去の承認を、この委任でAIの実行へ読み替えない。
  */
-export function validateApprovals(approvals, { policy = null, monthlyCap = null } = {}) {
+export function validateApprovals(approvals, { policy = null, monthlyCap = null, authority = null } = {}) {
   const problems = [];
   const rows = approvals.approvals || [];
   rows.forEach((a, i) => {
@@ -88,8 +90,8 @@ export function validateApprovals(approvals, { policy = null, monthlyCap = null 
     if (!Array.isArray(a.approved_by) || !a.approved_by.length) {
       problems.push(`${at}: approved_by が空`);
     } else if (a.approved_by.includes('ai')) {
-      problems.push(`${at}: approved_by に ai が入っている`
-        + ' — **AIは承認者になれない。**止めることは許しているが、金額を上げることは許さない');
+      const issues = monthlyDecisionProblems(a, authority);
+      if (issues.length) problems.push(`${at}: approved_by に ai が入っているが委任条件を満たさない — ${issues.join('; ')}`);
     }
     if (!a.approved_at) problems.push(`${at}: approved_at が無い`);
     if (typeof a.to_usd !== 'number') problems.push(`${at}: to_usd が数値でない`);
@@ -163,9 +165,11 @@ export function validateApprovals(approvals, { policy = null, monthlyCap = null 
     // **規則が無かった時点の記録を、後から作った規則で落とすのは、記録のほうを嘘にする。**
     // seq=1（08-22）と seq=2（09-03・間隔12日）はそれ以前なので対象外で、
     // その事実は policy 側の note に書いてある。**免除ではなく、適用の開始点。**
-    if (limit && typeof limit.min_days_between_changes === 'number' && limit.min_days_enforced_from
+    // A retained total with a new allocation is a decision, not a cap increase.
+    // The change interval still applies to every actual change in the total.
+    if (a.to_usd !== a.from_usd && limit && typeof limit.min_days_between_changes === 'number' && limit.min_days_enforced_from
         && a.approved_at && a.approved_at > limit.min_days_enforced_from) {
-      const prev = [...rows].filter((x) => x.domain === a.domain && x.seq < a.seq).pop();
+      const prev = [...rows].filter((x) => x.domain === a.domain && x.seq < a.seq && x.to_usd !== x.from_usd).pop();
       if (prev?.approved_at) {
         const days = Math.floor(
           (Date.parse(`${a.approved_at}T00:00:00Z`) - Date.parse(`${prev.approved_at}T00:00:00Z`)) / 86400000);
@@ -189,7 +193,7 @@ export function validateApprovals(approvals, { policy = null, monthlyCap = null 
   return problems;
 }
 
-export function validate(doc, { authorityDomains = new Set(), monthlyCap = null } = {}) {
+export function validate(doc, { authorityDomains = new Set(), monthlyCap = null, authority = null } = {}) {
   const problems = [];
   for (const c of doc.change_limits || []) {
     const at = `change_limits「${c.domain}」`;
@@ -198,8 +202,9 @@ export function validate(doc, { authorityDomains = new Set(), monthlyCap = null 
       problems.push(`${at}: authority_domain "${c.authority_domain}" が権限表に無い`
         + ' — 片方だけ名前が変わると、境界が二重管理になる');
     }
-    if (c.who_decides !== 'human') {
-      problems.push(`${at}: who_decides が human でない — **金額を動かす判断はAIに渡さない**`);
+    if (c.who_decides !== 'human' && !(c.who_decides === 'ai'
+        && c.domain === AI_BUDGET_DOMAIN && hasMonthlyMandate(authority))) {
+      problems.push(`${at}: AIによる月次決定には該当領域のオーナー委任が必要`);
     }
     if (c.status === 'active') {
       for (const [k, label] of [['max_step_pct', '変更幅'], ['min_days_between_changes', '変更間隔'],
@@ -281,7 +286,7 @@ const SELFTEST_BREAKAGES = [
 ];
 const SCENARIOS = ledgerScenarios(
   () => JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')),
-  (d) => validate(d),
+  (d) => validate(d, { authority: JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8')) }),
   SELFTEST_BREAKAGES,
 );
 
@@ -395,6 +400,7 @@ SCENARIOS.push(
   ['**実データの承認記録が、いまの規則で通ること**', () => {
     const p = validateApprovals(JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8')), {
       policy: JSON.parse(fs.readFileSync(POLICY_PATH, 'utf8')),
+      authority: JSON.parse(fs.readFileSync(AUTHORITY_PATH, 'utf8')),
       monthlyCap: JSON.parse(fs.readFileSync(COST_PATH, 'utf8')).budget.monthly_usd_cap });
     assert(p.length === 0, JSON.stringify(p));
   }],
@@ -477,9 +483,10 @@ if (isMain) {
   if (capIssue) { console.error(capIssue); process.exit(1); }
   const approvals = JSON.parse(fs.readFileSync(APPROVALS_PATH, 'utf8'));
   const problems = [
-    ...validate(doc, { authorityDomains: domains, monthlyCap: cap }),
-    ...validateApprovals(approvals, { policy: doc, monthlyCap: cap }),
+    ...validate(doc, { authorityDomains: domains, monthlyCap: cap, authority }),
+    ...validateApprovals(approvals, { policy: doc, monthlyCap: cap, authority }),
     ...validateAuthorityBudget(authority, approvals, cap),
+    ...appliedDecisionProblems(costDoc, approvals.approvals.filter(a => a.domain === AI_BUDGET_DOMAIN).at(-1)),
   ];
 
   console.log('金額を動かす規則\n');
@@ -520,7 +527,7 @@ if (isMain) {
       + `${a.two_person_required ? '  **二者承認**' : ''}`);
   }
   console.log('    **承認記録を書かずに上限を動かせない**（実際の上限と最新の承認値が一致しないと落ちる）。');
-  console.log('    **AIは承認者になれない。**止めることは許しているが、金額を上げることは許さない。');
+  console.log('    AIの月次決定はオーナーの委任・実績の根拠・変更幅・変更間隔・実行予算への反映を検査する。');
 
   if (problems.length) {
     console.error('\n金額の規則: 不整合');

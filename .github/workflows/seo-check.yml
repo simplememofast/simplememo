@@ -40,6 +40,9 @@ jobs:
       - name: Local preflight includes grouped tests and propagates failures
         run: node scripts/preflight.mjs --selftest
 
+      - name: AI monthly budget decisions respect evidence and runtime caps
+        run: node --test scripts/monthly-budget.test.mjs
+
       - name: Language switcher insertion and regeneration regressions
         run: python3 scripts/inject_lang_switcher_test.py
 
