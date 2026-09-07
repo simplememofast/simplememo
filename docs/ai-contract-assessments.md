@@ -33,3 +33,27 @@ AnthropicのConsumer Termsを追加URLとして登録し、AIによる12観点�
 同じURLでも今回のWeb取得はEEA・スイス向け、ローカルHTTPS取得はAnthropic, PBCの§1〜§13を返した。後者の30,324文字を今回の参照元とした。これは観測された応答の差であり、差の原因や契約改定を断定しない。取得経路と表示された契約主体を記録し、地域別の本文を混ぜない。
 
 追加URLの登録は分析用であり、週次の `vendor-terms.mjs` が監視する主URLを増やすものではない。追加契約の自動改定監視は未実装。再分析時には原文を再取得する。実際の同意版・補足条件・DPA・SLA・移行実証の確認は残る。
+
+## 2026-09-07: API契約とConsumer契約を分ける
+
+[Commercial Terms](https://www.anthropic.com/legal/commercial-terms)の2025-06-17版、全A〜M節をAIが直接取得・読解し、追加の12観点を原文へ結び付けた。Consumerの記録や過去の人の判定は置き換えない。
+
+| 観点 | Commercial | Consumer |
+|---|---|---|
+| 学習利用 | Customer Contentの学習禁止（B） | 設定による除外と例外（§4） |
+| 責任上限 | 原則12か月の支払額、補償義務は除外（L.3） | 原則6か月の支払額と100ドルの大きい方（§11） |
+| 紛争 | 地域別の仲裁と裁判所（J・M.7） | San Franciscoの裁判所（§13） |
+
+表は取得した本文の比較であり、各条件の適用法上の制限や例外を省略している。実際のアカウントへの適用、補足契約、運用設定の確認は別途必要。Consumer側は先述のPBC版を参照した。APIの保証をOAuth経路へ広げない。
+
+## 2026-09-07: Search ConsoleのGoogle規約
+
+[Google利用規約](https://policies.google.com/terms?hl=en&gl=jp)を英語・Japan指定で取得し、2026-07-30版の全文を12観点に結び付けた。同じURLの国表示による差を混ぜず、取得条件を記録した。[サービス別一覧](https://policies.google.com/terms/service-specific)のSearch Console項目はGoogle利用規約を案内している。
+
+この表示は実際のアカウントの契約国やAPI契約の適用を証明しない。アカウントの同意記録、追加契約、データ保護条件は引き続き未確認。過去の人の判定と業務のexecutorは保持する。
+
+## 2026-09-07: GitHubの規約と公開範囲
+
+[GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)の2026-04-27版を全A〜S節まで取得・読解し、12観点を記録した。公開コンテンツの許諾とAI機能の入力・出力に対する設定の範囲を区別した。
+
+同日の認証済みGitHub APIで、`simplememo` はpublic、`simplememo-api` と `simplememo-ios` はprivateで、3リポジトリともarchivedではないことを確認した。公開範囲は変更していない。この確認はAI機能への入力履歴、Copilotの設定、実際に適用される契約種別を証明しない。
