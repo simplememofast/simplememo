@@ -102,6 +102,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -116,6 +117,25 @@ const WORKFLOW = path.join(ROOT, '.github/workflows/seo-check.yml');
  * **1か所だけ直すと、鏡が古い版を映し続ける。**
  */
 const RUN_RE = /^(node|python3)\s+((?:scripts|growth\/(?:scripts|queries))\/[A-Za-z0-9_.-]+\.(?:m?js|py))(.*)$/;
+
+// Keep node's test-runner flag and file grouping intact. Only explicit local
+// test files are accepted here; unknown options/paths still fail the audit.
+const TEST_FILE_RE = /^(?:scripts|growth\/lib)\/[A-Za-z0-9_.-]+\.test\.mjs$/;
+export function parseCommand(line) {
+  const words = line.trim().split(/\s+/);
+  if (words[0] === 'node' && words[1] === '--test') {
+    const files = words.slice(2);
+    return files.length && files.every((file) => TEST_FILE_RE.test(file))
+      ? { runner: 'node', script: '--test', args: files } : null;
+  }
+  if (words[0] === 'node' && words.length === 2 && TEST_FILE_RE.test(words[1])) {
+    return { runner: 'node', script: words[1], args: [] };
+  }
+  const m = line.match(RUN_RE);
+  if (!m) return null;
+  const args = m[3].trim();
+  return { runner: m[1], script: m[2], args: args === '' ? [] : args.split(/\s+/) };
+}
 
 /**
  * ワークフローから `node <script> <args>` の行を拾う。**純関数。**
@@ -157,15 +177,13 @@ export function extractCommands(yamlText) {
     if (/[|&;><]/.test(line)) continue;          // 合成された行は取らない
     if (/\$\{\{|\$[A-Z_]/.test(line)) continue;  // 変数を含む行は手元で意味が変わる
     if (stepHasIf) continue;                     // 条件付きのステップは手元で意味が違う
-    const m = line.match(RUN_RE);
-    if (!m) continue;
-    const args = m[3].trim();
-    out.push({ runner: m[1], script: m[2], args: args === '' ? [] : args.split(/\s+/) });
+    const command = parseCommand(line);
+    if (command) out.push(command);
   }
   // 同じ script+args は1回だけ
   const seen = new Set();
   return out.filter((c) => {
-    const k = `${c.script} ${c.args.join(' ')}`;
+    const k = `${c.runner} ${c.script} ${c.args.join(' ')}`;
     if (seen.has(k)) return false;
     seen.add(k);
     return true;
@@ -196,7 +214,7 @@ export function auditExtraction(yamlText) {
     if (inline) line = inline[1].trim();
     // 実行系に見える行だけを対象にする（散文やYAMLの他のキーは無視）
     if (!/^(node|python3|npx)\s/.test(line)) continue;
-    if (RUN_RE.test(line)
+    if (parseCommand(line)
         && !/[|&;><]/.test(line) && !/\$\{\{|\$[A-Z_]/.test(line) && !stepHasIf) { taken += 1; continue; }
     if (/[|&;><]/.test(line)) { dropped.composed.push(line); continue; }
     if (/\$\{\{|\$[A-Z_]/.test(line)) { dropped.variable.push(line); continue; }
@@ -204,15 +222,13 @@ export function auditExtraction(yamlText) {
     // 「main への push のときだけ」と言っているものを手元で回すと、
     // 検査ではなく副作用（IndexNow への実送信）が起きる。
     if (stepHasIf) { dropped.conditional.push(line); continue; }
-    // npx と growth/lib のテストは、**現状は回していない。**
-    // 回さないこと自体は判断だが、黙って消えていてよい理由は無いので表に出す。
+    // npx remains outside the local script runner.
     //
     // **ここを「node/python で始まる行はすべて対象外」にしない。**そう書くと
     // 見たことのない形（例: `node tools/x.mjs`）まで「既知の除外」に流れ込み、
     // 下の unknown が構造的に到達不能になる —— 「分類できなかった」を
     // 「分類済み」と報告する形で、この工程が潰しているものそのもの。
-    if (/^npx\s/.test(line) || /\.test\.mjs\b/.test(line)
-        || /^(?:node|python3)\s+growth\/lib\//.test(line)) { dropped.out_of_scope.push(line); continue; }
+    if (/^npx\s/.test(line)) { dropped.out_of_scope.push(line); continue; }
     dropped.unknown.push(line);
   }
   return { taken, dropped };
@@ -299,10 +315,62 @@ function selftest() {
     const got = extractCommands(yaml('        run: node scripts/a.mjs'));
     assertEq(got[0].runner, 'node');
   });
-  t('scripts/ の外は対象外として表に出す（黙って消さない）', () => {
-    const d = auditExtraction(yaml('        run: node growth/lib/x.test.mjs')).dropped;
-    assertEq(d.out_of_scope.join(), 'node growth/lib/x.test.mjs');
-    assertEq(d.unknown.length, 0);
+  t('growth/lib の直接実行テストを拾う', () => {
+    const text = yaml('        run: node growth/lib/x.test.mjs');
+    assertEq(names(text).join(), 'growth/lib/x.test.mjs');
+    assertEq(auditExtraction(text).taken, 1);
+  });
+  t('node --test の複数ファイルを同じコマンドとして実行する', () => {
+    const text = yaml('        run: node --test scripts/a.test.mjs growth/lib/b.test.mjs');
+    const got = extractCommands(text);
+    assertEq(JSON.stringify(got), JSON.stringify([
+      { runner: 'node', script: '--test', args: ['scripts/a.test.mjs', 'growth/lib/b.test.mjs'] },
+    ]));
+    assertEq(auditExtraction(text).taken, 1);
+  });
+  t('node --test の未知の引数・パスを対象外扱いで隠さない', () => {
+    for (const command of [
+      'node --test', 'node --test tools/a.test.mjs',
+      'node --test scripts/a.test.mjs --watch',
+      'node --test scripts/a.test.mjs growth/lib/../send.mjs',
+      'node growth/lib/production.mjs',
+    ]) {
+      const text = yaml(`        run: ${command}`);
+      assertEq(extractCommands(text).length, 0);
+      assertEq(auditExtraction(text).dropped.unknown.length, 1);
+    }
+  });
+  t('テスト形式でも条件付き・合成・変数を実行しない', () => {
+    for (const [text, reason] of [
+      [yaml('      - name: x', '        if: inputs.run', '        run: node --test scripts/a.test.mjs'), 'conditional'],
+      ['run: node --test scripts/a.test.mjs || true', 'composed'],
+      ['run: node --test scripts/a.test.mjs $TEST_FILES', 'variable'],
+    ]) {
+      assertEq(extractCommands(text).length, 0);
+      assertEq(auditExtraction(text).dropped[reason].length, 1);
+    }
+  });
+  t('実CLI: 後ろのテストファイルの失敗でも一括検証を失敗させる', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'preflight-node-test-'));
+    try {
+      fs.mkdirSync(path.join(dir, 'scripts'));
+      fs.mkdirSync(path.join(dir, '.github/workflows'), { recursive: true });
+      fs.copyFileSync(fileURLToPath(import.meta.url), path.join(dir, 'scripts/preflight.mjs'));
+      fs.writeFileSync(path.join(dir, '.github/workflows/seo-check.yml'),
+        'run: node --test scripts/first.test.mjs scripts/second.test.mjs\n');
+      const first = path.join(dir, 'scripts/first.test.mjs');
+      const second = path.join(dir, 'scripts/second.test.mjs');
+      fs.writeFileSync(first, 'import { test } from "node:test"; test("first", () => {});\n');
+      fs.writeFileSync(second, 'import { test } from "node:test"; test("second", () => { throw new Error("fixture failure"); });\n');
+      const run = () => spawnSync(process.execPath, ['scripts/preflight.mjs'], { cwd: dir, encoding: 'utf8' });
+      const failed = run();
+      assertEq(failed.status, 1);
+      if (!failed.stdout.includes('1 本中 1 本失敗')) throw new Error(failed.stdout + failed.stderr);
+      fs.writeFileSync(second, 'import { test } from "node:test"; test("second", () => {});\n');
+      const passed = run();
+      assertEq(passed.status, 0);
+      if (!passed.stdout.includes('1 本中 0 本失敗')) throw new Error(passed.stdout + passed.stderr);
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
   });
   t('npx は対象外', () => {
     const d = auditExtraction(yaml('        run: npx playwright test')).dropped;
