@@ -1138,8 +1138,8 @@
       "name": "L1適格性ゲートの判定",
       "formula": "開いている候補（data/autopilot-actions.json の state != done）を5基準（可逆性・変更境界・証拠の鮮度・予算・重複）で判定した結果の内訳。eligible / ineligible_recorded / escalate_l4。enforcement=record_plus_r2_block では R2 だけが実行を止める",
       "source_file": "scripts/autonomy-eligibility.mjs",
-      "version": 6,
-      "checksum": "19e84b81918b412b",
+      "version": 7,
+      "checksum": "15943d1f50b71d3c",
       "changed_at": "2026-09-07",
       "why_it_matters": "**L1 で落ちた候補は L0 の失敗ログとは別のテーブル（data/eligibility-log.json）に書く。**これだけで「22件の死は選択ミスか実行ミスか」が機械的に答えられる問いに変わる。判定が全候補で同値になった基準は --check が名指しで落とす —— 判定しているように見えて分岐が死んでいる形を、このリポジトリは 2026-08-26 に5回踏んでいる",
       "history": [
@@ -1167,6 +1167,11 @@
           "version": 6,
           "at": "2026-09-07",
           "why": "定義は変えていない。明示費用でもレーン由来の種別を保持し、既存の種別上限で判定する不具合修正。"
+        },
+        {
+          "version": 7,
+          "at": "2026-09-07",
+          "why": "予算ゲートの欠損処理を修正。欠落・非数・負値の上限と、不正な予測をpassではなくunknownにする。設定済みの上限・配点・分母・執行権限は変更しない。"
         }
       ]
     }
