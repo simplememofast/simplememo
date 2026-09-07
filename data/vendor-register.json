@@ -291,7 +291,8 @@
       "terms_accepted_by": "human",
       "evidence": [
         "../simplememo-api/src/appcheck.ts",
-        "../simplememo-api/src/oauth.ts"
+        "../simplememo-api/src/oauth.ts",
+        "docs/firebase-recovery-scope-2026-09-07.md"
       ],
       "money_flow": "usage",
       "payment_method": "card",
@@ -300,7 +301,7 @@
       "approved_by": "human",
       "approved_at": "2026-08-22",
       "$fallback_was": "App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）",
-      "fallback_note": "**代替ではなく回避策。**App Check は緊急停止スイッチで外せる（VERIFY_OAUTH_DISABLED 等）が、外している間は検証が効かない。落ちたときの選択肢であって、機能の代替ではない",
+      "fallback_note": "同等の代替は未検証。VERIFY_OAUTH_DISABLED=true は OAuth 受付を503 oauth_disabledで停止し、認証検証を回避しない。App Check は別の APP_CHECK_ENFORCE で監視・拒否を制御する。監視モードでもトークン検証は実行され得るため、Firebase通信全体の停止ではない。2026-09-07、API main d712aed8 の両ハンドラを照合して従来の説明を訂正。",
       "account_evidence_note": "2026-09-07 source inspection at iOS ddcb604685153d661f92040f55ad8d23e64d37c7: GoogleSignInService uses Firebase Auth credentials and returns authResult.user.email; AppleSignInService passes appleIDCredential.fullName into the Firebase credential and reads Firebase user.email. This establishes personal-data handling in code, not observed user payloads or account contract applicability. See docs/firebase-service-scope-2026-09-07.md."
     },
     {
