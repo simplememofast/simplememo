@@ -10,7 +10,7 @@
  *        --run-id 123 --job-id 456 --cost 0.81 --turns 30 --outcome shipped
  *   node scripts/autopilot-budget.mjs --check-run-cap --task article   # 1回上限
  *   node scripts/autopilot-budget.mjs --runtime-budget --task article # SDKへ渡す支出閾値
- *   node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why "…" # 人間のみ
+ *   node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why "…" # 既定はowner、委任範囲は --by ai
  *
  * 【1回あたりの上限（--check-run-cap）】
  * data/model-routing.json の rules.<kind>.max_usd_per_run は長らく**宣言だけ**で、
@@ -24,11 +24,10 @@
  * --check-run-cap は、その種別の直近runが上限を超えたまま**未レビュー**なら
  * 非ゼロを返し、ワークフローが主系の次回をスキップする。
  *
- * 【解除は人間のみ】
- * --ack-overrun は data/authority-matrix.json の「AI実費」が人間に残している
- * `monthly_usd_cap の決定` と同じ側にある。**AIが自分の超過を自分で承認できると、
- * 上限が「お願い」になる。**止まっている間も副系CCRは別経路なので出荷は続く
- * （二重化がここで効く）ため、承認を待つ間に運用が止まることはない。
+ * 【2026-09-07 所有者による費用判断の委任】
+ * --ack-overrun --by ai は、開始前に記録した cost_expectation の5倍以内だけ許す。
+ * 5倍超の見込みは --check-cost-forecast で追加支出前に止める。月次枠は維持する。
+ * 初期想定が残っていない過去runのレビューをAIへ読み替えない。
  *
  * 【なぜ表示ではなく exit code なのか】
  * 「予算を可視化した」と「予算に応じて止まる」は別物で、外に言えるのは後者だけ。
@@ -73,6 +72,33 @@ export function jstMonth(d = new Date()) {
 
 export function loadLedger(file = LEDGER_PATH) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+/** Compare the latest total forecast with the original, positive estimate. */
+export function costForecast(expected, projected) {
+  assert(Number.isFinite(expected) && expected > 0, '開始前の想定費用が不明（0扱いしない）');
+  assert(Number.isFinite(projected) && projected >= 0, '総費用の見込みが不明（0扱いしない）');
+  const authority = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/authority-matrix.json'), 'utf8'));
+  const policy = authority.domains.find(d => d.domain === 'AI実費（開発・運用のトークン費）')?.cost_delegation;
+  assert(policy?.approved_by === 'owner' && policy?.escalate_above_multiple === 5 && policy?.evidence,
+    '費用判断の委任を確認できない');
+  const limit = expected * policy.escalate_above_multiple;
+  assert(Number.isFinite(limit), '費用想定が大きすぎる');
+  return { expected_usd: expected, projected_usd: projected, escalate: projected > limit, threshold_usd: limit };
+}
+
+export function delegatedCostReview(run, projected) {
+  const baseline = run.cost_expectation;
+  assert(baseline && baseline.run_id === run.run_id && typeof run.run_id === 'string', 'このrunの開始前想定が無い');
+  assert(typeof baseline.evidence === 'string' && baseline.evidence.trim().length >= 12, '想定額の根拠が無い');
+  const recorded = Date.parse(baseline.recorded_at), started = Date.parse(baseline.started_at);
+  assert(Number.isFinite(recorded) && Number.isFinite(started) && recorded <= started
+    && todayJst(new Date(started)) === run.date_jst, '想定は当該runの開始前に保存する');
+  assert(Number.isFinite(run.total_cost_usd) && run.total_cost_usd >= 0, '実費が不明');
+  const forecast = costForecast(baseline.expected_usd, projected);
+  assert(projected >= run.total_cost_usd, '見込みが既知の実費を下回っている');
+  assert(!forecast.escalate, '想定の5倍超：追加支出前にオーナーへエスカレーション');
+  return forecast;
 }
 
 export function runtimeBudget(ledger, routing, kind, month = jstMonth()) {
@@ -185,7 +211,10 @@ export function validate(ledger) {
           if (!cr.why || String(cr.why).trim().length < 10) {
             problems.push(`runs[${i}].cap_review.why が無い（または短すぎる） — 超過を通した理由が残らない`);
           }
-          if (cr.by !== 'owner') problems.push(`runs[${i}].cap_review.by must be "owner"（1回上限の解除は人間のみ）`);
+          if (!['owner', 'ai'].includes(cr.by)) problems.push(`runs[${i}].cap_review.by must be owner or ai`);
+          if (cr.by === 'ai') {
+            try { delegatedCostReview(r, cr.projected_usd); } catch (e) { problems.push(`runs[${i}]: ${e.message}`); }
+          }
         }
       }
     });
@@ -287,7 +316,10 @@ export function overruns(ledger, routing, { month = null } = {}) {
     const cap = rules[r.task_kind]?.max_usd_per_run;
     if (typeof cap !== 'number' || !(cap > 0)) continue;
     if (!(r.total_cost_usd > cap)) continue;
+    let aiReviewEligible = false;
+    try { delegatedCostReview(r, r.total_cost_usd); aiReviewEligible = true; } catch { /* Evidence absent or beyond delegation. */ }
     out.push({
+      ai_review_eligible: aiReviewEligible,
       run_id: r.run_id ?? null, date_jst: r.date_jst, task_kind: r.task_kind,
       cost: r.total_cost_usd, cap, times: Number((r.total_cost_usd / cap).toFixed(1)),
       reviewed: Boolean(r.cap_review),
@@ -469,7 +501,7 @@ export function render(s, ledger) {
       }
       if (unreviewed.length) {
         out.push('    解除: node scripts/autopilot-budget.mjs --ack-overrun <run_id> --why "…"');
-        out.push('    **人間のみ。**AIが自分の超過を自分で通せると、上限が「お願い」になる。');
+        out.push('    AIは --by ai --projected-usd <総費用見込み> を指定。開始前想定の5倍超または根拠なしなら解除しない。');
         out.push('    止まるのは主系だけで、副系CCRは別経路のため出荷は続く。');
       }
     }
@@ -538,6 +570,34 @@ const SCENARIOS = ledgerScenarios(
 // 足りずに別の理由で落ちる（一度やった）。summarize の結果の run_caps だけ差し替える。
 const budgetDoc = () => JSON.parse(fs.readFileSync(LEDGER_PATH, 'utf8'));
 SCENARIOS.push(
+  ['費用委任は5倍超・不明・事後想定・実費より小さい見込みを拒む', () => {
+    assert(costForecast(10, 50).escalate === false, '5倍ちょうどを超過扱い');
+    assert(costForecast(10, 50.0001).escalate === true, '5倍超を許可');
+    const fail = fn => { let caught = false; try { fn(); } catch { caught = true; } assert(caught, '不正な費用判断を許可'); };
+    for (const n of [undefined, null, NaN, Infinity, -1, 0]) fail(() => costForecast(n, 10));
+    for (const n of [undefined, null, NaN, Infinity, -1]) fail(() => costForecast(10, n));
+    const row = { run_id:'test',date_jst:'2026-09-07',total_cost_usd:20,
+      cost_expectation:{run_id:'test',expected_usd:10,evidence:'fixture: 開始前の費用想定',recorded_at:'2026-09-07T00:00:00Z',started_at:'2026-09-07T00:01:00Z'} };
+    delegatedCostReview(row, 50);
+    const ledger = budgetDoc(); ledger.runs = [{...row,route:'actions',task_kind:'article',cap_review:{by:'ai',at:'2026-09-07',why:'開始前想定と実費を照合した委任判定',projected_usd:50}}];
+    assert(validate(ledger).length === 0, '有効なAIレビューを拒否');
+    ledger.runs[0].cap_review.projected_usd = 51;
+    assert(validate(ledger).length > 0, '台帳に直接書いた5倍超レビューを許可');
+    const original = JSON.stringify(ledger.runs[0].cost_expectation);
+    appendRun(ledger, {...ledger.runs[0],cost_expectation:{...row.cost_expectation,expected_usd:999}}, {enrichMissing:true});
+    assert(JSON.stringify(ledger.runs[0].cost_expectation) === original, '再取り込みで当初想定が変わった');
+    for (const [projection, code] of [['50',0],['50.01',1],['NaN',1]]) {
+      const result = spawnSync(process.execPath,[fileURLToPath(import.meta.url),'--check-cost-forecast','--expected-usd','10','--projected-usd',projection],{encoding:'utf8'});
+      assert(result.status === code, '実際のCLIが費用見込みの判定を反映しない');
+    }
+
+    fail(() => delegatedCostReview(row, 51));
+    fail(() => delegatedCostReview(row, 19));
+    fail(() => delegatedCostReview({...row,cost_expectation:null}, 20));
+    for (const patch of [{run_id:'other'},{recorded_at:'2026-09-07T00:02:00Z'},{evidence:''}]) {
+      fail(() => delegatedCostReview({...row,cost_expectation:{...row.cost_expectation,...patch}},20));
+    }
+  }],
   ['SDK閾値は種別の残枠も守り、他種別・前月・warn_onlyを混同しない', () => {
     const ledger = budgetDoc(), routing = loadRouting();
     routing.rules.article.max_usd_per_run = 20;
@@ -752,6 +812,14 @@ if (isMain) {
     process.exit(1);
   }
 
+  if (flag('check-cost-forecast')) {
+    try {
+      const result = costForecast(Number(val('expected-usd')), Number(val('projected-usd')));
+      console.log(JSON.stringify(result));
+      process.exit(result.escalate ? 1 : 0);
+    } catch (e) { console.error(e.message); process.exit(1); }
+  }
+
   if (flag('runtime-budget')) {
     try {
       const threshold = runtimeBudget(ledger, loadRouting(), val('task'), val('month', jstMonth()));
@@ -776,6 +844,7 @@ if (isMain) {
       task_kind_unavailable: val('task-kind-unavailable') ? JSON.parse(val('task-kind-unavailable')) : undefined,
       outcome: val('outcome') || undefined,
       note: val('note') || undefined,
+      cost_expectation: val('expectation-file') ? JSON.parse(fs.readFileSync(val('expectation-file'), 'utf8')) : undefined,
     };
     for (const k of Object.keys(run)) if (run[k] === undefined) delete run[k];
     if (!Number.isFinite(run.total_cost_usd)) {
@@ -794,7 +863,7 @@ if (isMain) {
     process.exit(0);
   }
 
-  // 1回上限の解除。**人間のみ。**ワークフローからは呼ばない（呼ぶと自己承認になる）。
+  // 所有者、または明示委任された費用境界内のAIによるレビュー。
   if (val('ack-overrun') !== undefined) {
     const id = val('ack-overrun');
     const why = val('why');
@@ -804,7 +873,13 @@ if (isMain) {
     }
     const run = ledger.runs.find((r) => r.run_id === id);
     if (!run) { console.error(`run_id ${id} が台帳に無い`); process.exit(1); }
-    run.cap_review = { at: val('at', todayJst()), by: 'owner', why };
+    const by = val('by', 'owner');
+    if (!['owner', 'ai'].includes(by)) { console.error('--by must be owner or ai'); process.exit(1); }
+    const projected = Number(val('projected-usd'));
+    if (by === 'ai') {
+      try { delegatedCostReview(run, projected); } catch (e) { console.error(e.message); process.exit(1); }
+    }
+    run.cap_review = { at: val('at', todayJst()), by, why, ...(by === 'ai' ? { projected_usd: projected } : {}) };
     fs.writeFileSync(LEDGER_PATH, JSON.stringify(ledger, null, 2) + '\n');
     console.log(`ack ${id}: ${why}`);
     process.exit(0);
@@ -826,7 +901,7 @@ if (isMain) {
     for (const o of hits) {
       console.log(`::error file=data/autopilot-cost.json::${o.date_jst} の ${o.task_kind} が`
         + ` 1回上限 ${fmt(o.cap)} に対し ${fmt(o.cost)}（${o.times}倍）。未レビューのため主系を止める。`
-        + ` 解除: node scripts/autopilot-budget.mjs --ack-overrun ${o.run_id} --why "…"（人間のみ）`);
+        + ` 解除: node scripts/autopilot-budget.mjs --ack-overrun ${o.run_id} --why "…"（AIは開始前想定と総費用見込みの検査が必要）`);
     }
     process.exit(1);
   }

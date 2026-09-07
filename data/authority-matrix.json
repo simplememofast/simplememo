@@ -215,7 +215,8 @@
       "domain": "AI実費（開発・運用のトークン費）",
       "reversible": true,
       "ai_may": [
-        "上限内での消費"
+        "上限内での消費",
+        "開始時に保存した費用想定の5倍以内での費用判断と超過レビュー（既存の月次枠内）。5倍を超える見込みなら追加支出前にオーナーへ上げる"
       ],
       "requires_approval": false,
       "human_only": [
@@ -232,6 +233,15 @@
         "set_by": "owner",
         "approval_ref": "data/spend-approvals.json#seq=2",
         "note": "2026-09-03の既存承認（seq=2、月$280）へ写しを同期した。実費台帳・財務方針の実行上限は既に$280であり、今回の増額ではない。1回上限と未レビュー超過の停止は維持する。**副系CCRの実費は観測手段が無く、この上限では止められない**"
+      },
+      "cost_delegation": {
+        "approved_by": "owner",
+        "approved_at": "2026-09-07",
+        "evidence": "1 ai ok 2 ai ok 3 ai ok 4 ai ok 5 ai ok\n想定の5倍超えそうな時はエスカレほしいな、でも基本ai ok",
+        "escalate_above_multiple": 5,
+        "baseline": "作業開始前に保存した想定費用と根拠。途中の上書き禁止。未観測の費用を0としない。",
+        "scope": "AI開発・運用費の判断。既存の月次総額・種別枠は変更しない。",
+        "check": "node scripts/autopilot-budget.mjs --check-cost-forecast --expected-usd <開始前想定> --projected-usd <最新の総費用見込み>"
       }
     },
     {

@@ -41,6 +41,10 @@ gateの旧引継ぎメッセージにある`GITHUB_RUN_ID`は、この実タス�
    0ドルや推計を追記しない。既存のClaude SDKのドル停止閾値がCodexでも働くとは報告しない。
    実行は1アクションに限定し、開始後90分までに実装を区切って実状態を記録する。
    これは作業手順上の区切りであり、Codexの強制終了タイマーを保証しない。
+   費用判断は `docs/cost-delegation.md` に従い、開始前の費用想定を実タスクID付きで保存する。
+   有料の追加実行・再試行・方針変更の前には最新の総費用見込みを
+   `autopilot-budget.mjs --check-cost-forecast` に渡す。5倍超なら追加支出前に所有者へ上げる。
+   Codexの実費が読めなければ金額を捏造せず、観測不能として既存の作業時間・月次枠を守る。
 4. GitHub接続で当日共有ブランチ、同headのPR（state=all）、latest mainのstatus、
    本番`https://simplememofast.com/data/autopilot-status.json`を読む。
    別の実行中/queuedの旧Actions runとCodexタスクも確認する。
