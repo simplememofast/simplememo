@@ -195,6 +195,12 @@ jobs:
           node scripts/check-domain-expiry.mjs --write 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
+      # Recorded contract dates are not proof of live service state. Remind the
+      # operator 90 days before the recorded end; do not buy, renew, or stop a plan.
+      - name: Recorded vendor plan dates
+        continue-on-error: true
+        run: node scripts/check-vendors.mjs --plan-dates 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+
       # **答えを job ログにも出す（`tee`）。**隣の domain-expiry は最初から tee があり、
       # こちらだけ無かった。2026-09-05、その非対称が実害になった —— 公開版が 5.8.4 から
       # 5.8.17 へ動いていたのに台帳が3日古いままで、**本番サイトが21面で 5.8.4 を名乗っていた。**

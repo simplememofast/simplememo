@@ -27,6 +27,40 @@ export const DATA_LEVELS = ['none', 'pseudonymous', 'personal'];
 /** 金銭の動き方。none も明示させる（書いていない＝考えていない、を許さない）。 */
 export const MONEY_FLOWS = ['none', 'subscription', 'usage', 'one_off'];
 
+function dayNumber(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const timestamp = Date.parse(`${value}T00:00:00Z`);
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString().slice(0, 10) !== value) return null;
+  return timestamp / 86400000;
+}
+
+/** Recorded plan dates are observations, not proof of renewal or service shutdown. */
+export function planDates(doc, { today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tokyo' }).format(new Date()) } = {}) {
+  const now = dayNumber(today);
+  if (now === null) throw new Error('plan dates: today must be an ISO calendar date');
+  const rows = [], errors = [], unobserved = [];
+  for (const vendor of doc.vendors) {
+    const term = vendor.plan_dates;
+    if (term === undefined) { unobserved.push(vendor.id); continue; }
+    if (!term || typeof term !== 'object' || Array.isArray(term)) {
+      errors.push(`${vendor.id}: plan_dates must be an observation object`); continue;
+    }
+    const start = dayNumber(term.starts_on), end = dayNumber(term.ends_on), observed = dayNumber(term.observed_on);
+    let validSource = false;
+    try { validSource = new URL(term.source).protocol === 'https:'; } catch { /* Missing source is invalid. */ }
+    if (start === null || end === null || observed === null || start > end || observed > now
+        || typeof term.plan !== 'string' || !term.plan.trim() || !validSource
+        || term.renewal_after_term !== 'unverified') {
+      errors.push(`${vendor.id}: invalid plan dates, observation source, or unsupported renewal claim`); continue;
+    }
+    const days = end - now;
+    rows.push({ vendor: vendor.id, plan: term.plan, observed_on: term.observed_on, ends_on: term.ends_on,
+      days_until_recorded_end: days, status: days < 0 ? 'recorded_term_elapsed' : days <= 90 ? 'review_due' : 'recorded',
+      renewal_after_term: 'unverified' });
+  }
+  return { as_of: today, review_days: 90, rows, unobserved, errors };
+}
+
 export function audit(doc) {
   const errors = [];
   const unreviewed = [];
@@ -69,6 +103,7 @@ export function audit(doc) {
       }
     }
   }
+  errors.push(...planDates(doc).errors);
   return { errors, unreviewed, noFallback, money: doc.vendors.filter((v) => v.money_flow && v.money_flow !== 'none') };
 }
 
@@ -107,12 +142,58 @@ const SCENARIOS = ledgerScenarios(
 // 壊れた台帳を既定値に落とすと、突き合わせが消えて「食い違いなし」と同じ見た目になる。
 SCENARIOS.push(...readLedgerScenarios(fs, os));
 
+const planFixture = () => ({ vendors: [{ id: 'test', plan_dates: {
+  plan: 'Welcome', starts_on: '2026-04-24', ends_on: '2027-04-23', observed_on: '2026-09-07',
+  source: 'https://example.com/account/plan', renewal_after_term: 'unverified',
+} }] });
+SCENARIOS.push(
+  ['期限の91日前は記録、90日前から再確認を要求する', () => {
+    assert(planDates(planFixture(), { today: '2027-01-22' }).rows[0].status === 'recorded', 'early warning');
+    assert(planDates(planFixture(), { today: '2027-01-23' }).rows[0].status === 'review_due', '90-day warning missing');
+  }],
+  ['期限当日と翌日を区別し、停止・更新済みとは断定しない', () => {
+    const end = planDates(planFixture(), { today: '2027-04-23' }).rows[0];
+    const after = planDates(planFixture(), { today: '2027-04-24' }).rows[0];
+    assert(end.status === 'review_due' && end.days_until_recorded_end === 0, 'end date lost');
+    assert(after.status === 'recorded_term_elapsed' && after.renewal_after_term === 'unverified', 'fabricated service state');
+  }],
+  ['未観測と不正な観測を区別する', () => {
+    const d = planFixture(); delete d.vendors[0].plan_dates;
+    assert(planDates(d).unobserved[0] === 'test', 'absence treated as a known term');
+    d.vendors[0].plan_dates = null;
+    assert(planDates(d).errors.length === 1, 'null observation silently discarded');
+  }],
+  ...[
+    ['invalid date', t => { t.ends_on = '2027-02-30'; }],
+    ['reversed dates', t => { t.starts_on = '2028-01-01'; }],
+    ['future observation', t => { t.observed_on = '2028-01-01'; }],
+    ['missing source', t => { delete t.source; }],
+    ['renewal assertion', t => { t.renewal_after_term = 'confirmed'; }],
+  ].map(([name, mutate]) => [`plan dates reject ${name}`, () => {
+    const d = planFixture(); mutate(d.vendors[0].plan_dates);
+    assert(planDates(d, { today: '2026-09-07' }).errors.length > 0, 'invalid observation passed');
+  }]),
+);
+
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = readJSON(ROOT, 'data/vendor-register.json');
   const { errors, unreviewed, noFallback, money } = audit(doc);
+  const plans = planDates(doc);
+
+  if (argv.includes('--plan-dates')) {
+    console.log(`記録されたベンダープランの期限（${plans.as_of}、${plans.review_days}日前から再確認）`);
+    for (const row of plans.rows) {
+      const message = `${row.vendor}: ${row.plan} / 記録上の終了日 ${row.ends_on} / 残り ${row.days_until_recorded_end}日 / ${row.status} / 観測 ${row.observed_on}`;
+      console.log(message);
+      if (row.status !== 'recorded') console.log(`::warning title=Vendor plan review::${message.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')}。現在のプラン・継続条件を再確認してください。自動更新やサービス停止は未確認。`);
+    }
+    console.log(`期限未観測: ${plans.unobserved.length}社（${plans.unobserved.join(', ')}）。無期限契約を意味しない。`);
+    errors.forEach(e => console.error(e));
+    process.exit(errors.length ? 1 : 0);
+  }
 
   if (argv.includes('--json')) {
     console.log(JSON.stringify({
@@ -120,6 +201,7 @@ if (isMain) {
       unreviewed: unreviewed.map((v) => v.id),
       no_fallback: noFallback.map((v) => v.id),
       errors,
+      plan_dates: plans,
     }, null, 2));
     process.exit(errors.length ? 1 : 0);
   }
