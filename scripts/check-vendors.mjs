@@ -65,6 +65,25 @@ export function audit(doc) {
   const errors = [];
   const unreviewed = [];
   const noFallback = [];
+  // Dependencies found in deployed/source paths must be visible before their
+  // contract or payment facts are known. This queue grants no approval.
+  const discoveries = doc.discovered_dependencies ?? [];
+  const discoveryIds = new Set(doc.vendors.map(v => v.id));
+  if (!Array.isArray(discoveries)) errors.push('discovered_dependencies must be an array');
+  else for (const v of discoveries) {
+    if (!v || typeof v.id !== 'string' || !v.id.trim() || discoveryIds.has(v.id)) {
+      errors.push('discovered dependency has missing or duplicate id'); continue;
+    }
+    discoveryIds.add(v.id);
+    if (!DATA_LEVELS.includes(v.personal_data) || v.status !== 'pending_review'
+        || v.payment_authorized !== false || v.contract_approved !== false
+        || !Array.isArray(v.evidence) || !v.evidence.length
+        || v.evidence.some(x => typeof x !== 'string' || !x.trim())
+        || !Array.isArray(v.open_questions) || !v.open_questions.length
+        || v.open_questions.some(x => typeof x !== 'string' || !x.trim())) {
+      errors.push(`${v.id}: discovery needs evidence, questions and explicit non-approval`);
+    }
+  }
 
   for (const v of doc.vendors) {
     if (!DATA_LEVELS.includes(v.personal_data)) {
@@ -104,7 +123,8 @@ export function audit(doc) {
     }
   }
   errors.push(...planDates(doc).errors);
-  return { errors, unreviewed, noFallback, money: doc.vendors.filter((v) => v.money_flow && v.money_flow !== 'none') };
+  return { errors, unreviewed, noFallback, discoveries: Array.isArray(discoveries) ? discoveries : [],
+    money: doc.vendors.filter((v) => v.money_flow && v.money_flow !== 'none') };
 }
 
 /**
@@ -141,6 +161,24 @@ const SCENARIOS = ledgerScenarios(
 // **台帳の読み方そのもの**も、この検査から走らせる。
 // 壊れた台帳を既定値に落とすと、突き合わせが消えて「食い違いなし」と同じ見た目になる。
 SCENARIOS.push(...readLedgerScenarios(fs, os));
+
+SCENARIOS.push(['未審査依存先は支払許可リストへ入らず、不正な承認・重複を拒否する', () => {
+  const doc = readJSON(ROOT, 'data/vendor-register.json');
+  doc.discovered_dependencies = [{ id: 'unverified_test', personal_data: 'personal',
+    status: 'pending_review', payment_authorized: false, contract_approved: false,
+    evidence: ['source.ts'], open_questions: ['Contract applicability'] }];
+  const report = audit(doc);
+  assert(report.errors.length === 0, 'valid discovery rejected');
+  assert(report.discoveries.length === 1, 'valid discovery missing from inventory');
+  assert(!report.money.some(v => v.id === 'unverified_test'), 'discovery authorized payment');
+  for (const mutate of [
+    v => { v.payment_authorized = true; }, v => { v.contract_approved = true; },
+    v => { v.id = doc.vendors[0].id; }, v => { v.evidence = []; },
+  ]) {
+    const copy = structuredClone(doc); mutate(copy.discovered_dependencies[0]);
+    assert(audit(copy).errors.length > 0, 'invalid discovery accepted');
+  }
+}]);
 
 const planFixture = () => ({ vendors: [{ id: 'test', plan_dates: {
   plan: 'Welcome', starts_on: '2026-04-24', ends_on: '2027-04-23', observed_on: '2026-09-07',
@@ -180,7 +218,7 @@ if (isMain) {
   if (process.argv.includes('--selftest')) process.exit(run(SCENARIOS) === 0 ? 0 : 1);
   const argv = process.argv.slice(2);
   const doc = readJSON(ROOT, 'data/vendor-register.json');
-  const { errors, unreviewed, noFallback, money } = audit(doc);
+  const { errors, unreviewed, noFallback, money, discoveries } = audit(doc);
   const plans = planDates(doc);
 
   if (argv.includes('--plan-dates')) {
@@ -198,6 +236,8 @@ if (isMain) {
   if (argv.includes('--json')) {
     console.log(JSON.stringify({
       total: doc.vendors.length,
+      discovered_dependencies: discoveries,
+      inventory_total: doc.vendors.length + discoveries.length,
       unreviewed: unreviewed.map((v) => v.id),
       no_fallback: noFallback.map((v) => v.id),
       errors,
@@ -207,6 +247,11 @@ if (isMain) {
   }
 
   console.log(`依存ベンダー ${doc.vendors.length}社（data/vendor-register.json）\n`);
+  if (discoveries.length) {
+    console.log(`  追加で検出した未審査依存先 ${discoveries.length}社（契約・支払許可なし）:`);
+    for (const v of discoveries) console.log(`    ${v.id}: ${v.personal_data} / ${v.open_questions?.join(' / ')}`);
+    console.log('    既存登録分だけで審査の網羅性を判断しない。\n');
+  }
 
   const byData = { personal: [], pseudonymous: [], none: [] };
   for (const v of doc.vendors) (byData[v.personal_data] ??= []).push(v);
@@ -278,7 +323,7 @@ if (isMain) {
   errors.forEach((e) => console.log(`  NG: ${e}`));
 
   if (argv.includes('--check')) {
-    const blocked = doc.policy.enforce_unreviewed ? unreviewed.length : 0;
+    const blocked = doc.policy.enforce_unreviewed ? unreviewed.length + discoveries.length : 0;
     if (errors.length || blocked) {
       console.error(`ベンダー台帳の検査に失敗: 形の問題 ${errors.length}件 / 未レビュー ${blocked}社`);
       process.exit(1);
