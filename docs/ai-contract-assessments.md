@@ -57,3 +57,9 @@ AnthropicのConsumer Termsを追加URLとして登録し、AIによる12観点�
 [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)の2026-04-27版を全A〜S節まで取得・読解し、12観点を記録した。公開コンテンツの許諾とAI機能の入力・出力に対する設定の範囲を区別した。
 
 同日の認証済みGitHub APIで、`simplememo` はpublic、`simplememo-api` と `simplememo-ios` はprivateで、3リポジトリともarchivedではないことを確認した。公開範囲は変更していない。この確認はAI機能への入力履歴、Copilotの設定、実際に適用される契約種別を証明しない。
+
+## 2026-09-07: AppsFlyer利用規約の独立分析
+
+[利用規約](https://www.appsflyer.com/legal/terms-of-use/)の表示更新日2025-11-23の本文を、番号付きの全節と無料・Creativeサービスの追加条件まで読解し、12観点を原文の位置と指紋へ結び付けた。監視URL復旧の段階で未完了だった公開本文の分析記録を追加した。
+
+別URLのMSAの条件を混ぜていない。実際に適用される規約、Order Form、プラン、DPA、SDKが送るデータと同意取得、SLA、復旧実証は別途必要である。人の過去判定を上書きせず、契約承認と業務executorは変更しない。
