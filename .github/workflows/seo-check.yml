@@ -2,12 +2,15 @@ name: SEO Validation
 
 on:
   push:
-    branches: [main, 'claude/**', 'Codex/**']
+    branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
-# New revisions supersede validation of older revisions on the same branch/PR.
-# Keep push and pull_request separate: autonomous content requires PR validation.
+# Validate feature changes through the PR merge tree, once per PR revision.
+# Draft-to-ready transitions revalidate so auto-merge can resume after a draft check.
+# Branch-only pushes run no CI; local preflight is available before opening a PR.
+# New PR revisions supersede older PR validation.
 # Every main run has a unique group so deployment observations and IndexNow's
 # first-parent notifications still run for every merged commit.
 concurrency:

@@ -30,8 +30,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    # SEO Validation は push(claude/**) と pull_request の両方で走るため、
-    # 同一ブランチに対して workflow_run が2回発火しうる。直列化して二重マージを防ぐ。
+    # 再実行やReadyへの遷移で同じブランチの検証完了が重なるため、直列化する。
     concurrency:
       group: auto-merge-${{ github.event.workflow_run.head_branch }}
       cancel-in-progress: false
@@ -52,15 +51,14 @@ jobs:
               return;
             }
 
-            // A picker pushes its declaration before it has an implementation
-            // or a PR number. Only the PR check verifies the final run binding.
-            if (branch.startsWith('claude/obsidian-auto-') && run.event !== 'pull_request') {
-              core.info('自律施策は契約・実行記録・PRを照合した pull_request 検証の成功を待つ');
+            // Require the PR merge-tree check for every branch. Old branch
+            // workflows may still emit push results during this migration.
+            if (run.event !== 'pull_request') {
+              core.info('PRのマージ内容を照合した pull_request 検証の成功を待つ');
               return;
             }
 
-            // run.pull_requests は push 起因の run で空になることがあるため、
-            // head ブランチから開いているPRを引き直す。
+            // 検証時点の関連付けを信用せず、現在開いているPRをheadから引き直す。
             const { data: prs } = await github.rest.pulls.list({
               owner, repo, state: 'open', head: `${owner}:${branch}`,
             });

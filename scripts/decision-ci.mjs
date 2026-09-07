@@ -101,20 +101,26 @@ async function selftest() {
   assert.equal(required('claude/obsidian-auto-20260905', ['index.html'], { metrics: [] }), false);
 
   // Execute the actual workflow body: declaration-only push success must never
-  // merge a picker PR, while other validated branches retain their merge path.
+  // merge any PR. Only PR validation can merge, including during trigger migration.
   const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/auto-merge.yml'), 'utf8');
   const body = workflow.match(/          script: \|\n((?:            .*\n|\n)+)/)?.[1];
   assert(body, 'auto-merge workflow script required');
   const executeMerge = new (Object.getPrototypeOf(async function () {}).constructor)('context', 'github', 'core', body);
-  for (const [branch, event, expected] of [
+  for (const [branch, event, expected, overrides = {}] of [
     ['claude/obsidian-auto-test', 'push', 0], ['claude/obsidian-auto-test', undefined, 0],
-    ['claude/obsidian-auto-test', 'pull_request', 1], ['Codex/user-directed', 'push', 1],
+    ['claude/obsidian-auto-test', 'pull_request', 1], ['Codex/user-directed', 'push', 0],
+    ['Codex/user-directed', undefined, 0], ['Codex/user-directed', 'pull_request', 1],
+    ['untrusted/branch', 'pull_request', 0],
+    ['Codex/user-directed', 'pull_request', 0, { draft: true }],
+    ['Codex/user-directed', 'pull_request', 0, { sha: 'c'.repeat(40) }],
+    ['Codex/user-directed', 'pull_request', 0, { base: 'other' }],
+    ['Codex/user-directed', 'pull_request', 0, { repo: 'other/repo' }],
   ]) {
     let merged = 0;
     const sha = 'a'.repeat(40);
     await executeMerge({ repo: { owner: 'simplememofast', repo: 'simplememo' }, payload: { workflow_run: { head_branch: branch, head_sha: sha, event } } },
       { rest: { pulls: {
-        list: async () => ({ data: [{ number: 123, draft: false, base: { ref: 'main' }, head: { sha, repo: { full_name: REPO } } }] }),
+        list: async () => ({ data: [{ number: 123, draft: overrides.draft ?? false, base: { ref: overrides.base ?? 'main' }, head: { sha: overrides.sha ?? sha, repo: { full_name: overrides.repo ?? REPO } } }] }),
         merge: async args => { assert.equal(args.sha, sha); merged++; return { data: { sha: 'b'.repeat(40) } }; },
       } } }, { info() {}, notice() {}, setOutput() {} });
     assert.equal(merged, expected, `auto-merge must respect declaration/PR boundary: ${branch} ${event}`);
