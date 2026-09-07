@@ -17,4 +17,15 @@
 
 [Service Specific Terms](https://cloud.google.com/terms/service-terms) §41(b)はGoogle Sign-Inに[API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy)を適用する。後者の公開本文（2024-02-15更新）は全文確認済み。用途開示・必要最小限の権限・安全なデータ管理の条件があり、Sensitive/Restricted scopes向けの追加条件は実際の要求scopeとの照合が必要になる。電話番号認証の条件をGoogle/Apple認証へそのまま当てはめない。
 
-Firebase公式一覧が参照するService Specific Termsと、その定義が参照する[Cloud Data Processing Addendum](https://cloud.google.com/terms/data-processing-addendum)を審査対象へ追加した。Service Specific Termsは一般条項の途中と§41を確認した段階で、全文確認は未完了。DPA本文は未確認。URL登録は分析完了・契約適用・設定変更の証拠ではない。
+Firebase公式一覧が参照するService Specific Termsと、その定義が参照する[Cloud Data Processing Addendum](https://cloud.google.com/terms/data-processing-addendum)を審査対象へ追加した。Service Specific Termsは一般条項の途中と§41を確認した段階で、全文確認は未完了。URL登録は分析完了・契約適用・設定変更の証拠ではない。
+
+## DPAの読了範囲と残る確認
+
+2026-09-07に公開DPAの本文および付録1〜4を全文確認した。別リンクのSCC、再委託先一覧、監査対象一覧は未読であり、この読了範囲に含めない。
+
+- §6: 契約中の削除指示後は原則最長180日。終了時は最大30日の回復期間後に原則最長180日で削除する。法令上の保持や継続契約の例外がある。
+- §7.2: 事故通知は不当な遅滞なく行う条件で、固定時間の保証とは扱わない。通知先の更新・認証情報管理は顧客側の確認事項。
+- §11: 新規再委託先は原則30日前までに通知。異議申立ては通知後90日以内の即時契約終了による。
+- 付録3: 越境移転と各地域の条件がある。欧州法が適用される非EMEA顧客の管理画面での申告要否を、実際の利用者・請求国と照合する。
+
+付録4のImplementation Services等にある例外をFirebaseへ一律適用しない。実際の契約受諾、削除機能・保持状況、通知先、利用リージョン、再委託先とSCCの確認は残る。公開文書の読了をもってDPA適用確認や業務のAI移管完了にはしない。
