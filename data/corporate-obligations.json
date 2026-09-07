@@ -247,7 +247,7 @@
     "$unreviewed_budget": "**一度も見ていない条項マスの上限。**44/44 を埋め切った 2026-08-29 に 0 にした。**上限を上げて通さない** ——ベンダーを足したら、そのぶんを読むまで CI が落ちる。読まないと決めたなら `not_applicable` と理由を書く（それは判定であって、空欄ではない）。",
     "reset_grace_days": 14,
     "$reset_grace_days": "**改定で戻されたマスの猶予（日）。**`vendor-terms.mjs` が指紋の変化で reviewed を unreviewed へ戻したものは、この日数までは落とさない。\n\n**即座に落とすと膠着するから。**seo-daily は改定を検知して`data/corporate-obligations.json` をコミットするPRを出す。そこで落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。****機械が仕事をした瞬間に、機械の仕事が止まる。**\n\n14日 = 週次取得の2回ぶん。**1回見逃しても、2回目には赤くなる。**",
-    "never_fingerprinted_budget": 2,
+    "never_fingerprinted_budget": 0,
     "$never_fingerprinted_budget": "**指紋が一度も付いていないベンダーの上限。**現在の2社は `appsflyer` と `prtimes`。\n\n2026-09-02 の週次で 11社中 9社に指紋が付き、**この2社だけ付かなかった。**取得の段は `continue-on-error: true` ＋ `|| true` なので落ちず、`vendor-terms` の出力でも「取得できず」に混ざるため、**気づける場所が無かった。**\n\n**指紋が無い社は、本文が改定されても reviewed が戻らない。**人が付けた ok / risk を守っているのは指紋のほうなので、見張りの立っていない社の判定は永久に据え置かれる —— `unreviewed`（見ていない）より悪い形で、**見たという記録が嘘を守る。**\n\n**上限を上げて通さない。**2社が取れるようになったら、同じPRで 0 まで下げること。取れない理由が判明した場合も、理由をここに書いてから上げる（上げた事実は残る）。\n\n**なぜ台帳から数えるか** —— その日の取得の成否で動かさないため。ネットの機嫌でCIが赤くなる検査は、赤いことに意味が無くなって読まれなくなる。",
     "$clause_note": {
       "liability_cap": "責任上限。**代替の無い critical ベンダーで効く** — 止まったときに何も請求できないなら、冗長化でしか守れない",
@@ -397,7 +397,7 @@
         "ip": "ok",
         "personal_data": "ok",
         "governing_law": "risk",
-        "source": "https://www.appsflyer.com/legal/services-agreement/",
+        "source": "https://www.appsflyer.com/legal/terms-of-use/",
         "reviewed_at": "2026-08-29",
         "reviewed_by": "human",
         "risk_note": "**SDK が端末から直接送る構造だが、契約はそれを Processor の枠から外していない。**DPA §3.2 が、Customer の Developer Tools の implementation / configuration / use を通じて**AppsFlyer へ直接届いた情報も、Customer から受領した Customer Personal Information とみなす**と明示している。**サーバを経由しないことで枠外になる、とは書かれていない。**\n\n**ただし同意取得の責任はこちら側。**MSA §9.4 が、End User への privacy notice の提供・rights / lawful basis の確保・**法律上必要な consent の取得**・cookies 等の配置についてCustomer が責任を負うと定める。**SDK 直送でも、そこは動かない。**\n\n**risk は責任上限と管轄の2つだけ。**個人情報と知財は ok。",
@@ -406,7 +406,21 @@
         "$personal_data": "**この台帳で初めての `personal_data: ok`。**\n\nMSA §9.5 が DPA を incorporated by reference し、DPA 自身も**別途署名なしに Agreement 締結時に binding / integral part になる**と規定 ——**セルフサービス小規模顧客にも契約本文上組み込まれる。**\n\n**Customer = Controller / AppsFlyer = Processor**（DPA §2.1）。documented instructions 以外では原則処理しない。CCPA 対象についてsell / share しない、許可された目的外で retain / use / disclose しない、**Customer との直接関係外で利用しない**と明記。\n\n**SDK 直送も枠内**（§3.2・上の risk_note 参照）。\n\n**取得される識別子が Schedule 1 に列挙されている:** IDFA / Android ID / Google Advertiser ID / app IDs / 条件付き Customer User ID、IP address / User agent、広告クリック・impression、install、in-app purchases。**IDFV は明示列挙が見つからなかった。**\n\n**保持は『Agreement の期間』**（Schedule 1）。終了後は原則 delete / unrecoverable / anonymize。**Anthropic と同じ形**（契約が続くかぎり）だが、**あちらと違って Processor 条項と instructions の縛りが効いている。**\n\n**`ok` にした理由:** 役割が明確で、自社目的利用がAggregated and De-Identified Data に限定され、Customer Personal Data そのものをAppsFlyer 自身のマーケティングに使う条項が**探した上で見つからなかった。****cloudflare / firebase を risk にしたのは『DPA本文を読んでいない』からだったが、ここは DPA 本文まで読めている。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$governing_law": "**契約主体がどちらか、規約本文からは決まらない。**\n\n原則は **New York 州法・New York City の裁判所の exclusive jurisdiction**（§21.10）。ただし契約主体が **AppsFlyer UK Ltd.** の場合は England and Wales 法・London。\n\n**オンライン注文では契約主体が Customer の domicile に依存すると書かれているだけで、MSA 本文に国別対応表が無い。**日本からの申込がどちらに当たるかは**Order Form を見ないと確定しない。**\n\n強制仲裁・仲裁機関・仲裁地・opt-out・class action waiver はいずれも見つからなかった。**この4社で唯一、仲裁が無い。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "draft_note": "[2026-08-29] オーナーが外部ディープリサーチの結果を貼り、AIがそれを読んで下書きした。\n\n**読めた:** AppsFlyer Master Services Agreement §9 / §12 / §15 / §16(d) / §21.9 / §21.10、AppsFlyer Data Processing Addendum §2.1 / §3.1–3.2 / §10 / Schedule 1。\n\n**未確認: Order Form 上の contracting entity。**New York 型か UK 型かはそこでしか決まらない。オーナー側の確認事項。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
-        "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**`governing_law` の `human` は「New York 型か UK 型か未確定」を含んだままの承認。**Order Form を見ないと決まらない。"
+        "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。\n\n**`governing_law` の `human` は「New York 型か UK 型か未確定」を含んだままの承認。**Order Form を見ないと決まらない。",
+        "fingerprint": "d50b47016640",
+        "fetched_at": "2026-09-07",
+        "source_history": [
+          {
+            "url": "https://www.appsflyer.com/legal/services-agreement/",
+            "observed_at": "2026-09-07",
+            "http_status": 404,
+            "replacement": "https://www.appsflyer.com/legal/terms-of-use/",
+            "note": "Public Terms of Use page retrieved; MSA also exists separately. This monitoring repair does not establish the applicable agreement or reapprove historical findings."
+          }
+        ],
+        "analysis_sources": [
+          "https://www.appsflyer.com/legal/msa"
+        ]
       },
       {
         "id": "github",
@@ -433,7 +447,7 @@
         "ip": "risk",
         "personal_data": "risk",
         "governing_law": "ok",
-        "source": "https://prtimes.jp/main/html/terms",
+        "source": "https://prtimes.jp/main/html/kiyaku",
         "reviewed_at": "2026-08-29",
         "reviewed_by": "human",
         "risk_note": "**上限の計算基礎が「1回の配信料金」ではない。**都度課金なので直感的には1回分に思えるが、規約は**原則10万円／直近3か月の支払合計が10万円未満ならその額**としている（基本規約 §16）。**使っていない期間があるほど上限が下がる。**\n\n**適用は基本規約＋企業規約の2本立て**で、矛盾する場合は企業規約が優先する。\n\n**配信できなかった場合の救済は料金を請求しないことだけ**（企業規約 §10.6）——掲載・転載・配信ができず、こちらに帰責事由が一切ないと PR TIMES が判断した場合。**追加の損害賠償や逸失利益の補償は書かれていない。**\n\n**代替なし**（自社サイト・SNS へは出せるが配信網は置き換わらない）。ただし**原稿はリポジトリに残る**ので、失うのは配信であって資産ではない。",
@@ -442,7 +456,19 @@
         "$personal_data": "**GDPR の用語による役割指定が無い。**PR TIMES は自らを「個人情報取扱事業者」としており、**Controller / Processor という語での指定をしていない。****Search Console と同じく、DPA も見つからなかった。**\n\n取得されるのは登録情報のほか **username / date / device・browser / IP address / access location**。利用目的には問い合わせ・registration・billing・**marketing data research / statistics / analysis**・新サービス案内・商談/契約・account security が列挙されている。\n\n**原稿中の担当者名・連絡先には専用の削除規則が無い**（探した上で無かった）。企業コンテンツとして公開・転載ルールの対象になり、**media 限定で開示した連絡先を media users が閲覧して連絡できる仕組みがある。****上の $ip の『取り下げても消える保証が無い』が、担当者の連絡先にも及ぶ。**\n\n保持期間は固定日数ではなく、目的に照らして不要になったら速やかに消去。**個人情報を他顧客へ販売・提供すると定める条項は見つからなかった。**\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "$governing_law": "**日本法・東京地方裁判所または東京簡易裁判所の専属的合意管轄**（基本規約 §18）。訴額等に応じてどちらか。まず誠実に協議する定めがある。\n\n**11社でここだけが `ok`。**日本の一人法人にとって、**実際に使える紛争解決の場が本文で指定されている唯一の相手。**（ムームードメインも日本法・東京地裁だが、あちらは §2 が上位レジストラ規約を取り込んでいて、その先が特定できないので risk。）\n\n強制仲裁・仲裁機関・仲裁地・opt-out・class action waiver はいずれも無い。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "draft_note": "[2026-08-29] オーナーが外部ディープリサーチの結果を貼り、AIがそれを読んで下書きした。\n\n**読めた:** PR TIMES 基本規約（最終更新 2024-09-20）§6 / §12 / §14 / §16 / §18、PR TIMES 企業規約 §5 / §6 / §10.6、PR TIMES プライバシーポリシー（最終改定 2022-04-01）。\n\n**適用は基本規約＋企業規約の2本立て**で、矛盾する場合は企業規約が優先する（規約自身が明記）。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
-        "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。"
+        "$reviewed_by": "**経緯。**(1) オーナーが外部ディープリサーチに調査を依頼。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**運用説明（Help / Privacy Center）を契約本文から分けた。**(3) AIがそれを読んで下書き。(4) オーナーが判定を確認して承認（2026-08-29）。\n\n**原文を読んだ人間はこの鎖の中に居ない。**責任の所在は人にあるので `human` で正しいが、読解そのものは第三者と機械がやっている。",
+        "fingerprint": "a8d0d1cc22d0",
+        "fetched_at": "2026-09-07",
+        "source_history": [
+          {
+            "url": "https://prtimes.jp/main/html/terms",
+            "observed_at": "2026-09-07",
+            "http_status": 404,
+            "replacement": "https://prtimes.jp/main/html/kiyaku",
+            "discovery_source": "https://tayori.com/q/prtimes-faq/detail/423946/",
+            "note": "Official help directs to the replacement URL. Historical human decisions predate this source correction; a first fingerprint is not a new review."
+          }
+        ]
       },
       {
         "id": "registrar",
@@ -1609,6 +1635,192 @@
                 "start": 35000,
                 "length": 3644,
                 "sha256": "b133fbed6d0afb69295d95475735ddc3a433983636f623d0d2384a2767e3b413"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "prtimes-public-terms-20260907",
+        "vendor_id": "prtimes",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T08:41:44.212Z",
+        "source": {
+          "url": "https://prtimes.jp/main/html/kiyaku",
+          "version": "2024-09-20",
+          "representation": "Japanese full page: operator policy, basic, enterprise, media and general terms.",
+          "sha256": "a8d0d1cc22d02f8a621365673b2748e4377058ce49e23a63729182e4e7480012",
+          "characters": 26107
+        },
+        "open_questions": [
+          "Actual account agreement, plan and accepted version remain unverified.",
+          "Privacy policy, content standards, AI settings, billing and withdrawal evidence require separate checks."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "JPY100,000 ceiling, reduced by qualifying recent payments; broad exclusions.",
+            "action": "Assess recovery limits.",
+            "evidence": [
+              {
+                "section": "liability",
+                "start": 10380,
+                "length": 767,
+                "sha256": "a26af78db2d4b864b7796f3927beb1ab77e3edbbc404dc8d60203cd398f3dc11"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "risk",
+            "summary": "User bears disputes and provider damages.",
+            "action": "Review exposure.",
+            "evidence": [
+              {
+                "section": "warranty",
+                "start": 18677,
+                "length": 864,
+                "sha256": "7119c9eb821204ddc66e0b63b3f9152a151e51266d08d8bba22fc4da0b05a7c0"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Enterprise content retained with publication licenses.",
+            "action": "Confirm permissions.",
+            "evidence": [
+              {
+                "section": "ip",
+                "start": 15438,
+                "length": 652,
+                "sha256": "2c1cded049f512efc157067bd5fee42531b34a962c9ef0fe9326902fc79fd45b"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "Registration privacy policy incorporated; AI processing caveats.",
+            "action": "Review actual data flows.",
+            "evidence": [
+              {
+                "section": "privacy",
+                "start": 5209,
+                "length": 548,
+                "sha256": "902d0cdf24f41634a13f6b79a1c0754e44d0449bbaca06c6dbe571433ffa56db"
+              },
+              {
+                "section": "ai",
+                "start": 12804,
+                "length": 767,
+                "sha256": "07365c26349fafeb80d457d853e02216aeede6d0bef50f2fa425dc072c81e47e"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "risk",
+            "summary": "AI-input confidentiality leakage disclaimed.",
+            "action": "Keep confidential inputs out.",
+            "evidence": [
+              {
+                "section": "warranty",
+                "start": 18677,
+                "length": 864,
+                "sha256": "7119c9eb821204ddc66e0b63b3f9152a151e51266d08d8bba22fc4da0b05a7c0"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Service and generated-content guarantees disclaimed.",
+            "action": "Validate before publishing.",
+            "evidence": [
+              {
+                "section": "warranty",
+                "start": 18677,
+                "length": 864,
+                "sha256": "7119c9eb821204ddc66e0b63b3f9152a151e51266d08d8bba22fc4da0b05a7c0"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Cancellation removes access; suspension has broad grounds.",
+            "action": "Plan independent continuity.",
+            "evidence": [
+              {
+                "section": "termination",
+                "start": 6966,
+                "length": 824,
+                "sha256": "0b81688c875ffff73da2ce8d66e70506a9e8302b7da25f9b5fadb5f6114049fe"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "conditional",
+            "summary": "Japanese law; Tokyo first-instance courts after consultation.",
+            "action": "Assess recourse.",
+            "evidence": [
+              {
+                "section": "law",
+                "start": 11258,
+                "length": 177,
+                "sha256": "ebe50c97a287b0b0862a2712df45b1e4a794e72d04e573c3dc48097eabffe5b6"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "No insurance requirement identified.",
+            "action": "Check supplemental agreements.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 1339,
+                "length": 23897,
+                "sha256": "8e19c025df91bef7b32061e236bbf6e38083ccb4d975c767f8105ef103d32830"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "risk",
+            "summary": "User transfer requires consent.",
+            "action": "Verify transfer needs.",
+            "evidence": [
+              {
+                "section": "assign",
+                "start": 11147,
+                "length": 111,
+                "sha256": "2a2e2c18929c4ec974fb6666a499816bcb4a3c8daedeaeda90bea7df5265d82d"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "risk",
+            "summary": "Unannounced interruption allowed for enumerated events.",
+            "action": "Prepare fallback.",
+            "evidence": [
+              {
+                "section": "force",
+                "start": 8483,
+                "length": 345,
+                "sha256": "0ae50dfa20a76ff77dea5162be595ca0ec247c1b3c53e47d84fbfedef8ffa27d"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Fixed-term early cancellation barred; remaining fees owed.",
+            "action": "Verify actual plan.",
+            "evidence": [
+              {
+                "section": "payment",
+                "start": 16806,
+                "length": 1420,
+                "sha256": "41e2ab99bbb59b0361dc2520fbcbe23076358bff9b398bfa60602c5cabf43c46"
               }
             ]
           }
