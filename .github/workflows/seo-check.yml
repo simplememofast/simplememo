@@ -1111,7 +1111,9 @@ jobs:
       # （**「見ていない」を「問題なし」と書かない**）。
       # 資格情報の台帳との食い違いも見る — 片方だけ古くなるのを防ぐ。
       - name: Vendor register
-        run: node scripts/check-vendors.mjs --check
+        run: |
+          node scripts/check-vendors.mjs --selftest
+          node scripts/check-vendors.mjs --check
 
       # 【契約の種別】定型（規約への同意＝附合契約）か非定型（交渉・署名した書面）かを
       # **台帳から導く。**⑦「定型／非定型契約の分類」の実行側。
