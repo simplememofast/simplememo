@@ -51,3 +51,9 @@ AnthropicのConsumer Termsを追加URLとして登録し、AIによる12観点�
 [Google利用規約](https://policies.google.com/terms?hl=en&gl=jp)を英語・Japan指定で取得し、2026-07-30版の全文を12観点に結び付けた。同じURLの国表示による差を混ぜず、取得条件を記録した。[サービス別一覧](https://policies.google.com/terms/service-specific)のSearch Console項目はGoogle利用規約を案内している。
 
 この表示は実際のアカウントの契約国やAPI契約の適用を証明しない。アカウントの同意記録、追加契約、データ保護条件は引き続き未確認。過去の人の判定と業務のexecutorは保持する。
+
+## 2026-09-07: GitHubの規約と公開範囲
+
+[GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)の2026-04-27版を全A〜S節まで取得・読解し、12観点を記録した。公開コンテンツの許諾とAI機能の入力・出力に対する設定の範囲を区別した。
+
+同日の認証済みGitHub APIで、`simplememo` はpublic、`simplememo-api` と `simplememo-ios` はprivateで、3リポジトリともarchivedではないことを確認した。公開範囲は変更していない。この確認はAI機能への入力履歴、Copilotの設定、実際に適用される契約種別を証明しない。
