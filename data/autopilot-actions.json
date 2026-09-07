@@ -2113,11 +2113,11 @@
           "episode": "[\"completion_unverified\",\"2026-09-05T12:40:53.619116Z\",null,null,\"2026-09-05\"]"
         }
       },
-      "state": "open",
+      "state": "acknowledged",
       "created_jst": "2026-09-05",
       "last_seen_jst": "2026-09-07",
       "closed_jst": null,
-      "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
+      "evidence": "2026-09-07、依頼内容の「伏字が実際の日次取り込みで効いたか」は別経路で確認済み。simplememo-api Repro Facts の定期実行33961458095（9/5）・34029257450（9/6）はHTTP200と成果物コミット948a0bf・68c6b5bを実ログで照合。修正#244後の両成果物はstate=ok、端末欄2件をotherへ集約し件数を保持、端末/OS/版の許可外キー0件。元の単発Routineの終了状態は未観測のままで、done・自動復旧成功にはしない。同じ観測episodeだけを既知の制約として受容し、新しい状態/実行の異常は既存merge規則で再起票する。詳細: docs/repro-redaction-verification-2026-09-07.md。"
     },
     {
       "id": "act-selfheal-ap-20260906-actions",
