@@ -3790,3 +3790,45 @@ Capacities公式サイトのダウンロードページはJS描画でURLが取�
 - レーンA/Bは BQ 26/28日でまだ根拠薄い。次にレーンEへ行くときの先頭は **C10 `/obsidian/compare/memos/`**
   （31imp / pos4.1・memos はOSSでこの環境でもセルフホスト検証できる）
 - レーンCは前回 2026-09-04（`/obsidian/plugins/` テーマ内訳）で本日まで3日。7日未満
+
+---
+
+## 2026-09-08（Codex定期主系・06:00） — レーンE。Obsidianとmemosの実機比較を新規公開
+
+### 判断と価値契約
+
+停止フラグ、月次上限、1回上限、当日重複を確認し、レーンEのC10
+`/obsidian/compare/memos/` を選んだ。既存材料は「memos vs obsidian」31imp・平均掲載順位4.1で、
+受け皿ページが無かった。BQの当日再取得はこの実行環境に認証がなく不可だったため、欠損をゼロ扱いせず、
+検索台帳と公式一次資料と実機観察だけで進めた。
+
+実装前に `data/decision-intents/memos-comparison-c10-20260908.json` を別コミットでリモートへ置いた。
+予測は `publishing_day_rate` の +1、p=0.55、記事枠の見込み20ドル。実費はこのCodex定期セッションから
+観測できず、0ではなく `null` 扱い。月次の観測済み下限は $67.0402 / $280、記事枠は
+$34.1601 / $125で上限内だった。
+
+### 実機確認と成果物
+
+公式GitHub ReleasesのMemos 0.30.0 Apple Silicon用アーカイブを取得し、公開`checksums.txt`と
+SHA-256 `8156cb03cac46d599d06a12944b2cf9f224429599ec2a7066f6eb01ee96d7d24`が一致することを確認した。
+タスク専用の一時ディレクトリでローカル起動し、SQLite初期化、private access、最初の管理者作成、
+日本語メモ・タグ・未完了タスクのタイムライン保存を観察した。公開運用、HTTPS、バックアップ復元、移行、
+モバイル、SimpleMemo直接連携は未検証として記事と証跡に明記した。
+
+- 記事: `/obsidian/compare/memos/`
+- PR: #1116
+- run_id: `ap-20260908-actions-codex-01a07dad-42f9-72e2-897c-221062dc0f2b`
+- 証跡: `docs/obsidian/evidence/memos-20260908.md` と実画面2枚
+
+### 検証と修正
+
+ローカルではSEO 280面が0 errors / 0 warnings、content graph 31件、sitemap 272 URLが整合。
+Blinkで深い3面×14幅と全280面×4幅、計1,162通りを実描画し横漏れ0件。WebKitWebDriverは
+このmacOS環境になく未測定。
+
+PR初回CIは、新規ページのGA4ローダーに標準の`onload`初期化が無いことを22件の回帰テストで検出した。
+既存ページと同じローダーへ直して22/22をローカル再確認した。次のCIは価値契約に対応するrun行がまだ無い
+ことを検出したため、PR番号確定後に運転台帳とstatus JSONを同じPRへ追加した。これはRunbookの想定順序で、
+最終HEADのSEO Validation成功と自動マージ、本番URLの200確認を出荷成立条件とする。
+
+`ROUTINE_MCP_PROBE: not_applicable Codexへ移管済み、CCR可否は未再測定`
