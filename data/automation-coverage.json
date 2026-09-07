@@ -947,12 +947,13 @@
       "task": "App Review への提出",
       "executor": "human_only",
       "evidence": [
-        "../simplememo-ios/.github/workflows/submit-review.yml"
+        "../simplememo-ios/.github/workflows/submit-review.yml",
+        "docs/app-review-execution-2026-09-08.md"
       ],
-      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] 「実行側（ASCへの提出・公開の呼び出し）がまだ無い」は不正確だった。**ASC を呼ぶ経路は在る —— review-submit.yml が prepare_app_store_version.rb と fastlane submit_review を回しており、この経路で実際に何度も出荷している。**無かったのは実行側ではなく、門とその経路の接続**（材料の受け渡しと、release.yml から門を呼ぶ配線）。\n\n**executor は据え置く。**同日、門を release.yml の submit_review=true 経路へ配線し、材料は実行側が集める形にした（release-gate-run.mjs --materials）。ただし **policy.enabled は false のままで、まだ1回も通していない。**「配線した」を「動いた」と数えない。",
+      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] 「実行側（ASCへの提出・公開の呼び出し）がまだ無い」は不正確だった。**ASC を呼ぶ経路は在る —— review-submit.yml が prepare_app_store_version.rb と fastlane submit_review を回しており、この経路で実際に何度も出荷している。**無かったのは実行側ではなく、門とその経路の接続**（材料の受け渡しと、release.yml から門を呼ぶ配線）。\n\n**executor は据え置く。**同日、門を release.yml の submit_review=true 経路へ配線し、材料は実行側が集める形にした（release-gate-run.mjs --materials）。ただし **policy.enabled は false のままで、まだ1回も通していない。**「配線した」を「動いた」と数えない。\n\n[2026-09-08 実行証拠] オーナーが5.8.46と画像を明示して提出を依頼し、Codexがsubmit-review.yml run34166798798を起動。build1179・日英各3枚の画像を検証して提出し、ASCのWAITING_FOR_REVIEWを確認した。迅速審査も受付済み。ただし既存定義のai_executes_gatedは人の個別承認不要が条件で、今回は個別承認経路。evaluateSubmissionの通過や全リリースQA完了ではないため、AI実行率は加点しない。human_onlyはこの台帳の保守的な据え置きであり、今回の提出操作を人が行ったという意味ではない。詳細は実行証拠文書。",
       "blocker": "not_started",
       "unlock": "ship_execute",
-      "unblocked_by": "**実機確認は外していない**（機械には代われないので、門が `device_verified_sha` の一致を要求する形にした）。残るのは実行側の実装と、`policy.enabled` を立てる操作（権限表で human_only）",
+      "unblocked_by": "個別承認による提出経路は実行済み。残るのは既存の自律提出ゲートに必要な同一コミットの実機確認記録・CI・TestFlight経過・審査枠等の材料を満たし、ゲートを実際に通した提出を確認すること。個別承認付き実行を個別承認不要の定義へ加点しない。",
       "authority": {
         "domain": "App Review への提出",
         "ai_may": "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）"
