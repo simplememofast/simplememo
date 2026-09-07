@@ -37,6 +37,9 @@ jobs:
       - name: CI history audit preserves uncertainty and read failures
         run: node --test scripts/ci-health.test.mjs
 
+      - name: Local preflight includes grouped tests and propagates failures
+        run: node scripts/preflight.mjs --selftest
+
       - name: Language switcher insertion and regeneration regressions
         run: python3 scripts/inject_lang_switcher_test.py
 

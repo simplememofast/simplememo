@@ -2,9 +2,13 @@
 
 2026-09-07。AIによる候補化・採点の記録。製品変更の採用・出荷・効果判定ではない。
 
+原資料の記録コミット: API `ae762b017c5724212620643461bef7ed94527f44`。
+
 ## 実測から候補へ
 
-非公開APIリポジトリの `docs/cohort-language-auth-2026-09-07.md` は、2026-09-07 07:30 JST基準の本番コホートで、英語14 install中Apple provider_errorが6 install、エラー後48h以内のメール送信が0 installと記録している。旧版の詳細エラーコードはunknownであり、Appleの障害や言語差を原因と断定できない。
+非公開APIリポジトリの `docs/cohort-language-auth-2026-09-07.md` は、2026-09-07 07:30 JST基準の本番コホートで、英語14 install中Apple provider_errorが6 install、初回起動から48h未満にエラー後のメモ送信が記録されたのは0 installと記録している。旧版の詳細エラーコードはunknownであり、Appleの障害や言語差を原因と断定できない。
+
+観測窓は初回起動時刻 t0 から48h未満で、provider_error の受信より厳密に後の memo_send_success を数えている。エラー発生から丸48時間追跡した値ではない。
 
 この観測は認証の摩擦を調査する根拠にはなるが、機能削除の根拠には不足する。そのためApple/Googleサインインの削除案は不採用とし、より小さい単純化を候補化する。
 
