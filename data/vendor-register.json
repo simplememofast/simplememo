@@ -436,7 +436,7 @@
     "fallback_note … 代替が無い場合の説明。**空にしない** — 「代替なし」と「考えていない」は別"
   ],
   "$dpa_draft": "**`dpa_draft` は AI／外部リサーチが集めた下書き。`dpa_reviewed` とは別物。**\n\n`dpa_reviewed` に日付が入るのは**人が読んで判断した**ときだけで、\n下書きがあることは判断が済んだことを意味しない。\n条項側で `reviewed_by: \"ai_draft\"` を人の読みと区別しているのと同じ規律。\n\n**下書きがあっても DPA ワークシートの一覧からは消さない** ——\n消すと人が読みに来なくなる（条項側で同じ自己テストを持っている）。",
-  "$missing_vendors": "**台帳に載っていないが、載るべき先。**見つけた時点で書く（忘れないため）。\nここに書いてあることは「まだ載せていない」であって「対象外」ではない。\n\n  freee 会計 … **2026-09-01 に気づいた。**`entity.accounting_saas` が名指ししている\n    会計SaaSで、取引先・金額・請求書をすべて持つ。**依存している外部サービス**の\n    定義にそのまま当てはまるのに、11社の中に居ない。\n\n    **勝手に足さない理由**: 足すと条項マスが 44 → 48 になり、新しい4マスは\n    `unreviewed` になる。`contract_review.unreviewed_budget` は **0** で\n    ラチェットが掛かっているので、CIが落ちる。**上限を上げて通すのは、この台帳が\n    禁じている形。**正しい順序は「人が freee の規約4観点を読む → 同時に足す」。\n\n    **これは設計どおりの摩擦** —— ベンダーを足すには読むことが要る。\n    2026-09-01 に freee API を繋ぐ話が出たので、**繋ぐ前に足すのが筋。**",
+  "$missing_vendors": "**台帳に載っていないが、載るべき先。**見つけた時点で書く（忘れないため）。\nここに書いてあることは「まだ載せていない」であって「対象外」ではない。\n\n  freee 会計 … **2026-09-01 に気づいた。**`entity.accounting_saas` が名指ししている\n    会計SaaSで、取引先・金額・請求書をすべて持つ。**依存している外部サービス**の\n    定義にそのまま当てはまるのに、11社の中に居ない。\n\n    **勝手に足さない理由**: 足すと条項マスが 44 → 48 になり、新しい4マスは\n    `unreviewed` になる。`contract_review.unreviewed_budget` は **0** で\n    ラチェットが掛かっているので、CIが落ちる。**上限を上げて通すのは、この台帳が\n    禁じている形。**正しい順序は「人が freee の規約4観点を読む → 同時に足す」。\n\n    **これは設計どおりの摩擦** —— ベンダーを足すには読むことが要る。\n    2026-09-01 に freee API を繋ぐ話が出たので、**繋ぐ前に足すのが筋。**\n\n[2026-09-08] freee は discovered_dependencies に未審査依存先として記録した。上記は旧来の vendors（支払許可リストを兼ねる）への昇格条件の履歴。利用実態を審査待ち一覧から隠さず、契約承認・支払許可・人の条項判定とは分ける。OpenAIも同じ未審査一覧へ記録。未レビュー予算と既存11社の判定は変更していない。",
   "$missing_vendors_at": "2026-09-01",
   "$dpa_reviewed": "**日付が入っているのは「人が読んで、この条件で使い続けてよいと判断した」という記録。**\n`dpa_draft`（AI／外部リサーチが集めた材料）とは別物で、下書きだけでは日付は入らない。\n条項側が `reviewed_by: \"human\"` と `ai_draft` を分けているのと同じ規律。\n\n**[2026-09-01] apple / resend / registrar の3社にオーナーが日付を入れた。**\n空欄を残したまま承認している —— **空欄があること自体は承認を妨げない。**\n妨げるとしたら、空欄を空欄と書かずに埋めることのほう。\n各社の残る空欄は `dpa_draft.open_questions` に置いてある。\n\n**残り6社（cloudflare / google_cloud / search_console / firebase / appsflyer ほか）は未レビュー。**\n`policy.enforce_unreviewed` は false のままなので、CIは落ちない。\n**全部埋まってから true にする** —— いま true にすると、読む前に緑を求めることになる。",
   "discovered_dependencies": [
@@ -460,6 +460,47 @@
         "事業者側の費用と利用者側のプランを分けた支払範囲",
         "公開DPA・SLAの実契約への適用、DPA 9.5の機微情報除外と自由記述メモの関係、実際の再委託先・保持削除・撤退条件"
       ]
+    },
+    {
+      "id": "freee",
+      "name": "freee 会計",
+      "observation": "既存の会社情報と連携記録が会計SaaSとしての利用を示す。現在の契約プラン・同意版・請求額の確認とは区別する。",
+      "evidence": [
+        "data/corporate-obligations.json",
+        "docs/freee-integration-plan.md",
+        "docs/freee-dependency-review-2026-09-08.md"
+      ],
+      "open_questions": [
+        "実アカウントの契約主体・適用プラン・個別規約・同意履歴",
+        "API利用条件、実際のデータ処理・再委託・保持削除・退去時のエクスポートと復旧",
+        "確定請求・支払経路・共有費用配賦・支出許可の照合"
+      ],
+      "status": "pending_review",
+      "personal_data": "personal",
+      "observed_at": "2026-09-08",
+      "source_commit": "e55525a88435b1565844ee6fe6b16f22f4250893",
+      "contract_approved": false,
+      "payment_authorized": false
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI（Codexによる運営作業）",
+      "observation": "現在のCodex作業と既存の実行手順が運営上の依存を示す。アプリ利用者のメモ本文の送信を観測したという意味ではない。アカウント情報と作業に含む個人情報は審査対象とし、実際の入力範囲は未確認。",
+      "evidence": [
+        "docs/codex-autopilot-execution.md",
+        "docs/openai-dependency-review-2026-09-08.md"
+      ],
+      "open_questions": [
+        "Native Codexの実アカウント、契約主体、ChatGPT・API・追加クレジットの契約範囲と同意版",
+        "実際の入力範囲・データ利用設定・保持削除・DPA/SLAの適用・代替運転の検証",
+        "契約費と従量費の重複を除いた請求照合、SimpleMemoへの配賦、支出許可"
+      ],
+      "status": "pending_review",
+      "personal_data": "personal",
+      "observed_at": "2026-09-08",
+      "source_commit": "e55525a88435b1565844ee6fe6b16f22f4250893",
+      "contract_approved": false,
+      "payment_authorized": false
     }
   ]
 }
