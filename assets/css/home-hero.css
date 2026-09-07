@@ -22,7 +22,7 @@
 
 .hero__photograph {
   position: absolute;
-  inset: 0 0 0 30%;
+  inset: 0 0 0 36%;
   z-index: -2;
 }
 
@@ -32,14 +32,14 @@
   height: 100%;
   max-width: none;
   object-fit: cover;
-  object-position: 50% 65%;
+  object-position: 60% 50%;
 }
 
 .hero__shade {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(90deg, #030c0f 18%, rgba(3, 12, 15, .92) 32%, rgba(3, 12, 15, .28) 54%, transparent 72%),
+  background: linear-gradient(90deg, #030c0f 26%, rgba(3, 12, 15, .96) 36%, rgba(3, 12, 15, .25) 51%, transparent 62%),
     linear-gradient(0deg, rgba(3, 12, 15, .8), transparent 24%);
   pointer-events: none;
 }
@@ -68,7 +68,7 @@
 .home-photo .hero--photo .hero__title {
   margin: 0 0 28px;
   color: #fff;
-  font-size: clamp(2.7rem, 4.7vw, 4.5rem);
+  font-size: clamp(2.4rem, 4.1vw, 4.1rem);
   font-weight: 700;
   line-height: 1.45;
   letter-spacing: -.06em;
@@ -183,32 +183,23 @@
 }
 
 .home-photo:lang(en) .hero--photo .hero__title {
-  font-size: clamp(2.7rem, 4.7vw, 4.5rem);
+  font-size: clamp(2.4rem, 4.1vw, 4.1rem);
   line-height: 1.12;
   letter-spacing: -.055em;
 }
 
-@media (min-width: 768px) and (max-width: 1023px) {
-  .hero__photograph { left: 20%; }
-  .hero__photograph img { object-position: 42% 66%; }
-  .hero__shade {
-    background: linear-gradient(90deg, #030c0f 4%, rgba(3, 12, 15, .85) 25%, rgba(3, 12, 15, .3) 55%, transparent 80%),
-      linear-gradient(0deg, rgba(3, 12, 15, .8), transparent 30%);
-  }
-  .home-photo .hero--photo > .container { padding-top: 100px; padding-bottom: 160px; }
-}
-
-@media (max-width: 767px) {
+@media (max-width: 1023px) {
   .home-photo .global-nav__inner { height: 56px; }
-  .home-photo .hero--photo { min-height: max(740px, calc(100svh - 56px)); }
-  .hero__photograph { inset: 0; }
-  .hero__photograph img { object-position: 50% 0%; }
+  .home-photo .hero--photo { min-height: 0; }
+  .hero__photograph { position: relative; inset: auto; order: 2; z-index: 0; width: 100%; aspect-ratio: 3 / 2; }
+  .hero__photograph img { object-position: center; }
   .hero__shade {
-    background: linear-gradient(180deg, rgba(3, 12, 15, .12), rgba(3, 12, 15, .1) 39%, transparent 54%, rgba(3, 12, 15, .1) 76%, #030c0f 100%);
+    display: none;
   }
   .home-photo .hero--photo > .container {
+    order: 1;
     align-items: flex-start;
-    padding: 34px 24px 300px;
+    padding: 30px 24px 26px;
   }
   .hero__eyebrow { margin-bottom: 18px; font-size: .59rem; letter-spacing: .19em; }
   .home-photo .hero--photo .hero__title {
@@ -226,7 +217,7 @@
   .home-photo .hero--photo .app-store-badge img { height: 48px; }
   .home-photo .hero--photo .hero-cta-secondary { font-size: .77rem; }
   .hero__availability { margin-top: 12px; font-size: .66rem; }
-  .hero__footer { align-items: flex-start; flex-direction: column; gap: 0; padding: 0 24px 24px; }
+  .hero__footer { order: 3; align-items: flex-start; flex-direction: column; gap: 0; padding: 12px 24px 20px; }
   .hero__scene { margin-top: 2px; font-size: .62rem; }
   .home-photo:lang(en) .hero--photo .hero__title {
     font-size: clamp(2.4rem, 10.6vw, 4rem);
