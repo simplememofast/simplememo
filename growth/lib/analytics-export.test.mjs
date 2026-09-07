@@ -294,3 +294,21 @@ test('workflow handles secrets only in the reader, uploads ciphertext only, and 
   assert.ok(text.includes('ga4-journey'));
   assert.ok(text.includes('ga4-provisional'));
 });
+
+test('intent report uses Search Console metadata and tolerates no target rows without inventing them', async () => {
+  const datasets = [];
+  const api = fakeApi({
+    getDataset: async (_, { dataset }) => { datasets.push(dataset); return { id: dataset, location: LOCATION }; },
+    query: async (_, input) => input.dryRun ? { totalBytesProcessed: 100 } : {
+      statementType: 'SELECT', totalBytesBilled: 10000000,
+      rows: input.sql.includes('query_status') ? [] : ['2026-09-01', '2026-09-02'].map(value => ({ dimension: 'date', value })),
+    },
+  });
+  const result = await collect({ ...gsc, report: 'gsc-intent' }, { api, now });
+  assert.deepEqual(datasets, ['searchconsole']);
+  assert.equal(result.status, 'complete');
+  assert.equal(result.coverage.length, 1);
+  assert.deepEqual(result.queries[1].result.rows, []);
+  assert.match(result.interpretation, /not independently proven zero/);
+  assert.throws(() => validateOptions({ ...gsc, report: 'gsc-intent', end: '2026-09-17' }, now));
+});
