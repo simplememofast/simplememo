@@ -12,7 +12,7 @@ rows = [base, base, [*base[:2], 0, 5, 15, 'suppressed', 1, *base[7:]], [*base[:2
 for index, value in [(0, '2026-08-01'), (1, 'https://simplememofast.com/'), (7, 'sc-domain:other.test'), (8, 'IMAGE')]:
     excluded = base.copy(); excluded[index] = value; rows.append(excluded)
 db.executemany('INSERT INTO source VALUES (?,?,?,?,?,?,?,?,?)', rows)
-sql = Path(__file__).with_name('gsc-intent.sql').read_text().replace('`yurika-simplememo.searchconsole.searchdata_url_impression`', 'source')
+sql = (Path(__file__).resolve().parents[1] / 'sql/analytics/gsc-intent.sql').read_text().replace('`yurika-simplememo.searchconsole.searchdata_url_impression`', 'source')
 result = [dict(r) for r in db.execute(sql, {'start_date': '2026-09-01', 'end_date': '2026-09-02'})]
 assert len(result) == 3, result
 buckets = {r['query_status']: r for r in result}
