@@ -2348,17 +2348,18 @@
     {
       "area": "⑬ アナログ領域",
       "task": "契約: 定型契約・条項比較・リスク抽出",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs",
         "../simplememo-api/scripts/check-contracts.mjs",
-        "../simplememo-api/data/contract-register.json"
+        "../simplememo-api/data/contract-register.json",
+        "scripts/compare-vendor-clauses.mjs",
+        "scripts/lib/contract-comparison.mjs",
+        "docs/contract-comparison-execution-2026-09-07.md"
       ],
-      "note": "2026-08-22。⑦の条項検査と同じ機構。\n\n**[2026-08-28 訂正] 「契約書がリポジトリに無いのでできない」は誤り。**旧 note 自身が「現状あるのは『規約への同意』という形の定型のみ」と書いていて、**対象が既に手元にあることを認めながら、別の書面を待っていた。**条項比較は contract_review で実際に動いており（apple 4/4・resend 2/4）、止まっているのは残り34マスの読解＝ `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。\n\n**[2026-09-01] `evidence` の `../simplememo-api/*` 2件は、意図して指したままにしてある。**受け皿は未マージの PR [simplememo-api#200](https://github.com/simplememofast/simplememo-api/pull/200) の中にあり、**置き場所の決定が2つ並んでいるためオーナー待ち**で止まっている（オーナーがセッションに述べた「api 側（非公開）で良い」と、公開側 #725 の「原本は freee にあり、リポジトリへ写しは置かない」）。`automation-rate --check` は隣リポジトリが在る環境でこの不在を実際に検出するが、**それは欠陥ではなく、待っている対象が見えている状態。**CI は隣を checkout しないので緑のまま。**#200 がマージされれば両方そろって解消する。**（同じ断り書きが tasks[121] にある。この行にだけ無かった。）\n\n**blocker は `missing_source_document` のまま置く。**tasks[121] は 2026-08-31 に`not_started` へ移したが、**この行に同じ理由は当てはまらない。**121 の対象は「どれが定型か」の分類で、材料（ベンダー台帳・規約同意の記録）は手元にある。こちらの対象は**規約本文そのもの**で、それは決定により公開リポジトリへ運ばない。tasks[122] が同じことを「本文そのものは公開リポジトリに運ばないので `missing_source_document` は残る」と明記しており、この行はそちらと同じ形。\n\n**一度 `not_started` に変えかけて戻した。**「どちらも契約の行で、121 が直っている」を理由にしたが、**似ているのは主題で、待っているものが違う。**`not_started` は「着手していないだけ」と読ませるので、運べない本文を待っている行に使うと、**待ちが消えたように見える。**",
-      "blocker": "missing_source_document",
-      "unblocked_by": "**44マスは埋まった**（2026-08-29）。比較・リスク抽出の対象は規約本文で、それは公開リポジトリに運ばない。**書面契約は存在しない**",
-      "unlock": "vendor_terms"
+      "note": "2026-08-22。⑦の条項検査と同じ機構。\n\n**[2026-08-28 訂正] 「契約書がリポジトリに無いのでできない」は誤り。**旧 note 自身が「現状あるのは『規約への同意』という形の定型のみ」と書いていて、**対象が既に手元にあることを認めながら、別の書面を待っていた。**条項比較は contract_review で実際に動いており（apple 4/4・resend 2/4）、止まっているのは残り34マスの読解＝ `vendor_terms`。\n\n**[2026-08-28 決定] 原本はどのリポジトリにも置かない。**git の履歴は消せず simplememo は公開。原本は既に居場所がある（規約＝各ベンダーの管理画面 / 請求書＝freee）ので、写しを作ると正が2つになり、古いほうを機械が読む事故を足すだけになる。\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。\n\n**[2026-09-01] `evidence` の `../simplememo-api/*` 2件は、意図して指したままにしてある。**受け皿は未マージの PR [simplememo-api#200](https://github.com/simplememofast/simplememo-api/pull/200) の中にあり、**置き場所の決定が2つ並んでいるためオーナー待ち**で止まっている（オーナーがセッションに述べた「api 側（非公開）で良い」と、公開側 #725 の「原本は freee にあり、リポジトリへ写しは置かない」）。`automation-rate --check` は隣リポジトリが在る環境でこの不在を実際に検出するが、**それは欠陥ではなく、待っている対象が見えている状態。**CI は隣を checkout しないので緑のまま。**#200 がマージされれば両方そろって解消する。**（同じ断り書きが tasks[121] にある。この行にだけ無かった。）\n\n**blocker は `missing_source_document` のまま置く。**tasks[121] は 2026-08-31 に`not_started` へ移したが、**この行に同じ理由は当てはまらない。**121 の対象は「どれが定型か」の分類で、材料（ベンダー台帳・規約同意の記録）は手元にある。こちらの対象は**規約本文そのもの**で、それは決定により公開リポジトリへ運ばない。tasks[122] が同じことを「本文そのものは公開リポジトリに運ばないので `missing_source_document` は残る」と明記しており、この行はそちらと同じ形。\n\n**一度 `not_started` に変えかけて戻した。**「どちらも契約の行で、121 が直っている」を理由にしたが、**似ているのは主題で、待っているものが違う。**`not_started` は「着手していないだけ」と読ませるので、運べない本文を待っている行に使うと、**待ちが消えたように見える。**\n\n[2026-09-07 AI execution] The existing task targets standard vendor terms. check-contract-kind verified 11 standard vendors and no written/non-standard contracts. AI compared conditions across 11 source-bound assessments, recording differences, cross-vendor risks and actions for all four clauses in ai_comparisons. The actual comparison report links to source sections and rejects missing/changed references or false approval. Credit only comparison/risk extraction, not classification or individual reading again. Actual agreement applicability, DPA review, signing, switching vendors and payments remain unverified/unperformed. See docs/contract-comparison-execution-2026-09-07.md.",
+      "since": "2026-09"
     },
     {
       "area": "⑬ アナログ領域",
