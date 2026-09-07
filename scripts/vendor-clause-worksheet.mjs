@@ -39,6 +39,7 @@
  */
 
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, broken, run } from './lib/selftest.mjs';
@@ -195,16 +196,50 @@ export function publicAnalyses(cr) {
   const records = cr?.ai_assessments ?? [];
   const problems = assessmentProblems(records, cr?.vendors ?? []);
   if (problems.length) return { problems, vendors: [] };
-  return { problems, vendors: (cr?.vendors ?? []).map((vendor) => ({
-    vendor: vendor.id,
-    assessments: records.filter((r) => r.vendor_id === vendor.id).map((r) => ({
-      id: r.id, actor: r.actor, agent: r.agent, observed_at: r.observed_at,
-      scope: r.scope, contract_approved: r.contract_approved,
-      agreement_applicability: r.agreement_applicability,
-      source: r.source, open_questions: r.open_questions,
-      findings: Object.fromEntries((cr.clauses ?? []).map((clause) => [clause, r.findings[clause]])),
-    })),
-  })) };
+  const project = (r) => ({
+    id: r.id, actor: r.actor, agent: r.agent, observed_at: r.observed_at,
+    scope: r.scope, contract_approved: r.contract_approved,
+    agreement_applicability: r.agreement_applicability,
+    source: r.source, open_questions: r.open_questions,
+    findings: Object.fromEntries((cr.clauses ?? []).map((clause) => [clause, r.findings[clause]])),
+  });
+  const vendors = (cr?.vendors ?? []).map((vendor) => {
+    const shared = [], seen = new Set();
+    const references = vendor.shared_ai_assessments ?? [];
+    if (!Array.isArray(references)) problems.push(`${vendor.id}: 共有分析の参照が配列でない`);
+    else for (const ref of references) {
+      const fail = (message) => problems.push(`${vendor.id}: 共有分析 ${ref?.assessment_id ?? '?'}: ${message}`);
+      const record = records.find((r) => r.id === ref?.assessment_id);
+      if (!record || record.vendor_id === vendor.id || seen.has(ref.assessment_id)) {
+        fail('参照先が無い・直接分析と重複・参照が重複'); continue;
+      }
+      seen.add(ref.assessment_id);
+      if (![vendor.source, ...(vendor.analysis_sources ?? [])].includes(record.source.url)
+          || ref.source_sha256 !== record.source.sha256) {
+        fail('登録済み原文URL又は分析の指紋と一致しない'); continue;
+      }
+      // Local review prose explains the actual service-to-terms relation and
+      // supplemental reading. A URL alone must never imply shared coverage.
+      if (!/^docs\/[a-zA-Z0-9_-]+\.md$/.test(ref.basis_document ?? '')
+          || typeof ref.note !== 'string' || !ref.note.trim()) {
+        fail('共有の根拠文書・説明が無い'); continue;
+      }
+      let basis;
+      try { basis = fs.readFileSync(path.join(ROOT, ref.basis_document)); }
+      catch { fail('共有の根拠文書を読めない'); continue; }
+      if (crypto.createHash('sha256').update(basis).digest('hex') !== ref.basis_sha256
+          || !basis.toString('utf8').includes(record.id)
+          || !basis.toString('utf8').includes(record.source.url)) {
+        fail('共有の根拠文書が変更された又は分析・原文の参照が無い'); continue;
+      }
+      shared.push({ ...project(record), shared_from: record.vendor_id,
+        basis_document: ref.basis_document, basis_sha256: ref.basis_sha256, note: ref.note });
+    }
+    return { vendor: vendor.id,
+      assessments: records.filter((r) => r.vendor_id === vendor.id).map(project),
+      shared_assessments: shared };
+  });
+  return { problems, vendors: problems.length ? [] : vendors };
 }
 
 /**
@@ -264,11 +299,19 @@ export function build({ register, obligations }) {
 /**
  * CI が見るもの。**新しい赤を足さない** —— 未確認であること自体は
  * check-corporate.mjs が既に報告していて、二重に落とす意味が無い。
- * 台帳の不整合と、表示するAI分析の出典・範囲の不備を検出する。
+ * 台帳の不整合、AI分析の出典・範囲の不備、4観点の分析欠落を検出する。
  */
 export function check(doc) {
-  const { problems } = build(doc);
+  const { problems, public_analyses } = build(doc);
   const cr = doc.obligations?.contract_review;
+  for (const vendor of public_analyses) {
+    const analyses = [...vendor.assessments, ...vendor.shared_assessments];
+    for (const clause of cr?.clauses ?? []) {
+      if (!analyses.some((a) => a.findings[clause]?.evidence?.length)) {
+        problems.push(`${vendor.vendor}: ${clause} のAI読解記録が無い`);
+      }
+    }
+  }
   for (const clause of cr?.clauses ?? []) {
     const sample = doc.register?.vendors?.[0];
     if (sample && exposure(clause, sample) === null && !UNRANKED_CLAUSES.has(clause)) {
@@ -317,6 +360,43 @@ function selftest() {
       assert(Object.keys(a.findings).length === 4 && a.findings.ip.evidence.length > 0, '4条項と根拠が欠けた');
       assert(JSON.stringify(doc) === before, '元台帳を変更した');
     }],
+    ['共有は明示した根拠だけを使い、分析IDを増やさない', () => {
+      const doc = load();
+      const out = build(doc);
+      const firebase = out.public_analyses.find((v) => v.vendor === 'firebase');
+      assert(firebase.assessments.length === 0 && firebase.shared_assessments.length === 1, '直接分析と共有を混同');
+      const shared = firebase.shared_assessments[0];
+      assert(shared.shared_from === 'google_cloud' && shared.contract_approved === false, '共有元又は承認状態が変わった');
+      const ids = new Set(out.public_analyses.flatMap((v) => [...v.assessments, ...v.shared_assessments]).map((a) => a.id));
+      assert(ids.size === doc.obligations.contract_review.ai_assessments.length, '共有で分析件数を増やした');
+      delete doc.obligations.contract_review.vendors.find((v) => v.id === 'firebase').shared_ai_assessments;
+      assert(build(doc).public_analyses.find((v) => v.vendor === 'firebase').shared_assessments.length === 0, '参照を消しても共有した');
+    }],
+    ['壊し: 共有の原文・根拠文書・重複が不正なら表示しない', () => {
+      for (const mutate of [
+        (v) => { v.shared_ai_assessments[0].source_sha256 = '0'.repeat(64); },
+        (v) => { v.shared_ai_assessments[0].basis_sha256 = '0'.repeat(64); },
+        (v) => { v.shared_ai_assessments[0].basis_document = '../private.md'; },
+        (v) => { v.shared_ai_assessments[0].assessment_id = 'missing'; },
+        (v) => { v.shared_ai_assessments.push(v.shared_ai_assessments[0]); },
+        (v) => { v.analysis_sources = []; },
+      ]) {
+        const doc = load();
+        mutate(doc.obligations.contract_review.vendors.find((v) => v.id === 'firebase'));
+        const out = build(doc);
+        assert(out.problems.length > 0 && out.public_analyses.length === 0, '不正な共有を表示した');
+      }
+    }],
+
+    ['壊し: 共有参照又は直接分析を消すと4観点の未実施を検出する', () => {
+      const shared = load();
+      delete shared.obligations.contract_review.vendors.find((v) => v.id === 'firebase').shared_ai_assessments;
+      assert(check(shared).filter((p) => p.includes('firebase:')).length === 4, '共有欠落で4観点の空白を検出しない');
+      const direct = load();
+      direct.obligations.contract_review.ai_assessments = direct.obligations.contract_review.ai_assessments.filter((a) => a.vendor_id !== 'resend');
+      assert(check(direct).filter((p) => p.includes('resend:')).length === 4, '直接分析の欠落を検出しない');
+    }],
+
     ['壊し: 出典・承認状態が不正な分析を表示しない', () => {
       for (const mutate of [
         (a) => { a.contract_approved = true; },
@@ -570,8 +650,12 @@ function report() {
   console.log('\n  保存済みのAI公開規約分析（契約承認なし・アカウントへの適用未確認）');
   for (const vendor of public_analyses) {
     console.log(`\n    ${vendor.vendor}: ${vendor.assessments.length} 件`);
-    if (!vendor.assessments.length) console.log('      このベンダーに直接紐づく分析記録なし。別サービスの記録を自動流用しない。');
-    for (const a of vendor.assessments) {
+    if (!vendor.assessments.length && !vendor.shared_assessments.length) console.log('      このベンダーに紐づく分析記録・明示共有参照なし。');
+    for (const a of [...vendor.assessments, ...vendor.shared_assessments]) {
+      if (a.shared_from) {
+        console.log(`      共有参照（新しい分析件数には加えない）: ${a.shared_from} / ${a.basis_document}`);
+        console.log(`        ${a.note}`);
+      }
       console.log(`      ${a.id} / ${a.agent} / ${a.observed_at}`);
       console.log(`      原文: ${a.source.url} / 版: ${a.source.version} / SHA-256: ${a.source.sha256}`);
       for (const [clause, finding] of Object.entries(a.findings)) {

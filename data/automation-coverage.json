@@ -1523,18 +1523,18 @@
     {
       "area": "⑦ 法人経営",
       "task": "責任上限・知財・個人情報・準拠法の条項検査",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/corporate-obligations.json",
         "scripts/check-corporate.mjs",
         "data/vendor-register.json",
         "scripts/vendor-terms.mjs",
-        "scripts/vendor-clause-worksheet.mjs"
+        "scripts/vendor-clause-worksheet.mjs",
+        "scripts/lib/contract-assessment.mjs",
+        "docs/clause-inspection-execution-2026-09-07.md"
       ],
-      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。",
-      "blocker": "missing_source_document",
-      "unblocked_by": "**44マスは埋まった**（2026-08-29・全社 reviewed_by: human）。本文そのものは公開リポジトリに運ばないので `missing_source_document` は残るが、**待っているのは「人が読むこと」ではなく「改定で戻されたマスを読み直すこと」**に変わった。検知は週1回（月曜・seo-daily の内側）、守る側は `clauseGuard`",
-      "unlock": "vendor_terms"
+      "note": "2026-08-22に台帳と検査を実装。10社×4観点。**書面の契約書は無く、各社の規約への同意で成立している**ので、検査対象は規約本文であり確認は人が読むことでしか進まない。**現状40マスすべて unreviewed。**機械が守るのはベンダー台帳との照合（片方だけ増えると素通りする）と、riskと書いたら理由を要求すること [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-31 実測] この欄のマス数は古い。**`data/corporate-obligations.json` の `contract_review` を数えたところ、**44マスすべてが埋まっており `unreviewed` はゼロ**（risk 35 / ok 9）、11社すべてが `reviewed_by: \"human\"`。#726 / #728 / #731 / #732 で 08-28〜29 に埋め切られている。**「34マス未読」は事実でなくなった。**守る側も #733 で入った（`check-corporate.mjs` の `clauseGuard`）。\n\n[2026-09-07 AI実行へ移管] 対象は規約本文の4条項検査。AIが公開原文を読んだ11分析を、人の過去判定と分けて保存。Firebaseの共通本文は公式のサービス対応・固有条件の読み合わせを根拠に明示参照し、複製しない。実データの作業一覧で11社44観点の判断・対応・原文根拠を照合した。本文の転載なしで読解を記録する経路により旧missing_source_documentを解消。契約承認・適用認定・DPA審査全体・別契約間比較を完了とはしない。この1件だけを数える。詳細はdocs/clause-inspection-execution-2026-09-07.md。",
+      "since": "2026-09"
     },
     {
       "area": "⑦ 法人経営",
