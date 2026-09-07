@@ -96,18 +96,24 @@
     "cash_on_hand_connected": true,
     "$cash_on_hand_connected": "**2026-08-27、接続された。**freee の口座残高を日次 cron（`freee_balance`）で読んでいる。同日、freee の画面と突き合わせて **銀行 638,593円 / カード -1,600,509円 が完全一致**することを人が確認した。**カードは負債なので手元資金に足していない**（`cash_jpy` は銀行＋現金のみ。素朴に合計すると約96万円の過小評価になる）。\n\n**2026-08-27、鮮度も機械が言えるようになった。**一覧APIに `with_last_synced_at` / `with_sync_status` を渡すと返る（渡していなかっただけだった）。ただし**言えるのは口座ごと**で、全体を1つの真偽値にはしていない —— GMOあおぞらは `sync_status: success` で同期時刻を持つが、楽天カード（CSV手入力）は `disabled`、現金は `unsupported` で、そもそも同期時刻を持たない。**「同期していない」を「古い」と読まないこと。**API は内訳を返し、`freshness.ok` は `stale` も `unknown` も無いときだけ true になる。つまり **`cash_jpy` の主要部分（銀行）は毎日機械が鮮度を確かめられるが、`card_jpy` は人がCSVを入れた時点のまま**であり、そこは機械には言えない。\n\nこれを true にしても runway が出せるようになるわけではない（収入の履歴 28日がまだ足りない）。**外れたのは材料1つぶんだけ。**なお、ここに候補として書いていた「明細API（wallet_txns）の最終明細日」は**誤った道だった** —— 取引日なので、同期済みでも取引が無ければ古く見える。実際に叩いて確かめている（GMOは前日に同期済みなのに最新明細は21日前だった）。",
     "assumptions": {
-      "pessimistic": "無料枠を全部外れ、AI実費が損失上限まで伸びる",
-      "standard": "現状維持。AI実費は上限の範囲、他は無料枠内",
-      "optimistic": "AI実費が実測どおり（月$25前後の見込み）に収まる"
+      "pessimistic": "未推計。AI損失上限だけではベンダー費用を含む総支出は決まらない。",
+      "standard": "未推計。AI予算上限は支出予測ではなく、他社サービスの無料枠内継続も未確認。",
+      "optimistic": "未推計。初期の月$25外挿は現行の実績・稼働頻度を表さないため撤回。"
     },
     "monthly_outflow_usd": {
-      "pessimistic": 150,
-      "standard": 40,
-      "optimistic": 25
+      "pessimistic": null,
+      "standard": null,
+      "optimistic": null
     },
-    "$outflow_note": "悲観の150は、AI実費の損失上限60＋Cloudflare/Firebase/Resend が有料枠に入った場合の粗い見積り。**実測ではない。**実測が入ったらこの3つを置き換える",
+    "$outflow_note": "2026-09-07: 旧推計の悲観$150・標準$40・楽観$25を撤回。旧AI上限$40・損失上限$60を前提にしており、現行の$280・$420と整合しない。現行値はchange_limitsのAI領域から表示するが、総支出予測へ転用しない。各社請求と未観測費用が揃うまで総支出はnull。",
     "runway_months": null,
-    "$runway_note": "手元資金が未入力で、収益の観測範囲も不完全なためランウェイは計算しない。revenue_history_daysはdata/revenue-series.jsonの現在28日窓に確定版がある日数と照合する。全日が揃っても確定入金・利益・SEO由来LTVが自動的に確定するわけではない。",
-    "revenue_history_days": 8
+    "$runway_note": "収入の現在28日窓に確定版がある日数はdata/revenue-series.jsonと照合する。支出推計が未完了で、銀行・カード残高の鮮度も全口座では確定できないため、ランウェイは計算しない。全日が揃っても確定入金・利益・SEO由来LTVが自動的に確定するわけではない。",
+    "revenue_history_days": 8,
+    "outflow_status": "unestimated",
+    "outflow_missing": [
+      "副系CCRの当月実費",
+      "Cloudflare・Firebase・Resend等の当月請求と無料枠利用状況",
+      "予測の根拠となる十分な期間の実績"
+    ]
   }
 }
