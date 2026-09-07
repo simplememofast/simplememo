@@ -36,6 +36,10 @@ Firebase公式一覧が参照するService Specific Termsと、その定義が�
 
 ## 取得文書の照合用指紋
 
+同日の実管理画面も読み取り確認した。iOSの `GoogleService-Info.plist` のプロジェクトと一致するFirebaseプロジェクトで、料金プランはBlaze。「データのプライバシー」ではFirebase Service Dataの他Googleサービス改善等への使用が有効だった。画面説明はService Dataから顧客データとGoogle Cloudサービスデータを除外しているため、この設定を認証顧客データの学習利用への同意とは解釈しない。DPAの受諾日・版はこの画面からは確認できなかった。設定は変更していない。
+
+検査済みiOSソースの `GoogleSignInService.swift` は `signIn(withPresenting:)` を追加scope引数なしで呼ぶ。ただし、これは過去に付与済みの権限や管理コンソールの要求scope全体を確認した証拠ではない。
+
 全文は公開リポジトリに保存しない。以下は2026-09-07 09:35 UTCに取得したHTMLを既存の `scripts/vendor-terms.mjs` の `toText` で正規化した結果。本文の読了は公開ページ表示で行い、指紋は取得物の同一性の照合用である。ナビゲーション等も含むため、指紋変化だけでは条項改定と断定しない。
 
 | 文書 | 表示版日 | 文字数 | SHA-256 |
