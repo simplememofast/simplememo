@@ -1040,6 +1040,198 @@
             ]
           }
         }
+      },
+      {
+        "id": "anthropic-commercial-terms-20260907",
+        "vendor_id": "anthropic",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T08:25:39.635Z",
+        "source": {
+          "url": "https://www.anthropic.com/legal/commercial-terms",
+          "version": "2025-06-17",
+          "sha256": "e4b7577152d556a1ad276f674acd9360cc0a2eabdc70028ad6e6dceec319d4d9",
+          "characters": 25977
+        },
+        "open_questions": [
+          "Confirm actual account agreement and service-specific terms for API usage.",
+          "Review incorporated DPA, credit terms, subscribed SLA and export/restore capability separately.",
+          "Consumer/OAuth usage has a separate assessment; do not transfer Commercial guarantees to it."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Twelve-month fee cap; indemnities excluded.",
+            "action": "Assess uncapped exposure.",
+            "evidence": [
+              {
+                "section": "L",
+                "start": 16756,
+                "length": 2708,
+                "sha256": "5f1fa03d134cb57647db0b7fb073008b048fe65ef1396d1935123237011ad7c2"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "conditional",
+            "summary": "Mutual defense, broad supplier exclusions.",
+            "action": "Check claim conditions.",
+            "evidence": [
+              {
+                "section": "K",
+                "start": 13366,
+                "length": 3390,
+                "sha256": "8bade0739aec7267bfdac055c2913ffd6bdb2074ecae1719afa01407d735fa6a"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Customer content rights retained/assigned.",
+            "action": "Verify input permissions.",
+            "evidence": [
+              {
+                "section": "B",
+                "start": 2112,
+                "length": 677,
+                "sha256": "74a036e05aef1ccb9068a8aafdc07f69ba7cd4fe29766be3837dcf6b7482ab5c"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "DPA incorporated; content training prohibited.",
+            "action": "Check processing scope.",
+            "evidence": [
+              {
+                "section": "B",
+                "start": 2112,
+                "length": 677,
+                "sha256": "74a036e05aef1ccb9068a8aafdc07f69ba7cd4fe29766be3837dcf6b7482ab5c"
+              },
+              {
+                "section": "C",
+                "start": 2789,
+                "length": 192,
+                "sha256": "e4e45ab43e28ccc65a8feaf9b596318de94e391cfb83ff2f782c498671d7440b"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "conditional",
+            "summary": "Mutual protection; deletion has exceptions.",
+            "action": "Verify retention.",
+            "evidence": [
+              {
+                "section": "E",
+                "start": 5084,
+                "length": 2098,
+                "sha256": "2767cc1a318d5336f200bb5c94eefb97e9275c0247e7d15be656baf5818b1b88"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Broad service/output warranties disclaimed.",
+            "action": "Verify applicable SLA.",
+            "evidence": [
+              {
+                "section": "L",
+                "start": 16756,
+                "length": 2708,
+                "sha256": "5f1fa03d134cb57647db0b7fb073008b048fe65ef1396d1935123237011ad7c2"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Convenience termination and conditional suspension.",
+            "action": "Test continuity.",
+            "evidence": [
+              {
+                "section": "I",
+                "start": 9403,
+                "length": 2305,
+                "sha256": "c84b49ed55d190227cb4c6770bd888334f0ceebd29295e8f1684f1bf77a7e4f2"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "risk",
+            "summary": "Region-dependent law and binding arbitration.",
+            "action": "Confirm customer jurisdiction.",
+            "evidence": [
+              {
+                "section": "J",
+                "start": 11708,
+                "length": 1658,
+                "sha256": "6f70bb33be4fd2c7f5e6ad4aa918c17dd03286cac694bf4d7f5d3c6b78b6fedd"
+              },
+              {
+                "section": "M",
+                "start": 19464,
+                "length": 5184,
+                "sha256": "5889f619d89f7e3c80822eed3788f56c7e2854461d8c1a93a1e01c8595eda05a"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "Insurance requirement not identified.",
+            "action": "Check supplements.",
+            "evidence": [
+              {
+                "section": "A–M",
+                "start": 1357,
+                "length": 23291,
+                "sha256": "205fb6ab9d90df9fe281bd3539cf9c6abbe90438cb0119f8dcf40742d356ccc5"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "risk",
+            "summary": "Supplier affiliate/business-sale exceptions.",
+            "action": "Review restructuring.",
+            "evidence": [
+              {
+                "section": "M",
+                "start": 19464,
+                "length": 5184,
+                "sha256": "5889f619d89f7e3c80822eed3788f56c7e2854461d8c1a93a1e01c8595eda05a"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "conditional",
+            "summary": "Beyond-control delay/failure excused.",
+            "action": "Assess outage remedies.",
+            "evidence": [
+              {
+                "section": "M",
+                "start": 19464,
+                "length": 5184,
+                "sha256": "5889f619d89f7e3c80822eed3788f56c7e2854461d8c1a93a1e01c8595eda05a"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Account fees, prepayment, taxes and rate changes.",
+            "action": "Verify actual billing.",
+            "evidence": [
+              {
+                "section": "H",
+                "start": 7806,
+                "length": 1597,
+                "sha256": "0110c074bf01b3c26268e8d3f3e2598b1aaff368a7745c001a70a482fa9d4386"
+              }
+            ]
+          }
+        }
       }
     ]
   },
