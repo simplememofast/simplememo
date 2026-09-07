@@ -15,6 +15,7 @@ export const RUN_CAP = 2_000_000_000;
 const SQL_DIR = new URL('../sql/analytics/', import.meta.url);
 const FILES = {
   gsc: ['gsc-site.sql', 'gsc-pages.sql'],
+  'gsc-intent': ['gsc-pages.sql', 'gsc-intent.sql'],
   // Collection diagnostics only; never a session funnel or an outcome report.
   'ga4-provisional': ['ga4-quality.sql'],
   'ga4-quality': ['ga4-quality.sql'],
@@ -106,7 +107,7 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
   try {
     const client = await api.connect({ projectId: PROJECT, location: LOCATION });
     out.credential_type = client.credentialType;
-    const datasets = opts.report === 'preflight' ? ['searchconsole', GA4] : [opts.report === 'gsc' ? 'searchconsole' : GA4];
+    const datasets = opts.report === 'preflight' ? ['searchconsole', GA4] : [opts.report.startsWith('gsc') ? 'searchconsole' : GA4];
     for (const dataset of datasets) out.metadata[dataset] = await metadata(client, dataset, api);
     const states = Object.values(out.metadata).map((m) => m.status);
     if (states.some((s) => !['available', 'not_found'].includes(s))) { out.status = 'blocked'; return out; }
@@ -142,13 +143,14 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       }
     }
     out.total_bytes_billed = billed;
-    if (opts.report === 'gsc' && opts.execution === 'export') {
-      out.coverage = out.queries.map((q) => {
+    if (opts.report.startsWith('gsc') && opts.execution === 'export') {
+      out.coverage = out.queries.filter((q) => q.file !== 'gsc-intent.sql').map((q) => {
         const present = new Set(q.result.rows.filter((r) => r.dimension === 'date').map((r) => r.value));
         return { file: q.file, days: daysBetween(opts.start, opts.end).map((day) => ({ day, has_rows: present.has(day) })) };
       });
       out.status = out.coverage.some((t) => t.days.some((d) => !d.has_rows)) ? 'incomplete_date_coverage' : 'complete';
     } else out.status = (provisional ? 'provisional_' : '') + (opts.execution === 'dry-run' ? 'dry_run_complete' : 'complete');
+    if (opts.report === 'gsc-intent') out.interpretation = 'Fixed three-URL page/query diagnostics, grouped by Pacific date. Coverage describes the full URL export, not target traffic. Anonymous and missing query buckets are retained separately; absent target rows are not independently proven zero. URL impressions are not a site denominator. No SEO attribution to installations or LTV.';
     if (opts.report.startsWith('ga4-') && !provisional) {
       out.interpretation = 'GA4 exported observed events/sessions; inspect quality rows before scoring. Store clicks are not installations, revenue, or LTV.';
       if (opts.report === 'ga4-funnel') {

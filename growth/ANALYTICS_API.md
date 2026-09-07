@@ -298,3 +298,9 @@ The journey fixtures additionally cover repeated clicks, missing session starts
 and keys, different sessions/users, JST/24-hour boundaries, impression order,
 query/fragment removal, host spoofing, invalid targets, referrer context and
 non-additive route-session counts. Both suites execute the checked-in SQL.
+
+## Fixed search-intent diagnosis
+
+`report=gsc-intent` uses the same Pacific date, 31-day, three-day lag and cost guards as `gsc`. It returns the existing full URL/date aggregate plus daily page/query aggregates for `/vs/logseq/`, `/obsidian/compare/logseq/`, and `/vs/capacities/` only. No arbitrary SQL or URL input is accepted.
+
+Keep anonymous and missing query buckets in reconciliation; do not interpret them as known keywords. Reconcile clicks, impressions and position sums to the matching URL totals before comparing periods. Coverage comes from the full URL export, not the low-volume target pages. Missing target rows alone do not prove zero traffic. Page impressions are not the site denominator, and this report does not attribute installs or LTV to search.
