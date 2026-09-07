@@ -147,10 +147,12 @@ export const UNLOCKS = {
                             + '**待っても降りてこない** —— 残る面（Sales and Trends / Apple Search Ads / '
                             + 'ASCのWeb UI）のどれが organic の検索語を返すかを叩いて確かめる。'
                             + '**どれも返さないと分かった時点で never 側へ落とす**（それまでは推測で落とさない）' },
-  asc_dimension_read: { kind: 'implement', label: '内訳の値を非公開側で読む経路を作る',
-                       needs: '**列（Page Type ほか）は降りている**が、値はこの公開リポジトリに運ばない'
-                            + '（2026-08-26 の決定・data/publication-policy.json）。'
-                            + '読む側は ../simplememo-ios の asc_subscription.rb / asc_funnel.rb と同じ場所に置く' },
+  asc_dimension_read: { kind: 'implement', label: 'CPPの一次指標と比較期間を非公開側で確認する',
+                       needs: '日次・週次Detailedのページ×種別集計はiOS PR #401/#402で本番稼働済み。'
+                            + '観測したCPPセルは更新やImpressionで、初回DL・ページ閲覧とは異なる。'
+                            + '月次DetailedまたはASCのCPP画面で一次指標の観測可否を確認し、'
+                            + '共通期間・比較対象・同時施策を記録する。未観測を0にしない。'
+                            + '実験評価の数値は非公開simplememo-ios側に保持する。' },
   revenue_28d:       { kind: 'wait', label: '収入の観測が28日たまる',
                        // [2026-08-26] **08-26 まで、これは待ちではなかった。**積む側
                        // （growth/scripts/revenue-series.mjs）が読むのは ingest-asc.mjs の出力で、
