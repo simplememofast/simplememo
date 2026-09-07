@@ -363,59 +363,25 @@ export const UNLOCKS = {
                             + '「手動運用」「手動では実績あり」と書いてあり、そこは変わっていない。'
                             + '`kind` を `implement` へ戻し、ラベルも残っている作業のほうに直した —— '
                             + '**材料の完了を、行の完了と数えない。**' },
-  // [2026-09-01] **ラベルが、終わった作業を要求し続けていた。**条項44マスは
-  // 2026-08-29 に 0/44 unreviewed で埋め切っている（実測）。**残っているのは DPA のほうで、
-  // 人が確認済みなのは 3/11**（cloudflare / anthropic / google_cloud / search_console /
-  // firebase / appsflyer / github / prtimes が未）。**2つは別の書面で、束ねたままだと
-  // `--plan` が「規約を読め」と言い続ける** —— 済んだ作業を毎回オーナーの手数に数える形。
-  vendor_terms:      { kind: 'owner_input', label: '人がDPAを読む（3/11・条項44マスは 08-29 に完了）',
-                       needs: '**[2026-09-01 実測] 条項マスは終わっている** —— '
-                            + '`data/corporate-obligations.json` の contract_review は '
-                            + '**44マス中 unreviewed 0**、11社すべて `reviewed_by: "human"`。'
-                            + '2026-08-29 に埋め切られ、`check-corporate.mjs` の clauseGuard が守っている。'
-                            + '**旧ラベル「人が10社の規約を読んで40マスを埋める」は、済んだ作業を'
-                            + '要求し続けていた。**\n\n'
-                            + '**残っているのは DPA。人が確認済みは 3/11**（apple / resend / registrar）。'
-                            + '未読は cloudflare / anthropic / google_cloud / search_console / '
-                            + 'firebase / appsflyer / github / prtimes の8社。'
-                            + '**条項（規約本文の4観点）と DPA（データ処理の取り決め）は別の書面**なので、'
-                            + '片方が終わってももう片方は動かない。\n\n'
-                            + '**[2026-08-28] `implement` から `owner_input` へ移した。取り込む側は既に在る。**'
-                            + 'ラベルは「規約本文を取り込んで条項検査に載せる」だったが、'
-                            + '**取り込みと改定検知は 2026-08-26 に機械へ移っている**'
-                            + '（scripts/vendor-terms.mjs・seo-daily が**週1回・月曜に**取得し、'
-                            + '本文の指紋が変われば reviewed を unreviewed へ戻す）。'
-                            + '2行の note がどちらも「**本文を読んで ok / risk を決めるのは法的判断で、'
-                            + 'そこは人のまま**」と明記しており、これは 2026-08-26 に下した判断。'
-                            + '\n\n**[2026-08-28 訂正] 「毎日取得」は誤りだった。**'
-                            + 'vendor-terms.mjs は seo-daily の**月曜ゲートの内側**にあり、'
-                            + '改定検知は週1回。**火曜の改定は翌月曜まで緑のまま残る（最大6日）。**'
-                            + '指紋が全社で空なのは、配線が 08-26（水）に入って'
-                            + '**最初の月曜がまだ来ていない**ため（初着弾 2026-08-31）。'
-                            + '\n\n**したがって実装量では動かない。**残り21マス'
-                            + '（**44/44 すべて人の確認済み。**2026-08-29 に完了）。'
-                            + '\n\n**[2026-08-29] マスが 40 → 44 になった。**'
-                            + 'Search Console は GCP Terms ではなく Google 一般利用規約なので'
-                            + 'BigQuery と行を分けた（Google 公式のサービス別一覧で確認）。'
-                            + '**「同じ Google だから同じ規約」を確かめずに1行にしていた。**'
-                            + '\n\n**うち13マスは外部ディープリサーチ経由で、'
-                            + '原文を読んだ人間は鎖の中に居ない** —— 各行の $reviewed_by 参照。'
-                            + '\n\n**[2026-08-29] anthropic の行は契約が2つに割れている。**'
-                            + 'APIキー経路は Commercial Terms、Claude Code の OAuth 経路'
-                            + '（critical）は Consumer Terms で、**後者の非EEA版が取得できていない。**'
-                            + '行を割るかはオーナーの判断待ち（割るとマスが 40→44 になる）'
-                            + '\n\n**[2026-08-29 訂正] 「埋めたあと policy.enforce_unreviewed を true にすると CI が守る」は誤り。**'
-                            + 'あのフラグは data/vendor-register.json にあり、守るのは**DPAレビュー**で条項マスとは別物。'
-                            + '**実測した** —— 1マスを unreviewed に戻しても check-corporate --check は exit 0。'
-                            + '**条項マスを守る検査は存在しなかった。**'
-                            + '\n\n**[2026-08-29] 作った。**check-corporate.mjs の clauseGuard が'
-                            + '「一度も見ていないマス」（上限0・ラチェット）と'
-                            + '「改定で戻されたまま14日過ぎたマス」の2つで落とす。'
-                            + '**実測: 1マス戻すと exit 1**（入れる前は exit 0）'
-                            + '\n\n**[2026-08-28] 契約の分類と条項比較の2行がここへ移ってきた。**'
-                            + 'どちらも `contract_docs`（書面をリポジトリに置く）を待っていたが、'
-                            + '**書面契約は存在しない** —— 対象は規約本文で、それはこの入口が持っている。'
-                            + '存在しない書面を待つ行が、待つべき相手に付いた' },
+  // [2026-09-07] Public-text analysis is now performed by AI. Historical human
+  // verdicts, actual agreement applicability, and DPA operations are separate.
+  // Do not send the owner back to documents already read, or equate reading
+  // with approval. This next-action classification does not change executors.
+  vendor_terms:      { kind: 'implement', label: 'AI条項検査の残資料・実契約・運用条件を照合する',
+                       needs: '公開規約の分析記録は data/corporate-obligations.json の '
+                            + 'contract_review.ai_assessments を参照する。過去の人の判定を上書きしない。'
+                            + '原文取得とAI分析を、人による再読だけを待つ作業として扱わない。'
+                            + '\n\n残作業: 利用サービスに対応する契約版・注文書・請求地域・例外を照合し、'
+                            + 'DPAの受諾、再委託先、SCC、設定、削除・撤退手順、SLAを確認する。'
+                            + 'Firebaseの共通GCP本文は既存分析を参照し、同じ本文の複製で件数を増やさない。'
+                            + '追加条項の読了範囲と実管理画面の観測は '
+                            + 'docs/firebase-service-scope-2026-09-07.md に記録している。'
+                            + '\n\n条項検査・DPA等の審査・定型契約の比較は対象範囲が異なる。'
+                            + '各行の実行証跡を揃えてから個別に移管を判断し、公開文書の読了だけで'
+                            + '契約承認や全業務完了にしない。新規の契約受諾など別途の操作条件は維持する。'
+                            + '\n\n改定検知は seo-daily の月曜ゲートで週1回。主URLの指紋は'
+                            + 'リンク先の全文監視を保証しない。取得失敗・文字コードの変化・未読文書を'
+                            + '未確認として扱い、最新の取得記録を参照する。' },
   impl_product:      { kind: 'implement', label: 'プロダクト側を作る',
                        needs: 'PRDの定型化 / カナリアを本番で1周 / 課金失敗の回復 / 障害案内の一斉配信' },
   // [2026-08-27] オーナー判断「お金周りを除いて渡す」で、境界24件のうち15件が
