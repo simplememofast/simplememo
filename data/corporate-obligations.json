@@ -2637,6 +2637,90 @@
           }
         }
       }
+    ],
+    "ai_comparisons": [
+      {
+        "id": "vendor-terms-four-clause-comparison-20260907",
+        "actor": "ai",
+        "agent": "Codex",
+        "observed_at": "2026-09-07T11:30:53.139812+00:00",
+        "scope": "public_terms_comparison",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "sources": [
+          {
+            "assessment_id": "cloudflare-public-terms-20260906",
+            "source_sha256": "ddf973a64cb3a19c3c50a648022ca1ff4d7ccbe622e3dcfd66e57a6c5b373a43"
+          },
+          {
+            "assessment_id": "anthropic-consumer-terms-20260907",
+            "source_sha256": "b813cfcf668c9e81c0c783fa49df24b4f03ae411635aeefdcd14995fc9c62ad8"
+          },
+          {
+            "assessment_id": "resend-public-terms-20260907",
+            "source_sha256": "55e2506d70dfe0c9eb625e3b3d7722795c333a560418bea1e18289fc579ffa9b"
+          },
+          {
+            "assessment_id": "anthropic-commercial-terms-20260907",
+            "source_sha256": "e4b7577152d556a1ad276f674acd9360cc0a2eabdc70028ad6e6dceec319d4d9"
+          },
+          {
+            "assessment_id": "google-search-console-terms-jp-20260907",
+            "source_sha256": "723d82759e4fa7e04da27b71e6bc53e102eb0e723f7a485d7a1248800d7b55eb"
+          },
+          {
+            "assessment_id": "github-public-terms-20260907",
+            "source_sha256": "f1b532d9f8f8022d68fb15f5a208da18d303ec79c2ff166abdb0fd6f3152aaca"
+          },
+          {
+            "assessment_id": "prtimes-public-terms-20260907",
+            "source_sha256": "a8d0d1cc22d02f8a621365673b2748e4377058ce49e23a63729182e4e7480012"
+          },
+          {
+            "assessment_id": "appsflyer-tou-20260907",
+            "source_sha256": "d50b47016640c8d519b5228b6377b5635cb674e32141253c4ef39ea526971157"
+          },
+          {
+            "assessment_id": "google-cloud-base-terms-20260907",
+            "source_sha256": "4b93f47fbc885cfa17897e06e7374289eb25977df29ef050c1224da30e00a9a2"
+          },
+          {
+            "assessment_id": "registrar-public-terms-20260907",
+            "source_sha256": "1695db7fd95007659fe7bc55d1ed49235cf04ce20d6e7c6d5bce82797079109f"
+          },
+          {
+            "assessment_id": "apple-combined-public-terms-20260907",
+            "source_sha256": "b62525f448d4b92aa67cc39c3464249cba9282f0087fa4712fd5e3a1eabf6a2c"
+          }
+        ],
+        "findings": {
+          "liability_cap": {
+            "difference": "支払額連動でも対象期間・最低額・例外が異なる。Anthropic Commercial・AppsFlyer・GCPは12か月が基準だが、Anthropic Consumerは6か月と100ドルの大きい方、レジストラは2年のドメイン料金。Appleの50ドル、PR TIMESの10万円と対象支払額による制約は同じ式にできない。GitHubは数値上限を特定しておらず、無制限の補償を意味しない。CloudflareとResendも各自の支払額条件・免責を保持する。",
+            "risk": "上限の月数や額だけで回復可能額を比較すると、対象外損害・補償義務の例外・無料サービスの扱いを落とす。請求できる最大額を停止損失の補填見込みとみなせない。",
+            "action": "復旧計画と契約上の救済を別に評価する。金額比較は同じ通貨・サービス・対象期間・損害種別・適用例外が確定した案件で行い、現段階では順位や合計補償額を作らない。"
+          },
+          "ip": {
+            "difference": "多くは顧客コンテンツの帰属を維持するが、利用許諾の範囲は異なる。Apple・PR TIMESには配信の許諾、Resendにはサービス提供の許諾、Search Consoleには目的に結び付く許諾がある。GitHubの公開コンテンツにはAI学習を含む許諾があり、AppsFlyerの集計データ、GCP・Cloudflareのフィードバックの扱いも独立している。Anthropicの入力・出力の権利と、レジストラの代理公開・移管制約は同じ権利対象ではない。",
+            "risk": "所有権が残ることを、再利用・学習・フィードバック提供が一律に禁止されることと混同すると、公開リポジトリやサポート入力へ不適切な情報を渡す。ドメイン移管可能性をコンテンツ著作権の評価で代替できない。",
+            "action": "入力先を公開コンテンツ、顧客データ、フィードバック、集計データ、ドメイン登録に分けて許諾を照合する。所有権だけを根拠に機密情報の投入や再配布を許可しない。"
+          },
+          "personal_data": {
+            "difference": "Anthropic Commercial・GCP・Resend・Cloudflare・AppsFlyerはDPAの組込み条件を持つが、対象データと利用者側の義務は同じではない。Anthropic Consumerの学習除外には例外があり、GitHubの個人向けAI設定と公開コンテンツの許諾も別。Search Console・PR TIMES・レジストラには別のプライバシー文書や機能条件が関わる。AppleのiCloud・通知の条件は当該サービスに限定して読む。FirebaseはGCP共通本文と認証サービスの追加条件を明示参照する。",
+            "risk": "DPAという名称だけで同等の保護と判断したり、API側の学習禁止をConsumer/OAuthへ広げたりすると、実際の契約経路・対象データ・同意義務を取り違える。",
+            "action": "データと製品経路を先に特定し、契約種別、サービス固有条件、設定、同意、保持・削除を個別に照合する。今回の比較をDPA適用認定や設定検証の完了として使わない。"
+          },
+          "governing_law": {
+            "difference": "Californiaという共通表記があっても、Anthropic Commercial・Cloudflareの仲裁条件と、Consumer・GitHub・Google系の裁判所条件は同じではない。Google系とAppleには地域・請求国・請求対象等の修正条件があり、AppsFlyerはNew York、PR TIMESとレジストラは日本法・東京の裁判所。Resendで確認した準拠法だけから全紛争手続を推定しない。",
+            "risk": "法域名だけを揃えると、仲裁前通知、協議、裁判所、地域例外、必要言語や費用を見落とす。日本語アプリや会社所在地だけで、全アカウントの例外適用を確定できない。",
+            "action": "実紛争時は当該アカウントの契約主体・版・地域、請求種別と例外、通知手続を照合する。比較表の法域名だけで通知・申立て・権利放棄を実行しない。"
+          }
+        },
+        "limitations": [
+          "取得時点の公開本文に対する比較。実際の受諾版・個別契約・地域適用は未確認。",
+          "基礎となる個社分析の実行を再計上しない。比較は条件差と横断リスクを抽出する別の成果物。",
+          "AIの分析であり、検証器は法律解釈の正しさを証明しない。金額の単純ランキング・契約承認・事業者切替を行わない。"
+        ]
+      }
     ]
   },
   "entity": {

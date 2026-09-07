@@ -44,6 +44,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assert, broken, run } from './lib/selftest.mjs';
 import { assessmentProblems } from './lib/contract-assessment.mjs';
+import { comparisonProblems, comparisonScenarios } from './lib/contract-comparison.mjs';
 import { MONEY_FLOWS } from './check-vendors.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -304,6 +305,7 @@ export function build({ register, obligations }) {
 export function check(doc) {
   const { problems, public_analyses } = build(doc);
   const cr = doc.obligations?.contract_review;
+  if (cr) problems.push(...comparisonProblems(cr));
   for (const vendor of public_analyses) {
     const analyses = [...vendor.assessments, ...vendor.shared_assessments];
     for (const clause of cr?.clauses ?? []) {
@@ -344,6 +346,7 @@ function fixture() {
 
 function selftest() {
   const scenarios = [
+    ...comparisonScenarios(load().obligations.contract_review),
     ['実データで問題が出ない', () => assert(check(load()).length === 0, check(load()).join(' / '))],
 
     ['公開分析は出典別に残し、人の確認済みマスも参照できる', () => {
