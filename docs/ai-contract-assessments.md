@@ -45,3 +45,9 @@ AnthropicのConsumer Termsを追加URLとして登録し、AIによる12観点�
 | 紛争 | 地域別の仲裁と裁判所（J・M.7） | San Franciscoの裁判所（§13） |
 
 表は取得した本文の比較であり、各条件の適用法上の制限や例外を省略している。実際のアカウントへの適用、補足契約、運用設定の確認は別途必要。Consumer側は先述のPBC版を参照した。APIの保証をOAuth経路へ広げない。
+
+## 2026-09-07: Search ConsoleのGoogle規約
+
+[Google利用規約](https://policies.google.com/terms?hl=en&gl=jp)を英語・Japan指定で取得し、2026-07-30版の全文を12観点に結び付けた。同じURLの国表示による差を混ぜず、取得条件を記録した。[サービス別一覧](https://policies.google.com/terms/service-specific)のSearch Console項目はGoogle利用規約を案内している。
+
+この表示は実際のアカウントの契約国やAPI契約の適用を証明しない。アカウントの同意記録、追加契約、データ保護条件は引き続き未確認。過去の人の判定と業務のexecutorは保持する。
