@@ -760,11 +760,13 @@
       "task": "App Store CPP（訴求別ページ）の実験",
       "executor": "nobody",
       "evidence": [
-        "data/cpp-map.json"
+        "data/cpp-map.json",
+        "../simplememo-ios/scripts/lib/asc_product_pages.rb",
+        "../simplememo-ios/scripts/qa/test_asc_product_page_weeks.rb"
       ],
-      "note": "34本作成済みだが実験として回っていない",
-      "blocker": "not_started",
-      "unblocked_by": "**列は降りている。**2026-08-25 の10レポートに Page Type / Source Type / Territory があり、内訳も取得側が持つようになった（2026-08-26）。ただし**値はこの公開リポジトリに運ばない決定**なので、評価は ../simplememo-ios 側に置く。[2026-08-26] それまで「露出データがASCから降りない」と書いたままだった —— 降りていないのではなく、運んでいない",
+      "note": "34本作成済みだが実験として回っていない\n\n[2026-09-07 実測更新] 非公開iOS側PR #401/#402で日次とApple生成の週次Detailedを取得し、日付・ページ・イベント/Download Typeの組み合わせを保持した。mainの取得run 34111401528と34112630725は成功。観測されたCPPのダウンロードセルは更新、DiscoveryセルはImpressionであり、初回DL・ページ閲覧による実験評価には使えなかった。未観測セルは0ではない。実験の完了や効果は加点しない。ページ本数の旧34本は履歴で、2026-09-05の非公開棚卸しは70本（公開済みと下書きが混在）。",
+      "blocker": "external_data",
+      "unblocked_by": "取得経路は本番稼働済み。日次・週次の周辺合計を初回DLやページ閲覧へ読み替えない。次は月次DetailedまたはASCのCPP画面で一次指標の観測可否を確認し、共通の対象期間・比較対象・同時施策を記録する。初回DL・閲覧・比較の根拠が揃うまで実験完了へ移さない。数値は非公開iOS側に保持する。",
       "unlock": "asc_dimension_read"
     },
     {
