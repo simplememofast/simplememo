@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import { load, check } from './vendor-clause-worksheet.mjs';
+import { load as loadLedger, check } from './vendor-clause-worksheet.mjs';
 import { comparisonReport } from './lib/contract-comparison.mjs';
 
-const doc = load();
+const doc = loadLedger();
 const problems = check(doc);
 const report = problems.length ? { problems, comparisons: [] }
   : comparisonReport(doc.obligations.contract_review);
