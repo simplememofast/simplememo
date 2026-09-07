@@ -389,7 +389,10 @@
         "risk_note": "**Apple と同じ構造。金額では回復しない相手に、代替が無い。**\n\n上限は12か月の支払額、無料提供分は USD 5,000（≒75万円）。lost profits / revenues / savings / goodwill は種類として除外。**重過失・故意・人身損害は無制限リストに入っていない**（探した上で「見つからなかった」）。\n\n**ベンダー台帳は firebase を critical / fallback 無し と記録し、**App Check のキルスイッチについて「**代替ではなく回避策。**外している間は検証が効かない」と明記している。つまり止まったときの選択肢は「検証を切って動かす」で、**それは機能の代替ではなく、守りを下げること。**\n\n**USD 5,000 が意味するのは、代替の無いものの停止を金銭では戻せないということ。**下げる手立てがあるとすれば契約側ではなく運用側で、そこは一部ある（キルスイッチ）が、**外している間の穴は埋まっていない。**\n\n紛争は カリフォルニア州法・Santa Clara County 専属管轄。**日本は APAC の仲裁置換から明示的に除外されている**ので、米国の裁判所に行く。",
         "$ip": "**4社でいちばんきれい。ライセンスを渡していない。**\n\nGCP Terms §5.1 —— Customer Data と Customer Applications の**全 IP 権が Customer に残る。**（`Customer Application` は GCP を使って作成・ホストする software program、`Customer Data` は提供したデータとそこから導出したデータ。）\n\n**そして Google に与える IP ライセンス条項が、本文に見つからない。**modify も derivative work も sublicense も無い。**渡していないので、範囲を心配する必要が無い。**\n\n§5.2 はむしろ逆向き —— Google は Customer Data を **Cloud Data Processing Addendum に従ってのみ**access / use / process し、**それ以外の目的では処理しない。**\n\n**『改善のため利用できる』という一般的な権利も無い。**リサーチャーが `improv...` で本文を探して**見つからなかった**と報告している。**Cloudflare の Network Data に当たるものが、ここには無い。**\n\n**Feedback も表現が弱い。**Google と Affiliates が 'without restriction and without obligation to Customer' で使えるだけで、**過去版にあった『all right, title, and interest を Google に assign』という文言ではない**（リサーチャーが現行条文で確認）。Resend の exclusive・Cloudflare の perpetual/irrevocable と比べて、いちばん軽い。\n\n§14.14 が Section 5 全体を存続させる —— **権利帰属も §5.2 の保護も残る。**§8.7 は終了時に Services へのアクセスと Customer Data へのアクセスが終わると定める。\n\n**処理の具体的な許容範囲は §5.2 が Cloud DPA へ委ねているので、IP条項単独ではそこまで。**DPA 本文は別途（personal_data の欄が扱う範囲）。\n\n**出所は外部ディープリサーチ。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間は鎖の中に居ない。**",
         "fingerprint": "db2685cefe1a",
-        "fetched_at": "2026-09-02"
+        "fetched_at": "2026-09-02",
+        "analysis_sources": [
+          "https://cloud.google.com/terms"
+        ]
       },
       {
         "id": "appsflyer",
@@ -1821,6 +1824,402 @@
                 "start": 16806,
                 "length": 1420,
                 "sha256": "41e2ab99bbb59b0361dc2520fbcbe23076358bff9b398bfa60602c5cabf43c46"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "appsflyer-tou-20260907",
+        "vendor_id": "appsflyer",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T08:56:01.663Z",
+        "source": {
+          "url": "https://www.appsflyer.com/legal/terms-of-use/",
+          "version": "2025-11-23",
+          "representation": "English TOU, all numbered sections and free/creative additional terms; separate MSA not incorporated into this analysis.",
+          "sha256": "d50b47016640c8d519b5228b6377b5635cb674e32141253c4ef39ea526971157",
+          "characters": 53731
+        },
+        "open_questions": [
+          "Actual TOU versus MSA applicability, executed orders and subscription package remain unverified.",
+          "DPA, privacy policy, SDK data, consent, SLA and recovery need separate evidence."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Provider cap: prior twelve months paid; damage exclusions and legal qualifications.",
+            "action": "Assess exposure.",
+            "evidence": [
+              {
+                "section": "cap",
+                "start": 26878,
+                "length": 996,
+                "sha256": "b65d51bd1ecec796e3220d122f62e465cc65b94ec06d8cbb886db1964bbc2d61"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "conditional",
+            "summary": "Mutual indemnity has asymmetric scope and exclusions; privacy adds customer exposure.",
+            "action": "Check integrations.",
+            "evidence": [
+              {
+                "section": "ind",
+                "start": 18962,
+                "length": 3135,
+                "sha256": "e08d37a55460448410ad1a5cdc755959da463fcbf66dfe7efc672cbf9b8d1035"
+              },
+              {
+                "section": "privacy",
+                "start": 11746,
+                "length": 5246,
+                "sha256": "cefc0179120ef940312d7d3ef093177e83faccdf59c94a035d0a8b051ae41e22"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Customer data retained; provider owns technology and aggregated data.",
+            "action": "Verify data boundaries.",
+            "evidence": [
+              {
+                "section": "ip",
+                "start": 27874,
+                "length": 1010,
+                "sha256": "e58201a4955c7064ba247b6e560a08db33bd0c24d265d6c2f0120c031fc0a914"
+              },
+              {
+                "section": "privacy",
+                "start": 11746,
+                "length": 5246,
+                "sha256": "cefc0179120ef940312d7d3ef093177e83faccdf59c94a035d0a8b051ae41e22"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "risk",
+            "summary": "DPA incorporated; restricted data barred and customer bears consent duties.",
+            "action": "Inspect SDK configuration.",
+            "evidence": [
+              {
+                "section": "privacy",
+                "start": 11746,
+                "length": 5246,
+                "sha256": "cefc0179120ef940312d7d3ef093177e83faccdf59c94a035d0a8b051ae41e22"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "conditional",
+            "summary": "Mutual confidentiality lasts five years; pricing and testing disclosure restricted.",
+            "action": "Limit sharing.",
+            "evidence": [
+              {
+                "section": "conf",
+                "start": 9931,
+                "length": 1815,
+                "sha256": "37a2c8bc0a206493c24c04827818b29b33696873addd8a4902815c7d3d9496f2"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Broad disclaimer except express representations.",
+            "action": "Verify service-specific commitments.",
+            "evidence": [
+              {
+                "section": "war",
+                "start": 25284,
+                "length": 1594,
+                "sha256": "05e6e7591066a7a2048c30a26ebb51b928153684709a1784ff0e7146aec724d4"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Renewal requires timely notice; suspension and free-account deletion permitted.",
+            "action": "Check calendar and backups.",
+            "evidence": [
+              {
+                "section": "term",
+                "start": 28884,
+                "length": 2963,
+                "sha256": "bff343b19e9d7f3f5c342946bdc74e490486bcb3fe7158c7a5962e8dd7d1cf9f"
+              },
+              {
+                "section": "free",
+                "start": 35754,
+                "length": 2259,
+                "sha256": "39b03f3bb99ec09e0e3761e0cbaaf56063319779a128d82ce6f74e19a4beb037"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "risk",
+            "summary": "New York law and courts.",
+            "action": "Assess recourse.",
+            "evidence": [
+              {
+                "section": "misc",
+                "start": 33328,
+                "length": 1433,
+                "sha256": "09e240165aa668d5c89e7b6ec998fad58cbd08346eb0408084955d7b66287579"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "No insurance requirement identified.",
+            "action": "Check orders.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 1988,
+                "length": 40563,
+                "sha256": "853e203a77492bfb8901127ead3918466f53abecda1e0cb2a329027c6199497b"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "risk",
+            "summary": "Provider freely assigns; customer requires consent.",
+            "action": "Review transfer needs.",
+            "evidence": [
+              {
+                "section": "misc",
+                "start": 33328,
+                "length": 1433,
+                "sha256": "09e240165aa668d5c89e7b6ec998fad58cbd08346eb0408084955d7b66287579"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "risk",
+            "summary": "Provider performance excused beyond reasonable control.",
+            "action": "Maintain fallback.",
+            "evidence": [
+              {
+                "section": "misc",
+                "start": 33328,
+                "length": 1433,
+                "sha256": "09e240165aa668d5c89e7b6ec998fad58cbd08346eb0408084955d7b66287579"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Default ten-day payment, nonrefundable fees; renewal increases permitted.",
+            "action": "Reconcile actual order.",
+            "evidence": [
+              {
+                "section": "billing",
+                "start": 16992,
+                "length": 1970,
+                "sha256": "bf39b1bc0541b79c7ec3abc4fedf54b18d50c25bb5b2ab0c0e2cbd63598b9be5"
+              },
+              {
+                "section": "term",
+                "start": 28884,
+                "length": 2963,
+                "sha256": "bff343b19e9d7f3f5c342946bdc74e490486bcb3fe7158c7a5962e8dd7d1cf9f"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "google-cloud-base-terms-20260907",
+        "vendor_id": "google_cloud",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T09:00:46.608Z",
+        "source": {
+          "url": "https://cloud.google.com/terms",
+          "version": "2026-09-02",
+          "representation": "English base agreement, sections 1–15 and definitions. Linked regional modifications and URL Terms are separate documents.",
+          "sha256": "4b93f47fbc885cfa17897e06e7374289eb25977df29ef050c1224da30e00a9a2",
+          "characters": 95115
+        },
+        "open_questions": [
+          "Actual agreement, exemptions, billing region, order forms and service-specific terms remain unverified.",
+          "DPA, SLA, processing configuration and recovery require separate evidence."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Twelve-month fee cap; free-services USD5,000 cap; specified unlimited liabilities.",
+            "action": "Check service exposure.",
+            "evidence": [
+              {
+                "section": "cap",
+                "start": 66404,
+                "length": 1342,
+                "sha256": "9e503337bff22bdac6eb2585bcd2806d9d6aed2bf2053aaed72e99705a054a59"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "conditional",
+            "summary": "Mutual indemnities differ; free services excluded from provider IP indemnity.",
+            "action": "Review exclusions.",
+            "evidence": [
+              {
+                "section": "ind",
+                "start": 67746,
+                "length": 3817,
+                "sha256": "ef95ae16025ced9423924cf8b33df57db75745e9098bc87e6552c2704fb5280e"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Customer data and applications retained; feedback unrestricted.",
+            "action": "Separate feedback.",
+            "evidence": [
+              {
+                "section": "ip",
+                "start": 55954,
+                "length": 1319,
+                "sha256": "7ed703a67e8f0e8a25ea4c9efe15b1172a9643faf8020fff11be6e9dcadf0cce"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "Data processing restricted by incorporated DPA.",
+            "action": "Review DPA and actual configuration.",
+            "evidence": [
+              {
+                "section": "ip",
+                "start": 55954,
+                "length": 1319,
+                "sha256": "7ed703a67e8f0e8a25ea4c9efe15b1172a9643faf8020fff11be6e9dcadf0cce"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "conditional",
+            "summary": "Mutual reasonable-care duties with permitted disclosures.",
+            "action": "Review access.",
+            "evidence": [
+              {
+                "section": "conf",
+                "start": 58650,
+                "length": 1574,
+                "sha256": "390ec115691136cdef34d0541f3948eb7ddccd514c1dccd24e2b5b170f0f2f6e"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Express commitments remain; other warranties disclaimed.",
+            "action": "Check service SLAs.",
+            "evidence": [
+              {
+                "section": "war",
+                "start": 65652,
+                "length": 752,
+                "sha256": "d0c2096dbfbe11d019199922187ce00579f3f1397bdd82ea5a6517e822c6e60f"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "GCP convenience termination and suspension; access ends.",
+            "action": "Verify recovery.",
+            "evidence": [
+              {
+                "section": "term",
+                "start": 60224,
+                "length": 4658,
+                "sha256": "9d469e82e35e753501910d8665f45440cd2024ac452b49470a9387bb9668368a"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "conditional",
+            "summary": "Base California forum subject to regional modifications.",
+            "action": "Verify billing region.",
+            "evidence": [
+              {
+                "section": "law",
+                "start": 73982,
+                "length": 1480,
+                "sha256": "eb32faa4ed8197ad326f45948401444654ae4ac61f70ea0d54796f02e959b7aa"
+              },
+              {
+                "section": "region",
+                "start": 91850,
+                "length": 357,
+                "sha256": "230d0180daa16847ce1700406fdb168c64fc9f519038b522080eced1cf30c50e"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "No insurance requirement identified.",
+            "action": "Check orders.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 34939,
+                "length": 57268,
+                "sha256": "67d4259e5f1914f190db5243fba4f49cc7a209889c29520d56bd40720e69f58b"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "conditional",
+            "summary": "Consent generally required; qualifying affiliate assignment allowed.",
+            "action": "Review corporate changes.",
+            "evidence": [
+              {
+                "section": "assign",
+                "start": 72020,
+                "length": 610,
+                "sha256": "f25013b34b11e541fcdae1df6b020e479767419047a9c9fec6ef6324678af68c"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "conditional",
+            "summary": "Mutual relief for uncontrollable circumstances.",
+            "action": "Plan continuity.",
+            "evidence": [
+              {
+                "section": "force",
+                "start": 72959,
+                "length": 222,
+                "sha256": "1bff7594712f42d11405c64c52e5769597766a7a0a41e595487b171744621c74"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Noncancellable fees, limited credits, late charges; regional terms may override.",
+            "action": "Reconcile billing.",
+            "evidence": [
+              {
+                "section": "pay",
+                "start": 41122,
+                "length": 7119,
+                "sha256": "ee4d830d61871f1d9d2d3146be95ca8750bf0cd1ee1969219f2c4972cf980899"
+              },
+              {
+                "section": "region",
+                "start": 91850,
+                "length": 357,
+                "sha256": "230d0180daa16847ce1700406fdb168c64fc9f519038b522080eced1cf30c50e"
               }
             ]
           }
