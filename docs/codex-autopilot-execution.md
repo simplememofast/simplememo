@@ -45,8 +45,11 @@ gateの旧引継ぎメッセージにある`GITHUB_RUN_ID`は、この実タス�
 
 ## 着手前の確認
 
-1. latest mainを専用worktreeへ取得し、CLAUDE.md、Runbook、ローカルタスクSKILLと
-   `references/retry-procedure-v5.md`を全文読む。ユーザーのcheckoutを変更しない。
+1. latest mainを専用worktreeへ取得し、`CLAUDE.md`、
+   `docs/obsidian/AUTOPILOT_RUNBOOK.md`、本書、`docs/cost-delegation.md`を全文読む。
+   ユーザーのcheckoutを変更しない。Codexではこのリポジトリ内の手順を正本とし、
+   旧Claude環境のローカルタスクSKILLや`references/retry-procedure-v5.md`を前提にしない。
+   必要な手順や根拠が不足する場合は推測して進めず、未確認として止まる。
    作業環境・GitHub接続による配送は`docs/prtimes-d14-capture.md` §6に従う。
 2. `data/emergency-stop.json`の全体と自routeの停止を最初に読む。
    停止・予算・未レビュー超過の解除や閾値変更を自分で行わない。

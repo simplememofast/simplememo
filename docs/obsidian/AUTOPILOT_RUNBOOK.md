@@ -2,8 +2,8 @@
 
 ## 現行の実行元（2026-09-07移管）
 
-主系06:00 JSTと補完09:20/12:20 JSTは、このMacのCodex automation
-`obsidian-autopilot-retry-standby`へ移管する。現在の実行契約は
+主系06:00 JSTは、このMacのCodex automation `obsidian`、
+補完09:20/12:20 JSTは `obsidian-2`として保存・有効化済み。現在の実行契約は
 [`docs/codex-autopilot-execution.md`](../codex-autopilot-execution.md)を読む。
 下のActions/CCRの記述は旧実行環境の説明で、停止・予算・当日占有・価値契約・
 記事品質・台帳・本番確認の要件は引き続き適用する。ActionsのClaude workflowは
@@ -78,8 +78,8 @@
 
 | 経路 | 時刻 | 実体 | 状態の見える場所 |
 |---|---|---|---|
-| 主系・route `actions` | 06:00 JST | Codex automation `obsidian-autopilot-retry-standby` | Codexの実タスクID・ローカルrun-result/logs・共有runs台帳・PR・本番 |
-| 補完・route `ccr-0920` | 09:20 / 12:20 JST | 同じCodex automation（当日未完の場合のみ） | 同上 |
+| 主系・route `actions` | 06:00 JST | Codex automation `obsidian` | Codexの実タスクID・ローカルrun-result/logs・共有runs台帳・PR・本番 |
+| 補完・route `ccr-0920` | 09:20 / 12:20 JST | Codex automation `obsidian-2`（当日未完の場合のみ） | 同上 |
 | 旧Claude Actions | 定期なし・手動のみ | `.github/workflows/obsidian-autopilot.yml` | Actions runログ・共有台帳 |
 | 旧CCR A / B / retry | 停止 | 下の旧trigger IDを保持 | 元設定はロールバック参照用 |
 
