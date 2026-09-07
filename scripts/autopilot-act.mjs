@@ -111,12 +111,20 @@ export function daysBetween(a, b) {
 // （bq_checked:false を 0件 と書かないのと同じ規律）。
 
 /**
- * EP 委任判定の月次追認（D8）の閉じ条件。**追認が全部済んだか、窓を過ぎたか**のどちらかで閉じる。
+ * EP 委任判定の月次追認（D8）の閉じ条件。所有者が制度を終了した場合も、その根拠で閉じる。
+ * 制度が続く場合は追認完了または窓の経過を判定する。制度終了は個別の追認ではない。
  * 窓を過ぎて閉じた行は evidence に「未追認 N 件は翌月へ持ち越す」と書く —— 閉じたことを追認と読ませない。
  */
 function epRatifiedOrWindow(params, ctx) {
   const acts = ctx.ledgerDoc?.actions;
   if (!Array.isArray(acts)) return { closed: false, evidence: 'アクション台帳を読めず判定不能' };
+  const ratification = ctx.scorePolicy?.ep?.precision_review?.ratification;
+  if (ratification?.cadence === 'none' && ratification.decided_by === 'owner'
+      && /^\d{4}-\d{2}-\d{2}$/.test(ratification.decided_at ?? '')
+      && ratification.decided_at <= ctx.today
+      && typeof ratification.evidence === 'string' && ratification.evidence.trim()) {
+    return { closed: true, evidence: `${ratification.decided_at} の所有者判断で月次追認を終了。AI委任と個別判定を維持し、人の追認済みとは扱わない。根拠: ${ratification.evidence}` };
+  }
   const accepted = new Set(ctx.scorePolicy?.ep?.precision_review?.accepted_modes ?? ['human']);
   const ids = Array.isArray(params.ids) ? params.ids : [];
   const still = [];
@@ -4242,6 +4250,24 @@ async function selftest() {
     t('採点の方針が読めなければ立てない',
       derive(ctxOf([delegated('act-a')], '2026-10-01', null)).filter((d) => d.source === 'ep-ratification').length === 0);
     const params = { month: '2026-10', ids: ['act-a', 'act-b'], opened_jst: '2026-10-01', window_days: 14 };
+    const ended = structuredClone(policy);
+    ended.ep.precision_review.ratification = { cadence: 'none', decided_by: 'owner',
+      decided_at: '2026-10-03', evidence: '所有者が月次追認を終了してAI委任を維持すると選択' };
+    const rows = [delegated('act-a'), delegated('act-b')];
+    const before = JSON.stringify(rows);
+    const closure = CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf(rows, '2026-10-05', ended));
+    t('所有者の方針終了で閉じるが人の追認とはしない', closure.closed && closure.evidence.includes('人の追認済みとは扱わない'));
+    t('方針終了は個別の委任判定を変更しない', JSON.stringify(rows) === before);
+    const unknownDay = ctxOf(rows, '2026-10-05', ended);
+    delete unknownDay.today;
+    t('現在日を確認できなければ制度終了で閉じない', !CLOSE_CHECKS.ep_ratified_or_window(params, unknownDay).closed);
+    t('終了後は月次依頼を起票しない', derive(ctxOf(rows, '2026-11-01', ended)).filter(d => d.source === 'ep-ratification').length === 0);
+    for (const patch of [{ evidence: '' }, { decided_by: 'codex' }, { decided_at: '2026-11-01' }]) {
+      const invalid = structuredClone(ended);
+      Object.assign(invalid.ep.precision_review.ratification, patch);
+      t(`終了根拠が不十分なら閉じない ${JSON.stringify(patch)}`,
+        !CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf(rows, '2026-10-05', invalid)).closed);
+    }
     t('未追認が残っていれば閉じない',
       CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf([delegated('act-a'), delegated('act-b')], '2026-10-05')).closed === false);
     t('全部人の判定に置き換わったら閉じる',

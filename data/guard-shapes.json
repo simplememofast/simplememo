@@ -669,6 +669,18 @@
       "expr": "item.design_decision",
       "disposition": "任意項目",
       "note": "2026-09-06: 設計採用記録のない既存候補は未採用のまま採点する。記録がある場合の形式不正はrank→score→designDecisionProblemsで別に拒否し、正しい形の場合だけ文書の実在を追加確認する。記録の欠落は設計採用済み表示や採用の根拠にならない。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "ctx.today",
+      "disposition": "前提",
+      "note": "2026-09-07: 月次追認制度を終了できるのは所有者の決定日が現在日以前で根拠がある場合だけ。現在日が欠落すると終了の根拠として通さず、未追認はopenに残る。未来の決定日・根拠欠落・AI自己決定でも閉じない自己検査を確認。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "closure.closed",
+      "disposition": "報告のみ",
+      "note": "2026-09-07: 自己検査で制度終了と本人追認を区別する説明の両方を要求する。closed欠落・falseなら検査が失敗する向きで、違反を隠すガードではない。全81件のowner_neededとreview記録不変も実データで照合した。"
     }
   ],
   "coverage_measured_at": "2026-09-03",

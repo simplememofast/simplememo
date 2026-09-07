@@ -1,7 +1,7 @@
 {
   "as_of_jst": "2026-09-07",
   "routine_snapshot_sha256": "d6935b873c42a9da47b36562f0aac75f1d09cafe9d6f5f83a2f0dc78fb6c986e",
-  "open_total": 10,
+  "open_total": 9,
   "pending_pr": [],
   "oldest_open_days": 4,
   "acknowledged": 7,
@@ -37,6 +37,11 @@
       "evidence": "2026-09-05 以降 actions は 2回着手し usage_limit の再発なし"
     },
     {
+      "id": "act-ep-ratification-2026-09",
+      "title": "EP 委任判定の月次追認（2026-09）: 未追認 20 件を人が読む",
+      "evidence": "2026-09-07 の所有者判断で月次追認を終了。AI委任と個別判定を維持し、人の追認済みとは扱わない。根拠: 2026-09-07、提示した選択肢「今後はAI委任のみとし、月次の人の追認をやめる」に対し、オーナーが「1 独立タスク、2 任せる、3 、4 別で進んでいるのでスキップ  5 AI委任」と回答。既存の委任を維持し月次追認を終了する。個別20件の本人追認ではない。"
+    },
+    {
       "id": "act-selfheal-ap-20260906-actions",
       "title": "未修理の故障: ap-20260906-actions（unknown）",
       "evidence": "ap-20260906-actions は selfheal の未修理リストから消えた"
@@ -66,15 +71,6 @@
       "why": "当初のActions/CCRでは非公開分析へ到達できず、取得を担う実行系の検証が必要だった。2026-09-04、明示承認後のCodexでは対象画面の読み取りに成功し、項目・単位・導線の推定は解消した。現在のhuman分類は過去の依頼と未完了のD14評価を残すもので、閲覧承認を再度求める意味ではない。Coworkの日次Routineで取得からPR作成まで完走した証拠はまだない。評価日の実測・対象実験の確定評価まで閉じない。",
       "evidence": "リポジトリから検査できない（人が閉じる）",
       "not_before_jst": "2026-09-17"
-    },
-    {
-      "id": "act-ep-ratification-2026-09",
-      "title": "EP 委任判定の月次追認（2026-09）: 未追認 20 件を人が読む",
-      "detail": "オーナー判断（2026-09-05・data/autonomy-score.json ep.precision_review.ratification）: 委任で数えている判定を月1回、人が読んで納得した行を人の判定に上書きする。\n\n対象:\n- act-authority-split-deletion … owner_needed=true（owner_delegated/codex）\n- act-ccr-bigquery-connector … owner_needed=false（owner_delegated/codex）\n- act-ccr-command-classifier … owner_needed=false（owner_delegated/codex）\n- act-gh-pat-scope-and-rotation … owner_needed=true（owner_delegated/codex）\n- act-budget-overrun-32816234185 … owner_needed=true（owner_delegated/codex）\n- act-orphaned-pr-660 … owner_needed=false（owner_delegated/codex）\n- act-selfheal-ap-20260830-actions … owner_needed=true（owner_delegated/codex）\n- act-selfheal-ap-20260831-actions … owner_needed=true（owner_delegated/codex）\n- act-selfheal-ap-20260831-ccr0920 … owner_needed=true（owner_delegated/codex）\n- act-orphaned-branch-claude-obsidian-auto-20260902 … owner_needed=false（owner_delegated/codex）\n- act-budget-overrun-33454414490 … owner_needed=true（owner_delegated/codex）\n- act-pr6-d14-evaluate … owner_needed=true（owner_delegated/codex）\n- act-orphaned-branch-claude-obsidian-auto-20260903 … owner_needed=false（owner_delegated/codex）\n- act-autopilot-cpp-ppid … owner_needed=true（owner_delegated/codex）\n- act-pages-outside-shared-css … owner_needed=false（owner_delegated/codex）\n- act-two-lang-switchers … owner_needed=false（owner_delegated/codex）\n- act-asc-cpp-slot-cleanup … owner_needed=true（owner_delegated/codex）\n- act-faq-question-level-audit … owner_needed=false（owner_delegated/codex）\n- act-selftest-rule-only-coverage … owner_needed=false（owner_delegated/codex）\n- act-orphaned-branch-claude-google-discover-strategy-ydu1a6 … owner_needed=false（owner_delegated/codex）\n\n手順: `node scripts/ep-ratify.mjs --list` で読み、納得した行は `--ratify <id> --evidence \"オーナーの言葉\"`、納得しない行は `--overturn <id> --evidence \"…\"`。台帳をコミットして push する。\n\n**点は変わらない**（委任で既に数えている）。変わるのは公開面の「人の判定 0 件」で、反転した件数が AI の自己採点の甘さの実測になる。追認せずに 14 日の窓を過ぎたら閉じ、未追認は翌月の起票に持ち越す。",
-      "age_days": 2,
-      "why": "判定者を人に置き換える操作そのもの。AI が代筆すると #901 の穴（自己採点）に戻る",
-      "evidence": "未追認 20 件（act-authority-split-deletion / act-ccr-bigquery-connector / act-ccr-command-classifier / act-gh-pat-scope-and-rotation / act-budget-overrun-32816234185 / act-orphaned-pr-660 / act-selfheal-ap-20260830-actions / act-selfheal-ap-20260831-actions / act-selfheal-ap-20260831-ccr0920 / act-orphaned-branch-claude-obsidian-auto-20260902 / act-budget-overrun-33454414490 / act-pr6-d14-evaluate / act-orphaned-branch-claude-obsidian-auto-20260903 / act-autopilot-cpp-ppid / act-pages-outside-shared-css / act-two-lang-switchers / act-asc-cpp-slot-cleanup / act-faq-question-level-audit / act-selftest-rule-only-coverage / act-orphaned-branch-claude-google-discover-strategy-ydu1a6）。窓は 2026-09-05 から 14 日",
-      "not_before_jst": null
     }
   ],
   "ai": [
