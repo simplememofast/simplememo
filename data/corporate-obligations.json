@@ -848,6 +848,198 @@
             ]
           }
         }
+      },
+      {
+        "id": "resend-public-terms-20260907",
+        "vendor_id": "resend",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T08:12:27.327Z",
+        "source": {
+          "url": "https://resend.com/legal/terms-of-service",
+          "version": "2026-08-27",
+          "sha256": "55e2506d70dfe0c9eb625e3b3d7722795c333a560418bea1e18289fc579ffa9b",
+          "characters": 23905
+        },
+        "open_questions": [
+          "Verify actual accepted agreement, account plan, fee limits and any service-specific SLA.",
+          "Review incorporated DPA and actual processing/recipient-consent scope separately.",
+          "Verify delivery fallback and deletion/export behavior without exposing memo contents."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Liability capped at amounts paid; exclusions subject to law.",
+            "action": "Assess outage exposure.",
+            "evidence": [
+              {
+                "section": "21",
+                "start": 18407,
+                "length": 1216,
+                "sha256": "530ffbfd00c970fbd12903320a818821ca39a8d8751b698e221c22885b80793d"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "risk",
+            "summary": "Customer hold-harmless obligation.",
+            "action": "Review exposure.",
+            "evidence": [
+              {
+                "section": "21",
+                "start": 18407,
+                "length": 1216,
+                "sha256": "530ffbfd00c970fbd12903320a818821ca39a8d8751b698e221c22885b80793d"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Message/data rights retained; service license granted.",
+            "action": "Verify content rights.",
+            "evidence": [
+              {
+                "section": "9",
+                "start": 6627,
+                "length": 2209,
+                "sha256": "690fe3ff8f72cb85fa0cd02f81522a79f29ae2422e1d97688d74c49fe50a3443"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "DPA incorporated; recipient permissions required.",
+            "action": "Review DPA and consent.",
+            "evidence": [
+              {
+                "section": "1",
+                "start": 281,
+                "length": 923,
+                "sha256": "65555809780f8bed02e7e59d300d8b8d983b1ffc71cb21834036b7a97d131085"
+              },
+              {
+                "section": "9",
+                "start": 6627,
+                "length": 2209,
+                "sha256": "690fe3ff8f72cb85fa0cd02f81522a79f29ae2422e1d97688d74c49fe50a3443"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "conditional",
+            "summary": "Message disclosure limited; feedback lacks confidentiality.",
+            "action": "Keep secrets out of feedback.",
+            "evidence": [
+              {
+                "section": "9",
+                "start": 6627,
+                "length": 2209,
+                "sha256": "690fe3ff8f72cb85fa0cd02f81522a79f29ae2422e1d97688d74c49fe50a3443"
+              },
+              {
+                "section": "18",
+                "start": 14955,
+                "length": 1124,
+                "sha256": "1418c80e96cae887838c9f0ccc9a06e9c82aee38b3ca36522f6a4bc184870679"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Availability and other warranties disclaimed.",
+            "action": "Verify subscribed SLA.",
+            "evidence": [
+              {
+                "section": "20",
+                "start": 16929,
+                "length": 1478,
+                "sha256": "960845d9d4396f3b2c8f1f13c6b589d1d13a64d92594cde494f28ea40a62a901"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Immediate discretionary suspension or termination.",
+            "action": "Test alternate delivery.",
+            "evidence": [
+              {
+                "section": "22",
+                "start": 19623,
+                "length": 552,
+                "sha256": "9bc625f7594834680ee3c928653cfcbb9024c627b4c5e682d89a85aba1480bc5"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "risk",
+            "summary": "California law.",
+            "action": "Confirm dispute terms.",
+            "evidence": [
+              {
+                "section": "23",
+                "start": 20175,
+                "length": 595,
+                "sha256": "e0d461af107a3d700e08c0c87a8a12b4e0b3e6b03e6e06e72e6990a93bb8063b"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "Insurance requirement not identified.",
+            "action": "Check separate agreement.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 281,
+                "length": 23130,
+                "sha256": "493e2464904bb0a29727e9af7ff0095c63aaa90e3caa7536e185bb9357222818"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "not_identified",
+            "summary": "General assignment clause not identified.",
+            "action": "Check separate agreement.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 281,
+                "length": 23130,
+                "sha256": "493e2464904bb0a29727e9af7ff0095c63aaa90e3caa7536e185bb9357222818"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "not_identified",
+            "summary": "Standalone force-majeure clause not identified.",
+            "action": "Check remedies.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 281,
+                "length": 23130,
+                "sha256": "493e2464904bb0a29727e9af7ff0095c63aaa90e3caa7536e185bb9357222818"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Automatic renewal; free-tier conversion possible.",
+            "action": "Verify plan and limits.",
+            "evidence": [
+              {
+                "section": "pay",
+                "start": 3129,
+                "length": 3498,
+                "sha256": "cc7fb89e7cec42e9dff1ad518be4a6576640f91e54bb3f68395acb8a979acc66"
+              }
+            ]
+          }
+        }
       }
     ]
   },
