@@ -60,6 +60,21 @@ test('GA4 enforces release date, whole dates and late-arrival waiting', () => {
   assert.throws(() => validateOptions({ ...ga4, end: '2026-09-16' }, now));
   assert.equal(validateOptions({ ...ga4, end: '2026-09-15' }, now).end, '2026-09-15');
 });
+test('provisional diagnostics allow only seven closed JST dates from the link day', () => {
+  const options = { report: 'ga4-provisional', start: '2026-09-05', end: '2026-09-11' };
+  assert.equal(validateOptions(options, now).end, '2026-09-11');
+  for (const override of [{ start: '2026-09-04' }, { end: '2026-09-12' },
+    { start: '2026-09-19', end: '2026-09-20' }, { end: '2026-09-04' }]) {
+    assert.throws(() => validateOptions({ ...options, ...override }, now));
+  }
+  const midnight = new Date('2026-09-06T15:00:00Z'); // Sep 7 00:00 JST.
+  assert.equal(validateOptions({ ...options, end: '2026-09-06' }, midnight).end, '2026-09-06');
+  assert.throws(() => validateOptions({ ...options, end: '2026-09-07' }, midnight));
+  for (const report of ['ga4-quality', 'ga4-funnel', 'ga4-journey']) {
+    assert.throws(() => validateOptions({ ...options, report, provisional: true }, now));
+    assert.throws(() => validateOptions({ report, start: '2026-09-19', end: '2026-09-19' }, now));
+  }
+});
 test('GSC cutoff uses Pacific calendar, not the Mac or UTC date', () => {
   // Sep 19 17:00 PT: cutoff Sep 16, although UTC/JST are Sep 20.
   assert.throws(() => validateOptions({ ...gsc, end: '2026-09-17' }, now));
@@ -147,6 +162,69 @@ test('GA4 requires the following day before running the 24-hour funnel', async (
   assert.equal(result.status, 'incomplete_daily_tables'); assert.equal(api.calls.length, 0);
   assert.deepEqual(result.coverage.at(-1), { day: '2026-09-08', present: false });
 });
+test('provisional collection reads the partial link day without requesting a following day', async () => {
+  const api = fakeApi({ listTables: async () => [{ id: 'events_20260905' }] });
+  const result = await collect({ report: 'ga4-provisional', execution: 'export',
+    start: '2026-09-05', end: '2026-09-05' }, { api, now: new Date('2026-09-07T00:00:00Z') });
+  assert.equal(result.status, 'provisional_complete');
+  assert.equal(result.provisional, true);
+  assert.equal(result.eligible_for_outcome_evaluation, false);
+  assert.equal(result.partial_link_day_included, true);
+  assert.deepEqual(result.coverage, [{ day: '2026-09-05', present: true }]);
+  assert.deepEqual(result.queries.map(q => q.file), ['ga4-quality.sql']);
+  assert.equal(api.calls.length, 2);
+  assert.equal(api.calls[0].dryRun, true);
+  assert.equal(api.calls[1].dryRun, undefined);
+  assert.equal(api.calls[1].params.scan_end_date, '2026-09-05');
+  assert.equal(api.calls[1].types.scan_end_date, 'DATE');
+  assert.equal(api.calls[1].params.bridge_measurement_version, '2026-09-07');
+  assert.equal(api.calls[1].maximumBytesBilled, QUERY_CAP);
+  assert.match(result.interpretation, /not GA4 UI sessions/);
+  assert.deepEqual(unseal(seal(result, pair.publicKey), pair.privateKey), result);
+});
+test('provisional windows with missing daily tables do not scan a subset or substitute intraday', async () => {
+  for (const tables of [[{ id: 'events_20260905' }], [{ id: 'events_intraday_20260905' }]]) {
+    const api = fakeApi({ listTables: async () => tables });
+    const result = await collect({ report: 'ga4-provisional', execution: 'export',
+      start: '2026-09-05', end: '2026-09-06' }, { api, now });
+    assert.equal(result.status, 'incomplete_daily_tables');
+    assert.equal(result.provisional, true);
+    assert.equal(result.eligible_for_outcome_evaluation, false);
+    assert.equal(result.coverage.at(-1).day, '2026-09-06');
+    assert.equal(result.coverage.at(-1).present, false);
+    assert.equal(api.calls.length, 0);
+  }
+});
+test('provisional dry runs and unavailable estimates never execute a SELECT', async () => {
+  const options = { report: 'ga4-provisional', execution: 'dry-run', start: '2026-09-06', end: '2026-09-06' };
+  const api = fakeApi();
+  const result = await collect(options, { api, now });
+  assert.equal(result.status, 'provisional_dry_run_complete');
+  assert.equal(result.partial_link_day_included, false);
+  assert.equal(api.calls.length, 1);
+  assert.equal(api.calls[0].dryRun, true);
+  for (const estimate of [null, QUERY_CAP + 1]) {
+    const denied = fakeApi({ query: async (_, q) => { denied.calls.push(q); return { totalBytesProcessed: estimate }; } });
+    const failure = await collect({ ...options, execution: 'export' }, { api: denied, now });
+    assert.equal(failure.status, 'error');
+    assert.equal(failure.provisional, true);
+    assert.equal(denied.calls.length, 1);
+  }
+});
+test('all mature GA4 reports still require and scan the following day', async () => {
+  for (const report of ['ga4-quality', 'ga4-funnel', 'ga4-journey']) {
+    const api = fakeApi();
+    const result = await collect({ ...ga4, report }, { api, now });
+    assert.equal(result.status, 'complete');
+    assert.equal(result.provisional, undefined);
+    assert.deepEqual(result.coverage.at(-1), { day: '2026-09-08', present: true });
+    assert.equal(api.calls[0].params.scan_end_date, '2026-09-08');
+    assert.equal(api.calls[0].types.scan_end_date, 'DATE');
+    const missing = fakeApi({ listTables: async () => [{ id: 'events_20260906' }, { id: 'events_20260907' }] });
+    assert.equal((await collect({ ...ga4, report }, { api: missing, now })).status, 'incomplete_daily_tables');
+    assert.equal(missing.calls.length, 0);
+  }
+});
 test('dry-run-only never submits an execution', async () => {
   const api = fakeApi(); const result = await collect({ ...gsc, execution: 'dry-run' }, { api, now });
   assert.equal(result.status, 'dry_run_complete'); assert.equal(api.calls.length, 2);
@@ -214,4 +292,5 @@ test('workflow handles secrets only in the reader, uploads ciphertext only, and 
   assert.ok(!text.includes('contents: write')); assert.ok(!text.includes('schedule:'));
   assert.equal((text.match(/secrets\.GCP_SERVICE_ACCOUNT_JSON/g) || []).length, 1);
   assert.ok(text.includes('ga4-journey'));
+  assert.ok(text.includes('ga4-provisional'));
 });

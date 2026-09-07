@@ -1,5 +1,6 @@
 -- BigQuery Standard SQL. NOT EXECUTED; validate actual export schema first.
--- DATE parameters @start_date, @end_date; STRING @measurement_version.
+-- DATE parameters @start_date, @scan_end_date; STRING @measurement_version.
+-- The reader passes end_date + 1 day for mature reports, end_date for provisional diagnostics.
 -- STRING @bridge_measurement_version for the separate OneLink event contract.
 -- No user identifiers or full page URLs are emitted in the result.
 WITH extracted AS (
@@ -22,7 +23,7 @@ WITH extracted AS (
       '$.cross_channel_campaign.default_channel_group') AS default_channel_group
   FROM `yurika-simplememo.analytics_524656334.events_*`
   WHERE _TABLE_SUFFIX BETWEEN FORMAT_DATE('%Y%m%d', @start_date)
-    AND FORMAT_DATE('%Y%m%d', DATE_ADD(@end_date, INTERVAL 1 DAY))
+    AND FORMAT_DATE('%Y%m%d', @scan_end_date)
     AND REGEXP_CONTAINS(_TABLE_SUFFIX, r'^[0-9]{8}$')
     AND stream_id = '13605182969'
     AND platform = 'WEB'

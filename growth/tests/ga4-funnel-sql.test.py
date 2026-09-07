@@ -108,6 +108,23 @@ def run(events, sql_file=SQL):
 
 
 class FunnelTests(unittest.TestCase):
+    def test_quality_scan_uses_the_requested_boundary_and_excludes_intraday_other_streams_and_apps(self):
+        tree = sqlglot.parse_one(SQL.with_name("ga4-quality.sql").read_text(), read="bigquery")
+        predicate = tree.args["with_"].expressions[0].this.args["where"].this.sql(dialect="duckdb")
+        con = duckdb.connect(":memory:")
+        try:
+            con.execute("CREATE TABLE fixture (_TABLE_SUFFIX VARCHAR, stream_id VARCHAR, platform VARCHAR)")
+            con.executemany("INSERT INTO fixture VALUES (?, ?, ?)", [
+                (day, "13605182969", "WEB") for day in
+                ["20260904", "20260905", "20260906", "20260907", "intraday_20260905"]
+            ] + [("20260905", "other", "WEB"), ("20260905", "13605182969", "IOS")])
+            query = "SELECT _TABLE_SUFFIX FROM fixture WHERE " + predicate + " ORDER BY _TABLE_SUFFIX"
+            for end, expected in [(5, ["20260905"]), (6, ["20260905", "20260906"])]:
+                params = {"start_date": datetime.date(2026, 9, 5), "scan_end_date": datetime.date(2026, 9, end)}
+                self.assertEqual([row[0] for row in con.execute(query, params).fetchall()], expected)
+        finally:
+            con.close()
+
     def bridge(self, user, kind="web_to_app_click", offset=2, **overrides):
         data = dict(measurement_version="2026-09-07", link_route="onelink", bridge_scope="pilot",
                     link_url="https://simplememofast.onelink.me/it5q/test1234")
