@@ -314,7 +314,10 @@
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
-        "../simplememo-ios/SimpleMemo/FeatureFlags.swift"
+        "../simplememo-ios/SimpleMemo/FeatureFlags.swift",
+        "../simplememo-ios/SimpleMemo/AnalyticsClient.swift",
+        "../simplememo-ios/SimpleMemo/SceneDelegate.swift",
+        "docs/appsflyer-runtime-review-2026-09-07.md"
       ],
       "money_flow": "subscription",
       "payment_method": "none_registered",
@@ -323,7 +326,7 @@
       "approved_by": "human",
       "approved_at": "2026-08-22",
       "$fallback_was": "kill switch（FeatureFlags.appsFlyerEventEnabled）を false にするだけ",
-      "fallback_note": "**代替ではなく停止。**kill switch（FeatureFlags.appsFlyerEventEnabled）を false にすれば送信は止まるが、効果測定そのものは戻らない",
+      "fallback_note": "同等の代替は未検証。FeatureFlags.appsFlyerEventEnabled は AppsFlyerBridge のイベント送信だけを停止する。SceneDelegate の SDK start() はこのフラグから独立しており、false だけで SDK 全体の通信が止まるとは認定しない。停止しても広告効果測定は代替されない。2026-09-07、iOS main 3e1b3718 のコード照合で従来の説明を訂正。",
       "plan_dates": {
         "plan": "Welcome Plan",
         "starts_on": "2026-04-24",
