@@ -4258,6 +4258,9 @@ async function selftest() {
     const closure = CLOSE_CHECKS.ep_ratified_or_window(params, ctxOf(rows, '2026-10-05', ended));
     t('所有者の方針終了で閉じるが人の追認とはしない', closure.closed && closure.evidence.includes('人の追認済みとは扱わない'));
     t('方針終了は個別の委任判定を変更しない', JSON.stringify(rows) === before);
+    const unknownDay = ctxOf(rows, '2026-10-05', ended);
+    delete unknownDay.today;
+    t('現在日を確認できなければ制度終了で閉じない', !CLOSE_CHECKS.ep_ratified_or_window(params, unknownDay).closed);
     t('終了後は月次依頼を起票しない', derive(ctxOf(rows, '2026-11-01', ended)).filter(d => d.source === 'ep-ratification').length === 0);
     for (const patch of [{ evidence: '' }, { decided_by: 'codex' }, { decided_at: '2026-11-01' }]) {
       const invalid = structuredClone(ended);
