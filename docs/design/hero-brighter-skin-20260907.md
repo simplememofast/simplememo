@@ -1,0 +1,13 @@
+# Brighter homepage portrait
+
+Tool: built-in image_gen. Output: assets/img/voice-airpods-pro-bright-1536.webp (900px and 600px variants).
+
+The existing pose and iPhone angle are preserved. Facial, neck and hand lighting is brighter. The CSS shade now fades out before the face rather than darkening the portrait.
+
+## Final skin texture retouch prompt
+
+Edit this image with professional high-end beauty retouching. The skin currently has distracting rough, mottled, etched and scratchy texture, especially on cheeks, forehead, under eyes and neck. REMOVE that rough texture and artificial fine lines decisively. Give the woman beautifully smooth, clear, even, luminous skin, like a professionally retouched skincare campaign photograph. Smooth cheek surfaces and forehead, even out pigmentation and blotches, clean under-eye texture, smooth neck and hand. Retain subtle realistic soft skin modeling and a tiny amount of fine natural detail, but DO NOT add pores, grain, freckles, wrinkles or microtexture. No crunchy sharpening. The previous versions were too textured; clear silky skin is the priority now. Preserve her identity, facial proportions, ethnicity, gentle smile, current bright skin exposure, hair, AirPods Pro, clothing, hand size, phone angle and screen, pose, framing and dark city background. Do not alter expression or age. No change to composition. Natural photographic beauty retouch, not illustration. 1536x1024.
+
+## Lighting prompt
+
+Retouch this exact photograph into a beautiful premium beauty-editorial portrait with MUCH BRIGHTER skin lighting. The woman is currently underexposed. Add a large soft neutral-white key light and generous frontal fill on her face, ear, neck and hand, raising skin exposure by approximately 1.3 stops. Skin should look luminous, fresh, clean, healthy, softly radiant and attractively photographed, with open bright shadows under her eyes and along her cheek/jaw/neck. Professionally even the complexion, gently remove muddy patches, excess harsh texture and artificial-looking swirling grain; retain fine realistic skin detail, no waxy plastic skin, no overly sharp pores. Keep her natural complexion hue and ethnicity; lighting exposure change, not identity change. Soft natural rosy lips, subtle flattering catchlight and same gentle smile. Keep the city background dark so the brightly beautifully lit woman separates elegantly from it. Preserve exact person, face shape, expression, hair, jacket, pose, small hand, phone size, phone angle facing her, actual app screen and AirPods. No framing changes, no added props, no typography. This must be an OBVIOUS improvement in brightness on face and neck, not another barely noticeable shadow lift. Photorealistic, clean luxury campaign retouch, 1536x1024.
