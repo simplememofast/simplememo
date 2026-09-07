@@ -153,17 +153,12 @@ export const UNLOCKS = {
                             + '月次DetailedまたはASCのCPP画面で一次指標の観測可否を確認し、'
                             + '共通期間・比較対象・同時施策を記録する。未観測を0にしない。'
                             + '実験評価の数値は非公開simplememo-ios側に保持する。' },
-  revenue_28d:       { kind: 'wait', label: '収入の観測が28日たまる',
-                       // [2026-08-26] **08-26 まで、これは待ちではなかった。**積む側
-                       // （growth/scripts/revenue-series.mjs）が読むのは ingest-asc.mjs の出力で、
-                       // その ingest は `../simplememo-ios/data/asc/` を読む —— **このリポジトリの
-                       // CI に隣は無い。**実測 covered_days は 0 のまま動いていなかった。
-                       // 積む処理を取得側（../simplememo-ios/scripts/asc_revenue.rb、毎日実行）へ移し、
-                       // **08-26 から実際に増える。**待ちが本物になったのはこの日から。
-                       needs: '**08-26 に積み始めた**（それまでは配線が切れていて、待っても増えなかった）。'
-                            + '積むのは ../simplememo-ios/scripts/asc_revenue.rb で、'
-                            + 'ここが持つのは金額を運ばない写し。月額へ換算するには28日ぶんの観測が要る'
-                            + '（推定で埋めない）。28日そろうのは 2026-09-19 前後',
+  revenue_28d:       { kind: 'implement', label: '売上の欠測と費用・継続データを判断に接続する',
+                       needs: '日次v2は現在28日窓の確定観測日数で、時間経過だけでは全日が揃わない。'
+                            + '欠測を0にせず、期間比較には非公開simplememo-iosのApple暦週・暦月系列を使う。'
+                            + 'AI原価回収は同期間の費用と配賦、LTVは獲得分母と継続・課金の結合、'
+                            + '全体予算はベンダー実支出・残高・入金を照合して判断する。'
+                            + '28日到達は日次観測範囲の条件に限り、これらの業務完了を証明しない。',
                        satisfied_when: [{ file: 'data/revenue-series.json', path: 'covered_days', atLeast: 28 }] },
   bq_28d:            { kind: 'wait', label: 'BigQuery の28日蓄積が到達する',
                        needs: '9/6前後。D28が測れるようになる',
