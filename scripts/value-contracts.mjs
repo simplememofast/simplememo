@@ -165,7 +165,7 @@ export function prepare(candidate, ctx) {
     evidence: { source_hash: digest({ runs: ctx.runs, costs: ctx.costs }), date: candidate.evidence_date },
     rollback: { mode: 'revert_static_only', paths: candidate.touches.filter(staticPath) },
   };
-  c.input = Object.fromEntries(['id', 'run_id', 'metric', 'touches', 'lane', 'action', 'domain', 'reversibility_class',
+  c.input = Object.fromEntries(['id', 'run_id', 'metric', 'touches', 'lane', 'kind', 'action', 'domain', 'reversibility_class',
     'evidence_date', 'predicted_usd', 'predicted_delta', 'p', 'horizon_days', 'max_changed_lines', 'counterfactual', 'rank_gap',
     'scope', 'created_jst', 'max_binary_bytes'].filter(k => candidate[k] !== undefined).map(k => [k, candidate[k]]));
   const problems = contractProblems(c, ctx.metrics);
@@ -357,6 +357,9 @@ export async function selftest() {
   // A daily rate cannot improve past 100%, even if its supplied probability is low.
   // These are local fixtures, never production contracts or recovery evidence.
   assert.equal(prepare({ ...candidate, predicted_delta: 1 }, ctx).predicted_delta, 1);
+  const typed = prepare({ ...candidate, kind: 'article' }, ctx);
+  assert.equal(JSON.parse(JSON.stringify(typed)).input.kind, 'article');
+  assert.equal(prepare(JSON.parse(JSON.stringify(typed)).input, ctx).input.kind, 'article');
   assert.throws(() => prepare({ ...candidate, predicted_delta: 1.1 }, ctx), /predicted outcome outside metric domain/);
   const saturated = { ...ctx, runs: runs.map(r => ({ ...r, outcome: 'shipped', lane: 'F' })) };
   assert.deepEqual(readiness(ctx).forecast_available, ['shipping_day_rate']);
