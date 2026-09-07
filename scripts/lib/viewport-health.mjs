@@ -44,7 +44,7 @@ export function parseReport(log, step) {
     if (!m || m[2].length > 4096) continue;
     const t = Date.parse(m[1]);
     // The jobs API timestamps have second precision; logs have subsecond precision.
-    if (t < start || t >= end + 1000) continue;
+    if (!Number.isFinite(t) || t < start || t >= end + 1000) continue;
     try { matches.push(JSON.parse(m[2])); } catch { return null; }
   }
   return matches.length === 1 && reportState(matches[0]) !== 'unknown' ? matches[0] : null;
@@ -139,7 +139,7 @@ export async function observeViewport({ repo, token, fetchImpl = fetch, now = Da
 export function deriveViewportActions(ctx) {
   const v = ctx.viewport;
   if (!v || v.state === 'healthy' || v.reason === 'run_pending') return [];
-  return [{ id: 'act-viewport-measurement', source: 'viewport', domain: 'sitecontent', auto: null,
+  return [{ id: 'act-viewport-measurement', source: 'viewport', domain: null, auto: null,
     touches: ['scripts/check-viewport-overflow.mjs', 'scripts/lib/webkit-driver.mjs'],
     title: '描画検査の未測定・横はみ出しを解消する',
     detail: `最新mainの描画検査: ${v.state} (${v.reason ?? v.state})。${v.url ?? '検証ログ未取得'}。`

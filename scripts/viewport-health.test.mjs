@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { MARKER, STEP, measurementGroup, reportState, parseReport, observeViewport } from './lib/viewport-health.mjs';
-import { derive, merge, reconcile } from './autopilot-act.mjs';
+import { derive, merge, reconcile, classify, validateLedger } from './autopilot-act.mjs';
 
 const repo = 'simplememofast/simplememo';
 const main = 'a'.repeat(40), head = 'b'.repeat(40);
@@ -156,4 +157,16 @@ test('read failure preserves the known fault; a read-only outage can close on th
   assert.equal(ledger.actions[0].state, 'acknowledged');
   merge(ledger, derive({ ...ctx, viewport: { ...failed, attempt: 2 } }).filter(a => a.source === 'viewport'), ctx.today);
   assert.equal(ledger.actions[0].state, 'open');
+});
+
+test('real authority routes the candidate to an AI session without granting an unattended handler', () => {
+  const matrix = JSON.parse(fs.readFileSync(new URL('../data/authority-matrix.json', import.meta.url)));
+  const ledger = { actions: [] }, ctx = { today: '2026-09-07', viewport: { state: 'unknown', reason: 'observation_failed' } };
+  merge(ledger, derive(ctx).filter(a => a.source === 'viewport'), ctx.today);
+  const action = ledger.actions[0];
+  assert.equal(classify(action, matrix).owner, 'ai');
+  assert.equal(action.auto, null);
+  assert.deepEqual(validateLedger(ledger, matrix), []);
+  assert.equal(classify({ ...action, auto: 'not-authorized' }, matrix).owner, 'human');
+  assert.equal(classify({ ...action, force_owner: 'human' }, matrix).owner, 'human');
 });
