@@ -54,12 +54,51 @@ export function findWebKitDriver(candidates = ['/usr/bin/WebKitWebDriver', '/usr
  * 画面が要る（WebKitGTK はヘッドレスで動かない）。
  * `DISPLAY` が無ければ Xvfb を立てる。**立てられなければ null** —— 黙って続けない。
  */
-export function ensureDisplay({ display = ':99', spawnFn = spawn } = {}) {
-  if (process.env.DISPLAY) return { display: process.env.DISPLAY, proc: null };
-  if (!fs.existsSync('/usr/bin/Xvfb')) return null;
-  const proc = spawnFn('/usr/bin/Xvfb', [display, '-screen', '0', '1280x1024x24'],
-    { stdio: 'ignore', detached: false });
-  return { display, proc };
+export async function ensureDisplay({ env = process.env, xvfbPath = '/usr/bin/Xvfb',
+  spawnFn = spawn, startupMs = 5_000 } = {}) {
+  if (env.DISPLAY) return { display: env.DISPLAY, proc: null };
+  if (!fs.existsSync(xvfbPath)) return null;
+  // Let Xserver choose a free display and notify readiness on a private pipe.
+  // Never reuse :99 blindly or remove another server's socket/lock files.
+  const proc = spawnFn(xvfbPath, ['-displayfd', '3', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp'],
+    { env, stdio: ['ignore', 'ignore', 'pipe', 'pipe'], detached: false });
+  const disp = { display: null, proc, stderr: '', spawnError: null };
+  proc.stderr.on('data', chunk => { disp.stderr = (disp.stderr + chunk.toString()).slice(-2_048); });
+  proc.on('error', error => { disp.spawnError = errorDetail(error); });
+  try {
+    disp.display = await new Promise((resolve, reject) => {
+      let data = '';
+      const fd = proc.stdio[3];
+      const finish = (error, display) => {
+        clearTimeout(timer);
+        fd.off('data', onData); fd.off('end', onEnd); fd.off('error', onError);
+        proc.off('exit', onExit); proc.off('error', onError);
+        error ? reject(error) : resolve(display);
+      };
+      const onError = error => finish(error);
+      const onExit = (code, signal) => finish(new Error(`Xvfb exited before ready: code=${code} signal=${signal}`));
+      const onEnd = () => finish(new Error('Xvfb closed readiness pipe without a display'));
+      const onData = chunk => {
+        data += chunk.toString();
+        if (data.length > 16) return finish(new Error('Xvfb readiness response too long'));
+        if (!data.includes('\n')) return;
+        if (!/^\d{1,5}\n$/.test(data) || Number(data.trim()) > 65535) {
+          return finish(new Error('Xvfb returned an invalid display number'));
+        }
+        finish(null, `:${Number(data.trim())}`);
+      };
+      const timer = setTimeout(() => finish(new Error(`Xvfb readiness timed out after ${startupMs}ms`)), startupMs);
+      fd.on('data', onData); fd.once('end', onEnd); fd.once('error', onError);
+      proc.once('exit', onExit); proc.once('error', onError);
+    });
+    return disp;
+  } catch (error) {
+    // Readiness-pipe EOF can arrive before exit; retain the diagnostic now.
+    error.diagnostics = [displayDiagnostic(disp)];
+    try { await terminateOwnedProcess(proc); }
+    catch (cleanupError) { error.diagnostics.push(errorDetail(cleanupError)); }
+    throw error;
+  }
 }
 
 /**
@@ -136,15 +175,42 @@ export function driverDiagnostic(d) {
     + `spawn_error=${d.spawnError ?? 'none'} stderr=${d.stderr?.slice(-400) || '(empty)'}`);
 }
 
+export function displayDiagnostic(disp) {
+  return oneLine(`Xvfb display=${disp.display ?? 'unassigned'} pid=${disp.proc?.pid ?? 'unavailable'} `
+    + `exit=${disp.proc?.exitCode ?? 'none'} signal=${disp.proc?.signalCode ?? 'none'} `
+    + `spawn_error=${disp.spawnError ?? 'none'} stderr=${disp.stderr?.slice(-400) || '(empty)'}`);
+}
+
+// Wait for each owned direct child, with bounded escalation. This does not
+// claim that arbitrary descendants are reaped or touch externally owned X11.
+export async function terminateOwnedProcess(proc, { graceMs = 2_000, killMs = 1_000 } = {}) {
+  const exited = () => !proc.pid || proc.exitCode !== null || proc.signalCode !== null;
+  if (exited()) return;
+  const signalAndWait = (signal, waitMs) => new Promise(resolve => {
+    const finish = value => { clearTimeout(timer); proc.off('exit', onExit); resolve(value); };
+    const onExit = () => finish(true);
+    const timer = setTimeout(() => finish(exited()), waitMs);
+    proc.once('exit', onExit);
+    try { proc.kill(signal); } catch { finish(exited()); }
+  });
+  if (await signalAndWait('SIGTERM', graceMs)) return;
+  if (await signalAndWait('SIGKILL', killMs)) return;
+  throw new Error(`Owned process ${proc.pid} did not exit after SIGKILL`);
+}
+
 export async function stopDrivers(drivers, disp, { deadlineMs = 2_000 } = {}) {
-  try {
-    await Promise.all(drivers.map(async d => {
+  const results = await Promise.allSettled(drivers.map(async d => {
       try {
         if (d.session) await d.call('DELETE', `/session/${d.session}`, undefined, { deadlineMs });
       } catch { /* A broken driver must still be terminated below. */ }
-      finally { d.proc.kill(); }
+      finally { await terminateOwnedProcess(d.proc); }
     }));
-  } finally { if (disp.proc) disp.proc.kill(); }
+  if (disp.proc) {
+    try { await terminateOwnedProcess(disp.proc); }
+    catch (reason) { results.push({ status: 'rejected', reason }); }
+  }
+  const errors = results.filter(r => r.status === 'rejected').map(r => r.reason);
+  if (errors.length) throw new AggregateError(errors, 'Owned WebKit process cleanup failed');
 }
 
 /**
@@ -159,7 +225,7 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
     return { measurable: false, engine: 'webkit',
       why: 'WebKitWebDriver が無い（`apt-get install -y --no-install-recommends webkit2gtk-driver xvfb`）' };
   }
-  const disp = ensureDisplay();
+  const disp = await ensureDisplay();
   if (!disp) {
     return { measurable: false, engine: 'webkit',
       why: 'DISPLAY が無く Xvfb も入っていない（WebKitGTK はヘッドレスで動かない）' };
@@ -169,6 +235,7 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
   const n = Math.max(1, Math.min(concurrency, jobs.length));
   const drivers = [];
   const results = []; const failures = [];
+  let measurementError;
   try {
     for (let i = 0; i < n; i++) {
       const p = basePort + i;
@@ -203,12 +270,18 @@ export async function measureWebKit({ pages, widths, port, concurrency = 3, base
       }
     }));
   } catch (error) {
+    measurementError = error;
     // Capture state before cleanup sends its own termination signals.
     error.diagnostics = drivers.map(driverDiagnostic);
-    if (disp.proc) error.diagnostics.push(oneLine(`Xvfb pid=${disp.proc.pid} `
-      + `exit=${disp.proc.exitCode ?? 'none'} signal=${disp.proc.signalCode ?? 'none'}`));
+    if (disp.proc) error.diagnostics.push(displayDiagnostic(disp));
     throw error;
-  } finally { await stopDrivers(drivers, disp); }
+  } finally {
+    try { await stopDrivers(drivers, disp); }
+    catch (error) {
+      if (!measurementError) throw error;
+      measurementError.diagnostics.push(errorDetail(error));
+    }
+  }
   return { measurable: true, engine: 'webkit', results, failures,
     problems: results.filter((r) => r.over > 0) };
 }
