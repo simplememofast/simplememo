@@ -588,7 +588,7 @@ node scripts/check-definitions.mjs --check
 **2026-09-17（D+14）。**⑥の乗車判定を PR TIMES の分析画面から転記し、
 **配信見出しで再採点する**（手順は `docs/prtimes-d14-capture.md` §4・§4-b）。
 
-- `discover_boarding_post` は**まだ空**。D+1 の値で埋めると `pr-evaluation-due.mjs` が
-  「転記済み」と判定して**評価が起動しなくなる**
+- `discover_boarding_post` は**まだ空**。D+1の値をD+14へ流用しない。2026-09-07以降、
+  `pr-evaluation-due.mjs` は部分転記後も未評価なら追跡する（現行手順 §4）。
 - 再採点で S2 が 10 未満に下がれば、**必要条件で `--check` が赤になる。それが正しい状態**
 - 再採点が済んだら、`d-score.mjs` の「採点日が配信日より前」の警告を `problems` へ移して落とすようにする
