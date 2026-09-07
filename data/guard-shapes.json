@@ -681,6 +681,8 @@
     "scripts/autopilot-drill.mjs",
     "scripts/autopilot-gate.mjs",
     "scripts/check-asc-landed.mjs",
+    "scripts/ci-health.mjs",
+    "scripts/ci-health.test.mjs",
     "scripts/property-tests.mjs",
     "scripts/qr-routing.test.mjs",
     "scripts/should-snapshot.mjs"
@@ -693,6 +695,8 @@
       "scripts/autopilot-drill.mjs": "純粋な論理。decide() に状態オブジェクトを渡すだけ（readFileSync 0箇所）",
       "scripts/autopilot-gate.mjs": "同上。decide(s) は引数の状態だけを見る",
       "scripts/check-asc-landed.mjs": "**他モジュール経由**（ingest-asc.mjs の readSource）。上と同じ限界",
+      "scripts/ci-health.mjs": "ghからGitHub Actionsの履歴を読む。ローカルJSON台帳は読まない。読み取り失敗は中断し、成功再実行はflaky確定ではなく候補としてのみ出力する。",
+      "scripts/ci-health.test.mjs": "合成runと注入したgh応答で監査の境界を検査する。実台帳・ネットワークを読まない。",
       "scripts/property-tests.mjs": "他の検査から純粋関数を import して性質を回す（readFileSync 0箇所）",
       "growth/scripts/search-intent.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / listSnapshots）。この走査は1ファイル単位なので追えない —— 見えていないことを承知で置く（analyze.mjs / check-asc-landed.mjs と同じ限界）",
       "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
