@@ -15,6 +15,8 @@ export const RUN_CAP = 2_000_000_000;
 const SQL_DIR = new URL('../sql/analytics/', import.meta.url);
 const FILES = {
   gsc: ['gsc-site.sql', 'gsc-pages.sql'],
+  // Collection diagnostics only; never a session funnel or an outcome report.
+  'ga4-provisional': ['ga4-quality.sql'],
   'ga4-quality': ['ga4-quality.sql'],
   // Always attach quality results to the funnel; never silently discard QA.
   'ga4-funnel': ['ga4-quality.sql', 'ga4-funnel.sql'],
@@ -51,10 +53,13 @@ export function validateOptions({ report = 'preflight', start = '', end = '', ex
   const a = dateValue(start), z = dateValue(end);
   if (z < a || z - a > 30 * DAY) throw new Error('Use an ordered window of at most 31 days');
   const isGa4 = report.startsWith('ga4-');
+  const provisional = report === 'ga4-provisional';
+  if (provisional && z - a > 6 * DAY) throw new Error('Provisional diagnostics allow at most 7 days');
   const today = dateValue(dayAt(now, isGa4 ? 'Asia/Tokyo' : 'America/Los_Angeles'));
-  const lag = isGa4 ? 5 : 3;
+  const lag = provisional ? 1 : isGa4 ? 5 : 3;
   if (z > today - lag * DAY) throw new Error(`The window must end at least ${lag} local calendar days ago`);
-  if (isGa4 && start < '2026-09-06') throw new Error('GA4 cohort must start after the measurement release and link day');
+  if (provisional && start < '2026-09-05') throw new Error('Provisional diagnostics start on the GA4 link day');
+  if (isGa4 && !provisional && start < '2026-09-06') throw new Error('GA4 cohort must start after the measurement release and link day');
   if (!isGa4 && start < '2026-08-10') throw new Error('GSC export history starts on 2026-08-10');
   return { report, execution, start, end };
 }
@@ -80,17 +85,23 @@ export async function metadata(client, dataset, api = bq) {
   }
 }
 export function ga4Coverage(meta, options) {
-  const expected = daysBetween(options.start, options.end, 1);
+  const expected = daysBetween(options.start, options.end, options.report === 'ga4-provisional' ? 0 : 1);
   const present = new Set(meta.tables.map((t) => t.id));
   return expected.map((day) => ({ day, present: present.has(`events_${day.replaceAll('-', '')}`) }));
 }
 export async function collect(options, { api = bq, now = new Date() } = {}) {
   const opts = validateOptions(options, now);
+  const provisional = opts.report === 'ga4-provisional';
   const out = {
     schema_version: 1, observed_at: now.toISOString(), status: 'in_progress', ...opts,
     project: PROJECT, location: LOCATION, run_id: process.env.GITHUB_RUN_ID ?? null,
     source_sha: process.env.GITHUB_SHA ?? null, query_cap_bytes: QUERY_CAP, run_cap_bytes: RUN_CAP,
     metadata: {}, queries: [],
+    ...(provisional ? {
+      provisional: true, eligible_for_outcome_evaluation: false,
+      partial_link_day_included: opts.start === '2026-09-05',
+      interpretation: 'Provisional collection diagnostics from existing daily tables only. Table presence does not prove a complete day; the link day is partial and late events can change counts. Event rows are not GA4 UI sessions, a 24-hour funnel, installations, revenue, or LTV. Host scope does not exclude internal use. No outcome scoring or comparison with mature cohorts.',
+    } : {}),
   };
   try {
     const client = await api.connect({ projectId: PROJECT, location: LOCATION });
@@ -111,10 +122,13 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
       const limit = Math.min(QUERY_CAP, RUN_CAP - billed);
       if (limit <= 0) throw new Error('Run reading budget exhausted');
       const params = { start_date: opts.start, end_date: opts.end,
+        ...(file === 'ga4-quality.sql' ? { scan_end_date: provisional ? opts.end : daysBetween(opts.end, opts.end, 1).at(-1) } : {}),
         ...(opts.report.startsWith('ga4-') ? { measurement_version: '2026-09-05' } : {}),
         ...(['ga4-quality.sql', 'ga4-funnel.sql'].includes(file) ? { bridge_measurement_version: '2026-09-07' } : {}),
       };
-      const input = { sql, params, types: { start_date: 'DATE', end_date: 'DATE' }, maximumBytesBilled: limit };
+      const input = { sql, params, types: { start_date: 'DATE', end_date: 'DATE',
+        ...(file === 'ga4-quality.sql' ? { scan_end_date: 'DATE' } : {}),
+      }, maximumBytesBilled: limit };
       const item = { file, sql_sha256: crypto.createHash('sha256').update(sql).digest('hex'), params, maximum_bytes_billed: limit };
       out.queries.push(item);
       item.dry_run = await api.query(client, { ...input, dryRun: true });
@@ -134,8 +148,8 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
         return { file: q.file, days: daysBetween(opts.start, opts.end).map((day) => ({ day, has_rows: present.has(day) })) };
       });
       out.status = out.coverage.some((t) => t.days.some((d) => !d.has_rows)) ? 'incomplete_date_coverage' : 'complete';
-    } else out.status = opts.execution === 'dry-run' ? 'dry_run_complete' : 'complete';
-    if (opts.report.startsWith('ga4-')) {
+    } else out.status = (provisional ? 'provisional_' : '') + (opts.execution === 'dry-run' ? 'dry_run_complete' : 'complete');
+    if (opts.report.startsWith('ga4-') && !provisional) {
       out.interpretation = 'GA4 exported observed events/sessions; inspect quality rows before scoring. Store clicks are not installations, revenue, or LTV.';
       if (opts.report === 'ga4-funnel') {
         out.interpretation += ' OneLink pilot intent is separate from direct Apple clicks; QA is excluded from pilot and combined-route counts. The combined-route column is a session union, not the sum of route counts. Zero OneLink observations before pilot activation are not measured zero demand.';

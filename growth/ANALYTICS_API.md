@@ -10,6 +10,7 @@ It has no schedule and does not replace the existing SEO Daily workflow.
 | report | Result | Window |
 |---|---|---|
 | `preflight` | GSC/GA4 dataset region, retention, tables, first/latest daily schemas | No dates, no SQL scan |
+| `ga4-provisional` | Provisional collection-quality event counts; no funnel or outcome rates | Up to 7 closed JST dates from 2026-09-05; all requested daily tables must exist |
 | `gsc` | WEB dates, countries, devices, queries, anonymous impressions; separate URL dates/pages | Up to 31 days, PT, end at least 3 days ago; history starts 2026-08-10 |
 | `ga4-quality` | Host, missing identifiers/channel, consent, CTA version/target/dimensions | Up to 31 days, JST; see GA4 conditions below |
 | `ga4-funnel` | Quality report plus observed LP/session→own App Store click within 24 hours, grouped by session source/medium and landing referrer host | Same GA4 conditions |
@@ -23,11 +24,46 @@ or the monthly bill. See [Google's query API fields](https://docs.cloud.google.c
 
 GA4: property `524656334`, stream `13605182969`, dataset
 `yurika-simplememo.analytics_524656334`, Tokyo `asia-northeast1`.
-The cohort must start on/after 2026-09-06 and the end must be at least five JST
+For `ga4-quality`, `ga4-funnel`, and `ga4-journey`, the cohort must start on/after 2026-09-06 and the end must be at least five JST
 calendar days ago. Every daily table through the following day must exist.
 The first complete export day can move the real cohort start later.
 Missing tables and access-denied responses are diagnostic outcomes, never zero
 traffic. Metadata presence does not prove collection completeness.
+
+### Provisional collection diagnostics
+
+Use `report=ga4-provisional` to inspect available daily exports before they are
+mature. It runs the same fixed quality SELECT for the requested dates only,
+without scanning or requiring the following day. The end date must be earlier
+than today in JST; the window is at most seven days and starts no earlier than
+the partial link day, 2026-09-05. Intraday tables are excluded. Every requested
+daily table must exist: missing days stop SQL execution and remain missing,
+not zero-filled or silently omitted. To inspect just one available day, request
+that day explicitly rather than a larger incomplete window.
+
+Results carry `provisional=true`, `eligible_for_outcome_evaluation=false`, and
+`partial_link_day_included`. Successful statuses are `provisional_complete` or
+`provisional_dry_run_complete`, meaning retrieval/validation completed only.
+Error and missing-table outcomes keep the same provisional labels. The output
+contains event counts and quality flags by export event date, hostname scope,
+and event name. It does not compute sessions, CVR, installs, purchases, or LTV.
+Production hostname scope alone does not remove staff, QA, or automated visits.
+Quality counters can overlap; do not add them into a count of distinct failures.
+
+The 2026-09-05 export covers a partial link day and includes measurement changes.
+Later daily tables can also receive late events. Keep the observed timestamp,
+source SHA and SQL parameters with every snapshot; neither table presence nor
+an empty result proves a complete day or zero demand. Do not compare these
+diagnostics with mature cohorts or use them to score experiments. GA4 UI session
+counts and this exported event report have different definitions and processing
+timelines. [Google's data freshness documentation](https://support.google.com/analytics/answer/11198161?hl=en)
+explains why recent values can change.
+
+This uses the existing service account, recipient key, encrypted artifact,
+SELECT dry run, and cost caps. It does not grant new access, enable streaming,
+schedule jobs, or change the mature reports' five-day/following-day requirements.
+
+### Mature funnel reports
 
 The funnel counts observed session starts, not modeled GA4 UI sessions.
 It does not filter standard events by the CTA-only measurement version.
