@@ -866,7 +866,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
 
       - name: WebKit transport failures retain evidence and bound cleanup
-        run: node --test scripts/webkit-driver.test.mjs
+        run: node --test scripts/webkit-driver.test.mjs scripts/viewport-health.test.mjs
 
       - name: Landing pages do not scroll sideways (report-only)
         run: |

@@ -60,6 +60,7 @@ import { validTaskKindAbsence } from './autopilot-budget.mjs';
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
 import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded, routineIntakeDecision } from './lib/routine-actions.mjs';
+import { observeViewport, deriveViewportActions, viewportMeasured } from './lib/viewport-health.mjs';
 import { reconcileObservation } from './routine-observer.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -146,6 +147,7 @@ function epRatifiedOrWindow(params, ctx) {
 }
 
 export const CLOSE_CHECKS = {
+  viewport_measured: viewportMeasured,
   routine_resolved: routineResolved,
   ep_ratified_or_window: epRatifiedOrWindow,
   /** 対象の run が selfheal の未修理リストから消えたら閉じる。 */
@@ -534,6 +536,7 @@ export function classify(action, matrix) {
 
 export function derive(ctx) {
   const out = [];
+  out.push(...deriveViewportActions(ctx));
   const runs = ctx.runsDoc?.runs ?? [];
 
   // 主系モデルが動けない日も、独立したActが実際の監視Issueを台帳に運ぶ。
@@ -1198,6 +1201,11 @@ export function merge(ledger, derived, today) {
       if (cur.state === 'acknowledged' && d.source === 'routine-run'
         && cur.close_check?.params?.episode !== d.close_check?.params?.episode) {
         cur.state = 'done'; // below: reopen only a different observed execution/state
+      }
+      if (cur.state === 'acknowledged' && d.source === 'viewport' && d.close_check.params.run_id
+        && (cur.close_check?.params?.run_id !== d.close_check.params.run_id
+          || cur.close_check?.params?.attempt !== d.close_check.params.attempt)) {
+        cur.state = 'done'; // acknowledgment covers one observed attempt, not future failures
       }
       if (cur.state === 'done') {
         cur.state = 'open';
@@ -4986,10 +4994,11 @@ async function buildContext(today, ledger = null) {
   const watched = (ledger?.actions ?? []).filter(a => a.state !== 'done' && a.close_check?.kind === 'issue_closed')
     .map(a => a.close_check.params?.issue);
   const issues = await fetchOpenHealthIssues(repo, token, { watched });
+  const viewport = await observeViewport({ repo, token });
   if (issues === null) console.error('# 監視Issueの一覧を取得できず判定不能（台帳を解決扱いにしない）');
   // 台帳そのものも渡す。**handler が積んだ状態（除外一覧）を導出が読めないと、
   // 題と根拠で違う件数が出る。**判定には使わない —— 使うのは件数の表示だけ。
-  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues,
+  return { today, runsDoc, matrix, costDoc, statusDoc, routineDoc, selfheal, budget, workflowRuns, orphans, issues, viewport,
     ledgerDoc: ledger, repo, token, eventName: process.env.GITHUB_EVENT_NAME, completion,
     // 採点の方針（L4・読むだけ）。D8 の月次追認と、その閉じ条件が accepted_modes を見る
     scorePolicy: readJson(path.join(ROOT, 'data/autonomy-score.json')) };
@@ -5119,6 +5128,7 @@ async function main() {
   const payload = {
       as_of_jst: today,
       routine_snapshot_sha256: routineSnapshotDigest(ctx.routineDoc),
+      viewport_measurement: ctx.viewport,
       open_total: sum.open_total,
       pending_pr: sum.pending_pr.map(a => ({ id: a.id, title: a.title, pr: a.pending_pr.number,
         first_verified_head: a.pending_pr.head_sha, evidence: a.evidence })),

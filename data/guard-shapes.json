@@ -681,6 +681,12 @@
       "expr": "closure.closed",
       "disposition": "報告のみ",
       "note": "2026-09-07: 自己検査で制度終了と本人追認を区別する説明の両方を要求する。closed欠落・falseなら検査が失敗する向きで、違反を隠すガードではない。全81件のowner_neededとreview記録不変も実データで照合した。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "d.close_check.params.run_id",
+      "disposition": "前提",
+      "note": "2026-09-07: 描画障害の受容を開き直すのは実際に障害を観測したrun/attemptが以前と異なる場合だけ。API取得不能はrun_idを出さず、以前の障害の閉じ条件を保持する。欠落は健全・解決扱いにはならない。合成API応答を使うviewport-health.test.mjsで同じattemptの受容維持、新attemptの再点火、取得不能時の障害情報保持を検証。 実際のauthority-matrixも読み、AIセッションへの候補分類と無人handlerの権限外棄却を検証する。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
