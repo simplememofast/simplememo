@@ -168,7 +168,8 @@ SCENARIOS.push(['未審査依存先は支払許可リストへ入らず、不正
     status: 'pending_review', payment_authorized: false, contract_approved: false,
     evidence: ['source.ts'], open_questions: ['Contract applicability'] }];
   const report = audit(doc);
-  assert(!report.errors.length && report.discoveries.length === 1, 'valid discovery rejected');
+  assert(report.errors.length === 0, 'valid discovery rejected');
+  assert(report.discoveries.length === 1, 'valid discovery missing from inventory');
   assert(!report.money.some(v => v.id === 'unverified_test'), 'discovery authorized payment');
   for (const mutate of [
     v => { v.payment_authorized = true; }, v => { v.contract_approved = true; },
