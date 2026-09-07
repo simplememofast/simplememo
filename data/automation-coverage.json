@@ -2156,14 +2156,19 @@
     {
       "area": "⑪ データ・プライバシー",
       "task": "推論をどこで回すかの決定",
-      "executor": "human_only",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/VISION.md"
+        "../simplememo-ios/data/text-inference-policy.json",
+        "../simplememo-ios/scripts/qa/check_text_inference.py",
+        "../simplememo-ios/SimpleMemo/VoiceTextEditor.swift",
+        "../simplememo-ios/SimpleMemo/MemoFormatter.swift"
       ],
-      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**VISION §14 の未決定論点で、**決めるのがオーナー。**`relay に推論や Capture 本文の保持を足す変更は、この論点を決めてから`と../simplememo-api/CLAUDE.md が明記している。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
-      "blocker": "policy_boundary",
-      "unblocked_by": "VISION §14 の未決定論点。決めてから着手する",
-      "$authority_absent": "**権限表ではなくビジョン側の未決定論点**（../simplememo-ios/docs/VISION.md §14）。表に行を作るのは、どちらに決めるかが決まってから"
+      "note": "VISION §14 未決定論点。Capture本文は個人情報そのもの\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**VISION §14 の未決定論点で、**決めるのがオーナー。**`relay に推論や Capture 本文の保持を足す変更は、この論点を決めてから`と../simplememo-api/CLAUDE.md が明記している。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-07 AI決定・適用] オーナーの包括委任を受け、ADR-001で端末内推論を採用。音声編集・任意のメモ整形の既存2経路でモデルを明示し、未使用クラウド関数とフラグを廃止。新規プロバイダ・直接通信・モデル指定変更・既知のクラウドSDK・ToolをCIで検査する。ローカルの境界テスト11件とiOS/Watch Simulatorビルドは成功。Routingの完成、実機通信、対応端末の母数、Zero-decision実測は含めない。設計判断の1件だけで、既存のAI送信可否制御や第三者SDK監査には重ねて加点しない。iOS PR #391は全CI成功後にマージ済み（8594b7d199bba7ad0b731c6d6236b20acab13163）。Xcode Cloud PR Check de68740c-f513-4bb0-a8af-5e2fa1303d69でビルドとFastUnitが成功し、端末内推論の設計・実装・CI適用を確認した。5.8.38の配信は別途追跡し、この設計判断をApp Store公開の実績へ流用しない。",
+      "since": "2026-09",
+      "authority": {
+        "domain": "メモ本文の推論場所の設計判断",
+        "ai_may": "端末内推論の採用・適用と、クラウド推論を追加しない設計の保守"
+      }
     },
     {
       "area": "⑫ 事業継続性",
