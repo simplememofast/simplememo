@@ -211,7 +211,8 @@
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
-        "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh"
+        "../simplememo-ios/scripts/qa/build-ai-triage-bundle.sh",
+        "docs/vendor-runtime-review-2026-09-07.md"
       ],
       "money_flow": "usage",
       "payment_method": "card",
@@ -220,12 +221,19 @@
       "approved_by": "human",
       "approved_at": "2026-08-22",
       "$fallback_was": "副系（CCR Routines）が代走する。ただし同じ事業者なので同時に落ちる",
-      "fallback_note": "**代替なし。**副系（CCR Routines）は別経路だが**同じ事業者**なので、Anthropic 自体が落ちれば同時に落ちる。別事業者への代替は無い",
+      "fallback_note": "Codex replacement schedules are saved and ACTIVE; unattended execution and shipping through them are not yet verified. The old Claude workflow is manual-only. This is a configured alternative, not proven failover. Other QA and model callers remain outside this observation.",
       "degradation_probes": [
         "model_fallback"
       ],
       "degradation_note": "使えるモデルが減れば縮退先へ移る。全滅したら**走らない**（静かに寝ない）",
-      "$used_for": "**認証経路が2つあり、適用される契約が違う**（2026-08-29 の調査で判明）:\n\n  `anthropic_api_key`        … オートパイロット主系 → **Commercial Terms**\n  `claude_code_oauth_token`  … GitHub Actions の Claude Code。`claude setup-token` で取るので\n                               Pro/Max 経路 → **Consumer Terms**。**critical: true**\n\nAnthropic 自身の Claude Code 文書がこの区別を明記している。\n\n**contract_review の anthropic 行は Commercial Terms 側しか読めていない。**非EEA向けの Consumer Terms 本文が公式サイトから取得できなかった（取れた版は本文自身が EEA/スイス限定と書いている）。**重いほうの経路の契約が未確定** —— 詳細はあちらの `$two_contracts`。\n\n**行を割るかどうかは未決**（割るとマスが 40 → 44 になり、追ってきた数字が動く）。"
+      "$used_for": "**認証経路が2つあり、適用される契約が違う**（2026-08-29 の調査で判明）:\n\n  `anthropic_api_key`        … オートパイロット主系 → **Commercial Terms**\n  `claude_code_oauth_token`  … GitHub Actions の Claude Code。`claude setup-token` で取るので\n                               Pro/Max 経路 → **Consumer Terms**。**critical: true**\n\nAnthropic 自身の Claude Code 文書がこの区別を明記している。\n\n**contract_review の anthropic 行は Commercial Terms 側しか読めていない。**非EEA向けの Consumer Terms 本文が公式サイトから取得できなかった（取れた版は本文自身が EEA/スイス限定と書いている）。**重いほうの経路の契約が未確定** —— 詳細はあちらの `$two_contracts`。\n\n**行を割るかどうかは未決**（割るとマスが 40 → 44 になり、追ってきた数字が動く）。",
+      "fallback_note_history": [
+        {
+          "superseded_on": "2026-09-07",
+          "note": "**代替なし。**副系（CCR Routines）は別経路だが**同じ事業者**なので、Anthropic 自体が落ちれば同時に落ちる。別事業者への代替は無い"
+        }
+      ],
+      "runtime_review_note": "2026-09-07 AI observation: docs/vendor-runtime-review-2026-09-07.md distinguishes saved Codex schedules from successful unattended operation. Historical authentication-path notes are retained; they are not a current inventory of every execution route."
     },
     {
       "id": "google_cloud",
