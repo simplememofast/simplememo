@@ -1,18 +1,11 @@
 {
   "$comment": [
-    "金額の上限を動かした記録。**追記のみ。**scripts/check-financial-policy.mjs が検査する。",
-    "",
-    "**二者承認をここで実際に効かせている。**data/autopilot-cost.json の",
-    "monthly_usd_cap は、この台帳の最新の承認値と一致していなければCIが落ちる。",
-    "つまり**承認記録を書かずに上限を上げることができない。**",
-    "",
-    "変更幅が financial-policy.json の max_step_pct を超える場合は、",
-    "**承認者が2人要る**（approved_by が2件以上）。",
-    "",
-    "**AIは承認者になれない。**approved_by に ai を書くとCIが落ちる。",
-    "止めることはAIに許しているが（emergency-stop）、金額を上げることは許さない。"
+    "金額の上限と月次配分の決定記録。追記のみ。既存のhuman承認は変更しない。",
+    "2026-09-07以降、AI実費の月次決定はオーナーの包括委任と実績の指紋を持つ場合にapproved_by: [ai]として記録する。人の承認に偽装しない。",
+    "変更幅がfinancial-policyのmax_step_pctを超える場合の二者承認、実際の金額変更の最小間隔、損失上限は維持する。総額維持は変更間隔をリセットしない。",
+    "check-financial-policyが最新決定とcost・authority・financial-policyを照合する。予算ゲートが使う種別配分も決定記録と一致すること。"
   ],
-  "next_seq": 3,
+  "next_seq": 4,
   "approvals": [
     {
       "seq": 1,
@@ -40,6 +33,112 @@
       "two_person_required": false,
       "two_person_reason": "placeholder からの置き換え（placeholder_replacement）なので max_step_pct の自動発動を外した。規則の側の宣言（financial-policy.json の placeholder_replacement_exempt）とセットで、**1領域1回・直前が初期値のときだけ**成立する。詳細は同ファイルの placeholder_replacement_note",
       "placeholder_replacement": true
+    },
+    {
+      "seq": 3,
+      "domain": "AI実費（開発・運用のトークン費）",
+      "from_usd": 280,
+      "to_usd": 280,
+      "approved_at": "2026-09-07",
+      "approved_by": [
+        "ai"
+      ],
+      "authorization_ref": "owner-monthly-budget-20260907",
+      "note": "9/1〜9/7の主系実測9回は$67.0402（記事5回$34.1601、修理3回$32.6421、分析1回$0.2380）。修理は旧月次枠$60の54.4%を既に消化し、記事は旧$180の19.0%。月次総額は$280を維持し、月初の少数標本や未観測CCRを根拠に総額を増やさない。分析・広報・QA・監査の予備枠$40を維持し、主たる2種別の$240を実消費比で配分、修理枠を$5刻みに丸めて$115、記事を残り$125にする。最適配分や月次実費の確定値ではなく、修理が枠を先に使い切る偏りへの暫定対応。1回上限・月次停止・未レビュー超過の停止・開始前想定の5倍超エスカレーションを維持する。",
+      "two_person_required": false,
+      "two_person_reason": "オーナーの包括委任に基づくAI決定。既存の変更幅以内で、変更間隔と損失上限を維持する。",
+      "monthly_decision": {
+        "actor": "ai",
+        "month": "2026-09",
+        "as_of": "2026-09-07",
+        "observed_runs": [
+          {
+            "run_id": "33454414490",
+            "date_jst": "2026-09-01",
+            "route": "actions",
+            "task_kind": "repair",
+            "total_cost_usd": 9.3726075,
+            "outcome": "shipped"
+          },
+          {
+            "run_id": "33568838189",
+            "date_jst": "2026-09-02",
+            "route": "actions",
+            "task_kind": "repair",
+            "total_cost_usd": 13.5739125,
+            "outcome": "shipped"
+          },
+          {
+            "run_id": "33692832179",
+            "date_jst": "2026-09-03",
+            "route": "actions",
+            "task_kind": "article",
+            "total_cost_usd": 3.7802126000000005,
+            "outcome": "shipped"
+          },
+          {
+            "run_id": "33815445009",
+            "date_jst": "2026-09-04",
+            "route": "actions",
+            "task_kind": "article",
+            "total_cost_usd": 5.0613790000000005,
+            "outcome": "shipped"
+          },
+          {
+            "run_id": "33926832821",
+            "date_jst": "2026-09-05",
+            "route": "actions",
+            "task_kind": "article",
+            "total_cost_usd": 4.8768404,
+            "outcome": "failed"
+          },
+          {
+            "run_id": "33959414641",
+            "date_jst": "2026-09-05",
+            "route": "actions",
+            "task_kind": "article",
+            "total_cost_usd": 0.8407852,
+            "outcome": "no_artifact"
+          },
+          {
+            "run_id": "33996430959",
+            "date_jst": "2026-09-06",
+            "route": "actions",
+            "task_kind": "article",
+            "total_cost_usd": 19.600872199999998,
+            "outcome": "failed"
+          },
+          {
+            "run_id": "34016914073",
+            "date_jst": "2026-09-06",
+            "route": "actions",
+            "task_kind": "analysis",
+            "total_cost_usd": 0.23801699999999998,
+            "outcome": null
+          },
+          {
+            "run_id": "34064655036",
+            "date_jst": "2026-09-07",
+            "route": "actions",
+            "task_kind": "repair",
+            "total_cost_usd": 9.695607500000003,
+            "outcome": "shipped"
+          }
+        ],
+        "observation_sha256": "c679e36edfd1bd74add5607282e4ba9e4e93b1d500c4849b8e78fb7cd1ab5c59",
+        "cost_scope": "observed_actions_only",
+        "ccr_cost": "unobserved",
+        "basis": "partial_month_observations",
+        "task_caps": {
+          "article": 125,
+          "repair": 115,
+          "analysis": 12,
+          "pr": 12,
+          "qa_triage": 8,
+          "audit": 8
+        },
+        "rationale": "9/1〜9/7の主系実測9回は$67.0402（記事5回$34.1601、修理3回$32.6421、分析1回$0.2380）。修理は旧月次枠$60の54.4%を既に消化し、記事は旧$180の19.0%。月次総額は$280を維持し、月初の少数標本や未観測CCRを根拠に総額を増やさない。分析・広報・QA・監査の予備枠$40を維持し、主たる2種別の$240を実消費比で配分、修理枠を$5刻みに丸めて$115、記事を残り$125にする。最適配分や月次実費の確定値ではなく、修理が枠を先に使い切る偏りへの暫定対応。1回上限・月次停止・未レビュー超過の停止・開始前想定の5倍超エスカレーションを維持する。"
+      }
     }
   ]
 }

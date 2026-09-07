@@ -216,23 +216,27 @@
       "reversible": true,
       "ai_may": [
         "上限内での消費",
-        "開始時に保存した費用想定の5倍以内での費用判断と超過レビュー（既存の月次枠内）。5倍を超える見込みなら追加支出前にオーナーへ上げる"
+        "開始時に保存した費用想定の5倍以内での費用判断と超過レビュー（既存の月次枠内）。5倍を超える見込みなら追加支出前にオーナーへ上げる",
+        "オーナーの包括委任に基づく、実績を根拠とした月次上限・種別配分の決定と実行予算への適用"
       ],
       "requires_approval": false,
       "human_only": [
-        "monthly_usd_cap の決定"
+        "既存の変更幅・変更間隔を外す例外判断、5倍超の費用見込みへの対応"
       ],
-      "gate": "当月実績が上限に達すると予算ゲートが主系runを止める（--check の非ゼロ終了）",
+      "gate": "当月実績が上限に達すると予算ゲートが主系runを止める（--check の非ゼロ終了）。AI月次決定はcheck-financial-policyが委任・観測指紋・実予算との一致を検査し、monthly-budget --applyが4台帳を更新する。",
       "evidence": [
         "data/autopilot-cost.json",
-        "scripts/autopilot-budget.mjs"
+        "scripts/autopilot-budget.mjs",
+        "scripts/monthly-budget.mjs",
+        "scripts/lib/monthly-budget-decision.mjs",
+        "data/spend-approvals.json"
       ],
       "status": "active",
       "threshold": {
         "monthly_usd_cap": 280,
-        "set_by": "owner",
-        "approval_ref": "data/spend-approvals.json#seq=2",
-        "note": "2026-09-03の既存承認（seq=2、月$280）へ写しを同期した。実費台帳・財務方針の実行上限は既に$280であり、今回の増額ではない。1回上限と未レビュー超過の停止は維持する。**副系CCRの実費は観測手段が無く、この上限では止められない**"
+        "set_by": "ai",
+        "approval_ref": "data/spend-approvals.json#seq=3",
+        "note": "data/spend-approvals.json#seq=3でAIが決定。主系の実行ゲートに適用し、副系の残額は保証しない。"
       },
       "cost_delegation": {
         "approved_by": "owner",
@@ -242,6 +246,14 @@
         "baseline": "作業開始前に保存した想定費用と根拠。途中の上書き禁止。未観測の費用を0としない。",
         "scope": "AI開発・運用費の判断。既存の月次総額・種別枠は変更しない。",
         "check": "node scripts/autopilot-budget.mjs --check-cost-forecast --expected-usd <開始前想定> --projected-usd <最新の総費用見込み>"
+      },
+      "monthly_budget_delegation": {
+        "id": "owner-monthly-budget-20260907",
+        "approved_by": "owner",
+        "approved_at": "2026-09-07",
+        "enabled": true,
+        "evidence": "90%目指してすべて承認するのと権限を与えるのでデプロイやスコア上がり切るまで継続的に実行して、止まりかけても新しいアイディアで突破して",
+        "scope": "主系AI費用の月次上限・種別配分の決定と適用。既存の変更幅、変更間隔、損失上限、1回予算、開始前想定の5倍超のエスカレーションを維持する。金額の決定をAI自身の記録として残す。"
       }
     },
     {

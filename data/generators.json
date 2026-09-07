@@ -221,6 +221,10 @@
     {
       "file": "scripts/decision-monitor-local.py",
       "why": "Macの既存GitHub認証・実API・GitHub PR・launchdに接続するDecision Monitorの独立した定時実行。CIは資格情報不要の--selftestのみ。--once/--probe/--installを静的生成物の再生成に使わない。"
+    },
+    {
+      "file": "scripts/monthly-budget.mjs",
+      "why": "--applyはAIの予算判断を4台帳に適用する実行側。候補と実績の確認が必要で、自動再生成では回さない。CIはmonthly-budget.test.mjsとcheck-financial-policyで検証する。"
     }
   ]
 }
