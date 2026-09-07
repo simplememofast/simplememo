@@ -329,7 +329,10 @@
         "draft_note": "[2026-08-29] オーナーが外部ディープリサーチの結果を貼り、AIがそれを読んで下書きした。\n\n**読めた:** Commercial Terms（Effective June 17, 2025）§A.1 / §A.3 / §B / §C / §D.3 / §D.4 / §G / §I.4 / §J.1–J.3 / §K.1 / §K.3 / §L.3.a–c / §M.7、Service Specific Terms（Effective June 8, 2026）§B / §E / §F、Supplemental Credit Terms（Effective March 4, 2024）、Anthropic DPA（Effective February 24, 2025）§B / §B.3 / §H.1 / Schedule 1 §B.7、Claude Code 'Legal and compliance'（改定日の記載を確認できず）。\n\n**読めていない: Consumer Terms の非EEA版。**取得できたのは EEA/スイス限定版で、`claude_code_oauth_token` 経路（critical: true）はこの下書きの対象外。詳細は `$two_contracts`。\n\n**リサーチャーが契約本文と運用説明を分けた。**Privacy Center の「APIは通常30日」「ZDRは申請制」は**契約本文ではないので台帳用の事実から外している。****この線引きをそのまま引き継ぐ。**運用説明はいつでも変えられるが、契約は契約で、台帳が持つべきは後者。\n\n**出所は Apple より1段深い伝聞。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認。\n\n[2026-09-07 原文取得] AIが https://www.anthropic.com/legal/consumer-terms の非EEA限定版本文（Effective October 8, 2025、§1〜§13）を取得・読解できた。旧「非EEA版は取得できない」は取得履歴として残す。要点と残る適用確認は docs/anthropic-consumer-source-2026-09-07.md。人の過去承認やCommercial Termsの判定をこの取得で置き換えない。",
         "$reviewed_by": "**経緯をそのまま残す。**(1) オーナーが外部ディープリサーチに調査を依頼した。(2) リサーチャーが条項番号・文書名・URL・閲覧日つきで返し、**Privacy Center の運用説明（「APIは通常30日」「ZDRは申請制」）を契約本文ではないので除外した。**(3) AIがそれを読んで4観点を下書きした（`ai_draft`）。(4) オーナーが判定を確認して承認したので `human` に上げた（2026-08-29）。\n\n**Apple より1段深い伝聞。**規約本文 → 第三者の読解 → AIの下書き → オーナー承認で、**原文を読んだ人間はこの鎖の中に居ない。**\n\n**`ip: ok` は判断が分かれる箇所として提示した上での承認。**`$ip` に risk へ倒す3つの読み（当事者間の配分にすぎない／survival に §B が無い／**Consumer Terms の非EEA版が未取得**）を並べた上で、オーナーは ok を選んだ。\n\n**この `human` は Commercial Terms 側にしか及ばない。**`claude_code_oauth_token` 経路（Consumer Terms・critical: true）は**誰もまだ読めていない** —— `$two_contracts` 参照。",
         "fingerprint": "e4b7577152d5",
-        "fetched_at": "2026-09-02"
+        "fetched_at": "2026-09-02",
+        "analysis_sources": [
+          "https://www.anthropic.com/legal/consumer-terms"
+        ]
       },
       {
         "id": "google_cloud",
@@ -660,6 +663,187 @@
                 "start": 19379,
                 "length": 2862,
                 "sha256": "7e7a53cd9fa9939760afdea21f814277effc09ea18172d78799679e035487dc5"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "anthropic-consumer-terms-20260907",
+        "vendor_id": "anthropic",
+        "actor": "ai",
+        "agent": "Codex",
+        "scope": "public_terms_analysis",
+        "contract_approved": false,
+        "agreement_applicability": "unverified",
+        "basis": "generic_customer_review",
+        "observed_at": "2026-09-07T08:09:23.494Z",
+        "source": {
+          "url": "https://www.anthropic.com/legal/consumer-terms",
+          "version": "2025-10-08",
+          "representation": "Local HTTPS retrieval; Anthropic, PBC; sections 1–13. Web retrieval at the same URL returned a different EEA/Switzerland representation.",
+          "sha256": "b813cfcf668c9e81c0c783fa49df24b4f03ae411635aeefdcd14995fc9c62ad8",
+          "characters": 30324
+        },
+        "open_questions": [
+          "Confirm accepted agreement, account and supplemental terms for each execution path.",
+          "Verify privacy-policy/DPA applicability, subscribed SLA and actual export/restore capability.",
+          "Do not interpret a different regional response at this URL as a terms amendment without comparing applicability."
+        ],
+        "findings": {
+          "liability_cap": {
+            "result": "risk",
+            "summary": "Six-month fees/$100 cap, subject to law.",
+            "action": "Assess exposure.",
+            "evidence": [
+              {
+                "section": "11",
+                "start": 18722,
+                "length": 3559,
+                "sha256": "fb121582f4deafb612e83d065c454d9a39a1ac489683c721717ad0faa1761980"
+              }
+            ]
+          },
+          "indemnification": {
+            "result": "risk",
+            "summary": "Broad customer indemnity.",
+            "action": "Assess exposure.",
+            "evidence": [
+              {
+                "section": "11",
+                "start": 18722,
+                "length": 3559,
+                "sha256": "fb121582f4deafb612e83d065c454d9a39a1ac489683c721717ad0faa1761980"
+              }
+            ]
+          },
+          "ip": {
+            "result": "conditional",
+            "summary": "Input rights retained; output assignment conditional.",
+            "action": "Check permissions.",
+            "evidence": [
+              {
+                "section": "4",
+                "start": 5930,
+                "length": 2613,
+                "sha256": "ea8841f63b298068f06199488946f0e125a1f89a784c86c84af40520c9a861ba"
+              }
+            ]
+          },
+          "personal_data": {
+            "result": "conditional",
+            "summary": "Training opt-out has feedback/safety exceptions.",
+            "action": "Verify controls.",
+            "evidence": [
+              {
+                "section": "4",
+                "start": 5930,
+                "length": 2613,
+                "sha256": "ea8841f63b298068f06199488946f0e125a1f89a784c86c84af40520c9a861ba"
+              }
+            ]
+          },
+          "confidentiality": {
+            "result": "not_identified",
+            "summary": "Mutual confidentiality not identified.",
+            "action": "Check supplements.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 1067,
+                "length": 27890,
+                "sha256": "5527aa94efaae4ac249ffd2faa4616681faa71cda73fe3186a30335925e479de"
+              }
+            ]
+          },
+          "warranties": {
+            "result": "risk",
+            "summary": "Broad warranties disclaimed.",
+            "action": "Check remedies.",
+            "evidence": [
+              {
+                "section": "11",
+                "start": 18722,
+                "length": 3559,
+                "sha256": "fb121582f4deafb612e83d065c454d9a39a1ac489683c721717ad0faa1761980"
+              }
+            ]
+          },
+          "termination": {
+            "result": "risk",
+            "summary": "Termination may delete materials.",
+            "action": "Test migration.",
+            "evidence": [
+              {
+                "section": "12",
+                "start": 22281,
+                "length": 5560,
+                "sha256": "33b8dc8b654de198cd4991477ec41fb77f1caccd1a29acafc8d6c8091607a24f"
+              }
+            ]
+          },
+          "governing_law": {
+            "result": "risk",
+            "summary": "California law; San Francisco courts.",
+            "action": "Assess disputes.",
+            "evidence": [
+              {
+                "section": "13",
+                "start": 27841,
+                "length": 1116,
+                "sha256": "cdcfd670f0f827f2eb25813b9cc49a39e18b7a6e07ed0d27a66a1885705942fa"
+              }
+            ]
+          },
+          "insurance": {
+            "result": "not_identified",
+            "summary": "Insurance requirement not identified.",
+            "action": "Check supplements.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 1067,
+                "length": 27890,
+                "sha256": "5527aa94efaae4ac249ffd2faa4616681faa71cda73fe3186a30335925e479de"
+              }
+            ]
+          },
+          "assignment": {
+            "result": "risk",
+            "summary": "Assignment rights asymmetric.",
+            "action": "Review restructuring.",
+            "evidence": [
+              {
+                "section": "12",
+                "start": 22281,
+                "length": 5560,
+                "sha256": "33b8dc8b654de198cd4991477ec41fb77f1caccd1a29acafc8d6c8091607a24f"
+              }
+            ]
+          },
+          "force_majeure": {
+            "result": "not_identified",
+            "summary": "Standalone force-majeure clause not identified.",
+            "action": "Check supplements.",
+            "evidence": [
+              {
+                "section": "all",
+                "start": 1067,
+                "length": 27890,
+                "sha256": "5527aa94efaae4ac249ffd2faa4616681faa71cda73fe3186a30335925e479de"
+              }
+            ]
+          },
+          "payment": {
+            "result": "risk",
+            "summary": "Automatic renewal; advance cancellation required.",
+            "action": "Track renewals.",
+            "evidence": [
+              {
+                "section": "6",
+                "start": 9015,
+                "length": 7133,
+                "sha256": "6aa4ec8ce847a591660753bcac7833da2b5d760b2ab260b64d205258f5aa8a9b"
               }
             ]
           }

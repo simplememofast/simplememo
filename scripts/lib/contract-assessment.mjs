@@ -19,7 +19,8 @@ export function assessmentProblems(rows, vendors) {
     if (!nonempty(r.id) || seen.has(r.id)) fail('ID欠落又は重複');
     seen.add(r.id);
     const v = vendors.find((v) => v.id === r.vendor_id);
-    if (!v || r.source?.url !== v.source) fail('登録ベンダーの原文URLと一致しない');
+    const sources = v ? [v.source, ...(Array.isArray(v.analysis_sources) ? v.analysis_sources : [])] : [];
+    if (!v || !sources.includes(r.source?.url)) fail('登録ベンダーの原文URLと一致しない');
     if (r.actor !== 'ai' || !nonempty(r.agent)) fail('AI実行者を明記する');
     if (r.contract_approved !== false || r.scope !== 'public_terms_analysis'
       || r.agreement_applicability !== 'unverified') fail('公開規約の読解を契約承認・適用確認に変えている');
@@ -84,6 +85,16 @@ export const assessmentScenarios = [
         action: 'Verify', references: [{ section: 'fixture', from: 'BEGIN', to: 'END' }] }])) };
     const row = bindAssessment(input, text, vendors);
     assert(assessmentProblems([row], vendors).length === 0, '正しい検体');
+    const additional = 'https://example.com/consumer-terms';
+    const second = { ...input, source: { ...input.source, url: additional } };
+    let rejected = false;
+    try { bindAssessment(second, text, vendors); } catch { rejected = true; }
+    assert(rejected, '同じドメインでも未登録の契約URLは拒否');
+    const multi = [{ ...vendors[0], analysis_sources: [additional] }];
+    assert(bindAssessment(second, text, multi).source.url === additional, '明示登録した追加契約だけ許可');
+    assert(assessmentProblems([row], multi).length === 0, '主契約の過去記録は有効なまま');
+    assert(assessmentProblems([{ ...row, source: { ...row.source, url: additional } }],
+      [{ ...vendors[0], analysis_sources: additional }]).length > 0, '不正な追加URLリストは許可しない');
     for (const change of [
       (r) => { r.contract_approved = true; }, (r) => { r.actor = 'human'; },
       (r) => { r.agreement_applicability = 'verified'; }, (r) => { delete r.findings.ip; },
