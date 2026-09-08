@@ -23,9 +23,9 @@
       });
     });
   </script><title>メモアプリの暗号化を比較｜安全に残せるのはどれ</title>
-  <meta name="description" content="主要メモアプリの暗号化方式を比較。通信・保存・E2E暗号化の違いと脅威モデルを整理し、AES-GCMとAES-CBCの違い、ゼロナレッジの意味まで解説。10アプリの比較テーブルと脅威モデル別おすすめで、安全に残せるアプリが選べます。">
+  <meta name="description" content="メモアプリ10種類を、端末内・通信中・クラウド保存の暗号化範囲と鍵管理で比較。AES-GCMとCBC、E2EEの違いに加え、Bearの添付暗号化、Joplinの新方式、Appleメモの高度なデータ保護を整理。設定条件とバックアップ・書き出し先の確認方法も解説します。">
   <meta property="og:title" content="メモアプリの暗号化を比較｜安全に残せるのはどれ">
-  <meta property="og:description" content="主要メモアプリの暗号化を比較。通信・保存・E2Eの違いと脅威モデルを整理し、安全に残せるアプリの選び方を解説。">
+  <meta property="og:description" content="メモアプリ10種類を、端末内・通信中・クラウド保存の暗号化範囲と鍵管理で比較。AES-GCMとCBC、E2EEの違いに加え、Bearの添付暗号化、Joplinの新方式、Appleメモの高度なデータ保護を整理。設定条件とバックアップ・書き出し先の確認方法も解説します。">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-03-21T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/blog/memo-app-encryption-comparison">
@@ -38,31 +38,11 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
   <meta name="twitter:title" content="メモアプリの暗号化を比較｜安全に残せるのはどれ">
-  <meta name="twitter:description" content="主要メモアプリの暗号化を比較。通信・保存・E2Eの違いと脅威モデルを整理し、安全に残せるアプリの選び方を解説。">
+  <meta name="twitter:description" content="メモアプリ10種類を、端末内・通信中・クラウド保存の暗号化範囲と鍵管理で比較。AES-GCMとCBC、E2EEの違いに加え、Bearの添付暗号化、Joplinの新方式、Appleメモの高度なデータ保護を整理。設定条件とバックアップ・書き出し先の確認方法も解説します。">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png","headline":"メモアプリの暗号化を比較｜安全に残せるのはどれ","description":"主要メモアプリの暗号化を比較。通信・保存・E2Eの違いと脅威モデルを整理し、安全に残せるアプリの選び方を解説。AES-256-GCM/AES-CBC/E2EEの違いも。","url":"https://simplememofast.com/blog/memo-app-encryption-comparison","datePublished":"2026-03-21","dateModified":"2026-07-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#article","inLanguage":"ja","image":"https://simplememofast.com/assets/img/og/blog-memo-app-encryption-comparison.png","headline":"メモアプリの暗号化を比較｜安全に残せるのはどれ","description":"メモアプリ10種類を、端末内・通信中・クラウド保存の暗号化範囲と鍵管理で比較。AES-GCMとCBC、E2EEの違いに加え、Bearの添付暗号化、Joplinの新方式、Appleメモの高度なデータ保護を整理。設定条件とバックアップ・書き出し先の確認方法も解説します。","url":"https://simplememofast.com/blog/memo-app-encryption-comparison","datePublished":"2026-03-21","dateModified":"2026-09-09","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Simple Memo - for Obsidian"]},"mainEntityOfPage":{"@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"ブログ","item":"https://simplememofast.com/blog/"},{"@type":"ListItem","position":3,"name":"メモアプリの暗号化比較","item":"https://simplememofast.com/blog/memo-app-encryption-comparison"}]}</script>
-  <script type="application/ld+json">
-  {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "@id": "https://simplememofast.com/blog/memo-app-encryption-comparison#webpage",
-  "inLanguage": "ja",
-  "name": "メモアプリの暗号化比較【2026年】",
-  "isPartOf": {
-    "@id": "https://simplememofast.com/#website"
-  },
-  "speakable": {
-    "@type": "SpeakableSpecification",
-    "cssSelector": [
-      ".lp-hero__title",
-      ".lp-hero__sub",
-      ".tldr"
-    ]
-  },
-  "url": "https://simplememofast.com/blog/memo-app-encryption-comparison"
-}
-  </script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#webpage","inLanguage":"ja","name":"メモアプリの暗号化比較【2026年】","isPartOf":{"@id":"https://simplememofast.com/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".lp-hero__title",".lp-hero__sub",".tldr"]},"url":"https://simplememofast.com/blog/memo-app-encryption-comparison"}</script>
   <link rel="stylesheet" href="/assets/css/style.min.css?v=4806480582">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NotoSansJP-Bold-subset.woff2?v=2" as="font" type="font/woff2" crossorigin>
@@ -201,14 +181,26 @@
       }
     }
 
-  </style>
+
+    .tldr{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:1.5rem;line-height:1.85}
+    .encryption-review,.table-hint{font-size:.875rem;color:var(--text-secondary);line-height:1.8}
+    .lp-section p{line-height:1.85;margin:.75rem 0}.lp-section a,.encryption-callout a{color:var(--accent);text-underline-offset:3px}
+    .lp-section[id]{scroll-margin-top:76px}.tip-card h3{font-size:1rem;line-height:1.7}
+    .encryption-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:8px;margin:1rem 0}.encryption-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
+    .encryption-table{display:table;width:100%;min-width:1000px;font-size:.85rem;margin:0;table-layout:fixed}
+    .encryption-table th,.encryption-table td{white-space:normal;overflow-wrap:anywhere;padding:.8rem;line-height:1.75}
+    .encryption-table th:first-child{width:14%}.encryption-table th:last-child{width:15%}.encryption-table tbody th{background:transparent;color:var(--text);position:static}
+    .encryption-table caption{text-align:left;padding:1rem;font-weight:700;color:var(--text)}
+    .encryption-steps{padding-left:1.4rem;line-height:1.9}.encryption-steps li{margin:1rem 0}
+    .encryption-callout{margin:1.75rem 0;padding:1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;line-height:1.85}
+</style>
   <script src="https://analytics.ahrefs.com/analytics.js" data-key="6MwVxHQiKMs/Wl2rNBoiwQ" async></script>
     <link rel="preconnect" href="https://analytics.ahrefs.com">
   <!-- i18n: managed by scripts/normalize_i18n_head.py -->
   <link rel="canonical" href="https://simplememofast.com/blog/memo-app-encryption-comparison">
 
   <!-- JSON-LD: FAQPage (auto-generated from visible FAQ content) -->
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#faq","mainEntity":[{"@type":"Question","name":"AES-GCMとAES-CBCの違いは何ですか？","acceptedAnswer":{"@type":"Answer","text":"AES-GCMはガロアカウンターモードの略で、暗号化と認証を同時に行うAEAD方式です。改ざん検知が組み込まれており、AES-CBCより安全性が高いとされています。AES-CBCはCipher Block Chainingモードで、暗号化のみを行い、認証には別途HMACなどが必要です。Obsidian連携シンプルメモはAES-256-GCMを採用しています。"}},{"@type":"Question","name":"E2EE対応のメモアプリはどれですか？","acceptedAnswer":{"@type":"Answer","text":"2026年時点でE2EEに対応する主なメモアプリは、Standard Notes（XChaCha20-Poly1305）、Obsidian Sync（有料オプション）、Joplin（オプション）、Day One（オプション）、Apple Notes（Advanced Data Protection有効時）です。Obsidian連携シンプルメモは端末内AES-256-GCM暗号化（保管時）であり、E2EEではありません。Notion、Evernote、Google Keepは保管時暗号化のみでE2EEには非対応です。"}},{"@type":"Question","name":"ゼロナレッジ暗号化とは何ですか？","acceptedAnswer":{"@type":"Answer","text":"ゼロナレッジ暗号化とは、サービス運営者がユーザーのデータを一切閲覧できない設計のことです。暗号鍵がユーザーのパスワードから生成され、サーバーには保存されません。Standard Notesが代表的なゼロナレッジ設計のメモアプリです。法的な開示請求があっても技術的にデータを提出できないため、最高レベルのプライバシー保護を実現します。"}},{"@type":"Question","name":"日常的なメモにE2EEは必要ですか？","acceptedAnswer":{"@type":"Answer","text":"買い物リストやアイデアメモなど日常的な内容であれば、TLS通信暗号化と保管時暗号化（レベル2）で十分な保護が得られます。ただし、パスワード、財務データ、医療情報、ビジネスの機密情報を扱う場合はE2EE（レベル3以上）を推奨します。Obsidian連携シンプルメモはオフライン時のOutboxにAES-256-GCMを採用し、送信後はGmailの暗号化で保護されます。"}},{"@type":"Question","name":"メモアプリの暗号化で最も重要なチェックポイントは？","acceptedAnswer":{"@type":"Answer","text":"最も重要なのは「鍵の管理方式」です。同じAES-256でも、サービス側が鍵を保持する場合とユーザーだけが鍵を持つ場合では安全性が根本的に異なります。チェックすべきポイントは、(1)通信暗号化の有無、(2)保管時暗号化の有無、(3)E2EE対応、(4)鍵管理の方式、(5)オープンソースかどうかの5点です。"}},{"@type":"Question","name":"セキュリティとコラボレーション（共同編集）を高いレベルで両立できるメモソフトはどれですか？","acceptedAnswer":{"@type":"Answer","text":"2026年時点で、E2EE級の暗号化と本格的な共同編集を完全に両立するメモアプリは事実上存在しません。共同編集を優先するならNotionやMicrosoft OneNote（通信・保管時の暗号化と組織向けのアクセス権限管理を備えるがE2EEではない）が現実的です。セキュリティを最優先するならE2EEのStandard Notesが有力ですが、共有機能は限定的です。実務では「共同作業はNotion/OneNote、機密メモはE2EEや端末内暗号化のアプリに分離する」使い分けが最も安全です。なお、Obsidian連携シンプルメモは個人の高速キャプチャ専用で、共同編集には対応していません。"}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","@id":"https://simplememofast.com/blog/memo-app-encryption-comparison#faq","mainEntity":[{"@type":"Question","name":"AES-256ならE2EEですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。AES-256は暗号と鍵長を表します。E2EEかどうかは、どこで暗号化・復号し、誰が鍵を使えるかで決まります。サーバーが鍵を管理するAES-256保存と、利用者の端末だけで復号する設計は異なります。"}},{"@type":"Question","name":"AES-GCMとAES-CBCは何が違いますか？","acceptedAnswer":{"@type":"Answer","text":"GCMは暗号化と認証を組み合わせます。CBCは暗号化だけでは改ざんを検知しないため、認証の仕組みを適切に組み合わせる必要があります。方式名だけでアプリ全体の安全性を順位付けすることはできません。"}},{"@type":"Question","name":"E2EEなら端末内のファイルも暗号化されますか？","acceptedAnswer":{"@type":"Answer","text":"必ずしもそうではありません。Obsidian SyncとJoplinの同期暗号化は、端末内のローカルファイルやデータベースを同じように暗号化するものではありません。端末のディスク暗号化、アプリのローカル保護、バックアップを別に確認してください。"}},{"@type":"Question","name":"Bearで画像やPDFを含むノートも暗号化できますか？","acceptedAnswer":{"@type":"Answer","text":"Bear 2.4以降はBear Proで添付を含む個別ノートを暗号化できます。対象ノートにパスワードを追加し、同期先のアプリも対応版に更新します。タイトル表示や、暗号化していないノートは別に確認が必要です。"}},{"@type":"Question","name":"Day Oneの古いジャーナルも自動でE2EEになっていますか？","acceptedAnswer":{"@type":"Answer","text":"新しいジャーナルは4.2以降E2EEが既定ですが、古いものは個別に確認が必要です。現在の公式FAQでは、標準暗号化のジャーナルを直接切り替える代わりに、新しいE2EEジャーナルへエントリをコピーする方法を案内しています。"}},{"@type":"Question","name":"シンプルメモから自分に送るメールはE2EEですか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。Outboxと送信履歴の端末内暗号化と、メール配信は別です。本文は送信APIと外部配信基盤を通り、メールサービス側にもコピーが残ります。受信箱と連携先の保護・共有設定も確認してください。"}}]}</script>
 </head>
 <body>
   <!-- Global Navigation -->
@@ -238,379 +230,29 @@
   </nav>
 
 
-  <div class="meta-templates" style="display:none;"><div lang="ja" class="meta-template" data-lang="ja"><span class="meta-title">メモアプリの暗号化を比較｜安全に残せるのはどれ | Obsidian連携シンプルメモ</span><span class="meta-og-title">メモアプリの暗号化を比較｜安全に残せるのはどれ</span><span class="meta-description">主要メモアプリの暗号化を比較。通信・保存・E2Eの違いと脅威モデルを整理し、安全に残せるアプリの選び方を解説。</span></div><div lang="en" class="meta-template" data-lang="en"><span class="meta-title">Memo App Encryption Comparison 2026 | Simple Memo</span><span class="meta-og-title">Memo App Encryption Comparison</span><span class="meta-description">10 apps compared by encryption: AES-GCM, E2EE, zero-knowledge.</span></div></div>
+  <div class="meta-templates" style="display:none;"><div lang="ja" class="meta-template" data-lang="ja"><span class="meta-title">メモアプリの暗号化を比較｜安全に残せるのはどれ | Obsidian連携シンプルメモ</span><span class="meta-og-title">メモアプリの暗号化を比較｜安全に残せるのはどれ</span><span class="meta-description">メモアプリ10種類を、端末内・通信中・クラウド保存の暗号化範囲と鍵管理で比較。AES-GCMとCBC、E2EEの違いに加え、Bearの添付暗号化、Joplinの新方式、Appleメモの高度なデータ保護を整理。設定条件とバックアップ・書き出し先の確認方法も解説します。</span></div><div lang="en" class="meta-template" data-lang="en"><span class="meta-title">Memo App Encryption Comparison 2026 | Simple Memo</span><span class="meta-og-title">Memo App Encryption Comparison</span><span class="meta-description">Compare encryption across 10 note apps: local files, cloud copies, E2EE settings, AES-GCM and CBC, recovery keys, attachments, and exported notes.</span></div></div>
 <main class="page-content"><div class="container">
-    <div class="lp-hero"><div class="lp-hero__label"><span lang="ja" data-lang="ja">暗号化・セキュリティ</span><span lang="en" data-lang="en">Encryption & Security</span></div><h1 class="lp-hero__title"><span lang="ja" data-lang="ja">メモアプリの暗号化比較<br>【2026年】</span><span lang="en" data-lang="en">Memo App Encryption<br>Comparison 2026</span></h1><p class="lp-hero__sub"><span lang="ja" data-lang="ja">「暗号化対応」と書いてあるメモアプリは多いものの、実装レベルは天と地の差があります。本記事ではObsidian連携シンプルメモ、Standard Notes、Obsidian、Notion、Evernoteなど10アプリの暗号化方式を技術的に比較し、脅威モデル別のおすすめまで踏み込んで解説します。Obsidian連携シンプルメモの開発過程で各アプリの暗号化仕様を実際に調査した実体験に基づいています。</span><span lang="en" data-lang="en">Many memo apps claim "encryption support," but implementation levels vary dramatically. This article technically compares encryption methods across 10 apps including Simple Memo - for Obsidian, Standard Notes, Obsidian, Notion, and Evernote, with threat-model-based recommendations.</span></p>
+    <div class="lp-hero"><div class="lp-hero__label"><span lang="ja" data-lang="ja">暗号化・セキュリティ</span><span lang="en" data-lang="en">Encryption & Security</span></div><h1 class="lp-hero__title"><span lang="ja" data-lang="ja">メモアプリの暗号化比較<br>【2026年】</span><span lang="en" data-lang="en">Memo App Encryption<br>Comparison 2026</span></h1><p class="lp-hero__sub"><span lang="ja" data-lang="ja">「AES-256対応」と「運営者にも本文を読めない」は、別の条件です。10アプリの公式資料をもとに、どのコピーが暗号化され、誰が復号鍵を扱い、何を自分で有効にするのかを比較します。</span><span lang="en" data-lang="en">AES-256 and provider-inaccessible content describe different properties. Compare 10 apps by which copies they protect, who controls the keys, and which settings you need to enable.</span></p>
 <p class="article-meta" style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">
   <span lang="ja" data-lang="ja">著者: <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · 公開日: <time datetime="2026-03-21">2026年03月21日</time></span>
   <span lang="en" data-lang="en">By <a href="/about/" style="color:var(--accent);text-decoration:none;">AI Ataka</a> · Published: March 21, 2026</span>
 </p></div>
 
-    <!-- TL;DR Summary for AI Citation -->
-    <div class="tldr" style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin-bottom:2rem;font-size:.9rem;line-height:1.8;">
-      <div style="font-weight:700;color:var(--accent);font-size:.875rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;">TL;DR</div>
-      <p lang="ja" style="color:var(--text-secondary);margin:0;" data-lang="ja">メモアプリ10種類の暗号化方式を比較表で徹底解説。AES-256-GCMとAES-256-CBCの技術的違い、E2EE（エンドツーエンド暗号化）とゼロナレッジの実装差、そして一般ユーザー/ビジネス/高セキュリティの3段階の脅威モデル別おすすめを提示。Obsidian連携シンプルメモはAES-256-GCMでOutboxを暗号化し、サーバーにメモ本文を保存しないゼロストレージ設計を採用。</p>
-      <p lang="en" style="color:var(--text-secondary);margin:0;" data-lang="en">A comprehensive comparison of encryption methods across 10 memo apps. Covers AES-256-GCM vs AES-256-CBC technical differences, E2EE vs zero-knowledge implementations, and recommendations for 3 threat models: general users, business, and high-security. Simple Memo - for Obsidian uses AES-256-GCM for Outbox encryption with zero server storage of memo text.</p>
-    </div>
-
-    <!-- Section 1: Why Encryption Matters -->
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">なぜメモアプリの暗号化が重要なのか</span><span lang="en" data-lang="en">Why Memo App Encryption Matters</span></h2>
-      <div lang="ja" data-lang="ja">
-        <div class="tip-card">
-          <div class="tip-card__desc">
-            <p>メモアプリには個人情報からビジネスの機密情報まで、多種多様なデータが蓄積されます。暗号化が不十分なメモアプリを使い続けることは、鍵のかかっていない金庫にパスワードを保管するようなものです。</p>
-            <p style="margin-top:.75rem"><strong>個人情報のリスク：</strong></p>
-            <p style="margin-top:.5rem">メモアプリに保存されがちなデータには、住所・電話番号、クレジットカード情報のメモ書き、医療記録、家族の個人情報などがあります。2024年のIBM調査によると、データ漏洩1件あたりの平均コストは488万ドルに達しており、個人レベルでも情報漏洩の影響は深刻です。</p>
-            <p style="margin-top:.75rem"><strong>ビジネスメモのリスク：</strong></p>
-            <p style="margin-top:.5rem">会議の議事録、クライアントとの商談メモ、社内の戦略メモ、取引先の連絡先リストなど、ビジネスで使うメモには営業秘密に該当する情報が含まれることがあります。不正競争防止法の観点からも、「秘密管理性」を維持するためには暗号化による技術的保護措置が重要です。</p>
-            <p style="margin-top:.75rem"><strong>法的リスク：</strong></p>
-            <p style="margin-top:.5rem">2022年に施行された改正個人情報保護法では、個人データの安全管理措置が強化されました。EU圏のGDPRでは暗号化が「適切な技術的措置」として明記されています。暗号化されていないメモアプリで顧客情報を管理していた場合、漏洩時に法的責任が問われる可能性があります。メモアプリのプライバシー全般については<a href="/blog/memo-app-privacy" style="color:var(--accent)">メモアプリのプライバシー比較</a>も参照してください。</p>
-          </div>
-        </div>
-      </div>
-      <div lang="en" data-lang="en">
-        <div class="tip-card">
-          <div class="tip-card__desc">
-            <p>Memo apps accumulate everything from personal information to business secrets. Using a poorly encrypted memo app is like storing passwords in an unlocked safe.</p>
-            <p style="margin-top:.75rem"><strong>Personal Data Risk:</strong> Addresses, credit card notes, medical records, and family information. IBM's 2024 study found the average data breach costs $4.88 million.</p>
-            <p style="margin-top:.75rem"><strong>Business Memo Risk:</strong> Meeting minutes, client notes, strategy memos, and contact lists may contain trade secrets requiring technical protection measures.</p>
-            <p style="margin-top:.75rem"><strong>Legal Risk:</strong> Japan's amended Personal Information Protection Act (2022) and GDPR both require appropriate technical measures including encryption.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 2: Encryption Basics -->
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">暗号化方式の基礎知識：AES-GCM vs AES-CBC、E2EE、ゼロナレッジ</span><span lang="en" data-lang="en">Encryption Basics: AES-GCM vs AES-CBC, E2EE, Zero-Knowledge</span></h2>
-      <div lang="ja" data-lang="ja">
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>AES-GCM（ガロアカウンターモード）</span><span class="tip-card__rank">推奨</span></div>
-          <div class="tip-card__desc">
-            <p>AES-GCM（Advanced Encryption Standard - Galois/Counter Mode）は、暗号化と認証を同時に行う<strong>AEAD（Authenticated Encryption with Associated Data）</strong>方式です。</p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>暗号化＋認証が一体：</strong>データの暗号化と同時に、改ざんされていないことを検証する認証タグ（128bit）を生成</li>
-              <li><strong>高速処理：</strong>CTR（カウンター）モードベースのため並列処理が可能。ハードウェアアクセラレーション（AES-NI）との相性が良い</li>
-              <li><strong>採用実績：</strong>TLS 1.3の必須暗号スイート、Apple CryptoKit、Web Crypto API</li>
-              <li><strong>注意点：</strong>同じ鍵とIV（初期化ベクトル）の組み合わせを再利用すると安全性が崩壊する。IV管理が極めて重要</li>
-            </ul>
-          </div>
-          <div class="tip-card__example"><strong>Obsidian連携シンプルメモの実装：</strong>Outbox（オフライン保存領域）のメモをAES-256-GCMで暗号化。各メモごとにランダムなIVを生成し、IV再利用の問題を回避しています。</div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>AES-CBC（暗号ブロック連鎖モード）</span><span class="tip-card__rank">従来型</span></div>
-          <div class="tip-card__desc">
-            <p>AES-CBC（Cipher Block Chaining）は、前のブロックの暗号文を次のブロックの暗号化に使う方式です。長年使われてきた信頼性のある方式ですが、GCMと比較するといくつかの課題があります。</p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>認証なし：</strong>暗号化のみを行い、改ざん検知には別途HMAC（Hash-based Message Authentication Code）が必要</li>
-              <li><strong>パディング攻撃：</strong>Padding Oracle攻撃のリスクがあり、実装ミスで脆弱性が生じやすい</li>
-              <li><strong>逐次処理：</strong>ブロック間に依存関係があるため並列処理ができず、GCMより低速</li>
-              <li><strong>採用例：</strong>Standard Notes（初期実装ではAES-256-CBCを使用、現在はXChaCha20-Poly1305に移行）</li>
-            </ul>
-          </div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>E2EE（エンドツーエンド暗号化）</span><span class="tip-card__rank">高セキュリティ</span></div>
-          <div class="tip-card__desc">
-            <p>E2EEはデータがデバイス上で暗号化され、受信者のデバイスでのみ復号される方式です。サーバーを経由しても、サーバー運営者はデータの中身を見ることができません。</p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>鍵の生成場所：</strong>ユーザーのデバイス上でのみ暗号鍵が生成・保管される</li>
-              <li><strong>サーバーの役割：</strong>暗号化されたデータの中継・保管のみ。復号は不可能</li>
-              <li><strong>トレードオフ：</strong>パスワード紛失時のデータ復旧が原理的に不可能</li>
-            </ul>
-            <p style="margin-top:.75rem">E2EEの技術的な詳細については<a href="/blog/memo-app-security-comparison" style="color:var(--accent)">メモアプリのセキュリティ比較</a>で詳しく解説しています。</p>
-          </div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">4</span>ゼロナレッジ暗号化</span><span class="tip-card__rank">最高レベル</span></div>
-          <div class="tip-card__desc">
-            <p>ゼロナレッジ暗号化は、E2EEをさらに厳格にした設計哲学です。サービス提供者がユーザーのデータについて「何も知らない」（zero knowledge）状態を技術的に保証します。</p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>鍵導出：</strong>ユーザーのパスワードからArgon2idやPBKDF2で暗号鍵を導出。サーバーには一切送信されない</li>
-              <li><strong>法的意味：</strong>裁判所の開示命令があっても、技術的にデータを提出不可能</li>
-              <li><strong>代表アプリ：</strong>Standard Notes、Notesnook</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div lang="en" data-lang="en">
-        <div class="tip-card">
-          <div class="tip-card__desc">
-            <p><strong>AES-GCM:</strong> AEAD cipher providing encryption + authentication in one operation. Used in TLS 1.3, Apple CryptoKit. Simple Memo - for Obsidian uses AES-256-GCM for Outbox encryption.</p>
-            <p style="margin-top:.75rem"><strong>AES-CBC:</strong> Legacy mode requiring separate HMAC for authentication. Vulnerable to padding oracle attacks if misimplemented. Standard Notes initially used AES-256-CBC.</p>
-            <p style="margin-top:.75rem"><strong>E2EE:</strong> Data encrypted on-device, decrypted only on recipient's device. Server cannot read content.</p>
-            <p style="margin-top:.75rem"><strong>Zero-Knowledge:</strong> Stricter than E2EE -- keys derived from user password via Argon2id/PBKDF2, never transmitted to server. Even court orders cannot compel data disclosure.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 3: 10-App Comparison Table -->
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">10アプリ暗号化比較テーブル</span><span lang="en" data-lang="en">10-App Encryption Comparison Table</span></h2>
-      <div lang="ja" data-lang="ja">
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name">暗号化方式の一覧比較</span><span class="tip-card__rank">2026年3月時点</span></div>
-          <div class="tip-card__desc">
-            <p>以下の表は、各アプリの公式ドキュメントとセキュリティホワイトペーパーに基づいて作成しています。Obsidian連携シンプルメモについては、自社開発のため実装仕様を正確に記載しています。</p>
-          </div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <table class="encryption-table">
-            <thead>
-              <tr>
-                <th scope="col">アプリ</th>
-                <th scope="col">暗号化方式</th>
-                <th scope="col">E2EE</th>
-                <th scope="col">ゼロナレッジ</th>
-                <th scope="col">サーバー保存</th>
-                <th scope="col">オープンソース</th>
-                <th scope="col">備考</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Obsidian連携シンプルメモ</th>
-                <td>AES-256-GCM<br><small>（端末内 Outbox / 履歴）</small></td>
-                <td><span class="badge-none">非対応</span></td>
-                <td>-</td>
-                <td>本文の恒常保存なし<br><small>（送信時のみ通過）</small></td>
-                <td>-</td>
-                <td>端末内ストレージのみ暗号化。メール送信は標準 SMTP（E2E ではない）</td>
-              </tr>
-              <tr>
-                <th scope="row">Standard Notes</th>
-                <td>XChaCha20-Poly1305</td>
-                <td><span class="badge-e2e">対応</span></td>
-                <td><span class="badge-e2e">対応</span></td>
-                <td>暗号化済みのみ</td>
-                <td><span class="badge-e2e">OSS</span></td>
-                <td>旧AES-256-CBC。鍵導出にArgon2id使用</td>
-              </tr>
-              <tr>
-                <th scope="row">Obsidian</th>
-                <td>ローカルファイル</td>
-                <td><span class="badge-partial">Syncのみ</span></td>
-                <td>-</td>
-                <td>Sync使用時のみ</td>
-                <td>-</td>
-                <td>ローカルMarkdown。Obsidian Sync($4/月)でE2EE</td>
-              </tr>
-              <tr>
-                <th scope="row">Notion</th>
-                <td>TLS + AES-256 at rest</td>
-                <td><span class="badge-none">非対応</span></td>
-                <td><span class="badge-none">非対応</span></td>
-                <td>サーバー保存</td>
-                <td>-</td>
-                <td>AWS上に保管。SOC 2 Type II取得</td>
-              </tr>
-              <tr>
-                <th scope="row">Evernote</th>
-                <td>TLS + AES-256 at rest</td>
-                <td><span class="badge-none">非対応</span></td>
-                <td><span class="badge-none">非対応</span></td>
-                <td>サーバー保存</td>
-                <td>-</td>
-                <td>テキスト単位の暗号化機能あり（AES-128相当）</td>
-              </tr>
-              <tr>
-                <th scope="row">Apple Notes</th>
-                <td>AES-256（iCloud暗号化）</td>
-                <td><span class="badge-partial">ADP時</span></td>
-                <td>-</td>
-                <td>iCloudサーバー</td>
-                <td>-</td>
-                <td>Advanced Data Protection有効時にE2EE。ノート単位ロック可能</td>
-              </tr>
-              <tr>
-                <th scope="row">Google Keep</th>
-                <td>Google暗号化 at rest</td>
-                <td><span class="badge-none">非対応</span></td>
-                <td><span class="badge-none">非対応</span></td>
-                <td>Googleサーバー</td>
-                <td>-</td>
-                <td>Googleの共通暗号化基盤。広告目的のデータ利用なし（公式発表）</td>
-              </tr>
-              <tr>
-                <th scope="row">Bear</th>
-                <td>iCloud暗号化依存</td>
-                <td><span class="badge-partial">ADP時</span></td>
-                <td>-</td>
-                <td>iCloudサーバー</td>
-                <td>-</td>
-                <td>アプリ独自の暗号化なし。iCloudの暗号化に依存</td>
-              </tr>
-              <tr>
-                <th scope="row">Joplin</th>
-                <td>AES-256-CBC</td>
-                <td><span class="badge-partial">オプション</span></td>
-                <td>-</td>
-                <td>同期先による</td>
-                <td><span class="badge-e2e">OSS</span></td>
-                <td>E2EEはオプション有効化が必要。同期先は自由に選択可能</td>
-              </tr>
-              <tr>
-                <th scope="row">Day One</th>
-                <td>AES-256</td>
-                <td><span class="badge-partial">オプション</span></td>
-                <td>-</td>
-                <td>Day Oneサーバー</td>
-                <td>-</td>
-                <td>E2EEはオプション。ジャーナル特化アプリ</td>
-              </tr>
-            </tbody>
-          </table>
-          </div>
-          <div class="tip-card__example"><strong>表の読み方：</strong>「E2EE対応」でもオプションで有効化が必要なアプリが多い点に注意してください。デフォルトで E2EE が有効なのは Standard Notes のみです（Joplin・Day One・Apple Notes ADP・Obsidian Sync はオプション設定が必要）。Obsidian連携シンプルメモ は E2EE ではなく「端末内 Outbox/履歴の暗号化＋メール本文のサーバ恒常保存なし」というデータ最小化モデルです。各アプリの詳細な比較は<a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes比較</a>、<a href="/vs/obsidian/" style="color:var(--accent)">Obsidian比較</a>、<a href="/vs/notion/" style="color:var(--accent)">Notion比較</a>、<a href="/vs/evernote/" style="color:var(--accent)">Evernote比較</a>ページもご覧ください。</div>
-        </div>
-      </div>
-      <div lang="en" data-lang="en">
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name">Encryption Comparison at a Glance</span><span class="tip-card__rank">As of March 2026</span></div>
-          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <table class="encryption-table">
-            <thead>
-              <tr>
-                <th scope="col">App</th>
-                <th scope="col">Encryption</th>
-                <th scope="col">E2EE</th>
-                <th scope="col">Zero-Knowledge</th>
-                <th scope="col">Server Storage</th>
-                <th scope="col">Open Source</th>
-                <th scope="col">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th scope="row">Simple Memo - for Obsidian</th><td>AES-256-GCM<br><small>(on-device Outbox / history only)</small></td><td><span class="badge-none">No</span></td><td>-</td><td>Memo bodies not persistently stored<br><small>(transit only during send)</small></td><td>-</td><td>On-device storage only. Email delivery via standard SMTP — not E2EE</td></tr>
-              <tr><th scope="row">Standard Notes</th><td>XChaCha20-Poly1305</td><td><span class="badge-e2e">Yes</span></td><td><span class="badge-e2e">Yes</span></td><td>Encrypted only</td><td><span class="badge-e2e">OSS</span></td><td>Key derivation via Argon2id</td></tr>
-              <tr><th scope="row">Obsidian</th><td>Local files</td><td><span class="badge-partial">Sync only</span></td><td>-</td><td>Sync only</td><td>-</td><td>Obsidian Sync ($4/mo) for E2EE</td></tr>
-              <tr><th scope="row">Notion</th><td>TLS + AES-256 at rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Server</td><td>-</td><td>SOC 2 Type II certified</td></tr>
-              <tr><th scope="row">Evernote</th><td>TLS + AES-256 at rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Server</td><td>-</td><td>Per-text encryption (AES-128)</td></tr>
-              <tr><th scope="row">Apple Notes</th><td>AES-256 (iCloud)</td><td><span class="badge-partial">ADP</span></td><td>-</td><td>iCloud</td><td>-</td><td>E2EE with Advanced Data Protection</td></tr>
-              <tr><th scope="row">Google Keep</th><td>Google at-rest</td><td><span class="badge-none">No</span></td><td><span class="badge-none">No</span></td><td>Google</td><td>-</td><td>No ad-based data use (per Google)</td></tr>
-              <tr><th scope="row">Bear</th><td>iCloud encryption</td><td><span class="badge-partial">ADP</span></td><td>-</td><td>iCloud</td><td>-</td><td>No app-level encryption</td></tr>
-              <tr><th scope="row">Joplin</th><td>AES-256-CBC</td><td><span class="badge-partial">Optional</span></td><td>-</td><td>Varies</td><td><span class="badge-e2e">OSS</span></td><td>E2EE requires manual activation</td></tr>
-              <tr><th scope="row">Day One</th><td>AES-256</td><td><span class="badge-partial">Optional</span></td><td>-</td><td>Day One</td><td>-</td><td>Journal-focused app</td></tr>
-            </tbody>
-          </table>
-          </div>
-        </div>
-      </div>
-    
-      <p style="margin:1.75rem 0 .5rem;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(77,163,255,.07);border-radius:0 8px 8px 0;font-size:.95rem;line-height:1.85;">
-        <span lang="ja" data-lang="ja">暗号化の強さを比べる前に、そもそもサーバーにメモを置かない構成もあります。<a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8">Obsidian連携シンプルメモ</a>は既存のメール基盤で送ります（無料）。</span>
-        <span lang="en" data-lang="en">Before comparing encryption strength, there is also the option of never putting notes on a server at all. <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8">Simple Memo</a> sends through existing email infrastructure (free).</span>
-      </p>
-    </section>
-
-    <!-- Section 4: Threat Model Recommendations -->
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">脅威モデル別おすすめ</span><span lang="en" data-lang="en">Recommendations by Threat Model</span></h2>
-      <div lang="ja" data-lang="ja">
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">1</span>一般ユーザー向け</span><span class="tip-card__rank">レベル2</span></div>
-          <div class="tip-card__desc">
-            <p><strong>想定する脅威：</strong>Wi-Fi盗聴、デバイス紛失、クラウドサービスの情報漏洩</p>
-            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>通信暗号化（TLS）＋保管時暗号化（at-rest）</p>
-            <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>Obsidian連携シンプルメモ：</strong>買い物リストやアイデアメモに最適。AES-256-GCMでOutboxを保護し、送信後はGmail/iCloudの暗号化で保管。0.4秒起動で「思いついた瞬間にメモ」が可能</li>
-              <li><strong>Apple Notes：</strong>iPhoneユーザーなら最も手軽。iCloud暗号化で標準的な保護</li>
-              <li><strong>Google Keep：</strong>Googleアカウントのセキュリティ基盤に依存。シンプルで軽快</li>
-            </ul>
-          </div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">2</span>ビジネスユーザー向け</span><span class="tip-card__rank">レベル3</span></div>
-          <div class="tip-card__desc">
-            <p><strong>想定する脅威：</strong>産業スパイ、内部不正、クラウドプロバイダーへの法的開示請求、退職者によるデータ持ち出し</p>
-            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>本格的な機密情報には E2EE（エンドツーエンド暗号化）＋ 2 段階認証。一般業務メモには端末内暗号化＋本文サーバ非保存（データ最小化）でも実用上は十分</p>
-            <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>Obsidian連携シンプルメモ + Gmail（Workspace）：</strong>端末内 Outbox/履歴の AES-256-GCM 暗号化＋本文をサーバに恒常保存しない設計＋ Google Workspace のエンタープライズ暗号化（at-rest + in-transit）。E2EE ではないが、自分のメール受信箱にしかメモが存在しない構造のため、開発元への情報漏洩リスクが構造的にゼロ。日常業務メモにはこのモデルが現実的</li>
-              <li><strong>Obsidian + ローカル保存：</strong>データをクラウドに一切送信しない究極のローカル管理。ただしデバイス間同期には別途対策が必要</li>
-              <li><strong>Notion（SOC 2対応）：</strong>チーム共有機能が充実。ただしE2EE非対応のため、最高機密には不向き</li>
-              <li><strong>Standard Notes（最高機密用）：</strong>本物の E2EE が必要なら、メモアプリとしては Standard Notes 一択。Obsidian連携シンプルメモ は併用すると良い</li>
-            </ul>
-          </div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name"><span class="step-number">3</span>高セキュリティ環境向け</span><span class="tip-card__rank">レベル4</span></div>
-          <div class="tip-card__desc">
-            <p><strong>想定する脅威：</strong>国家レベルの監視、標的型攻撃、サーバーへの物理的アクセス、内部告発者への報復</p>
-            <p style="margin-top:.5rem"><strong>必要な保護レベル：</strong>ゼロナレッジ＋E2EE＋オープンソース監査</p>
-            <p style="margin-top:.75rem"><strong>おすすめアプリ：</strong></p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>Standard Notes：</strong>ゼロナレッジ＋E2EE＋オープンソース＋第三者監査。メモアプリとして最高レベルのセキュリティ設計。詳細は<a href="/vs/standard-notes/" style="color:var(--accent)">Standard Notes比較ページ</a>を参照</li>
-              <li><strong>Joplin（E2EE有効化＋セルフホスト）：</strong>自前サーバーでの運用が可能。データが外部に出ない完全自己管理型</li>
-            </ul>
-          </div>
-          <div class="tip-card__example"><strong>使い分けの実例：</strong>私自身は日常のアイデアメモにはObsidian連携シンプルメモを使い、パスワードや機密情報にはStandard Notesを使い分けています。「全てのメモに最高セキュリティ」は利便性を犠牲にするため、脅威モデルに応じた使い分けが現実的です。</div>
-        </div>
-      </div>
-      <div lang="en" data-lang="en">
-        <div class="tip-card">
-          <div class="tip-card__desc">
-            <p><strong>General Users (Level 2):</strong> Simple Memo - for Obsidian, Apple Notes, Google Keep -- TLS + at-rest encryption is sufficient for everyday notes.</p>
-            <p style="margin-top:.75rem"><strong>Business Users (Level 3):</strong> Simple Memo - for Obsidian + Gmail Workspace, Obsidian local, Notion (SOC 2) -- at-rest encryption plus 2FA for business confidentiality (E2EE only where the individual tool provides it).</p>
-            <p style="margin-top:.75rem"><strong>High Security (Level 4):</strong> Standard Notes (zero-knowledge + E2EE + OSS), Joplin self-hosted -- for state-level threat models.</p>
-            <p style="margin-top:.75rem"><strong>Practical tip:</strong> Match security level to content sensitivity. Not all memos need maximum encryption -- that approach sacrifices usability.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 5: Simple Memo - for Obsidian AES-GCM Implementation Details -->
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">Obsidian連携シンプルメモのAES-GCM実装詳細</span><span lang="en" data-lang="en">Simple Memo - for Obsidian's AES-GCM Implementation Details</span></h2>
-      <div lang="ja" data-lang="ja">
-        <div class="tip-card">
-          <div class="tip-card__header"><span class="tip-card__name">Outbox暗号化アーキテクチャ</span><span class="tip-card__rank">技術解説</span></div>
-          <div class="tip-card__desc">
-            <p>Obsidian連携シンプルメモは「メモ→メール」のワンタップ送信アプリです。メモ本文をサーバーに保存しないゼロストレージ設計を採用していますが、オフライン時にはデバイス上のOutbox（送信待ちキュー）にメモを一時保管する必要があります。このOutboxの暗号化にAES-256-GCMを採用しています。</p>
-            <p style="margin-top:.75rem"><strong>暗号化フロー：</strong></p>
-            <ul style="margin-top:.5rem;padding-left:1.2rem">
-              <li><strong>Step 1 鍵生成：</strong>Apple CryptoKitのSymmetricKeyを使用し、256ビットの暗号鍵を生成。鍵はiOS Keychainに安全に保管</li>
-              <li><strong>Step 2 暗号化：</strong>メモ本文をUTF-8でエンコード後、AES.GCM.seal()でAES-256-GCMにより暗号化。各メモごとにユニークな96ビットIV（Nonce）を自動生成</li>
-              <li><strong>Step 3 保管：</strong>暗号化済みデータ（combined形式：Nonce + 暗号文 + 認証タグ）をOutboxに保存</li>
-              <li><strong>Step 4 送信＋削除：</strong>ネットワーク復帰時に暗号化データを復号し、SMTP経由で送信。送信成功後、Outboxからデータを完全削除</li>
-            </ul>
-            <p style="margin-top:.75rem"><strong>なぜAES-GCMを選んだのか：</strong></p>
-            <p style="margin-top:.5rem">開発時にAES-CBCとAES-GCMを比較検討しました。AES-CBCは認証なしのため、Outbox内のデータが改ざんされた場合に検知できません。AES-GCMはAEAD方式のため、暗号化と同時に認証タグを生成し、復号時に改ざんを自動検知します。Apple CryptoKitがAES-GCMをネイティブサポートしていることも採用の決め手でした。</p>
-            <p style="margin-top:.75rem"><strong>セキュリティ境界線の明確化：</strong></p>
-            <p style="margin-top:.5rem">Obsidian連携シンプルメモが暗号化で保護するのはOutbox（デバイス上の一時保管領域）です。メールが送信された後は、Gmail/iCloud/Outlookなどメールプロバイダー側の暗号化に保護が移行します。つまり、Obsidian連携シンプルメモの暗号化はデバイス上の未送信メモを保護する「最後の砦」として機能しています。この設計思想については<a href="/devlog/privacy-first-design" style="color:var(--accent)">Privacy-First Design</a>で詳しく説明しています。</p>
-          </div>
-          <div class="tip-card__example"><strong>開発者ノート：</strong>最も苦労したのはIV管理です。AES-GCMでは同じ鍵＋IVの組み合わせを2回以上使うと暗号化の安全性が完全に崩壊します。CryptoKitのAES.GCM.Nonceを使い、各暗号化操作ごとにランダムなIVを生成することで、この問題を解決しました。</div>
-        </div>
-      </div>
-      <div lang="en" data-lang="en">
-        <div class="tip-card">
-          <div class="tip-card__desc">
-            <p>Simple Memo - for Obsidian encrypts its Outbox (offline queue) with AES-256-GCM using Apple CryptoKit. Each memo gets a unique 96-bit nonce. Keys are stored in iOS Keychain. After successful email send, Outbox data is permanently deleted.</p>
-            <p style="margin-top:.75rem"><strong>Why AES-GCM over AES-CBC:</strong> GCM provides AEAD (authenticated encryption), automatically detecting tampering. CBC requires separate HMAC and is vulnerable to padding oracle attacks.</p>
-            <p style="margin-top:.75rem"><strong>Security boundary:</strong> Simple Memo - for Obsidian protects unsent memos on-device. After sending, protection shifts to the email provider's encryption (Gmail, iCloud, etc.).</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 6: FAQ -->
-    <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">FAQ</span></h2>
-      <div lang="ja" data-lang="ja">
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとAES-CBCの違いは何ですか？</summary><div class="faq-answer"><p>AES-GCMはガロアカウンターモードの略で、暗号化と認証を同時に行うAEAD方式です。改ざん検知が組み込まれており、AES-CBCより安全性が高いとされています。AES-CBCはCipher Block Chainingモードで、暗号化のみを行い、認証には別途HMACなどが必要です。Obsidian連携シンプルメモはAES-256-GCMを採用しています。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EE対応のメモアプリはどれですか？</summary><div class="faq-answer"><p>2026年時点でE2EEに対応する主なメモアプリは、Standard Notes（XChaCha20-Poly1305）、Obsidian Sync（有料オプション）、Joplin（オプション）、Day One（オプション）、Apple Notes（Advanced Data Protection有効時）です。Obsidian連携シンプルメモは端末内AES-256-GCM暗号化（保管時）であり、E2EEではありません。Notion、Evernote、Google Keepは保管時暗号化のみでE2EEには非対応です。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">ゼロナレッジ暗号化とは何ですか？</summary><div class="faq-answer"><p>ゼロナレッジ暗号化とは、サービス運営者がユーザーのデータを一切閲覧できない設計のことです。暗号鍵がユーザーのパスワードから生成され、サーバーには保存されません。Standard Notesが代表的なゼロナレッジ設計のメモアプリです。法的な開示請求があっても技術的にデータを提出できないため、最高レベルのプライバシー保護を実現します。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">日常的なメモにE2EEは必要ですか？</summary><div class="faq-answer"><p>買い物リストやアイデアメモなど日常的な内容であれば、TLS通信暗号化と保管時暗号化（レベル2）で十分な保護が得られます。ただし、パスワード、財務データ、医療情報、ビジネスの機密情報を扱う場合はE2EE（レベル3以上）を推奨します。Obsidian連携シンプルメモはオフライン時のOutboxにAES-256-GCMを採用し、送信後はGmailの暗号化で保護されます。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">メモアプリの暗号化で最も重要なチェックポイントは？</summary><div class="faq-answer"><p>最も重要なのは「鍵の管理方式」です。同じAES-256でも、サービス側が鍵を保持する場合とユーザーだけが鍵を持つ場合では安全性が根本的に異なります。チェックすべきポイントは、(1)通信暗号化の有無、(2)保管時暗号化の有無、(3)E2EE対応、(4)鍵管理の方式、(5)オープンソースかどうかの5点です。</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">セキュリティとコラボレーション（共同編集）を高いレベルで両立できるメモソフトはどれですか？</summary><div class="faq-answer"><p>2026年時点で、E2EE級の暗号化と本格的な共同編集を完全に両立するメモアプリは事実上存在しません。共同編集を優先するならNotionやMicrosoft OneNote（通信・保管時の暗号化と組織向けのアクセス権限管理を備えるがE2EEではない）が現実的です。セキュリティを最優先するならE2EEのStandard Notesが有力ですが、共有機能は限定的です。実務では「共同作業はNotion/OneNote、機密メモはE2EEや端末内暗号化のアプリに分離する」使い分けが最も安全です。なお、Obsidian連携シンプルメモは個人の高速キャプチャ専用で、共同編集には対応していません。</p></div></details></div>
-      </div>
-      <div lang="en" data-lang="en">
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the difference between AES-GCM and AES-CBC?</summary><div class="faq-answer"><p>AES-GCM is an AEAD cipher that provides encryption + authentication simultaneously. AES-CBC only encrypts and requires separate HMAC for authentication, making it vulnerable to padding oracle attacks.</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which memo apps support E2EE?</summary><div class="faq-answer"><p>As of 2026: Standard Notes (XChaCha20), Obsidian Sync (paid), Joplin (optional), Day One (optional), Apple Notes (with ADP). Simple Memo - for Obsidian uses on-device AES-256-GCM (at rest) and is not E2EE. Notion, Evernote, and Google Keep do not support E2EE.</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is zero-knowledge encryption?</summary><div class="faq-answer"><p>A design where the service operator cannot access user data at all. Encryption keys are derived from the user's password and never stored on servers. Standard Notes is the leading zero-knowledge memo app.</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Do I need E2EE for everyday notes?</summary><div class="faq-answer"><p>For shopping lists and ideas, TLS + at-rest encryption (Level 2) is sufficient. For passwords, financial data, or medical info, E2EE (Level 3+) is recommended.</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">What is the most important encryption checkpoint?</summary><div class="faq-answer"><p>Key management. Even with AES-256, security differs fundamentally based on whether the service or the user holds the keys. Check: (1) transport encryption, (2) at-rest encryption, (3) E2EE, (4) key management, (5) open source.</p></div></details></div>
-        <div class="faq-item"><details class="faq-details"><summary class="faq-summary">Which memo app combines strong security with collaboration?</summary><div class="faq-answer"><p>As of 2026, no memo app fully combines E2EE-grade encryption with full collaborative editing. For collaboration, Notion or Microsoft OneNote (encrypted in transit and at rest with access controls, but not E2EE) are the practical picks. For security-first use, Standard Notes offers E2EE but limited sharing. The safest setup splits the two jobs: collaborate in Notion/OneNote, keep sensitive notes in an E2EE or on-device-encrypted app. Simple Memo - for Obsidian is a personal capture tool and does not support collaborative editing.</p></div></details></div>
-      </div>
-    </section>
-
-    <!-- Related Articles -->
+    <div class="tldr"><p><span lang="ja" data-lang="ja"><strong>先に確認すること：</strong>通信のTLS、端末やサーバーへの暗号化保存、E2EEは保護する場面が違います。同期がE2EEでも、端末のローカルファイルや書き出したPDFまで同じ暗号化が続くとは限りません。</span><span lang="en" data-lang="en"><strong>Start with the scope:</strong> TLS, encrypted storage, and E2EE protect different parts of a workflow. E2EE sync does not automatically encrypt local files or an exported PDF.</span></p></div>
+<p class="encryption-review"><span lang="ja" data-lang="ja">最終確認: <time datetime="2026-09-09">2026年9月9日</time>。筆者はシンプルメモの開発者です。他社製品は公式資料を比較しており、各アプリへの侵入試験や独立したセキュリティ監査を実施した結果ではありません。</span><span lang="en" data-lang="en">Reviewed September 9, 2026. The author develops Simple Memo. This comparison uses official product documentation; it is not a penetration test or an independent security audit of these apps.</span></p>
+<nav class="internal-links" aria-label="記事内の目次"><a href="#encryption-scopes"><span lang="ja" data-lang="ja">暗号化の範囲</span><span lang="en" data-lang="en">Encryption scope</span></a><a href="#ten-apps"><span lang="ja" data-lang="ja">10アプリ比較</span><span lang="en" data-lang="en">10-app comparison</span></a><a href="#check-your-copy"><span lang="ja" data-lang="ja">自分の設定を確認</span><span lang="en" data-lang="en">Check your setup</span></a><a href="#simplememo-scope"><span lang="ja" data-lang="ja">シンプルメモの範囲</span><span lang="en" data-lang="en">Simple Memo scope</span></a></nav>
+<section class="lp-section" id="encryption-scopes"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">TLS・保存時暗号化・E2EEは何が違う？</span><span lang="en" data-lang="en">TLS, encrypted storage, and E2EE</span></h2><div lang="ja" data-lang="ja"><div class="tip-card"><h3>通信中：接続先までの経路を守る</h3><p>TLSはアプリとサーバーなどの通信路を保護します。接続先が処理する本文まで、接続先から隠す仕組みではありません。HTTPSで送ったメモをサービスが検索・配信することと矛盾しません。</p></div>
+<div class="tip-card"><h3>保存時：どのファイルを、誰の鍵で暗号化するか</h3><p>端末内のデータベース、同期サーバー、バックアップは別々のコピーです。サーバーのディスクが暗号化されていても、サービスが鍵を管理していれば、必要な処理の際に復号できます。端末全体の暗号化と、アプリがメモごとに暗号化する仕組みも区別します。</p></div>
+<div class="tip-card"><h3>E2EE：同期先に本文の復号鍵を渡さない</h3><p>エンドツーエンド暗号化では、対応する端末側で暗号化・復号します。ただし、タイトルや時刻などのメタデータ、公開リンク、AI機能への送信、復号後の書き出しは別に確認が必要です。アプリにE2EE機能があっても、自分のノートで有効とは限りません。</p></div></div><div lang="en" data-lang="en"><div class="tip-card"><h3>In transit: protect the connection</h3><p>TLS protects traffic between endpoints, such as an app and its server. It does not hide content from a server that needs to process it. A service can receive a note over HTTPS and still read it for search or delivery.</p></div>
+<div class="tip-card"><h3>At rest: identify the copy and the key holder</h3><p>A local database, a sync server, and a backup are separate copies. Server-side disk encryption can coexist with the service holding decryption keys. Device-wide encryption and an app encrypting individual notes are also different controls.</p></div>
+<div class="tip-card"><h3>E2EE: keep content decryption at the endpoints</h3><p>End-to-end encryption encrypts and decrypts content on supported endpoints. Check metadata, public links, AI feature submissions, and decrypted exports separately. An app offering E2EE does not mean it is enabled for every note you already have.</p></div></div></section>
+<section class="lp-section" id="cipher-and-keys"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">AES-GCM・AES-CBC・ゼロナレッジを読み分ける</span><span lang="en" data-lang="en">Read cipher names and key ownership separately</span></h2><div lang="ja" data-lang="ja"><p><strong>AES-GCM</strong>は暗号化と認証を組み合わせ、改ざん検知に使う認証タグを生成します。<strong>AES-CBC</strong>は秘匿性を提供するモードで、それだけでは改ざん検知を行いません。認証はMACなどの別の仕組みと適切に組み合わせる必要があります。CBCという名前だけで製品が破られているとは判断できません。<a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">NISTのGCM仕様</a>、<a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">CBCを含む暗号モード仕様</a>。</p><p>「256」は鍵長で、鍵を誰が持つかやバックアップの設定までは説明しません。AES-GCMを使うE2EEも、AES-GCMで端末内だけを保護する設計もあります。</p><p><strong>ゼロナレッジ</strong>はストレージ製品で「事業者が本文を復号できない」設計を説明する言葉として使われます。暗号方式の名前や、全データが一切収集されないという保証ではありません。暗号化された鍵をサーバーに保管する設計もあるため、「鍵がサーバーに存在しない」だけで判定せず、復号できる主体と対象データを確認します。</p></div><div lang="en" data-lang="en"><p><strong>AES-GCM</strong> combines encryption with authentication and produces a tag used to detect tampering. <strong>AES-CBC</strong> provides confidentiality, without authentication on its own; it needs a correctly designed separate authentication mechanism, such as a MAC. The name CBC alone does not establish that a product is compromised. See <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">NIST’s GCM specification</a> and <a href="https://csrc.nist.gov/pubs/sp/800/38/a/final">its confidentiality-mode specification</a>.</p><p>“256” describes a key length, not who holds the keys or how backups work. AES-GCM can be used within E2EE or just to protect local storage.</p><p><strong>Zero-knowledge</strong> is used by storage products to describe designs where the provider cannot decrypt content. It is not a cipher name or a promise that no data is collected. Encrypted key material may be stored on a server; identify who can actually decrypt it and which data the promise covers.</p></div></section>
+<section class="lp-section" id="ten-apps"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">10アプリ：方式より先に、範囲と設定を比較</span><span lang="en" data-lang="en">10 apps: compare scope and settings before cipher names</span></h2><div lang="ja" data-lang="ja"><p class="table-hint">横にスクロールして「条件」「別に確認するコピー」まで確認できます。表はキーボードでも横に移動できます。</p><div class="encryption-scroll" role="region" aria-label="10アプリの暗号化比較表" tabindex="0"><table class="encryption-table"><caption>公式資料の比較（2026年9月9日確認）</caption><thead><tr><th scope="col">アプリ</th><th scope="col">暗号化の範囲</th><th scope="col">有効化・確認条件</th><th scope="col">別に確認するコピー・権限</th><th scope="col">根拠</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>端末側で内容を暗号化して同期。公開仕様はXChaCha20-Poly1305。</td><td>アカウント利用時はローカルデータも暗号化。アカウントなしの利用ではパスコード等の保護を別途設定。</td><td>書き出したファイルや別アプリへコピーした文章は保存先の条件を確認。</td><td><a href="https://standardnotes.com/help/security/encryption">暗号化の範囲</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">方式</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>リモートVaultをE2EEで暗号化する設定が既定。AES-256-GCM。</td><td>標準暗号化を選んだリモートVaultではObsidian側が鍵を管理。設定と暗号化パスワードを確認。</td><td>ローカルVaultのMarkdownファイルはObsidian自体では暗号化されない。端末のディスク暗号化やバックアップは別。</td><td><a href="https://obsidian.md/help/sync/security">Syncのセキュリティ</a></td></tr><tr><th scope="row">Notion</th><td>通信はTLS 1.2以上、保存時はAES-256。</td><td>公式資料が説明するのはサービス側の暗号化。利用者だけが復号鍵を持つノート全体のE2EEとは区別。</td><td>公開ページ・ゲスト・連携サービスに渡す権限も確認。暗号化だけでは公開範囲を制限しない。</td><td><a href="https://www.notion.com/help/security-and-privacy">セキュリティ方針</a></td></tr><tr><th scope="row">Evernote</th><td>TLS通信とGoogle管理鍵によるAES-256保存。選択したテキストにはパスフレーズ暗号化もある。</td><td>選択テキストの公開方式はAES-128-CBC。ノート全体・添付ファイルを一括でE2EE化する機能とは異なる。</td><td>暗号化した範囲の外にある本文、タイトル、添付は同じパスフレーズ保護とは扱わない。</td><td><a href="https://evernote.com/en-us/security">保存と通信</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">テキスト暗号化</a></td></tr><tr><th scope="row">Appleメモ / Apple Notes</th><td>通常のiCloud保護は通信・保存時の暗号化。高度なデータ保護（ADP）でiCloudメモがE2EEの対象になる。</td><td>ADPの有効状態と復旧手段を確認。共有メモでADPのE2EEを維持するには参加者全員でADPが必要。</td><td>一部メタデータは標準保護。書き出したPDFやメール添付は元のiCloudメモとは別のコピー。</td><td><a href="https://support.apple.com/en-us/102651">iCloudの保護範囲</a></td></tr><tr><th scope="row">Google Keep</th><td>通信中と保存時に暗号化。検索などの機能を提供するため内容を処理する。</td><td>公式資料の保護を、利用者だけが鍵を持つE2EEと読み替えない。</td><td>共有相手とGoogleアカウントの保護を確認。広告に内容を使わない方針と、内容を処理しない設計は別。</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Keepのプライバシーと保護</a></td></tr><tr><th scope="row">Bear</th><td>Bear Proで個別ノートをパスワード暗号化。2.4以降は画像・PDFなどの添付も対象。</td><td>対象ノートにパスワードを追加し、同期する端末のアプリも更新。アプリ全体のロックとは区別。</td><td>タイトルはノート一覧に表示される。iCloudのADPにもタイトル・タグ等の範囲を含めて確認。</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">ノートの暗号化</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">2.4の添付対応</a> · <a href="https://bear.app/faq/syncing-privacy/">同期の範囲</a></td></tr><tr><th scope="row">Joplin</th><td>有効化した同期でE2EE。v3.2からの新しいネイティブ方式はAES-256-GCM。</td><td>一台で暗号化を有効化し、同期完了を待って他端末に鍵を設定する公式手順を使う。</td><td>ローカルデータはこの同期暗号化では保護されない。端末のディスク暗号化も確認。</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">設定手順</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">新方式</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">端末内データ</a></td></tr><tr><th scope="row">Day One</th><td>4.2以降に新しく作るジャーナルは既定でE2EE。文章とメディアが対象。</td><td>古いジャーナルは個別に状態を確認。現在の公式FAQでは標準暗号化からの直接切替はできず、新しいE2EEジャーナルへコピーする。</td><td>鍵の保管先も確認。iCloud KeychainはE2EEだが、Day One独自のiCloud鍵バックアップはADPを有効にしてもE2EEにならない。書き出した日記も別のコピー。</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">E2EEのFAQ</a></td></tr><tr><th scope="row">シンプルメモ / Simple Memo</th><td>端末内のOutbox・送信履歴をCryptoKitのAES-GCMで暗号化。新規鍵は256-bitでKeychainに保存。</td><td>メール送信はE2EEではない。送信API・外部配信基盤を通り、受信箱にコピーが残る。</td><td>端末内保護は、メールサービスや連携したObsidian Vaultの保管方法まで保証するものではない。</td><td><a href="/privacy#technical">技術説明</a></td></tr></tbody></table></div></div><div lang="en" data-lang="en"><p class="table-hint">Scroll horizontally to read the conditions and other copies. The table region also supports keyboard scrolling.</p><div class="encryption-scroll" role="region" aria-label="Encryption comparison of 10 apps" tabindex="0"><table class="encryption-table"><caption>Official documentation compared — September 9, 2026</caption><thead><tr><th scope="col">App</th><th scope="col">Encryption scope</th><th scope="col">Settings and conditions</th><th scope="col">Other copies and access</th><th scope="col">Sources</th></tr></thead><tbody><tr><th scope="row">Standard Notes</th><td>Encrypts content client-side for sync; documented cipher is XChaCha20-Poly1305.</td><td>Local data is encrypted when using an account. Account-free use needs a separately configured passcode or other encryption protection.</td><td>Check files exported or copied into another app separately.</td><td><a href="https://standardnotes.com/help/security/encryption">Encryption scope</a> · <a href="https://standardnotes.com/help/3/how-does-standard-notes-secure-my-notes">Cipher</a></td></tr><tr><th scope="row">Obsidian Sync</th><td>E2EE is the default choice for a remote vault; AES-256-GCM.</td><td>A remote vault created with standard encryption uses provider-managed keys. Check its setting and encryption password.</td><td>Obsidian does not encrypt the local Markdown vault. Disk encryption and local backups need separate protection.</td><td><a href="https://obsidian.md/help/sync/security">Sync security</a></td></tr><tr><th scope="row">Notion</th><td>TLS 1.2 or later in transit; AES-256 at rest.</td><td>The documented controls are service-side encryption, distinct from full-note E2EE with keys held only by users.</td><td>Review published pages, guests, and integrations. Encryption does not narrow sharing permissions.</td><td><a href="https://www.notion.com/help/security-and-privacy">Security practices</a></td></tr><tr><th scope="row">Evernote</th><td>TLS plus AES-256 storage with Google-managed keys; selected text also supports passphrase encryption.</td><td>The documented selected-text cipher is AES-128-CBC. This is distinct from E2EE of the whole note and its attachments.</td><td>Text outside the selection, titles, and attachments do not acquire that passphrase protection.</td><td><a href="https://evernote.com/en-us/security">Storage and transport</a> · <a href="https://help.evernote.com/hc/en-us/articles/208314128-What-type-of-encryption-does-Evernote-use">Text encryption</a></td></tr><tr><th scope="row">Appleメモ / Apple Notes</th><td>Standard iCloud protection encrypts Notes in transit and at rest. Advanced Data Protection (ADP) extends E2EE to iCloud Notes.</td><td>Check ADP and recovery arrangements. Shared notes retain ADP E2EE when every participant has ADP enabled.</td><td>Some metadata remains under standard protection. Exported PDFs and email attachments are separate copies.</td><td><a href="https://support.apple.com/en-us/102651">iCloud protection</a></td></tr><tr><th scope="row">Google Keep</th><td>Encrypts data in transit and at rest and processes content to provide features such as search.</td><td>Do not interpret the documented protection as E2EE with user-only keys.</td><td>Review collaborators and account protection. Not using content for ads does not mean content is never processed.</td><td><a href="https://support.google.com/keep/answer/10431250?hl=en">Keep privacy and protection</a></td></tr><tr><th scope="row">Bear</th><td>Bear Pro encrypts individual notes with a Note Password. Version 2.4 added encryption for images, PDFs, and other attachments.</td><td>Add a password to the intended note and update syncing clients. Distinguish note encryption from locking the app.</td><td>Titles remain visible in the note list. Check the stated title and tag limits of iCloud ADP too.</td><td><a href="https://bear.app/faq/how-to-encrypt-lock-notes-with-bear/">Note encryption</a> · <a href="https://blog.bear.app/2025/05/bear-2-4-update-better-encryption-smarter-todo-and-more/">2.4 attachments</a> · <a href="https://bear.app/faq/syncing-privacy/">Sync scope</a></td></tr><tr><th scope="row">Joplin</th><td>Offers E2EE for sync when enabled. Native methods introduced in v3.2 use AES-256-GCM.</td><td>Follow the setup guide: enable on one device, finish syncing, then configure the key on other devices.</td><td>The sync encryption does not encrypt local data. Check device disk encryption too.</td><td><a href="https://joplinapp.org/help/apps/sync/e2ee/">Setup</a> · <a href="https://joplinapp.org/help/dev/spec/e2ee/native_encryption/">Native methods</a> · <a href="https://github.com/laurent22/joplin/blob/dev/SECURITY.md">Local data</a></td></tr><tr><th scope="row">Day One</th><td>New journals created since version 4.2 use E2EE by default, covering text and media.</td><td>Check older journals individually. The current FAQ directs users to copy entries into a new E2EE journal rather than convert standard encryption directly.</td><td>Check key copies: iCloud Keychain is E2EE; Day One’s separate iCloud key backup is not E2EE, even with ADP. Journal exports are separate copies.</td><td><a href="https://dayoneapp.com/guides/day-one-sync/end-to-end-encryption-faq/">E2EE FAQ</a></td></tr><tr><th scope="row">シンプルメモ / Simple Memo</th><td>Uses CryptoKit AES-GCM for the local Outbox and sent history, with new 256-bit keys stored in Keychain.</td><td>Email delivery is not E2EE. Content passes through the sending API and delivery provider, and a copy reaches the inbox.</td><td>Local encryption does not determine protection in the mail service or a connected Obsidian vault.</td><td><a href="/en/privacy#technical">Technical policy</a></td></tr></tbody></table></div></div></section>
+<p class="encryption-callout"><span lang="ja" data-lang="ja">自分の受信箱へ短いメモを残す用途なら、<a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__mid&amp;mt=8">Obsidian連携シンプルメモ</a>も選択肢です。端末内の暗号化と、送信先メールの保管・共有設定をそれぞれ確認してください。</span><span lang="en" data-lang="en">For short notes sent to your own inbox, <a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="mid" data-cta-position="mid" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__mid&amp;mt=8">Simple Memo</a> is another option. Review local encryption and the inbox’s storage and sharing settings separately.</span></p>
+<section class="lp-section" id="check-your-copy"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">使う前に、設定とコピーを5点確認</span><span lang="en" data-lang="en">Check five things before moving real notes</span></h2><div lang="ja" data-lang="ja"><ol class="encryption-steps"><li><strong>既存データの設定を開く。</strong>アプリ名だけで判断せず、使うVault・ジャーナル・共有ノートで暗号化が有効か確認します。新規データの既定値が、古いデータにも適用されたとは限りません。</li><li><strong>復旧方法を確保する。</strong>同期用パスワード、暗号化キー、復旧連絡先など、製品が案内する方法を確認します。鍵をなくした状態で端末を消去して試すことは避けてください。</li><li><strong>公開・共有・連携の範囲を確認する。</strong>公開リンクや外部サービスへの送信は、保存時暗号化とは別です。仕事の情報は所属先が認める保存先・共有範囲に合わせます。</li><li><strong>ダミーの1件で同期と添付を確認する。</strong>内容に機密情報を使わず、別端末で開けるか、添付がそろうか、暗号化の状態がどう表示されるかを確認します。これだけで暗号実装の安全性を証明したことにはなりません。</li><li><strong>書き出し先とバックアップを確認する。</strong>Markdown、PDF、メール、ダウンロードフォルダに作ったコピーは、元のアプリのE2EEの外に出る場合があります。移行確認が終わる前に元データを削除しないでください。</li></ol></div><div lang="en" data-lang="en"><ol class="encryption-steps"><li><strong>Open the setting for existing data.</strong>Check the actual vault, journal, or shared note. A default for new data may not have changed older data.</li><li><strong>Keep the documented recovery method.</strong>Identify the sync password, encryption key, or recovery contact the product requires. Do not erase your only device as a recovery test.</li><li><strong>Review sharing and integrations.</strong>Public links and submissions to another service are separate from encrypted storage. Follow your organization’s approved destinations and sharing rules for work data.</li><li><strong>Sync one harmless sample with an attachment.</strong>Check that it opens on another device, the attachment arrives, and the expected encryption setting is shown. This functional check does not prove the cryptographic implementation is secure.</li><li><strong>Check exports and backups.</strong>Markdown, PDFs, email, and downloaded copies may leave the original app’s E2EE scope. Keep the original data until migration is verified.</li></ol></div></section>
+<section class="lp-section" id="simplememo-scope"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">シンプルメモが保護する範囲と、送信後に残るもの</span><span lang="en" data-lang="en">Simple Memo’s scope and the copies after sending</span></h2><div lang="ja" data-lang="ja"><p>シンプルメモは、端末内の送信待ちメモ（Outbox）と送信履歴をAES-GCMで暗号化します。公開済みアプリの共通暗号器では、新しく作る鍵は256-bitでKeychainに保存し、CryptoKitで暗号化・復号しています。これは端末内の対象データを保護する実装です。</p><p><strong>メール経路全体のE2EEではありません。</strong>アプリから送信APIへHTTPSで送り、外部のメール配信基盤を経由して受信箱へ届きます。「端末内の未送信メモが暗号化されている」ことは、「配信処理で本文を扱わない」「外部サーバーを通らない」という意味ではありません。</p><p>送信済みになってOutboxの対象項目が除かれても、送信履歴や受信メール、連携先のノートまで消えるわけではありません。ファイルの削除操作を、記憶媒体の完全消去とも呼びません。保存先と保持期間は<a href="/privacy#technical">プライバシーポリシーの技術説明</a>と<a href="/privacy-architecture/">データの通り道</a>で確認できます。</p><p>Obsidianへの保存を使う場合も、ローカルVaultと同期・バックアップの保護は自分の設定に依存します。本文を事業者が復号できないことが必須の用途では、その条件に合うE2EEの保存先と運用を先に選んでください。</p></div><div lang="en" data-lang="en"><p>Simple Memo encrypts its local Outbox and sent history with AES-GCM. In the shared cipher in the published app, new keys are 256-bit, stored in Keychain, and used through CryptoKit. This protects the specified local data.</p><p><strong>The email route is not E2EE.</strong>Content goes over HTTPS to the sending API, through an external email delivery provider, and into the inbox. Encrypted unsent notes do not imply that delivery systems never process content or that no external server is involved.</p><p>Removing a completed item from the Outbox does not erase sent history, received email, or a connected note destination. A file deletion is not a promise of physical media sanitization. See the <a href="/en/privacy#technical">technical privacy explanation</a> and <a href="/en/privacy-architecture/">data-flow guide</a> for handling and retention.</p><p>If you save to Obsidian, local vault, sync, and backup protection depend on your configuration. Where provider-inaccessible content is a requirement, choose a destination and workflow that meet that E2EE requirement first.</p></div></section>
+<section class="lp-section" id="encryption-faq"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">よくある質問</span><span lang="en" data-lang="en">Frequently asked questions</span></h2><div lang="ja" data-lang="ja"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-256ならE2EEですか？</summary><div class="faq-answer"><p>いいえ。AES-256は暗号と鍵長を表します。E2EEかどうかは、どこで暗号化・復号し、誰が鍵を使えるかで決まります。サーバーが鍵を管理するAES-256保存と、利用者の端末だけで復号する設計は異なります。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">AES-GCMとAES-CBCは何が違いますか？</summary><div class="faq-answer"><p>GCMは暗号化と認証を組み合わせます。CBCは暗号化だけでは改ざんを検知しないため、認証の仕組みを適切に組み合わせる必要があります。方式名だけでアプリ全体の安全性を順位付けすることはできません。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">E2EEなら端末内のファイルも暗号化されますか？</summary><div class="faq-answer"><p>必ずしもそうではありません。Obsidian SyncとJoplinの同期暗号化は、端末内のローカルファイルやデータベースを同じように暗号化するものではありません。端末のディスク暗号化、アプリのローカル保護、バックアップを別に確認してください。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Bearで画像やPDFを含むノートも暗号化できますか？</summary><div class="faq-answer"><p>Bear 2.4以降はBear Proで添付を含む個別ノートを暗号化できます。対象ノートにパスワードを追加し、同期先のアプリも対応版に更新します。タイトル表示や、暗号化していないノートは別に確認が必要です。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Day Oneの古いジャーナルも自動でE2EEになっていますか？</summary><div class="faq-answer"><p>新しいジャーナルは4.2以降E2EEが既定ですが、古いものは個別に確認が必要です。現在の公式FAQでは、標準暗号化のジャーナルを直接切り替える代わりに、新しいE2EEジャーナルへエントリをコピーする方法を案内しています。</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">シンプルメモから自分に送るメールはE2EEですか？</summary><div class="faq-answer"><p>いいえ。Outboxと送信履歴の端末内暗号化と、メール配信は別です。本文は送信APIと外部配信基盤を通り、メールサービス側にもコピーが残ります。受信箱と連携先の保護・共有設定も確認してください。</p></div></details></div></div><div lang="en" data-lang="en"><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does AES-256 mean E2EE?</summary><div class="faq-answer"><p>No. AES-256 names a cipher and key length. E2EE depends on where encryption and decryption happen and who can use the keys. Server storage encrypted with provider-managed keys differs from content decrypted only at user endpoints.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">How do AES-GCM and AES-CBC differ?</summary><div class="faq-answer"><p>GCM combines encryption and authentication. CBC does not detect tampering on its own and needs a correctly designed authentication mechanism. A cipher name alone cannot rank the security of an entire app.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Does E2EE also encrypt files on my device?</summary><div class="faq-answer"><p>Not necessarily. Obsidian Sync and Joplin sync encryption do not apply the same encryption to the local vault or database. Check disk encryption, local app protection, and backups separately.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Can Bear encrypt notes containing images and PDFs?</summary><div class="faq-answer"><p>Since Bear 2.4, Bear Pro can encrypt individual notes with attachments. Add a password to the note and update the apps on syncing devices. Review visible titles and notes you have not encrypted separately.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Are older Day One journals automatically E2EE?</summary><div class="faq-answer"><p>E2EE is the default for new journals since version 4.2, but older journals need checking. The current official FAQ advises copying entries into a new E2EE journal instead of directly converting a standard-encrypted journal.</p></div></details></div><div class="faq-item"><details class="faq-details"><summary class="faq-summary">Is email sent to myself from Simple Memo E2EE?</summary><div class="faq-answer"><p>No. Local Outbox and sent-history encryption is separate from email delivery. Content passes through the sending API and external delivery provider, and copies remain in the mail service. Check inbox and connected-destination protection and sharing settings too.</p></div></details></div></div></section>
+<!-- Related Articles -->
     <section class="lp-section">
   <h2 class="lp-section__title">
     <span lang="ja" data-lang="ja">関連記事</span>
@@ -644,7 +286,7 @@
   </div>
 </section>
 
-<div class="cta-box"><div class="cta-box__title"><span lang="ja" data-lang="ja">AES-256-GCM暗号化で安心メモ</span><span lang="en" data-lang="en">AES-256-GCM encrypted memos</span></div><div class="cta-box__desc"><span lang="ja" data-lang="ja">メモ本文をサーバーに保存しないゼロストレージ設計。0.4秒起動で安全にキャプチャ。</span><span lang="en" data-lang="en">Zero server storage of memo text. Capture securely with 0.4s launch.</span></div><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a></div>
+<div class="cta-box"><div class="cta-box__title"><span lang="ja" data-lang="ja">受信箱へメモを残す</span><span lang="en" data-lang="en">Capture a note into your inbox</span></div><div class="cta-box__desc"><span lang="ja" data-lang="ja">端末内のOutboxと送信履歴を暗号化。メール経路と保存先の保護範囲も確認して使えます。</span><span lang="en" data-lang="en">Encrypted local Outbox and sent history. Review email delivery and destination protection before use.</span></div><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" lang="ja" data-lang="ja" href="https://apps.apple.com/jp/app/id6758438948?pt=128498560&amp;ct=jp__bottom&amp;mt=8" class="app-store-badge" aria-label="App Store からダウンロード"><img class="badge-img" src="/assets/img/app-store-badge-ja.svg" width="109" height="40" alt="App Store からダウンロード" loading="lazy"></a><a data-cta-variant="v1" data-cta-cluster="blog" data-cta-placement="bottom" data-cta-position="bottom" lang="en" data-lang="en" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__bottom&amp;mt=8" class="app-store-badge" aria-label="Download on the App Store"><img class="badge-img" src="/assets/img/app-store-badge-en.svg" width="120" height="40" alt="Download on the App Store" loading="lazy"></a></div>
 
     <section class="lp-section"><h2 class="lp-section__title"><span lang="ja" data-lang="ja">関連ページ</span><span lang="en" data-lang="en">Related Pages</span></h2><div class="internal-links"><a href="/blog/free-memo-apps-ranking"><span lang="ja" data-lang="ja">無料メモアプリランキング</span><span lang="en" data-lang="en">Free App Ranking</span></a><a href="/blog/offline-memo-apps"><span lang="ja" data-lang="ja">オフラインメモアプリ</span><span lang="en" data-lang="en">Offline Memo Apps</span></a><a href="/blog/memo-taking-tips"><span lang="ja" data-lang="ja">メモの取り方コツ10選</span><span lang="en" data-lang="en">10 Note-Taking Tips</span></a><a href="/blog/best-memo-apps-2026"><span lang="ja" data-lang="ja">おすすめメモアプリ20選</span><span lang="en" data-lang="en">Best Memo Apps 2026</span></a><a href="/blog/business-memo-apps-2026"><span lang="ja" data-lang="ja">ビジネスメモアプリ7選</span><span lang="en" data-lang="en">Business Memo Apps</span></a><a href="/glossary/e2e-encryption/"><span lang="ja" data-lang="ja">用語: E2E暗号化</span><span lang="en" data-lang="en">Glossary: E2E Encryption</span></a><a href="/glossary/aes-gcm/"><span lang="ja" data-lang="ja">用語: AES-GCM</span><span lang="en" data-lang="en">Glossary: AES-GCM</span></a><a href="/blog/"><span lang="ja" data-lang="ja">ブログ一覧</span><span lang="en" data-lang="en">All Articles</span></a></div></section>
   </div>
