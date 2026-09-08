@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as bq from '../lib/bigquery.mjs';
+import { collectBackupInventory } from '../lib/backup-inventory.mjs';
 import { recipientKey, seal } from '../lib/analytics-envelope.mjs';
 
 export const PROJECT = 'yurika-simplememo';
@@ -45,9 +46,9 @@ export function daysBetween(start, end, extra = 0) {
   return dates;
 }
 export function validateOptions({ report = 'preflight', start = '', end = '', execution = 'dry-run' }, now = new Date()) {
-  if (!['preflight', ...Object.keys(FILES)].includes(report)) throw new Error('Unknown fixed report');
+  if (!['preflight', 'backup-inventory', ...Object.keys(FILES)].includes(report)) throw new Error('Unknown fixed report');
   if (!['dry-run', 'export'].includes(execution)) throw new Error('Unknown execution mode');
-  if (report === 'preflight') {
+  if (report === 'preflight' || report === 'backup-inventory') {
     if (start || end) throw new Error('Preflight takes no date window');
     return { report, execution, start, end };
   }
@@ -107,6 +108,11 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
   try {
     const client = await api.connect({ projectId: PROJECT, location: LOCATION });
     out.credential_type = client.credentialType;
+    if (opts.report === 'backup-inventory') {
+      out.backup_inventory = await collectBackupInventory(client, api, now);
+      out.status = out.backup_inventory.status;
+      return out;
+    }
     const datasets = opts.report === 'preflight' ? ['searchconsole', GA4] : [opts.report.startsWith('gsc') ? 'searchconsole' : GA4];
     for (const dataset of datasets) out.metadata[dataset] = await metadata(client, dataset, api);
     const states = Object.values(out.metadata).map((m) => m.status);
@@ -180,7 +186,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     fs.mkdirSync(path.dirname(output), { recursive: true, mode: 0o700 });
     fs.writeFileSync(output, JSON.stringify(envelope) + '\n', { flag: 'wx', mode: 0o600 });
     console.log(`Analytics report encrypted. status=${report.status}`);
-    if (['error', 'blocked', 'incomplete_daily_tables', 'incomplete_date_coverage'].includes(report.status)) process.exitCode = 1;
+    if (['error', 'partial', 'blocked', 'incomplete_daily_tables', 'incomplete_date_coverage'].includes(report.status)) process.exitCode = 1;
   } catch {
     // Raw exceptions may include SQL, API context or filenames. Keep logs generic.
     console.error('Analytics export could not be prepared. Check report inputs, public key, and output path.');
