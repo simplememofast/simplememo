@@ -167,19 +167,34 @@ test('Linux CI: independent real Xvfb displays remain connectable across cleanup
   { skip: process.platform !== 'linux' ? 'requires Linux Xvfb' :
     !fs.existsSync('/usr/bin/Xvfb') || !fs.existsSync('/usr/bin/xdpyinfo')
       ? 'Xvfb/xdpyinfo unavailable; real display readiness is unverified' : false, timeout: 20_000 }, async t => {
-    const first = await ensureDisplay({ env: {} });
-    t.after(() => terminateOwnedProcess(first.proc));
-    const second = await ensureDisplay({ env: {} });
-    t.after(() => terminateOwnedProcess(second.proc));
-    assert.notEqual(first.display, second.display);
+    const start = async label => {
+      const started = Date.now();
+      try {
+        const disp = await ensureDisplay({ env: {} });
+        t.after(() => terminateOwnedProcess(disp.proc));
+        t.diagnostic(`${label}: ready ${disp.display} after ${Date.now() - started}ms`);
+        return disp;
+      } catch (error) {
+        t.diagnostic(`${label}: ${error.message}; ${(error.diagnostics ?? []).join('; ')}`);
+        throw error;
+      }
+    };
     const check = display => execFileSync('/usr/bin/xdpyinfo', ['-display', display], { stdio: 'pipe', timeout: 2_000 });
-    check(first.display); check(second.display);
-    await stopDrivers([], second);
-    check(first.display);
-    const third = await ensureDisplay({ env: {} });
-    t.after(() => terminateOwnedProcess(third.proc));
-    check(third.display);
-    check(first.display);
+    // Repeated cleanup/reallocation exposed intermittent startup failures in CI.
+    // Keep the same 5-second startup deadline and all connectivity assertions.
+    for (let round = 1; round <= 3; round++) {
+      const first = await start(`${round}/first`);
+      const second = await start(`${round}/second`);
+      assert.notEqual(first.display, second.display);
+      check(first.display); check(second.display);
+      await stopDrivers([], second);
+      check(first.display);
+      const third = await start(`${round}/replacement`);
+      check(third.display);
+      check(first.display);
+      await stopDrivers([], third);
+      await stopDrivers([], first);
+    }
   });
 
 test('driver diagnostics distinguish process exit and stderr, with bounded single-line output', () => {
