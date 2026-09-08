@@ -26,6 +26,7 @@ REMOTE = 'https://github.com/' + REPO + '.git'
 BRANCH = 'Codex/routine-observations'
 LEDGER = 'data/routine-runs.json'
 OBSERVER = 'scripts/routine-observer.mjs'
+CODEX_OBSERVER = 'scripts/codex-routine-observer.py'
 LABEL = 'com.simplememo.routine-observer'
 NODE = '/opt/homebrew/bin/node'
 GH = '/opt/homebrew/bin/gh'
@@ -60,6 +61,7 @@ def semantic_state(doc):
         'routines': sorted(doc['routines'], key=lambda r: r['id']),
         'findings': sorted(({'id': f['id'], 'what': f['what']} for f in doc['open_findings']), key=lambda r: r['id']),
         'stops': doc['intentional_stops'],
+        'codex': {k: v for k, v in doc.get('codex_observation', {}).items() if k != 'observed_at'},
     }
 
 
@@ -203,11 +205,14 @@ def run_once(probe=False):
                 git(['-c', 'user.name=SimpleMemo Routine Observer', '-c', 'user.email=observer@simplememofast.com',
                      'merge', '--no-edit', 'origin/main'], work)
                 before = json.loads((work / LEDGER).read_text())
+                codex_summary = json.loads(command(['/usr/bin/python3', CODEX_OBSERVER, '--apply'], cwd=work))
                 summary = json.loads(observe(work))
+                summary['codex'] = codex_summary
                 summary['temporary_ledger_written'] = summary.pop('written')
                 after = json.loads((work / LEDGER).read_text())
                 check_paths(git(['diff', '--name-only'], work).splitlines())
                 command([NODE, 'scripts/check-routine-runs.mjs', '--check'], cwd=work)
+                command(['/usr/bin/python3', CODEX_OBSERVER, '--check'], cwd=work)
                 changed = should_publish(before, after)
                 if probe or not changed:
                     return {'state': 'probe' if probe else 'unchanged', 'published_to_git': False, 'publish_needed': changed, **summary}
@@ -223,6 +228,8 @@ def run_once(probe=False):
                 else:
                     body = Path(tmp) / 'pr.md'
                     body.write_text('登録済みSimpleMemoタスクの実行状態を、Macの既存認証で全ページ読み取りました。'
+                                    'Codexの移管済み定期運転はローカル予約記録と実行ログを読み取り、'
+                                    '初回実行と後続ターンを分けて記録しました。'
                                     'モデル呼出・予定変更・認証変更はありません。意図的な停止を保持し、'
                                     'SUCCEEDEDを出荷・投稿・依頼達成とは数えません。\n\n'
                                     '観測時刻: ' + after['observed_at'] + '\n')
@@ -304,6 +311,15 @@ class Tests(unittest.TestCase):
         b['observed_at'] = '2026-09-04T00:00:00Z'
         with self.assertRaises(RuntimeError):
             should_publish(a, b)
+
+    def test_codex_turn_changes_are_published_but_observation_clock_is_not(self):
+        a = {'observed_at': '2026-09-08T00:00:00Z', 'routines': [], 'open_findings': [], 'intentional_stops': [],
+             'codex_observation': {'observed_at': '2026-09-08T00:00:00Z', 'runs': [{'initial': 'failed'}]}}
+        b = json.loads(json.dumps(a))
+        b['observed_at'] = b['codex_observation']['observed_at'] = '2026-09-08T01:00:00Z'
+        self.assertFalse(should_publish(a, b))
+        b['codex_observation']['runs'].append({'initial': 'in_progress'})
+        self.assertTrue(should_publish(a, b))
 
     def test_credential_is_only_in_observer_environment(self):
         calls = []
