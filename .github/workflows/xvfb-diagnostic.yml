@@ -1,0 +1,28 @@
+name: Xvfb cold-start diagnosis
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - scripts/diagnose-xvfb.mjs
+      - .github/workflows/xvfb-diagnostic.yml
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [empty, inherited]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install the same display packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends webkit2gtk-driver xvfb x11-utils
+      - name: Record cold startup and child wait states
+        run: node scripts/diagnose-xvfb.mjs "${{ matrix.environment }}"
