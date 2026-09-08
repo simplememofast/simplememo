@@ -86,7 +86,8 @@
         "../simplememo-api/src/send.ts",
         "../simplememo-api/src/resend.ts",
         "../simplememo-api/migrations/0020_inquiries.sql",
-        "docs/cloudflare-service-scope-2026-09-07.md"
+        "docs/cloudflare-service-scope-2026-09-07.md",
+        "docs/cloudflare-dpa-account-2026-09-08.md"
       ],
       "money_flow": "subscription",
       "payment_method": "card",
@@ -105,7 +106,7 @@
         "deletion": "§3.1(i): 終了時は顧客の選択で削除又は返却。法令上の保持例外あり。具体的な消去日数は未確認。",
         "export": "契約上の返却と、D1/KVを別基盤へ復元できることは別。移行実証は未実施。",
         "open_questions": [
-          "自社が同意した契約版とDPAの適用記録。公開原文の取得は同意履歴の確認ではない。",
+          "2026-09-08に実アカウントの構成画面で標準契約へのDPA組込みの案内を確認。過去に同意した契約版・日時と個別交渉条項は未確認。docs/cloudflare-dpa-account-2026-09-08.md",
           "利用するWorkers・Pages・KV・D1ごとの再委託先と保存場所。",
           "Workers Paid / ドメインFree Planは2026-09-07に管理画面で確認済み。個別サービスへの契約版・SLA適用と同意履歴は未確認。以前のsubscriptions API403は履歴として残す。",
           "契約終了前にD1とKVの必要データを輸出し、別基盤で復元する手順と検証。"
@@ -140,7 +141,18 @@
             "result": "unavailable",
             "note": "利用プランを取得できなかった。無料・有料・Enterpriseのいずれとも判定せず、資格情報の権限は変更していない。"
           }
-        ]
+        ],
+        "account_incorporation_observation": {
+          "observed_on": "2026-09-08",
+          "source": "Authenticated SimpleMemo Cloudflare account / Manage account / Configurations / Data processing addendum",
+          "standard_contract_incorporation_displayed": true,
+          "individual_acceptance_version_verified": false,
+          "individual_acceptance_date_verified": false,
+          "negotiated_contract_verified": false,
+          "account_settings_changed": false,
+          "evidence": "docs/cloudflare-dpa-account-2026-09-08.md",
+          "note": "The account UI describes incorporation into self-serve and standard enterprise terms. Self-Serve section 6.1 has its own data-processing conditions; the display does not establish historical assent, negotiated terms, or service-specific SLA coverage."
+        }
       },
       "$personal_data": "2026-09-07、API SHA 65ac3f2 の src/send.ts / src/resend.ts / migrations/0020_inquiries.sql を確認。Workerは生の宛先メールアドレス・件名・メモ本文を処理してResendへ送る。D1には問い合わせ本文も保存する。集計用IDやメールハッシュが仮名化されていても、ベンダー全体の処理を pseudonymous と分類できない。メモ本文の恒久保存や全通信の実測を確認したという意味ではない。",
       "fallback_note": "同等の代替は未検証。端末側Outboxは未送信メモを保管する縮退手段であり、Relay API・サイト配信・サーバー側保存の代替ではない",
@@ -349,7 +361,8 @@
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
-        "data/autopilot-runs.json"
+        "data/autopilot-runs.json",
+        "docs/github-plan-and-training-2026-09-08.md"
       ],
       "money_flow": "subscription",
       "payment_method": "card",
@@ -363,7 +376,30 @@
       ],
       "degradation_note": "APIに到達できない日は走らずに落ちる（冪等チェックの根拠が消えるため）。egress が塞がれた日は一次情報の要るレーンを選ばない — 2026-08-22に github.com 本体が 403 になって実際に起きた",
       "$personal_data": "**[2026-08-29 訂正] `none` は規約本文から裏づけられなかった。**\n\nGitHub General Privacy Statement（Standard ToS が Site Policies として Agreement の一部に参照している）が、アカウント開設時に **GitHub handle / name / email address / password / payment information / transaction information** を収集すると明記。有料 subscription では name / billing address / payment specifics も列挙。\n\n**registrar と同じ形の誤りが2社目。**どちらも「ユーザーの個人情報を渡していない」は正しく、**渡しているのは会社（オーナー本人）の個人情報**だった。**この欄が2種類の事実を1つの語で表している。**\n\n**役割が状況で変わる点も記録しておく:** 通常の直接関係では GitHub が Controller、organization-provided account では Organization が Controller で GitHub は Processor、DPA に定める特定の処理では **GitHub 自身が Controller**。**Controller と Processor の双方の役割を持つ構造。**",
-      "fallback_note": "同等の代替は未検証。旧CCRの定期運転は停止済み。Codexの主系・補完は独立した予約だが、どちらもGitHubで当日占有・検証・出荷を行うため、GitHub障害時の代替には数えない"
+      "fallback_note": "同等の代替は未検証。旧CCRの定期運転は停止済み。Codexの主系・補完は独立した予約だが、どちらもGitHubで当日占有・検証・出荷を行うため、GitHub障害時の代替には数えない",
+      "account_plan_observation": {
+        "observed_on": "2026-09-08",
+        "source": "Authenticated GitHub billing overview for the repository owner",
+        "account_type": "User",
+        "github_plan": "GitHub Free",
+        "copilot_plan": "Copilot Free",
+        "api_plan": null,
+        "note": "Plan names were read in the UI. The authenticated API returned a null plan. Metered charges and account-specific DPA/SLA applicability are not established by the plan label."
+      },
+      "ai_training_control": {
+        "control": "copilot_model_training",
+        "changed_on": "2026-09-08",
+        "changed_by": "ai",
+        "authorization": "Standing owner delegation for SimpleMemo operations and vendor review, 2026-09-08",
+        "before": "enabled",
+        "after": "disabled",
+        "verification": "Same-account UI readback after browser reload showed Disabled",
+        "scope": "Copilot inputs, outputs and associated context",
+        "propagation_notice_minutes": 30,
+        "internal_processing_verified": false,
+        "past_data_deletion_verified": false,
+        "evidence": "docs/github-plan-and-training-2026-09-08.md"
+      }
     },
     {
       "id": "prtimes",
