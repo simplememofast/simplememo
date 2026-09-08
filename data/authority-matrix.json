@@ -567,6 +567,24 @@
       ],
       "status": "active",
       "$note": "新規ユーザーデータ送信や契約締結を伴わない設計判断なのでreversible:true。将来クラウド推論を採用する際は、この欄で自動許可せずADRを置き換えてデータ経路・利用者の選択・保持・削除・費用を先に具体化する。"
+    },
+    {
+      "domain": "プレミアム機能の設計判断",
+      "reversible": true,
+      "ai_may": [
+        "既存の有料権利と実装を照合し、Premiumの価値・表示範囲を決定して適用する"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "2026-09-08の包括委任に基づく設計判断。ADR-002とpremium-benefit-decision.jsonに判断・対象・配信状態を残し、変更SHAの静的QA、Localization Parity、Xcode Cloudのビルド・FastUnit成功を確認してmainへ適用する。価格・無料枠・StoreKit権利の変更は今回の設計に含まない。",
+      "evidence": [
+        "../simplememo-ios/docs/adr/ADR-002-premium-benefit-scope.md",
+        "../simplememo-ios/data/premium-benefit-decision.json",
+        "../simplememo-ios/SimpleMemo/PaywallViewController.swift",
+        "docs/premium-benefit-execution-20260908.md"
+      ],
+      "status": "active",
+      "note": "Premiumの価値を、利用上限解除と設定済みObsidian専用保存へ絞る判断をCodexが採用・実装。iOS PR #441の全CI成功後、2026-09-08T04:34:24Zにmainへマージ。価格決定・本番配信・購入率改善を完了したという意味ではない。"
     }
   ],
   "self_repair": {

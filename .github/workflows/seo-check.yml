@@ -1210,6 +1210,11 @@ jobs:
       - name: PR claims vs ledger
         run: node scripts/check-pr-claims.mjs --check
 
+      - name: Next press release evidence and dispatch rules
+        run: |
+          node --test scripts/press-release-next.test.mjs
+          node scripts/press-release-next.mjs --check
+
       # 【期限】資格情報・証明書が切れる前に気づく。
       #
       # これが無い間は **切れた日に初めて分かる** 状態だった。証明書と
