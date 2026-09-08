@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Collect public trend evidence; failures never become 'no relevant news'."""
 import argparse
+import concurrent.futures
 import datetime as dt
 import json
 import os
@@ -84,17 +85,26 @@ def fetch(url):
         return response.read(4_000_000)
 
 
+def collect_parallel(previous, fetch):
+    """Acquire each fixed source once; parse in source order with the same fallback."""
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+        pending = {url: pool.submit(fetch, url) for url in SOURCES.values()}
+        return collect(previous, lambda url: pending[url].result())
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path, default=ROOT / 'data/trend-radar.json')
+    parser.add_argument('--sequential', action='store_true', help='Use the previous acquisition method for rollback diagnosis')
     args = parser.parse_args()
     prior = json.loads(args.output.read_text()) if args.output.exists() else {}
-    result = collect(prior, fetch)
+    result = (collect if args.sequential else collect_parallel)(prior, fetch)
+    result['acquisition_mode'] = 'sequential' if args.sequential else 'parallel'
     args.output.parent.mkdir(parents=True, exist_ok=True)
     temp = args.output.with_suffix('.tmp')
     temp.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
     temp.replace(args.output)
-    print(json.dumps({'status': result['status'], 'sources': {
+    print(json.dumps({'status': result['status'], 'acquisition_mode': result['acquisition_mode'], 'sources': {
         k: {'status': v['status'], 'hits': len(v['hits']) if v['hits'] is not None else None}
         for k, v in result['sources'].items()}}, ensure_ascii=False))
     raise SystemExit(0 if result['status'] == 'ok' else 1)

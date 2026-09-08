@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """A bounded R&D experiment. Findings never deploy the candidate automatically."""
-import concurrent.futures
 import datetime as dt
 import importlib.util
 import json
@@ -16,12 +15,8 @@ spec.loader.exec_module(radar)
 
 
 def parallel(previous, fetch):
-    """Prototype: preload the same fixed URLs, preserving per-source exceptions."""
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
-        pending = {url: pool.submit(fetch, url) for url in radar.SOURCES.values()}
-        def cached(url):
-            return pending[url].result()
-        return radar.collect(previous, cached)
+    """Recheck the adopted implementation against the preserved sequential baseline."""
+    return radar.collect_parallel(previous, fetch)
 
 
 def semantic(result):
