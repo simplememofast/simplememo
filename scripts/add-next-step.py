@@ -51,23 +51,23 @@ ROUTES = [
      lambda p: re.search(r'^/methods/|^/glossary/|^/use-cases/|^/guides/|^/how-to/|^/templates/', p),
      '/obsidian/',
      '書いたメモを、Obsidianに貯める',
-     '手法を続けるには保存先が要ります。メールで送るだけで保管庫に追記されます。',
+     'iPhoneで保管庫へのアクセスと追記先を設定し、書いたメモをObsidianにも残せます。',
      'Send what you capture into Obsidian',
-     'A method needs somewhere to accumulate. Email it, and it lands in your vault.'),
+     'Grant vault access and choose a target on iPhone to also save what you capture in Obsidian.'),
     ('feature',
      lambda p: re.search(r'apple-watch|^/siri/|^/ai-tags/|voice-input|hands-free|fastest-voice', p),
      '/obsidian/',
      '声で残したメモの、行き先を決める',
-     'メールとObsidianの両方に届きます。プラグインは要りません。',
+     'iPhoneで連携と保存先を設定すると、音声メモをメールとObsidianに残せます。',
      'Choose where your voice notes land',
-     'They arrive in both your inbox and Obsidian. No plugin required.'),
+     'Configure the integration and target on iPhone to save voice notes to email and Obsidian.'),
 ]
 
 DEFAULT = ('explore', '/obsidian/',
            'Obsidian連携で、メモを貯める場所を作る',
-           'メールで自分に送るだけで、Obsidianのノートに追記されます。',
+           'iPhoneで連携と保存先を設定すると、送信したメモをObsidianにも残せます。',
            'Give your notes somewhere to accumulate',
-           'Email a note to yourself and it is appended to your Obsidian vault.')
+           'Set up the integration and target on iPhone to also save your notes in Obsidian.')
 
 # Pages that are not articles, or where a next-step card would be noise.
 SKIP = re.compile(
