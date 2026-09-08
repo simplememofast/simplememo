@@ -10,6 +10,18 @@
   var now = new Date();
   form.elements.date.value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
   form.elements.time.value = pad(now.getHours()) + ':' + pad(now.getMinutes());
+  function validInput() {
+    var daily = form.elements.destination.value === 'daily';
+    form.elements.date.required = daily;
+    form.elements.memo.setCustomValidity(form.elements.memo.value.trim() ? '' : (en ? 'Enter a note first.' : 'メモを入力してください。'));
+    if (!form.checkValidity()) {
+      document.getElementById('format-options').open = true;
+      form.reportValidity();
+      status.textContent = en ? 'Check the note and date before exporting.' : 'メモと日付を確認してから保存してください。';
+      return false;
+    }
+    return true;
+  }
   function build() {
     var date = form.elements.date.value;
     var daily = form.elements.destination.value === 'daily';
@@ -28,7 +40,8 @@
   form.addEventListener('change', build);
   form.addEventListener('submit', function (event) { event.preventDefault(); });
   document.getElementById('copy-markdown').addEventListener('click', async function () {
-    var content = preview.textContent;
+    if (!validInput()) return;
+    var content = build();
     try {
       if (!navigator.clipboard) throw new Error('Clipboard unavailable');
       await navigator.clipboard.writeText(content);
@@ -43,7 +56,8 @@
     }
   });
   document.getElementById('download-markdown').addEventListener('click', function () {
-    var blob = new Blob([preview.textContent], { type: 'text/markdown;charset=utf-8' });
+    if (!validInput()) return;
+    var blob = new Blob([build()], { type: 'text/markdown;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.href = url;

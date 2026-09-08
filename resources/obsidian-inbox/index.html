@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="/assets/css/safety-net.css?v=b380c7e070">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "@id": "https://simplememofast.com/resources/obsidian-inbox/#webpage", "name": "Obsidian Inbox用Markdown生成ツール｜シンプルメモ", "url": "https://simplememofast.com/resources/obsidian-inbox/", "inLanguage": "ja", "description": "ObsidianのInboxやデイリーノート向けに、時刻・チェックボックス付きのMarkdownをブラウザで作成。プレビュー、コピー、ファイル保存ができる無料ツールです。アカウントやアプリは不要。入力内容を送信せず、保管庫を変更することもありません。", "isPartOf": {"@id": "https://simplememofast.com/#website"}, "about": {"@id": "https://simplememofast.com/#app"}}</script>
 
-<script src="/js/obsidian-inbox-tool.js?v=a26747df54" defer></script>
+<script src="/js/obsidian-inbox-tool.js?v=f040b12584" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">本文へ移動</a>
@@ -38,13 +38,15 @@
 <nav class="languages" aria-label="言語"><a href="/resources/obsidian-inbox/" lang="ja" aria-current="page">JA</a><a href="/en/resources/obsidian-inbox/" lang="en" >EN</a></nav>
 </div></header>
 <main id="main" class="resource-main"><p class="eyebrow">無料・アカウント不要</p><h1>思いつきを、使いやすいInboxの形に。</h1><p class="lead">時刻付きの箇条書きやチェックボックスを試して、Markdownをコピー・保存できます。シンプルメモのアプリを使っていなくても利用できます。</p><div class="tool-grid"><form id="inbox-tool" class="tool-panel">
+<label for="memo">メモの例</label><textarea id="memo" name="memo" maxlength="10000" autocomplete="off" spellcheck="false" required>散歩のあとで、今日のメモを見返す。</textarea>
+<details id="format-options"><summary>ファイル名・日付・形式を変更</summary>
 <label for="destination">出力先の例</label><select id="destination" name="destination"><option value="inbox">Inbox.md</option><option value="daily">デイリーノート（YYYY-MM-DD.md）</option></select>
 <label for="heading">Inboxの見出し</label><input id="heading" name="heading" value="Inbox" maxlength="100" autocomplete="off">
 <label for="note-date">日付</label><input type="date" id="note-date" name="date" required>
 <label for="note-time">時刻</label><input type="time" id="note-time" name="time">
 <label class="check-label" for="timestamp"><input type="checkbox" id="timestamp" name="timestamp" checked>時刻を付ける</label>
 <label for="style">行の形式</label><select id="style" name="style"><option value="bullet">箇条書き</option><option value="task">チェックボックス</option></select>
-<label for="memo">メモの例</label><textarea id="memo" name="memo" maxlength="10000" autocomplete="off" spellcheck="false">散歩のあとで、今日のメモを見返す。</textarea>
+</details>
 <p class="small">生成処理はブラウザ内で完結します。アカウント、アップロード、保管庫へのアクセスはありません。</p>
 </form><section class="tool-panel" aria-label="Markdownプレビュー"><h2 style="margin-top:0;border:0;padding:0">プレビュー</h2><p><code id="markdown-filename">Inbox.md</code></p><pre><code id="markdown-preview"># Inbox
 
