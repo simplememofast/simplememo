@@ -99,6 +99,15 @@ export function validate(manifest, draft) {
   if (s.inventory !== manifest.baseline_inventory) errors.push('Task scope or exclusions changed');
   if (!/^[a-f0-9]{64}$/.test(s.execution ?? '') || !/^[a-f0-9]{64}$/.test(s.inventory ?? '')) errors.push('Invalid fingerprint');
   if (!['drafting','ready','scheduled','published'].includes(manifest.status)) errors.push('Invalid publication status');
+  const budget = manifest.dispatch_budget;
+  if (budget != null && (budget.campaign_id !== manifest.id || budget.company_id !== '182412'
+    || budget.release_id !== '10' || budget.release_id !== manifest.remote_draft_id
+    || budget.currency !== 'JPY' || budget.charge_basis !== 'per_release_excluding_tax'
+    || budget.max_basic_charge_excl_tax_jpy !== 30000 || budget.max_optional_charge_excl_tax_jpy !== 0
+    || budget.max_releases !== 1 || budget.authority !== '2026-09-08-owner-delegation'
+    || manifest.owner_delegation?.date !== '2026-09-08' || !manifest.owner_delegation?.evidence)) {
+    errors.push('Dispatch budget must stay within the delegated single release and existing basic price');
+  }
   if (draft !== markdown(render(manifest)) || digest(draft) !== manifest.draft.sha256) errors.push('Draft differs from its measured snapshot');
   if (manifest.status === 'published' && !/^https:\/\/prtimes\.jp\/main\/html\/rd\/p\/\d{9}\.000182412\.html$/.test(manifest.receipt?.public_url ?? '')) errors.push('Published needs an actual public URL');
   return errors;
@@ -126,7 +135,24 @@ export function evaluateDispatch(manifest, coverage, draft, ui, now = new Date()
   const rendered = render(manifest);
   for (const key of ['title','subtitle','body']) if (normalizedText(ui?.[key]) !== normalizedText(rendered[key])) reasons.push(`PR TIMES ${key} mismatch`);
   if (ui?.scheduled_at !== manifest.scheduled_at || !ui?.media_list_id || ui.media_list_id !== manifest.media_list_id) reasons.push('Verify time and media recipients');
-  if (ui?.incremental_charge_jpy !== 0 || ui?.terms_changed !== false) reasons.push('Existing distribution entitlement/terms unverified');
+  // A saved draft does not consume a release. Re-read the authenticated plan
+  // immediately before dispatch; the account's aggregate invoice is not a quote
+  // for this release. Never infer a free entitlement from an unchecked FAX box.
+  const budget = manifest.dispatch_budget;
+  const chargeVerified = budget == null ? ui?.incremental_charge_jpy === 0 : (
+    fresh(ui?.pricing_observed_at, 5 * 60 * 1000)
+    && ui?.pricing_company_id === budget.company_id
+    && ui?.billing_plan === '従量課金プラン'
+    && ui?.charge_scope === 'this_release'
+    && ui?.currency === budget.currency
+    && ui?.charge_basis === budget.charge_basis
+    && Number.isInteger(ui?.basic_charge_excl_tax_jpy)
+    && ui.basic_charge_excl_tax_jpy >= 0
+    && ui.basic_charge_excl_tax_jpy <= budget.max_basic_charge_excl_tax_jpy
+    && ui?.optional_charge_excl_tax_jpy === 0
+    && ui?.incremental_charge_jpy == null
+  );
+  if (!chargeVerified || ui?.terms_changed !== false) reasons.push('Existing distribution entitlement/terms or delegated charge unverified');
   if (!manifest.quality_review) reasons.push('Editorial evidence and D-SCORE review are pending');
   else {
     const quality = manifest.quality_review;
