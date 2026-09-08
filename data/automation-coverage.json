@@ -47,7 +47,7 @@
     "unlock は解除条件のまとまり。**1タスク＝1作業ではない** —— ASCのレポートが降りれば",
     "複数件が同時に動く。個別に積むと順番を間違えるので、解除する行為のほうを単位にする。"
   ],
-  "measured_at": "2026-09-07",
+  "measured_at": "2026-09-08",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -1791,14 +1791,19 @@
     {
       "area": "⑨ マネタイズ",
       "task": "プレミアム機能の設計判断",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/docs/obsidian-only-mode-design.md"
+        "../simplememo-ios/docs/adr/ADR-002-premium-benefit-scope.md",
+        "../simplememo-ios/data/premium-benefit-decision.json",
+        "../simplememo-ios/SimpleMemo/PaywallViewController.swift",
+        "docs/premium-benefit-execution-20260908.md"
       ],
-      "note": "Obsidianのみモードをプレミアム限定にする判断はオーナー",
-      "blocker": "policy_boundary",
-      "unblocked_by": "何を有料にするかはオーナー判断",
-      "$authority_absent": "同じく表に領域が無い。**何を有料にするかは価格の決定と地続き**なので「価格・プラン・無料枠の変更（human_only: すべて）」の隣に置いている"
+      "note": "2026-09-08、オーナー包括委任のもとCodexがPremiumの価値を利用上限解除と設定済みObsidian専用保存へ絞る設計を採用し、購入画面へ適用した。無料でも使える速度と優先サポート運用の裏付けがない一律表示を特典から外した。価格・無料枠・StoreKit権利は変更していない。変更SHA aea30f2d221c197c953d04fa676cb3b9fa0a1029 の静的QA・Localization Parity・Xcode CloudビルドとFastUnitが成功し、PR #441をmainへマージ済み（0a3d4ac8d9148576ecf0b84f97f64181f40e8e26、04:34:24Z）。設計判断1件の実行であり、TestFlight追加配信、課金導線の本番改善、購入率・解約率の効果へ重ねて加点しない。",
+      "since": "2026-09",
+      "authority": {
+        "domain": "プレミアム機能の設計判断",
+        "ai_may": "既存の有料権利と実装を照合し、Premiumの価値・表示範囲を決定して適用する"
+      }
     },
     {
       "area": "⑨ マネタイズ",
