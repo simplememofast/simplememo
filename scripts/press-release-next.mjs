@@ -24,6 +24,10 @@ export function fingerprints(coverage) {
 export function capture(coverage, sourceCommit, now = new Date().toISOString()) {
   return { observed_at: now, source_commit: sourceCommit, ...fingerprints(coverage), ...summarize(coverage).overall };
 }
+export function captureCommitted(coverage, sourceCommit, committedCoverage, now) {
+  if (digest(coverage) !== digest(committedCoverage)) throw new Error('Commit the coverage ledger before capturing its source SHA');
+  return capture(coverage, sourceCommit, now);
+}
 const pct = n => (n * 100).toFixed(1);
 export function render(manifest) {
   const s = manifest.snapshot;
@@ -138,10 +142,13 @@ if (main) {
   const coverage = read('data/automation-coverage.json');
   if (args.includes('--refresh')) {
     if (manifest.receipt || ['scheduled','published'].includes(manifest.status)) throw new Error('Do not rewrite a scheduled or published release');
-    manifest.snapshot = capture(coverage, execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim());
+    const sourceCommit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
+    const committedCoverage = JSON.parse(execFileSync('git', ['show', `${sourceCommit}:data/automation-coverage.json`], { cwd: ROOT, encoding: 'utf8' }));
+    manifest.snapshot = captureCommitted(coverage, sourceCommit, committedCoverage);
     if (manifest.snapshot.inventory !== manifest.baseline_inventory) throw new Error('Task scope changed; audit the inventory before refreshing');
     manifest.status = 'drafting';
     manifest.quality_review = null;
+    manifest.remote_saved_observation = null;
     const draft = markdown(render(manifest));
     manifest.draft.sha256 = digest(draft);
     fs.writeFileSync(path.join(ROOT, manifest.draft.path), draft);

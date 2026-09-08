@@ -1,8 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { capture, digest, render, markdown, validate, evaluateDispatch } from './press-release-next.mjs';
+import { capture, captureCommitted, digest, render, markdown, validate, evaluateDispatch } from './press-release-next.mjs';
 
 const now = '2026-09-17T00:30:00Z';
+test('snapshot source must contain the observed ledger', () => {
+  const committed = { tasks: [{area: 'Fixture', task: 'one', executor: 'human_only'}] };
+  const modified = structuredClone(committed);
+  modified.tasks[0].executor = 'ai_executes_gated';
+  assert.throws(() => captureCommitted(modified, 'a'.repeat(40), committed, now), /Commit the coverage/);
+  assert.equal(captureCommitted(modified, 'b'.repeat(40), modified, now).ai_executes, 1);
+});
 function fixture() {
   const coverage = { tasks: Array.from({ length: 203 }, (_, i) => ({ area: 'Fixture', task: `task-${i}`, executor: i < 177 ? 'ai_executes_gated' : i < 199 ? 'nobody' : 'intentional_no' })) };
   const snapshot = capture(coverage, 'a'.repeat(40), now);
