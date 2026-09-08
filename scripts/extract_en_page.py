@@ -33,13 +33,13 @@ EN_BRAND = "Simple Memo - for Obsidian"
 # These are SHARED across the blog cluster, so translating once covers all pages.
 # Keep entries here exact; applied as plain-text replacements on the final HTML.
 SHARED_JA_EN = {
+    # Legacy input is recognized without republishing unsupported biography claims.
     "Simple Memo - for Obsidian開発者。iOS開発歴10年以上。Captio終了をきっかけに"
     "「起動0.3秒・メモ→メール特化」のCaptio式シンプルメモを開発。"
     "プライバシーファースト設計（AES-GCM暗号化・ゼロサーバー保存）を信条とする。":
-        "Developer of Simple Memo - for Obsidian. 10+ years of iOS development. "
-        "After Captio shut down, built Simple Memo — focused on a 0.3-second launch "
-        "and memo-to-email — and stands by privacy-first design (AES-GCM encryption, "
-        "zero server-side storage).",
+        'Developer of Simple Memo, an iPhone app for capturing text into a configured email inbox or connected note destination.',
+    'Obsidian連携シンプルメモの開発者。iPhoneから、設定したメールアドレスや連携先のノートに文章を残すアプリを開発しています。':
+        'Developer of Simple Memo, an iPhone app for capturing text into a configured email inbox or connected note destination.',
     # EN content sometimes references the brand by its JA name inline.
     "Captio式シンプルメモ": EN_BRAND,
     "プロフィール": "Profile",
