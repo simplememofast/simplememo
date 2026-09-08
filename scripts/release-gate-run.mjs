@@ -345,8 +345,9 @@ function selftest() {
       assert(r.ifEnabled.submission.decision === 'hold', 'enabled を立てただけで submit になった');
       assert(r.ifEnabled.release.decision === 'hold', 'enabled を立てただけで release になった');
     }],
-    ['実台帳では enabled で止まる（仮定側はその先を見せる）', () => {
-      const r = evaluateBoth(toGateInput({ ledger, materials: null, now: NOW }));
+    ['無効な検体では enabled で止まる（仮定側はその先を見せる）', () => {
+      const disabled = { ...ledger, policy: { ...ledger.policy, enabled: false, kill_switch: false }, releases: [] };
+      const r = evaluateBoth(toGateInput({ ledger: disabled, materials: null, now: NOW }));
       assert(/enabled/.test(r.actual.submission.why), `実台帳の理由が enabled でない: ${r.actual.submission.why}`);
       assert(!/enabled/.test(r.ifEnabled.submission.why),
         `仮定側も enabled で止まっている（先が見えない）: ${r.ifEnabled.submission.why}`);
