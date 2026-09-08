@@ -687,6 +687,36 @@
       "expr": "d.close_check.params.run_id",
       "disposition": "前提",
       "note": "2026-09-07: 描画障害の受容を開き直すのは実際に障害を観測したrun/attemptが以前と異なる場合だけ。API取得不能はrun_idを出さず、以前の障害の閉じ条件を保持する。欠落は健全・解決扱いにはならない。合成API応答を使うviewport-health.test.mjsで同じattemptの受容維持、新attemptの再点火、取得不能時の障害情報保持を検証。 実際のauthority-matrixも読み、AIセッションへの候補分類と無人handlerの権限外棄却を検証する。"
+    },
+    {
+      "file": "scripts/press-release-next.mjs",
+      "expr": "budget",
+      "disposition": "任意項目",
+      "note": "2026-09-08: An absent budget retains the legacy zero-charge-only path; it never permits a paid release. A present budget is validated against the fixed campaign, account, draft, one release, basic-price cap, no paid options, and owner delegation. The no-budget new-charge rejection still passes."
+    },
+    {
+      "file": "scripts/press-release-next.mjs",
+      "expr": "budget.company_id",
+      "disposition": "別に検出",
+      "note": "2026-09-08: validate independently fixes the budget account to 182412. A missing or different pricing account makes chargeVerified false; the preview account is separately required. The wrong pricing-account regression passes."
+    },
+    {
+      "file": "scripts/press-release-next.mjs",
+      "expr": "budget.currency",
+      "disposition": "別に検出",
+      "note": "2026-09-08: validate independently requires JPY in the budget. A missing or different observed currency prevents dispatch. The USD quote and non-numeric price regressions pass."
+    },
+    {
+      "file": "scripts/press-release-next.mjs",
+      "expr": "budget.charge_basis",
+      "disposition": "別に検出",
+      "note": "2026-09-08: validate fixes the budget to a per-release price excluding tax. A missing or different quote basis, aggregate invoice, or mixed legacy free-price claim prevents dispatch. The corresponding rejection cases pass."
+    },
+    {
+      "file": "scripts/press-release-next.mjs",
+      "expr": "budget.max_basic_charge_excl_tax_jpy",
+      "disposition": "別に検出",
+      "note": "2026-09-08: validate independently fixes the cap to 30000 JPY excluding tax. Missing or raised caps are rejected; unknown, negative, string, and over-cap prices also fail chargeVerified. Removing the charge guard in a temporary mutant caused 16 test failures, including over-cap pricing and paid FAX."
     }
   ],
   "coverage_measured_at": "2026-09-03",

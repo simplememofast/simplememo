@@ -26,6 +26,50 @@ test('only a current measured release with matching remote preview can pass', ()
   assert.deepEqual(validate(f.manifest, f.draft), []);
   assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
 });
+function paidFixture() {
+  const f = fixture();
+  f.manifest.owner_delegation = { date: '2026-09-08', evidence: 'fixture-only' };
+  f.manifest.dispatch_budget = {
+    campaign_id: f.manifest.id, company_id: '182412', release_id: '10', currency: 'JPY',
+    charge_basis: 'per_release_excluding_tax', max_basic_charge_excl_tax_jpy: 30000,
+    max_optional_charge_excl_tax_jpy: 0, max_releases: 1, authority: '2026-09-08-owner-delegation',
+  };
+  delete f.ui.incremental_charge_jpy;
+  Object.assign(f.ui, { pricing_observed_at: now, pricing_company_id: '182412',
+    billing_plan: '従量課金プラン', charge_scope: 'this_release', currency: 'JPY',
+    charge_basis: 'per_release_excluding_tax', basic_charge_excl_tax_jpy: 30000,
+    optional_charge_excl_tax_jpy: 0 });
+  return f;
+}
+test('delegated single release accepts a fresh basic-price quote within its fixed cap', () => {
+  const f = paidFixture();
+  assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
+});
+for (const [name, mutate] of [
+  ['higher price', f => { f.ui.basic_charge_excl_tax_jpy = 30001; }],
+  ['unknown price', f => { delete f.ui.basic_charge_excl_tax_jpy; }],
+  ['negative price', f => { f.ui.basic_charge_excl_tax_jpy = -1; }],
+  ['string price', f => { f.ui.basic_charge_excl_tax_jpy = '30000'; }],
+  ['paid FAX', f => { f.ui.optional_charge_excl_tax_jpy = 5000; }],
+  ['unknown options', f => { delete f.ui.optional_charge_excl_tax_jpy; }],
+  ['aggregate invoice', f => { f.ui.charge_scope = 'current_invoice'; }],
+  ['wrong tax basis', f => { f.ui.charge_basis = 'including_tax'; }],
+  ['wrong currency', f => { f.ui.currency = 'USD'; }],
+  ['different plan', f => { f.ui.billing_plan = '年間契約'; }],
+  ['changed terms', f => { f.ui.terms_changed = true; }],
+  ['different pricing account', f => { f.ui.pricing_company_id = 'other'; }],
+  ['stale quote', f => { f.ui.pricing_observed_at = '2026-09-17T00:24:00Z'; }],
+  ['future quote', f => { f.ui.pricing_observed_at = '2026-09-17T00:31:00Z'; }],
+  ['mixed free claim', f => { f.ui.incremental_charge_jpy = 0; }],
+  ['raised cap', f => { f.manifest.dispatch_budget.max_basic_charge_excl_tax_jpy = 40000; }],
+  ['second release budget', f => { f.manifest.dispatch_budget.max_releases = 2; }],
+  ['other draft budget', f => { f.manifest.dispatch_budget.release_id = '11'; }],
+  ['missing delegation', f => { delete f.manifest.owner_delegation; }],
+  ['already dispatched', f => { f.manifest.receipt = { public_url: 'existing' }; }],
+]) test(`paid release holds: ${name}`, () => {
+  const f = paidFixture(); mutate(f);
+  assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, false);
+});
 for (const [name, mutate, expected] of [
   ['real unfinished task', f => {
     f.coverage.tasks[0].executor = 'human_only';
