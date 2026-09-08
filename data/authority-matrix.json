@@ -585,6 +585,29 @@
       ],
       "status": "active",
       "note": "Premiumの価値を、利用上限解除と設定済みObsidian専用保存へ絞る判断をCodexが採用・実装。iOS PR #441の全CI成功後、2026-09-08T04:34:24Zにmainへマージ。価格決定・本番配信・購入率改善を完了したという意味ではない。"
+    },
+    {
+      "domain": "R&Dの採用・投資継続判断",
+      "reversible": true,
+      "ai_may": [
+        "既存R&Dの実験結果を審査し、追加購入を伴わない採用・中止・再実験条件を決定して適用する"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "2026-09-08のオーナー包括委任に基づく判断。実験34065916789の事前条件と3組の結果、安全性・知財・追加費用を文書で審査。固定3URL各1回・既存の30秒/4MB/ジョブ10分上限・失敗時保存をテストで確認し、SEO Validationを通ったSHAだけをmainへ反映する。追加購入は0円。新しい取得先・頻度増加・有料利用・知財譲渡は個別に再評価する。",
+      "evidence": [
+        "docs/radar-adoption-decision-2026-09-08.md",
+        "scripts/trend-radar.py",
+        "scripts/trend-radar.test.py",
+        ".github/workflows/radar-research.yml",
+        "docs/execution-records-and-rd-20260908.md"
+      ],
+      "status": "active",
+      "threshold": {
+        "additional_purchase_cap_jpy": 0,
+        "set_by": "ai_under_owner_delegation",
+        "note": "既存研究の採用と反復投資終了のみ。追加契約・有料API・モデル利用の支出は許可しない。"
+      }
     }
   ],
   "self_repair": {

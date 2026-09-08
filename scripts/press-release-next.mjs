@@ -72,6 +72,8 @@ https://simplememofast.com/
 
 株式会社ユリカ シンプルメモ 広報担当
 support@simplememofast.com
+
+アプリ画面を参照したAI生成イメージ。
 `;
   return { title, subtitle, body };
 }
