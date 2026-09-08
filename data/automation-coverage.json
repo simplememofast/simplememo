@@ -1812,10 +1812,15 @@
       "area": "⑨ マネタイズ",
       "task": "課金失敗の回復",
       "executor": "nobody",
-      "evidence": [],
-      "note": "StoreKit側の失敗イベントを受ける経路が未実装。**[2026-08-26] 検知の側だけ配線が入った** ——Subscription State Report の `State Metric` に Billing Retry / Grace Period が入るので、asc_subscription.rb がそれを課金失敗として拾う（別行「課金失敗・解約の観測」）。**この行は nobody のまま。**数えているのは『回復させたか』であって『気づけるか』ではない。回復（アプリ内での告知・支払い方法の更新導線）は1つも実装していない。**気づけることを回復と数えない。**",
-      "blocker": "not_started",
-      "unblocked_by": "StoreKit の失敗イベントを受ける経路を作れば動く",
+      "evidence": [
+        "../simplememo-ios/SimpleMemo/SubscriptionRenewalState.swift",
+        "../simplememo-ios/SimpleMemo/SettingsViewController.swift",
+        "../simplememo-ios/SimpleMemoTests/SubscriptionLogicTests.swift",
+        "../simplememo-ios/docs/implementation/billing-recovery-settings.md"
+      ],
+      "note": "StoreKit側の失敗イベントを受ける経路が未実装。**[2026-08-26] 検知の側だけ配線が入った** ——Subscription State Report の `State Metric` に Billing Retry / Grace Period が入るので、asc_subscription.rb がそれを課金失敗として拾う（別行「課金失敗・解約の観測」）。**この行は nobody のまま。**数えているのは『回復させたか』であって『気づけるか』ではない。回復（アプリ内での告知・支払い方法の更新導線）は1つも実装していない。**気づけることを回復と数えない。**\n\n2026-09-08訂正: 「回復導線は1つも実装していない」は過去の状態。iOS PR387（merge d3dab4406e95fd0352818685810e880bc620a6fd、2026-09-07）で、署名検証済みの請求再試行・猶予期間を読み、設定の購入提案を支払い情報更新への案内に置き換える処理が実装された。Appleの支払い設定を利用者のタップで開き、画面復帰時に再取得する。現行mainの処理と実装文書を確認済み。既存購読・未検証状態の混在では表示を抑制し、権利付与や価格は変更しない。実装を繰り返す必要はないが、実際の請求問題からの回復は未確認のためexecutor=nobodyを維持する。",
+      "blocker": "verification_pending",
+      "unblocked_by": "実装済み導線を含むTestFlight版での実機確認、Apple支払い画面への遷移、実際の請求問題解消後の再取得・案内消去の証跡を確認する。単体テスト・画面文言の存在・ビルド配布だけで実回復とは数えない。新規購入や課金を検証のために作らず、実際の回復機会と検証可能な状態を待つ。",
       "unlock": "impl_product"
     },
     {
