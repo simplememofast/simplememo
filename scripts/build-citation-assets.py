@@ -149,6 +149,10 @@ chart("assets/img/research/autopilot-shipping-days-2026-09-02.svg", "Days with a
       [("One or more shipped runs", len({r["date_jst"] for r in shipped})), ("No shipped run", days-len({r["date_jst"] for r in shipped}))], days,
       "11 Aug–2 Sep 2026 JST · calendar days, not runs or working hours · simplememofast.com")
 
+chart("assets/img/research/autopilot-outcomes-2026-09-02-ja.svg", "AI運営23日間：着手28回の結果",
+      [("出荷", outcomes["shipped"]), ("失敗", outcomes["failed"]), ("成果物なし", outcomes["no_artifact"]), ("キャンセル", outcomes["cancelled"])], len(attempts),
+      "2026年8月11日〜9月2日 JST・全41件のうち未着手13件を除外・simplememofast.com")
+
 research = f"""
 <p class="eyebrow">Field report · a small iPhone app</p>
 <h1>What happened when AI ran the daily operations of an app?</h1>
@@ -239,13 +243,15 @@ for lang in ("ja", "en"):
     def tr(en, ja):
         return en if english else ja
     form = f"""<div class="tool-grid"><form id="inbox-tool" class="tool-panel">
+<label for="memo">{tr('Example note','メモの例')}</label><textarea id="memo" name="memo" maxlength="10000" autocomplete="off" spellcheck="false" required>{tr('Review the notes after my walk.','散歩のあとで、今日のメモを見返す。')}</textarea>
+<details id="format-options"><summary>{tr("Change filename, date and format", "ファイル名・日付・形式を変更")}</summary>
 <label for="destination">{tr('Destination example','出力先の例')}</label><select id="destination" name="destination"><option value="inbox">Inbox.md</option><option value="daily">{tr('Daily note (YYYY-MM-DD.md)','デイリーノート（YYYY-MM-DD.md）')}</option></select>
 <label for="heading">{tr('Inbox heading','Inboxの見出し')}</label><input id="heading" name="heading" value="Inbox" maxlength="100" autocomplete="off">
 <label for="note-date">{tr('Date','日付')}</label><input type="date" id="note-date" name="date" required>
 <label for="note-time">{tr('Time','時刻')}</label><input type="time" id="note-time" name="time">
 <label class="check-label" for="timestamp"><input type="checkbox" id="timestamp" name="timestamp" checked>{tr('Include a timestamp','時刻を付ける')}</label>
 <label for="style">{tr('Line format','行の形式')}</label><select id="style" name="style"><option value="bullet">{tr('Bullet list','箇条書き')}</option><option value="task">{tr('Checkbox','チェックボックス')}</option></select>
-<label for="memo">{tr('Example note','メモの例')}</label><textarea id="memo" name="memo" maxlength="10000" autocomplete="off" spellcheck="false">{tr('Review the notes after my walk.','散歩のあとで、今日のメモを見返す。')}</textarea>
+</details>
 <p class="small">{tr('The generator works locally. It has no account, upload, or vault access.','生成処理はブラウザ内で完結します。アカウント、アップロード、保管庫へのアクセスはありません。')}</p>
 </form><section class="tool-panel" aria-label="{tr('Markdown preview','Markdownプレビュー')}"><h2 style="margin-top:0;border:0;padding:0">{tr('Preview','プレビュー')}</h2><p><code id="markdown-filename">Inbox.md</code></p><pre><code id="markdown-preview"># Inbox\n\n- 09:00 {tr('Review the notes after my walk.','散歩のあとで、今日のメモを見返す。')}</code></pre>
 <div class="actions"><button id="copy-markdown" type="button">{tr('Copy Markdown','Markdownをコピー')}</button><button id="download-markdown" type="button">{tr('Download .md',' .mdを保存')}</button></div><p id="tool-status" role="status" aria-live="polite"></p></section></div>
