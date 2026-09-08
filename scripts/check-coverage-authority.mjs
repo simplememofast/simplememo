@@ -187,10 +187,12 @@ function selftest() {
       d.coverage.tasks.find((x) => x.task === '価格の変更').executor = 'ai_executes_gated';
     }],
     ['**表も指さず理由も書かない境界は落ちる**', (d) => {
-      delete d.coverage.tasks.find((x) => x.task === 'ChatOps によるリリース起動').$authority_absent;
+      const t = d.coverage.tasks.find((x) => x.task === 'ChatOps によるリリース起動');
+      t.blocker = 'policy_boundary'; delete t.authority; delete t.$authority_absent;
     }],
     ['理由が空文字なら落ちる（欄を作っただけで通さない）', (d) => {
-      d.coverage.tasks.find((x) => x.task === 'ChatOps によるリリース起動').$authority_absent = '   ';
+      const t = d.coverage.tasks.find((x) => x.task === 'ChatOps によるリリース起動');
+      t.blocker = 'policy_boundary'; delete t.authority; t.$authority_absent = '   ';
     }],
     ['ラチェットが増加を止める', (d) => {
       d.coverage.authority_absent_budget = 0;

@@ -1071,14 +1071,19 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "ChatOps によるリリース起動",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
-        "../simplememo-ios/.github/workflows/release-command.yml"
+        "docs/chatops-execution-20260908.md",
+        "../simplememo-ios/.github/workflows/release-command.yml",
+        "../simplememo-ios/scripts/release_command.rb",
+        "../simplememo-ios/scripts/lib/testflight_receipt.rb"
       ],
-      "note": "issue コメントで起動。コメントするのはオーナー\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**起動コメントを打つのがオーナー、という設計そのものが人間ゲート。**打つ主体を機械にすると、ゲートが消えて何も残らない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
-      "blocker": "policy_boundary",
-      "unblocked_by": "起動コメントを打つのがオーナー。ここが人間ゲート",
-      "$authority_absent": "表に領域が無い。**起動コメントを打つ主体が人**という設計そのものが人間ゲートで、打つ側を機械にすると門が消えて何も残らない\n\n**[2026-09-03 訂正] 「打つ主体が人という設計そのものが人間ゲート」は事実と違う。**release-command.yml の Security model 自身が 2026-08-01 にこう訂正している —— **セッションが持つ GitHub トークンは simplememofast として認証されるので、セッションが投稿したコマンドは両方のゲートを通り、実際に出荷する。**run 30699556723（v4.9.48）で skip ではなく実行された。同ファイルは「**『セッションが投稿した』を安全層として扱うな**」と名指しで書いている。\n\nしたがってこの行を止めているのは**投稿の主体ではない。**止めているのは (a) 版が 5.8.0 にピン留めされていること（main は 5.8.9。版を変えるには main への PR が要る＝**意図的な錠前**）と、(b) docs/release-automation.md の Hard Rule（実機確認が先）。**前者は錠前、後者は書いてある規則で、機械の門ではない。**"
+      "note": "issue コメントで起動。コメントするのはオーナー\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**起動コメントを打つのがオーナー、という設計そのものが人間ゲート。**打つ主体を機械にすると、ゲートが消えて何も残らない。**\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n2026-09-08実行検証: オーナーの継続的な実行権限委譲に基づき、Codexがissue35へ5.8.52 TESTFLIGHTを一度投稿（comment5578707772）。run34183973142はparse・対象CI・AppScope・固定タグ・Cloud・配布の全工程を成功。対象ソース4d87e9d10b5a0f90f6fba567bb84aa16cddda926、ビルド1275、Apple側の所属GETを伴う配布証明を回収し独立再確認した。旧版固定はPR434で解消済み。作者名だけを安全条件とせず、版・ソース・CI・対象アプリ・Cloud成功・グループ所属の機械検査を維持するためai_executes_gatedへ移す。TestFlight配布の起動実績であり、実機QAやApp Review提出・公開の完了には加点しない。",
+      "authority": {
+        "domain": "アプリのビルド・TestFlight内部配信",
+        "ai_may": "**submit_review=false に限った release.yml の起動**（v* タグ作成 → Xcode Cloud → TestFlight 内部配信まで）"
+      },
+      "since": "2026-09"
     },
     {
       "area": "⑤ AI予算・トークン管理",
