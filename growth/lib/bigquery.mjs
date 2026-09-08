@@ -535,3 +535,35 @@ export async function connect({ projectId, location, serviceAccount, credentials
 function auth(client) {
   return { token: client.token, quotaProject: client.quotaProject };
 }
+
+/** Fixed metadata endpoints for the encrypted backup inventory. No query/job creation. */
+export async function backupMetadata(client, { kind, dataset, table, pageToken, minCreationTime, maxCreationTime } = {}) {
+  if (client.projectId !== 'yurika-simplememo') throw new Error('Backup inventory project mismatch');
+  const segment = (v) => {
+    if (typeof v !== 'string' || !v || v.length > 1024) throw new Error('Invalid metadata identifier');
+    return encodeURIComponent(v);
+  };
+  const params = new URLSearchParams();
+  let suffix;
+  if (kind === 'datasets') {
+    suffix = '/datasets'; params.set('all', 'true');
+    params.set('fields', 'kind,datasets(datasetReference,location),nextPageToken,unreachable');
+  } else if (kind === 'tables') {
+    suffix = `/datasets/${segment(dataset)}/tables`;
+    params.set('fields', 'kind,tables(tableReference,type),nextPageToken');
+  } else if (kind === 'table') {
+    suffix = `/datasets/${segment(dataset)}/tables/${segment(table)}`;
+    params.set('fields', 'tableReference,type,creationTime,expirationTime,snapshotDefinition,cloneDefinition');
+  } else if (kind === 'jobs') {
+    if (!Number.isSafeInteger(minCreationTime) || !Number.isSafeInteger(maxCreationTime) ||
+        minCreationTime < 0 || maxCreationTime <= minCreationTime || maxCreationTime - minCreationTime > 30 * 86400000) {
+      throw new Error('Invalid backup job window');
+    }
+    suffix = '/jobs'; params.set('allUsers', 'true'); params.set('projection', 'FULL');
+    params.set('minCreationTime', String(minCreationTime)); params.set('maxCreationTime', String(maxCreationTime));
+    params.set('fields', 'kind,nextPageToken,unreachable,jobs(jobReference,state,status(state,errorResult(reason)),errorResult(reason),statistics(creationTime,startTime,endTime),configuration(jobType,copy,extract))');
+  } else throw new Error('Unknown backup metadata endpoint');
+  if (kind !== 'table') params.set('maxResults', '100');
+  if (pageToken) { segment(pageToken); params.set('pageToken', pageToken); }
+  return request(`${BQ_BASE}/projects/yurika-simplememo${suffix}?${params}`, auth(client));
+}
