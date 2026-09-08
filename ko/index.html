@@ -120,6 +120,11 @@
       letter-spacing: 0.05em; cursor: pointer; min-height: 32px; display: inline-flex;
       align-items: center; gap: 4px; transition: all 0.2s;
     }
+    .lang-dropdown__toggle { list-style: none; min-height: 44px; }
+    .lang-dropdown__toggle::-webkit-details-marker { display: none; }
+    .lang-dropdown__toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+    .lang-dropdown__menu { max-height: 70vh; overflow-y: auto; }
+    .lang-dropdown__menu a { min-height: 44px; display: flex; align-items: center; }
     .lang-dropdown__toggle:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
     .lang-dropdown__toggle::after { content: '▾'; font-size: 0.6rem; }
     .lang-dropdown__menu {
@@ -128,7 +133,7 @@
       border-radius: 8px; padding: 4px; min-width: 120px; z-index: 1001;
       backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.4);
     }
-    .lang-dropdown.open .lang-dropdown__menu { display: block; }
+    .lang-dropdown[open] .lang-dropdown__menu { display: block; }
     .lang-dropdown__menu a {
       display: block; padding: 8px 12px; color: rgba(255,255,255,0.7); text-decoration: none;
       font-size: 0.75rem; border-radius: 4px; transition: background 0.15s;
@@ -244,21 +249,21 @@
         Simple Memo - for Obsidian
       </a>
       <div class="global-nav__actions">
-        <div class="lang-dropdown" onclick="this.classList.toggle('open')">
-          <button class="lang-dropdown__toggle" aria-label="Language">KO</button>
+        <details class="lang-dropdown" onkeydown="if(event.key==='Escape'){this.open=false;this.querySelector('summary').focus()}" onfocusout="if(!this.contains(event.relatedTarget))this.open=false">
+          <summary class="lang-dropdown__toggle" aria-label="KO: 언어 선택">KO</summary>
           <div class="lang-dropdown__menu">
             <a href="/">日本語</a>
             <a href="/en/">English</a>
             <a href="/zh/">简体中文</a>
             <a href="/zh-Hant/">繁體中文</a>
-            <a href="/ko/" class="active">한국어</a>
+            <a href="/ko/" class="active" aria-current="page">한국어</a>
             <a href="/es/">Español</a>
             <a href="/pt-BR/">Português</a>
             <a href="/id/">Indonesia</a>
             <a href="/ar/">العربية</a>
             <a href="/tr/">Türkçe</a>
           </div>
-        </div>
+        </details>
         <a data-cta-variant="v1" data-cta-cluster="home" data-cta-placement="nav" href="https://apps.apple.com/us/app/id6758438948?pt=128498560&amp;ct=en__nav&amp;mt=8" class="global-nav__cta">
           다운로드
         </a>
