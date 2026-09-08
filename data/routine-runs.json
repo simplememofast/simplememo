@@ -137,7 +137,7 @@
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 8,
+  "open_budget": 4,
   "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
   "open_findings": [
     {
@@ -220,21 +220,6 @@
       }
     },
     {
-      "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
-      "what": "stopped",
-      "found_at": "2026-09-05",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-07T10:12:52.323Z",
-        "enabled": false,
-        "last_run_status": "SUCCEEDED",
-        "last_run_fired_at": "2026-09-05T10:24:32.667374953Z",
-        "last_run_finished_at": "2026-09-05T10:28:11.535061Z",
-        "last_run_session_id": "cse_012373J6kREn3SgUsxbt6W5C",
-        "next_run_at": "2026-09-06T00:04:57.619574729Z"
-      }
-    },
-    {
       "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
       "what": "completion_unverified",
       "found_at": "2026-09-05",
@@ -247,51 +232,6 @@
         "last_run_finished_at": null,
         "last_run_session_id": null,
         "next_run_at": "2026-09-06T12:40:53.239185213Z"
-      }
-    },
-    {
-      "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
-      "what": "stopped",
-      "found_at": "2026-09-06",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-07T10:12:52.323Z",
-        "enabled": false,
-        "last_run_status": "SUCCEEDED",
-        "last_run_fired_at": "2026-09-02T00:17:26.955371186Z",
-        "last_run_finished_at": "2026-09-02T00:23:44.195911Z",
-        "last_run_session_id": "cse_01Pr3mKHC8sK4GzbWdLj3nHE",
-        "next_run_at": "2026-09-08T00:01:21.733119813Z"
-      }
-    },
-    {
-      "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
-      "what": "stopped",
-      "found_at": "2026-09-06",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-07T10:12:52.323Z",
-        "enabled": false,
-        "last_run_status": "SUCCEEDED",
-        "last_run_fired_at": "2026-08-31T23:45:53.238315717Z",
-        "last_run_finished_at": "2026-08-31T23:55:21.353732Z",
-        "last_run_session_id": "cse_01G7W4hXatgFYKztZ48UtbCf",
-        "next_run_at": "2026-09-07T23:45:00Z"
-      }
-    },
-    {
-      "id": "trig_01RcUDUaFDf86KffssLRsQdw",
-      "what": "stopped",
-      "found_at": "2026-09-06",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-07T10:12:52.323Z",
-        "enabled": false,
-        "last_run_status": "SUCCEEDED",
-        "last_run_fired_at": "2026-09-06T03:07:27.375664461Z",
-        "last_run_finished_at": "2026-09-06T03:08:11.500476Z",
-        "last_run_session_id": "cse_01EnnW4Jjq8ZPMtPRFGNJMro",
-        "next_run_at": "2026-09-07T03:07:00Z"
       }
     }
   ],
@@ -416,6 +356,118 @@
           "last_run_finished_at": "2026-09-06T03:22:19.300179Z",
           "last_run_session_id": "cse_0125DcueHzhgn4nRVYMaLtK4",
           "next_run_at": "2026-09-07T00:20:00Z"
+        }
+      },
+      "resolution_kind": "retired_by_replacement_not_recovered"
+    },
+    {
+      "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
+      "found_at": "2026-09-08",
+      "decided_at": "2026-09-07",
+      "why": "所有者の「2 任せる」に基づきPR D+14取得を既存Codex heartbeat simplememo-2へ統合したため、旧Routineは停止維持する。2026-09-08に後継のACTIVE・毎日10:30 JST設定を読み戻し、実行中タスクの週次観測と照合した。これは旧経路の廃止判断であり、故障復旧や後継の全業務完了ではない。旧APIのobserved_atと実行結果は更新しない。後継の実測範囲と未完了条件はdocs/monitor-delegation-20260907.mdに保持する。",
+      "replacement_id": "simplememo-2",
+      "evidence": {
+        "owner_decision": "docs/monitor-delegation-20260907.md",
+        "successor_checked_on": "2026-09-08",
+        "legacy_observed_at": "2026-09-07T10:12:52.323Z"
+      },
+      "previous_finding": {
+        "id": "trig_01GphcHzTuH1A1JUGq8dYkWa",
+        "what": "stopped",
+        "found_at": "2026-09-05",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-07T10:12:52.323Z",
+          "enabled": false,
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-05T10:24:32.667374953Z",
+          "last_run_finished_at": "2026-09-05T10:28:11.535061Z",
+          "last_run_session_id": "cse_012373J6kREn3SgUsxbt6W5C",
+          "next_run_at": "2026-09-06T00:04:57.619574729Z"
+        }
+      },
+      "resolution_kind": "retired_by_replacement_not_recovered"
+    },
+    {
+      "id": "trig_01RcUDUaFDf86KffssLRsQdw",
+      "found_at": "2026-09-08",
+      "decided_at": "2026-09-07",
+      "why": "所有者の「2 任せる」に基づきD+14取りこぼし監視を既存Codex heartbeat simplememo-2へ統合したため、旧Routineは停止維持する。2026-09-08に後継のACTIVE・毎日10:30 JST設定を読み戻し、実行中タスクの週次観測と照合した。これは旧経路の廃止判断であり、故障復旧や後継の全業務完了ではない。旧APIのobserved_atと実行結果は更新しない。後継の実測範囲と未完了条件はdocs/monitor-delegation-20260907.mdに保持する。",
+      "replacement_id": "simplememo-2",
+      "evidence": {
+        "owner_decision": "docs/monitor-delegation-20260907.md",
+        "successor_checked_on": "2026-09-08",
+        "legacy_observed_at": "2026-09-07T10:12:52.323Z"
+      },
+      "previous_finding": {
+        "id": "trig_01RcUDUaFDf86KffssLRsQdw",
+        "what": "stopped",
+        "found_at": "2026-09-06",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-07T10:12:52.323Z",
+          "enabled": false,
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-06T03:07:27.375664461Z",
+          "last_run_finished_at": "2026-09-06T03:08:11.500476Z",
+          "last_run_session_id": "cse_01EnnW4Jjq8ZPMtPRFGNJMro",
+          "next_run_at": "2026-09-07T03:07:00Z"
+        }
+      },
+      "resolution_kind": "retired_by_replacement_not_recovered"
+    },
+    {
+      "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
+      "found_at": "2026-09-08",
+      "decided_at": "2026-09-07",
+      "why": "所有者の「2 任せる」に基づき週次SEOを既存Codex heartbeat simplememo-2へ統合したため、旧Routineは停止維持する。2026-09-08に後継のACTIVE・毎日10:30 JST設定を読み戻し、実行中タスクの週次観測と照合した。これは旧経路の廃止判断であり、故障復旧や後継の全業務完了ではない。旧APIのobserved_atと実行結果は更新しない。後継の実測範囲と未完了条件はdocs/monitor-delegation-20260907.mdに保持する。",
+      "replacement_id": "simplememo-2",
+      "evidence": {
+        "owner_decision": "docs/monitor-delegation-20260907.md",
+        "successor_checked_on": "2026-09-08",
+        "legacy_observed_at": "2026-09-07T10:12:52.323Z"
+      },
+      "previous_finding": {
+        "id": "trig_01QSHPhXs9J4mnJo2eiZoSoP",
+        "what": "stopped",
+        "found_at": "2026-09-06",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-07T10:12:52.323Z",
+          "enabled": false,
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-02T00:17:26.955371186Z",
+          "last_run_finished_at": "2026-09-02T00:23:44.195911Z",
+          "last_run_session_id": "cse_01Pr3mKHC8sK4GzbWdLj3nHE",
+          "next_run_at": "2026-09-08T00:01:21.733119813Z"
+        }
+      },
+      "resolution_kind": "retired_by_replacement_not_recovered"
+    },
+    {
+      "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
+      "found_at": "2026-09-08",
+      "decided_at": "2026-09-07",
+      "why": "所有者の「2 任せる」に基づきBigQuery退避・期限監視を既存Codex heartbeat simplememo-2へ統合したため、旧Routineは停止維持する。2026-09-08に後継のACTIVE・毎日10:30 JST設定を読み戻し、実行中タスクの週次観測と照合した。これは旧経路の廃止判断であり、故障復旧や後継の全業務完了ではない。旧APIのobserved_atと実行結果は更新しない。後継の実測範囲と未完了条件はdocs/monitor-delegation-20260907.mdに保持する。",
+      "replacement_id": "simplememo-2",
+      "evidence": {
+        "owner_decision": "docs/monitor-delegation-20260907.md",
+        "successor_checked_on": "2026-09-08",
+        "legacy_observed_at": "2026-09-07T10:12:52.323Z"
+      },
+      "previous_finding": {
+        "id": "trig_01QZb1NYgNfpSuot97dZZJpD",
+        "what": "stopped",
+        "found_at": "2026-09-06",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-07T10:12:52.323Z",
+          "enabled": false,
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-08-31T23:45:53.238315717Z",
+          "last_run_finished_at": "2026-08-31T23:55:21.353732Z",
+          "last_run_session_id": "cse_01G7W4hXatgFYKztZ48UtbCf",
+          "next_run_at": "2026-09-07T23:45:00Z"
         }
       },
       "resolution_kind": "retired_by_replacement_not_recovered"
