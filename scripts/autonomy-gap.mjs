@@ -160,10 +160,13 @@ export const UNLOCKS = {
                             + '全体予算はベンダー実支出・残高・入金を照合して判断する。'
                             + '28日到達は日次観測範囲の条件に限り、これらの業務完了を証明しない。',
                        satisfied_when: [{ file: 'data/revenue-series.json', path: 'covered_days', atLeast: 28 }] },
-  bq_28d:            { kind: 'wait', label: 'BigQuery の28日蓄積が到達する',
-                       needs: '9/6前後。D28が測れるようになる',
-                       satisfied_when: [{ file: 'data/autopilot-status.json',
-                                          path: 'data_freshness.bq_export_days_accumulated', atLeast: 28 }] },
+  // Keep the legacy ID for historical plan references; search exports are not app cohorts.
+  bq_28d:            { kind: 'implement', label: '継続コホートと課金・更新・失効・返金の評価を接続する',
+                       needs: 'Search Consoleの蓄積日数ではアプリの継続・課金評価は完成しない。'
+                            + '既存の継続コホート評価と課金状態の取得を起点に、同一コホートの分母、'
+                            + '成熟期間、課金・更新・失効・返金イベントの対応を検証する。'
+                            + '課金状態の日次在庫を新規解約件数に置き換えない。'
+                            + '接続後も観測数不足なら判定を保留し、詳細は非公開側に保持する。' },
   // [2026-08-28] **述語を書き直した。旧版は構造的に真になれなかった。**
   // `data/credential-expiry.json` の `apple_developer_enrolled_at` /
   // `domain_renewal_at` を見ていたが、**その名前のフィールドはリポジトリのどこにも無く、
@@ -692,6 +695,17 @@ export function selftest() {
     ] };
     const pl = planTo(doc, 1);
     if (pl.steps[pl.steps.length - 1]?.id !== 'impl_analog') p.push('defer が最後に来ていない');
+  }
+
+  // Search Console maturity must never present the paid-retention task as waiting only.
+  {
+    const doc = { tasks: [{ area: 'A', task: 'paid cohort evaluation', executor: 'ai_proposes',
+      blocker: 'not_started', unlock: 'bq_28d', evidence: [] }] };
+    const pl = planTo(doc, 1);
+    if (pl.steps[0]?.kind !== 'implement' || UNLOCKS.bq_28d.satisfied_when) {
+      problems.push('継続・課金の統合を検索データの蓄積だけで開く待ちとして扱っている');
+    }
+    if (pl.now !== 0 || pl.denominator !== 1) problems.push('待ち先の訂正を完了実績へ加算した');
   }
 
   // 5. 登録簿の klass は3種類だけ
