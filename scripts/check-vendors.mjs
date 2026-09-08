@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { assert, ledgerScenarios, run } from './lib/selftest.mjs';
 import { readLedger, readLedgerScenarios } from './lib/read-ledger.mjs';
 import { readJSON } from './lib/read-json.mjs';
+import { vendorReviewProblems, vendorReviewScenarios } from './lib/vendor-operating-review.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -75,7 +76,10 @@ export function audit(doc) {
       errors.push('discovered dependency has missing or duplicate id'); continue;
     }
     discoveryIds.add(v.id);
-    if (!DATA_LEVELS.includes(v.personal_data) || v.status !== 'pending_review'
+    if (!DATA_LEVELS.includes(v.personal_data)
+        || !['pending_review', 'account_verification_pending'].includes(v.status)
+        || (v.status === 'account_verification_pending'
+          && (typeof v.operating_review_id !== 'string' || !v.operating_review_id.trim()))
         || v.payment_authorized !== false || v.contract_approved !== false
         || !Array.isArray(v.evidence) || !v.evidence.length
         || v.evidence.some(x => typeof x !== 'string' || !x.trim())
@@ -161,6 +165,7 @@ const SCENARIOS = ledgerScenarios(
 // **台帳の読み方そのもの**も、この検査から走らせる。
 // 壊れた台帳を既定値に落とすと、突き合わせが消えて「食い違いなし」と同じ見た目になる。
 SCENARIOS.push(...readLedgerScenarios(fs, os));
+SCENARIOS.push(...vendorReviewScenarios);
 
 SCENARIOS.push(['未審査依存先は支払許可リストへ入らず、不正な承認・重複を拒否する', () => {
   const doc = readJSON(ROOT, 'data/vendor-register.json');
@@ -219,6 +224,10 @@ if (isMain) {
   const argv = process.argv.slice(2);
   const doc = readJSON(ROOT, 'data/vendor-register.json');
   const { errors, unreviewed, noFallback, money, discoveries } = audit(doc);
+  const operatingReview = readJSON(ROOT, 'data/vendor-operating-review.json');
+  errors.push(...vendorReviewProblems(operatingReview, doc, {
+    readFile: file => fs.readFileSync(path.join(ROOT, file)),
+  }));
   const plans = planDates(doc);
 
   if (argv.includes('--plan-dates')) {
@@ -238,6 +247,10 @@ if (isMain) {
       total: doc.vendors.length,
       discovered_dependencies: discoveries,
       inventory_total: doc.vendors.length + discoveries.length,
+      operating_review: { id: operatingReview.id, actor: operatingReview.actor,
+        reviewed_at: operatingReview.reviewed_at, valid_until: operatingReview.valid_until,
+        decisions: operatingReview.decisions,
+        note: 'Conditional operating decisions; historical human DPA dates and unresolved applicability remain separate.' },
       unreviewed: unreviewed.map((v) => v.id),
       no_fallback: noFallback.map((v) => v.id),
       errors,
@@ -247,9 +260,11 @@ if (isMain) {
   }
 
   console.log(`依存ベンダー ${doc.vendors.length}社（data/vendor-register.json）\n`);
+  console.log(`  AIによる4観点の運用審査: ${operatingReview.decisions.length}社 / ${operatingReview.reviewed_at}`);
+  console.log(`  期限: ${operatingReview.valid_until} UTC。契約適用・是正完了は各社の未解決事項を参照。\n`);
   if (discoveries.length) {
-    console.log(`  追加で検出した未審査依存先 ${discoveries.length}社（契約・支払許可なし）:`);
-    for (const v of discoveries) console.log(`    ${v.id}: ${v.personal_data} / ${v.open_questions?.join(' / ')}`);
+    console.log(`  追加依存先 ${discoveries.length}社（契約・支払許可なし）:`);
+    for (const v of discoveries) console.log(`    ${v.id}: ${v.status} / ${v.personal_data} / ${v.open_questions?.join(' / ')}`);
     console.log('    既存登録分だけで審査の網羅性を判断しない。\n');
   }
 
@@ -275,11 +290,10 @@ if (isMain) {
   }
 
   if (unreviewed.length) {
-    console.log(`  個人データを渡しているのに DPA 未確認 ${unreviewed.length}社:`);
+    console.log(`  従来の人による DPA 確認日が未記録 ${unreviewed.length}社:`);
     for (const v of unreviewed) console.log(`    ${v.name}（${v.personal_data}）`);
-    console.log('    **「見ていない」であって「問題なし」ではない。**');
-    console.log('    確認したら dpa_reviewed に日付を入れる。全部埋めたら');
-    console.log('    policy.enforce_unreviewed を true にすると CI が守る。\n');
+    console.log('    AIの運用審査は別記録。人の確認日、契約の受諾版、是正完了を代入しない。');
+    console.log('    policy.enforce_unreviewed は従来の人の確認日を要求するフラグのまま。\n');
   }
 
   if (money.length) {

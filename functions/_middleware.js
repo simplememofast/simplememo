@@ -127,6 +127,7 @@ const UNSERVED_DATA = new Set([
   "site-constants.json",
   "spend-approvals.json",
   "stop-drills.json",
+  "vendor-operating-review.json",
   "vendor-register.json",
   "waiting-progress.json",
 ]);
