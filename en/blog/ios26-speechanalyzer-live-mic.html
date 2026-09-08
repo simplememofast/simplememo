@@ -25,13 +25,13 @@
       });
     });
   </script>
-  <title>Wiring iOS 26 SpeechAnalyzer to a Live Mic: What the Docs Omit</title>
-  <meta name="description" content="iOS 26 SpeechAnalyzer + SpeechTranscriber on a live AVAudioEngine mic: working code, the format-conversion trap, volatile vs final results, the watchOS split.">
+  <title>iOS 26 SpeechAnalyzer Live Mic: Setup, Results, and Troubleshooting</title>
+  <meta name="description" content="Connect iOS 26 SpeechAnalyzer to a live mic: check model assets, PCM format, final results, DictationTranscriber vocabulary, and sample validation limits.">
   <meta name="theme-color" content="#070b14">
 
   <!-- OGP -->
-  <meta property="og:title" content="Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You">
-  <meta property="og:description" content="iOS 26 SpeechAnalyzer + SpeechTranscriber on a live AVAudioEngine mic: working code, the format-conversion trap, volatile vs final results, the watchOS split.">
+  <meta property="og:title" content="iOS 26 SpeechAnalyzer Live Mic: Setup, Results, and Troubleshooting">
+  <meta property="og:description" content="Connect iOS 26 SpeechAnalyzer to a live mic: check model assets, PCM format, final results, DictationTranscriber vocabulary, and sample validation limits.">
   <meta property="og:type" content="article">
   <meta property="article:published_time" content="2026-06-16T00:00:00+09:00">
   <meta property="og:url" content="https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic">
@@ -44,8 +44,8 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@simplememofast">
-  <meta name="twitter:title" content="Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You">
-  <meta name="twitter:description" content="iOS 26 SpeechAnalyzer + SpeechTranscriber on a live AVAudioEngine mic: working code, the format-conversion trap, volatile vs final results, the watchOS split.">
+  <meta name="twitter:title" content="iOS 26 SpeechAnalyzer Live Mic: Setup, Results, and Troubleshooting">
+  <meta name="twitter:description" content="Connect iOS 26 SpeechAnalyzer to a live mic: check model assets, PCM format, final results, DictationTranscriber vocabulary, and sample validation limits.">
   <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/blog.png">
 
   <!-- Favicon -->
@@ -61,8 +61,8 @@
 
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","inLanguage":"en","headline":"Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You","description":"iOS 26 SpeechAnalyzer + SpeechTranscriber on a live AVAudioEngine mic: working code, the format-conversion trap, volatile vs final results, the watchOS split.","image":"https://simplememofast.com/assets/img/og/blog.png","url":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic","datePublished":"2026-06-16","dateModified":"2026-06-16","author":{"@type":"Person","@id":"https://simplememofast.com/about/#person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Simple Memo - for Obsidian","@id":"https://simplememofast.com/#organization","url":"https://simplememofast.com/","logo":{"@type":"ImageObject","url":"https://simplememofast.com/assets/img/app-icon-256.png","width":256,"height":256},"alternateName":["Captio式シンプルメモ","シンプルメモ","SimpleMemoFast","Simple Memo","Obsidian連携シンプルメモ"]},"proficiencyLevel":"Expert","about":[{"@type":"Thing","name":"SpeechAnalyzer"},{"@type":"Thing","name":"SpeechTranscriber"},{"@type":"Thing","name":"iOS 26 speech-to-text"}],"keywords":"iOS 26, SpeechAnalyzer, SpeechTranscriber, AVAudioEngine, on-device speech-to-text, SFSpeechRecognizer migration"}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://simplememofast.com/en/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://simplememofast.com/en/blog/"},{"@type":"ListItem","position":3,"name":"iOS 26 SpeechAnalyzer Live Mic","item":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic"}]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic#webpage","inLanguage":"en","name":"Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You","isPartOf":{"@id":"https://simplememofast.com/en/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body p:first-of-type"]},"url":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic"}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Is SpeechAnalyzer on-device? Does it work offline?","acceptedAnswer":{"@type":"Answer","text":"Transcription runs fully on-device. The language model downloads on first use, so the first run needs a network connection; after that it works offline."}},{"@type":"Question","name":"Does it work on Apple Watch?","acceptedAnswer":{"@type":"Answer","text":"No — SpeechAnalyzer is iOS / iPadOS / macOS / visionOS / tvOS 26, not watchOS. Use the system dictation UI (TextFieldLink) on the Watch."}},{"@type":"Question","name":"SpeechAnalyzer vs SFSpeechRecognizer — which should I use?","acceptedAnswer":{"@type":"Answer","text":"SpeechAnalyzer for new iOS 26+ work. Keep SFSpeechRecognizer only for older OS support or if you need custom vocabulary."}},{"@type":"Question","name":"Why is my first transcription slow?","acceptedAnswer":{"@type":"Answer","text":"Stale beta builds were slow (the 14s+ reports were on iOS 26.0 beta). On shipping iOS 26.5, an iPhone 16e (the non-Pro A18) reaches the first volatile result in ~0.3–0.5s on a warm start (model installed, locale allocated). Pre-install the model and start the analyzer early; budget separately for the first-ever launch, which downloads the model once."}},{"@type":"Question","name":"Can I add custom vocabulary?","acceptedAnswer":{"@type":"Answer","text":"Not as of iOS 26.0 — there is no contextualStrings equivalent."}}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic#webpage","inLanguage":"en","name":"iOS 26 SpeechAnalyzer Live Mic: Setup, Results, and Troubleshooting","isPartOf":{"@id":"https://simplememofast.com/en/#website"},"speakable":{"@type":"SpeakableSpecification","cssSelector":[".page-content__title",".page-content__body p:first-of-type"]},"url":"https://simplememofast.com/en/blog/ios26-speechanalyzer-live-mic"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"en","mainEntity":[{"@type":"Question","name":"Does SpeechAnalyzer work offline?","acceptedAnswer":{"@type":"Answer","text":"SpeechTranscriber processes audio on the device, but its required model must be available. Assets can already be present before your app’s first launch. Check and prepare them before an offline session; do not assume either that every first launch must download or that a previously installed model will always remain available."}},{"@type":"Question","name":"Can I add custom vocabulary?","acceptedAnswer":{"@type":"Answer","text":"Apple documents AnalysisContext.contextualStrings for DictationTranscriber, and that module also exposes a customized-language content hint. This is not documentation of the same feature for SpeechTranscriber. Choose the module deliberately and test the words and locale you need."}},{"@type":"Question","name":"Why does the app record but show no text?","acceptedAnswer":{"@type":"Answer","text":"Check device and locale support, asset status, microphone input, the optional analyzer format, converter output, the input sequence, and the result consumer. Surface the actual error instead of treating every empty result as a format problem."}},{"@type":"Question","name":"How do I keep the last words when stopping?","acceptedAnswer":{"@type":"Answer","text":"Stop producing audio, finish the input continuation, and let the analyzer finalize through the end of input. Keep the result consumer alive to receive final results. Cancellation is a separate discard path, not a substitute for normal completion."}},{"@type":"Question","name":"Does this sample run on Apple Watch?","acceptedAnswer":{"@type":"Answer","text":"No. The linked microphone session is an iOS 26 example, and SpeechAnalyzer is unavailable on watchOS. A Watch app can use system text input such as TextFieldLink; that presents a system input interface and does not prove that dictation recording has begun."}},{"@type":"Question","name":"What has been validated for the sample?","acceptedAnswer":{"@type":"Answer","text":"The linked repository records four converter tests and an iOS Simulator build on September 9, 2026, including two regressions for reused source-buffer storage. No physical-device retest is claimed. This guide’s preparation helper was type-checked with Xcode 26.6 in Swift 6 complete strict-concurrency mode on September 9. These checks do not establish microphone accuracy, model-download behavior, or latency."}}]}</script>
 
   <link rel="stylesheet" href="/assets/css/style.min.css?v=4806480582">
   <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
@@ -225,6 +225,9 @@
     .article-body :not(pre)>code{background:rgba(148,178,230,.12);padding:.1em .4em;border-radius:5px;
       font-size:.88em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
     .article-body table{display:block;overflow-x:auto;width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:.9rem;}
+    .speech-table-scroll{max-width:100%;overflow-x:auto;margin:1.25rem 0;}
+    .article-body #speech-debug-table{display:table;min-width:640px;margin:0;}
+    .speech-table-scroll:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
     .article-body th,.article-body td{border:1px solid var(--border);padding:.55rem .7rem;text-align:left;vertical-align:top;}
     .article-body th{color:var(--text-muted);font-weight:700;}
     .article-body .callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);
@@ -263,154 +266,113 @@
 <main class="page-content">
     <div class="container">
 
-      <h1 class="page-content__title">Wiring iOS 26's SpeechAnalyzer to a Live Microphone: What the Docs Don't Tell You</h1>
+      <h1 class="page-content__title">iOS 26 SpeechAnalyzer Live Mic: Setup, Results, and Troubleshooting</h1>
 
       <p class="article-meta">
-        By <a href="/about/">AI Ataka</a> &middot; Published: June 16, 2026 &middot; Reading time: ~10 minutes
+        By <a href="/about/">AI Ataka</a> &middot; Published: June 16, 2026 &middot; Updated: September 9, 2026
       </p>
 
       <div class="page-content__body article-body">
 
-        <p><strong>TL;DR.</strong> iOS 26 replaces <code>SFSpeechRecognizer</code> with <code>SpeechAnalyzer</code> + composable modules. This is a practitioner's walkthrough of wiring <code>SpeechTranscriber</code> to a live <code>AVAudioEngine</code> microphone, with copy-pasteable SwiftUI code and the things the documentation doesn't warn you about: you must convert the audio buffer, the language model downloads on first use (so the first offline run fails), volatile vs. final results need different handling, there is no custom vocabulary, and SpeechAnalyzer isn't on watchOS. The full sample is on GitHub (<a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">simplememofast/ios26-speechanalyzer-live-mic</a>, MIT) and it builds and runs on a shipping iOS 26 device.</p>
-
-        <p>Who this is for: developers moving from <code>SFSpeechRecognizer</code>, or anyone who tried to follow the WWDC sample and ended up with code that compiles but produces no text.</p>
-
-        <h2>Why SpeechAnalyzer replaces SFSpeechRecognizer</h2>
-        <p>The old <code>SFSpeechRecognizer</code> bundled session management, language handling, and recognition into one object. iOS 26's <code>SpeechAnalyzer</code> splits that apart: the analyzer is an orchestrator you attach <em>modules</em> to, and you compose only the modules you need. The result is optimized for longer, conversational audio, runs fully on-device for supported locales, and — unlike the old API — does not require the user to first enable dictation or Siri voice input in Settings.</p>
-
-        <h2>The mental model: Analyzer + Modules</h2>
-        <p><code>SpeechAnalyzer</code> coordinates the pipeline. For speech-to-text you attach a <code>SpeechTranscriber</code> (a <code>SpeechDetector</code> module for voice-activity detection also exists, but most apps need only the transcriber). Audio goes in as <code>AnalyzerInput</code>; results come out of an <code>AsyncSequence</code>. There is also a <code>DictationTranscriber</code> for short, keyboard-style dictation. The flow:</p>
-
-        <pre><code>mic ─► AVAudioEngine.installTap ─► AVAudioConverter ─► AnalyzerInput
-                                                          │
-                                    SpeechAnalyzer([ SpeechTranscriber ])
-                                                          │
-                            for try await result in transcriber.results
-                                result.text (AttributedString) / result.isFinal</code></pre>
-
-        <h2>Minimal working implementation</h2>
-        <p>Permissions first. You need both microphone and speech-recognition authorization, plus <code>NSMicrophoneUsageDescription</code> and <code>NSSpeechRecognitionUsageDescription</code> in Info.plist. Then build the transcriber and analyzer:</p>
-
-        <pre><code>// Normalize the requested locale to one with an on-device model.
-guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: .current) else {
-    throw Failure.localeNotSupported
-}
-
-// .volatileResults streams partial text WHILE the user is still speaking.
-let transcriber = SpeechTranscriber(
-    locale: locale,
-    transcriptionOptions: [],
-    reportingOptions: [.volatileResults],
-    attributeOptions: []            // add .audioTimeRange for per-word timing
-)
-
-let analyzer = SpeechAnalyzer(modules: [transcriber])
-let analyzerFormat = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [transcriber])</code></pre>
-
-        <p>Subscribe to results, then feed an input stream and start the analyzer:</p>
-
-        <pre><code>// Results loop: volatile -> replace the tail; final -> append + clear the tail.
-resultsTask = Task {
-    for try await result in transcriber.results {
-        let piece = String(result.text.characters)   // result.text is AttributedString
-        if result.isFinal {
-            finalizedText += piece
-            volatileText = ""
-        } else {
-            volatileText = piece
-        }
+<p class="tldr"><strong>For a live iOS 26 microphone pipeline, check device and locale support, prepare model assets, obtain a compatible PCM format, and consume recognition results while feeding audio.</strong> Treat normal completion separately from cancellation so the last words can become final. This guide follows Apple’s API documentation and the current <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">SimpleMemo live-mic sample</a>; it also includes a separately downloadable preparation helper.</p>
+<nav class="speech-toc" aria-label="Article sections"><a href="#speech-sample">Run the example</a><a href="#speech-prepare">Prepare the analyzer</a><a href="#speech-audio">Feed microphone PCM</a><a href="#speech-finish">Handle results and stop</a><a href="#speech-vocabulary">Vocabulary support</a><a href="#speech-debug">Troubleshoot</a><a href="#speech-validation">Validation scope</a></nav>
+<section id="speech-sample"><h2>Start with the complete sample, then inspect the pipeline</h2>
+<p>The <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">MIT-licensed repository</a> exposes <code>SpeechSession</code> as a Swift package for an iOS 26 host app. Add the repository under Xcode’s package dependencies and link the <code>SpeechAnalyzerLiveMic</code> product. Its README shows a SwiftUI view that displays <code>finalizedText</code>, renders <code>volatileText</code> separately, and disables Start while the session is preparing.</p>
+<p>For a complete app project, follow the README’s XcodeGen route. Alternatively, copy the supplied app sources into a new iOS 26 app. Use one integration route so you do not define the same types twice. The package does not implement note storage, email delivery, or Obsidian integration.</p>
+<p>The linked sample requests microphone and speech-recognition authorization. Its host app must supply <code>NSMicrophoneUsageDescription</code> and <code>NSSpeechRecognitionUsageDescription</code>; adding the package cannot supply those host descriptions. Explain permission use, show denial and preparation states, and let the user choose when to record. The helper below does not request permission or start the microphone.</p>
+<p>Apple’s <a href="https://developer.apple.com/documentation/speech/bringing-advanced-speech-to-text-capabilities-to-your-app" rel="noopener">official live-transcription sample</a> and <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">WWDC25 session</a> are useful references for the architecture. <code>SpeechAnalyzer</code> coordinates modules; it is an additional API for supported systems, not a reason to assume all existing <code>SFSpeechRecognizer</code> code is obsolete.</p></section>
+<section id="speech-prepare"><h2>Prepare support, assets, and format before recording</h2>
+<p><a href="https://developer.apple.com/documentation/speech/speechtranscriber" rel="noopener">SpeechTranscriber</a> provides runtime device and locale checks. An iOS version check alone is insufficient. The following helper returns a configured transcriber, analyzer, and audio format, or throws a specific preparation error.</p>
+<p><a href="/assets/downloads/speech-analyzer-preparation.swift?v=7a01961842" download="speech-analyzer-preparation.swift">Download the complete Swift preparation helper</a>. The full file includes imports, result and error types, and the DictationTranscriber hint helper discussed below. This is a setup component, not a complete recording app.</p><pre tabindex="0"><code>@available(iOS 26.0, *)
+@MainActor
+public func prepareSpeechAnalyzer(
+    requestedLocale: Locale,
+    naturalFormat: AVAudioFormat? = nil
+) async throws -&gt; PreparedSpeechAnalyzer {
+    guard SpeechTranscriber.isAvailable else {
+        throw SpeechPreparationError.deviceUnavailable
     }
-}
-
-let (sequence, builder) = AsyncStream&lt;AnalyzerInput&gt;.makeStream()
-self.inputBuilder = builder
-try await analyzer.start(inputSequence: sequence)</code></pre>
-
-        <p>Now the microphone tap. This is where most people lose an afternoon:</p>
-
-        <pre><code>let converter = AudioBufferConverter()      // capture locals; never touch self in the tap
-let input = audioEngine.inputNode
-let micFormat = input.outputFormat(forBus: 0)
-
-input.installTap(onBus: 0, bufferSize: 4096, format: micFormat) { buffer, _ in
-    // Convert the mic buffer to the format SpeechAnalyzer asked for, THEN yield.
-    guard let converted = try? converter.convert(buffer, to: analyzerFormat) else { return }
-    builder.yield(AnalyzerInput(buffer: converted))
-}
-audioEngine.prepare()
-try audioEngine.start()</code></pre>
-
-        <p>The <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">GitHub repo</a> has the complete, compiling versions of <code>SpeechSession</code>, the <code>AudioBufferConverter</code>, and a SwiftUI view that renders the two-tone live caption.</p>
-
-        <h2>Getting the model on-device (the download trap)</h2>
-        <p>Transcription is on-device, but the language model is a <strong>system-shared asset that may not be installed yet</strong>. Check <code>SpeechTranscriber.installedLocales</code>; if your locale is missing, request and install it. The shared asset does <em>not</em> count against your app's bundle size — but a first run with no network can't download it, so handle that state explicitly instead of failing silently.</p>
-
-        <pre><code>let installed = await Set(SpeechTranscriber.installedLocales.map { $0.identifier(.bcp47) })
-if !installed.contains(locale.identifier(.bcp47)) {
-    if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) {
-        try await request.downloadAndInstall()   // request has a .progress you can show
+    guard let locale = await SpeechTranscriber.supportedLocale(
+        equivalentTo: requestedLocale
+    ) else {
+        throw SpeechPreparationError.unsupportedLocale
     }
+
+    let transcriber = SpeechTranscriber(
+        locale: locale,
+        preset: .progressiveTranscription
+    )
+    // The system may already have the asset; nil means no install is needed.
+    // A request can automatically reserve the locale or throw if no slot is free.
+    if let request = try await AssetInventory.assetInstallationRequest(
+        supporting: [transcriber]
+    ) {
+        try await request.downloadAndInstall()
+    }
+    try Task.checkCancellation()
+    guard await AssetInventory.status(forModules: [transcriber]) == .installed else {
+        throw SpeechPreparationError.assetsNotInstalled
+    }
+    guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(
+        compatibleWith: [transcriber], considering: naturalFormat
+    ) else {
+        throw SpeechPreparationError.noCompatibleFormat
+    }
+
+    let analyzer = SpeechAnalyzer(modules: [transcriber])
+    try await analyzer.prepareToAnalyze(in: format)
+    return PreparedSpeechAnalyzer(
+        locale: locale, transcriber: transcriber,
+        analyzer: analyzer, audioFormat: format
+    )
 }</code></pre>
-
-        <h2>Volatile vs. finalized results (the UX hinge)</h2>
-        <p>With <code>reportingOptions: [.volatileResults]</code> you get fast partial results while the user is still speaking; <code>result.isFinal</code> marks committed text. The idiomatic UI shows volatile text dimmed and replaces it when a final arrives, persisting only finals. Because <code>result.text</code> is an <code>AttributedString</code>, adding <code>attributeOptions: [.audioTimeRange]</code> gives you per-word time ranges for highlighting or seeking back into the audio.</p>
-
-        <h2>The gotchas (the part the docs skip)</h2>
-
-        <h3>1. You must convert the audio buffer</h3>
-        <p><code>AVAudioEngine</code>'s input node format (often 48 kHz, hardware-dependent) usually does <em>not</em> match <code>SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith:)</code>. Feed a mismatched buffer and you get a clean compile and zero transcription. Run every buffer through <code>AVAudioConverter</code> first. This is the single most common reason "it builds but nothing happens."</p>
-
-        <h3>2. Latency: what I measured on shipping iOS 26</h3>
-        <p>The most-cited SpeechAnalyzer latency figure comes from a WWDC25-era developer-forum report: <strong>~14s+ to the first result</strong> on an iPhone 16 <strong>Pro</strong> running iOS 26.0 beta with Xcode beta 5, even after <code>AssetInventory.allocate(locale:)</code> and preheating. If that were representative, the API would be unusable for live capture.</p>
-        <p>On shipping iOS 26.5 I don't see that. On an <strong>iPhone 16e — the binned, non-Pro A18 (6-core CPU, 4-core GPU), i.e. the <em>least</em> powerful A18 device</strong> — time to the first volatile result is <strong>~0.3–0.5s</strong>, with the model already installed and the locale allocated (a warm start). First-ever launch is different: it includes a one-time model-asset download, so budget for that path separately and show a progress UI.</p>
-        <p>This is a first-party measurement, not a controlled head-to-head: different device, shipping OS vs beta, timing time-to-first-volatile-result. But the direction is clear, and there's a reason a non-Pro device keeps up — on-device transcription runs primarily on the Neural Engine, which is the same 16-core unit across the whole A18 family (the 16e only gives up one GPU core, which speech doesn't lean on). The likely takeaway: the beta-era latency was a preheat/config/beta issue, not a hardware limit. Measure it on your own device and publish the device + OS + metric alongside the number.</p>
-
-        <h3>3. There is no Custom Vocabulary</h3>
-        <p><code>SFSpeechRecognizer</code> had <code>contextualStrings</code> to bias recognition toward known terms. <code>SpeechAnalyzer</code>, as of iOS 26.0, exposes no equivalent. If your domain is full of proper nouns or jargon, budget for that gap now.</p>
-
-        <h3>4. watchOS: SpeechAnalyzer isn't there — but voice input still is</h3>
-        <p><code>SpeechAnalyzer</code> ships on iOS, iPadOS, macOS, visionOS and tvOS 26 — <strong>not watchOS</strong>. That does <em>not</em> mean "no voice on the Watch." You fall back to the watchOS system dictation UI, which hands you back finished text. You lose the SpeechAnalyzer pipeline (volatile results, time ranges, your own audio tap), but voice capture works:</p>
-
-        <pre><code>// watchOS: no SpeechAnalyzer — the system handles dictation and returns text.
-TextFieldLink(prompt: Text("Speak or type")) {
-    Image(systemName: "mic.fill")
-} onSubmit: { text in
-    send(text)
-}</code></pre>
-
-        <p>This is the split we actually ship: <code>SpeechAnalyzer</code> on iPhone, <code>TextFieldLink</code> dictation on the Watch. Most write-ups get this wrong in one of two directions — claiming "no voice on watchOS" or implying SpeechAnalyzer runs everywhere. Neither is true.</p>
-
-        <h3>5. Gate on availability, and on Swift 6 concurrency</h3>
-        <p><code>SpeechAnalyzer</code> / <code>SpeechTranscriber</code> are iOS 26+. If your app deploys lower, mark the speech types <code>@available(iOS 26.0, *)</code> and gate the entry point with <code>if #available(iOS 26.0, *)</code>. Separately: the mic tap closure runs on a real-time audio thread, so under Swift 6 complete strict concurrency, capture only locals (the continuation, the target format, a fresh converter) and never touch a <code>@MainActor</code> object inside the tap. Done that way it compiles without <code>@unchecked Sendable</code> escape hatches.</p>
-
-        <h2>Migration checklist from SFSpeechRecognizer</h2>
-        <div style="overflow-x:auto">
-          <table>
-          <thead><tr><th scope="col">SFSpeechRecognizer (old)</th><th scope="col">SpeechAnalyzer (iOS 26)</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">One object does session + recognition</th><td><code>SpeechAnalyzer</code> + composable modules</td></tr>
-            <tr><th scope="row"><code>append(_:)</code> audio buffers</th><td><code>AnalyzerInput(buffer:)</code> yielded into an <code>AsyncStream</code></td></tr>
-            <tr><th scope="row"><code>partialResults</code> flag</th><td><code>reportingOptions: [.volatileResults]</code></td></tr>
-            <tr><th scope="row">delegate / result handler</th><td><code>for try await result in transcriber.results</code></td></tr>
-            <tr><th scope="row"><code>bestTranscription.formattedString</code></th><td><code>String(result.text.characters)</code> (text is <code>AttributedString</code>)</td></tr>
-            <tr><th scope="row"><code>contextualStrings</code> (custom vocab)</th><td>no equivalent</td></tr>
-            <tr><th scope="row">user enables dictation in Settings</th><td>not required</td></tr>
-            <tr><th scope="row">works on watchOS</th><td>not on watchOS (use system dictation)</td></tr>
-          </tbody>
-        </table>
-        </div>
-
-        <h2>Where this ships</h2>
-        <p>This exact pipeline (minus the email/send parts) powers the voice input in <a href="/voice-input/">Simple Memo's on-device voice capture</a> — a fast iPhone memo app that emails notes to yourself and auto-appends them to Obsidian, with no per-use API cost. The repo strips it down to the speech essentials so you can drop it into your own project.</p>
-
-        <h2>FAQ</h2>
-        <p><strong>Is SpeechAnalyzer on-device? Does it work offline?</strong><br>Transcription runs fully on-device. The language model downloads on first use, so the first run needs a network connection; after that it works offline.</p>
-        <p><strong>Does it work on Apple Watch?</strong><br>No — SpeechAnalyzer is iOS / iPadOS / macOS / visionOS / tvOS 26, not watchOS. Use the system dictation UI (<code>TextFieldLink</code>) on the Watch.</p>
-        <p><strong>SpeechAnalyzer vs SFSpeechRecognizer — which should I use?</strong><br>SpeechAnalyzer for new iOS 26+ work. Keep SFSpeechRecognizer only for older OS support or if you need custom vocabulary.</p>
-        <p><strong>Why is my first transcription slow?</strong><br>Stale beta builds were slow (the 14s+ reports were on iOS 26.0 beta). On shipping iOS 26.5, an iPhone 16e (the non-Pro A18) reaches the first volatile result in ~0.3–0.5s on a warm start (model installed, locale allocated). Pre-install the model and start the analyzer early; budget separately for the first-ever launch, which downloads the model once.</p>
-        <p><strong>Can I add custom vocabulary?</strong><br>Not as of iOS 26.0 — there is no <code>contextualStrings</code> equivalent.</p>
-
-        <p style="margin-top:2rem;font-size:.9rem;color:var(--text-muted);">Sample code: <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic" rel="noopener">github.com/simplememofast/ios26-speechanalyzer-live-mic</a> (MIT). Corrections welcome via PR. Related: <a href="/en/blog/offline-first-comparison">offline-first memo architecture</a>.</p>
+<p><a href="https://developer.apple.com/documentation/speech/assetinventory" rel="noopener">AssetInventory</a> manages shared system models. A model may already be installed by the system or another app. <a href="https://developer.apple.com/documentation/speech/assetinventory/assetinstallationrequest(supporting:)" rel="noopener">An installation request</a> returns <code>nil</code> when no installation is needed; otherwise it can reserve the locale and initiate a download. Reservation limits can also produce an error. Manage reservations across your app’s features, and release a locale when it is no longer needed rather than releasing a model still in use elsewhere in your app.</p>
+<p>Before going offline, prepare the required locale and verify readiness. Model assets live outside the app bundle, but still consume system storage and can change over time. Show download progress and cancellation in the host UI. “On-device recognition” does not mean “no preparation or network access is ever needed.”</p></section>
+<section id="speech-audio"><h2>Feed PCM in the format the analyzer accepts</h2>
+<pre tabindex="0"><code>AVAudioEngine microphone tap
+  -&gt; owned PCM / conversion for the selected format
+  -&gt; AsyncStream&lt;AnalyzerInput&gt;
+  -&gt; SpeechAnalyzer + SpeechTranscriber
+  -&gt; result consumer and UI state</code></pre>
+<p>After activating the audio session, inspect the input node’s actual format. Do not hard-code a sample rate because a device or route often used that rate before. Pass a natural format to <a href="https://developer.apple.com/documentation/speech/speechanalyzer/bestavailableaudioformat(compatiblewith:considering:)" rel="noopener"><code>bestAvailableAudioFormat(compatibleWith:considering:)</code></a> when appropriate and unwrap its optional result. Apple documents that the analyzer does not transparently resample or convert input.</p>
+<p>The repository’s <code>AudioBufferConverter</code> returns an already matching buffer unchanged and uses <code>AVAudioConverter</code> when formats differ. Conversion is required for mismatched formats, not as a blanket extra step for every buffer. Check output frame length and report conversion errors; silently dropping every failing buffer can make a recording UI appear healthy while producing no text.</p>
+<p>Give queued audio an explicit ownership policy. The updated sample converter returns independent PCM storage even when formats already match, so later reuse of the input does not overwrite queued audio. A buffer supplied by an audio callback must not be assumed to remain immutable after the callback returns. If you queue it for later use, arrange a suitable owned copy or a pipeline whose buffer lifetime is controlled. Keep per-buffer UI mutations off the audio callback. For production, also decide how you bound queued work and handle overload or route changes.</p>
+<p>In Swift 6, capturing local variables does not by itself prove that a pipeline is thread-safe. The current sample’s converter has a single-processing-thread contract and a private lock-protected <code>@unchecked Sendable</code> holder for one converter callback. It does not make all PCM buffers or the converter generally safe to share across threads. Read that contract before adapting the sample.</p></section>
+<section id="speech-finish"><h2>Replace volatile results; finish input before finalizing</h2>
+<p>With progressive results enabled, a volatile result can revise text for an audio range. Do not append every partial result as a new sentence. The simple sample keeps finalized text and a replaceable volatile tail. For richer editing, align updates with the audio ranges and preserve final segments separately. Apple describes this behavior in the <a href="https://developer.apple.com/videos/play/wwdc2025/277/" rel="noopener">results portion of the WWDC session</a>.</p>
+<ol class="speech-stop-steps"><li>On a normal Stop action, stop producing new microphone audio and remove the tap once.</li><li>Finish the <code>AsyncStream</code> input continuation so the analyzer can see the end of input.</li><li>Await <code>finalizeAndFinishThroughEndOfInput()</code>, while the result-consumer task remains alive.</li><li>Wait for result consumption to complete, then commit final text and release session resources.</li></ol>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/finalizeandfinishthroughendofinput()" rel="noopener">Finalization waits for input termination and consumption</a>. Calling it while the producer never finishes can leave Stop waiting. Cancelling the result task immediately can also lose the tail you intended to save. A Cancel action that discards an utterance should use a deliberate cancellation path instead of pretending it was a normal finalized result.</p>
+<p>The public package remains a learning sample. Its current <code>stop()</code> finalizes and then cancels the consumer; it does not expose a separate consumer-completion acknowledgement. If retaining every final result matters, adapt that lifecycle and test it. Also test Stop while preparation is in progress, repeated taps, view dismissal, interruption, and restart after an error.</p></section>
+<section id="speech-vocabulary"><h2>Vocabulary support depends on the transcriber module</h2>
+<p>It is inaccurate to say the new Speech API has no contextual vocabulary support. Apple documents <a href="https://developer.apple.com/documentation/speech/analysiscontext/contextualstrings" rel="noopener"><code>AnalysisContext.contextualStrings</code></a> for <strong>DictationTranscriber</strong>. The documentation recommends brief phrases and at most 100 phrases across tags. That is not a promise that the same hints customize <code>SpeechTranscriber</code>.</p>
+<pre tabindex="0"><code>// For an analyzer configured with DictationTranscriber.
+let context = AnalysisContext()
+context.contextualStrings[.general] = [&quot;Obsidian&quot;, &quot;Yurica&quot;]
+try await analyzer.setContext(context)</code></pre>
+<p><a href="https://developer.apple.com/documentation/speech/speechanalyzer/setcontext(_:)" rel="noopener"><code>setContext(_:)</code></a> replaces the current context, so preserve or merge any existing application context when needed. The downloadable helper rejects more than 100 phrases instead of silently truncating them. Phrase hints are distinct from the customized language-model option also documented for DictationTranscriber, and neither guarantees correct recognition of every name. Choose and test the module and language needed by your app.</p></section>
+<section id="speech-debug"><h2>When recording produces no text, locate the failing stage</h2>
+<div class="speech-table-scroll" tabindex="0" role="region" aria-label="Speech pipeline troubleshooting"><table id="speech-debug-table"><thead><tr><th scope="col">Symptom</th><th scope="col">Check next</th><th scope="col">Useful evidence</th></tr></thead><tbody>
+<tr><th scope="row">Preparation fails</th><td>Device support, normalized locale, asset status and reservation/download errors</td><td>OS and device, requested/selected locale, error domain and code</td></tr>
+<tr><th scope="row">Mic UI is active, no buffers</th><td>Permission, audio-session activation, route, engine start and tap lifecycle</td><td>Whether callbacks arrive; input sample rate and channel count</td></tr>
+<tr><th scope="row">Buffers arrive, no text</th><td>Compatible format, nonzero converter output, yielded inputs and active results task</td><td>Input/output frame counts and the first actual pipeline error</td></tr>
+<tr><th scope="row">Words repeat</th><td>Whether volatile revisions are being appended instead of replaced</td><td>Result audio ranges and final/volatile flags</td></tr>
+<tr><th scope="row">Last words disappear</th><td>Input completion and consumer lifetime during finalization</td><td>Last input time, finalization completion and final result receipt</td></tr>
+<tr><th scope="row">Offline launch fails</th><td>Required model readiness on that device and locale</td><td>Asset status before disconnecting and the surfaced setup error</td></tr>
+</tbody></table></div>
+<p>For diagnostics, start with stage timings, frame counts, locale, and error information. Raw recordings and recognized text are not needed for every log entry. If a user shares a reproduction, ask for a short nonsensitive test phrase and the relevant configuration rather than a private conversation.</p></section>
+<section id="speech-validation"><h2>What was checked, and what to measure on a device</h2>
+<p>This article was checked against Apple documentation and Xcode 26.6 on September 9, 2026. The downloadable helper passes Swift 6 type checking with complete strict concurrency for an iOS 26 Simulator target. It does not record audio, and this check does not demonstrate speech accuracy, successful asset installation, or an end-to-end microphone session.</p>
+<p>The public sample at <a href="https://github.com/simplememofast/ios26-speechanalyzer-live-mic/tree/1befcce6c60c0361dbf8cb25ba35fa482f3ec8ba" rel="noopener">revision 1befcce</a> passed four PCM converter tests and an iOS Simulator build on September 9. Two tests reuse the source buffer after conversion and confirm that mono float and interleaved stereo integer output remain intact; both fail against the previous matching-format passthrough implementation. Its README explicitly says the package refactor has not been re-tested on a physical iOS device. The historical latency numbers previously on this page are not a benchmark for the current package.</p>
+<p>For your own app, record device, OS, locale, audio route, model readiness, and the exact timing boundaries. Measure first volatile text, first final text, and normal-stop completion separately. Compare a session with assets ready against a session that requires preparation. Repeat a fixed nonsensitive phrase, and inspect missing or duplicated final words as well as speed. Do not infer Neural Engine behavior or a hardware limit from one timing result.</p>
+<p>On Apple Watch, use a separate system text-input flow if it fits your app. <a href="https://developer.apple.com/documentation/swiftui/textfieldlink" rel="noopener"><code>TextFieldLink</code></a> opens the system interface; it does not establish that dictation is already recording. SpeechAnalyzer is unavailable on watchOS, and the iOS package is not a Watch microphone implementation.</p></section>
+<section id="speech-faq"><h2>Frequently asked questions</h2>
+<details class="speech-faq-item"><summary>Does SpeechAnalyzer work offline?</summary><p>SpeechTranscriber processes audio on the device, but its required model must be available. Assets can already be present before your app’s first launch. Check and prepare them before an offline session; do not assume either that every first launch must download or that a previously installed model will always remain available.</p></details>
+<details class="speech-faq-item"><summary>Can I add custom vocabulary?</summary><p>Apple documents AnalysisContext.contextualStrings for DictationTranscriber, and that module also exposes a customized-language content hint. This is not documentation of the same feature for SpeechTranscriber. Choose the module deliberately and test the words and locale you need.</p></details>
+<details class="speech-faq-item"><summary>Why does the app record but show no text?</summary><p>Check device and locale support, asset status, microphone input, the optional analyzer format, converter output, the input sequence, and the result consumer. Surface the actual error instead of treating every empty result as a format problem.</p></details>
+<details class="speech-faq-item"><summary>How do I keep the last words when stopping?</summary><p>Stop producing audio, finish the input continuation, and let the analyzer finalize through the end of input. Keep the result consumer alive to receive final results. Cancellation is a separate discard path, not a substitute for normal completion.</p></details>
+<details class="speech-faq-item"><summary>Does this sample run on Apple Watch?</summary><p>No. The linked microphone session is an iOS 26 example, and SpeechAnalyzer is unavailable on watchOS. A Watch app can use system text input such as TextFieldLink; that presents a system input interface and does not prove that dictation recording has begun.</p></details>
+<details class="speech-faq-item"><summary>What has been validated for the sample?</summary><p>The linked repository records four converter tests and an iOS Simulator build on September 9, 2026, including two regressions for reused source-buffer storage. No physical-device retest is claimed. This guide’s preparation helper was type-checked with Xcode 26.6 in Swift 6 complete strict-concurrency mode on September 9. These checks do not establish microphone accuracy, model-download behavior, or latency.</p></details>
+</section><section id="speech-product"><h2>How this relates to Simple Memo</h2><p>This guide and the free sample are maintained by the SimpleMemo developer. The app’s <a href="/voice-input/">voice input guide</a> describes the product workflow. The sample itself sends no email and saves nothing to Obsidian. In Simple Memo, email requires recipient setup and verification, and <a href="/en/obsidian/">Obsidian saving requires integration and destination settings</a>. Local speech recognition does not describe the privacy or delivery behavior of any later action your app performs.</p><p>Related: <a href="/en/blog/offline-first-comparison">offline-first memo architecture</a>. The next step for a developer is to run the complete sample with a test phrase and verify preparation, results, and stopping on the device and locale they plan to support.</p></section>
 
       </div>
     </div>
