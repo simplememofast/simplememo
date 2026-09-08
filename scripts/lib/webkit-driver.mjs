@@ -55,9 +55,11 @@ export function findWebKitDriver(candidates = ['/usr/bin/WebKitWebDriver', '/usr
  * `DISPLAY` が無ければ Xvfb を立てる。**立てられなければ null** —— 黙って続けない。
  */
 export async function ensureDisplay({ env = process.env, xvfbPath = '/usr/bin/Xvfb',
-  spawnFn = spawn, startupMs = 5_000 } = {}) {
+  spawnFn = spawn, startupMs = 15_000 } = {}) {
   if (env.DISPLAY) return { display: env.DISPLAY, proc: null };
   if (!fs.existsSync(xvfbPath)) return null;
+  // Cold CI startup can wait on disk I/O in Xvfb/xkbcomp. Keep a bounded
+  // deadline while allowing the cold process to load before judging availability.
   // Let Xserver choose a free display and notify readiness on a private pipe.
   // Never reuse :99 blindly or remove another server's socket/lock files.
   const proc = spawnFn(xvfbPath, ['-displayfd', '3', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp'],
