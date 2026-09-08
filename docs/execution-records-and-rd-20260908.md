@@ -21,6 +21,11 @@ ARCHIVED/ACCEPTEDや正常終了を記事公開・業務成功へ読み替えな
 原ログは既存の非公開保管場所に置き、公開台帳にはハッシュ、時刻、件数を保持する。
 停止済みのClaude登録19件を含む既存の履歴も保持する。
 
+観測PR #1148はSEO Validation `34197080704` を通り、
+main `7da4a4523689128ca1d44a3ecb6ac276c10122f0` へ07:08 UTCに反映された。
+mainのCodex観測全体が上記の実PRと一致することを確認し、
+Cloudflare Pages本番 `ce9809cb-84f2-438a-bb7c-eab9df9d34aa` の成功も確認した。
+
 ## R&Dの安全性・知財・投資継続判断
 
 [採用判断](radar-adoption-decision-2026-09-08.md)は、実施済みの研究結果を根拠に
@@ -38,6 +43,8 @@ Cloudflare Pages本番 `edba8e0d-de5c-4127-8b7d-dcad8125d1e8` の成功も確認
 App Store 98件。観測時刻は `2026-09-08T06:58:36.298344+00:00`。
 [観測PR #1149](https://github.com/simplememofast/simplememo/pull/1149) のヘッド
 `a504e0d2497f4d4d8e7588ce79fd02a3f93fb938` に同じ結果を確認した。
+この観測PRはmain `723e43884c804b42d63d5e825bbb5fb314bfa689` へ反映され、
+本番 `7efb5bdd-b3b9-4bb3-aa69-4f9bf2d44379` が成功した。mainの観測JSONも実PRと一致した。
 
 ## 集計
 
