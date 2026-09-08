@@ -326,16 +326,16 @@ def build_launch(bg, icon, c):
 
 
 def build_apple_watch(bg, icon, c):
-    frames = [(title_scene(bg, icon, 'APPLE WATCH', ['手首に話すだけで、', 'メールとObsidianへ。'],
-                           'iPhoneを取り出さずに、Apple Watchから音声でメモを残せます。'), 3.2)]
-    steps = [('開く', '音声入力が自動で開く'), ('話す', '「完了」で送信'), ('届く', 'メールとObsidian')]
+    frames = [(title_scene(bg, icon, 'APPLE WATCH', ['手首で文章を入力し、', 'iPhone経由で送る。'],
+                           '入力方法を選び、文章を確定し、受信箱で到着を確認します。'), 3.2)]
+    steps = [('開く', '入力方法を選ぶ'), ('確定する', '内容を見て「完了」'), ('確認する', '受信箱で到着を確認')]
     for k in range(1, 4):
         frames.append((steps_scene(bg, 'Apple Watchからの経路', steps, k), 1.1))
     frames.append((steps_scene(bg, 'Apple Watchからの経路', steps, 3), 1.6))
-    frames.append((caveat_scene(bg, '音声入力と保存先の条件',
-                                ['自動で開かないときは、マイクをタップ。',
-                                 'メール送信には通信が必要です。',
-                                 'Obsidianへの追記はiPhoneを経由します。']), 3.6))
+    frames.append((caveat_scene(bg, '入力と送信の条件',
+                                ['入力画面と音声入力の開始は別です。',
+                                 'メール送信はペアのiPhoneを経由します。',
+                                 'Obsidian保存は連携・保存先の設定が必要です。']), 3.6))
     frames.append((outro_scene(bg, icon, 'Apple Watch対応。'), 2.4))
     return frames
 
@@ -429,8 +429,8 @@ def build_ai_tags(bg, icon, c):
 VIDEOS = {
     'launch-1s': (build_launch, '起動して書いて送るまで約1秒 — 実測ベンチマーク',
                   'アプリの起動から送信までの3ステップと、入力を開始できるまでの実測時間を主要メモアプリと比較した図解動画です。数値は当サイトの計測表に基づきます。'),
-    'apple-watch-voice': (build_apple_watch, 'Apple Watchから声だけでメモを残す',
-                          'Apple Watchでアプリを開くと音声入力が開き、話して「完了」で送信する現行手順の図解動画です。自動で開かない場合のマイク操作、メール送信に必要な通信、Obsidianへの追記はiPhoneを経由することも説明します。'),
+    'apple-watch-voice': (build_apple_watch, 'Apple Watchで入力してiPhone経由で送る',
+                          'Apple Watchの入力・送信を示す図解動画（2026年9月9日更新）。実機画面の録画ではありません。入力方法を選び、文章を確定し、受信箱で到着を確認します。メール送信はペアのiPhoneを経由し、Obsidianへの保存は連携・保存先の設定が必要です。'),
     'siri-airpods': (build_siri_airpods, 'Siriとその場のAirPodsでハンズフリーにメモを残す',
                      'アプリ内ガイドの実機スクリーンショットを使って、合言葉ひとつでAirPodsから音声メモを残す流れを紹介するスライドショー動画です。'),
     'obsidian-append': (build_obsidian, 'メモがObsidianのノートに追記されるまで',
@@ -440,7 +440,7 @@ VIDEOS = {
 }
 
 
-def encode(frames, out_mp4, out_poster, ffmpeg):
+def encode(frames, out_mp4, out_poster, ffmpeg, poster_index=2):
     tmp = tempfile.mkdtemp(prefix='vid-')
     try:
         n = 0
@@ -453,8 +453,8 @@ def encode(frames, out_mp4, out_poster, ffmpeg):
                         '-c:v', 'libx264', '-preset', 'slow', '-crf', '30',
                         '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
                         '-vf', 'format=yuv420p', out_mp4], check=True)
-        # Poster: a frame from the title card, after the fade-in has finished.
-        frames[min(2, len(frames) - 1)][0].save(out_poster, quality=82, optimize=True)
+        # Poster: select a stable representative frame (Watch shows all three steps).
+        frames[min(poster_index, len(frames) - 1)][0].save(out_poster, quality=82, optimize=True)
         return n / FPS
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -483,7 +483,8 @@ def main():
             continue
         mp4 = os.path.join(outdir, f'{name}.mp4')
         poster = os.path.join(outdir, f'{name}-poster.jpg')
-        dur = encode(builder(bg, icon, c), mp4, poster, ffmpeg)
+        dur = encode(builder(bg, icon, c), mp4, poster, ffmpeg,
+                     poster_index=4 if name == "apple-watch-voice" else 2)
         size = os.path.getsize(mp4)
         manifest[name] = {'title': title, 'description': desc,
                           'duration_s': round(dur, 1), 'bytes': size}
