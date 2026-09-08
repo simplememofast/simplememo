@@ -1573,17 +1573,25 @@
     {
       "area": "⑦ 法人経営",
       "task": "AI事業者のDPA・データ利用・SLA・撤退計画の審査",
-      "executor": "ai_proposes",
+      "executor": "ai_executes_gated",
       "evidence": [
         "data/vendor-register.json",
+        "data/vendor-operating-review.json",
         "scripts/check-vendors.mjs",
-        "scripts/vendor-terms.mjs",
-        "scripts/vendor-clause-worksheet.mjs"
+        "scripts/lib/vendor-operating-review.mjs",
+        "docs/vendor-operating-review-2026-09-08.md",
+        "docs/vendor-review-source-addendum-2026-09-08.md"
       ],
-      "note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**\n\n**[2026-08-31 実測] 未確認は6社ではなく9社。**`data/vendor-register.json` を数えた —— apple / resend / github / registrar が personal、cloudflare / google_cloud / search_console / firebase / appsflyer が pseudonymous で、**この9社すべてが `dpa_reviewed: null`。**確認済みは0社。**条項マスが埋まったこと（44/44）と混同しない** —— 別の欄で、別の文書を読む作業。",
-      "blocker": "missing_source_document",
-      "unblocked_by": "**[2026-08-31 実測] 「6社が未確認」は古い。**ベンダーが11社に増え、`personal_data` が none でない **9社すべてが `dpa_reviewed: null`**（確認済み0社）。`policy.enforce_unreviewed` も false のまま。**条項44マスとは別物**で、そちらが埋まってもこの行は動かない（2026-08-29 に実測で切り分け済み）。読む先は各社の DPA / Subprocessors / セキュリティ文書",
-      "unlock": "vendor_terms"
+      "$previous_note": "2026-08-22にベンダー台帳を作成（10社）。何を渡していて・止まると何が起きて・代替があるかを機械検査する。**DPAの確認そのものは人の作業で、いま6社が未確認**。確認したら enforce_unreviewed を true にすると CI が守る [2026-08-26] **改定の検知だけを機械に移した**（scripts/vendor-terms.mjs・seo-daily）。**[2026-08-28 訂正] ここは「毎日取得」と書いていたが誤り。**週1回（月曜）。**scripts/vendor-terms.mjs は seo-daily.yml の中にあるが、**月曜ゲート（steps.when.outputs.snapshot）の内側**にある。したがって改定検知は毎日ではなく週1回で、**火曜に改定されたら、翌月曜まで reviewed は緑のまま残る（最大6日）。**配線が入ったのが 2026-08-26（水）なので、**指紋は全社まだ空で、初着弾は 2026-08-31。**一度 ok と書いた判定は、改定後も ok のまま残る —— **unreviewed（見ていない）より悪い。見たという記録が嘘を守る。**本文の指紋が変われば reviewed を unreviewed へ戻し、読み直しを起こす。**executor は動かない。**本文を読んで ok / risk を決めるのは法的判断で、そこは人のまま。機械が持つのは「いつの本文を見たか」だけ\n\n**[2026-08-29 訂正] `policy.enforce_unreviewed` は条項マスを守らない。**あのフラグは data/vendor-register.json にあり、守るのは **DPAレビュー**（personal_data が none でないのに dpa_reviewed が無いベンダー）で、条項の40/44マスとは別物。**実測した** —— 1マスを unreviewed に戻して check-corporate --check を走らせても exit 0。**条項マスを守る検査は存在しない。**改定で reviewed が戻されても、CIは何も言わない。\n\n**[2026-08-29 追記] 守る検査を作った。**`check-corporate.mjs` の `clauseGuard` が、**一度も見ていないマス**（`unreviewed_budget`・ラチェット。今は0）と**改定で戻されたまま放置されたマス**（`reset_grace_days`・14日）の2つで落とす。**実測: 1マスを unreviewed に戻すと exit 1。**（入れる前は exit 0 だった。）\n\n**猶予が要るのは膠着を避けるため** —— seo-daily は改定を検知して台帳をコミットするPRを出すので、即座に落とすと**そのPR自身が入らず、指紋の更新も入らず、翌週また同じ改定を検知する。**\n\n**[2026-08-31 実測] 未確認は6社ではなく9社。**`data/vendor-register.json` を数えた —— apple / resend / github / registrar が personal、cloudflare / google_cloud / search_console / firebase / appsflyer が pseudonymous で、**この9社すべてが `dpa_reviewed: null`。**確認済みは0社。**条項マスが埋まったこと（44/44）と混同しない** —— 別の欄で、別の文書を読む作業。",
+      "$previous_blocker": "missing_source_document",
+      "$previous_unblocked_by": "**[2026-08-31 実測] 「6社が未確認」は古い。**ベンダーが11社に増え、`personal_data` が none でない **9社すべてが `dpa_reviewed: null`**（確認済み0社）。`policy.enforce_unreviewed` も false のまま。**条項44マスとは別物**で、そちらが埋まってもこの行は動かない（2026-08-29 に実測で切り分け済み）。読む先は各社の DPA / Subprocessors / セキュリティ文書",
+      "$previous_unlock": "vendor_terms",
+      "since": "2026-09",
+      "authority": {
+        "domain": "外部サービスの運用審査",
+        "ai_may": "既存利用範囲のDPA・データ利用・SLA・撤退計画を審査し、継続条件・未解決リスク・再審査条件を決定して適用する"
+      },
+      "note": "2026-09-08: 包括委任の下でAIが全14社（登録11・追加3）のDPA・データ利用・SLA・撤退計画を審査し、56観点の評価と条件付き既存利用継続を決定。追加の公開原文を読み、実プラン・ソース・復元実測と過去の人の審査を照合した。利用範囲拡大・契約変更・事故・撤退前は再審査。CIが対象漏れ、根拠/台帳の変更、期限切れ、契約承認や人の確認への誤変換を拒否する。人のDPA確認3社の日付と残るnullは維持。契約適用、実リージョン、SCC等の未読参照、未検証の移行・削除は各社のunresolvedに残し、是正済みとはしない。加点対象は4観点の運用審査・判断の実行であり、別行の条項検査・比較や是正・移行そのものではない。"
     },
     {
       "area": "⑦ 法人経営",

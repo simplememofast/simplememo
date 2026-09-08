@@ -608,6 +608,28 @@
         "set_by": "ai_under_owner_delegation",
         "note": "既存研究の採用と反復投資終了のみ。追加契約・有料API・モデル利用の支出は許可しない。"
       }
+    },
+    {
+      "domain": "外部サービスの運用審査",
+      "reversible": true,
+      "ai_may": [
+        "既存利用範囲のDPA・データ利用・SLA・撤退計画を審査し、継続条件・未解決リスク・再審査条件を決定して適用する"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "2026-09-08の包括委任に基づくAIの運用判断。全登録・追加依存先の4観点と実アカウント/実装/原文の証拠を照合する。check-vendorsが対象漏れ、根拠や利用範囲の変更、期限切れ、契約承認・人の確認への混同を拒否する。是正・移行の未完了は記録して残す。",
+      "evidence": [
+        "data/vendor-operating-review.json",
+        "scripts/check-vendors.mjs",
+        "scripts/lib/vendor-operating-review.mjs",
+        "docs/vendor-operating-review-2026-09-08.md"
+      ],
+      "status": "active",
+      "threshold": {
+        "additional_purchase_cap_jpy": 0,
+        "set_by": "ai_under_owner_delegation",
+        "note": "審査自体は追加購入・契約締結・支払先の承認を行わない。既存の個別支出権限は別の門で扱う。"
+      }
     }
   ],
   "self_repair": {

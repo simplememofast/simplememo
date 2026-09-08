@@ -251,7 +251,7 @@
     {
       "id": "google_cloud",
       "name": "Google Cloud（BigQuery）",
-      "used_for": "ファネル評価のためのデータ蓄積・集計（BigQuery）",
+      "used_for": "Search Consoleの検索実績をBigQueryへ保存・集計（実測済み）。アプリの顧客別ファネル倉庫は未確認",
       "personal_data": "pseudonymous",
       "critical": false,
       "breaks_if_down": "計測が止まる。出荷は続く",
@@ -259,7 +259,8 @@
       "dpa_reviewed": null,
       "terms_accepted_by": "human",
       "evidence": [
-        "scripts/autopilot-budget.mjs"
+        "scripts/autopilot-budget.mjs",
+        "docs/seo/audit-2026-09-05/gsc-bigquery.md"
       ],
       "money_flow": "usage",
       "payment_method": "card",
@@ -480,7 +481,7 @@
     {
       "id": "notion",
       "name": "Notion（利用者が接続する保存先）",
-      "status": "pending_review",
+      "status": "account_verification_pending",
       "personal_data": "personal",
       "observed_at": "2026-09-07",
       "source_commit": "d712aed8f86155805704f28374e9e98cffbc4aa1",
@@ -496,7 +497,8 @@
         "API開発者契約と利用者ワークスペース契約の役割・受諾記録",
         "事業者側の費用と利用者側のプランを分けた支払範囲",
         "公開DPA・SLAの実契約への適用、DPA 9.5の機微情報除外と自由記述メモの関係、実際の再委託先・保持削除・撤退条件"
-      ]
+      ],
+      "operating_review_id": "vendor-operating-decision-20260908"
     },
     {
       "id": "freee",
@@ -512,12 +514,13 @@
         "API利用条件、実際のデータ処理・再委託・保持削除・退去時のエクスポートと復旧",
         "確定請求・支払経路・共有費用配賦・支出許可の照合"
       ],
-      "status": "pending_review",
+      "status": "account_verification_pending",
       "personal_data": "personal",
       "observed_at": "2026-09-08",
       "source_commit": "e55525a88435b1565844ee6fe6b16f22f4250893",
       "contract_approved": false,
-      "payment_authorized": false
+      "payment_authorized": false,
+      "operating_review_id": "vendor-operating-decision-20260908"
     },
     {
       "id": "openai",
@@ -532,12 +535,14 @@
         "実際の入力範囲・データ利用設定・保持削除・DPA/SLAの適用・代替運転の検証",
         "契約費と従量費の重複を除いた請求照合、SimpleMemoへの配賦、支出許可"
       ],
-      "status": "pending_review",
+      "status": "account_verification_pending",
       "personal_data": "personal",
       "observed_at": "2026-09-08",
       "source_commit": "e55525a88435b1565844ee6fe6b16f22f4250893",
       "contract_approved": false,
-      "payment_authorized": false
+      "payment_authorized": false,
+      "operating_review_id": "vendor-operating-decision-20260908"
     }
-  ]
+  ],
+  "$operating_review": "2026-09-08: data/vendor-operating-review.json contains AI operating decisions for all 14 dependencies, covering DPA, data use, SLA and exit plans. Historical human dpa_reviewed dates are unchanged. account_verification_pending means the AI operating review is complete but actual agreement/account conditions remain unresolved; payment_authorized and contract_approved remain false."
 }
