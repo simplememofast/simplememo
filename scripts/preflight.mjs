@@ -376,6 +376,44 @@ function selftest() {
     const d = auditExtraction(yaml('        run: npx playwright test')).dropped;
     assertEq(d.out_of_scope.join(), 'npx playwright test');
   });
+  t('実CLI: 鏡を作れないときは生成器を本物の木で実行せず失敗する', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'preflight-mirror-failure-'));
+    try {
+      fs.mkdirSync(path.join(dir, 'scripts'));
+      fs.mkdirSync(path.join(dir, '.github/workflows'), { recursive: true });
+      fs.copyFileSync(fileURLToPath(import.meta.url), path.join(dir, 'scripts/preflight.mjs'));
+      fs.writeFileSync(path.join(dir, '.github/workflows/seo-check.yml'),
+        'run: node scripts/check-generators.mjs --run\nrun: node scripts/seo-check.js\n');
+      fs.writeFileSync(path.join(dir, 'scripts/check-generators.mjs'),
+        'import fs from "node:fs"; fs.writeFileSync("generator-ran", "changed original tree");\n');
+      fs.writeFileSync(path.join(dir, 'scripts/seo-check.js'),
+        'require("node:fs").writeFileSync("later-check-ran", "checked");\n');
+      const run = () => spawnSync(process.execPath, ['scripts/preflight.mjs'], { cwd: dir, encoding: 'utf8' });
+      const refused = () => {
+        const result = run();
+        assertEq(fs.existsSync(path.join(dir, 'generator-ran')), false);
+        assertEq(result.status, 1);
+        if (!result.stdout.includes('2 本中 1 本失敗')) throw new Error(result.stdout + result.stderr);
+        assertEq(fs.existsSync(path.join(dir, 'later-check-ran')), true);
+        fs.unlinkSync(path.join(dir, 'later-check-ran'));
+      };
+      refused(); // No Git repository: makeMirror cannot list the files.
+      const git = args => {
+        const result = spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
+        assertEq(result.status, 0);
+      };
+      git(['init', '-q']);
+      git(['add', '-A']);
+      git(['-c', 'user.email=preflight@local', '-c', 'user.name=preflight', 'commit', '-qm', 'fixture']);
+      fs.symlinkSync(path.join(dir, 'scripts'), path.join(dir, 'directory-link'), 'dir');
+      refused(); // The untracked directory symlink cannot be copied as a file.
+      fs.unlinkSync(path.join(dir, 'directory-link'));
+      const passed = run();
+      assertEq(passed.status, 0);
+      assertEq(fs.existsSync(path.join(dir, 'generator-ran')), false); // Ran only in the disposable mirror.
+      assertEq(fs.existsSync(path.join(dir, 'later-check-ran')), true);
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  });
   // **見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。**
   // **見たことのない書き方は「たぶん要らない」ではなく「まだ分かっていない」。**
   // 既知の除外を広げすぎると、ここが構造的に到達不能になる（実際に一度そうした）。
@@ -530,7 +568,12 @@ for (const c of cmds) {
   let cwd = ROOT;
   if (needsCleanTree(c)) {
     if (mirror === null) mirror = makeMirror();   // 1回だけ作って使い回す
-    if (mirror) cwd = mirror;
+    if (!mirror) {
+      failed.push({ label, out: '検証用の鏡を作れないため実行しなかった。本物の作業ツリーでは生成器を実行しない。' });
+      console.log(`  FAIL  ${label}`);
+      continue;
+    }
+    cwd = mirror;
   }
   const r = spawnSync(c.runner ?? 'node', [c.script, ...c.args], { cwd, encoding: 'utf8' });
   if (r.status === 0) {
