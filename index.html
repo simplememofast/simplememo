@@ -1805,10 +1805,11 @@
       reveals.forEach(function(el) { el.classList.add('visible'); });
     }
 
-    // Sticky Mobile CTA: show after scrolling past hero
+    // CSS controls the mobile breakpoint; observe across viewport changes.
+    // Avoid a synchronous layout read during startup.
     var stickyCta = document.getElementById('stickyCta');
     var hero = document.querySelector('.hero');
-    if (stickyCta && hero && window.innerWidth < 768) {
+    if (stickyCta && hero && 'IntersectionObserver' in window) {
       document.body.classList.add('has-sticky-cta');
       var stickyObserver = new IntersectionObserver(function(entries) {
         entries.forEach(function(entry) {
