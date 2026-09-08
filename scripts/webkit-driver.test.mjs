@@ -119,6 +119,15 @@ test('Xvfb readiness waits for a complete display number on the private pipe', {
   assert(fixture.child.exitCode !== null || fixture.child.signalCode !== null);
 });
 
+test('cold readiness beyond five seconds still connects and reaps the owned process', { timeout: 10_000 }, async t => {
+  const fixture = displayFixture(`setTimeout(() => require('fs').writeSync(3, '43\\n'), 5_500); setInterval(() => {}, 1000);`);
+  t.after(() => terminateOwnedProcess(fixture.child));
+  const disp = await ensureDisplay(fixture.options);
+  assert.equal(disp.display, ':43');
+  await stopDrivers([], disp);
+  assert(fixture.child.exitCode !== null || fixture.child.signalCode !== null);
+});
+
 test('a configured external display is preserved and never spawned or terminated', async () => {
   const disp = await ensureDisplay({ env: { DISPLAY: ':external' }, spawnFn: () => { throw Error('must not spawn'); } });
   assert.deepEqual(disp, { display: ':external', proc: null });
@@ -166,12 +175,18 @@ test('owned children that ignore SIGTERM are killed and awaited', { timeout: 3_0
 test('Linux CI: independent real Xvfb displays remain connectable across cleanup',
   { skip: process.platform !== 'linux' ? 'requires Linux Xvfb' :
     !fs.existsSync('/usr/bin/Xvfb') || !fs.existsSync('/usr/bin/xdpyinfo')
-      ? 'Xvfb/xdpyinfo unavailable; real display readiness is unverified' : false, timeout: 20_000 }, async t => {
+      ? 'Xvfb/xdpyinfo unavailable; real display readiness is unverified' : false, timeout: 45_000 }, async t => {
     const start = async label => {
       const started = Date.now();
       try {
-        const disp = await ensureDisplay({ env: {} });
-        t.after(() => terminateOwnedProcess(disp.proc));
+        t.signal.throwIfAborted();
+        const disp = await ensureDisplay({ env: {}, spawnFn: (...args) => {
+          // Register ownership before readiness can outlive the test deadline.
+          const proc = spawn(...args);
+          t.after(() => terminateOwnedProcess(proc));
+          return proc;
+        } });
+        t.signal.throwIfAborted();
         t.diagnostic(`${label}: ready ${disp.display} after ${Date.now() - started}ms`);
         return disp;
       } catch (error) {
@@ -181,7 +196,7 @@ test('Linux CI: independent real Xvfb displays remain connectable across cleanup
     };
     const check = display => execFileSync('/usr/bin/xdpyinfo', ['-display', display], { stdio: 'pipe', timeout: 2_000 });
     // Repeated cleanup/reallocation exposed intermittent startup failures in CI.
-    // Keep the same 5-second startup deadline and all connectivity assertions.
+    // Use the bounded cold-start deadline and retain every connectivity assertion.
     for (let round = 1; round <= 3; round++) {
       const first = await start(`${round}/first`);
       const second = await start(`${round}/second`);
