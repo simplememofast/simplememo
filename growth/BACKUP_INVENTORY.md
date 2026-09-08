@@ -1,0 +1,11 @@
+# Existing BigQuery backup evidence
+
+Use the encrypted Analytics API workflow with `report=backup-inventory`, empty dates and the existing RSA recipient key flow in [ANALYTICS_API.md](ANALYTICS_API.md). Both execution modes perform the same metadata GETs; neither creates a query job. Authentication remains confined to reviewed main. Results and diagnostic errors are encrypted before disk output. `partial` fails the job but retains the encrypted report.
+
+The fixed project is `yurika-simplememo`. The report lists visible datasets (including hidden datasets), lists their tables and reads snapshot/clone definitions and expiry. It also lists top-level jobs created in the 30 days ending at observation time, requesting all users and full projection. Only copy/extract configuration, resource identity, timing and state are requested; query SQL, user identity and row data are excluded.
+
+Limits are 100 items per page, 20 pages per collection, 50 datasets and 500 table-detail GETs total. Repeated/invalid pagination tokens, malformed results, exhausted limits, unreachable regions, redacted jobs and denied reads produce explicit partial evidence. Failed reads never become an empty successful inventory. The report does not broaden IAM or fall back to another account.
+
+Dataset listings are permission filtered even on success. Job metadata may be redacted without listAll permission. Other projects, Cloud Storage object existence/retention, scheduled transfers, child jobs and history older than 30 days are outside this inspection. A successful copy/extract is a candidate backup or restoration operation, not independent validation of a restoration. `restore_verified` therefore stays false. Inspect source/destination identity and independent restore-validation receipts before changing the coverage ledger; no score is awarded for this report alone.
+
+Sources: [dataset visibility and pagination](https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/datasets/list), [job history visibility, time bounds and unreachable regions](https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/jobs/list), [snapshot and clone table metadata](https://docs.cloud.google.com/bigquery/docs/reference/rest/v2/tables).
