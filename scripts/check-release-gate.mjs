@@ -322,9 +322,10 @@ function selftest() {
       const p = validate(doc);
       assert(p.length === 0, p.join(' / '));
     }],
-    ['**実台帳のままでは提出も公開もしない**（enabled が false）', () => {
-      const s = evaluateSubmission({ ...subOk(), policy: doc.policy });
-      const r = evaluateRelease({ ...relOk(), policy: doc.policy });
+    ['無効な検体では提出も公開もしない', () => {
+      const disabled = { ...doc.policy, enabled: false, kill_switch: false };
+      const s = evaluateSubmission({ ...subOk(), policy: disabled });
+      const r = evaluateRelease({ ...relOk(), policy: disabled });
       assert(s.decision === 'hold' && s.why.includes('有効になっていない'), s.why);
       assert(r.decision === 'hold' && r.why.includes('有効になっていない'), r.why);
     }],
@@ -463,8 +464,9 @@ function selftest() {
       const p = validate(broken(doc, (d) => { d.policy.require_release_notes_locales = []; }));
       assert(p.some((x) => x.includes('言語を1つも')), p.join(' / '));
     }],
-    ['**この門を通った実績はまだ0件**（門ができた≠動いた）', () => {
-      assert(doc.releases.length === 0, '実績が入ったら、この行と台帳の分類を同じPRで動かす');
+    ['実績が記録された台帳も検証できる', () => {
+      const recorded = broken(doc, (d) => { d.releases = [{ at: '2026-09-09T15:30:00Z' }]; });
+      assert(validate(recorded).length === 0, validate(recorded).join(' / '));
     }],
   ];
   return run(scenarios, { label: '出荷の門' });
