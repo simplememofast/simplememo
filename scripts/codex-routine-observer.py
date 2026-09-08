@@ -16,6 +16,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 REGISTERED = ('obsidian', 'obsidian-2')
 ROOT = Path(__file__).resolve().parents[1]
@@ -145,10 +146,12 @@ def observe(codex_dir, previous=None, now=None):
     for automation in automations:
         for key in ('next_run_at', 'last_run_at'):
             automation[key] = None if automation[key] is None else iso(automation[key])
-    result = {'schema_version': 1, 'observed_at': observed_at, 'registered': list(REGISTERED),
+    result = {'schema_version': 2, 'observed_at': observed_at, 'registered': list(REGISTERED),
               'source': 'local_codex_scheduler_and_session_store', 'scheduler_query_complete': True,
-              'collection_context': 'routine_observer_service' if os.environ.get('XPC_SERVICE_NAME') ==
-              'com.simplememo.routine-observer' else 'interactive',
+              # launchd's service name does not necessarily reach descendants.
+              # Its absence cannot establish that a person started this read.
+              'collection_context': 'service_environment_observed' if os.environ.get('XPC_SERVICE_NAME') ==
+              'com.simplememo.routine-observer' else 'unidentified_process',
               'automations': automations, 'runs': normalized}
     validate(result, now=observed_at)
     if previous is not None:
@@ -176,10 +179,14 @@ def keys(value, expected):
 
 def validate(doc, now=None):
     keys(doc, 'schema_version observed_at registered source scheduler_query_complete collection_context automations runs')
-    require(doc['schema_version'] == 1 and doc['registered'] == list(REGISTERED), 'Observation scope changed')
+    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2)
+            and doc['registered'] == list(REGISTERED), 'Observation scope changed')
     require(doc['source'] == 'local_codex_scheduler_and_session_store' and doc['scheduler_query_complete'] is True,
             'Scheduler inventory is incomplete')
-    require(doc['collection_context'] in ('interactive', 'routine_observer_service'), 'Unknown observer process')
+    contexts = ('interactive', 'routine_observer_service') if doc['schema_version'] == 1 else (
+        'unidentified_process', 'service_environment_observed')
+    require(doc['collection_context'] in contexts,
+            'Unknown observer process')
     observed = timestamp(doc['observed_at'])
     clock = timestamp(now) if now else dt.datetime.now(dt.timezone.utc).timestamp()
     require(0 <= clock - observed <= 3 * 86400, 'Codex observation is stale or future')
@@ -252,7 +259,7 @@ def apply(ledger, codex_dir):
 def summary(doc):
     initial = [r['transcript']['turns'][0] for r in doc['runs'] if r['transcript']['turns']]
     return {'observed_at': doc['observed_at'], 'registered': len(doc['automations']), 'runs': len(doc['runs']),
-            'collection_context': doc['collection_context'],
+            'collection_context': doc['collection_context'] if doc['schema_version'] == 2 else 'legacy_unverified',
             'initial_failed': sum(t['state'] in ('failed', 'aborted') for t in initial),
             'unavailable_transcripts': sum(r['transcript']['state'] != 'observed' for r in doc['runs']),
             'publication_success': 'not_inferred'}
@@ -312,6 +319,27 @@ class Tests(unittest.TestCase):
             self.assertNotIn('private', json.dumps(doc))
             self.assertEqual(run['transcript']['turns'][0]['unanswered_calls'], 0)
             self.assertEqual(run['transcript']['turns'][0]['unattributed_outputs'], 1)
+
+    def test_missing_service_environment_does_not_mean_manual_execution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); self.setup_store(root)
+            for env in ({}, {'XPC_SERVICE_NAME': 'unrelated-process'}):
+                with patch.dict(os.environ, env, clear=True):
+                    self.assertEqual(observe(root, now=self.now)['collection_context'], 'unidentified_process')
+            with patch.dict(os.environ, {'XPC_SERVICE_NAME': 'com.simplememo.routine-observer'}, clear=True):
+                self.assertEqual(observe(root, now=self.now)['collection_context'], 'service_environment_observed')
+
+    def test_legacy_snapshot_migrates_on_real_observation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); self.setup_store(root)
+            old = observe(root, now=self.now)
+            old.update(schema_version=1, collection_context='interactive')
+            validate(old, now=self.now)
+            self.assertEqual(summary(old)['collection_context'], 'legacy_unverified')
+            new = observe(root, old, now=self.now)
+            self.assertEqual(new['schema_version'], 2)
+            self.assertEqual(new['runs'], old['runs'])
+            self.assertEqual(summary(new)['initial_failed'], 1)
 
     def test_history_loss_and_closed_failure_rewrite_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
