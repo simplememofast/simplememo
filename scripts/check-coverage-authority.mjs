@@ -166,12 +166,16 @@ export function validate({ coverage, matrix }) {
 function selftest() {
   const scenarios = ledgerScenarios(load, validate, [
     ['**表から条項が消えたら落ちる**（渡されたのに境界のまま）', (d) => {
-      const dom = d.matrix.domains.find((x) => x.domain === 'プレスリリースの配信');
-      dom.human_only = dom.human_only.filter((c) => c !== 'PR TIMES管理画面からの配信操作');
+      const t = d.coverage.tasks.find((x) => x.task === '価格の変更');
+      const dom = d.matrix.domains.find((x) => x.domain === t.authority.domain);
+      dom.human_only = dom.human_only.filter((c) => c !== t.authority.human_only);
     }],
     ['**境界を到達可能側に数えたら落ちる**（2026-08-28 の12件）', (d) => {
-      const t = d.coverage.tasks.find((x) => x.task === 'PR TIMES への配信操作');
+      const t = d.coverage.tasks.find((x) => x.task === '価格の変更');
       t.blocker = 'not_started'; t.unlock = 'impl_product';
+    }],
+    ['承認済みの次回配信を再び権限待ちにしたら落ちる', (d) => {
+      d.coverage.tasks.find((x) => x.task === 'PR TIMES への配信操作').blocker = 'policy_boundary';
     }],
     ['**渡されたものを境界と書いたら落ちる**（逆向きの食い違い）', (d) => {
       d.coverage.tasks.find((x) => x.task === 'App Review への提出').blocker = 'policy_boundary';

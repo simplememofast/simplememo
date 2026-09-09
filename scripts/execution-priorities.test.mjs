@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { prioritize } from './execution-priorities.mjs';
+import { analyse, planTo, executionPlan } from './autonomy-gap.mjs';
 
 const now = new Date('2026-09-09T07:00:00Z');
 const task = (name, executor, blocker = 'not_started') => ({ area: 'A', task: name, executor, blocker });
@@ -27,6 +28,20 @@ test('waiting work and physical boundaries cannot become a quick win', () => {
     assessment('physical', { estimated_minutes: 1 })] }, now);
   assert.equal(r.opportunities[0].task, 'start');
   assert.equal(r.opportunities.find(t => t.task === 'physical').state, 'boundary');
+});
+
+test('delegation cannot add a circular dispatch prerequisite to the achievable ceiling', () => {
+  const doc = { tasks: [task('done', 'ai_autonomous'),
+    task('dispatch', 'human_only', 'circular_prerequisite'),
+    task('consent', 'ai_proposes', 'human_consent')] };
+  const before = JSON.stringify(doc);
+  const r = prioritize(doc, { entries: [assessment('dispatch', { state: 'act' })] }, now);
+  assert.equal(r.opportunities.find(t => t.task === 'dispatch').state, 'boundary');
+  assert.equal(analyse(doc).ceiling, 1);
+  assert.equal(analyse(doc).ceiling_with_handover, 1);
+  assert.equal(planTo(doc, 0.999).steps.length, 0);
+  assert.equal(executionPlan(doc).classified_ceiling.numerator, 1);
+  assert.equal(JSON.stringify(doc), before);
 });
 
 test('expired assessments lose their execution recommendation and estimate', () => {
