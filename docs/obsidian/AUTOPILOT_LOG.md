@@ -3832,3 +3832,46 @@ PR初回CIは、新規ページのGA4ローダーに標準の`onload`初期化�
 最終HEADのSEO Validation成功と自動マージ、本番URLの200確認を出荷成立条件とする。
 
 `ROUTINE_MCP_PROBE: not_applicable Codexへ移管済み、CCR可否は未再測定`
+
+---
+
+## 2026-09-10（Codex定期主系・06:00） — レーンE候補C13を実機QA不足で中断
+
+### 判定
+
+`codex-autopilot-preflight` は `run:true / code:run`。緊急停止と actions 停止は false、
+月次の観測済み下限は $67.0402 / $280、記事枠 $34.1601 / $125、修理枠
+$32.6421 / $115 で上限内だった。旧Actions run、別の進行中Codexタスク、当日PRは見つからず、
+`claude/obsidian-auto-20260910` を空コミット `a97d2005` で占有した。
+
+### 候補と止めた理由
+
+レーンEの先頭候補 C13 `/obsidian/plugins/templater/` を再確認した。前回の09:20再試行では
+Obsidian 1.13.7 と Templater 2.25.0 の公式配布物まで確認済みだが、記事の独自価値として必要な
+「TemplaterをObsidian内で有効化し、テンプレートとデイリーノートを実際に接続する」操作は未観測。
+今回も `/Applications/Obsidian.app` は存在しなかった。新規アプリの取得・起動を無人実行の権限へ
+拡張せず、未観測のUIや挙動を補完しなかったため、本文・HTML・画像は一切作っていない。
+
+### データ・費用・記録
+
+BigQuery preflight は既存認証がなく取得不能。欠損をゼロや「新規なし」と読まず、保存済みの
+manual snapshot `2026-09-02` を更新していない。Codex定期セッションの実費は観測経路がないため
+`null`（0ではない）。`value-contracts --readiness` は承認済み6指標、feedbackは決済4件を確認したが、
+実装不能が判明した候補について価値契約を宣言していない。
+
+運転台帳は `no_artifact / failure_stage=execution`。公開記事、実験、配信、追加API課金、認証情報の
+コピー、利用枠リセット、強制操作はなし。開始したrunの痕跡として status・LOG・runs のみを残した。
+
+### 同じ予約枠の別セッションの記録復旧
+
+別の定期タスク `01a087fa-5c5d-7ef0-ac9a-bb6abf67d499` は06:02に開始し、
+当日claimを再確認した時点で所有タスクの状態を確認できず、06:10に
+`skipped_duplicate / attempted=false` で終了した。終了結果と保存済み台帳を照合し、
+そのセッションのローカルにだけ残っていた1行を共有台帳へ反映した。
+上記のclaimを取得したセッションとは別の実行であり、両者の元の結果を保持している。
+確認時点の「所有タスク未確認」を、後から成功や実装済みへ書き換えていない。
+
+集計は58実行・着手39・出荷26。公開ページの合計点・復旧成分・失敗の層も台帳に合わせた。
+運用自律性の点数は45.0で、AI実行率156/179とは別指標。この復旧でAI実行率への加点はない。
+
+`ROUTINE_MCP_PROBE: not_applicable Codexへ移管済み、CCR可否は未再測定`

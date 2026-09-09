@@ -1180,6 +1180,43 @@
       "eligibility_verdict": "declined_unrecorded",
       "gate_code": null,
       "reason": "engine=codex; automation_id=obsidian; scheduled_slot=2026-09-09T06:00:00+09:00 (scheduler verified); preflight=skip_primary_running. Related owner-directed task 01a07f2e-a1ba-79f2-98e1-07b11da20d19 confirmed inProgress; conservatively treated as concurrent occupancy, not a second scheduled primary. Daily claim/PR absent; main and production status remain 2026-09-08. No implementation, claim or publication. Original run saved this record locally only. Recovered to the shared ledger on 2026-09-10 from scheduler/preflight/result records; original outcome unchanged."
+    },
+    {
+      "run_id": "ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b",
+      "date_jst": "2026-09-10",
+      "route": "actions",
+      "attempted": true,
+      "outcome": "no_artifact",
+      "lane": "E",
+      "action": "skip",
+      "pr": 1218,
+      "artifact": null,
+      "failure_reason": "C13 Templater requires actual Obsidian GUI verification; Obsidian.app is absent and unattended new-application execution is not authorized. No content implementation was made.",
+      "external_ref": "01a087f9-4092-7bc3-8274-69722c79e45b",
+      "interventions": [],
+      "source": "codex-scheduled-thread",
+      "failure_class": "no_artifact",
+      "failure_stage": "execution",
+      "stage_note": "Preflight returned run:true and remote daily claim a97d2005 was acquired. Official artifact/version evidence existed from the prior retry, but the quality gate requires operating Templater inside Obsidian. The application is not installed; missing observations were not inferred or written as zero."
+    },
+    {
+      "run_id": "ap-20260910-actions-codex-01a087fa-5c5d-7ef0-ac9a-bb6abf67d499",
+      "date_jst": "2026-09-10",
+      "route": "actions",
+      "attempted": false,
+      "outcome": "skipped_duplicate",
+      "lane": null,
+      "action": "skip",
+      "pr": null,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "codex:01a087fa-5c5d-7ef0-ac9a-bb6abf67d499",
+      "interventions": [],
+      "source": "codex-automation",
+      "failure_stage": "eligibility",
+      "eligibility_verdict": "declined_unrecorded",
+      "gate_code": null,
+      "reason": "engine=codex; automation_id=obsidian; scheduled_slot=2026-09-10T06:00:00+09:00 (scheduler verified). Initial fresh preflight allowed selection. Recheck found a new external daily claim a97d20055a0a26b5e4a0673495d452a60d41456a created 06:08:04 JST; owner task/status unverified. Final preflight rejected unknown execution status. No implementation, declaration push, claim or publication. Local-only ledger. Recovered to the shared ledger on 2026-09-10 from the completed scheduled task and saved ledger; original outcome unchanged. This is distinct from the separate claim-owning no_artifact run recorded in PR1218."
     }
   ],
   "retracted_observations": [
