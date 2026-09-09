@@ -4,6 +4,8 @@ import argparse
 import json
 import re
 import subprocess
+import sys
+import tempfile
 from html import escape
 from html.parser import HTMLParser
 from pathlib import Path
@@ -36,10 +38,43 @@ class Head(HTMLParser):
             self.in_head = False
 
 
+def selftest():
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        (root / 'scripts').mkdir()
+        (root / 'data').mkdir()
+        (root / 'scripts/smart-app-banner.py').write_text(Path(__file__).read_text())
+        (root / 'data/site-constants.json').write_text(json.dumps({'appStoreId': APP_ID}))
+        subprocess.run(['git', 'init', '-q', str(root)], check=True)
+        page = root / 'index.html'
+        banner = f'<meta name="apple-itunes-app" content="app-id={APP_ID}">'
+        page.write_text('<head>' + banner + '</head>')
+        subprocess.run(['git', 'add', 'index.html'], cwd=root, check=True)
+        command = [sys.executable, str(root / 'scripts/smart-app-banner.py')]
+        def check(expected):
+            result = subprocess.run(command + ['--check'], cwd=root, capture_output=True)
+            assert (result.returncode == 0) == expected, result.stdout + result.stderr
+        check(True)
+        for content in ['', banner + banner, banner.replace(APP_ID, '123'), '</head><body>' + banner]:
+            page.write_text('<head>' + content + '</head>')
+            check(False)
+        page.write_text('<head></head>')
+        subprocess.run(command, cwd=root, check=True, capture_output=True)
+        check(True)
+        before = page.read_bytes()
+        subprocess.run(command, cwd=root, check=True, capture_output=True)
+        assert page.read_bytes() == before
+    print('Smart App Banner selftest: missing, duplicate, wrong ID, outside-head and idempotent repair verified.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check', action='store_true')
+    parser.add_argument('--selftest', action='store_true')
     args = parser.parse_args()
+    if args.selftest:
+        selftest()
+        return
     files = subprocess.check_output(['git', 'ls-files', '*.html'], cwd=ROOT, text=True).splitlines()
     errors, changed, checked = [], 0, 0
     for name in files:
