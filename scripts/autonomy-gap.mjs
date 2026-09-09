@@ -132,6 +132,11 @@ export function analyse(doc, { target = 0.95 } = {}) {
  *          external_contract … 外部の鍵・契約が要る
  */
 export const UNLOCKS = {
+  pr_dispatch_verified: { kind: 'wait', label: '実測目標と配信前条件を満たし、今回のPRを配信・公開確認する',
+                       needs: '今回の企業182412・下書き10は委任済み。未丸め実測99.497%以上の最新台帳と'
+                            + '同一原稿・PR TIMESプレビュー、品質、宛先、日時、料金、未配信状態を'
+                            + 'evaluateDispatchで照合し、allowed=trueの時だけ配信して公開URL・本文・日時を確認する。'
+                            + '目標到達だけでは全条件の完了とせず、配信前の先取り加点もしない。' },
   // [2026-08-26] **`wait` から外した。**「待つだけ」は待てば来るものに使う語で、これは来ない。
   // Apple の Analytics Reports カタログ **156本を全部読んだ**（../simplememo-ios/data/asc/status.json
   // の available_reports）。検索語のレポートは**1本も無い** —— 名前に search / term / query を
