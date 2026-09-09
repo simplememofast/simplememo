@@ -56,6 +56,7 @@ export const BLOCKERS = {
   physical_human:          { klass: 'never',      label: '物理・対人・法的責任' },
   human_consent:           { klass: 'never',      label: '人の同意・操作が要る（ブラウザ同意・鍵の再発行）' },
   structural:              { klass: 'never',      label: '構造的に観測できない' },
+  circular_prerequisite:   { klass: 'never',      label: '実行前の条件に、この業務の実行済み判定が含まれる' },
   statistical_power:       { klass: 'never',      label: '分母が足りず判定できない' },
 };
 

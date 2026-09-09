@@ -296,20 +296,37 @@
       "ai_may": [
         "原稿作成",
         "D-SCORE採点の記録",
-        "素材の依頼文作成"
+        "素材の依頼文作成",
+        "次回リリース202609-autonomy-followup（企業182412・下書き10）の配信前検査と、全条件通過後のPR TIMES配信操作"
       ],
-      "requires_approval": true,
+      "requires_approval": false,
       "human_only": [
-        "PR TIMES管理画面からの配信操作",
-        "配信可否の判断"
+        "次回リリース202609-autonomy-followup以外の配信操作・配信可否の判断",
+        "99.9%未満の配信禁止、配信対象、基本料金上限・追加オプションの条件変更"
       ],
-      "gate": "D-SCORE >= 60 かつ G1〜G4 全通過。1つでも落ちたら配信しない。算数とゲートの矛盾はCIが落とす",
+      "gate": "今回1件はオーナー承認済み。scripts/press-release-next.mjs evaluateDispatchが実測99.9%以上、原稿と同一の台帳・PR TIMESプレビュー、D-SCORE >= 60とG1〜G4、未配信・未予約、日時・宛先・既存料金上限を照合する。allowed=trueのときだけ配信し、公開結果を読戻す。追加確認を求めず、未達・不明なら保留する。",
       "evidence": [
         "growth/scripts/d-score.mjs",
-        "growth/experiments/experiments.json"
+        "growth/experiments/experiments.json",
+        "scripts/press-release-next.mjs",
+        "data/press-release-next.json",
+        "docs/ai-execution-999-2026-09.md"
       ],
       "status": "active",
-      "note": "**採点そのものは人が根拠つきで置く。**自動採点にすると点を取るための見出しを機械が書き始め、G2に自分から違反する"
+      "note": "2026-09-09: 配信前検査の実装とオーナーの明示委任を権限表へ接続し、古い一律human_onlyを訂正。AIは今回1件の既存原稿を根拠付きで審査し、検査の全条件を満たした場合だけ配信する。採点の水増し、先取り加点、未達配信は認めない。PR TIMESの下書き上書きは最後の検証済み保存から実測+3ポイント以上（99.9%到達時の最終同期を除く）。委任記録自体は配信実績ではない。",
+      "machine_gate": {
+        "checker": "scripts/press-release-next.mjs",
+        "function": "evaluateDispatch",
+        "kill_switch_path": "data/press-release-next.json:enabled",
+        "daily_cap": 1,
+        "holds_when_unknown": true
+      },
+      "owner_delegation": {
+        "date": "2026-09-09",
+        "scope": "次回リリース202609-autonomy-followup（企業182412・下書き10）の配信前検査と、全条件通過後のPR TIMES配信操作",
+        "evidence": "docs/ai-execution-999-2026-09.md",
+        "note": "オーナーが同意・未配信業務を名指しして承認と権限を付与。今回の配信権限は委任済み。99.9%未満の配信禁止の撤回や、他の利用者の同意を代行した証拠とは扱わない。"
+      }
     },
     {
       "domain": "SNS投稿（X・TikTok）",
