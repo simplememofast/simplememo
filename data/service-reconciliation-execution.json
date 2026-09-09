@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-09-09T10:23:17.638984+00:00",
+  "task": "契約・請求・納品・支払いの照合",
+  "executed_by": "ai",
+  "result": "completed_with_exceptions",
+  "real_cases_reconciled": 1,
+  "scope": "法人の既存会計サービス1取引について、契約・請求・現在の役務提供・支払いをAIが照合した実行記録。全取引や将来の役務提供完了を示さない。",
+  "checks": {
+    "purchased_contract_and_invoice_linked": true,
+    "plan_quantity_and_price_match": true,
+    "invoice_and_receipt_payment_id_match": true,
+    "receipt_original_pdf_verified": true,
+    "documented_annual_prepayment": true,
+    "current_service_observed_during_billed_period": true,
+    "same_currency_date_vendor_and_card_amount_match": true,
+    "unique_matching_card_entry": true,
+    "existing_company_service_expense_observed": true,
+    "exception_recorded": true
+  },
+  "source_evidence": {
+    "location": "契約・請求・領収書は供給者の認証済み管理画面。カード明細と既存仕訳は当社の認証済み会計。識別子・実額・読取記録・原本の監査用コピーはリポジトリ外の非公開領域に保持。",
+    "original_receipt_sha256": "d75c9fbc0e50b3041ed3c5211683e42e9b91abbd21e2ec95cea15133781a08e3",
+    "private_observation_sha256": "3f02a4c30af859799ba2b1121c5d4a7e169ecda3c88c1247390996801f9feb1f",
+    "original_receipt_pages_reviewed": 1,
+    "validation_checks_passed": 28,
+    "validation_scope": "実PDFのハッシュと記載内容、および認証済み画面からの観測値を検証。CIが供給者の管理画面を再取得したという意味ではない。"
+  },
+  "exceptions": [
+    "年払いの前払期間は継続中。現在のサービス提供は確認したが、将来分を納品済みにしない。",
+    "領収書の登録番号と既存仕訳の税区分を要レビューとして記録。税務判断や仕訳の修正は行っていない。",
+    "カード明細は同日・同額・同じ供給者の一意一致。請求書への外部キー、発行会社原本、銀行口座からの引落を確認したとは主張しない。",
+    "当社の会計サービス費用として既存計上されていることを確認。SimpleMemo単体への費用配賦や全社の月次締めを認定しない。"
+  ],
+  "gate": {
+    "result": "pass_with_exceptions",
+    "criteria": [
+      "契約・請求・原本領収書・決済明細・実際のサービス提供を照合する",
+      "前払の根拠書面の所在とSHA-256を持ち、年間の将来分を納品済みにしない",
+      "不一致・未確認範囲を例外として残し、会計判断と実行者を混同しない"
+    ],
+    "recurring_service_claimed": false,
+    "accounting_mutations": 0,
+    "original_manual_bookkeeping_credited": false,
+    "payment_execution_credited": false
+  },
+  "score_change": {
+    "task_index": 125,
+    "from": "nobody",
+    "to": "ai_executes_gated",
+    "credits": 1,
+    "denominator_rules_changed": false
+  },
+  "prtimes_draft_sync": "最後に検証したPR TIMES保存値からAI実行率が3ポイント以上改善するまで更新しない。今回の1件では未到達。99.9%未満は配信・予約しない。"
+}
