@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-08T06:58:25.777Z",
+  "observed_at": "2026-09-09T10:03:03.971Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-08T06:58:25.777Z",
+        "observed_at": "2026-09-09T10:03:03.971Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
@@ -178,7 +178,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-08T06:58:25.777Z",
+        "observed_at": "2026-09-09T10:03:03.971Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -210,7 +210,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-08T06:58:25.777Z",
+        "observed_at": "2026-09-09T10:03:03.971Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
@@ -225,7 +225,7 @@
       "found_at": "2026-09-05",
       "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
       "observation": {
-        "observed_at": "2026-09-08T06:58:25.777Z",
+        "observed_at": "2026-09-09T10:03:03.971Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -752,9 +752,9 @@
     "pages": 3,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 252,
+    "total_records": 251,
     "unregistered_current_count": 2,
-    "ended_records": 232,
+    "ended_records": 231,
     "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
   },
@@ -862,7 +862,7 @@
   ],
   "codex_observation": {
     "schema_version": 2,
-    "observed_at": "2026-09-08T06:58:17.892Z",
+    "observed_at": "2026-09-09T10:02:57.077Z",
     "registered": [
       "obsidian",
       "obsidian-2"
@@ -875,15 +875,15 @@
         "id": "obsidian",
         "status": "ACTIVE",
         "kind": "cron",
-        "next_run_at": "2026-09-08T21:01:35.000Z",
-        "last_run_at": "2026-09-07T21:01:58.582Z"
+        "next_run_at": "2026-09-09T21:01:54.000Z",
+        "last_run_at": "2026-09-08T21:02:02.787Z"
       },
       {
         "id": "obsidian-2",
         "status": "ACTIVE",
         "kind": "cron",
-        "next_run_at": "2026-09-09T00:20:29.000Z",
-        "last_run_at": "2026-09-08T03:21:59.789Z"
+        "next_run_at": "2026-09-10T00:20:04.000Z",
+        "last_run_at": "2026-09-09T03:21:00.349Z"
       }
     ],
     "runs": [
@@ -986,6 +986,81 @@
               "state": "completed",
               "tool_calls": 2,
               "tool_outputs": 2,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a082d3-f05b-79a3-a19b-043b2bdf2d5c",
+        "automation_id": "obsidian",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-08T21:02:02.826Z",
+        "updated_at": "2026-09-09T09:38:17.460Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "57cbc5e3a1cdaa21547132f3adc748f50feabd4b719cfb25a9c36884af38487b",
+          "bytes": 1748314,
+          "turns": [
+            {
+              "turn_id": "01a082d3-f2d3-7ad1-a55e-05e9a14a1815",
+              "started_at": "2026-09-08T21:02:03.549Z",
+              "finished_at": "2026-09-08T21:07:27.493Z",
+              "state": "completed",
+              "tool_calls": 21,
+              "tool_outputs": 21,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a08389-ae4d-78b1-bf79-138617fc1f99",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-09T00:20:33.459Z",
+        "updated_at": "2026-09-09T09:38:13.870Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "7ac386b09da7b751c410574d84f82f895289b446dbc0751fd77f03014c39420c",
+          "bytes": 1297984,
+          "turns": [
+            {
+              "turn_id": "01a08389-b117-7b22-8a39-1f39a79bb805",
+              "started_at": "2026-09-09T00:20:34.284Z",
+              "finished_at": "2026-09-09T00:23:55.770Z",
+              "state": "completed",
+              "tool_calls": 12,
+              "tool_outputs": 12,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a0842e-e2e4-7e32-9a4f-6232383ca324",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-09T03:21:00.374Z",
+        "updated_at": "2026-09-09T09:38:08.799Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "12c57a5cca7a32f0733e6a2f867a9f39c67afe13376bc8069121408a185cadcf",
+          "bytes": 1301704,
+          "turns": [
+            {
+              "turn_id": "01a0842e-e567-7173-8356-5655dc9142b9",
+              "started_at": "2026-09-09T03:21:01.106Z",
+              "finished_at": "2026-09-09T03:24:24.411Z",
+              "state": "completed",
+              "tool_calls": 17,
+              "tool_outputs": 17,
               "unanswered_calls": 0,
               "unattributed_outputs": 1
             }
