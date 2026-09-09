@@ -314,17 +314,20 @@
     {
       "domain": "SNS投稿（X・TikTok）",
       "reversible": true,
-      "ai_may": [],
+      "ai_may": [
+        "承認済み投稿群のX Web日本語ブランド投稿（AIが最終本文・日時を判断し、照合後に公開・予約・公開確認）"
+      ],
       "requires_approval": false,
       "human_only": [
-        "再開の判断"
+        "旧scheduled API経路・英語専用アカウント・TikTokの再開の判断"
       ],
-      "gate": "scheduled自動投稿は2026-08-11に運用停止。X英語はアカウントBAN1回目、TikTokは品質未達、scheduled経路は Cloudflare Access の認証で8/7から故障中",
+      "gate": "9月5日に公開を委任された投稿群を対象とするX Web日本語投稿。投稿群の範囲外の任意投稿をこの記録だけで許可しない。対象アカウント、本文、予約日時を照合して保存し、公開URLを読戻す。旧x-post-scheduled.ymlと/admin/api/x-postは停止を維持。返信・DM・広告はこの委任の対象に含めない。",
       "evidence": [
-        "README.md",
+        "docs/x-japanese-execution-20260909.md",
+        "data/x-japanese-execution.json",
         ".github/workflows/x-post-scheduled.yml"
       ],
-      "status": "suspended"
+      "status": "active"
     },
     {
       "domain": "ユーザーデータの削除（アプリ内の自己削除）",
