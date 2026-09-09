@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "observed_on": "2026-09-09",
+  "observer": "Codex",
+  "mechanism": "auto-merge-verified-sha",
+  "method": "Authenticated GitHub run/job/PR reads and the historical workflow source; existing production events only",
+  "repository": "simplememofast/simplememo",
+  "failed_validation": {
+    "run_id": 34313069072,
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/34313069072",
+    "event": "pull_request",
+    "head_sha": "c4207d15f4c43aee57b9765279b6e7b1595d422a",
+    "conclusion": "failure",
+    "failed_step": "Generators still run, artifacts not stale",
+    "failure": "data/check-selftests.json changed during regeneration; the committed generated artifact was stale",
+    "failed_step_completed_at": "2026-09-09T04:59:55Z",
+    "run_updated_at": "2026-09-09T04:59:58Z"
+  },
+  "non_success_merge_gate": {
+    "run_id": 34313120381,
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/34313120381",
+    "event": "workflow_run",
+    "created_at": "2026-09-09T05:00:00Z",
+    "workflow_source_sha": "bd6b27b90d1c19ea4ec90cf961d6258acd55b3bb",
+    "workflow_path": ".github/workflows/auto-merge.yml",
+    "job_condition": "github.event.workflow_run.conclusion == 'success'",
+    "job_id": 102343701534,
+    "job_name": "auto-merge",
+    "job_conclusion": "skipped",
+    "job_started_at": "2026-09-09T05:00:01Z",
+    "job_completed_at": "2026-09-09T05:00:01Z",
+    "executed_step_count": 0
+  },
+  "corrected_validation": {
+    "run_id": 34313145190,
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/34313145190",
+    "head_sha": "c479537c0b337c2f52f8004cff567b84636775b5",
+    "conclusion": "success",
+    "check_completed_at": "2026-09-09T05:11:20Z"
+  },
+  "successful_merge": {
+    "run_id": 34313881381,
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/34313881381",
+    "conclusion": "success",
+    "notice_at": "2026-09-09T05:11:32.7052748Z",
+    "notice": "#1200 を c479537 でマージした",
+    "pull_request": 1200,
+    "pull_request_url": "https://github.com/simplememofast/simplememo/pull/1200",
+    "merged_at": "2026-09-09T05:11:31Z",
+    "merged_head_sha": "c479537c0b337c2f52f8004cff567b84636775b5",
+    "merge_commit": "c73255d62d874bc2721284f0b61885073a887731"
+  },
+  "limits": [
+    "The run API did not expose the parent workflow-run event payload. Pairing the failed validation with the 05:00 merge-gate run is a temporal inference, not a directly returned parent-run ID.",
+    "The skipped production job and its historical source directly establish that its success-only gate did not execute merge steps. The later merge log directly identifies the corrected validated head.",
+    "This does not exercise a head update racing after a successful validation, a deployment rollback, or customer feature and credential kill switches.",
+    "No new failing PR, workflow dispatch, production stop, credential revocation, or execution-score credit was created by this observation."
+  ]
+}

@@ -26,9 +26,9 @@
     "local": "**本番と同じ式・同じコマンド**を手元で通し、止まる出力を観測した",
     "production": "本番の実行で実際に止まった（止めた対象が存在した）"
   },
-  "measured_at": "2026-08-26",
-  "production_verified": 2,
-  "$production_verified": "**2026-08-26 訂正: 0 → 1。**flag-kill は 2026-08-22 に本番で実証済みだった（/admin/flags の history が証跡）。**この台帳を作った当日、実物を見ずに台帳の散文から0 と書いていた。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。",
+  "measured_at": "2026-09-09",
+  "production_verified": 3,
+  "$production_verified": "**2026-08-26 訂正: 0 → 1。**flag-kill は 2026-08-22 に本番で実証済みだった（/admin/flags の history が証跡）。**この台帳を作った当日、実物を見ずに台帳の散文から0 と書いていた。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。 [2026-09-09] 既存CIの非成功時に本番auto-merge jobが停止した観測を追加し、2件から3件へ更新。機構単位の本番観測数であり、業務200全体やAI実行率の加点ではない。",
   "mechanisms": [
     {
       "id": "emergency-stop-all",
@@ -264,18 +264,27 @@
       "stops": "検証を通っていない SHA が main に入ること（＝本番デプロイ）",
       "evidence": [
         ".github/workflows/auto-merge.yml",
-        ".github/workflows/seo-check.yml"
+        ".github/workflows/seo-check.yml",
+        "data/stop-drill-auto-merge-observation-20260909.json",
+        "docs/auto-merge-stop-observation-2026-09-09.md"
       ],
-      "how_to_drill": "SEO Validation が落ちる PR を作り、auto-merge が発火しないことを見る",
+      "how_to_drill": "まず既存の失敗したSEO Validationと本番auto-merge jobの状態・当時のworkflow条件を照合し、修正版の検証SHAと実マージログを確認する。新しい赤いPRを作る前に実際の履歴を調べる。イベントの親run IDが取得できない場合は時系列推定と明記する。",
       "drills": [
         {
           "at": "2026-08-26",
           "level": "static",
           "by": "ai",
           "observed": "auto-merge.yml を読んで配線を確認した: workflow_run で起動（L18）、`conclusion == 'success'` のときだけ走る（L28）、マージ対象を `run.head_sha` に固定（L46）、**検証後に push された PR は head.sha が違うので見送る**（L74）、draft は対象外（L67）。**ただし止まった実例は観測していない** —— 直近30件のPRはすべて merged_at を持っており、検証で止められた回が1件も無い。**通ったことは、止まることの証明にならない。**"
+        },
+        {
+          "at": "2026-09-09",
+          "level": "production",
+          "by": "ai",
+          "where": "GitHub production auto-merge workflow runs34313120381/34313881381; existing PR1200 history",
+          "observed": "本番auto-merge run34313120381のjobがskipped・実行step0件だったことと、そのmain SHA bd6b27bの成功時のみ実行する条件を直接確認。直前のSEO34313069072は生成物の古さで失敗（c4207d1）。両runの親子関係はAPIがイベント本文を返さないため時系列推定として区別する。修正版c479537のSEO34313145190成功後、run34313881381のログがPR1200を同じheadでマージしたことを明示し、PRのmerge commit c73255dとも整合。確認範囲は非成功時のマージ抑止と後続の成功headのマージで、検証後head更新の競合や他の停止機構は未実証。原本URL・時刻・限界は追加証拠JSONに記録。新たな停止は実行していない。"
         }
       ],
-      "blocked_by": "検証が落ちる PR がまだ出ていない。**わざと落として確かめることはできるが、本番デプロイ経路で意図的に赤を作るので、やるならオーナー判断**"
+      "blocked_by": null
     },
     {
       "id": "credential-revocation",
