@@ -5,12 +5,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { executionPlan, BLOCKERS, UNLOCKS, blockedOnSatisfied } from './autonomy-gap.mjs';
 
+import { OWNER_TARGET_AI_EXECUTION_RATE } from './press-release-next.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORDER = ['act', 'inspect', 'wait', 'boundary', 'defer'];
 
 export function prioritize(coverage, assessments, now = new Date()) {
   if (!Array.isArray(assessments?.entries) || !Number.isFinite(now.getTime())) throw new Error('Invalid assessment document or clock');
-  const plan = executionPlan(coverage, 0.999);
+  const plan = executionPlan(coverage, OWNER_TARGET_AI_EXECUTION_RATE);
   const current = plan.current;
   const known = new Map();
   for (const a of assessments.entries) {
@@ -57,7 +59,7 @@ export function prioritize(coverage, assessments, now = new Date()) {
   opportunities.sort((a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state)
     || (b.estimated_delta_pp_per_hour ?? -1) - (a.estimated_delta_pp_per_hour ?? -1)
     || b.potential.delta_pp - a.potential.delta_pp || a.task_index - b.task_index);
-  return { observed_at: now.toISOString(), metric: 'ai_execution_rate', current,
+  return { observed_at: now.toISOString(), metric: 'ai_execution_rate', target_ai_execution_rate: OWNER_TARGET_AI_EXECUTION_RATE, current,
     active_remaining: opportunities.filter(t => t.executor !== 'nobody').length,
     not_started: opportunities.filter(t => t.executor === 'nobody').length,
     opportunities,

@@ -11,6 +11,8 @@ import { score } from '../growth/scripts/d-score.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST = 'data/press-release-next.json';
+// Owner revised the pre-dispatch goal on 2026-09-09; compare unrounded ratios.
+export const OWNER_TARGET_AI_EXECUTION_RATE = 0.99497;
 export const digest = value => crypto.createHash('sha256').update(typeof value === 'string' ? value : JSON.stringify(value)).digest('hex');
 export const normalizedText = value => String(value ?? '').normalize('NFKC').replace(/\s+/gu, ' ').trim();
 export function fingerprints(coverage) {
@@ -83,7 +85,7 @@ export function validate(manifest, draft) {
   const errors = [];
   const s = manifest?.snapshot;
   if (manifest?.schema_version !== 1 || manifest.id !== '202609-autonomy-followup') errors.push('Unknown campaign');
-  if (manifest?.target_ai_execution_rate !== 0.999) errors.push('The owner target is 99.9%; do not lower it');
+  if (manifest?.target_ai_execution_rate !== OWNER_TARGET_AI_EXECUTION_RATE) errors.push('The owner target is 99.497%; do not change it without a new owner instruction');
   if (manifest?.window?.starts_at !== '2026-09-14T00:00:00+09:00' || manifest?.window?.ends_at !== '2026-09-21T00:00:00+09:00') errors.push('Publication window must remain September 14–20 JST');
   if (!s || !Number.isFinite(Date.parse(s.observed_at)) || !/^[a-f0-9]{40}$/.test(s.source_commit ?? '')) errors.push('Missing source snapshot');
   if (!s) return errors;

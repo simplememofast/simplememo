@@ -18,6 +18,7 @@ test('existing transfers gain more than starting a task; neither changes the inv
   assert.equal(r.opportunities[0].potential.denominator, 3);
   assert.equal(r.opportunities[1].potential.denominator, 4);
   assert.equal(r.current.ai_executes, 1);
+  assert.equal(r.target_ai_execution_rate, 0.99497);
   assert.equal(r.current.defined, 4);
   assert.equal(JSON.stringify(coverage), before);
   assert.deepEqual(new Set(r.opportunities.map(t => t.task)), new Set(['transfer', 'start', 'physical']));
