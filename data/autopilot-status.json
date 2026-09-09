@@ -1,21 +1,21 @@
 {
-  "date_jst": "2026-09-09",
-  "generated_at": "2026-09-09T16:01:22.508897+00:00",
+  "date_jst": "2026-09-10",
+  "generated_at": "2026-09-09T21:11:32.000000+00:00",
   "action": "skip",
   "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 1,
+    "consecutive_no_article_days": 2,
     "last_article_date_jst": "2026-09-08",
     "last_production_change_date_jst": "2026-09-08",
-    "days_since_production_change": 1
+    "days_since_production_change": 2
   },
   "data_freshness": {
     "bq_checked": false,
     "bq_export_last_data_date": null,
     "bq_export_days_accumulated": null,
     "manual_snapshot_label": "2026-09-02",
-    "$note": "2026-09-09 06:00 JST scheduled run: BigQuery retrieval unavailable because existing credentials were absent. Historical observations are not represented as a fresh retrieval."
+    "$note": "2026-09-10 06:00 JST scheduled run: BigQuery preflight could not retrieve data because credentials were unavailable. Missing observations are unknown, not zero; the latest stored manual snapshot remains 2026-09-02."
   },
   "cost": {
     "month": "2026-09",
@@ -63,12 +63,12 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-09-09",
-      "days": 30
+      "to": "2026-09-10",
+      "days": 31
     },
-    "completion_rate": 0.6842,
-    "change_failure_rate": 0.3158,
-    "human_intervention_rate": 0.2368,
+    "completion_rate": 0.6667,
+    "change_failure_rate": 0.3333,
+    "human_intervention_rate": 0.2308,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -76,28 +76,28 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.10526315789473684
+        "rate": 0.10256410256410256
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.02631578947368421
+        "rate": 0.02564102564102564
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.02631578947368421
+        "rate": 0.02564102564102564
       },
       "request": {
         "runs": 3,
-        "rate": 0.07894736842105263
+        "rate": 0.07692307692307693
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.7667,
+    "shipping_day_rate": 0.7419,
     "totals": {
-      "runs": 56,
-      "attempted": 38,
+      "runs": 57,
+      "attempted": 39,
       "shipped": 26,
-      "failed": 12,
+      "failed": 13,
       "no_run": 2
     },
     "by_route": {
@@ -107,8 +107,8 @@
         "shipped": 17
       },
       "primary": {
-        "runs": 35,
-        "attempted": 19,
+        "runs": 36,
+        "attempted": 20,
         "shipped": 9
       }
     },
@@ -119,16 +119,16 @@
     ],
     "streaks": {
       "current": {
-        "days": 23,
+        "days": 24,
         "from": "2026-08-18"
       },
       "longest": {
-        "days": 23,
+        "days": 24,
         "from": "2026-08-18",
-        "to": "2026-09-09"
+        "to": "2026-09-10"
       },
-      "active_days": 28,
-      "last_day": "2026-09-09"
+      "active_days": 29,
+      "last_day": "2026-09-10"
     },
     "shipping_streaks": {
       "current": {
@@ -141,7 +141,7 @@
         "to": "2026-09-08"
       },
       "active_days": 23,
-      "last_day": "2026-09-09"
+      "last_day": "2026-09-10"
     },
     "hands_off_streaks": {
       "current": {
@@ -154,7 +154,7 @@
         "to": "2026-09-05"
       },
       "active_days": 16,
-      "last_day": "2026-09-09"
+      "last_day": "2026-09-10"
     },
     "publishing_streaks": {
       "current": {
@@ -167,7 +167,7 @@
         "to": "2026-08-23"
       },
       "active_days": 15,
-      "last_day": "2026-09-09"
+      "last_day": "2026-09-10"
     },
     "last_publishing": {
       "date_jst": "2026-09-08",
@@ -238,15 +238,16 @@
       ]
     }
   },
-  "reason": "engine=codex; automation_id=obsidian; scheduled_slot=2026-09-09T06:00:00+09:00 (scheduler verified); preflight=skip_primary_running. Related owner-directed task 01a07f2e-a1ba-79f2-98e1-07b11da20d19 confirmed inProgress; conservatively treated as concurrent occupancy, not a second scheduled primary. Daily claim/PR absent; main and production status remain 2026-09-08. No implementation, claim or publication. Original run saved this record locally only. Recovered to the shared ledger on 2026-09-10 from scheduler/preflight/result records; original outcome unchanged.",
-  "verified": "2026-09-09 scheduled task, scheduler receipt, preflight and local ledger patch matched on 2026-09-10. Original run: skipped_duplicate, attempted=false, no claim or publication. Shared record recovery is separate from original execution.",
+  "reason": "engine=codex; automation_id=obsidian-autopilot-retry-standby; scheduled_slot=2026-09-10T06:00:00+09:00; route=actions; preflight=run:true/code:run. The daily branch was claimed with empty commit a97d2005. Lane E candidate C13 (/obsidian/plugins/templater/) requires hands-on verification inside the Obsidian GUI, but /Applications/Obsidian.app is absent. The prior retry verified official Obsidian 1.13.7 and Templater 2.25.0 artifacts only; it did not establish the UI workflow. Quality and evidence gates therefore stopped the run before content implementation. No article or production publication; unknown BigQuery and actual Codex cost remain unknown rather than zero.",
+  "verified": "2026-09-10 Codex scheduled primary: emergency stop false; agents.actions.stopped false; monthly and article/repair budgets passed; self-heal containment not required; no current duplicate task or old in-progress Actions run found; public GitHub reachable; claim commit a97d20055a0a26b5e4a0673495d452a60d41456a recorded. Candidate rejected at execution quality gate because actual Obsidian/Templater operation could not be observed. No implementation or article publication.",
   "checks": {
-    "codex_preflight": "2026-09-09: run:false / skip_primary_running",
-    "original_publication": "not attempted; no claim, PR or artifact"
+    "codex_preflight": "2026-09-10: run:true / code:run; five-minute snapshot saved by the migrated task runner",
+    "candidate_quality": "C13 Templater: official artifact evidence available, but required Obsidian GUI verification unavailable because the app is not installed",
+    "publication": "not attempted; claim only, no content implementation or public artifact"
   },
   "owner_requests": [
     "EP委任判定の月次追認（2026-09）20件は本人の回答待ち。AIで追認を代筆しない。",
     "指標 unresolved_failures は usage_limit 4件（escalation-rules が who: owner とする種別で repair_of を書けない）が構造的に残るため 4 を下回れない。14日移動中央値との比較ではレーンFの改善が今後も event=0 として決済される。分母の扱いか比較基準の見直しはオーナー判断。"
   ],
-  "next": "SEO/AIOの追加実行は再開しない。記録の復元を出荷成功として数えず、継続中のAI実行率改善と実機QAはそれぞれの実行証拠で追跡する。"
+  "next": "C13はObsidianとTemplaterを実際に操作できる既存環境がある回だけ再評価する。未検証の手順を補完して記事化しない。次回は最新main・本番status・当日claimを再照合し、同じ当日ブランチへ重ねない。"
 }
