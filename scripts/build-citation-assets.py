@@ -66,6 +66,7 @@ def page(path, title, description, body, ja, en, lang, tool=False):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-itunes-app" content="app-id={e(constants['appStoreId'])}, app-argument={BASE}{path}">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <title>{e(title)}</title>
 <meta name="description" content="{e(description)}">
