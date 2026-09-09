@@ -49,6 +49,9 @@ jobs:
       - name: Language switcher insertion and regeneration regressions
         run: python3 scripts/inject_lang_switcher_test.py
 
+      - name: Every public page declares the correct Smart App Banner
+        run: python3 scripts/smart-app-banner.py --check
+
       - name: Trend observations preserve failures and ranking baselines
         run: |
           python3 scripts/trend-radar.test.py
