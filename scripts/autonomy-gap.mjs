@@ -537,8 +537,10 @@ export const UNLOCKS = {
                             + '運営が良くなるからではなく分母の都合。**それを一番上に置く並びは間違い**なので後置する' },
   trend_source:      { kind: 'external_contract', label: '外部トレンドを取る経路',
                        needs: 'Googleトレンド/はてブ/ランキングの取得手段' },
-  analytics_vendors: { kind: 'external_contract', label: 'ahrefs / AppsFlyer / Firebase / 生成AI検索',
-                       needs: '鍵と契約' },
+  analytics_vendors: { kind: 'implement', label: 'ahrefs / AppsFlyer / Firebase の継続取得',
+                       needs: 'AppsFlyerの限定集計APIは取得成功。Ahrefsの継続取得とFirebase iOSの計測経路が残る。3社すべてが鍵待ちではない。WebのGA4をFirebase iOSのデータに代用しない。' },
+  impl_onboarding: { kind: 'implement', label: '初回オンボーディングの課金導線を改善する',
+                       needs: '2026-09-09の包括委任は受領済み。既存価格・権利を維持する提示とタイミングを設計・実装し、品質と配信の既存ゲートを通して適用する。未配信の設計や他業務の修正だけでは加点しない。' },
   bank_feed:         { kind: 'external_contract', label: '銀行・カードの明細連携',
                        needs: 'freee の読み取りは入ったが明細側が無い' },
 };

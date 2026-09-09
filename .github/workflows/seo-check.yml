@@ -40,6 +40,11 @@ jobs:
       - name: CI history audit preserves uncertainty and read failures
         run: node --test scripts/ci-health.test.mjs
 
+      - name: Execution priorities preserve denominators and waiting conditions
+        run: |
+          node --test scripts/execution-priorities.test.mjs
+          node scripts/execution-priorities.mjs --check
+
       - name: Local preflight includes grouped tests and propagates failures
         run: node scripts/preflight.mjs --selftest
 

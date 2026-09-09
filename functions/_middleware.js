@@ -97,6 +97,7 @@ const UNSERVED_DATA = new Set([
   "crossrepo-probes.json",
   "emergency-stop.json",
   "escalation-rules.json",
+  "execution-priorities.json",
   "expert-escalation.json",
   "feature-backlog.json",
   "feature-outcomes.json",
