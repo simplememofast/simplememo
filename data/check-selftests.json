@@ -670,6 +670,12 @@
       "broke": "壊し3通りで落ちることを観測。(1) 根拠（evidence）の検査を外す → 「根拠なしは拒む」「短すぎる根拠は拒む」の2件が名指しで落ちる。(2) ratified_from を書かない → 最初は assertion が TypeError でセッションごと死んだ（**名指しの失敗ではない**）ので `?.` に直し、「元の AI 判定を消さない」「元の理由も残す」「反転前の判定を残す」の3件が名指しで落ちるようにした。(3) humanReviewProblems の reviewer 検査を外す → 「機械が mode: human とだけ書いた行は3点で落ちる」「reviewer が owner でなければ落ちる」の2件が落ちる。GITHUB_ACTIONS 下で --ratify を拒む分岐は CLI 側にあり、自己テストでは覆っていない（人の操作の経路そのものなので、実行して確かめる）"
     },
     {
+      "script": "scripts/execution-priorities.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-09",
+      "broke": "独立した一時コピーで2変異を実測。未達 blocked_on による wait 強制を外すと fresh act assessments cannot override unmet inventory prerequisites が失敗。無効な証拠参照を例外で拒まず通すと evidence must reference a real repository file が失敗。いずれも node --test --test-reporter=tap が exit 1。一時コピーを除去した本体は7件成功。"
+    },
+    {
       "script": "scripts/feature-score.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",

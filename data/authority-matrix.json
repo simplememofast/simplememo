@@ -633,6 +633,24 @@
         "set_by": "ai_under_owner_delegation",
         "note": "審査自体は追加購入・契約締結・支払先の承認を行わない。既存の個別支出権限は別の門で扱う。"
       }
+    },
+    {
+      "domain": "オンボーディングの課金導線改善",
+      "reversible": true,
+      "ai_may": [
+        "既存の価格・権利を維持したオンボーディングの課金導線を設計・実装し、既存の品質・配信ゲートを通して適用する"
+      ],
+      "requires_approval": false,
+      "human_only": [],
+      "gate": "2026-09-09の包括委任。対象は既存価格・無料枠・StoreKit権利を維持する表示と提示タイミング。現在の利用データとCapture優先の設計制約を照合し、同一変更SHAの静的QA・パリティ・ビルド・回帰テスト成功を確認する。配信は既存release gateを維持し、TestFlightは複数の実行率改善に必要な変更をまとめる。主張する実行は適用後の実観測で検証する。",
+      "evidence": [
+        "docs/execution-priority-review-20260909.md",
+        "../simplememo-ios/.github/workflows/qa-static.yml",
+        "../simplememo-ios/SimpleMemo/OnboardingViewController.swift",
+        "../simplememo-ios/SimpleMemo/PaywallViewController.swift"
+      ],
+      "status": "active",
+      "note": "権限の現在化であって実行完了ではない。過去の人による採用や別のPremium設計判断をAIの新しい実行へ付け替えない。"
     }
   ],
   "self_repair": {

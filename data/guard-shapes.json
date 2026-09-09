@@ -731,6 +731,7 @@
     "scripts/check-asc-landed.mjs",
     "scripts/ci-health.mjs",
     "scripts/ci-health.test.mjs",
+    "scripts/execution-priorities.test.mjs",
     "scripts/press-release-next.test.mjs",
     "scripts/property-tests.mjs",
     "scripts/qr-routing.test.mjs",
@@ -751,7 +752,8 @@
       "growth/scripts/acquisition-mix.mjs": "**他モジュール経由で読む**（lib/gsc.mjs の loadSnapshot / BUSINESS_RELEVANCE）。analyze.mjs・search-intent.mjs と同じ形で、この走査は1ファイル単位なので追えない — 見えていないことを承知で置く",
       "scripts/should-snapshot.mjs": "**JSONの台帳を読まない。**読むのは `growth/data/gsc/` の**ディレクトリ名そのもの**（`YYYY-MM-DD` が前回のスナップショットの日付）。別に管理表を持つと、管理表だけ進んで実体が無い状態を作れてしまうので、成果物の名前を正にしてある。判定は純関数 `decide()` に寄せて自己テスト14件で固定した。**「無いと消える」側の形は持っていない** —— ラベルが読めない回は`snapshot: true`（取る）へ倒してあり、**空のときに規則が消えるのではなく発火する。**",
       "scripts/qr-routing.test.mjs": "合成HTML・CPPマップとQRの生成/独立復号による回帰テスト。実台帳のJSONを読まず、検体を自前で持つ。generate-qr-codes.mjs 本体はCPP台帳を読むようになったため除外一覧から外した。",
-      "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately."
+      "scripts/press-release-next.test.mjs": "Pure fixtures passed to the exported dispatch gate. Does not read live ledger JSON or access PR TIMES. The production module reads the actual ledger separately.",
+      "scripts/execution-priorities.test.mjs": "合成の業務棚卸し・評価を prioritize に渡す回帰テスト。実台帳JSONを直接読まない。別モジュールの証拠ファイル存在確認と未達blocked_on判定を通し、期限切れ・物理境界・分母維持・無効参照を検査する。実台帳のCLI検査は execution-priorities.mjs --check で別途行う。"
     },
     "scripts/preflight.mjs … **台帳を読まない。**読むのは `.github/workflows/seo-check.yml` で、そこから実行する検査の一覧を導出する（一覧を手で持つと、CI に検査を足した日に古くなる）。判定を持たない実行器なので、台帳由来の束縛が無いのは設計どおり"
   ],
