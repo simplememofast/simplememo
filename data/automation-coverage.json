@@ -971,11 +971,17 @@
       "task": "実機での事前確認",
       "executor": "human_only",
       "evidence": [
-        "../simplememo-ios/docs/release-automation.md"
+        "../simplememo-ios/docs/release-automation.md",
+        "docs/physical-device-evidence-20260910.md"
       ],
-      "note": "Hard Rule。技術的強制ではなく人間のルール",
-      "blocker": "physical_human",
-      "unblocked_by": "実機の操作"
+      "note": "Hard Rule。技術的強制ではなく人間のルール\n\n[2026-09-10追記] ユーザーは接続・信頼済みiPhone 13とApple Watchの実機利用を指示し、Developerモード・UIオートメーションを有効にして続行を依頼した。Codexによる同じ配布版の操作・結果観測を委任範囲へ反映する。旧「実機確認は機械には代われない」はこの経路に適用しない。本人の認証・ロック解除は人の前提として残す。現在5.8.53(1316)は5/6項目で、購入後の復元がApple再認証待ち。全6項目、実行者・日時・同一SHAの証拠が揃うまで実機確認完了の登録・加点はしない。既存の提出・配布ゲートは保持する。詳細はdocs/physical-device-evidence-20260910.md。",
+      "blocker": "verification_pending",
+      "unblocked_by": "同じ配布版の全6項目の実結果を揃える。5.8.53(1316)は5/6確認済みで、本人のApple再認証後に進行中の購入復元の成功を観測する。購入成功・Premium表示のみでは代用しない。全項目が揃ってから実行者・時刻・同一SHAを記録し、完遂の実績を反映する。",
+      "unlock": "delegated_device_verification",
+      "authority": {
+        "domain": "アプリのビルド・TestFlight内部配信",
+        "ai_may": "ユーザーが利用を指示し接続・信頼した端末で、同じ配布版の実機テストを操作し、項目別の実結果を記録する"
+      }
     },
     {
       "area": "④ 自動本番デプロイ",
