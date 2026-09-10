@@ -172,12 +172,12 @@ export const UNLOCKS = {
                             + '28日到達は日次観測範囲の条件に限り、これらの業務完了を証明しない。',
                        satisfied_when: [{ file: 'data/revenue-series.json', path: 'covered_days', atLeast: 28 }] },
   // Keep the legacy ID for historical plan references; search exports are not app cohorts.
-  bq_28d:            { kind: 'implement', label: '継続コホートと課金・更新・失効・返金の評価を接続する',
-                       needs: 'Search Consoleの蓄積日数ではアプリの継続・課金評価は完成しない。'
-                            + '既存の継続コホート評価と課金状態の取得を起点に、同一コホートの分母、'
-                            + '成熟期間、課金・更新・失効・返金イベントの対応を検証する。'
-                            + '課金状態の日次在庫を新規解約件数に置き換えない。'
-                            + '接続後も観測数不足なら判定を保留し、詳細は非公開側に保持する。' },
+  bq_28d:            { kind: 'wait', label: '同一コホートの実観測・成熟・課金履歴を検証する（日次接続済み）',
+                       needs: 'API306で日次の購読cohort接続と本番保存は完了したが、対象2週は適格コホートが空。'
+                            + '元の初回起動context、購読との対応、D7/D28の成熟と計測範囲を実観測で照合する。'
+                            + '完全な課金・解約履歴の不足も残る。現在の状態・復元済み価格・通知カテゴリ合算で代用しない。'
+                            + 'Search Consoleの日数、空の評価ファイル、workflow成功だけではこの待ちは解除しない。'
+                            + '不足を具体化して必要な対応へ進み、詳細は非公開側に保持する。' },
   // [2026-08-28] **述語を書き直した。旧版は構造的に真になれなかった。**
   // `data/credential-expiry.json` の `apple_developer_enrolled_at` /
   // `domain_renewal_at` を見ていたが、**その名前のフィールドはリポジトリのどこにも無く、
@@ -710,13 +710,14 @@ export function selftest() {
     if (pl.steps[pl.steps.length - 1]?.id !== 'impl_analog') p.push('defer が最後に来ていない');
   }
 
-  // Search Console maturity must never present the paid-retention task as waiting only.
+  // After API306, plans must wait for actual paired observations, without a
+  // calendar/file-existence predicate that would turn an empty report into credit.
   {
     const doc = { tasks: [{ area: 'A', task: 'paid cohort evaluation', executor: 'ai_proposes',
-      blocker: 'not_started', unlock: 'bq_28d', evidence: [] }] };
+      blocker: 'verification_pending', unlock: 'bq_28d', evidence: [] }] };
     const pl = planTo(doc, 1);
-    if (pl.steps[0]?.kind !== 'implement' || UNLOCKS.bq_28d.satisfied_when) {
-      problems.push('継続・課金の統合を検索データの蓄積だけで開く待ちとして扱っている');
+    if (pl.steps[0]?.kind !== 'wait' || UNLOCKS.bq_28d.satisfied_when) {
+      problems.push('接続済みの購読評価を再実装へ戻すか、日数・空の評価だけで解除している');
     }
     if (pl.now !== 0 || pl.denominator !== 1) problems.push('待ち先の訂正を完了実績へ加算した');
   }
