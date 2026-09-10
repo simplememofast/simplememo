@@ -552,8 +552,12 @@ export const UNLOCKS = {
                        needs: 'AppsFlyerの限定集計APIは取得成功。Ahrefsの継続取得とFirebase iOSの計測経路が残る。3社すべてが鍵待ちではない。WebのGA4をFirebase iOSのデータに代用しない。' },
   impl_onboarding: { kind: 'implement', label: '初回オンボーディングの課金導線を改善する',
                        needs: '2026-09-09の包括委任は受領済み。既存価格・権利を維持する提示とタイミングを設計・実装し、品質と配信の既存ゲートを通して適用する。未配信の設計や他業務の修正だけでは加点しない。' },
-  bank_feed:         { kind: 'external_contract', label: '銀行・カードの明細連携',
-                       needs: 'freee の読み取りは入ったが明細側が無い' },
+  // Retain the historical ID; the existing feed and official journal export are now verified.
+  bank_feed:         { kind: 'implement', label: '取得済みの会計資料から照合・仕訳処理・月次締めを統合する',
+                       needs: '既存freeeの銀行明細・収入支出取引・公式仕訳帳を取得済み。'
+                            + '会社関連の銀行原本と書類、期首残高・未登録明細・総額と手数料・税区分・配賦を照合し、'
+                            + 'その根拠で必要な仕訳処理と月次締めの統合を実行・検証する。'
+                            + '新しいアプリや資格情報は不要。読取成功・貸借一致だけでは業務完了にしない。' },
 };
 
 /**
