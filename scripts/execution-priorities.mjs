@@ -59,7 +59,27 @@ export function prioritize(coverage, assessments, now = new Date()) {
   opportunities.sort((a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state)
     || (b.estimated_delta_pp_per_hour ?? -1) - (a.estimated_delta_pp_per_hour ?? -1)
     || b.potential.delta_pp - a.potential.delta_pp || a.task_index - b.task_index);
+
+  // Even an optimistic scenario cannot borrow the user's consent or the
+  // release operation that the current goal explicitly holds until attainment.
+  // Other boundaries are deliberately relaxed here: this is an upper bound,
+  // not a claim that those tasks can actually be transferred.
+  const held = opportunities.filter(t => (t.area === '⑪ データ・プライバシー' && t.task === '収集同意')
+    || (t.area === '③ 自律型マーケティング' && t.task === 'PR TIMES への配信操作'));
+  const heldIndexes = new Set(held.map(t => t.task_index));
+  const movable = opportunities.filter(t => !heldIndexes.has(t.task_index));
+  const numerator = current.ai_executes + movable.length;
+  const denominator = current.doing + movable.filter(t => t.executor === 'nobody').length;
+  const preDispatchUpperBound = {
+    numerator, denominator, rate: numerator / denominator,
+    target_exceeds_upper_bound: OWNER_TARGET_AI_EXECUTION_RATE > numerator / denominator,
+    held_tasks: held.map(t => ({ task_index: t.task_index, area: t.area, task: t.task,
+      executor: t.executor, reason: t.task === '収集同意' ? 'human_consent' : 'dispatch_after_target' })),
+    assumption: '未実行の収集同意と配信操作を保持し、それ以外の残業務をすべてAI実行へ移せた場合の楽観上限。実行可能性・期限・完了は保証しない。',
+  };
   return { observed_at: now.toISOString(), metric: 'ai_execution_rate', target_ai_execution_rate: OWNER_TARGET_AI_EXECUTION_RATE, current,
+    classified_ceiling: plan.classified_ceiling,
+    pre_dispatch_upper_bound: preDispatchUpperBound,
     active_remaining: opportunities.filter(t => t.executor !== 'nobody').length,
     not_started: opportunities.filter(t => t.executor === 'nobody').length,
     opportunities,
@@ -78,6 +98,12 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const pct = n => (n * 100).toFixed(1) + '%';
     const c = result.current;
     console.log(`AI実行率 ${c.ai_executes}/${c.doing} = ${pct(c.ai_execution_rate)} / 総合 ${pct(c.overall_automation_rate)} / AI関与 ${pct(c.ai_involvement_rate)} / カバー ${pct(c.coverage_rate)}`);
+    const bound = result.pre_dispatch_upper_bound;
+    console.log(`配信前の楽観上限 ${bound.numerator}/${bound.denominator} = ${(bound.rate * 100).toFixed(6)}% / 目標 ${(result.target_ai_execution_rate * 100).toFixed(3)}%`);
+    console.log(bound.target_exceeds_upper_bound
+      ? '現行条件では配信前に目標へ届かない。本人同意・未配信業務の先取りや棚卸し変更で埋めず、実行可能な改善は継続する。'
+      : 'この上限だけでは目標を否定できない。各業務の実行証拠と配信ゲートの確認が必要。');
+    console.log(bound.assumption);
     console.log('状態 | task | 完遂時の差分pt | 見積分 | 次の作業');
     for (const t of result.opportunities) console.log(`${t.state} | ${t.task_index}: ${t.task} | +${t.potential.delta_pp.toFixed(3)} | ${t.estimated_minutes ?? '未評価'} | ${t.next_step}`);
     for (const line of result.limitations) console.log(line);

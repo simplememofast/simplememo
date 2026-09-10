@@ -83,3 +83,75 @@ test('evidence must reference a real repository file', () => {
   }
   assert.throws(() => prioritize(coverage, {}, now));
 });
+
+const dispatch = (executor = 'human_only') => ({ area: '③ 自律型マーケティング',
+  task: 'PR TIMES への配信操作', executor, blocker: 'verification_pending' });
+const consent = () => ({ area: '⑪ データ・プライバシー', task: '収集同意',
+  executor: 'ai_proposes', blocker: 'human_consent' });
+const goalInventory = () => ({ tasks: [
+  ...Array.from({ length: 156 }, (_, i) => task(`done${i}`, 'ai_executes_gated')),
+  ...Array.from({ length: 21 }, (_, i) => task(`transfer${i}`, 'human_only')),
+  consent(), dispatch(),
+  ...Array.from({ length: 20 }, (_, i) => task(`new${i}`, 'nobody')),
+  ...Array.from({ length: 4 }, (_, i) => task(`excluded${i}`, 'intentional_no')),
+] });
+
+test('consent and deferred dispatch keep the current 199-task pre-release goal out of reach', () => {
+  const doc = goalInventory(), before = JSON.stringify(doc);
+  const r = prioritize(doc, { entries: [] }, now), bound = r.pre_dispatch_upper_bound;
+  assert.equal(r.current.ai_executes, 156);
+  assert.equal(r.current.doing, 179);
+  assert.equal(bound.numerator, 197);
+  assert.equal(bound.denominator, 199);
+  assert.equal(bound.target_exceeds_upper_bound, true);
+  assert.deepEqual(new Set(bound.held_tasks.map(t => t.reason)), new Set(['human_consent', 'dispatch_after_target']));
+  assert.equal(JSON.stringify(doc), before);
+});
+
+test('an executed release changes the bound only through actual inventory status', () => {
+  const doc = goalInventory();
+  doc.tasks.find(t => t.task === 'PR TIMES への配信操作').executor = 'ai_executes_gated';
+  const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_upper_bound;
+  assert.equal(bound.numerator, 198);
+  assert.equal(bound.denominator, 199);
+  assert.equal(bound.target_exceeds_upper_bound, false);
+  assert.equal(bound.held_tasks.length, 1);
+});
+
+test('rounded 99.5 percent remains below the raw 99.497 percent target', () => {
+  const doc = goalInventory();
+  doc.tasks.find(t => t.task === 'PR TIMES への配信操作').executor = 'ai_executes_gated';
+  doc.tasks.splice(doc.tasks.findIndex(t => t.task === 'new0'), 1);
+  const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_upper_bound;
+  assert.equal(bound.numerator, 197);
+  assert.equal(bound.denominator, 198);
+  assert.equal((bound.rate * 100).toFixed(1), '99.5');
+  assert.equal(bound.target_exceeds_upper_bound, true);
+});
+
+test('a held unstarted task does not inflate the active-task denominator', () => {
+  const doc = { tasks: [task('done', 'ai_autonomous'), consent(),
+    dispatch('nobody'), task('start', 'nobody'), task('excluded', 'intentional_no')] };
+  const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_upper_bound;
+  assert.equal(bound.numerator, 2);
+  assert.equal(bound.denominator, 3);
+  assert.equal(bound.held_tasks.length, 2);
+});
+
+test('the optimistic bound does not claim that relaxed physical boundaries are executable', () => {
+  const r = prioritize(coverage, { entries: [] }, now);
+  assert.equal(r.pre_dispatch_upper_bound.rate, 1);
+  assert.equal(r.pre_dispatch_upper_bound.target_exceeds_upper_bound, false);
+  assert.equal(r.opportunities.find(t => t.task === 'physical').state, 'boundary');
+  assert.ok(r.classified_ceiling.rate < r.pre_dispatch_upper_bound.rate);
+});
+
+test('the two-task bound stays optimistic about other consent and credential boundaries', () => {
+  const doc = goalInventory();
+  const another = doc.tasks.find(t => t.task === 'transfer0');
+  another.blocker = 'human_consent';
+  const r = prioritize(doc, { entries: [] }, now);
+  assert.equal(r.pre_dispatch_upper_bound.numerator, 197);
+  assert.equal(r.pre_dispatch_upper_bound.held_tasks.length, 2);
+  assert.equal(r.opportunities.find(t => t.task === 'transfer0').state, 'boundary');
+});
