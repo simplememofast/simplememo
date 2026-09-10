@@ -2,13 +2,13 @@
   "as_of_jst": "2026-09-10",
   "routine_snapshot_sha256": "b5bfffe15e8d5bb1557adee1a183501704d1671f04f184a5b9684050828a72a0",
   "viewport_measurement": {
-    "main_sha": "e3b42244227d1e04bc17be88e4d49062b9d1d233",
-    "head_sha": "347e01a2f8c522b42a7b58f04d1fbdff210cd8c3",
-    "run_id": 34404932651,
+    "main_sha": "1e4ce2314f90376b61e8fb99e74a343b1b7a7130",
+    "head_sha": "826291141c32298ff5736c29d37f02cc955d40d7",
+    "run_id": 34416224948,
     "attempt": 1,
-    "started_at": "2026-09-09T21:05:37Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/34404932651/attempts/1",
-    "job_id": 102645518820,
+    "started_at": "2026-09-09T23:17:00Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/34416224948/attempts/1",
+    "job_id": 102681591024,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -38,7 +38,7 @@
       }
     }
   },
-  "open_total": 6,
+  "open_total": 8,
   "pending_pr": [],
   "oldest_open_days": 7,
   "acknowledged": 7,
@@ -46,17 +46,17 @@
     {
       "id": "act-selfheal-ap-20260830-actions",
       "title": "未修理の故障: ap-20260830-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "evidence": "2026-09-05 以降 actions は 3回着手し usage_limit の再発なし"
+      "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし"
     },
     {
       "id": "act-selfheal-ap-20260831-actions",
       "title": "未修理の故障: ap-20260831-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "evidence": "2026-09-05 以降 actions は 3回着手し usage_limit の再発なし"
+      "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし"
     },
     {
       "id": "act-selfheal-ap-20260905-actions",
       "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
-      "evidence": "2026-09-05 以降 actions は 3回着手し usage_limit の再発なし"
+      "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし"
     }
   ],
   "human": [
@@ -109,6 +109,22 @@
       "age_days": 1,
       "auto": null,
       "evidence": "#1203 がまだ open"
+    },
+    {
+      "id": "act-selfheal-ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b",
+      "title": "未修理の故障: ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b（no_artifact）",
+      "detail": "2026-09-10 / actions / outcome=no_artifact。C13 Templater requires actual Obsidian GUI verification; Obsidian.app is absent and unattended new-application execution is not authorized. No content implementation was made.",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b は未修理のまま（repair_of で名指しされていない）"
+    },
+    {
+      "id": "act-shipping-outage",
+      "title": "どの経路も 2日連続で出荷していない（2026-09-09〜2026-09-10）",
+      "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-09-09 / 2026-09-10）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
+      "age_days": 0,
+      "auto": null,
+      "evidence": "2026-09-08 以降どの経路も出荷していない"
     }
   ],
   "executed": []
