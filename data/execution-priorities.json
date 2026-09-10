@@ -5,12 +5,12 @@
       "area": "① 次期機能開発",
       "task": "D7/D28・課金・解約まで含む評価",
       "state": "wait",
-      "estimated_minutes": 240,
-      "observed_at": "2026-09-09T07:11:38.460422+00:00",
-      "expires_at": "2026-09-10T07:11:38.460422+00:00",
-      "next_step": "同じコホートの課金・更新・解約を結ぶ実観測が必要。D7/D28だけの再集計では完了しない。",
+      "estimated_minutes": null,
+      "observed_at": "2026-09-10T05:24:07.514630+00:00",
+      "expires_at": "2026-09-11T05:24:07.514630+00:00",
+      "next_step": "API306の日次結合評価は本番実行・保存済み。対象2週は初回起動context未計装で適格コホートが空。既存workflowの実観測・成熟・購読対応を確認し、完全な課金/解約履歴の不足も解消する。実装や旧集計の繰り返しでは加点しない。",
       "evidence": [
-        "docs/execution-priority-review-20260909.md"
+        "docs/subscription-observation-evidence-20260910.md"
       ]
     },
     {
@@ -146,6 +146,18 @@
       "next_step": "5.8.53(1316)は実機5/6確認済み。iPhoneのApple再認証後に現在進行中の復元結果だけを観測する。成功後に全6項目の同一版の証拠を登録する。Watchは実送信・受信・履歴確認済みなので再送しない。実機項目の部分完了で加点しない。",
       "evidence": [
         "docs/physical-device-evidence-20260910.md"
+      ]
+    },
+    {
+      "area": "⑨ マネタイズ",
+      "task": "返金の検出（Get Refund History）",
+      "state": "wait",
+      "estimated_minutes": null,
+      "observed_at": "2026-09-10T05:24:07.514630+00:00",
+      "expires_at": "2026-09-11T05:24:07.514630+00:00",
+      "next_step": "返金受信・検証・保存は実装済み。本番の保持済み通知は今回も空。実際の検証済み返金通知を既存経路で観測し、保持期間内の記録と照合する。加点目的の購入・返金・疑似通知を発生させない。",
+      "evidence": [
+        "docs/subscription-observation-evidence-20260910.md"
       ]
     }
   ]
