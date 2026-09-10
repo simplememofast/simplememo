@@ -73,22 +73,24 @@
       "reversible": true,
       "ai_may": [
         "**submit_review=false に限った release.yml の起動**（v* タグ作成 → Xcode Cloud → TestFlight 内部配信まで）",
-        "起動の提案と、対象コミット・版数の提示"
+        "起動の提案と、対象コミット・版数の提示",
+        "ユーザーが利用を指示し接続・信頼した端末で、同じ配布版の実機テストを操作し、項目別の実結果を記録する"
       ],
       "requires_approval": false,
       "human_only": [
         "**submit_review=true での起動**（App Review 提出を伴う起動）— 提出は領域「App Review への提出」の門が別に見る",
-        "**実機での事前確認そのもの**（機械には代われない。提出側の門がその記録を要求する）"
+        "端末のロック解除、Apple Accountの本人認証、サイドボタン認証など本人操作が必要な前提"
       ],
       "gate": "release.yml の preflight ジョブが**対象コミットで static / parity が success**でなければタグを作らせない（scripts/release_preflight.rb）。タグは動かさない・main の子孫であること・MARKETING_VERSION の一致もタグジョブが強制する。**submit_review=true の経路は別に門を通る** —— release.yml の release_gate ジョブが simplememo の check-release-gate を実行側の材料に当て、submit でなければ出荷ジョブへ進ませない",
       "evidence": [
         "../simplememo-ios/.github/workflows/release.yml",
         "../simplememo-ios/scripts/release_preflight.rb",
         "scripts/check-release-gate.mjs",
-        "scripts/release-gate-run.mjs"
+        "scripts/release-gate-run.mjs",
+        "docs/physical-device-evidence-20260910.md"
       ],
       "status": "active",
-      "note": "**[2026-09-03] オーナーが submit_review=false に限って渡した。**旧 note は「タグ push を拒む設計（claude.yml に actions: write を与えない）」だったが、**その記述は経路を1つしか見ていなかった** ——\n\n  - claude.yml … いまも actions: write を持たない（変えていない）\n  - MCP の actions_run_trigger … **actions:write あり**（2026-08-28 実測・CLAUDE.md）\n  - issue コメントの橋（release-command.yml）… **セッションはオーナーとして認証されるので通る**。run 30699556723（v4.9.48）で実際に出荷した\n\nつまり**技術的な経路は元から開いていて、塞いでいたのは書いてある規則だった。**渡すにあたって、渡す先を機械が読める形に切り分けてある —— TestFlight 内部配信までは AI、**App Review 提出を伴う起動は人**。提出そのものは別領域の門（machine_gate）が見る。\n\n**実機確認は外していない。**機械には代われないので、提出側の門が `device_verified_sha` と `build.sha` の一致を要求する形で残してある。\n\n**executor はまだ動かさない** —— この経路で AI が1回も起動していない（data/automation-coverage.json の ④ は据え置き）。"
+      "note": "**[2026-09-03] オーナーが submit_review=false に限って渡した。**旧 note は「タグ push を拒む設計（claude.yml に actions: write を与えない）」だったが、**その記述は経路を1つしか見ていなかった** ——\n\n  - claude.yml … いまも actions: write を持たない（変えていない）\n  - MCP の actions_run_trigger … **actions:write あり**（2026-08-28 実測・CLAUDE.md）\n  - issue コメントの橋（release-command.yml）… **セッションはオーナーとして認証されるので通る**。run 30699556723（v4.9.48）で実際に出荷した\n\nつまり**技術的な経路は元から開いていて、塞いでいたのは書いてある規則だった。**渡すにあたって、渡す先を機械が読める形に切り分けてある —— TestFlight 内部配信までは AI、**App Review 提出を伴う起動は人**。提出そのものは別領域の門（machine_gate）が見る。\n\n**実機確認は外していない。**機械には代われないので、提出側の門が `device_verified_sha` と `build.sha` の一致を要求する形で残してある。\n\n**executor はまだ動かさない** —— この経路で AI が1回も起動していない（data/automation-coverage.json の ④ は据え置き）。\n\n[2026-09-10追記] ユーザーは接続・信頼済みiPhone 13とApple Watchの実機利用を指示し、Developerモード・UIオートメーションを有効にして続行を依頼した。Codexによる同じ配布版の操作・結果観測を委任範囲へ反映する。旧「実機確認は機械には代われない」はこの経路に適用しない。本人の認証・ロック解除は人の前提として残す。現在5.8.53(1316)は5/6項目で、購入後の復元がApple再認証待ち。全6項目、実行者・日時・同一SHAの証拠が揃うまで実機確認完了の登録・加点はしない。既存の提出・配布ゲートは保持する。詳細はdocs/physical-device-evidence-20260910.md。"
     },
     {
       "domain": "macOSランナーの起動（GitHub Actions 分数の消費）",
@@ -136,22 +138,24 @@
       "reversible": false,
       "ai_may": [
         "提出の提案",
-        "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）"
+        "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）",
+        "ユーザーが利用を指示し接続・信頼した端末で、同じ配布版の実機テストを操作し、項目別の実結果を記録する"
       ],
       "requires_approval": false,
       "human_only": [
-        "**実機での事前確認そのもの**（機械には代われない。門はその記録を要求する）",
         "`policy.enabled` を立てる操作そのもの",
-        "kill_switch を倒す操作"
+        "kill_switch を倒す操作",
+        "端末のロック解除、Apple Accountの本人認証、サイドボタン認証など本人操作が必要な前提"
       ],
       "gate": "evaluateSubmission() が唯一の関門。CI が同一コミットで success、リリースノートが ja-JP/en-US とも揃い、TestFlight が VALID で24時間以上寝ていて、未解決のブロッカーが0で、**実機確認の記録が同一コミットに対して存在し**、審査が進行中でなく（**版の状態と、アプリ単位の提出枠の両方**）、本日まだ1件も出していないときだけ通る。**どれか1つでも材料が無ければ hold** **[2026-09-03] 段階リリースの確認を提出側にも足した** —— 承認後の公開が自動になったので、公開を決める時点が提出の時点へ移った。`review.phased_release` が true でなければ提出しない。",
       "evidence": [
         "scripts/check-release-gate.mjs",
         "data/release-gate.json",
-        "simplememo-ios/.github/workflows/submit-review.yml"
+        "simplememo-ios/.github/workflows/submit-review.yml",
+        "docs/physical-device-evidence-20260910.md"
       ],
       "status": "active",
-      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない\n\n**[2026-08-28] オーナーが名指しで渡した。**旧 note は「技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない」だった。\n\n**Hard Rule（実機で確認してから提出する）は外していない。**機械には代われないので、**門がその記録を要求する形に変えた** —— `device_verified_by` / `device_verified_at` / `device_verified_sha` が無ければ hold。sha を要求するのは、**見たものと出すものを一致させる**ため（別のビルドを見て出せてしまうと、記録があること自体が意味を失う）。\n\n**enabled は false で置いてある。**実行側（ASCへの提出の呼び出し・タグ作成の権限）もまだ無い。\n\n**[2026-09-03] 門を実行の経路へ配線した。**それまで門は `check-release-gate.mjs` に判定規則としてだけ在り、`release.yml` からも `review-submit.yml` からも呼ばれていなかった。いまは release.yml の `release_gate` ジョブが、実行側が集めた材料に門を当て、`submit` でなければ提出ジョブへ進ませない（`release-gate-run.mjs --materials`）。**材料は送る側が集める** —— 公開リポジトリには本番の管理鍵を置かない、という元からの分け方をパスの側でも通した。\n\n**`enabled` は false のまま。**配線しただけで、まだ1回も通していない。",
+      "note": "技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない\n\n**[2026-08-28] オーナーが名指しで渡した。**旧 note は「技術的な強制ではなく人間のルール。だからこそ actions: write を渡していない」だった。\n\n**Hard Rule（実機で確認してから提出する）は外していない。**機械には代われないので、**門がその記録を要求する形に変えた** —— `device_verified_by` / `device_verified_at` / `device_verified_sha` が無ければ hold。sha を要求するのは、**見たものと出すものを一致させる**ため（別のビルドを見て出せてしまうと、記録があること自体が意味を失う）。\n\n**enabled は false で置いてある。**実行側（ASCへの提出の呼び出し・タグ作成の権限）もまだ無い。\n\n**[2026-09-03] 門を実行の経路へ配線した。**それまで門は `check-release-gate.mjs` に判定規則としてだけ在り、`release.yml` からも `review-submit.yml` からも呼ばれていなかった。いまは release.yml の `release_gate` ジョブが、実行側が集めた材料に門を当て、`submit` でなければ提出ジョブへ進ませない（`release-gate-run.mjs --materials`）。**材料は送る側が集める** —— 公開リポジトリには本番の管理鍵を置かない、という元からの分け方をパスの側でも通した。\n\n**`enabled` は false のまま。**配線しただけで、まだ1回も通していない。\n\n[2026-09-10追記] ユーザーは接続・信頼済みiPhone 13とApple Watchの実機利用を指示し、Developerモード・UIオートメーションを有効にして続行を依頼した。Codexによる同じ配布版の操作・結果観測を委任範囲へ反映する。旧「実機確認は機械には代われない」はこの経路に適用しない。本人の認証・ロック解除は人の前提として残す。現在5.8.53(1316)は5/6項目で、購入後の復元がApple再認証待ち。全6項目、実行者・日時・同一SHAの証拠が揃うまで実機確認完了の登録・加点はしない。既存の提出・配布ゲートは保持する。詳細はdocs/physical-device-evidence-20260910.md。",
       "machine_gate": {
         "checker": "scripts/check-release-gate.mjs",
         "function": "evaluateSubmission",

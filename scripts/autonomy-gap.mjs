@@ -132,6 +132,11 @@ export function analyse(doc, { target = 0.95 } = {}) {
  *          external_contract … 外部の鍵・契約が要る
  */
 export const UNLOCKS = {
+  delegated_device_verification: { kind: 'owner_input', label: '接続した実機の本人認証後に全項目の結果を揃える',
+                       needs: 'ユーザーが接続・信頼し利用を指示した端末の実機テストは委任済み。'
+                            + '現在の5.8.53(1316)は5/6確認済みで、購入復元のApple本人認証を待つ。'
+                            + '認証後に進行中の復元結果を観測し、同じ配布版の全6項目・実行者・時刻・SHAを揃える。'
+                            + '購入成功やPremium表示だけでは復元成功にせず、部分完了では加点しない。' },
   pr_dispatch_verified: { kind: 'wait', label: '実測目標と配信前条件を満たし、今回のPRを配信・公開確認する',
                        needs: '今回の企業182412・下書き10は委任済み。未丸め実測99.497%以上の最新台帳と'
                             + '同一原稿・PR TIMESプレビュー、品質、宛先、日時、料金、未配信状態を'
