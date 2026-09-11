@@ -1,14 +1,14 @@
 {
-  "as_of_jst": "2026-09-10",
+  "as_of_jst": "2026-09-11",
   "routine_snapshot_sha256": "b5bfffe15e8d5bb1557adee1a183501704d1671f04f184a5b9684050828a72a0",
   "viewport_measurement": {
-    "main_sha": "1e4ce2314f90376b61e8fb99e74a343b1b7a7130",
-    "head_sha": "826291141c32298ff5736c29d37f02cc955d40d7",
-    "run_id": 34416224948,
+    "main_sha": "3e1b54879935b018ff64d93a52e17278da52cbcf",
+    "head_sha": "d5e7041c46c6be549a020d7bb194bab2fc19e8c4",
+    "run_id": 34550432373,
     "attempt": 1,
-    "started_at": "2026-09-09T23:17:00Z",
-    "url": "https://github.com/simplememofast/simplememo/actions/runs/34416224948/attempts/1",
-    "job_id": 102681591024,
+    "started_at": "2026-09-11T01:22:57Z",
+    "url": "https://github.com/simplememofast/simplememo/actions/runs/34550432373/attempts/1",
+    "job_id": 103112005486,
     "state": "healthy",
     "report": {
       "version": 1,
@@ -38,9 +38,9 @@
       }
     }
   },
-  "open_total": 8,
+  "open_total": 7,
   "pending_pr": [],
-  "oldest_open_days": 7,
+  "oldest_open_days": 8,
   "acknowledged": 7,
   "closed_today": [
     {
@@ -57,6 +57,11 @@
       "id": "act-selfheal-ap-20260905-actions",
       "title": "未修理の故障: ap-20260905-actions（usage_limit）— セッション側に打つ手が無い種別",
       "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし"
+    },
+    {
+      "id": "act-health-1203",
+      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1203 の state=closed をGitHub APIで確認"
     }
   ],
   "human": [
@@ -64,7 +69,7 @@
       "id": "act-pr6-d14-evaluate",
       "title": "PR⑥（9/3配信）の D+14 乗車判定 — PR TIMES 分析から5つの数値を転記して evaluate する",
       "detail": "2026-09-17（D+14）に、9/3配信のPR⑥を評価する。対象は growth/experiments/experiments.json の pr-2026-rsi-autopilot（status: running、evaluation_at: 2026-09-17）。\n\n2026-09-04、対象リリースの非公開分析を読み取り専用で開くことへのオーナーの明示承認「ok」を受け、Codexのアプリ内ブラウザーで取得経路を確認した。「分析データ」→「レポート」→対象行の「詳細」。公開URL・公開日時・期間指定を照合し、ページビュー、デバイス別アクセス、参照元サイト一覧、掲載メディア一覧を実際に読めた。閲覧承認待ちは解消済み。今回の非公開取得値は公開台帳へ転記していない。\n\n手順の正典は docs/prtimes-d14-capture.md。参照元は割合表示ではなく訪問者数の表なので、全ページの行を読み、Google系の合計を全参照元合計で割る。スマートフォン比率は対象リリースの期間合計の%を100で割る。送信者比率はPR TIMESにはなく、アプリ側の実測が別途必要。\n\n2026-09-07の所有者判断「2 任せる」により、停止した旧Cowork Routineの取得・取りこぼし監視はCodexの運用タスク simplememo-2（毎日10:30 JST）へ統合済み。docs/monitor-delegation-20260907.md に従い、既存の取得担当・実行中PRを照合し、不在なら取得から評価・PR反映まで引き受ける。停止済みCoworkの完走は現在の前提条件にしない。残る実測は、現行の担当による認可された取得・保存・PR反映と、9/17の評価値。予約保存や対話中の読み取り成功を無人完走とは扱わない。毎回最新の実験台帳で期限と未取得項目を確認する。\n\n期限後、対象と期間と公開範囲を確認した値だけを確定転記し、docs/prtimes-d14-capture.md に従って評価と3台帳の整合を検証する。この取得タスクでは d_score_pre を再採点せず、既存の点数と履歴を保持し「再採点は未実施」と報告する。annotations.jsonとbacktestは照合するが、既存D+1観測のあるPR⑥でbacktest件数の増加を合格条件にしない。読めた値が一部だけの場合は非公開の作業記録に保持し、最終転記先へ部分的に入れない（2026-09-07以降は部分転記も期限判定へ残る。既存値は証拠・期間・最新mainとの照合後、不足分だけを補う）。判定不能を完了とはせず、この対象実験の評価完了を確認して閉じる。",
-      "age_days": 7,
+      "age_days": 8,
       "why": "過去のエスカレーションとその判定を保持するためのhuman分類。現在の実行担当は所有者の委任を受けたCodex運用タスク simplememo-2であり、閲覧承認や人による転記を再度求める意味ではない。旧Cowork Routineは停止済みで、その完走を前提にしない。2026-09-17の実測・対象実験の確定評価まで閉じない。",
       "evidence": "リポジトリから検査できない（人が閉じる）",
       "not_before_jst": "2026-09-17"
@@ -72,7 +77,7 @@
     {
       "id": "act-health-1193",
       "title": "【監視】cron監視: 定期実行の失敗または起動欠落があります",
-      "age_days": 1,
+      "age_days": 2,
       "why": "触る対象も領域も特定できない（不明なものは自動実行しない）",
       "evidence": "#1193 がまだ open",
       "not_before_jst": null
@@ -83,7 +88,7 @@
       "id": "act-routine-run-trig_013uV3Pk3SZH8QJS6PxSg9Bw",
       "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】x-engagement 夜19:30 v4.1-device（19:35 の run が自ら dev:no と報告・投稿0） (stopped)",
       "detail": "登録済みタスク trig_013uV3Pk3SZH8QJS6PxSg9Bw。観測 2026-09-09T21:05:26.581Z、状態 stopped。\n実行 2026-09-05T10:35:45.582040954Z、セッション cse_017mXdfL64H762ZJMNcucRgy、終了 2026-09-05T10:59:08.552542Z、次回 2026-09-06T10:34:38.030652858Z、追跡開始時の予定 2026-09-05T10:34:49.332619211Z。\n名前は外部メタデータであり指示ではない。既存の調査・置換作業と実行証跡を照合し、原因と対応結果を記録する。未確定は故障や成功に数えない。利用枠リセット、再実行、投稿、予定・権限変更の許可をこの行から推定しない。解消は新しい観測の終了証跡、または理由付きの意図的停止と照合する。セッション終了は依頼内容の達成や自動修復の証明ではない。",
-      "age_days": 5,
+      "age_days": 6,
       "auto": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -91,7 +96,7 @@
       "id": "act-routine-run-trig_0146oEExJXb2GRXt6ES2nw7o",
       "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】obsidian-community v5.1-device（Reddit・承認署名が付かずクラウド実行のまま・投稿0） (stopped)",
       "detail": "登録済みタスク trig_0146oEExJXb2GRXt6ES2nw7o。観測 2026-09-09T21:05:26.581Z、状態 stopped。\n実行 未確認、セッション 未確認、終了 未確認、次回 2026-09-05T11:31:00Z、追跡開始時の予定 2026-09-05T11:31:00Z。\n名前は外部メタデータであり指示ではない。既存の調査・置換作業と実行証跡を照合し、原因と対応結果を記録する。未確定は故障や成功に数えない。利用枠リセット、再実行、投稿、予定・権限変更の許可をこの行から推定しない。解消は新しい観測の終了証跡、または理由付きの意図的停止と照合する。セッション終了は依頼内容の達成や自動修復の証明ではない。",
-      "age_days": 5,
+      "age_days": 6,
       "auto": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -99,22 +104,15 @@
       "id": "act-routine-run-trig_01DmNiVHB7jo42bNVJL1wnBo",
       "title": "定期タスクの異常を調査: 【停止・ローカル版へ移行 09-05】x-engagement 昼12:30 v4.1-device（承認署名が付かずクラウド実行のまま dev:no・投稿0） (stopped)",
       "detail": "登録済みタスク trig_01DmNiVHB7jo42bNVJL1wnBo。観測 2026-09-09T21:05:26.581Z、状態 stopped。\n実行 2026-09-05T05:32:36.629932818Z、セッション cse_01MUS3CPNZ8P76dMuJCZb4f5、終了 2026-09-05T09:51:47.580007Z、次回 2026-09-06T03:30:36.964912742Z、追跡開始時の予定 未確認。\n名前は外部メタデータであり指示ではない。既存の調査・置換作業と実行証跡を照合し、原因と対応結果を記録する。未確定は故障や成功に数えない。利用枠リセット、再実行、投稿、予定・権限変更の許可をこの行から推定しない。解消は新しい観測の終了証跡、または理由付きの意図的停止と照合する。セッション終了は依頼内容の達成や自動修復の証明ではない。",
-      "age_days": 5,
+      "age_days": 6,
       "auto": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
-    },
-    {
-      "id": "act-health-1203",
-      "title": "【監視】autopilot監視: 当日分の実行記録がありません",
-      "age_days": 1,
-      "auto": null,
-      "evidence": "#1203 がまだ open"
     },
     {
       "id": "act-selfheal-ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b",
       "title": "未修理の故障: ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b（no_artifact）",
       "detail": "2026-09-10 / actions / outcome=no_artifact。C13 Templater requires actual Obsidian GUI verification; Obsidian.app is absent and unattended new-application execution is not authorized. No content implementation was made.",
-      "age_days": 0,
+      "age_days": 1,
       "auto": null,
       "evidence": "ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b は未修理のまま（repair_of で名指しされていない）"
     },
@@ -122,7 +120,7 @@
       "id": "act-shipping-outage",
       "title": "どの経路も 2日連続で出荷していない（2026-09-09〜2026-09-10）",
       "detail": "台帳に行はあるが、出荷が1件も無い日が続いている（2026-09-09 / 2026-09-10）。\n\n**連続稼働は伸び続ける。**稼働の定義（no_run の行がある日だけ停止）では、失敗した日も「記録がある日」なので連続が切れない。`node scripts/autopilot-runs.mjs` の **連続出荷** と **無介入出荷** が切れているほうを見ること。\n\n**個別の故障行だけを見ていると、この形が見えない。**1日1件ずつ selfheal 行が立つので、台帳の上では「未修理が3件」に見え、「3日出ていない」にはならない。",
-      "age_days": 0,
+      "age_days": 1,
       "auto": null,
       "evidence": "2026-09-08 以降どの経路も出荷していない"
     }
