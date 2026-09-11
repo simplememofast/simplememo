@@ -18,7 +18,7 @@ test('existing transfers gain more than starting a task; neither changes the inv
   assert.equal(r.opportunities[0].potential.denominator, 3);
   assert.equal(r.opportunities[1].potential.denominator, 4);
   assert.equal(r.current.ai_executes, 1);
-  assert.equal(r.target_ai_execution_rate, 0.99);
+  assert.equal(r.target_ai_execution_rate, 0.98);
   assert.equal(r.target_comparison, 'strictly_greater');
   assert.equal(r.current.defined, 4);
   assert.equal(JSON.stringify(coverage), before);
@@ -97,14 +97,14 @@ const goalInventory = () => ({ tasks: [
   ...Array.from({ length: 4 }, (_, i) => task(`excluded${i}`, 'intentional_no')),
 ] });
 
-test('consent and deferred dispatch keep the current 199-task pre-release goal out of reach', () => {
+test('consent and deferred dispatch remain held under the owner-revised 98% goal', () => {
   const doc = goalInventory(), before = JSON.stringify(doc);
   const r = prioritize(doc, { entries: [] }, now), bound = r.pre_dispatch_upper_bound;
   assert.equal(r.current.ai_executes, 156);
   assert.equal(r.current.doing, 179);
   assert.equal(bound.numerator, 197);
   assert.equal(bound.denominator, 199);
-  assert.equal(bound.target_exceeds_upper_bound, true);
+  assert.equal(bound.target_exceeds_upper_bound, false);
   assert.deepEqual(new Set(bound.held_tasks.map(t => t.reason)), new Set(['human_consent', 'dispatch_after_target']));
   assert.equal(JSON.stringify(doc), before);
 });
@@ -130,10 +130,10 @@ test('197 of 198 exceeds the new target although it fell below the old target', 
   assert.equal(bound.target_exceeds_upper_bound, false);
 });
 
-test('an optimistic bound of exactly 99% cannot reach a strictly greater target', () => {
-  const doc = { tasks: [...Array.from({ length: 99 }, (_, i) => task(`done-${i}`, 'ai_autonomous')), consent()] };
+test('an optimistic bound of exactly 98% cannot reach a strictly greater target', () => {
+  const doc = { tasks: [...Array.from({ length: 98 }, (_, i) => task(`done-${i}`, 'ai_autonomous')), consent(), dispatch()] };
   const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_upper_bound;
-  assert.equal(bound.rate, 0.99);
+  assert.equal(bound.rate, 0.98);
   assert.equal(bound.target_exceeds_upper_bound, true);
 });
 
