@@ -34,9 +34,9 @@ export function captureCommitted(coverage, sourceCommit, committedCoverage, now)
 const pct = n => (n * 100).toFixed(1);
 export function render(manifest) {
   const s = manifest.snapshot;
-  const title = `Obsidian連携シンプルメモ、アプリ運営のAI実行率${pct(s.ai_execution_rate)}%を公開`;
-  const subtitle = `実施中${s.doing}業務のうち${s.ai_executes}業務をAIが実行。未着手を含む総合自動化率は${pct(s.overall_automation_rate)}%。実装・検証・本番反映の証拠と残る業務を公開`;
-  const body = `株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「シンプルメモ」の運営業務について、AIが担当する業務と実行証拠を公開しています。本稿の集計は${s.observed_at.slice(0, 10)}時点の業務台帳に基づきます。
+  const title = `Obsidian連携シンプルメモ、運営業務の担当と実行記録を公開`;
+  const subtitle = `AI実行率${pct(s.ai_execution_rate)}%。実施中${s.doing}業務のうち${s.ai_executes}業務をAIが実行。未着手を含む総合自動化率は${pct(s.overall_automation_rate)}%。実装・検証・本番反映の証拠と残る業務を公開`;
+  const body = `株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「シンプルメモ」の運営業務について、AIが担当する業務と実行証拠を公開しています。本稿の集計は${new Date(s.observed_at).toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" })}（日本時間）に取得した業務台帳に基づきます。
 
 シンプルメモは、思いついたことを話すか書いて、自分のメールやObsidianへ残すためのアプリです。その運営では、データの確認、改善案の選定、実装、自動検査、本番反映、結果の記録をAIが担う範囲を広げています。
 
@@ -57,12 +57,14 @@ AI関与率：${pct(s.ai_involvement_rate)}%（提案・下書きまでの業務
 
 実行の記録と最新の数値：
 https://simplememofast.com/autopilot/
-業務別の台帳：
+本稿の集計に使用した業務台帳（取得時点の版）：
+https://github.com/simplememofast/simplememo/blob/${s.source_commit}/data/automation-coverage.json
+最新の業務別台帳：
 https://simplememofast.com/data/automation-coverage.json
 
 ■ 人が担う役割と、残る仕事も示す
 
-全体の方針や委任の範囲はオーナーが決めます。包括的な委任があっても、現地での作業、利用者本人の同意、法的責任、第三者の審査を完了したことにはなりません。未完了の業務を分母から取り除かず、同じ定義で改善を追跡します。
+全体の方針や委任の範囲はオーナーが決めます。包括的な委任があっても、現地での作業、利用者本人の同意、法的責任、第三者の審査を完了したことにはなりません。総合自動化率は、未着手を含む199業務を分母とします。AI実行率は、そのうち実施中の業務が分母で、未着手の業務は含みません。着手が進むとAI実行率の分母も変わるため、件数と両方の率を併記して改善を追跡します。
 
 ■ シンプルメモについて
 
