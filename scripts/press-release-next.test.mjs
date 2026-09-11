@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { capture, captureCommitted, digest, render, markdown, validate, evaluateDispatch } from './press-release-next.mjs';
+import { capture, captureCommitted, digest, render, markdown, validate, evaluateDispatch, exceedsOwnerTarget } from './press-release-next.mjs';
 
 const now = '2026-09-17T00:30:00Z';
 test('snapshot source must contain the observed ledger', () => {
@@ -13,7 +13,7 @@ test('snapshot source must contain the observed ledger', () => {
 function fixture({ ai = 198, human = 1 } = {}) {
   const coverage = { tasks: Array.from({ length: 203 }, (_, i) => ({ area: 'Fixture', task: `task-${i}`, executor: i < ai ? 'ai_executes_gated' : i < ai + human ? 'human_only' : i < 199 ? 'nobody' : 'intentional_no' })) };
   const snapshot = capture(coverage, 'a'.repeat(40), now);
-  const manifest = { schema_version: 1, id: '202609-autonomy-followup', enabled: true, status: 'ready', target_ai_execution_rate: 0.99497, window: { starts_at: '2026-09-14T00:00:00+09:00', ends_at: '2026-09-21T00:00:00+09:00' }, scheduled_at: '2026-09-17T10:00:00+09:00', baseline_inventory: snapshot.inventory, snapshot, draft: {}, remote_draft_id: '10', media_list_id: 'test', receipt: null };
+  const manifest = { schema_version: 1, id: '202609-autonomy-followup', enabled: true, status: 'ready', target_ai_execution_rate: 0.99, target_comparison: 'strictly_greater', window: { starts_at: '2026-09-14T00:00:00+09:00', ends_at: '2026-09-21T00:00:00+09:00' }, scheduled_at: '2026-09-17T10:00:00+09:00', baseline_inventory: snapshot.inventory, snapshot, draft: {}, remote_draft_id: '10', media_list_id: 'test', receipt: null };
   const parts = render(manifest);
   const draft = markdown(parts);
   manifest.draft.sha256 = digest(draft);
@@ -26,7 +26,7 @@ test('only a current measured release with matching remote preview can pass', ()
   assert.deepEqual(validate(f.manifest, f.draft), []);
   assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
 });
-test('198 of 199 actual executions clears the owner-revised 99.497% goal before dispatch', () => {
+test('198 of 199 actual executions clears the owner-revised greater-than-99% goal before dispatch', () => {
   const f = fixture();
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
   assert.equal(result.metrics.ai_executes, 198);
@@ -34,13 +34,21 @@ test('198 of 199 actual executions clears the owner-revised 99.497% goal before 
   assert.equal(result.allowed, true);
   assert.equal(f.coverage.tasks[198].executor, 'human_only');
 });
-test('197 of 198 still fails although both boundary cases display as 99.5%', () => {
+test('197 of 198 passes the new goal without requiring the former 99.497%', () => {
   const f = fixture({ ai: 197, human: 1 });
   assert.match(f.ui.title, /99\.5%/);
   assert.match(fixture().ui.title, /99\.5%/);
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
-  assert.equal(result.allowed, false);
-  assert.match(result.reasons.join('\n'), /target not reached: 197\/198/);
+  assert.equal(result.allowed, true);
+});
+test('exactly 99% is held and rounding to 99.0% never grants execution credit', () => {
+  for (const counts of [{ ai: 99, human: 1 }, { ai: 197, human: 2 }]) {
+    const f = fixture(counts);
+    assert.match(f.ui.title, /99\.0%/);
+    assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, false);
+  }
+  for (const value of [NaN, Infinity, -Infinity, null, '1', 0.99]) assert.equal(exceedsOwnerTarget(value), false);
+  assert.equal(exceedsOwnerTarget(0.99001), true);
 });
 test('the current 156 of 179 and two unfinished tasks out of 199 remain below target', () => {
   for (const counts of [{ ai: 156, human: 23 }, { ai: 197, human: 2 }]) {
@@ -52,8 +60,13 @@ test('the current 156 of 179 and two unfinished tasks out of 199 remain below ta
 });
 test('the former target cannot silently remain as the campaign target', () => {
   const f = fixture();
-  f.manifest.target_ai_execution_rate = 0.999;
-  assert.match(validate(f.manifest, f.draft).join('\n'), /owner target is 99\.497%/);
+  for (const old of [0.999, 0.99497]) {
+    f.manifest.target_ai_execution_rate = old;
+    assert.match(validate(f.manifest, f.draft).join('\n'), /strictly greater than 99%/);
+  }
+  f.manifest.target_ai_execution_rate = 0.99;
+  delete f.manifest.target_comparison;
+  assert.match(validate(f.manifest, f.draft).join('\n'), /strictly greater than 99%/);
 });
 function paidFixture() {
   const f = fixture();
@@ -109,7 +122,7 @@ for (const [name, mutate, expected] of [
     f.manifest.quality_review.draft_sha256 = digest(f.draft);
     Object.assign(f.ui, parts);
   }, /target not reached/],
-  ['lowered target', f => { f.manifest.target_ai_execution_rate = 0.83; }, /99\.497/],
+  ['lowered target', f => { f.manifest.target_ai_execution_rate = 0.83; }, /strictly greater than 99/],
   ['excluded hard work', f => { f.manifest.snapshot.inventory = '0'.repeat(64); }, /scope/],
   ['stale snapshot', f => { f.manifest.snapshot.observed_at = '2026-09-15T00:00:00Z'; }, /24 hours/],
   ['future observation', f => { f.ui.observed_at = '2026-09-18T00:00:00Z'; }, /preview required/],
