@@ -13,7 +13,7 @@ test('snapshot source must contain the observed ledger', () => {
 function fixture({ ai = 198, human = 1 } = {}) {
   const coverage = { tasks: Array.from({ length: 203 }, (_, i) => ({ area: 'Fixture', task: `task-${i}`, executor: i < ai ? 'ai_executes_gated' : i < ai + human ? 'human_only' : i < 199 ? 'nobody' : 'intentional_no' })) };
   const snapshot = capture(coverage, 'a'.repeat(40), now);
-  const manifest = { schema_version: 1, id: '202609-autonomy-followup', enabled: true, status: 'ready', target_ai_execution_rate: 0.99, target_comparison: 'strictly_greater', window: { starts_at: '2026-09-14T00:00:00+09:00', ends_at: '2026-09-21T00:00:00+09:00' }, scheduled_at: '2026-09-17T10:00:00+09:00', baseline_inventory: snapshot.inventory, snapshot, draft: {}, remote_draft_id: '10', media_list_id: 'test', receipt: null };
+  const manifest = { schema_version: 1, id: '202609-autonomy-followup', enabled: true, status: 'ready', target_ai_execution_rate: 0.98, target_comparison: 'strictly_greater', window: { starts_at: '2026-09-14T00:00:00+09:00', ends_at: '2026-09-21T00:00:00+09:00' }, scheduled_at: '2026-09-17T10:00:00+09:00', baseline_inventory: snapshot.inventory, snapshot, draft: {}, remote_draft_id: '10', media_list_id: 'test', receipt: null };
   const parts = render(manifest);
   const draft = markdown(parts);
   manifest.draft.sha256 = digest(draft);
@@ -26,7 +26,7 @@ test('only a current measured release with matching remote preview can pass', ()
   assert.deepEqual(validate(f.manifest, f.draft), []);
   assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
 });
-test('198 of 199 actual executions clears the owner-revised greater-than-99% goal before dispatch', () => {
+test('198 of 199 actual executions clears the owner-revised greater-than-98% goal before dispatch', () => {
   const f = fixture();
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
   assert.equal(result.metrics.ai_executes, 198);
@@ -41,32 +41,38 @@ test('197 of 198 passes the new goal without requiring the former 99.497%', () =
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
   assert.equal(result.allowed, true);
 });
-test('exactly 99% is held and rounding to 99.0% never grants execution credit', () => {
-  for (const counts of [{ ai: 99, human: 1 }, { ai: 197, human: 2 }]) {
+test('exactly 98% is held even when a below-target ratio rounds to 98.0%', () => {
+  for (const counts of [{ ai: 98, human: 2 }, { ai: 195, human: 4 }]) {
     const f = fixture(counts);
-    assert.match(f.ui.title, /99\.0%/);
+    assert.match(f.ui.title, /98\.0%/);
     assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, false);
   }
-  for (const value of [NaN, Infinity, -Infinity, null, '1', 0.99]) assert.equal(exceedsOwnerTarget(value), false);
-  assert.equal(exceedsOwnerTarget(0.99001), true);
+  for (const value of [NaN, Infinity, -Infinity, null, '1', 0.98]) assert.equal(exceedsOwnerTarget(value), false);
+  assert.equal(exceedsOwnerTarget(0.98001), true);
 });
-test('the current 156 of 179 and two unfinished tasks out of 199 remain below target', () => {
-  for (const counts of [{ ai: 156, human: 23 }, { ai: 197, human: 2 }]) {
-    const f = fixture(counts);
-    const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
-    assert.equal(result.allowed, false);
-    assert.match(result.reasons.join('\n'), /target not reached/);
-  }
+test('196/199 clears 98% with consent and dispatch still unfinished; 195/199 does not', () => {
+  const f = fixture({ ai: 196, human: 3 });
+  const before = JSON.stringify(f.coverage);
+  assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
+  assert.equal(JSON.stringify(f.coverage), before);
+  const below = fixture({ ai: 195, human: 4 });
+  assert.equal(evaluateDispatch(below.manifest, below.coverage, below.draft, below.ui, now).allowed, false);
+});
+test('the current 158 of 179 remains below target', () => {
+  const f = fixture({ ai: 158, human: 21 });
+  const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
+  assert.equal(result.allowed, false);
+  assert.match(result.reasons.join('\n'), /target not reached/);
 });
 test('the former target cannot silently remain as the campaign target', () => {
   const f = fixture();
-  for (const old of [0.999, 0.99497]) {
+  for (const old of [0.99, 0.999, 0.99497]) {
     f.manifest.target_ai_execution_rate = old;
-    assert.match(validate(f.manifest, f.draft).join('\n'), /strictly greater than 99%/);
+    assert.match(validate(f.manifest, f.draft).join('\n'), /strictly greater than 98%/);
   }
-  f.manifest.target_ai_execution_rate = 0.99;
+  f.manifest.target_ai_execution_rate = 0.98;
   delete f.manifest.target_comparison;
-  assert.match(validate(f.manifest, f.draft).join('\n'), /strictly greater than 99%/);
+  assert.match(validate(f.manifest, f.draft).join('\n'), /strictly greater than 98%/);
 });
 function paidFixture() {
   const f = fixture();
@@ -114,7 +120,7 @@ for (const [name, mutate] of [
 });
 for (const [name, mutate, expected] of [
   ['real unfinished task', f => {
-    f.coverage.tasks[0].executor = 'human_only';
+    for (let i = 0; i < 3; i++) f.coverage.tasks[i].executor = 'human_only';
     f.manifest.snapshot = capture(f.coverage, 'a'.repeat(40), now);
     const parts = render(f.manifest);
     f.draft = markdown(parts);
@@ -122,7 +128,7 @@ for (const [name, mutate, expected] of [
     f.manifest.quality_review.draft_sha256 = digest(f.draft);
     Object.assign(f.ui, parts);
   }, /target not reached/],
-  ['lowered target', f => { f.manifest.target_ai_execution_rate = 0.83; }, /strictly greater than 99/],
+  ['lowered target', f => { f.manifest.target_ai_execution_rate = 0.83; }, /strictly greater than 98/],
   ['excluded hard work', f => { f.manifest.snapshot.inventory = '0'.repeat(64); }, /scope/],
   ['stale snapshot', f => { f.manifest.snapshot.observed_at = '2026-09-15T00:00:00Z'; }, /24 hours/],
   ['future observation', f => { f.ui.observed_at = '2026-09-18T00:00:00Z'; }, /preview required/],
