@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { executionPlan, BLOCKERS, UNLOCKS, blockedOnSatisfied } from './autonomy-gap.mjs';
 
-import { OWNER_TARGET_AI_EXECUTION_RATE } from './press-release-next.mjs';
+import { OWNER_TARGET_AI_EXECUTION_RATE, exceedsOwnerTarget } from './press-release-next.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORDER = ['act', 'inspect', 'wait', 'boundary', 'defer'];
@@ -72,12 +72,12 @@ export function prioritize(coverage, assessments, now = new Date()) {
   const denominator = current.doing + movable.filter(t => t.executor === 'nobody').length;
   const preDispatchUpperBound = {
     numerator, denominator, rate: numerator / denominator,
-    target_exceeds_upper_bound: OWNER_TARGET_AI_EXECUTION_RATE > numerator / denominator,
+    target_exceeds_upper_bound: !exceedsOwnerTarget(numerator / denominator),
     held_tasks: held.map(t => ({ task_index: t.task_index, area: t.area, task: t.task,
       executor: t.executor, reason: t.task === '収集同意' ? 'human_consent' : 'dispatch_after_target' })),
     assumption: '未実行の収集同意と配信操作を保持し、それ以外の残業務をすべてAI実行へ移せた場合の楽観上限。実行可能性・期限・完了は保証しない。',
   };
-  return { observed_at: now.toISOString(), metric: 'ai_execution_rate', target_ai_execution_rate: OWNER_TARGET_AI_EXECUTION_RATE, current,
+  return { observed_at: now.toISOString(), metric: 'ai_execution_rate', target_ai_execution_rate: OWNER_TARGET_AI_EXECUTION_RATE, target_comparison: 'strictly_greater', current,
     classified_ceiling: plan.classified_ceiling,
     pre_dispatch_upper_bound: preDispatchUpperBound,
     active_remaining: opportunities.filter(t => t.executor !== 'nobody').length,
@@ -99,7 +99,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const c = result.current;
     console.log(`AI実行率 ${c.ai_executes}/${c.doing} = ${pct(c.ai_execution_rate)} / 総合 ${pct(c.overall_automation_rate)} / AI関与 ${pct(c.ai_involvement_rate)} / カバー ${pct(c.coverage_rate)}`);
     const bound = result.pre_dispatch_upper_bound;
-    console.log(`配信前の楽観上限 ${bound.numerator}/${bound.denominator} = ${(bound.rate * 100).toFixed(6)}% / 目標 ${(result.target_ai_execution_rate * 100).toFixed(3)}%`);
+    console.log(`配信前の楽観上限 ${bound.numerator}/${bound.denominator} = ${(bound.rate * 100).toFixed(6)}% / 目標 ${(result.target_ai_execution_rate * 100).toFixed(0)}%超`);
     console.log(bound.target_exceeds_upper_bound
       ? '現行条件では配信前に目標へ届かない。本人同意・未配信業務の先取りや棚卸し変更で埋めず、実行可能な改善は継続する。'
       : 'この上限だけでは目標を否定できない。各業務の実行証拠と配信ゲートの確認が必要。');

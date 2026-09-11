@@ -18,7 +18,8 @@ test('existing transfers gain more than starting a task; neither changes the inv
   assert.equal(r.opportunities[0].potential.denominator, 3);
   assert.equal(r.opportunities[1].potential.denominator, 4);
   assert.equal(r.current.ai_executes, 1);
-  assert.equal(r.target_ai_execution_rate, 0.99497);
+  assert.equal(r.target_ai_execution_rate, 0.99);
+  assert.equal(r.target_comparison, 'strictly_greater');
   assert.equal(r.current.defined, 4);
   assert.equal(JSON.stringify(coverage), before);
   assert.deepEqual(new Set(r.opportunities.map(t => t.task)), new Set(['transfer', 'start', 'physical']));
@@ -118,7 +119,7 @@ test('an executed release changes the bound only through actual inventory status
   assert.equal(bound.held_tasks.length, 1);
 });
 
-test('rounded 99.5 percent remains below the raw 99.497 percent target', () => {
+test('197 of 198 exceeds the new target although it fell below the old target', () => {
   const doc = goalInventory();
   doc.tasks.find(t => t.task === 'PR TIMES への配信操作').executor = 'ai_executes_gated';
   doc.tasks.splice(doc.tasks.findIndex(t => t.task === 'new0'), 1);
@@ -126,6 +127,13 @@ test('rounded 99.5 percent remains below the raw 99.497 percent target', () => {
   assert.equal(bound.numerator, 197);
   assert.equal(bound.denominator, 198);
   assert.equal((bound.rate * 100).toFixed(1), '99.5');
+  assert.equal(bound.target_exceeds_upper_bound, false);
+});
+
+test('an optimistic bound of exactly 99% cannot reach a strictly greater target', () => {
+  const doc = { tasks: [...Array.from({ length: 99 }, (_, i) => task(`done-${i}`, 'ai_autonomous')), consent()] };
+  const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_upper_bound;
+  assert.equal(bound.rate, 0.99);
   assert.equal(bound.target_exceeds_upper_bound, true);
 });
 
