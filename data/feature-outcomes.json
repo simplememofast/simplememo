@@ -64,7 +64,7 @@
           "comparability": "Historical all-layout reference only; not a randomized control or a unique-capture rate."
         }
       },
-      "status": "declared_not_shipped",
+      "status": "observing_with_telemetry_gap",
       "implementation_dependencies": [
         "iOS and API allowlisted category-only telemetry",
         "release version/build recorded before measurement",
@@ -82,10 +82,31 @@
       },
       "rollback_policy": "Confirmed data loss, duplicate writes, or writes outside the selected vault stop rollout immediately. A nested failure-event rate above 5% after at least 50 attempts and 10 installs pauses further rollout for investigation.",
       "notes": [
-        "No shipped_at, result, or verdict is recorded before deployment and observation.",
+        "The September 6 metric declaration preceded the verified September 8 production rollout. Release identity was reconciled on September 11.",
+        "The first partial diagnostic found no classified write outcomes. Historical unknown categories cannot be filled from current settings.",
+        "Direct flat write classification is corrected in iOS PR482 source; it is absent from published build1179 and TestFlight1342. A later corrected release needs a separate prospective declaration before measurement.",
+        "The original 28-day window and October 18 review date are preserved. No result or verdict is recorded before that evaluation.",
         "The flat cohort is an observational reference; results cannot establish causal improvement.",
-        "No AI execution-rate increment is claimed for this declaration."
-      ]
+        "No AI execution-rate increment is claimed for declaration, rollout reconciliation, interim observation, or telemetry repair."
+      ],
+      "shipped_at": "2026-09-08",
+      "release": {
+        "app_version": "5.8.46",
+        "build_number": "1179",
+        "source_commit": "335e0aae107c5378c21da9ce5011e7a76afa75d4",
+        "feature_merge_commit": "2004620",
+        "app_store_version_id": "a4acd5a7-0563-415f-88ef-48f58a876f55",
+        "build_id": "55b35c2b-f921-4750-97b0-06fa739e8b76",
+        "xcode_cloud_run_id": "9407bf94-f5bf-45a8-9f5b-4482bbc6727d",
+        "observed_at": "2026-09-11T11:53:32Z",
+        "app_store_state": "READY_FOR_SALE",
+        "phased_release_state": "ACTIVE",
+        "rollout_start_utc": "2026-09-08T17:13:59Z",
+        "planned_window_end_utc": "2026-10-06T17:13:59Z",
+        "anchor_note": "ASC phased release startDate is the observed rollout anchor, not proof of identical first availability in every storefront.",
+        "evidence": "docs/obsidian-feature-observation-20260911.md"
+      },
+      "observation": "data/obsidian-feature-observation-20260911.json"
     }
   ]
 }
