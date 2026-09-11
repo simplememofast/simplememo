@@ -242,10 +242,12 @@
       "area": "① 次期機能開発",
       "task": "North Star Metric（Zero-decision Capture Rate）の実測",
       "executor": "nobody",
-      "evidence": [],
-      "note": "**定義はあるが実測が無い。**`../simplememo-ios/docs/VISION.md` が究極KPIとして定義し、CLAUDE.md も「Zero-decision の数値はまだ実測が無い。実測が出るまでサイトに数値を書かない」と明記している。**つまり最上位のKPIだけが、他の全指標に課している基準を満たしていない。**優先順位付けは代理指標（継続率・課金率）で回っており、NSMは判断に効いていない",
+      "evidence": [
+        "docs/nsm-measurement-resumption-20260911.md"
+      ],
+      "note": "**定義はあるが実測が無い。**`../simplememo-ios/docs/VISION.md` が究極KPIとして定義し、CLAUDE.md も「Zero-decision の数値はまだ実測が無い。実測が出るまでサイトに数値を書かない」と明記している。**つまり最上位のKPIだけが、他の全指標に課している基準を満たしていない。**優先順位付けは代理指標（継続率・課金率）で回っており、NSMは判断に効いていない\n2026-09-11: 完成済み計測案にCapture前の全入力監視を必須化する余分な条件があることを敵対的レビューで確認。VISIONに沿った前向き計測契約へ訂正し、全受付・失敗・欠測を保持した実装を再開する。定義修正やテストだけでは実測へ加点しない。",
       "blocker": "not_started",
-      "unblocked_by": "Capture後にユーザーが直したかをアプリ側で計装する。定義はVISIONにあり、無いのは観測",
+      "unblocked_by": "非空保存要求の受付を設定・上限判定前に全入口で記録し、受付台帳と操作順序・当時の保存指示・実配送結果を照合する。母数不明はnull、既知の欠測は同じ分母の不明として保持する。旧案の入力前witness待ちではなく、同一配布版での全入口検証と実収集まで進める。",
       "unlock": "impl_measurement"
     },
     {
