@@ -3875,3 +3875,42 @@ manual snapshot `2026-09-02` を更新していない。Codex定期セッショ�
 運用自律性の点数は45.0で、AI実行率156/179とは別指標。この復旧でAI実行率への加点はない。
 
 `ROUTINE_MCP_PROBE: not_applicable Codexへ移管済み、CCR可否は未再測定`
+
+---
+
+## 2026-09-11（Codex補完・12:20） — 検証不能な coverage 候補で止まり続ける選定手順を修理
+
+### 判定と引き継ぎ
+
+`codex-autopilot-preflight` は `run:true / code:run_takeover`。緊急停止と actions 停止は false、
+月次・修理枠・1回上限はすべて通過した。09:20 の当日 branch claim は 243 分経過していたが、
+非宣言差分も PR も無かったため、既存履歴を残す空コミットで引き継ぎ、force push を使わず
+最新 `main` に同期した。
+
+### 価値契約と修理
+
+`coverage-executable-fallback-20260911-1220` を実装前に宣言した。対象 KPI は
+`publishing_day_rate`、予測差分 +1、確信度 0.35、Lane F / maintenance。
+前日の C13 は Obsidian GUI が無く固有価値を検証できないため claim 後に `no_artifact` で止まった。
+Runbook に、検証不能な候補は pending のまま保持し、品質ゲートを弱めず、同一 run 内で
+固有価値を実測できる最初の後続候補へ進む手順を追加した。環境が変われば queue 先頭から
+再評価し、保留候補を done/drop にしない。
+
+Runbook が `noise_floor` KPI の算出元だったため、定義を変えず checksum 履歴を v52 へ更新した。
+最初の PR #1236 はこの必須 path が契約に無く decision gate で停止。宣言を実装後に書き換えず
+閉じ、最新 main から両 path を先に宣言した PR #1237 に置き換えた。
+
+- PR: #1237（#1236 は未マージで終了）
+- run_id: `ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a`
+- repair_of: `ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b`
+- 記事・配信 seed: なし
+
+### 検証と観測限界
+
+SEO 280 HTML（0 errors / 0 warnings）、CSS/version、benchmark、URL normalization、
+internal redirects、constants、CTA、experiments、budget、runs、authority、selfheal、
+drill 48/48、automation-rate、facts、landing freshness、static overflow、d-score、
+sitemap dry-run は通過。PR #1236 の CI では動的 viewport も通過し、その後の KPI 指紋検査で
+停止した。BigQuery は認証がなく取得不能、Codex 実費も観測経路が無いため、どちらもゼロではなく unknown。
+
+`ROUTINE_MCP_PROBE: not_applicable Codexへ移管済み、CCR可否は未再測定`
