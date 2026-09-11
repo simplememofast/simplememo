@@ -1387,6 +1387,281 @@
         "due_after_jst": "2026-09-09",
         "note": "Directional calibration against the frozen null model; not a causal estimate."
       }
+    },
+    {
+      "id": "coverage-executable-fallback-20260911-1220",
+      "run_id": "ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+      "horizon_days": 1,
+      "intent": {
+        "id": "coverage-executable-fallback-20260911-1220",
+        "run_id": "ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+        "created_at": "2026-09-11T03:50:48.490Z",
+        "metric": "publishing_day_rate",
+        "metric_policy_hash": "2cab4a44b192de519158921c6ea4eca81015ea18dc784514693a35604ffd30c3",
+        "baseline": 0,
+        "baseline_date": "2026-09-10",
+        "null_model": {
+          "kind": "trailing_median",
+          "value": 0,
+          "n": 14,
+          "samples": [
+            {
+              "date": "2026-09-10",
+              "value": 0,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-09-09",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-09-08",
+              "value": 1,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-09-07",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-09-06",
+              "value": 1,
+              "n": 4,
+              "reason": null
+            },
+            {
+              "date": "2026-09-05",
+              "value": 0,
+              "n": 4,
+              "reason": null
+            },
+            {
+              "date": "2026-09-04",
+              "value": 1,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-09-03",
+              "value": 1,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-09-02",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-09-01",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-08-31",
+              "value": 0,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-08-30",
+              "value": 0,
+              "n": 1,
+              "reason": null
+            },
+            {
+              "date": "2026-08-29",
+              "value": 0,
+              "n": 2,
+              "reason": null
+            },
+            {
+              "date": "2026-08-28",
+              "value": 1,
+              "n": 2,
+              "reason": null
+            }
+          ]
+        },
+        "predicted_delta": 1,
+        "p": 0.35,
+        "horizon_days": 1,
+        "counterfactual": {
+          "id": "coverage-prerequisite-probe-20260911-1220",
+          "reason": "A lightweight prerequisite probe is more mechanical, but it adds code and test surface before the fallback policy is explicit."
+        },
+        "rank_gap": 0.20000000000000007,
+        "touches": [
+          "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+          "data/kpi-definitions.json"
+        ],
+        "max_changed_lines": 140,
+        "max_binary_bytes": 5242880,
+        "predicted_usd": 18,
+        "eligibility": {
+          "candidate_id": "coverage-executable-fallback-20260911-1220",
+          "title": null,
+          "judged_jst": "2026-09-11",
+          "verdict": "eligible",
+          "halted": false,
+          "reversibility_class": "R0",
+          "criteria": {
+            "reversibility": {
+              "result": "pass",
+              "why": "R0",
+              "class": "R0",
+              "class_source": "lane:F/refresh"
+            },
+            "boundedness": {
+              "result": "pass",
+              "why": "2 パス・content の範囲内",
+              "scope": "content",
+              "scope_source": "inferred"
+            },
+            "evidence_age": {
+              "result": "pass",
+              "why": "0 日前の観測（declared）",
+              "age_days": 0,
+              "evidence_source": "declared"
+            },
+            "budget": {
+              "result": "pass",
+              "why": "予測 $18.0000（declared / 上限 $18）",
+              "predicted_usd": 18,
+              "cap_usd": 18,
+              "kind": "repair",
+              "prediction_source": "declared"
+            },
+            "repeat_guard": {
+              "result": "pass",
+              "why": "0 日（上限 7 日 / 実行主体 不要）",
+              "open_days": 0
+            }
+          },
+          "reasons": []
+        },
+        "evidence": {
+          "source_hash": "c04f8eda2d3e3b6f28961016d64067fbdb953765d8682aa92f63c9a7b46f226c",
+          "date": "2026-09-11"
+        },
+        "rollback": {
+          "mode": "revert_static_only",
+          "paths": []
+        },
+        "input": {
+          "id": "coverage-executable-fallback-20260911-1220",
+          "run_id": "ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+          "metric": "publishing_day_rate",
+          "touches": [
+            "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+            "data/kpi-definitions.json"
+          ],
+          "lane": "F",
+          "kind": "repair",
+          "action": "maintenance",
+          "evidence_date": "2026-09-11",
+          "predicted_usd": 18,
+          "predicted_delta": 1,
+          "p": 0.35,
+          "horizon_days": 1,
+          "max_changed_lines": 140,
+          "counterfactual": {
+            "id": "coverage-prerequisite-probe-20260911-1220",
+            "reason": "A lightweight prerequisite probe is more mechanical, but it adds code and test surface before the fallback policy is explicit."
+          },
+          "rank_gap": 0.20000000000000007
+        },
+        "selection": {
+          "selected": "coverage-executable-fallback-20260911-1220",
+          "reason": "ranked_first",
+          "exploration": false,
+          "calibration": {
+            "version": 1,
+            "snapshot_sha256": "d142f2980ae8824596dca483e1b73d1f2659e8cbbe079ae7974a7e3bf017d647",
+            "settled": 4
+          }
+        },
+        "candidates": [
+          {
+            "id": "coverage-executable-fallback-20260911-1220",
+            "run_id": "ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+            "rank": 0.55,
+            "metric": "publishing_day_rate",
+            "predicted_delta": 1,
+            "p": 0.35,
+            "horizon_days": 1,
+            "counterfactual": {
+              "id": "coverage-prerequisite-probe-20260911-1220",
+              "reason": "A lightweight prerequisite probe is more mechanical, but it adds code and test surface before the fallback policy is explicit."
+            },
+            "rank_gap": 0.20000000000000007,
+            "touches": [
+              "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+              "data/kpi-definitions.json"
+            ],
+            "max_changed_lines": 140,
+            "predicted_usd": 18,
+            "kind": "repair",
+            "lane": "F",
+            "action": "maintenance",
+            "evidence_date": "2026-09-11",
+            "calibration": {
+              "snapshot_sha256": "d142f2980ae8824596dca483e1b73d1f2659e8cbbe079ae7974a7e3bf017d647",
+              "reason": "Publishing has only three settlements: p=0.30 succeeded once, while p=0.70 and p=0.55 missed. This sparse mixed history does not establish calibration, so p=0.35 remains conservative. Direct evidence is two no-publication days caused by repeatedly selecting C13 while its required Obsidian GUI is absent; an explicit executable fallback can prevent repeated dead-end selection without weakening C13's evidence gate. Because the Runbook is the frozen noise_floor source, its required checksum-only history update is declared too."
+            }
+          },
+          {
+            "id": "coverage-prerequisite-probe-20260911-1220",
+            "run_id": "ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+            "rank": 0.35,
+            "metric": "publishing_day_rate",
+            "predicted_delta": 1,
+            "p": 0.25,
+            "horizon_days": 1,
+            "counterfactual": {
+              "id": "coverage-executable-fallback-20260911-1220",
+              "reason": "A Runbook-only fallback is smaller and immediately usable, while a probe adds implementation and classification failure modes."
+            },
+            "rank_gap": 0.20000000000000007,
+            "touches": [
+              "docs/obsidian/AUTOPILOT_RUNBOOK.md",
+              "data/kpi-definitions.json",
+              "scripts/autopilot-selfheal.mjs"
+            ],
+            "max_changed_lines": 320,
+            "predicted_usd": 18,
+            "kind": "repair",
+            "lane": "F",
+            "action": "maintenance",
+            "evidence_date": "2026-09-11",
+            "calibration": {
+              "snapshot_sha256": "d142f2980ae8824596dca483e1b73d1f2659e8cbbe079ae7974a7e3bf017d647",
+              "reason": "The same three publishing settlements are sparse and mixed, with two misses at p=0.70 and p=0.55, so the more complex probe receives p=0.25. It could reject candidates whose declared unique value is unavailable in the current environment, but it adds code and classification risk compared with a bounded documented fallback. The Runbook checksum history is declared because both candidates touch that frozen KPI source."
+            }
+          }
+        ]
+      },
+      "delivery": {
+        "verified": true,
+        "intent_hash": "255004c2ba8058fd7c3022539d741ecfb2caf62d28d47c66a545f4f1bc3324c3",
+        "merge_sha": "95bda7c7f4f3e34579b1da980ba9b3482b4e07b1",
+        "declaration_sha": "e61969b49342d36d35ffb151d324d84ef8cb2fe4",
+        "deployed_at": "2026-09-11T04:04:16Z",
+        "deployment_url": "https://dash.cloudflare.com/?to=/6f37d8ca103aa4af6a3722fc3c3e1ef6/pages/view/simplememo/3aa3769e-a56f-4963-b2ed-810c1082e6d6",
+        "pr": 1237
+      },
+      "settlement": {
+        "state": "pending",
+        "due_after_jst": "2026-09-12"
+      }
     }
   ]
 }
