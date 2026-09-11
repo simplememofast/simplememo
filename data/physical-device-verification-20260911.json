@@ -1,0 +1,103 @@
+{
+  "schema": "physical_device_verification_v1",
+  "by": "Codex (delegated physical-device QA)",
+  "at": "2026-09-11T05:11:02Z",
+  "sha": "a1cb757ba4a5f5730f50030c9d7b75704de2cb13",
+  "version": "5.8.54",
+  "build": "1342",
+  "build_id": "c3eb8b09-c1e0-4b2b-9b88-5369b8018183",
+  "recorded_from": "delegated device UI operations and recorded results",
+  "device_models": [
+    "iPhone 13",
+    "Apple Watch Series 7"
+  ],
+  "items_passed": 6,
+  "items_total": 6,
+  "checks": [
+    {
+      "id": "online_self_email",
+      "label": "iPhoneの通常メール送信",
+      "status": "passed",
+      "observed_date": "2026-09-10",
+      "result": "本文・実宛先・受信1件・同じ履歴を照合"
+    },
+    {
+      "id": "watch_real_voice_send",
+      "label": "Watchの音声送信",
+      "status": "passed",
+      "observed_date": "2026-09-10",
+      "result": "実マイクで全文認識、送信済み表示、受信本文・実宛先、iPhone履歴1件を照合"
+    },
+    {
+      "id": "offline_queue_recovery",
+      "label": "オフライン復帰",
+      "status": "passed",
+      "observed_date": "2026-09-10",
+      "result": "再起動をまたぐ待機状態、接続復帰後の配送と受信1件を照合"
+    },
+    {
+      "id": "sandbox_purchase_and_restore",
+      "label": "購入と権利の再取得",
+      "status": "passed",
+      "observed_date": "2026-09-11",
+      "result": "同じ配布版の専用Sandbox新規購入1件と、独立した無料状態からの自動権利再取得を確認"
+    },
+    {
+      "id": "obsidian_actual_write",
+      "label": "Obsidianへの追記",
+      "status": "passed",
+      "observed_date": "2026-09-10",
+      "result": "実際のDaily Noteへの通常送信・Watch送信の本文を各1件照合"
+    },
+    {
+      "id": "watch_and_iphone_widget_launch",
+      "label": "iPhone・Watchのウィジェット",
+      "status": "passed",
+      "observed_date": "2026-09-10",
+      "result": "両方の実ウィジェットから起動と音声入力開始を確認"
+    }
+  ],
+  "recovery_evidence": {
+    "method": "independent automatic entitlement reacquisition",
+    "free_state_at": "2026-09-11T05:03:24.210559+00:00",
+    "free_fields": {
+      "cached_is_premium": false,
+      "cached_plan_period": null,
+      "cached_sub_start_ts": null
+    },
+    "original_account_signed_in_before_app_at": "2026-09-11T05:08:58.868841+00:00",
+    "before_app_fields": {
+      "cached_is_premium": false,
+      "cached_plan_period": null,
+      "cached_sub_start_ts": null
+    },
+    "recovered_at": "2026-09-11T05:10:13.511490+00:00",
+    "recovered_fields": {
+      "cached_is_premium": true,
+      "cached_plan_period": "yearly",
+      "cached_sub_start_ts": 1788928421.0
+    },
+    "ui_observation": "Free and Premium rows in actual accessibility hierarchy; outside saved screenshot viewport",
+    "verification_basis": "Source-constrained inference from false/null/null before normal app activation to true/yearly/original purchase timestamp after activation, plus Premium UI. Shipping SubscriptionTelemetry.record has one call site, after checkVerified(Transaction.currentEntitlements). No raw signed JWS was collected.",
+    "original_chain_correspondence": "Privately matched account, annual product, and second-precision original purchase date; not a new device originalTransactionId join",
+    "new_purchase_actions_this_run": 0,
+    "explicit_restore_actions_this_run": 0,
+    "operator_app_data_writes": 0,
+    "app_reinstalled_or_replaced": false,
+    "original_media_account_restored": true,
+    "original_draft_preserved": true
+  },
+  "review": {
+    "result": "accepted_no_P1_P2",
+    "method": "independent adversarial evidence review",
+    "private_receipt_sha256": "ed89c432f6acdba47e526ff577cafc608e07647d8be57f462db7bae67cc505f5"
+  },
+  "private_evidence_sha256": "e0bf38d75e653ca5ad0abbf998d6ca0619787637e2588894d09f7c39a53e25ec",
+  "limits": [
+    "No raw signed JWS was collected; verified entitlement is a source-constrained inference.",
+    "Free metadata alone does not distinguish no entitlement from an unverified entitlement.",
+    "Explicit Restore button success and expired-account restoration were not confirmed. Earlier failed attempts remain failed.",
+    "Applies only to 5.8.54 (1342) and the recorded source SHA, not subsequent main changes.",
+    "App Review submission and publication require their separate existing gates."
+  ]
+}
