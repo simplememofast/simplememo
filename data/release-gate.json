@@ -81,10 +81,17 @@
     ],
     "$require_release_notes_locales": "この2つが揃っていないものは提出しない。**片方だけの版は出さない**。**`ja-JP` ではなく `ja`。**このアプリの実際の ASC ロケールは `ja` で、`release_notes/ja-JP/` はリポジトリ側のフォルダ名にすぎない（`scripts/prepare_app_store_version.rb` の LOCALE_MAP が `ja-JP => ja` に写している）。2026-08-28、ここに `ja-JP` と書いていたため材料が永久に埋まらない状態だった —— 隣のスクリプトが大文字で『this app's real Japanese locale code is \"ja\", not \"ja-JP\"』と書いてあるのを読まずに書いた。"
   },
-  "releases": [],
+  "releases": [
+    {
+      "at": "2026-09-11T21:13:08.228Z",
+      "version": "5.8.54",
+      "action": "app_review_submission",
+      "evidence": "data/delegated-review-acceptance-20260912.json"
+    }
+  ],
   "$releases": [
-    "この門を通って提出・公開したものの記録。**1件も無い。**",
-    "「門ができた」と「門を通って何かが動いた」は別なので、空のまま置く。",
-    "data/automation-coverage.json の ④ は、ここに1件入るまで分類を動かさない。"
+    "この門を通った実行記録。2026-09-12 JSTにApp Review提出1件のApple受付を確認した。",
+    "atはAppleのsubmittedDateで、scripts/release-gate-run.mjsの日次上限はJST日付で数える。未受付試行・下書き復旧は件数へ含めない。",
+    "この1件は提出の受付であり、App Store公開ではない。task76のみ分類を移し、task78は公開と既存条件の証拠が揃うまで維持する。"
   ]
 }

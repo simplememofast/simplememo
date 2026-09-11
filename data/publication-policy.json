@@ -271,7 +271,7 @@
     },
     "release-gate.json": {
       "served_by_site": false,
-      "why": "**出荷の門（App Review 提出 / App Store 公開）の設定値。**しきい値（TestFlight 24h・承認後6h・クラッシュ率の母数100と悪化1pt・kill後7日）と kill_switch の在り処が書いてある。rollout-promotion.json と同じ性質で、サイトから配信する理由が無い（/autopilot/ が見せるのは権限表のほう）。\n\n**読んで確かめたこと:** 中身は方針の数値と真偽値だけで、版数・ビルド番号・ASCの識別子・クラッシュ率の実測値は入らない（実測は実行時に渡され、台帳には残さない）。`releases` は通った出荷の記録用だが、**入れるのは版数と時刻までで、審査のやり取りや却下理由は入れない** ——そこはAppleとの非公開のやり取りで、公開リポジトリに置く理由が無い。",
+      "why": "提出・公開の門の数値・真偽値と、通過した実行の版数・日時・工程・公開証拠の参照。2026-09-12に初めて提出受付1件を記録した。審査連絡先、やり取り、却下理由、資格情報、クラッシュ率の原本は含めない。公開Gitへ保存し、サイトでは配信しない。",
       "ok_in_public_repo": "ok"
     },
     "relevance-undecided.json": {
@@ -449,6 +449,11 @@
     "physical-device-verification-20260911.json": {
       "served_by_site": true,
       "why": "実機確認1業務の完遂を説明する項目別の公開証拠。配布版・SHA・実施時刻・購読状態の変化・証拠のハッシュと限界を記録する。アカウント、端末識別子、下書き本文、元の画面や実行ログ、資格情報は含めない。公開内容は独立レビュー済み。",
+      "ok_in_public_repo": "ok"
+    },
+    "delegated-review-acceptance-20260912.json": {
+      "served_by_site": true,
+      "why": "恒常委任によるApp Review提出1件の受付証拠。版・ビルド・SHA・公開ワークフロー・提出日時・受付状態・対象版の照合用IDと非公開原本のハッシュのみ。資格情報、審査連絡先、審査メモ、却下理由、生ログ、利用者の情報は含めない。審査通過や公開の実績ではない。",
       "ok_in_public_repo": "ok"
     },
     "service-reconciliation-execution.json": {
