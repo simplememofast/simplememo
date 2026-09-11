@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-09T21:05:26.581Z",
+  "observed_at": "2026-09-11T11:18:41.508Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-09T21:05:26.581Z",
+        "observed_at": "2026-09-11T11:18:41.508Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
@@ -178,7 +178,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-09T21:05:26.581Z",
+        "observed_at": "2026-09-11T11:18:41.508Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -210,7 +210,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-09T21:05:26.581Z",
+        "observed_at": "2026-09-11T11:18:41.508Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
@@ -225,7 +225,7 @@
       "found_at": "2026-09-05",
       "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
       "observation": {
-        "observed_at": "2026-09-09T21:05:26.581Z",
+        "observed_at": "2026-09-11T11:18:41.508Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -862,7 +862,7 @@
   ],
   "codex_observation": {
     "schema_version": 2,
-    "observed_at": "2026-09-09T21:05:23.424Z",
+    "observed_at": "2026-09-11T11:18:33.427Z",
     "registered": [
       "obsidian",
       "obsidian-2"
@@ -875,15 +875,15 @@
         "id": "obsidian",
         "status": "ACTIVE",
         "kind": "cron",
-        "next_run_at": "2026-09-10T21:00:48.000Z",
-        "last_run_at": "2026-09-09T21:02:06.875Z"
+        "next_run_at": "2026-09-11T21:00:59.000Z",
+        "last_run_at": "2026-09-10T21:01:13.068Z"
       },
       {
         "id": "obsidian-2",
         "status": "ACTIVE",
         "kind": "cron",
-        "next_run_at": "2026-09-10T00:20:04.000Z",
-        "last_run_at": "2026-09-09T03:21:00.349Z"
+        "next_run_at": "2026-09-12T00:21:37.000Z",
+        "last_run_at": "2026-09-11T03:21:04.601Z"
       }
     ],
     "runs": [
@@ -960,9 +960,9 @@
       {
         "thread_id": "01a07f09-6f2b-7b32-b9d8-552211e66097",
         "automation_id": "obsidian-2",
-        "scheduler_status": "ACCEPTED",
+        "scheduler_status": "ARCHIVED",
         "created_at": "2026-09-08T03:21:59.834Z",
-        "updated_at": "2026-09-08T03:25:57.022Z",
+        "updated_at": "2026-09-11T10:42:22.368Z",
         "business_outcome": "not_inferred",
         "transcript": {
           "state": "observed",
@@ -1070,22 +1070,147 @@
       {
         "thread_id": "01a087fa-5c5d-7ef0-ac9a-bb6abf67d499",
         "automation_id": "obsidian",
-        "scheduler_status": "IN_PROGRESS",
+        "scheduler_status": "ARCHIVED",
         "created_at": "2026-09-09T21:02:06.926Z",
-        "updated_at": "2026-09-09T21:02:07.275Z",
+        "updated_at": "2026-09-11T10:42:15.911Z",
         "business_outcome": "not_inferred",
         "transcript": {
           "state": "observed",
-          "sha256": "646d57b3768b5cd6693c8ce2b07d2b3d0ff8edd66d31703a21cd9a371fe25cd1",
-          "bytes": 1420897,
+          "sha256": "cdee7783bac657af390c2fda93fe15bacd1414d2efae4b7c2481d5e0adaa5f5a",
+          "bytes": 2219474,
           "turns": [
             {
               "turn_id": "01a087fa-5ffe-7ae3-9962-c3c6e66e70a9",
               "started_at": "2026-09-09T21:02:07.950Z",
-              "finished_at": null,
-              "state": "in_progress",
-              "tool_calls": 12,
-              "tool_outputs": 12,
+              "finished_at": "2026-09-09T21:10:33.751Z",
+              "state": "completed",
+              "tool_calls": 30,
+              "tool_outputs": 30,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a088af-a470-7273-a9f4-564325746819",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-10T00:20:07.390Z",
+        "updated_at": "2026-09-11T10:42:14.723Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "d9665400aef492187252b588795e856ec691493f93bc46196ca3710d18b3b2bd",
+          "bytes": 1228683,
+          "turns": [
+            {
+              "turn_id": "01a088af-a6e8-7261-b02c-8406dbb96108",
+              "started_at": "2026-09-10T00:20:08.120Z",
+              "finished_at": "2026-09-10T00:23:17.336Z",
+              "state": "completed",
+              "tool_calls": 10,
+              "tool_outputs": 10,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a08955-6252-7d11-9ae7-4aedd8a6bd16",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-10T03:21:09.438Z",
+        "updated_at": "2026-09-11T09:48:34.995Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "ce7d92e32d8cf9a50caf2334b3ad327ffa1d4ad3d19169149574ffdd9d76411d",
+          "bytes": 1174053,
+          "turns": [
+            {
+              "turn_id": "01a08955-64e5-7ac1-9d1e-284505604171",
+              "started_at": "2026-09-10T03:21:10.213Z",
+              "finished_at": "2026-09-10T03:24:12.240Z",
+              "state": "completed",
+              "tool_calls": 11,
+              "tool_outputs": 11,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a08d1f-e643-7640-b922-3502cdcc0ac0",
+        "automation_id": "obsidian",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-10T21:01:13.127Z",
+        "updated_at": "2026-09-11T10:42:12.016Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "2e54b3746e3cf848cd489ae1469434b027e7084149f5207e0eee06d0d204d796",
+          "bytes": 1248262,
+          "turns": [
+            {
+              "turn_id": "01a08d1f-e952-78f3-9fe6-f593271ce11b",
+              "started_at": "2026-09-10T21:01:14.156Z",
+              "finished_at": "2026-09-10T21:04:43.422Z",
+              "state": "completed",
+              "tool_calls": 13,
+              "tool_outputs": 13,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a08dd7-c726-7b51-ae63-cb5e1f9d8d3e",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-11T00:22:03.799Z",
+        "updated_at": "2026-09-11T10:42:09.799Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "aea52ea4ad87b68da4b55d4c6cfe7ac8bad71de9a9a102b650d43878bcb7df88",
+          "bytes": 1379628,
+          "turns": [
+            {
+              "turn_id": "01a08dd7-c9b8-7680-ad29-879eeec8abdb",
+              "started_at": "2026-09-11T00:22:04.569Z",
+              "finished_at": "2026-09-11T00:25:56.493Z",
+              "state": "completed",
+              "tool_calls": 14,
+              "tool_outputs": 14,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a08e7b-ab8d-7af1-99d6-82a4ec7b65dd",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-11T03:21:04.638Z",
+        "updated_at": "2026-09-11T10:42:04.255Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "5d0d631ce7d4bce62895952596cc37f98e1ee47e8af72d864e4bcec6597e25fd",
+          "bytes": 1236989,
+          "turns": [
+            {
+              "turn_id": "01a08e7b-ae09-7011-89ce-7d1208135c94",
+              "started_at": "2026-09-11T03:21:05.376Z",
+              "finished_at": "2026-09-11T03:24:05.145Z",
+              "state": "completed",
+              "tool_calls": 11,
+              "tool_outputs": 11,
               "unanswered_calls": 0,
               "unattributed_outputs": 1
             }
