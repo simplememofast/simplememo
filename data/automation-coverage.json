@@ -47,7 +47,7 @@
     "unlock は解除条件のまとまり。**1タスク＝1作業ではない** —— ASCのレポートが降りれば",
     "複数件が同時に動く。個別に積むと順番を間違えるので、解除する行為のほうを単位にする。"
   ],
-  "measured_at": "2026-09-11",
+  "measured_at": "2026-09-12",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -960,20 +960,20 @@
     {
       "area": "④ 自動本番デプロイ",
       "task": "App Review への提出",
-      "executor": "human_only",
+      "executor": "ai_executes_gated",
       "evidence": [
         "../simplememo-ios/.github/workflows/submit-review.yml",
         "docs/app-review-execution-2026-09-08.md",
-        "docs/delegated-review-gate-20260911.md"
+        "docs/delegated-review-gate-20260911.md",
+        "data/delegated-review-acceptance-20260912.json",
+        "data/release-gate.json"
       ],
-      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] 「実行側（ASCへの提出・公開の呼び出し）がまだ無い」は不正確だった。**ASC を呼ぶ経路は在る —— review-submit.yml が prepare_app_store_version.rb と fastlane submit_review を回しており、この経路で実際に何度も出荷している。**無かったのは実行側ではなく、門とその経路の接続**（材料の受け渡しと、release.yml から門を呼ぶ配線）。\n\n**executor は据え置く。**同日、門を release.yml の submit_review=true 経路へ配線し、材料は実行側が集める形にした（release-gate-run.mjs --materials）。ただし **policy.enabled は false のままで、まだ1回も通していない。**「配線した」を「動いた」と数えない。\n\n[2026-09-08 実行証拠] オーナーが5.8.46と画像を明示して提出を依頼し、Codexがsubmit-review.yml run34166798798を起動。build1179・日英各3枚の画像を検証して提出し、ASCのWAITING_FOR_REVIEWを確認した。迅速審査も受付済み。ただし既存定義のai_executes_gatedは人の個別承認不要が条件で、今回は個別承認経路。evaluateSubmissionの通過や全リリースQA完了ではないため、AI実行率は加点しない。human_onlyはこの台帳の保守的な据え置きであり、今回の提出操作を人が行ったという意味ではない。詳細は実行証拠文書。\n\n[2026-09-11 自律提出の実行結果] iOS PR479で提出項目を含めて審査枠を判定し、PR480でrelease-blocker Issueの読取権限を補った。run34593711850は強制ゲート通過後に検証済みbuild1342を選択したが、既存の購読関連審査2件でAppleが最終提出を拒否した。PR481で同時審査上限の事前検査と同版の未提出下書き復旧を追加。未受付のためexecutor・分子は維持する。詳細は実行記録。",
-      "blocker": "verification_pending",
-      "unlock": "ship_execute",
-      "unblocked_by": "恒常委任・同一5.8.54/1342の実機6/6・CI・24時間soak・段階公開・強制ゲートは確認済み。残るのはiOSの同時審査枠と、限定復旧後の実提出の受付。最終POST/PATCHが拒否された試行を成功へ数えない。",
+      "note": "submit-v* タグ作成は人。Hard Ruleで実機確認が先\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] 「実行側（ASCへの提出・公開の呼び出し）がまだ無い」は不正確だった。**ASC を呼ぶ経路は在る —— review-submit.yml が prepare_app_store_version.rb と fastlane submit_review を回しており、この経路で実際に何度も出荷している。**無かったのは実行側ではなく、門とその経路の接続**（材料の受け渡しと、release.yml から門を呼ぶ配線）。\n\n**executor は据え置く。**同日、門を release.yml の submit_review=true 経路へ配線し、材料は実行側が集める形にした（release-gate-run.mjs --materials）。ただし **policy.enabled は false のままで、まだ1回も通していない。**「配線した」を「動いた」と数えない。\n\n[2026-09-08 実行証拠] オーナーが5.8.46と画像を明示して提出を依頼し、Codexがsubmit-review.yml run34166798798を起動。build1179・日英各3枚の画像を検証して提出し、ASCのWAITING_FOR_REVIEWを確認した。迅速審査も受付済み。ただし既存定義のai_executes_gatedは人の個別承認不要が条件で、今回は個別承認経路。evaluateSubmissionの通過や全リリースQA完了ではないため、AI実行率は加点しない。human_onlyはこの台帳の保守的な据え置きであり、今回の提出操作を人が行ったという意味ではない。詳細は実行証拠文書。\n\n[2026-09-11 自律提出の実行結果] iOS PR479で提出項目を含めて審査枠を判定し、PR480でrelease-blocker Issueの読取権限を補った。run34593711850は強制ゲート通過後に検証済みbuild1342を選択したが、既存の購読関連審査2件でAppleが最終提出を拒否した。PR481で同時審査上限の事前検査と同版の未提出下書き復旧を追加。未受付のためexecutor・分子は維持する。詳細は実行記録。\n\n[2026-09-12 受付確認] 恒常委任によるrelease.yml run34647987301で最新材料・固定SHA・強制提出ゲートを再確認し、既存5.8.54/1342を提出。Apple APIを独立再取得し、submittedDate=2026-09-11T21:13:08.228Z、同じappStoreVersionIDとbuildID、WAITING_FOR_REVIEWを確認した。初めて実際に門を通った受付としてai_executes_gatedへ移し、AI実行率158/179（88.268156%）へ1件加点。過去の未受付試行、公開、無料4回目の実機確認には加点しない。",
       "authority": {
         "domain": "App Review への提出",
         "ai_may": "**ゲートを通った提出の実行**（CI緑・実機確認の記録あり・TestFlightで24時間以上・1日1回）"
-      }
+      },
+      "since": "2026-09"
     },
     {
       "area": "④ 自動本番デプロイ",
@@ -1000,12 +1000,13 @@
       "executor": "human_only",
       "evidence": [
         "../simplememo-ios/fastlane/Fastfile",
-        "docs/delegated-review-gate-20260911.md"
+        "docs/delegated-review-gate-20260911.md",
+        "data/delegated-review-acceptance-20260912.json"
       ],
       "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] この欄の先頭「automatic_release がハードコードで false」は失効した。**同日 #313 で true になり、prepare_app_store_version.rb は releaseType を AFTER_APPROVAL に強制する。**承認された瞬間に出る。**\n\n**executor は動かさない**（AI が実行しているのではなく、Apple が出している）。むしろこの行で起きたのは、**渡した権限に付けた条件が効かなくなったこと**のほう —— release-gate.json の require_phased_release は「一度に全員へ出さないための最後の砦」と書いてあるが、門は enabled: false・材料は隣のリポジトリ・release.yml から一度も呼ばれない。実測でも段階リリースは付いていなかった（review.phased_release: false・2026-09-02 取得）。\n\n**同日、門の外側で塞いだ** —— simplememo-ios の scripts/lib/phased_release.rb が提出前に段階リリースを作り、作れなければ提出を止める。あわせて evaluateSubmission 側にも段階リリースの条件を置いた（**evaluateRelease は AFTER_APPROVAL では構造的に到達しない**ため、あちらに置いたままでは効かない）。",
       "blocker": "verification_pending",
       "unlock": "ship_execute",
-      "unblocked_by": "包括委任とenabled/enforceは有効。5.8.54にはAFTER_APPROVAL・段階公開が設定されている。実際の自律提出受付、Apple承認、公開状態の確認が残る。設定だけでは公開実績にしない。",
+      "unblocked_by": "5.8.54/1342の強制ゲート経由の提出は2026-09-12にApple受付を確認した。現在WAITING_FOR_REVIEW、AFTER_APPROVAL・段階公開設定済み。Apple承認後の実公開と、公開側の権限条件（クラッシュ率・killを含む）の充足を別途確認する。提出受付・設定だけでは公開実績にしない。",
       "authority": {
         "domain": "App Store への公開（審査通過後）",
         "ai_may": "**ゲートを通った公開の実行**（段階リリース限定・1日1回・クラッシュ率とkillの確認つき）"
