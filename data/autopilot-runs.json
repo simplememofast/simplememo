@@ -1217,6 +1217,25 @@
       "eligibility_verdict": "declined_unrecorded",
       "gate_code": null,
       "reason": "engine=codex; automation_id=obsidian; scheduled_slot=2026-09-10T06:00:00+09:00 (scheduler verified). Initial fresh preflight allowed selection. Recheck found a new external daily claim a97d20055a0a26b5e4a0673495d452a60d41456a created 06:08:04 JST; owner task/status unverified. Final preflight rejected unknown execution status. No implementation, declaration push, claim or publication. Local-only ledger. Recovered to the shared ledger on 2026-09-10 from the completed scheduled task and saved ledger; original outcome unchanged. This is distinct from the separate claim-owning no_artifact run recorded in PR1218."
+    },
+    {
+      "run_id": "ap-20260911-ccr-0920-codex-01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+      "date_jst": "2026-09-11",
+      "route": "ccr-0920",
+      "attempted": true,
+      "outcome": "shipped",
+      "lane": "F",
+      "action": "maintenance",
+      "pr": 1237,
+      "artifact": null,
+      "failure_reason": null,
+      "external_ref": "codex:01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a",
+      "interventions": [],
+      "source": "codex-automation",
+      "repair_of": [
+        "ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b"
+      ],
+      "repair_note": "前日の C13 は Obsidian GUI が無い実行環境では固有価値を検証できず、claim 後に no_artifact で停止した。本 run は品質ゲートを弱めず、検証不能な候補を pending のまま保留して同一 run 内で実測可能な次候補へ進む Lane E 選定手順を Runbook に追加した。環境が変われば queue 先頭から再評価し、保留候補を done/drop 扱いにしない。"
     }
   ],
   "retracted_observations": [
