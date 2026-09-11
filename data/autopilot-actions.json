@@ -37,7 +37,7 @@
     "                 台帳から言えないため）。ブランチへの白紙委任にすると、以後どんな",
     "                 取り残しを積まれても鳴らない —— 受容が消音になる"
   ],
-  "last_run_jst": "2026-09-10",
+  "last_run_jst": "2026-09-11",
   "actions": [
     {
       "id": "act-asc-privacy-answers",
@@ -613,7 +613,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-08-27",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "2026-09-03 にセッションが 813b335 の中身を main と突き合わせた。**再投入するものは無い。** data/autopilot-runs.json: ブランチ側 29行の run_id がすべて main にあり、date_jst/route/outcome/lane/action/pr/artifact も一致（欠落0件）。 docs/obsidian/AUTOPILOT_LOG.md: ブランチ側 2,034行が main 側 2,710行の先頭と完全一致（差分は main 側の追記 676行のみ）。当日の owner-session が同日中に拾っている。 data/autopilot-status.json: ブランチは 2026-08-27 の写しで main は 2026-09-02。**状態型なので当てると巻き戻る**（追記型と分けて扱う、の指示どおり当てない）。 残るのはブランチのSHAだけで、走査はSHAで見るため取り残しと呼び続ける。ブランチの削除は delete-branch.yml だが現在の照合条件では通らない（docs/orphan-branch-cleanup-2026-09-03.md）。",
       "reviewed_orphans": [
@@ -875,11 +875,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-10",
-      "last_seen_jst": "2026-09-10",
-      "closed_jst": "2026-09-10",
+      "created_jst": "2026-09-11",
+      "last_seen_jst": "2026-09-11",
+      "closed_jst": "2026-09-11",
       "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-10",
+      "reopened_jst": "2026-09-11",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -914,11 +914,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-10",
-      "last_seen_jst": "2026-09-10",
-      "closed_jst": "2026-09-10",
+      "created_jst": "2026-09-11",
+      "last_seen_jst": "2026-09-11",
+      "closed_jst": "2026-09-11",
       "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-10",
+      "reopened_jst": "2026-09-11",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1050,7 +1050,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-01",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "**オーナーが決めた（2026-09-03）: 枠を上げる（プラン階層）。**escalation-rules が挙げる3つの手「待つ・枠を上げる・1回あたりの入力量を減らす」のうち、実測で3つ目は落ちた —— 週次上限はアカウント全体で共有される資源で、autopilot の寄与はごく一部。autopilot 側の入力量を削ってもこの上限は空かない。実際の消費は x20 プランに収まるという判断で、追加の課金経路（ANTHROPIC_API_KEY）は使わない（PR #808）。\n\n**「知っていて受け入れている」に移した理由。**依頼していたのは\"人の判断\"で、それは済んだ。一方この行の閉じ条件（`no_failure_since`）は「ccr-0920 が実際に着手して usage_limit が再発しないこと」で、**まだ満たされていない** —— 08-31 以降 ccr-0920 の行が台帳に1つも無い。だから done にはしない。既知の制約として残す。\n\n⚠ **残る弱さ:** 台帳は「主系が当日ロックを先に取ったので副系がスキップした」と「副系が死んでいる」を区別できない。スキップ回は `attempted: false` で行すら残らないことがあり、09-01 の ccr-0920 の起動は 09-01 の主系の行の注記にしか残っていない。**副系が本当に生きているかは、主系が落ちた日にしか分からない。**",
       "owner_needed": true,
@@ -1108,7 +1108,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-02",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ef8b3a7`「ドリルの本数を実測に直す（15→39）」は、**取り残しではなく main に届かなかった訂正**で、内容は PR #811 が同日に入れている。4ファイルの照合:\n① `docs/obsidian/AUTOPILOT_RUNBOOK.md` §4 … main は「切替演習（39シナリオ・gateの16コードを全被覆）」。実測 `autopilot-drill --check` は 39/39 で一致\n② `docs/obsidian/AUTOPILOT_LOG.md` … 09-02 エントリの「35→39」が main にある\n③ `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で新しい\n④ `data/kpi-definitions.json` … **ブランチ側の行は literal には入っていない。入れてはいけない。**ブランチは noise_floor を v24→v25 にしているが、main は同じ番号 v25 を**別の変更**（09-02・Runbook §0-2）に使っており、いまは v30。**版番号が衝突している**ので写しを当てると5版ぶん巻き戻る。ブランチが必要としていたもの（Runbook を触ったことによる checksum の更新）は main の v30 が果たしている —— why にも「§4 のドリル本数の表記を実測値（39シナリオ）へ直したため」と同じ理由が書いてある。**欠けているのは版番号ではなく無い**、と示せたので受容する。",
       "reviewed_orphans": [
@@ -1250,7 +1250,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-03",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "照合した（2026-09-03・代走セッション）。取り残し `ac0e224` は主系が PR #793 の**マージ後**に積んだ記録コミットで、3ファイルすべてについて main に欠けが無いことを示した:\n① `data/autopilot-runs.json` … 行キーの包含（ブランチ側 42行すべてが main にある。apply-orphan-ledger が機械で照合）。**ただし `ap-20260903-actions` の行を main へ入れたのはこのセッション**で、ブランチの写しではなく Actions API の run 33692832179 とマージ済み PR #793 から起こし直した（`external_ref` はブランチ側の行に無かった値）\n② `data/autopilot-status.json` … 状態型。main 側が 2026-09-03 で、ブランチ側と同じ日付＝上書き済み。**写しは当てていない**（当てると cost 枠が $40 時代へ巻き戻る）\n③ `docs/obsidian/AUTOPILOT_LOG.md` … 機械の前方一致は通らない（ブランチが分岐したあとに main へ別の 09-03 エントリが5本入っているので、ブランチ側は main の接頭辞になりえない）。**代わりに行の包含で示した** —— ブランチが `b7e6e3e` へ足した 3,471文字・非空66行のうち、**いま main に無い行は0行**（本文を回収して同じPRで入れた）。",
       "last_run_jst": "2026-09-03",
@@ -1710,11 +1710,11 @@
         }
       },
       "state": "done",
-      "created_jst": "2026-09-10",
-      "last_seen_jst": "2026-09-10",
-      "closed_jst": "2026-09-10",
+      "created_jst": "2026-09-11",
+      "last_seen_jst": "2026-09-11",
+      "closed_jst": "2026-09-11",
       "evidence": "2026-09-05 以降 actions は 4回着手し usage_limit の再発なし",
-      "reopened_jst": "2026-09-10",
+      "reopened_jst": "2026-09-11",
       "owner_needed": false,
       "owner_needed_review": {
         "mode": "human",
@@ -1869,7 +1869,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない",
       "reopened_jst": "2026-09-05"
@@ -2024,7 +2024,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -2083,7 +2083,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
     },
@@ -2143,7 +2143,7 @@
       },
       "state": "acknowledged",
       "created_jst": "2026-09-05",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "2026-09-07、依頼内容の「伏字が実際の日次取り込みで効いたか」は別経路で確認済み。simplememo-api Repro Facts の定期実行33961458095（9/5）・34029257450（9/6）はHTTP200と成果物コミット948a0bf・68c6b5bを実ログで照合。修正#244後の両成果物はstate=ok、端末欄2件をotherへ集約し件数を保持、端末/OS/版の許可外キー0件。元の単発Routineの終了状態は未観測のままで、done・自動復旧成功にはしない。同じ観測episodeだけを既知の制約として受容し、新しい状態/実行の異常は既存merge規則で再起票する。詳細: docs/repro-redaction-verification-2026-09-07.md。",
       "owner_needed": false,
@@ -2473,7 +2473,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-09",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "#1193 がまだ open"
     },
@@ -2492,11 +2492,11 @@
           "issue": 1203
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-09",
       "last_seen_jst": "2026-09-10",
-      "closed_jst": null,
-      "evidence": "#1203 がまだ open"
+      "closed_jst": "2026-09-11",
+      "evidence": "https://github.com/simplememofast/simplememo/issues/1203 の state=closed をGitHub APIで確認"
     },
     {
       "id": "act-selfheal-ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b",
@@ -2519,7 +2519,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-10",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "ap-20260910-actions-codex-01a087f9-4092-7bc3-8274-69722c79e45b は未修理のまま（repair_of で名指しされていない）"
     },
@@ -2543,7 +2543,7 @@
       },
       "state": "open",
       "created_jst": "2026-09-10",
-      "last_seen_jst": "2026-09-10",
+      "last_seen_jst": "2026-09-11",
       "closed_jst": null,
       "evidence": "2026-09-08 以降どの経路も出荷していない"
     }
