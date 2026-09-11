@@ -107,7 +107,7 @@ of chronological causation. Read the quality output first. Version parameters
 for direct events and OneLink are recorded separately in each query artifact.
 
 The collector does not generate links, load AppsFlyer scripts, forward IDs or
-change navigation. No site anchor is switched by this implementation. Existing
+change navigation. Switching a site anchor requires an explicit HTML change. Existing
 Apple hrefs continue working even with opt-in attributes, including a fallback.
 Impression monitoring covers anchors present when the tracker starts; later
 inserted anchors get delegated clicks only. URL replacement before first
@@ -123,6 +123,9 @@ new fields; live BigQuery validation and the same mature-day conditions remain
 required. GA4's [custom event setup](https://developers.google.com/analytics/devguides/collection/ga4/events)
 and [BigQuery aggregate definitions](https://docs.cloud.google.com/bigquery/docs/reference/standard-sql/aggregate_functions#countif)
 are the underlying collection and counting references.
+
+The first placement, saved link parameters, pre-release evidence, existing
+experiment conflicts and rollback are specified in [the pilot handoff](ONELINK_PILOT.md).
 
 ### Comparing referral channels
 
