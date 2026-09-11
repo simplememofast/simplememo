@@ -36,15 +36,15 @@ test('198 of 199 actual executions clears the owner-revised greater-than-98% goa
 });
 test('197 of 198 passes the new goal without requiring the former 99.497%', () => {
   const f = fixture({ ai: 197, human: 1 });
-  assert.match(f.ui.title, /99\.5%/);
-  assert.match(fixture().ui.title, /99\.5%/);
+  assert.match(f.ui.subtitle, /99\.5%/);
+  assert.match(fixture().ui.subtitle, /99\.5%/);
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
   assert.equal(result.allowed, true);
 });
 test('exactly 98% is held even when a below-target ratio rounds to 98.0%', () => {
   for (const counts of [{ ai: 98, human: 2 }, { ai: 195, human: 4 }]) {
     const f = fixture(counts);
-    assert.match(f.ui.title, /98\.0%/);
+    assert.match(f.ui.subtitle, /98\.0%/);
     assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, false);
   }
   for (const value of [NaN, Infinity, -Infinity, null, '1', 0.98]) assert.equal(exceedsOwnerTarget(value), false);
@@ -148,4 +148,15 @@ for (const [name, mutate, expected] of [
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
   assert.equal(result.allowed, false);
   assert.match(result.reasons.join('\n'), expected);
+});
+
+
+test('the Japanese press date uses JST and evidence stays bound to the snapshot commit', () => {
+  const f = fixture();
+  f.manifest.snapshot.observed_at = '2026-09-16T23:30:00Z';
+  const parts = render(f.manifest);
+  assert.match(parts.body, /2026-09-17（日本時間）/);
+  assert.ok(parts.body.includes(`https://github.com/simplememofast/simplememo/blob/${f.manifest.snapshot.source_commit}/data/automation-coverage.json`));
+  assert.doesNotMatch(parts.body, /未完了の業務を分母から取り除かず/);
+  assert.doesNotMatch(parts.title, /AI/);
 });
