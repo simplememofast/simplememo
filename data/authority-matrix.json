@@ -672,6 +672,26 @@
       ],
       "status": "active",
       "note": "権限の現在化であって実行完了ではない。過去の人による採用や別のPremium設計判断をAIの新しい実行へ付け替えない。"
+    },
+    {
+      "domain": "本番停止機構の訓練",
+      "reversible": true,
+      "ai_may": [
+        "停止対象・影響・実障害との分離・所有状態の復元条件を確認し、既存の検証を通して本番停止訓練を実行・記録する"
+      ],
+      "requires_approval": false,
+      "human_only": [
+        "演習の所有状態に一致しない本物の停止の解除、対象・影響範囲の未承認の拡大"
+      ],
+      "gate": "対象・影響・停止前状態・復元差分を用意し、本番前に事故と競合変更を確認する。停止と復元は通常PRの検証済みSHAで反映し、復元直前にも実停止の必要を確認する。不明なら解除しない。演習の完全一致する停止だけを元へ戻す。ai_may_resume=falseと他経路は維持する。機構別の既存human_onlyや固有ゲートを、このdomainで上書きしない。",
+      "evidence": [
+        "docs/production-act-stop-exercise-20260912.md",
+        "data/production-stop-exercise-20260912.json",
+        ".github/workflows/autopilot-act.yml",
+        "scripts/check-emergency-stop.mjs"
+      ],
+      "status": "active",
+      "note": "2026-09-12の必要な実行・デプロイを承認し都度確認不要というオーナー委任を具体化。今回の実行対象はAct経路。アプリKill・資格情報失効・全体停止の実証や、本物の停止の無条件解除を今回の記録から推定しない。カナリアガードの既存権限は変更していない。"
     }
   ],
   "self_repair": {
