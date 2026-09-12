@@ -1,14 +1,14 @@
 {
-  "date_jst": "2026-09-11",
-  "generated_at": "2026-09-11T03:52:30.000000+00:00",
-  "action": "maintenance",
+  "date_jst": "2026-09-12",
+  "generated_at": "2026-09-12T03:23:35.865709+00:00",
+  "action": "skip",
   "article": null,
-  "pr": 1237,
+  "pr": null,
   "streak": {
-    "consecutive_no_article_days": 3,
+    "consecutive_no_article_days": 4,
     "last_article_date_jst": "2026-09-08",
     "last_production_change_date_jst": "2026-09-08",
-    "days_since_production_change": 3
+    "days_since_production_change": 4
   },
   "data_freshness": {
     "bq_checked": false,
@@ -63,8 +63,8 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-09-11",
-      "days": 32
+      "to": "2026-09-12",
+      "days": 33
     },
     "completion_rate": 0.675,
     "change_failure_rate": 0.325,
@@ -92,9 +92,9 @@
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.75,
+    "shipping_day_rate": 0.7273,
     "totals": {
-      "runs": 59,
+      "runs": 62,
       "attempted": 40,
       "shipped": 27,
       "failed": 13,
@@ -102,12 +102,12 @@
     },
     "by_route": {
       "secondary": {
-        "runs": 22,
+        "runs": 24,
         "attempted": 20,
         "shipped": 18
       },
       "primary": {
-        "runs": 37,
+        "runs": 38,
         "attempted": 20,
         "shipped": 9
       }
@@ -119,21 +119,21 @@
     ],
     "streaks": {
       "current": {
-        "days": 25,
+        "days": 26,
         "from": "2026-08-18"
       },
       "longest": {
-        "days": 25,
+        "days": 26,
         "from": "2026-08-18",
-        "to": "2026-09-11"
+        "to": "2026-09-12"
       },
-      "active_days": 30,
-      "last_day": "2026-09-11"
+      "active_days": 31,
+      "last_day": "2026-09-12"
     },
     "shipping_streaks": {
       "current": {
-        "days": 1,
-        "from": "2026-09-11"
+        "days": 0,
+        "from": null
       },
       "longest": {
         "days": 8,
@@ -141,12 +141,12 @@
         "to": "2026-09-08"
       },
       "active_days": 24,
-      "last_day": "2026-09-11"
+      "last_day": "2026-09-12"
     },
     "hands_off_streaks": {
       "current": {
-        "days": 1,
-        "from": "2026-09-11"
+        "days": 0,
+        "from": null
       },
       "longest": {
         "days": 5,
@@ -154,7 +154,7 @@
         "to": "2026-09-05"
       },
       "active_days": 17,
-      "last_day": "2026-09-11"
+      "last_day": "2026-09-12"
     },
     "publishing_streaks": {
       "current": {
@@ -167,7 +167,7 @@
         "to": "2026-08-23"
       },
       "active_days": 15,
-      "last_day": "2026-09-11"
+      "last_day": "2026-09-12"
     },
     "last_publishing": {
       "date_jst": "2026-09-08",
@@ -238,16 +238,15 @@
       ]
     }
   },
-  "reason": "engine=codex; automation_id=obsidian-autopilot-retry-standby; scheduled_slot=2026-09-11T12:20:00+09:00; route=ccr-0920; preflight=run:true/code:run_takeover. The 09:20 claim was stale after 243 minutes with no implementation diff or PR, so it was taken over without force push and synchronized to latest main. Lane F repaired the selection dead end exposed by the 2026-09-10 C13 no_artifact run: candidates whose unique value cannot be verified in the current environment remain pending while the same run may select the first later candidate whose unique value is measurable. Quality and evidence gates remain unchanged. No article or distribution seed; BigQuery and actual Codex cost remain unknown rather than zero.",
-  "verified": "2026-09-11 Codex retry standby: emergency stop false; agents.actions.stopped false; monthly and repair budgets passed; stale claim 243 minutes with no non-declaration diff and no PR; takeover and latest-main sync completed without force push. The first PR #1236 exposed an undeclared checksum dependency and was closed without rewriting its declaration. Replacement PR #1237 declares both the Runbook and KPI checksum before implementation. Static validation suite passed; PR #1236 also completed dynamic viewport before the later decision-gate stop.",
+  "reason": "engine=codex; automation_id=obsidian-2; scheduled_slot=2026-09-12T12:20:00+09:00; preflight rejected unknown execution state of repair task 01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a; primary and earlier retry completed. No implementation or publication.",
+  "verified": "Recovered the three September 12 Codex scheduled gate outcomes from completed tasks and saved local ledgers on September 13. All three stopped before implementation because repair task execution state was unknown. No new article, shipment, or measured dollar cost is claimed.",
   "checks": {
-    "codex_preflight": "2026-09-11 12:25 JST: run:true / code:run_takeover; five-minute snapshot saved by the migrated task runner",
-    "candidate_quality": "Lane F repair selected from readiness-approved candidates; publishing_day_rate +1 at p=0.35; corrected declaration precedes implementation",
-    "publication": "replacement PR #1237 opened; no article or distribution seed; final merge and production sync are verified separately"
+    "codex_preflight": "Three observed rejections: unknown execution state; outcomes unchanged",
+    "ledger_recovery": "Existing September 12 primary, 09:20 retry and 12:20 retry local records restored to shared ledger"
   },
   "owner_requests": [
     "EP委任判定の月次追認（2026-09）20件は本人の回答待ち。AIで追認を代筆しない。",
     "指標 unresolved_failures は usage_limit 4件（escalation-rules が who: owner とする種別で repair_of を書けない）が構造的に残るため 4 を下回れない。14日移動中央値との比較ではレーンFの改善が今後も event=0 として決済される。分母の扱いか比較基準の見直しはオーナー判断。"
   ],
-  "next": "次回の coverage 選定では queue 先頭から再評価し、C13 は Obsidian と Templater を実際に操作できる環境がある場合だけ進める。検証不能なら pending を保持し、同一 run 内で固有価値を実測できる最初の後続候補へ進む。"
+  "next": "Recheck actual repair task state before implementation."
 }
