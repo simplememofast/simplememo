@@ -210,3 +210,76 @@ test('the two-task bound stays optimistic about other consent and credential bou
   assert.equal(r.pre_dispatch_upper_bound.held_tasks.length, 2);
   assert.equal(r.opportunities.find(t => t.task === 'transfer0').state, 'boundary');
 });
+
+const constrainedGoalInventory = () => {
+  const doc = goalInventory();
+  Object.assign(doc.tasks.find(task => task.task === 'transfer0'), {
+    area: '⑬ アナログ領域', task: 'イベント: 現地設営・接客・実施', blocker: 'physical_human',
+  });
+  Object.assign(doc.tasks.find(task => task.task === 'transfer1'), {
+    area: '⑬ アナログ領域', task: '人事: 採用・解雇・評価・健康情報の判断', blocker: 'physical_human',
+  });
+  return doc;
+};
+
+test('human execution cannot be borrowed to make the pre-dispatch goal appear feasible', () => {
+  const doc = constrainedGoalInventory(), before = JSON.stringify(doc);
+  const result = prioritize(doc, { entries: [] }, now);
+  const bound = result.pre_dispatch_execution_bound;
+  assert.equal(bound.numerator, 195);
+  assert.equal(bound.denominator, 199);
+  assert.equal(bound.rate, 195 / 199);
+  assert.equal((bound.rate * 100).toFixed(1), '98.0');
+  assert.equal(bound.target_exceeds_upper_bound, true);
+  assert.deepEqual(new Set(bound.held_tasks.map(task => task.reason)), new Set([
+    'human_consent', 'dispatch_after_target', 'physical_event_execution', 'human_employment_decision',
+  ]));
+  assert.equal(result.pre_dispatch_upper_bound.numerator, 197);
+  assert.equal(result.pre_dispatch_upper_bound.target_exceeds_upper_bound, false);
+  assert.equal(JSON.stringify(doc), before);
+});
+
+test('no number of the existing unstarted tasks can escape four retained active tasks', () => {
+  const doc = constrainedGoalInventory();
+  const result = prioritize(doc, { entries: [] }, now);
+  const bound = result.pre_dispatch_execution_bound;
+  const held = new Set(bound.held_tasks.map(task => task.task_index));
+  const activeTransfers = result.opportunities.filter(task => task.executor !== 'nobody' && !held.has(task.task_index)).length;
+  for (let started = 0; started <= result.not_started; started += 1) {
+    const best = (result.current.ai_executes + activeTransfers + started) / (result.current.doing + started);
+    assert.ok(best <= bound.rate);
+    assert.ok(best < result.target_ai_execution_rate);
+  }
+});
+
+test('the deferred release is not advance credit even if it would cross the threshold afterward', () => {
+  const doc = constrainedGoalInventory();
+  assert.equal(prioritize(doc, { entries: [] }, now).pre_dispatch_execution_bound.target_exceeds_upper_bound, true);
+  doc.tasks.find(task => task.task === 'PR TIMES への配信操作').executor = 'ai_executes_gated';
+  const after = prioritize(doc, { entries: [] }, now).pre_dispatch_execution_bound;
+  assert.equal(after.numerator, 196);
+  assert.equal(after.denominator, 199);
+  assert.equal(after.target_exceeds_upper_bound, false);
+  assert.equal(after.held_tasks.length, 3);
+});
+
+test('planning or document assistance does not hold or replace the distinct human-execution tasks', () => {
+  const doc = constrainedGoalInventory();
+  Object.assign(doc.tasks.find(task => task.task === 'new0'), {
+    area: '⑬ アナログ領域', task: 'イベント: 候補選定・見積比較・発注・リード集計',
+  });
+  Object.assign(doc.tasks.find(task => task.task === 'new1'), {
+    area: '⑬ アナログ領域', task: '人事: 募集・候補抽出・日程調整・書類作成',
+  });
+  const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_execution_bound;
+  assert.equal(bound.numerator, 195);
+  assert.equal(bound.held_tasks.length, 4);
+});
+
+test('an unstarted held human task does not invent an active denominator', () => {
+  const doc = constrainedGoalInventory();
+  doc.tasks.find(task => task.task === 'イベント: 現地設営・接客・実施').executor = 'nobody';
+  const bound = prioritize(doc, { entries: [] }, now).pre_dispatch_execution_bound;
+  assert.equal(bound.numerator, 195);
+  assert.equal(bound.denominator, 198);
+});
