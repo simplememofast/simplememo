@@ -36,11 +36,12 @@ export function prioritize(coverage, assessments, now = new Date()) {
     if (!['nobody', 'ai_proposes', 'human_only'].includes(t.executor)) return [];
     const a = known.get(JSON.stringify([t.area, t.task]));
     const fresh = a && !a.stale;
+    const heldAssessment = a && ['wait', 'defer'].includes(a.state);
     const constrained = BLOCKERS[t.blocker].klass !== 'reachable';
     const waiting = ['external_data', 'external_credential', 'missing_source_document', 'verification_pending'].includes(t.blocker);
     let state = UNLOCKS[t.unlock]?.defer ? 'defer' : constrained ? 'boundary' : waiting ? 'wait' : 'inspect';
     // Assessments can defer work, but cannot override an authority/physical boundary.
-    if (fresh && !constrained && state !== 'defer') state = a.state;
+    if ((fresh || heldAssessment) && !constrained && state !== 'defer') state = a.state;
     const unmet = (t.blocked_on ?? []).filter(p => !blockedOnSatisfied(p));
     if (unmet.length && !constrained && state !== 'defer') state = 'wait';
     const starts = t.executor === 'nobody' ? 1 : 0;
@@ -49,11 +50,12 @@ export function prioritize(coverage, assessments, now = new Date()) {
     const minutes = fresh ? a.estimated_minutes : null;
     return [{ task_index: index, area: t.area, task: t.task, executor: t.executor,
       blocker: t.blocker, state, estimated_minutes: minutes, assessment_stale: !!a?.stale,
+      last_assessed_at: a?.observed_at ?? null,
       unmet_prerequisites: unmet,
       potential: { numerator, denominator, ai_execution_rate: numerator / denominator, delta_pp: delta * 100 },
-      estimated_delta_pp_per_hour: minutes ? delta * 100 * 60 / minutes : null,
-      next_step: fresh ? a.next_step : '現在の解除条件と実行証拠を確認してから作業量を見積もる。',
-      evidence: fresh ? a.evidence : [],
+      estimated_delta_pp_per_hour: state === 'act' && minutes ? delta * 100 * 60 / minutes : null,
+      next_step: fresh || heldAssessment ? a.next_step : '現在の解除条件と実行証拠を確認してから作業量を見積もる。',
+      evidence: fresh || heldAssessment ? a.evidence : [],
     }];
   });
   opportunities.sort((a, b) => ORDER.indexOf(a.state) - ORDER.indexOf(b.state)
@@ -86,7 +88,9 @@ export function prioritize(coverage, assessments, now = new Date()) {
     limitations: ['加点は各業務を実際に完遂した場合の仮定。見積もり・優先順位・閲覧だけで台帳を変更しない。',
       '各行の差分は現在値から独立に計算する。未着手を始めると分母も増えるため、単純加算しない。',
       '所要時間は実行証拠が揃うまでの作業見積もり。待機時間や外部審査の短縮を保証しない。',
-      'actは現行の権限・品質ゲートを通して進める候補。古い評価はinspectへ戻し、未知を簡単とみなさない。'] };
+      'actは現行の権限・品質ゲートを通して進める候補。古いactはinspectへ戻し、未知を簡単とみなさない。',
+      'wait・deferの期限切れは解除の証拠ではない。以前の理由と証拠を保持し、外部状態の変化を確認してから新しい評価で再開する。',
+      '時間あたりの加点見積もりはactだけに表示する。待機や閲覧を直接加点できる作業とみなさない。'] };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -98,6 +102,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const pct = n => (n * 100).toFixed(1) + '%';
     const c = result.current;
     console.log(`AI実行率 ${c.ai_executes}/${c.doing} = ${pct(c.ai_execution_rate)} / 総合 ${pct(c.overall_automation_rate)} / AI関与 ${pct(c.ai_involvement_rate)} / カバー ${pct(c.coverage_rate)}`);
+    const ceiling = result.classified_ceiling;
+    console.log(`現行分類での上限 ${ceiling.numerator}/${ceiling.denominator} = ${(ceiling.rate * 100).toFixed(6)}%（実績ではない）`);
+    console.log(`現在の実行候補 ${result.opportunities.filter(task => task.state === 'act').length}件 / 期限切れ評価 ${result.opportunities.filter(task => task.assessment_stale).length}件（期限切れだけでは再開しない）`);
     const bound = result.pre_dispatch_upper_bound;
     console.log(`配信前の楽観上限 ${bound.numerator}/${bound.denominator} = ${(bound.rate * 100).toFixed(6)}% / 目標 ${(result.target_ai_execution_rate * 100).toFixed(0)}%超`);
     console.log(bound.target_exceeds_upper_bound

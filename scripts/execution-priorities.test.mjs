@@ -52,6 +52,53 @@ test('expired assessments lose their execution recommendation and estimate', () 
   assert.equal(row.state, 'inspect');
   assert.equal(row.estimated_minutes, null);
   assert.equal(row.assessment_stale, true);
+  assert.equal(row.estimated_delta_pp_per_hour, null);
+  assert.deepEqual(row.evidence, []);
+  assert.notEqual(row.next_step, 'Execute and verify');
+});
+
+test('expiry preserves waiting reasons instead of promoting unresolved work to inspection', () => {
+  const prior = assessment('start', { state: 'wait', expires_at: now.toISOString(),
+    next_step: 'Resume only after real delivery evidence is available' });
+  const before = JSON.stringify(prior);
+  const result = prioritize(coverage, { entries: [prior] }, now);
+  const row = result.opportunities.find(candidate => candidate.task === 'start');
+  assert.equal(row.state, 'wait');
+  assert.equal(row.assessment_stale, true);
+  assert.equal(row.last_assessed_at, prior.observed_at);
+  assert.equal(row.estimated_minutes, null);
+  assert.equal(row.estimated_delta_pp_per_hour, null);
+  assert.equal(row.next_step, prior.next_step);
+  assert.deepEqual(row.evidence, prior.evidence);
+  assert.equal(JSON.stringify(prior), before);
+});
+
+test('an expired deferral remains deferred without a new assessment', () => {
+  const result = prioritize(coverage, { entries: [assessment('start', {
+    state: 'defer', expires_at: now.toISOString(), next_step: 'Wait for a relevant business need',
+  })] }, now);
+  const row = result.opportunities.find(candidate => candidate.task === 'start');
+  assert.equal(row.state, 'defer');
+  assert.equal(row.assessment_stale, true);
+  assert.equal(row.estimated_delta_pp_per_hour, null);
+});
+
+test('a new act assessment can resume held work but cannot override physical boundaries', () => {
+  const result = prioritize(coverage, { entries: [assessment('start'), assessment('physical')] }, now);
+  const resumed = result.opportunities.find(candidate => candidate.task === 'start');
+  const boundary = result.opportunities.find(candidate => candidate.task === 'physical');
+  assert.equal(resumed.state, 'act');
+  assert.ok(resumed.estimated_delta_pp_per_hour > 0);
+  assert.equal(boundary.state, 'boundary');
+  assert.equal(boundary.estimated_delta_pp_per_hour, null);
+});
+
+test('fresh waiting work never claims immediately executable score per hour', () => {
+  const result = prioritize(coverage, { entries: [assessment('transfer', { state: 'wait', estimated_minutes: 1 })] }, now);
+  const row = result.opportunities.find(candidate => candidate.task === 'transfer');
+  assert.equal(row.estimated_minutes, 1);
+  assert.equal(row.estimated_delta_pp_per_hour, null);
+  assert.ok(row.potential.delta_pp > 0);
 });
 
 test('fresh act assessments cannot override unmet inventory prerequisites', () => {
