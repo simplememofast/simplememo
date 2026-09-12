@@ -43,14 +43,15 @@
       "task": "App Store への公開（審査通過後）",
       "state": "wait",
       "estimated_minutes": 30,
-      "observed_at": "2026-09-12T00:09:01Z",
-      "expires_at": "2026-09-13T00:09:01Z",
-      "next_step": "5.8.54/1342のASC READY_FOR_SALE・段階公開ACTIVEと一般公開ページの現行版を2026-09-12に確認。公開操作業務のクラッシュ率・kill等の独立条件の充足は未確認。公開の事後観測を事前ゲート判定へ読み替えず、human_onlyを維持する。再提出・新しいTestFlightは不要。",
+      "observed_at": "2026-09-12T10:05:02Z",
+      "expires_at": "2026-09-13T10:05:02Z",
+      "next_step": "iOS494の同一確定週・直前公開版との健康度照合を本番実行済み。2026-09-12T10:05:02Zの材料は現行5.8.54・比較5.8.46が対象週内訳に無く、App Crashesも未受信で欠測。既存の日次収集で実報告の到着を確認し、両版100セッション以上と公開の独立条件が揃ってから実行する。健康度基盤の再実装や同じ欠測の反復取得を優先しない。既存公開を事前ゲート通過へ読み替えずhuman_onlyを維持。再提出・小幅TestFlightは不要。",
       "evidence": [
         "docs/execution-priority-review-20260909.md",
         "docs/delegated-review-gate-20260911.md",
         "data/delegated-review-acceptance-20260912.json",
-        "docs/quota-physical-publication-20260912.md"
+        "docs/quota-physical-publication-20260912.md",
+        "docs/release-health-weekly-evidence-20260912.md"
       ]
     },
     {
@@ -82,15 +83,16 @@
       "task": "オンボーディング改善（課金導線）",
       "state": "wait",
       "estimated_minutes": null,
-      "observed_at": "2026-09-12T00:34:31.603795Z",
-      "expires_at": "2026-09-13T00:34:31.603795Z",
-      "next_step": "5.8.54/1342の追加実機確認で、アプリ終了・新プロセス・24時間より前の保存日時の不変と出荷ソースを照合し、旧レビュー分岐に該当する条件で4通目が直接価格画面へ進む証拠を回収した。初回分岐の実機確認は再実行しない。残るのは公開側のクラッシュ率・kill等の独立条件と適用の証拠。公開の事後観測を事前ゲート通過へ読み替えず、ai_proposesを維持する。新しい小幅TestFlightや再提出は不要。",
+      "observed_at": "2026-09-12T10:05:02Z",
+      "expires_at": "2026-09-13T10:05:02Z",
+      "next_step": "初回分岐の実機証拠は回収済みなので再実行しない。iOS494の週次健康度照合は本番稼働済みだが、2026-09-12T10:05:02Zには現行5.8.54・比較5.8.46の対象週セッションとApp Crashesが欠測。今後の実報告と公開側のkill・寝かせ等の独立条件、実適用の証拠が残る。健康度基盤の再実装・小幅TestFlight・既存公開の事後的なゲート通過扱いでは加点せずai_proposesを維持。",
       "evidence": [
         "docs/execution-priority-review-20260909.md",
         "docs/ai-execution-999-2026-09.md",
         "docs/physical-device-evidence-20260910.md",
         "docs/quota-physical-publication-20260912.md",
-        "docs/physical-quota-cold-session-20260912.md"
+        "docs/physical-quota-cold-session-20260912.md",
+        "docs/release-health-weekly-evidence-20260912.md"
       ]
     },
     {
