@@ -26,8 +26,8 @@
     "local": "**本番と同じ式・同じコマンド**を手元で通し、止まる出力を観測した",
     "production": "本番の実行で実際に止まった（止めた対象が存在した）"
   },
-  "measured_at": "2026-09-09",
-  "production_verified": 3,
+  "measured_at": "2026-09-12",
+  "production_verified": 4,
   "$production_verified": "**2026-08-26 訂正: 0 → 1。**flag-kill は 2026-08-22 に本番で実証済みだった（/admin/flags の history が証跡）。**この台帳を作った当日、実物を見ずに台帳の散文から0 と書いていた。**check-stop-drills.mjs が実測と突き合わせる。公開文にこの数を書くなら、ここが正。 [2026-09-09] 既存CIの非成功時に本番auto-merge jobが停止した観測を追加し、2件から3件へ更新。機構単位の本番観測数であり、業務200全体やAI実行率の加点ではない。",
   "mechanisms": [
     {
@@ -57,7 +57,9 @@
       "evidence": [
         "data/emergency-stop.json",
         ".github/workflows/obsidian-autopilot.yml",
-        "scripts/check-emergency-stop.mjs"
+        "scripts/check-emergency-stop.mjs",
+        ".github/workflows/autopilot-act.yml",
+        "data/production-stop-exercise-20260912.json"
       ],
       "how_to_drill": "同上。agents.actions.stopped:true にして、全体停止ではなく経路名で止まることを見る（『主系だけ止めたい』が効くか）",
       "drills": [
@@ -67,9 +69,17 @@
           "by": "ai",
           "command": "同上",
           "observed": "agents.actions.stopped:true で STOP='actions:訓練: 主系だけ止まるか'、exit 1。全体停止と区別された文字列で出るので、**どちらで止まったかがログから分かる**"
+        },
+        {
+          "at": "2026-09-12",
+          "level": "production",
+          "by": "ai",
+          "where": "simplememo本番main、停止run34698150205・復元後run34698821083",
+          "command": "gh workflow run autopilot-act.yml --repo simplememofast/simplememo --ref main -f dry_run=true",
+          "observed": "Act経路の停止チェックでexit1、後続全skipped。所有停止だけをPR1271で復元後、停止検査と実行対象の後続処理が成功したことを確認。停止977秒。監視2runの停止・復元後の監視成功、owner_direct通知1件を照合。アプリKillや全体停止、通常apply・実公開の復旧はこの観測の対象外。"
         }
       ],
-      "blocked_by": "同上"
+      "blocked_by": null
     },
     {
       "id": "budget-gate",
