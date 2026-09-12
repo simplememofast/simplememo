@@ -22,6 +22,34 @@ class ProbeTests(unittest.TestCase):
         output = probe.summarize(self.stream(search=False), 0)
         self.assertEqual(output['status'], 'unverified')
         self.assertIsNone(output['mention'])
+        self.assertEqual(output['error'], 'search_unverified')
+
+    def test_subscription_denial_with_success_subtype_is_diagnosed(self):
+        stream = json.dumps({'type': 'result', 'subtype': 'success', 'is_error': True,
+            'total_cost_usd': 0, 'result': 'Your organization has disabled Claude subscription access for Claude Code · Use an Anthropic API key instead, or ask your admin to enable access'})
+        for exit_code in [0, 1]:
+            output = probe.summarize(stream, exit_code)
+            self.assertEqual(output['status'], 'unverified')
+            self.assertEqual(output['error'], 'subscription_access_disabled')
+            self.assertEqual(output['cost_usd'], 0)
+            self.assertIsNone(output['mention'])
+
+    def test_failed_results_never_report_success_as_error(self):
+        for extra, code, expected in [
+            ({'is_error': True}, 0, 'model_error'),
+            ({}, 1, 'process_failure'),
+            ({'subtype': 'error_max_budget_usd'}, 0, 'error_max_budget_usd'),
+            ({'result': ''}, 0, 'empty_answer'),
+        ]:
+            events = [json.loads(line) for line in self.stream().splitlines()]
+            events[-1].update(extra)
+            self.assertEqual(probe.summarize('\n'.join(json.dumps(e) for e in events), code)['error'], expected)
+        self.assertEqual(probe.summarize('', 1)['error'], 'missing_result')
+
+    def test_verified_answer_quoting_denial_is_still_successful(self):
+        events = [json.loads(line) for line in self.stream().splitlines()]
+        events[-1]['result'] = 'your organization has disabled claude subscription access for claude code'
+        self.assertIsNone(probe.summarize('\n'.join(json.dumps(e) for e in events), 0)['error'])
 
     def test_failed_search_is_not_verified(self):
         self.assertEqual(probe.summarize(self.stream(error=True), 0)['status'], 'unverified')

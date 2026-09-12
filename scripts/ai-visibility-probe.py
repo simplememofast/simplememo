@@ -127,12 +127,30 @@ def summarize(stream, exit_code):
     answer = final.get('result', '')
     verified = bool(searches & completed)
     success = exit_code == 0 and not final.get('is_error', True) and final.get('subtype') == 'success' and verified and bool(answer)
+    error = None
+    if not success:
+        # The CLI can report subtype=success for an access-denied result.
+        # Keep that denial distinct from an expired key or a missing search.
+        if 'your organization has disabled claude subscription access for claude code' in answer.lower():
+            error = 'subscription_access_disabled'
+        elif not final:
+            error = 'missing_result'
+        elif final.get('subtype') not in (None, 'success'):
+            error = final['subtype']
+        elif final.get('is_error', True):
+            error = 'model_error'
+        elif exit_code != 0:
+            error = 'process_failure'
+        elif not verified:
+            error = 'search_unverified'
+        else:
+            error = 'empty_answer'
     return {'status': 'ok' if success else 'unverified', 'answer': answer,
             'verified_search_calls': len(searches & completed),
             'models': sorted(final.get('modelUsage', {})),
             'cost_usd': final.get('total_cost_usd'),
             **answer_metrics(answer, success),
-            'error': None if success else final.get('subtype', 'missing_result')}
+            'error': error}
 
 
 def observe():
@@ -195,5 +213,7 @@ if __name__ == '__main__':
     result = observe()
     path = ROOT / 'data/ai-visibility-probe.json'
     path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
-    print(json.dumps({key: result[key] for key in ['status', 'valid_questions', 'unaided_mention_rate', 'total_cost_usd']}))
+    summary = {key: result[key] for key in ['status', 'valid_questions', 'unaided_mention_rate', 'total_cost_usd']}
+    summary['errors'] = {row['question_id']: row['error'] for row in result['observations'] if row.get('error')}
+    print(json.dumps(summary))
     raise SystemExit(0 if result['status'] == 'ok' else 1)
