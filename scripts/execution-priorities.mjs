@@ -10,6 +10,17 @@ import { OWNER_TARGET_AI_EXECUTION_RATE, exceedsOwnerTarget } from './press-rele
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORDER = ['act', 'inspect', 'wait', 'boundary', 'defer'];
 
+function upperBound(current, opportunities, held, assumption) {
+  const heldIndexes = new Set(held.map(task => task.task_index));
+  const movable = opportunities.filter(task => !heldIndexes.has(task.task_index));
+  const numerator = current.ai_executes + movable.length;
+  const denominator = current.doing + movable.filter(task => task.executor === 'nobody').length;
+  return { numerator, denominator, rate: numerator / denominator,
+    target_exceeds_upper_bound: !exceedsOwnerTarget(numerator / denominator),
+    held_tasks: held.map(({ task_index, area, task, executor, reason }) => ({ task_index, area, task, executor, reason })),
+    assumption };
+}
+
 export function prioritize(coverage, assessments, now = new Date()) {
   if (!Array.isArray(assessments?.entries) || !Number.isFinite(now.getTime())) throw new Error('Invalid assessment document or clock');
   const plan = executionPlan(coverage, OWNER_TARGET_AI_EXECUTION_RATE);
@@ -67,21 +78,22 @@ export function prioritize(coverage, assessments, now = new Date()) {
   // Other boundaries are deliberately relaxed here: this is an upper bound,
   // not a claim that those tasks can actually be transferred.
   const held = opportunities.filter(t => (t.area === '⑪ データ・プライバシー' && t.task === '収集同意')
-    || (t.area === '③ 自律型マーケティング' && t.task === 'PR TIMES への配信操作'));
-  const heldIndexes = new Set(held.map(t => t.task_index));
-  const movable = opportunities.filter(t => !heldIndexes.has(t.task_index));
-  const numerator = current.ai_executes + movable.length;
-  const denominator = current.doing + movable.filter(t => t.executor === 'nobody').length;
-  const preDispatchUpperBound = {
-    numerator, denominator, rate: numerator / denominator,
-    target_exceeds_upper_bound: !exceedsOwnerTarget(numerator / denominator),
-    held_tasks: held.map(t => ({ task_index: t.task_index, area: t.area, task: t.task,
-      executor: t.executor, reason: t.task === '収集同意' ? 'human_consent' : 'dispatch_after_target' })),
-    assumption: '未実行の収集同意と配信操作を保持し、それ以外の残業務をすべてAI実行へ移せた場合の楽観上限。実行可能性・期限・完了は保証しない。',
-  };
+    || (t.area === '③ 自律型マーケティング' && t.task === 'PR TIMES への配信操作'))
+    .map(task => ({ ...task, reason: task.task === '収集同意' ? 'human_consent' : 'dispatch_after_target' }));
+  const preDispatchUpperBound = upperBound(current, opportunities, held,
+    '未実行の収集同意と配信操作だけを保持した緩い上限。現地作業・採用等の人の判断まで移せる仮定なので、実行可能性の根拠には使わない。');
+  const humanActions = new Map([
+    ['イベント: 現地設営・接客・実施', 'physical_event_execution'],
+    ['人事: 採用・解雇・評価・健康情報の判断', 'human_employment_decision'],
+  ]);
+  const executionHeld = [...held, ...opportunities.filter(task => task.area === '⑬ アナログ領域' && humanActions.has(task.task))
+    .map(task => ({ ...task, reason: humanActions.get(task.task) }))];
+  const preDispatchExecutionBound = upperBound(current, opportunities, executionHeld,
+    '本人同意・未配信・現地での実作業・採用等の人の判断を保持し、ほかは全件完遂できたとしても届く上限。手配・補助・承認を別の実行行為に読み替えない。現在の実行能力と棚卸し定義の下での条件付き上限であり、実績ではない。');
   return { observed_at: now.toISOString(), metric: 'ai_execution_rate', target_ai_execution_rate: OWNER_TARGET_AI_EXECUTION_RATE, target_comparison: 'strictly_greater', current,
     classified_ceiling: plan.classified_ceiling,
     pre_dispatch_upper_bound: preDispatchUpperBound,
+    pre_dispatch_execution_bound: preDispatchExecutionBound,
     active_remaining: opportunities.filter(t => t.executor !== 'nobody').length,
     not_started: opportunities.filter(t => t.executor === 'nobody').length,
     opportunities,
@@ -105,12 +117,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const ceiling = result.classified_ceiling;
     console.log(`現行分類での上限 ${ceiling.numerator}/${ceiling.denominator} = ${(ceiling.rate * 100).toFixed(6)}%（実績ではない）`);
     console.log(`現在の実行候補 ${result.opportunities.filter(task => task.state === 'act').length}件 / 期限切れ評価 ${result.opportunities.filter(task => task.assessment_stale).length}件（期限切れだけでは再開しない）`);
-    const bound = result.pre_dispatch_upper_bound;
-    console.log(`配信前の楽観上限 ${bound.numerator}/${bound.denominator} = ${(bound.rate * 100).toFixed(6)}% / 目標 ${(result.target_ai_execution_rate * 100).toFixed(0)}%超`);
+    const bound = result.pre_dispatch_execution_bound;
+    console.log(`必要な人の行為を残した配信前上限 ${bound.numerator}/${bound.denominator} = ${(bound.rate * 100).toFixed(6)}% / 目標 ${(result.target_ai_execution_rate * 100).toFixed(0)}%超`);
     console.log(bound.target_exceeds_upper_bound
-      ? '現行条件では配信前に目標へ届かない。本人同意・未配信業務の先取りや棚卸し変更で埋めず、実行可能な改善は継続する。'
+      ? '現行条件では配信前に目標へ届かない。人の実行・未配信業務の先取りや棚卸し変更で埋めない。追加実装だけでこの制約は解消しない。'
       : 'この上限だけでは目標を否定できない。各業務の実行証拠と配信ゲートの確認が必要。');
     console.log(bound.assumption);
+    for (const task of bound.held_tasks) console.log(`上限に残す業務 ${task.task_index}: ${task.task}（${task.reason}）`);
+    const relaxed = result.pre_dispatch_upper_bound;
+    console.log(`参考・2業務だけを保持した緩い上限 ${relaxed.numerator}/${relaxed.denominator} = ${(relaxed.rate * 100).toFixed(6)}%（実行可能性の根拠ではない）`);
     console.log('状態 | task | 完遂時の差分pt | 見積分 | 次の作業');
     for (const t of result.opportunities) console.log(`${t.state} | ${t.task_index}: ${t.task} | +${t.potential.delta_pp.toFixed(3)} | ${t.estimated_minutes ?? '未評価'} | ${t.next_step}`);
     for (const line of result.limitations) console.log(line);
