@@ -1001,12 +1001,13 @@
       "evidence": [
         "../simplememo-ios/fastlane/Fastfile",
         "docs/delegated-review-gate-20260911.md",
-        "data/delegated-review-acceptance-20260912.json"
+        "data/delegated-review-acceptance-20260912.json",
+        "docs/quota-physical-publication-20260912.md"
       ],
       "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] この欄の先頭「automatic_release がハードコードで false」は失効した。**同日 #313 で true になり、prepare_app_store_version.rb は releaseType を AFTER_APPROVAL に強制する。**承認された瞬間に出る。**\n\n**executor は動かさない**（AI が実行しているのではなく、Apple が出している）。むしろこの行で起きたのは、**渡した権限に付けた条件が効かなくなったこと**のほう —— release-gate.json の require_phased_release は「一度に全員へ出さないための最後の砦」と書いてあるが、門は enabled: false・材料は隣のリポジトリ・release.yml から一度も呼ばれない。実測でも段階リリースは付いていなかった（review.phased_release: false・2026-09-02 取得）。\n\n**同日、門の外側で塞いだ** —— simplememo-ios の scripts/lib/phased_release.rb が提出前に段階リリースを作り、作れなければ提出を止める。あわせて evaluateSubmission 側にも段階リリースの条件を置いた（**evaluateRelease は AFTER_APPROVAL では構造的に到達しない**ため、あちらに置いたままでは効かない）。",
       "blocker": "verification_pending",
       "unlock": "ship_execute",
-      "unblocked_by": "5.8.54/1342の強制ゲート経由の提出は2026-09-12にApple受付を確認した。現在WAITING_FOR_REVIEW、AFTER_APPROVAL・段階公開設定済み。Apple承認後の実公開と、公開側の権限条件（クラッシュ率・killを含む）の充足を別途確認する。提出受付・設定だけでは公開実績にしない。",
+      "unblocked_by": "5.8.54/1342のASC READY_FOR_SALE・段階公開ACTIVEと一般公開ページの現行版を2026-09-12に確認。公開操作業務のクラッシュ率・kill等の独立条件の充足は未確認。公開の事後観測を事前ゲート判定へ読み替えず、human_onlyを維持する。再提出・新しいTestFlightは不要。",
       "authority": {
         "domain": "App Store への公開（審査通過後）",
         "ai_may": "**ゲートを通った公開の実行**（段階リリース限定・1日1回・クラッシュ率とkillの確認つき）"
@@ -1827,11 +1828,13 @@
       "executor": "ai_proposes",
       "evidence": [
         "../simplememo-ios/docs/reports/ONBOARDING_REDESIGN_2026-08-06.md",
-        "docs/execution-priority-review-20260909.md"
+        "docs/execution-priority-review-20260909.md",
+        "docs/quota-physical-publication-20260912.md",
+        "../simplememo-ios/SimpleMemo/ComposeViewController.swift"
       ],
-      "note": "データ起点の再設計。実施は人の判断\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**2026-08-27 のオーナー判断は「**お金周りを除いて**渡す」で、課金導線はその除外側。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-09] 最新の包括委任に合わせて古い権限待ちを解消。価格・無料枠・StoreKit権利を変えない課金導線の実装・適用をAIへ委任する。変更の実行証拠はまだ無いためai_proposesを維持し、実行率を加点しない。\n\n[2026-09-09 実装後] iOS PR #454は最終コミットのCI成功後、main 8ac29b4e558b73dc73bd6a0e6105234915632cd8へマージ済み。無料枠の4回目で課金画面を直接表示し、価格・権利は変更していない。Free・期限切れ・Premiumの3経路をSimulatorで確認し、旧導線に戻した変異は対象テストで失敗した。実適用は未確認のためai_proposesを維持。未着手から検証・配信待ちへ訂正し、再実装や小幅加点だけのTestFlightを優先候補にしない。",
+      "note": "データ起点の再設計。実施は人の判断\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**2026-08-27 のオーナー判断は「**お金周りを除いて**渡す」で、課金導線はその除外側。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-09] 最新の包括委任に合わせて古い権限待ちを解消。価格・無料枠・StoreKit権利を変えない課金導線の実装・適用をAIへ委任する。変更の実行証拠はまだ無いためai_proposesを維持し、実行率を加点しない。\n\n[2026-09-09 実装後] iOS PR #454は最終コミットのCI成功後、main 8ac29b4e558b73dc73bd6a0e6105234915632cd8へマージ済み。無料枠の4回目で課金画面を直接表示し、価格・権利は変更していない。Free・期限切れ・Premiumの3経路をSimulatorで確認し、旧導線に戻した変異は対象テストで失敗した。実適用は未確認のためai_proposesを維持。未着手から検証・配信待ちへ訂正し、再実装や小幅加点だけのTestFlightを優先候補にしない。\n\n[2026-09-12 部分実機確認・一般公開] 同じ5.8.54/1342の既存開発者Freeモードで3通送信・4通目の価格画面への直接遷移・閉じた後の下書き保持・カウント3を実機観測。検証モードOFF、Premiumと原下書きを復元済み。ASC段階公開ACTIVEと一般公開ページ5.8.54も照合した。ただし端末の初回レビュー履歴は不明で、変更前コードでも成立する経路の可能性が残る。公開側の既存条件も未証明。独立レビューの指摘に従い、今回の部分実機確認・公開観測ではai_proposesを維持する。追加TestFlightなし。",
       "blocker": "verification_pending",
-      "unblocked_by": "包括委任は受領済み。iOS PR #454で既存価格・権利を維持した初回課金導線の実装・QA・mainマージを完了。残りは同一変更を含む版の実機QAと既存の配信条件を満たした実適用。コード・Simulator検証のみでは完了せず、実適用の証拠が揃ってから分類する。",
+      "unblocked_by": "1342は一般公開済みで4通目の価格画面・下書き保持を実機観測したが、変更対象の初回レビュー履歴を伴う実機分岐と既存配信条件の充足は未証明。既存Simulator初回分岐テストは成功済み。今回と同じ履歴不明の実機確認を繰り返さず、初回分岐の証拠と公開側のクラッシュ率・kill等の条件が揃ってから分類する。",
       "unlock": "impl_onboarding",
       "authority": {
         "domain": "オンボーディングの課金導線改善",
