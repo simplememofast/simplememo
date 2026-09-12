@@ -1,11 +1,14 @@
 name: AI Visibility Probe
+
+# Collection moved to the local Codex weekly heartbeat on 2026-09-13.
+# Keep this workflow identity for independent health monitoring and cron-health.
+# No model login or secret is needed in GitHub Actions.
 on:
   schedule:
-    - cron: '47 21 * * 2'
+    - cron: '47 21 * * *' # Daily 06:47 JST; Codex collection is Wednesday 06:47 JST.
   workflow_dispatch:
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 concurrency:
   group: ai-visibility-probe
   cancel-in-progress: false
@@ -13,63 +16,13 @@ jobs:
   observe:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-      - name: Check existing analysis and monthly budget
-        run: |
-          node scripts/autopilot-budget.mjs --check
-          node scripts/autopilot-budget.mjs --runtime-budget --task analysis > /tmp/probe-budget
-          python3 -c "from pathlib import Path; assert float(Path('/tmp/probe-budget').read_text()) >= 1.25, 'Insufficient analysis budget for five questions'"
-      - name: Install measured CLI version
-        run: npm install --global @anthropic-ai/claude-code@2.1.261
-      - name: Test search verification
-        run: python3 scripts/ai-visibility-probe.test.py
-      - name: Collect independent answers
-        id: observe
-        continue-on-error: true
-        env:
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          PROBE_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: python3 scripts/ai-visibility-probe.py
-      - name: Account for measured analysis cost
-        if: always() && steps.observe.outcome != 'skipped'
-        run: |
-          python3 - <<'PY'
-          import datetime as dt, json, os, subprocess
-          from pathlib import Path
-          report = json.loads(Path('data/ai-visibility-probe.json').read_text())
-          if report.get('run_url') != f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}":
-              raise RuntimeError('No current run observation; do not account a stale report')
-          cost = report['total_cost_usd']
-          if not isinstance(cost, (float, int)):
-              raise RuntimeError('Unknown cost; observation retained but cost must be recovered before retry')
-          day = dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).date().isoformat()
-          subprocess.run(['node', 'scripts/autopilot-budget.mjs', '--append', '--date', day,
-              '--route', 'actions', '--run-id', os.environ['GITHUB_RUN_ID'], '--cost', str(cost),
-              '--task-kind', 'analysis',
-              '--note', 'AI visibility measurement; measured CLI cost. Observation status is in data/ai-visibility-probe.json; no product shipment is claimed.'], check=True)
-          PY
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ai-visibility-probe
-          path: data/ai-visibility-probe.json
-          retention-days: 90
-      - uses: peter-evans/create-pull-request@v6
-        if: always() && steps.observe.outcome != 'skipped'
-        with:
-          token: ${{ secrets.GH_PAT }}
-          branch: Codex/ai-visibility-observations
-          add-paths: |
-            data/ai-visibility-probe.json
-            data/autopilot-cost.json
-          commit-message: 'chore: record independent AI visibility observations and cost'
-          title: 'chore: record independent AI visibility observations and cost'
-          body: 'Search calls are verified from tool events. Branded Q5 is excluded from unaided mention rate. This is a separate Claude model series, not a continuation of the manual three-provider baseline.'
-      - name: Report incomplete observation
-        if: steps.observe.outcome == 'failure'
-        run: exit 1
+          ref: main
+          persist-credentials: false
+      - name: Test Codex observation verification
+        run: python3 scripts/codex-ai-visibility-probe.test.py
+      - name: Require a complete Codex observation within eight days
+        run: python3 scripts/codex-ai-visibility-probe.py --health

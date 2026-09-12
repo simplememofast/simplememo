@@ -82,3 +82,10 @@ Q5は `question_type: "brand"`、その他のv1質問は `nonbrand`。
 
 誤記があれば、該当ページの可視本文・一次資料の改善に使う。
 llms.txt の更新だけをGoogle検索の掲載改善策として扱わない。
+
+## 2026-09-13: 週次5問のCodex系列
+
+自動の5問調査はオーナー指示でClaudeからCodexへ移管した。
+`docs/codex-ai-visibility.md`が実行契約、`data/ai-visibility-probe.json`が最新結果。
+`codex-astra-web-v1`はこの手動プロトコルや旧Claude系列とは別の観測であり、
+モデル変更前後の数値を連続した改善率として扱わない。旧結果は履歴に保持する。

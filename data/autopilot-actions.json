@@ -2458,12 +2458,15 @@
     },
     {
       "id": "act-health-1193",
-      "title": "【監視】AI露出調査: Claude Codeの組織利用許可を確認",
+      "title": "【監視】AI露出調査: Codex移管後の監視確認",
       "source": "health",
       "domain": null,
-      "touches": [],
-      "force_owner": "human",
-      "force_owner_why": "現行mainで再確認してもClaude Codeの組織側サブスクリプション利用制限が継続。組織管理者による利用許可の確認が必要（トークン失効・使用量上限とは断定しない）",
+      "touches": [
+        "scripts/codex-ai-visibility-probe.py",
+        ".github/workflows/ai-visibility-probe.yml"
+      ],
+      "force_owner": null,
+      "force_owner_why": null,
       "auto": null,
       "close_check": {
         "kind": "issue_closed",
@@ -2476,7 +2479,7 @@
       "last_seen_jst": "2026-09-12",
       "closed_jst": null,
       "evidence": "#1193 がまだ open",
-      "detail": "9月12日23:10 JSTの現行mainでの手動確認でも、5問すべてが組織のClaude Code利用制限で失敗。有効回答0件・実費0ドル。組織管理者が利用許可を確認し、必要な変更後に再検証する。新しい課金経路や資格情報は追加していない。Issue #1193は最新定期実行の成功を確認するまで未解決。\n確認run: https://github.com/simplememofast/simplememo/actions/runs/34698479441\n診断: docs/cron-probe-access-20260912.md"
+      "detail": "2026-09-13のオーナー指示でCodexへ移管。heartbeat simplememo-aiを毎週水曜06:47 JSTに保存し、初回5問の独立検索が成功。Claudeの利用許可確認は不要。main反映後のAI Visibility Probe監視の成功をAIが確認してIssue #1193を閉じる。旧Claudeの失敗を復旧成功へ書き換えない。\n根拠: docs/codex-ai-visibility.md / data/ai-visibility-probe.json"
     },
     {
       "id": "act-health-1203",

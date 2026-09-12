@@ -240,6 +240,12 @@ jobs:
       # どちらも赤くならない。
       - name: Locale seed rules fire (self-test)
         run: python3 scripts/inject_locale_seed.py --selftest
+
+      - name: Codex AI visibility observation contract
+        run: |
+          python3 scripts/ai-visibility-probe.test.py
+          python3 scripts/codex-ai-visibility-probe.test.py
+          python3 scripts/codex-ai-visibility-probe.py --check-report
       - name: /en/ pages seed the reader's locale
         run: python3 scripts/inject_locale_seed.py --check
 
