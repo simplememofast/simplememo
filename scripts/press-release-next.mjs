@@ -36,7 +36,7 @@ export function render(manifest) {
   const s = manifest.snapshot;
   const title = `「牛乳を買う」のひと言をNotionへ。シンプルメモがNotion連携を提供開始`;
   const subtitle = `文字・音声・Siri・Apple Watchから「SimpleMemo Inbox」に1メモ1ページ。運営業務のAI実行率${pct(s.ai_execution_rate)}%（${s.ai_executes}/${s.doing}）と、未着手を含む総合自動化率${pct(s.overall_automation_rate)}%も証拠付きで公開`;
-  const body = `株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「シンプルメモ」で、書いたり話したりしたメモをNotionへ保存する連携機能の提供を開始しました。既存の自分宛メール、Obsidianへの記録に加え、Notionの「SimpleMemo Inbox」へ1メモ1ページで保存できます。
+  const body = `株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「Obsidian連携シンプルメモ」（以下「シンプルメモ」）で、書いたり話したりしたメモをNotionへ保存する連携機能の提供を開始しました。既存の自分宛メール、Obsidianへの記録に加え、Notionの「SimpleMemo Inbox」へ1メモ1ページで保存できます。
 
 ■ 買い物メモを、Notionを開かずに残す
 

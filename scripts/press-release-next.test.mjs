@@ -30,6 +30,7 @@ test('the new product story preserves its setup limits and does not relabel oper
   const { ui } = fixture();
   assert.match(ui.title, /牛乳を買う.*Notion.*提供開始/);
   assert.doesNotMatch(ui.title, /AI|世界初|唯一/);
+  assert.match(ui.body, /「Obsidian連携シンプルメモ」（以下「シンプルメモ」）/);
   for (const text of ['Apple WatchのメモはiPhoneを経由', '初回はメールの宛先を設定',
     'プレミアムの「Notionのみに保存」', 'Obsidianへの追加コピーも止まります',
     '任意のデータベース選択、双方向同期、添付ファイルには対応していません',
