@@ -1,14 +1,33 @@
-# Obsidian連携シンプルメモ、運営業務の担当と実行記録を公開
+# 「牛乳を買う」のひと言をNotionへ。シンプルメモがNotion連携を提供開始
 
 <!-- fact-check: draft -->
 
-AI実行率88.3%。実施中179業務のうち158業務をAIが実行。未着手を含む総合自動化率は79.4%。実装・検証・本番反映の証拠と残る業務を公開
+文字・音声・Siri・Apple Watchから「SimpleMemo Inbox」に1メモ1ページ。運営業務のAI実行率88.3%（158/179）と、未着手を含む総合自動化率79.4%も証拠付きで公開
 
-株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「シンプルメモ」の運営業務について、AIが担当する業務と実行証拠を公開しています。本稿の集計は2026-09-12（日本時間）に取得した業務台帳に基づきます。
+株式会社ユリカ（東京都渋谷区）は、iPhone／Apple Watch向けアプリ「シンプルメモ」で、書いたり話したりしたメモをNotionへ保存する連携機能の提供を開始しました。既存の自分宛メール、Obsidianへの記録に加え、Notionの「SimpleMemo Inbox」へ1メモ1ページで保存できます。
 
-シンプルメモは、思いついたことを話すか書いて、自分のメールやObsidianへ残すためのアプリです。その運営では、データの確認、改善案の選定、実装、自動検査、本番反映、結果の記録をAIが担う範囲を広げています。
+■ 買い物メモを、Notionを開かずに残す
 
-■ 何件を、誰が実行しているか
+たとえば「牛乳を買う」と話した短いメモを、あとでNotionから読み返せます。iPhoneでの文字・音声入力、設定済みのSiriショートカット、Apple Watchからの入力に対応します。Apple WatchのメモはiPhoneを経由します。
+
+接続時に作られる「SimpleMemo Inbox」に、メモごとのページが追加されます。最初の空でない行がタイトル、入力した内容が本文になります。買い物の例は保存する文章の例であり、買い物リストの自動分類、期限や通知の設定を行う機能ではありません。
+
+端末にメモを保管したあと、Notionへ送ります。「Notionに保存しました」という表示は、Notion側のページIDを確認した場合に限ります。保存できていないメモは端末に残り、履歴から送り直せます。端末への保管とNotionでの保存完了は区別します。
+
+■ メールとの併記が基本。Notionだけへの保存はプレミアム設定
+
+初回はメールの宛先を設定し、アプリの設定画面からNotionへ接続します。利用にはNotion側での許可と通信が必要です。初回設定を省いて使える機能ではありません。
+
+既定の動作は、メール送信に加えてNotionへ保存する形です。プレミアムの「Notionのみに保存」をONにすると、メールを送らずNotionへ保存します。この設定ではObsidianへの追加コピーも止まります。
+
+保存先は接続時に作る「SimpleMemo Inbox」です。任意のデータベース選択、双方向同期、添付ファイルには対応していません。Notion側のページをアプリ内で整理・編集する画面も追加していません。
+
+機能と設定手順：
+https://simplememofast.com/notion/
+
+■ 開発・運営の進捗も、実行記録とともに公開
+
+シンプルメモの運営では、データの確認、改善案の選定、実装、自動検査、本番反映、結果の記録をAIが担う範囲を広げています。以下は2026-09-12（日本時間）に取得した業務台帳の集計です。Notion連携の成功率や、今回の機能だけによる改善値ではありません。
 
 棚卸しした203業務のうち、意図的に実施しない4業務を除く199業務を対象にしています。内訳は、AIが実行158件、AIが提案・下書きまで7件、人が担当14件、未着手20件です。
 
@@ -26,7 +45,7 @@ AI関与率：92.2%（提案・下書きまでの業務も含む）
 実行の記録と最新の数値：
 https://simplememofast.com/autopilot/
 本稿の集計に使用した業務台帳（取得時点の版）：
-https://github.com/simplememofast/simplememo/blob/7bb3526447451de57ba471717d003ecb7fe27624/data/automation-coverage.json
+https://github.com/simplememofast/simplememo/blob/11e5db53ba64fad7853c44d4faed1563fe36ca73/data/automation-coverage.json
 最新の業務別台帳：
 https://simplememofast.com/data/automation-coverage.json
 
@@ -36,7 +55,7 @@ https://simplememofast.com/data/automation-coverage.json
 
 ■ シンプルメモについて
 
-思いついた瞬間のメモを、iPhoneやApple Watchから残すアプリです。Obsidianを利用する方にも、自分のメールへメモを届けたい方にも利用いただけます。
+思いついた瞬間のメモを、iPhoneやApple Watchから残すアプリです。保存先との接続や設定を行い、自分のメール、Obsidian、Notionで読み返せます。
 
 App Store：
 https://apps.apple.com/jp/app/id6758438948?pt=128498560&ct=prtimes_202609_autonomy_followup&mt=8

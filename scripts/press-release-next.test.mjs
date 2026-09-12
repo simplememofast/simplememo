@@ -26,6 +26,25 @@ test('only a current measured release with matching remote preview can pass', ()
   assert.deepEqual(validate(f.manifest, f.draft), []);
   assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
 });
+test('the new product story preserves its setup limits and does not relabel operational ratios as capture success', () => {
+  const { ui } = fixture();
+  assert.match(ui.title, /牛乳を買う.*Notion.*提供開始/);
+  assert.doesNotMatch(ui.title, /AI|世界初|唯一/);
+  for (const text of ['Apple WatchのメモはiPhoneを経由', '初回はメールの宛先を設定',
+    'プレミアムの「Notionのみに保存」', 'Obsidianへの追加コピーも止まります',
+    '任意のデータベース選択、双方向同期、添付ファイルには対応していません',
+    '端末への保管とNotionでの保存完了は区別', 'Notion連携の成功率や、今回の機能だけによる改善値ではありません']) {
+    assert.ok(ui.body.includes(text), text);
+  }
+});
+test('a newsworthy product story cannot release the current below-target execution ratio', () => {
+  const current = fixture({ ai: 158, human: 21 });
+  assert.match(current.ui.subtitle, /88\.3%（158\/179）/);
+  assert.match(current.ui.body, /158\/199/);
+  const result = evaluateDispatch(current.manifest, current.coverage, current.draft, current.ui, now);
+  assert.equal(result.allowed, false);
+  assert.match(result.reasons.join('\n'), /target not reached/);
+});
 test('198 of 199 actual executions clears the owner-revised greater-than-98% goal before dispatch', () => {
   const f = fixture();
   const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
