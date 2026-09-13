@@ -833,5 +833,12 @@
       "node growth/scripts/check-mentions.mjs --check",
       "node scripts/autopilot-act.mjs --check"
     ]
+  },
+  "company_monthly_budget": {
+    "decision_ref": "data/company-monthly-budget.json",
+    "mandate": "2026-09-13 owner delegates company-wide monthly budgeting to AI",
+    "scope": "全社月次予算の策定と支出管理への適用。送金、契約変更、賃金改定、債務延期の実行権限ではない。",
+    "enforcement": "新規任意支出の判断時にはscripts/company-monthly-budget.mjs --request <request.json>を実行し、既存の承認・品質・料金ゲートと併用する。次回PR配信のpreflightはこの判定を直接呼ぶ。",
+    "effective_until": "2026-10-01T00:00:00+09:00"
   }
 }
