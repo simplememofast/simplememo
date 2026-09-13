@@ -435,7 +435,7 @@ export const CLOSE_CHECKS = {
       : { closed: true, pending_pr: null, evidence: `${label} の取り残しは解消（走査に出てこない）` };
   },
 
-  manual({ observed } = {}, _ctx) {
+  manual({ observed, reviewer } = {}, _ctx) {
     // **手で観測したことを書く口を1つ開けてある。**閉じ条件は機械で判定
     // できないが、「いま外はどうなっているか」は人が見れば書ける
     // （例: GitHub の secrets 画面の Last updated）。
@@ -449,7 +449,7 @@ export const CLOSE_CHECKS = {
     return {
       closed: false,
       evidence: observed
-        ? `${observed}（リポジトリからは検査できない。閉じるのは人）`
+        ? `${observed}（リポジトリからは検査できない。${reviewer === 'ai' ? '証跡の照合後、AI担当が閉じる' : '閉じるのは人'}）`
         : 'リポジトリから検査できない（人が閉じる）',
     };
   },
@@ -491,6 +491,12 @@ export function classify(action, matrix) {
   // 1. 領域として人間に固定されているもの（値の判断・不可逆な操作）
   if (action.force_owner === 'human') {
     return { owner: 'human', why: action.force_owner_why ?? '領域として人間の判断が要る' };
+  }
+  // An explicitly delegated session task can be outside this script's repository.
+  // This never grants a handler permission or bypasses unattended path checks.
+  if (action.force_owner === 'ai' && !action.auto && action.execution_authorization?.by === 'owner'
+    && typeof action.force_owner_why === 'string' && action.force_owner_why.trim()) {
+    return { owner: 'ai', why: action.force_owner_why };
   }
   // 2. リポジトリの外が対象（App Store Connect・オーナーのローカル・課金コンソール）。
   //    **検査できないものは実行もできない。**
@@ -1336,17 +1342,21 @@ export function summarize(ledger, matrix, today) {
   const open = ledger.actions.filter((a) => a.state === 'open' && !a.pending_pr);
   const rows = open.map((a) => {
     const c = classify(a, matrix);
-    return { ...a, owner: c.owner, owner_why: c.why, age_days: daysBetween(a.created_jst, today) ?? 0 };
+    const start = a.not_before_jst && a.not_before_jst > a.created_jst ? a.not_before_jst : a.created_jst;
+    return { ...a, owner: c.owner, owner_why: c.why, age_days: Math.max(0, daysBetween(start, today) ?? 0) };
   });
   rows.sort((a, b) => (b.age_days - a.age_days) || a.id.localeCompare(b.id));
+  const deferred = rows.filter(a => a.not_before_jst && a.not_before_jst > today);
+  const ready = rows.filter(a => !deferred.includes(a));
   return {
-    open_total: rows.length,
+    open_total: ready.length,
+    deferred,
     pending_pr,
-    human: rows.filter((r) => r.owner === 'human'),
-    ai: rows.filter((r) => r.owner === 'ai'),
+    human: ready.filter((r) => r.owner === 'human'),
+    ai: ready.filter((r) => r.owner === 'ai'),
     acknowledged: ledger.actions.filter((a) => a.state === 'acknowledged').length,
     closed_today: ledger.actions.filter((a) => a.state === 'done' && a.closed_jst === today),
-    oldest_open_days: rows.length ? rows[0].age_days : 0,
+    oldest_open_days: ready.length ? ready[0].age_days : 0,
   };
 }
 
@@ -2813,6 +2823,10 @@ function render(sum, applied, today) {
       if (a.evidence) L.push(`        現状: ${a.evidence}`);
     }
   }
+  if (sum.deferred?.length) {
+    L.push('', '■ 期日待ち（今すぐの対応は不要）');
+    for (const a of sum.deferred) L.push(`  ${a.not_before_jst}: ${a.title}\n        担当: ${a.owner_why}`);
+  }
   if (sum.pending_pr?.length) {
     L.push('', '■ PR待ち（再投入せず検証・マージを追跡）');
     for (const a of sum.pending_pr) L.push(`  ${a.title}\n        ${a.evidence}`);
@@ -2828,7 +2842,7 @@ function render(sum, applied, today) {
     L.push('', '■ 本日クローズ（閉じ条件が通ったもの）');
     for (const a of sum.closed_today) L.push(`  ${a.title}\n        根拠: ${a.evidence}`);
   }
-  if (sum.open_total === 0 && !sum.pending_pr?.length) L.push('', '未処理なし。');
+  if (sum.open_total === 0 && !sum.pending_pr?.length && !sum.deferred?.length) L.push('', '未処理なし。');
   return L.join('\n');
 }
 
@@ -3381,6 +3395,14 @@ async function selftest() {
     classify({ auto: 'reconcile-runs', touches: ['data/autopilot-runs.json'], force_owner: 'human' }, matrix).owner === 'human');
   t('承認が要る領域は human', classify({ touches: ['x'], domain: '承認が要る領域' }, matrix).owner === 'human');
   t('リポジトリ外は human', classify({ touches: ['x'], outside_repo: true }, matrix).owner === 'human');
+  {
+    const delegated = { outside_repo: true, force_owner: 'ai', force_owner_why: 'owner delegated',
+      execution_authorization: { by: 'owner' } };
+    t('明示委任済みのセッション業務はAI担当', classify(delegated, matrix).owner === 'ai');
+    t('AI分類だけでは委任にならない', classify({ ...delegated, execution_authorization: null }, matrix).owner === 'human');
+    t('委任は無人handlerの権限を拡張しない', classify({ ...delegated, auto: 'reconcile-runs' }, matrix).owner === 'human');
+    t('AI担当の手動照合は人への再依頼にしない', /AI担当が閉じる/.test(CLOSE_CHECKS.manual({ observed: 'future', reviewer: 'ai' }, {}).evidence));
+  }
   // **may_modify はレーンFの境界であって、セッションの境界ではない。**
   // ここを取り違えたことが「自分で直せたものをオーナー依頼に積む」誤りの原因。
   t('セッション実装は may_modify 外でも ai',
@@ -3416,6 +3438,14 @@ async function selftest() {
     t('**書き間違えた期日は落とす**（黙って永久に鳴らなくなるのを防ぐ）',
       nb('9/17').length === 1 && nb('いつか').length === 1);
     t('欄が無い行はこれまでどおり通る', nb(undefined).length === 0 && nb(null).length === 0);
+    const waiting = { actions: [{ id: 'future', title: 'D+14', state: 'open', created_jst: '2026-09-03',
+      not_before_jst: '2026-09-17', force_owner: 'human' }] };
+    const before = summarize(waiting, matrix, '2026-09-13');
+    t('期日前は見えるが要対応・最古滞留に含めない', before.deferred.length === 1 && before.open_total === 0
+      && before.human.length === 0 && before.oldest_open_days === 0);
+    const due = summarize(waiting, matrix, '2026-09-17');
+    t('期日当日に要対応へ戻る', due.deferred.length === 0 && due.human.length === 1 && due.oldest_open_days === 0);
+    t('期日を過ぎた分だけ滞留になる', summarize(waiting, matrix, '2026-09-18').oldest_open_days === 1);
   }
 
   // 閉じ条件: 失敗が無いだけでは閉じない（走っていない可能性を潰す）
@@ -5215,6 +5245,8 @@ async function main() {
       routine_snapshot_sha256: routineSnapshotDigest(ctx.routineDoc),
       viewport_measurement: ctx.viewport,
       open_total: sum.open_total,
+      deferred: sum.deferred.map(a => ({ id: a.id, title: a.title, detail: a.detail, owner: a.owner,
+        why: a.owner_why, age_days: a.age_days, not_before_jst: a.not_before_jst, evidence: a.evidence })),
       pending_pr: sum.pending_pr.map(a => ({ id: a.id, title: a.title, pr: a.pending_pr.number,
         first_verified_head: a.pending_pr.head_sha, evidence: a.evidence })),
       oldest_open_days: sum.oldest_open_days,

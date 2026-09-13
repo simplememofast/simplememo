@@ -137,88 +137,9 @@
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
   "$max_snapshot_age_days": "これより古い写しでは検査を通さない。**読めているつもりを緑にしない**",
-  "open_budget": 4,
-  "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**",
+  "open_budget": 1,
+  "$open_budget": "2026-08-28: 4件から2件へ（副系A/B は止めたままにする判断を下して intentional_stops へ移した）。**下げる方向にしか動かさない**\n\n**[2026-08-31] 2 → 4。**Obsidian 系の2件が 08-28 と 08-31 のあいだに壊れた。**枠を広げたのではなく、理由を書いた行を2つ足した結果として一致させた**（この検査は `open.length !== budget` で落ちるので、**枠だけ広げることはできない**）。**原因は特定できていないので、直したら減らすこと。**\n\n2026-09-13: 4 → 1。9/7の所有者判断と停止観測を照合し、旧X/Reddit 3件を理由・履歴付き intentional_stops へ整理。後継の成功を意味しない。",
   "open_findings": [
-    {
-      "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
-      "what": "stopped",
-      "found_at": "2026-09-05",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-13T08:31:06.151Z",
-        "enabled": false,
-        "last_run_status": "SUCCEEDED",
-        "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
-        "last_run_finished_at": "2026-09-05T10:59:08.552542Z",
-        "last_run_session_id": "cse_017mXdfL64H762ZJMNcucRgy",
-        "next_run_at": "2026-09-06T10:34:38.030652858Z"
-      },
-      "tracked_due_at": "2026-09-05T10:34:49.332619211Z",
-      "state_history": [
-        {
-          "what": "never_ran",
-          "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T10:34:49.332619211Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
-          "observation": {
-            "observed_at": "2026-09-05T10:20:45.084Z",
-            "enabled": true,
-            "last_run_status": null,
-            "last_run_fired_at": null,
-            "last_run_finished_at": null,
-            "last_run_session_id": null,
-            "next_run_at": "2026-09-05T10:34:49.332619211Z"
-          },
-          "changed_at": "2026-09-05T11:21:01.154Z"
-        }
-      ]
-    },
-    {
-      "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
-      "what": "stopped",
-      "found_at": "2026-09-05",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-13T08:31:06.151Z",
-        "enabled": false,
-        "last_run_status": null,
-        "last_run_fired_at": null,
-        "last_run_finished_at": null,
-        "last_run_session_id": null,
-        "next_run_at": "2026-09-05T11:31:00Z"
-      },
-      "tracked_due_at": "2026-09-05T11:31:00Z",
-      "state_history": [
-        {
-          "what": "never_ran",
-          "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T11:31:00Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
-          "observation": {
-            "observed_at": "2026-09-05T11:21:01.154Z",
-            "enabled": true,
-            "last_run_status": null,
-            "last_run_fired_at": null,
-            "last_run_finished_at": null,
-            "last_run_session_id": null,
-            "next_run_at": "2026-09-05T11:31:00Z"
-          },
-          "changed_at": "2026-09-05T12:21:18.352Z"
-        }
-      ]
-    },
-    {
-      "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
-      "what": "stopped",
-      "found_at": "2026-09-05",
-      "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
-      "observation": {
-        "observed_at": "2026-09-13T08:31:06.151Z",
-        "enabled": false,
-        "last_run_status": "SUCCEEDED",
-        "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
-        "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
-        "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5",
-        "next_run_at": "2026-09-06T03:30:36.964912742Z"
-      }
-    },
     {
       "id": "trig_01N1SWZdPwKTot2SbT71UV2U",
       "what": "completion_unverified",
@@ -471,6 +392,127 @@
         }
       },
       "resolution_kind": "retired_by_replacement_not_recovered"
+    },
+    {
+      "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
+      "decided_at": "2026-09-13",
+      "why": "docs/monitor-delegation-20260907.md の所有者判断でXとRedditは別担当が継続し、旧予約を変更しない。9/13の実API観測は停止・ローカル移行の名称かつ enabled=false。旧クラウド予約を再開する故障として扱わず、意図的停止に分類する。ローカル後継の現在の稼働・投稿成功は未確認であり、この整理を復旧や移行完了とは数えない。",
+      "observation": {
+        "observed_at": "2026-09-13T08:31:06.151Z",
+        "enabled": false,
+        "last_run_status": "SUCCEEDED",
+        "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
+        "last_run_finished_at": "2026-09-05T10:59:08.552542Z",
+        "last_run_session_id": "cse_017mXdfL64H762ZJMNcucRgy",
+        "next_run_at": "2026-09-06T10:34:38.030652858Z"
+      },
+      "previous_finding": {
+        "id": "trig_013uV3Pk3SZH8QJS6PxSg9Bw",
+        "what": "stopped",
+        "found_at": "2026-09-05",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-13T08:31:06.151Z",
+          "enabled": false,
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
+          "last_run_finished_at": "2026-09-05T10:59:08.552542Z",
+          "last_run_session_id": "cse_017mXdfL64H762ZJMNcucRgy",
+          "next_run_at": "2026-09-06T10:34:38.030652858Z"
+        },
+        "tracked_due_at": "2026-09-05T10:34:49.332619211Z",
+        "state_history": [
+          {
+            "what": "never_ran",
+            "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T10:34:49.332619211Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
+            "observation": {
+              "observed_at": "2026-09-05T10:20:45.084Z",
+              "enabled": true,
+              "last_run_status": null,
+              "last_run_fired_at": null,
+              "last_run_finished_at": null,
+              "last_run_session_id": null,
+              "next_run_at": "2026-09-05T10:34:49.332619211Z"
+            },
+            "changed_at": "2026-09-05T11:21:01.154Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
+      "decided_at": "2026-09-13",
+      "why": "docs/monitor-delegation-20260907.md の所有者判断でXとRedditは別担当が継続し、旧予約を変更しない。9/13の実API観測は停止・ローカル移行の名称かつ enabled=false。旧クラウド予約を再開する故障として扱わず、意図的停止に分類する。ローカル後継の現在の稼働・投稿成功は未確認であり、この整理を復旧や移行完了とは数えない。",
+      "observation": {
+        "observed_at": "2026-09-13T08:31:06.151Z",
+        "enabled": false,
+        "last_run_status": null,
+        "last_run_fired_at": null,
+        "last_run_finished_at": null,
+        "last_run_session_id": null,
+        "next_run_at": "2026-09-05T11:31:00Z"
+      },
+      "previous_finding": {
+        "id": "trig_0146oEExJXb2GRXt6ES2nw7o",
+        "what": "stopped",
+        "found_at": "2026-09-05",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-13T08:31:06.151Z",
+          "enabled": false,
+          "last_run_status": null,
+          "last_run_fired_at": null,
+          "last_run_finished_at": null,
+          "last_run_session_id": null,
+          "next_run_at": "2026-09-05T11:31:00Z"
+        },
+        "tracked_due_at": "2026-09-05T11:31:00Z",
+        "state_history": [
+          {
+            "what": "never_ran",
+            "why": "置換先は有効だがlast_runはまだnull。初回の次回予定は2026-09-05T11:31:00Zで、この観測時点では未来。故障や実行成功とは断定せず、実際の発火・終了を次の観測で確認する。",
+            "observation": {
+              "observed_at": "2026-09-05T11:21:01.154Z",
+              "enabled": true,
+              "last_run_status": null,
+              "last_run_fired_at": null,
+              "last_run_finished_at": null,
+              "last_run_session_id": null,
+              "next_run_at": "2026-09-05T11:31:00Z"
+            },
+            "changed_at": "2026-09-05T12:21:18.352Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
+      "decided_at": "2026-09-13",
+      "why": "docs/monitor-delegation-20260907.md の所有者判断でXとRedditは別担当が継続し、旧予約を変更しない。9/13の実API観測は停止・ローカル移行の名称かつ enabled=false。旧クラウド予約を再開する故障として扱わず、意図的停止に分類する。ローカル後継の現在の稼働・投稿成功は未確認であり、この整理を復旧や移行完了とは数えない。",
+      "observation": {
+        "observed_at": "2026-09-13T08:31:06.151Z",
+        "enabled": false,
+        "last_run_status": "SUCCEEDED",
+        "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
+        "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
+        "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5",
+        "next_run_at": "2026-09-06T03:30:36.964912742Z"
+      },
+      "previous_finding": {
+        "id": "trig_01DmNiVHB7jo42bNVJL1wnBo",
+        "what": "stopped",
+        "found_at": "2026-09-05",
+        "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
+        "observation": {
+          "observed_at": "2026-09-13T08:31:06.151Z",
+          "enabled": false,
+          "last_run_status": "SUCCEEDED",
+          "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
+          "last_run_finished_at": "2026-09-05T09:51:47.580007Z",
+          "last_run_session_id": "cse_01MUS3CPNZ8P76dMuJCZb4f5",
+          "next_run_at": "2026-09-06T03:30:36.964912742Z"
+        }
+      }
     }
   ],
   "$intentional_stops": "止めてよいと決めたもの。**件数には数えないが、列挙は必須。**書かずに済ませられるなら、黙って止まったものがここに紛れる",
