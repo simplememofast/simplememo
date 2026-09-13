@@ -7,6 +7,33 @@ import { privateState, atomicJson, cadenceKey, opportunities } from './company-l
 const percent = v => Number.isFinite(v) ? (100 * v).toFixed(2) + '%' : 'unknown';
 const value = (m, v) => m.id === 'autonomy_score' && Number.isFinite(v) ? v.toFixed(3) + '/100' : percent(v);
 
+export function summarizeGa4(reports) {
+  if(!Array.isArray(reports)) return null;
+  const funnel=reports.find(r=>r.file==='ga4-funnel.sql')?.result;
+  const quality=reports.find(r=>r.file==='ga4-quality.sql')?.result;
+  const sum=(rows,key)=>{
+    if(!rows.length || rows.some(r=>r[key]===null || r[key]===undefined || (typeof r[key]==='string' && !/^\d+$/.test(r[key])) || !['number','string'].includes(typeof r[key]) || !Number.isSafeInteger(Number(r[key])) || Number(r[key])<0)) return null;
+    const n=rows.reduce((a,r)=>a+Number(r[key]),0);return Number.isSafeInteger(n)?n:null;
+  };
+  const grouped=(rows,dimensions,counts)=>{
+    if(!Array.isArray(rows))return null;
+    const groups=new Map();
+    for(const row of rows){const key=JSON.stringify(dimensions.map(k=>row[k]??null));if(!groups.has(key))groups.set(key,[]);groups.get(key).push(row);}
+    return [...groups.values()].map(group=>Object.fromEntries([...dimensions.map(k=>[k,group[0][k]??null]),...counts.map(k=>[k,sum(group,k)])]));
+  };
+  const counts=['observed_started_sessions','sessions_with_cta_impression','sessions_with_own_app_click_24h','sessions_with_onelink_click_24h','sessions_with_any_app_route_click_24h','sessions_with_onelink_qa_click_24h'];
+  const byChannel=grouped(funnel,['landing_scope','session_channel'],counts);
+  for(const g of byChannel??[])g.own_app_click_session_rate_24h=g.observed_started_sessions>0 && g.sessions_with_own_app_click_24h!==null?g.sessions_with_own_app_click_24h/g.observed_started_sessions:null;
+  const qualityFields=['recorded_events','events_without_session_key','analytics_storage_denied_events','missing_session_channel_events','cta_version_missing_or_other','click_target_invalid_or_missing','cta_dimensions_incomplete','onelink_version_missing_or_other','onelink_target_invalid_or_missing','onelink_dimensions_incomplete','onelink_qa_scope_mismatch'];
+  return {funnel_source_rows:Array.isArray(funnel)?funnel.length:null,by_landing_scope_and_session_channel:byChannel,
+    quality_source_rows:Array.isArray(quality)?quality.length:null,quality_by_hostname_scope:grouped(quality,['hostname_scope'],qualityFields),
+    quality_observed_event_dates:Array.isArray(quality)?[...new Set(quality.map(r=>r.event_date).filter(d=>typeof d==='string' && /^\d{8}$/.test(d)))].sort():null,
+    quality_rows_without_valid_date:Array.isArray(quality)?quality.filter(r=>typeof r.event_date!=='string' || !/^\d{8}$/.test(r.event_date)).length:null,
+    quality_period_note:'Quality counts describe observed event dates, including the day after the funnel cohort ends. They are not cohort-session counts; absent event dates do not prove zero events.',
+    interpretation:'Disjoint session groups from the existing fixed query. Production and missing/nonproduction landings remain separate. Direct and OneLink overlap; use the existing union column. QA clicks are separate. Rates use summed counts, never mean row rates. Not GA4 UI parity or installs/revenue. Missing counts remain null.',
+    detail:'Use growth-status --full or private data/connections.json for landing/source/medium rows and source windows.'};
+}
+
 export function compactGrowth(o) {
   const connections = o.growth.connections ?? {};
   const asc = connections.app_store_connect;
@@ -16,11 +43,11 @@ export function compactGrowth(o) {
       window: v.window ?? null, evidence: v.evidence ?? null, reason: v.reason ?? null }])),
     acquisition: connections.appsflyer ? { population: connections.appsflyer.population,
       metrics: connections.appsflyer.quality?.additive_metrics, caveats: connections.appsflyer.quality?.notes } : null,
-    ga4: connections.ga4?.reports ?? null,
+    ga4: summarizeGa4(connections.ga4?.reports),
     revenue: asc?.revenue ? Object.fromEntries(Object.entries(asc.revenue.granularities).map(([k,v]) => [k,
       { current: v.current ? { from: v.current.from, to: v.current.to, state: v.current.state, totals: v.current.totals } : null,
         previous: v.previous ? { from: v.previous.from, to: v.previous.to, state: v.previous.state, totals: v.previous.totals } : null }])) : null,
-    experiments: o.growth.experiments?.filter(e => e.status === 'RUNNING' || e.due),
+    experiments: o.growth.experiments?.filter(e => e.status === 'RUNNING' || e.due).map(e=>({id:e.id,status:e.status,legacy_status:e.legacy_status,decision:e.decision,due:e.due,evaluation_date:e.evaluation_date,primary_kpi:e.primary_kpi,affected_area:e.affected_area})),
     top_opportunities: opportunities(o).slice(0, 5), pipeline_failures: o.failures,
     private_detail: 'data/connections.json and growth-status.json in the private company-os directory' };
 }
