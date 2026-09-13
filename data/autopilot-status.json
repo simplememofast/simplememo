@@ -1,12 +1,12 @@
 {
   "date_jst": "2026-09-13",
-  "generated_at": "2026-09-13T08:08:26.441130+00:00",
+  "generated_at": "2026-09-13T11:04:16.074096+00:00",
   "action": "maintenance",
   "article": {
-    "url": "https://simplememofast.com/data/billing-recovery-readiness-20260913.json",
-    "title": "課金回復のテスト済み運用準備（保守の検証資料）"
+    "url": "https://simplememofast.com/data/service-notice-readiness-20260913.json",
+    "title": "障害案内のテスト済み運用準備（保守の検証資料）"
   },
-  "pr": 1314,
+  "pr": 1322,
   "streak": {
     "consecutive_no_article_days": 5,
     "last_article_date_jst": "2026-09-08",
@@ -69,9 +69,9 @@
       "to": "2026-09-13",
       "days": 34
     },
-    "completion_rate": 0.6744,
-    "change_failure_rate": 0.3256,
-    "human_intervention_rate": 0.2558,
+    "completion_rate": 0.6818,
+    "change_failure_rate": 0.3182,
+    "human_intervention_rate": 0.2727,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -79,35 +79,35 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.09302325581395349
+        "rate": 0.09090909090909091
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.023255813953488372
+        "rate": 0.022727272727272728
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.023255813953488372
+        "rate": 0.022727272727272728
       },
       "request": {
-        "runs": 5,
-        "rate": 0.11627906976744186
+        "runs": 6,
+        "rate": 0.13636363636363635
       }
     },
     "artifact_autonomy_rate": 1,
     "shipping_day_rate": 0.7353,
     "totals": {
-      "runs": 65,
-      "attempted": 43,
-      "shipped": 29,
+      "runs": 66,
+      "attempted": 44,
+      "shipped": 30,
       "failed": 14,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 27,
-        "attempted": 23,
-        "shipped": 20
+        "runs": 28,
+        "attempted": 24,
+        "shipped": 21
       },
       "primary": {
         "runs": 38,
@@ -177,7 +177,7 @@
       "lane": "E",
       "artifact": "/obsidian/compare/memos/"
     },
-    "intervention_count": 11,
+    "intervention_count": 12,
     "timings": {
       "time_to_detect_hours": {
         "median": 2.95,
@@ -245,18 +245,21 @@
       ]
     }
   },
-  "reason": "【連続無記事5日目・本番HTML最終変更 2026-09-08・BQ固定集計取得済み】オーナー依頼のGoalで既存運営とGrowth readerを統合。人手のAppsFlyer取得を既存日次主系へ接続し、元parserとのparityを実CSVで確認。自然定期起動の成功とは区別する。 同日の別オーナー依頼として、課金回復の検証済み準備と自然な毎時監視を完了し、task145の受入を161/177から162/178（91.01%）へ反映。今回の公開物は保守の検証資料で、記事公開の連続日数には加算しない。",
-  "verified": "GSC/GA4の暗号化取得、既存AppsFlyer readerの実行とCSV/parsing parity、ASC既存成果物の再利用を確認。204本のローカルCI相当検査と18件のCompany境界テストが成功。出荷はこのPRのmergeと本番内容の一致で別途確認する。 課金回復はAPI 3,125件、iOS SubscriptionLogicTests 26件が成功。API PR318、iOS PR503はマージ済み。本番1.5.75、Apple TEST成功、08:00 UTCのbilling_recovery_monitor自然実行（eligible=0/errors=0）を確認。実際の課金回復・案内効果は未観測。",
+  "reason": "【連続無記事5日目・本番HTML最終変更 2026-09-08・BQ固定集計取得済み】オーナー依頼のGoalで既存運営とGrowth readerを統合。人手のAppsFlyer取得を既存日次主系へ接続し、元parserとのparityを実CSVで確認。自然定期起動の成功とは区別する。 同日の別オーナー依頼として、課金回復の検証済み準備と自然な毎時監視を完了し、task145の受入を161/177から162/178（91.01%）へ反映。今回の公開物は保守の検証資料で、記事公開の連続日数には加算しない。 別の同日オーナー依頼として、task134の障害案内の運用準備を検証。初回の自然監視失敗を修正し、修正版の自然実行成功後、162/178から163/179（91.061453%）へ反映。保守資料のため記事公開数には加算しない。",
+  "verified": "GSC/GA4の暗号化取得、既存AppsFlyer readerの実行とCSV/parsing parity、ASC既存成果物の再利用を確認。204本のローカルCI相当検査と18件のCompany境界テストが成功。出荷はこのPRのmergeと本番内容の一致で別途確認する。 課金回復はAPI 3,125件、iOS SubscriptionLogicTests 26件が成功。API PR318、iOS PR503はマージ済み。本番1.5.75、Apple TEST成功、08:00 UTCのbilling_recovery_monitor自然実行（eligible=0/errors=0）を確認。実際の課金回復・案内効果は未観測。 障害案内はAPI 3,155件とiOS 11件が成功。API PR320・修正PR321、iOS PR505の最終SHA CI成功とmergeを確認。1.5.78配信後の11:00 UTC自然監視がeligible=0/errors=0で成功。10:00 UTCの失敗（errors=1・件数未設定）も保持。実障害案内と全端末到達は未観測。",
   "checks": {
     "company_boundaries": "18 passed",
     "local_preflight": "204 passed",
     "mobile_qa": "not applicable; no product layout change",
     "billing_recovery_api": "3125 passed (2922 unit + 203 integration)",
     "billing_recovery_ios": "26 passed; fixture state/UI logic, not payment E2E",
-    "billing_recovery_monitor": "natural hourly execution: eligible 0, errors 0; 2026-09-13T08:00:48.608Z"
+    "billing_recovery_monitor": "natural hourly execution: eligible 0, errors 0; 2026-09-13T08:00:48.608Z",
+    "service_notice_api": "3155 passed (2949 unit + 206 integration); final-SHA CI passed including repair",
+    "service_notice_ios": "11 passed; simulator HTTP/cache lifecycle, not physical incident delivery",
+    "service_notice_monitor": "natural hourly execution: eligible 0, errors 0; 2026-09-13T11:00:48.511Z after repaired 1.5.78 deployment; initial 10:00 failure retained"
   },
   "owner_requests": [
     "ChatGPT/GCPの残るscheduler inventoryは利用可能な認証済みread-only画面がなく未確認。他の運営・取得処理は継続可能。"
   ],
-  "next": "既存06:00主系へCompany OSのDaily/Weekly/Monthly/follow-upを統合。自然起動は初回turn admissionの証跡で確認し、7日分が揃うまでは効果を確定しない。 課金回復は既存の毎時監視とAI実行率heartbeatで初回Production DID_RENEW/BILLING_RECOVERYを待ち、再加点せず一次証跡を保存する。"
+  "next": "既存06:00主系へCompany OSのDaily/Weekly/Monthly/follow-upを統合。自然起動は初回turn admissionの証跡で確認し、7日分が揃うまでは効果を確定しない。 課金回復は既存の毎時監視とAI実行率heartbeatで初回Production DID_RENEW/BILLING_RECOVERYを待ち、再加点せず一次証跡を保存する。 障害案内も既存ai-90が自然監視の鮮度2時間以内・数値の正常を確認。初回activeは実際の承認済みPRと公開ID/revisionを照合して一次証跡を保存し、準備完了の二重加点はしない。"
 }
