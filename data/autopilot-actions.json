@@ -1178,19 +1178,22 @@
         "growth/data/annotations.json"
       ],
       "outside_repo": true,
-      "force_owner": "human",
-      "force_owner_why": "過去のエスカレーションとその判定を保持するためのhuman分類。現在の実行担当は所有者の委任を受けたCodex運用タスク simplememo-2であり、閲覧承認や人による転記を再度求める意味ではない。旧Cowork Routineは停止済みで、その完走を前提にしない。2026-09-17の実測・対象実験の確定評価まで閉じない。",
+      "force_owner": "ai",
+      "force_owner_why": "所有者の委任によりCodexが取得・評価する。過去のhuman分類とowner_needed_reviewは履歴に保存。旧simplememo-2はPAUSEDを維持し、2026-09-13に稼働中のai-90監視へD+14追跡を引継いだ。9/17の実測・確定評価まで未完了。人による転記は求めない。",
       "auto": null,
       "close_check": {
         "kind": "manual",
-        "params": {}
+        "params": {
+          "observed": "9/17の対象実験の実測取得・確定評価待ち。ai-90のACTIVE予約への追跡追加を読み戻し確認。予約保存は評価完了ではない。",
+          "reviewer": "ai"
+        }
       },
       "state": "open",
       "not_before_jst": "2026-09-17",
       "created_jst": "2026-09-03",
       "last_seen_jst": "2026-09-04",
       "closed_jst": null,
-      "evidence": "リポジトリから検査できない（人が閉じる）",
+      "evidence": "9/17の対象実験の実測取得・確定評価待ち。ai-90のACTIVE予約への追跡追加を読み戻し確認。予約保存は評価完了ではない。（リポジトリからは検査できない。証跡の照合後、AI担当が閉じる）",
       "owner_needed": true,
       "owner_needed_review": {
         "reviewed_jst": "2026-09-04",
@@ -1220,13 +1223,27 @@
         "routine_end_to_end_verified": false,
         "private_metrics_published": false,
         "current_execution": {
-          "updated_jst": "2026-09-07",
-          "automation_id": "simplememo-2",
-          "evidence": "所有者が停止監視の整理について「2 任せる」と選択。docs/monitor-delegation-20260907.md と保存済みautomationで照合。",
+          "updated_jst": "2026-09-13",
+          "automation_id": "ai-90",
+          "evidence": "旧simplememo-2のPAUSEDを確認し維持。所有者の修正委任に基づき、既存ACTIVE監視ai-90へD+14の対象と期日・完了条件を追加し保存後読み戻した。",
           "prior_runtime": "旧Cowork Routineは停止を維持。以前のroutine_end_to_end_verifiedは履歴で、現在の実行条件ではない。",
-          "natural_execution_verified": false
+          "natural_execution_verified": false,
+          "history": {
+            "updated_jst": "2026-09-07",
+            "automation_id": "simplememo-2",
+            "evidence": "所有者が停止監視の整理について「2 任せる」と選択。docs/monitor-delegation-20260907.md と保存済みautomationで照合。",
+            "prior_runtime": "旧Cowork Routineは停止を維持。以前のroutine_end_to_end_verifiedは履歴で、現在の実行条件ではない。",
+            "natural_execution_verified": false
+          }
         }
-      }
+      },
+      "owner_classification_history": [
+        {
+          "recorded_jst": "2026-09-13",
+          "force_owner": "human",
+          "force_owner_why": "過去のエスカレーションとその判定を保持するためのhuman分類。現在の実行担当は所有者の委任を受けたCodex運用タスク simplememo-2であり、閲覧承認や人による転記を再度求める意味ではない。旧Cowork Routineは停止済みで、その完走を前提にしない。2026-09-17の実測・対象実験の確定評価まで閉じない。"
+        }
+      ]
     },
     {
       "id": "act-orphaned-branch-claude-obsidian-auto-20260903",
@@ -1867,11 +1884,11 @@
           "episode": "[\"stopped\",\"2026-09-05T05:32:36.629932818Z\",\"cse_01MUS3CPNZ8P76dMuJCZb4f5\",null,\"2026-09-05\"]"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-05",
       "last_seen_jst": "2026-09-13",
-      "closed_jst": null,
-      "evidence": "定期タスクの追跡が継続中。未確定は解消ではない",
+      "closed_jst": "2026-09-13",
+      "evidence": "trig_01DmNiVHB7jo42bNVJL1wnBo: 理由付きの意図的停止と照合。調査終了であり復旧成功ではない",
       "reopened_jst": "2026-09-05"
     },
     {
@@ -2022,11 +2039,11 @@
           "episode": "[\"stopped\",\"2026-09-05T10:35:45.582040954Z\",\"cse_017mXdfL64H762ZJMNcucRgy\",\"2026-09-05T10:34:49.332619211Z\",\"2026-09-05\"]"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-05",
       "last_seen_jst": "2026-09-13",
-      "closed_jst": null,
-      "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
+      "closed_jst": "2026-09-13",
+      "evidence": "trig_013uV3Pk3SZH8QJS6PxSg9Bw: 理由付きの意図的停止と照合。調査終了であり復旧成功ではない"
     },
     {
       "id": "act-credentials-check-blind-in-ci",
@@ -2081,11 +2098,11 @@
           "episode": "[\"stopped\",null,null,\"2026-09-05T11:31:00Z\",\"2026-09-05\"]"
         }
       },
-      "state": "open",
+      "state": "done",
       "created_jst": "2026-09-05",
       "last_seen_jst": "2026-09-13",
-      "closed_jst": null,
-      "evidence": "定期タスクの追跡が継続中。未確定は解消ではない"
+      "closed_jst": "2026-09-13",
+      "evidence": "trig_0146oEExJXb2GRXt6ES2nw7o: 理由付きの意図的停止と照合。調査終了であり復旧成功ではない"
     },
     {
       "id": "act-routine-run-trig_01GphcHzTuH1A1JUGq8dYkWa",
