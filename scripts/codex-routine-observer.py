@@ -2,7 +2,7 @@
 """Read registered Codex scheduler runs and their original turn lifecycle.
 
 Local SQLite files and transcripts are opened read-only. Only allowlisted
-metadata goes into routine-runs.json; prompts, outputs, paths, errors and costs
+metadata goes into routine-runs.json; prompts, outputs, paths, error messages and costs
 never do. A later follow-up cannot turn the initial scheduled failure green.
 """
 import argparse
@@ -25,6 +25,7 @@ UUID = re.compile(r'^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$')
 HASH = re.compile(r'^[0-9a-f]{64}$')
 CALLS = {'function_call', 'custom_tool_call'}
 OUTPUTS = {'function_call_output', 'custom_tool_call_output'}
+RUNTIME_FAILURES = {'usage_limit_exceeded': 'usage_limit'}
 
 
 def require(condition, message):
@@ -51,7 +52,7 @@ def readonly(path):
     return connection
 
 
-def transcript(raw, thread_id):
+def transcript(raw, thread_id, runtime_failure=None):
     require(raw.endswith(b'\n'), 'Incomplete transcript line')
     turns, active, meta = [], None, False
     for line in raw.splitlines():
@@ -77,6 +78,17 @@ def transcript(raw, thread_id):
                 active['finished_at'] = event['timestamp']
                 active['state'] = 'aborted' if kind == 'turn_aborted' else (
                     'failed' if payload.get('error') else 'completed')
+                error = payload.get('error')
+                code = error.get('codex_error_info') if isinstance(error, dict) else None
+                # Only the original failed turn and an exact structured code
+                # establish a cause. Free text and follow-up errors never do.
+                if runtime_failure is not None and len(turns) == 1 and active['state'] == 'failed' \
+                        and isinstance(code, str) and code in RUNTIME_FAILURES:
+                    runtime_failure.update(version=1, thread_id=thread_id, turn_id=active['turn_id'],
+                                           finished_at=active['finished_at'], code=code,
+                                           failure_class=RUNTIME_FAILURES[code],
+                                           transcript_sha256=hashlib.sha256(raw).hexdigest())
+                    runtime_failure['sha256'] = receipt_digest(runtime_failure)
                 active = None
         elif event.get('type') == 'response_item' and active is not None:
             kind = payload.get('type')
@@ -105,7 +117,7 @@ def transcript(raw, thread_id):
             'bytes': len(raw), 'turns': turns}
 
 
-def local_transcript(codex_dir, state, thread_id):
+def local_transcript(codex_dir, state, thread_id, runtime_failure=None):
     thread = state.execute('SELECT rollout_path FROM threads WHERE id=?', (thread_id,)).fetchone()
     details = {'state': 'unavailable', 'reason': 'thread_missing', 'sha256': None, 'bytes': None, 'turns': []}
     if not thread:
@@ -115,7 +127,7 @@ def local_transcript(codex_dir, state, thread_id):
         details['reason'] = 'path_outside_session_store'
         return details
     try:
-        return transcript(path.read_bytes(), thread_id)
+        return transcript(path.read_bytes(), thread_id, runtime_failure)
     except (OSError, ValueError, KeyError, TypeError):
         details['reason'] = 'unreadable_or_incomplete_transcript'
         return details
@@ -258,6 +270,21 @@ def validate_detection_receipt(receipt, row, observed):
             'Invalid automatic detection receipt')
 
 
+def validate_runtime_failure(receipt, row):
+    keys(receipt, 'version thread_id turn_id finished_at code failure_class transcript_sha256 sha256')
+    turns = row['transcript'].get('turns', [])
+    require(turns and row['transcript']['state'] == 'observed', 'Missing runtime failure transcript')
+    first = turns[0]
+    require(type(receipt['version']) is int and receipt['version'] == 1
+            and first['state'] == 'failed' and receipt['thread_id'] == row['thread_id']
+            and receipt['turn_id'] == first['turn_id'] and receipt['finished_at'] == first['finished_at']
+            and isinstance(receipt['code'], str) and receipt['code'] in RUNTIME_FAILURES
+            and receipt['failure_class'] == RUNTIME_FAILURES[receipt['code']]
+            and receipt['transcript_sha256'] == row['transcript']['sha256']
+            and receipt['sha256'] == receipt_digest({k: v for k, v in receipt.items() if k != 'sha256'}),
+            'Invalid runtime failure receipt')
+
+
 def observe(codex_dir, previous=None, now=None):
     observed_at = now or dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
     origin = native_observer_origin(observed_at)
@@ -280,7 +307,10 @@ def observe(codex_dir, previous=None, now=None):
             record = {'thread_id': tid, 'automation_id': row['automation_id'],
                       'scheduler_status': row['status'], 'created_at': iso(row['created_at']),
                       'updated_at': iso(row['updated_at']), 'business_outcome': 'not_inferred'}
-            record['transcript'] = local_transcript(codex_dir, state, tid)
+            runtime_failure = {}
+            record['transcript'] = local_transcript(codex_dir, state, tid, runtime_failure)
+            if runtime_failure and record['transcript']['state'] == 'observed':
+                record['runtime_failure'] = runtime_failure
             receipt = gate_receipt(codex_dir, record)
             if receipt is not None:
                 record['gate_receipt'] = receipt
@@ -303,7 +333,7 @@ def observe(codex_dir, previous=None, now=None):
     for automation in automations:
         for key in ('next_run_at', 'last_run_at'):
             automation[key] = None if automation[key] is None else iso(automation[key])
-    result = {'schema_version': 3, 'observed_at': observed_at, 'registered': list(REGISTERED),
+    result = {'schema_version': 4, 'observed_at': observed_at, 'registered': list(REGISTERED),
               'source': 'local_codex_scheduler_and_session_store', 'scheduler_query_complete': True,
               # launchd's service name does not necessarily reach descendants.
               # Its absence cannot establish that a person started this read.
@@ -320,6 +350,12 @@ def observe(codex_dir, previous=None, now=None):
             require(newer['automation_id'] == old['automation_id'] and newer['created_at'] == old['created_at'],
                     'Scheduled run identity changed')
             prior_turns = old['transcript']['turns']
+            if old.get('runtime_failure'):
+                # New follow-up bytes may change the transcript hash, never
+                # the already-observed cause of the original failure.
+                stable = lambda r: {k: v for k, v in r.items() if k not in ('sha256', 'transcript_sha256')}
+                require(stable(newer.get('runtime_failure', {})) == stable(old['runtime_failure']),
+                        'Original runtime failure classification changed')
             if prior_turns and prior_turns[0]['state'] != 'in_progress' and old.get('gate_receipt'):
                 require(newer.get('gate_receipt') == old['gate_receipt'], 'Closed gate receipt changed')
             new_turns = newer['transcript']['turns']
@@ -338,7 +374,7 @@ def keys(value, expected):
 
 def validate(doc, now=None):
     keys(doc, 'schema_version observed_at registered source scheduler_query_complete collection_context automations runs')
-    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2, 3)
+    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2, 3, 4)
             and doc['registered'] == list(REGISTERED), 'Observation scope changed')
     require(doc['source'] == 'local_codex_scheduler_and_session_store' and doc['scheduler_query_complete'] is True,
             'Scheduler inventory is incomplete')
@@ -362,7 +398,10 @@ def validate(doc, now=None):
     for run in doc['runs']:
         keys(run, 'thread_id automation_id scheduler_status created_at updated_at business_outcome transcript'
              + (' gate_receipt' if doc['schema_version'] >= 3 and 'gate_receipt' in run else '')
-             + (' detection_receipt' if doc['schema_version'] >= 3 and 'detection_receipt' in run else ''))
+             + (' detection_receipt' if doc['schema_version'] >= 3 and 'detection_receipt' in run else '')
+             + (' runtime_failure' if doc['schema_version'] >= 4 and 'runtime_failure' in run else ''))
+        if 'runtime_failure' in run:
+            validate_runtime_failure(run['runtime_failure'], run)
         if 'detection_receipt' in run:
             validate_detection_receipt(run['detection_receipt'], run, observed)
         if 'gate_receipt' in run:
@@ -617,6 +656,67 @@ class Tests(unittest.TestCase):
             with patch.dict(os.environ, {'XPC_SERVICE_NAME': 'com.simplememo.routine-observer'}, clear=True):
                 self.assertEqual(observe(root, now=self.now)['collection_context'], 'service_environment_observed')
 
+    def test_structured_original_failure_classification(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); log = self.setup_store(root)
+            legacy = observe(root, now=self.now)
+            legacy['schema_version'] = 3
+            records = [json.loads(line) for line in self.raw().splitlines()]
+            original = next(r for r in records if r.get('payload', {}).get('error'))
+            original['payload']['error']['codex_error_info'] = 'usage_limit_exceeded'
+            encode = lambda: b''.join((json.dumps(r) + '\n').encode() for r in records)
+            log.write_bytes(encode())
+            doc = observe(root, legacy, now=self.now)
+            run = doc['runs'][0]
+            self.assertEqual(run['transcript']['turns'], legacy['runs'][0]['transcript']['turns'])
+            self.assertEqual(run['runtime_failure']['failure_class'], 'usage_limit')
+            self.assertNotIn('private', json.dumps(doc))
+            self.assertEqual(observe(root, doc, now=self.now), doc)
+            # Python's actual receipt must reach the production JS intake and
+            # existing-row classifier, without changing detection provenance.
+            check = subprocess.run(['node', '--input-type=module', '-e',
+                "import assert from 'node:assert/strict';"
+                "import {codexRunIntake,applyCodexTriage} from './scripts/lib/codex-run-intake.mjs';"
+                "let s='';for await(const c of process.stdin)s+=c;const d=JSON.parse(s);"
+                "const routine={codex_observation:d},opts={now:Date.parse(d.observed_at)};"
+                "const r=codexRunIntake(routine,{runs:[]},opts).rows[0];"
+                "assert.equal(r.failure_class,'usage_limit');assert.equal(r.needs_triage,false);"
+                "delete r.failure_class;r.needs_triage=true;const before=structuredClone(r);"
+                "const a=applyCodexTriage(routine,{runs:[r]},opts);assert.equal(a.changed,1);"
+                "const {failure_class,needs_triage,triage_note,...rest}=a.doc.runs[0];"
+                "delete before.needs_triage;assert.deepEqual(rest,before);"],
+                cwd=ROOT, input=json.dumps(doc), text=True, capture_output=True)
+            self.assertEqual(check.returncode, 0, check.stderr)
+            # A later error cannot rewrite the original classification. Its
+            # extra transcript bytes only refresh the fingerprint.
+            third = '00000000-0000-0000-0000-000000000004'
+            records.extend([
+                {'type': 'event_msg', 'timestamp': '2026-09-08T03:00:00.000Z',
+                 'payload': {'type': 'task_started', 'turn_id': third}},
+                {'type': 'event_msg', 'timestamp': '2026-09-08T03:01:00.000Z',
+                 'payload': {'type': 'task_complete', 'turn_id': third, 'error': {'codex_error_info': 'other_error'}}}])
+            log.write_bytes(encode())
+            followup = observe(root, doc, now=self.now)
+            self.assertEqual(followup['runs'][0]['runtime_failure']['failure_class'], 'usage_limit')
+            for error in ({'message': 'usage_limit_exceeded'}, {'codex_error_info': 'other_error'},
+                          {'codex_error_info': {'usage_limit_exceeded': True}}):
+                original['payload']['error'] = error
+                log.write_bytes(encode())
+                self.assertNotIn('runtime_failure', observe(root, now=self.now)['runs'][0])
+                with self.assertRaisesRegex(ValueError, 'classification changed'):
+                    observe(root, doc, now=self.now)
+            # A known code on a follow-up is never attributed to the first turn.
+            records[-1]['payload']['error'] = {'codex_error_info': 'usage_limit_exceeded'}
+            log.write_bytes(encode())
+            self.assertNotIn('runtime_failure', observe(root, now=self.now)['runs'][0])
+            for key, value in [('turn_id', self.two), ('finished_at', self.now), ('failure_class', 'unknown'),
+                               ('transcript_sha256', 'b' * 64)]:
+                bad = json.loads(json.dumps(doc)); r = bad['runs'][0]['runtime_failure']
+                r[key] = value; r['sha256'] = receipt_digest({k: v for k, v in r.items() if k != 'sha256'})
+                with self.assertRaisesRegex(ValueError, 'runtime failure receipt'):
+                    validate(bad, now=self.now)
+
     def test_legacy_snapshot_migrates_on_real_observation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); self.setup_store(root)
@@ -625,7 +725,7 @@ class Tests(unittest.TestCase):
             validate(old, now=self.now)
             self.assertEqual(summary(old)['collection_context'], 'legacy_unverified')
             new = observe(root, old, now=self.now)
-            self.assertEqual(new['schema_version'], 3)
+            self.assertEqual(new['schema_version'], 4)
             self.assertEqual(new['runs'], old['runs'])
             self.assertEqual(summary(new)['initial_failed'], 1)
 

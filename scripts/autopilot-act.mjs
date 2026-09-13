@@ -150,7 +150,8 @@ function epRatifiedOrWindow(params, ctx) {
 export const CLOSE_CHECKS = {
   codex_ledger_covers_runs(_params, ctx) {
     const intake = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() });
-    return { closed: intake.valid && intake.rows.length === 0, evidence: `観測有効=${intake.valid}、未記帳のCodex結果 ${intake.rows.length} 件` };
+    return { closed: intake.valid && intake.rows.length + intake.triage.length === 0,
+      evidence: `観測有効=${intake.valid}、未記帳のCodex結果 ${intake.rows.length} 件、原因分類 ${intake.triage.length} 件` };
   },
 
   viewport_measured: viewportMeasured,
@@ -634,9 +635,9 @@ export function derive(ctx) {
     }
   }
 
-  const codexMissing = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() }).rows;
-  if (codexMissing.length) out.push({ id: 'act-codex-ledger-sync', source: 'ledger',
-    title: `未記帳のCodex実行 ${codexMissing.length} 件を同期する`,
+  const codexIntake = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() });
+  if (codexIntake.rows.length + codexIntake.triage.length) out.push({ id: 'act-codex-ledger-sync', source: 'ledger',
+    title: `Codex実行の未記帳 ${codexIntake.rows.length} 件・原因分類 ${codexIntake.triage.length} 件を同期する`,
     detail: '予約と元の終了証跡・判定レシートを照合する。正常終了を出荷とは数えない。',
     auto: 'reconcile-codex-runs', touches: ['data/autopilot-runs.json', 'data/autopilot-status.json'],
     close_check: { kind: 'codex_ledger_covers_runs', params: {} } });
@@ -2222,14 +2223,17 @@ export function detectionEvidence(run, eventName, now = new Date(), completion =
 export const HANDLERS = {
   async 'reconcile-codex-runs'(ctx, _action, { append = args => execFileSync(process.execPath,
     [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }),
+    triage = () => execFileSync(process.execPath, [path.join(ROOT, 'scripts/autopilot-runs.mjs'), '--classify-codex-failures'],
+      { cwd: ROOT, encoding: 'utf8' }),
     syncStatus = () => execFileSync(process.execPath, [path.join(ROOT, 'scripts/autopilot-runs.mjs'), '--write-status'],
       { cwd: ROOT, encoding: 'utf8' }) } = {}) {
     const automatic = ctx.completion ? ctx.completion.automatic === true : ['schedule', 'workflow_run'].includes(ctx.eventName);
-    const { rows } = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now(), automatic });
+    const { rows, triage: classifications } = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now(), automatic });
     let changed = 0;
     for (const row of rows) { append(codexAppendArgs(row)); changed++; }
+    if (classifications.length) { triage(); changed += classifications.length; }
     if (changed) syncStatus();
-    return { ok: true, changed, log: `Codex original outcomes appended: ${changed}; shipments not inferred` };
+    return { ok: true, changed, log: `Codex original outcomes appended: ${rows.length}; causes classified: ${classifications.length}; shipments not inferred` };
   },
 
   /**
@@ -3296,6 +3300,25 @@ async function selftest() {
     t('Codex ledger coverage closes after actual append', CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
     const repeated = await HANDLERS['reconcile-codex-runs'](ctx, action, { append: () => { throw new Error('duplicate'); }, syncStatus: () => { throw new Error('unnecessary status write'); } });
     t('Codex intake is idempotent', repeated.changed === 0);
+    const { createHash } = await import('node:crypto');
+    const { applyCodexTriage } = await import('./lib/codex-run-intake.mjs');
+    ctx.runsDoc.runs = codexRunIntake(routineDoc, { runs: [] }, { now }).rows;
+    routineDoc.codex_observation.schema_version = 4;
+    const entry = routineDoc.codex_observation.runs[0], first = entry.transcript.turns[0];
+    const proof = { version: 1, thread_id: tid, turn_id: first.turn_id, finished_at: first.finished_at,
+      code: 'usage_limit_exceeded', failure_class: 'usage_limit', transcript_sha256: entry.transcript.sha256 };
+    proof.sha256 = createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.entries(proof).sort()))).digest('hex');
+    entry.runtime_failure = proof;
+    const triageAction = derive(ctx).find(a => a.id === 'act-codex-ledger-sync');
+    t('Codex known runtime cause reopens synchronization for an existing failure', triageAction?.auto === 'reconcile-codex-runs'
+      && !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
+    const triaged = await HANDLERS['reconcile-codex-runs'](ctx, triageAction, {
+      append: () => { throw new Error('existing outcome must not be appended again'); },
+      triage: () => { ctx.runsDoc = applyCodexTriage(routineDoc, ctx.runsDoc, { now }).doc; },
+      syncStatus: () => { statusSyncs++; } });
+    t('Codex classification writes through the bounded handler and synchronizes status', triaged.changed === 1
+      && statusSyncs === 2 && ctx.runsDoc.runs[0].failure_class === 'usage_limit');
+    t('Codex classification closes only after the ledger actually changes', CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
     ctx.now += 4 * 86400000;
     t('Codex stale observation never proves closure', !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
   }
