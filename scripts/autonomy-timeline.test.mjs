@@ -78,3 +78,41 @@ test('公開面の変更前比較は、保存した採点範囲の分子・分�
     assert.equal(spans[0][1], expected, `${page}: 変更前の数値を現行値へ置き換えない`);
   }
 });
+
+test('返金準備の加点は採点条件の変更前比較と完了証拠を伴う', () => {
+  const coverage = JSON.parse(fs.readFileSync(new URL('data/automation-coverage.json', root), 'utf8'));
+  const id = 'refund-tested-readiness-20260913';
+  const revision = coverage.acceptance_revisions.find(r => r.id === id);
+  const proof = JSON.parse(fs.readFileSync(new URL(revision.evidence, root), 'utf8'));
+  const row = coverage.tasks[revision.task_index];
+  assert.equal(row.acceptance_basis, 'test_verified_readiness_and_active_production_monitoring');
+  assert.equal(row.executor, revision.executor);
+  assert.equal(proof.status, 'complete');
+  assert.equal(proof.acceptance.task_index, revision.task_index);
+  assert.equal(proof.tests.api.unit.passed, 2909);
+  assert.equal(proof.tests.api.integration.passed, 190);
+  assert.equal(proof.tests.apple_sandbox_refund_e2e, false);
+  assert.equal(proof.production.actual_refund_observed, false);
+  assert.equal(proof.production.apple_test_delivery.result, 'SUCCESS');
+  assert.equal(proof.production.apple_test_delivery.environment, 'production');
+  const deploy = Date.parse(proof.production.deployment.deployed_at);
+  const cron = proof.production.scheduled_observation;
+  assert.ok(Date.parse(proof.production.apple_test_delivery.observed_at) > deploy);
+  assert.equal(cron.job_name, 'refund_monitor');
+  assert.equal(cron.cron_expression, '0 * * * *');
+  assert.equal(cron.errors, 0);
+  assert.equal(cron.reason, 'awaiting_production_refund');
+  assert.equal(cron.eligible, 0);
+  assert.ok(Date.parse(cron.started_at) > deploy);
+  assert.equal(proof.continuation.status, 'ACTIVE');
+  assert.deepEqual(proof.acceptance.previous, revision.previous);
+  assert.deepEqual(proof.acceptance.current, revision.current);
+  const before = revision.previous;
+  const expected = `変更前の実例必須基準：${before.ai_executes}/${before.doing}＝${(100 * before.ai_executes / before.doing).toFixed(2)}%`;
+  for (const page of ['index.html', 'autopilot/index.html']) {
+    const html = fs.readFileSync(new URL(page, root), 'utf8');
+    const spans = [...html.matchAll(/<span data-acceptance-before="refund-tested-readiness-20260913">([^<]*)<\/span>/g)];
+    assert.equal(spans.length, 1, `${page}: 条件変更前の比較が一意に存在する`);
+    assert.equal(spans[0][1], expected);
+  }
+});
