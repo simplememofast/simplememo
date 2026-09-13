@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readCompanyBudget, validateCompanyBudget, evaluateCompanySpending } from './lib/company-monthly-budget.mjs';
-const { policy } = readCompanyBudget();
+import fs from 'node:fs';
+import { POLICY_URL, validateCompanyBudget, evaluateCompanySpending } from './lib/company-monthly-budget.mjs';
+const policy = JSON.parse(fs.readFileSync(POLICY_URL, 'utf8'));
 const now = '2026-09-17T00:30:00Z';
 const request = { id: 'fixture', kind: 'new_discretionary', currency: 'JPY', requested_commitment_jpy: 1 };
 test('new optional paid commitments are held, while zero-cost work keeps its other gates', () => {
