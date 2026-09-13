@@ -5,9 +5,15 @@ Claudeの組織利用許可の変更・再認証は不要。旧失敗runやClaud
 
 ## 予約と実行
 
-- Codex heartbeat: `simplememo-ai`、このタスクで毎週水曜06:47 JST。
-  ネイティブ予約とローカルscheduler DBの両方でACTIVEを確認した。
-  作成時の次回予定は2026-09-16 06:47:08 JST。自然起動の成功はまだ未観測。
+- 初回移管記録ではCodex heartbeat `simplememo-ai`、毎週水曜06:47 JST、初回9/16と記載していた。
+  9/13の再調査では現在のscheduler DB・legacy ID・コードパスを含む目的検索・実行履歴・設定に
+  この所有者が存在しない。過去の記載を現存・自然実行成功の証拠として扱わない。
+- 現在の所有者は既存 `obsidian` 日次主系。毎日06:00 JSTの運転で
+  `python3 scripts/codex-ai-visibility-probe.py --scheduled` を読む。
+  水曜06:47 JSTより前は取得せず、通常は木曜06:00の主系で未取得分を補完する。
+  新しい予約は作らない。同週の検証済み結果は再利用し、失敗・不明を含む定期取得の着手も
+  週1回に予約してから実行する。自動で有料の5問を繰り返さず、元ログを診断する。
+  新所有者による将来の自然起動と配送は、その実記録が届くまで未観測。
 - 最新mainの専用worktreeで `python3 scripts/codex-ai-visibility-probe.py` を実行する。
   作業中checkoutを切り替えない。過去の会話から5問に回答せず、スクリプトが
   固定質問ごとに別のCodex CLIセッションを起動する。

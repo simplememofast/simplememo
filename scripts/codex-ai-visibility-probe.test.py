@@ -14,6 +14,65 @@ spec.loader.exec_module(probe)
 
 
 class CodexProbeTests(unittest.TestCase):
+    def test_scheduled_slot_is_not_early_and_catches_up_after_wednesday(self):
+        tz = dt.timezone(dt.timedelta(hours=9))
+        with patch.object(probe, 'collect') as collect:
+            for value in ['2026-09-14T06:00:00', '2026-09-16T06:46:59']:
+                self.assertEqual(probe.scheduled_collect(dt.datetime.fromisoformat(value).replace(tzinfo=tz))['status'], 'not_due')
+            collect.assert_not_called()
+        local, slot = probe.scheduled_slot(dt.datetime(2026, 9, 17, 6, tzinfo=tz))
+        self.assertGreater(local, slot)
+        self.assertEqual(slot.isoformat(), '2026-09-16T06:47:00+09:00')
+
+    def test_failed_scheduled_attempt_cannot_restart_paid_questions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory) / 'private'; report=Path(directory) / 'missing.json'
+            at=dt.datetime(2026,9,17,6,tzinfo=dt.timezone(dt.timedelta(hours=9)))
+            with patch.object(probe,'STATE',state), patch.object(probe,'REPORT',report), \
+                    patch.object(probe,'collect',side_effect=ValueError('fixture failure')) as collect:
+                with self.assertRaises(ValueError): probe.scheduled_collect(at)
+                result=probe.scheduled_collect(at)
+                self.assertEqual(result['status'],'weekly_attempt_reserved')
+                self.assertEqual(result['attempt_state'],'failed_or_output_unverified')
+                self.assertEqual(collect.call_count,1)
+                self.assertEqual((state/'scheduled-2026-W38.json').stat().st_mode & 0o077,0)
+
+    def test_current_week_output_needs_no_new_question_or_reservation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'private'; file=Path(directory)/'report.json'
+            file.write_text(json.dumps(self.report()))
+            at=dt.datetime(2026,9,17,6,tzinfo=dt.timezone(dt.timedelta(hours=9)))
+            with patch.object(probe,'STATE',state),patch.object(probe,'REPORT',file), \
+                    patch.object(probe,'current_week',return_value=True),patch.object(probe,'collect') as collect:
+                self.assertEqual(probe.scheduled_collect(at)['status'],'current_week_output_present')
+                collect.assert_not_called()
+                self.assertEqual(list(state.glob('scheduled-*.json')),[])
+
+    def test_stale_previous_week_does_not_prevent_one_recovery_attempt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state=Path(directory)/'private';file=Path(directory)/'report.json'
+            report=self.report();old=(dt.datetime.now(dt.timezone.utc)-dt.timedelta(days=20)).isoformat()
+            report.update(started_at=old,observed_at=old);file.write_text(json.dumps(report))
+            at=dt.datetime(2026,9,17,6,tzinfo=dt.timezone(dt.timedelta(hours=9)))
+            with patch.object(probe,'STATE',state),patch.object(probe,'REPORT',file), \
+                    patch.object(probe,'collect',side_effect=ValueError('attempt reached')) as collect:
+                with self.assertRaisesRegex(ValueError,'attempt reached'):probe.scheduled_collect(at)
+                self.assertEqual(collect.call_count,1)
+
+    def test_reserved_attempt_does_not_hide_completed_cache_in_new_worktree(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'data').mkdir();file=root/'data/ai-visibility-probe.json'
+            state=root/'private';folder=state/'runs'/'completed';folder.mkdir(parents=True);state.chmod(0o700)
+            report=self.report();(folder/'report.json').write_text(json.dumps(report))
+            file.write_text(json.dumps({'series':'claude-sonnet-web-v1'}))
+            (state/'scheduled-2026-W38.json').write_text(json.dumps({'status':'reserved'}))
+            at=dt.datetime(2026,9,17,6,tzinfo=dt.timezone(dt.timedelta(hours=9)))
+            with patch.object(probe,'ROOT',root),patch.object(probe,'STATE',state),patch.object(probe,'REPORT',file), \
+                    patch.object(probe,'preflight'),patch.object(probe,'collect') as collect:
+                result=probe.scheduled_collect(at)
+                self.assertEqual(result['status'],'restored_current_week_output');self.assertEqual(result['model_calls'],0)
+                self.assertEqual(json.loads(file.read_text()),report);collect.assert_not_called()
+
     def events(self, ident=1):
         return [
             {'type': 'thread.started', 'thread_id': f'00000000-0000-4000-8000-{ident:012d}'},

@@ -44,6 +44,8 @@ The regular finish evidence is `{ "kind": "autopilot_run", "run_id": "<bound ID>
 
 All four duties are hooks in the existing daily owner, not four new model jobs:
 
+The historical dedicated `simplememo-ai` reservation could not be found in current scheduler rows, legacy IDs, purpose matches or execution history. Its weekly visibility duty now belongs to this existing daily owner: after the usual preflight, inspect the current main and unfinished same-week observation PR, then run `python3 scripts/codex-ai-visibility-probe.py --scheduled` once. It keeps the Wednesday06:47 JST target, catching up at the next existing daily slot (normally Thursday06:00), and preserves the existing five-question collector, stop/budget gates, shared lock and successful-result reuse. A durable weekly attempt reservation also prevents paid repeats after failure. A retained failed attempt needs diagnosis, not blind resampling. If collection writes a new report, finish its existing reviewed publication route and verify public bytes; a returned command alone is not delivery. Read `docs/codex-ai-visibility.md`. Do not restore an absent or paused historical owner or add a timer.
+
 | Hook | Due key / action |
 |---|---|
 | Daily | JST date: source health, ingest, anomalies, failed jobs, stop/permission failures, due experiments, highest-value AUTO action |
