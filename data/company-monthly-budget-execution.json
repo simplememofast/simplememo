@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "decision_id": "company-monthly-budget-20260913",
+  "actor": "ai",
+  "source_commit": "77c77ba0a2df4698bbc374f910c470c85fd2853e",
+  "implementation_pr": "https://github.com/simplememofast/simplememo/pull/1302",
+  "validation_run": "https://github.com/simplememofast/simplememo/actions/runs/34742362551",
+  "policy_sha256": "aee2d9eb2ecf765d5b0d3b958346c2fc5c07911b529aa1a3a8c3c9999dc4e575",
+  "public_readback": {
+    "url": "https://simplememofast.com/data/company-monthly-budget.json",
+    "method": "curl GET canonical URL",
+    "http_status": 200,
+    "sha256": "aee2d9eb2ecf765d5b0d3b958346c2fc5c07911b529aa1a3a8c3c9999dc4e575",
+    "matches": true,
+    "observed_at": "2026-09-13T06:31:30.346840+00:00"
+  },
+  "spending_decisions": {
+    "existing_press_candidate": {
+      "policy_sha256": "aee2d9eb2ecf765d5b0d3b958346c2fc5c07911b529aa1a3a8c3c9999dc4e575",
+      "request_id": "202609-autonomy-followup",
+      "amount_basis": "existing_campaign_requested_ceiling_excluding_tax",
+      "decision_id": "company-monthly-budget-20260913",
+      "assessed_at": "2026-09-13T06:28:46.704Z",
+      "allowed_by_budget": false,
+      "disposition": "hold",
+      "reasons": [
+        "Company monthly budget: additional discretionary commitment exceeds 0 JPY"
+      ]
+    },
+    "documented_existing_obligation": {
+      "policy_sha256": "aee2d9eb2ecf765d5b0d3b958346c2fc5c07911b529aa1a3a8c3c9999dc4e575",
+      "request_id": "existing-settlement-202606-202607",
+      "decision_id": "company-monthly-budget-20260913",
+      "assessed_at": "2026-09-13T06:28:46.789Z",
+      "allowed_by_budget": true,
+      "disposition": "preserve_existing_obligation",
+      "reasons": [
+        "Existing obligation remains due; other payment controls and cash verification still apply"
+      ]
+    }
+  },
+  "other_press_holds": [
+    "Company monthly budget: additional discretionary commitment exceeds 0 JPY",
+    "Draft is not ready",
+    "Snapshot must be at most 24 hours old",
+    "Current ledger has changed: regenerate draft",
+    "AI execution target not reached: 159/176",
+    "Fresh PR TIMES preview required",
+    "Wrong account, draft, or remote state",
+    "PR TIMES title mismatch",
+    "PR TIMES subtitle mismatch",
+    "PR TIMES body mismatch",
+    "Verify time and media recipients",
+    "Existing distribution entitlement/terms or delegated charge unverified"
+  ],
+  "private_application_receipt_sha256": "b421c51ad1bc95572d7c39b7b186bab435e3c05bf669c4cd3d81be4bd1612111",
+  "scope": "全社月次予算の登録と、本番main版の実在PR候補・原本で確認した既存義務への支出判断。送金、配信、全決済経路の自動制御、債務消滅、会計締めを示すものではない。"
+}
