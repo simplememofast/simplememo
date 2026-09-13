@@ -9,6 +9,7 @@ import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth
 import { followUp } from '../growth/lib/company-followup.mjs';
 import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from '../growth/lib/company-growth-followup.mjs';
 import { recordCommand, recordHumanTouch, observabilityStatus } from '../growth/lib/company-observability.mjs';
+import {registerGoalFollowup,goalWake,acknowledgeGoalWake} from '../growth/lib/company-goal-followup.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -24,6 +25,16 @@ if (command === 'follow-up') {
   catch { result.operational=null; result.failures.push({source:'operational_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
   try { result.growth=growthFollowups({stateRoot}); }
   catch { result.growth=null; result.failures.push({source:'growth_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
+  try { result.goal_wake=goalWake({stateRoot});
+    if(result.goal_wake.failures?.length)result.failures.push({source:'goal_followup',state:'unavailable',reason:'native_evidence_unverified'});
+  }
+  catch { result.goal_wake=null; result.failures.push({source:'goal_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
+} else if(command==='register-goal-followup') {
+  result=registerGoalFollowup({stateRoot,experimentId:option('experiment')});
+} else if(command==='goal-wake') {
+  result=goalWake({stateRoot,reserve:args.includes('--reserve')});
+} else if(command==='acknowledge-goal-wake') {
+  result=acknowledgeGoalWake({stateRoot,eventId:option('event')});
 } else if (command === 'register-growth-followup') {
   result=registerGrowthFollowup({stateRoot, experimentId:option('experiment'), evaluationDate:option('evaluate'),
     postStart:option('post-start'), postEnd:option('post-end'), rationale:option('rationale')});

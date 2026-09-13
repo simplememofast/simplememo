@@ -153,6 +153,7 @@ def thread_state(codex_dir, thread_id, now=None):
     return {'thread_id': thread_id, 'automation_id': automation_id,
             'observed_at': observed, 'state': status,
             'latest_turn': last, 'original_turn_id': turns[0]['turn_id'] if turns else None,
+            'original_turn': turns[0] if turns else None,
             'gate_receipt': gate_receipt(codex_dir, {'thread_id': thread_id, 'transcript': details}),
             'transcript_sha256': details['sha256'], 'business_outcome': 'not_inferred'}
 
@@ -575,6 +576,8 @@ class Tests(unittest.TestCase):
             self.assertEqual(state['state'], 'completed')
             self.assertEqual(state['business_outcome'], 'not_inferred')
             self.assertEqual(state['original_turn_id'], self.one)
+            self.assertEqual(state['original_turn']['turn_id'], self.one)
+            self.assertIsNotNone(state['original_turn']['finished_at'])
             log.write_bytes(b'\n'.join(self.raw().splitlines()[:-1]) + b'\n')
             self.assertEqual(thread_state(root, self.tid, self.now)['state'], 'in_progress')
             log.unlink()

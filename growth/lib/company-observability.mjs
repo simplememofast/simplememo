@@ -7,7 +7,7 @@ import { nativeOrigin } from './company-origin.mjs';
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const stages = ['detect', 'decide', 'execute', 'verify', 'report', 'learn'];
 const kinds = ['manual_start', 'manual_decision', 'manual_execution', 'manual_verification', 'manual_reporting', 'approval', 'credential'];
-const commands = ['follow-up','register-growth-followup','evaluate-growth-followup','bind','finish','collect','run','autonomy-lift','growth-autopilot','autonomy-status','autonomy-audit','growth-audit','review','growth-status','content-gap','aio-audit','observability-status','record-human-touch'];
+const commands = ['follow-up','register-growth-followup','evaluate-growth-followup','register-goal-followup','goal-wake','acknowledge-goal-wake','bind','finish','collect','run','autonomy-lift','growth-autopilot','autonomy-status','autonomy-audit','growth-audit','review','growth-status','content-gap','aio-audit','observability-status','record-human-touch'];
 const directory = (root, child) => privateState(path.join(privateState(root), child));
 
 // Subprocess measurements are not observations of all parent-session handoffs.
