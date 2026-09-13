@@ -638,7 +638,7 @@ export function derive(ctx) {
   if (codexMissing.length) out.push({ id: 'act-codex-ledger-sync', source: 'ledger',
     title: `未記帳のCodex実行 ${codexMissing.length} 件を同期する`,
     detail: '予約と元の終了証跡・判定レシートを照合する。正常終了を出荷とは数えない。',
-    auto: 'reconcile-codex-runs', touches: ['data/autopilot-runs.json'],
+    auto: 'reconcile-codex-runs', touches: ['data/autopilot-runs.json', 'data/autopilot-status.json'],
     close_check: { kind: 'codex_ledger_covers_runs', params: {} } });
 
   // --- D3: 運転台帳の取りこぼし ---
@@ -2221,11 +2221,14 @@ export function detectionEvidence(run, eventName, now = new Date(), completion =
 
 export const HANDLERS = {
   async 'reconcile-codex-runs'(ctx, _action, { append = args => execFileSync(process.execPath,
-    [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
+    [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }),
+    syncStatus = () => execFileSync(process.execPath, [path.join(ROOT, 'scripts/autopilot-runs.mjs'), '--write-status'],
+      { cwd: ROOT, encoding: 'utf8' }) } = {}) {
     const automatic = ctx.completion ? ctx.completion.automatic === true : ['schedule', 'workflow_run'].includes(ctx.eventName);
     const { rows } = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now(), automatic });
     let changed = 0;
     for (const row of rows) { append(codexAppendArgs(row)); changed++; }
+    if (changed) syncStatus();
     return { ok: true, changed, log: `Codex original outcomes appended: ${changed}; shipments not inferred` };
   },
 
@@ -3277,15 +3280,21 @@ async function selftest() {
     t('Codex initial failure derives an authorized ledger action', action?.auto === 'reconcile-codex-runs'
       && classify(action, matrix).owner === 'ai');
     t('Codex intake remains open before appending', !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
-    const appended = [];
-    await HANDLERS['reconcile-codex-runs'](ctx, action, { append: args => appended.push(args) });
+    const appended = []; let statusSyncs = 0;
+    await HANDLERS['reconcile-codex-runs'](ctx, action, { append: args => appended.push(args), syncStatus: () => { statusSyncs++; } });
+    t('Codex ledger intake synchronizes and declares the public totals', statusSyncs === 1
+      && action.touches.includes('data/autopilot-status.json'));
+    const workflow = fs.readFileSync(path.join(ROOT, '.github/workflows/autopilot-act.yml'), 'utf8');
+    t('Act accepts and publishes the synchronized public totals',
+      workflow.includes('data/autopilot-runs.json|data/autopilot-status.json|')
+      && workflow.includes('data/autopilot-runs.json data/autopilot-status.json data/autopilot-cost.json'));
     const val = flag => appended[0][appended[0].indexOf(flag) + 1];
     t('Codex completion provenance overrides a workflow_run envelope', val('--source') === 'act-reconcile-session');
     t('Codex failure uses the shared validated append interface', val('--external-ref') === `codex:${tid}`
       && val('--outcome') === 'failed' && val('--needs-triage') === 'true');
     ctx.runsDoc.runs.push({ external_ref: `codex:${tid}`, run_id: val('--run-id') });
     t('Codex ledger coverage closes after actual append', CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
-    const repeated = await HANDLERS['reconcile-codex-runs'](ctx, action, { append: () => { throw new Error('duplicate'); } });
+    const repeated = await HANDLERS['reconcile-codex-runs'](ctx, action, { append: () => { throw new Error('duplicate'); }, syncStatus: () => { throw new Error('unnecessary status write'); } });
     t('Codex intake is idempotent', repeated.changed === 0);
     ctx.now += 4 * 86400000;
     t('Codex stale observation never proves closure', !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
