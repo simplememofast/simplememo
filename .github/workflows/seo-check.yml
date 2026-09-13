@@ -1314,6 +1314,9 @@ jobs:
 
       - name: Private analytics API retrieval
         run: node --test growth/lib/analytics-export.test.mjs growth/lib/backup-inventory.test.mjs
+
+      - name: Autonomous Company source boundaries and recovery
+        run: node --test growth/lib/company.test.mjs
       - name: Test GA4 funnel SQL with synthetic events
         run: |
           python3 -m venv "$RUNNER_TEMP/ga4-sql-tests"
