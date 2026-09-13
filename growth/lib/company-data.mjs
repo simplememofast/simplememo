@@ -9,6 +9,7 @@ import { unseal } from './analytics-envelope.mjs';
 import { ROOT } from './company-metrics.mjs';
 import { privateState, atomicJson, boundedRead, acquireLock } from './company-loop.mjs';
 import { nativeOrigin } from './company-origin.mjs';
+import { appleAdsConnection } from './company-connection-evidence.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -207,7 +208,7 @@ export function connectionView({ stateRoot, now = new Date() } = {}) {
       collection_state:ascReceipt?.status??'unknown',
       evidence: path.join(data, 'asc/receipt.json'), report_status: ascStatus, revenue,
       crash_performance: optional('asc/app-crashes.json'), note: 'Missing ASC reports remain missing; App Store proceeds and AppsFlyer LTV are different series' },
-    apple_search_ads: { status: 'BLOCKED', reason: 'No existing configured connection found; provisioning outside current scope' } };
+    apple_search_ads: appleAdsConnection(optional('apple-ads-configuration.json'), now) };
 }
 
 export async function collectData({ stateRoot, now = new Date(), analytics = false, operations, makeConnections=connectionView } = {}) {
