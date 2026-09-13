@@ -53,7 +53,7 @@ export function codexRunIntake(routineDoc, runsDoc, { now = Date.now(), automati
     // A runtime error wins over any earlier successful or declined gate.
     if (['failed', 'aborted'].includes(first.state)) {
       Object.assign(row, { outcome: first.state === 'aborted' ? 'cancelled' : 'failed', attempted: true,
-        failure_class: 'unknown', failure_stage: 'execution', needs_triage: true, failed_at: first.finished_at,
+        failure_stage: 'execution', needs_triage: true, failed_at: first.finished_at,
         failure_reason: 'Original scheduled Codex turn terminated abnormally; cause needs triage. No business success inferred.' });
     } else if (first.state === 'completed' && entry.gate_receipt) {
       const r = entry.gate_receipt;
@@ -66,7 +66,6 @@ export function codexRunIntake(routineDoc, runsDoc, { now = Date.now(), automati
       Object.assign(row, { outcome: 'skipped_gate', attempted: false, failure_stage: 'eligibility', gate_code: r.code,
         eligibility_verdict: FAULT_GATE_CODES.includes(r.code) ? 'declined_by_fault' : 'declined_by_design',
         failure_reason: `Recorded Codex preflight decision: ${r.code}; receipt SHA256 ${sha256}` });
-      if (FAULT_GATE_CODES.includes(r.code)) row.failure_class = r.code;
     } else { empty.unresolved.push(ref); continue; }
     empty.rows.push(row); known.add(ref); taken.add(row.run_id);
   }
@@ -84,7 +83,7 @@ export function codexAppendArgs(row) {
 export async function codexIntakeSelftest() {
   const { default: assert } = await import('node:assert/strict');
   const { validate } = await import('../autopilot-runs.mjs');
-  const { analyze } = await import('../autopilot-selfheal.mjs');
+  const { analyze, validate: validateSelfheal, observedPendingTriage } = await import('../autopilot-selfheal.mjs');
   const now = Date.parse('2026-09-13T03:00:00Z');
   const tid = '00000000-0000-0000-0000-000000000001', turn = '00000000-0000-0000-0000-000000000002';
   const first = { turn_id: turn, started_at: '2026-09-13T00:00:00Z', finished_at: '2026-09-13T00:10:00Z', state: 'failed' };
@@ -106,6 +105,13 @@ export async function codexIntakeSelftest() {
   assert.equal(failed.source, 'act-reconcile-session');
   assert.equal(intake(doc(), { runs: [] }, true).rows[0].source, 'act-reconcile');
   assert.deepEqual(validate({ runs: [failed] }), []);
+  assert.equal(failed.failure_class, undefined, 'an unknown cause is not an invented failure class');
+  assert.equal(observedPendingTriage(failed), true);
+  for (const change of [{ external_ref: 'codex:invalid' }, { route: 'outside' }, { detected_note: 'unverified' }, { needs_triage: false }]) {
+    assert.equal(observedPendingTriage({ ...failed, ...change }), false);
+  }
+  const aborted = doc(); aborted.codex_observation.runs[0].transcript.turns[0].state = 'aborted';
+  assert.equal(observedPendingTriage(intake(aborted).rows[0]), true);
   assert.equal(intake(doc(), { runs: [failed] }).rows.length, 0, 'external id makes reconciliation idempotent');
   const duplicate = doc(); duplicate.codex_observation.runs.push(structuredClone(entry));
   assert.throws(() => intake(duplicate), /duplicate/);
@@ -122,6 +128,8 @@ export async function codexIntakeSelftest() {
   assert.equal(gated.eligibility_verdict, 'declined_by_fault');
   assert.deepEqual(validate({ runs: [gated] }), []);
   const matrix = { self_repair: { stop_after_failed_repairs: 3, may_modify: ['scripts/'], must_not: ['weaken checks'] } };
+  assert.deepEqual(validateSelfheal({ runs: [failed, gated] }, matrix), []);
+  assert.equal(gated.failure_class, undefined, 'gate codes retain their existing eligibility representation');
   assert.equal(analyze({ runs: [gated] }, matrix).lane_f_required, true, 'recorded preflight faults must reach the existing repair lane');
   const priorFaults = [1, 2, 3].map(i => ({ ...gated, run_id: `prior-${i}` }));
   const repairRuns = priorFaults.map(r => ({ run_id: `repair-${r.run_id}`, outcome: 'shipped', repair_of: [r.run_id] }));

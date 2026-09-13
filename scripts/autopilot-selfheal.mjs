@@ -45,17 +45,22 @@ const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
 const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
 
 const FAILED = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
-const repairFailure = r => FAILED.has(r.outcome)
-  || (r.outcome === 'skipped_gate' && r.eligibility_verdict === 'declined_by_fault'
-    && r.gate_code === 'preflight_error');
+const preflightFault = r => r.outcome === 'skipped_gate' && r.eligibility_verdict === 'declined_by_fault'
+  && r.gate_code === 'preflight_error';
+const repairFailure = r => FAILED.has(r.outcome) || preflightFault(r);
+const repairClass = r => r?.failure_class || (r && preflightFault(r) ? r.gate_code : 'unknown');
 
 /** A failed execution can be observed before its cause is known. */
 export function observedPendingTriage(row) {
   const failed = Date.parse(row.failed_at);
   const detected = Date.parse(row.detected_at);
-  return row.outcome === 'failed' && row.attempted === true && row.needs_triage === true
-    && ['act-reconcile', 'act-reconcile-session'].includes(row.source)
-    && row.route === 'actions' && /^[1-9]\d*$/.test(String(row.external_ref ?? ''))
+  const codex = /^codex:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(row.external_ref ?? '')
+    && ['actions', 'ccr-0920'].includes(row.route)
+    && /^Codex original turn [0-9a-f-]{36}; transcript SHA256 [0-9a-f]{64}; observed /.test(row.detected_note ?? '');
+  const actions = row.route === 'actions' && /^[1-9]\d*$/.test(String(row.external_ref ?? ''));
+  return (row.outcome === 'failed' || (codex && row.outcome === 'cancelled'))
+    && row.attempted === true && row.needs_triage === true
+    && ['act-reconcile', 'act-reconcile-session'].includes(row.source) && (codex || actions)
     && typeof row.failure_reason === 'string' && row.failure_reason.trim().length > 0
     && typeof row.detected_note === 'string' && row.detected_note.trim().length > 0
     && [row.failed_at, row.detected_at].every(value => typeof value === 'string'
@@ -107,7 +112,7 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
   for (const r of runs) {
     for (const targetId of r.repair_of || []) {
       const target = runs.find((x) => x.run_id === targetId);
-      const cls = target?.failure_class || 'unknown';
+      const cls = repairClass(target);
       repairAttempts[cls] = (repairAttempts[cls] || 0) + 1;
     }
   }
@@ -116,7 +121,7 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
   const limit = sr.stop_after_failed_repairs ?? 3;
 
   const targets = unrepaired.map((r) => {
-    const cls = r.failure_class || 'unknown';
+    const cls = repairClass(r);
     const tried = repairAttempts[cls] || 0;
     const rule = escalationRules.find((x) => x.trigger === cls);
     return {
