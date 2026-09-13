@@ -87,6 +87,16 @@ function searchValue(row, metric) {
   return row.position;
 }
 
+export function gscBaseline(exp) {
+  gscScope(exp);
+  const before=baselinePeriod(exp);
+  dateNumber(exp.started_at);
+  requireThat(before.end < exp.started_at, 'Baseline must end before the change');
+  const value=searchValue(exp.baseline, exp.target_metric);
+  requireThat(value !== null, 'No comparable numeric baseline for the target metric');
+  return { ...before, value, registered_baseline_sha256: fingerprint(canonical(exp.baseline)) };
+}
+
 export function gscEvidence(exp, snapshot, { asOf, decision, files = [] } = {}) {
   const scope = gscScope(exp);
   const before = baselinePeriod(exp);

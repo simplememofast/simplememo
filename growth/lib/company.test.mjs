@@ -10,6 +10,8 @@ import { collectionWindow, collectAppsFlyer, verifyAppsFlyer, collectAnalytics, 
 import { formalMetrics, compareMetrics, humanTouchMetrics } from './company-metrics.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { evaluateOperationalFollowup } from './company-followup.mjs';
+import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from './company-growth-followup.mjs';
+import { gscBaseline, gscScope } from './experiment-evidence.mjs';
 import { summarizeGa4 } from './company-review.mjs';
 import { verifyMergedChange, verifyNativeIntegration,verifyPublishedArtifact,verifyOperationalDelivery,verifyIntegrationLedger,verifyActionDelivery } from './company-proof.mjs';
 
@@ -18,6 +20,73 @@ function directory(t) {
   t.after(() => fs.rmSync(dir, { recursive: true, force: true })); return dir;
 }
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+
+test('Growth follow-ups preserve original decisions, remain pending with time, and admit only the registered mature cohort', t => {
+  const root=directory(t), now=new Date('2026-09-13T11:00:00Z');
+  const parent={id:'search-1',status:'evaluated',decision:'inconclusive',evaluated_at:'2026-09-01',
+    page:'/example',type:'title_test',started_at:'2026-08-01',target_metric:'ctr',
+    baseline:{clicks:20,impressions:100,ctr:.2,position:5,window:'2026-07-01..2026-07-28'},min_sample:{metric:'clicks',threshold:10}};
+  parent.evidence={kind:'gsc_comparison',source:'gsc',target_metric:parent.target_metric,baseline:gscBaseline(parent),scope:gscScope(parent)};
+  const original=JSON.stringify(parent);
+  const args={stateRoot:root,experimentId:parent.id,evaluationDate:'2026-10-14',postStart:'2026-09-14',postEnd:'2026-10-11',rationale:'Recheck with a separate mature window',now,experiments:[parent]};
+  const registered=registerGrowthFollowup(args);
+  assert.equal(registerGrowthFollowup(args).id,registered.id);
+  assert.equal(growthFollowups({stateRoot:root,now}).reviews.length,1);
+  assert.equal(growthFollowups({stateRoot:root,now}).reviews[0].due,false);
+  assert.throws(()=>registerGrowthFollowup({...args,postEnd:'2026-10-10'}),/window length/);
+  assert.throws(()=>registerGrowthFollowup({...args,evaluationDate:'2026-10-15'}),/active review/);
+  assert.throws(()=>registerGrowthFollowup({...args,experiments:[{...parent,min_sample:null}]}),/sample floor/);
+  assert.throws(()=>registerGrowthFollowup({...args,experiments:[{...parent,baseline:{...parent.baseline,impressions:null}}]}),/numeric|impressions/);
+  assert.throws(()=>registerGrowthFollowup({...args,experiments:[{...parent,page:'/other'}]}),/scope/);
+  const later=new Date('2026-10-14T11:00:00Z');
+  assert.equal(growthFollowups({stateRoot:root,now:later}).reviews[0].status,'RUNNING');
+  assert.equal(growthFollowups({stateRoot:root,now:later}).reviews[0].due,true);
+  const snapshot=path.join(root,'snapshot');fs.mkdirSync(snapshot);
+  const write=(name,value)=>fs.writeFileSync(path.join(snapshot,name+'.json'),JSON.stringify(value));
+  write('meta',{period_start:'2026-09-14',period_end:'2026-10-11',search_type:'WEB',time_zone:'America/Los_Angeles'});
+  write('dates',Array.from({length:28},(_,i)=>({date:new Date(Date.parse('2026-09-14')+i*86400000).toISOString().slice(0,10),clicks:1,impressions:10,position:5})));
+  write('pages',[{page:'/wrong',clicks:3,impressions:100,position:5}]);
+  const evaluate={stateRoot:root,id:registered.id,snapshotDirectory:snapshot,decision:'inconclusive',rationale:'Read the scope and overlapping changes',now:later};
+  const before=fs.readFileSync(path.join(root,'growth-followups.json'),'utf8');
+  assert.throws(()=>evaluateGrowthFollowup({...evaluate,now}),/due/);
+  assert.throws(()=>evaluateGrowthFollowup(evaluate),/matching measurement row/);
+  assert.equal(fs.readFileSync(path.join(root,'growth-followups.json'),'utf8'),before);
+  write('pages',[{page:'/example',clicks:3,impressions:100,position:5}]);
+  assert.throws(()=>evaluateGrowthFollowup({...evaluate,decision:'keep'}),/sample/);
+  write('meta',{period_start:'2026-09-13',period_end:'2026-10-10'});
+  assert.throws(()=>evaluateGrowthFollowup(evaluate),/registered follow-up window/);
+  write('meta',{period_start:'2026-09-14',period_end:'2026-10-11'});
+  const result=evaluateGrowthFollowup(evaluate);
+  assert.equal(result.status,'EVALUATED');assert.equal(result.decision,'inconclusive');
+  assert.equal(result.evidence.post.clicks,3);assert.equal(result.parent.decision,'inconclusive');
+  assert.equal(JSON.stringify(parent),original);
+  assert.throws(()=>evaluateGrowthFollowup(evaluate),/due/);
+  assert.equal(fs.statSync(path.join(root,'growth-followups.json')).mode&0o077,0);
+  const doc=JSON.parse(fs.readFileSync(path.join(root,'growth-followups.json')));doc.reviews[0].parent.baseline.impressions=50;
+  fs.writeFileSync(path.join(root,'growth-followups.json'),JSON.stringify(doc));
+  assert.throws(()=>growthFollowups({stateRoot:root,now}),/integrity/);
+});
+
+test('Growth registration rejects backdated windows, immature dates and non-comparable legacy experiments',t=>{
+  const root=directory(t),now=new Date('2026-09-13T11:00:00Z');
+  const args={stateRoot:root,experimentId:'cta',evaluationDate:'2026-10-14',postStart:'2026-09-14',postEnd:'2026-10-11',rationale:'Review',now,experiments:[{id:'cta',status:'evaluated',decision:'measurement_failed',target_metric:'app_store_clicks'}]};
+  assert.throws(()=>registerGrowthFollowup(args),/measured GSC/);
+  assert.throws(()=>registerGrowthFollowup({...args,postStart:'2026-09-13'}),/future window/);
+  assert.throws(()=>registerGrowthFollowup({...args,evaluationDate:'2026-10-12'}),/maturity/);
+  assert.throws(()=>registerGrowthFollowup({...args,postEnd:'2026-02-31'}),/calendar date/);
+});
+
+test('one corrupt follow-up store does not hide the other source result',t=>{
+  const root=directory(t);
+  const run=()=>JSON.parse(execFileSync(process.execPath,['scripts/company-os.mjs','follow-up','--state-root',root],{encoding:'utf8'}));
+  fs.writeFileSync(path.join(root,'operational-experiments.json'),'{broken');
+  let result=run();assert.equal(result.growth.reviews.length,0);assert.equal(result.operational,null);
+  assert.deepEqual(result.failures.map(f=>f.source),['operational_followup']);
+  fs.unlinkSync(path.join(root,'operational-experiments.json'));
+  fs.writeFileSync(path.join(root,'growth-followups.json'),'{broken');
+  result=run();assert.equal(result.status,'no_operational_followup_registered');assert.equal(result.growth,null);
+  assert.deepEqual(result.failures.map(f=>f.source),['growth_followup']);
+});
 
 test('browser inventory is scoped and expires; reused native IDs cannot hide missing owners', () => {
   execFileSync('python3', ['-c', `
