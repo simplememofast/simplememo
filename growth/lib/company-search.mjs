@@ -9,6 +9,7 @@ import {analyzeSnapshot} from './analysis.mjs';
 import {selectComparison} from './comparison.mjs';
 import {inspectSnapshot} from '../../scripts/autopilot-data.mjs';
 import {validateOptions} from '../scripts/export-analytics.mjs';
+import {retainedDaily} from './daily-gsc-handoff.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -79,6 +80,12 @@ export function snapshotFromExport(payload, receipt, {now = new Date()} = {}) {
 export function companySearch({stateRoot, now = new Date(), fallback = latestSnapshot(), history = null} = {}) {
   const directory = path.join(stateRoot, 'data/collection-receipts'), failures = [];
   let snapshot = fallback, receipt = null, selected = 'existing_snapshot';
+  try {
+    const daily = retainedDaily({stateRoot, now});
+    if (daily && (!snapshot || daily.snapshot.meta.period_end >= snapshot.meta.period_end)) {
+      snapshot = daily.snapshot; receipt = daily.receipt; selected = 'verified_seo_daily_handoff';
+    }
+  } catch {failures.push({source: 'gsc_decision_input', state: 'unavailable', reason: 'daily_handoff_not_admitted'});}
   if (fs.existsSync(directory)) {
     const receipts = [];
     for (const file of fs.readdirSync(directory).filter(f => /^gsc-\d{4}-\d{2}-\d{2}\.json$/.test(f))) {
@@ -91,7 +98,7 @@ export function companySearch({stateRoot, now = new Date(), fallback = latestSna
       } catch { failures.push({source: 'gsc_decision_input', state: 'unavailable', reason: 'invalid_collection_receipt', file}); }
     }
     receipts.sort((a, b) => b.window.end.localeCompare(a.window.end));
-    for (const candidate of receipts.filter(r => !fallback || r.window.end > fallback.meta.period_end)) {
+    for (const candidate of receipts.filter(r => !snapshot || r.window.end > snapshot.meta.period_end)) {
       try {
         const output = fs.realpathSync(candidate.output), root = fs.realpathSync(stateRoot);
         assert(output.startsWith(root + path.sep), 'export outside private state');

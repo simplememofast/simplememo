@@ -10,6 +10,8 @@ import { ROOT } from './company-metrics.mjs';
 import { privateState, atomicJson, boundedRead, acquireLock } from './company-loop.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { appleAdsConnection } from './company-connection-evidence.mjs';
+import { collectDailyGsc } from './company-daily-gsc.mjs';
+import { retainedDaily } from './daily-gsc-handoff.mjs';
 
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -200,10 +202,19 @@ export function connectionView({ stateRoot, now = new Date() } = {}) {
   const revenue = optional('asc/latest.json');
   const preflight = fs.readdirSync(data).filter(n => /^preflight-\d+\.json$/.test(n)).sort().at(-1);
   const bq = preflight ? read(path.join(data, preflight)) : null;
+  const gsc = connection('gsc');
+  try {
+    const daily = retainedDaily({stateRoot, now});
+    if (daily && (!gsc.window || daily.receipt.window.end >= gsc.window.end)) {
+      gsc.status = 'CONNECTED'; gsc.collection = daily.receipt; gsc.evidence = daily.receipt.output;
+      gsc.window = daily.receipt.window;
+      gsc.note = 'Verified existing SEO Daily output; native Company scheduled-origin proof remains separate';
+    }
+  } catch {gsc.daily_handoff = 'unavailable_or_not_admitted';}
   return { schema_version: 1, updated_at: now.toISOString(),
     bigquery: { status: bq?.status === 'complete' ? 'CONNECTED' : 'PARTIAL', evidence: preflight ? path.join(data, preflight) : null,
       project: 'yurika-simplememo', scope: 'Existing aggregate data authority; registry/run state remains in its canonical local/Git stores' },
-    search_console: connection('gsc'), ga4: ga, appsflyer: af,
+    search_console: gsc, ga4: ga, appsflyer: af,
     app_store_connect: { status: ascStatus?.state === 'complete' && ascReceipt?.status !== 'stale' ? 'CONNECTED' : 'PARTIAL', observed_at: ascStatus?.fetched_at ?? null,
       collection_state:ascReceipt?.status??'unknown',
       evidence: path.join(data, 'asc/receipt.json'), report_status: ascStatus, revenue,
@@ -219,6 +230,7 @@ export async function collectData({ stateRoot, now = new Date(), analytics = fal
     const receipts = [], failures = [];
     // Source failures never prevent the other independent readers from running.
     for (const [source, operation] of operations ?? [
+      ['gsc_daily_handoff', () => collectDailyGsc({ stateRoot, now })],
       ['appsflyer', () => collectAppsFlyer({ stateRoot, now })],
       ['asc', () => collectAsc({ stateRoot, now })],
       ...(analytics ? [['ga4-funnel', () => collectAnalytics({ stateRoot, now })]] : []),
@@ -231,7 +243,7 @@ export async function collectData({ stateRoot, now = new Date(), analytics = fal
     catch {failures.push({source:'connection_view',reason:'view_unavailable; independent reader receipts retained'});connections={status:'PARTIAL',updated_at:now.toISOString(),view_failure:true};}
     atomicJson(path.join(stateRoot, 'data/connections.json'), connections);
     const receipt = { schema_version: 1, observed_at: now.toISOString(), native_origin:nativeOrigin(), receipts, failures,
-      status: failures.length || receipts.some(r => ['failed', 'stale', 'dispatched', 'dispatch_uncertain'].includes(r.receipt.status)) ? 'partial' : 'verified',
+      status: failures.length || receipts.some(r => ['failed', 'stale', 'unavailable', 'dispatched', 'dispatch_uncertain'].includes(r.receipt.status)) ? 'partial' : 'verified',
       query_policy: 'GSC reuses existing daily/weekly collector. GA4 is opt-in for the single native owner, max one fixed query run per mature end-date, no remote retry.' };
     atomicJson(path.join(stateRoot, 'data/latest-collection.json'), receipt);
     const events=privateState(path.join(stateRoot,'data/collection-events'));
