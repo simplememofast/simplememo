@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import * as bq from '../lib/bigquery.mjs';
 import { collectBackupInventory } from '../lib/backup-inventory.mjs';
+import { collectGcpSchedules } from '../lib/gcp-schedule-inventory.mjs';
 import { recipientKey, seal } from '../lib/analytics-envelope.mjs';
 
 export const PROJECT = 'yurika-simplememo';
@@ -46,9 +47,9 @@ export function daysBetween(start, end, extra = 0) {
   return dates;
 }
 export function validateOptions({ report = 'preflight', start = '', end = '', execution = 'dry-run' }, now = new Date()) {
-  if (!['preflight', 'backup-inventory', ...Object.keys(FILES)].includes(report)) throw new Error('Unknown fixed report');
+  if (!['preflight', 'backup-inventory', 'scheduler-inventory', ...Object.keys(FILES)].includes(report)) throw new Error('Unknown fixed report');
   if (!['dry-run', 'export'].includes(execution)) throw new Error('Unknown execution mode');
-  if (report === 'preflight' || report === 'backup-inventory') {
+  if (['preflight', 'backup-inventory', 'scheduler-inventory'].includes(report)) {
     if (start || end) throw new Error('Preflight takes no date window');
     return { report, execution, start, end };
   }
@@ -106,6 +107,12 @@ export async function collect(options, { api = bq, now = new Date() } = {}) {
     } : {}),
   };
   try {
+    if (opts.report === 'scheduler-inventory') {
+      out.scheduler_inventory = await collectGcpSchedules({ api, now });
+      out.status = out.scheduler_inventory.status;
+      out.total_bytes_billed = 0;
+      return out;
+    }
     const client = await api.connect({ projectId: PROJECT, location: LOCATION });
     out.credential_type = client.credentialType;
     if (opts.report === 'backup-inventory') {

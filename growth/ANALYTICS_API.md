@@ -10,6 +10,7 @@ It has no schedule and does not replace the existing SEO Daily workflow.
 | report | Result | Window |
 |---|---|---|
 | `preflight` | GSC/GA4 dataset region, retention, tables, first/latest daily schemas | No dates, no SQL scan |
+| `scheduler-inventory` | Existing Cloud Scheduler jobs and BigQuery transfer configurations across their listed locations | No dates, metadata GETs only, no SQL scan |
 | `ga4-provisional` | Provisional collection-quality event counts; no funnel or outcome rates | Up to 7 closed JST dates from 2026-09-05; all requested daily tables must exist |
 | `gsc` | WEB dates, countries, devices, queries, anonymous impressions; separate URL dates/pages | Up to 31 days, PT, end at least 3 days ago; history starts 2026-08-10 |
 | `ga4-quality` | Host, missing identifiers/channel, consent, CTA version/target/dimensions | Up to 31 days, JST; see GA4 conditions below |
@@ -304,3 +305,24 @@ non-additive route-session counts. Both suites execute the checked-in SQL.
 `report=gsc-intent` uses the same Pacific date, 31-day, three-day lag and cost guards as `gsc`. It returns the existing full URL/date aggregate plus daily page/query aggregates for `/vs/logseq/`, `/obsidian/compare/logseq/`, and `/vs/capacities/` only. No arbitrary SQL or URL input is accepted.
 
 Keep anonymous and missing query buckets in reconciliation; do not interpret them as known keywords. Reconcile clicks, impressions and position sums to the matching URL totals before comparing periods. Coverage comes from the full URL export, not the low-volume target pages. Missing target rows alone do not prove zero traffic. Page impressions are not the site denominator, and this report does not attribute installs or LTV to search.
+
+### Existing GCP schedule inventory
+
+Use the same reviewed-main workflow, recipient key and UUID receipt with
+`report: scheduler-inventory`, `execution: export`, and no dates. The reader
+uses the existing credential's IAM grants. Cloud Scheduler requests its
+`cloud-scheduler` OAuth scope; BigQuery Data Transfer requires `cloud-platform`.
+These token requests do not grant IAM roles. The existing BigQuery client's
+default scope is unchanged. Every resource request is a fixed-project metadata
+GET; redirects, job execution, API enablement and IAM writes are excluded.
+Pagination, retries, location/request/time bounds and per-service failures are
+recorded. A partial, denied or disabled service is never treated as empty.
+
+Decrypt privately as usual, then copy the verified report (including source SHA
+and run ID) to `~/.config/simplememo/company-os/discovery/gcp-schedules.json`
+with mode 0600 and run `python3 scripts/company-inventory.py`. Keep prior receipts.
+This is an on-demand discovery extension to the existing workflow, not another
+scheduled task. Refresh when inventory becomes stale or ownership changes.
+
+API contracts: [Cloud Scheduler list](https://docs.cloud.google.com/scheduler/docs/reference/rest/v1/projects.locations.jobs/list)
+and [BigQuery transfer configurations list](https://docs.cloud.google.com/bigquery/docs/reference/datatransfer/rest/v1/projects.locations.transferConfigs/list).

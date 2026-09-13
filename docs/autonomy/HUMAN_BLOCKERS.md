@@ -4,8 +4,10 @@ Updated 2026-09-13. These do not suspend independent implementation or available
 
 | Scope blocked | Evidence / reason | Minimum human action | Permission | Work unlocked |
 |---|---|---|---|---|
-| Complete current ChatGPT Tasks inventory | Available in-app browser is signed out. Historical email proves a Reddit task was paused, not the current full account inventory | Make the existing authenticated ChatGPT Tasks session accessible | Read existing task settings/history | Verify remaining ChatGPT report owners and overlap; no new posting authority |
-| GCP Cloud Scheduler / BigQuery Scheduled Queries control-plane inventory | No local authenticated GCP browser/CLI session; existing CI BigQuery credential works for fixed aggregate reads | Provide existing read-only scheduler/transfer-config access or expose the authenticated console | Scheduler/transfer metadata read only | Complete remote scheduler inventory and rule out undiscovered duplicates |
+| Complete current ChatGPT Tasks inventory | Existing read authority is confirmed. The available browser session is signed out; historical email is not the current full inventory | No new permission requested. Recheck available authenticated routes before identifying a necessary user action | Existing task settings/history read | Verify remaining ChatGPT report owners and overlap; no new posting authority |
+| GCP Cloud Scheduler / BigQuery Scheduled Queries control-plane inventory | Existing encrypted Analytics workflow already has Google credentials. Browser sign-out does not block this route | No new permission requested. Execute the fixed `scheduler-inventory` report with that credential and use its actual result | Existing principal's metadata read grants; no IAM edits | Complete remote scheduler inventory and rule out undiscovered duplicates |
+
+The earlier assertion that authenticated console screens were required was premature. On 2026-09-13 the owner reiterated existing authority. The reader uses API-required OAuth scopes with the existing credential, without adding IAM grants; an actual API denial, not missing local browser login, determines whether this route is blocked. Service-disabled and denied responses remain incomplete inventories and do not authorize enabling APIs or broadening IAM.
 
 Other limits currently need investigation or observation, not a new user permission:
 
