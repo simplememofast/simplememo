@@ -26,6 +26,8 @@ function fixture(t) {
   buckets.pages = [{page: '/example/', clicks: 112, impressions: 2800, ctr: .04, position: 5}];
   buckets.queries = [{query: 'sample', clicks: 56, impressions: 1400, ctr: .04, position: 5}];
   buckets['query-pages'] = [{...buckets.queries[0], page: '/example/'}];
+  buckets.devices = [{device: 'MOBILE', clicks: 112, impressions: 2800, ctr: .04, position: 5}];
+  buckets.countries = [{country: 'jpn', clicks: 112, impressions: 2800, ctr: .04, position: 5}];
   const meta = buildMeta({label, buckets, source: 'bigquery', period: '2026-08-14..2026-09-10',
     extra: {bigquery: {project: 'yurika-simplememo', dataset: 'searchconsole', site_url: 'sc-domain:simplememofast.com', search_type: 'WEB', window_days_requested: 28, window_days_available: 28}}});
   const dir = path.join(root, 'source'); writeSnapshot({label, buckets, meta, dir});
@@ -56,6 +58,10 @@ test('wrong workflow, branch, attempt, source, run outcome and timing cannot aut
 test('tampering, missing days, unknown files, totals drift and stale snapshots are rejected without inventing zeroes', t => {
   const {payload, dir, env} = fixture(t);
   const bad = structuredClone(payload); bad.files['dates.json'].body += ' '; assert.throws(() => snapshotFromDaily(bad, {now, remote}));
+  for (const file of ['queries.json', 'pages.json', 'dates.json', 'query-pages.json', 'devices.json', 'countries.json']) {
+    const incomplete = structuredClone(payload); delete incomplete.files[file];
+    assert.throws(() => snapshotFromDaily(incomplete, {now, remote}));
+  }
   for (const [name, mutation] of [
     ['dates.json', rows => rows.slice(1)], ['pages.json', rows => [...rows, rows[0]]],
     ['meta.json', meta => ({...meta, totals: {...meta.totals, clicks: 999}})],

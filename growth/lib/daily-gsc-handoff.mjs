@@ -87,7 +87,8 @@ export function snapshotFromDaily(payload, {now = new Date(), remote = null} = {
   assert.equal(inspectSnapshot(meta, buckets.dates, now).state, 'ready');
   const canonical = buildMeta({label: payload.label, buckets, period: meta.period_start + '..' + meta.period_end,
     source: meta.source, extra: {bigquery: meta.bigquery}});
-  for (const key of ['totals', 'ctr_curve', 'ctr_curve_segments', 'ctr_curve_calibration'])
+  for (const key of ['row_counts', 'complete_window', 'aio', 'totals', 'ctr_curve', 'ctr_curve_source',
+    'ctr_curve_coverage', 'ctr_curve_derived_positions', 'ctr_curve_segments', 'ctr_curve_calibration'])
     assert.deepEqual(meta[key], canonical[key], 'canonical snapshot derivation differs');
   return {label: payload.label, meta, queries: buckets.queries, pages: buckets.pages, dates: buckets.dates,
     queryPages: buckets['query-pages'], pagesAio: buckets['pages-aio']};
