@@ -105,8 +105,163 @@ def transcript(raw, thread_id):
             'bytes': len(raw), 'turns': turns}
 
 
+def local_transcript(codex_dir, state, thread_id):
+    thread = state.execute('SELECT rollout_path FROM threads WHERE id=?', (thread_id,)).fetchone()
+    details = {'state': 'unavailable', 'reason': 'thread_missing', 'sha256': None, 'bytes': None, 'turns': []}
+    if not thread:
+        return details
+    path = Path(thread['rollout_path']).resolve()
+    if not any(parent.resolve() in path.parents for parent in (codex_dir / 'sessions', codex_dir / 'archived_sessions')):
+        details['reason'] = 'path_outside_session_store'
+        return details
+    try:
+        return transcript(path.read_bytes(), thread_id)
+    except (OSError, ValueError, KeyError, TypeError):
+        details['reason'] = 'unreadable_or_incomplete_transcript'
+        return details
+
+
+def thread_state(codex_dir, thread_id, now=None):
+    """Fresh lifecycle evidence for an exact task, including archived owners."""
+    require(isinstance(thread_id, str) and UUID.fullmatch(thread_id), 'Invalid thread identity')
+    observed = now or dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    scheduler = readonly(codex_dir / 'sqlite/codex-dev.db')
+    state = readonly(codex_dir / 'state_5.sqlite')
+    try:
+        matches = scheduler.execute('SELECT automation_id FROM automation_runs WHERE thread_id=?', (thread_id,)).fetchall()
+        require(len(matches) <= 1, 'Ambiguous scheduled execution')
+        automation_id = matches[0]['automation_id'] if matches else None
+        details = local_transcript(codex_dir, state, thread_id)
+    finally:
+        scheduler.close(); state.close()
+    turns = details['turns']
+    last = turns[-1] if turns else None
+    status = 'unknown' if not last else ('in_progress' if last['state'] == 'in_progress' else 'completed')
+    require(not last or timestamp(last['finished_at'] or last['started_at']) <= timestamp(observed), 'Future turn lifecycle')
+    return {'thread_id': thread_id, 'automation_id': automation_id,
+            'observed_at': observed, 'state': status,
+            'latest_turn': last, 'original_turn_id': turns[0]['turn_id'] if turns else None,
+            'gate_receipt': gate_receipt(codex_dir, {'thread_id': thread_id, 'transcript': details}),
+            'transcript_sha256': details['sha256'], 'business_outcome': 'not_inferred'}
+
+
+def receipt_root(codex_dir):
+    return codex_dir / 'simplememo-autopilot-receipts'
+
+
+def receipt_digest(doc):
+    return hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def gate_receipt(codex_dir, row):
+    file = receipt_root(codex_dir) / (row['thread_id'] + '.json')
+    if not file.exists():
+        return None
+    receipt = json.loads(file.read_text())
+    keys(receipt, 'version thread_id turn_id observed_at admitted code input_sha256 script_sha256 sha256')
+    body = {k: v for k, v in receipt.items() if k != 'sha256'}
+    require(receipt['version'] == 1 and receipt['sha256'] == receipt_digest(body), 'Invalid gate receipt')
+    require(receipt['thread_id'] == row['thread_id'] and type(receipt['admitted']) is bool,
+            'Gate receipt identity mismatch')
+    require(isinstance(receipt['code'], str) and re.fullmatch('[a-z][a-z0-9_]{0,79}', receipt['code']), 'Invalid gate code')
+    require(all(HASH.fullmatch(receipt[k]) for k in ['input_sha256', 'script_sha256']), 'Missing gate hashes')
+    turns = row['transcript']['turns']
+    # Only the original scheduled turn can describe its gate. Later repairs
+    # cannot replace the original failure with their successful preflight.
+    if not turns or turns[0]['turn_id'] != receipt['turn_id']:
+        return None
+    first = turns[0]
+    require(timestamp(first['started_at']) <= timestamp(receipt['observed_at']), 'Gate predates the turn')
+    if first['finished_at']:
+        require(timestamp(receipt['observed_at']) <= timestamp(first['finished_at']), 'Gate follows the turn')
+    return receipt
+
+
+def record_preflight(codex_dir, file, now=None, invoke=None):
+    import subprocess
+    raw = file.read_bytes()
+    snapshot = json.loads(raw)
+    tid = snapshot['task_id']
+    require(os.environ.get('CODEX_THREAD_ID') == tid, 'Preflight must belong to the executing task')
+    state = thread_state(codex_dir, tid, now)
+    require(state['state'] == 'in_progress', 'Preflight requires a live turn')
+    require(state['latest_turn']['turn_id'] == state['original_turn_id'],
+            'Only the original scheduled turn may record its preflight')
+    require(state['automation_id'] in REGISTERED, 'Preflight requires a registered scheduled execution')
+    route = 'actions' if state['automation_id'] == 'obsidian' else 'ccr-0920'
+    require(snapshot['state']['route'] == route, 'Preflight route differs from scheduler')
+    script = ROOT / 'scripts/codex-autopilot-preflight.mjs'
+    runner = invoke or (lambda args: subprocess.run(args, capture_output=True, text=True, timeout=30))
+    result = runner(['node', str(script), '--input', str(file)])
+    decision = json.loads(result.stdout) if result.returncode == 0 else {'run': False, 'code': 'preflight_error'}
+    require(type(decision.get('run')) is bool and isinstance(decision.get('code'), str)
+            and re.fullmatch('[a-z][a-z0-9_]{0,79}', decision['code']), 'Preflight decision missing')
+    # Once admitted, a later check cannot turn an attempted run into a skip.
+    prior = state.get('gate_receipt')
+    if prior and prior['admitted']:
+        return {'decision': decision, 'receipt_sha256': prior['sha256'], 'recorded_at': prior['observed_at']}
+    observed = now or dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    receipt = {'version': 1, 'thread_id': tid, 'turn_id': state['latest_turn']['turn_id'],
+               'observed_at': observed, 'admitted': decision['run'], 'code': decision['code'],
+               'input_sha256': hashlib.sha256(raw).hexdigest(),
+               'script_sha256': hashlib.sha256(script.read_bytes()).hexdigest()}
+    receipt['sha256'] = receipt_digest(receipt)
+    folder = receipt_root(codex_dir)
+    folder.mkdir(mode=0o700, parents=True, exist_ok=True); folder.chmod(0o700)
+    target = folder / (tid + '.json')
+    with tempfile.NamedTemporaryFile('w', dir=folder, delete=False) as stream:
+        temp = Path(stream.name)
+        json.dump(receipt, stream); stream.write('\n')
+    temp.chmod(0o600); temp.replace(target)
+    return {'decision': decision, 'receipt_sha256': receipt['sha256'], 'recorded_at': observed}
+
+
+def native_observer_origin(observed_at, invoke=None, parent_pid=None, home=None):
+    """Verify the live launchd timer, executable and installed launcher identity."""
+    if sys.platform != 'darwin':
+        return None
+    import subprocess
+    launcher = (home or Path.home()) / '.local/libexec/simplememo-routine-observer.py'
+    domain = f'gui/{os.getuid()}/com.simplememo.routine-observer'
+    parent = parent_pid if parent_pid is not None else os.getppid()
+    run = invoke or (lambda args: subprocess.run(args, capture_output=True, text=True, timeout=10))
+    try:
+        installed = launcher.read_bytes()
+        if installed != (ROOT / 'scripts/routine-observer-local.py').read_bytes():
+            return None
+        state = run(['/bin/launchctl', 'print', domain])
+        blame = run(['/bin/launchctl', 'blame', domain])
+        if state.returncode or blame.returncode or blame.stdout.strip() != 'interval':
+            return None
+        args = re.search(r'(?m)^\s*arguments = \{\n(.*?)^\s*\}', state.stdout, re.S)
+        if not re.search(r'(?m)^\s*pid = ' + str(parent) + r'\s*$', state.stdout) \
+                or not re.search(r'(?m)^\s*program = /usr/bin/python3\s*$', state.stdout) \
+                or not args or [line.strip() for line in args[1].splitlines() if line.strip()] \
+                != ['/usr/bin/python3', str(launcher), '--once']:
+            return None
+        return {'kind': 'launchd_interval', 'observed_at': observed_at, 'parent_pid': parent,
+                'launcher_sha256': hashlib.sha256(installed).hexdigest()}
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def validate_detection_receipt(receipt, row, observed):
+    keys(receipt, 'version kind observed_at parent_pid launcher_sha256 thread_id turn_id transcript_sha256 sha256')
+    first = row['transcript']['turns'][0]
+    require(receipt['version'] == 1 and receipt['kind'] == 'launchd_interval'
+            and type(receipt['parent_pid']) is int and receipt['parent_pid'] > 1
+            and receipt['thread_id'] == row['thread_id'] and receipt['turn_id'] == first['turn_id']
+            and first['state'] != 'in_progress'
+            and all(HASH.fullmatch(receipt[k]) for k in ['launcher_sha256', 'transcript_sha256'])
+            and timestamp(first['finished_at']) <= timestamp(receipt['observed_at']) <= observed
+            and receipt['sha256'] == receipt_digest({k: v for k, v in receipt.items() if k != 'sha256'}),
+            'Invalid automatic detection receipt')
+
+
 def observe(codex_dir, previous=None, now=None):
     observed_at = now or dt.datetime.now(dt.timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+    origin = native_observer_origin(observed_at)
+    prior_runs = {r['thread_id']: r for r in (previous or {}).get('runs', [])}
     scheduler = readonly(codex_dir / 'sqlite/codex-dev.db')
     state = readonly(codex_dir / 'state_5.sqlite')
     placeholders = ','.join('?' for _ in REGISTERED)
@@ -125,20 +280,22 @@ def observe(codex_dir, previous=None, now=None):
             record = {'thread_id': tid, 'automation_id': row['automation_id'],
                       'scheduler_status': row['status'], 'created_at': iso(row['created_at']),
                       'updated_at': iso(row['updated_at']), 'business_outcome': 'not_inferred'}
-            thread = state.execute('SELECT rollout_path FROM threads WHERE id=?', (tid,)).fetchone()
-            details = {'state': 'unavailable', 'reason': 'thread_missing', 'sha256': None, 'bytes': None, 'turns': []}
-            if thread:
-                path = Path(thread['rollout_path']).resolve()
-                allowed = any(parent.resolve() in path.parents for parent in
-                              (codex_dir / 'sessions', codex_dir / 'archived_sessions'))
-                if not allowed:
-                    details['reason'] = 'path_outside_session_store'
-                else:
-                    try:
-                        details = transcript(path.read_bytes(), tid)
-                    except (OSError, ValueError, KeyError, TypeError):
-                        details['reason'] = 'unreadable_or_incomplete_transcript'
-            record['transcript'] = details
+            record['transcript'] = local_transcript(codex_dir, state, tid)
+            receipt = gate_receipt(codex_dir, record)
+            if receipt is not None:
+                record['gate_receipt'] = receipt
+            prior = prior_runs.get(tid, {})
+            if prior.get('detection_receipt'):
+                record['detection_receipt'] = prior['detection_receipt']
+            else:
+                before = prior.get('transcript', {}).get('turns', [])
+                turns = record['transcript']['turns']
+                if origin and turns and turns[0]['state'] != 'in_progress' \
+                        and (not before or before[0]['state'] == 'in_progress'):
+                    detection = {**origin, 'version': 1, 'thread_id': tid, 'turn_id': turns[0]['turn_id'],
+                                 'transcript_sha256': record['transcript']['sha256']}
+                    detection['sha256'] = receipt_digest(detection)
+                    record['detection_receipt'] = detection
             normalized.append(record)
     finally:
         scheduler.close()
@@ -146,7 +303,7 @@ def observe(codex_dir, previous=None, now=None):
     for automation in automations:
         for key in ('next_run_at', 'last_run_at'):
             automation[key] = None if automation[key] is None else iso(automation[key])
-    result = {'schema_version': 2, 'observed_at': observed_at, 'registered': list(REGISTERED),
+    result = {'schema_version': 3, 'observed_at': observed_at, 'registered': list(REGISTERED),
               'source': 'local_codex_scheduler_and_session_store', 'scheduler_query_complete': True,
               # launchd's service name does not necessarily reach descendants.
               # Its absence cannot establish that a person started this read.
@@ -163,6 +320,8 @@ def observe(codex_dir, previous=None, now=None):
             require(newer['automation_id'] == old['automation_id'] and newer['created_at'] == old['created_at'],
                     'Scheduled run identity changed')
             prior_turns = old['transcript']['turns']
+            if prior_turns and prior_turns[0]['state'] != 'in_progress' and old.get('gate_receipt'):
+                require(newer.get('gate_receipt') == old['gate_receipt'], 'Closed gate receipt changed')
             new_turns = newer['transcript']['turns']
             require(len(new_turns) >= len(prior_turns), 'Previously observed transcript disappeared')
             for a, b in zip(prior_turns, new_turns):
@@ -179,7 +338,7 @@ def keys(value, expected):
 
 def validate(doc, now=None):
     keys(doc, 'schema_version observed_at registered source scheduler_query_complete collection_context automations runs')
-    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2)
+    require(type(doc['schema_version']) is int and doc['schema_version'] in (1, 2, 3)
             and doc['registered'] == list(REGISTERED), 'Observation scope changed')
     require(doc['source'] == 'local_codex_scheduler_and_session_store' and doc['scheduler_query_complete'] is True,
             'Scheduler inventory is incomplete')
@@ -201,7 +360,23 @@ def validate(doc, now=None):
             timestamp(a['next_run_at'])
     seen = set()
     for run in doc['runs']:
-        keys(run, 'thread_id automation_id scheduler_status created_at updated_at business_outcome transcript')
+        keys(run, 'thread_id automation_id scheduler_status created_at updated_at business_outcome transcript'
+             + (' gate_receipt' if doc['schema_version'] >= 3 and 'gate_receipt' in run else '')
+             + (' detection_receipt' if doc['schema_version'] >= 3 and 'detection_receipt' in run else ''))
+        if 'detection_receipt' in run:
+            validate_detection_receipt(run['detection_receipt'], run, observed)
+        if 'gate_receipt' in run:
+            receipt = run['gate_receipt']
+            keys(receipt, 'version thread_id turn_id observed_at admitted code input_sha256 script_sha256 sha256')
+            require(receipt['version'] == 1 and receipt['thread_id'] == run['thread_id']
+                    and type(receipt['admitted']) is bool and HASH.fullmatch(receipt['input_sha256'])
+                    and HASH.fullmatch(receipt['script_sha256'])
+                    and receipt['sha256'] == receipt_digest({k: v for k, v in receipt.items() if k != 'sha256'}), 'Invalid gate receipt')
+            require(isinstance(receipt['code'], str) and re.fullmatch('[a-z][a-z0-9_]{0,79}', receipt['code']), 'Invalid gate code')
+            first = run['transcript']['turns'][0]
+            require(receipt['turn_id'] == first['turn_id'] and timestamp(first['started_at']) <= timestamp(receipt['observed_at']) <= observed
+                    and (first['finished_at'] is None or timestamp(receipt['observed_at']) <= timestamp(first['finished_at'])),
+                    'Gate receipt is outside the original turn')
         tid = run['thread_id']
         require(isinstance(tid, str) and UUID.fullmatch(tid) and tid not in seen, 'Duplicate or invalid scheduled run')
         seen.add(tid)
@@ -259,7 +434,7 @@ def apply(ledger, codex_dir):
 def summary(doc):
     initial = [r['transcript']['turns'][0] for r in doc['runs'] if r['transcript']['turns']]
     return {'observed_at': doc['observed_at'], 'registered': len(doc['automations']), 'runs': len(doc['runs']),
-            'collection_context': doc['collection_context'] if doc['schema_version'] == 2 else 'legacy_unverified',
+            'collection_context': doc['collection_context'] if doc['schema_version'] >= 2 else 'legacy_unverified',
             'initial_failed': sum(t['state'] in ('failed', 'aborted') for t in initial),
             'unavailable_transcripts': sum(r['transcript']['state'] != 'observed' for r in doc['runs']),
             'publication_success': 'not_inferred'}
@@ -320,6 +495,119 @@ class Tests(unittest.TestCase):
             self.assertEqual(run['transcript']['turns'][0]['unanswered_calls'], 0)
             self.assertEqual(run['transcript']['turns'][0]['unattributed_outputs'], 1)
 
+    def test_native_origin_and_first_detection_cannot_relabel_history(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); log = self.setup_store(root)
+            launcher = root / '.local/libexec/simplememo-routine-observer.py'
+            launcher.parent.mkdir(parents=True)
+            launcher.write_bytes((ROOT / 'scripts/routine-observer-local.py').read_bytes())
+            state = f'program = /usr/bin/python3\narguments = {{\n/usr/bin/python3\n{launcher}\n--once\n}}\npid = 123\n'
+            def invoke(args):
+                return SimpleNamespace(returncode=0, stdout='interval' if args[1] == 'blame' else state)
+            with patch.object(sys, 'platform', 'darwin'):
+                origin = native_observer_origin(self.now, invoke, 123, root)
+                self.assertEqual(origin['kind'], 'launchd_interval')
+                self.assertIsNone(native_observer_origin(self.now, invoke, 456, root))
+                self.assertIsNone(native_observer_origin(self.now,
+                    lambda args: SimpleNamespace(returncode=0, stdout='demand' if args[1] == 'blame' else state), 123, root))
+                launcher.write_text('changed launcher')
+                self.assertIsNone(native_observer_origin(self.now, invoke, 123, root))
+            with patch(__name__ + '.native_observer_origin', return_value=None):
+                historical = observe(root, now=self.now)
+            with patch(__name__ + '.native_observer_origin', return_value=origin):
+                self.assertNotIn('detection_receipt', observe(root, historical, now=self.now)['runs'][0])
+                log.write_bytes(b'\n'.join(self.raw().splitlines()[:5]) + b'\n')
+                pending = observe(root, now=self.now)
+                self.assertNotIn('detection_receipt', pending['runs'][0])
+                log.write_bytes(self.raw())
+                first = observe(root, pending, now=self.now)
+                receipt = first['runs'][0]['detection_receipt']
+                self.assertEqual(receipt['thread_id'], self.tid)
+                self.assertEqual(observe(root, first, now=self.now)['runs'][0]['detection_receipt'], receipt)
+                receipt['parent_pid'] += 1
+                with self.assertRaisesRegex(ValueError, 'Invalid automatic detection receipt'):
+                    validate(first, now=self.now)
+
+    def test_live_and_archived_thread_state_never_infers_business_success(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); log = self.setup_store(root)
+            state = thread_state(root, self.tid, self.now)
+            self.assertEqual(state['state'], 'completed')
+            self.assertEqual(state['business_outcome'], 'not_inferred')
+            self.assertEqual(state['original_turn_id'], self.one)
+            log.write_bytes(b'\n'.join(self.raw().splitlines()[:-1]) + b'\n')
+            self.assertEqual(thread_state(root, self.tid, self.now)['state'], 'in_progress')
+            log.unlink()
+            self.assertEqual(thread_state(root, self.tid, self.now)['state'], 'unknown')
+            self.assertEqual(thread_state(root, self.two, self.now)['state'], 'unknown')
+
+    def test_preflight_receipt_preserves_admission_and_original_turn(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); log = self.setup_store(root)
+            original_open = b'\n'.join(self.raw().splitlines()[:5]) + b'\n'
+            log.write_bytes(original_open)
+            snapshot = root / 'input.json'
+            snapshot.write_text(json.dumps({'task_id': self.tid, 'state': {'route': 'ccr-0920'}}))
+            stamp = '2026-09-08T01:00:30.000Z'
+            def result(run, code):
+                return lambda args: SimpleNamespace(returncode=0, stdout=json.dumps({'run': run, 'code': code}))
+            with patch.dict(os.environ, {'CODEX_THREAD_ID': self.tid}):
+                stopped = record_preflight(root, snapshot, stamp, result(False, 'skip_budget'))
+                self.assertFalse(observe(root, now=stamp)['runs'][0]['gate_receipt']['admitted'])
+                admitted = record_preflight(root, snapshot, stamp, result(True, 'run'))
+                again = record_preflight(root, snapshot, stamp, result(False, 'skip_budget'))
+                self.assertFalse(again['decision']['run'])
+                self.assertEqual(again['receipt_sha256'], admitted['receipt_sha256'])
+                self.assertNotEqual(stopped['receipt_sha256'], admitted['receipt_sha256'])
+                log.write_bytes(self.raw())
+                closed = observe(root, now=self.now)
+                log.write_bytes(b'\n'.join(self.raw().splitlines()[:-1]) + b'\n')
+                with self.assertRaisesRegex(ValueError, 'original scheduled turn'):
+                    record_preflight(root, snapshot, self.now, result(False, 'skip_budget'))
+                log.write_bytes(self.raw())
+                self.assertEqual(observe(root, closed, now=self.now)['runs'][0]['gate_receipt']['sha256'], admitted['receipt_sha256'])
+                receipt = receipt_root(root) / (self.tid + '.json')
+                self.assertEqual(receipt.stat().st_mode & 0o777, 0o600)
+                receipt.unlink()
+                with self.assertRaisesRegex(ValueError, 'Closed gate receipt changed'):
+                    observe(root, closed, now=self.now)
+
+    def test_preflight_identity_route_and_receipt_integrity(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); log = self.setup_store(root)
+            log.write_bytes(b'\n'.join(self.raw().splitlines()[:5]) + b'\n')
+            snapshot = root / 'input.json'
+            snapshot.write_text(json.dumps({'task_id': self.tid, 'state': {'route': 'actions'}}))
+            with patch.dict(os.environ, {'CODEX_THREAD_ID': self.two}):
+                with self.assertRaisesRegex(ValueError, 'executing task'):
+                    record_preflight(root, snapshot, self.now)
+            with patch.dict(os.environ, {'CODEX_THREAD_ID': self.tid}):
+                with self.assertRaisesRegex(ValueError, 'route differs'):
+                    record_preflight(root, snapshot, self.now)
+                snapshot.write_text(json.dumps({'task_id': self.tid, 'state': {'route': 'ccr-0920'}}))
+                record_preflight(root, snapshot, '2026-09-08T01:00:30.000Z',
+                                 lambda args: SimpleNamespace(returncode=1, stdout='private error'))
+            log.write_bytes(self.raw(failed=False))
+            doc = observe(root, now=self.now)
+            self.assertNotIn('private', json.dumps(doc))
+            # Verify the Python receipt reaches the actual JS intake and fault lane.
+            import subprocess
+            check = subprocess.run(['node', '--input-type=module', '-e',
+                "import {codexRunIntake} from './scripts/lib/codex-run-intake.mjs';"
+                "let s=''; for await(const c of process.stdin)s+=c; const d=JSON.parse(s);"
+                "const r=codexRunIntake({codex_observation:d},{runs:[]},{now:Date.parse(d.observed_at)}).rows;"
+                "if(r.length!==1||r[0].gate_code!=='preflight_error'||r[0].attempted!==false)process.exit(1);"],
+                cwd=ROOT, input=json.dumps(doc), text=True, capture_output=True)
+            self.assertEqual(check.returncode, 0, check.stderr)
+            receipt = receipt_root(root) / (self.tid + '.json')
+            tampered = json.loads(receipt.read_text()); tampered['admitted'] = True
+            receipt.write_text(json.dumps(tampered))
+            with self.assertRaisesRegex(ValueError, 'Invalid gate receipt'):
+                observe(root, now=self.now)
+
     def test_missing_service_environment_does_not_mean_manual_execution(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); self.setup_store(root)
@@ -337,7 +625,7 @@ class Tests(unittest.TestCase):
             validate(old, now=self.now)
             self.assertEqual(summary(old)['collection_context'], 'legacy_unverified')
             new = observe(root, old, now=self.now)
-            self.assertEqual(new['schema_version'], 2)
+            self.assertEqual(new['schema_version'], 3)
             self.assertEqual(new['runs'], old['runs'])
             self.assertEqual(summary(new)['initial_failed'], 1)
 
@@ -413,6 +701,8 @@ if __name__ == '__main__':
     mode = parser.add_mutually_exclusive_group(required=True)
     for flag in ('apply', 'probe', 'check', 'selftest'):
         mode.add_argument('--' + flag, action='store_true')
+    mode.add_argument('--thread-state')
+    mode.add_argument('--preflight', type=Path)
     parser.add_argument('--ledger', type=Path, default=ROOT / 'data/routine-runs.json')
     parser.add_argument('--codex-dir', type=Path, default=Path.home() / '.codex')
     options = parser.parse_args()
@@ -420,7 +710,11 @@ if __name__ == '__main__':
         unittest.main(argv=[__file__])
     else:
         try:
-            if options.apply:
+            if options.thread_state:
+                result = thread_state(options.codex_dir, options.thread_state)
+            elif options.preflight:
+                result = record_preflight(options.codex_dir, options.preflight)
+            elif options.apply:
                 result = apply(options.ledger, options.codex_dir)
             elif options.probe:
                 prior = json.loads(options.ledger.read_text()).get(KEY)

@@ -45,6 +45,9 @@ const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
 const MATRIX_PATH = path.join(ROOT, 'data/authority-matrix.json');
 
 const FAILED = new Set(['no_artifact', 'failed', 'cancelled', 'no_run']);
+const repairFailure = r => FAILED.has(r.outcome)
+  || (r.outcome === 'skipped_gate' && r.eligibility_verdict === 'declined_by_fault'
+    && r.gate_code === 'preflight_error');
 
 /** A failed execution can be observed before its cause is known. */
 export function observedPendingTriage(row) {
@@ -95,7 +98,7 @@ export function observedPendingTriage(row) {
 export function analyze(runsDoc, matrix, escalationRules = []) {
   const runs = runsDoc.runs;
   const repaired = new Set(runs.flatMap((r) => r.repair_of || []));
-  const failures = runs.filter((r) => FAILED.has(r.outcome));
+  const failures = runs.filter(repairFailure);
   const unrepaired = failures.filter((r) => !repaired.has(r.run_id));
 
   // 同じ failure_class を何回直したかを数える。再発の回数ではなく

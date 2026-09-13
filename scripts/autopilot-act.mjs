@@ -57,6 +57,7 @@
  */
 
 import { validTaskKindAbsence } from './autopilot-budget.mjs';
+import { codexRunIntake, codexAppendArgs, codexIntakeSelftest } from './lib/codex-run-intake.mjs';
 import { FAULT_GATE_CODES } from './autopilot-runs.mjs';
 import { completionOrigin, primaryJob, primarySteps } from './autopilot-completion.mjs';
 import { deriveRoutineActions, routineResolved, routineSnapshotDigest, routineIntakeNeeded, routineIntakeDecision } from './lib/routine-actions.mjs';
@@ -147,6 +148,11 @@ function epRatifiedOrWindow(params, ctx) {
 }
 
 export const CLOSE_CHECKS = {
+  codex_ledger_covers_runs(_params, ctx) {
+    const intake = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() });
+    return { closed: intake.valid && intake.rows.length === 0, evidence: `観測有効=${intake.valid}、未記帳のCodex結果 ${intake.rows.length} 件` };
+  },
+
   viewport_measured: viewportMeasured,
   routine_resolved: routineResolved,
   ep_ratified_or_window: epRatifiedOrWindow,
@@ -627,6 +633,13 @@ export function derive(ctx) {
       });
     }
   }
+
+  const codexMissing = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now() }).rows;
+  if (codexMissing.length) out.push({ id: 'act-codex-ledger-sync', source: 'ledger',
+    title: `未記帳のCodex実行 ${codexMissing.length} 件を同期する`,
+    detail: '予約と元の終了証跡・判定レシートを照合する。正常終了を出荷とは数えない。',
+    auto: 'reconcile-codex-runs', touches: ['data/autopilot-runs.json'],
+    close_check: { kind: 'codex_ledger_covers_runs', params: {} } });
 
   // --- D3: 運転台帳の取りこぼし ---
   //
@@ -2207,6 +2220,15 @@ export function detectionEvidence(run, eventName, now = new Date(), completion =
 }
 
 export const HANDLERS = {
+  async 'reconcile-codex-runs'(ctx, _action, { append = args => execFileSync(process.execPath,
+    [path.join(ROOT, 'scripts/autopilot-runs.mjs'), ...args], { cwd: ROOT, encoding: 'utf8' }) } = {}) {
+    const automatic = ctx.completion ? ctx.completion.automatic === true : ['schedule', 'workflow_run'].includes(ctx.eventName);
+    const { rows } = codexRunIntake(ctx.routineDoc, ctx.runsDoc, { now: ctx.now ?? Date.now(), automatic });
+    let changed = 0;
+    for (const row of rows) { append(codexAppendArgs(row)); changed++; }
+    return { ok: true, changed, log: `Codex original outcomes appended: ${changed}; shipments not inferred` };
+  },
+
   /**
    * 運転台帳の同期。Actions API の run を台帳へ落とす。
    * autopilot-runs.mjs --append を呼ぶ（検証を通す唯一の書き込み経路）。
@@ -2807,6 +2829,8 @@ function render(sum, applied, today) {
 // 自己検査 — 判定ロジックそのものを台帳無しで検証する
 // ============================================================
 async function selftest() {
+  await codexIntakeSelftest();
+
   const fails = [];
   // 件数は数える。**リテラルで書かない** —— 検査を足しても数字が動かないと、
   // 「32項目通った」が事実でなくなる（実際 54 項目あるのに 32 と出ていた）。
@@ -3237,6 +3261,35 @@ async function selftest() {
     },
     domains: [{ domain: '承認が要る領域', requires_approval: true }],
   };
+
+  {
+    const tid = '00000000-0000-0000-0000-000000000001';
+    const now = Date.parse('2026-09-13T03:00:00Z');
+    const routineDoc = { codex_observation: { schema_version: 3, observed_at: new Date(now).toISOString(),
+      source: 'local_codex_scheduler_and_session_store', scheduler_query_complete: true, runs: [{
+        thread_id: tid, automation_id: 'obsidian-2', created_at: '2026-09-13T00:00:00Z',
+        transcript: { state: 'observed', sha256: 'a'.repeat(64), turns: [{
+          turn_id: '00000000-0000-0000-0000-000000000002', state: 'failed',
+          started_at: '2026-09-13T00:00:00Z', finished_at: '2026-09-13T00:01:00Z' }] } }] } };
+    const ctx = { routineDoc, runsDoc: { runs: [] }, now, today: '2026-09-13', eventName: 'workflow_run',
+      completion: { automatic: false } };
+    const action = derive(ctx).find(a => a.id === 'act-codex-ledger-sync');
+    t('Codex initial failure derives an authorized ledger action', action?.auto === 'reconcile-codex-runs'
+      && classify(action, matrix).owner === 'ai');
+    t('Codex intake remains open before appending', !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
+    const appended = [];
+    await HANDLERS['reconcile-codex-runs'](ctx, action, { append: args => appended.push(args) });
+    const val = flag => appended[0][appended[0].indexOf(flag) + 1];
+    t('Codex completion provenance overrides a workflow_run envelope', val('--source') === 'act-reconcile-session');
+    t('Codex failure uses the shared validated append interface', val('--external-ref') === `codex:${tid}`
+      && val('--outcome') === 'failed' && val('--needs-triage') === 'true');
+    ctx.runsDoc.runs.push({ external_ref: `codex:${tid}`, run_id: val('--run-id') });
+    t('Codex ledger coverage closes after actual append', CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
+    const repeated = await HANDLERS['reconcile-codex-runs'](ctx, action, { append: () => { throw new Error('duplicate'); } });
+    t('Codex intake is idempotent', repeated.changed === 0);
+    ctx.now += 4 * 86400000;
+    t('Codex stale observation never proves closure', !CLOSE_CHECKS.codex_ledger_covers_runs({}, ctx).closed);
+  }
 
   // A real failure needed two manual Act invocations on 2026-09-05: the first
   // recorded the run, but append-cost was only derived after execution ended.
