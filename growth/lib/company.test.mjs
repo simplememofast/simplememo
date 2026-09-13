@@ -26,6 +26,9 @@ test('compact GA4 retains scope, missing counts and union semantics and weights 
   assert.equal(rows.length,2);assert.equal(rows[0].observed_started_sessions,100);assert.equal(rows[0].own_app_click_session_rate_24h,.02);
   assert.equal(rows[0].sessions_with_any_app_route_click_24h,2);assert.equal(rows[1].sessions_with_cta_impression,null);
   assert.equal(s.quality_by_hostname_scope,null);assert.equal(summarizeGa4(null),null);
+  reports.push({file:'ga4-quality.sql',result:[{hostname_scope:'production',event_date:'20260909',recorded_events:1},{hostname_scope:'production',event_date:'20260906',recorded_events:2}]});
+  assert.deepEqual(summarizeGa4(reports).quality_observed_event_dates,['20260906','20260909']);
+  assert.equal(summarizeGa4(reports).quality_rows_without_valid_date,0);
   reports[0].result[0].observed_started_sessions='';assert.equal(summarizeGa4(reports).by_landing_scope_and_session_channel[0].observed_started_sessions,null);
 });
 
