@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-13T21:34:23.222Z",
+  "observed_at": "2026-09-13T22:34:40.017Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
       "observation": {
-        "observed_at": "2026-09-13T21:34:23.222Z",
+        "observed_at": "2026-09-13T22:34:40.017Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -524,7 +524,7 @@
       "run_once_at": "2026-09-13T00:30:00Z",
       "enabled": true,
       "bound_session": true,
-      "next_run_at": "2026-09-13T21:37:08.893587132Z",
+      "next_run_at": "2026-09-13T22:38:23.255174603Z",
       "last_fired_at": null,
       "last_run_status": null,
       "last_run_fired_at": null,
@@ -904,7 +904,7 @@
   ],
   "codex_observation": {
     "schema_version": 4,
-    "observed_at": "2026-09-13T21:34:19.123Z",
+    "observed_at": "2026-09-13T22:34:36.126Z",
     "registered": [
       "obsidian",
       "obsidian-2"
@@ -1429,21 +1429,21 @@
         "automation_id": "obsidian",
         "scheduler_status": "ACCEPTED",
         "created_at": "2026-09-13T21:01:34.028Z",
-        "updated_at": "2026-09-13T21:28:57.641Z",
+        "updated_at": "2026-09-13T21:46:14.958Z",
         "business_outcome": "not_inferred",
         "transcript": {
           "state": "observed",
-          "sha256": "eec9e851e43802fd6c3774f038dedfe2a4e61a4e16662d675d0e0c72d36cd6f8",
-          "bytes": 7475459,
+          "sha256": "5e898ff9dfe13f32ae807eaf0a0affa7d74ae9e489d5fbf3651e1591183d78b6",
+          "bytes": 7700971,
           "turns": [
             {
               "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
               "started_at": "2026-09-13T21:01:35.516Z",
-              "finished_at": null,
-              "state": "in_progress",
-              "tool_calls": 97,
-              "tool_outputs": 96,
-              "unanswered_calls": 1,
+              "finished_at": "2026-09-13T21:46:14.723Z",
+              "state": "completed",
+              "tool_calls": 123,
+              "tool_outputs": 123,
+              "unanswered_calls": 0,
               "unattributed_outputs": 3
             }
           ]
@@ -1458,6 +1458,17 @@
           "input_sha256": "e68aadc1d83503612a6f57e40ab573df0a04c62bac9dd963f1520ccd81244bfa",
           "script_sha256": "b6d6ddc51ecac069e40bcf4942a912a2a97beeb442fe3a0f20bbb7d987484e6f",
           "sha256": "5d028dace376556f08180c3965d4a199eae4a60fa3d12f4eec2456a823c7df74"
+        },
+        "detection_receipt": {
+          "kind": "launchd_interval",
+          "observed_at": "2026-09-13T22:34:36.126Z",
+          "parent_pid": 68602,
+          "launcher_sha256": "e86c364721d94a07e37abe9079faec8966c6c365e46485b1428b25820a13026c",
+          "version": 1,
+          "thread_id": "01a09c93-4c00-78c0-9d0f-f47136880182",
+          "turn_id": "01a09c93-4f8d-7613-8772-00ac01f7e58d",
+          "transcript_sha256": "5e898ff9dfe13f32ae807eaf0a0affa7d74ae9e489d5fbf3651e1591183d78b6",
+          "sha256": "b23cff9926dbb5a7b3e5bdd1959f7e284b5a059559121e01e552841d6770bc40"
         }
       }
     ]
