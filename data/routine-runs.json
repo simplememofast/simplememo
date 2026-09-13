@@ -132,7 +132,7 @@
     "同じファイルに未コミットの本来の変更が乗っていないかを先に見ること。**",
     "【2026-09-05 更新】端末側へ置換された3本を、旧タスクの停止・置換名と新タスクのID/cron/有効状態で照合し登録。旧3本の停止前のfindingはintentional_stops.previous_findingに保存し、復旧成功に数えない。PENDINGは故障ではなく結果未確定として追跡し、同じ実行の終了まで閉じない。"
   ],
-  "observed_at": "2026-09-12T23:28:25.668Z",
+  "observed_at": "2026-09-13T01:28:58.988Z",
   "observed_by": "session via mcp list_triggers",
   "$observed_by": "**CIからは叩けない。**セッションが写しを置き、CIは写しを検査する",
   "max_snapshot_age_days": 3,
@@ -146,7 +146,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-12T23:28:25.668Z",
+        "observed_at": "2026-09-13T01:28:58.988Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T10:35:45.582040954Z",
@@ -178,7 +178,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-12T23:28:25.668Z",
+        "observed_at": "2026-09-13T01:28:58.988Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -210,7 +210,7 @@
       "found_at": "2026-09-05",
       "why": "実APIの観測で stopped。原因や依頼内容の達成は未判定。実行状態の回復を次の観測で確認する。",
       "observation": {
-        "observed_at": "2026-09-12T23:28:25.668Z",
+        "observed_at": "2026-09-13T01:28:58.988Z",
         "enabled": false,
         "last_run_status": "SUCCEEDED",
         "last_run_fired_at": "2026-09-05T05:32:36.629932818Z",
@@ -225,7 +225,7 @@
       "found_at": "2026-09-05",
       "why": "単発の予約は発火後に終了したが、APIから実行結果を確認できない。成功・故障と断定せず、実行の終了証跡を待つ。",
       "observation": {
-        "observed_at": "2026-09-12T23:28:25.668Z",
+        "observed_at": "2026-09-13T01:28:58.988Z",
         "enabled": false,
         "last_run_status": null,
         "last_run_fired_at": null,
@@ -482,7 +482,7 @@
       "run_once_at": "2026-09-13T00:30:00Z",
       "enabled": true,
       "bound_session": true,
-      "next_run_at": "2026-09-13T00:30:00Z",
+      "next_run_at": "2026-09-13T01:30:05.432350720Z",
       "last_fired_at": null,
       "last_run_status": null,
       "last_run_fired_at": null,
@@ -752,9 +752,9 @@
     "pages": 3,
     "has_more": false,
     "scope": "registered_simplememo_routines",
-    "total_records": 236,
+    "total_records": 235,
     "unregistered_current_count": 2,
-    "ended_records": 216,
+    "ended_records": 215,
     "ended_since_previous": [],
     "note": "全ページを読み、登録済みのSimpleMemoタスクだけを同期。未登録タスクは件数のみ記録し、名前やプロンプトは公開しない。意図的な停止や予定は変更しない。"
   },
@@ -862,7 +862,7 @@
   ],
   "codex_observation": {
     "schema_version": 2,
-    "observed_at": "2026-09-12T23:28:13.676Z",
+    "observed_at": "2026-09-13T01:28:55.823Z",
     "registered": [
       "obsidian",
       "obsidian-2"
@@ -880,10 +880,10 @@
       },
       {
         "id": "obsidian-2",
-        "status": "ACTIVE",
+        "status": "PAUSED",
         "kind": "cron",
-        "next_run_at": "2026-09-13T00:20:03.000Z",
-        "last_run_at": "2026-09-12T03:20:35.887Z"
+        "next_run_at": null,
+        "last_run_at": "2026-09-13T00:20:08.767Z"
       }
     ],
     "runs": [
@@ -1313,6 +1313,61 @@
               "tool_outputs": 12,
               "unanswered_calls": 0,
               "unattributed_outputs": 1
+            }
+          ]
+        }
+      },
+      {
+        "thread_id": "01a09822-be15-7690-95bf-87e1eb10b262",
+        "automation_id": "obsidian-2",
+        "scheduler_status": "ARCHIVED",
+        "created_at": "2026-09-13T00:20:08.821Z",
+        "updated_at": "2026-09-13T01:22:45.536Z",
+        "business_outcome": "not_inferred",
+        "transcript": {
+          "state": "observed",
+          "sha256": "c6bb5c51e23ee6ccd21be2a5c0beac7307d201925b3cb7dcd66ad604bdc1f625",
+          "bytes": 1428686,
+          "turns": [
+            {
+              "turn_id": "01a09822-c1e4-7192-a4f6-2e4423f96da9",
+              "started_at": "2026-09-13T00:20:10.038Z",
+              "finished_at": "2026-09-13T00:23:04.494Z",
+              "state": "completed",
+              "tool_calls": 11,
+              "tool_outputs": 11,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 1
+            },
+            {
+              "turn_id": "01a0984a-a10a-7831-9e5b-91222c4f388e",
+              "started_at": "2026-09-13T01:03:42.879Z",
+              "finished_at": "2026-09-13T01:03:53.486Z",
+              "state": "completed",
+              "tool_calls": 0,
+              "tool_outputs": 0,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 0
+            },
+            {
+              "turn_id": "01a0984b-9c6b-7b32-b36b-132770eb0e2b",
+              "started_at": "2026-09-13T01:04:47.226Z",
+              "finished_at": "2026-09-13T01:04:59.432Z",
+              "state": "completed",
+              "tool_calls": 0,
+              "tool_outputs": 0,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 0
+            },
+            {
+              "turn_id": "01a0984c-62dc-7502-8946-6c018d153558",
+              "started_at": "2026-09-13T01:05:38.048Z",
+              "finished_at": "2026-09-13T01:06:21.257Z",
+              "state": "completed",
+              "tool_calls": 5,
+              "tool_outputs": 5,
+              "unanswered_calls": 0,
+              "unattributed_outputs": 0
             }
           ]
         }
