@@ -646,6 +646,12 @@
       "broke": "6自己テスト。予約の初回失敗を正常終了へ置換、終了済みターンの書換え拒否を無効化、公開メタデータの余分な項目を許可する3変異が非0終了。ARCHIVEDと後続正常終了でも初回失敗を保持し、欠測・不完全ログ・消えた実行・対応のないツール結果を区別する。登録外の予約と本文・秘密の試験値は出力されない。実ローカル予約3回・6ターンを読み取り、初回失敗1回と原ログ欠測0を確認。毎時の自動更新はまだ未検証。 [2026-09-08 source correction] Eight self-tests. A natural launchd run incremented the service counter from 21 to 22 but the child process had no matching service environment. Version 2 records an unidentified process instead of inferring manual execution. The mutation treating a missing environment as service evidence fails. Version 1 remains readable as legacy_unverified and is replaced only by an actual source read. [2026-09-08 06:58 UTC] Existing hourly service run23 exited0 and created actual observation PR1148 with schema2, all3 registered runs/six turns, original failure1 and unavailable transcripts0. Service origin is verified separately from collection_context."
     },
     {
+      "script": "scripts/company-monthly-budget.mjs",
+      "state": "demonstrated",
+      "at": "2026-09-13",
+      "broke": "隔離コピーの実CLI --checkで、非公開根拠SHAの削除・追加支出枠の無断引上げ・既存義務保護の削除がそれぞれexit 1になることを観測。本番の支払い・設定は変更せず、復元後は予算とPRの52検査が成功。料金・枠・再配信の既存検査は予算理由とは別の拒否理由も要求する。"
+    },
+    {
       "script": "scripts/daily-brief.mjs",
       "state": "demonstrated",
       "at": "2026-08-26",
@@ -694,16 +700,16 @@
       "broke": "未知の evidence_strength／工数0（ゼロ除算で無限大の価値にしない）／負の工数／確信度が低いのに「まず測る」へ送らない／承認が要るリスクを gated にしない／効果×確信度÷工数 の式の入れ替わり の6通りで落ちることを観測 [2026-09-06 設計採用] 7自己検査。AIの設計採用を実CLIでfolder_pick_uxへ反映し、採点出力の次工程へ運ぶ。根拠・受入条件不足、リスク付き採用、既存判断上書きを拒否。リスク拒否を削除した変異で自己検査がexit 1。"
     },
     {
-      "script": "scripts/generate_sitemap.py",
-      "state": "demonstrated",
-      "at": "2026-09-06",
-      "broke": "2026-09-06: URL集合だけでなく内容履歴から導く日付も検査。最新main取り込み後の旧XMLに対する --check が238件（ページ237・索引1）の不一致でexit 1となることを確認。日付比較を無効化した写しでは古いlastmodの自己テストが失敗。41ページ以上のコミットを除外する旧判定を戻した写しでも実Git履歴の回帰検査が失敗した。通常マージ/JST境界・大規模な実リンク変更・大規模/小規模のCSSと計測パラメータ変更・新規/未コミット・浅い履歴・構造化データ・CPP・子XMLの更新日を含む9テスト、およびXML/URLの28自己検査を確認。変更なしの再生成は4XMLのSHA-256が一致。\n\n以下は2026-09-03の旧仕様での観測。末尾の「lastmodを比較しない」は今回撤回した仕様であり、現在の要件ではない。\n\n**この道具は一度、まさに台帳が狩っている形で効いていなかった。**2026-08-22 まで CI にあったのは `--dry-run`（件数を表示するだけでコミット済みのファイルを一切見ない）で、**generate_sitemap.py を回し忘れた PR を一度も止められなかった。**`--check` に置き換えて URL の集合を突き合わせるようにしたが、**その `--check` が落ちることは誰も確かめていなかった** —— `check-selftests.mjs` の列挙が `node` で始まる行しか見ておらず、python の2本は台帳の外にいたため。\n\n自己テスト23件。壊し7通りで落ちるのを観測（2026-09-03）: **(1)「載っていない URL」を問題に数えない**と1件 —— 2026-08-22 の穴そのもので、回し忘れた PR が素通りする。**(2)「消えた面が残っている」を数えない**と1件。**(3) ファイルが無いのを見逃す**と1件（sitemap が消えても「一致」と言う）。**(4) 404.html を載せる**と1件。**(5) 除外ディレクトリを外す**と5件 —— `scripts/` の検体や `build/`（生成物）まで sitemap に載る。**(6) ルートの index.html を `/` に写さない**と1件。**(7) noindex の判定を殺す**と1件（noindex の面を robots.txt が指す先に載せる）。\n\n**lastmod を比較しないこと自体も固定した** —— スイープ判定される面の lastmod は再生成のたびに動くので、差分に数えると毎日落ちる検査になり、誰も見なくなる。検体は tmpdir に置く（壊れた sitemap をリポジトリに置かない）。そのため `check_committed` のラベル計算を REPO_ROOT の外でも壊れないようにした。"
-    },
-    {
       "script": "scripts/generate-qr-codes.mjs",
       "state": "demonstrated",
       "at": "2026-09-05",
       "broke": "QRのCPP解決を常にnullにする変更で qr-routing.test.mjs が失敗することを実測し、元へ復元。実際の旧SVGに対しても --check は28件の経路不一致でexit 1（CPP指定なし26件・provider tokenなし2件）。再生成後は46件を独立デコーダーで復号して一致。英語ページの実URL、無効CPP、参照元競合、未管理画像も合成検体で検証。"
+    },
+    {
+      "script": "scripts/generate_sitemap.py",
+      "state": "demonstrated",
+      "at": "2026-09-06",
+      "broke": "2026-09-06: URL集合だけでなく内容履歴から導く日付も検査。最新main取り込み後の旧XMLに対する --check が238件（ページ237・索引1）の不一致でexit 1となることを確認。日付比較を無効化した写しでは古いlastmodの自己テストが失敗。41ページ以上のコミットを除外する旧判定を戻した写しでも実Git履歴の回帰検査が失敗した。通常マージ/JST境界・大規模な実リンク変更・大規模/小規模のCSSと計測パラメータ変更・新規/未コミット・浅い履歴・構造化データ・CPP・子XMLの更新日を含む9テスト、およびXML/URLの28自己検査を確認。変更なしの再生成は4XMLのSHA-256が一致。\n\n以下は2026-09-03の旧仕様での観測。末尾の「lastmodを比較しない」は今回撤回した仕様であり、現在の要件ではない。\n\n**この道具は一度、まさに台帳が狩っている形で効いていなかった。**2026-08-22 まで CI にあったのは `--dry-run`（件数を表示するだけでコミット済みのファイルを一切見ない）で、**generate_sitemap.py を回し忘れた PR を一度も止められなかった。**`--check` に置き換えて URL の集合を突き合わせるようにしたが、**その `--check` が落ちることは誰も確かめていなかった** —— `check-selftests.mjs` の列挙が `node` で始まる行しか見ておらず、python の2本は台帳の外にいたため。\n\n自己テスト23件。壊し7通りで落ちるのを観測（2026-09-03）: **(1)「載っていない URL」を問題に数えない**と1件 —— 2026-08-22 の穴そのもので、回し忘れた PR が素通りする。**(2)「消えた面が残っている」を数えない**と1件。**(3) ファイルが無いのを見逃す**と1件（sitemap が消えても「一致」と言う）。**(4) 404.html を載せる**と1件。**(5) 除外ディレクトリを外す**と5件 —— `scripts/` の検体や `build/`（生成物）まで sitemap に載る。**(6) ルートの index.html を `/` に写さない**と1件。**(7) noindex の判定を殺す**と1件（noindex の面を robots.txt が指す先に載せる）。\n\n**lastmod を比較しないこと自体も固定した** —— スイープ判定される面の lastmod は再生成のたびに動くので、差分に数えると毎日落ちる検査になり、誰も見なくなる。検体は tmpdir に置く（壊れた sitemap をリポジトリに置かない）。そのため `check_committed` のラベル計算を REPO_ROOT の外でも壊れないようにした。"
     },
     {
       "script": "scripts/health-intake.mjs",
