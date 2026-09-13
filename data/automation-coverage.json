@@ -53,7 +53,8 @@
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
     "開発領域の変更行比率94.2%に相当する客観指標が他領域には無い",
     "返金検出1件は、2026-09-13の明示承認によりテストでの運用準備完了と本番自動監視で計上。本番の返金初回検出やApple Sandbox REFUNDの完走実績ではない。返金の条件変更時点の比較は159/176=90.340909%（後続の月次予算・課金回復準備の加点前）。",
-    "返金検出と課金失敗回復の2件は、所有者指定のテスト済み運用準備＋稼働確認済み本番監視で計上。本番の初回返金・初回課金回復は未観測。課金回復準備直前は161/177=90.960452%、直後162/178=91.011236%。この2件を実例必須として除いた参考値は160/176=90.909091%。"
+    "返金検出と課金失敗回復の2件は、所有者指定のテスト済み運用準備＋稼働確認済み本番監視で計上。本番の初回返金・初回課金回復は未観測。課金回復準備直前は161/177=90.960452%、直後162/178=91.011236%。この2件を実例必須として除いた参考値は160/176=90.909091%。",
+    "返金検出・課金失敗回復・障害案内の3件は、所有者指定のテスト済み運用準備＋稼働確認済み本番監視で計上。本番の各初回は未観測。障害案内準備直前162/178=91.011236%、直後163/179=91.061453%。3件を実例必須として除いた参考値は160/176=90.909091%。案内APIの正常応答は全利用者への到達や法的通知完了を意味しない。"
   ],
   "tasks": [
     {
@@ -1726,13 +1727,20 @@
     {
       "area": "⑧ カスタマーサポート",
       "task": "障害案内の一斉配信",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**旧行から切り出した。**旧行は「回答・返金・障害案内」で、自動化できた回答と、権限表で人に残した返金（⑨に別行がある）と、未実装の障害案内が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。障害案内は宛先の名簿と配信基準の設計が要る\n\n**[2026-08-28] この行の性格が変わった。プロダクトの機能ではなく、契約上の義務になった。**⑦の条項検査で Apple Developer Program License Agreement §3.3.3(C) を読んだところ、**利用者へのデータ侵害通知が契約で約束されている**（You agree to notify Your users ... in the event of a data breach）。\n\n**つまり「まだ作っていない機能」ではなく「約束したのに実行できない動作」。**優先順位の意味が変わるので、ここに書いておく。経路が2つとも閉じている事実（下記 unblocked_by）は変わらない —— 変わったのは、開けないままでよいかどうかの判断材料のほう。data/corporate-obligations.json の contract_review.apple.$personal_data に同じことが書いてある。",
-      "blocker": "not_started",
-      "unblocked_by": "**[2026-08-27 実測] 「決めれば作れる」ではなかった。**経路が2つしかなく、どちらも決定では開かない。**(a) メール** —— 宛先になりうる名簿は reminder_optin_invites だけで、同意文言は『メモが途切れた日に、そっと1通』『お届けは週2通まで』とリマインダーに限定してある。障害案内はその範囲外で、**送ると同意を超える。** **(b) アプリ内** —— /v1/config の RemoteFlagPayload は flags / rollouts / killed / maxStaleSeconds / refreshSeconds しか運ばず、**文言を運ぶ欄も表示するUIも無い。**足すには iOS 側の実装（payload の欄・バナー・テスト）が要る。したがって開くのは『閾値を決める』ではなく **(a) 障害案内という別の同意を取る**か **(b) iOS に通知面を作る**か",
-      "unlock": "impl_product",
-      "since": null
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "../simplememo-api/src/service-notice.ts",
+        "../simplememo-api/src/service-notice-monitor.ts",
+        "../simplememo-api/test/service-notice-monitor.integration.test.ts",
+        "../simplememo-api/test/service-notice-monitor.test.ts",
+        "../simplememo-ios/SimpleMemoTests/ServiceNoticeTests.swift",
+        "docs/service-notice-tested-readiness-20260913.md",
+        "data/service-notice-readiness-20260913.json"
+      ],
+      "note": "**旧行から切り出した。**旧行は「回答・返金・障害案内」で、自動化できた回答と、権限表で人に残した返金（⑨に別行がある）と、未実装の障害案内が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。障害案内は宛先の名簿と配信基準の設計が要る\n\n**[2026-08-28] この行の性格が変わった。プロダクトの機能ではなく、契約上の義務になった。**⑦の条項検査で Apple Developer Program License Agreement §3.3.3(C) を読んだところ、**利用者へのデータ侵害通知が契約で約束されている**（You agree to notify Your users ... in the event of a data breach）。\n\n**つまり「まだ作っていない機能」ではなく「約束したのに実行できない動作」。**優先順位の意味が変わるので、ここに書いておく。経路が2つとも閉じている事実（下記 unblocked_by）は変わらない —— 変わったのは、開けないままでよいかどうかの判断材料のほう。data/corporate-obligations.json の contract_review.apple.$personal_data に同じことが書いてある。\n\n[2026-09-13 完了条件変更] 返金・課金回復と同様のテスト済み運用準備を提案し、オーナーが「他と被らないなら進めて」と指定。task134だけを対象に、既存の公開案内API・アプリ内バナー経路のテストと、毎時の本番公開応答照合・自然発火・既存継続監視を完了条件とした。APIのactive/期限/撤回/改訂/キャッシュ/失敗と、実workerd・D1への監視記録、iOSのHTTP→キャッシュ保持→改訂→再起動復元→null撤回を検証。実障害の告知、全利用者への到達、実機E2E、法的・契約上の通知義務の充足は未確認で別の観測として保持する。メール同意を転用せず、本番fixtureや架空の障害は作らない。毎時の標本観測なので全revisionや観測間の可用性を証明しない。初回の実障害案内で二重加点しない。変更直前162/178=91.011236%、変更後163/179=91.061453%、増分約0.050217ポイント。全203件と定義対象192件は不変。",
+      "since": "2026-09",
+      "acceptance_basis": "test_verified_readiness_and_active_production_monitoring",
+      "production_service_notice_observed_at": null
     },
     {
       "area": "⑧ カスタマーサポート",
@@ -2794,6 +2802,28 @@
         "defined": 192
       },
       "delta_ai_execution_pp": 0.0507839776550556
+    },
+    {
+      "id": "service-notice-tested-readiness-20260913",
+      "approved_by": "owner",
+      "task_index": 134,
+      "previous_executor": "nobody",
+      "executor": "ai_executes_gated",
+      "scope": "この1業務のみ。全203タスクと定義対象192タスクは不変。",
+      "previous_criterion": "実障害の案内配信と実機での受信・表示を確認する",
+      "criterion": "既存の公開案内・アプリ内表示経路のテストで運用準備を完了し、本番の初回案内は稼働確認済みの自動監視に任せる。全利用者への到達と通知義務の充足は別の未観測事項。",
+      "evidence": "data/service-notice-readiness-20260913.json",
+      "previous": {
+        "ai_executes": 162,
+        "doing": 178,
+        "defined": 192
+      },
+      "current": {
+        "ai_executes": 163,
+        "doing": 179,
+        "defined": 192
+      },
+      "delta_ai_execution_pp": 0.05021655891029875
     }
   ]
 }
