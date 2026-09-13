@@ -10,6 +10,7 @@
  *   node scripts/autopilot-runs.mjs --since 2026-08-15
  *   node scripts/autopilot-runs.mjs --append --run-id ... --date ... --route ... --outcome ...
  *        [--failure-class ... --failed-at ... --detected-at ... --needs-triage true]
+ *   node scripts/autopilot-runs.mjs --classify-codex-failures # verified original runtime codes only
  *
  * 【何を測るか】外部レビュー（2026-08-22）が求めた指標のうち、
  * 実行を一意に指す識別子があれば数えられるもの:
@@ -48,6 +49,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readLedger, readLedgerScenarios } from './lib/read-ledger.mjs';
+import { FAULT_GATE_CODES } from './lib/autopilot-gate-codes.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const RUNS_PATH = path.join(ROOT, 'data/autopilot-runs.json');
@@ -295,7 +297,7 @@ export const ELIGIBILITY_VERDICTS = ['declined_by_design', 'declined_by_fault',
  * escalation-rules.json も fail_credential を 4時間・stop_automation: true と扱っていて、
  * 設計どおりの棄却とは別物として既に区別している。
  */
-export const FAULT_GATE_CODES = ['fail_credential', 'fail_api', 'fail_no_model', 'preflight_error'];
+export { FAULT_GATE_CODES };
 
 /**
  * gate_code の記録を要求し始めた日。**これより前の行は遡って復元できないので免除する。**
@@ -1284,6 +1286,23 @@ if (isMain) {
     for (const p of problems) console.error(`  - ${p}`);
     console.error('\n壊れた台帳は「集計できない」ではなく「指標が黙って嘘になる」を意味する。');
     process.exit(1);
+  }
+
+  if (has('classify-codex-failures')) {
+    const { applyCodexTriage } = await import('./lib/codex-run-intake.mjs');
+    const routineDoc = readLedger(path.join(ROOT, 'data/routine-runs.json'));
+    const updated = applyCodexTriage(routineDoc, doc);
+    const after = validate(updated.doc);
+    if (after.length) throw new Error(`Codex triage produced invalid ledger: ${after.join('; ')}`);
+    if (updated.changed) {
+      const tmp = `${RUNS_PATH}.${process.pid}.tmp`;
+      try {
+        fs.writeFileSync(tmp, JSON.stringify(updated.doc, null, 2) + '\n', { flag: 'wx' });
+        fs.renameSync(tmp, RUNS_PATH);
+      } finally { fs.rmSync(tmp, { force: true }); }
+    }
+    console.log(`Codex runtime failures classified: ${updated.changed}; original outcomes and detection provenance preserved`);
+    process.exit(0);
   }
 
   if (has('append')) {

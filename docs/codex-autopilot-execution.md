@@ -104,6 +104,10 @@ gateの旧引継ぎメッセージにある`GITHUB_RUN_ID`は、この実タス�
    インストール済み監視スクリプトの一致を検証した証跡を使う。
    既に観測済みの過去行を、後日の定期監視で自動検知へ付け替えない。
    `preflight_error`は既存レーンFへ送る。予算・停止による拒否は修理による解除対象にしない。
+   元の失敗ターンに構造化コード`usage_limit_exceeded`がある場合は、観測器が
+   ターンID・終了時刻・transcriptハッシュ付きで`usage_limit`へ分類し、既存の所有者対応へ送る。
+   エラー本文や後続ターンから原因を推定しない。Actは既存の未分類行にもこの証跡だけを適用する。
+   元の失敗・検知元・検知時刻・介入履歴は保持し、分類を修理成功や自動検知へ置き換えない。
 
 snapshotは`schema_version:1`、`task_id`、ISO8601 `observed_at`、`state`を持つ。
 stateの必須値は`route`、当日JSTの`todayJst`、booleanの`credentialsAvailable`、

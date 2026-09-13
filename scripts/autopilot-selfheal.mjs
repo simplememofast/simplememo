@@ -127,7 +127,8 @@ export function analyze(runsDoc, matrix, escalationRules = []) {
     return {
       run_id: r.run_id, date_jst: r.date_jst, route: r.route,
       outcome: r.outcome, failure_class: cls,
-      failure_reason: r.failure_reason,
+      // Preserve the original ledger message, but show the verified diagnosis.
+      failure_reason: r.triage_note ?? r.failure_reason,
       needs_triage: r.needs_triage === true,
       repair_attempts_for_class: tried,
       // 上限に達した種別は**直さない**。人に上げる。
