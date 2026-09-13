@@ -7,6 +7,7 @@ import { ROOT, digest, formalMetrics, compareMetrics, humanTouchMetrics, autonom
 import { latestSnapshot } from './gsc.mjs';
 import { isDue, validate as validateExperiments } from './ledger.mjs';
 import { nativeOrigin } from './company-origin.mjs';
+import { growthFollowups } from './company-growth-followup.mjs';
 
 export const DEFAULT_STATE = path.join(os.homedir(), '.config/simplememo/company-os');
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
@@ -152,6 +153,7 @@ export function observe({ stateRoot = DEFAULT_STATE, now = new Date() } = {}) {
         clicks: snapshot.dates?.reduce((n, r) => n + r.clicks, 0) ?? null,
         impressions: snapshot.dates?.reduce((n, r) => n + r.impressions, 0) ?? null } : null,
       connections, experiments, content_gaps: gaps,
+      followups: attempt('growth_followups', () => growthFollowups({stateRoot, now}), failures),
       aio: probe ? { series: probe.series, observed_at: probe.observed_at, status: probe.status,
         valid_questions: probe.valid_questions, unaided_valid_questions: probe.unaided_valid_questions,
         unaided_mention_rate: probe.unaided_mention_rate, unaided_own_site_citation_rate: probe.unaided_own_site_citation_rate,
@@ -186,6 +188,11 @@ export function opportunities(observation) {
     id: 'evaluate:' + e.id, kind: 'evaluate_existing_experiment', title: 'Evaluate ' + e.id,
     permission: 'AUTO', executable: true, owner: 'existing growth experiment ledger', evidence: [e.id, e.evaluation_date],
     action_scope: 'Use the existing metric-specific evidence gate. Keep INCONCLUSIVE or measurement_failed when appropriate; no early window or invented data.',
+    factors: { ...defaults, frequency: 45, business_impact: 80, growth_impact: 80, ease: 55 } });
+  for (const r of observation.growth.followups?.reviews ?? []) if (r.due) candidates.push({
+    id: 'followup:' + r.id, kind: 'evaluate_growth_followup', title: 'Follow up ' + r.parent.id,
+    permission: 'AUTO', executable: true, owner: r.owner, evidence: [r.id, r.parent_sha256, r.post_start, r.post_end],
+    action_scope: 'Collect the registered mature GSC window, inspect concurrent changes, then use evaluate-growth-followup with the original metric-specific admission gate. Missing evidence stays pending; keep is not WIN. No automatic source retry, publication or model call.',
     factors: { ...defaults, frequency: 45, business_impact: 80, growth_impact: 80, ease: 55 } });
   if (observation.growth.aio?.unaided_valid_questions >= 4 && observation.growth.aio.unaided_mention_rate === 0) candidates.push({
     id: 'content:ai-visibility-gap', kind: 'existing_content_queue', title: 'Choose an evidenced content gap using the existing coverage queue',

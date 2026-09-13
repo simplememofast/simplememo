@@ -7,6 +7,7 @@ import { collectData } from '../growth/lib/company-data.mjs';
 import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
 import { followUp } from '../growth/lib/company-followup.mjs';
+import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from '../growth/lib/company-growth-followup.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
@@ -14,7 +15,17 @@ const option = (name, fallback) => { const i = args.indexOf('--' + name); return
 const stateRoot = option('state-root', DEFAULT_STATE);
 let result;
 if (command === 'follow-up') {
-  result=followUp({stateRoot});
+  result={failures:[]};
+  try { Object.assign(result, followUp({stateRoot})); }
+  catch { result.operational=null; result.failures.push({source:'operational_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
+  try { result.growth=growthFollowups({stateRoot}); }
+  catch { result.growth=null; result.failures.push({source:'growth_followup',state:'unavailable',reason:'read_or_validation_failed'}); }
+} else if (command === 'register-growth-followup') {
+  result=registerGrowthFollowup({stateRoot, experimentId:option('experiment'), evaluationDate:option('evaluate'),
+    postStart:option('post-start'), postEnd:option('post-end'), rationale:option('rationale')});
+} else if (command === 'evaluate-growth-followup') {
+  result=evaluateGrowthFollowup({stateRoot, id:option('id'), snapshotDirectory:option('snapshot-directory'),
+    decision:option('decision'), rationale:option('rationale')});
 } else if (command === 'bind') {
   result = bindExistingRun({stateRoot,id:option('run'),autopilotRunId:option('autopilot-run')});
 } else if (command === 'finish') {
