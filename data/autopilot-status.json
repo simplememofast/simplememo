@@ -1,21 +1,21 @@
 {
-  "date_jst": "2026-09-12",
+  "date_jst": "2026-09-13",
   "generated_at": "2026-09-12T03:23:35.865709+00:00",
-  "action": "skip",
+  "action": "maintenance",
   "article": null,
   "pr": null,
   "streak": {
-    "consecutive_no_article_days": 4,
+    "consecutive_no_article_days": 5,
     "last_article_date_jst": "2026-09-08",
     "last_production_change_date_jst": "2026-09-08",
-    "days_since_production_change": 4
+    "days_since_production_change": 5
   },
   "data_freshness": {
-    "bq_checked": false,
+    "bq_checked": true,
     "bq_export_last_data_date": null,
     "bq_export_days_accumulated": null,
     "manual_snapshot_label": "2026-09-07",
-    "$note": "2026-09-11 12:20 JST retry run: BigQuery preflight could not retrieve data because credentials were unavailable. Missing observations are unknown, not zero; the latest stored manual snapshot remains 2026-09-07."
+    "$note": "既存暗号化経路でGSC 2026-08-13..09-09、GA4 09-06..09-08の固定集計を取得。ExportLog全体の最新data_dateと蓄積日数は今回照会していないためnull。"
   },
   "cost": {
     "month": "2026-09",
@@ -63,12 +63,12 @@
   "runs": {
     "window": {
       "from": "2026-08-11",
-      "to": "2026-09-12",
-      "days": 33
+      "to": "2026-09-13",
+      "days": 34
     },
-    "completion_rate": 0.6585,
-    "change_failure_rate": 0.3415,
-    "human_intervention_rate": 0.2195,
+    "completion_rate": 0.6667,
+    "change_failure_rate": 0.3333,
+    "human_intervention_rate": 0.2381,
     "intervention_by_kind": {
       "artifact": {
         "runs": 0,
@@ -76,35 +76,35 @@
       },
       "infra": {
         "runs": 4,
-        "rate": 0.0975609756097561
+        "rate": 0.09523809523809523
       },
       "substitute": {
         "runs": 1,
-        "rate": 0.024390243902439025
+        "rate": 0.023809523809523808
       },
       "bootstrap": {
         "runs": 1,
-        "rate": 0.024390243902439025
+        "rate": 0.023809523809523808
       },
       "request": {
-        "runs": 3,
-        "rate": 0.07317073170731707
+        "runs": 4,
+        "rate": 0.09523809523809523
       }
     },
     "artifact_autonomy_rate": 1,
-    "shipping_day_rate": 0.7273,
+    "shipping_day_rate": 0.7353,
     "totals": {
-      "runs": 63,
-      "attempted": 41,
-      "shipped": 27,
+      "runs": 64,
+      "attempted": 42,
+      "shipped": 28,
       "failed": 14,
       "no_run": 2
     },
     "by_route": {
       "secondary": {
-        "runs": 25,
-        "attempted": 21,
-        "shipped": 18
+        "runs": 26,
+        "attempted": 22,
+        "shipped": 19
       },
       "primary": {
         "runs": 38,
@@ -119,29 +119,29 @@
     ],
     "streaks": {
       "current": {
-        "days": 26,
+        "days": 27,
         "from": "2026-08-18"
       },
       "longest": {
-        "days": 26,
+        "days": 27,
         "from": "2026-08-18",
-        "to": "2026-09-12"
+        "to": "2026-09-13"
       },
-      "active_days": 31,
-      "last_day": "2026-09-12"
+      "active_days": 32,
+      "last_day": "2026-09-13"
     },
     "shipping_streaks": {
       "current": {
-        "days": 0,
-        "from": null
+        "days": 1,
+        "from": "2026-09-13"
       },
       "longest": {
         "days": 8,
         "from": "2026-09-01",
         "to": "2026-09-08"
       },
-      "active_days": 24,
-      "last_day": "2026-09-12"
+      "active_days": 25,
+      "last_day": "2026-09-13"
     },
     "hands_off_streaks": {
       "current": {
@@ -154,7 +154,7 @@
         "to": "2026-09-05"
       },
       "active_days": 17,
-      "last_day": "2026-09-12"
+      "last_day": "2026-09-13"
     },
     "publishing_streaks": {
       "current": {
@@ -167,14 +167,14 @@
         "to": "2026-08-23"
       },
       "active_days": 15,
-      "last_day": "2026-09-12"
+      "last_day": "2026-09-13"
     },
     "last_publishing": {
       "date_jst": "2026-09-08",
       "lane": "E",
       "artifact": "/obsidian/compare/memos/"
     },
-    "intervention_count": 9,
+    "intervention_count": 10,
     "timings": {
       "time_to_detect_hours": {
         "median": 2.95,
@@ -242,15 +242,15 @@
       ]
     }
   },
-  "reason": "engine=codex; automation_id=obsidian-2; scheduled_slot=2026-09-12T12:20:00+09:00; preflight rejected unknown execution state of repair task 01a08e7c-1a0e-7003-b3af-fb72dfc4ef9a; primary and earlier retry completed. No implementation or publication.",
-  "verified": "Recovered the three September 12 Codex scheduled gate outcomes from completed tasks and saved local ledgers on September 13. All three stopped before implementation because repair task execution state was unknown. No new article, shipment, or measured dollar cost is claimed.",
+  "reason": "【連続無記事5日目・本番HTML最終変更 2026-09-08・BQ固定集計取得済み】オーナー依頼のGoalで既存運営とGrowth readerを統合。人手のAppsFlyer取得を既存日次主系へ接続し、元parserとのparityを実CSVで確認。自然定期起動の成功とは区別する。",
+  "verified": "GSC/GA4の暗号化取得、既存AppsFlyer readerの実行とCSV/parsing parity、ASC既存成果物の再利用を確認。204本のローカルCI相当検査と18件のCompany境界テストが成功。出荷はこのPRのmergeと本番内容の一致で別途確認する。",
   "checks": {
-    "codex_preflight": "Three observed rejections: unknown execution state; outcomes unchanged",
-    "ledger_recovery": "Existing September 12 primary, 09:20 retry and 12:20 retry local records restored to shared ledger"
+    "company_boundaries": "18 passed",
+    "local_preflight": "204 passed",
+    "mobile_qa": "not applicable; no product layout change"
   },
   "owner_requests": [
-    "EP委任判定の月次追認（2026-09）20件は本人の回答待ち。AIで追認を代筆しない。",
-    "指標 unresolved_failures は usage_limit 4件（escalation-rules が who: owner とする種別で repair_of を書けない）が構造的に残るため 4 を下回れない。14日移動中央値との比較ではレーンFの改善が今後も event=0 として決済される。分母の扱いか比較基準の見直しはオーナー判断。"
+    "ChatGPT/GCPの残るscheduler inventoryは利用可能な認証済みread-only画面がなく未確認。他の運営・取得処理は継続可能。"
   ],
-  "next": "Recheck actual repair task state before implementation."
+  "next": "既存06:00主系へCompany OSのDaily/Weekly/Monthly/follow-upを統合。自然起動は初回turn admissionの証跡で確認し、7日分が揃うまでは効果を確定しない。"
 }

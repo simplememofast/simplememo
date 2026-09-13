@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "scope": "Existing source definitions; unchanged. Ceilings are not achieved performance.",
+  "baseline_calculated_at": "2026-09-13T06:14:35.305Z",
+  "scope_fingerprint": "c7b6ab51fea340951b7020f9752b6a2c27a00e37e61d7a7cddd93f271cba1587",
+  "metrics": [
+    {
+      "id": "ai_execution_rate",
+      "formula": "(ai_autonomous + ai_executes_gated) / doing",
+      "numerator": 159,
+      "denominator": 176,
+      "value": 0.9034090909090909,
+      "source": "scripts/automation-rate.mjs",
+      "source_sha256": "dd9ea3309e964add1f2fc270dfebfb9ce4a4ad1417d0ca2cb8f76ac9b28fbc80",
+      "exclusions": [
+        "nobody",
+        "intentional_no"
+      ],
+      "version": "legacy-coverage-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "overall_automation_rate",
+      "formula": "(ai_autonomous + ai_executes_gated) / defined",
+      "numerator": 159,
+      "denominator": 192,
+      "value": 0.828125,
+      "source": "scripts/automation-rate.mjs",
+      "source_sha256": "dd9ea3309e964add1f2fc270dfebfb9ce4a4ad1417d0ca2cb8f76ac9b28fbc80",
+      "exclusions": [
+        "intentional_no"
+      ],
+      "version": "legacy-coverage-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "ai_involvement_rate",
+      "formula": "(ai_executes + ai_proposes) / doing",
+      "numerator": 166,
+      "denominator": 176,
+      "value": 0.9431818181818182,
+      "source": "scripts/automation-rate.mjs",
+      "source_sha256": "dd9ea3309e964add1f2fc270dfebfb9ce4a4ad1417d0ca2cb8f76ac9b28fbc80",
+      "exclusions": [
+        "nobody",
+        "intentional_no"
+      ],
+      "version": "legacy-coverage-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "coverage_rate",
+      "formula": "doing / defined",
+      "numerator": 176,
+      "denominator": 192,
+      "value": 0.9166666666666666,
+      "source": "scripts/automation-rate.mjs",
+      "source_sha256": "dd9ea3309e964add1f2fc270dfebfb9ce4a4ad1417d0ca2cb8f76ac9b28fbc80",
+      "exclusions": [
+        "intentional_no"
+      ],
+      "version": "legacy-coverage-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "ai_completion_rate",
+      "formula": "shipped / attempted",
+      "numerator": 27,
+      "denominator": 41,
+      "value": 0.6585365853658537,
+      "source": "scripts/autopilot-runs.mjs",
+      "source_sha256": "45f7de803acd00cbee23cc2a66c5a2d49133c675f9b6f4661db746612bfdb282",
+      "exclusions": [
+        "unattempted eligibility and duplicate skips"
+      ],
+      "version": "legacy-runs-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "reachable_automation",
+      "formula": "classified_current_boundary_ceiling / defined",
+      "numerator": 176,
+      "denominator": 192,
+      "value": 0.9166666666666666,
+      "source": "scripts/autonomy-gap.mjs",
+      "source_sha256": "121d3e7bae1139ad3ef90fb8e877e8836f3c89c3d6daef273098176afaedd91d",
+      "exclusions": [
+        "intentional_no"
+      ],
+      "version": "legacy-gap-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "boundary_delegation",
+      "formula": "classified_ceiling_with_all_handover / defined",
+      "numerator": 183,
+      "denominator": 192,
+      "value": 0.953125,
+      "source": "scripts/autonomy-gap.mjs",
+      "source_sha256": "121d3e7bae1139ad3ef90fb8e877e8836f3c89c3d6daef273098176afaedd91d",
+      "exclusions": [
+        "intentional_no"
+      ],
+      "version": "legacy-gap-v1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    },
+    {
+      "id": "autonomy_score",
+      "formula": "existing VDC + UMR + RA + EP + TUC with existing holds and carry policy",
+      "numerator": 46.61554206662902,
+      "denominator": 100,
+      "value": 46.61554206662902,
+      "source": "scripts/autonomy-score.mjs",
+      "source_sha256": "dd783b1f89638e745e2faadd94ab33f12749fb9b9a3470583d8a2247d18da7b8",
+      "exclusions": [
+        "existing instrument policy; not the task-coverage rate"
+      ],
+      "version": "legacy-score-policy-1",
+      "last_calculated": "2026-09-13T06:14:35.305Z"
+    }
+  ]
+}
