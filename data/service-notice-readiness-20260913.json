@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "recorded_at": "2026-09-13T11:01:38.116241+00:00",
+  "acceptance": {
+    "id": "service-notice-tested-readiness-20260913",
+    "task_index": 134,
+    "approved_by": "owner",
+    "basis": "test_verified_readiness_and_active_production_monitoring",
+    "previous": {
+      "ai_executes": 162,
+      "doing": 178,
+      "defined": 192
+    },
+    "current": {
+      "ai_executes": 163,
+      "doing": 179,
+      "defined": 192
+    },
+    "delta_ai_execution_pp": 0.05021655891029875,
+    "scope": "task134_only",
+    "repeat_credit_on_first_production_notice": false
+  },
+  "tests": {
+    "api": {
+      "source_commit": "9b49ca77321ddb3337d14a20973f9141f51bb042",
+      "ci_url": "https://github.com/simplememofast/simplememo-api/actions/runs/34751348993",
+      "typecheck": "passed",
+      "unit": {
+        "passed": 2949,
+        "files": 130
+      },
+      "integration": {
+        "passed": 206,
+        "files": 19
+      },
+      "service_notice_monitor_unit": {
+        "passed": 21
+      },
+      "service_notice_monitor_integration": {
+        "passed": 3,
+        "runtime": "local_workerd_and_D1",
+        "actual_router_inactive_response": true,
+        "active_notice_observations": "fixtures"
+      },
+      "ci_conclusion": "success",
+      "ci_head": "9b49ca77321ddb3337d14a20973f9141f51bb042",
+      "implementation_pr": 320,
+      "repair_pr": 321
+    },
+    "ios": {
+      "pr": 505,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "runtime": "iPhone 17 Pro Simulator / iOS 26.5",
+      "scheme": "SimpleMemoQA",
+      "plan": "SimpleMemo-FastUnit",
+      "suites": [
+        "ServiceNoticeTests",
+        "ServiceNoticeHTTPTests"
+      ],
+      "notice_observations": "fixtures",
+      "physical_device_e2e": false,
+      "xcresult_summary_sha256": "d66f75a7b9287763f502f6ec96968dbf42eb66498241a855e6316fe0c7ba099c",
+      "source_commit": "60806d734dcfdc1d08a7e387b59910c65a630e63",
+      "merge_commit": "5fa45cb67b138b3d8947997eca12cc23012354d2",
+      "merged_at": "2026-09-13T09:42:43Z",
+      "ci": {
+        "static": "passed",
+        "parity": "passed",
+        "xcode_cloud_build": "passed",
+        "xcode_cloud_fast_unit": "passed",
+        "xcode_cloud_url": "https://appstoreconnect.apple.com/apps/6758438948/ci/builds/89e88f1a-d082-4fe9-b28a-0cf12c879b31"
+      }
+    },
+    "production_fixture_inserted": false,
+    "testflight_distributed": false
+  },
+  "production": {
+    "actual_incident_notice_observed": false,
+    "all_client_delivery_verified": false,
+    "legal_notification_obligation_verified": false,
+    "deployment": {
+      "repository": "simplememofast/simplememo-api",
+      "pr": 321,
+      "merge_commit": "ced6e019d3bb348339df4dd7bf17f16e872f01d9",
+      "version": "1.5.78",
+      "worker_version_id": "257650a9-6769-440c-b4fd-5a682e72afd9",
+      "deployment_id": "f7140811-72b6-4658-8fc1-00349d590698",
+      "build_id": "ff6e64ec-a0ea-4589-8746-87f7ca8afd0f",
+      "build_outcome": "success",
+      "build_commit": "ced6e019d3bb348339df4dd7bf17f16e872f01d9",
+      "deployed_at": "2026-09-13T10:20:31.389352Z",
+      "status_http": 200
+    },
+    "public_readback": {
+      "url": "https://api.simplememofast.com/v1/service-notice",
+      "http_status": 200,
+      "observed_at": "2026-09-13T10:23:00.346770+00:00",
+      "body": {
+        "schema_version": 1,
+        "notice": null
+      },
+      "sha256": "08e827637f8806c6d464adf810e2c92b842aa3fd82a0108712403c66b41805de"
+    },
+    "scheduled_observation": {
+      "job_name": "service_notice_monitor",
+      "cron_expression": "0 * * * *",
+      "started_at": "2026-09-13T11:00:48.511000+00:00",
+      "finished_at": "2026-09-13T11:00:48.638000+00:00",
+      "eligible": 0,
+      "sent": 0,
+      "skipped": null,
+      "errors": 0,
+      "last_error": null,
+      "reason": "service_notice_inactive",
+      "readback_rows_written": 0,
+      "readback_source": "production_D1_cron_run_log",
+      "manually_triggered": false
+    },
+    "existing_client_distribution": {
+      "version": "5.8.54",
+      "build": "1342",
+      "public_observation_date": "2026-09-12",
+      "receipt": "docs/quota-physical-publication-20260912.md",
+      "source_commit": "a1cb757ba4a5f5730f50030c9d7b75704de2cb13",
+      "service_notice_merge": "612e86acb66dd96834157103e8b0d0f799cb127c",
+      "notice_is_ancestor": true,
+      "module": "SimpleMemo/ServiceNotice.swift",
+      "module_blob": "163a304fcc55d51b4e67d97983eb26cd8590503e",
+      "unchanged_in_tested_source": true,
+      "new_distribution_performed": false
+    },
+    "initial_deployment": {
+      "repository": "simplememofast/simplememo-api",
+      "pr": 320,
+      "merge_commit": "8a3bbd36abac6d9b9e30d5f5f4530a0dfba753ae",
+      "version": "1.5.77",
+      "worker_version_id": "f47757c6-9f21-48da-88bb-216a09e3481c",
+      "deployment_id": "f5dc9cfe-607b-4263-8b35-595798a5bc94",
+      "build_id": "c5c7cf1d-ebc6-4c1d-b7f5-b037f40efb16",
+      "build_outcome": "success",
+      "build_commit": "8a3bbd36abac6d9b9e30d5f5f4530a0dfba753ae",
+      "deployed_at": "2026-09-13T09:33:43.360608Z",
+      "status_http": 200
+    },
+    "failed_scheduled_observations": [
+      {
+        "job_name": "service_notice_monitor",
+        "cron_expression": "0 * * * *",
+        "started_at": "2026-09-13T10:00:49.099000+00:00",
+        "finished_at": "2026-09-13T10:00:49.169000+00:00",
+        "eligible": null,
+        "sent": null,
+        "skipped": null,
+        "errors": 1,
+        "last_error": null,
+        "reason": "service_notice_monitor_unavailable",
+        "manually_triggered": false,
+        "readback_source": "production_D1_cron_run_log",
+        "readback_rows_written": 0,
+        "credited": false
+      }
+    ],
+    "repair": {
+      "compatibility_flag": "global_fetch_strictly_public",
+      "initial_cause": "suspected legacy same-zone routing; no specific Cloudflare error code observed",
+      "daily_report_business_code_changed": false,
+      "local_workerd_public_read_check": {
+        "notice_reason": "service_notice_inactive",
+        "notice_errors": 0,
+        "daily_status_kind": "ok",
+        "daily_status_date_jst": "2026-09-13",
+        "customer_email_sent": false,
+        "production_scheduled_evidence": false
+      },
+      "pr": 321
+    }
+  },
+  "continuation": {
+    "automation_id": "ai-90",
+    "status": "ACTIVE",
+    "updated_at": "2026-09-13T10:23:30.960000+00:00",
+    "worker_observation": "hourly",
+    "follow_up": "existing twice-daily continuation",
+    "stale_after_hours": 2,
+    "missing_or_error_is_zero": false,
+    "first_positive_action": "Verify the public ID/revision against the actual authorized notice PR and public response, preserve a private receipt, and do not credit task134 twice."
+  },
+  "limits": [
+    "Local active/revision/retraction fixtures are not an actual incident notice.",
+    "The public endpoint monitor observes hourly samples, not every revision or availability between checks.",
+    "A public response and cached UI tests do not prove delivery to every client or discharge a legal notification obligation.",
+    "No incident was fabricated, production fixture inserted, customer email sent, or TestFlight build distributed.",
+    "Actual incident publication and physical device delivery remain separate unobserved milestones."
+  ]
+}
