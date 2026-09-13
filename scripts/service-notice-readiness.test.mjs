@@ -73,7 +73,12 @@ test('credit requires real deployment, public readback and a later natural hourl
   assert.equal(p.repair.daily_report_business_code_changed, false);
   assert.equal(p.repair.local_workerd_public_read_check.daily_status_kind, 'ok');
   assert.equal(p.repair.local_workerd_public_read_check.production_scheduled_evidence, false);
-  assert.equal(proof.continuation.automation_id, 'ai-90');
+  assert.equal(proof.continuation.automation_id, 'obsidian');
+  assert.equal(proof.continuation.previous_configuration.automation_id, 'ai-90');
+  assert.equal(proof.continuation.previous_automation_currently_missing, true);
+  assert.equal(proof.continuation.new_automation_created, false);
+  assert.equal(proof.continuation.previous_fields_and_prompt_preserved, true);
+  assert.ok(Date.parse(proof.continuation.updated_at) > Date.parse(proof.continuation.previous_configuration.updated_at));
   assert.equal(proof.continuation.status, 'ACTIVE');
   assert.equal(proof.continuation.missing_or_error_is_zero, false);
 });
