@@ -24,6 +24,7 @@
  */
 
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -214,6 +215,41 @@ export function timelineClaims(text, doc) {
     }
   }
   return problems;
+}
+
+/** 配信済み資料は、明示的に保存した旧スコープに照合する。凍結マーカーだけでは検証を省略しない。 */
+export function surfaceTimelineClaims(text, doc, relativePath) {
+  const frozen = /^<!-- numbers-frozen: (\d{4}-\d{2}-\d{2})\b[^\n]*-->$/m.exec(text);
+  const registered = (doc.previous_scope_series || []).some(series =>
+    (series.frozen_documents || []).some(record => record.path === relativePath));
+  if (!frozen) return registered
+    ? ['保存済みの配信資料から凍結日を削除・変更している']
+    : timelineClaims(text, doc);
+  const candidates = (doc.previous_scope_series || []).flatMap(series =>
+    (series.frozen_documents || [])
+      .filter(record => record.path === relativePath && record.frozen_on === frozen[1])
+      .map(record => ({ series, record })));
+  if (candidates.length !== 1) return ['配信済み資料に対応する旧スコープの保存記録が一意に存在しない'];
+  const { series, record } = candidates[0];
+  if (createHash('sha256').update(text).digest('hex') !== record.sha256) {
+    return ['配信済み資料が保存時の内容と違う。現在の数値で過去の配信内容を書き換えない'];
+  }
+  if (!Number.isInteger(series.denominator_tasks) || series.denominator_tasks <= 0
+      || !Array.isArray(series.points) || series.points.length < 2
+      || !series.points.some(p => p.month === series.launch_month)) {
+    return ['旧スコープの分母・点列・起点が不正'];
+  }
+  let cumulative = 0;
+  for (const p of series.points) {
+    if (!Number.isInteger(p.cumulative) || p.cumulative < cumulative
+        || p.cumulative > series.denominator_tasks
+        || !Number.isFinite(p.overall_automation_rate)
+        || Math.abs(p.overall_automation_rate - p.cumulative / series.denominator_tasks) > 1e-10) {
+      return ['旧スコープの実行件数と比率が不整合'];
+    }
+    cumulative = p.cumulative;
+  }
+  return timelineClaims(text, series);
 }
 
 /**
@@ -502,7 +538,7 @@ if (isMain) {
       problems.push(`${rel} が無い — **系列から引いた数字を突き合わせる相手が消える**`);
       continue;
     }
-    for (const c of timelineClaims(fs.readFileSync(abs, 'utf8'), doc)) problems.push(`${rel}: ${c}`);
+    for (const c of surfaceTimelineClaims(fs.readFileSync(abs, 'utf8'), doc, rel)) problems.push(`${rel}: ${c}`);
   }
 
   // [2026-08-26] **生成物が台帳から遅れているのを、誰も見ていなかった。**

@@ -200,6 +200,9 @@ function selftest() {
     }],
     ['ラチェットが増加を止める', (d) => {
       d.coverage.authority_absent_budget = 0;
+      // 現行台帳が0件でも、1件の追加を止めることを確かめる。
+      d.coverage.tasks.push({ area: '検体', task: '未定義の権限境界', executor: 'nobody',
+        blocker: 'policy_boundary', $authority_absent: '権限表に対応領域がない検体' });
     }],
     ['上限が数でなければ落ちる', (d) => { delete d.coverage.authority_absent_budget; }],
     ['human_only と ai_may を両方書いたら落ちる', (d) => {

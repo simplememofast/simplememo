@@ -797,7 +797,9 @@ jobs:
       # ずれた瞬間にグラフ全体が嘘になる。**そこだけは機械が見る
       # （分母のタスク数と、累計が減っていないことも同時に見る）。
       - name: Autonomy timeline
-        run: node scripts/autonomy-timeline.mjs --check
+        run: |
+          node scripts/autonomy-timeline.mjs --check
+          node --test scripts/autonomy-timeline.test.mjs
 
       # 【モデルの振り分け】タスク種別 → モデル。**引かれない表は装飾**なので、
       # obsidian-autopilot.yml が実際に --resolve を呼んでいることまで見る。
