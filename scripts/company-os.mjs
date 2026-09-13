@@ -8,12 +8,16 @@ import { compactGrowth, saveReview } from '../growth/lib/company-review.mjs';
 import { finishIntegration, finishExistingRun, bindExistingRun } from '../growth/lib/company-proof.mjs';
 import { followUp } from '../growth/lib/company-followup.mjs';
 import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from '../growth/lib/company-growth-followup.mjs';
+import { recordCommand, recordHumanTouch, observabilityStatus } from '../growth/lib/company-observability.mjs';
 
 const args = process.argv.slice(2);
 const command = args[0] ?? 'autonomy-status';
 const option = (name, fallback) => { const i = args.indexOf('--' + name); return i < 0 ? fallback : args[i + 1]; };
 const stateRoot = option('state-root', DEFAULT_STATE);
+const startedAt=new Date().toISOString(), started=performance.now();
 let result;
+let failed=false;
+try {
 if (command === 'follow-up') {
   result={failures:[]};
   try { Object.assign(result, followUp({stateRoot})); }
@@ -26,6 +30,10 @@ if (command === 'follow-up') {
 } else if (command === 'evaluate-growth-followup') {
   result=evaluateGrowthFollowup({stateRoot, id:option('id'), snapshotDirectory:option('snapshot-directory'),
     decision:option('decision'), rationale:option('rationale')});
+} else if (command === 'observability-status') {
+  result=observabilityStatus({stateRoot});
+} else if (command === 'record-human-touch') {
+  result=recordHumanTouch({stateRoot,eventId:option('event'),runId:option('run'),stage:option('stage'),kind:option('kind'),evidenceFile:option('evidence'),occurredAt:option('occurred-at')});
 } else if (command === 'bind') {
   result = bindExistingRun({stateRoot,id:option('run'),autopilotRunId:option('autopilot-run')});
 } else if (command === 'finish') {
@@ -44,12 +52,17 @@ if (command === 'follow-up') {
     result = { metrics: o.formal_metrics?.metrics,
       comparison: fs.existsSync(baseline) && o.formal_metrics ? compareMetrics(JSON.parse(fs.readFileSync(baseline)), o.formal_metrics) : null,
       human_touches: o.human_touches, active_failures: o.automation.failures.map(x => ({ id: x.id, health: x.health })),
-      source_failures: o.failures };
+      stage_observability:observabilityStatus({stateRoot}), source_failures: o.failures };
   } else if (['autonomy-audit', 'growth-audit'].includes(command)) result = auditObservation(o);
   else if (command === 'review') result = saveReview(o, { stateRoot, cadence: option('cadence', 'daily') });
   else if (command === 'growth-status') result = args.includes('--full') ? { ...o.growth, pipeline_health: o.automation, source_failures: o.failures } : compactGrowth(o);
   else if (command === 'content-gap') result = o.growth.content_gaps;
   else if (command === 'aio-audit') result = o.growth.aio;
   else throw new Error('Unknown company command');
+}
+} catch(error) { failed=true;throw error; }
+finally {
+  try { recordCommand({stateRoot,command,startedAt,durationMs:performance.now()-started,result,failed}); }
+  catch { console.error('Company command observation could not be saved; command result is retained.'); }
 }
 console.log(JSON.stringify(result, null, 2));

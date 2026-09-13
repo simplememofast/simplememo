@@ -12,6 +12,7 @@ import { nativeOrigin } from './company-origin.mjs';
 import { evaluateOperationalFollowup } from './company-followup.mjs';
 import { growthFollowups, registerGrowthFollowup, evaluateGrowthFollowup } from './company-growth-followup.mjs';
 import { gscBaseline, gscScope } from './experiment-evidence.mjs';
+import { recordCommand, recordHumanTouch, observabilityStatus } from './company-observability.mjs';
 import { summarizeGa4 } from './company-review.mjs';
 import { verifyMergedChange, verifyNativeIntegration,verifyPublishedArtifact,verifyOperationalDelivery,verifyIntegrationLedger,verifyActionDelivery } from './company-proof.mjs';
 
@@ -86,6 +87,33 @@ test('one corrupt follow-up store does not hide the other source result',t=>{
   fs.writeFileSync(path.join(root,'growth-followups.json'),'{broken');
   result=run();assert.equal(result.status,'no_operational_followup_registered');assert.equal(result.growth,null);
   assert.deepEqual(result.failures.map(f=>f.source),['growth_followup']);
+});
+
+test('command telemetry retains partial states and unknown parent touches/cost without promoting a command to H0',t=>{
+  const root=directory(t),now=new Date('2026-09-13T12:00:00Z');
+  const base={stateRoot:root,command:'collect',startedAt:'2026-09-13T11:59:58Z',durationMs:2000,origin:{state:'not_a_recorded_automation_run'},now};
+  const r=recordCommand({...base,result:{status:'partial',failures:[{source:'gsc'}]}});
+  assert.equal(r.execution_state,'returned');assert.equal(r.result_status,'partial');assert.equal(r.source_failures,1);
+  assert.equal(r.parent_human_touches,null);assert.equal(r.cost.parent_model_usd,null);
+  recordCommand({...base,failed:true});
+  let status=observabilityStatus({stateRoot:root});assert.equal(status.command_invocations,2);assert.equal(status.failed_commands,1);
+  assert.equal(status.native_component_invocations,0);assert.equal(status.zero_touch_completion_rate,null);
+  assert.equal(status.cost_per_shipped_improvement_usd,null);assert.equal(status.elapsed_ms,4000);
+  assert.throws(()=>recordCommand({...base,durationMs:-1}),/measurement/);
+  fs.writeFileSync(path.join(root,'command-events','broken.json'),'{bad');
+  status=observabilityStatus({stateRoot:root});assert.equal(status.command_invocations,2);assert.equal(status.failures.length,1);
+});
+
+test('reported human events are positive-only, immutable, evidenced and deduplicated',t=>{
+  const root=directory(t),file=path.join(root,'source.txt');fs.writeFileSync(file,'synthetic test approval, not a production event');
+  const args={stateRoot:root,eventId:'message-1',runId:'run-1',stage:'execute',kind:'approval',evidenceFile:file,occurredAt:'2026-09-13T11:00:00Z',now:new Date('2026-09-13T12:00:00Z')};
+  recordHumanTouch(args);recordHumanTouch(args);
+  let status=observabilityStatus({stateRoot:root});assert.equal(status.reported_human_touches.approval,1);
+  assert.equal(status.stage_observations.execute.reported_human_touches,1);assert.equal(status.human_touches_per_successful_output,null);
+  assert.throws(()=>recordHumanTouch({...args,kind:'manual_start'}),/different evidence/);
+  assert.throws(()=>recordHumanTouch({...args,occurredAt:'2026-09-14T00:00:00Z'}),/nonfuture/);
+  fs.writeFileSync(file,'different evidence');assert.throws(()=>recordHumanTouch(args),/different evidence/);
+  assert.equal(fs.statSync(path.join(root,'human-touch-events','message-1.json')).mode&0o077,0);
 });
 
 test('browser inventory is scoped and expires; reused native IDs cannot hide missing owners', () => {
