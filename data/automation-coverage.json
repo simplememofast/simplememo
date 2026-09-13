@@ -47,7 +47,7 @@
     "unlock は解除条件のまとまり。**1タスク＝1作業ではない** —— ASCのレポートが降りれば",
     "複数件が同時に動く。個別に積むと順番を間違えるので、解除する行為のほうを単位にする。"
   ],
-  "measured_at": "2026-09-12",
+  "measured_at": "2026-09-13",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -1925,12 +1925,21 @@
     {
       "area": "⑨ マネタイズ",
       "task": "返金の可否についてAppleに意見を出す（refundPreference）",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**ここが本当の境界。**ConsumptionRequest の必須欄は customerConsented / deliveryStatus / sampleContentProvided の3つで、**どれも事実**（同意の有無・配信できたか・購入前に無料で試せたか）。SimpleMemo は無料枠があるので sampleContentProvided は定数に近い。**事実だけで有効な応答が作れる。** 判断が入るのは `refundPreference` **1欄だけ**で、しかも**必須ではない。**値は DECLINE / GRANT_FULL / GRANT_PRORATED の3つ。Apple は「your refund preference is one of a variety of factors that the App Store uses to inform its refund decisions」と書いている。 つまり DECLINE を出すことは、**機械が「この客に返金しないでほしい」とAppleに言う**ということ。定型文でレビューに返すのとは性質が違う —— 相手は返金を求めている個人で、こちらの一言が不利に働きうる。 **設計としては、この欄を省いて応答できる。**期限内に事実を出す（＝窓を落とさない）ことと、可否に意見を言うことは分けられる。**分けられるものを一緒に自動化しない。** 自動化するなら Level を明示すること（返信のゲートと同じ）。既定は「refundPreference を送らない」",
-      "blocker": "policy_boundary",
-      "unblocked_by": "**機械が「返金しないでほしい」と言ってよいか。**事実だけの応答（refundPreference 無し）はこの行の外で、そちらは境界ではなく実装",
-      "$authority_absent": "表に領域が無い。**機械が「返金しないでほしい」と言ってよいか**という問いで、事実だけの応答（refundPreference 無し）はこの行の外"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "**ここが本当の境界。**ConsumptionRequest の必須欄は customerConsented / deliveryStatus / sampleContentProvided の3つで、**どれも事実**（同意の有無・配信できたか・購入前に無料で試せたか）。SimpleMemo は無料枠があるので sampleContentProvided は定数に近い。**事実だけで有効な応答が作れる。** 判断が入るのは `refundPreference` **1欄だけ**で、しかも**必須ではない。**値は DECLINE / GRANT_FULL / GRANT_PRORATED の3つ。Apple は「your refund preference is one of a variety of factors that the App Store uses to inform its refund decisions」と書いている。 つまり DECLINE を出すことは、**機械が「この客に返金しないでほしい」とAppleに言う**ということ。定型文でレビューに返すのとは性質が違う —— 相手は返金を求めている個人で、こちらの一言が不利に働きうる。 **設計としては、この欄を省いて応答できる。**期限内に事実を出す（＝窓を落とさない）ことと、可否に意見を言うことは分けられる。**分けられるものを一緒に自動化しない。** 自動化するなら Level を明示すること（返信のゲートと同じ）。既定は「refundPreference を送らない」\n\n[2026-09-13 事業スコープ決定] 既存業務147で消費情報応答と同意フローを作らないと決定済み。任意の返金意見送信も現在の製品方針に採用しない。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "既存業務147で消費情報応答と同意フローを作らないと決定済み。任意の返金意見送信も現在の製品方針に採用しない。",
+        "reactivate_when": "消費情報応答を行う製品方針に変更した時点で、147との関係を含め必要性を再評価する。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "policy_boundary",
+        "previous_unblocked_by": "**機械が「返金しないでほしい」と言ってよいか。**事実だけの応答（refundPreference 無し）はこの行の外で、そちらは境界ではなく実装",
+        "previous_authority_absent": "表に領域が無い。**機械が「返金しないでほしい」と言ってよいか**という問いで、事実だけの応答（refundPreference 無し）はこの行の外"
+      }
     },
     {
       "area": "⑨ マネタイズ",
@@ -2356,44 +2365,78 @@
     {
       "area": "⑬ アナログ領域",
       "task": "イベント: 候補選定・見積比較・発注・リード集計",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "AIが担える設計だが未着手",
-      "blocker": "not_started",
-      "unblocked_by": "AIが担える設計。着手していないだけ",
-      "unlock": "impl_analog"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "AIが担える設計だが未着手\n\n[2026-09-13 事業スコープ決定] 現行事業にイベント出展・開催活動を採用しない。AI側と人間側を対で対象外にする。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "現行事業にイベント出展・開催活動を採用しない。AI側と人間側を対で対象外にする。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "not_started",
+        "previous_unblocked_by": "AIが担える設計。着手していないだけ",
+        "previous_unlock": "impl_analog"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "イベント: 現地設営・接客・実施",
-      "executor": "human_only",
+      "executor": "intentional_no",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/authority-matrix.json",
+        "docs/automation-scope-review-20260913.md"
       ],
-      "note": "物理領域。人間が担う",
-      "blocker": "physical_human",
-      "unblocked_by": "現地作業"
+      "note": "物理領域。人間が担う\n\n[2026-09-13 事業スコープ決定] イベント出展・開催を採用しない決定に合わせ、184と対で対象外。責任分担の例を実施中業務としない。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "human_only",
+        "reason": "イベント出展・開催を採用しない決定に合わせ、184と対で対象外。責任分担の例を実施中業務としない。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "physical_human",
+        "previous_unblocked_by": "現地作業"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "人事: 募集・候補抽出・日程調整・書類作成",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "未着手",
-      "blocker": "not_started",
-      "unblocked_by": "同上。ただし現在は従業員がいない",
-      "unlock": "impl_analog"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "未着手\n\n[2026-09-13 事業スコープ決定] 現行事業に採用パイプラインを新設しない。AI側と人間側を対で対象外にする。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "現行事業に採用パイプラインを新設しない。AI側と人間側を対で対象外にする。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "not_started",
+        "previous_unblocked_by": "同上。ただし現在は従業員がいない",
+        "previous_unlock": "impl_analog"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "人事: 採用・解雇・評価・健康情報の判断",
-      "executor": "human_only",
+      "executor": "intentional_no",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/authority-matrix.json",
+        "docs/automation-scope-review-20260913.md"
       ],
-      "note": "人間が担う",
-      "blocker": "physical_human",
-      "unblocked_by": "対人・法的責任"
+      "note": "人間が担う\n\n[2026-09-13 事業スコープ決定] 採用活動を新設しない決定に合わせ、186と対で対象外。汎用的な雇用判断を現行運営の実施中業務としない。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "human_only",
+        "reason": "採用活動を新設しない決定に合わせ、186と対で対象外。汎用的な雇用判断を現行運営の実施中業務としない。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "physical_human",
+        "previous_unblocked_by": "対人・法的責任"
+      }
     },
     {
       "area": "⑬ アナログ領域",
@@ -2488,23 +2531,40 @@
     {
       "area": "⑬ アナログ領域",
       "task": "営業: リード選定・メール・提案書",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "未着手",
-      "blocker": "not_started",
-      "unblocked_by": "同上",
-      "unlock": "impl_analog"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "未着手\n\n[2026-09-13 事業スコープ決定] 個別商談型の営業を現行事業に採用しない。App Store販売・既存マーケティング・サポートは継続。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "個別商談型の営業を現行事業に採用しない。App Store販売・既存マーケティング・サポートは継続。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "not_started",
+        "previous_unblocked_by": "同上",
+        "previous_unlock": "impl_analog"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "営業: 交渉・信頼形成・重要契約",
-      "executor": "human_only",
+      "executor": "intentional_no",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/authority-matrix.json",
+        "docs/automation-scope-review-20260913.md"
       ],
-      "note": "人間が担う",
-      "blocker": "physical_human",
-      "unblocked_by": "対人交渉"
+      "note": "人間が担う\n\n[2026-09-13 事業スコープ決定] 個別商談型営業を採用しない決定に合わせ、194と対で対象外。通常のサポートとベンダー契約は別業務で継続。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "human_only",
+        "reason": "個別商談型営業を採用しない決定に合わせ、194と対で対象外。通常のサポートとベンダー契約は別業務で継続。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "physical_human",
+        "previous_unblocked_by": "対人交渉"
+      }
     },
     {
       "area": "⑬ アナログ領域",
@@ -2606,7 +2666,73 @@
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
   ],
   "blocked_on_missing_budget": 13,
-  "authority_absent_budget": 2,
-  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。",
-  "$blocked_on_missing_budget": "**[2026-08-31] 11 → 14 へ戻した。**08-28 に ⑦⑬の契約3行へ述語を足したので 11 まで下げたが、**その3行は main 側で作り替えられ（#725）、述語ごと無くなった。**待っていた相手が違っていた、というのが向こうの結論で、そちらが正しい。**これは上限を上げたのではなく、下げた根拠が消えたので戻したもの。**述語を足したぶんだけ下げる、という規則自体は動かしていない。\n\n**[2026-08-31] 14 → 13。**⑦「定型／非定型契約の分類」を待ち種別から外したぶん（対象が揃っていたので `not_started` へ）。**減ったら下げる。**"
+  "authority_absent_budget": 0,
+  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。\n[2026-09-13] 148の対象外化で該当する現行行が0件になったため、上限を2から0へ下げた。旧理由は148のscope_exclusion.previous_authority_absentに保持。",
+  "$blocked_on_missing_budget": "**[2026-08-31] 11 → 14 へ戻した。**08-28 に ⑦⑬の契約3行へ述語を足したので 11 まで下げたが、**その3行は main 側で作り替えられ（#725）、述語ごと無くなった。**待っていた相手が違っていた、というのが向こうの結論で、そちらが正しい。**これは上限を上げたのではなく、下げた根拠が消えたので戻したもの。**述語を足したぶんだけ下げる、という規則自体は動かしていない。\n\n**[2026-08-31] 14 → 13。**⑦「定型／非定型契約の分類」を待ち種別から外したぶん（対象が揃っていたので `not_started` へ）。**減ったら下げる。**",
+  "scope_revisions": [
+    {
+      "date": "2026-09-13",
+      "basis": "owner_authorized_current_business_scope",
+      "document": "docs/automation-scope-review-20260913.md",
+      "before": {
+        "defined": 199,
+        "doing": 179,
+        "ai_executes": 159,
+        "ai_involved": 166,
+        "intentional_no": 4
+      },
+      "after": {
+        "defined": 192,
+        "doing": 176,
+        "ai_executes": 159,
+        "ai_involved": 166,
+        "intentional_no": 11
+      },
+      "execution_gain": 0,
+      "excluded": [
+        {
+          "task_index": 148,
+          "area": "⑨ マネタイズ",
+          "task": "返金の可否についてAppleに意見を出す（refundPreference）",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 184,
+          "area": "⑬ アナログ領域",
+          "task": "イベント: 候補選定・見積比較・発注・リード集計",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 185,
+          "area": "⑬ アナログ領域",
+          "task": "イベント: 現地設営・接客・実施",
+          "previous_executor": "human_only"
+        },
+        {
+          "task_index": 186,
+          "area": "⑬ アナログ領域",
+          "task": "人事: 募集・候補抽出・日程調整・書類作成",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 187,
+          "area": "⑬ アナログ領域",
+          "task": "人事: 採用・解雇・評価・健康情報の判断",
+          "previous_executor": "human_only"
+        },
+        {
+          "task_index": 194,
+          "area": "⑬ アナログ領域",
+          "task": "営業: リード選定・メール・提案書",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 195,
+          "area": "⑬ アナログ領域",
+          "task": "営業: 交渉・信頼形成・重要契約",
+          "previous_executor": "human_only"
+        }
+      ]
+    }
+  ]
 }
