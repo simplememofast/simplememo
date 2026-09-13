@@ -140,7 +140,14 @@ for (const [name, mutate] of [
   ['already dispatched', f => { f.manifest.receipt = { public_url: 'existing' }; }],
 ]) test(`paid release holds: ${name}`, () => {
   const f = paidFixture(); mutate(f);
-  assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, false);
+  const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
+  assert.equal(result.allowed, false);
+  const expected = name === 'already dispatched' ? /Already scheduled\/published/
+    : ['raised cap', 'second release budget', 'other draft budget', 'missing delegation'].includes(name)
+      ? /Dispatch budget must stay/
+      : /entitlement\/terms or delegated charge unverified/;
+  // The zero-budget hold must not mask regressions in the older release gates.
+  assert.match(result.reasons.join('\n'), expected);
 });
 for (const [name, mutate, expected] of [
   ['real unfinished task', f => {
