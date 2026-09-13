@@ -80,11 +80,30 @@ gateの旧引継ぎメッセージにある`GITHUB_RUN_ID`は、この実タス�
    別の実行中/queuedの旧Actions runとCodexタスクも確認する。
    Codexはautomation_runs等のローカル予約記録から対象タスクIDを取得し、
    `wait_threads`/`read_thread`の実状態を確認する。現在の自タスクは除く。
-   経過90分だけで他のCodex実行を死亡扱いしない。読めなければ未確認として止まる。
+   確認対象は予約一覧の未終了実行と、当日claim/未解決PRの所有タスク。
+   過去の出荷台帳に残るIDだけを、新しい日の排他所有者として持ち越さない。
+   そのIDが当日claim等に結び付く場合は終了証跡が必要で、読めなければ止まる。
+   未解決PR・当日claimがないこと、予約実行一覧を完全に取得できたことも根拠に残す。
+   APIでタスクが見つからない場合は、最新mainの
+   `python3 scripts/codex-routine-observer.py --thread-state <実タスクUUID>`で
+   指定IDのローカルSQLiteとsession/archived sessionの終了証跡を読む。
+   `state:completed`は直近ターンの終了だけを示し、業務成功・出荷を意味しない。
+   `in_progress`は稼働中、`unknown`・読取エラーは未確認として止まる。
+   経過90分や予約一覧のARCHIVED表示だけで終了扱いしない。claim直前にも再確認する。
 5. 5分以内の根拠をローカルのsnapshotへ保存し、
-   `node scripts/codex-autopilot-preflight.mjs --input <snapshot.json>`を実行する。
+   `python3 scripts/codex-routine-observer.py --preflight <snapshot.json>`を実行する。
+   このラッパーは既存のNodeゲートを呼び、実行中の`CODEX_THREAD_ID`・初回ターン・
+   routeに結び付けた判定を非公開の`~/.codex/simplememo-autopilot-receipts/`へ保存する。
+   出力の`decision.run`を確認する。後日の手動フォローアップは初回判定を上書きできない。
+   一度許可された初回ターンを、後続の拒否判定で未着手スキップに変えない。
    下記の各値には取得元・取得時刻を別のローカル証跡として添える。
-   `run:false`または検査例外なら実装・claim・投稿へ進まない。forceは使わない。
+   `decision.run:false`または検査例外なら実装・claim・投稿へ進まない。forceは使わない。
+   Routine Observerが判定ハッシュと初回終了状態を公開台帳へ収集し、Actが未記帳の
+   失敗・中断・証拠のあるスキップだけを取り込む。正常終了だけで出荷・修復済みとしない。
+   自動検知の帰属には、初めて終了を観測した回のlaunchd親PID・interval起動・
+   インストール済み監視スクリプトの一致を検証した証跡を使う。
+   既に観測済みの過去行を、後日の定期監視で自動検知へ付け替えない。
+   `preflight_error`は既存レーンFへ送る。予算・停止による拒否は修理による解除対象にしない。
 
 snapshotは`schema_version:1`、`task_id`、ISO8601 `observed_at`、`state`を持つ。
 stateの必須値は`route`、当日JSTの`todayJst`、booleanの`credentialsAvailable`、

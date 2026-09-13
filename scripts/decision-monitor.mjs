@@ -24,23 +24,36 @@ const api = route => gh('api', `repos/${REPO}/${route}`);
 const shaOK = s => /^[a-f0-9]{40}$/.test(s ?? '');
 const stop = () => { const s = read('data/emergency-stop.json'); return s.stopped || s.agents?.act?.stopped; };
 const ledgerFiles = ['data/value-contracts.json', 'data/decision-recovery.json', 'data/decision-review.json', 'autopilot/index.html'];
-const reportSitemaps = { 'sitemap-ja.xml': 'https://simplememofast.com/autopilot/',
-  'sitemap.xml': 'https://simplememofast.com/sitemap-ja.xml' };
+const reportSitemaps = {
+  // Both pages derive their publication date from the same operational ledgers.
+  'sitemap-ja.xml': ['https://simplememofast.com/', 'https://simplememofast.com/autopilot/'],
+  'sitemap.xml': ['https://simplememofast.com/sitemap-ja.xml'],
+};
 
-// The report's content date can cross midnight. Accept only its generated
-// lastmod companion lines, never arbitrary sitemap edits or omitted patches.
+// Accept only generated lastmod replacements for these exact URLs. A generator
+// can change both entries at midnight; all other sitemap edits remain rejected.
 export function reportSitemapChange(file) {
-  const url = Object.hasOwn(reportSitemaps, file.filename) ? reportSitemaps[file.filename] : null;
-  if (!url || file.status !== 'modified' || file.additions !== 1 || file.deletions !== 1
-    || file.changes !== 2 || typeof file.patch !== 'string') return false;
+  const urls = reportSitemaps[file.filename];
+  if (!Object.hasOwn(reportSitemaps, file.filename) || file.status !== 'modified'
+    || !Number.isInteger(file.additions) || file.additions < 1 || file.additions > urls.length
+    || file.deletions !== file.additions || file.changes !== 2 * file.additions
+    || typeof file.patch !== 'string') return false;
   const lines = file.patch.split('\n');
   const changed = lines.filter(line => /^[+-]/.test(line));
-  if (changed.length !== 2 || lines.filter(line => line.startsWith('@@ ')).length !== 1) return false;
-  const dates = changed.map(line => line.match(/^[+-]\s*<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>$/)?.[1]);
-  if (dates.some(d => !d || !Number.isFinite(Date.parse(d)) || new Date(d).toISOString().slice(0, 10) !== d)) return false;
-  const at = lines.indexOf(changed[0]);
-  return changed[0].startsWith('-') && changed[1].startsWith('+')
-    && lines[at + 1] === changed[1] && lines[at - 1]?.trim() === `<loc>${url}</loc>`;
+  if (changed.length !== file.changes) return false;
+  const seen = new Set();
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^[+-]/.test(lines[i])) continue;
+    const before = lines[i].match(/^-\s*<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>$/);
+    const after = lines[i + 1]?.match(/^\+\s*<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>$/);
+    const url = lines[i - 1]?.match(/^ \s*<loc>([^<]+)<\/loc>$/)?.[1];
+    if (!before || !after || !urls.includes(url) || seen.has(url)) return false;
+    for (const date of [before[1], after[1]]) {
+      if (!Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date) return false;
+    }
+    seen.add(url); i++;
+  }
+  return seen.size === file.additions;
 }
 
 export function synchronizeReportSitemaps(cwd = ROOT) {
@@ -430,6 +443,14 @@ function selftest() {
   const generatedFiles = [{ filename: 'autopilot/index.html' }, sitemapChange, indexChange];
   assert.deepEqual(pendingPublication(publicationApi({ detail: { ...publication, changed_files: 3 }, files: generatedFiles })),
     [{ pr: 321, head: publication.head.sha, draft: false }]);
+  const twoDates = { ...sitemapChange, additions: 2, deletions: 2, changes: 4,
+    patch: sitemapChange.patch.replace('/autopilot/', '/') + '\n' + sitemapChange.patch };
+  assert.equal(reportSitemapChange(twoDates), true, 'midnight root and report dates must both be accepted');
+  for (const patch of [twoDates.patch.replace('/autopilot/', '/other/'),
+    sitemapChange.patch + '\n' + sitemapChange.patch,
+    twoDates.patch.replace('+    <lastmod>2026-09-07</lastmod>', '+    <lastmod>2026-09-07</lastmod>changed')]) {
+    assert.equal(reportSitemapChange({ ...twoDates, patch }), false, 'unrelated or duplicate replacements must fail');
+  }
   for (const bad of [{ ...sitemapChange, patch: undefined }, { ...sitemapChange, status: 'added' },
     { ...sitemapChange, filename: 'sitemap-en.xml' }, { ...sitemapChange, changes: 4 },
     { ...sitemapChange, patch: sitemapChange.patch.replace('/autopilot/', '/other/') },
