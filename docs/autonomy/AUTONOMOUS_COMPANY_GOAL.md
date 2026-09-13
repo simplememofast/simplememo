@@ -8,9 +8,9 @@ SimpleMemoの既存自動運営資産をすべて発見・統合し、定期レ�
 
 ## Context and canonical state
 
-- Native Codex Goal: thread `01a09937-5f64-7032-9084-650e5bdd6c28`, active since 2026-09-13. Native `create_goal` succeeded; no emulation or restart is needed.
-- Resume from `GOAL_STATE.json` in this directory. Runtime inventory and private observations are under `~/.config/simplememo/company-os/`; never commit credentials, private analytics, customer data, email bodies or imported conversation transcripts.
-- Implementation worktree: `~/.codex/worktrees/autonomous-company-os-20260913/simplememo`, branch `Codex/autonomous-company-os-20260913`, starting main `e5cd8db1`.
+- Native `create_goal` succeeded for the original installation on 2026-09-13. The current owning thread is recorded in private runtime state; verify actual active/blocked/complete status with the native Goal feature. A historical thread ID is not the current owner or a reason to create a duplicate Goal.
+- `GOAL_STATE.json` in this directory is a stable resume locator with a preserved historical checkpoint. The authoritative current state is `~/.config/simplememo/company-os/GOAL_STATE.json`. Read its current worktree, owner mapping, pending work and evidence before resuming. Never commit credentials, private analytics, customer data, email bodies or imported conversation transcripts.
+- The installation began at main `e5cd8db1`. Use the current worktree and branch from private state, then verify reviewed Git and actual run state. Old installation paths and pending actions in the historical checkpoint are not current instructions.
 - Original checkout has unrelated uncommitted work; preserve it. Other active tasks and registered schedulers retain ownership until parity and rollback are verified.
 
 ## Baseline and metric integrity
