@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { summarize, validate as validateCoverage } from './automation-rate.mjs';
 import { score } from '../growth/scripts/d-score.mjs';
+import { readCompanyBudget, evaluateCompanySpending } from './lib/company-monthly-budget.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST = 'data/press-release-next.json';
@@ -141,6 +142,23 @@ export function validate(manifest, draft) {
 // A local/CI pass never claims the external publication was performed.
 export function evaluateDispatch(manifest, coverage, draft, ui, now = new Date().toISOString()) {
   const reasons = validate(manifest, draft);
+  // Assess this real pending commitment even when publication has other holds.
+  // The requested ceiling is not a fresh vendor quote or an actual payment.
+  let companyBudget;
+  try {
+    const { policy, sha256 } = readCompanyBudget();
+    companyBudget = { policy_sha256: sha256, request_id: manifest.id,
+      amount_basis: manifest.dispatch_budget ? 'existing_campaign_requested_ceiling_excluding_tax' : 'preview_incremental_charge',
+      ...evaluateCompanySpending(policy, {
+        id: manifest.id, kind: 'new_discretionary', currency: 'JPY',
+        requested_commitment_jpy: manifest.dispatch_budget
+          ? manifest.dispatch_budget.max_basic_charge_excl_tax_jpy + manifest.dispatch_budget.max_optional_charge_excl_tax_jpy
+          : ui?.incremental_charge_jpy,
+      }, now) };
+  } catch {
+    companyBudget = { allowed_by_budget: false, disposition: 'hold', reasons: ['Company monthly budget unavailable'] };
+  }
+  if (!companyBudget.allowed_by_budget) reasons.push(...companyBudget.reasons);
   const t = Date.parse(now);
   const s = manifest.snapshot;
   const fresh = (at, age) => Number.isFinite(Date.parse(at)) && Date.parse(at) <= t && t - Date.parse(at) <= age;
@@ -183,7 +201,7 @@ export function evaluateDispatch(manifest, coverage, draft, ui, now = new Date()
     const result = score(quality.record ?? {});
     if (quality.draft_sha256 !== manifest.draft.sha256 || !quality.evidence?.length || result.problems.length || !result.verdict.startsWith('GO')) reasons.push('Editorial review does not clear the unchanged quality gates for this draft');
   }
-  return { allowed: reasons.length === 0, reasons, metrics: live };
+  return { allowed: reasons.length === 0, reasons, metrics: live, company_budget: companyBudget };
 }
 
 const main = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

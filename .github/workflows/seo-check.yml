@@ -1232,6 +1232,8 @@ jobs:
 
       - name: Next press release evidence and dispatch rules
         run: |
+          node --test scripts/company-monthly-budget.test.mjs
+          node scripts/company-monthly-budget.mjs --check
           node --test scripts/press-release-next.test.mjs
           node scripts/press-release-next.mjs --check
 

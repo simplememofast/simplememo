@@ -109,9 +109,13 @@ function paidFixture() {
     optional_charge_excl_tax_jpy: 0 });
   return f;
 }
-test('delegated single release accepts a fresh basic-price quote within its fixed cap', () => {
+test('a valid delegated quote still respects the later company monthly budget decision', () => {
   const f = paidFixture();
-  assert.equal(evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now).allowed, true);
+  const result = evaluateDispatch(f.manifest, f.coverage, f.draft, f.ui, now);
+  assert.equal(result.allowed, false);
+  assert.deepEqual(result.reasons, ['Company monthly budget: additional discretionary commitment exceeds 0 JPY']);
+  assert.equal(result.company_budget.decision_id, 'company-monthly-budget-20260913');
+  assert.match(result.company_budget.policy_sha256, /^[a-f0-9]{64}$/);
 });
 for (const [name, mutate] of [
   ['higher price', f => { f.ui.basic_charge_excl_tax_jpy = 30001; }],
