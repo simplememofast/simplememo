@@ -47,7 +47,7 @@
     "unlock は解除条件のまとまり。**1タスク＝1作業ではない** —— ASCのレポートが降りれば",
     "複数件が同時に動く。個別に積むと順番を間違えるので、解除する行為のほうを単位にする。"
   ],
-  "measured_at": "2026-09-12",
+  "measured_at": "2026-09-13",
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
@@ -1002,12 +1002,13 @@
         "../simplememo-ios/fastlane/Fastfile",
         "docs/delegated-review-gate-20260911.md",
         "data/delegated-review-acceptance-20260912.json",
-        "docs/quota-physical-publication-20260912.md"
+        "docs/quota-physical-publication-20260912.md",
+        "docs/gated-publication-execution-20260913.md"
       ],
-      "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] この欄の先頭「automatic_release がハードコードで false」は失効した。**同日 #313 で true になり、prepare_app_store_version.rb は releaseType を AFTER_APPROVAL に強制する。**承認された瞬間に出る。**\n\n**executor は動かさない**（AI が実行しているのではなく、Apple が出している）。むしろこの行で起きたのは、**渡した権限に付けた条件が効かなくなったこと**のほう —— release-gate.json の require_phased_release は「一度に全員へ出さないための最後の砦」と書いてあるが、門は enabled: false・材料は隣のリポジトリ・release.yml から一度も呼ばれない。実測でも段階リリースは付いていなかった（review.phased_release: false・2026-09-02 取得）。\n\n**同日、門の外側で塞いだ** —— simplememo-ios の scripts/lib/phased_release.rb が提出前に段階リリースを作り、作れなければ提出を止める。あわせて evaluateSubmission 側にも段階リリースの条件を置いた（**evaluateRelease は AFTER_APPROVAL では構造的に到達しない**ため、あちらに置いたままでは効かない）。",
+      "note": "automatic_release がハードコードで false。**[2026-08-27] 「恒久的に手動」はオーナー判断で撤回された。**ハードコードを外すには machine_gate が要る\n\n**[2026-08-28] 2つの台帳が食い違っていたので更新した（訂正ではない）。**この行の unblocked_by は境界がまだ在る前提で書かれていたが、**同じ日にオーナーが名指しで渡し、権限表は既に `requires_approval: false` ＋ machine_gate。**門は #708 で実装済み（`scripts/check-release-gate.mjs`）。\n\n**executor は動かさない。**`policy.enabled` は false で、**実行側（ASCへの提出・公開の呼び出し）がまだ無い。**「門を作った」を「動いた」と数えないための据え置きで、レビュー返信の行が実際に投稿するまで動かなかったのと同じ基準。\n\n**[2026-09-03 訂正] この欄の先頭「automatic_release がハードコードで false」は失効した。**同日 #313 で true になり、prepare_app_store_version.rb は releaseType を AFTER_APPROVAL に強制する。**承認された瞬間に出る。**\n\n**executor は動かさない**（AI が実行しているのではなく、Apple が出している）。むしろこの行で起きたのは、**渡した権限に付けた条件が効かなくなったこと**のほう —— release-gate.json の require_phased_release は「一度に全員へ出さないための最後の砦」と書いてあるが、門は enabled: false・材料は隣のリポジトリ・release.yml から一度も呼ばれない。実測でも段階リリースは付いていなかった（review.phased_release: false・2026-09-02 取得）。\n\n**同日、門の外側で塞いだ** —— simplememo-ios の scripts/lib/phased_release.rb が提出前に段階リリースを作り、作れなければ提出を止める。あわせて evaluateSubmission 側にも段階リリースの条件を置いた（**evaluateRelease は AFTER_APPROVAL では構造的に到達しない**ため、あちらに置いたままでは効かない）。\n\n[2026-09-13 公開経路の実装・反映] iOS PR500の最終CI成功後にmainへマージし、委任公開を有効化。API PR314で公開直前の停止証拠を読めるようにした。5.8.56はASC審査版の不一致で停止。既存5.8.54は対象版観測の非公開保存・読戻しまで成功したが、公開処理は実機記録のASC版ID不足で停止。Appleへの変更要求と公開予約は0件。健康度を含む公開条件の通過と次の実適用は未確認のためexecutorを維持する。",
       "blocker": "verification_pending",
       "unlock": "ship_execute",
-      "unblocked_by": "5.8.54/1342のASC READY_FOR_SALE・段階公開ACTIVEと一般公開ページの現行版を2026-09-12に確認。公開操作業務のクラッシュ率・kill等の独立条件の充足は未確認。公開の事後観測を事前ゲート判定へ読み替えず、human_onlyを維持する。再提出・新しいTestFlightは不要。",
+      "unblocked_by": "5.8.54/1342のASC READY_FOR_SALE・段階公開ACTIVEと一般公開ページの現行版を2026-09-12に確認。公開操作業務のクラッシュ率・kill等の独立条件の充足は未確認。公開の事後観測を事前ゲート判定へ読み替えず、human_onlyを維持する。再提出・新しいTestFlightは不要。 2026-09-13: 委任公開の独立ゲート接続はmain反映済み。次の正当な公開では対象版と一致する実機記録・ASC版/ビルドID、同一確定週の健康度、6時間の承認待機・7日のkill待機等を満たし、要求と公開状態を照合する。過去の自動公開や今回の読取りだけでは加点しない。",
       "authority": {
         "domain": "App Store への公開（審査通過後）",
         "ai_may": "**ゲートを通った公開の実行**（段階リリース限定・1日1回・クラッシュ率とkillの確認つき）"
@@ -1069,9 +1070,10 @@
         "../simplememo-api/data/rollout-bucket-vectors.json",
         "../simplememo-api/test/rollout-vectors.test.ts",
         "../simplememo-ios/scripts/qa/check_rollout_vectors.py",
-        "data/stop-drills.json"
+        "data/stop-drills.json",
+        "docs/gated-publication-execution-20260913.md"
       ],
-      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした\n\n**[2026-08-26 訂正] 「本番で kill を1回も通していない」は事実と違っていた。**/admin/flags の history に残っている: 2026-08-22 14:44:53Z に `tf04_progress` を rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に解除 → 15:01:10Z に rollout 0 へ戻し description を「**kill の実証完了（2026-08-22）**」へ。**この欄を書いた日と同じ日に、実証は済んでいた。**ただし残っているのはサーバ側の状態遷移だけで、**端末で実際にオフになったことの記録は無い**（data/stop-drills.json の flag-kill）\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「段階公開の撤回（カナリアガード）」が human_only に「ガードの判定によらない kill の実行」を置いている。**緊急停止はその定義そのもの**（ガードの判定によらない）なので、人の側に残る。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**",
+      "note": "[2026-08-22訂正] 前回の「iOS側が入るまで実際には止められない」は誤り — v4.7から /v1/config + REMOTE_FLAGS_JSON で全体キルができていた。同日、不足分（段階公開・キャッシュ期限・取得経路のテスト）を実装し、**2026-08-22 に v5.8.1 として本番リリースした**（リリースノートも「問題があれば即座に取り下げられる仕組み」と書いている）。これで台帳上の『両側が揃った』が、実際に利用者の端末に載った状態になった。**human_only なのは kill を叩くのが人間だから** — AIが自動で kill する経路は無い。さらに**本番で kill を1回も通していない**（止まることを確かめていない停止機構は無いのと同じ）。v5.8.1 で経路が本番に載ったので、**次に確かめるべきはこれ**。**バケット割りは iOS ↔ relay の契約として固定した**（同日） — 期待値15本は元々サーバ実装を一度回して Swift にコピーしたもので、**凍っているのは Swift の期待値のほう**（サーバが変わっても Swift のテストは通り続ける）。本番に載った以降ここがずれると『サーバでは配布対象だがアプリでは対象外』になり、**出荷済みのバイナリは直せない**。両側が同じ1ファイルを読む形にした\n\n**[2026-08-26 訂正] 「本番で kill を1回も通していない」は事実と違っていた。**/admin/flags の history に残っている: 2026-08-22 14:44:53Z に `tf04_progress` を rollout 100 で作成（description「TestFlight で kill の実証を行うための一時配布」）→ 14:57:38Z に **killed: true**（actor: human）→ 15:00:12Z に解除 → 15:01:10Z に rollout 0 へ戻し description を「**kill の実証完了（2026-08-22）**」へ。**この欄を書いた日と同じ日に、実証は済んでいた。**ただし残っているのはサーバ側の状態遷移だけで、**端末で実際にオフになったことの記録は無い**（data/stop-drills.json の flag-kill）\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**権限表「段階公開の撤回（カナリアガード）」が human_only に「ガードの判定によらない kill の実行」を置いている。**緊急停止はその定義そのもの**（ガードの判定によらない）なので、人の側に残る。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-13 準備の実機確認] 最新の包括委任に基づく限定停止・復元の計画を作成し独立レビュー済み。iPhone 13の5.8.56/1428で、再取得の試行時刻だけを除いた通常起動が実サーバー設定を取得することを確認し、連携・宛先・下書き設定の不変を照合した。画面の対象行をまだ観測できず、本番の定義・kill・復元は0件。既存tf04_progress停止は維持し、executorと加点は変えない。準備成功を遠隔停止の成功へ読み替えない。",
       "blocker": "policy_boundary",
       "unblocked_by": "緊急停止は人が握る",
       "authority": {
@@ -1831,11 +1833,12 @@
         "docs/execution-priority-review-20260909.md",
         "docs/quota-physical-publication-20260912.md",
         "../simplememo-ios/SimpleMemo/ComposeViewController.swift",
-        "docs/physical-quota-cold-session-20260912.md"
+        "docs/physical-quota-cold-session-20260912.md",
+        "docs/gated-publication-execution-20260913.md"
       ],
-      "note": "データ起点の再設計。実施は人の判断\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**2026-08-27 のオーナー判断は「**お金周りを除いて**渡す」で、課金導線はその除外側。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-09] 最新の包括委任に合わせて古い権限待ちを解消。価格・無料枠・StoreKit権利を変えない課金導線の実装・適用をAIへ委任する。変更の実行証拠はまだ無いためai_proposesを維持し、実行率を加点しない。\n\n[2026-09-09 実装後] iOS PR #454は最終コミットのCI成功後、main 8ac29b4e558b73dc73bd6a0e6105234915632cd8へマージ済み。無料枠の4回目で課金画面を直接表示し、価格・権利は変更していない。Free・期限切れ・Premiumの3経路をSimulatorで確認し、旧導線に戻した変異は対象テストで失敗した。実適用は未確認のためai_proposesを維持。未着手から検証・配信待ちへ訂正し、再実装や小幅加点だけのTestFlightを優先候補にしない。\n\n[2026-09-12 部分実機確認・一般公開] 同じ5.8.54/1342の既存開発者Freeモードで3通送信・4通目の価格画面への直接遷移・閉じた後の下書き保持・カウント3を実機観測。検証モードOFF、Premiumと原下書きを復元済み。ASC段階公開ACTIVEと一般公開ページ5.8.54も照合した。ただし端末の初回レビュー履歴は不明で、変更前コードでも成立する経路の可能性が残る。公開側の既存条件も未証明。独立レビューの指摘に従い、今回の部分実機確認・公開観測ではai_proposesを維持する。追加TestFlightなし。",
+      "note": "データ起点の再設計。実施は人の判断\n\n**[2026-08-28] 到達可能側から外した（分類の訂正）。**2026-08-27 のオーナー判断は「**お金周りを除いて**渡す」で、課金導線はその除外側。\n**害は件数ではなく向きに出る** —— `--plan` が「作れば進む」と言い続け、天井が実際より高く出る。到達可能な件数は減るが、**下がった天井のほうが本物。**\n\n[2026-09-09] 最新の包括委任に合わせて古い権限待ちを解消。価格・無料枠・StoreKit権利を変えない課金導線の実装・適用をAIへ委任する。変更の実行証拠はまだ無いためai_proposesを維持し、実行率を加点しない。\n\n[2026-09-09 実装後] iOS PR #454は最終コミットのCI成功後、main 8ac29b4e558b73dc73bd6a0e6105234915632cd8へマージ済み。無料枠の4回目で課金画面を直接表示し、価格・権利は変更していない。Free・期限切れ・Premiumの3経路をSimulatorで確認し、旧導線に戻した変異は対象テストで失敗した。実適用は未確認のためai_proposesを維持。未着手から検証・配信待ちへ訂正し、再実装や小幅加点だけのTestFlightを優先候補にしない。\n\n[2026-09-12 部分実機確認・一般公開] 同じ5.8.54/1342の既存開発者Freeモードで3通送信・4通目の価格画面への直接遷移・閉じた後の下書き保持・カウント3を実機観測。検証モードOFF、Premiumと原下書きを復元済み。ASC段階公開ACTIVEと一般公開ページ5.8.54も照合した。ただし端末の初回レビュー履歴は不明で、変更前コードでも成立する経路の可能性が残る。公開側の既存条件も未証明。独立レビューの指摘に従い、今回の部分実機確認・公開観測ではai_proposesを維持する。追加TestFlightなし。\n\n[2026-09-13 公開経路の実装・反映] iOS PR500の最終CI成功後にmainへマージし、委任公開を有効化。API PR314で公開直前の停止証拠を読めるようにした。5.8.56はASC審査版の不一致で停止。既存5.8.54は対象版観測の非公開保存・読戻しまで成功したが、公開処理は実機記録のASC版ID不足で停止。Appleへの変更要求と公開予約は0件。健康度を含む公開条件の通過と次の実適用は未確認のためexecutorを維持する。",
       "blocker": "verification_pending",
-      "unblocked_by": "5.8.54/1342の追加実機確認で、アプリ終了・新プロセス・24時間より前の保存日時の不変と出荷ソースを照合し、旧レビュー分岐に該当する条件で4通目が直接価格画面へ進む証拠を回収した。初回分岐の実機確認は再実行しない。残るのは公開側のクラッシュ率・kill等の独立条件と適用の証拠。公開の事後観測を事前ゲート通過へ読み替えず、ai_proposesを維持する。新しい小幅TestFlightや再提出は不要。",
+      "unblocked_by": "5.8.54/1342の追加実機確認で、アプリ終了・新プロセス・24時間より前の保存日時の不変と出荷ソースを照合し、旧レビュー分岐に該当する条件で4通目が直接価格画面へ進む証拠を回収した。初回分岐の実機確認は再実行しない。残るのは公開側のクラッシュ率・kill等の独立条件と適用の証拠。公開の事後観測を事前ゲート通過へ読み替えず、ai_proposesを維持する。新しい小幅TestFlightや再提出は不要。 2026-09-13: 委任公開の独立ゲート接続はmain反映済み。次の正当な公開では対象版と一致する実機記録・ASC版/ビルドID、同一確定週の健康度、6時間の承認待機・7日のkill待機等を満たし、要求と公開状態を照合する。過去の自動公開や今回の読取りだけでは加点しない。",
       "unlock": "impl_onboarding",
       "authority": {
         "domain": "オンボーディングの課金導線改善",
@@ -1922,12 +1925,21 @@
     {
       "area": "⑨ マネタイズ",
       "task": "返金の可否についてAppleに意見を出す（refundPreference）",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "**ここが本当の境界。**ConsumptionRequest の必須欄は customerConsented / deliveryStatus / sampleContentProvided の3つで、**どれも事実**（同意の有無・配信できたか・購入前に無料で試せたか）。SimpleMemo は無料枠があるので sampleContentProvided は定数に近い。**事実だけで有効な応答が作れる。** 判断が入るのは `refundPreference` **1欄だけ**で、しかも**必須ではない。**値は DECLINE / GRANT_FULL / GRANT_PRORATED の3つ。Apple は「your refund preference is one of a variety of factors that the App Store uses to inform its refund decisions」と書いている。 つまり DECLINE を出すことは、**機械が「この客に返金しないでほしい」とAppleに言う**ということ。定型文でレビューに返すのとは性質が違う —— 相手は返金を求めている個人で、こちらの一言が不利に働きうる。 **設計としては、この欄を省いて応答できる。**期限内に事実を出す（＝窓を落とさない）ことと、可否に意見を言うことは分けられる。**分けられるものを一緒に自動化しない。** 自動化するなら Level を明示すること（返信のゲートと同じ）。既定は「refundPreference を送らない」",
-      "blocker": "policy_boundary",
-      "unblocked_by": "**機械が「返金しないでほしい」と言ってよいか。**事実だけの応答（refundPreference 無し）はこの行の外で、そちらは境界ではなく実装",
-      "$authority_absent": "表に領域が無い。**機械が「返金しないでほしい」と言ってよいか**という問いで、事実だけの応答（refundPreference 無し）はこの行の外"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "**ここが本当の境界。**ConsumptionRequest の必須欄は customerConsented / deliveryStatus / sampleContentProvided の3つで、**どれも事実**（同意の有無・配信できたか・購入前に無料で試せたか）。SimpleMemo は無料枠があるので sampleContentProvided は定数に近い。**事実だけで有効な応答が作れる。** 判断が入るのは `refundPreference` **1欄だけ**で、しかも**必須ではない。**値は DECLINE / GRANT_FULL / GRANT_PRORATED の3つ。Apple は「your refund preference is one of a variety of factors that the App Store uses to inform its refund decisions」と書いている。 つまり DECLINE を出すことは、**機械が「この客に返金しないでほしい」とAppleに言う**ということ。定型文でレビューに返すのとは性質が違う —— 相手は返金を求めている個人で、こちらの一言が不利に働きうる。 **設計としては、この欄を省いて応答できる。**期限内に事実を出す（＝窓を落とさない）ことと、可否に意見を言うことは分けられる。**分けられるものを一緒に自動化しない。** 自動化するなら Level を明示すること（返信のゲートと同じ）。既定は「refundPreference を送らない」\n\n[2026-09-13 事業スコープ決定] 既存業務147で消費情報応答と同意フローを作らないと決定済み。任意の返金意見送信も現在の製品方針に採用しない。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "既存業務147で消費情報応答と同意フローを作らないと決定済み。任意の返金意見送信も現在の製品方針に採用しない。",
+        "reactivate_when": "消費情報応答を行う製品方針に変更した時点で、147との関係を含め必要性を再評価する。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "policy_boundary",
+        "previous_unblocked_by": "**機械が「返金しないでほしい」と言ってよいか。**事実だけの応答（refundPreference 無し）はこの行の外で、そちらは境界ではなく実装",
+        "previous_authority_absent": "表に領域が無い。**機械が「返金しないでほしい」と言ってよいか**という問いで、事実だけの応答（refundPreference 無し）はこの行の外"
+      }
     },
     {
       "area": "⑨ マネタイズ",
@@ -2353,44 +2365,78 @@
     {
       "area": "⑬ アナログ領域",
       "task": "イベント: 候補選定・見積比較・発注・リード集計",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "AIが担える設計だが未着手",
-      "blocker": "not_started",
-      "unblocked_by": "AIが担える設計。着手していないだけ",
-      "unlock": "impl_analog"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "AIが担える設計だが未着手\n\n[2026-09-13 事業スコープ決定] 現行事業にイベント出展・開催活動を採用しない。AI側と人間側を対で対象外にする。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "現行事業にイベント出展・開催活動を採用しない。AI側と人間側を対で対象外にする。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "not_started",
+        "previous_unblocked_by": "AIが担える設計。着手していないだけ",
+        "previous_unlock": "impl_analog"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "イベント: 現地設営・接客・実施",
-      "executor": "human_only",
+      "executor": "intentional_no",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/authority-matrix.json",
+        "docs/automation-scope-review-20260913.md"
       ],
-      "note": "物理領域。人間が担う",
-      "blocker": "physical_human",
-      "unblocked_by": "現地作業"
+      "note": "物理領域。人間が担う\n\n[2026-09-13 事業スコープ決定] イベント出展・開催を採用しない決定に合わせ、184と対で対象外。責任分担の例を実施中業務としない。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "human_only",
+        "reason": "イベント出展・開催を採用しない決定に合わせ、184と対で対象外。責任分担の例を実施中業務としない。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "physical_human",
+        "previous_unblocked_by": "現地作業"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "人事: 募集・候補抽出・日程調整・書類作成",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "未着手",
-      "blocker": "not_started",
-      "unblocked_by": "同上。ただし現在は従業員がいない",
-      "unlock": "impl_analog"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "未着手\n\n[2026-09-13 事業スコープ決定] 現行事業に採用パイプラインを新設しない。AI側と人間側を対で対象外にする。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "現行事業に採用パイプラインを新設しない。AI側と人間側を対で対象外にする。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "not_started",
+        "previous_unblocked_by": "同上。ただし現在は従業員がいない",
+        "previous_unlock": "impl_analog"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "人事: 採用・解雇・評価・健康情報の判断",
-      "executor": "human_only",
+      "executor": "intentional_no",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/authority-matrix.json",
+        "docs/automation-scope-review-20260913.md"
       ],
-      "note": "人間が担う",
-      "blocker": "physical_human",
-      "unblocked_by": "対人・法的責任"
+      "note": "人間が担う\n\n[2026-09-13 事業スコープ決定] 採用活動を新設しない決定に合わせ、186と対で対象外。汎用的な雇用判断を現行運営の実施中業務としない。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "human_only",
+        "reason": "採用活動を新設しない決定に合わせ、186と対で対象外。汎用的な雇用判断を現行運営の実施中業務としない。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "physical_human",
+        "previous_unblocked_by": "対人・法的責任"
+      }
     },
     {
       "area": "⑬ アナログ領域",
@@ -2485,23 +2531,40 @@
     {
       "area": "⑬ アナログ領域",
       "task": "営業: リード選定・メール・提案書",
-      "executor": "nobody",
-      "evidence": [],
-      "note": "未着手",
-      "blocker": "not_started",
-      "unblocked_by": "同上",
-      "unlock": "impl_analog"
+      "executor": "intentional_no",
+      "evidence": [
+        "docs/automation-scope-review-20260913.md"
+      ],
+      "note": "未着手\n\n[2026-09-13 事業スコープ決定] 個別商談型の営業を現行事業に採用しない。App Store販売・既存マーケティング・サポートは継続。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "nobody",
+        "reason": "個別商談型の営業を現行事業に採用しない。App Store販売・既存マーケティング・サポートは継続。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "not_started",
+        "previous_unblocked_by": "同上",
+        "previous_unlock": "impl_analog"
+      }
     },
     {
       "area": "⑬ アナログ領域",
       "task": "営業: 交渉・信頼形成・重要契約",
-      "executor": "human_only",
+      "executor": "intentional_no",
       "evidence": [
-        "data/authority-matrix.json"
+        "data/authority-matrix.json",
+        "docs/automation-scope-review-20260913.md"
       ],
-      "note": "人間が担う",
-      "blocker": "physical_human",
-      "unblocked_by": "対人交渉"
+      "note": "人間が担う\n\n[2026-09-13 事業スコープ決定] 個別商談型営業を採用しない決定に合わせ、194と対で対象外。通常のサポートとベンダー契約は別業務で継続。 オーナーが妥当な業務の対象外化を明示承認。AI実行は増えていない。旧分類・再開条件はscope_exclusionに保存。",
+      "scope_exclusion": {
+        "decided_on": "2026-09-13",
+        "previous_executor": "human_only",
+        "reason": "個別商談型営業を採用しない決定に合わせ、194と対で対象外。通常のサポートとベンダー契約は別業務で継続。",
+        "reactivate_when": "当該活動の調査・準備・実行を事業として採用した時点、または実案件・既存義務を確認した時点の早い方で、対になるAI側・人間側を同時に採点対象へ戻す。",
+        "evidence": "docs/automation-scope-review-20260913.md",
+        "previous_blocker": "physical_human",
+        "previous_unblocked_by": "対人交渉"
+      }
     },
     {
       "area": "⑬ アナログ領域",
@@ -2603,7 +2666,73 @@
     "scripts/autonomy-timeline.mjs は since があればそれを優先する。"
   ],
   "blocked_on_missing_budget": 13,
-  "authority_absent_budget": 2,
-  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。",
-  "$blocked_on_missing_budget": "**[2026-08-31] 11 → 14 へ戻した。**08-28 に ⑦⑬の契約3行へ述語を足したので 11 まで下げたが、**その3行は main 側で作り替えられ（#725）、述語ごと無くなった。**待っていた相手が違っていた、というのが向こうの結論で、そちらが正しい。**これは上限を上げたのではなく、下げた根拠が消えたので戻したもの。**述語を足したぶんだけ下げる、という規則自体は動かしていない。\n\n**[2026-08-31] 14 → 13。**⑦「定型／非定型契約の分類」を待ち種別から外したぶん（対象が揃っていたので `not_started` へ）。**減ったら下げる。**"
+  "authority_absent_budget": 0,
+  "$authority_absent_budget": "**権限表の行を名指しできない policy_boundary の上限。**scripts/check-coverage-authority.mjs が読む。境界だと言い張るのに表に対応が無い行は、散文だけが根拠になる —— この台帳が 2026-08-28 に12件まとめて外したのは、まさにその形だった。**上げて通さない。**表に領域を足して名指しするか、境界でないと認めて分類を直すか、そのどちらかで減らす。\n[2026-09-13] 148の対象外化で該当する現行行が0件になったため、上限を2から0へ下げた。旧理由は148のscope_exclusion.previous_authority_absentに保持。",
+  "$blocked_on_missing_budget": "**[2026-08-31] 11 → 14 へ戻した。**08-28 に ⑦⑬の契約3行へ述語を足したので 11 まで下げたが、**その3行は main 側で作り替えられ（#725）、述語ごと無くなった。**待っていた相手が違っていた、というのが向こうの結論で、そちらが正しい。**これは上限を上げたのではなく、下げた根拠が消えたので戻したもの。**述語を足したぶんだけ下げる、という規則自体は動かしていない。\n\n**[2026-08-31] 14 → 13。**⑦「定型／非定型契約の分類」を待ち種別から外したぶん（対象が揃っていたので `not_started` へ）。**減ったら下げる。**",
+  "scope_revisions": [
+    {
+      "date": "2026-09-13",
+      "basis": "owner_authorized_current_business_scope",
+      "document": "docs/automation-scope-review-20260913.md",
+      "before": {
+        "defined": 199,
+        "doing": 179,
+        "ai_executes": 159,
+        "ai_involved": 166,
+        "intentional_no": 4
+      },
+      "after": {
+        "defined": 192,
+        "doing": 176,
+        "ai_executes": 159,
+        "ai_involved": 166,
+        "intentional_no": 11
+      },
+      "execution_gain": 0,
+      "excluded": [
+        {
+          "task_index": 148,
+          "area": "⑨ マネタイズ",
+          "task": "返金の可否についてAppleに意見を出す（refundPreference）",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 184,
+          "area": "⑬ アナログ領域",
+          "task": "イベント: 候補選定・見積比較・発注・リード集計",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 185,
+          "area": "⑬ アナログ領域",
+          "task": "イベント: 現地設営・接客・実施",
+          "previous_executor": "human_only"
+        },
+        {
+          "task_index": 186,
+          "area": "⑬ アナログ領域",
+          "task": "人事: 募集・候補抽出・日程調整・書類作成",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 187,
+          "area": "⑬ アナログ領域",
+          "task": "人事: 採用・解雇・評価・健康情報の判断",
+          "previous_executor": "human_only"
+        },
+        {
+          "task_index": 194,
+          "area": "⑬ アナログ領域",
+          "task": "営業: リード選定・メール・提案書",
+          "previous_executor": "nobody"
+        },
+        {
+          "task_index": 195,
+          "area": "⑬ アナログ領域",
+          "task": "営業: 交渉・信頼形成・重要契約",
+          "previous_executor": "human_only"
+        }
+      ]
+    }
+  ]
 }
