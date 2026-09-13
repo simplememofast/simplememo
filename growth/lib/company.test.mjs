@@ -10,6 +10,7 @@ import { collectionWindow, collectAppsFlyer, verifyAppsFlyer, collectAnalytics, 
 import { formalMetrics, compareMetrics, humanTouchMetrics } from './company-metrics.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { evaluateOperationalFollowup } from './company-followup.mjs';
+import { summarizeGa4 } from './company-review.mjs';
 import { verifyMergedChange, verifyNativeIntegration,verifyPublishedArtifact,verifyOperationalDelivery,verifyIntegrationLedger,verifyActionDelivery } from './company-proof.mjs';
 
 function directory(t) {
@@ -17,6 +18,16 @@ function directory(t) {
   t.after(() => fs.rmSync(dir, { recursive: true, force: true })); return dir;
 }
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+
+test('compact GA4 retains scope, missing counts and union semantics and weights rates by sessions',()=>{
+  const base={landing_scope:'production',session_channel:'Organic Search',sessions_with_cta_impression:1,sessions_with_own_app_click_24h:1,sessions_with_onelink_click_24h:1,sessions_with_any_app_route_click_24h:1,sessions_with_onelink_qa_click_24h:0};
+  const reports=[{file:'ga4-funnel.sql',result:[{...base,observed_started_sessions:1},{...base,observed_started_sessions:'99'},{...base,landing_scope:'missing_landing_page',observed_started_sessions:5,sessions_with_cta_impression:null}]}];
+  const s=summarizeGa4(reports),rows=s.by_landing_scope_and_session_channel;
+  assert.equal(rows.length,2);assert.equal(rows[0].observed_started_sessions,100);assert.equal(rows[0].own_app_click_session_rate_24h,.02);
+  assert.equal(rows[0].sessions_with_any_app_route_click_24h,2);assert.equal(rows[1].sessions_with_cta_impression,null);
+  assert.equal(s.quality_by_hostname_scope,null);assert.equal(summarizeGa4(null),null);
+  reports[0].result[0].observed_started_sessions='';assert.equal(summarizeGa4(reports).by_landing_scope_and_session_channel[0].observed_started_sessions,null);
+});
 
 test('mature windows use the source timezone and preserve existing lag', () => {
   const now = new Date('2026-09-13T05:00:00Z');
