@@ -155,6 +155,8 @@ function withCli(fn) {
       fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
       fs.copyFileSync(path.join(ROOT, file), path.join(dir, file));
     }
+    // Reuse the real private-storage guards only when the CLI selects that mode.
+    fs.symlinkSync(path.join(ROOT, 'growth/lib/company-loop.mjs'), path.join(dir, 'growth/lib/company-loop.mjs'));
     const ledgerPath = path.join(dir, 'growth/experiments/experiments.json');
     fs.mkdirSync(path.dirname(ledgerPath), { recursive: true });
     const e = exp();
@@ -167,6 +169,41 @@ function withCli(fn) {
     save(); return fn({ e, s, dir, target, save, run, ledgerPath });
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
+test('private evidence retains admission and round-trip integrity without publishing values or paths', () => withCli(({ e, run, ledgerPath }) => {
+  const privateDir = fs.mkdtempSync(path.join(os.tmpdir(), 'simplememo-private-evidence-'));
+  try {
+    const out = run('evaluate', e.id, '--decision', 'keep', '--snapshot', 'synthetic-post',
+      '--note', 'Synthetic review; full measurement stays private', '--private-evidence-dir', privateDir);
+    assert.equal(out.status, 0, out.stderr);
+    const result = JSON.parse(fs.readFileSync(ledgerPath)).experiments[0];
+    assert.equal(result.evidence.kind, 'private_reference');
+    assert.equal(result.evidence.source_kind, 'gsc_comparison');
+    assert.equal(result.evidence.post, undefined);
+    assert.ok(!JSON.stringify(result).includes(privateDir));
+    const file = path.join(privateDir, result.evidence.artifact), bytes = fs.readFileSync(file);
+    assert.equal(fingerprint(bytes), result.evidence.sha256);
+    assert.equal(JSON.parse(bytes).experiment_id, e.id);
+    assert.equal(JSON.parse(bytes).evidence.post.value, 0.2);
+    assert.equal(fs.statSync(file).mode & 0o777, 0o600);
+  } finally { fs.rmSync(privateDir, { recursive: true, force: true }); }
+}));
+test('private storage cannot bypass a source mismatch or write inside a checkout', () => withCli(({ e, save, run, ledgerPath, dir }) => {
+  fs.mkdirSync(path.join(dir, '.git'));
+  const args = ['evaluate', e.id, '--decision', 'keep', '--snapshot', 'synthetic-post',
+    '--note', 'Synthetic', '--private-evidence-dir', path.join(dir, 'private')];
+  let before = fs.readFileSync(ledgerPath, 'utf8');
+  const rejectedPath = run(...args);
+  assert.equal(rejectedPath.status, 2);
+  assert.match(rejectedPath.stderr, /outside Git/);
+  assert.equal(fs.readFileSync(ledgerPath, 'utf8'), before);
+  assert.equal(fs.existsSync(path.join(dir, 'private')), false);
+  e.target_metric = 'app_store_click / session_start'; save();
+  before = fs.readFileSync(ledgerPath, 'utf8');
+  const rejectedSource = run(...args);
+  assert.equal(rejectedSource.status, 2);
+  assert.match(rejectedSource.stderr, /own source/);
+  assert.equal(fs.readFileSync(ledgerPath, 'utf8'), before);
+}));
 test('CLI reproducer: CTA plus post-period metadata is rejected without changing the ledger', () => withCli(({ e, save, run, target, ledgerPath }) => {
   e.target_metric = 'app_store_click / session_start'; save();
   for (const file of ['pages.json', 'query-pages.json', 'dates.json']) fs.unlinkSync(path.join(target, file));

@@ -524,7 +524,7 @@
       },
       "started_at": "2026-08-09",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -537,13 +537,14 @@
         "note": "Clean pre-change baseline: the FAQ shipped 08-09, after this window closed."
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "2026-08-09: The page also carries frozen title test title-2026-07-01-002. Its measurement window (2026-07-01..07-29) has already elapsed and is banked in GSC, so this change cannot corrupt it retroactively — but that window is the ONLY period from which the title decision may be read. Do not evaluate the title test on post-08-09 data.",
         "2026-08-09: Answer states only what the page already establishes. LINE's current UI could not be verified — guide.line.me and help.line.me are both blocked by this environment's network policy (CONNECT 403) — so no menu paths, button names or retention periods are claimed.",
         "2026-08-09: baseline corrected 490 → 139 imp. The seeded value scaled a 7-day figure (122 imp, 07-08..07-14) from gsc-analysis-2026-07-16.md to 28 days and got ~490. The measured 28-day value is 139, so that week was a spike, not the run rate. Expected impact revised down accordingly.",
-        "CORRECTION 2026-09-06: The earlier 139-to-99 correction mixed different 28-day periods. The original 139 impressions belong to 2026-07-11..08-07; the 99 belong to 2026-07-13..08-09, including the FAQ launch date. Both the site-query and query-by-page rows in the latter export are 99, so those exports do not establish a page-allocation difference. Search Console was re-exported on 2026-09-06 with exact query line keepメモ どこ and exact page https://simplememofast.com/blog/line-keep-alternative for 07-11..08-07: 0 clicks, 139 impressions, CTR 0%, position 9.87. Keep the original pre-change baseline; use the same query AND page filters at review. See growth/reports/2026-09-06-experiment-review-readiness.md."
+        "CORRECTION 2026-09-06: The earlier 139-to-99 correction mixed different 28-day periods. The original 139 impressions belong to 2026-07-11..08-07; the 99 belong to 2026-07-13..08-09, including the FAQ launch date. Both the site-query and query-by-page rows in the latter export are 99, so those exports do not establish a page-allocation difference. Search Console was re-exported on 2026-09-06 with exact query line keepメモ どこ and exact page https://simplememofast.com/blog/line-keep-alternative for 07-11..08-07: 0 clicks, 139 impressions, CTR 0%, position 9.87. Keep the original pre-change baseline; use the same query AND page filters at review. See growth/reports/2026-09-06-experiment-review-readiness.md.",
+        "2026-09-13: Authenticated GSC export uses the exact registered query AND page, closed equal-length WEB/PT windows, all countries/devices. The registered impression floor is not met; no efficacy or failure claim. Preserve the FAQ and collect another mature window through the existing owner."
       ],
       "control": {
         "kind": "pre_post",
@@ -567,6 +568,14 @@
         "kind": "query_page",
         "page": "/blog/line-keep-alternative",
         "query": "line keepメモ どこ"
+      },
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-09ff129f591dec46912b271304814e477e05ea42d96358832df570c8e950c66a.json",
+        "sha256": "09ff129f591dec46912b271304814e477e05ea42d96358832df570c8e950c66a",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
       }
     },
     {
@@ -580,7 +589,7 @@
       },
       "started_at": "2026-08-09",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -593,12 +602,13 @@
         "note": "Pre-retitle reference: 682 imp / CTR 7.30% / pos 7.9 (docs 06-09..07-04). Recovery target is CTR back above ~6%."
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "iterate",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "No change ships with this entry — it exists so the regression stays visible. The title was kept by owner decision (title-2026-07-02-011); that ruled out one lever, not the problem.",
         "On the next snapshot: if CTR is still near 4.5% at a flat position, the remaining lever is the meta description / snippet. Check the query x page export first to see whether the query mix widened.",
-        "NEW HYPOTHESIS 2026-08-11 (query x page export), distinct from the refuted cannibalisation one: the queries actually landing here are how-to — 「obsidian 使い方 iphone」 66 imp / 6.06%, 「obsidian iphone 使い方」 46 imp / 6.52% — while the current title sells speed (「最速でメモを送る方法」). Demand is how-to, the pitch is speed. This is a wording mismatch on the page own queries, not traffic lost to neighbouring pages. Visible queries convert at 4.97% overall, so whatever costs the page CTR is outside this 302-impression slice."
+        "NEW HYPOTHESIS 2026-08-11 (query x page export), distinct from the refuted cannibalisation one: the queries actually landing here are how-to — 「obsidian 使い方 iphone」 66 imp / 6.06%, 「obsidian iphone 使い方」 46 imp / 6.52% — while the current title sells speed (「最速でメモを送る方法」). Demand is how-to, the pitch is speed. This is a wording mismatch on the page own queries, not traffic lost to neighbouring pages. Visible queries convert at 4.97% overall, so whatever costs the page CTR is outside this 302-impression slice.",
+        "2026-09-13: Monitoring still shows a CTR shortfall at a similar aggregate position. Diagnose exact query mix before changing the owner-retained title. This is a monitoring decision, not a measured treatment loss. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "none",
@@ -617,7 +627,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-c62d746dbb38b567c0a1343b7c0565c92bb7f4a658e4cc234698e43722909cf8.json",
+        "sha256": "c62d746dbb38b567c0a1343b7c0565c92bb7f4a658e4cc234698e43722909cf8",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "snippet-2026-08-09-free-memo-ranking",
@@ -630,7 +648,7 @@
       },
       "started_at": "2026-08-09",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": {
         "title": "無料で使えるメモアプリランキング2026 — コスト0で始める最強メモ環境 | Obsidian連携シンプルメモ"
       },
@@ -646,15 +664,16 @@
         "source": "growth/data/gsc/2026-08-09"
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "Two changes, one experiment: title and meta description both moved. At 33 clicks/28d they cannot be separated, and both are the same surface (the SERP snippet).",
         "The queries this page is shown for are dominated by qualifiers absent from the old title: メモアプリ 無料 (966 imp, 1 click, pos 8.4), メモアプリ 無料 シンプル (756 imp, 1 click, pos 9.3), メモ帳アプリ 広告なし 無料 (82 imp, 0 clicks). 「最強メモ環境」 answered none of them.",
         "Brand-suffix hypothesis is SUGGESTIVE, NOT ESTABLISHED. Site-wide, titles carrying 「| Obsidian連携シンプルメモ」 average 1.72% CTR (67 pages, 7,889 imp) against 2.17% without (146 pages, 31,431 imp) — but position and page type are not controlled for, so this is a reason to test one page, not to strip suffixes site-wide.",
         "Body untouched. If CTR moves, the cause is the snippet alone.",
         "2026-08-28 中間読み（**評価ではない。評価日は 2026-09-13 のまま**）: 2026-08-24スナップショット（08-10..08-22）で 13クリック / 2,084表示 / CTR 0.62% / 順位 8.22。基準は CTR 0.82% / 順位 9.19 なので、**CTRは下がり、順位は約1つ上がっている。****このままCTRだけを読むと『retitle失敗・revert』になるが、それは誤読になりうる。**同じ窓で表示は 144→160回/日 に増えており、順位が上がった面ほど「まだ買う気のない検索」まで拾い始める。CTRは分母の広がりでも下がる。9/13には最低限、(a) 順位を揃えたときの期待CTR（expectedCtr）との差、(b) クリック**数**の日次、(c) 流入クエリ構成の3つを併せて読むこと。**CTR単独での keep/revert 判定は、この実験については禁止。**",
-        "2026-08-28: 手元のGSC分析（〜08-25の直近7日）では 15クリック / 2,298表示 / CTR 0.65% / 順位 8.78 で、**表示は 328回/日**とさらに広がっている。窓が違うので上の数字とは直接比べない（重ねない）が、「表示が増えてCTRが下がる」という向きは両方の窓で一致している。"
+        "2026-08-28: 手元のGSC分析（〜08-25の直近7日）では 15クリック / 2,298表示 / CTR 0.65% / 順位 8.78 で、**表示は 328回/日**とさらに広がっている。窓が違うので上の数字とは直接比べない（重ねない）が、「表示が増えてCTRが下がる」という向きは両方の窓で一致している。",
+        "2026-09-13: Clicks and impressions both grew while CTR fell. The registered query-mix and position-adjusted review is not yet available; do not revert from CTR alone. Concurrent selector/CTA work prevents isolating the snippet. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "pre_post",
@@ -673,7 +692,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-fdb8e70acb9e560ce9ee1fcc81289c330bd0d40c31fb05610fa6ba2b70aa14e5.json",
+        "sha256": "fdb8e70acb9e560ce9ee1fcc81289c330bd0d40c31fb05610fa6ba2b70aa14e5",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "snippet-2026-08-09-gkeep-vs-anotes",
@@ -686,7 +713,7 @@
       },
       "started_at": "2026-08-09",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": null,
       "after": null,
       "baseline": {
@@ -698,13 +725,14 @@
         "source": "growth/data/gsc/2026-08-09"
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "Three changes, one experiment — they cannot be separated at this traffic level (6 clicks/28d): (1) intro now opens with the verdict, (2) description rewritten to carry it into the snippet, (3) FAQPage schema added — 5 answers existed on the page with no schema at all.",
         "The +36 clicks/month figure from analyze.mjs is likely OPTIMISTIC. Expected CTR came from a curve fitted on this site's mostly-Japanese SERPs; this page competes in English against large tech publishers, where a small site at position 8 plausibly earns less. Treat +10-20 as the realistic band.",
         "Title untouched: title-2026-07-01-005 was evaluated inconclusive (no pre-change baseline), and stacking a title change here would make this snippet test unreadable too.",
-        "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves."
+        "CORRECTION 2026-08-09 (later same day): the +36 clicks/month this was queued on is overstated about 7x. It compared an English page against a CTR curve fitted on traffic that is 77% Japanese. Against an English-only curve (0.56% expected at pos 7.8) the upside is +3.5 clicks/month. The page IS still below its own segment, so the experiment stands — but it is a small bet, not the top opportunity it was recorded as. See growth/lib/gsc.mjs buildSegmentCurves.",
+        "2026-09-13: The registered impression floor is met, but very few clicks and no holdout support no reliable efficacy conclusion. Preserve the English population and avoid Japanese CTR expectations. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "pre_post",
@@ -730,7 +758,15 @@
           "original_hypothesis": "Leading with a verdict in the snippet and adding FAQ rich-result eligibility lifts CTR at unchanged position.",
           "reason": "FAQ rich results are no longer a valid Google target; preserve the historical hypothesis and evaluate observed CTR only."
         }
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-8af5b7ebb87410289a8480da55104bb17dcaedb1f08cc112c92195fa462120f3.json",
+        "sha256": "8af5b7ebb87410289a8480da55104bb17dcaedb1f08cc112c92195fa462120f3",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "snippet-2026-08-09-offline-memo-apps",
@@ -743,7 +779,7 @@
       },
       "started_at": "2026-08-09",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": {
         "title": "オフラインで使えるメモアプリ｜電波なしでも即記録"
       },
@@ -759,13 +795,14 @@
         "source": "growth/data/gsc/2026-08-09"
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "Top unblocked opportunity on the segment-corrected model: +27.6 clicks/month against a Japanese-only expectation of 4.52% at pos 6.0.",
         "The old title already carried the query words. The change adds the list signal (5選) the competing results carry, and moves the description off 「SimpleMemoを中心に」 — a comparison shopper reads a vendor-first description as a vendor page.",
         "Known dilution: some impressions are Android intent (「android メモアプリ オフライン」 31 imp, 0 clicks, pos 6.2) on an iOS-only app. Those clicks are unwinnable and unwanted, so the realised gain should land under +27.6 even if the hypothesis is right.",
-        "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated."
+        "Body untouched. Title and description move together — at 32 clicks/28d they cannot be separated.",
+        "2026-09-13: Clicks are similar and CTR lower; concurrent factual description/body correction and acquisition changes prevent attributing this comparison to the earlier snippet alone. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "pre_post",
@@ -784,7 +821,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-67cbe553bc495d2ef2f8f57681e2fae8d6e93c07e38502d44e53acbcb3f17537.json",
+        "sha256": "67cbe553bc495d2ef2f8f57681e2fae8d6e93c07e38502d44e53acbcb3f17537",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "cta-2026-08-10-desktop-qr",
@@ -1523,7 +1568,7 @@
       },
       "started_at": "2026-08-12",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": {
         "title": "【2026年版】メモアプリおすすめ10選｜用途別の本命と最速キャプチャ"
       },
@@ -1539,11 +1584,12 @@
         "source": "growth/data/gsc/2026-08-11 (pages.json)"
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "2026-08-12: cta-2026-08-10-desktop-qr がこのページを含み、同じ 2026-09-13 に評価される。タイトル変更は流入クエリの構成を動かすため、CTA側の数値は単独で読まず、この実験と併せて読むこと。",
-        "2026-08-12: 同日、このページの比較表と本文の競合起動速度を data/benchmark.json の正準値へ訂正した（Apple Notes 約1秒→1.7秒、Google Keep 約1.5秒→2.1秒、Notion 2〜3秒→2.8秒、Evernote 3〜5秒→2.5秒、Drafts 1.1秒→0.9秒、Bear/OneNote は「—」だったが実測値があるので 0.9秒/2.6秒、未計測の3アプリは「計測なし」と明記）。タイトル実験の target_metric は SERP の CTR なので、本文の数値訂正はタイトルにも description にも入らず交絡しない。ただし訂正は自社に不利な方向（Evernote は主張より速く、Bear は隠れていたが速い）で、「最速」の主張自体は 0.4秒 対 2位 0.9秒 で変わらない。"
+        "2026-08-12: 同日、このページの比較表と本文の競合起動速度を data/benchmark.json の正準値へ訂正した（Apple Notes 約1秒→1.7秒、Google Keep 約1.5秒→2.1秒、Notion 2〜3秒→2.8秒、Evernote 3〜5秒→2.5秒、Drafts 1.1秒→0.9秒、Bear/OneNote は「—」だったが実測値があるので 0.9秒/2.6秒、未計測の3アプリは「計測なし」と明記）。タイトル実験の target_metric は SERP の CTR なので、本文の数値訂正はタイトルにも description にも入らず交絡しない。ただし訂正は自社に不利な方向（Evernote は主張より速く、Bear は隠れていたが速い）で、「最速」の主張自体は 0.4秒 対 2位 0.9秒 で変わらない。",
+        "2026-09-13: CTR declined while clicks and aggregate position improved. Concurrent body/CTA changes and unknown query composition prevent a title-only efficacy claim. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "pre_post",
@@ -1562,7 +1608,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-a8c038655ed72785e4c77efe64295870047f079c3eba26cc09510e1af219da59.json",
+        "sha256": "a8c038655ed72785e4c77efe64295870047f079c3eba26cc09510e1af219da59",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "title-2026-08-12-014",
@@ -1575,7 +1629,7 @@
       },
       "started_at": "2026-08-12",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": {
         "title": "会議メモ・議事メモ テンプレート5選｜コピペで使えるフォーマットと書き方"
       },
@@ -1591,10 +1645,11 @@
         "source": "growth/data/gsc/2026-08-11 (pages.json)"
       },
       "target_metric": "position",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "keep",
+      "evaluated_at": "2026-09-13",
       "notes": [
-        "2026-08-12: タイトルと本文構成（コピペ用テンプレを冒頭へ移動）を同時に動かしている。分離した実験ではないので、効果はどちらの寄与か切り分けられない。cta-2026-08-10-mid-placement もこのページを含み、同日評価。"
+        "2026-08-12: タイトルと本文構成（コピペ用テンプレを冒頭へ移動）を同時に動かしている。分離した実験ではないので、効果はどちらの寄与か切り分けられない。cta-2026-08-10-mid-placement もこのページを含み、同日評価。",
+        "2026-09-13: The registered primary position metric improved; retain the combined title/template arrangement operationally. This pre/post comparison has no holdout and does not identify the contribution of title versus body or other interventions. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "pre_post",
@@ -1613,7 +1668,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-380b31ab8fdc5d8b843d68ad11539399f55c1465f6a885fe2ca1663f7317ad23.json",
+        "sha256": "380b31ab8fdc5d8b843d68ad11539399f55c1465f6a885fe2ca1663f7317ad23",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "title-2026-08-12-015",
@@ -1626,7 +1689,7 @@
       },
       "started_at": "2026-08-12",
       "evaluation_at": "2026-09-13",
-      "status": "running",
+      "status": "evaluated",
       "before": {
         "title": "Capacitiesとは？特徴・料金・Obsidianとの違いまで徹底比較【2026】"
       },
@@ -1642,11 +1705,12 @@
         "source": "growth/data/gsc/2026-08-11 (pages.json)"
       },
       "target_metric": "ctr",
-      "decision": null,
-      "evaluated_at": null,
+      "decision": "inconclusive",
+      "evaluated_at": "2026-09-13",
       "notes": [
         "2026-08-12: 2026-07-29 に keep と判定された題を差し替える2回目の実験。当時（imp 1,605 / CTR 1.62% / pos 7.4）から imp は増えたが CTR は 1.57% に低下しており、keep の根拠は現在の数値では成り立たない。cta-2026-08-10-desktop-qr と cta-2026-08-10-mid-placement もこのページを含み、同日評価。",
-        "2026-08-12: 依頼①では 日本語対応 を題に入れる案だったが、ページに日本語対応の記述が無いため入れていない。題と中身を合わせるなら、先に本文へ節を足すこと。"
+        "2026-08-12: 依頼①では 日本語対応 を題に入れる案だったが、ページに日本語対応の記述が無いため入れていない。題と中身を合わせるなら、先に本文へ節を足すこと。",
+        "2026-09-13: The exact registered URL shows a large impression contraction and few clicks despite higher CTR. Query/scope changes must be diagnosed before treating the ratio as a win or reverting the title. Same-length closed WEB/PT windows, all countries/devices; original baseline extraction and pre/post confounding remain explicit in private evidence."
       ],
       "control": {
         "kind": "pre_post",
@@ -1665,7 +1729,15 @@
         "評価日までに min_sample に届かない → 結論を出さず、次サイクルへ持ち越す（**「効果なし」と書かない**）",
         "対象ページの順位が実験と無関係な理由で大きく動いた → 中断して annotations.json に記録する",
         "同じページで別の実験が始まった → 先に始まったほうを優先し、後を cancelled にする"
-      ]
+      ],
+      "evidence": {
+        "schema_version": 1,
+        "kind": "private_reference",
+        "source_kind": "gsc_comparison",
+        "artifact": "experiment-evidence-76b99fc3953f0c4608d2fb68c2cc8fbe753fe61fc387a2772a4fa18809e82ca3.json",
+        "sha256": "76b99fc3953f0c4608d2fb68c2cc8fbe753fe61fc387a2772a4fa18809e82ca3",
+        "validation": "Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome."
+      }
     },
     {
       "id": "title-2026-08-20-home-grammar",
