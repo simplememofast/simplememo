@@ -22,7 +22,7 @@ Daily collection/health/action, Weekly Growth + Autonomy review, Monthly review 
 
 Company receipt: `f4e1cb26-009a-40f1-bdd3-8f54f148c8b5`, private `runs/<id>.json`, state `verified_integration`. Canonical run: `ap-20260913-owner-session-company-os`, with its actual owner request preserved. The implementation transfers the AppsFlyer subtask; it does not promote the entire multi-vendor legacy task 49 or invent a historical touch count.
 
-Twenty Company tests cover negative source, permission, partial-failure, pending-request, stale-ref, identity, exact-deployment, ledger and concurrent-lock cases. Initial full local preflight passed 204 checks, and PR #1306's complete CI passed. The follow-up verifier correction remains subject to its own final-head CI and normal merge; see `GOAL_STATE.json` and the private closeout receipt for that result.
+Twenty-two Company tests cover negative source, permission, partial-failure, pending-request, stale-ref, identity, exact-deployment, ledger, concurrent-lock and malformed/expired browser-observation cases. Initial full local preflight passed 204 checks, and PR #1306's complete CI passed. The delivery-verifier correction ([#1309](https://github.com/simplememofast/simplememo/pull/1309)), compact Growth status ([#1310](https://github.com/simplememofast/simplememo/pull/1310)) and existing-CI scheduler reader ([#1313](https://github.com/simplememofast/simplememo/pull/1313)) also merged after their final-head validation. Actual CI inventory run [34746778461](https://github.com/simplememofast/simplememo/actions/runs/34746778461) produced a retained partial report: authentication succeeded, Cloud Scheduler was disabled and transfer metadata was IAM-denied. A partial report is not recorded as a successful complete inventory.
 
 ## Formal autonomy comparison
 
@@ -41,6 +41,8 @@ Same existing formulas, source hashes and exclusions; fixed baseline task denomi
 
 Attribution matters: other concurrent main changes had already raised the coverage-based measures to the after values before PR #1306. This Goal claims the actual successful integration run's contribution to AI completion, not those other tasks' work. The separate 100-point score fell; it is not hidden. Classified ceilings are conditional potential, not achieved operation. The earlier illustrative 82.9%/93% values are not the current definitions' recalculated ceilings.
 
+At the authenticated-inventory recheck (2026-09-13 10:38 UTC, reviewed main `e9cd2a82`), the current formal values were AI execution 162/178 = 91.0112%, overall automation 162/192 = 84.3750%, AI involvement 169/178 = 94.9438%, coverage 178/192 = 92.7083%, AI completion 29/43 = 67.4419%, and the separate instrument 45.7562/100. Both classified ceilings remained unchanged. The baseline task cohort and exclusions still matched. These later changes include other tasks' work; the table above preserves the isolated integration checkpoint rather than retroactively claiming those gains.
+
 ## Growth sources and cost
 
 | Source | State / actual evidence |
@@ -50,7 +52,7 @@ Attribution matters: other concurrent main changes had already raised the covera
 | GA4 | CONNECTED; actual mature funnel September 6–8, run 34740964904; coverage and attribution limits retained |
 | AppsFlyer | CONNECTED; actual aggregate August 16–September 12, original CSV/quality hashes and reuse verified |
 | App Store Connect | PARTIAL; existing private iOS collector outputs reused; missing Analytics/crash dimensions remain missing |
-| Apple Search Ads | BLOCKED / no existing configured use discovered; not provisioned |
+| Apple Search Ads | PARTIAL / historical account evidence, configured data connection unverified; not provisioned |
 | SEO | CONNECTED; existing analyzer, queues, GSC and audit reused |
 | AIO | PARTIAL; existing valid fixed-probe results consumed, but the documented weekly native reservation is not visible in inspected current scheduler records |
 
@@ -58,7 +60,9 @@ The two successful BigQuery reports each recorded 20,971,520 billed bytes. Monet
 
 ## Remaining evidence and next frontier
 
-Current ChatGPT Tasks and GCP scheduler/transfer-config inventory need an accessible existing authenticated read-only session. See `HUMAN_BLOCKERS.md`; no new broad credential is requested. The documented missing native reservations, Cloudflare VFU counted errors with no root-cause detail, and historical touch-measurement gaps remain visible in the audit.
+The owner completed both existing passkeys, and authenticated ChatGPT and GCP console inventories were inspected. All three current task-status views were checked; recommendations were excluded. The BigQuery scheduled-query, transfer and Dataform views displayed no configured rows, and the unfiltered orchestration table explicitly displayed no rows. These are scoped, dated browser observations, not proof of historical or cross-account absence. Cloud Scheduler is disabled in both the API and console; any retained dormant definitions remain unknown. No API was enabled and no IAM grant was expanded. Private evidence, its expiry and remaining source limits are described in `HUMAN_BLOCKERS.md` and `OPERATING_RUNBOOK.md`.
+
+The documented unmatched native reservations, Cloudflare VFU counted errors with no confirmed root cause, and historical touch-measurement gaps remain visible in the audit. A new one-time authentication reminder reused a historical native ID; the normalizer now checks purpose and recurring trigger before treating it as that operating owner. The fulfilled reminder was paused and read back; no legacy operating task was retired.
 
 The operational experiment is registered for September 20, 2026, with a minimum of seven distinct observed native days. Manual bootstrap cannot satisfy that condition. The next existing daily owner runs the collection, due evaluation and highest eligible AUTO action. Growth impact and sustained zero-touch reliability remain INCONCLUSIVE until their actual evidence horizons mature.
 
