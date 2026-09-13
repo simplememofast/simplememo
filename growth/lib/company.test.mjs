@@ -10,7 +10,7 @@ import { collectionWindow, collectAppsFlyer, verifyAppsFlyer, collectAnalytics, 
 import { formalMetrics, compareMetrics, humanTouchMetrics } from './company-metrics.mjs';
 import { nativeOrigin } from './company-origin.mjs';
 import { evaluateOperationalFollowup } from './company-followup.mjs';
-import { verifyMergedChange, verifyNativeIntegration,verifyPublishedArtifact } from './company-proof.mjs';
+import { verifyMergedChange, verifyNativeIntegration,verifyPublishedArtifact,verifyOperationalDelivery,verifyIntegrationLedger,verifyActionDelivery } from './company-proof.mjs';
 
 function directory(t) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'company-test-')); fs.chmodSync(dir, 0o700);
@@ -176,6 +176,31 @@ test('a saved integration and open PR are not execution success',()=>{
   assert.throws(()=>verifyMergedChange(1,()=>JSON.stringify({state:'OPEN',baseRefName:'main'})),/not merged/);
   assert.throws(()=>verifyNativeIntegration(()=>JSON.stringify({status:'ACTIVE',integration_present:false})),/not persisted/);
   assert.throws(()=>verifyNativeIntegration(()=>JSON.stringify({status:'PAUSED',integration_present:true,rrule:'FREQ=DAILY;BYHOUR=6;BYMINUTE=0;BYSECOND=0'})),/not persisted/);
+});
+
+test('operational delivery requires exact Pages deployment and fresh public status while scripts stay blocked',async()=>{
+  const merge={merge_sha:'merged'};
+  let head='merged',body='new status',internalStatus=404;
+  const call=(name)=>name==='gh'?JSON.stringify({check_runs:[{id:1,name:'Cloudflare Pages',status:'completed',conclusion:'success',head_sha:head}]}):'new status';
+  const remote=async url=>url.includes('/scripts/')?{status:internalStatus}:{ok:true,url,text:async()=>body};
+  const proof=await verifyOperationalDelivery(merge,call,remote);
+  assert.equal(proof.artifact_source,'data/autopilot-status.json');assert.equal(proof.internal_script_status,404);
+  assert.equal((await verifyActionDelivery(null,merge,call,remote)).artifact_source,'data/autopilot-status.json');
+  await assert.rejects(()=>verifyActionDelivery(undefined,merge,call,remote),/same-site artifact/);
+  body='old status';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/differs/);
+  body='new status';internalStatus=200;await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/publication boundary/);
+  internalStatus=404;head='different';await assert.rejects(()=>verifyOperationalDelivery(merge,call,remote),/exact-commit/);
+});
+
+test('integration proof rejects historical or mismatched ledger rows and retains the human request',()=>{
+  const merge={pr:1306,merge_sha:'merged',merged_at:'2026-09-13T06:53:42Z'};
+  const receipt={bound_autopilot_run_id:'new-run',origin:'goal',started_at:'2026-09-13T05:00:00Z',prior_autopilot_run_ids:[]};
+  let row={run_id:'new-run',route:'owner-session',pr:1306,attempted:true,outcome:'shipped',interventions:[{kind:'request'}]},old=[];
+  const call=(name,args)=>JSON.stringify({runs:args[1].includes('^:')?old:[row]});
+  assert.equal(verifyIntegrationLedger(receipt,merge,call).human_interventions[0].kind,'request');
+  old=[row];assert.throws(()=>verifyIntegrationLedger(receipt,merge,call),/did not introduce/);
+  old=[];row={...row,route:'actions'};assert.throws(()=>verifyIntegrationLedger(receipt,merge,call),/does not match/);
+  assert.throws(()=>verifyIntegrationLedger({...receipt,prior_autopilot_run_ids:['new-run']},merge,call),/new actual run/);
 });
 
 test('only the checked final PR SHA can finish; another successful SHA cannot',()=>{

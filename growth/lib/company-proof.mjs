@@ -60,6 +60,37 @@ export async function verifyPublishedArtifact(artifact,mergeSha,call=run,fetchIm
   return {artifact_source:sourcePath,served_sha256:hash(body)};
 }
 
+export function verifyIntegrationLedger(receipt,merge,call=run) {
+  const id=receipt.bound_autopilot_run_id;
+  if(!id || receipt.prior_autopilot_run_ids?.includes(id) || Date.parse(merge.merged_at)<Date.parse(receipt.started_at)) throw new Error('Integration must bind a new actual run before execution');
+  const ledger=JSON.parse(call('git',['show',merge.merge_sha+':data/autopilot-runs.json']));
+  const row=ledger.runs.find(r=>r.run_id===id);
+  const route=receipt.route??(receipt.origin==='codex-automation'?'actions':'owner-session');
+  if(!row || row.outcome!=='shipped' || row.attempted!==true || row.pr!==merge.pr || row.route!==route) throw new Error('Merged integration ledger does not match the bound action');
+  const prior=JSON.parse(call('git',['show',merge.merge_sha+'^:data/autopilot-runs.json']));
+  if(prior.runs.some(r=>r.run_id===id)) throw new Error('Integration merge did not introduce the bound run');
+  return {canonical_run_id:id,canonical_source:'data/autopilot-runs.json',human_interventions:row.interventions??null};
+}
+
+export async function verifyOperationalDelivery(merge,call=run,fetchImpl=fetch) {
+  const checks=JSON.parse(call('gh',['api',`repos/simplememofast/simplememo/commits/${merge.merge_sha}/check-runs`]));
+  const pages=checks.check_runs?.find(c=>c.name==='Cloudflare Pages' && c.status==='completed' && c.conclusion==='success' && c.head_sha===merge.merge_sha);
+  if(!pages) throw new Error('Merged integration has no successful exact-commit Pages deployment');
+  // The middleware intentionally returns 404 for /scripts and /growth. Keep
+  // that boundary; verify the actual public status consumed by the site.
+  const publicOutput=await verifyPublishedArtifact('/data/autopilot-status.json',merge.merge_sha,call,fetchImpl);
+  const internal=await fetchImpl('https://simplememofast.com/scripts/company-os.mjs',{redirect:'error',signal:AbortSignal.timeout(20000)});
+  if(internal.status!==404) throw new Error('Internal Company script publication boundary changed');
+  return {pages_check_id:pages.id,pages_deployment_url:pages.details_url,...publicOutput,internal_script_status:404,
+    code_delivery:'Reviewed merge on origin/main; native owner creates its next worktree from latest main'};
+}
+
+export async function verifyActionDelivery(artifact,merge,call=run,fetchImpl=fetch) {
+  // An explicit null is the existing ledger's representation for operational
+  // code wiring. It still requires a real deployment and exact public status.
+  return artifact===null?verifyOperationalDelivery(merge,call,fetchImpl):verifyPublishedArtifact(artifact,merge.merge_sha,call,fetchImpl);
+}
+
 export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,fetchImpl=fetch,now=new Date()}) {
   if (!/^[a-f0-9-]{36}$/.test(id)) throw new Error('Invalid Company run ID');
   const dir=privateState(stateRoot), release=acquireLock(dir);
@@ -75,7 +106,7 @@ export async function finishExistingRun({stateRoot,id,evidenceFile,call=run,fetc
     if (!row || row.outcome!=='shipped' || row.attempted!==true || row.pr!==evidence.pr || row.route!==receipt.route) throw new Error('Merged canonical run does not match this action');
     const prior=JSON.parse(call('git',['show',merge.merge_sha+'^:data/autopilot-runs.json']));
     if(prior.runs.some(r=>r.run_id===evidence.run_id)) throw new Error('Merge did not introduce this run');
-    const artifactProof=await verifyPublishedArtifact(row.artifact,merge.merge_sha,call,fetchImpl);
+    const artifactProof=await verifyActionDelivery(row.artifact,merge,call,fetchImpl);
     receipt.status='verified_existing_autopilot'; receipt.finished_at=now.toISOString();
     receipt.stages={detect:'completed',decide:'completed',execute:'completed',verify:'completed',report:'saved',learn:'recorded'};
     receipt.evidence_of_completion={merge,canonical_run_id:row.run_id,canonical_source:'data/autopilot-runs.json',artifact:row.artifact,...artifactProof,
@@ -121,18 +152,17 @@ export async function finishIntegration({ stateRoot, id, evidenceFile, call = ru
     const currentStops = read(path.join(ROOT,'data/emergency-stop.json'));
     if (currentStops.stopped !== false || currentStops.agents?.[route]?.stopped !== false) throw new Error('Current stop gate blocks completion');
     const merge = verifyMergedChange(evidence.pr,call);
+    const canonical = verifyIntegrationLedger(receipt,merge,call);
     const scheduler = verifyNativeIntegration(call);
     const collection = read(evidence.collection_receipt);
     if (collection.status !== 'verified' || collection.source !== 'appsflyer') throw new Error('Verified aggregate collection required');
     const parity = verifyReaderParity(collection,call);
     const testOutput = call(process.execPath,['--test','growth/lib/company.test.mjs']);
-    const sourcePath='scripts/company-os.mjs';
-    const expected=call('git',['show',merge.merge_sha+':'+sourcePath]);
-    const response=await fetchImpl('https://simplememofast.com/'+sourcePath,{redirect:'error',signal:AbortSignal.timeout(20000)});
-    if (!response.ok || hash(await response.text())!==hash(expected)) throw new Error('Served integration source does not match the merged commit yet');
+    const delivery=await verifyOperationalDelivery(merge,call,fetchImpl);
     receipt.status='verified_integration'; receipt.finished_at=now.toISOString();
     receipt.stages={detect:'completed',decide:'completed',execute:'completed',verify:'completed',report:'saved',learn:'recorded'};
-    receipt.evidence_of_completion={merge,scheduler,parity,test_output_sha256:hash(testOutput),served_source_sha256:hash(expected)};
+    receipt.evidence_of_completion={merge,scheduler,parity,canonical,delivery,test_output_sha256:hash(testOutput)};
+    receipt.human_interventions=canonical.human_interventions;
     receipt.human_work_removed={task:'AppsFlyer report collection and handoff',previous:'documented manual reader invocation/date choice/CSV validation',
       current:'existing daily owner invokes and validates the original reader using a source-day receipt',
       legacy_task_index:49,whole_legacy_task_promoted:false,
