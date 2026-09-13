@@ -188,6 +188,81 @@ def current_week(report):
             == dt.datetime.now(tz).isocalendar()[:2])
 
 
+def cached_current_week_report():
+    for cached_path in sorted((STATE / 'runs').glob('*/report.json')):
+        cached = json.loads(cached_path.read_text())
+        if cached.get('series') == SERIES and cached.get('status') == 'ok' and current_week(cached):
+            validate_report(cached, healthy=True)
+            return cached
+    return None
+
+
+def scheduled_slot(at=None):
+    tz = dt.timezone(dt.timedelta(hours=9))
+    local = (at or dt.datetime.now(tz)).astimezone(tz)
+    monday = local.replace(hour=6, minute=47, second=0, microsecond=0) - dt.timedelta(days=local.weekday())
+    return local, monday + dt.timedelta(days=2)
+
+
+def scheduled_collect(at=None):
+    """Existing daily owner catches the Wednesday slot; one paid attempt/week."""
+    local, slot = scheduled_slot(at)
+    if local < slot:
+        return {'status': 'not_due', 'slot_jst': slot.isoformat(), 'model_calls': 0}
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    info = STATE.lstat()
+    require(not STATE.is_symlink() and info.st_uid == os.getuid() and info.st_mode & 0o077 == 0,
+            'Visibility state must be owned and private')
+    fd = os.open(STATE / 'scheduled.lock', os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'w') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        if REPORT.exists():
+            previous = json.loads(REPORT.read_text())
+            if previous.get('series') == SERIES and previous.get('status') == 'ok':
+                validate_report(previous)
+                require(dt.datetime.fromisoformat(previous['observed_at']) <= dt.datetime.now(dt.timezone.utc),
+                        'Future observation cannot justify scheduled execution')
+                if current_week(previous):
+                    validate_report(previous, healthy=True)
+                    return {'status': 'current_week_output_present', 'run_id': previous['run_id'], 'model_calls': 0}
+        shared_fd = os.open(STATE / 'run.lock', os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(shared_fd, 'w') as shared_lock:
+            fcntl.flock(shared_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            cached = cached_current_week_report()
+            if cached:
+                preflight()
+                save_report(cached)
+                return {'status': 'restored_current_week_output', 'run_id': cached['run_id'], 'model_calls': 0,
+                        'publication': 'Resume the existing reviewed publication; do not resample.'}
+        year, week, _ = local.isocalendar()
+        attempt = STATE / f'scheduled-{year}-W{week:02d}.json'
+        if attempt.exists():
+            prior = json.loads(attempt.read_text())
+            return {'status': 'weekly_attempt_reserved', 'attempt_state': prior['status'],
+                    'model_calls': 0, 'next': 'Inspect the retained run; do not resample automatically.'}
+        def persist(record):
+            temporary = attempt.with_suffix('.' + str(uuid.uuid4()) + '.tmp')
+            fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(fd, 'w') as output:
+                json.dump(record, output)
+            temporary.replace(attempt)
+        record = {'slot_jst': slot.isoformat(), 'reserved_at': now(), 'status': 'reserved',
+                  'maximum_questions': 5, 'cost_usd': None, 'owner': 'existing obsidian daily owner'}
+        persist(record)
+        try:
+            collect()
+            report = json.loads(REPORT.read_text())
+            validate_report(report, healthy=True)
+            require(current_week(report), 'Returned observation does not belong to this week')
+            record.update(status='observation_verified', run_id=report['run_id'])
+        except Exception:
+            record.update(status='failed_or_output_unverified', next='Inspect original private logs; no automatic paid rerun.')
+            persist(record)
+            raise
+        persist(record)
+        return {**record, 'publication': 'pending existing PR, exact CI, merge and served-output verification'}
+
+
 def save_report(result):
     text = json.dumps(result, ensure_ascii=False, indent=2) + '\n'
     history = ROOT / 'data/ai-visibility-history'
@@ -210,13 +285,11 @@ def collect():
                 if current_week(previous):
                     print('This JST week already has a complete Codex observation; no resampling.')
                     return
-        for cached_path in sorted((STATE / 'runs').glob('*/report.json')):
-            cached = json.loads(cached_path.read_text())
-            if cached.get('series') == SERIES and cached.get('status') == 'ok' and current_week(cached):
-                validate_report(cached, healthy=True)
-                save_report(cached)
-                print('Reused this JST week\'s completed local observation; finish publishing it without resampling.')
-                return
+        cached = cached_current_week_report()
+        if cached:
+            save_report(cached)
+            print('Reused this JST week\'s completed local observation; finish publishing it without resampling.')
+            return
         run_id, started = str(uuid.uuid4()), now()
         folder = STATE / 'runs' / run_id
         folder.mkdir(parents=True, mode=0o700)
@@ -242,9 +315,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--check-report', action='store_true')
     parser.add_argument('--health', action='store_true')
+    parser.add_argument('--scheduled', action='store_true')
     args = parser.parse_args()
     if args.check_report or args.health:
         validate_report(json.loads(REPORT.read_text()), healthy=args.health)
         print('Codex observation verified' + (' and current.' if args.health else '.'))
+    elif args.scheduled:
+        print(json.dumps(scheduled_collect(), ensure_ascii=False))
     else:
         collect()
