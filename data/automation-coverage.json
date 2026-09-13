@@ -52,7 +52,8 @@
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
     "開発領域の変更行比率94.2%に相当する客観指標が他領域には無い",
-    "返金検出1件は、2026-09-13の明示承認によりテストでの運用準備完了と本番自動監視で計上。本番の返金初回検出やApple Sandbox REFUNDの完走実績ではない。変更前の基準では159/176=90.340909%。"
+    "返金検出1件は、2026-09-13の明示承認によりテストでの運用準備完了と本番自動監視で計上。本番の返金初回検出やApple Sandbox REFUNDの完走実績ではない。返金の条件変更時点の比較は159/176=90.340909%（後続の月次予算・課金回復準備の加点前）。",
+    "返金検出と課金失敗回復の2件は、所有者指定のテスト済み運用準備＋稼働確認済み本番監視で計上。本番の初回返金・初回課金回復は未観測。課金回復準備直前は161/177=90.960452%、直後162/178=91.011236%。この2件を実例必須として除いた参考値は160/176=90.909091%。"
   ],
   "tasks": [
     {
@@ -1882,17 +1883,22 @@
     {
       "area": "⑨ マネタイズ",
       "task": "課金失敗の回復",
-      "executor": "nobody",
+      "executor": "ai_executes_gated",
       "evidence": [
         "../simplememo-ios/SimpleMemo/SubscriptionRenewalState.swift",
         "../simplememo-ios/SimpleMemo/SettingsViewController.swift",
         "../simplememo-ios/SimpleMemoTests/SubscriptionLogicTests.swift",
-        "../simplememo-ios/docs/implementation/billing-recovery-settings.md"
+        "../simplememo-ios/docs/implementation/billing-recovery-settings.md",
+        "../simplememo-api/src/billing-recovery-monitor.ts",
+        "../simplememo-api/test/billing-recovery-readiness.integration.test.ts",
+        "../simplememo-api/test/billing-recovery-monitor.test.ts",
+        "docs/billing-recovery-tested-readiness-20260913.md",
+        "data/billing-recovery-readiness-20260913.json"
       ],
-      "note": "StoreKit側の失敗イベントを受ける経路が未実装。**[2026-08-26] 検知の側だけ配線が入った** ——Subscription State Report の `State Metric` に Billing Retry / Grace Period が入るので、asc_subscription.rb がそれを課金失敗として拾う（別行「課金失敗・解約の観測」）。**この行は nobody のまま。**数えているのは『回復させたか』であって『気づけるか』ではない。回復（アプリ内での告知・支払い方法の更新導線）は1つも実装していない。**気づけることを回復と数えない。**\n\n2026-09-08訂正: 「回復導線は1つも実装していない」は過去の状態。iOS PR387（merge d3dab4406e95fd0352818685810e880bc620a6fd、2026-09-07）で、署名検証済みの請求再試行・猶予期間を読み、設定の購入提案を支払い情報更新への案内に置き換える処理が実装された。Appleの支払い設定を利用者のタップで開き、画面復帰時に再取得する。現行mainの処理と実装文書を確認済み。既存購読・未検証状態の混在では表示を抑制し、権利付与や価格は変更しない。実装を繰り返す必要はないが、実際の請求問題からの回復は未確認のためexecutor=nobodyを維持する。",
-      "blocker": "verification_pending",
-      "unblocked_by": "実装済み導線を含むTestFlight版での実機確認、Apple支払い画面への遷移、実際の請求問題解消後の再取得・案内消去の証跡を確認する。単体テスト・画面文言の存在・ビルド配布だけで実回復とは数えない。新規購入や課金を検証のために作らず、実際の回復機会と検証可能な状態を待つ。",
-      "unlock": "impl_product"
+      "note": "StoreKit側の失敗イベントを受ける経路が未実装。**[2026-08-26] 検知の側だけ配線が入った** ——Subscription State Report の `State Metric` に Billing Retry / Grace Period が入るので、asc_subscription.rb がそれを課金失敗として拾う（別行「課金失敗・解約の観測」）。**この行は nobody のまま。**数えているのは『回復させたか』であって『気づけるか』ではない。回復（アプリ内での告知・支払い方法の更新導線）は1つも実装していない。**気づけることを回復と数えない。**\n\n2026-09-08訂正: 「回復導線は1つも実装していない」は過去の状態。iOS PR387（merge d3dab4406e95fd0352818685810e880bc620a6fd、2026-09-07）で、署名検証済みの請求再試行・猶予期間を読み、設定の購入提案を支払い情報更新への案内に置き換える処理が実装された。Appleの支払い設定を利用者のタップで開き、画面復帰時に再取得する。現行mainの処理と実装文書を確認済み。既存購読・未検証状態の混在では表示を抑制し、権利付与や価格は変更しない。実装を繰り返す必要はないが、実際の請求問題からの回復は未確認のためexecutor=nobodyを維持する。\n\n[2026-09-13 完了条件変更] 返金と同様のテスト済み運用準備を提案し、オーナーが「スコアすぐあがるなら進めて」と指定。この1業務に限り、既存支払い案内の状態判定・設定セルの遷移テスト、検証済み通知のHTTP受信→実D1→重複抑止→回復監視テスト、配信済みの毎時監視の自然発火と既存フォローアップへの接続を完了条件にした。StoreKit状態はfixtureであり、Apple支払い画面での本人操作・Sandbox実決済・本番の実回復は未確認のまま別に保持する。新たな購入や請求失敗を作らず、回復通知も案内UIの効果に帰属させない。後日の本番初回回復で二重加点しない。変更直前161/177=90.960452%、変更後162/178=91.011236%、増分は約0.050784ポイント。全社月次予算の別セッションによる加点は維持し、本変更に帰属させない。",
+      "since": "2026-09",
+      "acceptance_basis": "test_verified_readiness_and_active_production_monitoring",
+      "production_billing_recovery_observed_at": null
     },
     {
       "area": "⑨ マネタイズ",
@@ -2766,6 +2772,28 @@
         "defined": 192
       },
       "delta_ai_execution_pp": 0.054571135079606314
+    },
+    {
+      "id": "billing-recovery-tested-readiness-20260913",
+      "approved_by": "owner",
+      "task_index": 145,
+      "previous_executor": "nobody",
+      "executor": "ai_executes_gated",
+      "scope": "この1業務のみ。全203タスクと定義対象192タスクは不変。",
+      "previous_criterion": "実機でApple支払い画面へ遷移し、実際の請求問題解消後の再取得・案内消去を確認する",
+      "criterion": "既存案内と検証済み通知経路のテストで運用準備を完了し、本番の初回課金回復は稼働確認済みの自動監視に任せる",
+      "evidence": "data/billing-recovery-readiness-20260913.json",
+      "previous": {
+        "ai_executes": 161,
+        "doing": 177,
+        "defined": 192
+      },
+      "current": {
+        "ai_executes": 162,
+        "doing": 178,
+        "defined": 192
+      },
+      "delta_ai_execution_pp": 0.0507839776550556
     }
   ]
 }

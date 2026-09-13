@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "recorded_at": "2026-09-13T08:01:42.564029+00:00",
+  "acceptance": {
+    "id": "billing-recovery-tested-readiness-20260913",
+    "task_index": 145,
+    "approved_by": "owner",
+    "basis": "test_verified_readiness_and_active_production_monitoring",
+    "previous": {
+      "ai_executes": 161,
+      "doing": 177,
+      "defined": 192
+    },
+    "current": {
+      "ai_executes": 162,
+      "doing": 178,
+      "defined": 192
+    },
+    "delta_ai_execution_pp": 0.0507839776550556,
+    "scope": "task145_only",
+    "repeat_credit_on_first_production_recovery": false
+  },
+  "tests": {
+    "api": {
+      "source_commit": "5e2833156f8b4a04f69f0a5ace1750152a84be9e",
+      "ci_url": "https://github.com/simplememofast/simplememo-api/actions/runs/34745227934",
+      "typecheck": "passed",
+      "unit": {
+        "passed": 2922,
+        "files": 128
+      },
+      "integration": {
+        "passed": 203,
+        "files": 18
+      },
+      "billing_readiness_integration": {
+        "passed": 13,
+        "runtime": "local_workerd_and_D1",
+        "signature_boundary": "mocked_in_test_only"
+      },
+      "billing_monitor_unit": {
+        "passed": 13
+      }
+    },
+    "ios": {
+      "pr": 503,
+      "passed": 26,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "runtime": "iPhone 17 Pro Simulator / iOS 26.5",
+      "scheme": "SimpleMemoQA",
+      "plan": "SimpleMemo-FastUnit",
+      "suite": "SubscriptionLogicTests",
+      "storekit_observations": "fixtures",
+      "foreground_storekit_network_e2e": false,
+      "xcresult_summary_sha256": "0ca30983ff44008684007037cae79a7a55afb3623f2932492e09f0bf5240555c",
+      "source_commit": "90f04f5fffd78f930bc9f3c45b1efb9525423405",
+      "merge_commit": "9dc0164e67f61d0cef4c9cd1db3240efcd4c7273",
+      "merged_at": "2026-09-13T07:43:23Z",
+      "ci": {
+        "static": "passed",
+        "parity": "passed",
+        "xcode_cloud_build": "passed",
+        "xcode_cloud_fast_unit": "passed",
+        "xcode_cloud_url": "https://appstoreconnect.apple.com/apps/6758438948/ci/builds/3fe41b55-8e98-43d7-a515-45854ff9910a"
+      }
+    },
+    "apple_signature": "Existing actual Apple TEST JWS/root/tampering tests; separate live TEST delivery through production verifier.",
+    "apple_sandbox_billing_recovery_e2e": false,
+    "production_fixture_inserted": false
+  },
+  "production": {
+    "actual_billing_recovery_observed": false,
+    "observation_scope": "stored_production_notifications_last_180_days",
+    "guidance_attribution": "not_measured",
+    "deployment": {
+      "repository": "simplememofast/simplememo-api",
+      "pr": 318,
+      "merge_commit": "169748116bc019d64dd9b0e8c5a4f25a30c7f0e4",
+      "version": "1.5.75",
+      "worker_version_id": "3ad015c4-c61b-48ab-97b6-e4f8f49f25b5",
+      "build_id": "4e2737aa-8b7d-468b-9bda-c620d4b72b26",
+      "deployed_at": "2026-09-13T07:32:00.479651Z",
+      "status_http": 200
+    },
+    "apple_test_delivery": {
+      "environment": "production",
+      "observed_at": "2026-09-13T07:34:38Z",
+      "http_status": 200,
+      "result": "SUCCESS",
+      "first_attempt_at": "2026-09-13T07:34:38.508000+00:00",
+      "source_commit": "4a3d74deabed3517a29d0b4e0f10477b9f585b82",
+      "run_url": "https://github.com/simplememofast/simplememo-ios/actions/runs/34745565435",
+      "notification_type": "TEST"
+    },
+    "scheduled_observation": {
+      "job_name": "billing_recovery_monitor",
+      "cron_expression": "0 * * * *",
+      "started_at": "2026-09-13T08:00:48.367000+00:00",
+      "finished_at": "2026-09-13T08:00:48.608000+00:00",
+      "eligible": 0,
+      "sent": 0,
+      "skipped": 0,
+      "errors": 0,
+      "last_error": null,
+      "reason": "awaiting_production_billing_recovery",
+      "readback_rows_written": 0,
+      "readback_source": "production_D1_cron_run_log",
+      "manually_triggered": false
+    }
+  },
+  "continuation": {
+    "automation_id": "ai-90",
+    "status": "ACTIVE",
+    "updated_at": "2026-09-13T07:34:54.326000+00:00",
+    "worker_observation": "hourly",
+    "follow_up": "existing twice-daily continuation",
+    "stale_after_hours": 2,
+    "missing_or_error_is_zero": false,
+    "first_positive_action": "Verify Production DID_RENEW/BILLING_RECOVERY and record privately; no repeat readiness credit."
+  },
+  "limits": [
+    "Local fixture tests are not Apple-issued Sandbox billing recovery.",
+    "TEST delivery is not a customer billing failure or recovery.",
+    "No purchase, payment-method change, artificial failure, customer message or TestFlight distribution was performed.",
+    "StoreKit foreground network and external Apple payment UI are not exercised by the state/cell fixture test.",
+    "Retained notification counts cannot establish current entitlement, recovery rate or causal UI effect."
+  ]
+}
