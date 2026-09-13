@@ -1476,12 +1476,15 @@
     {
       "area": "⑥ アプリ運営意思決定",
       "task": "月次予算の決定",
-      "executor": "human_only",
-      "evidence": [],
-      "blocker": "external_data",
-      "unblocked_by": "全体の運営予算として収入・銀行残高・ベンダー実支出・観測範囲を照合し、資金制約と配分を決めて適用する。AI費用だけの決定を二重計上しない。",
-      "note": "2026-09-07: オーナーの包括承認で実行は委任されたが、全体の運営予算は未決定。主系AI費用のseq=3は⑤に一度だけ計上する。Appleの月次購入集計は非公開側で取得済みだが確定入金ではなく、全社サービス費用・配賦・残高との照合が残る。executorは既存のhuman_onlyのまま（直近の実行者であり、新たな承認要求ではない）。",
-      "unlock": "revenue_28d"
+      "executor": "ai_executes_gated",
+      "evidence": [
+        "data/company-monthly-budget.json",
+        "data/company-monthly-budget-execution.json",
+        "scripts/company-monthly-budget.mjs",
+        "scripts/press-release-next.mjs",
+        "docs/company-monthly-budget-20260913.md"
+      ],
+      "note": "2026-09-13: オーナーの明示委任に基づきAIが全社の月次予算を策定。銀行取得残高と帳簿残高、会計取引、支払原本、過去精算を照合し、通常運営計画・過去精算・条件付き不足資金を区別した。9月末までの追加任意支出0円と既存義務保護を決定し、PR1302で支出管理へ適用。本番main版の実在PR候補で全社予算による保留、原本のある既存精算項目で義務維持を実行。公開設定のHTTP200・SHA一致を読戻しした。主系AI280USDの再設定ではなく全社予算の決定・適用1件。銀行やカードの全決済の自動制御、送金、過去精算完了、月次締めは加点対象外。"
     },
     {
       "area": "⑥ アプリ運営意思決定",
