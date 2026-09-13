@@ -717,6 +717,18 @@
       "expr": "budget.max_basic_charge_excl_tax_jpy",
       "disposition": "別に検出",
       "note": "2026-09-08: validate independently fixes the cap to 30000 JPY excluding tax. Missing or raised caps are rejected; unknown, negative, string, and over-cap prices also fail chargeVerified. Removing the charge guard in a temporary mutant caused 16 test failures, including over-cap pricing and paid FAX."
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "action.auto",
+      "disposition": "前提",
+      "note": "2026-09-13: AIへの明示委任があるセッション作業の担当分類は、無人handlerが無い場合だけ適用する。autoの欠落だけでは許可にならず、force_owner=ai・所有者の委任証跡・理由が必須。handlerがある場合は従来の権限検査へ進む。委任なしとhandlerありの回帰検査でhumanを維持することを確認。"
+    },
+    {
+      "file": "scripts/autopilot-act.mjs",
+      "expr": "sum.pending_pr?.length",
+      "disposition": "報告のみ",
+      "note": "2026-09-13: 未処理なしの表示は、要対応・PR待ち・期日待ちがすべて空の場合に限る。任意の旧PR欄の欠落は空扱いだが、期日待ちを消したり行を閉じたりしない。未来行は別枠で表示し、期日当日に担当へ戻る自己検査を確認。"
     }
   ],
   "coverage_measured_at": "2026-09-03",
