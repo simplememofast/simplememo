@@ -1316,7 +1316,7 @@ jobs:
         run: node --test growth/lib/analytics-export.test.mjs growth/lib/backup-inventory.test.mjs growth/lib/gcp-schedule-inventory.test.mjs
 
       - name: Autonomous Company source boundaries and recovery
-        run: node --test growth/lib/company.test.mjs
+        run: node --test growth/lib/company.test.mjs growth/lib/company-connection-evidence.test.mjs
       - name: Test GA4 funnel SQL with synthetic events
         run: |
           python3 -m venv "$RUNNER_TEMP/ga4-sql-tests"

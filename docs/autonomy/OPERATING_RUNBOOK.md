@@ -24,6 +24,8 @@ Authenticated console observations use private `discovery/browser-inventory.json
 
 Private runtime files must remain outside every Git checkout, in an owned 0700 directory with 0600 files. Do not commit customer data, ASC revenue, AppsFlyer rows, decrypted BigQuery results, native prompts, shell history, account/task inventory or credentials. Public site assets can expose even robots-disallowed documents.
 
+Existing Apple Ads configuration can be observed read-only in the authenticated AppsFlyer partner view. Retain the scoped observation privately as `data/apple-ads-configuration.json`; `growth/lib/company-connection-evidence.mjs` accepts only the expected provider/app/account and observations no older than seven days. Active attribution configuration does not prove installs or cost ingestion. Invalid cost credentials, missing plan access and unknown costs remain explicit; do not create another connection, retry rejected credentials, buy access or change campaigns to clear a source limit.
+
 ## One native run
 
 1. Confirm the actual native automation ID, planned slot and task ID with the existing native scheduler/preflight reader. Keep the original `actions` route and stop key for `obsidian`. Manual Goal/bootstrap execution is `owner-session` with its recorded human request; do not manufacture a scheduled origin. Existing stop, unresolved claim, budget or preflight rejection is not bypassed by this OS.
