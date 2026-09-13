@@ -51,7 +51,7 @@ function validRun(run, now) {
 }
 
 export async function confirmCronRecovery({ github, owner, repo, issue, now = Date.now(),
-  perPage = 100, maxPages = 5 }) {
+  perPage = 100, maxPages = 5, initialAttemptOnly = false }) {
   if (!integer(issue?.number) || issue.pull_request || typeof issue.body !== 'string' || !Number.isFinite(now)
     || !integer(perPage) || perPage > 100 || !integer(maxPages) || maxPages > 5) return unknown('追跡するIssueまたは取得上限が不正');
   try {
@@ -92,6 +92,7 @@ export async function confirmCronRecovery({ github, owner, repo, issue, now = Da
       if (entry.refs.some(id => !runs.some(r => r.id === id))) return unknown(`workflow ${workflow_id} の一覧が故障runを覆っていない`);
       const latest = runs.reduce((a, b) => a.run_number > b.run_number ? a : b);
       if (latest.run_number < entry.number || latest.status !== 'completed' || latest.conclusion !== 'success'
+        || (initialAttemptOnly && latest.run_attempt !== 1)
         || Date.parse(latest.created_at) < (entry.not_before ?? 0)) {
         return unknown(`workflow ${workflow_id} の最新定期実行 ${latest.id} は成功を確認できない`);
       }
@@ -104,9 +105,72 @@ export async function confirmCronRecovery({ github, owner, repo, issue, now = Da
   }
 }
 
+// A frequent recovery check should wake Act only while an actual issue closure
+// remains absent from its ledger. Read failure is not a closure.
+export async function cronRecoveryIntakeDecision({ github, owner, repo, ledger }) {
+  if (!Array.isArray(ledger?.actions)) return { needed: false, reason: 'invalid_ledger' };
+  const ids = [...new Set(ledger.actions.filter(a => a.source === 'health' && a.state !== 'done'
+    && a.close_check?.kind === 'issue_closed').map(a => a.close_check.params?.issue))];
+  if (ids.length > 50 || ids.some(id => !integer(id))) return { needed: false, reason: 'invalid_targets' };
+  try {
+    const closed = [];
+    for (const issue_number of ids) {
+      const { data: issue } = await github.rest.issues.get({ owner, repo, issue_number });
+      if (issue?.number !== issue_number || issue.pull_request || !['open', 'closed'].includes(issue.state)
+        || !Array.isArray(issue.labels)) return { needed: false, reason: 'unknown_issue' };
+      if (issue.state === 'closed' && issue.labels.some(l => (typeof l === 'string' ? l : l?.name) === 'ops/cron-failure')) closed.push(issue_number);
+    }
+    return { needed: closed.length > 0, issues: closed, reason: closed.length ? 'closure_not_in_ledger' : 'unchanged' };
+  } catch {
+    return { needed: false, reason: 'read_failed' };
+  }
+}
+
 export async function selftest() {
   const errors = await silenceSelftest();
   const check = (yes, message) => { if (!yes) errors.push(message); };
+  const healthAction = { source: 'health', state: 'open', close_check: { kind: 'issue_closed', params: { issue: 7 } } };
+  for (const [state, actionState, expected] of [['open', 'open', false], ['closed', 'open', true], ['closed', 'done', false]]) {
+    const decision = await cronRecoveryIntakeDecision({ owner: 'o', repo: 'r', ledger: { actions: [{ ...healthAction, state: actionState }] },
+      github: { rest: { issues: { get: async () => ({ data: { number: 7, state, labels: [{ name: 'ops/cron-failure' }] } }) } } } });
+    check(decision.needed === expected, 'Cron復旧の台帳差分とAct起動が一致しない');
+  }
+  for (const response of [null, { number: 8, state: 'closed', labels: ['ops/cron-failure'] },
+    { number: 7, state: 'closed', labels: ['ops/autopilot-stale'] },
+    { number: 7, state: 'closed', labels: ['ops/cron-failure'], pull_request: {} }]) {
+    const decision = await cronRecoveryIntakeDecision({ owner: 'o', repo: 'r', ledger: { actions: [healthAction] },
+      github: { rest: { issues: { get: async () => { if (!response) throw new Error('API'); return { data: response }; } } } } });
+    check(!decision.needed, '不明・別Issue・別監視・PRでActを起動した');
+  }
+  const actWorkflow = fs.readFileSync(new URL('../../.github/workflows/autopilot-act.yml', import.meta.url), 'utf8');
+  const intakeJob = actWorkflow.split('  cron-recovery-intake:\n')[1]?.split('\n  act:')[0];
+  const intakeSource = intakeJob?.split('          script: |\n')[1]?.split('\n').map(s => s.replace(/^            /, '')).join('\n');
+  const actExpression = actWorkflow.split('\n  act:\n')[1]?.match(/    if: >-\n((?: {6,}.+\n)+)/)?.[1]?.trim();
+  check(Boolean(intakeSource && actExpression) && actWorkflow.includes('needs: [routine-intake, cron-recovery-intake]'),
+    'Cron復旧の差分gateがActに接続されていない');
+  if (intakeSource && actExpression) {
+    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    const execute = new AsyncFunction('github', 'core', 'context', 'process', 'require', intakeSource);
+    for (const [state, conclusion, expected] of [['open', 'success', 'false'], ['closed', 'success', 'true'],
+      ['closed', 'skipped', 'false'], ['closed', 'failure', 'false']]) {
+      const outputs = {};
+      await execute({ rest: { issues: { get: async () => ({ data: { number: 7, state, labels: ['ops/cron-failure'] } }) } } },
+        { setOutput: (key, value) => { outputs[key] = value; }, notice() {} },
+        { repo: { owner: 'o', repo: 'r' }, payload: { repository: { default_branch: 'main' },
+          workflow_run: { conclusion, head_branch: 'main', head_repository: { full_name: 'o/r' } } } },
+        { env: { GITHUB_WORKSPACE: fileURLToPath(new URL('../../', import.meta.url)) } },
+        () => ({ readFileSync: () => JSON.stringify({ actions: [healthAction] }) }));
+      check(outputs.needed === expected, '実workflowがCron状態差分または上流の結論を無視した');
+    }
+    const admitAct = new Function('needs', 'github', 'always', 'cancelled', 'startsWith',
+      `return Boolean(${actExpression.replace(/needs\.([a-z-]+)/g, 'needs["$1"]')})`);
+    for (const [result, needed, expected] of [['success', 'true', true], ['success', 'false', false],
+      ['failure', undefined, false], ['skipped', undefined, true]]) {
+      const needs = { 'routine-intake': { result: 'skipped' }, 'cron-recovery-intake': { result, outputs: { needed } } };
+      check(admitAct(needs, { event_name: 'workflow_run' }, () => true, () => false, () => false) === expected,
+        'Actの実条件式が未変更・読取失敗・従来経路を誤判定した');
+    }
+  }
   const line = id => `  - 2026/9/1 7:00:00 JST — https://github.com/o/r/actions/runs/${id}`;
   const run = (id, number, extra = {}) => ({ id, run_number: number, workflow_id: 10, event: 'schedule',
     created_at: '2026-09-01T00:00:00Z', status: 'completed', conclusion: 'failure', run_attempt: 1, ...extra });
@@ -186,6 +250,24 @@ export async function selftest() {
   // 実際のworkflowのscriptを実行する。GitHubへの読み書きだけを検体へ差し替える。
   // helper単体が正しくても、呼び出し側がconfirmedを無視すれば故障を閉じてしまう。
   const workflow = fs.readFileSync(new URL('../../.github/workflows/cron-health.yml', import.meta.url), 'utf8');
+  const trigger = workflow.match(/    if: >-\n((?: {6,}.+\n)+)/)?.[1]?.trim();
+  check(workflow.includes('workflows: ["Decision Monitor"]') && workflow.includes('types: [completed]')
+    && Boolean(trigger), '定期成功による復旧確認の起動が接続されていない');
+  if (trigger) {
+    // Exercise the actual job expression, not a second copy of the condition.
+    const admitted = new Function('github', `return Boolean(${trigger})`);
+    const github = { event_name: 'workflow_run', repository: 'o/r', event: { repository: { default_branch: 'main' },
+      workflow_run: { event: 'schedule', run_attempt: 1, conclusion: 'success', head_branch: 'main', head_repository: { full_name: 'o/r' } } } };
+    check(admitted(github), '同一リポジトリの定期成功が復旧確認を起動しない');
+    for (const change of [{ event: 'workflow_dispatch' }, { event: 'workflow_run' }, { conclusion: 'failure' },
+      { conclusion: null }, { run_attempt: 2 }, { run_attempt: null }, { run_attempt: undefined }, { head_branch: 'feature' }, { head_repository: { full_name: 'fork/r' } }]) {
+      check(!admitted({ ...github, event: { ...github.event, workflow_run: { ...github.event.workflow_run, ...change } } }),
+        '手動・マージ・失敗・別headを定期成功の起動とした');
+    }
+    for (const event_name of ['schedule', 'workflow_dispatch']) {
+      check(admitted({ event_name }), '従来の監視起動を止めた');
+    }
+  }
   const source = workflow.split('          script: |\n')[1]?.split('\n').map(s => s.replace(/^            /, '')).join('\n');
   check(Boolean(source?.includes('confirmCronRecovery')), 'workflowから復旧確認が切断されている');
   if (source) {
@@ -194,7 +276,7 @@ export async function selftest() {
     const frozenNow = Date.parse('2026-09-04T00:00:00Z');
     class Clock extends Date { constructor(value = frozenNow) { super(value); } static now() { return frozenNow; } }
     async function workflowCase(options, { open = true, pullRequest = false, incomplete = false,
-      silent = false, unavailableLiveness = false } = {}) {
+      silent = false, unavailableLiveness = false, eventName = 'workflow_dispatch' } = {}) {
       const f = fixture(options); const writes = [];
       Object.assign(f.github.rest.issues, {
         listForRepo: async () => ({ data: open ? [{ ...f.args.issue, state: 'open', ...(pullRequest ? { pull_request: {} } : {}) }] : [] }),
@@ -217,7 +299,7 @@ export async function selftest() {
       let error = null;
       try {
         await execute(f.github, { notice() {}, warning() {}, summary },
-          { repo: { owner: 'o', repo: 'r' }, serverUrl: 'https://github.com', runId: 999, eventName: 'workflow_dispatch' },
+          { repo: { owner: 'o', repo: 'r' }, serverUrl: 'https://github.com', runId: 999, eventName },
           { env: { GITHUB_WORKSPACE: fileURLToPath(new URL('../../', import.meta.url)) } }, Clock);
       } catch (e) { error = e; }
       return { writes, error };
@@ -249,6 +331,21 @@ export async function selftest() {
     const afterResume = await workflowCase({ body: marker, recent: [resumed] });
     check(!afterResume.error && afterResume.writes.some(w => w.state === 'closed')
       && afterResume.writes.some(w => w.body?.includes('/actions/runs/104 (completed/success)')), '実workflowが再開後の成功と閉鎖を接続しない');
+    const wakeup = await workflowCase({}, { eventName: 'workflow_run' });
+    check(!wakeup.error && wakeup.writes.some(w => w.kind === 'update' && w.state === 'closed')
+      && wakeup.writes.some(w => w.body?.includes('/actions/runs/102 (completed/success)')), '定期成功の起動が全対象の復旧確認と閉鎖を接続しない');
+    for (const options of [{ open: false }, { open: false, silent: true }, { silent: true }]) {
+      const result = await workflowCase({}, { ...options, eventName: 'workflow_run' });
+      check(!result.error && result.writes.length === 0, '復旧専用の起動が新規通知または未回復の追記をした');
+    }
+    for (const options of [{ recent: [failed] }, { failRead: 'comments' },
+      { recent: [failed, recovered, run(103, 3, { status: 'in_progress', conclusion: null })] },
+      ...[2, null, undefined].map(run_attempt => ({ recent: [failed, { ...recovered, run_attempt }] })),
+      { comments: [{ body: line(201) }], recent: [failed, recovered, run(201, 1, { workflow_id: 20 }),
+        run(202, 2, { workflow_id: 20, conclusion: 'success', run_attempt: 2 })] }]) {
+      const result = await workflowCase(options, { eventName: 'workflow_run' });
+      check(!result.error && result.writes.length === 0, '起動を根拠に失敗・読取不能・新しい未終了実行を無視して閉じた');
+    }
   }
   return errors;
 }

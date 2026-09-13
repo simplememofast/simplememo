@@ -98,13 +98,49 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `needed=${decision.needed}\n`);
           JS
 
+  cron-recovery-intake:
+    # The frequent recovery-only Cron callback must not run the full actuator
+    # when no issue state changed. Daily/manual Cron runs keep their old path.
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.name == 'Cron Health' &&
+      github.event.workflow_run.event == 'workflow_run'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      issues: read
+    outputs:
+      needed: ${{ steps.observe.outputs.needed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/github-script@v7
+        id: observe
+        with:
+          script: |
+            const { cronRecoveryIntakeDecision } = await import(`${process.env.GITHUB_WORKSPACE}/scripts/lib/cron-recovery.mjs`);
+            const fs = require('node:fs');
+            const ledger = JSON.parse(fs.readFileSync('data/autopilot-actions.json', 'utf8'));
+            const upstream = context.payload.workflow_run;
+            const trusted = upstream.conclusion === 'success'
+              && upstream.head_branch === context.payload.repository.default_branch
+              && upstream.head_repository?.full_name === `${context.repo.owner}/${context.repo.repo}`;
+            const decision = trusted
+              ? await cronRecoveryIntakeDecision({ github, ...context.repo, ledger })
+              : { needed: false, reason: 'upstream_not_successful_or_trusted' };
+            core.setOutput('needed', String(decision.needed));
+            core.notice(JSON.stringify(decision));
+
   act:
-    needs: routine-intake
+    needs: [routine-intake, cron-recovery-intake]
     # A routine observation should wake intake. If this job's optional API
     # observer writes a snapshot, its own merge must not create a publish loop.
     if: >-
       always() && !cancelled() &&
       (needs.routine-intake.result == 'skipped' || needs.routine-intake.outputs.needed == 'true') &&
+      (needs.cron-recovery-intake.result == 'skipped' || needs.cron-recovery-intake.outputs.needed == 'true') &&
       (github.event_name != 'push' ||
       (!startsWith(github.event.head_commit.message, '日次アクチュエータの同期（') &&
        !startsWith(github.event.head_commit.message, 'chore(autopilot): 日次アクチュエータの同期（')))
