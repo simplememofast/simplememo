@@ -92,19 +92,21 @@ function bar(label, value, detail, state = '') {
 // ── 各パネル ───────────────────────────────────────────
 
 const o = rate.overall;
+const readinessCount = coverage.tasks.filter(t =>
+  ['ai_autonomous', 'ai_executes_gated'].includes(t.executor)
+  && t.acceptance_basis === 'test_verified_readiness_and_active_production_monitoring').length;
 const thesis = panel({
   title: '自動化率 — 4つの分母',
-  lede: '<strong>1つの数字にすると、必ず都合のよい数字になる。</strong>どれか1つだけを出さない。'
-      + '分母を変えれば 31% にも 82% にもなる。同じ現実である。',
+  lede: '未着手を含む率、実施中の業務に対する率、提案を含む率を併記します。',
   body: `<div class="readouts readouts--four">
-    ${readout({ label: '総合自動化率', value: pct(o.overall_automation_rate), note: `定義タスク ${o.defined}（未実装63を含む・最も厳しい）`, state: 'crit' })}
+    ${readout({ label: '総合自動化率', value: pct(o.overall_automation_rate), note: `定義タスク ${o.defined}（未着手 ${o.counts.nobody} を含む）`, state: 'crit' })}
     ${readout({ label: 'AI実行率', value: pct(o.ai_execution_rate), note: `実施中 ${o.doing}（未実装を除く）`, state: 'warn' })}
     ${readout({ label: 'AI関与率', value: pct(o.ai_involvement_rate), note: `実施中 ${o.doing}（提案・下書きも数える・最も甘い）`, state: 'ok' })}
     ${readout({ label: 'カバー率', value: pct(o.coverage_rate), note: 'そもそも誰かがやっているタスクの割合', state: 'warn' })}
   </div>
   <p class="panel__foot"><strong>現在地は総合自動化率 ${pct(o.overall_automation_rate)}%。</strong>
-  あるべき運営業務のうち、AIが実行しているのは3割。
-  残りのうち63件は<strong>誰もやっていない</strong>（自動化以前に未着手）。</p>`,
+  対象 ${o.defined} 件中 ${o.ai_executes} 件をAI実行に分類し、${o.counts.nobody} 件が未着手です。
+  ${readinessCount ? `うち ${readinessCount} 件はオーナー承認のテスト済み運用準備と本番監視で計上。本番の初回検出とは区別します。` : ''}</p>`,
   source: `data/automation-coverage.json · ${coverage.tasks.length} タスク / ${Object.keys(rate.by_area).length} 領域 · scripts/automation-rate.mjs`,
 });
 
@@ -112,8 +114,7 @@ const areas = Object.entries(rate.by_area)
   .sort((a, b) => b[1].overall_automation_rate - a[1].overall_automation_rate);
 const areaPanel = panel({
   title: '領域別',
-  lede: '開発だけが自律しているわけではない。<strong>法人経営とアナログ領域は 0%</strong>で、'
-      + 'ここは「AIが遅い」のではなく<strong>着手していない</strong>。',
+  lede: '領域ごとの対象件数、AI実行件数、未着手件数を現在の台帳から集計します。',
   body: `<div class="bars">${areas.map(([name, a]) => bar(
     name, a.overall_automation_rate, `${a.defined} タスク中 ${a.counts.ai_autonomous + a.counts.ai_executes_gated} をAIが実行 / 未実装 ${a.counts.nobody}`,
     a.overall_automation_rate === 0 ? 'crit' : a.overall_automation_rate >= 0.5 ? 'ok' : 'warn'

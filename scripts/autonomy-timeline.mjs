@@ -258,8 +258,9 @@ export function surfaceTimelineClaims(text, doc, relativePath) {
  * 色は dataviz の検証済みカテゴリカル 1・2（#2a78d6 / #eb6834）。
  */
 export function toSvg(doc) {
-  const W = 880, H = 330;
-  const M = { t: 58, r: 132, b: 50, l: 62 };
+  const noteHeight = doc.readiness_note ? 22 : 0;
+  const W = 880, H = 330 + noteHeight;
+  const M = { t: 58, r: 132, b: 50 + noteHeight, l: 62 };
   const iw = W - M.l - M.r, ih = H - M.t - M.b;
   const pts = doc.points;
   const x = (i) => M.l + (iw * i) / (pts.length - 1);
@@ -282,7 +283,7 @@ export function toSvg(doc) {
     ? `運営の自律度は${months}か月で${ratio}倍。コードは最初から高いまま。`
     : '運営の自律度とコード変更のAI比率';
   o.push(`<text x="${M.l}" y="27" fill="${INK}" font-size="17" font-weight="700">${esc(headline)}</text>`);
-  o.push(`<text x="${M.l}" y="46" fill="${INK2}" font-size="12">総合自動化率（未実装を分母に含む最も厳しい数え方）／ 2026-08 のみ実測・他は証跡の初出月からの再構成</text>`);
+  o.push(`<text x="${M.l}" y="46" fill="${INK2}" font-size="12">総合自動化率（未着手を含む）／ 2026-08と09途中を観測・以前は証跡の初出月から再構成</text>`);
 
   // グリッドは1pxソリッド・面から1段だけ外す
   for (let v = 0; v <= 1.0001; v += 0.25) {
@@ -325,11 +326,12 @@ export function toSvg(doc) {
   }
 
   // 凡例（2系列なので必ず置く）
-  const ly = H - 12;
+  const ly = H - 12 - noteHeight;
   o.push(`<line x1="${M.l}" y1="${ly - 4}" x2="${M.l + 18}" y2="${ly - 4}" stroke="${S1}" stroke-width="2" stroke-linecap="round"/>`);
   o.push(`<text x="${M.l + 24}" y="${ly}" fill="${INK2}" font-size="11">運営タスクの自律度（再構成）</text>`);
   o.push(`<line x1="${M.l + 210}" y1="${ly - 4}" x2="${M.l + 228}" y2="${ly - 4}" stroke="${S2}" stroke-width="2" stroke-linecap="round"/>`);
   o.push(`<text x="${M.l + 234}" y="${ly}" fill="${INK2}" font-size="11">コード変更のAI著者率（実測）</text>`);
+  if (doc.readiness_note) o.push(`<text x="${M.l}" y="${H - 10}" fill="${INK2}" font-size="11">${esc(doc.readiness_note)}</text>`);
   o.push('</svg>');
   return o.join('\n');
 }

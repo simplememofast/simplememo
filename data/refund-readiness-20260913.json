@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "recorded_at": "2026-09-13T06:01:52.871Z",
+  "acceptance": {
+    "id": "refund-tested-readiness-20260913",
+    "task_index": 146,
+    "approved_by": "owner",
+    "basis": "test_verified_readiness_and_active_production_monitoring",
+    "previous": {
+      "ai_executes": 159,
+      "doing": 176,
+      "defined": 192
+    },
+    "current": {
+      "ai_executes": 160,
+      "doing": 177,
+      "defined": 192
+    },
+    "delta_ai_execution_pp": 0.054571135079606314,
+    "scope": "task146_only",
+    "repeat_credit_on_first_production_refund": false
+  },
+  "tests": {
+    "api": {
+      "source_commit": "b9fe3084643269b667e967fc94ea40374353b89f",
+      "ci_url": "https://github.com/simplememofast/simplememo-api/actions/runs/34740973110",
+      "typecheck": "passed",
+      "unit": {
+        "passed": 2909,
+        "files": 127
+      },
+      "integration": {
+        "passed": 190,
+        "files": 17
+      },
+      "refund_readiness_integration": {
+        "passed": 10,
+        "runtime": "local_workerd_and_D1",
+        "signature_boundary": "mocked_in_test_only",
+        "checks": [
+          "http_to_storage_to_monitor",
+          "duplicate_idempotency",
+          "production_sandbox_separation",
+          "declined_and_reversed_separation",
+          "database_failure_and_retry_recovery",
+          "expiry_and_future_exclusion",
+          "foreign_app_rejection",
+          "admin_auth_and_aggregate_privacy"
+        ]
+      },
+      "refund_monitor_unit": {
+        "passed": 8,
+        "checks": [
+          "invalid_count_or_timestamps_rejected",
+          "database_errors_not_zero",
+          "fixed_error_without_customer_data"
+        ]
+      }
+    },
+    "apple_history_scripts": {
+      "passed": 35,
+      "source_commit": "99c07b64547ad42f47c5bb14d148f1c03395e566",
+      "observed_refunds": 14,
+      "notification_history": 11,
+      "encrypted_envelope": 10
+    },
+    "apple_signature": "Existing cryptographic tests use a real Apple TEST JWS and pinned Apple public root; the live delivery separately exercises the deployed verifier.",
+    "apple_sandbox_refund_e2e": false,
+    "production_test_refund_inserted": false
+  },
+  "production": {
+    "actual_refund_observed": false,
+    "observation_scope": "stored_production_notifications_last_180_days",
+    "deployment": {
+      "repository": "simplememofast/simplememo-api",
+      "pr": 317,
+      "merge_commit": "56f3f2f21f54ff3e36d8515117805afffdf8e1cd",
+      "version": "1.5.74",
+      "worker_version_id": "993d6301-534b-4de8-ac79-b8ce3e12cb4b",
+      "build_id": "2fbcd983-688a-4a52-a86b-550efc1ff10b",
+      "deployed_at": "2026-09-13T05:47:34.408Z",
+      "status_http": 200
+    },
+    "apple_test_delivery": {
+      "environment": "production",
+      "observed_at": "2026-09-13T05:48:54Z",
+      "http_status": 200,
+      "result": "SUCCESS",
+      "first_attempt_at": "2026-09-13T05:48:54.500Z",
+      "source_commit": "71bda3dc11c07739496fc75a6cb30df2cea95e6e",
+      "run_url": "https://github.com/simplememofast/simplememo-ios/actions/runs/34741213245",
+      "notification_type": "TEST"
+    },
+    "scheduled_observation": {
+      "job_name": "refund_monitor",
+      "cron_expression": "0 * * * *",
+      "started_at": "2026-09-13T06:00:51.128Z",
+      "finished_at": "2026-09-13T06:00:51.336Z",
+      "eligible": 0,
+      "sent": 0,
+      "skipped": 0,
+      "errors": 0,
+      "last_error": null,
+      "reason": "awaiting_production_refund",
+      "readback_rows_written": 0,
+      "readback_source": "production_D1_cron_run_log",
+      "manually_triggered": false
+    }
+  },
+  "continuation": {
+    "automation_id": "ai-90",
+    "status": "ACTIVE",
+    "updated_at": "2026-09-13T05:57:21.716Z",
+    "worker_observation": "hourly",
+    "follow_up": "existing twice-daily continuation",
+    "stale_after_hours": 2,
+    "missing_or_error_is_zero": false,
+    "first_positive_action": "Verify the production REFUND source and record first observation without another score credit."
+  },
+  "limits": [
+    "Local REFUND fixtures are not Apple-issued Sandbox REFUND evidence.",
+    "Production TEST delivery is not a production REFUND.",
+    "No actual purchase, refund request, or TestFlight distribution was performed.",
+    "The previous real-refund-required criterion remains 159/176.",
+    "Zero retained notifications does not prove no customer refunds."
+  ]
+}

@@ -51,7 +51,8 @@
   "known_limits": [
     "タスク数の重み付けが粗い（全タスクが等価に数えられる）",
     "タスク粒度が領域間で揃っていない（法人経営は粗く、マーケは細かい）",
-    "開発領域の変更行比率94.2%に相当する客観指標が他領域には無い"
+    "開発領域の変更行比率94.2%に相当する客観指標が他領域には無い",
+    "返金検出1件は、2026-09-13の明示承認によりテストでの運用準備完了と本番自動監視で計上。本番の返金初回検出やApple Sandbox REFUNDの完走実績ではない。変更前の基準では159/176=90.340909%。"
   ],
   "tasks": [
     {
@@ -1893,7 +1894,7 @@
     {
       "area": "⑨ マネタイズ",
       "task": "返金の検出（Get Refund History）",
-      "executor": "nobody",
+      "executor": "ai_executes_gated",
       "evidence": [
         "../simplememo-api/src/apple-asn.ts",
         "../simplememo-api/src/apple-jws.ts",
@@ -1903,12 +1904,16 @@
         "../simplememo-ios/scripts/asc_refund_probe.rb",
         "../simplememo-ios/scripts/lib/asc_api.rb",
         "docs/subscription-observation-evidence-20260910.md",
-        "docs/refund-history-observation-20260913.md"
+        "docs/refund-history-observation-20260913.md",
+        "../simplememo-api/src/refund-monitor.ts",
+        "../simplememo-api/test/refund-readiness.integration.test.ts",
+        "docs/refund-tested-readiness-20260913.md",
+        "data/refund-readiness-20260913.json"
       ],
-      "note": "**旧行から切り出した。**旧行は「返金・不正課金・チャージバック対応」で、検出・応答・意見表明が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。 これは**観測だけ**で、外に何も出ない可逆な操作 —— 権限表の非対称でいえばAI側。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 残っているのは実装だけ: `GET /inApps/v2/refund/lookup/{transactionId}` は**取引IDを要求する**ので、まず取引を1つ手に入れる経路が要る（Get Transaction History / 通知）。**そこは叩いていないので、取引IDの出どころが実在するかはまだ書かない。**\n\n**[2026-08-27 追記 — 取引IDの出どころは、探さなくてよかった]** 上で「取引IDの出どころが実在するかはまだ書かない」と保留していた点が解けた。Apple の notificationType の一覧を取って確かめたところ、返金は**通知として押されてくる**: `REFUND`（返金した）／`REFUND_DECLINED`（アプリ内の要求を却下した）／`REFUND_REVERSED`（争議で返金を取り消した）。つまり `refund/lookup` に渡す取引IDを別経路で先に手に入れる必要は無く、**通知が運んでくる。** \n\n同日、その通知を受ける側が揃った: 受け口（simplememo-api の `/webhooks/apple-asn`）、通知URLの設定（Apple の実配信が `first_attempt_result: SUCCESS`）、そして **signedPayload の検証器**（`src/apple-jws.ts`）。検証器は**Apple が実際に署名した TEST 通知**で通ることを確かめてある。信頼の起点は通知に入っていた root ではなく、Apple の公開ページからランナーが取った実物（`data/apple-root-pin.json`・583 bytes / sha256 63343abf…。両者はバイト単位で一致した）。\n\n**残っているのは、受け口が検証器を呼ぶ配線と、通知を残す部分。**後者は simplememo-api の保持台帳（`data/data-retention.json`）に何をどれだけ持つかを書いてからでないと着手しない —— 受け口はいま**意図的に env を取らない**形で、書き込む手段そのものを持っていない。\n\n[2026-09-10 実観測] 本番D1のapple_refund_eventsを型・環境別に読み取り集計し、保存済み通知が空であることとrows_written=0を確認した。受信・保存経路の再実装は不要。実際の返金通知の受信証拠は得られていないためexecutorはnobodyのまま。\n\n[2026-09-13 追加実観測] 本番の保持済み通知とApple側の返金通知履歴を読み取り、観測された更新取引からのGet Refund Historyを期間分割して完了した。取得元のApple署名・アプリ・環境・商品・対象期間と各照会の完了を検証したが、返金取引は返らなかった。観測対象に限った結果であり、全顧客の返金不存在や実際の返金検出とはしない。件数上限を超えた場合の診断をiOS PR502で区別し、上限は維持。executorと加点は変更しない。",
-      "blocker": "verification_pending",
-      "unblocked_by": "**[2026-08-28] ここに残件として書いてあった2つは、どちらも既に済んでいた。**(1) 受け口から検証器を呼ぶ配線 … `src/apple-asn.ts` が `isRefundNotification` → `buildRefundEvent` → `recordRefundEvent` を呼ぶ（simplememo-api#193・main の 8f036b7）。(2) 保持台帳に載せてから残す部分 … `apple_refund_events` は `data-retention.json` に載り、migration 0028 ／ `refund_retention` cron ／ `REFUND_RETENTION_DAYS=180` ／ `/admin/refunds` まで入っている。通知URLも設定済み（`../simplememo-ios/data/asc-server-api.json` の `notification_url_configured: true`、Apple のテスト配信が `first_attempt_result: SUCCESS`）。\n\n**したがって `not_started`（着手していないだけ）は事実として誤りだった。**残っているのは実装ではなく、**実際の返金が1件届くこと**。届くまで executor は動かさない —— 「作った」と「動いた」を分ける。\n\n**この行が古くなった理由のほうを書いておく。**#193 は 2026-08-28 に main へ入ったが、台帳の `measured_at` は 08-26 のまま。**出荷が台帳より速い日には、台帳のほうが嘘になる。**同じ日に手で書いた3本の監査（#692 / #704 / #705）も、この行を `not_started` として数えている。",
-      "unlock": "refund_observe"
+      "note": "**旧行から切り出した。**旧行は「返金・不正課金・チャージバック対応」で、検出・応答・意見表明が1行に入っていた。混ぜると、どれか1つができた時点で行が動く。 これは**観測だけ**で、外に何も出ない可逆な操作 —— 権限表の非対称でいえばAI側。 **[2026-08-27 実測 — この2つは「未確認」ではなくなった]** `POST /inApps/v1/notifications/test` を1回叩いた（../simplememo-ios/data/asc-server-api.json・run 33029719938）。HTTP 404 / ServerNotificationURLNotFound。読みは2つ: **(1) 鍵は通る。**いまの App Store Connect API の鍵で App Store Server API を叩ける（JWT に `bid` クレームを足すだけ。別の In-App Purchase 鍵は要らなかった）—— **「別の鍵が要る」と推測で書かなくてよかった。** **(2) 通知URLが設定されていない。**したがって CONSUMPTION_REQUEST はどこにも届いていない。 残っているのは実装だけ: `GET /inApps/v2/refund/lookup/{transactionId}` は**取引IDを要求する**ので、まず取引を1つ手に入れる経路が要る（Get Transaction History / 通知）。**そこは叩いていないので、取引IDの出どころが実在するかはまだ書かない。**\n\n**[2026-08-27 追記 — 取引IDの出どころは、探さなくてよかった]** 上で「取引IDの出どころが実在するかはまだ書かない」と保留していた点が解けた。Apple の notificationType の一覧を取って確かめたところ、返金は**通知として押されてくる**: `REFUND`（返金した）／`REFUND_DECLINED`（アプリ内の要求を却下した）／`REFUND_REVERSED`（争議で返金を取り消した）。つまり `refund/lookup` に渡す取引IDを別経路で先に手に入れる必要は無く、**通知が運んでくる。** \n\n同日、その通知を受ける側が揃った: 受け口（simplememo-api の `/webhooks/apple-asn`）、通知URLの設定（Apple の実配信が `first_attempt_result: SUCCESS`）、そして **signedPayload の検証器**（`src/apple-jws.ts`）。検証器は**Apple が実際に署名した TEST 通知**で通ることを確かめてある。信頼の起点は通知に入っていた root ではなく、Apple の公開ページからランナーが取った実物（`data/apple-root-pin.json`・583 bytes / sha256 63343abf…。両者はバイト単位で一致した）。\n\n**残っているのは、受け口が検証器を呼ぶ配線と、通知を残す部分。**後者は simplememo-api の保持台帳（`data/data-retention.json`）に何をどれだけ持つかを書いてからでないと着手しない —— 受け口はいま**意図的に env を取らない**形で、書き込む手段そのものを持っていない。\n\n[2026-09-10 実観測] 本番D1のapple_refund_eventsを型・環境別に読み取り集計し、保存済み通知が空であることとrows_written=0を確認した。受信・保存経路の再実装は不要。実際の返金通知の受信証拠は得られていないためexecutorはnobodyのまま。\n\n[2026-09-13 追加実観測] 本番の保持済み通知とApple側の返金通知履歴を読み取り、観測された更新取引からのGet Refund Historyを期間分割して完了した。取得元のApple署名・アプリ・環境・商品・対象期間と各照会の完了を検証したが、返金取引は返らなかった。観測対象に限った結果であり、全顧客の返金不存在や実際の返金検出とはしない。件数上限を超えた場合の診断をiOS PR502で区別し、上限は維持。executorと加点は変更しない。\n\n[2026-09-13 完了条件変更] オーナーが「テストで運用準備を完了し、本番の初回検出は自動監視に任せる。テスト完了時にスコアをあげる」と明示指定した。この1業務に限り、検出・記録・重複防止・失敗回復のテスト、Apple実署名と本番TEST通知の疎通、本番の毎時監視の稼働確認を完了条件にする。ローカル返金fixtureとApple-issued Sandbox返金を混同せず、本番の初回返金検出は未観測として別に保持する。後日の実返金検出で二重加点しない。変更前の本番実例必須基準では159/176=90.340909%である。",
+      "since": "2026-09",
+      "acceptance_basis": "test_verified_readiness_and_active_production_monitoring",
+      "production_refund_observed_at": null
     },
     {
       "area": "⑨ マネタイズ",
@@ -2734,6 +2739,30 @@
           "previous_executor": "human_only"
         }
       ]
+    }
+  ],
+  "acceptance_revisions": [
+    {
+      "id": "refund-tested-readiness-20260913",
+      "approved_by": "owner",
+      "task_index": 146,
+      "previous_executor": "nobody",
+      "executor": "ai_executes_gated",
+      "scope": "この1業務のみ。タスクの追加・削除や他業務の判定条件は変更しない。",
+      "previous_criterion": "本番の実返金を1件検出する",
+      "criterion": "返金処理のテストで運用準備を完了し、本番の初回検出は稼働確認済みの自動監視に任せる",
+      "evidence": "data/refund-readiness-20260913.json",
+      "previous": {
+        "ai_executes": 159,
+        "doing": 176,
+        "defined": 192
+      },
+      "current": {
+        "ai_executes": 160,
+        "doing": 177,
+        "defined": 192
+      },
+      "delta_ai_execution_pp": 0.054571135079606314
     }
   ]
 }
