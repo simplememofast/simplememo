@@ -8,6 +8,23 @@ const SEARCH_METRICS = ['ctr', 'position', 'impressions'];
 const requireThat = (condition, message) => { if (!condition) throw new Error(message); };
 const present = (x) => typeof x === 'string' && x.trim().length > 0;
 export const fingerprint = (bytes) => createHash('sha256').update(bytes).digest('hex');
+
+/** Store an already admitted review outside Git; the canonical ledger keeps a
+ * content-addressed reference. This changes storage, never evidence admission. */
+export async function privateEvidenceReference(evidence, { directory, experimentId, decision, evaluatedAt }) {
+  const { privateState, atomicJson } = await import('./company-loop.mjs');
+  const root = privateState(directory);
+  const bundle = { schema_version: 1, experiment_id: experimentId, decision,
+    evaluated_at: evaluatedAt, evidence };
+  const bytes = JSON.stringify(bundle, null, 2) + '\n';
+  const sha256 = fingerprint(bytes);
+  const artifact = `experiment-evidence-${sha256}.json`;
+  atomicJson(path.join(root, artifact), bundle);
+  requireThat(fingerprint(fs.readFileSync(path.join(root, artifact))) === sha256,
+    'Private evidence verification failed');
+  return { schema_version: 1, kind: 'private_reference', source_kind: evidence.kind,
+    artifact, sha256, validation: 'Original evidence admission completed before private storage; resolve and verify this artifact before interpreting the outcome.' };
+}
 const canonical = (x) => JSON.stringify(x, (_, v) => v && typeof v === 'object' && !Array.isArray(v)
   ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b))) : v);
 

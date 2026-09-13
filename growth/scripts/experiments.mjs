@@ -27,7 +27,7 @@ import {
 import fs from 'node:fs';
 import path from 'node:path';
 import { listSnapshots, loadSnapshot, GSC_DIR } from '../lib/gsc.mjs';
-import { gscEvidence, reviewEvidence, fingerprint } from '../lib/experiment-evidence.mjs';
+import { gscEvidence, reviewEvidence, fingerprint, privateEvidenceReference } from '../lib/experiment-evidence.mjs';
 
 const argv = process.argv.slice(2);
 const cmd = argv[0];
@@ -199,6 +199,13 @@ switch (cmd) {
 
     const problems = validate(ledger);
     if (problems.length) die(`refusing to write:\n  ${problems.join('\n  ')}`);
+    if (has('private-evidence-dir')) {
+      try {
+        const directory = flag('private-evidence-dir') || die('--private-evidence-dir requires a directory');
+        e.evidence = await privateEvidenceReference(evidence, { directory,
+          experimentId: e.id, decision, evaluatedAt: asOf });
+      } catch (error) { die(`refusing to write: ${error.message}`); }
+    }
     saveLedger(ledger);
     console.log(`${e.id} → evaluated / ${decision} (evidence: ${evidence.kind})`);
     if (decision === 'revert') console.log(`Next: restore the previous title on ${e.page}:\n  ${e.before?.title ?? '(no recorded before-title)'}`);
