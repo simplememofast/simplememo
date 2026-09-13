@@ -136,11 +136,12 @@
       "task": "返金の検出（Get Refund History）",
       "state": "wait",
       "estimated_minutes": null,
-      "observed_at": "2026-09-10T05:24:07.514630+00:00",
-      "expires_at": "2026-09-11T05:24:07.514630+00:00",
-      "next_step": "返金受信・検証・保存は実装済み。本番の保持済み通知は今回も空。実際の検証済み返金通知を既存経路で観測し、保持期間内の記録と照合する。加点目的の購入・返金・疑似通知を発生させない。",
+      "observed_at": "2026-09-13T04:43:28Z",
+      "expires_at": "2026-09-14T04:43:28Z",
+      "next_step": "返金通知履歴と観測済み更新取引からのGet Refund Historyを、件数制限を保った期間分割で取得・署名照合済み。返金の実検出は未確認。新しい実通知・観測対象が来た時に再開し、同じ空結果や件数超過の再取得、加点目的の購入・返金・疑似通知は行わない。",
       "evidence": [
-        "docs/subscription-observation-evidence-20260910.md"
+        "docs/subscription-observation-evidence-20260910.md",
+        "docs/refund-history-observation-20260913.md"
       ]
     },
     {
