@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+  <meta name="apple-itunes-app" content="app-id=6758438948, app-argument=https://simplememofast.com/obsidian/journaling/">
+  <title>Obsidianでジャーナリング — 日付ノートと手動テンプレートの記録例 | Obsidian連携シンプルメモ</title>
+  <meta name="description" content="Obsidianでジャーナリングを始める人へ。日付ごとのMarkdownに短い記録を残し、翌日や週末に見返す例を紹介。既存の手動テンプレート、日付と時刻の置き換え方、記録が途切れた日の扱いをまとめます。過去の実操作画像と現在の公式説明、未検証の動作を区別しています。">
+  <meta name="theme-color" content="#070b14">
+  <meta property="og:title" content="Obsidianでジャーナリング — 日付ノートと手動テンプレートの記録例">
+  <meta property="og:description" content="Obsidianでジャーナリングを始める人へ。日付ごとのMarkdownに短い記録を残し、翌日や週末に見返す例を紹介。既存の手動テンプレート、日付と時刻の置き換え方、記録が途切れた日の扱いをまとめます。過去の実操作画像と現在の公式説明、未検証の動作を区別しています。">
+  <meta property="og:type" content="article">
+  <meta property="article:published_time" content="2026-09-14T00:00:00+09:00">
+  <meta property="og:url" content="https://simplememofast.com/obsidian/journaling/">
+  <meta property="og:image" content="https://simplememofast.com/assets/img/og/obsidian-journaling.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Obsidian連携シンプルメモ">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@simplememofast">
+  <meta name="twitter:title" content="Obsidianでジャーナリング — 日付ノートと手動テンプレートの記録例">
+  <meta name="twitter:description" content="Obsidianでジャーナリングを始める人へ。日付ごとのMarkdownに短い記録を残し、翌日や週末に見返す例を紹介。既存の手動テンプレート、日付と時刻の置き換え方、記録が途切れた日の扱いをまとめます。過去の実操作画像と現在の公式説明、未検証の動作を区別しています。">
+  <meta name="twitter:image" content="https://simplememofast.com/assets/img/og/obsidian-journaling.png">
+  <link rel="canonical" href="https://simplememofast.com/obsidian/journaling/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/favicon/site.webmanifest">
+  <link rel="stylesheet" href="/assets/css/style.min.css?v=beeac7c9bb">
+  <link rel="preload" href="/assets/fonts/NotoSansJP-Regular-subset.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+    .global-nav{position:sticky;top:0;z-index:1000;background:rgba(10,12,18,.88);backdrop-filter:blur(20px);border-bottom:1px solid rgba(100,160,220,.1)}
+    .global-nav__inner{max-width:1200px;margin:auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px}
+    .global-nav__logo{display:flex;align-items:center;min-height:48px;gap:.5rem;text-decoration:none;color:#fff;font-weight:700}
+    .global-nav__logo img{border-radius:8px}.global-nav__links{display:flex;gap:.25rem;list-style:none;margin:0;padding:0}.global-nav__links a{color:rgba(255,255,255,.7);text-decoration:none;padding:.7rem;min-height:48px;display:inline-flex;align-items:center}.global-nav__cta{background:linear-gradient(135deg,#007aff,#5856d6);color:#fff!important;text-decoration:none;font-weight:700;padding:.55rem 1rem;border-radius:20px}.global-nav__hamburger{display:none}
+    .lp-hero{text-align:center;padding:4rem 0 3rem}.lp-hero__label{display:inline-block;font-size:.875rem;font-weight:700;color:var(--accent-bright);background:rgba(100,180,255,.08);border:1px solid rgba(100,180,255,.15);border-radius:20px;padding:.35rem 1rem;margin-bottom:1.5rem}.lp-hero__title{font-size:clamp(1.8rem,5vw,2.6rem);line-height:1.35;margin-bottom:1rem}.lp-hero__sub{font-size:1.02rem;color:var(--text-secondary);line-height:1.9;max-width:42rem;margin:0 auto 2rem}
+    .lp-section{padding:3rem 0}.lp-section__title{font-size:1.4rem;margin-bottom:1.5rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}.lp-section__lead{color:var(--text-secondary);line-height:1.9;max-width:46rem}.tip-box{background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--radius-sm);padding:1.25rem 1.5rem;margin:1rem 0;line-height:1.9}
+    .rt-table{width:100%;border-collapse:collapse;margin:1.25rem 0 2rem;font-size:.925rem}.rt-table th,.rt-table td{padding:.8rem .9rem;border:1px solid var(--border);text-align:left;line-height:1.75;vertical-align:top}.rt-table th{background:rgba(100,180,255,.06)}.rt-table tbody th{width:25%}
+    .steps-list{list-style:none;counter-reset:step;padding:0}.steps-list li{counter-increment:step;position:relative;padding:1.1rem 1.1rem 1.1rem 3.5rem;margin:.75rem 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);line-height:1.85}.steps-list li:before{content:counter(step);position:absolute;left:1rem;top:1.15rem;width:1.8rem;height:1.8rem;border-radius:50%;background:rgba(34,211,238,.12);color:#4fdcf0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .shot{margin:1.5rem 0 2rem}.shot img{width:100%;height:auto;border:1px solid var(--border);border-radius:var(--radius-sm);display:block}.shot figcaption{font-size:.85rem;color:var(--text-muted);line-height:1.7;margin-top:.6rem}.faq-item{border-bottom:1px solid var(--border)}.faq-summary{padding:1rem 0;font-weight:700;cursor:pointer}.faq-answer{padding:0 0 1rem;color:var(--text-secondary);line-height:1.9}.internal-links{display:flex;gap:.75rem;flex-wrap:wrap;margin:1.5rem 0}.internal-links a{color:var(--accent-bright);text-decoration:none;padding:.55rem .9rem;border:1px solid rgba(100,180,255,.22);border-radius:8px;min-height:48px;display:inline-flex;align-items:center}
+    @media(max-width:700px){.lp-hero__sub{text-align:left}.global-nav__links,.global-nav__cta{display:none}.rt-table,.rt-table tbody,.rt-table tr,.rt-table td,.rt-table tbody th{display:block;width:auto}.rt-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.rt-table tr{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:.75rem;padding:.25rem 0}.rt-table tbody th,.rt-table td{border:0;padding:.5rem 1rem}.rt-table td:before{content:attr(data-label);display:block;font-size:.7rem;font-weight:700;color:var(--text-muted)}}
+  </style>
+<style>.journal-sample{white-space:pre-wrap;overflow-wrap:anywhere;padding:1.2rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;line-height:1.8}.journal-toc{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0}.lp-section p,.lp-section li{line-height:1.9}.lp-section ul,.lp-section ol{padding-left:1.5rem}.journal-note{color:var(--text-secondary);font-size:.9rem}</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","@id":"https://simplememofast.com/obsidian/journaling/#article","inLanguage":"ja","headline":"Obsidianでジャーナリング — 日付ノートと手動テンプレートの記録例","description":"Obsidianでジャーナリングを始める人へ。日付ごとのMarkdownに短い記録を残し、翌日や週末に見返す例を紹介。既存の手動テンプレート、日付と時刻の置き換え方、記録が途切れた日の扱いをまとめます。過去の実操作画像と現在の公式説明、未検証の動作を区別しています。","url":"https://simplememofast.com/obsidian/journaling/","datePublished":"2026-09-14","dateModified":"2026-09-14","author":{"@type":"Person","name":"AI Ataka","url":"https://simplememofast.com/about/"},"publisher":{"@type":"Organization","name":"Obsidian連携シンプルメモ","url":"https://simplememofast.com/"},"image":"https://simplememofast.com/assets/img/og/obsidian-journaling.png"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"ホーム","item":"https://simplememofast.com/"},{"@type":"ListItem","position":2,"name":"Obsidian","item":"https://simplememofast.com/obsidian/"},{"@type":"ListItem","position":3,"name":"ジャーナリング","item":"https://simplememofast.com/obsidian/journaling/"}]}</script>
+</head>
+<body>
+<nav class="global-nav" aria-label="Global navigation"><div class="global-nav__inner"><a href="/" class="global-nav__logo"><img src="/assets/img/app-icon-56.png" alt="" width="28" height="28"><span>Obsidian連携シンプルメモ</span></a><ul class="global-nav__links"><li><a href="/guides/">使い方</a></li><li><a href="/use-cases/">活用事例</a></li><li><a href="/vs/">比較</a></li><li><a href="/blog/">ブログ</a></li><li><a href="/about/">開発者</a></li></ul><a class="global-nav__cta" data-cta-variant="v1" data-cta-cluster="obsidian" data-cta-placement="nav" href="https://apps.apple.com/jp/app/id6758438948?ppid=1408d7a4-3249-4c87-a079-e13032312579&amp;pt=128498560&amp;ct=jp__nav&amp;mt=8">ダウンロード</a></div></nav>
+<main class="page-content"><article class="container" style="max-width:880px">
+<header class="lp-hero"><div class="lp-hero__label">Obsidian · 日付ごとの記録</div><h1 class="lp-hero__title">Obsidianでジャーナリング<br>日付ノートに、短く残して見返す</h1><p class="lp-hero__sub">まずは日付のノートに、今日残したいことを1行。夜に「明日やること」と「覚えておきたいこと」を足すところから始められます。ここでは手で使えるひな形と、記録を読み返す具体例を紹介します。</p><p class="article-meta">著者: <a href="/about/">AI Ataka</a> ・ 公開・資料確認: <time datetime="2026-09-14">2026年9月14日</time></p></header>
+<aside class="tip-box">この記事は<strong>Obsidianのノートを使った記入・見返しの例</strong>です。以下の生活記録は架空の例で、継続効果を測った実験ではありません。実画面は2026年8月11日のLinux版の検証から再掲しています。</aside>
+<nav class="journal-toc" aria-label="この記事の目次"><a href="#first-note">最初の記入例</a><a href="#starter">手動ひな形</a><a href="#review">見返し方</a><a href="#template">自動テンプレートとの違い</a><a href="#evidence">実画面と検証範囲</a></nav>
+<section class="lp-section" id="first-note"><h2 class="lp-section__title">Obsidianで日記を書くには、何を用意すればよい？</h2><p><strong>保管庫に日付のノートを1つ用意し、その日の出来事を箇条書きで残す</strong>形にできます。最初からタグやプラグインを増やす必要はありません。保管庫をまだ作っていない場合は、先に<a href="/obsidian/getting-started/">Obsidianの始め方</a>を参照してください。</p><p>公式の<a href="https://obsidian.md/help/plugins/daily-notes" target="_blank" rel="noopener">Daily notesの説明</a>では、今日のノートを開き、なければ作る仕組みが案内されています。既定のファイル名は<code>YYYY-MM-DD</code>形式です。これは公式仕様の確認で、今回のMacで設定画面を操作した記録ではありません。</p><p>次は、2026年9月14日のノートに書く<strong>架空の完成例</strong>です。時刻は後で順序を知りたい記録にだけ付けても構いません。</p>
+<pre class="journal-sample"><code># 2026-09-14
+
+## 記録
+- 09:15 散歩の途中で、来週の発表の導入を思いついた。
+- 18:40 下書きを開いた。最初の一段落だけ直した。
+
+## 1日の終わりに
+- 明日やることを1つ：導入を声に出して読み直す。
+- 覚えておきたいことを1つ：短く始めると下書きに戻りやすかった。</code></pre>
+<p>書ける日に長く書くのも自由です。ただ、毎回すべての欄を埋める約束にすると負担になるなら、「記録」だけに減らします。これは運用の選択肢であり、誰でも続くという保証ではありません。</p></section>
+<section class="lp-section" id="starter"><h2 class="lp-section__title">既存の手動テンプレートを、そのまま試す</h2><p><a href="/assets/downloads/obsidian-daily-ja.md" download>日本語の手動ひな形を保存する（Markdown）</a>。このサイトで配布している原本は、次の短いテキストです。リンクを保存できない場合は、この内容をコピーして使えます。</p>
+<pre class="journal-sample"><code># YYYY-MM-DD
+
+## 記録
+
+- HH:mm この例を、残したいことに置き換える。
+
+## 1日の終わりに
+
+- 明日やることを1つ：
+- 覚えておきたいことを1つ：</code></pre>
+<p>手で始める場合は、<strong>使用する保管庫内に日付名の新しいノートを作り、上のひな形本文を貼り付けます。</strong>ダウンロードしたファイルを移す操作が分からなくても、この方法で記入例を試せます。</p><ol><li>ひな形のコピーを、その日の記録用に用意する。元のひな形を残しておく。</li><li>ファイル名と見出しの日付を、例えば<code>2026-09-14</code>に置き換える。</li><li><code>HH:mm</code>と例文を、自分の時刻と記録に置き換える。時刻が不要なら、その部分を削る。</li><li>保存後に自分のObsidianで開き、意図した保管庫・日付・本文になっているか確かめる。</li></ol>
+<p><strong><code>YYYY-MM-DD</code>と<code>HH:mm</code>は、このファイルでは単なる文字です。</strong>ダウンロードしただけで今日の日付に変わったり、保管庫へ自動で入ったりはしません。ここでの手順は読者が確認するための案内で、今回、保管庫への取り込みは実行していません。</p><p>日付やチェック欄を変えた例がほしい場合は、既存の<a href="/resources/obsidian-inbox/">Markdownひな形ツール</a>も使えます。そこでファイルを保存できることと、自分の保管庫へ取り込めたことは別々に確認します。個人の記録を試す前に、架空の短い例で流れを確かめてください。</p></section>
+<section class="lp-section" id="review"><h2 class="lp-section__title">3日分を見返すなら、出来事と次の行動を分ける</h2><p>日記が増えてきたら、すべてを書き直す代わりに、直近のノートを開いて同じ話題を拾う方法があります。次の表も<strong>架空の記入例</strong>です。3日は説明用の長さで、効果の出る期間を示すものではありません。</p><div style="overflow-x:auto"><table class="rt-table"><thead><tr><th>日付</th><th>残っていた記録</th><th>見返したときの扱い</th></tr></thead><tbody><tr><th>9月14日</th><td data-label="記録">発表の導入を思いついた</td><td data-label="扱い">まだ試していない案として残す</td></tr><tr><th>9月15日</th><td data-label="記録">声に出すと冒頭が長かった</td><td data-label="扱い">実際に試したこととして区別する</td></tr><tr><th>9月16日</th><td data-label="記録">導入を一段落に直した</td><td data-label="扱い">次は相手に伝わるか確かめる</td></tr></tbody></table></div><p>この例では、「思いついた」と「試した」を分けることで、次に何をするかを1つ選べます。原文はその日のノートに残し、見返した日の末尾に短くまとめれば、あとから解釈を変えたときも元の記録へ戻れます。</p><p>同じ話題が何度も出てきて、別のノートで考えたくなったら、その時点でまとめ先を作る選択肢があります。最初からすべてを分類しなくても、まず日付で戻れるようにする、という順序です。</p></section>
+<section class="lp-section" id="stuck"><h2 class="lp-section__title">書けない日・長くなる日・見つからない日</h2><ul><li><strong>書けなかった日：</strong>空白を埋め直すか、そのまま次の日から再開するかを選べます。後日書くなら「9月16日に追記」のように、出来事の日と記入日を分けると読み違えにくくなります。</li><li><strong>日記が長くなる日：</strong>長い本文の最後に「覚えておきたいこと」を1行置く方法があります。全文を短く削る必要はありません。</li><li><strong>ノートが見つからない日：</strong>開いている保管庫、ファイル名の日付、保存先フォルダを順に確認します。外部からの追記や日付のずれは<a href="/obsidian/daily-note/">デイリーノートの追記トラブル</a>で扱っています。</li><li><strong>別端末に出てこない日：</strong>保存と同期を分けて確認します。複数端末での運用は<a href="/obsidian/sync/">同期方法の比較</a>へ。この記事のひな形だけで同期設定は完了しません。</li></ul><p>見返しを目的にしない日は、出来事の記録だけでも使えます。記録を残す場所としてObsidianを使い続けたいかも、自分の負担に合わせて判断してください。</p></section>
+<section class="lp-section" id="template"><h2 class="lp-section__title">自動テンプレートに進むときは、変数を区別する</h2><p>手動ひな形と、Obsidianが値を差し込むテンプレートは別です。公式の<a href="https://obsidian.md/help/plugins/templates" target="_blank" rel="noopener">Templatesの説明</a>では、<code>{{date}}</code>や<code>{{time}}</code>のように波括弧を付けた変数が案内されています。</p><p>Daily notesのテンプレート指定は、新しい日付ノートを作るときの本文に関する設定です。既に存在する日記へ後から一律に適用されるもの、と考えないようにします。自動化したくなった段階で、上記の公式資料を読み、自分の設定で試してください。</p><aside class="tip-box"><strong>今回の確認範囲：</strong>公式説明を2026年9月14日に確認しました。現在のObsidianでのテンプレート設定、変数展開、iOSでの動作は未検証です。過去の画像は、これらの自動設定を実証するものではありません。</aside></section>
+<section class="lp-section" id="evidence"><h2 class="lp-section__title">日付Markdownに残った実画面と、その限界</h2><figure class="shot"><img src="/assets/img/obsidian-logseq/roundtrip-obsidian.png" alt="2026年8月11日のLinux版Obsidianで、日付ノートに時刻付き4行を表示した過去の検証画面" width="1600" height="1000" loading="lazy"><figcaption>2026年8月11日、Linux版Obsidian 1.13.6／Logseq 0.10.15の検証より。日付ノートに4行が表示され、最後の行はLogseq側で入力した記録です。</figcaption></figure><p>元の<a href="/obsidian/compare/logseq/">ObsidianとLogseqの比較検証</a>では、同じ日付Markdownへの往復書き込みを確認しました。元の変更記録は<a href="https://github.com/simplememofast/simplememo/pull/470" target="_blank" rel="noopener">PR #470</a>です。この画面が示すのは、当時の検証環境で短い記録が1つの日付ノートに残ったことです。</p><p>今回の記事では、その形式を手動ジャーナリングの例へつなぎました。<strong>現在のMac・iPhoneへの取り込み、同期、テンプレートの自動適用、ジャーナリングが続く効果を実証したものではありません。</strong></p><ul><li><strong>過去の実操作確認：</strong>2026年8月11日のLinux版での日付Markdown往復。画像と元の公開記録を再確認。</li><li><strong>今回の原本・配布確認：</strong>手動ひな形のGit原本と公開URLの取得内容を照合。文字列の例は自動変数へ置き換えていません。</li><li><strong>公式資料確認：</strong>Daily notesとTemplatesの役割・変数記法を確認。</li><li><strong>未検証：</strong>現在の保管庫取り込み・設定・端末同期・継続率・心理的効果。SimpleMemoの新しい機能や速度も測定していません。</li></ul></section>
+<section class="lp-section" id="choose"><h2 class="lp-section__title">メールに残す日記と、Obsidianの日記を選び分ける</h2><p>この記事の中心は、Obsidianの中で日付のノートを開き、短い記録をためて見返すことです。メールを日記の置き場所にしたい場合は<a href="/use-cases/journaling/">メールへの1行日記</a>、何を書けばよいかから考えたい場合は<a href="/blog/journaling-for-beginners">ジャーナリングの書き出し例</a>へ進んでください。</p><p>移動中の記録もObsidianへつなぎたい場合は、<a href="/obsidian/">シンプルメモの連携・保存先設定</a>を確認できます。Obsidian内だけで書く運用なら、この記事のために別アプリを導入する必要はありません。</p><p class="journal-note">本サイトは株式会社ユリカが運営し、独立アプリ「Obsidian連携シンプルメモ」を紹介しています。Obsidian公式による記事ではありません。</p></section>
+<aside class="next-step" style="margin:2rem 0 3rem"><a data-next-step="explore" href="/obsidian/" style="display:block;padding:1.25rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius-sm);text-decoration:none;color:inherit"><span style="display:block;font-size:.8rem;color:var(--accent);margin-bottom:.5rem">次に読む</span><strong>Obsidian連携と保存先の設定を確認する</strong></a></aside>
+</article></main>
+<footer class="footer"><div class="container"><nav class="footer__nav" aria-label="Footer navigation"><div class="footer__col"><p class="footer__col-title">プロダクト</p><a href="/download/" class="footer__link">ダウンロード</a><a href="/" class="footer__link">ホーム</a><a href="/obsidian/" class="footer__link">Obsidian連携</a></div><div class="footer__col"><p class="footer__col-title">比較・乗り換え</p><a href="/vs/" class="footer__link">比較</a><a href="/obsidian/compare/" class="footer__link">Obsidian比較</a></div><div class="footer__col"><p class="footer__col-title">サポート</p><a href="/about/" class="footer__link">開発者について</a><a href="/faq" class="footer__link">FAQ</a><a href="/privacy" class="footer__link">プライバシー</a></div></nav><p class="footer__copyright">© 2026 Obsidian連携シンプルメモ（Simple Memo - for Obsidian） / 運営: 株式会社ユリカ</p></div></footer>
+<script>
+window.addEventListener('load', function() {
+  if (!/^(www\.)?simplememofast\.com$/.test(location.hostname)) return;
+  var ric = window.requestIdleCallback || function(cb) { setTimeout(cb, 1); };
+  ric(function() {
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-EPZVZKCVQG';
+    s.async = true;
+    document.head.appendChild(s);
+    s.onload = function() {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EPZVZKCVQG', {page_language: 'ja'});
+    };
+  });
+});
+</script>
+<script src="/js/app-store-tracking.js?v=fd48cabcf6" defer></script>
+</body>
+</html>
